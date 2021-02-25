@@ -61,8 +61,6 @@ namespace dyno
 		std::shared_ptr<Frame<TDataType>> m_frame;
 	};
 
-
-
 #ifdef PRECISION_FLOAT
 	template class RigidBody<DataType3f>;
 #else
