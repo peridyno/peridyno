@@ -1,0 +1,47 @@
+#pragma once
+#include <iostream>
+#include "rigid_base.h"
+#include "../Vector.h"
+#include "../Matrix.h"
+#include "Quaternion/quaternion.h"
+
+namespace dyno {
+	template <typename T>
+	class Rigid<T, 3>
+	{
+	public:
+		typedef Vector<T, 3> TranslationDOF;
+		typedef Vector<T, 3> RotationDOF;
+
+		DYN_FUNC Rigid()
+			: m_p(0)
+			, m_quat(Quaternion<T>::Identity())
+		{};
+
+		DYN_FUNC Rigid(Vector<T, 3> p, Quaternion<T> quat)
+			: m_p(p)
+			, m_quat(quat)
+		{};
+
+		DYN_FUNC ~Rigid() {};
+
+		DYN_FUNC Vector<T, 3> getCenter() const { return m_p; }
+
+		DYN_FUNC SquareMatrix<T, 3> getRotationMatrix() const
+		{
+			return m_quat.get3x3Matrix();
+		}
+
+		DYN_FUNC Quaternion<T> getOrientation() const { return m_quat; }
+
+	private:
+		Vector<T, 3> m_p;
+		Quaternion<T> m_quat;
+	};
+
+	template class Rigid<float, 3>;
+	template class Rigid<double, 3>;
+
+	typedef Rigid<float, 3> Rigid3f;
+	typedef Rigid<double, 3> Rigid3d;
+}  //end of namespace dyno

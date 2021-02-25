@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="30px"
+	 height="30px" viewBox="0 0 30 30" enable-background="new 0 0 30 30" xml:space="preserve">
+<g id="Layer_2">
+</g>
+<g id="Layer_3">
+</g>
+<g id="Layer_1">
+
+	<g>
+		
+			<image overflow="visible" width="88" height="77" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABNCAYAAAAijqMcAAAACXBIWXMAAAsSAAALEgHS3X78AAAA
+GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAdFJREFUeNrs101v2kAUhWHGHhMn
+FKs1SZpNV6Urlvz/P1KxQGqkqpUcPmwDjj+mZyovumilSt0M1ftIVzN4WJjD1cVMJgAAAAAAAAAA
+AAAAAAAAAACAv2L+k3t3od5kfIWhRv6+l8tlkmWZ3e/3UciNYq4kVLNarexut7OXy8WmaTrVeuuc
+M6+SJMlFQTd6X6vqQ+poE/gXH6lT7TAMadM08ziOs67rUtWNv6bVh3lU2DvVQfuTqlMNoXwQG+II
+8KFqvfHVtu2bKIoeFO5j3/f3Kn/2qoDP6mAfamWMGcZQXWjzOKSA/RhIFObsfD7n1tr3CvGtgn2n
+UJ90nvnwFeZR179rX6oKdfaLurfSvhnHw4SAf2O9XtuyLDOF90GhftT6SR2aq6b+R00hN7pWqL6p
+nhX0V40IPxrqMdygRkNoAZuiKOLZbHanIB8U4KMCvB078qCQfYh7nflwv+i17+BDXde/Bhvko1oo
+AbvFYtErsFrd+6wQTwrx83jm522jbj1pfJTq2GOe56ftdtuGHGyITxE/Z7DWqYJMFKrRyHDau6qq
+egU/zOfzbrPZ9KE9il3TY5r5w325a/jXBgAAAAAAAAAAAAAAAAAAAAD4Bz8EGADaevUlTLiulAAA
+AABJRU5ErkJggg==" transform="matrix(1 0 0 1 -29.2275 -18.0127)">
+		</image>
+	</g>
+	
+
+	<polygon fill="#2E81DA" stroke="#282828" stroke-miterlimit="10" points="0.597,4.576 1.013,16.463 7.746,22.031 19.134,17.932 
+		19.549,6.156 11.652,1.5 	"/>
+	<polygon fill="#004798" points="19.549,6.266 7.828,9.674 7.746,22.143 19.134,18.042 	"/>
+	<polygon fill="#0265CB" points="0.597,4.576 7.828,9.674 7.746,22.031 1.013,16.463 	"/>
+	<polygon fill="none" stroke="#282828" stroke-linejoin="round" stroke-miterlimit="10" points="0.597,4.576 1.013,16.463 
+		7.746,22.031 19.134,17.932 19.549,6.156 11.652,1.5 	"/>
+	<g>
+		
+			<radialGradient id="SVGID_1_" cx="-40.2588" cy="-8.9443" r="3.2085" gradientTransform="matrix(1.0502 0 0 1.0537 67.4406 33.9968)" gradientUnits="userSpaceOnUse">
+			<stop  offset="0" style="stop-color:#52A7FF"/>
+			<stop  offset="1" style="stop-color:#0265CB"/>
+		</radialGradient>
+		<path fill="url(#SVGID_1_)" stroke="#282828" stroke-miterlimit="10" d="M29.403,25.117c0,1.869-1.51,3.383-3.372,3.383
+			c-1.859,0-3.369-1.514-3.369-3.383c0-1.865,1.51-3.379,3.369-3.379C27.894,21.738,29.403,23.252,29.403,25.117z"/>
+		
+			<line fill="none" stroke="#E6E6E6" stroke-linecap="round" stroke-miterlimit="10" x1="13.84" y1="12.887" x2="22.662" y2="21.738"/>
+		
+			<line fill="none" stroke="#E6E6E6" stroke-linecap="round" stroke-miterlimit="10" x1="19.633" y1="15.316" x2="24.909" y2="20.611"/>
+		
+			<line fill="none" stroke="#E6E6E6" stroke-linecap="round" stroke-miterlimit="10" x1="16.262" y1="18.699" x2="21.539" y2="23.992"/>
+	</g>
+</g>
+</svg>

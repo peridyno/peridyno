@@ -1,0 +1,51 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/Images">
+    <!-- Typical file operations. -->
+    <file>disk.png</file>
+    <file>disks.png</file>
+    <file>folder-open-document.png</file>
+    <file>folders-stack.png</file>
+
+    
+    <file>disk--plus.png</file>
+    <file>star--arrow.png</file>
+    <file>star--plus.png</file>
+    <file>star--pencil.png</file>
+    <file>star--minus.png</file>
+    <file>table-import.png</file>
+    <file>table-export.png</file>
+
+    <!-- Lighting -->
+    <file>light-bulb--plus.png</file>
+    <file>light-bulb--minus.png</file>
+    <file>light-bulb--pencil.png</file>
+
+    <!-- Node Properties -->
+    <file>arrow.png</file>
+    <file>arrow-180.png</file>
+    <file>bin.png</file>
+
+    <!-- Miscellaneous -->
+    <file>folder-open-image.png</file>
+    <file>color--pencil.png</file>
+    <file>pencil-field.png</file>
+    <file>alarm-clock.png</file>
+    <file>memory.png</file>
+    <file>grid.png</file>
+    <file>camera.png</file>
+    <file>gear.png</file>
+    <file>palette.png</file>
+    <file>application-list.png</file>
+    <file>light-bulb.png</file>
+    <file>document-copy.png</file>
+    <file>graphic-card.png</file>
+    <file>processor.png</file>
+    <file>checkerboard.png</file>
+    <file>eraser.png</file>
+    <file>cross.png</file>
+    <file>edit.png</file>
+    <file>folders.png</file>
+    
+  </qresource>
+</RCC>

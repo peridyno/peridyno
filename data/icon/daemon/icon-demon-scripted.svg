@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="30px"
+	 height="30px" viewBox="0 0 30 30" enable-background="new 0 0 30 30" xml:space="preserve">
+<g id="Layer_2">
+</g>
+<g id="Layer_3">
+</g>
+<g id="Layer_1">
+	<g>
+		
+			<image overflow="visible" width="93" height="80" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF0AAABQCAYAAAB773kdAAAACXBIWXMAAAsSAAALEgHS3X78AAAA
+GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmVJREFUeNrs2MuP0mAUxuEptFxq
+FSiM0YiJC3az5P9fExfsJMzeSIKDw8Vy72XeQ6qZmLgbk4/4e5KTA1+ZhL49fJS5uQEAAAAAAAAA
+AAAAAAAAAAAAAFfJ+w/OpyD0f3MOl7q7u6tKsNvtqmEYZnKeTCapjuWE/jLv2RsOh1X1YLlcBrVa
+zfc8L1LFRVHUK5XKPk3ThziOl6PR6OhS8N6VBV0ZDAa+TXKj0Qh83480zZ0gCN4o7FDHuwr8o7qF
+v8rz/F79frPZfJ/NZgdXgveuIOyKVb/f9zW9DU3vawX7ygJX2Lda+6R6q7J1Cz/W62uqjQWutc+q
+L3r9QlvN2YU93nc4cAvb7/V69cPh0EiSJNQW0tae/V7VU6AdhXmr/qEMOlQPrDThhS5CRcf7Wp/r
+9d/0yVjp8dmFE/MdDjxot9tNhd1SYG09t7Kw31lXprGqY+sKt2mfCsn0+KS+VX/Q8bkuQKJPR+bS
+yfkObym14/EYaUpbCrCrHpd7dqucanvvhfpefau+0bGduu3dP9S/KvC5+kLPF65MufOTrtDq6g2F
+WVP55TSfLWAdW5dbiK0lqpnqsQw90fqjLtRP1VG3j6fxeJy6cs/u6qT//gJViJbqSV+Eaz23QJcK
+NFWtVQd7XE77SncyW20l5yiK0vIePXt2x1Iw6X9XlJVpkA82rXbPrcm2cC/Bqadas4CP+nLNtOdf
+fghNp9Ps2d87+WvU5e3Fwts3m81MwW4V6CVoTfslVF2IvNvtZtoyMtcDvqb7dO+PbebX9OYu/08F
+AAAAAAAAAAAAAAAAAAAAAAAAL+1JgAEAITAanHpoOLIAAAAASUVORK5CYII=" transform="matrix(1 0 0 1 -31.752 -15.0127)">
+		</image>
+	</g>
+	<polygon fill="#B02427" points="8.294,26.267 6.753,25.428 6.79,4.994 8.331,5.833 	"/>
+	<polygon fill="#C43333" points="8.331,5.833 6.79,4.994 19.091,3.267 20.633,4.104 	"/>
+	<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="4.3232" y1="7.2988" x2="19.3232" y2="18.9658">
+		<stop  offset="0" style="stop-color:#C43333"/>
+		<stop  offset="1" style="stop-color:#9E1117"/>
+	</linearGradient>
+	<polygon fill="url(#SVGID_1_)" points="20.633,4.104 24.139,7.285 24.107,24.045 8.294,26.267 8.331,5.833 	"/>
+	<polygon fill="#800F17" points="20.672,7.899 20.633,4.104 24.332,7.463 	"/>
+	<g>
+		<path fill="#282828" d="M19.091,3.267l1.542,0.838l3.506,3.181l-0.031,16.76L8.294,26.267l-1.541-0.839L6.79,4.994L19.091,3.267
+			 M19.278,2.23l-0.327,0.046L6.65,4.004L5.791,4.125L5.79,4.992L5.753,25.426l-0.001,0.596l0.523,0.284l1.541,0.839l0.289,0.158
+			l0.328-0.046l15.813-2.222l0.859-0.121l0.002-0.867l0.031-16.76l0.001-0.444l-0.329-0.298l-3.506-3.181l-0.089-0.081L21.11,3.226
+			l-1.542-0.838L19.278,2.23L19.278,2.23z"/>
+	</g>
+	<g>
+		<path fill="#EAEAEA" d="M9.203,16.168l4.439-2.792l0.098,0.889l-3.537,2.146l0.002,0.02l3.918,1.324l0.099,0.893l-4.94-1.764
+			L9.203,16.168z"/>
+		<path fill="#EAEAEA" d="M14.966,18.958l1.618-7.452l0.854-0.093l-1.629,7.452L14.966,18.958z"/>
+		<path fill="#EAEAEA" d="M23.229,15.372l-4.452,2.774l-0.097-0.882l3.597-2.159l-0.002-0.02l-3.979-1.329l-0.098-0.881l4.946,1.741
+			L23.229,15.372z"/>
+	</g>
+	<g>
+		
+			<image overflow="visible" width="93" height="80" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF0AAABQCAYAAAB773kdAAAACXBIWXMAAAsSAAALEgHS3X78AAAA
+GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmVJREFUeNrs2MuP0lAYxmFaWi4V
+pRTGaMTEBTuW/P9r4oKdhNkbSXBwgFouhV58D1YzMXE3Jof4e5IvXzllEnj7cShTqwEAAAAAAAAA
+AAAAAAAAAAAAgJvk/AfvpyT0f/MerjUej+viHw6HehAEuVzm83mmcwWhP89rdiaTSV3d32w2fqPR
+8BzH6aiisiybrusesyx7iKJoM51OU5uCd24saHc0Gnlmklutlu95XkfT3PN9/5XCDnS+r8Dfq5vw
+t0VR3Kvfx3H8dblcnmwJ3rmBsF1Tw+HQ0/S2NL0vFewLE7jCvtPaB9VrlVk34Ud6fkMVm8C19lH1
+Sc9fa6u52LDHexYHbsL2BoNB83Q6tZIkCbSFhNqz36oGCrSnMO/U31VBB+q+KU14qYvg6vxQ6ys9
+/4s+GVsdX2x4Y57FgfthGLYVdqjAunocqkzYb0xXppGqZ9YVbtt8KiTX8Vl9r/6g8ytdgESfjtym
+N+dZvKU00jTtaEq7CrCvHlV7dreaavPaS/Wj+l491rmDutm7v6l/VuAr9bUer22ZcusnXaE11ZsK
+s6Hyqmm+mIB1bldtIWYtUS1Vj1XoidYfdaG+q1LdPp5ns1lmyz27rZP++wu09jPps74Idzo0gW4U
+aKbaqU7muJr2re5k9tpKLp1OJ6vu0fMndywlk/53ZVW5BvmksGP1gybbhFtWFyHTmgk41Zdrrj3/
++kNosVjkT/7eyl+jNm8vJrxju93OFexegV6D1gW4hqoto+j3+7m2jNz2gG/pPt35Y5v5Nb2Fzf9T
+AQAAAAAAAAAAAAAAAAAAAAAAwHP7IcAA85IZmvSydu8AAAAASUVORK5CYII=" transform="matrix(1 0 0 1 -31.752 21.9873)">
+		</image>
+	</g>
+</g>
+</svg>

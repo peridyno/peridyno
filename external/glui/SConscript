@@ -1,0 +1,75 @@
+#################################################################
+# Scons script for glui-2.35
+# called by Scons script of Physika
+# Precompiled libs of glui compiled by different MSVCs are not 
+# compatible, Hence I wrote this script to compile glui from 
+# source code on traget machine.
+# Note:
+#       This script does not copy glui.h to target directory, it's
+#       already done by OpenGL dependency of Physika.
+# @author: Fei Zhu, 06/25/2014     
+#          Wei Chen,04/07/2016   
+#################################################################
+
+######################!!EDIT HERE!!##############################
+#SRC PATH
+src_root_path = './'
+
+#EXTERNAL INCLUDE PATH
+external_include_path = ['./']
+
+#LIB NAME
+lib_name = 'glui'
+#################################################################
+
+######################CONFIGURATIONS#############################
+# IMPORT FROM PARENT SCONS SCRIPT
+Import('release_env os_name os_architecture compiler')
+#################################################################
+
+#IMPORTS
+import os
+from os.path import basename
+from glob import glob
+
+#PHYSIKA ROOT PATH
+physika_root_path = '../../../'
+
+#LIB PREFIX AND SUFFIX 
+if os_name == 'Windows':
+    obj_suffix = '32.obj'
+    lib_suffix = '32.lib'
+elif os_name in ('Linux', 'Darwin'):
+    lib_preffix = 'lib'
+    if os_architecture == '32bit':
+        obj_suffix = '32.o'
+        lib_suffix = '32.a'
+    else:
+        obj_suffix = '64.o'
+        lib_suffix = '64.a'
+
+#ADD ADDITIONAL INCLUDE PATH
+external_include_path = external_include_path+[physika_root_path+'Physika_Src/Physika_Dependency/OpenGL/']
+release_env.Append(CPPPATH = external_include_path)
+
+#COMPILE SRC FILES AND ARCHIVE INTO LIB
+lib_target = []
+target_root_path = physika_root_path+'Public_Library/'
+lib_obj_files = []
+lib_src_files = glob(os.path.join(src_root_path, '*.cpp'))
+   
+lib_file = lib_name+lib_suffix
+if os_name in ('Linux', 'Darwin'):
+   lib_file = lib_preffix+lib_file
+release_lib_file = target_root_path+'lib/release/'+os.path.basename(lib_file)
+debug_lib_file   = target_root_path+'lib/debug/'+os.path.basename(lib_file)
+
+release_env.StaticLibrary(target = release_lib_file, source = lib_src_files)
+release_env.StaticLibrary(target = debug_lib_file, source = lib_src_files)
+
+#COPY GLUI HEADER TO TARGET DIRECTORY
+header_target = Command(target_root_path+'include/Physika_Dependency/OpenGL/GL/glui.h', 'GL/glui.h', Copy("$TARGET", "$SOURCE"))
+   
+#CUSTOMIZE CLEAN OPTION
+lib_delete_files = glob(os.path.join(src_root_path, '*.pdb'))
+Clean(lib_target, lib_delete_files)

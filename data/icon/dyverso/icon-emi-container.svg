@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="30px" height="30px" viewBox="-282 405.89 30 30" enable-background="new -282 405.89 30 30" xml:space="preserve">
+<g id="Layer_2">
+</g>
+<g id="Layer_1_1_">
+	<g>
+		<g>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-280.44,410.198 -281.403,410.466 -281.368,411.466 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="1.9788,1.9788" x1="-281.299" y1="413.443" x2="-281.057" y2="420.365"/>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-281.022,421.353 -280.987,422.353 -280.217,422.99 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="2.2456,2.2456" x1="-278.486" y1="424.421" x2="-275.891" y2="426.568"/>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-275.026,427.284 -274.255,427.921 -273.314,427.582 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="2.0208,2.0208" x1="-271.413" y1="426.898" x2="-264.758" y2="424.503"/>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-263.807,424.16 -262.866,423.822 -262.831,422.822 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="1.9565,1.9565" x1="-262.762" y1="420.867" x2="-262.522" y2="414.023"/>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-262.487,413.046 -262.452,412.046 -263.314,411.538 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="2.389,2.389" x1="-265.371" y1="410.325" x2="-268.458" y2="408.505"/>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-269.487,407.898 -270.349,407.39 -271.312,407.658 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="1.8949,1.8949" x1="-273.138" y1="408.166" x2="-279.527" y2="409.944"/>
+		</g>
+	</g>
+	<g>
+		
+			<radialGradient id="SVGID_1_" cx="-874.9222" cy="1238.8285" r="3.2093" gradientTransform="matrix(-1.0502 0 0 1.0537 -1182.7584 -882.6482)" gradientUnits="userSpaceOnUse">
+			<stop  offset="0" style="stop-color:#52A7FF"/>
+			<stop  offset="1" style="stop-color:#0265CB"/>
+		</radialGradient>
+		<path fill="url(#SVGID_1_)" stroke="#282828" stroke-miterlimit="10" d="M-268.16,422.16c0-1.869,1.51-3.383,3.373-3.383
+			c1.859,0,3.369,1.514,3.369,3.383c0,1.865-1.51,3.379-3.369,3.379C-266.65,425.538-268.16,424.025-268.16,422.16z"/>
+		
+			<line fill="none" stroke="#E6E6E6" stroke-linecap="round" stroke-miterlimit="10" x1="-252.596" y1="434.39" x2="-261.418" y2="425.538"/>
+		
+			<line fill="none" stroke="#E6E6E6" stroke-linecap="round" stroke-miterlimit="10" x1="-258.389" y1="431.96" x2="-263.666" y2="426.665"/>
+		
+			<line fill="none" stroke="#E6E6E6" stroke-linecap="round" stroke-miterlimit="10" x1="-255.018" y1="428.578" x2="-260.295" y2="423.285"/>
+	</g>
+	<g>
+		<g>
+			<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" x1="-262.451" y1="412.243" x2="-263.409" y2="412.53"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="2.0474,2.0474" x1="-265.37" y1="413.119" x2="-272.234" y2="415.178"/>
+			<polyline fill="none" stroke="#B3B3B3" stroke-linejoin="round" points="-273.214,415.473 -274.172,415.76 -274.178,416.76 			
+				"/>
+			
+				<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-dasharray="2.0715,2.0715" x1="-274.192" y1="418.832" x2="-274.24" y2="426.082"/>
+			<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" x1="-274.247" y1="427.118" x2="-274.254" y2="428.118"/>
+		</g>
+	</g>
+	
+		<line fill="none" stroke="#B3B3B3" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="2" x1="-281.403" y1="410.662" x2="-274.172" y2="415.76"/>
+</g>
+</svg>
