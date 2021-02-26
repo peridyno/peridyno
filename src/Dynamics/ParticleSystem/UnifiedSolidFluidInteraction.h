@@ -142,14 +142,14 @@ namespace dyno
 		DeviceArrayField<Matrix> m_rigid_rotation;//
 
 
-		DeviceArray<int> m_objId;
+		GArray<int> m_objId;
 		DeviceArrayField<int> ParticleId;
 
-		DeviceArray<Coord> posBuf;
-		DeviceArray<Coord> VelBuf;
+		GArray<Coord> posBuf;
+		GArray<Coord> VelBuf;
 
-		DeviceArray<Real> weights;
-		DeviceArray<Coord> init_pos;
+		GArray<Real> weights;
+		GArray<Coord> init_pos;
 
 
 		std::shared_ptr<UnifiedFluidRigidConstraint<TDataType>> m_intermediateModule;

@@ -50,10 +50,10 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void test_HM_UpdatePosition(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> y_next,
-		DeviceArray<Coord> position_old,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> y_next,
+		GArray<Coord> position_old,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -74,8 +74,8 @@ namespace dyno
 	//�������ֵ
 	template <typename Real, typename Coord>
 	__global__ void HM_Blend(
-		DeviceArray<Real> blend,
-		DeviceArray<Coord> eigens)
+		GArray<Real> blend,
+		GArray<Coord> eigens)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= blend.size()) return;
@@ -92,9 +92,9 @@ namespace dyno
 
 	template <typename Real, typename Matrix>
 	__global__ void HM_ComputeFirstPiolaKirchhoff(
-		DeviceArray<Matrix> stressTensor,
-		DeviceArray<Matrix> F,
-		DeviceArray<Matrix> inverseF,
+		GArray<Matrix> stressTensor,
+		GArray<Matrix> F,
+		GArray<Matrix> inverseF,
 		Real mu,
 		Real lambda)
 	{
@@ -112,13 +112,13 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiStepExplicit(
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> y_new,
-		DeviceArray<Coord> y_old,
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> stressTensor,
-		DeviceArray<Matrix> invK,
-		DeviceArray<Matrix> invL,
+		GArray<Coord> velocity,
+		GArray<Coord> y_new,
+		GArray<Coord> y_old,
+		GArray<Coord> source,
+		GArray<Matrix> stressTensor,
+		GArray<Matrix> invK,
+		GArray<Matrix> invL,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real mass,
@@ -195,15 +195,15 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiLinear(
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> A,
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Matrix> F,
+		GArray<Coord> source,
+		GArray<Matrix> A,
+		GArray<Coord> y_pre,
+		GArray<Matrix> F,
 		NeighborList<NPair> restShapes,
-		DeviceArray<Real> volume,
+		GArray<Real> volume,
 		Real horizon,
 		Real dt,
-		DeviceArray<Real> fraction)
+		GArray<Real> fraction)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= source.size()) return;
@@ -320,21 +320,21 @@ namespace dyno
 	 */
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiStepSymmetric(
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> A,
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Matrix> matU,
-		DeviceArray<Matrix> matV,
-		DeviceArray<Coord> eigen,
-		DeviceArray<bool> validOfK,
-		DeviceArray<Matrix> F,
-		DeviceArray<Real> coefficients,
+		GArray<Coord> source,
+		GArray<Matrix> A,
+		GArray<Coord> y_pre,
+		GArray<Matrix> matU,
+		GArray<Matrix> matV,
+		GArray<Coord> eigen,
+		GArray<bool> validOfK,
+		GArray<Matrix> F,
+		GArray<Real> coefficients,
 		NeighborList<NPair> restShapes,
 		Real horizon,
-		DeviceArray<Real> volume,
+		GArray<Real> volume,
 		Real dt,
 		EnergyType type,
-		DeviceArray<Real> fraction)
+		GArray<Real> fraction)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_pre.size()) return;
@@ -433,14 +433,14 @@ namespace dyno
 	// these deformation gradients are mat3x3, may be singular
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_ComputeF(
-		DeviceArray<Matrix> F,
-		DeviceArray<Coord> eigens,
-		DeviceArray<Matrix> invK,
-		DeviceArray<bool> validOfK,
-		DeviceArray<Matrix> matU,
-		DeviceArray<Matrix> matV,
-		DeviceArray<Matrix> Rots,
-		DeviceArray<Coord> position,
+		GArray<Matrix> F,
+		GArray<Coord> eigens,
+		GArray<Matrix> invK,
+		GArray<bool> validOfK,
+		GArray<Matrix> matU,
+		GArray<Matrix> matV,
+		GArray<Matrix> Rots,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real horizon)
 	{
@@ -738,20 +738,20 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiStepNonsymmetric(
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> A,
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Matrix> matU,
-		DeviceArray<Matrix> matV,
-		DeviceArray<Coord> eigen,
-		DeviceArray<bool> validOfK,
-		DeviceArray<Matrix> F,
+		GArray<Coord> source,
+		GArray<Matrix> A,
+		GArray<Coord> y_pre,
+		GArray<Matrix> matU,
+		GArray<Matrix> matV,
+		GArray<Coord> eigen,
+		GArray<bool> validOfK,
+		GArray<Matrix> F,
 		NeighborList<NPair> restShapes,
 		Real horizon,
-		DeviceArray<Real> volume,
+		GArray<Real> volume,
 		Real dt,
 		EnergyType type,
-		DeviceArray<Real> fraction)
+		GArray<Real> fraction)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_pre.size()) return;
@@ -894,22 +894,22 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiStepDegenerate(
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> A,
-		DeviceArray<Coord> y_next,
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Coord> y_old,
-		DeviceArray<Matrix> matU,
-		DeviceArray<Matrix> matV,
-		DeviceArray<Coord> eigen,
-		DeviceArray<Matrix> F,
-		DeviceArray<Real> coefficients,
+		GArray<Coord> source,
+		GArray<Matrix> A,
+		GArray<Coord> y_next,
+		GArray<Coord> y_pre,
+		GArray<Coord> y_old,
+		GArray<Matrix> matU,
+		GArray<Matrix> matV,
+		GArray<Coord> eigen,
+		GArray<Matrix> F,
+		GArray<Real> coefficients,
 		NeighborList<NPair> restShapes,
 		Real horizon,
-		DeviceArray<Real> volume,
+		GArray<Real> volume,
 		Real dt,
 		EnergyType type,
-		DeviceArray<Real> fraction)
+		GArray<Real> fraction)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_next.size()) return;
@@ -1006,13 +1006,13 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix>
 	__global__ void HM_ComputeNextPosition(
-		DeviceArray<Coord> y_next,
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Coord> y_old,
-		DeviceArray<Real> volume,
-		DeviceArray<Coord> source,
-		DeviceArray<Attribute> atts,
-		DeviceArray<Matrix> A,
+		GArray<Coord> y_next,
+		GArray<Coord> y_pre,
+		GArray<Coord> y_old,
+		GArray<Real> volume,
+		GArray<Coord> source,
+		GArray<Attribute> atts,
+		GArray<Matrix> A,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1071,12 +1071,12 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix>
 	__global__ void HM_ComputeResidual(
-		DeviceArray<Coord> residual,
-		DeviceArray<Coord> y_current,
-		DeviceArray<Coord> y_old,
-		DeviceArray<Real> volume,
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> A,
+		GArray<Coord> residual,
+		GArray<Coord> y_current,
+		GArray<Coord> y_old,
+		GArray<Real> volume,
+		GArray<Coord> source,
+		GArray<Matrix> A,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1106,11 +1106,11 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix>
 	__global__ void HM_ComputeGradC(
-		DeviceArray<Coord> gradC,
-		DeviceArray<Coord> y_delta,
-		DeviceArray<Real> volume,
-		DeviceArray<Coord> source,
-		DeviceArray<Matrix> A,
+		GArray<Coord> gradC,
+		GArray<Coord> y_delta,
+		GArray<Real> volume,
+		GArray<Coord> source,
+		GArray<Matrix> A,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1140,8 +1140,8 @@ namespace dyno
 
 	template <typename Matrix>
 	__global__ void HM_InitRotation(
-		DeviceArray<Matrix> U,
-		DeviceArray<Matrix> V)
+		GArray<Matrix> U,
+		GArray<Matrix> V)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= U.size()) return;
@@ -1244,7 +1244,7 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void HM_InitVolume(
-		DeviceArray<Real> volume
+		GArray<Real> volume
 	) 
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1266,8 +1266,8 @@ namespace dyno
 	template <typename Coord, typename Matrix>
 	__global__ void HM_AdjustFixedPos_rotate(
 		int adjust_type,
-		DeviceArray<int> m_points_move_type,
-		DeviceArray<Coord> fixedPos,
+		GArray<int> m_points_move_type,
+		GArray<Coord> fixedPos,
 		Matrix rotate_mat
 	)
 	{
@@ -1293,7 +1293,7 @@ namespace dyno
 
 	template <typename Coord, typename Matrix>
 	__global__ void HM_RotateInitPos(
-		DeviceArray<Coord> position)
+		GArray<Coord> position)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -1327,9 +1327,9 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void HM_ComputeGradient(
-		DeviceArray<Coord> grad,
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Coord> y_next)
+		GArray<Coord> grad,
+		GArray<Coord> y_pre,
+		GArray<Coord> y_next)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_next.size()) return;
@@ -1343,10 +1343,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void HM_ComputeCurrentPosition(
-		DeviceArray<Coord> grad,
-		DeviceArray<Coord> y_current,
-		DeviceArray<Coord> y_next,
-		DeviceArray<Real> alpha)
+		GArray<Coord> grad,
+		GArray<Coord> y_current,
+		GArray<Coord> y_next,
+		GArray<Real> alpha)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_next.size()) return;
@@ -1356,9 +1356,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void HM_ComputeCurrentPosition(
-		DeviceArray<Coord> grad,
-		DeviceArray<Coord> y_current,
-		DeviceArray<Coord> y_next,
+		GArray<Coord> grad,
+		GArray<Coord> y_current,
+		GArray<Coord> y_next,
 		Real alpha)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1369,12 +1369,12 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_Compute1DEnergy(
-		DeviceArray<Real> energy,
-		DeviceArray<Coord> pos_current,
-		DeviceArray<Matrix> F,
-		DeviceArray<Real> volume,
-		DeviceArray<bool> validOfK,
-		DeviceArray<Coord> eigenValues,
+		GArray<Real> energy,
+		GArray<Coord> pos_current,
+		GArray<Matrix> F,
+		GArray<Real> volume,
+		GArray<bool> validOfK,
+		GArray<Coord> eigenValues,
 		NeighborList<NPair> restShapes,
 		EnergyType type)
 	{
@@ -1432,7 +1432,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__global__ void HM_Chebyshev_Acceleration(DeviceArray<Coord> next_X, DeviceArray<Coord> X, DeviceArray<Coord> prev_X, float omega)
+	__global__ void HM_Chebyshev_Acceleration(GArray<Coord> next_X, GArray<Coord> X, GArray<Coord> prev_X, float omega)
 	{
 		int pId = blockDim.x * blockIdx.x + threadIdx.x;
 		if (pId >= prev_X.size())	return;
@@ -1444,10 +1444,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void HM_DOT(
-		DeviceArray<Real> gradSquare,
-		DeviceArray<Real> gradResidual,
-		DeviceArray<Coord> gradC,
-		DeviceArray<Coord> residual)
+		GArray<Real> gradSquare,
+		GArray<Real> gradResidual,
+		GArray<Coord> gradC,
+		GArray<Coord> residual)
 	{
 		int pId = blockDim.x * blockIdx.x + threadIdx.x;
 		if (pId >= residual.size())	return;
@@ -1462,8 +1462,8 @@ namespace dyno
 
 	template <typename Coord, typename NPair>
 	__global__ void HM_AccumulateGradient(
-		DeviceArray<Coord> accumulate,
-		DeviceArray<Coord> gradient,
+		GArray<Coord> accumulate,
+		GArray<Coord> gradient,
 		NeighborList<NPair> restShapes)
 	{
 		int pId = blockDim.x * blockIdx.x + threadIdx.x;
@@ -1484,11 +1484,11 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_ComputeStepLength(
-		DeviceArray<Real> stepLength,
-		DeviceArray<Coord> gradient,
-		DeviceArray<Real> volume,
-		DeviceArray<Matrix> A,
-		DeviceArray<Real> energy,
+		GArray<Real> stepLength,
+		GArray<Coord> gradient,
+		GArray<Real> volume,
+		GArray<Matrix> A,
+		GArray<Real> energy,
 		NeighborList<NPair> restShapes)
 	{
 		int pId = blockDim.x * blockIdx.x + threadIdx.x;
@@ -1531,8 +1531,8 @@ namespace dyno
 // 		auto d_ele = this->inRestShape()->getValue().getElements();
 // 		auto d_index = this->inRestShape()->getValue().getIndex();
 // 
-// 		HostArray<NPair> h_ele;
-// 		HostArray<int> h_index;
+// 		CArray<NPair> h_ele;
+// 		CArray<int> h_index;
 // 
 // 		h_ele.resize(d_ele.size());
 // 		h_index.resize(d_index.size());
@@ -1686,7 +1686,7 @@ namespace dyno
 				;
 			}
 
-// 			DeviceArray<Coord> gradient_cpy;
+// 			GArray<Coord> gradient_cpy;
 // 			gradient_cpy.resize(m_gradient.size());
 // 			Function1Pt::copy(gradient_cpy, m_gradient);
 // 			cuExecute(m_gradient.size(),
@@ -1724,8 +1724,8 @@ namespace dyno
 					m_A,
 					m_energyType);
 
-				DeviceArray<Matrix> tmpA;
-				DeviceArray<Coord> tmpSource;
+				GArray<Matrix> tmpA;
+				GArray<Coord> tmpSource;
 				tmpA.resize(y_current.size());	tmpA.reset();
 				tmpSource.resize(y_current.size());	tmpSource.reset();
 				HM_JacobiStepSymmetric << <pDims, BLOCK_SIZE >> > (
@@ -1756,8 +1756,8 @@ namespace dyno
 				tmpSource.release();
 				tmpA.release();
 
-				DeviceArray<Real> gradSquare;
-				DeviceArray<Real> gradResidual;
+				GArray<Real> gradSquare;
+				GArray<Real> gradResidual;
 				gradSquare.resize(y_current.size());
 				gradResidual.resize(y_current.size());
 
@@ -1838,7 +1838,7 @@ namespace dyno
 			}*/
 			
 			if (this->var_isConvergeComputeField.getValue()) {
-				HostArray<Coord> y_current_host, y_next_host;
+				CArray<Coord> y_current_host, y_next_host;
 				y_current_host.resize(y_current.size());
 				y_next_host.resize(y_next.size());
 
@@ -1904,8 +1904,8 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix>
 	__global__ void HM_ComputeEnergy(
-		DeviceArray<Real> energy,
-		DeviceArray<Coord> eigens,
+		GArray<Real> energy,
+		GArray<Coord> eigens,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1930,7 +1930,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void HyperelasticityModule_test<TDataType>::getEnergy(Real& totalEnergy, DeviceArray<Coord>& position)
+	void HyperelasticityModule_test<TDataType>::getEnergy(Real& totalEnergy, GArray<Coord>& position)
 	{
 		int numOfParticles = this->inPosition()->getElementCount();
 		uint pDims = cudaGridSize(numOfParticles, BLOCK_SIZE);

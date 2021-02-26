@@ -41,13 +41,13 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void PM_ComputeInvariants(
-		DeviceArray<bool> bYield,
-		DeviceArray<Real> yield_I1,
-		DeviceArray<Real> yield_J2,
-		DeviceArray<Real> arrI1,
-		DeviceArray<Coord> position,
-		DeviceArray<Real> density,
-		DeviceArray<Real> bulk_stiffiness,
+		GArray<bool> bYield,
+		GArray<Real> yield_I1,
+		GArray<Real> yield_J2,
+		GArray<Real> arrI1,
+		GArray<Coord> position,
+		GArray<Real> density,
+		GArray<Real> bulk_stiffiness,
 		NeighborList<NPair> restShape,
 		Real horizon,
 		Real A,
@@ -171,10 +171,10 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void PM_ApplyYielding(
-		DeviceArray<Real> yield_I1,
-		DeviceArray<Real> yield_J2,
-		DeviceArray<Real> arrI1,
-		DeviceArray<Coord> position,
+		GArray<Real> yield_I1,
+		GArray<Real> yield_J2,
+		GArray<Real> arrI1,
+		GArray<Coord> position,
 		NeighborList<NPair> restShape)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -313,12 +313,12 @@ namespace dyno
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void PM_ReconstructRestShape(
 		NeighborList<NPair> new_rest_shape,
-		DeviceArray<bool> bYield,
-		DeviceArray<Coord> position,
-		DeviceArray<Real> I1,
-		DeviceArray<Real> I1_yield,
-		DeviceArray<Real> J2_yield,
-		DeviceArray<Matrix> invF,
+		GArray<bool> bYield,
+		GArray<Coord> position,
+		GArray<Real> I1,
+		GArray<Real> I1_yield,
+		GArray<Real> J2_yield,
+		GArray<Matrix> invF,
 		NeighborList<int> neighborhood,
 		NeighborList<NPair> restShape,
 		Real horizon)
@@ -378,8 +378,8 @@ namespace dyno
 
 	template <typename NPair>
 	__global__ void PM_ReconfigureRestShape(
-		DeviceArray<int> nbSize,
-		DeviceArray<bool> bYield,
+		GArray<int> nbSize,
+		GArray<bool> bYield,
 		NeighborList<int> neighborhood,
 		NeighborList<NPair> restShape)
 	{
@@ -398,8 +398,8 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void PM_ComputeInverseDeformation(
-		DeviceArray<Matrix> invF,
-		DeviceArray<Coord> position,
+		GArray<Matrix> invF,
+		GArray<Coord> position,
 		NeighborList<NPair> restShape,
 		Real horizon)
 	{
@@ -472,7 +472,7 @@ namespace dyno
 	}
 
 	__global__ void PM_EnableAllReconstruction(
-		DeviceArray<bool> bYield)
+		GArray<bool> bYield)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (i >= bYield.size()) return;
@@ -494,8 +494,8 @@ namespace dyno
 
 		NeighborList<NPair> newNeighborList;
 		newNeighborList.resize(this->inPosition()->getElementCount());
-		DeviceArray<int>& index = newNeighborList.getIndex();
-		DeviceArray<NPair>& elements = newNeighborList.getElements();
+		GArray<int>& index = newNeighborList.getIndex();
+		GArray<NPair>& elements = newNeighborList.getElements();
 
 		PM_ReconfigureRestShape << <pDims, BLOCK_SIZE >> > (
 			index,
@@ -562,8 +562,8 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_RotateRestShape(
-		DeviceArray<Coord> position,
-		DeviceArray<bool> bYield,
+		GArray<Coord> position,
+		GArray<bool> bYield,
 		NeighborList<NPair> restShapes,
 		Real smoothingLength)
 	{

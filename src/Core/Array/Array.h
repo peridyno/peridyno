@@ -77,10 +77,10 @@ namespace dyno {
 	};
 
 	template<typename T>
-	using HostArray = Array<T, DeviceType::CPU>;
+	using CArray = Array<T, DeviceType::CPU>;
 
 	template<typename T>
-	using DeviceArray = Array<T, DeviceType::GPU>;
+	using GArray = Array<T, DeviceType::GPU>;
 }
 
 #include "Array.inl"

@@ -25,13 +25,13 @@ namespace dyno {
 
 		void compute() override;
 
-		void compute(DeviceArray<Real>& rho);
+		void compute(GArray<Real>& rho);
 
 		void compute(
-			DeviceArray<Real>& rho,
-			DeviceArray<Coord>& pos,
-			DeviceArray<TopologyModule::Triangle>& Tri,
-			DeviceArray<Coord>& positionTri,
+			GArray<Real>& rho,
+			GArray<Coord>& pos,
+			GArray<TopologyModule::Triangle>& Tri,
+			GArray<Coord>& positionTri,
 			NeighborList<int>& neighbors,
 			NeighborList<int>& neighborsTri,
 			Real smoothingLength,

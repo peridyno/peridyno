@@ -17,8 +17,8 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename NPair>
 	__global__ void PM_ComputeInvariants(
-		DeviceArray<Real> bulk_stiffiness,
-		DeviceArray<Coord> position,
+		GArray<Real> bulk_stiffiness,
+		GArray<Coord> position,
 		NeighborList<NPair> restShape,
 		Real horizon,
 		Real A,
@@ -129,11 +129,11 @@ namespace dyno
 
 	template<typename Coord, typename Tri2Tet, typename Tetrahedron>
 	__global__ void HFM_TagFracture(
-		DeviceArray<bool> tags,
-		DeviceArray<Coord> positions,
-		DeviceArray<Coord> restPositions,
-		DeviceArray<Tri2Tet> tri2Tets,
-		DeviceArray<Tetrahedron> tets,
+		GArray<bool> tags,
+		GArray<Coord> positions,
+		GArray<Coord> restPositions,
+		GArray<Tri2Tet> tri2Tets,
+		GArray<Tetrahedron> tets,
 		Real crictialStretch)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);

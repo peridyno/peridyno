@@ -34,7 +34,7 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void PS_Scale(
-		DeviceArray<Coord> vertex,
+		GArray<Coord> vertex,
 		Real s)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -51,7 +51,7 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void PS_Scale(
-		DeviceArray<Coord> vertex,
+		GArray<Coord> vertex,
 		Coord s)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -69,7 +69,7 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void PS_Translate(
-		DeviceArray<Coord> vertex,
+		GArray<Coord> vertex,
 		Coord t)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

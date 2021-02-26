@@ -110,10 +110,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 		__global__ void H_ComputeGradient(
-			DeviceArray<Coord> grads,
-			DeviceArray<Real> rhoArr,
-			DeviceArray<Coord> curPos,
-			DeviceArray<Coord> originPos,
+			GArray<Coord> grads,
+			GArray<Real> rhoArr,
+			GArray<Coord> curPos,
+			GArray<Coord> originPos,
 			NeighborList<int> neighbors,
 			Real bulk,
 			Real surfaceTension,
@@ -208,8 +208,8 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void H_UpdatePosition(
-		DeviceArray<Coord> gradients,
-		DeviceArray<Coord> curPos)
+		GArray<Coord> gradients,
+		GArray<Coord> curPos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;
@@ -218,9 +218,9 @@ namespace dyno
 	}
 
 	__global__ void H_UpdateVelocity(
-		DeviceArray<float3> curVel,
-		DeviceArray<float3> curPos,
-		DeviceArray<float3> originalPos,
+		GArray<float3> curVel,
+		GArray<float3> curPos,
+		GArray<float3> originalPos,
 		float dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -272,8 +272,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void H_ComputeEnergy(
-		DeviceArray<Real> energy,
-		DeviceArray<Coord> curPos,
+		GArray<Real> energy,
+		GArray<Coord> curPos,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real scale)
@@ -308,12 +308,12 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void H_TakeOneIteration(
-		DeviceArray<Coord> newPos,
-		DeviceArray<Coord> curPos,
-		DeviceArray<Coord> prePos,
-		DeviceArray<Real> c,
-		DeviceArray<Real> lc,
-		DeviceArray<Real> energy,
+		GArray<Coord> newPos,
+		GArray<Coord> curPos,
+		GArray<Coord> prePos,
+		GArray<Real> c,
+		GArray<Real> lc,
+		GArray<Real> energy,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real restRho,
@@ -416,9 +416,9 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void H_UpdateVelocity(
-		DeviceArray<Coord> curVel,
-		DeviceArray<Coord> curPos,
-		DeviceArray<Coord> oriPos,
+		GArray<Coord> curVel,
+		GArray<Coord> curPos,
+		GArray<Coord> oriPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -521,8 +521,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void H_ComputeC(
-		DeviceArray<Real> c,
-		DeviceArray<Coord> pos,
+		GArray<Real> c,
+		GArray<Coord> pos,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real scale)
@@ -546,7 +546,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Helmholtz<TDataType>::computeC(DeviceArray<Real>& c, DeviceArray<Coord>& pos, NeighborList<int>& neighbors)
+	void Helmholtz<TDataType>::computeC(GArray<Real>& c, GArray<Coord>& pos, NeighborList<int>& neighbors)
 	{
 		uint pDims = cudaGridSize(c.size(), BLOCK_SIZE);
 		H_ComputeC << <pDims, BLOCK_SIZE >> > (c, pos, neighbors, m_smoothingLength, m_scale);
@@ -554,8 +554,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void H_ComputeGC(
-		DeviceArray<Coord> gc,
-		DeviceArray<Coord> pos,
+		GArray<Coord> gc,
+		GArray<Coord> pos,
 		NeighborList<int> neighbors,
 		Real smoothingLength)
 	{
@@ -589,8 +589,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void H_ComputeLC(
-		DeviceArray<Real> lc,
-		DeviceArray<Coord> pos,
+		GArray<Real> lc,
+		GArray<Coord> pos,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real scale)
@@ -615,7 +615,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Helmholtz<TDataType>::computeLC(DeviceArray<Real>& lc, DeviceArray<Coord>& pos, NeighborList<int>& neighbors)
+	void Helmholtz<TDataType>::computeLC(GArray<Real>& lc, GArray<Coord>& pos, NeighborList<int>& neighbors)
 	{
 		uint pDims = cudaGridSize(m_c.size(), BLOCK_SIZE);
 		H_ComputeLC << <pDims, BLOCK_SIZE >> > (lc, pos, neighbors, m_smoothingLength, m_scale);

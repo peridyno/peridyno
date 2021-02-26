@@ -3,7 +3,7 @@
 #include "Array/Array2D.h"
 #include "Array/Array3D.h"
 /*
-*  This file implements two-point functions on device array types (DeviceArray, DeviceArray2D, DeviceArray3D, etc.)
+*  This file implements two-point functions on device array types (GArray, DeviceArray2D, DeviceArray3D, etc.)
 */
 
 namespace dyno
@@ -12,22 +12,22 @@ namespace dyno
 	{
 		// z = x + y;
 		template <typename T>
-		void plus(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr);
+		void plus(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr);
 
 		// z = x - y;
 		template <typename T>
-		void subtract(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr);
+		void subtract(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr);
 
 		// z = x * y;
 		template <typename T>
-		void multiply(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr);
+		void multiply(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr);
 
 		// z = x / y;
 		template <typename T>
-		void divide(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr);
+		void divide(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr);
 
 		// z = a * x + y;
 		template <typename T>
-		void saxpy(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr, T alpha);
+		void saxpy(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr, T alpha);
 	};
 }

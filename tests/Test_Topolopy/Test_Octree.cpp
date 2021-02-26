@@ -53,8 +53,8 @@ TEST(Octree, Compare)
 
 TEST(Octree, Construct)
 {
-	HostArray<Vector3f> h_arr;
-	DeviceArray<Vector3f> d_arr;
+	CArray<Vector3f> h_arr;
+	GArray<Vector3f> d_arr;
 	h_arr.resize(4);
 	d_arr.resize(4);
 	for (int i = 0; i < 4; i++)

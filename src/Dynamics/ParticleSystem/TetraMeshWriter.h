@@ -57,9 +57,9 @@ namespace dyno
 		std::string name_prefix = "defaut_";
 		std::string file_postfix = ".obj";
 
-		DeviceArray<Triangle>* ptr_triangles;
-		DeviceArray<Tri2Tet>* ptr_tri2tet;
-		DeviceArray<Coord>* ptr_vertices;
+		GArray<Triangle>* ptr_triangles;
+		GArray<Tri2Tet>* ptr_tri2tet;
+		GArray<Coord>* ptr_vertices;
 		std::shared_ptr<TetrahedronSet<TDataType>> ptr_TetrahedronSet;
 	};
 

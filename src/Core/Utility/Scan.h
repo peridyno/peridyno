@@ -14,8 +14,8 @@ namespace dyno
 		void exclusive(int* output, int* input, int length, bool bcao = true);
 		void exclusive(int* data, int length, bool bcao = true);
 
-		void exclusive(DeviceArray<int>& output, DeviceArray<int>& input, bool bcao = true);
-		void exclusive(DeviceArray<int>& data, bool bcao = true);
+		void exclusive(GArray<int>& output, GArray<int>& input, bool bcao = true);
+		void exclusive(GArray<int>& data, bool bcao = true);
 
 	private:
 		void scanLargeDeviceArray(int *d_out, int *d_in, int length, bool bcao, int level);
@@ -27,10 +27,10 @@ namespace dyno
 
 
 	private:
-		DeviceArray<int> m_buffer;
+		GArray<int> m_buffer;
 
-		DeviceArray<int> m_sums[SCAN_LEVEL];
-		DeviceArray<int> m_incr[SCAN_LEVEL];
+		GArray<int> m_sums[SCAN_LEVEL];
+		GArray<int> m_incr[SCAN_LEVEL];
 	};
 
 }

@@ -41,8 +41,8 @@ namespace dyno
 	template<typename Real,
 			 typename Coord>
 	__global__ void K_InitKernelFunctionMesh(
-		DeviceArray<Real> weights,
-		DeviceArray<Coord> posArr,
+		GArray<Real> weights,
+		GArray<Coord> posArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kernel,
 		Real smoothingLength)
@@ -71,11 +71,11 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeLambdasMesh(
-		DeviceArray<Real> lambdaArr,
-		DeviceArray<Real> rhoArr,
-		DeviceArray<Coord> posArr,
-		DeviceArray<TopologyModule::Triangle> Tri,
-		DeviceArray<Coord> positionTri,
+		GArray<Real> lambdaArr,
+		GArray<Real> rhoArr,
+		GArray<Coord> posArr,
+		GArray<TopologyModule::Triangle> Tri,
+		GArray<Coord> positionTri,
 		NeighborList<int> neighbors,
 		NeighborList<int> neighborsTri,
 		SpikyKernel<Real> kern,
@@ -204,10 +204,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeLambdasMesh(
-		DeviceArray<Real> lambdaArr,
-		DeviceArray<Real> rhoArr,
-		DeviceArray<Coord> posArr,
-		DeviceArray<Real> massInvArr,
+		GArray<Real> lambdaArr,
+		GArray<Real> rhoArr,
+		GArray<Coord> posArr,
+		GArray<Real> massInvArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kern,
 		Real smoothingLength)
@@ -246,11 +246,11 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeDisplacementMesh(
-		DeviceArray<Coord> dPos, 
-		DeviceArray<Real> lambdas, 
-		DeviceArray<Coord> posArr, 
-		DeviceArray<TopologyModule::Triangle> Tri,
-		DeviceArray<Coord> positionTri,
+		GArray<Coord> dPos, 
+		GArray<Real> lambdas, 
+		GArray<Coord> posArr, 
+		GArray<TopologyModule::Triangle> Tri,
+		GArray<Coord> positionTri,
 		NeighborList<int> neighbors, 
 		NeighborList<int> neighborsTri,
 		SpikyKernel<Real> kern,
@@ -421,10 +421,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeDisplacementMesh(
-		DeviceArray<Coord> dPos,
-		DeviceArray<Real> lambdas,
-		DeviceArray<Coord> posArr,
-		DeviceArray<Real> massInvArr,
+		GArray<Coord> dPos,
+		GArray<Real> lambdas,
+		GArray<Coord> posArr,
+		GArray<Real> massInvArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kern,
 		Real smoothingLength,
@@ -466,9 +466,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdatePositionMesh(
-		DeviceArray<Coord> posArr, 
-		DeviceArray<Coord> velArr, 
-		DeviceArray<Coord> dPos, 
+		GArray<Coord> posArr, 
+		GArray<Coord> velArr, 
+		GArray<Coord> dPos, 
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -683,9 +683,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void DP_UpdateVelocityMesh(
-		DeviceArray<Coord> velArr,
-		DeviceArray<Coord> prePos,
-		DeviceArray<Coord> curPos,
+		GArray<Coord> velArr,
+		GArray<Coord> prePos,
+		GArray<Coord> curPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -696,8 +696,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void DP_NVelocityMesh(
-		DeviceArray<Coord> velArr,
-		DeviceArray<Real> veln)
+		GArray<Coord> velArr,
+		GArray<Real> veln)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velArr.size()) return;

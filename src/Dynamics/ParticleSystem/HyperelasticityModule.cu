@@ -15,11 +15,11 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair, typename Function>
 	__global__ void HM_EnforceElasticity(
-		DeviceArray<Coord> delta_position,
-		DeviceArray<Real> weights,
-		DeviceArray<Real> bulkCoefs,
-		DeviceArray<Matrix> invK,
-		DeviceArray<Coord> position,
+		GArray<Coord> delta_position,
+		GArray<Real> weights,
+		GArray<Real> bulkCoefs,
+		GArray<Matrix> invK,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real mu,
@@ -163,10 +163,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void HM_UpdatePosition(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> old_position,
-		DeviceArray<Coord> delta_position,
-		DeviceArray<Real> delta_weights)
+		GArray<Coord> position,
+		GArray<Coord> old_position,
+		GArray<Coord> delta_position,
+		GArray<Real> delta_weights)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;

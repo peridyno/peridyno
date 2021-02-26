@@ -19,11 +19,11 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ApplyViscosity(
-		DeviceArray<Coord> velNew,
-		DeviceArray<Coord> posArr,
+		GArray<Coord> velNew,
+		GArray<Coord> posArr,
 		NeighborList<int> neighbors,
-		DeviceArray<Coord> velOld,
-		DeviceArray<Coord> velArr,
+		GArray<Coord> velOld,
+		GArray<Coord> velArr,
 		Real viscosity,
 		Real smoothingLength,
 		Real dt)
@@ -63,8 +63,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void VB_UpdateVelocity(
-		DeviceArray<Coord> velArr, 
-		DeviceArray<Coord> dVel)
+		GArray<Coord> velArr, 
+		GArray<Coord> dVel)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velArr.size()) return;

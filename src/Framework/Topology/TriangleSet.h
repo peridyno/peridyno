@@ -91,7 +91,7 @@ namespace dyno
 			PointType id[3];
 		};
 
-		DeviceArray<Triangle>* getTriangles() { return &m_triangles; }
+		GArray<Triangle>* getTriangles() { return &m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
 
 		NeighborList<int>& getVertex2Triangles();
@@ -107,10 +107,10 @@ namespace dyno
 
 	protected:
 
-		DeviceArray<Triangle> m_triangles;
+		GArray<Triangle> m_triangles;
 		NeighborList<int> m_ver2Tri;
 
-		DeviceArray<Edg2Tri> edg2Tri;
+		GArray<Edg2Tri> edg2Tri;
 	};
 
 #ifdef PRECISION_FLOAT

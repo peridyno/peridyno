@@ -21,10 +21,10 @@ namespace dyno
 		void copyFrom(PointSet<TDataType>& pointSet);
 
 		void setPoints(std::vector<Coord>& pos);
-		void setPoints(DeviceArray<Coord>& pos);
+		void setPoints(GArray<Coord>& pos);
 		void setSize(int size);
 
-		DeviceArray<Coord>& getPoints() { return m_coords; }
+		GArray<Coord>& getPoints() { return m_coords; }
 
 		int getPointSize() { return m_coords.size(); };
 
@@ -40,7 +40,7 @@ namespace dyno
 	protected:
 		bool initializeImpl() override;
 
-		DeviceArray<Coord> m_coords;
+		GArray<Coord> m_coords;
 		ListArray<int> m_pointNeighbors;
 	};
 

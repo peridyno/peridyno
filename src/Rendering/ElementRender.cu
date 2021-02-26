@@ -145,9 +145,9 @@ namespace dyno
 
 
 	__global__ void Mix_Setup_Mapping(
-		DeviceArray<int> mapping,
-		DeviceArray<int> mapping_shape,
-		DeviceArray<int> attribute,
+		GArray<int> mapping,
+		GArray<int> mapping_shape,
+		GArray<int> attribute,
 		int num_box,
 		int num_triangle_sphere
 	)
@@ -170,12 +170,12 @@ namespace dyno
 	}
 
 	__global__ void Mix_Setup_Box(
-		DeviceArray<Box3D> box,
-		DeviceArray<float3> centre_box,
-		DeviceArray<float3> uu,
-		DeviceArray<float3> vv,
-		DeviceArray<float3> ww,
-		DeviceArray<float3> ex
+		GArray<Box3D> box,
+		GArray<float3> centre_box,
+		GArray<float3> uu,
+		GArray<float3> vv,
+		GArray<float3> ww,
+		GArray<float3> ex
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -191,9 +191,9 @@ namespace dyno
 	}
 
 	__global__ void Mix_Setup_Sphere(
-		DeviceArray<Sphere3D> sphere,
-		DeviceArray<float> radius,
-		DeviceArray<float3> centre_sphere
+		GArray<Sphere3D> sphere,
+		GArray<float> radius,
+		GArray<float3> centre_sphere
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -203,21 +203,21 @@ namespace dyno
 	}
 
 	__global__ void Mix_SetupTriangles(
-		DeviceArray<float3> vertices,
-		DeviceArray<float3> normals,
-		DeviceArray<float3> colors,
-		DeviceArray<float3> centre_box,
-		DeviceArray<float3> ext,
-		DeviceArray<float3> u,
-		DeviceArray<float3> v,
-		DeviceArray<float3> w,
-		DeviceArray<float3> centre_sphere,
-		DeviceArray<float> radius,
-		DeviceArray<float3> pos,
-		DeviceArray<int> index,
-		DeviceArray<int> mapping,
-		DeviceArray<int> mapping_shape,
-		DeviceArray<int> attribute,
+		GArray<float3> vertices,
+		GArray<float3> normals,
+		GArray<float3> colors,
+		GArray<float3> centre_box,
+		GArray<float3> ext,
+		GArray<float3> u,
+		GArray<float3> v,
+		GArray<float3> w,
+		GArray<float3> centre_sphere,
+		GArray<float> radius,
+		GArray<float3> pos,
+		GArray<int> index,
+		GArray<int> mapping,
+		GArray<int> mapping_shape,
+		GArray<int> attribute,
 		float3 color
 	)
 	{

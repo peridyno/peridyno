@@ -87,11 +87,11 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void K_DoFixPoints(
-		DeviceArray<Coord> curPos,
-		DeviceArray<Coord> curVel,
-		DeviceArray<Attribute> curAtts,
-		DeviceArray<int> bFixed,
-		DeviceArray<Coord> fixedPts)
+		GArray<Coord> curPos,
+		GArray<Coord> curVel,
+		GArray<Attribute> curAtts,
+		GArray<int> bFixed,
+		GArray<Coord> fixedPts)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;

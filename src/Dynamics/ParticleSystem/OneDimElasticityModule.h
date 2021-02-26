@@ -63,8 +63,8 @@ namespace dyno {
 		*/
 		VarField<Real> m_lambda;
 
-		DeviceArray<Coord> m_position_old;
-		DeviceArray<Coord> m_position_buf;
+		GArray<Coord> m_position_old;
+		GArray<Coord> m_position_buf;
 
 	private:
 		VarField<int> m_iterNum;

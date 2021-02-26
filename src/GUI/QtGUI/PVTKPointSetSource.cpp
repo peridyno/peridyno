@@ -46,7 +46,7 @@ int PVTKPointSetSource::RequestData(
 	int num_of_points = device_pts.size();
 	printf("RD %d\n", num_of_points);
 
-	dyno::HostArray<dyno::Vector3f> host_pts;
+	dyno::CArray<dyno::Vector3f> host_pts;
 	host_pts.resize(num_of_points);
 
 	printf("HostPtsSize %d\n", host_pts.size());

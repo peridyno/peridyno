@@ -47,9 +47,9 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeAlpha
 	(
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength
 	)
@@ -81,7 +81,7 @@ namespace dyno
 	template <typename Real>
 	__global__ void VC_CorrectAlpha
 	(
-		DeviceArray<Real> alpha,
+		GArray<Real> alpha,
 		Real maxAlpha)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -98,11 +98,11 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDiagonalElement
 	(
-		DeviceArray<Real> AiiFluid,
-		DeviceArray<Real> AiiTotal,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> AiiFluid,
+		GArray<Real> AiiTotal,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength
 	)
@@ -150,10 +150,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDiagonalElement
 	(
-		DeviceArray<Real> diaA,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> diaA,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength)
 	{
@@ -186,12 +186,12 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_DetectSurface
 	(
-		DeviceArray<Real> Aii,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Real> AiiFluid,
-		DeviceArray<Real> AiiTotal,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> Aii,
+		GArray<bool> bSurface,
+		GArray<Real> AiiFluid,
+		GArray<Real> AiiTotal,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real maxA
@@ -255,14 +255,14 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDivergence
 	(
-		DeviceArray<Real> divergence,
-		DeviceArray<Real> alpha,
-		DeviceArray<Real> density,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Coord> normals,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> divergence,
+		GArray<Real> alpha,
+		GArray<Real> density,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<bool> bSurface,
+		GArray<Coord> normals,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real separation,
 		Real tangential,
@@ -336,10 +336,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_CompensateSource
 	(
-		DeviceArray<Real> divergence,
-		DeviceArray<Real> density,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Coord> position,
+		GArray<Real> divergence,
+		GArray<Real> density,
+		GArray<Attribute> attribute,
+		GArray<Coord> position,
 		Real restDensity,
 		Real dt
 	)
@@ -360,12 +360,12 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeAx
 	(
-		DeviceArray<Real> residual,
-		DeviceArray<Real> pressure,
-		DeviceArray<Real> aiiSymArr,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> residual,
+		GArray<Real> pressure,
+		GArray<Real> aiiSymArr,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbor,
 		Real smoothingLength
 	)
@@ -399,13 +399,13 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void VC_UpdateVelocityBoundaryCorrected(
-		DeviceArray<Real> pressure,
-		DeviceArray<Real> alpha,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> normal,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> pressure,
+		GArray<Real> alpha,
+		GArray<bool> bSurface,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> normal,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbor,
 		Real restDensity,
 		Real airPressure,

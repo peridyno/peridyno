@@ -51,17 +51,17 @@ namespace dyno {
 
 		EnergyType m_energyType;
 
-		DeviceArray<Real> m_totalWeight;
+		GArray<Real> m_totalWeight;
 		Real weightScale = 110;
 
-		DeviceArray<Coord> m_Sum_delta_x;
-		DeviceArray<Coord> m_source_items;
+		GArray<Coord> m_Sum_delta_x;
+		GArray<Coord> m_source_items;
 
-		DeviceArray<Matrix> m_invK;
+		GArray<Matrix> m_invK;
 		Matrix common_K;
 
-		DeviceArray<Matrix> m_F;
-		DeviceArray<Matrix> m_firstPiolaKirchhoffStress;
+		GArray<Matrix> m_F;
+		GArray<Matrix> m_firstPiolaKirchhoffStress;
 
 		bool debug_pos_isNaN = false;
 		bool debug_v_isNaN = false;

@@ -13,7 +13,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CollidableSpheres<TDataType>::setCenters(DeviceArray<Coord>& centers)
+	void CollidableSpheres<TDataType>::setCenters(GArray<Coord>& centers)
 	{
 
 	}

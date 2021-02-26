@@ -64,13 +64,13 @@ namespace dyno {
 		VarField<Real> m_c;
 		VarField<Real> m_phi;
 
-		DeviceArray<Coord> m_yielding;
+		GArray<Coord> m_yielding;
 
-		DeviceArray<bool> m_bYield;
-		DeviceArray<Matrix> m_invF;
-		DeviceArray<Real> m_yiled_I1;
-		DeviceArray<Real> m_yield_J2;
-		DeviceArray<Real> m_I1;
+		GArray<bool> m_bYield;
+		GArray<Matrix> m_invF;
+		GArray<Real> m_yiled_I1;
+		GArray<Real> m_yield_J2;
+		GArray<Real> m_I1;
 	};
 
 #ifdef PRECISION_FLOAT

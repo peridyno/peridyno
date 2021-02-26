@@ -35,7 +35,7 @@ namespace dyno
 
 
 		template <typename T>
-		void plus(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr)
+		void plus(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -44,7 +44,7 @@ namespace dyno
 		}
 
 		template <typename T>
-		void subtract(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr)
+		void subtract(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -53,7 +53,7 @@ namespace dyno
 
 
 		template <typename T>
-		void multiply(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr)
+		void multiply(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -62,7 +62,7 @@ namespace dyno
 		}
 
 		template <typename T>
-		void divide(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr)
+		void divide(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -72,30 +72,30 @@ namespace dyno
 
 
 		template <typename T>
-		void saxpy(DeviceArray<T>& zArr, DeviceArray<T>& xArr, DeviceArray<T>& yArr, T alpha)
+		void saxpy(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr, T alpha)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
 			KerSaxpy << <pDim, BLOCK_SIZE >> > (zArr.begin(), xArr.begin(), yArr.begin(), alpha, zArr.size());
 		}
 
-		template void plus(DeviceArray<int>&, DeviceArray<int>&, DeviceArray<int>&);
-		template void plus(DeviceArray<float>&, DeviceArray<float>&, DeviceArray<float>&);
-		template void plus(DeviceArray<double>&, DeviceArray<double>&, DeviceArray<double>&);
+		template void plus(GArray<int>&, GArray<int>&, GArray<int>&);
+		template void plus(GArray<float>&, GArray<float>&, GArray<float>&);
+		template void plus(GArray<double>&, GArray<double>&, GArray<double>&);
 
-		template void subtract(DeviceArray<int>&, DeviceArray<int>&, DeviceArray<int>&);
-		template void subtract(DeviceArray<float>&, DeviceArray<float>&, DeviceArray<float>&);
-		template void subtract(DeviceArray<double>&, DeviceArray<double>&, DeviceArray<double>&);
+		template void subtract(GArray<int>&, GArray<int>&, GArray<int>&);
+		template void subtract(GArray<float>&, GArray<float>&, GArray<float>&);
+		template void subtract(GArray<double>&, GArray<double>&, GArray<double>&);
 
-		template void multiply(DeviceArray<int>&, DeviceArray<int>&, DeviceArray<int>&);
-		template void multiply(DeviceArray<float>&, DeviceArray<float>&, DeviceArray<float>&);
-		template void multiply(DeviceArray<double>&, DeviceArray<double>&, DeviceArray<double>&);
+		template void multiply(GArray<int>&, GArray<int>&, GArray<int>&);
+		template void multiply(GArray<float>&, GArray<float>&, GArray<float>&);
+		template void multiply(GArray<double>&, GArray<double>&, GArray<double>&);
 
-		template void divide(DeviceArray<int>&, DeviceArray<int>&, DeviceArray<int>&);
-		template void divide(DeviceArray<float>&, DeviceArray<float>&, DeviceArray<float>&);
-		template void divide(DeviceArray<double>&, DeviceArray<double>&, DeviceArray<double>&);
+		template void divide(GArray<int>&, GArray<int>&, GArray<int>&);
+		template void divide(GArray<float>&, GArray<float>&, GArray<float>&);
+		template void divide(GArray<double>&, GArray<double>&, GArray<double>&);
 
-		template void saxpy(DeviceArray<float>&, DeviceArray<float>&, DeviceArray<float>&, float);
-		template void saxpy(DeviceArray<double>&, DeviceArray<double>&, DeviceArray<double>&, double);
+		template void saxpy(GArray<float>&, GArray<float>&, GArray<float>&, float);
+		template void saxpy(GArray<double>&, GArray<double>&, GArray<double>&, double);
 	}
 }

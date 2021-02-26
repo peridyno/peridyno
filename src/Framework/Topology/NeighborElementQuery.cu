@@ -26,8 +26,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void NEQ_SetupAABB(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Coord> position,
+		GArray<AABB> boundingBox,
+		GArray<Coord> position,
 		Real radius)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -43,9 +43,9 @@ namespace dyno
 
 	template<typename Box3D>
 	__global__ void NEQ_SetupAABB(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Box3D> boxes,
-		DeviceArray<Sphere3D> spheres,
+		GArray<AABB> boundingBox,
+		GArray<Box3D> boxes,
+		GArray<Sphere3D> spheres,
 		int start_sphere,
 		int start_box)
 	{
@@ -68,11 +68,11 @@ namespace dyno
 	}
 	template<typename Coord, typename Box3D>
 	__global__ void NEQ_Narrow_Count(
-		DeviceArray<Coord> pos,
+		GArray<Coord> pos,
 		NeighborList<int> nbr,
-		DeviceArray<Box3D> boxes,
-		DeviceArray<Sphere3D> spheres,
-		DeviceArray<int> count,
+		GArray<Box3D> boxes,
+		GArray<Sphere3D> spheres,
+		GArray<int> count,
 		int start_sphere,
 		int start_box,
 		Real radius)
@@ -108,9 +108,9 @@ namespace dyno
 	template<typename Box3D>
 	__global__ void NEQ_Narrow_Count(
 		NeighborList<int> nbr,
-		DeviceArray<Box3D> boxes,
-		DeviceArray<Sphere3D> spheres,
-		DeviceArray<int> count,
+		GArray<Box3D> boxes,
+		GArray<Sphere3D> spheres,
+		GArray<int> count,
 		int start_sphere,
 		int start_box)
 	{
@@ -152,10 +152,10 @@ namespace dyno
 	template<typename Box3D, typename NeighborConstraints>
 	__global__ void NEQ_Narrow_Set(
 		NeighborList<int> nbr,
-		DeviceArray<Box3D> boxes,
-		DeviceArray<Sphere3D> spheres,
+		GArray<Box3D> boxes,
+		GArray<Sphere3D> spheres,
 		NeighborList<int> nbr_out,
-		DeviceArray<NeighborConstraints> nbr_cons,
+		GArray<NeighborConstraints> nbr_cons,
 		int start_sphere,
 		int start_box)
 	{
@@ -237,12 +237,12 @@ namespace dyno
 
 	template<typename Coord, typename Box3D, typename NeighborConstraints>
 	__global__ void NEQ_Narrow_Set(
-		DeviceArray<Coord> pos,
+		GArray<Coord> pos,
 		NeighborList<int> nbr,
-		DeviceArray<Box3D> boxes,
-		DeviceArray<Sphere3D> spheres,
+		GArray<Box3D> boxes,
+		GArray<Sphere3D> spheres,
 		NeighborList<int> nbr_out,
-		DeviceArray<NeighborConstraints> nbr_cons,
+		GArray<NeighborConstraints> nbr_cons,
 		int start_sphere,
 		int start_box,
 		Real radius)
@@ -344,7 +344,7 @@ namespace dyno
 
 			//broad phase end
 
-			DeviceArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			GArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
 			
 			
 			cuExecute(p_num, 
@@ -369,7 +369,7 @@ namespace dyno
 
 			if (sum > 0)
 			{
-				DeviceArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+				GArray<int>& elements = this->outNeighborhood()->getValue().getElements();
 				elements.resize(sum);
 				nbr_cons.setElementCount(sum);
 				
@@ -435,7 +435,7 @@ namespace dyno
 	
 			//broad phase end
 
-			DeviceArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			GArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
 			
 			Real zero = 0;
 			
@@ -458,7 +458,7 @@ namespace dyno
 
 			printf("FROM NEQ: %d", sum);
 
-			DeviceArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+			GArray<int>& elements = this->outNeighborhood()->getValue().getElements();
 			elements.resize(sum);
 			nbr_cons.setElementCount(sum);
 

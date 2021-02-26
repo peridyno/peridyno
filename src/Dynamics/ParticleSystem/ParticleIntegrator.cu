@@ -59,8 +59,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
-		DeviceArray<Coord> vel,
-		DeviceArray<Coord> forceDensity,
+		GArray<Coord> vel,
+		GArray<Coord> forceDensity,
 		Coord gravity,
 		Real dt)
 	{
@@ -73,9 +73,9 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
-		DeviceArray<Coord> vel,
-		DeviceArray<Coord> forceDensity,
-		DeviceArray<Attribute> atts,
+		GArray<Coord> vel,
+		GArray<Coord> forceDensity,
+		GArray<Attribute> atts,
 		Coord gravity,
 		Real dt)
 	{
@@ -126,8 +126,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_UpdatePosition(
-		DeviceArray<Coord> pos,
-		DeviceArray<Coord> vel,
+		GArray<Coord> pos,
+		GArray<Coord> vel,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -138,9 +138,9 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_UpdatePosition(
-		DeviceArray<Coord> pos,
-		DeviceArray<Coord> vel,
-		DeviceArray<Attribute> att,
+		GArray<Coord> pos,
+		GArray<Coord> vel,
+		GArray<Attribute> att,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

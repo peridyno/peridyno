@@ -48,12 +48,12 @@ namespace dyno
 		DeviceArrayField<Coord> m_vels;
 
 
-		DeviceArray<int> m_objId;
+		GArray<int> m_objId;
 		
 
-		DeviceArray<Coord> posBuf;
-		DeviceArray<Real> weights;
-		DeviceArray<Coord> init_pos;
+		GArray<Coord> posBuf;
+		GArray<Real> weights;
+		GArray<Coord> init_pos;
 
 		std::shared_ptr<NeighborList<int>> m_nList;
 		std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;

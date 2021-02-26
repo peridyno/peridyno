@@ -21,13 +21,13 @@ namespace dyno
 		virtual ~CollidablePoints();
 
 		void setRadius(Real radius) { m_radius = radius; }
-		void setRadii(DeviceArray<Coord>& radii);
+		void setRadii(GArray<Coord>& radii);
 
-		void setPositions(DeviceArray<Coord>& centers);
-		void setVelocities(DeviceArray<Coord>& vel);
+		void setPositions(GArray<Coord>& centers);
+		void setVelocities(GArray<Coord>& vel);
 
-		DeviceArray<Coord>& getPositions() { return m_positions; }
-		DeviceArray<Coord>& getVelocities() { return m_velocities; }
+		GArray<Coord>& getPositions() { return m_positions; }
+		GArray<Coord>& getVelocities() { return m_velocities; }
 
 		bool initializeImpl() override;
 
@@ -40,8 +40,8 @@ namespace dyno
 		bool m_bUniformRaidus;
 		Real m_radius;
 		
-		DeviceArray<Coord> m_positions;
-		DeviceArray<Coord> m_velocities;
+		GArray<Coord> m_positions;
+		GArray<Coord> m_velocities;
 	};
 
 

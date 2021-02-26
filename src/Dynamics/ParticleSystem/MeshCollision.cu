@@ -49,9 +49,9 @@ namespace dyno
 	template <typename Coord>
 	__global__ void VC_Sort_Neighbors_Collide
 	(
-		DeviceArray<Coord> position,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
+		GArray<Coord> position,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
 		NeighborList<int> neighborsTri
 	)
 	{
@@ -273,11 +273,11 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_CD_mesh2(
-		DeviceArray<Coord> points,
-		DeviceArray<Coord> pointsTri,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> vels,
-		DeviceArray<int> flip,
+		GArray<Coord> points,
+		GArray<Coord> pointsTri,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> vels,
+		GArray<int> flip,
 		NeighborList<int> neighborsTriangle,
 		Real radius,
 		Real dt
@@ -351,9 +351,9 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ComputeTarget(
-		DeviceArray<Coord> oldPoints,
-		DeviceArray<Coord> newPoints, 
-		DeviceArray<Real> weights)
+		GArray<Coord> oldPoints,
+		GArray<Coord> newPoints, 
+		GArray<Real> weights)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= oldPoints.size()) return;
@@ -369,9 +369,9 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ComputeVelocity(
-		DeviceArray<Coord> initPoints,
-		DeviceArray<Coord> curPoints,
-		DeviceArray<Coord> velocites,
+		GArray<Coord> initPoints,
+		GArray<Coord> curPoints,
+		GArray<Coord> velocites,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -384,12 +384,12 @@ namespace dyno
 	//Continuous collision detection between points and triangles
 	template<typename Real, typename Coord>
 	__global__ void K_CCD_MESH(
-		DeviceArray<Coord> particle_position,
-		DeviceArray<Coord> particle_velocity,
-		DeviceArray<Coord> particle_position_previous,
-		DeviceArray<Coord> triangle_vertex,
-		DeviceArray<Coord> triangle_vertex_previous,
-		DeviceArray<TopologyModule::Triangle> triangle_index,
+		GArray<Coord> particle_position,
+		GArray<Coord> particle_velocity,
+		GArray<Coord> particle_position_previous,
+		GArray<Coord> triangle_vertex,
+		GArray<Coord> triangle_vertex_previous,
+		GArray<TopologyModule::Triangle> triangle_index,
 		NeighborList<int> triangle_neighbors,
 		Real threshold,
 		Real dt

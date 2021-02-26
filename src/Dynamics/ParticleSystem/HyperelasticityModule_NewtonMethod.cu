@@ -12,9 +12,9 @@ namespace dyno
 {
 	template <typename Real, typename Coord>
 	__global__ void computeDelta_vec(
-		DeviceArray<Coord> vec1,
-		DeviceArray<Coord> vec2,
-		DeviceArray<Real> delta_norm)
+		GArray<Coord> vec1,
+		GArray<Coord> vec2,
+		GArray<Real> delta_norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vec1.size()) return;
@@ -24,8 +24,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void computeNorm_vec(
-		DeviceArray<Coord> vec,
-		DeviceArray<Real> norm)
+		GArray<Coord> vec,
+		GArray<Real> norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vec.size()) return;
@@ -35,9 +35,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void computeRelativeError_vec(
-		DeviceArray<Coord> vec1,
-		DeviceArray<Coord> vec2,
-		DeviceArray<Real> relative_error)
+		GArray<Coord> vec1,
+		GArray<Coord> vec2,
+		GArray<Real> relative_error)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vec1.size()) return;
@@ -90,9 +90,9 @@ namespace dyno
 	//**********compute total weight of each particle************************
 	template <typename Real, typename Coord, typename NPair>
 	__global__ void HM_ComputeTotalWeight_newton(
-		DeviceArray<Coord> position,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
-		DeviceArray<Real> totalWeight,
+		GArray<Real> totalWeight,
 		Real horizon)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -125,8 +125,8 @@ namespace dyno
 	// *************************  only update position **************************
 	template <typename Coord>
 	__global__ void HM_UpdatePosition_only(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> y_next)
+		GArray<Coord> position,
+		GArray<Coord> y_next)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -136,8 +136,8 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void HM_UpdatePosition_delta_only(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> delta_y)
+		GArray<Coord> position,
+		GArray<Coord> delta_y)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -147,10 +147,10 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void HM_UpdatePosition_Velocity(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> y_next,
-		DeviceArray<Coord> position_old,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> y_next,
+		GArray<Coord> position_old,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -162,9 +162,9 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void HM_UpdateVelocity_only(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> position_old,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> position_old,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -176,10 +176,10 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix>
 	__global__ void HM_ComputeTotalEnergy_Linear(
-		DeviceArray<Real> energy_i,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> position_old,
-		DeviceArray<Matrix> F,
+		GArray<Real> energy_i,
+		GArray<Coord> position,
+		GArray<Coord> position_old,
+		GArray<Matrix> F,
 		Real mu,
 		Real lambda,
 		Real mass,
@@ -197,10 +197,10 @@ namespace dyno
 	}
 	template <typename Real, typename Coord, typename Matrix>
 	__global__ void HM_ComputeTotalEnergy_StVK(
-		DeviceArray<Real> energy_i,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> position_old,
-		DeviceArray<Matrix> F,
+		GArray<Real> energy_i,
+		GArray<Coord> position,
+		GArray<Coord> position_old,
+		GArray<Matrix> F,
 		Real mass,
 		Real volume,
 		Real mu,
@@ -281,12 +281,12 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_ComputeSourceTerm_Linear(
-		DeviceArray<Coord> sourceItems,
-		DeviceArray<Matrix> inverseK,
-		DeviceArray<Matrix> stressTensors,
-		DeviceArray<Coord> position_old,
-		DeviceArray<Coord> y_current,
-		DeviceArray<Coord> Sum_delta_x,
+		GArray<Coord> sourceItems,
+		GArray<Matrix> inverseK,
+		GArray<Matrix> stressTensors,
+		GArray<Coord> position_old,
+		GArray<Coord> y_current,
+		GArray<Coord> Sum_delta_x,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real mu, Real lambda,
@@ -417,13 +417,13 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_ComputeSourceTerm_StVK(
-		DeviceArray<Coord> sourceItems,
-		DeviceArray<Matrix> F,
-		DeviceArray<Matrix> inverseK,
-		DeviceArray<Matrix> stressTensors,
-		DeviceArray<Coord> position_old,
-		DeviceArray<Coord> y_current,
-		DeviceArray<Coord> Sum_delta_x,
+		GArray<Coord> sourceItems,
+		GArray<Matrix> F,
+		GArray<Matrix> inverseK,
+		GArray<Matrix> stressTensors,
+		GArray<Coord> position_old,
+		GArray<Coord> y_current,
+		GArray<Coord> Sum_delta_x,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real mu, Real lambda,
@@ -481,10 +481,10 @@ namespace dyno
 	// these deformation gradients are mat3x3, may be singular
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_ComputeFandSdx(
-		DeviceArray<Matrix> inverseK,
-		DeviceArray<Matrix> F,
-		DeviceArray<Coord> Sum_delta_x,
-		DeviceArray<Coord> position,
+		GArray<Matrix> inverseK,
+		GArray<Matrix> F,
+		GArray<Coord> Sum_delta_x,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real weightScale)
@@ -549,8 +549,8 @@ namespace dyno
 
 	template <typename Real, typename Matrix>
 	__global__ void HM_ComputeFirstPiolaKirchhoff_Linear(
-		DeviceArray<Matrix> stressTensor,
-		DeviceArray<Matrix> F,
+		GArray<Matrix> stressTensor,
+		GArray<Matrix> F,
 		Real mu,
 		Real lambda)
 	{
@@ -568,8 +568,8 @@ namespace dyno
 
 	template <typename Real, typename Matrix>
 	__global__ void HM_ComputeFirstPiolaKirchhoff_StVK(
-		DeviceArray<Matrix> stressTensor,
-		DeviceArray<Matrix> F,
+		GArray<Matrix> stressTensor,
+		GArray<Matrix> F,
 		Real mu,
 		Real lambda)
 	{
@@ -587,11 +587,11 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiStep_Linear(
-		DeviceArray<Coord> delta_y_new,
-		DeviceArray<Coord> delta_y_old,
-		DeviceArray<Coord> sourceItems,
-		DeviceArray<Matrix> inverseK,
-		DeviceArray<Coord> Sum_delta_x,
+		GArray<Coord> delta_y_new,
+		GArray<Coord> delta_y_old,
+		GArray<Coord> sourceItems,
+		GArray<Matrix> inverseK,
+		GArray<Coord> Sum_delta_x,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real mu, Real lambda,
@@ -684,12 +684,12 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HM_JacobiStep_StVK(
-		DeviceArray<Coord> delta_y_new,
-		DeviceArray<Coord> delta_y_old,
-		DeviceArray<Coord> sourceItems,
-		DeviceArray<Matrix> F,
-		DeviceArray<Matrix> inverseK,
-		DeviceArray<Coord> Sum_delta_x,
+		GArray<Coord> delta_y_new,
+		GArray<Coord> delta_y_old,
+		GArray<Coord> sourceItems,
+		GArray<Matrix> F,
+		GArray<Matrix> inverseK,
+		GArray<Coord> Sum_delta_x,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real mu, Real lambda,
@@ -854,8 +854,8 @@ namespace dyno
 		Real volume = 1.0;
 
 		// initialize y_now, y_next_iter
-		DeviceArray<Coord> delta_y_pre(numOfParticles);
-		DeviceArray<Coord> delta_y_next(numOfParticles);
+		GArray<Coord> delta_y_pre(numOfParticles);
+		GArray<Coord> delta_y_next(numOfParticles);
 
 		delta_y_pre.reset();
 		delta_y_next.reset();
@@ -895,7 +895,7 @@ namespace dyno
 			cuSynchronize();
 
 			{
-				DeviceArray<Real> energy_particles(numOfParticles);
+				GArray<Real> energy_particles(numOfParticles);
 				HM_ComputeTotalEnergy_Linear << <pDims, BLOCK_SIZE >> > (
 					energy_particles,
 					this->inPosition()->getValue(),
@@ -959,7 +959,7 @@ namespace dyno
 
 				{
 					Reduction<Real>* pReduction = Reduction<Real>::Create(numOfParticles);
-					DeviceArray<Real> Delta_y_norm(numOfParticles);
+					GArray<Real> Delta_y_norm(numOfParticles);
 					computeNorm_vec << <pDims, BLOCK_SIZE >> >(delta_y_next, Delta_y_norm);
 					cuSynchronize();
 
@@ -984,7 +984,7 @@ namespace dyno
 
 			{
 				Reduction<Real>* pReduction = Reduction<Real>::Create(numOfParticles);
-				DeviceArray<Real> Delta_y_norm(numOfParticles);
+				GArray<Real> Delta_y_norm(numOfParticles);
 
 				computeNorm_vec << <pDims, BLOCK_SIZE >> >(delta_y_next, Delta_y_norm);
 				cuSynchronize();
@@ -1046,8 +1046,8 @@ namespace dyno
 		Real volume = 1.0;
 
 		// initialize y_now, y_next_iter
-		DeviceArray<Coord> delta_y_pre(numOfParticles);
-		DeviceArray<Coord> delta_y_next(numOfParticles);
+		GArray<Coord> delta_y_pre(numOfParticles);
+		GArray<Coord> delta_y_next(numOfParticles);
 
 		delta_y_pre.reset();
 		delta_y_next.reset();
@@ -1126,7 +1126,7 @@ namespace dyno
 
 				{
 					Reduction<Real>* pReduction = Reduction<Real>::Create(numOfParticles);
-					DeviceArray<Real> Delta_y_norm(numOfParticles);
+					GArray<Real> Delta_y_norm(numOfParticles);
 					computeNorm_vec << <pDims, BLOCK_SIZE >> >(delta_y_next, Delta_y_norm);
 					cuSynchronize();
 
@@ -1151,7 +1151,7 @@ namespace dyno
 
 			{
 				Reduction<Real>* pReduction = Reduction<Real>::Create(numOfParticles);
-				DeviceArray<Real> Delta_y_norm(numOfParticles);
+				GArray<Real> Delta_y_norm(numOfParticles);
 
 				computeNorm_vec << <pDims, BLOCK_SIZE >> >(delta_y_next, Delta_y_norm);
 				cuSynchronize();

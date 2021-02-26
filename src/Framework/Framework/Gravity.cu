@@ -23,7 +23,7 @@ Gravity<TDataType>::~Gravity()
 
 template <typename Coord>
 __global__ void K_AddGravity(
-	DeviceArray<Coord> points,
+	GArray<Coord> points,
 	Coord force)
 {
 	int pId = threadIdx.x + (blockIdx.x * blockDim.x);

@@ -56,8 +56,8 @@ namespace dyno {
 
 
 	private:
-		DeviceArray<Coord> m_prePosition;
-		DeviceArray<Coord> m_preVelocity;
+		GArray<Coord> m_prePosition;
+		GArray<Coord> m_preVelocity;
 	};
 
 #ifdef PRECISION_FLOAT

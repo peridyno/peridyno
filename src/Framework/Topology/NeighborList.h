@@ -138,13 +138,13 @@ namespace dyno
 			Function1Pt::copy(m_index, index);
 		}
 
-		DeviceArray<int>& getIndex() { return m_index; }
-		DeviceArray<ElementType>& getElements() { return m_elements; }
+		GArray<int>& getIndex() { return m_index; }
+		GArray<ElementType>& getElements() { return m_elements; }
 
 	private:
 
 		int m_maxNum;
-		DeviceArray<ElementType> m_elements;
-		DeviceArray<int> m_index;
+		GArray<ElementType> m_elements;
+		GArray<int> m_index;
 	};
 }

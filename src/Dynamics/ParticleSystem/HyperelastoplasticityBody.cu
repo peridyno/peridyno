@@ -115,7 +115,7 @@ namespace dyno
 	}
 
 	__global__ void HB_SetSize(
-		DeviceArray<int> index,
+		GArray<int> index,
 		ListArray<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -126,10 +126,10 @@ namespace dyno
 
 	template<typename Coord, typename NPair>
 	__global__ void HB_SetRestShape(
-		DeviceArray<NPair> elements,
-		DeviceArray<int> shifts,
-		DeviceArray<Coord> restPos,
-		DeviceArray<Coord> yieldings,
+		GArray<NPair> elements,
+		GArray<int> shifts,
+		GArray<Coord> restPos,
+		GArray<Coord> yieldings,
 		ListArray<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -195,7 +195,7 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void HPB_Rotate(
-		DeviceArray<Coord> pos) 
+		GArray<Coord> pos) 
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -279,14 +279,14 @@ namespace dyno
 
 
 	__global__ void HFM_SplitVertex(
-		DeviceArray<int> splitNum,
+		GArray<int> splitNum,
 		NeighborList<Pair<int, int>> vertPairs,
-		DeviceArray<bool> tagSplit,
+		GArray<bool> tagSplit,
 		NeighborList<int> ver2Tri,
 		NeighborList<int> ver2Tet,
-		DeviceArray<TopologyModule::Tri2Tet> tri2Tet,
-		DeviceArray<TopologyModule::Tetrahedron> tets,
-		DeviceArray<TopologyModule::Triangle> triangles,
+		GArray<TopologyModule::Tri2Tet> tri2Tet,
+		GArray<TopologyModule::Tetrahedron> tets,
+		GArray<TopologyModule::Triangle> triangles,
 		int sharedSkip)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -395,10 +395,10 @@ namespace dyno
 
 
 	__global__ void HFM_UpdateTopology(
-		DeviceArray<TopologyModule::Tetrahedron> tets,
-		DeviceArray<TopologyModule::Tetrahedron> tets_old,
-		DeviceArray<int> vertNum,
-		DeviceArray<int> shift,
+		GArray<TopologyModule::Tetrahedron> tets,
+		GArray<TopologyModule::Tetrahedron> tets_old,
+		GArray<int> vertNum,
+		GArray<int> shift,
 		NeighborList<Pair<int, int>> vertPairs)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -431,20 +431,20 @@ namespace dyno
 
 	template<typename Coord, typename Matrix>
 	__global__ void HFM_UpdateFields(
-		DeviceArray<Coord> rest_pos_new,
-		DeviceArray<Coord> rest_pos_old,
-		DeviceArray<Coord> pos_new,
-		DeviceArray<Coord> pos_old,
-		DeviceArray<Coord> vel_new,
-		DeviceArray<Coord> vel_old,
-		DeviceArray<Coord> yielding_new,
-		DeviceArray<Coord> yielding_old,
-		DeviceArray<Attribute> att_new,
-		DeviceArray<Attribute> att_old,
-		DeviceArray<Matrix> rot_new,
-		DeviceArray<Matrix> rot_old,
-		DeviceArray<int> vertNum,
-		DeviceArray<int> shift)
+		GArray<Coord> rest_pos_new,
+		GArray<Coord> rest_pos_old,
+		GArray<Coord> pos_new,
+		GArray<Coord> pos_old,
+		GArray<Coord> vel_new,
+		GArray<Coord> vel_old,
+		GArray<Coord> yielding_new,
+		GArray<Coord> yielding_old,
+		GArray<Attribute> att_new,
+		GArray<Attribute> att_old,
+		GArray<Matrix> rot_new,
+		GArray<Matrix> rot_old,
+		GArray<int> vertNum,
+		GArray<int> shift)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (vId >= pos_old.size()) return;
@@ -473,8 +473,8 @@ namespace dyno
 
 	void print(NeighborList<int>& list)
 	{
-		HostArray<int> index;
-		HostArray<int> elements;
+		CArray<int> index;
+		CArray<int> elements;
 		index.resize(list.getIndex().size());
 		elements.resize(list.getElements().size());
 
@@ -497,8 +497,8 @@ namespace dyno
 	template<typename NPair>
 	void print(NeighborList<NPair>& list)
 	{
-		HostArray<int> index;
-		HostArray<NPair> elements;
+		CArray<int> index;
+		CArray<NPair> elements;
 		index.resize(list.getIndex().size());
 		elements.resize(list.getElements().size());
 
@@ -518,9 +518,9 @@ namespace dyno
 		elements.release();
 	}
 
-	void print(DeviceArray<TopologyModule::Tetrahedron>& tets)
+	void print(GArray<TopologyModule::Tetrahedron>& tets)
 	{
-		HostArray<TopologyModule::Tetrahedron> h_tets;
+		CArray<TopologyModule::Tetrahedron> h_tets;
 		h_tets.resize(tets.size());
 		Function1Pt::copy(h_tets, tets);
 
@@ -532,9 +532,9 @@ namespace dyno
 		h_tets.release();
 	}
 
-	void print(DeviceArray<bool>& bArray)
+	void print(GArray<bool>& bArray)
 	{
-		HostArray<bool> h_bool;
+		CArray<bool> h_bool;
 		h_bool.resize(bArray.size());
 		Function1Pt::copy(h_bool, bArray);
 
@@ -553,9 +553,9 @@ namespace dyno
 		h_bool.release();
 	}
 
-	void print(DeviceArray<int>& intArray)
+	void print(GArray<int>& intArray)
 	{
-		HostArray<int> h_intArray;
+		CArray<int> h_intArray;
 		h_intArray.resize(intArray.size());
 		Function1Pt::copy(h_intArray, intArray);
 
@@ -577,10 +577,10 @@ namespace dyno
 
 	template<typename EKey>
 	__global__ void HB_SetupTri2Tet(
-		DeviceArray<EKey> keys,
-		DeviceArray<Flag> flags,
-		DeviceArray<bool> toSplit,
-		DeviceArray<TopologyModule::Tri2Tet> tri2tet,
+		GArray<EKey> keys,
+		GArray<Flag> flags,
+		GArray<bool> toSplit,
+		GArray<TopologyModule::Tri2Tet> tri2tet,
 		int shift,
 		bool bOld)
 	{
@@ -605,9 +605,9 @@ namespace dyno
 
 	template<typename EKey>
 	__global__ void HB_UpdateFractureTag(
-		DeviceArray<bool> fTag,
-		DeviceArray<EKey> keys,
-		DeviceArray<Flag> flags)
+		GArray<bool> fTag,
+		GArray<EKey> keys,
+		GArray<Flag> flags)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= keys.size()) return;
@@ -648,7 +648,7 @@ namespace dyno
 	}
 
 	__global__ void HPB_CalculateNeighborTetSize(
-		DeviceArray<int> count,
+		GArray<int> count,
 		NeighborList<int> ver2Tet)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -669,10 +669,10 @@ namespace dyno
 		//Error exists
 		auto topo = TypeInfo::cast<TetrahedronSet<TDataType>>(this->getTopologyModule());
 
-		DeviceArray<TopologyModule::Tetrahedron>& tets = topo->getTetrahedrons();
-		DeviceArray<TopologyModule::Tri2Tet>& tri2Tet = topo->getTri2Tet();
+		GArray<TopologyModule::Tetrahedron>& tets = topo->getTetrahedrons();
+		GArray<TopologyModule::Tri2Tet>& tri2Tet = topo->getTri2Tet();
 
-		DeviceArray<TopologyModule::Triangle>* tris = topo->getTriangles();
+		GArray<TopologyModule::Triangle>* tris = topo->getTriangles();
 
 		NeighborList<int>& ver2Tri = topo->getVertex2Triangles();
 		NeighborList<int>& ver2Tet = topo->getVer2Tet();
@@ -680,7 +680,7 @@ namespace dyno
 		int verSize = ver2Tri.size();
 		int triSize = tris->size();
 
-		DeviceArray<TopologyModule::Tri2Tet> tri2Tet_old;
+		GArray<TopologyModule::Tri2Tet> tri2Tet_old;
 		tri2Tet_old.resize(tri2Tet.size());
 		Function1Pt::copy(tri2Tet_old, tri2Tet);
 
@@ -690,7 +690,7 @@ namespace dyno
 		Function1Pt::copy(pairList.getIndex(), ver2Tet.getIndex());
 		pairList.getElements().resize(ver2Tet.getElements().size());
 
-		DeviceArray<int> counter;
+		GArray<int> counter;
 		counter.resize(verSize);
 
 #ifdef DEBUG_INFO
@@ -700,7 +700,7 @@ namespace dyno
 		printf("Vertex to tets; \n");
 		print(ver2Tet);
 #endif
-		DeviceArray<int> neiTetNum;
+		GArray<int> neiTetNum;
 		neiTetNum.resize(ver2Tet.size());
 
 		cuExecute(neiTetNum.size(),
@@ -728,7 +728,7 @@ namespace dyno
 			maxNum);
 		cuSynchronize();
 
-		DeviceArray<int> shift;
+		GArray<int> shift;
 		shift.resize(counter.size());
 		Function1Pt::copy(shift, counter);
 
@@ -742,7 +742,7 @@ namespace dyno
 		print(tets);
 #endif
 
-		DeviceArray<TopologyModule::Tetrahedron> tets_old;
+		GArray<TopologyModule::Tetrahedron> tets_old;
 		tets_old.resize(tets.size());
 		Function1Pt::copy(tets_old, tets);
 
@@ -762,22 +762,22 @@ namespace dyno
 // 		print(tets_old);
 // 		print(tets);
 
-		DeviceArray<Coord> position_new;
+		GArray<Coord> position_new;
 		position_new.resize(new_num);
 
-		DeviceArray<Coord> velocity_new;
+		GArray<Coord> velocity_new;
 		velocity_new.resize(new_num);
 
-		DeviceArray<Coord> rest_position_new;
+		GArray<Coord> rest_position_new;
 		rest_position_new.resize(new_num);
 
-		DeviceArray<Attribute> attribute_new;
+		GArray<Attribute> attribute_new;
 		attribute_new.resize(new_num);
 
-		DeviceArray<Coord> yielding_new;
+		GArray<Coord> yielding_new;
 		yielding_new.resize(new_num);
 
-		DeviceArray<Matrix> rotation_new;
+		GArray<Matrix> rotation_new;
 		rotation_new.resize(new_num);
 
 		int pNum = this->currentPosition()->getElementCount();
@@ -802,12 +802,12 @@ namespace dyno
 		topo->setPoints(position_new);
 		topo->updateTriangles();
 
-		DeviceArray<TopologyModule::Tri2Tet> tri2Tet_new;
+		GArray<TopologyModule::Tri2Tet> tri2Tet_new;
 		tri2Tet_new.resize(topo->getTri2Tet().size());
 		Function1Pt::copy(tri2Tet_new, topo->getTri2Tet());
 
 		//update fracture tag
-		DeviceArray<bool> fractureTag_old;
+		GArray<bool> fractureTag_old;
 		fractureTag_old.resize(this->currentFractureTag()->getElementCount());
 		Function1Pt::copy(fractureTag_old, this->currentFractureTag()->getValue());
 
@@ -816,8 +816,8 @@ namespace dyno
 		this->currentFractureTag()->setElementCount(topo->getTriangles()->size());
 		this->currentFractureTag()->getReference()->reset();
 
-		DeviceArray<typename EdgeSet<TDataType>::EKey> keys;
-		DeviceArray<Flag> flags;
+		GArray<typename EdgeSet<TDataType>::EKey> keys;
+		GArray<Flag> flags;
 		int total_tri2tet = tri2Tet_old.size() + tri2Tet_new.size();
 		keys.resize(total_tri2tet);
 		flags.resize(total_tri2tet);
@@ -893,7 +893,7 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void HB_InitPlasticYielding(
-		DeviceArray<Coord> yieldings)
+		GArray<Coord> yieldings)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= yieldings.size()) return;
@@ -907,14 +907,14 @@ namespace dyno
 		auto tetSet = TypeInfo::cast<TetrahedronSet<TDataType>>(this->getTopologyModule());
 		if (!tetSet) return false;
 		
-		DeviceArray<TopologyModule::Triangle>* tris = tetSet->getTriangles();
+		GArray<TopologyModule::Triangle>* tris = tetSet->getTriangles();
 
 		if (tris->size() > 0)
 		{
 			this->currentFractureTag()->setElementCount(tris->size());
 			//this->currentFractureTag()->getReference()->reset();
 
-// 			HostArray<bool> host_bool;
+// 			CArray<bool> host_bool;
 // 			host_bool.resize(tris->size());
 // 			for (int i = 0; i < tris->size(); i++)
 // 			{

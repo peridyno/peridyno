@@ -34,18 +34,18 @@ public:
 
 	void resize(unsigned int num);
 
-	void setVertexArray(DeviceArray<float3> &pos);
-	void setVertexArray(HostArray<float3> &pos);
+	void setVertexArray(GArray<float3> &pos);
+	void setVertexArray(CArray<float3> &pos);
 
-	void setColorArray(DeviceArray<float3> &color);
-	void setColorArray(HostArray<float3> &color);
+	void setColorArray(GArray<float3> &color);
+	void setColorArray(CArray<float3> &color);
 
 	void setPointSize(float point_size);
 	void setInstanceSize(float r);
 	float pointSize() const;
 
 	void setColor(glm::vec3 color);
-	void setColor(DeviceArray<glm::vec3> color);
+	void setColor(GArray<glm::vec3> color);
 
 	void setPointScaleForPointSprite(float point_scale);
 	float pointScaleForPointSprite() const;

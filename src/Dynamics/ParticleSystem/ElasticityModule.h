@@ -98,17 +98,17 @@ namespace dyno {
 		VarField<Real> m_mu;
 		VarField<Real> m_lambda;
 
-		DeviceArray<Real> m_bulkCoefs;
-		DeviceArray<Coord> m_position_old;
+		GArray<Real> m_bulkCoefs;
+		GArray<Coord> m_position_old;
 
-		DeviceArray<Real> m_weights;
-		DeviceArray<Coord> m_displacement;
-		DeviceArray<Matrix> m_invK;
+		GArray<Real> m_weights;
+		GArray<Coord> m_displacement;
+		GArray<Matrix> m_invK;
 	private:
 		VarField<int> m_iterNum;
 
-		DeviceArray<Real> m_stiffness;
-		DeviceArray<Matrix> m_F;
+		GArray<Real> m_stiffness;
+		GArray<Matrix> m_F;
 	};
 
 #ifdef PRECISION_FLOAT

@@ -63,8 +63,8 @@ namespace dyno {
 
 
 	private:
-		DeviceArray<AABB> m_queryAABB;
-		DeviceArray<AABB> m_queriedAABB;
+		GArray<AABB> m_queryAABB;
+		GArray<AABB> m_queriedAABB;
 
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
 	};

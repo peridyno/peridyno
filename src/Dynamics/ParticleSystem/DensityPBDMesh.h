@@ -35,7 +35,7 @@ namespace dyno {
 
 		void setIterationNumber(int n) { m_maxIteration = n; }
 
-		DeviceArray<Real>& getDensity() { return m_density.getValue(); }
+		GArray<Real>& getDensity() { return m_density.getValue(); }
 
 	protected:
 		bool initializeImpl() override;
@@ -69,9 +69,9 @@ namespace dyno {
 
 		SpikyKernel<Real> m_kernel;
 
-		DeviceArray<Real> m_lamda;
-		DeviceArray<Coord> m_deltaPos;
-		DeviceArray<Coord> m_position_old;
+		GArray<Real> m_lamda;
+		GArray<Coord> m_deltaPos;
+		GArray<Coord> m_position_old;
 
 		std::shared_ptr<DensitySummationMesh<TDataType>> m_densitySum;
 	};

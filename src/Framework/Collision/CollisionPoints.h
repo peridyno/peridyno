@@ -29,9 +29,9 @@ public:
 	void doCollision() override;
 	
 protected:
-	DeviceArray<int> m_objId;
-	DeviceArray<Coord> m_points;
-	DeviceArray<Coord> m_vels;
+	GArray<int> m_objId;
+	GArray<Coord> m_points;
+	GArray<Coord> m_vels;
 
 	std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
 	std::shared_ptr<NeighborList<int>> m_nList;

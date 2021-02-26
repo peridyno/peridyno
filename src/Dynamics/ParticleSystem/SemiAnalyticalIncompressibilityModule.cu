@@ -84,9 +84,9 @@ namespace dyno
 	template <typename Coord>
 	__global__ void VC_Sort_Neighbors
 	(
-		DeviceArray<Coord> position,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
+		GArray<Coord> position,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
 		NeighborList<int> neighborsTri
 	)
 	{
@@ -306,18 +306,18 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeAlphaTmp
 	(
-		DeviceArray<Real> alpha,
-		DeviceArray<Real> rho_alpha,
-		DeviceArray<Real> mass,
-		DeviceArray<Coord> position,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> alpha,
+		GArray<Real> rho_alpha,
+		GArray<Real> mass,
+		GArray<Coord> position,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		NeighborList<int> neighborsTri,
 		Real smoothingLength,
 		Real m_sampling_distance,
-		DeviceArray<int> flip
+		GArray<int> flip
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -435,9 +435,9 @@ namespace dyno
 	template <typename Real>
 	__global__ void VC_CorrectAlphaTmp
 	(
-		DeviceArray<Real> alpha,
-		DeviceArray<Real> rho_alpha,
-		DeviceArray<Real> mass,
+		GArray<Real> alpha,
+		GArray<Real> rho_alpha,
+		GArray<Real> mass,
 		Real maxAlpha)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -457,18 +457,18 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDiagonalElementTmp
 	(
-		DeviceArray<Real> AiiFluid,
-		DeviceArray<Real> AiiTotal,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> AiiFluid,
+		GArray<Real> AiiTotal,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		NeighborList<int> neighborsTri,
 		Real smoothingLength,
 		Real m_sampling_distance,
-		DeviceArray<int> flip
+		GArray<int> flip
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -598,10 +598,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDiagonalElementTmp
 	(
-		DeviceArray<Real> diaA,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> diaA,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength)
 	{
@@ -634,12 +634,12 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_DetectSurfaceTmp
 	(
-		DeviceArray<Real> Aii,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Real> AiiFluid,
-		DeviceArray<Real> AiiTotal,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> Aii,
+		GArray<bool> bSurface,
+		GArray<Real> AiiFluid,
+		GArray<Real> AiiTotal,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real maxA
@@ -708,18 +708,18 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDivergenceTmp
 	(
-		DeviceArray<Real> divergence,
-		DeviceArray<Real> alpha,
-		DeviceArray<Real> density,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> velocityTri,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Real> mass,
-		DeviceArray<Real> m_triangle_vertex_mass,
+		GArray<Real> divergence,
+		GArray<Real> alpha,
+		GArray<Real> density,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> velocityTri,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
+		GArray<bool> bSurface,
+		GArray<Attribute> attribute,
+		GArray<Real> mass,
+		GArray<Real> m_triangle_vertex_mass,
 		NeighborList<int> neighbors,
 		NeighborList<int> neighborsTri,
 		Real separation,
@@ -728,7 +728,7 @@ namespace dyno
 		Real smoothingLength,
 		Real m_sampling_distance,
 		Real dt,
-		DeviceArray<int> flip
+		GArray<int> flip
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -966,10 +966,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_CompensateSourceTmp
 	(
-		DeviceArray<Real> divergence,
-		DeviceArray<Real> density,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Coord> position,
+		GArray<Real> divergence,
+		GArray<Real> density,
+		GArray<Attribute> attribute,
+		GArray<Coord> position,
 		Real restDensity,
 		Real dt
 	)
@@ -990,12 +990,12 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeAxTmp
 	(
-		DeviceArray<Real> residual,
-		DeviceArray<Real> pressure,
-		DeviceArray<Real> aiiSymArr,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> residual,
+		GArray<Real> pressure,
+		GArray<Real> aiiSymArr,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbor,
 		Real smoothingLength
 	)
@@ -1030,8 +1030,8 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void VC_InitAttrTmp(
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Real> mass
+		GArray<Attribute> attribute,
+		GArray<Real> mass
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1043,9 +1043,9 @@ namespace dyno
 
 	template <typename Coord, typename Real>
 	__global__ void VC_TriVelTmp(
-		DeviceArray<Coord> oldPos,
-		DeviceArray<Coord> newPos,
-		DeviceArray<Coord> vels,
+		GArray<Coord> oldPos,
+		GArray<Coord> newPos,
+		GArray<Coord> vels,
 		Real dt
 	)
 	{
@@ -1057,17 +1057,17 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void VC_UpdateVelocityBoundaryCorrectedTmp(
-		DeviceArray<Real> pressure,
-		DeviceArray<Real> alpha,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> velocityTri,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Real> mass,
-		DeviceArray<Real> m_triangle_vertex_mass,
+		GArray<Real> pressure,
+		GArray<Real> alpha,
+		GArray<bool> bSurface,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> velocityTri,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
+		GArray<Attribute> attribute,
+		GArray<Real> mass,
+		GArray<Real> m_triangle_vertex_mass,
 		NeighborList<int> neighbor,
 		NeighborList<int> neighborTri,
 		Real restDensity,
@@ -1077,7 +1077,7 @@ namespace dyno
 		Real smoothingLength,
 		Real m_sampling_distance,
 		Real dt,
-		DeviceArray<int> flip)
+		GArray<int> flip)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;

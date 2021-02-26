@@ -63,9 +63,9 @@ namespace dyno
 
 		this->updatePtr();
 
-		HostArray<Coord> host_vertices;
-		HostArray<Triangle> host_triangles;
-		HostArray<Tri2Tet> host_tri2tet;
+		CArray<Coord> host_vertices;
+		CArray<Triangle> host_triangles;
+		CArray<Tri2Tet> host_tri2tet;
 
 		host_vertices.resize( (*(this->ptr_vertices)).size() );
 		host_triangles.resize( (*(this->ptr_triangles)).size() );

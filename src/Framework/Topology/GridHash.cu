@@ -295,7 +295,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	void GridHash<TDataType>::construct(DeviceArray<Coord>& pos)
+	void GridHash<TDataType>::construct(GArray<Coord>& pos)
 	{
 		clear();
 
@@ -324,7 +324,7 @@ namespace dyno {
 
 
 	template<typename TDataType>
-	void GridHash<TDataType>::construct(DeviceArray<Coord>& pos, DeviceArray<Triangle>& tri, DeviceArray<Coord>& Tri_pos)
+	void GridHash<TDataType>::construct(GArray<Coord>& pos, GArray<Triangle>& tri, GArray<Coord>& Tri_pos)
 	{
 		clear();
 

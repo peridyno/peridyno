@@ -63,19 +63,19 @@ void LineRender::resize(unsigned int num)
 	m_vertexColor.resize(2 * num);
 }
 
-void LineRender::setLines(DeviceArray<float3>& pos)
+void LineRender::setLines(GArray<float3>& pos)
 {
 	cudaMemcpy(m_vertex.cudaMap(), pos.begin(), sizeof(float3) * m_vertex.getSize(), cudaMemcpyDeviceToDevice);
 	m_vertex.cudaUnmap();
 }
 
-void LineRender::setLines(HostArray<float3>& pos)
+void LineRender::setLines(CArray<float3>& pos)
 {
 	cudaMemcpy(m_vertex.cudaMap(), pos.begin(), sizeof(float3) * m_vertex.getSize(), cudaMemcpyHostToDevice);
 	m_vertex.cudaUnmap();
 }
 
-void LineRender::setColors(HostArray<float3>& color)
+void LineRender::setColors(CArray<float3>& color)
 {
 	cudaMemcpy(m_vertexColor.cudaMap(), color.begin(), sizeof(float3) * m_vertexColor.getSize(), cudaMemcpyHostToDevice);
 	m_vertexColor.cudaUnmap();

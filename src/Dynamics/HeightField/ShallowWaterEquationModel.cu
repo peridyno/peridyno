@@ -31,11 +31,11 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void Init(
-		DeviceArray<Coord> pos,
-		DeviceArray<Coord> solid,
-		DeviceArray<Real> h,
-		DeviceArray<int> isBound,
-		DeviceArray<Coord> m_velocity
+		GArray<Coord> pos,
+		GArray<Coord> solid,
+		GArray<Real> h,
+		GArray<int> isBound,
+		GArray<Coord> m_velocity
 		)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -67,12 +67,12 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void computeAccel(
-		DeviceArray<Real> h,
+		GArray<Real> h,
 		NeighborList<int>	neighborIndex,
-		DeviceArray<Coord> m_accel,
-		DeviceArray<Coord> m_velocity,
-		DeviceArray<Coord> m_position,
-		DeviceArray<int> isBound,
+		GArray<Coord> m_accel,
+		GArray<Coord> m_velocity,
+		GArray<Coord> m_position,
+		GArray<int> isBound,
 		Real distance,
 		Real gravity)
 	{
@@ -120,12 +120,12 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void computeVelocity(
-		DeviceArray<Real> h,
+		GArray<Real> h,
 		NeighborList<int>	neighborIndex,
-		DeviceArray<Coord> m_accel,
-		DeviceArray<Coord> m_velocity,
-		DeviceArray<Coord> m_position,
-		DeviceArray<int> isBound,
+		GArray<Coord> m_accel,
+		GArray<Coord> m_velocity,
+		GArray<Coord> m_position,
+		GArray<int> isBound,
 		Real distance,
 		Real relax,
 		Real gravity,
@@ -174,12 +174,12 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void computeBoundConstrant(
-		DeviceArray<Real> h,
+		GArray<Real> h,
 		NeighborList<int>	neighborIndex,
-		DeviceArray<Coord> m_accel,
-		DeviceArray<Coord> m_velocity,
-		DeviceArray<Coord> m_position,
-		DeviceArray<int> isBound,
+		GArray<Coord> m_accel,
+		GArray<Coord> m_velocity,
+		GArray<Coord> m_position,
+		GArray<int> isBound,
 		Real distance,
 		Real gravity,
 		Real dt)
@@ -226,14 +226,14 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void computeHeight(
-		DeviceArray<Real> h,
+		GArray<Real> h,
 		NeighborList<int>	neighborIndex,
-		DeviceArray<Coord> m_velocity,
-		DeviceArray<Coord> m_accel,
-		DeviceArray<int> isBound,
-		DeviceArray<Coord> m_position,
-		DeviceArray<Coord> solid,
-		DeviceArray<Coord> normal,
+		GArray<Coord> m_velocity,
+		GArray<Coord> m_accel,
+		GArray<int> isBound,
+		GArray<Coord> m_position,
+		GArray<Coord> solid,
+		GArray<Coord> normal,
 		Real distance,
 		Real dt)
 	{

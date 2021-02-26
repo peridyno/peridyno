@@ -14,8 +14,8 @@ namespace dyno
 	template<typename Real,
 			 typename Coord>
 	__global__ void K_InitKernelFunction(
-		DeviceArray<Real> weights,
-		DeviceArray<Coord> posArr,
+		GArray<Real> weights,
+		GArray<Coord> posArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kernel,
 		Real smoothingLength)
@@ -44,9 +44,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeLambdas(
-		DeviceArray<Real> lambdaArr,
-		DeviceArray<Real> rhoArr,
-		DeviceArray<Coord> posArr,
+		GArray<Real> lambdaArr,
+		GArray<Real> rhoArr,
+		GArray<Coord> posArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kern,
 		Real smoothingLength)
@@ -91,10 +91,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeLambdas(
-		DeviceArray<Real> lambdaArr,
-		DeviceArray<Real> rhoArr,
-		DeviceArray<Coord> posArr,
-		DeviceArray<Real> massInvArr,
+		GArray<Real> lambdaArr,
+		GArray<Real> rhoArr,
+		GArray<Coord> posArr,
+		GArray<Real> massInvArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kern,
 		Real smoothingLength)
@@ -133,9 +133,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeDisplacement(
-		DeviceArray<Coord> dPos, 
-		DeviceArray<Real> lambdas, 
-		DeviceArray<Coord> posArr, 
+		GArray<Coord> dPos, 
+		GArray<Real> lambdas, 
+		GArray<Coord> posArr, 
 		NeighborList<int> neighbors, 
 		SpikyKernel<Real> kern,
 		Real smoothingLength,
@@ -180,10 +180,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeDisplacement(
-		DeviceArray<Coord> dPos,
-		DeviceArray<Real> lambdas,
-		DeviceArray<Coord> posArr,
-		DeviceArray<Real> massInvArr,
+		GArray<Coord> dPos,
+		GArray<Real> lambdas,
+		GArray<Coord> posArr,
+		GArray<Real> massInvArr,
 		NeighborList<int> neighbors,
 		SpikyKernel<Real> kern,
 		Real smoothingLength,
@@ -225,9 +225,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdatePosition(
-		DeviceArray<Coord> posArr, 
-		DeviceArray<Coord> velArr, 
-		DeviceArray<Coord> dPos, 
+		GArray<Coord> posArr, 
+		GArray<Coord> velArr, 
+		GArray<Coord> dPos, 
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -366,9 +366,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void DP_UpdateVelocity(
-		DeviceArray<Coord> velArr,
-		DeviceArray<Coord> prePos,
-		DeviceArray<Coord> curPos,
+		GArray<Coord> velArr,
+		GArray<Coord> prePos,
+		GArray<Coord> curPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

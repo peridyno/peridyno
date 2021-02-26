@@ -59,9 +59,9 @@ namespace dyno
     typename Coord=typename TDataType::Coord,
     typename PhaseVector=typename CahnHilliard<TDataType>::PhaseVector>
     __global__ void calcChemicalPotential(
-		DeviceArray<Coord> posArr,
-        DeviceArray<PhaseVector> cArr,
-        DeviceArray<PhaseVector> muArr,
+		GArray<Coord> posArr,
+        GArray<PhaseVector> cArr,
+        GArray<PhaseVector> muArr,
 		NeighborList<int> neighbors,
         Real smoothingLength,
         Real particleVolume,
@@ -106,9 +106,9 @@ namespace dyno
     typename Coord=typename TDataType::Coord,
     typename PhaseVector=typename CahnHilliard<TDataType>::PhaseVector>
     __global__ void updateConcentration(
-		DeviceArray<Coord> posArr,
-        DeviceArray<PhaseVector> cArr,
-        DeviceArray<PhaseVector> muArr,
+		GArray<Coord> posArr,
+        GArray<PhaseVector> cArr,
+        GArray<PhaseVector> muArr,
 		NeighborList<int> neighbors,
         Real smoothingLength,
         Real particleVolume,

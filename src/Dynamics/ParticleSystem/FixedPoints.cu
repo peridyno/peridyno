@@ -108,10 +108,10 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void K_DoFixPoints(
-		DeviceArray<Coord> curPos,
-		DeviceArray<Coord> curVel,
-		DeviceArray<int> bFixed,
-		DeviceArray<Coord> fixedPts)
+		GArray<Coord> curPos,
+		GArray<Coord> curVel,
+		GArray<int> bFixed,
+		GArray<Coord> fixedPts)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;
@@ -146,7 +146,7 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void K_DoPlaneConstrain(
-		DeviceArray<Coord> curPos,
+		GArray<Coord> curPos,
 		Coord origin,
 		Coord dir)
 	{

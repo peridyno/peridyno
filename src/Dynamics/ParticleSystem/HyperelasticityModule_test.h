@@ -518,40 +518,40 @@ namespace dyno {
 		//void previous_enforceElasticity();
 
 	private:
-		void getEnergy(Real& totalEnergy, DeviceArray<Coord>& position);
+		void getEnergy(Real& totalEnergy, GArray<Coord>& position);
 
 		EnergyType m_energyType;
 
-		DeviceArray<Real> m_fraction;
+		GArray<Real> m_fraction;
 
-		DeviceArray<Real> m_energy;
-		DeviceArray<Real> m_alpha;
-		DeviceArray<Coord> m_gradient;
+		GArray<Real> m_energy;
+		GArray<Real> m_alpha;
+		GArray<Coord> m_gradient;
 
-		DeviceArray<Coord> m_eigenValues;
+		GArray<Coord> m_eigenValues;
 
-		DeviceArray<Matrix> m_F;
-		DeviceArray<Matrix> m_invF;
-		DeviceArray<bool> m_validOfK;
-		DeviceArray<Matrix> m_invK;
-		DeviceArray<Matrix> m_matU;
-		DeviceArray<Matrix> m_matV;
+		GArray<Matrix> m_F;
+		GArray<Matrix> m_invF;
+		GArray<bool> m_validOfK;
+		GArray<Matrix> m_invK;
+		GArray<Matrix> m_matU;
+		GArray<Matrix> m_matV;
 
-		//DeviceArray<Coord> y_pre;
-		DeviceArray<Coord> y_current;
-		DeviceArray<Coord> y_next;
-		DeviceArray<Coord> y_residual;
-		DeviceArray<Coord> y_gradC;
+		//GArray<Coord> y_pre;
+		GArray<Coord> y_current;
+		GArray<Coord> y_next;
+		GArray<Coord> y_residual;
+		GArray<Coord> y_gradC;
 
-		DeviceArray<Coord> m_source;
-		DeviceArray<Matrix> m_A;
+		GArray<Coord> m_source;
+		GArray<Matrix> m_A;
 
 		Reduction<Real>* m_reduce;
 		Arithmetic<Real>* m_alg;
 
-		DeviceArray<bool> m_bFixed;
-		DeviceArray<int> m_points_move_type;
-		DeviceArray<Coord> m_fixedPos;
+		GArray<bool> m_bFixed;
+		GArray<int> m_points_move_type;
+		GArray<Coord> m_fixedPos;
 
 		bool isAlphaCompute = true;		// compute alpha step length or not
 		bool isChebyshevAcce = false;	// chebyshev accelerate or not

@@ -59,8 +59,8 @@ namespace dyno
 		}
 
 
-		HostArray<Coord> host_position;
-		HostArray<Real> host_mapping;
+		CArray<Coord> host_position;
+		CArray<Real> host_mapping;
 		host_position.resize(total_num);
 		host_mapping.resize(total_num);
 

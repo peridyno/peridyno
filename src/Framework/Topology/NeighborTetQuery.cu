@@ -25,8 +25,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void NTQ_SetupAABB(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Coord> position,
+		GArray<AABB> boundingBox,
+		GArray<Coord> position,
 		Real radius)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -42,9 +42,9 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void NTQ_SetupAABB(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<TopologyModule::Tetrahedron> tet,
-		DeviceArray<Coord> position)
+		GArray<AABB> boundingBox,
+		GArray<TopologyModule::Tetrahedron> tet,
+		GArray<Coord> position)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tet.size()) return;
@@ -59,12 +59,12 @@ namespace dyno
 	
 	template<typename Coord>
 	__global__ void NTQ_Narrow_Count(
-		DeviceArray<Coord> pos,
+		GArray<Coord> pos,
 		NeighborList<int> nbr,
-		DeviceArray<int> tag,
-		DeviceArray<Coord> pos_tet,
-		DeviceArray<TopologyModule::Tetrahedron> tet,
-		DeviceArray<int> count,
+		GArray<int> tag,
+		GArray<Coord> pos_tet,
+		GArray<TopologyModule::Tetrahedron> tet,
+		GArray<int> count,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -112,12 +112,12 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void NTQ_Narrow_Set(
-		DeviceArray<Coord> pos,
+		GArray<Coord> pos,
 		NeighborList<int> nbr,
-		DeviceArray<int> tag,
+		GArray<int> tag,
 		NeighborList<int> nbr_out,
-		DeviceArray<Coord> pos_tet,
-		DeviceArray<TopologyModule::Tetrahedron> tet,
+		GArray<Coord> pos_tet,
+		GArray<TopologyModule::Tetrahedron> tet,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -211,9 +211,9 @@ namespace dyno
 			printf("broad phase time: %f\n", t2.getEclipsedTime());
 			//broad phase end
 
-			DeviceArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			GArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
 			
-			DeviceArray<int> tag;
+			GArray<int> tag;
 			tag.resize(m_broadPhaseCD->outContactList()->getValue().getElementSize());
 			tag.reset();
 			
@@ -237,7 +237,7 @@ namespace dyno
 			printf("Neighbor Tet Sum: %d %d\n", sum, m_broadPhaseCD->outContactList()->getValue().getElementSize());
 
 
-			DeviceArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+			GArray<int>& elements = this->outNeighborhood()->getValue().getElements();
 			elements.resize(sum);
 
 			if (sum > 0)

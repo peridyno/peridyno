@@ -116,7 +116,7 @@ namespace dyno
 
 	template<typename Matrix>
 	__global__ void InitRotation(
-		DeviceArray<Matrix> rots)
+		GArray<Matrix> rots)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= rots.size()) return;
@@ -130,7 +130,7 @@ namespace dyno
 		auto tetSet = TypeInfo::cast<TetrahedronSet<TDataType>>(this->getTopologyModule());
 		if (tetSet == nullptr) return false;
 
-		HostArray<Attribute> host_attribute;
+		CArray<Attribute> host_attribute;
 		host_attribute.resize(tetSet->getPoints().size());
 		for (int i = 0; i < tetSet->getPoints().size(); i++)
 		{
@@ -155,8 +155,8 @@ namespace dyno
 		this->updateVolume();
 		this->updateRestShape();
 
-		/*HostArray<Coord> host_position;
-		HostArray<TopologyModule::Tetrahedron> host_tets;
+		/*CArray<Coord> host_position;
+		CArray<TopologyModule::Tetrahedron> host_tets;
 		host_position.resize(tetSet->getPoints().size());
 		host_tets.resize(tetSet->getTetrahedrons().size());
 
@@ -471,7 +471,7 @@ namespace dyno
 	}
 
 	__global__ void SetSize(
-		DeviceArray<int> index,
+		GArray<int> index,
 		ListArray<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -482,9 +482,9 @@ namespace dyno
 
 	template<typename Coord, typename NPair>
 	__global__ void SetRestShape(
-		DeviceArray<NPair> elements,
-		DeviceArray<int> shifts,
-		DeviceArray<Coord> restPos,
+		GArray<NPair> elements,
+		GArray<int> shifts,
+		GArray<Coord> restPos,
 		ListArray<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -540,9 +540,9 @@ namespace dyno
 
 	template<typename Real, typename Coord, typename Tetrahedron>
 	__global__ void HB_CalculateVolume(
-		DeviceArray<Real> volume,
-		DeviceArray<Coord> restPos,
-		DeviceArray<Tetrahedron> tets,
+		GArray<Real> volume,
+		GArray<Coord> restPos,
+		GArray<Tetrahedron> tets,
 		NeighborList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

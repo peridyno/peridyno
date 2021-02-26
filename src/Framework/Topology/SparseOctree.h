@@ -115,8 +115,8 @@ namespace dyno {
 
 		void setSpace(Coord lo, Real h, Real L);
 
-		void construct(DeviceArray<Coord>& points, Real radius);
-		void construct(DeviceArray<AABB>& aabb);
+		void construct(GArray<Coord>& points, Real radius);
+		void construct(GArray<AABB>& aabb);
 
 		int getLevelMax() { return m_level_max; }
 
@@ -163,8 +163,8 @@ namespace dyno {
 
 		Coord m_lo;
 
-		DeviceArray<OctreeNode> m_all_nodes;
-		DeviceArray<OctreeNode> m_post_ordered_nodes;
+		GArray<OctreeNode> m_all_nodes;
+		GArray<OctreeNode> m_post_ordered_nodes;
 	};
 
 

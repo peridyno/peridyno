@@ -22,8 +22,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void NTQ_SetupAABB(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Coord> position,
+		GArray<AABB> boundingBox,
+		GArray<Coord> position,
 		Real radius)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -39,9 +39,9 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void NTQ_SetupAABB(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Coord> vertex,
-		DeviceArray<TriangleIndex> tIndex)
+		GArray<AABB> boundingBox,
+		GArray<Coord> vertex,
+		GArray<TriangleIndex> tIndex)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tIndex.size()) return;

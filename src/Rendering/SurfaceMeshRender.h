@@ -25,9 +25,9 @@ namespace dyno
 	private:
 		Vector3f m_color;
 
-		DeviceArray<float3> vertices;
-		DeviceArray<float3> normals;
-		DeviceArray<float3> colors;
+		GArray<float3> vertices;
+		GArray<float3> normals;
+		GArray<float3> colors;
 
 		std::shared_ptr<TriangleRender> m_triangleRender;
 	};

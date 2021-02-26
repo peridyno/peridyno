@@ -15,8 +15,8 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename NPair>
 	__global__ void PM_ComputeInvariants(
-		DeviceArray<Real> bulk_stiffiness,
-		DeviceArray<Coord> position,
+		GArray<Real> bulk_stiffiness,
+		GArray<Coord> position,
 		NeighborList<NPair> restShape,
 		Real horizon,
 		Real A,

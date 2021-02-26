@@ -32,14 +32,14 @@ public:
     TriangleRender(const TriangleRender &) = delete;
     TriangleRender & operator = (const TriangleRender &) = delete;
 
-	void setVertexArray(HostArray<float3>& vertArray);
-	void setVertexArray(DeviceArray<float3>& vertArray);
+	void setVertexArray(CArray<float3>& vertArray);
+	void setVertexArray(GArray<float3>& vertArray);
 
-	void setNormalArray(HostArray<float3>& normArray);
-	void setNormalArray(DeviceArray<float3>& normArray);
+	void setNormalArray(CArray<float3>& normArray);
+	void setNormalArray(GArray<float3>& normArray);
 
-	void setColorArray(HostArray<float3>& colorArray);
-	void setColorArray(DeviceArray<float3>& colorArray);
+	void setColorArray(CArray<float3>& colorArray);
+	void setColorArray(GArray<float3>& colorArray);
 
 	void enableDoubleShading();
 	void disableDoubleShading();

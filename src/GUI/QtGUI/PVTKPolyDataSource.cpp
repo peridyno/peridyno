@@ -41,7 +41,7 @@ int PVTKPolyDataSource::RequestData(
 	auto device_pts = m_tri_set->getPoints();
 
 	int num_of_points = device_pts.size();
-	dyno::HostArray<dyno::Vector3f> host_pts;
+	dyno::CArray<dyno::Vector3f> host_pts;
 	host_pts.resize(num_of_points);
 	dyno::Function1Pt::copy(host_pts, device_pts);
 
@@ -55,7 +55,7 @@ int PVTKPolyDataSource::RequestData(
 	auto device_triangles = m_tri_set->getTriangles();
 	int num_of_triangles = device_triangles->size();
 
-	dyno::HostArray<dyno::TopologyModule::Triangle> host_triangles;
+	dyno::CArray<dyno::TopologyModule::Triangle> host_triangles;
 	host_triangles.resize(num_of_triangles);
 	dyno::Function1Pt::copy(host_triangles, *device_triangles);
 

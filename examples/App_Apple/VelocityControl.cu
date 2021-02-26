@@ -18,8 +18,8 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void Constrain(
-		DeviceArray<Coord> poss,
-		DeviceArray<Coord> vels)
+		GArray<Coord> poss,
+		GArray<Coord> vels)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (vId >= poss.size()) return;

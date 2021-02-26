@@ -35,8 +35,8 @@ private:
 	//Searching radius
 	Real m_radius = 0.0125;
 
-	DeviceArray<int> m_nearestTriangle;
-	DeviceArray<Coord> m_barycentric;
+	GArray<int> m_nearestTriangle;
+	GArray<Coord> m_barycentric;
 
 	std::shared_ptr<TetrahedronSet<TDataType>> m_initFrom = nullptr;
 	std::shared_ptr<TriangleSet<TDataType>> m_initTo = nullptr;

@@ -49,14 +49,14 @@ public:
 
 	
 protected:
-	DeviceArray<int> m_objId;
+	GArray<int> m_objId;
 	
-	DeviceArray<Real> weights;
-	DeviceArray<Coord> init_pos;
-	DeviceArray<Coord> posBuf;
+	GArray<Real> weights;
+	GArray<Coord> init_pos;
+	GArray<Coord> posBuf;
 
-	DeviceArray<Coord> m_position_previous;
-	DeviceArray<Coord> m_triangle_vertex_previous;
+	GArray<Coord> m_position_previous;
+	GArray<Coord> m_triangle_vertex_previous;
 
 	std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
 	std::shared_ptr<NeighborList<int>> m_nList;

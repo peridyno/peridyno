@@ -141,8 +141,8 @@ namespace dyno
 		if (total_num > 0)
 		{
 			int start = 0;
-			DeviceArray<Coord>& allpoints = m_particle_position.getValue();
-			DeviceArray<Attribute>& allattrs = m_particle_attribute.getValue();
+			GArray<Coord>& allpoints = m_particle_position.getValue();
+			GArray<Attribute>& allattrs = m_particle_attribute.getValue();
 
 
 			std::vector<Attribute> attributeList;
@@ -155,8 +155,8 @@ namespace dyno
 				{
 					continue;
 				}
-				DeviceArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
-				DeviceArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
+				GArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
+				GArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
 
 				int num = points.size();
 				//printf("%s\n",m_particleSystems[i]->getName().c_str());
@@ -222,7 +222,7 @@ namespace dyno
 			auto triangle_index = m_surfaces[i]->getTriangleIndex()->getValue();
 			int num_triangle = triangle_index.size();
 
-			HostArray<Triangle> host_triangle;
+			CArray<Triangle> host_triangle;
 			host_triangle.resize(num_triangle);
 
 			printf("mesh tri size: %d %d %d\n", num_triangle, start_triangle, start_vertex);
@@ -345,8 +345,8 @@ namespace dyno
 		if (m_particle_position.getElementCount() > 0)
 		{
 			int start = 0;
-			DeviceArray<Coord>& allvels = m_particle_velocity.getValue();
-			DeviceArray<Coord>& allposs = m_particle_position.getValue();
+			GArray<Coord>& allvels = m_particle_velocity.getValue();
+			GArray<Coord>& allposs = m_particle_position.getValue();
 
 			for (int i = 0; i < m_particleSystems.size(); i++)
 			{
@@ -359,8 +359,8 @@ namespace dyno
 				{
 					continue;
 				}
-				DeviceArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
-				DeviceArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
+				GArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
+				GArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
 				int num = points.size();
 				cudaMemcpy(points.begin(), allposs.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 				cudaMemcpy(vels.begin(), allvels.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);

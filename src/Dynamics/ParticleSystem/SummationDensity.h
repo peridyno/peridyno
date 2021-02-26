@@ -29,11 +29,11 @@ namespace dyno {
 		void calculateScalingFactor();
 		void calculateParticleMass();
 
-		void compute(DeviceArray<Real>& rho);
+		void compute(GArray<Real>& rho);
 
 		void compute(
-			DeviceArray<Real>& rho,
-			DeviceArray<Coord>& pos,
+			GArray<Real>& rho,
+			GArray<Coord>& pos,
 			NeighborList<int>& neighbors,
 			Real smoothingLength,
 			Real mass);

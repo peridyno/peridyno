@@ -27,8 +27,8 @@ namespace dyno{
 
 		void setSpace(Real _h, Coord _lo, Coord _hi);
 
-		void construct(DeviceArray<Coord>& pos);
-		void construct(DeviceArray<Coord>& pos, DeviceArray<Triangle>& tri, DeviceArray<Coord>& Tri_pos);
+		void construct(GArray<Coord>& pos);
+		void construct(GArray<Coord>& pos, GArray<Triangle>& tri, GArray<Coord>& Tri_pos);
 
 		void clear();
 

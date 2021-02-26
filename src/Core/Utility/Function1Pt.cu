@@ -14,13 +14,13 @@ namespace dyno
 		}
 
 		template<typename T1, typename T2>
-		void Length(DeviceArray<T1>& lhs, DeviceArray<T2>& rhs)
+		void Length(GArray<T1>& lhs, GArray<T2>& rhs)
 		{
 			assert(lhs.size() == rhs.size());
 			unsigned pDim = cudaGridSize(rhs.size(), BLOCK_SIZE);
 			KerLength << <pDim, BLOCK_SIZE >> > (lhs.begin(), rhs.begin(), lhs.size());
 		}
 
-		template void Length(DeviceArray<float>&, DeviceArray<float3>&);
+		template void Length(GArray<float>&, GArray<float3>&);
 	}
 }

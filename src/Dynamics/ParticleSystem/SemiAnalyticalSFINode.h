@@ -124,14 +124,14 @@ namespace dyno
 //		DeviceArrayField<Real> ElasityPressure;
 
 
-		DeviceArray<int> m_objId;
+		GArray<int> m_objId;
 		DeviceArrayField<int> ParticleId;
 
-		DeviceArray<Coord> posBuf;
-		DeviceArray<Coord> VelBuf;
+		GArray<Coord> posBuf;
+		GArray<Coord> VelBuf;
 
-		DeviceArray<Real> weights;
-		DeviceArray<Coord> init_pos;
+		GArray<Real> weights;
+		GArray<Coord> init_pos;
 		
 		//std::vector<std::shared_ptr<ParticleSystem<TDataType>>> m_particleSystems;
 		//std::vector<std::shared_ptr<TriangularSurfaceMeshNode<TDataType>>> m_surfaces;

@@ -11,8 +11,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ComputeDensity(
-		DeviceArray<Real> rhoArr,
-		DeviceArray<Coord> posArr,
+		GArray<Real> rhoArr,
+		GArray<Coord> posArr,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real mass
@@ -83,7 +83,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void SummationDensity<TDataType>::compute(DeviceArray<Real>& rho)
+	void SummationDensity<TDataType>::compute(GArray<Real>& rho)
 	{
 		compute(
 			rho,
@@ -95,8 +95,8 @@ namespace dyno
 
 	template<typename TDataType>
 	void SummationDensity<TDataType>::compute(
-		DeviceArray<Real>& rho, 
-		DeviceArray<Coord>& pos,
+		GArray<Real>& rho, 
+		GArray<Coord>& pos,
 		NeighborList<int>& neighbors, 
 		Real smoothingLength,
 		Real mass)

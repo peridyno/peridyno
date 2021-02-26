@@ -31,7 +31,7 @@ namespace dyno {
 	}
 
 	template<typename T>
-	T Arithmetic<T>::Dot(DeviceArray<T>& xArr, DeviceArray<T>& yArr)
+	T Arithmetic<T>::Dot(GArray<T>& xArr, GArray<T>& yArr)
 	{
 		if (m_buf.size() != xArr.size())
 		{

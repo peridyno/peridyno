@@ -27,11 +27,11 @@ namespace dyno
 
 	template <typename Coord, typename Matrix, typename TQuaternion>
 	__global__ void RB_initialize_device(
-		DeviceArray<Coord> pos,
-		DeviceArray<Matrix> rotation,
-		DeviceArray<TQuaternion> rotation_q,
-		DeviceArray<Sphere3D> spheres,
-		DeviceArray<Box3D> boxes,
+		GArray<Coord> pos,
+		GArray<Matrix> rotation,
+		GArray<TQuaternion> rotation_q,
+		GArray<Sphere3D> spheres,
+		GArray<Box3D> boxes,
 		int start_box,
 		int start_sphere
 	)
@@ -177,8 +177,8 @@ namespace dyno
 	
 	template <typename Coord>
 	__global__ void RB_update_sphere(
-		DeviceArray<Coord> pos,
-		DeviceArray<Sphere3D> sphere,
+		GArray<Coord> pos,
+		GArray<Sphere3D> sphere,
 		int start_sphere
 	)
 	{
@@ -189,10 +189,10 @@ namespace dyno
 
 	template <typename Coord, typename Matrix>
 	__global__ void RB_update_box(
-		DeviceArray<Coord> pos,
-		DeviceArray<Matrix> rotation,
-		DeviceArray<Box3D> box,
-		DeviceArray<Box3D> box_init,
+		GArray<Coord> pos,
+		GArray<Matrix> rotation,
+		GArray<Box3D> box,
+		GArray<Box3D> box_init,
 		int start_box
 	)
 	{
@@ -208,13 +208,13 @@ namespace dyno
 
 	template <typename Coord, typename Matrix, typename TQuaternion>
 	__global__ void RB_update_state(
-		DeviceArray<Coord> pos,
-		DeviceArray<Matrix> rotation,
-		DeviceArray<TQuaternion> rotation_q,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> angular_velocity,
-		DeviceArray<Matrix> inertia,
-		DeviceArray<Matrix> inertia_init,
+		GArray<Coord> pos,
+		GArray<Matrix> rotation,
+		GArray<TQuaternion> rotation_q,
+		GArray<Coord> velocity,
+		GArray<Coord> angular_velocity,
+		GArray<Matrix> inertia,
+		GArray<Matrix> inertia_init,
 		Real dt
 	)
 	{
@@ -233,9 +233,9 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void RB_update_velocity(
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> angular_velocity,
-		DeviceArray<Coord> AA,
+		GArray<Coord> velocity,
+		GArray<Coord> angular_velocity,
+		GArray<Coord> AA,
 		Real dt
 	)
 	{
@@ -254,12 +254,12 @@ namespace dyno
 
 	template <typename Coord, typename Matrix>
 	__global__ void RB_constrct_jacobi(
-		DeviceArray<Coord> pos,
-		DeviceArray<Matrix> inertia,
-		DeviceArray<Real> mass,
-		DeviceArray<Coord> J,
-		DeviceArray<Coord> B,
-		DeviceArray<NeighborConstraints> nbc
+		GArray<Coord> pos,
+		GArray<Matrix> inertia,
+		GArray<Real> mass,
+		GArray<Coord> J,
+		GArray<Coord> B,
+		GArray<NeighborConstraints> nbc
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -335,11 +335,11 @@ namespace dyno
 	// ignore zeta !!!!!!
 	template <typename Coord>
 	__global__ void RB_compute_ita(
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> angular_velocity,
-		DeviceArray<Coord> J,
-		DeviceArray<Real> ita,
-		DeviceArray<NeighborConstraints> nbq,
+		GArray<Coord> velocity,
+		GArray<Coord> angular_velocity,
+		GArray<Coord> J,
+		GArray<Real> ita,
+		GArray<NeighborConstraints> nbq,
 		Real dt
 	)
 	{
@@ -372,9 +372,9 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void RB_compute_d(
-		DeviceArray<Coord> J,
-		DeviceArray<Coord> B,
-		DeviceArray<Real> D
+		GArray<Coord> J,
+		GArray<Coord> B,
+		GArray<Real> D
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -392,13 +392,13 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void RB_take_one_iteration(
-		DeviceArray<Coord> AA,
-		DeviceArray<Real> d,
-		DeviceArray<Coord> J,
-		DeviceArray<Coord> B,
-		DeviceArray<Real> ita,
-		DeviceArray<Real> lambda,
-		DeviceArray<NeighborConstraints> nbq
+		GArray<Coord> AA,
+		GArray<Real> d,
+		GArray<Coord> J,
+		GArray<Coord> B,
+		GArray<Real> ita,
+		GArray<Real> lambda,
+		GArray<NeighborConstraints> nbq
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -462,15 +462,15 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void RB_take_one_iteration_cg(
-		DeviceArray<Coord> AA,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> angular_velocity,
-		DeviceArray<Real> d,
-		DeviceArray<Coord> J,
-		DeviceArray<Coord> B,
-		DeviceArray<Real> ita,
-		DeviceArray<Real> lambda,
-		DeviceArray<NeighborConstraints> nbq,
+		GArray<Coord> AA,
+		GArray<Coord> velocity,
+		GArray<Coord> angular_velocity,
+		GArray<Real> d,
+		GArray<Coord> J,
+		GArray<Coord> B,
+		GArray<Real> ita,
+		GArray<Real> lambda,
+		GArray<NeighborConstraints> nbq,
 		Real dt
 	)
 	{
@@ -541,10 +541,10 @@ namespace dyno
 
 	template <typename Coord, typename Matrix> /* FOR TEST */
 	__global__ void RB_update_pair_info(
-		DeviceArray<Coord> center_init,
-		DeviceArray<Coord> center_now,
-		DeviceArray<Matrix> rotation,
-		DeviceArray<NeighborConstraints> nbq
+		GArray<Coord> center_init,
+		GArray<Coord> center_now,
+		GArray<Matrix> rotation,
+		GArray<NeighborConstraints> nbq
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -655,10 +655,10 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void RB_set_boundary(
-		DeviceArray<Sphere3D> sphere,
-		DeviceArray<Box3D> box,
-		DeviceArray<int> count,
-		DeviceArray<NeighborConstraints> nbq,
+		GArray<Sphere3D> sphere,
+		GArray<Box3D> box,
+		GArray<int> count,
+		GArray<NeighborConstraints> nbq,
 		Coord hi,
 		Coord lo,
 		int start_sphere,
@@ -770,9 +770,9 @@ namespace dyno
 
 		template <typename Coord>
 		__global__ void RB_count_boundary(
-			DeviceArray<Sphere3D> sphere,
-			DeviceArray<Box3D> box,
-			DeviceArray<int> count,
+			GArray<Sphere3D> sphere,
+			GArray<Box3D> box,
+			GArray<int> count,
 			Coord hi,
 			Coord lo,
 			int start_sphere,

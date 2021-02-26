@@ -48,7 +48,7 @@ namespace dyno
 
 		float m_refV;
 
-		DeviceArray<glm::vec3> m_colorArray;
+		GArray<glm::vec3> m_colorArray;
 
 // 		std::shared_ptr<PointRenderUtil> point_render_util;
 // 		std::shared_ptr<PointRenderTask> point_render_task;

@@ -85,13 +85,13 @@ namespace dyno
 
 	template <typename Coord, typename Triangle>
 	__global__ void K_ApplyTransform(
-		DeviceArray<Coord> tarVertex,
-		DeviceArray<Coord> tarInitVertex,
-		DeviceArray<Coord> srcVertex,
-		DeviceArray<Coord> srcInitVertex,
-		DeviceArray<Triangle> srcTriangle,
-		DeviceArray<int> nearestTriangleIndex,
-		DeviceArray<Coord> barycentric)
+		GArray<Coord> tarVertex,
+		GArray<Coord> tarInitVertex,
+		GArray<Coord> srcVertex,
+		GArray<Coord> srcInitVertex,
+		GArray<Triangle> srcTriangle,
+		GArray<int> nearestTriangleIndex,
+		GArray<Coord> barycentric)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (vId >= tarVertex.size()) return;
@@ -126,9 +126,9 @@ namespace dyno
 
 	template <typename Coord, typename Triangle>
 	__global__ void SetupBoundBoxFrom(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Coord> points,
-		DeviceArray<Triangle> triangleIndex)
+		GArray<AABB> boundingBox,
+		GArray<Coord> points,
+		GArray<Triangle> triangleIndex)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= triangleIndex.size()) return;
@@ -141,8 +141,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void SetupBoundBoxTo(
-		DeviceArray<AABB> boundingBox,
-		DeviceArray<Coord> points,
+		GArray<AABB> boundingBox,
+		GArray<Coord> points,
 		Real radius)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -155,12 +155,12 @@ namespace dyno
 
 	template <typename Coord, typename Triangle>
 	__global__ void SetupInternalData(
-		DeviceArray<int> nearestIds,
-		DeviceArray<Coord> barycentric,
-		DeviceArray<Coord> toVertex,
-		DeviceArray<Coord> fromVertex,
-		DeviceArray<Triangle> fromTriangle,
-		DeviceArray<TopologyModule::Tri2Tet> tri2Tet,
+		GArray<int> nearestIds,
+		GArray<Coord> barycentric,
+		GArray<Coord> toVertex,
+		GArray<Coord> fromVertex,
+		GArray<Triangle> fromTriangle,
+		GArray<TopologyModule::Tri2Tet> tri2Tet,
 		NeighborList<int> neighborIds)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -216,8 +216,8 @@ namespace dyno
 		int fromTriangleSize = from->getTriangles()->size();
 		int toVertSize = to->getPoints().size();
 
-		DeviceArray<AABB> fromAABB;
-		DeviceArray<AABB> toAABB;
+		GArray<AABB> fromAABB;
+		GArray<AABB> toAABB;
 		
 		fromAABB.resize(fromTriangleSize);
 		toAABB.resize(toVertSize);

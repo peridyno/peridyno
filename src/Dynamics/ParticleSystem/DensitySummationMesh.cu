@@ -39,10 +39,10 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ComputeDensityMesh(
-		DeviceArray<Real> rhoArr,
-		DeviceArray<Coord> posArr,
-		DeviceArray<TopologyModule::Triangle> Tri,
-		DeviceArray<Coord> positionTri,
+		GArray<Real> rhoArr,
+		GArray<Coord> posArr,
+		GArray<TopologyModule::Triangle> Tri,
+		GArray<Coord> positionTri,
 		NeighborList<int> neighbors,
 		NeighborList<int> neighborsTri,
 		Real smoothingLength,
@@ -206,7 +206,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void DensitySummationMesh<TDataType>::compute(DeviceArray<Real>& rho)
+	void DensitySummationMesh<TDataType>::compute(GArray<Real>& rho)
 	{
 
 		compute(
@@ -226,10 +226,10 @@ namespace dyno
 
 	template<typename TDataType>
 	void DensitySummationMesh<TDataType>::compute(
-		DeviceArray<Real>& rho, 
-		DeviceArray<Coord>& pos,
-		DeviceArray<TopologyModule::Triangle>& Tri,
-		DeviceArray<Coord>& positionTri,
+		GArray<Real>& rho, 
+		GArray<Coord>& pos,
+		GArray<TopologyModule::Triangle>& Tri,
+		GArray<Coord>& positionTri,
 		NeighborList<int>& neighbors, 
 		NeighborList<int>& neighborsTri,
 		Real smoothingLength,

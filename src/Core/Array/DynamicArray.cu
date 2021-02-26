@@ -9,9 +9,9 @@ namespace dyno
 {
 	template<typename ElementType>
 	__global__ void DA_SetupListArray(
-		DeviceArray<List<ElementType>> lists,
-		DeviceArray<ElementType> elements,
-		DeviceArray<int> index)
+		GArray<List<ElementType>> lists,
+		GArray<ElementType> elements,
+		GArray<int> index)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= index.size()) return;
@@ -25,7 +25,7 @@ namespace dyno
 	}
 
 	template< class  ElementType, DeviceType deviceType /*= DeviceType::GPU*/>
-	bool ListArray<ElementType, deviceType>::allocate(DeviceArray<int> counts)
+	bool ListArray<ElementType, deviceType>::allocate(GArray<int> counts)
 	{
 		if (index.size() != counts.size())
 		{

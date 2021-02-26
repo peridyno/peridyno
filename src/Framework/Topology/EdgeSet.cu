@@ -21,8 +21,8 @@ namespace dyno
 	}
 
 	__global__ void K_CountNumber(
-		DeviceArray<int> num,
-		DeviceArray<TopologyModule::Edge> edges)
+		GArray<int> num,
+		GArray<TopologyModule::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (eId >= edges.size()) return;
@@ -35,7 +35,7 @@ namespace dyno
 
 	__global__ void K_StoreIds(
 		ListArray<int> ids,
-		DeviceArray<TopologyModule::Edge> edges)
+		GArray<TopologyModule::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (eId >= edges.size()) return;
@@ -55,7 +55,7 @@ namespace dyno
 		if (this->m_coords.isEmpty())
 			return;
 
-		DeviceArray<int> counts;
+		GArray<int> counts;
 		counts.resize(m_coords.size());
 		counts.reset();
 		

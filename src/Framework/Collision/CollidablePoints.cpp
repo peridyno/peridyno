@@ -25,17 +25,17 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CollidablePoints<TDataType>::setPositions(DeviceArray<Coord>& centers)
+	void CollidablePoints<TDataType>::setPositions(GArray<Coord>& centers)
 	{
 	}
 
 	template<typename TDataType>
-	void CollidablePoints<TDataType>::setVelocities(DeviceArray<Coord>& vel)
+	void CollidablePoints<TDataType>::setVelocities(GArray<Coord>& vel)
 	{
 	}
 
 	template<typename TDataType>
-	void CollidablePoints<TDataType>::setRadii(DeviceArray<Coord>& radii)
+	void CollidablePoints<TDataType>::setRadii(GArray<Coord>& radii)
 	{
 
 	}
@@ -128,9 +128,9 @@ namespace dyno
 			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getValue();
 			auto vel = mstate->getField<HostVarField<Coord>>(MechanicalState::velocity())->getValue();
 			
-			HostArray<Coord> hPos;
-			HostArray<Coord> hInitPos;
-			DeviceArray<Coord> dInitPos;
+			CArray<Coord> hPos;
+			CArray<Coord> hInitPos;
+			GArray<Coord> dInitPos;
 			hPos.resize(m_positions.size());
 			hInitPos.resize(m_positions.size());
 			dInitPos.resize(m_positions.size());

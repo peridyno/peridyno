@@ -28,12 +28,12 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HPM_ComputeInvariants(
-		DeviceArray<Coord> stretching,
-		DeviceArray<bool> bYield,
-		DeviceArray<Real> yield_I1,
-		DeviceArray<Real> yield_J2,
-		DeviceArray<Real> arrI1,
-		DeviceArray<Coord> position,
+		GArray<Coord> stretching,
+		GArray<bool> bYield,
+		GArray<Real> yield_I1,
+		GArray<Real> yield_J2,
+		GArray<Real> arrI1,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real A,
 		Real B,
@@ -202,12 +202,12 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void HPM_ApplyYielding(
-		DeviceArray<Coord> restPrincipleStretching,
-		DeviceArray<Real> yield_I1,
-		DeviceArray<Real> yield_J2,
-		DeviceArray<Real> arrI1,
-		DeviceArray<Coord> currentPrincipleStretching,
-		DeviceArray<Coord> position,
+		GArray<Coord> restPrincipleStretching,
+		GArray<Real> yield_I1,
+		GArray<Real> yield_J2,
+		GArray<Real> arrI1,
+		GArray<Coord> currentPrincipleStretching,
+		GArray<Coord> position,
 		NeighborList<NPair> restShape)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);

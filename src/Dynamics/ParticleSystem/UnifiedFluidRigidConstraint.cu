@@ -15,9 +15,9 @@ namespace dyno
 	
 	template <typename Coord>
 	__global__ void USFI_update_rigid_rigid(
-		DeviceArray<Coord> tmp_velocity,
-		DeviceArray<Coord> tmp_angular_velocity,
-		DeviceArray<Coord> AA,
+		GArray<Coord> tmp_velocity,
+		GArray<Coord> tmp_angular_velocity,
+		GArray<Coord> AA,
 		Real dt
 	)
 	{
@@ -30,12 +30,12 @@ namespace dyno
 
 	template <typename Coord, typename Matrix>
 	__global__ void USFI_update_fluid_rigid(
-		DeviceArray<Real> force,
-		DeviceArray<Coord> AA,
-		DeviceArray<Coord> rigid_pos,
-		DeviceArray<Real> rigid_mass,
-		DeviceArray<Matrix> rigid_interior,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> force,
+		GArray<Coord> AA,
+		GArray<Coord> rigid_pos,
+		GArray<Real> rigid_mass,
+		GArray<Matrix> rigid_interior,
+		GArray<NeighborConstraints> nbc,
 		Real sampling_distance,
 		Real restDensity,
 		Real dt
@@ -75,13 +75,13 @@ namespace dyno
 
 	template <typename Coord, typename Matrix>
 	__global__ void USFI_update_fluid_rigid(
-		DeviceArray<Real> force,
-		DeviceArray<Coord> tmp_rigid_velocity,
-		DeviceArray<Coord> tmp_rigid_angular_velocity,
-		DeviceArray<Coord> rigid_pos,
-		DeviceArray<Real> rigid_mass,
-		DeviceArray<Matrix> rigid_interior,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> force,
+		GArray<Coord> tmp_rigid_velocity,
+		GArray<Coord> tmp_rigid_angular_velocity,
+		GArray<Coord> rigid_pos,
+		GArray<Real> rigid_mass,
+		GArray<Matrix> rigid_interior,
+		GArray<NeighborConstraints> nbc,
 		Real sampling_distance,
 		Real restDensity,
 		Real dt
@@ -112,13 +112,13 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void USFI_compute_gradient(
-		DeviceArray<Real> force,
-		DeviceArray<Coord> velocity_fluid_in_iteration,
-		DeviceArray<Coord> tmp_rigid_velocity,
-		DeviceArray<Coord> tmp_rigid_angular_velocity,
-		DeviceArray<Coord> rigid_pos,
-		DeviceArray<Real> gradient,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> force,
+		GArray<Coord> velocity_fluid_in_iteration,
+		GArray<Coord> tmp_rigid_velocity,
+		GArray<Coord> tmp_rigid_angular_velocity,
+		GArray<Coord> rigid_pos,
+		GArray<Real> gradient,
+		GArray<NeighborConstraints> nbc,
 		Real sampling_distance,
 		Real restDensity,
 		Real dt
@@ -153,11 +153,11 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void USFI_update_gradient(
-		DeviceArray<Real> force,
-		DeviceArray<Real> delta_force,
-		DeviceArray<Real> gradient_point,
-		DeviceArray<Real> gradient_edge,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> force,
+		GArray<Real> delta_force,
+		GArray<Real> gradient_point,
+		GArray<Real> gradient_edge,
+		GArray<NeighborConstraints> nbc,
 		Real sampling_distance,
 		Real restDensity
 	)
@@ -184,11 +184,11 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void USFI_collision_rigid_fluid(
-		DeviceArray<Coord> pos,
-		DeviceArray<Coord> vel,
-		DeviceArray<Box3D> boxes,
-		DeviceArray<Sphere3D> spheres,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Coord> pos,
+		GArray<Coord> vel,
+		GArray<Box3D> boxes,
+		GArray<Sphere3D> spheres,
+		GArray<NeighborConstraints> nbc,
 		int start_sphere,
 		int start_box,
 		Real radius,

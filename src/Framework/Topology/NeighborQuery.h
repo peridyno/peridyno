@@ -20,7 +20,7 @@ namespace dyno {
 		typedef typename TopologyModule::Triangle Triangle;
 
 		NeighborQuery();
-		NeighborQuery(DeviceArray<Coord>& position);
+		NeighborQuery(GArray<Coord>& position);
 		NeighborQuery(Real s, Coord lo, Coord hi);
 		~NeighborQuery() override;
 		
@@ -29,7 +29,7 @@ namespace dyno {
 //		void setRadius(Real r) { m_radius.setValue(r); }
 		void setBoundingBox(Coord lowerBound, Coord upperBound);
 
-		void queryParticleNeighbors(NeighborList<int>& nbr, DeviceArray<Coord>& pos, Real radius);
+		void queryParticleNeighbors(NeighborList<int>& nbr, GArray<Coord>& pos, Real radius);
 
 		void setNeighborSizeLimit(int num) { m_maxNum = num; }
 
@@ -37,10 +37,10 @@ namespace dyno {
 		bool initializeImpl() override;
 
 	private:
-		void queryNeighborSize(DeviceArray<int>& num, DeviceArray<Coord>& pos, Real h);
-		void queryNeighborDynamic(NeighborList<int>& nbrList, DeviceArray<Coord>& pos, Real h);
+		void queryNeighborSize(GArray<int>& num, GArray<Coord>& pos, Real h);
+		void queryNeighborDynamic(NeighborList<int>& nbrList, GArray<Coord>& pos, Real h);
 
-		void queryNeighborFixed(NeighborList<int>& nbrList, DeviceArray<Coord>& pos, Real h);
+		void queryNeighborFixed(NeighborList<int>& nbrList, GArray<Coord>& pos, Real h);
 
 
 	public:

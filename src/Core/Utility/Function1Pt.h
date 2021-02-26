@@ -3,7 +3,7 @@
 #include "Array/Array2D.h"
 #include "Array/Array3D.h"
 /*
-*  This file implements all one-point functions on device array types (DeviceArray, DeviceArray2D, DeviceArray3D, etc.)
+*  This file implements all one-point functions on device array types (GArray, DeviceArray2D, DeviceArray3D, etc.)
 */
 namespace dyno
 {
@@ -61,7 +61,7 @@ namespace dyno
 		}
 
 		template<typename T1, typename T2>
-		void Length(DeviceArray<T1>& lhs, DeviceArray<T2>& rhs);
+		void Length(GArray<T1>& lhs, GArray<T2>& rhs);
 
 
 	}

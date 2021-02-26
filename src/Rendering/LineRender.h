@@ -34,10 +34,10 @@ public:
 
 	void resize(unsigned int num);
 
-	void setLines(DeviceArray<float3>& pos);
-	void setLines(HostArray<float3>& pos);
+	void setLines(GArray<float3>& pos);
+	void setLines(CArray<float3>& pos);
 
-	void setColors(HostArray<float3>& color);
+	void setColors(CArray<float3>& color);
 
     void setLineWidth(float line_width);
     float getLineWidth() const;

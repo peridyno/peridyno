@@ -15,7 +15,7 @@ namespace dyno
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	GPU_FUNC void getDeformationGradient(
 		int curParticleID,
-		DeviceArray<Coord>& position,
+		GArray<Coord>& position,
 		NeighborList<NPair>& restShapes,
 		Real horizon,
 		Matrix* pResultMatrix)
@@ -232,14 +232,14 @@ namespace dyno
 	// these deformation gradients are mat3x3, may be singular
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	GPU_FUNC void get_GInverseOfF_PiolaKirchhoff(
-		DeviceArray<Coord> position,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real distance,
 		Real mu,
 		Real lambda,
-		DeviceArray<Matrix> resultGInverseMatrices,
-		DeviceArray<Matrix> firstPiolaKirchhoffMatrices)
+		GArray<Matrix> resultGInverseMatrices,
+		GArray<Matrix> firstPiolaKirchhoffMatrices)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -273,22 +273,22 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	GPU_FUNC void getJacobiMethod_D_R_b_constants(
-		DeviceArray<Coord> position,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
-		DeviceArray<Coord> velocity,
+		GArray<Coord> velocity,
 
 		Real horizon,
 		Real mass,
 		Real volume,
 		Real dt,
 
-		DeviceArray<Matrix> deformGradGInverseMats,
-		DeviceArray<Matrix> PiolaKirchhoffMats,
+		GArray<Matrix> deformGradGInverseMats,
+		GArray<Matrix> PiolaKirchhoffMats,
 
-		DeviceArray< Matrix > arrayR,
-		DeviceArray<int> arrayRIndex,
-		DeviceArray<Matrix> arrayDiagInverse,
-		DeviceArray<Coord> array_b)
+		GArray< Matrix > arrayR,
+		GArray<int> arrayRIndex,
+		GArray<Matrix> arrayDiagInverse,
+		GArray<Coord> array_b)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -358,15 +358,15 @@ namespace dyno
 	// one iteration of Jacobi method 
 	template <typename Coord, typename Matrix, typename NPair>
 	GPU_FUNC void JacobiStep(
-		DeviceArray<Matrix> arrayR,
-		DeviceArray<int> arrayRIndex,
-		DeviceArray<Matrix> arrayDiagInverse,
-		DeviceArray<Coord> array_b,
+		GArray<Matrix> arrayR,
+		GArray<int> arrayRIndex,
+		GArray<Matrix> arrayDiagInverse,
+		GArray<Coord> array_b,
 		
 		NeighborList<NPair> restShapes,
 
-		DeviceArray<Coord> y_pre,
-		DeviceArray<Coord> y_next) 
+		GArray<Coord> y_pre,
+		GArray<Coord> y_next) 
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_pre.size()) return;
@@ -390,13 +390,13 @@ namespace dyno
 	// cuda test function
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	GPU_FUNC void get_DeformationMat_F(
-		DeviceArray<Coord> position,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real horizon,
 		Real distance,
 		Real mu,
 		Real lambda,
-		DeviceArray<Matrix> resultDeformationMatrices)
+		GArray<Matrix> resultDeformationMatrices)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -418,7 +418,7 @@ namespace dyno
 	template <typename NPair>
 	__global__ void findNieghborNums(
 		NeighborList<NPair> restShapes,
-		DeviceArray<int> neighborNums)
+		GArray<int> neighborNums)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= neighborNums.size()) return;
@@ -430,9 +430,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	GPU_FUNC void computeDelta_vec_const(
-		DeviceArray<Coord> vec1,
+		GArray<Coord> vec1,
 		Coord vec2,
-		DeviceArray<Real> delta_norm)
+		GArray<Real> delta_norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vec1.size()) return;
@@ -442,9 +442,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	GPU_FUNC void computeDelta_vec(
-		DeviceArray<Coord> vec1,
-		DeviceArray<Coord> vec2,
-		DeviceArray<Real> delta_norm)
+		GArray<Coord> vec1,
+		GArray<Coord> vec2,
+		GArray<Real> delta_norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vec1.size()) return;
@@ -454,9 +454,9 @@ namespace dyno
 
 	template <typename Real, typename Matrix>
 	GPU_FUNC void computeDelta_mat_const(
-		DeviceArray<Matrix> mat1,
+		GArray<Matrix> mat1,
 		Matrix mat2,
-		DeviceArray<Real> delta_norm)
+		GArray<Real> delta_norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= mat1.size()) return;
@@ -466,9 +466,9 @@ namespace dyno
 
 	template <typename Real, typename Matrix>
 	GPU_FUNC void computeDelta_mat(
-		DeviceArray<Matrix> mat1,
-		DeviceArray<Matrix> mat2,
-		DeviceArray<Real> delta_norm)
+		GArray<Matrix> mat1,
+		GArray<Matrix> mat2,
+		GArray<Real> delta_norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= mat1.size()) return;

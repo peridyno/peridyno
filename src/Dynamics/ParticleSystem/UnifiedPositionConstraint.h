@@ -31,9 +31,9 @@ namespace dyno {
 		void setIterationNumber(int n) { m_maxIteration = n; }
 		void setSmoothingLength(Real len) { m_smoothingLength = len; }
 
-		void computeC(DeviceArray<Real>& c, DeviceArray<Coord>& pos, NeighborList<int>& neighbors);
+		void computeC(GArray<Real>& c, GArray<Coord>& pos, NeighborList<int>& neighbors);
 		void computeGC();
-		void computeLC(DeviceArray<Real>& lc, DeviceArray<Coord>& pos, NeighborList<int>& neighbors);
+		void computeLC(GArray<Real>& lc, GArray<Coord>& pos, NeighborList<int>& neighbors);
 
 		void setReferenceDensity(Real rho) {
 			m_referenceRho = rho;
@@ -58,11 +58,11 @@ namespace dyno {
 		Real m_lambda;
 		Real m_kappa;
 
-		DeviceArray<Real> m_c;
-		DeviceArray<Real> m_lc;
-		DeviceArray<Real> m_energy;
-		DeviceArray<Coord> m_bufPos;
-		DeviceArray<Coord> m_originPos;
+		GArray<Real> m_c;
+		GArray<Real> m_lc;
+		GArray<Real> m_energy;
+		GArray<Coord> m_bufPos;
+		GArray<Coord> m_originPos;
 	};
 
 #ifdef PRECISION_FLOAT

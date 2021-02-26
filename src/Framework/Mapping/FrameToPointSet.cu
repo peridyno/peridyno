@@ -33,7 +33,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void FrameToPointSet<TDataType>::initialize(const Rigid& rigid, DeviceArray<Coord>& points)
+	void FrameToPointSet<TDataType>::initialize(const Rigid& rigid, GArray<Coord>& points)
 	{
 		m_refRigid = rigid;
 		m_refPoints.resize(points.size());
@@ -54,10 +54,10 @@ namespace dyno
 
 	template <typename Coord, typename Rigid, typename Matrix>
 	__global__ void ApplyRigidTranform(
-		DeviceArray<Coord> points,
+		GArray<Coord> points,
 		Coord curCenter,
 		Matrix curMat,
-		DeviceArray<Coord> refPoints,
+		GArray<Coord> refPoints,
 		Coord refCenter,
 		Matrix refMat)
 	{
@@ -68,7 +68,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void FrameToPointSet<TDataType>::applyTransform(const Rigid& rigid, DeviceArray<Coord>& points)
+	void FrameToPointSet<TDataType>::applyTransform(const Rigid& rigid, GArray<Coord>& points)
 	{
 		if (points.size() != m_refPoints.size())
 		{
@@ -83,7 +83,7 @@ namespace dyno
 	template<typename TDataType>
 	bool FrameToPointSet<TDataType>::apply()
 	{
-		DeviceArray<Coord>& m_coords = m_initTo->getPoints();
+		GArray<Coord>& m_coords = m_initTo->getPoints();
 
 		uint pDims = cudaGridSize(m_coords.size(), BLOCK_SIZE);
 

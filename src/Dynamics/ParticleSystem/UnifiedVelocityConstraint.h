@@ -66,7 +66,7 @@ namespace dyno {
 
 		DeviceArrayField<Coord> m_particle_position;
 		DeviceArrayField<Coord> m_particle_velocity;
-		DeviceArray<Coord> particle_velocity_buffer;
+		GArray<Coord> particle_velocity_buffer;
 		//		DeviceArrayField<Coord> m_particle_normal;
 
 		DeviceArrayField<Attribute> m_particle_attribute;
@@ -115,43 +115,43 @@ namespace dyno {
 
 
 		//Refer to "A Nonlocal Variational Particle Framework for Incompressible Free Surface Flows" for their exact meanings
-		DeviceArray<Real> m_alpha;
-		DeviceArray<Real> Rho_alpha;
-		DeviceArray<Real> m_Aii;
-		DeviceArray<Real> m_AiiFluid;
-		DeviceArray<Real> m_AiiTotal;
+		GArray<Real> m_alpha;
+		GArray<Real> Rho_alpha;
+		GArray<Real> m_Aii;
+		GArray<Real> m_AiiFluid;
+		GArray<Real> m_AiiTotal;
 
 		//DeviceArrayField<Real> m_density_field;
-		DeviceArray<Real> m_density;
+		GArray<Real> m_density;
 		DeviceArrayField<Real> m_density_field;
 
-		DeviceArray<Real> invRadius;
+		GArray<Real> invRadius;
 
 
 		
 
 		
-		DeviceArray<Real> m_divergence;
-		DeviceArray<Real> m_gradient;
-		DeviceArray<Real> m_step;
+		GArray<Real> m_divergence;
+		GArray<Real> m_gradient;
+		GArray<Real> m_step;
 		//Indicate whether a particle is near the free surface boundary.
-		DeviceArray<bool> m_bSurface;
+		GArray<bool> m_bSurface;
 
 		//Used to solve the linear system of equations with a conjugate gradient method.
-		DeviceArray<Real> m_y;
-		DeviceArray<Real> m_r;
-		DeviceArray<Real> m_p;
+		GArray<Real> m_y;
+		GArray<Real> m_r;
+		GArray<Real> m_p;
 
 		Reduction<Real>* m_reduce;
 		Arithmetic<Real>* m_arithmetic;
 
-		DeviceArray<Coord> m_meshVel;
+		GArray<Coord> m_meshVel;
 
-		DeviceArray<Real> m_pairwise_force;
-		DeviceArray<int> m_mapping;
-		DeviceArray<int> m_index_sym;
+		GArray<Real> m_pairwise_force;
+		GArray<int> m_mapping;
+		GArray<int> m_index_sym;
 
-		DeviceArray<Coord> m_particle_velocity_buffer;
+		GArray<Coord> m_particle_velocity_buffer;
 		
 
 		std::shared_ptr<DensitySummationMesh<TDataType>> m_densitySum;

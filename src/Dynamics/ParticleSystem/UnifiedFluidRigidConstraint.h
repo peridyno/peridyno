@@ -79,10 +79,10 @@ namespace dyno {
 		std::shared_ptr<DiscreteElements<TDataType>> m_shapes;
 		std::shared_ptr<NeighborElementQuery<TDataType>>m_nbrQueryElement;
 		
-		DeviceArray<Coord> tmp_rigid_velocity;
-		DeviceArray<Coord> tmp_rigid_angular_velocity;
+		GArray<Coord> tmp_rigid_velocity;
+		GArray<Coord> tmp_rigid_angular_velocity;
 
-		DeviceArray<Real> delta_force;
+		GArray<Real> delta_force;
 
 		Real sampling_distance = 0.005f;
 		Real restDensity = 1000.0f;

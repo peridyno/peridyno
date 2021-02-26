@@ -44,10 +44,10 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_Collide(
-		DeviceArray<int> objIds,
-		DeviceArray<Coord> points,
-		DeviceArray<Coord> newPoints,
-		DeviceArray<Real> weights,
+		GArray<int> objIds,
+		GArray<Coord> points,
+		GArray<Coord> newPoints,
+		GArray<Real> weights,
 		NeighborList<int> neighbors,
 		Real radius
 	)
@@ -111,9 +111,9 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ComputeTarget(
-		DeviceArray<Coord> oldPoints,
-		DeviceArray<Coord> newPoints, 
-		DeviceArray<Real> weights)
+		GArray<Coord> oldPoints,
+		GArray<Coord> newPoints, 
+		GArray<Real> weights)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= oldPoints.size()) return;
@@ -128,9 +128,9 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ComputeVelocity(
-		DeviceArray<Coord> initPoints,
-		DeviceArray<Coord> curPoints,
-		DeviceArray<Coord> velocites,
+		GArray<Coord> initPoints,
+		GArray<Coord> curPoints,
+		GArray<Coord> velocites,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -145,8 +145,8 @@ namespace dyno
 		int start = 0;
 		for (int i = 0; i < m_collidableObjects.size(); i++)
 		{
-			DeviceArray<Coord>& points = m_collidableObjects[i]->getPositions();
-			DeviceArray<Coord>& vels = m_collidableObjects[i]->getVelocities();
+			GArray<Coord>& points = m_collidableObjects[i]->getPositions();
+			GArray<Coord>& vels = m_collidableObjects[i]->getVelocities();
 			int num = points.size();
 			cudaMemcpy(m_points.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			cudaMemcpy(m_vels.begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
@@ -168,13 +168,13 @@ namespace dyno
 		Real radius = 0.005;
 		m_nbrQuery->queryParticleNeighbors(*m_nList, m_points, radius);
 
-		DeviceArray<Coord> posBuf;
+		GArray<Coord> posBuf;
 		posBuf.resize(m_points.size());
 
-		DeviceArray<Real> weights;
+		GArray<Real> weights;
 		weights.resize(m_points.size());
 
-		DeviceArray<Coord> init_pos;
+		GArray<Coord> init_pos;
 		init_pos.resize(m_points.size());
 
 		Function1Pt::copy(init_pos, m_points);
@@ -198,8 +198,8 @@ namespace dyno
 		start = 0;
 		for (int i = 0; i < m_collidableObjects.size(); i++)
 		{
-			DeviceArray<Coord>& points = m_collidableObjects[i]->getPositions();
-			DeviceArray<Coord>& vels = m_collidableObjects[i]->getVelocities();
+			GArray<Coord>& points = m_collidableObjects[i]->getPositions();
+			GArray<Coord>& vels = m_collidableObjects[i]->getVelocities();
 			int num = points.size();
 			cudaMemcpy(points.begin(), m_points.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			cudaMemcpy(vels.begin(), m_vels.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
@@ -223,7 +223,7 @@ namespace dyno
 		std::vector<Coord> hPos;
 		for (int i = 0; i < m_collidableObjects.size(); i++)
 		{
-			DeviceArray<Coord>& points = m_collidableObjects[i]->getPositions();
+			GArray<Coord>& points = m_collidableObjects[i]->getPositions();
 			for (int j = 0; j < points.size(); j++)
 			{
 				ids.push_back(i);

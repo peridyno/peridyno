@@ -26,9 +26,9 @@ namespace dyno {
 
 	}
 
-	void print(DeviceArray<OctreeNode>& d_arr)
+	void print(GArray<OctreeNode>& d_arr)
 	{
-		HostArray<OctreeNode> h_arr;
+		CArray<OctreeNode> h_arr;
 		h_arr.resize(d_arr.size());
 
 		Function1Pt::copy(h_arr, d_arr);
@@ -278,8 +278,8 @@ namespace dyno {
 
 	template<typename Real, typename Coord>
 	__global__ void SO_ConstructAABB(
-		DeviceArray<AABB> aabb,
-		DeviceArray<Coord> pos,
+		GArray<AABB> aabb,
+		GArray<Coord> pos,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -300,7 +300,7 @@ namespace dyno {
 
 		OcKey mask = 7U << 3 * l;
 
-		HostArray<OctreeNode> h_ordered_nodes(m_post_ordered_nodes.size());
+		CArray<OctreeNode> h_ordered_nodes(m_post_ordered_nodes.size());
 		Function1Pt::copy(h_ordered_nodes, m_post_ordered_nodes);
 
 		OctreeNode node = h_ordered_nodes[h_ordered_nodes.size() - 1];
@@ -766,10 +766,10 @@ namespace dyno {
 	}
 	template<typename TDataType>
 	void SparseOctree<TDataType>::construct(
-		DeviceArray<Coord>& points,
+		GArray<Coord>& points,
 		Real radius)
 	{
-		DeviceArray<AABB> aabb;
+		GArray<AABB> aabb;
 		aabb.resize(points.size());
 
 
@@ -915,8 +915,8 @@ namespace dyno {
 
 	template<typename Coord>
 	__global__ void SO_InitCounter(
-		DeviceArray<int> counter,
-		DeviceArray<AABB> aabb,
+		GArray<int> counter,
+		GArray<AABB> aabb,
 		Coord origin,
 		Real h_min,
 		int level_max)
@@ -940,9 +940,9 @@ namespace dyno {
 
 	template<typename Coord>
 	__global__ void SO_CreateAllNodes(
-		DeviceArray<OctreeNode> nodes,
-		DeviceArray<AABB> aabb,
-		DeviceArray<int> index,
+		GArray<OctreeNode> nodes,
+		GArray<AABB> aabb,
+		GArray<int> index,
 		Coord origin,
 		Real h_min,
 		int level_max)
@@ -985,8 +985,8 @@ namespace dyno {
 
 
 	__global__ void SO_CountNonRepeatedNodes(
-		DeviceArray<int> counter,
-		DeviceArray<OctreeNode> morton)
+		GArray<int> counter,
+		GArray<OctreeNode> morton)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -1004,9 +1004,9 @@ namespace dyno {
 
 	//the size of counter is 1 more than the size of post_ordered_nodes
 	__global__ void SO_RemoveDuplicativeNodes(
-		DeviceArray<OctreeNode> non_repeated_nodes,
-		DeviceArray<OctreeNode> post_ordered_nodes,
-		DeviceArray<int> counter
+		GArray<OctreeNode> non_repeated_nodes,
+		GArray<OctreeNode> post_ordered_nodes,
+		GArray<int> counter
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1023,7 +1023,7 @@ namespace dyno {
 	}
 
 	__global__ void	SO_CalculateDataSize(
-		DeviceArray<OctreeNode> non_repeated_nodes,
+		GArray<OctreeNode> non_repeated_nodes,
 		int non_repeated_node_num,
 		int total_node_num)
 	{
@@ -1038,7 +1038,7 @@ namespace dyno {
 
 
 	__global__ void SO_GenerateLCA(
-		DeviceArray<OctreeNode> nodes,
+		GArray<OctreeNode> nodes,
 		int shift
 	)
 	{
@@ -1050,9 +1050,9 @@ namespace dyno {
 
 
 	__global__ void SO_RemoveDuplicativeInternalNodes(
-		DeviceArray<OctreeNode> nodes,
-		DeviceArray<int> counter,
-		DeviceArray<OctreeNode> nodes_cpy)
+		GArray<OctreeNode> nodes,
+		GArray<int> counter,
+		GArray<OctreeNode> nodes_cpy)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -1071,8 +1071,8 @@ namespace dyno {
 	}
 
 	__global__ void SO_GenerateAuxNodes(
-		DeviceArray<OctreeNode> aux_nodes,
-		DeviceArray<OctreeNode> post_ordered_nodes,
+		GArray<OctreeNode> aux_nodes,
+		GArray<OctreeNode> post_ordered_nodes,
 		int shift)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1092,8 +1092,8 @@ namespace dyno {
 	}
 
 	__global__ void SO_GeneratePostOrderedNodes(
-		DeviceArray<OctreeNode> post_ordered_nodes,
-		DeviceArray<OctreeNode> nodes_buffer,
+		GArray<OctreeNode> post_ordered_nodes,
+		GArray<OctreeNode> nodes_buffer,
 		int num)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1104,8 +1104,8 @@ namespace dyno {
 	}
 
 	__global__ void SO_SetupParentChildRelationship(
-		DeviceArray<OctreeNode> post_ordered_nodes,
-		DeviceArray<OctreeNode> aux_nodes)
+		GArray<OctreeNode> post_ordered_nodes,
+		GArray<OctreeNode> aux_nodes)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -1138,9 +1138,9 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	void SparseOctree<TDataType>::construct(DeviceArray<AABB>& aabb)
+	void SparseOctree<TDataType>::construct(GArray<AABB>& aabb)
 	{
-		DeviceArray<int> data_count;
+		GArray<int> data_count;
 		data_count.resize(aabb.size());
 
 
@@ -1181,7 +1181,7 @@ namespace dyno {
 
 		/*************** step 2: remove duplicative nodes ****************/
 
-		DeviceArray<int> duplicates_count;
+		GArray<int> duplicates_count;
 		duplicates_count.resize(total_node_num);
 
 		cuExecute(duplicates_count.size(),
@@ -1192,7 +1192,7 @@ namespace dyno {
 		int non_duplicative_num = thrust::reduce(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), duplicates_count.begin());
 
-		DeviceArray<OctreeNode> node_buffer;
+		GArray<OctreeNode> node_buffer;
 		node_buffer.resize(2 * non_duplicative_num - 1);
 
 		//Remove duplicative nodes, record the first location using node.setStartIndex();
@@ -1227,12 +1227,12 @@ namespace dyno {
 
 		//print(node_buffer);
 
-		DeviceArray<OctreeNode> nonRepeatNodes_cpy;
+		GArray<OctreeNode> nonRepeatNodes_cpy;
 		nonRepeatNodes_cpy.resize(node_buffer.size());
 		Function1Pt::copy(nonRepeatNodes_cpy, node_buffer);
 
 		//leaf + LCA
-		DeviceArray<int> node_count;
+		GArray<int> node_count;
 		node_count.resize(node_buffer.size());
 
 		//step 3.2: remove duplicates
@@ -1258,7 +1258,7 @@ namespace dyno {
 
 		//print(m_post_ordered_nodes);
 
-		DeviceArray<OctreeNode> aux_nodes;
+		GArray<OctreeNode> aux_nodes;
 		aux_nodes.resize(2 * m_post_ordered_nodes.size() - 1);
 
 		cuExecute(m_post_ordered_nodes.size(),

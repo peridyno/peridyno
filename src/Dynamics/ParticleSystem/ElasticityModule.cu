@@ -21,7 +21,7 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_PrecomputeShape(
-		DeviceArray<Matrix> invK,
+		GArray<Matrix> invK,
 		NeighborList<NPair> restShapes)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -140,11 +140,11 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_EnforceElasticity(
-		DeviceArray<Coord> delta_position,
-		DeviceArray<Real> weights,
-		DeviceArray<Real> bulkCoefs,
-		DeviceArray<Matrix> invK,
-		DeviceArray<Coord> position,
+		GArray<Coord> delta_position,
+		GArray<Real> weights,
+		GArray<Real> bulkCoefs,
+		GArray<Matrix> invK,
+		GArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real mu,
 		Real lambda)
@@ -271,10 +271,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdatePosition(
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> old_position,
-		DeviceArray<Coord> delta_position,
-		DeviceArray<Real> delta_weights)
+		GArray<Coord> position,
+		GArray<Coord> old_position,
+		GArray<Coord> delta_position,
+		GArray<Real> delta_weights)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -285,9 +285,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
-		DeviceArray<Coord> velArr,
-		DeviceArray<Coord> prePos,
-		DeviceArray<Coord> curPos,
+		GArray<Coord> velArr,
+		GArray<Coord> prePos,
+		GArray<Coord> curPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -361,7 +361,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	__global__ void EM_InitBulkStiffness(DeviceArray<Real> stiffness)
+	__global__ void EM_InitBulkStiffness(GArray<Real> stiffness)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= stiffness.size()) return;
@@ -441,7 +441,7 @@ namespace dyno
 	__global__ void K_UpdateRestShape(
 		NeighborList<NPair> shape,
 		NeighborList<int> nbr,
-		DeviceArray<Coord> pos)
+		GArray<Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;

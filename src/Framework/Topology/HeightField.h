@@ -34,8 +34,8 @@ namespace dyno
 		DeviceArray2D<Real>& getHeights() { return m_height; }
 
 	protected:
-// 		DeviceArray<Coord> m_coords;
-// 		DeviceArray<Coord> m_normals;
+// 		GArray<Coord> m_coords;
+// 		GArray<Coord> m_normals;
 // 		NeighborList<int> m_pointNeighbors;
 
 		Coord origin;

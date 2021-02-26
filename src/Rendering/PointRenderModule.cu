@@ -44,8 +44,8 @@ namespace dyno
 	}
 
 	__global__ void PRM_MappingColor(
-		DeviceArray<glm::vec3> color,
-		DeviceArray<Vector3f> index,
+		GArray<glm::vec3> color,
+		GArray<Vector3f> index,
 		float minIndex,
 		float maxIndex)
 	{
@@ -66,8 +66,8 @@ namespace dyno
 	}
 
 	__global__ void PRM_MappingColor(
-		DeviceArray<glm::vec3> color,
-		DeviceArray<float> index,
+		GArray<glm::vec3> color,
+		GArray<float> index,
 		float refV,
 		float minIndex,
 		float maxIndex)
@@ -104,7 +104,7 @@ namespace dyno
 			return;
 		}
 
-		DeviceArray<float3>* xyz = (DeviceArray<float3>*)&(pSet->getPoints());
+		GArray<float3>* xyz = (GArray<float3>*)&(pSet->getPoints());
 		
 		if (xyz->size() != m_pointRender->numOfPoints())
 		{
@@ -145,7 +145,7 @@ namespace dyno
 
 		
 		//if (m_colorArray)
-		//	m_pointRender->setColorArray(*(DeviceArray<float3>*)m_colorArray.get());
+		//	m_pointRender->setColorArray(*(GArray<float3>*)m_colorArray.get());
 		
 		m_pointRender->setVertexArray(*xyz);
 	}

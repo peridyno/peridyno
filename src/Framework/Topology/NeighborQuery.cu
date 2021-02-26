@@ -60,7 +60,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	NeighborQuery<TDataType>::NeighborQuery(DeviceArray<Coord>& position)
+	NeighborQuery<TDataType>::NeighborQuery(GArray<Coord>& position)
 		: ComputeModule()
 	{
 		Vector3f sceneLow = SceneGraph::getInstance().getLowerBound();
@@ -107,7 +107,7 @@ namespace dyno
 
 		int pNum = this->inPosition()->getElementCount();
 
-		HostArray<Coord> hostPos;
+		CArray<Coord> hostPos;
 		hostPos.resize(pNum);
 
 // 		Function1Pt::copy(hostPos, m_position.getValue());
@@ -176,9 +176,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void NeighborQuery<TDataType>::queryParticleNeighbors(NeighborList<int>& nbr, DeviceArray<Coord>& pos, Real radius)
+	void NeighborQuery<TDataType>::queryParticleNeighbors(NeighborList<int>& nbr, GArray<Coord>& pos, Real radius)
 	{
-		HostArray<Coord> hostPos;
+		CArray<Coord> hostPos;
 		hostPos.resize(pos.size());
 
 		Function1Pt::copy(hostPos, pos);
@@ -212,9 +212,9 @@ namespace dyno
 
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_CalNeighborSize(
-		DeviceArray<int> count,
-		DeviceArray<Coord> position_new,
-		DeviceArray<Coord> position, 
+		GArray<int> count,
+		GArray<Coord> position_new,
+		GArray<Coord> position, 
 		GridHash<TDataType> hash, 
 		Real h)
 	{
@@ -248,8 +248,8 @@ namespace dyno
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_GetNeighborElements(
 		NeighborList<int> nbr,
-		DeviceArray<Coord> position_new,
-		DeviceArray<Coord> position, 
+		GArray<Coord> position_new,
+		GArray<Coord> position, 
 		GridHash<TDataType> hash, 
 		Real h)
 	{
@@ -279,7 +279,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void NeighborQuery<TDataType>::queryNeighborSize(DeviceArray<int>& num, DeviceArray<Coord>& pos, Real h)
+	void NeighborQuery<TDataType>::queryNeighborSize(GArray<int>& num, GArray<Coord>& pos, Real h)
 	{
 		uint pDims = cudaGridSize(num.size(), BLOCK_SIZE);
 		K_CalNeighborSize << <pDims, BLOCK_SIZE >> > (num, pos, this->inPosition()->getValue(), m_hash, h);
@@ -287,14 +287,14 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void NeighborQuery<TDataType>::queryNeighborDynamic(NeighborList<int>& nbrList, DeviceArray<Coord>& pos, Real h)
+	void NeighborQuery<TDataType>::queryNeighborDynamic(NeighborList<int>& nbrList, GArray<Coord>& pos, Real h)
 	{
 		if (pos.size() <= 0)
 		{
 			return;
 		}
 
-		DeviceArray<int>& nbrNum = nbrList.getIndex();
+		GArray<int>& nbrNum = nbrList.getIndex();
 		if (nbrNum.size() != pos.size())
 			nbrList.resize(pos.size());
 
@@ -308,7 +308,7 @@ namespace dyno
 
 		if (sum > 0)
 		{
-			DeviceArray<int>& elements = nbrList.getElements();
+			GArray<int>& elements = nbrList.getElements();
 			elements.resize(sum);
 
 			uint pDims = cudaGridSize(pos.size(), BLOCK_SIZE);
@@ -320,8 +320,8 @@ namespace dyno
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_ComputeNeighborFixed(
 		NeighborList<int> neighbors, 
-		DeviceArray<Coord> position_new,
-		DeviceArray<Coord> position, 
+		GArray<Coord> position_new,
+		GArray<Coord> position, 
 		GridHash<TDataType> hash, 
 		Real h,
 		int* heapIDs,
@@ -388,7 +388,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void NeighborQuery<TDataType>::queryNeighborFixed(NeighborList<int>& nbrList, DeviceArray<Coord>& pos, Real h)
+	void NeighborQuery<TDataType>::queryNeighborFixed(NeighborList<int>& nbrList, GArray<Coord>& pos, Real h)
 	{
 		int num = pos.size();
 		int* ids;

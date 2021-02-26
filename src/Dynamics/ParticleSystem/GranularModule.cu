@@ -41,8 +41,8 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void PM_ComputeStiffness(
-		DeviceArray<Real> stiffiness,
-		DeviceArray<Real> density)
+		GArray<Real> stiffiness,
+		GArray<Real> density)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (i >= stiffiness.size()) return;

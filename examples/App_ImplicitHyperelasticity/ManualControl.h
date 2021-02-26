@@ -50,8 +50,8 @@ namespace dyno {
 		std::vector<int> m_bFixed_host;
 		std::vector<Coord> m_fixed_positions_host;
 
-		DeviceArray<int> m_bFixed;
-		DeviceArray<Coord> m_fixed_positions;
+		GArray<int> m_bFixed;
+		GArray<Coord> m_fixed_positions;
 	};
 
 #ifdef PRECISION_FLOAT

@@ -26,7 +26,7 @@ namespace dyno
 			return m_lists[id];
 		}
 
-		bool allocate(DeviceArray<int> counts);
+		bool allocate(GArray<int> counts);
 
 		void release()
 		{

@@ -43,7 +43,7 @@ public:
 
 	Array<T, deviceType>& getValue() { return *(getReference()); }
 	void setValue(std::vector<T>& vals);
-	void setValue(DeviceArray<T>& vals);
+	void setValue(GArray<T>& vals);
 
 //	void reset() override { m_data->reset(); }
 
@@ -164,7 +164,7 @@ void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
 }
 
 template<typename T, DeviceType deviceType>
-void ArrayField<T, deviceType>::setValue(DeviceArray<T>& vals)
+void ArrayField<T, deviceType>::setValue(GArray<T>& vals)
 {
 	std::shared_ptr<Array<T, deviceType>> data = getReference();
 	if (data == nullptr)

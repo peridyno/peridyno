@@ -21,8 +21,8 @@ namespace dyno
 
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_BoundaryHandling(
-		DeviceArray<Coord> posArr,
-		DeviceArray<Coord> velArr,
+		GArray<Coord> posArr,
+		GArray<Coord> velArr,
 		DistanceField3D<TDataType> df,
 		Real normalFriction,
 		Real tangentialFriction,

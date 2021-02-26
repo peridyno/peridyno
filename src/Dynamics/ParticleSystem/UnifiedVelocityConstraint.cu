@@ -85,9 +85,9 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void UVC_ComputeAlphaTmp
 	(
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength
 	)
@@ -128,9 +128,9 @@ namespace dyno
 	template <typename Real>
 	__global__ void UVC_CorrectAlphaTmp
 	(
-		DeviceArray<Real> alpha,
-		DeviceArray<Real> rho_alpha,
-		DeviceArray<Real> mass,
+		GArray<Real> alpha,
+		GArray<Real> rho_alpha,
+		GArray<Real> mass,
 		Real maxAlpha)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -153,13 +153,13 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void UVC_ComputeDivergence
 	(
-		DeviceArray<Real> divergence,
-		DeviceArray<Real> density,
-		DeviceArray<int> mapping,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> divergence,
+		GArray<Real> density,
+		GArray<int> mapping,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real restDensity,
 		Real smoothingLength,
@@ -212,10 +212,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void UVC_CompensateSourceTmp
 	(
-		DeviceArray<Real> divergence,
-		DeviceArray<Real> density,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Coord> position,
+		GArray<Real> divergence,
+		GArray<Real> density,
+		GArray<Attribute> attribute,
+		GArray<Coord> position,
 		Real restDensity,
 		Real dt
 	)
@@ -237,16 +237,16 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void UVC_ComputeGradient
 	(
-		DeviceArray<Coord> velocity_inside_iteration,
-		DeviceArray<Real> gradient,
-		DeviceArray<int> index_sym,
-		DeviceArray<Real> density,
-		DeviceArray<Real> force,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Coord> velocity_inside_iteration,
+		GArray<Real> gradient,
+		GArray<int> index_sym,
+		GArray<Real> density,
+		GArray<Real> force,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbor,
-		DeviceArray<int> mapping,
+		GArray<int> mapping,
 		Real smoothingLength,
 		Real dt,
 		Real restDensity
@@ -317,9 +317,9 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void UVC_NormalizeGradientPoint(
-		DeviceArray<Real> gradient_point,
-		DeviceArray<Real> invRadius,
-		DeviceArray<Real> density
+		GArray<Real> gradient_point,
+		GArray<Real> invRadius,
+		GArray<Real> density
 		)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -346,14 +346,14 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void UVC_ComputeGradientPoint(
-		DeviceArray<Real> alpha,
-		DeviceArray<int> index_sym,
-		DeviceArray<Real> invRadius,
-		DeviceArray<Real> gradient_edge,
-		DeviceArray<Real> gradient_point,
-		DeviceArray<Real> pressure_point,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> alpha,
+		GArray<int> index_sym,
+		GArray<Real> invRadius,
+		GArray<Real> gradient_edge,
+		GArray<Real> gradient_point,
+		GArray<Real> pressure_point,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbor,
 		Real restDensity,
 		Real airPressure,
@@ -413,11 +413,11 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void UVC_ComputeGradientPointRigid(
-		DeviceArray<Real> invRadius,
-		DeviceArray<Real> gradient_edge,
-		DeviceArray<Real> gradient_point,
-		DeviceArray<Real> density,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> invRadius,
+		GArray<Real> gradient_edge,
+		GArray<Real> gradient_point,
+		GArray<Real> density,
+		GArray<NeighborConstraints> nbc,
 		Real restDensity,
 		Real smoothingLength,
 		Real m_sampling_distance,
@@ -443,11 +443,11 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void UVC_CompensateRhoRigid(
-		DeviceArray<Real> invRadius,
-		DeviceArray<Real> gradient_edge,
-		DeviceArray<Real> gradient_point,
-		DeviceArray<Real> density,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> invRadius,
+		GArray<Real> gradient_edge,
+		GArray<Real> gradient_point,
+		GArray<Real> density,
+		GArray<NeighborConstraints> nbc,
 		Real restDensity,
 		Real smoothingLength,
 		Real m_sampling_distance,
@@ -472,16 +472,16 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void UVC_UpdateGradient
 	(
-		DeviceArray<Real> gradient_point,
-		DeviceArray<Real> gradient_edge,
-		DeviceArray<Real> force,
-		DeviceArray<Coord> vel_tmp,
-		DeviceArray<Real> alpha,
-		DeviceArray<Real> invRadius,
-		DeviceArray<Coord> position,
-		DeviceArray<Attribute> attribute,
+		GArray<Real> gradient_point,
+		GArray<Real> gradient_edge,
+		GArray<Real> force,
+		GArray<Coord> vel_tmp,
+		GArray<Real> alpha,
+		GArray<Real> invRadius,
+		GArray<Coord> position,
+		GArray<Attribute> attribute,
 		NeighborList<int> neighbor,
-		DeviceArray<int> mapping,
+		GArray<int> mapping,
 		Real smoothingLength,
 		Real dt,
 		Real restDensity,
@@ -547,8 +547,8 @@ namespace dyno
 
 	template <typename Real>
 	__global__ void UVC_InitAttrTmp(
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Real> mass
+		GArray<Attribute> attribute,
+		GArray<Real> mass
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -562,7 +562,7 @@ namespace dyno
 
 	__global__ void UVC_initialize_mapping(
 		NeighborList<int> nbr,
-		DeviceArray<int> mapping
+		GArray<int> mapping
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -578,8 +578,8 @@ namespace dyno
 
 	__global__ void UVC_initialize_sym_mapping(
 		NeighborList<int> nbr,
-		DeviceArray<int> mapping,
-		DeviceArray<int> mapping_sym
+		GArray<int> mapping,
+		GArray<int> mapping_sym
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -612,14 +612,14 @@ namespace dyno
 	
 	template <typename Real, typename Coord>
 	__global__ void UVC_UpdateVelocityParticles(
-		DeviceArray<Real> force,
-		DeviceArray<int> index_sym,
-		DeviceArray<Real> alpha,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity_old,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Real> density,
+		GArray<Real> force,
+		GArray<int> index_sym,
+		GArray<Real> alpha,
+		GArray<Coord> position,
+		GArray<Coord> velocity_old,
+		GArray<Coord> velocity,
+		GArray<Attribute> attribute,
+		GArray<Real> density,
 		NeighborList<int> neighbor,
 		Real restDensity,
 		Real smoothingLength,
@@ -667,9 +667,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void UVC_UpdateVelocityParticlesRigid(
-		DeviceArray<Real> force_interface,
-		DeviceArray<Coord> velocity,
-		DeviceArray<NeighborConstraints> nbc,
+		GArray<Real> force_interface,
+		GArray<Coord> velocity,
+		GArray<NeighborConstraints> nbc,
 		Real restDensity,
 		Real smoothingLength,
 		Real m_sampling_distance,
@@ -700,20 +700,20 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void UVC_UpdateVelocityBoundaryCorrectedTmp(
-		DeviceArray<Real> force,
-		DeviceArray<int> index_sym,
-		DeviceArray<Real> alpha,
-		DeviceArray<bool> bSurface,
-		DeviceArray<Coord> position,
-		DeviceArray<Coord> velocity,
-		DeviceArray<Coord> velocity_old,
-		DeviceArray<Coord> velocityTri,
-		DeviceArray<TopologyModule::Triangle> m_triangle_index,
-		DeviceArray<Coord> positionTri,
-		DeviceArray<Attribute> attribute,
-		DeviceArray<Real> mass,
-		DeviceArray<Real> density,
-		DeviceArray<Real> m_triangle_vertex_mass,
+		GArray<Real> force,
+		GArray<int> index_sym,
+		GArray<Real> alpha,
+		GArray<bool> bSurface,
+		GArray<Coord> position,
+		GArray<Coord> velocity,
+		GArray<Coord> velocity_old,
+		GArray<Coord> velocityTri,
+		GArray<TopologyModule::Triangle> m_triangle_index,
+		GArray<Coord> positionTri,
+		GArray<Attribute> attribute,
+		GArray<Real> mass,
+		GArray<Real> density,
+		GArray<Real> m_triangle_vertex_mass,
 		NeighborList<int> neighbor,
 		NeighborList<int> neighborTri,
 		Real restDensity,
@@ -723,7 +723,7 @@ namespace dyno
 		Real smoothingLength,
 		Real m_sampling_distance,
 		Real dt,
-		DeviceArray<int> flip)
+		GArray<int> flip)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
