@@ -2,7 +2,7 @@
 #include "Framework/ModuleTopology.h"
 #include "Topology/NeighborList.h"
 #include "Vector.h"
-#include "DynamicArray.h"
+#include "Array/DynamicArray.h"
 
 
 namespace dyno

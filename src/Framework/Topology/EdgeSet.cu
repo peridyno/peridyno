@@ -1,7 +1,7 @@
 #include "EdgeSet.h"
 #include <vector>
 #include <Utility.h>
-#include "DynamicArray.h"
+#include "Array/DynamicArray.h"
 
 #include <thrust/sort.h>
 
