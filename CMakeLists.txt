@@ -3,8 +3,8 @@
 project(peridyno LANGUAGES CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
 # define library version (update: apparently you can also do it in project()!)
-set(PERIDYNO_LIBRARY_VERSION_MAJOR 2 CACHE STRING "peridyno major version" FORCE)
-set(PERIDYNO_LIBRARY_VERSION_MINOR 2 CACHE STRING "peridyno minor version" FORCE)
+set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
+set(PERIDYNO_LIBRARY_VERSION_MINOR 1 CACHE STRING "peridyno minor version" FORCE)
 set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
