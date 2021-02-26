@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <glm/vec2.hpp>
-#include "vector_base.h"
+#include "VectorBase.h"
 
 namespace dyno {
 
@@ -72,4 +72,4 @@ namespace dyno {
 
 } //end of namespace dyno
 
-#include "vector_2d.inl"
+#include "Vector2D.inl"

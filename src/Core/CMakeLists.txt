@@ -15,10 +15,6 @@ if(${LIB_NAME} STREQUAL "Core")
     list(FILTER LIB_SRC EXCLUDE REGEX Platform.h.in)
 endif()
 
-if(${LIB_NAME} STREQUAL "IO")
-    list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/LodePNG/lodepng.cpp")
-endif()
-
 if(WIN32)
     add_library(${LIB_NAME} STATIC ${LIB_SRC})
 elseif(UNIX)
@@ -26,7 +22,7 @@ elseif(UNIX)
 endif()
 
 if(WIN32)
-    foreach(SRC IN ITEMS ${LIB_SRC})                                                #为VS工程添加filter 方便查看文件结构目录
+    foreach(SRC IN ITEMS ${LIB_SRC})
         get_filename_component(SRC_PATH "${SRC}" PATH)
         file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
         string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
@@ -34,14 +30,13 @@ if(WIN32)
     endforeach()
 endif()
 
-if(WIN32)                                                                       #only for windows compile option
-    target_compile_options(${LIB_NAME} PRIVATE -Xcompiler "/wd 4819")               #禁止编译时报告文件编码不是unicode的warning，由于cuda头文件都不是unicode。使编译报错更清晰
+if(WIN32)
+    target_compile_options(${LIB_NAME} PRIVATE -Xcompiler "/wd 4819") 
 endif()
 
-file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                 #判断当前project在根目录下的相对路径
-set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")      #为project设定folder目录
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)    #cmake 会自动延迟cuda dlink操作直到静态库被编译成动态库或者exe，
-                                                                                #但这样影响了后面其他工程对PhysLeo.lib的引用，现在还有些原因未明，暂时在编译成库之前开启dlink
+file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
@@ -68,7 +63,6 @@ install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DI
 get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
 list(APPEND LOCAL_CMAKES_NAMES "${LIB_NAME}Targets.cmake")    
 set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
-
 
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core)

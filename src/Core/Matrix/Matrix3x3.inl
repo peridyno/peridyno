@@ -1,7 +1,7 @@
 #include <cmath>
 #include <limits>
 
-#include "../Vector.h"
+#include "Vector.h"
 
 namespace dyno
 {

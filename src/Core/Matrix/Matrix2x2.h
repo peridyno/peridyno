@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/mat2x2.hpp>
-#include "square_matrix.h"
+#include "SquareMatrix.h"
 
 namespace dyno {
 
@@ -88,4 +88,4 @@ namespace dyno {
 
 }  //end of namespace dyno
 
-#include "matrix_2x2.inl"
+#include "Matrix2x2.inl"

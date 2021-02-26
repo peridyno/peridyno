@@ -17,7 +17,7 @@ namespace QtNodes
 		{
 			//initialize in node ports
 			auto inputs = m_node->getAllNodePorts();
-			int input_num = inputs.size();
+			auto input_num = inputs.size();
 
 			im_nodes.resize(input_num);
 			for (int i = 0; i < inputs.size(); i++)
@@ -42,7 +42,7 @@ namespace QtNodes
 
 		if (portType == PortType::In)
 		{
-			result = m_node->getAllNodePorts().size();
+			result = (unsigned int)m_node->getAllNodePorts().size();
 		}
 		else
 		{

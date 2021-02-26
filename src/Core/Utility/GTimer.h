@@ -1,8 +1,8 @@
 #pragma once
 #include <cuda_runtime.h>
 
-namespace dyno {
-
+namespace dyno 
+{
 	class GTimer
 	{
 	private:

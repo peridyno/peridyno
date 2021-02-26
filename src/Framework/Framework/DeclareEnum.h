@@ -63,5 +63,3 @@ private:									\
 	VarField<PEnum> var_##enum_name = VarField<PEnum>(PEnum(#enum_type, enum_value, full_name_##enum_type), std::string(#enum_name), desc, FieldType::Param, this);			\
 public:										\
 	inline VarField<PEnum>* var##enum_name() {return &var_##enum_name;}
-
-

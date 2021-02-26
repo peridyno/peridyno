@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector/vector_2d.h"
-#include "Vector/vector_3d.h"
-#include "Vector/vector_4d.h"
-#include "Vector/vector_fixed.h"
+#include "Vector/Vector2D.h"
+#include "Vector/Vector3D.h"
+#include "Vector/Vector4D.h"
+#include "Vector/VectorND.h"

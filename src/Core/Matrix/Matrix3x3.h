@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/mat3x3.hpp>
-#include "square_matrix.h"
+#include "SquareMatrix.h"
 
 namespace dyno {
 
@@ -91,4 +91,4 @@ namespace dyno {
 
 }  //end of namespace dyno
 
-#include "matrix_3x3.inl"
+#include "Matrix3x3.inl"

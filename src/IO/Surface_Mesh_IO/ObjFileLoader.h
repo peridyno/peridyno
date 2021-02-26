@@ -6,8 +6,8 @@
 namespace dyno{
 
 	typedef Vector<float, 2> TexCoord;
-	typedef FixedVector<int, 3>	Face;
-	typedef FixedVector<int, 3>	TexIndex;
+	typedef VectorND<int, 3>	Face;
+	typedef VectorND<int, 3>	TexIndex;
 
 class ObjFileLoader
 {

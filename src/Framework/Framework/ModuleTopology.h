@@ -27,18 +27,18 @@ class TopologyModule : public Module
 public:
 	typedef int PointType;
 	typedef PointType					Point;
-	typedef FixedVector<PointType, 2>	Edge;
-	typedef FixedVector<PointType, 3>	Triangle;
-	typedef FixedVector<PointType, 4>	Quad;
-	typedef FixedVector<PointType, 4>	Tetrahedron;
-	typedef FixedVector<PointType, 5>	Pyramid;
-	typedef FixedVector<PointType, 6>	Pentahedron;
-	typedef FixedVector<PointType, 8>	Hexahedron;
+	typedef VectorND<PointType, 2>	Edge;
+	typedef VectorND<PointType, 3>	Triangle;
+	typedef VectorND<PointType, 4>	Quad;
+	typedef VectorND<PointType, 4>	Tetrahedron;
+	typedef VectorND<PointType, 5>	Pyramid;
+	typedef VectorND<PointType, 6>	Pentahedron;
+	typedef VectorND<PointType, 8>	Hexahedron;
 
-	typedef FixedVector<PointType, 2>	Edg2Tri;
-	typedef FixedVector<PointType, 3>	Tri2Edg;
-	typedef FixedVector<PointType, 2>	Tri2Tet;
-	typedef FixedVector<PointType, 4>	Tet2Tri;
+	typedef VectorND<PointType, 2>	Edg2Tri;
+	typedef VectorND<PointType, 3>	Tri2Edg;
+	typedef VectorND<PointType, 2>	Tri2Tet;
+	typedef VectorND<PointType, 4>	Tet2Tri;
 	
 public:
 	TopologyModule();

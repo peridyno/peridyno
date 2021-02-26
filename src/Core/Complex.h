@@ -1,6 +1,4 @@
-#ifndef Complex_H
-#define Complex_H
-
+#pragma once
 #include "Platform.h"
 
 namespace dyno
@@ -82,5 +80,3 @@ namespace dyno
 }
 
 #include "Complex.inl"
-
-#endif // Complex_H

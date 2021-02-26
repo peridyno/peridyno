@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <set>
-#include <Vector/vector_3d.h>
+#include "Vector.h"
 #include <Framework/ModuleTopology.h>
 
 namespace dyno{

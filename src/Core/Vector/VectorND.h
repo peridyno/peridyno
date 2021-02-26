@@ -10,7 +10,7 @@
 namespace dyno
 {
 	template<class T, unsigned int N>
-	class FixedVector
+	class VectorND
 	{
 	public:
 		// type definitions
@@ -21,13 +21,13 @@ namespace dyno
 		typedef const T&       const_reference;
 		typedef unsigned int   size_type;
 
-		DYN_FUNC FixedVector()
+		DYN_FUNC VectorND()
 		{
 		}
 
 		/// Specific constructor for 1-element vectors.
 		template<int NN = N, typename std::enable_if<NN == 1, int>::type = 0>
-		DYN_FUNC explicit FixedVector(value_type r1)
+		DYN_FUNC explicit VectorND(value_type r1)
 		{
 			static_assert(N == 1, "");
 			this->data[0] = r1;
@@ -35,7 +35,7 @@ namespace dyno
 
 		/// Specific constructor for 2-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 2, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2)
+		DYN_FUNC VectorND(value_type r1, value_type r2)
 		{
 			static_assert(N == 2, "");
 			this->data[0] = r1;
@@ -44,7 +44,7 @@ namespace dyno
 
 		/// Specific constructor for 3-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 3, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3)
 		{
 			static_assert(N == 3, "");
 			this->data[0] = r1;
@@ -54,7 +54,7 @@ namespace dyno
 
 		/// Specific constructor for 4-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 4, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4)
 		{
 			static_assert(N == 4, "");
 			this->data[0] = r1;
@@ -65,7 +65,7 @@ namespace dyno
 
 		/// Specific constructor for 5-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 5, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5)
 		{
 			static_assert(N == 5, "");
 			this->data[0] = r1;
@@ -77,7 +77,7 @@ namespace dyno
 
 		/// Specific constructor for 6-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 6, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6)
 		{
 			static_assert(N == 6, "");
 			this->data[0] = r1;
@@ -90,7 +90,7 @@ namespace dyno
 
 		/// Specific constructor for 7-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 7, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7)
 		{
 			static_assert(N == 7, "");
 			this->data[0] = r1;
@@ -104,7 +104,7 @@ namespace dyno
 
 		/// Specific constructor for 8-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 8, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7, value_type r8)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7, value_type r8)
 		{
 			static_assert(N == 8, "");
 			this->data[0] = r1;
@@ -119,7 +119,7 @@ namespace dyno
 
 		/// Specific constructor for 9-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 9, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7, value_type r8, value_type r9)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7, value_type r8, value_type r9)
 		{
 			static_assert(N == 9, "");
 			this->data[0] = r1;
@@ -135,7 +135,7 @@ namespace dyno
 
 		/// Specific constructor for 10-elements vectors.
 		template<int NN = N, typename std::enable_if<NN == 10, int>::type = 0>
-		DYN_FUNC FixedVector(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7, value_type r8, value_type r9, value_type r10)
+		DYN_FUNC VectorND(value_type r1, value_type r2, value_type r3, value_type r4, value_type r5, value_type r6, value_type r7, value_type r8, value_type r9, value_type r10)
 		{
 			static_assert(N == 10, "");
 			this->data[0] = r1;
@@ -225,7 +225,7 @@ namespace dyno
 
 		// assignment with type conversion
 		template <typename T2>
-		DYN_FUNC FixedVector<T, N>& operator= (const FixedVector<T2, N>& rhs)
+		DYN_FUNC VectorND<T, N>& operator= (const VectorND<T2, N>& rhs)
 		{
 			//std::copy(rhs.begin(),rhs.end(), begin());
 			for (size_type i = 0; i < N; i++)
@@ -242,7 +242,7 @@ namespace dyno
 		}
 
 		//template<int NN = N, typename std::enable_if<NN>0,int>::type = 0>
-		CPU_FUNC inline friend std::ostream& operator << (std::ostream& out, const FixedVector<T, N>& a)
+		CPU_FUNC inline friend std::ostream& operator << (std::ostream& out, const VectorND<T, N>& a)
 		{
 			static_assert(N > 0, "Cannot create a zero size arrays");
 			for (size_type i = 0; i < N - 1; i++)
@@ -251,14 +251,14 @@ namespace dyno
 			return out;
 		}
 
-		CPU_FUNC inline friend std::istream& operator >> (std::istream& in, FixedVector<T, N>& a)
+		CPU_FUNC inline friend std::istream& operator >> (std::istream& in, VectorND<T, N>& a)
 		{
 			for (size_type i = 0; i < N; i++)
 				in >> a.elems[i];
 			return in;
 		}
 
-		DYN_FUNC inline bool operator < (const FixedVector& v) const
+		DYN_FUNC inline bool operator < (const VectorND& v) const
 		{
 			for (size_type i = 0; i < N; i++)
 			{
@@ -276,18 +276,18 @@ namespace dyno
 	};
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 2> makeFixedVector(const T& v0, const T& v1)
+	DYN_FUNC inline VectorND<T, 2> makeFixedVector(const T& v0, const T& v1)
 	{
-		FixedVector<T, 2> v;
+		VectorND<T, 2> v;
 		v[0] = v0;
 		v[1] = v1;
 		return v;
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 3> makeFixedVector(const T& v0, const T& v1, const T& v2)
+	DYN_FUNC inline VectorND<T, 3> makeFixedVector(const T& v0, const T& v1, const T& v2)
 	{
-		FixedVector<T, 3> v;
+		VectorND<T, 3> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -295,9 +295,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 4> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3)
+	DYN_FUNC inline VectorND<T, 4> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3)
 	{
-		FixedVector<T, 4> v;
+		VectorND<T, 4> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -306,9 +306,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 5> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4)
+	DYN_FUNC inline VectorND<T, 5> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4)
 	{
-		FixedVector<T, 5> v;
+		VectorND<T, 5> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -318,9 +318,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 6> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5)
+	DYN_FUNC inline VectorND<T, 6> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5)
 	{
-		FixedVector<T, 6> v;
+		VectorND<T, 6> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -331,9 +331,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 7> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6)
+	DYN_FUNC inline VectorND<T, 7> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6)
 	{
-		FixedVector<T, 7> v;
+		VectorND<T, 7> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -345,9 +345,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 8> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6, const T& v7)
+	DYN_FUNC inline VectorND<T, 8> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6, const T& v7)
 	{
-		FixedVector<T, 8> v;
+		VectorND<T, 8> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -360,9 +360,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 9> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6, const T& v7, const T& v8)
+	DYN_FUNC inline VectorND<T, 9> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6, const T& v7, const T& v8)
 	{
-		FixedVector<T, 9> v;
+		VectorND<T, 9> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
@@ -376,9 +376,9 @@ namespace dyno
 	}
 
 	template<class T>
-	DYN_FUNC inline FixedVector<T, 10> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6, const T& v7, const T& v8, const T& v9)
+	DYN_FUNC inline VectorND<T, 10> makeFixedVector(const T& v0, const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6, const T& v7, const T& v8, const T& v9)
 	{
-		FixedVector<T, 10> v;
+		VectorND<T, 10> v;
 		v[0] = v0;
 		v[1] = v1;
 		v[2] = v2;
