@@ -24,7 +24,7 @@ void VisualModule::setVisible(bool bVisible)
 
 void VisualModule::rotate(float angle, float x, float y, float z)
 {
-	m_rotation += Quaternion<float>(angle, x, y, z);
+	m_rotation += Quat<float>(angle, x, y, z);
 }
 
 void VisualModule::translate(float x, float y, float z)

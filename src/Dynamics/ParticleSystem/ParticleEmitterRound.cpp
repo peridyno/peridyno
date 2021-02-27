@@ -42,14 +42,14 @@ namespace dyno
 
 		auto rot_vec = this->varRotation()->getValue();
 
-		Quaternion<Real> quat = Quaternion<float>::Identity();
+		Quat<Real> quat = Quat<float>::Identity();
 		float x_rad = rot_vec[0] / 180.0f * M_PI;
 		float y_rad = rot_vec[1] / 180.0f * M_PI;
 		float z_rad = rot_vec[2] / 180.0f * M_PI;
 
-		quat = quat * Quaternion<Real>(x_rad, Coord(1, 0, 0));
-		quat = quat * Quaternion<Real>(y_rad, Coord(0, 1, 0));
-		quat = quat * Quaternion<Real>(z_rad, Coord(0, 0, 1));
+		quat = quat * Quat<Real>(x_rad, Coord(1, 0, 0));
+		quat = quat * Quat<Real>(y_rad, Coord(0, 1, 0));
+		quat = quat * Quat<Real>(z_rad, Coord(0, 0, 1));
 
 		auto rot_mat = quat.get3x3Matrix();
 

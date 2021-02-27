@@ -116,7 +116,7 @@ namespace dyno
 
 	__global__ void HB_SetSize(
 		GArray<int> index,
-		ListArray<int> lists)
+		ArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;
@@ -130,7 +130,7 @@ namespace dyno
 		GArray<int> shifts,
 		GArray<Coord> restPos,
 		GArray<Coord> yieldings,
-		ListArray<int> lists)
+		ArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;

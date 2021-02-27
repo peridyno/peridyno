@@ -75,7 +75,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, Array<typename TDataType::Coord> pos)
+	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, GArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -88,7 +88,7 @@ namespace dyno {
 
 
 	template<typename TDataType>
-	__global__ void K_AddTriNumber(GridHash<TDataType> hash, Array<typename TopologyModule::Triangle> tri, Array<typename TDataType::Coord> pos)
+	__global__ void K_AddTriNumber(GridHash<TDataType> hash, GArray<typename TopologyModule::Triangle> tri, GArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tri.size()) return;
@@ -184,7 +184,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	__global__ void K_ConstructHashTable(GridHash<TDataType> hash, Array<typename TDataType::Coord> pos)
+	__global__ void K_ConstructHashTable(GridHash<TDataType> hash, GArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -199,7 +199,7 @@ namespace dyno {
 
 
 	template<typename TDataType>
-	__global__ void K_AddTriElement(GridHash<TDataType> hash, Array<typename TopologyModule::Triangle> tri, Array<typename TDataType::Coord> pos)
+	__global__ void K_AddTriElement(GridHash<TDataType> hash, GArray<typename TopologyModule::Triangle> tri, GArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tri.size()) return;

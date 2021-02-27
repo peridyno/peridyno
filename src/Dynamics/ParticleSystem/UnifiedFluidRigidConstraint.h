@@ -25,7 +25,7 @@ namespace dyno {
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename Quaternion<Real> TQuaternion;
+		typedef typename Quat<Real> TQuaternion;
 
 		UnifiedFluidRigidConstraint();
 		~UnifiedFluidRigidConstraint() override;

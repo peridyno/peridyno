@@ -177,7 +177,7 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void SetupHeights(
-		DeviceArray2D<Real> height, 
+		GArray2D<Real> height, 
 		GArray<Coord> pts)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;

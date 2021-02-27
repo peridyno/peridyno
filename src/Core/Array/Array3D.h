@@ -160,12 +160,12 @@ namespace dyno {
 	}
 
 	template<typename T>
-	using HostArray3D = Array3D<T, DeviceType::CPU>;
+	using CArray3D = Array3D<T, DeviceType::CPU>;
 
 	template<typename T>
-	using DeviceArray3D = Array3D<T, DeviceType::GPU>;
+	using GArray3D = Array3D<T, DeviceType::GPU>;
 
-	typedef DeviceArray3D<float>	Grid1f;
-	typedef DeviceArray3D<float3> Grid3f;
-	typedef DeviceArray3D<bool> Grid1b;
+	typedef GArray3D<float>	Grid1f;
+	typedef GArray3D<float3> Grid3f;
+	typedef GArray3D<bool> Grid1b;
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/Node.h"
-//#include "Quaternion/quaternion.h"
 #include "Topology/Primitive3D.h"
 #include "Topology/NeighborElementQuery.h"
 
@@ -24,7 +23,7 @@ namespace dyno
 
 		typedef typename TSphere3D<Real> Sphere3D;
 		typedef typename TOrientedBox3D<Real> Box3D;
-		typedef typename Quaternion<Real> TQuaternion;
+		typedef typename Quat<Real> TQuaternion;
 
 
 		RigidBodySystem(std::string name = "RigidBodySystem");

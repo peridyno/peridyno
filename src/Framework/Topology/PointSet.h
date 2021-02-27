@@ -2,7 +2,7 @@
 #include "Framework/ModuleTopology.h"
 #include "Topology/NeighborList.h"
 #include "Vector.h"
-#include "Array/DynamicArray.h"
+#include "Array/ArrayList.h"
 
 
 namespace dyno
@@ -28,7 +28,7 @@ namespace dyno
 
 		int getPointSize() { return m_coords.size(); };
 
-		ListArray<int>* getPointNeighbors();
+		ArrayList<int>* getPointNeighbors();
 		virtual void updatePointNeighbors();
 
 		void scale(Real s);
@@ -41,7 +41,7 @@ namespace dyno
 		bool initializeImpl() override;
 
 		GArray<Coord> m_coords;
-		ListArray<int> m_pointNeighbors;
+		ArrayList<int> m_pointNeighbors;
 	};
 
 

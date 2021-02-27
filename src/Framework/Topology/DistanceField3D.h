@@ -106,7 +106,7 @@ namespace dyno {
 		 * @brief Storing the signed distance field as a 3D array.
 		 * 
 		 */
-		DeviceArray3D<Real> m_distance;
+		GArray3D<Real> m_distance;
 	};
 
 	template<typename TDataType>

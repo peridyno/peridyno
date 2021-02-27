@@ -3,7 +3,7 @@
 #include "rigid_base.h"
 #include "../Vector.h"
 #include "../Matrix.h"
-#include "Quaternion/quaternion.h"
+#include "Quat.h"
 
 namespace dyno {
 	template <typename T>
@@ -15,10 +15,10 @@ namespace dyno {
 
 		DYN_FUNC Rigid()
 			: m_p(0)
-			, m_quat(Quaternion<T>::Identity())
+			, m_quat(Quat<T>::Identity())
 		{};
 
-		DYN_FUNC Rigid(Vector<T, 3> p, Quaternion<T> quat)
+		DYN_FUNC Rigid(Vector<T, 3> p, Quat<T> quat)
 			: m_p(p)
 			, m_quat(quat)
 		{};
@@ -32,11 +32,11 @@ namespace dyno {
 			return m_quat.get3x3Matrix();
 		}
 
-		DYN_FUNC Quaternion<T> getOrientation() const { return m_quat; }
+		DYN_FUNC Quat<T> getOrientation() const { return m_quat; }
 
 	private:
 		Vector<T, 3> m_p;
-		Quaternion<T> m_quat;
+		Quat<T> m_quat;
 	};
 
 	template class Rigid<float, 3>;

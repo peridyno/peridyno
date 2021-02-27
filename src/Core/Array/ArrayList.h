@@ -5,14 +5,14 @@
 namespace dyno
 {
 	template< class  ElementType, DeviceType deviceType = DeviceType::GPU>
-	class ListArray
+	class ArrayList
 	{
 	public:
-		ListArray()
+		ArrayList()
 		{
 		};
 
-		~ListArray() {};
+		~ArrayList() {};
 
 		DYN_FUNC inline int size() { return m_lists.size(); }
 		
@@ -40,5 +40,5 @@ namespace dyno
 		Array<List<ElementType>, deviceType> m_lists;
 	};
 
-	template class ListArray<int>;
+	template class ArrayList<int>;
 }

@@ -2,13 +2,13 @@
 #include <cstdlib>
 #include <iostream>
 #include "Utility.h"
-#include "../Vector.h"
-#include "../Matrix.h"
+#include "Vector.h"
+#include "Matrix.h"
 
 namespace dyno
 {
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion() :
+	DYN_FUNC Quat<Real>::Quat() :
 		x_(0),
 		y_(0),
 		z_(0),
@@ -17,7 +17,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(Real x, Real y, Real z, Real w) :
+	DYN_FUNC Quat<Real>::Quat(Real x, Real y, Real z, Real w) :
 		x_(x),
 		y_(y),
 		z_(z),
@@ -26,7 +26,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(const Vector<Real, 3> & unit_axis, Real angle_rad)
+	DYN_FUNC Quat<Real>::Quat(const Vector<Real, 3> & unit_axis, Real angle_rad)
 	{
 		const Real a = angle_rad * (Real)0.5;
 		const Real s = glm::sin(a);
@@ -37,7 +37,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(Real angle_rad, const Vector<Real, 3> & unit_axis)
+	DYN_FUNC Quat<Real>::Quat(Real angle_rad, const Vector<Real, 3> & unit_axis)
 	{
 		Real c = glm::cos(0.5f*angle_rad);
 		Real s = glm::sin(0.5f*angle_rad);
@@ -49,7 +49,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(const Real *ptrq) :
+	DYN_FUNC Quat<Real>::Quat(const Real *ptrq) :
 		x_(ptrq[0]),
 		y_(ptrq[1]),
 		z_(ptrq[2]),
@@ -58,7 +58,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(const Quaternion<Real> & quat) :
+	DYN_FUNC Quat<Real>::Quat(const Quat<Real> & quat) :
 		x_(quat.x()),
 		y_(quat.y()),
 		z_(quat.z()),
@@ -68,7 +68,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(const Vector<Real, 3>& euler_angle)
+	DYN_FUNC Quat<Real>::Quat(const Vector<Real, 3>& euler_angle)
 	{
 		Real cos_roll = glm::cos(euler_angle[0] * Real(0.5));
 		Real sin_roll = glm::sin(euler_angle[0] * Real(0.5));
@@ -85,7 +85,7 @@ namespace dyno
 
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real> & Quaternion<Real>::operator = (const Quaternion<Real> &quat)
+	DYN_FUNC Quat<Real> & Quat<Real>::operator = (const Quat<Real> &quat)
 	{
 		w_ = quat.w();
 		x_ = quat.x();
@@ -95,7 +95,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real> & Quaternion<Real>::operator += (const Quaternion<Real> &quat)
+	DYN_FUNC Quat<Real> & Quat<Real>::operator += (const Quat<Real> &quat)
 	{
 		w_ += quat.w();
 		x_ += quat.x();
@@ -105,7 +105,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real> & Quaternion<Real>::operator -= (const Quaternion<Real> &quat)
+	DYN_FUNC Quat<Real> & Quat<Real>::operator -= (const Quat<Real> &quat)
 	{
 		w_ -= quat.w();
 		x_ -= quat.x();
@@ -115,33 +115,33 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>  Quaternion<Real>::operator - (const Quaternion<Real> &quat) const
+	DYN_FUNC Quat<Real>  Quat<Real>::operator - (const Quat<Real> &quat) const
 	{
-		return Quaternion(x_ - quat.x(), y_ - quat.y(), z_ - quat.z(), w_ - quat.w());
+		return Quat(x_ - quat.x(), y_ - quat.y(), z_ - quat.z(), w_ - quat.w());
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>  Quaternion<Real>::operator - (void) const
+	DYN_FUNC Quat<Real>  Quat<Real>::operator - (void) const
 	{
-		return Quaternion(-x_, -y_, -z_, -w_);
+		return Quat(-x_, -y_, -z_, -w_);
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>  Quaternion<Real>::operator + (const Quaternion<Real> &quat) const
+	DYN_FUNC Quat<Real>  Quat<Real>::operator + (const Quat<Real> &quat) const
 	{
-		return Quaternion(x_ + quat.x(), y_ + quat.y(), z_ + quat.z(), w_ + quat.w());
+		return Quat(x_ + quat.x(), y_ + quat.y(), z_ + quat.z(), w_ + quat.w());
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>  Quaternion<Real>::operator * (const Real& scale) const
+	DYN_FUNC Quat<Real>  Quat<Real>::operator * (const Real& scale) const
 	{
-		return Quaternion(x_ * scale, y_ * scale, z_ * scale, w_ * scale);
+		return Quat(x_ * scale, y_ * scale, z_ * scale, w_ * scale);
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real> Quaternion<Real>::operator * (const Quaternion<Real>& q) const
+	DYN_FUNC Quat<Real> Quat<Real>::operator * (const Quat<Real>& q) const
 	{
-		Quaternion result;
+		Quat result;
 		result.x_ = x_ * q.x_ - y_ * q.y_ - z_ * q.z_ - w_ * q.w_;
 		result.y_ = x_ * q.y_ + y_ * q.x_ + z_ * q.w_ - w_ * q.z_;
 		result.z_ = x_ * q.z_ + z_ * q.x_ + w_ * q.y_ - y_ * q.w_;
@@ -149,22 +149,22 @@ namespace dyno
 		return result;
 	}
 	template <typename Real>
-	DYN_FUNC Quaternion<Real> Quaternion<Real>::multiply_q(const Quaternion<Real>& q)
+	DYN_FUNC Quat<Real> Quat<Real>::multiply_q(const Quat<Real>& q)
 	{
-		return Quaternion(w_ * q.x() + x_ * q.w() + y_ * q.z() - z_ * q.y(),
+		return Quat(w_ * q.x() + x_ * q.w() + y_ * q.z() - z_ * q.y(),
 			w_ * q.y() + y_ * q.w() + z_ * q.x() - x_ * q.z(),
 			w_ * q.z() + z_ * q.w() + x_ * q.y() - y_ * q.x(),
 			w_ * q.w() - x_ * q.x() - y_ * q.y() - z_ * q.z());
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>  Quaternion<Real>::operator / (const Real& scale) const
+	DYN_FUNC Quat<Real>  Quat<Real>::operator / (const Real& scale) const
 	{
-		return Quaternion(x_ / scale, y_ / scale, z_ / scale, w_ / scale);
+		return Quat(x_ / scale, y_ / scale, z_ / scale, w_ / scale);
 	}
 
 	template <typename Real>
-	DYN_FUNC bool  Quaternion<Real>::operator == (const Quaternion<Real> &quat) const
+	DYN_FUNC bool  Quat<Real>::operator == (const Quat<Real> &quat) const
 	{
 		if (w_ == quat.w() && x_ == quat.x() && y_ == quat.y() && z_ == quat.z())
 			return true;
@@ -172,7 +172,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC bool  Quaternion<Real>::operator != (const Quaternion<Real> &quat) const
+	DYN_FUNC bool  Quat<Real>::operator != (const Quat<Real> &quat) const
 	{
 		if (*this == quat)
 			return false;
@@ -180,7 +180,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Real&  Quaternion<Real>::operator[] (unsigned int idx)
+	DYN_FUNC Real&  Quat<Real>::operator[] (unsigned int idx)
 	{
 		switch (idx)
 		{
@@ -198,7 +198,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC const Real&  Quaternion<Real>::operator[] (unsigned int idx) const
+	DYN_FUNC const Real&  Quat<Real>::operator[] (unsigned int idx) const
 	{
 		switch (idx)
 		{
@@ -216,7 +216,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Real Quaternion<Real>::norm()
+	DYN_FUNC Real Quat<Real>::norm()
 	{
 		Real result = w_ * w_ + x_ * x_ + y_ * y_ + z_ * z_;
 		result = glm::sqrt(result);
@@ -224,7 +224,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>& Quaternion<Real>::normalize()
+	DYN_FUNC Quat<Real>& Quat<Real>::normalize()
 	{
 		Real d = glm::sqrt(x_*x_ + y_ * y_ + z_ * z_ + w_ * w_);
 		if (d < 0.00001) {
@@ -241,7 +241,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC void Quaternion<Real>::set(const Vector<Real, 3>& vec3, Real scale)
+	DYN_FUNC void Quat<Real>::set(const Vector<Real, 3>& vec3, Real scale)
 	{
 		w_ = scale;
 		x_ = vec3[0];
@@ -250,7 +250,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC void Quaternion<Real>::set(Real scale, const Vector<Real, 3>& vec3)
+	DYN_FUNC void Quat<Real>::set(Real scale, const Vector<Real, 3>& vec3)
 	{
 		w_ = scale;
 		x_ = vec3[0];
@@ -259,7 +259,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC void Quaternion<Real>::set(const Vector<Real, 3>& euler_angle)
+	DYN_FUNC void Quat<Real>::set(const Vector<Real, 3>& euler_angle)
 	{
 		Real cos_roll = glm::cos(euler_angle[0] * Real(0.5));
 		Real sin_roll = glm::sin(euler_angle[0] * Real(0.5));
@@ -275,7 +275,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Vector<Real, 3> Quaternion<Real>::getEulerAngle() const
+	DYN_FUNC Vector<Real, 3> Quat<Real>::getEulerAngle() const
 	{
 		Vector<Real, 3> euler_angle;
 		euler_angle[0] = atan2(Real(2.0) * (w_ * z_ + x_ * y_), Real(1.0) - Real(2.0) * (z_ * z_ + x_ * x_));
@@ -290,31 +290,31 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Real Quaternion<Real>::getAngle() const
+	DYN_FUNC Real Quat<Real>::getAngle() const
 	{
 		return glm::acos(w_) * (Real)(2);
 	}
 
 	template <typename Real>
-	DYN_FUNC Real Quaternion<Real>::getAngle(const Quaternion<Real>& quat) const
+	DYN_FUNC Real Quat<Real>::getAngle(const Quat<Real>& quat) const
 	{
 		return glm::acos(dot(quat)) * (Real)(2);
 	}
 
 	template <typename Real>
-	DYN_FUNC Real Quaternion<Real>::dot(const Quaternion<Real> & quat) const
+	DYN_FUNC Real Quat<Real>::dot(const Quat<Real> & quat) const
 	{
 		return w_ * quat.w() + x_ * quat.x() + y_ * quat.y() + z_ * quat.z();
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real> Quaternion<Real>::getConjugate() const
+	DYN_FUNC Quat<Real> Quat<Real>::getConjugate() const
 	{
-		return Quaternion<Real>(x_, -y_, -z_, -w_);
+		return Quat<Real>(x_, -y_, -z_, -w_);
 	}
 
 	template <typename Real>
-	DYN_FUNC const Vector<Real, 3> Quaternion<Real>::rotate(const Vector<Real, 3> v) const
+	DYN_FUNC const Vector<Real, 3> Quat<Real>::rotate(const Vector<Real, 3> v) const
 	{
 		const Real vx = Real(2.0) * v[0];
 		const Real vy = Real(2.0) * v[1];
@@ -330,14 +330,14 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC void Quaternion<Real>::rotateVector(Vector<Real, 3>& v)
+	DYN_FUNC void Quat<Real>::rotateVector(Vector<Real, 3>& v)
 	{
 		Real xlen = v.norm();
 		if (xlen == 0.0f) return;
 
-		Quaternion p(0, v[0], v[1], v[2]);
-		Quaternion qbar(x_, -y_, -z_, -w_);
-		Quaternion qtmp;
+		Quat p(0, v[0], v[1], v[2]);
+		Quat qbar(x_, -y_, -z_, -w_);
+		Quat qtmp;
 		qtmp = (*this)*p;
 		qtmp = qtmp * qbar;
 		qtmp.normalize();
@@ -348,7 +348,7 @@ namespace dyno
 
 
 	template <typename Real>
-	DYN_FUNC SquareMatrix<Real, 3> Quaternion<Real>::get3x3Matrix() const
+	DYN_FUNC SquareMatrix<Real, 3> Quat<Real>::get3x3Matrix() const
 	{
 		Real x = x_, y = y_, z = z_, w = w_;
 		Real x2 = x + x, y2 = y + y, z2 = z + z;
@@ -362,7 +362,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC SquareMatrix<Real, 4> Quaternion<Real>::get4x4Matrix() const
+	DYN_FUNC SquareMatrix<Real, 4> Quat<Real>::get4x4Matrix() const
 	{
 		Real x = x_, y = y_, z = z_, w = w_;
 		Real x2 = x + x, y2 = y + y, z2 = z + z;
@@ -394,7 +394,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(const SquareMatrix<Real, 3>& matrix)
+	DYN_FUNC Quat<Real>::Quat(const SquareMatrix<Real, 3>& matrix)
 	{
 		Real tr = matrix(0, 0) + matrix(1, 1) + matrix(2, 2);
 		if (tr > 0.0)
@@ -431,7 +431,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC Quaternion<Real>::Quaternion(const SquareMatrix<Real, 4>& matrix)
+	DYN_FUNC Quat<Real>::Quat(const SquareMatrix<Real, 4>& matrix)
 	{
 		Real tr = matrix(0, 0) + matrix(1, 1) + matrix(2, 2);
 		if (tr > 0.0)
@@ -468,7 +468,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	DYN_FUNC void Quaternion<Real>::toRotationAxis(Real& rot, Vector<Real, 3>& axis) const
+	DYN_FUNC void Quat<Real>::toRotationAxis(Real& rot, Vector<Real, 3>& axis) const
 	{
 		rot = 2.0f * glm::acos(x_);
 		if (rot == 0) {

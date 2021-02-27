@@ -104,7 +104,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	ListArray<int>* PointSet<TDataType>::getPointNeighbors()
+	ArrayList<int>* PointSet<TDataType>::getPointNeighbors()
 	{
 		this->updatePointNeighbors();
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "DynamicArray.h"
+#include "ArrayList.h"
 
 #include "Utility.h"
 
@@ -25,7 +25,7 @@ namespace dyno
 	}
 
 	template< class  ElementType, DeviceType deviceType /*= DeviceType::GPU*/>
-	bool ListArray<ElementType, deviceType>::allocate(GArray<int> counts)
+	bool ArrayList<ElementType, deviceType>::allocate(GArray<int> counts)
 	{
 		if (index.size() != counts.size())
 		{

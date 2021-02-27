@@ -211,7 +211,7 @@ namespace dyno{
 	}
 
 	template <typename Real>
-	__global__ void K_Scale(DeviceArray3D<Real> distance, float s)
+	__global__ void K_Scale(GArray3D<Real> distance, float s)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -240,7 +240,7 @@ namespace dyno{
 	}
 
 	template<typename Real>
-	__global__ void K_Invert(DeviceArray3D<Real> distance)
+	__global__ void K_Invert(GArray3D<Real> distance)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -263,7 +263,7 @@ namespace dyno{
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToBox(DeviceArray3D<Real> distance, Coord start, Coord h, Coord lo, Coord hi, bool inverted)
+	__global__ void K_DistanceFieldToBox(GArray3D<Real> distance, Coord start, Coord h, Coord lo, Coord hi, bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -291,7 +291,7 @@ namespace dyno{
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToCylinder(DeviceArray3D<Real> distance, Coord start, Coord h, Coord center, Real radius, Real height, int axis, bool inverted)
+	__global__ void K_DistanceFieldToCylinder(GArray3D<Real> distance, Coord start, Coord h, Coord center, Real radius, Real height, int axis, bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -320,7 +320,7 @@ namespace dyno{
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToSphere(DeviceArray3D<Real> distance, Coord start, Coord h, Coord center, Real radius, bool inverted)
+	__global__ void K_DistanceFieldToSphere(GArray3D<Real> distance, Coord start, Coord h, Coord center, Real radius, bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);

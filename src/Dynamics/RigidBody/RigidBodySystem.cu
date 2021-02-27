@@ -9,7 +9,7 @@
 namespace dyno
 {
 	typedef typename TOrientedBox3D<Real> Box3D;
-	typedef typename Quaternion<Real> TQuaternion;
+	typedef typename Quat<Real> TQuaternion;
 
 	IMPLEMENT_CLASS_1(RigidBodySystem, TDataType)
 	template<typename TDataType>

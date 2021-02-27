@@ -94,7 +94,7 @@ namespace dyno
 		GArray<float3> vertices,
 		GArray<float3> normals,
 		GArray<float3> colors,
-		DeviceArray2D<float> heights,
+		GArray2D<float> heights,
 		float dx,
 		float dz,
 		float3 origin,

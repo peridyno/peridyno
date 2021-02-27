@@ -74,7 +74,7 @@ namespace dyno
 			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getValue();
 			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getValue();
 
-			Rigid tmp_rigid(center, Quaternion<Real>(rotation));
+			Rigid tmp_rigid(center, Quat<Real>(rotation));
 			mapping->initialize(tmp_rigid, m_positions);
 			m_mapping = mapping;
 		}
@@ -100,7 +100,7 @@ namespace dyno
 
 			auto mp = std::dynamic_pointer_cast<FrameToPointSet<TDataType>>(m_mapping);
 
-			Rigid tmp_rigid(center, Quaternion<Real>(rotation));
+			Rigid tmp_rigid(center, Quat<Real>(rotation));
 			mp->applyTransform(tmp_rigid, m_positions);
 		}
 		else
@@ -136,7 +136,7 @@ namespace dyno
 			dInitPos.resize(m_positions.size());
 
 			auto mp = std::dynamic_pointer_cast<FrameToPointSet<TDataType>>(m_mapping);
-			mp->applyTransform(Rigid(center, Quaternion<Real>(rotation)), dInitPos);
+			mp->applyTransform(Rigid(center, Quat<Real>(rotation)), dInitPos);
 
 			Real dt = getParent()->getDt();
 

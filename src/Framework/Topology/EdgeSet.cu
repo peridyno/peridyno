@@ -1,7 +1,7 @@
 #include "EdgeSet.h"
 #include <vector>
 #include <Utility.h>
-#include "Array/DynamicArray.h"
+#include "Array/ArrayList.h"
 
 #include <thrust/sort.h>
 
@@ -34,7 +34,7 @@ namespace dyno
 	}
 
 	__global__ void K_StoreIds(
-		ListArray<int> ids,
+		ArrayList<int> ids,
 		GArray<TopologyModule::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);

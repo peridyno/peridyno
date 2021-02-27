@@ -472,7 +472,7 @@ namespace dyno
 
 	__global__ void SetSize(
 		GArray<int> index,
-		ListArray<int> lists)
+		ArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;
@@ -485,7 +485,7 @@ namespace dyno
 		GArray<NPair> elements,
 		GArray<int> shifts,
 		GArray<Coord> restPos,
-		ListArray<int> lists)
+		ArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;

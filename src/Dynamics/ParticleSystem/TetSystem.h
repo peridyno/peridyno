@@ -2,7 +2,7 @@
 //#include "Framework/Node.h"
 #include "ParticleSystem/ParticleSystem.h"
 //#include "PointRenderModule.h"
-#include "Quaternion/quaternion.h"
+#include "Quat.h"
 
 namespace dyno
 {
@@ -70,7 +70,7 @@ namespace dyno
 
 		DEF_EMPTY_CURRENT_ARRAY(Orientation, Matrix, DeviceType::GPU, "");
 
-		Quaternion<Real> m_quaternion;
+		Quat<Real> m_quaternion;
 		
 		std::shared_ptr<TetrahedronSet<TDataType>> derivedTopology() {
 			return m_tethedrons;

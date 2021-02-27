@@ -1,13 +1,13 @@
 #pragma once
 #include <vector>
-#include "Quaternion/quaternion.h"
+#include "Quat.h"
 #include "Vector.h"
 
 #define M_PI 3.14159265358979323846
 
 namespace dyno
 {
-	typedef Quaternion<float> Quat1f;
+	typedef Quat<float> Quat1f;
 
 	class Camera {
 

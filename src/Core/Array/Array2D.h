@@ -128,8 +128,8 @@ namespace dyno {
 	}
 
 	template<typename T>
-	using HostArray2D = Array2D<T, DeviceType::CPU>;
+	using CArray2D = Array2D<T, DeviceType::CPU>;
 
 	template<typename T>
-	using DeviceArray2D = Array2D<T, DeviceType::GPU>;
+	using GArray2D = Array2D<T, DeviceType::GPU>;
 }

@@ -3,7 +3,7 @@
 #include "Array/Array2D.h"
 #include "Array/Array3D.h"
 /*
-*  This file implements all one-point functions on device array types (GArray, DeviceArray2D, DeviceArray3D, etc.)
+*  This file implements all one-point functions on device array types (GArray, GArray2D, GArray3D, etc.)
 */
 namespace dyno
 {

@@ -31,7 +31,7 @@ namespace dyno
 		Coord getOrigin() { return origin; }
 		
 
-		DeviceArray2D<Real>& getHeights() { return m_height; }
+		GArray2D<Real>& getHeights() { return m_height; }
 
 	protected:
 // 		GArray<Coord> m_coords;
@@ -43,7 +43,7 @@ namespace dyno
 		Real m_dx;
 		Real m_dz;
 
-		DeviceArray2D<Real> m_height;
+		GArray2D<Real> m_height;
 	};
 
 

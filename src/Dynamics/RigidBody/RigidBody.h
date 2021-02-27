@@ -1,6 +1,6 @@
 #pragma once
 #include "Framework/Node.h"
-#include "Quaternion/quaternion.h"
+#include "Quat.h"
 
 namespace dyno
 {
@@ -53,7 +53,7 @@ namespace dyno
 		VarField<Matrix> m_rotation;
 
 
-		Quaternion<Real> m_quaternion;
+		Quat<Real> m_quaternion;
 
 		std::shared_ptr<Node> m_surfaceNode;
 		std::shared_ptr<Node> m_collisionNode;

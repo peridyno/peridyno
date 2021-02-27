@@ -16,7 +16,7 @@
 #pragma once
 #include "Framework/Module.h"
 #include "Vector.h"
-#include "Quaternion/quaternion.h"
+#include "Quat.h"
 #include "FieldVar.h"
 
 namespace dyno
@@ -43,7 +43,7 @@ public:
 protected:
 	VarField<bool> m_visible;
 
-	Quaternion<float> m_rotation;
+	Quat<float> m_rotation;
 	Vector3f m_scale;
 	Vector3f m_translation;
 };

@@ -13,7 +13,7 @@ namespace dyno
 	template<typename TDataType>
 	RigidBody<TDataType>::RigidBody(std::string name)
 		: Node(name)
-		, m_quaternion(Quaternion<Real>(Matrix::identityMatrix()))
+		, m_quaternion(Quat<Real>(Matrix::identityMatrix()))
 	{
 		attachField(&m_mass, MechanicalState::mass(), "Total mass of the rigid body!", false);
 		attachField(&m_center, MechanicalState::position(), "Center of the rigid body!", false);
@@ -111,7 +111,7 @@ namespace dyno
 		angularVel += dt*(invMass*forceMoment);
 		transVel += dt*force / mass + dt*Coord(0.0f, -9.8f, 0.0f);
 
-		m_quaternion = m_quaternion + (0.5f * dt) * Quaternion<Real>(0, angularVel[0], angularVel[1], angularVel[2])*(m_quaternion);
+		m_quaternion = m_quaternion + (0.5f * dt) * Quat<Real>(0, angularVel[0], angularVel[1], angularVel[2])*(m_quaternion);
 
 		m_quaternion.normalize();
 		center += transVel*dt;
