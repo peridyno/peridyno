@@ -12,10 +12,16 @@ namespace dyno {
 	class Array
 	{
 	public:
-		Array()	{};
-		Array(int num) {};
+		Array();
+		Array(int num);
 
 		~Array() {};
+
+		void resize(size_t n);
+		void reset();
+		void release();
+
+		DeviceType	deviceType();
 	};
 
 	/*!
@@ -60,14 +66,14 @@ namespace dyno {
 
 		DYN_FUNC inline T*	begin() { return m_data; }
 
-		DeviceType	getDeviceType() { return DeviceType::GPU; }
+		DeviceType	deviceType() { return DeviceType::GPU; }
 
-		DYN_FUNC inline T& operator [] (unsigned int id)
+		GPU_FUNC inline T& operator [] (unsigned int id)
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline T operator [] (unsigned int id) const
+		GPU_FUNC inline T operator [] (unsigned int id) const
 		{
 			return m_data[id];
 		}
@@ -92,24 +98,18 @@ namespace dyno {
 	{
 	public:
 		Array()
-			: m_data(NULL)
-			, m_totalNum(0)
 		{
-			m_alloc = std::make_shared<DefaultMemoryManager<DeviceType::CPU>>();
 		};
 
 		Array(int num)
-			: m_data(NULL)
-			, m_totalNum(num)
 		{
-			m_alloc = std::make_shared<DefaultMemoryManager<DeviceType::CPU>>();
-			allocMemory();
+			m_data.resize(num);
 		}
 
 		/*!
 		*	\brief	Should not release data here, call Release() explicitly.
 		*/
-		~Array() {};
+		~Array() { release(); };
 
 		void resize(size_t n);
 
@@ -118,37 +118,31 @@ namespace dyno {
 		*/
 		void reset();
 
-		/*!
-		*	\brief	Free allocated memory.	Should be called before the object is deleted.
-		*/
 		void release();
 
-		DYN_FUNC inline T*		begin() { return m_data; }
+		inline T*	begin() { return m_data.size() == 0 ? nullptr : &m_data[0]; }
 
-		DeviceType	getDeviceType() { return DeviceType::CPU; }
+		DeviceType	deviceType() { return DeviceType::CPU; }
 
-		DYN_FUNC inline T& operator [] (unsigned int id)
+		inline T& operator [] (unsigned int id)
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline T operator [] (unsigned int id) const
+		inline T operator [] (unsigned int id) const
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline size_t size() { return m_totalNum; }
-		DYN_FUNC inline bool isCPU() { return true; }
-		DYN_FUNC inline bool isGPU() { return false; }
-		DYN_FUNC inline bool isEmpty() { return m_data == NULL; }
+		inline size_t size() { return m_data.size(); }
+		inline bool isCPU() { return true; }
+		inline bool isGPU() { return false; }
+		inline bool isEmpty() { return m_data.empty(); }
 
-	protected:
-		void allocMemory();
+		inline void push_back(T ele) { m_data.push_back(ele); }
 
 	private:
-		T* m_data;
-		size_t m_totalNum;
-		std::shared_ptr<MemoryManager<DeviceType::CPU>> m_alloc;
+		std::vector<T> m_data;
 	};
 
 

@@ -4,7 +4,6 @@
 #include "Vector.h"
 #include "Array/ArrayList.h"
 
-
 namespace dyno
 {
 	template<typename TDataType>
@@ -28,7 +27,7 @@ namespace dyno
 
 		int getPointSize() { return m_coords.size(); };
 
-		ArrayList<int>* getPointNeighbors();
+		GArrayList<int>* getPointNeighbors();
 		virtual void updatePointNeighbors();
 
 		void scale(Real s);
@@ -41,7 +40,7 @@ namespace dyno
 		bool initializeImpl() override;
 
 		GArray<Coord> m_coords;
-		ArrayList<int> m_pointNeighbors;
+		GArrayList<int> m_pointNeighbors;
 	};
 
 

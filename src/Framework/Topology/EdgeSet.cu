@@ -34,7 +34,7 @@ namespace dyno
 	}
 
 	__global__ void K_StoreIds(
-		ArrayList<int> ids,
+		GArrayList<int> ids,
 		GArray<TopologyModule::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -64,7 +64,7 @@ namespace dyno
 			counts,
 			m_edges);
 
-		m_pointNeighbors.allocate(counts);
+		m_pointNeighbors.resize(counts);
 
 		cuExecute(m_edges.size(),
 			K_StoreIds,

@@ -116,7 +116,7 @@ namespace dyno
 
 	__global__ void HB_SetSize(
 		GArray<int> index,
-		ArrayList<int> lists)
+		GArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;
@@ -130,7 +130,7 @@ namespace dyno
 		GArray<int> shifts,
 		GArray<Coord> restPos,
 		GArray<Coord> yieldings,
-		ArrayList<int> lists)
+		GArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;
@@ -532,26 +532,26 @@ namespace dyno
 		h_tets.release();
 	}
 
-	void print(GArray<bool>& bArray)
-	{
-		CArray<bool> h_bool;
-		h_bool.resize(bArray.size());
-		Function1Pt::copy(h_bool, bArray);
-
-		for (size_t i = 0; i < h_bool.size(); i++)
-		{
-			if (h_bool[i])
-			{
-				printf("Array %d: true \n", i);
-			}
-			else
-			{
-				printf("Array %d: false \n", i);
-			}
-		}
-
-		h_bool.release();
-	}
+// 	void print(GArray<bool>& bArray)
+// 	{
+// 		CArray<bool> h_bool;
+// 		h_bool.resize(bArray.size());
+// 		Function1Pt::copy(h_bool, bArray);
+// 
+// 		for (size_t i = 0; i < h_bool.size(); i++)
+// 		{
+// 			if (h_bool[i])
+// 			{
+// 				printf("Array %d: true \n", i);
+// 			}
+// 			else
+// 			{
+// 				printf("Array %d: false \n", i);
+// 			}
+// 		}
+// 
+// 		h_bool.release();
+// 	}
 
 	void print(GArray<int>& intArray)
 	{
