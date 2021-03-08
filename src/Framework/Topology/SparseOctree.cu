@@ -50,7 +50,7 @@ namespace dyno {
 
 			printf("\n");
 		}
-		h_arr.release();
+		h_arr.clear();
 
 		printf("\n\n");
 	}
@@ -258,8 +258,8 @@ namespace dyno {
 	template<typename TDataType>
 	void SparseOctree<TDataType>::release()
 	{
-		m_all_nodes.release();
-		m_post_ordered_nodes.release();
+		m_all_nodes.clear();
+		m_post_ordered_nodes.clear();
 	}
 
 	template<typename TDataType>
@@ -321,7 +321,7 @@ namespace dyno {
 			}
 		}
 
-		h_ordered_nodes.release();
+		h_ordered_nodes.clear();
 
 		if (key == node.key())
 		{
@@ -782,7 +782,7 @@ namespace dyno {
 		this->construct(aabb);
 
 
-		aabb.release();
+		aabb.clear();
 	}
 
 
@@ -1281,12 +1281,12 @@ namespace dyno {
 		//print(m_post_ordered_nodes);
 
 
-		node_buffer.release();
-		data_count.release();
-		node_count.release();
-		nonRepeatNodes_cpy.release();
-		aux_nodes.release();
-		duplicates_count.release();
+		node_buffer.clear();
+		data_count.clear();
+		node_count.clear();
+		nonRepeatNodes_cpy.clear();
+		aux_nodes.clear();
+		duplicates_count.clear();
 		//thrust::sort_by_key(thrust::device, m_key.getDataPtr(), m_key.getDataPtr() + m_key.size(), m_morton.getDataPtr());
 	}
 

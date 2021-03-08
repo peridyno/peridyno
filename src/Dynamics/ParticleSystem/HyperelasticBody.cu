@@ -150,7 +150,7 @@ namespace dyno
 			InitRotation,
 			this->currentVertexRotation()->getValue());
 
-		host_attribute.release();
+		host_attribute.clear();
 
 		this->updateVolume();
 		this->updateRestShape();

@@ -128,9 +128,9 @@ namespace dyno
 		Function1Pt::copy(m_ver2Tri.getIndex(), shift);
 		Function1Pt::copy(m_ver2Tri.getElements(), elements);
 
-		counter.release();
-		shift.release();
-		elements.release();
+		counter.clear();
+		shift.clear();
+		elements.clear();
 
 		return m_ver2Tri;
 	}
@@ -242,9 +242,9 @@ namespace dyno
 			counter,
 			triIds);
 
-		counter.release();
-		triIds.release();
-		keys.release();
+		counter.clear();
+		triIds.clear();
+		keys.clear();
 	}
 
 	template<typename TDataType>

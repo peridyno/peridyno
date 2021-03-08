@@ -10,7 +10,7 @@ namespace dyno
 	namespace Function1Pt
 	{ 
 		template<typename T, DeviceType dType1, DeviceType dType2>
-		void copy(Array<T, dType1>& arr1, Array<T, dType2>& arr2)
+		void copy(Array<T, dType1>& arr1, const Array<T, dType2>& arr2)
 		{
 			assert(arr1.size() == arr2.size());
 			size_t totalNum = arr1.size();
@@ -41,23 +41,23 @@ namespace dyno
 		template<typename T, DeviceType dType1, DeviceType dType2>
 		void copy(Array2D<T, dType1>& g1, Array2D<T, dType1>& g2)
 		{
-			assert(g1.Size() == g2.Size() && g1.Nx()() == g2.Nx() && g2.Ny() == g2.Ny());
-			size_t totalNum = g1.Size();
-			if (g1.IsGPU() && g2.IsGPU())	(cudaMemcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T), cudaMemcpyDeviceToDevice));
-			else if (g1.IsCPU() && g2.IsGPU())	(cudaMemcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T), cudaMemcpyDeviceToHost));
-			else if (g1.IsGPU() && g2.IsCPU())	(cudaMemcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T), cudaMemcpyHostToDevice));
-			else if (g1.IsCPU() && g2.IsCPU())	memcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T));
+			assert(g1.size() == g2.size() && g1.nx()() == g2.nx() && g2.ny() == g2.ny());
+			size_t totalNum = g1.size();
+			if (g1.isGPU() && g2.isGPU())	(cudaMemcpy(g1.getDataPtr(), g2.data(), totalNum * sizeof(T), cudaMemcpyDeviceToDevice));
+			else if (g1.isCPU() && g2.isGPU())	(cudaMemcpy(g1.data(), g2.data(), totalNum * sizeof(T), cudaMemcpyDeviceToHost));
+			else if (g1.isGPU() && g2.isCPU())	(cudaMemcpy(g1.data(), g2.data(), totalNum * sizeof(T), cudaMemcpyHostToDevice));
+			else if (g1.isCPU() && g2.isCPU())	memcpy(g1.data(), g2.data(), totalNum * sizeof(T));
 		}
 
 		template<typename T, DeviceType dType1, DeviceType dType2>
 		void copy(Array3D<T, dType1>& g1, Array3D<T, dType1>& g2)
 		{
-			assert(g1.Size() == g2.Size() && g1.Nx()() == g2.Nx() && g2.Ny() == g2.Ny() && g1.Nz() == g2.Nz());
-			size_t totalNum = g1.Size();
-			if (g1.IsGPU() && g2.IsGPU())	(cudaMemcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T), cudaMemcpyDeviceToDevice));
-			else if (g1.IsCPU() && g2.IsGPU())	(cudaMemcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T), cudaMemcpyDeviceToHost));
-			else if (g1.IsGPU() && g2.IsCPU())	(cudaMemcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T), cudaMemcpyHostToDevice));
-			else if (g1.IsCPU() && g2.IsCPU())	memcpy(g1.GetDataPtr(), g2.GetDataPtr(), totalNum * sizeof(T));
+			assert(g1.size() == g2.size() && g1.nx()() == g2.nx() && g2.ny() == g2.ny() && g1.nz() == g2.nz());
+			size_t totalNum = g1.size();
+			if (g1.isGPU() && g2.isGPU())	(cudaMemcpy(g1.data(), g2.data(), totalNum * sizeof(T), cudaMemcpyDeviceToDevice));
+			else if (g1.isCPU() && g2.isGPU())	(cudaMemcpy(g1.data(), g2.data(), totalNum * sizeof(T), cudaMemcpyDeviceToHost));
+			else if (g1.isGPU() && g2.isCPU())	(cudaMemcpy(g1.data(), g2.data(), totalNum * sizeof(T), cudaMemcpyHostToDevice));
+			else if (g1.isCPU() && g2.isCPU())	memcpy(g1.data(), g2.data(), totalNum * sizeof(T));
 		}
 
 		template<typename T1, typename T2>

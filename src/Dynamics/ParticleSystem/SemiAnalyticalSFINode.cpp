@@ -259,7 +259,7 @@ namespace dyno
 			//printf("%d\n", start_vertex);
 			cudaMemcpy(m_triangle_index.getValue().begin() + start_triangle, host_triangle.begin(), num_triangle * sizeof(Triangle), cudaMemcpyHostToDevice);
 		
-			host_triangle.release();
+			host_triangle.clear();
 
 			start_vertex += num_vertex;
 			start_triangle += num_triangle;

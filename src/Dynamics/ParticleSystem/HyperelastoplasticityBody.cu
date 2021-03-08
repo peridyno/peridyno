@@ -490,8 +490,8 @@ namespace dyno
 			}
 		}
 
-		index.release();
-		elements.release();
+		index.clear();
+		elements.clear();
 	}
 
 	template<typename NPair>
@@ -514,8 +514,8 @@ namespace dyno
 			}
 		}
 
-		index.release();
-		elements.release();
+		index.clear();
+		elements.clear();
 	}
 
 	void print(GArray<TopologyModule::Tetrahedron>& tets)
@@ -529,7 +529,7 @@ namespace dyno
 			printf("Tet %d: %d %d %d %d \n", i, h_tets[i][0], h_tets[i][1], h_tets[i][2], h_tets[i][3]);
 		}
 
-		h_tets.release();
+		h_tets.clear();
 	}
 
 // 	void print(GArray<bool>& bArray)
@@ -564,7 +564,7 @@ namespace dyno
 			printf("Array %d: %d \n", i, h_intArray[i]);
 		}
 
-		h_intArray.release();
+		h_intArray.clear();
 	}
 
 
@@ -711,7 +711,7 @@ namespace dyno
 		Reduction<int> reduce;
 		int maxNum = reduce.maximum(neiTetNum.begin(), neiTetNum.size());
 
-		neiTetNum.release();
+		neiTetNum.clear();
 
 		uint pDims = cudaGridSize(verSize, 16);
 		uint sharedSize = maxNum * 16 *(sizeof(Pair<int, int>) + sizeof(int));
@@ -872,23 +872,23 @@ namespace dyno
 		this->updateRestShape();
 		this->updateVolume();
 
-		fractureTag_old.release();
-		tri2Tet_old.release();
-		tri2Tet_new.release();
-		keys.release();
-		flags.release();
+		fractureTag_old.clear();
+		tri2Tet_old.clear();
+		tri2Tet_new.clear();
+		keys.clear();
+		flags.clear();
 
 		pairList.release();
-		counter.release();
-		shift.release();
+		counter.clear();
+		shift.clear();
 
-		position_new.release();
-		velocity_new.release();
-		rest_position_new.release();
-		attribute_new.release();
-		yielding_new.release();
-		tets_old.release();
-		rotation_new.release();
+		position_new.clear();
+		velocity_new.clear();
+		rest_position_new.clear();
+		attribute_new.clear();
+		yielding_new.clear();
+		tets_old.clear();
+		rotation_new.clear();
 	}
 
 	template<typename Coord>

@@ -6,7 +6,7 @@ set(GLEW_HEADER
 set(GLEW_SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glew.c)
 
-add_library(glew SHARED ${GLEW_HEADER} ${GLEW_SOURCE})
+add_library(glew STATIC ${GLEW_HEADER} ${GLEW_SOURCE})
 set_target_properties(glew PROPERTIES
         OUTPUT_NAME "glew-1.10.0")
 

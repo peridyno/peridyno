@@ -194,9 +194,9 @@ namespace dyno
 		Function1Pt::copy(m_ver2Tet.getIndex(), shift);
 		Function1Pt::copy(m_ver2Tet.getElements(), elements);
 
-		counter.release();
-		shift.release();
-		elements.release();
+		counter.clear();
+		shift.clear();
+		elements.clear();
 
 		return m_ver2Tet;
 	}
@@ -297,7 +297,7 @@ namespace dyno
 			printf("%d: %d %d %d \n", i, h_keys[i][0], h_keys[i][1], h_keys[i][2]);
 		}
 
-		h_keys.release();
+		h_keys.clear();
 	}
 
 	void printCount(GArray<int> keys, int maxLength) {
@@ -311,7 +311,7 @@ namespace dyno
 			printf("%d: %d \n", i, h_keys[i]);
 		}
 
-		h_keys.release();
+		h_keys.clear();
 	}
 
 	template<typename TDataType>
@@ -356,9 +356,9 @@ namespace dyno
 			counter,
 			tetIds);
 
-		counter.release();
-		tetIds.release();
-		keys.release();
+		counter.clear();
+		tetIds.clear();
+		keys.clear();
 
 		this->updateEdges();
 	}

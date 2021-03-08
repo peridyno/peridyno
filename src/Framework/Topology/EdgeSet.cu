@@ -71,7 +71,7 @@ namespace dyno
 			m_pointNeighbors,
 			m_edges);
 
-		counts.release();
+		counts.clear();
 	}
 
 	template<typename TDataType>

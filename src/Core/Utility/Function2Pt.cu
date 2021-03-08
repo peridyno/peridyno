@@ -7,7 +7,7 @@ namespace dyno
 	namespace Function2Pt
 	{
 		template <typename T, typename Function>
-		__global__ void KerTwoPointFunc(T *out, T* a1, T* a2, int num, Function func)
+		__global__ void KerTwoPointFunc(T *out, T* a1, T* a2, size_t num, Function func)
 		{
 			int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 			if (pId >= num) return;
@@ -16,7 +16,7 @@ namespace dyno
 		}
 
 		template <typename T, typename Function>
-		__global__ void KerTwoPointFunc(T *out, T* a2, int num, Function func)
+		__global__ void KerTwoPointFunc(T *out, T* a2, size_t num, Function func)
 		{
 			int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 			if (pId >= num) return;
@@ -25,7 +25,7 @@ namespace dyno
 		}
 
 		template <typename T>
-		__global__ void KerSaxpy(T *zArr, T* xArr, T* yArr, T alpha, int num)
+		__global__ void KerSaxpy(T *zArr, T* xArr, T* yArr, T alpha, size_t num)
 		{
 			int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 			if (pId >= num) return;

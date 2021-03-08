@@ -37,18 +37,17 @@ namespace dyno {
 		*/
 		~Array3D() { };
 
-		void Resize(int nx, int ny, int nz);
+		void resize(int nx, int ny, int nz);
 
-		void Reset();
+		void reset();
 
-		void Release();
+		void clear();
 
-		inline T*		GetDataPtr() { return m_data; }
-		void			SetDataPtr(T* _data) { m_data = _data; }
+		inline T*		data() { return m_data; }
 
-		DYN_FUNC inline int Nx() { return m_nx; }
-		DYN_FUNC inline int Ny() { return m_ny; }
-		DYN_FUNC inline int Nz() { return m_nz; }
+		DYN_FUNC inline int nx() { return m_nx; }
+		DYN_FUNC inline int ny() { return m_ny; }
+		DYN_FUNC inline int nz() { return m_nz; }
 		
 		DYN_FUNC inline T operator () (const int i, const int j, const int k) const
 		{
@@ -60,7 +59,7 @@ namespace dyno {
 			return m_data[i + j*m_nx + k*m_nxy];
 		}
 
-		DYN_FUNC inline int Index(const int i, const int j, const int k)
+		DYN_FUNC inline int index(const int i, const int j, const int k)
 		{
 			return i + j*m_nx + k*m_nxy;
 		}
@@ -75,9 +74,9 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		DYN_FUNC inline int Size() { return m_totalNum; }
-		DYN_FUNC inline bool IsCPU() { return deviceType == DeviceType::CPU; }
-		DYN_FUNC inline bool IsGPU() { return deviceType == DeviceType::GPU; }
+		DYN_FUNC inline int size() const { return m_totalNum; }
+		DYN_FUNC inline bool isCPU() const { return deviceType == DeviceType::CPU; }
+		DYN_FUNC inline bool isGPU() const { return deviceType == DeviceType::GPU; }
 
 	public:
 		void AllocMemory();
@@ -92,15 +91,15 @@ namespace dyno {
 	};
 
 	template<typename T, DeviceType deviceType>
-	void Array3D<T, deviceType>::Resize(int nx, int ny, int nz)
+	void Array3D<T, deviceType>::resize(int nx, int ny, int nz)
 	{
-		if (NULL != m_data) Release();
+		if (NULL != m_data) clear();
 		m_nx = nx;	m_ny = ny;	m_nz = nz;	m_nxy = m_nx*m_ny;	m_totalNum = m_nxy*m_nz;
 		AllocMemory();
 	}
 
 	template<typename T, DeviceType deviceType>
-	void Array3D<T, deviceType>::Reset()
+	void Array3D<T, deviceType>::reset()
 	{
 		switch (deviceType)
 		{
@@ -116,7 +115,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void Array3D<T, deviceType>::Release()
+	void Array3D<T, deviceType>::clear()
 	{
 		if (m_data != NULL)
 		{
@@ -156,7 +155,7 @@ namespace dyno {
 			break;
 		}
 
-		Reset();
+		reset();
 	}
 
 	template<typename T>

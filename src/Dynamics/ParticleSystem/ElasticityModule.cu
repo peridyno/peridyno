@@ -325,11 +325,11 @@ namespace dyno
 	template<typename TDataType>
 	ElasticityModule<TDataType>::~ElasticityModule()
 	{
-		m_weights.release();
-		m_displacement.release();
-		m_invK.release();
-		m_F.release();
-		m_position_old.release();
+		m_weights.clear();
+		m_displacement.clear();
+		m_invK.clear();
+		m_F.clear();
+		m_position_old.clear();
 	}
 
 	template<typename TDataType>

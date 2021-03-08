@@ -1853,8 +1853,8 @@ namespace dyno
 				delta_sum = delta_sum / particle_num;
 				delta_sum = sqrt(delta_sum);
 
-				y_current_host.release();
-				y_next_host.release();
+				y_current_host.clear();
+				y_next_host.clear();
 
 				if (delta_sum <= this->var_convergencyEpsilonField.getValue()) { // converge
 					iterCount++;

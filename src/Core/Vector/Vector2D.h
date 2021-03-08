@@ -60,6 +60,12 @@ namespace dyno {
 
 		DYN_FUNC T* getDataPtr() { return &data_.x; }
 
+		friend std::ostream& operator<<(std::ostream &out, const Vector<T, 2>& vec)
+		{
+			out << "(" << vec[0] << ", " << vec[1] << ")";
+			return out;
+		}
+
 	public:
 		glm::tvec2<T> data_;
 	};

@@ -29,6 +29,12 @@ namespace dyno
 			return m_startLoc + m_size;
 		}
 
+		DYN_FUNC void assign(T* beg, int num, int buffer_size) {
+			m_startLoc = beg;
+			m_size = num;
+			m_maxSize = buffer_size;
+		}
+
 		DYN_FUNC void clear();
 
 		DYN_FUNC int size();

@@ -22,8 +22,8 @@ namespace dyno
 	template<typename TDataType>
 	FixedPoints<TDataType>::~FixedPoints()
 	{
-		m_bFixed.release();
-		m_fixed_positions.release();
+		m_bFixed.clear();
+		m_fixed_positions.clear();
 	}
 
 

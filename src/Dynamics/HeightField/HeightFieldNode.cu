@@ -183,9 +183,9 @@ namespace dyno
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
 
-		if (i < height.Nx() && j < height.Ny())
+		if (i < height.nx() && j < height.ny())
 		{
-			int id = i + j * (height.Nx() + 1);
+			int id = i + j * (height.nx() + 1);
 
 			height(i, j) = pts[id][1];
 		}
@@ -202,7 +202,7 @@ namespace dyno
 			m_height_field->setSpace(0.005, 0.005);
 			auto& heights = m_height_field->getHeights();
 
-			if (nx != heights.Nx() || nz != heights.Ny())
+			if (nx != heights.nx() || nz != heights.ny())
 			{
 				heights.resize(nx, nz);
 			}

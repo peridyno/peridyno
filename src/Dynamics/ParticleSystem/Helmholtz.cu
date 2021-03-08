@@ -249,8 +249,8 @@ namespace dyno
 	template<typename TDataType>
 	Helmholtz<TDataType>::~Helmholtz()
 	{
-		m_bufPos.release();
-		m_originPos.release();
+		m_bufPos.clear();
+		m_originPos.clear();
 	}
 
 	template<typename TDataType>

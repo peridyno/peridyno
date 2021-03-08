@@ -26,7 +26,7 @@ namespace dyno
 	template<typename TDataType>
 	ParticleEmitterSquare<TDataType>::~ParticleEmitterSquare()
 	{
-		gen_pos.release();
+		gen_pos.clear();
 	}
 	
 

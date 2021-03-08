@@ -27,7 +27,7 @@ namespace dyno
 	{
 		if (m_refPoints.begin() != NULL)
 		{
-			m_refPoints.release();
+			m_refPoints.clear();
 		}
 	}
 

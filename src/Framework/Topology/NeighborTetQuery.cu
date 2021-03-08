@@ -261,7 +261,7 @@ namespace dyno
 				cuSynchronize();
 			}
 
-			tag.release();
+			tag.clear();
 			t1.stop();
 			printf("find_all time: %f\n", t1.getEclipsedTime());
 			

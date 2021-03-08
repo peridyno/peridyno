@@ -6,28 +6,23 @@ set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES "")
 
 add_subdirectory(Core)
 
-option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 if(PERIDYNO_LIBRARY_FRAMEWORK)
     add_subdirectory(Framework)
 endif()
 
-option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)
 endif()
 
-option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-if(PERIDYNO_LIBRARY_RENDERING)
+if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
     add_subdirectory(Rendering)
 endif()
 
-option(PERIDYNO_LIBRARY_DYNAMICS "Enable binding the dynamics library" ON)
-if(PERIDYNO_LIBRARY_DYNAMICS)
+if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_DYNAMICS)
     add_subdirectory(Dynamics)
 endif()
 
-option(PERIDYNO_LIBRARY_GUI "Enable binding the GUI library" ON)
-if(PERIDYNO_LIBRARY_GUI)
+if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GUI)
     add_subdirectory(GUI)
 endif()
 

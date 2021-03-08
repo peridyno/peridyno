@@ -24,7 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	ParticleEmitterRound<TDataType>::~ParticleEmitterRound()
 	{
-		gen_pos.release();
+		gen_pos.clear();
 	}
 	
 

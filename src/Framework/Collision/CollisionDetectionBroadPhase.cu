@@ -23,7 +23,7 @@ namespace dyno
 			printf("%d: %d \n", i, h_arr[i]);
 		}
 
-		h_arr.release();
+		h_arr.clear();
 	};
 
 	void print(GArray<PKey> arr)
@@ -39,7 +39,7 @@ namespace dyno
 			printf("%d: %d \n", i, id);
 		}
 
-		h_arr.release();
+		h_arr.clear();
 	};
 
 	IMPLEMENT_CLASS_1(CollisionDetectionBroadPhase, TDataType)
@@ -404,9 +404,9 @@ namespace dyno
 
 		min_val = max(min_val, this->varGridSizeLimit()->getValue());
 
-		h_arr.release();
-		v0_arr.release();
-		v1_arr.release();
+		h_arr.clear();
+		v0_arr.clear();
+		v1_arr.clear();
 
 
 		octree.setSpace(min_v0 - min_val, min_val, max(max_v1[0] - min_v0[0], max(max_v1[1] - min_v0[1], max_v1[2] - min_v0[2])) + 2.0f * min_val);
@@ -523,8 +523,8 @@ namespace dyno
 			//printf("FROM OCT: %d\n", elements.size());
 
 		octree.release();
-		ids.release();
-		keys.release();
-		counter.release();
+		ids.clear();
+		keys.clear();
+		counter.clear();
 	}
 }

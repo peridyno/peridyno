@@ -349,18 +349,18 @@ namespace dyno
 		);
 
 
-		x_array.release();
-		y_array.release();
+		x_array.clear();
+		y_array.clear();
 
-		interNormal.release();
-		interDistance.release();
-		collision_type.release();
-		force.release();
-		force_buffer.release();
-		volume.release();
-		volume2.release();
-		velocity_buffer.release();
-		sum_nbr.release();
+		interNormal.clear();
+		interDistance.clear();
+		collision_type.clear();
+		force.clear();
+		force_buffer.clear();
+		volume.clear();
+		volume2.clear();
+		velocity_buffer.clear();
+		sum_nbr.clear();
 	}
 
 

@@ -117,7 +117,7 @@ namespace dyno {
 		const int i = (int)floor(fp[0]);
 		const int j = (int)floor(fp[1]);
 		const int k = (int)floor(fp[2]);
-		if (i < 0 || i >= m_distance.Nx() - 1 || j < 0 || j >= m_distance.Ny() - 1 || k < 0 || k >= m_distance.Nz() - 1) {
+		if (i < 0 || i >= m_distance.nx() - 1 || j < 0 || j >= m_distance.ny() - 1 || k < 0 || k >= m_distance.nz() - 1) {
 			if (m_bInverted) d = -100000.0f;
 			else d = 100000.0f;
 			normal = Coord(0);

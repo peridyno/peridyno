@@ -10,28 +10,28 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(int n);
+		static Reduction* Create(size_t n);
 		~Reduction();
 
-		T accumulate(T * val, int num);
+		T accumulate(T * val, size_t num);
 
-		T maximum(T* val, int num);
+		T maximum(T* val, size_t num);
 
-		T minimum(T* val, int num);
+		T minimum(T* val, size_t num);
 
-		T average(T* val, int num);
+		T average(T* val, size_t num);
 
 	private:
-		Reduction(unsigned num);
+		Reduction(size_t num);
 
-		void allocAuxiliaryArray(int num);
+		void allocAuxiliaryArray(size_t num);
 
-		int getAuxiliaryArraySize(int n);
+		int getAuxiliaryArraySize(size_t n);
 		
 		unsigned m_num;
 		
 		T* m_aux;
-		int m_auxNum;
+		size_t m_auxNum;
 	};
 
 
@@ -45,20 +45,20 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(int n);
+		static Reduction* Create(size_t n);
 		~Reduction();
 
 
-		Vector3f accumulate(Vector3f * val, int num);
+		Vector3f accumulate(Vector3f * val, size_t num);
 
-		Vector3f maximum(Vector3f* val, int num);
+		Vector3f maximum(Vector3f* val, size_t num);
 
-		Vector3f minimum(Vector3f* val, int num);
+		Vector3f minimum(Vector3f* val, size_t num);
 
-		Vector3f average(Vector3f* val, int num);
+		Vector3f average(Vector3f* val, size_t num);
 
 	private:
-		void allocAuxiliaryArray(int num);
+		void allocAuxiliaryArray(size_t num);
 
 
 		unsigned m_num;
@@ -73,20 +73,20 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(int n);
+		static Reduction* Create(size_t n);
 		~Reduction();
 
 
-		Vector3d accumulate(Vector3d * val, int num);
+		Vector3d accumulate(Vector3d * val, size_t num);
 
-		Vector3d maximum(Vector3d* val, int num);
+		Vector3d maximum(Vector3d* val, size_t num);
 
-		Vector3d minimum(Vector3d* val, int num);
+		Vector3d minimum(Vector3d* val, size_t num);
 
-		Vector3d average(Vector3d* val, int num);
+		Vector3d average(Vector3d* val, size_t num);
 
 	private:
-		void allocAuxiliaryArray(int num);
+		void allocAuxiliaryArray(size_t num);
 
 
 		unsigned m_num;

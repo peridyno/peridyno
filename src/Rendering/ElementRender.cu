@@ -75,9 +75,9 @@ namespace dyno
 
 	ElementRender::~ElementRender()
 	{
-		vertices.release();
-		normals.release();
-		colors.release();
+		vertices.clear();
+		normals.clear();
+		colors.clear();
 	}
 
 	bool ElementRender::initializeImpl()

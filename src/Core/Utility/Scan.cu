@@ -19,12 +19,12 @@ namespace dyno
 
 	Scan::~Scan()
 	{
-		m_buffer.release();
+		m_buffer.clear();
 
 		for (int i = 0; i < SCAN_LEVEL; i++)
 		{
-			m_sums[i].release();
-			m_incr[i].release();
+			m_sums[i].clear();
+			m_incr[i].clear();
 		}
 	}
 
@@ -51,7 +51,7 @@ namespace dyno
 		this->exclusive(data, m_buffer, bcao);
 	}
 
-	void Scan::exclusive(int* data, int length, bool bcao /*= true*/)
+	void Scan::exclusive(int* data, size_t length, bool bcao /*= true*/)
 	{
 		if (m_buffer.size() != length)
 		{
@@ -63,7 +63,7 @@ namespace dyno
 		this->exclusive(data, m_buffer.begin(), length, bcao);
 	}
 
-	void Scan::exclusive(int* output, int* input, int length, bool bcao /*= true*/)
+	void Scan::exclusive(int* output, int* input, size_t length, bool bcao /*= true*/)
 	{
 		if (length > SCAN_ELEMENTS_PER_BLOCK) {
 			scanLargeDeviceArray(output, input, length, bcao, 0);
@@ -73,7 +73,7 @@ namespace dyno
 		}
 	}
 
-	__global__ void k_prescan_arbitrary(int *output, int *input, int n, int powerOfTwo)
+	__global__ void k_prescan_arbitrary(int *output, int *input, size_t n, int powerOfTwo)
 	{
 		extern __shared__ int temp[];// allocated on invocation
 		int threadID = threadIdx.x;
@@ -138,7 +138,7 @@ namespace dyno
 		}
 	}
 
-	__global__ void k_prescan_arbitrary_unoptimized(int *output, int *input, int n, int powerOfTwo) {
+	__global__ void k_prescan_arbitrary_unoptimized(int *output, int *input, size_t n, int powerOfTwo) {
 		extern __shared__ int temp[];// allocated on invocation
 		int threadID = threadIdx.x;
 
@@ -188,7 +188,7 @@ namespace dyno
 		}
 	}
 
-	__global__ void k_add(int *output, int length, int *n) {
+	__global__ void k_add(int *output, size_t length, int *n) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * length;
@@ -196,7 +196,7 @@ namespace dyno
 		output[blockOffset + threadID] += n[blockID];
 	}
 
-	__global__ void k_add(int *output, int length, int *n1, int *n2) {
+	__global__ void k_add(int *output, size_t length, int *n1, int *n2) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * length;
@@ -204,36 +204,36 @@ namespace dyno
 		output[blockOffset + threadID] += n1[blockID] + n2[blockID];
 	}
 
-	void Scan::scanLargeDeviceArray(int *d_out, int *d_in, int length, bool bcao, int level)
+	void Scan::scanLargeDeviceArray(int *d_out, int *d_in, size_t length, bool bcao, size_t level)
 	{
-		int remainder = length % (SCAN_ELEMENTS_PER_BLOCK);
+		size_t remainder = length % (SCAN_ELEMENTS_PER_BLOCK);
 		if (remainder == 0) {
 			scanLargeEvenDeviceArray(d_out, d_in, length, bcao, level);
 		}
 		else {
 			// perform a large scan on a compatible multiple of elements
-			int lengthMultiple = length - remainder;
+			size_t lengthMultiple = length - remainder;
 			scanLargeEvenDeviceArray(d_out, d_in, lengthMultiple, bcao, level);
 
 			// scan the remaining elements and add the (inclusive) last element of the large scan to this
 			int *startOfOutputArray = &(d_out[lengthMultiple]);
 			scanSmallDeviceArray(startOfOutputArray, &(d_in[lengthMultiple]), remainder, bcao);
 
-			k_add << <1, remainder >> > (startOfOutputArray, remainder, &(d_in[lengthMultiple - 1]), &(d_out[lengthMultiple - 1]));
+			k_add << <1, (unsigned int)remainder >> > (startOfOutputArray, remainder, &(d_in[lengthMultiple - 1]), &(d_out[lengthMultiple - 1]));
 			cuSynchronize();
 		}
 	}
 
-	void Scan::scanSmallDeviceArray(int *d_out, int *d_in, int length, bool bcao)
+	void Scan::scanSmallDeviceArray(int *d_out, int *d_in, size_t length, bool bcao)
 	{
-		int powerOfTwo = nextPowerOfTwo(length);
+		size_t powerOfTwo = nextPowerOfTwo(length);
 
 		if (bcao) {
-			k_prescan_arbitrary << <1, (length + 1) / 2, 2 * powerOfTwo * sizeof(int) >> > (d_out, d_in, length, powerOfTwo);
+			k_prescan_arbitrary << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(int) >> > (d_out, d_in, length, powerOfTwo);
 			cuSynchronize();
 		}
 		else {
-			k_prescan_arbitrary_unoptimized << <1, (length + 1) / 2, 2 * powerOfTwo * sizeof(int) >> > (d_out, d_in, length, powerOfTwo);
+			k_prescan_arbitrary_unoptimized << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(int) >> > (d_out, d_in, length, powerOfTwo);
 			cuSynchronize();
 		}
 	}
@@ -345,7 +345,7 @@ namespace dyno
 		output[blockOffset + (2 * threadID) + 1] = temp[2 * threadID + 1];
 	}
 
-	void Scan::scanLargeEvenDeviceArray(int *output, int *input, int length, bool bcao, int level)
+	void Scan::scanLargeEvenDeviceArray(int *output, int *input, size_t length, bool bcao, size_t level)
 	{
 		const int blocks = length / SCAN_ELEMENTS_PER_BLOCK;
 		const int sharedMemArraySize = SCAN_ELEMENTS_PER_BLOCK * sizeof(int);
@@ -417,12 +417,12 @@ namespace dyno
 		}
 	}
 
-	bool Scan::isPowerOfTwo(int x)
+	bool Scan::isPowerOfTwo(size_t x)
 	{
 		return x && !(x & (x - 1));
 	}
 
-	int Scan::nextPowerOfTwo(int x)
+	size_t Scan::nextPowerOfTwo(size_t x)
 	{
 		int power = 1;
 		while (power < x) {

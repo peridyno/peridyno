@@ -94,8 +94,8 @@ namespace dyno
 		
 		void release()
 		{
-			m_elements.release();
-			m_index.release();
+			m_elements.clear();
+			m_index.clear();
 		}
 
 		void setNeighborLimit(int nbrMax)

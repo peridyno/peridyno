@@ -19,9 +19,9 @@ namespace dyno
 
 	SurfaceMeshRender::~SurfaceMeshRender()
 	{
-		vertices.release();
-		normals.release();
-		colors.release();
+		vertices.clear();
+		normals.clear();
+		colors.clear();
 	}
 
 	bool SurfaceMeshRender::initializeImpl()

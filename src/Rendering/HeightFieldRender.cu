@@ -103,9 +103,9 @@ namespace dyno
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
 
-		if (i < heights.Nx() - 1 && j < heights.Ny() - 1)
+		if (i < heights.nx() - 1 && j < heights.ny() - 1)
 		{
-			int id = i + j * heights.Nx();
+			int id = i + j * heights.nx();
 
 			//if (j == 2)
 // 			{
@@ -175,15 +175,15 @@ namespace dyno
 
 
 		auto heights = hf->getHeights();
-		int numOfTriangles = (heights.Nx() - 1)*(heights.Ny() - 1) * 2;
+		int numOfTriangles = (heights.nx() - 1)*(heights.ny() - 1) * 2;
 
 		vertices.resize(3 * numOfTriangles);
 		normals.resize(3 * numOfTriangles);
 		colors.resize(3 * numOfTriangles);
 
 		uint3 total_size;
-		total_size.x = heights.Nx() - 1;
-		total_size.y = heights.Ny() - 1;
+		total_size.x = heights.nx() - 1;
+		total_size.y = heights.ny() - 1;
 		total_size.z = 1;
 
 		auto ori = hf->getOrigin();

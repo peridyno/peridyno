@@ -5,7 +5,7 @@ namespace dyno
 	namespace Function1Pt
 	{
 		template<typename T1, typename T2>
-		__global__ void KerLength(T1* lhs, T2* rhs, int num)
+		__global__ void KerLength(T1* lhs, T2* rhs, size_t num)
 		{
 			int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 			if (pId >= num) return;

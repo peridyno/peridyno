@@ -69,7 +69,7 @@ int PVTKPointSetSource::RequestData(
 	output->SetPoints(pts);
 	pts->Delete();
 
-	host_pts.release();
+	host_pts.clear();
 
 	return 1;
 }

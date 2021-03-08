@@ -191,9 +191,9 @@ namespace dyno
 
 		K_ComputeVelocity << <pDims, BLOCK_SIZE >> > (init_pos, m_points, m_vels, getParent()->getDt());
 
-		posBuf.release();
-		weights.release();
-		init_pos.release();
+		posBuf.clear();
+		weights.clear();
+		init_pos.clear();
 
 		start = 0;
 		for (int i = 0; i < m_collidableObjects.size(); i++)

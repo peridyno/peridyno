@@ -249,8 +249,8 @@ namespace dyno
 	template<typename TDataType>
 	UnifiedPositionConstraint<TDataType>::~UnifiedPositionConstraint()
 	{
-		m_bufPos.release();
-		m_originPos.release();
+		m_bufPos.clear();
+		m_originPos.clear();
 	}
 
 	template<typename TDataType>

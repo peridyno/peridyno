@@ -11,19 +11,19 @@ namespace dyno
 		Scan();
 		~Scan();
 
-		void exclusive(int* output, int* input, int length, bool bcao = true);
-		void exclusive(int* data, int length, bool bcao = true);
+		void exclusive(int* output, int* input, size_t length, bool bcao = true);
+		void exclusive(int* data, size_t length, bool bcao = true);
 
 		void exclusive(GArray<int>& output, GArray<int>& input, bool bcao = true);
 		void exclusive(GArray<int>& data, bool bcao = true);
 
 	private:
-		void scanLargeDeviceArray(int *d_out, int *d_in, int length, bool bcao, int level);
-		void scanSmallDeviceArray(int *d_out, int *d_in, int length, bool bcao);
-		void scanLargeEvenDeviceArray(int *output, int *input, int length, bool bcao, int level);
+		void scanLargeDeviceArray(int *d_out, int *d_in, size_t length, bool bcao, size_t level);
+		void scanSmallDeviceArray(int *d_out, int *d_in, size_t length, bool bcao);
+		void scanLargeEvenDeviceArray(int *output, int *input, size_t length, bool bcao, size_t level);
 
-		bool isPowerOfTwo(int x);
-		int nextPowerOfTwo(int x);
+		bool isPowerOfTwo(size_t x);
+		size_t nextPowerOfTwo(size_t x);
 
 
 	private:

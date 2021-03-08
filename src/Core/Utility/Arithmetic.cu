@@ -20,7 +20,7 @@ namespace dyno {
 			delete m_reduce;
 		}
 		//if (m_buf != NULL)
-		m_buf.release();
+		m_buf.clear();
 	}
 
 

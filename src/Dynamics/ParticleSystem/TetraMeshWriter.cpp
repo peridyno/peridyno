@@ -87,9 +87,9 @@ namespace dyno
 			}
 		}
 
-		host_vertices.release();
-		host_triangles.release();
-		host_tri2tet.release();
+		host_vertices.clear();
+		host_triangles.clear();
+		host_tri2tet.clear();
 
 		this->m_output_index ++;
 		return true;

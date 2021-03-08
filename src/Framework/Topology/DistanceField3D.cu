@@ -197,7 +197,7 @@ namespace dyno{
 
 		m_h = (p1 - p0)*Coord(1.0 / Real(nbx+1), 1.0 / Real(nby+1), 1.0 / Real(nbz+1));
 
-		m_distance.Resize(nbx+1, nby+1, nbz+1);
+		m_distance.resize(nbx+1, nby+1, nbz+1);
 	}
 
 	template<typename TDataType>
@@ -217,9 +217,9 @@ namespace dyno{
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
 		int k = threadIdx.z + (blockIdx.z * blockDim.z);
 
-		if (i >= distance.Nx()) return;
-		if (j >= distance.Ny()) return;
-		if (k >= distance.Nz()) return;
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
 
 		distance(i, j, k) = s*distance(i, j, k);
 	}
@@ -234,7 +234,7 @@ namespace dyno{
 		m_h[2] *= s;
 
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.Nx(), m_distance.Ny(), m_distance.Nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
 
 		K_Scale << <gridDims, blockSize >> >(m_distance, s);
 	}
@@ -246,9 +246,9 @@ namespace dyno{
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
 		int k = threadIdx.z + (blockIdx.z * blockDim.z);
 
-		if (i >= distance.Nx()) return;
-		if (j >= distance.Ny()) return;
-		if (k >= distance.Nz()) return;
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
 
 		distance(i, j, k) = -distance(i, j, k);
 	}
@@ -257,7 +257,7 @@ namespace dyno{
 	void DistanceField3D<TDataType>::invertSDF()
 	{
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.Nx(), m_distance.Ny(), m_distance.Nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
 
 		K_Invert << <gridDims, blockSize >> >(m_distance);
 	}
@@ -269,9 +269,9 @@ namespace dyno{
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
 		int k = threadIdx.z + (blockIdx.z * blockDim.z);
 
-		if (i >= distance.Nx()) return;
-		if (j >= distance.Ny()) return;
-		if (k >= distance.Nz()) return;
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
 
 		int sign = inverted ? 1.0f : -1.0f;
 		Coord p = start + Coord(i, j, k)*h;
@@ -285,7 +285,7 @@ namespace dyno{
 		m_bInverted = inverted;
 
 		dim3 blockSize = make_uint3(4, 4, 4);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.Nx(), m_distance.Ny(), m_distance.Nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
 
 		K_DistanceFieldToBox << <gridDims, blockSize >> >(m_distance, m_left, m_h, lo, hi, inverted);
 	}
@@ -297,9 +297,9 @@ namespace dyno{
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
 		int k = threadIdx.z + (blockIdx.z * blockDim.z);
 
-		if (i >= distance.Nx()) return;
-		if (j >= distance.Ny()) return;
-		if (k >= distance.Nz()) return;
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
 
 		int sign = inverted ? -1.0f : 1.0f;
 
@@ -314,7 +314,7 @@ namespace dyno{
 		m_bInverted = inverted;
 
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.Nx(), m_distance.Ny(), m_distance.Nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
 
 		K_DistanceFieldToCylinder << <gridDims, blockSize >> >(m_distance, m_left, m_h, center, radius, height, axis, inverted);
 	}
@@ -326,9 +326,9 @@ namespace dyno{
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
 		int k = threadIdx.z + (blockIdx.z * blockDim.z);
 
-		if (i >= distance.Nx()) return;
-		if (j >= distance.Ny()) return;
-		if (k >= distance.Nz()) return;
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
 
 		int sign = inverted ? -1.0f : 1.0f;
 
@@ -345,7 +345,7 @@ namespace dyno{
 		m_bInverted = inverted;
 
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.Nx(), m_distance.Ny(), m_distance.Nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
 
 		K_DistanceFieldToSphere << <gridDims, blockSize >> >(m_distance, m_left, m_h, center, radius, inverted);
 	}
@@ -398,8 +398,8 @@ namespace dyno{
 		}
 		input.close();
 
-		m_distance.Resize(nbx, nby, nbz);
-		cuSafeCall(cudaMemcpy(m_distance.GetDataPtr(), distances, (nbx)*(nby)*(nbz) * sizeof(Real), cudaMemcpyHostToDevice));
+		m_distance.resize(nbx, nby, nbz);
+		cuSafeCall(cudaMemcpy(m_distance.data(), distances, (nbx)*(nby)*(nbz) * sizeof(Real), cudaMemcpyHostToDevice));
 
 		m_bInverted = inverted;
 		if (inverted)
@@ -413,7 +413,7 @@ namespace dyno{
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::release()
 	{
-		m_distance.Release();
+		m_distance.clear();
 	}
 
 	template class DistanceField3D<DataType3f>;

@@ -78,8 +78,8 @@ namespace dyno
 
 		output.close();
 
-		host_position.release();
-		host_mapping.release();
+		host_position.clear();
+		host_mapping.clear();
 
 
 		m_output_index++;

@@ -551,19 +551,19 @@ namespace dyno
 	template<typename TDataType>
 	VelocityConstraint<TDataType>::~VelocityConstraint()
 	{
-		m_alpha.release();
-		m_Aii.release();
-		m_AiiFluid.release();
-		m_AiiTotal.release();
-		m_pressure.release();
-		m_divergence.release();
-		m_bSurface.release();
+		m_alpha.clear();
+		m_Aii.clear();
+		m_AiiFluid.clear();
+		m_AiiTotal.clear();
+		m_pressure.clear();
+		m_divergence.clear();
+		m_bSurface.clear();
 
-		m_y.release();
-		m_r.release();
-		m_p.release();
+		m_y.clear();
+		m_r.clear();
+		m_p.clear();
 
-		m_pressure.release();
+		m_pressure.clear();
 
 		if (m_reduce)
 		{

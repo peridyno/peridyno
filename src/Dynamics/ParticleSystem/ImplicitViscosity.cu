@@ -91,8 +91,8 @@ namespace dyno
 	template<typename TDataType>
 	ImplicitViscosity<TDataType>::~ImplicitViscosity()
 	{
-		m_velOld.release();
-		m_velBuf.release();
+		m_velOld.clear();
+		m_velBuf.clear();
 	}
 
 	template<typename TDataType>

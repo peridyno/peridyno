@@ -64,6 +64,12 @@ namespace dyno {
 		DYN_FUNC Vector<T, 4> maximum(const Vector<T, 4> &) const;
 
 		DYN_FUNC T* getDataPtr() { return &data_.x; }
+
+		friend std::ostream& operator<<(std::ostream &out, const Vector<T, 4>& vec)
+		{
+			out << "(" << vec[0] << ", " << vec[1] << ", " << vec[2] << ", " << vec[3] << ")";
+			return out;
+		}
 	public:
 		glm::tvec4<T> data_; //default: zero vector
 	};

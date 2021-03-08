@@ -262,9 +262,9 @@ namespace dyno
 	template<typename TDataType>
 	DensityPBD<TDataType>::~DensityPBD()
 	{
-		m_lamda.release();
-		m_deltaPos.release();
-		m_position_old.release();
+		m_lamda.clear();
+		m_deltaPos.clear();
+		m_position_old.clear();
 	}
 
 	template<typename TDataType>

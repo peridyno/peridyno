@@ -103,7 +103,7 @@ ArrayField<T, deviceType>::~ArrayField()
 {
 	if (m_data.use_count() == 1)
 	{
-		m_data->release();
+		m_data->clear();
 	}
 }
 

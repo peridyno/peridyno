@@ -166,9 +166,9 @@ namespace dyno
 			dc->getField<HostVarField<Coord>>(MechanicalState::velocity())->setValue(vel + displacement/ dt);
 			dc->getField<HostVarField<Coord>>(MechanicalState::angularVelocity())->setValue(angularVel);
 
-			hPos.release();
-			hInitPos.release();
-			dInitPos.release();
+			hPos.clear();
+			hInitPos.clear();
+			dInitPos.clear();
 		}
 		else
 		{

@@ -17,9 +17,8 @@
 #include "Platform.h"
 #include <cassert>
 #include <vector>
-#include <cuda_runtime.h>
+#include <iostream>
 #include <memory>
-#include "MemoryManager.h"
 
 namespace dyno {
 
@@ -31,82 +30,7 @@ namespace dyno {
 		Array(int num);
 
 		~Array() {};
-
-		void resize(size_t n);
-		void reset();
-		void release();
-
-		DeviceType	deviceType();
 	};
-
-	/*!
-	*	\class	Array
-	*	\brief	This class is designed to be elegant, so it can be directly passed to GPU as parameters.
-	*/
-	template<typename T>
-	class Array<T, DeviceType::GPU>
-	{
-	public:
-		Array()
-			: m_data(NULL)
-			, m_totalNum(0)
-		{
-			m_alloc = std::make_shared<DefaultMemoryManager<DeviceType::GPU>>();
-		};
-
-		Array(int num)
-			: m_data(NULL)
-			, m_totalNum(num)
-		{
-			m_alloc = std::make_shared<DefaultMemoryManager<DeviceType::GPU>>();
-			allocMemory();
-		}
-
-		/*!
-		*	\brief	Should not release data here, call Release() explicitly.
-		*/
-		~Array() {};
-
-		void resize(size_t n);
-
-		/*!
-		*	\brief	Clear all data to zero.
-		*/
-		void reset();
-
-		/*!
-		*	\brief	Free allocated memory.	Should be called before the object is deleted.
-		*/
-		void release();
-
-		DYN_FUNC inline T*	begin() { return m_data; }
-
-		DeviceType	deviceType() { return DeviceType::GPU; }
-
-		GPU_FUNC inline T& operator [] (unsigned int id)
-		{
-			return m_data[id];
-		}
-
-		GPU_FUNC inline T operator [] (unsigned int id) const
-		{
-			return m_data[id];
-		}
-
-		DYN_FUNC inline size_t size() { return m_totalNum; }
-		DYN_FUNC inline bool isCPU() { return false; }
-		DYN_FUNC inline bool isGPU() { return true; }
-		DYN_FUNC inline bool isEmpty() { return m_data == NULL; }
-
-	protected:
-		void allocMemory();
-		
-	private:
-		T* m_data;
-		size_t m_totalNum;
-		std::shared_ptr<MemoryManager<DeviceType::GPU>> m_alloc;
-	};
-
 
 	template<typename T>
 	class Array<T, DeviceType::CPU>
@@ -116,15 +40,12 @@ namespace dyno {
 		{
 		};
 
-		Array(int num)
+		Array(size_t num)
 		{
 			m_data.resize(num);
 		}
 
-		/*!
-		*	\brief	Should not release data here, call Release() explicitly.
-		*/
-		~Array() { release(); };
+		~Array() { clear(); };
 
 		void resize(size_t n);
 
@@ -133,8 +54,9 @@ namespace dyno {
 		*/
 		void reset();
 
-		void release();
+		void clear();
 
+		inline const T*	begin() const { return m_data.size() == 0 ? nullptr : &m_data[0]; }
 		inline T*	begin() { return m_data.size() == 0 ? nullptr : &m_data[0]; }
 
 		DeviceType	deviceType() { return DeviceType::CPU; }
@@ -149,15 +71,100 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		inline size_t size() { return m_data.size(); }
-		inline bool isCPU() { return true; }
-		inline bool isGPU() { return false; }
-		inline bool isEmpty() { return m_data.empty(); }
+		inline size_t size() const { return m_data.size(); }
+		inline bool isCPU() const { return true; }
+		inline bool isGPU() const { return false; }
+		inline bool isEmpty() const { return m_data.empty(); }
 
 		inline void pushBack(T ele) { m_data.push_back(ele); }
 
+		void assign(const Array<T, DeviceType::GPU>& src);
+		void assign(const Array<T, DeviceType::CPU>& src);
+
+		friend std::ostream& operator<<(std::ostream &out, const Array<T, DeviceType::CPU>& cArray)
+		{
+			for (int i = 0; i < cArray.size(); i++)
+			{
+				out << i << ": " << cArray[i] << std::endl;
+			}
+
+			return out;
+		}
+
 	private:
 		std::vector<T> m_data;
+	};
+
+	/*!
+*	\class	Array
+*	\brief	This class is designed to be elegant, so it can be directly passed to GPU as parameters.
+*/
+	template<typename T>
+	class Array<T, DeviceType::GPU>
+	{
+	public:
+		Array()
+		{
+		};
+
+		Array(size_t num)
+		{
+			this->resize(num);
+		}
+
+		/*!
+		*	\brief	Do not release memory here, call clear() explicitly.
+		*/
+		~Array() {};
+
+		void resize(const size_t n);
+
+		/*!
+		*	\brief	Clear all data to zero.
+		*/
+		void reset();
+
+		/*!
+		*	\brief	Free allocated memory.	Should be called before the object is deleted.
+		*/
+		void clear();
+
+		DYN_FUNC inline const T*	begin() const { return m_data; }
+		DYN_FUNC inline T*	begin() { return m_data; }
+
+		DeviceType	deviceType() { return DeviceType::GPU; }
+
+		GPU_FUNC inline T& operator [] (unsigned int id)
+		{
+			return m_data[id];
+		}
+
+		GPU_FUNC inline T operator [] (unsigned int id) const
+		{
+			return m_data[id];
+		}
+
+		DYN_FUNC inline size_t size() const { return m_totalNum; }
+		DYN_FUNC inline bool isCPU() const { return false; }
+		DYN_FUNC inline bool isGPU() const { return true; }
+		DYN_FUNC inline bool isEmpty() const { return m_data == NULL; }
+
+		void assign(const Array<T, DeviceType::GPU>& src);
+		void assign(const Array<T, DeviceType::CPU>& src);
+
+		friend std::ostream& operator<<(std::ostream &out, const Array<T, DeviceType::GPU>& dArray)
+		{
+			Array<T, DeviceType::CPU> hArray;
+			hArray.assign(dArray);
+
+			out << hArray;
+
+			return out;
+		}
+
+	private:
+		T* m_data = 0;
+		size_t m_totalNum = 0;
 	};
 
 

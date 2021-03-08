@@ -51,75 +51,74 @@ namespace dyno {
 		*/
 		~Array2D() { };
 
-		void resize(int nx, int ny);
+		void resize(size_t nx, size_t ny);
 
-		void Reset();
+		void reset();
 
-		void Release();
+		void clear();
 
-		inline T*		GetDataPtr() { return m_data; }
-		void			SetDataPtr(T* _data) { m_data = _data; }
+		inline T* data() const { return m_data; }
 
-		DYN_FUNC inline int Nx() { return m_nx; }
-		DYN_FUNC inline int Ny() { return m_ny; }
+		DYN_FUNC inline size_t nx() const { return m_nx; }
+		DYN_FUNC inline size_t ny() const { return m_ny; }
 
-		DYN_FUNC inline T operator () (const int i, const int j) const
+		DYN_FUNC inline T operator () (const size_t i, const size_t j) const
 		{
 			return m_data[i + j* m_pitch];
 		}
 
-		DYN_FUNC inline T& operator () (const int i, const int j)
+		DYN_FUNC inline T& operator () (const size_t i, const size_t j)
 		{
 			return m_data[i + j* m_pitch];
 		}
 
-		DYN_FUNC inline int Index(const int i, const int j)
+		DYN_FUNC inline int index(const size_t i, const size_t j) const
 		{
 			return i + j * m_pitch;
 		}
 
-		DYN_FUNC inline T operator [] (const int id) const
+		DYN_FUNC inline T operator [] (const size_t id) const
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline T& operator [] (const int id)
+		DYN_FUNC inline T& operator [] (const size_t id)
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline int Size() { return m_totalNum; }
-		DYN_FUNC inline bool IsCPU() { return deviceType; }
-		DYN_FUNC inline bool IsGPU() { return deviceType; }
+		DYN_FUNC inline size_t size() const { return m_totalNum; }
+		DYN_FUNC inline bool isCPU() const { return deviceType; }
+		DYN_FUNC inline bool isGPU() const { return deviceType; }
 
 	public:
 		void AllocMemory();
 
 	private:
-		int m_nx;
-		int m_ny;
+		size_t m_nx;
+		size_t m_ny;
 		size_t m_pitch;
-		int m_totalNum;
+		size_t m_totalNum;
 		T*	m_data;
 		std::shared_ptr<MemoryManager<deviceType>> m_alloc;
 	};
 
 	template<typename T, DeviceType deviceType>
-	void Array2D<T, deviceType>::resize(int nx, int ny)
+	void Array2D<T, deviceType>::resize(size_t nx, size_t ny)
 	{
-		if (NULL != m_data) Release();
+		if (NULL != m_data) clear();
 		m_nx = nx;	m_ny = ny;	m_totalNum = m_nx*m_ny;
 		AllocMemory();
 	}
 
 	template<typename T, DeviceType deviceType>
-	void Array2D<T, deviceType>::Reset()
+	void Array2D<T, deviceType>::reset()
 	{
 		m_alloc->initMemory((void*)m_data, 0, m_pitch * m_ny * sizeof(T));
 	}
 
 	template<typename T, DeviceType deviceType>
-	void Array2D<T, deviceType>::Release()
+	void Array2D<T, deviceType>::clear()
 	{
 		if (m_data != NULL)
 		{
@@ -139,7 +138,7 @@ namespace dyno {
 		m_alloc->allocMemory2D((void**)&m_data, m_pitch, m_nx, m_ny, sizeof(T));
 		m_pitch /= sizeof(T);
 
-		Reset();
+		reset();
 	}
 
 	template<typename T>

@@ -79,8 +79,8 @@ int PVTKPolyDataSource::RequestData(
 	output->SetPolys(polys);
 	polys->Delete();
 
-	host_pts.release();
-	host_triangles.release();
+	host_pts.clear();
+	host_triangles.clear();
 
 	return 1;
 }

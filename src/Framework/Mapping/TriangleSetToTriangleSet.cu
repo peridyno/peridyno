@@ -28,8 +28,8 @@ namespace dyno
 	template<typename TDataType>
 	TriangleSetToTriangleSet<TDataType>::~TriangleSetToTriangleSet()
 	{
-		m_nearestTriangle.release();
-		m_barycentric.release();
+		m_nearestTriangle.clear();
+		m_barycentric.clear();
 	}
 
 	template<typename TDataType>
@@ -253,7 +253,7 @@ namespace dyno
 			from->getTri2Tet(),
 			broadPhase->outContactList()->getValue());
 
-		fromAABB.release();
-		toAABB.release();
+		fromAABB.clear();
+		toAABB.clear();
 	}
 }

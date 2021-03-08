@@ -79,8 +79,8 @@ namespace dyno
 			output << "f " << host_triangles[i][0] << " " << host_triangles[i][1] << " " << host_triangles[i][2] << std::endl;
 		}
 
-		host_vertices.release();
-		host_triangles.release();
+		host_vertices.clear();
+		host_triangles.clear();
 
 		this->m_output_index++;
 		return true;
