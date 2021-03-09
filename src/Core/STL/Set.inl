@@ -42,7 +42,7 @@ namespace dyno
 		else
 		{
 			//if found, move all element backward
-			for (int j = m_size; j > ind; j--)
+			for (size_t j = m_size; j > ind; j--)
 			{
 				m_startLoc[j] = m_startLoc[j - 1];
 			}

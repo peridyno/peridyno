@@ -22,7 +22,7 @@ namespace dyno
 	DYN_FUNC int leftBound(T target, T* startLoc, size_t maxSize)
 	{
 		int left = 0;
-		int right = maxSize;
+		int right = (int)maxSize;
 
 		while (left < right) {
 			int mid = (left + right) / 2;
@@ -54,7 +54,7 @@ namespace dyno
 	DYN_FUNC int rightBound(T target, T* startLoc, size_t maxSize)
 	{
 		if (maxSize == 0) return -1;
-		int left = 0, right = maxSize;
+		int left = 0, right = (int)maxSize;
 
 		while (left < right) {
 			int mid = (left + right) / 2;

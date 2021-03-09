@@ -1,42 +1,41 @@
-/**
- * Copyright 2021 Xiaowei He
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-#pragma once
-#include "Platform.h"
-#include "Array/Array.h"
+#include "ArrayTools.h"
+#include "Utility/cuda_utilities.h"
 #include "STL/List.h"
 
 namespace dyno
 {
 	template<int N>
-	struct PlaceHolder
+	__global__ void AA_Allocate(
+		void* lists,
+		void* elements,
+		size_t ele_size,
+		GArray<int> index)
 	{
-		char data[N];
-	};
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= index.size()) return;
 
-	template struct PlaceHolder<1>;
-	template struct PlaceHolder<2>;
-	template struct PlaceHolder<3>;
-	template struct PlaceHolder<4>;
-	template struct PlaceHolder<5>;
-	template struct PlaceHolder<6>;
-	template struct PlaceHolder<7>;
-	template struct PlaceHolder<8>;
+		List<PlaceHolder<N>>* listPtr = (List<PlaceHolder<N>>*)lists;
+		PlaceHolder<N>* elementsPtr = (PlaceHolder<N>*)elements;
+
+		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
+
+		List<PlaceHolder<N>> list;
+		list.reserve(elementsPtr + index[tId], count);
+
+		listPtr[tId] = list;
+	}
 
 	template<int N>
-	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index);
+	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index)
+	{
+		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
+		AA_Allocate<N> << <pDims, BLOCK_SIZE >> > (	
+			lists,
+			elements,
+			ele_size,
+			index);
+		cuSynchronize();
+	}
 
 	template void parallel_allocate_for_list<1>(void* lists, void* elements, size_t ele_size, GArray<int> index);
 	template void parallel_allocate_for_list<2>(void* lists, void* elements, size_t ele_size, GArray<int> index);
@@ -47,9 +46,38 @@ namespace dyno
 	template void parallel_allocate_for_list<7>(void* lists, void* elements, size_t ele_size, GArray<int> index);
 	template void parallel_allocate_for_list<8>(void* lists, void* elements, size_t ele_size, GArray<int> index);
 
+	template<int N>
+	__global__ void AA_Assign(
+		void* lists,
+		void* elements,
+		size_t ele_size,
+		GArray<int> index)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= index.size()) return;
+
+		List<PlaceHolder<N>>* listStartPtr = (List<PlaceHolder<N>>*)lists;
+		PlaceHolder<N>* elementsPtr = (PlaceHolder<N>*)elements;
+
+		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
+
+		List<PlaceHolder<N>> list = *(listStartPtr + tId);
+		list.reserve(elementsPtr + index[tId], count);
+
+		listStartPtr[tId] = list;
+	}
 
 	template<int N>
-	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index);
+	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index)
+	{
+		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
+		AA_Assign<N> << <pDims, BLOCK_SIZE >> > (
+			lists,
+			elements,
+			ele_size,
+			index);
+		cuSynchronize();
+	}
 
 	template void parallel_init_for_list<1>(void* lists, void* elements, size_t ele_size, GArray<int> index);
 	template void parallel_init_for_list<2>(void* lists, void* elements, size_t ele_size, GArray<int> index);

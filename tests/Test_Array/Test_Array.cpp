@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "Array/Array.h"
+#include "Array/Array2D.h"
+#include "Array/Array3D.h"
 #include "Array/ArrayList.h"
 #include <thrust/sort.h>
 #include <vector>
@@ -84,7 +86,60 @@ TEST(ArrayList, Copy)
 	EXPECT_EQ(*iter, 2);
 }
 
-TEST(Array2D, CPU)
+TEST(Array2D, Copy)
 {
+	CArray2D<int> cArr2d;
+	cArr2d.resize(2, 2);
+	cArr2d(0, 0) = 0;
+	cArr2d(0, 1) = 1;
+	cArr2d(1, 0) = 2;
+	cArr2d(1, 1) = 3;
 
+	GArray2D<int> dArr2d;
+	dArr2d.assign(cArr2d);
+
+	CArray2D<int> cArr2d2;
+	cArr2d2.assign(dArr2d);
+
+	EXPECT_EQ(cArr2d2(0, 0), 0);
+
+	cArr2d2.assign(cArr2d);
+	EXPECT_EQ(cArr2d2(0, 0), 0);
+}
+
+TEST(Array3D, Copy)
+{
+	CArray3D<int> cArr3d;
+	cArr3d.resize(3, 3, 3);
+	int ind = 0;
+	for (int k = 0; k < 3; k++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				cArr3d(i, j, k) = ind;
+				ind++;
+			}
+		}
+	}
+
+	GArray3D<int> dArr3d;
+	dArr3d.assign(cArr3d);
+
+	CArray3D<int> cArr3d_2;
+	cArr3d_2.assign(dArr3d);
+
+	ind = 0;
+	for (int k = 0; k < 3; k++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				EXPECT_EQ(cArr3d(i, j, k), ind);
+				ind++;
+			}
+		}
+	}
 }

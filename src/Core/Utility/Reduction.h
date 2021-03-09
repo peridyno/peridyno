@@ -34,11 +34,6 @@ namespace dyno {
 		size_t m_auxNum;
 	};
 
-
-	template class Reduction<int>;
-	template class Reduction<float>;
-	template class Reduction<double>;
-
 	template<>
 	class Reduction<Vector3f>
 	{

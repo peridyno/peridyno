@@ -41,4 +41,7 @@ namespace dyno {
 		return m_reduce->accumulate(m_buf.begin(), m_buf.size());
 	}
 
+	template class Arithmetic<int>;
+	template class Arithmetic<float>;
+	template class Arithmetic<double>;
 }

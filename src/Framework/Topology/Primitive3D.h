@@ -162,10 +162,6 @@ namespace dyno
 		DYN_FUNC Real distance(const TRectangle3D<Real>& rectangle) const;
 		DYN_FUNC Real distance(const TDisk3D<Real>& disk) const;
 
-
-		DYN_FUNC Real areaTriangle(const TTriangle3D<Real>& triangle, const Real& r) const;
-		DYN_FUNC Real areaTrianglePrint(const TTriangle3D<Real>& triangle, const Real& r) const;
-
 		/**
 		 * @brief compute signed distance to 3D geometric primitives
 		 *

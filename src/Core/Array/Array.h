@@ -22,15 +22,7 @@
 
 namespace dyno {
 
-	template<typename T, DeviceType deviceType>
-	class Array
-	{
-	public:
-		Array();
-		Array(int num);
-
-		~Array() {};
-	};
+	template<typename T, DeviceType deviceType> class Array;
 
 	template<typename T>
 	class Array<T, DeviceType::CPU>

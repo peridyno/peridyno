@@ -20,16 +20,7 @@
 
 namespace dyno
 {
-	template<class ElementType, DeviceType deviceType>
-	class ArrayList
-	{
-	public:
-		ArrayList()
-		{
-		};
-
-		~ArrayList() {};
-	};
+	template<class ElementType, DeviceType deviceType> class ArrayList;
 
 	template<class ElementType>
 	class ArrayList<ElementType, DeviceType::CPU>

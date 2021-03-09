@@ -45,18 +45,18 @@ namespace dyno{
 
 		GPU_FUNC inline int getIndex(Coord pos)
 		{
-			int i = floor((pos[0] - lo[0]) / ds);
-			int j = floor((pos[1] - lo[1]) / ds);
-			int k = floor((pos[2] - lo[2]) / ds);
+			int i = (int)floor((pos[0] - lo[0]) / ds);
+			int j = (int)floor((pos[1] - lo[1]) / ds);
+			int k = (int)floor((pos[2] - lo[2]) / ds);
 
 			return getIndex(i, j, k);
 		}
 
 		GPU_FUNC inline int3 getIndex3(Coord pos)
 		{
-			int i = floor((pos[0] - lo[0]) / ds);
-			int j = floor((pos[1] - lo[1]) / ds);
-			int k = floor((pos[2] - lo[2]) / ds);
+			int i = (int)floor((pos[0] - lo[0]) / ds);
+			int j = (int)floor((pos[1] - lo[1]) / ds);
+			int k = (int)floor((pos[2] - lo[2]) / ds);
 
 			return make_int3(i, j, k);
 		}

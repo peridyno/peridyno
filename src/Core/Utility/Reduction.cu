@@ -167,6 +167,10 @@ namespace dyno {
 		cudaMalloc((void**)&m_aux, m_auxNum * sizeof(T));
 	}
 
+	template class Reduction<int>;
+	template class Reduction<float>;
+	template class Reduction<double>;
+
 	Reduction<Vector3f>::Reduction()
 		: m_num(0)
 		, m_aux(NULL)

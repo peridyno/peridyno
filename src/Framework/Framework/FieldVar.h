@@ -5,7 +5,6 @@
 #include "Field.h"
 #include "Base.h"
 #include "Framework/Log.h"
-#include "Array/MemoryManager.h"
 
 namespace dyno {
 

@@ -23,7 +23,4 @@ namespace dyno
 		GArray<T> m_buf;
 	};
 
-	template class Arithmetic<int>;
-	template class Arithmetic<float>;
-	template class Arithmetic<double>;
 }

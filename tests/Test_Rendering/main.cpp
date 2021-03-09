@@ -9,7 +9,6 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/DiscreteElements.h"
 #include "Topology/Primitive3D.h"
-#include "ParticleSystem/TriangularSurfaceMeshNode.h"
 
 #include "RigidBody/RigidBodySystem.h"
 

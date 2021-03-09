@@ -17,8 +17,6 @@
 #include "ParticleSystem/StaticMeshBoundary.h"
 #include "ParticleSystem/ParticleWriter.h"
 #include "ParticleSystem/StaticMeshBoundary.h"
-#include "ParticleSystem/SemiAnalyticalSFINode.h"
-#include "ParticleSystem/TriangularSurfaceMeshNode.h"
 
 #include "Framework/SceneGraph.h"
 #include "Framework/ControllerAnimation.h"
@@ -90,66 +88,9 @@ std::vector<float>& creare_scene_init()
 	return test_vector;
 }
 
-void create_scene_semianylitical()
-{
-	SceneGraph& scene = SceneGraph::getInstance();
-	scene.setUpperBound(Vector3f(1.2));
-	scene.setLowerBound(Vector3f(-0.2));
-
-	scene.setFrameRate(1000);
-
-	std::shared_ptr<SemiAnalyticalSFINode<DataType3f>> root = scene.createNewScene<SemiAnalyticalSFINode<DataType3f>>();
-	root->setName("SemiAnalyticalSFI");
-	//root->loadMesh();
-
-	auto writer = std::make_shared<ParticleWriter<DataType3f>>();
-	writer->setNamePrefix("particles_");
-	root->getParticlePosition()->connect(&writer->m_position);
-	root->getParticleMass()->connect(&writer->m_color_mapping);
-	//root->addModule(writer);
-
-
-	std::shared_ptr<ParticleFluid<DataType3f>> child1 = std::make_shared<ParticleFluid<DataType3f>>();
-	root->addParticleSystem(child1);
-	child1->setName("fluid");
-	//child1->loadParticles(Vector3f(0.75, 0.05, 0.75), Vector3f(0.85, 0.35, 0.85), 0.005);
-	child1->setMass(1);
-
-	std::shared_ptr<ParticleEmitterSquare<DataType3f>> child3 = std::make_shared<ParticleEmitterSquare<DataType3f>>();
-	child1->addParticleEmitter(child3);
-
-
-	auto pRenderer = std::make_shared<PVTKPointSetRender>();
-	pRenderer->setName("VTK Point Renderer");
-
-
-	//auto pRenderer = std::make_shared<PointRenderModule>();
-	//pRenderer->setColor(Vector3f(0, 0, 1));
-
-	child1->addVisualModule(pRenderer);
-
-
-	std::shared_ptr <TriangularSurfaceMeshNode<DataType3f>> child2 = std::make_shared<TriangularSurfaceMeshNode<DataType3f>>("boundary");
-	child2->getTriangleSet()->loadObjFile("../../data/standard/standard_cube_01.obj");
-
-	root->addTriangularSurfaceMeshNode(child2);
-
-
-	QtApp window;
-	window.createWindow(1024, 768);
-	//printf("outside 4\n");
-	auto classMap = Object::getClassMap();
-
-	for (auto const c : *classMap)
-		std::cout << "Class Name: " << c.first << std::endl;
-
-	window.mainLoop();
-}
-
 int main()
 {
-	auto& v = creare_scene_init();
-	v.resize(5);
+	creare_scene_init();
 
 	printf("outside 3\n");
 	QtApp window;

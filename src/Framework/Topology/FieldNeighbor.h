@@ -1,7 +1,6 @@
 #pragma once
 #include "Typedef.h"
 #include "Array/Array.h"
-#include "Array/MemoryManager.h"
 #include "Framework/Field.h"
 #include "Framework/Base.h"
 #include "Topology/NeighborList.h"

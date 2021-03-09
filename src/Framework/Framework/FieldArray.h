@@ -1,7 +1,6 @@
 #pragma once
 #include "Typedef.h"
 #include "Array/Array.h"
-#include "Array/MemoryManager.h"
 #include "Utility.h"
 #include "Field.h"
 #include "Base.h"

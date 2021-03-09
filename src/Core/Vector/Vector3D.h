@@ -1,6 +1,7 @@
 #pragma once
-#include <iostream>
 #include <glm/vec3.hpp>
+#include <iostream>
+
 #include "VectorBase.h"
 
 namespace dyno {
