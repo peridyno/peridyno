@@ -17,9 +17,6 @@
 #include "Platform.h"
 
 namespace dyno {
-
-#define INVALID -1
-
 	template<typename T, DeviceType deviceType> class Array2D;
 
 	template<typename T>

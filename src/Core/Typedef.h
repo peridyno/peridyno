@@ -6,29 +6,131 @@
 #include <string>
 #include <algorithm>
 
-using uint = unsigned int;
-using String = std::string;
+#include <assert.h>
+#include <stdio.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <vector_types.h>
+#include <vector_functions.h>
+#include <iostream>
 
-template<class T>
-using VectorPtr = std::vector< std::shared_ptr<T> >;
+#ifdef PRECISION_FLOAT
+typedef float Real;
+#else
+typedef double Real;
+#endif
 
-template<class T>
-using List = std::list< T >;
+namespace dyno {
 
-template<class T>
-using ListPtr = std::list< std::shared_ptr<T> >;
+	using uint = unsigned int;
 
-template<class T>
-using Map = std::map< std::string, T >;
+#define INVALID -1
+#define M_PI 3.14159265358979323846
+#define M_E 2.71828182845904523536
 
-template<class T>
-using MapPtr = std::map< std::string, std::shared_ptr<T> >;
+	constexpr Real EPSILON = std::numeric_limits<Real>::epsilon();
+	constexpr uint BLOCK_SIZE = 64;
 
-template<class T>
-using MultiMap = std::multimap< std::string, T >;
+	static uint iDivUp(uint a, uint b)
+	{
+		return (a % b != 0) ? (a / b + 1) : (a / b);
+	}
 
-template<class T>
-using MultiMapPtr = std::multimap< std::string, std::shared_ptr<T> >;
+	// compute grid and thread block size for a given number of elements
+	static uint cudaGridSize(uint totalSize, uint blockSize)
+	{
+		int dim = iDivUp(totalSize, blockSize);
+		return dim == 0 ? 1 : dim;
+	}
+
+	static dim3 cudaGridSize3D(uint3 totalSize, uint blockSize)
+	{
+		dim3 gridDims;
+		gridDims.x = iDivUp(totalSize.x, blockSize);
+		gridDims.y = iDivUp(totalSize.y, blockSize);
+		gridDims.z = iDivUp(totalSize.z, blockSize);
+
+		gridDims.x = gridDims.x == 0 ? 1 : gridDims.x;
+		gridDims.y = gridDims.y == 0 ? 1 : gridDims.y;
+		gridDims.z = gridDims.z == 0 ? 1 : gridDims.z;
+
+		return gridDims;
+	}
+
+	static dim3 cudaGridSize3D(uint3 totalSize, uint3 blockSize)
+	{
+		dim3 gridDims;
+		gridDims.x = iDivUp(totalSize.x, blockSize.x);
+		gridDims.y = iDivUp(totalSize.y, blockSize.y);
+		gridDims.z = iDivUp(totalSize.z, blockSize.z);
+
+		gridDims.x = gridDims.x == 0 ? 1 : gridDims.x;
+		gridDims.y = gridDims.y == 0 ? 1 : gridDims.y;
+		gridDims.z = gridDims.z == 0 ? 1 : gridDims.z;
+
+		return gridDims;
+	}
+
+	/** check whether cuda thinks there was an error and fail with msg, if this is the case
+	* @ingroup tools
+	*/
+	static inline void checkCudaError(const char *msg) {
+		cudaError_t err = cudaGetLastError();
+		if (cudaSuccess != err) {
+			//printf( "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);
+			throw std::runtime_error(std::string(msg) + ": " + cudaGetErrorString(err));
+		}
+	}
+
+	// use this macro to make sure no error occurs when cuda functions are called
+#ifdef NDEBUG
+#define cuSafeCall(X)  X
+#else
+#define cuSafeCall(X) X; dyno::checkCudaError(#X);
+#endif
+
+/**
+ * @brief Macro to check cuda errors
+ *
+ */
+#ifdef NDEBUG
+#define cuSynchronize() {}
+#else
+#define cuSynchronize()	{						\
+		char str[200];							\
+		cudaDeviceSynchronize();				\
+		cudaError_t err = cudaGetLastError();	\
+		if (err != cudaSuccess)					\
+		{										\
+			sprintf(str, "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);		\
+			throw std::runtime_error(std::string(str));																\
+		}																											\
+	}
+#endif
+
+ /**
+  * @brief Macro definition for execuation of cuda kernels, note that at lease one block will be executed.
+  *
+  * size: indicate how many threads are required in total.
+  * Func: kernel function
+  */
+#define cuExecute(size, Func, ...){						\
+		uint pDims = cudaGridSize(size, BLOCK_SIZE);	\
+		Func << <pDims, BLOCK_SIZE >> > (				\
+		__VA_ARGS__);									\
+		cuSynchronize();								\
+	}
+
+#define cuExecute3D(size, Func, ...){						\
+		uint3 pDims = cudaGridSize3D(size, 8);		\
+		dim3 threadsPerBlock(8, 8, 8);		\
+		Func << <pDims, threadsPerBlock >> > (				\
+		__VA_ARGS__);										\
+		cuSynchronize();									\
+	}
+
+}// end of namespace dyno
+
 
 namespace TypeInfo
 {

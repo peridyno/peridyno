@@ -1,6 +1,5 @@
 #pragma once
 #include "GridHash.h"
-#include "Utility.h"
 
 namespace dyno {
 

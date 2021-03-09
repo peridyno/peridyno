@@ -1,5 +1,5 @@
 #include "STLMacro.h"
-#include "Utility/SimpleMath.h"
+#include "Algorithm/SimpleMath.h"
 #include <glm/glm.hpp>
 
 namespace dyno

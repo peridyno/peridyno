@@ -1,7 +1,6 @@
 #include <cuda_runtime.h>
 #include "TetSystem.h"
 #include "Topology/TetrahedronSet.h"
-#include "Utility.h"
 #include "Mapping/FrameToPointSet.h"
 
 

@@ -63,7 +63,7 @@ TEST(Octree, Construct)
 	}
 	h_arr[0] = Vector3f(1.5f);
 	h_arr[3] = Vector3f(3.0f);
-	Function1Pt::copy(d_arr, h_arr);
+	d_arr.assign(h_arr);
 
 	SparseOctree<DataType3f> octree;
 	octree.setSpace(Vector3f(0), 1, 4);

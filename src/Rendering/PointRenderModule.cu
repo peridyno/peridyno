@@ -4,7 +4,6 @@
 #include "PointRenderModule.h"
 #include "Topology/PointSet.h"
 #include "Vector.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "OpenGLContext.h"
 #include "Color.h"

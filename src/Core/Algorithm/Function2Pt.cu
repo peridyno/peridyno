@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <vector_types.h>
-#include "Utility.h"
+#include "Functional.h"
+#include "Function2Pt.h"
 
 namespace dyno
 {

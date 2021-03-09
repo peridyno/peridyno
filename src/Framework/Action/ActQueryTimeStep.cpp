@@ -1,5 +1,7 @@
 #include "ActQueryTimeStep.h"
 
+#include <algorithm>
+
 namespace dyno
 {
 	
@@ -27,7 +29,7 @@ namespace dyno
 
 	void QueryTimeStep::process(Node* node)
 	{
-		m_timestep = min(node->getDt(), m_timestep);
+		m_timestep = std::min(node->getDt(), m_timestep);
 	}
 
 }

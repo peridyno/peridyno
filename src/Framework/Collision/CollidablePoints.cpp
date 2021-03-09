@@ -1,5 +1,4 @@
 #include "CollidablePoints.h"
-#include "Utility.h"
 #include "Framework/DeviceContext.h"
 #include "Framework/MechanicalState.h"
 #include "Framework/Node.h"
@@ -60,7 +59,7 @@ namespace dyno
 		auto initPoints = pSet->getPoints();
 
 		m_positions.resize(initPoints.size());
-		Function1Pt::copy(m_positions, initPoints);
+		m_positions.assign(initPoints);
 
 		m_velocities.resize(initPoints.size());
 		m_velocities.reset();
@@ -111,8 +110,8 @@ namespace dyno
 			auto vBuf = mstate->getField<DeviceArrayField<Coord>>(MechanicalState::velocity());
 			//std::shared_ptr<DeviceArrayField<Coord>> vBuf = TypeInfo::cast<DeviceArrayField<Coord>>(vel);
 
-			Function1Pt::copy(m_positions, *(pBuf->getReference()));
-			Function1Pt::copy(m_velocities, *(vBuf->getReference()));
+			m_positions.assign(*(pBuf->getReference()));
+			m_velocities.assign(*(vBuf->getReference()));
 		}
 	}
 
@@ -140,8 +139,8 @@ namespace dyno
 
 			Real dt = getParent()->getDt();
 
-			Function1Pt::copy(hPos, m_positions);
-			Function1Pt::copy(hInitPos, dInitPos);
+			hPos.assign(m_positions);
+			hInitPos.assign(dInitPos);
 			Coord displacement(0);
 			Coord angularVel(0);
 			int nn = 0;
@@ -175,8 +174,8 @@ namespace dyno
 			auto posArr = dc->getField<DeviceArrayField<Coord>>(MechanicalState::position());
 			auto velArr = dc->getField<DeviceArrayField<Coord>>(MechanicalState::velocity());
 
-			Function1Pt::copy(*(posArr->getReference()), m_positions);
-			Function1Pt::copy(*(velArr->getReference()), m_velocities);
+			posArr->getReference()->assign(m_positions);
+			velArr->getReference()->assign(m_velocities);
 		}
 	}
 }

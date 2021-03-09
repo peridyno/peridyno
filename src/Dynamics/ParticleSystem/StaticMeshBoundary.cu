@@ -1,5 +1,4 @@
 #include "StaticMeshBoundary.h"
-#include "Utility.h"
 #include "Framework/Log.h"
 #include "Framework/Node.h"
 #include "ParticleSystem/BoundaryConstraint.h"

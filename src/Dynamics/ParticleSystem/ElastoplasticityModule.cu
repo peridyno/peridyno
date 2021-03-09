@@ -1,8 +1,7 @@
 #include <cuda_runtime.h>
 #include "ElastoplasticityModule.h"
 #include "Framework/Node.h"
-#include "Algorithm/MatrixFunc.h"
-#include "Utility.h"
+#include "Matrix/MatrixFunc.h"
 #include "Kernel.h"
 #include <thrust/scan.h>
 #include <thrust/reduce.h>
@@ -241,7 +240,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::solveElasticity()
 	{
-		Function1Pt::copy(this->m_position_old, this->inPosition()->getValue());
+		this->m_position_old.assign(this->inPosition()->getValue());
 
 		this->computeInverseK();
 

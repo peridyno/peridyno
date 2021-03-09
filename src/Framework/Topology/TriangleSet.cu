@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "Utility.h"
 
 #include <thrust/sort.h>
 
@@ -104,7 +103,7 @@ namespace dyno
 		GArray<int> shift;
 		shift.resize(m_coords.size());
 
-		Function1Pt::copy(shift, counter);
+		shift.assign(counter);
 
 		//print(counter);
 
@@ -125,8 +124,8 @@ namespace dyno
 		m_ver2Tri.getIndex().resize(shift.size());
 		m_ver2Tri.getElements().resize(elements.size());
 
-		Function1Pt::copy(m_ver2Tri.getIndex(), shift);
-		Function1Pt::copy(m_ver2Tri.getElements(), elements);
+		m_ver2Tri.getIndex().assign(shift);
+		m_ver2Tri.getElements().assign(elements);
 
 		counter.clear();
 		shift.clear();
@@ -259,7 +258,7 @@ namespace dyno
 	void TriangleSet<TDataType>::setTriangles(std::vector<Triangle>& triangles)
 	{
 		m_triangles.resize(triangles.size());
-		Function1Pt::copy(m_triangles, triangles);
+		m_triangles.assign(triangles);
 	}
 
 	template<typename TDataType>
@@ -314,10 +313,10 @@ namespace dyno
 		m_ver2Tri.copyFrom(triangleSet.m_ver2Tri);
 
 		m_triangles.resize(triangleSet.m_triangles.size());
-		Function1Pt::copy(m_triangles, triangleSet.m_triangles);
+		m_triangles.assign(triangleSet.m_triangles);
 
 		edg2Tri.resize(triangleSet.edg2Tri.size());
-		Function1Pt::copy(edg2Tri, triangleSet.edg2Tri);
+		edg2Tri.assign(triangleSet.edg2Tri);
 
 		EdgeSet<TDataType>::copyFrom(triangleSet);
 	}

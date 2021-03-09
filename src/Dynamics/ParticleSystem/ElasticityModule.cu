@@ -1,8 +1,7 @@
 #include <cuda_runtime.h>
 #include "ElasticityModule.h"
 #include "Framework/Node.h"
-#include "Algorithm/MatrixFunc.h"
-#include "Utility.h"
+#include "Matrix/MatrixFunc.h"
 #include "Kernel.h"
 
 namespace dyno
@@ -396,7 +395,7 @@ namespace dyno
 	void ElasticityModule<TDataType>::solveElasticity()
 	{
 		//Save new positions
-		Function1Pt::copy(m_position_old, this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getValue());
 
 		this->computeInverseK();
 
@@ -500,7 +499,7 @@ namespace dyno
 			this->inRestShape()->getValue().getElements().resize(this->inNeighborhood()->getValue().getElements().size());
 		}
 
-		Function1Pt::copy(this->inRestShape()->getValue().getIndex(), this->inNeighborhood()->getValue().getIndex());
+		this->inRestShape()->getValue().getIndex().assign(this->inNeighborhood()->getValue().getIndex());
 
 		uint pDims = cudaGridSize(this->inPosition()->getValue().size(), BLOCK_SIZE);
 
@@ -535,7 +534,7 @@ namespace dyno
 		
 		this->computeMaterialStiffness();
 
-		Function1Pt::copy(m_position_old, this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getValue());
 
 		return true;
 	}
@@ -560,7 +559,7 @@ namespace dyno
 
 		this->computeMaterialStiffness();
 
-		Function1Pt::copy(m_position_old, this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getValue());
 	}
 
 }

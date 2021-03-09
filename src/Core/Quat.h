@@ -2,7 +2,6 @@
 #include "Vector.h"
 #include "Matrix.h"
 
-
 namespace dyno 
 {
 	/*

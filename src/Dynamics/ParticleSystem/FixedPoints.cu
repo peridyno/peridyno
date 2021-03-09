@@ -1,5 +1,4 @@
 #include <cuda_runtime.h>
-#include "Utility.h"
 #include "Framework/Log.h"
 #include "Framework/FieldVar.h"
 #include "Framework/MechanicalState.h"
@@ -67,8 +66,8 @@ namespace dyno
 			}
 		}
 
-		Function1Pt::copy(m_bFixed, m_bFixed_host);
-		Function1Pt::copy(m_fixed_positions, m_fixed_positions_host);
+		m_bFixed.assign(m_bFixed_host);
+		m_fixed_positions.assign(m_fixed_positions_host);
 	}
 
 	template<typename TDataType>

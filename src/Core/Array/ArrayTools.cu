@@ -1,5 +1,4 @@
 #include "ArrayTools.h"
-#include "Utility/cuda_utilities.h"
 #include "STL/List.h"
 
 namespace dyno

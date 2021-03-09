@@ -95,7 +95,7 @@ namespace dyno
 		}
 
 		this->currentPosition()->setElementCount(vertList.size());
-		Function1Pt::copy(this->currentPosition()->getValue(), vertList);
+		this->currentPosition()->getValue().assign(vertList);
 
 		this->currentVelocity()->setElementCount(vertList.size());
 
@@ -133,16 +133,16 @@ namespace dyno
 		}
 
 		solid.setElementCount(solidList.size());
-		Function1Pt::copy(solid.getValue(), solidList);
+		solid.getValue().assign(solidList);
 
 		//h.setElementCount(solidList.size());
 		//Function1Pt::copy(h.getValue(), wh);
 
 		isBound.setElementCount(solidList.size());
-		Function1Pt::copy(isBound.getValue(), isbound);
+		isBound.getValue().assign(isbound);
 
 		normal.setElementCount(solidList.size());
-		Function1Pt::copy(normal.getValue(), normals);
+		normal.getValue().assign(normals);
 		//m_velocity.setElementCount(solidList.size());
 		//neighbors.resize(solidList.size(), 4);
 		neighbors.setElementCount(solidList.size(), 4);
@@ -150,7 +150,7 @@ namespace dyno
 		int zcount = solidList.size() / xcount;
 		int num = solidList.size();
 		printf("zcount is %d, xcount is %d\n", zcount, xcount);
-		cuint pDims = cudaGridSize(num, BLOCK_SIZE);
+		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 		InitNeighbor << < pDims, BLOCK_SIZE >> > (neighbors.getValue(), zcount, xcount);
 		cuSynchronize();
 		solidList.clear();

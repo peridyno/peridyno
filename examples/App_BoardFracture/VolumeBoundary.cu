@@ -1,6 +1,7 @@
 #include "VolumeBoundary.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/SignedDistanceField.h"
+#include "Algorithm/CudaRand.h"
 
 namespace dyno
 {

@@ -2,8 +2,7 @@
 #include <cuda_runtime.h>
 #include "TriangleSetToTriangleSet.h"
 #include "Topology/NeighborQuery.h"
-#include "Algorithm/MatrixFunc.h"
-#include "Utility.h"
+#include "Matrix/MatrixFunc.h"
 #include "Topology/Primitive3D.h"
 #include "Collision/CollisionDetectionBroadPhase.h"
 

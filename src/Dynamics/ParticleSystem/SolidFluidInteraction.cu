@@ -2,7 +2,6 @@
 #include "PositionBasedFluidModel.h"
 
 #include "Topology/PointSet.h"
-#include "Utility.h"
 #include "ParticleSystem.h"
 #include "Topology/NeighborQuery.h"
 #include "Kernel.h"
@@ -95,8 +94,8 @@ namespace dyno
 		weights.resize(total_num);
 		init_pos.resize(total_num);
 
-		Function1Pt::copy(m_objId, ids);
-		Function1Pt::copy(m_mass.getValue(), mass);
+		m_objId.assign(ids);
+		m_mass.getValue().assign(mass);
 		ids.clear();
 		mass.clear();
 

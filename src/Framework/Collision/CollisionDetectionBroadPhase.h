@@ -2,6 +2,7 @@
 #include "Framework/CollisionModel.h"
 #include "Topology/Primitive3D.h"
 #include "Topology/SparseOctree.h"
+#include "Algorithm/Reduction.h"
 
 namespace dyno
 {

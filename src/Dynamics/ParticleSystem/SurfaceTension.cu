@@ -1,5 +1,4 @@
 #include <cuda_runtime.h>
-#include "Utility.h"
 #include "SurfaceTension.h"
 #include "Framework/MechanicalState.h"
 #include "Topology/NeighborList.h"

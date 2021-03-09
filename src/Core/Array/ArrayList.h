@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 #pragma once
-#include <list>
+#include <vector>
 #include <iostream>
 #include "STL/List.h"
 
-namespace dyno
-{
+namespace dyno {
 	template<class ElementType, DeviceType deviceType> class ArrayList;
 
 	template<class ElementType>

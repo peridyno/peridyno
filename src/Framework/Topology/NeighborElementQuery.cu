@@ -415,7 +415,7 @@ namespace dyno
 				discreteSet->getSpheres().size()
 			);
 
-			Function1Pt::copy(m_queryAABB, m_queriedAABB);
+			m_queryAABB.assign(m_queriedAABB);
 
 			Real radius = this->inRadius()->getValue();
 

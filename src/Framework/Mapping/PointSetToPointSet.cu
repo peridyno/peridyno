@@ -1,10 +1,8 @@
 #pragma once
 #include <cuda_runtime.h>
 #include "PointSetToPointSet.h"
-#include "Utility.h"
 #include "Topology/NeighborQuery.h"
-#include "Algorithm/MatrixFunc.h"
-#include "Utility.h"
+#include "Matrix/MatrixFunc.h"
 
 template <typename Real>
 DYN_FUNC inline Real PP_Weight(const Real r, const Real h)
@@ -189,7 +187,7 @@ namespace dyno
 	template<typename TDataType>
 	bool PointSetToPointSet<TDataType>::apply()
 	{
-		cuint pDim = cudaGridSize(m_to->getPoints().size(), BLOCK_SIZE);
+		uint pDim = cudaGridSize(m_to->getPoints().size(), BLOCK_SIZE);
 
 		K_ApplyTransform << <pDim, BLOCK_SIZE >> > (
 			m_to->getPoints(),

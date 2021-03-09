@@ -20,7 +20,7 @@ TEST(Array, CPU)
 	GArray<int> gArr;
 	gArr.resize(2);
 	
-	Function1Pt::copy(gArr, cArr);
+	gArr.assign(cArr);
 
 	GArrayList<int> arrList;
 	arrList.resize(gArr);

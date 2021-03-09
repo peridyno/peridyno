@@ -6,7 +6,6 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "ParticleIntegrator.h"
 #include "Topology/NeighborQuery.h"
-#include "Utility.h"
 
 namespace dyno
 {

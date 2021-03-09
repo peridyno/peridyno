@@ -1,7 +1,6 @@
 #include "HyperelasticityModule.h"
-#include "Utility.h"
 #include "Framework/Node.h"
-#include "Algorithm/MatrixFunc.h"
+#include "Matrix/MatrixFunc.h"
 #include "Kernel.h"
 
 namespace dyno

@@ -2,7 +2,6 @@
 #include "SummationDensity.h"
 #include "Framework/MechanicalState.h"
 #include "Framework/Node.h"
-#include "Utility.h"
 #include "Kernel.h"
 
 namespace dyno

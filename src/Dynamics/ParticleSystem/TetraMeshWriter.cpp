@@ -1,6 +1,5 @@
 #include "TetraMeshWriter.h"
 #include "Framework/ModuleIO.h"
-#include "Utility/Function1Pt.h"
 
 #include <sstream>
 #include <iostream>
@@ -71,9 +70,9 @@ namespace dyno
 		host_triangles.resize( (*(this->ptr_triangles)).size() );
 		host_tri2tet.resize( (*(this->ptr_tri2tet)).size() );
 
-		Function1Pt::copy(host_vertices, *(this->ptr_vertices));
-		Function1Pt::copy(host_triangles, *(this->ptr_triangles));
-		Function1Pt::copy(host_tri2tet, *(this->ptr_tri2tet));
+		host_vertices.assign(*(this->ptr_vertices));
+		host_triangles.assign(*(this->ptr_triangles));
+		host_tri2tet.assign(*(this->ptr_tri2tet));
 
 		for (int i = 0; i < host_vertices.size(); ++i) {
 			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;

@@ -18,7 +18,6 @@
 #include "Image_IO/image_io.h"
 #include "Image_IO/png_io.h"
 #include "LodePNG/lodepng.h"
-#include "Utility.h"
 
 using std::string;
 

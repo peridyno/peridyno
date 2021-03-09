@@ -1,10 +1,11 @@
 #include <cuda_runtime.h>
 #include "VelocityConstraint.h"
 #include "Framework/Node.h"
-#include "Utility.h"
 #include "SummationDensity.h"
 #include "Attribute.h"
 #include "Kernel.h"
+#include "Algorithm/Function2Pt.h"
+#include "Algorithm/CudaRand.h"
 
 namespace dyno
 {
@@ -661,7 +662,7 @@ namespace dyno
 
 		m_r.reset();
 		Function2Pt::subtract(m_r, m_divergence, m_y);
-		Function1Pt::copy(m_p, m_r);
+		m_p.assign(m_r);
 		Real rr = m_arithmetic->Dot(m_r, m_r);
 		Real err = sqrt(rr / m_r.size());
 

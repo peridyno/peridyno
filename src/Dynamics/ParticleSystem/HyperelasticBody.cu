@@ -1,6 +1,5 @@
 #include "HyperelasticBody.h"
 #include "Topology/UnstructuredPointSet.h"
-#include "Utility.h"
 #include "Topology/NeighborQuery.h"
 #include "ParticleIntegrator.h"
 #include "HyperelasticityModule_test.h"
@@ -110,7 +109,7 @@ namespace dyno
 				pts.resize(num);
 			}
 
-			Function1Pt::copy(pts, this->currentPosition()->getValue());
+			pts.assign(this->currentPosition()->getValue());
 		}
 	}
 
@@ -140,10 +139,10 @@ namespace dyno
 		int vNum = tetSet->getPoints().size();
 
 		this->currentRestPosition()->setElementCount(vNum);
-		Function1Pt::copy(this->currentRestPosition()->getValue(), tetSet->getPoints());
+		this->currentRestPosition()->getValue().assign(tetSet->getPoints());
 
 		this->currentAttribute()->setElementCount(vNum);
-		Function1Pt::copy(this->currentAttribute()->getValue(), host_attribute);
+		this->currentAttribute()->getValue().assign(host_attribute);
 
 		this->currentVertexRotation()->setElementCount(vNum);
 		cuExecute(vNum,

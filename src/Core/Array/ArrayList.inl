@@ -1,5 +1,6 @@
-#include "Utility.h"
 #include "ArrayTools.h"
+#include "Algorithm/Scan.h"
+#include "Algorithm/Reduction.h"
 
 namespace dyno
 {
@@ -22,7 +23,7 @@ namespace dyno
 			m_lists.resize(counts.size());
 		}
 
-		Function1Pt::copy(m_index, counts);
+		m_index.assign(counts);
 
 		Reduction<int> reduce;
 		int total_num = reduce.accumulate(m_index.begin(), m_index.size());
@@ -64,7 +65,7 @@ namespace dyno
 			accNum += eleSize;
 		}
 
-		Function1Pt::copy(m_index, hIndex);
+		m_index.assign(hIndex);
 
 		m_elements.resize(arraySize*eleSize);
 

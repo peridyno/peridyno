@@ -1,6 +1,5 @@
 #include <fstream>
 #include "DistanceField3D.h"
-#include "Utility.h"
 #include "Vector.h"
 #include "DataTypes.h"
 

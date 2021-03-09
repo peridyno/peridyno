@@ -1,5 +1,4 @@
 ﻿#include "MeshCollision.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "Framework/CollidableObject.h"
 #include "Collision/CollidablePoints.h"
@@ -543,7 +542,7 @@ namespace dyno
 			init_pos.resize(m_position.getElementCount());
 
 			m_position_previous.resize(m_position.getElementCount());
-			Function1Pt::copy(m_position_previous, m_position.getValue());
+			m_position_previous.assign(m_position.getValue());
 			printf("resize finished\n");
 		}
 		
@@ -554,7 +553,7 @@ namespace dyno
 		//auto m_neighbor_tri = m_neighborhood_tri.getValue();
 	//	auto flip = m_flip.getValue();
 
-		Function1Pt::copy(init_pos, m_position.getValue());
+		init_pos.assign(m_position.getValue());
 
 		//uint pDims = cudaGridSize(m_position.getValue().size(), BLOCK_SIZE);
 
@@ -604,8 +603,8 @@ namespace dyno
 // 			getParent()->getDt()
 // 			);
 
-		Function1Pt::copy(m_triangle_vertex_previous, m_triangle_vertex.getValue());
-		Function1Pt::copy(m_position_previous, m_position.getValue());
+		m_triangle_vertex_previous.assign(m_triangle_vertex.getValue());
+		m_position_previous.assign(m_position.getValue());
 
 	}
 
@@ -614,7 +613,7 @@ namespace dyno
 	bool MeshCollision<TDataType>::initializeImpl()
 	{
 		m_triangle_vertex_previous.resize(m_triangle_vertex.getElementCount());
-		Function1Pt::copy(m_triangle_vertex_previous, m_triangle_vertex.getValue());
+		m_triangle_vertex_previous.assign(m_triangle_vertex.getValue());
 
 		if (m_position.getElementCount() == 0)
 			return true;
@@ -627,7 +626,7 @@ namespace dyno
 		init_pos.resize(m_position.getElementCount());
 
 		m_position_previous.resize(m_position.getElementCount());
-		Function1Pt::copy(m_position_previous, m_position.getValue());
+		m_position_previous.assign(m_position.getValue());
 
 		
 

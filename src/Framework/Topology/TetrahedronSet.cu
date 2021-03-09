@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "Utility.h"
 
 #include <thrust/sort.h>
 
@@ -35,7 +34,7 @@ namespace dyno
 		std::vector<Triangle> triangles;
 
 		m_tethedrons.resize(tetrahedrons.size());
-		Function1Pt::copy(m_tethedrons, tetrahedrons);
+		m_tethedrons.assign(tetrahedrons);
 
 		this->updateTriangles();
 	}
@@ -48,7 +47,7 @@ namespace dyno
 			m_tethedrons.resize(tetrahedrons.size());
 		}
 
-		Function1Pt::copy(m_tethedrons, tetrahedrons);
+		m_tethedrons.assign(tetrahedrons);
 
 		this->updateTriangles();
 	}
@@ -172,7 +171,7 @@ namespace dyno
 		GArray<int> shift;
 		shift.resize(m_coords.size());
 
-		Function1Pt::copy(shift, counter);
+		shift.assign(counter);
 
 		int total_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, shift.begin(), shift.begin() + shift.size(), shift.begin());
@@ -191,8 +190,8 @@ namespace dyno
 		m_ver2Tet.getIndex().resize(shift.size());
 		m_ver2Tet.getElements().resize(elements.size());
 
-		Function1Pt::copy(m_ver2Tet.getIndex(), shift);
-		Function1Pt::copy(m_ver2Tet.getElements(), elements);
+		m_ver2Tet.getIndex().assign(shift);
+		m_ver2Tet.getElements().assign(elements);
 
 		counter.clear();
 		shift.clear();
@@ -289,7 +288,7 @@ namespace dyno
 	void printTKey(GArray<TKey> keys, int maxLength) {
 		CArray<TKey> h_keys;
 		h_keys.resize(keys.size());
-		Function1Pt::copy(h_keys, keys);
+		h_keys.assign(keys);
 
 		int psize = min((int)h_keys.size(), maxLength);
 		for (int i = 0; i < psize; i++)
@@ -303,9 +302,9 @@ namespace dyno
 	void printCount(GArray<int> keys, int maxLength) {
 		CArray<int> h_keys;
 		h_keys.resize(keys.size());
-		Function1Pt::copy(h_keys, keys);
+		h_keys.assign(keys);
 
-		int psize = min((int)h_keys.size(), maxLength);
+		int psize = minimum((int)h_keys.size(), maxLength);
 		for (int i = 0; i < psize; i++)
 		{
 			printf("%d: %d \n", i, h_keys[i]);
@@ -368,10 +367,10 @@ namespace dyno
 	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType> tetSet)
 	{
 		m_tethedrons.resize(tetSet.m_tethedrons.size());
-		Function1Pt::copy(m_tethedrons, tetSet.m_tethedrons);
+		m_tethedrons.assign(tetSet.m_tethedrons);
 
 		tri2Tet.resize(tetSet.tri2Tet.size());
-		Function1Pt::copy(tri2Tet, tetSet.tri2Tet);
+		tri2Tet.assign(tetSet.tri2Tet);
 
 		m_ver2Tet.copyFrom(tetSet.m_ver2Tet);
 

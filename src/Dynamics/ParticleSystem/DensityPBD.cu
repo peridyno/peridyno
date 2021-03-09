@@ -1,6 +1,5 @@
 #include <cuda_runtime.h>
 //#include "Core/Utilities/template_functions.h"
-#include "Utility.h"
 #include "DensityPBD.h"
 #include "Framework/Node.h"
 #include <string>
@@ -275,7 +274,7 @@ namespace dyno
 		if (m_position_old.size() != this->inPosition()->getElementCount())
 			m_position_old.resize(this->inPosition()->getElementCount());
 
-		Function1Pt::copy(m_position_old, this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getValue());
 
 		if (this->outDensity()->getElementCount() != this->inPosition()->getElementCount())
 			this->outDensity()->setElementCount(this->inPosition()->getElementCount());

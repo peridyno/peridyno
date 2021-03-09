@@ -1,9 +1,8 @@
 #pragma once
 #include "Typedef.h"
-#include "Array/Array.h"
-#include "Utility.h"
-#include "Field.h"
 #include "Base.h"
+#include "Array/Array.h"
+#include "Field.h"
 #include "Framework/Log.h"
 
 namespace dyno {
@@ -146,7 +145,7 @@ void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
 	{
 		m_data = std::make_shared<Array<T, deviceType>>();
 		m_data->resize(vals.size());
-		Function1Pt::copy(*m_data, vals);
+		m_data->assign(vals);
 		return;
 	}
 	else
@@ -157,7 +156,7 @@ void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
 		}
 		else
 		{
-			Function1Pt::copy(*data, vals);
+			data->assign(vals);
 		}
 	}
 }
@@ -170,7 +169,7 @@ void ArrayField<T, deviceType>::setValue(GArray<T>& vals)
 	{
 		m_data = std::make_shared<Array<T, deviceType>>();
 		m_data->resize(vals.size());
-		Function1Pt::copy(*m_data, vals);
+		m_data->assign(vals);
 		return;
 	}
 	else
@@ -180,7 +179,7 @@ void ArrayField<T, deviceType>::setValue(GArray<T>& vals)
 			m_data->resize(vals.size());
 		}
 		
-		Function1Pt::copy(*data, vals);
+		data->assign(vals);
 	}
 }
 

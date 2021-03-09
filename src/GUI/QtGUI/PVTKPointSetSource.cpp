@@ -1,7 +1,5 @@
 #include "PVTKPointSetSource.h"
 
-#include "Utility/Function1Pt.h"
-
 #include "vtkObjectFactory.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -50,7 +48,7 @@ int PVTKPointSetSource::RequestData(
 	host_pts.resize(num_of_points);
 
 	printf("HostPtsSize %d\n", host_pts.size());
-	dyno::Function1Pt::copy(host_pts, device_pts);
+	host_pts.assign(device_pts);
 
 	printf("Host Copy Finished\n");
 

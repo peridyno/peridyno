@@ -1,6 +1,5 @@
 #include "HyperelasticityModule_test.h"
-#include "Utility.h"
-#include "Algorithm/MatrixFunc.h"
+#include "Matrix/MatrixFunc.h"
 
 #include "Kernel.h"
 #include <math.h>

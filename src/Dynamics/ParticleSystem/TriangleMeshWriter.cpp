@@ -1,6 +1,5 @@
 #include "TriangleMeshWriter.h"
 #include "Framework/ModuleIO.h"
-#include "Utility/Function1Pt.h"
 
 #include <sstream>
 #include <iostream>
@@ -69,8 +68,8 @@ namespace dyno
 		host_vertices.resize((*(this->ptr_vertices)).size());
 		host_triangles.resize((*(this->ptr_triangles)).size());
 
-		Function1Pt::copy(host_vertices, *(this->ptr_vertices));
-		Function1Pt::copy(host_triangles, *(this->ptr_triangles));
+		host_vertices.assign(*(this->ptr_vertices));
+		host_triangles.assign(*(this->ptr_triangles));
 
 		for (int i = 0; i < host_vertices.size(); ++i) {
 			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;

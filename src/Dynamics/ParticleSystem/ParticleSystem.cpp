@@ -2,8 +2,6 @@
 #include "PositionBasedFluidModel.h"
 
 #include "Topology/PointSet.h"
-#include "Utility.h"
-
 
 namespace dyno
 {
@@ -134,7 +132,7 @@ namespace dyno
 				pts.resize(num);
 			}
 
-			Function1Pt::copy(pts, this->currentPosition()->getValue());
+			pts.assign(this->currentPosition()->getValue());
 		}
 	}
 
@@ -153,7 +151,7 @@ namespace dyno
 			this->currentVelocity()->setElementCount(pts.size());
 			this->currentForce()->setElementCount(pts.size());
 
-			Function1Pt::copy(this->currentPosition()->getValue(), pts);
+			this->currentPosition()->getValue().assign(pts);
 			this->currentVelocity()->getReference()->reset();
 		}
 

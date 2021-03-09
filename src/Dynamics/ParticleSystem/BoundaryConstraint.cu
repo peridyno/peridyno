@@ -1,8 +1,7 @@
 #include "BoundaryConstraint.h"
-#include "Utility.h"
 #include "Framework/Log.h"
 #include "Framework/Node.h"
-
+#include "Algorithm/CudaRand.h"
 #include "Topology/DistanceField3D.h"
 
 namespace dyno
@@ -70,7 +69,7 @@ namespace dyno
 	template<typename TDataType>
 	bool BoundaryConstraint<TDataType>::constrain()
 	{
-		cuint pDim = cudaGridSize(m_position.getElementCount(), BLOCK_SIZE);
+		uint pDim = cudaGridSize(m_position.getElementCount(), BLOCK_SIZE);
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
 			m_position.getValue(),
 			m_velocity.getValue(),
@@ -85,7 +84,7 @@ namespace dyno
 	template<typename TDataType>
 	bool BoundaryConstraint<TDataType>::constrain(GArray<Coord>& position, GArray<Coord>& velocity, Real dt)
 	{
-		cuint pDim = cudaGridSize(position.size(), BLOCK_SIZE);
+		uint pDim = cudaGridSize(position.size(), BLOCK_SIZE);
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
 			position,
 			velocity,

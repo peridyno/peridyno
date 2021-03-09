@@ -1,6 +1,6 @@
 #include "CollisionDetectionBroadPhase.h"
 
-#include "Utility/Reduction.h"
+#include "Algorithm/Reduction.h"
 
 #include "Topology/SparseOctree.h"
 
@@ -16,7 +16,7 @@ namespace dyno
 		CArray<int> h_arr;
 		h_arr.resize(arr.size());
 
-		Function1Pt::copy(h_arr, arr);
+		h_arr.assign(arr);
 
 		for (int i = 0; i < h_arr.size(); i++)
 		{
@@ -31,7 +31,7 @@ namespace dyno
 		CArray<PKey> h_arr;
 		h_arr.resize(arr.size());
 
-		Function1Pt::copy(h_arr, arr);
+		h_arr.assign(arr);
 
 		for (int i = 0; i < h_arr.size(); i++)
 		{

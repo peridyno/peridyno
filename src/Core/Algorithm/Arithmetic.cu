@@ -1,5 +1,4 @@
 #include "Arithmetic.h"
-#include "Function1Pt.h"
 #include "Function2Pt.h"
 
 namespace dyno {

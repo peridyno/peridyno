@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Utility/ForEach.h"
+#include "Algorithm/ForEach.h"
 
 using namespace dyno;
 

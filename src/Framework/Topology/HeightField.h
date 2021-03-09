@@ -1,7 +1,7 @@
 #pragma once
 #include "Framework/ModuleTopology.h"
-#include "Topology/NeighborList.h"
 #include "Vector.h"
+#include "Array/Array2D.h"
 
 
 namespace dyno

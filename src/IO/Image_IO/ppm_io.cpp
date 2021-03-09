@@ -18,7 +18,7 @@
 #include <sstream>
 #include "Image_IO/image_io.h"
 #include "Image_IO/ppm_io.h"
-#include "Utility.h"
+#include "Algorithm.h"
 #include "File_Utilities/file_content_utilities.h"
 #include "File_Utilities/file_path_utilities.h"
 using std::string;

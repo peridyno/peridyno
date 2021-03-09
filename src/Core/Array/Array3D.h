@@ -3,9 +3,6 @@
 #include <vector>
 
 namespace dyno {
-
-#define INVALID -1
-
 	template<typename T, DeviceType deviceType> class Array3D;
 
 	template<typename T>

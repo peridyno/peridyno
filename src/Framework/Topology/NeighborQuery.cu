@@ -1,13 +1,10 @@
 #include <cuda_runtime.h>
 #include "NeighborQuery.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "Topology/NeighborList.h"
 #include "Topology/FieldNeighbor.h"
 #include "Framework/SceneGraph.h"
-#include "Utility/Scan.h"
-
-
+#include "Algorithm/Scan.h"
 
 namespace dyno
 {
@@ -71,7 +68,7 @@ namespace dyno
 		this->inRadius()->setValue(Real(0.011));
 
 		this->inPosition()->setElementCount(position.size());
-		Function1Pt::copy(this->inPosition()->getValue(), position);
+		this->inPosition()->getValue().assign(position);
 	}
 
 	template<typename TDataType>
@@ -181,7 +178,7 @@ namespace dyno
 		CArray<Coord> hostPos;
 		hostPos.resize(pos.size());
 
-		Function1Pt::copy(hostPos, pos);
+		hostPos.assign(pos);
 
 // 		m_lowBound = Vector3f(10000000, 10000000, 10000000);
 // 		m_highBound = Vector3f(-10000000, -10000000, -10000000);

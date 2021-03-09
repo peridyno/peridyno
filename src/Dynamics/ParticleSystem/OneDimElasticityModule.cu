@@ -110,13 +110,13 @@ namespace dyno
 	void OneDimElasticityModule<TDataType>::solveElasticity()
 	{
 		//Save new positions
-		Function1Pt::copy(m_position_old, m_position.getValue());
+		m_position_old.assign(m_position.getValue());
 		
 		int itor = 0;
 		Real lambda_prime = 1 - pow(1 - m_lambda.getValue(), 1 / Real(m_iterNum.getValue()));
 		while (itor < m_iterNum.getValue())
 		{
-			Function1Pt::copy(m_position_buf, m_position.getValue());
+			m_position_buf.assign(m_position.getValue());
 
 			int num = m_position.getElementCount();
 			uint pDims = cudaGridSize(num, BLOCK_SIZE);

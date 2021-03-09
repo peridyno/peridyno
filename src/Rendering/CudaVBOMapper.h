@@ -13,9 +13,9 @@
 */
 
 #pragma once
+#include "Platform.h"
 #include <GL/glew.h>
 #include <cuda_gl_interop.h> 
-#include "Utility.h"
 
 namespace dyno{
 

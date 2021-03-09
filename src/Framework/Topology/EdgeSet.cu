@@ -1,6 +1,5 @@
 #include "EdgeSet.h"
 #include <vector>
-#include <Utility.h>
 #include "Array/ArrayList.h"
 
 #include <thrust/sort.h>
@@ -83,7 +82,7 @@ namespace dyno
 	void EdgeSet<TDataType>::copyFrom(EdgeSet<TDataType>& edgeSet)
 	{
 		m_edges.resize(edgeSet.m_edges.size());
-		Function1Pt::copy(m_edges, edgeSet.m_edges);
+		m_edges.assign(edgeSet.m_edges);
 
 		PointSet<TDataType>::copyFrom(edgeSet);
 	}

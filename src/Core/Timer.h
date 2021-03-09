@@ -5,6 +5,9 @@
 #include <windows.h>
 #endif
 
+#include <cuda_runtime.h>
+#include <iostream>
+
 namespace dyno 
 {
 	class CTimer
@@ -24,4 +27,22 @@ namespace dyno
 #endif
 	};
 
+	class GTimer
+	{
+	private:
+		cudaEvent_t m_start, m_stop;
+
+		float milliseconds;
+
+	public:
+		GTimer();
+		~GTimer();
+
+		void start();
+		void stop();
+
+		float getEclipsedTime();
+
+		void outputString(char* str);
+	};
 } //end of namespace dyno

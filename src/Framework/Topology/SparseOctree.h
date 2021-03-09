@@ -1,6 +1,7 @@
 #pragma once
 #include "DataTypes.h"
 #include "Primitive3D.h"
+#include "Array/Array.h"
 
 namespace dyno {
 

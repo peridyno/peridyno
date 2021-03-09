@@ -1,9 +1,6 @@
 #pragma once
 #include <set>
-
-#include "Platform.h"
 #include "Array/Array.h"
-#include "Utility.h"
 
 namespace dyno
 {
@@ -115,12 +112,12 @@ namespace dyno
 			if (m_elements.size() != neighborlist.m_elements.size())
 				m_elements.resize(neighborlist.m_elements.size());
 
-			Function1Pt::copy(m_elements, neighborlist.m_elements);
+			m_elements.assign(neighborlist.m_elements);
 
 			if (m_index.size() != neighborlist.m_index.size())
 				m_index.resize(neighborlist.m_index.size());
 
-			Function1Pt::copy(m_index, neighborlist.m_index);
+			m_index.assign(neighborlist.m_index);
 			
 		}
 
@@ -130,12 +127,12 @@ namespace dyno
 			if (m_elements.size() != elements.size())
 				m_elements.resize(elements.size());
 
-			Function1Pt::copy(m_elements, elements);
+			m_elements.assign(elements);
 
 			if (m_index.size() != index.size())
 				m_index.resize(index.size());
 
-			Function1Pt::copy(m_index, index);
+			m_index.assign(index);
 		}
 
 		GArray<int>& getIndex() { return m_index; }

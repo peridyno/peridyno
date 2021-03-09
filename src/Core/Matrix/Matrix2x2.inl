@@ -1,7 +1,6 @@
 #include <cmath>
 #include <limits>
 
-#include "Utility.h"
 #include "Vector.h"
 
 namespace dyno 

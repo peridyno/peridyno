@@ -8,9 +8,7 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/FieldNeighbor.h"
 #include "Topology/NeighborQuery.h"
-#include "ParticleSystem/Helmholtz.h"
 #include "ParticleSystem/Attribute.h"
-#include "Utility.h"
 
 namespace dyno
 {

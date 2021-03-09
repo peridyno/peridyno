@@ -1,9 +1,12 @@
 #pragma once
 #include "Framework/ModuleConstraint.h"
 #include "Framework/FieldArray.h"
-#include "Utility.h"
 #include "Framework/FieldVar.h"
 #include "Topology/FieldNeighbor.h"
+#include "Algorithm/Reduction.h"
+#include "Algorithm/Functional.h"
+#include "Algorithm/Arithmetic.h"
+#include "Algorithm/Reduction.h"
 
 namespace dyno {
 

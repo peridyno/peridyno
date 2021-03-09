@@ -4,7 +4,6 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/UnstructuredPointSet.h"
 
-#include "Utility.h"
 #include "ParticleSystem/Peridynamics.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborQuery.h"
@@ -23,6 +22,8 @@
 #include "STL/MultiMap.h"
 #include "STL/Set.h"
 #include "STL/Pair.h"
+
+#include "Timer.h"
 
 #include <thrust/sort.h>
 
@@ -478,8 +479,8 @@ namespace dyno
 		index.resize(list.getIndex().size());
 		elements.resize(list.getElements().size());
 
-		Function1Pt::copy(index, list.getIndex());
-		Function1Pt::copy(elements, list.getElements());
+		index.assign(list.getIndex());
+		elements.assign(list.getElements());
 
 		for (int i = 0; i < index.size(); i++)
 		{
@@ -502,8 +503,8 @@ namespace dyno
 		index.resize(list.getIndex().size());
 		elements.resize(list.getElements().size());
 
-		Function1Pt::copy(index, list.getIndex());
-		Function1Pt::copy(elements, list.getElements());
+		index.assign(list.getIndex());
+		elements.assign(list.getElements());
 
 		for (int i = 0; i < index.size(); i++)
 		{
@@ -522,7 +523,7 @@ namespace dyno
 	{
 		CArray<TopologyModule::Tetrahedron> h_tets;
 		h_tets.resize(tets.size());
-		Function1Pt::copy(h_tets, tets);
+		h_tets.assign(tets);
 
 		for (size_t i = 0; i < tets.size(); i++)
 		{
@@ -557,7 +558,7 @@ namespace dyno
 	{
 		CArray<int> h_intArray;
 		h_intArray.resize(intArray.size());
-		Function1Pt::copy(h_intArray, intArray);
+		h_intArray.assign(intArray);
 
 		for (size_t i = 0; i < intArray.size(); i++)
 		{
@@ -682,12 +683,12 @@ namespace dyno
 
 		GArray<TopologyModule::Tri2Tet> tri2Tet_old;
 		tri2Tet_old.resize(tri2Tet.size());
-		Function1Pt::copy(tri2Tet_old, tri2Tet);
+		tri2Tet_old.assign(tri2Tet);
 
 		NeighborList<Pair<int, int>> pairList;
 		pairList.resize(verSize);
 
-		Function1Pt::copy(pairList.getIndex(), ver2Tet.getIndex());
+		pairList.getIndex().assign(ver2Tet.getIndex());
 		pairList.getElements().resize(ver2Tet.getElements().size());
 
 		GArray<int> counter;
@@ -730,7 +731,7 @@ namespace dyno
 
 		GArray<int> shift;
 		shift.resize(counter.size());
-		Function1Pt::copy(shift, counter);
+		shift.assign(counter);
 
 		int new_num = thrust::reduce(thrust::device, shift.begin(), shift.begin() + shift.size());
 		thrust::exclusive_scan(thrust::device, shift.begin(), shift.begin() + shift.size(), shift.begin());
@@ -744,7 +745,7 @@ namespace dyno
 
 		GArray<TopologyModule::Tetrahedron> tets_old;
 		tets_old.resize(tets.size());
-		Function1Pt::copy(tets_old, tets);
+		tets_old.assign(tets);
 
 		cuExecute(pairList.size(),
 			HFM_UpdateTopology,
@@ -804,12 +805,12 @@ namespace dyno
 
 		GArray<TopologyModule::Tri2Tet> tri2Tet_new;
 		tri2Tet_new.resize(topo->getTri2Tet().size());
-		Function1Pt::copy(tri2Tet_new, topo->getTri2Tet());
+		tri2Tet_new.assign(topo->getTri2Tet());
 
 		//update fracture tag
 		GArray<bool> fractureTag_old;
 		fractureTag_old.resize(this->currentFractureTag()->getElementCount());
-		Function1Pt::copy(fractureTag_old, this->currentFractureTag()->getValue());
+		fractureTag_old.assign(this->currentFractureTag()->getValue());
 
 		//print(fractureTag_old);
 
@@ -953,7 +954,7 @@ namespace dyno
 			this->currentVelocity()->setElementCount(pts.size());
 			this->currentForce()->setElementCount(pts.size());
 
-			Function1Pt::copy(this->currentPosition()->getValue(), pts);
+			this->currentPosition()->getValue().assign(pts);
 			this->currentVelocity()->getReference()->reset();
 		}
 	}

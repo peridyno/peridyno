@@ -1,5 +1,5 @@
 #include "Interval.h"
-#include "Utility/SimpleMath.h"
+#include "Algorithm/SimpleMath.h"
 
 namespace dyno {
 
@@ -132,8 +132,8 @@ namespace dyno {
 	{
 		Interval<Real> ret;
 
-		ret.v0 = max(v0, itv.v0);
-		ret.v1 = min(v1, itv.v1);
+		ret.v0 = maximum(v0, itv.v0);
+		ret.v1 = minimum(v1, itv.v1);
 		ret.leftOpen = outside(ret.v0)||itv.outside(ret.v0);
 		ret.rightOpen = outside(ret.v1) || itv.outside(ret.v1);
 

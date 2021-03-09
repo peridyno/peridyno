@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "Utility.h"
 
 namespace dyno
 {
@@ -74,7 +73,7 @@ namespace dyno
 		{
 			m_coords.resize(pointSet.getPointSize());
 		}
-		Function1Pt::copy(m_coords, pointSet.getPoints());
+		m_coords.assign(pointSet.getPoints());
 	}
 
 	template<typename TDataType>
@@ -82,7 +81,7 @@ namespace dyno
 	{
 		//printf("%d\n", pos.size());
 		m_coords.resize(pos.size());
-		Function1Pt::copy(m_coords, pos);
+		m_coords.assign(pos);
 
 		tagAsChanged();
 	}
@@ -91,7 +90,7 @@ namespace dyno
 	void PointSet<TDataType>::setPoints(GArray<Coord>& pos)
 	{
 		m_coords.resize(pos.size());
-		Function1Pt::copy(m_coords, pos);
+		m_coords.assign(pos);
 
 		tagAsChanged();
 	}

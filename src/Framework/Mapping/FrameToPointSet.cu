@@ -1,6 +1,5 @@
 #pragma once
 #include "FrameToPointSet.h"
-#include "Utility.h"
 #include "Topology/Frame.h"
 #include "Topology/PointSet.h"
 
@@ -37,7 +36,7 @@ namespace dyno
 	{
 		m_refRigid = rigid;
 		m_refPoints.resize(points.size());
-		Function1Pt::copy(m_refPoints, points);
+		m_refPoints.assign(points);
 	}
 
 

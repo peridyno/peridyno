@@ -1,9 +1,8 @@
 #pragma once
 #include "DataTypes.h"
-#include "Utility.h"
 #include "Array/Array.h"
 #include "Topology/NeighborList.h"
-#include "Utility/Scan.h"
+#include "Algorithm/Scan.h"
 #include "EdgeSet.h"
 #include "Framework/ModuleTopology.h"
 #include "Topology/Primitive3D.h"

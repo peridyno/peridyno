@@ -1,5 +1,4 @@
 #include <cuda_runtime.h>
-#include "Utility.h"
 #include "Framework/Log.h"
 #include "Framework/FieldVar.h"
 #include "Framework/MechanicalState.h"

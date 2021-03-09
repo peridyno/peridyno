@@ -2,7 +2,6 @@
 #include "PositionBasedFluidModel.h"
 
 #include "Topology/PointSet.h"
-#include "Utility.h"
 #include "SummationDensity.h"
 
 #include <time.h>

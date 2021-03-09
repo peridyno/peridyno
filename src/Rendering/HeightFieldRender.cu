@@ -1,10 +1,9 @@
 #pragma once
-
+#include "cuda_helper_math.h"
 #include <GL/glew.h>
 #include "HeightFieldRender.h"
 #include "Topology/HeightField.h"
 #include "Vector.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "OpenGLContext.h"
 #include "Color.h"

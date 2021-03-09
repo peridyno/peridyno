@@ -1,7 +1,6 @@
 #include "ParticleElasticBody.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
-#include "Utility.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborQuery.h"
 #include "ParticleIntegrator.h"
@@ -101,7 +100,7 @@ namespace dyno
 	void ParticleElasticBody<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
-		Function1Pt::copy(pts, this->currentPosition()->getValue());
+		pts.assign(this->currentPosition()->getValue());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)

@@ -1,10 +1,10 @@
 #pragma once
 #include <GL/glew.h>
+#include "cuda_helper_math.h"
 #include "ElementRender.h"
 #include "Topology/TriangleSet.h"
 #include "Vector.h"
 #include "Framework/Node.h"
-#include "Utility.h"
 #include "OpenGLContext.h"
 #include "Topology/Primitive3D.h"
 #include "Topology/DiscreteElements.h"
@@ -126,8 +126,8 @@ namespace dyno
 		standard_sphere_position.resize(sphereVertices.size());
 		standard_sphere_index.resize(sphereIndices.size());
 
-		Function1Pt::copy(standard_sphere_position, sphereVertices);
-		Function1Pt::copy(standard_sphere_index, sphereIndices);
+		standard_sphere_position.assign(sphereVertices);
+		standard_sphere_index.assign(sphereIndices);
 
 
 

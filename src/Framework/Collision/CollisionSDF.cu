@@ -1,10 +1,10 @@
 #include "CollisionSDF.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "Framework/CollidableObject.h"
 #include "Topology/DistanceField3D.h"
 #include "Collision/CollidablePoints.h"
 #include "Collision/CollidableSDF.h"
+#include "Algorithm/CudaRand.h"
 
 namespace dyno
 {
@@ -115,7 +115,7 @@ namespace dyno
 
 				cPoints->updateCollidableObject();
 
-				cuint pDim = cudaGridSize(pos.size(), BLOCK_SIZE);
+				uint pDim = cudaGridSize(pos.size(), BLOCK_SIZE);
 				K_ConstrainParticles << <pDim, BLOCK_SIZE >> > (
 					pos,
 					vel,

@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "Utility.h"
 
 namespace dyno
 {
@@ -33,9 +32,9 @@ namespace dyno
 		m_boxes.resize(m_hostBoxes.size());
 
 		if(m_spheres.size() > 0)
-			Function1Pt::copy(m_spheres, m_hostSpheres);
+			m_spheres.assign(m_hostSpheres);
 		if(m_boxes.size() > 0)
-			Function1Pt::copy(m_boxes, m_hostBoxes);
+			m_boxes.assign(m_hostBoxes);
 
 		return true;
 	}

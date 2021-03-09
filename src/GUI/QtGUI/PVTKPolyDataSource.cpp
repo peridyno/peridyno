@@ -1,6 +1,6 @@
 #include "PVTKPolyDataSource.h"
 
-#include "Utility/Function1Pt.h"
+#include "Array/Array.h"
 
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -43,7 +43,7 @@ int PVTKPolyDataSource::RequestData(
 	int num_of_points = device_pts.size();
 	dyno::CArray<dyno::Vector3f> host_pts;
 	host_pts.resize(num_of_points);
-	dyno::Function1Pt::copy(host_pts, device_pts);
+	host_pts.assign(device_pts);
 
 	pts->Allocate(num_of_points);
 
@@ -57,7 +57,7 @@ int PVTKPolyDataSource::RequestData(
 
 	dyno::CArray<dyno::TopologyModule::Triangle> host_triangles;
 	host_triangles.resize(num_of_triangles);
-	dyno::Function1Pt::copy(host_triangles, *device_triangles);
+	host_triangles.assign(*device_triangles);
 
 
 	vtkCellArray *polys;

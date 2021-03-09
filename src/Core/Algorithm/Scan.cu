@@ -1,6 +1,5 @@
 #include "Scan.h"
 #include <cuda_runtime.h>
-#include "Function1Pt.h"
 #include "cuda_utilities.h"
 
 namespace dyno
@@ -47,7 +46,7 @@ namespace dyno
 			m_buffer.resize(data.size());
 		}
 		
-		Function1Pt::copy(m_buffer, data);
+		m_buffer.assign(data);
 		this->exclusive(data, m_buffer, bcao);
 	}
 

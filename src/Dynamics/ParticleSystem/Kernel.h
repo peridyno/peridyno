@@ -1,7 +1,5 @@
 #pragma once
 #include "Platform.h"
-#include "Utility.h"
-
 namespace dyno {
 
 	template<typename Real>

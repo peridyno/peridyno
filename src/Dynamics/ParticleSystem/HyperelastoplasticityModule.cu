@@ -1,9 +1,9 @@
 #include <cuda_runtime.h>
 #include "HyperelastoplasticityModule.h"
 #include "Framework/Node.h"
-#include "Algorithm/MatrixFunc.h"
-#include "Utility.h"
+#include "Matrix/MatrixFunc.h"
 #include "ParticleSystem/Kernel.h"
+#include "Algorithm/SimpleMath.h"
 #include <thrust/scan.h>
 #include <thrust/reduce.h>
 //#include "svd3_cuda2.h"

@@ -12,6 +12,7 @@
 #pragma once
 #include "ElasticityModule.h"
 #include "Attribute.h"
+#include "Algorithm/Arithmetic.h"
 
 namespace dyno {
 

@@ -1,10 +1,10 @@
 #pragma once
 #include <GL/glew.h>
+#include "cuda_helper_math.h"
 #include "SurfaceMeshRender.h"
 #include "Topology/TriangleSet.h"
 #include "Vector.h"
 #include "Framework/Node.h"
-#include "Utility.h"
 #include "OpenGLContext.h"
 
 namespace dyno

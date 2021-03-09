@@ -1,4 +1,4 @@
-#include "Utility/SimpleMath.h"
+#include "Algorithm/SimpleMath.h"
 #include <glm/glm.hpp>
 
 #include "STLMacro.h"

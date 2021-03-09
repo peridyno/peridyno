@@ -78,8 +78,8 @@ namespace dyno
 			gen_pos.resize(pos_list.size());
 			gen_vel.resize(pos_list.size());
 
-			Function1Pt::copy(gen_pos, pos_list);
-			Function1Pt::copy(gen_vel, vel_list);
+			gen_pos.assign(pos_list);
+			gen_vel.assign(vel_list);
 		}
 	
 		

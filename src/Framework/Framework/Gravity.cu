@@ -2,7 +2,6 @@
 #include "Framework/Node.h"
 #include "Framework/FieldVar.h"
 #include "Framework/FieldArray.h"
-#include "Utility.h"
 
 namespace dyno
 {

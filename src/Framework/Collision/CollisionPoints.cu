@@ -1,5 +1,4 @@
 #include "CollisionPoints.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "Framework/CollidableObject.h"
 #include "Collision/CollidablePoints.h"
@@ -177,7 +176,7 @@ namespace dyno
 		GArray<Coord> init_pos;
 		init_pos.resize(m_points.size());
 
-		Function1Pt::copy(init_pos, m_points);
+		init_pos.assign(m_points);
 
 		uint pDims = cudaGridSize(m_points.size(), BLOCK_SIZE);
 		for (size_t it = 0; it < 5; it++)
@@ -186,7 +185,7 @@ namespace dyno
 			posBuf.reset();
 			K_Collide << <pDims, BLOCK_SIZE >> > (m_objId, m_points, posBuf, weights, *m_nList, radius);
 			K_ComputeTarget << <pDims, BLOCK_SIZE >> > (m_points, posBuf, weights);
-			Function1Pt::copy(m_points, posBuf);
+			m_points.assign(posBuf);
 		}
 
 		K_ComputeVelocity << <pDims, BLOCK_SIZE >> > (init_pos, m_points, m_vels, getParent()->getDt());
@@ -238,7 +237,7 @@ namespace dyno
 		m_points.resize(totalNum);
 		m_vels.resize(totalNum);
 
-		Function1Pt::copy(m_objId, ids);
+		m_objId.assign(ids);
 
 		return true;
 	}

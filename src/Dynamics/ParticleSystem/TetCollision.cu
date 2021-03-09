@@ -1,5 +1,4 @@
 ﻿#include "TetCollision.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "Framework/CollidableObject.h"
 #include "Collision/CollidablePoints.h"
@@ -230,7 +229,7 @@ namespace dyno
 			init_pos.resize(m_position.getElementCount());
 
 			m_position_previous.resize(m_position.getElementCount());
-			Function1Pt::copy(m_position_previous, m_position.getValue());
+			m_position_previous.assign(m_position.getValue());
 			printf("resize finished %d %d\n", m_position.getElementCount(), m_velocity.getElementCount());
 
 		}
@@ -238,8 +237,8 @@ namespace dyno
 			m_tet_vertex.setElementCount(m_position.getElementCount());
 
 
-		Function1Pt::copy(init_pos, m_position.getValue());
-		Function1Pt::copy(m_tet_vertex.getValue(), m_position.getValue());
+		init_pos.assign(m_position.getValue());
+		m_tet_vertex.getValue().assign(m_position.getValue());
 
 
 
@@ -286,7 +285,7 @@ namespace dyno
 		sum_nbr.resize(tetSet->getTetrahedrons().size());
 		sum_nbr.reset();
 
-		Function1Pt::copy(velocity_buffer, m_velocity.getValue());
+		velocity_buffer.assign(m_velocity.getValue());
 
 		if (m_neighborhood_tri.getValue().getElementSize() > 0)
 		{
@@ -381,7 +380,7 @@ namespace dyno
 		init_pos.resize(m_position.getElementCount());
 
 		m_position_previous.resize(m_position.getElementCount());
-		Function1Pt::copy(m_position_previous, m_position.getValue());
+		m_position_previous.assign(m_position.getValue());
 
 
 

@@ -1,4 +1,3 @@
-#include "Utility/cuda_utilities.h"
 namespace dyno {
 
 	template<typename T>

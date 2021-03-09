@@ -4,7 +4,6 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "SurfaceMeshRender.h"
 #include "PointRenderModule.h"
-#include "Utility.h"
 #include "ParticleSystem/ElasticityModule.h"
 #include "ParticleSystem/Peridynamics.h"
 #include "ParticleSystem/FixedPoints.h"
@@ -84,7 +83,7 @@ namespace dyno
 	void ParticleCloth<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
-		Function1Pt::copy(pts, this->currentPosition()->getValue());
+		pts.assign(this->currentPosition()->getValue());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)

@@ -37,9 +37,9 @@ namespace dyno
 			vel_buf.resize(cur_size);
 			force_buf.resize(cur_size);
 
-			Function1Pt::copy(pos_buf, cur_points0);
-			Function1Pt::copy(vel_buf, cur_vels0);
-			Function1Pt::copy(force_buf, cur_forces0);
+			pos_buf.assign(cur_points0);
+			vel_buf.assign(cur_vels0);
+			force_buf.assign(cur_forces0);
 		}
 
 
@@ -88,9 +88,9 @@ namespace dyno
 		vel_buf.resize(cur_size);
 		force_buf.resize(cur_size);
 
-		Function1Pt::copy(pos_buf, cur_points0);
-		Function1Pt::copy(vel_buf, cur_vels0);
-		Function1Pt::copy(force_buf, cur_forces0);
+		pos_buf.assign(cur_points0);
+		vel_buf.assign(cur_vels0);
+		force_buf.assign(cur_forces0);
 
 
 		this->currentPosition()->setElementCount(cur_size + gen_pos.size());

@@ -156,11 +156,6 @@ namespace dyno
 	void NeighborTetQuery<TDataType>::compute()
 	{
 		{
-			GTimer t1;
-			GTimer t2;
-			//int p_num = this->inPosition()->getElementCount();
-			
-			t1.start();
 			int t_num = tetSet->getTetrahedrons().size();
 			if (m_queriedAABB.size() != t_num)
 			{
@@ -185,7 +180,7 @@ namespace dyno
 				this->inPosition()->getValue()
 				);
 
-			Function1Pt::copy(m_queryAABB, m_queriedAABB);
+			m_queryAABB.assign(m_queriedAABB);
 			this->inRadius()->setValue(0.017);
 			Real radius = this->inRadius()->getValue();
 			
@@ -199,18 +194,12 @@ namespace dyno
 				this->outNeighborhood()->setElementCount(t_num);
 			}
 
-			t2.start();
 			m_broadPhaseCD->inSource()->setValue(m_queryAABB);
 			m_broadPhaseCD->inTarget()->setValue(m_queriedAABB);
 			// 
 			m_broadPhaseCD->update();
-
-			t2.stop();
-
 			
-			printf("broad phase time: %f\n", t2.getEclipsedTime());
 			//broad phase end
-
 			GArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
 			
 			GArray<int> tag;
@@ -242,11 +231,6 @@ namespace dyno
 
 			if (sum > 0)
 			{
-				
-				//nbr_cons.setElementCount(sum);
-				
-				
-				
 				Real zero = 0;
 				cuExecute(t_num,
 					NTQ_Narrow_Set,
@@ -262,9 +246,6 @@ namespace dyno
 			}
 
 			tag.clear();
-			t1.stop();
-			printf("find_all time: %f\n", t1.getEclipsedTime());
-			
 		}
 		
 	}

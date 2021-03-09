@@ -143,6 +143,7 @@ namespace dyno {
 
 		void assign(const Array<T, DeviceType::GPU>& src);
 		void assign(const Array<T, DeviceType::CPU>& src);
+		void assign(const std::vector<T>& src);
 
 		friend std::ostream& operator<<(std::ostream &out, const Array<T, DeviceType::GPU>& dArray)
 		{

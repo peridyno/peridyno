@@ -4,7 +4,6 @@
 #include "Framework/FieldArray.h"
 #include "Topology/FieldNeighbor.h"
 #include "Topology/GridHash.h"
-#include "Utility.h"
 
 namespace dyno {
 	template<typename ElementType> class NeighborList;

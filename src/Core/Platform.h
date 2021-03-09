@@ -47,10 +47,6 @@ enum DeviceType
 
 #define PRECISION_FLOAT
 
-#ifdef PRECISION_FLOAT
-typedef float Real;
-#else
-typedef double Real;
-#endif
+#include "Typedef.h"
 
 //#define SIMULATION2D

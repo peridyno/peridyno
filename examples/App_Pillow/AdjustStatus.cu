@@ -2,7 +2,7 @@
 #include "Framework/Node.h"
 #include "AdjustStatus.h"
 
-#include "Utility/CudaRand.h"
+#include "Algorithm/CudaRand.h"
 
 namespace dyno
 {

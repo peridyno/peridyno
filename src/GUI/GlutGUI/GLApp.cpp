@@ -18,7 +18,6 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "Utility.h"
 #include "Image_IO/image_io.h"
 #include "GLApp.h"
 #include "OpenGLContext.h"

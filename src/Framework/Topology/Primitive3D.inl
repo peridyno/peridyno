@@ -1,5 +1,5 @@
 //#include "Primitive3D.h"
-#include "Utility/SimpleMath.h"
+#include "Algorithm/SimpleMath.h"
 #include "Interval.h"
 #include <glm/glm.hpp>
 
@@ -2385,8 +2385,8 @@ namespace dyno
 		if (discr > (Real)0)
 		{
 			Real root = glm::sqrt(discr);
-			Real t1 = max(-a1 - root, Real(0));
-			Real t2 = min(-a1 + root, Real(1));
+			Real t1 = maximum(-a1 - root, Real(0));
+			Real t2 = minimum(-a1 + root, Real(1));
 			if (t1 < t2)
 			{
 				interSeg.startPoint() = v0 + t1 * dir;
@@ -2634,7 +2634,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC Real TTriangle3D<Real>::maximumEdgeLength() const
 	{
-		return max(max((v[1] - v[0]).norm(), (v[2] - v[0]).norm()), (v[2] - v[1]).norm());
+		return maximum(maximum((v[1] - v[0]).norm(), (v[2] - v[0]).norm()), (v[2] - v[1]).norm());
 	}
 
 	template<typename Real>
@@ -2995,8 +2995,8 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = max(left, 0.0f);
-				right = min(right, maxx);
+				left = maximum(left, 0.0f);
+				right = minimum(right, maxx);
 
 				p1 = s[i].v0 + ((left + right) / 2.0f * s[i].direction().normalize());
 				Bool tmp_bool;
@@ -3062,13 +3062,13 @@ namespace dyno
 	DYN_FUNC TAlignedBox3D<Real> TTet3D<Real>::aabb()
 	{
 		TAlignedBox3D<Real> abox;
-		abox.v0[0] = min(min(v[0][0], v[1][0]), min(v[2][0], v[3][0]));
-		abox.v0[1] = min(min(v[0][1], v[1][1]), min(v[2][1], v[3][1]));
-		abox.v0[2] = min(min(v[0][2], v[1][2]), min(v[2][2], v[3][2]));
+		abox.v0[0] = minimum(minimum(v[0][0], v[1][0]), minimum(v[2][0], v[3][0]));
+		abox.v0[1] = minimum(minimum(v[0][1], v[1][1]), minimum(v[2][1], v[3][1]));
+		abox.v0[2] = minimum(minimum(v[0][2], v[1][2]), minimum(v[2][2], v[3][2]));
 
-		abox.v1[0] = max(max(v[0][0], v[1][0]), max(v[2][0], v[3][0]));
-		abox.v1[1] = max(max(v[0][1], v[1][1]), max(v[2][1], v[3][1]));
-		abox.v1[2] = max(max(v[0][2], v[1][2]), max(v[2][2], v[3][2]));
+		abox.v1[0] = maximum(maximum(v[0][0], v[1][0]), maximum(v[2][0], v[3][0]));
+		abox.v1[1] = maximum(maximum(v[0][1], v[1][1]), maximum(v[2][1], v[3][1]));
+		abox.v1[2] = maximum(maximum(v[0][2], v[1][2]), maximum(v[2][2], v[3][2]));
 
 		return abox;
 	}
@@ -3360,12 +3360,12 @@ namespace dyno
 			if (i == 0) min_u = max_u = tmp;
 			else
 			{
-				min_u = min(min_u, tmp);
-				max_u = max(max_u, tmp);
+				min_u = minimum(min_u, tmp);
+				max_u = maximum(max_u, tmp);
 			}
 		}
 		if (max_u < -OBB.extent[0] || min_u > OBB.extent[0]) return false;
-		Real inter_u = min(min(max_u + OBB.extent[0], OBB.extent[0] - min_u), min(2 * OBB.extent[0], max_u - min_u));
+		Real inter_u = minimum(minimum(max_u + OBB.extent[0], OBB.extent[0] - min_u), minimum(2 * OBB.extent[0], max_u - min_u));
 		axis = OBB.u;
 		inter = inter_u;
 		plane1 = Plane3D((OBB.center + OBB.u * OBB.extent[0]), OBB.u);
@@ -3380,12 +3380,12 @@ namespace dyno
 			if (i == 0) min_v = max_v = tmp;
 			else
 			{
-				min_v = min(min_v, tmp);
-				max_v = max(max_v, tmp);
+				min_v = minimum(min_v, tmp);
+				max_v = maximum(max_v, tmp);
 			}
 		}
 		if (max_v < -OBB.extent[1] || min_v > OBB.extent[1]) return false;
-		Real inter_v = min(min(max_v + OBB.extent[1], OBB.extent[1] - min_v), min(2 * OBB.extent[1], max_v - min_v));
+		Real inter_v = minimum(minimum(max_v + OBB.extent[1], OBB.extent[1] - min_v), minimum(2 * OBB.extent[1], max_v - min_v));
 		if (inter_v < inter)
 		{
 			axis = OBB.v;
@@ -3403,12 +3403,12 @@ namespace dyno
 			if (i == 0) min_w = max_w = tmp;
 			else
 			{
-				min_w = min(min_w, tmp);
-				max_w = max(max_w, tmp);
+				min_w = minimum(min_w, tmp);
+				max_w = maximum(max_w, tmp);
 			}
 		}
 		if (max_w < -OBB.extent[2] || min_w > OBB.extent[2]) { return false; }
-		Real inter_w = min(min(max_w + OBB.extent[2], OBB.extent[2] - min_w), min(2 * OBB.extent[2], max_w - min_w));
+		Real inter_w = minimum(minimum(max_w + OBB.extent[2], OBB.extent[2] - min_w), minimum(2 * OBB.extent[2], max_w - min_w));
 		if (inter_w < inter)
 		{
 			axis = OBB.w;
@@ -3421,7 +3421,7 @@ namespace dyno
 
 		for (int i = 0; i < 8; i++)
 		{
-			Real tmp = -min(abs(p[i].distance(plane1)), abs(p[i].distance(plane2)));
+			Real tmp = -minimum(abs(p[i].distance(plane1)), abs(p[i].distance(plane2)));
 			if (tmp < distance && p[i].distance(OBB) < EPSILON)
 			{
 				distance = tmp;
@@ -3435,7 +3435,7 @@ namespace dyno
 			if (s[i].intersect(OBB, tmp))
 			{
 				Point3D inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
-				Real tmp_distance = -min(abs(inp.distance(plane1)), abs(inp.distance(plane2)));
+				Real tmp_distance = -minimum(abs(inp.distance(plane1)), abs(inp.distance(plane2)));
 				if (tmp_distance < distance)
 				{
 

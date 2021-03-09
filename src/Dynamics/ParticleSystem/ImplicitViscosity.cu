@@ -1,5 +1,4 @@
 #include "ImplicitViscosity.h"
-#include "Utility.h"
 #include "Framework/Node.h"
 #include "Topology/FieldNeighbor.h"
 
@@ -101,17 +100,17 @@ namespace dyno
 		int num = m_position.getElementCount();
 		if (num > 0)
 		{
-			cuint pDims = cudaGridSize(num, BLOCK_SIZE);
+			uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 			m_velOld.resize(num);
 			m_velBuf.resize(num);
 
 			Real vis = m_viscosity.getValue();
 			Real dt = getParent()->getDt();
-			Function1Pt::copy(m_velOld, m_velocity.getValue());
+			m_velOld.assign(m_velocity.getValue());
 			for (int t = 0; t < m_maxInteration; t++)
 			{
-				Function1Pt::copy(m_velBuf, m_velocity.getValue());
+				m_velBuf.assign(m_velocity.getValue());
 				cuExecute(num, K_ApplyViscosity,
 					m_velocity.getValue(),
 					m_position.getValue(),

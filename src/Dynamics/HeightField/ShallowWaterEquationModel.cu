@@ -5,9 +5,7 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/FieldNeighbor.h"
 #include "Topology/NeighborQuery.h"
-#include "ParticleSystem/Helmholtz.h"
 #include "ParticleSystem/Attribute.h"
-#include "Utility.h"
 #include <cuda_runtime.h>
 #include "cublas_v2.h"
 namespace dyno
@@ -59,7 +57,7 @@ namespace dyno
 		h.setElementCount(num);
 		
 		printf("neighbor limit is %d, index count is %d\n", neighborIndex.getReference()->getNeighborLimit(), neighborIndex.getElementCount());
-		cuint pDims = cudaGridSize(num, BLOCK_SIZE);
+		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 		Init <Real, Coord> << < pDims, BLOCK_SIZE >> > (m_position.getValue(), solid.getValue(), h.getValue(), isBound.getValue(), m_velocity.getValue());
 		cuSynchronize();
 		return true;
@@ -283,7 +281,7 @@ namespace dyno
 		}
 		
 		int num = m_position.getElementCount();
-		cuint pDims = cudaGridSize(num, BLOCK_SIZE);
+		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		computeBoundConstrant <Real, Coord> << < pDims, BLOCK_SIZE >> > (
 			h.getValue(),

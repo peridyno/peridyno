@@ -46,8 +46,6 @@ namespace dyno
 
 		DYN_FUNC const Complex<Real> operator - (void) const;
 
-
-
 	protected:
 		Real m_real;
 		Real m_imag;

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Utility/Functional.h"
+#include "Algorithm/Functional.h"
 
 using namespace dyno;
 

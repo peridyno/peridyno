@@ -58,8 +58,8 @@ namespace dyno
 		m_box3d_init.resize(discreteSet->getBoxes().size());
 		m_sphere3d_init.resize(discreteSet->getSpheres().size());
 
-		Function1Pt::copy(m_box3d_init, discreteSet->getBoxes());
-		Function1Pt::copy(m_sphere3d_init, discreteSet->getSpheres());
+		m_box3d_init.assign(discreteSet->getBoxes());
+		m_sphere3d_init.assign(discreteSet->getSpheres());
 
 		int size_rigids = discreteSet->getBoxes().size() + discreteSet->getSpheres().size();
 
@@ -100,7 +100,7 @@ namespace dyno
 		
 		// TODO: initialize pos_init
 		center_init.resize(size_rigids);
-		Function1Pt::copy(center_init, currentCenter()->getValue());
+		center_init.assign(currentCenter()->getValue());
 
 
 		
@@ -157,12 +157,12 @@ namespace dyno
 		}
 		
 
-		Function1Pt::copy(m_inertia.getValue(), host_inertia_tensor);
-		Function1Pt::copy(m_inertia_init, host_inertia_tensor);
-		Function1Pt::copy(currentVelocity()->getValue(), host_velocity);
-		Function1Pt::copy(currentAngularVelocity()->getValue(), host_angular_velocity);
+		m_inertia.getValue().assign(host_inertia_tensor);
+		m_inertia_init.assign(host_inertia_tensor);
+		currentVelocity()->getValue().assign(host_velocity);
+		currentAngularVelocity()->getValue().assign(host_angular_velocity);
 		
-		Function1Pt::copy(currentMass()->getValue(), host_mass);
+		currentMass()->getValue().assign(host_mass);
 		
 		printf("INITIALIZE NEQ\n");
 		/* FOR TEST ONLY */

@@ -1,6 +1,5 @@
 #pragma once
 #include "SparseOctree.h"
-#include "Utility.h"
 
 #include <thrust/sort.h>
 
@@ -31,7 +30,7 @@ namespace dyno {
 		CArray<OctreeNode> h_arr;
 		h_arr.resize(d_arr.size());
 
-		Function1Pt::copy(h_arr, d_arr);
+		h_arr.assign(d_arr);
 
 		for (int i = 0; i < h_arr.size(); i++)
 		{
@@ -301,7 +300,7 @@ namespace dyno {
 		OcKey mask = 7U << 3 * l;
 
 		CArray<OctreeNode> h_ordered_nodes(m_post_ordered_nodes.size());
-		Function1Pt::copy(h_ordered_nodes, m_post_ordered_nodes);
+		h_ordered_nodes.assign(m_post_ordered_nodes);
 
 		OctreeNode node = h_ordered_nodes[h_ordered_nodes.size() - 1];
 
@@ -1229,7 +1228,7 @@ namespace dyno {
 
 		GArray<OctreeNode> nonRepeatNodes_cpy;
 		nonRepeatNodes_cpy.resize(node_buffer.size());
-		Function1Pt::copy(nonRepeatNodes_cpy, node_buffer);
+		nonRepeatNodes_cpy.assign(node_buffer);
 
 		//leaf + LCA
 		GArray<int> node_count;

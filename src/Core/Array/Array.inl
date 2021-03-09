@@ -1,4 +1,3 @@
-#include "Utility/cuda_utilities.h"
 namespace dyno 
 {
 	template<typename T>
@@ -45,6 +44,16 @@ namespace dyno
 			this->resize(src.size());
 
 		cuSafeCall(cudaMemcpy(m_data, src.begin(), src.size() * sizeof(T), cudaMemcpyHostToDevice));
+	}
+
+
+	template<typename T>
+	void Array<T, DeviceType::GPU>::assign(const std::vector<T>& src)
+	{
+		if (m_totalNum != src.size())
+			this->resize(src.size());
+
+		cuSafeCall(cudaMemcpy(m_data, src.data(), src.size() * sizeof(T), cudaMemcpyHostToDevice));
 	}
 
 	template<typename T>

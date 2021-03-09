@@ -121,7 +121,7 @@ public:
 	 * 
 	 * @return ListPtr<Node> Children list
 	 */
-	ListPtr<Node>& getChildren() { return m_children; }
+	std::list<std::shared_ptr<Node>>& getChildren() { return m_children; }
 
 
 	std::shared_ptr<DeviceContext> getContext();
@@ -440,7 +440,7 @@ private:
 
 	std::shared_ptr<DeviceContext> m_context;
 
-	ListPtr<Node> m_children;
+	std::list<std::shared_ptr<Node>> m_children;
 
 	std::vector<NodePort*> m_node_ports;
 

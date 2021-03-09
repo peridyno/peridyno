@@ -1,6 +1,5 @@
 #include "ParticleRod.h"
 #include "Topology/PointSet.h"
-#include "Utility.h"
 #include "Topology/NeighborQuery.h"
 #include "ParticleIntegrator.h"
 #include "ElasticityModule.h"

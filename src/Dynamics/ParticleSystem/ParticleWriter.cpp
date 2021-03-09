@@ -1,7 +1,6 @@
 #include "ParticleWriter.h"
 #include "Framework/MechanicalState.h"
 #include "Framework/ModuleIO.h"
-#include "Utility/Function1Pt.h"
 
 #include <sstream>
 #include <iostream>
@@ -64,8 +63,8 @@ namespace dyno
 		host_position.resize(total_num);
 		host_mapping.resize(total_num);
 
-		Function1Pt::copy(host_position, m_position.getValue());
-		Function1Pt::copy(host_mapping, m_color_mapping.getValue());
+		host_position.assign(m_position.getValue());
+		host_mapping.assign(m_color_mapping.getValue());
 
 		
 		for (int i = 0; i < total_num; i++)

@@ -3,7 +3,6 @@
 #include "Framework/FieldArray.h"
 #include "Framework/FieldVar.h"
 #include "Framework/Node.h"
-#include "Utility.h"
 #include "Framework/SceneGraph.h"
 
 namespace dyno
@@ -27,8 +26,8 @@ namespace dyno
 			m_prePosition.resize(num);
 			m_preVelocity.resize(num);
 
-			Function1Pt::copy(m_prePosition, this->inPosition()->getValue());
-			Function1Pt::copy(m_preVelocity, this->inVelocity()->getValue());
+			m_prePosition.assign(this->inPosition()->getValue());
+			m_preVelocity.assign(this->inVelocity()->getValue());
 
 			this->inForceDensity()->getReference()->reset();
 		}

@@ -1,12 +1,11 @@
 #include "HyperelasticityModule_test.h"
-#include "Utility.h"
-#include "Utility/CudaRand.h"
+#include "Algorithm/CudaRand.h"
 #include "Framework/Node.h"
-#include "Algorithm/MatrixFunc.h"
+#include "Matrix/MatrixFunc.h"
 #include "Kernel.h"
 
 #include "Framework/Log.h"
-#include "Utility/Function1Pt.h"
+#include "Algorithm/SimpleMath.h"
 
 #include "Hyperelasticity_computation_helper.cu"
 
@@ -1557,9 +1556,9 @@ namespace dyno
 
 		/**************************** Jacobi method ************************************************/
 		// initialize y_now, y_next_iter
-		Function1Pt::copy(y_current, this->inPosition()->getValue());
-		Function1Pt::copy(y_next, this->inPosition()->getValue());
-		Function1Pt::copy(m_position_old, this->inPosition()->getValue());
+		y_current.assign(this->inPosition()->getValue());
+		y_next.assign(this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getValue());
 
 		// do Jacobi method Loop
 		bool convergeFlag = false; // converge or not
@@ -1842,8 +1841,8 @@ namespace dyno
 				y_current_host.resize(y_current.size());
 				y_next_host.resize(y_next.size());
 
-				Function1Pt::copy(y_current_host, y_current);
-				Function1Pt::copy(y_next_host, y_next);
+				y_current_host.assign(y_current);
+				y_next_host.assign(y_next);
 
 				int particle_num = y_current.size();
 				Real delta_sum = Real(0.0);
@@ -1862,7 +1861,7 @@ namespace dyno
 				}
 			}
 
-			Function1Pt::copy(y_current, y_next);
+			y_current.assign(y_next);
 
 			printf("Timestep: %f \n", this->getParent()->getDt());
 
