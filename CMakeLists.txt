@@ -18,7 +18,7 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPIL
 set(CMAKE_CUDA_FLAGS "-arch=sm_60")                                         #默认为所有cuda代码生成computability7.0下二进制代码
 
 file(COPY "data/" DESTINATION "data")
-file(COPY "src/Rendering/Shader/" DESTINATION "Shader")
+file(COPY "src/Graphics/Shader/" DESTINATION "Shader")
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
@@ -61,7 +61,7 @@ endif()
 
 option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
-option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
+option(PERIDYNO_LIBRARY_GRAPHICS "Enable binding the graphics library using opengl" ON)
 option(PERIDYNO_LIBRARY_DYNAMICS "Enable binding the dynamics library" ON)
 option(PERIDYNO_LIBRARY_GUI "Enable binding the GUI library" ON)
 

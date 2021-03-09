@@ -40,7 +40,7 @@ std::string Node::getName()
 
 Node* Node::getChild(std::string name)
 {
-	for (ListPtr<Node>::iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (auto it = m_children.begin(); it != m_children.end(); ++it)
 	{
 		if ((*it)->getName() == name)
 			return it->get();
@@ -132,7 +132,7 @@ bool Node::hasChild(std::shared_ptr<Node> child)
 
 void Node::removeChild(std::shared_ptr<Node> child)
 {
-	ListPtr<Node>::iterator iter = m_children.begin();
+	auto iter = m_children.begin();
 	for (; iter != m_children.end(); )
 	{
 		if (*iter == child)
@@ -148,7 +148,7 @@ void Node::removeChild(std::shared_ptr<Node> child)
 
 void Node::removeAllChildren()
 {
-	ListPtr<Node>::iterator iter = m_children.begin();
+	auto iter = m_children.begin();
 	for (; iter != m_children.end(); )
 	{
 		m_children.erase(iter++);
@@ -379,7 +379,7 @@ void Node::doTraverseBottomUp(Action* act)
 {
 	act->start(this);
 
-	ListPtr<Node>::iterator iter = m_children.begin();
+	auto iter = m_children.begin();
 	for (; iter != m_children.end(); iter++)
 	{
 		(*iter)->traverseBottomUp(act);
@@ -395,7 +395,7 @@ void Node::doTraverseTopDown(Action* act)
 	act->start(this);
 	act->process(this);
 
-	ListPtr<Node>::iterator iter = m_children.begin();
+	auto iter = m_children.begin();
 	for (; iter != m_children.end(); iter++)
 	{
 		(*iter)->doTraverseTopDown(act);

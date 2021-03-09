@@ -1,7 +1,7 @@
 
 set(PROJECT_NAME App_Elasticity)
 
-link_libraries(Core Framework IO Rendering)
+link_libraries(Core Framework IO Graphics)
 link_libraries(ParticleSystem)
 link_libraries(GlutGUI)
 

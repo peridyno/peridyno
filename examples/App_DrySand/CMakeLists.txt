@@ -1,7 +1,7 @@
 
 set(PROJECT_NAME App_DrySand)
 
-link_libraries(Core Framework IO Rendering)
+link_libraries(Core Framework IO Graphics)
 link_libraries(ParticleSystem RigidBody)
 link_libraries(GlutGUI)
 

@@ -7,7 +7,3 @@ if(PERIDYNO_LIBRARY_FRAMEWORK)
     add_subdirectory(Test_Topolopy)
     add_subdirectory(Test_Collision)
 endif()
-
-if(PERIDYNO_LIBRARY_FRAMEWORK)
-    add_subdirectory(Test_Rendering)
-endif()

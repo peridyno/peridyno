@@ -28,7 +28,7 @@ namespace dyno {
 
 		int getAuxiliaryArraySize(size_t n);
 		
-		unsigned m_num;
+		uint m_num;
 		
 		T* m_aux;
 		size_t m_auxNum;
@@ -56,7 +56,7 @@ namespace dyno {
 		void allocAuxiliaryArray(size_t num);
 
 
-		unsigned m_num;
+		uint m_num;
 		
 		float* m_aux;
 		Reduction<float> m_reduce_float;
@@ -84,7 +84,7 @@ namespace dyno {
 		void allocAuxiliaryArray(size_t num);
 
 
-		unsigned m_num;
+		uint m_num;
 
 		double* m_aux;
 		Reduction<double> m_reduce_double;

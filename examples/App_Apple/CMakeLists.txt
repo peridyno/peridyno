@@ -1,7 +1,7 @@
 
 set(PROJECT_NAME App_Apple)
 
-link_libraries(Core Framework IO Rendering Volume)
+link_libraries(Core Framework IO Graphics Volume)
 link_libraries(ParticleSystem)
 link_libraries(GlutGUI)
 

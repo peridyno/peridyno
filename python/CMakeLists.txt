@@ -22,7 +22,7 @@ elseif(UNIX)
     endif()
 endif()
 
-link_libraries(Core Framework IO Rendering)
+link_libraries(Core Framework IO Graphics)
 link_libraries(GlutGUI)
 link_libraries(ParticleSystem RigidBody)
 

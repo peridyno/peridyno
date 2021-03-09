@@ -1,8 +1,6 @@
 #include "Reduction.h"
 #include <cassert>
 #include <cfloat>
-#include <cuda_runtime.h>
-#include "cuda_utilities.h"
 #include "SharedMemory.h"
 #include "Functional.h"
 

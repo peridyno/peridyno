@@ -1,6 +1,6 @@
 set(PROJECT_NAME App_WetSand)
 
-link_libraries(Core Framework IO Rendering)
+link_libraries(Core Framework IO Graphics)
 link_libraries(ParticleSystem RigidBody)
 link_libraries(GlutGUI)
 

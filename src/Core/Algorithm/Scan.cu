@@ -1,6 +1,5 @@
 #include "Scan.h"
 #include <cuda_runtime.h>
-#include "cuda_utilities.h"
 
 namespace dyno
 {
