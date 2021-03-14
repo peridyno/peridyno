@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.10)
 
-set(LIB_NAMES ParticleSystem RigidBody HeightField Volume)
+set(LIB_NAMES ParticleSystem RigidBody Volume)
 
 foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}")
