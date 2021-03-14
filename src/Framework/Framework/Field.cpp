@@ -72,14 +72,14 @@ namespace dyno
 		m_derived = derived;
 	}
 
-	bool Field::connectPtr(Field* field2)
+	bool Field::connectField(Field* dst)
 	{
-		if (field2->getSource() != nullptr && field2->getSource() != this)
+		if (dst->getSource() != nullptr && dst->getSource() != this)
 		{
-			field2->getSource()->removeSink(field2);
+			dst->getSource()->removeSink(dst);
 		}
 
-		this->addSink(field2);
+		this->addSink(dst);
 
 		return true;
 	}

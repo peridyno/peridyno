@@ -132,7 +132,7 @@ bool NeighborField<T>::connect(NeighborField<T>* field2)
 {
 
 	auto f = field2->fieldPtr();
-	this->connectPtr(f);
+	this->connectField(f);
 // 	if (this->isEmpty())
 // 	{
 // 		Log::sendMessage(Log::Warning, "The parent field " + this->getObjectName() + " is empty!");

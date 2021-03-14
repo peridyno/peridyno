@@ -33,8 +33,6 @@ public:
 	virtual const std::string getTemplateName() { return std::string(""); }
 	virtual const std::string getClassName() { return std::string("Field"); }
 
-	FieldType getFieldType();
-
 	std::string	getObjectName() { return m_name; }
 	std::string	getDescription() { return m_description; }
 	virtual DeviceType getDeviceType() { return DeviceType::UNDEFINED; }
@@ -53,8 +51,6 @@ public:
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
-	bool connectPtr(Field* field2);
-
 	Field* fieldPtr();
 
 	std::vector<Field*>& getSinkFields() { return m_field_sink; }
@@ -70,6 +66,10 @@ public:
 
 	inline float getMax() { return m_max; }
 	inline void setMax(float max_val) { m_max = max_val; }
+
+	FieldType getFieldType();
+
+	bool connectField(Field* dst);
 
 protected:
 	void setSource(Field* source);

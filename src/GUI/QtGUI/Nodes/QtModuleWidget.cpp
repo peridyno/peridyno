@@ -107,7 +107,7 @@ namespace QtNodes
 		if (field_port != nullptr)
 		{
 			auto in_fields = getInputFields();
-			field_port->getField()->connectPtr(in_fields[portIndex]);
+			field_port->getField()->connectField(in_fields[portIndex]);
 		}
 
 		updateModule();

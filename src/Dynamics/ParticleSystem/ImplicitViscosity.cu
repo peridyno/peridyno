@@ -74,7 +74,6 @@ namespace dyno
 	template<typename TDataType>
 	ImplicitViscosity<TDataType>::ImplicitViscosity()
 		:ConstraintModule()
-		, m_smoothingLength(0.0125)
 		, m_maxInteration(5)
 	{
 		m_viscosity.setValue(Real(0.05));

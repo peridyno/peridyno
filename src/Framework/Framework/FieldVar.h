@@ -20,7 +20,6 @@ public:
 	typedef T VarType;
 
 	VarField();
-	VarField(T value);
 	VarField(std::string name, std::string description, FieldType fieldType, Base* parent);
 	VarField(T value, std::string name, std::string description, FieldType fieldType, Base* parent);
 
@@ -42,6 +41,9 @@ public:
 
 	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
 
+	CallBackFunc callbackFunc;
+
+
 	inline std::shared_ptr<T> getReference();
 
 //	void reset() override;
@@ -53,8 +55,6 @@ public:
 	bool connect(VarField<T>* field2);
 
 private:
-	CallBackFunc callbackFunc;
-	
 	std::shared_ptr<T> m_data = nullptr;
 
 };
@@ -63,13 +63,6 @@ template<typename T>
 VarField<T>::VarField()
 	: Field("", "")
 {
-}
-
-template<typename T>
-VarField<T>::VarField(T value)
-	: Field("", "")
-{
-	m_data = std::make_shared<T>(value);
 }
 
 template<typename T>
@@ -167,18 +160,9 @@ std::shared_ptr<T> VarField<T>::getReference()
 template<typename T>
 bool VarField<T>::connect(VarField<T>* field2)
 {
-	auto f = field2->fieldPtr();
-	this->connectPtr(f);
+	this->connectField(field2);
 	field2->update();
 
-// 	if (this->isEmpty())
-// 	{
-// 		Log::sendMessage(Log::Warning, "The parent field " + this->getObjectName() + " is empty!");
-// 		return false;
-// 	}
-// 	field2.setDerived(true);
-// 	field2.setSource(this);
-	//field2.m_data = m_data;
 	return true;
 }
 

@@ -7,13 +7,13 @@
 namespace dyno
 {
 	template <typename T>
-	inline __host__ __device__ T clamp(const T& v, const T& lo, const T& hi)
+	inline DYN_FUNC T clamp(const T& v, const T& lo, const T& hi)
 	{
 		return (v < lo) ? lo : (hi < v) ? hi : v;
 	}
 
     template <typename T>
-	inline __host__ __device__ Vector<T,2> clamp(const Vector<T,2>& v, const Vector<T,2>& lo, const Vector<T,2>& hi)
+	inline DYN_FUNC Vector<T,2> clamp(const Vector<T,2>& v, const Vector<T,2>& lo, const Vector<T,2>& hi)
     {
         Vector<T,2> ret;
 		ret[0] = (v[0] < lo[0]) ? lo[0] : (hi[0] < v[0]) ? hi[0] : v[0];
@@ -23,7 +23,7 @@ namespace dyno
     }
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 3> clamp(const Vector<T, 3>& v, const Vector<T, 3>& lo, const Vector<T, 3>& hi)
+	inline DYN_FUNC Vector<T, 3> clamp(const Vector<T, 3>& v, const Vector<T, 3>& lo, const Vector<T, 3>& hi)
 	{
 		Vector<T, 3> ret;
 		ret[0] = (v[0] < lo[0]) ? lo[0] : (hi[0] < v[0]) ? hi[0] : v[0];
@@ -34,7 +34,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 4> clamp(const Vector<T, 4>& v, const Vector<T, 4>& lo, const Vector<T, 4>& hi)
+	inline DYN_FUNC Vector<T, 4> clamp(const Vector<T, 4>& v, const Vector<T, 4>& lo, const Vector<T, 4>& hi)
 	{
 		Vector<T, 3> ret;
 		ret[0] = (v[0] < lo[0]) ? lo[0] : (hi[0] < v[0]) ? hi[0] : v[0];
@@ -46,13 +46,13 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ T abs(const T& v)
+	inline DYN_FUNC T abs(const T& v)
 	{
 		return v < T(0) ? - v : v;
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 2> abs(const Vector<T, 2>& v)
+	inline DYN_FUNC Vector<T, 2> abs(const Vector<T, 2>& v)
 	{
 		Vector<T, 2> ret;
 		ret[0] = (v[0] < T(0)) ? -v[0] : v[0];
@@ -62,7 +62,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 3> abs(const Vector<T, 3>& v)
+	inline DYN_FUNC Vector<T, 3> abs(const Vector<T, 3>& v)
 	{
 		Vector<T, 3> ret;
 		ret[0] = (v[0] < T(0)) ? -v[0] : v[0];
@@ -73,7 +73,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 4> abs(const Vector<T, 4>& v)
+	inline DYN_FUNC Vector<T, 4> abs(const Vector<T, 4>& v)
 	{
 		Vector<T, 3> ret;
 		ret[0] = (v[0] < T(0)) ? -v[0] : v[0];
@@ -85,13 +85,13 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ T minimum(const T& v0, const T& v1)
+	inline DYN_FUNC T minimum(const T& v0, const T& v1)
 	{
 		return v0 < v1 ? v0 : v1;
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 2> minimum(const Vector<T, 2>& v0, const Vector<T, 2>& v1)
+	inline DYN_FUNC Vector<T, 2> minimum(const Vector<T, 2>& v0, const Vector<T, 2>& v1)
 	{
 		Vector<T, 2> ret;
 		ret[0] = (v0[0] < v1[0]) ? v0[0] : v1[0];
@@ -101,7 +101,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 3> minimum(const Vector<T, 3>& v0, const Vector<T, 3>& v1)
+	inline DYN_FUNC Vector<T, 3> minimum(const Vector<T, 3>& v0, const Vector<T, 3>& v1)
 	{
 		Vector<T, 3> ret;
 		ret[0] = (v0[0] < v1[0]) ? v0[0] : v1[0];
@@ -112,7 +112,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 4> minimum(const Vector<T, 4>& v0, const Vector<T, 4>& v1)
+	inline DYN_FUNC Vector<T, 4> minimum(const Vector<T, 4>& v0, const Vector<T, 4>& v1)
 	{
 		Vector<T, 4> ret;
 		ret[0] = (v0[0] < v1[0]) ? v0[0] : v1[0];
@@ -125,13 +125,13 @@ namespace dyno
 
 
 	template <typename T>
-	inline __host__ __device__ T maximum(const T& v0, const T& v1)
+	inline DYN_FUNC T maximum(const T& v0, const T& v1)
 	{
 		return v0 > v1 ? v0 : v1;
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 2> maximum(const Vector<T, 2>& v0, const Vector<T, 2>& v1)
+	inline DYN_FUNC Vector<T, 2> maximum(const Vector<T, 2>& v0, const Vector<T, 2>& v1)
 	{
 		Vector<T, 2> ret;
 		ret[0] = (v0[0] > v1[0]) ? v0[0] : v1[0];
@@ -141,7 +141,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 3> maximum(const Vector<T, 3>& v0, const Vector<T, 3>& v1)
+	inline DYN_FUNC Vector<T, 3> maximum(const Vector<T, 3>& v0, const Vector<T, 3>& v1)
 	{
 		Vector<T, 3> ret;
 		ret[0] = (v0[0] > v1[0]) ? v0[0] : v1[0];
@@ -152,7 +152,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	inline __host__ __device__ Vector<T, 4> maximum(const Vector<T, 4>& v0, const Vector<T, 4>& v1)
+	inline DYN_FUNC Vector<T, 4> maximum(const Vector<T, 4>& v0, const Vector<T, 4>& v1)
 	{
 		Vector<T, 4> ret;
 		ret[0] = (v0[0] > v1[0]) ? v0[0] : v1[0];

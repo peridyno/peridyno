@@ -15,8 +15,6 @@ public:
 	typedef Array<T, deviceType> DataType;
 
 	ArrayField();
-	ArrayField(int num);
-	ArrayField(std::string name, std::string description, int num = 1);
 	ArrayField(int num, std::string name, std::string description, FieldType fieldType, Base* parent);
 	~ArrayField() override;
 
@@ -62,31 +60,6 @@ ArrayField<T, deviceType>::ArrayField()
 	: Field("", "")
 	, m_data(nullptr)
 {
-//	m_data = std::make_shared<Array<T, deviceType>>();
-}
-
-// template<typename T, DeviceType deviceType>
-// ArrayBuffer<T, deviceType>::ArrayBuffer(int num)
-// 	: Field()
-// 	, m_data(NULL)
-// {
-// 	m_data = new Array<T, deviceType>(num);
-// }
-
-
-template<typename T, DeviceType deviceType>
-ArrayField<T, deviceType>::ArrayField(int num)
-	: Field("", "")
-{
-	m_data = num <= 0 ? nullptr : std::make_shared<Array<T, deviceType>>(num);
-}
-
-
-template<typename T, DeviceType deviceType>
-ArrayField<T, deviceType>::ArrayField(std::string name, std::string description, int num)
-	: Field(name, description)
-{
-	m_data = num <= 0 ? nullptr : std::make_shared<Array<T, deviceType>>(num);
 }
 
 template<typename T, DeviceType deviceType>
@@ -131,8 +104,7 @@ void ArrayField<T, deviceType>::setElementCount(size_t num)
 template<typename T, DeviceType deviceType>
 bool ArrayField<T, deviceType>::connect(ArrayField<T, deviceType>* field2)
 {
-	auto f = field2->fieldPtr();
-	this->connectPtr(f);
+	this->connectField(field2);
 
 	return true;
 }
