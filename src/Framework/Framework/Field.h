@@ -2,8 +2,7 @@
 #include "Platform.h"
 #include <typeinfo>
 #include <string>
-#include <vector>
-#include <cuda_runtime.h>
+#include <functional>
 #include "Typedef.h"
 
 namespace dyno {
@@ -24,6 +23,7 @@ namespace dyno {
 */
 class Field
 {
+	using CallBackFunc = std::function<void()>;
 public:
 	Field() : m_name("default"), m_description("") {};
 	Field(std::string name, std::string description, FieldType type = FieldType::Param, Base* parent = nullptr);
@@ -46,8 +46,6 @@ public:
 	bool isDerived();
 	bool isAutoDestroyable();
 
-	virtual bool isEmpty() = 0;
-
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
@@ -69,8 +67,14 @@ public:
 
 	FieldType getFieldType();
 
+
 	bool connectField(Field* dst);
 
+
+	virtual bool isEmpty() = 0;
+	virtual void update();
+
+	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
 protected:
 	void setSource(Field* source);
 	Field* getSource();
@@ -97,6 +101,7 @@ private:
 	bool m_modified = false;
 
 	std::vector<Field*> m_field_sink;
+	CallBackFunc callbackFunc;
 };
 
 }

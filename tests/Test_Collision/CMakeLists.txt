@@ -1,6 +1,6 @@
 set(TEST_PROJECT Test_Collision)
 
-link_libraries(Core IO Framework)
+link_libraries(Core Framework)
 
 file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.h *.cpp)
 

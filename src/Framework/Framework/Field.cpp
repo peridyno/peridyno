@@ -84,6 +84,24 @@ namespace dyno
 		return true;
 	}
 
+	void Field::update()
+	{
+		if (!this->isEmpty() && callbackFunc != nullptr)
+		{
+			callbackFunc();
+		}
+
+		auto& sinks = this->getSinkFields();
+
+		for each (auto var in sinks)
+		{
+			if (var != nullptr)
+			{
+				var->update();
+			}
+		}
+	}
+
 	Field* Field::fieldPtr()
 	{
 		return this;

@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <functional>
 #include "Typedef.h"
 #include "Field.h"
 #include "Base.h"
@@ -15,7 +14,6 @@ namespace dyno {
 template<typename T>
 class VarField : public Field
 {
-	using CallBackFunc = std::function<void()>;
 public:
 	typedef T VarType;
 
@@ -32,17 +30,6 @@ public:
 
 	T& getValue();
 	void setValue(T val);
-
-	/**
-	 * @brief Call the call back function if set
-	 * 
-	 */
-	void update();
-
-	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
-
-	CallBackFunc callbackFunc;
-
 
 	inline std::shared_ptr<T> getReference();
 
@@ -112,27 +99,6 @@ void VarField<T>::setValue(T val)
 	}
 
 	this->update();
-}
-
-
-template<typename T>
-void VarField<T>::update()
-{
-	if (m_data != nullptr && callbackFunc != nullptr)
-	{
-		callbackFunc();
-	}
-
-	auto& sinks = this->getSinkFields();
-	
-	for each (auto fs in sinks)
-	{
-		VarField<T>* var = dynamic_cast<VarField<T>*>(fs);
-		if (var != nullptr)
-		{
-			var->update();
-		}
-	}
 }
 
 template<typename T>

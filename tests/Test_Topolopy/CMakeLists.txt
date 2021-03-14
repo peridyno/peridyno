@@ -1,6 +1,6 @@
 set(TEST_PROJECT Test_Topology)
 
-link_libraries(Core Framework IO)
+link_libraries(Core Framework)
 
 file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.h *.cpp)
 

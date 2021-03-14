@@ -24,10 +24,9 @@ public:
 	}
 
 	void setElementCount(size_t num);
-//	void resize(int num);
+
 	const std::string getTemplateName() override { return std::string(typeid(T).name()); }
 	const std::string getClassName() override { return std::string("ArrayBuffer"); }
-//	DeviceType getDeviceType() override { return deviceType; }
 
 	/**
 	 * @brief Get the shared pointer of the contained array, it will return the its own pointer if no Field is driven this object.
