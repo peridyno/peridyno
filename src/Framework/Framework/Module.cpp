@@ -256,15 +256,15 @@ bool Module::attachField(Field* field, std::string name, std::string desc, bool 
 	auto fType = field->getFieldType();
 	switch (field->getFieldType())
 	{
-	case FieldType::In:
+	case EFieldType::In:
 		ret = addInputField(field);
 		break;
 
-	case FieldType::Out:
+	case EFieldType::Out:
 		ret = addOutputField(field);
 		break;
 
-	case FieldType::Param:
+	case EFieldType::Param:
 		ret = addParameter(field);
 		break;
 

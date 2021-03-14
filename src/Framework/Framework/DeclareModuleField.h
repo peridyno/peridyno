@@ -14,63 +14,63 @@ namespace dyno
 
 #define DEF_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> var_##name = VarField<T>(T(value), std::string(#name), desc, FieldType::Param, this);			\
+	VarField<T> var_##name = VarField<T>(T(value), std::string(#name), desc, EFieldType::Param, this);			\
 public:										\
 	inline VarField<T>* var##name() {return &var_##name;}
 
 #define DEF_IN_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> in_##name = VarField<T>(T(value), std::string(#name), desc, FieldType::In, this);			\
+	VarField<T> in_##name = VarField<T>(T(value), std::string(#name), desc, EFieldType::In, this);			\
 public:										\
 	inline VarField<T>* in##name() {return &in_##name;}
 
 #define DEF_OUT_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> out_##name = VarField<T>(T(value), std::string(#name), desc, FieldType::Out, this);			\
+	VarField<T> out_##name = VarField<T>(T(value), std::string(#name), desc, EFieldType::Out, this);			\
 public:										\
 	inline VarField<T>* out##name() {return &out_##name;}
 
 #define DEF_EMPTY_VAR(name, T, desc) \
 private:									\
-	VarField<T> var_##name = VarField<T>(std::string(#name), desc, FieldType::Param, this);			\
+	VarField<T> var_##name = VarField<T>(std::string(#name), desc, EFieldType::Param, this);			\
 public:										\
 	inline VarField<T>* var##name() {return &var_##name;}
 
 #define DEF_EMPTY_IN_VAR(name, T, desc) \
 private:									\
-	VarField<T> in_##name = VarField<T>(std::string(#name), desc, FieldType::In, this);			\
+	VarField<T> in_##name = VarField<T>(std::string(#name), desc, EFieldType::In, this);			\
 public:										\
 	inline VarField<T>* in##name() {return &in_##name;}
 
 #define DEF_EMPTY_OUT_VAR(name, T, desc) \
 private:									\
-	VarField<T> out_##name = VarField<T>(std::string(#name), desc, FieldType::Out, this);			\
+	VarField<T> out_##name = VarField<T>(std::string(#name), desc, EFieldType::Out, this);			\
 public:									\
 	inline VarField<T>* out##name() {return &out_##name;}
 
 
 #define DEF_IN_ARRAY(name, T, size, device, desc) \
 private:									\
-	ArrayField<T, device> in_##name = ArrayField<T, device>(size, std::string(#name), desc, FieldType::In, this);	\
+	ArrayField<T, device> in_##name = ArrayField<T, device>(size, std::string(#name), desc, EFieldType::In, this);	\
 public:									\
 	inline ArrayField<T, device>* in##name() {return &in_##name;}
 
 #define DEF_OUT_ARRAY(name, T, size, device, desc) \
 private:									\
-	ArrayField<T, device> out_##name = ArrayField<T, device>(size, std::string(#name), desc, FieldType::Out, this);	\
+	ArrayField<T, device> out_##name = ArrayField<T, device>(size, std::string(#name), desc, EFieldType::Out, this);	\
 public:									\
 	inline ArrayField<T, device>* out##name() {return &out_##name;}
 
 
 #define DEF_EMPTY_IN_ARRAY(name, T, device, desc) \
 private:									\
-	ArrayField<T, device> in_##name = ArrayField<T, device>(0, std::string(#name), desc, FieldType::In, this);	\
+	ArrayField<T, device> in_##name = ArrayField<T, device>(0, std::string(#name), desc, EFieldType::In, this);	\
 public:									\
 	inline ArrayField<T, device>* in##name() {return &in_##name;}
 
 #define DEF_EMPTY_OUT_ARRAY(name, T, device, desc) \
 private:									\
-	ArrayField<T, device> out_##name = ArrayField<T, device>(0, std::string(#name), desc, FieldType::Out, this);	\
+	ArrayField<T, device> out_##name = ArrayField<T, device>(0, std::string(#name), desc, EFieldType::Out, this);	\
 public:									\
 	inline ArrayField<T, device>* out##name() {return &out_##name;}
 
@@ -79,25 +79,25 @@ public:									\
 
 #define DEF_EMPTY_IN_NEIGHBOR_LIST(name, T, desc)		\
 private:									\
-	NeighborField<T> in_##name = NeighborField<T>(std::string(#name), desc, FieldType::In, this, 0, 0);	\
+	NeighborField<T> in_##name = NeighborField<T>(std::string(#name), desc, EFieldType::In, this, 0, 0);	\
 public:									\
 	inline NeighborField<T>* in##name() {return &in_##name;}
 
 #define DEF_EMPTY_OUT_NEIGHBOR_LIST(name, T, desc)		\
 private:									\
-	NeighborField<T> out_##name = NeighborField<T>(std::string(#name), desc, FieldType::Out, this, 0, 0);	\
+	NeighborField<T> out_##name = NeighborField<T>(std::string(#name), desc, EFieldType::Out, this, 0, 0);	\
 public:									\
 	inline NeighborField<T>* out##name() {return &out_##name;}
 
 #define DEF_IN_NEIGHBOR_LIST(name, T, size, nbr, desc)		\
 private:									\
-	NeighborField<T> in_##name = NeighborField<T>(std::string(#name), desc, FieldType::In, this, size, nbr);	\
+	NeighborField<T> in_##name = NeighborField<T>(std::string(#name), desc, EFieldType::In, this, size, nbr);	\
 public:									\
 	inline NeighborField<T>* in##name() {return &in_##name;}
 
 #define DEF_OUT_NEIGHBOR_LIST(name, T, size, nbr, desc)		\
 private:									\
-	NeighborField<T> out_##name = NeighborField<T>(std::string(#name), desc, FieldType::Out, this, size, nbr);	\
+	NeighborField<T> out_##name = NeighborField<T>(std::string(#name), desc, EFieldType::Out, this, size, nbr);	\
 public:									\
 	inline NeighborField<T>* out##name() {return &out_##name;}
 }

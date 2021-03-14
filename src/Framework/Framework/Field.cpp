@@ -84,6 +84,11 @@ namespace dyno
 		return true;
 	}
 
+	Field* Field::getTopField()
+	{
+		return m_source == nullptr ? this : m_source->getTopField();
+	}
+
 	void Field::update()
 	{
 		if (!this->isEmpty() && callbackFunc != nullptr)
@@ -127,7 +132,7 @@ namespace dyno
 		m_optional = optional;
 	}
 
-	Field::Field(std::string name, std::string description, FieldType type, Base* parent)
+	Field::Field(std::string name, std::string description, EFieldType type, Base* parent)
 	{
 		m_name = name; m_description = description;
 		m_fType = type;
@@ -137,7 +142,7 @@ namespace dyno
 		}
 	}
 
-	FieldType Field::getFieldType()
+	EFieldType Field::getFieldType()
 	{
 		return m_fType;
 	}

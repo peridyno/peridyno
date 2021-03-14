@@ -17,7 +17,7 @@ public:
 	NeighborField();
 	NeighborField(int num, int nbrSize = 0);
 	NeighborField(std::string name, std::string description, int num = 1, int nbrSize = 0);
-	NeighborField(std::string name, std::string description, FieldType fieldType, Base* parent, int num, int nbrSize);
+	NeighborField(std::string name, std::string description, EFieldType fieldType, Base* parent, int num, int nbrSize);
 	~NeighborField() override;
 
 	size_t getElementCount() override {
@@ -105,7 +105,7 @@ NeighborField<T>::NeighborField(std::string name, std::string description, int n
 
 
 template<typename T>
-NeighborField<T>::NeighborField(std::string name, std::string description, FieldType fieldType, Base* parent, int num, int nbrSize)
+NeighborField<T>::NeighborField(std::string name, std::string description, EFieldType fieldType, Base* parent, int num, int nbrSize)
 	: Field(name, description, fieldType, parent)
 {
 	m_data = num <= 0 ? nullptr : std::make_shared<NeighborList<T>>(num, nbrSize);

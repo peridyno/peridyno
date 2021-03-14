@@ -8,7 +8,7 @@
 namespace dyno {
 	class Base;
 
-	enum FieldType
+	enum EFieldType
 	{
 		In,
 		Out,
@@ -26,7 +26,7 @@ class Field
 	using CallBackFunc = std::function<void()>;
 public:
 	Field() : m_name("default"), m_description("") {};
-	Field(std::string name, std::string description, FieldType type = FieldType::Param, Base* parent = nullptr);
+	Field(std::string name, std::string description, EFieldType type = EFieldType::Param, Base* parent = nullptr);
 	virtual ~Field() {};
 
 	virtual size_t getElementCount() { return 0; }
@@ -65,11 +65,12 @@ public:
 	inline float getMax() { return m_max; }
 	inline void setMax(float max_val) { m_max = max_val; }
 
-	FieldType getFieldType();
+	EFieldType getFieldType();
 
 
 	bool connectField(Field* dst);
 
+	Field* getTopField();
 
 	virtual bool isEmpty() = 0;
 	virtual void update();
@@ -82,7 +83,7 @@ protected:
 	void addSink(Field* f);
 	void removeSink(Field* f);
 
-	FieldType m_fType = FieldType::Param;
+	EFieldType m_fType = EFieldType::Param;
 
 private:
 	std::string m_name;
@@ -103,5 +104,28 @@ private:
 	std::vector<Field*> m_field_sink;
 	CallBackFunc callbackFunc;
 };
+
+#define DEFINE_DERIVED_FUNC(DerivedField,Data)						\
+std::shared_ptr<Data>& getReference()								\
+{																	\
+	Field* topField = this->getTopField();							\
+	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
+	return derived->m_data;											\
+}																	\
+\
+bool isEmpty() override {											\
+return this->getReference() == nullptr;								\
+}																	\
+\
+bool connect(DerivedField* dst)						\
+{																	\
+	this->connectField(dst);										\
+	this->update();													\
+	return true;													\
+}																	\
+Data& getValue() { return *(getReference()); }					\
+private:															\
+	std::shared_ptr<Data> m_data = nullptr;							\
+public:
 
 }
