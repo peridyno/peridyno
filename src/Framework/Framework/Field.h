@@ -49,8 +49,6 @@ public:
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
-	Field* fieldPtr();
-
 	std::vector<Field*>& getSinkFields() { return m_field_sink; }
 
 	bool isModified();

@@ -107,11 +107,6 @@ namespace dyno
 		}
 	}
 
-	Field* Field::fieldPtr()
-	{
-		return this;
-	}
-
 	bool Field::isModified()
 	{
 		return m_modified;
