@@ -15,7 +15,7 @@
  */
 #pragma once
 #include <iostream>
-#include "Framework/Field.h"
+#include "Framework/FieldBase.h"
 #include "Framework/Object.h"
 
 namespace dyno {
@@ -32,8 +32,8 @@ typedef std::string FieldID;
 class Base : public Object
 {
 public:
-	typedef std::vector<Field*> FieldVector;
-	typedef std::map<FieldID, Field*> FieldMap;
+	typedef std::vector<FieldBase*> FieldVector;
+	typedef std::map<FieldID, FieldBase*> FieldMap;
 
 	Base() : Object() {};
 	~Base() override {};
@@ -42,23 +42,23 @@ public:
 	 * @brief Add a field to Base
 	 * FieldID will be set to the name of Field by default
 	 */
-	bool addField(Field* data);
+	bool addField(FieldBase* data);
 	/**
 	 * @brief Add a field to Base
 	 * 
 	 * @param Field name
 	 * @param Field pointer
 	 */
-	bool addField(FieldID name, Field* data);
-	bool addFieldAlias(FieldID name, Field* data);
-	bool addFieldAlias(FieldID name, Field* data, FieldMap& fieldAlias);
+	bool addField(FieldID name, FieldBase* data);
+	bool addFieldAlias(FieldID name, FieldBase* data);
+	bool addFieldAlias(FieldID name, FieldBase* data, FieldMap& fieldAlias);
 
 	/**
 	 * @brief Find a field by its pointer
 	 * 
 	 * @param data Field pointer
 	 */
-	bool findField(Field* data);
+	bool findField(FieldBase* data);
 	/**
 	 * @brief Find a field by its name
 	 * 
@@ -78,7 +78,7 @@ public:
 	 * @brief Remove a field by its pointer
 	 * 
 	 */
-	bool removeField(Field* data);
+	bool removeField(FieldBase* data);
 	/**
 	 * @brief Remove a field by its name
 	 * 
@@ -90,9 +90,9 @@ public:
 	 * @brief Return a field by its name
 	 * 
 	 */
-	Field*	getField(const FieldID name);
+	FieldBase*	getField(const FieldID name);
 
-	std::vector<Field*>& getAllFields();
+	std::vector<FieldBase*>& getAllFields();
 
 	/**
 	 * @brief Attach a field to Base
@@ -104,7 +104,7 @@ public:
 	 * 
 	 * @return Return false if the name conflicts with exists fields' names
 	 */
-	virtual bool attachField(Field* field, std::string name, std::string desc, bool autoDestroy = true);
+	virtual bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true);
 
 	template<typename T>
 	T* getField(FieldID name)
@@ -122,8 +122,8 @@ public:
 	 */
 	bool isAllFieldsReady();
 
-	std::vector<FieldID>	getFieldAlias(Field* data);
-	int				getFieldAliasCount(Field* data);
+	std::vector<FieldID>	getFieldAlias(FieldBase* data);
+	int				getFieldAliasCount(FieldBase* data);
 
 
 	inline void setBlockCoord(float x, float y) { block_x = x; block_y = y; }

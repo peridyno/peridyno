@@ -1,10 +1,9 @@
 #include "gtest/gtest.h"
 #include "ModuleFields.h"
-#include "Framework/FieldArray.h"
 
 using namespace dyno;
 
-TEST(Field, connect)
+TEST(FieldBase, connect)
 {
 	ModuleFields m1("m1");
 	ModuleFields m2("m2");

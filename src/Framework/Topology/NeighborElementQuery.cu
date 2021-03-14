@@ -1,5 +1,4 @@
 #include "NeighborElementQuery.h"
-#include "Framework/FieldArray.h"
 #include "Collision/CollisionDetectionBroadPhase.h"
 #include "Topology/Primitive3D.h"
 #include "NeighborConstraints.h"

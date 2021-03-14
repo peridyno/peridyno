@@ -1,7 +1,5 @@
 #pragma once
 #include "Framework/ModuleConstraint.h"
-#include "Framework/FieldVar.h"
-#include "Framework/FieldArray.h"
 #include "Topology/FieldNeighbor.h"
 
 namespace dyno {

@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/ModuleCustom.h"
-#include "Framework/FieldArray.h"
 #include "ParticleSystem/Attribute.h"
 
 #include <map>

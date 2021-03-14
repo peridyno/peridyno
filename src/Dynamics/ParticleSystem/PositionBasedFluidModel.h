@@ -1,7 +1,5 @@
 #pragma once
 #include "Framework/NumericalModel.h"
-#include "Framework/FieldVar.h"
-#include "Framework/FieldArray.h"
 #include "DensityPBD.h"
 
 namespace dyno

@@ -1,7 +1,5 @@
 #pragma once
 #include "Framework/ModuleConstraint.h"
-#include "Framework/FieldArray.h"
-#include "Framework/FieldVar.h"
 #include "Topology/FieldNeighbor.h"
 #include "Algorithm/Reduction.h"
 #include "Algorithm/Functional.h"

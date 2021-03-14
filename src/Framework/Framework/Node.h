@@ -16,7 +16,7 @@
 #pragma once
 #include "Base.h"
 #include "Typedef.h"
-#include "FieldVar.h"
+#include "Field.h"
 #include "Platform.h"
 #include "NumericalModel.h"
 #include "ModuleTopology.h"
@@ -344,7 +344,7 @@ public:
 	 *
 	 * @return Return false if the name conflicts with exists fields' names
 	 */
-	bool attachField(Field* field, std::string name, std::string desc, bool autoDestroy = true) override;
+	bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 
 
 	bool addNodePort(NodePort* port);

@@ -3,7 +3,6 @@
 #include <vector>
 #include "Framework/NumericalModel.h"
 #include "ElasticityModule.h"
-#include "Framework/FieldVar.h"
 
 
 namespace dyno

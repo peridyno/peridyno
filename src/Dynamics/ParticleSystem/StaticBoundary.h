@@ -1,7 +1,5 @@
 #pragma once
 #include "Framework/Node.h"
-#include "Framework/FieldArray.h"
-
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/ParticleSystem.h"
 

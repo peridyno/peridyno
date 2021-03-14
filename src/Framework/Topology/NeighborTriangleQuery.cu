@@ -1,5 +1,4 @@
 #include "NeighborTriangleQuery.h"
-#include "Framework/FieldArray.h"
 #include "Collision/CollisionDetectionBroadPhase.h"
 
 namespace dyno

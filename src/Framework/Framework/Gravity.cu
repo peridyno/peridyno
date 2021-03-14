@@ -1,7 +1,5 @@
 #include "Gravity.h"
 #include "Framework/Node.h"
-#include "Framework/FieldVar.h"
-#include "Framework/FieldArray.h"
 
 namespace dyno
 {

@@ -1,7 +1,5 @@
 #include <cuda_runtime.h>
 #include "ParticleIntegrator.h"
-#include "Framework/FieldArray.h"
-#include "Framework/FieldVar.h"
 #include "Framework/Node.h"
 #include "Framework/SceneGraph.h"
 

@@ -1,14 +1,14 @@
 #pragma once
 #include "Typedef.h"
 #include "Array/Array.h"
-#include "Framework/Field.h"
+#include "Framework/FieldBase.h"
 #include "Framework/Base.h"
 #include "Topology/NeighborList.h"
 
 namespace dyno {
 
 template<typename T>
-class NeighborField : public Field
+class NeighborField : public FieldBase
 {
 public:
 	typedef T VarType;
@@ -48,7 +48,7 @@ private:
 
 template<typename T>
 NeighborField<T>::NeighborField()
-	:Field("", "")
+	:FieldBase("", "")
 	, m_data(nullptr)
 {
 }
@@ -56,7 +56,7 @@ NeighborField<T>::NeighborField()
 
 template<typename T>
 NeighborField<T>::NeighborField(int num, int nbrSize /*= 0*/)
-	:Field("", "")
+	:FieldBase("", "")
 {
 	m_data = std::make_shared<NeighborList<T>>();
 	m_data->resize(num);
@@ -89,7 +89,7 @@ void NeighborField<T>::setElementCount(int num, int nbrSize /*= 0*/)
 
 template<typename T>
 NeighborField<T>::NeighborField(std::string name, std::string description, int num, int nbrSize)
-	: Field(name, description)
+	: FieldBase(name, description)
 {
 	m_data = std::make_shared<NeighborList<T>>();
 	m_data->resize(num);
@@ -106,7 +106,7 @@ NeighborField<T>::NeighborField(std::string name, std::string description, int n
 
 template<typename T>
 NeighborField<T>::NeighborField(std::string name, std::string description, EFieldType fieldType, Base* parent, int num, int nbrSize)
-	: Field(name, description, fieldType, parent)
+	: FieldBase(name, description, fieldType, parent)
 {
 	m_data = num <= 0 ? nullptr : std::make_shared<NeighborList<T>>(num, nbrSize);
 }
@@ -137,7 +137,7 @@ bool NeighborField<T>::connect(NeighborField<T>* field2)
 template<typename T>
 std::shared_ptr<NeighborList<T>> NeighborField<T>::getReference()
 {
-	Field* source = getSource();
+	FieldBase* source = getSource();
 	if (source == nullptr)
 	{
 		return m_data;
@@ -160,7 +160,7 @@ std::shared_ptr<NeighborList<T>> NeighborField<T>::getReference()
 template<typename T>
 NeighborField<T>* NeighborField<T>::getSourceNeighborField()
 {
-	Field* source = getSource();
+	FieldBase* source = getSource();
 	if (source == nullptr)
 	{
 		return this;

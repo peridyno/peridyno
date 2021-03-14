@@ -1,8 +1,6 @@
 #pragma once
 #include "Array/Array.h"
 #include "Framework/ModuleConstraint.h"
-#include "Framework/FieldVar.h"
-#include "Framework/FieldArray.h"
 #include "Topology/FieldNeighbor.h"
 #include "Kernel.h"
 

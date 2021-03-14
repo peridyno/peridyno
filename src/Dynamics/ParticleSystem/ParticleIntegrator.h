@@ -1,7 +1,5 @@
 #pragma once
 #include "Framework/NumericalIntegrator.h"
-#include "Framework/FieldVar.h"
-#include "Framework/FieldArray.h"
 #include "Attribute.h"
 
 namespace dyno {

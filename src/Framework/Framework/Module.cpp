@@ -104,7 +104,7 @@ bool Module::isInitialized()
 	return m_initialized;
 }
 
-bool Module::findInputField(Field* field)
+bool Module::findInputField(FieldBase* field)
 {
 	auto result = find(fields_input.begin(), fields_input.end(), field);
 	// return false if no field is found!
@@ -115,7 +115,7 @@ bool Module::findInputField(Field* field)
 	return true;
 }
 
-bool Module::addInputField(Field* field)
+bool Module::addInputField(FieldBase* field)
 {
 	if (findInputField(field))
 	{
@@ -129,7 +129,7 @@ bool Module::addInputField(Field* field)
 	return true;
 }
 
-bool Module::removeInputField(Field* field)
+bool Module::removeInputField(FieldBase* field)
 {
 	if (!findInputField(field))
 	{
@@ -147,7 +147,7 @@ bool Module::removeInputField(Field* field)
 	return true;
 }
 
-bool Module::findOutputField(Field* field)
+bool Module::findOutputField(FieldBase* field)
 {
 	auto result = find(fields_output.begin(), fields_output.end(), field);
 	// return false if no field is found!
@@ -158,7 +158,7 @@ bool Module::findOutputField(Field* field)
 	return true;
 }
 
-bool Module::addOutputField(Field* field)
+bool Module::addOutputField(FieldBase* field)
 {
 	if (findOutputField(field))
 	{
@@ -172,7 +172,7 @@ bool Module::addOutputField(Field* field)
 	return true;
 }
 
-bool Module::removeOutputField(Field* field)
+bool Module::removeOutputField(FieldBase* field)
 {
 	if (!findOutputField(field))
 	{
@@ -190,7 +190,7 @@ bool Module::removeOutputField(Field* field)
 	return true;
 }
 
-bool Module::findParameter(Field* field)
+bool Module::findParameter(FieldBase* field)
 {
 	auto result = find(fields_param.begin(), fields_param.end(), field);
 	// return false if no field is found!
@@ -201,7 +201,7 @@ bool Module::findParameter(Field* field)
 	return true;
 }
 
-bool Module::addParameter(Field* field)
+bool Module::addParameter(FieldBase* field)
 {
 	if (findParameter(field))
 	{
@@ -215,7 +215,7 @@ bool Module::addParameter(Field* field)
 	return true;
 }
 
-bool Module::removeParameter(Field* field)
+bool Module::removeParameter(FieldBase* field)
 {
 	if (!findParameter(field))
 	{
@@ -244,7 +244,7 @@ bool Module::initializeImpl()
 	return true;
 }
 
-bool Module::attachField(Field* field, std::string name, std::string desc, bool autoDestroy)
+bool Module::attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy)
 {
 	field->setParent(this);
 	field->setObjectName(name);

@@ -1,7 +1,6 @@
 #pragma once
 #include "Array/Array.h"
 #include "Framework/CollidableObject.h"
-#include "Framework/FieldArray.h"
 
 namespace dyno
 {

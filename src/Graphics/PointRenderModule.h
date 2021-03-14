@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Framework/ModuleVisual.h"
-#include "Framework/FieldVar.h"
 #include "Framework/DeclareEnum.h"
-#include "Framework/FieldArray.h"
 
 #include "PointRender.h"
 #include "LineRender.h"

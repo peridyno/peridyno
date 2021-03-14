@@ -1,7 +1,5 @@
 #pragma once
 #include "Framework/ModuleCompute.h"
-#include "Framework/FieldVar.h"
-#include "Framework/FieldArray.h"
 #include "Topology/FieldNeighbor.h"
 #include "Topology/GridHash.h"
 #include "Framework/ModuleTopology.h"

@@ -1,6 +1,5 @@
 #include <cuda_runtime.h>
 #include "Framework/Log.h"
-#include "Framework/FieldVar.h"
 #include "Framework/MechanicalState.h"
 #include "Framework/Node.h"
 #include "FixedPoints.h"

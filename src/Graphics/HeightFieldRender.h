@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Framework/ModuleVisual.h"
-#include "Framework/FieldArray.h"
-#include "Framework/FieldVar.h"
-
 #include "PointRender.h"
 #include "LineRender.h"
 #include "TriangleRender.h"

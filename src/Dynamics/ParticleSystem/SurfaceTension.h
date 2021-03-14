@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/ModuleForce.h"
-#include "Framework/FieldArray.h"
 
 namespace dyno {
 

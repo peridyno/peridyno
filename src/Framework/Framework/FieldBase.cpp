@@ -1,32 +1,32 @@
-#include "Field.h"
+#include "FieldBase.h"
 #include <algorithm>
 
 #include "Module.h"
 
 namespace dyno
 {
-	void Field::setParent(Base* owner)
+	void FieldBase::setParent(Base* owner)
 	{
 		m_owner = owner;
 	}
 
-	Base* Field::getParent()
+	Base* FieldBase::getParent()
 	{
 		return m_owner;
 	}
 
-	void Field::setSource(Field* source)
+	void FieldBase::setSource(FieldBase* source)
 	{
 		m_derived = source == nullptr ? false : true;
 		m_source = source;
 	}
 
-	Field* Field::getSource()
+	FieldBase* FieldBase::getSource()
 	{
 		return m_source;
 	}
 
-	void Field::addSink(Field* f)
+	void FieldBase::addSink(FieldBase* f)
 	{
 		auto it = std::find(m_field_sink.begin(), m_field_sink.end(), f);
 
@@ -39,7 +39,7 @@ namespace dyno
 		}
 	}
 
-	void Field::removeSink(Field* f)
+	void FieldBase::removeSink(FieldBase* f)
 	{
 		auto it = std::find(m_field_sink.begin(), m_field_sink.end(), f);
 		
@@ -52,27 +52,27 @@ namespace dyno
 		}
 	}
 
-	bool Field::isDerived()
+	bool FieldBase::isDerived()
 	{
 		return m_derived;
 	}
 
-	bool Field::isAutoDestroyable()
+	bool FieldBase::isAutoDestroyable()
 	{
 		return m_autoDestroyable;
 	}
 
-	void Field::setAutoDestroy(bool autoDestroy)
+	void FieldBase::setAutoDestroy(bool autoDestroy)
 	{
 		m_autoDestroyable = autoDestroy;
 	}
 
-	void Field::setDerived(bool derived)
+	void FieldBase::setDerived(bool derived)
 	{
 		m_derived = derived;
 	}
 
-	bool Field::connectField(Field* dst)
+	bool FieldBase::connectField(FieldBase* dst)
 	{
 		if (dst->getSource() != nullptr && dst->getSource() != this)
 		{
@@ -84,12 +84,12 @@ namespace dyno
 		return true;
 	}
 
-	Field* Field::getTopField()
+	FieldBase* FieldBase::getTopField()
 	{
 		return m_source == nullptr ? this : m_source->getTopField();
 	}
 
-	void Field::update()
+	void FieldBase::update()
 	{
 		if (!this->isEmpty() && callbackFunc != nullptr)
 		{
@@ -107,27 +107,27 @@ namespace dyno
 		}
 	}
 
-	bool Field::isModified()
+	bool FieldBase::isModified()
 	{
 		return m_modified;
 	}
 
-	void Field::tagModified(bool modifed)
+	void FieldBase::tagModified(bool modifed)
 	{
 		m_modified = modifed;
 	}
 
-	bool Field::isOptional()
+	bool FieldBase::isOptional()
 	{
 		return m_optional;
 	}
 
-	void Field::tagOptional(bool optional)
+	void FieldBase::tagOptional(bool optional)
 	{
 		m_optional = optional;
 	}
 
-	Field::Field(std::string name, std::string description, EFieldType type, Base* parent)
+	FieldBase::FieldBase(std::string name, std::string description, EFieldType type, Base* parent)
 	{
 		m_name = name; m_description = description;
 		m_fType = type;
@@ -137,7 +137,7 @@ namespace dyno
 		}
 	}
 
-	EFieldType Field::getFieldType()
+	EFieldType FieldBase::getFieldType()
 	{
 		return m_fType;
 	}

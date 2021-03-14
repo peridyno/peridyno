@@ -3,7 +3,6 @@
 #include "Framework/CollisionModel.h"
 #include "Framework/ModuleTopology.h"
 #include "Framework/Node.h"
-#include "Framework/FieldArray.h"
 #include "Topology/TetrahedronSet.h""
 
 namespace dyno

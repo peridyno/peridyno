@@ -1,129 +1,188 @@
 #pragma once
-#include "Platform.h"
-#include <typeinfo>
-#include <string>
-#include <functional>
-#include "Typedef.h"
+#include <iostream>
+#include "FieldBase.h"
+#include "Base.h"
+#include "Array/Array.h"
+#include "Framework/Log.h"
 
 namespace dyno {
-	class Base;
-
-	enum EFieldType
-	{
-		In,
-		Out,
-		Param,
-		Current,
-		Next
-	};
 
 /*!
 *	\class	Variable
-*	\brief	Interface for all variables.
+*	\brief	Variables of build-in data types.
 */
-class Field
+template<typename T>
+class VarField : public FieldBase
 {
-	using CallBackFunc = std::function<void()>;
 public:
-	Field() : m_name("default"), m_description("") {};
-	Field(std::string name, std::string description, EFieldType type = EFieldType::Param, Base* parent = nullptr);
-	virtual ~Field() {};
+	typedef T VarType;
+	typedef T DataType;
+	typedef VarField<T> FieldClass;
 
-	virtual size_t getElementCount() { return 0; }
-	virtual const std::string getTemplateName() { return std::string(""); }
-	virtual const std::string getClassName() { return std::string("Field"); }
+	DEFINE_DERIVED_FUNC(FieldClass, DataType);
 
-	std::string	getObjectName() { return m_name; }
-	std::string	getDescription() { return m_description; }
-	virtual DeviceType getDeviceType() { return DeviceType::UNDEFINED; }
+	VarField();
+	VarField(std::string name, std::string description, EFieldType fieldType, Base* parent);
+	VarField(T value, std::string name, std::string description, EFieldType fieldType, Base* parent);
+	~VarField() override;
 
-	void setObjectName(std::string name) { m_name = name; }
-	void setDescription(std::string description) { m_description = description; }
+	size_t getElementCount() override { return 1; }
+	const std::string getTemplateName() override { return std::string(typeid(T).name()); }
+	const std::string getClassName() override { return std::string("Variable"); }
 
-	void setParent(Base* owner);
-	Base* getParent();
-
-	bool isDerived();
-	bool isAutoDestroyable();
-
-	void setAutoDestroy(bool autoDestroy);
-	void setDerived(bool derived);
-
-	std::vector<Field*>& getSinkFields() { return m_field_sink; }
-
-	bool isModified();
-	void tagModified(bool modifed);
-
-	bool isOptional();
-	void tagOptional(bool optional);
-
-	inline float getMin() { return m_min; }
-	inline void setMin(float min_val) { m_min = min_val; }
-
-	inline float getMax() { return m_max; }
-	inline void setMax(float max_val) { m_max = max_val; }
-
-	EFieldType getFieldType();
-
-
-	bool connectField(Field* dst);
-
-	Field* getTopField();
-
-	virtual bool isEmpty() = 0;
-	virtual void update();
-
-	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
-protected:
-	void setSource(Field* source);
-	Field* getSource();
-
-	void addSink(Field* f);
-	void removeSink(Field* f);
-
-	EFieldType m_fType = EFieldType::Param;
-
-private:
-	std::string m_name;
-	std::string m_description;
-
-	bool m_optional = false;
-
-	bool m_autoDestroyable = true;
-	bool m_derived = false;
-	Field* m_source = nullptr;
-	Base* m_owner = nullptr;
-
-	float m_min = -FLT_MAX;
-	float m_max = FLT_MAX;
-
-	bool m_modified = false;
-
-	std::vector<Field*> m_field_sink;
-	CallBackFunc callbackFunc;
+	void setValue(T val);
 };
 
-#define DEFINE_DERIVED_FUNC(DerivedField,Data)						\
-std::shared_ptr<Data>& getReference()								\
-{																	\
-	Field* topField = this->getTopField();							\
-	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
-	return derived->m_data;											\
-}																	\
-\
-bool isEmpty() override {											\
-return this->getReference() == nullptr;								\
-}																	\
-\
-bool connect(DerivedField* dst)						\
-{																	\
-	this->connectField(dst);										\
-	this->update();													\
-	return true;													\
-}																	\
-Data& getValue() { return *(getReference()); }					\
-private:															\
-	std::shared_ptr<Data> m_data = nullptr;							\
-public:
+template<typename T>
+VarField<T>::VarField()
+	: FieldBase("", "")
+{
+}
 
+template<typename T>
+VarField<T>::VarField(std::string name, std::string description, EFieldType fieldType, Base* parent)
+	: FieldBase(name, description, fieldType, parent)
+	, m_data(nullptr)
+{
+}
+
+template<typename T>
+VarField<T>::VarField(T value, std::string name, std::string description, EFieldType fieldType, Base* parent)
+	: FieldBase(name, description, fieldType, parent)
+{
+	this->setValue(value);
+}
+
+template<typename T>
+VarField<T>::~VarField()
+{
+};
+
+template<typename T>
+void VarField<T>::setValue(T val)
+{
+	std::shared_ptr<T>& data = this->getReference();
+	if (data == nullptr)
+	{
+		data = std::make_shared<T>(val);
+	}
+	else
+	{
+		*data = val;
+	}
+
+	this->update();
+}
+
+template<typename T>
+using HostVarField = VarField<T>;
+
+template<typename T>
+using DeviceVarField = VarField<T>;
+
+template<typename T>
+using HostVariablePtr = std::shared_ptr< HostVarField<T> >;
+
+template<typename T>
+using DeviceVariablePtr = std::shared_ptr< DeviceVarField<T> >;
+
+
+/**
+ * Define field for Array
+ */
+template<typename T, DeviceType deviceType>
+class ArrayField : public FieldBase
+{
+public:
+	typedef T VarType;
+	typedef Array<T, deviceType> DataType;
+	typedef ArrayField<T, deviceType> FieldClass;
+
+	DEFINE_DERIVED_FUNC(FieldClass, DataType);
+
+	ArrayField();
+	ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent);
+	~ArrayField() override;
+
+	inline size_t getElementCount() override {
+		auto ref = this->getReference();
+		return ref == nullptr ? 0 : ref->size();
+	}
+
+	void setElementCount(size_t num);
+
+	const std::string getTemplateName() override { return std::string(typeid(T).name()); }
+	const std::string getClassName() override { return std::string("ArrayBuffer"); }
+
+	void setValue(std::vector<T>& vals);
+	void setValue(GArray<T>& vals);
+};
+
+template<typename T, DeviceType deviceType>
+ArrayField<T, deviceType>::ArrayField()
+	: FieldBase("", "")
+{
+}
+
+template<typename T, DeviceType deviceType>
+ArrayField<T, deviceType>::ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent)
+	: FieldBase(name, description, fieldType, parent)
+{
+	m_data = num <= 0 ? nullptr : std::make_shared<Array<T, deviceType>>(num);
+}
+
+template<typename T, DeviceType deviceType>
+ArrayField<T, deviceType>::~ArrayField()
+{
+	if (m_data.use_count() == 1)
+	{
+		m_data->clear();
+	}
+}
+
+template<typename T, DeviceType deviceType>
+void ArrayField<T, deviceType>::setElementCount(size_t num)
+{
+	FieldBase* topField = this->getTopField();
+	ArrayField<T, deviceType>* derived = dynamic_cast<ArrayField<T, deviceType>*>(topField);
+
+	if (derived->m_data == nullptr)
+	{
+		derived->m_data = std::make_shared<Array<T, deviceType>>(num);
+	}
+	else
+	{
+		derived->m_data->resize(num);
+	}
+}
+
+template<typename T, DeviceType deviceType>
+void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
+{
+	std::shared_ptr<Array<T, deviceType>>& data = this->getReference();
+	if (data == nullptr)
+	{
+		data = std::make_shared<Array<T, deviceType>>();
+	}
+
+	data->assign(vals);
+}
+
+template<typename T, DeviceType deviceType>
+void ArrayField<T, deviceType>::setValue(GArray<T>& vals)
+{
+	std::shared_ptr<Array<T, deviceType>>& data = this->getReference();
+	if (data == nullptr)
+	{
+		data = std::make_shared<Array<T, deviceType>>();
+	}
+
+	data->assign(vals);
+}
+
+template<typename T>
+using HostArrayField = ArrayField<T, DeviceType::CPU>;
+
+template<typename T>
+using DeviceArrayField = ArrayField<T, DeviceType::GPU>;
 }

@@ -17,7 +17,6 @@
 #include "Framework/Module.h"
 #include "Vector.h"
 #include "Quat.h"
-#include "FieldVar.h"
 
 namespace dyno
 {
