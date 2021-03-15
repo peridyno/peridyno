@@ -10,6 +10,7 @@ file(
 )
 
 if(${LIB_NAME} STREQUAL "IO")
+    list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/tinyxml/tinyxml2.cpp")
     list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/LodePNG/lodepng.cpp")
 endif()
 

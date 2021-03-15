@@ -103,7 +103,7 @@ private:
 	CallBackFunc callbackFunc;
 };
 
-#define DEFINE_DERIVED_FUNC(DerivedField,Data)						\
+#define DEFINE_FIELD_FUNC(DerivedField,Data)						\
 std::shared_ptr<Data>& getReference()								\
 {																	\
 	FieldBase* topField = this->getTopField();							\

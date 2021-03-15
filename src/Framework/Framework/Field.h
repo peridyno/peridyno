@@ -19,7 +19,7 @@ public:
 	typedef T DataType;
 	typedef VarField<T> FieldClass;
 
-	DEFINE_DERIVED_FUNC(FieldClass, DataType);
+	DEFINE_FIELD_FUNC(FieldClass, DataType);
 
 	VarField();
 	VarField(std::string name, std::string description, EFieldType fieldType, Base* parent);
@@ -98,7 +98,7 @@ public:
 	typedef Array<T, deviceType> DataType;
 	typedef ArrayField<T, deviceType> FieldClass;
 
-	DEFINE_DERIVED_FUNC(FieldClass, DataType);
+	DEFINE_FIELD_FUNC(FieldClass, DataType);
 
 	ArrayField();
 	ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent);
