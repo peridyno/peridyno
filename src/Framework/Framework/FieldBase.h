@@ -103,7 +103,14 @@ private:
 	CallBackFunc callbackFunc;
 };
 
-#define DEFINE_FIELD_FUNC(DerivedField,Data)						\
+#define DEFINE_FIELD_FUNC(DerivedField, Data, FieldName)						\
+FieldName() : FieldBase("", ""){}								\
+\
+FieldName(std::string name, std::string description, EFieldType fieldType, Base* parent)		\
+	: FieldBase(name, description, fieldType, parent){}				\
+\
+const std::string getTemplateName() override { return std::string(typeid(T).name()); }\
+\
 std::shared_ptr<Data>& getReference()								\
 {																	\
 	FieldBase* topField = this->getTopField();							\

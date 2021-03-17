@@ -19,32 +19,16 @@ public:
 	typedef T DataType;
 	typedef VarField<T> FieldClass;
 
-	DEFINE_FIELD_FUNC(FieldClass, DataType);
+	DEFINE_FIELD_FUNC(FieldClass, DataType, VarField);
 
-	VarField();
-	VarField(std::string name, std::string description, EFieldType fieldType, Base* parent);
 	VarField(T value, std::string name, std::string description, EFieldType fieldType, Base* parent);
 	~VarField() override;
 
 	size_t getElementCount() override { return 1; }
-	const std::string getTemplateName() override { return std::string(typeid(T).name()); }
 	const std::string getClassName() override { return std::string("Variable"); }
 
 	void setValue(T val);
 };
-
-template<typename T>
-VarField<T>::VarField()
-	: FieldBase("", "")
-{
-}
-
-template<typename T>
-VarField<T>::VarField(std::string name, std::string description, EFieldType fieldType, Base* parent)
-	: FieldBase(name, description, fieldType, parent)
-	, m_data(nullptr)
-{
-}
 
 template<typename T>
 VarField<T>::VarField(T value, std::string name, std::string description, EFieldType fieldType, Base* parent)
@@ -98,9 +82,8 @@ public:
 	typedef Array<T, deviceType> DataType;
 	typedef ArrayField<T, deviceType> FieldClass;
 
-	DEFINE_FIELD_FUNC(FieldClass, DataType);
+	DEFINE_FIELD_FUNC(FieldClass, DataType, ArrayField);
 
-	ArrayField();
 	ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent);
 	~ArrayField() override;
 
@@ -111,18 +94,11 @@ public:
 
 	void setElementCount(size_t num);
 
-	const std::string getTemplateName() override { return std::string(typeid(T).name()); }
 	const std::string getClassName() override { return std::string("ArrayBuffer"); }
 
 	void setValue(std::vector<T>& vals);
 	void setValue(GArray<T>& vals);
 };
-
-template<typename T, DeviceType deviceType>
-ArrayField<T, deviceType>::ArrayField()
-	: FieldBase("", "")
-{
-}
 
 template<typename T, DeviceType deviceType>
 ArrayField<T, deviceType>::ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent)
