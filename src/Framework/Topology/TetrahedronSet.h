@@ -19,14 +19,14 @@ namespace dyno
 		void loadTetFile(std::string filename);
 
 		void setTetrahedrons(std::vector<Tetrahedron>& tetrahedrons);
-		void setTetrahedrons(GArray<Tetrahedron>& tetrahedrons);
+		void setTetrahedrons(DArray<Tetrahedron>& tetrahedrons);
 
-		GArray<Tetrahedron>& getTetrahedrons() { return m_tethedrons; }
-		GArray<Tri2Tet>& getTri2Tet() { return tri2Tet; }
+		DArray<Tetrahedron>& getTetrahedrons() { return m_tethedrons; }
+		DArray<Tri2Tet>& getTri2Tet() { return tri2Tet; }
 
 		NeighborList<int>& getVer2Tet();
 
-		void getVolume(GArray<Real>& volume);
+		void getVolume(DArray<Real>& volume);
 
 		void updateTriangles();
 
@@ -36,10 +36,10 @@ namespace dyno
 		bool initializeImpl() override;
 
 	protected:
-		GArray<Tetrahedron> m_tethedrons;
+		DArray<Tetrahedron> m_tethedrons;
 
 	private:
-		GArray<Tri2Tet> tri2Tet;
+		DArray<Tri2Tet> tri2Tet;
 		NeighborList<int> m_ver2Tet;
 	};
 

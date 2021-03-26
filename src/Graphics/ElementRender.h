@@ -29,19 +29,19 @@ namespace dyno
 	private:
 		Vector3f m_color;
 
-		GArray<float3> vertices;
-		GArray<float3> normals;
-		GArray<float3> colors;
+		DArray<float3> vertices;
+		DArray<float3> normals;
+		DArray<float3> colors;
 
 
 
 
 
-		GArray<float3> standard_sphere_position;
-		GArray<int> standard_sphere_index;
-		GArray<int> mapping;
-		GArray<int> mapping_shape;
-		GArray<int> attr;
+		DArray<float3> standard_sphere_position;
+		DArray<int> standard_sphere_index;
+		DArray<int> mapping;
+		DArray<int> mapping_shape;
+		DArray<int> attr;
 
 		int x_segments = 50;
 		int y_segments = 50;
@@ -53,18 +53,18 @@ namespace dyno
 
 
 
-		GArray<Sphere3D> m_spheres;
-		GArray<Box3D> m_boxes;
+		DArray<Sphere3D> m_spheres;
+		DArray<Box3D> m_boxes;
 
 		//for test
-		GArray<float3> centre_sphere;
-		GArray<float> radius_sphere;
+		DArray<float3> centre_sphere;
+		DArray<float> radius_sphere;
 
-		GArray<float3> centre_box;
-		GArray<float3> u;
-		GArray<float3> v;
-		GArray<float3> w;
-		GArray<float3> ext_box;
+		DArray<float3> centre_box;
+		DArray<float3> u;
+		DArray<float3> v;
+		DArray<float3> w;
+		DArray<float3> ext_box;
 	};
 
 }

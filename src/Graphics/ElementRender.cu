@@ -145,9 +145,9 @@ namespace dyno
 
 
 	__global__ void Mix_Setup_Mapping(
-		GArray<int> mapping,
-		GArray<int> mapping_shape,
-		GArray<int> attribute,
+		DArray<int> mapping,
+		DArray<int> mapping_shape,
+		DArray<int> attribute,
 		int num_box,
 		int num_triangle_sphere
 	)
@@ -170,12 +170,12 @@ namespace dyno
 	}
 
 	__global__ void Mix_Setup_Box(
-		GArray<Box3D> box,
-		GArray<float3> centre_box,
-		GArray<float3> uu,
-		GArray<float3> vv,
-		GArray<float3> ww,
-		GArray<float3> ex
+		DArray<Box3D> box,
+		DArray<float3> centre_box,
+		DArray<float3> uu,
+		DArray<float3> vv,
+		DArray<float3> ww,
+		DArray<float3> ex
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -191,9 +191,9 @@ namespace dyno
 	}
 
 	__global__ void Mix_Setup_Sphere(
-		GArray<Sphere3D> sphere,
-		GArray<float> radius,
-		GArray<float3> centre_sphere
+		DArray<Sphere3D> sphere,
+		DArray<float> radius,
+		DArray<float3> centre_sphere
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -203,21 +203,21 @@ namespace dyno
 	}
 
 	__global__ void Mix_SetupTriangles(
-		GArray<float3> vertices,
-		GArray<float3> normals,
-		GArray<float3> colors,
-		GArray<float3> centre_box,
-		GArray<float3> ext,
-		GArray<float3> u,
-		GArray<float3> v,
-		GArray<float3> w,
-		GArray<float3> centre_sphere,
-		GArray<float> radius,
-		GArray<float3> pos,
-		GArray<int> index,
-		GArray<int> mapping,
-		GArray<int> mapping_shape,
-		GArray<int> attribute,
+		DArray<float3> vertices,
+		DArray<float3> normals,
+		DArray<float3> colors,
+		DArray<float3> centre_box,
+		DArray<float3> ext,
+		DArray<float3> u,
+		DArray<float3> v,
+		DArray<float3> w,
+		DArray<float3> centre_sphere,
+		DArray<float> radius,
+		DArray<float3> pos,
+		DArray<int> index,
+		DArray<int> mapping,
+		DArray<int> mapping_shape,
+		DArray<int> attribute,
 		float3 color
 	)
 	{

@@ -157,7 +157,7 @@ namespace dyno {
 	using CArray2D = Array2D<T, DeviceType::CPU>;
 
 	template<typename T>
-	using GArray2D = Array2D<T, DeviceType::GPU>;
+	using DArray2D = Array2D<T, DeviceType::GPU>;
 }
 
 #include "Array2D.inl"

@@ -11,7 +11,7 @@ namespace dyno
 {
 	typedef unsigned long long int PKey;
 
-	void print(GArray<int> arr)
+	void print(DArray<int> arr)
 	{
 		CArray<int> h_arr;
 		h_arr.resize(arr.size());
@@ -26,7 +26,7 @@ namespace dyno
 		h_arr.clear();
 	};
 
-	void print(GArray<PKey> arr)
+	void print(DArray<PKey> arr)
 	{
 		CArray<PKey> h_arr;
 		h_arr.resize(arr.size());
@@ -59,9 +59,9 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void CDBP_SetupCorners(
-		GArray<Coord> v0,
-		GArray<Coord> v1,
-		GArray<AABB> box)
+		DArray<Coord> v0,
+		DArray<Coord> v1,
+		DArray<AABB> box)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -74,8 +74,8 @@ namespace dyno
 
 	template<typename Real>
 	__global__ void CDBP_ComputeAABBSize(
-		GArray<Real> h,
-		GArray<AABB> boundingBox)
+		DArray<Real> h,
+		DArray<AABB> boundingBox)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -88,8 +88,8 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RequestIntersectionNumber(
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -100,9 +100,9 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RequestIntersectionIds(
-		GArray<int> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -115,8 +115,8 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RequestIntersectionNumber(
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree,
 		bool self_collision)
 	{
@@ -130,9 +130,9 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RequestIntersectionIds(
-		GArray<int> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree,
 		bool self_collision)
 	{
@@ -147,9 +147,9 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RequestIntersectionNumberRemove(
-		GArray<int> count,
-		GArray<AABB> boundingBox_src,
-		GArray<AABB> boundingBox_tar,
+		DArray<int> count,
+		DArray<AABB> boundingBox_src,
+		DArray<AABB> boundingBox_tar,
 		SparseOctree<TDataType> octree,
 		int self_collision)
 	{
@@ -163,10 +163,10 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RequestIntersectionIdsRemove(
-		GArray<int> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox_src,
-		GArray<AABB> boundingBox_tar,
+		DArray<int> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox_src,
+		DArray<AABB> boundingBox_tar,
 		SparseOctree<TDataType> octree,
 		int self_collision
 	)
@@ -180,9 +180,9 @@ namespace dyno
 	}
 
 	__global__ void CDBP_SetupKeys(
-		GArray<PKey> keys,
-		GArray<int> ids,
-		GArray<int> count)
+		DArray<PKey> keys,
+		DArray<int> ids,
+		DArray<int> count)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= count.size()) return;
@@ -202,10 +202,10 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_CountDuplicativeIds(
-		GArray<int> new_count,
-		GArray<PKey> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> new_count,
+		DArray<PKey> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -230,10 +230,10 @@ namespace dyno
 	}
 	template<typename TDataType>
 	__global__ void CDBP_CountDuplicativeIds(
-		GArray<int> new_count,
-		GArray<PKey> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> new_count,
+		DArray<PKey> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree,
 		bool self_collision)
 	{
@@ -274,11 +274,11 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RemoveDuplicativeIds(
-		GArray<int> new_ids,
-		GArray<int> new_count,
-		GArray<PKey> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> new_ids,
+		DArray<int> new_count,
+		DArray<PKey> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -305,11 +305,11 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RemoveDuplicativeIds(
-		GArray<int> new_ids,
-		GArray<int> new_count,
-		GArray<PKey> ids,
-		GArray<int> count,
-		GArray<AABB> boundingBox,
+		DArray<int> new_ids,
+		DArray<int> new_count,
+		DArray<PKey> ids,
+		DArray<int> count,
+		DArray<AABB> boundingBox,
 		SparseOctree<TDataType> octree,
 		bool self_collision)
 	{
@@ -361,7 +361,7 @@ namespace dyno
 
 
 	__global__ void CDBP_RevertIds(
-		GArray<int> elements)
+		DArray<int> elements)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= elements.size()) return;
@@ -377,10 +377,10 @@ namespace dyno
 		auto& aabb_src = this->inSource()->getValue();
 		auto& aabb_tar = this->inTarget()->getValue();
 
-		GArray<Coord> v0_arr;
-		GArray<Coord> v1_arr;
+		DArray<Coord> v0_arr;
+		DArray<Coord> v1_arr;
 
-		GArray<Real> h_arr;
+		DArray<Real> h_arr;
 
 		v0_arr.resize(aabb_tar.size());
 		v1_arr.resize(aabb_tar.size());
@@ -420,7 +420,7 @@ namespace dyno
 		//if(octree.getLevelMax() > 9)
 		//	octree.printPostOrderedTree();
 
-		GArray<int> counter;
+		DArray<int> counter;
 		counter.resize(aabb_src.size());
 		/*
 		cuExecute(aabb_src.size(),
@@ -444,7 +444,7 @@ namespace dyno
 
 		printf("total_node_num: %d\n", total_node_num);
 
-		GArray<int> ids;
+		DArray<int> ids;
 		ids.resize(total_node_num);
 		/*
 		cuExecute(aabb_src.size(),
@@ -467,7 +467,7 @@ namespace dyno
 		// 		print(counter);
 		// 		print(ids);
 
-		GArray<PKey> keys;
+		DArray<PKey> keys;
 		keys.resize(ids.size());
 
 

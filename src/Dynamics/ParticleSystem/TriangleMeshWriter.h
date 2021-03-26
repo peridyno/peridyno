@@ -51,8 +51,8 @@ namespace dyno
 		std::string name_prefix = "defaut_";
 		std::string file_postfix = ".obj";
 
-		GArray<Triangle>* ptr_triangles;
-		GArray<Coord>* ptr_vertices;
+		DArray<Triangle>* ptr_triangles;
+		DArray<Coord>* ptr_vertices;
 		std::shared_ptr<TriangleSet<TDataType>> ptr_TriangleSet = nullptr;
 	};
 

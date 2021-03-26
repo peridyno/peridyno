@@ -35,8 +35,8 @@ namespace dyno {
 	private:
 		int m_maxInteration;
 
-		GArray<Coord> m_velOld;
-		GArray<Coord> m_velBuf;
+		DArray<Coord> m_velOld;
+		DArray<Coord> m_velBuf;
 
 		
 	};

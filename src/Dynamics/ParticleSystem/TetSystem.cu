@@ -10,8 +10,8 @@ namespace dyno
 
 		template <typename Real, typename Coord>
 	__global__ void UpdatePosition(
-		GArray<Coord> posArr,
-		GArray<Coord> velArr,
+		DArray<Coord> posArr,
+		DArray<Coord> velArr,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -22,9 +22,9 @@ namespace dyno
 
 		template <typename Real, typename Coord>
 	__global__ void UpdateVelocity(
-		GArray<Coord> velArr,
-		GArray<Coord> forceArr,
-		GArray<Real> massArr,
+		DArray<Coord> velArr,
+		DArray<Coord> forceArr,
+		DArray<Real> massArr,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -35,9 +35,9 @@ namespace dyno
 	
 		template <typename Real, typename Coord, typename Matrix>
 	__global__ void UpdateAngularVelocity(
-		GArray<Coord> angularvelArr,
-		GArray<Matrix> invMassArr,
-		GArray<Coord> forceMomentArr,
+		DArray<Coord> angularvelArr,
+		DArray<Matrix> invMassArr,
+		DArray<Coord> forceMomentArr,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

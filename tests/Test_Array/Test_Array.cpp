@@ -17,17 +17,17 @@ TEST(Array, CPU)
 
 	EXPECT_EQ(cArr.size(), 2);
 
-	GArray<int> gArr;
+	DArray<int> gArr;
 	gArr.resize(2);
 	
 	gArr.assign(cArr);
 
-	GArrayList<int> arrList;
+	DArrayList<int> arrList;
 	arrList.resize(gArr);
 
 	EXPECT_EQ(arrList.elementSize(), 3);
 
-	GArrayList<int> constList;
+	DArrayList<int> constList;
 	constList.resize(5, 2);
 
 	EXPECT_EQ(constList.elementSize(), 10);
@@ -40,8 +40,8 @@ TEST(Array, Copy)
 {
 	CArray<int> cArr;
 	CArray<int> cArr2;
-	GArray<int> gArr;
-	GArray<int> gArr2;
+	DArray<int> gArr;
+	DArray<int> gArr2;
 
 	cArr.pushBack(1);
 	cArr.pushBack(2);
@@ -70,7 +70,7 @@ TEST(ArrayList, Copy)
 	vvec.push_back(vec1);
 	vvec.push_back(vec2);
 
-	GArrayList<int> gArrList;
+	DArrayList<int> gArrList;
 	gArrList.assign(vvec);
 
 	CArrayList<int> cArrList;
@@ -95,7 +95,7 @@ TEST(Array2D, Copy)
 	cArr2d(1, 0) = 2;
 	cArr2d(1, 1) = 3;
 
-	GArray2D<int> dArr2d;
+	DArray2D<int> dArr2d;
 	dArr2d.assign(cArr2d);
 
 	CArray2D<int> cArr2d2;
@@ -124,7 +124,7 @@ TEST(Array3D, Copy)
 		}
 	}
 
-	GArray3D<int> dArr3d;
+	DArray3D<int> dArr3d;
 	dArr3d.assign(cArr3d);
 
 	CArray3D<int> cArr3d_2;

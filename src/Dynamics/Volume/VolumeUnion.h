@@ -17,11 +17,5 @@ namespace dyno {
 	public:
 	};
 
-
-#ifdef PRECISION_FLOAT
-template class VolumeUnion<DataType3f>;
-#else
-template class VolumeUnion<DataType3d>;
-#endif
-
+	DEFINE_CLASS(VolumeUnion);
 }

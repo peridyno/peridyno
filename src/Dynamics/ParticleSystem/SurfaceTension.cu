@@ -9,8 +9,8 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void ST_ComputeSurfaceEnergy
 	(
-		GArray<Real> energyArr,
-		GArray<Coord> posArr,
+		DArray<Real> energyArr,
+		DArray<Coord> posArr,
 		NeighborList<int> neighbors,
 		Real smoothingLength
 	)
@@ -47,9 +47,9 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void ST_ComputeSurfaceTension
 	(
-		GArray<Coord> velArr, 
-		GArray<Real> energyArr, 
-		GArray<Coord> posArr, 
+		DArray<Coord> velArr, 
+		DArray<Real> energyArr, 
+		DArray<Coord> posArr, 
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real mass,
@@ -111,14 +111,14 @@ namespace dyno
 	{
 // 		m_energy = DeviceBuffer<Real>::create(num);
 // 
-// 		GArray<Coord>* posArr = m_parent->GetNewPositionBuffer()->getDataPtr();
-// 		GArray<Coord>* velArr = m_parent->GetNewVelocityBuffer()->getDataPtr();
-// 		GArray<Attribute>* attArr = m_parent->GetAttributeBuffer()->getDataPtr();
+// 		DArray<Coord>* posArr = m_parent->GetNewPositionBuffer()->getDataPtr();
+// 		DArray<Coord>* velArr = m_parent->GetNewVelocityBuffer()->getDataPtr();
+// 		DArray<Attribute>* attArr = m_parent->GetAttributeBuffer()->getDataPtr();
 // 		float dt = m_parent->getDt();
 // 
-// 		GArray<SPHNeighborList>* neighborArr = m_parent->GetNeighborBuffer()->getDataPtr();
+// 		DArray<SPHNeighborList>* neighborArr = m_parent->GetNeighborBuffer()->getDataPtr();
 // 
-// 		GArray<Real>* energy = m_energy->getDataPtr();
+// 		DArray<Real>* energy = m_energy->getDataPtr();
 // 
 // 		Real mass = m_parent->GetParticleMass();
 // 		Real smoothingLength = m_parent->GetSmoothingLength();

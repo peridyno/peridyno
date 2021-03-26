@@ -29,9 +29,9 @@ namespace dyno
 
 		if (cur_size > 0)
 		{
-			GArray<Coord>& cur_points0 = this->currentPosition()->getValue();
-			GArray<Coord>& cur_vels0 = this->currentVelocity()->getValue();
-			GArray<Coord>& cur_forces0 = this->currentForce()->getValue();
+			DArray<Coord>& cur_points0 = this->currentPosition()->getValue();
+			DArray<Coord>& cur_vels0 = this->currentVelocity()->getValue();
+			DArray<Coord>& cur_forces0 = this->currentForce()->getValue();
 
 			pos_buf.resize(cur_size);
 			vel_buf.resize(cur_size);
@@ -53,9 +53,9 @@ namespace dyno
 
 			//printf("%d %d %d\n", cur_size, gen_pos.size(), this->currentPosition()->getElementCount());
 
-			GArray<Coord>& cur_points = this->currentPosition()->getValue();
-			GArray<Coord>& cur_vels = this->currentVelocity()->getValue();
-			GArray<Coord>& cur_forces = this->currentForce()->getValue();
+			DArray<Coord>& cur_points = this->currentPosition()->getValue();
+			DArray<Coord>& cur_vels = this->currentVelocity()->getValue();
+			DArray<Coord>& cur_forces = this->currentForce()->getValue();
 
 			cur_points.reset();
 			cur_vels.reset();
@@ -78,9 +78,9 @@ namespace dyno
 	{
 		return;
 		generateParticles();
-		GArray<Coord>& cur_points0 = this->currentPosition()->getValue();
-		GArray<Coord>& cur_vels0 = this->currentVelocity()->getValue();
-		GArray<Coord>& cur_forces0 = this->currentForce()->getValue();
+		DArray<Coord>& cur_points0 = this->currentPosition()->getValue();
+		DArray<Coord>& cur_vels0 = this->currentVelocity()->getValue();
+		DArray<Coord>& cur_forces0 = this->currentForce()->getValue();
 
 		int cur_size = this->currentPosition()->getElementCount();
 
@@ -99,9 +99,9 @@ namespace dyno
 
 		//printf("%d %d %d\n", cur_size, gen_pos.size(), this->currentPosition()->getElementCount());
 
-		GArray<Coord>& cur_points = this->currentPosition()->getValue();
-		GArray<Coord>& cur_vels = this->currentVelocity()->getValue();
-		GArray<Coord>& cur_forces = this->currentForce()->getValue();
+		DArray<Coord>& cur_points = this->currentPosition()->getValue();
+		DArray<Coord>& cur_vels = this->currentVelocity()->getValue();
+		DArray<Coord>& cur_forces = this->currentForce()->getValue();
 
 		cur_points.reset();
 		cur_vels.reset();

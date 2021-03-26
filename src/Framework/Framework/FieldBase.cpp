@@ -127,7 +127,7 @@ namespace dyno
 		m_optional = optional;
 	}
 
-	FieldBase::FieldBase(std::string name, std::string description, EFieldType type, Base* parent)
+	FieldBase::FieldBase(std::string name, std::string description, FieldTypeEnum type, Base* parent)
 	{
 		m_name = name; m_description = description;
 		m_fType = type;
@@ -137,7 +137,7 @@ namespace dyno
 		}
 	}
 
-	EFieldType FieldBase::getFieldType()
+	FieldTypeEnum FieldBase::getFieldType()
 	{
 		return m_fType;
 	}

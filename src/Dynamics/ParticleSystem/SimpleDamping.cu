@@ -38,7 +38,7 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_DoDamping(
-		GArray<Coord> vel,
+		DArray<Coord> vel,
 		Real coefficient)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

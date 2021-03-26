@@ -27,8 +27,8 @@ namespace dyno
 
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_ConstrainSDF(
-		GArray<Coord> posArr,
-		GArray<Coord> velArr,
+		DArray<Coord> posArr,
+		DArray<Coord> velArr,
 		DistanceField3D<TDataType> df,
 		Real normalFriction,
 		Real tangentialFriction,
@@ -82,7 +82,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool BoundaryConstraint<TDataType>::constrain(GArray<Coord>& position, GArray<Coord>& velocity, Real dt)
+	bool BoundaryConstraint<TDataType>::constrain(DArray<Coord>& position, DArray<Coord>& velocity, Real dt)
 	{
 		uint pDim = cudaGridSize(position.size(), BLOCK_SIZE);
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (

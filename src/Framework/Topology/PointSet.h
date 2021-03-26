@@ -20,14 +20,14 @@ namespace dyno
 		void copyFrom(PointSet<TDataType>& pointSet);
 
 		void setPoints(std::vector<Coord>& pos);
-		void setPoints(GArray<Coord>& pos);
+		void setPoints(DArray<Coord>& pos);
 		void setSize(int size);
 
-		GArray<Coord>& getPoints() { return m_coords; }
+		DArray<Coord>& getPoints() { return m_coords; }
 
 		int getPointSize() { return m_coords.size(); };
 
-		GArrayList<int>* getPointNeighbors();
+		DArrayList<int>* getPointNeighbors();
 		virtual void updatePointNeighbors();
 
 		void scale(Real s);
@@ -39,8 +39,8 @@ namespace dyno
 	protected:
 		bool initializeImpl() override;
 
-		GArray<Coord> m_coords;
-		GArrayList<int> m_pointNeighbors;
+		DArray<Coord> m_coords;
+		DArrayList<int> m_pointNeighbors;
 	};
 
 

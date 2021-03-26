@@ -24,8 +24,8 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void NTQ_SetupAABB(
-		GArray<AABB> boundingBox,
-		GArray<Coord> position,
+		DArray<AABB> boundingBox,
+		DArray<Coord> position,
 		Real radius)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -41,9 +41,9 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void NTQ_SetupAABB(
-		GArray<AABB> boundingBox,
-		GArray<TopologyModule::Tetrahedron> tet,
-		GArray<Coord> position)
+		DArray<AABB> boundingBox,
+		DArray<TopologyModule::Tetrahedron> tet,
+		DArray<Coord> position)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tet.size()) return;
@@ -58,12 +58,12 @@ namespace dyno
 	
 	template<typename Coord>
 	__global__ void NTQ_Narrow_Count(
-		GArray<Coord> pos,
+		DArray<Coord> pos,
 		NeighborList<int> nbr,
-		GArray<int> tag,
-		GArray<Coord> pos_tet,
-		GArray<TopologyModule::Tetrahedron> tet,
-		GArray<int> count,
+		DArray<int> tag,
+		DArray<Coord> pos_tet,
+		DArray<TopologyModule::Tetrahedron> tet,
+		DArray<int> count,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -111,12 +111,12 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void NTQ_Narrow_Set(
-		GArray<Coord> pos,
+		DArray<Coord> pos,
 		NeighborList<int> nbr,
-		GArray<int> tag,
+		DArray<int> tag,
 		NeighborList<int> nbr_out,
-		GArray<Coord> pos_tet,
-		GArray<TopologyModule::Tetrahedron> tet,
+		DArray<Coord> pos_tet,
+		DArray<TopologyModule::Tetrahedron> tet,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -199,9 +199,9 @@ namespace dyno
 			m_broadPhaseCD->update();
 			
 			//broad phase end
-			GArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			DArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
 			
-			GArray<int> tag;
+			DArray<int> tag;
 			tag.resize(m_broadPhaseCD->outContactList()->getValue().getElementSize());
 			tag.reset();
 			
@@ -225,7 +225,7 @@ namespace dyno
 			printf("Neighbor Tet Sum: %d %d\n", sum, m_broadPhaseCD->outContactList()->getValue().getElementSize());
 
 
-			GArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+			DArray<int>& elements = this->outNeighborhood()->getValue().getElements();
 			elements.resize(sum);
 
 			if (sum > 0)

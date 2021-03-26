@@ -165,7 +165,7 @@ namespace dyno {
 	using CArray = Array<T, DeviceType::CPU>;
 
 	template<typename T>
-	using GArray = Array<T, DeviceType::GPU>;
+	using DArray = Array<T, DeviceType::GPU>;
 }
 
 #include "Array.inl"

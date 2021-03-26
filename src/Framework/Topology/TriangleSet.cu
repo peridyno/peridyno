@@ -40,8 +40,8 @@ namespace dyno
 
 	template<typename Triangle>
 	__global__ void TS_CountTriangles(
-		GArray<int> counter,
-		GArray<Triangle> triangles)
+		DArray<int> counter,
+		DArray<Triangle> triangles)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= triangles.size()) return;
@@ -55,10 +55,10 @@ namespace dyno
 
 	template<typename Triangle>
 	__global__ void TS_SetupTriIds(
-		GArray<int> ids,
-		GArray<int> counter,
-		GArray<int> shift,
-		GArray<Triangle> triangles)
+		DArray<int> ids,
+		DArray<int> counter,
+		DArray<int> shift,
+		DArray<Triangle> triangles)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= triangles.size()) return;
@@ -75,7 +75,7 @@ namespace dyno
 		ids[shift[t[2]] + index] = tId;
 	}
 
-// 	void print(GArray<int> arr)
+// 	void print(DArray<int> arr)
 // 	{
 // 		CArray<int> h_arr;
 // 		h_arr.resize(arr.size());
@@ -91,7 +91,7 @@ namespace dyno
 	template<typename TDataType>
 	NeighborList<int>& TriangleSet<TDataType>::getVertex2Triangles()
 	{
-		GArray<int> counter;
+		DArray<int> counter;
 		counter.resize(m_coords.size());
 		counter.reset();
 
@@ -100,7 +100,7 @@ namespace dyno
 			counter,
 			m_triangles);
 
-		GArray<int> shift;
+		DArray<int> shift;
 		shift.resize(m_coords.size());
 
 		shift.assign(counter);
@@ -110,7 +110,7 @@ namespace dyno
 		int total_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, shift.begin(), shift.begin() + shift.size(), shift.begin());
 
-		GArray<int> elements;
+		DArray<int> elements;
 		elements.resize(total_num);
 
 		counter.reset();
@@ -136,9 +136,9 @@ namespace dyno
 
 	template<typename EKey, typename Triangle>
 	__global__ void TS_SetupKeys(
-		GArray<EKey> keys,
-		GArray<int> ids,
-		GArray<Triangle> triangles)
+		DArray<EKey> keys,
+		DArray<int> ids,
+		DArray<Triangle> triangles)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= triangles.size()) return;
@@ -155,8 +155,8 @@ namespace dyno
 
 	template<typename EKey>
 	__global__ void TS_CountEdgeNumber(
-		GArray<int> counter,
-		GArray<EKey> keys)
+		DArray<int> counter,
+		DArray<EKey> keys)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= keys.size()) return;
@@ -169,11 +169,11 @@ namespace dyno
 
 	template<typename Edge, typename Edg2Tri, typename EKey>
 	__global__ void TS_SetupEdges(
-		GArray<Edge> edges,
-		GArray<Edg2Tri> edg2Tri,
-		GArray<EKey> keys,
-		GArray<int> counter,
-		GArray<int> triIds)
+		DArray<Edge> edges,
+		DArray<Edg2Tri> edg2Tri,
+		DArray<EKey> keys,
+		DArray<int> counter,
+		DArray<int> triIds)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= keys.size()) return;
@@ -204,8 +204,8 @@ namespace dyno
 	{
 		int triSize = m_triangles.size();
 
-		GArray<EKey> keys;
-		GArray<int> triIds;
+		DArray<EKey> keys;
+		DArray<int> triIds;
 
 		keys.resize(3 * triSize);
 		triIds.resize(3 * triSize);
@@ -218,7 +218,7 @@ namespace dyno
 
 		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), triIds.begin());
 
-		GArray<int> counter;
+		DArray<int> counter;
 		counter.resize(3 * triSize);
 
 		cuExecute(keys.size(),

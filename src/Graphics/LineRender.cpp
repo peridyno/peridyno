@@ -63,7 +63,7 @@ void LineRender::resize(unsigned int num)
 	m_vertexColor.resize(2 * num);
 }
 
-void LineRender::setLines(GArray<float3>& pos)
+void LineRender::setLines(DArray<float3>& pos)
 {
 	cudaMemcpy(m_vertex.cudaMap(), pos.begin(), sizeof(float3) * m_vertex.getSize(), cudaMemcpyDeviceToDevice);
 	m_vertex.cudaUnmap();

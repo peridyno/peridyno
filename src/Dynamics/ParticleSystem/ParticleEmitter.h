@@ -35,12 +35,12 @@ namespace dyno
 		DEF_VAR(VelocityMagnitude, Real, 1, "Emitter Velocity");
 		DEF_VAR(SamplingDistance, Real, 0.005, "Emitter Sampling Distance");
 
-		GArray<Coord> gen_pos;
-		GArray<Coord> gen_vel;
+		DArray<Coord> gen_pos;
+		DArray<Coord> gen_vel;
 
-		GArray<Coord> pos_buf;
-		GArray<Coord> vel_buf;
-		GArray<Coord> force_buf;
+		DArray<Coord> pos_buf;
+		DArray<Coord> vel_buf;
+		DArray<Coord> force_buf;
 		int sum = 0;
 	private:
 		

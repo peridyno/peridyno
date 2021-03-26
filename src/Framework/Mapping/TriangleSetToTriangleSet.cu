@@ -84,13 +84,13 @@ namespace dyno
 
 	template <typename Coord, typename Triangle>
 	__global__ void K_ApplyTransform(
-		GArray<Coord> tarVertex,
-		GArray<Coord> tarInitVertex,
-		GArray<Coord> srcVertex,
-		GArray<Coord> srcInitVertex,
-		GArray<Triangle> srcTriangle,
-		GArray<int> nearestTriangleIndex,
-		GArray<Coord> barycentric)
+		DArray<Coord> tarVertex,
+		DArray<Coord> tarInitVertex,
+		DArray<Coord> srcVertex,
+		DArray<Coord> srcInitVertex,
+		DArray<Triangle> srcTriangle,
+		DArray<int> nearestTriangleIndex,
+		DArray<Coord> barycentric)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (vId >= tarVertex.size()) return;
@@ -125,9 +125,9 @@ namespace dyno
 
 	template <typename Coord, typename Triangle>
 	__global__ void SetupBoundBoxFrom(
-		GArray<AABB> boundingBox,
-		GArray<Coord> points,
-		GArray<Triangle> triangleIndex)
+		DArray<AABB> boundingBox,
+		DArray<Coord> points,
+		DArray<Triangle> triangleIndex)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= triangleIndex.size()) return;
@@ -140,8 +140,8 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void SetupBoundBoxTo(
-		GArray<AABB> boundingBox,
-		GArray<Coord> points,
+		DArray<AABB> boundingBox,
+		DArray<Coord> points,
 		Real radius)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -154,12 +154,12 @@ namespace dyno
 
 	template <typename Coord, typename Triangle>
 	__global__ void SetupInternalData(
-		GArray<int> nearestIds,
-		GArray<Coord> barycentric,
-		GArray<Coord> toVertex,
-		GArray<Coord> fromVertex,
-		GArray<Triangle> fromTriangle,
-		GArray<TopologyModule::Tri2Tet> tri2Tet,
+		DArray<int> nearestIds,
+		DArray<Coord> barycentric,
+		DArray<Coord> toVertex,
+		DArray<Coord> fromVertex,
+		DArray<Triangle> fromTriangle,
+		DArray<TopologyModule::Tri2Tet> tri2Tet,
 		NeighborList<int> neighborIds)
 	{
 		int vId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -215,8 +215,8 @@ namespace dyno
 		int fromTriangleSize = from->getTriangles()->size();
 		int toVertSize = to->getPoints().size();
 
-		GArray<AABB> fromAABB;
-		GArray<AABB> toAABB;
+		DArray<AABB> fromAABB;
+		DArray<AABB> toAABB;
 		
 		fromAABB.resize(fromTriangleSize);
 		toAABB.resize(toVertSize);

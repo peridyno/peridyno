@@ -45,8 +45,8 @@ namespace dyno
 	}
 
 	__global__ void PRM_MappingColor(
-		GArray<glm::vec3> color,
-		GArray<Vector3f> index,
+		DArray<glm::vec3> color,
+		DArray<Vector3f> index,
 		float minIndex,
 		float maxIndex)
 	{
@@ -67,8 +67,8 @@ namespace dyno
 	}
 
 	__global__ void PRM_MappingColor(
-		GArray<glm::vec3> color,
-		GArray<float> index,
+		DArray<glm::vec3> color,
+		DArray<float> index,
 		float refV,
 		float minIndex,
 		float maxIndex)
@@ -90,10 +90,10 @@ namespace dyno
 	}
 
 	__global__ void SetupTriangles(
-		GArray<float3> vertices,
-		GArray<float3> normals,
-		GArray<float3> colors,
-		GArray2D<float> heights,
+		DArray<float3> vertices,
+		DArray<float3> normals,
+		DArray<float3> colors,
+		DArray2D<float> heights,
 		float dx,
 		float dz,
 		float3 origin,

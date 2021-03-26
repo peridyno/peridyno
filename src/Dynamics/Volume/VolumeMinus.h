@@ -17,11 +17,5 @@ namespace dyno {
 	public:
 	};
 
-
-#ifdef PRECISION_FLOAT
-template class VolumeMinus<DataType3f>;
-#else
-template class VolumeMinus<DataType3d>;
-#endif
-
+	DEFINE_CLASS(VolumeMinus);
 }

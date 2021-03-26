@@ -13,14 +13,14 @@ namespace dyno
 
 		static Arithmetic* Create(int n);
 		
-		T Dot(GArray<T>& xArr, GArray<T>& yArr);
+		T Dot(DArray<T>& xArr, DArray<T>& yArr);
 		
 		~Arithmetic();
 	private:
 		Arithmetic(int n);
 
 		Reduction<T>* m_reduce;
-		GArray<T> m_buf;
+		DArray<T> m_buf;
 	};
 
 }

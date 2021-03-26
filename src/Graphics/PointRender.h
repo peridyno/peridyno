@@ -34,10 +34,10 @@ public:
 
 	void resize(unsigned int num);
 
-	void setVertexArray(GArray<float3> &pos);
+	void setVertexArray(DArray<float3> &pos);
 	void setVertexArray(CArray<float3> &pos);
 
-	void setColorArray(GArray<float3> &color);
+	void setColorArray(DArray<float3> &color);
 	void setColorArray(CArray<float3> &color);
 
 	void setPointSize(float point_size);
@@ -45,7 +45,7 @@ public:
 	float pointSize() const;
 
 	void setColor(glm::vec3 color);
-	void setColor(GArray<glm::vec3> color);
+	void setColor(DArray<glm::vec3> color);
 
 	void setPointScaleForPointSprite(float point_scale);
 	float pointScaleForPointSprite() const;

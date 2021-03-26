@@ -6,9 +6,9 @@ namespace dyno
 {
 	template <typename Real, typename Coord>
 	__global__ void ODE_SolveElasticityWithPBD(
-		GArray<Coord> position_new,
-		GArray<Coord> position,
-		GArray<Real> mass,
+		DArray<Coord> position_new,
+		DArray<Coord> position,
+		DArray<Real> mass,
 		Real distance,
 		Real lambda_prime)
 	{
@@ -73,9 +73,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void ODE_UpdateVelocity(
-		GArray<Coord> velArr,
-		GArray<Coord> prePos,
-		GArray<Coord> curPos,
+		DArray<Coord> velArr,
+		DArray<Coord> prePos,
+		DArray<Coord> curPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

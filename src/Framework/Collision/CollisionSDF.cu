@@ -55,8 +55,8 @@ namespace dyno
 
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_ConstrainParticles(
-		GArray<Coord> posArr,
-		GArray<Coord> velArr,
+		DArray<Coord> posArr,
+		DArray<Coord> velArr,
 		DistanceField3D<TDataType> df,
 		Real normalFriction,
 		Real tangentialFriction,
@@ -110,8 +110,8 @@ namespace dyno
 			if (m_collidableObjects[i]->getType() == CollidableObject::POINTSET_TYPE)
 			{
 				std::shared_ptr<CollidablePoints<TDataType>> cPoints = std::dynamic_pointer_cast<CollidablePoints<TDataType>>(m_collidableObjects[i]);
-				GArray<Coord>& pos = cPoints->getPositions();
-				GArray<Coord>& vel = cPoints->getVelocities();
+				DArray<Coord>& pos = cPoints->getPositions();
+				DArray<Coord>& vel = cPoints->getVelocities();
 
 				cPoints->updateCollidableObject();
 

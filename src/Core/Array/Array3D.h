@@ -150,11 +150,11 @@ namespace dyno {
 	using CArray3D = Array3D<T, DeviceType::CPU>;
 
 	template<typename T>
-	using GArray3D = Array3D<T, DeviceType::GPU>;
+	using DArray3D = Array3D<T, DeviceType::GPU>;
 
-	typedef GArray3D<float>	Grid1f;
-	typedef GArray3D<float3> Grid3f;
-	typedef GArray3D<bool> Grid1b;
+	typedef DArray3D<float>	Grid1f;
+	typedef DArray3D<float3> Grid3f;
+	typedef DArray3D<bool> Grid1b;
 }
 
 #include "Array3D.inl"

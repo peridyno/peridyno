@@ -74,7 +74,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, GArray<typename TDataType::Coord> pos)
+	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, DArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -87,7 +87,7 @@ namespace dyno {
 
 
 	template<typename TDataType>
-	__global__ void K_AddTriNumber(GridHash<TDataType> hash, GArray<typename TopologyModule::Triangle> tri, GArray<typename TDataType::Coord> pos)
+	__global__ void K_AddTriNumber(GridHash<TDataType> hash, DArray<typename TopologyModule::Triangle> tri, DArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tri.size()) return;
@@ -183,7 +183,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	__global__ void K_ConstructHashTable(GridHash<TDataType> hash, GArray<typename TDataType::Coord> pos)
+	__global__ void K_ConstructHashTable(GridHash<TDataType> hash, DArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -198,7 +198,7 @@ namespace dyno {
 
 
 	template<typename TDataType>
-	__global__ void K_AddTriElement(GridHash<TDataType> hash, GArray<typename TopologyModule::Triangle> tri, GArray<typename TDataType::Coord> pos)
+	__global__ void K_AddTriElement(GridHash<TDataType> hash, DArray<typename TopologyModule::Triangle> tri, DArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tri.size()) return;
@@ -294,7 +294,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	void GridHash<TDataType>::construct(GArray<Coord>& pos)
+	void GridHash<TDataType>::construct(DArray<Coord>& pos)
 	{
 		clear();
 
@@ -323,7 +323,7 @@ namespace dyno {
 
 
 	template<typename TDataType>
-	void GridHash<TDataType>::construct(GArray<Coord>& pos, GArray<Triangle>& tri, GArray<Coord>& Tri_pos)
+	void GridHash<TDataType>::construct(DArray<Coord>& pos, DArray<Triangle>& tri, DArray<Coord>& Tri_pos)
 	{
 		clear();
 

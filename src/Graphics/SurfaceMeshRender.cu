@@ -32,11 +32,11 @@ namespace dyno
 	}
 
 	__global__ void SetupTriangles(
-		GArray<float3> originVerts,
-		GArray<float3> vertices,
-		GArray<float3> normals,
-		GArray<float3> colors,
-		GArray<TopologyModule::Triangle> triangles,
+		DArray<float3> originVerts,
+		DArray<float3> vertices,
+		DArray<float3> normals,
+		DArray<float3> colors,
+		DArray<TopologyModule::Triangle> triangles,
 		float3 color
 		)
 	{
@@ -95,7 +95,7 @@ namespace dyno
 
 		uint pDims = cudaGridSize(triangles->size(), BLOCK_SIZE);
 
-		GArray<float3>* fverts = (GArray<float3>*)&verts;
+		DArray<float3>* fverts = (DArray<float3>*)&verts;
 		SetupTriangles << <pDims, BLOCK_SIZE >> >(*fverts, vertices, normals, colors, *triangles, make_float3(m_color[0], m_color[1], m_color[2]));
 		cuSynchronize();
 

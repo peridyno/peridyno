@@ -38,11 +38,11 @@ namespace dyno
 
 		float m_refV;
 
-		GArray<float3> vertices;
-		GArray<float3> normals;
-		GArray<float3> colors;
+		DArray<float3> vertices;
+		DArray<float3> normals;
+		DArray<float3> colors;
 
-		GArray<glm::vec3> m_colorArray;
+		DArray<glm::vec3> m_colorArray;
 
 // 		std::shared_ptr<PointRenderUtil> point_render_util;
 // 		std::shared_ptr<PointRenderTask> point_render_task;

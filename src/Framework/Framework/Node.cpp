@@ -445,11 +445,11 @@ bool Node::attachField(FieldBase* field, std::string name, std::string desc, boo
 	auto fType = field->getFieldType();
 	switch (field->getFieldType())
 	{
-	case EFieldType::Current:
+	case FieldTypeEnum::Current:
 		ret = this->getMechanicalState()->addOutputField(field);
 		break;
 
-	case EFieldType::Param:
+	case FieldTypeEnum::Param:
 		ret = this->addField(field);
 
 	default:

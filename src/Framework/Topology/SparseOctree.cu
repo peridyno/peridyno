@@ -25,7 +25,7 @@ namespace dyno {
 
 	}
 
-	void print(GArray<OctreeNode>& d_arr)
+	void print(DArray<OctreeNode>& d_arr)
 	{
 		CArray<OctreeNode> h_arr;
 		h_arr.resize(d_arr.size());
@@ -277,8 +277,8 @@ namespace dyno {
 
 	template<typename Real, typename Coord>
 	__global__ void SO_ConstructAABB(
-		GArray<AABB> aabb,
-		GArray<Coord> pos,
+		DArray<AABB> aabb,
+		DArray<Coord> pos,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -765,10 +765,10 @@ namespace dyno {
 	}
 	template<typename TDataType>
 	void SparseOctree<TDataType>::construct(
-		GArray<Coord>& points,
+		DArray<Coord>& points,
 		Real radius)
 	{
-		GArray<AABB> aabb;
+		DArray<AABB> aabb;
 		aabb.resize(points.size());
 
 
@@ -914,8 +914,8 @@ namespace dyno {
 
 	template<typename Coord>
 	__global__ void SO_InitCounter(
-		GArray<int> counter,
-		GArray<AABB> aabb,
+		DArray<int> counter,
+		DArray<AABB> aabb,
 		Coord origin,
 		Real h_min,
 		int level_max)
@@ -939,9 +939,9 @@ namespace dyno {
 
 	template<typename Coord>
 	__global__ void SO_CreateAllNodes(
-		GArray<OctreeNode> nodes,
-		GArray<AABB> aabb,
-		GArray<int> index,
+		DArray<OctreeNode> nodes,
+		DArray<AABB> aabb,
+		DArray<int> index,
 		Coord origin,
 		Real h_min,
 		int level_max)
@@ -984,8 +984,8 @@ namespace dyno {
 
 
 	__global__ void SO_CountNonRepeatedNodes(
-		GArray<int> counter,
-		GArray<OctreeNode> morton)
+		DArray<int> counter,
+		DArray<OctreeNode> morton)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -1003,9 +1003,9 @@ namespace dyno {
 
 	//the size of counter is 1 more than the size of post_ordered_nodes
 	__global__ void SO_RemoveDuplicativeNodes(
-		GArray<OctreeNode> non_repeated_nodes,
-		GArray<OctreeNode> post_ordered_nodes,
-		GArray<int> counter
+		DArray<OctreeNode> non_repeated_nodes,
+		DArray<OctreeNode> post_ordered_nodes,
+		DArray<int> counter
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1022,7 +1022,7 @@ namespace dyno {
 	}
 
 	__global__ void	SO_CalculateDataSize(
-		GArray<OctreeNode> non_repeated_nodes,
+		DArray<OctreeNode> non_repeated_nodes,
 		int non_repeated_node_num,
 		int total_node_num)
 	{
@@ -1037,7 +1037,7 @@ namespace dyno {
 
 
 	__global__ void SO_GenerateLCA(
-		GArray<OctreeNode> nodes,
+		DArray<OctreeNode> nodes,
 		int shift
 	)
 	{
@@ -1049,9 +1049,9 @@ namespace dyno {
 
 
 	__global__ void SO_RemoveDuplicativeInternalNodes(
-		GArray<OctreeNode> nodes,
-		GArray<int> counter,
-		GArray<OctreeNode> nodes_cpy)
+		DArray<OctreeNode> nodes,
+		DArray<int> counter,
+		DArray<OctreeNode> nodes_cpy)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -1070,8 +1070,8 @@ namespace dyno {
 	}
 
 	__global__ void SO_GenerateAuxNodes(
-		GArray<OctreeNode> aux_nodes,
-		GArray<OctreeNode> post_ordered_nodes,
+		DArray<OctreeNode> aux_nodes,
+		DArray<OctreeNode> post_ordered_nodes,
 		int shift)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1091,8 +1091,8 @@ namespace dyno {
 	}
 
 	__global__ void SO_GeneratePostOrderedNodes(
-		GArray<OctreeNode> post_ordered_nodes,
-		GArray<OctreeNode> nodes_buffer,
+		DArray<OctreeNode> post_ordered_nodes,
+		DArray<OctreeNode> nodes_buffer,
 		int num)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1103,8 +1103,8 @@ namespace dyno {
 	}
 
 	__global__ void SO_SetupParentChildRelationship(
-		GArray<OctreeNode> post_ordered_nodes,
-		GArray<OctreeNode> aux_nodes)
+		DArray<OctreeNode> post_ordered_nodes,
+		DArray<OctreeNode> aux_nodes)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
@@ -1137,9 +1137,9 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	void SparseOctree<TDataType>::construct(GArray<AABB>& aabb)
+	void SparseOctree<TDataType>::construct(DArray<AABB>& aabb)
 	{
-		GArray<int> data_count;
+		DArray<int> data_count;
 		data_count.resize(aabb.size());
 
 
@@ -1180,7 +1180,7 @@ namespace dyno {
 
 		/*************** step 2: remove duplicative nodes ****************/
 
-		GArray<int> duplicates_count;
+		DArray<int> duplicates_count;
 		duplicates_count.resize(total_node_num);
 
 		cuExecute(duplicates_count.size(),
@@ -1191,7 +1191,7 @@ namespace dyno {
 		int non_duplicative_num = thrust::reduce(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), duplicates_count.begin());
 
-		GArray<OctreeNode> node_buffer;
+		DArray<OctreeNode> node_buffer;
 		node_buffer.resize(2 * non_duplicative_num - 1);
 
 		//Remove duplicative nodes, record the first location using node.setStartIndex();
@@ -1226,12 +1226,12 @@ namespace dyno {
 
 		//print(node_buffer);
 
-		GArray<OctreeNode> nonRepeatNodes_cpy;
+		DArray<OctreeNode> nonRepeatNodes_cpy;
 		nonRepeatNodes_cpy.resize(node_buffer.size());
 		nonRepeatNodes_cpy.assign(node_buffer);
 
 		//leaf + LCA
-		GArray<int> node_count;
+		DArray<int> node_count;
 		node_count.resize(node_buffer.size());
 
 		//step 3.2: remove duplicates
@@ -1257,7 +1257,7 @@ namespace dyno {
 
 		//print(m_post_ordered_nodes);
 
-		GArray<OctreeNode> aux_nodes;
+		DArray<OctreeNode> aux_nodes;
 		aux_nodes.resize(2 * m_post_ordered_nodes.size() - 1);
 
 		cuExecute(m_post_ordered_nodes.size(),

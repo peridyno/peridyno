@@ -18,7 +18,7 @@ namespace dyno {
 
 		bool constrain() override;
 
-		bool constrain(GArray<Coord>& position, GArray<Coord>& velocity, Real dt);
+		bool constrain(DArray<Coord>& position, DArray<Coord>& velocity, Real dt);
 
 		void load(std::string filename, bool inverted = false);
 		void setCube(Coord lo, Coord hi, Real distance, bool inverted = false);

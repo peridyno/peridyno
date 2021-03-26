@@ -20,9 +20,9 @@ public:
 	FrameToPointSet(std::shared_ptr<Frame<TDataType>> from, std::shared_ptr<PointSet<TDataType>> to);
 	~FrameToPointSet() override;
 
-	void initialize(const Rigid& rigid, GArray<Coord>& points);
+	void initialize(const Rigid& rigid, DArray<Coord>& points);
 
-	void applyTransform(const Rigid& rigid, GArray<Coord>& points);
+	void applyTransform(const Rigid& rigid, DArray<Coord>& points);
 
 	bool apply() override;
 
@@ -36,7 +36,7 @@ private:
 	std::shared_ptr<PointSet<TDataType>> m_to = nullptr;
 
 	Rigid m_refRigid;
-	GArray<Coord> m_refPoints;
+	DArray<Coord> m_refPoints;
 
 	std::shared_ptr<Frame<TDataType>> m_initFrom;
 	std::shared_ptr<PointSet<TDataType>> m_initTo;

@@ -24,8 +24,8 @@ namespace dyno
 
 
 	template<typename TShape>
-	__global__ void CD_ConstructAABB(GArray<AABB> abox,
-		GArray<TShape> shapes,
+	__global__ void CD_ConstructAABB(DArray<AABB> abox,
+		DArray<TShape> shapes,
 		int shift)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);

@@ -15,11 +15,11 @@ namespace dyno
 		virtual ~CollidableSpheres();
 
 		void setRadius(Real radius) { m_radius = radius; }
-		void setCenters(GArray<Coord>& centers);
+		void setCenters(DArray<Coord>& centers);
 
 	private:
 		Real m_radius;
-		GArray<Coord> m_centers;
+		DArray<Coord> m_centers;
 	};
 
 

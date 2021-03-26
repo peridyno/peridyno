@@ -128,7 +128,7 @@ void TriangleRender::setVertexArray(CArray<float3>& vertArray)
 	m_vertVBO.cudaUnmap();
 }
 
-void TriangleRender::setVertexArray(GArray<float3>& vertArray)
+void TriangleRender::setVertexArray(DArray<float3>& vertArray)
 {
 	cudaMemcpy(m_vertVBO.cudaMap(), vertArray.begin(), sizeof(float3) * m_vertVBO.getSize(), cudaMemcpyDeviceToDevice);
 	m_vertVBO.cudaUnmap();
@@ -140,7 +140,7 @@ void TriangleRender::setNormalArray(CArray<float3>& normArray)
 	m_normVBO.cudaUnmap();
 }
 
-void TriangleRender::setNormalArray(GArray<float3>& normArray)
+void TriangleRender::setNormalArray(DArray<float3>& normArray)
 {
 	cudaMemcpy(m_normVBO.cudaMap(), normArray.begin(), sizeof(float3) * m_normVBO.getSize(), cudaMemcpyDeviceToDevice);
 	m_normVBO.cudaUnmap();
@@ -152,7 +152,7 @@ void TriangleRender::setColorArray(CArray<float3>& colorArray)
 	m_colorVBO.cudaUnmap();
 }
 
-void TriangleRender::setColorArray(GArray<float3>& colorArray)
+void TriangleRender::setColorArray(DArray<float3>& colorArray)
 {
 	cudaMemcpy(m_colorVBO.cudaMap(), colorArray.begin(), sizeof(float3) * m_colorVBO.getSize(), cudaMemcpyDeviceToDevice);
 	m_colorVBO.cudaUnmap();

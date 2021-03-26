@@ -35,8 +35,8 @@ namespace dyno
 	template struct PlaceHolder<8>;
 
 	template<int N>
-	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index);
+	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<int> index);
 
 	template<int N>
-	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index);
+	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, DArray<int> index);
 }

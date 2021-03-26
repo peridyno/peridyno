@@ -15,23 +15,22 @@ template<typename T>
 class VarField : public FieldBase
 {
 public:
-	typedef T VarType;
-	typedef T DataType;
-	typedef VarField<T> FieldClass;
+	typedef T				VarType;
+	typedef T				DataType;
+	typedef VarField<T>		FieldType;
 
-	DEFINE_FIELD_FUNC(FieldClass, DataType, VarField);
+	DEFINE_FIELD_FUNC(FieldType, DataType, VarField);
 
-	VarField(T value, std::string name, std::string description, EFieldType fieldType, Base* parent);
+	VarField(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent);
 	~VarField() override;
 
 	size_t getElementCount() override { return 1; }
-	const std::string getClassName() override { return std::string("Variable"); }
 
 	void setValue(T val);
 };
 
 template<typename T>
-VarField<T>::VarField(T value, std::string name, std::string description, EFieldType fieldType, Base* parent)
+VarField<T>::VarField(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
 	: FieldBase(name, description, fieldType, parent)
 {
 	this->setValue(value);
@@ -78,13 +77,12 @@ template<typename T, DeviceType deviceType>
 class ArrayField : public FieldBase
 {
 public:
-	typedef T VarType;
-	typedef Array<T, deviceType> DataType;
-	typedef ArrayField<T, deviceType> FieldClass;
+	typedef T							VarType;
+	typedef Array<T, deviceType>		DataType;
+	typedef ArrayField<T, deviceType>	FieldType;
 
-	DEFINE_FIELD_FUNC(FieldClass, DataType, ArrayField);
+	DEFINE_FIELD_FUNC(FieldType, DataType, ArrayField);
 
-	ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent);
 	~ArrayField() override;
 
 	inline size_t getElementCount() override {
@@ -94,18 +92,9 @@ public:
 
 	void setElementCount(size_t num);
 
-	const std::string getClassName() override { return std::string("ArrayBuffer"); }
-
 	void setValue(std::vector<T>& vals);
-	void setValue(GArray<T>& vals);
+	void setValue(DArray<T>& vals);
 };
-
-template<typename T, DeviceType deviceType>
-ArrayField<T, deviceType>::ArrayField(int num, std::string name, std::string description, EFieldType fieldType, Base* parent)
-	: FieldBase(name, description, fieldType, parent)
-{
-	m_data = num <= 0 ? nullptr : std::make_shared<Array<T, deviceType>>(num);
-}
 
 template<typename T, DeviceType deviceType>
 ArrayField<T, deviceType>::~ArrayField()
@@ -145,7 +134,7 @@ void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
 }
 
 template<typename T, DeviceType deviceType>
-void ArrayField<T, deviceType>::setValue(GArray<T>& vals)
+void ArrayField<T, deviceType>::setValue(DArray<T>& vals)
 {
 	std::shared_ptr<Array<T, deviceType>>& data = this->getReference();
 	if (data == nullptr)

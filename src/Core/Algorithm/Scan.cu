@@ -26,7 +26,7 @@ namespace dyno
 		}
 	}
 
-	void Scan::exclusive(GArray<int>& output, GArray<int>& input, bool bcao)
+	void Scan::exclusive(DArray<int>& output, DArray<int>& input, bool bcao)
 	{
 		assert(input.size() == output.size());
 
@@ -38,7 +38,7 @@ namespace dyno
 		}
 	}
 
-	void Scan::exclusive(GArray<int>& data, bool bcao /*= true*/)
+	void Scan::exclusive(DArray<int>& data, bool bcao /*= true*/)
 	{
 		if (m_buffer.size() != data.size())
 		{

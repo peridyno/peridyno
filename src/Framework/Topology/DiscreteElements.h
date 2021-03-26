@@ -22,8 +22,8 @@ namespace dyno
 
 		void scale(Real s);
 
-		GArray<Box3D>& getBoxes() { return m_boxes; }
-		GArray<Sphere3D>& getSpheres() { return m_spheres; }
+		DArray<Box3D>& getBoxes() { return m_boxes; }
+		DArray<Sphere3D>& getSpheres() { return m_spheres; }
 
 		Box3D getHostBoxes(int i) { return m_hostBoxes[i]; }
 		Sphere3D getHostSpheres(int i) { return m_hostSpheres[i]; }
@@ -35,8 +35,8 @@ namespace dyno
 
 	protected:
 
-		GArray<Sphere3D> m_spheres;
-		GArray<Box3D> m_boxes;
+		DArray<Sphere3D> m_spheres;
+		DArray<Box3D> m_boxes;
 
 		
 		std::vector<Sphere3D> m_hostSpheres;

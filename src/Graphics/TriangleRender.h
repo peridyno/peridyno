@@ -33,13 +33,13 @@ public:
     TriangleRender & operator = (const TriangleRender &) = delete;
 
 	void setVertexArray(CArray<float3>& vertArray);
-	void setVertexArray(GArray<float3>& vertArray);
+	void setVertexArray(DArray<float3>& vertArray);
 
 	void setNormalArray(CArray<float3>& normArray);
-	void setNormalArray(GArray<float3>& normArray);
+	void setNormalArray(DArray<float3>& normArray);
 
 	void setColorArray(CArray<float3>& colorArray);
-	void setColorArray(GArray<float3>& colorArray);
+	void setColorArray(DArray<float3>& colorArray);
 
 	void enableDoubleShading();
 	void disableDoubleShading();

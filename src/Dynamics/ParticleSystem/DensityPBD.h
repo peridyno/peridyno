@@ -77,9 +77,9 @@ namespace dyno {
 	private:
 		SpikyKernel<Real> m_kernel;
 
-		GArray<Real> m_lamda;
-		GArray<Coord> m_deltaPos;
-		GArray<Coord> m_position_old;
+		DArray<Real> m_lamda;
+		DArray<Coord> m_deltaPos;
+		DArray<Coord> m_position_old;
 
 	private:
 		std::shared_ptr<SummationDensity<TDataType>> m_summation;

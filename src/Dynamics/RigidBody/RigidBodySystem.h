@@ -79,33 +79,33 @@ namespace dyno
 		DEF_EMPTY_CURRENT_ARRAY(Rotation, Matrix, DeviceType::GPU, "Rotation matrix of rigid bodies");
 
 		DeviceArrayField<Matrix> m_inertia;
-		GArray<Matrix> m_inertia_init;
-		GArray<Sphere3D> m_sphere3d_init;
-		GArray<Box3D> m_box3d_init;
-		GArray<TQuaternion> m_rotation_q;
+		DArray<Matrix> m_inertia_init;
+		DArray<Sphere3D> m_sphere3d_init;
+		DArray<Box3D> m_box3d_init;
+		DArray<TQuaternion> m_rotation_q;
 
-		GArray<int> m_Constraints;
+		DArray<int> m_Constraints;
 
 
 
-		GArray<Coord> pos_init;
-		GArray<Coord> center_init;
-		GArray<Coord> pair_point;
-		GArray<int> pair;
+		DArray<Coord> pos_init;
+		DArray<Coord> center_init;
+		DArray<Coord> pair_point;
+		DArray<int> pair;
 
 
 		
-		GArray<Coord> J;
-		GArray<Coord> B;
-		GArray<Real> ita;
-		GArray<Real> D;
-		GArray<Real> lambda;
+		DArray<Coord> J;
+		DArray<Coord> B;
+		DArray<Real> ita;
+		DArray<Real> D;
+		DArray<Real> lambda;
 
 
 
-		GArray<int> cnt_boudary;
-		GArray<NeighborConstraints> buffer_boundary;
-		GArray<NeighborConstraints> constraints_all;
+		DArray<int> cnt_boudary;
+		DArray<NeighborConstraints> buffer_boundary;
+		DArray<NeighborConstraints> constraints_all;
 
 		void rigid_update_topology();
 	private:

@@ -101,5 +101,9 @@ public:
 	static std::map< std::string, ClassInfo*>* getClassMap();
 };
 
-
+#ifdef PRECISION_FLOAT
+#define DEFINE_CLASS(name) template class name<DataType3f>;
+#else
+#define DEFINE_CLASS(name) template class name<DataType3d>;
+#endif
 }

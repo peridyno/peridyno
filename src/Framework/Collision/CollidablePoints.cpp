@@ -24,17 +24,17 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CollidablePoints<TDataType>::setPositions(GArray<Coord>& centers)
+	void CollidablePoints<TDataType>::setPositions(DArray<Coord>& centers)
 	{
 	}
 
 	template<typename TDataType>
-	void CollidablePoints<TDataType>::setVelocities(GArray<Coord>& vel)
+	void CollidablePoints<TDataType>::setVelocities(DArray<Coord>& vel)
 	{
 	}
 
 	template<typename TDataType>
-	void CollidablePoints<TDataType>::setRadii(GArray<Coord>& radii)
+	void CollidablePoints<TDataType>::setRadii(DArray<Coord>& radii)
 	{
 
 	}
@@ -129,7 +129,7 @@ namespace dyno
 			
 			CArray<Coord> hPos;
 			CArray<Coord> hInitPos;
-			GArray<Coord> dInitPos;
+			DArray<Coord> dInitPos;
 			hPos.resize(m_positions.size());
 			hInitPos.resize(m_positions.size());
 			dInitPos.resize(m_positions.size());

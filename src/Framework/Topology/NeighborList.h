@@ -135,13 +135,13 @@ namespace dyno
 			m_index.assign(index);
 		}
 
-		GArray<int>& getIndex() { return m_index; }
-		GArray<ElementType>& getElements() { return m_elements; }
+		DArray<int>& getIndex() { return m_index; }
+		DArray<ElementType>& getElements() { return m_elements; }
 
 	private:
 
 		int m_maxNum;
-		GArray<ElementType> m_elements;
-		GArray<int> m_index;
+		DArray<ElementType> m_elements;
+		DArray<int> m_index;
 	};
 }

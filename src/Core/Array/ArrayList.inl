@@ -13,7 +13,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	bool ArrayList<ElementType, DeviceType::GPU>::resize(const GArray<int> counts)
+	bool ArrayList<ElementType, DeviceType::GPU>::resize(const DArray<int> counts)
 	{
 		assert(counts.size() > 0);
 

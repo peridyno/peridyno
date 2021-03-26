@@ -59,8 +59,8 @@ namespace dyno {
 		DeviceArrayField<NeighborConstraints> nbr_cons;
 
 	private:
-		GArray<AABB> m_queryAABB;
-		GArray<AABB> m_queriedAABB;
+		DArray<AABB> m_queryAABB;
+		DArray<AABB> m_queriedAABB;
 
 		Scan m_scan;
 		Reduction<int> m_reduce;

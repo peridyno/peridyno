@@ -71,11 +71,11 @@ namespace dyno {
 		VarField<bool> m_reconstuct_all_neighborhood;
 		VarField<bool> m_incompressible;
 
-		GArray<bool> m_bYield;
-		GArray<Matrix> m_invF;
-		GArray<Real> m_yiled_I1;
-		GArray<Real> m_yield_J2;
-		GArray<Real> m_I1;
+		DArray<bool> m_bYield;
+		DArray<Matrix> m_invF;
+		DArray<Real> m_yiled_I1;
+		DArray<Real> m_yield_J2;
+		DArray<Real> m_I1;
 
 		std::shared_ptr<DensityPBD<TDataType>> m_pbdModule;
 	};

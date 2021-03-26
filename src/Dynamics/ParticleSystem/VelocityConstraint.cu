@@ -48,9 +48,9 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeAlpha
 	(
-		GArray<Real> alpha,
-		GArray<Coord> position,
-		GArray<Attribute> attribute,
+		DArray<Real> alpha,
+		DArray<Coord> position,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength
 	)
@@ -82,7 +82,7 @@ namespace dyno
 	template <typename Real>
 	__global__ void VC_CorrectAlpha
 	(
-		GArray<Real> alpha,
+		DArray<Real> alpha,
 		Real maxAlpha)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -99,11 +99,11 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDiagonalElement
 	(
-		GArray<Real> AiiFluid,
-		GArray<Real> AiiTotal,
-		GArray<Real> alpha,
-		GArray<Coord> position,
-		GArray<Attribute> attribute,
+		DArray<Real> AiiFluid,
+		DArray<Real> AiiTotal,
+		DArray<Real> alpha,
+		DArray<Coord> position,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength
 	)
@@ -151,10 +151,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDiagonalElement
 	(
-		GArray<Real> diaA,
-		GArray<Real> alpha,
-		GArray<Coord> position,
-		GArray<Attribute> attribute,
+		DArray<Real> diaA,
+		DArray<Real> alpha,
+		DArray<Coord> position,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength)
 	{
@@ -187,12 +187,12 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_DetectSurface
 	(
-		GArray<Real> Aii,
-		GArray<bool> bSurface,
-		GArray<Real> AiiFluid,
-		GArray<Real> AiiTotal,
-		GArray<Coord> position,
-		GArray<Attribute> attribute,
+		DArray<Real> Aii,
+		DArray<bool> bSurface,
+		DArray<Real> AiiFluid,
+		DArray<Real> AiiTotal,
+		DArray<Coord> position,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real smoothingLength,
 		Real maxA
@@ -256,14 +256,14 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeDivergence
 	(
-		GArray<Real> divergence,
-		GArray<Real> alpha,
-		GArray<Real> density,
-		GArray<Coord> position,
-		GArray<Coord> velocity,
-		GArray<bool> bSurface,
-		GArray<Coord> normals,
-		GArray<Attribute> attribute,
+		DArray<Real> divergence,
+		DArray<Real> alpha,
+		DArray<Real> density,
+		DArray<Coord> position,
+		DArray<Coord> velocity,
+		DArray<bool> bSurface,
+		DArray<Coord> normals,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbors,
 		Real separation,
 		Real tangential,
@@ -337,10 +337,10 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_CompensateSource
 	(
-		GArray<Real> divergence,
-		GArray<Real> density,
-		GArray<Attribute> attribute,
-		GArray<Coord> position,
+		DArray<Real> divergence,
+		DArray<Real> density,
+		DArray<Attribute> attribute,
+		DArray<Coord> position,
 		Real restDensity,
 		Real dt
 	)
@@ -361,12 +361,12 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void VC_ComputeAx
 	(
-		GArray<Real> residual,
-		GArray<Real> pressure,
-		GArray<Real> aiiSymArr,
-		GArray<Real> alpha,
-		GArray<Coord> position,
-		GArray<Attribute> attribute,
+		DArray<Real> residual,
+		DArray<Real> pressure,
+		DArray<Real> aiiSymArr,
+		DArray<Real> alpha,
+		DArray<Coord> position,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbor,
 		Real smoothingLength
 	)
@@ -400,13 +400,13 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void VC_UpdateVelocityBoundaryCorrected(
-		GArray<Real> pressure,
-		GArray<Real> alpha,
-		GArray<bool> bSurface,
-		GArray<Coord> position,
-		GArray<Coord> velocity,
-		GArray<Coord> normal,
-		GArray<Attribute> attribute,
+		DArray<Real> pressure,
+		DArray<Real> alpha,
+		DArray<bool> bSurface,
+		DArray<Coord> position,
+		DArray<Coord> velocity,
+		DArray<Coord> normal,
+		DArray<Attribute> attribute,
 		NeighborList<int> neighbor,
 		Real restDensity,
 		Real airPressure,

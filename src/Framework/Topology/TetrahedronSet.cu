@@ -40,7 +40,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::setTetrahedrons(GArray<Tetrahedron>& tetrahedrons)
+	void TetrahedronSet<TDataType>::setTetrahedrons(DArray<Tetrahedron>& tetrahedrons)
 	{
 		if (tetrahedrons.size() != m_tethedrons.size())
 		{
@@ -117,8 +117,8 @@ namespace dyno
 
 	template<typename Tetrahedron>
 	__global__ void TS_CountTets(
-		GArray<int> counter,
-		GArray<Tetrahedron> tets)
+		DArray<int> counter,
+		DArray<Tetrahedron> tets)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tets.size()) return;
@@ -133,10 +133,10 @@ namespace dyno
 
 	template<typename Tetrahedron>
 	__global__ void TS_SetupTetIds(
-		GArray<int> ids,
-		GArray<int> counter,
-		GArray<int> shift,
-		GArray<Tetrahedron> tets)
+		DArray<int> ids,
+		DArray<int> counter,
+		DArray<int> shift,
+		DArray<Tetrahedron> tets)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tets.size()) return;
@@ -159,7 +159,7 @@ namespace dyno
 	template<typename TDataType>
 	NeighborList<int>& TetrahedronSet<TDataType>::getVer2Tet()
 	{
-		GArray<int> counter;
+		DArray<int> counter;
 		counter.resize(m_coords.size());
 		counter.reset();
 
@@ -168,7 +168,7 @@ namespace dyno
 			counter,
 			m_tethedrons);
 
-		GArray<int> shift;
+		DArray<int> shift;
 		shift.resize(m_coords.size());
 
 		shift.assign(counter);
@@ -176,7 +176,7 @@ namespace dyno
 		int total_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, shift.begin(), shift.begin() + shift.size(), shift.begin());
 
-		GArray<int> elements;
+		DArray<int> elements;
 		elements.resize(total_num);
 
 		counter.reset();
@@ -201,16 +201,16 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::getVolume(GArray<Real>& volume)
+	void TetrahedronSet<TDataType>::getVolume(DArray<Real>& volume)
 	{
 
 	}
 
 	template<typename TKey, typename Tetrahedron>
 	__global__ void TS_SetupKeys(
-		GArray<TKey> keys,
-		GArray<int> ids,
-		GArray<Tetrahedron> tets)
+		DArray<TKey> keys,
+		DArray<int> ids,
+		DArray<Tetrahedron> tets)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tets.size()) return;
@@ -229,8 +229,8 @@ namespace dyno
 
 	template<typename TKey>
 	__global__ void TS_CountTriangleNumber(
-		GArray<int> counter,
-		GArray<TKey> keys) 
+		DArray<int> counter,
+		DArray<TKey> keys) 
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= keys.size()) return;
@@ -243,11 +243,11 @@ namespace dyno
 
 	template<typename Triangle, typename Tri2Tet, typename TKey>
 	__global__ void TS_SetupTriangles(
-		GArray<Triangle> triangles,
-		GArray<Tri2Tet> tri2Tet,
-		GArray<TKey> keys,
-		GArray<int> counter,
-		GArray<int> tetIds)
+		DArray<Triangle> triangles,
+		DArray<Tri2Tet> tri2Tet,
+		DArray<TKey> keys,
+		DArray<int> counter,
+		DArray<int> tetIds)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= keys.size()) return;
@@ -275,7 +275,7 @@ namespace dyno
 
 // 	template<typename Tri2Tet>
 // 	__global__ void TS_InitTri2Tet(
-// 		GArray<Tri2Tet> tri2Tet)
+// 		DArray<Tri2Tet> tri2Tet)
 // 	{
 // 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 // 		if (tId > tri2Tet.size()) return;
@@ -285,7 +285,7 @@ namespace dyno
 // 	}
 
 	template<typename TKey>
-	void printTKey(GArray<TKey> keys, int maxLength) {
+	void printTKey(DArray<TKey> keys, int maxLength) {
 		CArray<TKey> h_keys;
 		h_keys.resize(keys.size());
 		h_keys.assign(keys);
@@ -299,7 +299,7 @@ namespace dyno
 		h_keys.clear();
 	}
 
-	void printCount(GArray<int> keys, int maxLength) {
+	void printCount(DArray<int> keys, int maxLength) {
 		CArray<int> h_keys;
 		h_keys.resize(keys.size());
 		h_keys.assign(keys);
@@ -318,8 +318,8 @@ namespace dyno
 	{
 		int tetSize = m_tethedrons.size();
 
-		GArray<TKey> keys;
-		GArray<int> tetIds;
+		DArray<TKey> keys;
+		DArray<int> tetIds;
 
 		keys.resize(4 * tetSize);
 		tetIds.resize(4 * tetSize);
@@ -332,7 +332,7 @@ namespace dyno
 
 		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), tetIds.begin());
 
-		GArray<int> counter;
+		DArray<int> counter;
 		counter.resize(4 * tetSize);
 
 		cuExecute(keys.size(),

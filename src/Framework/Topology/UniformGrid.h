@@ -14,7 +14,7 @@ namespace dyno
 		~UniformGrid3D() {};
 
 	private:
-		GArray3D<Coord> m_coords;
+		DArray3D<Coord> m_coords;
 	};
 }
 

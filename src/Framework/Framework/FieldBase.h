@@ -8,7 +8,7 @@
 namespace dyno {
 	class Base;
 
-	enum EFieldType
+	enum FieldTypeEnum
 	{
 		In,
 		Out,
@@ -26,7 +26,7 @@ class FieldBase
 	using CallBackFunc = std::function<void()>;
 public:
 	FieldBase() : m_name("default"), m_description("") {};
-	FieldBase(std::string name, std::string description, EFieldType type = EFieldType::Param, Base* parent = nullptr);
+	FieldBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, Base* parent = nullptr);
 	virtual ~FieldBase() {};
 
 	virtual size_t getElementCount() { return 0; }
@@ -63,7 +63,7 @@ public:
 	inline float getMax() { return m_max; }
 	inline void setMax(float max_val) { m_max = max_val; }
 
-	EFieldType getFieldType();
+	FieldTypeEnum getFieldType();
 
 
 	bool connectField(FieldBase* dst);
@@ -81,7 +81,7 @@ protected:
 	void addSink(FieldBase* f);
 	void removeSink(FieldBase* f);
 
-	EFieldType m_fType = EFieldType::Param;
+	FieldTypeEnum m_fType = FieldTypeEnum::Param;
 
 private:
 	std::string m_name;
@@ -106,14 +106,15 @@ private:
 #define DEFINE_FIELD_FUNC(DerivedField, Data, FieldName)						\
 FieldName() : FieldBase("", ""){}								\
 \
-FieldName(std::string name, std::string description, EFieldType fieldType, Base* parent)		\
+FieldName(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)		\
 	: FieldBase(name, description, fieldType, parent){}				\
 \
-const std::string getTemplateName() override { return std::string(typeid(T).name()); }\
+const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }			\
+const std::string getClassName() override { return std::string(#FieldName); }					\
 \
 std::shared_ptr<Data>& getReference()								\
 {																	\
-	FieldBase* topField = this->getTopField();							\
+	FieldBase* topField = this->getTopField();						\
 	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
 	return derived->m_data;											\
 }																	\
@@ -122,13 +123,13 @@ bool isEmpty() override {											\
 return this->getReference() == nullptr;								\
 }																	\
 \
-bool connect(DerivedField* dst)						\
+bool connect(DerivedField* dst)										\
 {																	\
 	this->connectField(dst);										\
 	this->update();													\
 	return true;													\
 }																	\
-Data& getValue() { return *(getReference()); }					\
+Data& getValue() { return *(getReference()); }						\
 private:															\
 	std::shared_ptr<Data> m_data = nullptr;							\
 public:

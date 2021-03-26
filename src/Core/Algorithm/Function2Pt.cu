@@ -36,7 +36,7 @@ namespace dyno
 
 
 		template <typename T>
-		void plus(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
+		void plus(DArray<T>& zArr, DArray<T>& xArr, DArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -45,7 +45,7 @@ namespace dyno
 		}
 
 		template <typename T>
-		void subtract(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
+		void subtract(DArray<T>& zArr, DArray<T>& xArr, DArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -54,7 +54,7 @@ namespace dyno
 
 
 		template <typename T>
-		void multiply(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
+		void multiply(DArray<T>& zArr, DArray<T>& xArr, DArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -63,7 +63,7 @@ namespace dyno
 		}
 
 		template <typename T>
-		void divide(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr)
+		void divide(DArray<T>& zArr, DArray<T>& xArr, DArray<T>& yArr)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
@@ -73,30 +73,30 @@ namespace dyno
 
 
 		template <typename T>
-		void saxpy(GArray<T>& zArr, GArray<T>& xArr, GArray<T>& yArr, T alpha)
+		void saxpy(DArray<T>& zArr, DArray<T>& xArr, DArray<T>& yArr, T alpha)
 		{
 			assert(zArr.size() == xArr.size() && zArr.size() == yArr.size());
 			unsigned pDim = cudaGridSize(zArr.size(), BLOCK_SIZE);
 			KerSaxpy << <pDim, BLOCK_SIZE >> > (zArr.begin(), xArr.begin(), yArr.begin(), alpha, zArr.size());
 		}
 
-		template void plus(GArray<int>&, GArray<int>&, GArray<int>&);
-		template void plus(GArray<float>&, GArray<float>&, GArray<float>&);
-		template void plus(GArray<double>&, GArray<double>&, GArray<double>&);
+		template void plus(DArray<int>&, DArray<int>&, DArray<int>&);
+		template void plus(DArray<float>&, DArray<float>&, DArray<float>&);
+		template void plus(DArray<double>&, DArray<double>&, DArray<double>&);
 
-		template void subtract(GArray<int>&, GArray<int>&, GArray<int>&);
-		template void subtract(GArray<float>&, GArray<float>&, GArray<float>&);
-		template void subtract(GArray<double>&, GArray<double>&, GArray<double>&);
+		template void subtract(DArray<int>&, DArray<int>&, DArray<int>&);
+		template void subtract(DArray<float>&, DArray<float>&, DArray<float>&);
+		template void subtract(DArray<double>&, DArray<double>&, DArray<double>&);
 
-		template void multiply(GArray<int>&, GArray<int>&, GArray<int>&);
-		template void multiply(GArray<float>&, GArray<float>&, GArray<float>&);
-		template void multiply(GArray<double>&, GArray<double>&, GArray<double>&);
+		template void multiply(DArray<int>&, DArray<int>&, DArray<int>&);
+		template void multiply(DArray<float>&, DArray<float>&, DArray<float>&);
+		template void multiply(DArray<double>&, DArray<double>&, DArray<double>&);
 
-		template void divide(GArray<int>&, GArray<int>&, GArray<int>&);
-		template void divide(GArray<float>&, GArray<float>&, GArray<float>&);
-		template void divide(GArray<double>&, GArray<double>&, GArray<double>&);
+		template void divide(DArray<int>&, DArray<int>&, DArray<int>&);
+		template void divide(DArray<float>&, DArray<float>&, DArray<float>&);
+		template void divide(DArray<double>&, DArray<double>&, DArray<double>&);
 
-		template void saxpy(GArray<float>&, GArray<float>&, GArray<float>&, float);
-		template void saxpy(GArray<double>&, GArray<double>&, GArray<double>&, double);
+		template void saxpy(DArray<float>&, DArray<float>&, DArray<float>&, float);
+		template void saxpy(DArray<double>&, DArray<double>&, DArray<double>&, double);
 	}
 }

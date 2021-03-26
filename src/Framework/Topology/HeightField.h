@@ -31,11 +31,11 @@ namespace dyno
 		Coord getOrigin() { return origin; }
 		
 
-		GArray2D<Real>& getHeights() { return m_height; }
+		DArray2D<Real>& getHeights() { return m_height; }
 
 	protected:
-// 		GArray<Coord> m_coords;
-// 		GArray<Coord> m_normals;
+// 		DArray<Coord> m_coords;
+// 		DArray<Coord> m_normals;
 // 		NeighborList<int> m_pointNeighbors;
 
 		Coord origin;
@@ -43,7 +43,7 @@ namespace dyno
 		Real m_dx;
 		Real m_dz;
 
-		GArray2D<Real> m_height;
+		DArray2D<Real> m_height;
 	};
 
 

@@ -11,86 +11,73 @@
 
 namespace dyno
 {
-
+/**
+ * @brief Macro definitions for VarField
+ * 
+ */
 #define DEF_CURRENT_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> current_##name = VarField<T>(T(value), std::string(#name), desc, EFieldType::Current, this);			\
+	VarField<T> current_##name = VarField<T>(T(value), std::string(#name), desc, FieldTypeEnum::Current, this);			\
 public:										\
 	inline VarField<T>* current##name() {return &current_##name;}
 
 #define DEF_NEXT_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> next_##name = VarField<T>(T(value), std::string(#name), desc, EFieldType::Next, this);			\
+	VarField<T> next_##name = VarField<T>(T(value), std::string(#name), desc, FieldTypeEnum::Next, this);			\
 public:										\
 	inline VarField<T>* next##name() {return &next_##name;}
 
 #define DEF_EMPTY_CURRENT_VAR(name, T, desc) \
 private:									\
-	VarField<T> current_##name = VarField<T>(std::string(#name), desc, EFieldType::Current, this);			\
+	VarField<T> current_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
 public:										\
 	inline VarField<T>* current##name() {return &current_##name;}
 
 #define DEF_EMPTY_NEXT_VAR(name, T, desc) \
 private:									\
-	VarField<T> next_##name = VarField<T>(std::string(#name), desc, EFieldType::Next, this);			\
+	VarField<T> next_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Next, this);			\
 public:									\
 	inline VarField<T>* next##name() {return &next_##name;}
 
 
-
-#define DEF_CURRENT_ARRAY(name, T, size, device, desc) \
-private:									\
-	ArrayField<T, device> current_##name = ArrayField<T, device>(size, std::string(#name), desc, EFieldType::Current, this);	\
-public:									\
-	inline ArrayField<T, device>* current##name() {return &current_##name;}
-
-#define DEF_NEXT_ARRAY(name, T, size, device, desc) \
-private:									\
-	ArrayField<T, device> next_##name = ArrayField<T, device>(size, std::string(#name), desc, EFieldType::Next, this);	\
-public:									\
-	inline ArrayField<T, device>* next##name() {return &next_##name;}
-
-
+/**
+ * @brief Macro definitions for ArrayField
+ * 
+ */
 #define DEF_EMPTY_CURRENT_ARRAY(name, T, device, desc) \
 private:									\
-	ArrayField<T, device> current_##name = ArrayField<T, device>(0, std::string(#name), desc, EFieldType::Current, this);	\
+	ArrayField<T, device> current_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
 public:									\
 	inline ArrayField<T, device>* current##name() {return &current_##name;}
 
 #define DEF_EMPTY_NEXT_ARRAY(name, T, device, desc) \
 private:									\
-	ArrayField<T, device> next_##name = ArrayField<T, device>(0, std::string(#name), desc, EFieldType::Next, this);	\
+	ArrayField<T, device> next_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Next, this);	\
 public:									\
 	inline ArrayField<T, device>* next##name() {return &next_##name;}
 
 
-
-
+/**
+ * @brief Macro definitions for neighbor list
+ * 
+ */
 #define DEF_EMPTY_CURRENT_NEIGHBOR_LIST(name, T, desc)		\
 private:									\
-	NeighborField<T> current_##name = NeighborField<T>(std::string(#name), desc, EFieldType::Current, this, 0, 0);	\
+	NeighborField<T> current_##name = NeighborField<T>(std::string(#name), desc, FieldTypeEnum::Current, this, 0, 0);	\
 public:									\
 	inline NeighborField<T>* current##name() {return &current_##name;}
 
 #define DEF_EMPTY_NEXT_NEIGHBOR_LIST(name, T, desc)		\
 private:									\
-	NeighborField<T> next_##name = NeighborField<T>(std::string(#name), desc, EFieldType::Next, this, 0, 0);	\
-public:									\
-	inline NeighborField<T>* next##name() {return &next_##name;}
-
-#define DEF_CURRENT_NEIGHBOR_LIST(name, T, size, nbr, desc)		\
-private:									\
-	NeighborField<T> current_##name = NeighborField<T>(std::string(#name), desc, EFieldType::Current, this, size, nbr);	\
-public:									\
-	inline NeighborField<T>* in##name() {return &current_##name;}
-
-#define DEF_NEXT_NEIGHBOR_LIST(name, T, size, nbr, desc)		\
-private:									\
-	NeighborField<T> next_##name = NeighborField<T>(std::string(#name), desc, EFieldType::Next, this, size, nbr);	\
+	NeighborField<T> next_##name = NeighborField<T>(std::string(#name), desc, FieldTypeEnum::Next, this, 0, 0);	\
 public:									\
 	inline NeighborField<T>* next##name() {return &next_##name;}
 
 
+/**
+ * @brief Macro definitions for node ports
+ * 
+ */
 #define DEF_NODE_PORT(name, T, desc)				\
 private:									\
 	SingleNodePort<T> single_##name = SingleNodePort<T>(std::string(#name), desc, this);					\
@@ -103,15 +90,15 @@ private:									\
 public:									\
 	inline MultipleNodePort<T>* inport##name##s() { return &multiple_##name; }			\
 	inline std::vector<std::shared_ptr<T>>& get##name##s(){return multiple_##name.getDerivedNodes();}				\
-												\
-	bool add##name(std::shared_ptr<T> c){		\
-		multiple_##name.addDerivedNode(c);		\
-		c->setParent(this);						\
-		return true;							\
-	}											\
-												\
-	bool remove##name(std::shared_ptr<T> c) {	\
-		multiple_##name.removeDerivedNode(c);		\
-		return true;							\
+														\
+	bool add##name(std::shared_ptr<T> c){				\
+		multiple_##name.addDerivedNode(c);				\
+		c->setParent(this);								\
+		return true;									\
+	}													\
+														\
+	bool remove##name(std::shared_ptr<T> c) {			\
+		multiple_##name.removeDerivedNode(c);			\
+		return true;									\
 	}
 }

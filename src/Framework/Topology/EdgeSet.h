@@ -91,7 +91,7 @@ namespace dyno
 
 		void loadSmeshFile(std::string filename);
 
-		GArray<Edge>* getEdges() {return &m_edges;}
+		DArray<Edge>* getEdges() {return &m_edges;}
 		NeighborList<int>& getEdgeNeighbors() { return m_edgeNeighbors.getValue(); }
 
 		NeighborField<int> m_edgeNeighbors;
@@ -99,7 +99,7 @@ namespace dyno
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
 
 	protected:
-		GArray<Edge> m_edges;
+		DArray<Edge> m_edges;
 	};
 }
 

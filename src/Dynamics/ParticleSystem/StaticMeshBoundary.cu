@@ -15,10 +15,10 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_CD_mesh(
-		GArray<Coord> points,
-		GArray<Coord> pointsTri,
-		GArray<TopologyModule::Triangle> m_triangle_index,
-		GArray<Coord> vels,
+		DArray<Coord> points,
+		DArray<Coord> pointsTri,
+		DArray<TopologyModule::Triangle> m_triangle_index,
+		DArray<Coord> vels,
 		NeighborList<int> neighborsTriangle,
 		Real radius,
 		Real dt
@@ -88,8 +88,8 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void TEST_mesh(
-		GArray<Coord> points,
-		GArray<Coord> vels
+		DArray<Coord> points,
+		DArray<Coord> vels
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -157,8 +157,8 @@ namespace dyno
 		int start_tri = 0;
 		for (size_t t = 0; t < m_obstacles.size(); t++)
 		{
-			GArray<Coord> posTri = m_obstacles[t]->getPoints();
-			GArray<Triangle>* idxTri = m_obstacles[t]->getTriangles();
+			DArray<Coord> posTri = m_obstacles[t]->getPoints();
+			DArray<Triangle>* idxTri = m_obstacles[t]->getTriangles();
 			int num_p = posTri.size();
 			int num_i = idxTri->size();
 			if (num_p > 0)
@@ -241,8 +241,8 @@ namespace dyno
 
 			m_nbrQuery->compute();
 
-			GArray<Coord>& posRef = particle_position->getValue();
-			GArray<Coord>& velRef = particle_velocity->getValue();
+			DArray<Coord>& posRef = particle_position->getValue();
+			DArray<Coord>& velRef = particle_velocity->getValue();
 
 			cuExecute(total_num, K_CD_mesh,
 				posRef,

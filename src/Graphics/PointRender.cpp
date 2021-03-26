@@ -181,7 +181,7 @@ void PointRender::resize(unsigned int num)
 }
 
 int id = 0;
-void PointRender::setVertexArray(GArray<float3>& pos)
+void PointRender::setVertexArray(DArray<float3>& pos)
 {
 	cudaMemcpy(m_vertVBO.cudaMap(), pos.begin(), sizeof(float3) * pos.size(), cudaMemcpyDeviceToDevice);
 	m_vertVBO.cudaUnmap();
@@ -193,7 +193,7 @@ void PointRender::setVertexArray(CArray<float3>& pos)
 	m_vertVBO.cudaUnmap();
 }
 
-void PointRender::setColorArray(GArray<float3>& color)
+void PointRender::setColorArray(DArray<float3>& color)
 {
 	cudaMemcpy(m_vertexColor.cudaMap(), color.begin(), sizeof(float3) * color.size(), cudaMemcpyDeviceToDevice);
 	m_vertexColor.cudaUnmap();
@@ -233,7 +233,7 @@ void PointRender::setColor(glm::vec3 color)
 	delete[] colors;
 }
 
-void PointRender::setColor(GArray<glm::vec3> color)
+void PointRender::setColor(DArray<glm::vec3> color)
 {
 	cudaMemcpy(m_vertexColor.cudaMap(), color.begin(), sizeof(glm::vec3) * m_vertexColor.getSize(), cudaMemcpyHostToHost);
 	m_vertexColor.cudaUnmap();

@@ -34,7 +34,7 @@ public:
 
 	void resize(unsigned int num);
 
-	void setLines(GArray<float3>& pos);
+	void setLines(DArray<float3>& pos);
 	void setLines(CArray<float3>& pos);
 
 	void setColors(CArray<float3>& color);

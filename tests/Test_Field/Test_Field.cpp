@@ -16,7 +16,7 @@ TEST(FieldBase, connect)
 	EXPECT_EQ(m1.varArea()->getValue(), float(60));
 
 	ArrayField<float, DeviceType::GPU> arrField;
-	GArray<float> dArr;
+	DArray<float> dArr;
 	dArr.resize(20);
 
 	std::shared_ptr<float> A = nullptr;

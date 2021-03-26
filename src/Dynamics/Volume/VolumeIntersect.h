@@ -17,11 +17,5 @@ namespace dyno {
 	public:
 	};
 
-
-#ifdef PRECISION_FLOAT
-template class VolumeIntersect<DataType3f>;
-#else
-template class VolumeIntersect<DataType3d>;
-#endif
-
+	DEFINE_CLASS(VolumeIntersect);
 }

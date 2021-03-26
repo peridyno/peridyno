@@ -46,10 +46,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_ApplyTransform(
-		GArray<Coord> to, //new position of surface mesh
-		GArray<Coord> from,//inner particle's new position
-		GArray<Coord> initTo,  //initial
-		GArray<Coord> initFrom,
+		DArray<Coord> to, //new position of surface mesh
+		DArray<Coord> from,//inner particle's new position
+		DArray<Coord> initTo,  //initial
+		DArray<Coord> initFrom,
 		NeighborList<int> neighbors,
 		Real smoothingLength)  //radius
 	{

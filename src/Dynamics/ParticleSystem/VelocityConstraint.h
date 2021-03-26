@@ -47,22 +47,22 @@ namespace dyno {
 		Real m_restDensity = 1000.0f;
 
 		//Refer to "A Nonlocal Variational Particle Framework for Incompressible Free Surface Flows" for their exact meanings
-		GArray<Real> m_alpha;
-		GArray<Real> m_Aii;
-		GArray<Real> m_AiiFluid;
-		GArray<Real> m_AiiTotal;
+		DArray<Real> m_alpha;
+		DArray<Real> m_Aii;
+		DArray<Real> m_AiiFluid;
+		DArray<Real> m_AiiTotal;
 
-		GArray<Real> m_density;
+		DArray<Real> m_density;
 
-		GArray<Real> m_pressure;
-		GArray<Real> m_divergence;
+		DArray<Real> m_pressure;
+		DArray<Real> m_divergence;
 		//Indicate whether a particle is near the free surface boundary.
-		GArray<bool> m_bSurface;
+		DArray<bool> m_bSurface;
 
 		//Used to solve the linear system of equations with a conjugate gradient method.
-		GArray<Real> m_y;
-		GArray<Real> m_r;
-		GArray<Real> m_p;
+		DArray<Real> m_y;
+		DArray<Real> m_r;
+		DArray<Real> m_p;
 
 		Reduction<Real>* m_reduce;
 		Arithmetic<Real>* m_arithmetic;

@@ -47,14 +47,14 @@ public:
 
 	
 protected:
-	GArray<int> m_objId;
+	DArray<int> m_objId;
 	
-	GArray<Real> weights;
-	GArray<Coord> init_pos;
-	GArray<Coord> posBuf;
+	DArray<Real> weights;
+	DArray<Coord> init_pos;
+	DArray<Coord> posBuf;
 
-	GArray<Coord> m_position_previous;
-	GArray<Coord> m_triangle_vertex_previous;
+	DArray<Coord> m_position_previous;
+	DArray<Coord> m_triangle_vertex_previous;
 
 	std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
 	std::shared_ptr<NeighborList<int>> m_nList;

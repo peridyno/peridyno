@@ -52,16 +52,16 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_SETUP_TET(
-		GArray<Coord> tet_vertex,
-		GArray<TopologyModule::Tetrahedron> tet_index,
+		DArray<Coord> tet_vertex,
+		DArray<TopologyModule::Tetrahedron> tet_index,
 		NeighborList<int> tet_neighbors,
-		GArray<Coord> interNormal,
-		GArray<Real> interDistance,
-		GArray<int> x_array,
-		GArray<int> y_array,
-		GArray<int> sum_nbr,
-		GArray<Real> volume,
-		GArray<Real> volume2
+		DArray<Coord> interNormal,
+		DArray<Real> interDistance,
+		DArray<int> x_array,
+		DArray<int> y_array,
+		DArray<int> sum_nbr,
+		DArray<Real> volume,
+		DArray<Real> volume2
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -125,7 +125,7 @@ namespace dyno
 
 	template<typename Coord>
 	__global__ void K_DAMP_TET(
-		GArray<Coord> velocity
+		DArray<Coord> velocity
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -137,17 +137,17 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_ITER_TET(
-		GArray<int> array_i,
-		GArray<int> array_j,
-		GArray<Real> volume,
-		GArray<TopologyModule::Tetrahedron> tet_index,
+		DArray<int> array_i,
+		DArray<int> array_j,
+		DArray<Real> volume,
+		DArray<TopologyModule::Tetrahedron> tet_index,
 		NeighborList<int> tet_neighbors,
-		GArray<Coord> interNormal,
-		GArray<Real> interDistance,
-		GArray<Coord> velocity,
-		GArray<Coord> velocity_init,
-		GArray<Real> force_previous,
-		GArray<Real> force,
+		DArray<Coord> interNormal,
+		DArray<Real> interDistance,
+		DArray<Coord> velocity,
+		DArray<Coord> velocity_init,
+		DArray<Real> force_previous,
+		DArray<Real> force,
 		Real dt
 	)
 	{
@@ -178,15 +178,15 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void K_UPDATE_TET(
-		GArray<int> array_i,
-		GArray<int> array_j,
-		GArray<Real> volume,
-		GArray<Real> volume2,
-		GArray<Coord> interNorm,
-		GArray<TopologyModule::Tetrahedron> tet_index,
-		GArray<Coord> velocity,
-		GArray<Real> force,
-		GArray<int> sum_nbr,
+		DArray<int> array_i,
+		DArray<int> array_j,
+		DArray<Real> volume,
+		DArray<Real> volume2,
+		DArray<Coord> interNorm,
+		DArray<TopologyModule::Tetrahedron> tet_index,
+		DArray<Coord> velocity,
+		DArray<Real> force,
+		DArray<int> sum_nbr,
 		Real dt
 	)
 	{
@@ -247,21 +247,21 @@ namespace dyno
 		//printf("SIZE TET: %d\n", tetSet->getTetrahedrons().size());
 
 
-		GArray<int> x_array;
-		GArray<int> y_array;
-		GArray<Coord> interNormal;
-		GArray<Real> interDistance;
+		DArray<int> x_array;
+		DArray<int> y_array;
+		DArray<Coord> interNormal;
+		DArray<Real> interDistance;
 
-		GArray<Real> force;
-		GArray<Real> force_buffer;
-		GArray<Coord> velocity_buffer;
-		GArray<int> collision_type;
-		GArray<Real> volume;
-		GArray<Real> volume2;
+		DArray<Real> force;
+		DArray<Real> force_buffer;
+		DArray<Coord> velocity_buffer;
+		DArray<int> collision_type;
+		DArray<Real> volume;
+		DArray<Real> volume2;
 
 
 
-		GArray<int> sum_nbr;
+		DArray<int> sum_nbr;
 
 
 		x_array.resize(m_neighborhood_tri.getValue().getElementSize());

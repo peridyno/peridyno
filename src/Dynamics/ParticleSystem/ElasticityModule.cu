@@ -20,7 +20,7 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_PrecomputeShape(
-		GArray<Matrix> invK,
+		DArray<Matrix> invK,
 		NeighborList<NPair> restShapes)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -139,11 +139,11 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_EnforceElasticity(
-		GArray<Coord> delta_position,
-		GArray<Real> weights,
-		GArray<Real> bulkCoefs,
-		GArray<Matrix> invK,
-		GArray<Coord> position,
+		DArray<Coord> delta_position,
+		DArray<Real> weights,
+		DArray<Real> bulkCoefs,
+		DArray<Matrix> invK,
+		DArray<Coord> position,
 		NeighborList<NPair> restShapes,
 		Real mu,
 		Real lambda)
@@ -270,10 +270,10 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdatePosition(
-		GArray<Coord> position,
-		GArray<Coord> old_position,
-		GArray<Coord> delta_position,
-		GArray<Real> delta_weights)
+		DArray<Coord> position,
+		DArray<Coord> old_position,
+		DArray<Coord> delta_position,
+		DArray<Real> delta_weights)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -284,9 +284,9 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
-		GArray<Coord> velArr,
-		GArray<Coord> prePos,
-		GArray<Coord> curPos,
+		DArray<Coord> velArr,
+		DArray<Coord> prePos,
+		DArray<Coord> curPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -360,7 +360,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	__global__ void EM_InitBulkStiffness(GArray<Real> stiffness)
+	__global__ void EM_InitBulkStiffness(DArray<Real> stiffness)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= stiffness.size()) return;
@@ -440,7 +440,7 @@ namespace dyno
 	__global__ void K_UpdateRestShape(
 		NeighborList<NPair> shape,
 		NeighborList<int> nbr,
-		GArray<Coord> pos)
+		DArray<Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;

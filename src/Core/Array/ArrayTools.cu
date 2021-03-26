@@ -8,7 +8,7 @@ namespace dyno
 		void* lists,
 		void* elements,
 		size_t ele_size,
-		GArray<int> index)
+		DArray<int> index)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= index.size()) return;
@@ -25,7 +25,7 @@ namespace dyno
 	}
 
 	template<int N>
-	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index)
+	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<int> index)
 	{
 		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
 		AA_Allocate<N> << <pDims, BLOCK_SIZE >> > (	
@@ -36,21 +36,21 @@ namespace dyno
 		cuSynchronize();
 	}
 
-	template void parallel_allocate_for_list<1>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<2>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<3>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<4>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<5>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<6>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<7>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_allocate_for_list<8>(void* lists, void* elements, size_t ele_size, GArray<int> index);
+	template void parallel_allocate_for_list<1>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<2>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<3>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<4>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<5>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<6>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<7>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_allocate_for_list<8>(void* lists, void* elements, size_t ele_size, DArray<int> index);
 
 	template<int N>
 	__global__ void AA_Assign(
 		void* lists,
 		void* elements,
 		size_t ele_size,
-		GArray<int> index)
+		DArray<int> index)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= index.size()) return;
@@ -67,7 +67,7 @@ namespace dyno
 	}
 
 	template<int N>
-	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, GArray<int> index)
+	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, DArray<int> index)
 	{
 		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
 		AA_Assign<N> << <pDims, BLOCK_SIZE >> > (
@@ -78,12 +78,12 @@ namespace dyno
 		cuSynchronize();
 	}
 
-	template void parallel_init_for_list<1>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<2>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<3>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<4>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<5>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<6>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<7>(void* lists, void* elements, size_t ele_size, GArray<int> index);
-	template void parallel_init_for_list<8>(void* lists, void* elements, size_t ele_size, GArray<int> index);
+	template void parallel_init_for_list<1>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<2>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<3>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<4>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<5>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<6>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<7>(void* lists, void* elements, size_t ele_size, DArray<int> index);
+	template void parallel_init_for_list<8>(void* lists, void* elements, size_t ele_size, DArray<int> index);
 }

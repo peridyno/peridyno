@@ -104,7 +104,7 @@ namespace dyno {
 		 * @return true
 		 * @return false
 		 */
-		bool resize(const GArray<int> counts);
+		bool resize(const DArray<int> counts);
 		bool resize(const size_t arraySize, const size_t eleSize);
 
 		DYN_FUNC inline int size() const { return m_lists.size(); }
@@ -139,19 +139,19 @@ namespace dyno {
 			return out;
 		}
 
-		const GArray<int>& index() const { return m_index; }
-		const GArray<ElementType> elements() const { return m_elements; }
-		const GArray<List<ElementType>> lists() const { return m_lists; }
+		const DArray<int>& index() const { return m_index; }
+		const DArray<ElementType> elements() const { return m_elements; }
+		const DArray<List<ElementType>> lists() const { return m_lists; }
 
 	private:
-		GArray<int> m_index;
-		GArray<ElementType> m_elements;
+		DArray<int> m_index;
+		DArray<ElementType> m_elements;
 
-		GArray<List<ElementType>> m_lists;
+		DArray<List<ElementType>> m_lists;
 	};
 
 	template<typename T>
-	using GArrayList = ArrayList<T, DeviceType::GPU>;
+	using DArrayList = ArrayList<T, DeviceType::GPU>;
 
 	template<typename T>
 	using CArrayList = ArrayList<T, DeviceType::CPU>;

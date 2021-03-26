@@ -87,7 +87,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointSet<TDataType>::setPoints(GArray<Coord>& pos)
+	void PointSet<TDataType>::setPoints(DArray<Coord>& pos)
 	{
 		m_coords.resize(pos.size());
 		m_coords.assign(pos);
@@ -103,7 +103,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	GArrayList<int>* PointSet<TDataType>::getPointNeighbors()
+	DArrayList<int>* PointSet<TDataType>::getPointNeighbors()
 	{
 		this->updatePointNeighbors();
 
@@ -119,7 +119,7 @@ namespace dyno
 
 	template <typename Real, typename Coord>
 	__global__ void PS_Scale(
-		GArray<Coord> vertex,
+		DArray<Coord> vertex,
 		Real s)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -136,7 +136,7 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void PS_Scale(
-		GArray<Coord> vertex,
+		DArray<Coord> vertex,
 		Coord s)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -154,7 +154,7 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void PS_Translate(
-		GArray<Coord> vertex,
+		DArray<Coord> vertex,
 		Coord t)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
