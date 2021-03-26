@@ -1,5 +1,4 @@
 #pragma once
-#include "Typedef.h"
 #include "Array/Array.h"
 #include "Framework/FieldBase.h"
 #include "Framework/Base.h"

@@ -83,23 +83,6 @@ namespace dyno
 	template <typename Real> class TAlignedBox3D;
 	template <typename Real> class TOrientedBox3D;
 
-	class Bool
-	{
-	public:
-		DYN_FUNC Bool(bool v = false) { val = v; }
-
-		DYN_FUNC bool operator! () { return !val; }
-		DYN_FUNC bool operator== (bool v) { return val == v; }
-
-		DYN_FUNC bool operator= (bool v) { return val = v; }
-
-		DYN_FUNC Bool& operator&= (bool v) { val &= v;  return *this; }
-		DYN_FUNC Bool& operator|= (bool v) { val |= v;  return *this; }
-
-	private:
-		bool val = false;
-	};
-
 	template<typename Real>
 	class TPoint3D
 	{

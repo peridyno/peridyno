@@ -90,7 +90,7 @@ std::vector<float>& creare_scene_init()
 
 int main()
 {
-	creare_scene_init();
+//	creare_scene_init();
 
 	printf("outside 3\n");
 	QtApp window;

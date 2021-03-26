@@ -5,7 +5,6 @@
 #include <iostream>
 #include <set>
 #include "Platform.h"
-#include "Typedef.h"
 #include "Framework/Module.h"
 #include "Topology/FieldNeighbor.h"
 

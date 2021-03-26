@@ -12,7 +12,7 @@
 class FieldData;
 
 using dyno::Module;
-using dyno::Field;
+using dyno::FieldBase;
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -86,9 +86,9 @@ namespace QtNodes
 
 	private:
 
-		Field* getField(PortType portType, PortIndex portIndex) const;
+		FieldBase* getField(PortType portType, PortIndex portIndex) const;
 
-		std::vector<Field*>& getOutputFields();
-		std::vector<Field*>& getInputFields();
+		std::vector<FieldBase*>& getOutputFields();
+		std::vector<FieldBase*>& getInputFields();
 	};
 }

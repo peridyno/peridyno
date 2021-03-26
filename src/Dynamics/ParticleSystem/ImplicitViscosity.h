@@ -2,7 +2,8 @@
 #include "Framework/ModuleConstraint.h"
 #include "Topology/FieldNeighbor.h"
 
-namespace dyno {
+namespace dyno 
+{
 	template<typename TDataType>
 	class ImplicitViscosity : public ConstraintModule
 	{

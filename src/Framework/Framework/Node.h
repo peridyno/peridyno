@@ -15,7 +15,6 @@
  */
 #pragma once
 #include "Base.h"
-#include "Typedef.h"
 #include "Field.h"
 #include "Platform.h"
 #include "NumericalModel.h"

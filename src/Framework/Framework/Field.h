@@ -63,12 +63,6 @@ using HostVarField = VarField<T>;
 template<typename T>
 using DeviceVarField = VarField<T>;
 
-template<typename T>
-using HostVariablePtr = std::shared_ptr< HostVarField<T> >;
-
-template<typename T>
-using DeviceVariablePtr = std::shared_ptr< DeviceVarField<T> >;
-
 
 /**
  * Define field for Array

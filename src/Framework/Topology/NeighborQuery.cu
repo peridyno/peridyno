@@ -138,13 +138,12 @@ namespace dyno
 	template<typename TDataType>
 	void NeighborQuery<TDataType>::compute()
 	{
-		printf("====================================          FROM nbrPoint EMPTY: %d\n", this->inPosition()->isEmpty());
 		if (!this->inPosition()->isEmpty())
 		{
-
-			printf("====================================          FROM nbrPoint: %d\n", this->inPosition()->getElementCount());
-
 			int p_num = this->inPosition()->getElementCount();
+			if (p_num <= 0)
+				return;
+
 			if (this->outNeighborhood()->getElementCount() != p_num)
 			{
 				this->outNeighborhood()->setElementCount(p_num);

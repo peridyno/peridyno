@@ -1,4 +1,3 @@
-#pragma once
 #include <list>
 #include <vector>
 #include <map>
@@ -23,6 +22,106 @@ typedef double Real;
 namespace dyno {
 
 	using uint = unsigned int;
+
+	class Bool
+	{
+	public:
+		DYN_FUNC Bool(bool v = false) { val = v ? 1 : 0; }
+
+		DYN_FUNC inline bool operator! () const {
+			return 1 - val ? true : false; 
+		}
+
+		DYN_FUNC inline bool operator== (bool v) const {
+			uint tmpV = v ? 1 : 0; 
+			return val == tmpV; 
+		}
+
+		DYN_FUNC inline bool operator== (const Bool& v) const { 
+			return val == v.val; 
+		}
+
+		DYN_FUNC inline Bool& operator= (const bool v) { 
+			val = v ? 1 : 0; 
+			return *this; 
+		}
+
+		DYN_FUNC inline Bool& operator= (const Bool& v) { 
+			val = v.val; 
+			return *this; 
+		}
+
+		DYN_FUNC inline Bool& operator&= (const bool v) { 
+			val &= (v ? 1 : 0);  
+			return *this; 
+		}
+
+		DYN_FUNC inline Bool& operator|= (const bool v) { 
+			val |= (v ? 1 : 0);  
+			return *this; 
+		}
+
+		DYN_FUNC inline Bool operator& (const bool v) const {
+			Bool ret;
+			ret.val = val & (v ? 1 : 0);
+			return ret;
+		}
+
+		DYN_FUNC inline Bool operator| (const bool v) const {
+			Bool ret;
+			ret.val = val | (v ? 1 : 0);
+			return ret;
+		}
+
+		DYN_FUNC inline Bool& operator&= (const Bool& v) {
+			val &= v.val;  
+			return *this; 
+		}
+
+		DYN_FUNC inline Bool& operator|= (const Bool& v) { 
+			val |= v.val;  
+			return *this; 
+		}
+
+		DYN_FUNC inline Bool operator& (const Bool& v) const {
+			Bool ret;
+			ret.val = val & v.val;
+			return ret;
+		}
+
+		DYN_FUNC inline Bool operator| (const Bool& v) const {
+			Bool ret;
+			ret.val = val | v.val;
+			return ret;
+		}
+
+		DYN_FUNC inline bool operator&& (const Bool& v) const {
+			return val & v.val;
+		}
+
+		DYN_FUNC inline bool operator|| (const Bool& v) const {
+			return val | v.val;
+		}
+
+		DYN_FUNC inline bool operator&& (const bool& v) const {
+			uint tmpV = v ? 1 : 0;
+			return val & tmpV;
+		}
+
+		DYN_FUNC inline bool operator|| (const bool& v) const {
+			uint tmpV = v ? 1 : 0;
+			return val | tmpV;
+		}
+
+		DYN_FUNC inline operator bool() const {
+			return val == 1;
+		}
+		
+
+	private:
+		uint val = 0;
+	};
+
 
 #define INVALID -1
 #define M_PI 3.14159265358979323846

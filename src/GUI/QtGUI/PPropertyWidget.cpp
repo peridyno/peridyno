@@ -24,7 +24,7 @@
 
 namespace dyno
 {
-	QBoolFieldWidget::QBoolFieldWidget(Field* field)
+	QBoolFieldWidget::QBoolFieldWidget(FieldBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -81,7 +81,7 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-	QIntegerFieldWidget::QIntegerFieldWidget(Field* field)
+	QIntegerFieldWidget::QIntegerFieldWidget(FieldBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -126,7 +126,7 @@ namespace dyno
 	}
 
 
-	QRealFieldWidget::QRealFieldWidget(Field* field)
+	QRealFieldWidget::QRealFieldWidget(FieldBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -200,7 +200,7 @@ namespace dyno
 	}
 
 
-	QVector3FieldWidget::QVector3FieldWidget(Field* field)
+	QVector3FieldWidget::QVector3FieldWidget(FieldBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -396,13 +396,13 @@ namespace dyno
 
 		this->removeAllWidgets();
 
-		std::vector<Field*>& fields = base->getAllFields();
+		std::vector<FieldBase*>& fields = base->getAllFields();
 
-		for each (Field* var in fields)
+		for each (FieldBase* var in fields)
 		{
 			if (var != nullptr)
 			{
-				if (var->getClassName() == std::string("Variable"))
+				if (var->getClassName() == std::string("VarField"))
 				{
 					this->addScalarFieldWidget(var);
 				}
@@ -410,7 +410,7 @@ namespace dyno
 		}
 	}
 
-	void PPropertyWidget::addScalarFieldWidget(Field* field)
+	void PPropertyWidget::addScalarFieldWidget(FieldBase* field)
 	{
 		std::string template_name = field->getTemplateName();
 		if (template_name == std::string(typeid(bool).name()))
@@ -438,7 +438,7 @@ namespace dyno
 		}
 	}
 
-	void PPropertyWidget::addArrayFieldWidget(Field* field)
+	void PPropertyWidget::addArrayFieldWidget(FieldBase* field)
 	{
 
 	}

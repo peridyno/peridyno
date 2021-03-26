@@ -3,7 +3,6 @@
 #include <typeinfo>
 #include <string>
 #include <functional>
-#include "Typedef.h"
 
 namespace dyno {
 	class Base;
@@ -129,7 +128,11 @@ bool connect(DerivedField* dst)										\
 	this->update();													\
 	return true;													\
 }																	\
-Data& getValue() { return *(getReference()); }						\
+Data& getValue() {													\
+	auto dataPtr = this->getReference();							\
+	assert(dataPtr != nullptr);										\
+	return *dataPtr;												\
+}																	\
 private:															\
 	std::shared_ptr<Data> m_data = nullptr;							\
 public:

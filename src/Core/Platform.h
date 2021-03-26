@@ -47,6 +47,6 @@ enum DeviceType
 
 #define PRECISION_FLOAT
 
-#include "Typedef.h"
+#include "Typedef.inl"
 
 //#define SIMULATION2D
