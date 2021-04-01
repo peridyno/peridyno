@@ -1,10 +1,6 @@
 #include "ParticleEmitterRound.h"
 #include <time.h>
 
-#include <Eigen/Dense>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include <Eigen/StdVector>
 #include <stdlib.h>
 
 namespace dyno

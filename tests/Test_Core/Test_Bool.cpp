@@ -21,4 +21,7 @@ TEST(Bool, func)
 
 	EXPECT_EQ(b2, false);
 	EXPECT_EQ(b3, true);
+
+	EXPECT_EQ(false || b2, false);
+	EXPECT_EQ(true || b2, true);
 }
