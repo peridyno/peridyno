@@ -15,7 +15,6 @@
 #include <iostream>
 #include "File_Utilities/file_path_utilities.h"
 #include "Image_IO/image_io.h"
-#include "Image_IO/png_io.h"
 #include "Image_IO/ppm_io.h"
 using std::string;
 
@@ -30,9 +29,7 @@ bool ImageIO::load(const string & filename, Image* image)
 bool ImageIO::load(const string &filename, Image * image, Image::DataFormat data_format)
 {
     string suffix = FileUtilities::fileExtension(filename);
-    if(suffix==string(".png"))
-        return PngIO::load(filename, image, data_format);
-    else  if(suffix==string(".ppm"))
+	if(suffix==string(".ppm"))
         return PPMIO::load(filename, image, data_format);
     else
     {
@@ -44,9 +41,7 @@ bool ImageIO::load(const string &filename, Image * image, Image::DataFormat data
 bool ImageIO::save(const string &filename, const Image * image)
 {
     string suffix = FileUtilities::fileExtension(filename);
-    if(suffix==string(".png"))
-            return PngIO::save(filename, image);
-    else if(suffix==string(".ppm"))
+    if(suffix==string(".ppm"))
             return PPMIO::save(filename, image);
     else
     {
