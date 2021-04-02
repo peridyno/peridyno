@@ -18,10 +18,4 @@ namespace dyno {
 
 		void applyPlasticity() override;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class FractureModule<DataType3f>;
-#else
-	template class FractureModule<DataType3d>;
-#endif
 }

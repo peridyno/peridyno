@@ -87,11 +87,4 @@ namespace dyno
 		std::shared_ptr<TetrahedronSet<TDataType>> m_tethedrons;
 		//		std::shared_ptr<PointRenderModule> m_pointsRender;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class TetSystem<DataType3f>;
-#else
-	template class TetSystem<DataType3d>;
-#endif
 }

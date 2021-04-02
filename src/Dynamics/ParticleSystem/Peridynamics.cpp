@@ -77,4 +77,6 @@ namespace dyno
 
 		m_integrator->end();
 	}
+
+	DEFINE_CLASS(Peridynamics);
 }

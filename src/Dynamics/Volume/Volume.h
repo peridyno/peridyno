@@ -15,6 +15,4 @@ namespace dyno {
 		~Volume() override;
 	public:
 	};
-
-	DEFINE_CLASS(Volume);
 }

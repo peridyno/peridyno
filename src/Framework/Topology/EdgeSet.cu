@@ -87,9 +87,5 @@ namespace dyno
 		PointSet<TDataType>::copyFrom(edgeSet);
 	}
 
-#ifdef PRECISION_FLOAT
-	template class EdgeSet<DataType3f>;
-#else
-	template class EdgeSet<DataType3d>;
-#endif
+	DEFINE_CLASS(EdgeSet);
 }

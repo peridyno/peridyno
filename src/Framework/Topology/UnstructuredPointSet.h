@@ -19,12 +19,5 @@ namespace dyno
 		*/
 		DEF_EMPTY_IN_NEIGHBOR_LIST(Neighborhood, int, "Neighboring particles' ids");
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class UnstructuredPointSet<DataType3f>;
-#else
-	template class UnstructuredPointSet<DataType3d>;
-#endif
 }
 

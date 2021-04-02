@@ -216,4 +216,6 @@ namespace dyno
 
 		delete nbQuery;
 	}
+
+	DEFINE_CLASS(PointSetToPointSet);
 }

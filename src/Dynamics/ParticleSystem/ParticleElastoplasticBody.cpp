@@ -147,4 +147,6 @@ namespace dyno
 		solver->setName("elastoplasticity");
 		this->addConstraintModule(solver);
 	}
+
+	DEFINE_CLASS(ParticleElastoplasticBody);
 }

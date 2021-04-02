@@ -19,7 +19,7 @@ public:
 	NeighborField(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent, int num, int nbrSize);
 	~NeighborField() override;
 
-	size_t getElementCount() override {
+	uint getElementCount() override {
 		auto ref = this->getReference();
 		return ref == nullptr ? 0 : ref->size();;
 	}

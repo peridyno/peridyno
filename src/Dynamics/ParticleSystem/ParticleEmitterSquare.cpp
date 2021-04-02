@@ -31,7 +31,7 @@ namespace dyno
 	{
 		auto sampling_distance = this->varSamplingDistance()->getValue();
 		if (sampling_distance < EPSILON)
-			sampling_distance = 0.005;
+			sampling_distance = Real(0.005);
 		auto center = this->varLocation()->getValue();
 
 		std::vector<Coord> pos_list;
@@ -85,5 +85,5 @@ namespace dyno
 		vel_list.clear();
 	}
 
-	
+	DEFINE_CLASS(ParticleEmitterSquare);
 }

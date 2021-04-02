@@ -3,17 +3,15 @@
 #include "Topology/FieldNeighbor.h"
 
 namespace dyno {
-
 	/**
 	 * @brief The standard summation density
 	 * 
 	 * @tparam TDataType 
 	 */
 	template<typename TDataType>
-	class SummationDensity : public ComputeModule
+	class SummationDensity : public virtual ComputeModule
 	{
 		DECLARE_CLASS_1(SummationDensity, TDataType)
-
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -63,10 +61,4 @@ namespace dyno {
 		Real m_particle_mass;
 		Real m_factor;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class SummationDensity<DataType3f>;
-#else
-	template class SummationDensity<DataType3d>;
-#endif
 }

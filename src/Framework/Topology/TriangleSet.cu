@@ -13,7 +13,7 @@ namespace dyno
 	{
 		std::vector<Coord> positions;
 		std::vector<Triangle> triangles;
-		float dx = 0.1;
+		Real dx = Real(0.1);
 		int Nx = 11;
 		int Nz = 11;
 
@@ -202,7 +202,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateEdges()
 	{
-		int triSize = m_triangles.size();
+		uint triSize = m_triangles.size();
 
 		DArray<EKey> keys;
 		DArray<int> triIds;
@@ -320,4 +320,6 @@ namespace dyno
 
 		EdgeSet<TDataType>::copyFrom(triangleSet);
 	}
+	
+	DEFINE_CLASS(TriangleSet);
 }

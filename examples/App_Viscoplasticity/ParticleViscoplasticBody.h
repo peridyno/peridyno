@@ -49,11 +49,4 @@ namespace dyno
 		std::shared_ptr<DensityPBD<TDataType>> m_pbdModule;
 		std::shared_ptr<ImplicitViscosity<TDataType>> m_visModule;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class ParticleViscoplasticBody<DataType3f>;
-#else
-	template class ParticleViscoplasticBody<DataType3d>;
-#endif
 }

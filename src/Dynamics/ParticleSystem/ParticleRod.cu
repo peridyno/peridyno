@@ -212,4 +212,5 @@ namespace dyno
 
 	}
 
+	DEFINE_CLASS(ParticleRod);
 }

@@ -24,5 +24,7 @@ namespace dyno
 		m_coord = frame.m_coord;
 		m_rotation = frame.m_rotation;
 	}
+
+	DEFINE_CLASS(Frame);
 }
 

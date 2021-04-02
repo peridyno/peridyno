@@ -63,4 +63,6 @@ namespace dyno
 			m_densitySum->outDensity()->getValue());
 		cuSynchronize();
 	}
+
+	DEFINE_CLASS(GranularModule);
 }

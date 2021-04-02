@@ -32,10 +32,4 @@ namespace dyno
 
 		//DEF_NODE_PORTS(ParticleSystems, ParticleSystem<TDataType>, "Particle Systems");
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleEmitterRound<DataType3f>;
-#else
-	template class ParticleEmitterRound<DataType3d>;
-#endif
 }

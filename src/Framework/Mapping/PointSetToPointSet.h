@@ -42,11 +42,4 @@ private:
 	std::shared_ptr<PointSet<TDataType>> m_initFrom = nullptr;
 	std::shared_ptr<PointSet<TDataType>> m_initTo = nullptr;
 };
-
-
-#ifdef PRECISION_FLOAT
-template class PointSetToPointSet<DataType3f>;
-#else
-template class PointSetToPointSet<DataType3d>;
-#endif
 }

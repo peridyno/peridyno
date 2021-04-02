@@ -93,10 +93,4 @@ namespace dyno{
 		Scan* m_scan = nullptr;
 		Reduction<int>* m_reduce = nullptr;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class GridHash<DataType3f>;
-#else
-	template class GridHash<DataType3d>;
-#endif
 }

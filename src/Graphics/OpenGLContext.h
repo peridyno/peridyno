@@ -3,26 +3,23 @@
 #include <GL/glew.h>
 #include <memory>
 
-namespace dyno{
+namespace dyno {
+	class OpenGLContext
+	{
+	public:
+		static OpenGLContext& getInstance();
 
-class OpenGLContext
-{
-public:
-	static OpenGLContext& getInstance();
+		bool initialize();
+		bool isInitialized() { return m_initialized; }
 
-	bool initialize();
-	bool isInitialized() { return m_initialized; }
+	private:
+		explicit OpenGLContext() { m_initialized = false; }
 
-private:
-	explicit OpenGLContext() { m_initialized = false; }
-	OpenGLContext(const OpenGLContext&) {};
-	OpenGLContext& operator=(const OpenGLContext&) {};
+		OpenGLContext(const OpenGLContext&) = delete;
+		OpenGLContext& operator=(const OpenGLContext&) = delete;
 
-	~OpenGLContext() {};
+		~OpenGLContext() {};
 
-
-	
-	bool m_initialized;
-};
-
+		bool m_initialized;
+	};
 }

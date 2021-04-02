@@ -55,10 +55,4 @@ namespace dyno
 		DArray<Coord>* ptr_vertices;
 		std::shared_ptr<TriangleSet<TDataType>> ptr_TriangleSet = nullptr;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class TriangleMeshWriter<DataType3f>;
-#else
-	template class TriangleMeshWriter<DataType3d>;
-#endif
 }

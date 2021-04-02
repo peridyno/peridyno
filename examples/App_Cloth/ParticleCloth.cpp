@@ -97,4 +97,6 @@ namespace dyno
 	{
 		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->loadObjFile(filename);
 	}
+
+	DEFINE_CLASS(ParticleCloth);
 }

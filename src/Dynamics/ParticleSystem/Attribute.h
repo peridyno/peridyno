@@ -76,7 +76,7 @@ namespace dyno
 		DYN_FUNC inline unsigned getPartId() { return (unsigned)(m_tag&PART_MASK) >> 8; }
 
 	private:
-		unsigned m_tag;
+		uint m_tag;
 	};
 }
 

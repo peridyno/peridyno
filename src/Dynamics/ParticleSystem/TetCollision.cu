@@ -91,8 +91,7 @@ namespace dyno
 			atomicAdd(&sum_nbr[j], 1);
 			atomicAdd(&volume2[j], tet_i.volume() * 1000.0f);
 
-			Coord3D inter_norm, p1, p2;
-			Real inter_dist;
+			Coord3D p1, p2;
 
 			Real interdist1, interdist2;
 			Coord inter_norm1, pp11, pp12;
@@ -213,11 +212,7 @@ namespace dyno
 	template<typename TDataType>
 	void TetCollision<TDataType>::doCollision()
 	{
-		Real radius = 0.005;
-
-
 		if (m_position.getElementCount() == 0) return;
-
 
 		printf("%d %d\n", m_position.getElementCount(), m_velocity.getElementCount());
 		if (m_position_previous.isEmpty() || m_position_previous.size() != m_position.getElementCount())
@@ -387,4 +382,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(TetCollision);
 }

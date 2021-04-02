@@ -21,8 +21,8 @@ namespace dyno
 
 		~NeighborList() {};
 
-		DYN_FUNC size_t size() { return m_index.size(); }
-		DYN_FUNC size_t getElementSize() { return m_elements.size(); }
+		DYN_FUNC uint size() { return m_index.size(); }
+		DYN_FUNC uint getElementSize() { return m_elements.size(); }
 
 		GPU_FUNC int getNeighborSize(int i)
 		{ 

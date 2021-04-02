@@ -57,10 +57,4 @@ namespace dyno {
 		DArray<Coord> m_prePosition;
 		DArray<Coord> m_preVelocity;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleIntegrator<DataType3f>;
-#else
- 	template class ParticleIntegrator<DataType3d>;
-#endif
 }

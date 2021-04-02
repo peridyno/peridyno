@@ -133,4 +133,6 @@ namespace dyno
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
+
+	DEFINE_CLASS(ParticleViscoplasticBody);
 }

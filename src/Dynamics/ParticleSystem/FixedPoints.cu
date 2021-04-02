@@ -166,4 +166,5 @@ namespace dyno
 		K_DoPlaneConstrain<< < pDims, BLOCK_SIZE >> > (m_position.getValue(), pos, dir);
 	}
 
+	DEFINE_CLASS(FixedPoints);
 }

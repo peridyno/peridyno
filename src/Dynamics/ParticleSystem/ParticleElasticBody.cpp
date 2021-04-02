@@ -151,4 +151,5 @@ namespace dyno
 		return mapping;
 	}
 
+	DEFINE_CLASS(ParticleElasticBody);
 }

@@ -119,7 +119,6 @@ namespace dyno
 		Real diaA_fluid = 0.0f;
 		Coord pos_i = position[pId];
 
-		bool bNearWall = false;
 		int nbSize = neighbors.getNeighborSize(pId);
 		for (int ne = 0; ne < nbSize; ne++)
 		{
@@ -235,7 +234,6 @@ namespace dyno
 		Real diagF_i = AiiFluid[pId];
 		Real diagT_i = AiiTotal[pId];
 		Real aii = diagF_i;
-		Real eps = 0.001f;
 		Real diagS_i = diagT_i - diagF_i;
 		Real threshold = 0.0f;
 		if (bNearWall && diagT_i < maxA*(1.0f - threshold))
@@ -278,8 +276,6 @@ namespace dyno
 
 		Coord pos_i = position[pId];
 		Coord vel_i = velocity[pId];
-
-		Real div_vi = 0.0f;
 
 		Real invAlpha_i = 1.0f / alpha[pId];
 
@@ -424,17 +420,12 @@ namespace dyno
 			Real p_i = pressure[pId];
 
 			int nbSize = neighbor.getNeighborSize(pId);
-
-			Real total_weight = 0.0f;
-
 			Real ceo = 1.6f;
 
 			Real invAlpha = 1.0f / alpha[pId];
 			Coord vel_i = velocity[pId];
 			Coord dv_i(0.0f);
 			Real scale = 1.0f*dt / restDensity;
-			Real acuP = 0.0f;
-			total_weight = 0.0f;
 			for (int ne = 0; ne < nbSize; ne++)
 			{
 				int j = neighbor.getElement(pId, ne);
@@ -784,4 +775,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(VelocityConstraint);
 }

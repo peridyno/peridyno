@@ -62,12 +62,4 @@ namespace dyno {
 
 		std::vector<std::shared_ptr<TriangleSet<TDataType>>> m_obstacles;
 	};
-
-
-#ifdef PRECISION_FLOAT
-template class StaticMeshBoundary<DataType3f>;
-#else
-template class StaticMeshBoundary<DataType3d>;
-#endif
-
 }

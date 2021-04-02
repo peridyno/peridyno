@@ -29,10 +29,4 @@ namespace dyno
 	private:
 		DEF_NODE_PORTS(ParticleEmitter, ParticleEmitter<TDataType>, "Particle Emitters");
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleFluid<DataType3f>;
-#else
-	template class ParticleFluid<DataType3d>;
-#endif
 }

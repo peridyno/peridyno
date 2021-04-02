@@ -48,11 +48,4 @@ namespace dyno {
 
 		std::shared_ptr<DistanceField3D<TDataType>> m_sdf;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class CollidableSDF<DataType3f>;
-#else
-	template class CollidableSDF<DataType3d>;
-#endif
 }

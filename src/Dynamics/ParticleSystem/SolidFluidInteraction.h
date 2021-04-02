@@ -63,11 +63,4 @@ namespace dyno
 		std::vector<std::shared_ptr<RigidBody<TDataType>>> m_rigids;
 		std::vector<std::shared_ptr<ParticleSystem<TDataType>>> m_particleSystems;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class SolidFluidInteraction<DataType3f>;
-#else
-	template class SolidFluidInteraction<DataType3d>;
-#endif
 }

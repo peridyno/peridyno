@@ -133,4 +133,6 @@ namespace dyno
 		m_surfaceTensionSolver = solver;
 		getParent()->addForceModule(m_surfaceTensionSolver);
 	}
+
+	DEFINE_CLASS(PositionBasedFluidModel);
 }

@@ -31,8 +31,6 @@ namespace dyno
 	//		printf("******************************************%d\n",points.size());
 
 		Coord pos_i = points[pId];
-		Real nearest_distance = 1.0;
-		int nj;
 		if (vels[pId].norm() > radius / dt)
 			vels[pId] = vels[pId] / vels[pId].norm() * radius / dt;
 		Coord vel_tmp = vels[pId];
@@ -271,5 +269,5 @@ namespace dyno
 		}
 	}
 
-	
+	DEFINE_CLASS(StaticMeshBoundary);
 }

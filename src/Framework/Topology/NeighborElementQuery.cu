@@ -51,9 +51,7 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= boundingBox.size()) return;
 
-		printf("spheres size: %d box size: %d\n", spheres.size(), boxes.size());
 		AABB box;
-
 		if (tId >= start_box)
 		{
 			box = boxes[tId - start_box].aabb();
@@ -296,13 +294,13 @@ namespace dyno
 			// NOT SELF COLLISION
 		{
 			
-			int p_num = this->inPosition()->getElementCount();
+			uint p_num = this->inPosition()->getElementCount();
 			if (m_queryAABB.size() != p_num)
 			{
 				m_queryAABB.resize(p_num);
 			}
 
-			int t_num = discreteSet->getBoxes().size() + discreteSet->getSpheres().size();
+			uint t_num = discreteSet->getBoxes().size() + discreteSet->getSpheres().size();
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -322,14 +320,9 @@ namespace dyno
 				0,
 				discreteSet->getSpheres().size()
 				);
-			this->inRadius()->setValue(0.0075);
 			Real radius = this->inRadius()->getValue();
-			//printf("RADIUS!~ : %.10lf\n", this->inRadius()->getValue());
-			//this->inRadius()->setValue(0.0075);
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
-
-
 
 			if (this->outNeighborhood()->getElementCount() != p_num)
 			{
@@ -394,7 +387,7 @@ namespace dyno
 			// SELF COLLISION 
 		{
 			
-			int t_num = discreteSet->getBoxes().size() + discreteSet->getSpheres().size();
+			uint t_num = discreteSet->getBoxes().size() + discreteSet->getSpheres().size();
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -486,4 +479,5 @@ namespace dyno
 		}
 	}
 
+	DEFINE_CLASS(NeighborElementQuery);
 }

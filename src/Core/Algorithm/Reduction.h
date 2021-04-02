@@ -10,28 +10,28 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(size_t n);
+		static Reduction* Create(uint n);
 		~Reduction();
 
-		T accumulate(T * val, size_t num);
+		T accumulate(T * val, uint num);
 
-		T maximum(T* val, size_t num);
+		T maximum(T* val, uint num);
 
-		T minimum(T* val, size_t num);
+		T minimum(T* val, uint num);
 
-		T average(T* val, size_t num);
+		T average(T* val, uint num);
 
 	private:
-		Reduction(size_t num);
+		Reduction(uint num);
 
-		void allocAuxiliaryArray(size_t num);
+		void allocAuxiliaryArray(uint num);
 
-		int getAuxiliaryArraySize(size_t n);
+		uint getAuxiliaryArraySize(uint n);
 		
 		uint m_num;
 		
 		T* m_aux;
-		size_t m_auxNum;
+		uint m_auxNum;
 	};
 
 	template<>
@@ -40,20 +40,19 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(size_t n);
+		static Reduction* Create(uint n);
 		~Reduction();
 
+		Vector3f accumulate(Vector3f * val, uint num);
 
-		Vector3f accumulate(Vector3f * val, size_t num);
+		Vector3f maximum(Vector3f* val, uint num);
 
-		Vector3f maximum(Vector3f* val, size_t num);
+		Vector3f minimum(Vector3f* val, uint num);
 
-		Vector3f minimum(Vector3f* val, size_t num);
-
-		Vector3f average(Vector3f* val, size_t num);
+		Vector3f average(Vector3f* val, uint num);
 
 	private:
-		void allocAuxiliaryArray(size_t num);
+		void allocAuxiliaryArray(uint num);
 
 
 		uint m_num;
@@ -68,20 +67,19 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(size_t n);
+		static Reduction* Create(uint n);
 		~Reduction();
 
+		Vector3d accumulate(Vector3d * val, uint num);
 
-		Vector3d accumulate(Vector3d * val, size_t num);
+		Vector3d maximum(Vector3d* val, uint num);
 
-		Vector3d maximum(Vector3d* val, size_t num);
+		Vector3d minimum(Vector3d* val, uint num);
 
-		Vector3d minimum(Vector3d* val, size_t num);
-
-		Vector3d average(Vector3d* val, size_t num);
+		Vector3d average(Vector3d* val, uint num);
 
 	private:
-		void allocAuxiliaryArray(size_t num);
+		void allocAuxiliaryArray(uint num);
 
 
 		uint m_num;

@@ -110,10 +110,4 @@ namespace dyno {
 		DArray<Real> m_stiffness;
 		DArray<Matrix> m_F;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ElasticityModule<DataType3f>;
-#else
-	template class ElasticityModule<DataType3d>;
-#endif
 }

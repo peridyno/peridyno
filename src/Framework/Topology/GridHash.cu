@@ -379,4 +379,6 @@ namespace dyno {
 		// 			delete m_scan;
 		// 		}
 	}
+
+	DEFINE_CLASS(GridHash);
 }

@@ -84,7 +84,4 @@ namespace dyno {
 	private:
 		std::shared_ptr<SummationDensity<TDataType>> m_summation;
 	};
-
-
-
 }

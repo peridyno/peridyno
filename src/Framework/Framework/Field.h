@@ -24,7 +24,7 @@ public:
 	VarField(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent);
 	~VarField() override;
 
-	size_t getElementCount() override { return 1; }
+	uint getElementCount() override { return 1; }
 
 	void setValue(T val);
 };
@@ -79,12 +79,12 @@ public:
 
 	~ArrayField() override;
 
-	inline size_t getElementCount() override {
+	inline uint getElementCount() override {
 		auto ref = this->getReference();
 		return ref == nullptr ? 0 : ref->size();
 	}
 
-	void setElementCount(size_t num);
+	void setElementCount(uint num);
 
 	void setValue(std::vector<T>& vals);
 	void setValue(DArray<T>& vals);
@@ -100,7 +100,7 @@ ArrayField<T, deviceType>::~ArrayField()
 }
 
 template<typename T, DeviceType deviceType>
-void ArrayField<T, deviceType>::setElementCount(size_t num)
+void ArrayField<T, deviceType>::setElementCount(uint num)
 {
 	FieldBase* topField = this->getTopField();
 	ArrayField<T, deviceType>* derived = dynamic_cast<ArrayField<T, deviceType>*>(topField);

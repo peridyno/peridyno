@@ -390,9 +390,5 @@ namespace dyno
 			dt);
 	}
 
-#ifdef PRECISION_FLOAT
-	template class DensityPBD<DataType3f>;
-#else
- 	template class DensityPBD<DataType3d>;
-#endif
+	DEFINE_CLASS(DensityPBD);
 }

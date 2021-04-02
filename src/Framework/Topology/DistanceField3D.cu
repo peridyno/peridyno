@@ -384,7 +384,6 @@ namespace dyno{
 		m_h[1] = t_h;
 		m_h[2] = t_h;
 
-		int idd = 0;
 		Real* distances = new Real[(nbx)*(nby)*(nbz)];
 		for (int k = 0; k < zz; k++) {
 			for (int j = 0; j < yy; j++) {

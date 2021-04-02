@@ -42,10 +42,4 @@ namespace dyno
 	private:
 		std::shared_ptr<Node> m_surfaceNode;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleElasticBody<DataType3f>;
-#else
-	template class ParticleElasticBody<DataType3d>;
-#endif
 }

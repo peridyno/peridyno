@@ -409,8 +409,6 @@ namespace dyno
 		PointSweep3D ptSweep(start_point, end_point);
 
 		Real t = 100.0f;
-		Real min_t = 10.0f;
-		bool bIntersected = false;
 		int min_j = -1;
 
 		int interNum = 0;
@@ -472,7 +470,6 @@ namespace dyno
 			if (num > 0)
 			{
 				interNum++;
-				bool tmp = false;
 				Coord3D proj_j = end_triangle.computeLocation(baryc);
 
 				Coord3D dir_j = start_point.origin - proj_j;
@@ -481,11 +478,8 @@ namespace dyno
 					dir_j.normalize();
 				}
 				
-
 				Coord newpos = proj_j + dir_j * threshold;
 				
-
-
 				total_pos += newpos;// end_triangle.computeLocation(tParam) + threshold * end_triangle.normal();
 				auto d_pos_i = newpos - pos_i;
 				if (d_pos_i.norm() > threshold )
@@ -522,48 +516,24 @@ namespace dyno
 	template<typename TDataType>
 	void MeshCollision<TDataType>::doCollision()
 	{
-		Real radius = 0.005;
+		Real radius = Real(0.005);
 
 
 		if (m_position.getElementCount() == 0) return;
-		
-		printf("to resize %d %d\n", m_position_previous.size(), m_position.getElementCount());
-
-		
-		
-		
 
 		if (m_position_previous.isEmpty() || m_position_previous.size() != m_position.getElementCount())
-		{
-		//	m_flip.setElementCount(m_position.getElementCount());
-			
+		{	
 			posBuf.resize(m_position.getElementCount());
 			weights.resize(m_position.getElementCount());
 			init_pos.resize(m_position.getElementCount());
 
 			m_position_previous.resize(m_position.getElementCount());
 			m_position_previous.assign(m_position.getValue());
-			printf("resize finished\n");
 		}
 		
-		//auto m_points = m_position.getValue();
-		//auto m_points_tri = m_triangle_vertex.getValue();
-		//auto m_tri_idx = m_triangle_index.getValue();
-		//auto m_vels = m_velocity.getValue();
-		//auto m_neighbor_tri = m_neighborhood_tri.getValue();
-	//	auto flip = m_flip.getValue();
-
 		init_pos.assign(m_position.getValue());
 
-		//uint pDims = cudaGridSize(m_position.getValue().size(), BLOCK_SIZE);
-
-	//	flip.reset();
-		
-		//cuExecute
 		int total_num = m_position.getValue().size();
-		
-		//VC_Sort_Neighbors_Collide <Real, Coord> << <pDims, BLOCK_SIZE >> > (
-		/**/
 
 		cuSynchronize();
 		
@@ -573,10 +543,6 @@ namespace dyno
 			m_triangle_vertex.getValue(),
 			m_neighborhood_tri.getValue()
 			);
-		
-		//K_CCD_MESH <Real, Coord> << <pDims, BLOCK_SIZE >> > (
-		
-		printf("POSITION SIZE: %d %d %d\n", m_position.getValue().size(), m_triangle_index.getElementCount(), m_triangle_vertex.getElementCount());
 
 		cuExecute(total_num, K_CCD_MESH,
 			m_position.getValue(),
@@ -589,23 +555,9 @@ namespace dyno
 			radius,
 			getParent()->getDt()
 			);
-		
-		
-
-// 		K_CD_mesh2 << <pDims, BLOCK_SIZE >> > (
-// 			m_position.getValue(),
-// 			m_triangle_vertex.getValue(),
-// 			m_triangle_index.getValue(),
-// 			m_velocity.getValue(),
-// 			m_flip.getValue(),
-// 			m_neighborhood_tri.getValue(),
-// 			radius,
-// 			getParent()->getDt()
-// 			);
 
 		m_triangle_vertex_previous.assign(m_triangle_vertex.getValue());
 		m_position_previous.assign(m_position.getValue());
-
 	}
 
 	
@@ -633,4 +585,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(MeshCollision);
 }

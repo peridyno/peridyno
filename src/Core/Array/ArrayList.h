@@ -35,7 +35,7 @@ namespace dyno {
 
 		bool resize(size_t num);
 
-		inline const size_t size() const { return m_lists.size(); }
+		inline size_t size() const { return m_lists.size(); }
 		size_t elementSize();
 
 		inline List<ElementType>& operator [] (unsigned int id)
@@ -105,7 +105,7 @@ namespace dyno {
 		 * @return false
 		 */
 		bool resize(const DArray<int> counts);
-		bool resize(const size_t arraySize, const size_t eleSize);
+		bool resize(const uint arraySize, const uint eleSize);
 
 		DYN_FUNC inline int size() const { return m_lists.size(); }
 		DYN_FUNC inline int elementSize() const { return m_elements.size(); }

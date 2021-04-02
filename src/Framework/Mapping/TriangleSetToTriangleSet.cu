@@ -212,8 +212,8 @@ namespace dyno
 		m_initFrom->copyFrom(*from);
 		m_initTo->copyFrom(*to);
 
-		int fromTriangleSize = from->getTriangles()->size();
-		int toVertSize = to->getPoints().size();
+		uint fromTriangleSize = from->getTriangles()->size();
+		uint toVertSize = to->getPoints().size();
 
 		DArray<AABB> fromAABB;
 		DArray<AABB> toAABB;
@@ -255,4 +255,6 @@ namespace dyno
 		fromAABB.clear();
 		toAABB.clear();
 	}
+
+	DEFINE_CLASS(TriangleSetToTriangleSet);
 }

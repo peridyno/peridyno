@@ -28,4 +28,6 @@ namespace dyno {
 
 		return true;
 	}
+
+	DEFINE_CLASS(CollidableSDF);
 }

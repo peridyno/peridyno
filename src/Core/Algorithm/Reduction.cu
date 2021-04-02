@@ -18,7 +18,7 @@ namespace dyno {
 
 
 	template<typename T>
-	Reduction<T>::Reduction(size_t num)
+	Reduction<T>::Reduction(uint num)
 		: m_num(num)
 		, m_aux(NULL)
 	{
@@ -33,14 +33,14 @@ namespace dyno {
 	}
 
 	template<typename T>
-	Reduction<T>* Reduction<T>::Create(size_t n)
+	Reduction<T>* Reduction<T>::Create(uint n)
 	{
 		return new Reduction<T>(n);
 	}
 
 
 	template<typename T>
-	int Reduction<T>::getAuxiliaryArraySize(size_t n)
+	uint Reduction<T>::getAuxiliaryArraySize(uint n)
 	{
 		return (n / REDUCTION_BLOCK + 1) + (n / (REDUCTION_BLOCK*REDUCTION_BLOCK) + REDUCTION_BLOCK);
 	}
@@ -69,15 +69,15 @@ namespace dyno {
 	template <typename T, 
 			  unsigned blockSize,
 			  typename Function>
-	__global__ void KerReduce(const T *pData, unsigned n, T *pAux, Function func, T val)
+	__global__ void KerReduce(const T *pData, uint n, T *pAux, Function func, T val)
 	{
 		//extern __shared__ T sharedMem[];
 
 		SharedMemory<T> smem;
 		T* sharedMem = smem.getPointer();
 
-		unsigned tid = threadIdx.x;
-		unsigned id = blockIdx.x*blockDim.x + threadIdx.x;
+		uint tid = threadIdx.x;
+		uint id = blockIdx.x*blockDim.x + threadIdx.x;
 		sharedMem[tid] = (id < n ? pData[id] : val);
 		__syncthreads();
 		if (blockSize >= 512) { if (tid < 256)sharedMem[tid] = func(sharedMem[tid], sharedMem[tid + 256]);  __syncthreads(); }
@@ -88,11 +88,11 @@ namespace dyno {
 	}
 
 	template<typename T, typename Function>
-	T Reduce(T* pData, unsigned num, T* pAux, Function func, T v0)
+	T Reduce(T* pData, uint num, T* pAux, Function func, T v0)
 	{
-		unsigned n = num;
-		unsigned sharedMemSize = REDUCTION_BLOCK * sizeof(T);
-		unsigned blockNum = cudaGridSize(num, REDUCTION_BLOCK);
+		uint n = num;
+		uint sharedMemSize = REDUCTION_BLOCK * sizeof(T);
+		uint blockNum = cudaGridSize(num, REDUCTION_BLOCK);
 		T* subData = pData;
 		T* aux1 = pAux;
 		T* aux2 = pAux + blockNum;
@@ -116,7 +116,7 @@ namespace dyno {
 	}
 
 	template<typename T>
-	T Reduction<T>::accumulate(T* val, size_t num)
+	T Reduction<T>::accumulate(T* val, uint num)
 	{
 		if (num != m_num)
 			allocAuxiliaryArray(num);
@@ -125,25 +125,25 @@ namespace dyno {
 	}
 
 	template<typename T>
-	T Reduction<T>::maximum(T* val, size_t num)
+	T Reduction<T>::maximum(T* val, uint num)
 	{
 		if (num != m_num)
 			allocAuxiliaryArray(num);
 
-		return Reduce(val, num, m_aux, MaximumFunc<T>(), (T)-FLT_MAX);
+		return Reduce(val, num, m_aux, MaximumFunc<T>(), -(T)REAL_MAX);
 	}
 
 	template<typename T>
-	T Reduction<T>::minimum(T* val, size_t num)
+	T Reduction<T>::minimum(T* val, uint num)
 	{
 		if (num != m_num)
 			allocAuxiliaryArray(num);
 
-		return Reduce(val, num, m_aux, MinimumFunc<T>(), (T)FLT_MAX);
+		return Reduce(val, num, m_aux, MinimumFunc<T>(), (T)REAL_MAX);
 	}
 
 	template<typename T>
-	T Reduction<T>::average(T* val, size_t num)
+	T Reduction<T>::average(T* val, uint num)
 	{
 		if (num != m_num)
 			allocAuxiliaryArray(num);
@@ -152,7 +152,7 @@ namespace dyno {
 	}
 
 	template<typename T>
-	void Reduction<T>::allocAuxiliaryArray(size_t num)
+	void Reduction<T>::allocAuxiliaryArray(uint num)
 	{
 		if (m_aux != nullptr)
 		{
@@ -190,7 +190,7 @@ namespace dyno {
 		comp[tId] = raw[tId][comp_id];
 	}
 
-	Vector3f Reduction<Vector3f>::accumulate(Vector3f * val, size_t num)
+	Vector3f Reduction<Vector3f>::accumulate(Vector3f * val, uint num)
 	{
 		Vector3f ret;
 
@@ -228,7 +228,7 @@ namespace dyno {
 	}
 
 
-	Vector3f Reduction<Vector3f>::maximum(Vector3f* val, size_t num)
+	Vector3f Reduction<Vector3f>::maximum(Vector3f* val, uint num)
 	{
 		Vector3f ret;
 
@@ -265,7 +265,7 @@ namespace dyno {
 		return ret;
 	}
 
-	Vector3f Reduction<Vector3f>::minimum(Vector3f* val, size_t num)
+	Vector3f Reduction<Vector3f>::minimum(Vector3f* val, uint num)
 	{
 		Vector3f ret;
 
@@ -303,7 +303,7 @@ namespace dyno {
 	}
 
 
-	Vector3f Reduction<Vector3f>::average(Vector3f* val, size_t num)
+	Vector3f Reduction<Vector3f>::average(Vector3f* val, uint num)
 	{
 		Vector3f ret;
 
@@ -341,7 +341,7 @@ namespace dyno {
 		return ret;
 	}
 
-	void Reduction<Vector3f>::allocAuxiliaryArray(size_t num)
+	void Reduction<Vector3f>::allocAuxiliaryArray(uint num)
 	{
 		if (m_aux == nullptr)
 		{
@@ -374,7 +374,7 @@ namespace dyno {
 		comp[tId] = raw[tId][comp_id];
 	}
 
-	Vector3d Reduction<Vector3d>::accumulate(Vector3d * val, size_t num)
+	Vector3d Reduction<Vector3d>::accumulate(Vector3d * val, uint num)
 	{
 		Vector3d ret;
 
@@ -412,7 +412,7 @@ namespace dyno {
 	}
 
 
-	Vector3d Reduction<Vector3d>::maximum(Vector3d* val, size_t num)
+	Vector3d Reduction<Vector3d>::maximum(Vector3d* val, uint num)
 	{
 		Vector3d ret;
 
@@ -449,7 +449,7 @@ namespace dyno {
 		return ret;
 	}
 
-	Vector3d Reduction<Vector3d>::minimum(Vector3d* val, size_t num)
+	Vector3d Reduction<Vector3d>::minimum(Vector3d* val, uint num)
 	{
 		Vector3d ret;
 
@@ -484,7 +484,7 @@ namespace dyno {
 	}
 
 
-	Vector3d Reduction<Vector3d>::average(Vector3d* val, size_t num)
+	Vector3d Reduction<Vector3d>::average(Vector3d* val, uint num)
 	{
 		Vector3d ret;
 
@@ -519,7 +519,7 @@ namespace dyno {
 		return ret;
 	}
 
-	void Reduction<Vector3d>::allocAuxiliaryArray(size_t num)
+	void Reduction<Vector3d>::allocAuxiliaryArray(uint num)
 	{
 		if (m_aux == nullptr)
 		{

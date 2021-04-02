@@ -64,11 +64,4 @@ namespace dyno
 		std::shared_ptr<PointSet<TDataType>> m_pSet;
 //		std::shared_ptr<PointRenderModule> m_pointsRender;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class ParticleSystem<DataType3f>;
-#else
-	template class ParticleSystem<DataType3d>;
-#endif
 }

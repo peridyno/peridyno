@@ -74,10 +74,4 @@ namespace dyno {
 
 		bool triangle_first = true;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class NeighborQuery<DataType3f>;
-#else
-	template class NeighborQuery<DataType3d>;
-#endif
 }

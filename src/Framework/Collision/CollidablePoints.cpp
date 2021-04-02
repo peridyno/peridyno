@@ -14,7 +14,7 @@ namespace dyno
 	CollidablePoints<TDataType>::CollidablePoints()
 		: CollidableObject(CollidableObject::POINTSET_TYPE)
 		, m_bUniformRaidus(true)
-		, m_radius(0.005)
+		, m_radius(Real(0.005))
 	{
 	}
 	
@@ -82,6 +82,8 @@ namespace dyno
 			auto mapping = std::shared_ptr<PointSetToPointSet<TDataType>>();
 			m_mapping = mapping;
 		}
+
+		return true;
 	}
 
 
@@ -144,7 +146,7 @@ namespace dyno
 			Coord displacement(0);
 			Coord angularVel(0);
 			int nn = 0;
-			for (int i = 0; i < hPos.size(); i++)
+			for (uint i = 0; i < hPos.size(); i++)
 			{
 				Coord r = hInitPos[i] - center;
 				if ((hInitPos[i] - hPos[i]).norm() > EPSILON && r.norm() > EPSILON)
@@ -178,4 +180,6 @@ namespace dyno
 			velArr->getReference()->assign(m_velocities);
 		}
 	}
+
+	DEFINE_CLASS(CollidablePoints);
 }

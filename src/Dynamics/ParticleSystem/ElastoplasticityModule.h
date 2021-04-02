@@ -79,10 +79,4 @@ namespace dyno {
 
 		std::shared_ptr<DensityPBD<TDataType>> m_pbdModule;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ElastoplasticityModule<DataType3f>;
-#else
-	template class ElastoplasticityModule<DataType3d>;
-#endif
 }

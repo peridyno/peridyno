@@ -165,9 +165,9 @@ namespace dyno
 		std::string::size_type pos;
 		std::vector<std::string> result;
 		str += pattern;
-		int size = str.size();
+		size_t size = (uint)str.size();
 
-		for (int i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			pos = str.find(pattern, i);
 			if (pos < size)

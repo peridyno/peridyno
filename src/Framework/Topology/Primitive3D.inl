@@ -249,6 +249,112 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TSphere3D<Real>& sphere) const
+	{
+		Coord3D cp = origin - sphere.center;
+		Coord3D q = sphere.center + sphere.radius * cp.normalize();
+
+		return TPoint3D<Real>(q);
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TCapsule3D<Real>& capsule) const
+	{
+		Coord3D coordQ = project(capsule.segment).origin;
+		Coord3D dir = origin - coordQ;
+
+		return TPoint3D<Real>(coordQ + capsule.radius * dir.normalize());
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TTet3D<Real>& tet) const
+	{
+		TPoint3D<Real> closestPt;
+		Real minDist = REAL_MAX;
+		for (int i = 0; i < 4; i++)
+		{
+			TTriangle3D<Real> face = tet.face(i);
+			TPoint3D<Real> q = project(tet.face(i));
+			Real d = (origin - q.origin).normSquared();
+			if (d < minDist)
+			{
+				minDist = d;
+				closestPt = q;
+			}
+		}
+
+		return closestPt;
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TAlignedBox3D<Real>& abox) const
+	{
+		bool bInside = inside(abox);
+
+		if (!bInside)
+		{
+			return TPoint3D<Real>(clamp(origin, abox.v0, abox.v1));
+		}
+
+		//compute the distance to six faces
+		Coord3D q;
+		Real minDist = REAL_MAX;
+		Coord3D offset0 = abs(origin - abox.v0);
+		if (offset0[0] < minDist)
+		{
+			q = Coord3D(abox.v0[0], origin[1], origin[2]);
+			minDist = offset0[0];
+		}
+
+		if (offset0[1] < minDist)
+		{
+			q = Coord3D(origin[0], abox.v0[1], origin[2]);
+			minDist = offset0[1];
+		}
+
+		if (offset0[2] < minDist)
+		{
+			q = Coord3D(origin[0], origin[1], abox.v0[2]);
+			minDist = offset0[2];
+		}
+
+
+		Coord3D offset1 = abs(origin - abox.v1);
+		if (offset1[0] < minDist)
+		{
+			q = Coord3D(abox.v1[0], origin[1], origin[2]);
+			minDist = offset1[0];
+		}
+
+		if (offset1[1] < minDist)
+		{
+			q = Coord3D(origin[0], abox.v1[1], origin[2]);
+			minDist = offset1[1];
+		}
+
+		if (offset1[2] < minDist)
+		{
+			q = Coord3D(origin[0], origin[1], abox.v1[2]);
+			minDist = offset1[2];
+		}
+
+		return TPoint3D<Real>(q);
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TOrientedBox3D<Real>& obb) const
+	{
+		Coord3D offset = origin - obb.center;
+		Coord3D pPrime(offset.dot(obb.u), offset.dot(obb.v), offset.dot(obb.w));
+
+		Coord3D qPrime = TPoint3D<Real>(pPrime).project(TAlignedBox3D<Real>(-obb.extent, obb.extent)).origin;
+
+		Coord3D q = obb.center + qPrime[0] * obb.u + qPrime[1] * obb.v + qPrime[2] * obb.w;
+
+		return TPoint3D<Real>(q);
+	}
+
+	template<typename Real>
 	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TSphere3D<Real>& sphere, Bool& bInside) const
 	{
 		Coord3D cp = origin - sphere.center;

@@ -45,7 +45,7 @@ namespace dyno
 
 
 	template<class ElementType>
-	bool ArrayList<ElementType, DeviceType::GPU>::resize(const size_t arraySize, const size_t eleSize)
+	bool ArrayList<ElementType, DeviceType::GPU>::resize(const uint arraySize, const uint eleSize)
 	{
 		assert(arraySize > 0);
 		assert(eleSize > 0);

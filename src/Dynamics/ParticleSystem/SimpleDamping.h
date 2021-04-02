@@ -30,11 +30,4 @@ namespace dyno {
 	private:
 		VarField<float> m_damping;
 	};
-
-#ifdef PRECISION_FLOAT
-template class SimpleDamping<DataType3f>;
-#else
-template class SimpleDamping<DataType3d>;
-#endif
-
 }

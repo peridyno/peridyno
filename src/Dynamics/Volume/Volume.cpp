@@ -17,4 +17,6 @@ namespace dyno
 	Volume<TDataType>::~Volume()
 	{
 	}
+
+	DEFINE_CLASS(Volume);
 }

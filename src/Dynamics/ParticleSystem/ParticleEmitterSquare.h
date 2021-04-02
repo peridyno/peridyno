@@ -30,10 +30,4 @@ namespace dyno
 		DEF_VAR(Width, Real, 0.05, "Emitter width");
 		DEF_VAR(Height, Real, 0.05, "Emitter height");
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleEmitterSquare<DataType3f>;
-#else
-	template class ParticleEmitterSquare<DataType3d>;
-#endif
 }

@@ -46,7 +46,7 @@ void CreateScene()
 
 	for (size_t i = 0; i < 5; i++)
 	{
-		root->loadCube(Vector3f(0.2 + i * 0.08, 0.2, 0), Vector3f(0.25 + i * 0.08, 0.25, 1), 0.005, false);
+		root->loadCube(Vector3f(0.2f + i * 0.08f, 0.2f, 0.0f), Vector3f(0.25 + i * 0.08f, 0.25f, 1.0f), 0.005f, false);
 	}
 
 	std::shared_ptr<ParticleViscoplasticBody<DataType3f>> child3 = std::make_shared<ParticleViscoplasticBody<DataType3f>>();

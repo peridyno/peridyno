@@ -163,8 +163,7 @@ namespace dyno
 			m_nList->setNeighborLimit(5);
 		}
 		
-
-		Real radius = 0.005;
+		Real radius = Real(0.005);
 		m_nbrQuery->queryParticleNeighbors(*m_nList, m_points, radius);
 
 		DArray<Coord> posBuf;
@@ -223,7 +222,7 @@ namespace dyno
 		for (int i = 0; i < m_collidableObjects.size(); i++)
 		{
 			DArray<Coord>& points = m_collidableObjects[i]->getPositions();
-			for (int j = 0; j < points.size(); j++)
+			for (uint j = 0; j < points.size(); j++)
 			{
 				ids.push_back(i);
 			}
@@ -242,4 +241,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(RodCollision);
 }

@@ -31,10 +31,4 @@ namespace dyno {
 	private:
 		DistanceField3D<TDataType> distanceField;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class DistanceField3D<DataType3f>;
-#else
-	template class DistanceField3D<DataType3d>;
-#endif
 }

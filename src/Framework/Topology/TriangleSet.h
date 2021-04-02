@@ -38,7 +38,7 @@ namespace dyno
 			}
 
 			DYN_FUNC inline PointType operator[] (unsigned int i) { return id[i]; }
-			DYN_FUNC inline const PointType operator[] (unsigned int i) const { return id[i]; }
+			DYN_FUNC inline PointType operator[] (unsigned int i) const { return id[i]; }
 
 			DYN_FUNC inline bool operator>= (const TKey& other) const{
 				if (id[0] >= other.id[0]) return true;
@@ -112,11 +112,5 @@ namespace dyno
 
 		DArray<Edg2Tri> edg2Tri;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class TriangleSet<DataType3f>;
-#else
-	template class TriangleSet<DataType3d>;
-#endif
 }
 

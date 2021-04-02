@@ -32,14 +32,14 @@ namespace dyno {
 		{
 		};
 
-		Array(size_t num)
+		Array(uint num)
 		{
-			m_data.resize(num);
+			m_data.resize((size_t)num);
 		}
 
 		~Array() { clear(); };
 
-		void resize(size_t n);
+		void resize(uint n);
 
 		/*!
 		*	\brief	Clear all data to zero.
@@ -63,7 +63,7 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		inline size_t size() const { return m_data.size(); }
+		inline uint size() const { return (uint)m_data.size(); }
 		inline bool isCPU() const { return true; }
 		inline bool isGPU() const { return false; }
 		inline bool isEmpty() const { return m_data.empty(); }
@@ -75,7 +75,7 @@ namespace dyno {
 
 		friend std::ostream& operator<<(std::ostream &out, const Array<T, DeviceType::CPU>& cArray)
 		{
-			for (int i = 0; i < cArray.size(); i++)
+			for (uint i = 0; i < cArray.size(); i++)
 			{
 				out << i << ": " << cArray[i] << std::endl;
 			}
@@ -99,7 +99,7 @@ namespace dyno {
 		{
 		};
 
-		Array(size_t num)
+		Array(uint num)
 		{
 			this->resize(num);
 		}
@@ -109,7 +109,7 @@ namespace dyno {
 		*/
 		~Array() {};
 
-		void resize(const size_t n);
+		void resize(const uint n);
 
 		/*!
 		*	\brief	Clear all data to zero.
@@ -136,7 +136,7 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		DYN_FUNC inline size_t size() const { return m_totalNum; }
+		DYN_FUNC inline uint size() const { return m_totalNum; }
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return m_data == NULL; }
@@ -157,7 +157,7 @@ namespace dyno {
 
 	private:
 		T* m_data = 0;
-		size_t m_totalNum = 0;
+		uint m_totalNum = 0;
 	};
 
 

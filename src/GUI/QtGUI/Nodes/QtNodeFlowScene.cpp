@@ -13,8 +13,6 @@
 
 #include <QtWidgets/QMessageBox>
 
-dyno::Node;
-
 namespace QtNodes
 {
 

@@ -18,7 +18,4 @@ namespace dyno
 		Coord m_length;
 		Coord m_center;
 	};
-
-
-
 }

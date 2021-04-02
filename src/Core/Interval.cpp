@@ -68,18 +68,6 @@ namespace dyno {
 	}
 
 	template <typename Real>
-	inline DYN_FUNC Real Interval<Real>::leftLimit() const
-	{
-		return v0;
-	}
-
-	template <typename Real>
-	inline DYN_FUNC Real Interval<Real>::rightLimit() const
-	{
-		return v1;
-	}
-
-	template <typename Real>
 	DYN_FUNC bool Interval<Real>::isLeftOpen() const
 	{
 		return leftOpen;
@@ -151,5 +139,8 @@ namespace dyno {
 	{
 		return Interval<Real>(0, 1, false, false);
 	}
+
+	template class Interval<float>;
+	template class Interval<double>;
 
 } //end of namespace dyno

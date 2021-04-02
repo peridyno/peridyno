@@ -47,11 +47,4 @@ namespace dyno
 		SparseOctree<TDataType> octree;
 		bool self_collision = false;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class CollisionDetectionBroadPhase<DataType3f>;
-#else
-	template class CollisionDetectionBroadPhase<DataType3d>;
-#endif
-
 }

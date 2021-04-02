@@ -42,11 +42,4 @@ namespace dyno
 		DArray<Coord> m_positions;
 		DArray<Coord> m_velocities;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class CollidablePoints<DataType3f>;
-#else
-	template class CollidablePoints<DataType3d>;
-#endif
 }

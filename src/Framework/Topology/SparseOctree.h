@@ -167,12 +167,4 @@ namespace dyno {
 		DArray<OctreeNode> m_all_nodes;
 		DArray<OctreeNode> m_post_ordered_nodes;
 	};
-
-
-
-#ifdef PRECISION_FLOAT
-	template class SparseOctree<DataType3f>;
-#else
-	template class SparseOctree<DataType3d>;
-#endif
 }

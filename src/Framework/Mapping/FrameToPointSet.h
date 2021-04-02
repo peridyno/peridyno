@@ -41,11 +41,4 @@ private:
 	std::shared_ptr<Frame<TDataType>> m_initFrom;
 	std::shared_ptr<PointSet<TDataType>> m_initTo;
 };
-
-#ifdef PRECISION_FLOAT
-template class FrameToPointSet<DataType3f>;
-#else
-template class FrameToPointSet<DataType3d>;
-#endif
-
 }

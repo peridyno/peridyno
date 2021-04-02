@@ -32,6 +32,8 @@ namespace dyno
 		{
 			return true;
 		}
+
+		return false;
 	}
 
 	template<typename TDataType>
@@ -143,4 +145,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(CollisionSDF);
 }

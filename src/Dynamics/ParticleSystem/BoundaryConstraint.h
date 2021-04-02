@@ -33,11 +33,4 @@ namespace dyno {
 
 		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
 	};
-
-#ifdef PRECISION_FLOAT
-template class BoundaryConstraint<DataType3f>;
-#else
-template class BoundaryConstraint<DataType3d>;
-#endif
-
 }

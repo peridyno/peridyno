@@ -34,7 +34,7 @@ namespace dyno
 			}
 
 			DYN_FUNC inline PointType operator[] (unsigned int i) { return id[i]; }
-			DYN_FUNC inline const PointType operator[] (unsigned int i) const { return id[i]; }
+			DYN_FUNC inline PointType operator[] (unsigned int i) const { return id[i]; }
 
 			DYN_FUNC inline bool operator>= (const EKey& other) const {
 				if (id[0] >= other.id[0]) return true;

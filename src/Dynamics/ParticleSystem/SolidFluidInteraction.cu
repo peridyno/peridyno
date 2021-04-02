@@ -281,4 +281,6 @@ namespace dyno
 		}
 
 	}
+
+	DEFINE_CLASS(SolidFluidInteraction);
 }

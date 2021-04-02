@@ -33,11 +33,4 @@ protected:
 	std::shared_ptr<CollidableSDF<TDataType>> m_cSDF;
 	std::vector<std::shared_ptr<CollidableObject>> m_collidableObjects;
 };
-
-#ifdef PRECISION_FLOAT
-template class CollisionSDF<DataType3f>;
-#else
-template class CollisionSDF<DataType3d>;
-#endif
-
 }

@@ -69,10 +69,4 @@ namespace dyno
 		std::shared_ptr<ParticleIntegrator<TDataType>> m_integrator;
 		std::shared_ptr<NeighborQuery<TDataType>>m_nbrQuery;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class PositionBasedFluidModel<DataType3f>;
-#else
-	template class PositionBasedFluidModel<DataType3d>;
-#endif
 }

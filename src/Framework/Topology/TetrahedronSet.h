@@ -42,11 +42,5 @@ namespace dyno
 		DArray<Tri2Tet> tri2Tet;
 		NeighborList<int> m_ver2Tet;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class TetrahedronSet<DataType3f>;
-#else
-	template class TetrahedronSet<DataType3d>;
-#endif
 }
 

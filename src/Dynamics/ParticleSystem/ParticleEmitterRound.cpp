@@ -83,5 +83,5 @@ namespace dyno
 		vel_list.clear();
 	}
 
-
+	DEFINE_CLASS(ParticleEmitterRound);
 }

@@ -37,11 +37,4 @@ public:
 private:
 	std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
 };
-
-#ifdef PRECISION_FLOAT
-template class CollisionDetection<DataType3f>;
-#else
-template class CollisionDetection<DataType3d>;
-#endif
-
 }

@@ -1,7 +1,7 @@
 namespace dyno 
 {
 	template<typename T>
-	void Array<T, DeviceType::GPU>::resize(const size_t n)
+	void Array<T, DeviceType::GPU>::resize(const uint n)
 	{
 		//		assert(n >= 1);
 		if (NULL != m_data) clear();
@@ -51,13 +51,13 @@ namespace dyno
 	void Array<T, DeviceType::GPU>::assign(const std::vector<T>& src)
 	{
 		if (m_totalNum != src.size())
-			this->resize(src.size());
+			this->resize((uint)src.size());
 
 		cuSafeCall(cudaMemcpy(m_data, src.data(), src.size() * sizeof(T), cudaMemcpyHostToDevice));
 	}
 
 	template<typename T>
-	void Array<T, DeviceType::CPU>::resize(const size_t n)
+	void Array<T, DeviceType::CPU>::resize(const uint n)
 	{
 		m_data.resize(n);
 	}

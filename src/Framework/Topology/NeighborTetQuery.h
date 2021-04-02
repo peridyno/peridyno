@@ -68,10 +68,4 @@ namespace dyno {
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
 		std::shared_ptr<TetrahedronSet<TDataType>> tetSet;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class NeighborTetQuery<DataType3f>;
-#else
-	template class NeighborTetQuery<DataType3d>;
-#endif
 }

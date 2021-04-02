@@ -52,6 +52,9 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/eigen>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7>)
 
+#To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
+target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets
     RUNTIME  DESTINATION  ${PERIDYNO_RUNTIME_INSTALL_DIR}

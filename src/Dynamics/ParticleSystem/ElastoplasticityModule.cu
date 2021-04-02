@@ -628,7 +628,6 @@ namespace dyno
 		for (int ne = 0; ne < size_i; ne++)
 		{
 			NPair np_j = restShapes.getElement(pId, ne);
-			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 
 			Coord new_rest_pos_j = rest_pos_i + R*(rest_pos_j - rest_pos_i);
@@ -689,4 +688,6 @@ namespace dyno
 	{
 		m_phi.setValue(phi/180);
 	}
+
+	DEFINE_CLASS(ElastoplasticityModule);
 }

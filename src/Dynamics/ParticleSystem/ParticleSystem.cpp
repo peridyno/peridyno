@@ -158,15 +158,5 @@ namespace dyno
 		return Node::resetStatus();
 	}
 
-// 	template<typename TDataType>
-// 	std::shared_ptr<PointRenderModule> ParticleSystem<TDataType>::getRenderModule()
-// 	{
-// // 		if (m_pointsRender == nullptr)
-// // 		{
-// // 			m_pointsRender = std::make_shared<PointRenderModule>();
-// // 			this->addVisualModule(m_pointsRender);
-// // 		}
-// 
-// 		return m_pointsRender;
-// 	}
+	DEFINE_CLASS(ParticleSystem);
 }

@@ -125,4 +125,5 @@ namespace dyno
 		m_cSDF->loadSphere(center, r, inverted);
 	}
 
+	DEFINE_CLASS(BoundaryConstraint);
 }

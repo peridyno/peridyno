@@ -64,4 +64,5 @@ namespace dyno
 		m_damping.setValue(c);
 	}
 
+	DEFINE_CLASS(SimpleDamping);
 }

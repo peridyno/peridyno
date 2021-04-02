@@ -66,11 +66,4 @@ namespace dyno
 		std::shared_ptr<FixedPoints<TDataType>> m_fixed;
 		std::shared_ptr<SimpleDamping<TDataType>> m_damping;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class ParticleRod<DataType3f>;
-#else
-	template class ParticleRod<DataType3d>;
-#endif
 }

@@ -45,10 +45,4 @@ namespace dyno
 	private:
 		
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleEmitter<DataType3f>;
-#else
-	template class ParticleEmitter<DataType3d>;
-#endif
 }

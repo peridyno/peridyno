@@ -155,7 +155,7 @@ namespace dyno
 	void NeighborTetQuery<TDataType>::compute()
 	{
 		{
-			int t_num = tetSet->getTetrahedrons().size();
+			uint t_num = tetSet->getTetrahedrons().size();
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -180,9 +180,7 @@ namespace dyno
 				);
 
 			m_queryAABB.assign(m_queriedAABB);
-			this->inRadius()->setValue(0.017);
 			Real radius = this->inRadius()->getValue();
-			
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 			m_broadPhaseCD->setSelfCollision(true);
@@ -230,7 +228,6 @@ namespace dyno
 
 			if (sum > 0)
 			{
-				Real zero = 0;
 				cuExecute(t_num,
 					NTQ_Narrow_Set,
 					this->inPosition()->getValue(),
@@ -249,4 +246,5 @@ namespace dyno
 		
 	}
 
+	DEFINE_CLASS(NeighborTetQuery);
 }

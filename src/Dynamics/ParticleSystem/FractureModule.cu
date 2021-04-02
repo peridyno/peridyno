@@ -125,4 +125,5 @@ namespace dyno
 		cuSynchronize();
 	}
 
+	DEFINE_CLASS(FractureModule);
 }

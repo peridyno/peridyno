@@ -28,7 +28,7 @@ public:
 	FieldBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, Base* parent = nullptr);
 	virtual ~FieldBase() {};
 
-	virtual size_t getElementCount() { return 0; }
+	virtual uint getElementCount() { return 0; }
 	virtual const std::string getTemplateName() { return std::string(""); }
 	virtual const std::string getClassName() { return std::string("Field"); }
 

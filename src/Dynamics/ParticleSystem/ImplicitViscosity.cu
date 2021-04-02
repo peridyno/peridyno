@@ -143,5 +143,5 @@ namespace dyno
 		m_viscosity.setValue(mu);
 	}
 
-
+	DEFINE_CLASS(ImplicitViscosity);
 }

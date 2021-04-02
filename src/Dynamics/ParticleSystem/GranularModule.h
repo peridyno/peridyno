@@ -24,10 +24,4 @@ namespace dyno {
 	private:
 		std::shared_ptr<SummationDensity<TDataType>> m_densitySum;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class GranularModule<DataType3f>;
-#else
-	template class GranularModule<DataType3d>;
-#endif
 }

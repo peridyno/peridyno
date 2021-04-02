@@ -57,8 +57,8 @@ void CreateScene()
 	child3->setMass(1.0);
   	child3->loadParticles("../../data/bunny/bunny_points.obj");
   	child3->loadSurface("../../data/bunny/bunny_mesh.obj");
-	child3->translate(Vector3f(0.3, 0.4, 0.5));
-	child3->setDt(0.001);
+	child3->translate(Vector3f(0.3f, 0.4f, 0.5f));
+	child3->setDt(0.001f);
 	auto elasto = std::make_shared<GranularModule<DataType3f>>();
 	elasto->enableFullyReconstruction();
 	child3->setElastoplasticitySolver(elasto);

@@ -40,53 +40,9 @@ namespace dyno
 			return false;
 		}
 
-
 		Log::sendMessage(Log::Info, "HeightFieldRenderModule successfully initialized!");
-	}
 
-	__global__ void PRM_MappingColor(
-		DArray<glm::vec3> color,
-		DArray<Vector3f> index,
-		float minIndex,
-		float maxIndex)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= color.size()) return;
-
-		float index_i = index[tId].norm();
-
-		index_i = index_i > maxIndex ? maxIndex : index_i;
-		index_i = index_i < minIndex ? minIndex : index_i;
-
-		float a = (index_i - minIndex) / (maxIndex - minIndex);
-
-		Color hsv;
-		hsv.HSVtoRGB(240, 1-a, 1);
-
-		color[tId] = glm::vec3(hsv.r, hsv.g, hsv.b);
-	}
-
-	__global__ void PRM_MappingColor(
-		DArray<glm::vec3> color,
-		DArray<float> index,
-		float refV,
-		float minIndex,
-		float maxIndex)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= color.size()) return;
-
-		float index_i = index[tId];
-
-		index_i = index_i > maxIndex ? maxIndex : index_i;
-		index_i = index_i < minIndex ? minIndex : index_i;
-
-		float a = (index_i - refV) / (maxIndex - minIndex);
-
-		Color hsv;
-		hsv.HSVtoRGB(a * 120 + 120, 1, 1);
-
-		color[tId] = glm::vec3(hsv.r, hsv.g, hsv.b);
+		return true;
 	}
 
 	__global__ void SetupTriangles(

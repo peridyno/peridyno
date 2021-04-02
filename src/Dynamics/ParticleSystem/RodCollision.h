@@ -4,45 +4,38 @@
 
 namespace dyno
 {
-template <typename> class CollidablePoints;
-template <typename> class NeighborQuery;
-template <typename> class NeighborList;
-template <typename> class GridHash;
+	template <typename> class CollidablePoints;
+	template <typename> class NeighborQuery;
+	template <typename> class NeighborList;
+	template <typename> class GridHash;
 
-template<typename TDataType>
-class RodCollision : public CollisionModel
-{
-	DECLARE_CLASS_1(RodCollision, TDataType)
-public:
-	typedef typename TDataType::Real Real;
-	typedef typename TDataType::Coord Coord;
+	template<typename TDataType>
+	class RodCollision : public CollisionModel
+	{
+		DECLARE_CLASS_1(RodCollision, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
 
-	RodCollision();
-	virtual ~RodCollision();
+		RodCollision();
+		virtual ~RodCollision();
 
-	bool isSupport(std::shared_ptr<CollidableObject> obj) override;
+		bool isSupport(std::shared_ptr<CollidableObject> obj) override;
 
-	void addCollidableObject(std::shared_ptr<CollidableObject> obj) override;
+		void addCollidableObject(std::shared_ptr<CollidableObject> obj) override;
 
-	bool initializeImpl() override;
+		bool initializeImpl() override;
 
-	void doCollision() override;
-	
-protected:
-	DArray<int> m_objId;
-	DArray<Coord> m_points;
-	DArray<Coord> m_vels;
+		void doCollision() override;
 
-	std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
-	std::shared_ptr<NeighborList<int>> m_nList;
+	protected:
+		DArray<int> m_objId;
+		DArray<Coord> m_points;
+		DArray<Coord> m_vels;
 
-	std::vector<std::shared_ptr<CollidablePoints<TDataType>>> m_collidableObjects;
-};
+		std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
+		std::shared_ptr<NeighborList<int>> m_nList;
 
-#ifdef PRECISION_FLOAT
-template class RodCollision<DataType3f>;
-#else
-template class RodCollision<DataType3d>;
-#endif
-
+		std::vector<std::shared_ptr<CollidablePoints<TDataType>>> m_collidableObjects;
+	};
 }

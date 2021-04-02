@@ -37,7 +37,7 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC int size();
+		DYN_FUNC uint size();
 
 		DYN_FUNC inline iterator insert(T val);
 		DYN_FUNC inline iterator atomicInsert(T val);
@@ -48,7 +48,7 @@ namespace dyno
 		DYN_FUNC bool empty();
 
 	private:
-		int m_size = 0;
+		uint m_size = 0;
 	};
 
 }

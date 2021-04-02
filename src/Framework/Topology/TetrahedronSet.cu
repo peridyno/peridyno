@@ -316,7 +316,7 @@ namespace dyno
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::updateTriangles()
 	{
-		int tetSize = m_tethedrons.size();
+		uint tetSize = m_tethedrons.size();
 
 		DArray<TKey> keys;
 		DArray<int> tetIds;
@@ -377,4 +377,5 @@ namespace dyno
 		TriangleSet<TDataType>::copyFrom(tetSet);
 	}
 
+	DEFINE_CLASS(TetrahedronSet);
 }

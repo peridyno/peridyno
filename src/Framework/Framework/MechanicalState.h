@@ -114,7 +114,7 @@ public:
 	{
 		auto field = new HostArrayField<T>();
 		bool ret = attachField(field, name, description, true);
-		if (ret = false)
+		if (ret == false)
 		{
 			return nullptr;
 		}

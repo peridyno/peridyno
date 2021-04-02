@@ -135,7 +135,7 @@ namespace dyno
 		//Function1Pt::copy(pos_init, host_pair_point);
 		printf("11\n");
 		
-		for(int i = 0; i < discreteSet->getBoxes().size(); i ++)
+		for(uint i = 0; i < discreteSet->getBoxes().size(); i ++)
 		{ 
 			Real mass_i = 0.05f;
 
@@ -674,7 +674,6 @@ namespace dyno
 		}
 		else if (pId >= start_box)
 		{
-			int idx = pId - start_box;
 			int cnt = 0;
 			int start_i = count[pId];
 			Coord center = box[pId].center;
@@ -788,9 +787,7 @@ namespace dyno
 			}
 			else if (pId >= start_box)
 			{
-				int idx = pId - start_box;
 				int cnt = 0;
-				int start_i;
 				Coord center = box[pId].center;
 				Coord u = box[pId].u;
 				Coord v = box[pId].v;
@@ -1041,4 +1038,5 @@ namespace dyno
 		
 	}
 
+	DEFINE_CLASS(RigidBodySystem);
 }

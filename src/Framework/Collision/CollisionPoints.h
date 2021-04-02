@@ -38,11 +38,4 @@ protected:
 
 	std::vector<std::shared_ptr<CollidablePoints<TDataType>>> m_collidableObjects;
 };
-
-#ifdef PRECISION_FLOAT
-template class CollisionPoints<DataType3f>;
-#else
-template class CollisionPoints<DataType3d>;
-#endif
-
 }

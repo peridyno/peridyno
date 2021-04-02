@@ -42,12 +42,5 @@ namespace dyno
 		DArray<Coord> m_coords;
 		DArrayList<int> m_pointNeighbors;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class PointSet<DataType3f>;
-#else
-	template class PointSet<DataType3d>;
-#endif
 }
 

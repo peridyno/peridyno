@@ -176,4 +176,6 @@ namespace dyno
 // 			t);
 // 		cuSynchronize();
 	}
+
+	DEFINE_CLASS(PointSet);
 }

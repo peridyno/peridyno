@@ -129,15 +129,12 @@ namespace dyno
 		standard_sphere_position.assign(sphereVertices);
 		standard_sphere_index.assign(sphereIndices);
 
-
-
-
 		m_triangleRender = std::make_shared<TriangleRender>();
-
 
 		sphereVertices.clear();
 		sphereIndices.clear();
 
+		return true;
 	}
 
 

@@ -44,11 +44,4 @@ private:
 	std::shared_ptr<TetrahedronSet<TDataType>> m_from = nullptr;
 	std::shared_ptr<TriangleSet<TDataType>> m_to = nullptr;
 };
-
-
-#ifdef PRECISION_FLOAT
-template class TriangleSetToTriangleSet<DataType3f>;
-#else
-template class TriangleSetToTriangleSet<DataType3d>;
-#endif
 }

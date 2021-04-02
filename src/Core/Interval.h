@@ -21,8 +21,8 @@ namespace dyno {
 
 		DYN_FUNC Real size() const;
 
-		inline DYN_FUNC Real leftLimit() const;
-		inline DYN_FUNC Real rightLimit() const;
+		inline DYN_FUNC Real leftLimit() const { return v0; }
+		inline DYN_FUNC Real rightLimit() const { return v1; }
 
 		DYN_FUNC bool isLeftOpen() const;
 		DYN_FUNC bool isRightOpen() const;
@@ -42,8 +42,4 @@ namespace dyno {
 		Real v0, v1;
 		bool leftOpen, rightOpen;
 	};
-
-	template class Interval<float>;
-	template class Interval<double>;
-
 }  //end of namespace dyno

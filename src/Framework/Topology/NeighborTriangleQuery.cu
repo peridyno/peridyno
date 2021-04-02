@@ -77,13 +77,13 @@ namespace dyno
 		if (!this->inPosition()->isEmpty() && !this->inTriangleVertex()->isEmpty() && !this->inTriangleIndex()->isEmpty())
 		{
 
-			int p_num = this->inPosition()->getElementCount();
+			uint p_num = this->inPosition()->getElementCount();
 			if (m_queryAABB.size() != p_num)
 			{
 				m_queryAABB.resize(p_num);
 			}
 
-			int t_num = this->inTriangleIndex()->getElementCount();
+			uint t_num = this->inTriangleIndex()->getElementCount();
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -122,4 +122,5 @@ namespace dyno
 		}
 	}
 
+	DEFINE_CLASS(NeighborTriangleQuery);
 }

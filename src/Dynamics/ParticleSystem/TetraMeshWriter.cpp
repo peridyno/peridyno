@@ -74,7 +74,7 @@ namespace dyno
 		host_triangles.assign(*(this->ptr_triangles));
 		host_tri2tet.assign(*(this->ptr_tri2tet));
 
-		for (int i = 0; i < host_vertices.size(); ++i) {
+		for (uint i = 0; i < host_vertices.size(); ++i) {
 			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;
 		}
 		for (int i = 0; i < host_tri2tet.size(); ++i) {
@@ -109,4 +109,6 @@ namespace dyno
 			this->current_idle_frame--;
 		}
 	}
+
+	DEFINE_CLASS(TetraMeshWriter);
 }

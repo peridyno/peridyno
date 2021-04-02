@@ -45,12 +45,4 @@ namespace dyno {
 		DEF_NODE_PORTS(RigidBody, RigidBody<TDataType>, "A rigid body");
 		DEF_NODE_PORTS(ParticleSystem, ParticleSystem<TDataType>, "Particle Systems");
 	};
-
-
-#ifdef PRECISION_FLOAT
-template class StaticBoundary<DataType3f>;
-#else
-template class StaticBoundary<DataType3d>;
-#endif
-
 }

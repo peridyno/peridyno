@@ -19,7 +19,7 @@ namespace dyno
 	ParticleViscoplasticBody<TDataType>::ParticleViscoplasticBody(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
-		m_horizon.setValue(0.0085);
+		m_horizon.setValue(Real(0.0085));
 
 		m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->currentPosition()->connect(m_integrator->inPosition());

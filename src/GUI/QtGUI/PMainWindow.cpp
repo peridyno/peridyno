@@ -58,7 +58,7 @@
 #include "PLogWidget.h"
 #include "PConsoleWidget.h"
 #include "PSceneGraphWidget.h"
-#include "PPropertyWidget.h"'
+#include "PPropertyWidget.h"
 #include "PModuleListWidget.h"
 #include "PSimulationThread.h"
 #include "PNodeFlowWidget.h"

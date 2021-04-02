@@ -121,12 +121,4 @@ namespace dyno
 		Coord hi = Coord(0.4925,0.4925,0.4925);
 		Coord lo = Coord(0.0075,0.0075,0.0075);
 	};
-
-
-
-#ifdef PRECISION_FLOAT
-	template class RigidBodySystem<DataType3f>;
-#else
-	template class RigidBodySystem<DataType3d>;
-#endif
 }

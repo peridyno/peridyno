@@ -21,7 +21,4 @@ namespace dyno
 		Real m_radius;
 		DArray<Coord> m_centers;
 	};
-
-
-
 }

@@ -52,11 +52,4 @@ namespace dyno {
 		DArray<int> m_bFixed;
 		DArray<Coord> m_fixed_positions;
 	};
-
-#ifdef PRECISION_FLOAT
-template class FixedPoints<DataType3f>;
-#else
-template class FixedPoints<DataType3d>;
-#endif
-
 }

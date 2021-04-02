@@ -83,8 +83,8 @@ public:
 	/**
 	* To avoid erroneous operations
 	*/
-	SceneGraph(const SceneGraph&) {};
-	SceneGraph& operator=(const SceneGraph&) {};
+	SceneGraph(const SceneGraph&) = delete;
+	SceneGraph& operator=(const SceneGraph&) = delete;
 
 private:
 	bool m_initialized;

@@ -102,7 +102,7 @@ namespace dyno
 			return false;
 		}
 
-		int pNum = this->inPosition()->getElementCount();
+		uint pNum = this->inPosition()->getElementCount();
 
 		CArray<Coord> hostPos;
 		hostPos.resize(pNum);
@@ -140,7 +140,7 @@ namespace dyno
 	{
 		if (!this->inPosition()->isEmpty())
 		{
-			int p_num = this->inPosition()->getElementCount();
+			uint p_num = this->inPosition()->getElementCount();
 			if (p_num <= 0)
 				return;
 
@@ -386,7 +386,7 @@ namespace dyno
 	template<typename TDataType>
 	void NeighborQuery<TDataType>::queryNeighborFixed(NeighborList<int>& nbrList, DArray<Coord>& pos, Real h)
 	{
-		int num = pos.size();
+		uint num = pos.size();
 		int* ids;
 		Real* distance;
 		cuSafeCall(cudaMalloc((void**)&ids, num * sizeof(int) * nbrList.getNeighborLimit()));
@@ -406,4 +406,6 @@ namespace dyno
 		cuSafeCall(cudaFree(ids));
 		cuSafeCall(cudaFree(distance));
 	}
+
+	DEFINE_CLASS(NeighborQuery);
 }

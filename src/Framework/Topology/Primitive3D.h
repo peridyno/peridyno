@@ -34,8 +34,6 @@ namespace dyno
 	typedef Matrix3d Matrix3D;
 #endif
 
-	constexpr Real REAL_MAX = (std::numeric_limits<Real>::max)();
-	constexpr Real REAL_MIN = (std::numeric_limits<Real>::min)();
 	constexpr Real REAL_EPSILON = (std::numeric_limits<Real>::epsilon)();
 	constexpr Real REAL_EPSILON_SQUARED = REAL_EPSILON * REAL_EPSILON;
 
@@ -122,11 +120,17 @@ namespace dyno
 		 * @param sphere/capsule/tet/abox/obb polyhedra components
 		 * @return closest point
 		 */
-		DYN_FUNC TPoint3D<Real> project(const TSphere3D<Real>& sphere, Bool& bInside = Bool(false)) const;
-		DYN_FUNC TPoint3D<Real> project(const TCapsule3D<Real>& capsule, Bool& bInside = Bool(false)) const;
-		DYN_FUNC TPoint3D<Real> project(const TTet3D<Real>& tet, Bool& bInside = Bool(false)) const;
-		DYN_FUNC TPoint3D<Real> project(const TAlignedBox3D<Real>& abox, Bool& bInside = Bool(false)) const;
-		DYN_FUNC TPoint3D<Real> project(const TOrientedBox3D<Real>& obb, Bool& bInside = Bool(false)) const;
+		DYN_FUNC TPoint3D<Real> project(const TSphere3D<Real>& sphere) const;
+		DYN_FUNC TPoint3D<Real> project(const TCapsule3D<Real>& capsule) const;
+		DYN_FUNC TPoint3D<Real> project(const TTet3D<Real>& tet) const;
+		DYN_FUNC TPoint3D<Real> project(const TAlignedBox3D<Real>& abox) const;
+		DYN_FUNC TPoint3D<Real> project(const TOrientedBox3D<Real>& obb) const;
+
+		DYN_FUNC TPoint3D<Real> project(const TSphere3D<Real>& sphere, Bool& bInside) const;
+		DYN_FUNC TPoint3D<Real> project(const TCapsule3D<Real>& capsule, Bool& bInside) const;
+		DYN_FUNC TPoint3D<Real> project(const TTet3D<Real>& tet, Bool& bInside) const;
+		DYN_FUNC TPoint3D<Real> project(const TAlignedBox3D<Real>& abox, Bool& bInside) const;
+		DYN_FUNC TPoint3D<Real> project(const TOrientedBox3D<Real>& obb, Bool& bInside) const;
 
 
 

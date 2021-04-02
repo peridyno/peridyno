@@ -46,6 +46,9 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>)
 
+#To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
+target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+
 target_link_libraries(${LIB_NAME} Core)
 
 install(TARGETS ${LIB_NAME}

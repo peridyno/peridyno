@@ -151,4 +151,6 @@ namespace dyno
 		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);
 		//TypeInfo::cast<PointSet<TDataType>>(m_collisionNode->getTopologyModule())->translate(t);
 	}
+
+	DEFINE_CLASS(RigidBody);
 }

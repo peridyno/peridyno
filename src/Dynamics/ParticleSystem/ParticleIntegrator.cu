@@ -90,7 +90,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleIntegrator<TDataType>::updateVelocity()
 	{
-		Real dt = 0.001;
+		Real dt = Real(0.001);
 		if(this->getParent() != NULL)
 			dt = getParent()->getDt();
 		Coord gravity = SceneGraph::getInstance().getGravity();
@@ -192,4 +192,6 @@ namespace dyno
 
 		return true;
 	}
+
+	DEFINE_CLASS(ParticleIntegrator);
 }

@@ -146,7 +146,7 @@ namespace dyno
 		{
 			DArray<Coord>& points = m_collidableObjects[i]->getPositions();
 			DArray<Coord>& vels = m_collidableObjects[i]->getVelocities();
-			int num = points.size();
+			uint num = points.size();
 			cudaMemcpy(m_points.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			cudaMemcpy(m_vels.begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			start += num;
@@ -162,9 +162,8 @@ namespace dyno
 			m_nList->resize(m_points.size());
 			m_nList->setNeighborLimit(5);
 		}
-		
 
-		Real radius = 0.005;
+		Real radius = Real(0.005);
 		m_nbrQuery->queryParticleNeighbors(*m_nList, m_points, radius);
 
 		DArray<Coord> posBuf;
@@ -199,7 +198,7 @@ namespace dyno
 		{
 			DArray<Coord>& points = m_collidableObjects[i]->getPositions();
 			DArray<Coord>& vels = m_collidableObjects[i]->getVelocities();
-			int num = points.size();
+			uint num = points.size();
 			cudaMemcpy(points.begin(), m_points.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			cudaMemcpy(vels.begin(), m_vels.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 
@@ -242,4 +241,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(CollisionPoints);
 }

@@ -35,10 +35,4 @@ namespace dyno {
 
 		DeviceArrayField<Real>* m_energy;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class SurfaceTension<DataType3f>;
-#else
-	template class SurfaceTension<DataType3d>;
-#endif
 }

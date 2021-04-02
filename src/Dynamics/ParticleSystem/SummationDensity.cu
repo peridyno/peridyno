@@ -106,8 +106,6 @@ namespace dyno
 			neighbors, 
 			smoothingLength, 
 			m_factor*mass);
-
-		
 	}
 
 	template<typename TDataType>
@@ -148,4 +146,11 @@ namespace dyno
 		m_particle_mass = d*d*d*rho_0;
 	}
 
+#ifdef PRECISION_FLOAT
+template class SummationDensity<DataType3f>;
+#else
+template class SummationDensity<DataType3d>;
+#endif
+
+//	DEFINE_CLASS(SummationDensity);
 }

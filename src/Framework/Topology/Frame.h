@@ -34,12 +34,5 @@ namespace dyno
 		Coord m_coord;
 		Matrix m_rotation;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class Frame<DataType3f>;
-#else
-	template class Frame<DataType3d>;
-#endif
 }
 

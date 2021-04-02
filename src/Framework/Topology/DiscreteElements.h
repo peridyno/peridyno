@@ -42,12 +42,5 @@ namespace dyno
 		std::vector<Sphere3D> m_hostSpheres;
 		std::vector<Box3D> m_hostBoxes;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class DiscreteElements<DataType3f>;
-#else
-	template class DiscreteElements<DataType3d>;
-#endif
 }
 

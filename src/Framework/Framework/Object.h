@@ -106,4 +106,6 @@ public:
 #else
 #define DEFINE_CLASS(name) template class name<DataType3d>;
 #endif
+
+#define DEFINE_UNIQUE_CLASS(name, type) template class name<type>;
 }

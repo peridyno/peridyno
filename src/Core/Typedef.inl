@@ -23,111 +23,13 @@ namespace dyno {
 
 	using uint = unsigned int;
 
-	class Bool
-	{
-	public:
-		DYN_FUNC Bool(bool v = false) { val = v ? 1 : 0; }
-
-		DYN_FUNC inline bool operator! () const {
-			return 1 - val ? true : false; 
-		}
-
-		DYN_FUNC inline bool operator== (bool v) const {
-			uint tmpV = v ? 1 : 0; 
-			return val == tmpV; 
-		}
-
-		DYN_FUNC inline bool operator== (const Bool& v) const { 
-			return val == v.val; 
-		}
-
-		DYN_FUNC inline Bool& operator= (const bool v) { 
-			val = v ? 1 : 0; 
-			return *this; 
-		}
-
-		DYN_FUNC inline Bool& operator= (const Bool& v) { 
-			val = v.val; 
-			return *this; 
-		}
-
-		DYN_FUNC inline Bool& operator&= (const bool v) { 
-			val &= (v ? 1 : 0);  
-			return *this; 
-		}
-
-		DYN_FUNC inline Bool& operator|= (const bool v) { 
-			val |= (v ? 1 : 0);  
-			return *this; 
-		}
-
-		DYN_FUNC inline Bool operator& (const bool v) const {
-			Bool ret;
-			ret.val = val & (v ? 1 : 0);
-			return ret;
-		}
-
-		DYN_FUNC inline Bool operator| (const bool v) const {
-			Bool ret;
-			ret.val = val | (v ? 1 : 0);
-			return ret;
-		}
-
-		DYN_FUNC inline Bool& operator&= (const Bool& v) {
-			val &= v.val;  
-			return *this; 
-		}
-
-		DYN_FUNC inline Bool& operator|= (const Bool& v) { 
-			val |= v.val;  
-			return *this; 
-		}
-
-		DYN_FUNC inline Bool operator& (const Bool& v) const {
-			Bool ret;
-			ret.val = val & v.val;
-			return ret;
-		}
-
-		DYN_FUNC inline Bool operator| (const Bool& v) const {
-			Bool ret;
-			ret.val = val | v.val;
-			return ret;
-		}
-
-		DYN_FUNC inline bool operator&& (const Bool& v) const {
-			return val & v.val;
-		}
-
-		DYN_FUNC inline bool operator|| (const Bool& v) const {
-			return val | v.val;
-		}
-
-		DYN_FUNC inline bool operator&& (const bool& v) const {
-			uint tmpV = v ? 1 : 0;
-			return val & tmpV;
-		}
-
-		DYN_FUNC inline bool operator|| (const bool& v) const {
-			uint tmpV = v ? 1 : 0;
-			return val | tmpV;
-		}
-
-		DYN_FUNC inline operator bool() const {
-			return val == 1;
-		}
-		
-
-	private:
-		uint val = 0;
-	};
-
-
 #define INVALID -1
 #define M_PI 3.14159265358979323846
 #define M_E 2.71828182845904523536
 
 	constexpr Real EPSILON = std::numeric_limits<Real>::epsilon();
+	constexpr Real REAL_MAX = (std::numeric_limits<Real>::max)();
+	constexpr Real REAL_MIN = (std::numeric_limits<Real>::min)();
 	constexpr uint BLOCK_SIZE = 64;
 
 	static uint iDivUp(uint a, uint b)
@@ -201,7 +103,7 @@ namespace dyno {
 		cudaError_t err = cudaGetLastError();	\
 		if (err != cudaSuccess)					\
 		{										\
-			sprintf(str, "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);		\
+			sprintf_s(str, "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);		\
 			throw std::runtime_error(std::string(str));																\
 		}																											\
 	}
@@ -228,6 +130,105 @@ namespace dyno {
 		cuSynchronize();									\
 	}
 
+
+	class Bool
+	{
+	public:
+		DYN_FUNC Bool(bool v = false) { val = v ? 1 : 0; }
+
+		DYN_FUNC inline bool operator! () const {
+			return 1 - val ? true : false;
+		}
+
+		DYN_FUNC inline bool operator== (bool v) const {
+			uint tmpV = v ? 1 : 0;
+			return val == tmpV;
+		}
+
+		DYN_FUNC inline bool operator== (const Bool& v) const {
+			return val == v.val;
+		}
+
+		DYN_FUNC inline Bool& operator= (const bool v) {
+			val = v ? 1 : 0;
+			return *this;
+		}
+
+		DYN_FUNC inline Bool& operator= (const Bool& v) {
+			val = v.val;
+			return *this;
+		}
+
+		DYN_FUNC inline Bool& operator&= (const bool v) {
+			val &= (v ? 1 : 0);
+			return *this;
+		}
+
+		DYN_FUNC inline Bool& operator|= (const bool v) {
+			val |= (v ? 1 : 0);
+			return *this;
+		}
+
+		DYN_FUNC inline Bool operator& (const bool v) const {
+			Bool ret;
+			ret.val = val & (v ? 1 : 0);
+			return ret;
+		}
+
+		DYN_FUNC inline Bool operator| (const bool v) const {
+			Bool ret;
+			ret.val = val | (v ? 1 : 0);
+			return ret;
+		}
+
+		DYN_FUNC inline Bool& operator&= (const Bool& v) {
+			val &= v.val;
+			return *this;
+		}
+
+		DYN_FUNC inline Bool& operator|= (const Bool& v) {
+			val |= v.val;
+			return *this;
+		}
+
+		DYN_FUNC inline Bool operator& (const Bool& v) const {
+			Bool ret;
+			ret.val = val & v.val;
+			return ret;
+		}
+
+		DYN_FUNC inline Bool operator| (const Bool& v) const {
+			Bool ret;
+			ret.val = val | v.val;
+			return ret;
+		}
+
+		DYN_FUNC inline bool operator&& (const Bool& v) const {
+			return val & v.val;
+		}
+
+		DYN_FUNC inline bool operator|| (const Bool& v) const {
+			return val | v.val;
+		}
+
+		DYN_FUNC inline bool operator&& (const bool& v) const {
+			uint tmpV = v ? 1 : 0;
+			return val & tmpV;
+		}
+
+		DYN_FUNC inline bool operator|| (const bool& v) const {
+			uint tmpV = v ? 1 : 0;
+			return val | tmpV;
+		}
+
+		DYN_FUNC inline operator bool() const {
+			return val == 1;
+		}
+
+
+	private:
+		uint val = 0;
+	};
 }// end of namespace dyno
 
 

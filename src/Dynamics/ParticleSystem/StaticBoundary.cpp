@@ -142,4 +142,6 @@ namespace dyno
 			m_obstacles[i]->m_cSDF->translate(t);
 		}
 	}
+
+	DEFINE_CLASS(StaticBoundary);
 }

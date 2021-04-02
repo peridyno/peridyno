@@ -41,11 +41,4 @@ namespace dyno
 
 		
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class ImplicitViscosity<DataType3f>;
-#else
-	template class ImplicitViscosity<DataType3d>;
-#endif
 }

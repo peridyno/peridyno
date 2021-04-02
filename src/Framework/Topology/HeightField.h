@@ -45,12 +45,5 @@ namespace dyno
 
 		DArray2D<Real> m_height;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class HeightField<DataType3f>;
-#else
-	template class HeightField<DataType3d>;
-#endif
 }
 

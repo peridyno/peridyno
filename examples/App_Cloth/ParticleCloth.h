@@ -32,10 +32,4 @@ namespace dyno
 	private:
 		std::shared_ptr<Node> m_surfaceNode;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleCloth<DataType3f>;
-#else
-	template class ParticleCloth<DataType3d>;
-#endif
 }

@@ -34,7 +34,6 @@ namespace dyno
 		for (int ne = 0; ne < size_i; ne++)
 		{
 			NPair np_j = restShapes.getElement(pId, ne);
-			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_i - rest_pos_j).norm();
 
@@ -562,4 +561,5 @@ namespace dyno
 		m_position_old.assign(this->inPosition()->getValue());
 	}
 
+	DEFINE_CLASS(ElasticityModule);
 }

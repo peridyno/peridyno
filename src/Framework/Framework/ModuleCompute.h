@@ -1,21 +1,21 @@
 #pragma once
 #include "Framework/Module.h"
 
-namespace dyno{
-
-class ComputeModule : public Module
+namespace dyno 
 {
-public:
-	ComputeModule();
-	~ComputeModule() override;
+	class ComputeModule : public Module
+	{
+	public:
+		ComputeModule();
+		~ComputeModule() override;
 
-	bool execute() override;
+		bool execute() override;
 
-	virtual void compute() {};
+		virtual void compute() = 0;
 
-	std::string getModuleType() override { return "ComputeModule"; }
-private:
+		std::string getModuleType() override { return "ComputeModule"; }
+	private:
 
-};
+	};
 }
 

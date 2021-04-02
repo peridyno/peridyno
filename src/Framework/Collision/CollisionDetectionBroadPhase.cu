@@ -18,7 +18,7 @@ namespace dyno
 
 		h_arr.assign(arr);
 
-		for (int i = 0; i < h_arr.size(); i++)
+		for (uint i = 0; i < h_arr.size(); i++)
 		{
 			printf("%d: %d \n", i, h_arr[i]);
 		}
@@ -33,7 +33,7 @@ namespace dyno
 
 		h_arr.assign(arr);
 
-		for (int i = 0; i < h_arr.size(); i++)
+		for (uint i = 0; i < h_arr.size(); i++)
 		{
 			int id = h_arr[i] & UINT_MAX;
 			printf("%d: %d \n", i, id);
@@ -527,4 +527,6 @@ namespace dyno
 		keys.clear();
 		counter.clear();
 	}
+
+	DEFINE_CLASS(CollisionDetectionBroadPhase);
 }

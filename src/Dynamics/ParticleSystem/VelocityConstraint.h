@@ -69,12 +69,4 @@ namespace dyno {
 
 		std::shared_ptr<SummationDensity<TDataType>> m_densitySum;
 	};
-
-
-
-#ifdef PRECISION_FLOAT
-	template class VelocityConstraint<DataType3f>;
-#else
-	template class VelocityConstraint<DataType3d>;
-#endif
 }

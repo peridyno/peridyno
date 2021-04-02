@@ -11,4 +11,6 @@ namespace dyno
 	UnstructuredPointSet<Coord>::~UnstructuredPointSet()
 	{
 	}
+
+	DEFINE_CLASS(UnstructuredPointSet);
 }

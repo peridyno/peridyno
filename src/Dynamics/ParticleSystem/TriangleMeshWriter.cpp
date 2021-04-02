@@ -71,10 +71,10 @@ namespace dyno
 		host_vertices.assign(*(this->ptr_vertices));
 		host_triangles.assign(*(this->ptr_triangles));
 
-		for (int i = 0; i < host_vertices.size(); ++i) {
+		for (uint i = 0; i < host_vertices.size(); ++i) {
 			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;
 		}
-		for (int i = 0; i < host_triangles.size(); ++i) {
+		for (uint i = 0; i < host_triangles.size(); ++i) {
 			output << "f " << host_triangles[i][0] << " " << host_triangles[i][1] << " " << host_triangles[i][2] << std::endl;
 		}
 
@@ -100,4 +100,6 @@ namespace dyno
 			this->current_idle_frame--;
 		}
 	}
+
+	DEFINE_CLASS(TriangleMeshWriter);
 }

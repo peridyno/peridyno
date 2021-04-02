@@ -69,10 +69,4 @@ namespace dyno {
 	private:
 		VarField<int> m_iterNum;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class OneDimElasticityModule<DataType3f>;
-#else
-	template class OneDimElasticityModule<DataType3d>;
-#endif
 }

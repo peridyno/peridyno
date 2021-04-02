@@ -134,4 +134,5 @@ namespace dyno
 		return true;
 	}
 
+	DEFINE_CLASS(ParticleEmitter);
 }

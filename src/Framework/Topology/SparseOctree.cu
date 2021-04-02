@@ -3,6 +3,8 @@
 
 #include <thrust/sort.h>
 
+#include "Framework/Object.h"
+
 namespace dyno {
 	DYN_FUNC OcKey CalculateMortonCode(Level l, OcIndex x, OcIndex y, OcIndex z)
 	{
@@ -32,7 +34,7 @@ namespace dyno {
 
 		h_arr.assign(d_arr);
 
-		for (int i = 0; i < h_arr.size(); i++)
+		for (uint i = 0; i < h_arr.size(); i++)
 		{
 			Level level;
 			OcIndex tnx, tny, tnz;
@@ -630,8 +632,6 @@ namespace dyno {
 	template<typename TDataType>
 	GPU_FUNC void SparseOctree<TDataType>::reqeustIntersectionIds(int* ids, int& shift, const OcKey key, const Level l)
 	{
-		int ret_num = 0;
-
 		OcKey mask = 7U << 3 * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
@@ -697,8 +697,6 @@ namespace dyno {
 	template<typename TDataType>
 	GPU_FUNC void SparseOctree<TDataType>::reqeustIntersectionIds(int* ids, int& shift, const OcKey key, const Level l, const AABB box, AABB* data)
 	{
-		int ret_num = 0;
-
 		OcKey mask = 7U << 3 * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
@@ -1302,4 +1300,6 @@ namespace dyno {
 	{
 		print(m_all_nodes);
 	}
+
+	DEFINE_CLASS(SparseOctree);
 }

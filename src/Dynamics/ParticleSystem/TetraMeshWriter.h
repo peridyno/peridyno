@@ -62,10 +62,4 @@ namespace dyno
 		DArray<Coord>* ptr_vertices;
 		std::shared_ptr<TetrahedronSet<TDataType>> ptr_TetrahedronSet;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class TetraMeshWriter<DataType3f>;
-#else
-	template class TetraMeshWriter<DataType3d>;
-#endif
 }

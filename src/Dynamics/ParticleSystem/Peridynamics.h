@@ -58,10 +58,4 @@ namespace dyno
 		std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
 		std::shared_ptr<ElasticityModule<TDataType>> m_elasticity;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class Peridynamics<DataType3f>;
-#else
-	template class Peridynamics<DataType3d>;
-#endif
 }

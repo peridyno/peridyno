@@ -3,19 +3,18 @@
 
 namespace dyno
 {
-ComputeModule::ComputeModule()
-{
-}
+	ComputeModule::ComputeModule()
+	{
+	}
 
-ComputeModule::~ComputeModule()
-{
-}
+	ComputeModule::~ComputeModule()
+	{
+	}
 
-bool ComputeModule::execute()
-{
-	this->compute();
+	bool ComputeModule::execute()
+	{
+		this->compute();
 
-	return true;
-}
-
+		return true;
+	}
 }

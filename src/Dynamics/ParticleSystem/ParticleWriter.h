@@ -36,10 +36,4 @@ namespace dyno
 		std::string m_output_path;
 		std::string m_name_prefix;
 	};
-
-#ifdef PRECISION_FLOAT
-	template class ParticleWriter<DataType3f>;
-#else
-	template class ParticleWriter<DataType3d>;
-#endif
 }
