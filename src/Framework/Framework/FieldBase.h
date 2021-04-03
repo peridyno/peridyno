@@ -118,6 +118,15 @@ std::shared_ptr<Data>& getReference()								\
 	return derived->m_data;											\
 }																	\
 \
+std::shared_ptr<Data> allocate()									\
+{																	\
+	auto& data = this->getReference();								\
+	if (data == nullptr) {											\
+		data = std::make_shared<Data>();							\
+	}																\
+	return data;													\
+}																	\
+\
 bool isEmpty() override {											\
 return this->getReference() == nullptr;								\
 }																	\

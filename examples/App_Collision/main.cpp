@@ -19,7 +19,6 @@
 #include "Collision/CollidableSDF.h"
 #include "Collision/CollidablePoints.h"
 #include "Collision/CollisionSDF.h"
-#include "Framework/Gravity.h"
 #include "ParticleSystem/FixedPoints.h"
 #include "Collision/CollisionPoints.h"
 #include "ParticleSystem/ParticleSystem.h"

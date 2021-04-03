@@ -2,7 +2,6 @@
 #include "Framework/ModuleTopology.h"
 #include "Primitive3D.h"
 
-
 namespace dyno
 {
 	template<typename TDataType>

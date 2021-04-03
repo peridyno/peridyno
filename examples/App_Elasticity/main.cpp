@@ -27,9 +27,9 @@ int main()
 	bunny->addVisualModule(m_pointsRender);
 
 	bunny->setMass(1.0);
-	bunny->loadParticles("../../data/bunny/small_sphere.obj");
-	//bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
-	bunny->scale(0.1);
+	bunny->loadParticles("../../data/bunny/bunny_points.obj");
+	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
+	bunny->scale(1.0f);
 	bunny->translate(Vector3f(0.5f, 0.1f, 0.5f));
 	bunny->setVisible(true);
 
@@ -38,7 +38,7 @@ int main()
 	sRender->setColor(Vector3f(1, 1, 0));
 
 	bunny->getElasticitySolver()->setIterationNumber(10);
-	bunny->getElasticitySolver()->inHorizon()->setValue(0.1);
+	bunny->getElasticitySolver()->inHorizon()->setValue(0.01);
 
 	GLApp window;
 	window.createWindow(1024, 768);
