@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	template<typename> class NeighborQuery;
+	template<typename> class NeighborPointQuery;
 	template<typename> class PointSetToPointSet;
 	template<typename> class ParticleIntegrator;
 	template<typename> class ElasticityModule;
@@ -55,7 +55,7 @@ namespace dyno
 
 		std::shared_ptr<PointSetToPointSet<TDataType>> m_mapping;
 		std::shared_ptr<ParticleIntegrator<TDataType>> m_integrator;
-		std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
+		std::shared_ptr<NeighborPointQuery<TDataType>> m_nbrQuery;
 		std::shared_ptr<ElasticityModule<TDataType>> m_elasticity;
 	};
 }

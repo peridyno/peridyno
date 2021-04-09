@@ -1,22 +1,23 @@
 #pragma once
 #include "Framework/Module.h"
 
-namespace dyno{
+namespace dyno {
 
-class CustomModule : public Module
-{
-	DECLARE_CLASS(CustomModule)
-public:
-	CustomModule();
-	virtual ~CustomModule();
+	class CustomModule : public Module
+	{
+		DECLARE_CLASS(CustomModule)
+	public:
+		CustomModule();
+		virtual ~CustomModule();
 
-	bool execute() override;
+		bool execute() override;
 
-	std::string getModuleType() override { return "CustomModule"; }
+		std::string getModuleType() override { return "CustomModule"; }
 
-protected:
-	virtual void applyCustomBehavior();
+	protected:
+		virtual void applyCustomBehavior();
 
-};
+	};
+
 }
 

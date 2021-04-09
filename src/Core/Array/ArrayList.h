@@ -112,16 +112,17 @@ namespace dyno {
 		bool resize(const DArray<int> counts);
 		bool resize(const uint arraySize, const uint eleSize);
 
+		template<typename ET2>
+		bool resize(const ArrayList<ET2, DeviceType::GPU>& src);
+
 		DYN_FUNC inline uint size() const { return m_lists.size(); }
 		DYN_FUNC inline uint elementSize() const { return m_elements.size(); }
 
-		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id)
-		{
+		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id) {
 			return m_lists[id];
 		}
 
-		GPU_FUNC inline List<ElementType> operator [] (unsigned int id) const
-		{
+		GPU_FUNC inline List<ElementType> operator [] (unsigned int id) const {
 			return m_lists[id];
 		}
 

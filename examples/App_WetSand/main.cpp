@@ -1,10 +1,3 @@
-#include <iostream>
-#include <memory>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
 #include "GlutGUI/GLApp.h"
 
 #include "Framework/SceneGraph.h"

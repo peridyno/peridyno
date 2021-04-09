@@ -1,11 +1,5 @@
 #include "CollisionDetectionBroadPhase.h"
-
-#include "Algorithm/Reduction.h"
-
-#include "Topology/SparseOctree.h"
-
 #include <thrust/sort.h>
-
 
 namespace dyno
 {
@@ -305,8 +299,7 @@ namespace dyno
 
 	template<typename TDataType>
 	__global__ void CDBP_RemoveDuplicativeIds(
-		DArray<int> new_ids,
-		DArray<int> new_count,
+		DArrayList<int> contactLists,
 		DArray<PKey> ids,
 		DArray<int> count,
 		DArray<AABB> boundingBox,
@@ -320,9 +313,7 @@ namespace dyno
 		int shift = count[tId];
 		int n = tId == total_num - 1 ? ids.size() - count[total_num - 1] : count[tId + 1] - shift;
 
-		int col_num = 0;
-
-		int shift_new = new_count[tId];
+		List<int>& cList_i = contactLists[tId];
 
 		for (int i = 0; i < n; i++)
 		{
@@ -339,21 +330,18 @@ namespace dyno
 
 							if (B_id > tId)
 							{
-								new_ids[shift_new + col_num] = B_id;
-								col_num++;
+								cList_i.insert(B_id);
 							}
 						}
 						else
 						{
-							new_ids[shift_new + col_num] = B_id;
-							col_num++;
+							cList_i.insert(B_id);
 						}
 					}
 				}
 				else
 				{
-					new_ids[shift_new + col_num] = B_id;
-					col_num++;
+					cList_i.insert(B_id);
 				}
 			}
 		}
@@ -376,6 +364,12 @@ namespace dyno
 	{
 		auto& aabb_src = this->inSource()->getData();
 		auto& aabb_tar = this->inTarget()->getData();
+
+		if (this->outContactList()->isEmpty()) {
+			this->outContactList()->allocate();
+		}
+		
+		auto& contacts = this->outContactList()->getData();
 
 		DArray<Coord> v0_arr;
 		DArray<Coord> v1_arr;
@@ -412,9 +406,6 @@ namespace dyno
 		octree.setSpace(min_v0 - min_val, min_val, max(max_v1[0] - min_v0[0], max(max_v1[1] - min_v0[1], max_v1[2] - min_v0[2])) + 2.0f * min_val);
 		//octree.setSpace(Coord(0,0,0) - min_val, min_val, 1.0f + 2.0f * min_val);
 
-
-		printf("level max: %d\n", octree.getLevelMax());
-
 		octree.construct(aabb_tar);
 
 		//if(octree.getLevelMax() > 9)
@@ -441,8 +432,6 @@ namespace dyno
 
 		int total_node_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
-
-		printf("total_node_num: %d\n", total_node_num);
 
 		DArray<int> ids;
 		ids.resize(total_node_num);
@@ -483,32 +472,26 @@ namespace dyno
 		// 		print(keys);
 		// 		print(counter);
 
-		this->outContactList()->setElementCount(aabb_src.size());
-
-		auto& contacts = this->outContactList()->getData();
-
-		auto& index = contacts.getIndex();
-		auto& elements = contacts.getElements();
-
-
+		DArray<int> new_count(counter.size());
 		cuExecute(aabb_src.size(),
 			CDBP_CountDuplicativeIds,
-			index,
+			new_count,
 			keys,
 			counter,
 			aabb_src,
 			octree,
 			self_collision);
 
-		int ele_num = thrust::reduce(thrust::device, index.begin(), index.begin() + index.size(), (int)0, thrust::plus<int>());
-		thrust::exclusive_scan(thrust::device, index.begin(), index.begin() + index.size(), index.begin());
+		contacts.resize(new_count);
 
-		elements.resize(ele_num);
+// 		int ele_num = thrust::reduce(thrust::device, index.begin(), index.begin() + index.size(), (int)0, thrust::plus<int>());
+// 		thrust::exclusive_scan(thrust::device, index.begin(), index.begin() + index.size(), index.begin());
+// 
+// 		elements.resize(ele_num);
 
 		cuExecute(aabb_src.size(),
 			CDBP_RemoveDuplicativeIds,
-			elements,
-			index,
+			contacts,
 			keys,
 			counter,
 			aabb_src,
@@ -526,6 +509,7 @@ namespace dyno
 		ids.clear();
 		keys.clear();
 		counter.clear();
+		new_count.clear();
 	}
 
 	DEFINE_CLASS(CollisionDetectionBroadPhase);

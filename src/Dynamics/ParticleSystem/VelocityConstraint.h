@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/ModuleConstraint.h"
-#include "Topology/FieldNeighbor.h"
 #include "Algorithm/Reduction.h"
 #include "Algorithm/Functional.h"
 #include "Algorithm/Arithmetic.h"
@@ -30,7 +29,8 @@ namespace dyno {
 		DeviceArrayField<Coord> m_position;
 		DeviceArrayField<Coord> m_normal;
 		DeviceArrayField<Attribute> m_attribute;
-		NeighborField<int> m_neighborhood;
+		
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
 	protected:
 		bool initializeImpl() override;

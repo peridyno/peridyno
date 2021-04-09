@@ -51,9 +51,8 @@ namespace dyno
 		DArray<Real> alpha,
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbors,
-		Real smoothingLength
-	)
+		DArrayList<int> neighbors,
+		Real smoothingLength)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -62,11 +61,11 @@ namespace dyno
 		Coord pos_i = position[pId];
 		Real alpha_i = 0.0f;
 
-		int nbSize = neighbors.getNeighborSize(pId);
-
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();;
 
 			if (r > EPSILON)
@@ -104,7 +103,7 @@ namespace dyno
 		DArray<Real> alpha,
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		Real smoothingLength
 	)
 	{
@@ -119,10 +118,11 @@ namespace dyno
 		Real diaA_fluid = 0.0f;
 		Coord pos_i = position[pId];
 
-		int nbSize = neighbors.getNeighborSize(pId);
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
 			Attribute att_j = attribute[j];
@@ -154,7 +154,7 @@ namespace dyno
 		DArray<Real> alpha,
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		Real smoothingLength)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -165,11 +165,11 @@ namespace dyno
 		Real invAlpha_i = 1.0f / alpha[pId];
 		Real A_i = 0.0f;
 
-		int nbSize = neighbors.getNeighborSize(pId);
-
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
 			if (r > EPSILON && attribute[j].IsDynamic())
@@ -192,7 +192,7 @@ namespace dyno
 		DArray<Real> AiiTotal,
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		Real smoothingLength,
 		Real maxA
 	)
@@ -207,11 +207,13 @@ namespace dyno
 		SmoothKernel<Real> kernSmooth;
 
 		Coord pos_i = position[pId];
-		int nbSize = neighbors.getNeighborSize(pId);
 		bool bNearWall = false;
+
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
 			if (r > EPSILON && attribute[j].IsDynamic())
@@ -262,7 +264,7 @@ namespace dyno
 		DArray<bool> bSurface,
 		DArray<Coord> normals,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		Real separation,
 		Real tangential,
 		Real restDensity,
@@ -279,10 +281,11 @@ namespace dyno
 
 		Real invAlpha_i = 1.0f / alpha[pId];
 
-		int nbSize = neighbors.getNeighborSize(pId);
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
 			if (r > EPSILON && attribute[j].IsFluid())
@@ -363,7 +366,7 @@ namespace dyno
 		DArray<Real> alpha,
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbor,
+		DArrayList<int> neighbors,
 		Real smoothingLength
 	)
 	{
@@ -377,10 +380,11 @@ namespace dyno
 		atomicAdd(&residual[pId], aiiSymArr[pId] * pressure[pId]);
 		Real con1 = 1.0f;// PARAMS.mass / PARAMS.restDensity / PARAMS.restDensity;
 
-		int nbSize = neighbor.getNeighborSize(pId);
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbor.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
 			if (r > EPSILON && attribute[j].IsDynamic())
@@ -403,7 +407,7 @@ namespace dyno
 		DArray<Coord> velocity,
 		DArray<Coord> normal,
 		DArray<Attribute> attribute,
-		NeighborList<int> neighbor,
+		DArrayList<int> neighbors,
 		Real restDensity,
 		Real airPressure,
 		Real sliding,
@@ -419,16 +423,18 @@ namespace dyno
 			Coord pos_i = position[pId];
 			Real p_i = pressure[pId];
 
-			int nbSize = neighbor.getNeighborSize(pId);
 			Real ceo = 1.6f;
 
 			Real invAlpha = 1.0f / alpha[pId];
 			Coord vel_i = velocity[pId];
 			Coord dv_i(0.0f);
 			Real scale = 1.0f*dt / restDensity;
+
+			List<int>& list_i = neighbors[pId];
+			int nbSize = list_i.size();
 			for (int ne = 0; ne < nbSize; ne++)
 			{
-				int j = neighbor.getElement(pId, ne);
+				int j = list_i[ne];
 				Real r = (pos_i - position[j]).norm();
 
 				Attribute att_j = attribute[j];
@@ -530,14 +536,6 @@ namespace dyno
 		, m_arithmetic(NULL)
 	{
 		m_smoothingLength.setValue(Real(0.011));
-
-		attachField(&m_smoothingLength, "smoothing_length", "The smoothing length in SPH!", false);
-
-		attachField(&m_position, "position", "Storing the particle positions!", false);
-		attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-		attachField(&m_normal, "normal", "Storing the particle normals!", false);
-		attachField(&m_attribute, "attribute", "Storing the particle attributes!", false);
-		attachField(&m_neighborhood, "neighborhood", "Storing neighboring particles' ids!", false);
 	}
 
 	template<typename TDataType>
@@ -580,7 +578,7 @@ namespace dyno
 			m_alpha, 
 			m_position.getData(), 
 			m_attribute.getData(), 
-			m_neighborhood.getData(), 
+			this->inNeighborIds()->getData(), 
 			m_smoothingLength.getData());
 		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha, 
@@ -595,7 +593,7 @@ namespace dyno
 			m_alpha, 
 			m_position.getData(),
 			m_attribute.getData(),
-			m_neighborhood.getData(),
+			this->inNeighborIds()->getData(),
 			m_smoothingLength.getData());
 
 		m_bSurface.reset();
@@ -607,7 +605,7 @@ namespace dyno
 			m_AiiTotal,
 			m_position.getData(),
 			m_attribute.getData(),
-			m_neighborhood.getData(),
+			this->inNeighborIds()->getData(),
 			m_smoothingLength.getData(),
 			m_maxA);
 
@@ -625,7 +623,7 @@ namespace dyno
 			m_bSurface, 
 			m_normal.getData(), 
 			m_attribute.getData(), 
-			m_neighborhood.getData(), 
+			this->inNeighborIds()->getData(),
 			m_separation, 
 			m_tangential, 
 			m_restDensity,
@@ -648,7 +646,7 @@ namespace dyno
 			m_alpha, 
 			m_position.getData(),
 			m_attribute.getData(),
-			m_neighborhood.getData(),
+			this->inNeighborIds()->getData(),
 			m_smoothingLength.getData());
 
 		m_r.reset();
@@ -668,7 +666,7 @@ namespace dyno
 				m_alpha, 
 				m_position.getData(),
 				m_attribute.getData(),
-				m_neighborhood.getData(),
+				this->inNeighborIds()->getData(),
 				m_smoothingLength.getData());
 
 			float alpha = rr / m_arithmetic->Dot(m_p, m_y);
@@ -696,7 +694,7 @@ namespace dyno
 			m_velocity.getData(), 
 			m_normal.getData(), 
 			m_attribute.getData(), 
-			m_neighborhood.getData(),
+			this->inNeighborIds()->getData(),
 			m_restDensity,
 			m_airPressure,
 			m_tangential,
@@ -716,10 +714,11 @@ namespace dyno
 			return false;
 		}
 
+		//TODO: replace
 		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
 		m_smoothingLength.connect(m_densitySum->varSmoothingLength());
 		m_position.connect(m_densitySum->inPosition());
-		m_neighborhood.connect(m_densitySum->inNeighborIndex());
+		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
 		m_densitySum->initialize();
 
 		int num = m_position.getElementCount();
@@ -749,7 +748,7 @@ namespace dyno
 			m_alpha,
 			m_position.getData(),
 			m_attribute.getData(),
-			m_neighborhood.getData(),
+			this->inNeighborIds()->getData(),
 			m_smoothingLength.getData());
 
 		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
@@ -764,7 +763,7 @@ namespace dyno
 			m_alpha,
 			m_position.getData(),
 			m_attribute.getData(),
-			m_neighborhood.getData(),
+			this->inNeighborIds()->getData(),
 			m_smoothingLength.getData());
 
 		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());

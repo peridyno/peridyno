@@ -6,8 +6,7 @@
 #include "ImplicitViscosity.h"
 #include "Framework/MechanicalState.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "Topology/FieldNeighbor.h"
-#include "Topology/NeighborQuery.h"
+#include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/Attribute.h"
 
 namespace dyno
@@ -40,7 +39,7 @@ namespace dyno
 	{
 		cuSynchronize();
 
-		m_nbrQuery = this->getParent()->addComputeModule<NeighborQuery<TDataType>>("neighborhood");
+		m_nbrQuery = this->getParent()->addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
 		m_smoothingLength.connect(m_nbrQuery->inRadius());
 		m_position.connect(m_nbrQuery->inPosition());
 		m_nbrQuery->initialize();
@@ -51,7 +50,7 @@ namespace dyno
 		m_smoothingLength.connect(m_pbdModule->varSmoothingLength());
 		m_position.connect(m_pbdModule->inPosition());
 		m_velocity.connect(m_pbdModule->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_pbdModule->inNeighborIndex());
+		m_nbrQuery->outNeighborIds()->connect(m_pbdModule->inNeighborIds());
 		m_pbdModule->initialize();
 
 		cuSynchronize();
@@ -69,7 +68,7 @@ namespace dyno
 		m_smoothingLength.connect(&m_visModule->m_smoothingLength);
 		m_position.connect(&m_visModule->m_position);
 		m_velocity.connect(&m_visModule->m_velocity);
-		m_nbrQuery->outNeighborhood()->connect(&m_visModule->m_neighborhood);
+		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 		m_visModule->initialize();
 
 		cuSynchronize();

@@ -5,7 +5,7 @@ namespace dyno
 {
 	template <typename T> class RigidBody;
 	template <typename T> class ParticleSystem;
-	template <typename T> class NeighborQuery;
+	template <typename T> class NeighborPointQuery;
 	template <typename T> class DensityPBD;
 
 	/*!
@@ -55,8 +55,7 @@ namespace dyno
 		DArray<Real> weights;
 		DArray<Coord> init_pos;
 
-		std::shared_ptr<NeighborList<int>> m_nList;
-		std::shared_ptr<NeighborQuery<TDataType>> m_nbrQuery;
+		std::shared_ptr<NeighborPointQuery<TDataType>> m_nbrQuery;
 
 		std::shared_ptr<DensityPBD<TDataType>> m_pbdModule;;
 

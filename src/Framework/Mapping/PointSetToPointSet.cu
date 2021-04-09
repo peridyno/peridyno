@@ -1,8 +1,7 @@
-#pragma once
-#include <cuda_runtime.h>
 #include "PointSetToPointSet.h"
-#include "Topology/NeighborQuery.h"
+
 #include "Matrix/MatrixFunc.h"
+#include "Topology/NeighborPointQuery.h"
 
 template <typename Real>
 DYN_FUNC inline Real PP_Weight(const Real r, const Real h)
@@ -50,7 +49,7 @@ namespace dyno
 		DArray<Coord> from,//inner particle's new position
 		DArray<Coord> initTo,  //initial
 		DArray<Coord> initFrom,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		Real smoothingLength)  //radius
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -61,7 +60,9 @@ namespace dyno
 		Coord to_i = to[pId];
 		Coord initTo_i = initTo[pId];
 		Coord accDisplacement_i = Coord(0);
-		int nbSize = neighbors.getNeighborSize(pId);
+
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 
 		Real total_weight1 = 0.0f;
 		Matrix3f mat_i = Matrix3f(0);
@@ -71,8 +72,7 @@ namespace dyno
 
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 
 			//1
 			Real r1 = (initTo_i - initFrom[j]).norm();//j->to
@@ -80,18 +80,6 @@ namespace dyno
 			//2
 			Real r2 = (initFrom[j] - initTo_i).norm();//to->j
 
-			/*if (pId == 0)
-			{
-				printf("initFrom**************************************");
-
-				printf("\n initFrom[j0]: %f %f %f \n from[j0]: %f %f %f \n initFrom: \n %f %f %f \n from: %f %f %f \n initTo: %f %f %f \n\n\n",
-					initFrom[j0][0], initFrom[j0][1], initFrom[j0][2],
-					from[j][0], from[j][1], from[j][2],
-					initFrom[j][0], initFrom[j][1], initFrom[j][2],
-					from[j][0], from[j][1], from[j][2],
-					initTo_i[0], initTo_i[1], initTo_i[2]);
-
-			}*/
 
 			//1
 			if (r1 > EPSILON)
@@ -105,10 +93,7 @@ namespace dyno
 
 				total_weight1 += weight1;
 			}
-			//
 
-
-			//2
 			if (r2 > EPSILON)
 			{
 				Real weight2 = PP_Weight(r2, smoothingLength);
@@ -152,19 +137,10 @@ namespace dyno
 			total_weight2 = 1.0f;
 		}
 
-		//Check whether the reference shape is inverted, if yes, simply set K^{-1} to be an identity matrix
-		//Note other solutions are possible.
-		//if ((deform_i.determinant()) < -0.001f)
-		//{
-		//		deform_i = Matrix3f::identityMatrix();
-		//	//	printf("**************************************");
-		//}
-
 		//get new position
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			Real r = (initFrom[j] - initTo[pId]).norm();
 
 			if (r > 0.01f * smoothingLength)
@@ -180,8 +156,6 @@ namespace dyno
 		}
 		accDisplacement_i = totalWeight > EPSILON ? (accDisplacement_i / totalWeight) : accDisplacement_i;
 		to[pId] = accDisplacement_i;
-
-
 	}
 
 	template<typename TDataType>
@@ -194,7 +168,7 @@ namespace dyno
 			m_from->getPoints(),
 			m_initTo->getPoints(),
 			m_initFrom->getPoints(),
-			m_neighborhood,
+			mNeighborIds,
 			m_radius);
 
 		return true;
@@ -209,12 +183,15 @@ namespace dyno
 		m_initFrom->copyFrom(*from);
 		m_initTo->copyFrom(*to);
 
-		NeighborQuery<TDataType>* nbQuery = new NeighborQuery<TDataType>(m_initFrom->getPoints());
+		auto nbQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 
-		m_neighborhood.resize(m_initTo->getPoints().size());
-		nbQuery->queryParticleNeighbors(m_neighborhood, m_initTo->getPoints(), m_radius);
+		nbQuery->inRadius()->setValue(m_radius);
+		nbQuery->inPosition()->allocate()->assign(m_initFrom->getPoints());
+		nbQuery->inOther()->allocate()->assign(m_initTo->getPoints());
 
-		delete nbQuery;
+		nbQuery->update();
+
+		mNeighborIds.assign(nbQuery->outNeighborIds()->getData());
 	}
 
 	DEFINE_CLASS(PointSetToPointSet);

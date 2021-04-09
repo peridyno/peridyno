@@ -1,4 +1,3 @@
-#include <iostream>
 #include "GlutGUI/GLApp.h"
 #include "Framework/SceneGraph.h"
 #include "ParticleSystem/ParticleElasticBody.h"

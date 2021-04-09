@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/ModuleConstraint.h"
-#include "Topology/FieldNeighbor.h"
 
 namespace dyno 
 {
@@ -31,7 +30,7 @@ namespace dyno
 		DeviceArrayField<Coord> m_velocity;
 		DeviceArrayField<Coord> m_position;
 
-		NeighborField<int> m_neighborhood;
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
 	private:
 		int m_maxInteration;

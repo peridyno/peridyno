@@ -4,7 +4,7 @@
 #include "SurfaceMeshRender.h"
 #include "PointRenderModule.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "Topology/NeighborQuery.h"
+#include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/ParticleIntegrator.h"
 #include "ParticleSystem/ElastoplasticityModule.h"
 
@@ -26,30 +26,30 @@ namespace dyno
 		this->currentVelocity()->connect(m_integrator->inVelocity());
 		this->currentForce()->connect(m_integrator->inForceDensity());
 
-		m_nbrQuery = this->template addComputeModule<NeighborQuery<TDataType>>("neighborhood");
+		m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
 		m_horizon.connect(m_nbrQuery->inRadius());
 		this->currentPosition()->connect(m_nbrQuery->inPosition());
 
 		m_plasticity = this->template addConstraintModule<ElastoplasticityModule<TDataType>>("elastopolasticity");
 		this->currentPosition()->connect(m_plasticity->inPosition());
 		this->currentVelocity()->connect(m_plasticity->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_plasticity->inNeighborhood());
+		m_nbrQuery->outNeighborIds()->connect(m_plasticity->inNeighborIds());
 		m_plasticity->setFrictionAngle(0);
 		m_plasticity->setCohesion(0.0);
 		m_plasticity->enableFullyReconstruction();
 
-		m_pbdModule = this->template addConstraintModule<DensityPBD<TDataType>>("pbd");
-		m_horizon.connect(m_pbdModule->varSmoothingLength());
-		this->currentPosition()->connect(m_pbdModule->inPosition());
-		this->currentVelocity()->connect(m_pbdModule->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_pbdModule->inNeighborIndex());
+// 		m_pbdModule = this->template addConstraintModule<DensityPBD<TDataType>>("pbd");
+// 		m_horizon.connect(m_pbdModule->varSmoothingLength());
+// 		this->currentPosition()->connect(m_pbdModule->inPosition());
+// 		this->currentVelocity()->connect(m_pbdModule->inVelocity());
+// 		m_nbrQuery->outNeighborhood()->connect(m_pbdModule->inNeighborIndex());
 
 		m_visModule = this->template addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
 		m_visModule->setViscosity(Real(1));
 		m_horizon.connect(&m_visModule->m_smoothingLength);
 		this->currentPosition()->connect(&m_visModule->m_position);
 		this->currentVelocity()->connect(&m_visModule->m_velocity);
-		m_nbrQuery->outNeighborhood()->connect(&m_visModule->m_neighborhood);
+		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 
 		m_surfaceNode = this->template createChild<Node>("Mesh");
 
@@ -79,9 +79,9 @@ namespace dyno
 
 		m_integrator->integrate();
 
-		m_nbrQuery->compute();
+		//m_nbrQuery->compute();
 		m_plasticity->solveElasticity();
-		m_nbrQuery->compute();
+		//m_nbrQuery->compute();
 
 		m_plasticity->applyPlasticity();
 

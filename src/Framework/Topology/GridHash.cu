@@ -374,10 +374,11 @@ namespace dyno {
 		if (index != nullptr)
 			cuSafeCall(cudaFree(index));
 
-		// 		if (m_scan != nullptr)
-		// 		{
-		// 			delete m_scan;
-		// 		}
+		if (m_scan != nullptr)
+			delete m_scan;
+
+		if (m_reduce != nullptr)
+			delete m_reduce;
 	}
 
 	DEFINE_CLASS(GridHash);

@@ -13,11 +13,12 @@ namespace dyno
 	template<typename TDataType>
 	bool GranularModule<TDataType>::initializeImpl()
 	{
+		//TODO: replace
 		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
 
 		this->inHorizon()->connect(m_densitySum->varSmoothingLength());
 		this->inPosition()->connect(m_densitySum->inPosition());
-		this->inNeighborhood()->connect(m_densitySum->inNeighborIndex());
+		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
 
 		m_densitySum->initialize();
 

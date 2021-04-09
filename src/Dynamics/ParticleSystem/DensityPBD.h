@@ -1,7 +1,5 @@
 #pragma once
-#include "Array/Array.h"
 #include "Framework/ModuleConstraint.h"
-#include "Topology/FieldNeighbor.h"
 #include "Kernel.h"
 
 namespace dyno {
@@ -30,9 +28,6 @@ namespace dyno {
 		void updateVelocity();
 
 	public:
-		DeviceArrayField<Real> m_massInv; // mass^-1 as described in unified particle physics
-
-	public:
 		DEF_EMPTY_VAR(IterationNumber, int, "Iteration number of the PBD solver");
 
 		DEF_EMPTY_VAR(RestDensity, Real, "Reference density");
@@ -45,34 +40,23 @@ namespace dyno {
 		/**
 		 * @brief Particle positions
 		 */
-		DEF_EMPTY_IN_ARRAY(Position, Coord, DeviceType::GPU, "Input particle position");
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Input particle position");
 
 		/**
 		 * @brief Particle velocities
 		 */
-		DEF_EMPTY_IN_ARRAY(Velocity, Coord, DeviceType::GPU, "Input particle velocity");
-
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Input particle velocity");
 
 		/**
 		 * @brief Neighboring particles' ids
 		 *
 		 */
-		DEF_EMPTY_IN_NEIGHBOR_LIST(NeighborIndex, int, "Neighboring particles' ids");
-
-		/**
-		 * @brief New particle positions
-		 */
-		DEF_EMPTY_OUT_ARRAY(Position, Coord, DeviceType::GPU, "Output particle position");
-
-		/**
-		 * @brief New particle velocities
-		 */
-		DEF_EMPTY_OUT_ARRAY(Velocity, Coord, DeviceType::GPU, "Output particle velocity");
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
 		/**
 		 * @brief Final particle densities
 		 */
-		DEF_EMPTY_OUT_ARRAY(Density, Real, DeviceType::GPU, "Final particle density");
+		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Final particle density");
 
 	private:
 		SpikyKernel<Real> m_kernel;

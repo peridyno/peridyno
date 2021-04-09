@@ -1,7 +1,5 @@
 #pragma once
 #include "PointSet.h"
-#include "Framework/ModuleTopology.h"
-#include "Topology/FieldNeighbor.h"
 
 namespace dyno
 {
@@ -91,10 +89,7 @@ namespace dyno
 
 		void loadSmeshFile(std::string filename);
 
-		DArray<Edge>* getEdges() {return &m_edges;}
-		NeighborList<int>& getEdgeNeighbors() { return m_edgeNeighbors.getData(); }
-
-		NeighborField<int> m_edgeNeighbors;
+		DArray<Edge>& getEdges() {return m_edges;}
 
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
 

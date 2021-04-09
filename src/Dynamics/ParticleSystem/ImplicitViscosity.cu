@@ -1,6 +1,5 @@
 #include "ImplicitViscosity.h"
 #include "Framework/Node.h"
-#include "Topology/FieldNeighbor.h"
 
 namespace dyno
 {
@@ -20,7 +19,7 @@ namespace dyno
 	__global__ void K_ApplyViscosity(
 		DArray<Coord> velNew,
 		DArray<Coord> posArr,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		DArray<Coord> velOld,
 		DArray<Coord> velArr,
 		Real viscosity,
@@ -35,10 +34,12 @@ namespace dyno
 		Coord pos_i = posArr[pId];
 		Coord vel_i = velArr[pId];
 		Real totalWeight = 0.0f;
-		int nbSize = neighbors.getNeighborSize(pId);
+
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			r = (pos_i - posArr[j]).norm();
 
 			if (r > EPSILON)
@@ -78,12 +79,6 @@ namespace dyno
 	{
 		m_viscosity.setValue(Real(0.05));
 		m_smoothingLength.setValue(Real(0.011));
-
-		attachField(&m_viscosity, "viscosity", "The viscosity of the fluid!", false);
-		attachField(&m_smoothingLength, "smoothing_length", "The smoothing length in SPH!", false);
-		attachField(&m_position, "position", "Storing the particle positions!", false);
-		attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-		attachField(&m_neighborhood, "neighborhood", "Storing neighboring particles' ids!", false);
 	}
 
 	template<typename TDataType>
@@ -96,6 +91,8 @@ namespace dyno
 	template<typename TDataType>
 	bool ImplicitViscosity<TDataType>::constrain()
 	{
+		auto& nbrIds = this->inNeighborIds()->getData();
+
 		int num = m_position.getElementCount();
 		if (num > 0)
 		{
@@ -110,10 +107,11 @@ namespace dyno
 			for (int t = 0; t < m_maxInteration; t++)
 			{
 				m_velBuf.assign(m_velocity.getData());
-				cuExecute(num, K_ApplyViscosity,
+				cuExecute(num, 
+					K_ApplyViscosity,
 					m_velocity.getData(),
 					m_position.getData(),
-					m_neighborhood.getData(),
+					nbrIds,
 					m_velOld,
 					m_velBuf,
 					vis,

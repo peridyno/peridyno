@@ -2,7 +2,7 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "Topology/NeighborQuery.h"
+#include "Topology/NeighborPointQuery.h"
 #include "ParticleIntegrator.h"
 #include "ElasticityModule.h"
 
@@ -24,7 +24,7 @@ namespace dyno
 
 		this->getAnimationPipeline()->push_back(m_integrator);
 
-		auto m_nbrQuery = this->template addComputeModule<NeighborQuery<TDataType>>("neighborhood");
+		auto m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
 		this->varHorizon()->connect(m_nbrQuery->inRadius());
 		this->currentPosition()->connect(m_nbrQuery->inPosition());
 
@@ -35,7 +35,7 @@ namespace dyno
 		this->varHorizon()->connect(m_elasticity->inHorizon());
 		this->currentPosition()->connect(m_elasticity->inPosition());
 		this->currentVelocity()->connect(m_elasticity->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_elasticity->inNeighborhood());
+		m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
 
 		this->getAnimationPipeline()->push_back(m_elasticity);
 
@@ -121,12 +121,12 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleElasticBody<TDataType>::setElasticitySolver(std::shared_ptr<ElasticityModule<TDataType>> solver)
 	{
-		auto nbrQuery = this->template getModule<NeighborQuery<TDataType>>("neighborhood");
+		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
 		auto module = this->template getModule<ElasticityModule<TDataType>>("elasticity");
 
 		this->currentPosition()->connect(solver->inPosition());
 		this->currentVelocity()->connect(solver->inVelocity());
-		nbrQuery->outNeighborhood()->connect(solver->inNeighborhood());
+		nbrQuery->outNeighborIds()->connect(solver->inNeighborIds());
 		this->varHorizon()->connect(solver->inHorizon());
 
 		this->deleteModule(module);

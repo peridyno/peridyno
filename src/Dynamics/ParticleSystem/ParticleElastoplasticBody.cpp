@@ -5,7 +5,7 @@
 #include "Topology/PointSet.h"
 #include "Peridynamics.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "Topology/NeighborQuery.h"
+#include "Topology/NeighborPointQuery.h"
 #include "ParticleIntegrator.h"
 #include "ElastoplasticityModule.h"
 
@@ -27,27 +27,28 @@ namespace dyno
 		this->currentVelocity()->connect(m_integrator->inVelocity());
 		this->currentForce()->connect(m_integrator->inForceDensity());
 		
-		m_nbrQuery = this->template addComputeModule<NeighborQuery<TDataType>>("neighborhood");
+		m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
 		m_horizon.connect(m_nbrQuery->inRadius());
 		this->currentPosition()->connect(m_nbrQuery->inPosition());
 
 		m_plasticity = this->template addConstraintModule<ElastoplasticityModule<TDataType>>("elastoplasticity");
+		m_horizon.connect(m_plasticity->inHorizon());
 		this->currentPosition()->connect(m_plasticity->inPosition());
 		this->currentVelocity()->connect(m_plasticity->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_plasticity->inNeighborhood());
+		m_nbrQuery->outNeighborIds()->connect(m_plasticity->inNeighborIds());
 
 		m_pbdModule = this->template addConstraintModule<DensityPBD<TDataType>>("pbd");
 		m_horizon.connect(m_pbdModule->varSmoothingLength());
 		this->currentPosition()->connect(m_pbdModule->inPosition());
 		this->currentVelocity()->connect(m_pbdModule->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_pbdModule->inNeighborIndex());
+		m_nbrQuery->outNeighborIds()->connect(m_pbdModule->inNeighborIds());
 
 		m_visModule = this->template addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
 		m_visModule->setViscosity(Real(1));
 		m_horizon.connect(&m_visModule->m_smoothingLength);
 		this->currentPosition()->connect(&m_visModule->m_position);
 		this->currentVelocity()->connect(&m_visModule->m_velocity);
-		m_nbrQuery->outNeighborhood()->connect(&m_visModule->m_neighborhood);
+		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 
 
 		m_surfaceNode = this->template createChild<Node>("Mesh");
@@ -137,11 +138,11 @@ namespace dyno
 		auto module = this->getModule("elastoplasticity");
 		this->deleteModule(module);
 
-		auto nbrQuery = this->template getModule<NeighborQuery<TDataType>>("neighborhood");
+		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
 
 		this->currentPosition()->connect(solver->inPosition());
 		this->currentVelocity()->connect(solver->inVelocity());
-		nbrQuery->outNeighborhood()->connect(solver->inNeighborhood());
+		nbrQuery->outNeighborIds()->connect(solver->inNeighborIds());
 		m_horizon.connect(solver->inHorizon());
 
 		solver->setName("elastoplasticity");

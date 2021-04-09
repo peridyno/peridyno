@@ -74,6 +74,24 @@ namespace dyno
 		return true;
 	}
 
+	template<typename ElementType>
+	template<typename ET2>
+	bool ArrayList<ElementType, DeviceType::GPU>::resize(const ArrayList<ET2, DeviceType::GPU>& src) {
+		uint arraySize = src.size();
+		if (m_index.size() != arraySize)
+		{
+			m_index.resize(arraySize);
+			m_lists.resize(arraySize);
+		}
+
+		m_index.assign(src.index());
+		m_elements.resize(src.elementSize());
+
+		parallel_allocate_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
+
+		return true;
+	}
+
 	template<class ElementType>
 	void ArrayList<ElementType, DeviceType::GPU>::assign(const ArrayList<ElementType, DeviceType::GPU>& src)
 	{
@@ -183,7 +201,7 @@ namespace dyno
 		//redirect the element address
 		for (int i = 0; i < src.size(); i++)
 		{
-			m_lists[i].reverse(m_elements.begin(), m_lists[i].size());
+			m_lists[i].reverse(m_elements.begin() + m_index[i], m_lists[i].size());
 		}
 	}
 
@@ -198,7 +216,7 @@ namespace dyno
 		//redirect the element address
 		for (int i = 0; i < src.size(); i++)
 		{
-			m_lists[i].reserve(m_elements.begin(), m_lists[i].size());
+			m_lists[i].reserve(m_elements.begin() + m_index[i], m_lists[i].size());
 		}
 	}
 }

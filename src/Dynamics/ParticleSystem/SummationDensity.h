@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/ModuleCompute.h"
-#include "Topology/FieldNeighbor.h"
 
 namespace dyno {
 	/**
@@ -30,7 +29,7 @@ namespace dyno {
 		void compute(
 			DArray<Real>& rho,
 			DArray<Coord>& pos,
-			NeighborList<int>& neighbors,
+			DArrayList<int>& neighbors,
 			Real smoothingLength,
 			Real mass);
 
@@ -43,19 +42,19 @@ namespace dyno {
 		/**
 		 * @brief Particle positions
 		 */
-		DEF_EMPTY_IN_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
 
 		/**
 		 * @brief Neighboring particles
 		 *
 		 */
-		DEF_EMPTY_IN_NEIGHBOR_LIST(NeighborIndex, int, "Neighboring particles' ids");
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
 		///Define outputs
 		/**
 		 * @brief Particle densities
 		 */
-		DEF_EMPTY_OUT_ARRAY(Density, Real, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Return the particle density");
 
 	private:
 		Real m_particle_mass;

@@ -10,14 +10,6 @@ namespace dyno
 	public:
 		UnstructuredPointSet();
 		~UnstructuredPointSet();
-
-	private:
-
-		/**
-		* @brief Neighboring particles
-		*
-		*/
-		DEF_EMPTY_IN_NEIGHBOR_LIST(Neighborhood, int, "Neighboring particles' ids");
 	};
 }
 

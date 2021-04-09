@@ -6,8 +6,6 @@
 #include <set>
 #include "Platform.h"
 #include "Framework/Module.h"
-#include "Topology/FieldNeighbor.h"
-
 namespace dyno
 {
 class MechanicalState : public Module

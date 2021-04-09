@@ -1,8 +1,8 @@
 #pragma once
 #include "Framework/CollisionModel.h"
+#include "Algorithm/Reduction.h"
 #include "Topology/Primitive3D.h"
 #include "Topology/SparseOctree.h"
-#include "Algorithm/Reduction.h"
 
 namespace dyno
 {
@@ -29,15 +29,13 @@ namespace dyno
 		}
 
 	public:
-
 		DEF_EMPTY_VAR(GridSizeLimit, Real, "Limit the smallest grid size");
 
-		DEF_EMPTY_IN_ARRAY(Source, AABB, DeviceType::GPU, "");
+		DEF_ARRAY_IN(AABB, Source, DeviceType::GPU, "");
 
-		DEF_EMPTY_IN_ARRAY(Target, AABB, DeviceType::GPU, "");
+		DEF_ARRAY_IN(AABB, Target, DeviceType::GPU, "");
 
-
-		DEF_EMPTY_OUT_NEIGHBOR_LIST(ContactList, int, "Contact pairs");
+		DEF_ARRAYLIST_OUT(int, ContactList, DeviceType::GPU, "Contact pairs");
 
 
 	private:

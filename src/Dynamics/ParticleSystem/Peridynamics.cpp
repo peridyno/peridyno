@@ -5,7 +5,7 @@
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "ParticleIntegrator.h"
-#include "Topology/NeighborQuery.h"
+#include "Topology/NeighborPointQuery.h"
 
 namespace dyno
 {
@@ -39,7 +39,7 @@ namespace dyno
 		m_forceDensity.connect(m_integrator->inForceDensity());
 		m_integrator->initialize();
 
-		m_nbrQuery = std::make_shared<NeighborQuery<TDataType>>();
+		m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		m_horizon.connect(m_nbrQuery->inRadius());
 		m_position.connect(m_nbrQuery->inPosition());
 		m_nbrQuery->initialize();
@@ -49,7 +49,7 @@ namespace dyno
 		m_position.connect(m_elasticity->inPosition());
 		m_velocity.connect(m_elasticity->inVelocity());
 		m_horizon.connect(m_elasticity->inHorizon());
-		m_nbrQuery->outNeighborhood()->connect(m_elasticity->inNeighborhood());
+		m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
 		m_elasticity->initialize();
 
 		m_nbrQuery->setParent(getParent());

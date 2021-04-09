@@ -58,6 +58,13 @@ namespace dyno
 		}
 	}
 
+	template<typename TDataType>
+	bool NeighborPointQuery<TDataType>::initializeImpl()
+	{
+		this->update();
+		return true;
+	}
+
 
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_CalNeighborSize(
@@ -173,7 +180,7 @@ namespace dyno
 			h);
 
 		counter.clear();
-		hashGrid.clear();
+		hashGrid.release();
 	}
 	
 	template<typename Real, typename Coord, typename TDataType>

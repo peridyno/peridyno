@@ -126,13 +126,11 @@ namespace dyno {
 
 		DeviceType	deviceType() { return DeviceType::GPU; }
 
-		GPU_FUNC inline T& operator [] (unsigned int id)
-		{
+		GPU_FUNC inline T& operator [] (unsigned int id) {
 			return m_data[id];
 		}
 
-		GPU_FUNC inline T operator [] (unsigned int id) const
-		{
+		GPU_FUNC inline T operator [] (unsigned int id) const {
 			return m_data[id];
 		}
 

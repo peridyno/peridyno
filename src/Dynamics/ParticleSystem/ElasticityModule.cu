@@ -21,19 +21,19 @@ namespace dyno
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_PrecomputeShape(
 		DArray<Matrix> invK,
-		NeighborList<NPair> restShapes)
+		DArrayList<NPair> restShapes)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= invK.size()) return;
 
-		NPair np_i = restShapes.getElement(pId, 0);
+		List<NPair>& restShape_i = restShapes[pId];
+		NPair np_i = restShape_i[0];
 		Coord rest_i = np_i.pos;
-		int size_i = restShapes.getNeighborSize(pId);
-
+		int size_i = restShape_i.size();
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes.getElement(pId, ne);
+			NPair np_j = restShape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_i - rest_pos_j).norm();
 
@@ -46,7 +46,7 @@ namespace dyno
 		Matrix mat_i = Matrix(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes.getElement(pId, ne);
+			NPair np_j = restShape_i[ne];
 			Coord rest_j = np_j.pos;
 			Real r = (rest_i - rest_j).norm();
 
@@ -94,40 +94,6 @@ namespace dyno
 		else
 			mat_i = mat_i.inverse();
 
-		
-
-// 		polarDecomposition(mat_i, R, U, D);
-// 
-// 		Real threshold = 0.0001f*smoothingLength;
-// 		D(0, 0) = D(0, 0) > threshold ? 1.0 / D(0, 0) : 1.0;
-// 		D(1, 1) = D(1, 1) > threshold ? 1.0 / D(1, 1) : 1.0;
-// 		D(2, 2) = D(2, 2) > threshold ? 1.0 / D(2, 2) : 1.0;
-// 
-// 		mat_i = R.transpose()*U*D*U.transpose();
-
-// 		printf("Mat: \n %f %f %f \n %f %f %f \n %f %f %f \n	R: \n %f %f %f \n %f %f %f \n %f %f %f \n D: \n %f %f %f \n %f %f %f \n %f %f %f \n U :\n %f %f %f \n %f %f %f \n %f %f %f \n Determinant: %f \n\n",
-// 			mat_i(0, 0), mat_i(0, 1), mat_i(0, 2),
-// 			mat_i(1, 0), mat_i(1, 1), mat_i(1, 2),
-// 			mat_i(2, 0), mat_i(2, 1), mat_i(2, 2),
-// 			R(0, 0), R(0, 1), R(0, 2),
-// 			R(1, 0), R(1, 1), R(1, 2),
-// 			R(2, 0), R(2, 1), R(2, 2),
-// 			D(0, 0), D(0, 1), D(0, 2),
-// 			D(1, 0), D(1, 1), D(1, 2),
-// 			D(2, 0), D(2, 1), D(2, 2),
-// 			U(0, 0), U(0, 1), U(0, 2),
-// 			U(1, 0), U(1, 1), U(1, 2),
-// 			U(2, 0), U(2, 1), U(2, 2),
-// 			R.determinant());
-// 		printf("Mat: \n %f %f %f \n %f %f %f \n %f %f %f \n	U :\n %f %f %f \n %f %f %f \n %f %f %f \n Determinant: %f \n\n",
-// 			mat_i(0, 0), mat_i(0, 1), mat_i(0, 2),
-// 			mat_i(1, 0), mat_i(1, 1), mat_i(1, 2),
-// 			mat_i(2, 0), mat_i(2, 1), mat_i(2, 2),
-// 			U(0, 0), U(0, 1), U(0, 2),
-// 			U(1, 0), U(1, 1), U(1, 2),
-// 			U(2, 0), U(2, 1), U(2, 2),
-// 			R.determinant());
-
 		invK[pId] = mat_i;
 	}
 
@@ -143,7 +109,7 @@ namespace dyno
 		DArray<Real> bulkCoefs,
 		DArray<Matrix> invK,
 		DArray<Coord> position,
-		NeighborList<NPair> restShapes,
+		DArrayList<NPair> restShapes,
 		Real mu,
 		Real lambda)
 	{
@@ -151,9 +117,10 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
 
-		NPair np_i = restShapes.getElement(pId, 0);
+		List<NPair>& restShape_i = restShapes[pId];
+		NPair np_i = restShape_i[0];
 		Coord rest_i = np_i.pos;
-		int size_i = restShapes.getNeighborSize(pId);
+		int size_i = restShape_i.size();
 
 		Coord cur_pos_i = position[pId];
 
@@ -164,7 +131,7 @@ namespace dyno
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes.getElement(pId, ne);
+			NPair np_j = restShape_i[ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_i - rest_pos_j).norm();
@@ -179,7 +146,7 @@ namespace dyno
 		Matrix deform_i = Matrix(0.0f);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes.getElement(pId, ne);
+			NPair np_j = restShape_i[ne];
 			Coord rest_j = np_j.pos;
 			int j = np_j.index;
 
@@ -218,9 +185,19 @@ namespace dyno
 		}
 
 
+// 		//if (pId == 0)
+// 		{
+// 			Matrix mat_i = invK[pId];
+// 			printf("Mat %d: \n %f %f %f \n %f %f %f \n %f %f %f \n", 
+// 				pId,
+// 				mat_i(0, 0), mat_i(0, 1), mat_i(0, 2),
+// 				mat_i(1, 0), mat_i(1, 1), mat_i(1, 2),
+// 				mat_i(2, 0), mat_i(2, 1), mat_i(2, 2));
+// 		}
+
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes.getElement(pId, ne);
+			NPair np_j = restShape_i[ne];
 			Coord rest_j = np_j.pos;
 			int j = np_j.index;
 
@@ -278,6 +255,13 @@ namespace dyno
 		if (pId >= position.size()) return;
 
 		position[pId] = (old_position[pId] + delta_position[pId]) / (1.0+delta_weights[pId]);
+
+		if (pId == 0)
+		{
+			Coord vec_i = position[pId];
+			printf("Vec: \n %f %f %f \n",
+				vec_i[0], vec_i[1], vec_i[2]);
+		}
 	}
 
 
@@ -298,25 +282,12 @@ namespace dyno
 	ElasticityModule<TDataType>::ElasticityModule()
 		: ConstraintModule()
 	{
-//		this->attachField(&m_horizon, "horizon", "Supporting radius!", false);
-//		this->attachField(&m_distance, "distance", "The sampling distance!", false);
-		this->attachField(&m_mu, "mu", "Material stiffness!", false);
-		this->attachField(&m_lambda, "lambda", "Material stiffness!", false);
-		this->attachField(&m_iterNum, "Iterations", "Iteration Number", false);
-
-//		this->attachField(&m_position, "position", "Storing the particle positions!", false);
-//		this->attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-//		this->attachField(&m_neighborhood, "neighborhood", "Storing neighboring particles' ids!", false);
-
-//		this->attachField(&testing, "testing", "For testing", false);
-//		this->attachField(&TetOut, "TetOut", "For testing", false);
-
 		this->inHorizon()->setValue(0.0125);
  		m_mu.setValue(0.05);
  		m_lambda.setValue(0.1);
 		m_iterNum.setValue(10);
 
-		this->inNeighborhood()->tagOptional(true);
+		this->inNeighborIds()->tagOptional(true);
 	}
 
 
@@ -380,12 +351,12 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::computeInverseK()
 	{
-		int num = this->inRestShape()->getElementCount();
-		uint pDims = cudaGridSize(num, BLOCK_SIZE);
+		auto& restShapes = this->inRestShape()->getData();
+		uint pDims = cudaGridSize(restShapes.size(), BLOCK_SIZE);
 
 		EM_PrecomputeShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
 			m_invK,
-			this->inRestShape()->getData());
+			restShapes);
 		cuSynchronize();
 	}
 
@@ -399,10 +370,8 @@ namespace dyno
 		this->computeInverseK();
 
 		int itor = 0;
-		while (itor < m_iterNum.getData())
-		{
+		while (itor < m_iterNum.getData()) {
 			this->enforceElasticity();
-
 			itor++;
 		}
 
@@ -437,80 +406,96 @@ namespace dyno
 
 	template <typename Coord, typename NPair>
 	__global__ void K_UpdateRestShape(
-		NeighborList<NPair> shape,
-		NeighborList<int> nbr,
+		DArrayList<NPair> shape,
+		DArrayList<int> nbr,
 		DArray<Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
 
 		NPair np;
-		int nbSize = nbr.getNeighborSize(pId);
-		
+
+		List<NPair>& rest_shape_i = shape[pId];
+		List<int>& list_id_i = nbr[pId];
+		int nbSize = list_id_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = nbr.getElement(pId, ne);
+			int j = list_id_i[ne];
 			np.index = j;
 			np.pos = pos[j];
 			np.weight = 1;
- 			if (pId != j)
- 			{
-// 				if (pId == 4 && j == 5)
-// 				{
-// 					np.pos += Coord(0.0001, 0, 0);
-// 				}
-// 
-// 				if (pId == 5 && j == 4)
-// 				{
-// 					np.pos += Coord(-0.0001, 0, 0);
-// 				}
 
- 				shape.setElement(pId, ne, np);
-			}
-			else
+			rest_shape_i.insert(np);
+			if (pId == j)
 			{
-				if (ne == 0)
-				{
-					shape.setElement(pId, ne, np);
-				}
-				else
-				{
-					auto ele = shape.getElement(pId, 0);
-					shape.setElement(pId, 0, np);
-					shape.setElement(pId, ne, ele);
-				}
+				NPair np_0 = rest_shape_i[0];
+				rest_shape_i[0] = np;
+				rest_shape_i[ne] = np_0;
 			}
 		}
+
+		if (pId == 0)
+		{
+			for (int ne = 0; ne < nbSize; ne++)
+			{
+				NPair np_j = rest_shape_i[ne];
+
+				printf("%d: %d; %f %f %f \n", pId, np_j.index, np_j.pos[0], np_j.pos[1], np_j.pos[2]);
+			}
+		}
+		
+
+// 		for (int ne = 0; ne < nbSize; ne++)
+// 		{
+// 			int j = list_id_i[ne];
+// 
+// 			printf("%d: %d; %f %f %f \n", pId, j, pos[j][0], pos[j][1], pos[j][2]);
+// 		}
 	}
 
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::resetRestShape()
 	{
-		this->inRestShape()->setElementCount(this->inNeighborhood()->getData().size());
-		this->inRestShape()->getData().getIndex().resize(this->inNeighborhood()->getData().getIndex().size());
+		auto& nbrIds = this->inNeighborIds()->getData();
 
-		if (this->inNeighborhood()->getData().isLimited())
-		{
-			this->inRestShape()->getData().setNeighborLimit(this->inNeighborhood()->getData().getNeighborLimit());
-		}
-		else
-		{
-			this->inRestShape()->getData().getElements().resize(this->inNeighborhood()->getData().getElements().size());
+		if (this->inRestShape()->isEmpty()) {
+			this->inRestShape()->allocate();
 		}
 
-		this->inRestShape()->getData().getIndex().assign(this->inNeighborhood()->getData().getIndex());
+		this->inRestShape()->getDataPtr()->resize(nbrIds);
 
-		uint pDims = cudaGridSize(this->inPosition()->getData().size(), BLOCK_SIZE);
-
-		K_UpdateRestShape<< <pDims, BLOCK_SIZE >> > (this->inRestShape()->getData(), this->inNeighborhood()->getData(), this->inPosition()->getData());
-		cuSynchronize();
+		cuExecute(nbrIds.size(),
+			K_UpdateRestShape,
+			this->inRestShape()->getData(),
+			this->inNeighborIds()->getData(),
+			this->inPosition()->getData());
 	}
 
 	template<typename TDataType>
 	bool ElasticityModule<TDataType>::initializeImpl()
 	{
-		if (this->inHorizon()->isEmpty() || this->inPosition()->isEmpty() || this->inVelocity()->isEmpty() || this->inNeighborhood()->isEmpty())
+		if (this->inHorizon()->isEmpty() || this->inPosition()->isEmpty() || this->inVelocity()->isEmpty() || this->inNeighborIds()->isEmpty())
 		{
+			if (this->inHorizon()->isEmpty())
+			{
+				return false;
+			}
+
+			if (this->inPosition()->isEmpty())
+			{
+				return false;
+			}
+
+			if (this->inVelocity()->isEmpty())
+			{
+				return false;
+			}
+
+			if (this->inNeighborIds()->isEmpty())
+			{
+				return false;
+			}
+
 			std::cout << "Exception: " << std::string("ElasticityModule's fields are not fully initialized!") << "\n";
 			return false;
 		}

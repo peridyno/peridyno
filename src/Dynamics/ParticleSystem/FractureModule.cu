@@ -17,7 +17,7 @@ namespace dyno
 	__global__ void PM_ComputeInvariants(
 		DArray<Real> bulk_stiffiness,
 		DArray<Coord> position,
-		NeighborList<NPair> restShape,
+		DArrayList<NPair> restShape,
 		Real horizon,
 		Real A,
 		Real B,
@@ -31,17 +31,18 @@ namespace dyno
 
 		Real s_A = A;
 
-		Coord rest_pos_i = restShape.getElement(i, 0).pos;
+		List<NPair>& rest_shape_i = restShape[i];
+		Coord rest_pos_i = rest_shape_i[0].pos;
 		Coord cur_pos_i = position[i];
 
 		Real I1_i = 0.0f;
 		Real J2_i = 0.0f;
 		//compute the first and second invariants of the deformation state, i.e., I1 and J2
-		int size_i = restShape.getNeighborSize(i);
+		int size_i = rest_shape_i.size();
 		Real total_weight = Real(0);
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			NPair np_j = restShape.getElement(i, ne);
+			NPair np_j = rest_shape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 			int j = np_j.index;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -69,7 +70,7 @@ namespace dyno
 
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			NPair np_j = restShape.getElement(i, ne);
+			NPair np_j = rest_shape_i[ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_pos_i - rest_pos_j).norm();

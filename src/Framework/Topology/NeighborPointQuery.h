@@ -16,6 +16,9 @@ namespace dyno
 		
 		void compute() override;
 
+	protected:
+		bool initializeImpl() override;
+
 	private:
 		void requestDynamicNeighborIds();
 
@@ -31,7 +34,7 @@ namespace dyno
 		DEF_VAR_IN(Real, Radius, "Search radius");
 
 		/**
-		 * @brief A set of points to be required from
+		 * @brief A set of points to be required from.
 		 */
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "A set of points to be required from");
 

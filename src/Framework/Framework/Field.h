@@ -156,5 +156,10 @@ namespace dyno {
 		typedef ArrayListField<T, deviceType>	FieldType;
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, ArrayListField);
+
+		inline uint getElementCount() override {
+			auto ref = this->getDataPtr();
+			return ref == nullptr ? 0 : ref->size();
+		}
 	};
 }

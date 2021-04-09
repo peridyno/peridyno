@@ -1,19 +1,12 @@
-#include <iostream>
-#include <memory>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
 #include "GlutGUI/GLApp.h"
 
 #include "Framework/SceneGraph.h"
-#include "Topology/PointSet.h"
 #include "Framework/Log.h"
 
 #include "ParticleSystem/ParticleElasticBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 #include "PointRenderModule.h"
+#include "SurfaceMeshRender.h"
 #include "ParticleCloth.h"
 
 
@@ -48,10 +41,9 @@ void CreateScene()
 	root->addParticleSystem(child3);
 
 	auto m_pointsRender = std::make_shared<PointRenderModule>();
-
 	m_pointsRender->setColor(Vector3f(1, 0.2, 1));
 	child3->addVisualModule(m_pointsRender);
-	child3->setVisible(true);
+	child3->setVisible(false);
 
 	child3->setMass(1.0);
   	child3->loadParticles("../../data/cloth/cloth.obj");

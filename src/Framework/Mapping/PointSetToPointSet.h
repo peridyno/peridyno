@@ -1,6 +1,5 @@
 #pragma once
 #include "Framework/TopologyMapping.h"
-#include "Array/Array.h"
 #include "Topology/PointSet.h"
 
 namespace dyno
@@ -34,7 +33,7 @@ private:
 	//Searching radius
 	Real m_radius = 0.0125;
 
-	NeighborList<int> m_neighborhood;
+	DArrayList<int> mNeighborIds;
 	
 	std::shared_ptr<PointSet<TDataType>> m_from = nullptr;
 	std::shared_ptr<PointSet<TDataType>> m_to = nullptr;

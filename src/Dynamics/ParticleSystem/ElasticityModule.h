@@ -81,11 +81,11 @@ namespace dyno {
 		 * @brief Neighboring particles
 		 * 
 		 */
-		DEF_EMPTY_IN_NEIGHBOR_LIST(Neighborhood, int, "Neighboring particles' ids");
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 		//NeighborField<int> m_neighborhood;
 
 
-		DEF_EMPTY_IN_NEIGHBOR_LIST(RestShape, NPair, "Reference shape");
+		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
 		//NeighborField<int> m_neighborhood;
 
 //		NeighborField<NPair> m_restShape;

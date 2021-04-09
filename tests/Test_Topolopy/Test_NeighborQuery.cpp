@@ -3,6 +3,27 @@
 
 using namespace dyno;
 
+TEST(NeighborPointQuery, findNeighbors1D)
+{
+	NeighborPointQuery<DataType3f> nQuery;
+
+	CArray<Vector3f> points;
+
+	for (float x = 0.0f; x < 1.0f; x += 0.1f)
+	{
+		points.pushBack(Vector3f(x, 0.0f, 0.0f));
+	}
+
+	nQuery.inRadius()->setValue(1.01f);
+	nQuery.inPosition()->allocate()->assign(points);
+	nQuery.update();
+
+	auto& nbrIds = nQuery.outNeighborIds()->getData();
+
+	std::cout << nbrIds.elements() << std::endl;
+	std::cout << nbrIds << std::endl;
+}
+
 TEST(NeighborPointQuery, findNeighbors)
 {
 	NeighborPointQuery<DataType3f> nQuery;

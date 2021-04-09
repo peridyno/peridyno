@@ -2,8 +2,8 @@
 #include "PositionBasedFluidModel.h"
 
 #include "Topology/PointSet.h"
+#include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem.h"
-#include "Topology/NeighborQuery.h"
 #include "Kernel.h"
 #include "DensityPBD.h"
 #include "ImplicitViscosity.h"
@@ -19,7 +19,7 @@ namespace dyno
 		this->attachField(&radius, "radius", "radius");
 		radius.setValue(0.0075);
 
-		m_nbrQuery = this->template addComputeModule<NeighborQuery<TDataType>>("neighborhood");
+		m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
 		radius.connect(m_nbrQuery->inRadius());
 		m_position.connect(m_nbrQuery->inPosition());
 
@@ -27,7 +27,7 @@ namespace dyno
 		radius.connect(m_pbdModule->varSmoothingLength());
 		m_position.connect(m_pbdModule->inPosition());
 		m_vels.connect(m_pbdModule->inVelocity());
-		m_nbrQuery->outNeighborhood()->connect(m_pbdModule->inNeighborIndex());
+		m_nbrQuery->outNeighborIds()->connect(m_pbdModule->inNeighborIds());
 		m_pbdModule->varIterationNumber()->setValue(5);
 	}
 

@@ -1,10 +1,3 @@
-#include <iostream>
-#include <memory>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
 #include "GlutGUI/GLApp.h"
 
 #include "Framework/SceneGraph.h"
@@ -44,7 +37,7 @@ void CreateScene()
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
 	root->loadCube(Vector3f(-0.5, 0, -0.5), Vector3f(1.5, 2, 1.5), 0.02, true);
-	root->loadSDF("../../data/bowl/bowl.sdf", false);
+	//root->loadSDF("../../data/bowl/bowl.sdf", false);
 
 	std::shared_ptr<ParticleFluid<DataType3f>> child1 = std::make_shared<ParticleFluid<DataType3f>>();
 	root->addParticleSystem(child1);
@@ -54,7 +47,6 @@ void CreateScene()
 	ptRender->setColorRange(0, 4);
 	child1->addVisualModule(ptRender);
 
-	//child1->loadParticles("../data/fluid/fluid_point.obj");
 	child1->loadParticles(Vector3f(0.5, 0.2, 0.4), Vector3f(0.7, 1.5, 0.6), 0.005);
 	child1->setMass(100);
 	child1->currentVelocity()->connect(&ptRender->m_vecIndex);

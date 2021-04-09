@@ -231,11 +231,11 @@ namespace dyno
 
 		edg2Tri.resize(edgeNum);
 
-		auto pEdges = this->getEdges();
-		pEdges->resize(edgeNum);
+		auto& pEdges = this->getEdges();
+		pEdges.resize(edgeNum);
 		cuExecute(keys.size(),
 			TS_SetupEdges,
-			*pEdges,
+			pEdges,
 			edg2Tri,
 			keys,
 			counter,

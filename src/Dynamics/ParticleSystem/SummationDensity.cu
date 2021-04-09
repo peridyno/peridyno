@@ -1,6 +1,4 @@
-#include <cuda_runtime.h>
 #include "SummationDensity.h"
-#include "Framework/MechanicalState.h"
 #include "Framework/Node.h"
 #include "Kernel.h"
 
@@ -9,13 +7,12 @@ namespace dyno
 	IMPLEMENT_CLASS_1(SummationDensity, TDataType)
 
 	template<typename Real, typename Coord>
-	__global__ void K_ComputeDensity(
+	__global__ void SD_ComputeDensity(
 		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
-		NeighborList<int> neighbors,
+		DArrayList<int> neighbors,
 		Real smoothingLength,
-		Real mass
-	)
+		Real mass)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= posArr.size()) return;
@@ -24,10 +21,11 @@ namespace dyno
 		Real r;
 		Real rho_i = Real(0);
 		Coord pos_i = posArr[pId];
-		int nbSize = neighbors.getNeighborSize(pId);
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = neighbors.getElement(pId, ne);
+			int j = list_i[ne];
 			r = (pos_i - posArr[j]).norm();
 			rho_i += mass*kern.Weight(r, smoothingLength);
 		}
@@ -57,27 +55,23 @@ namespace dyno
 	template<typename TDataType>
 	void SummationDensity<TDataType>::compute()
 	{
-		int p_num = this->inPosition()->getElementCount();
-		int n_num = this->inNeighborIndex()->getElementCount();
-		if (p_num != n_num)
-		{
+		int p_num = this->inPosition()->getDataPtr()->size();
+		int n_num = this->inNeighborIds()->getDataPtr()->size();
+		if (p_num != n_num) {
 			Log::sendMessage(Log::Error, "The input array sizes of DensitySummation are not compatible!");
 			return;
 		}
 
-		if (this->outDensity()->getElementCount() != p_num)
-		{
+		if (this->outDensity()->getElementCount() != p_num) {
 			this->outDensity()->setElementCount(p_num);
 		}
 
 		compute(
 			this->outDensity()->getData(),
 			this->inPosition()->getData(),
-			this->inNeighborIndex()->getData(),
+			this->inNeighborIds()->getData(),
 			this->varSmoothingLength()->getData(),
 			m_particle_mass);
-
-		this->outDensity()->tagModified(true);
 	}
 
 
@@ -87,7 +81,7 @@ namespace dyno
 		compute(
 			rho,
 			this->inPosition()->getData(),
-			this->inNeighborIndex()->getData(),
+			this->inNeighborIds()->getData(),
 			this->varSmoothingLength()->getData(),
 			m_particle_mass);
 	}
@@ -96,11 +90,12 @@ namespace dyno
 	void SummationDensity<TDataType>::compute(
 		DArray<Real>& rho, 
 		DArray<Coord>& pos,
-		NeighborList<int>& neighbors, 
+		DArrayList<int>& neighbors,
 		Real smoothingLength,
 		Real mass)
 	{
-		cuExecute(rho.size(), K_ComputeDensity,
+		cuExecute(rho.size(), 
+			SD_ComputeDensity,
 			rho, 
 			pos, 
 			neighbors, 
@@ -120,7 +115,7 @@ namespace dyno
 		SpikyKernel<Real> kern;
 
 		Real total_weight(0);
-		int half_res = H / d + 1;
+		int half_res = (int)(H / d + 1);
 		for (int i = -half_res; i <= half_res; i++)
 			for (int j = -half_res; j <= half_res; j++)
 				for (int k = -half_res; k <= half_res; k++)
@@ -132,7 +127,7 @@ namespace dyno
 					total_weight += V * kern.Weight(r, H);
 				}
 
-		m_factor = 1.0 / total_weight;
+		m_factor = Real(1) / total_weight;
 		m_particle_mass = rho_0 * V;
 	}
 
@@ -146,11 +141,11 @@ namespace dyno
 		m_particle_mass = d*d*d*rho_0;
 	}
 
-#ifdef PRECISION_FLOAT
-template class SummationDensity<DataType3f>;
-#else
-template class SummationDensity<DataType3d>;
-#endif
+// #ifdef PRECISION_FLOAT
+// template class SummationDensity<DataType3f>;
+// #else
+// template class SummationDensity2<DataType3d>;
+// #endif
 
-//	DEFINE_CLASS(SummationDensity);
+	DEFINE_CLASS(SummationDensity);
 }

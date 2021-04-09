@@ -38,7 +38,7 @@ namespace dyno
 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
 		this->addTopologyMapping(surfaceMapping);
 
-		this->setVisible(false);
+		this->setVisible(true);
 	}
 
 	template<typename TDataType>
