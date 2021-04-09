@@ -33,10 +33,10 @@ namespace dyno {
 			m_lists.clear();
 		}
 
-		bool resize(size_t num);
+		bool resize(uint num);
 
-		inline size_t size() const { return m_lists.size(); }
-		size_t elementSize();
+		inline uint size() const { return m_lists.size(); }
+		uint elementSize();
 
 		inline List<ElementType>& operator [] (unsigned int id)
 		{
@@ -77,6 +77,11 @@ namespace dyno {
 		const CArray<ElementType> elements() const { return m_elements; }
 		const CArray<List<ElementType>> lists() const { return m_lists; }
 
+		/*!
+		 *	\brief	To avoid erroneous shallow copy.
+		 */
+		ArrayList<ElementType, DeviceType::CPU>& operator=(const ArrayList<ElementType, DeviceType::CPU> &) = delete;
+
 	private:
 		CArray<int> m_index;
 		CArray<ElementType> m_elements;
@@ -107,8 +112,8 @@ namespace dyno {
 		bool resize(const DArray<int> counts);
 		bool resize(const uint arraySize, const uint eleSize);
 
-		DYN_FUNC inline int size() const { return m_lists.size(); }
-		DYN_FUNC inline int elementSize() const { return m_elements.size(); }
+		DYN_FUNC inline uint size() const { return m_lists.size(); }
+		DYN_FUNC inline uint elementSize() const { return m_elements.size(); }
 
 		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id)
 		{
@@ -142,6 +147,11 @@ namespace dyno {
 		const DArray<int>& index() const { return m_index; }
 		const DArray<ElementType> elements() const { return m_elements; }
 		const DArray<List<ElementType>> lists() const { return m_lists; }
+
+		/*!
+		*	\brief	To avoid erroneous shallow copy.
+		*/
+		ArrayList<ElementType, DeviceType::GPU>& operator=(const ArrayList<ElementType, DeviceType::GPU> &) = delete;
 
 	private:
 		DArray<int> m_index;

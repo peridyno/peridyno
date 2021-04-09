@@ -14,4 +14,6 @@ namespace dyno
 	VolumeUnion<TDataType>::~VolumeUnion()
 	{
 	}
+
+	DEFINE_CLASS(VolumeUnion);
 }

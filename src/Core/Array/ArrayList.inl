@@ -140,7 +140,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	bool ArrayList<ElementType, DeviceType::CPU>::resize(size_t num)
+	bool ArrayList<ElementType, DeviceType::CPU>::resize(uint num)
 	{
 		assert(num > 0);
 
@@ -161,9 +161,9 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	size_t ArrayList<ElementType, DeviceType::CPU>::elementSize()
+	uint ArrayList<ElementType, DeviceType::CPU>::elementSize()
 	{
-		size_t totalSize = 0;
+		uint totalSize = 0;
 		for (int i = 0; i < m_lists.size(); i++)
 		{
 			totalSize += m_lists[i].size();

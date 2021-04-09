@@ -13,9 +13,6 @@ namespace dyno {
 		VolumeIntersect();
 		~VolumeIntersect() override;
 
-
 	public:
 	};
-
-	DEFINE_CLASS(VolumeIntersect);
 }

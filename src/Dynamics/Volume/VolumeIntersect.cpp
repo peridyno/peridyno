@@ -14,4 +14,6 @@ namespace dyno
 	VolumeIntersect<TDataType>::~VolumeIntersect()
 	{
 	}
+
+	DEFINE_CLASS(VolumeIntersect);
 }

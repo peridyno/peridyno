@@ -16,6 +16,4 @@ namespace dyno {
 
 	public:
 	};
-
-	DEFINE_CLASS(VolumeUnion);
 }

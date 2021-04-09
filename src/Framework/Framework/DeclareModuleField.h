@@ -42,6 +42,12 @@ private:									\
 public:										\
 	inline VarField<T>* in##name() {return &in_##name;}
 
+#define DEF_VAR_IN(T, name, desc) \
+private:									\
+	VarField<T> in_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::In, this);			\
+public:										\
+	inline VarField<T>* in##name() {return &in_##name;}
+
 #define DEF_EMPTY_OUT_VAR(name, T, desc) \
 private:									\
 	VarField<T> out_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Out, this);			\
@@ -55,7 +61,19 @@ private:									\
 public:									\
 	inline ArrayField<T, device>* in##name() {return &in_##name;}
 
+#define DEF_ARRAY_IN(T, name, device, desc) \
+private:									\
+	ArrayField<T, device> in_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::In, this);	\
+public:									\
+	inline ArrayField<T, device>* in##name() {return &in_##name;}
+
 #define DEF_EMPTY_OUT_ARRAY(name, T, device, desc) \
+private:									\
+	ArrayField<T, device> out_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
+public:									\
+	inline ArrayField<T, device>* out##name() {return &out_##name;}
+
+#define DEF_ARRAY_OUT(T, name, device, desc) \
 private:									\
 	ArrayField<T, device> out_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
 public:									\
@@ -73,4 +91,20 @@ private:									\
 	NeighborField<T> out_##name = NeighborField<T>(std::string(#name), desc, FieldTypeEnum::Out, this, 0, 0);	\
 public:									\
 	inline NeighborField<T>* out##name() {return &out_##name;}
+
+	/**
+	 *
+	 */
+
+#define DEF_ARRAYLIST_IN(T, name, device, desc)			\
+private:												\
+	ArrayListField<T, device> in_##name = ArrayListField<T, device>(std::string(#name), desc, FieldTypeEnum::In, this);	\
+public:													\
+	inline ArrayListField<T, device>* in##name() {return &in_##name;}
+
+#define DEF_ARRAYLIST_OUT(T, name, device, desc)		\
+private:												\
+	ArrayListField<T, device> out_##name = ArrayListField<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
+public:													\
+	inline ArrayListField<T, device>* out##name() {return &out_##name;}
 }
