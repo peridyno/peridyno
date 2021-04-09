@@ -52,14 +52,14 @@ namespace dyno {
 
 		inline Real computeA()
 		{
-			Real phi = m_phi.getValue();
-			return (Real)6.0*m_c.getValue()*cos(phi) / (3.0f + sin(phi)) / sqrt(3.0f);
+			Real phi = m_phi.getData();
+			return (Real)6.0*m_c.getData()*cos(phi) / (3.0f + sin(phi)) / sqrt(3.0f);
 		}
 
 
 		inline Real computeB()
 		{
-			Real phi = m_phi.getValue();
+			Real phi = m_phi.getData();
 			return (Real)2.0f*sin(phi) / (3.0f + sin(phi)) / sqrt(3.0f);
 		}
 

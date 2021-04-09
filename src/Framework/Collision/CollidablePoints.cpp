@@ -70,8 +70,8 @@ namespace dyno
 		if (mType == MechanicalState::ParticleSystem)
 		{
 			auto mapping = std::make_shared<FrameToPointSet<TDataType>>();
-			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getValue();
-			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getValue();
+			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getData();
+			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getData();
 
 			Rigid tmp_rigid(center, Quat<Real>(rotation));
 			mapping->initialize(tmp_rigid, m_positions);
@@ -94,8 +94,8 @@ namespace dyno
 		auto mType = mstate->getMaterialType();
 		if (mType == MechanicalState::ParticleSystem)
 		{
-			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getValue();
-			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getValue();
+			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getData();
+			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getData();
 
 			auto pSet = TypeInfo::cast<PointSet<TDataType>>(getParent()->getTopologyModule());
 
@@ -112,8 +112,8 @@ namespace dyno
 			auto vBuf = mstate->getField<DeviceArrayField<Coord>>(MechanicalState::velocity());
 			//std::shared_ptr<DeviceArrayField<Coord>> vBuf = TypeInfo::cast<DeviceArrayField<Coord>>(vel);
 
-			m_positions.assign(*(pBuf->getReference()));
-			m_velocities.assign(*(vBuf->getReference()));
+			m_positions.assign(*(pBuf->getDataPtr()));
+			m_velocities.assign(*(vBuf->getDataPtr()));
 		}
 	}
 
@@ -125,9 +125,9 @@ namespace dyno
 		auto dc = getParent()->getMechanicalState();
 		if (mType == MechanicalState::ParticleSystem)
 		{
-			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getValue();
-			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getValue();
-			auto vel = mstate->getField<HostVarField<Coord>>(MechanicalState::velocity())->getValue();
+			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getData();
+			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getData();
+			auto vel = mstate->getField<HostVarField<Coord>>(MechanicalState::velocity())->getData();
 			
 			CArray<Coord> hPos;
 			CArray<Coord> hInitPos;
@@ -176,8 +176,8 @@ namespace dyno
 			auto posArr = dc->getField<DeviceArrayField<Coord>>(MechanicalState::position());
 			auto velArr = dc->getField<DeviceArrayField<Coord>>(MechanicalState::velocity());
 
-			posArr->getReference()->assign(m_positions);
-			velArr->getReference()->assign(m_velocities);
+			posArr->getDataPtr()->assign(m_positions);
+			velArr->getDataPtr()->assign(m_velocities);
 		}
 	}
 

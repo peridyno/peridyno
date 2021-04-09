@@ -274,7 +274,7 @@ namespace dyno
 		if (m_position_old.size() != this->inPosition()->getElementCount())
 			m_position_old.resize(this->inPosition()->getElementCount());
 
-		m_position_old.assign(this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getData());
 
 		if (this->outDensity()->getElementCount() != this->inPosition()->getElementCount())
 			this->outDensity()->setElementCount(this->inPosition()->getElementCount());
@@ -287,7 +287,7 @@ namespace dyno
 
 		int it = 0;
 
-		int itNum = this->varIterationNumber()->getValue();
+		int itNum = this->varIterationNumber()->getData();
 		while (it < itNum)
 		{
 			takeOneIteration();
@@ -319,46 +319,46 @@ namespace dyno
 		{
 			cuExecute(num, K_ComputeLambdas,
 				m_lamda,
-				m_summation->outDensity()->getValue(),
-				this->inPosition()->getValue(),
-				this->inNeighborIndex()->getValue(),
+				m_summation->outDensity()->getData(),
+				this->inPosition()->getData(),
+				this->inNeighborIndex()->getData(),
 				m_kernel,
-				this->varSmoothingLength()->getValue());
+				this->varSmoothingLength()->getData());
 
 			cuExecute(num, K_ComputeDisplacement,
 				m_deltaPos,
 				m_lamda,
-				this->inPosition()->getValue(),
-				this->inNeighborIndex()->getValue(),
+				this->inPosition()->getData(),
+				this->inNeighborIndex()->getData(),
 				m_kernel,
-				this->varSmoothingLength()->getValue(),
+				this->varSmoothingLength()->getData(),
 				dt);
 		}
 		else
 		{
 			cuExecute(num, K_ComputeLambdas,
 				m_lamda,
-				m_summation->outDensity()->getValue(),
-				this->inPosition()->getValue(),
-				m_massInv.getValue(),
-				this->inNeighborIndex()->getValue(),
+				m_summation->outDensity()->getData(),
+				this->inPosition()->getData(),
+				m_massInv.getData(),
+				this->inNeighborIndex()->getData(),
 				m_kernel,
-				this->varSmoothingLength()->getValue());
+				this->varSmoothingLength()->getData());
 
 			cuExecute(num, K_ComputeDisplacement,
 				m_deltaPos,
 				m_lamda,
-				this->inPosition()->getValue(),
-				m_massInv.getValue(),
-				this->inNeighborIndex()->getValue(),
+				this->inPosition()->getData(),
+				m_massInv.getData(),
+				this->inNeighborIndex()->getData(),
 				m_kernel,
-				this->varSmoothingLength()->getValue(),
+				this->varSmoothingLength()->getData(),
 				dt);
 		}
 
 		cuExecute(num, K_UpdatePosition,
-			this->inPosition()->getValue(),
-			this->inVelocity()->getValue(),
+			this->inPosition()->getData(),
+			this->inVelocity()->getData(),
 			m_deltaPos,
 			dt);
 	}
@@ -384,9 +384,9 @@ namespace dyno
 		Real dt = this->getParent()->getDt();
 
 		cuExecute(num, DP_UpdateVelocity,
-			this->inVelocity()->getValue(),
+			this->inVelocity()->getData(),
 			m_position_old,
-			this->inPosition()->getValue(),
+			this->inPosition()->getData(),
 			dt);
 	}
 

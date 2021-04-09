@@ -168,19 +168,19 @@ namespace dyno
 			cuExecute(p_num,
 				NTQ_SetupAABB,
 				m_queryAABB,
-				this->inPosition()->getValue(),
-				this->inRadius()->getValue());
+				this->inPosition()->getData(),
+				this->inRadius()->getData());
 				*/
 
 			cuExecute(t_num,
 				NTQ_SetupAABB,
 				m_queriedAABB,
 				tetSet->getTetrahedrons(),
-				this->inPosition()->getValue()
+				this->inPosition()->getData()
 				);
 
 			m_queryAABB.assign(m_queriedAABB);
-			Real radius = this->inRadius()->getValue();
+			Real radius = this->inRadius()->getData();
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 			m_broadPhaseCD->setSelfCollision(true);
@@ -197,21 +197,21 @@ namespace dyno
 			m_broadPhaseCD->update();
 			
 			//broad phase end
-			DArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			DArray<int>& nbrNum = this->outNeighborhood()->getData().getIndex();
 			
 			DArray<int> tag;
-			tag.resize(m_broadPhaseCD->outContactList()->getValue().getElementSize());
+			tag.resize(m_broadPhaseCD->outContactList()->getData().getElementSize());
 			tag.reset();
 			
 			cuExecute(t_num, 
 				NTQ_Narrow_Count,
-				this->inPosition()->getValue(),
-				m_broadPhaseCD->outContactList()->getValue(),
+				this->inPosition()->getData(),
+				m_broadPhaseCD->outContactList()->getData(),
 				tag,
-				this->inPosition()->getValue(),
+				this->inPosition()->getData(),
 				tetSet->getTetrahedrons(),
 				nbrNum,
-				this->inRadius()->getValue());
+				this->inRadius()->getData());
 
 			//queryNeighborSize(nbrNum, pos, h);
 			
@@ -220,23 +220,23 @@ namespace dyno
 			
 			m_scan.exclusive(nbrNum, true);
 			cuSynchronize();
-			printf("Neighbor Tet Sum: %d %d\n", sum, m_broadPhaseCD->outContactList()->getValue().getElementSize());
+			printf("Neighbor Tet Sum: %d %d\n", sum, m_broadPhaseCD->outContactList()->getData().getElementSize());
 
 
-			DArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+			DArray<int>& elements = this->outNeighborhood()->getData().getElements();
 			elements.resize(sum);
 
 			if (sum > 0)
 			{
 				cuExecute(t_num,
 					NTQ_Narrow_Set,
-					this->inPosition()->getValue(),
-					m_broadPhaseCD->outContactList()->getValue(),
+					this->inPosition()->getData(),
+					m_broadPhaseCD->outContactList()->getData(),
 					tag,
-					outNeighborhood()->getValue(),
-					this->inPosition()->getValue(),
+					outNeighborhood()->getData(),
+					this->inPosition()->getData(),
 					tetSet->getTetrahedrons(),
-					this->inRadius()->getValue());
+					this->inRadius()->getData());
 					
 				cuSynchronize();
 			}

@@ -161,12 +161,12 @@ namespace dyno
 			int num_i = idxTri->size();
 			if (num_p > 0)
 			{
-				cudaMemcpy(triangle_vertex->getReference()->begin() + start_pos, posTri.begin(), num_p * sizeof(Coord), cudaMemcpyDeviceToDevice);
+				cudaMemcpy(triangle_vertex->getDataPtr()->begin() + start_pos, posTri.begin(), num_p * sizeof(Coord), cudaMemcpyDeviceToDevice);
 				start_pos += num_p;
 			}
 			if(num_i > 0)
 			{
-				cudaMemcpy(triangle_index->getReference()->begin() + start_tri, idxTri->begin(), num_i * sizeof(Triangle), cudaMemcpyDeviceToDevice);
+				cudaMemcpy(triangle_index->getDataPtr()->begin() + start_tri, idxTri->begin(), num_i * sizeof(Triangle), cudaMemcpyDeviceToDevice);
 				start_tri += num_i;
 			}
 			
@@ -189,8 +189,8 @@ namespace dyno
 			int num = posFd->getElementCount();
 			if (num > 0)
 			{
-				cudaMemcpy(particle_position->getReference()->begin() + start_point, posFd->getValue().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-				cudaMemcpy(particle_velocity->getReference()->begin() + start_point, velFd->getValue().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+				cudaMemcpy(particle_position->getDataPtr()->begin() + start_point, posFd->getData().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+				cudaMemcpy(particle_velocity->getDataPtr()->begin() + start_point, velFd->getData().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 				start_point += num;
 			}
 		}
@@ -231,24 +231,24 @@ namespace dyno
 				int num = posFd->getElementCount();
 				if (num > 0)
 				{
-					cudaMemcpy(particle_position->getReference()->begin() + start_point, posFd->getValue().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-					cudaMemcpy(particle_velocity->getReference()->begin() + start_point, velFd->getValue().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					cudaMemcpy(particle_position->getDataPtr()->begin() + start_point, posFd->getData().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					cudaMemcpy(particle_velocity->getDataPtr()->begin() + start_point, velFd->getData().begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 					start_point += num;
 				}
 			}
 
 			m_nbrQuery->compute();
 
-			DArray<Coord>& posRef = particle_position->getValue();
-			DArray<Coord>& velRef = particle_velocity->getValue();
+			DArray<Coord>& posRef = particle_position->getData();
+			DArray<Coord>& velRef = particle_velocity->getData();
 
 			cuExecute(total_num, K_CD_mesh,
 				posRef,
-				triangle_vertex->getValue(),
-				triangle_index->getValue(),
+				triangle_vertex->getData(),
+				triangle_index->getData(),
 				velRef,
-				m_nbrQuery->outNeighborhood()->getValue(),
-				radius.getValue(),
+				m_nbrQuery->outNeighborhood()->getData(),
+				radius.getData(),
 				dt);
 
 
@@ -261,8 +261,8 @@ namespace dyno
 				int num = posFd->getElementCount();
 				if (num > 0)
 				{
-					cudaMemcpy(posFd->getValue().begin(), posRef.begin() + start_point, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-					cudaMemcpy(velFd->getValue().begin(), velRef.begin() + start_point, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					cudaMemcpy(posFd->getData().begin(), posRef.begin() + start_point, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					cudaMemcpy(velFd->getData().begin(), velRef.begin() + start_point, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 					start_point += num;
 				}
 			}

@@ -24,7 +24,7 @@ TEST(NeighborPointQuery, findNeighbors)
 	nQuery.inPosition()->allocate()->assign(points);
 	nQuery.update();
 
-	auto& nbrIds = nQuery.outNeighborIds()->getValue();
+	auto& nbrIds = nQuery.outNeighborIds()->getData();
 
 	CArrayList<int> host_nbrIds;
 	host_nbrIds.assign(nbrIds);

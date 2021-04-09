@@ -397,7 +397,7 @@ namespace dyno{
 		input.close();
 
 		m_distance.resize(nbx, nby, nbz);
-		cuSafeCall(cudaMemcpy(m_distance.data(), distances, (nbx)*(nby)*(nbz) * sizeof(Real), cudaMemcpyHostToDevice));
+		cuSafeCall(cudaMemcpy(m_distance.begin(), distances, (nbx)*(nby)*(nbz) * sizeof(Real), cudaMemcpyHostToDevice));
 
 		m_bInverted = inverted;
 		if (inverted)

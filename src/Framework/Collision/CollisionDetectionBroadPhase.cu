@@ -374,8 +374,8 @@ namespace dyno
 	template<typename TDataType>
 	void CollisionDetectionBroadPhase<TDataType>::doCollision()
 	{
-		auto& aabb_src = this->inSource()->getValue();
-		auto& aabb_tar = this->inTarget()->getValue();
+		auto& aabb_src = this->inSource()->getData();
+		auto& aabb_tar = this->inTarget()->getData();
 
 		DArray<Coord> v0_arr;
 		DArray<Coord> v1_arr;
@@ -402,7 +402,7 @@ namespace dyno
 		auto max_v1 = m_reduce_coord.maximum(v1_arr.begin(), v1_arr.size());
 
 
-		min_val = max(min_val, this->varGridSizeLimit()->getValue());
+		min_val = max(min_val, this->varGridSizeLimit()->getData());
 
 		h_arr.clear();
 		v0_arr.clear();
@@ -485,7 +485,7 @@ namespace dyno
 
 		this->outContactList()->setElementCount(aabb_src.size());
 
-		auto& contacts = this->outContactList()->getValue();
+		auto& contacts = this->outContactList()->getData();
 
 		auto& index = contacts.getIndex();
 		auto& elements = contacts.getElements();

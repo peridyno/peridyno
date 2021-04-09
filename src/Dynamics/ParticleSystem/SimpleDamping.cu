@@ -50,9 +50,9 @@ namespace dyno
 	template<typename TDataType>
 	bool SimpleDamping<TDataType>::constrain()
 	{
-		uint pDims = cudaGridSize(m_velocity.getValue().size(), BLOCK_SIZE);
+		uint pDims = cudaGridSize(m_velocity.getData().size(), BLOCK_SIZE);
 
-		K_DoDamping<< < pDims, BLOCK_SIZE >> > (m_velocity.getValue(), m_damping.getValue());
+		K_DoDamping<< < pDims, BLOCK_SIZE >> > (m_velocity.getData(), m_damping.getData());
 
 		return true;
 	}

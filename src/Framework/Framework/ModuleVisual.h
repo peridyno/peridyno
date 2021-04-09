@@ -30,7 +30,7 @@ public:
 	virtual void display() {};
 
 	void setVisible(bool bVisible);
-	bool isVisible() { return m_visible.getValue(); }
+	bool isVisible() { return m_visible.getData(); }
 
 	void rotate(float angle, float x, float y, float z);
 	void translate(float x, float y, float z);

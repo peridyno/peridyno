@@ -79,24 +79,24 @@ namespace dyno
 	{
 		int num = this->currentPosition()->getElementCount();
 		cuExecute(num, UpdateVelocity,
-			this->currentVelocity()->getValue(),
-			this->currentForce()->getValue(),
-			this->currentMass()->getValue(),
+			this->currentVelocity()->getData(),
+			this->currentForce()->getData(),
+			this->currentMass()->getData(),
 			dt);
 
 		//currentVelocity()->setValue(linearVel);
 
 		cuExecute(num, UpdatePosition,
-			this->currentPosition()->getValue(),
-			this->currentVelocity()->getValue(),
+			this->currentPosition()->getData(),
+			this->currentVelocity()->getData(),
 			dt);
 
 		//currentPosition()->setValue(center);
 
 		cuExecute(num, UpdateAngularVelocity,
-			this->currentAngularVelocity()->getValue(),
-			this->currentAngularMass()->getValue(),
-			this->currentTorque()->getValue(),
+			this->currentAngularVelocity()->getData(),
+			this->currentAngularMass()->getData(),
+			this->currentTorque()->getData(),
 			dt);
 	}
 

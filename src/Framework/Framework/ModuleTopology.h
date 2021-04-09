@@ -26,7 +26,7 @@ class TopologyModule : public Module
 
 public:
 	typedef int PointType;
-	typedef PointType					Point;
+	typedef PointType				Point;
 	typedef VectorND<PointType, 2>	Edge;
 	typedef VectorND<PointType, 3>	Triangle;
 	typedef VectorND<PointType, 4>	Quad;

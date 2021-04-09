@@ -82,8 +82,8 @@ namespace dyno
 		uint pDimsR = cudaGridSize(size_rigids, BLOCK_SIZE);
 		
 		RB_initialize_device << <pDimsR, BLOCK_SIZE >> > (
-			currentCenter()->getValue(),
-			currentRotation()->getValue(),
+			currentCenter()->getData(),
+			currentRotation()->getData(),
 			m_rotation_q,
 			m_sphere3d_init,
 			m_box3d_init,
@@ -100,7 +100,7 @@ namespace dyno
 		
 		// TODO: initialize pos_init
 		center_init.resize(size_rigids);
-		center_init.assign(currentCenter()->getValue());
+		center_init.assign(currentCenter()->getData());
 
 
 		
@@ -157,12 +157,12 @@ namespace dyno
 		}
 		
 
-		m_inertia.getValue().assign(host_inertia_tensor);
+		m_inertia.getData().assign(host_inertia_tensor);
 		m_inertia_init.assign(host_inertia_tensor);
-		currentVelocity()->getValue().assign(host_velocity);
-		currentAngularVelocity()->getValue().assign(host_angular_velocity);
+		currentVelocity()->getData().assign(host_velocity);
+		currentAngularVelocity()->getData().assign(host_angular_velocity);
 		
-		currentMass()->getValue().assign(host_mass);
+		currentMass()->getData().assign(host_mass);
 		
 		printf("INITIALIZE NEQ\n");
 		/* FOR TEST ONLY */
@@ -572,8 +572,8 @@ namespace dyno
 		uint pDimsB = cudaGridSize(m_box3d_init.size(), BLOCK_SIZE);
 		if(pDimsB > 0)
 		RB_update_box << <pDimsB, BLOCK_SIZE >> > (
-			currentCenter()->getValue(),
-			currentRotation()->getValue(),
+			currentCenter()->getData(),
+			currentRotation()->getData(),
 			discreteSet->getBoxes(),
 			m_box3d_init,
 			start_box
@@ -584,7 +584,7 @@ namespace dyno
 		uint pDimsS = cudaGridSize(m_sphere3d_init.size(), BLOCK_SIZE);
 		if(pDimsS > 0)
 		RB_update_sphere << <pDimsS, BLOCK_SIZE >> > (
-			currentCenter()->getValue(),
+			currentCenter()->getData(),
 			discreteSet->getSpheres(),
 			start_sphere
 			);
@@ -604,7 +604,7 @@ namespace dyno
 			// todo : project gs
 			uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
 			RB_take_one_iteration<< <pDims, BLOCK_SIZE >> > (
-				AA.getValue(),
+				AA.getData(),
 				D,
 				J,
 				B,
@@ -626,20 +626,20 @@ namespace dyno
 		uint pDims = cudaGridSize(currentCenter()->getElementCount(), BLOCK_SIZE);
 		
 		RB_update_velocity << <pDims, BLOCK_SIZE >> > (
-			currentVelocity()->getValue(),
-			currentAngularVelocity()->getValue(),
-			AA.getValue(),
+			currentVelocity()->getData(),
+			currentAngularVelocity()->getData(),
+			AA.getData(),
 			dt
 			);
 		cuSynchronize();
 		
 		RB_update_state << <pDims, BLOCK_SIZE >> > (
-			currentCenter()->getValue(),
-			currentRotation()->getValue(),
+			currentCenter()->getData(),
+			currentRotation()->getData(),
 			m_rotation_q,
-			currentVelocity()->getValue(),
-			currentAngularVelocity()->getValue(),
-			m_inertia.getValue(),
+			currentVelocity()->getData(),
+			currentAngularVelocity()->getData(),
+			m_inertia.getData(),
 			m_inertia_init,
 			dt
 			);
@@ -907,14 +907,14 @@ namespace dyno
 		B.reset();
 		D.reset();
 		ita.reset();
-		AA.getValue().reset();
+		AA.getData().reset();
 		lambda.reset();
 
 
 		if (size_constraints == 0) return;
 
 		if (m_nbrQueryElement->nbr_cons.getElementCount() > 0)
-			cudaMemcpy(constraints_all.begin(), m_nbrQueryElement->nbr_cons.getValue().begin(), m_nbrQueryElement->nbr_cons.getElementCount() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
+			cudaMemcpy(constraints_all.begin(), m_nbrQueryElement->nbr_cons.getData().begin(), m_nbrQueryElement->nbr_cons.getElementCount() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
 		if (buffer_boundary.size() > 0)
 			cudaMemcpy(constraints_all.begin() + m_nbrQueryElement->nbr_cons.getElementCount(), buffer_boundary.begin(), buffer_boundary.size() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
 
@@ -922,17 +922,17 @@ namespace dyno
 		uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
 		RB_update_pair_info << <pDims, BLOCK_SIZE >> > (
 			center_init,
-			currentCenter()->getValue(),
-			currentRotation()->getValue(),
+			currentCenter()->getData(),
+			currentRotation()->getData(),
 			constraints_all
 			);
 
 		cuSynchronize();
 
 		RB_constrct_jacobi << <pDims, BLOCK_SIZE >> > (
-			currentCenter()->getValue(),
-			m_inertia.getValue(),
-			currentMass()->getValue(),
+			currentCenter()->getData(),
+			m_inertia.getData(),
+			currentMass()->getData(),
 			J,
 			B,
 			constraints_all
@@ -948,8 +948,8 @@ namespace dyno
 
 		printf("BEFORE ITA!!!!!\n");
 		RB_compute_ita << <pDims, BLOCK_SIZE >> > (
-			currentVelocity()->getValue(),
-			currentAngularVelocity()->getValue(),
+			currentVelocity()->getData(),
+			currentAngularVelocity()->getData(),
 			J,
 			ita,
 			constraints_all,
@@ -977,9 +977,9 @@ namespace dyno
 		// todo: update AA;
 		/*
 		RB_take_one_iteration_cg << <pDims, BLOCK_SIZE >> > (
-			AA.getValue(),
-			currentVelocity()->getValue(),
-			currentAngularVelocity()->getValue(),
+			AA.getData(),
+			currentVelocity()->getData(),
+			currentAngularVelocity()->getData(),
 			D,
 			J,
 			B,
@@ -992,7 +992,7 @@ namespace dyno
 		
 
 		RB_take_one_iteration << <pDims, BLOCK_SIZE >> > (
-				AA.getValue(),
+				AA.getData(),
 				D,
 				J,
 				B,

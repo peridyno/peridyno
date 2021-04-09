@@ -240,7 +240,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::solveElasticity()
 	{
-		this->m_position_old.assign(this->inPosition()->getValue());
+		this->m_position_old.assign(this->inPosition()->getData());
 
 		this->computeInverseK();
 
@@ -251,7 +251,7 @@ namespace dyno
 		while (iter < total)
 		{
 			this->enforceElasticity();
-			if (m_incompressible.getValue() == true)
+			if (m_incompressible.getData() == true)
 			{
 				m_pbdModule->constrain();
 			}
@@ -288,23 +288,23 @@ namespace dyno
 			m_yiled_I1,
 			m_yield_J2,
 			m_I1,
-			this->inPosition()->getValue(),
-			m_pbdModule->outDensity()->getValue(),
+			this->inPosition()->getData(),
+			m_pbdModule->outDensity()->getData(),
 			this->m_bulkCoefs,
-			this->inRestShape()->getValue(),
-			this->inHorizon()->getValue(),
+			this->inRestShape()->getData(),
+			this->inHorizon()->getData(),
 			A,
 			B,
-			this->m_mu.getValue(),
-			this->m_lambda.getValue());
+			this->m_mu.getData(),
+			this->m_lambda.getData());
 		cuSynchronize();
 		// 
 		PM_ApplyYielding<Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
 			m_yiled_I1,
 			m_yield_J2,
 			m_I1,
-			this->inPosition()->getValue(),
-			this->inRestShape()->getValue());
+			this->inPosition()->getData(),
+			this->inRestShape()->getData());
 		cuSynchronize();
 	}
 
@@ -482,11 +482,11 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::reconstructRestShape()
 	{
-		//constructRestShape(m_neighborhood.getValue(), m_position.getValue());
+		//constructRestShape(m_neighborhood.getData(), m_position.getData());
 
 		uint pDims = cudaGridSize(this->inPosition()->getElementCount(), BLOCK_SIZE);
 
-		if (m_reconstuct_all_neighborhood.getValue())
+		if (m_reconstuct_all_neighborhood.getData())
 		{
 			PM_EnableAllReconstruction << <pDims, BLOCK_SIZE >> > (m_bYield);
 		}
@@ -499,8 +499,8 @@ namespace dyno
 		PM_ReconfigureRestShape << <pDims, BLOCK_SIZE >> > (
 			index,
 			m_bYield,
-			this->inNeighborhood()->getValue(),
-			this->inRestShape()->getValue());
+			this->inNeighborhood()->getData(),
+			this->inRestShape()->getData());
 
 		int total_num = thrust::reduce(thrust::device, index.begin(), index.begin() + index.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, index.begin(), index.begin() + index.size(), index.begin());
@@ -508,23 +508,23 @@ namespace dyno
 
 		PM_ComputeInverseDeformation << <pDims, BLOCK_SIZE >> > (
 			m_invF,
-			this->inPosition()->getValue(),
-			this->inRestShape()->getValue(),
-			this->inHorizon()->getValue());
+			this->inPosition()->getData(),
+			this->inRestShape()->getData(),
+			this->inHorizon()->getData());
 
 		PM_ReconstructRestShape<< <pDims, BLOCK_SIZE >> > (
 			newNeighborList,
 			m_bYield,
-			this->inPosition()->getValue(),
+			this->inPosition()->getData(),
 			m_I1,
 			m_yiled_I1,
 			m_yield_J2,
 			m_invF,
-			this->inNeighborhood()->getValue(),
-			this->inRestShape()->getValue(),
-			this->inHorizon()->getValue());
+			this->inNeighborhood()->getData(),
+			this->inRestShape()->getData(),
+			this->inHorizon()->getData());
 
-		this->inRestShape()->getValue().copyFrom(newNeighborList);
+		this->inRestShape()->getData().copyFrom(newNeighborList);
 
 		newNeighborList.release();
 		cuSynchronize();
@@ -644,10 +644,10 @@ namespace dyno
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		EM_RotateRestShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
-			this->inPosition()->getValue(),
+			this->inPosition()->getData(),
 			m_bYield,
-			this->inRestShape()->getValue(),
-			this->inHorizon()->getValue());
+			this->inRestShape()->getData(),
+			this->inHorizon()->getData());
 		cuSynchronize();
 	}
 

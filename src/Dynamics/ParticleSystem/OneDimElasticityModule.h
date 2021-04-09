@@ -29,7 +29,7 @@ namespace dyno {
 		void solveElasticity();
 
 		void setIterationNumber(int num) { m_iterNum.setValue(num); }
-		int getIterationNumber() { return m_iterNum.getValue(); }
+		int getIterationNumber() { return m_iterNum.getData(); }
 
 		void setMaterialStiffness(Real stiff) { m_lambda.setValue(stiff); }
 

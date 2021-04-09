@@ -71,10 +71,10 @@ namespace dyno
 		}
 
 		compute(
-			this->outDensity()->getValue(),
-			this->inPosition()->getValue(),
-			this->inNeighborIndex()->getValue(),
-			this->varSmoothingLength()->getValue(),
+			this->outDensity()->getData(),
+			this->inPosition()->getData(),
+			this->inNeighborIndex()->getData(),
+			this->varSmoothingLength()->getData(),
 			m_particle_mass);
 
 		this->outDensity()->tagModified(true);
@@ -86,9 +86,9 @@ namespace dyno
 	{
 		compute(
 			rho,
-			this->inPosition()->getValue(),
-			this->inNeighborIndex()->getValue(),
-			this->varSmoothingLength()->getValue(),
+			this->inPosition()->getData(),
+			this->inNeighborIndex()->getData(),
+			this->varSmoothingLength()->getData(),
 			m_particle_mass);
 	}
 
@@ -111,9 +111,9 @@ namespace dyno
 	template<typename TDataType>
 	void SummationDensity<TDataType>::calculateScalingFactor()
 	{
-		Real d = this->varSamplingDistance()->getValue();
-		Real H = this->varSmoothingLength()->getValue();
-		Real rho_0 = this->varRestDensity()->getValue();
+		Real d = this->varSamplingDistance()->getData();
+		Real H = this->varSmoothingLength()->getData();
+		Real rho_0 = this->varRestDensity()->getData();
 		
 		Real V = d * d*d;
 
@@ -140,8 +140,8 @@ namespace dyno
 	template<typename TDataType>
 	void SummationDensity<TDataType>::calculateParticleMass()
 	{
-		Real rho_0 = this->varRestDensity()->getValue();
-		Real d = this->varSamplingDistance()->getValue();
+		Real rho_0 = this->varRestDensity()->getData();
+		Real d = this->varSamplingDistance()->getData();
 
 		m_particle_mass = d*d*d*rho_0;
 	}

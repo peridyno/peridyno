@@ -20,7 +20,7 @@ namespace dyno
 		m_minIndex.setValue(0);
 		m_maxIndex.setValue(1);
 
-		m_refV = m_minIndex.getValue();
+		m_refV = m_minIndex.getData();
 
 		this->attachField(&m_minIndex, "minIndex", "minIndex", false);
 		this->attachField(&m_maxIndex, "maxIndex", "maxIndex", false);
@@ -117,9 +117,9 @@ namespace dyno
 			uint pDims = cudaGridSize(xyz->size(), BLOCK_SIZE);
 			PRM_MappingColor << <pDims, BLOCK_SIZE >> > (
 				m_colorArray,
-				m_vecIndex.getValue(),
-				m_minIndex.getValue(),
-				m_maxIndex.getValue());
+				m_vecIndex.getData(),
+				m_minIndex.getData(),
+				m_maxIndex.getData());
 			cuSynchronize();
 
 			m_pointRender->setColor(m_colorArray);
@@ -129,10 +129,10 @@ namespace dyno
 			uint pDims = cudaGridSize(xyz->size(), BLOCK_SIZE);
 			PRM_MappingColor << <pDims, BLOCK_SIZE >> > (
 				m_colorArray,
-				m_scalarIndex.getValue(),
+				m_scalarIndex.getData(),
 				m_refV,
-				m_minIndex.getValue(),
-				m_maxIndex.getValue());
+				m_minIndex.getData(),
+				m_maxIndex.getData());
 			cuSynchronize();
 
 			m_pointRender->setColor(m_colorArray);
@@ -160,7 +160,7 @@ namespace dyno
 
  		//m_pointRender->display();
 
-		switch (this->varRenderMode()->getReference()->currentKey())
+		switch (this->varRenderMode()->getDataPtr()->currentKey())
 		{
 		case RenderModeEnum::POINT:
 			m_pointRender->renderPoints();

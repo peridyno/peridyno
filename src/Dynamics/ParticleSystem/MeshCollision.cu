@@ -528,36 +528,36 @@ namespace dyno
 			init_pos.resize(m_position.getElementCount());
 
 			m_position_previous.resize(m_position.getElementCount());
-			m_position_previous.assign(m_position.getValue());
+			m_position_previous.assign(m_position.getData());
 		}
 		
-		init_pos.assign(m_position.getValue());
+		init_pos.assign(m_position.getData());
 
-		int total_num = m_position.getValue().size();
+		int total_num = m_position.getData().size();
 
 		cuSynchronize();
 		
 		cuExecute(total_num, VC_Sort_Neighbors_Collide,
-			m_position.getValue(),
-			m_triangle_index.getValue(),
-			m_triangle_vertex.getValue(),
-			m_neighborhood_tri.getValue()
+			m_position.getData(),
+			m_triangle_index.getData(),
+			m_triangle_vertex.getData(),
+			m_neighborhood_tri.getData()
 			);
 
 		cuExecute(total_num, K_CCD_MESH,
-			m_position.getValue(),
-			m_velocity.getValue(),
+			m_position.getData(),
+			m_velocity.getData(),
 			m_position_previous,
-			m_triangle_vertex.getValue(),
+			m_triangle_vertex.getData(),
 			m_triangle_vertex_previous,
-			m_triangle_index.getValue(),
-			m_neighborhood_tri.getValue(),
+			m_triangle_index.getData(),
+			m_neighborhood_tri.getData(),
 			radius,
 			getParent()->getDt()
 			);
 
-		m_triangle_vertex_previous.assign(m_triangle_vertex.getValue());
-		m_position_previous.assign(m_position.getValue());
+		m_triangle_vertex_previous.assign(m_triangle_vertex.getData());
+		m_position_previous.assign(m_position.getData());
 	}
 
 	
@@ -565,7 +565,7 @@ namespace dyno
 	bool MeshCollision<TDataType>::initializeImpl()
 	{
 		m_triangle_vertex_previous.resize(m_triangle_vertex.getElementCount());
-		m_triangle_vertex_previous.assign(m_triangle_vertex.getValue());
+		m_triangle_vertex_previous.assign(m_triangle_vertex.getData());
 
 		if (m_position.getElementCount() == 0)
 			return true;
@@ -578,7 +578,7 @@ namespace dyno
 		init_pos.resize(m_position.getElementCount());
 
 		m_position_previous.resize(m_position.getElementCount());
-		m_position_previous.assign(m_position.getValue());
+		m_position_previous.assign(m_position.getData());
 
 		
 

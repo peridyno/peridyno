@@ -51,7 +51,7 @@ namespace dyno
 
 		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(changeValue(int)));
 
-		checkbox->setChecked(f->getValue());
+		checkbox->setChecked(f->getData());
 	}
 
 
@@ -103,7 +103,7 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		QSpinBox* spinner = new QSpinBox;
-		spinner->setValue(f->getValue());
+		spinner->setValue(f->getData());
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
@@ -168,12 +168,12 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			VarField<float>* f = TypeInfo::cast<VarField<float>>(m_field);
-			slider->setValue((double)f->getValue());
+			slider->setValue((double)f->getData());
 		}
 		else if(template_name == std::string(typeid(double).name()))
 		{
 			VarField<double>* f = TypeInfo::cast<VarField<double>>(m_field);
-			slider->setValue(f->getValue());
+			slider->setValue(f->getData());
 		}
 
 		FormatFieldWidgetName(field->getObjectName());
@@ -240,7 +240,7 @@ namespace dyno
 		if (template_name == std::string(typeid(Vector3f).name()))
 		{
 			VarField<Vector3f>* f = TypeInfo::cast<VarField<Vector3f>>(m_field);
-			auto v = f->getValue();
+			auto v = f->getData();
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
@@ -248,7 +248,7 @@ namespace dyno
 		else if (template_name == std::string(typeid(Vector3d).name()))
 		{
 			VarField<Vector3d>* f = TypeInfo::cast<VarField<Vector3d>>(m_field);
-			auto v = f->getValue();
+			auto v = f->getData();
 
 			v1 = v[0];
 			v2 = v[1];

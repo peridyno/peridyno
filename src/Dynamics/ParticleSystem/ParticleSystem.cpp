@@ -132,7 +132,7 @@ namespace dyno
 				pts.resize(num);
 			}
 
-			pts.assign(this->currentPosition()->getValue());
+			pts.assign(this->currentPosition()->getData());
 		}
 	}
 
@@ -151,8 +151,8 @@ namespace dyno
 			this->currentVelocity()->setElementCount(pts.size());
 			this->currentForce()->setElementCount(pts.size());
 
-			this->currentPosition()->getValue().assign(pts);
-			this->currentVelocity()->getReference()->reset();
+			this->currentPosition()->getData().assign(pts);
+			this->currentVelocity()->getDataPtr()->reset();
 		}
 
 		return Node::resetStatus();

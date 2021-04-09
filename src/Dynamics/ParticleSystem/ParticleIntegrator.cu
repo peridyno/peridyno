@@ -24,10 +24,10 @@ namespace dyno
 			m_prePosition.resize(num);
 			m_preVelocity.resize(num);
 
-			m_prePosition.assign(this->inPosition()->getValue());
-			m_preVelocity.assign(this->inVelocity()->getValue());
+			m_prePosition.assign(this->inPosition()->getData());
+			m_preVelocity.assign(this->inVelocity()->getData());
 
-			this->inForceDensity()->getReference()->reset();
+			this->inForceDensity()->getDataPtr()->reset();
 		}
 	}
 
@@ -101,8 +101,8 @@ namespace dyno
 		{
 			cuExecute(total_num,
 				K_UpdateVelocity,
-				this->inVelocity()->getValue(),
-				this->inForceDensity()->getValue(),
+				this->inVelocity()->getData(),
+				this->inForceDensity()->getData(),
 				gravity,
 				dt);
 		}
@@ -110,9 +110,9 @@ namespace dyno
 		{
 			cuExecute(total_num,
 				K_UpdateVelocity,
-				this->inVelocity()->getValue(),
-				this->inForceDensity()->getValue(),
-				this->inAttribute()->getValue(),
+				this->inVelocity()->getData(),
+				this->inForceDensity()->getData(),
+				this->inAttribute()->getData(),
 				gravity,
 				dt);
 		}
@@ -158,22 +158,22 @@ namespace dyno
 		if (this->getParent() != NULL)
 			dt = getParent()->getDt();
 
-		int total_num = this->inPosition()->getReference()->size();
+		int total_num = this->inPosition()->getDataPtr()->size();
 		if (this->inAttribute()->isEmpty())
 		{
 			cuExecute(total_num,
 				K_UpdatePosition,
-				this->inPosition()->getValue(),
-				this->inVelocity()->getValue(),
+				this->inPosition()->getData(),
+				this->inVelocity()->getData(),
 				dt);
 		}
 		else
 		{
 			cuExecute(total_num,
 				K_UpdatePosition,
-				this->inPosition()->getValue(),
-				this->inVelocity()->getValue(),
-				this->inAttribute()->getValue(),
+				this->inPosition()->getData(),
+				this->inVelocity()->getData(),
+				this->inAttribute()->getData(),
 				dt);
 		}
 

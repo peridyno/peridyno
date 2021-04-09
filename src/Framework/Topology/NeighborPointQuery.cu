@@ -50,7 +50,7 @@ namespace dyno
 	template<typename TDataType>
 	void NeighborPointQuery<TDataType>::compute()
 	{
-		if (this->varSizeLimit()->getValue() <= 0) {
+		if (this->varSizeLimit()->getData() <= 0) {
 			requestDynamicNeighborIds();
 		}
 		else {
@@ -133,15 +133,15 @@ namespace dyno
 	void NeighborPointQuery<TDataType>::requestDynamicNeighborIds()
 	{
 		// Prepare inputs
-		auto& points	= this->inPosition()->getValue();
-		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->getValue() : this->inOther()->getValue();
-		auto h			= this->inRadius()->getValue();
+		auto& points	= this->inPosition()->getData();
+		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->getData() : this->inOther()->getData();
+		auto h			= this->inRadius()->getData();
 
 		// Prepare outputs
 		if (this->outNeighborIds()->isEmpty())
 			this->outNeighborIds()->allocate();
 
-		auto& nbrIds = this->outNeighborIds()->getValue();
+		auto& nbrIds = this->outNeighborIds()->getData();
 
 		// Construct hash grid
 		Reduction<Coord> reduce;
@@ -247,18 +247,18 @@ namespace dyno
 	void NeighborPointQuery<TDataType>::requestFixedSizeNeighborIds()
 	{
 		// Prepare inputs
-		auto& points	= this->inPosition()->getValue();
-		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->getValue() : this->inOther()->getValue();
-		auto h			= this->inRadius()->getValue();
+		auto& points	= this->inPosition()->getData();
+		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->getData() : this->inOther()->getData();
+		auto h			= this->inRadius()->getData();
 
 		// Prepare outputs
 		if (this->outNeighborIds()->isEmpty())
 			this->outNeighborIds()->allocate();
 
-		auto& nbrIds = this->outNeighborIds()->getValue();
+		auto& nbrIds = this->outNeighborIds()->getData();
 
-		uint numPt  = this->inPosition()->getReference()->size();
-		uint sizeLimit = this->varSizeLimit()->getValue();
+		uint numPt  = this->inPosition()->getDataPtr()->size();
+		uint sizeLimit = this->varSizeLimit()->getData();
 		
 		nbrIds.resize(numPt, sizeLimit);
 

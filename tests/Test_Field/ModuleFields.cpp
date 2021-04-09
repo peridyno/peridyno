@@ -19,6 +19,6 @@ namespace dyno
 			return;
 		}
 
-		this->varArea()->setValue(this->varWidth()->getValue()*this->varHeight()->getValue());
+		this->varArea()->setValue(this->varWidth()->getData()*this->varHeight()->getData());
 	}
 }

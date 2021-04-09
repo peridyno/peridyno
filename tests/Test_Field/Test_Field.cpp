@@ -13,7 +13,7 @@ TEST(FieldBase, connect)
 	m1.varWidth()->setValue(12.0f);
 	m1.varHeight()->setValue(5.0f);
 
-	EXPECT_EQ(m1.varArea()->getValue(), float(60));
+	EXPECT_EQ(m1.varArea()->getData(), float(60));
 
 	ArrayField<float, DeviceType::GPU> arrField;
 	DArray<float> dArr;

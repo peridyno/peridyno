@@ -250,7 +250,7 @@ namespace dyno
 			from->getPoints(),
 			*(from->getTriangles()),
 			from->getTri2Tet(),
-			broadPhase->outContactList()->getValue());
+			broadPhase->outContactList()->getData());
 
 		fromAABB.clear();
 		toAABB.clear();

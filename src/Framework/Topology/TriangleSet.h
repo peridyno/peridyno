@@ -2,7 +2,6 @@
 #include "EdgeSet.h"
 #include "Framework/ModuleTopology.h"
 
-
 namespace dyno
 {
 	template<typename TDataType>

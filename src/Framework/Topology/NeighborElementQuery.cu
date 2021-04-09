@@ -309,8 +309,8 @@ namespace dyno
 			cuExecute(p_num,
 				NEQ_SetupAABB,
 				m_queryAABB,
-				this->inPosition()->getValue(),
-				this->inRadius()->getValue());
+				this->inPosition()->getData(),
+				this->inRadius()->getData());
 
 			cuExecute(t_num,
 				NEQ_SetupAABB,
@@ -320,7 +320,7 @@ namespace dyno
 				0,
 				discreteSet->getSpheres().size()
 				);
-			Real radius = this->inRadius()->getValue();
+			Real radius = this->inRadius()->getData();
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 
@@ -336,19 +336,19 @@ namespace dyno
 
 			//broad phase end
 
-			DArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			DArray<int>& nbrNum = this->outNeighborhood()->getData().getIndex();
 			
 			
 			cuExecute(p_num, 
 				NEQ_Narrow_Count,
-				this->inPosition()->getValue(),
-				m_broadPhaseCD->outContactList()->getValue(),
+				this->inPosition()->getData(),
+				m_broadPhaseCD->outContactList()->getData(),
 				discreteSet->getBoxes(),
 				discreteSet->getSpheres(),
 				nbrNum,
 				0,
 				discreteSet->getSpheres().size(),
-				this->inRadius()->getValue());
+				this->inRadius()->getData());
 
 			//queryNeighborSize(nbrNum, pos, h);
 			
@@ -361,7 +361,7 @@ namespace dyno
 
 			if (sum > 0)
 			{
-				DArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+				DArray<int>& elements = this->outNeighborhood()->getData().getElements();
 				elements.resize(sum);
 				nbr_cons.setElementCount(sum);
 				
@@ -369,15 +369,15 @@ namespace dyno
 				Real zero = 0;
 				cuExecute(p_num,
 					NEQ_Narrow_Set,
-					this->inPosition()->getValue(),
-					m_broadPhaseCD->outContactList()->getValue(),
+					this->inPosition()->getData(),
+					m_broadPhaseCD->outContactList()->getData(),
 					discreteSet->getBoxes(),
 					discreteSet->getSpheres(),
-					outNeighborhood()->getValue(),
-					nbr_cons.getValue(),
+					outNeighborhood()->getData(),
+					nbr_cons.getData(),
 					zero,
 					discreteSet->getSpheres().size(),
-					this->inRadius()->getValue());
+					this->inRadius()->getData());
 					
 				cuSynchronize();
 			}
@@ -409,7 +409,7 @@ namespace dyno
 
 			m_queryAABB.assign(m_queriedAABB);
 
-			Real radius = this->inRadius()->getValue();
+			Real radius = this->inRadius()->getData();
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 			m_broadPhaseCD->setSelfCollision(true);
@@ -427,13 +427,13 @@ namespace dyno
 	
 			//broad phase end
 
-			DArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
+			DArray<int>& nbrNum = this->outNeighborhood()->getData().getIndex();
 			
 			Real zero = 0;
 			
 			cuExecute(t_num,
 				NEQ_Narrow_Count,
-				m_broadPhaseCD->outContactList()->getValue(),
+				m_broadPhaseCD->outContactList()->getData(),
 				discreteSet->getBoxes(),
 				discreteSet->getSpheres(),
 				nbrNum,
@@ -450,7 +450,7 @@ namespace dyno
 
 			printf("FROM NEQ: %d", sum);
 
-			DArray<int>& elements = this->outNeighborhood()->getValue().getElements();
+			DArray<int>& elements = this->outNeighborhood()->getData().getElements();
 			elements.resize(sum);
 			nbr_cons.setElementCount(sum);
 
@@ -462,11 +462,11 @@ namespace dyno
 				
 				cuExecute(t_num,
 					NEQ_Narrow_Set,
-					m_broadPhaseCD->outContactList()->getValue(),
+					m_broadPhaseCD->outContactList()->getData(),
 					discreteSet->getBoxes(),
 					discreteSet->getSpheres(),
-					this->outNeighborhood()->getValue(),
-					nbr_cons.getValue(),
+					this->outNeighborhood()->getData(),
+					nbr_cons.getData(),
 					0,
 					discreteSet->getSpheres().size());
 					

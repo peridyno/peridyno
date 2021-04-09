@@ -71,11 +71,11 @@ namespace dyno
 	{
 		uint pDim = cudaGridSize(m_position.getElementCount(), BLOCK_SIZE);
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
-			m_position.getValue(),
-			m_velocity.getValue(),
+			m_position.getData(),
+			m_velocity.getData(),
 			*m_cSDF,
-			this->varNormalFriction()->getValue(),
-			this->varTangentialFriction()->getValue(),
+			this->varNormalFriction()->getData(),
+			this->varTangentialFriction()->getData(),
 			getParent()->getDt());
 
 		return true;
@@ -89,8 +89,8 @@ namespace dyno
 			position,
 			velocity,
 			*m_cSDF,
-			this->varNormalFriction()->getValue(),
-			this->varTangentialFriction()->getValue(),
+			this->varNormalFriction()->getData(),
+			this->varTangentialFriction()->getData(),
 			dt);
 
 		return true;

@@ -42,7 +42,7 @@ namespace dyno {
 
 		void clear();
 
-		inline const T* data() const { return m_data.data(); }
+		inline const T* begin() const { return m_data.data(); }
 
 		inline size_t nx() const { return m_nx; }
 		inline size_t ny() const { return m_ny; }
@@ -108,7 +108,7 @@ namespace dyno {
 
 		void clear();
 
-		inline T* data() const { return m_data; }
+		inline T* begin() const { return m_data; }
 
 		DYN_FUNC inline size_t nx() const { return m_nx; }
 		DYN_FUNC inline size_t ny() const { return m_ny; }

@@ -97,14 +97,14 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBody<TDataType>::advance(Real dt)
 	{
-		Real mass = m_mass.getValue();
-		Coord center = m_center.getValue();
-		Coord transVel = m_transVelocity.getValue();
-		Coord angularVel = m_angularVelocity.getValue();
-		Matrix angularMass = m_angularMass.getValue();
+		Real mass = m_mass.getData();
+		Coord center = m_center.getData();
+		Coord transVel = m_transVelocity.getData();
+		Coord angularVel = m_angularVelocity.getData();
+		Matrix angularMass = m_angularMass.getData();
 
-		Coord force = m_force.getValue();
-		Coord forceMoment = m_torque.getValue();
+		Coord force = m_force.getData();
+		Coord forceMoment = m_torque.getData();
 
 		Matrix invMass = angularMass;
 		angularVel += dt*(invMass*forceMoment);
@@ -124,7 +124,7 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBody<TDataType>::updateTopology()
 	{
-		m_frame->setCenter(m_center.getValue());
+		m_frame->setCenter(m_center.getData());
 		m_frame->setOrientation(m_quaternion.get3x3Matrix());
 
 		auto tMappings = this->getTopologyMappingList();
@@ -145,7 +145,7 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBody<TDataType>::translate(Coord t)
 	{
-		Coord center = m_center.getValue();
+		Coord center = m_center.getData();
 		m_center.setValue(center + t);
 
 		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);

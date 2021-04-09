@@ -224,7 +224,7 @@ namespace dyno
 			init_pos.resize(m_position.getElementCount());
 
 			m_position_previous.resize(m_position.getElementCount());
-			m_position_previous.assign(m_position.getValue());
+			m_position_previous.assign(m_position.getData());
 			printf("resize finished %d %d\n", m_position.getElementCount(), m_velocity.getElementCount());
 
 		}
@@ -232,12 +232,12 @@ namespace dyno
 			m_tet_vertex.setElementCount(m_position.getElementCount());
 
 
-		init_pos.assign(m_position.getValue());
-		m_tet_vertex.getValue().assign(m_position.getValue());
+		init_pos.assign(m_position.getData());
+		m_tet_vertex.getData().assign(m_position.getData());
 
 
 
-		int total_num_particles = m_position.getValue().size();
+		int total_num_particles = m_position.getData().size();
 		int total_num_tets = tetSet->getTetrahedrons().size();
 		//printf("SIZE TET: %d\n", tetSet->getTetrahedrons().size());
 
@@ -259,12 +259,12 @@ namespace dyno
 		DArray<int> sum_nbr;
 
 
-		x_array.resize(m_neighborhood_tri.getValue().getElementSize());
-		y_array.resize(m_neighborhood_tri.getValue().getElementSize());
-		interNormal.resize(m_neighborhood_tri.getValue().getElementSize());
-		interDistance.resize(m_neighborhood_tri.getValue().getElementSize());
-		force.resize(m_neighborhood_tri.getValue().getElementSize());
-		force_buffer.resize(m_neighborhood_tri.getValue().getElementSize());
+		x_array.resize(m_neighborhood_tri.getData().getElementSize());
+		y_array.resize(m_neighborhood_tri.getData().getElementSize());
+		interNormal.resize(m_neighborhood_tri.getData().getElementSize());
+		interDistance.resize(m_neighborhood_tri.getData().getElementSize());
+		force.resize(m_neighborhood_tri.getData().getElementSize());
+		force_buffer.resize(m_neighborhood_tri.getData().getElementSize());
 		force.reset();
 		force_buffer.reset();
 
@@ -274,21 +274,21 @@ namespace dyno
 		volume2.reset();
 		velocity_buffer.resize(m_velocity.getElementCount());
 
-		collision_type.resize(m_neighborhood_tri.getValue().getElementSize());
+		collision_type.resize(m_neighborhood_tri.getData().getElementSize());
 		collision_type.reset();
 
 		sum_nbr.resize(tetSet->getTetrahedrons().size());
 		sum_nbr.reset();
 
-		velocity_buffer.assign(m_velocity.getValue());
+		velocity_buffer.assign(m_velocity.getData());
 
-		if (m_neighborhood_tri.getValue().getElementSize() > 0)
+		if (m_neighborhood_tri.getData().getElementSize() > 0)
 		{
 
 			cuExecute(total_num_tets, K_SETUP_TET,
-				m_tet_vertex.getValue(),
+				m_tet_vertex.getData(),
 				tetSet->getTetrahedrons(),
-				m_neighborhood_tri.getValue(),
+				m_neighborhood_tri.getData(),
 				interNormal,
 				interDistance,
 				x_array,
@@ -298,19 +298,19 @@ namespace dyno
 				volume2
 			);
 
-			printf("INSEDE TET COLLISION! %d %.10lf\n", m_neighborhood_tri.getValue().getElementSize(), dt);
+			printf("INSEDE TET COLLISION! %d %.10lf\n", m_neighborhood_tri.getData().getElementSize(), dt);
 			for (int i = 0; i < 25; i++)
 			{
 
-				cuExecute(m_neighborhood_tri.getValue().getElementSize(), K_ITER_TET,
+				cuExecute(m_neighborhood_tri.getData().getElementSize(), K_ITER_TET,
 					x_array,
 					y_array,
 					volume,
 					tetSet->getTetrahedrons(),
-					m_neighborhood_tri.getValue(),
+					m_neighborhood_tri.getData(),
 					interNormal,
 					interDistance,
-					m_velocity.getValue(),
+					m_velocity.getData(),
 					velocity_buffer,
 					force_buffer,
 					force,
@@ -319,14 +319,14 @@ namespace dyno
 
 				//Function1Pt::copy(force_buffer, force);
 
-				cuExecute(m_neighborhood_tri.getValue().getElementSize(), K_UPDATE_TET,
+				cuExecute(m_neighborhood_tri.getData().getElementSize(), K_UPDATE_TET,
 					x_array,
 					y_array,
 					volume,
 					volume2,
 					interNormal,
 					tetSet->getTetrahedrons(),
-					m_velocity.getValue(),
+					m_velocity.getData(),
 					force,
 					sum_nbr,
 					dt
@@ -339,7 +339,7 @@ namespace dyno
 
 
 		cuExecute(m_velocity.getElementCount(), K_DAMP_TET,
-			m_velocity.getValue()
+			m_velocity.getData()
 		);
 
 
@@ -362,7 +362,7 @@ namespace dyno
 	bool TetCollision<TDataType>::initializeImpl()
 	{
 		//m_tet_vertex_previous.resize(m_tet_vertex.getElementCount());
-		//Function1Pt::copy(m_tet_vertex_previous, m_tet_vertex.getValue());
+		//Function1Pt::copy(m_tet_vertex_previous, m_tet_vertex.getData());
 
 		if (m_position.getElementCount() == 0)
 			return true;
@@ -375,7 +375,7 @@ namespace dyno
 		init_pos.resize(m_position.getElementCount());
 
 		m_position_previous.resize(m_position.getElementCount());
-		m_position_previous.assign(m_position.getValue());
+		m_position_previous.assign(m_position.getData());
 
 
 

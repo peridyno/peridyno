@@ -578,10 +578,10 @@ namespace dyno
 		m_alpha.reset();
 		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha, 
-			m_position.getValue(), 
-			m_attribute.getValue(), 
-			m_neighborhood.getValue(), 
-			m_smoothingLength.getValue());
+			m_position.getData(), 
+			m_attribute.getData(), 
+			m_neighborhood.getData(), 
+			m_smoothingLength.getData());
 		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha, 
 			m_maxAlpha);
@@ -593,10 +593,10 @@ namespace dyno
 			m_AiiFluid, 
 			m_AiiTotal, 
 			m_alpha, 
-			m_position.getValue(),
-			m_attribute.getValue(),
-			m_neighborhood.getValue(),
-			m_smoothingLength.getValue());
+			m_position.getData(),
+			m_attribute.getData(),
+			m_neighborhood.getData(),
+			m_smoothingLength.getData());
 
 		m_bSurface.reset();
 		m_Aii.reset();
@@ -605,10 +605,10 @@ namespace dyno
 			m_bSurface, 
 			m_AiiFluid,
 			m_AiiTotal,
-			m_position.getValue(),
-			m_attribute.getValue(),
-			m_neighborhood.getValue(),
-			m_smoothingLength.getValue(),
+			m_position.getData(),
+			m_attribute.getData(),
+			m_neighborhood.getData(),
+			m_smoothingLength.getData(),
 			m_maxA);
 
 		int itor = 0;
@@ -619,23 +619,23 @@ namespace dyno
 		VC_ComputeDivergence << <pDims, BLOCK_SIZE >> > (
 			m_divergence, 
 			m_alpha, 
-			m_densitySum->outDensity()->getValue(),
-			m_position.getValue(), 
-			m_velocity.getValue(), 
+			m_densitySum->outDensity()->getData(),
+			m_position.getData(), 
+			m_velocity.getData(), 
 			m_bSurface, 
-			m_normal.getValue(), 
-			m_attribute.getValue(), 
-			m_neighborhood.getValue(), 
+			m_normal.getData(), 
+			m_attribute.getData(), 
+			m_neighborhood.getData(), 
 			m_separation, 
 			m_tangential, 
 			m_restDensity,
-			m_smoothingLength.getValue(), 
+			m_smoothingLength.getData(), 
 			dt);
 		VC_CompensateSource << <pDims, BLOCK_SIZE >> > (
 			m_divergence, 
 			m_density, 
-			m_attribute.getValue(), 
-			m_position.getValue(), 
+			m_attribute.getData(), 
+			m_position.getData(), 
 			m_restDensity, 
 			dt);
 		
@@ -646,10 +646,10 @@ namespace dyno
 			m_pressure, 
 			m_Aii, 
 			m_alpha, 
-			m_position.getValue(),
-			m_attribute.getValue(),
-			m_neighborhood.getValue(),
-			m_smoothingLength.getValue());
+			m_position.getData(),
+			m_attribute.getData(),
+			m_neighborhood.getData(),
+			m_smoothingLength.getData());
 
 		m_r.reset();
 		Function2Pt::subtract(m_r, m_divergence, m_y);
@@ -666,10 +666,10 @@ namespace dyno
 				m_p, 
 				m_Aii, 
 				m_alpha, 
-				m_position.getValue(),
-				m_attribute.getValue(),
-				m_neighborhood.getValue(),
-				m_smoothingLength.getValue());
+				m_position.getData(),
+				m_attribute.getData(),
+				m_neighborhood.getData(),
+				m_smoothingLength.getData());
 
 			float alpha = rr / m_arithmetic->Dot(m_p, m_y);
 			Function2Pt::saxpy(m_pressure, m_p, m_pressure, alpha);
@@ -692,16 +692,16 @@ namespace dyno
 			m_pressure,
 			m_alpha,
 			m_bSurface, 
-			m_position.getValue(), 
-			m_velocity.getValue(), 
-			m_normal.getValue(), 
-			m_attribute.getValue(), 
-			m_neighborhood.getValue(),
+			m_position.getData(), 
+			m_velocity.getData(), 
+			m_normal.getData(), 
+			m_attribute.getData(), 
+			m_neighborhood.getData(),
 			m_restDensity,
 			m_airPressure,
 			m_tangential,
 			m_separation,
-			m_smoothingLength.getValue(),
+			m_smoothingLength.getData(),
 			dt);
 
 		return true;
@@ -747,10 +747,10 @@ namespace dyno
 		m_alpha.reset();
 		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha,
-			m_position.getValue(),
-			m_attribute.getValue(),
-			m_neighborhood.getValue(),
-			m_smoothingLength.getValue());
+			m_position.getData(),
+			m_attribute.getData(),
+			m_neighborhood.getData(),
+			m_smoothingLength.getData());
 
 		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
 
@@ -762,10 +762,10 @@ namespace dyno
 		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
 			m_AiiFluid,
 			m_alpha,
-			m_position.getValue(),
-			m_attribute.getValue(),
-			m_neighborhood.getValue(),
-			m_smoothingLength.getValue());
+			m_position.getData(),
+			m_attribute.getData(),
+			m_neighborhood.getData(),
+			m_smoothingLength.getData());
 
 		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
 

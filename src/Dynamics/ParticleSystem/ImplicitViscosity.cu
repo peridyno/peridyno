@@ -104,20 +104,20 @@ namespace dyno
 			m_velOld.resize(num);
 			m_velBuf.resize(num);
 
-			Real vis = m_viscosity.getValue();
+			Real vis = m_viscosity.getData();
 			Real dt = getParent()->getDt();
-			m_velOld.assign(m_velocity.getValue());
+			m_velOld.assign(m_velocity.getData());
 			for (int t = 0; t < m_maxInteration; t++)
 			{
-				m_velBuf.assign(m_velocity.getValue());
+				m_velBuf.assign(m_velocity.getData());
 				cuExecute(num, K_ApplyViscosity,
-					m_velocity.getValue(),
-					m_position.getValue(),
-					m_neighborhood.getValue(),
+					m_velocity.getData(),
+					m_position.getData(),
+					m_neighborhood.getData(),
 					m_velOld,
 					m_velBuf,
 					vis,
-					m_smoothingLength.getValue(),
+					m_smoothingLength.getData(),
 					dt);
 			}
 

@@ -110,22 +110,22 @@ namespace dyno
 	void OneDimElasticityModule<TDataType>::solveElasticity()
 	{
 		//Save new positions
-		m_position_old.assign(m_position.getValue());
+		m_position_old.assign(m_position.getData());
 		
 		int itor = 0;
-		Real lambda_prime = 1 - pow(1 - m_lambda.getValue(), 1 / Real(m_iterNum.getValue()));
-		while (itor < m_iterNum.getValue())
+		Real lambda_prime = 1 - pow(1 - m_lambda.getData(), 1 / Real(m_iterNum.getData()));
+		while (itor < m_iterNum.getData())
 		{
-			m_position_buf.assign(m_position.getValue());
+			m_position_buf.assign(m_position.getData());
 
 			int num = m_position.getElementCount();
 			uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 			ODE_SolveElasticityWithPBD << <pDims, BLOCK_SIZE >> > (
-				m_position.getValue(),
+				m_position.getData(),
 				m_position_buf,
-				m_mass.getValue(),
-				m_distance.getValue(),
+				m_mass.getData(),
+				m_distance.getData(),
 				lambda_prime);
 
 			itor++;
@@ -143,9 +143,9 @@ namespace dyno
 		Real dt = 0.001;
 
 		ODE_UpdateVelocity << <pDims, BLOCK_SIZE >> > (
-			m_velocity.getValue(),
+			m_velocity.getData(),
 			m_position_old,
-			m_position.getValue(),
+			m_position.getData(),
 			dt);
 		cuSynchronize();
 	}
@@ -185,7 +185,7 @@ namespace dyno
 // 
 // 		this->computeMaterialStiffness();
 // 
-// 		Function1Pt::copy(m_position_old, m_position.getValue());
+// 		Function1Pt::copy(m_position_old, m_position.getData());
 
 		return true;
 	}

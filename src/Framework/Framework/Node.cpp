@@ -75,7 +75,7 @@ void Node::setControllable(bool con)
 
 bool Node::isActive()
 {
-	return this->varActive()->getValue();
+	return this->varActive()->getData();
 }
 
 void Node::setActive(bool active)
@@ -85,7 +85,7 @@ void Node::setActive(bool active)
 
 bool Node::isVisible()
 {
-	return this->varVisible()->getValue();
+	return this->varVisible()->getData();
 }
 
 void Node::setVisible(bool visible)

@@ -52,7 +52,7 @@ namespace dyno
 		m_highBound = Coord(sceneUp[0], sceneUp[1], sceneUp[2]);
 		this->inRadius()->setValue(Real(0.011));
 
-		m_hash.setSpace(this->inRadius()->getValue(), m_lowBound, m_highBound);
+		m_hash.setSpace(this->inRadius()->getData(), m_lowBound, m_highBound);
 	}
 
 
@@ -68,7 +68,7 @@ namespace dyno
 		this->inRadius()->setValue(Real(0.011));
 
 		this->inPosition()->setElementCount(position.size());
-		this->inPosition()->getValue().assign(position);
+		this->inPosition()->getData().assign(position);
 	}
 
 	template<typename TDataType>
@@ -107,7 +107,7 @@ namespace dyno
 		CArray<Coord> hostPos;
 		hostPos.resize(pNum);
 
-// 		Function1Pt::copy(hostPos, m_position.getValue());
+// 		Function1Pt::copy(hostPos, m_position.getData());
 // 
 // 		m_lowBound = Vector3f(10000000, 10000000, 10000000);
 // 		m_highBound = Vector3f(-10000000, -10000000, -10000000);
@@ -124,7 +124,7 @@ namespace dyno
 // 		}
 
 	
-		m_hash.setSpace(this->inRadius()->getValue(), m_lowBound, m_highBound);
+		m_hash.setSpace(this->inRadius()->getData(), m_lowBound, m_highBound);
 
 //		m_reduce = Reduction<int>::Create(m_position.getElementCount());
 		triangle_first = true;
@@ -150,15 +150,15 @@ namespace dyno
 			}
 
 			m_hash.clear();
-			m_hash.construct(this->inPosition()->getValue());
+			m_hash.construct(this->inPosition()->getData());
 
-			if (!this->outNeighborhood()->getValue().isLimited())
+			if (!this->outNeighborhood()->getData().isLimited())
 			{
-				queryNeighborDynamic(this->outNeighborhood()->getValue(), this->inPosition()->getValue(), this->inRadius()->getValue());
+				queryNeighborDynamic(this->outNeighborhood()->getData(), this->inPosition()->getData(), this->inRadius()->getData());
 			}
 			else
 			{
-				queryNeighborFixed(this->outNeighborhood()->getValue(), this->inPosition()->getValue(), this->inRadius()->getValue());
+				queryNeighborFixed(this->outNeighborhood()->getData(), this->inPosition()->getData(), this->inRadius()->getData());
 			}
 		}
 	}
@@ -194,7 +194,7 @@ namespace dyno
 // 		}
 
 		m_hash.setSpace(radius, m_lowBound, m_highBound);
-		m_hash.construct(this->inPosition()->getValue());
+		m_hash.construct(this->inPosition()->getData());
 
 		if (!nbr.isLimited())
 		{
@@ -278,7 +278,7 @@ namespace dyno
 	void NeighborQuery<TDataType>::queryNeighborSize(DArray<int>& num, DArray<Coord>& pos, Real h)
 	{
 		uint pDims = cudaGridSize(num.size(), BLOCK_SIZE);
-		K_CalNeighborSize << <pDims, BLOCK_SIZE >> > (num, pos, this->inPosition()->getValue(), m_hash, h);
+		K_CalNeighborSize << <pDims, BLOCK_SIZE >> > (num, pos, this->inPosition()->getData(), m_hash, h);
 		cuSynchronize();
 	}
 
@@ -308,7 +308,7 @@ namespace dyno
 			elements.resize(sum);
 
 			uint pDims = cudaGridSize(pos.size(), BLOCK_SIZE);
-			K_GetNeighborElements << <pDims, BLOCK_SIZE >> > (nbrList, pos, this->inPosition()->getValue(), m_hash, h);
+			K_GetNeighborElements << <pDims, BLOCK_SIZE >> > (nbrList, pos, this->inPosition()->getData(), m_hash, h);
 			cuSynchronize();
 		}
 	}
@@ -396,7 +396,7 @@ namespace dyno
 		K_ComputeNeighborFixed << <pDims, BLOCK_SIZE >> > (
 			nbrList, 
 			pos, 
-			this->inPosition()->getValue(), 
+			this->inPosition()->getData(), 
 			m_hash, 
 			h, 
 			ids, 

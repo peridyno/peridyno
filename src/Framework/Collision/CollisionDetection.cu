@@ -59,7 +59,7 @@ namespace dyno
 		total_num += boxes.size() + spheres.size();
 
 
-		auto& aabb = m_broadPhaseCD->inSource()->getValue();
+		auto& aabb = m_broadPhaseCD->inSource()->getData();
 
 		if (aabb.size() != total_num)
 		{

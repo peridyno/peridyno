@@ -115,13 +115,13 @@ namespace dyno
 
 		PM_ComputeInvariants<< <pDims, BLOCK_SIZE >> > (
 			this->m_bulkCoefs,
-			this->inPosition()->getValue(),
-			this->inRestShape()->getValue(),
-			this->inHorizon()->getValue(),
+			this->inPosition()->getData(),
+			this->inRestShape()->getData(),
+			this->inHorizon()->getData(),
 			A,
 			B,
-			this->m_mu.getValue(),
-			this->m_lambda.getValue());
+			this->m_mu.getData(),
+			this->m_lambda.getData());
 		cuSynchronize();
 	}
 

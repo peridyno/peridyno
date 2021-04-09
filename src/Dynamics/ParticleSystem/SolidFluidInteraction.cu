@@ -75,7 +75,7 @@ namespace dyno
 		std::vector<Real> mass;
 		for (int i = 0; i < m_particleSystems.size(); i++)
 		{
-			auto points = m_particleSystems[i]->currentPosition()->getValue();
+			auto points = m_particleSystems[i]->currentPosition()->getData();
 			total_num += points.size();
 			Real m = m_particleSystems[i]->getMass() / points.size();
 			for (int j = 0; j < points.size(); j++)
@@ -95,19 +95,19 @@ namespace dyno
 		init_pos.resize(total_num);
 
 		m_objId.assign(ids);
-		m_mass.getValue().assign(mass);
+		m_mass.getData().assign(mass);
 		ids.clear();
 		mass.clear();
 
 		int start = 0;
-		DArray<Coord>& allpoints = m_position.getValue();
+		DArray<Coord>& allpoints = m_position.getData();
 		for (int i = 0; i < m_particleSystems.size(); i++)
 		{
-			DArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
-			DArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
+			DArray<Coord>& points = m_particleSystems[i]->currentPosition()->getData();
+			DArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getData();
 			int num = points.size();
 			cudaMemcpy(allpoints.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-			cudaMemcpy(m_vels.getValue().begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+			cudaMemcpy(m_vels.getData().begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			start += num;
 		}
 
@@ -223,14 +223,14 @@ namespace dyno
 	void SolidFluidInteraction<TDataType>::advance(Real dt)
 	{
 		int start = 0;
-		DArray<Coord>& allpoints = m_position.getValue();
+		DArray<Coord>& allpoints = m_position.getData();
 		for (int i = 0; i < m_particleSystems.size(); i++)
 		{
-			DArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
-			DArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
+			DArray<Coord>& points = m_particleSystems[i]->currentPosition()->getData();
+			DArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getData();
 			int num = points.size();
 			cudaMemcpy(allpoints.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-			cudaMemcpy(m_vels.getValue().begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+			cudaMemcpy(m_vels.getData().begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 			start += num;
 		}
 
@@ -251,12 +251,12 @@ namespace dyno
 			posBuf.reset();
 			K_Collide << <pDims, BLOCK_SIZE >> > (
 				m_objId, 
-				m_mass.getValue(),
+				m_mass.getData(),
 				allpoints,
 				posBuf, 
 				weights, 
 				m_nbrQuery->getNeighborList(),
-				radius.getValue());
+				radius.getData());
 
 			K_ComputeTarget << <pDims, BLOCK_SIZE >> > (
 				allpoints,
@@ -266,16 +266,16 @@ namespace dyno
 			Function1Pt::copy(allpoints, posBuf);
 		}
 
-		K_ComputeVelocity << <pDims, BLOCK_SIZE >> > (init_pos, allpoints, m_vels.getValue(), getParent()->getDt());*/
+		K_ComputeVelocity << <pDims, BLOCK_SIZE >> > (init_pos, allpoints, m_vels.getData(), getParent()->getDt());*/
 
 		start = 0;
 		for (int i = 0; i < m_particleSystems.size(); i++)
 		{
-			DArray<Coord>& points = m_particleSystems[i]->currentPosition()->getValue();
-			DArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getValue();
+			DArray<Coord>& points = m_particleSystems[i]->currentPosition()->getData();
+			DArray<Coord>& vels = m_particleSystems[i]->currentVelocity()->getData();
 			int num = points.size();
 			cudaMemcpy(points.begin(), allpoints.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-			cudaMemcpy(vels.begin(), m_vels.getValue().begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+			cudaMemcpy(vels.begin(), m_vels.getData().begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 
 			start += num;
 		}

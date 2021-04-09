@@ -63,8 +63,8 @@ namespace dyno
 		host_position.resize(total_num);
 		host_mapping.resize(total_num);
 
-		host_position.assign(m_position.getValue());
-		host_mapping.assign(m_color_mapping.getValue());
+		host_position.assign(m_position.getData());
+		host_mapping.assign(m_color_mapping.getData());
 
 		
 		for (int i = 0; i < total_num; i++)

@@ -170,13 +170,13 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleRod<TDataType>::getHostPosition(std::vector<Coord>& pos)
 	{
-		int pNum = this->currentPosition()->getValue().size();
+		int pNum = this->currentPosition()->getData().size();
 		if (pos.size() != pNum)
 		{
 			pos.resize(pNum);
 		}
 
-		cudaMemcpy(&pos[0], this->currentPosition()->getValue().begin(), pNum*sizeof(Coord), cudaMemcpyDeviceToHost);
+		cudaMemcpy(&pos[0], this->currentPosition()->getData().begin(), pNum*sizeof(Coord), cudaMemcpyDeviceToHost);
 	}
 
 	template<typename TDataType>

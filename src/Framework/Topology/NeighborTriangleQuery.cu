@@ -92,16 +92,16 @@ namespace dyno
 			cuExecute(p_num,
 				NTQ_SetupAABB,
 				m_queryAABB,
-				this->inPosition()->getValue(),
-				this->inRadius()->getValue()*0.9);
+				this->inPosition()->getData(),
+				this->inRadius()->getData()*0.9);
 
 			cuExecute(t_num,
 				NTQ_SetupAABB,
 				m_queriedAABB,
-				this->inTriangleVertex()->getValue(),
-				this->inTriangleIndex()->getValue());
+				this->inTriangleVertex()->getData(),
+				this->inTriangleIndex()->getData());
 
-			Real radius = this->inRadius()->getValue();
+			Real radius = this->inRadius()->getData();
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 

@@ -111,7 +111,7 @@ FieldName(std::string name, std::string description, FieldTypeEnum fieldType, Ba
 const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }			\
 const std::string getClassName() override { return std::string(#FieldName); }					\
 \
-std::shared_ptr<Data>& getReference()								\
+std::shared_ptr<Data>& getDataPtr()									\
 {																	\
 	FieldBase* topField = this->getTopField();						\
 	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
@@ -120,7 +120,7 @@ std::shared_ptr<Data>& getReference()								\
 \
 std::shared_ptr<Data> allocate()									\
 {																	\
-	auto& data = this->getReference();								\
+	auto& data = this->getDataPtr();								\
 	if (data == nullptr) {											\
 		data = std::make_shared<Data>();							\
 	}																\
@@ -128,7 +128,7 @@ std::shared_ptr<Data> allocate()									\
 }																	\
 \
 bool isEmpty() override {											\
-return this->getReference() == nullptr;								\
+return this->getDataPtr() == nullptr;								\
 }																	\
 \
 bool connect(DerivedField* dst)										\
@@ -137,8 +137,8 @@ bool connect(DerivedField* dst)										\
 	this->update();													\
 	return true;													\
 }																	\
-Data& getValue() {													\
-	auto dataPtr = this->getReference();							\
+Data& getData() {													\
+	auto dataPtr = this->getDataPtr();								\
 	assert(dataPtr != nullptr);										\
 	return *dataPtr;												\
 }																	\

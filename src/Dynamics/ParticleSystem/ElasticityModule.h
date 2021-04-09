@@ -38,7 +38,7 @@ namespace dyno {
 
 //		void setHorizon(Real len) { m_horizon.setValue(len); }
 		void setIterationNumber(int num) { m_iterNum.setValue(num); }
-		int getIterationNumber() { return m_iterNum.getValue(); }
+		int getIterationNumber() { return m_iterNum.getData(); }
 
 		void resetRestShape();
 

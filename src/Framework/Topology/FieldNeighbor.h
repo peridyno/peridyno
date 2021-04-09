@@ -20,7 +20,7 @@ public:
 	~NeighborField() override;
 
 	uint getElementCount() override {
-		auto ref = this->getReference();
+		auto ref = this->getDataPtr();
 		return ref == nullptr ? 0 : ref->size();;
 	}
 	void setElementCount(int num, int nbrSize = 0);
@@ -29,12 +29,12 @@ public:
 	const std::string getClassName() override { return std::string("NeighborField"); }
 //	DeviceType getDeviceType() override { return DeviceType::GPU; }
 
-	std::shared_ptr<NeighborList<T>> getReference();
+	std::shared_ptr<NeighborList<T>> getDataPtr();
 
-	NeighborList<T>& getValue() { return *getReference(); }
+	NeighborList<T>& getData() { return *getDataPtr(); }
 
 	bool isEmpty() override {
-		return getReference() == nullptr;
+		return getDataPtr() == nullptr;
 	}
 
 	bool connect(NeighborField<T>* field2);
@@ -73,7 +73,7 @@ template<typename T>
 void NeighborField<T>::setElementCount(int num, int nbrSize /*= 0*/)
 {
 	auto arr = this->getSourceNeighborField();
-	//std::shared_ptr<NeighborList<T>> data = getReference();
+	//std::shared_ptr<NeighborList<T>> data = getDataPtr();
 	if (arr == nullptr)
 	{
 		m_data = num <= 0 ? nullptr : std::make_shared<NeighborList<T>>(num, nbrSize);
@@ -134,7 +134,7 @@ bool NeighborField<T>::connect(NeighborField<T>* field2)
 }
 
 template<typename T>
-std::shared_ptr<NeighborList<T>> NeighborField<T>::getReference()
+std::shared_ptr<NeighborList<T>> NeighborField<T>::getDataPtr()
 {
 	FieldBase* source = getSource();
 	if (source == nullptr)
@@ -146,8 +146,8 @@ std::shared_ptr<NeighborList<T>> NeighborField<T>::getReference()
 		NeighborField<T>* var = dynamic_cast<NeighborField<T>*>(source);
 		if (var != nullptr)
 		{
-			//return var->getReference();
-			return (*var).getReference();
+			//return var->getDataPtr();
+			return (*var).getDataPtr();
 		}
 		else
 		{

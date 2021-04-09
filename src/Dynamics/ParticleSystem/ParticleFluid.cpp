@@ -40,9 +40,9 @@ namespace dyno
 			int total_num = this->currentPosition()->getElementCount();
 			if (total_num > 0)
 			{
-				DArray<Coord>& position = this->currentPosition()->getValue();
-				DArray<Coord>& velocity = this->currentVelocity()->getValue();
-				DArray<Coord>& force = this->currentForce()->getValue();
+				DArray<Coord>& position = this->currentPosition()->getData();
+				DArray<Coord>& velocity = this->currentVelocity()->getData();
+				DArray<Coord>& force = this->currentForce()->getData();
 
 				int start = 0;
 				for (int i = 0; i < m_particleEmitters.size(); i++)
@@ -50,9 +50,9 @@ namespace dyno
 					int num = m_particleEmitters[i]->currentPosition()->getElementCount();
 					if (num > 0)
 					{
-						auto points = m_particleEmitters[i]->currentPosition()->getValue();
-						auto vels = m_particleEmitters[i]->currentVelocity()->getValue();
-						auto fors = m_particleEmitters[i]->currentForce()->getValue();
+						auto points = m_particleEmitters[i]->currentPosition()->getData();
+						auto vels = m_particleEmitters[i]->currentVelocity()->getData();
+						auto fors = m_particleEmitters[i]->currentForce()->getData();
 
 						cudaMemcpy(points.begin(), position.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 						cudaMemcpy(vels.begin(), velocity.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
@@ -87,9 +87,9 @@ namespace dyno
 
 				//printf("###### %d\n", this->currentPosition()->getElementCount());
 
-				DArray<Coord>& position = this->currentPosition()->getValue();
-				DArray<Coord>& velocity = this->currentVelocity()->getValue();
-				DArray<Coord>& force = this->currentForce()->getValue();
+				DArray<Coord>& position = this->currentPosition()->getData();
+				DArray<Coord>& velocity = this->currentVelocity()->getData();
+				DArray<Coord>& force = this->currentForce()->getData();
 
 				int start = 0;
 				for (int i = 0; i < m_particleEmitters.size(); i++)
@@ -97,9 +97,9 @@ namespace dyno
 					int num = m_particleEmitters[i]->currentPosition()->getElementCount();
 					if (num > 0)
 					{
-						DArray<Coord>& points = m_particleEmitters[i]->currentPosition()->getValue();
-						DArray<Coord>& vels = m_particleEmitters[i]->currentVelocity()->getValue();
-						DArray<Coord>& fors = m_particleEmitters[i]->currentForce()->getValue();
+						DArray<Coord>& points = m_particleEmitters[i]->currentPosition()->getData();
+						DArray<Coord>& vels = m_particleEmitters[i]->currentVelocity()->getData();
+						DArray<Coord>& fors = m_particleEmitters[i]->currentForce()->getData();
 
 						cudaMemcpy(position.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
 						cudaMemcpy(velocity.begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);

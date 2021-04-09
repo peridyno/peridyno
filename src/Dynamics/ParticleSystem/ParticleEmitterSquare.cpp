@@ -29,16 +29,16 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleEmitterSquare<TDataType>::generateParticles()
 	{
-		auto sampling_distance = this->varSamplingDistance()->getValue();
+		auto sampling_distance = this->varSamplingDistance()->getData();
 		if (sampling_distance < EPSILON)
 			sampling_distance = Real(0.005);
-		auto center = this->varLocation()->getValue();
+		auto center = this->varLocation()->getData();
 
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
 
-		auto rot_vec = this->varRotation()->getValue();
+		auto rot_vec = this->varRotation()->getData();
 
 		Quat<Real> quat = Quat<float>::Identity();
 		float x_rad = rot_vec[0] / 180.0f * M_PI;
@@ -51,10 +51,10 @@ namespace dyno
 
 		auto rot_mat = quat.get3x3Matrix();
 
-		Coord v0 = this->varVelocityMagnitude()->getValue()*rot_mat*Vector3f(0, -1, 0);
+		Coord v0 = this->varVelocityMagnitude()->getData()*rot_mat*Vector3f(0, -1, 0);
 
-		auto w = this->varWidth()->getValue();
-		auto h = this->varHeight()->getValue();
+		auto w = this->varWidth()->getData();
+		auto h = this->varHeight()->getData();
 
 		for (Real x = -w; x <= w; x += sampling_distance)
 		{

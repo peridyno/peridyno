@@ -344,14 +344,14 @@ namespace dyno
 			m_weights,
 			m_bulkCoefs,
 			m_invK,
-			this->inPosition()->getValue(),
-			this->inRestShape()->getValue(),
-			m_mu.getValue(),
-			m_lambda.getValue());
+			this->inPosition()->getData(),
+			this->inRestShape()->getData(),
+			m_mu.getData(),
+			m_lambda.getData());
 		cuSynchronize();
 
 		K_UpdatePosition << <pDims, BLOCK_SIZE >> > (
-			this->inPosition()->getValue(),
+			this->inPosition()->getData(),
 			m_position_old,
 			m_displacement,
 			m_weights);
@@ -385,7 +385,7 @@ namespace dyno
 
 		EM_PrecomputeShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
 			m_invK,
-			this->inRestShape()->getValue());
+			this->inRestShape()->getData());
 		cuSynchronize();
 	}
 
@@ -394,12 +394,12 @@ namespace dyno
 	void ElasticityModule<TDataType>::solveElasticity()
 	{
 		//Save new positions
-		m_position_old.assign(this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getData());
 
 		this->computeInverseK();
 
 		int itor = 0;
-		while (itor < m_iterNum.getValue())
+		while (itor < m_iterNum.getData())
 		{
 			this->enforceElasticity();
 
@@ -418,9 +418,9 @@ namespace dyno
 		Real dt = this->getParent()->getDt();
 
 		K_UpdateVelocity << <pDims, BLOCK_SIZE >> > (
-			this->inVelocity()->getValue(),
+			this->inVelocity()->getData(),
 			m_position_old,
-			this->inPosition()->getValue(),
+			this->inPosition()->getData(),
 			dt);
 		cuSynchronize();
 	}
@@ -486,23 +486,23 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::resetRestShape()
 	{
-		this->inRestShape()->setElementCount(this->inNeighborhood()->getValue().size());
-		this->inRestShape()->getValue().getIndex().resize(this->inNeighborhood()->getValue().getIndex().size());
+		this->inRestShape()->setElementCount(this->inNeighborhood()->getData().size());
+		this->inRestShape()->getData().getIndex().resize(this->inNeighborhood()->getData().getIndex().size());
 
-		if (this->inNeighborhood()->getValue().isLimited())
+		if (this->inNeighborhood()->getData().isLimited())
 		{
-			this->inRestShape()->getValue().setNeighborLimit(this->inNeighborhood()->getValue().getNeighborLimit());
+			this->inRestShape()->getData().setNeighborLimit(this->inNeighborhood()->getData().getNeighborLimit());
 		}
 		else
 		{
-			this->inRestShape()->getValue().getElements().resize(this->inNeighborhood()->getValue().getElements().size());
+			this->inRestShape()->getData().getElements().resize(this->inNeighborhood()->getData().getElements().size());
 		}
 
-		this->inRestShape()->getValue().getIndex().assign(this->inNeighborhood()->getValue().getIndex());
+		this->inRestShape()->getData().getIndex().assign(this->inNeighborhood()->getData().getIndex());
 
-		uint pDims = cudaGridSize(this->inPosition()->getValue().size(), BLOCK_SIZE);
+		uint pDims = cudaGridSize(this->inPosition()->getData().size(), BLOCK_SIZE);
 
-		K_UpdateRestShape<< <pDims, BLOCK_SIZE >> > (this->inRestShape()->getValue(), this->inNeighborhood()->getValue(), this->inPosition()->getValue());
+		K_UpdateRestShape<< <pDims, BLOCK_SIZE >> > (this->inRestShape()->getData(), this->inNeighborhood()->getData(), this->inPosition()->getData());
 		cuSynchronize();
 	}
 
@@ -533,7 +533,7 @@ namespace dyno
 		
 		this->computeMaterialStiffness();
 
-		m_position_old.assign(this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getData());
 
 		return true;
 	}
@@ -558,7 +558,7 @@ namespace dyno
 
 		this->computeMaterialStiffness();
 
-		m_position_old.assign(this->inPosition()->getValue());
+		m_position_old.assign(this->inPosition()->getData());
 	}
 
 	DEFINE_CLASS(ElasticityModule);

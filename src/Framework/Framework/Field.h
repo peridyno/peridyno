@@ -42,7 +42,7 @@ namespace dyno {
 	template<typename T>
 	void VarField<T>::setValue(T val)
 	{
-		std::shared_ptr<T>& data = this->getReference();
+		std::shared_ptr<T>& data = this->getDataPtr();
 		if (data == nullptr)
 		{
 			data = std::make_shared<T>(val);
@@ -78,7 +78,7 @@ namespace dyno {
 		~ArrayField() override;
 
 		inline uint getElementCount() override {
-			auto ref = this->getReference();
+			auto ref = this->getDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
@@ -116,7 +116,7 @@ namespace dyno {
 	template<typename T, DeviceType deviceType>
 	void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
 	{
-		std::shared_ptr<Array<T, deviceType>>& data = this->getReference();
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
 		{
 			data = std::make_shared<Array<T, deviceType>>();
@@ -128,7 +128,7 @@ namespace dyno {
 	template<typename T, DeviceType deviceType>
 	void ArrayField<T, deviceType>::setValue(DArray<T>& vals)
 	{
-		std::shared_ptr<Array<T, deviceType>>& data = this->getReference();
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
 		{
 			data = std::make_shared<Array<T, deviceType>>();

@@ -41,7 +41,7 @@ namespace dyno
 	template<typename TDataType>
 	void FixedPoints<TDataType>::updateContext()
 	{
-		int totalNum = m_position.getValue().size();
+		int totalNum = m_position.getData().size();
 		if (m_bFixed.size() != totalNum)
 		{
 			m_bFixed_host.resize(totalNum);
@@ -137,7 +137,7 @@ namespace dyno
 
 		uint pDims = cudaGridSize(m_bFixed.size(), BLOCK_SIZE);
 
-		K_DoFixPoints<Coord> << < pDims, BLOCK_SIZE >> > (m_position.getValue(), m_velocity.getValue(), m_bFixed, m_fixed_positions);
+		K_DoFixPoints<Coord> << < pDims, BLOCK_SIZE >> > (m_position.getData(), m_velocity.getData(), m_bFixed, m_fixed_positions);
 
 		return true;
 	}
@@ -163,7 +163,7 @@ namespace dyno
 	{
 		uint pDims = cudaGridSize(m_bFixed.size(), BLOCK_SIZE);
 
-		K_DoPlaneConstrain<< < pDims, BLOCK_SIZE >> > (m_position.getValue(), pos, dir);
+		K_DoPlaneConstrain<< < pDims, BLOCK_SIZE >> > (m_position.getData(), pos, dir);
 	}
 
 	DEFINE_CLASS(FixedPoints);

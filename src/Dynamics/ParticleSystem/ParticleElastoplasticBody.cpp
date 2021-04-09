@@ -90,7 +90,7 @@ namespace dyno
 	void ParticleElastoplasticBody<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
-		pts.assign(this->currentPosition()->getValue());
+		pts.assign(this->currentPosition()->getData());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
