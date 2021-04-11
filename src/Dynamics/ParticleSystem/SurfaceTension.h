@@ -17,22 +17,11 @@ namespace dyno {
 
 		bool applyForce() override;
 
-		void setPositionID(FieldID id) { m_posID = id; }
-		void setVelocityID(FieldID id) { m_velID = id; }
-		void setNeighborhoodID(FieldID id) { m_neighborhoodID = id; }
-
 		void setIntensity(Real intensity) { m_intensity = intensity; }
 		void setSmoothingLength(Real len) { m_soothingLength = len; }
-
-	protected:
-		FieldID m_posID;
-		FieldID m_velID;
-		FieldID m_neighborhoodID;
 
 	private:
 		Real m_intensity;
 		Real m_soothingLength;
-
-		DeviceArrayField<Real>* m_energy;
 	};
 }

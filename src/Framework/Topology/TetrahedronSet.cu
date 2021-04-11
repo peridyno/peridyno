@@ -133,9 +133,7 @@ namespace dyno
 
 	template<typename Tetrahedron>
 	__global__ void TS_SetupTetIds(
-		DArray<int> ids,
-		DArray<int> counter,
-		DArray<int> shift,
+		DArrayList<int> tetIds,
 		DArray<Tetrahedron> tets)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -143,21 +141,14 @@ namespace dyno
 
 		Tetrahedron t = tets[tId];
 
-		int index = atomicAdd(&(counter[t[0]]), 1);
-		ids[shift[t[0]] + index] = tId;
-
-		index = atomicAdd(&(counter[t[1]]), 1);
-		ids[shift[t[1]] + index] = tId;
-
-		index = atomicAdd(&(counter[t[2]]), 1);
-		ids[shift[t[2]] + index] = tId;
-
-		index = atomicAdd(&(counter[t[3]]), 1);
-		ids[shift[t[3]] + index] = tId;
+		tetIds[t[0]].atomicInsert(tId);
+		tetIds[t[1]].atomicInsert(tId);
+		tetIds[t[2]].atomicInsert(tId);
+		tetIds[t[3]].atomicInsert(tId);
 	}
 
 	template<typename TDataType>
-	NeighborList<int>& TetrahedronSet<TDataType>::getVer2Tet()
+	DArrayList<int>& TetrahedronSet<TDataType>::getVer2Tet()
 	{
 		DArray<int> counter;
 		counter.resize(m_coords.size());
@@ -168,34 +159,15 @@ namespace dyno
 			counter,
 			m_tethedrons);
 
-		DArray<int> shift;
-		shift.resize(m_coords.size());
-
-		shift.assign(counter);
-
-		int total_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
-		thrust::exclusive_scan(thrust::device, shift.begin(), shift.begin() + shift.size(), shift.begin());
-
-		DArray<int> elements;
-		elements.resize(total_num);
+		m_ver2Tet.resize(counter);
 
 		counter.reset();
 		cuExecute(m_tethedrons.size(),
 			TS_SetupTetIds,
-			elements,
-			counter,
-			shift,
+			m_ver2Tet,
 			m_tethedrons);
 
-		m_ver2Tet.getIndex().resize(shift.size());
-		m_ver2Tet.getElements().resize(elements.size());
-
-		m_ver2Tet.getIndex().assign(shift);
-		m_ver2Tet.getElements().assign(elements);
-
 		counter.clear();
-		shift.clear();
-		elements.clear();
 
 		return m_ver2Tet;
 	}
@@ -265,24 +237,8 @@ namespace dyno
 				t2T[1] = tetIds[tId + 1];
 
 			tri2Tet[shift] = t2T;
-
-// 			printf("T2T %d: %d %d \n", shift, t2T[0], t2T[1]);
-// 
-// 			printf("Tri %d: %d %d %d; Tet: %d \n", shift, keys[tId][0], keys[tId][1], keys[tId][2], tetIds[tId]);
-// 			printf("Counter: %d \n", shift, counter[tId]);
 		}
 	}
-
-// 	template<typename Tri2Tet>
-// 	__global__ void TS_InitTri2Tet(
-// 		DArray<Tri2Tet> tri2Tet)
-// 	{
-// 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (tId > tri2Tet.size()) return;
-// 
-// 		tri2Tet[0] = EMPTY;
-// 		tri2Tet[1] = EMPTY;
-// 	}
 
 	template<typename TKey>
 	void printTKey(DArray<TKey> keys, int maxLength) {
@@ -372,7 +328,7 @@ namespace dyno
 		tri2Tet.resize(tetSet.tri2Tet.size());
 		tri2Tet.assign(tetSet.tri2Tet);
 
-		m_ver2Tet.copyFrom(tetSet.m_ver2Tet);
+		m_ver2Tet.assign(tetSet.m_ver2Tet);
 
 		TriangleSet<TDataType>::copyFrom(tetSet);
 	}

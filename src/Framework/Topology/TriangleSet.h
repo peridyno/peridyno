@@ -1,6 +1,5 @@
 #pragma once
 #include "EdgeSet.h"
-#include "Framework/ModuleTopology.h"
 
 namespace dyno
 {
@@ -93,7 +92,7 @@ namespace dyno
 		DArray<Triangle>* getTriangles() { return &m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
 
-		NeighborList<int>& getVertex2Triangles();
+		DArrayList<int>& getVertex2Triangles();
 
 		void updateEdges();
 
@@ -107,7 +106,7 @@ namespace dyno
 	protected:
 
 		DArray<Triangle> m_triangles;
-		NeighborList<int> m_ver2Tri;
+		DArrayList<int> m_ver2Tri;
 
 		DArray<Edg2Tri> edg2Tri;
 	};

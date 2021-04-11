@@ -1,8 +1,5 @@
 #pragma once
 #include "Framework/ModuleTopology.h"
-#include "Topology/NeighborList.h"
-#include "Vector.h"
-#include "Array/ArrayList.h"
 
 namespace dyno
 {

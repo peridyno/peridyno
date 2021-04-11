@@ -30,14 +30,9 @@ namespace dyno
 
 		Coord getOrigin() { return origin; }
 		
-
 		DArray2D<Real>& getHeights() { return m_height; }
 
 	protected:
-// 		DArray<Coord> m_coords;
-// 		DArray<Coord> m_normals;
-// 		NeighborList<int> m_pointNeighbors;
-
 		Coord origin;
 
 		Real m_dx;

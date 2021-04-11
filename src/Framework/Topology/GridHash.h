@@ -1,11 +1,6 @@
 #pragma once
-#include "DataTypes.h"
-#include "Array/Array.h"
-#include "Topology/NeighborList.h"
 #include "Algorithm/Scan.h"
-#include "EdgeSet.h"
-#include "Framework/ModuleTopology.h"
-#include "Topology/Primitive3D.h"
+#include "Algorithm/Reduction.h"
 
 namespace dyno{
 
@@ -19,7 +14,6 @@ namespace dyno{
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
 		GridHash();
 		~GridHash();
@@ -27,7 +21,6 @@ namespace dyno{
 		void setSpace(Real _h, Coord _lo, Coord _hi);
 
 		void construct(DArray<Coord>& pos);
-		void construct(DArray<Coord>& pos, DArray<Triangle>& tri, DArray<Coord>& Tri_pos);
 
 		void clear();
 
@@ -42,8 +35,7 @@ namespace dyno{
 			return i + j*nx + k*nx*ny;
 		}
 
-		GPU_FUNC inline int getIndex(Coord pos)
-		{
+		GPU_FUNC inline int getIndex(Coord pos) {
 			int i = (int)floor((pos[0] - lo[0]) / ds);
 			int j = (int)floor((pos[1] - lo[1]) / ds);
 			int k = (int)floor((pos[2] - lo[2]) / ds);
@@ -51,8 +43,7 @@ namespace dyno{
 			return getIndex(i, j, k);
 		}
 
-		GPU_FUNC inline int3 getIndex3(Coord pos)
-		{
+		GPU_FUNC inline int3 getIndex3(Coord pos) {
 			int i = (int)floor((pos[0] - lo[0]) / ds);
 			int j = (int)floor((pos[1] - lo[1]) / ds);
 			int k = (int)floor((pos[2] - lo[2]) / ds);
@@ -61,12 +52,11 @@ namespace dyno{
 		}
 
 		GPU_FUNC inline int getCounter(int gId) { 
-			if (gId >= num - 1)
-			{
+			if (gId >= num - 1) {
 				return particle_num - index[gId];
 			}
+
 			return index[gId + 1] - index[gId];
-			//return counter[gId]; 
 		}
 
 		GPU_FUNC inline int getParticleId(int gId, int n) { 

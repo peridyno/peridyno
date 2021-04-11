@@ -55,9 +55,7 @@ namespace dyno
 
 	template<typename Triangle>
 	__global__ void TS_SetupTriIds(
-		DArray<int> ids,
-		DArray<int> counter,
-		DArray<int> shift,
+		DArrayList<int> triIds,
 		DArray<Triangle> triangles)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -65,34 +63,15 @@ namespace dyno
 
 		Triangle t = triangles[tId];
 
-		int index = atomicAdd(&(counter[t[0]]), 1);
-		ids[shift[t[0]] + index] = tId;
-
-		index = atomicAdd(&(counter[t[1]]), 1);
-		ids[shift[t[1]] + index] = tId;
-
-		index = atomicAdd(&(counter[t[2]]), 1);
-		ids[shift[t[2]] + index] = tId;
+		triIds[t[0]].atomicInsert(tId);
+		triIds[t[1]].atomicInsert(tId);
+		triIds[t[2]].atomicInsert(tId);
 	}
 
-// 	void print(DArray<int> arr)
-// 	{
-// 		CArray<int> h_arr;
-// 		h_arr.resize(arr.size());
-// 		Function1Pt::copy(arr, h_arr);
-// 
-// 		for (int i =0;i < arr.size(); i++)
-// 		{
-// 			printf("%d %d \n", i, h_arr[i]);
-// 		}
-// 		h_arr.release();
-// 	}
-
 	template<typename TDataType>
-	NeighborList<int>& TriangleSet<TDataType>::getVertex2Triangles()
+	DArrayList<int>& TriangleSet<TDataType>::getVertex2Triangles()
 	{
-		DArray<int> counter;
-		counter.resize(m_coords.size());
+		DArray<int> counter(m_coords.size());
 		counter.reset();
 
 		cuExecute(m_triangles.size(),
@@ -100,36 +79,15 @@ namespace dyno
 			counter,
 			m_triangles);
 
-		DArray<int> shift;
-		shift.resize(m_coords.size());
-
-		shift.assign(counter);
-
-		//print(counter);
-
-		int total_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
-		thrust::exclusive_scan(thrust::device, shift.begin(), shift.begin() + shift.size(), shift.begin());
-
-		DArray<int> elements;
-		elements.resize(total_num);
+		m_ver2Tri.resize(counter);
 
 		counter.reset();
 		cuExecute(m_triangles.size(),
 			TS_SetupTriIds,
-			elements,
-			counter,
-			shift,
+			m_ver2Tri,
 			m_triangles);
 
-		m_ver2Tri.getIndex().resize(shift.size());
-		m_ver2Tri.getElements().resize(elements.size());
-
-		m_ver2Tri.getIndex().assign(shift);
-		m_ver2Tri.getElements().assign(elements);
-
 		counter.clear();
-		shift.clear();
-		elements.clear();
 
 		return m_ver2Tri;
 	}
@@ -310,7 +268,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::copyFrom(TriangleSet<TDataType>& triangleSet)
 	{
-		m_ver2Tri.copyFrom(triangleSet.m_ver2Tri);
+		m_ver2Tri.assign(triangleSet.m_ver2Tri);
 
 		m_triangles.resize(triangleSet.m_triangles.size());
 		m_triangles.assign(triangleSet.m_triangles);

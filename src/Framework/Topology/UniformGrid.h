@@ -10,8 +10,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		UniformGrid3D() {};
-		~UniformGrid3D() {};
+		UniformGrid3D();
+		~UniformGrid3D();
 
 	private:
 		DArray3D<Coord> m_coords;

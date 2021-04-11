@@ -1,7 +1,5 @@
 #pragma once
 #include "TriangleSet.h"
-#include "Framework/ModuleTopology.h"
-
 
 namespace dyno
 {
@@ -24,7 +22,7 @@ namespace dyno
 		DArray<Tetrahedron>& getTetrahedrons() { return m_tethedrons; }
 		DArray<Tri2Tet>& getTri2Tet() { return tri2Tet; }
 
-		NeighborList<int>& getVer2Tet();
+		DArrayList<int>& getVer2Tet();
 
 		void getVolume(DArray<Real>& volume);
 
@@ -40,7 +38,7 @@ namespace dyno
 
 	private:
 		DArray<Tri2Tet> tri2Tet;
-		NeighborList<int> m_ver2Tet;
+		DArrayList<int> m_ver2Tet;
 	};
 }
 
