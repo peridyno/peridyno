@@ -2,7 +2,6 @@
 #include "Framework/ModuleTopology.h"
 #include "Vector.h"
 
-
 namespace dyno
 {
 	/*!

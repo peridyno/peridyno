@@ -6,10 +6,6 @@ namespace dyno
 	/*!
 	*	\class	ParticleEimitter
 	*	\brief	
-	*
-	*	
-	*	
-	*
 	*/
 	template <typename T> class ParticleFluid;
 	template<typename TDataType>

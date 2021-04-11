@@ -13,7 +13,6 @@ namespace dyno {
 		VolumeUnion();
 		~VolumeUnion() override;
 
-
 	public:
 	};
 }

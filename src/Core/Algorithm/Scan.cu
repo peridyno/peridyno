@@ -1,5 +1,4 @@
 #include "Scan.h"
-#include <cuda_runtime.h>
 
 namespace dyno
 {

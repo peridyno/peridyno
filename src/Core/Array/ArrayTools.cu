@@ -4,7 +4,46 @@
 namespace dyno
 {
 	template<int N>
-	__global__ void AA_Allocate(
+	struct SpaceHolder
+	{
+		char data[N];
+	};
+
+	template struct SpaceHolder<1>;
+	template struct SpaceHolder<2>;
+	template struct SpaceHolder<3>;
+	template struct SpaceHolder<4>;
+	template struct SpaceHolder<5>;
+	template struct SpaceHolder<6>;
+	template struct SpaceHolder<7>;
+	template struct SpaceHolder<8>;
+	template struct SpaceHolder<9>;
+	template struct SpaceHolder<10>;
+	template struct SpaceHolder<11>;
+	template struct SpaceHolder<12>;
+	template struct SpaceHolder<13>;
+	template struct SpaceHolder<14>;
+	template struct SpaceHolder<15>;
+	template struct SpaceHolder<16>;
+	template struct SpaceHolder<17>;
+	template struct SpaceHolder<18>;
+	template struct SpaceHolder<19>;
+	template struct SpaceHolder<20>;
+	template struct SpaceHolder<21>;
+	template struct SpaceHolder<22>;
+	template struct SpaceHolder<23>;
+	template struct SpaceHolder<24>;
+	template struct SpaceHolder<25>;
+	template struct SpaceHolder<26>;
+	template struct SpaceHolder<27>;
+	template struct SpaceHolder<28>;
+	template struct SpaceHolder<29>;
+	template struct SpaceHolder<30>;
+	template struct SpaceHolder<31>;
+	template struct SpaceHolder<32>;
+
+	template<int N>
+	__global__ void AT_Allocate(
 		void* lists,
 		void* elements,
 		size_t ele_size,
@@ -13,12 +52,12 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= index.size()) return;
 
-		List<PlaceHolder<N>>* listPtr = (List<PlaceHolder<N>>*)lists;
-		PlaceHolder<N>* elementsPtr = (PlaceHolder<N>*)elements;
+		List<SpaceHolder<N>>* listPtr = (List<SpaceHolder<N>>*)lists;
+		SpaceHolder<N>* elementsPtr = (SpaceHolder<N>*)elements;
 
 		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
 
-		List<PlaceHolder<N>> list;
+		List<SpaceHolder<N>> list;
 		list.reserve(elementsPtr + index[tId], count);
 
 		listPtr[tId] = list;
@@ -28,7 +67,7 @@ namespace dyno
 	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<int>& index)
 	{
 		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
-		AA_Allocate<N> << <pDims, BLOCK_SIZE >> > (	
+		AT_Allocate<N> << <pDims, BLOCK_SIZE >> > (	
 			lists,
 			elements,
 			ele_size,
@@ -73,7 +112,7 @@ namespace dyno
 	template void parallel_allocate_for_list<32>(void* lists, void* elements, size_t ele_size, DArray<int>& index);
 
 	template<int N>
-	__global__ void AA_Assign(
+	__global__ void AT_Assign(
 		void* lists,
 		void* elements,
 		size_t ele_size,
@@ -82,12 +121,12 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= index.size()) return;
 
-		List<PlaceHolder<N>>* listStartPtr = (List<PlaceHolder<N>>*)lists;
-		PlaceHolder<N>* elementsPtr = (PlaceHolder<N>*)elements;
+		List<SpaceHolder<N>>* listStartPtr = (List<SpaceHolder<N>>*)lists;
+		SpaceHolder<N>* elementsPtr = (SpaceHolder<N>*)elements;
 
 		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
 
-		List<PlaceHolder<N>> list = *(listStartPtr + tId);
+		List<SpaceHolder<N>> list = *(listStartPtr + tId);
 		list.reserve(elementsPtr + index[tId], count);
 
 		listStartPtr[tId] = list;
@@ -97,7 +136,7 @@ namespace dyno
 	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, DArray<int>& index)
 	{
 		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
-		AA_Assign<N> << <pDims, BLOCK_SIZE >> > (
+		AT_Assign<N> << <pDims, BLOCK_SIZE >> > (
 			lists,
 			elements,
 			ele_size,

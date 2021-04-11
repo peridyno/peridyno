@@ -26,6 +26,5 @@ namespace dyno {
 	private:
 		curandState s;
 	};
-
 }
 

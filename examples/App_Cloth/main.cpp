@@ -9,7 +9,6 @@
 #include "SurfaceMeshRender.h"
 #include "ParticleCloth.h"
 
-
 using namespace std;
 using namespace dyno;
 

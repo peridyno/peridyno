@@ -1,4 +1,3 @@
-#pragma once
 #include "GridHash.h"
 
 #include "Framework/Object.h"

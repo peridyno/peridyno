@@ -14,50 +14,10 @@
  * limitations under the License.
  */
 #pragma once
-#include "Platform.h"
 #include "Array/Array.h"
 
 namespace dyno
 {
-	template<int N>
-	struct PlaceHolder
-	{
-		char data[N];
-	};
-
-	template struct PlaceHolder<1>;
-	template struct PlaceHolder<2>;
-	template struct PlaceHolder<3>;
-	template struct PlaceHolder<4>;
-	template struct PlaceHolder<5>;
-	template struct PlaceHolder<6>;
-	template struct PlaceHolder<7>;
-	template struct PlaceHolder<8>;
-	template struct PlaceHolder<9>;
-	template struct PlaceHolder<10>;
-	template struct PlaceHolder<11>;
-	template struct PlaceHolder<12>;
-	template struct PlaceHolder<13>;
-	template struct PlaceHolder<14>;
-	template struct PlaceHolder<15>;
-	template struct PlaceHolder<16>;
-	template struct PlaceHolder<17>;
-	template struct PlaceHolder<18>;
-	template struct PlaceHolder<19>;
-	template struct PlaceHolder<20>;
-	template struct PlaceHolder<21>;
-	template struct PlaceHolder<22>;
-	template struct PlaceHolder<23>;
-	template struct PlaceHolder<24>;
-	template struct PlaceHolder<25>;
-	template struct PlaceHolder<26>;
-	template struct PlaceHolder<27>;
-	template struct PlaceHolder<28>;
-	template struct PlaceHolder<29>;
-	template struct PlaceHolder<30>;
-	template struct PlaceHolder<31>;
-	template struct PlaceHolder<32>;
-
 	template<int N>
 	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<int>& index);
 
