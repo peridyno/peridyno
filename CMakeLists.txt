@@ -78,6 +78,7 @@ endif()
 
 add_subdirectory(external/glew-1.10.0)
 add_subdirectory(external/freeglut-3.2.1)
+add_subdirectory(external/glfw-3.3.0)
 
 option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
 
