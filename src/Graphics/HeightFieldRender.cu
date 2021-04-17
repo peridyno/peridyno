@@ -1,6 +1,6 @@
 #pragma once
 #include "cuda_helper_math.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "HeightFieldRender.h"
 #include "Topology/HeightField.h"
 #include "Vector.h"
@@ -16,7 +16,7 @@ namespace dyno
 	HeightFieldRenderModule::HeightFieldRenderModule()
 		: VisualModule()
 		, m_mode(HeightFieldRenderModule::Instance)
-		, m_color(Vector3f(0.8, 0.8, 0.8))
+		, m_color(Vec3f(0.8, 0.8, 0.8))
 	{
 	}
 
@@ -188,7 +188,7 @@ namespace dyno
 		m_mode = mode;
 	}
 
-	void HeightFieldRenderModule::setColor(Vector3f color)
+	void HeightFieldRenderModule::setColor(Vec3f color)
 	{
 		m_color = color;
 	}

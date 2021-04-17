@@ -22,7 +22,7 @@ namespace dyno
 
 		void display() override;
 		void setRenderMode(RenderMode mode);
-		void setColor(Vector3f color);
+		void setColor(Vec3f color);
 
 		void setColorRange(float min, float max);
 		void setReferenceColor(float v);
@@ -34,7 +34,7 @@ namespace dyno
 
 	private:
 		RenderMode m_mode;
-		Vector3f m_color;
+		Vec3f m_color;
 
 		float m_refV;
 

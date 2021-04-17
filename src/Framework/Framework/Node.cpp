@@ -15,7 +15,7 @@ Node::Node(std::string name)
 	, m_dt(0.001f)
 	, m_mass(1.0f)
 {
-	this->varScale()->setValue(Vector3f(1, 1, 1));
+	this->varScale()->setValue(Vec3f(1, 1, 1));
 	this->varScale()->setMin(0.01);
 	this->varScale()->setMax(100.0f);
 }

@@ -7,11 +7,11 @@ TEST(NeighborPointQuery, findNeighbors1D)
 {
 	NeighborPointQuery<DataType3f> nQuery;
 
-	CArray<Vector3f> points;
+	CArray<Vec3f> points;
 
 	for (float x = 0.0f; x < 1.0f; x += 0.1f)
 	{
-		points.pushBack(Vector3f(x, 0.0f, 0.0f));
+		points.pushBack(Vec3f(x, 0.0f, 0.0f));
 	}
 
 	nQuery.inRadius()->setValue(1.01f);
@@ -28,7 +28,7 @@ TEST(NeighborPointQuery, findNeighbors)
 {
 	NeighborPointQuery<DataType3f> nQuery;
 
-	CArray<Vector3f> points;
+	CArray<Vec3f> points;
 
 	for (float x = 0.0f; x < 1.0f; x += 0.1f)
 	{
@@ -36,7 +36,7 @@ TEST(NeighborPointQuery, findNeighbors)
 		{
 			for (float z = 0.0f; z < 1.0f; z += 0.1f)
 			{
-				points.pushBack(Vector3f(x, y, z));
+				points.pushBack(Vec3f(x, y, z));
 			}
 		}
 	}
@@ -52,8 +52,8 @@ TEST(NeighborPointQuery, findNeighbors)
 
 	EXPECT_EQ(host_nbrIds[0].size() == 4, true);
 
-	CArray<Vector3f> points2;
-	points2.pushBack(Vector3f(0.2f));
+	CArray<Vec3f> points2;
+	points2.pushBack(Vec3f(0.2f));
 	nQuery.inOther()->allocate()->assign(points2);
 	nQuery.update();
 

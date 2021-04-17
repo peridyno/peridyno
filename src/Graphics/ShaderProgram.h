@@ -72,31 +72,31 @@ public:
     bool setInt(const std::string & name, int val);
     bool setFloat(const std::string & name, float val);
 
-    bool setVec2(const std::string & name, const Vector2f & val);
-    bool setVec2(const std::string & name, const Vector2d & val); //degrade to float type
+    bool setVec2(const std::string & name, const Vec2f & val);
+    bool setVec2(const std::string & name, const Vec2d & val); //degrade to float type
     bool setVec2(const std::string & name, const glm::vec2 & val);
     bool setVec2(const std::string & name, float x, float y);
 
-    bool setVec3(const std::string & name, const Vector3f & val);
-    bool setVec3(const std::string & name, const Vector3d & val); //degrade to float type
+    bool setVec3(const std::string & name, const Vec3f & val);
+    bool setVec3(const std::string & name, const Vec3d & val); //degrade to float type
     bool setVec3(const std::string & name, const glm::vec3 & val);
     bool setVec3(const std::string & name, float x, float y, float z);
     
-    bool setVec4(const std::string & name, const Vector4f & val);
-    bool setVec4(const std::string & name, const Vector4d & val); //degrade to float type
+    bool setVec4(const std::string & name, const Vec4f & val);
+    bool setVec4(const std::string & name, const Vec4d & val); //degrade to float type
     bool setVec4(const std::string & name, const glm::vec4 & val);
     bool setVec4(const std::string & name, float x, float y, float z, float w);
 
-    bool setMat2(const std::string & name, const Matrix2f & val);
-    bool setMat2(const std::string & name, const Matrix2d & val); //degrade to float type
+    bool setMat2(const std::string & name, const Mat2f & val);
+    bool setMat2(const std::string & name, const Mat2d & val); //degrade to float type
     bool setMat2(const std::string & name, const glm::mat2 & val);
 
-    bool setMat3(const std::string & name, const Matrix3f & val);
-    bool setMat3(const std::string & name, const Matrix3d & val); //degrade to float type
+    bool setMat3(const std::string & name, const Mat3f & val);
+    bool setMat3(const std::string & name, const Mat3d & val); //degrade to float type
     bool setMat3(const std::string & name, const glm::mat3 & val);
     
-    bool setMat4(const std::string & name, const Matrix4f & val);
-    bool setMat4(const std::string & name, const Matrix4d & val); //degrade to float type
+    bool setMat4(const std::string & name, const Mat4f & val);
+    bool setMat4(const std::string & name, const Mat4d & val); //degrade to float type
     bool setMat4(const std::string & name, const glm::mat4 & val);
 
     bool isValid() const;

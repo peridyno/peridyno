@@ -43,8 +43,8 @@ protected:
 	VarField<bool> m_visible;
 
 	Quat<float> m_rotation;
-	Vector3f m_scale;
-	Vector3f m_translation;
+	Vec3f m_scale;
+	Vec3f m_translation;
 };
 
 }

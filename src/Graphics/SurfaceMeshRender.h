@@ -15,7 +15,7 @@ namespace dyno
 		~SurfaceMeshRender();
 
 		void display() override;
-		void setColor(Vector3f color);
+		void setColor(Vec3f color);
 
 	protected:
 		bool  initializeImpl() override;
@@ -23,7 +23,7 @@ namespace dyno
 		void updateRenderingContext() override;
 
 	private:
-		Vector3f m_color;
+		Vec3f m_color;
 
 		DArray<float3> vertices;
 		DArray<float3> normals;

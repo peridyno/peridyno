@@ -54,14 +54,14 @@ public:
 	bool isIntervalAdaptive();
 	void setAdaptiveInterval(bool adaptive);
 
-	void setGravity(Vector3f g);
-	Vector3f getGravity();
+	void setGravity(Vec3f g);
+	Vec3f getGravity();
 
-	Vector3f getLowerBound();
-	Vector3f getUpperBound();
+	Vec3f getLowerBound();
+	Vec3f getUpperBound();
 
-	void setLowerBound(Vector3f lowerBound);
-	void setUpperBound(Vector3f upperBound);
+	void setLowerBound(Vec3f lowerBound);
+	void setUpperBound(Vec3f upperBound);
 
 	inline Iterator begin() { return NodeIterator(m_root); }
 	inline Iterator end() {return NodeIterator(nullptr);	}
@@ -77,7 +77,7 @@ public:
 		, m_lowerBound(0, 0, 0)
 		, m_upperBound(1, 1, 1)
 	{
-		m_gravity = Vector3f(0.0f, -9.8f, 0.0f);
+		m_gravity = Vec3f(0.0f, -9.8f, 0.0f);
 	};
 
 	/**
@@ -97,10 +97,10 @@ private:
 
 	int m_frameNumber;
 
-	Vector3f m_gravity;
+	Vec3f m_gravity;
 
-	Vector3f m_lowerBound;
-	Vector3f m_upperBound;
+	Vec3f m_lowerBound;
+	Vec3f m_upperBound;
 
 private:
 	std::shared_ptr<Node> m_root = nullptr;

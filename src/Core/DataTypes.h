@@ -39,11 +39,11 @@ namespace dyno
 	template<> inline const char* DataType1f::getName() { return "DataType1f"; }
 
 	/// 2f DOF, single precision
-	typedef DataTypes<float, Vector2f, Matrix2f, Rigid2f> DataType2f;
+	typedef DataTypes<float, Vec2f, Mat2f, Rigid2f> DataType2f;
 	template<> inline const char* DataType2f::getName() { return "DataType2f"; }
 
 	/// 3f DOF, single precision
-	typedef DataTypes<float, Vector3f, Matrix3f, Rigid3f> DataType3f;
+	typedef DataTypes<float, Vec3f, Mat3f, Rigid3f> DataType3f;
 	template<> inline const char* DataType3f::getName() { return "DataType3f"; }
 
 	/// 1d DOF, double precision
@@ -51,11 +51,11 @@ namespace dyno
 	template<> inline const char* DataType1d::getName() { return "DataType1d"; }
 
 	/// 2d DOF, double precision
-	typedef DataTypes<double, Vector2d, Matrix2d, Rigid2d> DataType2d;
+	typedef DataTypes<double, Vec2d, Mat2d, Rigid2d> DataType2d;
 	template<> inline const char* DataType2d::getName() { return "DataType2d"; }
 
 	/// 3d DOF, double precision
-	typedef DataTypes<double, Vector3d, Matrix3d, Rigid3d> DataType3d;
+	typedef DataTypes<double, Vec3d, Mat3d, Rigid3d> DataType3d;
 	template<> inline const char* DataType3d::getName() { return "DataType3d"; }
 
 

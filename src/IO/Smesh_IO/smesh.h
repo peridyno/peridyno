@@ -19,7 +19,7 @@ namespace dyno{
 
 
 
-		std::vector<Vector3f> m_points;
+		std::vector<Vec3f> m_points;
 		std::vector<TopologyModule::Edge> m_edges;
 		std::vector<TopologyModule::Triangle> m_triangles;
 		std::vector<TopologyModule::Quad> m_quads;

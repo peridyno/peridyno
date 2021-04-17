@@ -57,7 +57,7 @@ namespace dyno
 		m_surfaceNode->setTopologyModule(triSet);
 
 		auto render = std::make_shared<SurfaceMeshRender>();
-		render->setColor(Vector3f(0.2f, 0.6, 1.0f));
+		render->setColor(Vec3f(0.2f, 0.6, 1.0f));
 		m_surfaceNode->addVisualModule(render);
 
 		m_surfaceNode->setVisible(false);

@@ -26,12 +26,12 @@ void SceneGraph::setAdaptiveInterval(bool adaptive)
 	m_advative_interval = adaptive;
 }
 
-void SceneGraph::setGravity(Vector3f g)
+void SceneGraph::setGravity(Vec3f g)
 {
 	m_gravity = g;
 }
 
-Vector3f SceneGraph::getGravity()
+Vec3f SceneGraph::getGravity()
 {
 	return m_gravity;
 }
@@ -160,22 +160,22 @@ bool SceneGraph::load(std::string name)
 	return false;
 }
 
-Vector3f SceneGraph::getLowerBound()
+Vec3f SceneGraph::getLowerBound()
 {
 	return m_lowerBound;
 }
 
-Vector3f SceneGraph::getUpperBound()
+Vec3f SceneGraph::getUpperBound()
 {
 	return m_upperBound;
 }
 
-void SceneGraph::setLowerBound(Vector3f lowerBound)
+void SceneGraph::setLowerBound(Vec3f lowerBound)
 {
 	m_lowerBound = lowerBound;
 }
 
-void SceneGraph::setUpperBound(Vector3f upperBound)
+void SceneGraph::setUpperBound(Vec3f upperBound)
 {
 	m_upperBound = upperBound;
 }

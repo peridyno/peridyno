@@ -105,8 +105,8 @@ void ShaderProgram::createFromCStyleString(const char * vertex_shader_source,
                         GL_VERTEX_SHADER,
                         GL_FRAGMENT_SHADER,
                         GL_GEOMETRY_SHADER,
-                        GL_TESS_CONTROL_SHADER,
-                        GL_TESS_CONTROL_SHADER
+						GL_GEOMETRY_SHADER,
+						GL_GEOMETRY_SHADER
                       };
 
     const char * sources[5] = {
@@ -245,12 +245,12 @@ bool ShaderProgram::setFloat(const std::string & name, float val)
     return openGLSetShaderFloat(this->program_, name, val);
 }
 
-bool ShaderProgram::setVec2(const std::string & name, const Vector2f & val)
+bool ShaderProgram::setVec2(const std::string & name, const Vec2f & val)
 {
     return openGLSetShaderVec2(this->program_, name, val);
 }
 
-bool ShaderProgram::setVec2(const std::string & name, const Vector2d & val)
+bool ShaderProgram::setVec2(const std::string & name, const Vec2d & val)
 {
     return openGLSetShaderVec2(this->program_, name, val);
 }
@@ -265,12 +265,12 @@ bool ShaderProgram::setVec2(const std::string & name, float x, float y)
     return openGLSetShaderVec2(this->program_, name, x, y);
 }
 
-bool ShaderProgram::setVec3(const std::string & name, const Vector3f & val)
+bool ShaderProgram::setVec3(const std::string & name, const Vec3f & val)
 {
     return openGLSetShaderVec3(this->program_, name, val);
 }
 
-bool ShaderProgram::setVec3(const std::string & name, const Vector3d & val)
+bool ShaderProgram::setVec3(const std::string & name, const Vec3d & val)
 {
     return openGLSetShaderVec3(this->program_, name, val);
 }
@@ -285,12 +285,12 @@ bool ShaderProgram::setVec3(const std::string & name, float x, float y, float z)
     return openGLSetShaderVec3(this->program_, name, x, y, z);
 }
 
-bool ShaderProgram::setVec4(const std::string & name, const Vector4f & val)
+bool ShaderProgram::setVec4(const std::string & name, const Vec4f & val)
 {
     return openGLSetShaderVec4(this->program_, name, val);
 }
 
-bool ShaderProgram::setVec4(const std::string & name, const Vector4d & val)
+bool ShaderProgram::setVec4(const std::string & name, const Vec4d & val)
 {
     return openGLSetShaderVec4(this->program_, name, val);
 }
@@ -305,12 +305,12 @@ bool ShaderProgram::setVec4(const std::string & name, float x, float y, float z,
     return openGLSetShaderVec4(this->program_, name, x, y, z, w);
 }
 
-bool ShaderProgram::setMat2(const std::string & name, const Matrix2f & val)
+bool ShaderProgram::setMat2(const std::string & name, const Mat2f & val)
 {
     return openGLSetShaderMat2(this->program_, name, val);
 }
 
-bool ShaderProgram::setMat2(const std::string & name, const Matrix2d & val)
+bool ShaderProgram::setMat2(const std::string & name, const Mat2d & val)
 {
     return openGLSetShaderMat2(this->program_, name, val);
 }
@@ -320,12 +320,12 @@ bool ShaderProgram::setMat2(const std::string & name, const glm::mat2 & val)
     return openGLSetShaderMat2(this->program_, name, val);
 }
 
-bool ShaderProgram::setMat3(const std::string & name, const Matrix3f & val)
+bool ShaderProgram::setMat3(const std::string & name, const Mat3f & val)
 {
     return openGLSetShaderMat3(this->program_, name, val);
 }
 
-bool ShaderProgram::setMat3(const std::string & name, const Matrix3d & val)
+bool ShaderProgram::setMat3(const std::string & name, const Mat3d & val)
 {
     return openGLSetShaderMat3(this->program_, name, val);
 }
@@ -335,12 +335,12 @@ bool ShaderProgram::setMat3(const std::string & name, const glm::mat3 & val)
     return openGLSetShaderMat3(this->program_, name, val);
 }
 
-bool ShaderProgram::setMat4(const std::string & name, const Matrix4f & val)
+bool ShaderProgram::setMat4(const std::string & name, const Mat4f & val)
 {
     return openGLSetShaderMat4(this->program_, name, val);
 }
 
-bool ShaderProgram::setMat4(const std::string & name, const Matrix4d & val)
+bool ShaderProgram::setMat4(const std::string & name, const Mat4d & val)
 {
     return openGLSetShaderMat4(this->program_, name, val);
 }

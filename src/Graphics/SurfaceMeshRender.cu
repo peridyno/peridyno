@@ -1,5 +1,5 @@
 #pragma once
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "cuda_helper_math.h"
 #include "SurfaceMeshRender.h"
 #include "Topology/TriangleSet.h"
@@ -13,7 +13,7 @@ namespace dyno
 
 		SurfaceMeshRender::SurfaceMeshRender()
 		: VisualModule()
-		, m_color(Vector3f(0.2f, 0.3, 0.0f))
+		, m_color(Vec3f(0.2f, 0.3, 0.0f))
 	{
 	}
 
@@ -119,7 +119,7 @@ namespace dyno
 		glPopMatrix();
 	}
 
-	void SurfaceMeshRender::setColor(Vector3f color)
+	void SurfaceMeshRender::setColor(Vec3f color)
 	{
 		m_color = color;
 	}

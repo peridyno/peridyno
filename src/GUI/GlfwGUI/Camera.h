@@ -22,20 +22,20 @@ namespace dyno
 		void zoom(float amount);
 		void setGL(float neardist, float fardist, float width, float height);
 
-		Vector3f getViewDir() const;
+		Vec3f getViewDir() const;
 
 		float getPixelArea() const;
 		int width() const;
 		int height() const;
-		Vector3f getEye() const;
+		Vec3f getEye() const;
 
-		void getCoordSystem(Vector3f &view, Vector3f &up, Vector3f &right) const;
+		void getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const;
 		void rotate(Quat1f &rotquat);
-		void translate(const Vector3f translation);
+		void translate(const Vec3f translation);
 
 	private:
-		void translateLight(const Vector3f translation);
-		Vector3f getPosition(float x, float y);
+		void translateLight(const Vec3f translation);
+		Vec3f getPosition(float x, float y);
 		Quat1f getQuaternion(float x1, float y1, float x2, float y2);
 
 	private:
@@ -54,9 +54,9 @@ namespace dyno
 
 		float m_pixelarea;
 
-		Vector3f m_eye;
-		Vector3f m_light;
-		Vector3f m_rotation_axis;
+		Vec3f m_eye;
+		Vec3f m_light;
+		Vec3f m_rotation_axis;
 	};
 
 }

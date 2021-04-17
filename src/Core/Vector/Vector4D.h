@@ -72,14 +72,19 @@ namespace dyno {
 			return out;
 		}
 	public:
-		glm::tvec4<T> data_; //default: zero vector
+		union
+		{
+			glm::tvec4<T> data_; //default: zero vector
+			struct { T x, y, z, w; };
+		};
+		
 	};
 
 	template class Vector<float, 4>;
 	template class Vector<double, 4>;
 	//convenient typedefs
-	typedef Vector<float, 4> Vector4f;
-	typedef Vector<double, 4> Vector4d;
+	typedef Vector<float, 4> Vec4f;
+	typedef Vector<double, 4> Vec4d;
 
 } //end of namespace dyno
 

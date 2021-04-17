@@ -23,19 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ******************************************************************************/
 
-#include <GL/gl.h>
+#include <glad/gl.h>
 #include "Camera.h"
 #include <iostream>
 #include <math.h>
-using namespace std;
 
 namespace dyno
 {
 	Camera::Camera() {
-		m_eye = Vector3f(0, 0, 3);
-		m_light = Vector3f(0, 0, 3);
+		m_eye = Vec3f(0, 0, 3);
+		m_light = Vec3f(0, 0, 3);
 		m_rotation = 0;
-		m_rotation_axis = Vector3f(0, 1, 0);
+		m_rotation_axis = Vec3f(0, 1, 0);
 		m_fov = 0.90f;
 	}
 
@@ -79,7 +78,7 @@ namespace dyno
 		return m_pixelarea;
 	}
 
-	Vector3f Camera::getEye() const {
+	Vec3f Camera::getEye() const {
 		return m_eye;
 	}
 
@@ -88,14 +87,14 @@ namespace dyno
 		Quat1f q(m_rotation, m_rotation_axis);
 		//q.x = -q.x;
 		q.setX(-q.x());
-		Vector3f viewdir(0, 0, -1);
+		Vec3f viewdir(0, 0, -1);
 		q.rotateVector(viewdir);
 		// end set up orth system
 		//   q = Quat1f(angle, axis);
 		q = rotquat;
 		Quat1f currq(m_rotation, m_rotation_axis);
-		Vector3f rotcenter = m_eye + 3.0f*viewdir;
-		Vector3f rotcenter2 = m_light + 3.0f*viewdir;
+		Vec3f rotcenter = m_eye + 3.0f*viewdir;
+		Vec3f rotcenter2 = m_light + 3.0f*viewdir;
 // 		currq = q.ComposeWith(currq);
 // 		currq.ToRotAxis(m_rotation, m_rotation_axis);
 		currq = q * currq;
@@ -105,40 +104,40 @@ namespace dyno
 		Quat1f q2(m_rotation, m_rotation_axis);
 		//q2.x = -q2.x;
 		q2.setX(-q2.x());
-		Vector3f viewdir2(0, 0, -1);
+		Vec3f viewdir2(0, 0, -1);
 		q2.rotateVector(viewdir2);
 
 		m_eye = rotcenter - 3.0f*viewdir2;
 		m_light = rotcenter2 - 3.0f*viewdir2;
 	}
 
-	Vector3f Camera::getViewDir() const {
+	Vec3f Camera::getViewDir() const {
 		Quat1f q(m_rotation, m_rotation_axis);
 		//q.x = -q.x;
 		q.setX(-q.x());
-		Vector3f viewdir(0, 0, 1);
+		Vec3f viewdir(0, 0, 1);
 		q.rotateVector(viewdir);
 		return viewdir;
 	}
 
-	void Camera::getCoordSystem(Vector3f &view, Vector3f &up, Vector3f &right) const {
+	void Camera::getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const {
 		Quat1f q(m_rotation, m_rotation_axis);
 		//q.x = -q.x;
 		q.setX(-q.x());
-		view = Vector3f(0, 0, 1);
+		view = Vec3f(0, 0, 1);
 		q.rotateVector(view);
-		up = Vector3f(0, 1, 0);
+		up = Vec3f(0, 1, 0);
 		q.rotateVector(up);
 		right = -view.cross(up);
 	}
 
-	void Camera::translate(const Vector3f translation) {
+	void Camera::translate(const Vec3f translation) {
 		Quat1f q(m_rotation, m_rotation_axis);
 		//q.x = -q.x;
 		q.setX(-q.x());
-		Vector3f xax(1, 0, 0);
-		Vector3f yax(0, 1, 0);
-		Vector3f zax(0, 0, 1);
+		Vec3f xax(1, 0, 0);
+		Vec3f yax(0, 1, 0);
+		Vec3f zax(0, 0, 1);
 
 		q.rotateVector(xax);
 		q.rotateVector(yax);
@@ -149,13 +148,13 @@ namespace dyno
 			translation[2] * zax;
 	}
 
-	void Camera::translateLight(const Vector3f translation) {
+	void Camera::translateLight(const Vec3f translation) {
 		Quat1f q(m_rotation, m_rotation_axis);
 		//q.x = -q.x;
 		q.setX(-q.x());
-		Vector3f xax(1, 0, 0);
-		Vector3f yax(0, 1, 0);
-		Vector3f zax(0, 0, 1);
+		Vec3f xax(1, 0, 0);
+		Vec3f yax(0, 1, 0);
+		Vec3f zax(0, 0, 1);
 
 		q.rotateVector(xax);
 		q.rotateVector(yax);
@@ -168,19 +167,19 @@ namespace dyno
 
 	void Camera::zoom(float amount) {
 		m_fov += amount / 10;
-		m_fov = max(m_fov, 0.01f);
+		m_fov = std::max(m_fov, 0.01f);
 	}
 
-	Vector3f Camera::getPosition(float x, float y) {
+	Vec3f Camera::getPosition(float x, float y) {
 		float r = x*x + y*y;
 		float t = 0.5f * 1 * 1;
 		if (r < t) {
-			Vector3f result(x, y, sqrt(2.0f*t - r));
+			Vec3f result(x, y, sqrt(2.0f*t - r));
 			result.normalize();
 			return result;
 		}
 		else {
-			Vector3f result(x, y, t / sqrt(r));
+			Vec3f result(x, y, t / sqrt(r));
 			result.normalize();
 			return result;
 		}
@@ -190,9 +189,9 @@ namespace dyno
 		if ((x1 == x2) && (y1 == y2)) {
 			return Quat1f(1, 0, 0, 0);
 		}
-		Vector3f pos1 = getPosition(x1, y1);
-		Vector3f pos2 = getPosition(x2, y2);
-		Vector3f rotaxis = pos1.cross(pos2);
+		Vec3f pos1 = getPosition(x1, y1);
+		Vec3f pos2 = getPosition(x2, y2);
+		Vec3f rotaxis = pos1.cross(pos2);
 		rotaxis.normalize();
 		float rotangle = 2 * sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
 		return Quat1f(rotangle, rotaxis);
@@ -212,7 +211,7 @@ namespace dyno
 		float dy = y - m_y;
 		float dz = 0;
 		registerPoint(x, y);
-		translate(Vector3f(-dx, -dy, -dz));
+		translate(Vec3f(-dx, -dy, -dz));
 	}
 
 	void Camera::translateLightToPoint(float x, float y) {
@@ -220,7 +219,7 @@ namespace dyno
 		float dy = y - m_y;
 		float dz = 0;
 		registerPoint(x, y);
-		translateLight(Vector3f(3 * dx, 3 * dy, 3 * dz));
+		translateLight(Vec3f(3 * dx, 3 * dy, 3 * dz));
 	}
 
 }

@@ -41,7 +41,7 @@ int PVTKPolyDataSource::RequestData(
 	auto device_pts = m_tri_set->getPoints();
 
 	int num_of_points = device_pts.size();
-	dyno::CArray<dyno::Vector3f> host_pts;
+	dyno::CArray<dyno::Vec3f> host_pts;
 	host_pts.resize(num_of_points);
 	host_pts.assign(device_pts);
 

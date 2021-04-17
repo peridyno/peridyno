@@ -35,7 +35,7 @@ namespace dyno {
 	};
 
 	template<>
-	class Reduction<Vector3f>
+	class Reduction<Vec3f>
 	{
 	public:
 		Reduction();
@@ -43,13 +43,13 @@ namespace dyno {
 		static Reduction* Create(uint n);
 		~Reduction();
 
-		Vector3f accumulate(Vector3f * val, uint num);
+		Vec3f accumulate(Vec3f * val, uint num);
 
-		Vector3f maximum(Vector3f* val, uint num);
+		Vec3f maximum(Vec3f* val, uint num);
 
-		Vector3f minimum(Vector3f* val, uint num);
+		Vec3f minimum(Vec3f* val, uint num);
 
-		Vector3f average(Vector3f* val, uint num);
+		Vec3f average(Vec3f* val, uint num);
 
 	private:
 		void allocAuxiliaryArray(uint num);
@@ -62,7 +62,7 @@ namespace dyno {
 	};
 
 	template<>
-	class Reduction<Vector3d>
+	class Reduction<Vec3d>
 	{
 	public:
 		Reduction();
@@ -70,13 +70,13 @@ namespace dyno {
 		static Reduction* Create(uint n);
 		~Reduction();
 
-		Vector3d accumulate(Vector3d * val, uint num);
+		Vec3d accumulate(Vec3d * val, uint num);
 
-		Vector3d maximum(Vector3d* val, uint num);
+		Vec3d maximum(Vec3d* val, uint num);
 
-		Vector3d minimum(Vector3d* val, uint num);
+		Vec3d minimum(Vec3d* val, uint num);
 
-		Vector3d average(Vector3d* val, uint num);
+		Vec3d average(Vec3d* val, uint num);
 
 	private:
 		void allocAuxiliaryArray(uint num);

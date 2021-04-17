@@ -65,10 +65,10 @@ namespace dyno
 		int nbSize = list_i.size();
 
 		Real total_weight1 = 0.0f;
-		Matrix3f mat_i = Matrix3f(0);
+		Mat3f mat_i = Mat3f(0);
 
 		Real total_weight2 = 0.0f;
-		Matrix3f deform_i = Matrix3f(0.0f);
+		Mat3f deform_i = Mat3f(0.0f);
 
 		for (int ne = 0; ne < nbSize; ne++)
 		{
@@ -115,7 +115,7 @@ namespace dyno
 			mat_i *= (1.0f / total_weight1);
 		}
 
-		Matrix3f R(0), U(0), D(0), V(0);
+		Mat3f R(0), U(0), D(0), V(0);
 		polarDecomposition(mat_i, R, U, D, V);
 
 		Real threshold = 0.0001f*smoothingLength;

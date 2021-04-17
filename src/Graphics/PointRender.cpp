@@ -13,7 +13,7 @@
  */
 
 #include <glm/glm.hpp>
-#include <GL/glew.h>
+#include <glad/gl.h>
 //#include "Rendering/OpenGL_Primitives/glew_utilities.h"
 
 #include "PointRender.h"
@@ -300,12 +300,12 @@ void PointRender::renderSprite()
 {
 	m_glsl.enable();
 
-	Matrix4f idenity = Matrix4f::identityMatrix();
+	Mat4f idenity = Mat4f::identityMatrix();
 	m_glsl.setMat4("proj_trans", idenity);
 	m_glsl.setMat4("view_trans", idenity);
 	m_glsl.setMat4("model_trans", idenity);
 
-	Vector3f vec = Vector3f(0.0f);
+	Vec3f vec = Vec3f(0.0f);
 	m_glsl.setVec3("view_pos", vec);
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -338,12 +338,12 @@ void PointRender::renderPoints()
 {
 	m_glsl.enable();
 
-	Matrix4f idenity = Matrix4f::identityMatrix();
+	Mat4f idenity = Mat4f::identityMatrix();
 	m_glsl.setMat4("proj_trans", idenity);
 	m_glsl.setMat4("view_trans", idenity);
 	m_glsl.setMat4("model_trans", idenity);
 
-	Vector3f vec = Vector3f(0.0f);
+	Vec3f vec = Vec3f(0.0f);
 	m_glsl.setVec3("view_pos", vec);
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);

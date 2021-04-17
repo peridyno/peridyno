@@ -23,7 +23,7 @@ elseif(UNIX)
 endif()
 
 link_libraries(Core Framework IO Graphics)
-link_libraries(GlutGUI)
+link_libraries(GlfwGUI)
 link_libraries(ParticleSystem RigidBody)
 
 file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)

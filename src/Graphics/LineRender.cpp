@@ -11,7 +11,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html
  *
  */
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "LineRender.h"
 
 

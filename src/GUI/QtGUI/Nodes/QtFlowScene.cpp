@@ -669,11 +669,11 @@ void QtFlowScene::newNode()
 
 	std::shared_ptr<dyno::ParticleElasticBody<dyno::DataType3f>> bunny = std::make_shared<dyno::ParticleElasticBody<dyno::DataType3f>>();
 	root->addChild(bunny);
-	//	bunny->getRenderModule()->setColor(Vector3f(0, 1, 1));
+	//	bunny->getRenderModule()->setColor(Vec3f(0, 1, 1));
 	bunny->setMass(1.0);
 	bunny->loadParticles("../../data/bunny/bunny_points.obj");
 	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
-	bunny->translate(dyno::Vector3f(0.5, 0.2, 0.5));
+	bunny->translate(dyno::Vec3f(0.5, 0.2, 0.5));
 	bunny->setVisible(true);
 
 // 	auto renderer = std::make_shared<dyno::PVTKSurfaceMeshRender>();
