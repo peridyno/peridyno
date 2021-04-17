@@ -22,7 +22,7 @@ namespace dyno
 			INSTANCE = 2);
 
 		void display() override;
-		void setColor(Vector3f color);
+		void setColor(Vec3f color);
 
 		void setColorRange(float min, float max);
 		void setReferenceColor(float v);
@@ -33,7 +33,7 @@ namespace dyno
 
 		DEF_ENUM(RenderMode, RenderModeEnum, RenderModeEnum::INSTANCE, "Rendering mode");
 
-		DeviceArrayField<Vector3f> m_vecIndex;
+		DeviceArrayField<Vec3f> m_vecIndex;
 		DeviceArrayField<float> m_scalarIndex;
 
 	protected:
@@ -42,7 +42,7 @@ namespace dyno
 		void updateRenderingContext() override;
 
 	private:
-		Vector3f m_color;
+		Vec3f m_color;
 
 		float m_refV;
 

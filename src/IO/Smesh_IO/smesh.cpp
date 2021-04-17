@@ -27,7 +27,7 @@ void Smesh::loadFile(string filename)
     filein >> num_points >> point_dim;
 	int dummy;
 	filein >> dummy >> dummy;
-    m_points.resize(num_points, Vector3f(0.0f));
+    m_points.resize(num_points, Vec3f(0.0f));
     for (int i = 0; i < num_points; ++i)
     {
         int vert_index;
@@ -144,7 +144,7 @@ void Smesh::loadNodeFile(std::string filename)
 	filein >> num_points >> point_dim;
 	int dummy;
 	filein >> dummy >> dummy;
-	m_points.resize(num_points, Vector3f(0.0f));
+	m_points.resize(num_points, Vec3f(0.0f));
 	for (int i = 0; i < num_points; ++i)
 	{
 		int vert_index;

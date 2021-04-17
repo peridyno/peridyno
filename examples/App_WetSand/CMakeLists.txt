@@ -1,9 +1,5 @@
 set(PROJECT_NAME App_WetSand)
 
-link_libraries(Core Framework IO Graphics)
-link_libraries(ParticleSystem RigidBody)
-link_libraries(GlutGUI)
-
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
 file(                                                                                                       #利用glob命令读取所有源文件list
@@ -17,6 +13,15 @@ file(                                                                           
 list(FILTER SRC_LIST EXCLUDE REGEX .*data/.*)                                                              #排除deprecated 文件下面的所有文件
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 #添加编译目标 可执行文件
+
+target_link_libraries(${PROJECT_NAME} 
+	Core 
+	Framework 
+	IO 
+	Graphics 
+	ParticleSystem 
+	RigidBody 
+	GlfwGUI)
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  #判断当前project在根目录下的相对路径
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")                              #为project设定folder目录

@@ -1,4 +1,4 @@
-#include "GlutGUI/GLApp.h"
+#include "GlfwGUI/GlfwApp.h"
 
 #include "Framework/SceneGraph.h"
 #include "Topology/PointSet.h"
@@ -36,21 +36,21 @@ void CreateScene()
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
 	root->loadSDF("../../data/bar/bar.sdf", false);
-	root->translate(Vector3f(0.2f, 0.2f, 0));
-	root->loadCube(Vector3f(0), Vector3f(1), 0.005f, true);
+	root->translate(Vec3f(0.2f, 0.2f, 0));
+	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
 
 	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
 	auto m_pointsRender = std::make_shared<PointRenderModule>();
 
-	m_pointsRender->setColor(Vector3f(0.98, 0.85, 0.40));
+	m_pointsRender->setColor(Vec3f(0.98, 0.85, 0.40));
 	child3->addVisualModule(m_pointsRender);
 
 	child3->setMass(1.0);
   	child3->loadParticles("../../data/bunny/bunny_points.obj");
   	child3->loadSurface("../../data/bunny/bunny_mesh.obj");
-	child3->translate(Vector3f(0.3f, 0.4f, 0.5f));
+	child3->translate(Vec3f(0.3f, 0.4f, 0.5f));
 	child3->setDt(0.001f);
 	auto elasto = std::make_shared<GranularModule<DataType3f>>();
 	elasto->enableFullyReconstruction();
@@ -61,7 +61,7 @@ void CreateScene()
 	root->addRigidBody(rigidbody);
 	rigidbody->loadShape("../../data/bar/bar.obj");
 	rigidbody->setActive(false);
-	rigidbody->translate(Vector3f(0.2f, 0.2f, 0));
+	rigidbody->translate(Vec3f(0.2f, 0.2f, 0));
 }
 
 
@@ -74,7 +74,7 @@ int main()
 	Log::setUserReceiver(&RecieveLogMessage);
 	Log::sendMessage(Log::Info, "Simulation begin");
 
-	GLApp window;
+	GlfwApp window;
 	window.createWindow(1024, 768);
 
 	window.mainLoop();

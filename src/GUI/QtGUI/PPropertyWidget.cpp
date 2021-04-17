@@ -237,17 +237,17 @@ namespace dyno
 		double v2 = 0;
 		double v3 = 0;
 
-		if (template_name == std::string(typeid(Vector3f).name()))
+		if (template_name == std::string(typeid(Vec3f).name()))
 		{
-			VarField<Vector3f>* f = TypeInfo::cast<VarField<Vector3f>>(m_field);
+			VarField<Vec3f>* f = TypeInfo::cast<VarField<Vec3f>>(m_field);
 			auto v = f->getData();
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
 		}
-		else if (template_name == std::string(typeid(Vector3d).name()))
+		else if (template_name == std::string(typeid(Vec3d).name()))
 		{
-			VarField<Vector3d>* f = TypeInfo::cast<VarField<Vector3d>>(m_field);
+			VarField<Vec3d>* f = TypeInfo::cast<VarField<Vec3d>>(m_field);
 			auto v = f->getData();
 
 			v1 = v[0];
@@ -273,16 +273,16 @@ namespace dyno
 
 		std::string template_name = m_field->getTemplateName();
 
-		if (template_name == std::string(typeid(Vector3f).name()))
+		if (template_name == std::string(typeid(Vec3f).name()))
 		{
-			VarField<Vector3f>* f = TypeInfo::cast<VarField<Vector3f>>(m_field);
-			f->setValue(Vector3f((float)v1, (float)v2, (float)v3));
+			VarField<Vec3f>* f = TypeInfo::cast<VarField<Vec3f>>(m_field);
+			f->setValue(Vec3f((float)v1, (float)v2, (float)v3));
 			f->update();
 		}
-		else if (template_name == std::string(typeid(Vector3d).name()))
+		else if (template_name == std::string(typeid(Vec3d).name()))
 		{
-			VarField<Vector3d>* f = TypeInfo::cast<VarField<Vector3d>>(m_field);
-			f->setValue(Vector3d(v1, v2, v3));
+			VarField<Vec3d>* f = TypeInfo::cast<VarField<Vec3d>>(m_field);
+			f->setValue(Vec3d(v1, v2, v3));
 			f->update();
 		}
 
@@ -432,7 +432,7 @@ namespace dyno
 		{
 			this->addWidget(new QRealFieldWidget(field));
 		}
-		else if (template_name == std::string(typeid(Vector3f).name()))
+		else if (template_name == std::string(typeid(Vec3f).name()))
 		{
 			this->addWidget(new QVector3FieldWidget(field));
 		}

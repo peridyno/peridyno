@@ -74,8 +74,8 @@ namespace dyno {
 	template class Vector<float, 2>;
 	template class Vector<double, 2>;
 
-	typedef Vector<float, 2> Vector2f;
-	typedef Vector<double, 2> Vector2d;
+	typedef Vector<float, 2> Vec2f;
+	typedef Vector<double, 2> Vec2d;
 
 } //end of namespace dyno
 

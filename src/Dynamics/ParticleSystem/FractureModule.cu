@@ -78,7 +78,7 @@ namespace dyno
 			if (r > 0.01*horizon)
 			{
 				Real weight = kernSmooth.Weight(r, horizon);
-				Vector3f p = (position[j] - cur_pos_i);
+				Vec3f p = (position[j] - cur_pos_i);
 				Real ratio_ij = p.norm() / r;
 				J2_i = (ratio_ij - I1_i)*(ratio_ij - I1_i)*weight;
 			}

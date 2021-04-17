@@ -33,7 +33,7 @@ namespace dyno{
 			if (line.substr(0, 1) == std::string("v") && line.substr(0, 2) != std::string("vn") && line.substr(0, 2) != std::string("vt")) {
 				std::stringstream data(line);
 				char c;
-				Vector3f point;
+				Vec3f point;
 				data >> c >> point[0] >> point[1] >> point[2];
 				vertList.push_back(point);
 			}
@@ -99,7 +99,7 @@ namespace dyno{
 		return true;
 	}
 
-	std::vector<Vector3f>& ObjFileLoader::getVertexList()
+	std::vector<Vec3f>& ObjFileLoader::getVertexList()
 	{
 		return vertList;
 	}

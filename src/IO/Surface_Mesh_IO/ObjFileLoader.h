@@ -19,7 +19,7 @@ public:
     
     bool save(const std::string &filename);
 
-	std::vector<Vector3f>& getVertexList();
+	std::vector<Vec3f>& getVertexList();
 	std::vector<Face>& getFaceList();
 
 	std::vector<TexCoord>& getTexCoordList()
@@ -37,7 +37,7 @@ public:
 	}
 
 private:
-	std::vector<Vector3f> vertList;
+	std::vector<Vec3f> vertList;
 	std::vector<Face> faceList;
 
 	std::vector<TexCoord> texCoords;

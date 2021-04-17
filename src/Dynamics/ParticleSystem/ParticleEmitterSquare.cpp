@@ -51,7 +51,7 @@ namespace dyno
 
 		auto rot_mat = quat.get3x3Matrix();
 
-		Coord v0 = this->varVelocityMagnitude()->getData()*rot_mat*Vector3f(0, -1, 0);
+		Coord v0 = this->varVelocityMagnitude()->getData()*rot_mat*Vec3f(0, -1, 0);
 
 		auto w = this->varWidth()->getData();
 		auto h = this->varHeight()->getData();

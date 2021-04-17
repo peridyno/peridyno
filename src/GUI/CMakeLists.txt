@@ -4,7 +4,6 @@ set(LIB_NAMES GlutGUI QtGUI)
 
 include_directories("${CMAKE_SOURCE_DIR}/Source")                                                              #默认为本项目下各编译目标添加Source/ 目录
 
-add_subdirectory(GlutGUI)
 add_subdirectory(GlfwGUI)
 
 if(PERIDYNO_Qt5_GUI)

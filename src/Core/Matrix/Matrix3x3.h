@@ -86,8 +86,8 @@ namespace dyno {
 	template class SquareMatrix<float, 3>;
 	template class SquareMatrix<double, 3>;
 	//convenient typedefs
-	typedef SquareMatrix<float, 3> Matrix3f;
-	typedef SquareMatrix<double, 3> Matrix3d;
+	typedef SquareMatrix<float, 3> Mat3f;
+	typedef SquareMatrix<double, 3> Mat3d;
 
 }  //end of namespace dyno
 

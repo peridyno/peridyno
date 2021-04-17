@@ -1,9 +1,4 @@
-
 set(PROJECT_NAME App_SingleFluid)
-
-link_libraries(Core Framework IO Graphics)
-link_libraries(ParticleSystem RigidBody)
-link_libraries(GlutGUI)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
@@ -16,6 +11,14 @@ file(
 )
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
+target_link_libraries(${PROJECT_NAME} 
+	Core 
+	Framework 
+	IO 
+	Graphics 
+	ParticleSystem 
+	RigidBody 
+	GlfwGUI)
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "PointRenderModule.h"
 #include "Topology/PointSet.h"
 #include "Vector.h"
@@ -15,7 +15,7 @@ namespace dyno
 
 	PointRenderModule::PointRenderModule()
 		: VisualModule()
-		, m_color(Vector3f(0.8, 0.8, 0.8))
+		, m_color(Vec3f(0.8, 0.8, 0.8))
 	{
 		m_minIndex.setValue(0);
 		m_maxIndex.setValue(1);
@@ -44,7 +44,7 @@ namespace dyno
 
 	__global__ void PRM_MappingColor(
 		DArray<glm::vec3> color,
-		DArray<Vector3f> index,
+		DArray<Vec3f> index,
 		float minIndex,
 		float maxIndex)
 	{
@@ -177,7 +177,7 @@ namespace dyno
 		glPopMatrix();
 	}
 
-	void PointRenderModule::setColor(Vector3f color)
+	void PointRenderModule::setColor(Vec3f color)
 	{
 		m_color = color;
 	}

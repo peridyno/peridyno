@@ -1,7 +1,16 @@
 #include "GlfwApp.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <sstream>
+
+#include "Image_IO/image_io.h"
+#include "Framework/SceneGraph.h"
+
+
 namespace dyno 
-{	
+{
 	static void glfw_error_callback(int error, const char* description)
 	{
 		fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -24,7 +33,7 @@ namespace dyno
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 
 	}
@@ -33,6 +42,8 @@ namespace dyno
 	{
 		mWidth = width;
 		mHeight = height;
+
+		mWindowTitle = std::string("PeriDyno ") + std::to_string(PERIDYNO_VERSION_MAJOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_MINOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_PATCH);
 
 		// Setup window
 		glfwSetErrorCallback(glfw_error_callback);
@@ -63,16 +74,20 @@ namespace dyno
 #endif
 
 	// Create window with graphics context
-		window = glfwCreateWindow(width, height, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
-		if (window == NULL)
+		mWindow = glfwCreateWindow(width, height, mWindowTitle.c_str(), NULL, NULL);
+		if (mWindow == NULL)
 			return;
 
 		initCallbacks();
+		
 
-		glfwMakeContextCurrent(window);
+		glfwMakeContextCurrent(mWindow);
+		gladLoadGL(glfwGetProcAddress);
 		glfwSwapInterval(1); // Enable vsync
 
-		glfwSetWindowUserPointer(window, this);
+		glfwSetWindowUserPointer(mWindow, this);
+
+		initOpenGL();
 
 		// Initialize OpenGL loader
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
@@ -110,34 +125,35 @@ namespace dyno
 		//ImGui::StyleColorsClassic();
 
 		// Setup Platform/Renderer backends
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
+
+		mCamera.registerPoint(0.5f, 0.5f);
+		mCamera.translateToPoint(0, 0);
+
+		mCamera.zoom(3.0f);
+		mCamera.setGL(0.01f, 3.0f, (float)getWidth(), (float)getHeight());
 	}
 
 	void GlfwApp::mainLoop()
 	{
-		// Our state
+		SceneGraph::getInstance().initialize();
+
 		bool show_demo_window = true;
-		bool show_another_window = false;
 
 		// Main loop
-		while (!glfwWindowShouldClose(window))
+		while (!glfwWindowShouldClose(mWindow))
 		{
-			// Poll and handle events (inputs, window resize, etc.)
-			// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-			// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-			// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-			// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 			glfwPollEvents();
+
+			if (mAnimationToggle)
+				SceneGraph::getInstance().takeOneFrame();
+				
 
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-
-			// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-			if (show_demo_window)
-				ImGui::ShowDemoWindow(&show_demo_window);
 
 			// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 			{
@@ -148,10 +164,9 @@ namespace dyno
 
 				ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 				ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-				ImGui::Checkbox("Another Window", &show_another_window);
 
 				ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-				ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+				ImGui::ColorEdit3("clear color", (float*)&mClearColor); // Edit 3 floats representing a color
 
 				if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
 					counter++;
@@ -162,126 +177,198 @@ namespace dyno
 				ImGui::End();
 			}
 
-			// 3. Show another simple window.
-			if (show_another_window)
-			{
-				ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-				ImGui::Text("Hello from another window!");
-				if (ImGui::Button("Close Me"))
-					show_another_window = false;
-				ImGui::End();
-			}
-
-			// Rendering
 			ImGui::Render();
-			
+
+			int width, height;
+			glfwGetFramebufferSize(mWindow, &width, &height);
+			const float ratio = width / (float)height;
+
+			glViewport(0, 0, width, height);
+			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+ 			glPushMatrix();
+
 			drawScene();
+
+			glPopMatrix();
 
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-			glfwSwapBuffers(window);
+			glfwSwapBuffers(mWindow);
 		}
+	}
+
+	const std::string& GlfwApp::name() const
+	{
+		return mWindowTitle;
+	}
+
+	void GlfwApp::setCursorPos(double x, double y)
+	{
+		mCursorPosX = x;
+		mCursorPosY = y;
+	}
+
+	double GlfwApp::getCursorPosX()
+	{
+		return mCursorPosX;
+	}
+
+	double GlfwApp::getCursorPosY()
+	{
+		return mCursorPosY;
+	}
+
+	int GlfwApp::getWidth() const
+	{
+		return mWidth;
+	}
+
+	int GlfwApp::getHeight() const
+	{
+		return mHeight;
+	}
+
+	void GlfwApp::setWidth(int width)
+	{
+		mWidth = width;
+	}
+
+	void GlfwApp::setHeight(int height)
+	{
+		mHeight = height;
+	}
+
+
+	bool GlfwApp::saveScreen(const std::string &file_name) const
+	{
+		int width = this->getWidth(), height = this->getHeight();
+		unsigned char *data = new unsigned char[width*height * 3];  //RGB
+		assert(data);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
+		Image image(width, height, Image::RGB, data);
+		image.flipVertically();
+		bool status = ImageIO::save(file_name, &image);
+		delete[] data;
+		return status;
+	}
+
+	bool GlfwApp::saveScreen()
+	{
+		std::stringstream adaptor;
+		adaptor << mSaveScreenIndex++;
+		std::string index_str;
+		adaptor >> index_str;
+		std::string file_name = mOutputPath + std::string("screen_capture_") + index_str + std::string(".ppm");
+		return saveScreen(file_name);
+	}
+
+
+	void GlfwApp::toggleAnimation()
+	{
+		mAnimationToggle = !mAnimationToggle;
 	}
 
 	void GlfwApp::initCallbacks()
 	{
-		mMouseButtonCallback = GlfwApp::mouseButtonCallback;
-		mKeyboardCallback = GlfwApp::keyboardCallback;
+		mMouseButtonFunc = GlfwApp::mouseButtonCallback;
+		mKeyboardFunc = GlfwApp::keyboardCallback;
+		mReshapeFunc = GlfwApp::reshapeCallback;
+		mCursorPosFunc = GlfwApp::cursorPosCallback;
+		mCursorEnterFunc = GlfwApp::cursorEnterCallback;
+		mScrollFunc = GlfwApp::scrollCallback;
 
-		glfwSetMouseButtonCallback(window, mMouseButtonCallback);
-		glfwSetKeyCallback(window, mKeyboardCallback);
+		glfwSetMouseButtonCallback(mWindow, mMouseButtonFunc);
+		glfwSetKeyCallback(mWindow, mKeyboardFunc);
+		glfwSetFramebufferSizeCallback(mWindow, mReshapeFunc);
+		glfwSetCursorPosCallback(mWindow, mCursorPosFunc);
+		glfwSetCursorEnterCallback(mWindow, mCursorEnterFunc);
+		glfwSetScrollCallback(mWindow, mScrollFunc);
 	}
 
-#define TORUS_MAJOR     1.5
-#define TORUS_MINOR     0.5
-#define TORUS_MAJOR_RES 32
-#define TORUS_MINOR_RES 32
-
-
-	static void drawTorus(void)
+	void GlfwApp::initOpenGL()
 	{
-		static GLuint torus_list = 0;
-		int    i, j, k;
-		double s, t, x, y, z, nx, ny, nz, scale, twopi;
-
-		if (!torus_list)
-		{
-			// Start recording displaylist
-			torus_list = glGenLists(1);
-			glNewList(torus_list, GL_COMPILE_AND_EXECUTE);
-
-			// Draw torus
-			twopi = 2.0 * M_PI;
-			for (i = 0; i < TORUS_MINOR_RES; i++)
-			{
-				glBegin(GL_QUAD_STRIP);
-				for (j = 0; j <= TORUS_MAJOR_RES; j++)
-				{
-					for (k = 1; k >= 0; k--)
-					{
-						s = (i + k) % TORUS_MINOR_RES + 0.5;
-						t = j % TORUS_MAJOR_RES;
-
-						// Calculate point on surface
-						x = (TORUS_MAJOR + TORUS_MINOR * cos(s * twopi / TORUS_MINOR_RES)) * cos(t * twopi / TORUS_MAJOR_RES);
-						y = TORUS_MINOR * sin(s * twopi / TORUS_MINOR_RES);
-						z = (TORUS_MAJOR + TORUS_MINOR * cos(s * twopi / TORUS_MINOR_RES)) * sin(t * twopi / TORUS_MAJOR_RES);
-
-						// Calculate surface normal
-						nx = x - TORUS_MAJOR * cos(t * twopi / TORUS_MAJOR_RES);
-						ny = y;
-						nz = z - TORUS_MAJOR * sin(t * twopi / TORUS_MAJOR_RES);
-						scale = 1.0 / sqrt(nx*nx + ny * ny + nz * nz);
-						nx *= scale;
-						ny *= scale;
-						nz *= scale;
-
-						glNormal3f((float)nx, (float)ny, (float)nz);
-						glVertex3f((float)x, (float)y, (float)z);
-					}
-				}
-
-				glEnd();
-			}
-
-			// Stop recording displaylist
-			glEndList();
-		}
-		else
-		{
-			// Playback displaylist
-			glCallList(torus_list);
-		}
+		glShadeModel(GL_SMOOTH);
+		glClearDepth(1.0);														// specify the clear value for the depth buffer
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void GlfwApp::drawScene(void)
 	{
-		int display_w, display_h;
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
-		glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glPushMatrix();
-
-		// Move back
-		glTranslatef(0.0, 0.0, -zoom);
-		// Rotate the view
-		glRotatef(beta, 1.0, 0.0, 0.0);
-		glRotatef(alpha, 0.0, 0.0, 1.0);
-
-		//drawTorus();
+		glUseProgram(0);
 		drawBackground();
 
-		glPopMatrix();
+		SceneGraph::getInstance().draw();
 	}
 
 	void GlfwApp::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+		auto camera = activeWindow->activeCamera();
+
+		activeWindow->setButtonType(button);
+		activeWindow->setButtonAction(action);
+		activeWindow->setButtonMode(mods);
+
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		if (action == GLFW_PRESS)
+		{
+			camera->registerPoint(float(xpos) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - float(ypos)) / float(activeWindow->getHeight()) - 0.5f);
+			activeWindow->setButtonState(GLFW_DOWN);
+		}
+		else
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		if (action == GLFW_RELEASE)
+		{
+			activeWindow->setButtonState(GLFW_UP);
+		}
 
 		if (action != GLFW_PRESS)
 			return;
+	}
+
+	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
+	{
+		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+
+		auto camera = activeWindow->activeCamera();
+
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN) {
+			camera->rotateToPoint(float(x) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - y) / float(activeWindow->getHeight()) - 0.5f);
+		}
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN) {
+			camera->translateToPoint(float(x) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - y) / float(activeWindow->getHeight()) - 0.5f);
+		}
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_MIDDLE) {
+			camera->translateLightToPoint(float(x) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - y) / float(activeWindow->getHeight()) - 0.5f);
+		}
+		camera->setGL(0.01f, 10.0f, (float)activeWindow->getWidth(), (float)activeWindow->getHeight());
+	}
+
+	void GlfwApp::cursorEnterCallback(GLFWwindow* window, int entered)
+	{
+		if (entered)
+		{
+			// The cursor entered the content area of the window
+		}
+		else
+		{
+			// The cursor left the content area of the window
+		}
+	}
+
+	void GlfwApp::scrollCallback(GLFWwindow* window, double offsetX, double OffsetY)
+	{
+		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+		auto camera = activeWindow->activeCamera();
+
+		camera->zoom(-OffsetY);
+		camera->setGL(0.01f, 10.0f, (float)activeWindow->getWidth(), (float)activeWindow->getHeight());
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -297,32 +384,38 @@ namespace dyno
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 			break;
 		case GLFW_KEY_SPACE:
+			activeWindow->toggleAnimation();
+			break;
 			break;
 		case GLFW_KEY_LEFT:
-			activeWindow->alpha += 5;
 			break;
 		case GLFW_KEY_RIGHT:
-			activeWindow->alpha -= 5;
 			break;
 		case GLFW_KEY_UP:
-			activeWindow->beta -= 5;
 			break;
 		case GLFW_KEY_DOWN:
-			activeWindow->beta += 5;
 			break;
 		case GLFW_KEY_PAGE_UP:
-			activeWindow->zoom -= 0.25f;
-			if (activeWindow->zoom < 0.f)
-				activeWindow->zoom = 0.f;
 			break;
 		case GLFW_KEY_PAGE_DOWN:
-			activeWindow->zoom += 0.25f;
 			break;
 		default:
 			break;
 		}
 	}
 
+	void GlfwApp::reshapeCallback(GLFWwindow* window, int w, int h)
+	{
+		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+
+		glfwGetFramebufferSize(window, &activeWindow->mWidth, &activeWindow->mHeight);
+
+		activeWindow->activeCamera()->setGL(0.01f, 10.0f, (float)w, (float)h);
+		activeWindow->setWidth(w);
+		activeWindow->setHeight(h);
+
+		glViewport(0, 0, w, h);
+	}
 
 	void GlfwApp::drawBackground()
 	{

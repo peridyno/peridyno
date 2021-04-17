@@ -32,7 +32,7 @@ namespace dyno
 		m_surfaceNode->setTopologyModule(triSet);
 
 		auto render = std::make_shared<SurfaceMeshRender>();
-		render->setColor(Vector3f(0.4, 0.75, 1));
+		render->setColor(Vec3f(0.4, 0.75, 1));
 		m_surfaceNode->addVisualModule(render);
 
 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);

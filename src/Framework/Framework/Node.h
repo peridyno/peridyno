@@ -385,9 +385,9 @@ private:
 
 	Real m_mass;
 
-	DEF_VAR(Location, Vector3f, 0, "Node location");
-	DEF_VAR(Rotation, Vector3f, 0, "Node rotation");
-	DEF_VAR(Scale, Vector3f, 0, "Node scale");
+	DEF_VAR(Location, Vec3f, 0, "Node location");
+	DEF_VAR(Rotation, Vec3f, 0, "Node rotation");
+	DEF_VAR(Scale, Vec3f, 0, "Node scale");
 
 	std::string m_node_name;
 

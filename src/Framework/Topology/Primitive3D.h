@@ -25,13 +25,13 @@ namespace dyno
 	// #endif
 
 #ifdef PRECISION_FLOAT
-	typedef Vector2f Coord2D;
-	typedef Vector3f Coord3D;
-	typedef Matrix3f Matrix3D;
+	typedef Vec2f Coord2D;
+	typedef Vec3f Coord3D;
+	typedef Mat3f Matrix3D;
 #else
-	typedef Vector2d Coord2D;
-	typedef Vector3d Coord3D;
-	typedef Matrix3d Matrix3D;
+	typedef Vec2d Coord2D;
+	typedef Vec3d Coord3D;
+	typedef Mat3d Matrix3D;
 #endif
 
 	constexpr Real REAL_EPSILON = (std::numeric_limits<Real>::epsilon)();
@@ -39,13 +39,13 @@ namespace dyno
 
 
 #ifdef PRECISION_FLOAT
-	typedef Vector2f Coord2D;
-	typedef Vector3f Coord3D;
-	typedef Matrix3f Matrix3D;
+	typedef Vec2f Coord2D;
+	typedef Vec3f Coord3D;
+	typedef Mat3f Matrix3D;
 #else
-	typedef Vector2d Coord2D;
-	typedef Vector3d Coord3D;
-	typedef Matrix3d Matrix3D;
+	typedef Vec2d Coord2D;
+	typedef Vec3d Coord3D;
+	typedef Mat3d Matrix3D;
 #endif
 
 	/**

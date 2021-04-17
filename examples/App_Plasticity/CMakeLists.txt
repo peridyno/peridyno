@@ -1,10 +1,4 @@
-
 set(PROJECT_NAME App_Plasticity)
-
-link_libraries(Core Framework IO Graphics)
-link_libraries(ParticleSystem)
-link_libraries(GlutGUI)
-
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
@@ -17,6 +11,15 @@ file(                                                                           
 )
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 #添加编译目标 可执行文件
+
+target_link_libraries(${PROJECT_NAME} 
+	Core 
+	Framework 
+	IO 
+	Graphics 
+	ParticleSystem 
+	RigidBody 
+	GlfwGUI)
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  #判断当前project在根目录下的相对路径
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")                              #为project设定folder目录

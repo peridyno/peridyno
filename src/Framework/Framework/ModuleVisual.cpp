@@ -29,12 +29,12 @@ void VisualModule::rotate(float angle, float x, float y, float z)
 
 void VisualModule::translate(float x, float y, float z)
 {
-	m_translation += Vector3f(x, y, z);
+	m_translation += Vec3f(x, y, z);
 }
 
 void VisualModule::scale(float x, float y, float z)
 {
-	m_scale += Vector3f(x, y, z);
+	m_scale += Vec3f(x, y, z);
 }
 
 }
