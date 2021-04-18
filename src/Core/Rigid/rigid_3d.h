@@ -15,7 +15,7 @@ namespace dyno {
 
 		DYN_FUNC Rigid()
 			: m_p(0)
-			, m_quat(Quat<T>::Identity())
+			, m_quat(Quat<T>::identity())
 		{};
 
 		DYN_FUNC Rigid(Vector<T, 3> p, Quat<T> quat)
@@ -29,7 +29,7 @@ namespace dyno {
 
 		DYN_FUNC SquareMatrix<T, 3> getRotationMatrix() const
 		{
-			return m_quat.get3x3Matrix();
+			return m_quat.toMatrix3x3();
 		}
 
 		DYN_FUNC Quat<T> getOrientation() const { return m_quat; }

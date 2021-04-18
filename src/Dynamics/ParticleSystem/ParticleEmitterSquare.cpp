@@ -40,7 +40,7 @@ namespace dyno
 
 		auto rot_vec = this->varRotation()->getData();
 
-		Quat<Real> quat = Quat<float>::Identity();
+		Quat<Real> quat = Quat<float>::identity();
 		float x_rad = rot_vec[0] / 180.0f * M_PI;
 		float y_rad = rot_vec[1] / 180.0f * M_PI;
 		float z_rad = rot_vec[2] / 180.0f * M_PI;
@@ -49,7 +49,7 @@ namespace dyno
 		quat = quat * Quat<Real>(y_rad, Coord(0, 1, 0));
 		quat = quat * Quat<Real>(z_rad, Coord(0, 0, 1));
 
-		auto rot_mat = quat.get3x3Matrix();
+		auto rot_mat = quat.toMatrix3x3();
 
 		Coord v0 = this->varVelocityMagnitude()->getData()*rot_mat*Vec3f(0, -1, 0);
 

@@ -38,7 +38,7 @@ namespace dyno
 		this->setTopologyModule(m_frame);
 
 		m_frame->setCenter(trans);
-		m_frame->setOrientation(m_quaternion.get3x3Matrix());
+		m_frame->setOrientation(m_quaternion.toMatrix3x3());
 
 		//create a child node for surface rendering
 		m_surfaceNode = this->createChild<Node>("Mesh");
@@ -118,14 +118,14 @@ namespace dyno
 		m_center.setValue(center);
 		m_transVelocity.setValue(transVel);
 		m_angularVelocity.setValue(angularVel);
-		m_rotation.setValue(m_quaternion.get3x3Matrix());
+		m_rotation.setValue(m_quaternion.toMatrix3x3());
 	}
 
 	template<typename TDataType>
 	void RigidBody<TDataType>::updateTopology()
 	{
 		m_frame->setCenter(m_center.getData());
-		m_frame->setOrientation(m_quaternion.get3x3Matrix());
+		m_frame->setOrientation(m_quaternion.toMatrix3x3());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)

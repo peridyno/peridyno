@@ -1,49 +1,30 @@
-/******************************************************************************
-Copyright (c) 2007 Bart Adams (bart.adams@gmail.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software. The authors shall be
-acknowledged in scientific publications resulting from using the Software
-by referencing the ACM SIGGRAPH 2007 paper "Adaptively Sampled Particle
-Fluids".
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-******************************************************************************/
+#include "Camera.h"
 
 #include <glad/gl.h>
-#include "Camera.h"
 #include <iostream>
 #include <math.h>
 
 namespace dyno
 {
 	Camera::Camera() {
-		m_eye = Vec3f(0, 0, 3);
-		m_light = Vec3f(0, 0, 3);
-		m_rotation = 0;
-		m_rotation_axis = Vec3f(0, 1, 0);
-		m_fov = 0.90f;
+		mFocusDist = 3.0f;
+		mEyePos = Vec3f(0, 0, mFocusDist);
+		mTargetPos = Vec3f(0);
+		mLightPos = Vec3f(0, 0, mFocusDist);
+		mRotAngle = 0;
+		mRotAxis = Vec3f(0, 1, 0);
+		mFov = 0.90f;
+
+		mYaw = 0.0f;// M_PI / 2.0f;
+		mPitch = 0.0f;//M_PI / 4.0f;
 	}
 
 
 	void Camera::setGL(float neardist, float fardist, float width, float height) {
 		float diag = sqrt(width*width + height*height);
-		float top = height / diag * 0.5f*m_fov*neardist;
+		float top = height / diag * 0.5f*mFov*neardist;
 		float bottom = -top;
-		float right = width / diag* 0.5f*m_fov*neardist;
+		float right = width / diag* 0.5f*mFov*neardist;
 		float left = -right;
 
 		glMatrixMode(GL_PROJECTION);
@@ -52,122 +33,108 @@ namespace dyno
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		glRotatef(180.0f / M_PI*m_rotation, m_rotation_axis[0], m_rotation_axis[1], m_rotation_axis[2]);
-		glTranslatef(-m_eye[0], -m_eye[1], -m_eye[2]);
+		glRotatef(180.0f / M_PI*mRotAngle, mRotAxis[0], mRotAxis[1], mRotAxis[2]);
+		glTranslatef(-mEyePos[0], -mEyePos[1], -mEyePos[2]);
 
-		GLfloat pos[] = { m_light[0], m_light[1], m_light[2],1 };
+		//printf("Angle: %f; Axis: %f %f %f \n", mRotAngle, mRotAxis[0], mRotAxis[1], mRotAxis[2]);
+
+		GLfloat pos[] = { mLightPos[0], mLightPos[1], mLightPos[2],1 };
 		glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
-		m_width = (int)width;
-		m_height = (int)height;
-		m_pixelarea = 4 * right*top / (width*height);
-		m_near = neardist;
-		m_far = fardist;
-		m_right = right;
+		mViewportWidth = (int)width;
+		mViewportHeight = (int)height;
+
+		mNear = neardist;
+		mFar = fardist;
+		mRight = right;
 	}
 
-	int Camera::width() const {
-		return m_width;
+	int Camera::viewportWidth() const {
+		return mViewportWidth;
 	}
 
-	int Camera::height() const {
-		return m_height;
+	int Camera::viewportHeight() const {
+		return mViewportHeight;
 	}
 
-	float Camera::getPixelArea() const {
-		return m_pixelarea;
+	Vec3f Camera::getEyePos() const {
+		return mEyePos;
 	}
 
-	Vec3f Camera::getEye() const {
-		return m_eye;
-	}
+	void Camera::rotate(float dx, float dy)
+	{
+		float newYaw = mYaw + dx;
+		float newPitch = mPitch + dy;
 
-	void Camera::rotate(Quat1f &rotquat) {
-		// set up orthogonal camera system
-		Quat1f q(m_rotation, m_rotation_axis);
-		//q.x = -q.x;
-		q.setX(-q.x());
-		Vec3f viewdir(0, 0, -1);
-		q.rotateVector(viewdir);
-		// end set up orth system
-		//   q = Quat1f(angle, axis);
-		q = rotquat;
-		Quat1f currq(m_rotation, m_rotation_axis);
-		Vec3f rotcenter = m_eye + 3.0f*viewdir;
-		Vec3f rotcenter2 = m_light + 3.0f*viewdir;
-// 		currq = q.ComposeWith(currq);
-// 		currq.ToRotAxis(m_rotation, m_rotation_axis);
-		currq = q * currq;
-		q.normalize();
-		currq.toRotationAxis(m_rotation, m_rotation_axis);
-		// set up orthogonal camera system
-		Quat1f q2(m_rotation, m_rotation_axis);
-		//q2.x = -q2.x;
-		q2.setX(-q2.x());
-		Vec3f viewdir2(0, 0, -1);
-		q2.rotateVector(viewdir2);
+		Quat1f oldQuat(mRotAngle, mRotAxis);
+		oldQuat.w = -oldQuat.w;
+		Vec3f curViewdir = oldQuat.rotate(Vec3f(0, 0, -1));
 
-		m_eye = rotcenter - 3.0f*viewdir2;
-		m_light = rotcenter2 - 3.0f*viewdir2;
+		Vec3f eyeCenter = mEyePos + mFocusDist * curViewdir;
+		Vec3f lightCenter = mLightPos + mFocusDist * curViewdir;
+
+		Quat1f newQuat = Quat1f(newPitch, Vec3f(1.0f, 0.0f, 0.0f)) * Quat1f(newYaw, Vec3f(0.0f, 1.0f, 0.0f));
+
+		newQuat.toRotationAxis(mRotAngle, mRotAxis);
+
+		Quat1f q2 = newQuat;
+		q2.w = -q2.w;
+		Quat1f qFinal = q2;
+		//Quat1f qFinal = Quat1f(newPitch, vecX) * q;
+
+		Vec3f newViewdir = q2.rotate(Vec3f(0, 0, -1));
+
+		mEyePos = eyeCenter - mFocusDist * newViewdir;
+		mLightPos = lightCenter - mFocusDist * newViewdir;
+
+		mYaw = newYaw;
+		mPitch = newPitch;
 	}
 
 	Vec3f Camera::getViewDir() const {
-		Quat1f q(m_rotation, m_rotation_axis);
-		//q.x = -q.x;
-		q.setX(-q.x());
-		Vec3f viewdir(0, 0, 1);
-		q.rotateVector(viewdir);
+		Quat1f q(mRotAngle, mRotAxis);
+		q.w = -q.w;
+		Vec3f viewdir = q.rotate(Vec3f(0, 0, 1));
 		return viewdir;
 	}
 
 	void Camera::getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const {
-		Quat1f q(m_rotation, m_rotation_axis);
-		//q.x = -q.x;
-		q.setX(-q.x());
-		view = Vec3f(0, 0, 1);
-		q.rotateVector(view);
-		up = Vec3f(0, 1, 0);
-		q.rotateVector(up);
+		Quat1f q(mRotAngle, mRotAxis);
+		q.w = -q.w;
+		view = q.rotate(Vec3f(0, 0, 1));
+		up = q.rotate(Vec3f(0, 1, 0));
 		right = -view.cross(up);
 	}
 
 	void Camera::translate(const Vec3f translation) {
-		Quat1f q(m_rotation, m_rotation_axis);
-		//q.x = -q.x;
-		q.setX(-q.x());
-		Vec3f xax(1, 0, 0);
-		Vec3f yax(0, 1, 0);
-		Vec3f zax(0, 0, 1);
+		Quat1f q(mRotAngle, mRotAxis);
+		q.w = -q.w;
 
-		q.rotateVector(xax);
-		q.rotateVector(yax);
-		q.rotateVector(zax);
+		Vec3f xax = q.rotate(Vec3f(1, 0, 0));
+		Vec3f yax = q.rotate(Vec3f(0, 1, 0));
+		Vec3f zax = q.rotate(Vec3f(0, 0, 1));
 
-		m_eye += translation[0] * xax +
+		mEyePos += translation[0] * xax +
 			translation[1] * yax +
 			translation[2] * zax;
 	}
 
 	void Camera::translateLight(const Vec3f translation) {
-		Quat1f q(m_rotation, m_rotation_axis);
-		//q.x = -q.x;
-		q.setX(-q.x());
-		Vec3f xax(1, 0, 0);
-		Vec3f yax(0, 1, 0);
-		Vec3f zax(0, 0, 1);
+		Quat1f q(mRotAngle, mRotAxis);
+		q.w = -q.w;
+		
+		Vec3f xax = q.rotate(Vec3f(1, 0, 0));
+		Vec3f yax = q.rotate(Vec3f(0, 1, 0));
+		Vec3f zax = q.rotate(Vec3f(0, 0, 1));
 
-		q.rotateVector(xax);
-		q.rotateVector(yax);
-		q.rotateVector(zax);
-
-		m_light += translation[0] * xax +
+		mLightPos += translation[0] * xax +
 			translation[1] * yax +
 			translation[2] * zax;
 	}
 
 	void Camera::zoom(float amount) {
-		m_fov += amount / 10;
-		m_fov = std::max(m_fov, 0.01f);
+		mFov += amount / 10;
+		mFov = std::max(mFov, 0.01f);
 	}
 
 	Vec3f Camera::getPosition(float x, float y) {
@@ -187,7 +154,7 @@ namespace dyno
 
 	Quat1f Camera::getQuaternion(float x1, float y1, float x2, float y2) {
 		if ((x1 == x2) && (y1 == y2)) {
-			return Quat1f(1, 0, 0, 0);
+			return Quat1f();
 		}
 		Vec3f pos1 = getPosition(x1, y1);
 		Vec3f pos2 = getPosition(x2, y2);
@@ -198,28 +165,35 @@ namespace dyno
 	}
 
 	void Camera::registerPoint(float x, float y) {
-		m_x = x;
-		m_y = y;
+		mRegX = x;
+		mRegY = y;
 	}
+
 	void Camera::rotateToPoint(float x, float y) {
-		Quat1f q = getQuaternion(m_x, m_y, x, y);
+		float dx = x - mRegX;
+		float dy = y - mRegY;
+		Quat1f q = getQuaternion(mRegX, mRegY, x, y);
+		rotate(dx, -dy);
+
 		registerPoint(x, y);
-		rotate(q);
 	}
+
 	void Camera::translateToPoint(float x, float y) {
-		float dx = x - m_x;
-		float dy = y - m_y;
+		float dx = x - mRegX;
+		float dy = y - mRegY;
 		float dz = 0;
-		registerPoint(x, y);
 		translate(Vec3f(-dx, -dy, -dz));
+
+		registerPoint(x, y);
 	}
 
 	void Camera::translateLightToPoint(float x, float y) {
-		float dx = x - m_x;
-		float dy = y - m_y;
+		float dx = x - mRegX;
+		float dy = y - mRegY;
 		float dz = 0;
+		translateLight(mFocusDist*Vec3f(dx, dy, dz));
+
 		registerPoint(x, y);
-		translateLight(Vec3f(3 * dx, 3 * dy, 3 * dz));
 	}
 
 }

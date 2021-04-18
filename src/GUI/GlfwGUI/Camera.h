@@ -3,8 +3,6 @@
 #include "Quat.h"
 #include "Vector.h"
 
-#define M_PI 3.14159265358979323846
-
 namespace dyno
 {
 	typedef Quat<float> Quat1f;
@@ -15,48 +13,53 @@ namespace dyno
 		Camera();
 		~Camera() {};
 
-		void registerPoint(float x, float y);
 		void rotateToPoint(float x, float y);
 		void translateToPoint(float x, float y);
 		void translateLightToPoint(float x, float y);
 		void zoom(float amount);
 		void setGL(float neardist, float fardist, float width, float height);
 
-		Vec3f getViewDir() const;
+		int viewportWidth() const;
+		int viewportHeight() const;
 
-		float getPixelArea() const;
-		int width() const;
-		int height() const;
-		Vec3f getEye() const;
+		Vec3f getViewDir() const;
+		Vec3f getEyePos() const;
 
 		void getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const;
-		void rotate(Quat1f &rotquat);
-		void translate(const Vec3f translation);
+
+		void registerPoint(float x, float y);
 
 	private:
+		void rotate(float dx, float dy);
+		void translate(const Vec3f translation);
 		void translateLight(const Vec3f translation);
+
 		Vec3f getPosition(float x, float y);
+
 		Quat1f getQuaternion(float x1, float y1, float x2, float y2);
 
 	private:
-		float m_x;
-		float m_y;
+		float mRegX;
+		float mRegY;
 
-		float m_near;
-		float m_far;
-		float m_right;
-		float m_fov;
+		float mNear;
+		float mFar;
+		float mRight;
+		float mFov;
 
-		float m_rotation;
+		float mRotAngle;
+		float mFocusDist;
 		
-		int m_width;
-		int m_height;
+		float mYaw;	//along Y
+		float mPitch;	//along axis X of the viewport coordinate system
 
-		float m_pixelarea;
+		int mViewportWidth;
+		int mViewportHeight;
 
-		Vec3f m_eye;
-		Vec3f m_light;
-		Vec3f m_rotation_axis;
+		Vec3f mEyePos;
+		Vec3f mTargetPos;
+		Vec3f mLightPos;
+		Vec3f mRotAxis;
 	};
 
 }

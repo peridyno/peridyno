@@ -173,7 +173,7 @@ namespace dyno
 		glMatrixMode(GL_MODELVIEW_MATRIX);
 		glPushMatrix();
 
-		glRotatef(m_rotation.x(), m_rotation.y(), m_rotation.z(), m_rotation.w());
+		glRotatef(m_rotation.x, m_rotation.y, m_rotation.z, m_rotation.w);
 		glTranslatef(m_translation[0], m_translation[1], m_translation[2]);
 		glScalef(m_scale[0], m_scale[1], m_scale[2]);
 
