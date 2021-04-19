@@ -101,6 +101,8 @@ namespace dyno {
 		uint mButtonAction;
 		ButtonState mButtonState;
 
+		int mPlaneSize = 4;
+
 		double mCursorPosX;
 		double mCursorPosY;
 

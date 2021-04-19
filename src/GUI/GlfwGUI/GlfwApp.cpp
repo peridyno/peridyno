@@ -419,10 +419,10 @@ namespace dyno
 
 	void GlfwApp::drawBackground()
 	{
-		int xmin = -10;
-		int xmax = 10;
-		int zmin = -10;
-		int zmax = 10;
+		int xmin = -mPlaneSize;
+		int xmax = mPlaneSize;
+		int zmin = -mPlaneSize;
+		int zmax = mPlaneSize;
 
 		float s = 1.0f;
 		int nSub = 10;
@@ -456,7 +456,7 @@ namespace dyno
 		glEnable(GL_LINE_STIPPLE);
 		glColor4f(0.55f, 0.55f, 0.55f, 1.0f);
 		glBegin(GL_LINES);
-		for (int i = xmin; i <= xmax; i++)
+		for (int i = xmin; i < xmax; i++)
 		{
 			for (int j = 1; j < nSub; j++)
 			{
@@ -464,7 +464,7 @@ namespace dyno
 				glVertex3f(i*s + j * sub_s, 0, zmax*s);
 			}
 		}
-		for (int i = zmin; i <= zmax; i++)
+		for (int i = zmin; i < zmax; i++)
 		{
 			for (int j = 1; j < nSub; j++)
 			{
