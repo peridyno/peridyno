@@ -25,15 +25,12 @@ namespace dyno
 		bool execute() override;
 
 	public:
-		DeviceArrayField<Coord> m_position;
-		DeviceArrayField<Real> m_color_mapping;
-
-		DeviceArrayField<Triangle> m_triangle_index;
-		DeviceArrayField<Coord> m_triangle_pos;
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 
 	private:
-		int m_output_index = 0;
-		std::string m_output_path;
-		std::string m_name_prefix;
+		int mFileIndex = 0;
+
+		std::string mOutpuPath;
+		std::string mOutputPrefix;
 	};
 }

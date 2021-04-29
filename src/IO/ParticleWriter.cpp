@@ -1,11 +1,8 @@
 #include "ParticleWriter.h"
-#include "Framework/MechanicalState.h"
-#include "Framework/ModuleIO.h"
 
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 
 namespace dyno
 {
@@ -15,8 +12,6 @@ namespace dyno
 	ParticleWriter<TDataType>::ParticleWriter()
 	: IOModule()
 	{
-		attachField(&m_position, MechanicalState::position(), "Storing the particle positions!", false);
-		attachField(&m_color_mapping, "ColorMapping", "Storing the particle properties!", false);
 	}
 
 	template<typename TDataType>
@@ -27,61 +22,41 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleWriter<TDataType>::setNamePrefix(std::string prefix)
 	{
-		m_name_prefix = prefix;
+		mOutputPrefix = prefix;
 	}
 
 	template<typename TDataType>
 	void ParticleWriter<TDataType>::setOutputPath(std::string path)
 	{
-		m_output_path = path;
+		mOutpuPath = path;
 	}
 
 	template<typename TDataType>
 	bool ParticleWriter<TDataType>::execute()
 	{
-		printf("===========WRITER============\n");
-		assert(m_position.getElementCount() == m_color_mapping.getElementCount());
-
-		std::stringstream ss; ss << m_output_index;
-		std::string filename = m_output_path + std::string("D:\\info\\0918\\test_") + ss.str() + std::string(".txt");
+		std::stringstream ss; ss << mFileIndex;
+		std::string filename = mOutpuPath + ss.str() + mOutputPrefix + std::string(".txt");
 		std::ofstream output(filename.c_str(), std::ios::out | std::ios::binary);
 
-		int total_num = m_position.getElementCount();
+		int pNum = this->inPosition()->getElementCount();
 
-		output.write((char*)&total_num, sizeof(int));
+		output.write((char*)&pNum, sizeof(int));
 
-		if (total_num == 0)
-		{
-			m_output_index++;
-			output.close();
-			return true;
-		}
-
-
-		CArray<Coord> host_position;
-		CArray<Real> host_mapping;
-		host_position.resize(total_num);
-		host_mapping.resize(total_num);
-
-		host_position.assign(m_position.getData());
-		host_mapping.assign(m_color_mapping.getData());
-
+		CArray<Coord> hPosition;
 		
-		for (int i = 0; i < total_num; i++)
+		hPosition.resize(pNum);
+		hPosition.assign(this->inPosition()->getData());
+		
+		for (int i = 0; i < pNum; i++)
 		{
-			output.write((char*)&(host_position[i][0]), sizeof(Real));
-			output.write((char*)&(host_position[i][1]), sizeof(Real));
-			output.write((char*)&(host_position[i][2]), sizeof(Real));
-			output.write((char*)&(host_mapping[i]), sizeof(Real));
+			output.write((char*)&(hPosition[i][0]), sizeof(Real));
+			output.write((char*)&(hPosition[i][1]), sizeof(Real));
+			output.write((char*)&(hPosition[i][2]), sizeof(Real));
 		}
 
 		output.close();
 
-		host_position.clear();
-		host_mapping.clear();
-
-
-		m_output_index++;
+		mFileIndex++;
 
 		return true;
 	}

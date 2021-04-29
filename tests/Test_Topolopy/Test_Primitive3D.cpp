@@ -284,3 +284,375 @@ TEST(OrientedBox3D, distance) {
 	EXPECT_EQ(point1.distance(obb), 1);
 	EXPECT_EQ(point2.distance(obb), Real(-0.5));
 }
+
+using namespace glm;
+
+#define FLOAT_MAX 1000000
+
+struct Box
+{
+	vec4 center;
+	vec4 halfLength;
+	vec4 rot;
+};
+
+vec3 quat_rotate(vec4 quat, vec3 v)
+{
+	// Extract the vector part of the quaternion
+	vec3 u = vec3(quat.x, quat.y, quat.z);
+
+	// Extract the scalar part of the quaternion
+	float s = quat.w;
+
+	// Do the math
+	return    2.0f * dot(u, v) * u
+		+ (s*s - dot(u, u)) * v
+		+ 2.0f * s * cross(u, v);
+}
+
+bool checkCollision(Box box0, Box box1, vec3& cNormal, float& cDist, float& outRA, float& outRB)
+{
+	float d = FLOAT_MAX;
+	vec3 normalA = vec3(0);
+
+	vec3 v = vec3(box1.center.x, box1.center.y, box1.center.z) - vec3(box0.center.x, box0.center.y, box0.center.z);
+
+	//Compute A's basis  
+	vec3 VAx = quat_rotate(box0.rot, vec3(1, 0, 0));
+	vec3 VAy = quat_rotate(box0.rot, vec3(0, 1, 0));
+	vec3 VAz = quat_rotate(box0.rot, vec3(0, 0, 1));
+
+	vec3 VA[3];
+	VA[0] = VAx;
+	VA[1] = VAy;
+	VA[2] = VAz;
+
+	//Compute B's basis  
+	vec3 VBx = quat_rotate(box1.rot, vec3(1, 0, 0));
+	vec3 VBy = quat_rotate(box1.rot, vec3(0, 1, 0));
+	vec3 VBz = quat_rotate(box1.rot, vec3(0, 0, 1));
+
+	vec3 VB[3];
+	VB[0] = VBx;
+	VB[1] = VBy;
+	VB[2] = VBz;
+
+	vec3 T = vec3(dot(v, VAx), dot(v, VAy), dot(v, VAz));
+
+	float R[3][3];
+	float FR[3][3];
+	float ra, rb, t;
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int k = 0; k < 3; k++)
+		{
+			R[i][k] = dot(VA[i], VB[k]);
+			FR[i][k] = abs(R[i][k]);
+		}
+	}
+
+	// A's basis vectors  
+	for (int i = 0; i < 3; i++)
+	{
+		ra = box0.halfLength[i];
+		rb = box1.halfLength[0] * FR[i][0] + box1.halfLength[1] * FR[i][1] + box1.halfLength[2] * FR[i][2];
+		t = abs(T[i]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, VA[i]) > 0 ? VA[i] : -VA[i];
+			}
+		}
+	}
+
+	// B's basis vectors  
+	for (int k = 0; k < 3; k++)
+	{
+		ra = box0.halfLength[0] * FR[0][k] + box0.halfLength[1] * FR[1][k] + box0.halfLength[2] * FR[2][k];
+		rb = box1.halfLength[k];
+		t = abs(T[0] * R[0][k] + T[1] * R[1][k] + T[2] * R[2][k]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, VB[k]) > 0 ? VB[k] : -VB[k];
+			}
+		}
+	}
+
+	//9 cross products  
+	bool parallel = false;
+	for (int i = 0; i < 3; i++)
+	{
+		for (int k = 0; k < 3; k++)
+		{
+			if (FR[i][k] + EPSILON >= 1.0)
+				parallel = true;
+		}
+	}
+
+	if (!parallel)
+	{
+		//L = A0 x B0  
+		ra = box0.halfLength[1] * FR[2][0] + box0.halfLength[2] * FR[1][0];
+		rb = box1.halfLength[1] * FR[0][2] + box1.halfLength[2] * FR[0][1];
+		t = abs(T[2] * R[1][0] - T[1] * R[2][0]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[0];
+				vec3 e1 = VB[0];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A0 x B1  
+		ra = box0.halfLength[1] * FR[2][1] + box0.halfLength[2] * FR[1][1];
+		rb = box1.halfLength[0] * FR[0][2] + box1.halfLength[2] * FR[0][0];
+		t = abs(T[2] * R[1][1] - T[1] * R[2][1]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[0];
+				vec3 e1 = VB[1];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A0 x B2  
+		ra = box0.halfLength[1] * FR[2][2] + box0.halfLength[2] * FR[1][2];
+		rb = box1.halfLength[0] * FR[0][1] + box1.halfLength[1] * FR[0][0];
+		t = abs(T[2] * R[1][2] - T[1] * R[2][2]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[0];
+				vec3 e1 = VB[2];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A1 x B0  
+		ra = box0.halfLength[0] * FR[2][0] + box0.halfLength[2] * FR[0][0];
+		rb = box1.halfLength[1] * FR[1][2] + box1.halfLength[2] * FR[1][1];
+		t = abs(T[0] * R[2][0] - T[2] * R[0][0]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[1];
+				vec3 e1 = VB[0];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A1 x B1  
+		ra = box0.halfLength[0] * FR[2][1] + box0.halfLength[2] * FR[0][1];
+		rb = box1.halfLength[0] * FR[1][2] + box1.halfLength[2] * FR[1][0];
+		t = abs(T[0] * R[2][1] - T[2] * R[0][1]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[1];
+				vec3 e1 = VB[1];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A1 x B2  
+		ra = box0.halfLength[0] * FR[2][2] + box0.halfLength[2] * FR[0][2];
+		rb = box1.halfLength[0] * FR[1][1] + box1.halfLength[1] * FR[1][0];
+		t = abs(T[0] * R[2][2] - T[2] * R[0][2]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[1];
+				vec3 e1 = VB[2];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A2 x B0  
+		ra = box0.halfLength[0] * FR[1][0] + box0.halfLength[1] * FR[0][0];
+		rb = box1.halfLength[1] * FR[2][2] + box1.halfLength[2] * FR[2][1];
+		t = abs(T[1] * R[0][0] - T[0] * R[1][0]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[2];
+				vec3 e1 = VB[0];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A2 x B1  
+		ra = box0.halfLength[0] * FR[1][1] + box0.halfLength[1] * FR[0][1];
+		rb = box1.halfLength[0] * FR[2][2] + box1.halfLength[2] * FR[2][0];
+		t = abs(T[1] * R[0][1] - T[0] * R[1][1]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[2];
+				vec3 e1 = VB[1];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+
+		//L = A2 x B2  
+		ra = box0.halfLength[0] * FR[1][2] + box0.halfLength[1] * FR[0][2];
+		rb = box1.halfLength[0] * FR[2][1] + box1.halfLength[1] * FR[2][0];
+		t = abs(T[1] * R[0][2] - T[0] * R[1][2]);
+		if (t > ra + rb)
+			return false;
+		else
+		{
+			float tmp_d = ra + rb - t;
+			if (tmp_d < d)
+			{
+				vec3 e0 = VA[2];
+				vec3 e1 = VB[2];
+				vec3 dir = cross(e0, e1);
+
+				vec3 dirN = length(dir) > EPSILON ? normalize(dir) : normalize(v - dot(v, e0)*e0);
+
+				d = tmp_d;
+				outRA = ra;
+				outRB = rb;
+				normalA = dot(v, dirN) > 0 ? dirN : -dirN;
+			}
+		}
+	}
+
+	cNormal = normalA;
+	cDist = d;
+
+	return true;
+}
+
+TEST(OrientedBox3D, intersectWithOBB) {
+	OrientedBox3D obb;
+
+	Point3D point1(0, 2, 0);
+	Point3D point2(0, 0.5, 0);
+
+	Box boxA;
+	Box boxB;
+
+	boxA.center = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	boxA.halfLength = vec4(0.3f, 0.3f, 0.3f, 0.0f);
+	boxA.rot = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	boxB.center = vec4(0.0f, 1.5f, 0.0f, 0.0f);
+	boxB.halfLength = vec4(0.3f, 0.3f, 0.3f, 0.0f);
+	boxB.rot = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	vec3 normal;
+	float distance;
+	float rA;
+	float rB;
+	checkCollision(boxA, boxB, normal, distance, rA, rB);
+
+	EXPECT_EQ(point1.distance(obb), 1);
+	EXPECT_EQ(point2.distance(obb), Real(-0.5));
+}
