@@ -8,16 +8,34 @@ using namespace dyno;
 TEST(Map, CPU)
 {
 	Pair<int, double> pair1(1, 1.1), pair2(2, 2.2), pair3(3, 3.3), pair4(4, 4.4);
-	Pair<int, double>* pairptr = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
+
 	Map<int, double> mymap;
+	if (mymap.empty()) std::cout << "this map is empty" << std::endl;
+
+	Pair<int, double>* pairptr = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
 	mymap.reserve(pairptr, 4);
-	Pair<int, double>* pairp = mymap.begin();
+	if (mymap.empty()) std::cout << "this map is empty" << std::endl;
+
+	Pair<int, double>* pairp=mymap.insert(pair1);
 	std::cout << pairp->first << " ; " << pairp->second << std::endl;
 
-	mymap.insert(pair1);
-    pairp = mymap.begin();
+	pairp = mymap.insert(pair4);
 	std::cout << pairp->first << " ; " << pairp->second << std::endl;
 
+	pairp = mymap.insert(pair2);
+	std::cout << pairp->first << " ; " << pairp->second << std::endl;
+
+	pairp = mymap.begin();
+	std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	std::cout << (pairp+1)->first << " ; " << (pairp+1)->second << std::endl;
+	std::cout << (pairp+2)->first << " ; " << (pairp+2)->second << std::endl;
+
+	pairp = mymap.find(2);
+	if (pairp != nullptr) std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	pairp = mymap.find(3);
+	if (pairp != nullptr) std::cout << pairp->first << " ; " << pairp->second << std::endl;
+
+	free(pairptr);
 }
 
 //TEST(ArrayList, Copy)
