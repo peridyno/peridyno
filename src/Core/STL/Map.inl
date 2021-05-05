@@ -33,19 +33,19 @@ namespace dyno
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC void Map<T>::clear()
+	DYN_FUNC void Map<MKey, T>::clear()
 	{
 		m_size = 0;
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC int Map<T>::size()
+	DYN_FUNC int Map<MKey, T>::size()
 	{
 		return m_size;
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC bool Map<T>::empty()
+	DYN_FUNC bool Map<MKey, T>::empty()
 	{
 		return data == nullptr;
 	}
