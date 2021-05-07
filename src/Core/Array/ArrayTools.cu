@@ -1,5 +1,6 @@
 #include "ArrayTools.h"
 #include "STL/List.h"
+#include "STL/Map.h"
 
 namespace dyno
 {
@@ -179,4 +180,146 @@ namespace dyno
 	template void parallel_init_for_list<30>(void* lists, void* elements, size_t ele_size, DArray<int>& index);
 	template void parallel_init_for_list<31>(void* lists, void* elements, size_t ele_size, DArray<int>& index);
 	template void parallel_init_for_list<32>(void* lists, void* elements, size_t ele_size, DArray<int>& index);
+
+
+
+
+
+	template<int N>
+	__global__ void AT_Allocate_Map(
+		void* maps,
+		void* elements,
+		size_t ele_size,
+		DArray<int> index)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= index.size()) return;
+
+		Map<int,SpaceHolder<N>>* mapPtr = (Map<int,SpaceHolder<N>>*)maps;
+		Pair<int,SpaceHolder<N>>* elementsPtr = (Pair<int,SpaceHolder<N>>*)elements;
+
+		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
+
+		Map<int,SpaceHolder<N>> map;
+		map.reserve(elementsPtr + index[tId], count);
+
+		mapPtr[tId] = map;
+	}
+
+	template<int N>
+	void parallel_allocate_for_map(void* maps, void* elements, size_t ele_size, DArray<int>& index)
+	{
+		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
+		AT_Allocate_Map<N> << <pDims, BLOCK_SIZE >> > (
+			maps,
+			elements,
+			ele_size,
+			index);
+		cuSynchronize();
+	}
+
+	template void parallel_allocate_for_map<1>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<2>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<3>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<4>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<5>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<6>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<7>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<8>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template void parallel_allocate_for_map<9>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<10>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<11>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<12>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<13>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<14>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<15>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<16>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template void parallel_allocate_for_map<17>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<18>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<19>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<20>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<21>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<22>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<23>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<24>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template void parallel_allocate_for_map<25>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<26>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<27>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<28>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<29>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<30>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<31>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_allocate_for_map<32>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template<int N>
+	__global__ void AT_Assign_Map(
+		void* maps,
+		void* elements,
+		size_t ele_size,
+		DArray<int> index)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= index.size()) return;
+
+		Map<int,SpaceHolder<N>>* mapStartPtr = (Map<int,SpaceHolder<N>>*)maps;
+		Pair<int,SpaceHolder<N>>* elementsPtr = (Pair<int,SpaceHolder<N>>*)elements;
+
+		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
+
+		Map<int,SpaceHolder<N>> map = *(mapStartPtr + tId);
+		map.reserve(elementsPtr + index[tId], count);
+
+		mapStartPtr[tId] = map;
+	}
+
+	template<int N>
+	void parallel_init_for_map(void* maps, void* elements, size_t ele_size, DArray<int>& index)
+	{
+		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
+		AT_Assign_Map<N> << <pDims, BLOCK_SIZE >> > (
+			maps,
+			elements,
+			ele_size,
+			index);
+		cuSynchronize();
+	}
+
+	template void parallel_init_for_map<1>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<2>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<3>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<4>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<5>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<6>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<7>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<8>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template void parallel_init_for_map<9>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<10>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<11>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<12>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<13>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<14>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<15>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<16>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template void parallel_init_for_map<17>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<18>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<19>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<20>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<21>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<22>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<23>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<24>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+
+	template void parallel_init_for_map<25>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<26>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<27>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<28>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<29>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<30>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<31>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template void parallel_init_for_map<32>(void* maps, void* elements, size_t ele_size, DArray<int>& index);
 }

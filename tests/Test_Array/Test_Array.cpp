@@ -15,6 +15,7 @@ TEST(Array, CPU)
 	cArr.pushBack(1);
 	cArr.pushBack(2);
 
+	if (cArr.size() == 2) std::cout << "it is ok here " << std::endl;
 	EXPECT_EQ(cArr.size(), 2);
 
 	DArray<int> gArr;
@@ -25,6 +26,7 @@ TEST(Array, CPU)
 	DArrayList<int> arrList;
 	arrList.resize(gArr);
 
+	if (arrList.elementSize() == 3) std::cout << "it is ok here??? " << std::endl;
 	EXPECT_EQ(arrList.elementSize(), 3);
 
 	DArrayList<int> constList;
@@ -76,7 +78,11 @@ TEST(ArrayList, Copy)
 	CArrayList<int> cArrList;
 	cArrList.assign(gArrList);
 
+	CArrayList<int> cArrList1;
+	cArrList1.assign(cArrList);
+
 	std::cout << "Device ArrayList: " << cArrList;
+	std::cout << "Device ArrayList: " << cArrList1;
 	std::cout << "Host ArrayList: " << gArrList;
 
 	auto iter = cArrList[0].begin();
