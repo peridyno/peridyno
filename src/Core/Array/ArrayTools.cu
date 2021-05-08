@@ -53,7 +53,7 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= index.size()) return;
 
-		List<SpaceHolder<N>>* listPtr = (List<SpaceHolder<N>>*)lists;
+		List<SpaceHolder<N>>* listStartPtr = (List<SpaceHolder<N>>*)lists;
 		SpaceHolder<N>* elementsPtr = (SpaceHolder<N>*)elements;
 
 		int count = tId == index.size() - 1 ? ele_size - index[index.size() - 1] : index[tId + 1] - index[tId];
@@ -61,14 +61,14 @@ namespace dyno
 		List<SpaceHolder<N>> list;
 		list.reserve(elementsPtr + index[tId], count);
 
-		listPtr[tId] = list;
+		listStartPtr[tId] = list;
 	}
 
 	template<int N>
 	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<int>& index)
 	{
 		uint pDims = cudaGridSize(index.size(), BLOCK_SIZE);
-		AT_Allocate<N> << <pDims, BLOCK_SIZE >> > (	
+		AT_Allocate<N> << <pDims, BLOCK_SIZE >> > (
 			lists,
 			elements,
 			ele_size,

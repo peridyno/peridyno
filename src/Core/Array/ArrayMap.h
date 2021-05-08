@@ -40,7 +40,7 @@ namespace dyno {
 			return m_maps[id];
 		}
 
-		inline const Map<int,ElementType>& operator [] (unsigned int id) const
+		inline Map<int,ElementType> operator [] (unsigned int id) const
 		{
 			return m_maps[id];
 		}
@@ -119,7 +119,7 @@ namespace dyno {
 			return m_maps[id];
 		}
 
-		GPU_FUNC inline const Map<int,ElementType>& operator [] (unsigned int id) const {
+		GPU_FUNC inline Map<int,ElementType> operator [] (unsigned int id) const {
 			return m_maps[id];
 		}
 

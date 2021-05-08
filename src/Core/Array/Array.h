@@ -58,7 +58,7 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		inline const T& operator [] (unsigned int id) const
+		inline T operator [] (unsigned int id) const
 		{
 			return m_data[id];
 		}
@@ -130,7 +130,7 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		GPU_FUNC inline const T& operator [] (unsigned int id) const {
+		GPU_FUNC inline T operator [] (unsigned int id) const {
 			return m_data[id];
 		}
 

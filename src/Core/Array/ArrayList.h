@@ -38,7 +38,7 @@ namespace dyno {
 			return m_lists[id];
 		}
 
-		inline const List<ElementType>& operator [] (unsigned int id) const
+		inline List<ElementType> operator [] (unsigned int id) const
 		{
 			return m_lists[id];
 		}
@@ -117,7 +117,7 @@ namespace dyno {
 			return m_lists[id];
 		}
 
-		GPU_FUNC inline const List<ElementType>& operator [] (unsigned int id) const {
+		GPU_FUNC inline List<ElementType> operator [] (unsigned int id) const {
 			return m_lists[id];
 		}
 

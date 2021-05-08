@@ -15,27 +15,24 @@ TEST(Array, CPU)
 	cArr.pushBack(1);
 	cArr.pushBack(2);
 
-	if (cArr.size() == 2) std::cout << "it is ok here " << std::endl;
 	EXPECT_EQ(cArr.size(), 2);
-
-	DArray<int> gArr;
-	gArr.resize(2);
-	
+	std::cout << cArr;
+	std::cout << "it is ok here??? " << std::endl;
+	DArray<int> gArr;	
 	gArr.assign(cArr);
-
-	DArrayList<int> arrList;
-	arrList.resize(gArr);
-
-	if (arrList.elementSize() == 3) std::cout << "it is ok here??? " << std::endl;
-	EXPECT_EQ(arrList.elementSize(), 3);
+	std::cout << "it is ok here??? " << std::endl;
+	EXPECT_EQ(gArr.size(), 2);
+	std::cout << gArr;
+	//DArrayList<int> arrList;
+	//arrList.resize(gArr);
+	std::cout << "it is ok here??? " << std::endl;
+	//if (arrList.elementSize() == 3) std::cout << "it is ok here??? " << std::endl;
+	//EXPECT_EQ(arrList.elementSize(), 3);
 
 	DArrayList<int> constList;
 	constList.resize(5, 2);
-
+	std::cout << "it is ok here??? " << std::endl;
 	EXPECT_EQ(constList.elementSize(), 10);
-
-	std::cout << cArr;
-	std::cout << gArr;
 }
 
 TEST(Array, Copy)
@@ -72,8 +69,9 @@ TEST(ArrayList, Copy)
 	vvec.push_back(vec1);
 	vvec.push_back(vec2);
 
-	DArrayList<int> gArrList;
+	DArrayList<int> gArrList,gArrList1;
 	gArrList.assign(vvec);
+	gArrList1.resize(gArrList);
 
 	CArrayList<int> cArrList;
 	cArrList.assign(gArrList);
