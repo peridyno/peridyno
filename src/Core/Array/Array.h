@@ -58,7 +58,7 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		inline T operator [] (unsigned int id) const
+		inline const T& operator [] (unsigned int id) const
 		{
 			return m_data[id];
 		}
@@ -130,14 +130,14 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		GPU_FUNC inline T operator [] (unsigned int id) const {
+		GPU_FUNC inline const T& operator [] (unsigned int id) const {
 			return m_data[id];
 		}
 
 		DYN_FUNC inline uint size() const { return m_totalNum; }
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
-		DYN_FUNC inline bool isEmpty() const { return m_data == NULL; }
+		DYN_FUNC inline bool isEmpty() const { return m_data == nullptr; }
 
 		void assign(const Array<T, DeviceType::GPU>& src);
 		void assign(const Array<T, DeviceType::CPU>& src);

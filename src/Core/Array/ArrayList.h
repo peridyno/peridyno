@@ -26,12 +26,7 @@ namespace dyno {
 	{
 	public:
 		ArrayList() {};
-		~ArrayList()
-		{
-			m_index.clear();
-			m_elements.clear();
-			m_lists.clear();
-		}
+		~ArrayList() { clear(); }
 
 		bool resize(uint num);
 
@@ -43,7 +38,7 @@ namespace dyno {
 			return m_lists[id];
 		}
 
-		inline List<ElementType> operator [] (unsigned int id) const
+		inline const List<ElementType>& operator [] (unsigned int id) const
 		{
 			return m_lists[id];
 		}
@@ -74,8 +69,8 @@ namespace dyno {
 		}
 
 		const CArray<int>& index() const { return m_index; }
-		const CArray<ElementType> elements() const { return m_elements; }
-		const CArray<List<ElementType>> lists() const { return m_lists; }
+		const CArray<ElementType>& elements() const { return m_elements; }
+		const CArray<List<ElementType>>& lists() const { return m_lists; }
 
 		/*!
 		 *	\brief	To avoid erroneous shallow copy.
@@ -122,7 +117,7 @@ namespace dyno {
 			return m_lists[id];
 		}
 
-		GPU_FUNC inline List<ElementType> operator [] (unsigned int id) const {
+		GPU_FUNC inline const List<ElementType>& operator [] (unsigned int id) const {
 			return m_lists[id];
 		}
 
@@ -146,8 +141,8 @@ namespace dyno {
 		}
 
 		const DArray<int>& index() const { return m_index; }
-		const DArray<ElementType> elements() const { return m_elements; }
-		const DArray<List<ElementType>> lists() const { return m_lists; }
+		const DArray<ElementType>& elements() const { return m_elements; }
+		const DArray<List<ElementType>>& lists() const { return m_lists; }
 
 		/*!
 		*	\brief	To avoid erroneous shallow copy.

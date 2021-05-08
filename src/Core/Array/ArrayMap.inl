@@ -142,15 +142,9 @@ namespace dyno
 		m_index.assign(hIndex);
 		m_elements.assign(hElements);
 
-		CArray<Map<int,ElementType>> maps;
-		maps.resize(indNum);
-
-		for (int i = 0; i < src.size(); i++)
-		{
-			maps.pushBack(src[i]);
-		}
-		m_maps.assign(maps);
+		m_maps.assign(src);
 	}
+
 
 	template<class ElementType>
 	bool ArrayMap<ElementType, DeviceType::CPU>::resize(uint num)

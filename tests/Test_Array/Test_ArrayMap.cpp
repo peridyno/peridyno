@@ -17,23 +17,34 @@ TEST(Map, CPU)
 	if (mymap.empty()) std::cout << "this map is empty" << std::endl;
 
 	Pair<int, double>* pairp=mymap.insert(pair1);
-	std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	EXPECT_EQ(pairp->first, 1);
+	EXPECT_EQ(pairp->second, 1.1);
 
 	pairp = mymap.insert(pair4);
-	std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	EXPECT_EQ(pairp->first, 4);
+	EXPECT_EQ(pairp->second, 4.4);
 
 	pairp = mymap.insert(pair2);
-	std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	EXPECT_EQ(pairp->first, 2);
+	EXPECT_EQ(pairp->second, 2.2);
+
+	pairp = mymap.insert(pair2);
+	EXPECT_EQ(pairp->first, 2);
+	EXPECT_EQ(pairp->second, 4.4);
 
 	pairp = mymap.begin();
-	std::cout << pairp->first << " ; " << pairp->second << std::endl;
-	std::cout << (pairp+1)->first << " ; " << (pairp+1)->second << std::endl;
-	std::cout << (pairp+2)->first << " ; " << (pairp+2)->second << std::endl;
+	EXPECT_EQ(pairp->first, 1);
+	EXPECT_EQ(pairp->second, 1.1);
+	EXPECT_EQ((pairp+1)->first, 2);
+	EXPECT_EQ((pairp+1)->second, 4.4);
+	EXPECT_EQ((pairp+2)->first, 4);
+	EXPECT_EQ((pairp+2)->second, 4.4);
 
 	pairp = mymap.find(2);
-	if (pairp != nullptr) std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	EXPECT_EQ(pairp->first, 2);
+	EXPECT_EQ(pairp->second, 4.4);
 	pairp = mymap.find(3);
-	if (pairp != nullptr) std::cout << pairp->first << " ; " << pairp->second << std::endl;
+	EXPECT_EQ(pairp, nullptr);
 
 	free(pairptr);
 }
