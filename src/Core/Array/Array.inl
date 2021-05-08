@@ -4,7 +4,7 @@ namespace dyno
 	void Array<T, DeviceType::GPU>::resize(const uint n)
 	{
 		//		assert(n >= 1);
-		if (NULL != m_data) clear();
+		if (m_data!=nullptr) clear();
 
 		m_totalNum = n;
 		cuSafeCall(cudaMalloc(&m_data, n * sizeof(T)));
