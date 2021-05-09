@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "STL/Map.h"
 #include "STL/Pair.h"
+#include "Array/ArrayMap.h"
 #include <vector>
 
 using namespace dyno;
@@ -9,30 +10,31 @@ TEST(Map, CPU)
 {
 	Pair<int, double> pair1(1, 1.1), pair2(2, 2.2), pair3(3, 3.3), pair4(4, 4.4);
 
-	Map<int, double> mymap;
-	if (mymap.empty()) std::cout << "this map is empty" << std::endl;
+	Map<int, double> mymap1,mymap2;
+	if (mymap1.empty()) std::cout << "this map is empty" << std::endl;
 
-	Pair<int, double>* pairptr = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
-	mymap.reserve(pairptr, 4);
-	if (mymap.empty()) std::cout << "this map is empty" << std::endl;
+	Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
+	Pair<int, double>* pairptr2 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
+	mymap1.reserve(pairptr1, 4);
+	mymap2.reserve(pairptr2, 4);
 
-	Pair<int, double>* pairp=mymap.insert(pair1);
+	Pair<int, double>* pairp=mymap1.insert(pair1);
 	EXPECT_EQ(pairp->first, 1);
 	EXPECT_EQ(pairp->second, 1.1);
 
-	pairp = mymap.insert(pair4);
+	pairp = mymap1.insert(pair4);
 	EXPECT_EQ(pairp->first, 4);
 	EXPECT_EQ(pairp->second, 4.4);
 
-	pairp = mymap.insert(pair2);
+	pairp = mymap1.insert(pair2);
 	EXPECT_EQ(pairp->first, 2);
 	EXPECT_EQ(pairp->second, 2.2);
 
-	pairp = mymap.insert(pair2);
+	pairp = mymap1.insert(pair2);
 	EXPECT_EQ(pairp->first, 2);
 	EXPECT_EQ(pairp->second, 4.4);
 
-	pairp = mymap.begin();
+	pairp = mymap1.begin();
 	EXPECT_EQ(pairp->first, 1);
 	EXPECT_EQ(pairp->second, 1.1);
 	EXPECT_EQ((pairp+1)->first, 2);
@@ -40,42 +42,37 @@ TEST(Map, CPU)
 	EXPECT_EQ((pairp+2)->first, 4);
 	EXPECT_EQ((pairp+2)->second, 4.4);
 
-	pairp = mymap.find(2);
+	pairp = mymap1.find(2);
 	EXPECT_EQ(pairp->first, 2);
 	EXPECT_EQ(pairp->second, 4.4);
-	pairp = mymap.find(3);
+	pairp = mymap1.find(3);
 	EXPECT_EQ(pairp, nullptr);
 
-	free(pairptr);
+	pairp = mymap2.insert(pair2);
+	pairp = mymap2.insert(pair3);
+	pairp = mymap2.insert(pair4);
+	pairp = mymap2.insert(pair1);
+
+	std::vector<Map<int, double>> mapvec;
+	mapvec.push_back(mymap1);
+	mapvec.push_back(mymap2);
+
+	DArrayMap<double> dArrMap;
+	dArrMap.assign(mapvec);
+
+	CArrayMap<double> cArrMap;
+	cArrMap.assign(dArrMap);
+
+	std::cout << "Device ArrayMap: " << dArrMap;
+	std::cout << "Host ArrayMap: " << cArrMap;
+
+	EXPECT_EQ(cArrMap[0].size(), 3);
+	EXPECT_EQ(cArrMap[0].size(), 4);
+
+	free(pairptr1);
+	free(pairptr2);
 }
 
-//TEST(ArrayList, Copy)
-//{
-//	std::vector<std::vector<int>> vvec;
-//	std::vector<int> vec1;
-//	std::vector<int> vec2;
-//
-//	vec1.push_back(1);
-//	vec1.push_back(2);
-//
-//	vec2.push_back(2);
-//	vvec.push_back(vec1);
-//	vvec.push_back(vec2);
-//
-//	DArrayList<int> gArrList;
-//	gArrList.assign(vvec);
-//
-//	CArrayList<int> cArrList;
-//	cArrList.assign(gArrList);
-//
-//	std::cout << "Device ArrayList: " << cArrList;
-//	std::cout << "Host ArrayList: " << gArrList;
-//
-//	auto iter = cArrList[0].begin();
-//	EXPECT_EQ(*iter, 1);
-//
-//	iter++;
-//	EXPECT_EQ(*iter, 2);
-//}
+
 
 

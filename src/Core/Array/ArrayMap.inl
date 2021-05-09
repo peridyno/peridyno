@@ -39,7 +39,7 @@ namespace dyno
 
 		m_elements.resize(total_num);
 
-		parallel_allocate_for_map<sizeof(ElementType)>(m_Maps.begin(), m_elements.begin(), m_elements.size(), m_index);
+		parallel_allocate_for_map<sizeof(ElementType)>(m_maps.begin(), m_elements.begin(), m_elements.size(), m_index);
 
 		return true;
 	}

@@ -3,6 +3,7 @@
 #include "Array/Array2D.h"
 #include "Array/Array3D.h"
 #include "Array/ArrayList.h"
+#include "Array/ArrayMap.h"
 #include <thrust/sort.h>
 #include <vector>
 
@@ -23,16 +24,26 @@ TEST(Array, CPU)
 
 	EXPECT_EQ(gArr.size(), 2);
 	std::cout << gArr;
-	//DArrayList<int> arrList;
-	//arrList.resize(gArr);
 
-	//if (arrList.elementSize() == 3) std::cout << "it is ok here??? " << std::endl;
-	//EXPECT_EQ(arrList.elementSize(), 3);
+	DArrayList<int> arrList;
+	arrList.resize(gArr);
+
+	EXPECT_EQ(arrList.elementSize(), 3);
+
+	DArrayMap<int> arrMap;
+	arrMap.resize(gArr);
+
+	EXPECT_EQ(arrMap.elementSize(), 3);
 
 	DArrayList<int> constList;
 	constList.resize(5, 2);
 
 	EXPECT_EQ(constList.elementSize(), 10);
+
+	DArrayMap<int> constMap;
+	constMap.resize(5, 3);
+
+	EXPECT_EQ(constMap.elementSize(), 15);
 }
 
 TEST(Array, Copy)
