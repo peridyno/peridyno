@@ -17,6 +17,7 @@
 #include <vector>
 #include <iostream>
 #include "STL/Map.h"
+#include "Array/Array.h"
 
 namespace dyno {
 	template<class ElementType, DeviceType deviceType> class ArrayMap;
@@ -40,7 +41,7 @@ namespace dyno {
 			return m_maps[id];
 		}
 
-		inline Map<int,ElementType> operator [] (unsigned int id) const
+		inline const Map<int,ElementType>& operator [] (unsigned int id) const
 		{
 			return m_maps[id];
 		}
@@ -57,9 +58,9 @@ namespace dyno {
 		friend std::ostream& operator<<(std::ostream &out, const ArrayMap<ElementType, DeviceType::CPU>& aMap)
 		{
 			out << std::endl;
-			for (unsigned int i = 0; i < aMap.size(); i++)
+			for (int i = 0; i < aMap.size(); i++)
 			{
-				Map<int,ElementType>& mmap = aMap[i];
+				Map<int,ElementType> mmap = aMap[i];
 				out << "Map " << i << " (" << mmap.size() << "):";
 				for (auto it = mmap.begin(); it != mmap.end(); it++)
 				{
@@ -119,7 +120,7 @@ namespace dyno {
 			return m_maps[id];
 		}
 
-		GPU_FUNC inline Map<int,ElementType> operator [] (unsigned int id) const {
+		GPU_FUNC inline const Map<int,ElementType>& operator [] (unsigned int id) const {
 			return m_maps[id];
 		}
 
@@ -131,7 +132,7 @@ namespace dyno {
 
 		void assign(const ArrayMap<ElementType, DeviceType::GPU>& src);
 		void assign(const ArrayMap<ElementType, DeviceType::CPU>& src);
-		void assign(const std::vector<Map<int,ElementType>>& src);
+		void assign(std::vector<Map<int,ElementType>>& src);
 
 		friend std::ostream& operator<<(std::ostream &out, const ArrayMap<ElementType, DeviceType::GPU>& aMap)
 		{

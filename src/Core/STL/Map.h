@@ -19,20 +19,17 @@ namespace dyno
 
 		DYN_FUNC Map();
 
-		DYN_FUNC void reserve(Pair<MKey, T>* buf, int maxSize) {
+		DYN_FUNC void reserve(Pair<MKey, T>* buf, int maxSize)
+		{
 			m_pairs = buf;
 			m_maxSize = maxSize;
 		}
 		
 		DYN_FUNC iterator find(MKey key);
 
-		DYN_FUNC inline iterator begin() {
-			return m_pairs;
-		};
+		DYN_FUNC inline iterator begin() { return m_pairs; }
 
-		DYN_FUNC inline iterator end() {
-			return m_pairs + m_size;
-		}
+		DYN_FUNC inline iterator end() { return m_pairs + m_size; }
 
 		DYN_FUNC void clear();
 
@@ -40,6 +37,15 @@ namespace dyno
 
 		DYN_FUNC iterator insert(Pair<MKey, T> pair);
 		DYN_FUNC bool empty();
+
+		DYN_FUNC Pair<MKey, T>& operator [] (unsigned int id) {
+			return m_pairs[id];
+		}
+
+		DYN_FUNC const Pair<MKey, T>& operator [] (unsigned int id) const {
+			return m_pairs[id];
+		}
+
 
 		DYN_FUNC int erase(const T val);
 		DYN_FUNC void erase(iterator val_ptr);

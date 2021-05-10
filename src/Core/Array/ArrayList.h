@@ -38,7 +38,7 @@ namespace dyno {
 			return m_lists[id];
 		}
 
-		inline List<ElementType> operator [] (unsigned int id) const
+		inline const List<ElementType>& operator [] (unsigned int id) const
 		{
 			return m_lists[id];
 		}
@@ -57,7 +57,7 @@ namespace dyno {
 			out << std::endl;
 			for (int i = 0; i < aList.size(); i++)
 			{
-				List<ElementType>& lst = aList[i];
+				List<ElementType> lst = aList[i];
 				out << "List " << i << " (" << lst.size() << "):";
 				for (auto it = lst.begin(); it != lst.end(); it++)
 				{
@@ -117,7 +117,7 @@ namespace dyno {
 			return m_lists[id];
 		}
 
-		GPU_FUNC inline List<ElementType> operator [] (unsigned int id) const {
+		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id) const {
 			return m_lists[id];
 		}
 

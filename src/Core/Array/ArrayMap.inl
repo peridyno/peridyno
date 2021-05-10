@@ -1,7 +1,7 @@
 #include "ArrayTools.h"
 #include "Algorithm/Scan.h"
 #include "Algorithm/Reduction.h"
-//#include "Array/Array.h"
+#include "Array/Array.h"
 
 namespace dyno
 {
@@ -118,7 +118,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	void ArrayMap<ElementType, DeviceType::GPU>::assign(const std::vector<Map<int,ElementType>>& src)
+	void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<Map<int,ElementType>>& src)
 	{
 		size_t indNum = src.size();
 		CArray<int> hIndex(indNum);
@@ -135,7 +135,7 @@ namespace dyno
 			{
 				for (int j = 0; j < src[i].size(); j++)
 				{
-					hElements.pushBack(src[i].m_pairs[j]);
+					hElements.pushBack(src[i][j]);
 				}
 			}
 		}

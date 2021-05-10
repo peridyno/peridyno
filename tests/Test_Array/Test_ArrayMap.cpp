@@ -63,11 +63,12 @@ TEST(Map, CPU)
 	CArrayMap<double> cArrMap;
 	cArrMap.assign(dArrMap);
 
-	std::cout << "Device ArrayMap: " << dArrMap;
 	std::cout << "Host ArrayMap: " << cArrMap;
+	std::cout << "Device ArrayMap: " << dArrMap;
+
 
 	EXPECT_EQ(cArrMap[0].size(), 3);
-	EXPECT_EQ(cArrMap[0].size(), 4);
+	EXPECT_EQ(cArrMap[1].size(), 4);
 
 	free(pairptr1);
 	free(pairptr2);
