@@ -81,7 +81,7 @@ namespace dyno
 
 		Attribute att = atts[pId];
 
-		if (att.IsDynamic())
+		if (att.isDynamic())
 		{
 			vel[pId] += dt * (forceDensity[pId] + gravity);
 		}
@@ -145,7 +145,7 @@ namespace dyno
 
 		Attribute att_i = att[pId];
 
-		if (!att_i.IsFixed())
+		if (!att_i.isFixed())
 		{
 			pos[pId] += dt * vel[pId];
 		}

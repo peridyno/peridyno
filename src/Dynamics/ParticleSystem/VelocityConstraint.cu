@@ -56,7 +56,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Coord pos_i = position[pId];
 		Real alpha_i = 0.0f;
@@ -109,7 +109,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Real invAlpha = 1.0f / alpha[pId];
 
@@ -129,7 +129,7 @@ namespace dyno
 			if (r > EPSILON)
 			{
 				Real wrr_ij = invAlpha*kernWRR(r, smoothingLength);
-				if (att_j.IsDynamic())
+				if (att_j.isDynamic())
 				{
 					diaA_total += wrr_ij;
 					diaA_fluid += wrr_ij;
@@ -159,7 +159,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Coord pos_i = position[pId];
 		Real invAlpha_i = 1.0f / alpha[pId];
@@ -172,7 +172,7 @@ namespace dyno
 			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
-			if (r > EPSILON && attribute[j].IsDynamic())
+			if (r > EPSILON && attribute[j].isDynamic())
 			{
 				Real wrr_ij = invAlpha_i*kernWRR(r, smoothingLength);
 				A_i += wrr_ij;
@@ -199,7 +199,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Real total_weight = 0.0f;
 		Coord div_i = Coord(0);
@@ -216,14 +216,14 @@ namespace dyno
 			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
-			if (r > EPSILON && attribute[j].IsDynamic())
+			if (r > EPSILON && attribute[j].isDynamic())
 			{
 				float weight = -kernSmooth.Gradient(r, smoothingLength);
 				total_weight += weight;
 				div_i += (position[j] - pos_i)*(weight / r);
 			}
 
-			if (!attribute[j].IsDynamic())
+			if (!attribute[j].isDynamic())
 			{
 				bNearWall = true;
 			}
@@ -274,7 +274,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Coord pos_i = position[pId];
 		Coord vel_i = velocity[pId];
@@ -288,12 +288,12 @@ namespace dyno
 			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
-			if (r > EPSILON && attribute[j].IsFluid())
+			if (r > EPSILON && attribute[j].isFluid())
 			{
 				Real wr_ij = kernWR(r, smoothingLength);
 				Coord g = -invAlpha_i*(pos_i - position[j])*wr_ij*(1.0f / r);
 
-				if (attribute[j].IsDynamic())
+				if (attribute[j].isDynamic())
 				{
 					Real div_ij = 0.5f*(vel_i - velocity[j]).dot(g)*restDensity / dt;	//dv_ij = 1 / alpha_i * (v_i-v_j).*(x_i-x_j) / r * (w / r);
 					atomicAdd(&divergence[pId], div_ij);
@@ -346,7 +346,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= density.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Coord pos_i = position[pId];
 		if (density[pId] > restDensity)
@@ -372,7 +372,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
-		if (!attribute[pId].IsDynamic()) return;
+		if (!attribute[pId].isDynamic()) return;
 
 		Coord pos_i = position[pId];
 		Real invAlpha_i = 1.0f / alpha[pId];
@@ -387,7 +387,7 @@ namespace dyno
 			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();
 
-			if (r > EPSILON && attribute[j].IsDynamic())
+			if (r > EPSILON && attribute[j].isDynamic())
 			{
 				Real wrr_ij = kernWRR(r, smoothingLength);
 				Real a_ij = -invAlpha_i*wrr_ij;
@@ -418,7 +418,7 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
 
-		if (attribute[pId].IsDynamic())
+		if (attribute[pId].isDynamic())
 		{
 			Coord pos_i = position[pId];
 			Real p_i = pressure[pId];
@@ -454,7 +454,7 @@ namespace dyno
 					Coord dvij_sym = 0.5f*(pressure[pId] + pressure[j])*corrected;
 
 					//Calculate asymmetric pressure force
-					if (att_j.IsDynamic())
+					if (att_j.isDynamic())
 					{
 						if (bSurface[pId])
 						{
