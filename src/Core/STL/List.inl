@@ -28,7 +28,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	DYN_FUNC T* List<T>::atomicInsert(T val)
+	GPU_FUNC T* List<T>::atomicInsert(T val)
 	{
 		int index = atomicAdd(&m_size, 1);
 		m_startLoc[index] = val;

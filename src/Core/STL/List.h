@@ -48,7 +48,7 @@ namespace dyno
 		DYN_FUNC uint size();
 
 		DYN_FUNC inline iterator insert(T val);
-		DYN_FUNC inline iterator atomicInsert(T val);
+		GPU_FUNC inline iterator atomicInsert(T val);
 
 		DYN_FUNC inline T front();
 		DYN_FUNC inline T back();
