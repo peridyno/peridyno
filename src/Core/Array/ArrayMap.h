@@ -27,7 +27,7 @@ namespace dyno {
 	{
 	public:
 		ArrayMap() {};
-		~ArrayMap() { clear(); }
+		~ArrayMap() {}
 
 		void clear();
 
@@ -128,7 +128,7 @@ namespace dyno {
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return m_index.size() == 0; }
 
-		void release();
+		void clear();
 
 		void assign(const ArrayMap<ElementType, DeviceType::GPU>& src);
 		void assign(const ArrayMap<ElementType, DeviceType::CPU>& src);

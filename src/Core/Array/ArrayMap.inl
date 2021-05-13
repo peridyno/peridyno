@@ -6,7 +6,7 @@
 namespace dyno
 {
 	template<class ElementType>
-	void ArrayMap<ElementType, DeviceType::GPU>::release()
+	void ArrayMap<ElementType, DeviceType::GPU>::clear()
 	{
 		m_index.clear();
 		m_elements.clear();

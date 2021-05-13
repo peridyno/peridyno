@@ -26,7 +26,7 @@ namespace dyno {
 	{
 	public:
 		ArrayList() {};
-		~ArrayList() { clear(); }
+		~ArrayList() {}
 
 		bool resize(uint num);
 
@@ -125,7 +125,7 @@ namespace dyno {
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return m_index.size() == 0; }
 
-		void release();
+		void clear();
 
 		void assign(const ArrayList<ElementType, DeviceType::GPU>& src);
 		void assign(const ArrayList<ElementType, DeviceType::CPU>& src);

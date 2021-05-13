@@ -37,7 +37,7 @@ namespace dyno {
 			m_data.resize((size_t)num);
 		}
 
-		~Array() { clear(); };
+		~Array() {};
 
 		void resize(uint n);
 
