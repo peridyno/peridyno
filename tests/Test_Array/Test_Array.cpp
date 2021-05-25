@@ -3,6 +3,7 @@
 #include "Array/Array2D.h"
 #include "Array/Array3D.h"
 #include "Array/ArrayList.h"
+#include "Array/ArrayMap.h"
 #include <thrust/sort.h>
 #include <vector>
 
@@ -16,24 +17,33 @@ TEST(Array, CPU)
 	cArr.pushBack(2);
 
 	EXPECT_EQ(cArr.size(), 2);
+	std::cout << cArr;
 
-	DArray<int> gArr;
-	gArr.resize(2);
-	
+	DArray<int> gArr;	
 	gArr.assign(cArr);
+
+	EXPECT_EQ(gArr.size(), 2);
+	std::cout << gArr;
 
 	DArrayList<int> arrList;
 	arrList.resize(gArr);
 
 	EXPECT_EQ(arrList.elementSize(), 3);
 
+	DArrayMap<int> arrMap;
+	arrMap.resize(gArr);
+
+	EXPECT_EQ(arrMap.elementSize(), 3);
+
 	DArrayList<int> constList;
 	constList.resize(5, 2);
 
 	EXPECT_EQ(constList.elementSize(), 10);
 
-	std::cout << cArr;
-	std::cout << gArr;
+	DArrayMap<int> constMap;
+	constMap.resize(5, 3);
+
+	EXPECT_EQ(constMap.elementSize(), 15);
 }
 
 TEST(Array, Copy)
@@ -76,7 +86,11 @@ TEST(ArrayList, Copy)
 	CArrayList<int> cArrList;
 	cArrList.assign(gArrList);
 
+	CArrayList<int> cArrList1;
+	cArrList1.assign(cArrList);
+
 	std::cout << "Device ArrayList: " << cArrList;
+	std::cout << "Device ArrayList: " << cArrList1;
 	std::cout << "Host ArrayList: " << gArrList;
 
 	auto iter = cArrList[0].begin();

@@ -1,6 +1,8 @@
 #include "Algorithm/SimpleMath.h"
 #include <glm/glm.hpp>
 
+#include "STLMacro.h"
+
 namespace dyno
 {
 	template <typename MKey, typename T>
@@ -11,43 +13,54 @@ namespace dyno
 	template <typename MKey, typename T>
 	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::find(MKey key)
 	{
-		return leftBound(key, data, m_size);
+		int ind=leftBound(Pair<MKey,T> (key,T()), m_pairs, m_size);
+
+		return (ind >= m_size || m_pairs[ind] != Pair<MKey, T>(key, T())) ? nullptr : (m_pairs + ind);
 	}
 
 
 	template <typename MKey, typename T>
 	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::insert(Pair<MKey, T> pair)
 	{
-		int t = leftBound(val, data, m_size);
+		//return nullptr if the data buffer is full
+		if (m_size >= m_maxSize) return nullptr;
 
-		if (t == INVALID) return nullptr;
-		if (data[t] == val) return data + t;
+		//return the index of the first element that is equel to or biger than val
+		int t = leftBound(pair, m_pairs, m_size);
 
-		for (int j = m_size; j > t; t--)
+		//if the element is equel to the val, return the sum of the old element and the new element
+		if (m_pairs[t] == pair)
 		{
-			data[j] = data[j - 1];
+			m_pairs[t].second += pair.second;
+			return m_pairs + t;
 		}
-		data[t] = val;
+		//insert val to t location
+		for (int j = m_size; j > t; j--)
+		{
+			m_pairs[j] = m_pairs[j - 1];
+		}
+		m_pairs[t] = pair;
+		m_size++;
 
-		return data + t;
+		return m_pairs + t;
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC void Map<T>::clear()
+	DYN_FUNC void Map<MKey, T>::clear()
 	{
 		m_size = 0;
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC int Map<T>::size()
+	DYN_FUNC int Map<MKey, T>::size()
 	{
 		return m_size;
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC bool Map<T>::empty()
+	DYN_FUNC bool Map<MKey, T>::empty()
 	{
-		return data == nullptr;
+		return m_pairs == nullptr;
 	}
 }
 

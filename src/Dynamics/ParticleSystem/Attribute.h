@@ -12,7 +12,7 @@ namespace dyno
 	public:
 		DYN_FUNC Attribute() { 
 			m_tag = 0; 
-			this->SetDynamic();
+			this->setDynamic();
 		}
 
 		DYN_FUNC ~Attribute() {};
@@ -39,41 +39,32 @@ namespace dyno
 			OBJECTID_MASK = 0x000000FF
 		};
 
-		enum PartID
-		{
-			PART_MASK = 0x0000FF00
-		};
+		DYN_FUNC inline void setMaterialType(MaterialType type) { m_tag = ((~MATERIAL_MASK) & m_tag) | type; }
+		DYN_FUNC inline void setKinematicType(KinematicType type) { m_tag = ((~KINEMATIC_MASK) & m_tag) | type; }
+		DYN_FUNC inline void setObjectId(unsigned id) { m_tag = ((~OBJECTID_MASK) & m_tag) | id; }
 
-		DYN_FUNC inline void SetMaterialType(MaterialType type) { m_tag = ((~MATERIAL_MASK) & m_tag) | type; }
-		DYN_FUNC inline void SetKinematicType(KinematicType type) { m_tag = ((~KINEMATIC_MASK) & m_tag) | type; }
-		DYN_FUNC inline void SetObjectId(unsigned id) { m_tag = ((~OBJECTID_MASK) & m_tag) | id; }
+		DYN_FUNC inline MaterialType materialType() { return (MaterialType)(m_tag&MATERIAL_MASK); }
+		DYN_FUNC inline KinematicType kinematicType() { return (KinematicType)(m_tag&KINEMATIC_MASK); }
 
-		DYN_FUNC inline MaterialType GetMaterialType() { return (MaterialType)(m_tag&MATERIAL_MASK); }
-		DYN_FUNC inline KinematicType GetKinematicType() { return (KinematicType)(m_tag&KINEMATIC_MASK); }
+		DYN_FUNC inline bool isFluid() { return MaterialType::MATERIAL_FLUID == materialType(); }
+		DYN_FUNC inline bool isRigid() { return MaterialType::MATERIAL_RIGID == materialType(); }
+		DYN_FUNC inline bool isElastic() { return MaterialType::MATERIAL_ELASTIC == materialType(); }
+		DYN_FUNC inline bool isPlastic() { return MaterialType::MATERIAL_PLASTIC == materialType(); }
 
-		DYN_FUNC inline bool IsFluid() { return MaterialType::MATERIAL_FLUID == GetMaterialType(); }
-		DYN_FUNC inline bool IsRigid() { return MaterialType::MATERIAL_RIGID == GetMaterialType(); }
-		DYN_FUNC inline bool IsElastic() { return MaterialType::MATERIAL_ELASTIC == GetMaterialType(); }
-		DYN_FUNC inline bool IsPlastic() { return MaterialType::MATERIAL_PLASTIC == GetMaterialType(); }
+		DYN_FUNC inline void setFluid() { setMaterialType(MaterialType::MATERIAL_FLUID); }
+		DYN_FUNC inline void setRigid() { setMaterialType(MaterialType::MATERIAL_RIGID); }
+		DYN_FUNC inline void setElastic() { setMaterialType(MaterialType::MATERIAL_ELASTIC); }
+		DYN_FUNC inline void setPlastic() { setMaterialType(MaterialType::MATERIAL_PLASTIC); }
 
-		DYN_FUNC inline void SetFluid() { SetMaterialType(MaterialType::MATERIAL_FLUID); }
-		DYN_FUNC inline void SetRigid() { SetMaterialType(MaterialType::MATERIAL_RIGID); }
-		DYN_FUNC inline void SetElastic() { SetMaterialType(MaterialType::MATERIAL_ELASTIC); }
-		DYN_FUNC inline void SetPlastic() { SetMaterialType(MaterialType::MATERIAL_PLASTIC); }
+		DYN_FUNC inline bool isFixed() { return KinematicType::KINEMATIC_FIXED == kinematicType(); }
+		DYN_FUNC inline bool isPassive() { return KinematicType::KINEMATIC_PASSIVE == kinematicType(); }
+		DYN_FUNC inline bool isDynamic() { return KinematicType::KINEMATIC_POSITIVE == kinematicType(); }
 
-		DYN_FUNC inline bool IsFixed() { return KinematicType::KINEMATIC_FIXED == GetKinematicType(); }
-		DYN_FUNC inline bool IsPassive() { return KinematicType::KINEMATIC_PASSIVE == GetKinematicType(); }
-		DYN_FUNC inline bool IsDynamic() { return KinematicType::KINEMATIC_POSITIVE == GetKinematicType(); }
+		DYN_FUNC inline void setFixed() { setKinematicType(KinematicType::KINEMATIC_FIXED); }
+		DYN_FUNC inline void setPassive() { setKinematicType(KinematicType::KINEMATIC_PASSIVE); }
+		DYN_FUNC inline void setDynamic() { setKinematicType(KinematicType::KINEMATIC_POSITIVE); }
 
-		DYN_FUNC inline void SetFixed() { SetKinematicType(KinematicType::KINEMATIC_FIXED); }
-		DYN_FUNC inline void SetPassive() { SetKinematicType(KinematicType::KINEMATIC_PASSIVE); }
-		DYN_FUNC inline void SetDynamic() { SetKinematicType(KinematicType::KINEMATIC_POSITIVE); }
-
-		DYN_FUNC inline void setObjectId(unsigned id) { m_tag |= id; }
-		DYN_FUNC inline unsigned getObjectId() { return (unsigned)(m_tag&OBJECTID_MASK); }
-
-		DYN_FUNC inline void setPartId(unsigned id) { m_tag |= id << 8; }
-		DYN_FUNC inline unsigned getPartId() { return (unsigned)(m_tag&PART_MASK) >> 8; }
+		DYN_FUNC inline unsigned objectId() { return (unsigned)(m_tag&OBJECTID_MASK); }
 
 	private:
 		uint m_tag;

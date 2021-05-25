@@ -162,8 +162,9 @@ namespace dyno
 	{
 		assert(num > 0);
 
+		m_index.resize(num);
 		m_lists.resize(num);
-
+		
 		return true;
 	}
 
@@ -176,18 +177,14 @@ namespace dyno
 		}
 
 		m_lists.clear();
+		m_index.clear();
+		m_elements.clear();
 	}
 
 	template<class ElementType>
 	uint ArrayList<ElementType, DeviceType::CPU>::elementSize()
 	{
-		uint totalSize = 0;
-		for (int i = 0; i < m_lists.size(); i++)
-		{
-			totalSize += m_lists[i].size();
-		}
-
-		return totalSize;
+		return m_elements.size();
 	}
 
 	template<class ElementType>
@@ -196,12 +193,12 @@ namespace dyno
 		m_index.assign(src.index());
 		m_elements.assign(src.elements());
 
-		m_lists.assign(src.size());
+		m_lists.assign(src.lists());
 
 		//redirect the element address
 		for (int i = 0; i < src.size(); i++)
 		{
-			m_lists[i].reverse(m_elements.begin() + m_index[i], m_lists[i].size());
+			m_lists[i].reserve(m_elements.begin() + m_index[i], m_lists[i].size());
 		}
 	}
 

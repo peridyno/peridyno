@@ -18,6 +18,9 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC T* List<T>::insert(T val)
 	{
+		//return nullptr if the data buffer is full
+		if (m_size >= m_maxSize) return nullptr;
+
 		m_startLoc[m_size] = val;
 		m_size++;
 
@@ -25,7 +28,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	DYN_FUNC T* List<T>::atomicInsert(T val)
+	GPU_FUNC T* List<T>::atomicInsert(T val)
 	{
 		int index = atomicAdd(&m_size, 1);
 		m_startLoc[index] = val;
@@ -50,7 +53,7 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC bool List<T>::empty()
 	{
-		return m_size == 0;
+		return m_startLoc == nullptr;
 	}
 
 	template <typename T>
