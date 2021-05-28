@@ -77,6 +77,7 @@ if(PERIDYNO_TESTS)
 endif()
 
 add_subdirectory(external/glfw-3.3.0)
+add_subdirectory(external/glad-4.6)
 
 option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
 

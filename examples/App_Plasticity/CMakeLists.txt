@@ -16,7 +16,7 @@ target_link_libraries(${PROJECT_NAME}
 	Core 
 	Framework 
 	IO 
-	Graphics 
+	RenderEngine 
 	ParticleSystem 
 	RigidBody 
 	GlfwGUI)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include "PointRenderModule.h"
 #include "Topology/PointSet.h"
 #include "Vector.h"

@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include <iostream>
 #include <math.h>
 

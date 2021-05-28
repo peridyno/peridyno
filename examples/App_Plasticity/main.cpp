@@ -10,8 +10,7 @@
 #include "ParticleSystem/ElasticityModule.h"
 #include "RigidBody/RigidBody.h"
 
-#include "SurfaceMeshRender.h"
-#include "PointRenderModule.h"
+#include "module/SurfaceRender.h"
 
 using namespace std;
 using namespace dyno;
@@ -44,9 +43,8 @@ void CreateScene()
 	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
-	auto ptRender = std::make_shared<PointRenderModule>();
-	ptRender->setColor(Vec3f(0, 1, 1));
-	child3->addVisualModule(ptRender);
+	auto ptRender = std::make_shared<SurfaceRenderer>();
+	ptRender->setColor(glm::vec3(0, 1, 1));
 
 	child3->setVisible(false);
 	child3->setMass(1.0);
@@ -55,18 +53,14 @@ void CreateScene()
 	child3->scale(0.05);
 	child3->translate(Vec3f(0.3, 0.2, 0.5));
 	child3->getSurfaceNode()->setVisible(true);
+	child3->getSurfaceNode()->addVisualModule(ptRender);
 
-	auto sRender = std::make_shared<SurfaceMeshRender>();
+	auto sRender = std::make_shared<SurfaceRenderer>();
 	child3->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(Vec3f(1, 1, 1));
-
+	sRender->setColor(glm::vec3(1, 1, 1));
 
 	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);
-	
-	auto ptRender2 = std::make_shared<PointRenderModule>();
-	ptRender2->setColor(Vec3f(0, 1, 1));
-	child2->addVisualModule(ptRender2);
 
 	child2->setVisible(false);
 	child2->setMass(1.0);
@@ -75,10 +69,7 @@ void CreateScene()
 	child2->scale(0.05);
 	child2->translate(Vec3f(0.5, 0.2, 0.5));
 	child2->getElasticitySolver()->setIterationNumber(10);
-
-	auto sRender2 = std::make_shared<SurfaceMeshRender>();
-	child2->getSurfaceNode()->addVisualModule(sRender2);
-	sRender2->setColor(Vec3f(1, 1, 0));
+	child2->getSurfaceNode()->addVisualModule(sRender);
 }
 
 

@@ -7,6 +7,7 @@
 
 #include "Image_IO/image_io.h"
 #include "Framework/SceneGraph.h"
+#include "Framework/Log.h"
 
 
 namespace dyno 
@@ -82,7 +83,13 @@ namespace dyno
 		
 
 		glfwMakeContextCurrent(mWindow);
-		gladLoadGL(glfwGetProcAddress);
+		
+		if (!gladLoadGL()) {
+			Log::sendMessage(Log::Error, "Failed to load GLAD!");
+			//SPDLOG_CRITICAL("Failed to load GLAD!");
+			exit(-1);
+		}
+
 		glfwSwapInterval(1); // Enable vsync
 
 		glfwSetWindowUserPointer(mWindow, this);
