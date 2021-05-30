@@ -9,6 +9,9 @@
 #include "Framework/SceneGraph.h"
 #include "Framework/Log.h"
 
+#include "../RenderEngine/RenderEngine.h"
+#include "../RenderEngine/RenderTarget.h"
+#include "../RenderEngine/RenderParams.h"
 
 namespace dyno 
 {
@@ -33,6 +36,11 @@ namespace dyno
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+
+		//
+		delete mRenderEngine;
+		delete mRenderTarget;
+		delete mRenderParams;
 
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
@@ -140,6 +148,22 @@ namespace dyno
 
 		mCamera.zoom(3.0f);
 		mCamera.setGL(0.01f, 3.0f, (float)getWidth(), (float)getHeight());
+
+		// Jian: initialize rendering engine
+		mRenderEngine = new RenderEngine();
+		mRenderTarget = new RenderTarget();
+		mRenderParams = new RenderParams();
+
+		mRenderEngine->initialize();
+		mRenderTarget->initialize();
+
+		mRenderTarget->resize(width, height);
+		// set the viewport
+		mRenderParams->viewport.x = 0;
+		mRenderParams->viewport.y = 0;
+		mRenderParams->viewport.w = width;
+		mRenderParams->viewport.h = height;
+		mRenderParams->camera.aspect = (float)width / height;
 	}
 
 	void GlfwApp::mainLoop()
@@ -304,10 +328,38 @@ namespace dyno
 
 	void GlfwApp::drawScene(void)
 	{
-		glUseProgram(0);
-		drawBackground();
+		if (mUseNewRenderEngine)
+		{
+			Vec3f view, up, right;
+			mCamera.getCoordSystem(view, up, right);
+			Vec3f eye = mCamera.getEyePos();
 
-		SceneGraph::getInstance().draw();
+			// draw with RenderEngine
+			mRenderParams->camera.eye = { eye[0], eye[1], eye[2] };
+			mRenderParams->camera.target = mRenderParams->camera.eye - glm::vec3(view[0], view[1], view[2]);
+			mRenderParams->camera.up = glm::vec3(up[0], up[1], up[2]);
+
+			mRenderParams->camera.y_fov = mCamera.mFov;
+			mRenderParams->camera.aspect = (float)mCamera.mViewportWidth / mCamera.mViewportHeight;
+			
+			// set the viewport
+			mRenderParams->viewport.x = 0;
+			mRenderParams->viewport.y = 0;
+			mRenderParams->viewport.w = mCamera.mViewportWidth;
+			mRenderParams->viewport.h = mCamera.mViewportHeight;
+
+			mRenderTarget->resize(mCamera.mViewportWidth, mCamera.mViewportHeight);
+
+			mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
+			mRenderTarget->blitTo(0);
+		}
+		else
+		{
+			glUseProgram(0);
+			drawBackground();
+
+			SceneGraph::getInstance().draw();
+		}
 	}
 
 	void GlfwApp::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

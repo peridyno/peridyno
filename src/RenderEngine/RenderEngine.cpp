@@ -247,7 +247,7 @@ namespace dyno
 		mShadowMapUBO.load(&shadowUniformBuffer, sizeof(shadowUniformBuffer));
 
 		// light properties, convert into camera space
-		Light light = rparams.light;
+		RenderParams::Light light = rparams.light;
 		light.mainLightDirection = glm::vec3(sceneUniformBuffer.view * glm::vec4(light.mainLightDirection, 0));
 		light.mainLightVP = shadowUniformBuffer.projection * shadowUniformBuffer.view * glm::inverse(sceneUniformBuffer.view);
 		mLightUBO.load(&light, sizeof(light));
@@ -321,33 +321,33 @@ namespace dyno
 
 	void RenderEngine::renderModule(GLVisualModule* m, unsigned int subroutine)
 	{
-// 		if (auto* p = dynamic_cast<SurfaceRenderer*>(m))
-// 		{
-// 			mSurfaceProgram.use();
-// 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-// 			m->paintGL();
-// 		}
-// 		else if (auto* p = dynamic_cast<PointRenderer*>(m))
-// 		{
-// 			mPointProgram.use();
-// 			mPointProgram.setFloat("uPointSize", p->getPointSize());
-// 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-// 			m->paintGL();
-// 		}
-// 		else if (auto* p = dynamic_cast<HeightFieldRender*>(m))
-// 		{
-// 			mSurfaceProgram.use();
-// 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-// 			m->paintGL();
-// 		}
-// 		else if (auto* p = dynamic_cast<FluidRenderer*>(m))
-// 		{
-// 			// skip...
-// 		}
-// 		else
-// 		{
-// 			SPDLOG_ERROR("Unimplemented render module!");
-// 		}
+ 		if (auto* p = dynamic_cast<SurfaceRenderer*>(m))
+ 		{
+ 			mSurfaceProgram.use();
+ 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+ 			m->paintGL();
+ 		}
+ 		else if (auto* p = dynamic_cast<PointRenderer*>(m))
+ 		{
+ 			mPointProgram.use();
+ 			mPointProgram.setFloat("uPointSize", p->getPointSize());
+ 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+ 			m->paintGL();
+ 		}
+ 		//else if (auto* p = dynamic_cast<HeightFieldRender*>(m))
+ 		//{
+ 		//	mSurfaceProgram.use();
+ 		//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+ 		//	m->paintGL();
+ 		//}
+ 		else if (auto* p = dynamic_cast<FluidRenderer*>(m))
+ 		{
+ 			// skip...
+ 		}
+ 		else
+ 		{
+ 			//SPDLOG_ERROR("Unimplemented render module!");
+ 		}
 	}
 
 	void RenderEngine::updateShadowMap(const RenderParams& rparams)

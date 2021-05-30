@@ -13,6 +13,10 @@
 
 namespace dyno {
 
+	class RenderEngine;
+	class RenderTarget;
+	class RenderParams;
+
 	enum ButtonState
 	{
 		GLFW_DOWN = 0,
@@ -122,6 +126,13 @@ namespace dyno {
 		Vec4f mClearColor = Vec4f(0.45f, 0.55f, 0.60f, 1.00f);
 
 		Camera mCamera;
+
+		RenderEngine* mRenderEngine;
+		RenderTarget* mRenderTarget;
+		RenderParams* mRenderParams;
+
+	public:
+		bool			mUseNewRenderEngine = false;
     };
 
 }
