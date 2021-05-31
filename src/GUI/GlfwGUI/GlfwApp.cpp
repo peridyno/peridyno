@@ -163,7 +163,6 @@ namespace dyno
 		mRenderParams->viewport.y = 0;
 		mRenderParams->viewport.w = width;
 		mRenderParams->viewport.h = height;
-		mRenderParams->camera.aspect = (float)width / height;
 	}
 
 	void GlfwApp::mainLoop()
@@ -330,17 +329,9 @@ namespace dyno
 	{
 		if (mUseNewRenderEngine)
 		{
-			Vec3f view, up, right;
-			mCamera.getCoordSystem(view, up, right);
-			Vec3f eye = mCamera.getEyePos();
-
-			// draw with RenderEngine
-			mRenderParams->camera.eye = { eye[0], eye[1], eye[2] };
-			mRenderParams->camera.target = mRenderParams->camera.eye - glm::vec3(view[0], view[1], view[2]);
-			mRenderParams->camera.up = glm::vec3(up[0], up[1], up[2]);
-
-			mRenderParams->camera.y_fov = mCamera.mFov;
-			mRenderParams->camera.aspect = (float)mCamera.mViewportWidth / mCamera.mViewportHeight;
+			// simply dump transform matrices...
+			glGetFloatv(GL_PROJECTION_MATRIX, &mRenderParams->proj[0][0]);
+			glGetFloatv(GL_MODELVIEW_MATRIX, &mRenderParams->view[0][0]);
 			
 			// set the viewport
 			mRenderParams->viewport.x = 0;

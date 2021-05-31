@@ -65,6 +65,9 @@ namespace dyno
 		GLShaderProgram mFluidFilterProgram;
 		GLShaderProgram mFluidBlendProgram;
 
+		// background
+		GLShaderProgram mBackgroundProgram;
+
 		GLMesh			mScreenQuad;
 
 		ShadowMap* mShadowMap;

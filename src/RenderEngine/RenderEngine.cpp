@@ -103,6 +103,9 @@ namespace dyno
 		mFluidProgram = CreateShaderProgram("fluid.vert", "fluid.frag");
 		mFluidFilterProgram = CreateShaderProgram("screen.vert", "fluid.filter.frag");
 		mFluidBlendProgram = CreateShaderProgram("screen.vert", "fluid.final.frag");
+
+		// background
+		mBackgroundProgram = CreateShaderProgram("screen.vert", "background.frag");
 	}
 
 
@@ -201,17 +204,19 @@ namespace dyno
 		} sceneUniformBuffer, shadowUniformBuffer;
 
 		sceneUniformBuffer.model = shadowUniformBuffer.model = glm::mat4(1);
+		sceneUniformBuffer.view = rparams.view;
+		sceneUniformBuffer.projection = rparams.proj;
 		// basic camera transform...
-		sceneUniformBuffer.view = glm::lookAt(
-			rparams.camera.eye,
-			rparams.camera.target,
-			rparams.camera.up);
-		// set projection matrix
-		sceneUniformBuffer.projection = glm::perspective(
-			rparams.camera.y_fov,
-			rparams.camera.aspect,
-			rparams.camera.z_min,
-			rparams.camera.z_max);
+		//sceneUniformBuffer.view = glm::lookAt(
+		//	rparams.camera.eye,
+		//	rparams.camera.target,
+		//	rparams.camera.up);
+		//// set projection matrix
+		//sceneUniformBuffer.projection = glm::perspective(
+		//	rparams.camera.y_fov,
+		//	rparams.camera.aspect,
+		//	rparams.camera.z_min,
+		//	rparams.camera.z_max);
 		sceneUniformBuffer.width = target->width;
 		sceneUniformBuffer.height = target->height;
 
@@ -399,8 +404,14 @@ namespace dyno
 	{
 		mShadowMap->bindShadowTex();
 		target->drawColorTex();
-		glClearColor(rparams.bgColor.r, rparams.bgColor.g, rparams.bgColor.b, 1.f);
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		mBackgroundProgram.use();
+		mBackgroundProgram.setVec3("uColor0", rparams.bgColor0);
+		mBackgroundProgram.setVec3("uColor1", rparams.bgColor1);
+		mScreenQuad.draw();
+
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		// draw a plane
 		if (rparams.showGround)
