@@ -65,7 +65,7 @@ union q3FeaturePair
 	i32 key;
 };
 
-struct q3Transform
+struct Transform
 {
 	vec3 position;
 	mat3 rotation;
@@ -75,26 +75,13 @@ struct q3Contact
 {
 	vec3 position;			// World coordinate of contact
 	r32 penetration;			// Depth of penetration from collision
-	r32 normalImpulse;			// Accumulated normal impulse
-	r32 tangentImpulse[2];	// Accumulated friction impulse
-	r32 bias;					// Restitution + baumgarte
-	r32 normalMass;				// Normal constraint mass
-	r32 tangentMass[2];		// Tangent constraint mass
-	q3FeaturePair fp;			// Features on A and B for this contact
-	u8 warmStarted;				// Used for debug rendering
 };
 
 struct q3Manifold
 {
 	vec3 normal;				// From A to B
-	vec3 tangentVectors[2];	// Tangent vectors
 	q3Contact contacts[8];
 	i32 contactCount;
-
-	q3Manifold* next;
-	q3Manifold* prev;
-
-	bool sensor;
 };
 
 struct Box
@@ -118,12 +105,12 @@ inline const vec3 q3Mul(const mat3& r, const vec3& v)
 	return r * v;
 }
 
-inline const vec3 q3Mul(const q3Transform& tx, const vec3& v)
+inline const vec3 q3Mul(const Transform& tx, const vec3& v)
 {
 	return vec3(tx.rotation * v + tx.position);
 }
 
-inline const vec3 q3MulT(const q3Transform& tx, const vec3& v)
+inline const vec3 q3MulT(const Transform& tx, const vec3& v)
 {
 	return transpose(tx.rotation) * (v - tx.position);
 }
@@ -190,7 +177,7 @@ struct q3ClipVertex
 };
 
 //--------------------------------------------------------------------------------------------------
-void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const q3Transform& rtx, vec3 n, i32 axis, u8* out, mat3* basis, vec3* e)
+void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 n, i32 axis, u8* out, mat3* basis, vec3* e)
 {
 	n = q3MulT(rtx.rotation, n);
 
@@ -294,7 +281,7 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const q3Transform& rtx, vec
 }
 
 //--------------------------------------------------------------------------------------------------
-void q3ComputeIncidentFace(const q3Transform& itx, const vec3& e, vec3 n, q3ClipVertex* out)
+void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVertex* out)
 {
 	n = -q3MulT(itx.rotation, n);
 	vec3 absN = abs(n);
@@ -334,7 +321,6 @@ void q3ComputeIncidentFace(const q3Transform& itx, const vec3& e, vec3 n, q3Clip
 			out[3].f.outI = 5;
 		}
 	}
-
 	else if (absN.y > absN.x && absN.y > absN.z)
 	{
 		if (n.y > r32(0.0))
@@ -607,32 +593,12 @@ void q3SupportEdge(const mat3& rot, const vec3& trans, const vec3& e, vec3 n, ve
 // http://www.randygaul.net/2014/05/22/deriving-obb-to-obb-intersection-sat/
 // https://box2d.googlecode.com/files/GDC2007_ErinCatto.zip
 // https://box2d.googlecode.com/files/Box2D_Lite.zip
-void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
+void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 {
 	vec3 v = box1.center - box0.center;
 
 	vec3 eA = box0.halfLength;
 	vec3 eB = box1.halfLength;
-
-	//Compute A's basis  
-	vec3 VAx = quat_rotate(box0.rot, vec3(1, 0, 0));
-	vec3 VAy = quat_rotate(box0.rot, vec3(0, 1, 0));
-	vec3 VAz = quat_rotate(box0.rot, vec3(0, 0, 1));
-
-	vec3 VA[3];
-	VA[0] = VAx;
-	VA[1] = VAy;
-	VA[2] = VAz;
-
-	//Compute B's basis  
-	vec3 VBx = quat_rotate(box1.rot, vec3(1, 0, 0));
-	vec3 VBy = quat_rotate(box1.rot, vec3(0, 1, 0));
-	vec3 VBz = quat_rotate(box1.rot, vec3(0, 0, 1));
-
-	vec3 VB[3];
-	VB[0] = VBx;
-	VB[1] = VBy;
-	VB[2] = VBz;
 
 	mat3 rotA = quat_to_mat3(box0.rot);
 	mat3 rotB = quat_to_mat3(box1.rot);
@@ -679,32 +645,32 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 
 	// a's x axis
 	s = abs(t.x) - (box0.halfLength.x + dot(absC[0], box1.halfLength));
-	if (q3TrackFaceAxis(&aAxis, 0, s, &aMax, rotAT[0], &nA))
+	if (q3TrackFaceAxis(&aAxis, 0, s, &aMax, rotA[0], &nA))
 		return;
 
 	// a's y axis
 	s = abs(t.y) - (box0.halfLength.y + dot(absC[1], box1.halfLength));
-	if (q3TrackFaceAxis(&aAxis, 1, s, &aMax, rotAT[1], &nA))
+	if (q3TrackFaceAxis(&aAxis, 1, s, &aMax, rotA[1], &nA))
 		return;
 
 	// a's z axis
 	s = abs(t.z) - (box0.halfLength.z + dot(absC[2], box1.halfLength));
-	if (q3TrackFaceAxis(&aAxis, 2, s, &aMax, rotAT[2], &nA))
+	if (q3TrackFaceAxis(&aAxis, 2, s, &aMax, rotA[2], &nA))
 		return;
 
 	// b's x axis
 	s = abs(dot(t, cT[0])) - (box1.halfLength.x + dot(absCT[0], box0.halfLength));
-	if (q3TrackFaceAxis(&bAxis, 3, s, &bMax, rotBT[0], &nB))
+	if (q3TrackFaceAxis(&bAxis, 3, s, &bMax, rotB[0], &nB))
 		return;
 
 	// b's y axis
 	s = abs(dot(t, cT[1])) - (box1.halfLength.y + dot(absCT[1], box0.halfLength));
-	if (q3TrackFaceAxis(&bAxis, 4, s, &bMax, rotBT[1], &nB))
+	if (q3TrackFaceAxis(&bAxis, 4, s, &bMax, rotB[1], &nB))
 		return;
 
 	// b's z axis
 	s = abs(dot(t, cT[2])) - (box1.halfLength.z + dot(absCT[2], box0.halfLength));
-	if (q3TrackFaceAxis(&bAxis, 5, s, &bMax, rotBT[2], &nB))
+	if (q3TrackFaceAxis(&bAxis, 5, s, &bMax, rotB[2], &nB))
 		return;
 
 	if (!parallel)
@@ -790,7 +756,6 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 		sMax = eMax;
 		n = nE;
 	}
-
 	else
 	{
 		if (kRelTol * bMax > aMax + kAbsTol)
@@ -799,7 +764,6 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 			sMax = bMax;
 			n = nB;
 		}
-
 		else
 		{
 			axis = aAxis;
@@ -814,8 +778,8 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 	if (axis == ~0)
 		return;
 
-	q3Transform atx;
-	q3Transform btx;
+	Transform atx;
+	Transform btx;
 	atx.position = box0.center;
 	atx.rotation = rotA;
 
@@ -824,8 +788,8 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 
 	if (axis < 6)
 	{
-		q3Transform rtx;
-		q3Transform itx;
+		Transform rtx;
+		Transform itx;
 		vec3 eR;
 		vec3 eI;
 		bool flip;
@@ -865,22 +829,13 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 
 		if (outNum)
 		{
-			m->contactCount = outNum;
-			m->normal = flip ? -n : n;
+			m.contactCount = outNum;
+			m.normal = flip ? -n : n;
 
 			for (i32 i = 0; i < outNum; ++i)
 			{
-				q3Contact* c = m->contacts + i;
+				q3Contact* c = m.contacts + i;
 
-				q3FeaturePair pair = out[i].f;
-
-				if (flip)
-				{
-					std::swap(pair.inI, pair.inR);
-					std::swap(pair.outI, pair.outR);
-				}
-
-				c->fp = out[i].f;
 				c->position = out[i].v;
 				c->penetration = depths[i];
 			}
@@ -901,15 +856,11 @@ void q3BoxtoBox(q3Manifold* m, Box box0, Box box1)
 		vec3 CA, CB;
 		q3EdgesContact(&CA, &CB, PA, QA, PB, QB);
 
-		m->normal = n;
-		m->contactCount = 1;
+		m.normal = n;
+		m.contactCount = 1;
 
-		q3Contact* c = m->contacts;
-		q3FeaturePair pair;
-		pair.key = axis;
-		c->fp = pair;
-		c->penetration = sMax;
-		c->position = (CA + CB) * r32(0.5);
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = (CA + CB) * r32(0.5);
 	}
 }
 
@@ -927,7 +878,40 @@ TEST(OBB, collision)
 	b1.rot = vec4(0, 0, 0, 1);
 
 	q3Manifold manifold;
-	q3BoxtoBox(&manifold, b0, b1);
+	q3BoxtoBox(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 4, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[1].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[2].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[3].penetration + 0.5f) < REAL_EPSILON, true);
 
-	EXPECT_EQ(manifold.contactCount > 0, true);
+	b1.center = vec3(1.5, 0, 0);
+	b1.halfLength = vec3(1, 1, 1);
+	b1.rot = vec4(0, 0, 0, 1);
+
+	q3BoxtoBox(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 4, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[1].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[2].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[3].penetration + 0.5f) < REAL_EPSILON, true);
+
+	b1.center = vec3(0, 0, 1.5);
+	b1.halfLength = vec3(1, 1, 1);
+	b1.rot = vec4(0, 0, 0, 1);
+
+	q3BoxtoBox(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 4, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[1].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[2].penetration + 0.5f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[3].penetration + 0.5f) < REAL_EPSILON, true);
+
+	Quat1f quat = Quat1f(0.2f, Vec3f(0.2, 0.5, 1));
+	b1.center = vec3(0, 1.5, 0);
+	b1.halfLength = vec3(1, 1, 1);
+	b1.rot = vec4(quat.x, quat.y, quat.z, quat.w);
+	q3BoxtoBox(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 1, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.731658161f) < REAL_EPSILON, true);
 }
