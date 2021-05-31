@@ -14,7 +14,7 @@ typedef signed int i32;
 typedef float r32;
 typedef unsigned char u8;
 
-#define Q3_R32_MAX 1000000;
+#define R32_MAX 1000000;
 
 vec3 quat_rotate(vec4 quat, vec3 v)
 {
@@ -52,37 +52,18 @@ mat3 quat_to_mat3(vec4 quat)
 		xz - yw, yz + xw, 1.0 - xx - yy);
 }
 
-union q3FeaturePair
-{
-	struct
-	{
-		u8 inR;
-		u8 outR;
-		u8 inI;
-		u8 outI;
-	};
-
-	i32 key;
-};
-
-struct Transform
-{
-	vec3 position;
-	mat3 rotation;
-};
-
-struct q3Contact
-{
-	vec3 position;			// World coordinate of contact
-	r32 penetration;			// Depth of penetration from collision
-};
-
-struct q3Manifold
-{
-	vec3 normal;				// From A to B
-	q3Contact contacts[8];
-	i32 contactCount;
-};
+// union q3FeaturePair
+// {
+// 	struct
+// 	{
+// 		u8 inR;
+// 		u8 outR;
+// 		u8 inI;
+// 		u8 outI;
+// 	};
+// 
+// 	i32 key;
+// };
 
 struct Box
 {
@@ -99,54 +80,68 @@ struct Box
 	vec4 rot;
 };
 
-//--------------------------------------------------------------------------------------------------
-inline const vec3 q3Mul(const mat3& r, const vec3& v)
-{
-	return r * v;
-}
 
-inline const vec3 q3Mul(const Transform& tx, const vec3& v)
+struct Transform
+{
+	vec3 position;
+	mat3 rotation;
+};
+
+struct Contact
+{
+	vec3 position;			// World coordinate of contact
+	r32 penetration;			// Depth of penetration from collision
+};
+
+struct Manifold
+{
+	vec3 normal;				// From A to B
+	Contact contacts[8];
+	i32 contactCount;
+};
+
+
+inline const vec3 mul(const Transform& tx, const vec3& v)
 {
 	return vec3(tx.rotation * v + tx.position);
 }
 
-inline const vec3 q3MulT(const Transform& tx, const vec3& v)
+inline const vec3 mul(const mat3& rot, const vec3& trans, const vec3& v)
+{
+	return vec3(rot * v + trans);
+}
+
+inline const vec3 mul_t(const Transform& tx, const vec3& v)
 {
 	return transpose(tx.rotation) * (v - tx.position);
 }
 
 //--------------------------------------------------------------------------------------------------
-inline const vec3 q3MulT(const mat3& r, const vec3& v)
+inline const vec3 mul_t(const mat3& r, const vec3& v)
 {
 	return transpose(r) * v;
 }
 
-inline const vec3 q3Mul(const mat3& rot, const vec3& trans, const vec3& v)
-{
-	return vec3(rot * v + trans);
-}
-
-
 //--------------------------------------------------------------------------------------------------
 // qBoxtoBox
 //--------------------------------------------------------------------------------------------------
-inline bool q3TrackFaceAxis(i32* axis, i32 n, r32 s, r32* sMax, const vec3& normal, vec3* axisNormal)
+inline bool trackFaceAxis(i32& axis, r32& sMax, vec3& axisNormal, i32 n, r32 s, const vec3& normal)
 {
 	if (s > r32(0.0))
 		return true;
 
-	if (s > *sMax)
+	if (s > sMax)
 	{
-		*sMax = s;
-		*axis = n;
-		*axisNormal = normal;
+		sMax = s;
+		axis = n;
+		axisNormal = normal;
 	}
 
 	return false;
 }
 
 //--------------------------------------------------------------------------------------------------
-inline bool q3TrackEdgeAxis(i32* axis, i32 n, r32 s, r32* sMax, const vec3& normal, vec3* axisNormal)
+inline bool trackEdgeAxis(i32& axis, r32& sMax, vec3& axisNormal, i32 n, r32 s, const vec3& normal)
 {
 	if (s > r32(0.0))
 		return true;
@@ -154,37 +149,32 @@ inline bool q3TrackEdgeAxis(i32* axis, i32 n, r32 s, r32* sMax, const vec3& norm
 	r32 l = r32(1.0) / length(normal);
 	s *= l;
 
-	if (s > *sMax)
+	if (s > sMax)
 	{
-		*sMax = s;
-		*axis = n;
-		*axisNormal = normal * l;
+		sMax = s;
+		axis = n;
+		axisNormal = normal * l;
 	}
 
 	return false;
 }
 
 //--------------------------------------------------------------------------------------------------
-struct q3ClipVertex
+struct ClipVertex
 {
-	q3ClipVertex()
-	{
-		f.key = ~0;
-	}
-
 	vec3 v;
-	q3FeaturePair f;
+	//q3FeaturePair f;
 };
 
 //--------------------------------------------------------------------------------------------------
-void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 n, i32 axis, u8* out, mat3* basis, vec3* e)
+void computeReferenceEdgesAndBasis(u8* out, mat3* basis, vec3* e, const vec3& eR, const Transform& rtx, vec3 n, i32 axis)
 {
-	n = q3MulT(rtx.rotation, n);
+	n = mul_t(rtx.rotation, n);
 
 	if (axis >= 3)
 		axis -= 3;
 
-	mat3 rT = rtx.rotation;
+	mat3 rot_t = rtx.rotation;
 	mat3 outB;
 
 	switch (axis)
@@ -199,9 +189,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 
 			*e = vec3(eR.y, eR.z, eR.x);
 			//basis->SetRows(rtx.rotation.ey, rtx.rotation.ez, rtx.rotation.ex);
-			outB[0] = rT[1];
-			outB[1] = rT[2];
-			outB[2] = rT[0];
+			outB[0] = rot_t[1];
+			outB[1] = rot_t[2];
+			outB[2] = rot_t[0];
 		}
 		else
 		{
@@ -212,9 +202,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 
 			*e = vec3(eR.z, eR.y, eR.x);
 			//basis->SetRows(rtx.rotation.ez, rtx.rotation.ey, -rtx.rotation.ex);
-			outB[0] = rT[2];
-			outB[1] = rT[1];
-			outB[2] = -rT[0];
+			outB[0] = rot_t[2];
+			outB[1] = rot_t[1];
+			outB[2] = -rot_t[0];
 		}
 		break;
 
@@ -228,9 +218,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 
 			*e = vec3(eR.z, eR.x, eR.y);
 			//basis->SetRows(rtx.rotation.ez, rtx.rotation.ex, rtx.rotation.ey);
-			outB[0] = rT[2];
-			outB[1] = rT[0];
-			outB[2] = rT[1];
+			outB[0] = rot_t[2];
+			outB[1] = rot_t[0];
+			outB[2] = rot_t[1];
 		}
 		else
 		{
@@ -241,9 +231,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 
 			*e = vec3(eR.z, eR.x, eR.y);
 			//basis->SetRows(rtx.rotation.ez, -rtx.rotation.ex, -rtx.rotation.ey);
-			outB[0] = rT[2];
-			outB[1] = -rT[0];
-			outB[2] = -rT[1];
+			outB[0] = rot_t[2];
+			outB[1] = -rot_t[0];
+			outB[2] = -rot_t[1];
 		}
 		break;
 
@@ -257,9 +247,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 
 			*e = vec3(eR.y, eR.x, eR.z);
 			//basis->SetRows(-rtx.rotation.ey, rtx.rotation.ex, rtx.rotation.ez);
-			outB[0] = -rT[1];
-			outB[1] = rT[0];
-			outB[2] = rT[2];
+			outB[0] = -rot_t[1];
+			outB[1] = rot_t[0];
+			outB[2] = rot_t[2];
 		}
 		else
 		{
@@ -270,9 +260,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 
 			*e = vec3(eR.y, eR.x, eR.z);
 			//basis->SetRows(-rtx.rotation.ey, -rtx.rotation.ex, -rtx.rotation.ez);
-			outB[0] = -rT[1];
-			outB[1] = -rT[0];
-			outB[2] = -rT[2];
+			outB[0] = -rot_t[1];
+			outB[1] = -rot_t[0];
+			outB[2] = -rot_t[2];
 		}
 		break;
 	}
@@ -281,9 +271,9 @@ void q3ComputeReferenceEdgesAndBasis(const vec3& eR, const Transform& rtx, vec3 
 }
 
 //--------------------------------------------------------------------------------------------------
-void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVertex* out)
+void computeIncidentFace(ClipVertex* out, const Transform& itx, const vec3& e, vec3 n)
 {
-	n = -q3MulT(itx.rotation, n);
+	n = -mul_t(itx.rotation, n);
 	vec3 absN = abs(n);
 
 	if (absN.x > absN.y && absN.x > absN.z)
@@ -295,14 +285,14 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 			out[2].v = vec3(e.x, -e.y, e.z);
 			out[3].v = vec3(e.x, -e.y, -e.z);
 
-			out[0].f.inI = 9;
-			out[0].f.outI = 1;
-			out[1].f.inI = 1;
-			out[1].f.outI = 8;
-			out[2].f.inI = 8;
-			out[2].f.outI = 7;
-			out[3].f.inI = 7;
-			out[3].f.outI = 9;
+// 			out[0].f.inI = 9;
+// 			out[0].f.outI = 1;
+// 			out[1].f.inI = 1;
+// 			out[1].f.outI = 8;
+// 			out[2].f.inI = 8;
+// 			out[2].f.outI = 7;
+// 			out[3].f.inI = 7;
+// 			out[3].f.outI = 9;
 		}
 		else
 		{
@@ -311,14 +301,14 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 			out[2].v = vec3(-e.x, e.y, -e.z);
 			out[3].v = vec3(-e.x, -e.y, -e.z);
 
-			out[0].f.inI = 5;
-			out[0].f.outI = 11;
-			out[1].f.inI = 11;
-			out[1].f.outI = 3;
-			out[2].f.inI = 3;
-			out[2].f.outI = 10;
-			out[3].f.inI = 10;
-			out[3].f.outI = 5;
+// 			out[0].f.inI = 5;
+// 			out[0].f.outI = 11;
+// 			out[1].f.inI = 11;
+// 			out[1].f.outI = 3;
+// 			out[2].f.inI = 3;
+// 			out[2].f.outI = 10;
+// 			out[3].f.inI = 10;
+// 			out[3].f.outI = 5;
 		}
 	}
 	else if (absN.y > absN.x && absN.y > absN.z)
@@ -330,14 +320,14 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 			out[2].v = vec3(e.x, e.y, -e.z);
 			out[3].v = vec3(-e.x, e.y, -e.z);
 
-			out[0].f.inI = 3;
-			out[0].f.outI = 0;
-			out[1].f.inI = 0;
-			out[1].f.outI = 1;
-			out[2].f.inI = 1;
-			out[2].f.outI = 2;
-			out[3].f.inI = 2;
-			out[3].f.outI = 3;
+// 			out[0].f.inI = 3;
+// 			out[0].f.outI = 0;
+// 			out[1].f.inI = 0;
+// 			out[1].f.outI = 1;
+// 			out[2].f.inI = 1;
+// 			out[2].f.outI = 2;
+// 			out[3].f.inI = 2;
+// 			out[3].f.outI = 3;
 		}
 		else
 		{
@@ -345,18 +335,17 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 			out[1].v = vec3(-e.x, -e.y, e.z);
 			out[2].v = vec3(-e.x, -e.y, -e.z);
 			out[3].v = vec3(e.x, -e.y, -e.z);
-
-			out[0].f.inI = 7;
-			out[0].f.outI = 4;
-			out[1].f.inI = 4;
-			out[1].f.outI = 5;
-			out[2].f.inI = 5;
-			out[2].f.outI = 6;
-			out[3].f.inI = 5;
-			out[3].f.outI = 6;
+// 
+// 			out[0].f.inI = 7;
+// 			out[0].f.outI = 4;
+// 			out[1].f.inI = 4;
+// 			out[1].f.outI = 5;
+// 			out[2].f.inI = 5;
+// 			out[2].f.outI = 6;
+// 			out[3].f.inI = 5;
+// 			out[3].f.outI = 6;
 		}
 	}
-
 	else
 	{
 		if (n.z > r32(0.0))
@@ -365,17 +354,16 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 			out[1].v = vec3(-e.x, -e.y, e.z);
 			out[2].v = vec3(e.x, -e.y, e.z);
 			out[3].v = vec3(e.x, e.y, e.z);
-
-			out[0].f.inI = 0;
-			out[0].f.outI = 11;
-			out[1].f.inI = 11;
-			out[1].f.outI = 4;
-			out[2].f.inI = 4;
-			out[2].f.outI = 8;
-			out[3].f.inI = 8;
-			out[3].f.outI = 0;
+// 
+// 			out[0].f.inI = 0;
+// 			out[0].f.outI = 11;
+// 			out[1].f.inI = 11;
+// 			out[1].f.outI = 4;
+// 			out[2].f.inI = 4;
+// 			out[2].f.outI = 8;
+// 			out[3].f.inI = 8;
+// 			out[3].f.outI = 0;
 		}
-
 		else
 		{
 			out[0].v = vec3(e.x, -e.y, -e.z);
@@ -383,19 +371,19 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 			out[2].v = vec3(-e.x, e.y, -e.z);
 			out[3].v = vec3(e.x, e.y, -e.z);
 
-			out[0].f.inI = 9;
-			out[0].f.outI = 6;
-			out[1].f.inI = 6;
-			out[1].f.outI = 10;
-			out[2].f.inI = 10;
-			out[2].f.outI = 2;
-			out[3].f.inI = 2;
-			out[3].f.outI = 9;
+// 			out[0].f.inI = 9;
+// 			out[0].f.outI = 6;
+// 			out[1].f.inI = 6;
+// 			out[1].f.outI = 10;
+// 			out[2].f.inI = 10;
+// 			out[2].f.outI = 2;
+// 			out[3].f.inI = 2;
+// 			out[3].f.outI = 9;
 		}
 	}
 
 	for (i32 i = 0; i < 4; ++i)
-		out[i].v = q3Mul(itx, out[i].v);
+		out[i].v = mul(itx, out[i].v);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -408,49 +396,47 @@ void q3ComputeIncidentFace(const Transform& itx, const vec3& e, vec3 n, q3ClipVe
 #define On( a ) \
 	((a) < r32( 0.005 ) && (a) > -r32( 0.005 ))
 
-i32 q3Orthographic(r32 sign, r32 e, i32 axis, i32 clipEdge, q3ClipVertex* in, i32 inCount, q3ClipVertex* out)
+i32 orthographic(r32 sign, r32 e, i32 axis, i32 clipEdge, ClipVertex* in, i32 inCount, ClipVertex* out)
 {
 	i32 outCount = 0;
-	q3ClipVertex a = in[inCount - 1];
+	ClipVertex a = in[inCount - 1];
 
 	for (i32 i = 0; i < inCount; ++i)
 	{
-		q3ClipVertex b = in[i];
+		ClipVertex b = in[i];
 
 		r32 da = sign * a.v[axis] - e;
 		r32 db = sign * b.v[axis] - e;
 
-		q3ClipVertex cv;
+		ClipVertex cv;
 
 		// B
 		if (((InFront(da) && InFront(db)) || On(da) || On(db)))
 		{
-			assert(outCount < 8);
+			//assert(outCount < 8);
 			out[outCount++] = b;
 		}
-
 		// I
 		else if (InFront(da) && Behind(db))
 		{
-			cv.f = b.f;
+//			cv.f = b.f;
 			cv.v = a.v + (b.v - a.v) * (da / (da - db));
-			cv.f.outR = clipEdge;
-			cv.f.outI = 0;
-			assert(outCount < 8);
+// 			cv.f.outR = clipEdge;
+// 			cv.f.outI = 0;
+			//assert(outCount < 8);
 			out[outCount++] = cv;
 		}
-
 		// I, B
 		else if (Behind(da) && InFront(db))
 		{
-			cv.f = a.f;
+//			cv.f = a.f;
 			cv.v = a.v + (b.v - a.v) * (da / (da - db));
-			cv.f.inR = clipEdge;
-			cv.f.inI = 0;
-			assert(outCount < 8);
+// 			cv.f.inR = clipEdge;
+// 			cv.f.inI = 0;
+			//assert(outCount < 8);
 			out[outCount++] = cv;
 
-			assert(outCount < 8);
+			//assert(outCount < 8);
 			out[outCount++] = b;
 		}
 
@@ -463,32 +449,32 @@ i32 q3Orthographic(r32 sign, r32 e, i32 axis, i32 clipEdge, q3ClipVertex* in, i3
 //--------------------------------------------------------------------------------------------------
 // Resources (also see q3BoxtoBox's resources):
 // http://www.randygaul.net/2013/10/27/sutherland-hodgman-clipping/
-i32 q3Clip(const vec3& rPos, const vec3& e, u8* clipEdges, const mat3& basis, q3ClipVertex* incident, q3ClipVertex* outVerts, r32* outDepths)
+i32 clip(ClipVertex* outVerts, r32* outDepths, const vec3& rPos, const vec3& e, u8* clipEdges, const mat3& basis, ClipVertex* incident)
 {
 	i32 inCount = 4;
 	i32 outCount;
-	q3ClipVertex in[8];
-	q3ClipVertex out[8];
+	ClipVertex in[8];
+	ClipVertex out[8];
 
 	for (i32 i = 0; i < 4; ++i)
-		in[i].v = q3MulT(basis, incident[i].v - rPos);
+		in[i].v = mul_t(basis, incident[i].v - rPos);
 
-	outCount = q3Orthographic(r32(1.0), e.x, 0, clipEdges[0], in, inCount, out);
+	outCount = orthographic(r32(1.0), e.x, 0, clipEdges[0], in, inCount, out);
 
 	if (!outCount)
 		return 0;
 
-	inCount = q3Orthographic(r32(1.0), e.y, 1, clipEdges[1], out, outCount, in);
+	inCount = orthographic(r32(1.0), e.y, 1, clipEdges[1], out, outCount, in);
 
 	if (!inCount)
 		return 0;
 
-	outCount = q3Orthographic(r32(-1.0), e.x, 0, clipEdges[2], in, inCount, out);
+	outCount = orthographic(r32(-1.0), e.x, 0, clipEdges[2], in, inCount, out);
 
 	if (!outCount)
 		return 0;
 
-	inCount = q3Orthographic(r32(-1.0), e.y, 1, clipEdges[3], out, outCount, in);
+	inCount = orthographic(r32(-1.0), e.y, 1, clipEdges[3], out, outCount, in);
 
 	// Keep incident vertices behind the reference face
 	outCount = 0;
@@ -498,19 +484,19 @@ i32 q3Clip(const vec3& rPos, const vec3& e, u8* clipEdges, const mat3& basis, q3
 
 		if (d <= r32(0.0))
 		{
-			outVerts[outCount].v = q3Mul(basis, in[i].v) + rPos;
-			outVerts[outCount].f = in[i].f;
+			outVerts[outCount].v = basis * in[i].v + rPos;
+//			outVerts[outCount].f = in[i].f;
 			outDepths[outCount++] = d;
 		}
 	}
 
-	assert(outCount <= 8);
+	//assert(outCount <= 8);
 
 	return outCount;
 }
 
 //--------------------------------------------------------------------------------------------------
-inline void q3EdgesContact(vec3 *CA, vec3 *CB, const vec3& PA, const vec3& QA, const vec3& PB, const vec3& QB)
+inline void edgesContact(vec3& CA, vec3& CB, const vec3& PA, const vec3& QA, const vec3& PB, const vec3& QB)
 {
 	vec3 DA = QA - PA;
 	vec3 DB = QB - PB;
@@ -526,14 +512,14 @@ inline void q3EdgesContact(vec3 *CA, vec3 *CB, const vec3& PA, const vec3& QA, c
 	r32 TA = (b * f - c * e) / denom;
 	r32 TB = (b * TA + f) / e;
 
-	*CA = PA + DA * TA;
-	*CB = PB + DB * TB;
+	CA = PA + DA * TA;
+	CB = PB + DB * TB;
 }
 
 //--------------------------------------------------------------------------------------------------
-void q3SupportEdge(const mat3& rot, const vec3& trans, const vec3& e, vec3 n, vec3* aOut, vec3* bOut)
+void computeSupportEdge(vec3& aOut, vec3& bOut, const mat3& rot, const vec3& trans, const vec3& e, vec3 n)
 {
-	n = q3MulT(rot, n);
+	n = mul_t(rot, n);
 	vec3 absN = abs(n);
 	vec3 a, b;
 
@@ -546,7 +532,6 @@ void q3SupportEdge(const mat3& rot, const vec3& trans, const vec3& e, vec3 n, ve
 			a = vec3(e.x, e.y, e.z);
 			b = vec3(e.x, e.y, -e.z);
 		}
-
 		// x > z > y || z > x > y
 		else
 		{
@@ -564,7 +549,6 @@ void q3SupportEdge(const mat3& rot, const vec3& trans, const vec3& e, vec3 n, ve
 			a = vec3(e.x, e.y, e.z);
 			b = vec3(e.x, e.y, -e.z);
 		}
-
 		// z > y > x || y > z > x
 		else
 		{
@@ -584,8 +568,8 @@ void q3SupportEdge(const mat3& rot, const vec3& trans, const vec3& e, vec3 n, ve
 	b.y *= signy;
 	b.z *= signz;
 
-	*aOut = q3Mul(rot, trans, a);
-	*bOut = q3Mul(rot, trans, b);
+	aOut = mul(rot, trans, a);
+	bOut = mul(rot, trans, b);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -593,7 +577,7 @@ void q3SupportEdge(const mat3& rot, const vec3& trans, const vec3& e, vec3 n, ve
 // http://www.randygaul.net/2014/05/22/deriving-obb-to-obb-intersection-sat/
 // https://box2d.googlecode.com/files/GDC2007_ErinCatto.zip
 // https://box2d.googlecode.com/files/Box2D_Lite.zip
-void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
+void OBBtoOBB(Manifold& m, Box box0, Box box1)
 {
 	vec3 v = box1.center - box0.center;
 
@@ -602,9 +586,6 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 
 	mat3 rotA = quat_to_mat3(box0.rot);
 	mat3 rotB = quat_to_mat3(box1.rot);
-
-	mat3 rotAT = transpose(rotA);
-	mat3 rotBT = transpose(rotB);
 
 	// B's frame in A's space
 	mat3 C = transpose(rotA) * rotB;
@@ -623,17 +604,17 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 		}
 	}
 
-	mat3 cT = transpose(C);
-	mat3 absCT = transpose(absC);
+	mat3 C_t = transpose(C);
+	mat3 absC_t = transpose(absC);
 
 	// Vector from center A to center B in A's space
 	vec3 t = transpose(rotA) * v;
 
 	// Query states
 	r32 s;
-	r32 aMax = -Q3_R32_MAX;
-	r32 bMax = -Q3_R32_MAX;
-	r32 eMax = -Q3_R32_MAX;
+	r32 aMax = -R32_MAX;
+	r32 bMax = -R32_MAX;
+	r32 eMax = -R32_MAX;
 	i32 aAxis = ~0;
 	i32 bAxis = ~0;
 	i32 eAxis = ~0;
@@ -645,32 +626,32 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 
 	// a's x axis
 	s = abs(t.x) - (box0.halfLength.x + dot(absC[0], box1.halfLength));
-	if (q3TrackFaceAxis(&aAxis, 0, s, &aMax, rotA[0], &nA))
+	if (trackFaceAxis(aAxis, aMax, nA, 0, s, rotA[0]))
 		return;
 
 	// a's y axis
 	s = abs(t.y) - (box0.halfLength.y + dot(absC[1], box1.halfLength));
-	if (q3TrackFaceAxis(&aAxis, 1, s, &aMax, rotA[1], &nA))
+	if (trackFaceAxis(aAxis, aMax, nA, 1, s, rotA[1]))
 		return;
 
 	// a's z axis
 	s = abs(t.z) - (box0.halfLength.z + dot(absC[2], box1.halfLength));
-	if (q3TrackFaceAxis(&aAxis, 2, s, &aMax, rotA[2], &nA))
+	if (trackFaceAxis(aAxis, aMax, nA, 2, s, rotA[2]))
 		return;
 
 	// b's x axis
-	s = abs(dot(t, cT[0])) - (box1.halfLength.x + dot(absCT[0], box0.halfLength));
-	if (q3TrackFaceAxis(&bAxis, 3, s, &bMax, rotB[0], &nB))
+	s = abs(dot(t, C_t[0])) - (box1.halfLength.x + dot(absC_t[0], box0.halfLength));
+	if (trackFaceAxis(bAxis, bMax, nB, 3, s, rotB[0]))
 		return;
 
 	// b's y axis
-	s = abs(dot(t, cT[1])) - (box1.halfLength.y + dot(absCT[1], box0.halfLength));
-	if (q3TrackFaceAxis(&bAxis, 4, s, &bMax, rotB[1], &nB))
+	s = abs(dot(t, C_t[1])) - (box1.halfLength.y + dot(absC_t[1], box0.halfLength));
+	if (trackFaceAxis(bAxis, bMax, nB, 4, s, rotB[1]))
 		return;
 
 	// b's z axis
-	s = abs(dot(t, cT[2])) - (box1.halfLength.z + dot(absCT[2], box0.halfLength));
-	if (q3TrackFaceAxis(&bAxis, 5, s, &bMax, rotB[2], &nB))
+	s = abs(dot(t, C_t[2])) - (box1.halfLength.z + dot(absC_t[2], box0.halfLength));
+	if (trackFaceAxis(bAxis, bMax, nB, 5, s, rotB[2]))
 		return;
 
 	if (!parallel)
@@ -683,63 +664,63 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 		rA = eA.y * absC[0][2] + eA.z * absC[0][1];
 		rB = eB.y * absC[2][0] + eB.z * absC[1][0];
 		s = abs(t.z * C[0][1] - t.y * C[0][2]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 6, s, &eMax, vec3(r32(0.0), -C[0][2], C[0][1]), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 6, s, vec3(r32(0.0), -C[0][2], C[0][1])))
 			return;
 
 		// Cross( a.x, b.y )
 		rA = eA.y * absC[1][2] + eA.z * absC[1][1];
 		rB = eB.x * absC[2][0] + eB.z * absC[0][0];
 		s = abs(t.z * C[1][1] - t.y * C[1][2]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 7, s, &eMax, vec3(r32(0.0), -C[1][2], C[1][1]), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 7, s, vec3(r32(0.0), -C[1][2], C[1][1])))
 			return;
 
 		// Cross( a.x, b.z )
 		rA = eA.y * absC[2][2] + eA.z * absC[2][1];
 		rB = eB.x * absC[1][0] + eB.y * absC[0][0];
 		s = abs(t.z * C[2][1] - t.y * C[2][2]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 8, s, &eMax, vec3(r32(0.0), -C[2][2], C[2][1]), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 8, s, vec3(r32(0.0), -C[2][2], C[2][1])))
 			return;
 
 		// Cross( a.y, b.x )
 		rA = eA.x * absC[0][2] + eA.z * absC[0][0];
 		rB = eB.y * absC[2][1] + eB.z * absC[1][1];
 		s = abs(t.x * C[0][2] - t.z * C[0][0]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 9, s, &eMax, vec3(C[0][2], r32(0.0), -C[0][0]), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 9, s, vec3(C[0][2], r32(0.0), -C[0][0])))
 			return;
 
 		// Cross( a.y, b.y )
 		rA = eA.x * absC[1][2] + eA.z * absC[1][0];
 		rB = eB.x * absC[2][1] + eB.z * absC[0][1];
 		s = abs(t.x * C[1][2] - t.z * C[1][0]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 10, s, &eMax, vec3(C[1][2], r32(0.0), -C[1][0]), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 10, s, vec3(C[1][2], r32(0.0), -C[1][0])))
 			return;
 
 		// Cross( a.y, b.z )
 		rA = eA.x * absC[2][2] + eA.z * absC[2][0];
 		rB = eB.x * absC[1][1] + eB.y * absC[0][1];
 		s = abs(t.x * C[2][2] - t.z * C[2][0]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 11, s, &eMax, vec3(C[2][2], r32(0.0), -C[2][0]), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 11, s, vec3(C[2][2], r32(0.0), -C[2][0])))
 			return;
 
 		// Cross( a.z, b.x )
 		rA = eA.x * absC[0][1] + eA.y * absC[0][0];
 		rB = eB.y * absC[2][2] + eB.z * absC[1][2];
 		s = abs(t.y * C[0][0] - t.x * C[0][1]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 12, s, &eMax, vec3(-C[0][1], C[0][0], r32(0.0)), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 12, s, vec3(-C[0][1], C[0][0], r32(0.0))))
 			return;
 
 		// Cross( a.z, b.y )
 		rA = eA.x * absC[1][1] + eA.y * absC[1][0];
 		rB = eB.x * absC[2][2] + eB.z * absC[0][2];
 		s = abs(t.y * C[1][0] - t.x * C[1][1]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 13, s, &eMax, vec3(-C[1][1], C[1][0], r32(0.0)), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 13, s, vec3(-C[1][1], C[1][0], r32(0.0))))
 			return;
 
 		// Cross( a.z, b.z )
 		rA = eA.x * absC[2][1] + eA.y * absC[2][0];
 		rB = eB.x * absC[1][2] + eB.y * absC[0][2];
 		s = abs(t.y * C[2][0] - t.x * C[2][1]) - (rA + rB);
-		if (q3TrackEdgeAxis(&eAxis, 14, s, &eMax, vec3(-C[2][1], C[2][0], r32(0.0)), &nE))
+		if (trackEdgeAxis(eAxis, eMax, nE, 14, s, vec3(-C[2][1], C[2][0], r32(0.0))))
 			return;
 	}
 
@@ -802,7 +783,6 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 			eI = eB;
 			flip = false;
 		}
-
 		else
 		{
 			rtx = btx;
@@ -814,18 +794,18 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 		}
 
 		// Compute reference and incident edge information necessary for clipping
-		q3ClipVertex incident[4];
-		q3ComputeIncidentFace(itx, eI, n, incident);
+		ClipVertex incident[4];
+		computeIncidentFace(incident, itx, eI, n);
 		u8 clipEdges[4];
 		mat3 basis;
 		vec3 e;
-		q3ComputeReferenceEdgesAndBasis(eR, rtx, n, axis, clipEdges, &basis, &e);
+		computeReferenceEdgesAndBasis(clipEdges, &basis, &e, eR, rtx, n, axis);
 
 		// Clip the incident face against the reference face side planes
-		q3ClipVertex out[8];
+		ClipVertex out[8];
 		r32 depths[8];
 		i32 outNum;
-		outNum = q3Clip(rtx.position, e, clipEdges, basis, incident, out, depths);
+		outNum = clip(out, depths, rtx.position, e, clipEdges, basis, incident);
 
 		if (outNum)
 		{
@@ -834,10 +814,8 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 
 			for (i32 i = 0; i < outNum; ++i)
 			{
-				q3Contact* c = m.contacts + i;
-
-				c->position = out[i].v;
-				c->penetration = depths[i];
+				m.contacts[i].position = out[i].v;
+				m.contacts[i].penetration = depths[i];
 			}
 		}
 	}
@@ -850,11 +828,11 @@ void q3BoxtoBox(q3Manifold& m, Box box0, Box box1)
 
 		vec3 PA, QA;
 		vec3 PB, QB;
-		q3SupportEdge(rotA, box0.center, eA, n, &PA, &QA);
-		q3SupportEdge(rotB, box1.center, eB, -n, &PB, &QB);
+		computeSupportEdge(PA, QA, rotA, box0.center, eA, n);
+		computeSupportEdge(PB, QB, rotB, box1.center, eB, -n);
 
 		vec3 CA, CB;
-		q3EdgesContact(&CA, &CB, PA, QA, PB, QB);
+		edgesContact(CA, CB, PA, QA, PB, QB);
 
 		m.normal = n;
 		m.contactCount = 1;
@@ -877,8 +855,8 @@ TEST(OBB, collision)
 	b1.halfLength = vec3(1, 1, 1);
 	b1.rot = vec4(0, 0, 0, 1);
 
-	q3Manifold manifold;
-	q3BoxtoBox(manifold, b0, b1);
+	Manifold manifold;
+	OBBtoOBB(manifold, b0, b1);
 	EXPECT_EQ(manifold.contactCount == 4, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.5f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[1].penetration + 0.5f) < REAL_EPSILON, true);
@@ -889,7 +867,7 @@ TEST(OBB, collision)
 	b1.halfLength = vec3(1, 1, 1);
 	b1.rot = vec4(0, 0, 0, 1);
 
-	q3BoxtoBox(manifold, b0, b1);
+	OBBtoOBB(manifold, b0, b1);
 	EXPECT_EQ(manifold.contactCount == 4, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.5f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[1].penetration + 0.5f) < REAL_EPSILON, true);
@@ -900,7 +878,7 @@ TEST(OBB, collision)
 	b1.halfLength = vec3(1, 1, 1);
 	b1.rot = vec4(0, 0, 0, 1);
 
-	q3BoxtoBox(manifold, b0, b1);
+	OBBtoOBB(manifold, b0, b1);
 	EXPECT_EQ(manifold.contactCount == 4, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.5f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[1].penetration + 0.5f) < REAL_EPSILON, true);
@@ -911,7 +889,7 @@ TEST(OBB, collision)
 	b1.center = vec3(0, 1.5, 0);
 	b1.halfLength = vec3(1, 1, 1);
 	b1.rot = vec4(quat.x, quat.y, quat.z, quat.w);
-	q3BoxtoBox(manifold, b0, b1);
+	OBBtoOBB(manifold, b0, b1);
 	EXPECT_EQ(manifold.contactCount == 1, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.731658161f) < REAL_EPSILON, true);
 }
