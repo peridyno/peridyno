@@ -61,10 +61,11 @@ namespace dyno {
 			for (int i = 0; i < aMap.size(); i++)
 			{
 				Map<int,ElementType> mmap = aMap[i];
+
 				out << "Map " << i << " (" << mmap.size() << "):";
 				for (auto it = mmap.begin(); it != mmap.end(); it++)
 				{
-					std::cout << "  key:" << it->first<<" value:"<<it->second;
+					std::cout << "  key:" << it->first << " value:" << it->second;
 				}
 				out << std::endl;
 			}

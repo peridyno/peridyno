@@ -1,15 +1,16 @@
-#ifndef SIMPLE_H
-#define SIMPLE_H
+#pragma once
 
-#include "array3.h"
-#include "vec.h"
+#include "Array/Array3D.h"
+#include "Vector/Vector3D.h"
 
-#include<Eigen/Sparse>
+//#include<Eigen/Sparse>
 #include <vector>
 #include <stdio.h>
 #include <string>
 
 #include "DistanceField3D.h"
+
+//using namespace dyno;
 
 enum CellType
 {
@@ -25,12 +26,13 @@ enum CellType
 
 class Simple
 {
-	typedef Array3<CellType, Array1<CellType> > Array3BT;
+	typedef CArray3D<CellType> Array3BT;
+	typedef CArray3D<double> Array3d;
 
 public:
 	//double pressure_indicator;
-	void initialize(double dx_, std::string fluid, std::string inlet1, std::string inlet2, std::string outlet1, std::string outlet2, double alpha, double theta);
-	void initialize(Vec3d pos, double dx_, int ni_, int nj_, int nk_, mfd::DistanceField3D& fluidSDF, mfd::DistanceField3D& inletSDF, mfd::DistanceField3D& outletSDF,double alpha);
+	//void initialize(double dx_, std::string fluid, std::string inlet1, std::string inlet2, std::string outlet1, std::string outlet2, double alpha, double theta);
+	//void initialize(Vec3d pos, double dx_, int ni_, int nj_, int nk_, mfd::DistanceField3D& fluidSDF, mfd::DistanceField3D& inletSDF, mfd::DistanceField3D& outletSDF,double alpha);
 	void initialize(double dx_, std::string in_model, std::string in_centerline);
 	void advance(std::string path, int frame, double dt, double alpha,double theta);
 	void export_status(std::string path, int frame);
@@ -38,6 +40,7 @@ public:
 	double statistics_pressure(std::string face);
 	Vec3d statistics_vel(std::string face);
 	bool import_status(std::string path);
+
 	//export velocity field and pressure velocity in .vtk file
 	void export_velocity_vtk(std::string path);
 	void export_pressure_vtk(std::string path);
@@ -63,9 +66,10 @@ private:
 
 	double convergence_indicator;
 
-	//inlet condition
+	//inlet and outlet condition
 	Vec3d inlet_direction1, inlet_direction2;
 	double inlet_magnitude1, inlet_magnitude2;
+	Vec3d outlet_direction1, outlet_direction2;
 	//parameter
 	double total_time = 0.0;
 	double blood_density = 1060.0;
@@ -80,17 +84,19 @@ private:
 	double inlet_standard = 10;//standard distance from inlet intersection, unit:mm
 	double outlet_standard1 = 12;//standard distance from outlet intersection of LPV, unit:mm
 	double outlet_standard2 = 8;//standard distance from outlet intersection of RPV, unit:mm
-	Vec3d outlet_direction1, outlet_direction2;
-	//Solver data
-	typedef Eigen::SparseMatrix<double> SpMat;
-	typedef Eigen::Triplet<double> TripletD;
-	Eigen::VectorXd b;
-	SpMat A;
+	Vec3d inlet_point, outlet_point1, outlet_point2;
+	////Solver data
+	//typedef Eigen::SparseMatrix<double> SpMat;
+	//typedef Eigen::Triplet<double> TripletD;
+	//Eigen::VectorXd b;
+	//SpMat A;
 
 	//functions
-	void initialize_sdf(mfd::DistanceField3D& fSDF, mfd::DistanceField3D& inSDF1, mfd::DistanceField3D& inSDF2, mfd::DistanceField3D& outSDF1, mfd::DistanceField3D& outSDF2, Array3d& p_liq, Array3d& u_liq, Array3d& v_liq, Array3d& w_liq, Array3BT& p_id, Array3BT& u_id, Array3BT& v_id, Array3BT& w_id);
+	//void initialize_sdf(mfd::DistanceField3D& fSDF, mfd::DistanceField3D& inSDF1, mfd::DistanceField3D& inSDF2, mfd::DistanceField3D& outSDF1, mfd::DistanceField3D& outSDF2, Array3d& p_liq, Array3d& u_liq, Array3d& v_liq, Array3d& w_liq, Array3BT& p_id, Array3BT& u_id, Array3BT& v_id, Array3BT& w_id);
 	void initialize_sdf(mfd::DistanceField3D& fSDF);
-	void classifyBoundary(CellType& ct, Vec3d pos, mfd::DistanceField3D& inletSDF1, mfd::DistanceField3D& inletSDF2, mfd::DistanceField3D& outletSDF1, mfd::DistanceField3D& outletSDF2);
+	bool centerline(std::string in_centerline);
+	void compute_direction();
+	//void classifyBoundary(CellType& ct, Vec3d pos, mfd::DistanceField3D& inletSDF1, mfd::DistanceField3D& inletSDF2, mfd::DistanceField3D& outletSDF1, mfd::DistanceField3D& outletSDF2);
 	double u_boundary(Vec3d& in_dir, double& in_mag, double al,double the, int grid_j, int grid_k);
 	double v_boundary(Vec3d& in_dir, double& in_mag, double al,double the);
 	double w_boundary(Vec3d& in_dir, double& in_mag, double al,double the);
@@ -106,7 +112,7 @@ private:
 	void advect(Array3d &volecity_u, Array3d &volecity_v, Array3d &volecity_w, double t);
 	Vec3d trace_rk2(const Array3d& vol_u, const Array3d& vol_v, const Array3d& vol_w, const Vec3d& position, double t);
 	Vec3d get_velocity(const Array3d& v_u, const Array3d& v_v, const Array3d& v_w, const Vec3d& position);
-	bool centerline(std::string in_centerline);
+	
 
 	//Static geometry representation before rotation
 	Array3d liquid_phi_init, u_liquid_phi_init, v_liquid_phi_init, w_liquid_phi_init;
@@ -114,4 +120,3 @@ private:
 	Array3d u_init, v_init, w_init;
 };
 
-#endif

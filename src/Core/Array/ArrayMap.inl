@@ -143,6 +143,9 @@ namespace dyno
 		m_elements.assign(hElements);
 
 		m_maps.assign(src);
+
+		//redirect the element address
+		parallel_init_for_map<sizeof(ElementType)>(m_maps.begin(), m_elements.begin(), m_elements.size(), m_index);
 	}
 
 

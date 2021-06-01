@@ -10,7 +10,7 @@ TEST(Map, CPU)
 {
 	Pair<int, double> pair1(1, 1.1), pair2(2, 2.2), pair3(3, 3.3), pair4(4, 4.4);
 
-	Map<int, double> mymap1,mymap2;
+	Map<int, double> mymap1,mymap2,mymap3;
 	if (mymap1.empty()) std::cout << "this map is empty" << std::endl;
 
 	Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
@@ -55,6 +55,7 @@ TEST(Map, CPU)
 
 	std::vector<Map<int, double>> mapvec;
 	mapvec.push_back(mymap1);
+	mapvec.push_back(mymap3);
 	mapvec.push_back(mymap2);
 
 	DArrayMap<double> dArrMap;
@@ -68,7 +69,8 @@ TEST(Map, CPU)
 
 
 	EXPECT_EQ(cArrMap[0].size(), 3);
-	EXPECT_EQ(cArrMap[1].size(), 4);
+	EXPECT_EQ(cArrMap[1].size(), 0);
+	EXPECT_EQ(cArrMap[2].size(), 4);
 
 	free(pairptr1);
 	free(pairptr2);

@@ -46,7 +46,6 @@ namespace dyno
 			return m_pairs[id];
 		}
 
-
 		DYN_FUNC int erase(const T val);
 		DYN_FUNC void erase(iterator val_ptr);
 

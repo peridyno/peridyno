@@ -40,9 +40,9 @@ namespace dyno {
 		*/
 		void clear();
 
-	    void CGLS();
+	    void CGLS(int i_max, VarType threshold);
 		
-		SparseV X(); 
+		const SparseV& X() const { return x; }
 
 	private:
 		SparseM A;

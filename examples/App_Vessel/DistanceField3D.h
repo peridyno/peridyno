@@ -28,20 +28,20 @@ THE SOFTWARE.
 
 #include <vector>
 #include <string>
-#include "Vec.h"     //’‚¿Ô «vec.h∞…£ø£ø£ø
-#include "makelevelset3.h"
+#include "Vector/Vector3D.h"  
+//#include "makelevelset3.h"
 
 using namespace std;
+using namespace dyno;
 
 namespace mfd {
 
-class DistanceField3D {
+class DistanceField3D 
+{
    public:
 
-      DistanceField3D(string filename,float dx_grid,int padding_grid);
-
+      //DistanceField3D(string filename,float dx_grid,int padding_grid);
       DistanceField3D(string filename);
-
       DistanceField3D(const Vec3d p0_, const Vec3d p1_, int nbx_, int nby_, int nbz_, bool inv_ = false);
 
       virtual ~DistanceField3D();
@@ -98,10 +98,11 @@ class DistanceField3D {
 
 	  double * distances;
 	  double * weights;
+
       Vec3d * positions;
 
-      int _list;//this variable is for what?
-	  bool bInvert;//this variable is for what?
+      //int _list;//this variable is for what?
+	  //bool bInvert;//this variable is for what?
 };
 
 }

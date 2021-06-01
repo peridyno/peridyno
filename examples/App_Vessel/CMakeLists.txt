@@ -5,9 +5,9 @@ link_libraries(Core Framework IO Graphics)
 #link_libraries(GlfwGUI)
 
 ##### External Libraries ######
-find_package(Eigen3)
-INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
-include_directories("eigen-3.3.9")
+#find_package(Eigen3)
+#INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
+#include_directories("eigen-3.3.9")
 
 find_package(VTK REQUIRED)
 vtk_module_config(VTK

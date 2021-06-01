@@ -5,8 +5,13 @@
 #include <cmath>
 #include <chrono>
 #include <random>
-#include<Eigen/Sparse>
-#include<Eigen/IterativeLinearSolvers>
+#include "Array/Array.h"
+#include "Array/ArrayMap.h"
+#include "STL/Map.h"
+#include "STL/Pair.h"
+#include "Matrix/SparseMatrix.h"
+//#include<Eigen/Sparse>
+//#include<Eigen/IterativeLinearSolvers>
 
 #include"vtkSmartPointer.h"
 #include"vtkDoubleArray.h"
@@ -16,124 +21,125 @@
 #include"vtkCellArray.h"
 #include"vtkPolyDataWriter.h"
 
-#include "array3_utils.h"
-#include "levelset_util.h"
 
+//#include "levelset_util.h"
+#include "array3_utils.h"
+#include "util.h"
 //#define BLOCK
 
-void Simple::initialize(double dx_,std::string fluid, std::string inlet1, std::string inlet2, std::string outlet1, std::string outlet2,double alpha,double theta)
-{
-	//pipe
-	//inlet_direction1 = Vec3d(-cos(alpha)*cos(theta), cos(alpha)*sin(theta), -sin(alpha));
-	//inlet_direction2 = Vec3d(-cos(alpha)*cos(theta), cos(alpha)*sin(theta), -sin(alpha));
-	////YU_JUAN
-	//inlet_direction1 = Vec3d(0.333928,-0.575716,-0.746353);
-	//inlet_direction2 = Vec3d(0.333928, -0.575716, -0.746353);
-	//YANG_ZHONGYUN
-	//inlet_direction1 = Vec3d(0.121644, -0.481770, -0.867813);
-	//inlet_direction2 = Vec3d(0.121644, -0.481770, -0.867813);
-	//YANG_ZHONGYUN
-	//inlet_direction1 = Vec3d(0.566940, -0.393927, -0.723464);
-	//inlet_direction2 = Vec3d(0.566940, -0.393927, -0.723464);
-	//BAI_YUN
-	//inlet_direction1 = Vec3d(0.302251, -0.769818, -0.562161);
-	//inlet_direction2 = Vec3d(0.302251, -0.769818, -0.562161);
-	//NORMAL
-	inlet_direction1 = Vec3d(0.490999, -0.356215, -0.795004);
-	inlet_direction2 = Vec3d(0.490999, -0.356215, -0.795004);
-	//inlet_direction1 = Vec3d(0.213074, -0.507018, -0.835184);
-	//inlet_direction2 = Vec3d(0.213074, -0.507018, -0.835184);
-	//inlet_direction1 = Vec3d(0.176353, -0.527966, -0.830754);
-	//inlet_direction2 = Vec3d(0.176353, -0.527966, -0.830754);
-	//NORMAL2
-	//inlet_direction1 = Vec3d(0.457737, -0.447532, -0.768240);
-	//inlet_direction2 = Vec3d(0.457737, -0.447532, -0.768240);
-	//NORMAL3
-	//inlet_direction1 = Vec3d(0.482327, -0.326915, -0.812704);
-	//inlet_direction2 = Vec3d(0.482327, -0.326915, -0.812704);
-	//NORMAL4
-	//inlet_direction1 = Vec3d(0.620663, -0.626506, -0.471452);
-	//inlet_direction2 = Vec3d(0.620663, -0.626506, -0.471452);
-	//inlet_direction1 = Vec3d(0.612902, -0.632944, -0.473005);
-	//inlet_direction2 = Vec3d(0.612902, -0.632944, -0.473005);
-	//inlet_direction1 = Vec3d(0.676093, -0.563848, -0.474314);
-	//inlet_direction2 = Vec3d(0.676093, -0.563848, -0.474314);
-	//inlet_direction1 = Vec3d(0.584255, -0.692331, -0.423467);
-	//inlet_direction2 = Vec3d(0.584255, -0.692331, -0.423467);
-	//inlet_magnitude1 = 0.2;
-	//inlet_magnitude2 = 0.2;
-	inlet_magnitude1 = 0.1364;
-	inlet_magnitude2 = 0.1364;
-
-	mfd::DistanceField3D fluidSDF(fluid);
-	mfd::DistanceField3D inletSDF1(inlet1);
-	mfd::DistanceField3D inletSDF2(inlet2);
-	mfd::DistanceField3D outletSDF1(outlet1);
-	mfd::DistanceField3D outletSDF2(outlet2);
-
-	//Grid dimensions
-	lower_vertex = fluidSDF.p0;
-	Vec3d upper_vertex = fluidSDF.p1;
-	cout << "the lower vertex and upper vertex is: " << lower_vertex << " " << upper_vertex << endl;
-	dx_mm =dx_;
-	dx =dx_*0.001;
-	ni = floor((upper_vertex[0]-lower_vertex[0])/dx_mm);
-	nj = floor((upper_vertex[1] - lower_vertex[1]) / dx_mm);
-	nk = floor((upper_vertex[2] - lower_vertex[2]) / dx_mm);
-	std::cout << ni << " " << nj << " " << nk << std::endl;
-
-	u.resize(ni + 1, nj, nk); u_starstar.resize(ni + 1, nj, nk); u_prime.resize(ni + 1, nj, nk); u_init.resize(ni + 1, nj, nk);
-	v.resize(ni, nj + 1, nk); v_starstar.resize(ni, nj + 1, nk); v_prime.resize(ni, nj + 1, nk); v_init.resize(ni, nj + 1, nk);
-	w.resize(ni, nj, nk + 1); w_starstar.resize(ni, nj, nk + 1); w_prime.resize(ni, nj, nk + 1); w_init.resize(ni, nj, nk + 1);
-	u.set_zero(); u_starstar.set_zero(); u_prime.set_zero(); u_init.set_zero();
-	v.set_zero(); v_starstar.set_zero(); v_prime.set_zero(); v_init.set_zero();
-	w.set_zero(); w_starstar.set_zero(); w_prime.set_zero(); w_init.set_zero();
-
-	p.resize(ni, nj, nk); p_star.resize(ni, nj, nk); p_prime.resize(ni, nj, nk);
-	p.set_zero(); p_star.set_zero(); p_prime.set_zero();
-
-	//initialize the signed distance field for liquid, inlet and outlet.
-	initialize_sdf(fluidSDF, inletSDF1, inletSDF2, outletSDF1, outletSDF2, liquid_phi, u_liquid_phi, v_liquid_phi, w_liquid_phi, p_identifer, u_identifer, v_identifer, w_identifer);
-
-	std::cout << "initialize successful" << endl;
-}
-
-void Simple::initialize(Vec3d pos, double dx_, int ni_, int nj_, int nk_, mfd::DistanceField3D& fluidSDF, mfd::DistanceField3D& inletSDF, mfd::DistanceField3D& outletSDF,double alpha)
-{
-	ni = ni_; nj = nj_; nk = nk_;
-
-	lower_vertex = pos;
-
-	dx_mm = dx_;
-	dx = dx_ * 0.001;
-	std::cout << ni << " " << nj << " " << nk << std::endl;
-	u.resize(ni + 1, nj, nk); u_starstar.resize(ni + 1, nj, nk); u_prime.resize(ni + 1, nj, nk); u_init.resize(ni + 1, nj, nk);
-	v.resize(ni, nj + 1, nk); v_starstar.resize(ni, nj + 1, nk); v_prime.resize(ni, nj + 1, nk); v_init.resize(ni, nj + 1, nk);
-	w.resize(ni, nj, nk + 1); w_starstar.resize(ni, nj, nk + 1); w_prime.resize(ni, nj, nk + 1); w_init.resize(ni, nj, nk + 1);
-	u.set_zero(); u_starstar.set_zero(); u_prime.set_zero(); u_init.set_zero();
-	v.set_zero(); v_starstar.set_zero(); v_prime.set_zero(); v_init.set_zero();
-	w.set_zero(); w_starstar.set_zero(); w_prime.set_zero(); w_init.set_zero();
-
-	p.resize(ni, nj, nk); p_star.resize(ni, nj, nk); p_prime.resize(ni, nj, nk);
-	p.set_zero(); p_star.set_zero(); p_prime.set_zero();
-
-	//initialize the signed distance field and label for pressure and velocity
-	if (alpha == 0.0)
-	{
-		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi, u_liquid_phi, v_liquid_phi, w_liquid_phi, p_identifer, u_identifer, v_identifer, w_identifer);
-		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi_init, u_liquid_phi_init, v_liquid_phi_init, w_liquid_phi_init, p_identifer_init, u_identifer_init, v_identifer_init, w_identifer_init);
-	}
-	else
-	{
-		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi_init, u_liquid_phi_init, v_liquid_phi_init, w_liquid_phi_init, p_identifer_init, u_identifer_init, v_identifer_init, w_identifer_init);
-
-		fluidSDF.RotationDistance(alpha);
-		inletSDF.RotationDistance(alpha);
-		outletSDF.RotationDistance(alpha);
-
-		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi, u_liquid_phi, v_liquid_phi, w_liquid_phi, p_identifer, u_identifer, v_identifer, w_identifer);
-	}
-}
+//void Simple::initialize(double dx_,std::string fluid, std::string inlet1, std::string inlet2, std::string outlet1, std::string outlet2,double alpha,double theta)
+//{
+//	//pipe
+//	//inlet_direction1 = Vec3d(-cos(alpha)*cos(theta), cos(alpha)*sin(theta), -sin(alpha));
+//	//inlet_direction2 = Vec3d(-cos(alpha)*cos(theta), cos(alpha)*sin(theta), -sin(alpha));
+//	////YU_JUAN
+//	//inlet_direction1 = Vec3d(0.333928,-0.575716,-0.746353);
+//	//inlet_direction2 = Vec3d(0.333928, -0.575716, -0.746353);
+//	//YANG_ZHONGYUN
+//	//inlet_direction1 = Vec3d(0.121644, -0.481770, -0.867813);
+//	//inlet_direction2 = Vec3d(0.121644, -0.481770, -0.867813);
+//	//YANG_ZHONGYUN
+//	//inlet_direction1 = Vec3d(0.566940, -0.393927, -0.723464);
+//	//inlet_direction2 = Vec3d(0.566940, -0.393927, -0.723464);
+//	//BAI_YUN
+//	//inlet_direction1 = Vec3d(0.302251, -0.769818, -0.562161);
+//	//inlet_direction2 = Vec3d(0.302251, -0.769818, -0.562161);
+//	//NORMAL
+//	inlet_direction1 = Vec3d(0.490999, -0.356215, -0.795004);
+//	inlet_direction2 = Vec3d(0.490999, -0.356215, -0.795004);
+//	//inlet_direction1 = Vec3d(0.213074, -0.507018, -0.835184);
+//	//inlet_direction2 = Vec3d(0.213074, -0.507018, -0.835184);
+//	//inlet_direction1 = Vec3d(0.176353, -0.527966, -0.830754);
+//	//inlet_direction2 = Vec3d(0.176353, -0.527966, -0.830754);
+//	//NORMAL2
+//	//inlet_direction1 = Vec3d(0.457737, -0.447532, -0.768240);
+//	//inlet_direction2 = Vec3d(0.457737, -0.447532, -0.768240);
+//	//NORMAL3
+//	//inlet_direction1 = Vec3d(0.482327, -0.326915, -0.812704);
+//	//inlet_direction2 = Vec3d(0.482327, -0.326915, -0.812704);
+//	//NORMAL4
+//	//inlet_direction1 = Vec3d(0.620663, -0.626506, -0.471452);
+//	//inlet_direction2 = Vec3d(0.620663, -0.626506, -0.471452);
+//	//inlet_direction1 = Vec3d(0.612902, -0.632944, -0.473005);
+//	//inlet_direction2 = Vec3d(0.612902, -0.632944, -0.473005);
+//	//inlet_direction1 = Vec3d(0.676093, -0.563848, -0.474314);
+//	//inlet_direction2 = Vec3d(0.676093, -0.563848, -0.474314);
+//	//inlet_direction1 = Vec3d(0.584255, -0.692331, -0.423467);
+//	//inlet_direction2 = Vec3d(0.584255, -0.692331, -0.423467);
+//	//inlet_magnitude1 = 0.2;
+//	//inlet_magnitude2 = 0.2;
+//	inlet_magnitude1 = 0.1364;
+//	inlet_magnitude2 = 0.1364;
+//
+//	mfd::DistanceField3D fluidSDF(fluid);
+//	mfd::DistanceField3D inletSDF1(inlet1);
+//	mfd::DistanceField3D inletSDF2(inlet2);
+//	mfd::DistanceField3D outletSDF1(outlet1);
+//	mfd::DistanceField3D outletSDF2(outlet2);
+//
+//	//Grid dimensions
+//	lower_vertex = fluidSDF.p0;
+//	Vec3d upper_vertex = fluidSDF.p1;
+//	cout << "the lower vertex and upper vertex is: " << lower_vertex << " " << upper_vertex << endl;
+//	dx_mm =dx_;
+//	dx =dx_*0.001;
+//	ni = floor((upper_vertex[0]-lower_vertex[0])/dx_mm);
+//	nj = floor((upper_vertex[1] - lower_vertex[1]) / dx_mm);
+//	nk = floor((upper_vertex[2] - lower_vertex[2]) / dx_mm);
+//	std::cout << ni << " " << nj << " " << nk << std::endl;
+//
+//	u.resize(ni + 1, nj, nk); u_starstar.resize(ni + 1, nj, nk); u_prime.resize(ni + 1, nj, nk); u_init.resize(ni + 1, nj, nk);
+//	v.resize(ni, nj + 1, nk); v_starstar.resize(ni, nj + 1, nk); v_prime.resize(ni, nj + 1, nk); v_init.resize(ni, nj + 1, nk);
+//	w.resize(ni, nj, nk + 1); w_starstar.resize(ni, nj, nk + 1); w_prime.resize(ni, nj, nk + 1); w_init.resize(ni, nj, nk + 1);
+//	u.set_zero(); u_starstar.set_zero(); u_prime.set_zero(); u_init.set_zero();
+//	v.set_zero(); v_starstar.set_zero(); v_prime.set_zero(); v_init.set_zero();
+//	w.set_zero(); w_starstar.set_zero(); w_prime.set_zero(); w_init.set_zero();
+//
+//	p.resize(ni, nj, nk); p_star.resize(ni, nj, nk); p_prime.resize(ni, nj, nk);
+//	p.set_zero(); p_star.set_zero(); p_prime.set_zero();
+//
+//	//initialize the signed distance field for liquid, inlet and outlet.
+//	initialize_sdf(fluidSDF, inletSDF1, inletSDF2, outletSDF1, outletSDF2, liquid_phi, u_liquid_phi, v_liquid_phi, w_liquid_phi, p_identifer, u_identifer, v_identifer, w_identifer);
+//
+//	std::cout << "initialize successful" << endl;
+//}
+//
+//void Simple::initialize(Vec3d pos, double dx_, int ni_, int nj_, int nk_, mfd::DistanceField3D& fluidSDF, mfd::DistanceField3D& inletSDF, mfd::DistanceField3D& outletSDF,double alpha)
+//{
+//	ni = ni_; nj = nj_; nk = nk_;
+//
+//	lower_vertex = pos;
+//
+//	dx_mm = dx_;
+//	dx = dx_ * 0.001;
+//	std::cout << ni << " " << nj << " " << nk << std::endl;
+//	u.resize(ni + 1, nj, nk); u_starstar.resize(ni + 1, nj, nk); u_prime.resize(ni + 1, nj, nk); u_init.resize(ni + 1, nj, nk);
+//	v.resize(ni, nj + 1, nk); v_starstar.resize(ni, nj + 1, nk); v_prime.resize(ni, nj + 1, nk); v_init.resize(ni, nj + 1, nk);
+//	w.resize(ni, nj, nk + 1); w_starstar.resize(ni, nj, nk + 1); w_prime.resize(ni, nj, nk + 1); w_init.resize(ni, nj, nk + 1);
+//	u.set_zero(); u_starstar.set_zero(); u_prime.set_zero(); u_init.set_zero();
+//	v.set_zero(); v_starstar.set_zero(); v_prime.set_zero(); v_init.set_zero();
+//	w.set_zero(); w_starstar.set_zero(); w_prime.set_zero(); w_init.set_zero();
+//
+//	p.resize(ni, nj, nk); p_star.resize(ni, nj, nk); p_prime.resize(ni, nj, nk);
+//	p.set_zero(); p_star.set_zero(); p_prime.set_zero();
+//
+//	//initialize the signed distance field and label for pressure and velocity
+//	if (alpha == 0.0)
+//	{
+//		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi, u_liquid_phi, v_liquid_phi, w_liquid_phi, p_identifer, u_identifer, v_identifer, w_identifer);
+//		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi_init, u_liquid_phi_init, v_liquid_phi_init, w_liquid_phi_init, p_identifer_init, u_identifer_init, v_identifer_init, w_identifer_init);
+//	}
+//	else
+//	{
+//		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi_init, u_liquid_phi_init, v_liquid_phi_init, w_liquid_phi_init, p_identifer_init, u_identifer_init, v_identifer_init, w_identifer_init);
+//
+//		fluidSDF.RotationDistance(alpha);
+//		inletSDF.RotationDistance(alpha);
+//		outletSDF.RotationDistance(alpha);
+//
+//		initialize_sdf(fluidSDF, inletSDF, inletSDF, outletSDF, outletSDF, liquid_phi, u_liquid_phi, v_liquid_phi, w_liquid_phi, p_identifer, u_identifer, v_identifer, w_identifer);
+//	}
+//}
 
 void Simple::initialize(double dx_,std::string in_model,std::string in_centerline)
 {
@@ -152,20 +158,22 @@ void Simple::initialize(double dx_,std::string in_model,std::string in_centerlin
 	ni = floor((upper_vertex[0] - lower_vertex[0]) / dx_mm);
 	nj = floor((upper_vertex[1] - lower_vertex[1]) / dx_mm);
 	nk = floor((upper_vertex[2] - lower_vertex[2]) / dx_mm);
-	std::cout << ni << " " << nj << " " << nk << std::endl;
+	std::cout <<"the grid resolution is: "<<ni << " " << nj << " " << nk << std::endl;
 
 	u.resize(ni + 1, nj, nk); u_starstar.resize(ni + 1, nj, nk); u_prime.resize(ni + 1, nj, nk); u_init.resize(ni + 1, nj, nk);
 	v.resize(ni, nj + 1, nk); v_starstar.resize(ni, nj + 1, nk); v_prime.resize(ni, nj + 1, nk); v_init.resize(ni, nj + 1, nk);
 	w.resize(ni, nj, nk + 1); w_starstar.resize(ni, nj, nk + 1); w_prime.resize(ni, nj, nk + 1); w_init.resize(ni, nj, nk + 1);
-	u.set_zero(); u_starstar.set_zero(); u_prime.set_zero(); u_init.set_zero();
-	v.set_zero(); v_starstar.set_zero(); v_prime.set_zero(); v_init.set_zero();
-	w.set_zero(); w_starstar.set_zero(); w_prime.set_zero(); w_init.set_zero();
+	u.reset(); u_starstar.reset(); u_prime.reset(); u_init.reset();
+	v.reset(); v_starstar.reset(); v_prime.reset(); v_init.reset();
+	w.reset(); w_starstar.reset(); w_prime.reset(); w_init.reset();
 
 	p.resize(ni, nj, nk); p_star.resize(ni, nj, nk); p_prime.resize(ni, nj, nk);
-	p.set_zero(); p_star.set_zero(); p_prime.set_zero();
+	p.reset(); p_star.reset(); p_prime.reset();
 
 	//initialize the signed distance field for liquid, inlet and outlet.
 	centerline(in_centerline);
+	std::cout << "it is ok here now" << std::endl;
+	compute_direction();
 	std::cout << "it is ok here now" << std::endl;
 	initialize_sdf(fluidSDF);
 
@@ -204,9 +212,9 @@ bool Simple::centerline(std::string in_centerline)
 	std::cout << "read centerline successfully" << std::endl;
 
 	//compute points frequency
-	Array1i points_frequency;
+	CArray<int> points_frequency;
 	points_frequency.resize(points_numb);
-	points_frequency.set_zero();
+	points_frequency.reset();
 	for (int i = 0; i < 2*lines_numb; i++)
 	{
 		int line_p = centerline_lines[i];
@@ -229,9 +237,9 @@ bool Simple::centerline(std::string in_centerline)
 	}
 
 	//distinguish two intersections
-	Vec3d in_direction = (0.457737, -0.447532, -0.768240);
+	Vec3d in_direction(0.457737, -0.447532, -0.768240);
 	Vec3d vector_intersection = centerline_points[intersection[0]] - centerline_points[intersection[1]];
-	if (dot(in_direction, vector_intersection) > 0)
+	if (in_direction.dot(vector_intersection) > 0)
 	{
 		outlet_intersection = intersection[1];
 		inlet_intersection = intersection[0];
@@ -251,6 +259,7 @@ bool Simple::centerline(std::string in_centerline)
 	line_points3.push_back(inlet_intersection);
 	line_points4.push_back(outlet_intersection);
 	line_points5.push_back(outlet_intersection);
+
 	auto find_next_point = [&](int i_next, int& find_point_next, vector<int>& line_points_next)
 	{//function used to divid branches
 		if (find_point_next != outlet_intersection || line_points_next.size() == 1)
@@ -273,6 +282,7 @@ bool Simple::centerline(std::string in_centerline)
 			}
 		}
 	};
+
 	for (int j = 0; j < lines_numb; j++)
 	{
 		for (int i = 0; i < 2 * lines_numb; i++)
@@ -285,11 +295,11 @@ bool Simple::centerline(std::string in_centerline)
 
 	auto distinguish_branches = [&](vector<int>& line_nodes11, vector<int>& line_nodes22)
 	{//function used to distinguish smv and sv
-		Vec3d smv_direction = (-0.299036, -0.180007, -0.937110);
-		Vec3d sv_direction = (0.948883, -0.072825, 0.307111);
+		Vec3d smv_direction(-0.299036, -0.180007, -0.937110);
+		Vec3d sv_direction(0.948883, -0.072825, 0.307111);
 		Vec3d direction_in = centerline_points[line_nodes11[1]] - centerline_points[line_nodes11[0]];
 		//cout << direction_in << " " << dot(smv_direction, direction_in) << " " << dot(sv_direction, direction_in) << endl;
-		if (dot(smv_direction, direction_in) > dot(sv_direction, direction_in))
+		if (smv_direction.dot(direction_in) > sv_direction.dot(direction_in))
 		{
 			smv = line_nodes11;
 			sv = line_nodes22;
@@ -330,7 +340,7 @@ bool Simple::centerline(std::string in_centerline)
 	Vec3d direction_out = centerline_points[line_points4[1]] - centerline_points[line_points4[0]];
 	//cout << direction_out<<" "<<lpv_direction<<" "<<dot(direction_out,lpv_direction) << endl;
 	//cout << dot(lpv_direction, direction_out) << " " << dot(rpv_direction, direction_out) << endl;
-	if (dot(lpv_direction, direction_out) > dot(rpv_direction, direction_out))
+	if (lpv_direction.dot(direction_out) > rpv_direction.dot(direction_out))
 	{//distinguish lpv,rpv
 		lpv = line_points4;
 		rpv = line_points5;
@@ -350,234 +360,233 @@ bool Simple::centerline(std::string in_centerline)
 	std::cout << "the number of smv is: " << smv.size() << std::endl;
 }
 
-void Simple::initialize_sdf(mfd::DistanceField3D& fSDF, mfd::DistanceField3D& inSDF1, mfd::DistanceField3D& inSDF2, mfd::DistanceField3D& outSDF1, mfd::DistanceField3D& outSDF2, Array3d& p_liq, Array3d& u_liq, Array3d& v_liq, Array3d& w_liq,Array3BT& p_id, Array3BT& u_id, Array3BT& v_id, Array3BT& w_id)
-{
-	p_liq.resize(ni, nj, nk); u_liq.resize(ni + 1, nj, nk); v_liq.resize(ni, nj + 1, nk); w_liq.resize(ni, nj, nk + 1);
-	p_id.resize(ni, nj, nk); u_id.resize(ni + 1, nj, nk); v_id.resize(ni, nj + 1, nk); w_id.resize(ni, nj, nk + 1);
+//void Simple::initialize_sdf(mfd::DistanceField3D& fSDF, mfd::DistanceField3D& inSDF1, mfd::DistanceField3D& inSDF2, mfd::DistanceField3D& outSDF1, mfd::DistanceField3D& outSDF2, Array3d& p_liq, Array3d& u_liq, Array3d& v_liq, Array3d& w_liq,Array3BT& p_id, Array3BT& u_id, Array3BT& v_id, Array3BT& w_id)
+//{
+//	p_liq.resize(ni, nj, nk); u_liq.resize(ni + 1, nj, nk); v_liq.resize(ni, nj + 1, nk); w_liq.resize(ni, nj, nk + 1);
+//	p_id.resize(ni, nj, nk); u_id.resize(ni + 1, nj, nk); v_id.resize(ni, nj + 1, nk); w_id.resize(ni, nj, nk + 1);
+//
+//	//Initialize p
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		Vec3d pos(lower_vertex[0] + (i + 0.5) * dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
+//		double d;
+//		fSDF.GetDistance(pos, d);
+//
+//		if (d < 0)
+//			p_id(i, j, k) = CellType::Inside;
+//		else
+//			p_id(i, j, k) = CellType::Undefined;
+//		p_liq(i, j, k) = d;
+//	}
+//
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		if (p_id(i, j, k) == CellType::Inside)
+//		{
+//			Vec3d pos(lower_vertex[0] + (i + 0.5)* dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
+//			if (p_id(i + 1, j, k) != CellType::Inside)
+//				classifyBoundary(p_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (p_id(i - 1, j, k) != CellType::Inside)
+//				classifyBoundary(p_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (p_id(i, j + 1, k) != CellType::Inside)
+//				classifyBoundary(p_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (p_id(i, j - 1, k) != CellType::Inside)
+//				classifyBoundary(p_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (p_id(i, j, k + 1) != CellType::Inside)
+//				classifyBoundary(p_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (p_id(i, j, k - 1) != CellType::Inside)
+//				classifyBoundary(p_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//		}
+//	}
+//
+//	//Initialize u
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
+//	{
+//		Vec3d pos(lower_vertex[0] + (i)* dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
+//		double d;
+//		fSDF.GetDistance(pos, d);
+//		if (d < 0)
+//			u_id(i, j, k) = CellType::Inside;
+//		else
+//			u_id(i, j, k) = CellType::Undefined;
+//
+//		u_liq(i, j, k) = d;
+//	}
+//
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
+//	{
+//		if (u_id(i, j, k) == CellType::Inside)
+//		{
+//			Vec3d pos(lower_vertex[0] + (i)* dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
+//			if (u_id(i + 1, j, k) != CellType::Inside)
+//				classifyBoundary(u_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (u_id(i - 1, j, k) != CellType::Inside)
+//				classifyBoundary(u_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (u_id(i, j + 1, k) != CellType::Inside)
+//				classifyBoundary(u_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (u_id(i, j - 1, k) != CellType::Inside)
+//				classifyBoundary(u_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (u_id(i, j, k + 1) != CellType::Inside)
+//				classifyBoundary(u_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (u_id(i, j, k - 1) != CellType::Inside)
+//				classifyBoundary(u_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//		}
+//	}
+//
+//	//Initialize v
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj + 1; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		Vec3d pos(lower_vertex[0] + (i + 0.5)* dx_mm, lower_vertex[1] + (j)* dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
+//		double d;
+//		fSDF.GetDistance(pos, d);
+//		if (d < 0)
+//			v_id(i, j, k) = CellType::Inside;
+//		else
+//			v_id(i, j, k) = CellType::Undefined;
+//
+//		v_liq(i, j, k) = d;
+//	}
+//
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj + 1; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		if (v_id(i, j, k) == CellType::Inside)
+//		{
+//			Vec3d pos(lower_vertex[0] + (i + 0.5) * dx_mm, lower_vertex[1] + (j)* dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
+//			if (v_id(i + 1, j, k) != CellType::Inside)
+//				classifyBoundary(v_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (v_id(i - 1, j, k) != CellType::Inside)
+//				classifyBoundary(v_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (v_id(i, j + 1, k) != CellType::Inside)
+//				classifyBoundary(v_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (v_id(i, j - 1, k) != CellType::Inside)
+//				classifyBoundary(v_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (v_id(i, j, k + 1) != CellType::Inside)
+//				classifyBoundary(v_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (v_id(i, j, k - 1) != CellType::Inside)
+//				classifyBoundary(v_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//		}
+//	}
+//
+//	//Initialize w
+//	for (int k = 0; k < nk + 1; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		Vec3d pos(lower_vertex[0] + (i + 0.5)* dx_mm, lower_vertex[1] + (j + 0.5)* dx_mm, lower_vertex[2] + (k)* dx_mm);
+//		double d;
+//		fSDF.GetDistance(pos, d);
+//		if (d < 0)
+//			w_id(i, j, k) = CellType::Inside;
+//		else
+//			w_id(i, j, k) = CellType::Undefined;
+//
+//		w_liq(i, j, k) = d;
+//	}
+//
+//	for (int k = 0; k < nk + 1; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		if (w_id(i, j, k) == CellType::Inside)
+//		{
+//			//double d_inlet, d_outlet;
+//			Vec3d pos(lower_vertex[0] + (i + 0.5) * dx_mm, lower_vertex[1] + (j + 0.5)* dx_mm, lower_vertex[2] + (k)* dx_mm);
+//			if (w_id(i + 1, j, k) != CellType::Inside)
+//				classifyBoundary(w_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (w_id(i - 1, j, k) != CellType::Inside)
+//				classifyBoundary(w_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (w_id(i, j + 1, k) != CellType::Inside)
+//				classifyBoundary(w_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (w_id(i, j - 1, k) != CellType::Inside)
+//				classifyBoundary(w_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (w_id(i, j, k + 1) != CellType::Inside)
+//				classifyBoundary(w_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//
+//			if (w_id(i, j, k - 1) != CellType::Inside)
+//				classifyBoundary(w_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
+//		}
+//	}
+//
+//	std::string bStr[7] = { {"Undefined"}, {"Inside"}, {"Inlet1"},{"Inlet2"}, {"Outlet1"},{"Outlet2"}, {"Static"} };
+//	int total_u = 0,total_uin=0;
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
+//	{
+//		if (u_id(i, j, k) != CellType::Undefined)
+//		{
+//			total_u++;
+//			if (u_id(i, j, k) == CellType::Inside) total_uin++;
+//			//std::printf("u: %d %d %d: %s %f \n", i, j, k, bStr[u_id(i, j, k)].c_str(), u_liq(i, j, k));
+//		}
+//	}
+//
+//	int total_v = 0,total_vin=0;
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj + 1; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		if (v_id(i, j, k) != CellType::Undefined)
+//		{
+//			total_v++;
+//			if (v_id(i, j, k) == CellType::Inside) total_vin++;
+//			//std::printf("v: %d %d %d: %s %f \n", i, j, k, bStr[v_id(i, j, k)].c_str(),v_liq(i,j,k));
+//		}
+//	}
+//
+//	int total_w = 0,total_win=0;
+//	for (int k = 0; k < nk + 1; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		if (w_id(i, j, k)!= CellType::Undefined)
+//		{
+//			total_w++;
+//			if (w_id(i, j, k) == CellType::Inside) total_win++;
+//			//std::printf("w: %d %d %d: %s %f \n", i, j, k, bStr[w_id(i, j, k)].c_str(),w_liq(i,j,k)); 
+//		}
+//	}
+//
+//	int p_num = 0,pin_num=0;
+//	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
+//	{
+//		if (p_id(i, j, k) != CellType::Undefined)
+//		{
+//			p_num++;
+//			if (p_id(i, j, k) == CellType::Inside) pin_num++;
+//			//std::printf("p: %d %d %d: %s %f \n", i, j, k, bStr[p_id(i, j, k)].c_str(),p_liq(i,j,k));
+//		}
+//	}
+//	std::cout << "total u number: " << total_uin << "  " << total_u << endl;
+//	std::cout << "total v number: " << total_vin << "  " << total_v << endl;
+//	std::cout << "total w number: " << total_win << "  " << total_w << endl;
+//	std::cout << "total p number: " << pin_num << "  " << p_num << endl;
+//	
+//	std::cout << "initialize successful" << endl;
+//}
 
-	//Initialize p
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
-	{
-		Vec3d pos(lower_vertex[0] + (i + 0.5) * dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
-		double d;
-		fSDF.GetDistance(pos, d);
-
-		if (d < 0)
-			p_id(i, j, k) = CellType::Inside;
-		else
-			p_id(i, j, k) = CellType::Undefined;
-		p_liq(i, j, k) = d;
-	}
-
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
-	{
-		if (p_id(i, j, k) == CellType::Inside)
-		{
-			Vec3d pos(lower_vertex[0] + (i + 0.5)* dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
-			if (p_id(i + 1, j, k) != CellType::Inside)
-				classifyBoundary(p_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (p_id(i - 1, j, k) != CellType::Inside)
-				classifyBoundary(p_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (p_id(i, j + 1, k) != CellType::Inside)
-				classifyBoundary(p_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (p_id(i, j - 1, k) != CellType::Inside)
-				classifyBoundary(p_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (p_id(i, j, k + 1) != CellType::Inside)
-				classifyBoundary(p_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (p_id(i, j, k - 1) != CellType::Inside)
-				classifyBoundary(p_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-		}
-	}
-
-	//Initialize u
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
-	{
-		Vec3d pos(lower_vertex[0] + (i)* dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
-		double d;
-		fSDF.GetDistance(pos, d);
-		if (d < 0)
-			u_id(i, j, k) = CellType::Inside;
-		else
-			u_id(i, j, k) = CellType::Undefined;
-
-		u_liq(i, j, k) = d;
-	}
-
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
-	{
-		if (u_id(i, j, k) == CellType::Inside)
-		{
-			Vec3d pos(lower_vertex[0] + (i)* dx_mm, lower_vertex[1] + (j + 0.5) * dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
-			if (u_id(i + 1, j, k) != CellType::Inside)
-				classifyBoundary(u_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (u_id(i - 1, j, k) != CellType::Inside)
-				classifyBoundary(u_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (u_id(i, j + 1, k) != CellType::Inside)
-				classifyBoundary(u_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (u_id(i, j - 1, k) != CellType::Inside)
-				classifyBoundary(u_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (u_id(i, j, k + 1) != CellType::Inside)
-				classifyBoundary(u_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (u_id(i, j, k - 1) != CellType::Inside)
-				classifyBoundary(u_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-		}
-	}
-
-	//Initialize v
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj + 1; ++j) for (int i = 0; i < ni; ++i)
-	{
-		Vec3d pos(lower_vertex[0] + (i + 0.5)* dx_mm, lower_vertex[1] + (j)* dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
-		double d;
-		fSDF.GetDistance(pos, d);
-		if (d < 0)
-			v_id(i, j, k) = CellType::Inside;
-		else
-			v_id(i, j, k) = CellType::Undefined;
-
-		v_liq(i, j, k) = d;
-	}
-
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj + 1; ++j) for (int i = 0; i < ni; ++i)
-	{
-		if (v_id(i, j, k) == CellType::Inside)
-		{
-			Vec3d pos(lower_vertex[0] + (i + 0.5) * dx_mm, lower_vertex[1] + (j)* dx_mm, lower_vertex[2] + (k + 0.5) * dx_mm);
-			if (v_id(i + 1, j, k) != CellType::Inside)
-				classifyBoundary(v_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (v_id(i - 1, j, k) != CellType::Inside)
-				classifyBoundary(v_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (v_id(i, j + 1, k) != CellType::Inside)
-				classifyBoundary(v_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (v_id(i, j - 1, k) != CellType::Inside)
-				classifyBoundary(v_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (v_id(i, j, k + 1) != CellType::Inside)
-				classifyBoundary(v_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (v_id(i, j, k - 1) != CellType::Inside)
-				classifyBoundary(v_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-		}
-	}
-
-	//Initialize w
-	for (int k = 0; k < nk + 1; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
-	{
-		Vec3d pos(lower_vertex[0] + (i + 0.5)* dx_mm, lower_vertex[1] + (j + 0.5)* dx_mm, lower_vertex[2] + (k)* dx_mm);
-		double d;
-		fSDF.GetDistance(pos, d);
-		if (d < 0)
-			w_id(i, j, k) = CellType::Inside;
-		else
-			w_id(i, j, k) = CellType::Undefined;
-
-		w_liq(i, j, k) = d;
-	}
-
-	for (int k = 0; k < nk + 1; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
-	{
-		if (w_id(i, j, k) == CellType::Inside)
-		{
-			//double d_inlet, d_outlet;
-			Vec3d pos(lower_vertex[0] + (i + 0.5) * dx_mm, lower_vertex[1] + (j + 0.5)* dx_mm, lower_vertex[2] + (k)* dx_mm);
-			if (w_id(i + 1, j, k) != CellType::Inside)
-				classifyBoundary(w_id(i + 1, j, k), pos + Vec3d(dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (w_id(i - 1, j, k) != CellType::Inside)
-				classifyBoundary(w_id(i - 1, j, k), pos + Vec3d(-dx_mm, 0, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (w_id(i, j + 1, k) != CellType::Inside)
-				classifyBoundary(w_id(i, j + 1, k), pos + Vec3d(0, dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (w_id(i, j - 1, k) != CellType::Inside)
-				classifyBoundary(w_id(i, j - 1, k), pos + Vec3d(0, -dx_mm, 0), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (w_id(i, j, k + 1) != CellType::Inside)
-				classifyBoundary(w_id(i, j, k + 1), pos + Vec3d(0, 0, dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-
-			if (w_id(i, j, k - 1) != CellType::Inside)
-				classifyBoundary(w_id(i, j, k - 1), pos + Vec3d(0, 0, -dx_mm), inSDF1, inSDF2, outSDF1, outSDF2);
-		}
-	}
-
-	std::string bStr[7] = { {"Undefined"}, {"Inside"}, {"Inlet1"},{"Inlet2"}, {"Outlet1"},{"Outlet2"}, {"Static"} };
-	int total_u = 0,total_uin=0;
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
-	{
-		if (u_id(i, j, k) != CellType::Undefined)
-		{
-			total_u++;
-			if (u_id(i, j, k) == CellType::Inside) total_uin++;
-			//std::printf("u: %d %d %d: %s %f \n", i, j, k, bStr[u_id(i, j, k)].c_str(), u_liq(i, j, k));
-		}
-	}
-
-	int total_v = 0,total_vin=0;
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj + 1; ++j) for (int i = 0; i < ni; ++i)
-	{
-		if (v_id(i, j, k) != CellType::Undefined)
-		{
-			total_v++;
-			if (v_id(i, j, k) == CellType::Inside) total_vin++;
-			//std::printf("v: %d %d %d: %s %f \n", i, j, k, bStr[v_id(i, j, k)].c_str(),v_liq(i,j,k));
-		}
-	}
-
-	int total_w = 0,total_win=0;
-	for (int k = 0; k < nk + 1; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
-	{
-		if (w_id(i, j, k)!= CellType::Undefined)
-		{
-			total_w++;
-			if (w_id(i, j, k) == CellType::Inside) total_win++;
-			//std::printf("w: %d %d %d: %s %f \n", i, j, k, bStr[w_id(i, j, k)].c_str(),w_liq(i,j,k)); 
-		}
-	}
-
-	int p_num = 0,pin_num=0;
-	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni; ++i)
-	{
-		if (p_id(i, j, k) != CellType::Undefined)
-		{
-			p_num++;
-			if (p_id(i, j, k) == CellType::Inside) pin_num++;
-			//std::printf("p: %d %d %d: %s %f \n", i, j, k, bStr[p_id(i, j, k)].c_str(),p_liq(i,j,k));
-		}
-	}
-	std::cout << "total u number: " << total_uin << "  " << total_u << endl;
-	std::cout << "total v number: " << total_vin << "  " << total_v << endl;
-	std::cout << "total w number: " << total_win << "  " << total_w << endl;
-	std::cout << "total p number: " << pin_num << "  " << p_num << endl;
-	
-	std::cout << "initialize successful" << endl;
-}
-
-void Simple::initialize_sdf(mfd::DistanceField3D& fSDF)
+void Simple::compute_direction()
 {
 	//find the inlet point and compute inlet direction
 	double inlet_dist = 0;
-	Vec3d inlet_point;
-
-	for (int i = 0; i < pv.size()-1; i++)
+	for (int i = 0; i < pv.size() - 1; i++)
 	{
-		double inlet_dist_next = dist(centerline_points[pv[i]], centerline_points[pv[i + 1]]);
+		double inlet_dist_next = (centerline_points[pv[i]] - centerline_points[pv[i + 1]]).norm();
 		inlet_dist += inlet_dist_next;
 		std::cout << "the long of inlet is: " << inlet_dist << std::endl;
 		if (inlet_dist >= inlet_standard)
 		{
-			inlet_direction1 = inlet_direction2 = normalized(centerline_points[pv[i]] - centerline_points[pv[i + 1]]);
+			Vec3d vec1 = centerline_points[pv[i]] - centerline_points[pv[i + 1]];
+			inlet_direction1 = inlet_direction2 = vec1.normalize();
 			double inlet_diff = inlet_dist - inlet_standard;
 			inlet_point = lerp(centerline_points[pv[i + 1]], centerline_points[pv[i]], inlet_diff / inlet_dist_next);
 			std::cout << "inlet direction and inlet point is: " << inlet_direction1 << " " << inlet_point << std::endl;
@@ -588,15 +597,15 @@ void Simple::initialize_sdf(mfd::DistanceField3D& fSDF)
 
 	//find the outlet point and compute outlet direction of LPV and RPV
 	double outlet_dist1 = 0, outlet_dist2 = 0;
-	Vec3d outlet_point1, outlet_point2;
-	for (int i = 0; i < lpv.size()-1; i++)
+	for (int i = 0; i < lpv.size() - 1; i++)
 	{
-		double outlet_dist_next = dist(centerline_points[lpv[i]], centerline_points[lpv[i + 1]]);
+		double outlet_dist_next = (centerline_points[lpv[i]] - centerline_points[lpv[i + 1]]).norm();
 		outlet_dist1 += outlet_dist_next;
 		std::cout << "the long of outlet1 is: " << outlet_dist1 << std::endl;
 		if (outlet_dist1 >= outlet_standard1)
 		{
-			outlet_direction1 = normalized(centerline_points[lpv[i + 1]] - centerline_points[lpv[i]]);
+			Vec3d vec1 = centerline_points[lpv[i + 1]] - centerline_points[lpv[i]];
+			outlet_direction1 = vec1.normalize();
 			double outlet_diff = outlet_dist1 - outlet_standard1;
 			outlet_point1 = lerp(centerline_points[lpv[i + 1]], centerline_points[lpv[i]], outlet_diff / outlet_dist_next);
 			std::cout << "outlet direction1 and outlet point1 is: " << outlet_direction1 << " " << outlet_point1 << std::endl;
@@ -605,14 +614,15 @@ void Simple::initialize_sdf(mfd::DistanceField3D& fSDF)
 	}
 	std::cout << "it is ok here now2" << std::endl;
 
-	for (int i = 0; i < rpv.size()-1; i++)
+	for (int i = 0; i < rpv.size() - 1; i++)
 	{
-		double outlet_dist_next = dist(centerline_points[rpv[i]], centerline_points[rpv[i + 1]]);
+		double outlet_dist_next = (centerline_points[rpv[i]] - centerline_points[rpv[i + 1]]).norm();
 		outlet_dist2 += outlet_dist_next;
 		std::cout << "the long of outlet2 is: " << outlet_dist2 << std::endl;
 		if (outlet_dist2 >= outlet_standard2)
 		{
-			outlet_direction2 = normalized(centerline_points[rpv[i + 1]] - centerline_points[rpv[i]]);
+			Vec3d vec1 = centerline_points[rpv[i + 1]] - centerline_points[rpv[i]];
+			outlet_direction2 = vec1.normalize();
 			double outlet_diff = outlet_dist2 - outlet_standard2;
 			outlet_point2 = lerp(centerline_points[rpv[i + 1]], centerline_points[rpv[i]], outlet_diff / outlet_dist_next);
 			std::cout << "outlet direction2 and outlet point2 is: " << outlet_direction2 << " " << outlet_point2 << std::endl;
@@ -620,7 +630,10 @@ void Simple::initialize_sdf(mfd::DistanceField3D& fSDF)
 		}
 	}
 	std::cout << "it is ok here now3" << std::endl;
+}
 
+void Simple::initialize_sdf(mfd::DistanceField3D& fSDF)
+{
 	//compute sdf
 	liquid_phi.resize(ni, nj, nk); u_liquid_phi.resize(ni + 1, nj, nk); v_liquid_phi.resize(ni, nj + 1, nk); w_liquid_phi.resize(ni, nj, nk + 1);
 	p_identifer.resize(ni, nj, nk); u_identifer.resize(ni + 1, nj, nk); v_identifer.resize(ni, nj + 1, nk); w_identifer.resize(ni, nj, nk + 1);
@@ -632,9 +645,9 @@ void Simple::initialize_sdf(mfd::DistanceField3D& fSDF)
 		fSDF.GetDistance(pos, d);
 		if (d < 0)
 		{
-			double d1 = dot(pos, inlet_direction1) - dot(inlet_point, inlet_direction1);
-			double d2 = dot(pos, outlet_direction1) - dot(outlet_point1, outlet_direction1);
-			double d3 = dot(pos, outlet_direction2) - dot(outlet_point2, outlet_direction2);
+			double d1 = inlet_direction1.dot(pos - inlet_point);
+			double d2 = outlet_direction1.dot(pos - outlet_point1);
+			double d3 = outlet_direction2.dot(pos - outlet_point2);
 
 			if ((d1 < 0 && d2 < 0) && d3 < 0)
 			{
@@ -715,8 +728,8 @@ void Simple::advance(std::string path, int frame, double dt, double alpha,double
 		std::cout << std::endl;
 		std::cout << "----------------Substep: " << nSubstep << "----------------" << std::endl;
 
-		double substep1 = cfl();
-		double substep = 0.01;
+		//double substep1 = cfl();
+		double substep =cfl();
 
 		if (t + substep > dt)
 			substep = dt - t;
@@ -791,17 +804,17 @@ void Simple::advance(std::string path, int frame, double dt, double alpha,double
 				p_star[i] += p_prime[i];
 			}
 
-			u_starstar.copyFrom(u_prime);
-			v_starstar.copyFrom(v_prime);
-			w_starstar.copyFrom(w_prime);
+			u_starstar.assign(u_prime);
+			v_starstar.assign(v_prime);
+			w_starstar.assign(w_prime);
 			update_velocity(u_starstar, v_starstar, w_starstar, p_prime, substep, alpha, theta);
 
-			u.copyFrom(u_starstar);
-			v.copyFrom(v_starstar);
-			w.copyFrom(w_starstar);
+			u.assign(u_starstar);
+			v.assign(v_starstar);
+			w.assign(w_starstar);
 			double substep2 = cfl();
 
-			p.copyFrom(p_star);
+			p.assign(p_star);
 			//pressure_indicator = abs(statistics_pressure(face0) - pressure0);
 			//pressure0 = statistics_pressure(face0);
 			//std::cout << "the pressure_indicator is: " << pressure_indicator << endl;
@@ -1311,16 +1324,16 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 #else
 void Simple::solve_velocity_component(Array3d& vel, Array3d& vel_ss, Array3BT& identifier, Array3d& vel_phi, double dt, double alpha,double theta)
 {
-	int system_size = vel.ni * vel.nj * vel.nk;
-	b.resize(system_size);
-	A.resize(system_size, system_size);
-	std::vector<TripletD> coefficients;
-	Eigen::VectorXd x(system_size);
+	int system_size = (vel.nx()) * (vel.ny()) * (vel.nz());
 
-	b.setZero();
+	CArray<double> Cb(system_size), Cx(system_size);
+	vector<Map<int, double>> Cmatrix;
+	Cb.reset();
+	Cx.reset();
 
 	double term = kinetic_coefficient * dt / (blood_density*dx*dx);
 	auto setupNeighbors = [&](
+		Map<int ,double>& i_map,
 		double& s_i,
 		int i,
 		int i_minus,
@@ -1329,45 +1342,61 @@ void Simple::solve_velocity_component(Array3d& vel, Array3d& vel_ss, Array3BT& i
 		double phi_i_plus,
 		CellType cell_i_minus,
 		CellType cell_i_plus,
-		double vb_1_plus,
 		double vb_1_minus,
-		double vb_2_plus,
-		double vb_2_minus)
+		double vb_1_plus,
+		double vb_2_minus,
+		double vb_2_plus)
 	{
 		if (cell_i_minus == CellType::Inside && cell_i_plus == CellType::Inside)
 		{
-			coefficients.push_back(TripletD(i, i_minus, -term));
-			coefficients.push_back(TripletD(i, i_plus, -term));
-			coefficients.push_back(TripletD(i, i, 2 * term));
+			Pair<int, double> pair1(i_minus, -term), pair2(i_plus, -term), pair3(i, 2 * term);
+			i_map.insert(pair1);
+			i_map.insert(pair2);
+			i_map.insert(pair3);
+			//coefficients.push_back(TripletD(i, i_minus, -term));
+			//coefficients.push_back(TripletD(i, i_plus, -term));
+			//coefficients.push_back(TripletD(i, i, 2 * term));
 		}
 		else if (cell_i_minus == CellType::Inside && cell_i_plus != CellType::Inside)
 		{
 			if (cell_i_plus == CellType::Static)
 			{
 				double A = phi_i_plus / (2 * dx_mm - phi_i_plus);
-				coefficients.push_back(TripletD(i, i_minus, -term * (1-A)));
-				coefficients.push_back(TripletD(i, i, 2 * term));
+				Pair<int, double> pair1(i_minus, -term * (1 - A)), pair2(i, 2 * term);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_minus, -term * (1-A)));
+				//coefficients.push_back(TripletD(i, i, 2 * term));
 			}
 			else if (cell_i_plus == CellType::Inlet1)
 			{
 				double A =  phi_i_plus / (2 * dx_mm - phi_i_plus);
-				coefficients.push_back(TripletD(i, i_minus, -term * (1-A)));
-				coefficients.push_back(TripletD(i, i, 2 * term));
+				Pair<int, double> pair1(i_minus, -term * (1 - A)), pair2(i, 2 * term);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_minus, -term * (1-A)));
+				//coefficients.push_back(TripletD(i, i, 2 * term));
 
 				s_i += term * (1+A)*vb_1_plus;
 			}
 			else if (cell_i_plus == CellType::Inlet2)
 			{
 				double A = phi_i_plus / (2 * dx_mm - phi_i_plus);
-				coefficients.push_back(TripletD(i, i_minus, -term * (1 - A)));
-				coefficients.push_back(TripletD(i, i, 2 * term));
+				Pair<int, double> pair1(i_minus, -term * (1 - A)), pair2(i, 2 * term);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_minus, -term * (1 - A)));
+				//coefficients.push_back(TripletD(i, i, 2 * term));
 
 				s_i += term * (1 + A)*vb_2_plus;
 			}
 			else
 			{
-				coefficients.push_back(TripletD(i, i_minus, -term));
-				coefficients.push_back(TripletD(i, i, term));
+				Pair<int, double> pair1(i_minus, -term), pair2(i, term);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_minus, -term));
+				//coefficients.push_back(TripletD(i, i, term));
 			}
 		}
 		else if (cell_i_minus != CellType::Inside && cell_i_plus == CellType::Inside)
@@ -1375,29 +1404,41 @@ void Simple::solve_velocity_component(Array3d& vel, Array3d& vel_ss, Array3BT& i
 			if (cell_i_minus == CellType::Static)
 			{
 				double A =  phi_i_minus / (2 * dx_mm - phi_i_minus);
-				coefficients.push_back(TripletD(i, i_plus, -term * (1-A)));
-				coefficients.push_back(TripletD(i, i, 2 * term));
+				Pair<int, double> pair1(i, 2 * term), pair2(i_plus, -term * (1 - A));
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_plus, -term * (1-A)));
+				//coefficients.push_back(TripletD(i, i, 2 * term));
 			}
 			else if (cell_i_minus == CellType::Inlet1)
 			{
 				double A =  phi_i_minus / (2 * dx_mm - phi_i_minus);
-				coefficients.push_back(TripletD(i, i_plus, -term * (1-A)));
-				coefficients.push_back(TripletD(i, i, 2 * term));
+				Pair<int, double> pair1(i, 2 * term), pair2(i_plus, -term * (1 - A));
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_plus, -term * (1-A)));
+				//coefficients.push_back(TripletD(i, i, 2 * term));
 
 				s_i += term * (1+A)*vb_1_minus;
 			}
 			else if (cell_i_minus == CellType::Inlet2)
 			{
 				double A = phi_i_minus / (2 * dx_mm - phi_i_minus);
-				coefficients.push_back(TripletD(i, i_plus, -term * (1 - A)));
-				coefficients.push_back(TripletD(i, i, 2 * term));
+				Pair<int, double> pair1(i, 2 * term), pair2(i_plus, -term * (1 - A));
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_plus, -term * (1 - A)));
+				//coefficients.push_back(TripletD(i, i, 2 * term));
 
 				s_i += term * (1 + A)*vb_2_minus;
 			}
 			else
 			{
-				coefficients.push_back(TripletD(i, i_plus, -term));
-				coefficients.push_back(TripletD(i, i, term));
+				Pair<int, double> pair1(i, term), pair2(i_plus, -term);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(i, i_plus, -term));
+				//coefficients.push_back(TripletD(i, i, term));
 			}
 		}
 		else
@@ -1411,57 +1452,75 @@ void Simple::solve_velocity_component(Array3d& vel, Array3d& vel_ss, Array3BT& i
 		}
 	};
 
-	for (int k = 0; k < vel.nk; ++k) {
-		for (int j = 0; j < vel.nj; ++j) {
-			for (int i = 0; i < vel.ni; ++i) {
+	for (int k = 0; k < vel.nz(); ++k) {
+		for (int j = 0; j < vel.ny(); ++j) {
+			for (int i = 0; i < vel.nx(); ++i) {
 				int index = vel.index(i, j, k);
+				Map<int, double> map1;
 				if (identifier(i, j, k) == CellType::Inside)
 				{
-					double& b_ijk = b(index);
-					b(index) += vel_ss(i, j, k);
-					coefficients.push_back(TripletD(index, index, 1.0));
-					if (vel.ni > ni) 
+					double& b_ijk = Cb[index];
+					Cb[index] += vel_ss(i, j, k);
+
+					Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 7);
+					map1.reserve(pairptr1, 7);
+
+					Pair<int, double> pair(index, 1.0);
+					map1.insert(pair);
+
+					if (vel.nx() > ni) 
 					{
-						setupNeighbors(b_ijk, index, vel.index(i - 1, j, k), vel.index(i + 1, j, k), vel_phi(i - 1, j, k), vel_phi(i + 1, j, k), identifier(i - 1, j, k), identifier(i + 1, j, k), u_boundary(inlet_direction1,inlet_magnitude1, alpha,theta,j,k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k));
+						setupNeighbors(map1,b_ijk,index, vel.index(i - 1, j, k), vel.index(i + 1, j, k), vel_phi(i - 1, j, k), vel_phi(i + 1, j, k), identifier(i - 1, j, k), identifier(i + 1, j, k), u_boundary(inlet_direction1,inlet_magnitude1, alpha,theta,j,k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k));
 
-						setupNeighbors(b_ijk, index, vel.index(i, j - 1, k), vel.index(i, j + 1, k), vel_phi(i, j - 1, k), vel_phi(i, j + 1, k), identifier(i, j - 1, k), identifier(i, j + 1, k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j+1,k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j-1,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j+1,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j-1,k));
+						setupNeighbors(map1,b_ijk, index, vel.index(i, j - 1, k), vel.index(i, j + 1, k), vel_phi(i, j - 1, k), vel_phi(i, j + 1, k), identifier(i, j - 1, k), identifier(i, j + 1, k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j-1,k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j+1,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j-1,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j+1,k));
 
-						setupNeighbors(b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k+1), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k-1), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k+1), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k-1));
+						setupNeighbors(map1,b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k-1), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k+1), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k-1), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k+1));
 					}
-					else if (vel.nj > nj)
+					else if (vel.ny() > nj)
 					{
-						setupNeighbors(b_ijk, index, vel.index(i - 1, j, k), vel.index(i + 1, j, k), vel_phi(i - 1, j, k), vel_phi(i + 1, j, k), identifier(i - 1, j, k), identifier(i + 1, j, k), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
+						setupNeighbors(map1,b_ijk, index, vel.index(i - 1, j, k), vel.index(i + 1, j, k), vel_phi(i - 1, j, k), vel_phi(i + 1, j, k), identifier(i - 1, j, k), identifier(i + 1, j, k), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 
-						setupNeighbors(b_ijk, index, vel.index(i, j - 1, k), vel.index(i, j + 1, k), vel_phi(i, j - 1, k), vel_phi(i, j + 1, k), identifier(i, j - 1, k), identifier(i, j + 1, k), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
+						setupNeighbors(map1,b_ijk, index, vel.index(i, j - 1, k), vel.index(i, j + 1, k), vel_phi(i, j - 1, k), vel_phi(i, j + 1, k), identifier(i, j - 1, k), identifier(i, j + 1, k), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 
-						setupNeighbors(b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
+						setupNeighbors(map1,b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 					}
-					else if (vel.nk > nk)
+					else if (vel.nz() > nk)
 					{
-						setupNeighbors(b_ijk, index, vel.index(i - 1, j, k), vel.index(i + 1, j, k), vel_phi(i - 1, j, k), vel_phi(i + 1, j, k), identifier(i - 1, j, k), identifier(i + 1, j, k), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
+						setupNeighbors(map1,b_ijk, index, vel.index(i - 1, j, k), vel.index(i + 1, j, k), vel_phi(i - 1, j, k), vel_phi(i + 1, j, k), identifier(i - 1, j, k), identifier(i + 1, j, k), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 
-						setupNeighbors(b_ijk, index, vel.index(i, j - 1, k), vel.index(i, j + 1, k), vel_phi(i, j - 1, k), vel_phi(i, j + 1, k), identifier(i, j - 1, k), identifier(i, j + 1, k), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
+						setupNeighbors(map1,b_ijk, index, vel.index(i, j - 1, k), vel.index(i, j + 1, k), vel_phi(i, j - 1, k), vel_phi(i, j + 1, k), identifier(i, j - 1, k), identifier(i, j + 1, k), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 
-						setupNeighbors(b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
+						setupNeighbors(map1,b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 					}
 				}
+				Cmatrix.push_back(map1);
 			}
 		}
 	}
 
-	A.setFromTriplets(coefficients.begin(), coefficients.end());
-	Eigen::LeastSquaresConjugateGradient<Eigen::SparseMatrix<double>> so;
-	so.compute(A);
-	x = so.solve(b);
-	std::cout << "#iterations:   " << so.iterations() << "    #estimated error:   " << so.error() << std::endl;
+	DArrayMap<double> matrix_a;
+	matrix_a.assign(Cmatrix);
+
+	DArray<double> b;
+	b.assign(Cb);
+
+	SparseMatrix<double> solver(matrix_a, b);
+	solver.CGLS(1000, 0.0001);
+	
+	Cx.assign(solver.X());
+	//A.setFromTriplets(coefficients.begin(), coefficients.end());
+	//Eigen::LeastSquaresConjugateGradient<Eigen::SparseMatrix<double>> so;
+	//so.compute(A);
+	//x = so.solve(b);
+	//std::cout << "#iterations:   " << so.iterations() << "    #estimated error:   " << so.error() << std::endl;
 
 	//update velocity
-	for (int k = 0; k < vel.nk; ++k) {
-		for (int j = 0; j < vel.nj; ++j) {
-			for (int i = 0; i < vel.ni; ++i) {
+	for (int k = 0; k < vel.nz(); ++k) {
+		for (int j = 0; j < vel.ny(); ++j) {
+			for (int i = 0; i < vel.nx(); ++i) {
 				int index = vel.index(i, j, k);
 				if (identifier(i, j, k) == CellType::Inside)
-					vel(i, j, k) = x(index);
+					vel(i, j, k) = Cx[index];
 			}
 		}
 	}
@@ -1469,18 +1528,18 @@ void Simple::solve_velocity_component(Array3d& vel, Array3d& vel_ss, Array3BT& i
 
 void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Array3d& w_in, double dt, double alpha,double theta)
 {
-	int system_size = pressure.ni * pressure.nj * pressure.nk;
-	b.resize(system_size);
-	A.resize(system_size, system_size);
-	std::vector<TripletD> coefficients;
-	Eigen::VectorXd x(system_size);
+	int system_size = (pressure.nx()) * (pressure.ny()) * (pressure.nz());
 
-	b.setZero();
+	CArray<double> Cb(system_size), Cx(system_size);
+	vector<Map<int, double>> Cmatrix;
+	Cb.reset();
+	Cx.reset();
 
-	pressure.set_zero();
+	pressure.reset();
 
 	double term = dx * blood_density / dt;
 	auto setupPPE = [&](
+		Map<int, double>& i_map,
 		double& s_i,
 		int p_i,
 		int p_i_minus,
@@ -1505,9 +1564,13 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 
 		if (p_type_i_minus == CellType::Inside && p_type_i_plus == CellType::Inside)
 		{
-			coefficients.push_back(TripletD(p_i, p_i_plus, -1.0));
-			coefficients.push_back(TripletD(p_i, p_i_minus, -1.0));
-			coefficients.push_back(TripletD(p_i, p_i, 2.0));
+			Pair<int, double> pair1(p_i_minus, -1.0), pair2(p_i, 2.0), pair3(p_i_plus, -1.0);
+			i_map.insert(pair1);
+			i_map.insert(pair2);
+			i_map.insert(pair3);
+			//coefficients.push_back(TripletD(p_i, p_i_plus, -1.0));
+			//coefficients.push_back(TripletD(p_i, p_i_minus, -1.0));
+			//coefficients.push_back(TripletD(p_i, p_i, 2.0));
 
 			s_i += -term * (v_i_plus - v_i_minus);
 		}
@@ -1518,8 +1581,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 				{
 					//Impose velocity boundary conditions
 					double A = -dx_mm / (v_phi_i_plus - dx_mm);
-					coefficients.push_back(TripletD(p_i, p_i_minus, -A));
-					coefficients.push_back(TripletD(p_i, p_i, A));
+					Pair<int, double> pair1(p_i_minus, -A), pair2(p_i, A);
+					i_map.insert(pair1);
+					i_map.insert(pair2);
+					//coefficients.push_back(TripletD(p_i, p_i_minus, -A));
+					//coefficients.push_back(TripletD(p_i, p_i, A));
 
 					s_i += term * v_i_minus* A;
 				}
@@ -1527,8 +1593,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 				{
 					//Impose velocity boundary conditions
 					double A = -dx_mm / (v_phi_i_plus - dx_mm);
-					coefficients.push_back(TripletD(p_i, p_i_minus, -A));
-					coefficients.push_back(TripletD(p_i, p_i, A));
+					Pair<int, double> pair1(p_i_minus, -A), pair2(p_i, A);
+					i_map.insert(pair1);
+					i_map.insert(pair2);
+					//coefficients.push_back(TripletD(p_i, p_i_minus, -A));
+					//coefficients.push_back(TripletD(p_i, p_i, A));
 
 					s_i += term * v_i_minus*A;
 					//TODO: compute the inlet velocity boundary
@@ -1538,8 +1607,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 				{
 					//Impose velocity boundary conditions
 					double A = -dx_mm / (v_phi_i_plus - dx_mm);
-					coefficients.push_back(TripletD(p_i, p_i_minus, -A));
-					coefficients.push_back(TripletD(p_i, p_i, A));
+					Pair<int, double> pair1(p_i_minus, -A), pair2(p_i, A);
+					i_map.insert(pair1);
+					i_map.insert(pair2);
+					//coefficients.push_back(TripletD(p_i, p_i_minus, -A));
+					//coefficients.push_back(TripletD(p_i, p_i, A));
 
 					s_i += term * v_i_minus*A;
 					//TODO: compute the inlet velocity boundary
@@ -1552,9 +1624,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 					{
 						//Impose pressure boundary conditions
 						double A = p_phi_i_plus / (2 * dx_mm - p_phi_i_plus);
-
-						coefficients.push_back(TripletD(p_i, p_i_minus, -(1 - A)));
-						coefficients.push_back(TripletD(p_i, p_i, 2.0));
+						Pair<int, double> pair1(p_i_minus, -(1-A)), pair2(p_i, 2.0);
+						i_map.insert(pair1);
+						i_map.insert(pair2);
+						//coefficients.push_back(TripletD(p_i, p_i_minus, -(1 - A)));
+						//coefficients.push_back(TripletD(p_i, p_i, 2.0));
 
 						//TODO: check the sign for this term
 						s_i += -term * (v_i_plus - v_i_minus);
@@ -1570,9 +1644,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 			{
 			    //Impose velocity boundary conditions
 				double A = -dx_mm / (v_phi_i_minus - dx_mm);
-
-				coefficients.push_back(TripletD(p_i, p_i_plus, -A));
-				coefficients.push_back(TripletD(p_i, p_i, A));
+				Pair<int, double> pair1(p_i, A), pair2(p_i_plus, -A);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(p_i, p_i_plus, -A));
+				//coefficients.push_back(TripletD(p_i, p_i, A));
 
 				s_i += -term * v_i_plus* A;
 			}
@@ -1580,9 +1656,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 			{
 				//Impose velocity boundary conditions
 				double A = -dx_mm / (v_phi_i_minus - dx_mm);
-
-				coefficients.push_back(TripletD(p_i, p_i_plus, -A));
-				coefficients.push_back(TripletD(p_i, p_i,A));
+				Pair<int, double> pair1(p_i, A), pair2(p_i_plus, -A);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(p_i, p_i_plus, -A));
+				//coefficients.push_back(TripletD(p_i, p_i,A));
 
 				s_i += -term * v_i_plus*A;
 
@@ -1592,9 +1670,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 			{
 				//Impose velocity boundary conditions
 				double A = -dx_mm / (v_phi_i_minus - dx_mm);
-
-				coefficients.push_back(TripletD(p_i, p_i_plus, -A));
-				coefficients.push_back(TripletD(p_i, p_i, A));
+				Pair<int, double> pair1(p_i, A), pair2(p_i_plus, -A);
+				i_map.insert(pair1);
+				i_map.insert(pair2);
+				//coefficients.push_back(TripletD(p_i, p_i_plus, -A));
+				//coefficients.push_back(TripletD(p_i, p_i, A));
 
 				s_i += -term * v_i_plus*A;
 
@@ -1607,8 +1687,11 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 				{
 					//Impose pressure boundary conditions
 					double A = p_phi_i_minus / (2 * dx_mm - p_phi_i_minus);
-					coefficients.push_back(TripletD(p_i, p_i_plus, -(1 - A)));
-					coefficients.push_back(TripletD(p_i, p_i, 2.0));
+					Pair<int, double> pair1(p_i, 2.0), pair2(p_i_plus, -(1 - A));
+					i_map.insert(pair1);
+					i_map.insert(pair2);
+					//coefficients.push_back(TripletD(p_i, p_i_plus, -(1 - A)));
+					//coefficients.push_back(TripletD(p_i, p_i, 2.0));
 
 					//TODO: check the sign for this term
 					s_i += -term * (v_i_plus - v_i_minus);
@@ -1632,38 +1715,52 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 	for (int k = 0; k <nk; ++k) {
 		for (int j = 0; j < nj; ++j) {
 			for (int i = 0; i < ni; ++i) {
+				Map<int, double> map1;
 				int index = pressure.index(i, j, k);
 				if (p_identifer(i,j,k) == CellType::Inside)
 				{
 					double source_ijk = 0.0;
-					setupPPE(source_ijk, index, pressure.index(i - 1, j, k), pressure.index(i + 1, j, k),u_in(i, j, k),u_in(i + 1, j, k),u_liquid_phi(i, j, k),u_liquid_phi(i + 1, j, k),u_identifer(i, j, k),u_identifer(i + 1, j, k), u_boundary(inlet_direction1,inlet_magnitude1,alpha, theta,j,k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k),p_boundary());
 
-					setupPPE(source_ijk,index,pressure.index(i, j - 1, k),pressure.index(i, j + 1, k),v_in(i, j, k),v_in(i, j + 1, k),v_liquid_phi(i, j, k),v_liquid_phi(i, j + 1, k),v_identifer(i, j, k),v_identifer(i, j + 1, k), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), p_boundary());
+					Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 7);
+					map1.reserve(pairptr1, 7);
 
-					setupPPE(source_ijk,index,pressure.index(i, j, k - 1),pressure.index(i, j, k + 1),w_in(i, j, k),w_in(i, j, k + 1),w_liquid_phi(i, j, k),w_liquid_phi(i, j, k + 1),w_identifer(i, j, k),w_identifer(i, j, k + 1), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), p_boundary());
+					setupPPE(map1,source_ijk, index, pressure.index(i - 1, j, k), pressure.index(i + 1, j, k),u_in(i, j, k),u_in(i + 1, j, k),u_liquid_phi(i, j, k),u_liquid_phi(i + 1, j, k),u_identifer(i, j, k),u_identifer(i + 1, j, k), u_boundary(inlet_direction1,inlet_magnitude1,alpha, theta,j,k), u_boundary(inlet_direction1, inlet_magnitude1, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k), u_boundary(inlet_direction2, inlet_magnitude2, alpha, theta,j,k),p_boundary());
 
-					b[index] = source_ijk;
+					setupPPE(map1,source_ijk,index,pressure.index(i, j - 1, k),pressure.index(i, j + 1, k),v_in(i, j, k),v_in(i, j + 1, k),v_liquid_phi(i, j, k),v_liquid_phi(i, j + 1, k),v_identifer(i, j, k),v_identifer(i, j + 1, k), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), v_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), p_boundary());
+
+					setupPPE(map1,source_ijk,index,pressure.index(i, j, k - 1),pressure.index(i, j, k + 1),w_in(i, j, k),w_in(i, j, k + 1),w_liquid_phi(i, j, k),w_liquid_phi(i, j, k + 1),w_identifer(i, j, k),w_identifer(i, j, k + 1), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), p_boundary());
+
+					Cb[index] = source_ijk;
 				}
+				Cmatrix.push_back(map1);
 			}
 		}
 	}
-	A.setFromTriplets(coefficients.begin(), coefficients.end());
-	Eigen::LeastSquaresConjugateGradient<Eigen::SparseMatrix<double>> so;
-	so.compute(A);
-	x = so.solve(b);
-	std::cout << "Pressure iterations:   " << so.iterations() << "    #estimated error:   " << so.error() << std::endl;
 
-	//update velocity
+	DArrayMap<double> matrix_a;
+	matrix_a.assign(Cmatrix);
+
+	DArray<double> b;
+	b.assign(Cb);
+
+	SparseMatrix<double> solver(matrix_a, b);
+	solver.CGLS(1000, 0.0001);
+
+	Cx.assign(solver.X());
+
+	//update pressure
 	for (int k = 0; k < nk; ++k) {
 		for (int j = 0; j < nj; ++j) {
 			for (int i = 0; i < ni; ++i) {
 				int index = pressure.index(i, j, k);
 				if (p_identifer(i, j, k) == CellType::Inside)
-					pressure(i, j, k) = x(index);
+				{
+					pressure(i, j, k) = Cx[index];
+					convergence_indicator += sqr(Cb[index]);
+				}
 			}
 		}
 	}
- 	convergence_indicator = b.norm();
 }
 
 void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressure, double dt, double alpha,double theta)
@@ -1671,7 +1768,7 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 	std::cout << "************this conditation is UNBLOCK" << std::endl;
 	double term = dt / (dx * blood_density);
 
-	for (int k = 0; k < u.nk; ++k) for (int j = 0; j < u.nj; ++j) for (int i = 1; i < u.ni - 1; ++i)
+	for (int k = 0; k < u.nz(); ++k) for (int j = 0; j < u.ny(); ++j) for (int i = 1; i < u.nx() - 1; ++i)
 	{
 		if (u_identifer(i, j, k) == CellType::Inside)
 		{
@@ -1679,7 +1776,7 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 				u(i, j, k) -= term * (pressure(i, j, k) - pressure(i - 1, j, k));
 		}
 	}
-	for (int k = 0; k < v.nk; ++k) for (int j = 1; j < v.nj - 1; ++j) for (int i = 0; i < v.ni; ++i)
+	for (int k = 0; k < v.nz(); ++k) for (int j = 1; j < v.ny() - 1; ++j) for (int i = 0; i < v.nx(); ++i)
 	{
 		if (v_identifer(i, j, k) == CellType::Inside)
 		{
@@ -1687,7 +1784,7 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 				v(i, j, k) -= term * (pressure(i, j, k) - pressure(i, j - 1, k));
 		}
 	}
-	for (int k = 1; k < w.nk - 1; ++k) for (int j = 0; j < w.nj; ++j) for (int i = 0; i < w.ni; ++i)
+	for (int k = 1; k < w.nz() - 1; ++k) for (int j = 0; j < w.ny(); ++j) for (int i = 0; i < w.nx(); ++i)
 	{
 		if (w_identifer(i, j, k) == CellType::Inside)
 		{
@@ -1727,7 +1824,7 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 				{
 					double A = -dx_mm / (v_phi_i_plus - dx_mm);
 
-					v_i_plus = (1-A) * v_i_minus;
+					v_i_plus = (1 - A) * v_i_minus;
 				}
 				else if (p_type_i_plus == CellType::Inlet1)
 				{
@@ -1791,7 +1888,7 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 		}
 	};
 	//Impose boundary conditions
-	for (int k = 0; k < pressure.nk; ++k) for (int j = 0; j < pressure.nj; ++j) for (int i = 0; i < pressure.ni; ++i)
+	for (int k = 0; k < pressure.nz(); ++k) for (int j = 0; j < pressure.ny(); ++j) for (int i = 0; i < pressure.nx(); ++i)
 	{
 		if (p_identifer(i, j, k) == CellType::Inside)
 		{
@@ -1805,34 +1902,34 @@ void Simple::update_velocity(Array3d& u, Array3d& v, Array3d& w, Array3d& pressu
 }
 #endif // BLOCK
 
-void Simple::classifyBoundary(CellType& ct, Vec3d pos, mfd::DistanceField3D& inletSDF1, mfd::DistanceField3D& inletSDF2, mfd::DistanceField3D& outletSDF1, mfd::DistanceField3D& outletSDF2)
-{
-	double d_inlet1, d_inlet2, d_outlet1, d_outlet2;
-	inletSDF1.GetDistance(pos, d_inlet1);
-	inletSDF2.GetDistance(pos, d_inlet2);
-	outletSDF1.GetDistance(pos, d_outlet1);
-	outletSDF2.GetDistance(pos, d_outlet2);
-	if (d_inlet1 < 0)
-	{
-		ct = CellType::Inlet1;
-	}
-	else if (d_inlet2 < 0)
-	{
-		ct = CellType::Inlet2;
-	}
-	else if (d_outlet1 < 0)
-	{
-		ct = CellType::Outlet1;
-	}
-	else if (d_outlet2 < 0)
-	{
-		ct = CellType::Outlet2;
-	}
-	else
-	{
-		ct = CellType::Static;
-	}
-}
+//void Simple::classifyBoundary(CellType& ct, Vec3d pos, mfd::DistanceField3D& inletSDF1, mfd::DistanceField3D& inletSDF2, mfd::DistanceField3D& outletSDF1, mfd::DistanceField3D& outletSDF2)
+//{
+//	double d_inlet1, d_inlet2, d_outlet1, d_outlet2;
+//	inletSDF1.GetDistance(pos, d_inlet1);
+//	inletSDF2.GetDistance(pos, d_inlet2);
+//	outletSDF1.GetDistance(pos, d_outlet1);
+//	outletSDF2.GetDistance(pos, d_outlet2);
+//	if (d_inlet1 < 0)
+//	{
+//		ct = CellType::Inlet1;
+//	}
+//	else if (d_inlet2 < 0)
+//	{
+//		ct = CellType::Inlet2;
+//	}
+//	else if (d_outlet1 < 0)
+//	{
+//		ct = CellType::Outlet1;
+//	}
+//	else if (d_outlet2 < 0)
+//	{
+//		ct = CellType::Outlet2;
+//	}
+//	else
+//	{
+//		ct = CellType::Static;
+//	}
+//}
 
 double Simple::u_boundary(Vec3d& in_dir,double& in_mag, double al,double the,int grid_j,int grid_k)
 {
@@ -1842,7 +1939,6 @@ double Simple::u_boundary(Vec3d& in_dir,double& in_mag, double al,double the,int
 	Vec3d inlet_vel = -in_mag * in_dir;
 
 	return inlet_vel[0];
-
 }
 
 double Simple::v_boundary(Vec3d& in_dir, double& in_mag, double al,double the)
@@ -1865,12 +1961,12 @@ double Simple::p_boundary()
 double Simple::cfl()
 {
 	double maxvel = 0.0,cfl_v=1.0;
-	for (unsigned int i = 0; i < u.a.size(); ++i)
-		maxvel = max(maxvel, abs(u.a[i]));
-	for (unsigned int i = 0; i < v.a.size(); ++i)
-		maxvel = max(maxvel, abs(v.a[i]));
-	for (unsigned int i = 0; i < w.a.size(); ++i)
-		maxvel = max(maxvel, abs(w.a[i]));
+	for (unsigned int i = 0; i < u.size(); ++i)
+		maxvel = max(maxvel, abs(u[i]));
+	for (unsigned int i = 0; i < v.size(); ++i)
+		maxvel = max(maxvel, abs(v[i]));
+	for (unsigned int i = 0; i < w.size(); ++i)
+		maxvel = max(maxvel, abs(w[i]));
 
 	std::printf("max velocity: %f \n", maxvel);
 
@@ -2070,10 +2166,10 @@ bool Simple::import_status(std::string path)
 void Simple::extrapolate(Array3d& grid, Array3BT iden) 
 {
 	Array3d temp_grid = grid;
-	Array3BT old_iden(iden.ni, iden.nj, iden.nk);
+	Array3BT old_iden(iden.nx(), iden.ny(), iden.nz());
 	for (int layers = 0; layers < 10; ++layers) {
 		old_iden = iden;
-		for (int k = 1; k < grid.nk - 1; ++k) for (int j = 1; j < grid.nj - 1; ++j) for (int i = 1; i < grid.ni - 1; ++i) {
+		for (int k = 1; k < grid.nz() - 1; ++k) for (int j = 1; j < grid.ny() - 1; ++j) for (int i = 1; i < grid.nx() - 1; ++i) {
 			double sum = 0;
 			int count = 0;
 
@@ -2184,21 +2280,21 @@ double Simple::statistics_pressure(std::string face)
 
 void Simple::statistics_velocity(Array3BT& identifer, Array3d& velocity, Vec3d& orientation, double alpha, double theta)
 {
-	cout << velocity.ni << " " << velocity.nj << " " << velocity.nk << endl;
+	cout << velocity.nx() << " " << velocity.ny() << " " << velocity.nz() << endl;
 	Array3d velocity_error;
-	velocity_error.resize(velocity.ni, velocity.nj, velocity.nk);
-	velocity_error.set_zero();
+	velocity_error.resize(velocity.nx(), velocity.ny(), velocity.nz());
+	velocity_error.reset();
 
 	//statistics velocity
 	int number = 0;
 	double total_error = 0.0, error_avg = 0.0, error_deviation = 0.0;
 	double max_error = FLT_MIN, min_error = FLT_MAX;
-	for (int k = 0; k < velocity.nk; k++) {
-		for (int j = 0; j < velocity.nj; j++) {
-			for (int i = 0; i < velocity.ni; i++) {
+	for (int k = 0; k < velocity.nz(); k++) {
+		for (int j = 0; j < velocity.ny(); j++) {
+			for (int i = 0; i < velocity.nx(); i++) {
 				if (identifer(i, j, k) == CellType::Inside)
 				{
-					Vec3d pnew = lower_vertex + Vec3d((i + ((ni + 1) - (velocity.ni))*0.5) * dx_mm, (j + ((nj + 1) - (velocity.nj))*0.5) * dx_mm, (k + ((nk + 1) - (velocity.nk))*0.5) * dx_mm);
+					Vec3d pnew = lower_vertex + Vec3d((i + ((ni + 1) - (velocity.nx()))*0.5) * dx_mm, (j + ((nj + 1) - (velocity.ny()))*0.5) * dx_mm, (k + ((nk + 1) - (velocity.nz()))*0.5) * dx_mm);
 					double f1 = pnew[0] * cos(alpha)*cos(theta) - pnew[1] * cos(alpha)*sin(theta) + pnew[2] * sin(alpha) + 8;
 					double f2 = pnew[0] * cos(alpha)*cos(theta) - pnew[1] * cos(alpha)*sin(theta) + pnew[2] * sin(alpha) - 13;
 
@@ -2208,12 +2304,12 @@ void Simple::statistics_velocity(Array3BT& identifer, Array3d& velocity, Vec3d& 
 						Vec3d o2(sin(theta), cos(theta), 0);
 						Vec3d o3(-sin(alpha)*cos(theta), sin(alpha)*sin(theta), cos(alpha));
 
-						Vec3d pold(dot(pnew, o1), dot(pnew, o2), dot(pnew, o3));
+						Vec3d pold(pnew.dot(o1), pnew.dot(o2), pnew.dot(o3));
 
 						double c = 0.4*(1.0 - ((sqr(pold[1]) + sqr(pold[2])) / sqr(5.4)));
 
 
-						double vel = dot(Vec3d(c, 0, 0), orientation);
+						double vel = (Vec3d(c, 0, 0)).dot(orientation);
 						velocity_error(i, j, k) =abs(vel - velocity(i, j, k)) / 0.2;
 
 						max_error = max(max_error, velocity_error(i, j, k));
@@ -2227,12 +2323,12 @@ void Simple::statistics_velocity(Array3BT& identifer, Array3d& velocity, Vec3d& 
 		}
 	}
 	error_avg = total_error / number;
-	for (int k = 0; k < velocity.nk; k++) {
-		for (int j = 0; j < velocity.nj; j++) {
-			for (int i = 0; i < velocity.ni; i++) {
+	for (int k = 0; k < velocity.nz(); k++) {
+		for (int j = 0; j < velocity.ny(); j++) {
+			for (int i = 0; i < velocity.nx(); i++) {
 				if (identifer(i, j, k) == CellType::Inside)
 				{
-					Vec3d pnew = lower_vertex + Vec3d((i + ((ni + 1) - (velocity.ni))*0.5) * dx_mm, (j + ((nj + 1) - (velocity.nj))*0.5) * dx_mm, (k + ((nk + 1) - (velocity.nk))*0.5) * dx_mm);
+					Vec3d pnew = lower_vertex + Vec3d((i + ((ni + 1) - (velocity.nx()))*0.5) * dx_mm, (j + ((nj + 1) - (velocity.ny()))*0.5) * dx_mm, (k + ((nk + 1) - (velocity.nz()))*0.5) * dx_mm);
 					double f1 = pnew[0] * cos(alpha)*cos(theta) - pnew[1] * cos(alpha)*sin(theta) + pnew[2] * sin(alpha) + 10;
 					double f2 = pnew[0] * cos(alpha)*cos(theta) - pnew[1] * cos(alpha)*sin(theta) + pnew[2] * sin(alpha) - 10;
 
@@ -2254,7 +2350,7 @@ void Simple::face_vertex_pressure(std::string path1, std::string path2, double z
 {
 	Array3d pre1, pre2;
 	pre1.resize(ni, nj, nk); pre2.resize(ni, nj, nk);
-	pre1.set_zero(); pre2.set_zero();
+	pre1.reset(); pre2.reset();
 
 	std::ifstream status_in1(path1), status_in2(path2);
 	if ((!status_in1.good()) || (!status_in2.good()))
@@ -2446,9 +2542,9 @@ void Simple::statistics(double al)
 {
 	Array3d u_error, v_error, w_error;
 	u_error.resize(ni + 1, nj, nk); v_error.resize(ni, nj + 1, nk); w_error.resize(ni, nj, nk + 1);
-	u_error.set_zero();	v_error.set_zero();	w_error.set_zero();
+	u_error.reset();	v_error.reset();	w_error.reset();
 	u_init.resize(ni + 1, nj, nk); v_init.resize(ni, nj + 1, nk); w_init.resize(ni, nj, nk + 1);
-	u_init.set_zero(); v_init.set_zero(); w_init.set_zero();
+	u_init.reset(); v_init.reset(); w_init.reset();
 
 	//compute the analytical solution of u velocity before rotation
 	for (int k = 0; k < nk; k++) {
@@ -2491,7 +2587,7 @@ void Simple::statistics(double al)
 						pold = pold - lower_vertex;
 
 						Vec3d vel_p = get_velocity(u_init, v_init, w_init, pold);
-						double vel_o = dot(vel_p, orientation);
+						double vel_o = vel_p.dot(orientation);
 						u_error(i, j, k) = (vel_o - u(i, j, k)) / 0.2;
 
 						u_max_error = max(u_max_error, u_error(i, j, k));
@@ -2552,7 +2648,7 @@ void Simple::statistics(double al)
 						pold = pold - lower_vertex;
 
 						Vec3d vel_p = get_velocity(u_init, v_init, w_init, pold);
-						double vel_o = -dot(vel_p, orientation);
+						double vel_o = -(vel_p.dot(orientation));
 						v_error(i, j, k) = (vel_o - v(i, j, k)) / 0.2;
 
 						v_max_error = max(v_max_error, v_error(i, j, k));
@@ -2596,9 +2692,9 @@ void Simple::advect(Array3d &velocity_u, Array3d &velocity_v, Array3d &velocity_
 	temp_u.resize(ni + 1, nj, nk);
 	temp_v.resize(ni, nj + 1, nk);
 	temp_w.resize(ni, nj, nk + 1);
-	temp_u.assign(0);
-	temp_v.assign(0);
-	temp_w.assign(0);
+	temp_u.reset();
+	temp_v.reset();
+	temp_w.reset();
 
 	//semi-Lagrangian advection on u-component of velocity
 	for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) for (int i = 0; i < ni + 1; ++i)
