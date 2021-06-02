@@ -10,7 +10,7 @@
 #include "ParticleSystem/ElasticityModule.h"
 #include "RigidBody/RigidBody.h"
 
-#include "module/SurfaceRender.h"
+#include "module/VtkSurfaceVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -43,8 +43,8 @@ void CreateScene()
 	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
-	auto ptRender = std::make_shared<SurfaceRenderer>();
-	ptRender->setColor(glm::vec3(0, 1, 1));
+	auto ptRender = std::make_shared<SurfaceVisualModule>();
+	//ptRender->setColor(glm::vec3(0, 1, 1));
 
 	child3->setVisible(false);
 	child3->setMass(1.0);
@@ -55,9 +55,9 @@ void CreateScene()
 	child3->getSurfaceNode()->setVisible(true);
 	child3->getSurfaceNode()->addVisualModule(ptRender);
 
-	auto sRender = std::make_shared<SurfaceRenderer>();
+	auto sRender = std::make_shared<SurfaceVisualModule>();
 	child3->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(glm::vec3(1, 1, 1));
+	//sRender->setColor(glm::vec3(1, 1, 1));
 
 	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);

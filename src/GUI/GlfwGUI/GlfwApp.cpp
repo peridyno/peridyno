@@ -10,7 +10,6 @@
 #include "Framework/Log.h"
 
 #include "../RenderEngine/RenderEngine.h"
-#include "../RenderEngine/RenderTarget.h"
 #include "../RenderEngine/RenderParams.h"
 
 namespace dyno 
@@ -39,7 +38,6 @@ namespace dyno
 
 		//
 		delete mRenderEngine;
-		delete mRenderTarget;
 		delete mRenderParams;
 
 		glfwDestroyWindow(mWindow);
@@ -151,13 +149,10 @@ namespace dyno
 
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
-		mRenderTarget = new RenderTarget();
 		mRenderParams = new RenderParams();
 
 		mRenderEngine->initialize();
-		mRenderTarget->initialize();
 
-		mRenderTarget->resize(width, height);
 		// set the viewport
 		mRenderParams->viewport.x = 0;
 		mRenderParams->viewport.y = 0;
@@ -169,6 +164,8 @@ namespace dyno
 	{
 		SceneGraph::getInstance().initialize();
 
+		mRenderEngine->setSceneGraph(&SceneGraph::getInstance());
+
 		bool show_demo_window = true;
 
 		// Main loop
@@ -178,9 +175,18 @@ namespace dyno
 
 			if (mAnimationToggle)
 				SceneGraph::getInstance().takeOneFrame();
-				
 
-			// Start the Dear ImGui frame
+			int width, height;
+			glfwGetFramebufferSize(mWindow, &width, &height);
+			const float ratio = width / (float)height;
+
+			glViewport(0, 0, width, height);
+			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
+			drawScene();
+
+			//// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
@@ -208,20 +214,6 @@ namespace dyno
 			}
 
 			ImGui::Render();
-
-			int width, height;
-			glfwGetFramebufferSize(mWindow, &width, &height);
-			const float ratio = width / (float)height;
-
-			glViewport(0, 0, width, height);
-			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
- 			glPushMatrix();
-
-			drawScene();
-
-			glPopMatrix();
 
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -338,11 +330,8 @@ namespace dyno
 			mRenderParams->viewport.y = 0;
 			mRenderParams->viewport.w = mCamera.mViewportWidth;
 			mRenderParams->viewport.h = mCamera.mViewportHeight;
-
-			mRenderTarget->resize(mCamera.mViewportWidth, mCamera.mViewportHeight);
-
-			mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
-			mRenderTarget->blitTo(0);
+			
+			mRenderEngine->render(*mRenderParams);
 		}
 		else
 		{

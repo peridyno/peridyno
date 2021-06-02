@@ -14,7 +14,6 @@
 namespace dyno {
 
 	class RenderEngine;
-	class RenderTarget;
 	class RenderParams;
 
 	enum ButtonState
@@ -128,7 +127,6 @@ namespace dyno {
 		Camera mCamera;
 
 		RenderEngine* mRenderEngine;
-		RenderTarget* mRenderTarget;
 		RenderParams* mRenderParams;
 
 	public:
