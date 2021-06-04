@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include <map>
 #include <vector>
 #include <iostream>
 #include "STL/Map.h"
@@ -133,7 +134,8 @@ namespace dyno {
 
 		void assign(const ArrayMap<ElementType, DeviceType::GPU>& src);
 		void assign(const ArrayMap<ElementType, DeviceType::CPU>& src);
-		void assign(std::vector<Map<int,ElementType>>& src);
+		void assign(std::vector<std::map<int, ElementType>>& src);
+		//void assign(std::vector<std::vector<Pair<int, ElementType>>>& src);
 
 		friend std::ostream& operator<<(std::ostream &out, const ArrayMap<ElementType, DeviceType::GPU>& aMap)
 		{

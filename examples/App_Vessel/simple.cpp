@@ -1492,8 +1492,14 @@ void Simple::solve_velocity_component(Array3d& vel, Array3d& vel_ss, Array3BT& i
 
 						setupNeighbors(map1,b_ijk, index, vel.index(i, j, k - 1), vel.index(i, j, k + 1), vel_phi(i, j, k - 1), vel_phi(i, j, k + 1), identifier(i, j, k - 1), identifier(i, j, k + 1), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta),w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta));
 					}
+
+					Cmatrix.push_back(map1);
+					free(pairptr1);
 				}
-				Cmatrix.push_back(map1);
+				else
+				{
+					Cmatrix.push_back(map1);
+				}
 			}
 		}
 	}
@@ -1731,8 +1737,14 @@ void Simple::solve_pressure(Array3d& pressure, Array3d& u_in, Array3d& v_in, Arr
 					setupPPE(map1,source_ijk,index,pressure.index(i, j, k - 1),pressure.index(i, j, k + 1),w_in(i, j, k),w_in(i, j, k + 1),w_liquid_phi(i, j, k),w_liquid_phi(i, j, k + 1),w_identifer(i, j, k),w_identifer(i, j, k + 1), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction1, inlet_magnitude1, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), w_boundary(inlet_direction2, inlet_magnitude2, alpha, theta), p_boundary());
 
 					Cb[index] = source_ijk;
+
+					Cmatrix.push_back(map1);
+					free(pairptr1);
 				}
-				Cmatrix.push_back(map1);
+				else
+				{
+					Cmatrix.push_back(map1);
+				}
 			}
 		}
 	}

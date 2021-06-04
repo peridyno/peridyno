@@ -18,17 +18,18 @@
 #include "Array/ArrayMap.h"
 
 
-namespace dyno {
+namespace dyno 
+{
 	template <typename VarType>
 	class SparseMatrix
 	{
 	public:
-		typedef DArrayMap<VarType> SparseM;
-		typedef DArray<VarType> SparseV;
+		//typedef DArrayMap<VarType> SparseM;
+		//typedef DArray<VarType> SparseV;
 
 		SparseMatrix() {};
 
-		SparseMatrix(const SparseM s_matrix,const SparseV s_b);
+		void Initialize(DArrayMap<VarType>& s_matrix,DArray<VarType>& s_b);
 
 		/*!
 		*	\brief	Do not release memory here, call clear() explicitly.
@@ -42,12 +43,12 @@ namespace dyno {
 
 	    void CGLS(int i_max, VarType threshold);
 		
-		const SparseV& X() const { return x; }
+		const DArray<VarType>& X() const { return my_x; }
 
 	private:
-		SparseM A;
+		DArrayMap<VarType> my_A;
 
-		SparseV x;
-		SparseV b;
+		DArray<VarType> my_x;
+		DArray<VarType> my_b;
 	};
 }  //end of namespace dyno

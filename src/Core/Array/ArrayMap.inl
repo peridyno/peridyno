@@ -118,7 +118,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<Map<int,ElementType>>& src)
+	void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<std::map<int,ElementType>>& src)
 	{
 		size_t indNum = src.size();
 		CArray<int> hIndex(indNum);
@@ -133,21 +133,79 @@ namespace dyno
 
 			if (src[i].size() > 0)
 			{
+				typename std::map<int, ElementType>:: iterator map_it = src[i].begin();
 				for (int j = 0; j < src[i].size(); j++)
 				{
-					hElements.pushBack(src[i][j]);
+					Pair<int, ElementType> mypair(map_it->first, map_it->second);
+					hElements.pushBack(mypair);
+					map_it++;
 				}
 			}
 		}
+		CArray<Map<int, ElementType>> maps;
+		maps.resize(indNum);
+
 		m_index.assign(hIndex);
 		m_elements.assign(hElements);
+		Pair<int, ElementType>* strAdr = m_elements.begin();
 
-		m_maps.assign(src);
+		eleNum = 0;
+		for (int i = 0; i < src.size(); i++)
+		{
+			size_t num_i = src[i].size();
+			Map<int, ElementType> mmap;
+			mmap.assign(strAdr + eleNum, num_i, num_i);
+			maps[i] = mmap;
 
-		//redirect the element address
-		parallel_init_for_map<sizeof(ElementType)>(m_maps.begin(), m_elements.begin(), m_elements.size(), m_index);
+			eleNum += src[i].size();
+		}
+
+		m_maps.assign(maps);
 	}
 
+	//template<class ElementType>
+	//void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<std::vector<Pair<int, ElementType>>>& src)
+	//{
+	//	size_t indNum = src.size();
+	//	CArray<int> hIndex(indNum);
+
+	//	CArray<Pair<int, ElementType>> hElements;
+
+	//	size_t eleNum = 0;
+	//	for (int i = 0; i < src.size(); i++)
+	//	{
+	//		hIndex[i] = (int)eleNum;
+	//		eleNum += src[i].size();
+
+	//		if (src[i].size() > 0)
+	//		{
+	//			for (int j = 0; j < src[i].size(); j++)
+	//			{
+	//				hElements.pushBack(src[i][j]);
+	//			}
+	//		}
+	//	}
+
+	//	CArray<Map<int, ElementType>> maps;
+	//	maps.resize(indNum);
+
+	//	m_index.assign(hIndex);
+	//	m_elements.assign(hElements);
+	//	Pair<int,ElementType>* strAdr = m_elements.begin();
+
+	//	eleNum = 0;
+	//	for (int i = 0; i < src.size(); i++)
+	//	{
+	//		size_t num_i = src[i].size();
+	//		Map<int, ElementType> mmap;
+	//		mmap.assign(strAdr + eleNum, num_i, num_i);
+	//		maps[i] = mmap;
+
+	//		eleNum += src[i].size();
+	//	}
+
+	//	m_maps.assign(maps);
+	//}
 
 	template<class ElementType>
 	bool ArrayMap<ElementType, DeviceType::CPU>::resize(uint num)

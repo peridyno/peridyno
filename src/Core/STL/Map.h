@@ -38,6 +38,13 @@ namespace dyno
 		DYN_FUNC iterator insert(Pair<MKey, T> pair);
 		DYN_FUNC bool empty();
 
+		DYN_FUNC void assign(Pair<MKey, T>* beg, int num, int buffer_size)
+		{
+			m_pairs = beg;
+			m_size = num;
+			m_maxSize = buffer_size;
+		}
+
 		DYN_FUNC Pair<MKey, T>& operator [] (unsigned int id) {
 			return m_pairs[id];
 		}
