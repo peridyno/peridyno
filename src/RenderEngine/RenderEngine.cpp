@@ -18,6 +18,8 @@
 #include <vtkRenderer.h>
 #include <vtkAnnotatedCubeActor.h>
 #include <vtkOrientationMarkerWidget.h>
+#include <vtkPlaneSource.h>
+#include <vtkCubeSource.h>
 
 #include <array>
 
@@ -74,6 +76,10 @@ namespace dyno
 			m_vtkRenderer->RemoveActor(actor);
 			actor = actors->GetNextActor();
 		}
+
+		// add back some actor
+		m_vtkRenderer->AddActor(m_planeActor);
+		m_vtkRenderer->AddActor(m_bboxActor);
 	}
 
 	void RenderEngine::setSceneGraph(dyno::SceneGraph* scene)
@@ -99,11 +105,41 @@ namespace dyno
 		m_vtkWindow->AddRenderer(m_vtkRenderer);
 
 		m_vtkCamera = vtkExternalOpenGLCamera::New();
-		m_vtkRenderer->SetActiveCamera(m_vtkCamera);		
+		m_vtkRenderer->SetActiveCamera(m_vtkCamera);
+
+		// ground plane 
+		vtkNew<vtkPlaneSource> planeSource;
+		planeSource->SetXResolution(20);
+		planeSource->SetYResolution(20);
+		vtkNew<vtkPolyDataMapper> planeMapper;
+		planeMapper->SetInputConnection(planeSource->GetOutputPort());
+
+		m_planeActor->SetMapper(planeMapper);
+		m_planeActor->GetProperty()->SetRepresentationToWireframe();
+		m_planeActor->RotateX(90);
+		m_planeActor->SetPosition(0.5, 0, 0.5);
+		m_planeActor->SetScale(2);
+
+		// bounding box
+		vtkNew<vtkCubeSource> cubeSource;
+		cubeSource->SetBounds(0, 1, 0, 1, 0, 1);
+		vtkNew<vtkPolyDataMapper> cubeMapper;
+		cubeMapper->SetInputConnection(cubeSource->GetOutputPort());
+
+		m_bboxActor->SetMapper(cubeMapper);
+		m_bboxActor->GetProperty()->SetRepresentationToWireframe();
+		m_bboxActor->GetProperty()->SetLineWidth(2);
+
+		m_vtkRenderer->AddActor(m_bboxActor);
+		m_vtkRenderer->AddActor(m_planeActor);
+				
 	}	   
 
 	void RenderEngine::render(const RenderParams& rparams)
 	{
+		m_planeActor->SetVisibility(rparams.showGround);
+		m_bboxActor->SetVisibility(rparams.showSceneBounds);
+
 		// set background
 		m_vtkRenderer->SetBackground(rparams.bgColor0[0], rparams.bgColor0[1], rparams.bgColor0[2]);
 		m_vtkRenderer->SetBackground2(rparams.bgColor1[0], rparams.bgColor1[1], rparams.bgColor1[2]);

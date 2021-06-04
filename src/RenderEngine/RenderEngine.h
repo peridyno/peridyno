@@ -7,6 +7,9 @@
 #include <vtkOpenGLRenderer.h>
 #include <vtkExternalOpenGLRenderWindow.h>
 #include <vtkExternalOpenGLCamera.h>
+#include <vtkActor.h>
+#include <vtkNew.h>
+
 
 namespace dyno
 {
@@ -30,7 +33,10 @@ namespace dyno
 		vtkOpenGLRenderer*				m_vtkRenderer;
 		vtkExternalOpenGLRenderWindow*	m_vtkWindow;
 		vtkExternalOpenGLCamera*		m_vtkCamera;
-
+		
+		vtkNew<vtkActor>				m_planeActor;
+		vtkNew<vtkActor>				m_bboxActor;
+		
 	private:
 		dyno::SceneGraph*				m_sceneGraph;
 		
