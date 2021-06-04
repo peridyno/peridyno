@@ -42,9 +42,10 @@ mat3 quat_to_mat3(vec4 quat)
 	float xz = x2 * quat.z;
 	float xw = x2 * quat.w;
 	float yz = y2 * quat.z, yw = y2 * quat.w, zw = z2 * quat.w;
-	return mat3(1.0 - yy - zz, xy - zw, xz + yw,
+	//be aware glm stores matrix in column major order
+	return glm::transpose(mat3(1.0 - yy - zz, xy - zw, xz + yw,
 		xy + zw, 1.0 - xx - zz, yz - xw,
-		xz - yw, yz + xw, 1.0 - xx - yy);
+		xz - yw, yz + xw, 1.0 - xx - yy));
 }
 
 // union q3FeaturePair
@@ -578,6 +579,8 @@ void computeSupportEdge(vec3& aOut, vec3& bOut, const mat3& rot, const vec3& tra
 // https://box2d.googlecode.com/files/Box2D_Lite.zip
 void OBBtoOBB(Manifold& m, Box box0, Box box1)
 {
+	m.contactCount = 0;
+
 	vec3 v = box1.center - box0.center;
 
 	vec3 eA = box0.halfLength;
@@ -624,32 +627,32 @@ void OBBtoOBB(Manifold& m, Box box0, Box box1)
 	// Face axis checks
 
 	// a's x axis
-	s = abs(t.x) - (box0.halfLength.x + dot(absC[0], box1.halfLength));
+	s = abs(t.x) - (box0.halfLength.x + dot(absC_t[0], box1.halfLength));
 	if (trackFaceAxis(aAxis, aMax, nA, 0, s, rotA[0]))
 		return;
 
 	// a's y axis
-	s = abs(t.y) - (box0.halfLength.y + dot(absC[1], box1.halfLength));
+	s = abs(t.y) - (box0.halfLength.y + dot(absC_t[1], box1.halfLength));
 	if (trackFaceAxis(aAxis, aMax, nA, 1, s, rotA[1]))
 		return;
 
 	// a's z axis
-	s = abs(t.z) - (box0.halfLength.z + dot(absC[2], box1.halfLength));
+	s = abs(t.z) - (box0.halfLength.z + dot(absC_t[2], box1.halfLength));
 	if (trackFaceAxis(aAxis, aMax, nA, 2, s, rotA[2]))
 		return;
 
 	// b's x axis
-	s = abs(dot(t, C_t[0])) - (box1.halfLength.x + dot(absC_t[0], box0.halfLength));
+	s = abs(dot(t, C[0])) - (box1.halfLength.x + dot(absC[0], box0.halfLength));
 	if (trackFaceAxis(bAxis, bMax, nB, 3, s, rotB[0]))
 		return;
 
 	// b's y axis
-	s = abs(dot(t, C_t[1])) - (box1.halfLength.y + dot(absC_t[1], box0.halfLength));
+	s = abs(dot(t, C[1])) - (box1.halfLength.y + dot(absC[1], box0.halfLength));
 	if (trackFaceAxis(bAxis, bMax, nB, 4, s, rotB[1]))
 		return;
 
 	// b's z axis
-	s = abs(dot(t, C_t[2])) - (box1.halfLength.z + dot(absC_t[2], box0.halfLength));
+	s = abs(dot(t, C[2])) - (box1.halfLength.z + dot(absC[2], box0.halfLength));
 	if (trackFaceAxis(bAxis, bMax, nB, 5, s, rotB[2]))
 		return;
 
@@ -884,11 +887,56 @@ TEST(OBB, collision)
 	EXPECT_EQ(std::abs(manifold.contacts[2].penetration + 0.5f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[3].penetration + 0.5f) < REAL_EPSILON, true);
 
-	Quat1f quat = Quat1f(0.2f, Vec3f(0.2, 0.5, 1));
+	Quat1f quat0 = Quat1f(0.1f, Vec3f(0.3, 0.2, 0.1));
+	b0.center = vec3(0, 0, 0);
+	b0.halfLength = vec3(1, 1, 1);
+	b0.rot = vec4(quat0.x, quat0.y, quat0.z, quat0.w);
+
+	Quat1f quat1 = Quat1f(0.2f, Vec3f(0.2, 0.5, 1));
 	b1.center = vec3(0, 1.5, 0);
 	b1.halfLength = vec3(1, 1, 1);
-	b1.rot = vec4(quat.x, quat.y, quat.z, quat.w);
+	b1.rot = vec4(quat1.x, quat1.y, quat1.z, quat1.w);
 	OBBtoOBB(manifold, b0, b1);
 	EXPECT_EQ(manifold.contactCount == 1, true);
-	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.731658161f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.672051370) < REAL_EPSILON, true);
+
+	b0.center = vec3(0, 0, 0);
+	b0.halfLength = vec3(1, 1, 1);
+	b0.rot = vec4(0, 0, 0, 1);
+
+	quat1 = Quat1f(0.2f, Vec3f(0.2, 0.5, 1));
+	b1.center = vec3(0, 1.5, 0);
+	b1.halfLength = vec3(1, 1, 1);
+	b1.rot = vec4(quat1.x, quat1.y, quat1.z, quat1.w);
+	OBBtoOBB(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 1, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.708195090) < REAL_EPSILON, true);
+
+	quat1 = Quat1f(0.2f, Vec3f(0.2, 0.5, 1));
+	b1.center = vec3(1.5, 0, 0);
+	b1.halfLength = vec3(1, 1, 1);
+	b1.rot = vec4(quat1.x, quat1.y, quat1.z, quat1.w);
+	OBBtoOBB(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 1, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.786478937) < REAL_EPSILON, true);
+
+	quat1 = Quat1f(0.2f, Vec3f(0.2, 0.5, 1));
+	b1.center = vec3(0, 0, 1.5);
+	b1.halfLength = vec3(1, 1, 1);
+	b1.rot = vec4(quat1.x, quat1.y, quat1.z, quat1.w);
+	OBBtoOBB(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 1, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.629602551) < REAL_EPSILON, true);
+
+	b0.center = vec3(0, 0.0, 0);
+	b0.halfLength = vec3(0.2, 0.2, 0.2);
+	b0.rot = vec4(1, 0, 0, 0);
+
+	b1.center = vec3(0.000000, 0.415704, 0.000000);
+	b1.halfLength = vec3(0.2, 0.2, 0.2);
+	b1.rot = vec4(0.000000, 0.000000, 0.049979, 0.998750);
+	OBBtoOBB(manifold, b0, b1);
+	EXPECT_EQ(manifold.contactCount == 2, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.00326342881) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].position[0] + 0.179034233) < REAL_EPSILON, true);
 }
