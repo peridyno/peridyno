@@ -4,8 +4,10 @@
 #include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/ElasticityModule.h"
 
-#include "SurfaceMeshRender.h"
-#include "PointRenderModule.h"
+
+#include "RenderEngine.h"
+#include "module/VtkSurfaceVisualModule.h"
+#include "module/VtkPointVisualModule.h"
 
 using namespace dyno;
 
@@ -21,8 +23,8 @@ int main()
 	std::shared_ptr<ParticleElasticBody<DataType3f>> bunny = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(bunny);
 
-	auto m_pointsRender = std::make_shared<PointRenderModule>();
-	m_pointsRender->setColor(Vec3f(0, 1, 1));
+	auto m_pointsRender = std::make_shared<PointVisualModule>();
+	m_pointsRender->setColor(0, 1, 1);
 	bunny->addVisualModule(m_pointsRender);
 
 	bunny->setMass(1.0);
@@ -32,19 +34,24 @@ int main()
 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
 	bunny->setVisible(true);
 
-	auto sRender = std::make_shared<SurfaceMeshRender>();
+	auto sRender = std::make_shared<SurfaceVisualModule>();
 	bunny->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setColor(1, 1, 0);
 
 	bunny->getElasticitySolver()->setIterationNumber(10);
 	bunny->getElasticitySolver()->inHorizon()->setValue(0.01);
+	
+	//GlfwApp window;
+	//window.createWindow(1024, 768);
+	//window.mainLoop();
 
-	GlfwApp window;
-	window.createWindow(1024, 768);
-
-	window.mainLoop();
-
+	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
+	scene.initialize();
+	RenderEngine engine;
+	engine.setSceneGraph(&scene);
+	engine.start();
 	return 0;
+
 }
 
 

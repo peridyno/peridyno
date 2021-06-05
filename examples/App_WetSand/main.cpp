@@ -9,7 +9,10 @@
 #include "ParticleSystem/ParticleElastoplasticBody.h"
 #include "ParticleSystem/GranularModule.h"
 
-#include "PointRenderModule.h"
+//#include "PointRenderModule.h"
+
+#include "RenderEngine.h"
+#include "module/VtkPointVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -42,8 +45,8 @@ void CreateScene()
 	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
-	auto ptRender = std::make_shared<PointRenderModule>();
-	ptRender->setColor(Vec3f(0.50, 0.44, 0.38));
+	auto ptRender = std::make_shared<PointVisualModule>();
+	ptRender->setColor(0.50, 0.44, 0.38);
 	child3->addVisualModule(ptRender);
 
 	child3->setMass(1.0);
@@ -66,7 +69,14 @@ void CreateScene()
 
 int main()
 {
-	CreateScene();
+	CreateScene();	
+	
+	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
+	SceneGraph::getInstance().initialize();
+	RenderEngine engine;
+	engine.setSceneGraph(&SceneGraph::getInstance());
+	engine.start();
+	return 0;
 
 	Log::setOutput("console_log.txt");
 	Log::setLevel(Log::Info);

@@ -21,21 +21,28 @@ namespace dyno
 		RenderEngine();
 		~RenderEngine();
 
-		void initialize();
-		void render(const RenderParams& rparams);	
+		// for external rendering
+		void initializeExternal();
+		void renderExternal(const RenderParams& rparams);	
+
 		void setSceneGraph(dyno::SceneGraph* scene);
+
+		void start();
 
 	private:
 		void clearActors();
 
 	private:
-
-		vtkOpenGLRenderer*				m_vtkRenderer;
-		vtkExternalOpenGLRenderWindow*	m_vtkWindow;
-		vtkExternalOpenGLCamera*		m_vtkCamera;
+		
+		vtkNew<vtkOpenGLRenderer>		m_vtkRenderer;
 		
 		vtkNew<vtkActor>				m_planeActor;
 		vtkNew<vtkActor>				m_bboxActor;
+
+
+		// for external rendering
+		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;
+		vtkNew<vtkExternalOpenGLCamera>			m_vtkCamera;
 		
 	private:
 		dyno::SceneGraph*				m_sceneGraph;

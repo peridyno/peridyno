@@ -29,6 +29,7 @@ namespace dyno
 
 		void loadSurface(std::string filename);
 
+		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
 	private:
 		std::shared_ptr<Node> m_surfaceNode;
 	};

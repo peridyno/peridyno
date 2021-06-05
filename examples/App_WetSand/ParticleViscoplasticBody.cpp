@@ -1,8 +1,8 @@
 #include "ParticleViscoplasticBody.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
-#include "SurfaceMeshRender.h"
-#include "PointRenderModule.h"
+//#include "SurfaceMeshRender.h"
+//#include "PointRenderModule.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/ParticleIntegrator.h"
@@ -69,9 +69,9 @@ namespace dyno
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		m_surfaceNode->setTopologyModule(triSet);
 
-		auto render = std::make_shared<SurfaceMeshRender>();
-		render->setColor(Vec3f(0.2f, 0.6, 1.0f));
-		m_surfaceNode->addVisualModule(render);
+		//auto render = std::make_shared<SurfaceMeshRender>();
+		//render->setColor(Vec3f(0.2f, 0.6, 1.0f));
+		//m_surfaceNode->addVisualModule(render);
 
 		m_surfaceNode->setVisible(false);
 

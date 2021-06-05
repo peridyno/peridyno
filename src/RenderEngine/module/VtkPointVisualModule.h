@@ -4,11 +4,11 @@
 
 namespace dyno
 {
-	class SurfaceVisualModule : public VtkVisualModule
+	class PointVisualModule : public VtkVisualModule
 	{
-		DECLARE_CLASS(SurfaceVisualModule)
+		DECLARE_CLASS(PointVisualModule)
 	public:
-		SurfaceVisualModule();
+		PointVisualModule();
 
 		virtual void updateRenderingContext() override;
 

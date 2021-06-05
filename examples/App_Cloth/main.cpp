@@ -5,9 +5,13 @@
 
 #include "ParticleSystem/ParticleElasticBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "PointRenderModule.h"
-#include "SurfaceMeshRender.h"
+//#include "PointRenderModule.h"
+//#include "SurfaceMeshRender.h"
 #include "ParticleCloth.h"
+
+#include "RenderEngine.h"
+#include "module/VtkSurfaceVisualModule.h"
+#include "module/VtkPointVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -39,20 +43,32 @@ void CreateScene()
 	std::shared_ptr<ParticleCloth<DataType3f>> child3 = std::make_shared<ParticleCloth<DataType3f>>();
 	root->addParticleSystem(child3);
 
-	auto m_pointsRender = std::make_shared<PointRenderModule>();
-	m_pointsRender->setColor(Vec3f(1, 0.2, 1));
-	child3->addVisualModule(m_pointsRender);
-	child3->setVisible(false);
-
 	child3->setMass(1.0);
-  	child3->loadParticles("../../data/cloth/cloth.obj");
-  	child3->loadSurface("../../data/cloth/cloth.obj");
+	child3->loadParticles("../../data/cloth/cloth.obj");
+	child3->loadSurface("../../data/cloth/cloth.obj");
+
+	auto sRender = std::make_shared<SurfaceVisualModule>();
+	sRender->setColor(0.4, 0.75, 1);
+	child3->getSurfaceNode()->addVisualModule(sRender);
+
+	auto pRender = std::make_shared<PointVisualModule>();
+	pRender->setColor(1, 0.2, 1);
+	child3->addVisualModule(pRender);
+	child3->setVisible(true);
+
 }
 
 
 int main()
 {
 	CreateScene();
+
+	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
+	SceneGraph::getInstance().initialize();
+	RenderEngine engine;
+	engine.setSceneGraph(&SceneGraph::getInstance());
+	engine.start();
+	return 0;
 
 	Log::setOutput("console_log.txt");
 	Log::setLevel(Log::Info);
@@ -61,6 +77,7 @@ int main()
 
 	GlfwApp window;
 	window.createWindow(1024, 768);
+	window.mUseNewRenderEngine = true;
 
 	window.mainLoop();
 

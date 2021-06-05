@@ -9,7 +9,10 @@
 #include "ParticleSystem/ParticleElastoplasticBody.h"
 #include "ParticleSystem/GranularModule.h"
 
-#include "PointRenderModule.h"
+//#include "PointRenderModule.h"
+
+#include "RenderEngine.h"
+#include "module/VtkPointVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -42,9 +45,8 @@ void CreateScene()
 	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
-	auto m_pointsRender = std::make_shared<PointRenderModule>();
-
-	m_pointsRender->setColor(Vec3f(0.98, 0.85, 0.40));
+	auto m_pointsRender = std::make_shared<PointVisualModule>();
+	m_pointsRender->setColor(0.98, 0.85, 0.40);
 	child3->addVisualModule(m_pointsRender);
 
 	child3->setMass(1.0);
@@ -69,6 +71,14 @@ int main()
 {
 	CreateScene();
 
+	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
+	SceneGraph::getInstance().initialize();
+	RenderEngine engine;
+	engine.setSceneGraph(&SceneGraph::getInstance());
+	engine.start();
+	return 0;
+
+
 	Log::setOutput("console_log.txt");
 	Log::setLevel(Log::Info);
 	Log::setUserReceiver(&RecieveLogMessage);
@@ -76,6 +86,7 @@ int main()
 
 	GlfwApp window;
 	window.createWindow(1024, 768);
+	window.mUseNewRenderEngine = true;
 
 	window.mainLoop();
 

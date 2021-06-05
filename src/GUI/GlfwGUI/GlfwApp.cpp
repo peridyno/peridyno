@@ -151,7 +151,7 @@ namespace dyno
 		mRenderEngine = new RenderEngine();
 		mRenderParams = new RenderParams();
 
-		mRenderEngine->initialize();
+		mRenderEngine->initializeExternal();
 
 		// set the viewport
 		mRenderParams->viewport.x = 0;
@@ -331,7 +331,7 @@ namespace dyno
 			mRenderParams->viewport.w = mCamera.mViewportWidth;
 			mRenderParams->viewport.h = mCamera.mViewportHeight;
 			
-			mRenderEngine->render(*mRenderParams);
+			mRenderEngine->renderExternal(*mRenderParams);
 		}
 		else
 		{
