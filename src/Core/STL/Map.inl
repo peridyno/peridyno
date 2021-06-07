@@ -13,9 +13,7 @@ namespace dyno
 	template <typename MKey, typename T>
 	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::find(MKey key)
 	{
-		std::cout << "it is map.find ok here1" << std::endl;
 		int ind=leftBound(Pair<MKey,T> (key,T()), m_pairs, m_size);
-		std::cout << "it is map.find ok here2" << std::endl;
 		return (ind >= m_size || m_pairs[ind] != Pair<MKey, T>(key, T())) ? nullptr : (m_pairs + ind);
 	}
 
@@ -24,7 +22,7 @@ namespace dyno
 	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::insert(Pair<MKey, T> pair)
 	{
 		//return nullptr if the data buffer is full
-		//if (m_size >= m_maxSize) return nullptr;
+		if (m_size >= m_maxSize) return nullptr;
 
 		//return the index of the first element that is equel to or biger than val
 		int t = leftBound(pair, m_pairs, m_size);

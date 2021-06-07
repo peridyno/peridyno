@@ -19,11 +19,11 @@ namespace dyno
 	DYN_FUNC T* List<T>::insert(T val)
 	{
 		//return nullptr if the data buffer is full
-		//if (m_size >= m_maxSize) return nullptr;
+		if (m_size >= m_maxSize) return nullptr;
 
 		m_startLoc[m_size] = val;
 		m_size++;
-		std::cout << "it is ok here" << std::endl;
+
 		return m_startLoc + m_size - 1;;
 	}
 

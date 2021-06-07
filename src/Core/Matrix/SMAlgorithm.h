@@ -18,38 +18,12 @@
 #include "Array/ArrayMap.h"
 
 
-
 namespace dyno 
 {
-	template <typename VarType>
-	class SparseMatrix
-	{
-	public:
-		typedef DArrayMap<VarType> SparseM;
-		typedef DArray<VarType> SparseV;
+	template<typename VarType>
+	void multiply_transposedSM_by_vector(DArrayMap<VarType>& matrix_a, DArray<VarType>& a, DArray<VarType>& Aa);
 
-		SparseMatrix(SparseM& s_matrix, SparseV& s_b);
+	template<typename VarType>
+	void multiply_SM_by_vector(DArrayMap<VarType>& matrix_a, DArray<VarType>& a, DArray<VarType>& Aa);
 
-		/*!
-		*	\brief	Do not release memory here, call clear() explicitly.
-		*/
-		~SparseMatrix() {};
-
-		/*!
-		*	\brief	Free allocated memory.	Should be called before the object is deleted.
-		*/
-		void clear();
-
-	    void CGLS(int i_max, VarType threshold);
-		
-		const SparseV& X() const { return my_x; }
-
-	private:
-		SparseM my_A;
-
-		SparseV my_x;
-		SparseV my_b;
-	};
 }  
-
-#include "SparseMatrix.inl"

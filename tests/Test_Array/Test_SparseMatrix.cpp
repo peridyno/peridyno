@@ -4,96 +4,81 @@
 #include "Array/ArrayMap.h"
 #include "Matrix/SparseMatrix.h"
 #include <vector>
+#include <map>
 
 using namespace dyno;
 
 TEST(SparseMatrix, CPU)
 {
-	//Pair<int, double> pair11(1, 1), pair12(2, 2), pair14(4, 5), pair32(2, 3), pair33(3, 2), pair34(4, 6), pair43(3, 2), pair44(4, 1);
-	//std::vector<std::vector<Pair<int, double>>> vecmaps;
+	//Pair<int, double> ptrpair1[4];
+	//Pair<int, float> ptrpair2[4];
+	//double ptrdouble[4];
+    //Map<int, double> ptrmap1[4];
+	//Map<int, float> ptrmap2[4];
 
+	//printf("the ptrpair1 is: %x \n", ptrpair1);
+	//printf("the ptrpair1 is: %x \n\n", &(ptrpair1[1]));
+	//printf("the ptrpair2 is: %x \n", ptrpair2);
+	//printf("the ptrpair2 is: %x \n\n", &(ptrpair2[1]));
+	//printf("the ptrdouble is: %x \n", ptrdouble);
+	//printf("the ptrdouble is: %x \n\n", &(ptrdouble[1]));
+	//printf("the ptrmap1 is: %x \n", ptrmap1);
+	//printf("the ptrmap1 is: %x \n\n", &(ptrmap1[1]));
+	//printf("the ptrmap2 is: %x \n", ptrmap2);
+	//printf("the ptrmap2 is: %x \n\n", &(ptrmap2[1]));
+
+
+	std::vector<std::map<int, float>> vecmap;
 	for (int i = 0; i < 4; i++)
 	{
-		std::cout << "i is: " << i << std::endl;
-		std::vector<Pair<int, double>> vecmap;
+		std::map<int, float> mymap;
 		if (i == 0)
 		{
-			Map<int, double> mymap1;
-			Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
-			mymap1.reserve(pairptr1, 4);
-			mymap1.insert(pair11);
-			mymap1.insert(pair12);
-			mymap1.insert(pair14);
-
-			for (int j = 0; j < mymap1.size(); j++)
-			{
-				vecmap.push_back(mymap1[j]);
-			}
-			free(pairptr1);
+			mymap.insert(std::pair<int, float>(0, 1));
+			mymap.insert(std::pair<int, float>(3, 5));
 		}
 		else if (i == 2)
 		{
-			Map<int, double> mymap1;
-			Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
-			mymap1.reserve(pairptr1, 4);
-			mymap1.insert(pair32);
-			mymap1.insert(pair33);
-			mymap1.insert(pair34);
-
-			for (int j = 0; j < mymap1.size(); j++)
-			{
-				vecmap.push_back(mymap1[j]);
-			}
-			free(pairptr1);
+			mymap.insert(std::pair<int, float>(2, 2));
+			mymap.insert(std::pair<int, float>(3, 6));
 		}
 		else if (i == 3)
 		{
-			Map<int, double> mymap1;
-			Pair<int, double>* pairptr1 = (Pair<int, double>*)malloc(sizeof(Pair<int, double>) * 4);
-			mymap1.reserve(pairptr1, 4);
-			mymap1.insert(pair43);
-			mymap1.insert(pair44);
-
-			for (int j = 0; j < mymap1.size(); j++)
-			{
-				vecmap.push_back(mymap1[j]);
-			}
-			free(pairptr1);
+			mymap.insert(std::pair<int, float>(2, 2));
+			mymap.insert(std::pair<int, float>(3, 1));
 		}
-		for (int j = 0; j < vecmap.size(); j++)
-		{
-			std::cout << vecmap[j].first << ": " << vecmap[j].second << std::endl;
-		}
-		vecmaps.push_back(vecmap);
-		std::cout << std::endl << std::endl;
+		vecmap.push_back(mymap);
+		//std::cout << std::endl << std::endl;
 	}
 
-	//DArrayMap<double> A;
-	//A.assign(vecmaps);
-	//std::cout << "A ArrayMap: " << A << std::endl;
+	DArrayMap<float> A;
+	A.assign(vecmap);
+	std::cout << "A ArrayMap: " << A << std::endl;
 
-	//CArray<double> Cb(4);
-	//Cb.reset();
-	//Cb[0] = 1.0;
-	//Cb[1] = 0.0;
-	//Cb[2] = 1.0;
-	//Cb[3] = 1.0;
+	CArray<float> Cb(4);
+	Cb.reset();
+	Cb[0] = -14.0;
+	Cb[1] = 0.0;
+	Cb[2] = -15.0;
+	Cb[3] = 0.0;
 
-	//DArray<double> b;
-	//b.assign(Cb);
+	DArray<float> b;
+	b.assign(Cb);
 
-	//std::cout << "b: "<< std::endl <<Cb << std::endl;
+	std::cout << "b: "<< std::endl <<Cb << std::endl;
 
-	//SparseMatrix<double> solver;
-	//solver.Initialize(A, b);
-	//std::cout << "it is ok here !" << std::endl;
-	//solver.CGLS(100, 0.001);
+	SparseMatrix<float> solver(A, b);
+	std::cout << "it is ok here !" << std::endl;
+	solver.CGLS(100, 0.001);
 
-	//CArray<double> Cx;
-	//Cx.assign(solver.X());
+	CArray <float> Cx;
+	Cx.assign(solver.X());
 
-	//std::cout << "x: " << std::endl << Cx << std::endl;
+	std::cout << "x: " << std::endl << Cx << std::endl;
+	solver.clear();
 }
+
+
 
 
 

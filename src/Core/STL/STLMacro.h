@@ -21,7 +21,6 @@ namespace dyno
 	template<typename T>
 	DYN_FUNC int leftBound(T target, T* startLoc, size_t maxSize)
 	{
-		std::cout << "it is map.find.leftBound ok here1" << std::endl;
 		int left = 0;
 		int right = (int)maxSize;
 
