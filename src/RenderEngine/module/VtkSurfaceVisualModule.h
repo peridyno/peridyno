@@ -9,9 +9,5 @@ namespace dyno
 		DECLARE_CLASS(SurfaceVisualModule)
 	public:
 		SurfaceVisualModule();
-
-		virtual void updateRenderingContext() override;
-
-
 	};
 };

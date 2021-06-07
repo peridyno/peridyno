@@ -9,7 +9,5 @@ namespace dyno
 		DECLARE_CLASS(FluidVisualModule)
 	public:
 		FluidVisualModule();
-
-		virtual void updateRenderingContext() override {}
 	};
 };

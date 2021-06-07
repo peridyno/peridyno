@@ -9,7 +9,5 @@ namespace dyno
 		DECLARE_CLASS(PointVisualModule)
 	public:
 		PointVisualModule();
-
-		virtual void updateRenderingContext() override;
 	};
 };

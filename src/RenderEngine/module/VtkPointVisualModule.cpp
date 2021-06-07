@@ -21,6 +21,8 @@
 
 #include <cuda_gl_interop.h>
 
+#include "Framework/SceneGraph.h"
+
 using namespace dyno;
 
 class PointMapper : public vtkOpenGLPolyDataMapper
@@ -29,27 +31,23 @@ public:
 	PointMapper(PointVisualModule* v): m_module(v)
 	{
 		// create psedo data, required by the vtkOpenGLPolyDataMapper to render content
-		vtkNew<vtkPointSource> psedoData;
-		psedoData->SetCenter(0, 0, 0);
-		psedoData->SetNumberOfPoints(10);
-		psedoData->SetRadius(1.0);
-		SetInputConnection(psedoData->GetOutputPort());
-	}
+		vtkNew<vtkPoints> points;
 
-	void ComputeBounds() override
-	{
-		// TODO: we might need the accurate bound of the node
-		this->Bounds[0] = 0;
-		this->Bounds[1] = 1;
-		this->Bounds[2] = 0;
-		this->Bounds[3] = 1;
-		this->Bounds[4] = 0;
-		this->Bounds[5] = 1;
+		Vec3f bbox0 = SceneGraph::getInstance().getLowerBound();
+		Vec3f bbox1 = SceneGraph::getInstance().getUpperBound();
+		points->InsertNextPoint(bbox0[0], bbox0[1], bbox0[2]);
+		points->InsertNextPoint(bbox1[0], bbox1[1], bbox1[2]);
+
+		vtkNew<vtkPolyData> polyData;
+		polyData->SetPoints(points);
+		SetInputData(polyData);
 	}
+	
 
 	void UpdateBufferObjects(vtkRenderer *ren, vtkActor *act) override
 	{
-		// TODO: we need some mechanism to check whether the VBO need update
+		if (!m_module->isDirty())
+			return;
 
 		if (!m_module->isInitialized())	return;
 
@@ -64,7 +62,6 @@ public:
 
 		if (!m_initialized)
 		{
-			printf("Intialize\n");
 			m_initialized = true;
 								
 			// vertex buffer
@@ -78,7 +75,6 @@ public:
 			vtkOpenGLVertexBufferObject* vertexBuffer = this->VBOs->GetVBO("vertexMC");
 						
 			// index buffer
-			// this->Primitives[PrimitivePoints].IBO;
 			std::vector<unsigned int> indexArray(verts.size());
 			for (unsigned int i = 0; i < indexArray.size(); i++)
 				indexArray[i] = i;
@@ -117,7 +113,6 @@ PointVisualModule::PointVisualModule()
 {
 	this->setName("point_renderer");
 
-
 	m_actor = vtkActor::New();
 	m_actor->GetProperty()->SetRepresentationToPoints();
 	m_actor->GetProperty()->RenderPointsAsSpheresOn();
@@ -125,8 +120,3 @@ PointVisualModule::PointVisualModule()
 	m_actor->SetMapper(new PointMapper(this));
 }
 
-
-void PointVisualModule::updateRenderingContext()
-{
-	// TODO: update VBO here?
-}

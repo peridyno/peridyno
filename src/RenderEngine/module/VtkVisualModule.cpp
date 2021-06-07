@@ -42,3 +42,23 @@ vtkVolume* VtkVisualModule::getVolume()
 {
 	return m_volume;
 }
+
+void VtkVisualModule::display()
+{
+	// DO NOTHING!
+}
+
+void VtkVisualModule::updateRenderingContext()
+{
+	m_sceneTime.Modified();
+}
+
+bool VtkVisualModule::isDirty(bool update)
+{
+	bool b = m_updateTime < m_sceneTime;
+
+	if (update)
+		m_updateTime.Modified();
+
+	return b;
+}

@@ -48,21 +48,26 @@ public:
 		// hack for VBO update...
 		vtkOpenGLVertexBufferObject* vertexBuffer = this->VBOs->GetVBO("vertexMC");
 
-		if (vertexBuffer)
-		{
-			//printf("update\n");
-			// update the VBO build time, so vtk will not write to VBO
-			this->VBOBuildTime.Modified();
-			
-			if (!m_module->isInitialized())	
-				return;
+		// check whether the vertex buffer is ready...
+		if (vertexBuffer == NULL)
+			return;
+		
+		//printf("update\n");
+		// update the VBO build time, so vtk framework will not write to VBO
+		this->VBOBuildTime.Modified();
 
+		if (!m_module->isInitialized())
+			return;
+
+		if (m_module->isDirty())
+		{
 			auto node = m_module->getParent();
 			auto pSet = std::dynamic_pointer_cast<dyno::PointSet<dyno::DataType3f>>(node->getTopologyModule());
 			auto verts = pSet->getPoints();
 
 			cudaError_t error;
 
+			// only initialize once
 			if (!m_initialized)
 			{
 				printf("Intialize\n");
@@ -83,7 +88,7 @@ public:
 				void*  cudaPtr = 0;
 
 				// upload vertex
-				error = cudaGraphicsMapResources(1, &m_cudaVBO); 
+				error = cudaGraphicsMapResources(1, &m_cudaVBO);
 				//printf("%s\n", cudaGetErrorName(error));
 				error = cudaGraphicsResourceGetMappedPointer(&cudaPtr, &size, m_cudaVBO);
 				//printf("%s\n", cudaGetErrorName(error));
@@ -92,15 +97,12 @@ public:
 				error = cudaGraphicsUnmapResources(1, &m_cudaVBO);
 				//printf("%s\n", cudaGetErrorName(error));
 			}
-		
+
 			/// seems not necessary
 			vtkIdType numPts = verts.size();
 			this->GLHelperDepthThickness.IBO->IndexCount = static_cast<size_t>(numPts);
 		}
-		else
-		{
-			// wait for the vtkOpenGLFluidMapper to initialize VBO...
-		}
+
 
 	}
 

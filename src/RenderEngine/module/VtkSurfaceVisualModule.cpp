@@ -41,7 +41,8 @@ public:
 
 	void UpdateBufferObjects(vtkRenderer *ren, vtkActor *act) override
 	{
-		// TODO: we need some mechanism to check whether the VBO need update
+		if (!m_module->isDirty())
+			return;
 
 		if (!m_module->isInitialized())	return;
 
@@ -57,7 +58,6 @@ public:
 
 		if (!m_initialized)
 		{
-			printf("Intialize\n");
 			m_initialized = true;
 								
 			// vertex buffer
@@ -126,8 +126,3 @@ SurfaceVisualModule::SurfaceVisualModule()
 	m_actor->SetMapper(new SurfaceMapper(this));
 }
 
-
-void SurfaceVisualModule::updateRenderingContext()
-{
-	// TODO: update VBO here?
-}

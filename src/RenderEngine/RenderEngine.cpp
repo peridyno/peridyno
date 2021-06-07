@@ -144,6 +144,8 @@ namespace dyno
 			m_scenePlane->SetOrigin(cx - dx, bbox0[1], cz - dz);
 			m_scenePlane->SetPoint1(cx + dx, bbox0[1], cz - dz);
 			m_scenePlane->SetPoint2(cx - dx, bbox0[1], cz + dz);
+
+			m_sceneGraph->draw();
 		}
 
 		// add back some actor
@@ -201,6 +203,7 @@ namespace dyno
 		if (data->run)
 		{
 			data->scene->takeOneFrame();
+			data->scene->draw();
 			iren->Render();
 		}
 	}
