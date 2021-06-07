@@ -18,13 +18,11 @@ if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
     add_subdirectory(Graphics)
 endif()
 
-if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_DYNAMICS)
-    add_subdirectory(Dynamics)
-endif()
-
 if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GUI)
     add_subdirectory(GUI)
 endif()
+
+add_subdirectory(Dynamics)
 
 # Write/install version file
 include(CMakePackageConfigHelpers)

@@ -3,8 +3,10 @@
 #include "Framework/SceneGraph.h"
 #include "Framework/Log.h"
 
-#include "ParticleSystem/ParticleElasticBody.h"
+#include "Peridynamics/ParticleElasticBody.h"
+
 #include "ParticleSystem/StaticBoundary.h"
+
 #include "PointRenderModule.h"
 #include "SurfaceMeshRender.h"
 #include "ParticleCloth.h"

@@ -1,5 +1,5 @@
 #include "GranularModule.h"
-#include "SummationDensity.h"
+#include "Particlesystem/SummationDensity.h"
 
 namespace dyno
 {

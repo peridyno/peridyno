@@ -1,13 +1,15 @@
 #include "GlfwGUI/GlfwApp.h"
 
 #include "Framework/SceneGraph.h"
-#include "Topology/PointSet.h"
 #include "Framework/Log.h"
+#include "Topology/PointSet.h"
+
+#include "RigidBody/RigidBody.h"
 
 #include "ParticleSystem/StaticBoundary.h"
-#include "RigidBody/RigidBody.h"
-#include "ParticleSystem/ParticleElastoplasticBody.h"
-#include "ParticleSystem/GranularModule.h"
+
+#include "Peridynamics/ParticleElastoplasticBody.h"
+#include "Peridynamics/GranularModule.h"
 
 #include "PointRenderModule.h"
 

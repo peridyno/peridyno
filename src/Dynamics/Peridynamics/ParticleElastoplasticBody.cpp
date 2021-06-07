@@ -1,16 +1,17 @@
 #include "ParticleElastoplasticBody.h"
-#include "PositionBasedFluidModel.h"
+#include "ElastoplasticityModule.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
 #include "Peridynamics.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
-#include "ParticleIntegrator.h"
-#include "ElastoplasticityModule.h"
 
-#include "DensityPBD.h"
-#include "ImplicitViscosity.h"
+#include "ParticleSystem/PositionBasedFluidModel.h"
+#include "ParticleSystem/ParticleIntegrator.h"
+#include "ParticleSystem/DensityPBD.h"
+#include "ParticleSystem/ImplicitViscosity.h"
+
 
 namespace dyno
 {

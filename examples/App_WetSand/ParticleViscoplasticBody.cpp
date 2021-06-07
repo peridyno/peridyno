@@ -6,7 +6,8 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/ParticleIntegrator.h"
-#include "ParticleSystem/ElastoplasticityModule.h"
+
+#include "Peridynamics/ElastoplasticityModule.h"
 
 #include "ParticleSystem/DensityPBD.h"
 #include "ParticleSystem/ImplicitViscosity.h"

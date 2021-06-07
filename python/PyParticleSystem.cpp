@@ -1,8 +1,10 @@
 #include "PyParticleSystem.h"
 
-#include "ParticleSystem/ParticleElasticBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ElasticityModule.h"
+
+#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticityModule.h"
+
 #include "RigidBody/RigidBody.h"
 
 template <typename TDataType>

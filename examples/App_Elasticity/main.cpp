@@ -1,8 +1,10 @@
 #include "GlfwGUI/GlfwApp.h"
 #include "Framework/SceneGraph.h"
-#include "ParticleSystem/ParticleElasticBody.h"
+
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ElasticityModule.h"
+
+#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticityModule.h"
 
 #include "SurfaceMeshRender.h"
 #include "PointRenderModule.h"

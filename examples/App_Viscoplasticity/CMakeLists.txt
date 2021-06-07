@@ -1,4 +1,4 @@
-if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
+if(PERIDYNO_LIBRARY_PERIDYNAMICS)
     set(PROJECT_NAME App_Viscoplasticity)
 
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
@@ -19,7 +19,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Framework 
         IO 
         Graphics 
-        ParticleSystem 
+        Peridynamics 
         RigidBody 
         GlfwGUI)
 
