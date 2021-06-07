@@ -1,8 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.10)
 
-set(LIB_NAMES ParticleSystem RigidBody Volume)
-
-foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
+#foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
+function(build_library LIB_NAME)
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}")
 
     file(                                                                           
@@ -64,4 +63,20 @@ foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
 
     file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
     install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Dynamics/${LIB_NAME})
- endforeach()
+endfunction(build_library)
+
+option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system library" ON)
+option(PERIDYNO_LIBRARY_RigidBody "Enable binding the rigid body library" ON)
+option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
+
+if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
+    build_library(ParticleSystem)
+endif()
+
+if(PERIDYNO_LIBRARY_RigidBody)
+    build_library(RigidBody)
+endif()
+
+if(PERIDYNO_LIBRARY_VOLUME)
+    build_library(Volume)
+endif()
