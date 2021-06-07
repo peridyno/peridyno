@@ -12,8 +12,6 @@ namespace dyno
 
 		virtual void updateRenderingContext() override;
 
-	protected:
-		void createActor() override;
 
 	};
 };

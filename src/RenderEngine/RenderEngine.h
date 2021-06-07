@@ -9,7 +9,8 @@
 #include <vtkExternalOpenGLCamera.h>
 #include <vtkActor.h>
 #include <vtkNew.h>
-
+#include <vtkPlaneSource.h>
+#include <vtkCubeSource.h>
 
 namespace dyno
 {
@@ -36,13 +37,19 @@ namespace dyno
 		
 		vtkNew<vtkOpenGLRenderer>		m_vtkRenderer;
 		
-		vtkNew<vtkActor>				m_planeActor;
-		vtkNew<vtkActor>				m_bboxActor;
 
 
 		// for external rendering
 		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;
 		vtkNew<vtkExternalOpenGLCamera>			m_vtkCamera;
+
+
+		// ground plane
+		vtkNew<vtkPlaneSource>			m_scenePlane;
+		vtkNew<vtkActor>				m_scenePlaneActor;
+		// scene boundingbox
+		vtkNew<vtkCubeSource>			m_sceneCube;
+		vtkNew<vtkActor>				m_sceneCubeActor;
 		
 	private:
 		dyno::SceneGraph*				m_sceneGraph;

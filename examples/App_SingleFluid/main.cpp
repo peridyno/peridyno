@@ -7,7 +7,10 @@
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 
-#include "PointRenderModule.h"
+
+#include "RenderEngine.h"
+#include "module/VtkPointVisualModule.h"
+#include "module/VtkFluidVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -42,14 +45,16 @@ void CreateScene()
 	std::shared_ptr<ParticleFluid<DataType3f>> child1 = std::make_shared<ParticleFluid<DataType3f>>();
 	root->addParticleSystem(child1);
 
-	auto ptRender = std::make_shared<PointRenderModule>();
-	ptRender->setColor(Vec3f(1, 0, 0));
-	ptRender->setColorRange(0, 4);
-	child1->addVisualModule(ptRender);
+	//auto ptRender = std::make_shared<PointVisualModule>();
+	//ptRender->setColor(1, 0, 0);
+	//ptRender->setColorRange(0, 4);
+	//child1->addVisualModule(ptRender);
+	   
+	child1->addVisualModule(std::make_shared<FluidVisualModule>());
 
 	child1->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 	child1->setMass(100);
-	child1->currentVelocity()->connect(&ptRender->m_vecIndex);
+	//child1->currentVelocity()->connect(&ptRender->m_vecIndex);
 
 	std::shared_ptr<RigidBody<DataType3f>> rigidbody = std::make_shared<RigidBody<DataType3f>>();
 	root->addRigidBody(rigidbody);
@@ -60,6 +65,14 @@ void CreateScene()
 int main()
 {
 	CreateScene();
+
+	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
+	SceneGraph::getInstance().initialize();
+	RenderEngine engine;
+	engine.setSceneGraph(&SceneGraph::getInstance());
+	engine.start();
+	return 0;
+
 
 	Log::setOutput("console_log.txt");
 	Log::setLevel(Log::Info);

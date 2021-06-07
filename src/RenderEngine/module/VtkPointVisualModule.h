@@ -11,9 +11,5 @@ namespace dyno
 		PointVisualModule();
 
 		virtual void updateRenderingContext() override;
-
-	protected:
-		void createActor() override;
-
 	};
 };

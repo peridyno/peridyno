@@ -6,6 +6,7 @@ find_package(VTK COMPONENTS
   RenderingExternal
   RenderingOpenGL2
   InteractionStyle
+  InteractionWidgets
   REQUIRED
 )
 

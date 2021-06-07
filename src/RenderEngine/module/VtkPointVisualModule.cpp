@@ -116,18 +116,15 @@ IMPLEMENT_CLASS_COMMON(PointVisualModule, 0)
 PointVisualModule::PointVisualModule()
 {
 	this->setName("point_renderer");
-	createActor();
-}
 
-void PointVisualModule::createActor()
-{
+
 	m_actor = vtkActor::New();
-	m_actor->GetProperty()->SetRepresentationToPoints(); 
+	m_actor->GetProperty()->SetRepresentationToPoints();
 	m_actor->GetProperty()->RenderPointsAsSpheresOn();
 	m_actor->GetProperty()->SetPointSize(2.0);
-	this->m_mapper = new PointMapper(this);
-	m_actor->SetMapper(m_mapper);	
+	m_actor->SetMapper(new PointMapper(this));
 }
+
 
 void PointVisualModule::updateRenderingContext()
 {

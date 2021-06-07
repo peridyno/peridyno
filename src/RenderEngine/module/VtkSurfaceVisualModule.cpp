@@ -121,15 +121,11 @@ IMPLEMENT_CLASS_COMMON(SurfaceVisualModule, 0)
 SurfaceVisualModule::SurfaceVisualModule()
 {
 	this->setName("surface_renderer");
-	createActor();
+
+	m_actor = vtkActor::New();
+	m_actor->SetMapper(new SurfaceMapper(this));
 }
 
-void SurfaceVisualModule::createActor()
-{
-	m_actor = vtkActor::New();
-	this->m_mapper = new SurfaceMapper(this);
-	m_actor->SetMapper(m_mapper);
-}
 
 void SurfaceVisualModule::updateRenderingContext()
 {
