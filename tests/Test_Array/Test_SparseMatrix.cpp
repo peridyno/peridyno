@@ -11,10 +11,10 @@ using namespace dyno;
 TEST(SparseMatrix, CPU)
 {
 	//Pair<int, double> ptrpair1[4];
-	//Pair<int, float> ptrpair2[4];
+	//Pair<int, double> ptrpair2[4];
 	//double ptrdouble[4];
     //Map<int, double> ptrmap1[4];
-	//Map<int, float> ptrmap2[4];
+	//Map<int, double> ptrmap2[4];
 
 	//printf("the ptrpair1 is: %x \n", ptrpair1);
 	//printf("the ptrpair1 is: %x \n\n", &(ptrpair1[1]));
@@ -69,7 +69,7 @@ TEST(SparseMatrix, CPU)
 
 	SparseMatrix<float> solver(A, b);
 	std::cout << "it is ok here !" << std::endl;
-	solver.CGLS(100, 0.001);
+	solver.CGLS(1000, 0.000001);
 
 	CArray <float> Cx;
 	Cx.assign(solver.X());

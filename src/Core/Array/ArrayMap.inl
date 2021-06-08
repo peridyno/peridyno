@@ -133,12 +133,10 @@ namespace dyno
 
 			if (src[i].size() > 0)
 			{
-				typename std::map<int, ElementType>:: iterator map_it = src[i].begin();
-				for (int j = 0; j < src[i].size(); j++)
+				for (typename std::map<int, ElementType>::iterator map_it = src[i].begin(); map_it != src[i].end(); map_it++)
 				{
 					Pair<int, ElementType> mypair(map_it->first, map_it->second);
 					hElements.pushBack(mypair);
-					map_it++;
 				}
 			}
 		}
