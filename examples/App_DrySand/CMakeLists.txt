@@ -2,7 +2,7 @@ set(PROJECT_NAME App_DrySand)
 
 link_libraries(Core Framework IO Graphics)
 link_libraries(ParticleSystem RigidBody)
-link_libraries(GlfwGUI)
+link_libraries(VtkApp)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 

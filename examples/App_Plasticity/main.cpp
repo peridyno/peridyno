@@ -1,5 +1,3 @@
-#include "GlfwGUI/GlfwApp.h"
-
 #include "Framework/SceneGraph.h"
 #include "Topology/PointSet.h"
 #include "Framework/Log.h"
@@ -10,8 +8,9 @@
 #include "ParticleSystem/ElasticityModule.h"
 #include "RigidBody/RigidBody.h"
 
-#include "module/VtkSurfaceVisualModule.h"
-#include "RenderEngine.h"
+#include "../VTK/VtkApp/VtkApp.h"
+#include "../VTK/VtkVisualModule/VtkSurfaceVisualModule.h"
+#include "../VTK/VtkVisualModule/VtkPointVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -45,7 +44,7 @@ void CreateScene()
 	root->addParticleSystem(child3);
 
 	auto ptRender = std::make_shared<SurfaceVisualModule>();
-	//ptRender->setColor(glm::vec3(0, 1, 1));
+	ptRender->setColor(0, 1, 1);
 
 	child3->setVisible(false);
 	child3->setMass(1.0);
@@ -58,7 +57,7 @@ void CreateScene()
 
 	auto sRender = std::make_shared<SurfaceVisualModule>();
 	child3->getSurfaceNode()->addVisualModule(sRender);
-	//sRender->setColor(glm::vec3(1, 1, 1));
+	sRender->setColor(1, 1, 1);
 
 	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);
@@ -78,31 +77,18 @@ int main()
 {
 	CreateScene();
 
-	if (false)
-	{
-		SceneGraph::getInstance().initialize();
+	SceneGraph::getInstance().initialize();
 
-		RenderEngine engine;
-		engine.setSceneGraph(&SceneGraph::getInstance());
-		engine.start();
-	}
-	else
-	{
+	Log::setOutput("console_log.txt");
+	Log::setLevel(Log::Info);
+	Log::setUserReceiver(&RecieveLogMessage);
+	Log::sendMessage(Log::Info, "Simulation begin");
 
-		Log::setOutput("console_log.txt");
-		Log::setLevel(Log::Info);
-		Log::setUserReceiver(&RecieveLogMessage);
-		Log::sendMessage(Log::Info, "Simulation begin");
+	VtkApp window;
+	window.createWindow(1024, 768);
+	window.mainLoop();
 
-		GlfwApp window;
-		window.createWindow(1024, 768);
-
-		window.mUseNewRenderEngine = true;
-		window.mainLoop();
-
-		Log::sendMessage(Log::Info, "Simulation end!");
-	}
-
+	Log::sendMessage(Log::Info, "Simulation end!");
 	return 0;
 }
 

@@ -1,7 +1,5 @@
 #include "VtkFluidVisualModule.h"
-// opengl
-#include <glad/glad.h>
-#include "RenderEngine.h"
+
 // framework
 #include "Topology/TriangleSet.h"
 #include "Framework/Node.h"
@@ -17,6 +15,9 @@
 
 #include <vtkOpenGLFluidMapper.h>
 
+#ifdef _WIN32
+	#include <windows.h>
+#endif
 #include <cuda_gl_interop.h>
 
 #include "Framework/SceneGraph.h"

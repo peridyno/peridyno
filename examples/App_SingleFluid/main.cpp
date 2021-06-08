@@ -1,5 +1,3 @@
-#include "GlfwGUI/GlfwApp.h"
-
 #include "Framework/SceneGraph.h"
 #include "Framework/Log.h"
 
@@ -7,10 +5,10 @@
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 
-
-#include "RenderEngine.h"
-#include "module/VtkPointVisualModule.h"
-#include "module/VtkFluidVisualModule.h"
+#include "../VTK/VtkApp/VtkApp.h"
+#include "../VTK/VtkVisualModule/VtkSurfaceVisualModule.h"
+#include "../VTK/VtkVisualModule/VtkPointVisualModule.h"
+#include "../VTK/VtkVisualModule/VtkFluidVisualModule.h"
 
 using namespace std;
 using namespace dyno;
@@ -66,20 +64,14 @@ int main()
 {
 	CreateScene();
 
-	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
 	SceneGraph::getInstance().initialize();
-	RenderEngine engine;
-	engine.setSceneGraph(&SceneGraph::getInstance());
-	engine.start();
-	return 0;
-
 
 	Log::setOutput("console_log.txt");
 	Log::setLevel(Log::Info);
 	Log::setUserReceiver(&RecieveLogMessage);
 	Log::sendMessage(Log::Info, "Simulation begin");
 
-	GlfwApp window;
+	VtkApp window;
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

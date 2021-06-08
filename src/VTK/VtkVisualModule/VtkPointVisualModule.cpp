@@ -1,15 +1,13 @@
-#include "VtkSurfaceVisualModule.h"
-
-// opengl
-#include <glad/glad.h>
-#include "RenderEngine.h"
+#include "VtkPointVisualModule.h"
 
 // framework
 #include "Topology/TriangleSet.h"
 #include "Framework/Node.h"
 
 #include <vtkActor.h>
-#include <vtkCubeSource.h>
+#include <vtkProperty.h>
+#include <vtkPointSource.h>
+#include <vtkRenderer.h>
 #include <vtkOpenGLPolyDataMapper.h>
 #include <vtkOpenGLRenderWindow.h>
 #include <vtkOpenGLVertexBufferObjectCache.h>
@@ -19,25 +17,33 @@
 #include <vtkOpenGLVertexBufferObject.h>
 #include <vtkOpenGLIndexBufferObject.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <cuda_gl_interop.h>
+
+#include "Framework/SceneGraph.h"
 
 using namespace dyno;
 
-class SurfaceMapper : public vtkOpenGLPolyDataMapper
+class PointMapper : public vtkOpenGLPolyDataMapper
 {
 public:
-	SurfaceMapper(SurfaceVisualModule* v): m_module(v)
+	PointMapper(PointVisualModule* v): m_module(v)
 	{
 		// create psedo data, required by the vtkOpenGLPolyDataMapper to render content
-		vtkNew<vtkCubeSource> psedoData;
-		SetInputConnection(psedoData->GetOutputPort());
-	}
+		vtkNew<vtkPoints> points;
 
-	void ComputeBounds() override
-	{
-		// TODO: we might need the accurate bound of the node
-		this->GetInput()->GetBounds(this->Bounds);
+		Vec3f bbox0 = SceneGraph::getInstance().getLowerBound();
+		Vec3f bbox1 = SceneGraph::getInstance().getUpperBound();
+		points->InsertNextPoint(bbox0[0], bbox0[1], bbox0[2]);
+		points->InsertNextPoint(bbox1[0], bbox1[1], bbox1[2]);
+
+		vtkNew<vtkPolyData> polyData;
+		polyData->SetPoints(points);
+		SetInputData(polyData);
 	}
+	
 
 	void UpdateBufferObjects(vtkRenderer *ren, vtkActor *act) override
 	{
@@ -50,9 +56,8 @@ public:
 
 		if (node == NULL || !node->isVisible())	return;
 		
-		auto mesh = std::dynamic_pointer_cast<dyno::TriangleSet<dyno::DataType3f>>(node->getTopologyModule());
-		auto faces = mesh->getTriangles();
-		auto verts = mesh->getPoints();
+		auto pSet = std::dynamic_pointer_cast<dyno::PointSet<dyno::DataType3f>>(node->getTopologyModule());
+		auto verts = pSet->getPoints();
 
 		cudaError_t error;
 
@@ -71,26 +76,15 @@ public:
 			vtkOpenGLVertexBufferObject* vertexBuffer = this->VBOs->GetVBO("vertexMC");
 						
 			// index buffer
-			this->Primitives[PrimitiveTris].IBO;
-			std::vector<unsigned int> indexArray(faces->size() * 3);
-			this->Primitives[PrimitiveTris].IBO->Upload(indexArray, vtkOpenGLIndexBufferObject::ElementArrayBuffer);
-			this->Primitives[PrimitiveTris].IBO->IndexCount = indexArray.size();
-			vtkOpenGLIndexBufferObject* indexBuffer = this->Primitives[PrimitiveTris].IBO;
+			std::vector<unsigned int> indexArray(verts.size());
+			for (unsigned int i = 0; i < indexArray.size(); i++)
+				indexArray[i] = i;
+			
+			this->Primitives[PrimitivePoints].IBO->Upload(indexArray, vtkOpenGLIndexBufferObject::ElementArrayBuffer);
+			this->Primitives[PrimitivePoints].IBO->IndexCount = indexArray.size();
 
 			// create memory mapper for CUDA
 			error = cudaGraphicsGLRegisterBuffer(&m_cudaVBO, vertexBuffer->GetHandle(), cudaGraphicsRegisterFlagsWriteDiscard);
-			//printf("%s\n", cudaGetErrorName(error));
-			error = cudaGraphicsGLRegisterBuffer(&m_cudaIBO, indexBuffer->GetHandle(), cudaGraphicsRegisterFlagsWriteDiscard);
-
-			// copy index buffer, maybe only need once...
-			{
-				size_t size;
-				void*  cudaPtr = 0;
-				error = cudaGraphicsMapResources(1, &m_cudaIBO);
-				error = cudaGraphicsResourceGetMappedPointer(&cudaPtr, &size, m_cudaIBO);
-				error = cudaMemcpy(cudaPtr, faces->begin(), faces->size() * sizeof(unsigned int) * 3, cudaMemcpyDeviceToDevice);
-				error = cudaGraphicsUnmapResources(1, &m_cudaIBO);
-			}
 		}
 
 		// copy vertex memory
@@ -100,7 +94,6 @@ public:
 
 			// upload vertex
 			error = cudaGraphicsMapResources(1, &m_cudaVBO);
-			//printf("1, %s\n", cudaGetErrorName(error));
 			error = cudaGraphicsResourceGetMappedPointer(&cudaPtr, &size, m_cudaVBO);
 			error = cudaMemcpy(cudaPtr, verts.begin(), verts.size() * sizeof(float) * 3, cudaMemcpyDeviceToDevice);
 			error = cudaGraphicsUnmapResources(1, &m_cudaVBO);
@@ -108,21 +101,23 @@ public:
 	}
 
 private:
-	dyno::SurfaceVisualModule* m_module;
+	dyno::PointVisualModule* m_module;
 
 	bool				m_initialized = false;
 
 	cudaGraphicsResource*			m_cudaVBO;
-	cudaGraphicsResource*			m_cudaIBO;
 };
 
-IMPLEMENT_CLASS_COMMON(SurfaceVisualModule, 0)
+IMPLEMENT_CLASS_COMMON(PointVisualModule, 0)
 
-SurfaceVisualModule::SurfaceVisualModule()
+PointVisualModule::PointVisualModule()
 {
-	this->setName("surface_renderer");
+	this->setName("point_renderer");
 
 	m_actor = vtkActor::New();
-	m_actor->SetMapper(new SurfaceMapper(this));
+	m_actor->GetProperty()->SetRepresentationToPoints();
+	m_actor->GetProperty()->RenderPointsAsSpheresOn();
+	m_actor->GetProperty()->SetPointSize(2.0);
+	m_actor->SetMapper(new PointMapper(this));
 }
 

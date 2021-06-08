@@ -1,13 +1,11 @@
-#include "GlfwGUI/GlfwApp.h"
 #include "Framework/SceneGraph.h"
 #include "ParticleSystem/ParticleElasticBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/ElasticityModule.h"
 
-
-#include "RenderEngine.h"
-#include "module/VtkSurfaceVisualModule.h"
-#include "module/VtkPointVisualModule.h"
+#include "../VTK/VtkApp/VtkApp.h"
+#include "../VTK/VtkVisualModule/VtkSurfaceVisualModule.h"
+#include "../VTK/VtkVisualModule/VtkPointVisualModule.h"
 
 using namespace dyno;
 
@@ -40,16 +38,13 @@ int main()
 
 	bunny->getElasticitySolver()->setIterationNumber(10);
 	bunny->getElasticitySolver()->inHorizon()->setValue(0.01);
-	
-	//GlfwApp window;
-	//window.createWindow(1024, 768);
-	//window.mainLoop();
 
-	// we should use vtk GUI since some rendering is supported by OpenGL 3.2+
 	scene.initialize();
-	RenderEngine engine;
-	engine.setSceneGraph(&scene);
-	engine.start();
+	
+	VtkApp window;
+	window.createWindow(1024, 768);
+	window.mainLoop();
+	
 	return 0;
 
 }

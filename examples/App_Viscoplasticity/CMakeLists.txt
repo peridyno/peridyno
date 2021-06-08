@@ -20,7 +20,7 @@ target_link_libraries(${PROJECT_NAME}
 	Graphics 
 	ParticleSystem 
 	RigidBody 
-	GlfwGUI)
+	VtkApp)
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  #判断当前project在根目录下的相对路径
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")                              #为project设定folder目录

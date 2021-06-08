@@ -16,7 +16,6 @@ endif()
 
 if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
     add_subdirectory(Graphics)
-    add_subdirectory(RenderEngine)
 endif()
 
 if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_DYNAMICS)
@@ -25,6 +24,10 @@ endif()
 
 if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GUI)
     add_subdirectory(GUI)
+endif()
+
+if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_PLUGIN_VTK)
+    add_subdirectory(VTK)
 endif()
 
 # Write/install version file

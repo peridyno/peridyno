@@ -18,7 +18,7 @@ target_link_libraries(${PROJECT_NAME}
 	Graphics 
 	ParticleSystem 
 	RigidBody 
-	GlfwGUI)
+	VtkApp)
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")

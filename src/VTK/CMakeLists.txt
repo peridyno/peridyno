@@ -1,0 +1,2 @@
+add_subdirectory(VtkVisualModule)
+add_subdirectory(VtkApp)

@@ -9,8 +9,6 @@
 #include "Framework/SceneGraph.h"
 #include "Framework/Log.h"
 
-#include "../RenderEngine/RenderEngine.h"
-#include "../RenderEngine/RenderParams.h"
 
 namespace dyno 
 {
@@ -35,11 +33,7 @@ namespace dyno
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-
-		//
-		delete mRenderEngine;
-		delete mRenderParams;
-
+		
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 
@@ -147,25 +141,11 @@ namespace dyno
 		mCamera.zoom(3.0f);
 		mCamera.setGL(0.01f, 3.0f, (float)getWidth(), (float)getHeight());
 
-		// Jian: initialize rendering engine
-		mRenderEngine = new RenderEngine();
-		mRenderParams = new RenderParams();
-
-		mRenderEngine->initializeExternal();
-
-		// set the viewport
-		mRenderParams->viewport.x = 0;
-		mRenderParams->viewport.y = 0;
-		mRenderParams->viewport.w = width;
-		mRenderParams->viewport.h = height;
 	}
 
 	void GlfwApp::mainLoop()
 	{
 		SceneGraph::getInstance().initialize();
-
-		mRenderEngine->setSceneGraph(&SceneGraph::getInstance());
-
 		bool show_demo_window = true;
 
 		// Main loop
@@ -319,27 +299,9 @@ namespace dyno
 
 	void GlfwApp::drawScene(void)
 	{
-		if (mUseNewRenderEngine)
-		{
-			// simply dump transform matrices...
-			glGetFloatv(GL_PROJECTION_MATRIX, &mRenderParams->proj[0][0]);
-			glGetFloatv(GL_MODELVIEW_MATRIX, &mRenderParams->view[0][0]);
-			
-			// set the viewport
-			mRenderParams->viewport.x = 0;
-			mRenderParams->viewport.y = 0;
-			mRenderParams->viewport.w = mCamera.mViewportWidth;
-			mRenderParams->viewport.h = mCamera.mViewportHeight;
-			
-			mRenderEngine->renderExternal(*mRenderParams);
-		}
-		else
-		{
-			glUseProgram(0);
-			drawBackground();
-
-			SceneGraph::getInstance().draw();
-		}
+		glUseProgram(0);
+		drawBackground();
+		SceneGraph::getInstance().draw();
 	}
 
 	void GlfwApp::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

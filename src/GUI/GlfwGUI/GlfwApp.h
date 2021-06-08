@@ -13,9 +13,6 @@
 
 namespace dyno {
 
-	class RenderEngine;
-	class RenderParams;
-
 	enum ButtonState
 	{
 		GLFW_DOWN = 0,
@@ -126,11 +123,6 @@ namespace dyno {
 
 		Camera mCamera;
 
-		RenderEngine* mRenderEngine;
-		RenderParams* mRenderParams;
-
-	public:
-		bool			mUseNewRenderEngine = false;
     };
 
 }

@@ -3,7 +3,7 @@ set(PROJECT_NAME App_Cloth)
 
 link_libraries(Core Framework IO Graphics)
 link_libraries(ParticleSystem)
-link_libraries(GlfwGUI)
+link_libraries(VtkApp)
 
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
