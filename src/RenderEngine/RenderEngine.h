@@ -1,3 +1,19 @@
+/**
+ * Copyright 2017-2021 Jian SHI
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #pragma once
 
 #include "GLVertexArray.h"
@@ -29,16 +45,8 @@ namespace dyno
 		void renderSetup(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams);
 		void updateShadowMap(const RenderParams&);
 
-		// render pass
-		void renderBackground(RenderTarget* target, const RenderParams& rparams);
-		void renderOpacity(RenderTarget* target, const RenderParams& rparams);
-		void renderTransparency(RenderTarget* target, const RenderParams& rparams);
-		void renderFluid(RenderTarget* target, const RenderParams& rparams);
-		void renderPostprocess(RenderTarget* target, const RenderParams& rparams);
-
 		// surface material
 		void setMaterial(dyno::GLVisualModule* m);
-		void renderModule(dyno::GLVisualModule* m, unsigned int subroutine);
 
 	private:
 		// uniform buffer for matrices
@@ -47,24 +55,11 @@ namespace dyno
 		GLBuffer mLightUBO;
 		GLBuffer mMaterialUBO;
 
+		// SSAO
 		GLBuffer mSSAOKernelUBO;
 		GLTexture2D mSSAONoiseTex;
-
-		GLShaderProgram mSurfaceProgram;
-		GLShaderProgram mPointProgram;
-
-		GLShaderProgram mPBRShadingProgram;
 		GLShaderProgram mSSAOProgram;
-		GLShaderProgram mFXAAProgram;
-
-		// transparency blend
-		GLShaderProgram mBlendProgram;
-
-		// fluid
-		GLShaderProgram mFluidProgram;
-		GLShaderProgram mFluidFilterProgram;
-		GLShaderProgram mFluidBlendProgram;
-
+		
 		// background
 		GLShaderProgram mBackgroundProgram;
 

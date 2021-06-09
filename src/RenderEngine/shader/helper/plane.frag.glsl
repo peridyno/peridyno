@@ -16,7 +16,6 @@ layout(std140, binding = 1) uniform LightUniformBlock
 
 /***************** ShadowMap *********************/
 layout(binding = 5) uniform sampler2D shadowDepth;
-layout(binding = 6) uniform sampler2D shadowColor;
 
 vec3 GetShadowFactor(vec3 pos)
 {
@@ -39,7 +38,7 @@ vec3 GetShadowFactor(vec3 pos)
 		{
 			float pcfDepth = texture(shadowDepth, projCoords.xy + vec2(x, y) * texelSize).r;
 			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
-			shadow += texture(shadowColor, projCoords.xy + vec2(x, y) * texelSize).rgb * visible;
+			shadow += visible;
 		}
 	}
 	return clamp(shadow / 9.0, 0, 1);

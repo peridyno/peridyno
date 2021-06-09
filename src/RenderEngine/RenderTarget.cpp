@@ -29,9 +29,6 @@ namespace dyno
 
 		mSSAOTex.create();
 
-		mFluidTex[0].create();
-		mFluidTex[1].create();
-
 		// transparency
 		mHeadIndexTex.internalFormat = GL_R32UI;
 		mHeadIndexTex.format = GL_RED_INTEGER;
@@ -59,10 +56,6 @@ namespace dyno
 
 		// screen-space ambient occlusion
 		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT4, mSSAOTex.id);
-
-		// screen-space fluid rendering
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT5, mFluidTex[0].id);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT6, mFluidTex[1].id);
 
 		mFramebuffer.checkStatus();
 
@@ -103,10 +96,6 @@ namespace dyno
 
 		// ssao
 		mSSAOTex.resize(width, height);
-
-		// fluid
-		mFluidTex[0].resize(width, height);
-		mFluidTex[1].resize(width, height);
 
 		// transparency
 		mHeadIndexTex.resize(width, height);
@@ -194,17 +183,4 @@ namespace dyno
 		mColorTex.bind(GL_TEXTURE1);
 	}
 
-
-	void RenderTarget::drawFluidTex(int idx)
-	{
-		const GLenum buffers[] = { GL_COLOR_ATTACHMENT5 + idx };
-		mFramebuffer.bind();
-		mFramebuffer.drawBuffers(1, buffers);
-		glViewport(0, 0, width, height);
-	}
-
-	void RenderTarget::bindFluidTex(int target, int idx)
-	{
-		mFluidTex[idx].bind(target);
-	}
 }

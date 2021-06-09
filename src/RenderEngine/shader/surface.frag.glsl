@@ -21,122 +21,26 @@ layout(std140, binding = 2) uniform MaterialUniformBlock
 	int   shadowMode;
 };
 
-layout(location = 0) out vec4 fOutput0;
-layout(location = 1) out vec4 fOutput1;
-layout(location = 2) out vec4 fOutput2;
-
-
-// color map
-vec3 JetColor(float v, float vmin, float vmax){
-
-    float x = clamp((v-vmin)/(vmax-vmin), 0, 1);
-    float r = clamp(-4*abs(x-0.75) + 1.5, 0, 1);
-    float g = clamp(-4*abs(x-0.50) + 1.5, 0, 1);
-    float b = clamp(-4*abs(x-0.25) + 1.5, 0, 1);
-    return vec3(r,g,b);
-}
-
-vec3 HeatColor(float v,float vmin,float vmax){
-    float x = clamp((v-vmin)/(vmax-vmin), 0, 1);
-    float r = clamp(-4*abs(x-0.75) + 2, 0, 1);
-    float g = clamp(-4*abs(x-0.50) + 2, 0, 1);
-    float b = clamp(-4*abs(x) + 2, 0, 1);
-    return vec3(r,g,b);
-}
-
-vec4 get_color()
-{
-	// color by velocity
-	if(colorMode == 1)
-		return vec4(JetColor(length(velocity), colorMin, colorMax), 1);
-	if(colorMode == 2)
-		return vec4(HeatColor(length(velocity), colorMin, colorMax), 1);
-	if(colorMode == 3)
-		return vec4(JetColor(length(force), colorMin, colorMax), 1);
-	if(colorMode == 4)
-		return vec4(HeatColor(length(force), colorMin, colorMax), 1);
-	// default 
-	return albedo;
-}
+layout(location = 0) out vec4 fragColor;
 
 subroutine void RenderPass(void);
-
 layout(location = 0) subroutine uniform RenderPass renderPass;
 
 void main(void) { 
 	renderPass();
 } 
 
-layout(index = 0) subroutine(RenderPass) void GBufferPass(void)
-{
-	// pack g-buffer outputs
-	fOutput0 = get_color();
-	fOutput0.w = 1.0;
-	fOutput1.xyz = normal;
-	fOutput1.w = metallic;
-	fOutput2.xyz = position;
-	fOutput2.w = roughness;
-}
-
-layout(index = 1) subroutine(RenderPass) void ShadowMapPass(void)
-{
-	// todo: transparent shadow map?
-	fOutput0 = albedo * (1 - albedo.a);
-}
-
-// OIT - Linked List
-struct NodeType
-{
-	vec4 color;
-	float depth;
-	uint nextIndex;
-};
-
-// enable early-z
-layout(early_fragment_tests) in;
-
-#define BINDING_ATOMIC_FREE_INDEX 0
-#define BINDING_IMAGE_HEAD_INDEX 0
-#define BINDING_BUFFER_LINKED_LIST 0
-
-layout(binding = BINDING_ATOMIC_FREE_INDEX) uniform atomic_uint u_freeNodeIndex;
-layout(binding = BINDING_IMAGE_HEAD_INDEX, r32ui) uniform uimage2D u_headIndex;
-layout(binding = BINDING_BUFFER_LINKED_LIST, std430) buffer LinkedList
-{
-	NodeType nodes[];
-};
-
-
-uniform uint u_maxNodes = 1024 * 1024 * 8;
-
 vec3 pbr();
-
-layout(index = 2) subroutine(RenderPass) void TransparencyLinkedList(void)
+layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 {
-	// Get the index of the next free node in the buffer.
-	uint freeNodeIndex = atomicCounterIncrement(u_freeNodeIndex);
-
-	// Check, if still space in the buffer.
-	if (freeNodeIndex < u_maxNodes)
-	{
-		// Replace new index as the new head and gather the previous head, which will be the next index of this entry.
-		uint nextIndex = imageAtomicExchange(u_headIndex, ivec2(gl_FragCoord.xy), freeNodeIndex);
-
-		// Calculate color.
-		vec4 color = get_color();
-		
-		color.rgb = pbr();
-		color.a = albedo.a;
-
-		// Store the color, depth and the next index for later resolving.
-		nodes[freeNodeIndex].color = color;
-		nodes[freeNodeIndex].depth = gl_FragCoord.z;
-		nodes[freeNodeIndex].nextIndex = nextIndex;
-	}
-
-	// No output to the framebuffer.
+	fragColor.rgb = pbr();
+	fragColor.a = 1.0;
 }
 
+layout(index = 1) subroutine(RenderPass) void DepthPass(void)
+{
+	// do nothing
+}
 
 layout(std140, binding = 1) uniform LightUniformBlock
 {
