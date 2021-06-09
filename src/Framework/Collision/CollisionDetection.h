@@ -28,11 +28,11 @@ public:
 
 public:
 	
-	DEF_EMPTY_IN_ARRAY(Position, Coord, DeviceType::GPU, "");
+	DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 
-	DEF_EMPTY_IN_ARRAY(Rotation, Matrix, DeviceType::GPU, "");
+	DEF_ARRAY_IN(Matrix, Rotation, DeviceType::GPU, "");
 
-	DEF_EMPTY_OUT_ARRAY(ContactPairs, ContactPair, DeviceType::GPU, "Contact pairs");
+	DEF_ARRAY_OUT(ContactPair, ContactPairs, DeviceType::GPU, "Contact pairs");
 
 private:
 	std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;

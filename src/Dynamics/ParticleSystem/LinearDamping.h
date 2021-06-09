@@ -37,7 +37,7 @@ namespace dyno
 		bool constrain() override;
 
 	public:
-		DEF_VAR(DampingCoefficient, Real, 0.9, "");
+		DEF_VAR(Real, DampingCoefficient, 0.9, "");
 
 		/**
 		* @brief Particle velocity

@@ -62,33 +62,25 @@ namespace dyno {
 			* @brief Horizon
 			* A positive number represents the radius of neighborhood for each point
 			*/
-		DEF_EMPTY_IN_VAR(Horizon, Real, "");
-		//VarField<Real> m_horizon;
+		DEF_VAR_IN(Real, Horizon, "");
 
 		/**
 		 * @brief Particle position
 		 */
-		DEF_EMPTY_IN_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
-		//DeviceArrayField<Coord> m_position;
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
 
 		/**
 			* @brief Particle velocity
 			*/
-		DEF_EMPTY_IN_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
-		//DeviceArrayField<Coord> m_velocity;
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
 		/**
 		 * @brief Neighboring particles
 		 * 
 		 */
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
-		//NeighborField<int> m_neighborhood;
-
 
 		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
-		//NeighborField<int> m_neighborhood;
-
-//		NeighborField<NPair> m_restShape;
 
 	protected:
 		/**

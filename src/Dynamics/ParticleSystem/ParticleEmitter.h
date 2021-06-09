@@ -26,10 +26,10 @@ namespace dyno
 		bool resetStatus() override;
 
 
-		//DEF_VAR(Centre, Vec3f, 0, "Emitter location");
-		//DEF_VAR(Radius, Real, 0.1, "Emitter scale");
-		DEF_VAR(VelocityMagnitude, Real, 1, "Emitter Velocity");
-		DEF_VAR(SamplingDistance, Real, 0.005, "Emitter Sampling Distance");
+		//DEF_VAR(Vec3f, Centre, 0, "Emitter location");
+		//DEF_VAR(Real, Radius, 0.1, "Emitter scale");
+		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
+		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
 
 		DArray<Coord> gen_pos;
 		DArray<Coord> gen_vel;

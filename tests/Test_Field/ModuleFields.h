@@ -14,10 +14,10 @@ namespace dyno {
 		CALLBACK calculateRectangleArea();
 
 	public:
-		DEF_EMPTY_VAR(Width, float, "Width of a rectangle");
-		DEF_EMPTY_VAR(Height, float, "Height of a rectangle");
+		DEF_VAR_IN(float, Width, "Width of a rectangle");
+		DEF_VAR_IN(float, Height, "Height of a rectangle");
 
-		DEF_EMPTY_VAR(Area, float, "Area of a rectangle");
+		DEF_VAR_OUT(float, Area, "Area of a rectangle");
 
 	private:
 		float mDerived;

@@ -28,13 +28,13 @@ namespace dyno {
 		void updateVelocity();
 
 	public:
-		DEF_EMPTY_VAR(IterationNumber, int, "Iteration number of the PBD solver");
+		DEF_VAR(int, IterationNumber, 5, "Iteration number of the PBD solver");
 
-		DEF_EMPTY_VAR(RestDensity, Real, "Reference density");
+		DEF_VAR(Real, RestDensity, 1000, "Reference density");
 
-		DEF_EMPTY_VAR(SamplingDistance, Real, "");
+		DEF_VAR(Real, SamplingDistance, 0.005, "");
 
-		DEF_EMPTY_VAR(SmoothingLength, Real, "");
+		DEF_VAR(Real, SmoothingLength, 0.01, "");
 
 
 		/**

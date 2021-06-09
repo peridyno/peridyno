@@ -123,8 +123,8 @@ namespace dyno
 		m_summation = std::make_shared<SummationDensity<TDataType>>();
 
 		this->varRestDensity()->connect(m_summation->varRestDensity());
-		this->varSmoothingLength()->connect(m_summation->varSmoothingLength());
-		this->varSamplingDistance()->connect(m_summation->varSamplingDistance());
+		this->varSmoothingLength()->connect(m_summation->inSmoothingLength());
+		this->varSamplingDistance()->connect(m_summation->inSamplingDistance());
 
 		this->inPosition()->connect(m_summation->inPosition());
 		this->inNeighborIds()->connect(m_summation->inNeighborIds());

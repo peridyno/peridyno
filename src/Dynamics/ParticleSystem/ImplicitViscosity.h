@@ -31,9 +31,9 @@ namespace dyno
 		bool constrain() override;
 
 	public:
-		DEF_VAR(Viscosity, Real, 0.05, "");
+		DEF_VAR(Real, Viscosity, 0.05, "");
 
-		DEF_VAR(InterationNumber, int, 3, "");
+		DEF_VAR(int, InterationNumber, 3, "");
 
 		DEF_VAR_IN(Real, SmoothingLength, "");
 

@@ -37,7 +37,7 @@ namespace dyno
 		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
 
 	public:
-		DEF_EMPTY_VAR(Horizon, Real, "Horizon");
+		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 
 	private:
 		std::shared_ptr<Node> m_surfaceNode;

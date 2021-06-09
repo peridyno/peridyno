@@ -25,7 +25,7 @@ namespace dyno
 		void requestFixedSizeNeighborIds();
 
 	public:
-		DEF_VAR(SizeLimit, uint, 0, "Maximum number of neighbors");
+		DEF_VAR(uint, SizeLimit, 0, "Maximum number of neighbors");
 
 		/**
 		* @brief Search radius
