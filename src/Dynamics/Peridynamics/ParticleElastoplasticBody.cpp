@@ -45,10 +45,10 @@ namespace dyno
 		m_nbrQuery->outNeighborIds()->connect(m_pbdModule->inNeighborIds());
 
 		m_visModule = this->template addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
-		m_visModule->setViscosity(Real(1));
-		m_horizon.connect(&m_visModule->m_smoothingLength);
-		this->currentPosition()->connect(&m_visModule->m_position);
-		this->currentVelocity()->connect(&m_visModule->m_velocity);
+		m_visModule->varViscosity()->setValue(Real(1));
+		m_horizon.connect(m_visModule->inSmoothingLength());
+		this->currentPosition()->connect(m_visModule->inPosition());
+		this->currentVelocity()->connect(m_visModule->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 
 

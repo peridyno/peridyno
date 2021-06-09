@@ -18,33 +18,30 @@
 
 namespace dyno 
 {
+	/**
+	 * @brief A linear damping model
+	 *
+	 * @tparam TDataType
+	 */
 	template<typename TDataType>
-	class ImplicitViscosity : public ConstraintModule
+	class LinearDamping : public ConstraintModule
 	{
+		DECLARE_CLASS_1(LinearDamping, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ImplicitViscosity();
-		~ImplicitViscosity() override;
-		
+		LinearDamping();
+		~LinearDamping() override;
+
 		bool constrain() override;
 
 	public:
-		DEF_VAR(Viscosity, Real, 0.05, "");
+		DEF_VAR(DampingCoefficient, Real, 0.9, "");
 
-		DEF_VAR(InterationNumber, int, 3, "");
-
-		DEF_VAR_IN(Real, SmoothingLength, "");
-
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
-
+		/**
+		* @brief Particle velocity
+		*/
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
-
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
-
-	private:
-		DArray<Coord> mVelOld;
-		DArray<Coord> mVelBuf;
 	};
 }
