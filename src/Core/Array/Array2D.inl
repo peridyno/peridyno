@@ -37,7 +37,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data, m_pitch, src.begin(), src.pitch(), src.nx(), src.ny(), cudaMemcpyDeviceToDevice));
+		cuSafeCall(cudaMemcpy2D(m_data, sizeof(T) *m_pitch, src.begin(), sizeof(T) *src.pitch(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyDeviceToDevice));
 	}
 
 	template<typename T>
@@ -47,7 +47,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data, m_pitch, src.begin(), src.nx(), src.nx(), src.ny(), cudaMemcpyHostToDevice));
+		cuSafeCall(cudaMemcpy2D(m_data, sizeof(T) *m_pitch, src.begin(), sizeof(T) *src.nx(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyHostToDevice));
 	}
 
 
@@ -83,7 +83,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data.data(), m_nx, src.begin(), src.pitch(), src.nx(), src.ny(), cudaMemcpyDeviceToHost));
+		cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) * m_nx, src.begin(), sizeof(T) *src.pitch(), sizeof(T) *src.nx(), src.ny(), cudaMemcpyDeviceToHost));
 	}
 
 	template<typename T>
@@ -93,6 +93,6 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data.data(), m_nx, src.begin(), m_nx, src.nx(), src.ny(), cudaMemcpyHostToHost));
+		cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) *m_nx, src.begin(), sizeof(T) *src.nx(), sizeof(T) *src.nx(), src.ny(), cudaMemcpyHostToHost));
 	}
 }

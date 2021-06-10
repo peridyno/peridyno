@@ -59,7 +59,7 @@ namespace dyno {
 
 		inline int index(const size_t i, const size_t j) const
 		{
-			return i + j * m_pitch;
+			return i + j * m_nx;
 		}
 
 		inline T operator [] (const size_t id) const
