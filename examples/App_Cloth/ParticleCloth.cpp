@@ -4,9 +4,10 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "SurfaceMeshRender.h"
 #include "PointRenderModule.h"
-#include "ParticleSystem/ElasticityModule.h"
-#include "ParticleSystem/Peridynamics.h"
-#include "ParticleSystem/FixedPoints.h"
+
+#include "Peridynamics/ElasticityModule.h"
+#include "Peridynamics/Peridynamics.h"
+#include "Peridynamics/FixedPoints.h"
 
 namespace dyno
 {

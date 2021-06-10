@@ -2,7 +2,7 @@
 #include "ElasticityModule.h"
 #include "Framework/Node.h"
 #include "Matrix/MatrixFunc.h"
-#include "Kernel.h"
+#include "ParticleSystem/Kernel.h"
 
 namespace dyno
 {
@@ -283,8 +283,8 @@ namespace dyno
 		: ConstraintModule()
 	{
 		this->inHorizon()->setValue(0.0125);
- 		m_mu.setValue(0.05);
- 		m_lambda.setValue(0.1);
+ 		m_mu.setValue(0.0);
+ 		m_lambda.setValue(0.01);
 		m_iterNum.setValue(10);
 
 		this->inNeighborIds()->tagOptional(true);

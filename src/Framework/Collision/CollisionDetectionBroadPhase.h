@@ -29,7 +29,7 @@ namespace dyno
 		}
 
 	public:
-		DEF_EMPTY_VAR(GridSizeLimit, Real, "Limit the smallest grid size");
+		DEF_VAR(Real, GridSizeLimit, 0.005, "Limit the smallest grid size");
 
 		DEF_ARRAY_IN(AABB, Source, DeviceType::GPU, "");
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "ParticleSystem/ParticleSystem.h"
+#include "Particlesystem/ParticleSystem.h"
 
 namespace dyno
 {
@@ -11,19 +11,19 @@ namespace dyno
 	template<typename> class DensityPBD;
 	template<typename TDataType> class ImplicitViscosity;
 	/*!
-	*	\class	ParticleViscoplasticBody
+	*	\class	ParticleElastoplasticBody
 	*	\brief	Peridynamics-based elastoplastic object.
 	*/
 	template<typename TDataType>
-	class ParticleViscoplasticBody : public ParticleSystem<TDataType>
+	class ParticleElastoplasticBody : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ParticleViscoplasticBody, TDataType)
+		DECLARE_CLASS_1(ParticleElastoplasticBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ParticleViscoplasticBody(std::string name = "default");
-		virtual ~ParticleViscoplasticBody();
+		ParticleElastoplasticBody(std::string name = "default");
+		virtual ~ParticleElastoplasticBody();
 
 		void advance(Real dt) override;
 
@@ -35,6 +35,10 @@ namespace dyno
 		bool scale(Real s) override;
 
 		void loadSurface(std::string filename);
+
+		void setElastoplasticitySolver(std::shared_ptr<ElastoplasticityModule<TDataType>> solver);
+
+		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
 
 	public:
 		VarField<Real> m_horizon;
@@ -49,11 +53,4 @@ namespace dyno
 		std::shared_ptr<DensityPBD<TDataType>> m_pbdModule;
 		std::shared_ptr<ImplicitViscosity<TDataType>> m_visModule;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class ParticleViscoplasticBody<DataType3f>;
-#else
-	template class ParticleViscoplasticBody<DataType3d>;
-#endif
 }

@@ -33,8 +33,8 @@ namespace dyno {
 		void scale(Real s);
 
 	public:
-		DEF_EMPTY_VAR(TangentialFriction, Real, "Tangential friction");
-		DEF_EMPTY_VAR(NormalFriction, Real, "Normal friction");
+		DEF_VAR(Real, TangentialFriction, 0.0, "Tangential friction");
+		DEF_VAR(Real, NormalFriction, 1.0, "Normal friction");
 
 
 		std::vector<std::shared_ptr<BoundaryConstraint<TDataType>>> m_obstacles;

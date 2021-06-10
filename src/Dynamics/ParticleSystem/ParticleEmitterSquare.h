@@ -27,7 +27,7 @@ namespace dyno
 
 		//void advance(Real dt) override;
 	private:
-		DEF_VAR(Width, Real, 0.05, "Emitter width");
-		DEF_VAR(Height, Real, 0.05, "Emitter height");
+		DEF_VAR(Real, Width, 0.05, "Emitter width");
+		DEF_VAR(Real, Height, 0.05, "Emitter height");
 	};
 }

@@ -7,18 +7,18 @@ namespace dyno
 	{
 		std::function<void()> callback = std::bind(&ModuleFields::calculateRectangleArea, this);
 
-		this->varWidth()->setCallBackFunc(callback);
-		this->varHeight()->setCallBackFunc(callback);
+		this->inWidth()->setCallBackFunc(callback);
+		this->inHeight()->setCallBackFunc(callback);
 	}
 
 	CALLBACK ModuleFields::calculateRectangleArea()
 	{
-		if (this->varWidth()->isEmpty() || this->varHeight()->isEmpty())
+		if (this->inWidth()->isEmpty() || this->inHeight()->isEmpty())
 		{
 			Log::sendMessage(Log::Warning, "Either the width or height of the rectangle is not set!");
 			return;
 		}
 
-		this->varArea()->setValue(this->varWidth()->getData()*this->varHeight()->getData());
+		this->outArea()->setValue(this->inWidth()->getData()*this->inHeight()->getData());
 	}
 }
