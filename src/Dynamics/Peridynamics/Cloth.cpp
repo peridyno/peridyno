@@ -1,9 +1,7 @@
-#include "ParticleCloth.h"
+#include "Cloth.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "SurfaceMeshRender.h"
-#include "PointRenderModule.h"
 
 #include "Peridynamics/ElasticityModule.h"
 #include "Peridynamics/Peridynamics.h"
@@ -11,10 +9,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleCloth, TDataType)
+	IMPLEMENT_CLASS_1(Cloth, TDataType)
 
 	template<typename TDataType>
-	ParticleCloth<TDataType>::ParticleCloth(std::string name)
+	Cloth<TDataType>::Cloth(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
@@ -25,63 +23,54 @@ namespace dyno
 
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
-
 		//Create a node for surface mesh rendering
-		m_surfaceNode = this->template createChild<Node>("Mesh");
+		mSurfaceNode = this->template createChild<Node>("Mesh");
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		m_surfaceNode->setTopologyModule(triSet);
-
-		auto render = std::make_shared<SurfaceMeshRender>();
-		render->setColor(Vec3f(0.4, 0.75, 1));
-		m_surfaceNode->addVisualModule(render);
+		mSurfaceNode->setTopologyModule(triSet);
 
 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
 		this->addTopologyMapping(surfaceMapping);
-
-		this->setVisible(true);
 	}
 
 	template<typename TDataType>
-	ParticleCloth<TDataType>::~ParticleCloth()
+	Cloth<TDataType>::~Cloth()
 	{
 		
 	}
 
 	template<typename TDataType>
-	bool ParticleCloth<TDataType>::translate(Coord t)
+	bool Cloth<TDataType>::translate(Coord t)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule())->translate(t);
 
 		return ParticleSystem<TDataType>::translate(t);
 	}
 
 
 	template<typename TDataType>
-	bool ParticleCloth<TDataType>::scale(Real s)
+	bool Cloth<TDataType>::scale(Real s)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->scale(s);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule())->scale(s);
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
 
-
 	template<typename TDataType>
-	bool ParticleCloth<TDataType>::initialize()
+	bool Cloth<TDataType>::initialize()
 	{
 		return ParticleSystem<TDataType>::initialize();
 	}
 
-
 	template<typename TDataType>
-	void ParticleCloth<TDataType>::advance(Real dt)
+	void Cloth<TDataType>::advance(Real dt)
 	{
 		auto nModel = this->getNumericalModel();
 		nModel->step(this->getDt());
 	}
 
 	template<typename TDataType>
-	void ParticleCloth<TDataType>::updateTopology()
+	void Cloth<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
 		pts.assign(this->currentPosition()->getData());
@@ -94,10 +83,16 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleCloth<TDataType>::loadSurface(std::string filename)
+	void Cloth<TDataType>::loadSurface(std::string filename)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->loadObjFile(filename);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule())->loadObjFile(filename);
 	}
 
-	DEFINE_CLASS(ParticleCloth);
+	template<typename TDataType>
+	std::shared_ptr<Node> Cloth<TDataType>::getSurface()
+	{
+		return mSurfaceNode;
+	}
+
+	DEFINE_CLASS(Cloth);
 }

@@ -16,7 +16,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Core 
         Framework 
         IO 
-        Graphics 
+        RenderEngine 
         ParticleSystem 
         RigidBody 
         GlfwGUI)

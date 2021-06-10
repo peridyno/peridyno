@@ -65,8 +65,6 @@ int main()
 
 	GlfwApp window;
 	window.createWindow(1024, 768);
-
-	window.mUseNewRenderEngine = true;
 	window.mainLoop();
 
 	return 0;

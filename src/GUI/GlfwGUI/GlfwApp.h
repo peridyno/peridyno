@@ -132,7 +132,7 @@ namespace dyno {
 		RenderParams* mRenderParams;
 
 	public:
-		bool			mUseNewRenderEngine = false;
+		bool			mUseNewRenderEngine = true;
     };
 
 }
