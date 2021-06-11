@@ -527,7 +527,7 @@ namespace dyno
 
 		this->inRestShape()->getDataPtr()->assign(newNeighborList);
 
-		newNeighborList.release();
+		newNeighborList.clear();
 		index.clear();
 		cuSynchronize();
 	}
