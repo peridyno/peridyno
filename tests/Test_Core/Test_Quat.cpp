@@ -19,5 +19,11 @@ TEST(Quat, func)
 
 	Quat<float> q3(0.21f, Vec3f(0.0f, 1.0f, 0.0f));
 
+	Quat<float> q0(0.0f, 0.0f, 0.0f, 1.0f);
+	Quat<float> omega(1.0f, 0.0f, 0.0f, 0.0f);
+
+	auto qN = q0 + 0.5f*omega * q0;
+	qN.normalize();
+
 	EXPECT_EQ(angle == 0.2f, true);
 }

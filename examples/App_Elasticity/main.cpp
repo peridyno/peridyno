@@ -1,8 +1,10 @@
 #include "GlfwGUI/GlfwApp.h"
 #include "Framework/SceneGraph.h"
-#include "ParticleSystem/ParticleElasticBody.h"
+
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ElasticityModule.h"
+
+#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticityModule.h"
 
 #include "SurfaceMeshRender.h"
 #include "PointRenderModule.h"
@@ -11,8 +13,6 @@ using namespace dyno;
 
 int main()
 {
-	Log::sendMessage(Log::Info, "Simulation start");
-
 	SceneGraph& scene = SceneGraph::getInstance();
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();

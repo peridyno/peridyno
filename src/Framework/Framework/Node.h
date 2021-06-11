@@ -385,9 +385,9 @@ private:
 
 	Real m_mass;
 
-	DEF_VAR(Location, Vec3f, 0, "Node location");
-	DEF_VAR(Rotation, Vec3f, 0, "Node rotation");
-	DEF_VAR(Scale, Vec3f, 0, "Node scale");
+	DEF_VAR(Vec3f, Location, 0, "Node location");
+	DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
+	DEF_VAR(Vec3f, Scale, 0, "Node scale");
 
 	std::string m_node_name;
 
@@ -396,7 +396,7 @@ private:
 	 * true: Dynamics is turn on
 	 * false: Dynamics is turned off
 	 */
-	DEF_VAR(Active, bool, true, "Indicating whether the simulation is on for this node!");
+	DEF_VAR(bool, Active, true, "Indicating whether the simulation is on for this node!");
 
 
 	/**
@@ -404,7 +404,7 @@ private:
 	 * true: the node is visible
 	 * false: the node is invisible
 	 */
-	DEF_VAR(Visible, bool, true, "Indicating whether the node is visible!");
+	DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
 
 	/**
 	 * @brief A module list containing all modules

@@ -28,7 +28,7 @@ namespace dyno
 		
 		//void advance(Real dt) override;
 	public:
-		DEF_VAR(Radius, Real, 0.05, "Emitter radius");
+		DEF_VAR(Real, Radius, 0.05, "Emitter radius");
 
 		//DEF_NODE_PORTS(ParticleSystems, ParticleSystem<TDataType>, "Particle Systems");
 	};

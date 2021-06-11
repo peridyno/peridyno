@@ -1,5 +1,5 @@
 #include "GranularModule.h"
-#include "SummationDensity.h"
+#include "Particlesystem/SummationDensity.h"
 
 namespace dyno
 {
@@ -16,7 +16,7 @@ namespace dyno
 		//TODO: replace
 		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
 
-		this->inHorizon()->connect(m_densitySum->varSmoothingLength());
+		this->inHorizon()->connect(m_densitySum->inSmoothingLength());
 		this->inPosition()->connect(m_densitySum->inPosition());
 		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
 

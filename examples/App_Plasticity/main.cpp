@@ -1,13 +1,15 @@
 #include "GlfwGUI/GlfwApp.h"
 
 #include "Framework/SceneGraph.h"
-#include "Topology/PointSet.h"
 #include "Framework/Log.h"
+#include "Topology/PointSet.h"
 
-#include "ParticleSystem/ParticleElastoplasticBody.h"
-#include "ParticleSystem/ParticleElasticBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ElasticityModule.h"
+
+#include "Peridynamics/ParticleElastoplasticBody.h"
+#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticityModule.h"
+
 #include "RigidBody/RigidBody.h"
 
 #include "SurfaceMeshRender.h"
@@ -15,22 +17,6 @@
 
 using namespace std;
 using namespace dyno;
-
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
 
 void CreateScene()
 {
@@ -86,17 +72,11 @@ int main()
 {
 	CreateScene();
 
-	Log::setOutput("console_log.txt");
-	Log::setLevel(Log::Info);
-	Log::setUserReceiver(&RecieveLogMessage);
-	Log::sendMessage(Log::Info, "Simulation begin");
-
 	GlfwApp window;
 	window.createWindow(1024, 768);
 
 	window.mainLoop();
 
-	Log::sendMessage(Log::Info, "Simulation end!");
 	return 0;
 }
 

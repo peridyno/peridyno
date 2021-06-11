@@ -20,12 +20,6 @@ namespace dyno
 		, m_pNum(0)
 	{
 		m_smoothingLength.setValue(Real(0.006));
-
-		attachField(&m_smoothingLength, "smoothingLength", "Smoothing length", false);
-
-		attachField(&m_position, "position", "Storing the particle positions!", false);
-		attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-		attachField(&m_forceDensity, "force_density", "Storing the particle force densities!", false);
 	}
 
 	template<typename TDataType>
@@ -64,10 +58,10 @@ namespace dyno
 		cuSynchronize();
 
 		m_visModule = this->getParent()->addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
-		m_visModule->setViscosity(Real(1));
-		m_smoothingLength.connect(&m_visModule->m_smoothingLength);
-		m_position.connect(&m_visModule->m_position);
-		m_velocity.connect(&m_visModule->m_velocity);
+		m_visModule->varViscosity()->setValue(Real(0.5));
+		m_smoothingLength.connect(m_visModule->inSmoothingLength());
+		m_position.connect(m_visModule->inPosition());
+		m_velocity.connect(m_visModule->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 		m_visModule->initialize();
 
@@ -108,7 +102,6 @@ namespace dyno
 		getParent()->addConstraintModule(solver);
 	}
 
-
 	template<typename TDataType>
 	void PositionBasedFluidModel<TDataType>::setViscositySolver(std::shared_ptr<ConstraintModule> solver)
 	{
@@ -119,8 +112,6 @@ namespace dyno
 		m_viscositySolver = solver;
 		getParent()->addConstraintModule(solver);
 	}
-
-
 
 	template<typename TDataType>
 	void PositionBasedFluidModel<TDataType>::setSurfaceTensionSolver(std::shared_ptr<ForceModule> solver)

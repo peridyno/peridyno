@@ -4,7 +4,7 @@
 #include "Framework/Node.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "ParticleIntegrator.h"
+#include "ParticleSystem/ParticleIntegrator.h"
 #include "Topology/NeighborPointQuery.h"
 
 namespace dyno

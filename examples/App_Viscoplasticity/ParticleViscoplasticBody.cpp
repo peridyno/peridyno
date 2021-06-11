@@ -6,7 +6,8 @@
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/ParticleIntegrator.h"
-#include "ParticleSystem/ElastoplasticityModule.h"
+
+#include "Peridynamics/ElastoplasticityModule.h"
 
 #include "ParticleSystem/DensityPBD.h"
 #include "ParticleSystem/ImplicitViscosity.h"
@@ -45,10 +46,10 @@ namespace dyno
 // 		m_nbrQuery->outNeighborhood()->connect(m_pbdModule->inNeighborIndex());
 
 		m_visModule = this->template addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
-		m_visModule->setViscosity(Real(1));
-		m_horizon.connect(&m_visModule->m_smoothingLength);
-		this->currentPosition()->connect(&m_visModule->m_position);
-		this->currentVelocity()->connect(&m_visModule->m_velocity);
+		m_visModule->varViscosity()->setValue(Real(1));
+		m_horizon.connect(m_visModule->inSmoothingLength());
+		this->currentPosition()->connect(m_visModule->inPosition());
+		this->currentVelocity()->connect(m_visModule->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 
 		m_surfaceNode = this->template createChild<Node>("Mesh");

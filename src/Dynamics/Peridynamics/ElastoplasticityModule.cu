@@ -2,7 +2,7 @@
 #include "ElastoplasticityModule.h"
 #include "Framework/Node.h"
 #include "Matrix/MatrixFunc.h"
-#include "Kernel.h"
+#include "ParticleSystem/Kernel.h"
 #include <thrust/scan.h>
 #include <thrust/reduce.h>
 //#include "svd3_cuda2.h"

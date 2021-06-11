@@ -1,5 +1,5 @@
 #pragma once
-#include "ParticleSystem/ElastoplasticityModule.h"
+#include "ElastoplasticityModule.h"
 
 namespace dyno {
 
