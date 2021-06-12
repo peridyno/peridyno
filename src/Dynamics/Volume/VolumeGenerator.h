@@ -51,10 +51,12 @@ namespace dyno {
 		int nj;
 		int nk;
 		
-		float dx;
+		int padding = 40;
 
-		CArray<Vec3ui> tri;
-		CArray<Vec3f> x;
+		float dx = 0.1;
+
+		CArray<Vec3ui> faceList;
+		CArray<Vec3f> vertList;
 		Vec3f origin;
 		CArray3f phi;
 

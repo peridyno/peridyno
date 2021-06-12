@@ -1,6 +1,11 @@
 #include "VolumeGenerator.h"
 #include "Topology/TriangleSet.h"
 
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <limits>
+
 namespace dyno
 {
 	IMPLEMENT_CLASS_1(VolumeGenerator, TDataType)
@@ -22,7 +27,59 @@ namespace dyno
 		closedSurface = std::make_shared<TriangleSet<TDataType>>();
 		closedSurface->loadObjFile(filename);
 
+		Vec3f min_box(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+		Vec3f max_box(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
+		std::ifstream infile(filename);
+		if (!infile) {
+			std::cerr << "Failed to open. Terminating.\n";
+			exit(-1);
+		}
+
+		int ignored_lines = 0;
+		std::string line;
+		while (!infile.eof()) {
+			std::getline(infile, line);
+
+			//.obj files sometimes contain vertex normals indicated by "vn"
+			if (line.substr(0, 1) == std::string("v") && line.substr(0, 2) != std::string("vn")) {
+				std::stringstream data(line);
+				char c;
+				Vec3f point;
+				data >> c >> point[0] >> point[1] >> point[2];
+				vertList.pushBack(point);
+				min_box = min_box.minimum(point);
+				max_box = max_box.maximum(point);
+			}
+			else if (line.substr(0, 1) == std::string("f")) {
+				std::stringstream data(line);
+				char c;
+				int v0, v1, v2;
+				data >> c >> v0 >> v1 >> v2;
+				faceList.pushBack(Vec3ui(v0 - 1, v1 - 1, v2 - 1));
+			}
+			else if (line.substr(0, 2) == std::string("vn")) {
+				std::cerr << "Obj-loader is not able to parse vertex normals, please strip them from the input file. \n";
+				exit(-2);
+			}
+			else {
+				++ignored_lines;
+			}
+		}
+		infile.close();
+
+
+		Vec3f unit(1, 1, 1);
+		min_box -= padding * dx*unit;
+		max_box += padding * dx*unit;
+
+		ni = std::floor((max_box[0] - min_box[0]) / dx);
+		nj = std::floor((max_box[1] - min_box[1]) / dx);
+		nk = std::floor((max_box[2] - min_box[2]) / dx);
+
+		origin = min_box;
+
+		makeLevelSet();
 	}
 
 	// find distance x0 is from segment x1-x2
@@ -39,7 +96,7 @@ namespace dyno
 			s12 = 1;
 		}
 		// and find the distance
-		return (x0, s12*x1 + (1 - s12)*x2).norm();
+		return (x0 - (s12*x1 + (1 - s12)*x2)).norm();
 	}
 
 	// find distance x0 is from triangle x1-x2-x3
@@ -55,7 +112,7 @@ namespace dyno
 		float w31 = invdet * (m13*b - d * a);
 		float w12 = 1 - w23 - w31;
 		if (w23 >= 0 && w31 >= 0 && w12 >= 0) { // if we're inside the triangle
-			return (x0, w23*x1 + w31 * x2 + w12 * x3).norm();
+			return (x0 - (w23*x1 + w31 * x2 + w12 * x3)).norm();
 		}
 		else { // we have to clamp to one of the edges
 			if (w23 > 0) // this rules out edge 2-3 for us
@@ -67,7 +124,7 @@ namespace dyno
 		}
 	}
 
-	static void check_neighbour(const CArray<Vec3ui> &tri, const CArray<Vec3f> &x,
+	static void check_neighbour(const CArray<Vec3ui> &tri, const CArray<Vec3f> &vert,
 		CArray3f &phi, CArray3i &closest_tri,
 		const Vec3f &gx, int i0, int j0, int k0, int i1, int j1, int k1)
 	{
@@ -77,7 +134,7 @@ namespace dyno
 			p = trijk[0];
 			q = trijk[1];
 			r = trijk[2];
-			float d = point_triangle_distance(gx, x[p], x[q], x[r]);
+			float d = point_triangle_distance(gx, vert[p], vert[q], vert[r]);
 			if (d < phi(i0, j0, k0)) {
 				phi(i0, j0, k0) = d;
 				closest_tri(i0, j0, k0) = closest_tri(i1, j1, k1);
@@ -90,14 +147,26 @@ namespace dyno
 		int di, int dj, int dk)
 	{
 		int i0, i1;
-		if (di > 0) { i0 = 1; i1 = phi.nx(); }
-		else { i0 = phi.nx() - 2; i1 = -1; }
+		if (di > 0) { 
+			i0 = 1; i1 = phi.nx(); 
+		}
+		else { 
+			i0 = phi.nx() - 2; i1 = -1; 
+		}
 		int j0, j1;
-		if (dj > 0) { j0 = 1; j1 = phi.ny(); }
-		else { j0 = phi.ny() - 2; j1 = -1; }
+		if (dj > 0) { 
+			j0 = 1; j1 = phi.ny(); 
+		}
+		else { 
+			j0 = phi.ny() - 2; j1 = -1; 
+		}
 		int k0, k1;
-		if (dk > 0) { k0 = 1; k1 = phi.nz(); }
-		else { k0 = phi.nz() - 2; k1 = -1; }
+		if (dk > 0) { 
+			k0 = 1; k1 = phi.nz(); 
+		}
+		else { 
+			k0 = phi.nz() - 2; k1 = -1; 
+		}
 		for (int k = k0; k != k1; k += dk) for (int j = j0; j != j1; j += dj) for (int i = i0; i != i1; i += di) {
 			Vec3f gx(i*dx + origin[0], j*dx + origin[1], k*dx + origin[2]);
 			check_neighbour(tri, x, phi, closest_tri, gx, i, j, k, i - di, j, k);
@@ -162,16 +231,21 @@ namespace dyno
 		CArray3i intersection_count(ni, nj, nk); //CArray3i intersection_count(ni, nj, nk, 0); // intersection_count(i,j,k) is # of tri intersections in (i-1,i]x{j}x{k}
 		intersection_count.assign(0);
 		// we begin by initializing distances near the mesh, and figuring out intersection counts
-		Vec3f ijkmin, ijkmax;
-		for (unsigned int t = 0; t < tri.size(); ++t) {
-			unsigned int p, q, r;
-			p = tri[t][0];
-			q = tri[t][1];
-			r = tri[t][2];
+		for (uint t = 0; t < faceList.size(); ++t) {
+			uint p, q, r;
+			p = faceList[t][0];
+			q = faceList[t][1];
+			r = faceList[t][2];
 			// coordinates in grid to high precision
-			double fip = ((double)x[p][0] - origin[0]) / dx, fjp = ((double)x[p][1] - origin[1]) / dx, fkp = ((double)x[p][2] - origin[2]) / dx;
-			double fiq = ((double)x[q][0] - origin[0]) / dx, fjq = ((double)x[q][1] - origin[1]) / dx, fkq = ((double)x[q][2] - origin[2]) / dx;
-			double fir = ((double)x[r][0] - origin[0]) / dx, fjr = ((double)x[r][1] - origin[1]) / dx, fkr = ((double)x[r][2] - origin[2]) / dx;
+			double fip = ((double)vertList[p][0] - origin[0]) / dx;
+			double fjp = ((double)vertList[p][1] - origin[1]) / dx;
+			double fkp = ((double)vertList[p][2] - origin[2]) / dx;
+			double fiq = ((double)vertList[q][0] - origin[0]) / dx; 
+			double fjq = ((double)vertList[q][1] - origin[1]) / dx; 
+			double fkq = ((double)vertList[q][2] - origin[2]) / dx;
+			double fir = ((double)vertList[r][0] - origin[0]) / dx; 
+			double fjr = ((double)vertList[r][1] - origin[1]) / dx; 
+			double fkr = ((double)vertList[r][2] - origin[2]) / dx;
 			// do distances nearby
 			int i0 = clamp(int(TRI_MIN(fip, fiq, fir)) - exact_band, 0, ni - 1);
 			int i1 = clamp(int(TRI_MAX(fip, fiq, fir)) + exact_band + 1, 0, ni - 1);
@@ -181,7 +255,7 @@ namespace dyno
 			int k1 = clamp(int(TRI_MAX(fkp, fkq, fkr)) + exact_band + 1, 0, nk - 1);
 			for (int k = k0; k <= k1; ++k) for (int j = j0; j <= j1; ++j) for (int i = i0; i <= i1; ++i) {
 				Vec3f gx(i*dx + origin[0], j*dx + origin[1], k*dx + origin[2]);
-				float d = point_triangle_distance(gx, x[p], x[q], x[r]);
+				float d = point_triangle_distance(gx, vertList[p], vertList[q], vertList[r]);
 				if (d < phi(i, j, k)) {
 					phi(i, j, k) = d;
 					closest_tri(i, j, k) = t;
@@ -205,14 +279,14 @@ namespace dyno
 		}
 		// and now we fill in the rest of the distances with fast sweeping
 		for (unsigned int pass = 0; pass < 2; ++pass) {
-			sweep(tri, x, phi, closest_tri, origin, dx, +1, +1, +1);
-			sweep(tri, x, phi, closest_tri, origin, dx, -1, -1, -1);
-			sweep(tri, x, phi, closest_tri, origin, dx, +1, +1, -1);
-			sweep(tri, x, phi, closest_tri, origin, dx, -1, -1, +1);
-			sweep(tri, x, phi, closest_tri, origin, dx, +1, -1, +1);
-			sweep(tri, x, phi, closest_tri, origin, dx, -1, +1, -1);
-			sweep(tri, x, phi, closest_tri, origin, dx, +1, -1, -1);
-			sweep(tri, x, phi, closest_tri, origin, dx, -1, +1, +1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, +1, +1, +1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, -1, -1, -1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, +1, +1, -1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, -1, -1, +1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, +1, -1, +1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, -1, +1, -1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, +1, -1, -1);
+			sweep(faceList, vertList, phi, closest_tri, origin, dx, -1, +1, +1);
 		}
 		// then figure out signs (inside/outside) from intersection counts
 		for (int k = 0; k < nk; ++k) for (int j = 0; j < nj; ++j) {
