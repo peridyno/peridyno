@@ -67,6 +67,21 @@ TEST(Array, Copy)
 //	gArr2.copyFrom(gArr);
 }
 
+TEST(Array, assign)
+{
+	CArray<int> cArr(6);
+	cArr.assign(5);
+	EXPECT_EQ(cArr.size() == 6, true);
+	EXPECT_EQ(cArr[0] == 5, true);
+
+	cArr.assign(3);
+	EXPECT_EQ(cArr[0] == 3, true);
+
+	cArr.assign(2, 1);
+	EXPECT_EQ(cArr.size() == 2, true);
+	EXPECT_EQ(cArr[0] == 1, true);
+}
+
 TEST(ArrayList, Copy)
 {
 	std::vector<std::vector<int>> vvec;
@@ -158,4 +173,25 @@ TEST(Array3D, Copy)
 			}
 		}
 	}
+}
+
+TEST(Array3D, assign)
+{
+	CArray3D<int> cArr3d(3, 4, 5);
+	cArr3d.assign(1);
+	EXPECT_EQ(cArr3d.size() == 60, true);
+	EXPECT_EQ(cArr3d.nx() == 3, true);
+	EXPECT_EQ(cArr3d.ny() == 4, true);
+	EXPECT_EQ(cArr3d.nz() == 5, true);
+	EXPECT_EQ(cArr3d(0, 0, 0) == 1, true);
+
+	cArr3d.assign(3);
+	EXPECT_EQ(cArr3d(0, 0, 0) == 3, true);
+
+	cArr3d.assign(1, 2, 3, 2);
+	EXPECT_EQ(cArr3d.size() == 6, true);
+	EXPECT_EQ(cArr3d.nx() == 1, true);
+	EXPECT_EQ(cArr3d.ny() == 2, true);
+	EXPECT_EQ(cArr3d.nz() == 3, true);
+	EXPECT_EQ(cArr3d(0, 0, 0) == 2, true);
 }

@@ -8,3 +8,7 @@ if(PERIDYNO_LIBRARY_FRAMEWORK)
     add_subdirectory(Test_Collision)
     add_subdirectory(Test_Field)
 endif()
+
+if(PERIDYNO_LIBRARY_VOLUME)
+    add_subdirectory(Test_Volume)
+endif()

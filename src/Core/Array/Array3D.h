@@ -11,7 +11,7 @@ namespace dyno {
 	public:
 		Array3D() {};
 
-		Array3D(size_t nx, size_t ny, size_t nz)
+		Array3D(uint nx, uint ny, uint nz)
 		{
 			this->resize(nx, ny, nz);
 		};
@@ -21,7 +21,7 @@ namespace dyno {
 		*/
 		~Array3D() { };
 
-		void resize(size_t nx, size_t ny, size_t nz);
+		void resize(uint nx, uint ny, uint nz);
 
 		void reset();
 
@@ -29,31 +29,31 @@ namespace dyno {
 
 		inline const T* begin() const { return m_data.data(); }
 
-		inline size_t nx() const { return m_nx; }
-		inline size_t ny() const { return m_ny; }
-		inline size_t nz() const { return m_nz; }
+		inline uint nx() const { return m_nx; }
+		inline uint ny() const { return m_ny; }
+		inline uint nz() const { return m_nz; }
 
-		inline T operator () (const size_t i, const size_t j, const size_t k) const
+		inline T operator () (const uint i, const uint j, const uint k) const
 		{
 			return m_data[i + j * m_nx + k * m_nxy];
 		}
 
-		inline T& operator () (const size_t i, const size_t j, const size_t k)
+		inline T& operator () (const uint i, const uint j, const uint k)
 		{
 			return m_data[i + j * m_nx + k * m_nxy];
 		}
 
-		inline size_t index(const size_t i, const size_t j, const size_t k) const
+		inline size_t index(const uint i, const uint j, const uint k) const
 		{
 			return i + j * m_nx + k * m_nxy;
 		}
 
-		inline T operator [] (const size_t id) const
+		inline T operator [] (const uint id) const
 		{
 			return m_data[id];
 		}
 
-		inline T& operator [] (const size_t id)
+		inline T& operator [] (const uint id)
 		{
 			return m_data[id];
 		}
@@ -62,17 +62,18 @@ namespace dyno {
 		inline bool isCPU() const { return true; }
 		inline bool isGPU() const { return false; }
 
+		void assign(const T& val);
+		void assign(uint nx, uint ny, uint nz, const T& val);
 		void assign(const Array3D<T, DeviceType::GPU>& src);
 		void assign(const Array3D<T, DeviceType::CPU>& src);
 
 	private:
-		size_t m_nx = 0;
-		size_t m_ny = 0;
-		size_t m_nz = 0;
-		size_t m_nxy = 0;
+		uint m_nx = 0;
+		uint m_ny = 0;
+		uint m_nz = 0;
+		uint m_nxy = 0;
 		std::vector<T>	m_data;
 	};
-
 
 	template<typename T>
 	class Array3D<T, DeviceType::GPU>
@@ -81,7 +82,7 @@ namespace dyno {
 		Array3D() 
 		{};
 
-		Array3D(int nx, int ny, int nz)
+		Array3D(uint nx, uint ny, uint nz)
 		{
 			this->resize(nx, ny, nz);
 		};
@@ -91,7 +92,7 @@ namespace dyno {
 			*/
 		~Array3D() { };
 
-		void resize(const size_t nx, const size_t ny, const size_t nz);
+		void resize(const uint nx, const uint ny, const uint nz);
 
 		void reset();
 
@@ -99,10 +100,10 @@ namespace dyno {
 
 		inline T* begin() const { return m_data; }
 
-		DYN_FUNC inline size_t nx() const { return m_nx; }
-		DYN_FUNC inline size_t ny() const { return m_ny; }
-		DYN_FUNC inline size_t nz() const { return m_nz; }
-		DYN_FUNC inline size_t pitch() const { return m_pitch_x; }
+		DYN_FUNC inline uint nx() const { return m_nx; }
+		DYN_FUNC inline uint ny() const { return m_ny; }
+		DYN_FUNC inline uint nz() const { return m_nz; }
+		DYN_FUNC inline uint pitch() const { return m_pitch_x; }
 		
 		DYN_FUNC inline T operator () (const int i, const int j, const int k) const
 		{
@@ -114,7 +115,7 @@ namespace dyno {
 			return m_data[i + j*m_nx + k*m_nxy];
 		}
 
-		DYN_FUNC inline size_t index(const int i, const int j, const int k) const
+		DYN_FUNC inline uint index(const int i, const int j, const int k) const
 		{
 			return i + j*m_nx + k*m_nxy;
 		}
@@ -137,12 +138,12 @@ namespace dyno {
 		void assign(const Array3D<T, DeviceType::CPU>& src);
 
 	private:
-		size_t m_nx = 0;
-		size_t m_pitch_x = 0;
+		uint m_nx = 0;
+		uint m_pitch_x = 0;
 
-		size_t m_ny = 0;
-		size_t m_nz = 0;
-		size_t m_nxy = 0;
+		uint m_ny = 0;
+		uint m_nz = 0;
+		uint m_nxy = 0;
 		T*	m_data = nullptr;
 	};
 

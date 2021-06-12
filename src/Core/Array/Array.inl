@@ -92,4 +92,15 @@ namespace dyno
 		memcpy(this->begin(), src.begin(), src.size() * sizeof(T));
 	}
 
+	template<typename T>
+	void Array<T, DeviceType::CPU>::assign(const T& val)
+	{
+		m_data.assign(m_data.size(), val);
+	}
+
+	template<typename T>
+	void Array<T, DeviceType::CPU>::assign(uint num, const T& val)
+	{
+		m_data.assign(num, val);
+	}
 }

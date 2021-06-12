@@ -1,12 +1,12 @@
 namespace dyno {
 
 	template<typename T>
-	void Array3D<T, DeviceType::CPU>::resize(size_t nx, size_t ny, size_t nz)
+	void Array3D<T, DeviceType::CPU>::resize(uint nx, uint ny, uint nz)
 	{
 		m_data.clear();
 		m_nx = nx;	m_ny = ny;	m_nz = nz; m_nxy = nx * ny;
 
-		m_data.resize(nx*ny*nz);
+		m_data.resize((size_t)nx*ny*nz);
 	}
 
 	template<typename T>
@@ -22,6 +22,22 @@ namespace dyno {
 		m_ny = 0;
 		m_nz = 0;
 		m_data.clear();
+	}
+
+	template<typename T>
+	void Array3D<T, DeviceType::CPU>::assign(uint nx, uint ny, uint nz, const T& val)
+	{
+		if (m_nx != nx || m_ny != ny || m_nz != nz) {
+			this->resize(nx, ny, nz);
+		}
+
+		m_data.assign(m_data.size(), val);
+	}
+
+	template<typename T>
+	void Array3D<T, DeviceType::CPU>::assign(const T& val)
+	{
+		m_data.assign(m_data.size(), val);
 	}
 
 	template<typename T>
@@ -46,13 +62,13 @@ namespace dyno {
 
 
 	template<typename T>
-	void Array3D<T, DeviceType::GPU>::resize(const size_t nx, const size_t ny, const size_t nz)
+	void Array3D<T, DeviceType::GPU>::resize(const uint nx, const uint ny, const uint nz)
 	{
 		if (NULL != m_data) clear();
 		
-		cuSafeCall(cudaMallocPitch((void**)&m_data, &m_pitch_x, sizeof(T) * nx, ny*nz));
+		cuSafeCall(cudaMallocPitch((void**)&m_data, (size_t*)&m_pitch_x, (size_t)sizeof(T) * nx, ny*nz));
 
-		m_pitch_x /= sizeof(T);
+		m_pitch_x /= (uint)sizeof(T);
 		m_nx = nx;	m_ny = ny;	m_nz = nz;	
 		m_nxy = m_pitch_x * m_ny;
 	}
