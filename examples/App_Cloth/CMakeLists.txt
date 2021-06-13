@@ -2,7 +2,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
     set(PROJECT_NAME App_Cloth)
 
     link_libraries(Core Framework IO Graphics)
-    link_libraries(Peridynamics)
+    link_libraries(Peridynamics RigidBody)
     link_libraries(GlfwGUI)
 
 

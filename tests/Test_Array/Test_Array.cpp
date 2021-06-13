@@ -151,7 +151,7 @@ TEST(Array3D, Copy)
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				EXPECT_EQ(cArr3d(i, j, k), ind);
+				EXPECT_EQ(cArr3d_2(i, j, k), ind);
 				ind++;
 			}
 		}

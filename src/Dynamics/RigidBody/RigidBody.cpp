@@ -139,7 +139,7 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBody<TDataType>::scale(Real t)
 	{
-
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->scale(Coord(t, t, t));
 	}
 
 	template<typename TDataType>

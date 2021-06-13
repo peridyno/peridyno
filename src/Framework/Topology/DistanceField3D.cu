@@ -384,26 +384,30 @@ namespace dyno{
 		m_h[1] = t_h;
 		m_h[2] = t_h;
 
-		Real* distances = new Real[(nbx)*(nby)*(nbz)];
+		CArray3D<Real> distances(nbx, nby, nbz);
 		for (int k = 0; k < zz; k++) {
 			for (int j = 0; j < yy; j++) {
 				for (int i = 0; i < xx; i++) {
 					float dist;
 					input >> dist;
-					distances[i + nbx*(j + nby*k)] = dist;
+					distances(i, j, k) = dist;
 				}
 			}
 		}
 		input.close();
 
 		m_distance.resize(nbx, nby, nbz);
-		cuSafeCall(cudaMemcpy(m_distance.begin(), distances, (nbx)*(nby)*(nbz) * sizeof(Real), cudaMemcpyHostToDevice));
+		m_distance.assign(distances);
+		//cuSafeCall(cudaMemcpy(m_distance.begin(), distances, (nbx)*(nby)*(nbz) * sizeof(Real), cudaMemcpyHostToDevice));
+
 
 		m_bInverted = inverted;
 		if (inverted)
 		{
 			invertSDF();
 		}
+
+		distances.clear();
 
 		std::cout << "read data successful" << std::endl;
 	}

@@ -106,17 +106,17 @@ namespace dyno {
 		
 		DYN_FUNC inline T operator () (const int i, const int j, const int k) const
 		{
-			return m_data[i + j*m_nx + k*m_nxy];
+			return m_data[i + j* m_pitch_x + k*m_nxy];
 		}
 
 		DYN_FUNC inline T& operator () (const int i, const int j, const int k)
 		{
-			return m_data[i + j*m_nx + k*m_nxy];
+			return m_data[i + j* m_pitch_x + k*m_nxy];
 		}
 
 		DYN_FUNC inline size_t index(const int i, const int j, const int k) const
 		{
-			return i + j*m_nx + k*m_nxy;
+			return i + j*m_pitch_x + k*m_nxy;
 		}
 
 		DYN_FUNC inline T operator [] (const int id) const

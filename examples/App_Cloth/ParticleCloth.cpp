@@ -23,6 +23,8 @@ namespace dyno
 		this->currentVelocity()->connect(&peri->m_velocity);
 		this->currentForce()->connect(&peri->m_forceDensity);
 
+		peri->m_horizon.setValue(0.016);
+
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
 
