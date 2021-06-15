@@ -38,12 +38,8 @@ namespace dyno {
 		void setCursorPos(double x, double y);
 		double getCursorPosX();
 		double getCursorPosY();
-
-		int getWidth() const;
-		int getHeight() const;
-
-		void setWidth(int width);
-		void setHeight(int height);
+		
+		void setWindowSize(int width, int height);
 
 		void setButtonType(uint button) { mButtonType = button; }
 		void setButtonMode(uint mode) { mButtonMode = mode; }
@@ -75,8 +71,6 @@ namespace dyno {
 		void initOpenGL();
 
 		void drawScene(void);
-		void drawBackground();
-		void drawAxis();
 
 		static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -95,9 +89,6 @@ namespace dyno {
 		void(*mScrollFunc)(GLFWwindow* window, double offsetX, double OffsetY);
 
 		GLFWwindow* mWindow = nullptr;
-
-		int mWidth;
-		int mHeight;
 
 		//state of the mouse
 		uint mButtonType;

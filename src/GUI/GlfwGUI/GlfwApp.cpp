@@ -49,9 +49,6 @@ namespace dyno
 
 	void GlfwApp::createWindow(int width, int height)
 	{
-		mWidth = width;
-		mHeight = height;
-
 		mWindowTitle = std::string("PeriDyno ") + std::to_string(PERIDYNO_VERSION_MAJOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_MINOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_PATCH);
 
 		// Setup window
@@ -76,7 +73,7 @@ namespace dyno
 #else
 	// GL 3.0 + GLSL 130
 		const char* glsl_version = "#version 130";
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
@@ -147,7 +144,10 @@ namespace dyno
 		mCamera.translateToPoint(0, 0);
 
 		mCamera.zoom(3.0f);
-		mCamera.setGL(0.01f, 3.0f, (float)getWidth(), (float)getHeight());
+		mCamera.setClipNear(0.01f);
+		mCamera.setClipFar(10.0f);
+		mCamera.setWidth(width);
+		mCamera.setHeight(height);
 
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
@@ -217,11 +217,11 @@ namespace dyno
 			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
- 			glPushMatrix();
+ 			//glPushMatrix();
 
 			drawScene();
 
-			glPopMatrix();
+			//glPopMatrix();
 
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -250,31 +250,20 @@ namespace dyno
 		return mCursorPosY;
 	}
 
-	int GlfwApp::getWidth() const
-	{
-		return mWidth;
-	}
 
-	int GlfwApp::getHeight() const
+	void GlfwApp::setWindowSize(int width, int height)
 	{
-		return mHeight;
+		mCamera.setWidth(width);
+		mCamera.setHeight(height);
 	}
-
-	void GlfwApp::setWidth(int width)
-	{
-		mWidth = width;
-	}
-
-	void GlfwApp::setHeight(int height)
-	{
-		mHeight = height;
-	}
-
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
 	{
-		int width = this->getWidth(), height = this->getHeight();
-		unsigned char *data = new unsigned char[width*height * 3];  //RGB
+		int width;
+		int height;
+		glfwGetFramebufferSize(mWindow, &width, &height);
+
+		unsigned char *data = new unsigned char[width * height * 3];  //RGB
 		assert(data);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
@@ -327,30 +316,20 @@ namespace dyno
 
 	void GlfwApp::drawScene(void)
 	{
-		if (mUseNewRenderEngine)
-		{
-			// simply dump transform matrices...
-			glGetFloatv(GL_PROJECTION_MATRIX, &mRenderParams->proj[0][0]);
-			glGetFloatv(GL_MODELVIEW_MATRIX, &mRenderParams->view[0][0]);
-			
-			// set the viewport
-			mRenderParams->viewport.x = 0;
-			mRenderParams->viewport.y = 0;
-			mRenderParams->viewport.w = mCamera.mViewportWidth;
-			mRenderParams->viewport.h = mCamera.mViewportHeight;
+		mRenderParams->proj = mCamera.getProjMat();
+		mRenderParams->view = mCamera.getViewMat();
+						
+		// set the viewport
+		mRenderParams->viewport.x = 0;
+		mRenderParams->viewport.y = 0;
+		mRenderParams->viewport.w = mCamera.mViewportWidth;
+		mRenderParams->viewport.h = mCamera.mViewportHeight;
 
-			mRenderTarget->resize(mCamera.mViewportWidth, mCamera.mViewportHeight);
+		mRenderTarget->resize(mCamera.mViewportWidth, mCamera.mViewportHeight);
 
-			mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
-			mRenderTarget->blitTo(0);
-		}
-		else
-		{
-			glUseProgram(0);
-			drawBackground();
-
-			SceneGraph::getInstance().draw();
-		}
+		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
+		mRenderTarget->blitTo(0);
+		
 	}
 
 	void GlfwApp::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -367,7 +346,7 @@ namespace dyno
 
 		if (action == GLFW_PRESS)
 		{
-			camera->registerPoint(float(xpos) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - float(ypos)) / float(activeWindow->getHeight()) - 0.5f);
+			camera->registerPoint(xpos, ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
 		}
 		else
@@ -389,15 +368,12 @@ namespace dyno
 		auto camera = activeWindow->activeCamera();
 
 		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN) {
-			camera->rotateToPoint(float(x) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - y) / float(activeWindow->getHeight()) - 0.5f);
+			camera->rotateToPoint(x, y);
 		}
 		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN) {
-			camera->translateToPoint(float(x) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - y) / float(activeWindow->getHeight()) - 0.5f);
+			camera->translateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_MIDDLE) {
-			camera->translateLightToPoint(float(x) / float(activeWindow->getWidth()) - 0.5f, float(activeWindow->getHeight() - y) / float(activeWindow->getHeight()) - 0.5f);
-		}
-		camera->setGL(0.01f, 10.0f, (float)activeWindow->getWidth(), (float)activeWindow->getHeight());
+
 	}
 
 	void GlfwApp::cursorEnterCallback(GLFWwindow* window, int entered)
@@ -416,9 +392,7 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
-
 		camera->zoom(-OffsetY);
-		camera->setGL(0.01f, 10.0f, (float)activeWindow->getWidth(), (float)activeWindow->getHeight());
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -457,135 +431,7 @@ namespace dyno
 	void GlfwApp::reshapeCallback(GLFWwindow* window, int w, int h)
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
-
-		glfwGetFramebufferSize(window, &activeWindow->mWidth, &activeWindow->mHeight);
-
-		activeWindow->activeCamera()->setGL(0.01f, 10.0f, (float)w, (float)h);
-		activeWindow->setWidth(w);
-		activeWindow->setHeight(h);
-
-		glViewport(0, 0, w, h);
+		activeWindow->setWindowSize(w, h);
 	}
 
-	void GlfwApp::drawBackground()
-	{
-		int xmin = -mPlaneSize;
-		int xmax = mPlaneSize;
-		int zmin = -mPlaneSize;
-		int zmax = mPlaneSize;
-
-		float s = 1.0f;
-		int nSub = 10;
-		float sub_s = s / nSub;
-
-		glPushMatrix();
-
-		float ep = 0.0001f;
-		glPushMatrix();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-		//Draw background grid
-		glLineWidth(2.0f);
-		glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
-		glBegin(GL_LINES);
-		for (int i = xmin; i <= xmax; i++)
-		{
-			glVertex3f(i*s, 0, zmin*s);
-			glVertex3f(i*s, 0, zmax*s);
-		}
-		for (int i = zmin; i <= zmax; i++)
-		{
-			glVertex3f(xmin*s, 0, i*s);
-			glVertex3f(xmax*s, 0, i*s);
-		}
-
-		glEnd();
-
-		glLineWidth(1.0f);
-		glLineStipple(1, 0x5555);
-		glEnable(GL_LINE_STIPPLE);
-		glColor4f(0.55f, 0.55f, 0.55f, 1.0f);
-		glBegin(GL_LINES);
-		for (int i = xmin; i < xmax; i++)
-		{
-			for (int j = 1; j < nSub; j++)
-			{
-				glVertex3f(i*s + j * sub_s, 0, zmin*s);
-				glVertex3f(i*s + j * sub_s, 0, zmax*s);
-			}
-		}
-		for (int i = zmin; i < zmax; i++)
-		{
-			for (int j = 1; j < nSub; j++)
-			{
-				glVertex3f(xmin*s, 0, i*s + j * sub_s);
-				glVertex3f(xmax*s, 0, i*s + j * sub_s);
-			}
-		}
-		glEnd();
-		glDisable(GL_LINE_STIPPLE);
-
-		glPopMatrix();
-
-//		drawAxis();
-	}
-
-	void GlfwApp::drawAxis()
-	{
-		GLfloat mv[16];
-		GLfloat proj[16];
-		glGetFloatv(GL_PROJECTION_MATRIX, proj);
-		glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-		mv[12] = mv[13] = mv[14] = 0.0;
-
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-		glMatrixMode(GL_PROJECTION);
-
-		glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0.0, 0.0, 1.0, 1.0, -1.0, 1.0);
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadMatrixf(mv);
-
-		//Draw axes
-		glViewport(20, 10, 90, 80);
-		glColor3ub(255, 255, 255);
-		glLineWidth(1.0f);
-		const float len = 0.9f;
-		GLfloat origin[3] = { 0.0f, 0.0f, 0.0f };
-		glBegin(GL_LINES);
-		glColor3f(1, 0, 0);
-		glVertex3f(origin[0], origin[1], origin[2]);
-		glVertex3f(origin[0] + len, origin[1], origin[2]);
-		glColor3f(0, 1, 0);
-		glVertex3f(origin[0], origin[1], origin[2]);
-		glVertex3f(origin[0], origin[1] + len, origin[2]);
-		glColor3f(0, 0, 1);
-		glVertex3f(origin[0], origin[1], origin[2]);
-		glVertex3f(origin[0], origin[1], origin[2] + len);
-		glEnd();
-
-// 		// Draw labels
-// 		glColor3f(1, 0, 0);
-// 		glRasterPos3f(origin[0] + len, origin[1], origin[2]);
-// 		glfwBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'x');
-// 		glColor3f(0, 1, 0);
-// 		glRasterPos3f(origin[0], origin[1] + len, origin[2]);
-// 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'y');
-// 		glColor3f(0, 0, 1);
-// 		glRasterPos3f(origin[0], origin[1], origin[2] + len);
-// 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'z');
-
-		glPopAttrib();
-
-		// Restore viewport, projection and model-view matrices
-		glViewport(0, 0, mWidth, mHeight);
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-	}
 }

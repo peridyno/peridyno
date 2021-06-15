@@ -3,6 +3,8 @@
 #include "Quat.h"
 #include "Vector.h"
 
+#include <glm/mat4x4.hpp>
+
 namespace dyno
 {
 	typedef Quat<float> Quat1f;
@@ -13,29 +15,29 @@ namespace dyno
 		Camera();
 		~Camera() {};
 
+		void reset();
+
 		void rotateToPoint(float x, float y);
 		void translateToPoint(float x, float y);
-		void translateLightToPoint(float x, float y);
 		void zoom(float amount);
-		void setGL(float neardist, float fardist, float width, float height);
 
-		int viewportWidth() const;
-		int viewportHeight() const;
+		void setWidth(int width) { mViewportWidth = width; }
+		void setHeight(int height) { mViewportHeight = height; }
 
-		Vec3f getViewDir() const;
-		Vec3f getEyePos() const;
+		void setClipNear(float zNear) { mNear = zNear; }
+		void setClipFar(float zFar) { mFar = zFar; }
 
-		void getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const;
+		glm::mat4 getViewMat();
+		glm::mat4 getProjMat();
 
+		
 		void registerPoint(float x, float y);
 
 	private:
 		void rotate(float dx, float dy);
 		void translate(const Vec3f translation);
-		void translateLight(const Vec3f translation);
 
 		Vec3f getPosition(float x, float y);
-
 		Quat1f getQuaternion(float x1, float y1, float x2, float y2);
 
 	public:
@@ -44,7 +46,6 @@ namespace dyno
 
 		float mNear;
 		float mFar;
-		float mRight;
 		float mFov;
 
 		float mRotAngle;
@@ -58,7 +59,6 @@ namespace dyno
 
 		Vec3f mEyePos;
 		Vec3f mTargetPos;
-		Vec3f mLightPos;
 		Vec3f mRotAxis;
 	};
 
