@@ -29,16 +29,9 @@ namespace dyno
 
 		glm::mat4 getViewMat();
 		glm::mat4 getProjMat();
-
 		
 		void registerPoint(float x, float y);
 
-	private:
-		void rotate(float dx, float dy);
-		void translate(const Vec3f translation);
-
-		Vec3f getPosition(float x, float y);
-		Quat1f getQuaternion(float x1, float y1, float x2, float y2);
 
 	public:
 		float mRegX;
@@ -48,18 +41,13 @@ namespace dyno
 		float mFar;
 		float mFov;
 
-		float mRotAngle;
-		float mFocusDist;
-		
-		float mYaw;	//along Y
-		float mPitch;	//along axis X of the viewport coordinate system
-
 		int mViewportWidth;
 		int mViewportHeight;
 
-		Vec3f mEyePos;
-		Vec3f mTargetPos;
-		Vec3f mRotAxis;
+		Vec3f mCameraPos;
+		Vec3f mCameraTarget;
+		Vec3f mCameraUp;
+
 	};
 
 }
