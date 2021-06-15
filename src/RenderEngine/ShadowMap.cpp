@@ -17,19 +17,12 @@ void ShadowMap::initialize()
 	mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
 	mShadowDepth.format = GL_DEPTH_COMPONENT;	
 	mShadowDepth.create();
-	mShadowDepth.resize(width, height);	
-	
-	mShadowColor.internalFormat = GL_RGB32F;
-	mShadowColor.format = GL_RGB;
-	mShadowColor.create();
-	mShadowColor.resize(width, height);
+	mShadowDepth.resize(width, height);		
 
 	mFramebuffer.create();
 	mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);
-	mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowColor.id);
-
 	mFramebuffer.bind();
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glDrawBuffer(GL_NONE);
 
 	mFramebuffer.checkStatus();
 	mFramebuffer.unbind();
@@ -45,5 +38,4 @@ void ShadowMap::bind()
 void ShadowMap::bindShadowTex()
 {
 	mShadowDepth.bind(GL_TEXTURE5);
-	mShadowColor.bind(GL_TEXTURE6);
 }

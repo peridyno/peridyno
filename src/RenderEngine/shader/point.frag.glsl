@@ -1,40 +1,37 @@
 #version 440
 
 in vec3 vPosition;
-in vec3 vColor;
 
-uniform float uPointSize;
-
-layout (std140, binding=0) uniform TransformUniformBlock
+layout(std140, binding=0) uniform TransformUniformBlock
 {
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
 	int width;
 	int height;
 } transform;
 
-layout(std140, binding = 2) uniform MaterialUniformBlock
+layout(std140, binding = 1) uniform LightUniformBlock
 {
-	vec4  albedo;
-	float metallic;
-	float roughness;
+	vec4 ambient;
+	vec4 intensity;
+	vec4 direction;
+	mat4 transform;
+} light;
 
-	int   colorMode;
-	float colorMin;
-	float colorMax;
+uniform vec4  albedo;
+uniform float metallic;
+uniform float roughness;
 
-	int   shadowMode;
-};
+uniform float uPointSize;
 
 layout(location = 0) out vec4 fragColor;
 
 subroutine void RenderPass(void);
 layout(location = 0) subroutine uniform RenderPass renderPass;
 
-vec3 normal;
-vec3 position;
+vec3 fNormal;
+vec3 fPosition;
 
 void main(void) 
 {
@@ -45,37 +42,44 @@ void main(void)
     {
         discard;
     }
-	normal = vec3(uv.x, -uv.y, sqrt(1.f-d));
-	position = vPosition + normal * uPointSize;
+	fNormal = vec3(uv.x, -uv.y, sqrt(1.f-d));
+	fPosition = vPosition + fNormal * uPointSize;
 
 	// update depth
-	vec4 clipPos = transform.proj * vec4(position, 1);
+	vec4 clipPos = transform.proj * vec4(fPosition, 1);
 	float ndcZ = clipPos.z / clipPos.w;
 
 	gl_FragDepth = (gl_DepthRange.diff * ndcZ + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
+
 	renderPass();
+}
+
+vec3 reinhard_tonemap(vec3 v)
+{
+	return v / (1.0f + v);
+}
+
+vec3 gamma_correct(vec3 v)
+{
+	float gamma = 2.2;
+	return pow(v, vec3(1.0 / gamma));
 }
 
 vec3 pbr();
 layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 {
-	fragColor.rgb = pbr();
+	vec3 color = pbr();
+	color = reinhard_tonemap(color);
+	color = gamma_correct(color);
+	fragColor.rgb = color;
 	fragColor.a = 1.0;
 }
 
 layout(index = 1) subroutine(RenderPass) void DepthPass(void)
 {
+	fragColor = vec4(1);
 }
 
-
-layout(std140, binding = 1) uniform LightUniformBlock
-{
-	vec4 ambient;
-// main directional light
-vec4 intensity;
-vec4 direction;
-mat4 transform;
-} light;
 
 /***************** ShadowMap *********************/
 layout(binding = 5) uniform sampler2D shadowDepth;
@@ -90,15 +94,15 @@ vec3 GetShadowFactor(vec3 pos)
 	float closestDepth = texture(shadowDepth, projCoords.xy).r;
 	float currentDepth = min(1.0, projCoords.z);
 
-	//float bias = max(0.05 * (1.0 - dot(normal, normalize(light.direction.xyz))), 0.005); 
+	//float bias = max(0.05 * (1.0 - dot(fNormal, normalize(light.direction.xyz))), 0.005); 
 	float bias = 0.005;
 
 	// simple PCF
 	vec3 shadow = vec3(0);
 	vec2 texelSize = 1.0 / textureSize(shadowDepth, 0);
-	for (int x = -1; x <= 1; ++x)
+	for (int x = -2; x <= 2; ++x)
 	{
-		for (int y = -1; y <= 1; ++y)
+		for (int y = -2; y <= 2; ++y)
 		{
 			float pcfDepth = texture(shadowDepth, projCoords.xy + vec2(x, y) * texelSize).r;
 			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
@@ -107,7 +111,7 @@ vec3 GetShadowFactor(vec3 pos)
 			shadow += vec3(visible);
 		}
 	}
-	return clamp(shadow / 9.0, 0, 1);
+	return clamp(shadow / 25.0, 0, 1);
 }
 
 // refer to https://learnopengl.com
@@ -155,13 +159,13 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 // ----------------------------------------------------------------------------
 vec3 pbr()
 {
-	vec3 N = normalize(normal);
-	vec3 V = normalize(-position);
+	vec3 N = normalize(fNormal);
+	vec3 V = normalize(-fPosition);
 
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;
 
-	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+	// calculate reflectance at fNormal incidence; if dia-electric (like plastic) use F0 
 	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo.rgb, metallic);
@@ -178,7 +182,7 @@ vec3 pbr()
 		//float attenuation = 1.0 / (distance * distance);
 		//vec3 radiance = lightColors[i] * attenuation;
 		vec3 radiance = light.intensity.rgb * light.intensity.a;
-
+				
 		// Cook-Torrance BRDF
 		float NDF = DistributionGGX(N, H, roughness);
 		float G = GeometrySmith(N, V, L, roughness);
@@ -205,7 +209,7 @@ vec3 pbr()
 		// add to outgoing radiance Lo
 		//Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-		Lo += GetShadowFactor(position) * (kD * albedo.rgb / PI + specular) * radiance * NdotL;
+		Lo += GetShadowFactor(fPosition) * (kD * albedo.rgb / PI + specular) * radiance * NdotL;
 	}
 
 	vec3 ambient = light.ambient.rgb * light.ambient.a * albedo.rgb;

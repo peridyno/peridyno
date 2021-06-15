@@ -29,7 +29,7 @@ namespace dyno
 		SurfaceRenderer();
 
 	protected:
-		virtual void paintGL() override;
+		virtual void paintGL(RenderMode mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 

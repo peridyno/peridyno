@@ -23,6 +23,7 @@ int main()
 
 	auto m_pointsRender = std::make_shared<PointRenderer>();
 	m_pointsRender->setColor(glm::vec3(0, 1, 1));
+	m_pointsRender->setPointSize(0.002f);
 	bunny->addVisualModule(m_pointsRender);
 
 	bunny->setMass(1.0);

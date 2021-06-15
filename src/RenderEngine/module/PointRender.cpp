@@ -78,12 +78,32 @@ void PointRenderer::updateGL()
 
 }
 
-void PointRenderer::paintGL()
+void PointRenderer::paintGL(RenderMode mode)
 {
-	unsigned int subroutine = 0;
 	mShaderProgram.use();
 	mShaderProgram.setFloat("uPointSize", this->getPointSize());
-	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+
+	unsigned int subroutine;
+	if (mode == RenderMode::COLOR)
+	{
+		mShaderProgram.setVec4("albedo", glm::vec4(mBaseColor, mAlpha));
+		mShaderProgram.setFloat("metallic", mMetallic);
+		mShaderProgram.setFloat("roughness", mRoughness);
+
+		subroutine = 0;
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+	}
+	else if (mode == RenderMode::DEPTH)
+	{
+		subroutine = 1;
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+	}
+	else
+	{
+		printf("Unknown render mode!\n");
+		return;
+	}
+
 
 	mVertexArray.bind();
 	glDrawArrays(GL_POINTS, 0, mNumPoints);

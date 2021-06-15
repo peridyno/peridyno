@@ -56,11 +56,30 @@ void SurfaceRenderer::updateGL()
 	mIndexBuffer.loadCuda(triangles->begin(), triangles->size() * sizeof(unsigned int) * 3);
 }
 
-void SurfaceRenderer::paintGL()
+void SurfaceRenderer::paintGL(RenderMode mode)
 {
-	unsigned int subroutine = 0;
 	mShaderProgram.use();
-	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+
+	unsigned int subroutine;
+	if (mode == RenderMode::COLOR)
+	{
+		mShaderProgram.setVec4("albedo", glm::vec4(mBaseColor, mAlpha));
+		mShaderProgram.setFloat("metallic", mMetallic);
+		mShaderProgram.setFloat("roughness", mRoughness);
+
+		subroutine = 0;
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+	}
+	else if (mode == RenderMode::DEPTH)
+	{
+		subroutine = 1;
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+	}
+	else
+	{
+		printf("Unknown render mode!\n");
+		return;
+	}
 
 	mVAO.bind();
 	glDrawElements(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0);

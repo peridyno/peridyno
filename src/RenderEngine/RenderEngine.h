@@ -53,7 +53,7 @@ namespace dyno
 		GLBuffer mTransformUBO;
 		GLBuffer mShadowMapUBO;
 		GLBuffer mLightUBO;
-		GLBuffer mMaterialUBO;
+		//GLBuffer mMaterialUBO;
 
 		// SSAO
 		GLBuffer mSSAOKernelUBO;

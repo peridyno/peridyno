@@ -1,11 +1,8 @@
 #include "GLVisualModule.h"
-#include "../RenderEngine.h"
-
-#include "Framework/Node.h"
 
 using namespace dyno;
 
-GLVisualModule::GLVisualModule(): mShadowMode(ShadowMode::ALL)
+GLVisualModule::GLVisualModule()
 {
 	this->setName("GLVisualModule");
 }
@@ -34,7 +31,6 @@ void GLVisualModule::updateRenderingContext()
 	this->updateGL();
 }
 
-
 void GLVisualModule::setColor(const glm::vec3& color)
 {
 	mBaseColor = color;
@@ -53,22 +49,6 @@ void GLVisualModule::setRoughness(float r)
 void GLVisualModule::setAlpha(float alpha)
 {
 	mAlpha = alpha;
-}
-
-void GLVisualModule::setColorMapMode(ColorMapMode mode)
-{
-	mColorMode = mode;
-}
-
-void GLVisualModule::setColorMapRange(float vmin, float vmax)
-{
-	mColorMin = vmin;
-	mColorMax = vmax;
-}
-
-void GLVisualModule::setShadowMode(ShadowMode mode)
-{
-	mShadowMode = mode;
 }
 
 bool GLVisualModule::isTransparent() const

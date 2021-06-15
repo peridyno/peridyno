@@ -8,18 +8,17 @@ in VertexData
 	vec3 force;
 };
 
-layout(std140, binding = 2) uniform MaterialUniformBlock
+layout(std140, binding = 1) uniform LightUniformBlock
 {
-	vec4  albedo;
-	float metallic;
-	float roughness;
+	vec4 ambient;
+	vec4 intensity;
+	vec4 direction;
+	mat4 transform;
+} light;
 
-	int   colorMode;
-	float colorMin;
-	float colorMax;
-
-	int   shadowMode;
-};
+uniform vec4  albedo;
+uniform float metallic;
+uniform float roughness;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -30,10 +29,24 @@ void main(void) {
 	renderPass();
 } 
 
+vec3 reinhard_tonemap(vec3 v)
+{
+	return v / (1.0f + v);
+}
+
+vec3 gamma_correct(vec3 v)
+{
+	float gamma = 2.2;
+	return pow(v, vec3(1.0 / gamma));
+}
+
 vec3 pbr();
 layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 {
-	fragColor.rgb = pbr();
+	vec3 color = pbr();
+	color = reinhard_tonemap(color);
+	color = gamma_correct(color);
+	fragColor.rgb = color;
 	fragColor.a = 1.0;
 }
 
@@ -41,15 +54,6 @@ layout(index = 1) subroutine(RenderPass) void DepthPass(void)
 {
 	// do nothing
 }
-
-layout(std140, binding = 1) uniform LightUniformBlock
-{
-	vec4 ambient;
-	// main directional light
-	vec4 intensity;
-	vec4 direction;
-	mat4 transform;
-} light;
 
 /***************** ShadowMap *********************/
 layout(binding = 5) uniform sampler2D shadowDepth;
@@ -70,9 +74,9 @@ vec3 GetShadowFactor(vec3 pos)
 	// simple PCF
 	vec3 shadow = vec3(0);
 	vec2 texelSize = 1.0 / textureSize(shadowDepth, 0);
-	for (int x = -1; x <= 1; ++x)
+	for (int x = -2; x <= 2; ++x)
 	{
-		for (int y = -1; y <= 1; ++y)
+		for (int y = -2; y <= 2; ++y)
 		{
 			float pcfDepth = texture(shadowDepth, projCoords.xy + vec2(x, y) * texelSize).r;
 			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
@@ -81,7 +85,7 @@ vec3 GetShadowFactor(vec3 pos)
 			shadow += vec3(visible);
 		}
 	}
-	return clamp(shadow / 9.0, 0, 1);
+	return clamp(shadow / 25.0, 0, 1);
 }
 
 // refer to https://learnopengl.com

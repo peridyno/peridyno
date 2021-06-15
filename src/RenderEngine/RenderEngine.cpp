@@ -53,7 +53,7 @@ namespace dyno
 	RenderEngine::RenderEngine()
 	{
 		mRenderHelper = new RenderHelper();
-		mShadowMap = new ShadowMap();
+		mShadowMap = new ShadowMap(2048, 2048);
 	}
 
 	RenderEngine::~RenderEngine()
@@ -101,11 +101,7 @@ namespace dyno
 		// create uniform block for light
 		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		mLightUBO.bindBufferBase(1);
-
-		// create uniform block for material
-		mMaterialUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-		mMaterialUBO.bindBufferBase(2);
-
+		
 		// SSAO kernel
 		mSSAOKernelUBO.create(GL_UNIFORM_BUFFER, GL_STATIC_DRAW);
 		mSSAOKernelUBO.bindBufferBase(3);
@@ -214,8 +210,8 @@ namespace dyno
 			lightUp = glm::vec3(0, 0, 1);
 		}
 		shadowUniformBuffer.view = glm::lookAt(center, center - rparams.light.mainLightDirection, lightUp);
-		shadowUniformBuffer.width = 1024;
-		shadowUniformBuffer.height = 1024;
+		shadowUniformBuffer.width = mShadowMap->width;
+		shadowUniformBuffer.height = mShadowMap->height;
 
 		mShadowMapUBO.load(&shadowUniformBuffer, sizeof(shadowUniformBuffer));
 
@@ -262,7 +258,7 @@ namespace dyno
 		{
 			// set material
 			setMaterial(m); 
-			m->paintGL();
+			m->paintGL(GLVisualModule::COLOR);
 		}
 		
 		// draw scene bounding box
@@ -290,23 +286,13 @@ namespace dyno
 			glm::vec4	baseColor;
 			float		metallic;
 			float		roughness;
-
-			int			colorMode;
-			float		colorMin;
-			float		colorMax;
-
-			int			shadowMode;
 		} mtl;
 
-		mtl.baseColor = glm::vec4(m->mBaseColor, m->mAlpha);
-		mtl.metallic = m->mMetallic;
-		mtl.roughness = m->mRoughness;
-		mtl.colorMode = m->mColorMode;
-		mtl.colorMin = m->mColorMin;
-		mtl.colorMax = m->mColorMax;
-		mtl.shadowMode = m->mShadowMode;
+		mtl.baseColor = glm::vec4(m->getColor(), m->getAlpha());
+		mtl.metallic = m->getMetallic();
+		mtl.roughness = m->getRoughness();
 
-		mMaterialUBO.load((void*)&mtl, sizeof(MaterialProperty));
+		//mMaterialUBO.load((void*)&mtl, sizeof(MaterialProperty));
 	}
 
 	void RenderEngine::updateShadowMap(const RenderParams& rparams)
@@ -316,7 +302,7 @@ namespace dyno
 
 		for (GLVisualModule* m : mRenderQueue)
 		{
-			m->paintGL();
+			m->paintGL(GLVisualModule::DEPTH);
 		}
 	}		
 }

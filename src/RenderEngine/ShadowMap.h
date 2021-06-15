@@ -35,8 +35,8 @@ private:
 	// framebuffers
 	GLFramebuffer	mFramebuffer;
 	GLTexture2D		mShadowDepth;
-	GLTexture2D		mShadowColor;
 
+public:
 	int				width;
 	int				height;
 };
