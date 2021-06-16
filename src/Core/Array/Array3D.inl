@@ -47,7 +47,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny(), src.nz());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) *m_nx, src.begin(), sizeof(T) *src.pitch(), sizeof(T) *src.nx(), src.ny()*src.nz(), cudaMemcpyDeviceToHost));
+		cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) *m_nx, src.begin(), src.pitch(), sizeof(T) *src.nx(), src.ny()*src.nz(), cudaMemcpyDeviceToHost));
 	}
 
 	template<typename T>
@@ -68,7 +68,7 @@ namespace dyno {
 		
 		cuSafeCall(cudaMallocPitch((void**)&m_data, (size_t*)&m_pitch_x, (size_t)sizeof(T) * nx, ny*nz));
 
-		m_pitch_x /= (uint)sizeof(T);
+		//TODO: check whether it has problem when m_pitch_x is not divisible by sizeof(T)
 		m_nx = nx;	m_ny = ny;	m_nz = nz;	
 		m_nxy = m_pitch_x * m_ny;
 	}
@@ -76,7 +76,7 @@ namespace dyno {
 	template<typename T>
 	void Array3D<T, DeviceType::GPU>::reset()
 	{
-		cuSafeCall(cudaMemset(m_data, 0, m_nxy * m_nz * sizeof(T)));
+		cuSafeCall(cudaMemset(m_data, 0, m_nxy * m_nz));
 	}
 
 	template<typename T>
@@ -98,7 +98,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny(), src.nz());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data, sizeof(T) *m_pitch_x, src.begin(), sizeof(T) *src.pitch(), sizeof(T) *src.nx(), src.ny()*src.nz(), cudaMemcpyDeviceToDevice));
+		cuSafeCall(cudaMemcpy2D(m_data, m_pitch_x, src.begin(), src.pitch(), sizeof(T) *src.nx(), src.ny()*src.nz(), cudaMemcpyDeviceToDevice));
 	}
 
 	template<typename T>
@@ -108,6 +108,6 @@ namespace dyno {
 			this->resize(src.nx(), src.ny(), src.nz());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data, sizeof(T) *m_pitch_x, src.begin(), sizeof(T) *src.nx(), sizeof(T) *src.nx(), src.ny()*src.nz(), cudaMemcpyHostToDevice));
+		cuSafeCall(cudaMemcpy2D(m_data, m_pitch_x, src.begin(), sizeof(T) *src.nx(), sizeof(T) *src.nx(), src.ny()*src.nz(), cudaMemcpyHostToDevice));
 	}
 }
