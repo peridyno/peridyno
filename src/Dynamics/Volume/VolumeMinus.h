@@ -13,7 +13,13 @@ namespace dyno {
 		VolumeMinus();
 		~VolumeMinus() override;
 
+		void updateVolume() override {};
 
 	public:
+		DEF_PORT_IN(DistanceField3D<TDataType>, A, "");
+		DEF_PORT_IN(DistanceField3D<TDataType>, B, "");
+
+	private:
+
 	};
 }

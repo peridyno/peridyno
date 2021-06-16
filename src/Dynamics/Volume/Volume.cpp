@@ -3,8 +3,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(Volume, TDataType)
-
 	template<typename TDataType>
 	Volume<TDataType>::Volume()
 		: Node()

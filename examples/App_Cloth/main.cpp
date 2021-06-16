@@ -28,7 +28,7 @@ void CreateScene()
 	auto m_pointsRender = std::make_shared<PointRenderModule>();
 	m_pointsRender->setColor(Vec3f(1, 0.2, 1));
 	child3->addVisualModule(m_pointsRender);
-	child3->setVisible(false);
+	child3->setVisible(true);
 
 	child3->setMass(1.0);
   	child3->loadParticles("../../data/cloth/cloth.obj");

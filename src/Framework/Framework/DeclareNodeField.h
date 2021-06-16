@@ -102,3 +102,15 @@ public:									\
 		return true;									\
 	}
 }
+
+#define DEF_PORT_IN(T, name, desc) \
+private:									\
+	VarField<T> in_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::In, this);			\
+public:										\
+	inline VarField<T>* in##name() {return &in_##name;}
+
+#define DEF_PORT_OUT(T, name, desc) \
+private:									\
+	VarField<T> in_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Out, this);			\
+public:										\
+	inline VarField<T>* out##name() {return &in_##name;}

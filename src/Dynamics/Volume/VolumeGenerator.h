@@ -17,9 +17,9 @@
 #include "Volume.h"
 #include "Array/Array3D.h"
 
-namespace dyno {
-	template<typename TDataType> class TriangleSet;
+#include "Topology/TriangleSet.h"
 
+namespace dyno {
 	typedef Vector<unsigned int, 3> Vec3ui;
 	typedef Vector<int, 3> Vec3i;
 
@@ -44,22 +44,26 @@ namespace dyno {
 		~VolumeGenerator() override;
 
 		void load(std::string filename);
+
+		void updateVolume() override;
+
+	public:
+		DEF_PORT_IN(TriangleSet<TDataType>, ClosedSurface, "");
+
+		DEF_PORT_IN(Real, Spacing, "");
+
+		DEF_PORT_IN(uint, Padding, "");
+
 	public:
 		void makeLevelSet();
 
 		int ni;
 		int nj;
 		int nk;
-		
-		int padding = 40;
-
-		float dx = 0.1;
 
 		CArray<Vec3ui> faceList;
 		CArray<Vec3f> vertList;
 		Vec3f origin;
 		CArray3f phi;
-
-		std::shared_ptr<TriangleSet<TDataType>> closedSurface;
 	};
 }

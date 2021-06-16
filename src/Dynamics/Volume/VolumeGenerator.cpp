@@ -1,5 +1,4 @@
 #include "VolumeGenerator.h"
-#include "Topology/TriangleSet.h"
 
 #include <fstream>
 #include <iostream>
@@ -14,6 +13,8 @@ namespace dyno
 	VolumeGenerator<TDataType>::VolumeGenerator()
 		: Volume()
 	{
+		this->inPadding()->setValue(10);
+		this->inSpacing()->setValue(0.1);
 	}
 
 	template<typename TDataType>
@@ -24,8 +25,8 @@ namespace dyno
 	template<typename TDataType>
 	void VolumeGenerator<TDataType>::load(std::string filename)
 	{
-		closedSurface = std::make_shared<TriangleSet<TDataType>>();
-		closedSurface->loadObjFile(filename);
+// 		closedSurface = std::make_shared<TriangleSet<TDataType>>();
+// 		closedSurface->loadObjFile(filename);
 
 		Vec3f min_box(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 		Vec3f max_box(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
@@ -68,7 +69,8 @@ namespace dyno
 		}
 		infile.close();
 
-
+		uint padding = this->inPadding()->getData();
+		Real dx = this->inSpacing()->getData();
 		Vec3f unit(1, 1, 1);
 		min_box -= padding * dx*unit;
 		max_box += padding * dx*unit;
@@ -222,6 +224,7 @@ namespace dyno
 	void VolumeGenerator<TDataType>::makeLevelSet()
 	{
 		const int exact_band = 1;
+		Real dx = this->inSpacing()->getData();
 
 		phi.resize(ni, nj, nk);
 		phi.assign((ni + nj + nk)*dx);
@@ -298,6 +301,12 @@ namespace dyno
 				}
 			}
 		}
+	}
+
+	template<typename TDataType>
+	void VolumeGenerator<TDataType>::updateVolume()
+	{
+
 	}
 
 	DEFINE_CLASS(VolumeGenerator);
