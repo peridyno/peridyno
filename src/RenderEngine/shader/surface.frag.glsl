@@ -16,9 +16,10 @@ layout(std140, binding = 1) uniform LightUniformBlock
 	mat4 transform;
 } light;
 
-uniform vec4  albedo;
-uniform float metallic;
-uniform float roughness;
+uniform vec3  uBaseColor;
+uniform float uMetallic;
+uniform float uRoughness;
+uniform float uAlpha;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -142,7 +143,7 @@ vec3 pbr()
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
 	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, albedo.rgb, metallic);
+	F0 = mix(F0, uBaseColor, uMetallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -158,8 +159,8 @@ vec3 pbr()
 		vec3 radiance = light.intensity.rgb * light.intensity.a;
 
 		// Cook-Torrance BRDF
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
+		float NDF = DistributionGGX(N, H, uRoughness);
+		float G = GeometrySmith(N, V, L, uRoughness);
 		vec3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
 		vec3 nominator = NDF * G * F;
@@ -175,7 +176,7 @@ vec3 pbr()
 		// multiply kD by the inverse metalness such that only non-metals 
 		// have diffuse lighting, or a linear blend if partly metal (pure metals
 		// have no diffuse light).
-		kD *= 1.0 - metallic;
+		kD *= 1.0 - uMetallic;
 
 		// scale light by NdotL
 		float NdotL = max(dot(N, L), 0.0);
@@ -183,10 +184,10 @@ vec3 pbr()
 		// add to outgoing radiance Lo
 		//Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-		Lo += GetShadowFactor(position) * (kD * albedo.rgb / PI + specular) * radiance * NdotL;
+		Lo += GetShadowFactor(position) * (kD * uBaseColor / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = light.ambient.rgb * light.ambient.a * albedo.rgb;
+	vec3 ambient = light.ambient.rgb * light.ambient.a * uBaseColor;
 
 	return ambient + Lo;
 }

@@ -1,6 +1,7 @@
 #version 440
 
 in vec3 vPosition;
+in vec3 vColor;
 
 layout(std140, binding=0) uniform TransformUniformBlock
 {
@@ -19,9 +20,9 @@ layout(std140, binding = 1) uniform LightUniformBlock
 	mat4 transform;
 } light;
 
-uniform vec4  albedo;
-uniform float metallic;
-uniform float roughness;
+uniform float uMetallic;
+uniform float uRoughness;
+uniform float uAlpha;
 
 uniform float uPointSize;
 
@@ -128,7 +129,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
 	denom = PI * denom * denom;
 
-	return nom / max(denom, 0.001); // prevent divide by zero for roughness=0.0 and NdotH=1.0
+	return nom / max(denom, 0.001); // prevent divide by zero for uRoughness=0.0 and NdotH=1.0
 }
 // ----------------------------------------------------------------------------
 float GeometrySchlickGGX(float NdotV, float roughness)
@@ -166,9 +167,9 @@ vec3 pbr()
 	if (dotNV < 0.0)	N = -N;
 
 	// calculate reflectance at fNormal incidence; if dia-electric (like plastic) use F0 
-	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+	// of 0.04 and if it's a metal, use the vColor color as F0 (uMetallic workflow)    
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, albedo.rgb, metallic);
+	F0 = mix(F0, vColor, uMetallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -184,8 +185,8 @@ vec3 pbr()
 		vec3 radiance = light.intensity.rgb * light.intensity.a;
 				
 		// Cook-Torrance BRDF
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
+		float NDF = DistributionGGX(N, H, uRoughness);
+		float G = GeometrySmith(N, V, L, uRoughness);
 		vec3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
 		vec3 nominator = NDF * G * F;
@@ -201,18 +202,18 @@ vec3 pbr()
 		// multiply kD by the inverse metalness such that only non-metals 
 		// have diffuse lighting, or a linear blend if partly metal (pure metals
 		// have no diffuse light).
-		kD *= 1.0 - metallic;
+		kD *= 1.0 - uMetallic;
 
 		// scale light by NdotL
 		float NdotL = max(dot(N, L), 0.0);
 
 		// add to outgoing radiance Lo
-		//Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+		//Lo += (kD * vColor / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-		Lo += GetShadowFactor(fPosition) * (kD * albedo.rgb / PI + specular) * radiance * NdotL;
+		Lo += GetShadowFactor(fPosition) * (kD * vColor / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = light.ambient.rgb * light.ambient.a * albedo.rgb;
+	vec3 ambient = light.ambient.rgb * light.ambient.a * vColor.rgb;
 
 	return ambient + Lo;
 }

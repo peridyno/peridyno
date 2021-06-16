@@ -7,8 +7,9 @@
 #include <cuda_gl_interop.h>
 
 // framework
-#include "Topology/TriangleSet.h"
-#include "Framework/Node.h"
+#include <ParticleSystem/ParticleSystem.h>
+#include <Topology/TriangleSet.h>
+#include <Framework/Node.h>
 
 using namespace dyno;
 
@@ -31,6 +32,16 @@ float PointRenderer::getPointSize() const
 	return mPointSize;
 }
 
+void PointRenderer::setColorMapMode(ColorMapMode mode)
+{
+	mColorMode = mode;
+}
+
+void PointRenderer::setColorMapRange(float vmin, float vmax)
+{
+	mColorMin = vmin;
+	mColorMax = vmax;
+}
 
 bool PointRenderer::initializeGL()
 {	
@@ -39,7 +50,7 @@ bool PointRenderer::initializeGL()
 	mForce.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 	mVertexArray.create();
-	mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
+	mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0); 
 	mVertexArray.bindVertexBuffer(&mVelocity, 1, 3, GL_FLOAT, 0, 0, 0);
 	mVertexArray.bindVertexBuffer(&mForce, 2, 3, GL_FLOAT, 0, 0, 0);
 	
@@ -63,19 +74,35 @@ void PointRenderer::updateGL()
  	if (!parent->isVisible())
  		return;
 
- 	auto pPointSet = TypeInfo::cast<PointSet<DataType3f>>(parent->getTopologyModule());
- 	if (pPointSet == nullptr)
- 	{
- 		return;
- 	}
- 	if (!pPointSet->isInitialized())
- 	{
- 		pPointSet->initialize();
- 	}
- 	auto& xyz = pPointSet->getPoints();
- 	mNumPoints = xyz.size();
- 	mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
+	auto pParticleSystem = TypeInfo::cast<ParticleSystem<DataType3f>>(parent);
 
+	if (pParticleSystem != nullptr)
+	{
+		auto force = pParticleSystem->currentForce()->getDataPtr();
+		auto position = pParticleSystem->currentPosition()->getDataPtr();
+		auto velocity = pParticleSystem->currentVelocity()->getDataPtr();
+
+		mNumPoints = position->size();
+		mPosition.loadCuda(position->begin(), mNumPoints * sizeof(float) * 3);
+		mVelocity.loadCuda(velocity->begin(), mNumPoints * sizeof(float) * 3);
+		mForce.loadCuda(force->begin(), mNumPoints * sizeof(float) * 3);
+	}
+	else
+	{
+		auto pPointSet = TypeInfo::cast<PointSet<DataType3f>>(parent->getTopologyModule());
+		if (pPointSet == nullptr)
+		{
+			return;
+		}
+		if (!pPointSet->isInitialized())
+		{
+			pPointSet->initialize();
+		}
+		
+		auto& xyz = pPointSet->getPoints();
+		mNumPoints = xyz.size();
+		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
+	}
 }
 
 void PointRenderer::paintGL(RenderMode mode)
@@ -86,9 +113,14 @@ void PointRenderer::paintGL(RenderMode mode)
 	unsigned int subroutine;
 	if (mode == RenderMode::COLOR)
 	{
-		mShaderProgram.setVec4("albedo", glm::vec4(mBaseColor, mAlpha));
-		mShaderProgram.setFloat("metallic", mMetallic);
-		mShaderProgram.setFloat("roughness", mRoughness);
+		mShaderProgram.setVec3("uBaseColor", mBaseColor);
+		mShaderProgram.setFloat("uMetallic", mMetallic);
+		mShaderProgram.setFloat("uRoughness", mRoughness);
+		mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
+		
+		mShaderProgram.setInt("uColorMode", mColorMode);
+		mShaderProgram.setFloat("uColorMin", mColorMin);
+		mShaderProgram.setFloat("uColorMax", mColorMax);
 
 		subroutine = 0;
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
@@ -103,7 +135,6 @@ void PointRenderer::paintGL(RenderMode mode)
 		printf("Unknown render mode!\n");
 		return;
 	}
-
 
 	mVertexArray.bind();
 	glDrawArrays(GL_POINTS, 0, mNumPoints);

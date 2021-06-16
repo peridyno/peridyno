@@ -63,9 +63,10 @@ void SurfaceRenderer::paintGL(RenderMode mode)
 	unsigned int subroutine;
 	if (mode == RenderMode::COLOR)
 	{
-		mShaderProgram.setVec4("albedo", glm::vec4(mBaseColor, mAlpha));
-		mShaderProgram.setFloat("metallic", mMetallic);
-		mShaderProgram.setFloat("roughness", mRoughness);
+		mShaderProgram.setVec3("uBaseColor", mBaseColor);
+		mShaderProgram.setFloat("uMetallic", mMetallic);
+		mShaderProgram.setFloat("uRoughness", mRoughness);
+		mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
 
 		subroutine = 0;
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

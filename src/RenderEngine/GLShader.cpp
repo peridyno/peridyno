@@ -21,7 +21,7 @@ bool GLShader::createFromSource(unsigned int type, const std::string& src)
 	if (!success)
 	{
 		glGetShaderInfoLog(shader, 2048, NULL, infoLog);
-		//SPDLOG_ERROR("Shader Compiling Error:\n{}",std::string(infoLog));
+		printf("Shader Compiling Error:\n%s\n", infoLog);
 		return false;
 	}
 
@@ -75,7 +75,7 @@ bool GLShaderProgram::link()
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(id, 2048, NULL, infoLog);
-		//SPDLOG_ERROR("Shader Program Linking Error:\n", std::string(infoLog));
+		printf("Shader Program Linking Error:\n%s\n", infoLog);
 		return false;
 	}
 

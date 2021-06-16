@@ -26,15 +26,24 @@ namespace dyno
 	{
 		DECLARE_CLASS(PointRenderer)
 	public:
+
+		enum ColorMapMode
+		{
+			CONSTANT = 0,	// use constant color
+			VELOCITY_JET = 1,
+			VELOCITY_HEAT = 2,
+			FORCE_JET = 3,
+			FORCE_HEAT = 4,
+		};
+
 		PointRenderer();
 
 		void setPointSize(float size);
 		float getPointSize() const;
 
-		bool isTransparent() const
-		{
-			return false;
-		}
+		void setColorMapMode(ColorMapMode mode);
+		void setColorMapRange(float vmin, float vmax);
+
 
 	protected:
 		virtual void paintGL(RenderMode mode) override;
@@ -52,5 +61,9 @@ namespace dyno
 		GLVertexArray	mVertexArray;
 
 		GLShaderProgram mShaderProgram;
+
+		ColorMapMode	mColorMode = ColorMapMode::CONSTANT;
+		float			mColorMin = 0.f;
+		float			mColorMax = 1.f;
 	};
 };
