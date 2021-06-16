@@ -14,39 +14,39 @@
  * limitations under the License.
  */
 
+
 #pragma once
 
 #include "GLFramebuffer.h"
 #include "GLTexture.h"
 #include "GLBuffer.h"
+#include "GLShader.h"
 
-namespace dyno
+class SSAO
 {
-	class RenderTarget
-	{
-	public:
-		RenderTarget();
-		~RenderTarget();
+public:
+	SSAO();
+	~SSAO();
 
-		void initialize();
-		void resize(int w, int h);
-		void blit(unsigned int attachment = 0);
-		void bind();
+	void initialize();	
+	void resize(unsigned int w, unsigned int h);
 
-	private:
-		GLFramebuffer mFramebuffer;
+private:
 
-		// frame color
-		GLTexture2D	  mColorTex;
-		// frame depth
-		GLTexture2D	  mDepthTex;
-		// node id
-		GLTexture2D	  mNodeIDTex;
-		
+	// SSAO
+	GLBuffer		mSSAOKernelUBO;
+	GLTexture2D		mSSAONoiseTex;
+	GLShaderProgram mSSAOProgram;
 
-		int width;
-		int height;
+	GLFramebuffer	mDepthFramebuffer;
+	GLTexture2D		mDepthTex;
 
-		friend class RenderEngine;
-	};
-}
+	GLFramebuffer	mSSAOFramebuffer;
+	GLTexture2D		mSSAOTex;
+
+	GLFramebuffer	mSSAOFilterFramebuffer;
+	GLTexture2D		mSSAOFilterTex;
+
+	unsigned int	mWidth;
+	unsigned int	mHeight;
+};

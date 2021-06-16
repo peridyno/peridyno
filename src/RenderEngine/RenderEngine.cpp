@@ -2,39 +2,30 @@
 // dyno
 #include "Framework/SceneGraph.h"
 #include "Action/Action.h"
+
 // GLM
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <glad/glad.h>
+
 #include "Utility.h"
 #include "ShadowMap.h"
+#include "SSAO.h"
 #include "RenderHelper.h"
 #include "RenderTarget.h"
 
 #include "module/GLVisualModule.h"
-#include "module/SurfaceRender.h"
-#include "module/PointRender.h"
-
-#include <random>
 
 namespace dyno
 {
-	class DrawAct2 : public Action
+	class RenderQueue : public Action
 	{
-	public:
-		DrawAct2(RenderEngine* engine)
-		{
-			mEngine = engine;
-		}
-
 	private:
 		void process(Node* node) override
 		{
 			if (!node->isVisible())
-			{
 				return;
-			}
 
 			for (auto iter : node->getVisualModuleList())
 			{
@@ -42,23 +33,26 @@ namespace dyno
 				if (m && m->isVisible())
 				{
 					m->updateRenderingContext();
-					mEngine->enqueue(m.get());
+					modules.push_back(m.get());
 				}
 			}
 		}
-	private:
-		RenderEngine* mEngine;
+	public:
+		std::vector<dyno::GLVisualModule*> modules;
 	};
 
 	RenderEngine::RenderEngine()
 	{
 		mRenderHelper = new RenderHelper();
 		mShadowMap = new ShadowMap(2048, 2048);
+		mSSAO = new SSAO;
 	}
 
 	RenderEngine::~RenderEngine()
 	{
-
+		delete mRenderHelper;
+		delete mShadowMap;
+		delete mSSAO;
 	}
 
 	void RenderEngine::initialize()
@@ -76,17 +70,9 @@ namespace dyno
 
 		initUniformBuffers();
 
+		mSSAO->initialize();
 		mShadowMap->initialize();
 		mRenderHelper->initialize();
-
-		// create a quad object
-		mScreenQuad = GLMesh::ScreenQuad();
-
-		// shader programs
-		mSSAOProgram = CreateShaderProgram("screen.vert", "ssao.frag");
-		
-		// background
-		mBackgroundProgram = CreateShaderProgram("screen.vert", "background.frag");
 	}
 
 
@@ -101,72 +87,12 @@ namespace dyno
 		// create uniform block for light
 		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		mLightUBO.bindBufferBase(1);
-		
-		// SSAO kernel
-		mSSAOKernelUBO.create(GL_UNIFORM_BUFFER, GL_STATIC_DRAW);
-		mSSAOKernelUBO.bindBufferBase(3);
-
-		std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
-		std::default_random_engine generator;
-		std::vector<glm::vec3> ssaoKernel;
-		for (unsigned int i = 0; i < 64; ++i)
-		{
-			glm::vec3 sample(
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator)
-			);
-			sample = glm::normalize(sample);
-			//sample *= randomFloats(generator);
-			//ssaoKernel.push_back(sample);
-			float scale = (float)i / 64.0;
-			//scale = lerp(0.1f, 1.0f, scale * scale);
-			scale = 0.1f + scale * scale * 0.9f;
-			sample *= scale;
-			ssaoKernel.push_back(sample);
-		}
-
-		mSSAOKernelUBO.load(ssaoKernel.data(), ssaoKernel.size() * sizeof(glm::vec3));
-
-		// create SSAO noise here...
-		std::vector<glm::vec3> ssaoNoise;
-		for (unsigned int i = 0; i < 16; i++)
-		{
-			glm::vec3 noise(
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator) * 2.0 - 1.0,
-				0.0f);
-			ssaoNoise.push_back(noise);
-		}
-
-		mSSAONoiseTex.format = GL_RGB;
-		mSSAONoiseTex.internalFormat = GL_RGB32F;
-		mSSAONoiseTex.wrapS = GL_REPEAT;
-		mSSAONoiseTex.wrapT = GL_REPEAT;
-		mSSAONoiseTex.create();
-		mSSAONoiseTex.load(4, 4, &ssaoNoise[0]);
 
 		glCheckError();
 	}
 
 	void RenderEngine::renderSetup(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams)
 	{
-		// reset render queue...
-		mRenderQueue.clear();
-		// enqueue render content
-		if (scene != 0)
-		{
-			if (scene->getRootNode() == nullptr)
-			{
-				return;
-			}
-
-			if (!scene->isInitialized())
-				scene->initialize();
-
-			scene->getRootNode()->traverseTopDown<DrawAct2>(this);
-		}
-
 		// uniform block for transform matrices
 		struct
 		{
@@ -225,27 +151,28 @@ namespace dyno
 
 	void RenderEngine::draw(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams)
 	{
-		// preserve current framebuffer
-		GLint fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-
 		// pre-rendering 
 		renderSetup(scene, target, rparams);
-		updateShadowMap(rparams);
+		
+		// gather visual modules
+		RenderQueue renderQueue;
+		// enqueue render content
+		if ((scene != 0) && (scene->getRootNode() != 0))
+		{
+			scene->getRootNode()->traverseTopDown(&renderQueue);
+		}
+
+		// render shadow map
+		mShadowMapUBO.bindBufferBase(0);
+		mShadowMap->update(renderQueue.modules, rparams);
 		
 		// transform block
 		mTransformUBO.bindBufferBase(0);
 
-		target->drawColorTex();
+		target->bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mShadowMap->bindShadowTex();
-
-		// render background
-		mBackgroundProgram.use();
-		mBackgroundProgram.setVec3("uColor0", rparams.bgColor0);
-		mBackgroundProgram.setVec3("uColor1", rparams.bgColor1);
-		mScreenQuad.draw();
+		mRenderHelper->drawBackground(rparams.bgColor0, rparams.bgColor1);
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 		// draw a plane
@@ -254,10 +181,9 @@ namespace dyno
 			mRenderHelper->drawGround(rparams.groudScale);
 		}
 
-		for (GLVisualModule* m : mRenderQueue)
+		// render modules
+		for (GLVisualModule* m : renderQueue.modules)
 		{
-			// set material
-			setMaterial(m); 
 			m->paintGL(GLVisualModule::COLOR);
 		}
 		
@@ -278,31 +204,4 @@ namespace dyno
 			mRenderHelper->drawAxis();
 		}
 	}
-
-	void RenderEngine::setMaterial(GLVisualModule* m)
-	{
-		struct MaterialProperty
-		{
-			glm::vec4	baseColor;
-			float		metallic;
-			float		roughness;
-		} mtl;
-
-		mtl.baseColor = glm::vec4(m->getColor(), m->getAlpha());
-		mtl.metallic = m->getMetallic();
-		mtl.roughness = m->getRoughness();
-
-		//mMaterialUBO.load((void*)&mtl, sizeof(MaterialProperty));
-	}
-
-	void RenderEngine::updateShadowMap(const RenderParams& rparams)
-	{
-		mShadowMapUBO.bindBufferBase(0);
-		mShadowMap->bind();
-
-		for (GLVisualModule* m : mRenderQueue)
-		{
-			m->paintGL(GLVisualModule::DEPTH);
-		}
-	}		
 }

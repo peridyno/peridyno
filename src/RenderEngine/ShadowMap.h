@@ -18,6 +18,9 @@
 
 #include "GLFramebuffer.h"
 #include "GLTexture.h"
+#include "RenderParams.h"
+#include "module/GLVisualModule.h"
+#include <vector>
 
 class ShadowMap
 {
@@ -26,10 +29,8 @@ public:
 	~ShadowMap();
 
 	void initialize();
-	// bind framebuffer for write
-	void bind();
-	// bind shadowmap texture for read
-	void bindShadowTex();
+
+	void update(const std::vector<dyno::GLVisualModule*>& modules, const dyno::RenderParams& rparams);
 
 private:
 	// framebuffers

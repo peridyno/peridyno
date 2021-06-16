@@ -28,14 +28,17 @@ void ShadowMap::initialize()
 	mFramebuffer.unbind();
 }
 
-void ShadowMap::bind()
+void ShadowMap::update(const std::vector<dyno::GLVisualModule*>& modules, const dyno::RenderParams & rparams)
 {
 	mFramebuffer.bind();
 	mFramebuffer.clearDepth(1.0);
 	glViewport(0, 0, width, height);
-}
 
-void ShadowMap::bindShadowTex()
-{
+	// shadow pass
+	for (auto* m : modules)
+		m->paintGL(dyno::GLVisualModule::DEPTH);
+
+	// bind the shadow texture to the slot
 	mShadowDepth.bind(GL_TEXTURE5);
 }
+

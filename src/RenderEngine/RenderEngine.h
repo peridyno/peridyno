@@ -23,12 +23,12 @@
 
 #include <vector>
 
+class SSAO;
 class ShadowMap;
 class RenderHelper;
 namespace dyno
 {
 	class SceneGraph;
-	class GLVisualModule;
 	class RenderTarget;
 	class RenderEngine
 	{
@@ -41,39 +41,17 @@ namespace dyno
 
 	private:
 		void initUniformBuffers();
-
 		void renderSetup(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams);
-		void updateShadowMap(const RenderParams&);
-
-		// surface material
-		void setMaterial(dyno::GLVisualModule* m);
 
 	private:
 		// uniform buffer for matrices
-		GLBuffer mTransformUBO;
-		GLBuffer mShadowMapUBO;
-		GLBuffer mLightUBO;
-		//GLBuffer mMaterialUBO;
-
-		// SSAO
-		GLBuffer mSSAOKernelUBO;
-		GLTexture2D mSSAONoiseTex;
-		GLShaderProgram mSSAOProgram;
+		GLBuffer		mTransformUBO;
+		GLBuffer		mShadowMapUBO;
+		GLBuffer		mLightUBO;
 		
-		// background
-		GLShaderProgram mBackgroundProgram;
+		SSAO*			mSSAO;
+		ShadowMap*		mShadowMap;
+		RenderHelper*	mRenderHelper;
 
-		GLMesh			mScreenQuad;
-
-		ShadowMap* mShadowMap;
-		RenderHelper* mRenderHelper;
-
-	private:
-		std::vector<dyno::GLVisualModule*> mRenderQueue;
-
-		void enqueue(dyno::GLVisualModule* m) {
-			mRenderQueue.push_back(m);
-		}
-		friend class DrawAct2;
 	};
 };

@@ -68,7 +68,6 @@ namespace dyno {
 
 	protected:
 		void initCallbacks();    //init default callbacks
-		void initOpenGL();
 
 		void drawScene(void);
 

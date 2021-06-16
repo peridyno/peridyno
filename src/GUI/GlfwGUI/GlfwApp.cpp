@@ -99,8 +99,6 @@ namespace dyno
 
 		glfwSetWindowUserPointer(mWindow, this);
 
-		initOpenGL();
-
 		// Initialize OpenGL loader
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
 		bool err = gl3wInit() != 0;
@@ -216,12 +214,8 @@ namespace dyno
 			glViewport(0, 0, width, height);
 			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
- 			//glPushMatrix();
-
+			
 			drawScene();
-
-			//glPopMatrix();
 
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -307,15 +301,12 @@ namespace dyno
 		glfwSetScrollCallback(mWindow, mScrollFunc);
 	}
 
-	void GlfwApp::initOpenGL()
-	{
-		glShadeModel(GL_SMOOTH);
-		glClearDepth(1.0);														// specify the clear value for the depth buffer
-		glEnable(GL_DEPTH_TEST);
-	}
-
 	void GlfwApp::drawScene(void)
 	{
+		// preserve current framebuffer
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+
 		mRenderParams->proj = mCamera.getProjMat();
 		mRenderParams->view = mCamera.getViewMat();
 						
@@ -328,7 +319,10 @@ namespace dyno
 		mRenderTarget->resize(mCamera.mViewportWidth, mCamera.mViewportHeight);
 
 		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
-		mRenderTarget->blitTo(0);
+
+		// write back to the framebuffer
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		mRenderTarget->blit(0);
 		
 	}
 
