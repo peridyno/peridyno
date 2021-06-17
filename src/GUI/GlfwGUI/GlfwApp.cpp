@@ -9,6 +9,9 @@
 #include "Framework/SceneGraph.h"
 #include "Framework/Log.h"
 
+#include "OrbitCamera.h"
+#include "TrackballCamera.h"
+
 #include "../RenderEngine/RenderEngine.h"
 #include "../RenderEngine/RenderTarget.h"
 #include "../RenderEngine/RenderParams.h"
@@ -22,11 +25,12 @@ namespace dyno
 
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
 	{
-
+		setupCamera();
 	}
 
 	GlfwApp::GlfwApp(int width, int height)
 	{
+		setupCamera();
 		this->createWindow(width, height);
 	}
 
@@ -138,14 +142,14 @@ namespace dyno
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
-		mCamera.registerPoint(0.5f, 0.5f);
-		mCamera.translateToPoint(0, 0);
+		mCamera->registerPoint(0.5f, 0.5f);
+		mCamera->translateToPoint(0, 0);
 
-		mCamera.zoom(3.0f);
-		mCamera.setClipNear(0.01f);
-		mCamera.setClipFar(10.0f);
-		mCamera.setWidth(width);
-		mCamera.setHeight(height);
+		mCamera->zoom(3.0f);
+		mCamera->setClipNear(0.01f);
+		mCamera->setClipFar(10.0f);
+		mCamera->setWidth(width);
+		mCamera->setHeight(height);
 
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
@@ -161,6 +165,21 @@ namespace dyno
 		mRenderParams->viewport.y = 0;
 		mRenderParams->viewport.w = width;
 		mRenderParams->viewport.h = height;
+	}
+
+	void GlfwApp::setupCamera()
+	{
+		switch (mCameraType)
+		{
+		case dyno::Orbit:
+			mCamera = std::make_shared<OrbitCamera>();
+			break;
+		case dyno::TrackBall:
+			mCamera = std::make_shared<TrackballCamera>();
+			break;
+		default:
+			break;
+		}
 	}
 
 	void GlfwApp::mainLoop()
@@ -223,6 +242,12 @@ namespace dyno
 		}
 	}
 
+	void GlfwApp::setCameraType(CameraType type)
+	{
+		mCameraType = type;
+		setupCamera();
+	}
+
 	const std::string& GlfwApp::name() const
 	{
 		return mWindowTitle;
@@ -247,8 +272,8 @@ namespace dyno
 
 	void GlfwApp::setWindowSize(int width, int height)
 	{
-		mCamera.setWidth(width);
-		mCamera.setHeight(height);
+		mCamera->setWidth(width);
+		mCamera->setHeight(height);
 	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
@@ -284,6 +309,16 @@ namespace dyno
 		mAnimationToggle = !mAnimationToggle;
 	}
 
+	int GlfwApp::getWidth()
+	{
+		return activeCamera()->viewportWidth();
+	}
+
+	int GlfwApp::getHeight()
+	{
+		return activeCamera()->viewportHeight();
+	}
+
 	void GlfwApp::initCallbacks()
 	{
 		mMouseButtonFunc = GlfwApp::mouseButtonCallback;
@@ -307,16 +342,16 @@ namespace dyno
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
-		mRenderParams->proj = mCamera.getProjMat();
-		mRenderParams->view = mCamera.getViewMat();
+		mRenderParams->proj = mCamera->getProjMat();
+		mRenderParams->view = mCamera->getViewMat();
 						
 		// set the viewport
 		mRenderParams->viewport.x = 0;
 		mRenderParams->viewport.y = 0;
-		mRenderParams->viewport.w = mCamera.mViewportWidth;
-		mRenderParams->viewport.h = mCamera.mViewportHeight;
+		mRenderParams->viewport.w = mCamera->viewportWidth();
+		mRenderParams->viewport.h = mCamera->viewportHeight();
 
-		mRenderTarget->resize(mCamera.mViewportWidth, mCamera.mViewportHeight);
+		mRenderTarget->resize(mCamera->viewportWidth(), mCamera->viewportHeight());
 
 		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
 

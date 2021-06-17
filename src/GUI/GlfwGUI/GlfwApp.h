@@ -9,10 +9,10 @@
 #include <GLFW/glfw3.h>
 
 #include "AppBase.h"
-#include "Camera.h"
 
 namespace dyno {
 
+	class Camera;
 	class RenderEngine;
 	class RenderTarget;
 	class RenderParams;
@@ -23,6 +23,12 @@ namespace dyno {
 		GLFW_UP
 	};
 
+	enum CameraType
+	{
+		Orbit,
+		TrackBall
+	};
+
     class GlfwApp : public AppBase
     {
     public:
@@ -31,7 +37,11 @@ namespace dyno {
         ~GlfwApp();
 
         void createWindow(int width, int height) override;
+		void setupCamera();
         void mainLoop() override;
+
+		void setCameraType(CameraType type);
+		CameraType cameraType() { return mCameraType; }
 
 		const std::string& name() const;
 
@@ -51,8 +61,7 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		Camera* activeCamera() { return &mCamera; }
-
+		std::shared_ptr<Camera> activeCamera() { return mCamera; }
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -65,6 +74,9 @@ namespace dyno {
 		int getSaveScreenInternal() { return mSaveScreenInterval; }
 
 		void toggleAnimation();
+
+		int getWidth();
+		int getHeight();
 
 	protected:
 		void initCallbacks();    //init default callbacks
@@ -115,7 +127,8 @@ namespace dyno {
 
 		Vec4f mClearColor = Vec4f(0.45f, 0.55f, 0.60f, 1.00f);
 
-		Camera mCamera;
+		std::shared_ptr<Camera> mCamera;
+		CameraType mCameraType = CameraType::Orbit;
 
 		RenderEngine* mRenderEngine;
 		RenderTarget* mRenderTarget;

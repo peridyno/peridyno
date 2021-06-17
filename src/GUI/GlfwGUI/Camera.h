@@ -3,23 +3,23 @@
 #include "Quat.h"
 #include "Vector.h"
 
-#include <glm/mat4x4.hpp>
-
 namespace dyno
 {
 	typedef Quat<float> Quat1f;
 
 	class Camera {
-
 	public:
-		Camera();
+		Camera() {};
 		~Camera() {};
 
-		void reset();
+		virtual glm::mat4 getViewMat() = 0;
+		virtual glm::mat4 getProjMat() = 0;
 
-		void rotateToPoint(float x, float y);
-		void translateToPoint(float x, float y);
-		void zoom(float amount);
+		virtual void rotateToPoint(float x, float y) = 0;
+		virtual void translateToPoint(float x, float y) = 0;
+		virtual void zoom(float amount) = 0;
+
+		virtual void registerPoint(float x, float y) = 0;
 
 		void setWidth(int width) { mViewportWidth = width; }
 		void setHeight(int height) { mViewportHeight = height; }
@@ -27,27 +27,19 @@ namespace dyno
 		void setClipNear(float zNear) { mNear = zNear; }
 		void setClipFar(float zFar) { mFar = zFar; }
 
-		glm::mat4 getViewMat();
-		glm::mat4 getProjMat();
-		
-		void registerPoint(float x, float y);
+		int viewportWidth() const {	return mViewportWidth; }
+		int viewportHeight() const { return mViewportHeight; }
 
+		float clipNear() const { return mNear; }
+		float clipFar() const { return mFar; }
 
-	public:
-		float mRegX;
-		float mRegY;
-
+	protected:
 		float mNear;
 		float mFar;
 		float mFov;
 
 		int mViewportWidth;
 		int mViewportHeight;
-
-		Vec3f mCameraPos;
-		Vec3f mCameraTarget;
-		Vec3f mCameraUp;
-
 	};
 
 }
