@@ -30,10 +30,7 @@ namespace dyno
 		enum ColorMapMode
 		{
 			CONSTANT = 0,	// use constant color
-			VELOCITY_JET = 1,
-			VELOCITY_HEAT = 2,
-			FORCE_JET = 3,
-			FORCE_HEAT = 4,
+			VELOCITY_JET = 1
 		};
 
 		PointRenderer();
@@ -44,6 +41,8 @@ namespace dyno
 		void setColorMapMode(ColorMapMode mode);
 		void setColorMapRange(float vmin, float vmax);
 
+	public:
+		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:
 		virtual void paintGL(RenderMode mode) override;
@@ -54,8 +53,7 @@ namespace dyno
 		unsigned int	mNumPoints;
 
 		GLCudaBuffer	mPosition;
-		GLCudaBuffer	mVelocity;
-		GLCudaBuffer	mForce;
+		GLCudaBuffer	mColor;
 
 		float			mPointSize;
 		GLVertexArray	mVertexArray;

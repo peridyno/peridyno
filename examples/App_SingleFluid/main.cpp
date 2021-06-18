@@ -27,6 +27,10 @@ void CreateScene()
 
 	auto ptRender = std::make_shared<PointRenderer>();
 	ptRender->setColor(glm::vec3(1, 0, 0));
+ 	ptRender->setColorMapMode(PointRenderer::VELOCITY_JET);
+ 	ptRender->setColorMapRange(0, 5);
+// 
+ 	fluid->currentVelocity()->connect(ptRender->inColor());
 	fluid->addVisualModule(ptRender);
 
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);

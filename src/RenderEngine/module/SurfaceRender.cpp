@@ -42,7 +42,7 @@ void SurfaceRenderer::updateGL()
 		return;
 
 	// dump geometry
-	auto triSet = std::dynamic_pointer_cast<dyno::TriangleSet<dyno::DataType3f>>(parent->getTopologyModule());
+	auto triSet = std::dynamic_pointer_cast<dyno::TriangleSet<DataType3f>>(parent->getTopologyModule());
 
 	if (triSet == nullptr)
 		return;

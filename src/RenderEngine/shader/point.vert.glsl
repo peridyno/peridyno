@@ -3,7 +3,6 @@
 // particle properties
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aVelocity;
-layout(location = 2) in vec3 aForce;
 
 out vec3 vPosition;
 out vec3 vColor;
@@ -68,10 +67,6 @@ vec3 ColorMapping()
 		return JetColor(length(aVelocity), uColorMin, uColorMax);
 	if (uColorMode == 2)
 		return HeatColor(length(aVelocity), uColorMin, uColorMax);
-	if (uColorMode == 3)
-		return JetColor(length(aForce), uColorMin, uColorMax);
-	if (uColorMode == 4)
-		return HeatColor(length(aForce), uColorMin, uColorMax);
 	// default 
 	return vec3(1, 0, 0);
 }
