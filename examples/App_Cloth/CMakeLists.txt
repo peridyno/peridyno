@@ -1,14 +1,8 @@
 if(PERIDYNO_LIBRARY_PERIDYNAMICS)
     set(PROJECT_NAME App_Cloth)
-
-    link_libraries(Core Framework IO Graphics)
-    link_libraries(Peridynamics)
-    link_libraries(GlfwGUI)
-
-
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
 
-    file(                                                                                                       #利用glob命令读取所有源文件list
+    file(
         GLOB_RECURSE SRC_LIST 
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
@@ -16,10 +10,17 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
         "${SRC_DIR}/*.h*"
     )
 
-    add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 #添加编译目标 可执行文件
+    add_executable(${PROJECT_NAME} ${SRC_LIST})
+	target_link_libraries(${PROJECT_NAME} 
+        Core 
+        Framework 
+        IO 
+        RenderEngine 
+        Peridynamics 
+		GlfwGUI)
 
-    file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  #判断当前project在根目录下的相对路径
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")                              #为project设定folder目录
+    file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
     #    set(EXECUTABLE_OUTPUT_PATH  ${CMAKE_CURRENT_BINARY_DIR}/bin/)
 
     if(WIN32)

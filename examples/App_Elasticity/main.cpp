@@ -6,8 +6,8 @@
 #include "Peridynamics/ParticleElasticBody.h"
 #include "Peridynamics/ElasticityModule.h"
 
-#include "SurfaceMeshRender.h"
-#include "PointRenderModule.h"
+#include "module/SurfaceRender.h"
+#include "module/PointRender.h"
 
 using namespace dyno;
 
@@ -21,8 +21,11 @@ int main()
 	std::shared_ptr<ParticleElasticBody<DataType3f>> bunny = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(bunny);
 
-	auto m_pointsRender = std::make_shared<PointRenderModule>();
-	m_pointsRender->setColor(Vec3f(0, 1, 1));
+	auto m_pointsRender = std::make_shared<PointRenderer>();
+	m_pointsRender->setColor(glm::vec3(0, 1, 1));
+	m_pointsRender->setPointSize(0.002f);
+	m_pointsRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
+	m_pointsRender->setColorMapRange(0, 1);
 	bunny->addVisualModule(m_pointsRender);
 
 	bunny->setMass(1.0);
@@ -32,16 +35,15 @@ int main()
 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
 	bunny->setVisible(true);
 
-	auto sRender = std::make_shared<SurfaceMeshRender>();
+	auto sRender = std::make_shared<SurfaceRenderer>();
 	bunny->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setColor(glm::vec3(1, 1, 0));
 
 	bunny->getElasticitySolver()->setIterationNumber(10);
 	bunny->getElasticitySolver()->inHorizon()->setValue(0.01);
 
 	GlfwApp window;
 	window.createWindow(1024, 768);
-
 	window.mainLoop();
 
 	return 0;

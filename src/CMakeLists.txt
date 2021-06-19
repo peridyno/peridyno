@@ -16,6 +16,7 @@ endif()
 
 if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
     add_subdirectory(Graphics)
+    add_subdirectory(RenderEngine)
 endif()
 
 if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GUI)

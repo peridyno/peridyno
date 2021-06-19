@@ -4,19 +4,19 @@
 namespace dyno
 {
 	/*!
-	*	\class	ParticleCloth
-	*	\brief	Peridynamics-based elastic object.
+	*	\class	Cloth
+	*	\brief	Peridynamics-based cloth.
 	*/
 	template<typename TDataType>
-	class ParticleCloth : public ParticleSystem<TDataType>
+	class Cloth : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ParticleCloth, TDataType)
+		DECLARE_CLASS_1(Cloth, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ParticleCloth(std::string name = "default");
-		virtual ~ParticleCloth();
+		Cloth(std::string name = "default");
+		virtual ~Cloth();
 
 		void advance(Real dt) override;
 
@@ -29,7 +29,9 @@ namespace dyno
 
 		void loadSurface(std::string filename);
 
+		std::shared_ptr<Node> getSurface();
+
 	private:
-		std::shared_ptr<Node> m_surfaceNode;
+		std::shared_ptr<Node> mSurfaceNode;
 	};
 }

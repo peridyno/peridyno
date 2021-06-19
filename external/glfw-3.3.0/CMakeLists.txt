@@ -336,7 +336,7 @@ configure_file(src/glfw3.pc.in src/glfw3.pc @ONLY)
 # Add subdirectories
 #--------------------------------------------------------------------
 add_subdirectory(src)
-add_subdirectory(deps)
+#add_subdirectory(deps)
 
 #--------------------------------------------------------------------
 # Install files other than the library

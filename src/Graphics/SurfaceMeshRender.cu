@@ -1,5 +1,5 @@
 #pragma once
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include "cuda_helper_math.h"
 #include "SurfaceMeshRender.h"
 #include "Topology/TriangleSet.h"
