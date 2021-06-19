@@ -4,19 +4,29 @@
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
 
-#include <glad/gl.h>
+#include <glad/glad.h>
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
 #include "AppBase.h"
-#include "Camera.h"
 
 namespace dyno {
+
+	class Camera;
+	class RenderEngine;
+	class RenderTarget;
+	class RenderParams;
 
 	enum ButtonState
 	{
 		GLFW_DOWN = 0,
 		GLFW_UP
+	};
+
+	enum CameraType
+	{
+		Orbit,
+		TrackBall
 	};
 
     class GlfwApp : public AppBase
@@ -27,19 +37,19 @@ namespace dyno {
         ~GlfwApp();
 
         void createWindow(int width, int height) override;
+		void setupCamera();
         void mainLoop() override;
+
+		void setCameraType(CameraType type);
+		CameraType cameraType() { return mCameraType; }
 
 		const std::string& name() const;
 
 		void setCursorPos(double x, double y);
 		double getCursorPosX();
 		double getCursorPosY();
-
-		int getWidth() const;
-		int getHeight() const;
-
-		void setWidth(int width);
-		void setHeight(int height);
+		
+		void setWindowSize(int width, int height);
 
 		void setButtonType(uint button) { mButtonType = button; }
 		void setButtonMode(uint mode) { mButtonMode = mode; }
@@ -51,8 +61,7 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		Camera* activeCamera() { return &mCamera; }
-
+		std::shared_ptr<Camera> activeCamera() { return mCamera; }
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -66,13 +75,13 @@ namespace dyno {
 
 		void toggleAnimation();
 
+		int getWidth();
+		int getHeight();
+
 	protected:
 		void initCallbacks();    //init default callbacks
-		void initOpenGL();
 
 		void drawScene(void);
-		void drawBackground();
-		void drawAxis();
 
 		static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -91,9 +100,6 @@ namespace dyno {
 		void(*mScrollFunc)(GLFWwindow* window, double offsetX, double OffsetY);
 
 		GLFWwindow* mWindow = nullptr;
-
-		int mWidth;
-		int mHeight;
 
 		//state of the mouse
 		uint mButtonType;
@@ -121,7 +127,15 @@ namespace dyno {
 
 		Vec4f mClearColor = Vec4f(0.45f, 0.55f, 0.60f, 1.00f);
 
-		Camera mCamera;
+		std::shared_ptr<Camera> mCamera;
+		CameraType mCameraType = CameraType::Orbit;
+
+		RenderEngine* mRenderEngine;
+		RenderTarget* mRenderTarget;
+		RenderParams* mRenderParams;
+
+	public:
+		bool			mUseNewRenderEngine = true;
     };
 
 }

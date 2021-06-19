@@ -1,6 +1,6 @@
 #pragma once
 #include "cuda_helper_math.h"
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include "HeightFieldRender.h"
 #include "Topology/HeightField.h"
 #include "Vector.h"

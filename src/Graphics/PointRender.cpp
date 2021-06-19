@@ -13,7 +13,7 @@
  */
 
 #include <glm/glm.hpp>
-#include <glad/gl.h>
+#include <glad/glad.h>
 //#include "Rendering/OpenGL_Primitives/glew_utilities.h"
 
 #include "PointRender.h"
