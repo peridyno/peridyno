@@ -27,7 +27,7 @@ void CreateScene()
 
 	auto ptRender = std::make_shared<PointRenderer>();
 	ptRender->setColor(glm::vec3(1, 0, 0));
- 	ptRender->setColorMapMode(PointRenderer::VELOCITY_JET);
+ 	ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
  	ptRender->setColorMapRange(0, 5);
 // 
  	fluid->currentVelocity()->connect(ptRender->inColor());

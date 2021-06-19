@@ -79,7 +79,7 @@ void PointRenderer::updateGL()
 	auto& xyz = pPointSet->getPoints();
 	mNumPoints = xyz.size();
 
-	if (mColorMode == ColorMapMode::VELOCITY_JET && !this->inColor()->isEmpty())
+	if (mColorMode == ColorMapMode::PER_VERTEX_SHADER && !this->inColor()->isEmpty())
 	{
 		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
 		mColor.loadCuda(this->inColor()->getDataPtr()->begin(), mNumPoints * sizeof(float) * 3);

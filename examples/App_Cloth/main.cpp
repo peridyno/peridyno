@@ -49,5 +49,3 @@ int main()
 	window.mainLoop();
 	return 0;
 }
-
-

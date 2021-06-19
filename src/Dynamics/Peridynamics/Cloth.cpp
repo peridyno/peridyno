@@ -29,8 +29,8 @@ namespace dyno
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		mSurfaceNode->setTopologyModule(triSet);
 
-		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
-		this->addTopologyMapping(surfaceMapping);
+// 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
+// 		this->addTopologyMapping(surfaceMapping);
 	}
 
 	template<typename TDataType>
@@ -75,11 +75,16 @@ namespace dyno
 		auto pts = this->m_pSet->getPoints();
 		pts.assign(this->currentPosition()->getData());
 
-		auto tMappings = this->getTopologyMappingList();
-		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
-		{
-			(*iter)->apply();
-		}
+		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule());
+
+		triSet->getPoints().assign(this->currentPosition()->getData());
+
+		//TODO: topology mapping has bugs
+// 		auto tMappings = this->getTopologyMappingList();
+// 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
+// 		{
+// 			(*iter)->apply();
+// 		}
 	}
 
 	template<typename TDataType>

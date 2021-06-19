@@ -29,8 +29,8 @@ namespace dyno
 
 		enum ColorMapMode
 		{
-			CONSTANT = 0,	// use constant color
-			VELOCITY_JET = 1
+			PER_OBJECT_SHADER = 0,	// use constant color
+			PER_VERTEX_SHADER = 1
 		};
 
 		PointRenderer();
@@ -60,7 +60,7 @@ namespace dyno
 
 		GLShaderProgram mShaderProgram;
 
-		ColorMapMode	mColorMode = ColorMapMode::CONSTANT;
+		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
 		float			mColorMin = 0.f;
 		float			mColorMax = 1.f;
 	};

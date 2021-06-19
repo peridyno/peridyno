@@ -43,6 +43,7 @@ namespace dyno
 		return true;
 	}
 
+	//TODO: fix the problem
 	template <typename Real, typename Coord>
 	__global__ void K_ApplyTransform(
 		DArray<Coord> to, //new position of surface mesh
