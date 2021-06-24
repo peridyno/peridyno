@@ -22,6 +22,11 @@ PointRenderer::PointRenderer()
 	this->setName("point_renderer");
 }
 
+PointRenderer::~PointRenderer()
+{
+	mColorBuffer.clear();
+}
+
 void PointRenderer::setPointSize(float size)
 {
 	mPointSize = size;
@@ -79,6 +84,10 @@ void PointRenderer::updateGL()
 	auto& xyz = pPointSet->getPoints();
 	mNumPoints = xyz.size();
 
+	if (mColorBuffer.size() != mNumPoints) {
+		mColorBuffer.resize(mNumPoints);
+	}
+
 	if (mColorMode == ColorMapMode::PER_VERTEX_SHADER && !this->inColor()->isEmpty())
 	{
 		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
@@ -86,18 +95,15 @@ void PointRenderer::updateGL()
 	}
 	else
 	{
-		if (this->inColor()->isEmpty())
-			this->inColor()->allocate();
-
-		if (this->inColor()->getDataPtr()->size() != mNumPoints) {
-			this->inColor()->getDataPtr()->resize(mNumPoints);
+		if (this->inColor()->isEmpty()) {
+			RenderTools::setupColor(mColorBuffer, Vec3f(mBaseColor.r, mBaseColor.g, mBaseColor.b));
+		}
+		else {
+			mColorBuffer.assign(this->inColor()->getData());
 		}
 
-		auto colorPtr = this->inColor()->getDataPtr();
-		RenderTools::setupColor(*colorPtr, Vec3f(mBaseColor.r, mBaseColor.g, mBaseColor.b));
-
 		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
-		mColor.loadCuda(colorPtr->begin(), mNumPoints * sizeof(float) * 3);
+		mColor.loadCuda(mColorBuffer.begin(), mNumPoints * sizeof(float) * 3);
 	}
 }
 

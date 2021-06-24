@@ -34,6 +34,7 @@ namespace dyno
 		};
 
 		PointRenderer();
+		~PointRenderer() override;
 
 		void setPointSize(float size);
 		float getPointSize() const;
@@ -63,5 +64,7 @@ namespace dyno
 		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
 		float			mColorMin = 0.f;
 		float			mColorMax = 1.f;
+
+		DArray<Vec3f> mColorBuffer;
 	};
 };
