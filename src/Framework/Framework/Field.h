@@ -52,7 +52,7 @@ namespace dyno {
 			*data = val;
 		}
 
-		this->update();
+		//this->update();
 	}
 
 	template<typename T>

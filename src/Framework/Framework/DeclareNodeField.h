@@ -81,8 +81,12 @@ public:									\
 #define DEF_NODE_PORT(name, T, desc)				\
 private:									\
 	SingleNodePort<T> single_##name = SingleNodePort<T>(std::string(#name), desc, this);					\
-public:									\
-	inline SingleNodePort<T>* get##name() {	return &single_##name; }
+public:																										\
+	inline std::shared_ptr<T> get##name() {	return single_##name.getDerivedNode(); }						\
+																			\
+	void set##name(std::shared_ptr<T> c) {									\
+		single_##name.setDerivedNode(c);									\
+	}
 
 #define DEF_NODE_PORTS(name, T, desc)				\
 private:									\
@@ -93,7 +97,6 @@ public:									\
 														\
 	bool add##name(std::shared_ptr<T> c){				\
 		multiple_##name.addDerivedNode(c);				\
-		c->setParent(this);								\
 		return true;									\
 	}													\
 														\

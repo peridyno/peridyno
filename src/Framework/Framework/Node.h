@@ -344,20 +344,22 @@ public:
 	 * @return Return false if the name conflicts with exists fields' names
 	 */
 	bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
-
-
-	bool addNodePort(NodePort* port);
-
+	
 	std::vector<NodePort*>& getAllNodePorts() { return m_node_ports; }
 
-	void setParent(Node* p) { m_parent = p; }
 
+	uint sizeOfNodePorts() const { return m_node_ports.size(); }
+	uint sizeOfAncestors() const { return m_children.size(); }
 protected:
 
 	virtual void doTraverseBottomUp(Action* act);
 	virtual void doTraverseTopDown(Action* act);
 
 private:
+	void setParent(Node* p) { m_parent = p; }
+
+	bool addNodePort(NodePort* port);
+
 	bool addToModuleList(std::shared_ptr<Module> module);
 	bool deleteFromModuleList(std::shared_ptr<Module> module);
 
@@ -441,6 +443,11 @@ private:
 
 	std::list<std::shared_ptr<Node>> m_children;
 
+	/**
+	 * @brief Storing pointers to descendants
+	 */
+	std::vector<std::weak_ptr<Node>> mDescendants;
+
 	std::vector<NodePort*> m_node_ports;
 
 	/**
@@ -448,5 +455,7 @@ private:
 	 * 
 	 */
 	Node* m_parent;
+
+	friend class NodePort;
 };
 }

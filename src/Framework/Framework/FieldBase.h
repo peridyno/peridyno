@@ -48,6 +48,7 @@ public:
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
+	uint sinkSize() { return (uint)m_field_sink.size(); }
 	std::vector<FieldBase*>& getSinkFields() { return m_field_sink; }
 
 	bool isModified();
