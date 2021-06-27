@@ -48,7 +48,7 @@ namespace dyno {
 		void updateVolume() override;
 
 	public:
-		DEF_VAR_IN(TriangleSet<TDataType>, ClosedSurface, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, ClosedSurface, "");
 
 		DEF_VAR_IN(Real, Spacing, "");
 

@@ -11,6 +11,7 @@ namespace dyno {
 	{
 		In,
 		Out,
+		IO,
 		Param,
 		Current,
 		Next

@@ -31,6 +31,28 @@ public:									\
 	inline VarField<T>* out##name() {return &out_##name;}
 
 /**
+*	Macro definition for input/output of type instance
+*/
+#define DEF_INSTANCE_IN(T, name, desc) \
+private:									\
+	InstanceField<T> in_##name = InstanceField<T>(std::string(#name), desc, FieldTypeEnum::In, this);			\
+public:										\
+	inline InstanceField<T>* in##name() {return &in_##name;}
+
+#define DEF_INSTANCE_OUT(T, name, desc) \
+private:									\
+	InstanceField<T> out_##name = InstanceField<T>(std::string(#name), desc, FieldTypeEnum::Out, this);			\
+public:									\
+	inline InstanceField<T>* out##name() {return &out_##name;}
+
+#define DEF_INSTANCE_STATE(T, name, desc) \
+private:									\
+	InstanceField<T> state_##name = InstanceField<T>(std::string(#name), desc, FieldTypeEnum::Out, this);			\
+public:									\
+	inline InstanceField<T>* state##name() {return &state_##name;}
+
+
+/**
 *	Macro definition for input/output of type Array
 */
 #define DEF_ARRAY_IN(T, name, device, desc) \
@@ -44,6 +66,13 @@ private:									\
 	ArrayField<T, device> out_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
 public:									\
 	inline ArrayField<T, device>* out##name() {return &out_##name;}
+
+#define DEF_ARRAY_IO(T, name, device, desc) \
+private:									\
+	ArrayField<T, device> io_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::IO, this);	\
+public:									\
+	inline ArrayField<T, device>* in##name() {return &io_##name;}		\
+	inline ArrayField<T, device>* out##name() {return &io_##name;}
 
 
 /**
@@ -60,4 +89,11 @@ private:												\
 	ArrayListField<T, device> out_##name = ArrayListField<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
 public:													\
 	inline ArrayListField<T, device>* out##name() {return &out_##name;}
+
+#define DEF_ARRAYLIST_IO(T, name, device, desc)		\
+private:												\
+	ArrayListField<T, device> io_##name = ArrayListField<T, device>(std::string(#name), desc, FieldTypeEnum::IO, this);	\
+public:													\
+	inline ArrayListField<T, device>* in##name() {return &io_##name;}	\
+	inline ArrayListField<T, device>* out##name() {return &io_##name;}
 }

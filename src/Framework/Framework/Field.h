@@ -61,6 +61,22 @@ namespace dyno {
 	template<typename T>
 	using DeviceVarField = VarField<T>;
 
+	/*!
+	*	\class	Instance
+	*	\brief	Reference of complex data types.
+	*/
+	template<typename T>
+	class InstanceField : public FieldBase
+	{
+	public:
+		typedef T				VarType;
+		typedef T				DataType;
+		typedef InstanceField<T>		FieldType;
+
+		DEFINE_FIELD_FUNC(FieldType, DataType, InstanceField);
+
+		uint getElementCount() override { return 1; }
+	};
 
 	/**
 	 * Define field for Array
