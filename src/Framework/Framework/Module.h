@@ -7,7 +7,7 @@
 #include "Base.h"
 #include "Log.h"
 #include "DataTypes.h"
-#include "DeclareModuleField.h"
+#include "DeclareField.h"
 #include "../FieldTypes.h"
 
 namespace dyno

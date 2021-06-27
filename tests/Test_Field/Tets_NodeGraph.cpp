@@ -15,7 +15,7 @@ public:
 	NodeB() {};
 	~NodeB() override {};
 
-	DEF_NODE_PORT(Ancestor1, NodeA, "");
+	DEF_NODE_PORT(NodeA, Ancestor1, "");
 };
 
 class NodeC : public NodeB {
@@ -29,7 +29,7 @@ public:
 	NodeD() {};
 	~NodeD() override {};
 
-	DEF_NODE_PORT(Ancestor1, NodeA, "");
+	DEF_NODE_PORT(NodeA, Ancestor1, "");
 
 	DEF_NODE_PORTS(Ancestor2, NodeB, "");
 };
@@ -55,8 +55,15 @@ TEST(NodeGraph, construct)
 
 	EXPECT_EQ(nd->sizeOfNodePorts() == 2, true);
 	EXPECT_EQ(nd->getAncestor1() != nullptr, true);
+	EXPECT_EQ(na->sizeofDescendants() == 1, true);
 
 	nb->setAncestor1(na);
 
 	EXPECT_EQ(nd->sizeOfAncestors() == 3, true);
+	EXPECT_EQ(nb->sizeOfAncestors() == 1, true);
+	EXPECT_EQ(na->sizeofDescendants() == 2, true);
+
+	nb->setAncestor1(nullptr);
+	EXPECT_EQ(na->sizeofDescendants() == 1, true);
+	EXPECT_EQ(nb->sizeOfAncestors() == 0, true);
 }

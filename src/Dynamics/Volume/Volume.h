@@ -17,6 +17,5 @@ namespace dyno {
 
 		virtual void updateVolume() = 0;
 	public:
-		DEF_PORT_OUT(DistanceField3D<TDataType>, SDF, "");
 	};
 }

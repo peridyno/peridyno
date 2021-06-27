@@ -24,7 +24,7 @@ namespace dyno
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
 		//Create a node for surface mesh rendering
-		mSurfaceNode = this->template createChild<Node>("Mesh");
+		mSurfaceNode = this->template createAncestor<Node>("Mesh");
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		mSurfaceNode->setTopologyModule(triSet);

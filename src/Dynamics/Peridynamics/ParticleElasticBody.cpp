@@ -40,7 +40,7 @@ namespace dyno
 		this->getAnimationPipeline()->push_back(m_elasticity);
 
 		//Create a node for surface mesh rendering
-		m_surfaceNode = this->template createChild<Node>("Mesh");
+		m_surfaceNode = this->template createAncestor<Node>("Mesh");
 
 		auto triSet = m_surfaceNode->template setTopologyModule<TriangleSet<TDataType>>("surface_mesh");
 

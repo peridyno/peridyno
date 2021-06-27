@@ -87,7 +87,7 @@ namespace dyno
 		Coord scale = (hi - lo) / 2;
 		Coord center = (hi + lo) / 2;
 
-		auto m_surfaceNode = this->createChild<Node>("cube");
+		auto m_surfaceNode = this->createAncestor<Node>("cube");
 		m_surfaceNode->setControllable(false);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
@@ -112,7 +112,7 @@ namespace dyno
 		m_obstacles.push_back(boundary);
 
 		//Note: the radius of the standard sphere is 1m
-		auto m_surfaceNode = this->createChild<Node>("sphere");
+		auto m_surfaceNode = this->createAncestor<Node>("sphere");
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		triSet->loadObjFile("../../data/standard/standard_sphere.obj");

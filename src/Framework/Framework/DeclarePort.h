@@ -78,7 +78,7 @@ public:									\
  * @brief Macro definitions for node ports
  * 
  */
-#define DEF_NODE_PORT(name, T, desc)				\
+#define DEF_NODE_PORT(T, name, desc)				\
 private:									\
 	SingleNodePort<T> single_##name = SingleNodePort<T>(std::string(#name), desc, this);					\
 public:																										\
@@ -105,15 +105,3 @@ public:									\
 		return true;									\
 	}
 }
-
-#define DEF_PORT_IN(T, name, desc) \
-private:									\
-	VarField<T> in_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::In, this);			\
-public:										\
-	inline VarField<T>* in##name() {return &in_##name;}
-
-#define DEF_PORT_OUT(T, name, desc) \
-private:									\
-	VarField<T> in_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Out, this);			\
-public:										\
-	inline VarField<T>* out##name() {return &in_##name;}

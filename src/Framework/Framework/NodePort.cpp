@@ -30,9 +30,9 @@ namespace dyno
 
 	bool NodePort::addNodeToParent(std::shared_ptr<Node> node)
 	{
-		if (!m_parent->hasChild(node))
+		if (!m_parent->hasAncestor(node))
 		{
-			m_parent->addChild(node);
+			m_parent->addAncestor(node);
 			return true;
 		}
 
@@ -41,9 +41,9 @@ namespace dyno
 
 	bool NodePort::removeNodeFromParent(std::shared_ptr<Node> node)
 	{
-		if (m_parent->hasChild(node))
+		if (m_parent->hasAncestor(node))
 		{
-			m_parent->removeChild(node);
+			m_parent->removeAncestor(node);
 			return true;
 		}
 

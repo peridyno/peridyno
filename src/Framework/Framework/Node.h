@@ -32,7 +32,7 @@
 #include "TopologyMapping.h"
 #include "NumericalIntegrator.h"
 #include "ModuleCompute.h"
-#include "DeclareNodeField.h"
+#include "DeclarePort.h"
 #include "NodePort.h"
 
 namespace dyno {
@@ -51,10 +51,6 @@ public:
 
 	void setName(std::string name);
 	std::string getName();
-
-	Node* getChild(std::string name);
-	Node* getParent();
-	Node* getRoot();
 
 	bool isControllable();
 
@@ -84,43 +80,41 @@ public:
 // 	Iterator begin();
 // 	Iterator end();
 
+	Node* getAncestor(std::string name);
+
 	/**
-	 * @brief Create a Child object
+	 * @brief Create an ancestor
 	 * 
 	 * @tparam TNode 						Node type of the child object
 	 * @param name 							Node name
 	 * @return std::shared_ptr<TNode> 		return the created child, if name is aleady used, return nullptr.
 	 */
 	template<class TNode>
-	std::shared_ptr<TNode> createChild(std::string name)
+	std::shared_ptr<TNode> createAncestor(std::string name)
 	{
-		return addChild(TypeInfo::New<TNode>(name));
+		return addAncestor(TypeInfo::New<TNode>(name));
 	}
 
 	/**
-	 * @brief Add a child
+	 * @brief Add a ancestor
 	 * 
-	 * @param child 
+	 * @param Ancestor 
 	 * @return std::shared_ptr<Node> 
 	 */
-	std::shared_ptr<Node> addChild(std::shared_ptr<Node> child) {
-		m_children.push_back(child);
-		child->setParent(this);
-		return child;
-	}
+	std::shared_ptr<Node> addAncestor(std::shared_ptr<Node> anc);
 
-	bool hasChild(std::shared_ptr<Node> child);
+	bool hasAncestor(std::shared_ptr<Node> anc);
 
-	void removeChild(std::shared_ptr<Node> child);
+	void removeAncestor(std::shared_ptr<Node> anc);
 
-	void removeAllChildren();
+	void removeAllAncestors();
 
 	/**
-	 * @brief Return all children
+	 * @brief Return all ancestors
 	 * 
-	 * @return ListPtr<Node> Children list
+	 * @return ListPtr<Node> ancestor list
 	 */
-	std::list<std::shared_ptr<Node>>& getChildren() { return m_children; }
+	std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
 
 
 	std::shared_ptr<DeviceContext> getContext();
@@ -345,18 +339,28 @@ public:
 	 */
 	bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 	
-	std::vector<NodePort*>& getAllNodePorts() { return m_node_ports; }
+	std::vector<NodePort*>& getAllNodePorts() { return mNodePorts; }
 
-
-	uint sizeOfNodePorts() const { return m_node_ports.size(); }
-	uint sizeOfAncestors() const { return m_children.size(); }
+	uint sizeOfNodePorts() const { return mNodePorts.size(); }
+	uint sizeOfAncestors() const { return mAncestors.size(); }
+	uint sizeofDescendants() const { return mDescendants.size(); }
 protected:
 
 	virtual void doTraverseBottomUp(Action* act);
 	virtual void doTraverseTopDown(Action* act);
 
 private:
-	void setParent(Node* p) { m_parent = p; }
+	/**
+	 * @brief Add a descendant
+	 *
+	 * @param descendant
+	 * @return std::shared_ptr<Node>
+	 */
+	Node* addDescendant(Node* descent);
+
+	bool hasDescendant(Node* descent);
+
+	void removeDescendant(Node* descent);
 
 	bool addNodePort(NodePort* port);
 
@@ -441,20 +445,14 @@ private:
 
 	std::shared_ptr<DeviceContext> m_context;
 
-	std::list<std::shared_ptr<Node>> m_children;
+	std::list<std::shared_ptr<Node>> mAncestors;
 
 	/**
 	 * @brief Storing pointers to descendants
 	 */
-	std::vector<std::weak_ptr<Node>> mDescendants;
+	std::list<Node*> mDescendants;
 
-	std::vector<NodePort*> m_node_ports;
-
-	/**
-	 * @brief Indicating which node the current module belongs to
-	 * 
-	 */
-	Node* m_parent;
+	std::vector<NodePort*> mNodePorts;
 
 	friend class NodePort;
 };

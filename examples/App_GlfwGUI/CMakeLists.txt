@@ -14,7 +14,7 @@ set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
                       C_STANDARD 99
                       FOLDER "Examples")
 
-target_link_libraries(${PROJECT_NAME} GlfwGUI ParticleSystem Graphics)
+target_link_libraries(${PROJECT_NAME} GlfwGUI ParticleSystem RenderEngine)
 
 if (MSVC)
     # Tell MSVC to use main instead of WinMain for Windows subsystem executables

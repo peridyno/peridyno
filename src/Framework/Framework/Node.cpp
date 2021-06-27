@@ -10,7 +10,6 @@ IMPLEMENT_CLASS(Node)
 
 Node::Node(std::string name)
 	: Base()
-	, m_parent(NULL)
 	, m_node_name(name)
 	, m_dt(0.001f)
 	, m_mass(1.0f)
@@ -38,29 +37,14 @@ std::string Node::getName()
 }
 
 
-Node* Node::getChild(std::string name)
+Node* Node::getAncestor(std::string name)
 {
-	for (auto it = m_children.begin(); it != m_children.end(); ++it)
+	for (auto it = mAncestors.begin(); it != mAncestors.end(); ++it)
 	{
 		if ((*it)->getName() == name)
 			return it->get();
 	}
 	return NULL;
-}
-
-Node* Node::getParent()
-{
-	return m_parent;
-}
-
-Node* Node::getRoot()
-{
-	Node* root = this;
-	while (root->getParent() != NULL)
-	{
-		root = root->getParent();
-	}
-	return root;
 }
 
 bool Node::isControllable()
@@ -113,11 +97,22 @@ Real Node::getMass()
 	return m_mass;
 }
 
-bool Node::hasChild(std::shared_ptr<Node> child)
+std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 {
-	auto it = find(m_children.begin(), m_children.end(), child);
+	if (hasAncestor(anc) || anc == nullptr)
+		return nullptr;
 
-	return it == m_children.end() ? false : true;
+	anc->addDescendant(this);
+
+	mAncestors.push_back(anc);
+	return anc;
+}
+
+bool Node::hasAncestor(std::shared_ptr<Node> anc)
+{
+	auto it = find(mAncestors.begin(), mAncestors.end(), anc);
+
+	return it == mAncestors.end() ? false : true;
 }
 
 // NodeIterator Node::begin()
@@ -130,14 +125,15 @@ bool Node::hasChild(std::shared_ptr<Node> child)
 // 	return NodeIterator();
 // }
 
-void Node::removeChild(std::shared_ptr<Node> child)
+void Node::removeAncestor(std::shared_ptr<Node> anc)
 {
-	auto iter = m_children.begin();
-	for (; iter != m_children.end(); )
+	auto iter = mAncestors.begin();
+	for (; iter != mAncestors.end(); )
 	{
-		if (*iter == child)
+		if (*iter == anc)
 		{
-			m_children.erase(iter++);
+			anc->removeDescendant(this);
+			mAncestors.erase(iter++);
 		}
 		else
 		{
@@ -146,12 +142,13 @@ void Node::removeChild(std::shared_ptr<Node> child)
 	}
 }
 
-void Node::removeAllChildren()
+void Node::removeAllAncestors()
 {
-	auto iter = m_children.begin();
-	for (; iter != m_children.end(); )
+	auto iter = mAncestors.begin();
+	for (; iter != mAncestors.end(); )
 	{
-		m_children.erase(iter++);
+		(*iter)->removeDescendant(this);
+		mAncestors.erase(iter++);
 	}
 }
 
@@ -379,8 +376,8 @@ void Node::doTraverseBottomUp(Action* act)
 {
 	act->start(this);
 
-	auto iter = m_children.begin();
-	for (; iter != m_children.end(); iter++)
+	auto iter = mAncestors.begin();
+	for (; iter != mAncestors.end(); iter++)
 	{
 		(*iter)->traverseBottomUp(act);
 	}
@@ -395,8 +392,8 @@ void Node::doTraverseTopDown(Action* act)
 	act->start(this);
 	act->process(this);
 
-	auto iter = m_children.begin();
-	for (; iter != m_children.end(); iter++)
+	auto iter = mAncestors.begin();
+	for (; iter != mAncestors.end(); iter++)
 	{
 		(*iter)->doTraverseTopDown(act);
 	}
@@ -464,9 +461,40 @@ bool Node::attachField(FieldBase* field, std::string name, std::string desc, boo
 	return ret;
 }
 
+Node* Node::addDescendant(Node* descent)
+{
+	if (hasDescendant(descent) || descent == nullptr)
+		return descent;
+
+	mDescendants.push_back(descent);
+	return descent;
+}
+
+bool Node::hasDescendant(Node* descent)
+{
+	auto it = std::find(mDescendants.begin(), mDescendants.end(), descent);
+	return it == mDescendants.end() ? false : true;
+}
+
+void Node::removeDescendant(Node* descent)
+{
+	auto iter = mDescendants.begin();
+	for (; iter != mDescendants.end(); )
+	{
+		if (*iter == descent)
+		{
+			mDescendants.erase(iter++);
+		}
+		else
+		{
+			++iter;
+		}
+	}
+}
+
 bool Node::addNodePort(NodePort* port)
 {
-	m_node_ports.push_back(port);
+	mNodePorts.push_back(port);
 
 	return true;
 }

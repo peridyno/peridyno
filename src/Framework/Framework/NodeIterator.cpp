@@ -16,7 +16,7 @@ NodeIterator::NodeIterator(std::shared_ptr<Node> node)
 
 	if (node_current != nullptr)
 	{
-		auto children = node_current->getChildren();
+		auto children = node_current->getAncestors();
 		for each (auto c in children)
 		{
 			if (c->isControllable())
@@ -42,7 +42,7 @@ NodeIterator& NodeIterator::operator++()
 		node_current = node_stack.top();
 		node_stack.pop();
 
-		auto children = node_current->getChildren();
+		auto children = node_current->getAncestors();
 		for each (auto c in children)
 		{
 			if (c->isActive())

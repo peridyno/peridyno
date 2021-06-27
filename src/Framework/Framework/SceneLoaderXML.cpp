@@ -41,7 +41,7 @@ namespace dyno
 		{
 			auto cNode = processNode(childNodeXML);
 			if (cNode)
-				node->addChild(cNode);
+				node->addAncestor(cNode);
 
 			std::cout << childNodeXML->Name() << std::endl;
 			childNodeXML = childNodeXML->NextSiblingElement("Node");
@@ -77,7 +77,7 @@ namespace dyno
 							{
 								cModel->addCollidableObject(node->getCollidableObject());
 							}
-							auto children = node->getChildren();
+							auto children = node->getAncestors();
 							std::list< std::shared_ptr<Node> >::iterator it = children.begin();
 							for (; it != children.end(); it++)
 							{

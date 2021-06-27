@@ -41,7 +41,7 @@ namespace dyno
 		m_frame->setOrientation(m_quaternion.toMatrix3x3());
 
 		//create a child node for surface rendering
-		m_surfaceNode = this->createChild<Node>("Mesh");
+		m_surfaceNode = this->createAncestor<Node>("Mesh");
 		m_surfaceNode->setActive(false);
 		m_surfaceNode->setControllable(false);
 
