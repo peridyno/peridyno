@@ -23,11 +23,12 @@
 
 #include <vector>
 
-class SSAO;
-class ShadowMap;
-class RenderHelper;
 namespace dyno
 {
+	class SSAO;
+	class ShadowMap;
+	class RenderHelper;
+
 	class SceneGraph;
 	class RenderTarget;
 	class RenderEngine

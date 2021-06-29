@@ -16,28 +16,32 @@
 
 #pragma once
 
-#include <glm/glm.hpp>
+#include "Vector.h"
 
-class AxisRenderer;
-class BBoxRenderer;
-class GroundRenderer;
-class BackgroundRenderer;
-class RenderHelper
+namespace dyno
 {
-public:
-	RenderHelper();
-	~RenderHelper();
+	class AxisRenderer;
+	class BBoxRenderer;
+	class GroundRenderer;
+	class BackgroundRenderer;
+	class RenderHelper
+	{
+	public:
+		RenderHelper();
+		~RenderHelper();
 
-	void initialize();
+		void initialize();
 
-	void drawGround(float scale = 3.f);
-	void drawAxis(float lineWidth = 2.f);
-	void drawBBox(glm::vec3 pmin, glm::vec3 pmax, int type = 0);
-	void drawBackground(glm::vec3 color0, glm::vec3 color1);
+		void drawGround(float scale = 3.f);
+		void drawAxis(float lineWidth = 2.f);
+		void drawBBox(Vec3f pmin, Vec3f pmax, int type = 0);
+		void drawBackground(Vec3f color0, Vec3f color1);
 
-private:
-	AxisRenderer*			mAxisRenderer = NULL;
-	BBoxRenderer*			mBBoxRenderer = NULL;
-	GroundRenderer*			mGroundRenderer = NULL;
-	BackgroundRenderer*		mBackgroundRenderer = NULL;
-};
+	private:
+		AxisRenderer*			mAxisRenderer = NULL;
+		BBoxRenderer*			mBBoxRenderer = NULL;
+		GroundRenderer*			mGroundRenderer = NULL;
+		BackgroundRenderer*		mBackgroundRenderer = NULL;
+	};
+}
+

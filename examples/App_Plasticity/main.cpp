@@ -30,7 +30,7 @@ void CreateScene()
 	root->addParticleSystem(child3);
 
 	auto ptRender = std::make_shared<SurfaceRenderer>();
-	ptRender->setColor(glm::vec3(0, 1, 1));
+	ptRender->setColor(Vec3f(0, 1, 1));
 
 	child3->setVisible(false);
 	child3->setMass(1.0);
@@ -43,7 +43,7 @@ void CreateScene()
 
 	auto sRender = std::make_shared<SurfaceRenderer>();
 	child3->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(glm::vec3(1, 1, 1));
+	sRender->setColor(Vec3f(1, 1, 1));
 
 	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);

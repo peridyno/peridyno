@@ -79,7 +79,7 @@ bool Module::isInputComplete()
 			std::string errMsg = std::string("The field ") + f_in->getObjectName() + 
 				std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-			Log::sendMessage(Log::Error, errMsg);
+			std::cout << errMsg << std::endl;
 			return false;
 		}
 	}

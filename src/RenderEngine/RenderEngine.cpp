@@ -32,7 +32,7 @@ namespace dyno
 				auto m = std::dynamic_pointer_cast<GLVisualModule>(iter);
 				if (m && m->isVisible())
 				{
-					m->updateRenderingContext();
+					m->update();
 					modules.push_back(m.get());
 				}
 			}
@@ -172,7 +172,9 @@ namespace dyno
 		target->bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mRenderHelper->drawBackground(rparams.bgColor0, rparams.bgColor1);
+		Vec3f c0 = Vec3f(rparams.bgColor0.x, rparams.bgColor0.y, rparams.bgColor0.z);
+		Vec3f c1 = Vec3f(rparams.bgColor1.x, rparams.bgColor1.y, rparams.bgColor1.z);
+		mRenderHelper->drawBackground(c0, c1);
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 		// draw a plane
@@ -193,9 +195,7 @@ namespace dyno
 			// get bounding box of the scene
 			auto p0 = scene->getLowerBound();
 			auto p1 = scene->getUpperBound();
-			glm::vec3 pmin = { p0[0], p0[1], p0[2] };
-			glm::vec3 pmax = { p1[0], p1[1], p1[2] };
-			mRenderHelper->drawBBox(pmin, pmax);
+			mRenderHelper->drawBBox(p0, p1);
 		}
 		// draw axis
 		if (rparams.showAxisHelper)

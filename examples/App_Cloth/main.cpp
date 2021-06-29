@@ -31,7 +31,7 @@ void CreateScene()
 	root->addParticleSystem(cloth);
 
 	auto pointRenderer = std::make_shared<PointRenderer>();
-	pointRenderer->setColor(glm::vec3(1, 0.2, 1));
+	pointRenderer->setColor(Vec3f(1, 0.2, 1));
 	cloth->addVisualModule(pointRenderer);
 	cloth->setVisible(true);
 

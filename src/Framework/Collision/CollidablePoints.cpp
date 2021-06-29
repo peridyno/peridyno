@@ -1,6 +1,5 @@
 #include "CollidablePoints.h"
 #include "Framework/DeviceContext.h"
-#include "Framework/MechanicalState.h"
 #include "Framework/Node.h"
 #include "Topology/PointSet.h"
 #include "Mapping/FrameToPointSet.h"
@@ -42,7 +41,7 @@ namespace dyno
 	template<typename TDataType>
 	bool CollidablePoints<TDataType>::initializeImpl()
 	{
-		Node* parent = getParent();
+/*		Node* parent = getParent();
 		if (parent == NULL)
 		{
 			Log::sendMessage(Log::Error, "Should insert this module into a node!");
@@ -81,7 +80,7 @@ namespace dyno
 		{
 			auto mapping = std::shared_ptr<PointSetToPointSet<TDataType>>();
 			m_mapping = mapping;
-		}
+		}*/
 
 		return true;
 	}
@@ -90,7 +89,7 @@ namespace dyno
 	template<typename TDataType>
 	void CollidablePoints<TDataType>::updateCollidableObject()
 	{
-		auto mstate = getParent()->getMechanicalState();
+/*		auto mstate = getParent()->getMechanicalState();
 		auto mType = mstate->getMaterialType();
 		if (mType == MechanicalState::ParticleSystem)
 		{
@@ -114,13 +113,13 @@ namespace dyno
 
 			m_positions.assign(*(pBuf->getDataPtr()));
 			m_velocities.assign(*(vBuf->getDataPtr()));
-		}
+		}*/
 	}
 
 	template<typename TDataType>
 	void CollidablePoints<TDataType>::updateMechanicalState()
 	{
-		auto mstate = getParent()->getMechanicalState();
+/*		auto mstate = getParent()->getMechanicalState();
 		auto mType = mstate->getMaterialType();
 		auto dc = getParent()->getMechanicalState();
 		if (mType == MechanicalState::ParticleSystem)
@@ -178,7 +177,7 @@ namespace dyno
 
 			posArr->getDataPtr()->assign(m_positions);
 			velArr->getDataPtr()->assign(m_velocities);
-		}
+		}*/
 	}
 
 	DEFINE_CLASS(CollidablePoints);

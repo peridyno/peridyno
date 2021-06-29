@@ -1,57 +1,49 @@
 #include "GLVisualModule.h"
 
-using namespace dyno;
-
-GLVisualModule::GLVisualModule()
+namespace dyno
 {
-	this->setName("GLVisualModule");
-}
+	GLVisualModule::GLVisualModule()
+	{
+		this->setName("GLVisualModule");
+	}
 
-void GLVisualModule::display()
-{
-	if (!this->isGLInitialized)
-	{		
-		isGLInitialized = initializeGL();
-
+	void GLVisualModule::updateRenderingContext()
+	{
 		if (!this->isGLInitialized)
-			return;
+		{
+			isGLInitialized = initializeGL();
+
+			if (!this->isGLInitialized)
+				return;
+		}
+
+		this->updateGL();
+	}
+
+	void GLVisualModule::setColor(const Vec3f& color)
+	{
+		mBaseColor = color;
+	}
+
+	void GLVisualModule::setMetallic(float m)
+	{
+		this->mMetallic = m;
+	}
+
+	void GLVisualModule::setRoughness(float r)
+	{
+		this->mRoughness = r;
+	}
+
+	void GLVisualModule::setAlpha(float alpha)
+	{
+		mAlpha = alpha;
+	}
+
+	bool GLVisualModule::isTransparent() const
+	{
+		return mAlpha < 1.f;
 	}
 }
 
-void GLVisualModule::updateRenderingContext()
-{
-	if (!this->isGLInitialized)
-	{		
-		isGLInitialized = initializeGL(); 
 
-		if (!this->isGLInitialized)
-			return;
-	}
-
-	this->updateGL();
-}
-
-void GLVisualModule::setColor(const glm::vec3& color)
-{
-	mBaseColor = color;
-}
-
-void GLVisualModule::setMetallic(float m)
-{
-	this->mMetallic = m;
-}
-
-void GLVisualModule::setRoughness(float r)
-{
-	this->mRoughness = r;
-}
-
-void GLVisualModule::setAlpha(float alpha)
-{
-	mAlpha = alpha;
-}
-
-bool GLVisualModule::isTransparent() const
-{
-	return mAlpha < 1.f;
-}

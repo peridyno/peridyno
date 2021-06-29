@@ -39,11 +39,8 @@ namespace dyno
 
 	bool VisualModule::updateImpl()
 	{
-		if (this->isVisible())
-		{
-			this->updateRenderingContext();
-			this->display();
-		}
+		this->updateRenderingContext();
+
 		return true;
 	}
 }

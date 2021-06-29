@@ -26,7 +26,7 @@ void CreateScene()
 	root->addParticleSystem(fluid);
 
 	auto ptRender = std::make_shared<PointRenderer>();
-	ptRender->setColor(glm::vec3(1, 0, 0));
+	ptRender->setColor(Vec3f(1, 0, 0));
  	ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
  	ptRender->setColorMapRange(0, 5);
 // 

@@ -26,8 +26,6 @@ namespace dyno
 		VisualModule();
 		virtual ~VisualModule();
 
-		
-
 		void setVisible(bool bVisible);
 		bool isVisible() { return m_visible.getData(); }
 

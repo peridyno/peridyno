@@ -22,7 +22,7 @@ int main()
 	root->addParticleSystem(bunny);
 
 	auto m_pointsRender = std::make_shared<PointRenderer>();
-	m_pointsRender->setColor(glm::vec3(0, 1, 1));
+	m_pointsRender->setColor(Vec3f(0, 1, 1));
 	m_pointsRender->setPointSize(0.002f);
 	m_pointsRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
 	m_pointsRender->setColorMapRange(0, 1);
@@ -37,7 +37,7 @@ int main()
 
 	auto sRender = std::make_shared<SurfaceRenderer>();
 	bunny->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(glm::vec3(1, 1, 0));
+	sRender->setColor(Vec3f(1, 1, 0));
 
 	bunny->getElasticitySolver()->setIterationNumber(10);
 	bunny->getElasticitySolver()->inHorizon()->setValue(0.01);

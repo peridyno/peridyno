@@ -22,31 +22,35 @@
 #include "GLBuffer.h"
 #include "GLShader.h"
 
-class SSAO
+namespace dyno 
 {
-public:
-	SSAO();
-	~SSAO();
+	class SSAO
+	{
+	public:
+		SSAO();
+		~SSAO();
 
-	void initialize();	
-	void resize(unsigned int w, unsigned int h);
+		void initialize();
+		void resize(unsigned int w, unsigned int h);
 
-private:
+	private:
 
-	// SSAO
-	GLBuffer		mSSAOKernelUBO;
-	GLTexture2D		mSSAONoiseTex;
-	GLShaderProgram mSSAOProgram;
+		// SSAO
+		GLBuffer		mSSAOKernelUBO;
+		GLTexture2D		mSSAONoiseTex;
+		GLShaderProgram mSSAOProgram;
 
-	GLFramebuffer	mDepthFramebuffer;
-	GLTexture2D		mDepthTex;
+		GLFramebuffer	mDepthFramebuffer;
+		GLTexture2D		mDepthTex;
 
-	GLFramebuffer	mSSAOFramebuffer;
-	GLTexture2D		mSSAOTex;
+		GLFramebuffer	mSSAOFramebuffer;
+		GLTexture2D		mSSAOTex;
 
-	GLFramebuffer	mSSAOFilterFramebuffer;
-	GLTexture2D		mSSAOFilterTex;
+		GLFramebuffer	mSSAOFilterFramebuffer;
+		GLTexture2D		mSSAOFilterTex;
 
-	unsigned int	mWidth;
-	unsigned int	mHeight;
-};
+		unsigned int	mWidth;
+		unsigned int	mHeight;
+	};
+}
+

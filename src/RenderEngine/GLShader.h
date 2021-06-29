@@ -18,39 +18,44 @@
 
 #include "GLObject.h"
 #include <string>
+#include "Vector.h"
 #include <glm/glm.hpp>
 
-class GLShader : public GLObject
-{
-public:
-	GLShader() {}
-	bool createFromFile(unsigned int type, const std::string& path);
-	bool createFromSource(unsigned int type, const std::string& src);
-	void release();
+namespace dyno {
 
-protected:
-	void create() {};
-	
-};
+	class GLShader : public GLObject
+	{
+	public:
+		GLShader() {}
+		bool createFromFile(unsigned int type, const std::string& path);
+		bool createFromSource(unsigned int type, const std::string& src);
+		void release();
 
-class GLShaderProgram : public GLObject
-{
-public:
-	void create();
-	void release();
+	protected:
+		void create() {};
 
-	void attachShader(const GLShader& shader);
-	bool link();
+	};
 
-	void use();
+	class GLShaderProgram : public GLObject
+	{
+	public:
+		void create();
+		void release();
 
-	//
-	void setFloat(const char* name, float v); 
-	void setInt(const char* name, int v);
-	void setVec4(const char* name, glm::vec4 v);
-	void setVec3(const char* name, glm::vec3 v);
-	void setVec2(const char* name, glm::vec2 v);
-};
+		void attachShader(const GLShader& shader);
+		bool link();
 
-// public helpe function...
-GLShaderProgram CreateShaderProgram(const char* vs,	const char* fs,	const char* gs = 0);
+		void use();
+
+		//
+		void setFloat(const char* name, float v);
+		void setInt(const char* name, int v);
+		void setVec4(const char* name, Vec4f v);
+		void setVec3(const char* name, Vec3f v);
+		void setVec2(const char* name, Vec2f v);
+	};
+
+	// public helpe function...
+	GLShaderProgram CreateShaderProgram(const char* vs, const char* fs, const char* gs = 0);
+
+}

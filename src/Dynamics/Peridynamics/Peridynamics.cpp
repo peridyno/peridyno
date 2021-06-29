@@ -1,6 +1,5 @@
 #include "Peridynamics.h"
 #include "Framework/DeviceContext.h"
-#include "Framework/MechanicalState.h"
 #include "Framework/Node.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
@@ -15,12 +14,6 @@ namespace dyno
 	Peridynamics<TDataType>::Peridynamics()
 		: NumericalModel()
 	{
-		attachField(&m_horizon, "horizon", "Supporting radius", false);
-
-		attachField(&m_position, "position", "Storing the particle positions!", false);
-		attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-		attachField(&m_forceDensity, "force_density", "Storing the particle force densities!", false);
-
 		m_horizon.setValue(0.0085);
 	}
 

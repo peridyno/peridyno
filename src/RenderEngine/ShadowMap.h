@@ -22,22 +22,25 @@
 #include "module/GLVisualModule.h"
 #include <vector>
 
-class ShadowMap
+namespace dyno
 {
-public:
-	ShadowMap(int w = 1024, int h = 1024);
-	~ShadowMap();
+	class ShadowMap
+	{
+	public:
+		ShadowMap(int w = 1024, int h = 1024);
+		~ShadowMap();
 
-	void initialize();
+		void initialize();
 
-	void update(const std::vector<dyno::GLVisualModule*>& modules, const dyno::RenderParams& rparams);
+		void update(const std::vector<dyno::GLVisualModule*>& modules, const dyno::RenderParams& rparams);
 
-private:
-	// framebuffers
-	GLFramebuffer	mFramebuffer;
-	GLTexture2D		mShadowDepth;
+	private:
+		// framebuffers
+		GLFramebuffer	mFramebuffer;
+		GLTexture2D		mShadowDepth;
 
-public:
-	int				width;
-	int				height;
-};
+	public:
+		int				width;
+		int				height;
+	};
+}
