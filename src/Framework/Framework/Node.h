@@ -341,9 +341,9 @@ public:
 	
 	std::vector<NodePort*>& getAllNodePorts() { return mNodePorts; }
 
-	uint sizeOfNodePorts() const { return mNodePorts.size(); }
-	uint sizeOfAncestors() const { return mAncestors.size(); }
-	uint sizeofDescendants() const { return mDescendants.size(); }
+	uint sizeOfNodePorts() const { return (uint)mNodePorts.size(); }
+	uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
+	uint sizeofDescendants() const { return (uint)mDescendants.size(); }
 protected:
 
 	virtual void doTraverseBottomUp(Action* act);
