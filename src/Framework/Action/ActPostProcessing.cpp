@@ -23,7 +23,7 @@ namespace dyno
 			if (std::string("IOModule").compare((*iter)->getModuleType()) == 0)
 			{
 				
-				(*iter)->execute();
+				(*iter)->update();
 			}
 		}
 	}

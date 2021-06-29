@@ -8,7 +8,7 @@ TEST(Volume, generator)
 	auto sdfGen = std::make_shared<VolumeGenerator<DataType3f>>();
 	sdfGen->load("../../data/standard/standard_cube.obj");
 
-	float val = sdfGen->phi(50, 50, 50);
+//	float val = sdfGen->phi(50, 50, 50);
 
 	for (uint i = 0; i < sdfGen->phi.size(); i++)
 	{

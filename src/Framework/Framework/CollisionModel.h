@@ -37,14 +37,14 @@ namespace dyno
 
 		virtual bool isSupport(std::shared_ptr<CollidableObject> obj) = 0;
 
-		bool execute() override;
-
 		virtual void doCollision() = 0;
 	
 		std::string getModuleType() override { return "CollisionModel"; }
 
 		virtual void addCollidableObject(std::shared_ptr<CollidableObject> obj) {};
+
 	protected:
+		bool updateImpl() override;
 	};
 
 }

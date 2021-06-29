@@ -11,7 +11,7 @@ namespace dyno
 	{
 	}
 
-	bool ComputeModule::execute()
+	bool ComputeModule::updateImpl()
 	{
 		this->compute();
 

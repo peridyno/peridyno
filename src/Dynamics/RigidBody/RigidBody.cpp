@@ -14,15 +14,6 @@ namespace dyno
 		: Node(name)
 		, m_quaternion(Quat<Real>(Matrix::identityMatrix()))
 	{
-		attachField(&m_mass, MechanicalState::mass(), "Total mass of the rigid body!", false);
-		attachField(&m_center, MechanicalState::position(), "Center of the rigid body!", false);
-		attachField(&m_transVelocity, MechanicalState::velocity(), "Transitional velocity of the rigid body!", false);
-		attachField(&m_angularVelocity, MechanicalState::angularVelocity(), "Angular velocity of the rigid body!", false);
-		attachField(&m_force, MechanicalState::force(), "Transitional force of the rigid body!", false);
-		attachField(&m_torque, MechanicalState::torque(), "Angular momentum of the rigid body!", false);
-		attachField(&m_angularMass, MechanicalState::angularMass(), "Angular momentum", false);
-		attachField(&m_rotation, MechanicalState::rotation(), "Orientation", false);
-
 		Coord trans(0.5, 0.2, 0.5);
 
 		m_mass.setValue(Real(1));

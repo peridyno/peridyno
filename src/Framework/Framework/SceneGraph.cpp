@@ -1,6 +1,6 @@
 #include "SceneGraph.h"
 #include "Action/ActAnimate.h"
-#include "Action/ActDraw.h"
+//#include "Action/ActDraw.h"
 #include "Action/ActInit.h"
 #include "Action/ActReset.h"
 #include "Action/ActQueryTimestep.h"
@@ -66,7 +66,7 @@ void SceneGraph::draw()
 		return;
 	}
 
-	m_root->traverseTopDown<DrawAct>();
+	//m_root->traverseTopDown<DrawAct>();
 }
 
 void SceneGraph::advance(float dt)

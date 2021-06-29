@@ -187,28 +187,6 @@ void Node::setContext(std::shared_ptr<DeviceContext> context)
 	addModule(m_context);
 }
 
-std::shared_ptr<MechanicalState> Node::getMechanicalState()
-{
-	if (m_mechanical_state == nullptr)
-	{
-		m_mechanical_state = TypeInfo::New<MechanicalState>();
-		m_mechanical_state->setParent(this);
-		addModule(m_mechanical_state);
-	}
-	return m_mechanical_state;
-}
-
-void Node::setMechanicalState(std::shared_ptr<MechanicalState> state)
-{
-	if (m_mechanical_state != nullptr)
-	{
-		deleteModule(m_mechanical_state);
-	}
-
-	m_mechanical_state = state; 
-	addModule(state);
-}
-
 std::unique_ptr<AnimationController>& Node::getAnimationPipeline()
 {
 	if (m_animation_pipeline == nullptr)
@@ -443,7 +421,7 @@ bool Node::attachField(FieldBase* field, std::string name, std::string desc, boo
 	switch (field->getFieldType())
 	{
 	case FieldTypeEnum::Current:
-		ret = this->getMechanicalState()->addOutputField(field);
+		ret = this->addField(field);
 		break;
 
 	case FieldTypeEnum::Param:

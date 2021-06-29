@@ -22,7 +22,8 @@ namespace dyno
 		void setNamePrefix(std::string prefix);
 		void setOutputPath(std::string path);
 
-		bool execute() override;
+	protected:
+		bool updateImpl() override;
 
 	public:
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");

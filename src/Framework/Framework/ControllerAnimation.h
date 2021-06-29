@@ -19,16 +19,16 @@
 
 namespace dyno
 {
-class AnimationController : public ControllerModule
-{
-	DECLARE_CLASS(AnimationController)
+	class AnimationController : public ControllerModule
+	{
+		DECLARE_CLASS(AnimationController)
 
-public:
-	AnimationController();
-	virtual ~AnimationController();
+	public:
+		AnimationController();
+		virtual ~AnimationController();
 
-	bool execute() override;
-private:
 
-};
+	protected:
+		bool updateImpl() override;
+	};
 }

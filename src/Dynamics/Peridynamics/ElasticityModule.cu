@@ -525,7 +525,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void ElasticityModule<TDataType>::begin()
+	void ElasticityModule<TDataType>::preprocess()
 	{
 		int num = this->inPosition()->getElementCount();
 

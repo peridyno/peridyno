@@ -39,11 +39,10 @@ namespace dyno
 		void setTetrahedronSetPtr(std::shared_ptr<TetrahedronSet<TDataType>> ptr_tets) { this->ptr_TetrahedronSet = ptr_tets;  this->updatePtr(); }
 		bool updatePtr();
 
-		bool execute() override;
 		bool outputSurfaceMesh();
 
 	protected:
-
+		bool updateImpl() override;
 
 	public:
 

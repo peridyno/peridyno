@@ -45,7 +45,7 @@ namespace dyno {
 	protected:
 		bool initializeImpl() override;
 
-		void begin() override;
+		void preprocess() override;
 
 		/**
 		 * @brief Correct the particle position with one iteration

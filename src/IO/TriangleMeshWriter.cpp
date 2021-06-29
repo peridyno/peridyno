@@ -86,7 +86,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool TriangleMeshWriter<TDataType>::execute()
+	bool TriangleMeshWriter<TDataType>::updateImpl()
 	{
 		printf("===========Triangle Mesh Writer============\n");
 

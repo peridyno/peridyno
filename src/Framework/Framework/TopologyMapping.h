@@ -9,10 +9,9 @@ namespace dyno
 		TopologyMapping();
 		virtual ~TopologyMapping();
 
-		bool execute() override;
-
 		virtual bool apply() = 0;
-	private:
 
+	private:
+		bool updateImpl() override;
 	};
 }

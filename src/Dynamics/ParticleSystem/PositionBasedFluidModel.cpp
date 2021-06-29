@@ -4,7 +4,6 @@
 #include "ParticleIntegrator.h"
 #include "SummationDensity.h"
 #include "ImplicitViscosity.h"
-#include "Framework/MechanicalState.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/Attribute.h"

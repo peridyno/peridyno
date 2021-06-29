@@ -14,7 +14,7 @@ CustomModule::~CustomModule()
 {
 }
 
-bool CustomModule::execute()
+bool CustomModule::updateImpl()
 {
 	this->applyCustomBehavior();
 	return true;

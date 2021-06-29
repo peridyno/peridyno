@@ -12,7 +12,7 @@ ConstraintModule::~ConstraintModule()
 {
 }
 
-bool ConstraintModule::execute()
+bool ConstraintModule::updateImpl()
 {
 	return this->constrain();
 }

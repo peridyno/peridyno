@@ -15,7 +15,7 @@ AnimationController::~AnimationController()
 {
 }
 
-bool AnimationController::execute()
+bool AnimationController::updateImpl()
 {
 	Node* parent = getParent();
 	if (parent == NULL)

@@ -20,7 +20,6 @@
 #include "NumericalModel.h"
 #include "ModuleTopology.h"
 #include "DeviceContext.h"
-#include "MechanicalState.h"
 #include "ModuleForce.h"
 #include "ModuleConstraint.h"
 #include "ModuleCustom.h"
@@ -120,9 +119,6 @@ public:
 	std::shared_ptr<DeviceContext> getContext();
 	void setContext(std::shared_ptr<DeviceContext> context);
 	virtual void setAsCurrentContext();
-
-	std::shared_ptr<MechanicalState> getMechanicalState();
-	void setMechanicalState(std::shared_ptr<MechanicalState> state);
 
 	/**
 	 * @brief Add a module to m_module_list and other special module lists
@@ -424,7 +420,6 @@ private:
 	 */
 	std::shared_ptr<TopologyModule> m_topology;
 	std::shared_ptr<NumericalModel> m_numerical_model;
-	std::shared_ptr<MechanicalState> m_mechanical_state;
 	std::shared_ptr<CollidableObject> m_collidable_object;
 	std::shared_ptr<NumericalIntegrator> m_numerical_integrator;
 

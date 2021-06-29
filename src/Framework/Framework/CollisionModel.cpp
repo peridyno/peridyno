@@ -12,7 +12,7 @@ CollisionModel::~CollisionModel()
 {
 }
 
-bool CollisionModel::execute()
+bool CollisionModel::updateImpl()
 {
 	this->doCollision();
 

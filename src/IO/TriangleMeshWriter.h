@@ -33,11 +33,10 @@ namespace dyno
 		void setTriangleSetPtr(std::shared_ptr<TriangleSet<TDataType>> ptr_triangles) { this->ptr_TriangleSet = ptr_triangles;  this->updatePtr(); }
 		bool updatePtr();
 
-		bool execute() override;
 		bool outputSurfaceMesh();
 
 	protected:
-
+		bool updateImpl() override;
 
 	public:
 

@@ -26,11 +26,7 @@ namespace dyno
 	public:
 		GLVisualModule();
 
-		// override method from VisualModule
-		void display() final;
-		void updateRenderingContext() final;
-
-		// basic disney PBR material properties
+		// basic Disney PBR material properties
 		void setColor(const glm::vec3& color);
 		void setMetallic(float metallic);
 		void setRoughness(float roughness);
@@ -53,6 +49,12 @@ namespace dyno
 		virtual bool initializeGL() = 0;
 		virtual void updateGL() = 0;
 		virtual void paintGL(RenderMode mode) = 0;
+
+		void updateRenderingContext() final;
+
+	protected:
+		// override method from VisualModule
+		void display() final;
 
 	private:
 		bool isGLInitialized = false;

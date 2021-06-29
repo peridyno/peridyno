@@ -14,7 +14,7 @@ namespace dyno
 
 	}
 
-	bool TopologyMapping::execute()
+	bool TopologyMapping::updateImpl()
 	{
 		this->apply();
 

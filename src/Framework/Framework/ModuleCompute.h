@@ -9,13 +9,11 @@ namespace dyno
 		ComputeModule();
 		~ComputeModule() override;
 
-		bool execute() override;
-
 		virtual void compute() = 0;
 
 		std::string getModuleType() override { return "ComputeModule"; }
 	private:
-
+		bool updateImpl() final;
 	};
 }
 

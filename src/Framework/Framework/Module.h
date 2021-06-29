@@ -25,27 +25,16 @@ public:
 
 	void update();
 
-	virtual bool execute();
-
-	/**
-	 * @brief Check the completeness of input fields
-	 * 
-	 * @return true, if all input fields are appropriately set.
-	 * @return false, if any of the input field is empty.
-	 */
-	bool isInputComplete();
-
 	void setName(std::string name);
 	void setParent(Node* node);
 
 	std::string getName();
 
-	Node* getParent()
-	{
-		if (m_node == NULL)
-		{
+	Node* getParent() {
+		if (m_node == NULL) {
 			Log::sendMessage(Log::Error, "Parent node is not set!");
 		}
+
 		return m_node;
 	}
 
@@ -76,20 +65,30 @@ public:
 	void setNext(std::weak_ptr<Module> next_module) { m_module_next = next_module; }
 
 	bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
-
-
 protected:
 	/// \brief Initialization function for each module
 	/// 
 	/// This function is used to initialize internal variables for each module
 	/// , it is called after all fields are set.
 	virtual bool initializeImpl();
+	virtual bool updateImpl();
+	
 
-	virtual void begin() {};
+	virtual void preprocess() {};
 
-	virtual void end() {};
+	virtual void postprocess() {};
 
-	std::weak_ptr<Module> m_module_next;
+	virtual bool validateInputs();
+	virtual bool validateOutputs();
+
+	/**
+	 * @brief Check the completeness of input fields
+	 *
+	 * @return true, if all input fields are appropriately set.
+	 * @return false, if any of the input field is empty.
+	 */
+	bool isInputComplete();
+	bool isOutputCompete();
 
 private:
 	Node* m_node;
@@ -97,6 +96,8 @@ private:
 	bool m_initialized;
 
 	bool m_update_required = true;
+
+	std::weak_ptr<Module> m_module_next;
 
 	std::vector<FieldBase*> fields_input;
 	std::vector<FieldBase*> fields_output;

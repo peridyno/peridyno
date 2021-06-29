@@ -13,7 +13,7 @@ namespace dyno {
 		SurfaceTension();
 		~SurfaceTension() override {};
 		
-		bool execute() override;
+		bool updateImpl() override;
 
 		bool applyForce() override;
 

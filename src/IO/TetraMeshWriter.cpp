@@ -95,7 +95,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool TetraMeshWriter<TDataType>::execute() 
+	bool TetraMeshWriter<TDataType>::updateImpl() 
 	{
 		printf("===========Tetra Mesh Writer============\n");
 

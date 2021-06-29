@@ -20,31 +20,35 @@
 
 namespace dyno
 {
+	class VisualModule : public Module
+	{
+	public:
+		VisualModule();
+		virtual ~VisualModule();
 
-class VisualModule : public Module
-{
-public:
-	VisualModule();
-	virtual ~VisualModule();
+		
 
-	virtual void display() {};
+		void setVisible(bool bVisible);
+		bool isVisible() { return m_visible.getData(); }
 
-	void setVisible(bool bVisible);
-	bool isVisible() { return m_visible.getData(); }
+		void rotate(float angle, float x, float y, float z);
+		void translate(float x, float y, float z);
+		void scale(float x, float y, float z);
 
-	void rotate(float angle, float x, float y, float z);
-	void translate(float x, float y, float z);
-	void scale(float x, float y, float z);
+		std::string getModuleType() override { return "VisualModule"; }
 
-	virtual void updateRenderingContext() {};
+		virtual void updateRenderingContext() {};
 
-	std::string getModuleType() override { return "VisualModule"; }
-protected:
-	VarField<bool> m_visible;
+	protected:
+		bool updateImpl() final;
 
-	Quat<float> m_rotation;
-	Vec3f m_scale;
-	Vec3f m_translation;
-};
+		virtual void display() {};
 
+	private:
+		VarField<bool> m_visible;
+
+		Quat<float> m_rotation;
+		Vec3f m_scale;
+		Vec3f m_translation;
+	};
 }

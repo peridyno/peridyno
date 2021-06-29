@@ -3,38 +3,47 @@
 
 namespace dyno
 {
-VisualModule::VisualModule()
-	: Module()
-	, m_scale(1.0f)
-	, m_translation(0.0f)
-	, m_rotation(0.0f, 0.0f, 0.0f, 1.0f)
-{
-	attachField(&m_visible, "visible", "this is a variable indicating whether this module will be rendered on screen!", false);
-	m_visible.setValue(true);
-}
+	VisualModule::VisualModule()
+		: Module()
+		, m_scale(1.0f)
+		, m_translation(0.0f)
+		, m_rotation(0.0f, 0.0f, 0.0f, 1.0f)
+	{
+		attachField(&m_visible, "visible", "this is a variable indicating whether this module will be rendered on screen!", false);
+		m_visible.setValue(true);
+	}
 
-VisualModule::~VisualModule()
-{
-}
+	VisualModule::~VisualModule()
+	{
+	}
 
-void VisualModule::setVisible(bool bVisible)
-{
-	m_visible.setValue(bVisible);
-}
+	void VisualModule::setVisible(bool bVisible)
+	{
+		m_visible.setValue(bVisible);
+	}
 
-void VisualModule::rotate(float angle, float x, float y, float z)
-{
-	m_rotation += Quat<float>(angle, x, y, z);
-}
+	void VisualModule::rotate(float angle, float x, float y, float z)
+	{
+		m_rotation += Quat<float>(angle, x, y, z);
+	}
 
-void VisualModule::translate(float x, float y, float z)
-{
-	m_translation += Vec3f(x, y, z);
-}
+	void VisualModule::translate(float x, float y, float z)
+	{
+		m_translation += Vec3f(x, y, z);
+	}
 
-void VisualModule::scale(float x, float y, float z)
-{
-	m_scale += Vec3f(x, y, z);
-}
+	void VisualModule::scale(float x, float y, float z)
+	{
+		m_scale += Vec3f(x, y, z);
+	}
 
+	bool VisualModule::updateImpl()
+	{
+		if (this->isVisible())
+		{
+			this->updateRenderingContext();
+			this->display();
+		}
+		return true;
+	}
 }

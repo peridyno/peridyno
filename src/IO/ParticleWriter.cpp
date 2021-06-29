@@ -32,7 +32,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ParticleWriter<TDataType>::execute()
+	bool ParticleWriter<TDataType>::updateImpl()
 	{
 		std::stringstream ss; ss << mFileIndex;
 		std::string filename = mOutpuPath + ss.str() + mOutputPrefix + std::string(".txt");

@@ -32,22 +32,19 @@ bool Module::initialize()
 
 void Module::update()
 {
-	if (!isInputComplete())
-	{
-		Log::sendMessage(Log::Error, std::string("Input for ") + this->getName() + std::string(" with class name of ") + this->getClassInfo()->getClassName() + std::string(" should be appropriately set"));
+	if (!this->validateInputs()) {
 		return;
 	}
 
-	if (m_update_required)
-	{
+	if (m_update_required) {
 		//pre processing
-		this->begin();
+		this->preprocess();
 
 		//do execution if any field is modified
-		this->execute();
+		this->updateImpl();
 
 		//post processing
-		this->end();
+		this->postprocess();
 
 		//reset input fields
 		for each (auto f_in in fields_input)
@@ -61,6 +58,15 @@ void Module::update()
 			f_out->tagModified(true);
 		}
 	}
+	
+	if (!this->validateOutputs()) {
+		return;
+	}
+}
+
+bool Module::validateInputs()
+{
+	return isInputComplete();
 }
 
 bool Module::isInputComplete()
@@ -70,7 +76,10 @@ bool Module::isInputComplete()
 	{
 		if (!f_in->isOptional() && f_in->isEmpty())
 		{
-			Log::sendMessage(Log::Error, std::string("The field ") + f_in->getObjectName() + std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!"));
+			std::string errMsg = std::string("The field ") + f_in->getObjectName() + 
+				std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
+
+			Log::sendMessage(Log::Error, errMsg);
 			return false;
 		}
 	}
@@ -78,9 +87,27 @@ bool Module::isInputComplete()
 	return true;
 }
 
-bool Module::execute()
+bool Module::isOutputCompete()
 {
+	//If any output field is empty, return false;
+	for each (auto f_out in fields_output)
+	{
+		if (f_out->isEmpty())
+		{
+			std::string errMsg = std::string("The field ") + f_out->getObjectName() + 
+				std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not prepared!");
+
+			Log::sendMessage(Log::Error, errMsg);
+			return false;
+		}
+	}
+
 	return true;
+}
+
+bool Module::validateOutputs()
+{
+	return isOutputCompete();
 }
 
 void Module::setName(std::string name)
@@ -241,6 +268,11 @@ bool Module::initializeImpl()
 		return false;
 	}
 
+	return true;
+}
+
+bool Module::updateImpl()
+{
 	return true;
 }
 

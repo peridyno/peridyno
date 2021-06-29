@@ -3,18 +3,19 @@
 
 namespace dyno
 {
-class FieldBase;
+	class FieldBase;
 
-class ConstraintModule : public Module
-{
-public:
-	ConstraintModule();
-	~ConstraintModule() override;
+	class ConstraintModule : public Module
+	{
+	public:
+		ConstraintModule();
+		~ConstraintModule() override;
 
-	bool execute() override;
+		virtual bool constrain() { return true; }
 
-	virtual bool constrain() { return true; }
+		std::string getModuleType() override { return "ConstraintModule"; }
 
-	std::string getModuleType() override { return "ConstraintModule"; }
-};
+	protected:
+		bool updateImpl() override;
+	};
 }
