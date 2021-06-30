@@ -44,7 +44,7 @@ namespace dyno
 		virtual void addCollidableObject(std::shared_ptr<CollidableObject> obj) {};
 
 	protected:
-		bool updateImpl() override;
+		void updateImpl() override;
 	};
 
 }

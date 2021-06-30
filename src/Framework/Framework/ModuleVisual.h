@@ -38,7 +38,7 @@ namespace dyno
 		virtual void updateRenderingContext() {};
 
 	protected:
-		bool updateImpl() final;
+		void updateImpl() final;
 
 		virtual void display() {};
 

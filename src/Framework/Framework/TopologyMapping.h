@@ -12,6 +12,6 @@ namespace dyno
 		virtual bool apply() = 0;
 
 	private:
-		bool updateImpl() override;
+		void updateImpl() override;
 	};
 }

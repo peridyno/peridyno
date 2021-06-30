@@ -95,15 +95,15 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool TetraMeshWriter<TDataType>::updateImpl() 
+	void TetraMeshWriter<TDataType>::updateImpl() 
 	{
 		printf("===========Tetra Mesh Writer============\n");
 
-		if (this->m_output_index >= this->max_output_files) { return true; }
+		if (this->m_output_index >= this->max_output_files) { return; }
 
 		if (this->current_idle_frame <= 0) {
 			this->current_idle_frame = this->idle_frame_num;
-			return this->outputSurfaceMesh();
+			this->outputSurfaceMesh();
 		}
 		else {
 			this->current_idle_frame--;

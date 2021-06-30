@@ -32,7 +32,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ParticleWriter<TDataType>::updateImpl()
+	void ParticleWriter<TDataType>::updateImpl()
 	{
 		std::stringstream ss; ss << mFileIndex;
 		std::string filename = mOutpuPath + ss.str() + mOutputPrefix + std::string(".txt");
@@ -57,8 +57,6 @@ namespace dyno
 		output.close();
 
 		mFileIndex++;
-
-		return true;
 	}
 
 	DEFINE_CLASS(ParticleWriter);

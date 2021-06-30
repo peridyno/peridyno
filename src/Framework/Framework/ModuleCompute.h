@@ -13,7 +13,7 @@ namespace dyno
 
 		std::string getModuleType() override { return "ComputeModule"; }
 	private:
-		bool updateImpl() final;
+		void updateImpl() final;
 	};
 }
 

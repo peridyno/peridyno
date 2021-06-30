@@ -36,7 +36,7 @@ namespace dyno
 		bool outputSurfaceMesh();
 
 	protected:
-		bool updateImpl() override;
+		void updateImpl() override;
 
 	public:
 

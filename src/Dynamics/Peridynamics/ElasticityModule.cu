@@ -132,7 +132,6 @@ namespace dyno
 		for (int ne = 0; ne < size_i; ne++)
 		{
 			NPair np_j = restShape_i[ne];
-			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_i - rest_pos_j).norm();
 

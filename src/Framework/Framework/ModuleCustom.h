@@ -13,7 +13,7 @@ namespace dyno {
 		std::string getModuleType() override { return "CustomModule"; }
 
 	protected:
-		bool updateImpl() override;
+		void updateImpl() override;
 
 		virtual void applyCustomBehavior();
 	};

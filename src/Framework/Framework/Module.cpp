@@ -36,7 +36,7 @@ void Module::update()
 		return;
 	}
 
-	if (m_update_required) {
+	if (this->requireUpdate()) {
 		//pre processing
 		this->preprocess();
 
@@ -108,6 +108,12 @@ bool Module::isOutputCompete()
 bool Module::validateOutputs()
 {
 	return isOutputCompete();
+}
+
+//TODO: check whether any of the input fields is updated
+bool Module::requireUpdate()
+{
+	return true;
 }
 
 void Module::setName(std::string name)
@@ -271,9 +277,8 @@ bool Module::initializeImpl()
 	return true;
 }
 
-bool Module::updateImpl()
+void Module::updateImpl()
 {
-	return true;
 }
 
 bool Module::attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy)

@@ -37,10 +37,8 @@ namespace dyno
 		m_scale += Vec3f(x, y, z);
 	}
 
-	bool VisualModule::updateImpl()
+	void VisualModule::updateImpl()
 	{
 		this->updateRenderingContext();
-
-		return true;
 	}
 }

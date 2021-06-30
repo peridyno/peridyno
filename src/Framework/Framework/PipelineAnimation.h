@@ -29,6 +29,6 @@ namespace dyno
 
 
 	protected:
-		bool updateImpl() override;
+		void updateImpl() override;
 	};
 }

@@ -23,7 +23,7 @@ namespace dyno
 		void setOutputPath(std::string path);
 
 	protected:
-		bool updateImpl() override;
+		void updateImpl() override;
 
 	public:
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");

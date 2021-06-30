@@ -6,7 +6,14 @@ namespace dyno
 static std::map< std::string, ClassInfo*> *classInfoMap = NULL;
 
 IMPLEMENT_CLASS(Object)
-	
+
+std::atomic_uint32_t Object::cId = 0;
+
+Object::Object()
+{
+	id = Object::generateObjectId();
+}
+
 bool Object::registerClass(ClassInfo* ci)
 {
 	if (!classInfoMap) {
@@ -31,6 +38,11 @@ Object* Object::createObject(std::string name)
 std::map< std::string, ClassInfo*>* Object::getClassMap()
 {
 	return classInfoMap;
+}
+
+uint32_t Object::generateObjectId()
+{
+	return cId++;
 }
 
 bool Register(ClassInfo* ci)

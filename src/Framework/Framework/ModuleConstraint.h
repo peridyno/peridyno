@@ -16,6 +16,6 @@ namespace dyno
 		std::string getModuleType() override { return "ConstraintModule"; }
 
 	protected:
-		bool updateImpl() override;
+		void updateImpl() override;
 	};
 }

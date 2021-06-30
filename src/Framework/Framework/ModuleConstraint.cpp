@@ -12,9 +12,9 @@ ConstraintModule::~ConstraintModule()
 {
 }
 
-bool ConstraintModule::updateImpl()
+void ConstraintModule::updateImpl()
 {
-	return this->constrain();
+	this->constrain();
 }
 
 }

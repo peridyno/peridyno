@@ -15,13 +15,13 @@ AnimationPipeline::~AnimationPipeline()
 {
 }
 
-bool AnimationPipeline::updateImpl()
+void AnimationPipeline::updateImpl()
 {
 	Node* parent = getParent();
 	if (parent == NULL)
 	{
 		Log::sendMessage(Log::Error, "Parent node is not set!");
-		return false;
+		return;
 	}
 	if (parent->isActive())
 	{
@@ -36,8 +36,6 @@ bool AnimationPipeline::updateImpl()
 			nModel->updateTopology();
 		}
 	}
-
-	return true;
 }
 
 }

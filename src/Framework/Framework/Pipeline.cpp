@@ -49,6 +49,32 @@ void Pipeline::push_back(std::weak_ptr<Module> m)
 	num++;
 }
 
+void Pipeline::addModule(Module* m)
+{
+	ObjectId id = m->objectId();
+	moduleMap[id] = m;
+
+	mModuleUpdated = true;
+}
+
+void Pipeline::preprocess()
+{
+
+}
+
+void Pipeline::updateImpl()
+{
+	for each (auto m in moduleList)
+	{
+		m->update();
+	}
+}
+
+bool Pipeline::requireUpdate()
+{
+	return mModuleUpdated;
+}
+
 ModuleIterator::ModuleIterator()
 {
 

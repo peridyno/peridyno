@@ -72,7 +72,7 @@ protected:
 	/// This function is used to initialize internal variables for each module
 	/// , it is called after all fields are set.
 	virtual bool initializeImpl();
-	virtual bool updateImpl();
+	virtual void updateImpl();
 	
 
 	virtual void preprocess() {};
@@ -81,6 +81,8 @@ protected:
 
 	virtual bool validateInputs();
 	virtual bool validateOutputs();
+
+	virtual bool requireUpdate();
 
 	/**
 	 * @brief Check the completeness of input fields
