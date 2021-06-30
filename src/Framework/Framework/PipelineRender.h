@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 #pragma once
-#include "Framework/ModuleController.h"
+#include "Framework/Pipeline.h"
 
 namespace dyno
 {
+	class RenderPipeline : public Pipeline
+	{
+		DECLARE_CLASS(RenderPipeline)
 
-class RenderController : public ControllerModule
-{
-	DECLARE_CLASS(RenderController)
+	public:
+		RenderPipeline();
+		virtual ~RenderPipeline();
 
-public:
-	RenderController();
-	virtual ~RenderController();
+	private:
 
-private:
-
-};
-
+	};
 }

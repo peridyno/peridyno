@@ -1,18 +1,18 @@
-#include "ModuleController.h"
+#include "Pipeline.h"
 
 namespace dyno
 {
-IMPLEMENT_CLASS(ControllerModule)
+IMPLEMENT_CLASS(Pipeline)
 
-ControllerModule::ControllerModule()
+Pipeline::Pipeline()
 {
 }
 
-ControllerModule::~ControllerModule()
+Pipeline::~Pipeline()
 {
 }
 
-ControllerModule::Iterator ControllerModule::entry()
+Pipeline::Iterator Pipeline::entry()
 {
 	Iterator iter;
 	iter.module = start_module;
@@ -20,7 +20,7 @@ ControllerModule::Iterator ControllerModule::entry()
 	return iter;
 }
 
-ControllerModule::Iterator ControllerModule::finished()
+Pipeline::Iterator Pipeline::finished()
 {
 	Iterator iter;
 	iter.module = end_module;
@@ -28,12 +28,12 @@ ControllerModule::Iterator ControllerModule::finished()
 	return iter;
 }
 
-unsigned int ControllerModule::size()
+unsigned int Pipeline::size()
 {
 	return num;
 }
 
-void ControllerModule::push_back(std::weak_ptr<Module> m)
+void Pipeline::push_back(std::weak_ptr<Module> m)
 {
 	if (start_module.lock() == nullptr)
 	{

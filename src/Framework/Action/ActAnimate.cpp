@@ -2,14 +2,13 @@
 #include "Framework/Node.h"
 #include "Framework/Module.h"
 #include "Framework/NumericalModel.h"
-#include "Framework/ControllerAnimation.h"
+#include "Framework/PipelineAnimation.h"
 #include "Framework/CollisionModel.h"
 #include "Framework/TopologyMapping.h"
 #include "Framework/ModuleCustom.h"
 
 namespace dyno
 {
-	
 	AnimateAct::AnimateAct(float dt)
 	{
 		m_dt = dt;

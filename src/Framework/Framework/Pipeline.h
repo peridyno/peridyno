@@ -32,17 +32,17 @@ namespace dyno
 
 		std::weak_ptr<Module> module;
 
-		friend class ControllerModule;
+		friend class Pipeline;
 	};
 
-	class ControllerModule : public Module
+	class Pipeline : public Module
 	{
-		DECLARE_CLASS(ControllerModule)
+		DECLARE_CLASS(Pipeline)
 	public:
 		typedef ModuleIterator Iterator;
 
-		ControllerModule();
-		virtual ~ControllerModule();
+		Pipeline();
+		virtual ~Pipeline();
 
 		Iterator entry();
 		Iterator finished();
@@ -57,6 +57,8 @@ namespace dyno
 		std::weak_ptr<Module> end_module;
 
 		unsigned int num = 0;
+
+		std::map<std::string, Module*> names;
 	};
 }
 

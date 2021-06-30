@@ -1,21 +1,21 @@
-#include "ControllerAnimation.h"
 #include "Node.h"
+#include "PipelineAnimation.h"
 #include "NumericalModel.h"
 
 namespace dyno
 {
 
-IMPLEMENT_CLASS(AnimationController)
+IMPLEMENT_CLASS(AnimationPipeline)
 
-AnimationController::AnimationController()
+AnimationPipeline::AnimationPipeline()
 {
 }
 
-AnimationController::~AnimationController()
+AnimationPipeline::~AnimationPipeline()
 {
 }
 
-bool AnimationController::updateImpl()
+bool AnimationPipeline::updateImpl()
 {
 	Node* parent = getParent();
 	if (parent == NULL)

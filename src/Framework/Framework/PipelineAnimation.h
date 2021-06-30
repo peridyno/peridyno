@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 #pragma once
-#include "Framework/ModuleController.h"
+#include "Framework/Pipeline.h"
 #include "Platform.h"
 
 namespace dyno
 {
-	class AnimationController : public ControllerModule
+	class AnimationPipeline : public Pipeline
 	{
-		DECLARE_CLASS(AnimationController)
+		DECLARE_CLASS(AnimationPipeline)
 
 	public:
-		AnimationController();
-		virtual ~AnimationController();
+		AnimationPipeline();
+		virtual ~AnimationPipeline();
 
 
 	protected:
