@@ -58,7 +58,7 @@ private:
 	enum_map m_enum_map;
 };
 
-#define DEF_ENUM(enum_name, enum_type, enum_value, desc)				\
+#define DEF_ENUM(enum_type, enum_name, enum_value, desc)				\
 private:									\
 	VarField<PEnum> var_##enum_name = VarField<PEnum>(PEnum(#enum_type, enum_value, full_name_##enum_type), std::string(#enum_name), desc, FieldTypeEnum::Param, this);			\
 public:										\

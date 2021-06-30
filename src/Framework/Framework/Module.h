@@ -7,6 +7,7 @@
 #include "Base.h"
 #include "Log.h"
 #include "DataTypes.h"
+#include "DeclareEnum.h"
 #include "DeclareField.h"
 #include "../FieldTypes.h"
 

@@ -27,9 +27,13 @@ target_include_directories(${LIB_NAME}
 	PRIVATE ${CMAKE_BINARY_DIR}
 )
 
+#To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
+target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+
 #Tell the required compilers to enable device linking on the library target.
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 target_include_directories(${LIB_NAME} PUBLIC
