@@ -41,7 +41,7 @@ public:
 	void setDescription(std::string description) { m_description = description; }
 
 	void setParent(Base* owner);
-	Base* getParent();
+	Base* parent();
 
 	bool isDerived();
 	bool isAutoDestroyable();
@@ -49,8 +49,8 @@ public:
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
-	uint sinkSize() { return (uint)m_field_sink.size(); }
-	std::vector<FieldBase*>& getSinkFields() { return m_field_sink; }
+	uint sinkSize() { return (uint)mSinks.size(); }
+	std::vector<FieldBase*>& getSinks() { return mSinks; }
 
 	bool isModified();
 	void tagModified(bool modifed);
@@ -92,15 +92,18 @@ private:
 
 	bool m_autoDestroyable = true;
 	bool m_derived = false;
-	FieldBase* m_source = nullptr;
-	Base* m_owner = nullptr;
 
 	float m_min = -FLT_MAX;
 	float m_max = FLT_MAX;
 
 	bool m_modified = false;
 
-	std::vector<FieldBase*> m_field_sink;
+	Base* mOwner = nullptr;
+
+	FieldBase* mSource = nullptr;
+
+	std::vector<FieldBase*> mSinks;
+
 	CallBackFunc callbackFunc;
 };
 

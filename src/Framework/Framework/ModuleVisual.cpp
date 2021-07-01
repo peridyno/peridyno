@@ -39,6 +39,6 @@ namespace dyno
 
 	void VisualModule::updateImpl()
 	{
-		this->updateRenderingContext();
+		this->updateGraphicsContext();
 	}
 }

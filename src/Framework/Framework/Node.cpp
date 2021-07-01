@@ -187,20 +187,20 @@ void Node::setContext(std::shared_ptr<DeviceContext> context)
 	addModule(m_context);
 }
 
-std::unique_ptr<AnimationPipeline>& Node::getAnimationPipeline()
+std::unique_ptr<AnimationPipeline>& Node::animationPipeline()
 {
 	if (m_animation_pipeline == nullptr)
 	{
-		m_animation_pipeline = std::make_unique<AnimationPipeline>();
+		m_animation_pipeline = std::make_unique<AnimationPipeline>(this);
 	}
 	return m_animation_pipeline;
 }
 
-std::unique_ptr<RenderPipeline>& Node::getRenderPipeline()
+std::unique_ptr<GraphicsPipeline>& Node::graphicsPipeline()
 {
 	if (m_render_pipeline == nullptr)
 	{
-		m_render_pipeline = std::make_unique<RenderPipeline>();
+		m_render_pipeline = std::make_unique<GraphicsPipeline>(this);
 	}
 	return m_render_pipeline;
 }

@@ -39,10 +39,9 @@ void CreateScene()
 	child3->scale(0.05);
 	child3->translate(Vec3f(0.3, 0.2, 0.5));
 	child3->getSurfaceNode()->setVisible(true);
-	child3->getSurfaceNode()->addVisualModule(ptRender);
+	child3->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(ptRender);
 
 	auto sRender = std::make_shared<SurfaceRenderer>();
-	child3->getSurfaceNode()->addVisualModule(sRender);
 	sRender->setColor(Vec3f(1, 1, 1));
 
 	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
@@ -55,7 +54,7 @@ void CreateScene()
 	child2->scale(0.05);
 	child2->translate(Vec3f(0.5, 0.2, 0.5));
 	child2->getElasticitySolver()->setIterationNumber(10);
-	child2->getSurfaceNode()->addVisualModule(sRender);
+	child2->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 }
 
 

@@ -53,7 +53,7 @@ public:									\
 
 #define DEF_INSTANCE_STATE(T, name, desc) \
 private:									\
-	InstanceField<T> state_##name = InstanceField<T>(std::string(#name), desc, FieldTypeEnum::Out, this);			\
+	InstanceField<T> state_##name = InstanceField<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
 public:									\
 	inline InstanceField<T>* state##name() {return &state_##name;}
 

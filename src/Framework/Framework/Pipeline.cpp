@@ -1,11 +1,16 @@
 #include "Pipeline.h"
+#include "Node.h"
+
+#include <queue>
+#include <set>
 
 namespace dyno
 {
-IMPLEMENT_CLASS(Pipeline)
-
-Pipeline::Pipeline()
+Pipeline::Pipeline(Node* node)
+	: Module()
 {
+	assert(node != nullptr);
+	mNode = node;
 }
 
 Pipeline::~Pipeline()
@@ -49,22 +54,35 @@ void Pipeline::push_back(std::weak_ptr<Module> m)
 	num++;
 }
 
-void Pipeline::addModule(Module* m)
+void Pipeline::pushModule(std::shared_ptr<Module> m)
 {
+	mNode->addModule(m);
+
 	ObjectId id = m->objectId();
-	moduleMap[id] = m;
+	mModuleMap[id] = m.get();
+
+	mModuleUpdated = true;
+}
+
+void Pipeline::pushPersistentModule(std::shared_ptr<Module> m)
+{
+	mNode->addModule(m);
+	mPersistentModule.push_back(m.get());
 
 	mModuleUpdated = true;
 }
 
 void Pipeline::preprocess()
 {
-
+	if (mModuleUpdated)
+	{
+		reconstructPipeline();
+	}
 }
 
 void Pipeline::updateImpl()
 {
-	for each (auto m in moduleList)
+	for each (auto m in mModuleList)
 	{
 		m->update();
 	}
@@ -72,7 +90,55 @@ void Pipeline::updateImpl()
 
 bool Pipeline::requireUpdate()
 {
-	return mModuleUpdated;
+	return true;
+}
+
+void Pipeline::reconstructPipeline()
+{
+	mModuleList.clear();
+
+	std::queue<Module*> moduleQueue;
+	std::set<ObjectId> moduleSet;
+
+	auto retrieveModules = [&](std::vector<FieldBase *>& fields) {
+		for each (auto f in fields) {
+			auto& sinks = f->getSinks();
+			for each (auto sink in sinks)
+			{
+				Module* module = dynamic_cast<Module*>(sink->parent());
+				if (module != nullptr)
+				{
+					ObjectId oId = module->objectId();
+
+					if (moduleSet.find(oId) == moduleSet.end() && mModuleMap.count(oId) > 0)
+					{
+						moduleSet.insert(oId);
+						moduleQueue.push(module);
+					}
+				}
+			}
+		}
+	};
+
+	auto& fields = mNode->getAllFields();
+	retrieveModules(fields);
+
+	while (!moduleQueue.empty())
+	{
+		Module* m = moduleQueue.front();
+
+		mModuleList.push_back(m);
+
+		auto& outFields = m->getOutputFields();
+		retrieveModules(outFields);
+
+		moduleQueue.pop();
+	}
+
+	for each (auto m in mPersistentModule)
+	{
+		mModuleList.push_back(m);
+	}
 }
 
 ModuleIterator::ModuleIterator()

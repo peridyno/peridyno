@@ -27,7 +27,7 @@
 #include "CollidableObject.h"
 #include "ModuleVisual.h"
 #include "PipelineAnimation.h"
-#include "PipelineRender.h"
+#include "PipelineGraphics.h"
 #include "TopologyMapping.h"
 #include "NumericalIntegrator.h"
 #include "ModuleCompute.h"
@@ -235,8 +235,8 @@ public:
 	std::shared_ptr<NumericalIntegrator>	getNumericalIntegrator() { return m_numerical_integrator; }
 
 
-	std::unique_ptr<AnimationPipeline>&		getAnimationPipeline();
-	std::unique_ptr<RenderPipeline>&		getRenderPipeline();
+	std::unique_ptr<AnimationPipeline>&		animationPipeline();
+	std::unique_ptr<GraphicsPipeline>&		graphicsPipeline();
 
 	template<class TModule>
 	std::shared_ptr<TModule> addModule(std::string name)
@@ -425,7 +425,7 @@ private:
 	std::shared_ptr<NumericalIntegrator> m_numerical_integrator;
 
 	std::unique_ptr<AnimationPipeline> m_animation_pipeline;
-	std::unique_ptr<RenderPipeline> m_render_pipeline;
+	std::unique_ptr<GraphicsPipeline> m_render_pipeline;
 
 	/**
 	 * @brief A module list containg specific modules

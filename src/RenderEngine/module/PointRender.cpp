@@ -20,8 +20,6 @@ namespace dyno
 		mPointSize = 0.001f;
 		mNumPoints = 1;
 		this->setName("point_renderer");
-
-		this->inColor()->tagOptional(true);
 	}
 
 	PointRenderer::~PointRenderer()
@@ -90,23 +88,24 @@ namespace dyno
 			mColorBuffer.resize(mNumPoints);
 		}
 
-		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER && !this->inColor()->isEmpty())
+		if (mColorMode == ColorMapMode::PER_OBJECT_SHADER)
 		{
-			mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
-			mColor.loadCuda(this->inColor()->getDataPtr()->begin(), mNumPoints * sizeof(float) * 3);
+			RenderTools::setupColor(mColorBuffer, mBaseColor);
 		}
 		else
 		{
-			if (this->inColor()->isEmpty()) {
-				RenderTools::setupColor(mColorBuffer, mBaseColor);
-			}
-			else {
+			if (!this->inColor()->isEmpty() && this->inColor()->getDataPtr()->size() == mNumPoints)
+			{
 				mColorBuffer.assign(this->inColor()->getData());
 			}
-
-			mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
-			mColor.loadCuda(mColorBuffer.begin(), mNumPoints * sizeof(float) * 3);
+			else 
+			{
+				RenderTools::setupColor(mColorBuffer, mBaseColor);
+			}
 		}
+
+		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
+		mColor.loadCuda(mColorBuffer.begin(), mNumPoints * sizeof(float) * 3);
 	}
 
 	void PointRenderer::paintGL(RenderMode mode)

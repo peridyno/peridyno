@@ -7,32 +7,32 @@ namespace dyno
 {
 	void FieldBase::setParent(Base* owner)
 	{
-		m_owner = owner;
+		mOwner = owner;
 	}
 
-	Base* FieldBase::getParent()
+	Base* FieldBase::parent()
 	{
-		return m_owner;
+		return mOwner;
 	}
 
 	void FieldBase::setSource(FieldBase* source)
 	{
 		m_derived = source == nullptr ? false : true;
-		m_source = source;
+		mSource = source;
 	}
 
 	FieldBase* FieldBase::getSource()
 	{
-		return m_source;
+		return mSource;
 	}
 
 	void FieldBase::addSink(FieldBase* f)
 	{
-		auto it = std::find(m_field_sink.begin(), m_field_sink.end(), f);
+		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 
-		if (it == m_field_sink.end())
+		if (it == mSinks.end())
 		{
-			m_field_sink.push_back(f);
+			mSinks.push_back(f);
 
 //			f->setDerived(true);
 			f->setSource(this);
@@ -41,11 +41,11 @@ namespace dyno
 
 	void FieldBase::removeSink(FieldBase* f)
 	{
-		auto it = std::find(m_field_sink.begin(), m_field_sink.end(), f);
+		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 		
-		if (it != m_field_sink.end())
+		if (it != mSinks.end())
 		{
-			m_field_sink.erase(it);
+			mSinks.erase(it);
 
 //			f->setDerived(false);
 			f->setSource(nullptr);
@@ -86,7 +86,7 @@ namespace dyno
 
 	FieldBase* FieldBase::getTopField()
 	{
-		return m_source == nullptr ? this : m_source->getTopField();
+		return mSource == nullptr ? this : mSource->getTopField();
 	}
 
 	void FieldBase::update()
@@ -96,7 +96,7 @@ namespace dyno
 			callbackFunc();
 		}
 
-		auto& sinks = this->getSinkFields();
+		auto& sinks = this->getSinks();
 
 		for each (auto var in sinks)
 		{

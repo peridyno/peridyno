@@ -22,13 +22,13 @@ namespace dyno
 		this->currentVelocity()->connect(m_integrator->inVelocity());
 		this->currentForce()->connect(m_integrator->inForceDensity());
 
-		this->getAnimationPipeline()->push_back(m_integrator);
+		this->animationPipeline()->push_back(m_integrator);
 
 		auto m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
 		this->varHorizon()->connect(m_nbrQuery->inRadius());
 		this->currentPosition()->connect(m_nbrQuery->inPosition());
 
-		this->getAnimationPipeline()->push_back(m_nbrQuery);
+		this->animationPipeline()->push_back(m_nbrQuery);
 
 
 		auto m_elasticity = this->template addConstraintModule<ElasticityModule<TDataType>>("elasticity");
@@ -37,7 +37,7 @@ namespace dyno
 		this->currentVelocity()->connect(m_elasticity->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
 
-		this->getAnimationPipeline()->push_back(m_elasticity);
+		this->animationPipeline()->push_back(m_elasticity);
 
 		//Create a node for surface mesh rendering
 		m_surfaceNode = this->template createAncestor<Node>("Mesh");

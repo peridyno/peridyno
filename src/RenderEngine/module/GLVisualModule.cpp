@@ -7,7 +7,7 @@ namespace dyno
 		this->setName("GLVisualModule");
 	}
 
-	void GLVisualModule::updateRenderingContext()
+	void GLVisualModule::updateGraphicsContext()
 	{
 		if (!this->isGLInitialized)
 		{

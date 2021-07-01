@@ -35,7 +35,7 @@ namespace dyno
 
 		std::string getModuleType() override { return "VisualModule"; }
 
-		virtual void updateRenderingContext() {};
+		virtual void updateGraphicsContext() {};
 
 	protected:
 		void updateImpl() final;

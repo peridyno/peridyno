@@ -32,11 +32,14 @@ void CreateScene()
 
 	auto pointRenderer = std::make_shared<PointRenderer>();
 	pointRenderer->setColor(Vec3f(1, 0.2, 1));
-	cloth->addVisualModule(pointRenderer);
+	pointRenderer->setColorMapMode(PointRenderer::PER_OBJECT_SHADER);
+	cloth->currentVelocity()->connect(pointRenderer->inColor());
+
+	cloth->graphicsPipeline()->pushModule(pointRenderer);
 	cloth->setVisible(true);
 
 	auto surfaceRenderer = std::make_shared<SurfaceRenderer>();
-	cloth->getSurface()->addVisualModule(surfaceRenderer);
+	cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
 }
 
 int main()

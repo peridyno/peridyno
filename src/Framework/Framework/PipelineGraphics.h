@@ -15,20 +15,13 @@
  */
 #pragma once
 #include "Framework/Pipeline.h"
-#include "Platform.h"
 
 namespace dyno
 {
-	class AnimationPipeline : public Pipeline
+	class GraphicsPipeline : public Pipeline
 	{
 	public:
-		AnimationPipeline(Node* node);
-		virtual ~AnimationPipeline();
-
-
-	protected:
-		void updateImpl() override;
-
-	private:
+		GraphicsPipeline(Node* node);
+		virtual ~GraphicsPipeline();
 	};
 }

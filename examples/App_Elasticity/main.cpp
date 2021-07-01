@@ -21,13 +21,6 @@ int main()
 	std::shared_ptr<ParticleElasticBody<DataType3f>> bunny = std::make_shared<ParticleElasticBody<DataType3f>>();
 	root->addParticleSystem(bunny);
 
-	auto m_pointsRender = std::make_shared<PointRenderer>();
-	m_pointsRender->setColor(Vec3f(0, 1, 1));
-	m_pointsRender->setPointSize(0.002f);
-	m_pointsRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
-	m_pointsRender->setColorMapRange(0, 1);
-	bunny->addVisualModule(m_pointsRender);
-
 	bunny->setMass(1.0);
 	bunny->loadParticles("../../data/bunny/bunny_points.obj");
 	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
@@ -36,7 +29,7 @@ int main()
 	bunny->setVisible(true);
 
 	auto sRender = std::make_shared<SurfaceRenderer>();
-	bunny->getSurfaceNode()->addVisualModule(sRender);
+	bunny->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 	sRender->setColor(Vec3f(1, 1, 0));
 
 	bunny->getElasticitySolver()->setIterationNumber(10);

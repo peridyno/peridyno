@@ -27,13 +27,13 @@ namespace dyno
 			if (!node->isVisible())
 				return;
 
-			for (auto iter : node->getVisualModuleList())
+			for (auto iter : node->graphicsPipeline()->activeModules())
 			{
-				auto m = std::dynamic_pointer_cast<GLVisualModule>(iter);
+				auto m = dynamic_cast<GLVisualModule*>(iter);
 				if (m && m->isVisible())
 				{
-					m->update();
-					modules.push_back(m.get());
+					//m->update();
+					modules.push_back(m);
 				}
 			}
 		}

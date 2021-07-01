@@ -51,7 +51,7 @@ namespace dyno
 		virtual void paintGL(RenderMode mode) = 0;
 
 	protected:
-		void updateRenderingContext() final;
+		void updateGraphicsContext() final;
 
 	private:
 		bool isGLInitialized = false;

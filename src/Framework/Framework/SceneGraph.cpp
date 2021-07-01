@@ -5,6 +5,7 @@
 #include "Action/ActReset.h"
 #include "Action/ActQueryTimestep.h"
 #include "Action/ActPostProcessing.h"
+#include "Action/ActUpdateGrpahicsContext.h"
 #include "Framework/SceneLoaderFactory.h"
 
 
@@ -124,6 +125,8 @@ void SceneGraph::takeOneFrame()
 		m_elapsedTime += interval;
 	}
 	
+	m_root->traverseTopDown<UpdateGrpahicsContextAct>();
+
 	m_root->traverseTopDown<PostProcessing>();
 
 	std::cout << "****************Frame " << m_frameNumber << " Ended" << std::endl << std::endl;

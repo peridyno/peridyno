@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Xiaowei He
+ * Copyright 2017-2021 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Framework/Pipeline.h"
 
-namespace dyno
+#pragma once
+#include "Framework/ModuleCompute.h"
+
+namespace dyno 
 {
-	class RenderPipeline : public Pipeline
+	template<typename TDataType>
+	class CalculateNorm : public ComputeModule
 	{
-		DECLARE_CLASS(RenderPipeline)
+		DECLARE_CLASS_1(ColorMapping, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		CalculateNorm() {};
+		~CalculateNorm() override {};
+
+		void compute() override;
 
 	public:
-		RenderPipeline();
-		virtual ~RenderPipeline();
-
-	private:
-
+		DEF_ARRAY_IN(Coord, Vec, DeviceType::GPU, "");
+		DEF_ARRAY_OUT(Real, Norm, DeviceType::GPU, "");
 	};
 }

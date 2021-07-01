@@ -18,6 +18,7 @@
 
 namespace dyno
 {
+	class Node;
 
 	class ModuleIterator
 	{
@@ -52,11 +53,10 @@ namespace dyno
 
 	class Pipeline : public Module
 	{
-		DECLARE_CLASS(Pipeline)
 	public:
 		typedef ModuleIterator Iterator;
 
-		Pipeline();
+		Pipeline(Node* node);
 		virtual ~Pipeline();
 
 		Iterator entry();
@@ -66,13 +66,23 @@ namespace dyno
 
 		void push_back(std::weak_ptr<Module> m);
 
-		void addModule(Module* m);
+		void pushModule(std::shared_ptr<Module> m);
+
+		//TODO: this is a temporary method 
+		void pushPersistentModule(std::shared_ptr<Module> m);
+
+		std::list<Module*>& activeModules() {
+			return mModuleList;
+		}
 
 	protected:
 		void preprocess() final;
 		void updateImpl() override;
 
 		bool requireUpdate() final;
+
+	private:
+		void reconstructPipeline();
 
 	private:
 		std::weak_ptr<Module> start_module;
@@ -83,8 +93,12 @@ namespace dyno
 
 		bool mModuleUpdated = false;
 
-		std::map<ObjectId, Module*> moduleMap;
-		std::list<Module*>  moduleList;
+		std::map<ObjectId, Module*> mModuleMap;
+		std::list<Module*>  mModuleList;
+
+		std::list<Module*> mPersistentModule;
+
+		Node* mNode;
 	};
 }
 

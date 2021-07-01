@@ -4,38 +4,35 @@
 
 namespace dyno
 {
-
-IMPLEMENT_CLASS(AnimationPipeline)
-
-AnimationPipeline::AnimationPipeline()
-{
-}
-
-AnimationPipeline::~AnimationPipeline()
-{
-}
-
-void AnimationPipeline::updateImpl()
-{
-	Node* parent = getParent();
-	if (parent == NULL)
+	AnimationPipeline::AnimationPipeline(Node* node)
+		: Pipeline(node)
 	{
-		Log::sendMessage(Log::Error, "Parent node is not set!");
-		return;
 	}
-	if (parent->isActive())
-	{
-		auto nModel = parent->getNumericalModel();
-		if (nModel == NULL)
-		{
-			Log::sendMessage(Log::Warning, parent->getName() + ": No numerical model is set!");
-		}
-		else
-		{
-			nModel->step(parent->getDt());
-			nModel->updateTopology();
-		}
-	}
-}
 
+	AnimationPipeline::~AnimationPipeline()
+	{
+	}
+
+	void AnimationPipeline::updateImpl()
+	{
+		Node* parent = getParent();
+		if (parent == NULL)
+		{
+			Log::sendMessage(Log::Error, "Parent node is not set!");
+			return;
+		}
+		if (parent->isActive())
+		{
+			auto nModel = parent->getNumericalModel();
+			if (nModel == NULL)
+			{
+				Log::sendMessage(Log::Warning, parent->getName() + ": No numerical model is set!");
+			}
+			else
+			{
+				nModel->step(parent->getDt());
+				nModel->updateTopology();
+			}
+		}
+	}
 }
