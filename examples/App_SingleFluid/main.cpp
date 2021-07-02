@@ -19,10 +19,10 @@ void CreateScene()
 	scene.setLowerBound(Vec3f(-0.5, 0, -0.5));
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
-	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true); // 正方体方格
+	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true); // cube
 	root->loadSDF("../../data/bowl/bowl.sdf", false); 
 
-	// 导入fluid
+	// ParticleFluid
 	std::shared_ptr<ParticleFluid<DataType3f>> fluid = std::make_shared<ParticleFluid<DataType3f>>();
 	root->addParticleSystem(fluid);
 
@@ -46,6 +46,7 @@ void CreateScene()
 	rigidbody->setActive(false);
 }
 
+bool GlfwApp::mOpenCameraRotate = true;
 int main()
 {
 	CreateScene();

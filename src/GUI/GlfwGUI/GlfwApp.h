@@ -78,6 +78,8 @@ namespace dyno {
 		int getWidth();
 		int getHeight();
 
+		bool getCameraRotateFlag();
+
 	protected:
 		void initCallbacks();    //init default callbacks
 
@@ -90,6 +92,8 @@ namespace dyno {
 		static void cursorEnterCallback(GLFWwindow* window, int entered);
 		static void scrollCallback(GLFWwindow* window, double offsetX, double OffsetY);
 
+
+		
     private:
 		//pointers to callback methods
 		void(*mMouseButtonFunc)(GLFWwindow* window, int button, int action, int mods);
@@ -116,6 +120,9 @@ namespace dyno {
 		bool mSaveScreenToggle = false;
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
+		
+		// The static bool variable is used for avoiding Camera Rotating in Imgui Windows
+		static bool mOpenCameraRotate;
 
 		int mSaveScreenInterval = 1;
 
@@ -136,6 +143,7 @@ namespace dyno {
 
 	public:
 		bool			mUseNewRenderEngine = true;
+		
     };
 
 }

@@ -188,9 +188,11 @@ namespace dyno
 
 		bool show_demo_window = true;
 
+		
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
+			
 			glfwPollEvents();
 
 			if (mAnimationToggle)
@@ -222,6 +224,9 @@ namespace dyno
 
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 				ImGui::End();
+
+				// Mouse Foucus on Any Imgui Windows
+				mOpenCameraRotate =  !ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow);
 			}
 
 			ImGui::Render();
@@ -309,6 +314,10 @@ namespace dyno
 		mAnimationToggle = !mAnimationToggle;
 	}
 
+	bool GlfwApp::getCameraRotateFlag() {
+		return mOpenCameraRotate;
+	}
+
 	int GlfwApp::getWidth()
 	{
 		return activeCamera()->viewportWidth();
@@ -375,7 +384,7 @@ namespace dyno
 
 		if (action == GLFW_PRESS)
 		{
-			camera->registerPoint(xpos, ypos);
+			if(mOpenCameraRotate)camera->registerPoint(xpos, ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
 		}
 		else
@@ -392,14 +401,14 @@ namespace dyno
 
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
 	{
-		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window); // User Pointer
 
 		auto camera = activeWindow->activeCamera();
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && mOpenCameraRotate) {
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN) {
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && mOpenCameraRotate) {
 			camera->translateToPoint(x, y);
 		}
 
@@ -421,7 +430,7 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
-		camera->zoom(-OffsetY);
+		if(mOpenCameraRotate)camera->zoom(-OffsetY);
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

@@ -29,7 +29,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleFluid<TDataType>::advance(Real dt)
+	void ParticleFluid<TDataType>::advance(Real dt)  // cudaMemcpy
 	{		
 		std::vector<std::shared_ptr<ParticleEmitter<TDataType>>> m_particleEmitters = this->getParticleEmitters();
 
