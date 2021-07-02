@@ -19,12 +19,14 @@ void CreateScene()
 	scene.setLowerBound(Vec3f(-0.5, 0, -0.5));
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
-	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	root->loadSDF("../../data/bowl/bowl.sdf", false);
+	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true); // 正方体方格
+	root->loadSDF("../../data/bowl/bowl.sdf", false); 
 
+	// 导入fluid
 	std::shared_ptr<ParticleFluid<DataType3f>> fluid = std::make_shared<ParticleFluid<DataType3f>>();
 	root->addParticleSystem(fluid);
 
+	// PBR?
 	auto ptRender = std::make_shared<PointRenderer>();
 	ptRender->setColor(glm::vec3(1, 0, 0));
  	ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
@@ -33,9 +35,11 @@ void CreateScene()
  	fluid->currentVelocity()->connect(ptRender->inColor());
 	fluid->addVisualModule(ptRender);
 
+	// Particles
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 	fluid->setMass(100);
 
+	// RigidBody for cube
 	std::shared_ptr<RigidBody<DataType3f>> rigidbody = std::make_shared<RigidBody<DataType3f>>();
 	root->addRigidBody(rigidbody);
 	rigidbody->loadShape("../../data/bowl/bowl.obj");
