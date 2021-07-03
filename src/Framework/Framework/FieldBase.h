@@ -49,7 +49,7 @@ public:
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
-	uint sinkSize() { return (uint)mSinks.size(); }
+	uint sizeOfSinks() { return (uint)mSinks.size(); }
 	std::vector<FieldBase*>& getSinks() { return mSinks; }
 
 	bool isModified();
