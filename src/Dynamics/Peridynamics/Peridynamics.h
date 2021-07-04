@@ -40,7 +40,7 @@ namespace dyno
 
 
 	public:
-		VarField<Real> m_horizon;
+		FVar<Real> m_horizon;
 
 		DeviceArrayField<Coord> m_position;
 		DeviceArrayField<Coord> m_velocity;

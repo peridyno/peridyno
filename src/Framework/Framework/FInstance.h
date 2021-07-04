@@ -15,18 +15,18 @@
  */
 #pragma once
 #include <iostream>
-#include "FieldBase.h"
+#include "FBase.h"
 
 namespace dyno {
 
 	class Object;
 
-	class InstanceBase : public FieldBase
+	class InstanceBase : public FBase
 	{
 	public:
-		InstanceBase() : FieldBase() {};
+		InstanceBase() : FBase() {};
 		InstanceBase(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
-			: FieldBase(name, description, fieldType, parent) {}
+			: FBase(name, description, fieldType, parent) {}
 
 	public:
 		virtual bool canBeConnectedBy(InstanceBase* ins) = 0;
@@ -73,7 +73,7 @@ namespace dyno {
 			return this->getDataPtr() == nullptr;
 		}
 
-		bool connect(FieldBase* dst) {
+		bool connect(FBase* dst) {
 			InstanceBase* ins = dynamic_cast<InstanceBase*>(dst);
 			if (ins == nullptr) {
 				return false;

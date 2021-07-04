@@ -21,13 +21,13 @@ namespace dyno {
 *	\class	Variable
 *	\brief	Interface for all variables.
 */
-class FieldBase
+class FBase
 {
 	using CallBackFunc = std::function<void()>;
 public:
-	FieldBase() : m_name("default"), m_description("") {};
-	FieldBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, Base* parent = nullptr);
-	virtual ~FieldBase() {};
+	FBase() : m_name("default"), m_description("") {};
+	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, Base* parent = nullptr);
+	virtual ~FBase() {};
 
 	virtual uint getElementCount() = 0;
 	virtual const std::string getTemplateName() { return std::string(""); }
@@ -50,7 +50,7 @@ public:
 	void setDerived(bool derived);
 
 	uint sizeOfSinks() { return (uint)mSinks.size(); }
-	std::vector<FieldBase*>& getSinks() { return mSinks; }
+	std::vector<FBase*>& getSinks() { return mSinks; }
 
 	bool isModified();
 	void tagModified(bool modifed);
@@ -67,20 +67,20 @@ public:
 	FieldTypeEnum getFieldType();
 
 
-	bool connectField(FieldBase* dst);
+	bool connectField(FBase* dst);
 
-	FieldBase* getTopField();
+	FBase* getTopField();
 
 	virtual bool isEmpty() = 0;
 	virtual void update();
 
 	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
 protected:
-	void setSource(FieldBase* source);
-	FieldBase* getSource();
+	void setSource(FBase* source);
+	FBase* getSource();
 
-	void addSink(FieldBase* f);
-	void removeSink(FieldBase* f);
+	void addSink(FBase* f);
+	void removeSink(FBase* f);
 
 	FieldTypeEnum m_fType = FieldTypeEnum::Param;
 
@@ -100,25 +100,25 @@ private:
 
 	Base* mOwner = nullptr;
 
-	FieldBase* mSource = nullptr;
+	FBase* mSource = nullptr;
 
-	std::vector<FieldBase*> mSinks;
+	std::vector<FBase*> mSinks;
 
 	CallBackFunc callbackFunc;
 };
 
 #define DEFINE_FIELD_FUNC(DerivedField, Data, FieldName)						\
-FieldName() : FieldBase("", ""){}								\
+FieldName() : FBase("", ""){}								\
 \
 FieldName(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)		\
-	: FieldBase(name, description, fieldType, parent){}				\
+	: FBase(name, description, fieldType, parent){}				\
 \
 const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }			\
 const std::string getClassName() override { return std::string(#FieldName); }					\
 \
 std::shared_ptr<Data>& getDataPtr()									\
 {																	\
-	FieldBase* topField = this->getTopField();						\
+	FBase* topField = this->getTopField();						\
 	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
 	return derived->m_data;											\
 }																	\

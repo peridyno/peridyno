@@ -41,7 +41,7 @@ namespace dyno
 		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
 
 	public:
-		VarField<Real> m_horizon;
+		FVar<Real> m_horizon;
 
 	private:
 		std::shared_ptr<Node> m_surfaceNode;

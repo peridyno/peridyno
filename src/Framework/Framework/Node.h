@@ -334,7 +334,7 @@ public:
 	 *
 	 * @return Return false if the name conflicts with exists fields' names
 	 */
-	bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
+	bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 	
 	std::vector<NodePort*>& getAllNodePorts() { return mNodePorts; }
 

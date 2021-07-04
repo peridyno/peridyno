@@ -1,17 +1,17 @@
 #include "Base.h"
 #include <algorithm>
-#include "Framework/FieldBase.h"
+#include "Framework/FBase.h"
 #include "Framework/Log.h"
 using std::find;
 
 namespace dyno {
 
-bool Base::addField(FieldBase* data)
+bool Base::addField(FBase* data)
 {
 	return addField(data->getObjectName(), data);
 }
 
-bool Base::addField(FieldID name, FieldBase* data)
+bool Base::addField(FieldID name, FBase* data)
 {
 	if (findField(data) == NULL)
 	{
@@ -30,7 +30,7 @@ bool Base::addField(FieldID name, FieldBase* data)
 	return true;
 }
 
-bool Base::addFieldAlias(FieldID name, FieldBase* data)
+bool Base::addFieldAlias(FieldID name, FBase* data)
 {
 	if (findFieldAlias(name) == NULL)
 	{
@@ -50,7 +50,7 @@ bool Base::addFieldAlias(FieldID name, FieldBase* data)
 
 }
 
-bool Base::addFieldAlias(FieldID name, FieldBase* data, FieldMap& fieldAlias)
+bool Base::addFieldAlias(FieldID name, FBase* data, FieldMap& fieldAlias)
 {
 	if (findFieldAlias(name, fieldAlias) == NULL)
 	{
@@ -69,7 +69,7 @@ bool Base::addFieldAlias(FieldID name, FieldBase* data, FieldMap& fieldAlias)
 	}
 }
 
-bool Base::findField(FieldBase* data)
+bool Base::findField(FBase* data)
 {
 	FieldVector::iterator result = find(m_field.begin(), m_field.end(), data);
 	// return false if no field is found!
@@ -102,7 +102,7 @@ bool Base::findFieldAlias(const FieldID name, FieldMap& fieldAlias)
 	return true;
 }
 
-bool Base::removeField(FieldBase* data)
+bool Base::removeField(FBase* data)
 {
 	FieldVector::iterator result = find(m_field.begin(), m_field.end(), data);
 	if (result == m_field.end())
@@ -138,7 +138,7 @@ bool Base::removeFieldAlias(const FieldID name, FieldMap& fieldAlias)
 	FieldMap::iterator iter = fieldAlias.find(name);
 	if (iter != fieldAlias.end())
 	{
-		FieldBase* data = iter->second;
+		FBase* data = iter->second;
 
 		fieldAlias.erase(iter);
 
@@ -152,7 +152,7 @@ bool Base::removeFieldAlias(const FieldID name, FieldMap& fieldAlias)
 	return false;
 }
 
-FieldBase* Base::getField(const FieldID name)
+FBase* Base::getField(const FieldID name)
 {
 	FieldMap::iterator iter = m_fieldAlias.find(name);
 	if (iter != m_fieldAlias.end())
@@ -162,7 +162,7 @@ FieldBase* Base::getField(const FieldID name)
 	return nullptr;
 }
 
-std::vector<FieldBase*>& Base::getAllFields()
+std::vector<FBase*>& Base::getAllFields()
 {
 	return m_field;
 }
@@ -182,7 +182,7 @@ bool Base::isAllFieldsReady()
 }
 
 
-std::vector<std::string> Base::getFieldAlias(FieldBase* field)
+std::vector<std::string> Base::getFieldAlias(FBase* field)
 {
 	std::vector<FieldID> names;
 	FieldMap::iterator iter;
@@ -196,7 +196,7 @@ std::vector<std::string> Base::getFieldAlias(FieldBase* field)
 	return names;
 }
 
-int Base::getFieldAliasCount(FieldBase* data)
+int Base::getFieldAliasCount(FBase* data)
 {
 	int num = 0;
 	FieldMap::iterator iter;
@@ -210,7 +210,7 @@ int Base::getFieldAliasCount(FieldBase* data)
 	return num;
 }
 
-bool Base::attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy /*= true*/)
+bool Base::attachField(FBase* field, std::string name, std::string desc, bool autoDestroy /*= true*/)
 {
 	field->setParent(this);
 	field->setObjectName(name);

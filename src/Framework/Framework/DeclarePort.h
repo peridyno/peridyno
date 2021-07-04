@@ -23,27 +23,27 @@ namespace dyno
  */
 #define DEF_CURRENT_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> current_##name = VarField<T>(T(value), std::string(#name), desc, FieldTypeEnum::Current, this);			\
+	FVar<T> current_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::Current, this);			\
 public:										\
-	inline VarField<T>* current##name() {return &current_##name;}
+	inline FVar<T>* current##name() {return &current_##name;}
 
 #define DEF_NEXT_VAR(name, T, value, desc) \
 private:									\
-	VarField<T> next_##name = VarField<T>(T(value), std::string(#name), desc, FieldTypeEnum::Next, this);			\
+	FVar<T> next_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::Next, this);			\
 public:										\
-	inline VarField<T>* next##name() {return &next_##name;}
+	inline FVar<T>* next##name() {return &next_##name;}
 
 #define DEF_EMPTY_CURRENT_VAR(name, T, desc) \
 private:									\
-	VarField<T> current_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
+	FVar<T> current_##name = FVar<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
 public:										\
-	inline VarField<T>* current##name() {return &current_##name;}
+	inline FVar<T>* current##name() {return &current_##name;}
 
 #define DEF_EMPTY_NEXT_VAR(name, T, desc) \
 private:									\
-	VarField<T> next_##name = VarField<T>(std::string(#name), desc, FieldTypeEnum::Next, this);			\
+	FVar<T> next_##name = FVar<T>(std::string(#name), desc, FieldTypeEnum::Next, this);			\
 public:									\
-	inline VarField<T>* next##name() {return &next_##name;}
+	inline FVar<T>* next##name() {return &next_##name;}
 
 
 /**
@@ -52,15 +52,15 @@ public:									\
  */
 #define DEF_EMPTY_CURRENT_ARRAY(name, T, device, desc) \
 private:									\
-	ArrayField<T, device> current_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+	FArray<T, device> current_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
 public:									\
-	inline ArrayField<T, device>* current##name() {return &current_##name;}
+	inline FArray<T, device>* current##name() {return &current_##name;}
 
 #define DEF_EMPTY_NEXT_ARRAY(name, T, device, desc) \
 private:									\
-	ArrayField<T, device> next_##name = ArrayField<T, device>(std::string(#name), desc, FieldTypeEnum::Next, this);	\
+	FArray<T, device> next_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Next, this);	\
 public:									\
-	inline ArrayField<T, device>* next##name() {return &next_##name;}
+	inline FArray<T, device>* next##name() {return &next_##name;}
 
 
 /**

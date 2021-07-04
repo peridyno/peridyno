@@ -43,29 +43,29 @@ public:
 
 	virtual std::string getModuleType() { return "Module"; }
 
-	bool findInputField(FieldBase* field);
-	bool addInputField(FieldBase* field);
-	bool removeInputField(FieldBase* field);
+	bool findInputField(FBase* field);
+	bool addInputField(FBase* field);
+	bool removeInputField(FBase* field);
 
-	std::vector<FieldBase*>& getInputFields() { return fields_input; }
+	std::vector<FBase*>& getInputFields() { return fields_input; }
 
-	bool findOutputField(FieldBase* field);
-	bool addOutputField(FieldBase* field);
-	bool removeOutputField(FieldBase* field);
+	bool findOutputField(FBase* field);
+	bool addOutputField(FBase* field);
+	bool removeOutputField(FBase* field);
 
-	std::vector<FieldBase*>& getOutputFields() { return fields_output; }
+	std::vector<FBase*>& getOutputFields() { return fields_output; }
 
-	bool findParameter(FieldBase* field);
-	bool addParameter(FieldBase* field);
-	bool removeParameter(FieldBase* field);
+	bool findParameter(FBase* field);
+	bool addParameter(FBase* field);
+	bool removeParameter(FBase* field);
 
-	std::vector<FieldBase*>& getParameters() { return fields_param; }
+	std::vector<FBase*>& getParameters() { return fields_param; }
 
 	virtual std::weak_ptr<Module> next() { return m_module_next; }
 
 	void setNext(std::weak_ptr<Module> next_module) { m_module_next = next_module; }
 
-	bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
+	bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 protected:
 	/// \brief Initialization function for each module
 	/// 
@@ -102,8 +102,8 @@ private:
 
 	std::weak_ptr<Module> m_module_next;
 
-	std::vector<FieldBase*> fields_input;
-	std::vector<FieldBase*> fields_output;
-	std::vector<FieldBase*> fields_param;
+	std::vector<FBase*> fields_input;
+	std::vector<FBase*> fields_output;
+	std::vector<FBase*> fields_param;
 };
 }

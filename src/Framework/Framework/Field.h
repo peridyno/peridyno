@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "FieldBase.h"
+#include "FBase.h"
 #include "Array/Array.h"
 #include "Array/ArrayList.h"
 
@@ -10,17 +10,17 @@ namespace dyno {
 	*	\brief	Variables of build-in data types.
 	*/
 	template<typename T>
-	class VarField : public FieldBase
+	class FVar : public FBase
 	{
 	public:
 		typedef T				VarType;
 		typedef T				DataType;
-		typedef VarField<T>		FieldType;
+		typedef FVar<T>		FieldType;
 
-		DEFINE_FIELD_FUNC(FieldType, DataType, VarField);
+		DEFINE_FIELD_FUNC(FieldType, DataType, FVar);
 
-		VarField(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent);
-		~VarField() override;
+		FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent);
+		~FVar() override;
 
 		uint getElementCount() override { return 1; }
 
@@ -28,19 +28,19 @@ namespace dyno {
 	};
 
 	template<typename T>
-	VarField<T>::VarField(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
-		: FieldBase(name, description, fieldType, parent)
+	FVar<T>::FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
+		: FBase(name, description, fieldType, parent)
 	{
 		this->setValue(value);
 	}
 
 	template<typename T>
-	VarField<T>::~VarField()
+	FVar<T>::~FVar()
 	{
 	};
 
 	template<typename T>
-	void VarField<T>::setValue(T val)
+	void FVar<T>::setValue(T val)
 	{
 		std::shared_ptr<T>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -56,42 +56,25 @@ namespace dyno {
 	}
 
 	template<typename T>
-	using HostVarField = VarField<T>;
+	using HostVarField = FVar<T>;
 
 	template<typename T>
-	using DeviceVarField = VarField<T>;
-
-	/*!
-	*	\class	Instance
-	*	\brief	Reference of complex data types.
-	*/
-	template<typename T>
-	class InstanceField : public FieldBase
-	{
-	public:
-		typedef T				VarType;
-		typedef T				DataType;
-		typedef InstanceField<T>		FieldType;
-
-		DEFINE_FIELD_FUNC(FieldType, DataType, InstanceField);
-
-		uint getElementCount() override { return 1; }
-	};
+	using DeviceVarField = FVar<T>;
 
 	/**
 	 * Define field for Array
 	 */
 	template<typename T, DeviceType deviceType>
-	class ArrayField : public FieldBase
+	class FArray : public FBase
 	{
 	public:
 		typedef T							VarType;
 		typedef Array<T, deviceType>		DataType;
-		typedef ArrayField<T, deviceType>	FieldType;
+		typedef FArray<T, deviceType>	FieldType;
 
-		DEFINE_FIELD_FUNC(FieldType, DataType, ArrayField);
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArray);
 
-		~ArrayField() override;
+		~FArray() override;
 
 		inline uint getElementCount() override {
 			auto ref = this->getDataPtr();
@@ -105,7 +88,7 @@ namespace dyno {
 	};
 
 	template<typename T, DeviceType deviceType>
-	ArrayField<T, deviceType>::~ArrayField()
+	FArray<T, deviceType>::~FArray()
 	{
 		if (m_data.use_count() == 1)
 		{
@@ -114,10 +97,10 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void ArrayField<T, deviceType>::setElementCount(uint num)
+	void FArray<T, deviceType>::setElementCount(uint num)
 	{
-		FieldBase* topField = this->getTopField();
-		ArrayField<T, deviceType>* derived = dynamic_cast<ArrayField<T, deviceType>*>(topField);
+		FBase* topField = this->getTopField();
+		FArray<T, deviceType>* derived = dynamic_cast<FArray<T, deviceType>*>(topField);
 
 		if (derived->m_data == nullptr)
 		{
@@ -130,7 +113,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void ArrayField<T, deviceType>::setValue(std::vector<T>& vals)
+	void FArray<T, deviceType>::setValue(std::vector<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -142,7 +125,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void ArrayField<T, deviceType>::setValue(DArray<T>& vals)
+	void FArray<T, deviceType>::setValue(DArray<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -154,24 +137,24 @@ namespace dyno {
 	}
 
 	template<typename T>
-	using HostArrayField = ArrayField<T, DeviceType::CPU>;
+	using HostArrayField = FArray<T, DeviceType::CPU>;
 
 	template<typename T>
-	using DeviceArrayField = ArrayField<T, DeviceType::GPU>;
+	using DeviceArrayField = FArray<T, DeviceType::GPU>;
 
 
 	/**
 	 * Define field for Array
 	 */
 	template<typename T, DeviceType deviceType>
-	class ArrayListField : public FieldBase
+	class FArrayList : public FBase
 	{
 	public:
 		typedef T								VarType;
 		typedef ArrayList<T, deviceType>		DataType;
-		typedef ArrayListField<T, deviceType>	FieldType;
+		typedef FArrayList<T, deviceType>	FieldType;
 
-		DEFINE_FIELD_FUNC(FieldType, DataType, ArrayListField);
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArrayList);
 
 		inline uint getElementCount() override {
 			auto ref = this->getDataPtr();

@@ -16,7 +16,7 @@ TEST(ModuleField, connect)
 	calArea.update();
 	EXPECT_EQ(calArea.outArea()->getData(), float(60));
 
-	VarField<float> inputWidth;
+	FVar<float> inputWidth;
 	inputWidth.setValue(30.0f);
 	inputWidth.connect(calArea.inWidth());
 
@@ -28,7 +28,7 @@ TEST(ModuleField, connect)
 	inputWidth.connect(calArea1.inWidth());
 	EXPECT_EQ(inputWidth.sizeOfSinks(), 2);
 
-	VarField<float> inputWidth1;
+	FVar<float> inputWidth1;
 	inputWidth1.setValue(10.0f);
 	inputWidth1.connect(calArea1.inWidth());
 	EXPECT_EQ(inputWidth.sizeOfSinks(), 1);

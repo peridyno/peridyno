@@ -100,7 +100,7 @@ void Pipeline::reconstructPipeline()
 	std::queue<Module*> moduleQueue;
 	std::set<ObjectId> moduleSet;
 
-	auto retrieveModules = [&](std::vector<FieldBase *>& fields) {
+	auto retrieveModules = [&](std::vector<FBase *>& fields) {
 		for each (auto f in fields) {
 			auto& sinks = f->getSinks();
 			for each (auto sink in sinks)

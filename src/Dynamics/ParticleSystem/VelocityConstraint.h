@@ -23,7 +23,7 @@ namespace dyno {
 		bool constrain() override;
 
 	public:
-		VarField<Real> m_smoothingLength;
+		FVar<Real> m_smoothingLength;
 
 		DeviceArrayField<Coord> m_velocity;
 		DeviceArrayField<Coord> m_position;

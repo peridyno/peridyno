@@ -60,6 +60,6 @@ private:
 
 #define DEF_ENUM(enum_type, enum_name, enum_value, desc)				\
 private:									\
-	VarField<PEnum> var_##enum_name = VarField<PEnum>(PEnum(#enum_type, enum_value, full_name_##enum_type), std::string(#enum_name), desc, FieldTypeEnum::Param, this);			\
+	FVar<PEnum> var_##enum_name = FVar<PEnum>(PEnum(#enum_type, enum_value, full_name_##enum_type), std::string(#enum_name), desc, FieldTypeEnum::Param, this);			\
 public:										\
-	inline VarField<PEnum>* var##enum_name() {return &var_##enum_name;}
+	inline FVar<PEnum>* var##enum_name() {return &var_##enum_name;}

@@ -45,7 +45,7 @@ namespace dyno
 		}
 
 	public:
-		VarField<Real> m_smoothingLength;
+		FVar<Real> m_smoothingLength;
 
 		DeviceArrayField<Coord> m_position;
 		DeviceArrayField<Coord> m_velocity;

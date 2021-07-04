@@ -15,7 +15,7 @@
  */
 #pragma once
 #include <iostream>
-#include "Framework/FieldBase.h"
+#include "Framework/FBase.h"
 #include "Framework/Object.h"
 
 namespace dyno {
@@ -32,8 +32,8 @@ typedef std::string FieldID;
 class Base : public Object
 {
 public:
-	typedef std::vector<FieldBase*> FieldVector;
-	typedef std::map<FieldID, FieldBase*> FieldMap;
+	typedef std::vector<FBase*> FieldVector;
+	typedef std::map<FieldID, FBase*> FieldMap;
 
 	Base() : Object() {};
 	~Base() override {};
@@ -42,23 +42,23 @@ public:
 	 * @brief Add a field to Base
 	 * FieldID will be set to the name of Field by default
 	 */
-	bool addField(FieldBase* data);
+	bool addField(FBase* data);
 	/**
 	 * @brief Add a field to Base
 	 * 
 	 * @param Field name
 	 * @param Field pointer
 	 */
-	bool addField(FieldID name, FieldBase* data);
-	bool addFieldAlias(FieldID name, FieldBase* data);
-	bool addFieldAlias(FieldID name, FieldBase* data, FieldMap& fieldAlias);
+	bool addField(FieldID name, FBase* data);
+	bool addFieldAlias(FieldID name, FBase* data);
+	bool addFieldAlias(FieldID name, FBase* data, FieldMap& fieldAlias);
 
 	/**
 	 * @brief Find a field by its pointer
 	 * 
 	 * @param data Field pointer
 	 */
-	bool findField(FieldBase* data);
+	bool findField(FBase* data);
 	/**
 	 * @brief Find a field by its name
 	 * 
@@ -78,7 +78,7 @@ public:
 	 * @brief Remove a field by its pointer
 	 * 
 	 */
-	bool removeField(FieldBase* data);
+	bool removeField(FBase* data);
 	/**
 	 * @brief Remove a field by its name
 	 * 
@@ -90,9 +90,9 @@ public:
 	 * @brief Return a field by its name
 	 * 
 	 */
-	FieldBase*	getField(const FieldID name);
+	FBase*	getField(const FieldID name);
 
-	std::vector<FieldBase*>& getAllFields();
+	std::vector<FBase*>& getAllFields();
 
 	/**
 	 * @brief Attach a field to Base
@@ -104,7 +104,7 @@ public:
 	 * 
 	 * @return Return false if the name conflicts with exists fields' names
 	 */
-	virtual bool attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy = true);
+	virtual bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true);
 
 	template<typename T>
 	T* getField(FieldID name)
@@ -122,8 +122,8 @@ public:
 	 */
 	bool isAllFieldsReady();
 
-	std::vector<FieldID>	getFieldAlias(FieldBase* data);
-	int				getFieldAliasCount(FieldBase* data);
+	std::vector<FieldID>	getFieldAlias(FBase* data);
+	int				getFieldAliasCount(FBase* data);
 
 
 	inline void setBlockCoord(float x, float y) { block_x = x; block_y = y; }

@@ -3,7 +3,7 @@
 
 namespace dyno
 {
-	class FieldBase;
+	class FBase;
 
 	class ConstraintModule : public Module
 	{

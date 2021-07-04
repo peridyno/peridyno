@@ -43,14 +43,14 @@ namespace dyno
 		bool initialize() override;
 
 	private:
-		VarField<Real> m_mass;
-		VarField<Coord> m_center;
-		VarField<Coord> m_transVelocity;
-		VarField<Coord> m_angularVelocity;
-		VarField<Coord> m_force;
-		VarField<Coord> m_torque;
-		VarField<Matrix> m_angularMass;
-		VarField<Matrix> m_rotation;
+		FVar<Real> m_mass;
+		FVar<Coord> m_center;
+		FVar<Coord> m_transVelocity;
+		FVar<Coord> m_angularVelocity;
+		FVar<Coord> m_force;
+		FVar<Coord> m_torque;
+		FVar<Matrix> m_angularMass;
+		FVar<Matrix> m_rotation;
 
 
 		Quat<Real> m_quaternion;

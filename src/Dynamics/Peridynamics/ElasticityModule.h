@@ -87,8 +87,8 @@ namespace dyno {
 		* @brief Lame parameters
 		* m_lambda controls the isotropic part while mu controls the deviatoric part.
 		*/
-		VarField<Real> m_mu;
-		VarField<Real> m_lambda;
+		FVar<Real> m_mu;
+		FVar<Real> m_lambda;
 
 		DArray<Real> m_bulkCoefs;
 		DArray<Coord> m_position_old;
@@ -97,7 +97,7 @@ namespace dyno {
 		DArray<Coord> m_displacement;
 		DArray<Matrix> m_invK;
 	private:
-		VarField<int> m_iterNum;
+		FVar<int> m_iterNum;
 
 		DArray<Real> m_stiffness;
 		DArray<Matrix> m_F;

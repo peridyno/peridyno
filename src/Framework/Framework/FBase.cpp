@@ -1,32 +1,32 @@
-#include "FieldBase.h"
+#include "FBase.h"
 #include <algorithm>
 
 #include "Module.h"
 
 namespace dyno
 {
-	void FieldBase::setParent(Base* owner)
+	void FBase::setParent(Base* owner)
 	{
 		mOwner = owner;
 	}
 
-	Base* FieldBase::parent()
+	Base* FBase::parent()
 	{
 		return mOwner;
 	}
 
-	void FieldBase::setSource(FieldBase* source)
+	void FBase::setSource(FBase* source)
 	{
 		m_derived = source == nullptr ? false : true;
 		mSource = source;
 	}
 
-	FieldBase* FieldBase::getSource()
+	FBase* FBase::getSource()
 	{
 		return mSource;
 	}
 
-	void FieldBase::addSink(FieldBase* f)
+	void FBase::addSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 
@@ -39,7 +39,7 @@ namespace dyno
 		}
 	}
 
-	void FieldBase::removeSink(FieldBase* f)
+	void FBase::removeSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 		
@@ -52,27 +52,27 @@ namespace dyno
 		}
 	}
 
-	bool FieldBase::isDerived()
+	bool FBase::isDerived()
 	{
 		return m_derived;
 	}
 
-	bool FieldBase::isAutoDestroyable()
+	bool FBase::isAutoDestroyable()
 	{
 		return m_autoDestroyable;
 	}
 
-	void FieldBase::setAutoDestroy(bool autoDestroy)
+	void FBase::setAutoDestroy(bool autoDestroy)
 	{
 		m_autoDestroyable = autoDestroy;
 	}
 
-	void FieldBase::setDerived(bool derived)
+	void FBase::setDerived(bool derived)
 	{
 		m_derived = derived;
 	}
 
-	bool FieldBase::connectField(FieldBase* dst)
+	bool FBase::connectField(FBase* dst)
 	{
 		if (dst->getSource() != nullptr && dst->getSource() != this)
 		{
@@ -84,12 +84,12 @@ namespace dyno
 		return true;
 	}
 
-	FieldBase* FieldBase::getTopField()
+	FBase* FBase::getTopField()
 	{
 		return mSource == nullptr ? this : mSource->getTopField();
 	}
 
-	void FieldBase::update()
+	void FBase::update()
 	{
 		if (!this->isEmpty() && callbackFunc != nullptr)
 		{
@@ -107,27 +107,27 @@ namespace dyno
 		}
 	}
 
-	bool FieldBase::isModified()
+	bool FBase::isModified()
 	{
 		return m_modified;
 	}
 
-	void FieldBase::tagModified(bool modifed)
+	void FBase::tagModified(bool modifed)
 	{
 		m_modified = modifed;
 	}
 
-	bool FieldBase::isOptional()
+	bool FBase::isOptional()
 	{
 		return m_optional;
 	}
 
-	void FieldBase::tagOptional(bool optional)
+	void FBase::tagOptional(bool optional)
 	{
 		m_optional = optional;
 	}
 
-	FieldBase::FieldBase(std::string name, std::string description, FieldTypeEnum type, Base* parent)
+	FBase::FBase(std::string name, std::string description, FieldTypeEnum type, Base* parent)
 	{
 		m_name = name; m_description = description;
 		m_fType = type;
@@ -137,7 +137,7 @@ namespace dyno
 		}
 	}
 
-	FieldTypeEnum FieldBase::getFieldType()
+	FieldTypeEnum FBase::getFieldType()
 	{
 		return m_fType;
 	}

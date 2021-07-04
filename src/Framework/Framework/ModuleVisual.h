@@ -43,7 +43,7 @@ namespace dyno
 		virtual void display() {};
 
 	private:
-		VarField<bool> m_visible;
+		FVar<bool> m_visible;
 
 		Quat<float> m_rotation;
 		Vec3f m_scale;

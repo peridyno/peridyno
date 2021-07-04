@@ -408,7 +408,7 @@ void Node::traverseTopDown(Action* act)
 	doTraverseTopDown(act);
 }
 
-bool Node::attachField(FieldBase* field, std::string name, std::string desc, bool autoDestroy /*= true*/)
+bool Node::attachField(FBase* field, std::string name, std::string desc, bool autoDestroy /*= true*/)
 {
 	field->setParent(this);
 	field->setObjectName(name);
