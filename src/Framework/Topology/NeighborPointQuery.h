@@ -16,9 +16,6 @@ namespace dyno
 		
 		void compute() override;
 
-	protected:
-		bool initializeImpl() override;
-
 	private:
 		void requestDynamicNeighborIds();
 

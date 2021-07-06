@@ -1,5 +1,20 @@
+/**
+ * Copyright 2021 Yue Chang
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
-#include "ParticleSystem.h"
+#include "Framework/Node.h"
 
 namespace dyno
 {
@@ -7,9 +22,8 @@ namespace dyno
 	*	\class	ParticleEimitter
 	*	\brief	
 	*/
-	template <typename T> class ParticleFluid;
 	template<typename TDataType>
-	class ParticleEmitter : public ParticleSystem<TDataType>
+	class ParticleEmitter : public Node
 	{
 	public:
 		typedef typename TDataType::Real Real;
@@ -18,27 +32,19 @@ namespace dyno
 		ParticleEmitter(std::string name = "particle emitter");
 		virtual ~ParticleEmitter();
 
-		void advance2(Real dt);
-		void advance(Real dt) override;
 		virtual void generateParticles();
 
-		void updateTopology() override;
-		bool resetStatus() override;
+		uint sizeOfParticles() { return mPosition.size(); }
 
+		DArray<Coord>& getPositions() { return mPosition; }
+		DArray<Coord>& getVelocities() { return mVelocity; }
 
-		//DEF_VAR(Vec3f, Centre, 0, "Emitter location");
-		//DEF_VAR(Real, Radius, 0.1, "Emitter scale");
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
 
-		DArray<Coord> gen_pos;
-		DArray<Coord> gen_vel;
-
-		DArray<Coord> pos_buf;
-		DArray<Coord> vel_buf;
-		DArray<Coord> force_buf;
-		int sum = 0;
-	private:
-		
+		void advance(Real dt) final;
+	protected:
+		DArray<Coord> mPosition;
+		DArray<Coord> mVelocity;
 	};
 }
