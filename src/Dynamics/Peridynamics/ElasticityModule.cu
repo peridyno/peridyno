@@ -1,4 +1,3 @@
-#include <cuda_runtime.h>
 #include "ElasticityModule.h"
 #include "Framework/Node.h"
 #include "Matrix/MatrixFunc.h"
@@ -254,15 +253,7 @@ namespace dyno
 		if (pId >= position.size()) return;
 
 		position[pId] = (old_position[pId] + delta_position[pId]) / (1.0+delta_weights[pId]);
-
-		if (pId == 0)
-		{
-			Coord vec_i = position[pId];
-			printf("Vec: \n %f %f %f \n",
-				vec_i[0], vec_i[1], vec_i[2]);
-		}
 	}
-
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
@@ -282,10 +273,6 @@ namespace dyno
 		: ConstraintModule()
 	{
 		this->inHorizon()->setValue(0.0125);
- 		m_mu.setValue(0.0);
- 		m_lambda.setValue(0.01);
-		m_iterNum.setValue(10);
-
 		this->inNeighborIds()->tagOptional(true);
 	}
 
@@ -293,11 +280,11 @@ namespace dyno
 	template<typename TDataType>
 	ElasticityModule<TDataType>::~ElasticityModule()
 	{
-		m_weights.clear();
-		m_displacement.clear();
-		m_invK.clear();
-		m_F.clear();
-		m_position_old.clear();
+		mWeights.clear();
+		mDisplacement.clear();
+		mInvK.clear();
+		mF.clear();
+		mPosBuf.clear();
 	}
 
 	template<typename TDataType>
@@ -306,25 +293,25 @@ namespace dyno
 		int num = this->inPosition()->getElementCount();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
-		m_displacement.reset();
-		m_weights.reset();
+		mDisplacement.reset();
+		mWeights.reset();
 
 		EM_EnforceElasticity << <pDims, BLOCK_SIZE >> > (
-			m_displacement,
-			m_weights,
-			m_bulkCoefs,
-			m_invK,
+			mDisplacement,
+			mWeights,
+			mBulkStiffness,
+			mInvK,
 			this->inPosition()->getData(),
 			this->inRestShape()->getData(),
-			m_mu.getData(),
-			m_lambda.getData());
+			this->varMu()->getData(),
+			this->varLambda()->getData());
 		cuSynchronize();
 
 		K_UpdatePosition << <pDims, BLOCK_SIZE >> > (
 			this->inPosition()->getData(),
-			m_position_old,
-			m_displacement,
-			m_weights);
+			mPosBuf,
+			mDisplacement,
+			mWeights);
 		cuSynchronize();
 	}
 
@@ -343,7 +330,7 @@ namespace dyno
 		int num = this->inPosition()->getElementCount();
 
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
-		EM_InitBulkStiffness << <pDims, BLOCK_SIZE >> > (m_bulkCoefs);
+		EM_InitBulkStiffness << <pDims, BLOCK_SIZE >> > (mBulkStiffness);
 	}
 
 
@@ -354,22 +341,22 @@ namespace dyno
 		uint pDims = cudaGridSize(restShapes.size(), BLOCK_SIZE);
 
 		EM_PrecomputeShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
-			m_invK,
+			mInvK,
 			restShapes);
 		cuSynchronize();
 	}
-
 
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::solveElasticity()
 	{
 		//Save new positions
-		m_position_old.assign(this->inPosition()->getData());
+		mPosBuf.assign(this->inPosition()->getData());
 
 		this->computeInverseK();
 
 		int itor = 0;
-		while (itor < m_iterNum.getData()) {
+		uint maxIterNum = this->varIterationNumber()->getData();
+		while (itor < maxIterNum) {
 			this->enforceElasticity();
 			itor++;
 		}
@@ -387,7 +374,7 @@ namespace dyno
 
 		K_UpdateVelocity << <pDims, BLOCK_SIZE >> > (
 			this->inVelocity()->getData(),
-			m_position_old,
+			mPosBuf,
 			this->inPosition()->getData(),
 			dt);
 		cuSynchronize();
@@ -432,24 +419,6 @@ namespace dyno
 				rest_shape_i[ne] = np_0;
 			}
 		}
-
-		if (pId == 0)
-		{
-			for (int ne = 0; ne < nbSize; ne++)
-			{
-				NPair np_j = rest_shape_i[ne];
-
-				printf("%d: %d; %f %f %f \n", pId, np_j.index, np_j.pos[0], np_j.pos[1], np_j.pos[2]);
-			}
-		}
-		
-
-// 		for (int ne = 0; ne < nbSize; ne++)
-// 		{
-// 			int j = list_id_i[ne];
-// 
-// 			printf("%d: %d; %f %f %f \n", pId, j, pos[j][0], pos[j][1], pos[j][2]);
-// 		}
 	}
 
 	template<typename TDataType>
@@ -473,42 +442,16 @@ namespace dyno
 	template<typename TDataType>
 	bool ElasticityModule<TDataType>::initializeImpl()
 	{
-		if (this->inHorizon()->isEmpty() || this->inPosition()->isEmpty() || this->inVelocity()->isEmpty() || this->inNeighborIds()->isEmpty())
-		{
-			if (this->inHorizon()->isEmpty())
-			{
-				return false;
-			}
-
-			if (this->inPosition()->isEmpty())
-			{
-				return false;
-			}
-
-			if (this->inVelocity()->isEmpty())
-			{
-				return false;
-			}
-
-			if (this->inNeighborIds()->isEmpty())
-			{
-				return false;
-			}
-
-			std::cout << "Exception: " << std::string("ElasticityModule's fields are not fully initialized!") << "\n";
-			return false;
-		}
-
 		int num = this->inPosition()->getElementCount();
 		
-		m_invK.resize(num);
-		m_weights.resize(num);
-		m_displacement.resize(num);
+		mInvK.resize(num);
+		mWeights.resize(num);
+		mDisplacement.resize(num);
 
-		m_F.resize(num);
+		mF.resize(num);
 		
-		m_position_old.resize(num);
-		m_bulkCoefs.resize(num);
+		mPosBuf.resize(num);
+		mBulkStiffness.resize(num);
 
 		if (this->inRestShape()->isEmpty())
 		{
@@ -517,7 +460,7 @@ namespace dyno
 		
 		this->computeMaterialStiffness();
 
-		m_position_old.assign(this->inPosition()->getData());
+		mPosBuf.assign(this->inPosition()->getData());
 
 		return true;
 	}
@@ -528,21 +471,19 @@ namespace dyno
 	{
 		int num = this->inPosition()->getElementCount();
 
-		if (num == m_invK.size())
+		if (num == mInvK.size())
 			return;
 
-		m_invK.resize(num);
-		m_weights.resize(num);
-		m_displacement.resize(num);
+		mInvK.resize(num);
+		mWeights.resize(num);
+		mDisplacement.resize(num);
 
-		m_F.resize(num);
+		mF.resize(num);
 
-		m_position_old.resize(num);
-		m_bulkCoefs.resize(num);
+		mPosBuf.resize(num);
+		mBulkStiffness.resize(num);
 
 		this->computeMaterialStiffness();
-
-		m_position_old.assign(this->inPosition()->getData());
 	}
 
 	DEFINE_CLASS(ElasticityModule);

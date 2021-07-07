@@ -1,13 +1,17 @@
 /**
- * @file ElasticityModule.h
- * @author Xiaowei He (xiaowei@iscas.ac.cn)
- * @brief This is an implementation of elasticity based on projective peridynamics.
- * 		  For more details, please refer to [He et al. 2017] "Projective Peridynamics for Modeling Versatile Elastoplastic Materials"
- * @version 0.1
- * @date 2019-06-18
- * 
- * @copyright Copyright (c) 2019
- * 
+ * Copyright 2021 Xiaowei He
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 #pragma once
 #include "Framework/ModuleConstraint.h"
@@ -15,6 +19,10 @@
 
 namespace dyno {
 
+	/**
+	  * @brief This is an implementation of elasticity based on projective peridynamics.
+	  *		   For more details, please refer to[He et al. 2017] "Projective Peridynamics for Modeling Versatile Elastoplastic Materials"
+	  */
 	template<typename TDataType>
 	class ElasticityModule : public ConstraintModule
 	{
@@ -32,13 +40,6 @@ namespace dyno {
 		bool constrain() override;
 
 		virtual void solveElasticity();
-
-		void setMu(Real mu) { m_mu.setValue(mu); }
-		void setLambda(Real lambda) { m_lambda.setValue(lambda); }
-
-//		void setHorizon(Real len) { m_horizon.setValue(len); }
-		void setIterationNumber(int num) { m_iterNum.setValue(num); }
-		int getIterationNumber() { return m_iterNum.getData(); }
 
 		void resetRestShape();
 
@@ -82,24 +83,25 @@ namespace dyno {
 
 		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
 
-	protected:
+	public:
 		/**
-		* @brief Lame parameters
-		* m_lambda controls the isotropic part while mu controls the deviatoric part.
-		*/
-		FVar<Real> m_mu;
-		FVar<Real> m_lambda;
+		 * @brief Lame parameters
+		 * m_lambda controls the isotropic part while mu controls the deviatoric part.
+		 */
+		DEF_VAR(Real, Mu, 0.001, "Lame parameters: mu");
 
-		DArray<Real> m_bulkCoefs;
-		DArray<Coord> m_position_old;
+		DEF_VAR(Real, Lambda, 0.01, "Lame parameters: lambda");
 
-		DArray<Real> m_weights;
-		DArray<Coord> m_displacement;
-		DArray<Matrix> m_invK;
-	private:
-		FVar<int> m_iterNum;
+		DEF_VAR(uint, IterationNumber, 10, "Iteration number");
 
-		DArray<Real> m_stiffness;
-		DArray<Matrix> m_F;
+	protected:
+		DArray<Real> mBulkStiffness;
+		DArray<Real> mWeights;
+
+		DArray<Coord> mDisplacement;
+		DArray<Coord> mPosBuf;
+
+		DArray<Matrix> mF;
+		DArray<Matrix> mInvK;
 	};
 }

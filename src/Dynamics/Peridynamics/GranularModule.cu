@@ -60,7 +60,7 @@ namespace dyno
 		m_densitySum->compute();
 
 		PM_ComputeStiffness << <pDims, BLOCK_SIZE >> > (
-			this->m_bulkCoefs,
+			this->mBulkStiffness,
 			m_densitySum->outDensity()->getData());
 		cuSynchronize();
 	}

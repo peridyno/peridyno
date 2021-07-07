@@ -242,14 +242,14 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::solveElasticity()
 	{
-		this->m_position_old.assign(this->inPosition()->getData());
+		this->mPosBuf.assign(this->inPosition()->getData());
 
 		this->computeInverseK();
 
 		m_pbdModule->varIterationNumber()->setValue(1);
 
 		int iter = 0;
-		int total = this->getIterationNumber();
+		int total = this->varIterationNumber()->getData();
 		while (iter < total)
 		{
 			this->enforceElasticity();
@@ -292,13 +292,13 @@ namespace dyno
 			m_I1,
 			this->inPosition()->getData(),
 			m_pbdModule->outDensity()->getData(),
-			this->m_bulkCoefs,
+			this->mBulkStiffness,
 			this->inRestShape()->getData(),
 			this->inHorizon()->getData(),
 			A,
 			B,
-			this->m_mu.getData(),
-			this->m_lambda.getData());
+			this->varMu()->getData(),
+			this->varLambda()->getData());
 		cuSynchronize();
 		// 
 		PM_ApplyYielding<Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (

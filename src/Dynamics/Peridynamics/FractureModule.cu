@@ -9,7 +9,6 @@ namespace dyno
 		: ElastoplasticityModule<TDataType>()
 	{
 		this->setCohesion(0.001);
-		this->setIterationNumber(10);
 	}
 
 
@@ -115,14 +114,14 @@ namespace dyno
 		Real B = this->computeB();
 
 		PM_ComputeInvariants<< <pDims, BLOCK_SIZE >> > (
-			this->m_bulkCoefs,
+			this->mBulkStiffness,
 			this->inPosition()->getData(),
 			this->inRestShape()->getData(),
 			this->inHorizon()->getData(),
 			A,
 			B,
-			this->m_mu.getData(),
-			this->m_lambda.getData());
+			this->varMu()->getData(),
+			this->varLambda()->getData());
 		cuSynchronize();
 	}
 

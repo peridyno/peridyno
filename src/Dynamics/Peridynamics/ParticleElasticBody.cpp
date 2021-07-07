@@ -76,6 +76,9 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleElasticBody<TDataType>::initialize()
 	{
+		auto nbrQuery = this->getModule("neighborhood");
+		nbrQuery->update();
+
 		return ParticleSystem<TDataType>::initialize();
 	}
 

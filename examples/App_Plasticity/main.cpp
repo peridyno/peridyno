@@ -53,7 +53,6 @@ void CreateScene()
 	child2->loadSurface("../../data/standard/standard_cube20.obj");
 	child2->scale(0.05);
 	child2->translate(Vec3f(0.5, 0.2, 0.5));
-	child2->getElasticitySolver()->setIterationNumber(10);
 	child2->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 }
 
