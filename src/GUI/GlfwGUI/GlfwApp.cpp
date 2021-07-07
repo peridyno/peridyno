@@ -187,9 +187,9 @@ namespace dyno
 	{
 		SceneGraph::getInstance().initialize();
 
-		bool show_demo_window = true;
-		float bggray[2] = { 0.2f, 0.8f };
-		
+		float iBgGray[2] = { 0.2f, 0.8f };
+		RenderParams::Light iLight;
+
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
@@ -227,9 +227,16 @@ namespace dyno
 				ImGui::Checkbox("With Scene Bounds", &(mRenderParams->showSceneBounds));
 				ImGui::Checkbox("With Axis Helper", &(mRenderParams->showAxisHelper));
 				
-				ImGui::SliderFloat2("BackColor", bggray, 0.0f, 1.0f, "%.3f", 0);
-				mRenderParams->bgColor0 = glm::vec3(bggray[0]);
-				mRenderParams->bgColor1 = glm::vec3(bggray[1]);
+				ImGui::SliderFloat2("BackColor", iBgGray, 0.0f, 1.0f, "%.3f", 0);
+				mRenderParams->bgColor0 = glm::vec3(iBgGray[0]);
+				mRenderParams->bgColor1 = glm::vec3(iBgGray[1]);
+				
+
+				ImGui::SliderFloat("Ambient Light Scale", &iLight.ambientScale, 0.0f, 10.0f, "%.3f", 0); 
+				ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview);
+				ImGui::SliderFloat("Main Light Scale", &iLight.mainLightScale, 0.0f, 10.0f, "%.3f", 0); 
+				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview);
+				mRenderParams->light = iLight;
 
 				if (ImGui::Button("Restart")) { // Restart Scene
 					mAnimationToggle = false;   //Stop first				
@@ -376,7 +383,7 @@ namespace dyno
 		mRenderParams->viewport.h = mCamera->viewportHeight();
 
 		mRenderTarget->resize(mCamera->viewportWidth(), mCamera->viewportHeight());
-
+		
 		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
 
 		// write back to the framebuffer
