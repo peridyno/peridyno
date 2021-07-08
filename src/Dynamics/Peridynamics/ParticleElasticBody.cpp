@@ -5,6 +5,7 @@
 #include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/ParticleIntegrator.h"
 #include "ElasticityModule.h"
+#include "SharedFunc.h"
 
 namespace dyno
 {
@@ -35,6 +36,7 @@ namespace dyno
 		this->varHorizon()->connect(m_elasticity->inHorizon());
 		this->currentPosition()->connect(m_elasticity->inPosition());
 		this->currentVelocity()->connect(m_elasticity->inVelocity());
+		this->currentRestShape()->connect(m_elasticity->inRestShape());
 		m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
 
 		this->animationPipeline()->push_back(m_elasticity);
@@ -76,9 +78,6 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleElasticBody<TDataType>::initialize()
 	{
-		auto nbrQuery = this->getModule("neighborhood");
-		nbrQuery->update();
-
 		return ParticleSystem<TDataType>::initialize();
 	}
 
@@ -94,7 +93,7 @@ namespace dyno
 		integrator->integrate();
 
 		if (module != nullptr && self_update)
-			module->constrain();
+			module->update();
 
 		integrator->end();
 	}
@@ -112,6 +111,31 @@ namespace dyno
 		}
 	}
 
+	template<typename TDataType>
+	bool ParticleElasticBody<TDataType>::resetStatus()
+	{
+		ParticleSystem<TDataType>::resetStatus();
+
+		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
+		nbrQuery->update();
+
+		if (!this->currentPosition()->isEmpty())
+		{
+			this->currentRestShape()->allocate();
+			auto nbrPtr = this->currentRestShape()->getDataPtr();
+			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
+
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+
+			this->currentReferencePosition()->allocate();
+			this->currentReferencePosition()->getDataPtr()->assign(this->currentPosition()->getData());
+
+			this->currentNeighborIds()->allocate();
+			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
+		}
+
+		return true;
+	}
 
 	template<typename TDataType>
 	std::shared_ptr<ElasticityModule<TDataType>> ParticleElasticBody<TDataType>::getElasticitySolver()

@@ -422,51 +422,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ElasticityModule<TDataType>::resetRestShape()
-	{
-		auto& nbrIds = this->inNeighborIds()->getData();
-
-		if (this->inRestShape()->isEmpty()) {
-			this->inRestShape()->allocate();
-		}
-
-		this->inRestShape()->getDataPtr()->resize(nbrIds);
-
-		cuExecute(nbrIds.size(),
-			K_UpdateRestShape,
-			this->inRestShape()->getData(),
-			this->inNeighborIds()->getData(),
-			this->inPosition()->getData());
-	}
-
-	template<typename TDataType>
-	bool ElasticityModule<TDataType>::initializeImpl()
-	{
-		int num = this->inPosition()->getElementCount();
-		
-		mInvK.resize(num);
-		mWeights.resize(num);
-		mDisplacement.resize(num);
-
-		mF.resize(num);
-		
-		mPosBuf.resize(num);
-		mBulkStiffness.resize(num);
-
-		if (this->inRestShape()->isEmpty())
-		{
-			resetRestShape();
-		}
-		
-		this->computeMaterialStiffness();
-
-		mPosBuf.assign(this->inPosition()->getData());
-
-		return true;
-	}
-
-
-	template<typename TDataType>
 	void ElasticityModule<TDataType>::preprocess()
 	{
 		int num = this->inPosition()->getElementCount();

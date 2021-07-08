@@ -63,6 +63,18 @@ public:									\
 	inline FArray<T, device>* next##name() {return &next_##name;}
 
 
+#define DEF_EMPTY_CURRENT_ARRAYLIST(T, name, device, desc) \
+private:									\
+	FArrayList<T, device> current_##name = FArrayList<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+public:									\
+	inline FArrayList<T, device>* current##name() {return &current_##name;}
+
+#define DEF_EMPTY_NEXT_ARRAYLIST(T, name, device, desc) \
+private:									\
+	FArrayList<T, device> next_##name = FArrayList<T, device>(std::string(#name), desc, FieldTypeEnum::Next, this);	\
+public:									\
+	inline FArrayList<T, device>* next##name() {return &next_##name;}
+
 /**
  * @brief Macro definitions for neighbor list
  * 

@@ -1,5 +1,6 @@
 #pragma once
 #include "ParticleSystem/ParticleSystem.h"
+#include "NeighborData.h"
 
 namespace dyno
 {
@@ -17,6 +18,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef TPair<TDataType> NPair;
 
 		ParticleElasticBody(std::string name = "default");
 		virtual ~ParticleElasticBody();
@@ -24,6 +26,7 @@ namespace dyno
 		bool initialize() override;
 		void advance(Real dt) override;
 		void updateTopology() override;
+		bool resetStatus() override;
 
 		bool translate(Coord t) override;
 		bool scale(Real s) override;
@@ -38,6 +41,12 @@ namespace dyno
 
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
+
+		DEF_EMPTY_CURRENT_ARRAY(ReferencePosition, Coord, DeviceType::GPU, "Reference position");
+
+		DEF_EMPTY_CURRENT_ARRAYLIST(int, NeighborIds, DeviceType::GPU, "Storing the ids for neighboring particles");
+
+		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	private:
 		std::shared_ptr<Node> m_surfaceNode;

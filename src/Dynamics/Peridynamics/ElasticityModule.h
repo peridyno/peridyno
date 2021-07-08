@@ -41,11 +41,7 @@ namespace dyno {
 
 		virtual void solveElasticity();
 
-		void resetRestShape();
-
 	protected:
-		bool initializeImpl() override;
-
 		void preprocess() override;
 
 		/**

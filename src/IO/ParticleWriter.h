@@ -6,7 +6,6 @@
 
 namespace dyno
 {
-
 	template <typename TDataType> class TriangleSet;
 	template<typename TDataType>
 	class ParticleWriter : public IOModule
