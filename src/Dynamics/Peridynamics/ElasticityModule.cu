@@ -96,11 +96,6 @@ namespace dyno
 		invK[pId] = mat_i;
 	}
 
-	__device__ float EM_GetStiffness(int r)
-	{
-		return 10.0f;
-	}
-
 	template <typename Real, typename Coord, typename Matrix, typename NPair>
 	__global__ void EM_EnforceElasticity(
 		DArray<Coord> delta_position,

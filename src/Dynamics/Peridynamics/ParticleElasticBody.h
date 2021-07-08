@@ -31,8 +31,6 @@ namespace dyno
 		bool translate(Coord t) override;
 		bool scale(Real s) override;
 
-		void setElasticitySolver(std::shared_ptr<ElasticityModule<TDataType>> solver);
-		std::shared_ptr<ElasticityModule<TDataType>> getElasticitySolver();
 		void loadSurface(std::string filename);
 
 		std::shared_ptr<PointSetToPointSet<TDataType>> getTopologyMapping();

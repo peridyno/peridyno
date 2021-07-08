@@ -25,10 +25,6 @@ namespace dyno
 		AnimationPipeline(Node* node);
 		virtual ~AnimationPipeline();
 
-
-	protected:
-		void updateImpl() override;
-
 	private:
 	};
 }

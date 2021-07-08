@@ -23,9 +23,6 @@ namespace dyno {
 		bool updateVelocity();
 		bool updatePosition();
 
-	protected:
-		bool initializeImpl() override;
-
 	public:
 
 		/**
@@ -52,6 +49,8 @@ namespace dyno {
 		*/
 		DEF_ARRAY_IN(Coord, ForceDensity, DeviceType::GPU, "Force density on each particle");
 
+	protected:
+		void updateImpl() override;
 
 	private:
 		DArray<Coord> m_prePosition;

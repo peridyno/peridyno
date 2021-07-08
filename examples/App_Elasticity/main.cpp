@@ -32,8 +32,6 @@ int main()
 	bunny->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 	sRender->setColor(Vec3f(1, 1, 0));
 
-	bunny->getElasticitySolver()->inHorizon()->setValue(0.01);
-
 	GlfwApp window;
 	window.createWindow(1024, 768);
 	window.mainLoop();

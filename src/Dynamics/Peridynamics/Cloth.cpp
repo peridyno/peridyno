@@ -21,33 +21,25 @@ namespace dyno
 	Cloth<TDataType>::Cloth(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
-// 		auto peri = std::make_shared<Peridynamics<TDataType>>();
-// 		this->setNumericalModel(peri);
-// 		this->currentPosition()->connect(&peri->m_position);
-// 		this->currentVelocity()->connect(&peri->m_velocity);
-// 		this->currentForce()->connect(&peri->m_forceDensity);
-		auto m_integrator = this->template setNumericalIntegrator<ParticleIntegrator<TDataType>>("integrator");
-		this->currentPosition()->connect(m_integrator->inPosition());
-		this->currentVelocity()->connect(m_integrator->inVelocity());
-		this->currentForce()->connect(m_integrator->inForceDensity());
+		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->currentPosition()->connect(integrator->inPosition());
+		this->currentVelocity()->connect(integrator->inVelocity());
+		this->currentForce()->connect(integrator->inForceDensity());
 
-		this->animationPipeline()->push_back(m_integrator);
+		this->animationPipeline()->pushModule(integrator);
 
-		auto m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
-		this->varHorizon()->connect(m_nbrQuery->inRadius());
-		this->currentPosition()->connect(m_nbrQuery->inPosition());
+		auto nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
+		this->varHorizon()->connect(nbrQuery->inRadius());
+		this->currentPosition()->connect(nbrQuery->inPosition());
 
-		this->animationPipeline()->push_back(m_nbrQuery);
+		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
+		this->varHorizon()->connect(elasticity->inHorizon());
+		this->currentPosition()->connect(elasticity->inPosition());
+		this->currentVelocity()->connect(elasticity->inVelocity());
+		this->currentRestShape()->connect(elasticity->inRestShape());
+		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
 
-
-		auto m_elasticity = this->template addConstraintModule<ElasticityModule<TDataType>>("elasticity");
-		this->varHorizon()->connect(m_elasticity->inHorizon());
-		this->currentPosition()->connect(m_elasticity->inPosition());
-		this->currentVelocity()->connect(m_elasticity->inVelocity());
-		this->currentRestShape()->connect(m_elasticity->inRestShape());
-		m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
-
-		this->animationPipeline()->push_back(m_elasticity);
+		this->animationPipeline()->pushModule(elasticity);
 
 
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
@@ -57,9 +49,6 @@ namespace dyno
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		mSurfaceNode->setTopologyModule(triSet);
-
-// 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
-// 		this->addTopologyMapping(surfaceMapping);
 	}
 
 	template<typename TDataType>
@@ -94,21 +83,7 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::advance(Real dt)
 	{
-// 		auto nModel = this->getNumericalModel();
-// 		nModel->step(this->getDt());
-
-		auto integrator = this->template getModule<ParticleIntegrator<TDataType>>("integrator");
-
-		auto module = this->template getModule<ElasticityModule<TDataType>>("elasticity");
-
-		integrator->begin();
-
-		integrator->integrate();
-
-		if (module != nullptr && self_update)
-			module->update();
-
-		integrator->end();
+		this->animationPipeline()->update();
 	}
 
 	template<typename TDataType>

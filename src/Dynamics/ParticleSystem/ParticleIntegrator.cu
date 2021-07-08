@@ -37,23 +37,6 @@ namespace dyno
 
 	}
 
-	template<typename TDataType>
-	bool ParticleIntegrator<TDataType>::initializeImpl()
-	{
-// 		if (!isAllFieldsReady())
-// 		{
-// 			std::cout << "Exception: " << std::string("DensitySummation's fields are not fully initialized!") << "\n";
-// 			return false;
-// 		}
-// 
-// 		int num = this->inPosition()->getElementCount();
-// 
-// 		m_prePosition.resize(num);
-// 		m_preVelocity.resize(num);
-
-		return true;
-	}
-
 	template<typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
 		DArray<Coord> vel,
@@ -192,6 +175,17 @@ namespace dyno
 
 		return true;
 	}
+
+
+	template<typename TDataType>
+	void ParticleIntegrator<TDataType>::updateImpl()
+	{
+		this->begin();
+		this->integrate();
+		this->end();
+	}
+
+
 
 	DEFINE_CLASS(ParticleIntegrator);
 }
