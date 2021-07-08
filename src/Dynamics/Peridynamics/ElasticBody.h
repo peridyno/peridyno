@@ -12,16 +12,16 @@ namespace dyno
 	*	\brief	Peridynamics-based elastic object.
 	*/
 	template<typename TDataType>
-	class ParticleElasticBody : public ParticleSystem<TDataType>
+	class ElasticBody : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ParticleElasticBody, TDataType)
+		DECLARE_CLASS_1(ElasticBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef TPair<TDataType> NPair;
 
-		ParticleElasticBody(std::string name = "default");
-		virtual ~ParticleElasticBody();
+		ElasticBody(std::string name = "default");
+		virtual ~ElasticBody();
 
 		bool initialize() override;
 		void advance(Real dt) override;

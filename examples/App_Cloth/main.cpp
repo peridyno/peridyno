@@ -3,7 +3,7 @@
 #include "Framework/SceneGraph.h"
 #include "Framework/Log.h"
 
-#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/Cloth.h"
 
 #include "ParticleSystem/StaticBoundary.h"

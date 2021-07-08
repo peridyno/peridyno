@@ -1,4 +1,4 @@
-#include "ParticleElasticBody.h"
+#include "ElasticBody.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
@@ -9,10 +9,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleElasticBody, TDataType)
+	IMPLEMENT_CLASS_1(ElasticBody, TDataType)
 
 	template<typename TDataType>
-	ParticleElasticBody<TDataType>::ParticleElasticBody(std::string name)
+	ElasticBody<TDataType>::ElasticBody(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
 		this->varHorizon()->setValue(0.0085);
@@ -50,13 +50,13 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	ParticleElasticBody<TDataType>::~ParticleElasticBody()
+	ElasticBody<TDataType>::~ElasticBody()
 	{
 		
 	}
 
 	template<typename TDataType>
-	bool ParticleElasticBody<TDataType>::translate(Coord t)
+	bool ElasticBody<TDataType>::translate(Coord t)
 	{
 		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);
 
@@ -64,7 +64,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ParticleElasticBody<TDataType>::scale(Real s)
+	bool ElasticBody<TDataType>::scale(Real s)
 	{
 		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->scale(s);
 
@@ -73,19 +73,19 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool ParticleElasticBody<TDataType>::initialize()
+	bool ElasticBody<TDataType>::initialize()
 	{
 		return ParticleSystem<TDataType>::initialize();
 	}
 
 	template<typename TDataType>
-	void ParticleElasticBody<TDataType>::advance(Real dt)
+	void ElasticBody<TDataType>::advance(Real dt)
 	{
 		this->animationPipeline()->update();
 	}
 
 	template<typename TDataType>
-	void ParticleElasticBody<TDataType>::updateTopology()
+	void ElasticBody<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
 		pts.assign(this->currentPosition()->getData());
@@ -98,7 +98,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ParticleElasticBody<TDataType>::resetStatus()
+	bool ElasticBody<TDataType>::resetStatus()
 	{
 		ParticleSystem<TDataType>::resetStatus();
 
@@ -124,19 +124,19 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleElasticBody<TDataType>::loadSurface(std::string filename)
+	void ElasticBody<TDataType>::loadSurface(std::string filename)
 	{
 		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->loadObjFile(filename);
 	}
 
 
 	template<typename TDataType>
-	std::shared_ptr<PointSetToPointSet<TDataType>> ParticleElasticBody<TDataType>::getTopologyMapping()
+	std::shared_ptr<PointSetToPointSet<TDataType>> ElasticBody<TDataType>::getTopologyMapping()
 	{
 		auto mapping = this->template getModule<PointSetToPointSet<TDataType>>("surface_mapping");
 
 		return mapping;
 	}
 
-	DEFINE_CLASS(ParticleElasticBody);
+	DEFINE_CLASS(ElasticBody);
 }

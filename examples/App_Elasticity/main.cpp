@@ -3,7 +3,7 @@
 
 #include "ParticleSystem/StaticBoundary.h"
 
-#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/ElasticityModule.h"
 
 #include "module/SurfaceRender.h"
@@ -18,7 +18,7 @@ int main()
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
 	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
 
-	std::shared_ptr<ParticleElasticBody<DataType3f>> bunny = std::make_shared<ParticleElasticBody<DataType3f>>();
+	std::shared_ptr<ElasticBody<DataType3f>> bunny = std::make_shared<ElasticBody<DataType3f>>();
 	root->addParticleSystem(bunny);
 
 	bunny->setMass(1.0);

@@ -6,8 +6,8 @@
 
 #include "ParticleSystem/StaticBoundary.h"
 
-#include "Peridynamics/ParticleElastoplasticBody.h"
-#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElastoplasticBody.h"
+#include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/ElasticityModule.h"
 
 #include "RigidBody/RigidBody.h"
@@ -26,7 +26,7 @@ void CreateScene()
 // 	root->translate(Vec3f(0.2f, 0.2f, 0));
 	root->loadCube(Vec3f(0), Vec3f(1), 0.005, true);
 
-	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
+	std::shared_ptr<ElastoplasticBody<DataType3f>> child3 = std::make_shared<ElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
 	auto ptRender = std::make_shared<SurfaceRenderer>();
@@ -44,7 +44,7 @@ void CreateScene()
 	auto sRender = std::make_shared<SurfaceRenderer>();
 	sRender->setColor(Vec3f(1, 1, 1));
 
-	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
+	std::shared_ptr<ElasticBody<DataType3f>> child2 = std::make_shared<ElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);
 
 	child2->setVisible(false);

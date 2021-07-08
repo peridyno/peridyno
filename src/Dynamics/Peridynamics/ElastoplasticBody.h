@@ -1,5 +1,6 @@
 #pragma once
 #include "Particlesystem/ParticleSystem.h"
+#include "NeighborData.h"
 
 namespace dyno
 {
@@ -15,19 +16,21 @@ namespace dyno
 	*	\brief	Peridynamics-based elastoplastic object.
 	*/
 	template<typename TDataType>
-	class ParticleElastoplasticBody : public ParticleSystem<TDataType>
+	class ElastoplasticBody : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ParticleElastoplasticBody, TDataType)
+		DECLARE_CLASS_1(ElastoplasticBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef TPair<TDataType> NPair;
 
-		ParticleElastoplasticBody(std::string name = "default");
-		virtual ~ParticleElastoplasticBody();
+		ElastoplasticBody(std::string name = "default");
+		virtual ~ElastoplasticBody();
 
 		void advance(Real dt) override;
 
 		void updateTopology() override;
+		bool resetStatus() override;
 
 		bool initialize() override;
 
@@ -42,6 +45,8 @@ namespace dyno
 
 	public:
 		FVar<Real> m_horizon;
+
+		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	private:
 		std::shared_ptr<Node> m_surfaceNode;
