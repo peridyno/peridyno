@@ -11,177 +11,175 @@
 
 namespace dyno
 {
-SceneGraph& SceneGraph::getInstance()
-{
-	static SceneGraph m_instance;
-	return m_instance;
-}
-
-bool SceneGraph::isIntervalAdaptive()
-{
-	return m_advative_interval;
-}
-
-void SceneGraph::setAdaptiveInterval(bool adaptive)
-{
-	m_advative_interval = adaptive;
-}
-
-void SceneGraph::setGravity(Vec3f g)
-{
-	m_gravity = g;
-}
-
-Vec3f SceneGraph::getGravity()
-{
-	return m_gravity;
-}
-
-bool SceneGraph::initialize()
-{
-	if (m_initialized)
+	SceneGraph& SceneGraph::getInstance()
 	{
-		return true;
+		static SceneGraph m_instance;
+		return m_instance;
 	}
-	//TODO: check initialization
-	if (m_root == nullptr)
+
+	bool SceneGraph::isIntervalAdaptive()
 	{
+		return m_advative_interval;
+	}
+
+	void SceneGraph::setAdaptiveInterval(bool adaptive)
+	{
+		m_advative_interval = adaptive;
+	}
+
+	void SceneGraph::setGravity(Vec3f g)
+	{
+		m_gravity = g;
+	}
+
+	Vec3f SceneGraph::getGravity()
+	{
+		return m_gravity;
+	}
+
+	bool SceneGraph::initialize()
+	{
+		if (m_initialized)
+		{
+			return true;
+		}
+		//TODO: check initialization
+		if (m_root == nullptr)
+		{
+			return false;
+		}
+
+		m_root->traverseBottomUp<InitAct>();
+		m_initialized = true;
+
+		return m_initialized;
+	}
+
+	void SceneGraph::invalid()
+	{
+		m_initialized = false;
+	}
+
+	void SceneGraph::draw()
+	{
+		if (m_root == nullptr)
+		{
+			return;
+		}
+
+		//m_root->traverseTopDown<DrawAct>();
+	}
+
+	void SceneGraph::advance(float dt)
+	{
+		//	AnimationController*  aController = m_root->getAnimationController();
+			//	aController->
+	}
+
+	void SceneGraph::takeOneFrame()
+	{
+		/*
+		if (m_root == nullptr)
+		{
+			return;
+		}
+		m_root->traverseTopDown<AnimateAct>();*/
+		std::cout << "****************Frame " << m_frameNumber << " Started" << std::endl;
+
+		if (m_root == nullptr)
+		{
+			return;
+		}
+
+
+
+		float t = 0.0f;
+		float dt = 0.0f;
+
+		QueryTimeStep time;
+
+		time.reset();
+		m_root->traverseTopDown(&time);
+		dt = time.getTimeStep();
+
+		if (m_advative_interval)
+		{
+			m_root->traverseTopDown<AnimateAct>(dt);
+			m_elapsedTime += dt;
+		}
+		else
+		{
+			float interval = 1.0f / m_frameRate;
+			while (t + dt < interval)
+			{
+				m_root->traverseTopDown<AnimateAct>(dt);
+
+				t += dt;
+				time.reset();
+				m_root->traverseTopDown(&time);
+				dt = time.getTimeStep();
+			}
+
+			m_root->traverseTopDown<AnimateAct>(interval - t);
+
+			m_elapsedTime += interval;
+		}
+
+		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
+
+		m_root->traverseTopDown<PostProcessing>();
+
+		std::cout << "****************Frame " << m_frameNumber << " Ended" << std::endl << std::endl;
+
+		m_frameNumber++;
+	}
+
+	void SceneGraph::run()
+	{
+
+	}
+
+	void SceneGraph::reset()
+	{
+		if (m_root == nullptr)
+		{
+			return;
+		}
+
+		m_root->traverseBottomUp<ResetAct>();
+
+		//m_root->traverseBottomUp();
+	}
+
+	bool SceneGraph::load(std::string name)
+	{
+		SceneLoader* loader = SceneLoaderFactory::getInstance().getEntryByFileName(name);
+		if (loader)
+		{
+			m_root = loader->load(name);
+			return true;
+		}
+
 		return false;
 	}
 
-	m_root->traverseBottomUp<InitAct>();
-	m_initialized = true;
-
-	return m_initialized;
-}
-
-void SceneGraph::invalid()
-{
-	m_initialized = false;
-}
-
-void SceneGraph::draw()
-{
-	if (m_root == nullptr)
+	Vec3f SceneGraph::getLowerBound()
 	{
-		return;
+		return m_lowerBound;
 	}
 
-	//m_root->traverseTopDown<DrawAct>();
-}
-
-void SceneGraph::advance(float dt)
-{
-//	AnimationController*  aController = m_root->getAnimationController();
-	//	aController->
-}
-
-void SceneGraph::takeOneFrame()
-{
-	/*
-	if (m_root == nullptr)
+	Vec3f SceneGraph::getUpperBound()
 	{
-		return;
-	}
-	m_root->traverseTopDown<AnimateAct>();*/
-	std::cout << "****************Frame " << m_frameNumber << " Started" << std::endl;
-
-	if (m_root == nullptr)
-	{
-		return;
+		return m_upperBound;
 	}
 
-	
-
-	float t = 0.0f;
-	float dt = 0.0f;
-
-	QueryTimeStep time;
-
-	time.reset();
-	m_root->traverseTopDown(&time);
-	dt = time.getTimeStep();
-
-	if (m_advative_interval)
+	void SceneGraph::setLowerBound(Vec3f lowerBound)
 	{
-		m_root->traverseTopDown<AnimateAct>(dt);
-		m_elapsedTime += dt;
-	}
-	else
-	{
-		float interval = 1.0f / m_frameRate;
-		while (t + dt < interval)
-		{
-			m_root->traverseTopDown<AnimateAct>(dt);
-
-			t += dt;
-			time.reset();
-			m_root->traverseTopDown(&time);
-			dt = time.getTimeStep();
-		}
-
-		m_root->traverseTopDown<AnimateAct>(interval - t);
-
-		m_elapsedTime += interval;
-	}
-	
-	m_root->traverseTopDown<UpdateGrpahicsContextAct>();
-
-	m_root->traverseTopDown<PostProcessing>();
-
-	std::cout << "****************Frame " << m_frameNumber << " Ended" << std::endl << std::endl;
-
-	m_frameNumber++;
-}
-
-void SceneGraph::run()
-{
-
-}
-
-void SceneGraph::reset()
-{
-	if (m_root == nullptr)
-	{
-		return;
+		m_lowerBound = lowerBound;
 	}
 
-	m_root->traverseBottomUp<ResetAct>();
-
-	//m_root->traverseBottomUp();
-}
-
-bool SceneGraph::load(std::string name)
-{
-	SceneLoader* loader = SceneLoaderFactory::getInstance().getEntryByFileName(name);
-	if (loader)
+	void SceneGraph::setUpperBound(Vec3f upperBound)
 	{
-		m_root = loader->load(name);
-		return true;
+		m_upperBound = upperBound;
 	}
-
-	return false;
-}
-
-Vec3f SceneGraph::getLowerBound()
-{
-	return m_lowerBound;
-}
-
-Vec3f SceneGraph::getUpperBound()
-{
-	return m_upperBound;
-}
-
-void SceneGraph::setLowerBound(Vec3f lowerBound)
-{
-	m_lowerBound = lowerBound;
-}
-
-void SceneGraph::setUpperBound(Vec3f upperBound)
-{
-	m_upperBound = upperBound;
-}
-
-
 }

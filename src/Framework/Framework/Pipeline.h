@@ -59,16 +59,11 @@ namespace dyno
 		Pipeline(Node* node);
 		virtual ~Pipeline();
 
-		Iterator entry();
-		Iterator finished();
-
-		unsigned int size();
-
-		void push_back(std::weak_ptr<Module> m);
+		uint sizeOfDynamicModules();
+		uint sizeOfPersistentModules();
 
 		void pushModule(std::shared_ptr<Module> m);
 
-		//TODO: this is a temporary method 
 		void pushPersistentModule(std::shared_ptr<Module> m);
 
 		std::list<Module*>& activeModules() {
@@ -85,12 +80,6 @@ namespace dyno
 		void reconstructPipeline();
 
 	private:
-		std::weak_ptr<Module> start_module;
-		std::weak_ptr<Module> current_module;
-		std::weak_ptr<Module> end_module;
-
-		unsigned int num = 0;
-
 		bool mModuleUpdated = false;
 
 		std::map<ObjectId, Module*> mModuleMap;

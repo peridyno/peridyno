@@ -38,7 +38,6 @@ namespace dyno
 		this->currentVelocity()->connect(elasticity->inVelocity());
 		this->currentRestShape()->connect(elasticity->inRestShape());
 		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
-
 		this->animationPipeline()->pushModule(elasticity);
 
 

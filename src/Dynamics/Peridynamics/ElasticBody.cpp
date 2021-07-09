@@ -5,6 +5,7 @@
 #include "Topology/NeighborPointQuery.h"
 #include "ParticleSystem/ParticleIntegrator.h"
 #include "ElasticityModule.h"
+#include "Peridynamics/Peridynamics.h"
 #include "SharedFunc.h"
 
 namespace dyno
@@ -16,27 +17,13 @@ namespace dyno
 		: ParticleSystem<TDataType>(name)
 	{
 		this->varHorizon()->setValue(0.0085);
-//		this->attachField(&m_horizon, "horizon", "horizon");
 
-		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
-		this->currentPosition()->connect(integrator->inPosition());
-		this->currentVelocity()->connect(integrator->inVelocity());
-		this->currentForce()->connect(integrator->inForceDensity());
-
-		this->animationPipeline()->pushModule(integrator);
-
-		auto nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
-		this->varHorizon()->connect(nbrQuery->inRadius());
-		this->currentPosition()->connect(nbrQuery->inPosition());
-
-		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
-		this->varHorizon()->connect(elasticity->inHorizon());
-		this->currentPosition()->connect(elasticity->inPosition());
-		this->currentVelocity()->connect(elasticity->inVelocity());
-		this->currentRestShape()->connect(elasticity->inRestShape());
-		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
-
-		this->animationPipeline()->pushModule(elasticity);
+		auto peri = std::make_shared<Peridynamics<TDataType>>();
+		this->currentPosition()->connect(peri->inPosition());
+		this->currentVelocity()->connect(peri->inVelocity());
+		this->currentForce()->connect(peri->inForce());
+		this->currentRestShape()->connect(peri->inRestShape());
+		this->animationPipeline()->pushModule(peri);
 
 		//Create a node for surface mesh rendering
 		m_surfaceNode = this->template createAncestor<Node>("Mesh");
@@ -102,7 +89,9 @@ namespace dyno
 	{
 		ParticleSystem<TDataType>::resetStatus();
 
-		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
+		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+ 		this->varHorizon()->connect(nbrQuery->inRadius());
+ 		this->currentPosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
 		if (!this->currentPosition()->isEmpty())

@@ -74,12 +74,20 @@ namespace dyno
 
 	bool FBase::connectField(FBase* dst)
 	{
-		if (dst->getSource() != nullptr && dst->getSource() != this)
-		{
+		if (dst->getSource() != nullptr && dst->getSource() != this) {
 			dst->getSource()->removeSink(dst);
 		}
 
 		this->addSink(dst);
+
+		return true;
+	}
+
+	bool FBase::disconnectField(FBase* dst)
+	{
+		if (dst->getSource() == this) {
+			dst->getSource()->removeSink(dst);
+		}
 
 		return true;
 	}

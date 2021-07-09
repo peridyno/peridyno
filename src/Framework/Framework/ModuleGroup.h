@@ -14,16 +14,32 @@
  * limitations under the License.
  */
 #pragma once
-#include "Array/Array.h"
-#include "Array/ArrayList.h"
-
-#include "NeighborData.h"
-#include "DataTypes.h"
+#include "Framework/Module.h"
 
 namespace dyno {
-	template<typename Coord, typename NPair>
-	void constructRestShape(
-		DArrayList<NPair>& shape,
-		DArrayList<int>& nbr,
-		DArray<Coord>& pos);
+	class GroupModule : public Module
+	{
+	public:
+		GroupModule();
+		virtual ~GroupModule();
+
+		void pushModule(std::shared_ptr<Module> m);
+
+		const std::list<Module*>& moduleList() const { return mModuleList; }
+
+	protected:
+		void preprocess() final;
+		void updateImpl() override;
+
+	private:
+		void reconstructPipeline();
+
+		bool mModuleUpdated = false;
+
+		std::map<ObjectId, std::shared_ptr<Module>> mModuleMap;
+		std::list<Module*>  mModuleList;
+
+		std::list<std::shared_ptr<Module>> mPersistentModule;
+	};
 }
+
