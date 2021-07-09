@@ -34,6 +34,7 @@ namespace dyno
 
 		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
 		this->varHorizon()->connect(elasticity->inHorizon());
+		this->varTimeStep()->connect(elasticity->inTimeStep());
 		this->currentPosition()->connect(elasticity->inPosition());
 		this->currentVelocity()->connect(elasticity->inVelocity());
 		this->currentRestShape()->connect(elasticity->inRestShape());

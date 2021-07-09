@@ -1,13 +1,8 @@
 #include "SceneGraph.h"
-#include "Action/ActAnimate.h"
 //#include "Action/ActDraw.h"
-#include "Action/ActInit.h"
 #include "Action/ActReset.h"
-#include "Action/ActQueryTimestep.h"
 #include "Action/ActPostProcessing.h"
-#include "Action/ActUpdateGrpahicsContext.h"
 #include "Framework/SceneLoaderFactory.h"
-
 
 namespace dyno
 {
@@ -19,27 +14,27 @@ namespace dyno
 
 	bool SceneGraph::isIntervalAdaptive()
 	{
-		return m_advative_interval;
+		return mAdvativeInterval;
 	}
 
 	void SceneGraph::setAdaptiveInterval(bool adaptive)
 	{
-		m_advative_interval = adaptive;
+		mAdvativeInterval = adaptive;
 	}
 
 	void SceneGraph::setGravity(Vec3f g)
 	{
-		m_gravity = g;
+		mGravity = g;
 	}
 
 	Vec3f SceneGraph::getGravity()
 	{
-		return m_gravity;
+		return mGravity;
 	}
 
 	bool SceneGraph::initialize()
 	{
-		if (m_initialized)
+		if (mInitialized)
 		{
 			return true;
 		}
@@ -49,15 +44,33 @@ namespace dyno
 			return false;
 		}
 
-		m_root->traverseBottomUp<InitAct>();
-		m_initialized = true;
+		class InitAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->resetStatus();
+				node->initialize();
 
-		return m_initialized;
+				auto& list = node->getModuleList();
+				std::list<std::shared_ptr<Module>>::iterator iter = list.begin();
+				for (; iter != list.end(); iter++)
+				{
+					(*iter)->initialize();
+				}
+
+				node->graphicsPipeline()->update();
+			}
+		};
+
+		m_root->traverseBottomUp<InitAct>();
+		mInitialized = true;
+
+		return mInitialized;
 	}
 
 	void SceneGraph::invalid()
 	{
-		m_initialized = false;
+		mInitialized = false;
 	}
 
 	void SceneGraph::draw()
@@ -72,66 +85,119 @@ namespace dyno
 
 	void SceneGraph::advance(float dt)
 	{
-		//	AnimationController*  aController = m_root->getAnimationController();
-			//	aController->
+		class AdvanceAct : public Action
+		{
+		public:
+			AdvanceAct(float dt, float t) {
+				mDt = dt; 
+				mElapsedTime = t;
+			};
+
+			void start(Node* node) override {
+				if (node == NULL)
+					return;
+
+				node->varTimeStep()->setValue(mDt);
+				node->varElapsedTime()->setValue(mElapsedTime);
+			}
+
+			void process(Node* node) override {
+				if (node == NULL)
+				{
+					Log::sendMessage(Log::Error, "Node is invalid!");
+					return;
+				}
+				if (node->isActive())
+				{
+					node->updateStatus();
+
+					auto customModules = node->getCustomModuleList();
+					for (std::list<std::shared_ptr<CustomModule>>::iterator iter = customModules.begin(); iter != customModules.end(); iter++)
+					{
+						(*iter)->update();
+					}
+
+					node->advance(node->getDt());
+					node->updateTopology();
+
+					auto topoModules = node->getTopologyMappingList();
+					for (std::list<std::shared_ptr<TopologyMapping>>::iterator iter = topoModules.begin(); iter != topoModules.end(); iter++)
+					{
+						(*iter)->update();
+					}
+				}
+			}
+
+			float mDt;
+			float mElapsedTime;
+		};	
+
+		m_root->traverseTopDown<AdvanceAct>(dt, mElapsedTime);
+		mElapsedTime += dt;
 	}
 
 	void SceneGraph::takeOneFrame()
 	{
-		/*
-		if (m_root == nullptr)
-		{
-			return;
-		}
-		m_root->traverseTopDown<AnimateAct>();*/
-		std::cout << "****************Frame " << m_frameNumber << " Started" << std::endl;
+		std::cout << "****************Frame " << mFrameNumber << " Started" << std::endl;
 
 		if (m_root == nullptr)
 		{
 			return;
 		}
-
-
 
 		float t = 0.0f;
 		float dt = 0.0f;
 
-		QueryTimeStep time;
-
-		time.reset();
-		m_root->traverseTopDown(&time);
-		dt = time.getTimeStep();
-
-		if (m_advative_interval)
+		class QueryTimeStep : public Action
 		{
-			m_root->traverseTopDown<AnimateAct>(dt);
-			m_elapsedTime += dt;
+		public:
+			void process(Node* node) override {
+				dt = std::min(node->getDt(), dt);
+			}
+
+			float dt;
+		} timeStep;
+
+		timeStep.dt = 1.0f / mFrameRate;
+
+		m_root->traverseTopDown(&timeStep);
+		dt = timeStep.dt;
+
+		if (mAdvativeInterval)
+		{
+			this->advance(dt);
 		}
 		else
 		{
-			float interval = 1.0f / m_frameRate;
+			float interval = 1.0f / mFrameRate;
 			while (t + dt < interval)
 			{
-				m_root->traverseTopDown<AnimateAct>(dt);
+				this->advance(dt);
 
 				t += dt;
-				time.reset();
-				m_root->traverseTopDown(&time);
-				dt = time.getTimeStep();
+				timeStep.dt = 1.0f / mFrameRate;
+				m_root->traverseTopDown(&timeStep);
+				dt = timeStep.dt;
 			}
 
-			m_root->traverseTopDown<AnimateAct>(interval - t);
-
-			m_elapsedTime += interval;
+			this->advance(interval - t);
 		}
+
+		class UpdateGrpahicsContextAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->graphicsPipeline()->update();
+			}
+		};
 
 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
 
 		m_root->traverseTopDown<PostProcessing>();
 
-		std::cout << "****************Frame " << m_frameNumber << " Ended" << std::endl << std::endl;
+		std::cout << "****************Frame " << mFrameNumber << " Ended" << std::endl << std::endl;
 
-		m_frameNumber++;
+		mFrameNumber++;
 	}
 
 	void SceneGraph::run()
@@ -165,21 +231,21 @@ namespace dyno
 
 	Vec3f SceneGraph::getLowerBound()
 	{
-		return m_lowerBound;
+		return mLowerBound;
 	}
 
 	Vec3f SceneGraph::getUpperBound()
 	{
-		return m_upperBound;
+		return mUpperBound;
 	}
 
 	void SceneGraph::setLowerBound(Vec3f lowerBound)
 	{
-		m_lowerBound = lowerBound;
+		mLowerBound = lowerBound;
 	}
 
 	void SceneGraph::setUpperBound(Vec3f upperBound)
 	{
-		m_upperBound = upperBound;
+		mUpperBound = upperBound;
 	}
 }

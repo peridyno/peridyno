@@ -37,6 +37,7 @@ namespace dyno
 
 		m_plasticity = this->template addConstraintModule<ElastoplasticityModule<TDataType>>("elastoplasticity");
 		m_horizon.connect(m_plasticity->inHorizon());
+		this->varTimeStep()->connect(m_plasticity->inTimeStep());
 		this->currentPosition()->connect(m_plasticity->inPosition());
 		this->currentVelocity()->connect(m_plasticity->inVelocity());
 		this->currentRestShape()->connect(m_plasticity->inRestShape());

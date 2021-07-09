@@ -25,6 +25,7 @@ namespace dyno
 
 		auto m_elasticity = std::make_shared<ElasticityModule<TDataType>>();
 		this->varHorizon()->connect(m_elasticity->inHorizon());
+		this->inTimeStep()->connect(m_elasticity->inTimeStep());
 		this->inPosition()->connect(m_elasticity->inPosition());
 		this->inVelocity()->connect(m_elasticity->inVelocity());
 		this->inRestShape()->connect(m_elasticity->inRestShape());

@@ -42,6 +42,8 @@ namespace dyno
 	public:
 		DEF_VAR(Real, Horizon, 0.0085, "");
 
+		DEF_VAR_IN(Real, TimeStep, "Time step size!");
+
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Force, DeviceType::GPU, "");

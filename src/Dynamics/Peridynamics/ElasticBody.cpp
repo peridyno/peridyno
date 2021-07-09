@@ -3,8 +3,6 @@
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
-#include "ParticleSystem/ParticleIntegrator.h"
-#include "ElasticityModule.h"
 #include "Peridynamics/Peridynamics.h"
 #include "SharedFunc.h"
 
@@ -19,6 +17,7 @@ namespace dyno
 		this->varHorizon()->setValue(0.0085);
 
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
+		this->varTimeStep()->connect(peri->inTimeStep());
 		this->currentPosition()->connect(peri->inPosition());
 		this->currentVelocity()->connect(peri->inVelocity());
 		this->currentForce()->connect(peri->inForce());

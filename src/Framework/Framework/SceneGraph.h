@@ -31,7 +31,7 @@ namespace dyno
 		std::shared_ptr<Node> getRootNode() { return m_root; }
 
 		virtual bool initialize();
-		bool isInitialized() { return m_initialized; }
+		bool isInitialized() { return mInitialized; }
 		void invalid();
 
 		virtual void draw();
@@ -56,14 +56,14 @@ namespace dyno
 	public:
 		static SceneGraph& getInstance();
 
-		inline void setTotalTime(float t) { m_maxTime = t; }
-		inline float getTotalTime() { return m_maxTime; }
+		inline void setTotalTime(float t) { mMaxTime = t; }
+		inline float getTotalTime() { return mMaxTime; }
 
-		inline void setFrameRate(float frameRate) { m_frameRate = frameRate; }
-		inline float getFrameRate() { return m_frameRate; }
-		inline float getTimeCostPerFrame() { return m_frameCost; }
-		inline float getFrameInterval() { return 1.0f / m_frameRate; }
-		inline int getFrameNumber() { return m_frameNumber; }
+		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; }
+		inline float getFrameRate() { return mFrameRate; }
+		inline float getTimeCostPerFrame() { return mFrameCost; }
+		inline float getFrameInterval() { return 1.0f / mFrameRate; }
+		inline int getFrameNumber() { return mFrameNumber; }
 
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
@@ -82,16 +82,16 @@ namespace dyno
 
 	public:
 		SceneGraph()
-			: m_elapsedTime(0)
-			, m_maxTime(0)
-			, m_frameRate(25)
-			, m_frameNumber(0)
-			, m_frameCost(0)
-			, m_initialized(false)
-			, m_lowerBound(0, 0, 0)
-			, m_upperBound(1, 1, 1)
+			: mElapsedTime(0)
+			, mMaxTime(0)
+			, mFrameRate(25)
+			, mFrameNumber(0)
+			, mFrameCost(0)
+			, mInitialized(false)
+			, mLowerBound(0, 0, 0)
+			, mUpperBound(1, 1, 1)
 		{
-			m_gravity = Vec3f(0.0f, -9.8f, 0.0f);
+			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
 		};
 
 		/**
@@ -101,20 +101,20 @@ namespace dyno
 		SceneGraph& operator=(const SceneGraph&) = delete;
 
 	private:
-		bool m_initialized;
-		bool m_advative_interval = true;
+		bool mInitialized;
+		bool mAdvativeInterval = true;
 
-		float m_elapsedTime;
-		float m_maxTime;
-		float m_frameRate;
-		float m_frameCost;
+		float mElapsedTime;
+		float mMaxTime;
+		float mFrameRate;
+		float mFrameCost;
 
-		int m_frameNumber;
+		int mFrameNumber;
 
-		Vec3f m_gravity;
+		Vec3f mGravity;
 
-		Vec3f m_lowerBound;
-		Vec3f m_upperBound;
+		Vec3f mLowerBound;
+		Vec3f mUpperBound;
 
 	private:
 		std::shared_ptr<Node> m_root = nullptr;

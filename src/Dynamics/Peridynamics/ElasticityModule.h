@@ -61,6 +61,8 @@ namespace dyno {
 			*/
 		DEF_VAR_IN(Real, Horizon, "");
 
+		DEF_VAR_IN(Real, TimeStep, "");
+
 		/**
 		 * @brief Particle position
 		 */

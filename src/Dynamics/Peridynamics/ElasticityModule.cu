@@ -365,8 +365,7 @@ namespace dyno
 		int num = this->inPosition()->getElementCount();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
-		//TODO: input dt
-		Real dt = this->getParent() == nullptr ? 0.001f : this->getParent()->getDt();
+		Real dt = this->inTimeStep()->getData();
 
 		K_UpdateVelocity << <pDims, BLOCK_SIZE >> > (
 			this->inVelocity()->getData(),
