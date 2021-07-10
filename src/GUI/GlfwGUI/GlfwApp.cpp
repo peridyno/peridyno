@@ -142,14 +142,14 @@ namespace dyno
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
+		mCamera->setWidth(width);
+		mCamera->setHeight(height);
 		mCamera->registerPoint(0.5f, 0.5f);
 		mCamera->translateToPoint(0, 0);
 
 		mCamera->zoom(3.0f);
 		mCamera->setClipNear(0.01f);
 		mCamera->setClipFar(10.0f);
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
 
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
