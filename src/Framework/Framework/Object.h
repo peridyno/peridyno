@@ -16,6 +16,7 @@
 #pragma once
 #include <string>
 #include <atomic>
+#include <map>
 
 namespace dyno
 {
@@ -118,7 +119,14 @@ public:
 	static Object* createObject(std::string name);
 	static std::map< std::string, ClassInfo*>* getClassMap();
 
-	ObjectId objectId() { return id; }	
+	/**
+	 * @brief Base Id
+	 * 
+	 * @return All objects will be countered starting from base id. 
+	 */
+	static ObjectId baseId();
+
+	ObjectId objectId() { return id; }
 private:
 	ObjectId id;
 

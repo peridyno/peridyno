@@ -3,6 +3,8 @@
 
 namespace dyno
 {
+	IMPLEMENT_CLASS_1(ImplicitViscosity, TDataType)
+
 	template<typename Real>
 	__device__ Real IV_Weight(const Real r, const Real h)
 	{
@@ -79,7 +81,8 @@ namespace dyno
 		auto& poss = this->inPosition()->getData();
 		auto& vels = this->inVelocity()->getData();
 		auto& nbrIds = this->inNeighborIds()->getData();
-		auto  h = this->inSmoothingLength()->getData();
+		Real  h = this->inSmoothingLength()->getData();
+		Real dt = this->inTimeStep()->getData();
 
 		int num = vels.size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
@@ -88,9 +91,6 @@ namespace dyno
 		mVelBuf.resize(num);
 
 		Real vis = this->varViscosity()->getData();
-		
-		//TODO: remove the following code
-		Real dt = getParent()->getDt();
 
 		int iterNum = this->varInterationNumber()->getData();
 

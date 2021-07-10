@@ -7,7 +7,9 @@ static std::map< std::string, ClassInfo*> *classInfoMap = NULL;
 
 IMPLEMENT_CLASS(Object)
 
-std::atomic_uint32_t Object::cId = 0;
+#define BASE_ID 0
+
+std::atomic_uint32_t Object::cId = BASE_ID + 1;
 
 Object::Object()
 {
@@ -38,6 +40,11 @@ Object* Object::createObject(std::string name)
 std::map< std::string, ClassInfo*>* Object::getClassMap()
 {
 	return classInfoMap;
+}
+
+ObjectId Object::baseId()
+{
+	return BASE_ID;
 }
 
 uint32_t Object::generateObjectId()

@@ -1,5 +1,6 @@
 #include "ModuleGroup.h"
 #include "Framework/Node.h"
+#include "DirectedAcyclicGraph.h"
 
 #include <queue>
 #include <set>
@@ -42,12 +43,16 @@ namespace dyno
 
 	void GroupModule::reconstructPipeline()
 	{
+		ObjectId baseId = Object::baseId();
+
 		mModuleList.clear();
 
 		std::queue<Module*> moduleQueue;
 		std::set<ObjectId> moduleSet;
 
-		auto retrieveModules = [&](std::vector<FBase *>& fields) {
+		DirectedAcyclicGraph graph;
+
+		auto retrieveModules = [&](ObjectId id, std::vector<FBase *>& fields) {
 			for each (auto f in fields) {
 				auto& sinks = f->getSinks();
 				for each (auto sink in sinks)
@@ -56,6 +61,7 @@ namespace dyno
 					if (module != nullptr)
 					{
 						ObjectId oId = module->objectId();
+						graph.addEdge(id, oId);
 
 						if (moduleSet.find(oId) == moduleSet.end() && mModuleMap.count(oId) > 0)
 						{
@@ -68,23 +74,34 @@ namespace dyno
 		};
 
 		auto& fields = this->getInputFields();
-		retrieveModules(fields);
+		retrieveModules(baseId, fields);
+
+		for each (auto m in mPersistentModule)
+		{
+			moduleQueue.push(m.get());
+		}
+
+// 		auto retrieveModules = [&](std::vector<FBase *>& fields) {
+// 		};
 
 		while (!moduleQueue.empty())
 		{
 			Module* m = moduleQueue.front();
 
-			mModuleList.push_back(m);
-
 			auto& outFields = m->getOutputFields();
-			retrieveModules(outFields);
+			retrieveModules(m->objectId(), outFields);
 
 			moduleQueue.pop();
 		}
 
-		for each (auto m in mPersistentModule)
+		auto& ids = graph.topologicalSort();
+
+		for each (auto id in ids)
 		{
-			mModuleList.push_back(m.get());
+			if (mModuleMap.count(id) > 0)
+			{
+				mModuleList.push_back(mModuleMap[id].get());
+			}
 		}
 
 		moduleSet.clear();

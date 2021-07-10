@@ -4,14 +4,6 @@
 
 namespace dyno
 {
-	/*!
-	*	\class	ParticleFluid
-	*	\brief	Position-based fluids.
-	*
-	*	This class implements a position-based fluid solver.
-	*	Refer to Macklin and Muller's "Position Based Fluids" for details
-	*
-	*/
 	template<typename TDataType>
 	class ParticleFluid : public ParticleSystem<TDataType>
 	{

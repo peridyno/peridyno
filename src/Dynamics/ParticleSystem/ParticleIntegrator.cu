@@ -137,9 +137,10 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleIntegrator<TDataType>::updatePosition()
 	{
+		//TODO: 
 		Real dt = 0.001;
-		if (this->getParent() != NULL)
-			dt = getParent()->getDt();
+// 		if (this->getParent() != NULL)
+// 			dt = getParent()->getDt();
 
 		int total_num = this->inPosition()->getDataPtr()->size();
 		if (this->inAttribute()->isEmpty())

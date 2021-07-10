@@ -1,7 +1,5 @@
 #include "DirectedAcyclicGraph.h"
 
-#include <iostream>
-
 namespace dyno {
 
 	DirectedAcyclicGraph::~DirectedAcyclicGraph()
@@ -18,7 +16,7 @@ namespace dyno {
 	void DirectedAcyclicGraph::addEdge(ObjectId v, ObjectId w)
 	{
 		// Add an edge (v, w).
-		mEdges[v].push_back(w); 
+		mEdges[v].insert(w); 
 		mVertices.insert(v);
 		mVertices.insert(w);
 	}
@@ -60,7 +58,7 @@ namespace dyno {
 			if (visited[id] == false)
 				topologicalSortUtil(id, visited, stack);
 
-		// Print contents of stack
+		// Output contents of stack
 		while (stack.empty() == false) {
 			mOrderVertices.push_back(stack.top());
 			stack.pop();
@@ -82,9 +80,9 @@ namespace dyno {
 		visited[v] = true;
 
 		std::list<ObjectId>::iterator i;
-		for (i = mEdges[v].begin(); i != mEdges[v].end(); ++i)
-			if (!visited[*i])
-				topologicalSortUtil(*i, visited, stack);
+		for each(auto id in mEdges[v])
+			if (!visited[id])
+				topologicalSortUtil(id, visited, stack);
 
 		// Push current vertex to stack
 		stack.push(v);
@@ -98,9 +96,9 @@ namespace dyno {
 
 		// Recur for all the vertices adjacent
 		std::list<ObjectId>::iterator i;
-		for (i = mEdges[v].begin(); i != mEdges[v].end(); ++i)
-			if (!visited[*i])
-				topologicalSortUtil(*i, visited);
+		for each(auto id in mEdges[v])
+			if (!visited[id])
+				topologicalSortUtil(id, visited);
 	}
 
 }

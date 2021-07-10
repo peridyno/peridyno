@@ -46,6 +46,7 @@ namespace dyno
 
 		m_visModule = this->template addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
 		m_visModule->varViscosity()->setValue(Real(1));
+		this->varTimeStep()->connect(m_visModule->inTimeStep());
 		m_horizon.connect(m_visModule->inSmoothingLength());
 		this->currentPosition()->connect(m_visModule->inPosition());
 		this->currentVelocity()->connect(m_visModule->inVelocity());

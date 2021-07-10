@@ -4,8 +4,6 @@
 #include "Topology/PointSet.h"
 #include "SummationDensity.h"
 
-#include <time.h>
-
 namespace dyno
 {
 	IMPLEMENT_CLASS_1(ParticleFluid, TDataType)
@@ -14,12 +12,16 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
-		auto pbf = this->template setNumericalModel<PositionBasedFluidModel<TDataType>>("pbd");
-		this->setNumericalModel(pbf);
+// 		auto pbf = this->template setNumericalModel<PositionBasedFluidModel<TDataType>>("pbd");
+// 		this->setNumericalModel(pbf);
 
-		this->currentPosition()->connect(&pbf->m_position);
-		this->currentVelocity()->connect(&pbf->m_velocity);
-		this->currentForce()->connect(&pbf->m_forceDensity);
+		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
+		this->animationPipeline()->pushModule(pbf);
+
+		this->varTimeStep()->connect(pbf->inTimeStep());
+		this->currentPosition()->connect(pbf->inPosition());
+		this->currentVelocity()->connect(pbf->inVelocity());
+		this->currentForce()->connect(pbf->inForce());
 	}
 
 	template<typename TDataType>
@@ -100,8 +102,7 @@ namespace dyno
 
 		if (totalNum > 0)
 		{
-			auto nModel = this->getNumericalModel();
-			nModel->step(this->getDt());
+			this->animationPipeline()->update();
 		}
 	}
 

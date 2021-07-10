@@ -178,7 +178,7 @@ namespace dyno
 	template<typename TDataType>
 	void DensityPBD<TDataType>::takeOneIteration()
 	{
-		Real dt = this->getParent()->getDt();
+		Real dt = this->inTimeStep()->getData();
 
 		int num = this->inPosition()->getElementCount();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
@@ -230,7 +230,7 @@ namespace dyno
 	{
 		int num = this->inPosition()->getElementCount();
 
-		Real dt = this->getParent()->getDt();
+		Real dt = this->inTimeStep()->getData();
 
 		cuExecute(num, DP_UpdateVelocity,
 			this->inVelocity()->getData(),

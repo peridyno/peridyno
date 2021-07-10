@@ -668,6 +668,7 @@ namespace dyno
 		m_bYield.reset();
 
 		m_pbdModule = std::make_shared<DensityPBD<TDataType>>();
+		this->inTimeStep()->connect(m_pbdModule->inTimeStep());
 		this->inHorizon()->connect(m_pbdModule->varSmoothingLength());
 		this->inPosition()->connect(m_pbdModule->inPosition());
 		this->inVelocity()->connect(m_pbdModule->inVelocity());
