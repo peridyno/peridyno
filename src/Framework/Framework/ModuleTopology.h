@@ -19,13 +19,13 @@
 
 namespace dyno
 {
+	typedef int PointType;
 
 class TopologyModule : public Module
 {
 	DECLARE_CLASS(TopologyModule)
 
 public:
-	typedef int PointType;
 	typedef PointType				Point;
 	typedef VectorND<PointType, 2>	Edge;
 	typedef VectorND<PointType, 3>	Triangle;

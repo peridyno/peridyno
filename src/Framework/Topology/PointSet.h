@@ -1,4 +1,5 @@
 #pragma once
+#include "TopologyConstants.h"
 #include "Framework/ModuleTopology.h"
 
 namespace dyno

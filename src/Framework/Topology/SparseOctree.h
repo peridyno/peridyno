@@ -1,5 +1,6 @@
 #pragma once
 #include "DataTypes.h"
+#include "TopologyConstants.h"
 #include "Primitive3D.h"
 #include "Array/Array.h"
 
