@@ -7,7 +7,11 @@ namespace dyno
 		if (m_data!=nullptr) clear();
 
 		m_totalNum = n;
-		cuSafeCall(cudaMalloc(&m_data, n * sizeof(T)));
+		if (n == 0) {
+			m_data = nullptr;
+		}
+		else
+			cuSafeCall(cudaMalloc(&m_data, n * sizeof(T)));
 	}
 
 	template<typename T>
