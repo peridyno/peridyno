@@ -20,11 +20,9 @@ namespace dyno
 		Cloth(std::string name = "default");
 		virtual ~Cloth();
 
-		void advance(Real dt) override;
-
 		void updateTopology() override;
 
-		bool resetStatus() override;
+		bool resetStates() override;
 
 		bool translate(Coord t) override;
 		bool scale(Real s) override;

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "Framework/Node.h"
-#include "Framework/Module.h"
+#include "Node.h"
+#include "Module.h"
 using namespace dyno;
 
 TEST(Object, id)

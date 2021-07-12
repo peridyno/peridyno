@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Framework/ModuleGroup.h"
+#include "Module/GroupModule.h"
 #include "NeighborData.h"
 
 namespace dyno

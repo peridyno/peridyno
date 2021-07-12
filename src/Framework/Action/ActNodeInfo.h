@@ -1,5 +1,4 @@
-#ifndef FRAMEWORK_NODEINFOACT_H
-#define FRAMEWORK_NODEINFOACT_H
+#pragma once
 
 #include "Action.h"
 
@@ -15,5 +14,3 @@ namespace dyno
 		void process(Node* node) override;
 	};
 }
-
-#endif

@@ -24,9 +24,9 @@ namespace dyno
 		virtual ~ElasticBody();
 
 		bool initialize() override;
-		void advance(Real dt) override;
+
 		void updateTopology() override;
-		bool resetStatus() override;
+		bool resetStates() override;
 
 		bool translate(Coord t) override;
 		bool scale(Real s) override;

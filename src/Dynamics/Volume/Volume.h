@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/Node.h"
+#include "Node.h"
 
 #include "Topology/SignedDistanceField.h"
 

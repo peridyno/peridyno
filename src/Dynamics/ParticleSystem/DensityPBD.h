@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 #include "Kernel.h"
 
 namespace dyno {

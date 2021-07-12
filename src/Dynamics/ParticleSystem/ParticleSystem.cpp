@@ -138,7 +138,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool ParticleSystem<TDataType>::resetStatus()
+	bool ParticleSystem<TDataType>::resetStates()
 	{
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->getTopologyModule());
 		if (ptSet == nullptr) return false;
@@ -155,7 +155,7 @@ namespace dyno
 			this->currentVelocity()->getDataPtr()->reset();
 		}
 
-		return Node::resetStatus();
+		return Node::resetStates();
 	}
 
 	DEFINE_CLASS(ParticleSystem);

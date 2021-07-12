@@ -1,5 +1,5 @@
 #include "GlfwGUI/GlfwApp.h"
-#include "Framework/SceneGraph.h"
+#include "SceneGraph.h"
 
 #include "ParticleSystem/StaticBoundary.h"
 

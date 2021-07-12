@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "CalculateArea.h"
-#include "Framework/FInstance.h"
+#include "FInstance.h"
 
 using namespace dyno;
 

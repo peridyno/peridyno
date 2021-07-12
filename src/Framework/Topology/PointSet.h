@@ -1,6 +1,6 @@
 #pragma once
 #include "TopologyConstants.h"
-#include "Framework/ModuleTopology.h"
+#include "Module/TopologyModule.h"
 
 namespace dyno
 {

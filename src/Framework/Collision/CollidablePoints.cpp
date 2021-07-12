@@ -1,6 +1,6 @@
 #include "CollidablePoints.h"
-#include "Framework/DeviceContext.h"
-#include "Framework/Node.h"
+#include "Module/DeviceContext.h"
+#include "Node.h"
 #include "Topology/PointSet.h"
 #include "Mapping/FrameToPointSet.h"
 #include "Mapping/PointSetToPointSet.h"

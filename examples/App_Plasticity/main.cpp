@@ -1,7 +1,7 @@
 #include "GlfwGUI/GlfwApp.h"
 
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 #include "Topology/PointSet.h"
 
 #include "ParticleSystem/StaticBoundary.h"

@@ -1,5 +1,5 @@
 #include "CalculateArea.h"
-#include "Framework/Log.h"
+#include "Log.h"
 namespace dyno
 {
 	CalculateArea::CalculateArea(std::string name)

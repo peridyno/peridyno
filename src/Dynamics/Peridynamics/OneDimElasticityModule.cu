@@ -1,5 +1,5 @@
 #include <cuda_runtime.h>
-#include "Framework/Node.h"
+#include "Node.h"
 #include "OneDimElasticityModule.h"
 
 namespace dyno

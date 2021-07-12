@@ -1,5 +1,5 @@
 #include "TriangleMeshWriter.h"
-#include "Framework/ModuleIO.h"
+#include "Module/OutputModule.h"
 
 #include <sstream>
 #include <iostream>
@@ -10,7 +10,7 @@ namespace dyno
 	IMPLEMENT_CLASS_1(TriangleMeshWriter, TDataType)
 
 	template<typename TDataType>
-	TriangleMeshWriter<TDataType>::TriangleMeshWriter() : IOModule()
+	TriangleMeshWriter<TDataType>::TriangleMeshWriter() : OutputModule()
 	{
 		;
 	}

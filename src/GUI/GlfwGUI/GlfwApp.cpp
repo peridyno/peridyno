@@ -6,8 +6,8 @@
 #include <sstream>
 
 #include "Image_IO/image_io.h"
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
 #include "OrbitCamera.h"
 #include "TrackballCamera.h"

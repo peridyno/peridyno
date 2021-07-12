@@ -27,10 +27,8 @@ namespace dyno
 		ElastoplasticBody(std::string name = "default");
 		virtual ~ElastoplasticBody();
 
-		void advance(Real dt) override;
-
 		void updateTopology() override;
-		bool resetStatus() override;
+		bool resetStates() override;
 
 		bool initialize() override;
 

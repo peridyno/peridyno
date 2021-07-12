@@ -1,5 +1,5 @@
 #include "ElasticityModule.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Matrix/MatrixFunc.h"
 #include "ParticleSystem/Kernel.h"
 

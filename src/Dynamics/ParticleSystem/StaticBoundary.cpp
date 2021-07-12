@@ -1,6 +1,6 @@
 #include "StaticBoundary.h"
-#include "Framework/Log.h"
-#include "Framework/Node.h"
+#include "Log.h"
+#include "Node.h"
 #include "ParticleSystem/BoundaryConstraint.h"
 
 #include "Topology/DistanceField3D.h"
@@ -43,8 +43,10 @@ namespace dyno
 // 	}
 
 	template<typename TDataType>
-	void StaticBoundary<TDataType>::advance(Real dt)
+	void StaticBoundary<TDataType>::updateImpl()
 	{
+		Real dt = this->varTimeStep()->getData();
+
 		auto pSys = this->getParticleSystems();
 
 		for (size_t t = 0; t < m_obstacles.size(); t++)

@@ -81,12 +81,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Cloth<TDataType>::advance(Real dt)
-	{
-		this->animationPipeline()->update();
-	}
-
-	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
@@ -106,9 +100,9 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool Cloth<TDataType>::resetStatus()
+	bool Cloth<TDataType>::resetStates()
 	{
-		ParticleSystem<TDataType>::resetStatus();
+		ParticleSystem<TDataType>::resetStates();
 
 		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
 		nbrQuery->update();

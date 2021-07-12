@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleForce.h"
+#include "Module/ForceModule.h"
 
 namespace dyno {
 

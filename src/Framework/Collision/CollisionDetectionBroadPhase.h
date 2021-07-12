@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/CollisionModel.h"
+#include "Module/CollisionModel.h"
 #include "Algorithm/Reduction.h"
 #include "Topology/Primitive3D.h"
 #include "Topology/SparseOctree.h"

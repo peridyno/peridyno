@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/CollisionModel.h"
+#include "Module/CollisionModel.h"
 #include "Topology/Primitive3D.h"
 
 namespace dyno

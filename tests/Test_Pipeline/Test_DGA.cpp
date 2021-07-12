@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Framework/DirectedAcyclicGraph.h"
+#include "DirectedAcyclicGraph.h"
 using namespace dyno;
 
 TEST(DAG, topologicalSortFromNode)

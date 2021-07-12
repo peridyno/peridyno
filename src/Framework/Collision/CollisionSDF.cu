@@ -1,6 +1,6 @@
 #include "CollisionSDF.h"
-#include "Framework/Node.h"
-#include "Framework/CollidableObject.h"
+#include "Node.h"
+#include "Module/CollidableObject.h"
 #include "Topology/DistanceField3D.h"
 #include "Collision/CollidablePoints.h"
 #include "Collision/CollidableSDF.h"

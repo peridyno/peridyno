@@ -1,5 +1,5 @@
 #include "CollisionDetection.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Topology/SparseOctree.h"
 #include "Topology/DiscreteElements.h"
 

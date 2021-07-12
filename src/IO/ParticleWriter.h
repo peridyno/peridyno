@@ -1,6 +1,6 @@
 #pragma once
-#include "Framework/ModuleIO.h"
-#include "Framework/ModuleTopology.h"
+#include "Module/OutputModule.h"
+#include "Module/TopologyModule.h"
 
 #include <string>
 
@@ -8,7 +8,7 @@ namespace dyno
 {
 	template <typename TDataType> class TriangleSet;
 	template<typename TDataType>
-	class ParticleWriter : public IOModule
+	class ParticleWriter : public OutputModule
 	{
 		DECLARE_CLASS_1(ParticleWriter, TDataType)
 	public:

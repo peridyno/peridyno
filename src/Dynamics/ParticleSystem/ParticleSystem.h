@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/Node.h"
+#include "Node.h"
 //#include "PointRenderModule.h"
 
 namespace dyno
@@ -35,7 +35,7 @@ namespace dyno
 
 
 		void updateTopology() override;
-		bool resetStatus() override;
+		bool resetStates() override;
 
 //		std::shared_ptr<PointRenderModule> getRenderModule();
 
