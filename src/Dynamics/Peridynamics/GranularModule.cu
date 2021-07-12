@@ -10,20 +10,20 @@ namespace dyno
 	}
 
 
-	template<typename TDataType>
-	bool GranularModule<TDataType>::initializeImpl()
-	{
-		//TODO: replace
-		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
-
-		this->inHorizon()->connect(m_densitySum->inSmoothingLength());
-		this->inPosition()->connect(m_densitySum->inPosition());
-		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
-
-		m_densitySum->initialize();
-
-		return ElastoplasticityModule<TDataType>::initializeImpl();
-	}
+// 	template<typename TDataType>
+// 	bool GranularModule<TDataType>::initializeImpl()
+// 	{
+// 		//TODO: replace
+// 		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
+// 
+// 		this->inHorizon()->connect(m_densitySum->inSmoothingLength());
+// 		this->inPosition()->connect(m_densitySum->inPosition());
+// 		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
+// 
+// 		m_densitySum->initialize();
+// 
+// 		return ElastoplasticityModule<TDataType>::initializeImpl();
+// 	}
 
 
 	__device__ Real Hardening(Real rho, Real restRho)

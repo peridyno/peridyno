@@ -19,13 +19,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool PointSet<TDataType>::initializeImpl()
-	{
-		return true;
-	}
-
-
-	template<typename TDataType>
 	void PointSet<TDataType>::loadObjFile(std::string filename)
 	{
 		if (filename.size() < 5 || filename.substr(filename.size() - 4) != std::string(".obj")) {

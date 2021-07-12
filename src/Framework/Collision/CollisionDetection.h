@@ -22,8 +22,6 @@ public:
 
 	void doCollision() override;
 
-	bool initializeImpl() override;
-
 	bool isSupport(std::shared_ptr<CollidableObject> obj);
 
 public:

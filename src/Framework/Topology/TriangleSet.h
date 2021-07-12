@@ -101,9 +101,6 @@ namespace dyno
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 
 	protected:
-		bool initializeImpl() override;
-
-	protected:
 
 		DArray<Triangle> m_triangles;
 		DArrayList<int> m_ver2Tri;

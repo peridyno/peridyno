@@ -28,8 +28,6 @@ namespace dyno
 		DArray<Coord>& getPositions() { return m_positions; }
 		DArray<Coord>& getVelocities() { return m_velocities; }
 
-		bool initializeImpl() override;
-
 		void updateCollidableObject() override;
 		void updateMechanicalState() override;
 

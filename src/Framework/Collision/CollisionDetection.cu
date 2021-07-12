@@ -92,12 +92,5 @@ namespace dyno
 		return true;
 	}
 
-
-	template<typename TDataType>
-	bool CollisionDetection<TDataType>::initializeImpl()
-	{
-		return true;
-	}
-
 	DEFINE_CLASS(CollisionDetection);
 }

@@ -19,15 +19,6 @@ namespace dyno
 	{
 	}
 
-
-	template<typename TDataType>
-	bool TetrahedronSet<TDataType>::initializeImpl()
-	{
-		
-		return true;
-	}
-
-
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::setTetrahedrons(std::vector<Tetrahedron>& tetrahedrons)
 	{

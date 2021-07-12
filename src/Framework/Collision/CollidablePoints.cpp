@@ -39,54 +39,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool CollidablePoints<TDataType>::initializeImpl()
-	{
-/*		Node* parent = getParent();
-		if (parent == NULL)
-		{
-			Log::sendMessage(Log::Error, "Should insert this module into a node!");
-			return false;
-		}
-
-		PointSet<TDataType>* pSet = dynamic_cast<PointSet<TDataType>*>(parent->getTopologyModule().get());
-		if (pSet == NULL)
-		{
-			Log::sendMessage(Log::Error, "The topology module is not supported!");
-			return false;
-		}
-
-		auto initPoints = pSet->getPoints();
-
-		m_positions.resize(initPoints.size());
-		m_positions.assign(initPoints);
-
-		m_velocities.resize(initPoints.size());
-		m_velocities.reset();
-
-		auto mstate = getParent()->getMechanicalState();
-		auto mType = getParent()->getMechanicalState()->getMaterialType();
-
-		if (mType == MechanicalState::ParticleSystem)
-		{
-			auto mapping = std::make_shared<FrameToPointSet<TDataType>>();
-			auto center = mstate->getField<HostVarField<Coord>>(MechanicalState::position())->getData();
-			auto rotation = mstate->getField<HostVarField<Matrix>>(MechanicalState::rotation())->getData();
-
-			Rigid tmp_rigid(center, Quat<Real>(rotation));
-			mapping->initialize(tmp_rigid, m_positions);
-			m_mapping = mapping;
-		}
-		else
-		{
-			auto mapping = std::shared_ptr<PointSetToPointSet<TDataType>>();
-			m_mapping = mapping;
-		}*/
-
-		return true;
-	}
-
-
-	template<typename TDataType>
 	void CollidablePoints<TDataType>::updateCollidableObject()
 	{
 /*		auto mstate = getParent()->getMechanicalState();

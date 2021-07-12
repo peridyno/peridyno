@@ -82,10 +82,7 @@ public:
 
 	bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 protected:
-	/// \brief Initialization function for each module
-	/// 
-	/// This function is used to initialize internal variables for each module
-	/// , it is called after all fields are set.
+	//TODO: remove this step
 	virtual bool initializeImpl();
 	virtual void updateImpl();
 	
