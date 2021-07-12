@@ -33,10 +33,7 @@ namespace dyno
 		virtual bool translate(Coord t);
 		virtual bool scale(Real s);
 
-
-		void updateTopology() override;
-		bool resetStates() override;
-
+	public:
 //		std::shared_ptr<PointRenderModule> getRenderModule();
 
 		/**
@@ -56,8 +53,9 @@ namespace dyno
 		DEF_EMPTY_CURRENT_ARRAY(Force, Coord, DeviceType::GPU, "Force on each particle");
 
 		
-	public:
-		bool initialize() override;
+	protected:
+		void updateTopology() override;
+		void resetStates() override;
 //		virtual void setVisible(bool visible) override;
 
 	protected:

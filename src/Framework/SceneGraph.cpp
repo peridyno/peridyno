@@ -48,7 +48,6 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				node->resetStates();
 				node->initialize();
 
 				auto& list = node->getModuleList();
@@ -106,7 +105,6 @@ namespace dyno
 					}
 
 					node->update();
-					node->updateTopology();
 
 					auto topoModules = node->getTopologyMappingList();
 					for (std::list<std::shared_ptr<TopologyMapping>>::iterator iter = topoModules.begin(); iter != topoModules.end(); iter++)

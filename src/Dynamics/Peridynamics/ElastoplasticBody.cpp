@@ -70,7 +70,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::resetStates()
+	void ElastoplasticBody<TDataType>::resetStates()
 	{
 		ParticleSystem<TDataType>::resetStates();
 
@@ -85,8 +85,6 @@ namespace dyno
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
 		}
-
-		return true;
 	}
 
 	template<typename TDataType>
@@ -100,15 +98,6 @@ namespace dyno
 		{
 			(*iter)->apply();
 		}
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::initialize()
-	{
-		m_nbrQuery->initialize();
-		m_nbrQuery->compute();
-
-		return ParticleSystem<TDataType>::initialize();
 	}
 
 	template<typename TDataType>

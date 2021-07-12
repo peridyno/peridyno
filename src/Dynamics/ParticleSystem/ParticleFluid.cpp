@@ -31,7 +31,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleFluid<TDataType>::preUpdate()
+	void ParticleFluid<TDataType>::preUpdateStates()
 	{
 		auto emitters = this->getParticleEmitters();
 
@@ -102,9 +102,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ParticleFluid<TDataType>::resetStates()
+	void ParticleFluid<TDataType>::resetStates()
 	{
-		return ParticleSystem<TDataType>::resetStates();
+		ParticleSystem<TDataType>::resetStates();
 	}
 
 	DEFINE_CLASS(ParticleFluid);

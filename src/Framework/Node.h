@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Base.h"
+#include "OBase.h"
 #include "Field.h"
 #include "Platform.h"
 #include "DeclarePort.h"
@@ -39,7 +39,7 @@ namespace dyno
 {
 	class Action;
 
-	class Node : public Base
+	class Node : public OBase
 	{
 		DECLARE_CLASS(Node)
 	public:
@@ -291,13 +291,18 @@ namespace dyno
 			NODE_CREATE_SPECIAL_MODULE(ComputeModule)
 			NODE_CREATE_SPECIAL_MODULE(CustomModule)
 
-			virtual bool initialize() { return true; }
-
+			
+		/**
+		 * @brief Initialize all states, called before the node is first updated.
+		 */
+		void initialize();
 		
+		/**
+		 * @brief Called every time interval.
+		 */
 		void update();
 
-		virtual void updateTopology();
-		virtual bool resetStates() { return true; }
+		void reset();
 
 		/**
 		 * @brief Depth-first tree traversal
@@ -340,14 +345,18 @@ namespace dyno
 		uint sizeOfNodePorts() const { return (uint)mNodePorts.size(); }
 		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
 		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
+	
 	protected:
-
 		virtual void doTraverseBottomUp(Action* act);
 		virtual void doTraverseTopDown(Action* act);
 
-		virtual void preUpdate();
-		virtual void updateImpl();
-		virtual void postUpdate();
+		virtual void preUpdateStates();
+		virtual void updateStates();
+		virtual void postUpdateStates();
+
+		virtual void updateTopology();
+
+		virtual void resetStates();
 
 	private:
 		/**

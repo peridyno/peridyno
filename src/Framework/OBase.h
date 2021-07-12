@@ -29,14 +29,14 @@ namespace dyno {
 
 typedef std::string FieldID;
 
-class Base : public Object
+class OBase : public Object
 {
 public:
 	typedef std::vector<FBase*> FieldVector;
 	typedef std::map<FieldID, FBase*> FieldMap;
 
-	Base() : Object() {};
-	~Base() override {};
+	OBase() : Object() {};
+	~OBase() override {};
 
 	/**
 	 * @brief Add a field to Base

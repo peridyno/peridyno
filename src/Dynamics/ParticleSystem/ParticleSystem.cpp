@@ -102,12 +102,6 @@ namespace dyno
 		return true;
 	}
 
-	template<typename TDataType>
-	bool ParticleSystem<TDataType>::initialize()
-	{
-		return Node::initialize();
-	}
-
 // 	template<typename TDataType>
 // 	void ParticleSystem<TDataType>::setVisible(bool visible)
 // 	{
@@ -138,10 +132,10 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool ParticleSystem<TDataType>::resetStates()
+	void ParticleSystem<TDataType>::resetStates()
 	{
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->getTopologyModule());
-		if (ptSet == nullptr) return false;
+		if (ptSet == nullptr) return;
 
 		auto pts = ptSet->getPoints();
 
@@ -155,7 +149,7 @@ namespace dyno
 			this->currentVelocity()->getDataPtr()->reset();
 		}
 
-		return Node::resetStates();
+		Node::resetStates();
 	}
 
 	DEFINE_CLASS(ParticleSystem);

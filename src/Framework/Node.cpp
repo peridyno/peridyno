@@ -9,7 +9,7 @@ namespace dyno
 IMPLEMENT_CLASS(Node)
 
 Node::Node(std::string name)
-	: Base()
+	: OBase()
 	, m_node_name(name)
 	, m_dt(0.001f)
 	, m_mass(1.0f)
@@ -152,26 +152,38 @@ void Node::removeAllAncestors()
 	}
 }
 
-void Node::preUpdate()
+void Node::preUpdateStates()
 {
 
 }
 
-void Node::updateImpl()
+void Node::updateStates()
 {
 	this->animationPipeline()->update();
 }
 
 void Node::update()
 {
-	this->preUpdate();
+	this->preUpdateStates();
 
-	this->updateImpl();
+	this->updateStates();
 
-	this->postUpdate();
+	this->postUpdateStates();
+
+	this->updateTopology();
 }
 
-void Node::postUpdate()
+void Node::reset()
+{
+	this->resetStates();
+}
+
+void Node::postUpdateStates()
+{
+
+}
+
+void Node::resetStates()
 {
 
 }
@@ -305,6 +317,11 @@ bool Node::addModule(std::shared_ptr<Module> module)
 	}
 
 	return ret;
+}
+
+void Node::initialize()
+{
+	this->resetStates();
 }
 
 bool Node::deleteModule(std::shared_ptr<Module> module)

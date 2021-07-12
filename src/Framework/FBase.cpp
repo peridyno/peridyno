@@ -5,12 +5,12 @@
 
 namespace dyno
 {
-	void FBase::setParent(Base* owner)
+	void FBase::setParent(OBase* owner)
 	{
 		mOwner = owner;
 	}
 
-	Base* FBase::parent()
+	OBase* FBase::parent()
 	{
 		return mOwner;
 	}
@@ -135,7 +135,7 @@ namespace dyno
 		m_optional = optional;
 	}
 
-	FBase::FBase(std::string name, std::string description, FieldTypeEnum type, Base* parent)
+	FBase::FBase(std::string name, std::string description, FieldTypeEnum type, OBase* parent)
 	{
 		m_name = name; m_description = description;
 		m_fType = type;

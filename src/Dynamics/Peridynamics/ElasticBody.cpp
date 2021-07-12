@@ -57,13 +57,6 @@ namespace dyno
 		return ParticleSystem<TDataType>::scale(s);
 	}
 
-
-	template<typename TDataType>
-	bool ElasticBody<TDataType>::initialize()
-	{
-		return ParticleSystem<TDataType>::initialize();
-	}
-
 	template<typename TDataType>
 	void ElasticBody<TDataType>::updateTopology()
 	{
@@ -78,7 +71,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ElasticBody<TDataType>::resetStates()
+	void ElasticBody<TDataType>::resetStates()
 	{
 		ParticleSystem<TDataType>::resetStates();
 
@@ -101,8 +94,6 @@ namespace dyno
 			this->currentNeighborIds()->allocate();
 			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
 		}
-
-		return true;
 	}
 
 	template<typename TDataType>

@@ -19,7 +19,7 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-#include "Base.h"
+#include "OBase.h"
 #include "Log.h"
 #include "DataTypes.h"
 #include "DeclareEnum.h"
@@ -30,7 +30,7 @@ namespace dyno
 {
 class Node;
 
-class Module : public Base
+class Module : public OBase
 {
 public:
 	Module(std::string name = "default");

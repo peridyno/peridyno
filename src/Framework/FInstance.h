@@ -25,7 +25,7 @@ namespace dyno {
 	{
 	public:
 		InstanceBase() : FBase() {};
-		InstanceBase(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
+		InstanceBase(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
 			: FBase(name, description, fieldType, parent) {}
 
 	public:
@@ -49,7 +49,7 @@ namespace dyno {
 
 		FInstance() : InstanceBase() {}
 
-		FInstance(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
+		FInstance(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
 			: InstanceBase(name, description, fieldType, parent) {}
 
 		const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }

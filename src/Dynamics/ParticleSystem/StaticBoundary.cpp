@@ -43,7 +43,7 @@ namespace dyno
 // 	}
 
 	template<typename TDataType>
-	void StaticBoundary<TDataType>::updateImpl()
+	void StaticBoundary<TDataType>::updateStates()
 	{
 		Real dt = this->varTimeStep()->getData();
 

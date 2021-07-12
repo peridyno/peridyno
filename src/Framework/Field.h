@@ -34,7 +34,7 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FVar);
 
-		FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent);
+		FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent);
 		~FVar() override;
 
 		uint getElementCount() override { return 1; }
@@ -43,7 +43,7 @@ namespace dyno {
 	};
 
 	template<typename T>
-	FVar<T>::FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)
+	FVar<T>::FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
 		: FBase(name, description, fieldType, parent)
 	{
 		this->setValue(value);

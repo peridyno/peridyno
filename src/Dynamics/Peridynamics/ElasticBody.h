@@ -23,10 +23,7 @@ namespace dyno
 		ElasticBody(std::string name = "default");
 		virtual ~ElasticBody();
 
-		bool initialize() override;
-
 		void updateTopology() override;
-		bool resetStates() override;
 
 		bool translate(Coord t) override;
 		bool scale(Real s) override;
@@ -45,6 +42,9 @@ namespace dyno
 		DEF_EMPTY_CURRENT_ARRAYLIST(int, NeighborIds, DeviceType::GPU, "Storing the ids for neighboring particles");
 
 		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+
+	protected:
+		void resetStates() override;
 
 	private:
 		std::shared_ptr<Node> m_surfaceNode;

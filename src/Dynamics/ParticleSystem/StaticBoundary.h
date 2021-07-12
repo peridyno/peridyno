@@ -31,7 +31,7 @@ namespace dyno {
 		void scale(Real s);
 
 	protected:
-		void updateImpl() override;
+		void updateStates() override;
 
 	public:
 		DEF_VAR(Real, TangentialFriction, 0.0, "Tangential friction");

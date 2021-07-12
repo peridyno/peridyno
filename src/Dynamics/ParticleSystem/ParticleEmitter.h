@@ -43,7 +43,7 @@ namespace dyno
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
 
 	protected:
-		void updateImpl() final;
+		void updateStates() final;
 
 	protected:
 		DArray<Coord> mPosition;

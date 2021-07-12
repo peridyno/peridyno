@@ -23,7 +23,7 @@ namespace dyno
 			return;
 		}
 
-		node->resetStates();
+		node->reset();
 	}
 
 }

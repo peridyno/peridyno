@@ -20,7 +20,7 @@
 #include <functional>
 
 namespace dyno {
-	class Base;
+	class OBase;
 
 	enum FieldTypeEnum
 	{
@@ -41,7 +41,7 @@ class FBase
 	using CallBackFunc = std::function<void()>;
 public:
 	FBase() : m_name("default"), m_description("") {};
-	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, Base* parent = nullptr);
+	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, OBase* parent = nullptr);
 	virtual ~FBase() {};
 
 	virtual uint getElementCount() = 0;
@@ -55,8 +55,8 @@ public:
 	void setObjectName(std::string name) { m_name = name; }
 	void setDescription(std::string description) { m_description = description; }
 
-	void setParent(Base* owner);
-	Base* parent();
+	void setParent(OBase* owner);
+	OBase* parent();
 
 	bool isDerived();
 	bool isAutoDestroyable();
@@ -115,7 +115,7 @@ private:
 
 	bool m_modified = false;
 
-	Base* mOwner = nullptr;
+	OBase* mOwner = nullptr;
 
 	FBase* mSource = nullptr;
 
@@ -127,7 +127,7 @@ private:
 #define DEFINE_FIELD_FUNC(DerivedField, Data, FieldName)						\
 FieldName() : FBase("", ""){}								\
 \
-FieldName(std::string name, std::string description, FieldTypeEnum fieldType, Base* parent)		\
+FieldName(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)		\
 	: FBase(name, description, fieldType, parent){}				\
 \
 const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }			\

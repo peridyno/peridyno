@@ -20,22 +20,22 @@ namespace dyno
 		Cloth(std::string name = "default");
 		virtual ~Cloth();
 
-		void updateTopology() override;
-
-		bool resetStates() override;
-
 		bool translate(Coord t) override;
 		bool scale(Real s) override;
-
-		bool initialize() override;
 
 		void loadSurface(std::string filename);
 
 		std::shared_ptr<Node> getSurface();
 
+	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 
 		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+
+	protected:
+		void resetStates() override;
+
+		void updateTopology() override;
 
 	private:
 		std::shared_ptr<Node> mSurfaceNode;

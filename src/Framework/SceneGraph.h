@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 #pragma once
-#include "Base.h"
+#include "OBase.h"
 #include "Node.h"
 #include "NodeIterator.h"
 
 namespace dyno 
 {
-	class SceneGraph : public Base
+	class SceneGraph : public OBase
 	{
 	public:
 		typedef NodeIterator Iterator;

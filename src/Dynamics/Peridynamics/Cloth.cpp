@@ -75,12 +75,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool Cloth<TDataType>::initialize()
-	{
-		return ParticleSystem<TDataType>::initialize();
-	}
-
-	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
@@ -100,7 +94,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool Cloth<TDataType>::resetStates()
+	void Cloth<TDataType>::resetStates()
 	{
 		ParticleSystem<TDataType>::resetStates();
 
@@ -115,8 +109,6 @@ namespace dyno
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
 		}
-
-		return true;
 	}
 
 	template<typename TDataType>
