@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "GLBuffer.h"
 #include "GLFramebuffer.h"
 #include "GLTexture.h"
 #include "RenderParams.h"
@@ -24,6 +25,7 @@
 
 namespace dyno
 {
+	class SceneGraph;
 	class ShadowMap
 	{
 	public:
@@ -31,13 +33,16 @@ namespace dyno
 		~ShadowMap();
 
 		void initialize();
-
-		void update(const std::vector<dyno::GLVisualModule*>& modules, const dyno::RenderParams& rparams);
+		
+		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
 
 	private:
 		// framebuffers
 		GLFramebuffer	mFramebuffer;
 		GLTexture2D		mShadowDepth;
+
+		GLBuffer		mTransformUBO;		// uniform buffer for light MVP matrices
+		GLBuffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices
 
 	public:
 		int				width;

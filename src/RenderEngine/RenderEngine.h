@@ -42,12 +42,10 @@ namespace dyno
 
 	private:
 		void initUniformBuffers();
-		void renderSetup(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams);
 
 	private:
 		// uniform buffer for matrices
 		GLBuffer		mTransformUBO;
-		GLBuffer		mShadowMapUBO;
 		GLBuffer		mLightUBO;
 		
 		SSAO*			mSSAO;

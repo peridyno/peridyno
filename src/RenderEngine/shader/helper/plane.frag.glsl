@@ -11,15 +11,22 @@ layout(std140, binding = 1) uniform LightUniformBlock
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
-	mat4 transform;
 } light;
 
 /***************** ShadowMap *********************/
+layout(std140, binding = 2) uniform ShadowUniformBlock
+{
+	// support up to 4 cascaded shadow map layers
+	mat4 transform[4];
+// may have some other data in future
+} shadow;
+
 layout(binding = 5) uniform sampler2D shadowDepth;
+//layout(binding = 6) uniform sampler2D shadowColor;
 
 vec3 GetShadowFactor(vec3 pos)
 {
-	vec4 posLightSpace = light.transform * vec4(pos, 1);
+	vec4 posLightSpace = shadow.transform[0] * vec4(pos, 1);
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
 	projCoords = projCoords * 0.5 + 0.5;
 
