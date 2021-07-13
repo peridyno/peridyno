@@ -34,6 +34,19 @@ namespace dyno
 	class RenderParams;
 	class Camera;
 
+	enum QButtonState
+	{
+		QBUTTON_DOWN = 0,
+		QBUTTON_UP
+	};
+
+	enum QButtonType
+	{
+		QBUTTON_LETF = 0,
+		QBUTTON_RIGHT,
+		QBUTTON_UNKNOWN
+	};
+
 	class POpenGLWidget
 		: public QOpenGLWidget
 		, private QOpenGLExtraFunctions
@@ -58,6 +71,8 @@ namespace dyno
 		RenderEngine* mRenderEngine;
 		RenderTarget* mRenderTarget;
 		RenderParams* mRenderParams;
+
+		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 
 		std::shared_ptr<Camera> mCamera;
 	};

@@ -5,6 +5,9 @@
 #include "SceneGraph.h"
 #include "camera/OrbitCamera.h"
 
+//Qt
+#include <QMouseEvent>
+
 namespace dyno
 {
 
@@ -83,22 +86,31 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
-		printf("Mouse pressed! \n");
+		mCamera->registerPoint(event->x(), event->y());
+		mButtonState = QButtonState::QBUTTON_DOWN;
 	}
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
-		printf("Mouse released! \n");
+		mButtonState = QButtonState::QBUTTON_UP;
 	}
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
 	{
-		printf("Mouse moved! \n");
+		if (event->buttons().testFlag(Qt::LeftButton) && mButtonState == QBUTTON_DOWN) {
+			mCamera->rotateToPoint(event->x(), event->y());
+		}
+		else if (event->buttons().testFlag(Qt::RightButton) && mButtonState == QBUTTON_DOWN) {
+			mCamera->translateToPoint(event->x(), event->y());
+		}
+
+		update();
 	}
 
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
-		printf("Mouse scrolled! \n");
+		mCamera->zoom(-0.001*event->angleDelta().y());
+		update();
 	}
 
 }
