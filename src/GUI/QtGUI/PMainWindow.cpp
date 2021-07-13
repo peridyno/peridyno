@@ -51,6 +51,7 @@
 #include "PDockWidget.h"
 #include "PToolBar.h"
 #include "PStatusBar.h"
+#include "POpenGLWidget.h"
 #include "PVTKOpenGLWidget.h"
 #include "PAnimationWidget.h"
 
@@ -90,6 +91,7 @@
 #include <QtSvg/QSvgRenderer>
 #include <QHBoxLayout>
 #include <QDialog>
+#include <QVBoxLayout>
 
 #include "Nodes/QtFlowView.h"
 #include "Nodes/QtModuleFlowScene.h"
@@ -128,7 +130,7 @@ namespace dyno
 // 		m_moduleListWidget(nullptr)
 	{
 		setObjectName("MainWindow");
-		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(": AI targeted physics simulation platform"));
+		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physics simulation platform"));
 		setWindowIcon(QPixmap("../../data/logo3.png"));
 
 		setCentralView();
@@ -165,7 +167,7 @@ namespace dyno
 		setCentralWidget(centralWidget);
 
 		centralWidget->setContentsMargins(0, 0, 0, 0);
-		QGridLayout* mainLayout = new QGridLayout();
+		QVBoxLayout* mainLayout = new QVBoxLayout();
 		mainLayout->setContentsMargins(0, 0, 0, 0);
 		mainLayout->setSpacing(0);
 		centralWidget->setLayout(mainLayout);
@@ -175,17 +177,29 @@ namespace dyno
 		tabWidget->setObjectName(QStringLiteral("tabWidget"));
 		tabWidget->setGeometry(QRect(140, 60, 361, 241));
 
-		m_vtkOpenglWidget = new PVTKOpenGLWidget();
-		m_vtkOpenglWidget->setObjectName(QStringLiteral("tabView"));
-		m_vtkOpenglWidget->layout()->setMargin(0);
-		tabWidget->addTab(m_vtkOpenglWidget, QString());
-		tabWidget->setTabText(tabWidget->indexOf(m_vtkOpenglWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
+// 		//VTK-based visualization widget
+// 		m_vtkOpenglWidget = new PVTKOpenGLWidget();
+// 		m_vtkOpenglWidget->setObjectName(QStringLiteral("tabView"));
+// 		m_vtkOpenglWidget->layout()->setMargin(0);
+// 		tabWidget->addTab(m_vtkOpenglWidget, QString());
+// 		tabWidget->setTabText(tabWidget->indexOf(m_vtkOpenglWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
+// 
+// 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), m_vtkOpenglWidget, SLOT(prepareRenderingContex()));
+// 		mainLayout->addWidget(tabWidget, 0, 0);
+
 
 // 		m_moduleFlowView = new PModuleFlowWidget();
 // 		m_moduleFlowView->setObjectName(QStringLiteral("tabEditor"));
 // 		tabWidget->addTab(m_moduleFlowView, QString());
 // 		tabWidget->setTabText(tabWidget->indexOf(m_moduleFlowView), QApplication::translate("MainWindow", "Module Editor", Q_NULLPTR));
 
+		//OpenGL-based visualization widget
+		mOpenGLWidget = new POpenGLWidget();
+// 		mOpenGLWidget->setObjectName(QStringLiteral("tabView"));
+// 		mOpenGLWidget->layout()->setMargin(0);
+// 		tabWidget->addTab(mOpenGLWidget, QString());
+// 		tabWidget->setTabText(tabWidget->indexOf(mOpenGLWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
+		mainLayout->addWidget(mOpenGLWidget, 1);
 
 		//Setup animation widget
 		m_animationWidget = new PAnimationWidget(this);
@@ -198,10 +212,7 @@ namespace dyno
 // 		hLayout->addWidget(m_vtkOpenglWidget, 1);
 // 		hLayout->addWidget(m_flowView, 1);
 
-		mainLayout->addWidget(tabWidget, 0, 0);
- 		mainLayout->addWidget(m_animationWidget, 1, 0);
-
-		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), m_vtkOpenglWidget, SLOT(prepareRenderingContex()));
+ 		mainLayout->addWidget(m_animationWidget, 0);
 	}
 
 	void PMainWindow::setupToolBar()

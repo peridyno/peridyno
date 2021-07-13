@@ -61,6 +61,7 @@ namespace dyno
 {
 	class PToolBar;
 	class PStatusBar;
+	class POpenGLWidget;
 	class PVTKOpenGLWidget;
 	class PSceneGraphWidget;
 	class PPropertyWidget;
@@ -122,6 +123,7 @@ namespace dyno
 		PNodeFlowWidget*		m_flowView;
 		
 		PStatusBar*				m_statusBar;
+		POpenGLWidget*			mOpenGLWidget;
 		PVTKOpenGLWidget*		m_vtkOpenglWidget;
 		
 		PPropertyWidget*		m_propertyWidget;

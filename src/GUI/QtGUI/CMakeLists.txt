@@ -65,7 +65,7 @@ set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
     
-target_link_libraries(${LIB_NAME} Core Framework ParticleSystem)
+target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
 
 target_include_directories(${LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/GUI>
@@ -80,8 +80,8 @@ install(TARGETS ${LIB_NAME}
     ARCHIVE  DESTINATION  ${PERIDYNO_ARCHIVE_INSTALL_DIR}
     )
 
-install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
-    FILE ${LIB_NAME}Targets.cmake)
+#install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
+#    FILE ${LIB_NAME}Targets.cmake)
 
 #Append ${LIB_NAME}Targets.cmake to the global list, which will be include in PeridynoConfig.cmake
 get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")

@@ -1,0 +1,104 @@
+#include "POpenGLWidget.h"
+#include "RenderEngine.h"
+#include "RenderTarget.h"
+#include "RenderParams.h"
+#include "SceneGraph.h"
+#include "camera/OrbitCamera.h"
+
+namespace dyno
+{
+
+	POpenGLWidget::POpenGLWidget()
+	{
+
+	}
+
+	POpenGLWidget::~POpenGLWidget()
+	{
+		delete mRenderEngine;
+		delete mRenderTarget;
+		delete mRenderParams;
+	}
+
+	void POpenGLWidget::initializeGL()
+	{
+		if (!gladLoadGL()) {
+			//SPDLOG_CRITICAL("Failed to load GLAD!");
+			exit(-1);
+		}
+
+		mRenderEngine = new RenderEngine();
+		mRenderTarget = new RenderTarget();
+		mRenderParams = new RenderParams();
+
+		mCamera = std::make_shared<OrbitCamera>();
+		mCamera->setWidth(this->width());
+		mCamera->setHeight(this->height());
+		mCamera->registerPoint(0.5f, 0.5f);
+		mCamera->translateToPoint(0, 0);
+
+		mCamera->zoom(3.0f);
+		mCamera->setClipNear(0.01f);
+		mCamera->setClipFar(10.0f);
+
+		mRenderEngine->initialize();
+		mRenderTarget->initialize();
+
+		initializeOpenGLFunctions();
+		glClearColor(0, 0, 0, 1);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_LIGHT0);
+		glEnable(GL_LIGHTING);
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+		glEnable(GL_COLOR_MATERIAL);
+	}
+
+	void POpenGLWidget::paintGL()
+	{
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+
+		mRenderParams->proj = mCamera->getProjMat();
+		mRenderParams->view = mCamera->getViewMat();
+
+		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
+
+		// write back to the framebuffer
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		mRenderTarget->blit(0);
+	}
+
+	void POpenGLWidget::resizeGL(int w, int h)
+	{
+		mCamera->setWidth(w);
+		mCamera->setHeight(h);
+
+		mRenderTarget->resize(w, h);
+		// set the viewport
+		mRenderParams->viewport.x = 0;
+		mRenderParams->viewport.y = 0;
+		mRenderParams->viewport.w = w;
+		mRenderParams->viewport.h = h;
+	}
+
+	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
+	{
+		printf("Mouse pressed! \n");
+	}
+
+	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
+	{
+		printf("Mouse released! \n");
+	}
+
+	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
+	{
+		printf("Mouse moved! \n");
+	}
+
+	void POpenGLWidget::wheelEvent(QWheelEvent *event)
+	{
+		printf("Mouse scrolled! \n");
+	}
+
+}
