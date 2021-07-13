@@ -1,6 +1,6 @@
 #include "PSimulationThread.h"
 
-#include "Framework/SceneGraph.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {

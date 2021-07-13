@@ -5,7 +5,7 @@
 #include <QtWidgets/QLabel>
 
 #include "QtBlockDataModel.h"
-#include "Framework/Node.h"
+#include "Node.h"
 
 #include <iostream>
 

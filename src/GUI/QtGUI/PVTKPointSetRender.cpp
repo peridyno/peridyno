@@ -3,7 +3,7 @@
 
 #include "PVTKPolyDataSource.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 #include "PVTKOpenGLWidget.h"
 #include "PVTKPointSetSource.h"
 
@@ -111,7 +111,7 @@ namespace dyno
 	}
 
 
-	void PVTKPointSetRender::updateRenderingContext()
+	void PVTKPointSetRender::updateGraphicsContext()
 	{
 		pointsetSource->Update();
 		pointsetSource->Modified();

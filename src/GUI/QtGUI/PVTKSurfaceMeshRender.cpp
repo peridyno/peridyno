@@ -3,7 +3,7 @@
 
 #include "PVTKPolyDataSource.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 #include "PVTKOpenGLWidget.h"
 
 //VTK
@@ -82,7 +82,7 @@ namespace dyno
 	}
 
 
-	void PVTKSurfaceMeshRender::updateRenderingContext()
+	void PVTKSurfaceMeshRender::updateGraphicsContext()
 	{
 		polydataSource->Update();
 		polydataSource->Modified();

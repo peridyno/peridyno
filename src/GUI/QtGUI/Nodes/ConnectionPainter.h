@@ -4,22 +4,21 @@
 
 namespace QtNodes
 {
+	class ConnectionGeometry;
+	class ConnectionState;
+	class QtConnection;
 
-class ConnectionGeometry;
-class ConnectionState;
-class QtConnection;
+	class ConnectionPainter
+	{
+	public:
 
-class ConnectionPainter
-{
-public:
+		static
+			void
+			paint(QPainter* painter,
+				QtConnection const& connection);
 
-  static
-  void
-  paint(QPainter* painter,
-        QtConnection const& connection);
-
-  static
-  QPainterPath
-  getPainterStroke(ConnectionGeometry const& geom);
-};
+		static
+			QPainterPath
+			getPainterStroke(ConnectionGeometry const& geom);
+	};
 }

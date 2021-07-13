@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "QtApp.h"
 #include "PMainWindow.h"
-#include "Framework/Log.h"
+#include "Log.h"
 //#include "Rendering/OpenGLContext.h"
 
 namespace dyno {

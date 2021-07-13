@@ -18,7 +18,7 @@
 namespace dyno
 {
 /**
- * @brief Macro definitions for VarField
+ * @brief Macro definitions for FVar
  * 
  */
 #define DEF_CURRENT_VAR(name, T, value, desc) \
