@@ -61,19 +61,34 @@ layout(std140, binding = 2) uniform ShadowUniformBlock
 {
 	// support up to 4 cascaded shadow map layers
 	mat4 transform[4];
+	vec4 minDepth;
+	vec4 maxDepth;
 	// may have some other data in future
 } shadow;
 
 layout(binding = 5) uniform sampler2D shadowDepth;
 //layout(binding = 6) uniform sampler2D shadowColor;
 
+int GetShadowLevel(vec3 pos)
+{
+	float depth = abs(pos.z);
+	for (int i = 0; i < 4; i++)
+	{
+		if (depth < shadow.maxDepth[i])
+			return i;
+	}
+	return 0;
+}
+
 vec3 GetShadowFactor(vec3 pos)
 {
-	vec4 posLightSpace = shadow.transform[0] * vec4(pos, 1);
+	int level = GetShadowLevel(pos);
+
+	vec4 posLightSpace = shadow.transform[level] * vec4(pos, 1);
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
 	projCoords = projCoords * 0.5 + 0.5;
 
-	float closestDepth = texture(shadowDepth, projCoords.xy).r;
+	float closestDepth = textureLod(shadowDepth, projCoords.xy, level).r;
 	float currentDepth = min(1.0, projCoords.z);
 
 	//float bias = max(0.05 * (1.0 - dot(normal, normalize(light.direction.xyz))), 0.005); 
@@ -81,19 +96,17 @@ vec3 GetShadowFactor(vec3 pos)
 
 	// simple PCF
 	vec3 shadow = vec3(0);
-	vec2 texelSize = 1.0 / textureSize(shadowDepth, 0);
-	for (int x = -2; x <= 2; ++x)
+	vec2 texelSize = 1.0 / textureSize(shadowDepth, level);
+	for (int x = -1; x <= 1; ++x)
 	{
-		for (int y = -2; y <= 2; ++y)
+		for (int y = -1; y <= 1; ++y)
 		{
-			float pcfDepth = texture(shadowDepth, projCoords.xy + vec2(x, y) * texelSize).r;
+			float pcfDepth = textureLod(shadowDepth, projCoords.xy + vec2(x, y) * texelSize, level).r;
 			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
-			//shadow += texture(shadowColor, projCoords.xy + vec2(x, y) * texelSize).rgb * visible;
-			// for transparent object, we only consider shadow from opacity objects...
-			shadow += vec3(visible);
+			shadow += visible;
 		}
 	}
-	return clamp(shadow / 25.0, 0, 1);
+	return clamp(shadow / 9.0, 0, 1) * sqrt(level + 1);
 }
 
 // refer to https://learnopengl.com

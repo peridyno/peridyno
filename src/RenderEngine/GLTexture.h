@@ -53,11 +53,13 @@ namespace dyno {
 
 		virtual void create();
 
-		virtual void resize(int w, int h);
+		virtual void resize(int w, int h, int level = 0);
 		virtual void load(int w, int h, void* data);
 
 		// OpenGL 4.4+, clear texture
 		virtual void clear(void* value);
+
+		void genMipmap();
 	};
 
 }

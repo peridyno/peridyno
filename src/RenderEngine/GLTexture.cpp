@@ -64,10 +64,10 @@ namespace dyno
 		glCheckError();
 	}
 
-	void GLTexture2D::resize(int w, int h)
+	void GLTexture2D::resize(int w, int h, int level)
 	{
 		glBindTexture(target, id);
-		glTexImage2D(target, 0, internalFormat, w, h, 0, format, type, 0);
+		glTexImage2D(target, level, internalFormat, w, h, 0, format, type, 0);
 		glCheckError();
 	}
 
@@ -83,6 +83,12 @@ namespace dyno
 	void GLTexture2D::clear(void* value)
 	{
 		glClearTexImage(id, 0, format, type, value);
+		glCheckError();
+	}
+	void GLTexture2D::genMipmap()
+	{
+		glBindTexture(target, id);
+		glGenerateMipmap(target);
 		glCheckError();
 	}
 }
