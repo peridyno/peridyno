@@ -77,6 +77,7 @@ endif()
 
 add_subdirectory(external/glfw-3.3.0)
 add_subdirectory(external/glad-4.6)
+add_subdirectory(external/imgui)
 
 option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
 
