@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 #include "Algorithm/Reduction.h"
 #include "Algorithm/Functional.h"
 #include "Algorithm/Arithmetic.h"
@@ -23,7 +23,7 @@ namespace dyno {
 		bool constrain() override;
 
 	public:
-		VarField<Real> m_smoothingLength;
+		FVar<Real> m_smoothingLength;
 
 		DeviceArrayField<Coord> m_velocity;
 		DeviceArrayField<Coord> m_position;

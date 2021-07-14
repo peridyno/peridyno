@@ -17,7 +17,6 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
         Core 
         Framework 
         IO 
-        Graphics 
         Peridynamics 
         RigidBody 
         GlfwGUI)

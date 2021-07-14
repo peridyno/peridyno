@@ -1,6 +1,6 @@
 #pragma once
 #include "Array/Array.h"
-#include "Framework/TopologyMapping.h"
+#include "Module/TopologyMapping.h"
 
 namespace dyno
 {

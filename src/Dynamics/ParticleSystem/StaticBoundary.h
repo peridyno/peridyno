@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/Node.h"
+#include "Node.h"
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/ParticleSystem.h"
 
@@ -23,14 +23,15 @@ namespace dyno {
 //		bool addRigidBody(std::shared_ptr<RigidBody<TDataType>> child);
 //		bool addParticleSystem(std::shared_ptr<ParticleSystem<TDataType>> child);
 
-		void advance(Real dt) override;
-
 		void loadSDF(std::string filename, bool bOutBoundary = false);
 		std::shared_ptr<Node> loadCube(Coord lo, Coord hi, Real distance = 0.005f, bool bOutBoundary = false);
 		void loadShpere(Coord center, Real r, Real distance = 0.005f, bool bOutBoundary = false, bool bVisible = false);
 
 		void translate(Coord t);
 		void scale(Real s);
+
+	protected:
+		void updateStates() override;
 
 	public:
 		DEF_VAR(Real, TangentialFriction, 0.0, "Tangential friction");

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Framework/ModuleVisual.h>
+#include <Module/VisualModule.h>
 #include <glm/vec3.hpp>
 
 namespace dyno
@@ -26,17 +26,13 @@ namespace dyno
 	public:
 		GLVisualModule();
 
-		// override method from VisualModule
-		void display() final;
-		void updateRenderingContext() final;
-
-		// basic disney PBR material properties
-		void setColor(const glm::vec3& color);
+		// basic Disney PBR material properties
+		void setColor(const Vec3f& color);
 		void setMetallic(float metallic);
 		void setRoughness(float roughness);
 		void setAlpha(float alpha);
 
-		glm::vec3 getColor() const { return mBaseColor; }
+		Vec3f getColor() const { return mBaseColor; }
 		float getMetallic() const { return mMetallic; }
 		float getRoughness() const { return mRoughness; }
 		float getAlpha() const { return mAlpha; }
@@ -54,12 +50,15 @@ namespace dyno
 		virtual void updateGL() = 0;
 		virtual void paintGL(RenderMode mode) = 0;
 
+	protected:
+		void updateGraphicsContext() final;
+
 	private:
 		bool isGLInitialized = false;
 
 	protected:
 		// material properties
-		glm::vec3		mBaseColor = glm::vec3(0.8f);
+		Vec3f			mBaseColor = Vec3f(0.8f);
 		float			mMetallic = 0.0f;
 		float			mRoughness = 0.5f;
 		float			mAlpha = 1.f;		

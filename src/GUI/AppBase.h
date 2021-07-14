@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
-#include "Framework/SceneGraph.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {

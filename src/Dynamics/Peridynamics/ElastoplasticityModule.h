@@ -18,6 +18,7 @@ namespace dyno {
 	template<typename TDataType>
 	class ElastoplasticityModule : public ElasticityModule<TDataType>
 	{
+		DECLARE_CLASS_1(ElastoplasticityModule, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -65,11 +66,11 @@ namespace dyno {
 
 	private:
 
-		VarField<Real> m_c;
-		VarField<Real> m_phi;
+		FVar<Real> m_c;
+		FVar<Real> m_phi;
 
-		VarField<bool> m_reconstuct_all_neighborhood;
-		VarField<bool> m_incompressible;
+		FVar<bool> m_reconstuct_all_neighborhood;
+		FVar<bool> m_incompressible;
 
 		DArray<bool> m_bYield;
 		DArray<Matrix> m_invF;

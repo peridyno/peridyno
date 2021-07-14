@@ -1,5 +1,5 @@
 #include "SummationDensity.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Kernel.h"
 
 namespace dyno

@@ -1,7 +1,7 @@
 #include <cuda_runtime.h>
 #include "ParticleIntegrator.h"
-#include "Framework/Node.h"
-#include "Framework/SceneGraph.h"
+#include "Node.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {
@@ -35,23 +35,6 @@ namespace dyno
 	void ParticleIntegrator<TDataType>::end()
 	{
 
-	}
-
-	template<typename TDataType>
-	bool ParticleIntegrator<TDataType>::initializeImpl()
-	{
-// 		if (!isAllFieldsReady())
-// 		{
-// 			std::cout << "Exception: " << std::string("DensitySummation's fields are not fully initialized!") << "\n";
-// 			return false;
-// 		}
-// 
-// 		int num = this->inPosition()->getElementCount();
-// 
-// 		m_prePosition.resize(num);
-// 		m_preVelocity.resize(num);
-
-		return true;
 	}
 
 	template<typename Real, typename Coord>
@@ -154,9 +137,10 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleIntegrator<TDataType>::updatePosition()
 	{
+		//TODO: 
 		Real dt = 0.001;
-		if (this->getParent() != NULL)
-			dt = getParent()->getDt();
+// 		if (this->getParent() != NULL)
+// 			dt = getParent()->getDt();
 
 		int total_num = this->inPosition()->getDataPtr()->size();
 		if (this->inAttribute()->isEmpty())
@@ -192,6 +176,17 @@ namespace dyno
 
 		return true;
 	}
+
+
+	template<typename TDataType>
+	void ParticleIntegrator<TDataType>::updateImpl()
+	{
+		this->begin();
+		this->integrate();
+		this->end();
+	}
+
+
 
 	DEFINE_CLASS(ParticleIntegrator);
 }

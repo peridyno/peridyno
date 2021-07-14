@@ -36,8 +36,7 @@ set_target_properties(${LIB_NAME} PROPERTIES
 
 target_include_directories(${LIB_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/GUI>
-	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/GUI/GlfwGUI/ImGUI>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/GUI>)
 
-target_link_libraries(${LIB_NAME} Core Framework IO RenderEngine glfw glad)
+target_link_libraries(${LIB_NAME} Core Framework IO RenderEngine glfw imgui)

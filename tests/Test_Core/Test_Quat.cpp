@@ -25,5 +25,5 @@ TEST(Quat, func)
 	auto qN = q0 + 0.5f*omega * q0;
 	qN.normalize();
 
-	EXPECT_EQ(angle == 0.2f, true);
+	EXPECT_EQ(abs(angle - 0.2f) < 10*EPSILON, true);
 }

@@ -2,16 +2,14 @@
 
 #include "QtBlock.h"
 
-#include "Framework/Object.h"
-#include "Framework/SceneGraph.h"
+#include "Object.h"
+#include "SceneGraph.h"
 #include "QtModuleWidget.h"
 
 #include "QtGUI/PVTKSurfaceMeshRender.h"
 #include "QtGUI/PVTKPointSetRender.h"
 
-#include "Framework/SceneGraph.h"
-#include "ParticleSystem/ParticleElasticBody.h"
-
+#include "SceneGraph.h"
 #include "QtFlowView.h"
 #include "DataModelRegistry.h"
 
@@ -65,7 +63,8 @@ QtModuleFlowScene::~QtModuleFlowScene()
 
 void QtModuleFlowScene::showNodeFlow(Node* node)
 {
-	clearScene();
+	return;
+/*	clearScene();
 
 	auto mlist = node->getModuleList();
 
@@ -108,10 +107,10 @@ void QtModuleFlowScene::showNodeFlow(Node* node)
 
 		for (int i = 0; i < fields.size(); i++)
 		{
-			auto sink_fields = fields[i]->getSinkFields();
+			auto sink_fields = fields[i]->getSinks();
 			for (int j = 0; j < sink_fields.size(); j++)
 			{
-				auto in_module = dynamic_cast<Module*>(sink_fields[j]->getParent());
+				auto in_module = dynamic_cast<Module*>(sink_fields[j]->parent());
 				if (in_module != nullptr)
 				{
 					auto in_fields = in_module->getInputFields();
@@ -135,15 +134,15 @@ void QtModuleFlowScene::showNodeFlow(Node* node)
 				}
 			}
 		}
-	};
+	};*/
 
-
-	createModuleConnections(node->getMechanicalState().get());
-	c = node->getAnimationPipeline()->entry();
-	for (; c != node->getAnimationPipeline()->finished(); c++)
-	{
-		createModuleConnections(c.get());
-	}
+	//TODO: fix
+// 	createModuleConnections(node->getMechanicalState().get());
+// 	c = node->getAnimationPipeline()->entry();
+// 	for (; c != node->getAnimationPipeline()->finished(); c++)
+// 	{
+// 		createModuleConnections(c.get());
+// 	}
 }
 
 void QtModuleFlowScene::moveModulePosition(QtBlock& n, const QPointF& newLocation)

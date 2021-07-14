@@ -1,21 +1,20 @@
 namespace dyno {
 
 	template<typename T>
-	void Array2D<T, DeviceType::GPU>::resize(size_t nx, size_t ny)
+	void Array2D<T, DeviceType::GPU>::resize(uint nx, uint ny)
 	{
 		if (nullptr != m_data) clear();
 
-		cuSafeCall(cudaMallocPitch((void**)&m_data, &m_pitch, sizeof(T) * nx, ny));
+		cuSafeCall(cudaMallocPitch((void**)&m_data, (size_t*)&m_pitch, (size_t)sizeof(T) * nx, (size_t)ny));
 		
 		m_nx = nx;	
 		m_ny = ny;
-		m_pitch /= sizeof(T);
 	}
 
 	template<typename T>
 	void Array2D<T, DeviceType::GPU>::reset()
 	{
-		cuSafeCall(cudaMemset((void*)m_data, 0, m_pitch * m_ny * sizeof(T)));
+		cuSafeCall(cudaMemset((void*)m_data, 0, m_pitch * m_ny));
 	}
 
 	template<typename T>
@@ -37,7 +36,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data, sizeof(T) *m_pitch, src.begin(), sizeof(T) *src.pitch(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyDeviceToDevice));
+		cuSafeCall(cudaMemcpy2D(m_data, m_pitch, src.begin(), src.pitch(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyDeviceToDevice));
 	}
 
 	template<typename T>
@@ -47,12 +46,12 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data, sizeof(T) *m_pitch, src.begin(), sizeof(T) *src.nx(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyHostToDevice));
+		cuSafeCall(cudaMemcpy2D(m_data, m_pitch, src.begin(), sizeof(T) *src.nx(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyHostToDevice));
 	}
 
 
 	template<typename T>
-	void Array2D<T, DeviceType::CPU>::resize(size_t nx, size_t ny)
+	void Array2D<T, DeviceType::CPU>::resize(uint nx, uint ny)
 	{
 		if (m_data.size() != 0) clear();
 		
@@ -83,7 +82,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny());
 		}
 
-		cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) * m_nx, src.begin(), sizeof(T) *src.pitch(), sizeof(T) *src.nx(), src.ny(), cudaMemcpyDeviceToHost));
+		cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) * m_nx, src.begin(), src.pitch(), sizeof(T) *src.nx(), src.ny(), cudaMemcpyDeviceToHost));
 	}
 
 	template<typename T>

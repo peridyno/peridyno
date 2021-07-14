@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 #include "ElastoplasticityModule.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Matrix/MatrixFunc.h"
 #include "ParticleSystem/Kernel.h"
 #include <thrust/scan.h>
@@ -9,6 +9,8 @@
 
 namespace dyno
 {
+	IMPLEMENT_CLASS_1(ElastoplasticityModule, TDataType)
+
 	template<typename TDataType>
 	ElastoplasticityModule<TDataType>::ElastoplasticityModule()
 		: ElasticityModule<TDataType>()
@@ -242,14 +244,14 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::solveElasticity()
 	{
-		this->m_position_old.assign(this->inPosition()->getData());
+		this->mPosBuf.assign(this->inPosition()->getData());
 
 		this->computeInverseK();
 
 		m_pbdModule->varIterationNumber()->setValue(1);
 
 		int iter = 0;
-		int total = this->getIterationNumber();
+		int total = this->varIterationNumber()->getData();
 		while (iter < total)
 		{
 			this->enforceElasticity();
@@ -292,13 +294,13 @@ namespace dyno
 			m_I1,
 			this->inPosition()->getData(),
 			m_pbdModule->outDensity()->getData(),
-			this->m_bulkCoefs,
+			this->mBulkStiffness,
 			this->inRestShape()->getData(),
 			this->inHorizon()->getData(),
 			A,
 			B,
-			this->m_mu.getData(),
-			this->m_lambda.getData());
+			this->varMu()->getData(),
+			this->varLambda()->getData());
 		cuSynchronize();
 		// 
 		PM_ApplyYielding<Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
@@ -666,6 +668,7 @@ namespace dyno
 		m_bYield.reset();
 
 		m_pbdModule = std::make_shared<DensityPBD<TDataType>>();
+		this->inTimeStep()->connect(m_pbdModule->inTimeStep());
 		this->inHorizon()->connect(m_pbdModule->varSmoothingLength());
 		this->inPosition()->connect(m_pbdModule->inPosition());
 		this->inVelocity()->connect(m_pbdModule->inVelocity());

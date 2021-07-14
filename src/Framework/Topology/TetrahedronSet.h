@@ -9,6 +9,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TopologyModule::Triangle Triangle;
 		typedef typename TopologyModule::Tetrahedron Tetrahedron;
 
 		TetrahedronSet();
@@ -29,9 +30,6 @@ namespace dyno
 		void updateTriangles();
 
 		void copyFrom(TetrahedronSet<TDataType> tetSet);
-
-	protected:
-		bool initializeImpl() override;
 
 	protected:
 		DArray<Tetrahedron> m_tethedrons;

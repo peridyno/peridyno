@@ -1,17 +1,24 @@
+/**
+ * Copyright 2021 Xiaowei He
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
-#include <vector_types.h>
-#include <vector>
-#include "Framework/NumericalModel.h"
-#include "ElasticityModule.h"
-
+#include "Module/GroupModule.h"
+#include "NeighborData.h"
 
 namespace dyno
 {
-	template<typename> class NeighborPointQuery;
-	template<typename> class PointSetToPointSet;
-	template<typename> class ParticleIntegrator;
-	template<typename> class ElasticityModule;
-	
 	/*!
 	*	\class	ParticleSystem
 	*	\brief	Projective peridynamics
@@ -20,42 +27,29 @@ namespace dyno
 	*	Refer to He et al' "Projective peridynamics for modeling versatile elastoplastic materials" for details.
 	*/
 	template<typename TDataType>
-	class Peridynamics : public NumericalModel
+	class Peridynamics : public GroupModule
 	{
 		DECLARE_CLASS_1(Peridynamics, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef TPair<TDataType> NPair;
 
 		Peridynamics();
 		~Peridynamics() override {};
 
-		/*!
-		*	\brief	All variables should be set appropriately before initializeImpl() is called.
-		*/
-		bool initializeImpl() override;
-
-		void step(Real dt) override;
-
-
 	public:
-		VarField<Real> m_horizon;
+		DEF_VAR(Real, Horizon, 0.0085, "");
 
-		DeviceArrayField<Coord> m_position;
-		DeviceArrayField<Coord> m_velocity;
-		DeviceArrayField<Coord> m_forceDensity;
+		DEF_VAR_IN(Real, TimeStep, "Time step size!");
 
-	private:
-		HostVarField<int>* m_num;
-		HostVarField<Real>* m_mass;
-		
-		HostVarField<Real>* m_samplingDistance;
-		HostVarField<Real>* m_restDensity;
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Coord, Force, DeviceType::GPU, "");
 
-		std::shared_ptr<PointSetToPointSet<TDataType>> m_mapping;
-		std::shared_ptr<ParticleIntegrator<TDataType>> m_integrator;
-		std::shared_ptr<NeighborPointQuery<TDataType>> m_nbrQuery;
-		std::shared_ptr<ElasticityModule<TDataType>> m_elasticity;
+		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+
+	protected:
 	};
 }

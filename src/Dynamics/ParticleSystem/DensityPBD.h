@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 #include "Kernel.h"
 
 namespace dyno {
@@ -28,14 +28,7 @@ namespace dyno {
 		void updateVelocity();
 
 	public:
-		DEF_VAR(int, IterationNumber, 5, "Iteration number of the PBD solver");
-
-		DEF_VAR(Real, RestDensity, 1000, "Reference density");
-
-		DEF_VAR(Real, SamplingDistance, 0.005, "");
-
-		DEF_VAR(Real, SmoothingLength, 0.01, "");
-
+		DEF_VAR_IN(Real, TimeStep, "Time Step");
 
 		/**
 		 * @brief Particle positions
@@ -57,6 +50,15 @@ namespace dyno {
 		 * @brief Final particle densities
 		 */
 		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Final particle density");
+
+	public:
+		DEF_VAR(int, IterationNumber, 5, "Iteration number of the PBD solver");
+
+		DEF_VAR(Real, RestDensity, 1000, "Reference density");
+
+		DEF_VAR(Real, SamplingDistance, 0.005, "");
+
+		DEF_VAR(Real, SmoothingLength, 0.01, "");
 
 	private:
 		SpikyKernel<Real> m_kernel;

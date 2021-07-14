@@ -18,7 +18,7 @@ namespace dyno {
 		~GranularModule() override {};
 
 	protected:
-		bool initializeImpl() override;
+		//bool initializeImpl() override;
 		void computeMaterialStiffness() override;
 
 	private:

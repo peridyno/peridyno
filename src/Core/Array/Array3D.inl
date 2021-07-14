@@ -66,7 +66,7 @@ namespace dyno {
 	{
 		if (NULL != m_data) clear();
 		
-		cuSafeCall(cudaMallocPitch((void**)&m_data, (size_t*)&m_pitch_x, (size_t)sizeof(T) * nx, ny*nz));
+		cuSafeCall(cudaMallocPitch((void**)&m_data, (size_t*)&m_pitch_x, (size_t)sizeof(T) * nx, (size_t)ny*nz));
 
 		//TODO: check whether it has problem when m_pitch_x is not divisible by sizeof(T)
 		m_nx = nx;	m_ny = ny;	m_nz = nz;	

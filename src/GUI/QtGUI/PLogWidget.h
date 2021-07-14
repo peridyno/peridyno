@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "Framework/Log.h"
+#include "Log.h"
 
 #include <QTableWidgetItem>
 

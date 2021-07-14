@@ -48,11 +48,11 @@ namespace dyno {
 		void updateVolume() override;
 
 	public:
-		DEF_PORT_IN(TriangleSet<TDataType>, ClosedSurface, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, ClosedSurface, "");
 
-		DEF_PORT_IN(Real, Spacing, "");
+		DEF_VAR_IN(Real, Spacing, "");
 
-		DEF_PORT_IN(uint, Padding, "");
+		DEF_VAR_IN(uint, Padding, "");
 
 	public:
 		void makeLevelSet();

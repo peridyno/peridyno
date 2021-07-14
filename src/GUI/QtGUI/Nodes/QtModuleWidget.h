@@ -5,14 +5,14 @@
 #include <QtWidgets/QLabel>
 
 #include "QtBlockDataModel.h"
-#include "Framework/Module.h"
+#include "Module.h"
 
 #include <iostream>
 
 class FieldData;
 
 using dyno::Module;
-using dyno::FieldBase;
+using dyno::FBase;
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -86,9 +86,9 @@ namespace QtNodes
 
 	private:
 
-		FieldBase* getField(PortType portType, PortIndex portIndex) const;
+		FBase* getField(PortType portType, PortIndex portIndex) const;
 
-		std::vector<FieldBase*>& getOutputFields();
-		std::vector<FieldBase*>& getInputFields();
+		std::vector<FBase*>& getOutputFields();
+		std::vector<FBase*>& getInputFields();
 	};
 }

@@ -3,9 +3,15 @@
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
 
+#include "ParticleSystem/ParticleIntegrator.h"
+
+#include "Topology/NeighborPointQuery.h"
+
 #include "Peridynamics/ElasticityModule.h"
 #include "Peridynamics/Peridynamics.h"
 #include "Peridynamics/FixedPoints.h"
+
+#include "SharedFunc.h"
 
 namespace dyno
 {
@@ -15,22 +21,34 @@ namespace dyno
 	Cloth<TDataType>::Cloth(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
-		auto peri = std::make_shared<Peridynamics<TDataType>>();
-		this->setNumericalModel(peri);
-		this->currentPosition()->connect(&peri->m_position);
-		this->currentVelocity()->connect(&peri->m_velocity);
-		this->currentForce()->connect(&peri->m_forceDensity);
+		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->currentPosition()->connect(integrator->inPosition());
+		this->currentVelocity()->connect(integrator->inVelocity());
+		this->currentForce()->connect(integrator->inForceDensity());
+
+		this->animationPipeline()->pushModule(integrator);
+
+		auto nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
+		this->varHorizon()->connect(nbrQuery->inRadius());
+		this->currentPosition()->connect(nbrQuery->inPosition());
+
+		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
+		this->varHorizon()->connect(elasticity->inHorizon());
+		this->varTimeStep()->connect(elasticity->inTimeStep());
+		this->currentPosition()->connect(elasticity->inPosition());
+		this->currentVelocity()->connect(elasticity->inVelocity());
+		this->currentRestShape()->connect(elasticity->inRestShape());
+		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
+		this->animationPipeline()->pushModule(elasticity);
+
 
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
 		//Create a node for surface mesh rendering
-		mSurfaceNode = this->template createChild<Node>("Mesh");
+		mSurfaceNode = this->template createAncestor<Node>("Mesh");
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		mSurfaceNode->setTopologyModule(triSet);
-
-// 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
-// 		this->addTopologyMapping(surfaceMapping);
 	}
 
 	template<typename TDataType>
@@ -57,19 +75,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool Cloth<TDataType>::initialize()
-	{
-		return ParticleSystem<TDataType>::initialize();
-	}
-
-	template<typename TDataType>
-	void Cloth<TDataType>::advance(Real dt)
-	{
-		auto nModel = this->getNumericalModel();
-		nModel->step(this->getDt());
-	}
-
-	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
 		auto pts = this->m_pSet->getPoints();
@@ -85,6 +90,25 @@ namespace dyno
 // 		{
 // 			(*iter)->apply();
 // 		}
+	}
+
+
+	template<typename TDataType>
+	void Cloth<TDataType>::resetStates()
+	{
+		ParticleSystem<TDataType>::resetStates();
+
+		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
+		nbrQuery->update();
+
+		if (!this->currentPosition()->isEmpty())
+		{
+			this->currentRestShape()->allocate();
+			auto nbrPtr = this->currentRestShape()->getDataPtr();
+			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
+
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+		}
 	}
 
 	template<typename TDataType>

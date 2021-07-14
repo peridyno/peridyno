@@ -1,7 +1,7 @@
 #include "QtModuleWidget.h"
 
 #include "FieldData.h"
-#include "Framework/Module.h"
+#include "Module.h"
 
 #include "../Common.h"
 
@@ -54,7 +54,7 @@ namespace QtNodes
 
 	BlockDataType QtModuleWidget::dataType(PortType portType, PortIndex portIndex) const
 	{
-		dyno::FieldBase* f = this->getField(portType, portIndex);
+		dyno::FBase* f = this->getField(portType, portIndex);
 
 		std::string name = f->getClassName();
 
@@ -92,7 +92,7 @@ namespace QtNodes
 
 	QString QtModuleWidget::portCaption(PortType portType, PortIndex portIndex) const
 	{
-		dyno::FieldBase* f = this->getField(portType, portIndex);
+		dyno::FBase* f = this->getField(portType, portIndex);
 		std::string name = f->getObjectName();
 
 		return dyno::FormatBlockPortName(name);
@@ -158,17 +158,17 @@ namespace QtNodes
 		}
 	}
 
-	FieldBase* QtModuleWidget::getField(PortType portType, PortIndex portIndex) const
+	FBase* QtModuleWidget::getField(PortType portType, PortIndex portIndex) const
 	{
 		return portType == PortType::In ? m_module->getInputFields()[portIndex] : m_module->getOutputFields()[portIndex];
 	}
 
-	std::vector<FieldBase*>& QtModuleWidget::getOutputFields()
+	std::vector<FBase*>& QtModuleWidget::getOutputFields()
 	{
 		return m_module->getOutputFields();
 	}
 
-	std::vector<FieldBase*>& QtModuleWidget::getInputFields()
+	std::vector<FBase*>& QtModuleWidget::getInputFields()
 	{
 		return m_module->getInputFields();
 	}

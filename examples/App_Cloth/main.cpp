@@ -1,9 +1,9 @@
 #include "GlfwGUI/GlfwApp.h"
 
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
-#include "Peridynamics/ParticleElasticBody.h"
+#include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/Cloth.h"
 
 #include "ParticleSystem/StaticBoundary.h"
@@ -31,12 +31,15 @@ void CreateScene()
 	root->addParticleSystem(cloth);
 
 	auto pointRenderer = std::make_shared<PointRenderer>();
-	pointRenderer->setColor(glm::vec3(1, 0.2, 1));
-	cloth->addVisualModule(pointRenderer);
+	pointRenderer->setColor(Vec3f(1, 0.2, 1));
+	pointRenderer->setColorMapMode(PointRenderer::PER_OBJECT_SHADER);
+	cloth->currentVelocity()->connect(pointRenderer->inColor());
+
+	cloth->graphicsPipeline()->pushModule(pointRenderer);
 	cloth->setVisible(true);
 
 	auto surfaceRenderer = std::make_shared<SurfaceRenderer>();
-	cloth->getSurface()->addVisualModule(surfaceRenderer);
+	cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
 }
 bool GlfwApp::mOpenCameraRotate = true;
 int main()

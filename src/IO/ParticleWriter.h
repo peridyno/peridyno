@@ -1,15 +1,14 @@
 #pragma once
-#include "Framework/ModuleIO.h"
-#include "Framework/ModuleTopology.h"
+#include "Module/OutputModule.h"
+#include "Module/TopologyModule.h"
 
 #include <string>
 
 namespace dyno
 {
-
 	template <typename TDataType> class TriangleSet;
 	template<typename TDataType>
-	class ParticleWriter : public IOModule
+	class ParticleWriter : public OutputModule
 	{
 		DECLARE_CLASS_1(ParticleWriter, TDataType)
 	public:
@@ -22,7 +21,8 @@ namespace dyno
 		void setNamePrefix(std::string prefix);
 		void setOutputPath(std::string path);
 
-		bool execute() override;
+	protected:
+		void updateImpl() override;
 
 	public:
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");

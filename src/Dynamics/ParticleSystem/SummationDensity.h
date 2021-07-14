@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleCompute.h"
+#include "Module/ComputeModule.h"
 
 namespace dyno {
 	/**

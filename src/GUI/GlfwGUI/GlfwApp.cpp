@@ -6,11 +6,11 @@
 #include <sstream>
 
 #include "Image_IO/image_io.h"
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
-#include "OrbitCamera.h"
-#include "TrackballCamera.h"
+#include "camera/OrbitCamera.h"
+#include "camera/TrackballCamera.h"
 
 #include "../RenderEngine/RenderEngine.h"
 #include "../RenderEngine/RenderTarget.h"
@@ -142,15 +142,14 @@ namespace dyno
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
-		// set Camera 
+		mCamera->setWidth(width);
+		mCamera->setHeight(height);
 		mCamera->registerPoint(0.5f, 0.5f);
 		mCamera->translateToPoint(0, 0);
 
 		mCamera->zoom(3.0f);
 		mCamera->setClipNear(0.01f);
 		mCamera->setClipFar(10.0f);
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
 
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();

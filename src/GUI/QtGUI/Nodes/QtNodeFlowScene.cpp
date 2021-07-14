@@ -4,10 +4,10 @@
 #include "QtFlowView.h"
 #include "QtNodeWidget.h"
 
-#include "Framework/Object.h"
-#include "Framework/NodeIterator.h"
-#include "Framework/NodePort.h"
-#include "Framework/SceneGraph.h"
+#include "Object.h"
+#include "NodeIterator.h"
+#include "NodePort.h"
+#include "SceneGraph.h"
 
 #include "DataModelRegistry.h"
 

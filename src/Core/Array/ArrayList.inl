@@ -28,11 +28,6 @@ namespace dyno
 		Reduction<int> reduce;
 		int total_num = reduce.accumulate(m_index.begin(), m_index.size());
 
-		if (total_num <= 0)
-		{
-			return false;
-		}
-
 		Scan scan;
 		scan.exclusive(m_index);
 

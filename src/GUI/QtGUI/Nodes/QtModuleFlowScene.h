@@ -2,7 +2,7 @@
 
 #include "QtFlowScene.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 
 namespace QtNodes
 {

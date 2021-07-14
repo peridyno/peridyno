@@ -1,6 +1,4 @@
-#ifndef FRAMEWORK_RESET_H
-#define FRAMEWORK_RESET_H
-
+#pragma once
 #include "Action.h"
 
 namespace dyno
@@ -15,5 +13,3 @@ namespace dyno
 		void process(Node* node) override;
 	};
 }
-
-#endif

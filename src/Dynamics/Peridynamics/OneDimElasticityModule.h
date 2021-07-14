@@ -10,7 +10,7 @@
  * 
  */
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 
 namespace dyno {
 
@@ -43,7 +43,7 @@ namespace dyno {
 		 * @brief Horizon
 		 * A positive number represents the radius of neighborhood for each point
 		 */
-		VarField<Real> m_distance;
+		FVar<Real> m_distance;
 
 		/**
 		 * @brief Particle position
@@ -61,12 +61,12 @@ namespace dyno {
 		* @brief Lame parameters
 		* m_lambda controls the isotropic part while mu controls the deviatoric part.
 		*/
-		VarField<Real> m_lambda;
+		FVar<Real> m_lambda;
 
 		DArray<Coord> m_position_old;
 		DArray<Coord> m_position_buf;
 
 	private:
-		VarField<int> m_iterNum;
+		FVar<int> m_iterNum;
 	};
 }

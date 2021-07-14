@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/TopologyMapping.h"
+#include "Module/TopologyMapping.h"
 #include "Topology/PointSet.h"
 
 namespace dyno

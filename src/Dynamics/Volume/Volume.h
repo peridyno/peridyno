@@ -1,7 +1,7 @@
 #pragma once
-#include "Framework/Node.h"
+#include "Node.h"
 
-#include "Topology/DistanceField3D.h"
+#include "Topology/SignedDistanceField.h"
 
 namespace dyno {
 
@@ -17,6 +17,6 @@ namespace dyno {
 
 		virtual void updateVolume() = 0;
 	public:
-		DEF_PORT_OUT(DistanceField3D<TDataType>, SDF, "");
+		DEF_INSTANCE_STATE(SignedDistanceField<TDataType>, SDF, "");
 	};
 }

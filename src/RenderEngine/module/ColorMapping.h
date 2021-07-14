@@ -15,9 +15,10 @@
  */
 
 #pragma once
-#include "Framework/ModuleCompute.h"
+#include "Module/ComputeModule.h"
 
-namespace dyno {
+namespace dyno 
+{
 	template<typename TDataType>
 	class ColorMapping : public ComputeModule
 	{
@@ -26,12 +27,22 @@ namespace dyno {
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ColorMapping();
-		~ColorMapping() override;
+		DECLARE_ENUM(ColorTable,
+			Jet = 0,
+			Heat = 1);
+
+		ColorMapping() {};
+		~ColorMapping() override {};
 
 		void compute() override;
 
-		DEF_ARRAY_IN(Coord, Vec, DeviceType::GPU, "");
+	public:
+		DEF_ENUM(ColorTable, Type, ColorTable::Jet, "");
+
+		DEF_VAR(Real, Min, Real(0), "");
+		DEF_VAR(Real, Max, Real(1), "");
+
+		DEF_ARRAY_IN(Real, Scalar, DeviceType::GPU, "");
 		DEF_ARRAY_OUT(Vec3f, Color, DeviceType::GPU, "");
 	};
 }

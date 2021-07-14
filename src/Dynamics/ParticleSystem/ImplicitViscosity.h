@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 
 namespace dyno 
 {
 	template<typename TDataType>
 	class ImplicitViscosity : public ConstraintModule
 	{
+		DECLARE_CLASS_1(ImplicitViscosity, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -36,6 +37,8 @@ namespace dyno
 		DEF_VAR(int, InterationNumber, 3, "");
 
 		DEF_VAR_IN(Real, SmoothingLength, "");
+
+		DEF_VAR_IN(Real, TimeStep, "");
 
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 

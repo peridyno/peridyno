@@ -19,41 +19,46 @@
 #include "GLObject.h"
 #include <glm/glm.hpp>
 
-class GLTexture : public GLObject
-{
-public:
-	virtual void create();
-	virtual void release();
+namespace dyno {
 
-	virtual void bind();
-	virtual void unbind();
+	class GLTexture : public GLObject
+	{
+	public:
+		virtual void create();
+		virtual void release();
 
-	virtual void bind(int slot);
+		virtual void bind();
+		virtual void unbind();
 
-public:
-	unsigned int target;
-	unsigned int internalFormat;
-	unsigned int format;
-	unsigned int type;
+		virtual void bind(int slot);
 
-	unsigned int minFilter;
-	unsigned int maxFilter;
-	unsigned int wrapS;
-	unsigned int wrapT;
+	public:
+		unsigned int target;
+		unsigned int internalFormat;
+		unsigned int format;
+		unsigned int type;
 
-	glm::vec4	 borderColor;
-};
+		unsigned int minFilter;
+		unsigned int maxFilter;
+		unsigned int wrapS;
+		unsigned int wrapT;
 
-class GLTexture2D : public GLTexture
-{
-public:
-	GLTexture2D();
+		glm::vec4	 borderColor;
+	};
 
-	virtual void create();
+	class GLTexture2D : public GLTexture
+	{
+	public:
+		GLTexture2D();
 
-	virtual void resize(int w, int h);
-	virtual void load(int w, int h, void* data);
+		virtual void create();
 
-	// OpenGL 4.4+, clear texture
-	virtual void clear(void* value);
-};
+		virtual void resize(int w, int h);
+		virtual void load(int w, int h, void* data);
+
+		// OpenGL 4.4+, clear texture
+		virtual void clear(void* value);
+	};
+
+}
+
