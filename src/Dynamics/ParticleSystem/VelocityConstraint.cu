@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 #include "VelocityConstraint.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "SummationDensity.h"
 #include "Attribute.h"
 #include "Kernel.h"

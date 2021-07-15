@@ -1,6 +1,6 @@
 #include "BoundaryConstraint.h"
-#include "Framework/Log.h"
-#include "Framework/Node.h"
+#include "Log.h"
+#include "Node.h"
 #include "Algorithm/CudaRand.h"
 #include "Topology/DistanceField3D.h"
 

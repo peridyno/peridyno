@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Framework/Node.h"
+#include "Node.h"
 
 namespace dyno
 {
@@ -42,7 +42,9 @@ namespace dyno
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
 
-		void advance(Real dt) final;
+	protected:
+		void updateStates() final;
+
 	protected:
 		DArray<Coord> mPosition;
 		DArray<Coord> mVelocity;

@@ -70,15 +70,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ElastoplasticBody<TDataType>::advance(Real dt)
+	void ElastoplasticBody<TDataType>::resetStates()
 	{
-		this->animationPipeline()->update();
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::resetStatus()
-	{
-		ParticleSystem<TDataType>::resetStatus();
+		ParticleSystem<TDataType>::resetStates();
 
 		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
 		nbrQuery->update();
@@ -91,8 +85,6 @@ namespace dyno
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
 		}
-
-		return true;
 	}
 
 	template<typename TDataType>
@@ -106,15 +98,6 @@ namespace dyno
 		{
 			(*iter)->apply();
 		}
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::initialize()
-	{
-		m_nbrQuery->initialize();
-		m_nbrQuery->compute();
-
-		return ParticleSystem<TDataType>::initialize();
 	}
 
 	template<typename TDataType>

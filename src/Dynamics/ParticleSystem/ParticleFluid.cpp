@@ -31,8 +31,8 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleFluid<TDataType>::advance(Real dt)
-	{		
+	void ParticleFluid<TDataType>::preUpdateStates()
+	{
 		auto emitters = this->getParticleEmitters();
 
 		int curNum = this->currentPosition()->getElementCount();
@@ -77,7 +77,7 @@ namespace dyno
 					vBuf.clear();
 					fBuf.clear();
 				}
-				
+
 				int start = curNum;
 				for (int i = 0; i < emitters.size(); i++)
 				{
@@ -99,18 +99,12 @@ namespace dyno
 				}
 			}
 		}
-
-		if (totalNum > 0)
-		{
-			this->animationPipeline()->update();
-		}
 	}
 
-
 	template<typename TDataType>
-	bool ParticleFluid<TDataType>::resetStatus()
+	void ParticleFluid<TDataType>::resetStates()
 	{
-		return ParticleSystem<TDataType>::resetStatus();
+		ParticleSystem<TDataType>::resetStates();
 	}
 
 	DEFINE_CLASS(ParticleFluid);

@@ -2,7 +2,7 @@
 #include <vector>
 #include <set>
 #include "Vector.h"
-#include <Framework/ModuleTopology.h>
+#include <Module/TopologyModule.h>
 
 namespace dyno{
 

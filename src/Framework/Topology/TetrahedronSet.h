@@ -32,9 +32,6 @@ namespace dyno
 		void copyFrom(TetrahedronSet<TDataType> tetSet);
 
 	protected:
-		bool initializeImpl() override;
-
-	protected:
 		DArray<Tetrahedron> m_tethedrons;
 
 	private:

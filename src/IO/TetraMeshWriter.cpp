@@ -1,5 +1,5 @@
 #include "TetraMeshWriter.h"
-#include "Framework/ModuleIO.h"
+#include "Module/OutputModule.h"
 
 #include <sstream>
 #include <iostream>
@@ -10,7 +10,7 @@ namespace dyno
 	IMPLEMENT_CLASS_1(TetraMeshWriter, TDataType)
 
 	template<typename TDataType>
-	TetraMeshWriter<TDataType>::TetraMeshWriter() : IOModule()
+	TetraMeshWriter<TDataType>::TetraMeshWriter() : OutputModule()
 	{
 
 	}

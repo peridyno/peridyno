@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 #include "ElastoplasticityModule.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Matrix/MatrixFunc.h"
 #include "ParticleSystem/Kernel.h"
 #include <thrust/scan.h>

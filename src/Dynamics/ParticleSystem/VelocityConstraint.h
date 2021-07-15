@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 #include "Algorithm/Reduction.h"
 #include "Algorithm/Functional.h"
 #include "Algorithm/Arithmetic.h"

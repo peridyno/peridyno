@@ -1,4 +1,4 @@
-#include "Framework/Node.h"
+#include "Node.h"
 #include "CollidableSDF.h"
 
 namespace dyno {

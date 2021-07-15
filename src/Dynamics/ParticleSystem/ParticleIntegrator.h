@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/NumericalIntegrator.h"
+#include "Module/NumericalIntegrator.h"
 #include "Attribute.h"
 
 namespace dyno {

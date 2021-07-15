@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
-#include "Framework/Log.h"
-#include "Framework/Node.h"
+#include "Log.h"
+#include "Node.h"
 #include "FixedPoints.h"
 
 namespace dyno

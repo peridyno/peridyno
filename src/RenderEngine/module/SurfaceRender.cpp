@@ -7,7 +7,7 @@
 
 // framework
 #include "Topology/TriangleSet.h"
-#include "Framework/Node.h"
+#include "Node.h"
 
 namespace dyno
 {

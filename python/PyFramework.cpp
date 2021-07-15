@@ -1,9 +1,9 @@
 #include "PyFramework.h"
 
-#include "Framework/Node.h"
-#include "Framework/ModuleVisual.h"
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "Node.h"
+#include "Module/VisualModule.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
 using Node = dyno::Node;
 using SceneGraph = dyno::SceneGraph;

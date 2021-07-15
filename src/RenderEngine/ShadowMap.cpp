@@ -1,7 +1,7 @@
 #include "ShadowMap.h"
 #include <glad/glad.h>
-#include "Framework/SceneGraph.h"
-#include "Action/Action.h"
+#include "SceneGraph.h"
+#include "Action.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

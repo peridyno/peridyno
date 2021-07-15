@@ -27,13 +27,6 @@ namespace dyno
 		ElastoplasticBody(std::string name = "default");
 		virtual ~ElastoplasticBody();
 
-		void advance(Real dt) override;
-
-		void updateTopology() override;
-		bool resetStatus() override;
-
-		bool initialize() override;
-
 		bool translate(Coord t) override;
 		bool scale(Real s) override;
 
@@ -47,6 +40,11 @@ namespace dyno
 		FVar<Real> m_horizon;
 
 		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+
+	protected:
+		void resetStates() override;
+
+		void updateTopology() override;
 
 	private:
 		std::shared_ptr<Node> m_surfaceNode;

@@ -1,7 +1,7 @@
 #include "GlfwGUI/GlfwApp.h"
 
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
 #include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/Cloth.h"

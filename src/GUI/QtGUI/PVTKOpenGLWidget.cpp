@@ -1,6 +1,6 @@
 #include "PVTKOpenGLWidget.h"
 
-#include "Framework/SceneGraph.h"
+#include "SceneGraph.h"
 #include "PSimulationThread.h"
 
 //VTK
@@ -95,7 +95,7 @@ namespace dyno
 	{
 		PSimulationThread::instance()->startRendering();
 
-		SceneGraph::getInstance().draw();
+		//SceneGraph::getInstance().draw();
 		m_OpenGLWidget->GetRenderWindow()->Render();
 
 		PSimulationThread::instance()->stopRendering();

@@ -6,11 +6,11 @@
 #include <sstream>
 
 #include "Image_IO/image_io.h"
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
-#include "OrbitCamera.h"
-#include "TrackballCamera.h"
+#include "camera/OrbitCamera.h"
+#include "camera/TrackballCamera.h"
 
 #include "../RenderEngine/RenderEngine.h"
 #include "../RenderEngine/RenderTarget.h"

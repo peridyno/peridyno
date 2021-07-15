@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleGroup.h"
+#include "Module/GroupModule.h"
 
 namespace dyno
 {

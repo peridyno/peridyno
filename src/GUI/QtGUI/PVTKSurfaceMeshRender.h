@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/ModuleVisual.h"
+#include "Module/VisualModule.h"
 
 class vtkActor;
 class vtkPolyDataMapper;
@@ -21,7 +21,7 @@ namespace dyno
 	protected:
 		bool  initializeImpl() override;
 
-		void updateRenderingContext() override;
+		void updateGraphicsContext() override;
 
 	private:
 		vtkActor* m_actor;

@@ -10,7 +10,7 @@ namespace dyno
 
 	template<typename TDataType>
 	ParticleWriter<TDataType>::ParticleWriter()
-	: IOModule()
+	: OutputModule()
 	{
 	}
 

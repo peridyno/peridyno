@@ -13,7 +13,7 @@
 #include "TypeConverter.h"
 #include "memory.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 
 namespace QtNodes
 {

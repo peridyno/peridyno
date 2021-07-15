@@ -1,7 +1,6 @@
 #pragma once
-#include "Framework/CollisionModel.h"
-#include "Framework/CollidableObject.h"
-#include "Framework/ModuleVisual.h"
-#include "Framework/ModuleTopology.h"
-#include "Framework/ModuleGeometry.h"
-#include "Framework/Pipeline.h"
+#include "Module/CollisionModel.h"
+#include "Module/CollidableObject.h"
+#include "Module/VisualModule.h"
+#include "Module/TopologyModule.h"
+#include "Module/Pipeline.h"

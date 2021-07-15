@@ -1,6 +1,6 @@
 #include "PInsertNodeAction.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 #include "PSceneGraphWidget.h"
 
 namespace dyno

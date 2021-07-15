@@ -21,7 +21,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleEmitter<TDataType>::advance(Real dt)
+	void ParticleEmitter<TDataType>::updateStates()
 	{
 		this->generateParticles();
 	}

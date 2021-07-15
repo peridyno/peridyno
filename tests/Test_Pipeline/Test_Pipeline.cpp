@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Framework/Pipeline.h"
+#include "Module/Pipeline.h"
 
 using namespace dyno;
 

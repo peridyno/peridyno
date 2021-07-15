@@ -1,6 +1,6 @@
 #include "PModuleListWidget.h"
-#include "Framework/Node.h"
-#include "Framework/Module.h"
+#include "Node.h"
+#include "Module.h"
 
 namespace dyno
 {	

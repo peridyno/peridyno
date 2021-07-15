@@ -1,7 +1,7 @@
 #include "GlfwGUI/GlfwApp.h"
 
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "SceneGraph.h"
+#include "Log.h"
 
 #include "ParticleSystem/ParticleFluid.h"
 #include "RigidBody/RigidBody.h"
@@ -45,11 +45,6 @@ void CreateScene()
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
-
-	std::shared_ptr<RigidBody<DataType3f>> rigidbody = std::make_shared<RigidBody<DataType3f>>();
-	root->addRigidBody(rigidbody);
-	rigidbody->loadShape("../../data/bowl/bowl.obj");
-	rigidbody->setActive(false);
 }
 
 int main()

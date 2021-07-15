@@ -1,6 +1,6 @@
 #pragma once
 #include "TopologyConstants.h"
-#include "Framework/ModuleTopology.h"
+#include "Module/TopologyModule.h"
 
 namespace dyno
 {
@@ -35,8 +35,6 @@ namespace dyno
 		void loadObjFile(std::string filename);
 
 	protected:
-		bool initializeImpl() override;
-
 		DArray<Coord> m_coords;
 		DArrayList<int> m_pointNeighbors;
 	};

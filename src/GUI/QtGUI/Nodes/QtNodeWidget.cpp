@@ -1,7 +1,7 @@
 #include "QtNodeWidget.h"
 
-#include "Framework/Node.h"
-#include "Framework/NodePort.h"
+#include "Node.h"
+#include "NodePort.h"
 
 #include "../Common.h"
 

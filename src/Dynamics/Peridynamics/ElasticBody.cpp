@@ -57,19 +57,6 @@ namespace dyno
 		return ParticleSystem<TDataType>::scale(s);
 	}
 
-
-	template<typename TDataType>
-	bool ElasticBody<TDataType>::initialize()
-	{
-		return ParticleSystem<TDataType>::initialize();
-	}
-
-	template<typename TDataType>
-	void ElasticBody<TDataType>::advance(Real dt)
-	{
-		this->animationPipeline()->update();
-	}
-
 	template<typename TDataType>
 	void ElasticBody<TDataType>::updateTopology()
 	{
@@ -84,9 +71,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ElasticBody<TDataType>::resetStatus()
+	void ElasticBody<TDataType>::resetStates()
 	{
-		ParticleSystem<TDataType>::resetStatus();
+		ParticleSystem<TDataType>::resetStates();
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
  		this->varHorizon()->connect(nbrQuery->inRadius());
@@ -107,8 +94,6 @@ namespace dyno
 			this->currentNeighborIds()->allocate();
 			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
 		}
-
-		return true;
 	}
 
 	template<typename TDataType>

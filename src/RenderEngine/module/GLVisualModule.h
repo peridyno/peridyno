@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Framework/ModuleVisual.h>
+#include <Module/VisualModule.h>
 #include <glm/vec3.hpp>
 
 namespace dyno

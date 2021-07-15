@@ -1,7 +1,7 @@
 #include <cuda_runtime.h>
 #include "ParticleIntegrator.h"
-#include "Framework/Node.h"
-#include "Framework/SceneGraph.h"
+#include "Node.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {

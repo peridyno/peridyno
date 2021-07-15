@@ -1,6 +1,6 @@
 #include "DensityPBD.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 #include "SummationDensity.h"
 
 namespace dyno

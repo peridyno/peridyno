@@ -1,5 +1,5 @@
 #include "CollisionDetection.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Topology/SparseOctree.h"
 #include "Topology/DiscreteElements.h"
 
@@ -88,13 +88,6 @@ namespace dyno
 
 	template<typename TDataType>
 	bool CollisionDetection<TDataType>::isSupport(std::shared_ptr<CollidableObject> obj)
-	{
-		return true;
-	}
-
-
-	template<typename TDataType>
-	bool CollisionDetection<TDataType>::initializeImpl()
 	{
 		return true;
 	}

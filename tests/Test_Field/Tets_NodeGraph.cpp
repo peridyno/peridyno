@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 
 using namespace dyno;
 

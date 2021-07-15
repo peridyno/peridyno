@@ -1,7 +1,7 @@
 #include "RenderEngine.h"
 // dyno
-#include "Framework/SceneGraph.h"
-#include "Action/Action.h"
+#include "SceneGraph.h"
+#include "Action.h"
 
 // GLM
 #include <glm/gtc/type_ptr.hpp>
