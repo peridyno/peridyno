@@ -1,7 +1,8 @@
 #include "RenderHelper.h"
-#include "Utility.h"
+
 #include "gl/Program.h"
 #include "gl/Mesh.h"
+#include "gl/Texture.h"
 
 #include <glad/glad.h>
 #include <vector>
@@ -13,8 +14,8 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mGroundProgram = gl::CreateShaderProgram("plane.vert", "plane.frag");
-			mGroundMesh = gl::Mesh::Plane(1.f);
+			mProgram = gl::CreateShaderProgram("plane.vert", "plane.frag");
+			mPlane = gl::Mesh::Plane(1.f);
 
 			// create ruler texture
 			const int k = 50;
@@ -32,44 +33,44 @@ namespace dyno
 				}
 			}
 
-			glGenTextures(1, &mGroundTex);
-			glBindTexture(GL_TEXTURE_2D, mGroundTex);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, img.data());
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			mRulerTex.wrapS = GL_REPEAT;
+			mRulerTex.wrapT = GL_REPEAT;
+			mRulerTex.minFilter = GL_LINEAR_MIPMAP_LINEAR;
+			mRulerTex.maxFilter = GL_LINEAR;
+			mRulerTex.format = GL_RED;
+			mRulerTex.internalFormat = GL_RED;
+			mRulerTex.type = GL_UNSIGNED_BYTE;
 
-			gl::glCheckError();
+			mRulerTex.create();
+			mRulerTex.load(w, h, img.data());
+			mRulerTex.genMipmap();
+			// set anisotropy
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
 		}
+
 
 		void draw(float scale = 3.f)
 		{
 			glEnable(GL_BLEND);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, mGroundTex);
-			mGroundProgram.use();
-
-			mGroundProgram.setFloat("uScale", scale);
-
 			glEnable(GL_CULL_FACE);
-			mGroundMesh.draw();
-			glDisable(GL_CULL_FACE);
 
-			glBindTexture(GL_TEXTURE_2D, 0);
+			mRulerTex.bind(GL_TEXTURE1);
+			
+			mProgram.use();
+			mProgram.setFloat("uScale", scale);
+
+			mPlane.draw();
+			
+			glDisable(GL_CULL_FACE);
 			glDisable(GL_BLEND);
+
 			gl::glCheckError();
 		}
 
 	private:
-		gl::Mesh			mGroundMesh;
-		unsigned int 		mGroundTex;
-		gl::Program mGroundProgram;
+		gl::Mesh			mPlane;
+		gl::Texture2D 		mRulerTex;
+		gl::Program			mProgram;
 	};
 
 	class AxisRenderer
@@ -77,7 +78,7 @@ namespace dyno
 	public:
 		AxisRenderer()
 		{
-			mAxisProgram = gl::CreateShaderProgram("axis.vert", "axis.frag");
+			mProgram = gl::CreateShaderProgram("axis.vert", "axis.frag");
 
 			mAxisVBO.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 			float vertices[] = {
@@ -100,7 +101,7 @@ namespace dyno
 
 		void draw(float lineWidth = 2.f)
 		{
-			mAxisProgram.use();
+			mProgram.use();
 			mAxisVAO.bind();
 
 			glLineWidth(lineWidth);
@@ -115,7 +116,7 @@ namespace dyno
 	private:
 		gl::VertexArray	mAxisVAO;
 		gl::Buffer		mAxisVBO;
-		gl::Program mAxisProgram;
+		gl::Program		mProgram;
 	};
 
 	class BBoxRenderer
@@ -123,7 +124,7 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mBBoxProgram = gl::CreateShaderProgram("bbox.vert", "bbox.frag");
+			mProgram = gl::CreateShaderProgram("bbox.vert", "bbox.frag");
 			mCubeVBO.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 			mCubeVBO.load(0, 8 * 3 * sizeof(float));
 			mCubeVAO.create();
@@ -146,8 +147,8 @@ namespace dyno
 
 			mCubeVBO.load(vertices, sizeof(vertices));
 			mCubeVAO.bind();
-			mBBoxProgram.use();
-			mBBoxProgram.setVec4("uColor", Vec4f(0.75));
+			mProgram.use();
+			mProgram.setVec4("uColor", Vec4f(0.75));
 
 			if (true)
 			{
@@ -186,7 +187,7 @@ namespace dyno
 	private:
 		gl::VertexArray	mCubeVAO;
 		gl::Buffer		mCubeVBO;
-		gl::Program mBBoxProgram;
+		gl::Program		mProgram;
 	};
 
 	class BackgroundRenderer
@@ -210,8 +211,8 @@ namespace dyno
 
 	private:
 		// background
-		gl::Program mBackgroundProgram;
-		gl::Mesh			mScreenQuad;
+		gl::Program		mBackgroundProgram;
+		gl::Mesh		mScreenQuad;
 	};
 
 

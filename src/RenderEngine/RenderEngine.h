@@ -16,12 +16,8 @@
 
 #pragma once
 
-#include "gl/VertexArray.h"
-#include "gl/Program.h"
-#include "gl/Texture.h"
+#include "gl/Buffer.h"
 #include "RenderParams.h"
-
-#include <vector>
 
 namespace dyno
 {

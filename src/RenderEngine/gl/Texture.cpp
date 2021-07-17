@@ -74,6 +74,7 @@ namespace gl
 	void Texture2D::load(int w, int h, void* data)
 	{
 		glBindTexture(target, id);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexImage2D(target, 0, internalFormat, w, h, 0, format, type, data);
 		glCheckError();
 	}
