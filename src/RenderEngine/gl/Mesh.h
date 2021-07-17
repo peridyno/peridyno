@@ -16,36 +16,27 @@
 
 #pragma once
 
-#include "gl/Buffer.h"
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "RenderParams.h"
-#include "module/GLVisualModule.h"
-#include <vector>
+#include "VertexArray.h"
 
-namespace dyno
+namespace gl
 {
-	class SceneGraph;
-	class ShadowMap
+	class Mesh : public VertexArray
 	{
 	public:
-		ShadowMap(int w = 1024, int h = 1024);
-		~ShadowMap();
+		virtual void create();
+		virtual void release();
 
-		void initialize();
-		
-		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
-
-	private:
-		// framebuffers
-		gl::Framebuffer	mFramebuffer;
-		gl::Texture2DArray		mShadowDepth;
-
-		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices
-		gl::Buffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices
+		virtual void draw(int instance = 0);
 
 	public:
-		int				width;
-		int				height;
+		static Mesh Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
+		static Mesh AABB(glm::vec3 p0, glm::vec3 p1);
+		static Mesh ScreenQuad();
+		static Mesh Plane(float scale);
+
+	private:
+		Buffer	mVertexBuffer;
+		Buffer	mIndexBuffer;
+		int			mDrawCount;
 	};
 }

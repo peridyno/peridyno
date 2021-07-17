@@ -1,10 +1,9 @@
 #include "RenderHelper.h"
 #include "Utility.h"
-#include "GLShader.h"
-#include "GLVertexArray.h"
+#include "gl/Program.h"
+#include "gl/Mesh.h"
 
 #include <glad/glad.h>
-
 #include <vector>
 
 namespace dyno
@@ -14,8 +13,8 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mGroundProgram = CreateShaderProgram("plane.vert", "plane.frag");
-			mGroundMesh = GLMesh::Plane(1.f);
+			mGroundProgram = gl::CreateShaderProgram("plane.vert", "plane.frag");
+			mGroundMesh = gl::Mesh::Plane(1.f);
 
 			// create ruler texture
 			const int k = 50;
@@ -46,7 +45,7 @@ namespace dyno
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			glCheckError();
+			gl::glCheckError();
 		}
 
 		void draw(float scale = 3.f)
@@ -64,13 +63,13 @@ namespace dyno
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_BLEND);
-			glCheckError();
+			gl::glCheckError();
 		}
 
 	private:
-		GLMesh			mGroundMesh;
-		unsigned int 	mGroundTex;
-		GLShaderProgram mGroundProgram;
+		gl::Mesh			mGroundMesh;
+		unsigned int 		mGroundTex;
+		gl::Program mGroundProgram;
 	};
 
 	class AxisRenderer
@@ -78,7 +77,7 @@ namespace dyno
 	public:
 		AxisRenderer()
 		{
-			mAxisProgram = CreateShaderProgram("axis.vert", "axis.frag");
+			mAxisProgram = gl::CreateShaderProgram("axis.vert", "axis.frag");
 
 			mAxisVBO.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 			float vertices[] = {
@@ -110,13 +109,13 @@ namespace dyno
 			glEnable(GL_DEPTH_TEST);
 
 			mAxisVAO.unbind();
-			glCheckError();
+			gl::glCheckError();
 		}
 
 	private:
-		GLVertexArray	mAxisVAO;
-		GLBuffer		mAxisVBO;
-		GLShaderProgram mAxisProgram;
+		gl::VertexArray	mAxisVAO;
+		gl::Buffer		mAxisVBO;
+		gl::Program mAxisProgram;
 	};
 
 	class BBoxRenderer
@@ -124,7 +123,7 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mBBoxProgram = CreateShaderProgram("bbox.vert", "bbox.frag");
+			mBBoxProgram = gl::CreateShaderProgram("bbox.vert", "bbox.frag");
 			mCubeVBO.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 			mCubeVBO.load(0, 8 * 3 * sizeof(float));
 			mCubeVAO.create();
@@ -181,13 +180,13 @@ namespace dyno
 			}
 
 			mCubeVAO.unbind();
-			glCheckError();
+			gl::glCheckError();
 		}
 
 	private:
-		GLVertexArray	mCubeVAO;
-		GLBuffer		mCubeVBO;
-		GLShaderProgram mBBoxProgram;
+		gl::VertexArray	mCubeVAO;
+		gl::Buffer		mCubeVBO;
+		gl::Program mBBoxProgram;
 	};
 
 	class BackgroundRenderer
@@ -196,8 +195,8 @@ namespace dyno
 		BackgroundRenderer()
 		{
 			// create a quad object
-			mScreenQuad = GLMesh::ScreenQuad();
-			mBackgroundProgram = CreateShaderProgram("screen.vert", "background.frag");
+			mScreenQuad = gl::Mesh::ScreenQuad();
+			mBackgroundProgram = gl::CreateShaderProgram("screen.vert", "background.frag");
 		}
 
 		void draw(Vec3f color0, Vec3f color1)
@@ -211,8 +210,8 @@ namespace dyno
 
 	private:
 		// background
-		GLShaderProgram mBackgroundProgram;
-		GLMesh			mScreenQuad;
+		gl::Program mBackgroundProgram;
+		gl::Mesh			mScreenQuad;
 	};
 
 

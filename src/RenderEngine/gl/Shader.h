@@ -16,20 +16,24 @@
 
 #pragma once
 
-namespace dyno
-{
-	class GLObject
-	{
-	protected:
-		virtual void create() = 0;
-		virtual void release() = 0;
+#include "Object.h"
+#include <string>
+#include "Vector.h"
+#include <glm/glm.hpp>
 
+namespace gl {
+
+	class Shader : public Object
+	{
 	public:
-		unsigned int id = 0xFFFFFFFF;
+		Shader() {}
+		bool createFromFile(unsigned int type, const std::string& path);
+		bool createFromSource(unsigned int type, const std::string& src);
+		void release();
+
+	protected:
+		void create() {};
+
 	};
 
-	// helper functions
-	unsigned int glCheckError_(const char* file, int line);
-	#define glCheckError() glCheckError_(__FILE__, __LINE__) 
 }
-

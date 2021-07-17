@@ -16,41 +16,31 @@
 
 #pragma once
 
-#include "gl/VertexArray.h"
-#include "gl/Program.h"
-#include "gl/Texture.h"
-#include "RenderParams.h"
+#include "Object.h"
 
-#include <vector>
-
-namespace dyno
+namespace gl
 {
-	class SSAO;
-	class ShadowMap;
-	class RenderHelper;
-
-	class SceneGraph;
-	class RenderTarget;
-	class RenderEngine
+	class Buffer : public Object
 	{
 	public:
-		RenderEngine();
-		~RenderEngine();
+		virtual void create(int target, int usage);
+		virtual void release();
 
-		void initialize();
-		void draw(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams);
+		void bind();
+		void unbind();
+
+		virtual void allocate(int size);
+		virtual void load(void* data, int size, int offset = 0);
+
+		// for uniform buffer
+		void bindBufferBase(int idx);
 
 	private:
-		void initUniformBuffers();
+		virtual void create();
 
-	private:
-		// uniform buffer for matrices
-		gl::Buffer		mTransformUBO;
-		gl::Buffer		mLightUBO;
-		
-		SSAO*			mSSAO;
-		ShadowMap*		mShadowMap;
-		RenderHelper*	mRenderHelper;
-
-	};
-};
+	protected:
+		int target = -1;
+		int usage = -1;
+		int size = -1;
+	};	   
+}

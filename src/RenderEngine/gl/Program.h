@@ -16,33 +16,19 @@
 
 #pragma once
 
-#include "GLObject.h"
-#include <string>
-#include "Vector.h"
-#include <glm/glm.hpp>
+#include "Object.h"
+#include "Shader.h"
 
-namespace dyno {
+namespace gl {
 
-	class GLShader : public GLObject
-	{
-	public:
-		GLShader() {}
-		bool createFromFile(unsigned int type, const std::string& path);
-		bool createFromSource(unsigned int type, const std::string& src);
-		void release();
 
-	protected:
-		void create() {};
-
-	};
-
-	class GLShaderProgram : public GLObject
+	class Program : public Object
 	{
 	public:
 		void create();
 		void release();
 
-		void attachShader(const GLShader& shader);
+		void attachShader(const Shader& shader);
 		bool link();
 
 		void use();
@@ -50,12 +36,12 @@ namespace dyno {
 		//
 		void setFloat(const char* name, float v);
 		void setInt(const char* name, int v);
-		void setVec4(const char* name, Vec4f v);
-		void setVec3(const char* name, Vec3f v);
-		void setVec2(const char* name, Vec2f v);
+
+		void setVec4(const char* name, dyno::Vec4f v);
+		void setVec3(const char* name, dyno::Vec3f v);
+		void setVec2(const char* name, dyno::Vec2f v);
 	};
 
-	// public helpe function...
-	GLShaderProgram CreateShaderProgram(const char* vs, const char* fs, const char* gs = 0);
-
+	// public helper function...
+	Program CreateShaderProgram(const char* vs, const char* fs, const char* gs = 0);
 }

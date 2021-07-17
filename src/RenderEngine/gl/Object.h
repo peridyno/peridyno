@@ -16,37 +16,20 @@
 
 #pragma once
 
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "gl/Buffer.h"
-
-namespace dyno
+namespace gl
 {
-	class RenderTarget
+	class Object
 	{
+	protected:
+		virtual void create() = 0;
+		virtual void release() = 0;
+
 	public:
-		RenderTarget();
-		~RenderTarget();
-
-		void initialize();
-		void resize(int w, int h);
-		void blit(unsigned int attachment = 0);
-		void bind();
-
-	private:
-		gl::Framebuffer mFramebuffer;
-
-		// frame color
-		gl::Texture2D	  mColorTex;
-		// frame depth
-		gl::Texture2D	  mDepthTex;
-		// node id
-		gl::Texture2D	  mNodeIDTex;
-		
-
-		int width;
-		int height;
-
-		friend class RenderEngine;
+		unsigned int id = 0xFFFFFFFF;
 	};
+
+	// helper functions
+	unsigned int glCheckError_(const char* file, int line);
+	#define glCheckError() glCheckError_(__FILE__, __LINE__) 
 }
+

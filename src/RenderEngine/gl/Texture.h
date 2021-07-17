@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include "GLObject.h"
+#include "Object.h"
 #include <glm/glm.hpp>
 
-namespace dyno {
+namespace gl {
 
-	class GLTexture : public GLObject
+	class Texture : public Object
 	{
 	public:
 		virtual void create();
@@ -46,10 +46,11 @@ namespace dyno {
 		glm::vec4	 borderColor;
 	};
 
-	class GLTexture2D : public GLTexture
+
+	class Texture2D : public Texture
 	{
 	public:
-		GLTexture2D();
+		Texture2D();
 
 		virtual void create();
 
@@ -62,10 +63,11 @@ namespace dyno {
 		void genMipmap();
 	};
 
-	class GLTexture2DArray : public GLTexture
+
+	class Texture2DArray : public Texture
 	{
 	public:
-		GLTexture2DArray();
+		Texture2DArray();
 
 		virtual void create();
 		virtual void resize(int w, int h, int layers);

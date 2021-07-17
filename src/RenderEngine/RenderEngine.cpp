@@ -83,7 +83,7 @@ namespace dyno
 		// create uniform block for light
 		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
-		glCheckError();
+		gl::glCheckError();
 	}
 
 	void RenderEngine::draw(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams)

@@ -230,7 +230,7 @@ namespace dyno
 			mFramebuffer.checkStatus();
 			mFramebuffer.clearDepth(1.0);
 			glViewport(0, 0, width, height);
-			glCheckError();
+			gl::glCheckError();
 			// shadow pass
 			if ((scene != 0) && (scene->getRootNode() != 0))
 			{

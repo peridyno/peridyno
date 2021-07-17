@@ -17,8 +17,9 @@
 #pragma once
 
 #include "GLVisualModule.h"
-#include "GLVertexArray.h"
-#include "GLShader.h"
+#include "GLCudaBuffer.h"
+#include "gl/VertexArray.h"
+#include "gl/Program.h"
 
 namespace dyno
 {
@@ -57,9 +58,9 @@ namespace dyno
 		GLCudaBuffer	mColor;
 
 		float			mPointSize;
-		GLVertexArray	mVertexArray;
+		gl::VertexArray	mVertexArray;
 
-		GLShaderProgram mShaderProgram;
+		gl::Program mShaderProgram;
 
 		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
 		float			mColorMin = 0.f;

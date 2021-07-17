@@ -1,39 +1,38 @@
-#include "GLTexture.h"
+#include "Texture.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "Utility.h"
 
-namespace dyno 
+namespace gl 
 {
-	void GLTexture::create()
+	void Texture::create()
 	{
 		glGenTextures(1, &id);
 	}
 
-	void GLTexture::release()
+	void Texture::release()
 	{
 		glDeleteTextures(1, &id);
 	}
 
-	void GLTexture::bind()
+	void Texture::bind()
 	{
 		glBindTexture(target, id);
 	}
 
-	void GLTexture::bind(int slot)
+	void Texture::bind(int slot)
 	{
 		glActiveTexture(slot);
 		glBindTexture(target, id);
 	}
 
-	void GLTexture::unbind()
+	void Texture::unbind()
 	{
 		glBindTexture(target, 0);
 	}
 
 
-	GLTexture2D::GLTexture2D()
+	Texture2D::Texture2D()
 	{
 		this->target = GL_TEXTURE_2D;
 
@@ -51,9 +50,9 @@ namespace dyno
 		this->borderColor = glm::vec4(1);
 	}
 
-	void GLTexture2D::create()
+	void Texture2D::create()
 	{
-		GLTexture::create();
+		Texture::create();
 		glBindTexture(target, id);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, maxFilter);
@@ -64,7 +63,7 @@ namespace dyno
 		glCheckError();
 	}
 
-	void GLTexture2D::resize(int w, int h)
+	void Texture2D::resize(int w, int h)
 	{
 		glBindTexture(target, id);
 		glTexImage2D(target, 0, internalFormat, w, h, 0, format, type, 0);
@@ -72,7 +71,7 @@ namespace dyno
 	}
 
 
-	void GLTexture2D::load(int w, int h, void* data)
+	void Texture2D::load(int w, int h, void* data)
 	{
 		glBindTexture(target, id);
 		glTexImage2D(target, 0, internalFormat, w, h, 0, format, type, data);
@@ -80,12 +79,12 @@ namespace dyno
 	}
 
 
-	void GLTexture2D::clear(void* value)
+	void Texture2D::clear(void* value)
 	{
 		glClearTexImage(id, 0, format, type, value);
 		glCheckError();
 	}
-	void GLTexture2D::genMipmap()
+	void Texture2D::genMipmap()
 	{
 		glBindTexture(target, id);
 		glGenerateMipmap(target);
@@ -93,7 +92,7 @@ namespace dyno
 	}
 
 
-	GLTexture2DArray::GLTexture2DArray()
+	Texture2DArray::Texture2DArray()
 	{
 		this->target = GL_TEXTURE_2D_ARRAY;
 
@@ -111,9 +110,9 @@ namespace dyno
 		this->borderColor = glm::vec4(1);
 	}
 
-	void GLTexture2DArray::create()
+	void Texture2DArray::create()
 	{
-		GLTexture::create();
+		Texture::create();
 		glBindTexture(target, id);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, minFilter);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, maxFilter);
@@ -123,7 +122,7 @@ namespace dyno
 		glCheckError();
 	}
 
-	void GLTexture2DArray::resize(int w, int h, int layers)
+	void Texture2DArray::resize(int w, int h, int layers)
 	{
 		glBindTexture(target, id);
 		glTexImage3D(target, 0, internalFormat, w, h, layers, 0, format, type, 0);
