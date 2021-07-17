@@ -90,7 +90,7 @@ layout(std140, binding = 2) uniform ShadowUniformBlock
 	// may have some other data in future
 } shadow;
 
-layout(binding = 5) uniform sampler2D shadowDepth;
+layout(binding = 5) uniform sampler2DArray shadowDepth;
 //layout(binding = 6) uniform sampler2D shadowColor;
 
 int GetShadowLevel(vec3 pos)
@@ -112,7 +112,7 @@ vec3 GetShadowFactor(vec3 pos)
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
 	projCoords = projCoords * 0.5 + 0.5;
 
-	float closestDepth = textureLod(shadowDepth, projCoords.xy, level).r;
+	float closestDepth = texture(shadowDepth, vec3(projCoords.xy, level)).r;
 	float currentDepth = min(1.0, projCoords.z);
 
 	//float bias = max(0.05 * (1.0 - dot(normal, normalize(light.direction.xyz))), 0.005); 
@@ -120,18 +120,19 @@ vec3 GetShadowFactor(vec3 pos)
 
 	// simple PCF
 	vec3 shadow = vec3(0);
-	vec2 texelSize = 1.0 / textureSize(shadowDepth, level);
+	vec2 texelSize = 1.0 / textureSize(shadowDepth, 0).xy;
 	for (int x = -1; x <= 1; ++x)
 	{
 		for (int y = -1; y <= 1; ++y)
 		{
-			float pcfDepth = textureLod(shadowDepth, projCoords.xy + vec2(x, y) * texelSize, level).r;
+			float pcfDepth = texture(shadowDepth, vec3(projCoords.xy + vec2(x, y) * texelSize, level)).r;
 			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
 			shadow += visible;
 		}
 	}
-	return clamp(shadow / 9.0, 0, 1) * sqrt(level + 1);
+	return clamp(shadow / 9.0, 0, 1);
 }
+
 // refer to https://learnopengl.com
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------

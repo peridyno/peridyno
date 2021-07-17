@@ -39,7 +39,7 @@ namespace dyno
 	private:
 		// framebuffers
 		GLFramebuffer	mFramebuffer;
-		GLTexture2D		mShadowDepth;
+		GLTexture2DArray		mShadowDepth;
 
 		GLBuffer		mTransformUBO;		// uniform buffer for light MVP matrices
 		GLBuffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices

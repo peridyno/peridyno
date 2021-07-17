@@ -43,18 +43,15 @@ namespace dyno
 	{
 		mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
 		mShadowDepth.format = GL_DEPTH_COMPONENT;
-		mShadowDepth.minFilter = GL_NEAREST_MIPMAP_NEAREST;
+		//mShadowDepth.minFilter = GL_NEAREST_MIPMAP_NEAREST;
 		mShadowDepth.create();
 
-		mShadowDepth.resize(width, height);
-		mShadowDepth.genMipmap(); // need to create mipmap texture
+		mShadowDepth.resize(width, height, 4);
+		//mShadowDepth.genMipmap(); // need to create mipmap texture
 
 		mFramebuffer.create();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);
-		
 		mFramebuffer.bind();
 		glDrawBuffer(GL_NONE);
-		mFramebuffer.checkStatus();
 		mFramebuffer.unbind();
 
 		// uniform buffers
@@ -209,6 +206,8 @@ namespace dyno
 			int height;
 		} lightMVP;
 
+		lightMVP.width = width;
+		lightMVP.height = height;
 		lightMVP.model = glm::mat4(1);		
 		lightMVP.view = getLightView(rparams.light.mainLightDirection);
 		
@@ -216,21 +215,21 @@ namespace dyno
 
 		for (int i = 0; i < 4; i++)
 		{
-			int w = width >> i;
-			int h = height >> i;
-
-			lightMVP.width = w;
-			lightMVP.height = h;
+			//int w = width >> i;
+			//int h = height >> i;
 			lightMVP.projection = split[i].projection;
 
 			mTransformUBO.load(&lightMVP, sizeof(lightMVP));
 			mTransformUBO.bindBufferBase(0);
 
 			// draw depth
-			mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id, i);
+			//mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id, i);
+			
+			glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mShadowDepth.id, 0, i);
+
 			mFramebuffer.checkStatus();
 			mFramebuffer.clearDepth(1.0);
-			glViewport(0, 0, w, h);
+			glViewport(0, 0, width, height);
 			glCheckError();
 			// shadow pass
 			if ((scene != 0) && (scene->getRootNode() != 0))
