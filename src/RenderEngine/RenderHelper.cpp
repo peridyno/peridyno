@@ -107,7 +107,8 @@ namespace dyno
 			mProgram.use();
 			mAxisVAO.bind();
 
-			glLineWidth(lineWidth);
+			//! Since it is deprecated since OpenGL 4.2, we do not allow user set line width now...
+			//glLineWidth(lineWidth);
 			glDisable(GL_DEPTH_TEST);
 			glDrawArrays(GL_LINES, 0, 6);
 			glEnable(GL_DEPTH_TEST);

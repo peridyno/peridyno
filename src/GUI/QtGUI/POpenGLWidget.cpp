@@ -13,7 +13,13 @@ namespace dyno
 
 	POpenGLWidget::POpenGLWidget()
 	{
-
+		QSurfaceFormat format;
+		format.setDepthBufferSize(24);
+		format.setMajorVersion(4);
+		format.setMinorVersion(4);
+		format.setSamples(4);
+		format.setProfile(QSurfaceFormat::CoreProfile);
+		setFormat(format);
 	}
 
 	POpenGLWidget::~POpenGLWidget()
