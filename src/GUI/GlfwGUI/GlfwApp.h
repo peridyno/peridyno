@@ -25,9 +25,9 @@ namespace dyno {
 
 	enum CameraType
 	{
-		Orbit,
+		Orbit = 0,
 		TrackBall
-	};
+	}; 	
 
     class GlfwApp : public AppBase
     {
@@ -79,6 +79,15 @@ namespace dyno {
 		int getHeight();
 
 		bool getCameraRotateFlag();
+
+		// ImGui extend function
+		// 切换按钮
+		void toggleButton(const char* label, bool *v);
+		// 可自定义形状按钮
+		void sampleButton(const char* label, bool *v);
+		// 获取ImGui ID， 同时避免label输出
+		void getIdWithoutTitle(const char* label);
+
 
 	protected:
 		void initCallbacks();    //init default callbacks

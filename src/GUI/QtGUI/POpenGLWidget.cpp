@@ -58,6 +58,7 @@ namespace dyno
 
 	void POpenGLWidget::paintGL()
 	{
+		// Graphscrene draw
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
