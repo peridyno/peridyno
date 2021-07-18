@@ -64,6 +64,9 @@ namespace dyno
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_BLEND);
 
+			// clear depth to get avoid object cross ground
+			glClear(GL_DEPTH_BUFFER_BIT);
+
 			gl::glCheckError();
 		}
 

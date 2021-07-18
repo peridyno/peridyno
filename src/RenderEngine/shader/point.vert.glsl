@@ -35,7 +35,16 @@ void main(void)
 	
 	gl_Position = transform.proj * cameraPos; 
 		
-	// point size
-	vec4 projCorner = transform.proj * vec4(uPointSize, uPointSize, cameraPos.z, cameraPos.w);
-	gl_PointSize = transform.width * projCorner.x / projCorner.w;
+	// determine point size
+	if (transform.proj[3][3] == 1)
+	{
+		// if it is orthogonal projection
+		gl_PointSize = transform.width * uPointSize;
+	}
+	else
+	{
+		// perspective projection
+		vec4 projCorner = transform.proj * vec4(uPointSize, uPointSize, cameraPos.z, cameraPos.w);
+		gl_PointSize = transform.width * projCorner.x / projCorner.w;
+	}
 }
