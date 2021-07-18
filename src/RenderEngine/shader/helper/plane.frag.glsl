@@ -63,7 +63,7 @@ vec3 GetShadowFactor(vec3 pos)
 			shadow += visible;
 		}
 	}
-	return clamp(shadow / 9.0, 0, 1) * sqrt(level + 1);
+	return clamp(shadow / 9.0, 0, 1)/* * sqrt(level + 1)*/;
 }
 
 
