@@ -52,7 +52,6 @@
 #include "PToolBar.h"
 #include "PStatusBar.h"
 #include "POpenGLWidget.h"
-#include "PVTKOpenGLWidget.h"
 #include "PAnimationWidget.h"
 
 #include "PIODockWidget.h"
@@ -123,7 +122,7 @@ namespace dyno
 	PMainWindow::PMainWindow(QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
 		m_statusBar(nullptr),
-		m_vtkOpenglWidget(nullptr),
+		//m_vtkOpenglWidget(nullptr),
 		m_propertyWidget(nullptr),
 		m_animationWidget(nullptr)
 // 		m_scenegraphWidget(nullptr),
