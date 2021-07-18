@@ -30,6 +30,8 @@ namespace dyno
 			exit(-1);
 		}
 
+		SceneGraph::getInstance().initialize();
+
 		mRenderEngine = new RenderEngine();
 		mRenderTarget = new RenderTarget();
 		mRenderParams = new RenderParams();
@@ -48,12 +50,12 @@ namespace dyno
 		mRenderTarget->initialize();
 
 		initializeOpenGLFunctions();
-		glClearColor(0, 0, 0, 1);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LIGHT0);
-		glEnable(GL_LIGHTING);
-		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-		glEnable(GL_COLOR_MATERIAL);
+// 		glClearColor(0, 0, 0, 1);
+// 		glEnable(GL_DEPTH_TEST);
+// 		glEnable(GL_LIGHT0);
+// 		glEnable(GL_LIGHTING);
+// 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+// 		glEnable(GL_COLOR_MATERIAL);
 	}
 
 	void POpenGLWidget::paintGL()

@@ -28,9 +28,6 @@ namespace dyno {
 
     void QtApp::mainLoop()
     {
-//         OpenGLContext::getInstance().initialize();
-        SceneGraph::getInstance().initialize();
-
         m_mainWindow->show();
         m_app->exec();
     }
