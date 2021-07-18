@@ -48,7 +48,6 @@ namespace dyno
 			float		mainLightScale = 5.f;
 			glm::vec3	mainLightDirection = glm::vec3(0.4f, 0.6f, 0.8f);
 			float		_padding = 0.f;
-			glm::mat4	mainLightVP = glm::mat4(1);
 		} light;
 
 

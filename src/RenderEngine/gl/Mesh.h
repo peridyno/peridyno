@@ -16,49 +16,27 @@
 
 #pragma once
 
-#include "GLObject.h"
-#include <glm/glm.hpp>
+#include "VertexArray.h"
 
-namespace dyno {
-
-	class GLTexture : public GLObject
+namespace gl
+{
+	class Mesh : public VertexArray
 	{
 	public:
 		virtual void create();
 		virtual void release();
 
-		virtual void bind();
-		virtual void unbind();
-
-		virtual void bind(int slot);
+		virtual void draw(int instance = 0);
 
 	public:
-		unsigned int target;
-		unsigned int internalFormat;
-		unsigned int format;
-		unsigned int type;
+		static Mesh Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
+		static Mesh AABB(glm::vec3 p0, glm::vec3 p1);
+		static Mesh ScreenQuad();
+		static Mesh Plane(float scale);
 
-		unsigned int minFilter;
-		unsigned int maxFilter;
-		unsigned int wrapS;
-		unsigned int wrapT;
-
-		glm::vec4	 borderColor;
+	private:
+		Buffer	mVertexBuffer;
+		Buffer	mIndexBuffer;
+		int			mDrawCount;
 	};
-
-	class GLTexture2D : public GLTexture
-	{
-	public:
-		GLTexture2D();
-
-		virtual void create();
-
-		virtual void resize(int w, int h);
-		virtual void load(int w, int h, void* data);
-
-		// OpenGL 4.4+, clear texture
-		virtual void clear(void* value);
-	};
-
 }
-

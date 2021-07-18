@@ -53,7 +53,7 @@ namespace dyno
 
 		mFramebuffer.checkStatus();
 		mFramebuffer.unbind();
-		glCheckError();
+		gl::glCheckError();
 	}
 
 	void RenderTarget::resize(int w, int h)
@@ -76,7 +76,7 @@ namespace dyno
 			0, 0, width, height,
 			0, 0, width, height,
 			GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glCheckError();
+		gl::glCheckError();
 	}
 
 	void RenderTarget::bind()

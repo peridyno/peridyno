@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "GLFramebuffer.h"
-#include "GLTexture.h"
-#include "GLBuffer.h"
+#include "gl/Framebuffer.h"
+#include "gl/Texture.h"
+#include "gl/Buffer.h"
 
 namespace dyno
 {
@@ -34,14 +34,14 @@ namespace dyno
 		void bind();
 
 	private:
-		GLFramebuffer mFramebuffer;
+		gl::Framebuffer mFramebuffer;
 
 		// frame color
-		GLTexture2D	  mColorTex;
+		gl::Texture2D	  mColorTex;
 		// frame depth
-		GLTexture2D	  mDepthTex;
+		gl::Texture2D	  mDepthTex;
 		// node id
-		GLTexture2D	  mNodeIDTex;
+		gl::Texture2D	  mNodeIDTex;
 		
 
 		int width;

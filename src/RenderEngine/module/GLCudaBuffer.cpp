@@ -1,73 +1,10 @@
-#include "GLBuffer.h"
+#include "GLCudaBuffer.h"
 
 #include <glad/glad.h>
-#include "Utility.h"
+#include <cuda_gl_interop.h>
 
 namespace dyno
 {
-#include <cuda_gl_interop.h>
-
-	void GLBuffer::create()
-	{
-		glGenBuffers(1, &id);
-	}
-
-	void GLBuffer::create(int target, int usage)
-	{
-		glGenBuffers(1, &id);
-		this->target = target;
-		this->usage = usage;
-		glCheckError();
-	}
-
-	void GLBuffer::release()
-	{
-		glDeleteBuffers(1, &id);
-		glCheckError();
-	}
-
-	void GLBuffer::bind()
-	{
-		glBindBuffer(target, id);
-		glCheckError();
-	}
-
-	void GLBuffer::unbind()
-	{
-		glBindBuffer(target, 0);
-		glCheckError();
-	}
-
-	void GLBuffer::allocate(int size)
-	{
-		if (size == this->size)
-			return;
-
-		this->size = size;
-		glBindBuffer(target, id);
-		glBufferData(target, size, 0, usage);
-		glBindBuffer(target, 0);
-		glCheckError();
-	}
-
-	void GLBuffer::load(void* data, int size, int offset)
-	{
-		if ((size + offset) > this->size)
-			allocate(size + offset);
-
-		glBindBuffer(target, id);
-		glBufferSubData(target, offset, size, data);
-		glBindBuffer(target, 0);
-		glCheckError();
-	}
-
-	void GLBuffer::bindBufferBase(int idx)
-	{
-		glBindBufferBase(this->target, idx, id);
-		glCheckError();
-	}
-
-
 	/// <summary>
 	/// for cuda
 	/// </summary>
@@ -77,7 +14,7 @@ namespace dyno
 		if (size == this->size)
 			return;
 
-		GLBuffer::allocate(size);
+		Buffer::allocate(size);
 
 		// register the cuda resource after resize...
 		if (resource != 0)
@@ -97,7 +34,7 @@ namespace dyno
 
 	void GLCudaBuffer::release()
 	{
-		GLBuffer::release();
+		Buffer::release();
 
 		if (resource != 0)
 		{

@@ -1,75 +1,21 @@
-#include "GLVertexArray.h"
+#include "Mesh.h"
 
 #include <glad/glad.h>
-#include "Utility.h"
-
 #include <vector>
 
-namespace dyno
+namespace gl
 {
-	void GLVertexArray::create()
-	{
-		glGenVertexArrays(1, &id);
-	}
 
-	void GLVertexArray::release()
+	void Mesh::create()
 	{
-		glDeleteVertexArrays(1, &id);
-	}
-
-	void GLVertexArray::bind()
-	{
-		glBindVertexArray(id);
-	}
-
-	void GLVertexArray::unbind()
-	{
-		glBindVertexArray(0);
-	}
-
-	void GLVertexArray::bindIndexBuffer(GLBuffer* buffer)
-	{
-		this->bind();
-		if (buffer == 0)
-		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		}
-		else
-		{
-			buffer->bind();
-		}
-		this->unbind();
-	}
-
-
-	void GLVertexArray::bindVertexBuffer(GLBuffer* buffer, int index,
-		int size, int type, int stride, int offset, int divisor)
-	{
-		this->bind();
-		if (buffer == 0)
-		{
-			glDisableVertexAttribArray(index);
-		}
-		else
-		{
-			buffer->bind();
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, size, type, GL_FALSE, stride, (void*)offset);
-			glVertexAttribDivisor(index, divisor);
-		}
-		this->unbind();
-	}
-
-	void GLMesh::create()
-	{
-		GLVertexArray::create();
+		VertexArray::create();
 		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 		bindIndexBuffer(&mIndexBuffer);
 		bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 	}
 
-	void GLMesh::release()
+	void Mesh::release()
 	{
 		unbind();
 		// release buffers
@@ -77,11 +23,11 @@ namespace dyno
 		mIndexBuffer.release();
 
 		// release VAO
-		GLVertexArray::release();
+		VertexArray::release();
 	}
 
 
-	void GLMesh::draw(int instance)
+	void Mesh::draw(int instance)
 	{
 		this->bind();
 
@@ -92,7 +38,7 @@ namespace dyno
 	}
 
 	// helper functions
-	GLMesh GLMesh::Sphere(float radius, int sectorCount, int stackCount)
+	Mesh Mesh::Sphere(float radius, int sectorCount, int stackCount)
 	{	// create sphere
 		// http://www.songho.ca/opengl/gl_sphere.html
 
@@ -173,7 +119,7 @@ namespace dyno
 			}
 		}
 
-		GLMesh vao;
+		Mesh vao;
 		vao.create();
 		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
 		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
@@ -181,7 +127,7 @@ namespace dyno
 		return vao;
 	}
 
-	GLMesh GLMesh::AABB(glm::vec3 p0, glm::vec3 p1)
+	Mesh Mesh::AABB(glm::vec3 p0, glm::vec3 p1)
 	{
 		std::vector<float> vertices = {
 			p0.x, p0.y, p0.z,
@@ -204,7 +150,7 @@ namespace dyno
 			5, 6, 2, 2, 1, 5, // back
 		};
 
-		GLMesh vao;
+		Mesh vao;
 		vao.create();
 		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
 		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
@@ -212,7 +158,7 @@ namespace dyno
 		return vao;
 	}
 
-	GLMesh GLMesh::ScreenQuad()
+	Mesh Mesh::ScreenQuad()
 	{
 		std::vector<float> vertices = {
 			-1, -1, 0,
@@ -226,7 +172,7 @@ namespace dyno
 			2, 3, 1
 		};
 
-		GLMesh vao;
+		Mesh vao;
 		vao.create();
 		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
 		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
@@ -234,7 +180,7 @@ namespace dyno
 		return vao;
 	}
 
-	GLMesh GLMesh::Plane(float scale)
+	Mesh Mesh::Plane(float scale)
 	{
 		std::vector<float> vertices = {
 			-scale, 0, -scale,
@@ -248,7 +194,7 @@ namespace dyno
 			2, 1, 3
 		};
 
-		GLMesh vao;
+		Mesh vao;
 		vao.create();
 		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
 		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
