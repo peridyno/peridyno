@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "AppBase.h"
+#include "picture.h"
 
 namespace dyno {
 
@@ -16,6 +17,7 @@ namespace dyno {
 	class RenderEngine;
 	class RenderTarget;
 	class RenderParams;
+	struct Picture;
 
 	enum ButtonState
 	{
@@ -85,12 +87,15 @@ namespace dyno {
 		void initializeStyle();
 		// 切换按钮
 		void toggleButton(const char* label, bool *v);
+		void toggleButton(ImTextureID texId, const char* label, bool *v);
 		// 可自定义形状按钮
 		void sampleButton(const char* label, bool *v);
 		// 避免label输出，ImGui ID压入栈中
 		void beginTitle(const char* label);
 		// ImGui ID弹栈
 		void endTitle();
+		// load imgui button icon 
+		void loadIcon();
 
 
 	protected:
@@ -136,6 +141,8 @@ namespace dyno {
 		
 		// The static bool variable is used for avoiding Camera Rotating in Imgui Windows
 		static bool mOpenCameraRotate;
+		// Save pictrue's texture ID
+		std::vector<std::shared_ptr<Picture>> pics;
 
 		int mSaveScreenInterval = 1;
 
@@ -153,6 +160,7 @@ namespace dyno {
 		RenderEngine* mRenderEngine;
 		RenderTarget* mRenderTarget;
 		RenderParams* mRenderParams;
+
 
 	public:
 		bool			mUseNewRenderEngine = true;

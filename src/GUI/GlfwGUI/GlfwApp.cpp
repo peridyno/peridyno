@@ -137,6 +137,8 @@ namespace dyno
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
+		initializeStyle();
+		loadIcon();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
@@ -182,6 +184,13 @@ namespace dyno
 		}
 	}
 
+	void GlfwApp::loadIcon(){
+		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/map.png"));
+		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/box.png"));
+		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/map.png"));
+		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/box.png"));
+	}
+
 	void GlfwApp::initializeStyle()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -190,7 +199,29 @@ namespace dyno
 		style.FrameRounding = 6.0f;
 		style.PopupRounding = 6.0f;
 	}
+	void GlfwApp::toggleButton(ImTextureID texId, const char* label, bool *v)
+	{
+		if (*v == true)
+		{
 
+			ImGui::PushID(label);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+			ImGui::ImageButtonWithText(texId, label);
+			if (ImGui::IsItemClicked(0))
+			{
+				*v = !*v;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+		else
+		{
+			if (ImGui::ImageButtonWithText(texId ,label))
+				*v = true;
+		}
+	}
 	void GlfwApp::toggleButton(const char* label, bool *v)
 	{
 		if (*v == true)
@@ -266,7 +297,7 @@ namespace dyno
 		float iBgGray[2] = { 0.2f, 0.8f };
 		RenderParams::Light iLight;
 		int width = 1024, height = 768;
-		initializeStyle();
+		
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
@@ -296,7 +327,6 @@ namespace dyno
 					}
 
 					if(ImGui::BeginPopup("LightingMenu")){
-						// TODO 固定位置
 						ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.3f", 0);
 						mRenderParams->bgColor0 = glm::vec3(iBgGray[0]);
 						mRenderParams->bgColor1 = glm::vec3(iBgGray[1]);
@@ -354,9 +384,11 @@ namespace dyno
 				{// Top Right widget
 					
 					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					toggleButton("Ground", &(mRenderParams->showGround));
+					toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
+
+					// toggleButton("Ground", &(mRenderParams->showGround));
 					ImGui::SameLine();
-					toggleButton("Bounds",&(mRenderParams->showSceneBounds));
+					toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
 					ImGui::SameLine();
 					toggleButton("Axis Helper", &(mRenderParams->showAxisHelper));
 					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, 0));
