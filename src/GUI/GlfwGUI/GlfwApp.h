@@ -81,12 +81,16 @@ namespace dyno {
 		bool getCameraRotateFlag();
 
 		// ImGui extend function
+		// 全局样式设定
+		void initializeStyle();
 		// 切换按钮
 		void toggleButton(const char* label, bool *v);
 		// 可自定义形状按钮
 		void sampleButton(const char* label, bool *v);
-		// 获取ImGui ID， 同时避免label输出
-		void getIdWithoutTitle(const char* label);
+		// 避免label输出，ImGui ID压入栈中
+		void beginTitle(const char* label);
+		// ImGui ID弹栈
+		void endTitle();
 
 
 	protected:
