@@ -68,7 +68,6 @@ QtNodeFlowScene::~QtNodeFlowScene()
 
 void QtNodeFlowScene::showSceneGraph(SceneGraph* scn)
 {
-	return;
 	std::map<std::string, QtBlock*> nodeMap;
 
 	auto root = scn->getRootNode();

@@ -204,6 +204,7 @@ namespace dyno
 		m_animationWidget = new PAnimationWidget(this);
 		m_animationWidget->layout()->setMargin(0);
 
+		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), mOpenGLWidget, SLOT(updateGraphicsContext()));
 
 // 		QWidget* viewWidget = new QWidget();
 // 		QHBoxLayout* hLayout = new QHBoxLayout();

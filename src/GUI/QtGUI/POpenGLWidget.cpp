@@ -4,6 +4,7 @@
 #include "RenderParams.h"
 #include "SceneGraph.h"
 #include "camera/OrbitCamera.h"
+#include "PSimulationThread.h"
 
 //Qt
 #include <QMouseEvent>
@@ -119,6 +120,16 @@ namespace dyno
 	{
 		mCamera->zoom(-0.001*event->angleDelta().y());
 		update();
+	}
+
+	void POpenGLWidget::updateGraphicsContext()
+	{
+		PSimulationThread::instance()->startRendering();
+		
+		SceneGraph::getInstance().updateGraphicsContext();
+		update();
+
+		PSimulationThread::instance()->stopRendering();
 	}
 
 }
