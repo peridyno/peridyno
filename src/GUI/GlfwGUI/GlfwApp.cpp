@@ -185,10 +185,10 @@ namespace dyno
 	}
 
 	void GlfwApp::loadIcon(){
-		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/map.png"));
-		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/box.png"));
-		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/arrow-090-medium.png"));
-		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/lock.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
 		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/map.png"));
 		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/box.png"));
 	}
