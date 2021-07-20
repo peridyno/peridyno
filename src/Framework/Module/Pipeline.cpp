@@ -130,8 +130,6 @@ namespace dyno
 		{
 			Module* m = moduleQueue.front();
 
-			mModuleList.push_back(m);
-
 			auto& outFields = m->getOutputFields();
 			retrieveModules(m->objectId(), outFields);
 
