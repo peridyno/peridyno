@@ -7342,6 +7342,7 @@ void ImGui::EndHorizontal(){
 
 bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2& imageSize, const ImVec2 &uv0, const ImVec2 &uv1, int frame_padding, const ImVec4 &bg_col, const ImVec4 &tint_col) {
     ImGuiWindow* window = GetCurrentWindow();
+    
     if (window->SkipItems)
     return false;
 
@@ -7365,9 +7366,13 @@ bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2
     const ImVec2 totalSizeWithoutPadding(size.x+innerSpacing+textSize.x,size.y>textSize.y ? size.y : textSize.y);
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + totalSizeWithoutPadding + padding*2);
     ImVec2 start(0,0);
-    start = window->DC.CursorPos + padding;if (size.y<textSize.y) start.y+=(textSize.y-size.y)*.5f;
+    start = window->DC.CursorPos + padding;
+    if (size.y<textSize.y) start.y+=(textSize.y-size.y)*.5f;
+
     const ImRect image_bb(start, start + size);
-    start = window->DC.CursorPos + padding;start.x+=size.x+innerSpacing;if (size.y>textSize.y) start.y+=(size.y-textSize.y)*.5f;
+    start = window->DC.CursorPos + padding;start.x+=size.x+innerSpacing;
+    if (size.y>textSize.y) start.y+=(size.y-textSize.y)*.5f;
+    
     ItemSize(bb);
     if (!ItemAdd(bb, id))
     return false;

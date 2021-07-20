@@ -187,6 +187,8 @@ namespace dyno
 	void GlfwApp::loadIcon(){
 		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/map.png"));
 		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/box.png"));
+		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/arrow-090-medium.png"));
+		pics.emplace_back(std::make_shared<Picture>("D:/LXK Code/WorkShip/peridyno/data/icon/lock.png"));
 		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/map.png"));
 		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/box.png"));
 	}
@@ -265,6 +267,7 @@ namespace dyno
 			*v = !*v;
 		ImVec4 col_bf4;
 		ImGuiStyle& style = ImGui::GetStyle();
+
 		// 颜色自定义
 		if (ImGui::IsItemActivated()) col_bf4 = *v ? style.Colors[40] : style.Colors[23];
 		else if (ImGui::IsItemHovered()) col_bf4 =  *v ? style.Colors[42] : style.Colors[24];
@@ -272,10 +275,9 @@ namespace dyno
 
 		ImU32 col_bg = IM_COL32(255 * col_bf4.x, 255 * col_bf4.y, 255 * col_bf4.z, 255 * col_bf4.w);
 		ImU32 col_text = IM_COL32(255, 255, 255, 255);
-
 		ImU32 col_bound = IM_COL32(0,0,0,255);
 		
-		// 绘制形状
+		// 绘制矩形形状
 		draw_list->AddRect(p, ImVec2(p.x + bound_size.x, p.y + bound_size.y), col_bound , radius);
 		draw_list->AddRectFilled(p_button, ImVec2(p_button.x + button_size.x, p_button.y + button_size.y), col_bg, radius);
 		draw_list->AddText(p_label, col_text, label);
@@ -295,9 +297,13 @@ namespace dyno
 		SceneGraph::getInstance().initialize();
 
 		float iBgGray[2] = { 0.2f, 0.8f };
+		bool mLock = false;
 		RenderParams::Light iLight;
 		int width = 1024, height = 768;
-		
+		static float values[90] = {};
+        static int values_offset = 0;
+        static double refresh_time = 0.0;
+
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
@@ -346,7 +352,7 @@ namespace dyno
 						ImGui::SameLine();
 						ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 						mRenderParams->light = iLight;
-						
+
 						ImGui::EndPopup();
 					}
 					
@@ -384,14 +390,27 @@ namespace dyno
 				{// Top Right widget
 					
 					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+					toggleButton(pics[3]->GetTexture(),"Lock", &(mLock));
+					ImGui::SameLine();
 					toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
-
-					// toggleButton("Ground", &(mRenderParams->showGround));
 					ImGui::SameLine();
 					toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
 					ImGui::SameLine();
-					toggleButton("Axis Helper", &(mRenderParams->showAxisHelper));
+					toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
 					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, 0));
+						
+					if (refresh_time == 0.0) refresh_time = ImGui::GetTime();
+					while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
+					{
+						static float phase = 0.0f;
+						values[values_offset] = cosf(phase);
+						values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
+						phase += 0.10f * values_offset;
+						refresh_time += 1.0f / 60.0f;
+					}
+					char overlay[32];
+					ImGui::PlotLines("Lines",  values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 80.0f));
+
 					ImGui::End();
 				}
 
@@ -399,11 +418,11 @@ namespace dyno
 					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 					ImGui::Text(" %.1f FPS", ImGui::GetIO().Framerate);
 					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, height - ImGui::GetWindowSize().y));
-					ImGui::End();					
+					ImGui::End();
 				}
 
-				// Mouse Foucus on Any Imgui Windows
-				mOpenCameraRotate = !ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow);
+				// Mouse Foucus on Any Imgui Windows || Lock
+				mOpenCameraRotate = !(ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mLock);
 			}
 
 			ImGui::Render();
