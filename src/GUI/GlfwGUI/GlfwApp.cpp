@@ -189,8 +189,6 @@ namespace dyno
 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
-		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/map.png"));
-		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/box.png"));
 	}
 
 	void GlfwApp::initializeStyle()
@@ -398,7 +396,14 @@ namespace dyno
 					ImGui::SameLine();
 					toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
 					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, 0));
+
+					ImGui::End();
+				}
+
+				{// Right sidebar
+					ImGui::Begin("Right sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 						
+					/*
 					if (refresh_time == 0.0) refresh_time = ImGui::GetTime();
 					while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
 					{
@@ -410,9 +415,17 @@ namespace dyno
 					}
 					char overlay[32];
 					ImGui::PlotLines("Lines",  values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 80.0f));
+					*/
+					
+					const int val[6 + 1] = {0,1,2,3,4,5,6};
+					const int style_alpha8 = 150;
+					const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
+					ImGui::ColorBar("ColorBar", val, col, 7);
 
+					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, (height - ImGui::GetWindowSize().y) /2));
 					ImGui::End();
 				}
+
 
 				{// Bottom Right widget
 					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
