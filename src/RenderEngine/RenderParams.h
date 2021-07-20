@@ -42,7 +42,7 @@ namespace dyno
 		{
 			// ambient light
 			glm::vec3	ambientColor = glm::vec3(0.05f);
-			float		ambientScale = 1.f;
+			float		ambientScale = 1.f; 
 			// directional light
 			glm::vec3	mainLightColor = glm::vec3(1.f);
 			float		mainLightScale = 5.f;
@@ -50,7 +50,7 @@ namespace dyno
 			float		_padding = 0.f;
 		} light;
 
-
+		// Backcolor gray scale
 		glm::vec3	bgColor0 = glm::vec3(0.2f);
 		glm::vec3	bgColor1 = glm::vec3(0.8f);
 

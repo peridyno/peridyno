@@ -137,6 +137,8 @@ namespace dyno
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
+		initializeStyle();
+		loadIcon();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
@@ -182,15 +184,130 @@ namespace dyno
 		}
 	}
 
+	void GlfwApp::loadIcon(){
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
+		pics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
+		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/map.png"));
+		// pics.emplace_back(std::make_shared<Picture>("../../../data/icon/box.png"));
+	}
+
+	void GlfwApp::initializeStyle()
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowRounding = 6.0f;
+		style.ChildRounding = 6.0f;
+		style.FrameRounding = 6.0f;
+		style.PopupRounding = 6.0f;
+	}
+	void GlfwApp::toggleButton(ImTextureID texId, const char* label, bool *v)
+	{
+		if (*v == true)
+		{
+
+			ImGui::PushID(label);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+			ImGui::ImageButtonWithText(texId, label);
+			if (ImGui::IsItemClicked(0))
+			{
+				*v = !*v;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+		else
+		{
+			if (ImGui::ImageButtonWithText(texId ,label))
+				*v = true;
+		}
+	}
+	void GlfwApp::toggleButton(const char* label, bool *v)
+	{
+		if (*v == true)
+		{
+
+			ImGui::PushID(label);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+			ImGui::Button(label);
+			if (ImGui::IsItemClicked(0))
+			{
+				*v = !*v;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+		else
+		{
+			if (ImGui::Button(label))
+				*v = true;
+		}
+	}
+
+	void GlfwApp::sampleButton(const char* label, bool *v)
+	{
+		float padding = 10.0f;
+		float bounding = 1.0f;
+		ImVec2 p = ImGui::GetCursorScreenPos();
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		const ImVec2 label_size = ImGui::CalcTextSize(label);
+		const ImVec2 button_size = ImVec2(label_size.x + padding * 2, label_size.y + padding * 2);
+		const ImVec2 bound_size =  ImVec2(button_size.x + bounding * 2, button_size.y + bounding * 2);
+		ImVec2 p_button = ImVec2(p.x + bounding, p.y + bounding);
+		ImVec2 p_label = ImVec2(p_button.x + padding, p_button.y + padding);
+
+		float radius = bound_size.y * 0.30f;
+
+		// 透明的按钮
+		if (ImGui::InvisibleButton(label, bound_size))
+			*v = !*v;
+		ImVec4 col_bf4;
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		// 颜色自定义
+		if (ImGui::IsItemActivated()) col_bf4 = *v ? style.Colors[40] : style.Colors[23];
+		else if (ImGui::IsItemHovered()) col_bf4 =  *v ? style.Colors[42] : style.Colors[24];
+		else col_bf4 = *v ? style.Colors[41] : style.Colors[22];
+
+		ImU32 col_bg = IM_COL32(255 * col_bf4.x, 255 * col_bf4.y, 255 * col_bf4.z, 255 * col_bf4.w);
+		ImU32 col_text = IM_COL32(255, 255, 255, 255);
+		ImU32 col_bound = IM_COL32(0,0,0,255);
+		
+		// 绘制矩形形状
+		draw_list->AddRect(p, ImVec2(p.x + bound_size.x, p.y + bound_size.y), col_bound , radius);
+		draw_list->AddRectFilled(p_button, ImVec2(p_button.x + button_size.x, p_button.y + button_size.y), col_bg, radius);
+		draw_list->AddText(p_label, col_text, label);
+	}
+
+	void GlfwApp::beginTitle(const char* label){
+		ImGui::PushID(label);
+	}
+
+	void GlfwApp::endTitle(){
+		ImGui::PopID();
+	}
+
 	void GlfwApp::mainLoop()
 	{
+		
 		SceneGraph::getInstance().initialize();
 
-		bool show_demo_window = true;
+		float iBgGray[2] = { 0.2f, 0.8f };
+		bool mLock = false;
+		RenderParams::Light iLight;
+		int width = 1024, height = 768;
+		static float values[90] = {};
+        static int values_offset = 0;
+        static double refresh_time = 0.0;
 
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
+			
 			glfwPollEvents();
 
 			if (mAnimationToggle)
@@ -207,26 +324,110 @@ namespace dyno
 				static float f = 0.0f;
 				static int counter = 0;
 
-				ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+				{// Top Left widget
+					ImGui::SetNextWindowPos(ImVec2(0,0));
+					ImGui::Begin("Top Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+					
+					if(ImGui::Button("Lighting")){
+						ImGui::OpenPopup("LightingMenu");
+					}
 
-				ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-				ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+					if(ImGui::BeginPopup("LightingMenu")){
+						ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.3f", 0);
+						mRenderParams->bgColor0 = glm::vec3(iBgGray[0]);
+						mRenderParams->bgColor1 = glm::vec3(iBgGray[1]);
+						
+						ImGui::Text("Ambient Light");
 
-				ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-				ImGui::ColorEdit3("clear color", (float*)&mClearColor); // Edit 3 floats representing a color
+						beginTitle("Ambient Light Scale");
+						ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 10.0f, "%.3f", 0); 
+						endTitle();
+						ImGui::SameLine();
+						ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel) ;
 
-				if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-					counter++;
-				ImGui::SameLine();
-				ImGui::Text("counter = %d", counter);
+						ImGui::Text("Main Light");
+						beginTitle("Main Light Scale");
+						ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 10.0f, "%.3f", 0); 
+						endTitle();
+						ImGui::SameLine();
+						ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
+						mRenderParams->light = iLight;
 
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-				ImGui::End();
+						ImGui::EndPopup();
+					}
+					
+
+					// Camera Select
+					static int camera_current = 0;
+					const char* camera_name[] = {"Orbit", "TrackBall"};
+					static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
+					// ImGui::Combo("Camera", &camera_current, camera_name, IM_ARRAYSIZE(camera_name));
+					ImGui::SetNextItemWidth(100);
+
+					beginTitle("Camera");
+					if (ImGui::BeginCombo("", camera_name[camera_current], flags))
+					{
+						for (int n = 0; n < IM_ARRAYSIZE(camera_name); n++)
+						{
+							const bool is_selected = (camera_current == n);
+							if (ImGui::Selectable(camera_name[n], is_selected))
+								camera_current = n;
+							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+							if (is_selected)
+								ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}			
+					endTitle();
+
+					if(CameraType(camera_current) != mCameraType){
+						// FIXME: GL error
+						// setCameraType(CameraType(camera_current));
+					}
+					ImGui::End();
+				}
+
+				{// Top Right widget
+					
+					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+					toggleButton(pics[3]->GetTexture(),"Lock", &(mLock));
+					ImGui::SameLine();
+					toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
+					ImGui::SameLine();
+					toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
+					ImGui::SameLine();
+					toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
+					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, 0));
+						
+					if (refresh_time == 0.0) refresh_time = ImGui::GetTime();
+					while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
+					{
+						static float phase = 0.0f;
+						values[values_offset] = cosf(phase);
+						values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
+						phase += 0.10f * values_offset;
+						refresh_time += 1.0f / 60.0f;
+					}
+					char overlay[32];
+					ImGui::PlotLines("Lines",  values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 80.0f));
+
+					ImGui::End();
+				}
+
+				{// Bottom Right widget
+					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+					ImGui::Text(" %.1f FPS", ImGui::GetIO().Framerate);
+					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, height - ImGui::GetWindowSize().y));
+					ImGui::End();
+				}
+
+				// Mouse Foucus on Any Imgui Windows || Lock
+				mOpenCameraRotate = !(ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mLock);
 			}
 
 			ImGui::Render();
 
-			int width, height;
+			
 			glfwGetFramebufferSize(mWindow, &width, &height);
 			const float ratio = width / (float)height;
 
@@ -309,6 +510,10 @@ namespace dyno
 		mAnimationToggle = !mAnimationToggle;
 	}
 
+	bool GlfwApp::getCameraRotateFlag() {
+		return mOpenCameraRotate;
+	}
+
 	int GlfwApp::getWidth()
 	{
 		return activeCamera()->viewportWidth();
@@ -352,7 +557,7 @@ namespace dyno
 		mRenderParams->viewport.h = mCamera->viewportHeight();
 
 		mRenderTarget->resize(mCamera->viewportWidth(), mCamera->viewportHeight());
-
+		
 		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
 
 		// write back to the framebuffer
@@ -375,6 +580,7 @@ namespace dyno
 
 		if (action == GLFW_PRESS)
 		{
+			// if(mOpenCameraRotate)
 			camera->registerPoint(xpos, ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
 		}
@@ -392,14 +598,14 @@ namespace dyno
 
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
 	{
-		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window); // User Pointer
 
 		auto camera = activeWindow->activeCamera();
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && mOpenCameraRotate) {
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN) {
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && mOpenCameraRotate) {
 			camera->translateToPoint(x, y);
 		}
 
@@ -421,7 +627,7 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
-		camera->zoom(-OffsetY);
+		if(mOpenCameraRotate)camera->zoom(-OffsetY);
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

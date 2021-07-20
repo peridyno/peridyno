@@ -11,6 +11,7 @@
 
 using namespace dyno;
 
+bool GlfwApp::mOpenCameraRotate = true;
 int main()
 {
 	SceneGraph& scene = SceneGraph::getInstance();

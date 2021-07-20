@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "AppBase.h"
+#include "picture.h"
 
 namespace dyno {
 
@@ -16,6 +17,7 @@ namespace dyno {
 	class RenderEngine;
 	class RenderTarget;
 	class RenderParams;
+	struct Picture;
 
 	enum ButtonState
 	{
@@ -25,9 +27,9 @@ namespace dyno {
 
 	enum CameraType
 	{
-		Orbit,
+		Orbit = 0,
 		TrackBall
-	};
+	}; 	
 
     class GlfwApp : public AppBase
     {
@@ -78,6 +80,24 @@ namespace dyno {
 		int getWidth();
 		int getHeight();
 
+		bool getCameraRotateFlag();
+
+		// ImGui extend function
+		// 全局样式设定
+		void initializeStyle();
+		// 切换按钮
+		void toggleButton(const char* label, bool *v);
+		void toggleButton(ImTextureID texId, const char* label, bool *v);
+		// 可自定义形状按钮
+		void sampleButton(const char* label, bool *v);
+		// 避免label输出，ImGui ID压入栈中
+		void beginTitle(const char* label);
+		// ImGui ID弹栈
+		void endTitle();
+		// load imgui button icon 
+		void loadIcon();
+
+
 	protected:
 		void initCallbacks();    //init default callbacks
 
@@ -90,6 +110,8 @@ namespace dyno {
 		static void cursorEnterCallback(GLFWwindow* window, int entered);
 		static void scrollCallback(GLFWwindow* window, double offsetX, double OffsetY);
 
+
+		
     private:
 		//pointers to callback methods
 		void(*mMouseButtonFunc)(GLFWwindow* window, int button, int action, int mods);
@@ -116,6 +138,11 @@ namespace dyno {
 		bool mSaveScreenToggle = false;
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
+		
+		// The static bool variable is used for avoiding Camera Rotating in Imgui Windows
+		static bool mOpenCameraRotate;
+		// Save pictrue's texture ID
+		std::vector<std::shared_ptr<Picture>> pics;
 
 		int mSaveScreenInterval = 1;
 
@@ -134,8 +161,10 @@ namespace dyno {
 		RenderTarget* mRenderTarget;
 		RenderParams* mRenderParams;
 
+
 	public:
 		bool			mUseNewRenderEngine = true;
+		
     };
 
 }
