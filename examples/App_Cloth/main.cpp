@@ -41,7 +41,7 @@ void CreateScene()
 	auto surfaceRenderer = std::make_shared<SurfaceRenderer>();
 	cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
 }
-bool GlfwApp::mOpenCameraRotate = true;
+
 int main()
 {
 	CreateScene();

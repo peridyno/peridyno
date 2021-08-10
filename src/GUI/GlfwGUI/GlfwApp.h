@@ -140,7 +140,7 @@ namespace dyno {
 		bool mBoundingboxToggle = false;
 		
 		// The static bool variable is used for avoiding Camera Rotating in Imgui Windows
-		static bool mOpenCameraRotate;
+		bool mOpenCameraRotate = true;
 		// Save pictrue's texture ID
 		std::vector<std::shared_ptr<Picture>> pics;
 

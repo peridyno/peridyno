@@ -1,7 +1,6 @@
 #include "GlfwGUI/GlfwApp.h"
 
 using namespace dyno;
-bool GlfwApp::mOpenCameraRotate = true;
 
 int main(int, char**)
 {

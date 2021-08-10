@@ -617,10 +617,10 @@ namespace dyno
 
 		auto camera = activeWindow->activeCamera();
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && mOpenCameraRotate) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && activeWindow->getCameraRotateFlag()) {
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && mOpenCameraRotate) {
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && activeWindow->getCameraRotateFlag()) {
 			camera->translateToPoint(x, y);
 		}
 
@@ -642,7 +642,9 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
-		if(mOpenCameraRotate)camera->zoom(-OffsetY);
+
+		if(activeWindow->getCameraRotateFlag())
+			camera->zoom(-OffsetY);
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

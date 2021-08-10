@@ -47,7 +47,6 @@ void CreateScene()
 	fluid->graphicsPipeline()->pushModule(ptRender);
 }
 
-bool GlfwApp::mOpenCameraRotate = true;
 int main()
 {
 	CreateScene();
