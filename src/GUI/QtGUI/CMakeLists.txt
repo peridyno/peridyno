@@ -19,7 +19,7 @@ qt5_add_resources(RESOURCES
     ./Resources/resources.qrc
     ./Resources/StyleTemplate.qrc)
 
-link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg)   
+link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg imgui)   
 
 file(                                                                           
     GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取所有源文件list
