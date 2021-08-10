@@ -4,6 +4,7 @@
 #include "RenderParams.h"
 #include "SceneGraph.h"
 #include "camera/OrbitCamera.h"
+#include "PSimulationThread.h"
 
 //Qt
 #include <QMouseEvent>
@@ -13,7 +14,13 @@ namespace dyno
 
 	POpenGLWidget::POpenGLWidget()
 	{
-
+		QSurfaceFormat format;
+		format.setDepthBufferSize(24);
+		format.setMajorVersion(4);
+		format.setMinorVersion(4);
+		format.setSamples(4);
+		format.setProfile(QSurfaceFormat::CoreProfile);
+		setFormat(format);
 	}
 
 	POpenGLWidget::~POpenGLWidget()
@@ -29,6 +36,8 @@ namespace dyno
 			//SPDLOG_CRITICAL("Failed to load GLAD!");
 			exit(-1);
 		}
+
+		SceneGraph::getInstance().initialize();
 
 		mRenderEngine = new RenderEngine();
 		mRenderTarget = new RenderTarget();
@@ -48,12 +57,12 @@ namespace dyno
 		mRenderTarget->initialize();
 
 		initializeOpenGLFunctions();
-		glClearColor(0, 0, 0, 1);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LIGHT0);
-		glEnable(GL_LIGHTING);
-		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-		glEnable(GL_COLOR_MATERIAL);
+// 		glClearColor(0, 0, 0, 1);
+// 		glEnable(GL_DEPTH_TEST);
+// 		glEnable(GL_LIGHT0);
+// 		glEnable(GL_LIGHTING);
+// 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+// 		glEnable(GL_COLOR_MATERIAL);
 	}
 
 	void POpenGLWidget::paintGL()
@@ -112,6 +121,16 @@ namespace dyno
 	{
 		mCamera->zoom(-0.001*event->angleDelta().y());
 		update();
+	}
+
+	void POpenGLWidget::updateGraphicsContext()
+	{
+		PSimulationThread::instance()->startRendering();
+		
+		SceneGraph::getInstance().updateGraphicsContext();
+		update();
+
+		PSimulationThread::instance()->stopRendering();
 	}
 
 }

@@ -35,7 +35,10 @@ void main(void)
 	
 	gl_Position = transform.proj * cameraPos; 
 		
-	// point size
-	vec4 projCorner = transform.proj * vec4(uPointSize, uPointSize, cameraPos.z, cameraPos.w);
-	gl_PointSize = transform.width * projCorner.x / projCorner.w;
+	// determine point size
+	vec4 p1 = transform.proj * vec4(uPointSize, uPointSize, cameraPos.z, cameraPos.w);
+	p1 = p1 / p1.w;
+	vec4 p0 = transform.proj * vec4(0, 0, cameraPos.z, cameraPos.w);
+	p0 = p0 / p0.w;
+	gl_PointSize = transform.width * abs(p1.x - p0.x);
 }

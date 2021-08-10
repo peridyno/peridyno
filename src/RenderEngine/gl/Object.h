@@ -16,37 +16,20 @@
 
 #pragma once
 
-#include "gl/Buffer.h"
-#include "RenderParams.h"
-
-namespace dyno
+namespace gl
 {
-	class SSAO;
-	class ShadowMap;
-	class RenderHelper;
-
-	class SceneGraph;
-	class RenderTarget;
-	class RenderEngine
+	class Object
 	{
+	protected:
+		virtual void create() = 0;
+		virtual void release() = 0;
+
 	public:
-		RenderEngine();
-		~RenderEngine();
-
-		void initialize();
-		void draw(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams);
-
-	private:
-		void initUniformBuffers();
-
-	private:
-		// uniform buffer for matrices
-		gl::Buffer		mTransformUBO;
-		gl::Buffer		mLightUBO;
-		
-		SSAO*			mSSAO;
-		ShadowMap*		mShadowMap;
-		RenderHelper*	mRenderHelper;
-
+		unsigned int id = 0xFFFFFFFF;
 	};
-};
+
+	// helper functions
+	unsigned int glCheckError_(const char* file, int line);
+	#define glCheckError() glCheckError_(__FILE__, __LINE__) 
+}
+

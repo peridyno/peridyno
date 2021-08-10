@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "GLObject.h"
+#include "Object.h"
 
-namespace dyno
+namespace gl
 {
-	class GLFramebuffer : public GLObject
+	class Framebuffer : public Object
 	{
 	public:
 		void create() override;
@@ -35,8 +35,11 @@ namespace dyno
 		void setTexture2D(unsigned int attachment, unsigned int tex, int level = 0);
 
 		void drawBuffers(int count, const unsigned int* buffers);
-
-
+		
 		int checkStatus();
+
+	public:
+		// current framebuffer binding
+		static unsigned int current();
 	};
 }

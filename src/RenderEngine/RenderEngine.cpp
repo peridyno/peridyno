@@ -80,80 +80,14 @@ namespace dyno
 	{
 		// create uniform block for transform
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-
-		// for light transform... temporary
-		mShadowMapUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-
 		// create uniform block for light
 		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-		mLightUBO.bindBufferBase(1);
 
-		glCheckError();
+		gl::glCheckError();
 	}
-
-	void RenderEngine::renderSetup(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams)
-	{
-		// uniform block for transform matrices
-		struct
-		{
-			// MVP
-			glm::mat4 model;
-			glm::mat4 view;
-			glm::mat4 projection;
-			int width;
-			int height;
-
-		} sceneUniformBuffer, shadowUniformBuffer;
-
-		sceneUniformBuffer.model = shadowUniformBuffer.model = glm::mat4(1);
-		sceneUniformBuffer.view = rparams.view;
-		sceneUniformBuffer.projection = rparams.proj;
-		sceneUniformBuffer.width = target->width;
-		sceneUniformBuffer.height = target->height;
-
-		// set mvp transform
-		mTransformUBO.load(&sceneUniformBuffer, sizeof(sceneUniformBuffer));
-
-		glm::vec3 center = glm::vec3(0.f);
-		float	  radius = 1.f;
-		// update camera
-		if (scene)
-		{
-			// get bounding box of the scene
-			auto p0 = scene->getLowerBound();
-			auto p1 = scene->getUpperBound();
-			glm::vec3 pmin = { p0[0], p0[1], p0[2] };
-			glm::vec3 pmax = { p1[0], p1[1], p1[2] };
-			center = (pmin + pmax) * 0.5f;
-			radius = glm::distance(pmin, pmax) * 0.5f;
-		}
-
-		// main light MVP matrices	
-		shadowUniformBuffer.projection = glm::ortho(-radius, radius, -radius, radius, -radius, radius);
-		glm::vec3 lightUp = glm::vec3(0, 1, 0);
-		if (glm::length(glm::cross(lightUp, rparams.light.mainLightDirection)) == 0.f)
-		{
-			lightUp = glm::vec3(0, 0, 1);
-		}
-		shadowUniformBuffer.view = glm::lookAt(center, center - rparams.light.mainLightDirection, lightUp);
-		shadowUniformBuffer.width = mShadowMap->width;
-		shadowUniformBuffer.height = mShadowMap->height;
-
-		mShadowMapUBO.load(&shadowUniformBuffer, sizeof(shadowUniformBuffer));
-
-		// light properties, convert into camera space
-		RenderParams::Light light = rparams.light;
-		light.mainLightDirection = glm::vec3(sceneUniformBuffer.view * glm::vec4(light.mainLightDirection, 0));
-		light.mainLightVP = shadowUniformBuffer.projection * shadowUniformBuffer.view * glm::inverse(sceneUniformBuffer.view);
-		mLightUBO.load(&light, sizeof(light));
-	}
-
 
 	void RenderEngine::draw(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams)
 	{
-		// pre-rendering 
-		renderSetup(scene, target, rparams);
-		
 		// gather visual modules
 		RenderQueue renderQueue;
 		// enqueue render content
@@ -162,13 +96,34 @@ namespace dyno
 			scene->getRootNode()->traverseTopDown(&renderQueue);
 		}
 
-		// render shadow map
-		mShadowMapUBO.bindBufferBase(0);
-		mShadowMap->update(renderQueue.modules, rparams);
-		
-		// transform block
+		// update shadow map
+		mShadowMap->update(scene, rparams);
+				
+		// setup scene transform matrices
+		struct
+		{
+			glm::mat4 model;
+			glm::mat4 view;
+			glm::mat4 projection;
+			int width;
+			int height;
+		} sceneUniformBuffer;
+		sceneUniformBuffer.model = glm::mat4(1);
+		sceneUniformBuffer.view = rparams.view;
+		sceneUniformBuffer.projection = rparams.proj;
+		sceneUniformBuffer.width = target->width;
+		sceneUniformBuffer.height = target->height;
+
+		mTransformUBO.load(&sceneUniformBuffer, sizeof(sceneUniformBuffer));
 		mTransformUBO.bindBufferBase(0);
 
+		// setup light block
+		RenderParams::Light light = rparams.light;
+		light.mainLightDirection = glm::vec3(rparams.view * glm::vec4(light.mainLightDirection, 0));
+		mLightUBO.load(&light, sizeof(light));
+		mLightUBO.bindBufferBase(1);
+
+		// begin rendering
 		target->bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -182,6 +137,16 @@ namespace dyno
 		{
 			mRenderHelper->drawGround(rparams.groudScale);
 		}
+
+
+		//glBegin(GL_TRIANGLES);
+
+		//glVertex3f(0.0f, 1.0f, 0.0f); glColor3f(1.0f, 0.0f, 0.0f);
+
+		//glVertex3f(-1.0f, 0.0f, 0.0f); glColor3f(0.0f, 1.0f, 0.0f);
+
+		//glVertex3f(1.0f, 0.0f, 0.0f); glColor3f(0.0f, 0.0f, 1.0f);
+		//glEnd();
 
 		// render modules
 		for (GLVisualModule* m : renderQueue.modules)

@@ -28,6 +28,3 @@ public:
 private:
 	std::chrono::system_clock::time_point tp;
 };
-
-// get current framebuffer id
-unsigned int GetCurrentFramebuffer();

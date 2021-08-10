@@ -3,15 +3,11 @@
 #include "Node.h"
 #include "SceneGraph.h"
 
-#include "PVTKOpenGLWidget.h"
 #include "PCustomWidgets.h"
 #include "Nodes/QtNodeWidget.h"
 #include "Nodes/QtModuleWidget.h"
 
 #include "Common.h"
-
-#include "vtkRenderer.h"
-#include <vtkRenderWindow.h>
 
 #include <QGroupBox>
 #include <QLabel>
@@ -384,7 +380,7 @@ namespace dyno
 	{
 //		PVTKOpenGLWidget::getCurrentRenderer()->GetActors()->RemoveAllItems();
 //		SceneGraph::getInstance().draw();
-		PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
+//		PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
 	}
 
 	void PPropertyWidget::updateContext(OBase* base)

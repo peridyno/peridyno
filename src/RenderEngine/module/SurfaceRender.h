@@ -17,8 +17,9 @@
 #pragma once
 
 #include "GLVisualModule.h"
-#include "GLVertexArray.h"
-#include "GLShader.h"
+#include "GLCudaBuffer.h"
+#include "gl/VertexArray.h"
+#include "gl/Program.h"
 
 namespace dyno
 {
@@ -35,11 +36,11 @@ namespace dyno
 
 	private:
 
-		GLShaderProgram mShaderProgram;
+		gl::Program mShaderProgram;
+		gl::VertexArray	mVAO;
 
 		GLCudaBuffer	mVertexBuffer;
 		GLCudaBuffer 	mIndexBuffer;
-		GLVertexArray	mVAO;
 
 		unsigned int	mDrawCount = 0;
 	};

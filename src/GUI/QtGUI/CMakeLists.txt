@@ -8,14 +8,6 @@ set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_AUTOMOC ON)                                                                   # 开启自动moc功能
 set(CMAKE_AUTOUIC ON) 
 
-if(NOT VTK_BINARY_DIR)
-    find_package(VTK)
-    if(NOT VTK_DIR)
-        MESSAGE(FATAL_ERROR "Please set VTK_DIR.")
-    endif(NOT VTK_DIR)
-    include(${VTK_USE_FILE})
-endif(NOT VTK_BINARY_DIR)
-
 find_package(Qt5 COMPONENTS
              Core
              Widgets
@@ -27,9 +19,7 @@ qt5_add_resources(RESOURCES
     ./Resources/resources.qrc
     ./Resources/StyleTemplate.qrc)
 
-link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg
-    ${VTK_LIBRARIES}
-)   
+link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg)   
 
 file(                                                                           
     GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取所有源文件list

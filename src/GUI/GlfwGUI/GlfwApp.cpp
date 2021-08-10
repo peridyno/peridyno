@@ -556,6 +556,8 @@ namespace dyno
 
 	void GlfwApp::drawScene(void)
 	{
+		SceneGraph::getInstance().updateGraphicsContext();
+
 		// preserve current framebuffer
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);

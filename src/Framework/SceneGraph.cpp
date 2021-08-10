@@ -169,6 +169,25 @@ namespace dyno
 			this->advance(interval - t);
 		}
 
+// 		class UpdateGrpahicsContextAct : public Action
+// 		{
+// 		public:
+// 			void process(Node* node) override {
+// 				node->graphicsPipeline()->update();
+// 			}
+// 		};
+// 
+// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
+
+		m_root->traverseTopDown<PostProcessing>();
+
+		std::cout << "****************Frame " << mFrameNumber << " Ended" << std::endl << std::endl;
+
+		mFrameNumber++;
+	}
+
+	void SceneGraph::updateGraphicsContext()
+	{
 		class UpdateGrpahicsContextAct : public Action
 		{
 		public:
@@ -178,12 +197,6 @@ namespace dyno
 		};
 
 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
-
-		m_root->traverseTopDown<PostProcessing>();
-
-		std::cout << "****************Frame " << mFrameNumber << " Ended" << std::endl << std::endl;
-
-		mFrameNumber++;
 	}
 
 	void SceneGraph::run()

@@ -266,6 +266,7 @@ namespace dyno {
 
 		std::vector<std::shared_ptr<Node>>& getNodes() override
 		{
+			m_nodes.clear();
 			m_nodes.resize(m_derived_nodes.size());
 			for (int i = 0; i < m_nodes.size(); i++)
 			{

@@ -51,6 +51,7 @@ namespace dyno
 		: public QOpenGLWidget
 		, private QOpenGLExtraFunctions
 	{
+		Q_OBJECT
 	public:
 		POpenGLWidget();
 		~POpenGLWidget();
@@ -66,6 +67,9 @@ namespace dyno
 		void mouseReleaseEvent(QMouseEvent *event) override;
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void wheelEvent(QWheelEvent *event) override;
+
+	public slots:
+		void updateGraphicsContext();
 
 	private:
 		RenderEngine* mRenderEngine;
