@@ -55,8 +55,8 @@ set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
     
-target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
-
+# target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
+target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32 imgui)
 target_include_directories(${LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/GUI>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>

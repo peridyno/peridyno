@@ -17,15 +17,18 @@
  * limitations under the License.
  */
 #pragma once
-#include <glad/glad.h>
-
+#include "QtImGui.h"
 
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLWidget>
+#include <QTimer>
 
 #include <GL/glu.h>
+
+#include "RenderParams.h"
+
 
 namespace dyno
 {
@@ -72,13 +75,13 @@ namespace dyno
 		void updateGraphicsContext();
 
 	private:
+		std::shared_ptr<Camera> activeCamera();
+
 		RenderEngine* mRenderEngine;
-		RenderTarget* mRenderTarget;
-		RenderParams* mRenderParams;
 
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
-
-		std::shared_ptr<Camera> mCamera;
+		// Qt
+		QTimer timer;
 	};
 
 }

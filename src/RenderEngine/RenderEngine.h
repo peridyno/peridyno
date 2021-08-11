@@ -16,8 +16,11 @@
 
 #pragma once
 
+#include <memory>
 #include "gl/Buffer.h"
 #include "RenderParams.h"
+
+//#include "ui/picture.h"
 
 namespace dyno
 {
@@ -25,21 +28,55 @@ namespace dyno
 	class ShadowMap;
 	class RenderHelper;
 
+	class Camera;
+
 	class SceneGraph;
 	class RenderTarget;
+	//HE Xiaowei
+	class RenderParams;
+
+	enum CameraType
+	{
+		Orbit = 0,
+		TrackBall
+	};
+
 	class RenderEngine
 	{
 	public:
 		RenderEngine();
 		~RenderEngine();
 
-		void initialize();
-		void draw(dyno::SceneGraph* scene, RenderTarget* target, const RenderParams& rparams);
+		void initialize(int width, int height);
 
+		void setupCamera();
+
+		void begin();
+		void end();
+
+		void draw(dyno::SceneGraph* scene);
+
+		void drawGUI();
+
+		void resizeRenderTarget(int w, int h);
+
+		RenderParams* renderParams() { return mRenderParams; }
+		RenderTarget* renderTarget() { return mRenderTarget; }
+
+		std::shared_ptr<Camera> camera() { return mCamera; }
+
+		bool cameraLocked();
 	private:
 		void initUniformBuffers();
 
 	private:
+		bool mEnableCamera = true;
+
+		glm::vec4 mClearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+		// Save pictrue's texture ID
+		//std::vector<std::shared_ptr<Picture>> pics;
+
 		// uniform buffer for matrices
 		gl::Buffer		mTransformUBO;
 		gl::Buffer		mLightUBO;
@@ -48,5 +85,11 @@ namespace dyno
 		ShadowMap*		mShadowMap;
 		RenderHelper*	mRenderHelper;
 
+		//HE Xiaowei
+		RenderTarget* mRenderTarget;
+		RenderParams* mRenderParams;
+
+		std::shared_ptr<Camera> mCamera;
+		CameraType mCameraType = CameraType::Orbit;
 	};
 };

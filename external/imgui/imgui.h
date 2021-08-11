@@ -428,6 +428,8 @@ namespace ImGui
     IMGUI_API float         GetTextLineHeightWithSpacing();                                 // ~ FontSize + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of text)
     IMGUI_API float         GetFrameHeight();                                               // ~ FontSize + style.FramePadding.y * 2
     IMGUI_API float         GetFrameHeightWithSpacing();                                    // ~ FontSize + style.FramePadding.y * 2 + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of framed widgets)
+    
+
 
     // ID stack/scopes
     // - Read the FAQ for more details about how ID are handled in dear imgui. If you are creating widgets in a loop you most
@@ -887,6 +889,24 @@ namespace ImGui
     IMGUI_API void          GetAllocatorFunctions(ImGuiMemAllocFunc* p_alloc_func, ImGuiMemFreeFunc* p_free_func, void** p_user_data);
     IMGUI_API void*         MemAlloc(size_t size);
     IMGUI_API void          MemFree(void* ptr);
+
+    // 临时解决方案 
+    // 水平布局
+    IMGUI_API void          BeginHorizontal();
+    IMGUI_API void          EndHorizontal();
+    // Logo带字按钮
+    IMGUI_API bool          ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2& imageSize=ImVec2(0,0), const ImVec2& uv0 = ImVec2(0,0),  const ImVec2& uv1 = ImVec2(1,1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0,0,0,0), const ImVec4& tint_col = ImVec4(1,1,1,1));
+    // ToggleButton (with Icon or no)
+    IMGUI_API void          toggleButton(ImTextureID texId, const char* label, bool *v);
+    IMGUI_API void          toggleButton(const char* label, bool *v);
+    // SampleButton 可自定义形状按钮
+    IMGUI_API void          sampleButton(const char* label, bool *v);
+    // ColorBar 
+    IMGUI_API bool          ColorBar(const char* label, const int* values, const ImU32* col, int length);
+    // Get ID without label showing
+    IMGUI_API void          beginTitle(const char* label);
+    IMGUI_API void          endTitle();
+
 
 } // namespace ImGui
 

@@ -25,12 +25,10 @@ namespace dyno
 
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
 	{
-		setupCamera();
 	}
 
 	GlfwApp::GlfwApp(int width, int height)
 	{
-		setupCamera();
 		this->createWindow(width, height);
 	}
 
@@ -43,8 +41,6 @@ namespace dyno
 
 		//
 		delete mRenderEngine;
-		delete mRenderTarget;
-		delete mRenderParams;
 
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
@@ -137,115 +133,57 @@ namespace dyno
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
+		initializeStyle();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
-		mCamera->registerPoint(0.5f, 0.5f);
-		mCamera->translateToPoint(0, 0);
-
-		mCamera->zoom(3.0f);
-		mCamera->setClipNear(0.01f);
-		mCamera->setClipFar(10.0f);
-
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
-		mRenderTarget = new RenderTarget();
-		mRenderParams = new RenderParams();
-
-		mRenderEngine->initialize();
-		mRenderTarget->initialize();
-
-		mRenderTarget->resize(width, height);
-		// set the viewport
-		mRenderParams->viewport.x = 0;
-		mRenderParams->viewport.y = 0;
-		mRenderParams->viewport.w = width;
-		mRenderParams->viewport.h = height;
+		mRenderEngine->initialize(width, height);
 	}
 
-	void GlfwApp::setupCamera()
+	void GlfwApp::initializeStyle()
 	{
-		switch (mCameraType)
-		{
-		case dyno::Orbit:
-			mCamera = std::make_shared<OrbitCamera>();
-			break;
-		case dyno::TrackBall:
-			mCamera = std::make_shared<TrackballCamera>();
-			break;
-		default:
-			break;
-		}
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowRounding = 6.0f;
+		style.ChildRounding = 6.0f;
+		style.FrameRounding = 6.0f;
+		style.PopupRounding = 6.0f;
 	}
+	
 
 	void GlfwApp::mainLoop()
 	{
 		SceneGraph::getInstance().initialize();
 
-		bool show_demo_window = true;
-
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
+			
 			glfwPollEvents();
 
-			if (mAnimationToggle)
+			if (mAnimationToggle){
 				SceneGraph::getInstance().takeOneFrame();
+				SceneGraph::getInstance().updateGraphicsContext();
+			}
 				
-
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-			{
-				static float f = 0.0f;
-				static int counter = 0;
-
-				ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-				ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-				ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-
-				ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-				ImGui::ColorEdit3("clear color", (float*)&mClearColor); // Edit 3 floats representing a color
-
-				if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-					counter++;
-				ImGui::SameLine();
-				ImGui::Text("counter = %d", counter);
-
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-				ImGui::End();
-			}
+			mRenderEngine->begin();
+			mRenderEngine->drawGUI();
+			mRenderEngine->draw(&SceneGraph::getInstance());
+			mRenderEngine->end();
 
 			ImGui::Render();
-
-			int width, height;
-			glfwGetFramebufferSize(mWindow, &width, &height);
-			const float ratio = width / (float)height;
-
-			glViewport(0, 0, width, height);
-			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
-			drawScene();
-
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 			glfwSwapBuffers(mWindow);
 		}
-	}
-
-	void GlfwApp::setCameraType(CameraType type)
-	{
-		mCameraType = type;
-		setupCamera();
 	}
 
 	const std::string& GlfwApp::name() const
@@ -272,8 +210,13 @@ namespace dyno
 
 	void GlfwApp::setWindowSize(int width, int height)
 	{
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
+		activeCamera()->setWidth(width);
+		activeCamera()->setHeight(height);
+	}
+
+	std::shared_ptr<dyno::Camera> GlfwApp::activeCamera()
+	{
+		return mRenderEngine->camera();
 	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
@@ -338,28 +281,6 @@ namespace dyno
 
 	void GlfwApp::drawScene(void)
 	{
-		SceneGraph::getInstance().updateGraphicsContext();
-
-		// preserve current framebuffer
-		GLint fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-
-		mRenderParams->proj = mCamera->getProjMat();
-		mRenderParams->view = mCamera->getViewMat();
-						
-		// set the viewport
-		mRenderParams->viewport.x = 0;
-		mRenderParams->viewport.y = 0;
-		mRenderParams->viewport.w = mCamera->viewportWidth();
-		mRenderParams->viewport.h = mCamera->viewportHeight();
-
-		mRenderTarget->resize(mCamera->viewportWidth(), mCamera->viewportHeight());
-
-		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
-
-		// write back to the framebuffer
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-		mRenderTarget->blit(0);
 		
 	}
 
@@ -377,6 +298,7 @@ namespace dyno
 
 		if (action == GLFW_PRESS)
 		{
+			// if(mOpenCameraRotate)
 			camera->registerPoint(xpos, ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
 		}
@@ -394,14 +316,14 @@ namespace dyno
 
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
 	{
-		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window); // User Pointer
 
 		auto camera = activeWindow->activeCamera();
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->renderEngine()->cameraLocked()) {
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN) {
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->renderEngine()->cameraLocked()) {
 			camera->translateToPoint(x, y);
 		}
 
@@ -423,7 +345,9 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
-		camera->zoom(-OffsetY);
+
+		if(!activeWindow->renderEngine()->cameraLocked())
+			camera->zoom(-OffsetY);
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -463,6 +387,8 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		activeWindow->setWindowSize(w, h);
+
+		activeWindow->renderEngine()->resizeRenderTarget(w, h);
 	}
 
 }

@@ -16,17 +16,12 @@ namespace dyno {
 	class RenderEngine;
 	class RenderTarget;
 	class RenderParams;
+	struct Picture;
 
 	enum ButtonState
 	{
 		GLFW_DOWN = 0,
 		GLFW_UP
-	};
-
-	enum CameraType
-	{
-		Orbit,
-		TrackBall
 	};
 
     class GlfwApp : public AppBase
@@ -37,11 +32,8 @@ namespace dyno {
         ~GlfwApp();
 
         void createWindow(int width, int height) override;
-		void setupCamera();
-        void mainLoop() override;
 
-		void setCameraType(CameraType type);
-		CameraType cameraType() { return mCameraType; }
+        void mainLoop() override;
 
 		const std::string& name() const;
 
@@ -61,7 +53,7 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		std::shared_ptr<Camera> activeCamera() { return mCamera; }
+		std::shared_ptr<Camera> activeCamera();
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -78,6 +70,12 @@ namespace dyno {
 		int getWidth();
 		int getHeight();
 
+		// ImGui extend function
+		// 全局样式设定
+		void initializeStyle();
+
+		RenderEngine* renderEngine() { return mRenderEngine; }
+
 	protected:
 		void initCallbacks();    //init default callbacks
 
@@ -90,6 +88,8 @@ namespace dyno {
 		static void cursorEnterCallback(GLFWwindow* window, int entered);
 		static void scrollCallback(GLFWwindow* window, double offsetX, double OffsetY);
 
+
+		
     private:
 		//pointers to callback methods
 		void(*mMouseButtonFunc)(GLFWwindow* window, int button, int action, int mods);
@@ -125,17 +125,7 @@ namespace dyno {
 		std::string mOutputPath;
 		std::string mWindowTitle;
 
-		Vec4f mClearColor = Vec4f(0.45f, 0.55f, 0.60f, 1.00f);
-
-		std::shared_ptr<Camera> mCamera;
-		CameraType mCameraType = CameraType::Orbit;
-
 		RenderEngine* mRenderEngine;
-		RenderTarget* mRenderTarget;
-		RenderParams* mRenderParams;
-
-	public:
-		bool			mUseNewRenderEngine = true;
     };
 
 }

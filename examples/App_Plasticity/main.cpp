@@ -56,7 +56,6 @@ void CreateScene()
 	child2->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 }
 
-
 int main()
 {
 	CreateScene();
