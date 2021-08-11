@@ -349,7 +349,6 @@ namespace dyno
 					ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, mRenderTarget->height - ImGui::GetWindowSize().y));
 					ImGui::End();
 				}
-
  			}
 
 	}
