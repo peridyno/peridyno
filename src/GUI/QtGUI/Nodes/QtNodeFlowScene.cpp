@@ -68,7 +68,7 @@ QtNodeFlowScene::~QtNodeFlowScene()
 
 void QtNodeFlowScene::showSceneGraph(SceneGraph* scn)
 {
-	std::map<std::string, QtBlock*> nodeMap;
+	std::map<dyno::ObjectId, QtBlock*> nodeMap;
 
 	auto root = scn->getRootNode();
 
@@ -76,13 +76,13 @@ void QtNodeFlowScene::showSceneGraph(SceneGraph* scn)
 
 	auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
 	{
-		auto module_name = m->getName();
+		auto mId = m->objectId();
 
 		auto type = std::make_unique<QtNodeWidget>(m);
 
 		auto& node = this->createNode(std::move(type));
 
-		nodeMap[module_name] = &node;
+		nodeMap[mId] = &node;
 
 		QPointF posView(m->bx(), m->by());
 
@@ -98,11 +98,11 @@ void QtNodeFlowScene::showSceneGraph(SceneGraph* scn)
 
 	auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
 	{
-		auto in_name = nd->getName();
+		auto inId = nd->objectId();
 		
-		if (nodeMap.find(in_name) != nodeMap.end())
+		if (nodeMap.find(inId) != nodeMap.end())
 		{
-			auto in_block = nodeMap[nd->getName()];
+			auto inBlock = nodeMap[nd->objectId()];
 
 			auto ports = nd->getAllNodePorts();
 
@@ -114,29 +114,29 @@ void QtNodeFlowScene::showSceneGraph(SceneGraph* scn)
 					auto node = ports[i]->getNodes()[0];
 					if (node != nullptr)
 					{
-						auto in_block = nodeMap[node->getName()];
-						createConnection(*in_block, 0, *in_block, i);
+						auto inBlock = nodeMap[node->objectId()];
+						createConnection(*inBlock, 0, *inBlock, i);
 					}
 				}
 				else if (dyno::Multiple == pType)
 				{
 					//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
 					//we still have to call clear to avoid memory leak.
-					auto nodes = ports[i]->getNodes();
-					ports[i]->clear();
+					auto& nodes = ports[i]->getNodes();
+					//ports[i]->clear();
 					for (int j = 0; j < nodes.size(); j++)
 					{
 						if (nodes[j] != nullptr)
 						{
-							auto out_name = nodes[j]->getName();
-							if (nodeMap.find(out_name) != nodeMap.end())
+							auto outId = nodes[j]->objectId();
+							if (nodeMap.find(outId) != nodeMap.end())
 							{
-								auto out_block = nodeMap[nodes[j]->getName()];
-								createConnection(*in_block, i, *out_block, 0);
+								auto outBlock = nodeMap[outId];
+								createConnection(*inBlock, i, *outBlock, 0);
 							}
 						}
 					}
-					nodes.clear();
+					//nodes.clear();
 				}
 			}
 		}

@@ -1,5 +1,4 @@
 #include "Utility.h"
-#include <glad/glad.h>
 
 TimeElapse::TimeElapse()
 {
@@ -13,10 +12,3 @@ double TimeElapse::elapse()
 	return (double)(duration.count()) / 1000.0;
 }
 
-
-unsigned int GetCurrentFramebuffer()
-{
-	GLint fbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-	return fbo;
-}

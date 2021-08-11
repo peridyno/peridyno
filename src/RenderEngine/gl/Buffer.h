@@ -16,37 +16,31 @@
 
 #pragma once
 
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "gl/Buffer.h"
+#include "Object.h"
 
-namespace dyno
+namespace gl
 {
-	class RenderTarget
+	class Buffer : public Object
 	{
 	public:
-		RenderTarget();
-		~RenderTarget();
+		virtual void create(int target, int usage);
+		virtual void release();
 
-		void initialize();
-		void resize(int w, int h);
-		void blit(unsigned int attachment = 0);
 		void bind();
+		void unbind();
+
+		virtual void allocate(int size);
+		virtual void load(void* data, int size, int offset = 0);
+
+		// for uniform buffer
+		void bindBufferBase(int idx);
 
 	private:
-		gl::Framebuffer mFramebuffer;
+		virtual void create();
 
-		// frame color
-		gl::Texture2D	  mColorTex;
-		// frame depth
-		gl::Texture2D	  mDepthTex;
-		// node id
-		gl::Texture2D	  mNodeIDTex;
-		
-
-		int width;
-		int height;
-
-		friend class RenderEngine;
-	};
+	protected:
+		int target = -1;
+		int usage = -1;
+		int size = -1;
+	};	   
 }

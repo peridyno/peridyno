@@ -9,7 +9,6 @@
 #include <GLFW/glfw3.h>
 
 #include "AppBase.h"
-#include "picture.h"
 
 namespace dyno {
 
@@ -25,12 +24,6 @@ namespace dyno {
 		GLFW_UP
 	};
 
-	enum CameraType
-	{
-		Orbit = 0,
-		TrackBall
-	}; 	
-
     class GlfwApp : public AppBase
     {
     public:
@@ -39,11 +32,8 @@ namespace dyno {
         ~GlfwApp();
 
         void createWindow(int width, int height) override;
-		void setupCamera();
-        void mainLoop() override;
 
-		void setCameraType(CameraType type);
-		CameraType cameraType() { return mCameraType; }
+        void mainLoop() override;
 
 		const std::string& name() const;
 
@@ -63,7 +53,7 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		std::shared_ptr<Camera> activeCamera() { return mCamera; }
+		std::shared_ptr<Camera> activeCamera();
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -80,14 +70,11 @@ namespace dyno {
 		int getWidth();
 		int getHeight();
 
-		bool getCameraRotateFlag();
-
 		// ImGui extend function
 		// 全局样式设定
 		void initializeStyle();
-		// load imgui button icon 
-		void loadIcon();
 
+		RenderEngine* renderEngine() { return mRenderEngine; }
 
 	protected:
 		void initCallbacks();    //init default callbacks
@@ -129,11 +116,6 @@ namespace dyno {
 		bool mSaveScreenToggle = false;
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
-		
-		// The static bool variable is used for avoiding Camera Rotating in Imgui Windows
-		static bool mOpenCameraRotate;
-		// Save pictrue's texture ID
-		std::vector<std::shared_ptr<Picture>> pics;
 
 		int mSaveScreenInterval = 1;
 
@@ -143,19 +125,7 @@ namespace dyno {
 		std::string mOutputPath;
 		std::string mWindowTitle;
 
-		Vec4f mClearColor = Vec4f(0.45f, 0.55f, 0.60f, 1.00f);
-
-		std::shared_ptr<Camera> mCamera;
-		CameraType mCameraType = CameraType::Orbit;
-
 		RenderEngine* mRenderEngine;
-		RenderTarget* mRenderTarget;
-		RenderParams* mRenderParams;
-
-
-	public:
-		bool			mUseNewRenderEngine = true;
-		
     };
 
 }

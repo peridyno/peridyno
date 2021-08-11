@@ -1,6 +1,5 @@
 #include "QtImGui.h"
 
-#include "ImGuiRenderer.h"
 #include <QWindow>
 #ifdef QT_WIDGETS_LIB
 #include <QWidget>

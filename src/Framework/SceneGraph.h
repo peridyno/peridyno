@@ -36,6 +36,7 @@ namespace dyno
 
 		virtual void advance(float dt);
 		virtual void takeOneFrame();
+		virtual void updateGraphicsContext();
 		virtual void run();
 
 		void reset();

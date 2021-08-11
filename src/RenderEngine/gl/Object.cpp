@@ -1,11 +1,11 @@
-#include "GLObject.h"
+#include "Object.h"
 
 #include <string>
 #include <iostream>
 
 #include <glad/glad.h>
 
-namespace dyno
+namespace gl
 {
 	GLenum glCheckError_(const char* file, int line)
 	{

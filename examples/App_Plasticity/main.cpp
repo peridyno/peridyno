@@ -56,7 +56,6 @@ void CreateScene()
 	child2->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 }
 
-bool GlfwApp::mOpenCameraRotate = true;
 int main()
 {
 	CreateScene();

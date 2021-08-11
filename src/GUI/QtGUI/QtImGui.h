@@ -21,6 +21,8 @@
 // SOFTWARE.
 #pragma once
 
+#include "ImGuiRenderer.h"
+
 class QWidget;
 class QWindow;
 

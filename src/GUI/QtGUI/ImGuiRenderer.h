@@ -21,6 +21,10 @@
 // SOFTWARE.
 #pragma once
 
+#include "glad/glad.h"
+#include <imgui.h>
+#include <memory>
+
 #include <QOpenGLExtraFunctions>
 #include <QObject>
 #include <QPoint>

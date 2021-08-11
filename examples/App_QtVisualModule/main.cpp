@@ -1,7 +1,4 @@
-#include "GlfwGUI/GlfwApp.h"
-
-#include "SceneGraph.h"
-#include "Log.h"
+#include "QtGUI/QtApp.h"
 
 #include "ParticleSystem/ParticleFluid.h"
 #include "RigidBody/RigidBody.h"
@@ -51,11 +48,9 @@ int main()
 {
 	CreateScene();
 
-	GlfwApp window;
+	QtApp window;
 	window.createWindow(1024, 768);
-	window.mainLoop();
 
+	window.mainLoop();
 	return 0;
 }
-
-

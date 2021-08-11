@@ -6,9 +6,6 @@
 #include "SceneGraph.h"
 #include "QtModuleWidget.h"
 
-#include "QtGUI/PVTKSurfaceMeshRender.h"
-#include "QtGUI/PVTKPointSetRender.h"
-
 #include "SceneGraph.h"
 #include "QtFlowView.h"
 #include "DataModelRegistry.h"

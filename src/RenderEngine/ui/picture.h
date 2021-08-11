@@ -3,7 +3,6 @@
 
 // 必须放最前面
 #include <glad/glad.h>  // Initialize with gladLoadGL()
-#include <GLFW/glfw3.h>
 #include <assert.h>
 // 图形加载
 // #define STB_IMAGE_IMPLEMENTATION

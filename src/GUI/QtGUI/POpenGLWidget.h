@@ -17,19 +17,13 @@
  * limitations under the License.
  */
 #pragma once
-#include <glad/glad.h>
-
+#include "QtImGui.h"
 
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLWidget>
 #include <QTimer>
-
-//QtImgui
-#include <imgui.h>
-#include "QtImGui.h"
-
 
 #include <GL/glu.h>
 
@@ -60,6 +54,7 @@ namespace dyno
 		: public QOpenGLWidget
 		, private QOpenGLExtraFunctions
 	{
+		Q_OBJECT
 	public:
 		POpenGLWidget();
 		~POpenGLWidget();
@@ -76,25 +71,15 @@ namespace dyno
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void wheelEvent(QWheelEvent *event) override;
 
+	public slots:
+		void updateGraphicsContext();
 
 	private:
+		std::shared_ptr<Camera> activeCamera();
+
 		RenderEngine* mRenderEngine;
-		RenderTarget* mRenderTarget;
-		RenderParams* mRenderParams;
 
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
-
-		std::shared_ptr<Camera> mCamera;
-		// CameraType mCameraType = CameraType::Orbit;
-
-		// ImGui
-		ImVec4 clear_color = ImColor(114, 144, 154);
-
-		bool mOpenCameraRotate = true;
-		float iBgGray[2] = { 0.2f, 0.8f };
-		RenderParams::Light iLight;
-		bool mLock = false;
-
 		// Qt
 		QTimer timer;
 	};
