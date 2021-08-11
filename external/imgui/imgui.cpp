@@ -4443,6 +4443,10 @@ void ImGui::EndFrame()
     memset(g.IO.NavInputs, 0, sizeof(g.IO.NavInputs));
 
     CallContextHooks(&g, ImGuiContextHookType_EndFramePost);
+    // right middle click focus
+    if (!ImGui::GetIO().WantCaptureMouse)
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) || ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
+            ImGui::FocusWindow(NULL);
 }
 
 void ImGui::Render()
@@ -4450,8 +4454,9 @@ void ImGui::Render()
     ImGuiContext& g = *GImGui;
     IM_ASSERT(g.Initialized);
 
-    if (g.FrameCountEnded != g.FrameCount)
-        EndFrame();
+	if (g.FrameCountEnded != g.FrameCount) {
+		EndFrame();
+	}
     g.FrameCountRendered = g.FrameCount;
     g.IO.MetricsRenderWindows = 0;
 
@@ -7339,7 +7344,88 @@ void ImGui::EndHorizontal(){
     window->DC.LayoutType = ImGuiLayoutType_Vertical;
 }
 
+void ImGui::sampleButton(const char* label, bool *v)
+{
+    float padding = 10.0f;
+    float bounding = 1.0f;
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 label_size = ImGui::CalcTextSize(label);
+    const ImVec2 button_size = ImVec2(label_size.x + padding * 2, label_size.y + padding * 2);
+    const ImVec2 bound_size =  ImVec2(button_size.x + bounding * 2, button_size.y + bounding * 2);
+    ImVec2 p_button = ImVec2(p.x + bounding, p.y + bounding);
+    ImVec2 p_label = ImVec2(p_button.x + padding, p_button.y + padding);
 
+    float radius = bound_size.y * 0.30f;
+
+    // 透明的按钮
+    if (ImGui::InvisibleButton(label, bound_size))
+        *v = !*v;
+    ImVec4 col_bf4;
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    // 颜色自定义
+    if (ImGui::IsItemActivated()) col_bf4 = *v ? style.Colors[40] : style.Colors[23];
+    else if (ImGui::IsItemHovered()) col_bf4 =  *v ? style.Colors[42] : style.Colors[24];
+    else col_bf4 = *v ? style.Colors[41] : style.Colors[22];
+
+    ImU32 col_bg = IM_COL32(255 * col_bf4.x, 255 * col_bf4.y, 255 * col_bf4.z, 255 * col_bf4.w);
+    ImU32 col_text = IM_COL32(255, 255, 255, 255);
+    ImU32 col_bound = IM_COL32(0,0,0,255);
+    
+    // 绘制矩形形状
+    draw_list->AddRect(p, ImVec2(p.x + bound_size.x, p.y + bound_size.y), col_bound , radius);
+    draw_list->AddRectFilled(p_button, ImVec2(p_button.x + button_size.x, p_button.y + button_size.y), col_bg, radius);
+    draw_list->AddText(p_label, col_text, label);
+}
+
+void ImGui::toggleButton(ImTextureID texId, const char* label, bool *v)
+{
+    if (*v == true)
+    {
+
+        ImGui::PushID(label);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+        ImGui::ImageButtonWithText(texId, label);
+        if (ImGui::IsItemClicked(0))
+        {
+            *v = !*v;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+    }
+    else
+    {
+        if (ImGui::ImageButtonWithText(texId ,label))
+            *v = true;
+    }
+}
+
+void ImGui::toggleButton(const char* label, bool *v)
+{
+    if (*v == true)
+    {
+
+        ImGui::PushID(label);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+        ImGui::Button(label);
+        if (ImGui::IsItemClicked(0))
+        {
+            *v = !*v;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+    }
+    else
+    {
+        if (ImGui::Button(label))
+            *v = true;
+    }
+}
 bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2& imageSize, const ImVec2 &uv0, const ImVec2 &uv1, int frame_padding, const ImVec4 &bg_col, const ImVec4 &tint_col) {
     ImGuiWindow* window = GetCurrentWindow();
     
@@ -7390,6 +7476,16 @@ bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2
 
     if (textSize.x>0) ImGui::RenderText(start,label);
     return pressed;
+}
+
+void ImGui::beginTitle(const char* label){
+    // 避免label输出，ImGui ID压入栈中
+    ImGui::PushID(label);
+}
+
+void ImGui::endTitle(){
+    // ImGui ID弹栈
+    ImGui::PopID();
 }
 
 void ImGui::ItemSize(const ImVec2& size, float text_baseline_y)

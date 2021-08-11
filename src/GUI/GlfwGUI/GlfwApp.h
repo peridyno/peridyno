@@ -85,15 +85,6 @@ namespace dyno {
 		// ImGui extend function
 		// 全局样式设定
 		void initializeStyle();
-		// 切换按钮
-		void toggleButton(const char* label, bool *v);
-		void toggleButton(ImTextureID texId, const char* label, bool *v);
-		// 可自定义形状按钮
-		void sampleButton(const char* label, bool *v);
-		// 避免label输出，ImGui ID压入栈中
-		void beginTitle(const char* label);
-		// ImGui ID弹栈
-		void endTitle();
 		// load imgui button icon 
 		void loadIcon();
 
