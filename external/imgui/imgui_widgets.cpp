@@ -5332,7 +5332,8 @@ bool ImGui::ColorBar(const char* label, const int* values, const ImU32* col, int
     ImDrawList* draw_list = window->DrawList;
     ImGuiStyle& style = g.Style;
     ImGuiIO& io = g.IO;
-
+    ImGuiID id = window->GetID(label);
+    
     const float width = CalcItemWidth();
     g.NextItemData.ClearFlags();
 
@@ -5343,9 +5344,14 @@ bool ImGui::ColorBar(const char* label, const int* values, const ImU32* col, int
     float bars_width = GetFrameHeight();
     float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
     ImVec2 bar_pos = window->DC.CursorPos;
-    
+    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width + text_width, bars_height));
     int grid_count = length - 1;  
-    InvisibleButton("detail",ImVec2(bars_width + text_width, bars_height));
+    
+    // Set Item Size
+    ItemSize(ImVec2(bars_width + text_width, bars_height));
+    if(!ItemAdd(bb, id))
+        return false;
+    // InvisibleButton("detail",ImVec2(bars_width + text_width, bars_height));
     // fprintf(stderr,"%d\n", grid_count);
     for (int i = 0; i < grid_count; ++i){
         draw_list->AddRectFilledMultiColor(

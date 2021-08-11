@@ -313,7 +313,7 @@ namespace dyno
 				}
 
 				{// Right sidebar
-					ImGui::Begin("Right sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+					ImGui::Begin("Right sidebar", NULL,/* ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 						
 					/*
 					if (refresh_time == 0.0) refresh_time = ImGui::GetTime();
@@ -334,7 +334,7 @@ namespace dyno
 					const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
 					ImGui::ColorBar("ColorBar", val, col, 7);
 
-					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, (height - ImGui::GetWindowSize().y) /2));
+					// ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, (height - ImGui::GetWindowSize().y) /2));
 					ImGui::End();
 				}
 
