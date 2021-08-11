@@ -199,95 +199,7 @@ namespace dyno
 		style.FrameRounding = 6.0f;
 		style.PopupRounding = 6.0f;
 	}
-	void GlfwApp::toggleButton(ImTextureID texId, const char* label, bool *v)
-	{
-		if (*v == true)
-		{
-
-			ImGui::PushID(label);
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
-			ImGui::ImageButtonWithText(texId, label);
-			if (ImGui::IsItemClicked(0))
-			{
-				*v = !*v;
-			}
-			ImGui::PopStyleColor(3);
-			ImGui::PopID();
-		}
-		else
-		{
-			if (ImGui::ImageButtonWithText(texId ,label))
-				*v = true;
-		}
-	}
-	void GlfwApp::toggleButton(const char* label, bool *v)
-	{
-		if (*v == true)
-		{
-
-			ImGui::PushID(label);
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
-			ImGui::Button(label);
-			if (ImGui::IsItemClicked(0))
-			{
-				*v = !*v;
-			}
-			ImGui::PopStyleColor(3);
-			ImGui::PopID();
-		}
-		else
-		{
-			if (ImGui::Button(label))
-				*v = true;
-		}
-	}
-
-	void GlfwApp::sampleButton(const char* label, bool *v)
-	{
-		float padding = 10.0f;
-		float bounding = 1.0f;
-		ImVec2 p = ImGui::GetCursorScreenPos();
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		const ImVec2 label_size = ImGui::CalcTextSize(label);
-		const ImVec2 button_size = ImVec2(label_size.x + padding * 2, label_size.y + padding * 2);
-		const ImVec2 bound_size =  ImVec2(button_size.x + bounding * 2, button_size.y + bounding * 2);
-		ImVec2 p_button = ImVec2(p.x + bounding, p.y + bounding);
-		ImVec2 p_label = ImVec2(p_button.x + padding, p_button.y + padding);
-
-		float radius = bound_size.y * 0.30f;
-
-		// 透明的按钮
-		if (ImGui::InvisibleButton(label, bound_size))
-			*v = !*v;
-		ImVec4 col_bf4;
-		ImGuiStyle& style = ImGui::GetStyle();
-
-		// 颜色自定义
-		if (ImGui::IsItemActivated()) col_bf4 = *v ? style.Colors[40] : style.Colors[23];
-		else if (ImGui::IsItemHovered()) col_bf4 =  *v ? style.Colors[42] : style.Colors[24];
-		else col_bf4 = *v ? style.Colors[41] : style.Colors[22];
-
-		ImU32 col_bg = IM_COL32(255 * col_bf4.x, 255 * col_bf4.y, 255 * col_bf4.z, 255 * col_bf4.w);
-		ImU32 col_text = IM_COL32(255, 255, 255, 255);
-		ImU32 col_bound = IM_COL32(0,0,0,255);
-		
-		// 绘制矩形形状
-		draw_list->AddRect(p, ImVec2(p.x + bound_size.x, p.y + bound_size.y), col_bound , radius);
-		draw_list->AddRectFilled(p_button, ImVec2(p_button.x + button_size.x, p_button.y + button_size.y), col_bg, radius);
-		draw_list->AddText(p_label, col_text, label);
-	}
-
-	void GlfwApp::beginTitle(const char* label){
-		ImGui::PushID(label);
-	}
-
-	void GlfwApp::endTitle(){
-		ImGui::PopID();
-	}
+	
 
 	void GlfwApp::mainLoop()
 	{
@@ -337,16 +249,16 @@ namespace dyno
 						
 						ImGui::Text("Ambient Light");
 
-						beginTitle("Ambient Light Scale");
+						ImGui::beginTitle("Ambient Light Scale");
 						ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 10.0f, "%.3f", 0); 
-						endTitle();
+						ImGui::endTitle();
 						ImGui::SameLine();
 						ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel) ;
 
 						ImGui::Text("Main Light");
-						beginTitle("Main Light Scale");
+						ImGui::beginTitle("Main Light Scale");
 						ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 10.0f, "%.3f", 0); 
-						endTitle();
+						ImGui::endTitle();
 						ImGui::SameLine();
 						ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 						mRenderParams->light = iLight;
@@ -362,7 +274,7 @@ namespace dyno
 					// ImGui::Combo("Camera", &camera_current, camera_name, IM_ARRAYSIZE(camera_name));
 					ImGui::SetNextItemWidth(100);
 
-					beginTitle("Camera");
+					ImGui::beginTitle("Camera");
 					if (ImGui::BeginCombo("", camera_name[camera_current], flags))
 					{
 						for (int n = 0; n < IM_ARRAYSIZE(camera_name); n++)
@@ -376,7 +288,7 @@ namespace dyno
 						}
 						ImGui::EndCombo();
 					}			
-					endTitle();
+					ImGui::endTitle();
 
 					if(CameraType(camera_current) != mCameraType){
 						// FIXME: GL error
@@ -388,13 +300,13 @@ namespace dyno
 				{// Top Right widget
 					
 					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					toggleButton(pics[3]->GetTexture(),"Lock", &(mLock));
+					ImGui::toggleButton(pics[3]->GetTexture(),"Lock", &(mLock));
 					ImGui::SameLine();
-					toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
+					ImGui::toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
 					ImGui::SameLine();
-					toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
+					ImGui::toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
 					ImGui::SameLine();
-					toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
+					ImGui::toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
 					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, 0));
 
 					ImGui::End();

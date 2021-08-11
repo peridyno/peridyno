@@ -17,15 +17,18 @@
  * limitations under the License.
  */
 #pragma once
-#include <glad/glad.h>
-
+#include "QtImGui.h"
 
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLWidget>
+#include <QTimer>
 
 #include <GL/glu.h>
+
+#include "RenderParams.h"
+
 
 namespace dyno
 {
@@ -79,6 +82,18 @@ namespace dyno
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 
 		std::shared_ptr<Camera> mCamera;
+		// CameraType mCameraType = CameraType::Orbit;
+
+		// ImGui
+		ImVec4 clear_color = ImColor(114, 144, 154);
+
+		bool mOpenCameraRotate = true;
+		float iBgGray[2] = { 0.2f, 0.8f };
+		RenderParams::Light iLight;
+		bool mLock = false;
+
+		// Qt
+		QTimer timer;
 	};
 
 }
