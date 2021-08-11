@@ -75,23 +75,11 @@ namespace dyno
 		void updateGraphicsContext();
 
 	private:
+		std::shared_ptr<Camera> activeCamera();
+
 		RenderEngine* mRenderEngine;
-		RenderTarget* mRenderTarget;
-		RenderParams* mRenderParams;
 
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
-
-		std::shared_ptr<Camera> mCamera;
-		// CameraType mCameraType = CameraType::Orbit;
-
-		// ImGui
-		ImVec4 clear_color = ImColor(114, 144, 154);
-
-		bool mOpenCameraRotate = true;
-		float iBgGray[2] = { 0.2f, 0.8f };
-		RenderParams::Light iLight;
-		bool mLock = false;
-
 		// Qt
 		QTimer timer;
 	};

@@ -25,12 +25,10 @@ namespace dyno
 
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
 	{
-		setupCamera();
 	}
 
 	GlfwApp::GlfwApp(int width, int height)
 	{
-		setupCamera();
 		this->createWindow(width, height);
 	}
 
@@ -43,8 +41,6 @@ namespace dyno
 
 		//
 		delete mRenderEngine;
-		delete mRenderTarget;
-		delete mRenderParams;
 
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
@@ -138,57 +134,14 @@ namespace dyno
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
 		initializeStyle();
-		loadIcon();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
-		mCamera->registerPoint(0.5f, 0.5f);
-		mCamera->translateToPoint(0, 0);
-
-		mCamera->zoom(3.0f);
-		mCamera->setClipNear(0.01f);
-		mCamera->setClipFar(10.0f);
-
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
-		mRenderTarget = new RenderTarget();
-		mRenderParams = new RenderParams();
-
-		mRenderEngine->initialize();
-		mRenderTarget->initialize();
-
-		mRenderTarget->resize(width, height);
-		// set the viewport
-		mRenderParams->viewport.x = 0;
-		mRenderParams->viewport.y = 0;
-		mRenderParams->viewport.w = width;
-		mRenderParams->viewport.h = height;
-	}
-
-	void GlfwApp::setupCamera()
-	{
-		switch (mCameraType)
-		{
-		case dyno::Orbit:
-			mCamera = std::make_shared<OrbitCamera>();
-			break;
-		case dyno::TrackBall:
-			mCamera = std::make_shared<TrackballCamera>();
-			break;
-		default:
-			break;
-		}
-	}
-
-	void GlfwApp::loadIcon(){
-		pics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
-		pics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
-		pics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
-		pics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
+		mRenderEngine->initialize(width, height);
 	}
 
 	void GlfwApp::initializeStyle()
@@ -203,16 +156,7 @@ namespace dyno
 
 	void GlfwApp::mainLoop()
 	{
-		
 		SceneGraph::getInstance().initialize();
-
-		float iBgGray[2] = { 0.2f, 0.8f };
-		bool mLock = false;
-		RenderParams::Light iLight;
-		int width = 1024, height = 768;
-		static float values[90] = {};
-        static int values_offset = 0;
-        static double refresh_time = 0.0;
 
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
@@ -220,158 +164,26 @@ namespace dyno
 			
 			glfwPollEvents();
 
-			if (mAnimationToggle)
+			if (mAnimationToggle){
 				SceneGraph::getInstance().takeOneFrame();
+				SceneGraph::getInstance().updateGraphicsContext();
+			}
 				
-
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-			{
-				static float f = 0.0f;
-				static int counter = 0;
-
-				{// Top Left widget
-					ImGui::SetNextWindowPos(ImVec2(0,0));
-					ImGui::Begin("Top Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					
-					if(ImGui::Button("Lighting")){
-						ImGui::OpenPopup("LightingMenu");
-					}
-
-					if(ImGui::BeginPopup("LightingMenu")){
-						ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.3f", 0);
-						mRenderParams->bgColor0 = glm::vec3(iBgGray[0]);
-						mRenderParams->bgColor1 = glm::vec3(iBgGray[1]);
-						
-						ImGui::Text("Ambient Light");
-
-						ImGui::beginTitle("Ambient Light Scale");
-						ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 10.0f, "%.3f", 0); 
-						ImGui::endTitle();
-						ImGui::SameLine();
-						ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel) ;
-
-						ImGui::Text("Main Light");
-						ImGui::beginTitle("Main Light Scale");
-						ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 10.0f, "%.3f", 0); 
-						ImGui::endTitle();
-						ImGui::SameLine();
-						ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
-						mRenderParams->light = iLight;
-
-						ImGui::EndPopup();
-					}
-					
-
-					// Camera Select
-					static int camera_current = 0;
-					const char* camera_name[] = {"Orbit", "TrackBall"};
-					static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
-					// ImGui::Combo("Camera", &camera_current, camera_name, IM_ARRAYSIZE(camera_name));
-					ImGui::SetNextItemWidth(100);
-
-					ImGui::beginTitle("Camera");
-					if (ImGui::BeginCombo("", camera_name[camera_current], flags))
-					{
-						for (int n = 0; n < IM_ARRAYSIZE(camera_name); n++)
-						{
-							const bool is_selected = (camera_current == n);
-							if (ImGui::Selectable(camera_name[n], is_selected))
-								camera_current = n;
-							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-							if (is_selected)
-								ImGui::SetItemDefaultFocus();
-						}
-						ImGui::EndCombo();
-					}			
-					ImGui::endTitle();
-
-					if(CameraType(camera_current) != mCameraType){
-						// FIXME: GL error
-						// setCameraType(CameraType(camera_current));
-					}
-					ImGui::End();
-				}
-
-				{// Top Right widget
-					
-					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					ImGui::toggleButton(pics[3]->GetTexture(),"Lock", &(mLock));
-					ImGui::SameLine();
-					ImGui::toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
-					ImGui::SameLine();
-					ImGui::toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
-					ImGui::SameLine();
-					ImGui::toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
-					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, 0));
-
-					ImGui::End();
-				}
-
-				{// Right sidebar
-					ImGui::Begin("Right sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-						
-					/*
-					if (refresh_time == 0.0) refresh_time = ImGui::GetTime();
-					while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
-					{
-						static float phase = 0.0f;
-						values[values_offset] = cosf(phase);
-						values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-						phase += 0.10f * values_offset;
-						refresh_time += 1.0f / 60.0f;
-					}
-					char overlay[32];
-					ImGui::PlotLines("Lines",  values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 80.0f));
-					*/
-					
-					const int val[6 + 1] = {0,1,2,3,4,5,6};
-					const int style_alpha8 = 150;
-					const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
-					ImGui::ColorBar("ColorBar", val, col, 7);
-
-					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, (height - ImGui::GetWindowSize().y) /2));
-					ImGui::End();
-				}
-
-
-				{// Bottom Right widget
-					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					ImGui::Text(" %.1f FPS", ImGui::GetIO().Framerate);
-					ImGui::SetWindowPos(ImVec2(width - ImGui::GetWindowSize().x, height - ImGui::GetWindowSize().y));
-					ImGui::End();
-				}
-
-				// Mouse Foucus on Any Imgui Windows || Lock
-				mOpenCameraRotate = !(ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mLock);
-			}
+			mRenderEngine->begin();
+			mRenderEngine->drawGUI();
+			mRenderEngine->draw(&SceneGraph::getInstance());
+			mRenderEngine->end();
 
 			ImGui::Render();
-
-			
-			glfwGetFramebufferSize(mWindow, &width, &height);
-			const float ratio = width / (float)height;
-
-			glViewport(0, 0, width, height);
-			glClearColor(mClearColor.x * mClearColor.w, mClearColor.y * mClearColor.w, mClearColor.z * mClearColor.w, mClearColor.w);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
-			drawScene();
-
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 			glfwSwapBuffers(mWindow);
 		}
-	}
-
-	void GlfwApp::setCameraType(CameraType type)
-	{
-		mCameraType = type;
-		setupCamera();
 	}
 
 	const std::string& GlfwApp::name() const
@@ -398,8 +210,13 @@ namespace dyno
 
 	void GlfwApp::setWindowSize(int width, int height)
 	{
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
+		activeCamera()->setWidth(width);
+		activeCamera()->setHeight(height);
+	}
+
+	std::shared_ptr<dyno::Camera> GlfwApp::activeCamera()
+	{
+		return mRenderEngine->camera();
 	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
@@ -435,10 +252,6 @@ namespace dyno
 		mAnimationToggle = !mAnimationToggle;
 	}
 
-	bool GlfwApp::getCameraRotateFlag() {
-		return mOpenCameraRotate;
-	}
-
 	int GlfwApp::getWidth()
 	{
 		return activeCamera()->viewportWidth();
@@ -468,28 +281,6 @@ namespace dyno
 
 	void GlfwApp::drawScene(void)
 	{
-		SceneGraph::getInstance().updateGraphicsContext();
-
-		// preserve current framebuffer
-		GLint fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-
-		mRenderParams->proj = mCamera->getProjMat();
-		mRenderParams->view = mCamera->getViewMat();
-						
-		// set the viewport
-		mRenderParams->viewport.x = 0;
-		mRenderParams->viewport.y = 0;
-		mRenderParams->viewport.w = mCamera->viewportWidth();
-		mRenderParams->viewport.h = mCamera->viewportHeight();
-
-		mRenderTarget->resize(mCamera->viewportWidth(), mCamera->viewportHeight());
-		
-		mRenderEngine->draw(&SceneGraph::getInstance(), mRenderTarget, *mRenderParams);
-
-		// write back to the framebuffer
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-		mRenderTarget->blit(0);
 		
 	}
 
@@ -529,10 +320,10 @@ namespace dyno
 
 		auto camera = activeWindow->activeCamera();
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && activeWindow->getCameraRotateFlag()) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->renderEngine()->cameraLocked()) {
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && activeWindow->getCameraRotateFlag()) {
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->renderEngine()->cameraLocked()) {
 			camera->translateToPoint(x, y);
 		}
 
@@ -555,7 +346,7 @@ namespace dyno
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
 
-		if(activeWindow->getCameraRotateFlag())
+		if(!activeWindow->renderEngine()->cameraLocked())
 			camera->zoom(-OffsetY);
 	}
 
@@ -596,6 +387,8 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		activeWindow->setWindowSize(w, h);
+
+		activeWindow->renderEngine()->resizeRenderTarget(w, h);
 	}
 
 }
