@@ -24,8 +24,17 @@
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLWidget>
+#include <QTimer>
+
+//QtImgui
+#include <imgui.h>
+#include "QtImGui.h"
+
 
 #include <GL/glu.h>
+
+#include "RenderParams.h"
+
 
 namespace dyno
 {
@@ -67,6 +76,7 @@ namespace dyno
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void wheelEvent(QWheelEvent *event) override;
 
+
 	private:
 		RenderEngine* mRenderEngine;
 		RenderTarget* mRenderTarget;
@@ -75,6 +85,18 @@ namespace dyno
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 
 		std::shared_ptr<Camera> mCamera;
+		// CameraType mCameraType = CameraType::Orbit;
+
+		// ImGui
+		ImVec4 clear_color = ImColor(114, 144, 154);
+
+		bool mOpenCameraRotate = true;
+		float iBgGray[2] = { 0.2f, 0.8f };
+		RenderParams::Light iLight;
+		bool mLock = false;
+
+		// Qt
+		QTimer timer;
 	};
 
 }
