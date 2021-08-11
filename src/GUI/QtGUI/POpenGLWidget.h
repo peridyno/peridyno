@@ -17,7 +17,8 @@
  * limitations under the License.
  */
 #pragma once
-#include "QtImGui.h"
+#include <glad/glad.h>
+
 
 //Qt
 #include <QWidget>

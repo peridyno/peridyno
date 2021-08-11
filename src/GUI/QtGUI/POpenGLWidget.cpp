@@ -57,19 +57,16 @@ namespace dyno
 		mRenderTarget->initialize();
 
 		initializeOpenGLFunctions();
-		QtImGUI::initialize(this);
+// 		glClearColor(0, 0, 0, 1);
+// 		glEnable(GL_DEPTH_TEST);
+// 		glEnable(GL_LIGHT0);
+// 		glEnable(GL_LIGHTING);
+// 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+// 		glEnable(GL_COLOR_MATERIAL);
 	}
 
 	void POpenGLWidget::paintGL()
 	{
-		QtImGUI::newFrame();
-
-		{
-			static float f = 0.0f;
-			ImGui::Text("Hello, world!");
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-		}
-
 		// Graphscrene draw
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
@@ -82,9 +79,6 @@ namespace dyno
 		// write back to the framebuffer
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 		mRenderTarget->blit(0);
-
-		ImGui::Render();
-		QtImGUI::render();
 	}
 
 	void POpenGLWidget::resizeGL(int w, int h)
