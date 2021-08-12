@@ -201,7 +201,7 @@ namespace dyno
 			mRenderHelper->drawGround(mRenderParams->groudScale);
 		}
 
-
+		
 		//glBegin(GL_TRIANGLES);
 
 		//glVertex3f(0.0f, 1.0f, 0.0f); glColor3f(1.0f, 0.0f, 0.0f);
@@ -216,7 +216,6 @@ namespace dyno
 		{
 			m->paintGL(GLVisualModule::COLOR);
 		}
-
 		// draw scene bounding box
 		if (mRenderParams->showSceneBounds && scene != 0)
 		{
@@ -231,7 +230,6 @@ namespace dyno
 			glViewport(10, 10, 100, 100);
 			mRenderHelper->drawAxis();
 		}
-
 
 		// write back to the framebuffer
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
@@ -331,15 +329,15 @@ namespace dyno
 				}
 
 				{// Right sidebar
-					ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+					// ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 						
-					const int val[6 + 1] = {0,1,2,3,4,5,6};
-					const int style_alpha8 = 150;
-					const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
-					ImGui::ColorBar("ColorBar", val, col, 7);
+					// const int val[6 + 1] = {0,1,2,3,4,5,6};
+					// const int style_alpha8 = 150;
+					// const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
+					// ImGui::ColorBar("ColorBar", val, col, 7);
 
-					// ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, (mRenderTarget->height - ImGui::GetWindowSize().y) /2));
-					ImGui::End();
+					// // ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, (mRenderTarget->height - ImGui::GetWindowSize().y) /2));
+					// ImGui::End();
 				}
 
 

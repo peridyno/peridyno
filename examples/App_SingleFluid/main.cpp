@@ -10,6 +10,7 @@
 #include "module/PointRender.h"
 #include "module/CalculateNorm.h"
 #include "module/ColorMapping.h"
+#include "module/ImColorbar.h"
 
 using namespace std;
 using namespace dyno;
@@ -41,10 +42,17 @@ void CreateScene()
 	fluid->currentVelocity()->connect(calculateNorm->inVec());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 	colorMapper->outColor()->connect(ptRender->inColor());
+	
+	// TODO add ImColorbar
+	// auto colorBar = std::make_shared<ImColorbar>();
+	// colorMapper->outColor()->connect(colorBar->inColor());
+
 
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
+	
+	// fluid->graphicsPipeline()->pushModule(colorBar);
 }
 
 int main()
