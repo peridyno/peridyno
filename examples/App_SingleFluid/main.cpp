@@ -44,15 +44,15 @@ void CreateScene()
 	colorMapper->outColor()->connect(ptRender->inColor());
 	
 	// TODO add ImColorbar
-	// auto colorBar = std::make_shared<ImColorbar>();
-	// colorMapper->outColor()->connect(colorBar->inColor());
+	auto colorBar = std::make_shared<ImColorbar>();
+	colorMapper->outColor()->connect(colorBar->inColor());
 
 
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
 	
-	// fluid->graphicsPipeline()->pushModule(colorBar);
+	fluid->graphicsPipeline()->pushModule(colorBar);
 }
 
 int main()

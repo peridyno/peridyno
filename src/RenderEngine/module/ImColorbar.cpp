@@ -17,8 +17,6 @@ namespace dyno
 
 	ImColorbar::ImColorbar()
 	{
-		// mPointSize = 0.001f;
-		// mNumPoints = 1;
 		mNum = 0;
 		mCoord = ImVec2(0,0);
 		this->setName("im_colorbar");
@@ -41,10 +39,10 @@ namespace dyno
 
 	bool ImColorbar::initializeGL()
 	{
-
+		mColor = nullptr;
+		mValue = nullptr;
 		return true;
 	}
-
 
 	void ImColorbar::updateGL()
 	{
@@ -56,41 +54,27 @@ namespace dyno
 		if (!parent->isVisible())
 			return;
 
-		// TODO: get the right Module
-		auto pColorSet = parent->getTopologyModule();
-		if (pColorSet == nullptr)
-		{
-			return;
+		if (!this->inColor()->isEmpty()){
+			// TODO 
+			// mNum = this->inColor()->getDataPtr()->size();
+			// mCol = ImGui::ToImU<dyno::DArray<dyno::Vec3f>>(this->inColor()->getData(), mNum);
+
+			mNum = 6 + 1;
+			mCol = ImGui::ToImU<const dyno::Vec3f*>(col, mNum);
+			std::cout << "Full" << std::endl;
+		}else{
+			mNum = 1;
+			mCol = ImGui::ToImU<dyno::Vec3f*>(&mBaseColor, mNum);
+			std::cout << "Base" << std::endl;
 		}
-
-		//TODO
-		// auto& xyz = pPointSet->getPoints();
-		// mNumPoints = xyz.size();
-		mNum = 6 + 1;
-
-		//TODO
-		// mColor = this->inColor()->getDataPtr();
-		// mValue = this->inValue()->getDataPtr();
-		const int val[6 + 1] = {0,1,2,3,4,5,6};
-		const Vec3f col[6 + 1] = { Vec3f(255,0,0), Vec3f(255,255,0), Vec3f(0,255,0), Vec3f(0,255,255), Vec3f(0,0,255), Vec3f(255,0,255), Vec3f(255,0,0) };
-		mColor = col;
-		mValue = val;
 	}
 
 	void ImColorbar::paintGL(RenderMode mode)
 	{
-		// FIXME RenderEngine make ImGui in Glfw
-		std::cout << "ColorBar" << std::endl;
-
-		ImGui::Begin("Demo");
-		ImGui::Button("1");
-		ImGui::Button("2");
-		ImGui::Button("3");
-		// ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-		// ImGui::ColorBar("ColorBar", mValue, mColor, mNum);
-		// // setCoord(ImGui::GetWindowPos());
-		// // ImGui::SetWindowPos(getCoord());
-		// ImGui::SetWindowPos(ImVec2(0, 0));
-		ImGui::End();
+		if(mode == RenderMode::COLOR){
+			ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::ColorBar("ColorBar", mValue, mCol, mNum);
+			ImGui::End();
+		}
 	}
 }

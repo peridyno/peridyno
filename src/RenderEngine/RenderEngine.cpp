@@ -216,6 +216,7 @@ namespace dyno
 		{
 			m->paintGL(GLVisualModule::COLOR);
 		}
+
 		// draw scene bounding box
 		if (mRenderParams->showSceneBounds && scene != 0)
 		{
@@ -367,11 +368,4 @@ namespace dyno
 		return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
 	}
 
-	// //TODO: 
-	// void RenderEngine::loadIcon() {
-	// 	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
-	// 	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
-	// 	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
-	// 	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
-	// }
 }

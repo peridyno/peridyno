@@ -7,6 +7,7 @@
 
 // dyno
 #include "Vector.h"
+#include "Module.h"
 
 namespace ImGui
 {
@@ -21,11 +22,20 @@ namespace ImGui
     // SampleButton 可自定义形状按钮
     IMGUI_API void          sampleButton(const char* label, bool *v);
     // ColorBar 
-    IMGUI_API bool          ColorBar(const char* label, const int* values, const dyno::Vec3f* col, int length);
-    IMGUI_API bool          ColorBar(const char* label, const int* values, const ImU32* col, int length);
+	IMGUI_API bool          ColorBar(const char* label, const int* values, std::shared_ptr<ImU32[]> col, int length);
+
     // Get ID without label showing
     IMGUI_API void          beginTitle(const char* label);
     IMGUI_API void          endTitle();
 
     IMGUI_API ImU32         VecToImU(const dyno::Vec3f* v);
+
+    template<typename T> 
+    std::shared_ptr<ImU32[]>  ToImU(T v, int size);
+    template 
+    std::shared_ptr<ImU32[]>  ToImU<dyno::Vec3f*>(dyno::Vec3f* v, int size);
+    template 
+    std::shared_ptr<ImU32[]>  ToImU<const dyno::Vec3f*>(const dyno::Vec3f* v, int size);
+    template 
+    std::shared_ptr<ImU32[]>  ToImU<dyno::DArray<dyno::Vec3f>>(dyno::DArray<dyno::Vec3f> v, int size);
 }

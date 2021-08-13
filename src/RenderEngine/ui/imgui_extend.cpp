@@ -155,14 +155,27 @@ void ImGui::endTitle(){
     ImGui::PopID();
 }
 
-ImU32 ImGui::VecToImU(const dyno::Vec3f* v)
+template<typename T> 
+std::shared_ptr<ImU32[]> ImGui::ToImU(T v, int size)
+{
+    auto vPtr = std::make_unique<ImU32[]>(size);
+    for(int i = 0; i < size; ++ i)
+		vPtr[i] = IM_COL32(v[i][0], v[i][1], v[i][2], 150);
+        // IM_COL32(v[i][0], v[i][1], v[i][2], 150);
+    return vPtr;
+    // return nullptr;
+}
+
+ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
 {
     return IM_COL32((*v)[0], (*v)[1], (*v)[2], 150);
+    //return IM_COL32(v[0], v[1], v[2], 150);
 }
 
-bool ImGui::ColorBar(const char* label, const int* values, const dyno::Vec3f* col, int length)
+bool ImGui::ColorBar(const char* label, const int* values, std::shared_ptr<ImU32[]> col, int length)
 {
-    ImGuiContext& g = *GImGui;
+	if (col == nullptr ) return false;
+	ImGuiContext& g = *GImGui;
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
         return false;
@@ -189,63 +202,18 @@ bool ImGui::ColorBar(const char* label, const int* values, const dyno::Vec3f* co
     ItemSize(ImVec2(bars_width + text_width, bars_height));
     if(!ItemAdd(bb, id))
         return false;
-    // InvisibleButton("detail",ImVec2(bars_width + text_width, bars_height));
-    // fprintf(stderr,"%d\n", grid_count);
+
     for (int i = 0; i < grid_count; ++i){
         draw_list->AddRectFilledMultiColor(
             ImVec2(bar_pos.x, bar_pos.y + i * (bars_height / grid_count)), 
             ImVec2(bar_pos.x + bars_width, bar_pos.y + (i + 1) * (bars_height / grid_count)), 
-            VecToImU(col + i), VecToImU(col + i), VecToImU(col + i + 1), VecToImU(col + i + 1));
-        char buf[20];
-        sprintf(buf,"%d", values[i]);
-        draw_list->AddText(ImVec2(bar_pos.x + bars_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
-    }
-    RenderFrameBorder(ImVec2(bar_pos.x, bar_pos.y), ImVec2(bar_pos.x + bars_width, bar_pos.y + bars_height), 0.0f);
-    EndGroup();
-    PopID();
-    return true;
-}
-
-
-bool ImGui::ColorBar(const char* label, const int* values, const ImU32* col, int length)
-{
-    ImGuiContext& g = *GImGui;
-    ImGuiWindow* window = GetCurrentWindow();
-    if (window->SkipItems)
-        return false;
-
-    ImDrawList* draw_list = window->DrawList;
-    ImGuiStyle& style = g.Style;
-    ImGuiIO& io = g.IO;
-    ImGuiID id = window->GetID(label);
-    
-    const float width = CalcItemWidth();
-    g.NextItemData.ClearFlags();
-
-    PushID(label);
-    BeginGroup();
-
-    float text_width = GetFrameHeight();
-    float bars_width = GetFrameHeight();
-    float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
-    ImVec2 bar_pos = window->DC.CursorPos;
-    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width + text_width, bars_height));
-    int grid_count = length - 1;  
-    
-    // Set Item Size
-    ItemSize(ImVec2(bars_width + text_width, bars_height));
-    if(!ItemAdd(bb, id))
-        return false;
-    // InvisibleButton("detail",ImVec2(bars_width + text_width, bars_height));
-    // fprintf(stderr,"%d\n", grid_count);
-    for (int i = 0; i < grid_count; ++i){
-        draw_list->AddRectFilledMultiColor(
-            ImVec2(bar_pos.x, bar_pos.y + i * (bars_height / grid_count)), 
-            ImVec2(bar_pos.x + bars_width, bar_pos.y + (i + 1) * (bars_height / grid_count)), 
+            // col.get()[i], col.get()[i], col.get()[i + 1], col.get()[i + 1]);
             col[i], col[i], col[i + 1], col[i + 1]);
-        char buf[20];
-        sprintf(buf,"%d", values[i]);
-        draw_list->AddText(ImVec2(bar_pos.x + bars_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
+        if (values != nullptr){
+            char buf[20];
+            sprintf(buf,"%d", values[i]);
+            draw_list->AddText(ImVec2(bar_pos.x + bars_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
+        }
     }
     RenderFrameBorder(ImVec2(bar_pos.x, bar_pos.y), ImVec2(bar_pos.x + bars_width, bar_pos.y + bars_height), 0.0f);
     EndGroup();
