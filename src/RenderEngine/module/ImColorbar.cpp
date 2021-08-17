@@ -17,8 +17,6 @@ namespace dyno
 
 	ImColorbar::ImColorbar()
 	{
-		mNum = 0;
-		mCoord = ImVec2(0,0);
 		this->setName("im_colorbar");
 	}
 
@@ -55,17 +53,23 @@ namespace dyno
 			return;
 
 		if (!this->inColor()->isEmpty()){
-			// TODO 
+			
 			// mNum = this->inColor()->getDataPtr()->size();
 			// mCol = ImGui::ToImU<dyno::DArray<dyno::Vec3f>>(this->inColor()->getData(), mNum);
-
-			mNum = 6 + 1;
-			mCol = ImGui::ToImU<const dyno::Vec3f*>(col, mNum);
-			std::cout << "Full" << std::endl;
+			// mCol = ImGui::ToImU<const dyno::Vec3f*>(col, mNum);
+			// mNum = 6 + 1;
+			
+			//TODO more color
+			mColorBuffer.assign(this->inColor()->getData());
+			auto min_color = m_reduce_vec3f.minimum(mColorBuffer.begin(), mColorBuffer.size());
+			auto max_color = m_reduce_vec3f.maximum(mColorBuffer.begin(), mColorBuffer.size());
+			
+			mMinCol = ImGui::VecToImU(&min_color);
+			mMaxCol = ImGui::VecToImU(&max_color);
 		}else{
-			mNum = 1;
-			mCol = ImGui::ToImU<dyno::Vec3f*>(&mBaseColor, mNum);
-			std::cout << "Base" << std::endl;
+			// mNum = 1;
+			// mCol = ImGui::ToImU<dyno::Vec3f*>(&mBaseColor, mNum);
+			mMinCol = mMaxCol = ImGui::VecToImU(&mBaseColor);
 		}
 	}
 
@@ -73,7 +77,8 @@ namespace dyno
 	{
 		if(mode == RenderMode::COLOR){
 			ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-			ImGui::ColorBar("ColorBar", mValue, mCol, mNum);
+			// ImGui::ColorBar("ColorBar", mValue, mCol, mNum);
+			ImGui::ColorBar("ColorBar", mMinCol, mMaxCol);
 			ImGui::End();
 		}
 	}
