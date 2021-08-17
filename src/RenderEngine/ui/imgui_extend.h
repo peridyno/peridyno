@@ -22,7 +22,9 @@ namespace ImGui
     // SampleButton 可自定义形状按钮
     IMGUI_API void          sampleButton(const char* label, bool *v);
     // ColorBar 
-	IMGUI_API bool          ColorBar(const char* label, const int* values, std::shared_ptr<ImU32[]> col, int length);
+    template<typename T> 
+    IMGUI_API bool          ColorBar(const char* label, const float* values, T col, int length);
+
     IMGUI_API bool          ColorBar(const char* label, const ImU32 min_col, const ImU32 max_col);
     IMGUI_API bool          ColorBar(const char* label, const ImU32 min_col, const ImU32 max_col, int length);
 
@@ -31,6 +33,8 @@ namespace ImGui
     IMGUI_API void          endTitle();
 
     IMGUI_API ImU32         VecToImU(const dyno::Vec3f* v);
+    IMGUI_API ImU32         ToHeatColor(const float v, const float v_min, const float v_max);
+    IMGUI_API ImU32         ToJetColor(const float v, const float v_min, const float v_max);
 
     template<typename T> 
     std::shared_ptr<ImU32[]>  ToImU(T v, int size);
@@ -40,4 +44,11 @@ namespace ImGui
     std::shared_ptr<ImU32[]>  ToImU<const dyno::Vec3f*>(const dyno::Vec3f* v, int size);
     template 
     std::shared_ptr<ImU32[]>  ToImU<dyno::DArray<dyno::Vec3f>>(dyno::DArray<dyno::Vec3f> v, int size);
+
+    template 
+    bool    ColorBar<std::shared_ptr<ImU32[]>>(const char* label, const float* values, std::shared_ptr<ImU32[]> col, int length);
+    template 
+    bool    ColorBar<ImU32*>(const char* label, const float* values, ImU32* col, int length);    
+
+    void initializeStyle();
 }

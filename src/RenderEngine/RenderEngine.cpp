@@ -103,6 +103,8 @@ namespace dyno
 		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
 		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
 		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));		
+
+		ImGui::initializeStyle();
 	}
 
 	void RenderEngine::setupCamera()
@@ -307,6 +309,7 @@ namespace dyno
 // 						// FIXME: GL error
 // 						// setCameraType(CameraType(camera_current));
 // 					}
+					//ImGui::ShowStyleEditor();
 					ImGui::End();
 				}
 

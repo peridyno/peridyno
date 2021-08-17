@@ -30,7 +30,10 @@ namespace dyno
 	{
 		DECLARE_CLASS(ImColorbar)
 	public:
-
+		DECLARE_ENUM(ColorTable,
+			Jet = 0,
+			Heat = 1);
+			
 		ImColorbar();
 		~ImColorbar() override;
 
@@ -39,7 +42,11 @@ namespace dyno
 		ImVec2 getCoord() const;
 
 	public:
-		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
+		DEF_ENUM(ColorTable, Type, ColorTable::Jet, "");
+		DEF_VAR(Real, Min, Real(0), "");
+		DEF_VAR(Real, Max, Real(1), "");
+
+		DEF_ARRAY_IN(Real, Scalar, DeviceType::GPU, "");
 		// DEF_ARRAY_IN(Vec3f, Color, DeviceType::CPU, "");
 		// DEF_ARRAY_IN(int, Value, DeviceType::GPU, "");
 
@@ -50,18 +57,16 @@ namespace dyno
 
 	private:
 
-		const int* 					mValue = nullptr;
-		const Vec3f*  				mColor = nullptr;
 		ImU32						mMinCol = 0;
 		ImU32						mMaxCol = 0;
 		int							mNum = 6 + 1;
         ImVec2              		mCoord = ImVec2(0,0);
 		DArray<Vec3f> 				mColorBuffer;
-		std::shared_ptr<ImU32 []> 	mCol;
-		
-		Reduction<Vec3f> 			m_reduce_vec3f;
+		float*						mVal = nullptr;
+		ImU32*						mCol = nullptr;
+		Reduction<Real> 			m_reduce_real;
 
-		const int val[6 + 1] = {0,1,2,3,4,5,6};
-		const Vec3f col[6 + 1] = { Vec3f(255,0,0), Vec3f(255,255,0), Vec3f(0,255,0), Vec3f(0,255,255), Vec3f(0,0,255), Vec3f(255,0,255), Vec3f(255,0,0)};
+		float val[6 + 1];
+		ImU32 col[6 + 1];
 	};
 };

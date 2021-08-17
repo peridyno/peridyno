@@ -37,8 +37,8 @@ namespace dyno
 
 	bool ImColorbar::initializeGL()
 	{
-		mColor = nullptr;
-		mValue = nullptr;
+		mCol = nullptr;
+		mVal = nullptr;
 		return true;
 	}
 
@@ -52,33 +52,57 @@ namespace dyno
 		if (!parent->isVisible())
 			return;
 
-		if (!this->inColor()->isEmpty()){
+		if (!this->inScalar()->isEmpty())
+		{
 			
-			// mNum = this->inColor()->getDataPtr()->size();
-			// mCol = ImGui::ToImU<dyno::DArray<dyno::Vec3f>>(this->inColor()->getData(), mNum);
-			// mCol = ImGui::ToImU<const dyno::Vec3f*>(col, mNum);
-			// mNum = 6 + 1;
+			auto pScalar = this->inScalar()->getData();
+			auto min_v = m_reduce_real.minimum(pScalar.begin(), pScalar.size());
+			auto max_v = m_reduce_real.maximum(pScalar.begin(), pScalar.size());
 			
-			//TODO more color
-			mColorBuffer.assign(this->inColor()->getData());
-			auto min_color = m_reduce_vec3f.minimum(mColorBuffer.begin(), mColorBuffer.size());
-			auto max_color = m_reduce_vec3f.maximum(mColorBuffer.begin(), mColorBuffer.size());
+			mNum = 6 + 1;
 			
-			mMinCol = ImGui::VecToImU(&min_color);
-			mMaxCol = ImGui::VecToImU(&max_color);
-		}else{
-			// mNum = 1;
-			// mCol = ImGui::ToImU<dyno::Vec3f*>(&mBaseColor, mNum);
-			mMinCol = mMaxCol = ImGui::VecToImU(&mBaseColor);
+			//assert(std::is_same<float, Real>::value);
+
+			float lowLimit = this->varMin()->getData();
+			float upLimit = this->varMax()->getData();
+			float dv = (max_v - min_v) / mNum;
+			if(this->varType()->getData() == ColorTable::Jet)
+			{
+				col[0] = ImGui::ToJetColor(min_v, lowLimit, upLimit);
+				val[0] = min_v;
+				for(int i = 1; i < mNum; ++i)
+				{
+					val[i] = min_v + dv * i;
+					col[i] = ImGui::ToJetColor(val[i], lowLimit, upLimit);
+				}
+			}
+			else if(this->varType()->getData() == ColorTable::Heat)
+			{
+				col[0] = ImGui::ToHeatColor(min_v, lowLimit, upLimit);
+				val[0] = min_v;
+				for(int i = 1; i < mNum; ++i)
+				{
+					val[i] = min_v + dv * i;
+					col[i] = ImGui::ToHeatColor(val[i], lowLimit, upLimit);
+				}				
+			}
 		}
+		else
+		{
+			mNum = 1;
+			col[0] = ImGui::VecToImU(&mBaseColor);
+			val[0] = 0.0;
+		}
+		mCol = col;
+		mVal = val;
 	}
 
 	void ImColorbar::paintGL(RenderMode mode)
 	{
-		if(mode == RenderMode::COLOR){
+		if(mode == RenderMode::COLOR)
+		{
 			ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-			// ImGui::ColorBar("ColorBar", mValue, mCol, mNum);
-			ImGui::ColorBar("ColorBar", mMinCol, mMaxCol);
+			ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
 			ImGui::End();
 		}
 	}

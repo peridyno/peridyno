@@ -172,7 +172,8 @@ ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
     //return IM_COL32(v[0], v[1], v[2], 150);
 }
 
-bool ImGui::ColorBar(const char* label, const int* values, std::shared_ptr<ImU32[]> col, int length)
+template<typename T> 
+bool ImGui::ColorBar(const char* label, const float* values, const T col, int length)
 {
 	if (col == nullptr ) return false;
 	ImGuiContext& g = *GImGui;
@@ -191,31 +192,34 @@ bool ImGui::ColorBar(const char* label, const int* values, std::shared_ptr<ImU32
     PushID(label);
     BeginGroup();
 
-    float text_width = GetFrameHeight();
+    float text_width = GetFrameHeight() * 2;
+    float text_height = GetFrameHeight();
     float bars_width = GetFrameHeight();
     float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
     ImVec2 bar_pos = window->DC.CursorPos;
-    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width + text_width, bars_height));
+    ImVec2 real_bar_pos = bar_pos + ImVec2(0, 0.3 * text_height );
+    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width + text_width, bars_height + text_height));
     int grid_count = length - 1;  
     
     // Set Item Size
-    ItemSize(ImVec2(bars_width + text_width, bars_height));
+    ItemSize(ImVec2(bars_width + text_width, bars_height + text_height));
     if(!ItemAdd(bb, id))
         return false;
 
-    for (int i = 0; i < grid_count; ++i){
+    for (int i = 0; i <= grid_count; ++i){
+        if (i != grid_count)
         draw_list->AddRectFilledMultiColor(
-            ImVec2(bar_pos.x, bar_pos.y + i * (bars_height / grid_count)), 
-            ImVec2(bar_pos.x + bars_width, bar_pos.y + (i + 1) * (bars_height / grid_count)), 
-            // col.get()[i], col.get()[i], col.get()[i + 1], col.get()[i + 1]);
+            ImVec2(real_bar_pos.x, real_bar_pos.y + i * (bars_height / grid_count)), 
+            ImVec2(real_bar_pos.x + bars_width, real_bar_pos.y + (i + 1) * (bars_height / grid_count)), 
             col[i], col[i], col[i + 1], col[i + 1]);
+
         if (values != nullptr){
             char buf[20];
-            sprintf(buf,"%d", values[i]);
+            sprintf(buf,"%.2f", values[i]);
             draw_list->AddText(ImVec2(bar_pos.x + bars_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
         }
     }
-    RenderFrameBorder(ImVec2(bar_pos.x, bar_pos.y), ImVec2(bar_pos.x + bars_width, bar_pos.y + bars_height), 0.0f);
+    RenderFrameBorder(ImVec2(real_bar_pos.x, real_bar_pos.y), ImVec2(real_bar_pos.x + bars_width, real_bar_pos.y + bars_height), 0.0f);
     EndGroup();
     PopID();
     return true;
@@ -261,41 +265,31 @@ bool ImGui::ColorBar(const char* label, const ImU32 min_col, const ImU32 max_col
     return true;
 }
 
-bool ImGui::ColorBar(const char* label, const ImU32 min_col, const ImU32 max_col, int length)
+ImU32 ImGui::ToHeatColor(const float v, const float v_min, const float v_max){
+    float x = dyno::clamp((v - v_min) / (v_max - v_min), float(0), float(1));
+    float r = dyno::clamp(float(-4 * abs(x - 0.75) + 2), float(0), float(1));
+    float g = dyno::clamp(float(-4 * abs(x - 0.50) + 2), float(0), float(1));
+    float b = dyno::clamp(float(-4 * abs(x) + 2), float(0), float(1));
+    return IM_COL32(r * 255, g * 255, b* 255, 150);
+}
+
+ImU32 ImGui::ToJetColor(const float v, const float v_min, const float v_max){
+    float x = dyno::clamp((v - v_min) / (v_max - v_min), float(0), float(1));
+    float r = dyno::clamp(float(-4 * abs(x - 0.75) + 1.5), float(0), float(1));
+    float g = dyno::clamp(float(-4 * abs(x - 0.50) + 1.5), float(0), float(1));
+    float b = dyno::clamp(float(-4 * abs(x - 0.25) + 1.5), float(0), float(1));
+    return IM_COL32(r * 255, g * 255, b* 255, 150);
+}
+
+void ImGui::initializeStyle()
 {
-	ImGuiContext& g = *GImGui;
-    ImGuiWindow* window = GetCurrentWindow();
-    if (window->SkipItems)
-        return false;
-
-    ImDrawList* draw_list = window->DrawList;
-    ImGuiStyle& style = g.Style;
-    ImGuiIO& io = g.IO;
-    ImGuiID id = window->GetID(label);
-    
-    const float width = CalcItemWidth();
-    g.NextItemData.ClearFlags();
-
-    PushID(label);
-    BeginGroup();
-
-    float bars_width = GetFrameHeight();
-    float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
-    ImVec2 bar_pos = window->DC.CursorPos;
-    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width, bars_height));
-    
-    // Set Item Size
-    ItemSize(ImVec2(bars_width , bars_height));
-    if(!ItemAdd(bb, id))
-        return false;
-    
-    draw_list->AddRectFilledMultiColor(
-            ImVec2(bar_pos.x, bar_pos.y), 
-            ImVec2(bar_pos.x + bars_width, bar_pos.y + bars_height), 
-            min_col, min_col, max_col, max_col);
-            
-    RenderFrameBorder(ImVec2(bar_pos.x, bar_pos.y), ImVec2(bar_pos.x + bars_width, bar_pos.y + bars_height), 0.0f);
-    EndGroup();
-    PopID();
-    return true;
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(4.0f);
+    style.WindowRounding = 7.0f;
+    style.ChildRounding = 7.0f;
+    style.FrameRounding = 7.0f;
+    style.PopupRounding = 7.0f;
+    ImFont* font_current = ImGui::GetFont();
+    ImGuiIO& io = ImGui::GetIO();
+    io.FontGlobalScale = 2.0f;
 }

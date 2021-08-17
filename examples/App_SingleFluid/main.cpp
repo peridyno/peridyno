@@ -45,7 +45,10 @@ void CreateScene()
 	
 	// TODO add ImColorbar
 	auto colorBar = std::make_shared<ImColorbar>();
-	colorMapper->outColor()->connect(colorBar->inColor());
+	colorBar->varMax()->setValue(5.0f);
+	
+	// colorMapper->outColor()->connect(colorBar->inColor());
+	calculateNorm->outNorm()->connect(colorBar->inScalar());
 
 
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
@@ -60,7 +63,7 @@ int main()
 	CreateScene();
 
 	GlfwApp window;
-	window.createWindow(1024, 768);
+	window.createWindow(2048, 1152);
 	window.mainLoop();
 
 	return 0;
