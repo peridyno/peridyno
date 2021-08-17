@@ -42,12 +42,12 @@ namespace dyno
 
 		SceneGraph::getInstance().initialize();
 
+		initializeOpenGLFunctions();
+		QtImGui::initialize(this);
+
 		mRenderEngine = new RenderEngine();
 
 		mRenderEngine->initialize(this->width(), this->height());
-
-		initializeOpenGLFunctions();
-		QtImGui::initialize(this);
 	}
 
 	void POpenGLWidget::paintGL()
