@@ -7,10 +7,6 @@
 
 #include <cuda_gl_interop.h>
 
-// framework
-#include <Topology/TriangleSet.h>
-#include <Node.h>
-
 namespace dyno
 {
 	IMPLEMENT_CLASS(PointRenderer)
@@ -67,19 +63,7 @@ namespace dyno
 
 	void PointRenderer::updateGL()
 	{
-		Node* parent = getParent();
-
-		if (parent == NULL)
-			return;
-
-		if (!parent->isVisible())
-			return;
-
-		auto pPointSet = TypeInfo::cast<PointSet<DataType3f>>(parent->getTopologyModule());
-		if (pPointSet == nullptr)
-		{
-			return;
-		}
+		auto pPointSet = this->inPointSet()->getDataPtr();
 
 		auto& xyz = pPointSet->getPoints();
 		mNumPoints = xyz.size();

@@ -29,9 +29,6 @@ void CreateScene()
 	std::shared_ptr<ElastoplasticBody<DataType3f>> child3 = std::make_shared<ElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
 
-	auto ptRender = std::make_shared<SurfaceRenderer>();
-	ptRender->setColor(Vec3f(0, 1, 1));
-
 	child3->setVisible(false);
 	child3->setMass(1.0);
   	child3->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
@@ -39,10 +36,11 @@ void CreateScene()
 	child3->scale(0.05);
 	child3->translate(Vec3f(0.3, 0.2, 0.5));
 	child3->getSurfaceNode()->setVisible(true);
-	child3->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(ptRender);
 
-	auto sRender = std::make_shared<SurfaceRenderer>();
-	sRender->setColor(Vec3f(1, 1, 1));
+	auto ptRender = std::make_shared<SurfaceRenderer>();
+	ptRender->setColor(Vec3f(0, 1, 1));
+	child3->getSurfaceNode()->currentTopology()->connect(ptRender->inTriangleSet());
+	child3->getSurfaceNode()->graphicsPipeline()->pushModule(ptRender);
 
 	std::shared_ptr<ElasticBody<DataType3f>> child2 = std::make_shared<ElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);
@@ -53,7 +51,11 @@ void CreateScene()
 	child2->loadSurface("../../data/standard/standard_cube20.obj");
 	child2->scale(0.05);
 	child2->translate(Vec3f(0.5, 0.2, 0.5));
-	child2->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
+
+	auto sRender = std::make_shared<SurfaceRenderer>();
+	sRender->setColor(Vec3f(1, 1, 1));
+	child2->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+	child2->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
 }
 
 int main()

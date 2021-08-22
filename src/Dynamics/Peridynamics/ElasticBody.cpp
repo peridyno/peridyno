@@ -28,6 +28,7 @@ namespace dyno
 		m_surfaceNode = this->template createAncestor<Node>("Mesh");
 
 		auto triSet = m_surfaceNode->template setTopologyModule<TriangleSet<TDataType>>("surface_mesh");
+		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
 		//Set the topology mapping from PointSet to TriangleSet
 		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");

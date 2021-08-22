@@ -17,6 +17,8 @@ namespace dyno
 		m_pSet = std::make_shared<PointSet<TDataType>>();
 		this->setTopologyModule(m_pSet);
 
+		this->currentTopology()->setDataPtr(m_pSet);
+
 // 		m_pointsRender = std::make_shared<PointRenderModule>();
 // 		this->addVisualModule(m_pointsRender);
 	}

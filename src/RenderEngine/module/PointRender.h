@@ -15,6 +15,7 @@
  */
 
 #pragma once
+#include "Topology/PointSet.h"
 
 #include "GLVisualModule.h"
 #include "GLCudaBuffer.h"
@@ -44,6 +45,8 @@ namespace dyno
 		void setColorMapRange(float vmin, float vmax);
 
 	public:
+		DEF_INSTANCE_IN(PointSet<DataType3f>, PointSet, "");
+
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:

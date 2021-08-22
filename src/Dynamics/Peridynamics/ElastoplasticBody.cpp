@@ -58,6 +58,7 @@ namespace dyno
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		m_surfaceNode->setTopologyModule(triSet);
+		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
 		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
 		this->addTopologyMapping(surfaceMapping);

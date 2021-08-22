@@ -49,6 +49,8 @@ namespace dyno
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		mSurfaceNode->setTopologyModule(triSet);
+
+		this->currentTopology()->setDataPtr(triSet);
 	}
 
 	template<typename TDataType>

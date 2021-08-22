@@ -432,6 +432,8 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Module>> m_module_list;
 
+
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 		/**
 		 * @brief Pointer of a specific module
 		 *
