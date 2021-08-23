@@ -241,8 +241,10 @@ namespace dyno
 
 	void RenderEngine::drawGUI()
 	{
-		float iBgGray[2] = { 0.2f, 0.8f };
-		RenderParams::Light iLight;
+		
+		float iBgGray[2] = { mRenderParams->bgColor0[0], mRenderParams->bgColor1[0]};
+		// float iBgGray[2] = { 0.2f, 0.8f };
+		RenderParams::Light iLight =mRenderParams->light;
 
  			// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
  			{
