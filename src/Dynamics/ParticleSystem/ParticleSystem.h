@@ -57,9 +57,5 @@ namespace dyno
 		void updateTopology() override;
 		void resetStates() override;
 //		virtual void setVisible(bool visible) override;
-
-	protected:
-		std::shared_ptr<PointSet<TDataType>> m_pSet;
-//		std::shared_ptr<PointRenderModule> m_pointsRender;
 	};
 }

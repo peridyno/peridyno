@@ -51,13 +51,6 @@ private:									\
 public:									\
 	inline FInstance<T>* out##name() {return &out_##name;}
 
-#define DEF_INSTANCE_STATE(T, name, desc) \
-private:									\
-	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
-public:									\
-	inline FInstance<T>* state##name() {return &state_##name;}
-
-
 /**
 *	Macro definition for input/output of type Array
 */

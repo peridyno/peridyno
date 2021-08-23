@@ -5,10 +5,6 @@
 #include "RenderEngine.h"
 #include "Utility.h"
 
-// framework
-#include "Topology/TriangleSet.h"
-#include "Node.h"
-
 namespace dyno
 {
 	IMPLEMENT_CLASS(SurfaceRenderer)
@@ -34,18 +30,19 @@ namespace dyno
 		return true;
 	}
 
+	void SurfaceRenderer::updateStarted()
+	{
+		std::cout << "Update for SurfaceRenderer started!" << std::endl;
+	}
+
+	void SurfaceRenderer::updateEnded()
+	{
+		std::cout << "Update for SurfaceRenderer ended!" << std::endl;
+	}
+
 	void SurfaceRenderer::updateGL()
 	{
-		dyno::Node* parent = getParent();
-
-		if (parent == NULL || !parent->isVisible())
-			return;
-
-		// dump geometry
-		auto triSet = std::dynamic_pointer_cast<dyno::TriangleSet<DataType3f>>(parent->getTopologyModule());
-
-		if (triSet == nullptr)
-			return;
+		auto triSet = this->inTriangleSet()->getDataPtr();
 
 		auto triangles = triSet->getTriangles();
 		auto vertices = triSet->getPoints();

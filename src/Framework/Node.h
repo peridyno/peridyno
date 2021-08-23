@@ -432,11 +432,15 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Module>> m_module_list;
 
+
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
+		//m_topology will be deprecated in the next version
+		std::shared_ptr<TopologyModule> m_topology;
 		/**
 		 * @brief Pointer of a specific module
 		 *
 		 */
-		std::shared_ptr<TopologyModule> m_topology;
 		std::shared_ptr<NumericalModel> m_numerical_model;
 		std::shared_ptr<CollidableObject> m_collidable_object;
 		std::shared_ptr<NumericalIntegrator> m_numerical_integrator;

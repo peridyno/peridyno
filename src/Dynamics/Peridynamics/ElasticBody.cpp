@@ -28,10 +28,12 @@ namespace dyno
 		m_surfaceNode = this->template createAncestor<Node>("Mesh");
 
 		auto triSet = m_surfaceNode->template setTopologyModule<TriangleSet<TDataType>>("surface_mesh");
+		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
 		//Set the topology mapping from PointSet to TriangleSet
 		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");
-		surfaceMapping->setFrom(this->m_pSet);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		surfaceMapping->setFrom(ptSet);
 		surfaceMapping->setTo(triSet);
 	}
 
@@ -60,7 +62,8 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticBody<TDataType>::updateTopology()
 	{
-		auto pts = this->m_pSet->getPoints();
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto& pts = ptSet->getPoints();
 		pts.assign(this->currentPosition()->getData());
 
 		auto tMappings = this->getTopologyMappingList();

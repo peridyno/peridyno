@@ -36,6 +36,7 @@ void CreateScene()
 	ptRender->setColorMapRange(0, 5);
 
 	fluid->currentVelocity()->connect(calculateNorm->inVec());
+	fluid->currentTopology()->connect(ptRender->inPointSet());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 	colorMapper->outColor()->connect(ptRender->inColor());
 
