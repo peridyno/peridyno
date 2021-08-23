@@ -79,19 +79,9 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
-		auto pts = this->m_pSet->getPoints();
-		pts.assign(this->currentPosition()->getData());
-
-		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule());
+		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->currentTopology()->getDataPtr());
 
 		triSet->getPoints().assign(this->currentPosition()->getData());
-
-		//TODO: topology mapping has bugs
-// 		auto tMappings = this->getTopologyMappingList();
-// 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
-// 		{
-// 			(*iter)->apply();
-// 		}
 	}
 
 

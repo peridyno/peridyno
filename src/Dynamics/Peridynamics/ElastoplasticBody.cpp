@@ -60,7 +60,8 @@ namespace dyno
 		m_surfaceNode->setTopologyModule(triSet);
 		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
-		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(ptSet, triSet);
 		this->addTopologyMapping(surfaceMapping);
 	}
 
@@ -91,7 +92,8 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticBody<TDataType>::updateTopology()
 	{
-		auto pts = this->m_pSet->getPoints();
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto& pts = ptSet->getPoints();
 		pts.assign(this->currentPosition()->getData());
 
 		auto tMappings = this->getTopologyMappingList();
