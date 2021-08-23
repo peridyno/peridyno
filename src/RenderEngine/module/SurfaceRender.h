@@ -15,6 +15,7 @@
  */
 
 #pragma once
+#include "Topology/TriangleSet.h"
 
 #include "GLVisualModule.h"
 #include "GLCudaBuffer.h"
@@ -29,10 +30,16 @@ namespace dyno
 	public:
 		SurfaceRenderer();
 
+	public:
+		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
+
 	protected:
 		virtual void paintGL(RenderMode mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
+
+		void updateStarted() override;
+		void updateEnded() override;
 
 	private:
 

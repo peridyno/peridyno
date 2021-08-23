@@ -130,12 +130,6 @@ namespace dyno
 		{
 			Module* m = moduleQueue.front();
 
-			//TODO: fix the bug for surface mesh renderer.
-			if (m->getInputFields().size() == 0 && m->getOutputFields().size() == 0)
-			{
-				mModuleList.push_back(m);
-			}
-
 			auto& outFields = m->getOutputFields();
 			retrieveModules(m->objectId(), outFields);
 

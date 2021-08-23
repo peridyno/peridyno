@@ -29,9 +29,10 @@ int main()
 	bunny->setVisible(true);
 
 	auto sRender = std::make_shared<SurfaceRenderer>();
-	bunny->getSurfaceNode()->graphicsPipeline()->pushPersistentModule(sRender);
 	sRender->setColor(Vec3f(1, 1, 0));
-
+	bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	
 	GlfwApp window;
 	window.createWindow(1024, 768);
 	window.mainLoop();
