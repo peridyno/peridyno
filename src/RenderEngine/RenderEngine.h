@@ -20,7 +20,9 @@
 #include "gl/Buffer.h"
 #include "RenderParams.h"
 
-//#include "ui/picture.h"
+//use stb_image load image
+#include "ui/picture.h"
+#include <vector>
 
 namespace dyno
 {
@@ -35,6 +37,8 @@ namespace dyno
 	//HE Xiaowei
 	class RenderParams;
 
+	struct Picture;
+	
 	enum CameraType
 	{
 		Orbit = 0,
@@ -47,7 +51,7 @@ namespace dyno
 		RenderEngine();
 		~RenderEngine();
 
-		void initialize(int width, int height);
+		void initialize(int width, int height, float scale);
 
 		void setupCamera();
 
@@ -70,7 +74,8 @@ namespace dyno
 		void initUniformBuffers();
 
 	private:
-		bool mEnableCamera = true;
+		bool mDisenableCamera = false;
+		// bool mOpenCameraRotate = true;
 
 		glm::vec4 mClearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -91,5 +96,7 @@ namespace dyno
 
 		std::shared_ptr<Camera> mCamera;
 		CameraType mCameraType = CameraType::Orbit;
+
+		std::vector<std::shared_ptr<Picture>> mPics;
 	};
 };

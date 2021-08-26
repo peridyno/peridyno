@@ -139,9 +139,12 @@ namespace dyno
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 
+		// Get Context scale
+		float xscale, yscale;
+		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 		// Jian: initialize rendering engine
 		mRenderEngine = new RenderEngine();
-		mRenderEngine->initialize(width, height);
+		mRenderEngine->initialize(width, height, xscale);
 	}
 
 	void GlfwApp::initializeStyle()

@@ -10,6 +10,7 @@
 #include "module/PointRender.h"
 #include "module/CalculateNorm.h"
 #include "module/ColorMapping.h"
+#include "module/ImColorbar.h"
 
 using namespace std;
 using namespace dyno;
@@ -42,10 +43,20 @@ void CreateScene()
 	fluid->currentTopology()->connect(ptRender->inPointSet());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 	colorMapper->outColor()->connect(ptRender->inColor());
+	
+	// TODO add ImColorbar
+	auto colorBar = std::make_shared<ImColorbar>();
+	colorBar->varMax()->setValue(5.0f);
+	
+	// colorMapper->outColor()->connect(colorBar->inColor());
+	calculateNorm->outNorm()->connect(colorBar->inScalar());
+
 
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
+	
+	fluid->graphicsPipeline()->pushModule(colorBar);
 }
 
 int main()
@@ -53,6 +64,7 @@ int main()
 	CreateScene();
 
 	GlfwApp window;
+	// window.createWindow(2048, 1152);
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

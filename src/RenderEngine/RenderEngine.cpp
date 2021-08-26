@@ -11,6 +11,8 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 
+#include "ui/imgui_extend.h"
+
 #include "Utility.h"
 #include "ShadowMap.h"
 #include "SSAO.h"
@@ -62,7 +64,7 @@ namespace dyno
 		delete mSSAO;
 	}
 
-	void RenderEngine::initialize(int width, int height)
+	void RenderEngine::initialize(int width, int height, float scale)
 	{
 		if (!gladLoadGL()) {
 			printf("Failed to load OpenGL!");
@@ -95,6 +97,14 @@ namespace dyno
 		mCamera->zoom(3.0f);
 		mCamera->setClipNear(0.01f);
 		mCamera->setClipFar(10.0f);
+
+		// TODO: Reorganize
+		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
+		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
+		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
+		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));		
+
+		ImGui::initializeStyle(scale);
 	}
 
 	void RenderEngine::setupCamera()
@@ -193,16 +203,6 @@ namespace dyno
 			mRenderHelper->drawGround(mRenderParams->groudScale);
 		}
 
-
-		//glBegin(GL_TRIANGLES);
-
-		//glVertex3f(0.0f, 1.0f, 0.0f); glColor3f(1.0f, 0.0f, 0.0f);
-
-		//glVertex3f(-1.0f, 0.0f, 0.0f); glColor3f(0.0f, 1.0f, 0.0f);
-
-		//glVertex3f(1.0f, 0.0f, 0.0f); glColor3f(0.0f, 0.0f, 1.0f);
-		//glEnd();
-
 		// render modules
 		for (GLVisualModule* m : renderQueue.modules)
 		{
@@ -224,7 +224,6 @@ namespace dyno
 			mRenderHelper->drawAxis();
 		}
 
-
 		// write back to the framebuffer
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 		mRenderTarget->blit(0);
@@ -232,8 +231,10 @@ namespace dyno
 
 	void RenderEngine::drawGUI()
 	{
-		float iBgGray[2] = { 0.2f, 0.8f };
-		RenderParams::Light iLight;
+		
+		float iBgGray[2] = { mRenderParams->bgColor0[0], mRenderParams->bgColor1[0]};
+		// float iBgGray[2] = { 0.2f, 0.8f };
+		RenderParams::Light iLight =mRenderParams->light;
 
  			// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
  			{
@@ -277,9 +278,8 @@ namespace dyno
 					static int camera_current = 0;
 					const char* camera_name[] = {"Orbit", "TrackBall"};
 					static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
-					// ImGui::Combo("Camera", &camera_current, camera_name, IM_ARRAYSIZE(camera_name));
-					ImGui::SetNextItemWidth(100);
 
+					ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
 					ImGui::beginTitle("Camera");
 					if (ImGui::BeginCombo("", camera_name[camera_current], flags))
 					{
@@ -297,57 +297,31 @@ namespace dyno
 					ImGui::endTitle();
 
 // 					if(CameraType(camera_current) != mCameraType){
-// 						// FIXME: GL error
+// 						// TODO 
 // 						// setCameraType(CameraType(camera_current));
 // 					}
+					//ImGui::ShowStyleEditor();
 					ImGui::End();
 				}
 
 				{// Top Right widget
 					
 					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					//ImGui::toggleButton(pics[3]->GetTexture(),"Lock", &(mLock));
-					ImGui::toggleButton("Lock", &(mEnableCamera));
+					ImGui::toggleButton(mPics[3]->GetTexture(),"Lock", &(mDisenableCamera));
+					// ImGui::toggleButton("Lock", &(mDisenableCamera));
 					ImGui::SameLine();
-					//ImGui::toggleButton(pics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
-					ImGui::toggleButton("Ground", &(mRenderParams->showGround));
+					ImGui::toggleButton(mPics[0]->GetTexture(),"Ground", &(mRenderParams->showGround));
+					// ImGui::toggleButton("Ground", &(mRenderParams->showGround));
 					ImGui::SameLine();
-					//ImGui::toggleButton(pics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
-					ImGui::toggleButton("Bounds", &(mRenderParams->showSceneBounds));
+					ImGui::toggleButton(mPics[1]->GetTexture(),"Bounds",&(mRenderParams->showSceneBounds));
+					// ImGui::toggleButton("Bounds", &(mRenderParams->showSceneBounds));
 					ImGui::SameLine();
-					//ImGui::toggleButton(pics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
-					ImGui::toggleButton("Axis Helper", &(mRenderParams->showAxisHelper));
+					ImGui::toggleButton(mPics[2]->GetTexture(),"Axis Helper", &(mRenderParams->showAxisHelper));
+					// ImGui::toggleButton("Axis Helper", &(mRenderParams->showAxisHelper));
 					ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, 0));
 
 					ImGui::End();
 				}
-
-				{// Right sidebar
-					ImGui::Begin("Right sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-						
-					/*
-					if (refresh_time == 0.0) refresh_time = ImGui::GetTime();
-					while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
-					{
-						static float phase = 0.0f;
-						values[values_offset] = cosf(phase);
-						values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-						phase += 0.10f * values_offset;
-						refresh_time += 1.0f / 60.0f;
-					}
-					char overlay[32];
-					ImGui::PlotLines("Lines",  values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 80.0f));
-					*/
-					
-					const int val[6 + 1] = {0,1,2,3,4,5,6};
-					const int style_alpha8 = 150;
-					const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
-					ImGui::ColorBar("ColorBar", val, col, 7);
-
-					ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, (mRenderTarget->height - ImGui::GetWindowSize().y) /2));
-					ImGui::End();
-				}
-
 
 				{// Bottom Right widget
 					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
@@ -355,9 +329,6 @@ namespace dyno
 					ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, mRenderTarget->height - ImGui::GetWindowSize().y));
 					ImGui::End();
 				}
-// 
-// 				// Mouse Foucus on Any Imgui Windows || Lock
-// 				mOpenCameraRotate = !(ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mLock);
  			}
 
 	}
@@ -374,14 +345,7 @@ namespace dyno
 
 	bool RenderEngine::cameraLocked()
 	{
-		return !(ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mEnableCamera);
+		return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
 	}
 
-	//TODO: 
-// 	void RenderEngine::loadIcon() {
-// 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
-// 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
-// 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
-// 		pics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
-// 	}
 }

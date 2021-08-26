@@ -7,6 +7,8 @@
 
 //Qt
 #include <QMouseEvent>
+#include <QGuiApplication>
+#include <QScreen>
 
 
 namespace dyno
@@ -42,12 +44,13 @@ namespace dyno
 
 		SceneGraph::getInstance().initialize();
 
-		mRenderEngine = new RenderEngine();
-
-		mRenderEngine->initialize(this->width(), this->height());
-
 		initializeOpenGLFunctions();
 		QtImGui::initialize(this);
+
+		mRenderEngine = new RenderEngine();
+		// Get Context scale
+		float scale = QGuiApplication::primaryScreen()->logicalDotsPerInchX() / 96.0;
+		mRenderEngine->initialize(this->width(), this->height(), scale);
 	}
 
 	void POpenGLWidget::paintGL()
