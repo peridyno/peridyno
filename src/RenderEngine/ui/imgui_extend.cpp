@@ -203,9 +203,13 @@ bool ImGui::ColorBar(const char* label, const float* values, const T col, int le
     
     // Set Item Size
     ItemSize(ImVec2(bars_width + text_width, bars_height + text_height));
-    if(!ItemAdd(bb, id))
-        return false;
-
+	if (!ItemAdd(bb, id))
+	{
+		EndGroup();
+		PopID();
+		return false;
+	}
+        
     for (int i = 0; i <= grid_count; ++i){
         if (i != grid_count)
         draw_list->AddRectFilledMultiColor(
