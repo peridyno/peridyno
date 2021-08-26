@@ -281,15 +281,15 @@ ImU32 ImGui::ToJetColor(const float v, const float v_min, const float v_max){
     return IM_COL32(r * 255, g * 255, b* 255, 150);
 }
 
-void ImGui::initializeStyle()
+void ImGui::initializeStyle(float scale)
 {
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(4.0f);
+    style.ScaleAllSizes(scale);
     style.WindowRounding = 7.0f;
     style.ChildRounding = 7.0f;
     style.FrameRounding = 7.0f;
     style.PopupRounding = 7.0f;
     ImFont* font_current = ImGui::GetFont();
     ImGuiIO& io = ImGui::GetIO();
-    io.FontGlobalScale = 2.0f;
+    io.FontGlobalScale = scale;
 }

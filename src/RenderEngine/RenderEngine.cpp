@@ -64,7 +64,7 @@ namespace dyno
 		delete mSSAO;
 	}
 
-	void RenderEngine::initialize(int width, int height)
+	void RenderEngine::initialize(int width, int height, float scale)
 	{
 		if (!gladLoadGL()) {
 			printf("Failed to load OpenGL!");
@@ -104,7 +104,7 @@ namespace dyno
 		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
 		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));		
 
-		ImGui::initializeStyle();
+		ImGui::initializeStyle(scale);
 	}
 
 	void RenderEngine::setupCamera()
@@ -203,16 +203,6 @@ namespace dyno
 			mRenderHelper->drawGround(mRenderParams->groudScale);
 		}
 
-		
-		//glBegin(GL_TRIANGLES);
-
-		//glVertex3f(0.0f, 1.0f, 0.0f); glColor3f(1.0f, 0.0f, 0.0f);
-
-		//glVertex3f(-1.0f, 0.0f, 0.0f); glColor3f(0.0f, 1.0f, 0.0f);
-
-		//glVertex3f(1.0f, 0.0f, 0.0f); glColor3f(0.0f, 0.0f, 1.0f);
-		//glEnd();
-
 		// render modules
 		for (GLVisualModule* m : renderQueue.modules)
 		{
@@ -288,9 +278,8 @@ namespace dyno
 					static int camera_current = 0;
 					const char* camera_name[] = {"Orbit", "TrackBall"};
 					static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
-					// ImGui::Combo("Camera", &camera_current, camera_name, IM_ARRAYSIZE(camera_name));
-					ImGui::SetNextItemWidth(100);
 
+					ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
 					ImGui::beginTitle("Camera");
 					if (ImGui::BeginCombo("", camera_name[camera_current], flags))
 					{
@@ -308,7 +297,7 @@ namespace dyno
 					ImGui::endTitle();
 
 // 					if(CameraType(camera_current) != mCameraType){
-// 						// FIXME: GL error
+// 						// TODO 
 // 						// setCameraType(CameraType(camera_current));
 // 					}
 					//ImGui::ShowStyleEditor();
@@ -334,19 +323,6 @@ namespace dyno
 					ImGui::End();
 				}
 
-				{// Right sidebar
-					// ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-						
-					// const int val[6 + 1] = {0,1,2,3,4,5,6};
-					// const int style_alpha8 = 150;
-					// const ImU32 col[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
-					// ImGui::ColorBar("ColorBar", val, col, 7);
-
-					// // ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, (mRenderTarget->height - ImGui::GetWindowSize().y) /2));
-					// ImGui::End();
-				}
-
-
 				{// Bottom Right widget
 					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 					ImGui::Text(" %.1f FPS", ImGui::GetIO().Framerate);
@@ -369,7 +345,6 @@ namespace dyno
 
 	bool RenderEngine::cameraLocked()
 	{
-		// return !mOpenCameraRotate;
 		return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
 	}
 

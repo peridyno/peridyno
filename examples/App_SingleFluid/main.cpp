@@ -64,7 +64,8 @@ int main()
 	CreateScene();
 
 	GlfwApp window;
-	window.createWindow(2048, 1152);
+	// window.createWindow(2048, 1152);
+	window.createWindow(1024, 768);
 	window.mainLoop();
 
 	return 0;

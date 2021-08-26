@@ -50,5 +50,5 @@ namespace ImGui
     template 
     bool    ColorBar<ImU32*>(const char* label, const float* values, ImU32* col, int length);    
 
-    void initializeStyle();
+    void initializeStyle(float scale);
 }

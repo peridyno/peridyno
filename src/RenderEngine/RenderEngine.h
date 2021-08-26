@@ -51,7 +51,7 @@ namespace dyno
 		RenderEngine();
 		~RenderEngine();
 
-		void initialize(int width, int height);
+		void initialize(int width, int height, float scale);
 
 		void setupCamera();
 
