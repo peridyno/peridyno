@@ -1,4 +1,7 @@
 #include "imgui_extend.h"
+namespace ImGui{
+ImVec4      ExColorsVal[ImGuiExColVal_COUNT];
+};
 
 void ImGui::BeginHorizontal(){
     ImGuiWindow* window = GetCurrentWindow();
@@ -52,9 +55,9 @@ void ImGui::toggleButton(ImTextureID texId, const char* label, bool *v)
     {
 
         ImGui::PushID(label);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+        ImGui::PushStyleColor(ImGuiCol_Button, ExColorsVal[ImGuiExColVal_Button_1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ExColorsVal[ImGuiExColVal_ButtonHovered_1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ExColorsVal[ImGuiExColVal_ButtonActive_1]);
         ImGui::ImageButtonWithText(texId, label);
         if (ImGui::IsItemClicked(0))
         {
@@ -76,9 +79,9 @@ void ImGui::toggleButton(const char* label, bool *v)
     {
 
         ImGui::PushID(label);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(230/255.0, 179/255.0, 0/255.0, 105/255.0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(230/255.0, 179/255.0, 0/255.0, 255/255.0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(255/255.0, 153/255.0, 0/255.0, 255/255.0));
+        ImGui::PushStyleColor(ImGuiCol_Button, ExColorsVal[ImGuiExColVal_Button_1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ExColorsVal[ImGuiExColVal_ButtonHovered_1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ExColorsVal[ImGuiExColVal_ButtonActive_1]);        
         ImGui::Button(label);
         if (ImGui::IsItemClicked(0))
         {
@@ -196,11 +199,11 @@ bool ImGui::ColorBar(const char* label, const float* values, const T col, int le
     float offset_width = bars_width * 0.2;
     ImVec2 bar_pos = window->DC.CursorPos;
     ImVec2 real_bar_pos = bar_pos + ImVec2(0, 0.3 * text_height );
-    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width + text_width, bars_height + text_height));
+    ImRect bb(bar_pos, bar_pos + ImVec2(bars_width + offset_width + text_width, bars_height + text_height));
     int grid_count = length - 1;  
     
     // Set Item Size
-    ItemSize(ImVec2(bars_width + text_width, bars_height + text_height));
+    ItemSize(ImVec2(bars_width + offset_width + text_width, bars_height + text_height));
 	if (!ItemAdd(bb, id))
 	{
 		EndGroup();
@@ -252,9 +255,29 @@ void ImGui::initializeStyle(float scale)
     style.ChildRounding = 7.0f;
     style.FrameRounding = 7.0f;
     style.PopupRounding = 7.0f;
-    // ImFont* font_current = ImGui::GetFont();
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontFromFileTTF("Arial.ttf", 13.0f);
-    io.FontGlobalScale = scale;
+	
+	ImGuiIO& io = ImGui::GetIO();
+	// Load a first font
+	//ImFont* font = io.Fonts->AddFontDefault();
+    //Default font as Qt
+	
+	io.Fonts->AddFontFromFileTTF("../../data/font/arial.ttf", 13.0f);
+	// IconFont
+	ImFontConfig config;
+	config.MergeMode = true;
+	config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
+	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+	
+	io.Fonts->AddFontFromFileTTF("../../data/font/fa-solid-900.ttf" , 13.0f, &config, icon_ranges);
+	io.Fonts->Build();
 
+    io.FontGlobalScale = scale;
+}
+
+void ImGui::initColorVal()
+{
+    ExColorsVal[ImGuiExColVal_Button_1]             = ImVec4(230/255.0, 179/255.0,   0/255.0, 105/255.0);
+    ExColorsVal[ImGuiExColVal_ButtonHovered_1]      = ImVec4(230/255.0, 179/255.0,   0/255.0, 255/255.0);
+    ExColorsVal[ImGuiExColVal_ButtonActive_1]       = ImVec4(255/255.0, 153/255.0,   0/255.0, 255/255.0);
+    ExColorsVal[ImGuiExColVal_WindowTopBg_1]        = ImVec4(  0/255.0,   0/255.0,   0/255.0,  10/255.0);
 }

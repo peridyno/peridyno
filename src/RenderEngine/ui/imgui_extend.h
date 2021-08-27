@@ -9,8 +9,20 @@
 #include "Vector.h"
 #include "Module.h"
 
+#include "IconsFontAwesome5.h"
 namespace ImGui
 {
+    enum ImGuiExColVal_
+    {
+        ImGuiExColVal_Button_1,
+        ImGuiExColVal_ButtonHovered_1,
+        ImGuiExColVal_ButtonActive_1,
+        ImGuiExColVal_WindowTopBg_1,
+        ImGuiExColVal_COUNT
+    };
+    extern IMGUI_API ImVec4 ExColorsVal[ImGuiExColVal_COUNT];
+    IMGUI_API void          initColorVal();
+    
     // 水平布局
     IMGUI_API void          BeginHorizontal();
     IMGUI_API void          EndHorizontal();
@@ -47,6 +59,5 @@ namespace ImGui
     bool    ColorBar<std::shared_ptr<ImU32[]>>(const char* label, const float* values, std::shared_ptr<ImU32[]> col, int length);
     template 
     bool    ColorBar<ImU32*>(const char* label, const float* values, ImU32* col, int length);    
-
     void initializeStyle(float scale);
 }
