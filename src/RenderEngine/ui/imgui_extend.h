@@ -25,8 +25,6 @@ namespace ImGui
     template<typename T> 
     IMGUI_API bool          ColorBar(const char* label, const float* values, T col, int length);
 
-    IMGUI_API bool          ColorBar(const char* label, const ImU32 min_col, const ImU32 max_col);
-    IMGUI_API bool          ColorBar(const char* label, const ImU32 min_col, const ImU32 max_col, int length);
 
     // Get ID without label showing
     IMGUI_API void          beginTitle(const char* label);
