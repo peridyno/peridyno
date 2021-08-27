@@ -220,7 +220,7 @@ bool ImGui::ColorBar(const char* label, const float* values, const T col, int le
 
         if (values != nullptr){
             char buf[20];
-            sprintf(buf,"%.2f", values[i]);
+            sprintf(buf,"%.3f", values[i]);
             draw_list->AddText(ImVec2(bar_pos.x + bars_width + offset_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
         }
     }
