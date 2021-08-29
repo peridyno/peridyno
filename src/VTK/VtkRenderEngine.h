@@ -2,10 +2,12 @@
 
 #include <RenderEngine.h>
 
-
 #include <vtkExternalOpenGLRenderer.h>
 #include <vtkExternalOpenGLRenderWindow.h>
-#include <ExternalVTKWidget.h>
+#include <vtkExternalOpenGLCamera.h>
+#include <vtkExternalLight.h>
+
+#include "VtkVisualModule.h"
 
 namespace dyno
 {
@@ -14,18 +16,22 @@ namespace dyno
 	public:
 		VtkRenderEngine();
 		virtual void draw(dyno::SceneGraph* scene) override; 
-		virtual void resize(int w, int h) override;
 
 	private:
 		void setScene(dyno::SceneGraph* scene);
+		void setCamera();
 
 	private:
 
-		vtkExternalOpenGLRenderer*		renderer = NULL;
-		vtkExternalOpenGLRenderWindow*	window = NULL;
+		vtkNew<vtkExternalOpenGLRenderer>		m_vtkRenderer;
+		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;
+		vtkNew<vtkExternalOpenGLCamera>			m_vtkCamera;
+		vtkNew<vtkExternalLight>				m_vtkLight;
 
-		vtkNew<ExternalVTKWidget>	widget;
+		std::vector<dyno::VtkVisualModule*>		m_modules;
 
 		dyno::SceneGraph* m_scene = NULL;
+
+		friend struct GatherVisualModuleAction;
 	};
 };

@@ -3,6 +3,7 @@ set(LIB_NAME VtkVisualModule)
 find_package(VTK COMPONENTS 
   RenderingOpenGL2
   RenderingExternal
+  FiltersSources
   REQUIRED
 )
 
