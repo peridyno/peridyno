@@ -27,6 +27,8 @@ if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_PLUGIN_VTK)
     add_subdirectory(VTK)
 endif()
 
+add_subdirectory(Dynamics)
+
 # Write/install version file
 include(CMakePackageConfigHelpers)
 set(version_file "${CMAKE_CURRENT_BINARY_DIR}/cmake/PeridynoConfigVersion.cmake")

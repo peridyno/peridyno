@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Framework/ModuleVisual.h>
+#include <Module/VisualModule.h>
 
 #include <vtkTimeStamp.h>
 
@@ -21,8 +21,8 @@ namespace dyno
 		vtkVolume*	getVolume();
 
 
-		void display() final;
-		void updateRenderingContext() final;
+		virtual void display() final;
+		virtual void updateRenderingContext() final;
 		
 		bool isDirty(bool update = true);
 

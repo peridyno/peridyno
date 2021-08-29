@@ -1,8 +1,9 @@
 #include "VtkSurfaceVisualModule.h"
 
 // framework
-#include "Topology/TriangleSet.h"
-#include "Framework/Node.h"
+#include <Node.h>
+#include <SceneGraph.h>
+#include <Topology/TriangleSet.h>
 
 #include <vtkActor.h>
 #include <vtkCubeSource.h>

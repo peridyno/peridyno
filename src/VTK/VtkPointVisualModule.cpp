@@ -1,8 +1,9 @@
 #include "VtkPointVisualModule.h"
 
 // framework
-#include "Topology/TriangleSet.h"
-#include "Framework/Node.h"
+#include <Node.h>
+#include <SceneGraph.h>
+#include <Topology/TriangleSet.h>
 
 #include <vtkActor.h>
 #include <vtkProperty.h>
@@ -21,8 +22,6 @@
 #include <windows.h>
 #endif
 #include <cuda_gl_interop.h>
-
-#include "Framework/SceneGraph.h"
 
 using namespace dyno;
 
