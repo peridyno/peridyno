@@ -40,7 +40,7 @@ namespace dyno
 		ImGui::DestroyContext();
 
 		//
-		delete mRenderEngine;
+		//delete mRenderEngine;
 
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
@@ -143,7 +143,7 @@ namespace dyno
 		float xscale, yscale;
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 		// Jian: initialize rendering engine
-		mRenderEngine = new RenderEngine();
+		//mRenderEngine = new RenderEngine();
 		mRenderEngine->initialize(width, height, xscale);
 	}
 
@@ -391,7 +391,7 @@ namespace dyno
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		activeWindow->setWindowSize(w, h);
 
-		activeWindow->renderEngine()->resizeRenderTarget(w, h);
+		activeWindow->renderEngine()->resize(w, h);
 	}
 
 }

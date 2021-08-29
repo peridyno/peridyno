@@ -333,7 +333,7 @@ namespace dyno
 
 	}
 
-	void RenderEngine::resizeRenderTarget(int w, int h)
+	void RenderEngine::resize(int w, int h)
 	{
 		mRenderTarget->resize(w, h);
 		// set the viewport

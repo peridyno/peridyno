@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VtkVisualModule.h"
+#include "Topology/TriangleSet.h"
 
 namespace dyno
 {
@@ -9,5 +10,7 @@ namespace dyno
 		DECLARE_CLASS(SurfaceVisualModule)
 	public:
 		SurfaceVisualModule();
+
+		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 	};
 };

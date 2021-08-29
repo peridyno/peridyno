@@ -7,6 +7,7 @@
 
 namespace dyno
 {
+	class RenderEngine;
 	class AppBase {
 	public:
 		AppBase(void) {};
@@ -14,6 +15,10 @@ namespace dyno
 
 		virtual void createWindow(int width, int height) {};
 		virtual void mainLoop() = 0;
+
+		virtual void setRenderEngine(RenderEngine* engine) { mRenderEngine = engine; }
+	protected:
+		RenderEngine* mRenderEngine;
 	};
 
 }

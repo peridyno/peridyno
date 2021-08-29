@@ -125,7 +125,6 @@ namespace dyno {
 		std::string mOutputPath;
 		std::string mWindowTitle;
 
-		RenderEngine* mRenderEngine;
     };
 
 }

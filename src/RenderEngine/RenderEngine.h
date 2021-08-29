@@ -58,14 +58,13 @@ namespace dyno
 		void begin();
 		void end();
 
-		void draw(dyno::SceneGraph* scene);
+		virtual void draw(dyno::SceneGraph* scene);
+		virtual void resize(int w, int h);
 
 		void drawGUI();
 
-		void resizeRenderTarget(int w, int h);
-
 		RenderParams* renderParams() { return mRenderParams; }
-		RenderTarget* renderTarget() { return mRenderTarget; }
+		//RenderTarget* renderTarget() { return mRenderTarget; }
 
 		std::shared_ptr<Camera> camera() { return mCamera; }
 

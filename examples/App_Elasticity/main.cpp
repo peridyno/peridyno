@@ -9,6 +9,9 @@
 #include "module/SurfaceRender.h"
 #include "module/PointRender.h"
 
+#include "../VTK/VtkSurfaceVisualModule.h"
+#include "../VTK/VtkRenderEngine.h"
+
 using namespace dyno;
 
 int main()
@@ -28,12 +31,24 @@ int main()
 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
 	bunny->setVisible(true);
 
-	auto sRender = std::make_shared<SurfaceRenderer>();
-	sRender->setColor(Vec3f(1, 1, 0));
-	bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
-	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
-	
+	bool useVTK = true;
+	if (useVTK)
+	{
+		auto sRender = std::make_shared<SurfaceVisualModule>();
+		bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+		bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	}
+	else
+	{
+		auto sRender = std::make_shared<SurfaceRenderer>();
+		sRender->setColor(Vec3f(1, 1, 0));
+		bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+		bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	}
+
+	VtkRenderEngine engine;
 	GlfwApp window;
+	window.setRenderEngine(&engine);
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

@@ -76,7 +76,7 @@ namespace dyno
 		activeCamera()->setWidth(w);
 		activeCamera()->setHeight(h);
 
-		mRenderEngine->renderTarget()->resize(w, h);
+		mRenderEngine->resize(w, h);
 	}
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
