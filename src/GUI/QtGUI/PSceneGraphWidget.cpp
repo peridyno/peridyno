@@ -1,8 +1,8 @@
 #include "PSceneGraphWidget.h"
 
-#include "Framework/SceneGraph.h"
+#include "Node.h"
+#include "SceneGraph.h"
 #include "PInsertNodeAction.h"
-#include "Framework/Node.h"
 
 #include <iostream>
 

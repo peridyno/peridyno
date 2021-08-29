@@ -4,8 +4,6 @@
 #include "Topology/PointSet.h"
 #include "SummationDensity.h"
 
-#include <time.h>
-
 namespace dyno
 {
 	IMPLEMENT_CLASS_1(ParticleFluid, TDataType)
@@ -14,12 +12,16 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
-		auto pbf = this->template setNumericalModel<PositionBasedFluidModel<TDataType>>("pbd");
-		this->setNumericalModel(pbf);
+// 		auto pbf = this->template setNumericalModel<PositionBasedFluidModel<TDataType>>("pbd");
+// 		this->setNumericalModel(pbf);
 
-		this->currentPosition()->connect(&pbf->m_position);
-		this->currentVelocity()->connect(&pbf->m_velocity);
-		this->currentForce()->connect(&pbf->m_forceDensity);
+		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
+		this->animationPipeline()->pushModule(pbf);
+
+		this->varTimeStep()->connect(pbf->inTimeStep());
+		this->currentPosition()->connect(pbf->inPosition());
+		this->currentVelocity()->connect(pbf->inVelocity());
+		this->currentForce()->connect(pbf->inForce());
 	}
 
 	template<typename TDataType>
@@ -29,119 +31,80 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleFluid<TDataType>::advance(Real dt)
-	{		
-		std::vector<std::shared_ptr<ParticleEmitter<TDataType>>> m_particleEmitters = this->getParticleEmitters();
+	void ParticleFluid<TDataType>::preUpdateStates()
+	{
+		auto emitters = this->getParticleEmitters();
 
-		int total_num = 0;
-		
-		if (m_particleEmitters.size() > 0)
+		int curNum = this->currentPosition()->getElementCount();
+		int totalNum = curNum;
+		if (emitters.size() > 0)
 		{
-			int total_num = this->currentPosition()->getElementCount();
-			if (total_num > 0)
+			for (int i = 0; i < emitters.size(); i++)
 			{
-				DArray<Coord>& position = this->currentPosition()->getData();
-				DArray<Coord>& velocity = this->currentVelocity()->getData();
-				DArray<Coord>& force = this->currentForce()->getData();
+				totalNum += emitters[i]->sizeOfParticles();
+			}
 
-				int start = 0;
-				for (int i = 0; i < m_particleEmitters.size(); i++)
+			if (totalNum > curNum)
+			{
+				DArray<Coord> pBuf;
+				DArray<Coord> vBuf;
+				DArray<Coord> fBuf;
+
+				if (curNum > 0)
 				{
-					int num = m_particleEmitters[i]->currentPosition()->getElementCount();
-					if (num > 0)
-					{
-						auto points = m_particleEmitters[i]->currentPosition()->getData();
-						auto vels = m_particleEmitters[i]->currentVelocity()->getData();
-						auto fors = m_particleEmitters[i]->currentForce()->getData();
-
-						cudaMemcpy(points.begin(), position.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(vels.begin(), velocity.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(fors.begin(), force.begin() + start, num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						start += num;
-						// 						if (rand() % 1 == 0)
-						// 							m_particleEmitters[i]->advance2(this->getDt());
-					}
+					pBuf.assign(this->currentPosition()->getData());
+					vBuf.assign(this->currentVelocity()->getData());
+					fBuf.assign(this->currentForce()->getData());
 				}
-			}
-		}
 
-
-		for (int i = 0; i < m_particleEmitters.size(); i++)
-		{
-			m_particleEmitters[i]->advance2(this->getDt());
-		}
-
-		total_num = 0;
-		if (m_particleEmitters.size() > 0)
-		{
-			for (int i = 0; i < m_particleEmitters.size(); i++)
-			{
-				total_num += m_particleEmitters[i]->currentPosition()->getElementCount();
-			}
-
-			if (total_num > 0)
-			{
-				this->currentPosition()->setElementCount(total_num);
-				this->currentVelocity()->setElementCount(total_num);
-				this->currentForce()->setElementCount(total_num);
+				this->currentPosition()->setElementCount(totalNum);
+				this->currentVelocity()->setElementCount(totalNum);
+				this->currentForce()->setElementCount(totalNum);
 
 				//printf("###### %d\n", this->currentPosition()->getElementCount());
 
-				DArray<Coord>& position = this->currentPosition()->getData();
-				DArray<Coord>& velocity = this->currentVelocity()->getData();
-				DArray<Coord>& force = this->currentForce()->getData();
+				DArray<Coord>& new_pos = this->currentPosition()->getData();
+				DArray<Coord>& new_vel = this->currentVelocity()->getData();
+				DArray<Coord>& new_force = this->currentForce()->getData();
 
-				int start = 0;
-				for (int i = 0; i < m_particleEmitters.size(); i++)
+				if (curNum > 0)
 				{
-					int num = m_particleEmitters[i]->currentPosition()->getElementCount();
+					cudaMemcpy(new_pos.begin(), pBuf.begin(), curNum * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					cudaMemcpy(new_vel.begin(), vBuf.begin(), curNum * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					cudaMemcpy(new_force.begin(), fBuf.begin(), curNum * sizeof(Coord), cudaMemcpyDeviceToDevice);
+
+					pBuf.clear();
+					vBuf.clear();
+					fBuf.clear();
+				}
+
+				int start = curNum;
+				for (int i = 0; i < emitters.size(); i++)
+				{
+					int num = emitters[i]->sizeOfParticles();
 					if (num > 0)
 					{
-						DArray<Coord>& points = m_particleEmitters[i]->currentPosition()->getData();
-						DArray<Coord>& vels = m_particleEmitters[i]->currentVelocity()->getData();
-						DArray<Coord>& fors = m_particleEmitters[i]->currentForce()->getData();
+						DArray<Coord>& points = emitters[i]->getPositions();
+						DArray<Coord>& vels = emitters[i]->getVelocities();
+						DArray<Coord> fors(num);
+						fors.reset();
 
-						cudaMemcpy(position.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(velocity.begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(force.begin() + start, fors.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+						cudaMemcpy(new_pos.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+						cudaMemcpy(new_vel.begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+						cudaMemcpy(new_force.begin() + start, fors.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+						fors.clear();
+
 						start += num;
 					}
 				}
 			}
 		}
-		else
-		{
-			total_num = this->currentPosition()->getElementCount();
-		}
-
-		std::cout << "Total number: " << total_num << std::endl;
-
-		if (total_num > 0 && this->self_update)
-		{
-			auto nModel = this->getNumericalModel();
-			nModel->step(this->getDt());
-		}
-
-		//printf("%d\n", this->currentPosition()->getElementCount());
-
-		
 	}
 
-
 	template<typename TDataType>
-	bool ParticleFluid<TDataType>::resetStatus()
+	void ParticleFluid<TDataType>::resetStates()
 	{
-		//printf("reset fluid\n");
-		std::vector<std::shared_ptr<ParticleEmitter<TDataType>>> m_particleEmitters = this->getParticleEmitters();
-		if(m_particleEmitters.size() > 0)
-		{ 
-			this->currentPosition()->setElementCount(0);
-			this->currentVelocity()->setElementCount(0);
-			this->currentForce()->setElementCount(0);
-		}
-		else 
-			return ParticleSystem<TDataType>::resetStatus();
-		return true;
+		ParticleSystem<TDataType>::resetStates();
 	}
 
 	DEFINE_CLASS(ParticleFluid);

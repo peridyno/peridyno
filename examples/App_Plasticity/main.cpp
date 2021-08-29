@@ -1,35 +1,21 @@
-#include "Framework/SceneGraph.h"
-#include "Topology/PointSet.h"
-#include "Framework/Log.h"
+#include "GlfwGUI/GlfwApp.h"
 
-#include "ParticleSystem/ParticleElastoplasticBody.h"
-#include "ParticleSystem/ParticleElasticBody.h"
+#include "SceneGraph.h"
+#include "Log.h"
+#include "Topology/PointSet.h"
+
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ElasticityModule.h"
+
+#include "Peridynamics/ElastoplasticBody.h"
+#include "Peridynamics/ElasticBody.h"
+#include "Peridynamics/ElasticityModule.h"
+
 #include "RigidBody/RigidBody.h"
 
-#include "../VTK/VtkApp/VtkApp.h"
-#include "../VTK/VtkVisualModule/VtkSurfaceVisualModule.h"
-#include "../VTK/VtkVisualModule/VtkPointVisualModule.h"
+#include "module/SurfaceRender.h"
 
 using namespace std;
 using namespace dyno;
-
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
 
 void CreateScene()
 {
@@ -40,11 +26,8 @@ void CreateScene()
 // 	root->translate(Vec3f(0.2f, 0.2f, 0));
 	root->loadCube(Vec3f(0), Vec3f(1), 0.005, true);
 
-	std::shared_ptr<ParticleElastoplasticBody<DataType3f>> child3 = std::make_shared<ParticleElastoplasticBody<DataType3f>>();
+	std::shared_ptr<ElastoplasticBody<DataType3f>> child3 = std::make_shared<ElastoplasticBody<DataType3f>>();
 	root->addParticleSystem(child3);
-
-	auto ptRender = std::make_shared<SurfaceVisualModule>();
-	ptRender->setColor(0, 1, 1);
 
 	child3->setVisible(false);
 	child3->setMass(1.0);
@@ -53,13 +36,13 @@ void CreateScene()
 	child3->scale(0.05);
 	child3->translate(Vec3f(0.3, 0.2, 0.5));
 	child3->getSurfaceNode()->setVisible(true);
-	child3->getSurfaceNode()->addVisualModule(ptRender);
 
-	auto sRender = std::make_shared<SurfaceVisualModule>();
-	child3->getSurfaceNode()->addVisualModule(sRender);
-	sRender->setColor(1, 1, 1);
+	auto ptRender = std::make_shared<SurfaceRenderer>();
+	ptRender->setColor(Vec3f(0, 1, 1));
+	child3->getSurfaceNode()->currentTopology()->connect(ptRender->inTriangleSet());
+	child3->getSurfaceNode()->graphicsPipeline()->pushModule(ptRender);
 
-	std::shared_ptr<ParticleElasticBody<DataType3f>> child2 = std::make_shared<ParticleElasticBody<DataType3f>>();
+	std::shared_ptr<ElasticBody<DataType3f>> child2 = std::make_shared<ElasticBody<DataType3f>>();
 	root->addParticleSystem(child2);
 
 	child2->setVisible(false);
@@ -68,27 +51,21 @@ void CreateScene()
 	child2->loadSurface("../../data/standard/standard_cube20.obj");
 	child2->scale(0.05);
 	child2->translate(Vec3f(0.5, 0.2, 0.5));
-	child2->getElasticitySolver()->setIterationNumber(10);
-	child2->getSurfaceNode()->addVisualModule(sRender);
-}
 
+	auto sRender = std::make_shared<SurfaceRenderer>();
+	sRender->setColor(Vec3f(1, 1, 1));
+	child2->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+	child2->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+}
 
 int main()
 {
 	CreateScene();
 
-	SceneGraph::getInstance().initialize();
-
-	Log::setOutput("console_log.txt");
-	Log::setLevel(Log::Info);
-	Log::setUserReceiver(&RecieveLogMessage);
-	Log::sendMessage(Log::Info, "Simulation begin");
-
-	VtkApp window;
+	GlfwApp window;
 	window.createWindow(1024, 768);
 	window.mainLoop();
 
-	Log::sendMessage(Log::Info, "Simulation end!");
 	return 0;
 }
 

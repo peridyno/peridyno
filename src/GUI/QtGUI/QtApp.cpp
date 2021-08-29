@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "QtApp.h"
 #include "PMainWindow.h"
-#include "Framework/Log.h"
+#include "Log.h"
 //#include "Rendering/OpenGLContext.h"
 
 namespace dyno {
@@ -28,9 +28,6 @@ namespace dyno {
 
     void QtApp::mainLoop()
     {
-//         OpenGLContext::getInstance().initialize();
-        SceneGraph::getInstance().initialize();
-
         m_mainWindow->show();
         m_app->exec();
     }

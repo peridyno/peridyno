@@ -57,10 +57,6 @@ namespace dyno
 	/// 3d DOF, double precision
 	typedef DataTypes<double, Vec3d, Mat3d, Rigid3d> DataType3d;
 	template<> inline const char* DataType3d::getName() { return "DataType3d"; }
-
-
-#define EMPTY -1
-
 }
 
 

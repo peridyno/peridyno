@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 #include "VelocityConstraint.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "SummationDensity.h"
 #include "Attribute.h"
 #include "Kernel.h"
@@ -716,7 +716,7 @@ namespace dyno
 
 		//TODO: replace
 		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
-		m_smoothingLength.connect(m_densitySum->varSmoothingLength());
+		m_smoothingLength.connect(m_densitySum->inSmoothingLength());
 		m_position.connect(m_densitySum->inPosition());
 		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
 		m_densitySum->initialize();

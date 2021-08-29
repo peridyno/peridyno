@@ -16,10 +16,10 @@
 
 namespace dyno
 {
-	class Base;
 	class Node;
 	class Module;
-	class FieldBase;
+	class OBase;
+	class FBase;
 	class QDoubleSpinner;
 	class PVTKOpenGLWidget;
 
@@ -27,7 +27,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		QBoolFieldWidget(FieldBase* field);
+		QBoolFieldWidget(FBase* field);
 		~QBoolFieldWidget() {};
 
 	Q_SIGNALS:
@@ -37,14 +37,14 @@ namespace dyno
 		void changeValue(int status);
 
 	private:
-		FieldBase* m_field = nullptr;
+		FBase* m_field = nullptr;
 	};
 
 	class QIntegerFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
 	public:
-		QIntegerFieldWidget(FieldBase* field);
+		QIntegerFieldWidget(FBase* field);
 		~QIntegerFieldWidget() {};
 
 	Q_SIGNALS:
@@ -54,14 +54,14 @@ namespace dyno
 		void changeValue(int);
 
 	private:
-		FieldBase* m_field = nullptr;
+		FBase* m_field = nullptr;
 	};
 
 	class QRealFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
 	public:
-		QRealFieldWidget(FieldBase* field);
+		QRealFieldWidget(FBase* field);
 		~QRealFieldWidget() {};
 
 	Q_SIGNALS:
@@ -71,7 +71,7 @@ namespace dyno
 		void changeValue(double);
 
 	private:
-		FieldBase* m_field = nullptr;
+		FBase* m_field = nullptr;
 	};
 
 
@@ -79,7 +79,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		QVector3FieldWidget(FieldBase* field);
+		QVector3FieldWidget(FBase* field);
 		~QVector3FieldWidget() {};
 
 	Q_SIGNALS:
@@ -89,7 +89,7 @@ namespace dyno
 		void changeValue(double);
 
 	private:
-		FieldBase* m_field = nullptr;
+		FBase* m_field = nullptr;
 
 		QDoubleSpinner* spinner1;
 		QDoubleSpinner* spinner2;
@@ -121,10 +121,10 @@ namespace dyno
 		void updateDisplay();
 
 	private:
-		void updateContext(Base* base);
+		void updateContext(OBase* base);
 
-		void addScalarFieldWidget(FieldBase* field);
-		void addArrayFieldWidget(FieldBase* field);
+		void addScalarFieldWidget(FBase* field);
+		void addArrayFieldWidget(FBase* field);
 
 		QVBoxLayout* m_main_layout;
 		QScrollArea* m_scroll_area;

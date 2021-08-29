@@ -6,7 +6,7 @@
 namespace dyno
 {
 	template<class ElementType>
-	void ArrayMap<ElementType, DeviceType::GPU>::release()
+	void ArrayMap<ElementType, DeviceType::GPU>::clear()
 	{
 		m_index.clear();
 		m_elements.clear();
@@ -28,11 +28,6 @@ namespace dyno
 
 		Reduction<int> reduce;
 		int total_num = reduce.accumulate(m_index.begin(), m_index.size());
-
-		if (total_num <= 0)
-		{
-			return false;
-		}
 
 		Scan scan;
 		scan.exclusive(m_index);
@@ -118,7 +113,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<Map<int,ElementType>>& src)
+	void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<std::map<int,ElementType>>& src)
 	{
 		size_t indNum = src.size();
 		CArray<int> hIndex(indNum);
@@ -133,18 +128,34 @@ namespace dyno
 
 			if (src[i].size() > 0)
 			{
-				for (int j = 0; j < src[i].size(); j++)
+				for (typename std::map<int, ElementType>::iterator map_it = src[i].begin(); map_it != src[i].end(); map_it++)
 				{
-					hElements.pushBack(src[i][j]);
+					Pair<int, ElementType> mypair(map_it->first, map_it->second);
+					hElements.pushBack(mypair);
 				}
 			}
 		}
+		CArray<Map<int, ElementType>> maps;
+		maps.resize(indNum);
+
 		m_index.assign(hIndex);
 		m_elements.assign(hElements);
+		Pair<int, ElementType>* strAdr = m_elements.begin();
 
-		m_maps.assign(src);
+		eleNum = 0;
+		for (int i = 0; i < src.size(); i++)
+		{
+			size_t num_i = src[i].size();
+			Map<int, ElementType> mmap;
+			mmap.assign(strAdr + eleNum, num_i, num_i);
+			printf("DArrayMap.assign(std::vector<std::map<>>): the ptrpair is: %x \n", (strAdr + eleNum));
+			maps[i] = mmap;
+
+			eleNum += src[i].size();
+		}
+
+		m_maps.assign(maps);
 	}
-
 
 	template<class ElementType>
 	bool ArrayMap<ElementType, DeviceType::CPU>::resize(uint num)

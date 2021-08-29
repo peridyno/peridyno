@@ -11,7 +11,7 @@
 #pragma once
 
 #include <string>
-#include "Framework/ModuleTopology.h"
+#include "Module/TopologyModule.h"
 #include "DistanceField3D.h"
 
 namespace dyno {

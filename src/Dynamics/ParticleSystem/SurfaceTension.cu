@@ -91,9 +91,8 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool SurfaceTension<TDataType>::execute()
+	void SurfaceTension<TDataType>::updateImpl()
 	{
-		return true;
 	}
 
 	template<typename TDataType>

@@ -9,9 +9,14 @@
 #include <GLFW/glfw3.h>
 
 #include "AppBase.h"
-#include "Camera.h"
 
 namespace dyno {
+
+	class Camera;
+	class RenderEngine;
+	class RenderTarget;
+	class RenderParams;
+	struct Picture;
 
 	enum ButtonState
 	{
@@ -27,6 +32,7 @@ namespace dyno {
         ~GlfwApp();
 
         void createWindow(int width, int height) override;
+
         void mainLoop() override;
 
 		const std::string& name() const;
@@ -34,12 +40,8 @@ namespace dyno {
 		void setCursorPos(double x, double y);
 		double getCursorPosX();
 		double getCursorPosY();
-
-		int getWidth() const;
-		int getHeight() const;
-
-		void setWidth(int width);
-		void setHeight(int height);
+		
+		void setWindowSize(int width, int height);
 
 		void setButtonType(uint button) { mButtonType = button; }
 		void setButtonMode(uint mode) { mButtonMode = mode; }
@@ -51,8 +53,7 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		Camera* activeCamera() { return &mCamera; }
-
+		std::shared_ptr<Camera> activeCamera();
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -66,13 +67,19 @@ namespace dyno {
 
 		void toggleAnimation();
 
+		int getWidth();
+		int getHeight();
+
+		// ImGui extend function
+		// 全局样式设定
+		void initializeStyle();
+
+		RenderEngine* renderEngine() { return mRenderEngine; }
+
 	protected:
 		void initCallbacks();    //init default callbacks
-		void initOpenGL();
 
 		void drawScene(void);
-		void drawBackground();
-		void drawAxis();
 
 		static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -81,6 +88,8 @@ namespace dyno {
 		static void cursorEnterCallback(GLFWwindow* window, int entered);
 		static void scrollCallback(GLFWwindow* window, double offsetX, double OffsetY);
 
+
+		
     private:
 		//pointers to callback methods
 		void(*mMouseButtonFunc)(GLFWwindow* window, int button, int action, int mods);
@@ -91,9 +100,6 @@ namespace dyno {
 		void(*mScrollFunc)(GLFWwindow* window, double offsetX, double OffsetY);
 
 		GLFWwindow* mWindow = nullptr;
-
-		int mWidth;
-		int mHeight;
 
 		//state of the mouse
 		uint mButtonType;
@@ -119,10 +125,7 @@ namespace dyno {
 		std::string mOutputPath;
 		std::string mWindowTitle;
 
-		Vec4f mClearColor = Vec4f(0.45f, 0.55f, 0.60f, 1.00f);
-
-		Camera mCamera;
-
+		RenderEngine* mRenderEngine;
     };
 
 }

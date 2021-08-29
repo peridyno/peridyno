@@ -1,6 +1,6 @@
 #include "DensityPBD.h"
 
-#include "Framework/Node.h"
+#include "Node.h"
 #include "SummationDensity.h"
 
 namespace dyno
@@ -123,8 +123,8 @@ namespace dyno
 		m_summation = std::make_shared<SummationDensity<TDataType>>();
 
 		this->varRestDensity()->connect(m_summation->varRestDensity());
-		this->varSmoothingLength()->connect(m_summation->varSmoothingLength());
-		this->varSamplingDistance()->connect(m_summation->varSamplingDistance());
+		this->varSmoothingLength()->connect(m_summation->inSmoothingLength());
+		this->varSamplingDistance()->connect(m_summation->inSamplingDistance());
 
 		this->inPosition()->connect(m_summation->inPosition());
 		this->inNeighborIds()->connect(m_summation->inNeighborIds());
@@ -178,7 +178,7 @@ namespace dyno
 	template<typename TDataType>
 	void DensityPBD<TDataType>::takeOneIteration()
 	{
-		Real dt = this->getParent()->getDt();
+		Real dt = this->inTimeStep()->getData();
 
 		int num = this->inPosition()->getElementCount();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
@@ -230,7 +230,7 @@ namespace dyno
 	{
 		int num = this->inPosition()->getElementCount();
 
-		Real dt = this->getParent()->getDt();
+		Real dt = this->inTimeStep()->getData();
 
 		cuExecute(num, DP_UpdateVelocity,
 			this->inVelocity()->getData(),

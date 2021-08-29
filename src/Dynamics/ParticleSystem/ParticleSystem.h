@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/Node.h"
+#include "Node.h"
 //#include "PointRenderModule.h"
 
 namespace dyno
@@ -33,10 +33,7 @@ namespace dyno
 		virtual bool translate(Coord t);
 		virtual bool scale(Real s);
 
-
-		void updateTopology() override;
-		bool resetStatus() override;
-
+	public:
 //		std::shared_ptr<PointRenderModule> getRenderModule();
 
 		/**
@@ -56,12 +53,9 @@ namespace dyno
 		DEF_EMPTY_CURRENT_ARRAY(Force, Coord, DeviceType::GPU, "Force on each particle");
 
 		
-	public:
-		bool initialize() override;
-//		virtual void setVisible(bool visible) override;
-
 	protected:
-		std::shared_ptr<PointSet<TDataType>> m_pSet;
-//		std::shared_ptr<PointRenderModule> m_pointsRender;
+		void updateTopology() override;
+		void resetStates() override;
+//		virtual void setVisible(bool visible) override;
 	};
 }

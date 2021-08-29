@@ -14,7 +14,6 @@ namespace dyno
 	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::find(MKey key)
 	{
 		int ind=leftBound(Pair<MKey,T> (key,T()), m_pairs, m_size);
-
 		return (ind >= m_size || m_pairs[ind] != Pair<MKey, T>(key, T())) ? nullptr : (m_pairs + ind);
 	}
 

@@ -2,7 +2,7 @@
 #define PINSERTTREENODEACTION_H
 
 #include <stack>
-#include "Action/Action.h"
+#include "Action.h"
 
 #include <QTreeWidget>
 

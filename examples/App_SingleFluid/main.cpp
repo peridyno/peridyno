@@ -1,34 +1,19 @@
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "GlfwGUI/GlfwApp.h"
+
+#include "SceneGraph.h"
+#include "Log.h"
 
 #include "ParticleSystem/ParticleFluid.h"
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 
-#include "../VTK/VtkApp/VtkApp.h"
-#include "../VTK/VtkVisualModule/VtkSurfaceVisualModule.h"
-#include "../VTK/VtkVisualModule/VtkPointVisualModule.h"
-#include "../VTK/VtkVisualModule/VtkFluidVisualModule.h"
+#include "module/PointRender.h"
+#include "module/CalculateNorm.h"
+#include "module/ColorMapping.h"
+#include "module/ImColorbar.h"
 
 using namespace std;
 using namespace dyno;
-
-
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
 
 void CreateScene()
 {
@@ -38,44 +23,51 @@ void CreateScene()
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
 	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	//root->loadSDF("../../data/bowl/bowl.sdf", false);
+	root->loadSDF("../../data/bowl/bowl.sdf", false);
 
-	std::shared_ptr<ParticleFluid<DataType3f>> child1 = std::make_shared<ParticleFluid<DataType3f>>();
-	root->addParticleSystem(child1);
+	std::shared_ptr<ParticleFluid<DataType3f>> fluid = std::make_shared<ParticleFluid<DataType3f>>();
+	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
+	fluid->setMass(100);
+	root->addParticleSystem(fluid);
 
-	//auto ptRender = std::make_shared<PointVisualModule>();
-	//ptRender->setColor(1, 0, 0);
-	//ptRender->setColorRange(0, 4);
-	//child1->addVisualModule(ptRender);
-	   
-	child1->addVisualModule(std::make_shared<FluidVisualModule>());
+	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+	colorMapper->varMax()->setValue(5.0f);
 
-	child1->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
-	child1->setMass(100);
-	//child1->currentVelocity()->connect(&ptRender->m_vecIndex);
+	auto ptRender = std::make_shared<PointRenderer>();
+	ptRender->setColor(Vec3f(1, 0, 0));
+	ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
+	ptRender->setColorMapRange(0, 5);
 
-	std::shared_ptr<RigidBody<DataType3f>> rigidbody = std::make_shared<RigidBody<DataType3f>>();
-	root->addRigidBody(rigidbody);
-	rigidbody->loadShape("../../data/bowl/bowl.obj");
-	rigidbody->setActive(false);
+	fluid->currentVelocity()->connect(calculateNorm->inVec());
+	fluid->currentTopology()->connect(ptRender->inPointSet());
+	calculateNorm->outNorm()->connect(colorMapper->inScalar());
+	colorMapper->outColor()->connect(ptRender->inColor());
+	
+	// TODO add ImColorbar
+	auto colorBar = std::make_shared<ImColorbar>();
+	colorBar->varMax()->setValue(5.0f);
+	
+	// colorMapper->outColor()->connect(colorBar->inColor());
+	calculateNorm->outNorm()->connect(colorBar->inScalar());
+
+
+	fluid->graphicsPipeline()->pushModule(calculateNorm);
+	fluid->graphicsPipeline()->pushModule(colorMapper);
+	fluid->graphicsPipeline()->pushModule(ptRender);
+	
+	fluid->graphicsPipeline()->pushModule(colorBar);
 }
 
 int main()
 {
 	CreateScene();
 
-	SceneGraph::getInstance().initialize();
-
-	Log::setOutput("console_log.txt");
-	Log::setLevel(Log::Info);
-	Log::setUserReceiver(&RecieveLogMessage);
-	Log::sendMessage(Log::Info, "Simulation begin");
-
-	VtkApp window;
+	GlfwApp window;
+	// window.createWindow(2048, 1152);
 	window.createWindow(1024, 768);
 	window.mainLoop();
 
-	Log::sendMessage(Log::Info, "Simulation end!");
 	return 0;
 }
 

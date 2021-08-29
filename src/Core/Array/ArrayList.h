@@ -16,7 +16,9 @@
 #pragma once
 #include <vector>
 #include <iostream>
+
 #include "STL/List.h"
+#include "Array/Array.h"
 
 namespace dyno {
 	template<class ElementType, DeviceType deviceType> class ArrayList;
@@ -26,7 +28,7 @@ namespace dyno {
 	{
 	public:
 		ArrayList() {};
-		~ArrayList() { clear(); }
+		~ArrayList() {}
 
 		bool resize(uint num);
 
@@ -55,7 +57,7 @@ namespace dyno {
 		friend std::ostream& operator<<(std::ostream &out, const ArrayList<ElementType, DeviceType::CPU>& aList)
 		{
 			out << std::endl;
-			for (int i = 0; i < aList.size(); i++)
+			for (uint i = 0; i < aList.size(); i++)
 			{
 				List<ElementType> lst = aList[i];
 				out << "List " << i << " (" << lst.size() << "):";
@@ -104,7 +106,7 @@ namespace dyno {
 		 * @return true
 		 * @return false
 		 */
-		bool resize(const DArray<int> counts);
+		bool resize(const DArray<int>& counts);
 		bool resize(const uint arraySize, const uint eleSize);
 
 		template<typename ET2>
@@ -125,7 +127,7 @@ namespace dyno {
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return m_index.size() == 0; }
 
-		void release();
+		void clear();
 
 		void assign(const ArrayList<ElementType, DeviceType::GPU>& src);
 		void assign(const ArrayList<ElementType, DeviceType::CPU>& src);

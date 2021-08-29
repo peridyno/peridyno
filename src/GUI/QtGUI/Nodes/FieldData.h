@@ -1,12 +1,12 @@
 #pragma once
 
 #include "QtBlockDataModel.h"
-#include "Framework/FieldBase.h"
+#include "FBase.h"
 
 using QtNodes::BlockDataType;
 using QtNodes::BlockData;
 
-using dyno::FieldBase;
+using dyno::FBase;
 
 /// The class can potentially incapsulate any user data which
 /// need to be transferred within the Node Editor graph
@@ -17,7 +17,7 @@ public:
 	FieldData()
 	{}
 
-	FieldData(FieldBase* f)
+	FieldData(FBase* f)
 		: field(f)
 	{}
 
@@ -27,7 +27,7 @@ public:
 							 "Field" };
 	}
 
-	FieldBase* getField() { return field; }
+	FBase* getField() { return field; }
 
 	bool isEmpty() { return field == nullptr; }
 
@@ -38,5 +38,5 @@ public:
 
 private:
 
-	FieldBase* field = nullptr;
+	FBase* field = nullptr;
 };

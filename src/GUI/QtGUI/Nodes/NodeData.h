@@ -1,7 +1,7 @@
 #pragma once
 
 #include "QtBlockDataModel.h"
-#include "Framework/NodePort.h"
+#include "NodePort.h"
 
 using QtNodes::BlockDataType;
 using QtNodes::BlockData;

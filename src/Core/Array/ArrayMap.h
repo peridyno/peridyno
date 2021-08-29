@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include <map>
 #include <vector>
 #include <iostream>
 #include "STL/Map.h"
@@ -27,7 +28,7 @@ namespace dyno {
 	{
 	public:
 		ArrayMap() {};
-		~ArrayMap() { clear(); }
+		~ArrayMap() {}
 
 		void clear();
 
@@ -61,10 +62,11 @@ namespace dyno {
 			for (int i = 0; i < aMap.size(); i++)
 			{
 				Map<int,ElementType> mmap = aMap[i];
+
 				out << "Map " << i << " (" << mmap.size() << "):";
 				for (auto it = mmap.begin(); it != mmap.end(); it++)
 				{
-					std::cout << "  key:" << it->first<<" value:"<<it->second;
+					std::cout << "  key:" << it->first << " value:" << it->second;
 				}
 				out << std::endl;
 			}
@@ -128,11 +130,11 @@ namespace dyno {
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return m_index.size() == 0; }
 
-		void release();
+		void clear();
 
 		void assign(const ArrayMap<ElementType, DeviceType::GPU>& src);
 		void assign(const ArrayMap<ElementType, DeviceType::CPU>& src);
-		void assign(std::vector<Map<int,ElementType>>& src);
+		void assign(std::vector<std::map<int, ElementType>>& src);
 
 		friend std::ostream& operator<<(std::ostream &out, const ArrayMap<ElementType, DeviceType::GPU>& aMap)
 		{

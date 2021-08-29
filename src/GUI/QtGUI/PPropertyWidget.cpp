@@ -1,17 +1,13 @@
 #include "PPropertyWidget.h"
-#include "Framework/Module.h"
-#include "Framework/Node.h"
-#include "Framework/SceneGraph.h"
+#include "Module.h"
+#include "Node.h"
+#include "SceneGraph.h"
 
-#include "PVTKOpenGLWidget.h"
 #include "PCustomWidgets.h"
 #include "Nodes/QtNodeWidget.h"
 #include "Nodes/QtModuleWidget.h"
 
 #include "Common.h"
-
-#include "vtkRenderer.h"
-#include <vtkRenderWindow.h>
 
 #include <QGroupBox>
 #include <QLabel>
@@ -24,11 +20,11 @@
 
 namespace dyno
 {
-	QBoolFieldWidget::QBoolFieldWidget(FieldBase* field)
+	QBoolFieldWidget::QBoolFieldWidget(FBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
-		VarField<bool>* f = TypeInfo::cast<VarField<bool>>(m_field);
+		FVar<bool>* f = TypeInfo::cast<FVar<bool>>(m_field);
 		if (f == nullptr)
 		{
 			return;
@@ -57,7 +53,7 @@ namespace dyno
 
 	void QBoolFieldWidget::changeValue(int status)
 	{
-		VarField<bool>* f = TypeInfo::cast<VarField<bool>>(m_field);
+		FVar<bool>* f = TypeInfo::cast<FVar<bool>>(m_field);
 		if (f == nullptr)
 		{
 			return;
@@ -81,11 +77,11 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-	QIntegerFieldWidget::QIntegerFieldWidget(FieldBase* field)
+	QIntegerFieldWidget::QIntegerFieldWidget(FBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
-		VarField<int>* f = TypeInfo::cast<VarField<int>>(m_field);
+		FVar<int>* f = TypeInfo::cast<FVar<int>>(m_field);
 		if (f == nullptr)
 		{
 			return;
@@ -113,7 +109,7 @@ namespace dyno
 
 	void QIntegerFieldWidget::changeValue(int value)
 	{
-		VarField<int>* f = TypeInfo::cast<VarField<int>>(m_field);
+		FVar<int>* f = TypeInfo::cast<FVar<int>>(m_field);
 		if (f == nullptr)
 		{
 			return;
@@ -126,7 +122,7 @@ namespace dyno
 	}
 
 
-	QRealFieldWidget::QRealFieldWidget(FieldBase* field)
+	QRealFieldWidget::QRealFieldWidget(FBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -167,12 +163,12 @@ namespace dyno
 		std::string template_name = field->getTemplateName();
 		if (template_name == std::string(typeid(float).name()))
 		{
-			VarField<float>* f = TypeInfo::cast<VarField<float>>(m_field);
+			FVar<float>* f = TypeInfo::cast<FVar<float>>(m_field);
 			slider->setValue((double)f->getData());
 		}
 		else if(template_name == std::string(typeid(double).name()))
 		{
-			VarField<double>* f = TypeInfo::cast<VarField<double>>(m_field);
+			FVar<double>* f = TypeInfo::cast<FVar<double>>(m_field);
 			slider->setValue(f->getData());
 		}
 
@@ -185,13 +181,13 @@ namespace dyno
 
 		if (template_name == std::string(typeid(float).name()))
 		{
-			VarField<float>* f = TypeInfo::cast<VarField<float>>(m_field);
+			FVar<float>* f = TypeInfo::cast<FVar<float>>(m_field);
 			f->setValue((float)value);
 			f->update();
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
-			VarField<double>* f = TypeInfo::cast<VarField<double>>(m_field);
+			FVar<double>* f = TypeInfo::cast<FVar<double>>(m_field);
 			f->setValue(value);
 			f->update();
 		}
@@ -200,7 +196,7 @@ namespace dyno
 	}
 
 
-	QVector3FieldWidget::QVector3FieldWidget(FieldBase* field)
+	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -239,7 +235,7 @@ namespace dyno
 
 		if (template_name == std::string(typeid(Vec3f).name()))
 		{
-			VarField<Vec3f>* f = TypeInfo::cast<VarField<Vec3f>>(m_field);
+			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(m_field);
 			auto v = f->getData();
 			v1 = v[0];
 			v2 = v[1];
@@ -247,7 +243,7 @@ namespace dyno
 		}
 		else if (template_name == std::string(typeid(Vec3d).name()))
 		{
-			VarField<Vec3d>* f = TypeInfo::cast<VarField<Vec3d>>(m_field);
+			FVar<Vec3d>* f = TypeInfo::cast<FVar<Vec3d>>(m_field);
 			auto v = f->getData();
 
 			v1 = v[0];
@@ -275,13 +271,13 @@ namespace dyno
 
 		if (template_name == std::string(typeid(Vec3f).name()))
 		{
-			VarField<Vec3f>* f = TypeInfo::cast<VarField<Vec3f>>(m_field);
+			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(m_field);
 			f->setValue(Vec3f((float)v1, (float)v2, (float)v3));
 			f->update();
 		}
 		else if (template_name == std::string(typeid(Vec3d).name()))
 		{
-			VarField<Vec3d>* f = TypeInfo::cast<VarField<Vec3d>>(m_field);
+			FVar<Vec3d>* f = TypeInfo::cast<FVar<Vec3d>>(m_field);
 			f->setValue(Vec3d(v1, v2, v3));
 			f->update();
 		}
@@ -383,11 +379,11 @@ namespace dyno
 	void PPropertyWidget::updateDisplay()
 	{
 //		PVTKOpenGLWidget::getCurrentRenderer()->GetActors()->RemoveAllItems();
-		SceneGraph::getInstance().draw();
-		PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
+//		SceneGraph::getInstance().draw();
+//		PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
 	}
 
-	void PPropertyWidget::updateContext(Base* base)
+	void PPropertyWidget::updateContext(OBase* base)
 	{
 		if (base == nullptr)
 		{
@@ -396,13 +392,13 @@ namespace dyno
 
 		this->removeAllWidgets();
 
-		std::vector<FieldBase*>& fields = base->getAllFields();
+		std::vector<FBase*>& fields = base->getAllFields();
 
-		for each (FieldBase* var in fields)
+		for each (FBase* var in fields)
 		{
 			if (var != nullptr)
 			{
-				if (var->getClassName() == std::string("VarField"))
+				if (var->getClassName() == std::string("FVar"))
 				{
 					this->addScalarFieldWidget(var);
 				}
@@ -410,7 +406,7 @@ namespace dyno
 		}
 	}
 
-	void PPropertyWidget::addScalarFieldWidget(FieldBase* field)
+	void PPropertyWidget::addScalarFieldWidget(FBase* field)
 	{
 		std::string template_name = field->getTemplateName();
 		if (template_name == std::string(typeid(bool).name()))
@@ -426,7 +422,7 @@ namespace dyno
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
 
 			this->addWidget(fw);
-//			this->addWidget(new QIntegerFieldWidget(new VarField<int>()));
+//			this->addWidget(new QIntegerFieldWidget(new FVar<int>()));
 		}
 		else if (template_name == std::string(typeid(float).name()))
 		{
@@ -438,7 +434,7 @@ namespace dyno
 		}
 	}
 
-	void PPropertyWidget::addArrayFieldWidget(FieldBase* field)
+	void PPropertyWidget::addArrayFieldWidget(FBase* field)
 	{
 
 	}

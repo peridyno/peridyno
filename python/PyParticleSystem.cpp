@@ -1,8 +1,10 @@
 #include "PyParticleSystem.h"
 
-#include "ParticleSystem/ParticleElasticBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ElasticityModule.h"
+
+#include "Peridynamics/ElasticBody.h"
+#include "Peridynamics/ElasticityModule.h"
+
 #include "RigidBody/RigidBody.h"
 
 template <typename TDataType>
@@ -33,7 +35,7 @@ void declare_particle_system(py::module &m, std::string typestr) {
 
 template <typename TDataType>
 void declare_particle_elastic_body(py::module &m, std::string typestr) {
-	using Class = dyno::ParticleElasticBody<TDataType>;
+	using Class = dyno::ElasticBody<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
 	std::string pyclass_name = std::string("ParticleElasticBody") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

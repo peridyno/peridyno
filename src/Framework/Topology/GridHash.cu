@@ -1,6 +1,6 @@
 #include "GridHash.h"
 
-#include "Framework/Object.h"
+#include "Object.h"
 #include "DataTypes.h"
 
 namespace dyno 

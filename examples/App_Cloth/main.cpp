@@ -1,32 +1,19 @@
-#include "Framework/SceneGraph.h"
-#include "Framework/Log.h"
+#include "GlfwGUI/GlfwApp.h"
 
-#include "ParticleSystem/ParticleElasticBody.h"
+#include "SceneGraph.h"
+#include "Log.h"
+
+#include "Peridynamics/ElasticBody.h"
+#include "Peridynamics/Cloth.h"
+
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleCloth.h"
 
-#include "../VTK/VtkApp/VtkApp.h"
-#include "../VTK/VtkVisualModule/VtkSurfaceVisualModule.h"
-#include "../VTK/VtkVisualModule/VtkPointVisualModule.h"
+#include "module/PointRender.h"
+#include "module/SurfaceRender.h"
+
 
 using namespace std;
 using namespace dyno;
-
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
 
 void CreateScene()
 {
@@ -34,44 +21,36 @@ void CreateScene()
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
 	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
-	root->loadShpere(Vec3f(0.5), 0.08f, 0.005f, false, true);
+	root->loadShpere(Vec3f(0.5, 0.7f, 0.5), 0.08f, 0.005f, false, true);
 
-	std::shared_ptr<ParticleCloth<DataType3f>> child3 = std::make_shared<ParticleCloth<DataType3f>>();
-	root->addParticleSystem(child3);
+	std::shared_ptr<Cloth<DataType3f>> cloth = std::make_shared<Cloth<DataType3f>>();
+	cloth->setMass(1.0);
+	cloth->loadParticles("../../data/cloth/cloth.obj");
+	cloth->loadSurface("../../data/cloth/cloth.obj");
 
-	child3->setMass(1.0);
-	child3->loadParticles("../../data/cloth/cloth.obj");
-	child3->loadSurface("../../data/cloth/cloth.obj");
+	root->addParticleSystem(cloth);
 
-	auto sRender = std::make_shared<SurfaceVisualModule>();
-	sRender->setColor(0.4, 0.75, 1);
-	child3->getSurfaceNode()->addVisualModule(sRender);
+	auto pointRenderer = std::make_shared<PointRenderer>();
+	pointRenderer->setColor(Vec3f(1, 0.2, 1));
+	pointRenderer->setColorMapMode(PointRenderer::PER_OBJECT_SHADER);
+	cloth->currentTopology()->connect(pointRenderer->inPointSet());
+	cloth->currentVelocity()->connect(pointRenderer->inColor());
 
-	auto pRender = std::make_shared<PointVisualModule>();
-	pRender->setColor(1, 0.2, 1);
-	child3->addVisualModule(pRender);
-	child3->setVisible(true);
+	cloth->graphicsPipeline()->pushModule(pointRenderer);
+	cloth->setVisible(true);
 
+	auto surfaceRenderer = std::make_shared<SurfaceRenderer>();
+	cloth->currentTopology()->connect(surfaceRenderer->inTriangleSet());
+	cloth->graphicsPipeline()->pushModule(surfaceRenderer);
+	//cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
 }
-
 
 int main()
 {
 	CreateScene();
 
-	SceneGraph::getInstance().initialize();
-
-	Log::setOutput("console_log.txt");
-	Log::setLevel(Log::Info);
-	Log::setUserReceiver(&RecieveLogMessage);
-	Log::sendMessage(Log::Info, "Simulation begin");
-
-	VtkApp window;
+	GlfwApp window;
 	window.createWindow(1024, 768);
 	window.mainLoop();
-
-	Log::sendMessage(Log::Info, "Simulation end!");
 	return 0;
 }
-
-

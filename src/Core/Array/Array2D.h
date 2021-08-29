@@ -25,7 +25,7 @@ namespace dyno {
 	public:
 		Array2D() {};
 
-		Array2D(size_t nx, size_t ny) {
+		Array2D(uint nx, uint ny) {
 			this->resize(nx, ny);
 		};
 
@@ -36,7 +36,7 @@ namespace dyno {
 			this->clear();
 		};
 
-		void resize(size_t nx, size_t ny);
+		void resize(uint nx, uint ny);
 
 		void reset();
 
@@ -44,35 +44,35 @@ namespace dyno {
 
 		inline const T* begin() const { return m_data.data(); }
 
-		inline size_t nx() const { return m_nx; }
-		inline size_t ny() const { return m_ny; }
+		inline uint nx() const { return m_nx; }
+		inline uint ny() const { return m_ny; }
 
-		inline T operator () (const size_t i, const size_t j) const
+		inline T operator () (const uint i, const uint j) const
 		{
 			return m_data[i + j * m_nx];
 		}
 
-		inline T& operator () (const size_t i, const size_t j)
+		inline T& operator () (const uint i, const uint j)
 		{
 			return m_data[i + j * m_nx];
 		}
 
-		inline int index(const size_t i, const size_t j) const
+		inline int index(const uint i, const uint j) const
 		{
-			return i + j * m_pitch;
+			return i + j * m_nx;
 		}
 
-		inline T operator [] (const size_t id) const
-		{
-			return m_data[id];
-		}
-
-		inline T& operator [] (const size_t id)
+		inline T operator [] (const uint id) const
 		{
 			return m_data[id];
 		}
 
-		inline size_t size() const { return m_data.size(); }
+		inline T& operator [] (const uint id)
+		{
+			return m_data[id];
+		}
+
+		inline uint size() const { return (uint)m_data.size(); }
 		inline bool isCPU() const { return false; }
 		inline bool isGPU() const { return true; }
 
@@ -80,8 +80,8 @@ namespace dyno {
 		void assign(const Array2D<T, DeviceType::CPU>& src);
 
 	private:
-		size_t m_nx = 0;
-		size_t m_ny = 0;
+		uint m_nx = 0;
+		uint m_ny = 0;
 
 		std::vector<T> m_data;
 	};
@@ -92,7 +92,7 @@ namespace dyno {
 	public:
 		Array2D() {};
 
-		Array2D(size_t nx, size_t ny)
+		Array2D(uint nx, uint ny)
 		{
 			this->resize(nx, ny);
 		};
@@ -102,7 +102,7 @@ namespace dyno {
 		*/
 		~Array2D() {};
 
-		void resize(size_t nx, size_t ny);
+		void resize(uint nx, uint ny);
 
 		void reset();
 
@@ -110,36 +110,36 @@ namespace dyno {
 
 		inline T* begin() const { return m_data; }
 
-		DYN_FUNC inline size_t nx() const { return m_nx; }
-		DYN_FUNC inline size_t ny() const { return m_ny; }
-		DYN_FUNC inline size_t pitch() const { return m_pitch; }
+		DYN_FUNC inline uint nx() const { return m_nx; }
+		DYN_FUNC inline uint ny() const { return m_ny; }
+		DYN_FUNC inline uint pitch() const { return m_pitch; }
 
-		DYN_FUNC inline T operator () (const size_t i, const size_t j) const
+		DYN_FUNC inline T operator () (const uint i, const uint j) const
 		{
 			return m_data[i + j* m_pitch];
 		}
 
-		DYN_FUNC inline T& operator () (const size_t i, const size_t j)
+		DYN_FUNC inline T& operator () (const uint i, const uint j)
 		{
 			return m_data[i + j* m_pitch];
 		}
 
-		DYN_FUNC inline int index(const size_t i, const size_t j) const
+		DYN_FUNC inline int index(const uint i, const uint j) const
 		{
 			return i + j * m_pitch;
 		}
 
-		DYN_FUNC inline T operator [] (const size_t id) const
+		DYN_FUNC inline T operator [] (const uint id) const
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline T& operator [] (const size_t id)
+		DYN_FUNC inline T& operator [] (const uint id)
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline size_t size() const { return m_nx * m_ny; }
+		DYN_FUNC inline uint size() const { return m_nx * m_ny; }
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
 
@@ -147,9 +147,9 @@ namespace dyno {
 		void assign(const Array2D<T, DeviceType::CPU>& src);
 
 	private:
-		size_t m_nx = 0;
-		size_t m_ny = 0;
-		size_t m_pitch = 0;
+		uint m_nx = 0;
+		uint m_ny = 0;
+		uint m_pitch = 0;
 		T* m_data = nullptr;
 	};
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/NumericalIntegrator.h"
+#include "Module/NumericalIntegrator.h"
 #include "Attribute.h"
 
 namespace dyno {
@@ -23,35 +23,34 @@ namespace dyno {
 		bool updateVelocity();
 		bool updatePosition();
 
-	protected:
-		bool initializeImpl() override;
-
 	public:
 
 		/**
 		* @brief Position
 		* Particle position
 		*/
-		DEF_EMPTY_IN_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
 
 		/**
 		* @brief Velocity
 		* Particle velocity
 		*/
-		DEF_EMPTY_IN_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
 		/**
 		* @brief Attribute
 		* Particle attribute
 		*/
-		DEF_EMPTY_IN_ARRAY(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
 
 		/**
 		* @brief Force density
 		* Force density on each particle
 		*/
-		DEF_EMPTY_IN_ARRAY(ForceDensity, Coord, DeviceType::GPU, "Force density on each particle");
+		DEF_ARRAY_IN(Coord, ForceDensity, DeviceType::GPU, "Force density on each particle");
 
+	protected:
+		void updateImpl() override;
 
 	private:
 		DArray<Coord> m_prePosition;

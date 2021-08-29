@@ -1,6 +1,6 @@
 #pragma once
 #include "Array/Array.h"
-#include "Framework/CollidableObject.h"
+#include "Module/CollidableObject.h"
 
 namespace dyno
 {
@@ -27,8 +27,6 @@ namespace dyno
 
 		DArray<Coord>& getPositions() { return m_positions; }
 		DArray<Coord>& getVelocities() { return m_velocities; }
-
-		bool initializeImpl() override;
 
 		void updateCollidableObject() override;
 		void updateMechanicalState() override;

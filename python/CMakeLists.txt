@@ -22,9 +22,9 @@ elseif(UNIX)
     endif()
 endif()
 
-link_libraries(Core Framework IO Graphics)
+link_libraries(Core Framework IO)
 link_libraries(GlfwGUI)
-link_libraries(ParticleSystem RigidBody)
+link_libraries(ParticleSystem RigidBody Peridynamics)
 
 file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
 file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
