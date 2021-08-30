@@ -8,8 +8,6 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-
-
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 
@@ -113,19 +111,19 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	// set axes
 	{
 		// NOT WORK!
-		vtkNew<vtkRenderWindowInteractor> m_interactor;
-		m_interactor->SetRenderWindow(m_vtkWindow);
+		//vtkNew<vtkRenderWindowInteractor> m_interactor;
+		//m_interactor->SetRenderWindow(m_vtkWindow);
 
-		// axes
-		vtkNew<vtkAxesActor>				axes;
-		vtkNew<vtkOrientationMarkerWidget>	widget;
+		//// axes
+		//vtkNew<vtkAxesActor>				axes;
+		//vtkNew<vtkOrientationMarkerWidget>	widget;
 
-		widget->SetOrientationMarker(axes);
-		//widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+		//widget->SetOrientationMarker(axes);
+		////widget->SetViewport(0.0, 0.0, 0.4, 0.4);
 
-		widget->SetInteractor(m_interactor);
-		widget->SetEnabled(1);
-		widget->InteractiveOn();
+		//widget->SetInteractor(m_interactor);
+		//widget->SetEnabled(1);
+		//widget->InteractiveOn();
 
 	}
 

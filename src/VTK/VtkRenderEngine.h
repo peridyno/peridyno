@@ -11,9 +11,9 @@
 #include <vtkCubeSource.h>
 #include <vtkPlaneSource.h>
 
-#include <vtkAxesActor.h>
-#include <vtkOrientationMarkerWidget.h>
-#include <vtkRenderWindowInteractor.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkRenderWindowInteractor.h>
 
 #include "VtkVisualModule.h"
 
