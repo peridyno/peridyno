@@ -7,8 +7,9 @@
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 
+#include "Module/CalculateNorm.h"
+
 #include "module/PointRender.h"
-#include "module/CalculateNorm.h"
 #include "module/ColorMapping.h"
 #include "module/ImColorbar.h"
 
