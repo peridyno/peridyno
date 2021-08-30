@@ -30,7 +30,10 @@ VtkVisualModule::~VtkVisualModule()
 void VtkVisualModule::setColor(float r, float g, float b, float a )
 {
 	if (m_actor != NULL)
+	{
 		m_actor->GetProperty()->SetColor(r, g, b);
+		m_actor->GetProperty()->SetOpacity(a);
+	}
 }
 
 vtkActor* VtkVisualModule::getActor()

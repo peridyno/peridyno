@@ -55,7 +55,7 @@ public:
 
 		if (node == NULL || !node->isVisible())	return;
 		
-		auto pSet = std::dynamic_pointer_cast<dyno::PointSet<dyno::DataType3f>>(node->getTopologyModule());
+		auto pSet = m_module->inPointSet()->getDataPtr();// std::dynamic_pointer_cast<dyno::PointSet<dyno::DataType3f>>(node->getTopologyModule());
 		auto verts = pSet->getPoints();
 
 		cudaError_t error;

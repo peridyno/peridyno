@@ -62,7 +62,8 @@ public:
 		if (m_module->isDirty())
 		{
 			auto node = m_module->getParent();
-			auto pSet = std::dynamic_pointer_cast<dyno::PointSet<dyno::DataType3f>>(node->getTopologyModule());
+			//auto pSet = std::dynamic_pointer_cast<dyno::PointSet<dyno::DataType3f>>(node->getTopologyModule());
+			auto pSet = m_module->inPointSet()->getDataPtr();
 			auto verts = pSet->getPoints();
 
 			cudaError_t error;

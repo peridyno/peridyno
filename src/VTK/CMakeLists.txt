@@ -4,6 +4,7 @@ find_package(VTK COMPONENTS
   RenderingOpenGL2
   RenderingExternal
   FiltersSources
+  InteractionWidgets
   REQUIRED
 )
 
