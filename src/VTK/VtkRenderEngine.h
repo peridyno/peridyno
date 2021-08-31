@@ -11,10 +11,6 @@
 #include <vtkCubeSource.h>
 #include <vtkPlaneSource.h>
 
-//#include <vtkAxesActor.h>
-//#include <vtkOrientationMarkerWidget.h>
-//#include <vtkRenderWindowInteractor.h>
-
 #include "VtkVisualModule.h"
 
 namespace dyno
@@ -23,13 +19,16 @@ namespace dyno
 	{
 	public:
 		VtkRenderEngine();
+
 		virtual void draw(dyno::SceneGraph* scene) override; 
+		virtual void resize(int w, int h) override;
 
 	private:
 		void setScene(dyno::SceneGraph* scene);
 		void setCamera();
 
 	private:
+		bool m_useOffScreen = true;
 
 		vtkNew<vtkExternalOpenGLRenderer>		m_vtkRenderer;
 		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;
@@ -39,7 +38,6 @@ namespace dyno
 
 		std::vector<dyno::VtkVisualModule*>		m_modules;
 
-
 		// ground plane
 		vtkNew<vtkPlaneSource>	m_plane;
 		vtkNew<vtkActor>		m_planeActor;
@@ -47,8 +45,6 @@ namespace dyno
 		// bounding box
 		vtkNew<vtkCubeSource>	m_sceneCube;
 		vtkNew<vtkActor>		m_bboxActor;
-
-
 
 		dyno::SceneGraph* m_scene = NULL;
 

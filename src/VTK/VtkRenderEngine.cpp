@@ -21,6 +21,8 @@
 #include <vtkRenderPassCollection.h>
 #include <vtkCameraPass.h>
 
+#include <vtkOpenGLFramebufferObject.h>
+
 using namespace dyno;
 
 struct dyno::GatherVisualModuleAction : public Action
@@ -62,16 +64,19 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	m_vtkRenderer->SetPreserveGLLights(false);
 	m_vtkRenderer->SetPreserveGLCameraMatrices(false);
 	m_vtkRenderer->SetGradientBackground(true);
-	
+			
 	m_vtkWindow->AutomaticWindowPositionAndResizeOff();
-	m_vtkWindow->SetUseExternalContent(true);
+	m_vtkWindow->SetUseExternalContent(false);
+	m_vtkWindow->SetOffScreenRendering(m_useOffScreen);
+	m_vtkWindow->SwapBuffersOff();
+	m_vtkWindow->DoubleBufferOff();
+	//m_vtkWindow->SetMultiSamples(0);
+
 	m_vtkWindow->AddRenderer(m_vtkRenderer);
-
+	
 	// light
-	m_vtkLight->SetLightTypeToSceneLight();
-	m_vtkLight->SetPosition(1, 1, 1);
 	m_vtkRenderer->AddLight(m_vtkLight);
-
+	
 	// create a ground plane
 	{
 		m_plane->SetResolution(100, 100);
@@ -93,8 +98,6 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 
 	// create a scene bounding box
 	{
-
-
 		vtkNew<vtkPolyDataMapper> mapper;
 		mapper->SetInputData(m_sceneCube->GetOutput());
 
@@ -129,10 +132,10 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 
 	// set shadow pass
 	{
-		// NOT WORK!
-		vtkNew<vtkShadowMapPass>		shadows;
-		vtkNew<vtkSequencePass>			seq;
 		vtkNew<vtkRenderPassCollection> passes;
+		vtkNew<vtkSequencePass>			seq;
+
+		vtkNew<vtkShadowMapPass>		shadows;
 		passes->AddItem(shadows->GetShadowMapBakerPass());
 		passes->AddItem(shadows);
 		seq->SetPasses(passes);
@@ -143,22 +146,19 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		// tell the renderer to use our render pass pipeline
 		// m_vtkRenderer->SetPass(cameraPass);
 	}
-
 }
 
 void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 {
-	// 
 	setScene(scene);
 	setCamera();
-
+		
 	RenderParams* rparams = renderParams();
 	
 	// set light
 	{
 		glm::vec3 lightClr = rparams->light.mainLightColor;// *rparams->light.mainLightScale;
-		glm::vec3 lightDir = rparams->light.mainLightDirection * 100.f;
-		
+		glm::vec3 lightDir = rparams->light.mainLightDirection * 100.f;		
 		glm::vec3 ambient = rparams->light.ambientColor * rparams->light.ambientScale;		
 
 		m_vtkLight->SetColor(lightClr.r, lightClr.g, lightClr.b);
@@ -194,9 +194,37 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 			item->getVolume()->SetVisibility(item->isVisible());
 	}
 
+	GLint currFBO;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currFBO);
+
 	m_vtkWindow->Render();
+	
+	// blit offscreen vtk framebuffer to screen
+	if(m_useOffScreen) {
+		vtkOpenGLFramebufferObject* offscreen = m_vtkWindow->GetOffScreenFramebuffer();
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currFBO);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, offscreen->GetFBOIndex());
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+		// TODO: we should not rely on camera width/height
+		auto camera = RenderEngine::camera();
+		int w = camera->viewportWidth();
+		int h = camera->viewportHeight();
+		glBlitFramebuffer(
+			0, 0, w, h,
+			0, 0, w, h,
+			GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+		gl::glCheckError();
+	}
 }
 
+
+void dyno::VtkRenderEngine::resize(int w, int h)
+{
+	// TODO...
+}
 
 void dyno::VtkRenderEngine::setScene(dyno::SceneGraph * scene)
 {
