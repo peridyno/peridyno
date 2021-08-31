@@ -42,7 +42,8 @@ if(PERIDYNO_Qt5_GUI)
             IO 
             ParticleSystem  
 			RigidBody
-            QtGUI) 
+            QtGUI
+            VtkVisualModule) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           

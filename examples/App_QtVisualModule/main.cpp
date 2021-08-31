@@ -8,8 +8,13 @@
 #include "module/CalculateNorm.h"
 #include "module/ColorMapping.h"
 
+#include "../VTK/VtkRenderEngine.h"
+#include "../VTK/VtkFluidVisualModule.h"
+
 using namespace std;
 using namespace dyno;
+
+bool useVTK = true;
 
 void CreateScene()
 {
@@ -30,26 +35,47 @@ void CreateScene()
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 	colorMapper->varMax()->setValue(5.0f);
 
-	auto ptRender = std::make_shared<PointRenderer>();
-	ptRender->setColor(Vec3f(1, 0, 0));
-	ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
-	ptRender->setColorMapRange(0, 5);
+	if (useVTK)
+	{
+		auto fRender = std::make_shared<FluidVisualModule>();
+		//fRender->setColor(1, 0, 0);
+		fluid->currentTopology()->connect(fRender->inPointSet());
+		fluid->graphicsPipeline()->pushModule(fRender);
+	}
+	else
+	{
+		auto ptRender = std::make_shared<PointRenderer>();
+		ptRender->setColor(Vec3f(1, 0, 0));
+		ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
+		ptRender->setColorMapRange(0, 5);
+		fluid->currentTopology()->connect(ptRender->inPointSet());
+		colorMapper->outColor()->connect(ptRender->inColor());
+		fluid->graphicsPipeline()->pushModule(ptRender);
+	}
 
 	fluid->currentVelocity()->connect(calculateNorm->inVec());
-	fluid->currentTopology()->connect(ptRender->inPointSet());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-	colorMapper->outColor()->connect(ptRender->inColor());
 
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
-	fluid->graphicsPipeline()->pushModule(ptRender);
 }
 
 int main()
 {
 	CreateScene();
 
+	RenderEngine* engine;
+	if (useVTK)
+	{
+		engine = new VtkRenderEngine;
+	}
+	else
+	{
+		engine = new RenderEngine;
+	}
+
 	QtApp window;
+	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 
 	window.mainLoop();

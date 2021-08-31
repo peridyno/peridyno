@@ -40,7 +40,7 @@ namespace dyno
 		void setCamera();
 
 	private:
-		bool m_useOffScreen = false;
+		bool m_useOffScreen = true;
 
 		vtkNew<vtkExternalOpenGLRenderer>		m_vtkRenderer;
 		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;

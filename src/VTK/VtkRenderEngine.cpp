@@ -65,12 +65,13 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	m_vtkWindow->SetOffScreenRendering(m_useOffScreen);
 	m_vtkWindow->SwapBuffersOff();
 	m_vtkWindow->DoubleBufferOff();
-	//m_vtkWindow->SetMultiSamples(0);
+	m_vtkWindow->SetMultiSamples(0);
 
 	m_vtkWindow->AddRenderer(m_vtkRenderer);
 	
 	// light
 	m_vtkLight->SetLightTypeToSceneLight();
+	m_vtkLight->PositionalOff();
 	m_vtkRenderer->AddLight(m_vtkLight);
 	
 	// create a ground plane
@@ -107,7 +108,7 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		m_bboxActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
 		m_bboxActor->GetProperty()->SetOpacity(0.8);
 		m_bboxActor->GetProperty()->SetLineWidth(2.0);
-		//m_bboxActor->GetProperty()->SetLighting(false);
+		m_bboxActor->GetProperty()->SetLighting(false);
 		
 		m_vtkRenderer->AddActor(m_bboxActor);
 
@@ -148,7 +149,7 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		m_renderPasses.cameraPass->SetDelegatePass(m_renderPasses.seq);
 
 		// tell the renderer to use our render pass pipeline
-		m_vtkRenderer->SetPass(m_renderPasses.cameraPass);
+		//m_vtkRenderer->SetPass(m_renderPasses.cameraPass);
 
 	}
 }
@@ -165,13 +166,14 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 
 	// set light
 	{
-		glm::vec3 lightClr = rparams->light.mainLightColor;// *rparams->light.mainLightScale;
+		glm::vec3 lightClr = rparams->light.mainLightColor;
 		glm::vec3 lightDir = rparams->light.mainLightDirection * 100.f;		
 		glm::vec3 ambient = rparams->light.ambientColor * rparams->light.ambientScale;		
 
 		m_vtkLight->SetColor(lightClr.r, lightClr.g, lightClr.b);
 		m_vtkLight->SetAmbientColor(ambient.r, ambient.g, ambient.b);
 		m_vtkLight->SetPosition(lightDir.x, lightDir.y, lightDir.z);
+		//m_vtkLight->SetIntensity(rparams->light.mainLightScale);
 	}
 
 	// set bounding box
@@ -206,15 +208,13 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currFBO);
 
 	m_vtkWindow->Render();
-	
+
 	// blit offscreen vtk framebuffer to screen
 	if(m_useOffScreen) {
 		vtkOpenGLFramebufferObject* offscreen = m_vtkWindow->GetOffScreenFramebuffer();
-
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currFBO);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, offscreen->GetFBOIndex());
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
-
 		// TODO: we should not rely on camera width/height
 		auto camera = RenderEngine::camera();
 		int w = camera->viewportWidth();
@@ -223,8 +223,6 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 			0, 0, w, h,
 			0, 0, w, h,
 			GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-		gl::glCheckError();
 	}
 }
 

@@ -119,7 +119,9 @@ namespace dyno
 {
 	Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
-	PMainWindow::PMainWindow(QWidget *parent, Qt::WindowFlags flags)
+	PMainWindow::PMainWindow(
+		RenderEngine* engine, 
+		QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
 		m_statusBar(nullptr),
 		//m_vtkOpenglWidget(nullptr),
@@ -132,7 +134,10 @@ namespace dyno
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physics simulation platform"));
 		setWindowIcon(QPixmap("../../data/logo3.png"));
 
+
+		mOpenGLWidget = new POpenGLWidget(engine);
 		setCentralView();
+
 		setupToolBar();
 		setupStatusBar();
 //		setupMenuBar();
@@ -193,7 +198,6 @@ namespace dyno
 // 		tabWidget->setTabText(tabWidget->indexOf(m_moduleFlowView), QApplication::translate("MainWindow", "Module Editor", Q_NULLPTR));
 
 		//OpenGL-based visualization widget
-		mOpenGLWidget = new POpenGLWidget();
 // 		mOpenGLWidget->setObjectName(QStringLiteral("tabView"));
 // 		mOpenGLWidget->layout()->setMargin(0);
 // 		tabWidget->addTab(mOpenGLWidget, QString());

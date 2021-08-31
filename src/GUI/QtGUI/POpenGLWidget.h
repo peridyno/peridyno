@@ -56,7 +56,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		POpenGLWidget();
+		POpenGLWidget(RenderEngine* engine);
 		~POpenGLWidget();
 
 	protected:

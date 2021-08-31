@@ -71,6 +71,8 @@ namespace dyno
 	class PModuleFlowWidget;
 	class PNodeEditor;
 
+	class RenderEngine;
+
 
 //	QT_FORWARD_DECLARE_CLASS(QLichtWidget)
 
@@ -81,7 +83,8 @@ namespace dyno
 	public:
 		typedef QMap<QString, QSize> CustomSizeHintMap;
 
-		explicit PMainWindow(QWidget *parent = Q_NULLPTR,
+		explicit PMainWindow(RenderEngine* engine,
+			QWidget *parent = Q_NULLPTR,
 			Qt::WindowFlags flags = 0);
 
 		void mainLoop();

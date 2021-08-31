@@ -14,7 +14,7 @@
 namespace dyno
 {
 
-	POpenGLWidget::POpenGLWidget()
+	POpenGLWidget::POpenGLWidget(RenderEngine* engine)
 	{
 		QSurfaceFormat format;
 		format.setDepthBufferSize(24);
@@ -27,12 +27,14 @@ namespace dyno
 		// Update at 60 fps
 		QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
 		timer.start(16);
+
+		mRenderEngine = engine;
 	}
 
 	POpenGLWidget::~POpenGLWidget()
 	{
 		timer.stop();
-		delete mRenderEngine;
+		//delete mRenderEngine;
 	}
 
 	void POpenGLWidget::initializeGL()
@@ -47,7 +49,7 @@ namespace dyno
 		initializeOpenGLFunctions();
 		QtImGui::initialize(this);
 
-		mRenderEngine = new RenderEngine();
+		//mRenderEngine = new RenderEngine();
 		// Get Context scale
 		float scale = QGuiApplication::primaryScreen()->logicalDotsPerInchX() / 96.0;
 		mRenderEngine->initialize(this->width(), this->height(), scale);
