@@ -14,12 +14,7 @@
 #include <vtkLight.h>
 #include <vtkLightActor.h>
 #include <vtkLightCollection.h>
-
-#include <vtkSequencePass.h>
-#include <vtkShadowMapPass.h>
-#include <vtkShadowMapBakerPass.h>
-#include <vtkRenderPassCollection.h>
-#include <vtkCameraPass.h>
+#include <vtkTextureObject.h>
 
 #include <vtkOpenGLFramebufferObject.h>
 
@@ -75,23 +70,28 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	m_vtkWindow->AddRenderer(m_vtkRenderer);
 	
 	// light
+	m_vtkLight->SetLightTypeToSceneLight();
 	m_vtkRenderer->AddLight(m_vtkLight);
 	
 	// create a ground plane
 	{
+		float scale = 2.0;
+
+		m_plane->SetOrigin(-scale, 0.0,  scale);
+		m_plane->SetPoint1( scale, 0.0,  scale);
+		m_plane->SetPoint2(-scale, 0.0, -scale);
 		m_plane->SetResolution(100, 100);
-		m_plane->SetNormal(0, 1, 0);
 		m_plane->Update();
 
 		vtkNew<vtkPolyDataMapper> planeMapper;
 		planeMapper->SetInputData(m_plane->GetOutput());
 
-		m_planeActor->SetScale(3);
 		m_planeActor->SetMapper(planeMapper);
 		m_planeActor->GetProperty()->SetEdgeVisibility(true);
 		m_planeActor->GetProperty()->SetEdgeColor(0.2, 0.2, 0.2);
 		m_planeActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
-		m_planeActor->GetProperty()->SetOpacity(0.5);
+		m_planeActor->GetProperty()->SetBackfaceCulling(true);
+		//m_planeActor->GetProperty()->SetOpacity(0.5);
 
 		m_vtkRenderer->AddActor(m_planeActor);
 	}
@@ -105,10 +105,12 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		m_bboxActor->SetMapper(mapper);
 		m_bboxActor->GetProperty()->SetRepresentationToWireframe();
 		m_bboxActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+		m_bboxActor->GetProperty()->SetOpacity(0.8);
 		m_bboxActor->GetProperty()->SetLineWidth(2.0);
-		m_bboxActor->GetProperty()->SetLighting(false);
+		//m_bboxActor->GetProperty()->SetLighting(false);
 		
 		m_vtkRenderer->AddActor(m_bboxActor);
+
 	}
 
 	// set axes
@@ -131,30 +133,36 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	}
 
 	// set shadow pass
-	{
-		vtkNew<vtkRenderPassCollection> passes;
-		vtkNew<vtkSequencePass>			seq;
+	{		
+		m_renderPasses.baker->SetResolution(4096);
+		m_renderPasses.shadow->SetShadowMapBakerPass(m_renderPasses.baker);
 
-		vtkNew<vtkShadowMapPass>		shadows;
-		passes->AddItem(shadows->GetShadowMapBakerPass());
-		passes->AddItem(shadows);
-		seq->SetPasses(passes);
-
-		vtkNew<vtkCameraPass> cameraPass;
-		cameraPass->SetDelegatePass(seq);
+		m_renderPasses.passes->AddItem(m_renderPasses.baker);
+		m_renderPasses.passes->AddItem(m_renderPasses.shadow);
+		//m_renderPasses.passes->AddItem(m_renderPasses.light);
+		m_renderPasses.passes->AddItem(m_renderPasses.translucent);
+		m_renderPasses.passes->AddItem(m_renderPasses.volume);
+		m_renderPasses.passes->AddItem(m_renderPasses.overlay);
+		
+		m_renderPasses.seq->SetPasses(m_renderPasses.passes);
+		m_renderPasses.cameraPass->SetDelegatePass(m_renderPasses.seq);
 
 		// tell the renderer to use our render pass pipeline
-		// m_vtkRenderer->SetPass(cameraPass);
+		m_vtkRenderer->SetPass(m_renderPasses.cameraPass);
+
 	}
 }
 
 void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 {
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
 	setScene(scene);
 	setCamera();
 		
 	RenderParams* rparams = renderParams();
-	
+
 	// set light
 	{
 		glm::vec3 lightClr = rparams->light.mainLightColor;// *rparams->light.mainLightScale;
@@ -187,7 +195,7 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 	{
 		if (item->isVisible())
 			item->updateRenderingContext();
-
+		
 		if (item->getActor())
 			item->getActor()->SetVisibility(item->isVisible());
 		if (item->getVolume())

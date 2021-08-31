@@ -11,6 +11,18 @@
 #include <vtkCubeSource.h>
 #include <vtkPlaneSource.h>
 
+#include <vtkSequencePass.h>
+#include <vtkDefaultPass.h>
+#include <vtkLightsPass.h>
+#include <vtkShadowMapPass.h>
+#include <vtkShadowMapBakerPass.h>
+#include <vtkRenderPassCollection.h>
+#include <vtkCameraPass.h>
+#include <vtkOverlayPass.h>
+#include <vtkOpaquePass.h>
+#include <vtkVolumetricPass.h>
+#include <vtkTranslucentPass.h>
+
 #include "VtkVisualModule.h"
 
 namespace dyno
@@ -28,7 +40,7 @@ namespace dyno
 		void setCamera();
 
 	private:
-		bool m_useOffScreen = true;
+		bool m_useOffScreen = false;
 
 		vtkNew<vtkExternalOpenGLRenderer>		m_vtkRenderer;
 		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;
@@ -45,6 +57,24 @@ namespace dyno
 		// bounding box
 		vtkNew<vtkCubeSource>	m_sceneCube;
 		vtkNew<vtkActor>		m_bboxActor;
+
+		// render passes
+		struct
+		{
+			vtkNew<vtkRenderPassCollection> passes;
+			vtkNew<vtkSequencePass>			seq;
+
+			vtkNew<vtkShadowMapPass>		shadow;
+			vtkNew<vtkShadowMapBakerPass>	baker;
+			vtkNew<vtkLightsPass>			light;
+			vtkNew<vtkTranslucentPass>		translucent;
+			vtkNew<vtkVolumetricPass>		volume;
+			vtkNew<vtkOverlayPass>			overlay;
+			vtkNew<vtkOpaquePass>			opaque;
+			
+			vtkNew<vtkCameraPass>			cameraPass;
+		} m_renderPasses;
+
 
 		dyno::SceneGraph* m_scene = NULL;
 

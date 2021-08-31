@@ -54,6 +54,11 @@ void VtkVisualModule::display()
 void VtkVisualModule::updateRenderingContext()
 {
 	m_sceneTime.Modified();
+
+	if(m_actor)
+		m_actor->Modified();
+	if (m_volume)
+		m_volume->Modified();
 }
 
 bool VtkVisualModule::isDirty(bool update)
