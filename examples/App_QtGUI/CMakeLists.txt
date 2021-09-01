@@ -33,6 +33,7 @@ if(PERIDYNO_Qt5_GUI)
             ParticleSystem  
             QtGUI
 			RigidBody
+			GLRenderEngine
             -Wl,--no-whole-archive) 
 
     elseif(WIN32)
@@ -42,7 +43,8 @@ if(PERIDYNO_Qt5_GUI)
             IO 
             ParticleSystem  
 			RigidBody
-            QtGUI) 
+            QtGUI
+			GLRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           

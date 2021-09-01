@@ -16,10 +16,10 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Core 
         Framework 
         IO 
-        RenderEngine 
         ParticleSystem 
         RigidBody 
-        GlfwGUI)
+        GlfwGUI
+        GLRenderEngine)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")

@@ -14,7 +14,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
         Core 
         Framework 
         IO 
-        RenderEngine 
+        GLRenderEngine 
         Peridynamics 
         RigidBody
 		GlfwGUI)

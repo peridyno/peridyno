@@ -1,15 +1,18 @@
-#include "QtGUI/QtApp.h"
+#include <QtApp.h>
 
-#include "ParticleSystem/ParticleFluid.h"
-#include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
+#include <SceneGraph.h>
 
-#include "module/PointRender.h"
-#include "module/CalculateNorm.h"
-#include "module/ColorMapping.h"
+#include <ParticleSystem/ParticleFluid.h>
+#include <ParticleSystem/StaticBoundary.h>
+#include <ParticleSystem/ParticleEmitterSquare.h>
 
-#include "../VTK/VtkRenderEngine.h"
-#include "../VTK/VtkFluidVisualModule.h"
+#include <GLRenderEngine.h>
+#include <GLPointVisualModule.h>
+#include <ColorMapping.h>
+#include <CalculateNorm.h>
+
+#include <VtkRenderEngine.h>
+#include <VtkFluidVisualModule.h>
 
 using namespace std;
 using namespace dyno;
@@ -37,16 +40,16 @@ void CreateScene()
 
 	if (useVTK)
 	{
-		auto fRender = std::make_shared<FluidVisualModule>();
+		auto fRender = std::make_shared<VtkFluidVisualModule>();
 		//fRender->setColor(1, 0, 0);
 		fluid->currentTopology()->connect(fRender->inPointSet());
 		fluid->graphicsPipeline()->pushModule(fRender);
 	}
 	else
 	{
-		auto ptRender = std::make_shared<PointRenderer>();
+		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->setColor(Vec3f(1, 0, 0));
-		ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
+		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		ptRender->setColorMapRange(0, 5);
 		fluid->currentTopology()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
@@ -71,7 +74,7 @@ int main()
 	}
 	else
 	{
-		engine = new RenderEngine;
+		engine = new GLRenderEngine;
 	}
 
 	QtApp window;
@@ -79,5 +82,8 @@ int main()
 	window.createWindow(1024, 768);
 
 	window.mainLoop();
+
+	delete engine;
+
 	return 0;
 }

@@ -1,16 +1,14 @@
-#include "GlfwGUI/GlfwApp.h"
+#include <GlfwApp.h>
 
-#include "SceneGraph.h"
-#include "Log.h"
+#include <SceneGraph.h>
+#include <Log.h>
+#include <Peridynamics/ElasticBody.h>
+#include <Peridynamics/Cloth.h>
+#include <ParticleSystem/StaticBoundary.h>
 
-#include "Peridynamics/ElasticBody.h"
-#include "Peridynamics/Cloth.h"
-
-#include "ParticleSystem/StaticBoundary.h"
-
-#include "module/PointRender.h"
-#include "module/SurfaceRender.h"
-
+#include <GLRenderEngine.h>
+#include <GLPointVisualModule.h>
+#include <GLSurfaceVisualModule.h>
 
 using namespace std;
 using namespace dyno;
@@ -30,16 +28,16 @@ void CreateScene()
 
 	root->addParticleSystem(cloth);
 
-	auto pointRenderer = std::make_shared<PointRenderer>();
+	auto pointRenderer = std::make_shared<GLPointVisualModule>();
 	pointRenderer->setColor(Vec3f(1, 0.2, 1));
-	pointRenderer->setColorMapMode(PointRenderer::PER_OBJECT_SHADER);
+	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 	cloth->currentTopology()->connect(pointRenderer->inPointSet());
 	cloth->currentVelocity()->connect(pointRenderer->inColor());
 
 	cloth->graphicsPipeline()->pushModule(pointRenderer);
 	cloth->setVisible(true);
 
-	auto surfaceRenderer = std::make_shared<SurfaceRenderer>();
+	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
 	cloth->currentTopology()->connect(surfaceRenderer->inTriangleSet());
 	cloth->graphicsPipeline()->pushModule(surfaceRenderer);
 	//cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
@@ -49,8 +47,14 @@ int main()
 {
 	CreateScene();
 
+	RenderEngine* engine = new GLRenderEngine;
+	
 	GlfwApp window;
+	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 	window.mainLoop();
+
+	delete engine;
+
 	return 0;
 }

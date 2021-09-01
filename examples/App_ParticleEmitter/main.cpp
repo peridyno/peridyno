@@ -1,14 +1,15 @@
-#include "GlfwGUI/GlfwApp.h"
+#include <GlfwApp.h>
 
-#include "SceneGraph.h"
+#include <SceneGraph.h>
 
-#include "ParticleSystem/ParticleFluid.h"
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/ParticleEmitterSquare.h"
+#include <ParticleSystem/ParticleFluid.h>
+#include <ParticleSystem/StaticBoundary.h>
+#include <ParticleSystem/ParticleEmitterSquare.h>
 
-#include "module/PointRender.h"
-#include "module/CalculateNorm.h"
-#include "module/ColorMapping.h"
+#include <GLRenderEngine.h>
+#include <GLPointVisualModule.h>
+#include <ColorMapping.h>
+#include <CalculateNorm.h>
 
 using namespace std;
 using namespace dyno;
@@ -30,9 +31,9 @@ void CreateScene()
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 	colorMapper->varMax()->setValue(5.0f);
 
-	auto ptRender = std::make_shared<PointRenderer>();
+	auto ptRender = std::make_shared<GLPointVisualModule>();
 	ptRender->setColor(Vec3f(1, 0, 0));
-	ptRender->setColorMapMode(PointRenderer::PER_VERTEX_SHADER);
+	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	ptRender->setColorMapRange(0, 5);
 
 	fluid->currentVelocity()->connect(calculateNorm->inVec());
@@ -54,9 +55,14 @@ int main()
 {
 	CreateScene();
 
+	GLRenderEngine* engine = new GLRenderEngine;
+
 	GlfwApp window;
+	window.setRenderEngine(engine);
 	window.createWindow(1280, 768);
 	window.mainLoop();
+
+	delete engine;
 
 	return 0;
 }

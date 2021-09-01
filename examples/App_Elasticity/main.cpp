@@ -1,16 +1,20 @@
-#include "GlfwGUI/GlfwApp.h"
-#include "SceneGraph.h"
+#include <GlfwApp.h>
 
-#include "ParticleSystem/StaticBoundary.h"
+#include <SceneGraph.h>
+#include <Log.h>
+#include <Peridynamics/ElasticBody.h>
+#include <Peridynamics/ElasticityModule.h>
+#include <ParticleSystem/StaticBoundary.h>
 
-#include "Peridynamics/ElasticBody.h"
-#include "Peridynamics/ElasticityModule.h"
+// Internal OpenGL Renderer
+#include <GLRenderEngine.h>
+#include <GLPointVisualModule.h>
+#include <GLSurfaceVisualModule.h>
 
-#include "module/SurfaceRender.h"
-#include "module/PointRender.h"
+// VTK Renderer
+#include <VtkRenderEngine.h>
+#include <VtkSurfaceVisualModule.h>
 
-#include "../VTK/VtkSurfaceVisualModule.h"
-#include "../VTK/VtkRenderEngine.h"
 
 using namespace dyno;
 
@@ -37,15 +41,15 @@ int main()
 	if (useVTK)
 	{
 		engine = new VtkRenderEngine;
-		auto sRender = std::make_shared<SurfaceVisualModule>();
+		auto sRender = std::make_shared<VtkSurfaceVisualModule>();
 		sRender->setColor(1, 1, 0);
 		bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
 		bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
 	}
 	else
 	{
-		engine = new RenderEngine;
-		auto sRender = std::make_shared<SurfaceRenderer>();
+		engine = new GLRenderEngine;
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
 		sRender->setColor(Vec3f(1, 1, 0));
 		bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
 		bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);

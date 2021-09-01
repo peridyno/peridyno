@@ -15,12 +15,13 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 
-        IO 
-        RenderEngine 
+        IO          
         ParticleSystem 
         RigidBody 
         GlfwGUI
-		VtkVisualModule)
+		GLRenderEngine
+		VtkRenderEngine
+		)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")

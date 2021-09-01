@@ -1,11 +1,16 @@
-#include "QtGUI/QtApp.h"
-using namespace std;
+#include <QtApp.h>
+#include <GLRenderEngine.h>
+
 using namespace dyno;
 
 int main()
 {
+	GLRenderEngine* engine = new GLRenderEngine;
+
 	QtApp window;
+	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
+	delete engine;
 
 	window.mainLoop();
 	return 0;
