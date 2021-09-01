@@ -40,4 +40,4 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/GUI>)
 
-target_link_libraries(${LIB_NAME} Core Framework IO Rendering RenderCore glfw imgui)
+target_link_libraries(${LIB_NAME} Core Framework IO Rendering RenderCore ImWidgets glfw imgui)

@@ -7,7 +7,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 )                                                              
 
-add_subdirectory(ImGuiWidgets)
+add_subdirectory(ImWidgets)
 add_subdirectory(GlfwGUI)
 
 if(PERIDYNO_Qt5_GUI)

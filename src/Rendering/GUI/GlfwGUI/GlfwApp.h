@@ -1,21 +1,14 @@
 #pragma once
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include <stdio.h>
 
-#include <glad/glad.h>
-// Include glfw3.h after our OpenGL definitions
-#include <GLFW/glfw3.h>
+#include <Platform.h>
+#include <ImWindow.h>
 
 #include "AppBase.h"
 
+struct GLFWwindow;
 namespace dyno {
 
 	class Camera;
-	class RenderEngine;
-	class RenderTarget;
-	class RenderParams;
 	struct Picture;
 
 	enum ButtonState
@@ -76,6 +69,7 @@ namespace dyno {
 
 		RenderEngine* renderEngine() { return mRenderEngine; }
 
+
 	protected:
 		void initCallbacks();    //init default callbacks
 
@@ -125,6 +119,8 @@ namespace dyno {
 		std::string mOutputPath;
 		std::string mWindowTitle;
 
+	public:
+		ImWindow mImWindow;
     };
 
 }

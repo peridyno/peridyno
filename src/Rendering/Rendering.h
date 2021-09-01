@@ -62,9 +62,6 @@ namespace dyno
 		virtual void draw(SceneGraph* scene) = 0;
 		virtual void resize(int w, int h) = 0;
 
-		// TODO: remove
-		virtual bool cameraLocked() { return false; }
-
 		// TODO: re-organize
 		RenderParams* renderParams() { return &m_rparams; }
 		std::shared_ptr<Camera> camera() { return m_camera; }

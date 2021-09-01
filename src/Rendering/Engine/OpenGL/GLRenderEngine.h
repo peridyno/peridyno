@@ -20,11 +20,7 @@
 #include <vector>
 
 #include <Rendering.h>
-
 #include "gl/Buffer.h"
-
-//use stb_image load image
-#include "ui/picture.h"
 
 namespace dyno
 {
@@ -56,15 +52,12 @@ namespace dyno
 		virtual void draw(dyno::SceneGraph* scene) override;
 		virtual void resize(int w, int h) override;
 
-		void drawGUI();
-		bool cameraLocked();
 
 	private:
 		void setupCamera();
 		void initUniformBuffers();
 
 	private:
-		bool mDisenableCamera = false;
 
 		// uniform buffer for matrices
 		gl::Buffer		mTransformUBO;
@@ -78,6 +71,5 @@ namespace dyno
 		GLRenderTarget* mRenderTarget;
 		CameraType mCameraType = CameraType::Orbit;
 
-		std::vector<std::shared_ptr<Picture>> mPics;
 	};
 };

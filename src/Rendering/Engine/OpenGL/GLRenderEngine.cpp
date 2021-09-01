@@ -7,8 +7,6 @@
 #include "ShadowMap.h"
 #include "SSAO.h"
 
-#include "ui/imgui_extend.h"
-
 // dyno
 #include "SceneGraph.h"
 #include "Action.h"
@@ -18,8 +16,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <glad/glad.h>
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
 
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
@@ -97,13 +93,6 @@ namespace dyno
 		m_camera->setClipNear(0.01f);
 		m_camera->setClipFar(10.0f);
 
-		// TODO: Reorganize
-		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
-		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
-		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
-		mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));		
-
-		ImGui::initializeStyle(scale);
 	}
 
 	void GLRenderEngine::setupCamera()
@@ -216,109 +205,6 @@ namespace dyno
 		mRenderTarget->blit(0);
 	}
 
-	void GLRenderEngine::drawGUI()
-	{
-		
-		float iBgGray[2] = { m_rparams.bgColor0[0], m_rparams.bgColor1[0]};
-		// float iBgGray[2] = { 0.2f, 0.8f };
-		RenderParams::Light iLight =m_rparams.light;
-
- 			// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
- 			{
-				static float f = 0.0f;
-				static int counter = 0;
-
-				{// Top Left widget
-					ImGui::SetNextWindowPos(ImVec2(0,0));
-					ImGui::Begin("Top Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					
-					if(ImGui::Button("Lighting")){
-						ImGui::OpenPopup("LightingMenu");
-					}
-
-					if(ImGui::BeginPopup("LightingMenu")){
-						ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.3f", 0);
-						m_rparams.bgColor0 = glm::vec3(iBgGray[0]);
-						m_rparams.bgColor1 = glm::vec3(iBgGray[1]);
-						
-						ImGui::Text("Ambient Light");
-
-						ImGui::beginTitle("Ambient Light Scale");
-						ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 10.0f, "%.3f", 0); 
-						ImGui::endTitle();
-						ImGui::SameLine();
-						ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel) ;
-
-						ImGui::Text("Main Light");
-						ImGui::beginTitle("Main Light Scale");
-						ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 10.0f, "%.3f", 0); 
-						ImGui::endTitle();
-						ImGui::SameLine();
-						ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
-						m_rparams.light = iLight;
-
-						ImGui::EndPopup();
-					}
-					
-
-					// Camera Select
-					static int camera_current = 0;
-					const char* camera_name[] = {"Orbit", "TrackBall"};
-					static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
-
-					ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
-					ImGui::beginTitle("Camera");
-					if (ImGui::BeginCombo("", camera_name[camera_current], flags))
-					{
-						for (int n = 0; n < IM_ARRAYSIZE(camera_name); n++)
-						{
-							const bool is_selected = (camera_current == n);
-							if (ImGui::Selectable(camera_name[n], is_selected))
-								camera_current = n;
-							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-							if (is_selected)
-								ImGui::SetItemDefaultFocus();
-						}
-						ImGui::EndCombo();
-					}			
-					ImGui::endTitle();
-
-// 					if(CameraType(camera_current) != mCameraType){
-// 						// TODO 
-// 						// setCameraType(CameraType(camera_current));
-// 					}
-					//ImGui::ShowStyleEditor();
-					ImGui::End();
-				}
-
-				{// Top Right widget
-					
-					ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					ImGui::toggleButton(mPics[3]->GetTexture(),"Lock", &(mDisenableCamera));
-					// ImGui::toggleButton("Lock", &(mDisenableCamera));
-					ImGui::SameLine();
-					ImGui::toggleButton(mPics[0]->GetTexture(),"Ground", &(m_rparams.showGround));
-					// ImGui::toggleButton("Ground", &(m_rparams.showGround));
-					ImGui::SameLine();
-					ImGui::toggleButton(mPics[1]->GetTexture(),"Bounds", &(m_rparams.showSceneBounds));
-					// ImGui::toggleButton("Bounds", &(m_rparams.showSceneBounds));
-					ImGui::SameLine();
-					ImGui::toggleButton(mPics[2]->GetTexture(),"Axis Helper", &(m_rparams.showAxisHelper));
-					// ImGui::toggleButton("Axis Helper", &(m_rparams.showAxisHelper));
-					ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, 0));
-
-					ImGui::End();
-				}
-
-				{// Bottom Right widget
-					ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-					ImGui::Text(" %.1f FPS", ImGui::GetIO().Framerate);
-					ImGui::SetWindowPos(ImVec2(mRenderTarget->width - ImGui::GetWindowSize().x, mRenderTarget->height - ImGui::GetWindowSize().y));
-					ImGui::End();
-				}
- 			}
-
-	}
 
 	void GLRenderEngine::resize(int w, int h)
 	{
@@ -328,11 +214,6 @@ namespace dyno
 		m_rparams.viewport.y = 0;
 		m_rparams.viewport.w = w;
 		m_rparams.viewport.h = h;
-	}
-
-	bool GLRenderEngine::cameraLocked()
-	{
-		return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
 	}
 
 }

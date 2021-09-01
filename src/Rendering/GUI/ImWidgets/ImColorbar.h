@@ -16,17 +16,11 @@
 
 #pragma once
 
-#include "GLVisualModule.h"
-#include <imgui.h>
-#include "ui/imgui_extend.h"
-
-// #include "GLCudaBuffer.h"
-// #include "gl/VertexArray.h"
-// #include "gl/Program.h"
+#include "ImWidget.h"
 
 namespace dyno
 {
-	class ImColorbar : public GLVisualModule
+	class ImColorbar : public ImWidget
 	{
 		DECLARE_CLASS(ImColorbar)
 	public:
@@ -34,11 +28,10 @@ namespace dyno
 			Jet = 0,
 			Heat = 1);
 			
-		ImColorbar();
+		ImColorbar(std::shared_ptr<Node> node = NULL);
 		~ImColorbar() override;
 
 		void setCoord(ImVec2 coord);
-
 		ImVec2 getCoord() const;
 
 	public:
@@ -51,9 +44,9 @@ namespace dyno
 		// DEF_ARRAY_IN(int, Value, DeviceType::GPU, "");
 
 	protected:
-		virtual void paintGL(RenderMode mode) override;
-		virtual void updateGL() override;
-		virtual bool initializeGL() override;
+		virtual void paint();
+		virtual void update();
+		virtual bool initialize();
 
 	private:
 
@@ -68,5 +61,8 @@ namespace dyno
 
 		float val[6 + 1];
 		ImU32 col[6 + 1];
+
+		Vec3f mBaseColor;
+		std::shared_ptr<Node> mNode;
 	};
 };

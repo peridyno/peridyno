@@ -1,23 +1,15 @@
 #include "ImColorbar.h"
-// opengl
-#include <glad/glad.h>
-#include "GLRenderEngine.h"
-
-#include <Utility.h>
-#include <RenderTools.h>
-
-#include <cuda_gl_interop.h>
 
 // framework
-#include <Topology/TriangleSet.h>
-#include <Node.h>
+#include "imgui_extend.h"
 
 namespace dyno
 {
 	IMPLEMENT_CLASS(ImColorbar)
 
-	ImColorbar::ImColorbar()
+	ImColorbar::ImColorbar(std::shared_ptr<Node> node)
 	{
+		this->mNode = node;
 		this->setName("im_colorbar");
 	}
 
@@ -36,21 +28,19 @@ namespace dyno
 		return mCoord;
 	}
 
-	bool ImColorbar::initializeGL()
+	bool ImColorbar::initialize()
 	{
 		mCol = nullptr;
 		mVal = nullptr;
 		return true;
 	}
 
-	void ImColorbar::updateGL()
+	void ImColorbar::update()
 	{
-		Node* parent = getParent();
-
-		if (parent == NULL)
+		if (mNode == NULL)
 			return;
 
-		if (!parent->isVisible())
+		if (!mNode->isVisible())
 			return;
 
 		if (!this->inScalar()->isEmpty())
@@ -98,13 +88,10 @@ namespace dyno
 		mVal = val;
 	}
 
-	void ImColorbar::paintGL(RenderMode mode)
+	void ImColorbar::paint()
 	{
-		if(mode == RenderMode::COLOR)
-		{
-			ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-			ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
-			ImGui::End();
-		}
+		ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+		ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
+		ImGui::End();
 	}
 }

@@ -72,7 +72,7 @@ namespace dyno
 	class PNodeEditor;
 
 	class RenderEngine;
-
+	class ImWidget;
 
 //	QT_FORWARD_DECLARE_CLASS(QLichtWidget)
 
@@ -89,6 +89,8 @@ namespace dyno
 
 		void mainLoop();
 		void createWindow(int width, int height);
+
+		void addImWidget(std::shared_ptr<ImWidget> widget);
 
 	public slots:
 		//File menu

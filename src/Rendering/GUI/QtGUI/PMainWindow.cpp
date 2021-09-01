@@ -157,6 +157,11 @@ namespace dyno
 
 	}
 
+	void PMainWindow::addImWidget(std::shared_ptr<ImWidget> widget)
+	{
+		mOpenGLWidget->addImWidget(widget);
+	}
+
 	void PMainWindow::newScene()
 	{
 		QMessageBox::StandardButton reply;

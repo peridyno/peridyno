@@ -1,3 +1,5 @@
+#include <glad/glad.h>
+
 #include "POpenGLWidget.h"
 #include "PSimulationThread.h"
 
@@ -10,6 +12,8 @@
 #include <QGuiApplication>
 #include <QScreen>
 
+#include "QtImGui.h"
+#include <ImWidget.h>
 
 namespace dyno
 {
@@ -53,6 +57,13 @@ namespace dyno
 		// Get Context scale
 		float scale = QGuiApplication::primaryScreen()->logicalDotsPerInchX() / 96.0;
 		mRenderEngine->initialize(this->width(), this->height(), scale);
+
+		mImWindow.initialize(scale);
+		// initialize widgets, should move into ImWindow...
+		for (auto widget : mWidgets)
+		{
+			widget->initialize();
+		}
 	}
 
 	void POpenGLWidget::paintGL()
@@ -60,10 +71,20 @@ namespace dyno
 		//QtImGui
 		QtImGui::newFrame();
 		
-		//mRenderEngine->begin();		
-		mRenderEngine->draw(&SceneGraph::getInstance());        
-		//mRenderEngine->drawGUI();
-		//mRenderEngine->end();
+		// Draw scene		
+		mRenderEngine->draw(&SceneGraph::getInstance());       
+
+		// Draw ImGui
+		mRenderEngine->renderParams()->viewport.w = this->width();
+		mRenderEngine->renderParams()->viewport.h = this->height();
+		mImWindow.draw(mRenderEngine);			
+		// Draw widgets
+		// TODO: maybe move into mImWindow...
+		for (auto widget : mWidgets)
+		{
+			widget->update();
+			widget->paint();
+		}
 
 		ImGui::Render();
 		// Do QtImgui Render After Glfw Render
@@ -91,10 +112,10 @@ namespace dyno
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
 	{
-		if (event->buttons().testFlag(Qt::LeftButton) && mButtonState == QBUTTON_DOWN && !mRenderEngine->cameraLocked()) {
+		if (event->buttons().testFlag(Qt::LeftButton) && mButtonState == QBUTTON_DOWN && !mImWindow.cameraLocked()) {
 			activeCamera()->rotateToPoint(event->x(), event->y());
 		}
-		else if (event->buttons().testFlag(Qt::RightButton) && mButtonState == QBUTTON_DOWN && !mRenderEngine->cameraLocked()) {
+		else if (event->buttons().testFlag(Qt::RightButton) && mButtonState == QBUTTON_DOWN && !mImWindow.cameraLocked()) {
 			activeCamera()->translateToPoint(event->x(), event->y());
 		}
 
@@ -103,7 +124,7 @@ namespace dyno
 
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
-		if(!mRenderEngine->cameraLocked())
+		if(!mImWindow.cameraLocked())
 			activeCamera()->zoom(-0.001*event->angleDelta().y());
 
 		update();

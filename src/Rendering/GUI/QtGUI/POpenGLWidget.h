@@ -17,8 +17,6 @@
  * limitations under the License.
  */
 #pragma once
-#include "QtImGui.h"
-
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
@@ -26,15 +24,13 @@
 #include <QTimer>
 
 //#include <GL/glu.h>
-
 #include <Rendering.h>
-
+#include <ImWindow.h>
 
 namespace dyno
 {
+	class ImWidget;
 	class RenderEngine;
-	class RenderTarget;
-	class RenderParams;
 	class Camera;
 
 	enum QButtonState
@@ -59,11 +55,11 @@ namespace dyno
 		POpenGLWidget(RenderEngine* engine);
 		~POpenGLWidget();
 
+		void addImWidget(std::shared_ptr<ImWidget> widget) { mWidgets.push_back(widget); };
+
 	protected:
-		void initializeGL() override;
-		
-		void paintGL() override;
-		
+		void initializeGL() override;		
+		void paintGL() override;		
 		void resizeGL(int w, int h) override;
 		
 		void mousePressEvent(QMouseEvent *event) override;
@@ -82,6 +78,10 @@ namespace dyno
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		// Qt
 		QTimer timer;
+
+		// 
+		ImWindow mImWindow;
+		std::vector<std::shared_ptr<ImWidget>> mWidgets;
 	};
 
 }

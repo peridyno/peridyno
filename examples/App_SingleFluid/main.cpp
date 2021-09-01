@@ -23,7 +23,7 @@ using namespace dyno;
 
 bool useVTK = false;
 
-void CreateScene()
+void CreateScene(AppBase* app)
 {
 	SceneGraph& scene = SceneGraph::getInstance();
 	scene.setUpperBound(Vec3f(1.5, 1, 1.5));
@@ -45,13 +45,6 @@ void CreateScene()
 	fluid->currentVelocity()->connect(calculateNorm->inVec());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
-	// TODO add ImColorbar
-	auto colorBar = std::make_shared<ImColorbar>();
-	colorBar->varMax()->setValue(5.0f);
-
-	// colorMapper->outColor()->connect(colorBar->inColor());
-	calculateNorm->outNorm()->connect(colorBar->inScalar());
-	
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
@@ -90,27 +83,25 @@ void CreateScene()
 		fluid->graphicsPipeline()->pushModule(ptRender);
 	}
 
-	
-	fluid->graphicsPipeline()->pushModule(colorBar);
+	// A simple color bar widget for node
+	auto colorBar = std::make_shared<ImColorbar>(fluid);
+	colorBar->varMax()->setValue(5.0f);
+	calculateNorm->outNorm()->connect(colorBar->inScalar());
+	// add the widget to app
+	app->addWidget(colorBar);
 }
 
 int main()
 {
-	CreateScene();
-
 	RenderEngine* engine;
-
-	if (useVTK)
-	{
-		engine = new VtkRenderEngine;
-	}
-	else
-	{
-		engine = new GLRenderEngine;
-	}
+	if (useVTK) engine = new VtkRenderEngine;
+	else		engine = new GLRenderEngine;
 
 	GlfwApp window;
 	window.setRenderEngine(engine);
+
+	CreateScene(&window);
+
 	// window.createWindow(2048, 1152);
 	window.createWindow(1024, 768);
 	window.mainLoop();

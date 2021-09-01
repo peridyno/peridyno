@@ -13,6 +13,16 @@
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
 
+#include <glad/glad.h>
+// Include glfw3.h after our OpenGL definitions
+#include <GLFW/glfw3.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+#include <ImWidget.h>
+
 namespace dyno 
 {
 	static void glfw_error_callback(int error, const char* description)
@@ -139,9 +149,18 @@ namespace dyno
 		// Get Context scale
 		float xscale, yscale;
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
+
 		// Jian: initialize rendering engine
-		//mRenderEngine = new RenderEngine();
 		mRenderEngine->initialize(width, height, xscale);
+
+		// Jian: initialize ImWindow
+		mImWindow.initialize(xscale);
+
+		// initialize widgets, should move into ImWindow...
+		for (auto widget : mWidgets)
+		{
+			widget->initialize();
+		}
 	}
 
 	void GlfwApp::initializeStyle()
@@ -178,6 +197,20 @@ namespace dyno
 			//mRenderEngine->drawGUI();
 			mRenderEngine->draw(&SceneGraph::getInstance());
 			//mRenderEngine->end();
+
+			// TODO: keep a track of window size in other place
+			int width, height;
+			glfwGetWindowSize(mWindow, &width, &height);
+			mRenderEngine->renderParams()->viewport.w = width;
+			mRenderEngine->renderParams()->viewport.h = height;
+			mImWindow.draw(mRenderEngine);
+			// Draw widgets
+			// TODO: maybe move into mImWindow...
+			for (auto widget : mWidgets)
+			{
+				widget->update();
+				widget->paint();
+			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -320,10 +353,10 @@ namespace dyno
 
 		auto camera = activeWindow->activeCamera();
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->renderEngine()->cameraLocked()) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->renderEngine()->cameraLocked()) {
+		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
 			camera->translateToPoint(x, y);
 		}
 
@@ -346,7 +379,7 @@ namespace dyno
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
 
-		if(!activeWindow->renderEngine()->cameraLocked())
+		if(!activeWindow->mImWindow.cameraLocked())
 			camera->zoom(-OffsetY);
 	}
 
