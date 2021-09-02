@@ -7,10 +7,11 @@
 #include <RigidBody/RigidBody.h>
 #include <ParticleSystem/StaticBoundary.h>
 
+#include <Module/CalculateNorm.h>
+
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 
-#include <CalculateNorm.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 

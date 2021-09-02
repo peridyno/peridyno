@@ -6,10 +6,11 @@
 #include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/ParticleEmitterSquare.h>
 
+#include <Module/CalculateNorm.h>
+
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
-#include <CalculateNorm.h>
 
 #include <VtkRenderEngine.h>
 #include <VtkFluidVisualModule.h>
