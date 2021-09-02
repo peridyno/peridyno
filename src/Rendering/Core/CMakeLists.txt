@@ -1,6 +1,7 @@
 set(LIB_NAME RenderCore)
 
 file(GLOB_RECURSE SOURCES *.cpp *.h *.cu)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME} PRIVATE Core Framework)

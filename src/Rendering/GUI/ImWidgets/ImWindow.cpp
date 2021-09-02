@@ -19,6 +19,7 @@ void dyno::ImWindow::initialize(float scale)
 	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
 
 	ImGui::initializeStyle(scale);
+	ImGui::initColorVal();
 }
 
 void dyno::ImWindow::draw(RenderEngine* engine)
@@ -39,7 +40,7 @@ void dyno::ImWindow::draw(RenderEngine* engine)
 			ImGui::SetNextWindowPos(ImVec2(0, 0));
 			ImGui::Begin("Top Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 
-			if (ImGui::Button("Lighting")) {
+			if (ImGui::Button(ICON_FA_LIGHTBULB " Lighting")) {
 				ImGui::OpenPopup("LightingMenu");
 			}
 
@@ -70,7 +71,7 @@ void dyno::ImWindow::draw(RenderEngine* engine)
 
 			// Camera Select
 			static int camera_current = 0;
-			const char* camera_name[] = { "Orbit", "TrackBall" };
+			const char* camera_name[] = { ICON_FA_CAMERA " Orbit", ICON_FA_CAMERA " TrackBall" };
 			static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
 
 			ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
@@ -101,16 +102,16 @@ void dyno::ImWindow::draw(RenderEngine* engine)
 		{// Top Right widget
 
 			ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-			ImGui::toggleButton(mPics[3]->GetTexture(), "Lock", &(mDisenableCamera));
+			ImGui::toggleButton(ICON_FA_ARROWS_ALT " Lock", &(mDisenableCamera));
 			// ImGui::toggleButton("Lock", &(mDisenableCamera));
 			ImGui::SameLine();
-			ImGui::toggleButton(mPics[0]->GetTexture(), "Ground", &(rparams->showGround));
+			ImGui::toggleButton(ICON_FA_SQUARE " Ground", &(rparams->showGround));
 			// ImGui::toggleButton("Ground", &(rparams->showGround));
 			ImGui::SameLine();
-			ImGui::toggleButton(mPics[1]->GetTexture(), "Bounds", &(rparams->showSceneBounds));
+			ImGui::toggleButton(ICON_FA_CUBE " Bounds", &(rparams->showSceneBounds));
 			// ImGui::toggleButton("Bounds", &(rparams->showSceneBounds));
 			ImGui::SameLine();
-			ImGui::toggleButton(mPics[2]->GetTexture(), "Axis Helper", &(rparams->showAxisHelper));
+			ImGui::toggleButton(ICON_FA_LOCATION_ARROW " Axis Helper", &(rparams->showAxisHelper));
 			// ImGui::toggleButton("Axis Helper", &(rparams->showAxisHelper));
 			ImGui::SetWindowPos(ImVec2(rparams->viewport.w - ImGui::GetWindowSize().x, 0));
 

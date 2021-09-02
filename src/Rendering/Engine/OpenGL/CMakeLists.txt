@@ -25,7 +25,6 @@ add_library(${LIB_NAME} STATIC ${SOURCES} ${SHADER_FILES} ${SHADER_HEADER_FILE})
 target_link_libraries(${LIB_NAME} PUBLIC
 	Core 
 	Framework 
-	Rendering 
 	RenderCore 
 	glad 
 	imgui)

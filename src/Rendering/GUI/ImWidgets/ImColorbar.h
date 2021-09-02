@@ -28,7 +28,7 @@ namespace dyno
 			Jet = 0,
 			Heat = 1);
 			
-		ImColorbar(std::shared_ptr<Node> node = NULL);
+		ImColorbar(std::shared_ptr<Node> node = nullptr);
 		~ImColorbar() override;
 
 		void setCoord(ImVec2 coord);
@@ -58,7 +58,7 @@ namespace dyno
 		float*						mVal = nullptr;
 		ImU32*						mCol = nullptr;
 		Reduction<Real> 			m_reduce_real;
-
+		const char*					mTitle;
 		float val[6 + 1];
 		ImU32 col[6 + 1];
 

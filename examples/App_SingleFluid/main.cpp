@@ -22,7 +22,7 @@
 using namespace std;
 using namespace dyno;
 
-bool useVTK = true;
+bool useVTK = false;
 
 void CreateScene(AppBase* app)
 {

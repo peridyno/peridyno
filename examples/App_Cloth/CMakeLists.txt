@@ -17,7 +17,6 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
         IO 
         Peridynamics 
 		GlfwGUI
-		Rendering
 		RenderCore
         GLRenderEngine
 		)
