@@ -19,7 +19,11 @@ namespace dyno
 	{
 		this->setName("im_colorbar");
 	}
-
+	ImColorbar::ImColorbar(const char* title)
+	{
+		mTitle = title;
+		this->setName("im_colorbar");
+	}
 	ImColorbar::~ImColorbar()
 	{
 		// mColorBuffer.clear();
@@ -101,7 +105,11 @@ namespace dyno
 	{
 		if(mode == RenderMode::COLOR)
 		{
-			ImGui::Begin("Right sidebar", NULL, /*ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			auto label = "Right sidebar ImColorBar";
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ExColorsVal[ImGui::ImGuiExColVal_WindowTopBg_1]);
+			ImGui::Begin(label, NULL, /*ImGuiWindowFlags_NoMove |*/  ImGuiWindowFlags_NoTitleBar | /*ImGuiWindowFlags_NoBackground |*/ ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::PopStyleColor();
+			ImGui::Text(mTitle);
 			ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
 			ImGui::End();
 		}

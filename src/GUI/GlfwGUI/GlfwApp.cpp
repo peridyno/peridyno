@@ -133,7 +133,7 @@ namespace dyno
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
-		initializeStyle();
+		// initializeStyle();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);

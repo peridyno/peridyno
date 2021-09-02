@@ -35,6 +35,7 @@ namespace dyno
 			Heat = 1);
 			
 		ImColorbar();
+		ImColorbar(const char* title);
 		~ImColorbar() override;
 
 		void setCoord(ImVec2 coord);
@@ -65,7 +66,7 @@ namespace dyno
 		float*						mVal = nullptr;
 		ImU32*						mCol = nullptr;
 		Reduction<Real> 			m_reduce_real;
-
+		const char*					mTitle;
 		float val[6 + 1];
 		ImU32 col[6 + 1];
 	};

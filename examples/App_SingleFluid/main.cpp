@@ -45,7 +45,7 @@ void CreateScene()
 	colorMapper->outColor()->connect(ptRender->inColor());
 	
 	// TODO add ImColorbar
-	auto colorBar = std::make_shared<ImColorbar>();
+	auto colorBar = std::make_shared<ImColorbar>("Velocity");
 	colorBar->varMax()->setValue(5.0f);
 	
 	// colorMapper->outColor()->connect(colorBar->inColor());
