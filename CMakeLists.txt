@@ -61,9 +61,7 @@ endif()
 
 option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
-option(PERIDYNO_LIBRARY_GRAPHICS "Enable binding the graphics library using opengl" ON)
 option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-option(PERIDYNO_LIBRARY_GUI "Enable binding the GUI library" ON)
 
 option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" ON)
 if(PERIDYNO_PYTHON_BINDING)
