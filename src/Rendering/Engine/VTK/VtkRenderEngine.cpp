@@ -112,7 +112,7 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		m_bboxActor->GetProperty()->SetRepresentationToWireframe();
 		m_bboxActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
 		m_bboxActor->GetProperty()->SetOpacity(0.8);
-		m_bboxActor->GetProperty()->SetLineWidth(2.0);
+		// m_bboxActor->GetProperty()->SetLineWidth(2.0);
 		m_bboxActor->GetProperty()->SetLighting(false);
 		
 		m_vtkRenderer->AddActor(m_bboxActor);
@@ -175,8 +175,8 @@ void VtkRenderEngine::initialize(int width, int height, float scale)
 
 void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 {
-	//glEnable(GL_LIGHTING);
-	//glEnable(GL_LIGHT0);
+	m_vtkWindow->GetState()->ResetFramebufferBindings();
+	m_vtkWindow->GetState()->ResetGLViewportState();
 
 	setScene(scene);
 	setCamera();

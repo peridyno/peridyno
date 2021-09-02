@@ -21,7 +21,7 @@
 using namespace std;
 using namespace dyno;
 
-bool useVTK = false;
+bool useVTK = true;
 
 void CreateScene(AppBase* app)
 {
