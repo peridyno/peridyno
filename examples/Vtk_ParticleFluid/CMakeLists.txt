@@ -1,5 +1,5 @@
-if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(PROJECT_NAME App_ParticleEmitter)
+if(PERIDYNO_LIBRARY_PARTICLESYSTEM AND PERIDYNO_PLUGIN_VTK)
+    set(PROJECT_NAME Vtk_ParticleFluid)
 
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
@@ -15,14 +15,15 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 
-        IO 
+        IO          
         ParticleSystem 
         RigidBody 
         GlfwGUI
-        GLRenderEngine)
+		VtkRenderEngine
+		)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/VTK")
 
     if(WIN32)
         set_target_properties(${PROJECT_NAME} PROPERTIES

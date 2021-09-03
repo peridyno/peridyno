@@ -8,8 +8,6 @@
 
 #include <Module/CalculateNorm.h>
 
-#include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 
 #include <VtkRenderEngine.h>
@@ -47,24 +45,10 @@ void CreateScene(AppBase* app)
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
-	if (useVTK)
-	{
-		auto fRender = std::make_shared<VtkFluidVisualModule>();
-		//fRender->setColor(1, 0, 0);
-		fluid->currentTopology()->connect(fRender->inPointSet());
-		fluid->graphicsPipeline()->pushModule(fRender);
-	}
-	else
-	{
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Vec3f(1, 0, 0));
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-		ptRender->setColorMapRange(0, 5);
-		fluid->currentTopology()->connect(ptRender->inPointSet());
-		colorMapper->outColor()->connect(ptRender->inColor());
-		fluid->graphicsPipeline()->pushModule(ptRender);
-	}
-
+	auto fRender = std::make_shared<VtkFluidVisualModule>();
+	//fRender->setColor(1, 0, 0);
+	fluid->currentTopology()->connect(fRender->inPointSet());
+	fluid->graphicsPipeline()->pushModule(fRender);
 
 	// A simple color bar widget for node
 	auto colorBar = std::make_shared<ImColorbar>(fluid);
@@ -76,9 +60,7 @@ void CreateScene(AppBase* app)
 
 int main()
 {
-	RenderEngine* engine;
-	if (useVTK) engine = new VtkRenderEngine;
-	else		engine = new GLRenderEngine;
+	RenderEngine* engine = new VtkRenderEngine;;
 
 	QtApp window;
 	window.setRenderEngine(engine);

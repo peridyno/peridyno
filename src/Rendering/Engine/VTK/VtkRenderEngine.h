@@ -36,6 +36,8 @@ namespace dyno
 		virtual void draw(dyno::SceneGraph* scene) override; 
 		virtual void resize(int w, int h) override;
 
+		virtual std::string name() override;
+
 	private:
 		void setScene(dyno::SceneGraph* scene);
 		void setCamera();
@@ -52,8 +54,10 @@ namespace dyno
 		std::vector<dyno::VtkVisualModule*>		m_modules;
 
 		// ground plane
-		vtkNew<vtkPlaneSource>	m_plane;
-		vtkNew<vtkActor>		m_planeActor;
+		vtkNew<vtkPlaneSource>	mPlane;
+		vtkNew<vtkPlaneSource>	mPlaneWireFrame;
+		vtkNew<vtkActor>		mPlaneActor;
+		vtkNew<vtkActor>		mPlaneWireFrameActor;
 
 		// bounding box
 		vtkNew<vtkCubeSource>	m_sceneCube;

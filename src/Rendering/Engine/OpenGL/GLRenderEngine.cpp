@@ -216,4 +216,9 @@ namespace dyno
 		m_rparams.viewport.h = h;
 	}
 
+	std::string GLRenderEngine::name()
+	{
+		return std::string("Native OpenGL");
+	}
+
 }

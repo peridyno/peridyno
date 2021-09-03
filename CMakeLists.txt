@@ -4,7 +4,7 @@ project(peridyno LANGUAGES CXX CUDA)                                            
 
 # define library version (update: apparently you can also do it in project()!)
 set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
-set(PERIDYNO_LIBRARY_VERSION_MINOR 3 CACHE STRING "peridyno minor version" FORCE)
+set(PERIDYNO_LIBRARY_VERSION_MINOR 4 CACHE STRING "peridyno minor version" FORCE)
 set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
@@ -18,7 +18,6 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPIL
 #set(CMAKE_CUDA_FLAGS "-arch=sm_60")                                         #默认为所有cuda代码生成computability7.0下二进制代码
 
 file(COPY "data/" DESTINATION "data")
-file(COPY "src/Graphics/Shader/" DESTINATION "Shader")
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
@@ -78,6 +77,9 @@ add_subdirectory(external/glfw-3.3.0)
 add_subdirectory(external/glad-4.6)
 add_subdirectory(external/imgui)
 
+# VTK rendering support, off by default
+option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
+# Qt GUI support, off by default
 option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
 
 option(PERIDYNO_EXAMPLE "Enable building examples" ON)

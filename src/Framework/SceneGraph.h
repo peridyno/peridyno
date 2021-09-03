@@ -27,8 +27,8 @@ namespace dyno
 
 		~SceneGraph() {};
 
-		void setRootNode(std::shared_ptr<Node> root) { m_root = root; }
-		std::shared_ptr<Node> getRootNode() { return m_root; }
+		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
+		std::shared_ptr<Node> getRootNode() { return mRoot; }
 
 		virtual bool initialize();
 		bool isInitialized() { return mInitialized; }
@@ -49,7 +49,7 @@ namespace dyno
 		std::shared_ptr<TNode> createNewScene(Args&& ... args)
 		{
 			std::shared_ptr<TNode> root = TypeInfo::New<TNode>(std::forward<Args>(args)...);
-			m_root = root;
+			mRoot = root;
 			return root;
 		}
 
@@ -77,7 +77,7 @@ namespace dyno
 		void setLowerBound(Vec3f lowerBound);
 		void setUpperBound(Vec3f upperBound);
 
-		inline Iterator begin() { return NodeIterator(m_root); }
+		inline Iterator begin() { return NodeIterator(mRoot); }
 		inline Iterator end() { return NodeIterator(nullptr); }
 
 	public:
@@ -91,6 +91,7 @@ namespace dyno
 			, mLowerBound(0, 0, 0)
 			, mUpperBound(1, 1, 1)
 		{
+			mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
 		};
 
@@ -117,7 +118,7 @@ namespace dyno
 		Vec3f mUpperBound;
 
 	private:
-		std::shared_ptr<Node> m_root = nullptr;
+		std::shared_ptr<Node> mRoot = nullptr;
 	};
 
 }

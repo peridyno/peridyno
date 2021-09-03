@@ -83,23 +83,41 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	{
 		float scale = 2.0;
 
-		m_plane->SetOrigin(-scale, 0.0,  scale);
-		m_plane->SetPoint1( scale, 0.0,  scale);
-		m_plane->SetPoint2(-scale, 0.0, -scale);
-		m_plane->SetResolution(100, 100);
-		m_plane->Update();
+		mPlane->SetOrigin(-scale, 0.0,  scale);
+		mPlane->SetPoint1( scale, 0.0,  scale);
+		mPlane->SetPoint2(-scale, 0.0, -scale);
+		mPlane->SetResolution(100, 100);
+		mPlane->Update();
 
 		vtkNew<vtkPolyDataMapper> planeMapper;
-		planeMapper->SetInputData(m_plane->GetOutput());
+		planeMapper->SetInputData(mPlane->GetOutput());
 
-		m_planeActor->SetMapper(planeMapper);
-		m_planeActor->GetProperty()->SetEdgeVisibility(true);
-		m_planeActor->GetProperty()->SetEdgeColor(0.2, 0.2, 0.2);
-		m_planeActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
-		m_planeActor->GetProperty()->SetBackfaceCulling(true);
+		mPlaneActor->SetMapper(planeMapper);
+		mPlaneActor->GetProperty()->SetEdgeVisibility(true);
+		mPlaneActor->GetProperty()->SetEdgeColor(0.4, 0.4, 0.4);
+		mPlaneActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+		mPlaneActor->GetProperty()->SetBackfaceCulling(true);
 		//m_planeActor->GetProperty()->SetOpacity(0.5);
 
-		m_vtkRenderer->AddActor(m_planeActor);
+		mPlaneWireFrame->SetOrigin(-scale, 0.0, scale);
+		mPlaneWireFrame->SetPoint1(scale, 0.0, scale);
+		mPlaneWireFrame->SetPoint2(-scale, 0.0, -scale);
+		mPlaneWireFrame->SetResolution(5, 5);
+		mPlaneWireFrame->Update();
+
+		vtkNew<vtkPolyDataMapper> wireframeMapper;
+		wireframeMapper->SetInputData(mPlaneWireFrame->GetOutput());
+
+		mPlaneWireFrameActor->SetMapper(wireframeMapper);
+		mPlaneWireFrameActor->GetProperty()->SetEdgeVisibility(true);
+		mPlaneWireFrameActor->GetProperty()->SetEdgeColor(0.35, 0.35, 0.35);
+		mPlaneWireFrameActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+		mPlaneWireFrameActor->GetProperty()->SetBackfaceCulling(true);
+		mPlaneWireFrameActor->GetProperty()->SetFrontfaceCulling(true);
+		mPlaneWireFrameActor->GetProperty()->SetLineWidth(1.5);
+
+		m_vtkRenderer->AddActor(mPlaneActor);
+		m_vtkRenderer->AddActor(mPlaneWireFrameActor);
 	}
 
 	// create a scene bounding box
@@ -180,7 +198,6 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 
 	setScene(scene);
 	setCamera();
-		
 
 	// set light
 	{
@@ -222,6 +239,11 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 			item->getVolume()->SetVisibility(item->isVisible());
 	}
 
+	mPlaneActor->SetVisibility(m_rparams.showGround);
+	mPlaneWireFrameActor->SetVisibility(m_rparams.showGround);
+
+	m_bboxActor->SetVisibility(m_rparams.showSceneBounds);
+
 	// with vtk_glew.h, we directly use OpenGL functions here
 	GLint currFBO;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currFBO);
@@ -252,7 +274,12 @@ void dyno::VtkRenderEngine::resize(int w, int h)
 	// TODO...
 }
 
-void dyno::VtkRenderEngine::setScene(dyno::SceneGraph * scene)
+std::string VtkRenderEngine::name()
+{
+	return std::string("VTK");
+}
+
+void VtkRenderEngine::setScene(dyno::SceneGraph * scene)
 {
 	if (scene == m_scene)
 		return;

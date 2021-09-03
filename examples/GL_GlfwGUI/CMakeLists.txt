@@ -1,6 +1,7 @@
-set(PROJECT_NAME App_GlfwGUI)
+set(PROJECT_NAME GL_GlfwGUI)
 
 set(LIB_SRC main.cpp)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})
 
 add_executable(${PROJECT_NAME} ${LIB_SRC})
 
@@ -15,6 +16,8 @@ set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
                       FOLDER "Examples")
 
 target_link_libraries(${PROJECT_NAME} GlfwGUI ParticleSystem GLRenderEngine)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
 
 if (MSVC)
     # Tell MSVC to use main instead of WinMain for Windows subsystem executables

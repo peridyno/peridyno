@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-if(PERIDYNO_Qt5_GUI)
-
-    set(PROJECT_NAME App_QtVisualModule)
+if(PERIDYNO_Qt5_GUI AND PERIDYNO_PLUGIN_VTK)
+    set(PROJECT_NAME Qt_VtkVisualModule)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
 
@@ -20,6 +19,7 @@ if(PERIDYNO_Qt5_GUI)
         "${SRC_DIR}/*.c*"
         "${SRC_DIR}/*.h*"
     )
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
     add_executable(${PROJECT_NAME} ${SRC_LIST})
     
@@ -34,7 +34,6 @@ if(PERIDYNO_Qt5_GUI)
             QtGUI
 			RigidBody
             VtkRenderEngine
-			GLRenderEngine
             -Wl,--no-whole-archive) 
 
     elseif(WIN32)
@@ -45,8 +44,7 @@ if(PERIDYNO_Qt5_GUI)
             ParticleSystem  
 			RigidBody
             QtGUI
-            VtkRenderEngine
-			GLRenderEngine) 
+            VtkRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
@@ -65,16 +63,8 @@ if(PERIDYNO_Qt5_GUI)
     endif()
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/Qt")
     set_target_properties(${PROJECT_NAME} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-
-    foreach(SRC IN ITEMS ${SRC_LIST})
-        get_filename_component(SRC_PATH "${SRC}" PATH)
-        file(RELATIVE_PATH SRC_PATH_REL "${SRC_DIR}" "${SRC_PATH}")
-        string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
-        source_group("${GROUP_PATH}" FILES "${SRC}")
-    endforeach()
-
 endif()
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <glm/glm.hpp>
 
 namespace dyno
@@ -66,6 +67,7 @@ namespace dyno
 		RenderParams* renderParams() { return &m_rparams; }
 		std::shared_ptr<Camera> camera() { return m_camera; }
 
+		virtual std::string name() = 0;
 	protected:
 		RenderParams m_rparams;
 

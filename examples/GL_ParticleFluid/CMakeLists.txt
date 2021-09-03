@@ -1,6 +1,7 @@
-if(PERIDYNO_LIBRARY_PERIDYNAMICS)
-    set(PROJECT_NAME App_Cloth)
-    set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
+if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
+    set(PROJECT_NAME GL_ParticleFluid)
+
+    set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
     file(
         GLOB_RECURSE SRC_LIST 
@@ -10,20 +11,21 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
         "${SRC_DIR}/*.h*"
     )
 
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
+
     add_executable(${PROJECT_NAME} ${SRC_LIST})
-	target_link_libraries(${PROJECT_NAME} 
+    target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 
-        IO 
-        Peridynamics 
-		GlfwGUI
-		RenderCore
-        GLRenderEngine
+        IO          
+        ParticleSystem 
+        RigidBody 
+        GlfwGUI
+		GLRenderEngine
 		)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
-    #    set(EXECUTABLE_OUTPUT_PATH  ${CMAKE_CURRENT_BINARY_DIR}/bin/)
 
     if(WIN32)
         set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -36,12 +38,5 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
             set_target_properties(${PROJECT_NAME} PROPERTIES
                 RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
         endif()
-    endif()    
-
-    foreach(SRC IN ITEMS ${SRC_LIST})                                                                           #为VS工程添加filter 方便查看文件结构目录
-        get_filename_component(SRC_PATH "${SRC}" PATH)
-        file(RELATIVE_PATH SRC_PATH_REL "${SRC_DIR}" "${SRC_PATH}")
-        string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
-        source_group("${GROUP_PATH}" FILES "${SRC}")
-    endforeach()
+    endif()   
 endif()
