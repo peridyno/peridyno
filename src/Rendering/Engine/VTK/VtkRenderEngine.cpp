@@ -72,6 +72,9 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	m_vtkWindow->DoubleBufferOff();
 	m_vtkWindow->SetMultiSamples(0);
 
+	// Toggle the line smoothing on, otherwise error occurs when calling the GetProperty()->SetLineWidth(1.5) function 
+	m_vtkWindow->LineSmoothingOn();
+
 	m_vtkWindow->AddRenderer(m_vtkRenderer);
 	
 	// light
