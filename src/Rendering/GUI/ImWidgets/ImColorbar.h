@@ -28,7 +28,7 @@ namespace dyno
 			Jet = 0,
 			Heat = 1);
 			
-		ImColorbar(std::shared_ptr<Node> node = nullptr);
+		ImColorbar();
 		~ImColorbar() override;
 
 		void setCoord(ImVec2 coord);

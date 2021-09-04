@@ -17,7 +17,7 @@
 using namespace std;
 using namespace dyno;
 
-void CreateScene(AppBase* app)
+void CreateScene()
 {
 	SceneGraph& scene = SceneGraph::getInstance();
 	scene.setUpperBound(Vec3f(1.5, 1, 1.5));
@@ -51,11 +51,10 @@ void CreateScene(AppBase* app)
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
 	// A simple color bar widget for node
-	auto colorBar = std::make_shared<ImColorbar>(fluid);
+	auto colorBar = std::make_shared<ImColorbar>();
 	colorBar->varMax()->setValue(5.0f);
 	calculateNorm->outNorm()->connect(colorBar->inScalar());
-	// add the widget to app
-	app->addWidget(colorBar);
+	fluid->graphicsPipeline()->pushModule(colorBar);
 }
 
 int main()
@@ -66,7 +65,7 @@ int main()
 	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 
-	CreateScene(&window);
+	CreateScene();
 
 	window.mainLoop();
 

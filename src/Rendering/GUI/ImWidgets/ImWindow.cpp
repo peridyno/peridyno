@@ -6,9 +6,38 @@
 #include "imgui_extend.h"
 #include "picture.h"
 
+//dyno
+#include "Action.h"
+#include "SceneGraph.h"
+
+//ImWidgets
+#include "ImWidget.h"
+
 #include <Rendering.h>
 
 using namespace dyno;
+
+class WidgetQueue : public Action
+{
+private:
+	void process(Node* node) override
+	{
+		if (!node->isVisible())
+			return;
+
+		for (auto iter : node->graphicsPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<ImWidget*>(iter);
+			if (m && m->isVisible())
+			{
+				//m->update();
+				modules.push_back(m);
+			}
+		}
+	}
+public:
+	std::vector<ImWidget*> modules;
+};
 
 void dyno::ImWindow::initialize(float scale)
 {		
@@ -22,7 +51,7 @@ void dyno::ImWindow::initialize(float scale)
 	ImGui::initColorVal();
 }
 
-void dyno::ImWindow::draw(RenderEngine* engine)
+void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 {
 
 	RenderParams* rparams = engine->renderParams();
@@ -126,6 +155,21 @@ void dyno::ImWindow::draw(RenderEngine* engine)
 			ImGui::SetWindowPos(ImVec2(rparams->viewport.w - ImGui::GetWindowSize().x, rparams->viewport.h - ImGui::GetWindowSize().y));
 			ImGui::End();
 		}
+	}
+
+	// Draw custom widgets
+	// gather visual modules
+	WidgetQueue imWidgetQueue;
+	// enqueue render content
+	if ((scene != 0) && (scene->getRootNode() != 0))
+	{
+		scene->getRootNode()->traverseTopDown(&imWidgetQueue);
+	}
+
+	for (auto widget : imWidgetQueue.modules)
+	{
+		widget->update();
+		widget->paint();
 	}
 }
 

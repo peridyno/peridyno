@@ -40,14 +40,14 @@ struct dyno::GatherVisualModuleAction : public Action
 
 	void process(Node* node) override
 	{
-		this->engine->m_modules.clear();
+		this->engine->mVisualModules.clear();
 
 		for (auto iter : node->graphicsPipeline()->activeModules())
 		{
 			auto m = dynamic_cast<VtkVisualModule*>(iter);
 			if (m)
 			{
-				this->engine->m_modules.push_back(m);
+				this->engine->mVisualModules.push_back(m);
 			}
 		}
 	}
@@ -58,29 +58,29 @@ struct dyno::GatherVisualModuleAction : public Action
 dyno::VtkRenderEngine::VtkRenderEngine()
 {
 	// initialize vtk window and renderer
-	m_vtkRenderer->SetActiveCamera(m_vtkCamera);
-	m_vtkRenderer->SetPreserveDepthBuffer(false);
-	m_vtkRenderer->SetPreserveColorBuffer(false);
-	m_vtkRenderer->SetPreserveGLLights(false);
-	m_vtkRenderer->SetPreserveGLCameraMatrices(false);
-	m_vtkRenderer->SetGradientBackground(true);
+	mVtkRenderer->SetActiveCamera(mVtkCamera);
+	mVtkRenderer->SetPreserveDepthBuffer(false);
+	mVtkRenderer->SetPreserveColorBuffer(false);
+	mVtkRenderer->SetPreserveGLLights(false);
+	mVtkRenderer->SetPreserveGLCameraMatrices(false);
+	mVtkRenderer->SetGradientBackground(true);
 			
-	m_vtkWindow->AutomaticWindowPositionAndResizeOff();
-	m_vtkWindow->SetUseExternalContent(false);
-	m_vtkWindow->SetOffScreenRendering(m_useOffScreen);
-	m_vtkWindow->SwapBuffersOff();
-	m_vtkWindow->DoubleBufferOff();
-	m_vtkWindow->SetMultiSamples(0);
+	mVtkWindow->AutomaticWindowPositionAndResizeOff();
+	mVtkWindow->SetUseExternalContent(false);
+	mVtkWindow->SetOffScreenRendering(m_useOffScreen);
+	mVtkWindow->SwapBuffersOff();
+	mVtkWindow->DoubleBufferOff();
+	mVtkWindow->SetMultiSamples(0);
 
 	// Toggle the line smoothing on, otherwise error occurs when calling the GetProperty()->SetLineWidth(1.5) function 
-	m_vtkWindow->LineSmoothingOn();
+	mVtkWindow->LineSmoothingOn();
 
-	m_vtkWindow->AddRenderer(m_vtkRenderer);
+	mVtkWindow->AddRenderer(mVtkRenderer);
 	
 	// light
-	m_vtkLight->SetLightTypeToSceneLight();
-	m_vtkLight->PositionalOff();
-	m_vtkRenderer->AddLight(m_vtkLight);
+	mVtkLight->SetLightTypeToSceneLight();
+	mVtkLight->PositionalOff();
+	mVtkRenderer->AddLight(mVtkLight);
 	
 	// create a ground plane
 	{
@@ -119,24 +119,24 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		mPlaneWireFrameActor->GetProperty()->SetFrontfaceCulling(true);
 		mPlaneWireFrameActor->GetProperty()->SetLineWidth(1.5);
 
-		m_vtkRenderer->AddActor(mPlaneActor);
-		m_vtkRenderer->AddActor(mPlaneWireFrameActor);
+		mVtkRenderer->AddActor(mPlaneActor);
+		mVtkRenderer->AddActor(mPlaneWireFrameActor);
 	}
 
 	// create a scene bounding box
 	{
 		vtkNew<vtkPolyDataMapper> mapper;
-		mapper->SetInputData(m_sceneCube->GetOutput());
+		mapper->SetInputData(mSceneCube->GetOutput());
 
 		// wireframe
-		m_bboxActor->SetMapper(mapper);
-		m_bboxActor->GetProperty()->SetRepresentationToWireframe();
-		m_bboxActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
-		m_bboxActor->GetProperty()->SetOpacity(0.8);
+		mBoxActor->SetMapper(mapper);
+		mBoxActor->GetProperty()->SetRepresentationToWireframe();
+		mBoxActor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+		mBoxActor->GetProperty()->SetOpacity(0.8);
 		// m_bboxActor->GetProperty()->SetLineWidth(2.0);
-		m_bboxActor->GetProperty()->SetLighting(false);
+		mBoxActor->GetProperty()->SetLighting(false);
 		
-		m_vtkRenderer->AddActor(m_bboxActor);
+		mVtkRenderer->AddActor(mBoxActor);
 
 	}
 
@@ -156,23 +156,22 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 		//widget->SetInteractor(m_interactor);
 		//widget->SetEnabled(1);
 		//widget->InteractiveOn();
-
 	}
 
 	// set shadow pass
 	{		
-		m_renderPasses.baker->SetResolution(4096);
-		m_renderPasses.shadow->SetShadowMapBakerPass(m_renderPasses.baker);
+		mRenderPasses.baker->SetResolution(4096);
+		mRenderPasses.shadow->SetShadowMapBakerPass(mRenderPasses.baker);
 
-		m_renderPasses.passes->AddItem(m_renderPasses.baker);
-		m_renderPasses.passes->AddItem(m_renderPasses.shadow);
+		mRenderPasses.passes->AddItem(mRenderPasses.baker);
+		mRenderPasses.passes->AddItem(mRenderPasses.shadow);
 		//m_renderPasses.passes->AddItem(m_renderPasses.light);
-		m_renderPasses.passes->AddItem(m_renderPasses.translucent);
-		m_renderPasses.passes->AddItem(m_renderPasses.volume);
-		m_renderPasses.passes->AddItem(m_renderPasses.overlay);
+		mRenderPasses.passes->AddItem(mRenderPasses.translucent);
+		mRenderPasses.passes->AddItem(mRenderPasses.volume);
+		mRenderPasses.passes->AddItem(mRenderPasses.overlay);
 		
-		m_renderPasses.seq->SetPasses(m_renderPasses.passes);
-		m_renderPasses.cameraPass->SetDelegatePass(m_renderPasses.seq);
+		mRenderPasses.seq->SetPasses(mRenderPasses.passes);
+		mRenderPasses.cameraPass->SetDelegatePass(mRenderPasses.seq);
 
 		// tell the renderer to use our render pass pipeline
 		//m_vtkRenderer->SetPass(m_renderPasses.cameraPass);
@@ -196,8 +195,8 @@ void VtkRenderEngine::initialize(int width, int height, float scale)
 
 void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 {
-	m_vtkWindow->GetState()->ResetFramebufferBindings();
-	m_vtkWindow->GetState()->ResetGLViewportState();
+	mVtkWindow->GetState()->ResetFramebufferBindings();
+	mVtkWindow->GetState()->ResetGLViewportState();
 
 	setScene(scene);
 	setCamera();
@@ -208,9 +207,9 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 		glm::vec3 lightDir = m_rparams.light.mainLightDirection * 100.f;		
 		glm::vec3 ambient = m_rparams.light.ambientColor * m_rparams.light.ambientScale;		
 
-		m_vtkLight->SetColor(lightClr.r, lightClr.g, lightClr.b);
-		m_vtkLight->SetAmbientColor(ambient.r, ambient.g, ambient.b);
-		m_vtkLight->SetPosition(lightDir.x, lightDir.y, lightDir.z);
+		mVtkLight->SetColor(lightClr.r, lightClr.g, lightClr.b);
+		mVtkLight->SetAmbientColor(ambient.r, ambient.g, ambient.b);
+		mVtkLight->SetPosition(lightDir.x, lightDir.y, lightDir.z);
 		//m_vtkLight->SetIntensity(m_rparams.light.mainLightScale);
 	}
 
@@ -218,20 +217,20 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 	{
 		auto b0 = scene->getLowerBound();
 		auto b1 = scene->getUpperBound();
-		m_sceneCube->SetBounds(b0[0], b1[0], b0[1], b1[1], b0[2], b1[2]);
-		m_sceneCube->Update();
+		mSceneCube->SetBounds(b0[0], b1[0], b0[1], b1[1], b0[2], b1[2]);
+		mSceneCube->Update();
 	}
 	
 	// background
 	{
 		glm::vec3 color0 = m_rparams.bgColor0;
 		glm::vec3 color1 = m_rparams.bgColor1;
-		m_vtkRenderer->SetBackground(color0.x, color0.y, color0.b);
-		m_vtkRenderer->SetBackground2(color1.x, color1.y, color1.b);
+		mVtkRenderer->SetBackground(color0.x, color0.y, color0.b);
+		mVtkRenderer->SetBackground2(color1.x, color1.y, color1.b);
 	}
 
 	// update nodes
-	for (auto* item : m_modules)
+	for (auto* item : mVisualModules)
 	{
 		if (item->isVisible())
 			item->updateRenderingContext();
@@ -245,17 +244,17 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 	mPlaneActor->SetVisibility(m_rparams.showGround);
 	mPlaneWireFrameActor->SetVisibility(m_rparams.showGround);
 
-	m_bboxActor->SetVisibility(m_rparams.showSceneBounds);
+	mBoxActor->SetVisibility(m_rparams.showSceneBounds);
 
 	// with vtk_glew.h, we directly use OpenGL functions here
 	GLint currFBO;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currFBO);
 
-	m_vtkWindow->Render();
+	mVtkWindow->Render();
 
 	// blit offscreen vtk framebuffer to screen
 	if(m_useOffScreen) {
-		vtkOpenGLFramebufferObject* offscreen = m_vtkWindow->GetOffScreenFramebuffer();
+		vtkOpenGLFramebufferObject* offscreen = mVtkWindow->GetOffScreenFramebuffer();
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currFBO);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, offscreen->GetFBOIndex());
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -290,17 +289,17 @@ void VtkRenderEngine::setScene(dyno::SceneGraph * scene)
 	m_scene = scene;
 
 	// first clear existing actors
-	for (dyno::VtkVisualModule* item : m_modules) {
+	for (dyno::VtkVisualModule* item : mVisualModules) {
 		vtkActor* actor = item->getActor();
 		if (actor != NULL)
 		{			
-			m_vtkRenderer->RemoveActor(actor);
+			mVtkRenderer->RemoveActor(actor);
 		}
 
 		vtkVolume* volume = item->getVolume();
 		if (volume != NULL)
 		{
-			m_vtkRenderer->RemoveVolume(volume);
+			mVtkRenderer->RemoveVolume(volume);
 		}
 	}
 	
@@ -308,18 +307,18 @@ void VtkRenderEngine::setScene(dyno::SceneGraph * scene)
 	GatherVisualModuleAction action(this, scene);
 
 	// add to renderer...
-	for (dyno::VtkVisualModule* item : m_modules)
+	for (dyno::VtkVisualModule* item : mVisualModules)
 	{
 		vtkActor* actor = item->getActor();
 		if (actor != NULL)
 		{		
-			m_vtkRenderer->AddActor(actor);
+			mVtkRenderer->AddActor(actor);
 		}
 
 		vtkVolume* volume = item->getVolume();
 		if (volume != NULL)
 		{
-			m_vtkRenderer->AddVolume(volume);
+			mVtkRenderer->AddVolume(volume);
 		}
 	}	
 }
@@ -333,9 +332,9 @@ void dyno::VtkRenderEngine::setCamera()
 	glm::dmat4 view = camera->getViewMat();
 	glm::dmat4 proj = camera->getProjMat();
 
-	m_vtkCamera->SetViewTransformMatrix(glm::value_ptr(view));
-	m_vtkCamera->SetProjectionTransformMatrix(glm::value_ptr(proj));
+	mVtkCamera->SetViewTransformMatrix(glm::value_ptr(view));
+	mVtkCamera->SetProjectionTransformMatrix(glm::value_ptr(proj));
 
 	// set window size..
-	m_vtkWindow->SetSize(camera->viewportWidth(), camera->viewportHeight());	
+	mVtkWindow->SetSize(camera->viewportWidth(), camera->viewportHeight());	
 }

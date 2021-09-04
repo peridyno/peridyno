@@ -7,9 +7,8 @@ namespace dyno
 {
 	IMPLEMENT_CLASS(ImColorbar)
 
-	ImColorbar::ImColorbar(std::shared_ptr<Node> node)
+	ImColorbar::ImColorbar()
 	{
-		this->mNode = node;
 		this->setName("im_colorbar");
 
 		mTitle = "Velocity";
@@ -39,15 +38,8 @@ namespace dyno
 
 	void ImColorbar::update()
 	{
-		if (mNode == NULL)
-			return;
-
-		if (!mNode->isVisible())
-			return;
-
 		if (!this->inScalar()->isEmpty())
 		{
-			
 			auto pScalar = this->inScalar()->getData();
 			auto min_v = m_reduce_real.minimum(pScalar.begin(), pScalar.size());
 			auto max_v = m_reduce_real.maximum(pScalar.begin(), pScalar.size());

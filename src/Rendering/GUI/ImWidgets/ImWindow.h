@@ -7,12 +7,13 @@ namespace dyno
 {
 	struct Picture;
 	class RenderEngine;
+	class SceneGraph;
 
 	class ImWindow
 	{
 	public:
 		void initialize(float scale);
-		void draw(RenderEngine* engine);
+		void draw(RenderEngine* engine, SceneGraph* scene);
 
 		bool cameraLocked();
 

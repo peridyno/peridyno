@@ -77,14 +77,14 @@ namespace dyno
 		// Draw ImGui
 		mRenderEngine->renderParams()->viewport.w = this->width();
 		mRenderEngine->renderParams()->viewport.h = this->height();
-		mImWindow.draw(mRenderEngine);			
+		mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
 		// Draw widgets
-		// TODO: maybe move into mImWindow...
-		for (auto widget : mWidgets)
-		{
-			widget->update();
-			widget->paint();
-		}
+// 		// TODO: maybe move into mImWindow...
+// 		for (auto widget : mWidgets)
+// 		{
+// 			widget->update();
+// 			widget->paint();
+// 		}
 
 		ImGui::Render();
 		// Do QtImgui Render After Glfw Render

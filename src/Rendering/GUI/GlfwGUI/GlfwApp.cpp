@@ -203,14 +203,14 @@ namespace dyno
 			glfwGetWindowSize(mWindow, &width, &height);
 			mRenderEngine->renderParams()->viewport.w = width;
 			mRenderEngine->renderParams()->viewport.h = height;
-			mImWindow.draw(mRenderEngine);
-			// Draw widgets
-			// TODO: maybe move into mImWindow...
-			for (auto widget : mWidgets)
-			{
-				widget->update();
-				widget->paint();
-			}
+			mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
+// 			// Draw widgets
+// 			// TODO: maybe move into mImWindow...
+// 			for (auto widget : mWidgets)
+// 			{
+// 				widget->update();
+// 				widget->paint();
+// 			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

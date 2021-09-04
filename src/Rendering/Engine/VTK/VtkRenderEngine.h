@@ -61,13 +61,13 @@ namespace dyno
 	private:
 		bool m_useOffScreen = true;
 
-		vtkNew<vtkExternalOpenGLRenderer>		m_vtkRenderer;
-		vtkNew<vtkExternalOpenGLRenderWindow>	m_vtkWindow;
-		vtkNew<vtkExternalOpenGLCamera>			m_vtkCamera;
+		vtkNew<vtkExternalOpenGLRenderer>		mVtkRenderer;
+		vtkNew<vtkExternalOpenGLRenderWindow>	mVtkWindow;
+		vtkNew<vtkExternalOpenGLCamera>			mVtkCamera;
 
-		vtkNew<vtkLight>						m_vtkLight;
+		vtkNew<vtkLight>						mVtkLight;
 
-		std::vector<dyno::VtkVisualModule*>		m_modules;
+		std::vector<VtkVisualModule*>		mVisualModules;
 
 		// ground plane
 		vtkNew<vtkPlaneSource>	mPlane;
@@ -76,8 +76,8 @@ namespace dyno
 		vtkNew<vtkActor>		mPlaneWireFrameActor;
 
 		// bounding box
-		vtkNew<vtkCubeSource>	m_sceneCube;
-		vtkNew<vtkActor>		m_bboxActor;
+		vtkNew<vtkCubeSource>	mSceneCube;
+		vtkNew<vtkActor>		mBoxActor;
 
 		// render passes
 		struct
@@ -94,7 +94,7 @@ namespace dyno
 			vtkNew<vtkOpaquePass>			opaque;
 			
 			vtkNew<vtkCameraPass>			cameraPass;
-		} m_renderPasses;
+		} mRenderPasses;
 
 
 		dyno::SceneGraph* m_scene = NULL;
