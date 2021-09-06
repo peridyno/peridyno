@@ -16,12 +16,9 @@ namespace dyno
 		virtual void mainLoop() = 0;
 
 		virtual void setRenderEngine(RenderEngine* engine) { mRenderEngine = engine; }
-		virtual void addWidget(std::shared_ptr<ImWidget> widget) { mWidgets.push_back(widget); };
 
 	protected:
 		RenderEngine* mRenderEngine;
-
-		std::vector<std::shared_ptr<ImWidget>> mWidgets;
 	};
 
 }

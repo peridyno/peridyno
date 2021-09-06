@@ -31,8 +31,4 @@ namespace dyno {
         m_mainWindow->show();
         m_app->exec();
     }
-    void QtApp::addWidget(std::shared_ptr<ImWidget> widget)
-    {
-        m_mainWindow->addImWidget(widget);
-    }
 }

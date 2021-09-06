@@ -179,7 +179,7 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	}
 }
 
-void VtkRenderEngine::initialize(int width, int height, float scale)
+void VtkRenderEngine::initialize(int width, int height)
 {
 	m_camera = std::make_shared<OrbitCamera>();
 

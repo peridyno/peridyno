@@ -55,8 +55,6 @@ namespace dyno
 		POpenGLWidget(RenderEngine* engine);
 		~POpenGLWidget();
 
-		void addImWidget(std::shared_ptr<ImWidget> widget) { mWidgets.push_back(widget); };
-
 	protected:
 		void initializeGL() override;		
 		void paintGL() override;		
@@ -81,7 +79,6 @@ namespace dyno
 
 		// 
 		ImWindow mImWindow;
-		std::vector<std::shared_ptr<ImWidget>> mWidgets;
 	};
 
 }

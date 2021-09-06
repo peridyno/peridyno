@@ -48,7 +48,7 @@ namespace dyno
 	public:
 		VtkRenderEngine();
 
-		virtual void initialize(int width, int height, float scale) override;
+		virtual void initialize(int width, int height) override;
 		virtual void draw(dyno::SceneGraph* scene) override; 
 		virtual void resize(int w, int h) override;
 

@@ -151,16 +151,10 @@ namespace dyno
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 
 		// Jian: initialize rendering engine
-		mRenderEngine->initialize(width, height, xscale);
+		mRenderEngine->initialize(width, height);
 
 		// Jian: initialize ImWindow
 		mImWindow.initialize(xscale);
-
-		// initialize widgets, should move into ImWindow...
-		for (auto widget : mWidgets)
-		{
-			widget->initialize();
-		}
 	}
 
 	void GlfwApp::initializeStyle()

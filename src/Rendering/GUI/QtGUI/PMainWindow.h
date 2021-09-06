@@ -90,8 +90,6 @@ namespace dyno
 		void mainLoop();
 		void createWindow(int width, int height);
 
-		void addImWidget(std::shared_ptr<ImWidget> widget);
-
 	public slots:
 		//File menu
 		void newScene();

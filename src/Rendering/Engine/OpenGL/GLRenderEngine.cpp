@@ -60,7 +60,7 @@ namespace dyno
 		delete mSSAO;
 	}
 
-	void GLRenderEngine::initialize(int width, int height, float scale)
+	void GLRenderEngine::initialize(int width, int height)
 	{
 		if (!gladLoadGL()) {
 			printf("Failed to load OpenGL!");

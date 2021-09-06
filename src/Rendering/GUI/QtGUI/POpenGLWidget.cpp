@@ -56,14 +56,9 @@ namespace dyno
 		//mRenderEngine = new RenderEngine();
 		// Get Context scale
 		float scale = QGuiApplication::primaryScreen()->logicalDotsPerInchX() / 96.0;
-		mRenderEngine->initialize(this->width(), this->height(), scale);
+		mRenderEngine->initialize(this->width(), this->height());
 
 		mImWindow.initialize(scale);
-		// initialize widgets, should move into ImWindow...
-		for (auto widget : mWidgets)
-		{
-			widget->initialize();
-		}
 	}
 
 	void POpenGLWidget::paintGL()

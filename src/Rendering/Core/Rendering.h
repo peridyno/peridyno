@@ -59,7 +59,7 @@ namespace dyno
 	class RenderEngine
 	{
 	public:
-		virtual void initialize(int width, int height, float scale) = 0;
+		virtual void initialize(int width, int height) = 0;
 		virtual void draw(SceneGraph* scene) = 0;
 		virtual void resize(int w, int h) = 0;
 
