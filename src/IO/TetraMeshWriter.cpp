@@ -1,5 +1,5 @@
 #include "TetraMeshWriter.h"
-#include "Framework/ModuleIO.h"
+#include "Module/OutputModule.h"
 
 #include <sstream>
 #include <iostream>
@@ -10,7 +10,7 @@ namespace dyno
 	IMPLEMENT_CLASS_1(TetraMeshWriter, TDataType)
 
 	template<typename TDataType>
-	TetraMeshWriter<TDataType>::TetraMeshWriter() : IOModule()
+	TetraMeshWriter<TDataType>::TetraMeshWriter() : OutputModule()
 	{
 
 	}
@@ -95,15 +95,15 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool TetraMeshWriter<TDataType>::execute() 
+	void TetraMeshWriter<TDataType>::updateImpl() 
 	{
 		printf("===========Tetra Mesh Writer============\n");
 
-		if (this->m_output_index >= this->max_output_files) { return true; }
+		if (this->m_output_index >= this->max_output_files) { return; }
 
 		if (this->current_idle_frame <= 0) {
 			this->current_idle_frame = this->idle_frame_num;
-			return this->outputSurfaceMesh();
+			this->outputSurfaceMesh();
 		}
 		else {
 			this->current_idle_frame--;

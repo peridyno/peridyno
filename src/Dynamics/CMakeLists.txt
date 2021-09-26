@@ -1,8 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.10)
 
-set(LIB_NAMES ParticleSystem RigidBody Volume)
-
-foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
+#foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
+macro(build_library LIB_NAME LIB_DEPENDENCY)
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}")
 
     file(                                                                           
@@ -32,6 +31,7 @@ foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine/Dynamics")
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
     
     set_target_properties(${LIB_NAME} PROPERTIES
         OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
@@ -45,7 +45,7 @@ foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
     target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 
-    target_link_libraries(${LIB_NAME} PUBLIC Core Framework IO)
+    target_link_libraries(${LIB_NAME} PUBLIC ${${LIB_DEPENDENCY}})
 
     install(TARGETS ${LIB_NAME}
         EXPORT ${LIB_NAME}Targets
@@ -64,4 +64,29 @@ foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
 
     file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
     install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Dynamics/${LIB_NAME})
- endforeach()
+endmacro()
+
+option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system library" ON)
+option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" ON)
+option(PERIDYNO_LIBRARY_RigidBody "Enable binding the rigid body library" ON)
+option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
+
+if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
+    set(LIB_DEPENDENCY Core IO Framework)
+    build_library(ParticleSystem LIB_DEPENDENCY)
+
+    if(PERIDYNO_LIBRARY_PERIDYNAMICS)
+    set(LIB_DEPENDENCY ParticleSystem)
+        build_library(Peridynamics LIB_DEPENDENCY)
+    endif()
+endif()
+
+if(PERIDYNO_LIBRARY_RigidBody)
+    set(LIB_DEPENDENCY Core IO Framework)
+    build_library(RigidBody LIB_DEPENDENCY)
+endif()
+
+if(PERIDYNO_LIBRARY_VOLUME)
+    set(LIB_DEPENDENCY Core IO Framework)
+    build_library(Volume LIB_DEPENDENCY)
+endif()

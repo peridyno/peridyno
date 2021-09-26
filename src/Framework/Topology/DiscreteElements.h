@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleTopology.h"
+#include "Module/TopologyModule.h"
 #include "Primitive3D.h"
 
 namespace dyno

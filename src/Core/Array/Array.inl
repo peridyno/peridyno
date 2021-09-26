@@ -7,7 +7,11 @@ namespace dyno
 		if (m_data!=nullptr) clear();
 
 		m_totalNum = n;
-		cuSafeCall(cudaMalloc(&m_data, n * sizeof(T)));
+		if (n == 0) {
+			m_data = nullptr;
+		}
+		else
+			cuSafeCall(cudaMalloc(&m_data, n * sizeof(T)));
 	}
 
 	template<typename T>
@@ -92,4 +96,15 @@ namespace dyno
 		memcpy(this->begin(), src.begin(), src.size() * sizeof(T));
 	}
 
+	template<typename T>
+	void Array<T, DeviceType::CPU>::assign(const T& val)
+	{
+		m_data.assign(m_data.size(), val);
+	}
+
+	template<typename T>
+	void Array<T, DeviceType::CPU>::assign(uint num, const T& val)
+	{
+		m_data.assign(num, val);
+	}
 }

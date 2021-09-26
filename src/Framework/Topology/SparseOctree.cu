@@ -3,7 +3,7 @@
 
 #include <thrust/sort.h>
 
-#include "Framework/Object.h"
+#include "Object.h"
 
 namespace dyno {
 	DYN_FUNC OcKey CalculateMortonCode(Level l, OcIndex x, OcIndex y, OcIndex z)

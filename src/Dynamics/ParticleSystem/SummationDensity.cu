@@ -1,5 +1,5 @@
 #include "SummationDensity.h"
-#include "Framework/Node.h"
+#include "Node.h"
 #include "Kernel.h"
 
 namespace dyno
@@ -38,14 +38,14 @@ namespace dyno
 		, m_factor(Real(1))
 	{
 		this->varRestDensity()->setValue(Real(1000));
-		this->varSmoothingLength()->setValue(Real(0.011));
-		this->varSamplingDistance()->setValue(Real(0.005));
+		this->inSmoothingLength()->setValue(Real(0.011));
+		this->inSamplingDistance()->setValue(Real(0.005));
 
 		std::function<void()> callback = std::bind(&SummationDensity<TDataType>::calculateScalingFactor, this);
 
 		this->varRestDensity()->setCallBackFunc(callback);
-		this->varSmoothingLength()->setCallBackFunc(callback);
-		this->varSamplingDistance()->setCallBackFunc(callback);
+		this->inSmoothingLength()->setCallBackFunc(callback);
+		this->inSamplingDistance()->setCallBackFunc(callback);
 
 		//Should be called after above four parameters are all set, this function will recalculate m_factor
 		calculateParticleMass();
@@ -70,7 +70,7 @@ namespace dyno
 			this->outDensity()->getData(),
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
-			this->varSmoothingLength()->getData(),
+			this->inSmoothingLength()->getData(),
 			m_particle_mass);
 	}
 
@@ -82,7 +82,7 @@ namespace dyno
 			rho,
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
-			this->varSmoothingLength()->getData(),
+			this->inSmoothingLength()->getData(),
 			m_particle_mass);
 	}
 
@@ -106,8 +106,8 @@ namespace dyno
 	template<typename TDataType>
 	void SummationDensity<TDataType>::calculateScalingFactor()
 	{
-		Real d = this->varSamplingDistance()->getData();
-		Real H = this->varSmoothingLength()->getData();
+		Real d = this->inSamplingDistance()->getData();
+		Real H = this->inSmoothingLength()->getData();
 		Real rho_0 = this->varRestDensity()->getData();
 		
 		Real V = d * d*d;
@@ -136,7 +136,7 @@ namespace dyno
 	void SummationDensity<TDataType>::calculateParticleMass()
 	{
 		Real rho_0 = this->varRestDensity()->getData();
-		Real d = this->varSamplingDistance()->getData();
+		Real d = this->inSamplingDistance()->getData();
 
 		m_particle_mass = d*d*d*rho_0;
 	}

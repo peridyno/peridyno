@@ -4,8 +4,8 @@ the output file format: obj
 */
 
 #pragma once
-#include "Framework/ModuleIO.h"
-#include "Framework/ModuleTopology.h"
+#include "Module/OutputModule.h"
+#include "Module/TopologyModule.h"
 
 #include "Topology/TriangleSet.h"
 
@@ -15,7 +15,7 @@ the output file format: obj
 namespace dyno
 {
 	template<typename TDataType>
-	class TriangleMeshWriter : public IOModule
+	class TriangleMeshWriter : public OutputModule
 	{
 		DECLARE_CLASS_1(TriangleMeshWriter, TDataType)
 
@@ -33,11 +33,10 @@ namespace dyno
 		void setTriangleSetPtr(std::shared_ptr<TriangleSet<TDataType>> ptr_triangles) { this->ptr_TriangleSet = ptr_triangles;  this->updatePtr(); }
 		bool updatePtr();
 
-		bool execute() override;
 		bool outputSurfaceMesh();
 
 	protected:
-
+		void updateImpl() override;
 
 	public:
 

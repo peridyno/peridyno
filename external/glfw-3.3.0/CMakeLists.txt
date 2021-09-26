@@ -336,24 +336,24 @@ configure_file(src/glfw3.pc.in src/glfw3.pc @ONLY)
 # Add subdirectories
 #--------------------------------------------------------------------
 add_subdirectory(src)
-add_subdirectory(deps)
+#add_subdirectory(deps)
 
 #--------------------------------------------------------------------
 # Install files other than the library
 # The library is installed by src/CMakeLists.txt
 #--------------------------------------------------------------------
 if (GLFW_INSTALL)
-    install(DIRECTORY include/GLFW DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    install(DIRECTORY include/GLFW DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/GLFW
             FILES_MATCHING PATTERN glfw3.h PATTERN glfw3native.h)
 
     install(FILES "${GLFW_BINARY_DIR}/src/glfw3Config.cmake"
                   "${GLFW_BINARY_DIR}/src/glfw3ConfigVersion.cmake"
-            DESTINATION "${GLFW_CONFIG_PATH}")
+            DESTINATION "${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}")
 
     install(EXPORT glfwTargets FILE glfw3Targets.cmake
             EXPORT_LINK_INTERFACE_LIBRARIES
-            DESTINATION "${GLFW_CONFIG_PATH}")
+            DESTINATION "${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}")
     install(FILES "${GLFW_BINARY_DIR}/src/glfw3.pc"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+            DESTINATION "${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}/pkgconfig")
 endif()
 

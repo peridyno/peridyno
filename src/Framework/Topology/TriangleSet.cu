@@ -205,14 +205,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool TriangleSet<TDataType>::initializeImpl()
-	{
-		
-		return true;
-	}
-
-
-	template<typename TDataType>
 	void TriangleSet<TDataType>::setTriangles(std::vector<Triangle>& triangles)
 	{
 		m_triangles.resize(triangles.size());

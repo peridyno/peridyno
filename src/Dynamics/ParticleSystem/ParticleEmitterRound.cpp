@@ -20,7 +20,7 @@ namespace dyno
 	template<typename TDataType>
 	ParticleEmitterRound<TDataType>::~ParticleEmitterRound()
 	{
-		gen_pos.clear();
+		mPosition.clear();
 	}
 	
 
@@ -71,11 +71,11 @@ namespace dyno
 		}
 
 		if (pos_list.size() > 0) {
-			gen_pos.resize(pos_list.size());
-			gen_vel.resize(pos_list.size());
+			mPosition.resize(pos_list.size());
+			mVelocity.resize(pos_list.size());
 
-			gen_pos.assign(pos_list);
-			gen_vel.assign(vel_list);
+			mPosition.assign(pos_list);
+			mVelocity.assign(vel_list);
 		}
 	
 		

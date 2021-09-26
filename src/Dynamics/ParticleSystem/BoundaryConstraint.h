@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleConstraint.h"
+#include "Module/ConstraintModule.h"
 
 namespace dyno {
 
@@ -28,8 +28,8 @@ namespace dyno {
 		DeviceArrayField<Coord> m_position;
 		DeviceArrayField<Coord> m_velocity;
 
-		DEF_VAR(TangentialFriction, Real, Real(0.95), "Tangential friction");
-		DEF_VAR(NormalFriction, Real, Real(0), "Normal friction");
+		DEF_VAR(Real, TangentialFriction, Real(0.95), "Tangential friction");
+		DEF_VAR(Real, NormalFriction, Real(0), "Normal friction");
 
 		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
 	};

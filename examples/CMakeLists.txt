@@ -1,6 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.10)
-
-MACRO(SUBDIRLIST result curdir)
+﻿MACRO(SUBDIRLIST result curdir)
   FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
   SET(dirlist "")
   FOREACH(child ${children})

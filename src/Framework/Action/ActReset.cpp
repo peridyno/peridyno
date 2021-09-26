@@ -1,5 +1,5 @@
 #include "ActReset.h"
-#include "Framework/Node.h"
+#include "Node.h"
 
 
 namespace dyno
@@ -23,7 +23,7 @@ namespace dyno
 			return;
 		}
 
-		node->resetStatus();
+		node->reset();
 	}
 
 }

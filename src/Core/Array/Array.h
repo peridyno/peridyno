@@ -37,7 +37,7 @@ namespace dyno {
 			m_data.resize((size_t)num);
 		}
 
-		~Array() { clear(); };
+		~Array() {};
 
 		void resize(uint n);
 
@@ -70,6 +70,8 @@ namespace dyno {
 
 		inline void pushBack(T ele) { m_data.push_back(ele); }
 
+		void assign(const T& val);
+		void assign(uint num, const T& val);
 		void assign(const Array<T, DeviceType::GPU>& src);
 		void assign(const Array<T, DeviceType::CPU>& src);
 

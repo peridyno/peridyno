@@ -67,6 +67,21 @@ TEST(Array, Copy)
 //	gArr2.copyFrom(gArr);
 }
 
+TEST(Array, assign)
+{
+	CArray<int> cArr(6);
+	cArr.assign(5);
+	EXPECT_EQ(cArr.size() == 6, true);
+	EXPECT_EQ(cArr[0] == 5, true);
+
+	cArr.assign(3);
+	EXPECT_EQ(cArr[0] == 3, true);
+
+	cArr.assign(2, 1);
+	EXPECT_EQ(cArr.size() == 2, true);
+	EXPECT_EQ(cArr[0] == 1, true);
+}
+
 TEST(ArrayList, Copy)
 {
 	std::vector<std::vector<int>> vvec;
@@ -112,13 +127,12 @@ TEST(Array2D, Copy)
 	DArray2D<int> dArr2d;
 	dArr2d.assign(cArr2d);
 
-	CArray2D<int> cArr2d2;
-	cArr2d2.assign(dArr2d);
-
-	EXPECT_EQ(cArr2d2(0, 0), 0);
+	CArray2D<int> cArr2d1, cArr2d2;
+	cArr2d1.assign(dArr2d);
+	EXPECT_EQ(cArr2d1(0, 1), 1);
 
 	cArr2d2.assign(cArr2d);
-	EXPECT_EQ(cArr2d2(0, 0), 0);
+	EXPECT_EQ(cArr2d2(0, 1), 1);
 }
 
 TEST(Array3D, Copy)
@@ -141,8 +155,9 @@ TEST(Array3D, Copy)
 	DArray3D<int> dArr3d;
 	dArr3d.assign(cArr3d);
 
-	CArray3D<int> cArr3d_2;
-	cArr3d_2.assign(dArr3d);
+	CArray3D<int> cArr3d_1, cArr3d_2;
+	cArr3d_1.assign(dArr3d);
+	cArr3d_2.assign(cArr3d);
 
 	ind = 0;
 	for (int k = 0; k < 3; k++)
@@ -152,8 +167,31 @@ TEST(Array3D, Copy)
 			for (int i = 0; i < 3; i++)
 			{
 				EXPECT_EQ(cArr3d(i, j, k), ind);
+				EXPECT_EQ(cArr3d_1(i, j, k), ind);
+				EXPECT_EQ(cArr3d_2(i, j, k), ind);
 				ind++;
 			}
 		}
 	}
+}
+
+TEST(Array3D, assign)
+{
+	CArray3D<int> cArr3d(3, 4, 5);
+	cArr3d.assign(1);
+	EXPECT_EQ(cArr3d.size() == 60, true);
+	EXPECT_EQ(cArr3d.nx() == 3, true);
+	EXPECT_EQ(cArr3d.ny() == 4, true);
+	EXPECT_EQ(cArr3d.nz() == 5, true);
+	EXPECT_EQ(cArr3d(0, 0, 0) == 1, true);
+
+	cArr3d.assign(3);
+	EXPECT_EQ(cArr3d(0, 0, 0) == 3, true);
+
+	cArr3d.assign(1, 2, 3, 2);
+	EXPECT_EQ(cArr3d.size() == 6, true);
+	EXPECT_EQ(cArr3d.nx() == 1, true);
+	EXPECT_EQ(cArr3d.ny() == 2, true);
+	EXPECT_EQ(cArr3d.nz() == 3, true);
+	EXPECT_EQ(cArr3d(0, 0, 0) == 2, true);
 }

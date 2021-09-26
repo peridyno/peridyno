@@ -4,8 +4,8 @@ the output file format: obj
 */
 
 #pragma once
-#include "Framework/ModuleIO.h"
-#include "Framework/ModuleTopology.h"
+#include "Module/OutputModule.h"
+#include "Module/TopologyModule.h"
 
 #include "Topology/TetrahedronSet.h"
 
@@ -19,7 +19,7 @@ namespace dyno
 	template <typename TDataType> class TetrahedronSet;
 
 	template<typename TDataType>
-	class TetraMeshWriter : public IOModule
+	class TetraMeshWriter : public OutputModule
 	{
 		DECLARE_CLASS_1(TetraMeshWriter, TDataType)
 
@@ -39,11 +39,10 @@ namespace dyno
 		void setTetrahedronSetPtr(std::shared_ptr<TetrahedronSet<TDataType>> ptr_tets) { this->ptr_TetrahedronSet = ptr_tets;  this->updatePtr(); }
 		bool updatePtr();
 
-		bool execute() override;
 		bool outputSurfaceMesh();
 
 	protected:
-
+		void updateImpl() override;
 
 	public:
 

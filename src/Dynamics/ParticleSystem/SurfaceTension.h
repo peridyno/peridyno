@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/ModuleForce.h"
+#include "Module/ForceModule.h"
 
 namespace dyno {
 
@@ -13,7 +13,7 @@ namespace dyno {
 		SurfaceTension();
 		~SurfaceTension() override {};
 		
-		bool execute() override;
+		void updateImpl() override;
 
 		bool applyForce() override;
 

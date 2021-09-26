@@ -11,14 +11,8 @@ namespace dyno
 	ParticleSystem<TDataType>::ParticleSystem(std::string name)
 		: Node(name)
 	{
-//		attachField(&m_velocity, MechanicalState::velocity(), "Storing the particle velocities!", false);
-//		attachField(&m_force, MechanicalState::force(), "Storing the force densities!", false);
-
-		m_pSet = std::make_shared<PointSet<TDataType>>();
-		this->setTopologyModule(m_pSet);
-
-// 		m_pointsRender = std::make_shared<PointRenderModule>();
-// 		this->addVisualModule(m_pointsRender);
+		auto ptSet = std::make_shared<PointSet<TDataType>>();
+		this->currentTopology()->setDataPtr(ptSet);
 	}
 
 	template<typename TDataType>
@@ -27,11 +21,11 @@ namespace dyno
 		
 	}
 
-
 	template<typename TDataType>
 	void ParticleSystem<TDataType>::loadParticles(std::string filename)
 	{
-		m_pSet->loadObjFile(filename);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		ptSet->loadObjFile(filename);
 	}
 
 	template<typename TDataType>
@@ -57,7 +51,8 @@ namespace dyno
 			}
 		}
 
-		m_pSet->setPoints(vertList);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		ptSet->setPoints(vertList);
 
 		vertList.clear();
 	}
@@ -78,7 +73,8 @@ namespace dyno
 			}
 		}
 
-		m_pSet->setPoints(vertList);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		ptSet->setPoints(vertList);
 
 		std::cout << "particle number: " << vertList.size() << std::endl;
 
@@ -88,7 +84,8 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleSystem<TDataType>::translate(Coord t)
 	{
-		m_pSet->translate(t);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		ptSet->translate(t);
 
 		return true;
 	}
@@ -97,15 +94,10 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleSystem<TDataType>::scale(Real s)
 	{
-		m_pSet->scale(s);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		ptSet->scale(s);
 
 		return true;
-	}
-
-	template<typename TDataType>
-	bool ParticleSystem<TDataType>::initialize()
-	{
-		return Node::initialize();
 	}
 
 // 	template<typename TDataType>
@@ -125,8 +117,9 @@ namespace dyno
 	{
 		if (!this->currentPosition()->isEmpty())
 		{
+			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
 			int num = this->currentPosition()->getElementCount();
-			auto& pts = m_pSet->getPoints();
+			auto& pts = ptSet->getPoints();
 			if (num != pts.size())
 			{
 				pts.resize(num);
@@ -138,10 +131,10 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool ParticleSystem<TDataType>::resetStatus()
+	void ParticleSystem<TDataType>::resetStates()
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->getTopologyModule());
-		if (ptSet == nullptr) return false;
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		if (ptSet == nullptr) return;
 
 		auto pts = ptSet->getPoints();
 
@@ -155,7 +148,7 @@ namespace dyno
 			this->currentVelocity()->getDataPtr()->reset();
 		}
 
-		return Node::resetStatus();
+		Node::resetStates();
 	}
 
 	DEFINE_CLASS(ParticleSystem);

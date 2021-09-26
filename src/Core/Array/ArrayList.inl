@@ -5,7 +5,7 @@
 namespace dyno
 {
 	template<class ElementType>
-	void ArrayList<ElementType, DeviceType::GPU>::release()
+	void ArrayList<ElementType, DeviceType::GPU>::clear()
 	{
 		m_index.clear();
 		m_elements.clear();
@@ -13,7 +13,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	bool ArrayList<ElementType, DeviceType::GPU>::resize(const DArray<int> counts)
+	bool ArrayList<ElementType, DeviceType::GPU>::resize(const DArray<int>& counts)
 	{
 		assert(counts.size() > 0);
 
@@ -27,11 +27,6 @@ namespace dyno
 
 		Reduction<int> reduce;
 		int total_num = reduce.accumulate(m_index.begin(), m_index.size());
-
-		if (total_num <= 0)
-		{
-			return false;
-		}
 
 		Scan scan;
 		scan.exclusive(m_index);
