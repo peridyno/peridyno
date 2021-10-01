@@ -3163,8 +3163,8 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = max(left, 0.0f);
-				right = min(right, maxx);
+				left = maximum(left, 0.0f);
+				right = minimum(right, maxx);
 
 				p1 = s[i].v0 + ((left + right) / 2.0f * s[i].direction().normalize());
 				Bool tmp_bool;
@@ -3267,8 +3267,8 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = max(left, 0.0f);
-				right = min(right, maxx);
+				left = maximum(left, 0.0f);
+				right = minimum(right, maxx);
 
 				p2 = s[i].v0 + ((left + right) / 2.0f * s[i].direction().normalize());
 				Bool tmp_bool;
@@ -3868,8 +3868,8 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = max(left, 0.0f);
-				right = min(right, maxx);
+				left = maximum(left, 0.0f);
+				right = minimum(right, maxx);
 
 				Bool tmp_bool;
 

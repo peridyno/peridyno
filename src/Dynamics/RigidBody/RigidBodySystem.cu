@@ -14,7 +14,7 @@ namespace dyno
 		: Node(name)
 	{
 		m_shapes = std::make_shared<DiscreteElements<TDataType>>();
-		this->setTopologyModule(m_shapes);
+		this->currentTopology()->setDataPtr(m_shapes);
 	}
 
 	template<typename TDataType>
@@ -60,8 +60,8 @@ namespace dyno
 		//todo: initialize inertial tensor
 		//todo: copy from topology module
 		
-		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->getTopologyModule());//this ???
-		m_shapes = TypeInfo::cast<DiscreteElements<DataType3f>>(this->getTopologyModule());
+		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());//this ???
+		m_shapes = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 		m_box3d_init.resize(discreteSet->getBoxes().size());
 		m_sphere3d_init.resize(discreteSet->getSpheres().size());
 		m_tet3d_init.resize(discreteSet->getTets().size());
@@ -856,7 +856,7 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::rigid_update_topology()
 	{
-		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->getTopologyModule());
+		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 
 
 		uint pDimsB = cudaGridSize(m_box3d_init.size(), BLOCK_SIZE);
@@ -1230,7 +1230,7 @@ namespace dyno
 	void RigidBodySystem<TDataType>::init_boundary()
 	{
 		
-		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->getTopologyModule());
+		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 		uint pDims = cudaGridSize((discreteSet->getSpheres().size() + discreteSet->getBoxes().size()), BLOCK_SIZE);
 		int sum = 0;
 

@@ -106,12 +106,5 @@ namespace dyno
 		std::vector<Tet3D> m_hostTets;
 		std::vector<Capsule3D> m_hostCaps;
 	};
-
-
-#ifdef PRECISION_FLOAT
-	template class DiscreteElements<DataType3f>;
-#else
-	template class DiscreteElements<DataType3d>;
-#endif
 }
 

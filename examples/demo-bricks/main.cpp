@@ -1,6 +1,3 @@
-#include <iostream>
-
-
 #include <GlfwApp.h>
 
 #include <SceneGraph.h>
@@ -13,6 +10,10 @@
 #include <GLRenderEngine.h>
 #include <GLElementVisualModule.h>
 #include <ColorMapping.h>
+
+
+#include <Mapping/DiscreteElementsToTriangleSet.h>
+#include <GLSurfaceVisualModule.h>
 
 
 using namespace std;
@@ -58,16 +59,24 @@ void creat_scene_fluid()
 	DE->initialize();
 
 	printf("222\n");
-	rigid->setTopologyModule(DE);
+	rigid->currentTopology()->setDataPtr(DE);
 
+	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+	rigid->currentTopology()->connect(mapper->inDiscreteElements());
+	rigid->graphicsPipeline()->pushModule(mapper);
 
-	auto eRender = std::make_shared<GLElementVisualModule>();
-	eRender->discreteSet = DE;
-	
-	//rigid->addVisualModule(eRender);
-	eRender->setColor(Vec3f(1, 0, 0));
-
-	rigid->graphicsPipeline()->pushModule(eRender);
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	sRender->setColor(Vec3f(1, 1, 0));
+	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+	rigid->graphicsPipeline()->pushModule(sRender);
+// 	auto eRender = std::make_shared<GLElementVisualModule>();
+// 	eRender->discreteSet = DE;
+// 	rigid->varTimeStep()->connect(eRender->inTimeStep());
+// 	
+// 	//rigid->addVisualModule(eRender);
+// 	eRender->setColor(Vec3f(1, 0, 0));
+// 
+// 	rigid->graphicsPipeline()->pushModule(eRender);
 	
 	//rigid->initialize();
 	

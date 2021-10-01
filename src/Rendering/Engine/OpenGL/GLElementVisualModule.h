@@ -23,6 +23,8 @@ namespace dyno
 		std::shared_ptr<DiscreteElements<DataType3f>> discreteSet;
 		//DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
+		DEF_VAR_IN(float, TimeStep, "dt");
+
 	protected:
 		virtual void paintGL(RenderMode mode) override;
 		virtual void updateGL() override;

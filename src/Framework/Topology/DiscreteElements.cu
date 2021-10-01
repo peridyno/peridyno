@@ -117,4 +117,10 @@ namespace dyno
 		m_tris.resize(triangles.size());
 		cudaMemcpy(m_tris.begin(), triangles.begin(), triangles.size() * sizeof(Triangle3D), cudaMemcpyDeviceToDevice);
 	}
+
+#ifdef PRECISION_FLOAT
+	template class DiscreteElements<DataType3f>;
+#else
+	template class DiscreteElements<DataType3d>;
+#endif
 }
