@@ -129,6 +129,7 @@ namespace dyno
 		DYN_FUNC TPoint3D<Real> project(const TSphere3D<Real>& sphere, Bool& bInside) const;
 		DYN_FUNC TPoint3D<Real> project(const TCapsule3D<Real>& capsule, Bool& bInside) const;
 		DYN_FUNC TPoint3D<Real> project(const TTet3D<Real>& tet, Bool& bInside) const;
+		DYN_FUNC TPoint3D<Real> project(const TTet3D<Real>& tet, Bool& bInside, int* idx) const;
 		DYN_FUNC TPoint3D<Real> project(const TAlignedBox3D<Real>& abox, Bool& bInside) const;
 		DYN_FUNC TPoint3D<Real> project(const TOrientedBox3D<Real>& obb, Bool& bInside) const;
 
@@ -367,7 +368,7 @@ namespace dyno
 
 		DYN_FUNC TSegment3D<Real> proximity(const TAlignedBox3D<Real>& box) const;
 		DYN_FUNC TSegment3D<Real> proximity(const TOrientedBox3D<Real>& obb) const;
-
+		DYN_FUNC TSegment3D<Real> proximity(const TTet3D<Real>& tet) const;
 
 		DYN_FUNC Real distance(const TSegment3D<Real>& segment) const;
 
@@ -533,6 +534,7 @@ namespace dyno
 		DYN_FUNC Real volume();
 
 		DYN_FUNC bool isValid();
+		DYN_FUNC TAlignedBox3D<Real> aabb();
 
 		Real radius;
 		TSegment3D<Real> segment;
@@ -556,7 +558,10 @@ namespace dyno
 
 		DYN_FUNC bool isValid();
 
+		//DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 		DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
+		DYN_FUNC bool intersect(const TTriangle3D<Real>& tri, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
+
 
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
@@ -611,7 +616,12 @@ namespace dyno
 
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
+		//DYN_FUNC bool point_intersect(const TOrientedBox3D<Real>& OBB, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const;
 		DYN_FUNC bool point_intersect(const TOrientedBox3D<Real>& OBB, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const;
+		DYN_FUNC bool point_intersect(const TTet3D<Real>& TET, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const;
+		DYN_FUNC bool point_intersect(const TTriangle3D<Real>& TRI, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const;
+
+
 		//DYN_FUNC bool triangle_intersect(const TTriangle3D<Real>& Tri) const;
 		/**
 		 * @brief centerpoint

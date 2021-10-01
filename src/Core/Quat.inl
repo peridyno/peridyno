@@ -1,4 +1,3 @@
-#include "Quat.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -386,9 +385,9 @@ namespace dyno
 		axis.normalize();
 	}
 
-	template class Quat<float>;
-	template class Quat<double>;
-	//convenient typedefs
-	typedef Quat<float> Quat1f;
-	typedef Quat<double> Quat1d;
+	//template class Quat<float>;
+	//template class Quat<double>;
+	////convenient typedefs
+	//typedef Quat<float> Quat1f;
+	//typedef Quat<double> Quat1d;
 }
