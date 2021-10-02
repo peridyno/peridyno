@@ -1,20 +1,18 @@
-#pragma once
 #include "RigidBodySystem.h"
-
-
 
 namespace dyno
 {
-	typedef typename TOrientedBox3D<Real> Box3D;
-	typedef typename Quat<Real> TQuat;
-
 	IMPLEMENT_CLASS_1(RigidBodySystem, TDataType)
+
 	template<typename TDataType>
 	RigidBodySystem<TDataType>::RigidBodySystem(std::string name)
 		: Node(name)
 	{
-		m_shapes = std::make_shared<DiscreteElements<TDataType>>();
-		this->currentTopology()->setDataPtr(m_shapes);
+		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
+		this->currentTopology()->setDataPtr(std::make_shared<DiscreteElements<TDataType>>());
+
+		m_nbrQueryElement = std::make_shared<NeighborElementQuery<TDataType>>();
+		this->currentTopology()->connect(m_nbrQueryElement->inDiscreteElements());
 	}
 
 	template<typename TDataType>
@@ -22,11 +20,67 @@ namespace dyno
 	{
 	}
 
-	template <typename Coord, typename Matrix>
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addBox(
+		const RigidBodyInfo& bodyDef, 
+		const BoxInfo& box,
+		const Real density)
+	{
+		auto b = box;
+		auto bd = bodyDef;
+
+		float lx = 2.0f * b.halfLength[0];
+		float ly = 2.0f * b.halfLength[1];
+		float lz = 2.0f * b.halfLength[2];
+		b.center = bodyDef.position;
+
+		bd.mass = density * lx * ly * lz;
+		bd.inertia = 1.0f / 12.0f * bd.mass
+			* Mat3f(ly*ly + lz * lz, 0, 0,
+				0, lx*lx + lz * lz, 0,
+				0, 0, lx*lx + ly * ly);
+
+		bd.sType = ST_Box;
+		bd.angle = b.rot;
+
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mSpheres.size() + mBoxes.size(), bd);
+		mBoxes.push_back(b);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addSphere(
+		const RigidBodyInfo& bodyDef, 
+		const SphereInfo& sphere, 
+		const Real density /*= Real(1)*/)
+	{
+		auto b = sphere;
+		auto bd = bodyDef;
+
+		b.center = bodyDef.position;
+
+		float r = b.radius;
+		if (bd.mass <= 0.0f) {
+			bd.mass = 3 / 4.0f*M_PI*r*r*r*density;
+		}
+		float I11 = r * r;
+		bd.inertia = 0.4f * bd.mass
+			* Mat3f(I11, 0, 0,
+				0, I11, 0,
+				0, 0, I11);
+
+		bd.sType = ST_Sphere;
+		bd.angle = b.rot;
+
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mSpheres.size(), bd);
+		mSpheres.push_back(b);
+	}
+
+	template <typename Coord, typename Matrix, typename Quat>
 	__global__ void RB_initialize_device(
 		DArray<Coord> pos,
 		DArray<Matrix> rotation,
-		DArray<TQuat> rotation_q,
+		DArray<Quat> rotation_q,
 		DArray<Sphere3D> spheres,
 		DArray<Box3D> boxes,
 		DArray<Tet3D> tets,
@@ -41,12 +95,12 @@ namespace dyno
 
 		if (pId >= rotation_q.size())
 			return;
-		rotation_q[pId] = TQuat(0, 0, 0, 1);
+		rotation_q[pId] = Quat(0, 0, 0, 1);
 		
 		if (pId >= start_mesh) return;
 		rotation[pId] = Matrix::identityMatrix();
 		
-		rotation_q[pId] = TQuat(0, 0, 0, 1);
+		rotation_q[pId] = Quat(0, 0, 0, 1);
 		
 		if (pId >= start_segment) {}
 		else if (pId >= start_tet) pos[pId] = (tets[pId - start_tet].v[0] + tets[pId - start_tet].v[1] + tets[pId - start_tet].v[2] + tets[pId - start_tet].v[3]) / 4.0f;
@@ -57,31 +111,24 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::resetStates()
 	{
-		//todo: initialize inertial tensor
-		//todo: copy from topology module
-		
-		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());//this ???
-		m_shapes = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
-		m_box3d_init.resize(discreteSet->getBoxes().size());
-		m_sphere3d_init.resize(discreteSet->getSpheres().size());
-		m_tet3d_init.resize(discreteSet->getTets().size());
+		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 
-		//Function1Pt::copy(m_box3d_init, discreteSet->getBoxes());
-		m_box3d_init.assign(discreteSet->getBoxes());
-		//Function1Pt::copy(m_sphere3d_init, discreteSet->getSpheres());
-		m_sphere3d_init.assign(discreteSet->getSpheres());
-		//Function1Pt::copy(m_tet3d_init, discreteSet->getTets());
-		m_tet3d_init.assign(discreteSet->getTets());
-		//printf("@@@");
+		m_box3d_init.resize(topo->getBoxes().size());
+		m_sphere3d_init.resize(topo->getSpheres().size());
+		m_tet3d_init.resize(topo->getTets().size());
 
-		int size_rigids = discreteSet->getBoxes().size() + discreteSet->getSpheres().size() + discreteSet->getTets().size();
+		m_box3d_init.assign(topo->getBoxes());
+		m_sphere3d_init.assign(topo->getSpheres());
+		m_tet3d_init.assign(topo->getTets());
+
+		int size_rigids = topo->getBoxes().size() + topo->getSpheres().size() + topo->getTets().size();
 		int size_rigids_0 = size_rigids;
 		size_else = size_rigids;
 
 		start_sphere = 0;
-		start_box = discreteSet->getSpheres().size();
-		start_tet = discreteSet->getSpheres().size() + discreteSet->getBoxes().size();
-		start_segment = discreteSet->getBoxes().size() + discreteSet->getSpheres().size() + discreteSet->getTets().size();
+		start_box = topo->getSpheres().size();
+		start_tet = topo->getSpheres().size() + topo->getBoxes().size();
+		start_segment = topo->getBoxes().size() + topo->getSpheres().size() + topo->getTets().size();
 
 		
 		currentRigidRotation()->setElementCount(size_rigids);
@@ -143,23 +190,6 @@ namespace dyno
 		host_velocity.clear();
 		host_angular_velocity.clear();
 		host_mass.clear();
-
-		//printf("INITIALIZE NEQ\n");
-		/* FOR TEST ONLY */
-		if(discreteSet->getSize() != 0)
-		{ 
-			if(m_nbrQueryElement == NULL)
-			{ 
-				m_nbrQueryElement = this->template addComputeModule<NeighborElementQuery<TDataType>>("neighborhood_rigid");
-				m_nbrQueryElement->setDiscreteSet(discreteSet);
-				m_nbrQueryElement->initialize();
-			}
-		}
-		//printf("graphics pipline %d\n", this->graphicsPipeline()->isNull())
-		this->graphicsPipeline()->initialize();
-		//this->graphicsPipeline()->update();
-		
-		//return true;
 	}
 	
 	template <typename Coord>
@@ -214,11 +244,11 @@ namespace dyno
 		tet[pId].v[3] = rotation[pId + start_tet] * (tet_init[pId].v[3] - center_init) + pos[pId + start_tet];
 	}
 
-	template <typename Coord, typename Matrix>
+	template <typename Coord, typename Matrix, typename Quat>
 	__global__ void RB_update_state(
 		DArray<Coord> pos,
 		DArray<Matrix> rotation,
-		DArray<TQuat> rotation_q,
+		DArray<Quat> rotation_q,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
 		DArray<Matrix> inertia,
@@ -232,7 +262,7 @@ namespace dyno
 		pos[pId] += velocity[pId] * dt;
 		
 		rotation_q[pId] += dt * 0.5f * 
-			TQuat(angular_velocity[pId][0], angular_velocity[pId][1],angular_velocity[pId][2], 0.0f)
+			Quat(angular_velocity[pId][0], angular_velocity[pId][1],angular_velocity[pId][2], 0.0f)
 			*
 			(rotation_q[pId]);
 		
@@ -1236,11 +1266,11 @@ namespace dyno
 		uint pDims = cudaGridSize((discreteSet->getSpheres().size() + discreteSet->getBoxes().size()), BLOCK_SIZE);
 		int sum = 0;
 
-		cnt_boudary.resize(discreteSet->getSize());
+		cnt_boudary.resize(discreteSet->totalSize());
 		cnt_boudary.reset();
-		if (discreteSet->getSize() > 0)
+		if (discreteSet->totalSize() > 0)
 		{
-			printf("Yes %d\n", discreteSet->getSize());
+			printf("Yes %d\n", discreteSet->totalSize());
 			RB_count_boundary << <pDims, BLOCK_SIZE >> > (
 				discreteSet->getSpheres(),
 				discreteSet->getBoxes(),
@@ -1303,11 +1333,10 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::init_jacobi(Real dt)
 	{
-		//auto start = std::chrono::system_clock::now();
+		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 		
-		
-		if(m_shapes->getSize() > 0)
-			m_nbrQueryElement->compute();
+		if(topo->totalSize() > 0)
+			m_nbrQueryElement->update();
 		
 
 
@@ -1321,12 +1350,8 @@ namespace dyno
 			//std::cout << "oct time = " << elapsed.count() << "ms" << '\n';
 		int size_constraints = buffer_boundary.size();
 		
-		if(m_shapes->getSize() > 0)
+		if(topo->totalSize() > 0)
 			size_constraints += m_nbrQueryElement->nbr_cons.getElementCount() ;
-		
-		printf("size constraints %d %d mshape size = %d\n", size_constraints, m_nbrQueryElement->nbr_cons.getElementCount(), m_shapes->getSize());
-
-		
 
 		int constraint_contact = size_constraints;
 		
@@ -1334,7 +1359,7 @@ namespace dyno
 		{
 		
 			size_constraints += 2 * buffer_boundary.size();
-			if (m_shapes->getSize() > 0)
+			if (topo->totalSize() > 0)
 				size_constraints += 2 * m_nbrQueryElement->nbr_cons.getElementCount();
 
 			
@@ -1363,13 +1388,13 @@ namespace dyno
 		if (size_constraints == 0) return;
 
 		
-		if (m_shapes->getSize() > 0  && m_nbrQueryElement->nbr_cons.getElementCount() > 0)
+		if (topo->totalSize() > 0  && m_nbrQueryElement->nbr_cons.getElementCount() > 0)
 			cudaMemcpy(constraints_all.begin(), m_nbrQueryElement->nbr_cons.getData().begin(), m_nbrQueryElement->nbr_cons.getElementCount() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
 		
 		
 		if (buffer_boundary.size() > 0)
 		{
-			if (m_shapes->getSize() > 0)
+			if (topo->totalSize() > 0)
 			{ 
 				if(!have_mesh)
 					cudaMemcpy(constraints_all.begin() + m_nbrQueryElement->nbr_cons.getElementCount(), buffer_boundary.begin(), buffer_boundary.size() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
@@ -1502,27 +1527,9 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::take_one_iteration(Real dt)
 	{
-		//int size_constraints = buffer_boundary.size();
-		//if (have_mesh)
-		//{
-		//	size_constraints += m_nbrQueryMeshRigids->nbr_cons.getElementCount();
-		//	//printf("????????????????????????????????????????????????????????? size of mesh constraints: %d\n", m_nbrQueryMeshRigids->nbr_cons.getElementCount());
-		//}
-		//if (m_nbrQueryElement != NULL)
-		//{
-		//	size_constraints += m_nbrQueryElement->nbr_cons.getElementCount();
-		//}
-
-		//auto start = std::chrono::system_clock::now();
-		
-		
-
 		int size_constraints = constraints_all.size();
 		if (size_constraints == 0) return;
 		uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-
-		//
-		//
 
 		RB_take_one_iteration << <pDims, BLOCK_SIZE >> > (
 				AA.getData(),
@@ -1535,31 +1542,18 @@ namespace dyno
 				constraints_all
 				);
 		cuSynchronize();
-		
-		//auto end = std::chrono::system_clock::now();
-		//auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-		//std::cout <<"one iteration time = " << elapsed.count() << "ms" << '\n';
-
 	}
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::update_state(Real dt)
 	{
-		//auto start = std::chrono::system_clock::now();
-
 		update_position_rotation(dt);
 		rigid_update_topology();
-
-		//auto end = std::chrono::system_clock::now();
-		//auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-		//std::cout <<"update time = " << elapsed.count() << "ms" << '\n';
-
 	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::updateStates()
 	{
-
-		this->graphicsPipeline()->update();
 		printf("inside\n");
 		Real dt = Real(0.001);
 		//if (this->getParent() != NULL)
@@ -1572,17 +1566,7 @@ namespace dyno
 		
 
 		rigid_update_topology();
-		return;
-		/*
-		init_jacobi(dt);
-
-		//solve_constraint 
-		solve_constraint();
-
-		update_position_rotation(dt);
-		rigid_update_topology();
-		*/
-		
 	}
+
 	DEFINE_CLASS(RigidBodySystem);
 }

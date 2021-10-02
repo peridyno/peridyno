@@ -52,12 +52,6 @@ namespace dyno {
 		
 		void compute() override;
 
-		bool initializeImpl() override;
-		void setDiscreteSet(std::shared_ptr<DiscreteElements<TDataType>> d)
-		{
-			discreteSet = d;
-		}
-
 	public:
 		/**
 		* @brief Search radius
@@ -65,11 +59,7 @@ namespace dyno {
 		*/
 		DEF_VAR_IN(Real, Radius, "Search radius");
 
-		/**
-		 * @brief Particle position
-		 */
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
-		
+		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
 		/**
 		 * @brief Ids of neighboring particles
@@ -88,16 +78,6 @@ namespace dyno {
 		Reduction<int> m_reduce;
 
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
-		std::shared_ptr<DiscreteElements<TDataType>> discreteSet;
-		std::shared_ptr<DiscreteElements<TDataType>> discreteSet_sorted;
-
-		std::ofstream fout;
-		
+		std::shared_ptr<DiscreteElements<TDataType>> discreteSet;		
 	};
-
-#ifdef PRECISION_FLOAT
-	template class NeighborElementQuery<DataType3f>;
-#else
-	template class NeighborElementQuery<DataType3d>;
-#endif
 }

@@ -1,7 +1,4 @@
 #include "DiscreteElements.h"
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
 namespace dyno
 {
@@ -23,6 +20,12 @@ namespace dyno
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::scale(Real s)
 	{
+	}
+
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::totalSize()
+	{
+		return m_boxes.size() + m_spheres.size() + m_tets.size() + m_caps.size() + m_tris.size();
 	}
 
 	template<typename TDataType>
@@ -64,58 +67,49 @@ namespace dyno
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setBoxes(DArray<Box3D>& boxes)
 	{
-		m_boxes.resize(boxes.size());
-		cudaMemcpy(m_boxes.begin(), boxes.begin(), m_boxes.size() * sizeof(Box3D), cudaMemcpyDeviceToDevice);
+		m_boxes.assign(boxes);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setSpheres(DArray<Sphere3D>& spheres)
 	{
-		m_spheres.resize(spheres.size());
-		cudaMemcpy(m_spheres.begin(), spheres.begin(), m_spheres.size() * sizeof(Sphere3D), cudaMemcpyDeviceToDevice);
+		m_spheres.assign(spheres);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTetSDF(DArray<Real>& sdf)
 	{
-		m_tet_sdf.resize(sdf.size());
-		cudaMemcpy(m_tet_sdf.begin(), sdf.begin(), m_tet_sdf.size() * sizeof(Real), cudaMemcpyDeviceToDevice);
+		m_tet_sdf.assign(sdf);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTets(DArray<Tet3D>& tets)
 	{
-		m_tets.resize(tets.size());
-		cudaMemcpy(m_tets.begin(), tets.begin(), m_tets.size() * sizeof(Tet3D), cudaMemcpyDeviceToDevice);
+		m_tets.assign(tets);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setCapsules(DArray<Capsule3D>& capsules)
 	{
-		m_caps.resize(capsules.size());
-		cudaMemcpy(m_caps.begin(), capsules.begin(), m_caps.size() * sizeof(Capsule3D), cudaMemcpyDeviceToDevice);
+		m_caps.assign(capsules);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTetBodyId(DArray<int>& body_id)
 	{
-		m_tet_body_mapping.resize(body_id.size());
-		cudaMemcpy(m_tet_body_mapping.begin(), body_id.begin(), m_tet_body_mapping.size() * sizeof(int), cudaMemcpyDeviceToDevice);
+		m_tet_body_mapping.assign(body_id);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id)
 	{
-		m_tet_element_id.resize(element_id.size());
-		cudaMemcpy(m_tet_element_id.begin(), element_id.begin(), element_id.size() * sizeof(TopologyModule::Tetrahedron), cudaMemcpyDeviceToDevice);
+		m_tet_element_id.assign(element_id);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTriangles(DArray<Triangle3D>& triangles)
 	{
-	
-		m_tris.resize(triangles.size());
-		cudaMemcpy(m_tris.begin(), triangles.begin(), triangles.size() * sizeof(Triangle3D), cudaMemcpyDeviceToDevice);
+		m_tris.assign(triangles);
 	}
 
 #ifdef PRECISION_FLOAT

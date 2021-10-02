@@ -1,5 +1,6 @@
 #pragma once
 #include "Node.h"
+#include "RigidBodyShared.h"
 //#include "Core/Quaternion/quaternion.h"
 #include "Topology/Primitive3D.h"
 #include "Topology/NeighborElementQuery.h"
@@ -10,6 +11,8 @@
 
 namespace dyno
 {
+	typedef typename TOrientedBox3D<Real> Box3D;
+
 	#define constraint_friction 5
 	#define	constraint_boundary 0
 	#define constraint_collision 1
@@ -38,6 +41,15 @@ namespace dyno
 		RigidBodySystem(std::string name = "RigidBodySystem");
 		virtual ~RigidBodySystem();
 
+		void addBox(
+			const RigidBodyInfo& bodyDef, 
+			const BoxInfo& box, 
+			const Real density = Real(1));
+
+		void addSphere(
+			const RigidBodyInfo& bodyDef, 
+			const SphereInfo& sphere, 
+			const Real density = Real(1));
 		
 		void solve_constraint();
 		void update_position_rotation(Real dt);
@@ -53,7 +65,6 @@ namespace dyno
 
 		
 	public:
-		void resetStates();
 		void set_hi(Coord h) { hi = h; }
 		void set_lo(Coord l) { lo = l; }
 
@@ -68,8 +79,15 @@ namespace dyno
 		std::vector<Real> host_mass;
 		std::vector<Coord> host_pair_point;
 
+		std::vector<RigidBodyInfo> mHostRigidBodyStates;
+		
+		std::vector<SphereInfo> mSpheres;
+		std::vector<BoxInfo> mBoxes;
+
 	protected:
+		void resetStates() override;
 		void updateStates() override;
+
 	private:
 		/**
 		 * @brief Particle position
@@ -116,11 +134,11 @@ namespace dyno
 		DArray<int> pair;
 
 
-		
 		DArray<Coord> J;
 		DArray<Coord> B;
 		DArray<Real> ita;
 		DArray<Real> D;
+
 		DArray<Real> lambda;
 
 		DArray<Real> mass_eq;
@@ -135,7 +153,6 @@ namespace dyno
 
 		void rigid_update_topology();
 	private:
-		std::shared_ptr<DiscreteElements<TDataType>> m_shapes;
 		std::shared_ptr<NeighborElementQuery<TDataType>>m_nbrQueryElement;
 
 
@@ -147,7 +164,7 @@ namespace dyno
 		int start_sphere;
 		int start_tet;
 		int start_segment;
-		
+
 		int size_mesh;
 
 		Reduction<int> m_reduce;

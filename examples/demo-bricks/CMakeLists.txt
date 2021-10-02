@@ -1,4 +1,4 @@
-if(PERIDYNO_LIBRARY_PERIDYNAMICS)
+if(PERIDYNO_LIBRARY_RigidBody)
     set(PROJECT_NAME demo-bricks)
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
 
@@ -16,9 +16,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
 	target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 
-        IO 
-        Peridynamics 
-        ParticleSystem 
+        IO
         RigidBody 
         GlfwGUI
         GLRenderEngine

@@ -2347,31 +2347,16 @@ namespace dyno
 		}
 	}
 
-	
-
-	
-
-	template<typename TDataType>
-	bool NeighborElementQuery<TDataType>::initializeImpl()
-	{
-		compute();
-		return true;
-	}
-
 	template<typename TDataType>
 	void NeighborElementQuery<TDataType>::compute()
 	{
-		if (this->discreteSet != NULL && this->discreteSet->getSize() > 0)
-			// SELF COLLISION 
+		auto inTopo = this->inDiscreteElements()->getDataPtr();
+
+		if (inTopo->totalSize() > 0)
 		{
-
-		//return;
-		clock_t start, end;
-		start = clock();
-
-		Real boundary_expand = 0.0f;
+			Real boundary_expand = 0.0f;
 			//printf("=========== ============= INSIDE SELF COLLISION %d\n", discreteSet->getTets().size());
-			int t_num = discreteSet->getSize();
+			int t_num = inTopo->totalSize();
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -2381,16 +2366,16 @@ namespace dyno
 				m_queryAABB.resize(t_num);
 			}
 
-			ElementOffset elementOffset = discreteSet->calculateElementOffset();
+			ElementOffset elementOffset = inTopo->calculateElementOffset();
 
 			cuExecute(t_num,
 				NEQ_SetupAABB,
 				m_queriedAABB,
-				discreteSet->getBoxes(),
-				discreteSet->getSpheres(),
-				discreteSet->getTets(),
-				discreteSet->getCaps(),
-				discreteSet->getTris(),
+				inTopo->getBoxes(),
+				inTopo->getSpheres(),
+				inTopo->getTets(),
+				inTopo->getCaps(),
+				inTopo->getTris(),
 				elementOffset,
 				boundary_expand);
 
@@ -2412,92 +2397,73 @@ namespace dyno
 			m_broadPhaseCD->inTarget()->setValue(m_queriedAABB);
 			// 
 			m_broadPhaseCD->update();
-			end = clock();
-			std::cout << "neighbor1111 time = " << double(end - start) << "s" << std::endl;
-
-			//fout<< double(end - start) / 1000.0f << std::endl;
-
-			start = clock();
-			//broad phase end
-			//printf("outside broad phase\n");
-			//DArray<int>& nbrNum = this->outNeighborhood()->getValue().getIndex();
-
+	
 			Real zero = 0;
-			//printf("%d\n", t_num);
-
-
-			
-				
+	
 			//return;
 			DArray<int> mapping_nbr;
 			DArray<int> cnt_element;
 			
-			{
-				
-				cnt_element.resize(discreteSet->getSize());
-				cnt_element.reset();
+			cnt_element.resize(inTopo->totalSize());
+			cnt_element.reset();
 
-				cuExecute(discreteSet->getSize(),
-					NEQ_Narrow_Count,
-					m_broadPhaseCD->outContactList()->getData(),
-					discreteSet->getBoxes(),
-					discreteSet->getSpheres(),
-					discreteSet->getTets(),
-					discreteSet->getTetSDF(),
-					discreteSet->getTetBodyMapping(),
-					discreteSet->getTetElementMapping(),
-					discreteSet->getCaps(),
-					discreteSet->getTris(),
-					//nbrNum,
-					cnt_element,
-					elementOffset,
-					Filter,
-					boundary_expand);
-			}
+			cuExecute(inTopo->totalSize(),
+				NEQ_Narrow_Count,
+				m_broadPhaseCD->outContactList()->getData(),
+				inTopo->getBoxes(),
+				inTopo->getSpheres(),
+				inTopo->getTets(),
+				inTopo->getTetSDF(),
+				inTopo->getTetBodyMapping(),
+				inTopo->getTetElementMapping(),
+				inTopo->getCaps(),
+				inTopo->getTris(),
+				//nbrNum,
+				cnt_element,
+				elementOffset,
+				Filter,
+				boundary_expand);
 			
-			printf("aa\n");
 			if (this->outNeighborhood()->isEmpty())
 				this->outNeighborhood()->allocate();
 
+			int sum = m_reduce.accumulate(cnt_element.begin(), cnt_element.size());
+
+			DArray<int> counter(cnt_element.size());
+			counter.assign(cnt_element);
+			printf("bb %d\n", counter.size());
+			auto& nbrIds = this->outNeighborhood()->getData();
+			printf("cc\n");
+			nbrIds.resize(counter);
+			printf("dd\n");
+			counter.clear();
+
+			m_scan.exclusive(cnt_element, true);
+			cuSynchronize();
+			printf("sum = %d\n", sum);
+			nbr_cons.setElementCount(sum);
+			//printf("sdf size = %d\n", discreteSet->getTetSDF().size());
+			if (sum > 0)
 			{
-				int sum = m_reduce.accumulate(cnt_element.begin(), cnt_element.size());
-
-				DArray<int> counter(cnt_element.size());
-				counter.assign(cnt_element);
-				printf("bb %d\n", counter.size());
-				auto& nbrIds = this->outNeighborhood()->getData();
-				printf("cc\n");
-				nbrIds.resize(counter); 
-				printf("dd\n");
-				counter.clear();
-
-				m_scan.exclusive(cnt_element, true);
+				cuExecute(inTopo->totalSize(),
+					NEQ_Narrow_Set,
+					m_broadPhaseCD->outContactList()->getData(),
+					inTopo->getBoxes(),
+					inTopo->getSpheres(),
+					inTopo->getTets(),
+					inTopo->getTetSDF(),
+					inTopo->getTetBodyMapping(),
+					inTopo->getTetElementMapping(),
+					inTopo->getCaps(),
+					inTopo->getTris(),
+					this->outNeighborhood()->getData(),
+					nbr_cons.getData(),
+					cnt_element,
+					elementOffset,
+					Filter,
+					boundary_expand
+				);
 				cuSynchronize();
-				printf("sum = %d\n", sum);
-				nbr_cons.setElementCount(sum);
-				//printf("sdf size = %d\n", discreteSet->getTetSDF().size());
-				if (sum > 0)
-				{
-					cuExecute(discreteSet->getSize(),
-						NEQ_Narrow_Set,
-						m_broadPhaseCD->outContactList()->getData(),
-						discreteSet->getBoxes(),
-						discreteSet->getSpheres(),
-						discreteSet->getTets(),
-						discreteSet->getTetSDF(),
-						discreteSet->getTetBodyMapping(),
-						discreteSet->getTetElementMapping(),
-						discreteSet->getCaps(),
-						discreteSet->getTris(),
-						this->outNeighborhood()->getData(),
-						nbr_cons.getData(),
-						cnt_element,
-						elementOffset,
-						Filter,
-						boundary_expand
-					);
-					cuSynchronize();
-				}
 			}
 
 			mapping_nbr.clear();
@@ -2510,4 +2476,5 @@ namespace dyno
 		}
 	}
 
+	DEFINE_CLASS(NeighborElementQuery);
 }
