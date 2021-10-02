@@ -31,8 +31,48 @@ void creat_scene_fluid()
 
 	std::shared_ptr<DiscreteElements<DataType3f>> DE = std::make_shared<DiscreteElements<DataType3f>>();
 	
+	DE->addSphere(Sphere3D(Vec3f(0.5f, 0.75f, 0.5f), 0.025f));
+
+	rigid->host_angular_velocity.push_back(Vec3f(0));
+	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
+	rigid->host_mass.push_back(0.004f);
+	rigid->host_inertia_tensor.push_back(
+		0.004 / 12.0f *
+		Matrix3D(
+			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
+			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
+			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
+		)
+	);
+
+	DE->addSphere(Sphere3D(Vec3f(0.5f, 0.95f, 0.5f), 0.025f));
+
+	rigid->host_angular_velocity.push_back(Vec3f(0));
+	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
+	rigid->host_mass.push_back(0.004f);
+	rigid->host_inertia_tensor.push_back(
+		0.004 / 12.0f *
+		Matrix3D(
+			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
+			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
+			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
+		)
+	);
 
 
+	DE->addSphere(Sphere3D(Vec3f(0.5f, 0.65f, 0.5f), 0.05f));
+
+	rigid->host_angular_velocity.push_back(Vec3f(0));
+	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
+	rigid->host_mass.push_back(0.004f);
+	rigid->host_inertia_tensor.push_back(
+		0.004 / 12.0f *
+		Matrix3D(
+			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
+			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
+			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
+		)
+	);
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)
 		{
@@ -53,8 +93,24 @@ void creat_scene_fluid()
 			);
 		}
 
+	
 
+	DE->addTet(Tet3D(Vec3f(0.5f, 1.1f, 0.5f), Vec3f(0.5f, 1.2f, 0.5f), 
+		Vec3f(0.6f, 1.1f, 0.5f), Vec3f(0.5f, 1.1f, 0.6f)));
 
+	rigid->host_angular_velocity.push_back(Vec3f(0));
+	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
+	rigid->host_mass.push_back(0.004f);
+	rigid->host_inertia_tensor.push_back(
+		0.004 / 12.0f *
+		Matrix3D(
+			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
+			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
+			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
+		)
+	);
+
+	
 
 	DE->initialize();
 

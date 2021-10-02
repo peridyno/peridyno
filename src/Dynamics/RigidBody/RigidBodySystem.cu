@@ -205,7 +205,9 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tet.size()) return;
 		//box[pId].center = pos[pId + start_box];
-		Coord3D center_init = (tet_init[pId - start_tet].v[0] + tet_init[pId - start_tet].v[1] + tet_init[pId - start_tet].v[2] + tet_init[pId - start_tet].v[3]) / 4.0f;
+
+		//printf("!!!!!!!!%d %d %d\n", rotation.size(), tet.size(), tet_init.size());
+		Coord3D center_init = (tet_init[pId].v[0] + tet_init[pId].v[1] + tet_init[pId].v[2] + tet_init[pId].v[3]) / 4.0f;
 		tet[pId].v[0] = rotation[pId + start_tet] * (tet_init[pId].v[0] - center_init) + pos[pId + start_tet];
 		tet[pId].v[1] = rotation[pId + start_tet] * (tet_init[pId].v[1] - center_init) + pos[pId + start_tet];
 		tet[pId].v[2] = rotation[pId + start_tet] * (tet_init[pId].v[2] - center_init) + pos[pId + start_tet];
@@ -996,11 +998,11 @@ namespace dyno
 			//int idx = pId - start_box;
 			int cnt = 0;
 			int start_i = count[pId];
-			Coord center = box[pId].center;
-			Coord u = box[pId].u;
-			Coord v = box[pId].v;
-			Coord w = box[pId].w;
-			Coord extent = box[pId].extent;
+			Coord center = box[pId - start_box].center;
+			Coord u = box[pId - start_box].u;
+			Coord v = box[pId - start_box].v;
+			Coord w = box[pId - start_box].w;
+			Coord extent = box[pId - start_box].extent;
 			Point3D p[8];
 			p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
 			p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
@@ -1165,11 +1167,11 @@ namespace dyno
 				//int idx = pId - start_box;
 				int cnt = 0;
 //				int start_i;
-				Coord center = box[pId].center;
-				Coord u = box[pId].u;
-				Coord v = box[pId].v;
-				Coord w = box[pId].w;
-				Coord extent = box[pId].extent;
+				Coord center = box[pId - start_box].center;
+				Coord u = box[pId - start_box].u;
+				Coord v = box[pId - start_box].v;
+				Coord w = box[pId - start_box].w;
+				Coord extent = box[pId - start_box].extent;
 				Point3D p[8];
 				p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
 				p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);

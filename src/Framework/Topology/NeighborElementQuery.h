@@ -28,7 +28,7 @@ namespace dyno {
 		bool capsule_capsule = true;
 		bool capsule_tri = true;
 		bool tri_tri = true;
-		bool tet_sdf = true;
+		bool tet_sdf = false;
 		bool tet_neighbor_filter = true;
 	};
 
