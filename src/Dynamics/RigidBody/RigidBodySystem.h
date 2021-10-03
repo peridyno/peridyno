@@ -37,56 +37,41 @@ namespace dyno
 		typedef typename TOrientedBox3D<Real> Box3D;
 		typedef typename Quat<Real> TQuat;
 
-
 		RigidBodySystem(std::string name = "RigidBodySystem");
 		virtual ~RigidBodySystem();
 
 		void addBox(
-			const RigidBodyInfo& bodyDef, 
 			const BoxInfo& box, 
+			const RigidBodyInfo& bodyDef,
 			const Real density = Real(1));
 
 		void addSphere(
+			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
-			const SphereInfo& sphere, 
 			const Real density = Real(1));
-		
+
+		void addTet(
+			const TetInfo& tet,
+			const RigidBodyInfo& bodyDef,
+			const Real density = Real(1));
+
 		void solve_constraint();
 		void update_position_rotation(Real dt);
 		void init_jacobi(Real dt);
-		void init_boundary();
+		
 		void init_friction();
+		
+		void detectCollisionWithBoundary();
 
-		void pretreat(Real dt);
-		void take_one_iteration(Real dt);
-		void update_state(Real dt);
-		
-		
-
-		
 	public:
 		void set_hi(Coord h) { hi = h; }
 		void set_lo(Coord l) { lo = l; }
 
-		DeviceArrayField<Coord> AA;
-
-		bool late_initialize = false;
-		int size_else;
-
-		std::vector<Coord> host_angular_velocity;
-		std::vector<Coord> host_velocity;
-		std::vector<Matrix> host_inertia_tensor;
-		std::vector<Real> host_mass;
-		std::vector<Coord> host_pair_point;
-
-		std::vector<RigidBodyInfo> mHostRigidBodyStates;
-		
-		std::vector<SphereInfo> mSpheres;
-		std::vector<BoxInfo> mBoxes;
-
 	protected:
 		void resetStates() override;
 		void updateStates() override;
+
+		void updateTopology() override;
 
 	private:
 		/**
@@ -94,12 +79,10 @@ namespace dyno
 		 */
 		DEF_EMPTY_CURRENT_ARRAY(Mass, Real, DeviceType::GPU, "Mass of rigid bodies");
 
-
 		/**
 		 * @brief Particle position
 		 */
 		DEF_EMPTY_CURRENT_ARRAY(Center, Coord, DeviceType::GPU, "Center of rigid bodies");
-
 
 		/**
 		 * @brief Particle position
@@ -111,74 +94,58 @@ namespace dyno
 		 */
 		DEF_EMPTY_CURRENT_ARRAY(AngularVelocity, Coord, DeviceType::GPU, "Angular velocity of rigid bodies");
 
-
 		/**
 		 * @brief Particle position
 		 */
 		DEF_EMPTY_CURRENT_ARRAY(RigidRotation, Matrix, DeviceType::GPU, "Rotation matrix of rigid bodies");
 
-		DeviceArrayField<Matrix> m_inertia;
-		DArray<Matrix> m_inertia_init;
-		DArray<Sphere3D> m_sphere3d_init;
-		DArray<Box3D> m_box3d_init;
-		DArray<Tet3D> m_tet3d_init;
-		DArray<TQuat> m_rotation_q;
+		DEF_EMPTY_CURRENT_ARRAY(Inertia, Matrix, DeviceType::GPU, "Interial matrix");
 
-		DArray<int> m_Constraints;
+		DEF_EMPTY_CURRENT_ARRAY(Rotation, TQuat, DeviceType::GPU, "Quaternion");
 
-
-
-		DArray<Coord> pos_init;
-		DArray<Coord> center_init;
-		DArray<Coord> pair_point;
-		DArray<int> pair;
-
-
-		DArray<Coord> J;
-		DArray<Coord> B;
-		DArray<Real> ita;
-		DArray<Real> D;
-
-		DArray<Real> lambda;
-
-		DArray<Real> mass_eq;
-		DArray<Real> mass_buffer;
-
-		bool use_new_mass = false;//true;
-
-		DArray<int> cnt_boudary;
-		DArray<NeighborConstraints> buffer_boundary;
-		DArray<NeighborConstraints> buffer_friction;
-		DArray<NeighborConstraints> constraints_all;
-
-		void rigid_update_topology();
 	private:
-		std::shared_ptr<NeighborElementQuery<TDataType>>m_nbrQueryElement;
+		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
+		std::vector<SphereInfo> mHostSpheres;
+		std::vector<BoxInfo> mHostBoxes;
+		std::vector<TetInfo> mHostTets;
+
+		DArray<RigidBodyInfo> mDeviceRigidBodyStates;
+
+		DArray<SphereInfo> mDeviceSpheres;
+		DArray<BoxInfo> mDeviceBoxes;
+		DArray<TetInfo> mDeviceTets;
+
+		DArray<Matrix> m_inertia_init;
+
+		DArray<Coord> center_init;
+
+		DArray<Coord> mJ;		//Jacobian
+		DArray<Coord> mB;		//B = M^{-1}J^T
+		DArray<Coord> mAccel;
+
+		DArray<Real> mEta;		//eta
+		DArray<Real> mD;		//diagonal elements of JB
+		DArray<Real> mLambda;	//contact impulse
+
+		DArray<int> mBoundaryContactCounter;
+		DArray<NeighborConstraints> mBoundaryContacts;
+		DArray<NeighborConstraints> buffer_friction;
+		DArray<NeighborConstraints> mAllConstraints;
+
+	private:
+		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
 
 		bool have_mesh = false;
 		bool have_friction = true;
 		bool have_mesh_boundary = false;
-
-		int start_box;
-		int start_sphere;
-		int start_tet;
-		int start_segment;
 
 		int size_mesh;
 
 		Reduction<int> m_reduce;
 		Scan m_scan;
 
-		Coord hi = Coord(100,5,100);//(0.4925,0.4925,0.4925);
+		Coord hi = Coord(100, 5, 100);//(0.4925,0.4925,0.4925);
 		Coord lo = Coord(-100, 0, -100);//(0.0075,0.0075,0.0075);
 	};
-
-
-
-//#ifdef PRECISION_FLOAT
-//	template class RigidBodySystem<DataType3f>;
-//#else
-//	template class RigidBodySystem<DataType3d>;
-//#endif
 }

@@ -11,8 +11,8 @@ namespace dyno
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
 		this->currentTopology()->setDataPtr(std::make_shared<DiscreteElements<TDataType>>());
 
-		m_nbrQueryElement = std::make_shared<NeighborElementQuery<TDataType>>();
-		this->currentTopology()->connect(m_nbrQueryElement->inDiscreteElements());
+		mElementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
+		this->currentTopology()->connect(mElementQuery->inDiscreteElements());
 	}
 
 	template<typename TDataType>
@@ -20,11 +20,10 @@ namespace dyno
 	{
 	}
 
-
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addBox(
-		const RigidBodyInfo& bodyDef, 
 		const BoxInfo& box,
+		const RigidBodyInfo& bodyDef, 
 		const Real density)
 	{
 		auto b = box;
@@ -33,7 +32,7 @@ namespace dyno
 		float lx = 2.0f * b.halfLength[0];
 		float ly = 2.0f * b.halfLength[1];
 		float lz = 2.0f * b.halfLength[2];
-		b.center = bodyDef.position;
+		bd.position = b.center;
 
 		bd.mass = density * lx * ly * lz;
 		bd.inertia = 1.0f / 12.0f * bd.mass
@@ -41,23 +40,23 @@ namespace dyno
 				0, lx*lx + lz * lz, 0,
 				0, 0, lx*lx + ly * ly);
 
-		bd.sType = ST_Box;
+		bd.shapeType = ST_Box;
 		bd.angle = b.rot;
 
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mSpheres.size() + mBoxes.size(), bd);
-		mBoxes.push_back(b);
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
+		mHostBoxes.push_back(b);
 	}
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addSphere(
-		const RigidBodyInfo& bodyDef, 
 		const SphereInfo& sphere, 
+		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
 	{
 		auto b = sphere;
 		auto bd = bodyDef;
 
-		b.center = bodyDef.position;
+		bd.position = b.center;
 
 		float r = b.radius;
 		if (bd.mass <= 0.0f) {
@@ -69,43 +68,113 @@ namespace dyno
 				0, I11, 0,
 				0, 0, I11);
 
-		bd.sType = ST_Sphere;
+		bd.shapeType = ST_Sphere;
 		bd.angle = b.rot;
 
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mSpheres.size(), bd);
-		mSpheres.push_back(b);
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
+		mHostSpheres.push_back(b);
 	}
 
-	template <typename Coord, typename Matrix, typename Quat>
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addTet(
+		const TetInfo& tet, 
+		const RigidBodyInfo& bodyDef, 
+		const Real density /*= Real(1)*/)
+	{
+		auto b = tet;
+		auto bd = bodyDef;
+
+		bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+
+		float r = 0.025;
+		if (bd.mass <= 0.0f) {
+			bd.mass = 3 / 4.0f*M_PI*r*r*r*density;
+		}
+		float I11 = r * r;
+		bd.inertia = 0.4f * bd.mass
+			* Mat3f(I11, 0, 0,
+				0, I11, 0,
+				0, 0, I11);
+
+		bd.shapeType = ST_Tet;
+		bd.angle = Quat1f();
+
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
+		mHostTets.push_back(b);
+	}
+
+	template <typename Real, typename Coord, typename Matrix, typename Quat>
 	__global__ void RB_initialize_device(
+		DArray<Real> mass,
 		DArray<Coord> pos,
 		DArray<Matrix> rotation,
+		DArray<Coord> velocity,
+		DArray<Coord> angularVelocity,
 		DArray<Quat> rotation_q,
-		DArray<Sphere3D> spheres,
-		DArray<Box3D> boxes,
-		DArray<Tet3D> tets,
-		int start_box,
-		int start_sphere,
-		int start_tet,
-		int start_segment,
-		int start_mesh
-	)
+		DArray<Matrix> inertia,
+		DArray<RigidBodyInfo> states,
+		ElementOffset offset,
+		int start_mesh)
 	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= start_mesh) return;
 
-		if (pId >= rotation_q.size())
+		if (tId >= rotation_q.size())
 			return;
-		rotation_q[pId] = Quat(0, 0, 0, 1);
 		
-		if (pId >= start_mesh) return;
-		rotation[pId] = Matrix::identityMatrix();
-		
-		rotation_q[pId] = Quat(0, 0, 0, 1);
-		
-		if (pId >= start_segment) {}
-		else if (pId >= start_tet) pos[pId] = (tets[pId - start_tet].v[0] + tets[pId - start_tet].v[1] + tets[pId - start_tet].v[2] + tets[pId - start_tet].v[3]) / 4.0f;
-		else if (pId >= start_box) pos[pId] = boxes[pId - start_box].center;
-		else pos[pId] = spheres[pId - start_sphere].center;
+		mass[tId] = states[tId].mass;
+		rotation[tId] = states[tId].angle.toMatrix3x3();
+		velocity[tId] = states[tId].linearVelocity;
+		angularVelocity[tId] = states[tId].angularVelocity;
+		rotation_q[tId] = states[tId].angle;
+		pos[tId] = states[tId].position;
+		inertia[tId] = states[tId].inertia;
+
+// 		if (tId >= offset.segOffset) {}
+// 		else if (tId >= offset.tetOffset) pos[tId] = (tets[tId - offset.tetOffset].v[0] + tets[tId - offset.tetOffset].v[1] + tets[tId - offset.tetOffset].v[2] + tets[tId - offset.tetOffset].v[3]) / 4.0f;
+// 		else if (tId >= offset.boxOffset) pos[tId] = boxes[tId - offset.boxOffset].center;
+// 		else pos[tId] = spheres[tId].center;
+	}
+
+	__global__ void SetupBoxes(
+		DArray<Box3D> box3d,
+		DArray<BoxInfo> boxInfo)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= boxInfo.size()) return;
+
+		box3d[tId].center = boxInfo[tId].center;
+		box3d[tId].extent = boxInfo[tId].halfLength;
+
+		Mat3f rot = boxInfo[tId].rot.toMatrix3x3();
+
+		box3d[tId].u = rot * Vec3f(1, 0, 0);
+		box3d[tId].v = rot * Vec3f(0, 1, 0);
+		box3d[tId].w = rot * Vec3f(0, 0, 1);
+	}
+
+	__global__ void SetupSpheres(
+		DArray<Sphere3D> sphere3d,
+		DArray<SphereInfo> sphereInfo)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= sphereInfo.size()) return;
+
+		sphere3d[tId].radius = sphereInfo[tId].radius;
+		sphere3d[tId].center = sphereInfo[tId].center;
+	}
+
+	__global__ void SetupTets(
+		DArray<Tet3D> tet3d,
+		DArray<TetInfo> tetInfo)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tetInfo.size()) return;
+
+		tet3d[tId].v[0] = tetInfo[tId].v[0];
+		tet3d[tId].v[1] = tetInfo[tId].v[1];
+		tet3d[tId].v[2] = tetInfo[tId].v[2];
+		tet3d[tId].v[3] = tetInfo[tId].v[3];
 	}
 
 	template<typename TDataType>
@@ -113,130 +182,113 @@ namespace dyno
 	{
 		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 
-		m_box3d_init.resize(topo->getBoxes().size());
-		m_sphere3d_init.resize(topo->getSpheres().size());
-		m_tet3d_init.resize(topo->getTets().size());
+		mDeviceBoxes.assign(mHostBoxes);
+		mDeviceSpheres.assign(mHostSpheres);
+		mDeviceTets.assign(mHostTets);
 
-		m_box3d_init.assign(topo->getBoxes());
-		m_sphere3d_init.assign(topo->getSpheres());
-		m_tet3d_init.assign(topo->getTets());
+		auto& boxes = topo->getBoxes();
+		auto& spheres = topo->getSpheres();
+		auto& tets = topo->getTets();
 
-		int size_rigids = topo->getBoxes().size() + topo->getSpheres().size() + topo->getTets().size();
-		int size_rigids_0 = size_rigids;
-		size_else = size_rigids;
+		boxes.resize(mDeviceBoxes.size());
+		spheres.resize(mDeviceSpheres.size());
+		tets.resize(mDeviceTets.size());
 
-		start_sphere = 0;
-		start_box = topo->getSpheres().size();
-		start_tet = topo->getSpheres().size() + topo->getBoxes().size();
-		start_segment = topo->getBoxes().size() + topo->getSpheres().size() + topo->getTets().size();
+		cuExecute(mDeviceBoxes.size(),
+			SetupBoxes,
+			boxes,
+			mDeviceBoxes);
 
-		
-		currentRigidRotation()->setElementCount(size_rigids);
-		currentAngularVelocity()->setElementCount(size_rigids);
-		currentCenter()->setElementCount(size_rigids);
-		currentVelocity()->setElementCount(size_rigids);
-		currentMass()->setElementCount(size_rigids);
-		cnt_boudary.resize(size_rigids);
+		cuExecute(mDeviceSpheres.size(),
+			SetupSpheres,
+			spheres,
+			mDeviceSpheres);
 
-		m_rotation_q.resize(size_rigids);
-		m_inertia.setElementCount(size_rigids);
-		m_inertia_init.resize(size_rigids);
+		cuExecute(mDeviceTets.size(),
+			SetupTets,
+			tets,
+			mDeviceTets);
 
-		mass_eq.resize(size_rigids * 6);
-		mass_buffer.resize(size_rigids * 6);
+		mDeviceRigidBodyStates.assign(mHostRigidBodyStates);
 
-		uint pDimsR = cudaGridSize(size_rigids, BLOCK_SIZE);
+		int sizeOfRigids = topo->totalSize();
+
+		ElementOffset eleOffset = topo->calculateElementOffset();
+
+		this->currentRigidRotation()->setElementCount(sizeOfRigids);
+		this->currentAngularVelocity()->setElementCount(sizeOfRigids);
+		this->currentCenter()->setElementCount(sizeOfRigids);
+		this->currentVelocity()->setElementCount(sizeOfRigids);
+		this->currentMass()->setElementCount(sizeOfRigids);
+		this->currentInertia()->setElementCount(sizeOfRigids);
+		this->currentRotation()->setElementCount(sizeOfRigids);
+
+		mBoundaryContactCounter.resize(sizeOfRigids);
+
+//		mass_eq.resize(sizeOfRigids * 6);
+
+		uint pDimsR = cudaGridSize(sizeOfRigids, BLOCK_SIZE);
 		
 		RB_initialize_device << <pDimsR, BLOCK_SIZE >> > (
-			currentCenter()->getData(),
-			currentRigidRotation()->getData(),
-			m_rotation_q,
-			m_sphere3d_init,
-			m_box3d_init,
-			m_tet3d_init,
-			start_box,
-			start_sphere,
-			start_tet,
-			start_segment,
-			size_rigids_0
-			);
-			
-		cuSynchronize();
-
-		
-
+			this->currentMass()->getData(),
+			this->currentCenter()->getData(),
+			this->currentRigidRotation()->getData(),
+			this->currentVelocity()->getData(),
+			this->currentAngularVelocity()->getData(),
+			this->currentRotation()->getData(),
+			this->currentInertia()->getData(),
+			mDeviceRigidBodyStates,
+			eleOffset,
+			sizeOfRigids);
 	
-		center_init.resize(size_rigids);
-		
-		//Function1Pt::copy(center_init, currentCenter()->getData());
-		center_init.assign(currentCenter()->getData());
+		center_init.resize(sizeOfRigids);
+		center_init.assign(this->currentCenter()->getData());
 
-		printf("%d %d %d %d %d\n", currentMass()->getElementCount(), host_inertia_tensor.size(), host_velocity.size(), host_angular_velocity.size(), host_mass.size());
-
-		//Function1Pt::copy(m_inertia.getData(), host_inertia_tensor);
-		m_inertia.getData().assign(host_inertia_tensor);
-
-		/*Function1Pt::copy(m_inertia_init, host_inertia_tensor);
-		Function1Pt::copy(currentVelocity()->getData(), host_velocity);
-		Function1Pt::copy(currentAngularVelocity()->getData(), host_angular_velocity);
-		Function1Pt::copy(currentMass()->getData(), host_mass);*/
-		m_inertia_init.assign(host_inertia_tensor);
-		currentVelocity()->getData().assign(host_velocity);
-		currentAngularVelocity()->getData().assign(host_angular_velocity);
-		currentMass()->getData().assign(host_mass);
-
-		
-		host_inertia_tensor.clear();
-		host_velocity.clear();
-		host_angular_velocity.clear();
-		host_mass.clear();
+		m_inertia_init.assign(this->currentInertia()->getData());
 	}
 	
 	template <typename Coord>
-	__global__ void RB_update_sphere(
-		DArray<Coord> pos,
+	__global__ void UpdateSpheres(
 		DArray<Sphere3D> sphere,
-		int start_sphere
-	)
+		DArray<Coord> pos,
+		int start_sphere)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= sphere.size()) return;
+
 		sphere[pId].center = pos[pId + start_sphere];
 	}
 
 	template <typename Coord, typename Matrix>
-	__global__ void RB_update_box(
+	__global__ void UpdateBoxes(
+		DArray<Box3D> box,
+		DArray<BoxInfo> box_init,
 		DArray<Coord> pos,
 		DArray<Matrix> rotation,
-		DArray<Box3D> box,
-		DArray<Box3D> box_init,
-		int start_box
-	)
+		int start_box)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= box.size()) return;
 		box[pId].center = pos[pId + start_box];
 
-		box[pId].u = rotation[pId + start_box] * box_init[pId].u;
-		box[pId].v = rotation[pId + start_box] * box_init[pId].v;
-		box[pId].w = rotation[pId + start_box] * box_init[pId].w;
+		box[pId].extent = box_init[pId].halfLength;
 
+		box[pId].u = rotation[pId + start_box] * Coord(1, 0, 0);
+		box[pId].v = rotation[pId + start_box] * Coord(0, 1, 0);
+		box[pId].w = rotation[pId + start_box] * Coord(0, 0, 1);
 	}
 
 	template <typename Coord, typename Matrix>
-	__global__ void RB_update_tet(
+	__global__ void UpdateTets(
+		DArray<Tet3D> tet,
+		DArray<TetInfo> tet_init,
 		DArray<Coord> pos,
 		DArray<Matrix> rotation,
-		DArray<Tet3D> tet,
-		DArray<Tet3D> tet_init,
-		int start_tet
-	)
+		int start_tet)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= tet.size()) return;
-		//box[pId].center = pos[pId + start_box];
 
-		//printf("!!!!!!!!%d %d %d\n", rotation.size(), tet.size(), tet_init.size());
 		Coord3D center_init = (tet_init[pId].v[0] + tet_init[pId].v[1] + tet_init[pId].v[2] + tet_init[pId].v[3]) / 4.0f;
 		tet[pId].v[0] = rotation[pId + start_tet] * (tet_init[pId].v[0] - center_init) + pos[pId + start_tet];
 		tet[pId].v[1] = rotation[pId + start_tet] * (tet_init[pId].v[1] - center_init) + pos[pId + start_tet];
@@ -270,7 +322,6 @@ namespace dyno
 		rotation[pId] = rotation_q[pId].toMatrix3x3();
 
 		inertia[pId] = rotation[pId] * inertia_init[pId] * rotation[pId].inverse();
-
 	}
 
 	template <typename Coord>
@@ -278,31 +329,26 @@ namespace dyno
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
 		DArray<Coord> AA,
-		Real dt
-	)
+		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= AA.size() / 2) return;
 
-		
 		//printf("%.3lf %.3lf %.3lf\n", AA[2 * pId][0], AA[2 * pId][1], AA[2 * pId][2]);
 		velocity[pId] += AA[2 * pId] * dt;// + Coord(0, -9.8f, 0) * dt;
 		velocity[pId] += Coord(0, -9.8f, 0) * dt;
 		 //printf("velocity: %.3lf %.3lf %.3lf\n", velocity[pId][0], velocity[pId][1], velocity[pId][2]);
 		angular_velocity[pId] += AA[2 * pId + 1] * dt;
-		
-
 	}
 
 	template <typename Coord, typename Matrix>
-	__global__ void RB_constrct_jacobi(
+	__global__ void CalculateJacobians(
+		DArray<Coord> J,
+		DArray<Coord> B,
 		DArray<Coord> pos,
 		DArray<Matrix> inertia,
 		DArray<Real> mass,
-		DArray<Coord> J,
-		DArray<Coord> B,
-		DArray<NeighborConstraints> nbc
-	)
+		DArray<NeighborConstraints> nbc)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -329,9 +375,6 @@ namespace dyno
 			B[4 * pId + 1] = inertia[idx1].inverse() * (- r1.cross(d)) ;
 			B[4 * pId + 2] = d / mass[idx2];
 			B[4 * pId + 3] = inertia[idx2].inverse() * (r2.cross(d));
-
-			//printf("B: %.3lf %.3lf %.3lf %.3lf\n", B[4 * pId], B[4 * pId + 1], B[4 * pId + 2], B[4 * pId + 3]);
-
 		}
 		else if (nbc[pId].constraint_type == constraint_collision) // contact, collision
 		{
@@ -351,10 +394,8 @@ namespace dyno
 			B[4 * pId + 2] = -n / mass[idx2];
 			B[4 * pId + 3] = inertia[idx2].inverse() * (-r2.cross(n));
 		}
-
 		else if (nbc[pId].constraint_type == constraint_boundary) // boundary
 		{
-			
 			Coord p1 = nbc[pId].pos1;
 		//	printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d %.3lf %.3lf %.3lf\n", idx1, p1[0], p1[1], p1[2]);
 
@@ -372,7 +413,6 @@ namespace dyno
 			B[4 * pId + 2] = Coord(0);
 			B[4 * pId + 3] = Coord(0);
 		}
-
 		else if (nbc[pId].constraint_type == constraint_friction) // friction
 		{
 			Coord p1 = nbc[pId].pos1;
@@ -414,20 +454,18 @@ namespace dyno
 				B[4 * pId + 3] = Coord(0);
 			}
 		}
-
 	}
 
 	template <typename Coord, typename Matrix>
-	__global__ void RB_constrct_jacobi(
+	__global__ void CalculateJacobians(
+		DArray<Coord> J,
+		DArray<Coord> B,
 		DArray<Coord> pos,
 		DArray<Matrix> inertia,
 		DArray<Matrix> inertia_eq,
 		DArray<Real> mass,
 		DArray<Real> mass_eq,
-		DArray<Coord> J,
-		DArray<Coord> B,
-		DArray<NeighborConstraints> nbc
-	)
+		DArray<NeighborConstraints> nbc)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -589,135 +627,134 @@ namespace dyno
 
 	}
 
-	template <typename Coord, typename Matrix, typename Real>
-	__global__ void RB_constrct_mass_eq(
-		DArray<Coord> pos,
-		DArray<Matrix> inertia,
-		DArray<Real> mass,
-		DArray<Coord> J,
-		DArray<Coord> B,
-		DArray<Real> mass_eq,
-		DArray<Real> mass_eq_old,
-		DArray<Matrix> inertia_eq,
-		DArray<NeighborConstraints> nbc
-	)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= J.size() / 4) return;
-		int idx1 = nbc[pId].idx1;
-		int idx2 = nbc[pId].idx2;
-		if(nbc[pId].constraint_type != constraint_friction)
-		{
-			Coord d = nbc[pId].normal1;
+// 	template <typename Coord, typename Matrix, typename Real>
+// 	__global__ void RB_constrct_mass_eq(
+// 		DArray<Coord> pos,
+// 		DArray<Matrix> inertia,
+// 		DArray<Real> mass,
+// 		DArray<Coord> J,
+// 		DArray<Coord> B,
+// 		DArray<Real> mass_eq,
+// 		DArray<Real> mass_eq_old,
+// 		DArray<Matrix> inertia_eq,
+// 		DArray<NeighborConstraints> nbc
+// 	)
+// 	{
+// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+// 		if (pId >= J.size() / 4) return;
+// 		int idx1 = nbc[pId].idx1;
+// 		int idx2 = nbc[pId].idx2;
+// 		if(nbc[pId].constraint_type != constraint_friction)
+// 		{
+// 			Coord d = nbc[pId].normal1;
+// 
+// 			if (d[0] > EPSILON)
+// 			{
+// 				Coord3D d_n = d / d.norm();
+// 				if(idx2 != -1)
+// 				{ 
+// 					atomicAdd(&mass_eq[idx1 * 6], mass_eq_old[idx2 * 6] * d_n[0]);
+// 					atomicAdd(&mass_eq[idx2 * 6 + 1], mass_eq_old[idx1 * 6 + 1] * d_n[0]);
+// 				}
+// 				else
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
+// 				}
+// 			}
+// 			else
+// 			{
+// 				Coord3D d_n = d / d.norm();
+// 				if (idx2 != -1)
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 1], - mass_eq_old[idx2 * 6 + 1] * d_n[0]);
+// 					atomicAdd(&mass_eq[idx2 * 6], - mass_eq_old[idx1 * 6] * d_n[0]);
+// 				}
+// 				else
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
+// 				}
+// 			}
+// 			if (d[1] > EPSILON)
+// 			{
+// 				Coord3D d_n = d / d.norm();
+// 				if (idx2 != -1)
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 2], mass_eq_old[idx2 * 6 + 2] * d_n[1]);
+// 					atomicAdd(&mass_eq[idx2 * 6 + 3], mass_eq_old[idx1 * 6 + 3] * d_n[1]);
+// 				}
+// 				else
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 2], 100000.0f);
+// 				}
+// 			}
+// 			else
+// 			{
+// 				Coord3D d_n = d / d.norm();
+// 				if (idx2 != -1)
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 3], - mass_eq_old[idx2 * 6 + 3] * d_n[1]);
+// 					atomicAdd(&mass_eq[idx2 * 6 + 2], - mass_eq_old[idx1 * 6 + 2] * d_n[1]);
+// 				}
+// 				else
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 3], 100000.0f);
+// 				}
+// 			}
+// 			if (d[2] > EPSILON)
+// 			{
+// 				Coord3D d_n = d / d.norm();
+// 				if (idx2 != -1)
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 4], mass_eq_old[idx2 * 6 + 4] * d_n[2]);
+// 					atomicAdd(&mass_eq[idx2 * 6 + 5], mass_eq_old[idx1 * 6 + 5] * d_n[2]);
+// 				}
+// 				else
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 4], 100000.0f);
+// 				}
+// 			}
+// 			else
+// 			{
+// 				Coord3D d_n = d / d.norm();
+// 				if (idx2 != -1)
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 5], - mass_eq_old[idx2 * 6 + 5] * d_n[2]);
+// 					atomicAdd(&mass_eq[idx2 * 6 + 4], - mass_eq_old[idx1 * 6 + 4] * d_n[2]);
+// 				}
+// 				else
+// 				{
+// 					atomicAdd(&mass_eq[idx1 * 6 + 5], 100000.0f);
+// 				}
+// 			}
+// 
+// 		}
+// 	}
 
-			if (d[0] > EPSILON)
-			{
-				Coord3D d_n = d / d.norm();
-				if(idx2 != -1)
-				{ 
-					atomicAdd(&mass_eq[idx1 * 6], mass_eq_old[idx2 * 6] * d_n[0]);
-					atomicAdd(&mass_eq[idx2 * 6 + 1], mass_eq_old[idx1 * 6 + 1] * d_n[0]);
-				}
-				else
-				{
-					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
-				}
-			}
-			else
-			{
-				Coord3D d_n = d / d.norm();
-				if (idx2 != -1)
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 1], - mass_eq_old[idx2 * 6 + 1] * d_n[0]);
-					atomicAdd(&mass_eq[idx2 * 6], - mass_eq_old[idx1 * 6] * d_n[0]);
-				}
-				else
-				{
-					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
-				}
-			}
-			if (d[1] > EPSILON)
-			{
-				Coord3D d_n = d / d.norm();
-				if (idx2 != -1)
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 2], mass_eq_old[idx2 * 6 + 2] * d_n[1]);
-					atomicAdd(&mass_eq[idx2 * 6 + 3], mass_eq_old[idx1 * 6 + 3] * d_n[1]);
-				}
-				else
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 2], 100000.0f);
-				}
-			}
-			else
-			{
-				Coord3D d_n = d / d.norm();
-				if (idx2 != -1)
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 3], - mass_eq_old[idx2 * 6 + 3] * d_n[1]);
-					atomicAdd(&mass_eq[idx2 * 6 + 2], - mass_eq_old[idx1 * 6 + 2] * d_n[1]);
-				}
-				else
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 3], 100000.0f);
-				}
-			}
-			if (d[2] > EPSILON)
-			{
-				Coord3D d_n = d / d.norm();
-				if (idx2 != -1)
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 4], mass_eq_old[idx2 * 6 + 4] * d_n[2]);
-					atomicAdd(&mass_eq[idx2 * 6 + 5], mass_eq_old[idx1 * 6 + 5] * d_n[2]);
-				}
-				else
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 4], 100000.0f);
-				}
-			}
-			else
-			{
-				Coord3D d_n = d / d.norm();
-				if (idx2 != -1)
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 5], - mass_eq_old[idx2 * 6 + 5] * d_n[2]);
-					atomicAdd(&mass_eq[idx2 * 6 + 4], - mass_eq_old[idx1 * 6 + 4] * d_n[2]);
-				}
-				else
-				{
-					atomicAdd(&mass_eq[idx1 * 6 + 5], 100000.0f);
-				}
-			}
-
-		}
-	}
-
-	template <typename Real, typename Matrix>
-	__global__ void RB_constrct_mass_eq(
-		DArray<Matrix> inertia,
-		DArray<Real> mass,
-		DArray<Real> mass_eq
-	)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= mass.size()) return;
-
-		for (int i = 0; i < 6; i++)
-			mass_eq[pId * 6 + i] += mass[pId];
-	}
+// 	template <typename Real, typename Matrix>
+// 	__global__ void RB_constrct_mass_eq(
+// 		DArray<Matrix> inertia,
+// 		DArray<Real> mass,
+// 		DArray<Real> mass_eq
+// 	)
+// 	{
+// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+// 		if (pId >= mass.size()) return;
+// 
+// 		for (int i = 0; i < 6; i++)
+// 			mass_eq[pId * 6 + i] += mass[pId];
+// 	}
 
 
 	// ignore zeta !!!!!!
 	template <typename Coord>
-	__global__ void RB_compute_ita(
+	__global__ void CalculateEta(
+		DArray<Real> eta,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
 		DArray<Coord> J,
-		DArray<Real> ita,
 		DArray<Real> mass,
 		DArray<NeighborConstraints> nbq,
-		Real dt
-	)
+		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -736,47 +773,42 @@ namespace dyno
 				ita_i -= J[4 * pId + 3].dot(angular_velocity[idx2]);
 			}
 		}
-		ita[pId] = ita_i / dt;
+		eta[pId] = ita_i / dt;
 		if (nbq[pId].constraint_type == constraint_collision || nbq[pId].constraint_type == constraint_boundary)
 		{
-			ita[pId] += min(nbq[pId].inter_distance, nbq[pId].inter_distance) / dt / dt / 15.0f;
+			eta[pId] += min(nbq[pId].inter_distance, nbq[pId].inter_distance) / dt / dt / 15.0f;
 		}
 
 	}
 
 	template <typename Coord>
-	__global__ void RB_compute_d(
+	__global__ void CalculateDiagonals(
+		DArray<Real> D,
 		DArray<Coord> J,
-		DArray<Coord> B,
-		DArray<Real> D
-	)
+		DArray<Coord> B)
 	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= J.size() / 4) return;
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= J.size() / 4) return;
+
 		Real d = Real(0);
-		
-		{
-			{
-				d += J[4 * pId].dot(B[4 * pId]);
-				d += J[4 * pId + 1].dot(B[4 * pId + 1]);
-				d += J[4 * pId + 2].dot(B[4 * pId + 2]);
-				d += J[4 * pId + 3].dot(B[4 * pId + 3]);
-			}
-		}
-		D[pId] = d;
+		d += J[4 * tId].dot(B[4 * tId]);
+		d += J[4 * tId + 1].dot(B[4 * tId + 1]);
+		d += J[4 * tId + 2].dot(B[4 * tId + 2]);
+		d += J[4 * tId + 3].dot(B[4 * tId + 3]);
+
+		D[tId] = d;
 	}
 
 	template <typename Coord>
-	__global__ void RB_take_one_iteration(
+	__global__ void TakeOneJacobiIteration(
+		DArray<Real> lambda,
 		DArray<Coord> AA,
 		DArray<Real> d,
 		DArray<Coord> J,
 		DArray<Coord> B,
 		DArray<Real> ita,
-		DArray<Real> lambda,
 		DArray<Real> mass,
-		DArray<NeighborConstraints> nbq
-	)
+		DArray<NeighborConstraints> nbq)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -818,13 +850,9 @@ namespace dyno
 			if (nbq[pId].constraint_type == constraint_friction) //	PROJECTION!!!!
 			{
 				Real lambda_new = lambda[pId] + delta_lambda;
-				
-
 				Real mass_i = mass[idx1];
 				if (idx2 != -1)
 					mass_i += mass[idx2];
-
-
 
 				//if ((lambda_new) > 15 * (mass_i)) lambda_new = 15 * (mass_i);
 				//if ((lambda_new) < -15 * (mass_i)) lambda_new = -15 * (mass_i);
@@ -862,12 +890,11 @@ namespace dyno
 	
 
 	template <typename Coord, typename Matrix> /* FOR TEST */
-	__global__ void RB_update_pair_info(
+	__global__ void SetupContactPairs(
+		DArray<NeighborConstraints> nbq,
 		DArray<Coord> center_init,
 		DArray<Coord> center_now,
-		DArray<Matrix> rotation,
-		DArray<NeighborConstraints> nbq
-	)
+		DArray<Matrix> rotation)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= nbq.size()) return;
@@ -886,51 +913,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::rigid_update_topology()
-	{
-		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
-
-
-		uint pDimsB = cudaGridSize(m_box3d_init.size(), BLOCK_SIZE);
-		if(pDimsB > 0)
-		RB_update_box << <pDimsB, BLOCK_SIZE >> > (
-			currentCenter()->getData(),
-			currentRigidRotation()->getData(),
-			discreteSet->getBoxes(),
-			m_box3d_init,
-			start_box
-			);
-
-		cuSynchronize();
-
-		uint pDimsS = cudaGridSize(m_sphere3d_init.size(), BLOCK_SIZE);
-		if(pDimsS > 0)
-		RB_update_sphere << <pDimsS, BLOCK_SIZE >> > (
-			currentCenter()->getData(),
-			discreteSet->getSpheres(),
-			start_sphere
-			);
-		cuSynchronize();
-
-		uint pDimsT = cudaGridSize(m_tet3d_init.size(), BLOCK_SIZE);
-		if (pDimsT > 0)
-			RB_update_tet << <pDimsT, BLOCK_SIZE >> > (
-				currentCenter()->getData(),
-				currentRigidRotation()->getData(),
-				discreteSet->getTets(),
-				m_tet3d_init,
-				start_tet
-				);
-		cuSynchronize();
-
-		
-		
-	}
-
-	template<typename TDataType>
 	void RigidBodySystem<TDataType>::solve_constraint()
 	{
-		int size_constraints = m_nbrQueryElement->nbr_cons.getElementCount() + buffer_boundary.size();
+		int size_constraints = mAllConstraints.size();
 
 		if (size_constraints == 0) return;
 
@@ -938,53 +923,42 @@ namespace dyno
 		{
 			// todo : project gs
 			uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-			RB_take_one_iteration<< <pDims, BLOCK_SIZE >> > (
-				AA.getData(),
-				D,
-				J,
-				B,
-				ita,
-				lambda,
-				currentMass()->getData(),
-				constraints_all
+			TakeOneJacobiIteration << <pDims, BLOCK_SIZE >> > (
+				mLambda,
+				mAccel,
+				mD,
+				mJ,
+				mB,
+				mEta,
+				this->currentMass()->getData(),
+				mAllConstraints
 				);
 
 			cuSynchronize();
 		}
-
 	}
-
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::update_position_rotation(Real dt)
 	{
-		
 		uint pDims = cudaGridSize(currentCenter()->getElementCount(), BLOCK_SIZE);
 		
 		RB_update_velocity << <pDims, BLOCK_SIZE >> > (
-			currentVelocity()->getData(),
-			currentAngularVelocity()->getData(),
-			AA.getData(),
-			dt
-			);
-		cuSynchronize();
-		
+			this->currentVelocity()->getData(),
+			this->currentAngularVelocity()->getData(),
+			mAccel,
+			dt);
+
 		RB_update_state << <pDims, BLOCK_SIZE >> > (
-			currentCenter()->getData(),
-			currentRigidRotation()->getData(),
-			m_rotation_q,
-			currentVelocity()->getData(),
-			currentAngularVelocity()->getData(),
-			m_inertia.getData(),
+			this->currentCenter()->getData(),
+			this->currentRigidRotation()->getData(),
+			this->currentRotation()->getData(),
+			this->currentVelocity()->getData(),
+			this->currentAngularVelocity()->getData(),
+			this->currentInertia()->getData(),
 			m_inertia_init,
-			dt
-			);
-
-		cuSynchronize();
-
-
+			dt);
 	}
-
 	
 	__global__ void RB_update_offset(
 		DArray<NeighborConstraints> nbq,
@@ -999,10 +973,8 @@ namespace dyno
 			nbq[pId].idx2 += offset;
 	}
 
-
-
 	template <typename Coord>
-	__global__ void RB_set_boundary(
+	__global__ void SetupContactsWithBoundary(
 		DArray<Sphere3D> sphere,
 		DArray<Box3D> box,
 		DArray<Tet3D> tet,
@@ -1013,8 +985,7 @@ namespace dyno
 		int start_sphere,
 		int start_box,
 		int start_tet,
-		int start_segment
-	)
+		int start_segment)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= sphere.size() + box.size()) return;
@@ -1125,14 +1096,12 @@ namespace dyno
 	}
 
 	//template <typename Coord>
-	__global__ void RB_set_friction(
+	__global__ void SetupFrictionConstraints(
 		DArray<NeighborConstraints> nbq,
-		int contact_size
-	)
+		int contact_size)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= contact_size) return;
-
 
 		Coord3D n = nbq[pId].normal1;
 		n /= n.norm();
@@ -1152,9 +1121,6 @@ namespace dyno
 			n2 = n1.cross(n);
 			n2 /= n2.norm();
 		}
-		
-		//else return;
-		//printf("%d %d %d %d %.3lf %.3lf %.3lf ||| %.10lf %.10lf %.10lf \n", pId, nbq[pId].constraint_type, nbq[pId].idx1, nbq[pId].idx2, nbq[pId].normal1[0], nbq[pId].normal1[1], nbq[pId].normal1[2], n1.dot(n), n2.dot(n), n1.dot(n2));
 
 		nbq[pId * 2 + contact_size] = nbq[pId];
 		nbq[pId * 2 + contact_size].constraint_type = constraint_friction;
@@ -1162,170 +1128,155 @@ namespace dyno
 		nbq[pId * 2 + 1 + contact_size] = nbq[pId];
 		nbq[pId * 2 + 1 + contact_size].constraint_type = constraint_friction;
 		nbq[pId * 2 + 1 + contact_size].normal1 = n2;
-
-		/*printf("%d %d %d %d\n", pId, 
-			nbq[pId * 2 + contact_size].constraint_type, 
-			nbq[pId * 2 + contact_size].idx1, 
-			nbq[pId * 2 + contact_size].idx2);
-*/
-		
 	}
 
-		template <typename Coord>
-		__global__ void RB_count_boundary(
-			DArray<Sphere3D> sphere,
-			DArray<Box3D> box,
-			DArray<Tet3D> tet,
-			DArray<int> count,
-			Coord hi,
-			Coord lo,
-			int start_sphere,
-			int start_box,
-			int start_tet,
-			int start_segment
-		)
+	template <typename Coord>
+	__global__ void CountContactsWithBoundary(
+		DArray<Sphere3D> sphere,
+		DArray<Box3D> box,
+		DArray<Tet3D> tet,
+		DArray<int> count,
+		Coord hi,
+		Coord lo,
+		int start_sphere,
+		int start_box,
+		int start_tet,
+		int start_segment)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= sphere.size() + box.size()) return;
+
+		if (pId < start_box && pId >= start_sphere)//sphere
 		{
-			int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-			if (pId >= sphere.size() + box.size()) return;
 
-			if (pId < start_box && pId >= start_sphere)//sphere
-			{
-
-			}
-			else if (pId >= start_box && pId < start_tet)//box
-			{
-				//int idx = pId - start_box;
-				int cnt = 0;
-//				int start_i;
-				Coord center = box[pId - start_box].center;
-				Coord u = box[pId - start_box].u;
-				Coord v = box[pId - start_box].v;
-				Coord w = box[pId - start_box].w;
-				Coord extent = box[pId - start_box].extent;
-				Point3D p[8];
-				p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
-				p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
-				p[2] = Point3D(center - u * extent[0] + v * extent[1] - w * extent[2]);
-				p[3] = Point3D(center - u * extent[0] + v * extent[1] + w * extent[2]);
-				p[4] = Point3D(center + u * extent[0] - v * extent[1] - w * extent[2]);
-				p[5] = Point3D(center + u * extent[0] - v * extent[1] + w * extent[2]);
-				p[6] = Point3D(center + u * extent[0] + v * extent[1] - w * extent[2]);
-				p[7] = Point3D(center + u * extent[0] + v * extent[1] + w * extent[2]);
-				bool c1, c2, c3, c4, c5, c6;
-				c1 = c2 = c3 = c4 = c5 = c6 = true;
-				for (int i = 0; i < 8; i++)
-				{
-					Coord pos = p[i].origin;
-					if (pos[0] > hi[0] && c1)
-					{
-						c1 = true;
-						cnt++;
-					}
-					if (pos[1] > hi[1] && c2)
-					{
-						c2 = true;
-						cnt++;
-					}
-					if (pos[2] > hi[2] && c3)
-					{
-						c3 = true;
-						cnt++;
-					}
-					if (pos[0] < lo[0] && c4)
-					{
-						c4 = true;
-						cnt++;
-					}
-					if (pos[1] < lo[1] && c5)
-					{
-						c5 = true;
-						cnt++;
-					}
-					if (pos[2] < lo[2] && c6)
-					{
-						c6 = true;
-						cnt++;
-					}
-
-				}
-				count[pId] = cnt;
-			}
-			else if (pId >= start_tet && pId < start_segment)//tets
-			{
-			}
-			else//segments
-			{}
 		}
-
+		else if (pId >= start_box && pId < start_tet)//box
+		{
+			//int idx = pId - start_box;
+			int cnt = 0;
+//				int start_i;
+			Coord center = box[pId - start_box].center;
+			Coord u = box[pId - start_box].u;
+			Coord v = box[pId - start_box].v;
+			Coord w = box[pId - start_box].w;
+			Coord extent = box[pId - start_box].extent;
+			Point3D p[8];
+			p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
+			p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
+			p[2] = Point3D(center - u * extent[0] + v * extent[1] - w * extent[2]);
+			p[3] = Point3D(center - u * extent[0] + v * extent[1] + w * extent[2]);
+			p[4] = Point3D(center + u * extent[0] - v * extent[1] - w * extent[2]);
+			p[5] = Point3D(center + u * extent[0] - v * extent[1] + w * extent[2]);
+			p[6] = Point3D(center + u * extent[0] + v * extent[1] - w * extent[2]);
+			p[7] = Point3D(center + u * extent[0] + v * extent[1] + w * extent[2]);
+			bool c1, c2, c3, c4, c5, c6;
+			c1 = c2 = c3 = c4 = c5 = c6 = true;
+			for (int i = 0; i < 8; i++)
+			{
+				Coord pos = p[i].origin;
+				if (pos[0] > hi[0] && c1)
+				{
+					c1 = true;
+					cnt++;
+				}
+				if (pos[1] > hi[1] && c2)
+				{
+					c2 = true;
+					cnt++;
+				}
+				if (pos[2] > hi[2] && c3)
+				{
+					c3 = true;
+					cnt++;
+				}
+				if (pos[0] < lo[0] && c4)
+				{
+					c4 = true;
+					cnt++;
+				}
+				if (pos[1] < lo[1] && c5)
+				{
+					c5 = true;
+					cnt++;
+				}
+				if (pos[2] < lo[2] && c6)
+				{
+					c6 = true;
+					cnt++;
+				}
+			}
+			count[pId] = cnt;
+		}
+		else if (pId >= start_tet && pId < start_segment)//tets
+		{
+		}
+		else//segments
+		{}
+	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::init_boundary()
+	void RigidBodySystem<TDataType>::detectCollisionWithBoundary()
 	{
-		
 		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
-		uint pDims = cudaGridSize((discreteSet->getSpheres().size() + discreteSet->getBoxes().size()), BLOCK_SIZE);
+		uint totalSize = discreteSet->totalSize();
+
+		ElementOffset offset = discreteSet->calculateElementOffset();
+
 		int sum = 0;
 
-		cnt_boudary.resize(discreteSet->totalSize());
-		cnt_boudary.reset();
+		mBoundaryContactCounter.resize(discreteSet->totalSize());
+		mBoundaryContactCounter.reset();
 		if (discreteSet->totalSize() > 0)
 		{
-			printf("Yes %d\n", discreteSet->totalSize());
-			RB_count_boundary << <pDims, BLOCK_SIZE >> > (
+			cuExecute(totalSize,
+				CountContactsWithBoundary,
 				discreteSet->getSpheres(),
 				discreteSet->getBoxes(),
 				discreteSet->getTets(),
-				cnt_boudary,
+				mBoundaryContactCounter,
 				hi,
 				lo,
-				start_sphere,
-				start_box,
-				start_tet,
-				start_segment
-				);
-			cuSynchronize();
+				0,
+				offset.boxOffset,
+				offset.tetOffset,
+				offset.segOffset);
 
-			sum  += m_reduce.accumulate(cnt_boudary.begin(), cnt_boudary.size());
-			m_scan.exclusive(cnt_boudary, true);
-			cuSynchronize();
+			sum += m_reduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
+			m_scan.exclusive(mBoundaryContactCounter, true);
 
-			buffer_boundary.resize(sum);
+			mBoundaryContacts.resize(sum);
 
-
-			printf("sum = %d\n", sum);
-			if (sum > 0)
-				RB_set_boundary << <pDims, BLOCK_SIZE >> > (
+			if (sum > 0) {
+				cuExecute(totalSize,
+					SetupContactsWithBoundary,
 					discreteSet->getSpheres(),
 					discreteSet->getBoxes(),
 					discreteSet->getTets(),
-					cnt_boudary,
-					buffer_boundary,
+					mBoundaryContactCounter,
+					mBoundaryContacts,
 					hi,
 					lo,
-					start_sphere,
-					start_box,
-					start_tet,
-					start_segment
-					);
-			cuSynchronize();
+					0,
+					offset.boxOffset,
+					offset.tetOffset,
+					offset.segOffset);
+			}
 		}
 		else
-			buffer_boundary.resize(0);
+			mBoundaryContacts.resize(0);
+
 		if (have_mesh_boundary)
 		{
 
 			
 		}
-
-
-
 	}
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::init_friction()
 	{
 
-		
+
 
 
 	}
@@ -1334,238 +1285,209 @@ namespace dyno
 	void RigidBodySystem<TDataType>::init_jacobi(Real dt)
 	{
 		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
-		
-		if(topo->totalSize() > 0)
-			m_nbrQueryElement->update();
-		
 
+		mElementQuery->update();
 
-		
+		auto& contacts = mElementQuery->outContacts()->getData();
 
-		//if (m_shapes->getSize() > 0)
-			init_boundary();
+		detectCollisionWithBoundary();
 
-			//auto end = std::chrono::system_clock::now();
-			//auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-			//std::cout << "oct time = " << elapsed.count() << "ms" << '\n';
-		int size_constraints = buffer_boundary.size();
-		
-		if(topo->totalSize() > 0)
-			size_constraints += m_nbrQueryElement->nbr_cons.getElementCount() ;
+		int sizeOfContacts = mBoundaryContacts.size();
+		sizeOfContacts += contacts.size();
 
-		int constraint_contact = size_constraints;
-		
+		int sizeOfConstraints = sizeOfContacts;
 		if (have_friction)
 		{
-		
-			size_constraints += 2 * buffer_boundary.size();
+			sizeOfConstraints += 2 * mBoundaryContacts.size();
 			if (topo->totalSize() > 0)
-				size_constraints += 2 * m_nbrQueryElement->nbr_cons.getElementCount();
-
-			
+				sizeOfConstraints += 2 * contacts.size();
 		}
 
-
-		constraints_all.resize(size_constraints);
+		mAllConstraints.resize(sizeOfConstraints);
 		
-		J.resize(4 * size_constraints);
-		B.resize(4 * size_constraints);
-		AA.setElementCount(currentCenter()->getElementCount() * 2);
-		D.resize(size_constraints);
-		ita.resize(size_constraints);
-		lambda.resize(size_constraints);
+		mJ.resize(4 * sizeOfConstraints);
+		mB.resize(4 * sizeOfConstraints);
+		mAccel.resize(currentCenter()->getElementCount() * 2);
+		mD.resize(sizeOfConstraints);
+		mEta.resize(sizeOfConstraints);
+		mLambda.resize(sizeOfConstraints);
 
-		J.reset();
-		B.reset();
-		D.reset();
-		ita.reset();
-		AA.getData().reset();
-		lambda.reset();
+		mJ.reset();
+		mB.reset();
+		mD.reset();
+		mEta.reset();
+		mAccel.reset();
+		mLambda.reset();
 
-		mass_eq.reset();
+//		mass_eq.reset();
 
+		if (sizeOfConstraints == 0) return;
 
-		if (size_constraints == 0) return;
-
+		if (topo->totalSize() > 0 && contacts.size() > 0)
+			mAllConstraints.assign(contacts, contacts.size());
 		
-		if (topo->totalSize() > 0  && m_nbrQueryElement->nbr_cons.getElementCount() > 0)
-			cudaMemcpy(constraints_all.begin(), m_nbrQueryElement->nbr_cons.getData().begin(), m_nbrQueryElement->nbr_cons.getElementCount() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
-		
-		
-		if (buffer_boundary.size() > 0)
+		if (mBoundaryContacts.size() > 0)
 		{
 			if (topo->totalSize() > 0)
 			{ 
-				if(!have_mesh)
-					cudaMemcpy(constraints_all.begin() + m_nbrQueryElement->nbr_cons.getElementCount(), buffer_boundary.begin(), buffer_boundary.size() * sizeof(NeighborConstraints), cudaMemcpyDeviceToDevice);
-				
+				if (!have_mesh)
+					mAllConstraints.assign(mBoundaryContacts, mBoundaryContacts.size(), contacts.size(), 0);
 			}
 			else
 			{
-					cudaMemcpy(
-						constraints_all.begin(),
-						buffer_boundary.begin(),
-						buffer_boundary.size() * sizeof(NeighborConstraints),
-						cudaMemcpyDeviceToDevice
-					);
+				mAllConstraints.assign(mBoundaryContacts, mBoundaryContacts.size());
 			}
 		}
-
-		printf("^^^^^^^^^^^^^^^ %d %d\n", constraint_contact, constraints_all.size());
 
 		if (have_friction)
 		{
-			cuExecute(constraint_contact, RB_set_friction,
-				constraints_all,
-				constraint_contact
+			cuExecute(sizeOfContacts, 
+				SetupFrictionConstraints,
+				mAllConstraints,
+				sizeOfContacts
 				);
-
 		}
-		uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-		uint pDimsR = cudaGridSize(currentMass()->getElementCount(), BLOCK_SIZE);
+// 		uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
+// 		uint pDimsR = cudaGridSize(currentMass()->getElementCount(), BLOCK_SIZE);
 
-
-		if(use_new_mass)
-		{
-			printf("?????? USE NEW\n");
-			mass_eq.reset();
-			mass_buffer.reset();
-
-			for (int it = 0; it < 15; it++)
-			{
-				mass_eq.reset();
-				RB_constrct_mass_eq << <pDims, BLOCK_SIZE >> > (
-					currentCenter()->getData(),
-					m_inertia.getData(),
-					currentMass()->getData(),
-					J,
-					B,
-					mass_eq,
-					mass_buffer,
-					m_inertia.getData(),
-					constraints_all
-					);
-				cuSynchronize();
-
-				RB_constrct_mass_eq<< <pDimsR, BLOCK_SIZE >> > (
-					m_inertia.getData(),
-					currentMass()->getData(),
-					mass_eq
-					);
-				cuSynchronize();
-				//Function1Pt::copy(mass_buffer, mass_eq);
-				mass_buffer.assign(mass_eq);
-			}
-		}
+		//TODO: ???
+// 		if(use_new_mass)
+// 		{
+// 			printf("?????? USE NEW\n");
+// 			mass_eq.reset();
+// 			mass_buffer.reset();
+// 
+// 			for (int it = 0; it < 15; it++)
+// 			{
+// 				mass_eq.reset();
+// 				RB_constrct_mass_eq << <pDims, BLOCK_SIZE >> > (
+// 					currentCenter()->getData(),
+// 					m_inertia.getData(),
+// 					currentMass()->getData(),
+// 					mJ,
+// 					mB,
+// 					mass_eq,
+// 					mass_buffer,
+// 					m_inertia.getData(),
+// 					constraints_all
+// 					);
+// 				cuSynchronize();
+// 
+// 				RB_constrct_mass_eq<< <pDimsR, BLOCK_SIZE >> > (
+// 					m_inertia.getData(),
+// 					currentMass()->getData(),
+// 					mass_eq
+// 					);
+// 				cuSynchronize();
+// 				//Function1Pt::copy(mass_buffer, mass_eq);
+// 				mass_buffer.assign(mass_eq);
+// 			}
+// 		}
 		
-		RB_update_pair_info << <pDims, BLOCK_SIZE >> > (
+		cuExecute(sizeOfConstraints,
+			SetupContactPairs,
+			mAllConstraints,
 			center_init,
-			currentCenter()->getData(),
-			currentRigidRotation()->getData(),
-			constraints_all
-			);
+			this->currentCenter()->getData(),
+			this->currentRigidRotation()->getData());
 
-		cuSynchronize();
-		if (use_new_mass)
-		{
-			RB_constrct_jacobi << <pDims, BLOCK_SIZE >> > (
-				currentCenter()->getData(),
-				m_inertia.getData(),
-				m_inertia.getData(),
-				currentMass()->getData(),
-				mass_eq,
-				J,
-				B,
-				constraints_all
-				);
-			cuSynchronize();
-		}
-		else
+// 		cuSynchronize();
+// 		if (use_new_mass)
+// 		{
+// 			cuExecute(size_constraints,
+// 				CalculateJacobians,
+// 				mJ,
+// 				mB,
+// 				currentCenter()->getData(),
+// 				m_inertia.getData(),
+// 				m_inertia.getData(),
+// 				currentMass()->getData(),
+// 				mass_eq,
+// 				constraints_all);
+// 		}
+// 		else
 		{ 
-			RB_constrct_jacobi << <pDims, BLOCK_SIZE >> > (
-				currentCenter()->getData(),
-				m_inertia.getData(),
-				currentMass()->getData(),
-				J,
-				B,
-				constraints_all
-				);
-			cuSynchronize();
+			cuExecute(sizeOfConstraints,
+				CalculateJacobians,
+				mJ,
+				mB,
+				this->currentCenter()->getData(),
+				this->currentInertia()->getData(),
+				this->currentMass()->getData(),
+				mAllConstraints);
 		}
-		RB_compute_d << <pDims, BLOCK_SIZE >> > (
-			J,
-			B,
-			D
-			);
-		cuSynchronize();
 
-		//printf("BEFORE ITA!!!!!\n");
-		RB_compute_ita << <pDims, BLOCK_SIZE >> > (
-			currentVelocity()->getData(),
-			currentAngularVelocity()->getData(),
-			J,
-			ita,
-			currentMass()->getData(),
-			constraints_all,
-			dt
-			);
-		cuSynchronize();
+		cuExecute(sizeOfConstraints,
+			CalculateDiagonals,
+			mD,
+			mJ,
+			mB);
 
-
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::pretreat(Real dt)
-	{
-		//auto start = std::chrono::system_clock::now();
-		init_jacobi(dt);
-		/*auto end = std::chrono::system_clock::now();
-		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-		std::cout<<"pretreat time = " << elapsed.count() << "ms" << '\n';*/
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::take_one_iteration(Real dt)
-	{
-		int size_constraints = constraints_all.size();
-		if (size_constraints == 0) return;
-		uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-
-		RB_take_one_iteration << <pDims, BLOCK_SIZE >> > (
-				AA.getData(),
-				D,
-				J,
-				B,
-				ita,
-				lambda,
-				currentMass()->getData(),
-				constraints_all
-				);
-		cuSynchronize();
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::update_state(Real dt)
-	{
-		update_position_rotation(dt);
-		rigid_update_topology();
+		cuExecute(sizeOfConstraints, 
+			CalculateEta,
+			mEta,
+			this->currentVelocity()->getData(),
+			this->currentAngularVelocity()->getData(),
+			mJ,
+			this->currentMass()->getData(),
+			mAllConstraints,
+			dt);
 	}
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::updateStates()
 	{
-		printf("inside\n");
-		Real dt = Real(0.001);
-		//if (this->getParent() != NULL)
-		dt = this->getDt();
+		Real dt = this->varTimeStep()->getData();
 		//construct j
-		pretreat(dt);
+		init_jacobi(dt);
 		for (int i = 0; i < 15; i++)
-			take_one_iteration(dt);
-		update_state(dt);
-		
+		{
+			int size_constraints = mAllConstraints.size();
+			if (size_constraints == 0) return;
+			uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
 
-		rigid_update_topology();
+			TakeOneJacobiIteration << <pDims, BLOCK_SIZE >> > (
+				mLambda,
+				mAccel,
+				mD,
+				mJ,
+				mB,
+				mEta,
+				currentMass()->getData(),
+				mAllConstraints);
+		}
+
+		update_position_rotation(dt);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::updateTopology()
+	{
+		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
+
+		ElementOffset offset = discreteSet->calculateElementOffset();
+
+		cuExecute(mDeviceBoxes.size(),
+			UpdateBoxes,
+			discreteSet->getBoxes(),
+			mDeviceBoxes,
+			this->currentCenter()->getData(),
+			this->currentRigidRotation()->getData(),
+			offset.boxOffset);
+
+		cuExecute(mDeviceBoxes.size(),
+			UpdateSpheres,
+			discreteSet->getSpheres(),
+			this->currentCenter()->getData(),
+			0);
+
+		cuExecute(mDeviceTets.size(),
+			UpdateTets,
+			discreteSet->getTets(),
+			mDeviceTets,
+			this->currentCenter()->getData(),
+			this->currentRigidRotation()->getData(),
+			offset.tetOffset);
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

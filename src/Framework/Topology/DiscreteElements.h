@@ -68,17 +68,17 @@ namespace dyno
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
 
-		Box3D getHostBoxes(int i) { return m_hostBoxes[i]; }
-		Sphere3D getHostSpheres(int i) { return m_hostSpheres[i]; }
-		Tet3D getHostTets(int i) { return m_hostTets[i]; }
-		Capsule3D getHostCaps(int i) { return m_hostCaps[i]; }
+// 		Box3D		getHostBoxes(int i) { return m_hostBoxes[i]; }
+// 		Sphere3D	getHostSpheres(int i) { return m_hostSpheres[i]; }
+// 		Tet3D		getHostTets(int i) { return m_hostTets[i]; }
+// 		Capsule3D	getHostCaps(int i) { return m_hostCaps[i]; }
 
-		bool initializeImpl() override;
+//		bool initializeImpl() override;
 
-		void addBox(Box3D box) { m_hostBoxes.push_back(box); }
-		void addSphere(Sphere3D sphere) { m_hostSpheres.push_back(sphere); }
-		void addTet(Tet3D tet) { m_hostTets.push_back(tet); }
-		void addCap(Capsule3D cap) { m_hostCaps.push_back(cap); }
+// 		void addBox(Box3D box) { m_hostBoxes.push_back(box); }
+// 		void addSphere(Sphere3D sphere) { m_hostSpheres.push_back(sphere); }
+// 		void addTet(Tet3D tet) { m_hostTets.push_back(tet); }
+// 		void addCap(Capsule3D cap) { m_hostCaps.push_back(cap); }
 
 		DArray<Real>&		getTetSDF() { return m_tet_sdf; }
 		DArray<int>&		getTetBodyMapping() { return m_tet_body_mapping; }
@@ -94,11 +94,6 @@ namespace dyno
 		DArray<Real> m_tet_sdf;
 		DArray<int> m_tet_body_mapping;
 		DArray<TopologyModule::Tetrahedron> m_tet_element_id;
-
-		std::vector<Sphere3D> m_hostSpheres;
-		std::vector<Box3D> m_hostBoxes;
-		std::vector<Tet3D> m_hostTets;
-		std::vector<Capsule3D> m_hostCaps;
 	};
 }
 

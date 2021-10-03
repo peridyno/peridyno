@@ -13,8 +13,8 @@ namespace dyno
 	template<typename TDataType>
 	DiscreteElements<TDataType>::~DiscreteElements()
 	{
-		m_hostBoxes.clear();
-		m_hostSpheres.clear();
+// 		m_hostBoxes.clear();
+// 		m_hostSpheres.clear();
 	}
 
 	template<typename TDataType>
@@ -28,28 +28,28 @@ namespace dyno
 		return m_boxes.size() + m_spheres.size() + m_tets.size() + m_caps.size() + m_tris.size();
 	}
 
-	template<typename TDataType>
-	bool DiscreteElements<TDataType>::initializeImpl()
-	{
-		m_spheres.resize(m_hostSpheres.size());
-		m_boxes.resize(m_hostBoxes.size());
-		m_tets.resize(m_hostTets.size());
-		m_caps.resize(m_hostCaps.size());
-
-		if (m_spheres.size() > 0)
-			m_spheres.assign(m_hostSpheres);
-		if(m_boxes.size() > 0)
-			m_boxes.assign(m_hostBoxes);
-		if (m_tets.size() > 0)
-			m_tets.assign(m_hostTets);
-		if (m_caps.size() > 0)
-			m_caps.assign(m_hostCaps);
-
-
-		//printf("%d\n", m_boxes.size());
-
-		return true;
-	}
+// 	template<typename TDataType>
+// 	bool DiscreteElements<TDataType>::initializeImpl()
+// 	{
+// 		m_spheres.resize(m_hostSpheres.size());
+// 		m_boxes.resize(m_hostBoxes.size());
+// 		m_tets.resize(m_hostTets.size());
+// 		m_caps.resize(m_hostCaps.size());
+// 
+// 		if (m_spheres.size() > 0)
+// 			m_spheres.assign(m_hostSpheres);
+// 		if(m_boxes.size() > 0)
+// 			m_boxes.assign(m_hostBoxes);
+// 		if (m_tets.size() > 0)
+// 			m_tets.assign(m_hostTets);
+// 		if (m_caps.size() > 0)
+// 			m_caps.assign(m_hostCaps);
+// 
+// 
+// 		//printf("%d\n", m_boxes.size());
+// 
+// 		return true;
+// 	}
 
 	template<typename TDataType>
 	ElementOffset DiscreteElements<TDataType>::calculateElementOffset()

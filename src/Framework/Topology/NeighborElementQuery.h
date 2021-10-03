@@ -66,8 +66,8 @@ namespace dyno {
 		 */
 		DEF_ARRAYLIST_OUT(int, Neighborhood, DeviceType::GPU, "Return neighbor ids");
 
+		DEF_ARRAY_OUT(NeighborConstraints, Contacts, DeviceType::GPU, "");
 
-		DeviceArrayField<NeighborConstraints> nbr_cons;
 		NbrFilter Filter;
 
 	private:

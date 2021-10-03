@@ -11,111 +11,50 @@
 #include <GLElementVisualModule.h>
 #include <ColorMapping.h>
 
-
 #include <Mapping/DiscreteElementsToTriangleSet.h>
 #include <GLSurfaceVisualModule.h>
-
 
 using namespace std;
 using namespace dyno;
 
 void creat_scene_fluid()
 {
-	Log::sendMessage(Log::Info, "Simulation start");
-
 	SceneGraph& scene = SceneGraph::getInstance();
-
-
 
 	std::shared_ptr<RigidBodySystem<DataType3f>> rigid = scene.createNewScene<RigidBodySystem<DataType3f>>();
 
-	std::shared_ptr<DiscreteElements<DataType3f>> DE = std::make_shared<DiscreteElements<DataType3f>>();
-	
-	DE->addSphere(Sphere3D(Vec3f(0.5f, 0.75f, 0.5f), 0.025f));
-
-	rigid->host_angular_velocity.push_back(Vec3f(0));
-	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
-	rigid->host_mass.push_back(0.004f);
-	rigid->host_inertia_tensor.push_back(
-		0.004 / 12.0f *
-		Matrix3D(
-			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
-			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
-			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
-		)
-	);
-
-	DE->addSphere(Sphere3D(Vec3f(0.5f, 0.95f, 0.5f), 0.025f));
-
-	rigid->host_angular_velocity.push_back(Vec3f(0));
-	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
-	rigid->host_mass.push_back(0.004f);
-	rigid->host_inertia_tensor.push_back(
-		0.004 / 12.0f *
-		Matrix3D(
-			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
-			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
-			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
-		)
-	);
-
-
-	DE->addSphere(Sphere3D(Vec3f(0.5f, 0.65f, 0.5f), 0.05f));
-
-	rigid->host_angular_velocity.push_back(Vec3f(0));
-	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
-	rigid->host_mass.push_back(0.004f);
-	rigid->host_inertia_tensor.push_back(
-		0.004 / 12.0f *
-		Matrix3D(
-			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
-			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
-			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
-		)
-	);
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
+	BoxInfo box;
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)
 		{
-			DE->addBox(Box3D(0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.2 * j + 0.1 * (8 - i)),
-				Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 0.0, 1.0),
-				0.5f * Vec3f(0.065, 0.065, 0.1)));
-
-			rigid->host_angular_velocity.push_back(Vec3f(0));
-			rigid->host_velocity.push_back(Vec3f(0.5, 0, 0));
-			rigid->host_mass.push_back(0.004f);
-			rigid->host_inertia_tensor.push_back(
-				0.004 / 12.0f *
-				Matrix3D(
-					(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
-					0, (0.065 * 0.065 + 0.1 * 0.1), 0,
-					0, 0, (0.065 * 0.065 + 0.065 * 0.065)
-				)
-			);
+			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.2 * j + 0.1 * (8 - i));
+			box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
+			rigid->addBox(box, rigidBody);
 		}
 
-	
+	SphereInfo sphere;
+	sphere.center = Vec3f(0.5f, 0.75f, 0.5f);
+	sphere.radius = 0.025f;
 
-	DE->addTet(Tet3D(Vec3f(0.5f, 1.1f, 0.5f), Vec3f(0.5f, 1.2f, 0.5f), 
-		Vec3f(0.6f, 1.1f, 0.5f), Vec3f(0.5f, 1.1f, 0.6f)));
+	RigidBodyInfo rigidSphere;
+	rigid->addSphere(sphere, rigidSphere);
 
-	rigid->host_angular_velocity.push_back(Vec3f(0));
-	rigid->host_velocity.push_back(Vec3f(0.0, 0, 0));
-	rigid->host_mass.push_back(0.004f);
-	rigid->host_inertia_tensor.push_back(
-		0.004 / 12.0f *
-		Matrix3D(
-			(0.065 * 0.065 + 0.1 * 0.1), 0, 0,
-			0, (0.065 * 0.065 + 0.1 * 0.1), 0,
-			0, 0, (0.065 * 0.065 + 0.065 * 0.065)
-		)
-	);
+	sphere.center = Vec3f(0.5f, 0.95f, 0.5f);
+	sphere.radius = 0.025f;
+	rigid->addSphere(sphere, rigidSphere);
 
-	
+	sphere.center = Vec3f(0.5f, 0.65f, 0.5f);
+	sphere.radius = 0.05f;
+	rigid->addSphere(sphere, rigidSphere);
 
-	DE->initialize();
-
-	printf("222\n");
-	rigid->currentTopology()->setDataPtr(DE);
+	TetInfo tet;
+	tet.v[0] = Vec3f(0.5f, 1.1f, 0.5f);
+	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
+	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
+	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
+	rigid->addTet(tet, rigidSphere);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->currentTopology()->connect(mapper->inDiscreteElements());

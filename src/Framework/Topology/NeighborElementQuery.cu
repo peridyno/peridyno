@@ -2427,12 +2427,16 @@ namespace dyno
 			if (this->outNeighborhood()->isEmpty())
 				this->outNeighborhood()->allocate();
 
+			if (this->outContacts()->isEmpty())
+				this->outContacts()->allocate();
+
 			int sum = m_reduce.accumulate(cnt_element.begin(), cnt_element.size());
 
 			DArray<int> counter(cnt_element.size());
 			counter.assign(cnt_element);
 			printf("bb %d\n", counter.size());
 			auto& nbrIds = this->outNeighborhood()->getData();
+			auto& contacts = this->outContacts()->getData();
 			printf("cc\n");
 			nbrIds.resize(counter);
 			printf("dd\n");
@@ -2441,7 +2445,7 @@ namespace dyno
 			m_scan.exclusive(cnt_element, true);
 			cuSynchronize();
 			printf("sum = %d\n", sum);
-			nbr_cons.setElementCount(sum);
+			contacts.resize(sum);
 			//printf("sdf size = %d\n", discreteSet->getTetSDF().size());
 			if (sum > 0)
 			{
@@ -2457,13 +2461,12 @@ namespace dyno
 					inTopo->getCaps(),
 					inTopo->getTris(),
 					this->outNeighborhood()->getData(),
-					nbr_cons.getData(),
+					contacts,
 					cnt_element,
 					elementOffset,
 					Filter,
 					boundary_expand
 				);
-				cuSynchronize();
 			}
 
 			mapping_nbr.clear();

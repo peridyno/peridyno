@@ -6,11 +6,11 @@
 
 namespace dyno
 {
-	enum BodyType
+	enum MotionType
 	{
-		Static = 0,
-		Kinematic,
-		Dynamic,
+		MT_Static = 0,
+		MT_Kinematic,
+		MT_Dynamic,
 	};
 
 	enum CollisionMask
@@ -64,6 +64,19 @@ namespace dyno
 		float radius;
 	};
 
+	struct TetInfo
+	{
+		TetInfo()
+		{
+			v[0] = Vec3f(0);
+			v[1] = Vec3f(1, 0 ,0);
+			v[2] = Vec3f(0, 1, 0);
+			v[3] = Vec3f(0, 0, 1);
+		}
+
+		Vec3f v[4];
+	};
+
 	struct CapsuleInfo
 	{
 		CapsuleInfo()
@@ -90,9 +103,9 @@ namespace dyno
 			inertia = Mat3f(0.0f);
 			friction = 0.0f;
 			restitution = 0.0f;
-			type = Static;
-			cType = CT_AllObjects;
-			sType = ST_Other;
+			motionType = MT_Static;
+			collisionType = CT_AllObjects;
+			shapeType = ST_Other;
 			angle = Quat1f(1.0f, 0.0f, 0.0f, 0.0f);
 		}
 
@@ -116,10 +129,11 @@ namespace dyno
 
 		float restitution;
 
- 		BodyType type;
+ 		MotionType motionType;
 		
-		CollisionMask cType;
-		ShapeType sType;
+		ShapeType shapeType;
+
+		CollisionMask collisionType;
 	};
 
 	enum ContactType
