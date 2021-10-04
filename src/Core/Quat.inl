@@ -9,10 +9,10 @@ namespace dyno
 {
 	template <typename Real>
 	DYN_FUNC Quat<Real>::Quat() :
-		w(0),
+		w(1),
 		x(0),
 		y(0),
-		z(1)
+		z(0)
 	{
 	}
 

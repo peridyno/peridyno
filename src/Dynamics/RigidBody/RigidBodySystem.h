@@ -1,18 +1,16 @@
 #pragma once
 #include "Node.h"
 #include "RigidBodyShared.h"
-//#include "Core/Quaternion/quaternion.h"
+
 #include "Topology/Primitive3D.h"
 #include "Topology/NeighborElementQuery.h"
-#include "Topology/DiscreteElements.h"
-#include "Matrix.h"
 #include "Topology/NeighborConstraints.h"
+
+#include "Matrix.h"
 #include "Quat.h"
 
 namespace dyno
 {
-	typedef typename TOrientedBox3D<Real> Box3D;
-
 	#define constraint_friction 5
 	#define	constraint_boundary 0
 	#define constraint_collision 1
@@ -55,17 +53,9 @@ namespace dyno
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(1));
 
-		void solve_constraint();
-		void update_position_rotation(Real dt);
-		void init_jacobi(Real dt);
-		
-		void init_friction();
-		
-		void detectCollisionWithBoundary();
-
 	public:
-		void set_hi(Coord h) { hi = h; }
-		void set_lo(Coord l) { lo = l; }
+		void setUpperCorner(Coord h) { mUpperCorner = h; }
+		void setLowerCorner(Coord l) { mLowerCorner = l; }
 
 	protected:
 		void resetStates() override;
@@ -74,6 +64,14 @@ namespace dyno
 		void updateTopology() override;
 
 	private:
+		void initializeJacobian(Real dt);
+		void detectCollisionWithBoundary();
+
+		void init_friction();
+
+	public:
+		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
+
 		/**
 		 * @brief Particle position
 		 */
@@ -97,11 +95,11 @@ namespace dyno
 		/**
 		 * @brief Particle position
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(RigidRotation, Matrix, DeviceType::GPU, "Rotation matrix of rigid bodies");
+		DEF_EMPTY_CURRENT_ARRAY(RotationMatrix, Matrix, DeviceType::GPU, "Rotation matrix of rigid bodies");
 
 		DEF_EMPTY_CURRENT_ARRAY(Inertia, Matrix, DeviceType::GPU, "Interial matrix");
 
-		DEF_EMPTY_CURRENT_ARRAY(Rotation, TQuat, DeviceType::GPU, "Quaternion");
+		DEF_EMPTY_CURRENT_ARRAY(Quaternion, TQuat, DeviceType::GPU, "Quaternion");
 
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
@@ -116,9 +114,7 @@ namespace dyno
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
 
-		DArray<Matrix> m_inertia_init;
-
-		DArray<Coord> center_init;
+		DArray<Matrix> mInitialInertia;
 
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
@@ -136,16 +132,14 @@ namespace dyno
 	private:
 		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
 
+		//TODO: add collision support with triangular mesh
 		bool have_mesh = false;
-		bool have_friction = true;
 		bool have_mesh_boundary = false;
-
-		int size_mesh;
 
 		Reduction<int> m_reduce;
 		Scan m_scan;
 
-		Coord hi = Coord(100, 5, 100);//(0.4925,0.4925,0.4925);
-		Coord lo = Coord(-100, 0, -100);//(0.0075,0.0075,0.0075);
+		Coord mUpperCorner = Coord(100, 5, 100);//(0.4925,0.4925,0.4925);
+		Coord mLowerCorner = Coord(-100, 0, -100);//(0.0075,0.0075,0.0075);
 	};
 }

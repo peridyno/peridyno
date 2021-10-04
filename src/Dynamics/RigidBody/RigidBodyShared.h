@@ -40,28 +40,28 @@ namespace dyno
 	{
 		BoxInfo()
 		{
-			center = Vec3f(0.0f, 0.0f, 0.0f);
-			halfLength = Vec3f(1.0f, 1.0f, 1.0f);
-			rot = Quat1f(1.0f, 0.0f, 0.0f, 0.0f);
+			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
+			halfLength = Vector<Real, 3>(1.0f, 1.0f, 1.0f);
+			rot = Quat<Real>(1.0f, 0.0f, 0.0f, 0.0f);
 		}
 
-		Vec3f center;
-		Vec3f halfLength;
+		Vector<Real, 3> center;
+		Vector<Real, 3> halfLength;
 
-		Quat1f rot;
+		Quat<Real> rot;
 	};
 
 	struct SphereInfo
 	{
 		SphereInfo()
 		{
-			center = Vec3f(0.0f, 0.0f, 0.0f);
+			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
 			radius = 1.0;
-			rot = Quat1f(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(1.0f, 0.0f, 0.0f, 0.0f);
 		}
-		Quat1f rot;
-		Vec3f center;
-		float radius;
+		Quat<Real> rot;
+		Vector<Real, 3> center;
+		Real radius;
 	};
 
 	struct TetInfo
@@ -74,7 +74,7 @@ namespace dyno
 			v[3] = Vec3f(0, 0, 1);
 		}
 
-		Vec3f v[4];
+		Vector<Real, 3> v[4];
 	};
 
 	struct CapsuleInfo
@@ -86,10 +86,10 @@ namespace dyno
 			radius = 1.0f;
 			halfLength = 1.0f;
 		}
-		Quat1f rot;
-		Vec3f center;
-		float halfLength;
-		float radius;
+		Quat<Real> rot;
+		Vector<Real, 3> center;
+		Real halfLength;
+		Real radius;
 	};
 
 	struct RigidBodyInfo
@@ -106,28 +106,28 @@ namespace dyno
 			motionType = MT_Static;
 			collisionType = CT_AllObjects;
 			shapeType = ST_Other;
-			angle = Quat1f(1.0f, 0.0f, 0.0f, 0.0f);
+			angle = Quat1f(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		Quat1f angle;
+		Quat<Real> angle;
 
 		/// The linear velocity of the body's origin in world co-ordinates.
-		Vec3f linearVelocity;
+		Vector<Real, 3> linearVelocity;
 
 		/// The angular velocity of the body.
-		Vec3f angularVelocity;
+		Vector<Real, 3> angularVelocity;
 
 		/// The world position of the body.
-		Vec3f position;
+		Vector<Real, 3> position;
 
 		/// The inertia of the body
-		Mat3f inertia;
+		SquareMatrix<Real, 3> inertia;
 
- 		float mass;
+ 		Real mass;
 
-		float friction;
+		Real friction;
 
-		float restitution;
+		Real restitution;
 
  		MotionType motionType;
 		

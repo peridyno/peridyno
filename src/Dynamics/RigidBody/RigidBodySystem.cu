@@ -4,6 +4,8 @@ namespace dyno
 {
 	IMPLEMENT_CLASS_1(RigidBodySystem, TDataType)
 
+	typedef typename TOrientedBox3D<Real> Box3D;
+
 	template<typename TDataType>
 	RigidBodySystem<TDataType>::RigidBodySystem(std::string name)
 		: Node(name)
@@ -77,7 +79,7 @@ namespace dyno
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addTet(
-		const TetInfo& tet, 
+		const TetInfo& tet,
 		const RigidBodyInfo& bodyDef, 
 		const Real density /*= Real(1)*/)
 	{
@@ -97,14 +99,14 @@ namespace dyno
 				0, 0, I11);
 
 		bd.shapeType = ST_Tet;
-		bd.angle = Quat1f();
+		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
 		mHostTets.push_back(b);
 	}
 
 	template <typename Real, typename Coord, typename Matrix, typename Quat>
-	__global__ void RB_initialize_device(
+	__global__ void RB_SetupInitialStates(
 		DArray<Real> mass,
 		DArray<Coord> pos,
 		DArray<Matrix> rotation,
@@ -194,6 +196,7 @@ namespace dyno
 		spheres.resize(mDeviceSpheres.size());
 		tets.resize(mDeviceTets.size());
 
+		//Setup the topology
 		cuExecute(mDeviceBoxes.size(),
 			SetupBoxes,
 			boxes,
@@ -215,36 +218,30 @@ namespace dyno
 
 		ElementOffset eleOffset = topo->calculateElementOffset();
 
-		this->currentRigidRotation()->setElementCount(sizeOfRigids);
+		this->currentRotationMatrix()->setElementCount(sizeOfRigids);
 		this->currentAngularVelocity()->setElementCount(sizeOfRigids);
 		this->currentCenter()->setElementCount(sizeOfRigids);
 		this->currentVelocity()->setElementCount(sizeOfRigids);
 		this->currentMass()->setElementCount(sizeOfRigids);
 		this->currentInertia()->setElementCount(sizeOfRigids);
-		this->currentRotation()->setElementCount(sizeOfRigids);
+		this->currentQuaternion()->setElementCount(sizeOfRigids);
 
 		mBoundaryContactCounter.resize(sizeOfRigids);
 
-//		mass_eq.resize(sizeOfRigids * 6);
-
-		uint pDimsR = cudaGridSize(sizeOfRigids, BLOCK_SIZE);
-		
-		RB_initialize_device << <pDimsR, BLOCK_SIZE >> > (
+		cuExecute(sizeOfRigids,
+			RB_SetupInitialStates,
 			this->currentMass()->getData(),
 			this->currentCenter()->getData(),
-			this->currentRigidRotation()->getData(),
+			this->currentRotationMatrix()->getData(),
 			this->currentVelocity()->getData(),
 			this->currentAngularVelocity()->getData(),
-			this->currentRotation()->getData(),
+			this->currentQuaternion()->getData(),
 			this->currentInertia()->getData(),
 			mDeviceRigidBodyStates,
 			eleOffset,
 			sizeOfRigids);
-	
-		center_init.resize(sizeOfRigids);
-		center_init.assign(this->currentCenter()->getData());
 
-		m_inertia_init.assign(this->currentInertia()->getData());
+		mInitialInertia.assign(this->currentInertia()->getData());
 	}
 	
 	template <typename Coord>
@@ -297,48 +294,45 @@ namespace dyno
 	}
 
 	template <typename Coord, typename Matrix, typename Quat>
-	__global__ void RB_update_state(
+	__global__ void RB_UpdateGesture(
 		DArray<Coord> pos,
-		DArray<Matrix> rotation,
-		DArray<Quat> rotation_q,
+		DArray<Quat> rotQuat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> inertia,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
-		DArray<Matrix> inertia,
 		DArray<Matrix> inertia_init,
-		Real dt
-	)
+		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
 		
 		pos[pId] += velocity[pId] * dt;
-		
-		rotation_q[pId] += dt * 0.5f * 
-			Quat(angular_velocity[pId][0], angular_velocity[pId][1],angular_velocity[pId][2], 0.0f)
-			*
-			(rotation_q[pId]);
-		
-		rotation_q[pId] = rotation_q[pId].normalize();
-		rotation[pId] = rotation_q[pId].toMatrix3x3();
 
-		inertia[pId] = rotation[pId] * inertia_init[pId] * rotation[pId].inverse();
+		rotQuat[pId] = rotQuat[pId].normalize();
+		rotMat[pId] = rotQuat[pId].toMatrix3x3();
+		
+		rotQuat[pId] += dt * 0.5f * 
+			Quat(angular_velocity[pId][0], angular_velocity[pId][1],angular_velocity[pId][2], 0.0)
+			*(rotQuat[pId]);
+
+		inertia[pId] = rotMat[pId] * inertia_init[pId] * rotMat[pId].inverse();
 	}
 
 	template <typename Coord>
-	__global__ void RB_update_velocity(
+	__global__ void RB_UpdateVelocity(
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
-		DArray<Coord> AA,
+		DArray<Coord> accel,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= AA.size() / 2) return;
+		if (pId >= accel.size() / 2) return;
 
-		//printf("%.3lf %.3lf %.3lf\n", AA[2 * pId][0], AA[2 * pId][1], AA[2 * pId][2]);
-		velocity[pId] += AA[2 * pId] * dt;// + Coord(0, -9.8f, 0) * dt;
+		velocity[pId] += accel[2 * pId] * dt;
 		velocity[pId] += Coord(0, -9.8f, 0) * dt;
-		 //printf("velocity: %.3lf %.3lf %.3lf\n", velocity[pId][0], velocity[pId][1], velocity[pId][2]);
-		angular_velocity[pId] += AA[2 * pId + 1] * dt;
+
+		angular_velocity[pId] += accel[2 * pId + 1] * dt;
 	}
 
 	template <typename Coord, typename Matrix>
@@ -802,11 +796,11 @@ namespace dyno
 	template <typename Coord>
 	__global__ void TakeOneJacobiIteration(
 		DArray<Real> lambda,
-		DArray<Coord> AA,
+		DArray<Coord> accel,
 		DArray<Real> d,
 		DArray<Coord> J,
 		DArray<Coord> B,
-		DArray<Real> ita,
+		DArray<Real> eta,
 		DArray<Real> mass,
 		DArray<NeighborConstraints> nbq)
 	{
@@ -816,20 +810,20 @@ namespace dyno
 		int idx1 = nbq[pId].idx1;
 		int idx2 = nbq[pId].idx2;
 
-		Real ita_i = ita[pId];
+		Real eta_i = eta[pId];
 		{
-			ita_i -= J[4 * pId].dot(AA[idx1 * 2]);
-			ita_i -= J[4 * pId + 1].dot(AA[idx1 * 2 + 1]);
+			eta_i -= J[4 * pId].dot(accel[idx1 * 2]);
+			eta_i -= J[4 * pId + 1].dot(accel[idx1 * 2 + 1]);
 			if (idx2 != -1)
 			{
-				ita_i -= J[4 * pId + 2].dot(AA[idx2 * 2]);
-				ita_i -= J[4 * pId + 3].dot(AA[idx2 * 2 + 1]);
+				eta_i -= J[4 * pId + 2].dot(accel[idx2 * 2]);
+				eta_i -= J[4 * pId + 3].dot(accel[idx2 * 2 + 1]);
 			}
 		}
 
 		if (d[pId] > EPSILON)
 		{
-			Real delta_lambda = ita_i / d[pId];
+			Real delta_lambda = eta_i / d[pId];
 			delta_lambda *= 0.2;
 
 			//printf("delta_lambda = %.3lf\n", delta_lambda);
@@ -863,103 +857,28 @@ namespace dyno
 
 			//printf("inside iteration: %d %d %.5lf   %.5lf\n", idx1, idx2, nbq[pId].s4, delta_lambda);
 
-			atomicAdd(&AA[idx1 * 2][0], B[4 * pId][0] * delta_lambda);
-			atomicAdd(&AA[idx1 * 2][1], B[4 * pId][1] * delta_lambda);
-			atomicAdd(&AA[idx1 * 2][2], B[4 * pId][2] * delta_lambda);
+			atomicAdd(&accel[idx1 * 2][0], B[4 * pId][0] * delta_lambda);
+			atomicAdd(&accel[idx1 * 2][1], B[4 * pId][1] * delta_lambda);
+			atomicAdd(&accel[idx1 * 2][2], B[4 * pId][2] * delta_lambda);
 
-			atomicAdd(&AA[idx1 * 2 + 1][0], B[4 * pId + 1][0] * delta_lambda);
-			atomicAdd(&AA[idx1 * 2 + 1][1], B[4 * pId + 1][1] * delta_lambda);
-			atomicAdd(&AA[idx1 * 2 + 1][2], B[4 * pId + 1][2] * delta_lambda);
+			atomicAdd(&accel[idx1 * 2 + 1][0], B[4 * pId + 1][0] * delta_lambda);
+			atomicAdd(&accel[idx1 * 2 + 1][1], B[4 * pId + 1][1] * delta_lambda);
+			atomicAdd(&accel[idx1 * 2 + 1][2], B[4 * pId + 1][2] * delta_lambda);
 
 			if (idx2 != -1)
 			{
-				atomicAdd(&AA[idx2 * 2][0], B[4 * pId + 2][0] * delta_lambda);
-				atomicAdd(&AA[idx2 * 2][1], B[4 * pId + 2][1] * delta_lambda);
-				atomicAdd(&AA[idx2 * 2][2], B[4 * pId + 2][2] * delta_lambda);
+				atomicAdd(&accel[idx2 * 2][0], B[4 * pId + 2][0] * delta_lambda);
+				atomicAdd(&accel[idx2 * 2][1], B[4 * pId + 2][1] * delta_lambda);
+				atomicAdd(&accel[idx2 * 2][2], B[4 * pId + 2][2] * delta_lambda);
 
-				atomicAdd(&AA[idx2 * 2 + 1][0], B[4 * pId + 3][0] * delta_lambda);
-				atomicAdd(&AA[idx2 * 2 + 1][1], B[4 * pId + 3][1] * delta_lambda);
-				atomicAdd(&AA[idx2 * 2 + 1][2], B[4 * pId + 3][2] * delta_lambda);
-
-				//AA[idx2 * 2] += B[4 * pId + 2] * delta_lambda;
-				//AA[idx2 * 2 + 1] += B[4 * pId + 3] * delta_lambda;
+				atomicAdd(&accel[idx2 * 2 + 1][0], B[4 * pId + 3][0] * delta_lambda);
+				atomicAdd(&accel[idx2 * 2 + 1][1], B[4 * pId + 3][1] * delta_lambda);
+				atomicAdd(&accel[idx2 * 2 + 1][2], B[4 * pId + 3][2] * delta_lambda);
 			}
 		}
 
 	}
-	
 
-	template <typename Coord, typename Matrix> /* FOR TEST */
-	__global__ void SetupContactPairs(
-		DArray<NeighborConstraints> nbq,
-		DArray<Coord> center_init,
-		DArray<Coord> center_now,
-		DArray<Matrix> rotation)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= nbq.size()) return;
-
-		if(nbq[pId].constraint_type == constraint_distance)
-		{ 
-			int idx1 = nbq[pId].idx1;
-			int idx2 = nbq[pId].idx2;
-			Coord offset1 = nbq[pId].v1 - center_init[idx1];
-			nbq[pId].pos1 = center_now[idx1] + rotation[idx1] * offset1;
-
-
-			Coord offset2 = nbq[pId].v2 - center_init[idx2];
-			nbq[pId].pos2 = center_now[idx2] + rotation[idx2] * offset2;
-		}
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::solve_constraint()
-	{
-		int size_constraints = mAllConstraints.size();
-
-		if (size_constraints == 0) return;
-
-		for (int it = 0; it < 100; it++)
-		{
-			// todo : project gs
-			uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-			TakeOneJacobiIteration << <pDims, BLOCK_SIZE >> > (
-				mLambda,
-				mAccel,
-				mD,
-				mJ,
-				mB,
-				mEta,
-				this->currentMass()->getData(),
-				mAllConstraints
-				);
-
-			cuSynchronize();
-		}
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::update_position_rotation(Real dt)
-	{
-		uint pDims = cudaGridSize(currentCenter()->getElementCount(), BLOCK_SIZE);
-		
-		RB_update_velocity << <pDims, BLOCK_SIZE >> > (
-			this->currentVelocity()->getData(),
-			this->currentAngularVelocity()->getData(),
-			mAccel,
-			dt);
-
-		RB_update_state << <pDims, BLOCK_SIZE >> > (
-			this->currentCenter()->getData(),
-			this->currentRigidRotation()->getData(),
-			this->currentRotation()->getData(),
-			this->currentVelocity()->getData(),
-			this->currentAngularVelocity()->getData(),
-			this->currentInertia()->getData(),
-			m_inertia_init,
-			dt);
-	}
-	
 	__global__ void RB_update_offset(
 		DArray<NeighborConstraints> nbq,
 		int offset
@@ -1234,8 +1153,8 @@ namespace dyno
 				discreteSet->getBoxes(),
 				discreteSet->getTets(),
 				mBoundaryContactCounter,
-				hi,
-				lo,
+				mUpperCorner,
+				mLowerCorner,
 				0,
 				offset.boxOffset,
 				offset.tetOffset,
@@ -1254,8 +1173,8 @@ namespace dyno
 					discreteSet->getTets(),
 					mBoundaryContactCounter,
 					mBoundaryContacts,
-					hi,
-					lo,
+					mUpperCorner,
+					mLowerCorner,
 					0,
 					offset.boxOffset,
 					offset.tetOffset,
@@ -1282,7 +1201,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::init_jacobi(Real dt)
+	void RigidBodySystem<TDataType>::initializeJacobian(Real dt)
 	{
 		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
 
@@ -1296,7 +1215,7 @@ namespace dyno
 		sizeOfContacts += contacts.size();
 
 		int sizeOfConstraints = sizeOfContacts;
-		if (have_friction)
+		if (this->varFrictionEnabled()->getData())
 		{
 			sizeOfConstraints += 2 * mBoundaryContacts.size();
 			if (topo->totalSize() > 0)
@@ -1319,8 +1238,6 @@ namespace dyno
 		mAccel.reset();
 		mLambda.reset();
 
-//		mass_eq.reset();
-
 		if (sizeOfConstraints == 0) return;
 
 		if (topo->totalSize() > 0 && contacts.size() > 0)
@@ -1339,7 +1256,7 @@ namespace dyno
 			}
 		}
 
-		if (have_friction)
+		if (this->varFrictionEnabled()->getData())
 		{
 			cuExecute(sizeOfContacts, 
 				SetupFrictionConstraints,
@@ -1347,75 +1264,15 @@ namespace dyno
 				sizeOfContacts
 				);
 		}
-// 		uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-// 		uint pDimsR = cudaGridSize(currentMass()->getElementCount(), BLOCK_SIZE);
 
-		//TODO: ???
-// 		if(use_new_mass)
-// 		{
-// 			printf("?????? USE NEW\n");
-// 			mass_eq.reset();
-// 			mass_buffer.reset();
-// 
-// 			for (int it = 0; it < 15; it++)
-// 			{
-// 				mass_eq.reset();
-// 				RB_constrct_mass_eq << <pDims, BLOCK_SIZE >> > (
-// 					currentCenter()->getData(),
-// 					m_inertia.getData(),
-// 					currentMass()->getData(),
-// 					mJ,
-// 					mB,
-// 					mass_eq,
-// 					mass_buffer,
-// 					m_inertia.getData(),
-// 					constraints_all
-// 					);
-// 				cuSynchronize();
-// 
-// 				RB_constrct_mass_eq<< <pDimsR, BLOCK_SIZE >> > (
-// 					m_inertia.getData(),
-// 					currentMass()->getData(),
-// 					mass_eq
-// 					);
-// 				cuSynchronize();
-// 				//Function1Pt::copy(mass_buffer, mass_eq);
-// 				mass_buffer.assign(mass_eq);
-// 			}
-// 		}
-		
 		cuExecute(sizeOfConstraints,
-			SetupContactPairs,
-			mAllConstraints,
-			center_init,
+			CalculateJacobians,
+			mJ,
+			mB,
 			this->currentCenter()->getData(),
-			this->currentRigidRotation()->getData());
-
-// 		cuSynchronize();
-// 		if (use_new_mass)
-// 		{
-// 			cuExecute(size_constraints,
-// 				CalculateJacobians,
-// 				mJ,
-// 				mB,
-// 				currentCenter()->getData(),
-// 				m_inertia.getData(),
-// 				m_inertia.getData(),
-// 				currentMass()->getData(),
-// 				mass_eq,
-// 				constraints_all);
-// 		}
-// 		else
-		{ 
-			cuExecute(sizeOfConstraints,
-				CalculateJacobians,
-				mJ,
-				mB,
-				this->currentCenter()->getData(),
-				this->currentInertia()->getData(),
-				this->currentMass()->getData(),
-				mAllConstraints);
-		}
+			this->currentInertia()->getData(),
+			this->currentMass()->getData(),
+			mAllConstraints);
 
 		cuExecute(sizeOfConstraints,
 			CalculateDiagonals,
@@ -1439,7 +1296,7 @@ namespace dyno
 	{
 		Real dt = this->varTimeStep()->getData();
 		//construct j
-		init_jacobi(dt);
+		initializeJacobian(dt);
 		for (int i = 0; i < 15; i++)
 		{
 			int size_constraints = mAllConstraints.size();
@@ -1457,7 +1314,24 @@ namespace dyno
 				mAllConstraints);
 		}
 
-		update_position_rotation(dt);
+		uint num = this->currentCenter()->getElementCount();
+		cuExecute(num,
+			RB_UpdateVelocity,
+			this->currentVelocity()->getData(),
+			this->currentAngularVelocity()->getData(),
+			mAccel,
+			dt);
+
+		cuExecute(num,
+			RB_UpdateGesture,
+			this->currentCenter()->getData(),
+			this->currentQuaternion()->getData(),
+			this->currentRotationMatrix()->getData(),
+			this->currentInertia()->getData(),
+			this->currentVelocity()->getData(),
+			this->currentAngularVelocity()->getData(),
+			mInitialInertia,
+			dt);
 	}
 
 	template<typename TDataType>
@@ -1472,7 +1346,7 @@ namespace dyno
 			discreteSet->getBoxes(),
 			mDeviceBoxes,
 			this->currentCenter()->getData(),
-			this->currentRigidRotation()->getData(),
+			this->currentRotationMatrix()->getData(),
 			offset.boxOffset);
 
 		cuExecute(mDeviceBoxes.size(),
@@ -1486,7 +1360,7 @@ namespace dyno
 			discreteSet->getTets(),
 			mDeviceTets,
 			this->currentCenter()->getData(),
-			this->currentRigidRotation()->getData(),
+			this->currentRotationMatrix()->getData(),
 			offset.tetOffset);
 	}
 

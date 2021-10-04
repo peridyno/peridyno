@@ -64,17 +64,6 @@ void creat_scene_fluid()
 	sRender->setColor(Vec3f(1, 1, 0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
-// 	auto eRender = std::make_shared<GLElementVisualModule>();
-// 	eRender->discreteSet = DE;
-// 	rigid->varTimeStep()->connect(eRender->inTimeStep());
-// 	
-// 	//rigid->addVisualModule(eRender);
-// 	eRender->setColor(Vec3f(1, 0, 0));
-// 
-// 	rigid->graphicsPipeline()->pushModule(eRender);
-	
-	//rigid->initialize();
-	
 
 	GLRenderEngine* engine = new GLRenderEngine;
 

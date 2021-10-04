@@ -1,5 +1,5 @@
 if(PERIDYNO_LIBRARY_RigidBody)
-    set(PROJECT_NAME demo-bricks)
+    set(PROJECT_NAME GL_Bricks)
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
 
     file(
