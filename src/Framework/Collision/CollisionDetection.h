@@ -2,6 +2,8 @@
 #include "Module/CollisionModel.h"
 #include "Topology/Primitive3D.h"
 
+#include "CollisionData.h"
+
 namespace dyno
 {
 template <typename> class CollisionDetectionBroadPhase;
@@ -30,7 +32,7 @@ public:
 
 	DEF_ARRAY_IN(Matrix, Rotation, DeviceType::GPU, "");
 
-	DEF_ARRAY_OUT(ContactPair, ContactPairs, DeviceType::GPU, "Contact pairs");
+	DEF_ARRAY_OUT(ContactPair<Real>, ContactPairs, DeviceType::GPU, "Contact pairs");
 
 private:
 	std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;

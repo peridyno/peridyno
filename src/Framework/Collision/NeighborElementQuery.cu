@@ -1,7 +1,7 @@
 #include "NeighborElementQuery.h"
 #include "Collision/CollisionDetectionBroadPhase.h"
-#include "Primitive3D.h"
-#include "NeighborConstraints.h"
+
+#include "Topology/Primitive3D.h"
 
 namespace dyno
 {
@@ -846,8 +846,8 @@ namespace dyno
 							//nbr_out.setElement(tId, cnt, j);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = inter_dist;
 							cnt++;
 							//printf("?????????????\n");
 
@@ -871,9 +871,9 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(j, tId, 8, p1, p2, 0.0f, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = inter_dist;
+							nbr_cons[idx_con].interpenetration = inter_dist;
 							cnt++;
 						}
 						else if ((proj_pos - spheres[tId].center).norm() < spheres[tId].radius + boundary_expand)
@@ -887,9 +887,9 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_fluid_stickiness, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(j, tId, 6, p1, p2, 0.0f, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = 0.0f;//inter_dist;
+							nbr_cons[idx_con].interpenetration = 0.0f;//inter_dist;
 							cnt++;
 							//printf("sphere!! %d\n", tId);
 						}
@@ -934,8 +934,8 @@ namespace dyno
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
 									list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
-									nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 									cnt++;
 								}
 								else if ((proj_pos - spheres[tId].center).norm() < spheres[tId].radius + boundary_expand
@@ -954,8 +954,8 @@ namespace dyno
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
 									list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
-									nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_fluid_stickiness, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 									cnt++;
 								}
 							}
@@ -993,8 +993,8 @@ namespace dyno
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
 									list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
-									nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 									cnt++;
 								}
 							}
@@ -1013,8 +1013,8 @@ namespace dyno
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
 								list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
-								nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = inter_dist;
+								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = inter_dist;
 								cnt++;
 							}
 							else if ((proj_pos - spheres[tId].center).norm() < spheres[tId].radius + boundary_expand)
@@ -1029,8 +1029,8 @@ namespace dyno
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
 								list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
-								nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = inter_dist;
+								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = inter_dist;
 								cnt++;
 							}
 						}
@@ -1076,13 +1076,13 @@ namespace dyno
 								int idx_con = prefix[tId] + cnt;
 								if (inter_dist > spheres[tId].radius)
 								{
-									nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist - spheres[tId].radius;
+									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist - spheres[tId].radius;
 								}
 								else
 								{
-									nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_fluid_stickiness, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 								}
 								cnt++;
 							}
@@ -1119,11 +1119,10 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = inter_dist;
 							if (inter_dist < boundary_expand * 0.25)
-								nbr_cons[idx_con].constraint_type = NeighborConstraints::type_fluid_stickiness;
-							nbr_cons[idx_con].i6 = 1;
+								nbr_cons[idx_con].contactType = ContactType::CT_FLUID_STICKINESS;
 							cnt++;
 							//cnt++;
 						}
@@ -1172,9 +1171,9 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(tId, j, 1, p1, p2, 0.0f, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = inter_dist;
+							nbr_cons[idx_con].interpenetration = inter_dist;
 							cnt++;
 							//printf("sphere!!!! %d\n", j);
 						}
@@ -1190,9 +1189,9 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_fluid_stickiness, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(tId, j, 1, p1, p2, 0.0f, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = 0.0f;//inter_dist;
+							nbr_cons[idx_con].interpenetration = 0.0f;//inter_dist;
 							cnt++;
 							//printf("sphere!!!! %d\n", j);
 						}
@@ -1230,8 +1229,8 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p11, p21, inter_norm1, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist1;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p11, p21, inter_norm1, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist1;
 							cnt++;
 						}
 						else if (type == 2)
@@ -1243,8 +1242,8 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p12, p22, inter_norm2, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist2;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p12, p22, inter_norm2, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist2;
 
 							cnt++;
 						}
@@ -1265,8 +1264,8 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist;
 							cnt++;
 						}
 					}
@@ -1310,10 +1309,10 @@ namespace dyno
 								interDist = -abs(ep.distance(boxes[tId - elementOffset.boxOffset]));
 							}
 
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
 
 
-							nbr_cons[idx_con].inter_distance = -interDist + caps[j - elementOffset.segOffset].radius;
+							nbr_cons[idx_con].interpenetration = -interDist + caps[j - elementOffset.segOffset].radius;
 							
 							cnt++;
 						}
@@ -1330,8 +1329,8 @@ namespace dyno
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
 								list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
-								nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = interDist;
+								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = interDist;
 								cnt++;
 							}
 						}
@@ -1354,8 +1353,8 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist;
 							cnt++;
 						}
 					}
@@ -1421,8 +1420,8 @@ namespace dyno
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
 									list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
-									nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 									cnt++;
 								}
 								else if ((proj_pos - spheres[j].center).norm() < spheres[j].radius + boundary_expand
@@ -1439,8 +1438,8 @@ namespace dyno
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
 									list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
-									nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_fluid_stickiness, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 									cnt++;
 								}
 							}
@@ -1475,8 +1474,8 @@ namespace dyno
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
 									list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
-									nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;
 									cnt++;
 								}
 							}
@@ -1498,8 +1497,8 @@ namespace dyno
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
 								list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
-								nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = inter_dist;
+								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = inter_dist;
 								cnt++;
 							}
 							else if ((proj_pos - spheres[j].center).norm() < spheres[j].radius + boundary_expand)
@@ -1514,8 +1513,8 @@ namespace dyno
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
 								list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
-								nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = inter_dist;
+								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = inter_dist;
 								cnt++;
 							}
 						}
@@ -1535,8 +1534,8 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist;
 							cnt++;
 							//printf("TTTTTTTTTTTBBBBBBBBBBBBBBBBBB interDist = %.3lf   interNormal = %.3lf %.3lf %.3lf\n",
 							//inter_dist,
@@ -1602,9 +1601,7 @@ namespace dyno
 						else if (insert_one && inter_dist1 < -3 * EPSILON) type = 1;
 						else if (insert_two && inter_dist2 < -3 * EPSILON) type = 2;
 
-						int ctype = NeighborConstraints::type_nointerpenetration_fluid;
-
-						
+						ContactType ctype = ContactType::CT_FLUID_NONPENETRATION;
 
 						if (type == 1)
 						{
@@ -1614,7 +1611,7 @@ namespace dyno
 							if (abs(inter_dist1) < EPSILON)
 							{
 								inter_norm1 = (tet_center1 - tet_center2) / (tet_center1 - tet_center2).norm();
-								ctype = NeighborConstraints::type_nointerpenetration_local;
+								ctype = ContactType::CT_LOACL_NONPENETRATION;
 							}
 
 							int idx;
@@ -1647,7 +1644,7 @@ namespace dyno
 								if (idx_con < nbr_cons.size())
 								{
 									nbr_cons[idx_con] = NeighborConstraints(tId, j, ctype, p11, p21, inter_norm1, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = -inter_dist1;
+									nbr_cons[idx_con].interpenetration = -inter_dist1;
 								}
 							}
 							else
@@ -1659,7 +1656,7 @@ namespace dyno
 									nbr_cons[idx_con] = NeighborConstraints(tId, j, ctype, p11, proj_pos,
 										(proj_pos - p11) / (proj_pos - p11).norm(), Coord3D(0, 0, 0));
 
-									nbr_cons[idx_con].inter_distance = (proj_pos - p11).norm();
+									nbr_cons[idx_con].interpenetration = (proj_pos - p11).norm();
 								}
 							}
 
@@ -1673,7 +1670,7 @@ namespace dyno
 							if (abs(inter_dist2) < EPSILON)
 							{
 								inter_norm2 = (tet_center2 - tet_center1) / (tet_center1 - tet_center2).norm();
-								ctype = NeighborConstraints::type_nointerpenetration_local;
+								ctype = ContactType::CT_LOACL_NONPENETRATION;
 							}
 							/*set up constraints*/
 							int idx;
@@ -1705,7 +1702,7 @@ namespace dyno
 								if(idx_con < nbr_cons.size())
 								{ 
 									nbr_cons[idx_con] = NeighborConstraints(j, tId, ctype, p12, p22, inter_norm2, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = -inter_dist2;
+									nbr_cons[idx_con].interpenetration = -inter_dist2;
 								}
 								//printf("%.5lf\n", inter_dist2);
 							}
@@ -1719,7 +1716,7 @@ namespace dyno
 									nbr_cons[idx_con] = NeighborConstraints(j, tId, ctype, p12, proj_pos,
 										(proj_pos - p12) / (proj_pos - p12).norm(), Coord3D(0, 0, 0));
 
-									nbr_cons[idx_con].inter_distance = (proj_pos - p12).norm();
+									nbr_cons[idx_con].interpenetration = (proj_pos - p12).norm();
 								}
 							}
 							cnt++;
@@ -1794,8 +1791,8 @@ namespace dyno
 									interDist = -(p1 - p2).norm();
 								}
 
-								nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = -interDist + caps[j - elementOffset.segOffset].radius;
+								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = -interDist + caps[j - elementOffset.segOffset].radius;
 								cnt++;
 							}
 						}
@@ -1813,8 +1810,8 @@ namespace dyno
 								p2 = segment_tmp2.v0;
 
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = interDist;
+								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = interDist;
 								cnt++;
 							}
 						}
@@ -1836,8 +1833,8 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist;
 							cnt++;
 
 						}
@@ -1904,13 +1901,13 @@ namespace dyno
 
 								if (inter_dist > spheres[j].radius)
 								{
-									nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist - spheres[j].radius;//inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist - spheres[j].radius;//inter_dist;
 								}
 								else
 								{
-									nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_fluid_stickiness, p1, p2, inter_norm, Coord3D(0, 0, 0));
-									nbr_cons[idx_con].inter_distance = inter_dist;//inter_dist;
+									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
+									nbr_cons[idx_con].interpenetration = inter_dist;//inter_dist;
 								}
 								cnt++;
 							}
@@ -1957,10 +1954,10 @@ namespace dyno
 								interDist = -abs(ep.distance(boxes[j - elementOffset.boxOffset]));
 							}
 
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
 
 
-							nbr_cons[idx_con].inter_distance = -interDist + caps[tId - elementOffset.segOffset].radius;
+							nbr_cons[idx_con].interpenetration = -interDist + caps[tId - elementOffset.segOffset].radius;
 							/*printf(" ================ %d %d %.13lf %.13lf %.13lf   %.13lf %.13lf %.13lf %.13lf\n",
 								tId, j,
 								segment_tmp.v0[0], segment_tmp.v0[1], segment_tmp.v0[2],
@@ -1982,8 +1979,8 @@ namespace dyno
 								p2 = segment_prox.v0;
 
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = interDist;
+								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = interDist;
 								cnt++;
 							}
 						}
@@ -2056,8 +2053,8 @@ namespace dyno
 									interDist = -(p1 - p2).norm();
 								}
 
-								nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = -interDist + caps[tId - elementOffset.segOffset].radius;
+								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, (p2 - p1) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = -interDist + caps[tId - elementOffset.segOffset].radius;
 								cnt++;
 							}
 						}
@@ -2075,8 +2072,8 @@ namespace dyno
 								p2 = segment_tmp2.v0;
 
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = interDist;
+								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = interDist;
 								cnt++;
 							}
 						}
@@ -2102,8 +2099,8 @@ namespace dyno
 								list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
-								nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
-								nbr_cons[idx_con].inter_distance = interDist;
+								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
+								nbr_cons[idx_con].interpenetration = interDist;
 								//cnt++;
 								cnt++;
 							}
@@ -2135,8 +2132,8 @@ namespace dyno
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, (p2 - p1) / interDist, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = 0;//interDist;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, (p2 - p1) / interDist, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = 0;//interDist;
 							cnt++;
 						}
 						else if ((segment.proximity(triangle)).length() < caps[tId - elementOffset.segOffset].radius)
@@ -2151,8 +2148,8 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, -proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = 0;// interDist;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, -proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = 0;// interDist;
 							cnt++;
 						}
 					}
@@ -2210,11 +2207,10 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = inter_dist;
 							if (inter_dist < boundary_expand * 0.25)
-								nbr_cons[idx_con].constraint_type = NeighborConstraints::type_fluid_stickiness;
-							nbr_cons[idx_con].i6 = 1;
+								nbr_cons[idx_con].contactType = ContactType::CT_FLUID_STICKINESS;
 							cnt++;
 
 						}
@@ -2239,8 +2235,8 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist;
 							cnt++;
 						}
 					}
@@ -2261,8 +2257,8 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_bodies, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = -inter_dist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = -inter_dist;
 							cnt++;
 
 						}
@@ -2306,8 +2302,8 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, (p2 - p1) / interDist, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = 0; interDist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, (p2 - p1) / interDist, Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = 0; interDist;
 							cnt++;
 						}
 						else if ((segment.proximity(triangle)).length() < caps[j - elementOffset.segOffset].radius)
@@ -2323,8 +2319,8 @@ namespace dyno
 							list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, NeighborConstraints::type_nointerpenetration_fluid, p1, p2, -proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
-							nbr_cons[idx_con].inter_distance = 0;//interDist;
+							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, -proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
+							nbr_cons[idx_con].interpenetration = 0;//interDist;
 							cnt++;
 						}
 					}

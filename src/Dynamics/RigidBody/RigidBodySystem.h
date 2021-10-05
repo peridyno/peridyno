@@ -3,20 +3,13 @@
 #include "RigidBodyShared.h"
 
 #include "Topology/Primitive3D.h"
-#include "Topology/NeighborElementQuery.h"
-#include "Topology/NeighborConstraints.h"
-
-#include "Matrix.h"
-#include "Quat.h"
+#include "Collision/NeighborElementQuery.h"
 
 namespace dyno
 {
-	#define constraint_friction 5
-	#define	constraint_boundary 0
-	#define constraint_collision 1
 	#define	constraint_distance -2
 	template<typename TDataType> class DiscreteElements;
-	typedef typename TNeighborConstraints<Real> NeighborConstraints;
+	typedef typename ContactPair<Real> NeighborConstraints;
 	/*!
 	*	\class	RigidBodySystem
 	*	\brief	Implementation of a rigid body system containing a variety of rigid bodies with different shapes.

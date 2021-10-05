@@ -1,14 +1,13 @@
 #pragma once
 #include "Module/ComputeModule.h"
 #include "Module/TopologyModule.h"
-#include "SparseOctree.h"
-#include "DiscreteElements.h"
-#include "NeighborConstraints.h"
+#include "Topology/SparseOctree.h"
+#include "Topology/DiscreteElements.h"
+
+#include "CollisionData.h"
 
 namespace dyno {
 	template<typename TDataType> class CollisionDetectionBroadPhase;
-	typedef typename TNeighborConstraints<Real> NeighborConstraints;
-
 
 	class NbrFilter
 	{
@@ -66,7 +65,7 @@ namespace dyno {
 		 */
 		DEF_ARRAYLIST_OUT(int, Neighborhood, DeviceType::GPU, "Return neighbor ids");
 
-		DEF_ARRAY_OUT(NeighborConstraints, Contacts, DeviceType::GPU, "");
+		DEF_ARRAY_OUT(ContactPair<Real>, Contacts, DeviceType::GPU, "");
 
 		NbrFilter Filter;
 

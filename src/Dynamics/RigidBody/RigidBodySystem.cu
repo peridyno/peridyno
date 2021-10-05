@@ -347,12 +347,12 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
 
-		int idx1 = nbc[pId].idx1;
-		int idx2 = nbc[pId].idx2;
+		int idx1 = nbc[pId].bodyId1;
+		int idx2 = nbc[pId].bodyId2;
 
 		//printf("%d %d\n", idx1, idx2);
 
-		if (nbc[pId].constraint_type == constraint_distance) // test dist constraint
+		if (nbc[pId].contactType == constraint_distance) // test dist constraint
 		{
 			Coord p2 = nbc[pId].pos2;
 			Coord p1 = nbc[pId].pos1;
@@ -370,7 +370,7 @@ namespace dyno
 			B[4 * pId + 2] = d / mass[idx2];
 			B[4 * pId + 3] = inertia[idx2].inverse() * (r2.cross(d));
 		}
-		else if (nbc[pId].constraint_type == constraint_collision) // contact, collision
+		else if (nbc[pId].contactType == ContactType::CT_NONPENETRATION) // contact, collision
 		{
 			Coord p1 = nbc[pId].pos1;
 			Coord p2 = nbc[pId].pos2;
@@ -388,7 +388,7 @@ namespace dyno
 			B[4 * pId + 2] = -n / mass[idx2];
 			B[4 * pId + 3] = inertia[idx2].inverse() * (-r2.cross(n));
 		}
-		else if (nbc[pId].constraint_type == constraint_boundary) // boundary
+		else if (nbc[pId].contactType == ContactType::CT_BOUDNARY) // boundary
 		{
 			Coord p1 = nbc[pId].pos1;
 		//	printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d %.3lf %.3lf %.3lf\n", idx1, p1[0], p1[1], p1[2]);
@@ -407,7 +407,7 @@ namespace dyno
 			B[4 * pId + 2] = Coord(0);
 			B[4 * pId + 3] = Coord(0);
 		}
-		else if (nbc[pId].constraint_type == constraint_friction) // friction
+		else if (nbc[pId].contactType == ContactType::CT_FRICTION) // friction
 		{
 			Coord p1 = nbc[pId].pos1;
 			//printf("~~~~~~~ %.3lf %.3lf %.3lf\n", p1[0], p1[1], p1[2]);
@@ -464,13 +464,13 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
 
-		int idx1 = nbc[pId].idx1;
-		int idx2 = nbc[pId].idx2;
+		int idx1 = nbc[pId].bodyId1;
+		int idx2 = nbc[pId].bodyId2;
 
 		//printf("%d %d\n", idx1, idx2);
 		//EPSILON
 
-		if (nbc[pId].constraint_type == constraint_collision) // contact, collision
+		if (nbc[pId].contactType == ContactType::CT_NONPENETRATION) // contact, collision
 		{
 			Coord p1 = nbc[pId].pos1;
 			Coord p2 = nbc[pId].pos2;
@@ -556,7 +556,7 @@ namespace dyno
 			B[4 * pId + 3] = inertia[idx2].inverse() * (-r2.cross(n)) * ratio2;
 		}
 
-		else if (nbc[pId].constraint_type == constraint_boundary) // boundary
+		else if (nbc[pId].contactType == ContactType::CT_BOUDNARY) // boundary
 		{
 
 			Coord p1 = nbc[pId].pos1;
@@ -577,7 +577,7 @@ namespace dyno
 			B[4 * pId + 3] = Coord(0);
 		}
 
-		else if (nbc[pId].constraint_type == constraint_friction) // friction
+		else if (nbc[pId].contactType == ContactType::CT_FRICTION) // friction
 		{
 			Coord p1 = nbc[pId].pos1;
 			//printf("~~~~~~~ %.3lf %.3lf %.3lf\n", p1[0], p1[1], p1[2]);
@@ -638,7 +638,7 @@ namespace dyno
 // 		if (pId >= J.size() / 4) return;
 // 		int idx1 = nbc[pId].idx1;
 // 		int idx2 = nbc[pId].idx2;
-// 		if(nbc[pId].constraint_type != constraint_friction)
+// 		if(nbc[pId].contactType != ContactType::CT_FRICTION)
 // 		{
 // 			Coord d = nbc[pId].normal1;
 // 
@@ -753,8 +753,8 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
 
-		int idx1 = nbq[pId].idx1;
-		int idx2 = nbq[pId].idx2;
+		int idx1 = nbq[pId].bodyId1;
+		int idx2 = nbq[pId].bodyId2;
 		//printf("from ita %d\n", pId);
 		Real ita_i = Real(0);
 		if (true) // test dist constraint
@@ -768,9 +768,9 @@ namespace dyno
 			}
 		}
 		eta[pId] = ita_i / dt;
-		if (nbq[pId].constraint_type == constraint_collision || nbq[pId].constraint_type == constraint_boundary)
+		if (nbq[pId].contactType == ContactType::CT_NONPENETRATION || nbq[pId].contactType == ContactType::CT_BOUDNARY)
 		{
-			eta[pId] += min(nbq[pId].inter_distance, nbq[pId].inter_distance) / dt / dt / 15.0f;
+			eta[pId] += min(nbq[pId].interpenetration, nbq[pId].interpenetration) / dt / dt / 15.0f;
 		}
 
 	}
@@ -807,8 +807,8 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
 
-		int idx1 = nbq[pId].idx1;
-		int idx2 = nbq[pId].idx2;
+		int idx1 = nbq[pId].bodyId1;
+		int idx2 = nbq[pId].bodyId2;
 
 		Real eta_i = eta[pId];
 		{
@@ -828,7 +828,7 @@ namespace dyno
 
 			//printf("delta_lambda = %.3lf\n", delta_lambda);
 
-			if (nbq[pId].constraint_type == constraint_collision || nbq[pId].constraint_type == constraint_boundary) //	PROJECTION!!!!
+			if (nbq[pId].contactType == ContactType::CT_NONPENETRATION || nbq[pId].contactType == ContactType::CT_BOUDNARY) //	PROJECTION!!!!
 			{
 				Real lambda_new = lambda[pId] + delta_lambda;
 				if (lambda_new < 0) lambda_new = 0;
@@ -841,7 +841,7 @@ namespace dyno
 				delta_lambda = lambda_new - lambda[pId];
 			}
 
-			if (nbq[pId].constraint_type == constraint_friction) //	PROJECTION!!!!
+			if (nbq[pId].contactType == ContactType::CT_FRICTION) //	PROJECTION!!!!
 			{
 				Real lambda_new = lambda[pId] + delta_lambda;
 				Real mass_i = mass[idx1];
@@ -881,15 +881,14 @@ namespace dyno
 
 	__global__ void RB_update_offset(
 		DArray<NeighborConstraints> nbq,
-		int offset
-	)
+		int offset)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= nbq.size()) return;
-		if(nbq[pId].idx1 != -1)
-			nbq[pId].idx1 += offset;
-		if(nbq[pId].idx2 != -1)
-			nbq[pId].idx2 += offset;
+		if(nbq[pId].bodyId1 != -1)
+			nbq[pId].bodyId1 += offset;
+		if(nbq[pId].bodyId2 != -1)
+			nbq[pId].bodyId2 += offset;
 	}
 
 	template <typename Coord>
@@ -940,67 +939,67 @@ namespace dyno
 				if (pos[0] > hi[0] && c1)
 				{
 					c1 = true;
-					nbq[cnt + start_i].idx1 = pId;
-					nbq[cnt + start_i].idx2 = -1;
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(-1,0,0);
 					nbq[cnt + start_i].pos1 = pos;
-					nbq[cnt + start_i].constraint_type = constraint_boundary;
-					nbq[cnt + start_i].inter_distance = pos[0] - hi[0];
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = pos[0] - hi[0];
 					cnt++;
 				}
 				if (pos[1] > hi[1] && c2)
 				{
 					c2 = true;
-					nbq[cnt + start_i].idx1 = pId;
-					nbq[cnt + start_i].idx2 = -1;
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
 					nbq[cnt + start_i].pos1 = pos;
-					nbq[cnt + start_i].constraint_type = constraint_boundary;
-					nbq[cnt + start_i].inter_distance = pos[1] - hi[1];
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = pos[1] - hi[1];
 					cnt++;
 				}
 				if (pos[2] > hi[2] && c3)
 				{
 					c3 = true;
-					nbq[cnt + start_i].idx1 = pId;
-					nbq[cnt + start_i].idx2 = -1;
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
 					nbq[cnt + start_i].pos1 = pos;
-					nbq[cnt + start_i].constraint_type = constraint_boundary;
-					nbq[cnt + start_i].inter_distance = pos[2] - hi[2];
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = pos[2] - hi[2];
 					cnt++;
 				}
 				if (pos[0] < lo[0] && c4)
 				{
 					c4 = true;
-					nbq[cnt + start_i].idx1 = pId;
-					nbq[cnt + start_i].idx2 = -1;
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
 					nbq[cnt + start_i].pos1 = pos;
-					nbq[cnt + start_i].constraint_type = constraint_boundary;
-					nbq[cnt + start_i].inter_distance = lo[0] - pos[0];
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo[0] - pos[0];
 					cnt++;
 				}
 				if (pos[1] < lo[1] && c5)
 				{
 					c5 = true;
-					nbq[cnt + start_i].idx1 = pId;
-					nbq[cnt + start_i].idx2 = -1;
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
 					nbq[cnt + start_i].pos1 = pos;
-					nbq[cnt + start_i].constraint_type = constraint_boundary;
-					nbq[cnt + start_i].inter_distance = lo[1] - pos[1];
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo[1] - pos[1];
 					cnt++;
 				}
 				if (pos[2] < lo[2] && c6)
 				{
 					c6 = true;
-					nbq[cnt + start_i].idx1 = pId;
-					nbq[cnt + start_i].idx2 = -1;
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
 					nbq[cnt + start_i].pos1 = pos;
-					nbq[cnt + start_i].constraint_type = constraint_boundary;
-					nbq[cnt + start_i].inter_distance = lo[2] - pos[2];
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo[2] - pos[2];
 					cnt++;
 				}
 
@@ -1042,10 +1041,10 @@ namespace dyno
 		}
 
 		nbq[pId * 2 + contact_size] = nbq[pId];
-		nbq[pId * 2 + contact_size].constraint_type = constraint_friction;
+		nbq[pId * 2 + contact_size].contactType = ContactType::CT_FRICTION;
 		nbq[pId * 2 + contact_size].normal1 = n1;
 		nbq[pId * 2 + 1 + contact_size] = nbq[pId];
-		nbq[pId * 2 + 1 + contact_size].constraint_type = constraint_friction;
+		nbq[pId * 2 + 1 + contact_size].contactType = ContactType::CT_FRICTION;
 		nbq[pId * 2 + 1 + contact_size].normal1 = n2;
 	}
 
