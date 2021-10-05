@@ -4,15 +4,10 @@
 
 #include <RigidBody/RigidBodySystem.h>
 
-#include <Module/CalculateNorm.h>
-#include <Quat.h>
-
 #include <GLRenderEngine.h>
-#include <GLElementVisualModule.h>
-#include <ColorMapping.h>
+#include <GLSurfaceVisualModule.h>
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
-#include <GLSurfaceVisualModule.h>
 
 using namespace std;
 using namespace dyno;
@@ -75,11 +70,8 @@ void creat_scene_fluid()
 	delete engine;
 }
 
-
-
 int main()
 {
-
 	creat_scene_fluid();
 	//test_render();
 

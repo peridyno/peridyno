@@ -292,11 +292,11 @@ namespace dyno
 
 		tri2Tet.resize(triNum);
 
-		auto pTri = this->getTriangles();
-		pTri->resize(triNum);
+		auto& pTri = this->getTriangles();
+		pTri.resize(triNum);
 		cuExecute(keys.size(),
 			TS_SetupTriangles,
-			*pTri,
+			pTri,
 			tri2Tet,
 			keys,
 			counter,

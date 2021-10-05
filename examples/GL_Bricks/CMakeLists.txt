@@ -19,11 +19,10 @@ if(PERIDYNO_LIBRARY_RigidBody)
         IO
         RigidBody 
         GlfwGUI
-        GLRenderEngine
-		)
+        GLRenderEngine)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/RigidBody")
 
     if(WIN32)
         set_target_properties(${PROJECT_NAME} PROPERTIES
