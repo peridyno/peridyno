@@ -32,16 +32,16 @@ namespace dyno
 	};
 
 	template<typename Real>
-	class ContactPair
+	class TContactPair
 	{
 	public:
-		DYN_FUNC ContactPair()
+		DYN_FUNC TContactPair()
 		{
 			bodyId1 = bodyId2 = 0;
 			contactType = CT_UNKNOWN;
 		};
 
-		DYN_FUNC ContactPair(
+		DYN_FUNC TContactPair(
 			int a, 
 			int b, 
 			ContactType type, 

@@ -18,6 +18,7 @@ public:
 	typedef typename TDataType::Real Real;
 	typedef typename TDataType::Coord Coord;
 	typedef typename TDataType::Matrix Matrix;
+	typedef typename TContactPair<Real> ContactPair;
 
 	CollisionDetection();
 	virtual ~CollisionDetection();
@@ -32,7 +33,7 @@ public:
 
 	DEF_ARRAY_IN(Matrix, Rotation, DeviceType::GPU, "");
 
-	DEF_ARRAY_OUT(ContactPair<Real>, ContactPairs, DeviceType::GPU, "Contact pairs");
+	DEF_ARRAY_OUT(ContactPair, ContactPairs, DeviceType::GPU, "Contact pairs");
 
 private:
 	std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;

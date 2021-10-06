@@ -65,7 +65,7 @@ namespace dyno {
 		 */
 		DEF_ARRAYLIST_OUT(int, Neighborhood, DeviceType::GPU, "Return neighbor ids");
 
-		DEF_ARRAY_OUT(ContactPair<Real>, Contacts, DeviceType::GPU, "");
+		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
 
 		NbrFilter Filter;
 

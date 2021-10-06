@@ -335,14 +335,14 @@ namespace dyno
 		angular_velocity[pId] += accel[2 * pId + 1] * dt;
 	}
 
-	template <typename Coord, typename Matrix>
+	template <typename Coord, typename Matrix, typename ContactPair>
 	__global__ void CalculateJacobians(
 		DArray<Coord> J,
 		DArray<Coord> B,
 		DArray<Coord> pos,
 		DArray<Matrix> inertia,
 		DArray<Real> mass,
-		DArray<NeighborConstraints> nbc)
+		DArray<ContactPair> nbc)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -352,25 +352,7 @@ namespace dyno
 
 		//printf("%d %d\n", idx1, idx2);
 
-		if (nbc[pId].contactType == constraint_distance) // test dist constraint
-		{
-			Coord p2 = nbc[pId].pos2;
-			Coord p1 = nbc[pId].pos1;
-			Coord d = p2 - p1;
-			Coord r1 = p1 - pos[idx1];
-			Coord r2 = p2 - pos[idx2];
-
-			J[4 * pId] = -d ;
-			J[4 * pId + 1] = (-r1.cross(d));
-			J[4 * pId + 2] = d ;
-			J[4 * pId + 3] = (r2.cross(d));
-
-			B[4 * pId] = -d / mass[idx1];
-			B[4 * pId + 1] = inertia[idx1].inverse() * (- r1.cross(d)) ;
-			B[4 * pId + 2] = d / mass[idx2];
-			B[4 * pId + 3] = inertia[idx2].inverse() * (r2.cross(d));
-		}
-		else if (nbc[pId].contactType == ContactType::CT_NONPENETRATION) // contact, collision
+		if (nbc[pId].contactType == ContactType::CT_NONPENETRATION) // contact, collision
 		{
 			Coord p1 = nbc[pId].pos1;
 			Coord p2 = nbc[pId].pos2;
@@ -450,7 +432,7 @@ namespace dyno
 		}
 	}
 
-	template <typename Coord, typename Matrix>
+	template <typename Coord, typename Matrix, typename ContactPair>
 	__global__ void CalculateJacobians(
 		DArray<Coord> J,
 		DArray<Coord> B,
@@ -459,7 +441,7 @@ namespace dyno
 		DArray<Matrix> inertia_eq,
 		DArray<Real> mass,
 		DArray<Real> mass_eq,
-		DArray<NeighborConstraints> nbc)
+		DArray<ContactPair> nbc)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -740,14 +722,14 @@ namespace dyno
 
 
 	// ignore zeta !!!!!!
-	template <typename Coord>
+	template <typename Coord, typename ContactPair>
 	__global__ void CalculateEta(
 		DArray<Real> eta,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
 		DArray<Coord> J,
 		DArray<Real> mass,
-		DArray<NeighborConstraints> nbq,
+		DArray<ContactPair> nbq,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -793,7 +775,7 @@ namespace dyno
 		D[tId] = d;
 	}
 
-	template <typename Coord>
+	template <typename Coord, typename ContactPair>
 	__global__ void TakeOneJacobiIteration(
 		DArray<Real> lambda,
 		DArray<Coord> accel,
@@ -802,7 +784,7 @@ namespace dyno
 		DArray<Coord> B,
 		DArray<Real> eta,
 		DArray<Real> mass,
-		DArray<NeighborConstraints> nbq)
+		DArray<ContactPair> nbq)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -879,8 +861,9 @@ namespace dyno
 
 	}
 
+	template<typename ContactPair>
 	__global__ void RB_update_offset(
-		DArray<NeighborConstraints> nbq,
+		DArray<ContactPair> nbq,
 		int offset)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -891,13 +874,13 @@ namespace dyno
 			nbq[pId].bodyId2 += offset;
 	}
 
-	template <typename Coord>
+	template <typename Coord, typename ContactPair>
 	__global__ void SetupContactsWithBoundary(
 		DArray<Sphere3D> sphere,
 		DArray<Box3D> box,
 		DArray<Tet3D> tet,
 		DArray<int> count,
-		DArray<NeighborConstraints> nbq,
+		DArray<ContactPair> nbq,
 		Coord hi,
 		Coord lo,
 		int start_sphere,
@@ -1013,9 +996,9 @@ namespace dyno
 		{}
 	}
 
-	//template <typename Coord>
+	template <typename ContactPair>
 	__global__ void SetupFrictionConstraints(
-		DArray<NeighborConstraints> nbq,
+		DArray<ContactPair> nbq,
 		int contact_size)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);

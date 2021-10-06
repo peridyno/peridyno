@@ -7,9 +7,6 @@
 
 namespace dyno
 {
-	#define	constraint_distance -2
-	template<typename TDataType> class DiscreteElements;
-	typedef typename ContactPair<Real> NeighborConstraints;
 	/*!
 	*	\class	RigidBodySystem
 	*	\brief	Implementation of a rigid body system containing a variety of rigid bodies with different shapes.
@@ -27,6 +24,8 @@ namespace dyno
 		typedef typename TSphere3D<Real> Sphere3D;
 		typedef typename TOrientedBox3D<Real> Box3D;
 		typedef typename Quat<Real> TQuat;
+
+		typedef typename TContactPair<Real> ContactPair;
 
 		RigidBodySystem(std::string name = "RigidBodySystem");
 		virtual ~RigidBodySystem();
@@ -118,9 +117,9 @@ namespace dyno
 		DArray<Real> mLambda;	//contact impulse
 
 		DArray<int> mBoundaryContactCounter;
-		DArray<NeighborConstraints> mBoundaryContacts;
-		DArray<NeighborConstraints> buffer_friction;
-		DArray<NeighborConstraints> mAllConstraints;
+		DArray<ContactPair> mBoundaryContacts;
+		DArray<ContactPair> buffer_friction;
+		DArray<ContactPair> mAllConstraints;
 
 	private:
 		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
