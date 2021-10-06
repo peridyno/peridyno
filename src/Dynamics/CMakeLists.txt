@@ -68,7 +68,7 @@ endmacro()
 
 option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system library" ON)
 option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" ON)
-option(PERIDYNO_LIBRARY_RigidBody "Enable binding the rigid body library" ON)
+option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
 option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
