@@ -21,7 +21,7 @@ namespace dyno
 		// http://www.randygaul.net/2014/05/22/deriving-obb-to-obb-intersection-sat/
 		// https://box2d.googlecode.com/files/GDC2007_ErinCatto.zip
 		// https://box2d.googlecode.com/files/Box2D_Lite.zip
-		DYN_FUNC static void request(Manifold& m, OBox3D box0, OBox3D box1);
+		DYN_FUNC static void request(Manifold& m, const OBox3D box0, const OBox3D box1);
 
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const OBox3D& box);
 

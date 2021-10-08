@@ -398,7 +398,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, OBox3D box0, OBox3D box1)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D box0, const OBox3D box1)
 	{
 		m.contactCount = 0;
 
