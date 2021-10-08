@@ -666,4 +666,56 @@ namespace dyno
 			m.contacts[0].position = (CA + CB) * float(0.5);
 		}
 	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphere, const OBox3D& box)
+	{
+		m.contactCount = 0;
+
+		Point3D c0(sphere.center);
+		Real r0 = sphere.radius;
+
+		Point3D vproj = c0.project(box);
+		bool bInside = c0.inside(box);
+
+		Segment3D dir = bInside ? c0 - vproj : vproj - c0;
+		Real sMax = bInside ? -dir.direction().norm() - r0 : dir.direction().norm() - r0;
+
+		if (sMax >= 0)
+			return;
+
+		m.normal = dir.direction().normalize();
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = vproj.origin;
+		m.contactCount = 1;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Sphere3D& sphere)
+	{
+		request(m, sphere, box);
+		m.normal = -m.normal;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphere0, const Sphere3D& sphere1)
+	{
+		m.contactCount = 0;
+
+		auto c0 = sphere0.center;
+		auto c1 = sphere1.center;
+
+		Real r0 = sphere0.radius;
+		Real r1 = sphere1.radius;
+
+		auto dir = c1 - c0;
+		Real sMax = dir.norm() - r0 - r1;
+		if (sMax >= 0)
+			return;
+
+		m.normal = dir.normalize();
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = c0 + (r0 - 0.5 * sMax) * m.normal;
+		m.contactCount = 1;
+	}
 }

@@ -55,10 +55,16 @@ namespace dyno
 	ElementOffset DiscreteElements<TDataType>::calculateElementOffset()
 	{
 		ElementOffset elementOffset;
-		elementOffset.boxOffset = this->getSpheres().size();
-		elementOffset.tetOffset = this->getSpheres().size() + this->getBoxes().size();
-		elementOffset.segOffset = this->getSpheres().size() + this->getBoxes().size() + this->getTets().size();
-		elementOffset.triOffset = this->getSpheres().size() + this->getBoxes().size() + this->getTets().size() + this->getCaps().size();
+		elementOffset.sphereStart = 0;
+		elementOffset.sphereEnd = this->getSpheres().size();
+		elementOffset.boxOffset = elementOffset.sphereEnd;
+		elementOffset.boxEnd = elementOffset.boxOffset + this->getBoxes().size();
+		elementOffset.tetOffset = elementOffset.boxEnd;
+		elementOffset.tetEnd = elementOffset.tetOffset + this->getTets().size();
+		elementOffset.segOffset = elementOffset.tetEnd;
+		elementOffset.segEnd = elementOffset.segOffset + this->getCaps().size();
+		elementOffset.triOffset = elementOffset.segEnd;
+		elementOffset.triEnd = elementOffset.triOffset + this->getTris().size();
 
 		return elementOffset;
 	}

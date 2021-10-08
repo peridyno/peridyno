@@ -6,6 +6,27 @@
 
 using namespace dyno;
 
+TEST(Sphere, collision)
+{
+	using Box = TOrientedBox3D<float>;
+	using Sphere = TSphere3D<float>;
+
+	Box box;
+	Sphere sphere;
+
+	box = Box(Coord3D(0, 0, 0), Quat<float>(0, 0, 0, 1), Coord3D(1, 1, 1));
+	sphere = Sphere(Coord3D(0, 2, 0), 1.1f);
+
+	TManifold<Real> manifold;
+	CollisionDetection<float>::request(manifold, sphere, box);
+	EXPECT_EQ(manifold.contactCount == 1, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.1f) < REAL_EPSILON, true);
+
+	sphere = Sphere(Coord3D(0, 2, 0), 0.9f);
+	CollisionDetection<float>::request(manifold, sphere, box);
+	EXPECT_EQ(manifold.contactCount == 0, true);
+}
+
 TEST(OBB, collision)
 {
 	using Box = TOrientedBox3D<float>;

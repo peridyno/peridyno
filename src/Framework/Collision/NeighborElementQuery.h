@@ -60,11 +60,6 @@ namespace dyno {
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
-// 		/**
-// 		 * @brief Ids of neighboring particles
-// 		 */
-// 		DEF_ARRAYLIST_OUT(int, Neighborhood, DeviceType::GPU, "Return neighbor ids");
-
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
 
 		NbrFilter Filter;

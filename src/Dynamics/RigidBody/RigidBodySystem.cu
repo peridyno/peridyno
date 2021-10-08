@@ -893,7 +893,76 @@ namespace dyno
 		
 		if (pId < start_box && pId >= start_sphere)//sphere
 		{
+			int cnt = 0;
+			int start_i = count[pId];
 
+			Sphere3D sp = sphere[pId - start_sphere];
+
+			Real radius = sp.radius;
+			Coord center = sp.center;
+
+			if (center.x + radius >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = center + Coord(radius, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = center.x + radius - hi.x;
+				cnt++;
+			}
+			if (center.x - radius <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = center - Coord(radius, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (center.x - radius);
+				cnt++;
+			}
+
+			if (center.y + radius >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = center + Coord(0, radius, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = center.y + radius - hi.y;
+				cnt++;
+			}
+			if (center.y - radius <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = center - Coord(0, radius, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (center.y - radius);
+				cnt++;
+			}
+
+			if (center.z + radius >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = center + Coord(0, 0, radius);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = center.z + radius - hi.z;
+				cnt++;
+			}
+			if (center.z - radius <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = center - Coord(0, 0, radius);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (center.z - radius);
+				cnt++;
+			}
 		}
 		else if (pId >= start_box && pId < start_tet)//box
 		{
@@ -1054,7 +1123,41 @@ namespace dyno
 
 		if (pId < start_box && pId >= start_sphere)//sphere
 		{
+			int cnt = 0;
 
+			Sphere3D sp = sphere[pId - start_sphere];
+
+			Real radius = sp.radius;
+			Coord center = sp.center;
+			
+			if (center.x + radius >= hi.x)
+			{
+				cnt++;
+			}
+			if (center.x - radius <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (center.y + radius >= hi.y)
+			{
+				cnt++;
+			}
+			if (center.y - radius <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (center.z + radius >= hi.z)
+			{
+				cnt++;
+			}
+			if (center.z - radius <= lo.z)
+			{
+				cnt++;
+			}
+
+			count[pId] = cnt;
 		}
 		else if (pId >= start_box && pId < start_tet)//box
 		{

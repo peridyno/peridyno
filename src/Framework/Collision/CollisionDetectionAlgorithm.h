@@ -13,6 +13,7 @@ namespace dyno
 		using Matrix3D = SquareMatrix<Real, 3>;
 		using Transform3D = Transform<Real, 3>;
 		using Manifold = TManifold<Real>;
+		using Sphere3D = TSphere3D<Real>;
 		using OBox3D = TOrientedBox3D<Real>;
 
 		//--------------------------------------------------------------------------------------------------
@@ -22,10 +23,15 @@ namespace dyno
 		// https://box2d.googlecode.com/files/Box2D_Lite.zip
 		DYN_FUNC static void request(Manifold& m, OBox3D box0, OBox3D box1);
 
+		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const OBox3D& box);
+
+		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Sphere3D& sphere);
+
+		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere0, const Sphere3D& sphere1);
+
 	private:
 
 	};
-
 }
 
 #include "CollisionDetectionAlgorithm.inl"

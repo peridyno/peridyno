@@ -15,10 +15,16 @@ namespace dyno
 
 	struct ElementOffset
 	{
+		int sphereStart;
+		int sphereEnd;
 		int boxOffset;
+		int boxEnd;
 		int tetOffset;
+		int tetEnd;
 		int segOffset;
+		int segEnd;
 		int triOffset;
+		int triEnd;
 	};
 
 	DYN_FUNC inline ElementType checkElementType(int id, ElementOffset offset)

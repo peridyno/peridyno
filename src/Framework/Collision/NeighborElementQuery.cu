@@ -110,9 +110,6 @@ namespace dyno
 		boundingBox[tId] = box;
 	}
 
-	
-
-
 	template<typename Box3D>
 	__global__ void NEQ_Narrow_Count(
 		DArrayList<int> nbr,
@@ -163,26 +160,28 @@ namespace dyno
 				{
 				case CT_SPHERE:
 				{
+					TManifold<Real> manifold;
+					CollisionDetection<Real>::request(manifold, spheres[tId], spheres[j]);
 
-					Real proj_dist = (spheres[j].center - spheres[tId].center).norm();
-					if (filter.sphere_sphere && proj_dist < spheres[tId].radius + spheres[j].radius)
-					{
-						cnt++;
-					}
+					cnt += manifold.contactCount;
+
+// 					Real proj_dist = (spheres[j].center - spheres[tId].center).norm();
+// 					if (filter.sphere_sphere && proj_dist < spheres[tId].radius + spheres[j].radius)
+// 					{
+// 						cnt++;
+// 					}
 					break;
 				}
 				case CT_BOX:
 				{
-					Point3D pos_sphere(spheres[tId].center);
-					Coord3D proj_pos = pos_sphere.project(boxes[j - elementOffset.boxOffset]).origin;
+					TManifold<Real> manifold;
 
-					if (filter.sphere_box)
-						if ((proj_pos - spheres[tId].center).norm() < spheres[tId].radius + boundary_expand
-							|| pos_sphere.inside(boxes[j - elementOffset.boxOffset]))
-						{
-							cnt++;
+					auto sphere = spheres[tId];
+					auto box = boxes[j - elementOffset.boxOffset];
+					CollisionDetection<Real>::request(manifold, sphere, box);
 
-						}
+					cnt += manifold.contactCount;
+
 					break;
 				}
 				case CT_TET:
@@ -310,20 +309,6 @@ namespace dyno
 					CollisionDetection<Real>::request(manifold, boxA, boxB);
 
 					cnt += manifold.contactCount;
-
-// 					Coord3D inter_norm, p1, p2;
-// 					Real inter_dist;
-// 					if (filter.box_box)
-// 					{
-// 						if (boxes[tId - elementOffset.boxOffset].point_intersect(boxes[j - elementOffset.boxOffset], inter_norm, inter_dist, p1, p2))
-// 						{
-// 							cnt++;
-// 						}
-// 						else if (boxes[j - elementOffset.boxOffset].point_intersect(boxes[tId - elementOffset.boxOffset], inter_norm, inter_dist, p1, p2))
-// 						{
-// 							cnt++;
-// 						}
-// 					}
 					break;
 				}
 				case CT_TET:
@@ -841,66 +826,74 @@ namespace dyno
 				{
 				case CT_SPHERE:
 				{
-					Real proj_dist = (spheres[j].center - spheres[tId].center).norm();
-					if (filter.sphere_sphere)
-						if (proj_dist < spheres[tId].radius + spheres[j].radius)
-						{
+					TManifold<Real> manifold;
+					CollisionDetection<Real>::request(manifold, spheres[tId], spheres[j]);
 
-							Coord3D inter_norm = (spheres[j].center - spheres[tId].center) / proj_dist;
-							Coord3D p1 = spheres[j].center - inter_norm * spheres[j].radius;
-							Coord3D p2 = spheres[tId].center + inter_norm * spheres[tId].radius;
-							Real inter_dist = spheres[tId].radius + spheres[j].radius - proj_dist;
+					for (int cn = 0; cn < manifold.contactCount; cn++)
+					{
+						int idx_con = prefix[tId] + cnt;
 
-							//nbr_out.setElement(tId, cnt, j);
-							//list_j.insert(j);
-							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].interpenetration = inter_dist;
-							cnt++;
-							//printf("?????????????\n");
+						NeighborConstraints cPair;
 
-						}
+						cPair.pos1 = manifold.contacts[cn].position;
+						cPair.pos2 = manifold.contacts[cn].position;
+						cPair.normal1 = -manifold.normal;
+						cPair.normal2 = manifold.normal;
+						cPair.bodyId1 = tId;
+						cPair.bodyId2 = j;
+						cPair.contactType = ContactType::CT_NONPENETRATION;
+						cPair.interpenetration = -manifold.contacts[cn].penetration;
+						nbr_cons[idx_con] = cPair;
+
+						cnt += 1;
+					}
+
+// 					Real proj_dist = (spheres[j].center - spheres[tId].center).norm();
+// 					if (filter.sphere_sphere)
+// 						if (proj_dist < spheres[tId].radius + spheres[j].radius)
+// 						{
+// 
+// 							Coord3D inter_norm = (spheres[j].center - spheres[tId].center) / proj_dist;
+// 							Coord3D p1 = spheres[j].center - inter_norm * spheres[j].radius;
+// 							Coord3D p2 = spheres[tId].center + inter_norm * spheres[tId].radius;
+// 							Real inter_dist = spheres[tId].radius + spheres[j].radius - proj_dist;
+// 
+// 							//nbr_out.setElement(tId, cnt, j);
+// 							//list_j.insert(j);
+// 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
+// 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
+// 							nbr_cons[idx_con].interpenetration = inter_dist;
+// 							cnt++;
+// 							//printf("?????????????\n");
+// 
+// 						}
 					break;
 				}
 				case CT_BOX:
 				{
-					if (filter.sphere_box)
+					TManifold<Real> manifold;
+
+					auto sphere = spheres[tId];
+					auto box = boxes[j - elementOffset.boxOffset];
+					CollisionDetection<Real>::request(manifold, sphere, box);
+
+					for (int cn = 0; cn < manifold.contactCount; cn++)
 					{
-						Point3D pos_sphere(spheres[tId].center);
-						Coord3D proj_pos = pos_sphere.project(boxes[j - elementOffset.boxOffset]).origin;
-						if (pos_sphere.inside(boxes[j - elementOffset.boxOffset]))
-						{
-							Coord3D inter_norm = -(proj_pos - spheres[tId].center) / (proj_pos - spheres[tId].center).norm();
-							Coord3D p1 = proj_pos;
-							Coord3D p2 = spheres[tId].center - inter_norm * spheres[tId].radius;
-							Real inter_dist = spheres[tId].radius + (proj_pos - spheres[tId].center).norm();
+						int idx_con = prefix[tId] + cnt;
 
-							//nbr_out.setElement(tId, cnt, j);
-							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							//list_j.insert(j);
-							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							//nbr_cons[idx_con] = NeighborConstraints(j, tId, 8, p1, p2, 0.0f, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].interpenetration = inter_dist;
-							cnt++;
-						}
-						else if ((proj_pos - spheres[tId].center).norm() < spheres[tId].radius + boundary_expand)
-						{
-							Coord3D inter_norm = (proj_pos - spheres[tId].center) / (proj_pos - spheres[tId].center).norm();
-							Coord3D p1 = proj_pos;
-							Coord3D p2 = spheres[tId].center + inter_norm * spheres[tId].radius;
-							Real inter_dist = spheres[tId].radius - (proj_pos - spheres[tId].center).norm();
+						NeighborConstraints cPair;
 
-							//nbr_out.setElement(tId, cnt, j);
-							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							//list_j.insert(j);
-							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
-							//nbr_cons[idx_con] = NeighborConstraints(j, tId, 6, p1, p2, 0.0f, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].interpenetration = 0.0f;//inter_dist;
-							cnt++;
-							//printf("sphere!! %d\n", tId);
-						}
+						cPair.pos1 = manifold.contacts[cn].position;
+						cPair.pos2 = manifold.contacts[cn].position;
+						cPair.normal1 = -manifold.normal;
+						cPair.normal2 = manifold.normal;
+						cPair.bodyId1 = tId;
+						cPair.bodyId2 = j;
+						cPair.contactType = ContactType::CT_NONPENETRATION;
+						cPair.interpenetration = -manifold.contacts[cn].penetration;
+						nbr_cons[idx_con] = cPair;
+
+						cnt += 1;
 					}
 					break;
 				}

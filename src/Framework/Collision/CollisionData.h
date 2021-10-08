@@ -6,6 +6,8 @@
 
 namespace dyno
 {
+#define INVLIDA_ID -1
+
 	enum CollisionMask
 	{
 		CT_AllObjects = 0xFFFFFFFF,
@@ -29,6 +31,12 @@ namespace dyno
 		CT_FLUID_NONPENETRATION,
 		CT_LOACL_NONPENETRATION,
 		CT_UNKNOWN
+	};
+
+	struct ContactId
+	{
+		int bodyId1 = INVLIDA_ID;
+		int bodyId2 = INVLIDA_ID;
 	};
 
 	template<typename Real>
