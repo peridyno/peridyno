@@ -52,7 +52,7 @@ namespace dyno
 		float groudScale = 3.f;
 
 		bool showAxisHelper = true;
-		bool showSceneBounds = true;
+		bool showSceneBounds = false;
 	};
 
 	// RenderEngine interface

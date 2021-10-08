@@ -1023,9 +1023,14 @@ namespace dyno
 			n2 /= n2.norm();
 		}
 
+		nbq[pId * 2 + contact_size].bodyId1 = nbq[pId].bodyId1;
+		nbq[pId * 2 + contact_size].bodyId2 = nbq[pId].bodyId2;
 		nbq[pId * 2 + contact_size] = nbq[pId];
 		nbq[pId * 2 + contact_size].contactType = ContactType::CT_FRICTION;
 		nbq[pId * 2 + contact_size].normal1 = n1;
+
+		nbq[pId * 2 + 1 + contact_size].bodyId1 = nbq[pId].bodyId1;
+		nbq[pId * 2 + 1 + contact_size].bodyId2 = nbq[pId].bodyId2;
 		nbq[pId * 2 + 1 + contact_size] = nbq[pId];
 		nbq[pId * 2 + 1 + contact_size].contactType = ContactType::CT_FRICTION;
 		nbq[pId * 2 + 1 + contact_size].normal1 = n2;
@@ -1193,15 +1198,12 @@ namespace dyno
 
 		detectCollisionWithBoundary();
 
-		int sizeOfContacts = mBoundaryContacts.size();
-		sizeOfContacts += contacts.size();
+		int sizeOfContacts = mBoundaryContacts.size() + contacts.size();
 
 		int sizeOfConstraints = sizeOfContacts;
 		if (this->varFrictionEnabled()->getData())
 		{
-			sizeOfConstraints += 2 * mBoundaryContacts.size();
-			if (topo->totalSize() > 0)
-				sizeOfConstraints += 2 * contacts.size();
+			sizeOfConstraints += 2 * sizeOfContacts;
 		}
 
 		mAllConstraints.resize(sizeOfConstraints);
@@ -1222,29 +1224,18 @@ namespace dyno
 
 		if (sizeOfConstraints == 0) return;
 
-		if (topo->totalSize() > 0 && contacts.size() > 0)
+		if (contacts.size() > 0)
 			mAllConstraints.assign(contacts, contacts.size());
 		
 		if (mBoundaryContacts.size() > 0)
-		{
-			if (topo->totalSize() > 0)
-			{ 
-				if (!have_mesh)
-					mAllConstraints.assign(mBoundaryContacts, mBoundaryContacts.size(), contacts.size(), 0);
-			}
-			else
-			{
-				mAllConstraints.assign(mBoundaryContacts, mBoundaryContacts.size());
-			}
-		}
+			mAllConstraints.assign(mBoundaryContacts, mBoundaryContacts.size(), contacts.size(), 0);
 
 		if (this->varFrictionEnabled()->getData())
 		{
 			cuExecute(sizeOfContacts, 
 				SetupFrictionConstraints,
 				mAllConstraints,
-				sizeOfContacts
-				);
+				sizeOfContacts);
 		}
 
 		cuExecute(sizeOfConstraints,
@@ -1279,13 +1270,12 @@ namespace dyno
 		Real dt = this->varTimeStep()->getData();
 		//construct j
 		initializeJacobian(dt);
+
+		int size_constraints = mAllConstraints.size();
 		for (int i = 0; i < 15; i++)
 		{
-			int size_constraints = mAllConstraints.size();
-			if (size_constraints == 0) return;
-			uint pDims = cudaGridSize(size_constraints, BLOCK_SIZE);
-
-			TakeOneJacobiIteration << <pDims, BLOCK_SIZE >> > (
+			cuExecute(size_constraints,
+				TakeOneJacobiIteration,
 				mLambda,
 				mAccel,
 				mD,

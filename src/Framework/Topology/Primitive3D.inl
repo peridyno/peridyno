@@ -3581,6 +3581,18 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TOrientedBox3D<Real>::TOrientedBox3D(const Coord3D c, const Quat<Real> rot, const Coord3D ext)
+	{
+		center = c;
+		extent = ext;
+
+		auto mat = rot.toMatrix3x3();
+		u = mat.col(0);
+		v = mat.col(1);
+		w = mat.col(2);
+	}
+
+	template<typename Real>
 	DYN_FUNC TOrientedBox3D<Real>::TOrientedBox3D(const TOrientedBox3D& obb)
 	{
 		center = obb.center;

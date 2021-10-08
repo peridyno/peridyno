@@ -13,6 +13,7 @@
 
 #include "Vector.h"
 #include "Matrix.h"
+#include "Quat.h"
 
 namespace dyno
 {
@@ -605,6 +606,8 @@ namespace dyno
 		 * @return DYN_FUNC
 		 */
 		DYN_FUNC TOrientedBox3D(const Coord3D c, const Coord3D u_t, const Coord3D v_t, const Coord3D w_t, const Coord3D ext);
+
+		DYN_FUNC TOrientedBox3D(const Coord3D c, const Quat<Real> rot, const Coord3D ext);
 
 		DYN_FUNC TOrientedBox3D(const TOrientedBox3D<Real>& obb);
 

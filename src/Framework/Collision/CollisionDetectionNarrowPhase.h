@@ -11,17 +11,17 @@ template <typename> class CollisionDetectionBroadPhase;
 typedef typename TAlignedBox3D<Real> AABB;
 
 template<typename TDataType>
-class CollisionDetection : public CollisionModel
+class CollisionDetectionNarrowPhase : public CollisionModel
 {
-	DECLARE_CLASS_1(CollisionDetection, TDataType)
+	DECLARE_CLASS_1(CollisionDetectionNarrowPhase, TDataType)
 public:
 	typedef typename TDataType::Real Real;
 	typedef typename TDataType::Coord Coord;
 	typedef typename TDataType::Matrix Matrix;
 	typedef typename TContactPair<Real> ContactPair;
 
-	CollisionDetection();
-	virtual ~CollisionDetection();
+	CollisionDetectionNarrowPhase();
+	virtual ~CollisionDetectionNarrowPhase();
 
 	void doCollision() override;
 

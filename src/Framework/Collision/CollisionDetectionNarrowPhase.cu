@@ -1,4 +1,4 @@
-#include "CollisionDetection.h"
+#include "CollisionDetectionNarrowPhase.h"
 #include "Node.h"
 #include "Topology/SparseOctree.h"
 #include "Topology/DiscreteElements.h"
@@ -8,17 +8,17 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(CollisionDetection, TDataType)
+	IMPLEMENT_CLASS_1(CollisionDetectionNarrowPhase, TDataType)
 
 	template<typename TDataType>
-	CollisionDetection<TDataType>::CollisionDetection()
+	CollisionDetectionNarrowPhase<TDataType>::CollisionDetectionNarrowPhase()
 		: CollisionModel()
 	{
 		m_broadPhaseCD = std::make_shared<CollisionDetectionBroadPhase<TDataType>>();
 	}
 
 	template<typename TDataType>
-	CollisionDetection<TDataType>::~CollisionDetection()
+	CollisionDetectionNarrowPhase<TDataType>::~CollisionDetectionNarrowPhase()
 	{
 	}
 
@@ -36,7 +36,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CollisionDetection<TDataType>::doCollision()
+	void CollisionDetectionNarrowPhase<TDataType>::doCollision()
 	{
 		Node* parent = this->getParent();
 		if (parent == NULL)
@@ -87,10 +87,10 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool CollisionDetection<TDataType>::isSupport(std::shared_ptr<CollidableObject> obj)
+	bool CollisionDetectionNarrowPhase<TDataType>::isSupport(std::shared_ptr<CollidableObject> obj)
 	{
 		return true;
 	}
 
-	DEFINE_CLASS(CollisionDetection);
+	DEFINE_CLASS(CollisionDetectionNarrowPhase);
 }

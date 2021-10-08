@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "Collision/CollisionDetection.h"
+#include "Collision/CollisionDetectionNarrowPhase.h"
 
 using namespace dyno;
 
-TEST(CollisionDetection, doCollision)
+TEST(CollisionDetectionNarrowPhase, doCollision)
 {
-	CollisionDetection<DataType3f> collisionModule;
+	CollisionDetectionNarrowPhase<DataType3f> collisionModule;
 }

@@ -1,4 +1,6 @@
 #include "NeighborElementQuery.h"
+#include "CollisionDetectionAlgorithm.h"
+
 #include "Collision/CollisionDetectionBroadPhase.h"
 
 #include "Topology/Primitive3D.h"
@@ -301,19 +303,27 @@ namespace dyno
 				}
 				case CT_BOX:
 				{
-					Coord3D inter_norm, p1, p2;
-					Real inter_dist;
-					if (filter.box_box)
-					{
-						if (boxes[tId - elementOffset.boxOffset].point_intersect(boxes[j - elementOffset.boxOffset], inter_norm, inter_dist, p1, p2))
-						{
-							cnt++;
-						}
-						else if (boxes[j - elementOffset.boxOffset].point_intersect(boxes[tId - elementOffset.boxOffset], inter_norm, inter_dist, p1, p2))
-						{
-							cnt++;
-						}
-					}
+					TManifold<Real> manifold;
+
+					auto boxA = boxes[tId - elementOffset.boxOffset];
+					auto boxB = boxes[j - elementOffset.boxOffset];
+					CollisionDetection<Real>::request(manifold, boxA, boxB);
+
+					cnt += manifold.contactCount;
+
+// 					Coord3D inter_norm, p1, p2;
+// 					Real inter_dist;
+// 					if (filter.box_box)
+// 					{
+// 						if (boxes[tId - elementOffset.boxOffset].point_intersect(boxes[j - elementOffset.boxOffset], inter_norm, inter_dist, p1, p2))
+// 						{
+// 							cnt++;
+// 						}
+// 						else if (boxes[j - elementOffset.boxOffset].point_intersect(boxes[tId - elementOffset.boxOffset], inter_norm, inter_dist, p1, p2))
+// 						{
+// 							cnt++;
+// 						}
+// 					}
 					break;
 				}
 				case CT_TET:
@@ -803,7 +813,6 @@ namespace dyno
 		DArray<TopologyModule::Tetrahedron> tet_element_ids,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> tris,
-		DArrayList<int> nbr_out,
 		DArray<NeighborConstraints> nbr_cons,
 		DArray<int> prefix,
 		ElementOffset elementOffset,
@@ -823,7 +832,6 @@ namespace dyno
 			//break;
 			//int nbSize = nbr.getNeighborSize(tId);
 			List<int>& list_i = nbr[tId];
-			List<int>& list_j = nbr_out[tId];
 			int nbSize = list_i.size();
 			for (int ne = 0; ne < nbSize; ne++)
 			{
@@ -844,7 +852,7 @@ namespace dyno
 							Real inter_dist = spheres[tId].radius + spheres[j].radius - proj_dist;
 
 							//nbr_out.setElement(tId, cnt, j);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							nbr_cons[idx_con].interpenetration = inter_dist;
@@ -869,7 +877,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(j, tId, 8, p1, p2, 0.0f, Coord3D(0, 0, 0));
@@ -885,7 +893,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;//nbr_out.getElementIndex(tId, cnt);
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(j, tId, 6, p1, p2, 0.0f, Coord3D(0, 0, 0));
@@ -932,7 +940,7 @@ namespace dyno
 
 									//nbr_out.setElement(tId, cnt, j);
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
-									list_j.insert(j);
+									//list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
 									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 									nbr_cons[idx_con].interpenetration = inter_dist;
@@ -952,7 +960,7 @@ namespace dyno
 
 									//nbr_out.setElement(tId, cnt, j);
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
-									list_j.insert(j);
+									//list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
 									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
 									nbr_cons[idx_con].interpenetration = inter_dist;
@@ -991,7 +999,7 @@ namespace dyno
 
 									//nbr_out.setElement(tId, cnt, j);
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
-									list_j.insert(j);
+									//list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
 									nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 									nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1011,7 +1019,7 @@ namespace dyno
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 								nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1027,7 +1035,7 @@ namespace dyno
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 								nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 								nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1072,7 +1080,7 @@ namespace dyno
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 								if (inter_dist > spheres[tId].radius)
 								{
@@ -1117,7 +1125,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1140,7 +1148,7 @@ namespace dyno
 			//printf("YES\n");
 			//int nbSize = nbr.getNeighborSize(tId);
 			List<int>& list_i = nbr[tId];
-			List<int>& list_j = nbr_out[tId];
+			//List<int>& list_j = nbr_out[tId];
 			int nbSize = list_i.size();
 			for (int ne = 0; ne < nbSize; ne++)
 			{
@@ -1169,7 +1177,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(tId, j, 1, p1, p2, 0.0f, Coord3D(0, 0, 0));
@@ -1187,7 +1195,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							//nbr_cons[idx_con] = NeighborConstraints(tId, j, 1, p1, p2, 0.0f, Coord3D(0, 0, 0));
@@ -1201,53 +1209,82 @@ namespace dyno
 
 				case CT_BOX: //boxes
 				{
-					if (filter.box_box)
+					TManifold<Real> manifold;
+
+					auto boxA = boxes[tId - elementOffset.boxOffset];
+					auto boxB = boxes[j - elementOffset.boxOffset];
+					CollisionDetection<Real>::request(manifold, boxA, boxB);
+
+					for (int cn = 0; cn < manifold.contactCount; cn++)
 					{
-						Coord3D inter_norm1, p11, p21;
-						Coord3D inter_norm2, p12, p22;
-						Real inter_dist1;
-						Real inter_dist2;
+						int idx_con = prefix[tId] + cnt;
 
+						NeighborConstraints cPair;
 
-						int type = 0;
-						bool insert_one = boxes[tId - elementOffset.boxOffset].point_intersect(boxes[j - elementOffset.boxOffset], inter_norm1, inter_dist1, p11, p21);
-						bool insert_two = boxes[j - elementOffset.boxOffset].point_intersect(boxes[tId - elementOffset.boxOffset], inter_norm2, inter_dist2, p12, p22);
+						cPair.pos1 = manifold.contacts[cn].position;
+						cPair.pos2 = manifold.contacts[cn].position;
+						cPair.normal1 = -manifold.normal;
+						cPair.normal2 = manifold.normal;
+						cPair.bodyId1 = tId;
+						cPair.bodyId2 = j;
+						cPair.contactType = ContactType::CT_NONPENETRATION;
+						cPair.interpenetration = -manifold.contacts[cn].penetration;
+						nbr_cons[idx_con] = cPair;
 
-						if (insert_one && insert_two)
-						{
-							if (inter_dist1 < inter_dist2) type = 1;
-							else type = 2;
-						}
-						else if (insert_one) type = 1;
-						else if (insert_two) type = 2;
-
-						if (type == 1)
-						{
-							//nbr_out.setElement(tId, cnt, j);
-
-							/*set up constraints*/
-							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
-							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p11, p21, inter_norm1, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].interpenetration = -inter_dist1;
-							cnt++;
-						}
-						else if (type == 2)
-						{
-
-							//nbr_out.setElement(tId, cnt, j);
-
-							/*set up constraints*/
-							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
-							int idx_con = prefix[tId] + cnt;
-							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p12, p22, inter_norm2, Coord3D(0, 0, 0));
-							nbr_cons[idx_con].interpenetration = -inter_dist2;
-
-							cnt++;
-						}
+						cnt += 1;
 					}
+
+// 					if (filter.box_box)
+// 					{
+// 						Coord3D inter_norm1, p11, p21;
+// 						Coord3D inter_norm2, p12, p22;
+// 						Real inter_dist1;
+// 						Real inter_dist2;
+// 
+// 
+// 						int type = 0;
+// 						bool insert_one = boxes[tId - elementOffset.boxOffset].point_intersect(boxes[j - elementOffset.boxOffset], inter_norm1, inter_dist1, p11, p21);
+// 						bool insert_two = boxes[j - elementOffset.boxOffset].point_intersect(boxes[tId - elementOffset.boxOffset], inter_norm2, inter_dist2, p12, p22);
+// 
+// 						if (insert_one && insert_two)
+// 						{
+// 							if (inter_dist1 < inter_dist2) type = 1;
+// 							else type = 2;
+// 						}
+// 						else if (insert_one) type = 1;
+// 						else if (insert_two) type = 2;
+// 
+// 						if (type == 1)
+// 						{
+// 							//nbr_out.setElement(tId, cnt, j);
+// 
+// 							/*set up constraints*/
+// 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
+// 							//list_j.insert(j);
+// 							int idx_con = prefix[tId] + cnt;
+// 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p11, p21, inter_norm1, Coord3D(0, 0, 0));
+// 							nbr_cons[idx_con].interpenetration = -inter_dist1;
+// 
+// 							//printf("Interpenetration: %f \n", nbr_cons[idx_con].interpenetration);
+// 							cnt++;
+// 						}
+// 						else if (type == 2)
+// 						{
+// 
+// 							//nbr_out.setElement(tId, cnt, j);
+// 
+// 							/*set up constraints*/
+// 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
+// 							//list_j.insert(j);
+// 							int idx_con = prefix[tId] + cnt;
+// 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p12, p22, inter_norm2, Coord3D(0, 0, 0));
+// 							nbr_cons[idx_con].interpenetration = -inter_dist2;
+// 
+// 							//printf("Interpenetration: %f \n", nbr_cons[idx_con].interpenetration);
+// 
+// 							cnt++;
+// 						}
+// 					}
 					break;
 				}
 				case CT_TET:// tets
@@ -1262,7 +1299,7 @@ namespace dyno
 						{
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							nbr_cons[idx_con].interpenetration = -inter_dist;
@@ -1283,7 +1320,7 @@ namespace dyno
 						{
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							Coord3D p1, p2;
 							Real interDist = 0.0f;
@@ -1327,7 +1364,7 @@ namespace dyno
 								p2 = segment_prox.v0;
 
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, (p1 - p2) / (p1 - p2).norm(), Coord3D(0, 0, 0));
 								nbr_cons[idx_con].interpenetration = interDist;
@@ -1351,7 +1388,7 @@ namespace dyno
 							//printf("ABox!!!!!!!!!!!!!!!!!!!\n");
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							nbr_cons[idx_con].interpenetration = -inter_dist;
@@ -1374,7 +1411,7 @@ namespace dyno
 			//printf("YYYYYYYYYYYEEEEEEEEEEESSSSSSSSSSS\n");
 			//int nbSize = nbr.getNeighborSize(tId);
 			List<int>& list_i = nbr[tId];
-			List<int>& list_j = nbr_out[tId];
+			//List<int>& list_j = nbr_out[tId];
 			int nbSize = list_i.size();
 
 			for (int ne = 0; ne < nbSize; ne++)
@@ -1418,7 +1455,7 @@ namespace dyno
 
 									//nbr_out.setElement(tId, cnt, j);
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
-									list_j.insert(j);
+									//list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
 									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 									nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1436,7 +1473,7 @@ namespace dyno
 
 									//nbr_out.setElement(tId, cnt, j);
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
-									list_j.insert(j);
+									//list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
 									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_STICKINESS, p1, p2, inter_norm, Coord3D(0, 0, 0));
 									nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1472,7 +1509,7 @@ namespace dyno
 
 									//nbr_out.setElement(tId, cnt, j);
 									//int idx_con = nbr_out.getElementIndex(tId, cnt);
-									list_j.insert(j);
+									//list_j.insert(j);
 									int idx_con = prefix[tId] + cnt;
 									nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 									nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1495,7 +1532,7 @@ namespace dyno
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 								nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1511,7 +1548,7 @@ namespace dyno
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 								nbr_cons[idx_con].interpenetration = inter_dist;
@@ -1532,7 +1569,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
 							nbr_cons[idx_con].interpenetration = -inter_dist;
@@ -1605,7 +1642,7 @@ namespace dyno
 
 						if (type == 1)
 						{
-							list_j.insert(j);
+							//list_j.insert(j);
 							//int idx_con = prefix[tId] + cnt;
 							/*set up constraints*/
 							if (abs(inter_dist1) < EPSILON)
@@ -1665,7 +1702,7 @@ namespace dyno
 						}
 						else if (type == 2)
 						{
-							list_j.insert(j);
+							//list_j.insert(j);
 							//int idx_con = prefix[tId] + cnt;
 							if (abs(inter_dist2) < EPSILON)
 							{
@@ -1754,7 +1791,7 @@ namespace dyno
 								intersect1 = true;
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								left = max(left, 0.0f);
@@ -1801,7 +1838,7 @@ namespace dyno
 							if (segment_tmp2.length() < caps[j - elementOffset.segOffset].radius)
 							{
 								//nbr_out.setElement(tId, cnt, j);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								Coord3D p1, p2;
@@ -1830,7 +1867,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
@@ -1854,7 +1891,7 @@ namespace dyno
 		{
 			//int nbSize = nbr.getNeighborSize(tId);
 			List<int>& list_i = nbr[tId];
-			List<int>& list_j = nbr_out[tId];
+			//List<int>& list_j = nbr_out[tId];
 			int nbSize = list_i.size();
 			for (int ne = 0; ne < nbSize; ne++)
 			{
@@ -1896,7 +1933,7 @@ namespace dyno
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								if (inter_dist > spheres[j].radius)
@@ -1927,7 +1964,7 @@ namespace dyno
 						{
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							Coord3D p1, p2;
@@ -1970,7 +2007,7 @@ namespace dyno
 							//if (segment_prox.direction().dot(segment_tmp.direction()) < EPSILON)//////to delete
 							{
 								//nbr_out.setElement(tId, cnt, j);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								Coord3D p1, p2;
@@ -2016,7 +2053,7 @@ namespace dyno
 								intersect1 = true;
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								left = max(left, 0.0f);
@@ -2063,7 +2100,7 @@ namespace dyno
 							if (segment_tmp2.length() < caps[tId - elementOffset.segOffset].radius)
 							{
 								//nbr_out.setElement(tId, cnt, j);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								Coord3D p1, p2;
@@ -2096,7 +2133,7 @@ namespace dyno
 								p2 = proxi.v0 + proxi.direction() / proxi.length() * caps[j - elementOffset.segOffset].radius;
 								//????????????????????
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
-								list_j.insert(j);
+								//list_j.insert(j);
 								int idx_con = prefix[tId] + cnt;
 
 								nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
@@ -2130,7 +2167,7 @@ namespace dyno
 
 
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, (p2 - p1) / interDist, Coord3D(0, 0, 0));
 							nbr_cons[idx_con].interpenetration = 0;//interDist;
@@ -2145,7 +2182,7 @@ namespace dyno
 							p1 = proxi.v0;
 							p2 = proxi.v1;
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, -proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
@@ -2167,7 +2204,7 @@ namespace dyno
 			//printf("TTTRRRRRRRRIIIIIIIII\n");
 			//int nbSize = nbr.getNeighborSize(tId);
 			List<int>& list_i = nbr[tId];
-			List<int>& list_j = nbr_out[tId];
+			//List<int>& list_j = nbr_out[tId];
 			int nbSize = list_i.size();
 
 			for (int ne = 0; ne < nbSize; ne++)
@@ -2204,7 +2241,7 @@ namespace dyno
 
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(tId, j, ContactType::CT_FLUID_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
@@ -2232,7 +2269,7 @@ namespace dyno
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
@@ -2254,7 +2291,7 @@ namespace dyno
 							//nbr_out.setElement(tId, cnt, j);
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_NONPENETRATION, p1, p2, inter_norm, Coord3D(0, 0, 0));
@@ -2299,7 +2336,7 @@ namespace dyno
 
 
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, (p2 - p1) / interDist, Coord3D(0, 0, 0));
@@ -2316,7 +2353,7 @@ namespace dyno
 							p2 = proxi.v1;
 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 
-							list_j.insert(j);
+							//list_j.insert(j);
 							int idx_con = prefix[tId] + cnt;
 
 							nbr_cons[idx_con] = NeighborConstraints(j, tId, ContactType::CT_FLUID_NONPENETRATION, p1, p2, -proxi.direction() / proxi.length(), Coord3D(0, 0, 0));
@@ -2419,30 +2456,15 @@ namespace dyno
 				elementOffset,
 				Filter,
 				boundary_expand);
-			
-			if (this->outNeighborhood()->isEmpty())
-				this->outNeighborhood()->allocate();
 
 			if (this->outContacts()->isEmpty())
 				this->outContacts()->allocate();
 
 			int sum = m_reduce.accumulate(cnt_element.begin(), cnt_element.size());
 
-			DArray<int> counter(cnt_element.size());
-			counter.assign(cnt_element);
-			printf("bb %d\n", counter.size());
-			auto& nbrIds = this->outNeighborhood()->getData();
 			auto& contacts = this->outContacts()->getData();
-			printf("cc\n");
-			nbrIds.resize(counter);
-			printf("dd\n");
-			counter.clear();
-
 			m_scan.exclusive(cnt_element, true);
-			cuSynchronize();
-			printf("sum = %d\n", sum);
 			contacts.resize(sum);
-			//printf("sdf size = %d\n", discreteSet->getTetSDF().size());
 			if (sum > 0)
 			{
 				cuExecute(inTopo->totalSize(),
@@ -2456,7 +2478,6 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					inTopo->getCaps(),
 					inTopo->getTris(),
-					this->outNeighborhood()->getData(),
 					contacts,
 					cnt_element,
 					elementOffset,

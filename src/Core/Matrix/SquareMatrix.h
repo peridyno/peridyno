@@ -13,5 +13,15 @@ namespace dyno {
 		virtual unsigned int cols() const;
 	};
 
+	template <typename T, int Dim>
+	class Transform : public MatrixBase
+	{
+	public:
+		Transform() {}
+		~Transform() {}
+		virtual unsigned int rows() const;
+		virtual unsigned int cols() const;
+	};
+
 }  //end of namespace dyno
 

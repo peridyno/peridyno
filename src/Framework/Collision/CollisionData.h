@@ -32,6 +32,23 @@ namespace dyno
 	};
 
 	template<typename Real>
+	class TContact
+	{
+	public:
+		Vector<Real, 3> position;			// World coordinate of contact
+		Real penetration;			// Depth of penetration from collision
+	};
+
+	template<typename Real>
+	struct TManifold
+	{
+	public:
+		Vector<Real, 3> normal;				// From A to B
+		TContact<Real> contacts[8];
+		int contactCount;
+	};
+
+	template<typename Real>
 	class TContactPair
 	{
 	public:
