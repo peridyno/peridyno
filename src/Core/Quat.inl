@@ -49,12 +49,12 @@ namespace dyno
 	template <typename Real>
 	DYN_FUNC Quat<Real>::Quat(const Real yaw, const Real pitch, const Real roll)
 	{
-		Real cy = cos(yaw * 0.5);
-		Real sy = sin(yaw * 0.5);
-		Real cp = cos(pitch * 0.5);
-		Real sp = sin(pitch * 0.5);
-		Real cr = cos(roll * 0.5);
-		Real sr = sin(roll * 0.5);
+		Real cy = cos(Real(yaw * 0.5));
+		Real sy = sin(Real(yaw * 0.5));
+		Real cp = cos(Real(pitch * 0.5));
+		Real sp = sin(Real(pitch * 0.5));
+		Real cr = cos(Real(roll * 0.5));
+		Real sr = sin(Real(roll * 0.5));
 
 		w = cr * cp * cy + sr * sp * sy;
 		x = sr * cp * cy - cr * sp * sy;
@@ -203,7 +203,7 @@ namespace dyno
 		// pitch (y-axis rotation)
 		Real sinp = 2 * (w * y - z * x);
 		if (glm::abs(sinp) >= 1)
-			pitch = sinp > 0 ? M_PI / 2 : -M_PI / 2; // use 90 degrees if out of range
+			pitch = sinp > 0 ? Real(M_PI / 2) : -Real(M_PI / 2); // use 90 degrees if out of range
 		else
 			pitch = glm::asin(sinp);
 

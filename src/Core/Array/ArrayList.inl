@@ -191,7 +191,7 @@ namespace dyno
 		m_lists.assign(src.lists());
 
 		//redirect the element address
-		for (int i = 0; i < src.size(); i++)
+		for (uint i = 0; i < src.size(); i++)
 		{
 			m_lists[i].reserve(m_elements.begin() + m_index[i], m_lists[i].size());
 		}

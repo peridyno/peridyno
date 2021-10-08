@@ -30,7 +30,6 @@ namespace dyno {
 		DYN_FUNC inline const Vector<T, 3> translation() const { return mTranslation; }
 
 		DYN_FUNC const Vector<T, 3> operator* (const Vector<T, 3> &) const;
-		DYN_FUNC Vector<T, 3>& operator*= (const Vector<T, 3> &);
 
 	protected:
 		SquareMatrix<T, 3> mRotation;
