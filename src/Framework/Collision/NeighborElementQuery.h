@@ -1,10 +1,9 @@
 #pragma once
-#include "Module/ComputeModule.h"
-#include "Module/TopologyModule.h"
-#include "Topology/SparseOctree.h"
-#include "Topology/DiscreteElements.h"
-
 #include "CollisionData.h"
+
+#include "Module/ComputeModule.h"
+
+#include "Topology/DiscreteElements.h"
 
 namespace dyno {
 	template<typename TDataType> class CollisionDetectionBroadPhase;
@@ -45,6 +44,7 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TAlignedBox3D<Real> AABB;
 
 		NeighborElementQuery();
 		~NeighborElementQuery() override;
@@ -61,6 +61,8 @@ namespace dyno {
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
+
+
 
 		NbrFilter Filter;
 

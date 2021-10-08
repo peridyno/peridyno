@@ -33,12 +33,6 @@ namespace dyno
 		CT_UNKNOWN
 	};
 
-	struct ContactId
-	{
-		int bodyId1 = INVLIDA_ID;
-		int bodyId2 = INVLIDA_ID;
-	};
-
 	template<typename Real>
 	class TContact
 	{
@@ -53,7 +47,7 @@ namespace dyno
 	public:
 		Vector<Real, 3> normal;				// From A to B
 		TContact<Real> contacts[8];
-		int contactCount;
+		int contactCount = 0;
 	};
 
 	template<typename Real>
@@ -62,7 +56,7 @@ namespace dyno
 	public:
 		DYN_FUNC TContactPair()
 		{
-			bodyId1 = bodyId2 = 0;
+			bodyId1 = bodyId2 = INVLIDA_ID;
 			contactType = CT_UNKNOWN;
 		};
 

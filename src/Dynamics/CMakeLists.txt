@@ -81,7 +81,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     endif()
 endif()
 
-if(PERIDYNO_LIBRARY_RigidBody)
+if(PERIDYNO_LIBRARY_RIGIDBODY)
     set(LIB_DEPENDENCY Core IO Framework)
     build_library(RigidBody LIB_DEPENDENCY)
 endif()

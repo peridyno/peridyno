@@ -10,6 +10,11 @@ namespace dyno
 	IMPLEMENT_CLASS_1(NeighborElementQuery, TDataType)
 		typedef typename TOrientedBox3D<Real> Box3D;
 
+	struct ContactId
+	{
+		int bodyId1 = INVLIDA_ID;
+		int bodyId2 = INVLIDA_ID;
+	};
 
 	template<typename TDataType>
 	NeighborElementQuery<TDataType>::NeighborElementQuery()
@@ -111,6 +116,122 @@ namespace dyno
 	}
 
 	template<typename Box3D>
+	__global__ void NEQ_Narrow_Count(
+		DArray<int> count,
+		DArray<ContactId> nbr,
+		DArray<Box3D> boxes,
+		DArray<Sphere3D> spheres,
+		DArray<Tet3D> tets,
+		DArray<Real> tets_sdf,
+		DArray<int> tet_body_ids,
+		DArray<TopologyModule::Tetrahedron> tet_element_ids,
+		DArray<Capsule3D> caps,
+		DArray<Triangle3D> triangles,
+		ElementOffset elementOffset,
+		NbrFilter filter,
+		Real boundary_expand)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= nbr.size()) return;
+
+		ContactId ids = nbr[tId];
+		ElementType eleType_i = checkElementType(ids.bodyId1, elementOffset);
+		ElementType eleType_j = checkElementType(ids.bodyId2, elementOffset);
+
+		TManifold<Real> manifold;
+		if (eleType_i == CT_BOX && eleType_j == CT_BOX)
+		{
+			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
+			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
+			CollisionDetection<Real>::request(manifold, boxA, boxB);
+		}
+		else if (eleType_i == CT_SPHERE && eleType_j == CT_BOX)
+		{
+			auto sphere = spheres[ids.bodyId1];
+			auto box = boxes[ids.bodyId2 - elementOffset.boxOffset];
+			CollisionDetection<Real>::request(manifold, sphere, box);
+		}
+		else if (eleType_i == CT_BOX && eleType_j == CT_SPHERE)
+		{
+			auto box = boxes[ids.bodyId1 - elementOffset.boxOffset];
+			auto sphere = spheres[ids.bodyId2];
+			CollisionDetection<Real>::request(manifold, box, sphere);
+		}
+		else if (eleType_i == CT_SPHERE && eleType_j == CT_SPHERE)
+		{
+			CollisionDetection<Real>::request(manifold, spheres[ids.bodyId1], spheres[ids.bodyId2]);
+		}
+
+		count[tId] = manifold.contactCount;
+	}
+
+	template<typename Box3D, typename ContactPair>
+	__global__ void NEQ_Narrow_Set(
+		DArray<ContactPair> nbr_cons,
+		DArray<ContactId> nbr,
+		DArray<Box3D> boxes,
+		DArray<Sphere3D> spheres,
+		DArray<Tet3D> tets,
+		DArray<Real> tets_sdf,
+		DArray<int> tet_body_ids,
+		DArray<TopologyModule::Tetrahedron> tet_element_ids,
+		DArray<Capsule3D> caps,
+		DArray<Triangle3D> tris,
+		DArray<int> prefix,
+		ElementOffset elementOffset,
+		NbrFilter filter,
+		Real boundary_expand)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= nbr.size()) return;
+		
+		ContactId ids = nbr[tId];
+		ElementType eleType_i = checkElementType(ids.bodyId1, elementOffset);
+		ElementType eleType_j = checkElementType(ids.bodyId2, elementOffset);
+
+		TManifold<Real> manifold;
+		if (eleType_i == CT_BOX && eleType_j == CT_BOX)
+		{
+			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
+			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
+			CollisionDetection<Real>::request(manifold, boxA, boxB);
+		}
+		else if (eleType_i == CT_SPHERE && eleType_j == CT_BOX)
+		{
+			auto sphere = spheres[ids.bodyId1];
+			auto box = boxes[ids.bodyId2 - elementOffset.boxOffset];
+			CollisionDetection<Real>::request(manifold, sphere, box);
+		}
+		else if (eleType_i == CT_BOX && eleType_j == CT_SPHERE)
+		{
+			auto box = boxes[ids.bodyId1 - elementOffset.boxOffset];
+			auto sphere = spheres[ids.bodyId2];
+			CollisionDetection<Real>::request(manifold, box, sphere);
+		}
+		else if (eleType_i == CT_SPHERE && eleType_j == CT_SPHERE)
+		{
+			CollisionDetection<Real>::request(manifold, spheres[ids.bodyId1], spheres[ids.bodyId2]);
+		}
+
+		int offset = prefix[tId];
+		for (int n = 0; n < manifold.contactCount; n++)
+		{
+			ContactPair cp;
+
+			cp.pos1 = manifold.contacts[n].position;
+			cp.pos2 = manifold.contacts[n].position;
+			cp.normal1 = -manifold.normal;
+			cp.normal2 = manifold.normal;
+			cp.bodyId1 = ids.bodyId1;
+			cp.bodyId2 = ids.bodyId2;
+			cp.contactType = ContactType::CT_NONPENETRATION;
+			cp.interpenetration = -manifold.contacts[n].penetration;
+			nbr_cons[offset + n] = cp;
+		}
+	}
+
+
+/*	template<typename Box3D>
 	__global__ void NEQ_Narrow_Count(
 		DArrayList<int> nbr,
 		DArray<Box3D> boxes,
@@ -244,10 +365,6 @@ namespace dyno
 							//printf("CNT_OKKKK\n");
 							//if((j - elementOffset.segOffset) % 39 == 0 || (j - elementOffset.segOffset) % 39 == 38)
 							cnt++;
-							/*else if ((pos_sphere.project(segment_tmp).origin - pos_sphere.origin).dot(segment_tmp.direction()) < EPSILON)
-							{
-								cnt++;
-							}*/
 						}
 					break;
 				}
@@ -586,10 +703,6 @@ namespace dyno
 							//printf("CNT_OKKKK\n");
 							//if ((tId - elementOffset.segOffset) % 39 == 0 || (tId - elementOffset.segOffset) % 39 == 38)
 							cnt++;
-							/*else if ((pos_sphere.project(segment_tmp).origin - pos_sphere.origin).dot(segment_tmp.direction()) < EPSILON)
-							{
-								cnt++;
-							}*/
 						}
 					break;
 				}
@@ -1051,10 +1164,7 @@ namespace dyno
 
 							//printf("ssssssssssssssssssss\n");
 							//printf("CNT_OKKKK\n");
-							/*if( ((j - elementOffset.segOffset) % 39 == 0 || (j - elementOffset.segOffset) % 39 == 38)
-								||
-							((pos_sphere.project(segment_tmp).origin - pos_sphere.origin).dot(segment_tmp.direction()) < EPSILON))
-							*/ {
+							 {
 								Coord3D proj_pos = pos_sphere.project(segment_tmp).origin;
 								Coord3D inter_norm = (proj_pos - spheres[tId].center) / (proj_pos - spheres[tId].center).norm();
 								Coord3D p1 = proj_pos - inter_norm * caps[j - elementOffset.segOffset].radius;
@@ -1066,10 +1176,6 @@ namespace dyno
 									- (proj_pos - spheres[tId].center).norm();
 
 								if (inter_dist < 0) inter_dist = 0;
-
-								/*printf("%.5lf %.5lf %.5lf     %.5lf\n",
-									inter_norm[0], inter_norm[1], inter_norm[2],
-									inter_dist);*/
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
@@ -1148,10 +1254,6 @@ namespace dyno
 				//int j = nbr.getElement(tId, ne);
 				int j = list_i[ne];
 				ElementType eleType_j = checkElementType(j, elementOffset);
-				/*if (j < 8)
-				{
-					printf("===================== !!!!!!!!!!!!! %d %d\n", tId, j);
-				}*/
 				switch (eleType_j)
 				{
 				case CT_SPHERE:
@@ -1251,7 +1353,6 @@ namespace dyno
 // 						{
 // 							//nbr_out.setElement(tId, cnt, j);
 // 
-// 							/*set up constraints*/
 // 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 // 							//list_j.insert(j);
 // 							int idx_con = prefix[tId] + cnt;
@@ -1266,7 +1367,6 @@ namespace dyno
 // 
 // 							//nbr_out.setElement(tId, cnt, j);
 // 
-// 							/*set up constraints*/
 // 							//int idx_con = nbr_out.getElementIndex(tId, cnt);
 // 							//list_j.insert(j);
 // 							int idx_con = prefix[tId] + cnt;
@@ -1637,7 +1737,6 @@ namespace dyno
 						{
 							//list_j.insert(j);
 							//int idx_con = prefix[tId] + cnt;
-							/*set up constraints*/
 							if (abs(inter_dist1) < EPSILON)
 							{
 								inter_norm1 = (tet_center1 - tet_center2) / (tet_center1 - tet_center2).norm();
@@ -1702,7 +1801,6 @@ namespace dyno
 								inter_norm2 = (tet_center2 - tet_center1) / (tet_center1 - tet_center2).norm();
 								ctype = ContactType::CT_LOACL_NONPENETRATION;
 							}
-							/*set up constraints*/
 							int idx;
 							Real max_dist = 0.0f;
 							for (int iii = 0; iii < 4; iii++)
@@ -1906,10 +2004,7 @@ namespace dyno
 						{
 
 							//printf("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
-							/*if (((tId - elementOffset.segOffset) % 39 == 0 || (tId - elementOffset.segOffset) % 39 == 38)
-								||
-								((pos_sphere.project(segment_tmp).origin - pos_sphere.origin).dot(segment_tmp.direction()) < EPSILON))
-							*/ {
+							 {
 								Coord3D proj_pos = pos_sphere.project(segment_tmp).origin;
 								Coord3D inter_norm = (proj_pos - spheres[j].center) / (proj_pos - spheres[j].center).norm();
 								Coord3D p1 = proj_pos - inter_norm * caps[tId - elementOffset.segOffset].radius;
@@ -1920,9 +2015,6 @@ namespace dyno
 									- (proj_pos - spheres[j].center).norm();
 
 								if (inter_dist < 0) inter_dist = 0;
-								/*printf("%.5lf %.5lf %.5lf     %.5lf\n",
-									inter_norm[0], inter_norm[1], inter_norm[2],
-									inter_dist);*/
 
 								//nbr_out.setElement(tId, cnt, j);
 								//int idx_con = nbr_out.getElementIndex(tId, cnt);
@@ -1988,11 +2080,6 @@ namespace dyno
 
 
 							nbr_cons[idx_con].interpenetration = -interDist + caps[tId - elementOffset.segOffset].radius;
-							/*printf(" ================ %d %d %.13lf %.13lf %.13lf   %.13lf %.13lf %.13lf %.13lf\n",
-								tId, j,
-								segment_tmp.v0[0], segment_tmp.v0[1], segment_tmp.v0[2],
-								segment_tmp.v1[0], segment_tmp.v1[1], segment_tmp.v1[2],
-								segment_intersect.length());*/
 							cnt++;
 						}
 						else if (segment_prox.length() < caps[tId - elementOffset.segOffset].radius)
@@ -2371,6 +2458,37 @@ namespace dyno
 		default:
 			break;
 		}
+	}*/
+
+	__global__ void CCL_CountListSize(
+		DArray<int> num,
+		DArrayList<int> contactList)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contactList.size()) return;
+
+		num[tId] = contactList[tId].size();
+	}
+
+	__global__ void CCL_SetupContactIds(
+		DArray<ContactId> ids,
+		DArray<int> index,
+		DArrayList<int> contactList)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contactList.size()) return;
+
+		int base = index[tId];
+
+		auto& list_i = contactList[tId];
+		for (int j = 0; j < list_i.size(); j++)
+		{
+			ContactId id;
+			id.bodyId1 = tId;
+			id.bodyId2 = list_i[j];
+
+			ids[base + j] = id;
+		}
 	}
 
 	template<typename TDataType>
@@ -2378,58 +2496,80 @@ namespace dyno
 	{
 		auto inTopo = this->inDiscreteElements()->getDataPtr();
 
-		if (inTopo->totalSize() > 0)
+		if (this->outContacts()->isEmpty())
+			this->outContacts()->allocate();
+
+		Real boundary_expand = 0.0f;
+		//printf("=========== ============= INSIDE SELF COLLISION %d\n", discreteSet->getTets().size());
+		int t_num = inTopo->totalSize();
+		if (m_queriedAABB.size() != t_num)
 		{
-			Real boundary_expand = 0.0f;
-			//printf("=========== ============= INSIDE SELF COLLISION %d\n", discreteSet->getTets().size());
-			int t_num = inTopo->totalSize();
-			if (m_queriedAABB.size() != t_num)
-			{
-				m_queriedAABB.resize(t_num);
-			}
-			if (m_queryAABB.size() != t_num)
-			{
-				m_queryAABB.resize(t_num);
-			}
+			m_queriedAABB.resize(t_num);
+		}
+		if (m_queryAABB.size() != t_num)
+		{
+			m_queryAABB.resize(t_num);
+		}
 
-			ElementOffset elementOffset = inTopo->calculateElementOffset();
+		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
-			cuExecute(t_num,
-				NEQ_SetupAABB,
-				m_queriedAABB,
-				inTopo->getBoxes(),
-				inTopo->getSpheres(),
-				inTopo->getTets(),
-				inTopo->getCaps(),
-				inTopo->getTris(),
-				elementOffset,
-				boundary_expand);
+		cuExecute(t_num,
+			NEQ_SetupAABB,
+			m_queriedAABB,
+			inTopo->getBoxes(),
+			inTopo->getSpheres(),
+			inTopo->getTets(),
+			inTopo->getCaps(),
+			inTopo->getTris(),
+			elementOffset,
+			boundary_expand);
 
-			m_queryAABB.assign(m_queriedAABB);
-			
-
-			Real radius = this->inRadius()->getData();
-
-			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
-			m_broadPhaseCD->setSelfCollision(true);
+		m_queryAABB.assign(m_queriedAABB);
 
 
-			/*if (this->outNeighborhood()->getElementCount() != t_num)
-			{
-				this->outNeighborhood()->setElementCount(t_num);
-			}*/
+		Real radius = this->inRadius()->getData();
 
-			m_broadPhaseCD->inSource()->setValue(m_queryAABB);
-			m_broadPhaseCD->inTarget()->setValue(m_queriedAABB);
-			// 
-			m_broadPhaseCD->update();
-	
-			Real zero = 0;
-	
-			//return;
-			DArray<int> mapping_nbr;
+		m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
+		m_broadPhaseCD->setSelfCollision(true);
+
+
+		m_broadPhaseCD->inSource()->setValue(m_queryAABB);
+		m_broadPhaseCD->inTarget()->setValue(m_queriedAABB);
+		// 
+		m_broadPhaseCD->update();
+
+
+		auto& contactList = m_broadPhaseCD->outContactList()->getData();
+
+		DArray<int> count(contactList.size());
+		cuExecute(contactList.size(),
+			CCL_CountListSize,
+			count,
+			contactList);
+
+		int totalSize = m_reduce.accumulate(count.begin(), count.size());
+
+		if (totalSize <= 0)
+			return;
+
+		m_scan.exclusive(count);
+
+		DArray<ContactId> deviceIds(totalSize);
+
+		cuExecute(contactList.size(),
+			CCL_SetupContactIds,
+			deviceIds,
+			count,
+			contactList);
+
+		count.clear();
+
+		Real zero = 0;
+
+		//return;
+/*			DArray<int> mapping_nbr;
 			DArray<int> cnt_element;
-			
+
 			cnt_element.resize(inTopo->totalSize());
 			cnt_element.reset();
 
@@ -2449,6 +2589,23 @@ namespace dyno
 				elementOffset,
 				Filter,
 				boundary_expand);
+
+// 			cuExecute(deviceIds.size(),
+// 				NEQ_Narrow_Count,
+// 				deviceIds,
+// 				inTopo->getBoxes(),
+// 				inTopo->getSpheres(),
+// 				inTopo->getTets(),
+// 				inTopo->getTetSDF(),
+// 				inTopo->getTetBodyMapping(),
+// 				inTopo->getTetElementMapping(),
+// 				inTopo->getCaps(),
+// 				inTopo->getTris(),
+// 				//nbrNum,
+// 				cnt_element,
+// 				elementOffset,
+// 				Filter,
+// 				boundary_expand);
 
 			if (this->outContacts()->isEmpty())
 				this->outContacts()->allocate();
@@ -2477,16 +2634,74 @@ namespace dyno
 					Filter,
 					boundary_expand
 				);
-			}
 
-			mapping_nbr.clear();
-			cnt_element.clear();
+// 				cuExecute(deviceIds.size(),
+// 					NEQ_Narrow_Set,
+// 					deviceIds,
+// 					inTopo->getBoxes(),
+// 					inTopo->getSpheres(),
+// 					inTopo->getTets(),
+// 					inTopo->getTetSDF(),
+// 					inTopo->getTetBodyMapping(),
+// 					inTopo->getTetElementMapping(),
+// 					inTopo->getCaps(),
+// 					inTopo->getTris(),
+// 					contacts,
+// 					cnt_element,
+// 					elementOffset,
+// 					Filter,
+// 					boundary_expand
+//				);
+			}*/
 
-		}
-		else
+		DArray<int> contactNum;
+
+		contactNum.resize(deviceIds.size());
+		contactNum.reset();
+
+		cuExecute(deviceIds.size(),
+			NEQ_Narrow_Count,
+			contactNum,
+			deviceIds,
+			inTopo->getBoxes(),
+			inTopo->getSpheres(),
+			inTopo->getTets(),
+			inTopo->getTetSDF(),
+			inTopo->getTetBodyMapping(),
+			inTopo->getTetElementMapping(),
+			inTopo->getCaps(),
+			inTopo->getTris(),
+			elementOffset,
+			Filter,
+			boundary_expand);
+
+		int sum = m_reduce.accumulate(contactNum.begin(), contactNum.size());
+
+		auto& contacts = this->outContacts()->getData();
+		m_scan.exclusive(contactNum, true);
+		contacts.resize(sum);
+		if (sum > 0)
 		{
-			//printf("NeighborElementQuery: Empty discreteSet! \n");
+			cuExecute(deviceIds.size(),
+				NEQ_Narrow_Set,
+				contacts,
+				deviceIds,
+				inTopo->getBoxes(),
+				inTopo->getSpheres(),
+				inTopo->getTets(),
+				inTopo->getTetSDF(),
+				inTopo->getTetBodyMapping(),
+				inTopo->getTetElementMapping(),
+				inTopo->getCaps(),
+				inTopo->getTris(),
+				contactNum,
+				elementOffset,
+				Filter,
+				boundary_expand);
 		}
+
+		contactNum.clear();
+		deviceIds.clear();
 	}
 
 	DEFINE_CLASS(NeighborElementQuery);
