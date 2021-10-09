@@ -222,6 +222,8 @@ namespace dyno
 			vertexOffset,
 			indexOffset);
 
+		this->outTriangleSet()->getDataPtr()->updateEdges();
+
 		return true;
 	}
 
