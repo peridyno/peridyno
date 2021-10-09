@@ -30,16 +30,6 @@ namespace dyno
 		return true;
 	}
 
-	void GLSurfaceVisualModule::updateStarted()
-	{
-		std::cout << "Update for GLSurfaceVisualModule started!" << std::endl;
-	}
-
-	void GLSurfaceVisualModule::updateEnded()
-	{
-		std::cout << "Update for GLSurfaceVisualModule ended!" << std::endl;
-	}
-
 	void GLSurfaceVisualModule::updateGL()
 	{
 		auto triSet = this->inTriangleSet()->getDataPtr();
