@@ -714,8 +714,8 @@ namespace dyno
 				if (idx2 != -1)
 					mass_i += mass[idx2];
 
-				if ((lambda_new) > 5 * (mass_i)) lambda_new = 5 * (mass_i);
-				if ((lambda_new) < -5 * (mass_i)) lambda_new = -5 * (mass_i);
+				//if ((lambda_new) > 5 * (mass_i)) lambda_new = 5 * (mass_i);
+				//if ((lambda_new) < -5 * (mass_i)) lambda_new = -5 * (mass_i);
 				delta_lambda = lambda_new - lambda[pId];
 			}
 
@@ -944,7 +944,7 @@ namespace dyno
 		}
 		else if (pId >= start_tet && pId < start_segment) // tets
 		{
-			printf("???????\n");
+			//printf("???????\n");
 			int cnt = 0;
 			int start_i = count[pId];
 
