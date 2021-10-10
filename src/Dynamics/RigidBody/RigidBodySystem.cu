@@ -603,122 +603,6 @@ namespace dyno
 
 	}
 
-// 	template <typename Coord, typename Matrix, typename Real>
-// 	__global__ void RB_constrct_mass_eq(
-// 		DArray<Coord> pos,
-// 		DArray<Matrix> inertia,
-// 		DArray<Real> mass,
-// 		DArray<Coord> J,
-// 		DArray<Coord> B,
-// 		DArray<Real> mass_eq,
-// 		DArray<Real> mass_eq_old,
-// 		DArray<Matrix> inertia_eq,
-// 		DArray<NeighborConstraints> nbc
-// 	)
-// 	{
-// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (pId >= J.size() / 4) return;
-// 		int idx1 = nbc[pId].idx1;
-// 		int idx2 = nbc[pId].idx2;
-// 		if(nbc[pId].contactType != ContactType::CT_FRICTION)
-// 		{
-// 			Coord d = nbc[pId].normal1;
-// 
-// 			if (d[0] > EPSILON)
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if(idx2 != -1)
-// 				{ 
-// 					atomicAdd(&mass_eq[idx1 * 6], mass_eq_old[idx2 * 6] * d_n[0]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 1], mass_eq_old[idx1 * 6 + 1] * d_n[0]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
-// 				}
-// 			}
-// 			else
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 1], - mass_eq_old[idx2 * 6 + 1] * d_n[0]);
-// 					atomicAdd(&mass_eq[idx2 * 6], - mass_eq_old[idx1 * 6] * d_n[0]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
-// 				}
-// 			}
-// 			if (d[1] > EPSILON)
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 2], mass_eq_old[idx2 * 6 + 2] * d_n[1]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 3], mass_eq_old[idx1 * 6 + 3] * d_n[1]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 2], 100000.0f);
-// 				}
-// 			}
-// 			else
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 3], - mass_eq_old[idx2 * 6 + 3] * d_n[1]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 2], - mass_eq_old[idx1 * 6 + 2] * d_n[1]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 3], 100000.0f);
-// 				}
-// 			}
-// 			if (d[2] > EPSILON)
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 4], mass_eq_old[idx2 * 6 + 4] * d_n[2]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 5], mass_eq_old[idx1 * 6 + 5] * d_n[2]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 4], 100000.0f);
-// 				}
-// 			}
-// 			else
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 5], - mass_eq_old[idx2 * 6 + 5] * d_n[2]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 4], - mass_eq_old[idx1 * 6 + 4] * d_n[2]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 5], 100000.0f);
-// 				}
-// 			}
-// 
-// 		}
-// 	}
-
-// 	template <typename Real, typename Matrix>
-// 	__global__ void RB_constrct_mass_eq(
-// 		DArray<Matrix> inertia,
-// 		DArray<Real> mass,
-// 		DArray<Real> mass_eq
-// 	)
-// 	{
-// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (pId >= mass.size()) return;
-// 
-// 		for (int i = 0; i < 6; i++)
-// 			mass_eq[pId * 6 + i] += mass[pId];
-// 	}
 
 
 	// ignore zeta !!!!!!
@@ -752,7 +636,7 @@ namespace dyno
 		eta[pId] = ita_i / dt;
 		if (nbq[pId].contactType == ContactType::CT_NONPENETRATION || nbq[pId].contactType == ContactType::CT_BOUDNARY)
 		{
-			eta[pId] += min(nbq[pId].interpenetration, nbq[pId].interpenetration) / dt / dt / 15.0f;
+			eta[pId] += min(nbq[pId].interpenetration, nbq[pId].interpenetration) / dt / dt / 5.0f;
 		}
 
 	}
@@ -830,8 +714,8 @@ namespace dyno
 				if (idx2 != -1)
 					mass_i += mass[idx2];
 
-				//if ((lambda_new) > 15 * (mass_i)) lambda_new = 15 * (mass_i);
-				//if ((lambda_new) < -15 * (mass_i)) lambda_new = -15 * (mass_i);
+				if ((lambda_new) > 5 * (mass_i)) lambda_new = 5 * (mass_i);
+				if ((lambda_new) < -5 * (mass_i)) lambda_new = -5 * (mass_i);
 				delta_lambda = lambda_new - lambda[pId];
 			}
 
@@ -889,7 +773,7 @@ namespace dyno
 		int start_segment)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size() + box.size()) return;
+		if (pId >= sphere.size() + box.size() + tet.size()) return;
 		
 		if (pId < start_box && pId >= start_sphere)//sphere
 		{
@@ -1060,6 +944,78 @@ namespace dyno
 		}
 		else if (pId >= start_tet && pId < start_segment) // tets
 		{
+			printf("???????\n");
+			int cnt = 0;
+			int start_i = count[pId];
+
+			Tet3D tet_i = tet[pId - start_tet];
+
+			for(int i = 0; i < 4; i ++)
+			{ 
+				Coord vertex = tet_i.v[i];
+				if (vertex.x >= hi.x)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = vertex.x - hi.x;
+					cnt++;
+				}
+				if (vertex.x <= lo.x)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo.x - (vertex.x);
+					cnt++;
+				}
+
+				if (vertex.y >= hi.y)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = vertex.y - hi.y;
+					cnt++;
+				}
+				if (vertex.y <= lo.y)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo.y - (vertex.y);
+					cnt++;
+				}
+
+				if (vertex.z >= hi.z)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = vertex.z - hi.z;
+					cnt++;
+				}
+				if (vertex.z <= lo.z)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo.z - (vertex.z);
+					cnt++;
+				}
+			}
 		}
 		else//segments 
 		{}
@@ -1119,7 +1075,7 @@ namespace dyno
 		int start_segment)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size() + box.size()) return;
+		if (pId >= sphere.size() + box.size() + tet.size()) return;
 
 		if (pId < start_box && pId >= start_sphere)//sphere
 		{
@@ -1216,8 +1172,45 @@ namespace dyno
 			}
 			count[pId] = cnt;
 		}
-		else if (pId >= start_tet && pId < start_segment)//tets
+		else if (pId >= start_tet && pId < start_segment) // tets
 		{
+			int cnt = 0;
+			int start_i = count[pId];
+
+			Tet3D tet_i = tet[pId - start_tet];
+
+			for (int i = 0; i < 4; i++)
+			{
+				Coord vertex = tet_i.v[i];
+				if (vertex.x >= hi.x)
+				{
+					cnt++;
+				}
+				if (vertex.x <= lo.x)
+				{
+					cnt++;
+				}
+
+				if (vertex.y >= hi.y)
+				{
+					cnt++;
+				}
+				if (vertex.y <= lo.y)
+				{
+					cnt++;
+				}
+
+				if (vertex.z >= hi.z)
+				{
+					cnt++;
+				}
+				if (vertex.z <= lo.z)
+				{
+					cnt++;
+				}
+			}
+
+			count[pId] = cnt;
 		}
 		else//segments
 		{}
