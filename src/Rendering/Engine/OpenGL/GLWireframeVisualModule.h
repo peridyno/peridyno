@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Jian SHI
+ * Copyright 2017-2021 Xiaowei He (xiaowei@iscas.ac.cn)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Topology/TriangleSet.h"
+#include "Topology/EdgeSet.h"
 
 #include "GLVisualModule.h"
 #include "GLCudaBuffer.h"
@@ -24,14 +24,14 @@
 
 namespace dyno
 {
-	class GLSurfaceVisualModule : public GLVisualModule
+	class GLWireframeVisualModule : public GLVisualModule
 	{
 		DECLARE_CLASS(GLSurfaceVisualModule)
 	public:
-		GLSurfaceVisualModule();
+		GLWireframeVisualModule();
 
 	public:
-		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
+		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
 
 	protected:
 		virtual void paintGL(RenderMode mode) override;

@@ -1,4 +1,4 @@
-#include "GLSurfaceVisualModule.h"
+#include "GLWireframeVisualModule.h"
 
 // opengl
 #include <glad/glad.h>
@@ -7,14 +7,14 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS(GLSurfaceVisualModule)
+	IMPLEMENT_CLASS(GLWireframeVisualModule)
 
-	GLSurfaceVisualModule::GLSurfaceVisualModule()
+	GLWireframeVisualModule::GLWireframeVisualModule()
 	{
-		this->setName("surface_renderer");
+		this->setName("wireframe_renderer");
 	}
 
-	bool GLSurfaceVisualModule::initializeGL()
+	bool GLWireframeVisualModule::initializeGL()
 	{
 		// create vertex buffer and vertex array object
 		mVAO.create();
@@ -25,25 +25,25 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		mShaderProgram = gl::CreateShaderProgram("line.vert", "line.frag", "line.geom");
 
 		return true;
 	}
 
-	void GLSurfaceVisualModule::updateGL()
+	void GLWireframeVisualModule::updateGL()
 	{
-		auto triSet = this->inTriangleSet()->getDataPtr();
+		auto edgeSet = this->inEdgeSet()->getDataPtr();
 
-		auto& triangles = triSet->getTriangles();
-		auto& vertices = triSet->getPoints();
+		auto& edges = edgeSet->getEdges();
+		auto& vertices = edgeSet->getPoints();
 
-		mDrawCount = triangles.size() * 3;
+		mDrawCount = edges.size() * 2;
 
 		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
+		mIndexBuffer.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
 	}
 
-	void GLSurfaceVisualModule::paintGL(RenderMode mode)
+	void GLWireframeVisualModule::paintGL(RenderMode mode)
 	{
 		mShaderProgram.use();
 
@@ -70,7 +70,7 @@ namespace dyno
 		}
 
 		mVAO.bind();
-		glDrawElements(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_LINES, mDrawCount, GL_UNSIGNED_INT, 0);
 		mVAO.unbind();
 
 		gl::glCheckError();

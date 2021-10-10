@@ -594,8 +594,8 @@ namespace dyno
 		if (axis == ~0)
 			return;
 
-		Transform3D atx(rotA, box0.center);
-		Transform3D btx(rotB, box1.center);
+		Transform3D atx(box0.center, rotA);
+		Transform3D btx(box1.center, rotB);
 
 		if (axis < 6)
 		{

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Jian SHI
+ * Copyright 2017-2021 Xiaowei He (xiaowei@iscas.ac.cn)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,16 @@
 
 namespace dyno
 {
-	class GLSurfaceVisualModule : public GLVisualModule
+	class GLInstanceVisualModule : public GLVisualModule
 	{
-		DECLARE_CLASS(GLSurfaceVisualModule)
+		DECLARE_CLASS(GLInstanceVisualModule)
 	public:
-		GLSurfaceVisualModule();
+		GLInstanceVisualModule();
 
 	public:
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
+
+		DEF_ARRAY_IN(Transform3f, Transform, DeviceType::GPU, "");
 
 	protected:
 		virtual void paintGL(RenderMode mode) override;
@@ -45,7 +47,11 @@ namespace dyno
 
 		GLCudaBuffer	mVertexBuffer;
 		GLCudaBuffer 	mIndexBuffer;
+		GLCudaBuffer	mInstanceBuffer;
 
-		unsigned int	mDrawCount = 0;
+		unsigned int	mVertexCount = 0;
+		unsigned int	mIndexCount = 0;
+
+		unsigned int	mInstanceCount = 0;
 	};
 };

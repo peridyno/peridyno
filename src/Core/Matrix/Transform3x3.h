@@ -15,7 +15,7 @@ namespace dyno {
 		typedef T VarType;
 
 		DYN_FUNC Transform();
-		DYN_FUNC Transform(const SquareMatrix<T, 3> &, const Vector<T, 3> &);
+		DYN_FUNC Transform(const Vector<T, 3>& t, const SquareMatrix<T, 3>& M, const Vector<T, 3>& s = Vector<T, 3>(1));
 
 		DYN_FUNC Transform(const Transform<T, 3>&);
 		DYN_FUNC ~Transform();
@@ -29,11 +29,15 @@ namespace dyno {
 		DYN_FUNC inline Vector<T, 3>& translation() { return mTranslation; }
 		DYN_FUNC inline const Vector<T, 3> translation() const { return mTranslation; }
 
+		DYN_FUNC inline Vector<T, 3>& scale() { return mScale; }
+		DYN_FUNC inline const Vector<T, 3> scale() const { return mScale; }
+
 		DYN_FUNC const Vector<T, 3> operator* (const Vector<T, 3> &) const;
 
 	protected:
-		SquareMatrix<T, 3> mRotation;
 		Vector<T, 3> mTranslation; //default: zero matrix
+		Vector<T, 3> mScale;
+		SquareMatrix<T, 3> mRotation;
 	};
 
 	template class Transform<float, 3>;
