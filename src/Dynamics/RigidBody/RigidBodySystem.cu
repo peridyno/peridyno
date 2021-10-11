@@ -636,7 +636,7 @@ namespace dyno
 		eta[pId] = ita_i / dt;
 		if (nbq[pId].contactType == ContactType::CT_NONPENETRATION || nbq[pId].contactType == ContactType::CT_BOUDNARY)
 		{
-			eta[pId] += min(nbq[pId].interpenetration, nbq[pId].interpenetration) / dt / dt / 5.0f;
+			eta[pId] += min(nbq[pId].interpenetration, nbq[pId].interpenetration) / dt / dt / 15.0f;
 		}
 
 	}
