@@ -1080,81 +1080,119 @@ namespace dyno
 		TManifold<Real>& m)
 	{
 		int cnt1, cnt2;
-		unsigned char boundaryPoints1[4], boundaryPoints2[4];
+		unsigned char boundaryPoints1[4];
+		Coord3D boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
 
 
-		//for (unsigned char i = 0; i < 4; i++)
-		//{
-		//	if (abs(tet1.v[i].dot(axisNormal) - boundary1) < EPSILON)
-		//		boundaryPoints1[cnt1++] = i;
-		//	if (abs(tet2.v[i].dot(axisNormal) - boundary2) < EPSILON)
-		//		boundaryPoints2[cnt2++] = i;
-		//}
-		////printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
-		//if (cnt1 == 1 || cnt2 == 1)
-		//{
-		//	m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
-		//	m.contacts[0].penetration = sMax;
-		//	m.contacts[0].position = (cnt1 == 1) ? tet1.v[boundaryPoints1[0]] : tet2.v[boundaryPoints2[0]];
-		//	m.contactCount = 1;
-		//	return;
-		//}
-		//else if (cnt1 == 2)
-		//{
-		//	Segment3D s1(tet1.v[boundaryPoints1[0]], tet1.v[boundaryPoints1[1]]);
+		for (unsigned char i = 0; i < 4; i++)
+		{
+			if (abs(tet.v[i].dot(axisNormal) - boundary1) < EPSILON)
+				boundaryPoints1[cnt1++] = i;
+		}
 
-		//	if (cnt2 == 2)
-		//	{
-		//		Segment3D s2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]]);
-		//		Segment3D dir = s1.proximity(s2);//v0: self v1: other
-		//		m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
-		//		m.contacts[0].penetration = sMax;
-		//		m.contacts[0].position = dir.v0;
-		//		m.contactCount = 1;
-		//		return;
-		//	}
-		//	else //cnt2 == 3
-		//	{
-		//		m.contactCount = 0;
-		//		m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
-		//		Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
-		//		Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
-		//		Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-		//		if (dirTmp1.cross(axisNormal).norm() < 1e-5)
-		//		{
-		//			m.contacts[m.contactCount].penetration = sMax;
-		//			m.contacts[m.contactCount].position = s1.v0;
-		//			m.contactCount++;
-		//		}
-		//		if (dirTmp2.cross(axisNormal).norm() < 1e-5)
-		//		{
-		//			m.contacts[m.contactCount].penetration = sMax;
-		//			m.contacts[m.contactCount].position = s1.v1;
-		//			m.contactCount++;
-		//		}
-		//		for (int i = 0; i < 3; i++)
-		//		{
-		//			Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
-		//			Segment3D dir = s1.proximity(s2);
-		//			/*printf("dir: %.3lf %.3lf %.3lf\naxisnormal %.3lf %.3lf %.3lf\n%.6lf\n",
-		//				dir.direction()[0], dir.direction()[1], dir.direction()[2],
-		//				axisNormal[0], axisNormal[1], axisNormal[2],
-		//				dir.direction().normalize().cross(axisNormal).norm());*/
-		//			if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
-		//			{
-		//				//printf("Yes\n");
-		//				if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
-		//				{
-		//					m.contacts[m.contactCount].penetration = sMax;
-		//					m.contacts[m.contactCount].position = dir.v0;
-		//					m.contactCount++;
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
+		Coord3D center = box.center;
+		Coord3D u = box.u;
+		Coord3D v = box.v;
+		Coord3D w = box.w;
+		Coord3D extent = box.extent;
+		Coord3D p;
+		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+			boundaryPoints2[cnt2++] = p;
+
+		////printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
+		if (cnt1 == 1 || cnt2 == 1)
+		{
+			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = (cnt1 == 1) ? tet.v[boundaryPoints1[0]] : boundaryPoints2[0];
+			m.contactCount = 1;
+			return;
+		}
+		else if (cnt1 == 2)
+		{
+			Segment3D s1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]]);
+
+			if (cnt2 == 2)
+			{
+				Segment3D s2(boundaryPoints2[0], boundaryPoints2[1]);
+				Segment3D dir = s1.proximity(s2);//v0: self v1: other
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+				m.contacts[0].penetration = sMax;
+				m.contacts[0].position = dir.v0;
+				m.contactCount = 1;
+				return;
+			}
+			//else //cnt2 == 3
+			//{
+			//	m.contactCount = 0;
+			//	m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			//	Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
+			//	Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+			//	Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+			//	if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+			//	{
+			//		m.contacts[m.contactCount].penetration = sMax;
+			//		m.contacts[m.contactCount].position = s1.v0;
+			//		m.contactCount++;
+			//	}
+			//	if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+			//	{
+			//		m.contacts[m.contactCount].penetration = sMax;
+			//		m.contacts[m.contactCount].position = s1.v1;
+			//		m.contactCount++;
+			//	}
+			//	for (int i = 0; i < 3; i++)
+			//	{
+			//		Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
+			//		Segment3D dir = s1.proximity(s2);
+			//		/*printf("dir: %.3lf %.3lf %.3lf\naxisnormal %.3lf %.3lf %.3lf\n%.6lf\n",
+			//			dir.direction()[0], dir.direction()[1], dir.direction()[2],
+			//			axisNormal[0], axisNormal[1], axisNormal[2],
+			//			dir.direction().normalize().cross(axisNormal).norm());*/
+			//		if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+			//		{
+			//			//printf("Yes\n");
+			//			if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+			//			{
+			//				m.contacts[m.contactCount].penetration = sMax;
+			//				m.contacts[m.contactCount].position = dir.v0;
+			//				m.contactCount++;
+			//			}
+			//		}
+			//	}
+			//}
+		}
 		//else if (cnt1 == 3)
 		//{
 		//	Triangle3D t1(tet1.v[boundaryPoints1[0]], tet1.v[boundaryPoints1[1]], tet1.v[boundaryPoints1[2]]);
