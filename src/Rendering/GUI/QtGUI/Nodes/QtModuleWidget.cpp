@@ -26,11 +26,12 @@ namespace QtNodes
 			//initialize in ports
 			int input_num = getInputFields().size();
 			input_fields.resize(input_num);
-			// 		auto inputs = getInputFields();
-			// 		for (int i = 0; i < outputs.size(); i++)
-			// 		{
-			// 			input_fields[i] = std::make_shared<FieldData>(inputs[i]);
-			// 		}
+			auto inputs = getInputFields();
+			for (int i = 0; i < inputs.size(); i++)
+			{
+				input_fields[i] = std::make_shared<FieldData>(inputs[i]);;
+				// fprintf(stderr, (input_fields[i].expired()) ? "expired\n" : "nothing!\n");
+			}
 		}
 	}
 
@@ -70,18 +71,25 @@ namespace QtNodes
 
 	std::shared_ptr<BlockData> QtModuleWidget::inData(PortIndex port)
 	{
-		return std::dynamic_pointer_cast<BlockData>(input_fields[port].lock());
+		// weak_ptr.lock() : if ptr is expired then return nullptr.
+		// fprintf(stderr, (input_fields[port].expired()) ? "expired\n" : "nothing!\n");
+		// return std::dynamic_pointer_cast<BlockData>(input_fields[port].lock());
+		return std::dynamic_pointer_cast<BlockData>(input_fields[port]);
 	}
 
 	QString QtModuleWidget::caption() const
 	{
-		return QString::fromStdString(m_module->getClassInfo()->getClassName());
 		//	return m_name;
+		std::string class_name = m_module->getClassInfo()->getClassName();
+		if(class_name.find("VirtualModel") != std::string::npos) return QString::fromStdString(m_module->getName());
+		else return QString::fromStdString(class_name);		
 	}
 
 	QString QtModuleWidget::name() const
 	{
-		return QString::fromStdString(m_module->getClassInfo()->getClassName());
+		std::string class_name = m_module->getClassInfo()->getClassName();
+		if(class_name.find("VirtualModel") != std::string::npos) return QString::fromStdString(m_module->getName());
+		else return QString::fromStdString(class_name);
 	}
 
 	bool QtModuleWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
@@ -136,7 +144,8 @@ namespace QtNodes
 		for (int i = 0; i < input_fields.size(); i++)
 		{
 
-			auto p = input_fields[i].lock();
+			//auto p = input_fields[i].lock();
+			auto p = input_fields[i];
 
 			hasAllInputs &= (p != nullptr);
 		}

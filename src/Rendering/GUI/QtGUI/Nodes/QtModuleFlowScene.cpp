@@ -10,6 +10,8 @@
 #include "QtFlowView.h"
 #include "DataModelRegistry.h"
 
+#include "Module/VirtualModel.h"
+
 
 namespace QtNodes
 {
@@ -21,7 +23,7 @@ QtModuleFlowScene::QtModuleFlowScene(std::shared_ptr<DataModelRegistry> registry
 	connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModulePosition);
 }
 
-QtModuleFlowScene::QtModuleFlowScene(QObject * parent)
+QtModuleFlowScene::QtModuleFlowScene(QObject * parent, QtNodeWidget* node_widget)
 	: QtFlowScene(parent)
 {
 	auto classMap = dyno::Object::getClassMap();
@@ -45,8 +47,42 @@ QtModuleFlowScene::QtModuleFlowScene(QObject * parent)
 
 			QString category = QString::fromStdString(module->getModuleType());
 			ret->registerModel<QtNodes::QtModuleWidget>(category, creator);
+		} 
+	}
+	if(node_widget != nullptr) 
+	{
+		// Build virtual module
+		// TODO: 将node改为selectnode
+		// dyno::Node* node = dynamic_cast<dyno::Node*>(obj);
+		dyno::Node *selectedNode = node_widget->getNode().get();
+		QString str_vir = QString::fromStdString(selectedNode->getClassInfo()->getClassName() + "(virtual)");
+		if(selectedNode != nullptr)
+		{
+			dyno::Object* obj = dyno::Object::createObject("VirtualModel<DataType3f>");
+			dyno::Module* module_vir = dynamic_cast<dyno::Module*>(obj);
+			if(module_vir != nullptr)
+			{
+				module_vir->setName(str_vir.toStdString());
+				auto& fields = selectedNode->getAllFields();
+				for (auto field : fields)
+				{
+					auto fType = field->getFieldType();
+					if(fType == dyno::FieldTypeEnum::Current)
+					{
+						module_vir->addOutputField(field);
+					}
+				}
+				QtNodes::DataModelRegistry::RegistryItemCreator creator = [str_vir, module_vir]() {
+					auto dat = std::make_unique<QtNodes::QtModuleWidget>(module_vir);
+					dat->setName(str_vir);
+					return dat; };
+				// FIXME: 没有完成所有节点的虚模块点创建
+				QString category = "Virtual";
+				ret->registerModel<QtNodes::QtModuleWidget>(category, creator);		
+			}		
 		}
 	}
+	
 
 	this->setRegistry(ret);
 }

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <QtCore/QString>
+#include <QDebug>
 
 #include "QtBlockDataModel.h"
 #include "TypeConverter.h"
@@ -138,6 +139,7 @@ private:
   registerModelImpl(RegistryItemCreator creator, QString const &category )
   {
     const QString name = creator()->name();
+	  qDebug() << name;
     if (_registeredItemCreators.count(name) == 0)
     {
       _registeredItemCreators[name] = std::move(creator);

@@ -11,7 +11,7 @@
 
 namespace dyno
 {
-	PModuleFlowWidget::PModuleFlowWidget(QWidget *parent) :
+	PModuleFlowWidget::PModuleFlowWidget(QWidget *parent, QtNodes::QtNodeWidget* node_widget) :
 		QWidget(parent)
 	{
 		auto menuBar = new QMenuBar();
@@ -23,7 +23,7 @@ namespace dyno
 		QVBoxLayout *l = new QVBoxLayout(this);
 
 		l->addWidget(menuBar);
-		module_scene = new QtModuleFlowScene(this);
+		module_scene = new QtModuleFlowScene(this, node_widget);
 		l->addWidget(new QtNodes::QtFlowView(module_scene));
 		l->setContentsMargins(0, 0, 0, 0);
 		l->setSpacing(0);

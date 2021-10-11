@@ -41,11 +41,11 @@ public:
 
 void dyno::ImWindow::initialize(float scale)
 {		
-	// TODO: Reorganize
-	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
-	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
-	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
-	mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
+	// // TODO: Reorganize
+	// mPics.emplace_back(std::make_shared<Picture>("../../data/icon/map.png"));
+	// mPics.emplace_back(std::make_shared<Picture>("../../data/icon/box.png"));
+	// mPics.emplace_back(std::make_shared<Picture>("../../data/icon/arrow-090-medium.png"));
+	// mPics.emplace_back(std::make_shared<Picture>("../../data/icon/lock.png"));
 
 	ImGui::initializeStyle(scale);
 	ImGui::initColorVal();

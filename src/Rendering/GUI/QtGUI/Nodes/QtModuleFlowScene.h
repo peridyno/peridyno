@@ -3,6 +3,7 @@
 #include "QtFlowScene.h"
 
 #include "Node.h"
+#include "Nodes/QtNodeWidget.h"
 
 namespace QtNodes
 {
@@ -19,7 +20,7 @@ public:
 	QtModuleFlowScene(std::shared_ptr<DataModelRegistry> registry,
 			QObject * parent = Q_NULLPTR);
 
-	QtModuleFlowScene(QObject * parent = Q_NULLPTR);
+	QtModuleFlowScene(QObject * parent = Q_NULLPTR, QtNodeWidget* node_widget = nullptr);
 
 
 	~QtModuleFlowScene();

@@ -24,6 +24,7 @@ bool Object::registerClass(ClassInfo* ci)
 	if (ci) {
 		if (classInfoMap->find(ci->m_className) == classInfoMap->end()) {
 			classInfoMap->insert(std::map< std::string, ClassInfo*>::value_type(ci->m_className, ci));
+			fprintf(stderr,"%s\n", ci->m_className.c_str());
 		}
 	}
 	return true;
