@@ -49,12 +49,12 @@ namespace dyno
 	template <typename Real>
 	DYN_FUNC Quat<Real>::Quat(const Real yaw, const Real pitch, const Real roll)
 	{
-		Real cy = cos(Real(yaw * 0.5));
-		Real sy = sin(Real(yaw * 0.5));
-		Real cp = cos(Real(pitch * 0.5));
-		Real sp = sin(Real(pitch * 0.5));
-		Real cr = cos(Real(roll * 0.5));
-		Real sr = sin(Real(roll * 0.5));
+		Real cy = glm::cos(Real(yaw * 0.5));
+		Real sy = glm::sin(Real(yaw * 0.5));
+		Real cp = glm::cos(Real(pitch * 0.5));
+		Real sp = glm::sin(Real(pitch * 0.5));
+		Real cr = glm::cos(Real(roll * 0.5));
+		Real sr = glm::sin(Real(roll * 0.5));
 
 		w = cr * cp * cy + sr * sp * sy;
 		x = sr * cp * cy - cr * sp * sy;
