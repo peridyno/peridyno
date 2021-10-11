@@ -49,6 +49,7 @@ namespace dyno
 		float mFocusDistMin = 0.1f;
 
 		float mSpeed = 2.0;
+		float mZoomSpeed = 1.0f;
 	};
 
 }

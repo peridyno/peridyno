@@ -97,8 +97,12 @@ namespace dyno
 
 		Vec3f eyeCenter = mEyePos + mFocusDist * curViewdir;
 
-		mFocusDist += 0.5*amount;
+		float logDist = std::log10(mFocusDist);
+		float logMin = std::log10(mFocusDistMin);
+		float logMax = std::log10(mFocusDistMax);
+		float frac = (logDist - logMax) / (logMax - logMin);
 
+		mFocusDist += mZoomSpeed * amount * std::pow(10.0f, frac);
 		mFocusDist = std::min(std::max(mFocusDist, mFocusDistMin), mFocusDistMax);
 		mEyePos = eyeCenter - mFocusDist * curViewdir;
 	}
