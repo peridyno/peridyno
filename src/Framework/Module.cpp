@@ -51,6 +51,8 @@ namespace dyno
 
 	void Module::update()
 	{
+		this->updateStarted();
+
 		if (!this->validateInputs()) {
 			return;
 		}
@@ -81,6 +83,8 @@ namespace dyno
 		if (!this->validateOutputs()) {
 			return;
 		}
+
+		this->updateEnded();
 	}
 
 	bool Module::validateInputs()

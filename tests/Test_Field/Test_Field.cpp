@@ -64,9 +64,9 @@ private:
 TEST(FInstance, connect)
 {
 	FInstance<OA> oA;
-	oA.allocate();
+	oA.setDataPtr(std::make_shared<OA>());
 	FInstance<OB> oB;
-	oB.allocate();
+	oB.setDataPtr(std::make_shared<OB>());
 	oB.connect(&oA);
 
 	FInstance<OB> oA2;
@@ -80,7 +80,7 @@ TEST(FInstance, connect)
 	EXPECT_EQ(oB.sizeOfSinks() == 2, true);
 
 	FInstance<OA> oA1;
-	oA1.allocate();
+	oA1.setDataPtr(std::make_shared<OA>());
 	FInstance<OB> oB1;
 	//oB1.allocate();
 

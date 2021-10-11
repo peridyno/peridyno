@@ -145,6 +145,10 @@ namespace dyno {
 		void assign(const Array<T, DeviceType::CPU>& src);
 		void assign(const std::vector<T>& src);
 
+		void assign(const Array<T, DeviceType::GPU>& src, const uint count, const uint dstOffset = 0, const uint srcOffset = 0);
+		void assign(const Array<T, DeviceType::CPU>& src, const uint count, const uint dstOffset = 0, const uint srcOffset = 0);
+		void assign(const std::vector<T>& src, const uint count, const uint dstOffset = 0, const uint srcOffset = 0);
+
 		friend std::ostream& operator<<(std::ostream &out, const Array<T, DeviceType::GPU>& dArray)
 		{
 			Array<T, DeviceType::CPU> hArray;
@@ -159,7 +163,6 @@ namespace dyno {
 		T* m_data = 0;
 		uint m_totalNum = 0;
 	};
-
 
 	template<typename T>
 	using CArray = Array<T, DeviceType::CPU>;

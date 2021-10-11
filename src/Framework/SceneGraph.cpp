@@ -39,7 +39,7 @@ namespace dyno
 			return true;
 		}
 		//TODO: check initialization
-		if (m_root == nullptr)
+		if (mRoot == nullptr)
 		{
 			return false;
 		}
@@ -56,12 +56,12 @@ namespace dyno
 				{
 					(*iter)->initialize();
 				}
-
+				
 				node->graphicsPipeline()->update();
 			}
 		};
 
-		m_root->traverseBottomUp<InitAct>();
+		mRoot->traverseBottomUp<InitAct>();
 		mInitialized = true;
 
 		return mInitialized;
@@ -118,7 +118,7 @@ namespace dyno
 			float mElapsedTime;
 		};	
 
-		m_root->traverseTopDown<AdvanceAct>(dt, mElapsedTime);
+		mRoot->traverseTopDown<AdvanceAct>(dt, mElapsedTime);
 		mElapsedTime += dt;
 	}
 
@@ -126,7 +126,7 @@ namespace dyno
 	{
 		std::cout << "****************Frame " << mFrameNumber << " Started" << std::endl;
 
-		if (m_root == nullptr)
+		if (mRoot == nullptr)
 		{
 			return;
 		}
@@ -146,7 +146,7 @@ namespace dyno
 
 		timeStep.dt = 1.0f / mFrameRate;
 
-		m_root->traverseTopDown(&timeStep);
+		mRoot->traverseTopDown(&timeStep);
 		dt = timeStep.dt;
 
 		if (mAdvativeInterval)
@@ -162,13 +162,32 @@ namespace dyno
 
 				t += dt;
 				timeStep.dt = 1.0f / mFrameRate;
-				m_root->traverseTopDown(&timeStep);
+				mRoot->traverseTopDown(&timeStep);
 				dt = timeStep.dt;
 			}
 
 			this->advance(interval - t);
 		}
 
+// 		class UpdateGrpahicsContextAct : public Action
+// 		{
+// 		public:
+// 			void process(Node* node) override {
+// 				node->graphicsPipeline()->update();
+// 			}
+// 		};
+// 
+// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
+
+		mRoot->traverseTopDown<PostProcessing>();
+
+		std::cout << "****************Frame " << mFrameNumber << " Ended" << std::endl << std::endl;
+
+		mFrameNumber++;
+	}
+
+	void SceneGraph::updateGraphicsContext()
+	{
 		class UpdateGrpahicsContextAct : public Action
 		{
 		public:
@@ -177,13 +196,7 @@ namespace dyno
 			}
 		};
 
-		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
-
-		m_root->traverseTopDown<PostProcessing>();
-
-		std::cout << "****************Frame " << mFrameNumber << " Ended" << std::endl << std::endl;
-
-		mFrameNumber++;
+		mRoot->traverseTopDown<UpdateGrpahicsContextAct>();
 	}
 
 	void SceneGraph::run()
@@ -193,12 +206,12 @@ namespace dyno
 
 	void SceneGraph::reset()
 	{
-		if (m_root == nullptr)
+		if (mRoot == nullptr)
 		{
 			return;
 		}
 
-		m_root->traverseBottomUp<ResetAct>();
+		mRoot->traverseBottomUp<ResetAct>();
 
 		//m_root->traverseBottomUp();
 	}
@@ -208,7 +221,7 @@ namespace dyno
 		SceneLoader* loader = SceneLoaderFactory::getInstance().getEntryByFileName(name);
 		if (loader)
 		{
-			m_root = loader->load(name);
+			mRoot = loader->load(name);
 			return true;
 		}
 

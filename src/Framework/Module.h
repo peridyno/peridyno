@@ -105,6 +105,13 @@ protected:
 	bool isInputComplete();
 	bool isOutputCompete();
 
+	/**
+	 * @brief Two functions called at the beginning and end of update()
+	 *	used for debug
+	 */
+	virtual void updateStarted() {};
+	virtual void updateEnded() {};
+
 private:
 	Node* m_node;
 	std::string m_module_name;

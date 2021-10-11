@@ -30,7 +30,9 @@ namespace dyno {
 
 	public:
 		virtual bool canBeConnectedBy(InstanceBase* ins) = 0;
+		virtual void setObjectPointer(std::shared_ptr<Object> op) = 0;
 		virtual std::shared_ptr<Object> objectPointer() = 0;
+		virtual std::shared_ptr<Object> standardObjectPointer() = 0;
 
 	private:
 
@@ -60,6 +62,12 @@ namespace dyno {
 			std::shared_ptr<T> data = std::static_pointer_cast<T>(ins->objectPointer());
 
 			return data;
+		}
+
+		void setDataPtr(std::shared_ptr<T> sPtr)
+		{
+			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getTopField());
+			ins->setObjectPointer(sPtr);
 		}
 
 		std::shared_ptr<T> allocate() {
@@ -98,11 +106,22 @@ namespace dyno {
 
 	public:
 		std::shared_ptr<Object> objectPointer() final {
-			return mData;
+			return std::dynamic_pointer_cast<Object>(mData);
+		}
+
+		std::shared_ptr<Object> standardObjectPointer() final {
+			return std::make_shared<T>();
+		}
+
+		void setObjectPointer(std::shared_ptr<Object> op) final	{
+			auto dPtr = std::dynamic_pointer_cast<T>(op);
+			assert(dPtr != nullptr);
+
+			mData = dPtr;
 		}
 
 		bool canBeConnectedBy(InstanceBase* ins) final {
-			std::shared_ptr<Object> dataPtr = ins->objectPointer();
+			std::shared_ptr<Object> dataPtr = ins->isEmpty() ? ins->standardObjectPointer() : ins->objectPointer();
 			auto dPtr = std::dynamic_pointer_cast<T>(dataPtr);
 
 			return dPtr == nullptr ? false : true;

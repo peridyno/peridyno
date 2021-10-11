@@ -75,7 +75,11 @@ namespace dyno {
 		}
 
 	public:
-		glm::tvec3<T> data_; //default: zero vector
+		union
+		{
+			glm::tvec3<T> data_; //default: zero vector
+			struct { T x, y, z; };
+		};
 	};
 
 	template class Vector<float, 3>;

@@ -18,7 +18,7 @@
 namespace dyno
 {
 /**
- * @brief Macro definitions for VarField
+ * @brief Macro definitions for FVar
  * 
  */
 #define DEF_CURRENT_VAR(name, T, value, desc) \
@@ -91,6 +91,15 @@ private:									\
 public:									\
 	inline NeighborField<T>* next##name() {return &next_##name;}
 
+ /**
+  * @brief Macro definitions for instance
+  *
+  */
+#define DEF_INSTANCE_STATE(T, name, desc)		\
+private:									\
+	FInstance<T> current_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+public:									\
+	inline FInstance<T>* current##name() {return &current_##name;}
 
 /**
  * @brief Macro definitions for node ports
