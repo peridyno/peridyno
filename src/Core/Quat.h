@@ -112,4 +112,12 @@ namespace dyno
 	{
 		return quad * scale;
 	}
+
+	template class Quat<float>;
+	template class Quat<double>;
+	//convenient typedefs
+	typedef Quat<float> Quat1f;
+	typedef Quat<double> Quat1d;
+    
 }//end of namespace dyno
+#include "Quat.inl"

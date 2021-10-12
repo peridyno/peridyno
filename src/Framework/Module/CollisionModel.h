@@ -19,16 +19,6 @@
 
 namespace dyno
 {
-
-	class ContactPair
-	{
-	public:
-		int id[2];
-
-		Real m_stiffness;
-		Real m_friction;
-	};
-
 	class CollisionModel : public Module
 	{
 	public:

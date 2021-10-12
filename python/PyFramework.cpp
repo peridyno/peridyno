@@ -6,6 +6,7 @@
 #include "Log.h"
 
 using Node = dyno::Node;
+using Module = dyno::Module;
 using SceneGraph = dyno::SceneGraph;
 using VisualModule = dyno::VisualModule;
 using Log = dyno::Log;
@@ -35,6 +36,9 @@ void pybind_framework(py::module& m)
 		.def("set_name", &Node::setName)
 		.def("is_active", &Node::isActive)
 		.def("add_visual_module", (void (Node::*)(std::shared_ptr<VisualModule>)) &Node::addVisualModule);
+
+	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
+		.def(py::init<>());
 
 	py::class_<VisualModule, std::shared_ptr<VisualModule>>(m, "VisualModule")
 		.def(py::init<>());
