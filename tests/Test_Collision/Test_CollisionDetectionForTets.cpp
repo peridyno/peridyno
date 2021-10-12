@@ -10,10 +10,12 @@ using namespace dyno;
 TEST(TET, collision)
 {
 	using Tet = TTet3D<float>;
+	using Box = TOrientedBox3D<float>;
 
 	Tet t0;
 	Tet t1;
 
+	Box b0;
 
 	//one contact point
 	t0 = Tet(Coord3D(0, 0, 0), Coord3D(1, 0, 0), Coord3D(0, 1, 0), Coord3D(0, 0, 1));
@@ -143,6 +145,42 @@ TEST(TET, collision)
 	EXPECT_EQ(std::abs(manifold.normal[1]) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.normal[2]) < REAL_EPSILON, true);
 	
+
+
+
+	//box-tet, 5 contact points
+	b0 = Box(Coord3D(0.5, 0.1, 0.5), Quat<float>(0, 0, 0, 1), Coord3D(0.1, 0.1, 0.1));
+	t0 = Tet(Coord3D(0.45f, 0.195f, 0.45f), Coord3D(0.45f, 0.345f, 0.45f), 
+		Coord3D(0.7f, 0.195f, 0.45f), Coord3D(0.45f, 0.195f, 0.7f));
+
+	CollisionDetection<float>::request(manifold, t0, b0);
+	EXPECT_EQ(manifold.contactCount >= 5, true);
+
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.005f) < REAL_EPSILON, true);
+
+	EXPECT_EQ(std::abs(manifold.normal[0]) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.normal[1] + 1.0f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.normal[2]) < REAL_EPSILON, true);
+
+
+	//box-tet, 5 contact points, reverse
+	CollisionDetection<float>::request(manifold, b0, t0);
+	EXPECT_EQ(manifold.contactCount >= 5, true);
+
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.005f) < REAL_EPSILON, true);
+
+	EXPECT_EQ(std::abs(manifold.normal[0]) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.normal[1] - 1.0f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.normal[2]) < REAL_EPSILON, true);
+
+
+	//no intersection
+	t0 = Tet(Coord3D(0.45f, 0.20095f, 0.45f), Coord3D(0.45f, 0.445f, 0.45f),
+		Coord3D(0.7f, 0.20095f, 0.45f), Coord3D(0.45f, 0.20095f, 0.7f));
+	CollisionDetection<float>::request(manifold, b0, t0);
+	EXPECT_EQ(manifold.contactCount == 0, true);
+
+
 
 
 	/*printf("%d contact normal: %.3lf %.3lf %.3lf\n", manifold.contactCount, manifold.normal[0], manifold.normal[1], manifold.normal[2]);
