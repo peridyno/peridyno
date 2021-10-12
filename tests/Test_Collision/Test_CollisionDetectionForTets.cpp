@@ -181,7 +181,17 @@ TEST(TET, collision)
 	EXPECT_EQ(manifold.contactCount == 0, true);
 
 
+	//no intersection, one intersection point
+	t0 = Tet(Coord3D(0.45f, 0.40095f, 0.45f), Coord3D(0.45f, 0.19f, 0.45f),
+		Coord3D(0.7f, 0.40095f, 0.45f), Coord3D(0.45f, 0.40095f, 0.7f));
+	CollisionDetection<float>::request(manifold, b0, t0);
+	EXPECT_EQ(manifold.contactCount == 1, true);
 
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.01f) < REAL_EPSILON, true);
+
+	EXPECT_EQ(std::abs(manifold.normal[0]) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.normal[1] - 1.0f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.normal[2]) < REAL_EPSILON, true);
 
 	/*printf("%d contact normal: %.3lf %.3lf %.3lf\n", manifold.contactCount, manifold.normal[0], manifold.normal[1], manifold.normal[2]);
 	printf("contact point 1: %.3lf %.3lf %.3lf\n", 
