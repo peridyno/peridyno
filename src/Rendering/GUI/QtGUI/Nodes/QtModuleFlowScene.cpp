@@ -27,7 +27,7 @@ QtModuleFlowScene::QtModuleFlowScene(QObject * parent, QtNodeWidget* node_widget
 	: QtFlowScene(parent)
 {
 	auto classMap = dyno::Object::getClassMap();
-
+	m_parent_node = node_widget;
 	auto ret = std::make_shared<QtNodes::DataModelRegistry>();
 	int id = 0;
 	for (auto const c : *classMap)
@@ -91,6 +91,41 @@ QtModuleFlowScene::~QtModuleFlowScene()
 
 }
 
+
+void QtModuleFlowScene::pushModule()
+{
+	if (m_parent_node == nullptr) 
+	{
+		return;
+	}
+	dyno::Node *selectedNode = m_parent_node->getNode().get();
+	// clear
+	// selectedNode->graphicsPipeline()->clear();
+	
+	// push
+	auto const & nodes = this->nodes();
+	for (auto const & pair : nodes)
+	{
+		auto const &node = pair.second;
+		auto const &module_widget = dynamic_cast<QtNodes::QtModuleWidget*>(node->nodeDataModel());
+		if (module_widget == nullptr) 
+		{
+			continue;
+		}
+
+		auto const &module = module_widget->getModule();
+		if (module == nullptr) 
+		{
+			continue;
+		}		
+
+		std::string class_name = module->getClassInfo()->getClassName();
+		if(class_name.find("virtual") == std::string::npos)
+		{
+			selectedNode->graphicsPipeline()->pushModule(std::shared_ptr<dyno::Module>(module));		
+		}
+	}
+}
 
 void QtModuleFlowScene::showNodeFlow(Node* node)
 {

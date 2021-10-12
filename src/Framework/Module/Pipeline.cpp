@@ -39,8 +39,22 @@ namespace dyno
 
 		mModuleUpdated = true;
 		mModuleMap[id] = m.get();
-
+		
 		mNode->addModule(m);
+	}
+	
+	void Pipeline::clear()
+	{
+		for (auto const &pair : mModuleMap)
+		{
+			mNode->deleteModule(std::shared_ptr<Module>(pair.second));
+		}
+
+		mModuleList.clear();
+		mPersistentModule.clear();
+		mModuleMap.clear();
+		
+		mModuleUpdated = true;
 	}
 
 	void Pipeline::pushPersistentModule(std::shared_ptr<Module> m)

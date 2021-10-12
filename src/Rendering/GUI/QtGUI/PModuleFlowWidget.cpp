@@ -19,6 +19,7 @@ namespace dyno
 		auto saveAction = menuBar->addAction("Save..");
 		auto loadAction = menuBar->addAction("Load..");
 		auto clearAction = menuBar->addAction("Clear..");
+		auto pushAction = menuBar->addAction("PushModule..");
 
 		QVBoxLayout *l = new QVBoxLayout(this);
 
@@ -36,6 +37,9 @@ namespace dyno
 
 		QObject::connect(clearAction, &QAction::triggered,
 			module_scene, &QtModuleFlowScene::clearScene);
+
+		QObject::connect(pushAction, &QAction::triggered,
+			module_scene, &QtModuleFlowScene::pushModule);
 	}
 
 	PModuleFlowWidget::~PModuleFlowWidget()

@@ -64,9 +64,9 @@ int main()
 	QtApp window;
 	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
-
-	CreateScene();
-
+	fprintf(stderr, "Begin\n\n\n");
+	// CreateScene();
+	// fprintf(stderr, "CreateScene\n\n\n");
 	window.mainLoop();
 
 	delete engine;

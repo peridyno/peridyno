@@ -12,6 +12,7 @@
 #include "BlockState.h"
 #include "BlockGeometry.h"
 #include "BlockData.h"
+#include "FieldData.h"
 #include "QtBlockGraphicsObject.h"
 #include "QtConnectionGraphicsObject.h"
 #include "Serializable.h"
@@ -100,6 +101,10 @@ public Q_SLOTS: // data propagation
   /// update the graphic part if the size of the embeddedwidget changes
   void
   onNodeSizeUpdated();
+
+  // Return Field corresponding Block's #index port 
+  FBase* 
+  getField(PortIndex index, PortType type);
 
 private:
 

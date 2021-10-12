@@ -25,6 +25,9 @@ public:
 
 	~QtModuleFlowScene();
 
+public:
+	// push and refresh modules to parent_node's graphicsPipeline
+	void pushModule();
 
 
 public Q_SLOTS:
@@ -34,6 +37,7 @@ public Q_SLOTS:
 
 private:
 	std::weak_ptr<dyno::Node> m_node;
+	QtNodeWidget* m_parent_node;
 };
 
 }
