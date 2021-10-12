@@ -44,6 +44,12 @@ namespace dyno
 		Vec3f mEyePos;
 		Vec3f mTargetPos;
 		Vec3f mRotAxis;
+
+		float mFocusDistMax = 10.0f;
+		float mFocusDistMin = 0.1f;
+
+		float mSpeed = 2.0;
+		float mZoomSpeed = 1.0f;
 	};
 
 }

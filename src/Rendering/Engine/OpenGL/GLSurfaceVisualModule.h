@@ -38,9 +38,6 @@ namespace dyno
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
-		void updateStarted() override;
-		void updateEnded() override;
-
 	private:
 
 		gl::Program mShaderProgram;

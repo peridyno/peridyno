@@ -38,7 +38,7 @@ namespace dyno
 		if (this->ptr_TetrahedronSet == nullptr) {
 			return false;
 		}
-		this->ptr_triangles = this->ptr_TetrahedronSet->getTriangles();
+		this->ptr_triangles = &( this->ptr_TetrahedronSet->getTriangles() );
 		this->ptr_tri2tet = &( this->ptr_TetrahedronSet->getTri2Tet() );
 		this->ptr_vertices = &( this->ptr_TetrahedronSet->getPoints() );
 	}

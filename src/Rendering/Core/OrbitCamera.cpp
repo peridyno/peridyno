@@ -90,8 +90,21 @@ namespace dyno
 	}
 
 	void OrbitCamera::zoom(float amount) {
-		mFov += amount / 10;
-		mFov = std::max(mFov, 0.01f);
+		// calculate the view direction
+		Quat1f oldQuat(mRotAngle, mRotAxis);
+		oldQuat.w = -oldQuat.w;
+		Vec3f curViewdir = oldQuat.rotate(Vec3f(0, 0, -1));
+
+		Vec3f eyeCenter = mEyePos + mFocusDist * curViewdir;
+
+		float logDist = std::log10(mFocusDist);
+		float logMin = std::log10(mFocusDistMin);
+		float logMax = std::log10(mFocusDistMax);
+		float frac = (logDist - logMax) / (logMax - logMin);
+
+		mFocusDist += mZoomSpeed * amount * std::pow(10.0f, frac);
+		mFocusDist = std::min(std::max(mFocusDist, mFocusDistMin), mFocusDistMax);
+		mEyePos = eyeCenter - mFocusDist * curViewdir;
 	}
 
 	Vec3f OrbitCamera::getPosition(float x, float y) {
@@ -153,7 +166,7 @@ namespace dyno
 		float dx = tx - mRegX;
 		float dy = ty - mRegY;
 		Quat1f q = getQuaternion(mRegX, mRegY, tx, ty);
-		rotate(dx, -dy);
+		rotate(mSpeed*dx, -mSpeed * dy);
 
 		registerPoint(x, y);
 	}
@@ -165,7 +178,7 @@ namespace dyno
 		float dx = tx - mRegX;
 		float dy = ty - mRegY;
 		float dz = 0;
-		translate(Vec3f(-dx, -dy, -dz));
+		translate(mSpeed*Vec3f(-dx, -dy, -dz));
 
 		registerPoint(x, y);
 	}

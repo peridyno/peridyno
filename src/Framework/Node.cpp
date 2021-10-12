@@ -381,7 +381,6 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 void Node::doTraverseBottomUp(Action* act)
 {
 	act->start(this);
-
 	auto iter = mAncestors.begin();
 	for (; iter != mAncestors.end(); iter++)
 	{

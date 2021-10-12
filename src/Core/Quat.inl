@@ -1,4 +1,3 @@
-#include "Quat.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -10,10 +9,10 @@ namespace dyno
 {
 	template <typename Real>
 	DYN_FUNC Quat<Real>::Quat() :
-		w(0),
+		w(1),
 		x(0),
 		y(0),
-		z(1)
+		z(0)
 	{
 	}
 
@@ -50,12 +49,12 @@ namespace dyno
 	template <typename Real>
 	DYN_FUNC Quat<Real>::Quat(const Real yaw, const Real pitch, const Real roll)
 	{
-		Real cy = cos(yaw * 0.5);
-		Real sy = sin(yaw * 0.5);
-		Real cp = cos(pitch * 0.5);
-		Real sp = sin(pitch * 0.5);
-		Real cr = cos(roll * 0.5);
-		Real sr = sin(roll * 0.5);
+		Real cy = glm::cos(Real(yaw * 0.5));
+		Real sy = glm::sin(Real(yaw * 0.5));
+		Real cp = glm::cos(Real(pitch * 0.5));
+		Real sp = glm::sin(Real(pitch * 0.5));
+		Real cr = glm::cos(Real(roll * 0.5));
+		Real sr = glm::sin(Real(roll * 0.5));
 
 		w = cr * cp * cy + sr * sp * sy;
 		x = sr * cp * cy - cr * sp * sy;
@@ -204,7 +203,7 @@ namespace dyno
 		// pitch (y-axis rotation)
 		Real sinp = 2 * (w * y - z * x);
 		if (glm::abs(sinp) >= 1)
-			pitch = sinp > 0 ? M_PI / 2 : -M_PI / 2; // use 90 degrees if out of range
+			pitch = sinp > 0 ? Real(M_PI / 2) : -Real(M_PI / 2); // use 90 degrees if out of range
 		else
 			pitch = glm::asin(sinp);
 
@@ -386,9 +385,9 @@ namespace dyno
 		axis.normalize();
 	}
 
-	template class Quat<float>;
-	template class Quat<double>;
-	//convenient typedefs
-	typedef Quat<float> Quat1f;
-	typedef Quat<double> Quat1d;
+	//template class Quat<float>;
+	//template class Quat<double>;
+	////convenient typedefs
+	//typedef Quat<float> Quat1f;
+	//typedef Quat<double> Quat1d;
 }

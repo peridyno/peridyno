@@ -56,7 +56,7 @@ namespace dyno
 				{
 					(*iter)->initialize();
 				}
-
+				
 				node->graphicsPipeline()->update();
 			}
 		};

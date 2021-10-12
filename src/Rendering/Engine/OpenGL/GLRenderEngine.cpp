@@ -91,7 +91,7 @@ namespace dyno
 
 		m_camera->zoom(3.0f);
 		m_camera->setClipNear(0.01f);
-		m_camera->setClipFar(10.0f);
+		m_camera->setClipFar(20.0f);
 
 	}
 

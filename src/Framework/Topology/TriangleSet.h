@@ -89,7 +89,7 @@ namespace dyno
 		TriangleSet();
 		~TriangleSet();
 
-		DArray<Triangle>* getTriangles() { return &m_triangles; }
+		DArray<Triangle>& getTriangles() { return m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
 
 		DArrayList<int>& getVertex2Triangles();

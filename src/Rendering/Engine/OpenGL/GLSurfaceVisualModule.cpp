@@ -30,27 +30,17 @@ namespace dyno
 		return true;
 	}
 
-	void GLSurfaceVisualModule::updateStarted()
-	{
-		std::cout << "Update for GLSurfaceVisualModule started!" << std::endl;
-	}
-
-	void GLSurfaceVisualModule::updateEnded()
-	{
-		std::cout << "Update for GLSurfaceVisualModule ended!" << std::endl;
-	}
-
 	void GLSurfaceVisualModule::updateGL()
 	{
 		auto triSet = this->inTriangleSet()->getDataPtr();
 
-		auto triangles = triSet->getTriangles();
-		auto vertices = triSet->getPoints();
+		auto& triangles = triSet->getTriangles();
+		auto& vertices = triSet->getPoints();
 
-		mDrawCount = triangles->size() * 3;
+		mDrawCount = triangles.size() * 3;
 
 		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-		mIndexBuffer.loadCuda(triangles->begin(), triangles->size() * sizeof(unsigned int) * 3);
+		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
 	}
 
 	void GLSurfaceVisualModule::paintGL(RenderMode mode)

@@ -8,6 +8,7 @@ namespace dyno {
 
 	/*
 	 * SquareMatrix<T,3> are defined for C++ fundamental integers types and floating-point types
+	 * Elements are stored in a column-major order
 	 */
 	template <typename T>
 	class SquareMatrix<T, 3>
