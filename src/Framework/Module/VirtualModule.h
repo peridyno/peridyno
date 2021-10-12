@@ -20,14 +20,14 @@ namespace dyno
 {
     // Make a field mapping from NodeFlowScene to ModelFlowScene
     template<typename TDataType>
-    class VirtualModel : public Module
+    class VirtualModule : public Module
 	{
-        DECLARE_CLASS_1(VirtualModel, TDataType)
+        DECLARE_CLASS_1(VirtualModule, TDataType)
 	public:
-        VirtualModel();
-		virtual ~VirtualModel();
+        VirtualModule();
+		virtual ~VirtualModule();
 
-		std::string getModuleType() override { return "VirtualModel"; }
+		std::string getModuleType() override { return "VirtualModule"; }
 
 	};
 }

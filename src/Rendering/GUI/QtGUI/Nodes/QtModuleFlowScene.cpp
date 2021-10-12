@@ -10,7 +10,7 @@
 #include "QtFlowView.h"
 #include "DataModelRegistry.h"
 
-#include "Module/VirtualModel.h"
+#include "Module/VirtualModule.h"
 
 
 namespace QtNodes
@@ -56,7 +56,7 @@ QtModuleFlowScene::QtModuleFlowScene(QObject * parent, QtNodeWidget* node_widget
 		QString str_vir = QString::fromStdString(selectedNode->getClassInfo()->getClassName() + "(virtual)");
 		if(selectedNode != nullptr)
 		{
-			dyno::Object* obj = dyno::Object::createObject("VirtualModel<DataType3f>");
+			dyno::Object* obj = dyno::Object::createObject("VirtualModule<DataType3f>");
 			dyno::Module* module_vir = dynamic_cast<dyno::Module*>(obj);
 			if(module_vir != nullptr)
 			{

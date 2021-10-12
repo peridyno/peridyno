@@ -81,14 +81,14 @@ namespace QtNodes
 	{
 		//	return m_name;
 		std::string class_name = m_module->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModel") != std::string::npos) return QString::fromStdString(m_module->getName());
+		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(m_module->getName());
 		else return QString::fromStdString(class_name);		
 	}
 
 	QString QtModuleWidget::name() const
 	{
 		std::string class_name = m_module->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModel") != std::string::npos) return QString::fromStdString(m_module->getName());
+		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(m_module->getName());
 		else return QString::fromStdString(class_name);
 	}
 
