@@ -167,7 +167,19 @@ namespace dyno
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
 			CollisionDetection<Real>::request(manifold, tetA, tetB);
 		}
-		//printf("narrow cnt = %d\n", manifold.contactCount);
+		else if (eleType_i == CT_TET && eleType_j == CT_BOX)
+		{
+			auto tetA = tets[ids.bodyId1 - elementOffset.tetOffset];
+			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
+			CollisionDetection<Real>::request(manifold, tetA, boxB);
+		}
+		else if (eleType_i == CT_BOX && eleType_j == CT_TET)
+		{
+			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
+			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
+			CollisionDetection<Real>::request(manifold, boxA, tetB);
+		}
+		printf("narrow cnt = %d\n", manifold.contactCount);
 		count[tId] = manifold.contactCount;
 	}
 
@@ -227,7 +239,18 @@ namespace dyno
 			/*printf("%.3lf %.3lf %.3lf  %.6lf\n", manifold.normal[0], manifold.normal[1], manifold.normal[2], 
 				manifold.contacts[0].penetration);*/
 		}
-
+		else if (eleType_i == CT_TET && eleType_j == CT_BOX)
+		{
+			auto tetA = tets[ids.bodyId1 - elementOffset.tetOffset];
+			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
+			CollisionDetection<Real>::request(manifold, tetA, boxB);
+		}
+		else if (eleType_i == CT_BOX && eleType_j == CT_TET)
+		{
+			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
+			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
+			CollisionDetection<Real>::request(manifold, boxA, tetB);
+		}
 		int offset = prefix[tId];
 		for (int n = 0; n < manifold.contactCount; n++)
 		{

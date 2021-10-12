@@ -917,9 +917,9 @@ namespace dyno
 
 		for (unsigned char i = 0; i < 4; i++)
 		{
-			if (abs(tet1.v[i].dot(axisNormal) - boundary1) < EPSILON)
+			if (abs(tet1.v[i].dot(axisNormal) - boundary1) < abs(sMax))
 				boundaryPoints1[cnt1 ++] = i;
-			if (abs(tet2.v[i].dot(axisNormal) - boundary2) < EPSILON)
+			if (abs(tet2.v[i].dot(axisNormal) - boundary2) < abs(sMax))
 				boundaryPoints2[cnt2 ++] = i;
 		}
 		//printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
@@ -1088,7 +1088,7 @@ namespace dyno
 
 		for (unsigned char i = 0; i < 4; i++)
 		{
-			if (abs(tet.v[i].dot(axisNormal) - boundary1) < EPSILON)
+			if (abs(tet.v[i].dot(axisNormal) - boundary1) < abs(sMax))
 				boundaryPoints1[cnt1++] = i;
 		}
 
@@ -1099,38 +1099,38 @@ namespace dyno
 		Coord3D extent = box.extent;
 		Coord3D p;
 		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < EPSILON)
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
-		////printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
+		//printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
 		if (cnt1 == 1 || cnt2 == 1)
 		{
 			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
@@ -1155,8 +1155,8 @@ namespace dyno
 			}
 			else //cnt2 == 4
 			{
-				if (cnt2 != 4)
-					printf("?????????\n");
+				//if (cnt2 != 4)
+				//	printf("?????????\n");
 
 				
 				for(int tmp_i = 1; tmp_i < 4; tmp_i ++)
@@ -1175,18 +1175,29 @@ namespace dyno
 							}
 						}
 
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[0][0], boundaryPoints2[0][1], boundaryPoints2[0][2]);
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[1][0], boundaryPoints2[1][1], boundaryPoints2[1][2]);
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[2][0], boundaryPoints2[2][1], boundaryPoints2[2][2]);
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[3][0], boundaryPoints2[3][1], boundaryPoints2[3][2]);
+
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				Triangle3D t2(boundaryPoints2[0], boundaryPoints2[1], boundaryPoints2[2]);
 				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
 				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+
+				/*printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
+				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2], dirTmp1.cross(axisNormal)[0], dirTmp1.cross(axisNormal)[1], dirTmp1.cross(axisNormal)[2]);
+				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2], dirTmp2.cross(axisNormal)[0], dirTmp2.cross(axisNormal)[1], dirTmp2.cross(axisNormal)[2]);*/
+
+
+				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s1.v0;
 					m.contactCount++;
 				}
-				if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+				if (dirTmp2.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s1.v1;
@@ -1195,13 +1206,17 @@ namespace dyno
 				t2 = Triangle3D(boundaryPoints2[3], boundaryPoints2[1], boundaryPoints2[2]);
 				dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
 				dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+				
+				/*printf("%.3lf %.3lf %.3lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2]);
+				printf("%.3lf %.3lf %.3lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2]);*/
+
+				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s1.v0;
 					m.contactCount++;
 				}
-				if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+				if (dirTmp2.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s1.v1;
@@ -1219,10 +1234,10 @@ namespace dyno
 						dir.direction()[0], dir.direction()[1], dir.direction()[2],
 						axisNormal[0], axisNormal[1], axisNormal[2],
 						dir.direction().normalize().cross(axisNormal).norm());*/
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-4)
 					{
 						//printf("Yes\n");
-						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+						if ((dir.v0 - s1.v0).norm() > 1e-4 && (dir.v0 - s1.v1).norm() > 1e-4)
 						{
 							m.contacts[m.contactCount].penetration = sMax;
 							m.contacts[m.contactCount].position = dir.v0;
@@ -1235,6 +1250,9 @@ namespace dyno
 		else if (cnt1 == 3)
 		{
 			Triangle3D t1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]], tet.v[boundaryPoints1[2]]);
+
+			//printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
+
 			if (cnt2 == 2)
 			{
 
@@ -1244,13 +1262,13 @@ namespace dyno
 
 				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
 				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
-				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s2.v0;
 					m.contactCount++;
 				}
-				if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+				if (dirTmp2.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s2.v1;
@@ -1260,9 +1278,9 @@ namespace dyno
 				{
 					Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
 					Segment3D dir = s2.proximity(s1);
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-4)
 					{
-						if ((dir.v0 - s2.v0).norm() > 1e-5 && (dir.v0 - s2.v1).norm() > 1e-5)
+						if ((dir.v0 - s2.v0).norm() > 1e-4 && (dir.v0 - s2.v1).norm() > 1e-4)
 						{
 							m.contacts[m.contactCount].penetration = sMax;
 							m.contacts[m.contactCount].position = dir.v0;
@@ -1276,8 +1294,8 @@ namespace dyno
 				Triangle3D t1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]], tet.v[boundaryPoints1[2]]);
 				//Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
 
-				if (cnt2 != 4)
-					printf("?????????\n");
+				//if (cnt2 != 4)
+				//	printf("?????????\n");
 
 
 				for (int tmp_i = 1; tmp_i < 4; tmp_i++)
@@ -1300,75 +1318,83 @@ namespace dyno
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
 				for(int i = 0; i < 4; i ++)
-					if ((Point3D(boundaryPoints2[i]).project(t1).origin - boundaryPoints2[i]).cross(t1.normal()).norm() < 1e-5)
+					if ((Point3D(boundaryPoints2[i]).project(t1).origin - boundaryPoints2[i]).cross(t1.normal()).norm() < 1e-4)
 					{
 						m.contacts[m.contactCount].penetration = sMax;
 						m.contacts[m.contactCount].position = boundaryPoints2[i];
 						m.contactCount++;
+						//printf("b");
 					}
 
 				for (int i = 0; i < 3; i++)
 				{
 					Triangle3D t2(boundaryPoints2[0], boundaryPoints2[1], boundaryPoints2[2]);
-					if ((Point3D(t1.v[i]).project(t2).origin - t1.v[i]).cross(t2.normal()).norm() < 1e-5)
+					if ((Point3D(t1.v[i]).project(t2).origin - t1.v[i]).cross(t2.normal()).norm() < 1e-4)
 					{
 						m.contacts[m.contactCount].penetration = sMax;
 						m.contacts[m.contactCount].position = t1.v[i];
 						m.contactCount++;
+						//printf("a1");
 					}
 					t2 = Triangle3D(boundaryPoints2[3], boundaryPoints2[1], boundaryPoints2[2]);
-					if ((Point3D(t1.v[i]).project(t2).origin - t1.v[i]).cross(t2.normal()).norm() < 1e-5)
+					if ((Point3D(t1.v[i]).project(t2).origin - t1.v[i]).cross(t2.normal()).norm() < 1e-4)
 					{
 						m.contacts[m.contactCount].penetration = sMax;
 						m.contacts[m.contactCount].position = t1.v[i];
 						m.contactCount++;
+						//printf("a2");
 					}
 					
 
 					Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
 					Segment3D s2(boundaryPoints2[0], boundaryPoints2[1]);
 					Segment3D dir = s1.proximity(s2);
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) || dir.direction().cross(axisNormal).norm() < 1e-4)
 					{
-						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+						if ((dir.v0 - s1.v0).norm() > 1e-4 && (dir.v0 - s1.v1).norm() > 1e-4)
 						{
 							m.contacts[m.contactCount].penetration = sMax;
 							m.contacts[m.contactCount].position = dir.v0;
 							m.contactCount++;
+							//printf("c");
 						}
+
 					}
 
 					s2 = Segment3D(boundaryPoints2[0], boundaryPoints2[2]);
 					dir = s1.proximity(s2);
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) || dir.direction().cross(axisNormal).norm() < 1e-4)
 					{
-						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+						if ((dir.v0 - s1.v0).norm() > 1e-4 && (dir.v0 - s1.v1).norm() > 1e-4)
 						{
 							m.contacts[m.contactCount].penetration = sMax;
 							m.contacts[m.contactCount].position = dir.v0;
 							m.contactCount++;
+							//printf("c");
 						}
 					}
 					s2 = Segment3D(boundaryPoints2[3], boundaryPoints2[2]);
 					dir = s1.proximity(s2);
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) || dir.direction().cross(axisNormal).norm() < 1e-4)
 					{
-						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+						if ((dir.v0 - s1.v0).norm() > 1e-4 && (dir.v0 - s1.v1).norm() > 1e-4)
 						{
 							m.contacts[m.contactCount].penetration = sMax;
 							m.contacts[m.contactCount].position = dir.v0;
 							m.contactCount++;
+							//printf("c");
 						}
 					}
 					s2 = Segment3D(boundaryPoints2[3], boundaryPoints2[1]);
 					dir = s1.proximity(s2);
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) || dir.direction().cross(axisNormal).norm() < 1e-4)
 					{
-						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+						if ((dir.v0 - s1.v0).norm() > 1e-4 && (dir.v0 - s1.v1).norm() > 1e-4)
 						{
 							m.contacts[m.contactCount].penetration = sMax;
 							m.contacts[m.contactCount].position = dir.v0;
 							m.contactCount++;
+							//printf("c");
 						}
 					}
 					
@@ -1538,7 +1564,7 @@ namespace dyno
 		}
 
 		//u
-		axisTmp = tet.face(i).normal();
+		axisTmp = box.u / box.u.norm();
 		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, box) == false)
 		{
 			m.contactCount = 0;
@@ -1661,5 +1687,6 @@ namespace dyno
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Tet3D& tet)
 	{
 		request(m, tet, box);
+		m.normal *= -1;
 	}
 }

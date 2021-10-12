@@ -12,7 +12,8 @@
 using namespace std;
 using namespace dyno;
 
-int main()
+
+void scene_two_tets()
 {
 	SceneGraph& scene = SceneGraph::getInstance();
 
@@ -52,7 +53,52 @@ int main()
 	window.mainLoop();
 
 	delete engine;
+}
 
+
+void scene_tet_box()
+{
+	SceneGraph& scene = SceneGraph::getInstance();
+
+	std::shared_ptr<RigidBodySystem<DataType3f>> rigid = scene.createNewScene<RigidBodySystem<DataType3f>>();
+
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	BoxInfo box;
+	box.center = Vec3f(0.5, 0.1, 0.5);
+	box.halfLength = Vec3f(0.1, 0.1, 0.1);
+	rigid->addBox(box, rigidBody);
+
+	TetInfo tet0;
+	tet0.v[0] = Vec3f(0.45f, 0.25f, 0.45f);
+	tet0.v[1] = Vec3f(0.45f, 0.5f, 0.45f);
+	tet0.v[2] = Vec3f(0.7f, 0.25f, 0.45f);
+	tet0.v[3] = Vec3f(0.45f, 0.25f, 0.7f);
+	rigid->addTet(tet0, rigidBody);
+
+	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+	rigid->currentTopology()->connect(mapper->inDiscreteElements());
+	rigid->graphicsPipeline()->pushModule(mapper);
+
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	sRender->setColor(Vec3f(1, 1, 0));
+	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+	rigid->graphicsPipeline()->pushModule(sRender);
+
+	GLRenderEngine* engine = new GLRenderEngine;
+
+	GlfwApp window;
+	window.setRenderEngine(engine);
+	window.createWindow(1280, 768);
+	window.mainLoop();
+
+	delete engine;
+}
+
+int main()
+{
+	//scene_two_tets();
+	scene_tet_box();
 	return 0;
 }
 
