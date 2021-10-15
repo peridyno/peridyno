@@ -29,11 +29,20 @@ namespace dyno
 
 	DYN_FUNC inline ElementType checkElementType(int id, ElementOffset offset)
 	{
-		return id < offset.boxOffset ?
-			CT_SPHERE : (
-				id < offset.tetOffset ? CT_BOX : (
-					id < offset.segOffset ? CT_TET : (
-						id < offset.triOffset ? CT_SEG : CT_TRI)));
+		if (id >= offset.sphereStart && id < offset.sphereEnd)
+			return CT_SPHERE;
+
+		if (id >= offset.boxOffset && id < offset.boxEnd)
+			return CT_BOX;
+
+		if (id >= offset.tetOffset && id < offset.tetEnd)
+			return CT_TET;
+
+		if (id >= offset.segOffset && id < offset.segEnd)
+			return CT_SEG;
+
+		if (id >= offset.triOffset && id < offset.triEnd)
+			return CT_TRI;
 	}
 
 	template<typename TDataType>
@@ -55,6 +64,12 @@ namespace dyno
 		void scale(Real s);
 
 		uint totalSize();
+
+		uint sphereIndex();
+		uint boxIndex();
+		uint capsuleIndex();
+		uint tetIndex();
+		uint triangleIndex();
 
 		ElementOffset calculateElementOffset();
 

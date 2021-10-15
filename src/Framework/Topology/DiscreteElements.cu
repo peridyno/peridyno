@@ -28,6 +28,36 @@ namespace dyno
 		return m_boxes.size() + m_spheres.size() + m_tets.size() + m_caps.size() + m_tris.size();
 	}
 
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::sphereIndex()
+	{
+		return 0;
+	}
+
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::triangleIndex()
+	{
+		return capsuleIndex() + this->getCaps().size();
+	}
+
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::tetIndex()
+	{
+		return boxIndex() + this->getBoxes().size();
+	}
+
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::capsuleIndex()
+	{
+		return tetIndex() + this->getCaps().size();
+	}
+
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::boxIndex()
+	{
+		return sphereIndex() + this->getSpheres().size();
+	}
+
 // 	template<typename TDataType>
 // 	bool DiscreteElements<TDataType>::initializeImpl()
 // 	{
@@ -55,16 +85,16 @@ namespace dyno
 	ElementOffset DiscreteElements<TDataType>::calculateElementOffset()
 	{
 		ElementOffset elementOffset;
-		elementOffset.sphereStart = 0;
-		elementOffset.sphereEnd = this->getSpheres().size();
-		elementOffset.boxOffset = elementOffset.sphereEnd;
-		elementOffset.boxEnd = elementOffset.boxOffset + this->getBoxes().size();
-		elementOffset.tetOffset = elementOffset.boxEnd;
-		elementOffset.tetEnd = elementOffset.tetOffset + this->getTets().size();
-		elementOffset.segOffset = elementOffset.tetEnd;
-		elementOffset.segEnd = elementOffset.segOffset + this->getCaps().size();
-		elementOffset.triOffset = elementOffset.segEnd;
-		elementOffset.triEnd = elementOffset.triOffset + this->getTris().size();
+		elementOffset.sphereStart = sphereIndex();
+		elementOffset.sphereEnd = sphereIndex() + this->getSpheres().size();
+		elementOffset.boxOffset = boxIndex();
+		elementOffset.boxEnd = boxIndex() + this->getBoxes().size();
+		elementOffset.tetOffset = tetIndex();
+		elementOffset.tetEnd = tetIndex() + this->getTets().size();
+		elementOffset.segOffset = capsuleIndex();
+		elementOffset.segEnd = capsuleIndex() + this->getCaps().size();
+		elementOffset.triOffset = triangleIndex();
+		elementOffset.triEnd = triangleIndex() + this->getTris().size();
 
 		return elementOffset;
 	}

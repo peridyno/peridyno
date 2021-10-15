@@ -92,7 +92,7 @@ namespace dyno
 			friction = 0.0f;
 			restitution = 0.0f;
 			motionType = MT_Static;
-			collisionType = CT_AllObjects;
+			collisionMask = CT_AllObjects;
 			shapeType = ST_Other;
 			angle = Quat1f(0.0f, 0.0f, 0.0f, 1.0f);
 		}
@@ -121,6 +121,6 @@ namespace dyno
 		
 		ShapeType shapeType;
 
-		CollisionMask collisionType;
+		CollisionMask collisionMask;
 	};
 }

@@ -15,6 +15,7 @@ namespace dyno
 
 		mElementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
 		this->currentTopology()->connect(mElementQuery->inDiscreteElements());
+		this->stateCollisionMask()->connect(mElementQuery->inCollisionMask());
 	}
 
 	template<typename TDataType>
@@ -114,6 +115,8 @@ namespace dyno
 		DArray<Coord> angularVelocity,
 		DArray<Quat> rotation_q,
 		DArray<Matrix> inertia,
+		DArray<CollisionMask> mask,
+		DArray<ShapeType> shape,
 		DArray<RigidBodyInfo> states,
 		ElementOffset offset,
 		int start_mesh)
@@ -131,6 +134,8 @@ namespace dyno
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
 		inertia[tId] = states[tId].inertia;
+		mask[tId] = states[tId].collisionMask;
+		shape[tId] = states[tId].shapeType;
 
 // 		if (tId >= offset.segOffset) {}
 // 		else if (tId >= offset.tetOffset) pos[tId] = (tets[tId - offset.tetOffset].v[0] + tets[tId - offset.tetOffset].v[1] + tets[tId - offset.tetOffset].v[2] + tets[tId - offset.tetOffset].v[3]) / 4.0f;
@@ -225,6 +230,8 @@ namespace dyno
 		this->currentMass()->setElementCount(sizeOfRigids);
 		this->currentInertia()->setElementCount(sizeOfRigids);
 		this->currentQuaternion()->setElementCount(sizeOfRigids);
+		this->stateCollisionMask()->setElementCount(sizeOfRigids);
+		this->stateShapeType()->setElementCount(sizeOfRigids);
 
 		mBoundaryContactCounter.resize(sizeOfRigids);
 
@@ -237,6 +244,8 @@ namespace dyno
 			this->currentAngularVelocity()->getData(),
 			this->currentQuaternion()->getData(),
 			this->currentInertia()->getData(),
+			this->stateCollisionMask()->getData(),
+			this->stateShapeType()->getData(),
 			mDeviceRigidBodyStates,
 			eleOffset,
 			sizeOfRigids);

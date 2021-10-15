@@ -60,6 +60,8 @@ namespace dyno {
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
+		DEF_ARRAY_IN(CollisionMask, CollisionMask, DeviceType::GPU, "");
+
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
 
 

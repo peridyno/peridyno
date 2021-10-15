@@ -93,6 +93,10 @@ namespace dyno
 
 		DEF_EMPTY_CURRENT_ARRAY(Quaternion, TQuat, DeviceType::GPU, "Quaternion");
 
+		DEF_ARRAY_STATE(CollisionMask, CollisionMask, DeviceType::GPU, "Collision mask for each rigid body");
+
+		DEF_ARRAY_STATE(ShapeType, ShapeType, DeviceType::GPU, "Shape types");
+
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 

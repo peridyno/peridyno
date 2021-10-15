@@ -115,10 +115,20 @@ namespace dyno
 		boundingBox[tId] = box;
 	}
 
+	__device__ inline bool checkCollision(CollisionMask cType0, CollisionMask cType1, ElementType eleType0, ElementType eleType1)
+	{
+		bool canCollide = (cType0 & eleType1) != 0 && (cType1 & eleType0) > 0;
+		if (!canCollide)
+			return false;
+
+		return true;
+	}
+
 	template<typename Box3D>
 	__global__ void NEQ_Narrow_Count(
 		DArray<int> count,
 		DArray<ContactId> nbr,
+		DArray<CollisionMask> mask,
 		DArray<Box3D> boxes,
 		DArray<Sphere3D> spheres,
 		DArray<Tet3D> tets,
@@ -187,6 +197,7 @@ namespace dyno
 	__global__ void NEQ_Narrow_Set(
 		DArray<ContactPair> nbr_cons,
 		DArray<ContactId> nbr,
+		DArray<CollisionMask> mask,
 		DArray<Box3D> boxes,
 		DArray<Sphere3D> spheres,
 		DArray<Tet3D> tets,
@@ -2533,6 +2544,7 @@ namespace dyno
 	void NeighborElementQuery<TDataType>::compute()
 	{
 		auto inTopo = this->inDiscreteElements()->getDataPtr();
+		auto& inMask = this->inCollisionMask()->getData();
 
 		if (this->outContacts()->isEmpty())
 			this->outContacts()->allocate();
@@ -2701,6 +2713,7 @@ namespace dyno
 			NEQ_Narrow_Count,
 			contactNum,
 			deviceIds,
+			inMask,
 			inTopo->getBoxes(),
 			inTopo->getSpheres(),
 			inTopo->getTets(),
@@ -2724,6 +2737,7 @@ namespace dyno
 				NEQ_Narrow_Set,
 				contacts,
 				deviceIds,
+				inMask,
 				inTopo->getBoxes(),
 				inTopo->getSpheres(),
 				inTopo->getTets(),
