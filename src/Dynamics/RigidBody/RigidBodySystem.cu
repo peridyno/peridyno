@@ -43,7 +43,7 @@ namespace dyno
 				0, lx*lx + lz * lz, 0,
 				0, 0, lx*lx + ly * ly);
 
-		bd.shapeType = ST_Box;
+		bd.shapeType = ET_BOX;
 		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
@@ -71,7 +71,7 @@ namespace dyno
 				0, I11, 0,
 				0, 0, I11);
 
-		bd.shapeType = ST_Sphere;
+		bd.shapeType = ET_SPHERE;
 		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
@@ -99,7 +99,7 @@ namespace dyno
 				0, I11, 0,
 				0, 0, I11);
 
-		bd.shapeType = ST_Tet;
+		bd.shapeType = ET_TET;
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
@@ -116,14 +116,10 @@ namespace dyno
 		DArray<Quat> rotation_q,
 		DArray<Matrix> inertia,
 		DArray<CollisionMask> mask,
-		DArray<ShapeType> shape,
 		DArray<RigidBodyInfo> states,
-		ElementOffset offset,
-		int start_mesh)
+		ElementOffset offset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= start_mesh) return;
-
 		if (tId >= rotation_q.size())
 			return;
 		
@@ -135,12 +131,6 @@ namespace dyno
 		pos[tId] = states[tId].position;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
-		shape[tId] = states[tId].shapeType;
-
-// 		if (tId >= offset.segOffset) {}
-// 		else if (tId >= offset.tetOffset) pos[tId] = (tets[tId - offset.tetOffset].v[0] + tets[tId - offset.tetOffset].v[1] + tets[tId - offset.tetOffset].v[2] + tets[tId - offset.tetOffset].v[3]) / 4.0f;
-// 		else if (tId >= offset.boxOffset) pos[tId] = boxes[tId - offset.boxOffset].center;
-// 		else pos[tId] = spheres[tId].center;
 	}
 
 	__global__ void SetupBoxes(
@@ -231,7 +221,6 @@ namespace dyno
 		this->currentInertia()->setElementCount(sizeOfRigids);
 		this->currentQuaternion()->setElementCount(sizeOfRigids);
 		this->stateCollisionMask()->setElementCount(sizeOfRigids);
-		this->stateShapeType()->setElementCount(sizeOfRigids);
 
 		mBoundaryContactCounter.resize(sizeOfRigids);
 
@@ -245,10 +234,8 @@ namespace dyno
 			this->currentQuaternion()->getData(),
 			this->currentInertia()->getData(),
 			this->stateCollisionMask()->getData(),
-			this->stateShapeType()->getData(),
 			mDeviceRigidBodyStates,
-			eleOffset,
-			sizeOfRigids);
+			eleOffset);
 
 		mInitialInertia.assign(this->currentInertia()->getData());
 	}

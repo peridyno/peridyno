@@ -6,11 +6,12 @@ namespace dyno
 {
 	enum ElementType
 	{
-		CT_SPHERE,
-		CT_BOX,
-		CT_TET,
-		CT_SEG,
-		CT_TRI
+		ET_BOX = 1,
+		ET_TET = 2,
+		ET_CAPSULE = 4,
+		ET_SPHERE = 8,
+		ET_TRI = 16,
+		ET_Other = 0x80000000
 	};
 
 	struct ElementOffset
@@ -30,19 +31,19 @@ namespace dyno
 	DYN_FUNC inline ElementType checkElementType(int id, ElementOffset offset)
 	{
 		if (id >= offset.sphereStart && id < offset.sphereEnd)
-			return CT_SPHERE;
+			return ET_SPHERE;
 
 		if (id >= offset.boxOffset && id < offset.boxEnd)
-			return CT_BOX;
+			return ET_BOX;
 
 		if (id >= offset.tetOffset && id < offset.tetEnd)
-			return CT_TET;
+			return ET_TET;
 
 		if (id >= offset.segOffset && id < offset.segEnd)
-			return CT_SEG;
+			return ET_CAPSULE;
 
 		if (id >= offset.triOffset && id < offset.triEnd)
-			return CT_TRI;
+			return ET_TRI;
 	}
 
 	template<typename TDataType>
@@ -88,18 +89,6 @@ namespace dyno
 
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
-
-// 		Box3D		getHostBoxes(int i) { return m_hostBoxes[i]; }
-// 		Sphere3D	getHostSpheres(int i) { return m_hostSpheres[i]; }
-// 		Tet3D		getHostTets(int i) { return m_hostTets[i]; }
-// 		Capsule3D	getHostCaps(int i) { return m_hostCaps[i]; }
-
-//		bool initializeImpl() override;
-
-// 		void addBox(Box3D box) { m_hostBoxes.push_back(box); }
-// 		void addSphere(Sphere3D sphere) { m_hostSpheres.push_back(sphere); }
-// 		void addTet(Tet3D tet) { m_hostTets.push_back(tet); }
-// 		void addCap(Capsule3D cap) { m_hostCaps.push_back(cap); }
 
 		DArray<Real>&		getTetSDF() { return m_tet_sdf; }
 		DArray<int>&		getTetBodyMapping() { return m_tet_body_mapping; }

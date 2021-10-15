@@ -69,34 +69,34 @@ namespace dyno
 		AABB box;
 		switch (eleType)
 		{
-		case CT_SPHERE:
+		case ET_SPHERE:
 		{
 			box = spheres[tId].aabb();
 
 			break;
 		}
-		case CT_BOX:
+		case ET_BOX:
 		{
 			box = boxes[tId - elementOffset.boxOffset].aabb();
 			box.v0 -= boundary_expand;
 			box.v1 += boundary_expand;
 			break;
 		}
-		case CT_TET:
+		case ET_TET:
 		{
 			box = tets[tId - elementOffset.tetOffset].aabb();
 			box.v0 -= boundary_expand;
 			box.v1 += boundary_expand;
 			break;
 		}
-		case CT_SEG:
+		case ET_CAPSULE:
 		{
 			box = caps[tId - elementOffset.segOffset].aabb();
 			box.v0 -= boundary_expand;
 			box.v1 += boundary_expand;
 			break;
 		}
-		case CT_TRI:
+		case ET_TRI:
 		{
 			box = tris[tId - elementOffset.triOffset].aabb();
 			box.v0 -= boundary_expand;
@@ -137,9 +137,7 @@ namespace dyno
 		DArray<TopologyModule::Tetrahedron> tet_element_ids,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> triangles,
-		ElementOffset elementOffset,
-		NbrFilter filter,
-		Real boundary_expand)
+		ElementOffset elementOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= nbr.size()) return;
@@ -148,48 +146,51 @@ namespace dyno
 		ElementType eleType_i = checkElementType(ids.bodyId1, elementOffset);
 		ElementType eleType_j = checkElementType(ids.bodyId2, elementOffset);
 
+		CollisionMask mask_i = mask[ids.bodyId1];
+		CollisionMask mask_j = mask[ids.bodyId2];
+
 		TManifold<Real> manifold;
-		if (eleType_i == CT_BOX && eleType_j == CT_BOX)
+		if (eleType_i == ET_BOX && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_BOX, ET_BOX))
 		{
 			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
 			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
 			CollisionDetection<Real>::request(manifold, boxA, boxB);
 		}
-		else if (eleType_i == CT_SPHERE && eleType_j == CT_BOX)
+		else if (eleType_i == ET_SPHERE && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_SPHERE, ET_BOX))
 		{
 			auto sphere = spheres[ids.bodyId1];
 			auto box = boxes[ids.bodyId2 - elementOffset.boxOffset];
 			CollisionDetection<Real>::request(manifold, sphere, box);
 		}
-		else if (eleType_i == CT_BOX && eleType_j == CT_SPHERE)
+		else if (eleType_i == ET_BOX && eleType_j == ET_SPHERE && checkCollision(mask_i, mask_j, ET_BOX, ET_SPHERE))
 		{
 			auto box = boxes[ids.bodyId1 - elementOffset.boxOffset];
 			auto sphere = spheres[ids.bodyId2];
 			CollisionDetection<Real>::request(manifold, box, sphere);
 		}
-		else if (eleType_i == CT_SPHERE && eleType_j == CT_SPHERE)
+		else if (eleType_i == ET_SPHERE && eleType_j == ET_SPHERE && checkCollision(mask_i, mask_j, ET_SPHERE, ET_SPHERE))
 		{
 			CollisionDetection<Real>::request(manifold, spheres[ids.bodyId1], spheres[ids.bodyId2]);
 		}
-		else if(eleType_i == CT_TET && eleType_j == CT_TET)
+		else if(eleType_i == ET_TET && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_TET, ET_TET))
 		{
 			auto tetA = tets[ids.bodyId1 - elementOffset.tetOffset];
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
 			CollisionDetection<Real>::request(manifold, tetA, tetB);
 		}
-		else if (eleType_i == CT_TET && eleType_j == CT_BOX)
+		else if (eleType_i == ET_TET && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_TET, ET_BOX))
 		{
 			auto tetA = tets[ids.bodyId1 - elementOffset.tetOffset];
 			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
 			CollisionDetection<Real>::request(manifold, tetA, boxB);
 		}
-		else if (eleType_i == CT_BOX && eleType_j == CT_TET)
+		else if (eleType_i == ET_BOX && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_BOX, ET_TET))
 		{
 			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
 			CollisionDetection<Real>::request(manifold, boxA, tetB);
 		}
-		printf("narrow cnt = %d\n", manifold.contactCount);
+
 		count[tId] = manifold.contactCount;
 	}
 
@@ -207,9 +208,7 @@ namespace dyno
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> tris,
 		DArray<int> prefix,
-		ElementOffset elementOffset,
-		NbrFilter filter,
-		Real boundary_expand)
+		ElementOffset elementOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= nbr.size()) return;
@@ -218,30 +217,33 @@ namespace dyno
 		ElementType eleType_i = checkElementType(ids.bodyId1, elementOffset);
 		ElementType eleType_j = checkElementType(ids.bodyId2, elementOffset);
 
+		CollisionMask mask_i = mask[ids.bodyId1];
+		CollisionMask mask_j = mask[ids.bodyId2];
+
 		TManifold<Real> manifold;
-		if (eleType_i == CT_BOX && eleType_j == CT_BOX)
+		if (eleType_i == ET_BOX && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_BOX, ET_BOX))
 		{
 			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
 			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
 			CollisionDetection<Real>::request(manifold, boxA, boxB);
 		}
-		else if (eleType_i == CT_SPHERE && eleType_j == CT_BOX)
+		else if (eleType_i == ET_SPHERE && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_SPHERE, ET_BOX))
 		{
 			auto sphere = spheres[ids.bodyId1];
 			auto box = boxes[ids.bodyId2 - elementOffset.boxOffset];
 			CollisionDetection<Real>::request(manifold, sphere, box);
 		}
-		else if (eleType_i == CT_BOX && eleType_j == CT_SPHERE)
+		else if (eleType_i == ET_BOX && eleType_j == ET_SPHERE && checkCollision(mask_i, mask_j, ET_BOX, ET_SPHERE))
 		{
 			auto box = boxes[ids.bodyId1 - elementOffset.boxOffset];
 			auto sphere = spheres[ids.bodyId2];
 			CollisionDetection<Real>::request(manifold, box, sphere);
 		}
-		else if (eleType_i == CT_SPHERE && eleType_j == CT_SPHERE)
+		else if (eleType_i == ET_SPHERE && eleType_j == ET_SPHERE && checkCollision(mask_i, mask_j, ET_SPHERE, ET_SPHERE))
 		{
 			CollisionDetection<Real>::request(manifold, spheres[ids.bodyId1], spheres[ids.bodyId2]);
 		}
-		else if (eleType_i == CT_TET && eleType_j == CT_TET)
+		else if (eleType_i == ET_TET && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_TET, ET_TET))
 		{
 			auto tetA = tets[ids.bodyId1 - elementOffset.tetOffset];
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
@@ -250,13 +252,13 @@ namespace dyno
 			/*printf("%.3lf %.3lf %.3lf  %.6lf\n", manifold.normal[0], manifold.normal[1], manifold.normal[2], 
 				manifold.contacts[0].penetration);*/
 		}
-		else if (eleType_i == CT_TET && eleType_j == CT_BOX)
+		else if (eleType_i == ET_TET && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_TET, ET_BOX))
 		{
 			auto tetA = tets[ids.bodyId1 - elementOffset.tetOffset];
 			auto boxB = boxes[ids.bodyId2 - elementOffset.boxOffset];
 			CollisionDetection<Real>::request(manifold, tetA, boxB);
 		}
-		else if (eleType_i == CT_BOX && eleType_j == CT_TET)
+		else if (eleType_i == ET_BOX && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_BOX, ET_TET))
 		{
 			auto boxA = boxes[ids.bodyId1 - elementOffset.boxOffset];
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetOffset];
@@ -2722,9 +2724,7 @@ namespace dyno
 			inTopo->getTetElementMapping(),
 			inTopo->getCaps(),
 			inTopo->getTris(),
-			elementOffset,
-			Filter,
-			boundary_expand);
+			elementOffset);
 
 		int sum = m_reduce.accumulate(contactNum.begin(), contactNum.size());
 
@@ -2747,9 +2747,7 @@ namespace dyno
 				inTopo->getCaps(),
 				inTopo->getTris(),
 				contactNum,
-				elementOffset,
-				Filter,
-				boundary_expand);
+				elementOffset);
 		}
 
 		contactNum.clear();
