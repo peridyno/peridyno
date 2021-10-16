@@ -93,6 +93,9 @@ namespace dyno
 
 		DEF_ARRAY_STATE(CollisionMask, CollisionMask, DeviceType::GPU, "Collision mask for each rigid body");
 
+
+		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
+
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
@@ -122,8 +125,6 @@ namespace dyno
 		DArray<ContactPair> mAllConstraints;
 
 	private:
-		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
-
 		//TODO: add collision support with triangular mesh
 		bool have_mesh = false;
 		bool have_mesh_boundary = false;
