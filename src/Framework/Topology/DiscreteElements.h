@@ -16,35 +16,68 @@ namespace dyno
 
 	struct ElementOffset
 	{
-		int sphereStart;
-		int sphereEnd;
-		int boxOffset;
-		int boxEnd;
-		int tetOffset;
-		int tetEnd;
-		int segOffset;
-		int segEnd;
-		int triOffset;
-		int triEnd;
+	public:
+		DYN_FUNC inline uint sphereIndex() { return sphereStart; }
+		DYN_FUNC inline uint boxIndex() { return boxStart; }
+		DYN_FUNC inline uint tetIndex() { return tetStart; }
+		DYN_FUNC inline uint capsuleIndex() { return capStart; }
+		DYN_FUNC inline uint triangleIndex() { return triStart; }
+
+		DYN_FUNC inline void setSphereRange(uint startIndex, uint endIndex) { 
+			sphereStart = startIndex;
+			sphereEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setBoxRange(uint startIndex, uint endIndex) {
+			boxStart = startIndex;
+			boxEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setTetRange(uint startIndex, uint endIndex) {
+			tetStart = startIndex;
+			tetEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setCapsuleRange(uint startIndex, uint endIndex) {
+			capStart = startIndex;
+			capEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setTriangleRange(uint startIndex, uint endIndex) {
+			triStart = startIndex;
+			triEnd = endIndex;
+		}
+
+		DYN_FUNC inline ElementType checkElementType(uint id)
+		{
+			if (id >= sphereStart && id < sphereEnd)
+				return ET_SPHERE;
+
+			if (id >= boxStart && id < boxEnd)
+				return ET_BOX;
+
+			if (id >= tetStart && id < tetEnd)
+				return ET_TET;
+
+			if (id >= capStart && id < capEnd)
+				return ET_CAPSULE;
+
+			if (id >= triStart && id < triEnd)
+				return ET_TRI;
+		}
+
+	private:
+		uint sphereStart;
+		uint sphereEnd;
+		uint boxStart;
+		uint boxEnd;
+		uint tetStart;
+		uint tetEnd;
+		uint capStart;
+		uint capEnd;
+		uint triStart;
+		uint triEnd;
 	};
-
-	DYN_FUNC inline ElementType checkElementType(int id, ElementOffset offset)
-	{
-		if (id >= offset.sphereStart && id < offset.sphereEnd)
-			return ET_SPHERE;
-
-		if (id >= offset.boxOffset && id < offset.boxEnd)
-			return ET_BOX;
-
-		if (id >= offset.tetOffset && id < offset.tetEnd)
-			return ET_TET;
-
-		if (id >= offset.segOffset && id < offset.segEnd)
-			return ET_CAPSULE;
-
-		if (id >= offset.triOffset && id < offset.triEnd)
-			return ET_TRI;
-	}
 
 	template<typename TDataType>
 	class DiscreteElements : public TopologyModule

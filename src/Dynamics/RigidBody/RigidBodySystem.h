@@ -59,8 +59,6 @@ namespace dyno
 		void initializeJacobian(Real dt);
 		void detectCollisionWithBoundary();
 
-		void init_friction();
-
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
 

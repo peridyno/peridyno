@@ -58,47 +58,18 @@ namespace dyno
 		return sphereIndex() + this->getSpheres().size();
 	}
 
-// 	template<typename TDataType>
-// 	bool DiscreteElements<TDataType>::initializeImpl()
-// 	{
-// 		m_spheres.resize(m_hostSpheres.size());
-// 		m_boxes.resize(m_hostBoxes.size());
-// 		m_tets.resize(m_hostTets.size());
-// 		m_caps.resize(m_hostCaps.size());
-// 
-// 		if (m_spheres.size() > 0)
-// 			m_spheres.assign(m_hostSpheres);
-// 		if(m_boxes.size() > 0)
-// 			m_boxes.assign(m_hostBoxes);
-// 		if (m_tets.size() > 0)
-// 			m_tets.assign(m_hostTets);
-// 		if (m_caps.size() > 0)
-// 			m_caps.assign(m_hostCaps);
-// 
-// 
-// 		//printf("%d\n", m_boxes.size());
-// 
-// 		return true;
-// 	}
-
 	template<typename TDataType>
 	ElementOffset DiscreteElements<TDataType>::calculateElementOffset()
 	{
 		ElementOffset elementOffset;
-		elementOffset.sphereStart = sphereIndex();
-		elementOffset.sphereEnd = sphereIndex() + this->getSpheres().size();
-		elementOffset.boxOffset = boxIndex();
-		elementOffset.boxEnd = boxIndex() + this->getBoxes().size();
-		elementOffset.tetOffset = tetIndex();
-		elementOffset.tetEnd = tetIndex() + this->getTets().size();
-		elementOffset.segOffset = capsuleIndex();
-		elementOffset.segEnd = capsuleIndex() + this->getCaps().size();
-		elementOffset.triOffset = triangleIndex();
-		elementOffset.triEnd = triangleIndex() + this->getTris().size();
+		elementOffset.setSphereRange(sphereIndex(), sphereIndex() + this->getSpheres().size());
+		elementOffset.setBoxRange(boxIndex(), boxIndex() + this->getBoxes().size());
+		elementOffset.setTetRange(tetIndex(), tetIndex() + this->getTets().size());
+		elementOffset.setCapsuleRange(capsuleIndex(), capsuleIndex() + this->getCaps().size());
+		elementOffset.setTriangleRange(triangleIndex(), triangleIndex() + this->getTris().size());
 
 		return elementOffset;
 	}
-
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setBoxes(DArray<Box3D>& boxes)

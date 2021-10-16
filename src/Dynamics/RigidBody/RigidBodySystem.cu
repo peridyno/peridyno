@@ -1235,9 +1235,9 @@ namespace dyno
 				mUpperCorner,
 				mLowerCorner,
 				0,
-				offset.boxOffset,
-				offset.tetOffset,
-				offset.segOffset);
+				offset.boxIndex(),
+				offset.tetIndex(),
+				offset.capsuleIndex());
 
 			sum += m_reduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
 			m_scan.exclusive(mBoundaryContactCounter, true);
@@ -1255,28 +1255,13 @@ namespace dyno
 					mUpperCorner,
 					mLowerCorner,
 					0,
-					offset.boxOffset,
-					offset.tetOffset,
-					offset.segOffset);
+					offset.boxIndex(),
+					offset.tetIndex(),
+					offset.capsuleIndex());
 			}
 		}
 		else
 			mBoundaryContacts.resize(0);
-
-		if (have_mesh_boundary)
-		{
-
-			
-		}
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::init_friction()
-	{
-
-
-
-
 	}
 
 	template<typename TDataType>
@@ -1411,13 +1396,13 @@ namespace dyno
 			mDeviceBoxes,
 			this->currentCenter()->getData(),
 			this->currentRotationMatrix()->getData(),
-			offset.boxOffset);
+			offset.boxIndex());
 
 		cuExecute(mDeviceBoxes.size(),
 			UpdateSpheres,
 			discreteSet->getSpheres(),
 			this->currentCenter()->getData(),
-			0);
+			offset.sphereIndex());
 
 		cuExecute(mDeviceTets.size(),
 			UpdateTets,
@@ -1425,7 +1410,7 @@ namespace dyno
 			mDeviceTets,
 			this->currentCenter()->getData(),
 			this->currentRotationMatrix()->getData(),
-			offset.tetOffset);
+			offset.tetIndex());
 	}
 
 	DEFINE_CLASS(RigidBodySystem);
