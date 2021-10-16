@@ -119,6 +119,8 @@ namespace dyno
 		DArray<Real> mD;		//diagonal elements of JB
 		DArray<Real> mLambda;	//contact impulse
 
+		DArray<Real> nbrContacts;
+
 		DArray<int> mBoundaryContactCounter;
 		DArray<ContactPair> mBoundaryContacts;
 		DArray<ContactPair> buffer_friction;

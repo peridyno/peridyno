@@ -222,6 +222,8 @@ namespace dyno
 		this->currentQuaternion()->setElementCount(sizeOfRigids);
 		this->stateCollisionMask()->setElementCount(sizeOfRigids);
 
+		nbrContacts.resize(sizeOfRigids);
+
 		mBoundaryContactCounter.resize(sizeOfRigids);
 
 		cuExecute(sizeOfRigids,
@@ -426,6 +428,24 @@ namespace dyno
 				B[4 * pId + 3] = Coord(0);
 			}
 		}
+	}
+
+
+	template <typename ContactPair>
+	__global__ void CalculateNbrCons(
+		DArray<ContactPair> nbc,
+		DArray<Real> nbrCnt)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= nbc.size()) return;
+
+		int idx1 = nbc[pId].bodyId1;
+		int idx2 = nbc[pId].bodyId2;
+
+		if(idx1 != -1)
+			atomicAdd(&nbrCnt[idx1], 1.0f);
+		if(idx2 != -1)
+			atomicAdd(&nbrCnt[idx2], 1.0f);
 	}
 
 	template <typename Coord, typename Matrix, typename ContactPair>
@@ -664,7 +684,8 @@ namespace dyno
 		DArray<Coord> B,
 		DArray<Real> eta,
 		DArray<Real> mass,
-		DArray<ContactPair> nbq)
+		DArray<ContactPair> nbq,
+		DArray<Real> stepInv)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -686,7 +707,10 @@ namespace dyno
 		if (d[pId] > EPSILON)
 		{
 			Real delta_lambda = eta_i / d[pId];
-			delta_lambda *= 0.2;
+			Real stepInverse = stepInv[idx1];
+			if(idx2 != -1)
+				stepInverse += stepInv[idx2];
+			delta_lambda *= (1.0f / stepInverse);
 
 			//printf("delta_lambda = %.3lf\n", delta_lambda);
 
@@ -1298,6 +1322,7 @@ namespace dyno
 		mEta.reset();
 		mAccel.reset();
 		mLambda.reset();
+		nbrContacts.reset();
 
 		if (sizeOfConstraints == 0) return;
 
@@ -1314,7 +1339,11 @@ namespace dyno
 				mAllConstraints,
 				sizeOfContacts);
 		}
-
+		cuExecute(sizeOfConstraints,
+			CalculateNbrCons,
+			mAllConstraints,
+			nbrContacts
+		);
 		cuExecute(sizeOfConstraints,
 			CalculateJacobians,
 			mJ,
@@ -1349,7 +1378,7 @@ namespace dyno
 		initializeJacobian(dt);
 
 		int size_constraints = mAllConstraints.size();
-		for (int i = 0; i < 15; i++)
+		for (int i = 0; i < 35; i++)
 		{
 			cuExecute(size_constraints,
 				TakeOneJacobiIteration,
@@ -1360,7 +1389,8 @@ namespace dyno
 				mB,
 				mEta,
 				currentMass()->getData(),
-				mAllConstraints);
+				mAllConstraints,
+				nbrContacts);
 		}
 
 		uint num = this->currentCenter()->getElementCount();
