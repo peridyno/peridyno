@@ -73,7 +73,7 @@ void creat_scene_fluid()
 
 	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactMapper->inContacts());
-	contactMapper->varScale()->setValue(0.1);
+	contactMapper->varScale()->setValue(0.02);
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
