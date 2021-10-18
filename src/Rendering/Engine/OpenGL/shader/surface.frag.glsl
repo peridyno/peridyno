@@ -56,57 +56,43 @@ layout(index = 1) subroutine(RenderPass) void DepthPass(void)
 	// do nothing
 }
 
+
 /***************** ShadowMap *********************/
-layout(std140, binding = 2) uniform ShadowUniformBlock
-{
-	// support up to 4 cascaded shadow map layers
-	mat4 transform[4];
-	vec4 minDepth;
-	vec4 maxDepth;
-	// may have some other data in future
-} shadow;
-
-layout(binding = 5) uniform sampler2DArray shadowDepth;
-//layout(binding = 6) uniform sampler2D shadowColor;
-
-int GetShadowLevel(vec3 pos)
-{
-	float depth = abs(pos.z);
-	for (int i = 0; i < 4; i++)
-	{
-		if (depth < shadow.maxDepth[i])
-			return i;
-	}
-	return 0;
-}
+layout(std140, binding = 2) uniform ShadowUniform{
+	mat4	transform;
+	float	bias0;
+	float	bias1;
+	float	radius;
+	float	clamp;
+} uShadowBlock;
+layout(binding = 5) uniform sampler2D uTexShadow;
 
 vec3 GetShadowFactor(vec3 pos)
 {
-	int level = GetShadowLevel(pos);
-
-	vec4 posLightSpace = shadow.transform[level] * vec4(pos, 1);
+	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
 	projCoords = projCoords * 0.5 + 0.5;
 
-	float closestDepth = texture(shadowDepth, vec3(projCoords.xy, level)).r;
+	float closestDepth = texture(uTexShadow, projCoords.xy).r;
 	float currentDepth = min(1.0, projCoords.z);
 
-	//float bias = max(0.05 * (1.0 - dot(normal, normalize(light.direction.xyz))), 0.005); 
-	float bias = 0.005;
+	float temp = 1.0 - abs(dot(normal, normalize(light.direction.xyz)));
+	float bias = max(uShadowBlock.bias0 * temp, uShadowBlock.bias1);
 
 	// simple PCF
-	vec3 shadow = vec3(0);
-	vec2 texelSize = 1.0 / textureSize(shadowDepth, 0).xy;
-	for (int x = -1; x <= 1; ++x)
+	vec2 shadow = vec2(0);
+	vec2 texelSize = 1.0 / textureSize(uTexShadow, 0).xy;
+
+	for (float x = -uShadowBlock.radius; x <= uShadowBlock.radius; x+=1.f)
 	{
-		for (int y = -1; y <= 1; ++y)
+		for (float y = -uShadowBlock.radius; y <= uShadowBlock.radius; y+=1.f)
 		{
-			float pcfDepth = texture(shadowDepth, vec3(projCoords.xy + vec2(x, y) * texelSize, level)).r;
+			float pcfDepth = texture(uTexShadow, projCoords.xy + vec2(x, y) * texelSize).r;
 			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
-			shadow += visible;
+			shadow += vec2(visible, 1);
 		}
 	}
-	return clamp(shadow / 9.0, 0, 1);
+	return vec3(clamp(shadow.x / shadow.y, uShadowBlock.clamp, 1.0));
 }
 
 
