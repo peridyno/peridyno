@@ -116,7 +116,7 @@ namespace dyno
 			lightView * glm::vec4{bbox[1][0], bbox[1][1], bbox[0][2], 1},
 			lightView * glm::vec4{bbox[1][0], bbox[1][1], bbox[1][2], 1},
 		};
-
+			   
 		glm::vec4 bmin = p[0];
 		glm::vec4 bmax = p[0];
 		for (int i = 1; i < 8; i++)
@@ -125,8 +125,28 @@ namespace dyno
 			bmax = glm::max(bmax, p[i]);
 		}
 
+		// frustrum clamp
+		if (true)
+		{
+			std::array<glm::vec4, 8> corners = getFrustumCorners(rparams.proj);
+			glm::mat4 tm = lightView * glm::inverse(rparams.view);
 
-		glm::mat4 lightProj = glm::ortho(-1, 1, -1, 1, -1, 1);
+			glm::vec4 fbmin = tm * corners[0];
+			glm::vec4 fbmax = tm * corners[0];
+			for (int i = 1; i < 8; i++)
+			{
+				glm::vec4 c = tm * corners[i];
+				fbmin = glm::min(fbmin, c);
+				fbmax = glm::max(fbmax, c);
+			}
+
+			bmin.x = glm::max(bmin.x, fbmin.x);
+			bmin.y = glm::max(bmin.y, fbmin.y);
+			bmax.x = glm::min(bmax.x, fbmax.x);
+			bmax.y = glm::min(bmax.y, fbmax.y);
+		}
+		
+		glm::mat4 lightProj = glm::ortho(bmin.x, bmax.x, bmin.y, bmax.y, -bmax.z, -bmin.z);
 		return lightProj;
 	}
 
