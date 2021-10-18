@@ -62,6 +62,13 @@ private:									\
 public:									\
 	inline FArray<T, device>* next##name() {return &next_##name;}
 
+#define DEF_ARRAY_STATE(T, name, device, desc) \
+private:									\
+	FArray<T, device> current_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+public:									\
+	inline FArray<T, device>* state##name() {return &current_##name;}
+
+
 
 #define DEF_EMPTY_CURRENT_ARRAYLIST(T, name, device, desc) \
 private:									\

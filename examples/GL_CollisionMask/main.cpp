@@ -5,16 +5,17 @@
 #include <RigidBody/RigidBodySystem.h>
 
 #include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
-#include <GLWireframeVisualModule.h>
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
-#include <Mapping/ContactsToEdgeSet.h>
-#include <Mapping/ContactsToPointSet.h>
 
 using namespace std;
 using namespace dyno;
+
+/**
+ * @brief This is an example to demonstrate how the collision mask works
+ * 
+ */
 
 void creat_scene_fluid()
 {
@@ -24,6 +25,9 @@ void creat_scene_fluid()
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
+
+	// Boxes are set to being able to collided with other boxes only
+	rigidBody.collisionMask = CT_BoxOnly;
 	BoxInfo box;
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)
@@ -38,6 +42,8 @@ void creat_scene_fluid()
 	sphere.radius = 0.025f;
 
 	RigidBodyInfo rigidSphere;
+	// Spheres are set to being able to collided with other spheres only
+	rigidSphere.collisionMask = CT_SphereOnly;
 	rigid->addSphere(sphere, rigidSphere);
 
 	sphere.center = Vec3f(0.5f, 0.95f, 0.5f);
@@ -63,33 +69,6 @@ void creat_scene_fluid()
 	sRender->setColor(Vec3f(1, 1, 0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
-
-	//TODO: to enable using internal modules inside a node
-	//Visualize contact normals
-	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
-	rigid->currentTopology()->connect(elementQuery->inDiscreteElements());
-	rigid->stateCollisionMask()->connect(elementQuery->inCollisionMask());
-	rigid->graphicsPipeline()->pushModule(elementQuery);
-
-	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
-	elementQuery->outContacts()->connect(contactMapper->inContacts());
-	contactMapper->varScale()->setValue(0.02);
-	rigid->graphicsPipeline()->pushModule(contactMapper);
-
-	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Vec3f(0, 1, 0));
-	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
-	rigid->graphicsPipeline()->pushModule(wireRender);
-
-	//Visualize contact points
-	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
-	rigid->graphicsPipeline()->pushModule(contactPointMapper);
-
-	auto pointRender = std::make_shared<GLPointVisualModule>();
-	pointRender->setColor(Vec3f(1, 0, 0));
-	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-	rigid->graphicsPipeline()->pushModule(pointRender);
 
 	GLRenderEngine* engine = new GLRenderEngine;
 

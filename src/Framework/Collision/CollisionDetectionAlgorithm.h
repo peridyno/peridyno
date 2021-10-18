@@ -29,7 +29,15 @@ namespace dyno
 
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere0, const Sphere3D& sphere1);
 
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tet0, const Tet3D& tet1);
+
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const OBox3D& box);
+
+		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Tet3D& tet);
+
+
 	private:
+		
 
 	};
 }
