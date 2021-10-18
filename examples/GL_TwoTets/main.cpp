@@ -5,9 +5,11 @@
 #include <RigidBody/RigidBodySystem.h>
 
 #include <GLRenderEngine.h>
+#include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
+#include <Mapping/ContactsToPointSet.h>
 
 using namespace std;
 using namespace dyno;
@@ -45,14 +47,23 @@ void scene_two_tets()
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
-	GLRenderEngine* engine = new GLRenderEngine;
 
-	GlfwApp window;
-	window.setRenderEngine(engine);
-	window.createWindow(1280, 768);
-	window.mainLoop();
+	//TODO: to enable using internal modules inside a node
+	//Visualize contact normals
+	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
+	rigid->currentTopology()->connect(elementQuery->inDiscreteElements());
+	rigid->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+	rigid->graphicsPipeline()->pushModule(elementQuery);
 
-	delete engine;
+	//Visualize contact points
+	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
+	rigid->graphicsPipeline()->pushModule(contactPointMapper);
+
+	auto pointRender = std::make_shared<GLPointVisualModule>();
+	pointRender->setColor(Vec3f(1, 0, 0));
+	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
+	rigid->graphicsPipeline()->pushModule(pointRender);
 }
 
 
@@ -85,6 +96,30 @@ void scene_tet_box()
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
+
+	//TODO: to enable using internal modules inside a node
+	//Visualize contact normals
+	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
+	rigid->currentTopology()->connect(elementQuery->inDiscreteElements());
+	rigid->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+	rigid->graphicsPipeline()->pushModule(elementQuery);
+
+	//Visualize contact points
+	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
+	rigid->graphicsPipeline()->pushModule(contactPointMapper);
+
+	auto pointRender = std::make_shared<GLPointVisualModule>();
+	pointRender->setColor(Vec3f(1, 0, 0));
+	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
+	rigid->graphicsPipeline()->pushModule(pointRender);
+}
+
+int main()
+{
+	//scene_two_tets();
+	scene_tet_box();
+
 	GLRenderEngine* engine = new GLRenderEngine;
 
 	GlfwApp window;
@@ -93,12 +128,7 @@ void scene_tet_box()
 	window.mainLoop();
 
 	delete engine;
-}
 
-int main()
-{
-	//scene_two_tets();
-	scene_tet_box();
 	return 0;
 }
 
