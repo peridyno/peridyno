@@ -5,7 +5,7 @@
 
 #include "imgui_extend.h"
 #include "picture.h"
-
+#include "imGuIZMO.quat/imGuIZMOquat.h"
 //dyno
 #include "Action.h"
 #include "SceneGraph.h"
@@ -57,14 +57,12 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 	RenderParams* rparams = engine->renderParams();
 
 	float iBgGray[2] = { rparams->bgColor0[0], rparams->bgColor1[0] };
-	
 	RenderParams::Light iLight = rparams->light;
-
+	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
 		static float f = 0.0f;
 		static int counter = 0;
-
 		{// Top Left widget
 			ImGui::SetNextWindowPos(ImVec2(0, 0));
 			ImGui::Begin("Top Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
@@ -74,24 +72,51 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 			}
 
 			if (ImGui::BeginPopup("LightingMenu")) {
-				ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.3f", 0);
+				ImGui::DragFloat2("BG color", iBgGray, 0.01f, 0.0f, 1.0f, "%.2f", 0);
 				rparams->bgColor0 = glm::vec3(iBgGray[0]);
 				rparams->bgColor1 = glm::vec3(iBgGray[1]);
 
 				ImGui::Text("Ambient Light");
 
 				ImGui::beginTitle("Ambient Light Scale");
-				ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 10.0f, "%.3f", 0);
+				ImGui::DragFloat("", &iLight.ambientScale,0.01f, 0.0f, 1.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
-
+				
 				ImGui::Text("Main Light");
 				ImGui::beginTitle("Main Light Scale");
-				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 10.0f, "%.3f", 0);
+				ImGui::DragFloat("", &iLight.mainLightScale, 0.01f, 0.0f, 5.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
+
+				// Light Direction
+				ImGui::Text("Light Dir");
+				
+				glm::mat4 inverse_view = glm::transpose(rparams->view);// view R^-1 = R^T
+				glm::vec3 tmpLightDir = glm::vec3(rparams->view * glm::vec4(iLight.mainLightDirection, 0));
+				vec3 vL(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
+
+				ImGui::beginTitle("Light dir");
+				ImGui::gizmo3D("", vL);
+				ImGui::endTitle();
+				
+				ImGui::SameLine();
+				ImGui::BeginGroup();
+				ImGui::PushItemWidth(120*.5-2);
+				ImGui::beginTitle("Light dir editor x");
+				ImGui::DragFloat("", (float*)(&vL[0]), 0.01f, -1.0f, 1.0f, "x:%.2f", 0);ImGui::endTitle();
+				ImGui::beginTitle("Light dir editor y");
+				ImGui::DragFloat("", (float*)(&vL[1]), 0.01f, -1.0f, 1.0f, "y:%.2f", 0);ImGui::endTitle();
+				ImGui::beginTitle("Light dir editor z");
+				ImGui::DragFloat("", (float*)(&vL[2]), 0.01f, -1.0f, 1.0f, "z:%.2f", 0);ImGui::endTitle();
+				ImGui::PopItemWidth();
+				ImGui::EndGroup();
+
+				tmpLightDir = glm::vec3(inverse_view * glm::vec4(vL[0], vL[1], vL[2], 0));
+				iLight.mainLightDirection = glm::vec3(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
+
 				rparams->light = iLight;
 
 				ImGui::EndPopup();
