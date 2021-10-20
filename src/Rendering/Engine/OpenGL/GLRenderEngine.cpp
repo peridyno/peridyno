@@ -165,7 +165,17 @@ namespace dyno
 		mLightUBO.bindBufferBase(1);
 
 		// begin rendering
-		mRenderTarget->bind();
+		bool offscreen = false;
+		if (offscreen)
+		{
+			mRenderTarget->bind();
+		}
+		else
+		{
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			glViewport(0, 0, mRenderTarget->width, mRenderTarget->height);
+		}
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Vec3f c0 = Vec3f(m_rparams.bgColor0.x, m_rparams.bgColor0.y, m_rparams.bgColor0.z);
@@ -200,9 +210,12 @@ namespace dyno
 			mRenderHelper->drawAxis();
 		}
 
-		// write back to the framebuffer
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-		mRenderTarget->blit(0);
+		if (offscreen)
+		{
+			// write back to the framebuffer
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			mRenderTarget->blit(0);
+		}
 	}
 
 
