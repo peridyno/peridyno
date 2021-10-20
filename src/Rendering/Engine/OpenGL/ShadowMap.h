@@ -56,9 +56,7 @@ namespace dyno
 		int				width;
 		int				height;
 
-		float			bias0  = 0.03f;
-		float			bias1  = 0.003f;
-		float			radius = 2.f;		// in pixel
-		float			clamp  = 0.f;
+		// patch to color bleeding, min p_max
+		float			minValue = 0.1f;
 	};
 }

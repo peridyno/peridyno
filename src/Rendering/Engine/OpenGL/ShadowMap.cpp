@@ -245,16 +245,10 @@ namespace dyno
 		// shadow map uniform
 		struct {
 			glm::mat4 transform;
-			float bias0;
-			float bias1;
-			float radius;
-			float clamp;
+			float minValue;
 		} shadow;
 		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
-		shadow.bias0 = bias0;
-		shadow.bias1 = bias1;
-		shadow.radius = radius; 
-		shadow.clamp = clamp;
+		shadow.minValue = minValue;
 
 		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
 		mShadowMatrixUBO.bindBufferBase(2);

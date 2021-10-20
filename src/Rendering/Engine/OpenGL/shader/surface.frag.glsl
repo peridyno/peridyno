@@ -70,10 +70,7 @@ layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
 /***************** ShadowMap *********************/
 layout(std140, binding = 2) uniform ShadowUniform{
 	mat4	transform;
-	float	bias0;
-	float	bias1;
-	float	radius;
-	float	clamp;
+	float	minValue;		// patch to color bleeding
 } uShadowBlock;
 layout(binding = 5) uniform sampler2D uTexShadow;
 
@@ -98,6 +95,10 @@ vec3 GetShadowFactor(vec3 pos)
 
 	float d = distance - moments.x;
 	float p_max = variance / (variance + d * d);
+
+	// simple patch to color bleeding 
+	p_max = (p_max - uShadowBlock.minValue) / (1.0 - uShadowBlock.minValue);
+	p_max = clamp(p_max, 0.0, 1.0);
 
 	return vec3(p_max);
 }
