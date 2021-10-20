@@ -6,35 +6,78 @@ namespace dyno
 {
 	enum ElementType
 	{
-		CT_SPHERE,
-		CT_BOX,
-		CT_TET,
-		CT_SEG,
-		CT_TRI
+		ET_BOX = 1,
+		ET_TET = 2,
+		ET_CAPSULE = 4,
+		ET_SPHERE = 8,
+		ET_TRI = 16,
+		ET_Other = 0x80000000
 	};
 
 	struct ElementOffset
 	{
-		int sphereStart;
-		int sphereEnd;
-		int boxOffset;
-		int boxEnd;
-		int tetOffset;
-		int tetEnd;
-		int segOffset;
-		int segEnd;
-		int triOffset;
-		int triEnd;
-	};
+	public:
+		DYN_FUNC inline uint sphereIndex() { return sphereStart; }
+		DYN_FUNC inline uint boxIndex() { return boxStart; }
+		DYN_FUNC inline uint tetIndex() { return tetStart; }
+		DYN_FUNC inline uint capsuleIndex() { return capStart; }
+		DYN_FUNC inline uint triangleIndex() { return triStart; }
 
-	DYN_FUNC inline ElementType checkElementType(int id, ElementOffset offset)
-	{
-		return id < offset.boxOffset ?
-			CT_SPHERE : (
-				id < offset.tetOffset ? CT_BOX : (
-					id < offset.segOffset ? CT_TET : (
-						id < offset.triOffset ? CT_SEG : CT_TRI)));
-	}
+		DYN_FUNC inline void setSphereRange(uint startIndex, uint endIndex) { 
+			sphereStart = startIndex;
+			sphereEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setBoxRange(uint startIndex, uint endIndex) {
+			boxStart = startIndex;
+			boxEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setTetRange(uint startIndex, uint endIndex) {
+			tetStart = startIndex;
+			tetEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setCapsuleRange(uint startIndex, uint endIndex) {
+			capStart = startIndex;
+			capEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setTriangleRange(uint startIndex, uint endIndex) {
+			triStart = startIndex;
+			triEnd = endIndex;
+		}
+
+		DYN_FUNC inline ElementType checkElementType(uint id)
+		{
+			if (id >= sphereStart && id < sphereEnd)
+				return ET_SPHERE;
+
+			if (id >= boxStart && id < boxEnd)
+				return ET_BOX;
+
+			if (id >= tetStart && id < tetEnd)
+				return ET_TET;
+
+			if (id >= capStart && id < capEnd)
+				return ET_CAPSULE;
+
+			if (id >= triStart && id < triEnd)
+				return ET_TRI;
+		}
+
+	private:
+		uint sphereStart;
+		uint sphereEnd;
+		uint boxStart;
+		uint boxEnd;
+		uint tetStart;
+		uint tetEnd;
+		uint capStart;
+		uint capEnd;
+		uint triStart;
+		uint triEnd;
+	};
 
 	template<typename TDataType>
 	class DiscreteElements : public TopologyModule
@@ -56,6 +99,12 @@ namespace dyno
 
 		uint totalSize();
 
+		uint sphereIndex();
+		uint boxIndex();
+		uint capsuleIndex();
+		uint tetIndex();
+		uint triangleIndex();
+
 		ElementOffset calculateElementOffset();
 
 		void setBoxes(DArray<Box3D>& boxes);
@@ -73,18 +122,6 @@ namespace dyno
 
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
-
-// 		Box3D		getHostBoxes(int i) { return m_hostBoxes[i]; }
-// 		Sphere3D	getHostSpheres(int i) { return m_hostSpheres[i]; }
-// 		Tet3D		getHostTets(int i) { return m_hostTets[i]; }
-// 		Capsule3D	getHostCaps(int i) { return m_hostCaps[i]; }
-
-//		bool initializeImpl() override;
-
-// 		void addBox(Box3D box) { m_hostBoxes.push_back(box); }
-// 		void addSphere(Sphere3D sphere) { m_hostSpheres.push_back(sphere); }
-// 		void addTet(Tet3D tet) { m_hostTets.push_back(tet); }
-// 		void addCap(Capsule3D cap) { m_hostCaps.push_back(cap); }
 
 		DArray<Real>&		getTetSDF() { return m_tet_sdf; }
 		DArray<int>&		getTetBodyMapping() { return m_tet_body_mapping; }

@@ -7,30 +7,6 @@
 
 namespace dyno {
 	template<typename TDataType> class CollisionDetectionBroadPhase;
-
-	class NbrFilter
-	{
-	public:
-		bool sphere_sphere = true;
-		bool sphere_box = true;
-		bool sphere_tet = true;
-		bool sphere_capsule = true;
-		bool sphere_tri = true;
-		bool box_box = true;
-		bool box_tet = true;
-		bool box_capsule = true;
-		bool box_tri = true;
-		bool tet_tet = true;
-		bool tet_capsule = true;
-		bool tet_tri = true;
-		bool capsule_capsule = true;
-		bool capsule_tri = true;
-		bool tri_tri = true;
-		bool tet_sdf = false;
-		bool tet_neighbor_filter = true;
-	};
-
-
 	/**
 	 * @brief A class implementation to find neighboring elements for a given array of elements
 	 * 
@@ -60,12 +36,9 @@ namespace dyno {
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
+		DEF_ARRAY_IN(CollisionMask, CollisionMask, DeviceType::GPU, "");
+
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
-
-
-
-		NbrFilter Filter;
-
 	private:
 		DArray<AABB> m_queryAABB;
 		DArray<AABB> m_queriedAABB;

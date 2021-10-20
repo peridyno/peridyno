@@ -6,8 +6,10 @@
 
 #include <GLRenderEngine.h>
 #include <GLSurfaceVisualModule.h>
+#include <GLWireframeVisualModule.h>
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
+#include <Mapping/ContactsToEdgeSet.h>
 
 using namespace std;
 using namespace dyno;
@@ -37,6 +39,22 @@ int main()
 	sRender->setColor(Vec3f(1, 1, 0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
+
+	//TODO: to enable using internal modules inside a node
+	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
+	rigid->currentTopology()->connect(elementQuery->inDiscreteElements());
+	rigid->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+	rigid->graphicsPipeline()->pushModule(elementQuery);
+
+	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
+	elementQuery->outContacts()->connect(contactMapper->inContacts());
+	contactMapper->varScale()->setValue(0.02);
+	rigid->graphicsPipeline()->pushModule(contactMapper);
+
+	auto wireRender = std::make_shared<GLWireframeVisualModule>();
+	wireRender->setColor(Vec3f(0, 1, 0));
+	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
+	rigid->graphicsPipeline()->pushModule(wireRender);
 
 	GLRenderEngine* engine = new GLRenderEngine;
 

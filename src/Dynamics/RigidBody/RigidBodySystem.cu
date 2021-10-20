@@ -15,6 +15,7 @@ namespace dyno
 
 		mElementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
 		this->currentTopology()->connect(mElementQuery->inDiscreteElements());
+		this->stateCollisionMask()->connect(mElementQuery->inCollisionMask());
 	}
 
 	template<typename TDataType>
@@ -42,7 +43,7 @@ namespace dyno
 				0, lx*lx + lz * lz, 0,
 				0, 0, lx*lx + ly * ly);
 
-		bd.shapeType = ST_Box;
+		bd.shapeType = ET_BOX;
 		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
@@ -70,7 +71,7 @@ namespace dyno
 				0, I11, 0,
 				0, 0, I11);
 
-		bd.shapeType = ST_Sphere;
+		bd.shapeType = ET_SPHERE;
 		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
@@ -98,7 +99,7 @@ namespace dyno
 				0, I11, 0,
 				0, 0, I11);
 
-		bd.shapeType = ST_Tet;
+		bd.shapeType = ET_TET;
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
@@ -114,13 +115,11 @@ namespace dyno
 		DArray<Coord> angularVelocity,
 		DArray<Quat> rotation_q,
 		DArray<Matrix> inertia,
+		DArray<CollisionMask> mask,
 		DArray<RigidBodyInfo> states,
-		ElementOffset offset,
-		int start_mesh)
+		ElementOffset offset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= start_mesh) return;
-
 		if (tId >= rotation_q.size())
 			return;
 		
@@ -131,11 +130,7 @@ namespace dyno
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
 		inertia[tId] = states[tId].inertia;
-
-// 		if (tId >= offset.segOffset) {}
-// 		else if (tId >= offset.tetOffset) pos[tId] = (tets[tId - offset.tetOffset].v[0] + tets[tId - offset.tetOffset].v[1] + tets[tId - offset.tetOffset].v[2] + tets[tId - offset.tetOffset].v[3]) / 4.0f;
-// 		else if (tId >= offset.boxOffset) pos[tId] = boxes[tId - offset.boxOffset].center;
-// 		else pos[tId] = spheres[tId].center;
+		mask[tId] = states[tId].collisionMask;
 	}
 
 	__global__ void SetupBoxes(
@@ -225,6 +220,9 @@ namespace dyno
 		this->currentMass()->setElementCount(sizeOfRigids);
 		this->currentInertia()->setElementCount(sizeOfRigids);
 		this->currentQuaternion()->setElementCount(sizeOfRigids);
+		this->stateCollisionMask()->setElementCount(sizeOfRigids);
+
+		nbrContacts.resize(sizeOfRigids);
 
 		mBoundaryContactCounter.resize(sizeOfRigids);
 
@@ -237,9 +235,9 @@ namespace dyno
 			this->currentAngularVelocity()->getData(),
 			this->currentQuaternion()->getData(),
 			this->currentInertia()->getData(),
+			this->stateCollisionMask()->getData(),
 			mDeviceRigidBodyStates,
-			eleOffset,
-			sizeOfRigids);
+			eleOffset);
 
 		mInitialInertia.assign(this->currentInertia()->getData());
 	}
@@ -432,6 +430,24 @@ namespace dyno
 		}
 	}
 
+
+	template <typename ContactPair>
+	__global__ void CalculateNbrCons(
+		DArray<ContactPair> nbc,
+		DArray<Real> nbrCnt)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= nbc.size()) return;
+
+		int idx1 = nbc[pId].bodyId1;
+		int idx2 = nbc[pId].bodyId2;
+
+		if(idx1 != -1)
+			atomicAdd(&nbrCnt[idx1], 1.0f);
+		if(idx2 != -1)
+			atomicAdd(&nbrCnt[idx2], 1.0f);
+	}
+
 	template <typename Coord, typename Matrix, typename ContactPair>
 	__global__ void CalculateJacobians(
 		DArray<Coord> J,
@@ -603,122 +619,6 @@ namespace dyno
 
 	}
 
-// 	template <typename Coord, typename Matrix, typename Real>
-// 	__global__ void RB_constrct_mass_eq(
-// 		DArray<Coord> pos,
-// 		DArray<Matrix> inertia,
-// 		DArray<Real> mass,
-// 		DArray<Coord> J,
-// 		DArray<Coord> B,
-// 		DArray<Real> mass_eq,
-// 		DArray<Real> mass_eq_old,
-// 		DArray<Matrix> inertia_eq,
-// 		DArray<NeighborConstraints> nbc
-// 	)
-// 	{
-// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (pId >= J.size() / 4) return;
-// 		int idx1 = nbc[pId].idx1;
-// 		int idx2 = nbc[pId].idx2;
-// 		if(nbc[pId].contactType != ContactType::CT_FRICTION)
-// 		{
-// 			Coord d = nbc[pId].normal1;
-// 
-// 			if (d[0] > EPSILON)
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if(idx2 != -1)
-// 				{ 
-// 					atomicAdd(&mass_eq[idx1 * 6], mass_eq_old[idx2 * 6] * d_n[0]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 1], mass_eq_old[idx1 * 6 + 1] * d_n[0]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
-// 				}
-// 			}
-// 			else
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 1], - mass_eq_old[idx2 * 6 + 1] * d_n[0]);
-// 					atomicAdd(&mass_eq[idx2 * 6], - mass_eq_old[idx1 * 6] * d_n[0]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6], 100000.0f);
-// 				}
-// 			}
-// 			if (d[1] > EPSILON)
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 2], mass_eq_old[idx2 * 6 + 2] * d_n[1]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 3], mass_eq_old[idx1 * 6 + 3] * d_n[1]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 2], 100000.0f);
-// 				}
-// 			}
-// 			else
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 3], - mass_eq_old[idx2 * 6 + 3] * d_n[1]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 2], - mass_eq_old[idx1 * 6 + 2] * d_n[1]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 3], 100000.0f);
-// 				}
-// 			}
-// 			if (d[2] > EPSILON)
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 4], mass_eq_old[idx2 * 6 + 4] * d_n[2]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 5], mass_eq_old[idx1 * 6 + 5] * d_n[2]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 4], 100000.0f);
-// 				}
-// 			}
-// 			else
-// 			{
-// 				Coord3D d_n = d / d.norm();
-// 				if (idx2 != -1)
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 5], - mass_eq_old[idx2 * 6 + 5] * d_n[2]);
-// 					atomicAdd(&mass_eq[idx2 * 6 + 4], - mass_eq_old[idx1 * 6 + 4] * d_n[2]);
-// 				}
-// 				else
-// 				{
-// 					atomicAdd(&mass_eq[idx1 * 6 + 5], 100000.0f);
-// 				}
-// 			}
-// 
-// 		}
-// 	}
-
-// 	template <typename Real, typename Matrix>
-// 	__global__ void RB_constrct_mass_eq(
-// 		DArray<Matrix> inertia,
-// 		DArray<Real> mass,
-// 		DArray<Real> mass_eq
-// 	)
-// 	{
-// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (pId >= mass.size()) return;
-// 
-// 		for (int i = 0; i < 6; i++)
-// 			mass_eq[pId * 6 + i] += mass[pId];
-// 	}
 
 
 	// ignore zeta !!!!!!
@@ -784,7 +684,8 @@ namespace dyno
 		DArray<Coord> B,
 		DArray<Real> eta,
 		DArray<Real> mass,
-		DArray<ContactPair> nbq)
+		DArray<ContactPair> nbq,
+		DArray<Real> stepInv)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
@@ -806,7 +707,10 @@ namespace dyno
 		if (d[pId] > EPSILON)
 		{
 			Real delta_lambda = eta_i / d[pId];
-			delta_lambda *= 0.2;
+			Real stepInverse = stepInv[idx1];
+			if(idx2 != -1)
+				stepInverse += stepInv[idx2];
+			delta_lambda *= (1.0f / stepInverse);
 
 			//printf("delta_lambda = %.3lf\n", delta_lambda);
 
@@ -830,8 +734,8 @@ namespace dyno
 				if (idx2 != -1)
 					mass_i += mass[idx2];
 
-				//if ((lambda_new) > 15 * (mass_i)) lambda_new = 15 * (mass_i);
-				//if ((lambda_new) < -15 * (mass_i)) lambda_new = -15 * (mass_i);
+				//if ((lambda_new) > 5 * (mass_i)) lambda_new = 5 * (mass_i);
+				//if ((lambda_new) < -5 * (mass_i)) lambda_new = -5 * (mass_i);
 				delta_lambda = lambda_new - lambda[pId];
 			}
 
@@ -889,7 +793,7 @@ namespace dyno
 		int start_segment)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size() + box.size()) return;
+		if (pId >= sphere.size() + box.size() + tet.size()) return;
 		
 		if (pId < start_box && pId >= start_sphere)//sphere
 		{
@@ -1060,6 +964,78 @@ namespace dyno
 		}
 		else if (pId >= start_tet && pId < start_segment) // tets
 		{
+			//printf("???????\n");
+			int cnt = 0;
+			int start_i = count[pId];
+
+			Tet3D tet_i = tet[pId - start_tet];
+
+			for(int i = 0; i < 4; i ++)
+			{ 
+				Coord vertex = tet_i.v[i];
+				if (vertex.x >= hi.x)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = vertex.x - hi.x;
+					cnt++;
+				}
+				if (vertex.x <= lo.x)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo.x - (vertex.x);
+					cnt++;
+				}
+
+				if (vertex.y >= hi.y)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = vertex.y - hi.y;
+					cnt++;
+				}
+				if (vertex.y <= lo.y)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo.y - (vertex.y);
+					cnt++;
+				}
+
+				if (vertex.z >= hi.z)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = vertex.z - hi.z;
+					cnt++;
+				}
+				if (vertex.z <= lo.z)
+				{
+					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId2 = -1;
+					nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+					nbq[cnt + start_i].pos1 = vertex;
+					nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+					nbq[cnt + start_i].interpenetration = lo.z - (vertex.z);
+					cnt++;
+				}
+			}
 		}
 		else//segments 
 		{}
@@ -1119,7 +1095,7 @@ namespace dyno
 		int start_segment)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size() + box.size()) return;
+		if (pId >= sphere.size() + box.size() + tet.size()) return;
 
 		if (pId < start_box && pId >= start_sphere)//sphere
 		{
@@ -1216,8 +1192,45 @@ namespace dyno
 			}
 			count[pId] = cnt;
 		}
-		else if (pId >= start_tet && pId < start_segment)//tets
+		else if (pId >= start_tet && pId < start_segment) // tets
 		{
+			int cnt = 0;
+			int start_i = count[pId];
+
+			Tet3D tet_i = tet[pId - start_tet];
+
+			for (int i = 0; i < 4; i++)
+			{
+				Coord vertex = tet_i.v[i];
+				if (vertex.x >= hi.x)
+				{
+					cnt++;
+				}
+				if (vertex.x <= lo.x)
+				{
+					cnt++;
+				}
+
+				if (vertex.y >= hi.y)
+				{
+					cnt++;
+				}
+				if (vertex.y <= lo.y)
+				{
+					cnt++;
+				}
+
+				if (vertex.z >= hi.z)
+				{
+					cnt++;
+				}
+				if (vertex.z <= lo.z)
+				{
+					cnt++;
+				}
+			}
+
+			count[pId] = cnt;
 		}
 		else//segments
 		{}
@@ -1246,9 +1259,9 @@ namespace dyno
 				mUpperCorner,
 				mLowerCorner,
 				0,
-				offset.boxOffset,
-				offset.tetOffset,
-				offset.segOffset);
+				offset.boxIndex(),
+				offset.tetIndex(),
+				offset.capsuleIndex());
 
 			sum += m_reduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
 			m_scan.exclusive(mBoundaryContactCounter, true);
@@ -1266,28 +1279,13 @@ namespace dyno
 					mUpperCorner,
 					mLowerCorner,
 					0,
-					offset.boxOffset,
-					offset.tetOffset,
-					offset.segOffset);
+					offset.boxIndex(),
+					offset.tetIndex(),
+					offset.capsuleIndex());
 			}
 		}
 		else
 			mBoundaryContacts.resize(0);
-
-		if (have_mesh_boundary)
-		{
-
-			
-		}
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::init_friction()
-	{
-
-
-
-
 	}
 
 	template<typename TDataType>
@@ -1324,6 +1322,7 @@ namespace dyno
 		mEta.reset();
 		mAccel.reset();
 		mLambda.reset();
+		nbrContacts.reset();
 
 		if (sizeOfConstraints == 0) return;
 
@@ -1340,7 +1339,11 @@ namespace dyno
 				mAllConstraints,
 				sizeOfContacts);
 		}
-
+		cuExecute(sizeOfConstraints,
+			CalculateNbrCons,
+			mAllConstraints,
+			nbrContacts
+		);
 		cuExecute(sizeOfConstraints,
 			CalculateJacobians,
 			mJ,
@@ -1375,7 +1378,7 @@ namespace dyno
 		initializeJacobian(dt);
 
 		int size_constraints = mAllConstraints.size();
-		for (int i = 0; i < 15; i++)
+		for (int i = 0; i < 35; i++)
 		{
 			cuExecute(size_constraints,
 				TakeOneJacobiIteration,
@@ -1386,7 +1389,8 @@ namespace dyno
 				mB,
 				mEta,
 				currentMass()->getData(),
-				mAllConstraints);
+				mAllConstraints,
+				nbrContacts);
 		}
 
 		uint num = this->currentCenter()->getElementCount();
@@ -1422,13 +1426,13 @@ namespace dyno
 			mDeviceBoxes,
 			this->currentCenter()->getData(),
 			this->currentRotationMatrix()->getData(),
-			offset.boxOffset);
+			offset.boxIndex());
 
 		cuExecute(mDeviceBoxes.size(),
 			UpdateSpheres,
 			discreteSet->getSpheres(),
 			this->currentCenter()->getData(),
-			0);
+			offset.sphereIndex());
 
 		cuExecute(mDeviceTets.size(),
 			UpdateTets,
@@ -1436,7 +1440,7 @@ namespace dyno
 			mDeviceTets,
 			this->currentCenter()->getData(),
 			this->currentRotationMatrix()->getData(),
-			offset.tetOffset);
+			offset.tetIndex());
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

@@ -50,7 +50,7 @@ int main(int, char**)
 	instanceNode->currentTransforms()->connect(instanceRender->inTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
-
+	scene.setUpperBound({ 4, 4, 4});
 	GLRenderEngine* engine = new GLRenderEngine;
 
 	GlfwApp window;

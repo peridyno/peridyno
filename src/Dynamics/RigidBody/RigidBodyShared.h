@@ -5,6 +5,7 @@
 #include "Quat.h"
 
 #include "Collision/CollisionData.h"
+#include "Topology/DiscreteElements.h"
 
 namespace dyno
 {
@@ -13,15 +14,6 @@ namespace dyno
 		MT_Static = 0,
 		MT_Kinematic,
 		MT_Dynamic,
-	};
-
-	enum ShapeType
-	{
-		ST_Box = 1,
-		ST_Tet = 2,
-		ST_Capsule = 4,
-		ST_Sphere = 8,
-		ST_Other = 0x80000000
 	};
 
 	struct BoxInfo
@@ -92,8 +84,8 @@ namespace dyno
 			friction = 0.0f;
 			restitution = 0.0f;
 			motionType = MT_Static;
-			collisionType = CT_AllObjects;
-			shapeType = ST_Other;
+			collisionMask = CT_AllObjects;
+			shapeType = ET_Other;
 			angle = Quat1f(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
@@ -119,8 +111,8 @@ namespace dyno
 
  		MotionType motionType;
 		
-		ShapeType shapeType;
+		ElementType shapeType;
 
-		CollisionMask collisionType;
+		CollisionMask collisionMask;
 	};
 }

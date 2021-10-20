@@ -38,8 +38,8 @@ namespace dyno
 
 	private:
 		// framebuffers
-		gl::Framebuffer	mFramebuffer;
-		gl::Texture2DArray		mShadowDepth;
+		gl::Framebuffer		mFramebuffer;
+		gl::Texture2D		mShadowDepth;
 
 		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices
 		gl::Buffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices
@@ -47,5 +47,10 @@ namespace dyno
 	public:
 		int				width;
 		int				height;
+
+		float			bias0  = 0.03f;
+		float			bias1  = 0.003f;
+		float			radius = 2.f;		// in pixel
+		float			clamp  = 0.f;
 	};
 }

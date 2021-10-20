@@ -18,6 +18,7 @@ namespace dyno
 		mPointSize = 0.001f;
 		mNumPoints = 1;
 		this->setName("point_renderer");
+		this->inColor()->tagOptional(true);
 	}
 
 	GLPointVisualModule::~GLPointVisualModule()
