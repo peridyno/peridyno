@@ -12,4 +12,8 @@ namespace dyno
 	{
 	}
 
+	void OutputModule::updateImpl()
+	{
+		this->flush();
+	}
 }

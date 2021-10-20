@@ -10,5 +10,13 @@ namespace dyno
 		virtual ~OutputModule();
 
 		std::string getModuleType() override { return "OuputModule"; }
+
+		virtual void flush() {};
+
+	protected:
+		void updateImpl() override;
+
+		DEF_VAR(std::string, OutputPath, "", "");
+		DEF_VAR(std::string, Prefix, "", "");
 	};
 }
