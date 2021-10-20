@@ -12,7 +12,7 @@
 namespace dyno 
 {
 	// draw depth for shadow map
-	class DrawDepth : public Action
+	class ShadowPassAction : public Action
 	{
 	private:
 		void process(Node* node) override
@@ -25,7 +25,7 @@ namespace dyno
 				auto m = dynamic_cast<GLVisualModule*>(iter);
 				if (m && m->isVisible())
 				{
-					m->paintGL(dyno::GLVisualModule::DEPTH);
+					m->paintGL(dyno::GLVisualModule::SHADOW);
 				}
 			}
 		}
@@ -45,20 +45,41 @@ namespace dyno
 
 	void ShadowMap::initialize()
 	{
+		mShadowTex.format = GL_RG;
+		mShadowTex.internalFormat = GL_RG32F;
+		mShadowTex.borderColor = glm::vec4(FLT_MAX);
+		mShadowTex.maxFilter = GL_LINEAR; 
+		mShadowTex.minFilter = GL_LINEAR;
+		mShadowTex.create();
+
+		mShadowBlur.format = GL_RG;
+		mShadowBlur.internalFormat = GL_RG32F;
+		mShadowBlur.borderColor = glm::vec4(FLT_MAX);
+		mShadowBlur.create();
+
 		mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
 		mShadowDepth.format = GL_DEPTH_COMPONENT;
 		mShadowDepth.create();
 
+		mShadowTex.resize(width, height);
+		mShadowBlur.resize(width, height);
 		mShadowDepth.resize(width, height);
 
 		mFramebuffer.create();
+
 		mFramebuffer.bind();
-		glDrawBuffer(GL_NONE);
+		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);
+		mFramebuffer.checkStatus();
+
 		mFramebuffer.unbind();
 
 		// uniform buffers
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW); 
 		mShadowMatrixUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
+		// for blur depth textures
+		mQuad = gl::Mesh::ScreenQuad();
+		mBlurProgram = gl::CreateShaderProgram("screen.vert", "blur.frag");
 	}
 
 	// extract frustum corners from camera projection matrix
@@ -145,8 +166,12 @@ namespace dyno
 			bmax.x = glm::min(bmax.x, fbmax.x);
 			bmax.y = glm::min(bmax.y, fbmax.y);
 		}
+
+		float cx = (bmin.x + bmax.x) * 0.5;
+		float cy = (bmin.y + bmax.y) * 0.5;
+		float d = glm::max(bmax.y - bmin.y, bmax.x - bmin.x) * 0.5f;
 		
-		glm::mat4 lightProj = glm::ortho(bmin.x, bmax.x, bmin.y, bmax.y, -bmax.z, -bmin.z);
+		glm::mat4 lightProj = glm::ortho(cx - d, cx + d, cy - d, cy + d, -bmax.z, -bmin.z);
 		return lightProj;
 	}
 
@@ -177,22 +202,45 @@ namespace dyno
 
 		// draw depth
 		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);			
-		//glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mShadowDepth.id, 0, i);
 
-		mFramebuffer.checkStatus();
+		// first draw to shadow texture
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+
 		mFramebuffer.clearDepth(1.0);
+		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
 		glViewport(0, 0, width, height);
 		gl::glCheckError();
 		// shadow pass
 		if ((scene != 0) && (scene->getRootNode() != 0))
 		{
-			scene->getRootNode()->traverseTopDown<DrawDepth>();
+			scene->getRootNode()->traverseTopDown<ShadowPassAction>();
+		}
+
+		// blur shadow map
+		{
+			glDisable(GL_DEPTH_TEST);
+			mBlurProgram.use();
+
+			const int blurIters = 1;
+			for (int i = 0; i < blurIters; i++)
+			{
+				mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
+				mShadowTex.bind(GL_TEXTURE5);
+				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
+				mQuad.draw();
+
+				mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
+				mShadowBlur.bind(GL_TEXTURE5);
+				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+				mQuad.draw();
+			}
+			
+			glEnable(GL_DEPTH_TEST);
 		}
 
 		// bind the shadow texture to the slot
-		mShadowDepth.bind(GL_TEXTURE5);
+		mShadowTex.bind(GL_TEXTURE5);
 	
 		// shadow map uniform
 		struct {

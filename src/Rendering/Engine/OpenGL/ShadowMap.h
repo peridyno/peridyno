@@ -19,6 +19,8 @@
 #include "gl/Buffer.h"
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
+#include "gl/Program.h"
+#include "gl/Mesh.h"
 
 #include <vector>
 #include <Rendering.h>
@@ -39,7 +41,13 @@ namespace dyno
 	private:
 		// framebuffers
 		gl::Framebuffer		mFramebuffer;
+		gl::Texture2D		mShadowTex;
 		gl::Texture2D		mShadowDepth;
+		gl::Texture2D		mShadowBlur;
+
+		gl::Program			mBlurProgram;
+		gl::Mesh			mQuad;
+
 
 		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices
 		gl::Buffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices

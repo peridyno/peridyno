@@ -43,12 +43,12 @@ namespace dyno
 		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
 	}
 
-	void GLSurfaceVisualModule::paintGL(RenderMode mode)
+	void GLSurfaceVisualModule::paintGL(RenderPass mode)
 	{
 		mShaderProgram.use();
 
 		unsigned int subroutine;
-		if (mode == RenderMode::COLOR)
+		if (mode == RenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", mBaseColor);
 			mShaderProgram.setFloat("uMetallic", mMetallic);
@@ -58,7 +58,7 @@ namespace dyno
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (mode == RenderMode::DEPTH)
+		else if (mode == RenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

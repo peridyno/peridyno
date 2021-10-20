@@ -49,9 +49,20 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fragColor.a = 1.0;
 }
 
-layout(index = 1) subroutine(RenderPass) void DepthPass(void)
+layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
 {
-	// do nothing
+	float depth = gl_FragCoord.z;
+	//depth = depth * 0.5 + 0.5;
+
+	float moment1 = depth;
+	float moment2 = depth * depth;
+
+	// Adjusting moments (this is sort of bias per pixel) using partial derivative
+	float dx = dFdx(depth);
+	float dy = dFdy(depth);
+	moment2 += 0.25 * (dx * dx + dy * dy);
+
+	fragColor = vec4(moment1, moment2, 0.0, 0.0);
 }
 
 /***************** ShadowMap *********************/
@@ -67,29 +78,26 @@ layout(binding = 5) uniform sampler2D uTexShadow;
 vec3 GetShadowFactor(vec3 pos)
 {
 	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
-	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
+	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;	// NDC
 	projCoords = projCoords * 0.5 + 0.5;
 
-	float closestDepth = texture(uTexShadow, projCoords.xy).r;
-	float currentDepth = min(1.0, projCoords.z);
+	// From http://fabiensanglard.net/shadowmappingVSM/index.php
+	float distance = min(1.0, projCoords.z);
+	vec2  moments = texture(uTexShadow, projCoords.xy).rg;
 
-	float temp = 1.0 - abs(dot(normal, normalize(light.direction.xyz)));
-	float bias = max(uShadowBlock.bias0 * temp, uShadowBlock.bias1);
+	// Surface is fully lit. as the current fragment is before the light occluder
+	if (distance <= moments.x)
+		return vec3(1.0);
 
-	// simple PCF
-	vec2 shadow = vec2(0);
-	vec2 texelSize = 1.0 / textureSize(uTexShadow, 0).xy;
+	// The fragment is either in shadow or penumbra. We now use chebyshev's upperBound to check
+	// How likely this pixel is to be lit (p_max)
+	float variance = moments.y - (moments.x * moments.x);
+	variance = max(variance, 0.00001);
 
-	for (float x = -uShadowBlock.radius; x <= uShadowBlock.radius; x += 1.f)
-	{
-		for (float y = -uShadowBlock.radius; y <= uShadowBlock.radius; y += 1.f)
-		{
-			float pcfDepth = texture(uTexShadow, projCoords.xy + vec2(x, y) * texelSize).r;
-			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
-			shadow += vec2(visible, 1);
-		}
-	}
-	return vec3(clamp(shadow.x / shadow.y, uShadowBlock.clamp, 1.0));
+	float d = distance - moments.x;
+	float p_max = variance / (variance + d * d);
+
+	return vec3(p_max);
 }
 
 

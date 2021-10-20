@@ -53,6 +53,9 @@ namespace dyno
 		virtual void resize(int w, int h) override;
 
 		virtual std::string name() override;
+
+		void setShadowBias(float b0, float b1);
+
 	private:
 		void setupCamera();
 		void initUniformBuffers();
