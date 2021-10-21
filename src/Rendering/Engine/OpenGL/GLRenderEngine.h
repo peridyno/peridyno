@@ -53,6 +53,7 @@ namespace dyno
 		virtual void resize(int w, int h) override;
 
 		virtual std::string name() override;
+
 	private:
 		void setupCamera();
 		void initUniformBuffers();

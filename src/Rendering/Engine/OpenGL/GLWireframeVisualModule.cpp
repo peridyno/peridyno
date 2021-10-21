@@ -43,29 +43,28 @@ namespace dyno
 		mIndexBuffer.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
 	}
 
-	void GLWireframeVisualModule::paintGL(RenderMode mode)
+	void GLWireframeVisualModule::paintGL(RenderPass pass)
 	{
 		mShaderProgram.use();
 
-		unsigned int subroutine;
-		if (mode == RenderMode::COLOR)
+		unsigned int subroutine = (unsigned int)pass;
+
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+
+		if (pass == RenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", mBaseColor);
 			mShaderProgram.setFloat("uMetallic", mMetallic);
 			mShaderProgram.setFloat("uRoughness", mRoughness);
 			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
-
-			subroutine = 0;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (mode == RenderMode::DEPTH)
+		else if (pass == RenderPass::SHADOW)
 		{
-			subroutine = 1;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+			// lines should cast shadow?
 		}
 		else
 		{
-			printf("Unknown render mode!\n");
+			printf("Unknown render pass!\n");
 			return;
 		}
 

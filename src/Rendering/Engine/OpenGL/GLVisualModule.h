@@ -40,15 +40,15 @@ namespace dyno
 		virtual bool isTransparent() const;
 
 	public:
-		enum RenderMode
+		enum RenderPass
 		{ 
 			COLOR = 0,
-			DEPTH = 1,
+			SHADOW = 1,
 		};
 
 		virtual bool initializeGL() = 0;
 		virtual void updateGL() = 0;
-		virtual void paintGL(RenderMode mode) = 0;
+		virtual void paintGL(RenderPass pass) = 0;
 
 	protected:
 		void updateGraphicsContext() final;
