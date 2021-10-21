@@ -11,26 +11,6 @@
 
 namespace dyno 
 {
-	// draw depth for shadow map
-	class DrawDepth : public Action
-	{
-	private:
-		void process(Node* node) override
-		{
-			if (!node->isVisible())
-				return;
-
-			for (auto iter : node->graphicsPipeline()->activeModules())
-			{
-				auto m = dynamic_cast<GLVisualModule*>(iter);
-				if (m && m->isVisible())
-				{
-					m->paintGL(dyno::GLVisualModule::DEPTH);
-				}
-			}
-		}
-	};
-
 
 	ShadowMap::ShadowMap(int w, int h)
 	{
@@ -45,20 +25,43 @@ namespace dyno
 
 	void ShadowMap::initialize()
 	{
+		mShadowTex.format = GL_RG;
+		mShadowTex.internalFormat = GL_RG32F;
+		mShadowTex.borderColor = glm::vec4(1);
+		mShadowTex.maxFilter = GL_LINEAR; 
+		mShadowTex.minFilter = GL_LINEAR;
+		mShadowTex.create();
+
+		mShadowBlur.format = GL_RG;
+		mShadowBlur.internalFormat = GL_RG32F;
+		mShadowBlur.borderColor = glm::vec4(1);
+		mShadowBlur.maxFilter = GL_LINEAR;
+		mShadowBlur.minFilter = GL_LINEAR;
+		mShadowBlur.create();
+
 		mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
 		mShadowDepth.format = GL_DEPTH_COMPONENT;
 		mShadowDepth.create();
 
+		mShadowTex.resize(width, height);
+		mShadowBlur.resize(width, height);
 		mShadowDepth.resize(width, height);
 
 		mFramebuffer.create();
+
 		mFramebuffer.bind();
-		glDrawBuffer(GL_NONE);
+		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);
+		mFramebuffer.checkStatus();
+
 		mFramebuffer.unbind();
 
 		// uniform buffers
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW); 
 		mShadowMatrixUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
+		// for blur depth textures
+		mQuad = gl::Mesh::ScreenQuad();
+		mBlurProgram = gl::CreateShaderProgram("screen.vert", "blur.frag");
 	}
 
 	// extract frustum corners from camera projection matrix
@@ -145,12 +148,16 @@ namespace dyno
 			bmax.x = glm::min(bmax.x, fbmax.x);
 			bmax.y = glm::min(bmax.y, fbmax.y);
 		}
+
+		float cx = (bmin.x + bmax.x) * 0.5;
+		float cy = (bmin.y + bmax.y) * 0.5;
+		float d = glm::max(bmax.y - bmin.y, bmax.x - bmin.x) * 0.5f;
 		
-		glm::mat4 lightProj = glm::ortho(bmin.x, bmax.x, bmin.y, bmax.y, -bmax.z, -bmin.z);
+		glm::mat4 lightProj = glm::ortho(cx - d, cx + d, cy - d, cy + d, -bmax.z, -bmin.z);
 		return lightProj;
 	}
 
-	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
+	void ShadowMap::beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
 	{
 		glm::mat4 lightView = getLightView(rparams.light.mainLightDirection);
 		glm::mat4 lightProj = getLightProj(lightView, scene, rparams);
@@ -166,50 +173,63 @@ namespace dyno
 			int height;
 		} lightMVP;
 
-		lightMVP.width  = width;
+		lightMVP.width = width;
 		lightMVP.height = height;
-		lightMVP.model  = glm::mat4(1);		
-		lightMVP.view   = lightView;
-		lightMVP.proj   = lightProj;
-			   
+		lightMVP.model = glm::mat4(1);
+		lightMVP.view = lightView;
+		lightMVP.proj = lightProj;
+
 		mTransformUBO.load(&lightMVP, sizeof(lightMVP));
 		mTransformUBO.bindBufferBase(0);
 
-		// draw depth
-		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);			
-		//glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mShadowDepth.id, 0, i);
-
-		mFramebuffer.checkStatus();
-		mFramebuffer.clearDepth(1.0);
-
-		glViewport(0, 0, width, height);
-		gl::glCheckError();
-		// shadow pass
-		if ((scene != 0) && (scene->getRootNode() != 0))
-		{
-			scene->getRootNode()->traverseTopDown<DrawDepth>();
-		}
-
-		// bind the shadow texture to the slot
-		mShadowDepth.bind(GL_TEXTURE5);
-	
 		// shadow map uniform
 		struct {
 			glm::mat4 transform;
-			float bias0;
-			float bias1;
-			float radius;
-			float clamp;
+			float minValue;
 		} shadow;
 		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
-		shadow.bias0 = bias0;
-		shadow.bias1 = bias1;
-		shadow.radius = radius; 
-		shadow.clamp = clamp;
+		shadow.minValue = minValue;
 
 		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
 		mShadowMatrixUBO.bindBufferBase(2);
+
+		// draw depth
+		mFramebuffer.bind();
+
+		// first draw to shadow texture
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+
+		mFramebuffer.clearDepth(1.0);
+		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
+
+		glViewport(0, 0, width, height);
+
+	}
+
+	void ShadowMap::endUpdate() 
+	{		 
+		// blur shadow map		
+		const int blurIters = 1;
+
+		glDisable(GL_DEPTH_TEST);
+		mBlurProgram.use();
+		for (int i = 0; i < blurIters; i++)
+		{
+			mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
+			mShadowTex.bind(GL_TEXTURE5);
+			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
+			mQuad.draw();
+
+			mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
+			mShadowBlur.bind(GL_TEXTURE5);
+			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+			mQuad.draw();
+		}
+		glEnable(GL_DEPTH_TEST);		
+
+		// bind the shadow texture to the slot
+		mShadowTex.bind(GL_TEXTURE5);	
+
 	}
 }
 

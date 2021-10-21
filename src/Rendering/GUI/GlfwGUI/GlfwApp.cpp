@@ -46,9 +46,6 @@ namespace dyno
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		//
-		//delete mRenderEngine;
-
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 
@@ -85,15 +82,16 @@ namespace dyno
 		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
+		// enable multisamples for anti alias
+		glfwWindowHint(GLFW_SAMPLES, 4);
 
-	// Create window with graphics context
+		// Create window with graphics context
 		mWindow = glfwCreateWindow(width, height, mWindowTitle.c_str(), NULL, NULL);
 		if (mWindow == NULL)
 			return;
 
 		initCallbacks();
 		
-
 		glfwMakeContextCurrent(mWindow);
 		
 		if (!gladLoadGL()) {
@@ -189,14 +187,13 @@ namespace dyno
 
 			//mRenderEngine->begin();
 			//mRenderEngine->drawGUI();
-			mRenderEngine->draw(&SceneGraph::getInstance());
-			//mRenderEngine->end();
-
-			// TODO: keep a track of window size in other place
 			int width, height;
 			glfwGetWindowSize(mWindow, &width, &height);
 			mRenderEngine->renderParams()->viewport.w = width;
 			mRenderEngine->renderParams()->viewport.h = height;
+
+			mRenderEngine->draw(&SceneGraph::getInstance());
+
 			mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
 // 			// Draw widgets
 // 			// TODO: maybe move into mImWindow...

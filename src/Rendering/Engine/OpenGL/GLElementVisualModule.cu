@@ -348,12 +348,12 @@ namespace dyno
 
 	}
 
-	void GLElementVisualModule::paintGL(RenderMode mode)
+	void GLElementVisualModule::paintGL(RenderPass pass)
 	{
 		mShaderProgram.use();
 
 		unsigned int subroutine;
-		if (mode == RenderMode::COLOR)
+		if (pass == RenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", mBaseColor);
 			mShaderProgram.setFloat("uMetallic", mMetallic);
@@ -363,14 +363,14 @@ namespace dyno
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (mode == RenderMode::DEPTH)
+		else if (pass == RenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
 		else
 		{
-			printf("Unknown render mode!\n");
+			printf("Unknown render pass!\n");
 			return;
 		}
 

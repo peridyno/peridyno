@@ -34,7 +34,7 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
 	protected:
-		virtual void paintGL(RenderMode mode) override;
+		virtual void paintGL(RenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
