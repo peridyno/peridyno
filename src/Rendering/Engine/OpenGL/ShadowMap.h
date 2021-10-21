@@ -36,7 +36,8 @@ namespace dyno
 
 		void initialize();
 		
-		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+		void beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+		void endUpdate();
 
 	private:
 		// framebuffers

@@ -49,23 +49,35 @@ namespace dyno
 		}
 
 
-		void draw(float scale = 3.f)
-		{
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-
-			mRulerTex.bind(GL_TEXTURE1);
-			
+		void draw(float scale, GLVisualModule::RenderPass mode)
+		{			
 			mProgram.use();
 			mProgram.setFloat("uScale", scale);
 
-			mPlane.draw();
-			
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_BLEND);
+			unsigned int subroutine;
+			if (mode == GLVisualModule::COLOR)
+			{
+				subroutine = 0;
+				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 
-			// clear depth to get avoid object cross ground
-			glClear(GL_DEPTH_BUFFER_BIT);
+				glEnable(GL_BLEND);
+				glEnable(GL_CULL_FACE);
+				mRulerTex.bind(GL_TEXTURE1);
+
+				mPlane.draw();
+
+				glDisable(GL_CULL_FACE);
+				glDisable(GL_BLEND);
+				
+				// clear depth to get avoid object cross ground
+				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+			else if (mode == GLVisualModule::SHADOW)
+			{
+				subroutine = 1;
+				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+				mPlane.draw();
+			}			
 
 			gl::glCheckError();
 		}
@@ -241,10 +253,10 @@ namespace dyno
 		mBackgroundRenderer = new BackgroundRenderer();
 	}
 
-	void GLRenderHelper::drawGround(float scale)
+	void GLRenderHelper::drawGround(float scale, GLVisualModule::RenderPass pass)
 	{
 		if (mGroundRenderer != NULL)
-			mGroundRenderer->draw(scale);
+			mGroundRenderer->draw(scale, pass);
 	}
 
 	void GLRenderHelper::drawAxis(float lineWidth)

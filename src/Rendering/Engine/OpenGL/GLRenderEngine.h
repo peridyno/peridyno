@@ -54,8 +54,6 @@ namespace dyno
 
 		virtual std::string name() override;
 
-		void setShadowBias(float b0, float b1);
-
 	private:
 		void setupCamera();
 		void initUniformBuffers();

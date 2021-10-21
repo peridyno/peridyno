@@ -11,26 +11,6 @@
 
 namespace dyno 
 {
-	// draw depth for shadow map
-	class ShadowPassAction : public Action
-	{
-	private:
-		void process(Node* node) override
-		{
-			if (!node->isVisible())
-				return;
-
-			for (auto iter : node->graphicsPipeline()->activeModules())
-			{
-				auto m = dynamic_cast<GLVisualModule*>(iter);
-				if (m && m->isVisible())
-				{
-					m->paintGL(dyno::GLVisualModule::SHADOW);
-				}
-			}
-		}
-	};
-
 
 	ShadowMap::ShadowMap(int w, int h)
 	{
@@ -47,14 +27,16 @@ namespace dyno
 	{
 		mShadowTex.format = GL_RG;
 		mShadowTex.internalFormat = GL_RG32F;
-		mShadowTex.borderColor = glm::vec4(FLT_MAX);
+		mShadowTex.borderColor = glm::vec4(1);
 		mShadowTex.maxFilter = GL_LINEAR; 
 		mShadowTex.minFilter = GL_LINEAR;
 		mShadowTex.create();
 
 		mShadowBlur.format = GL_RG;
 		mShadowBlur.internalFormat = GL_RG32F;
-		mShadowBlur.borderColor = glm::vec4(FLT_MAX);
+		mShadowBlur.borderColor = glm::vec4(1);
+		mShadowBlur.maxFilter = GL_LINEAR;
+		mShadowBlur.minFilter = GL_LINEAR;
 		mShadowBlur.create();
 
 		mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
@@ -175,7 +157,7 @@ namespace dyno
 		return lightProj;
 	}
 
-	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
+	void ShadowMap::beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
 	{
 		glm::mat4 lightView = getLightView(rparams.light.mainLightDirection);
 		glm::mat4 lightProj = getLightProj(lightView, scene, rparams);
@@ -191,14 +173,25 @@ namespace dyno
 			int height;
 		} lightMVP;
 
-		lightMVP.width  = width;
+		lightMVP.width = width;
 		lightMVP.height = height;
-		lightMVP.model  = glm::mat4(1);		
-		lightMVP.view   = lightView;
-		lightMVP.proj   = lightProj;
-			   
+		lightMVP.model = glm::mat4(1);
+		lightMVP.view = lightView;
+		lightMVP.proj = lightProj;
+
 		mTransformUBO.load(&lightMVP, sizeof(lightMVP));
 		mTransformUBO.bindBufferBase(0);
+
+		// shadow map uniform
+		struct {
+			glm::mat4 transform;
+			float minValue;
+		} shadow;
+		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
+		shadow.minValue = minValue;
+
+		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
+		mShadowMatrixUBO.bindBufferBase(2);
 
 		// draw depth
 		mFramebuffer.bind();
@@ -210,48 +203,33 @@ namespace dyno
 		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
 		glViewport(0, 0, width, height);
-		gl::glCheckError();
-		// shadow pass
-		if ((scene != 0) && (scene->getRootNode() != 0))
+
+	}
+
+	void ShadowMap::endUpdate() 
+	{		 
+		// blur shadow map		
+		const int blurIters = 1;
+
+		glDisable(GL_DEPTH_TEST);
+		mBlurProgram.use();
+		for (int i = 0; i < blurIters; i++)
 		{
-			scene->getRootNode()->traverseTopDown<ShadowPassAction>();
+			mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
+			mShadowTex.bind(GL_TEXTURE5);
+			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
+			mQuad.draw();
+
+			mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
+			mShadowBlur.bind(GL_TEXTURE5);
+			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+			mQuad.draw();
 		}
-
-		// blur shadow map
-		{
-			glDisable(GL_DEPTH_TEST);
-			mBlurProgram.use();
-
-			const int blurIters = 1;
-			for (int i = 0; i < blurIters; i++)
-			{
-				mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
-				mShadowTex.bind(GL_TEXTURE5);
-				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
-				mQuad.draw();
-
-				mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
-				mShadowBlur.bind(GL_TEXTURE5);
-				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
-				mQuad.draw();
-			}
-			
-			glEnable(GL_DEPTH_TEST);
-		}
+		glEnable(GL_DEPTH_TEST);		
 
 		// bind the shadow texture to the slot
-		mShadowTex.bind(GL_TEXTURE5);
-	
-		// shadow map uniform
-		struct {
-			glm::mat4 transform;
-			float minValue;
-		} shadow;
-		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
-		shadow.minValue = minValue;
+		mShadowTex.bind(GL_TEXTURE5);	
 
-		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
-		mShadowMatrixUBO.bindBufferBase(2);
 	}
 }
 
