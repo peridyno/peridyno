@@ -1,18 +1,20 @@
 #include "PNodeEditor.h"
 
 #include <QHBoxLayout>
+#include <QDebug>
 
 #include "PDockWidget.h"
 
 #include "PPropertyWidget.h"
 #include "PModuleFlowWidget.h"
 
+
 namespace dyno
 {
 	PNodeEditor::PNodeEditor(QtNodes::QtNodeWidget* node_widget)
 		: QMainWindow(nullptr, 0)
 	{
-		PModuleFlowWidget* moduleFlowView = new PModuleFlowWidget();
+		PModuleFlowWidget* moduleFlowView = new PModuleFlowWidget(nullptr, node_widget);
 		this->setCentralWidget(moduleFlowView);
 
 		//Set up property dock widget
@@ -27,7 +29,26 @@ namespace dyno
 
 		if (node_widget != nullptr)
 		{
-			moduleFlowView->getModuleFlowScene()->showNodeFlow(node_widget->getNode().get());
+			Node *selectedNode = node_widget->getNode().get();
+			moduleFlowView->getModuleFlowScene()->showNodeFlow(selectedNode);
+
+			// Here is Node's virtual module
+			auto& scene = moduleFlowView->module_scene;
+			auto c =selectedNode->getClassInfo();
+			auto type = scene->registry().create(QString::fromStdString(c->m_className + "(virtual)"));
+			
+			if (type)
+			{
+				auto& vir_module = scene->createNode(std::move(type));
+				// Centered
+				QPointF posView(120, 146);
+				vir_module.nodeGraphicsObject().setPos(posView);
+				scene->nodePlaced(vir_module);
+			}
+			else
+			{
+				qDebug() << "Model not found";
+			}			
 		}
 
 		connect(moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showBlockProperty);

@@ -72,8 +72,10 @@ namespace QtNodes
 	protected:
 
 		using OutFieldPtr = std::vector<std::shared_ptr<FieldData>>;
-		using InFieldPtr = std::vector<std::weak_ptr<FieldData>>;
-
+		//TODO: why weak_ptr?
+		// using InFieldPtr = std::vector<std::weak_ptr<FieldData>>;
+		
+		using InFieldPtr = std::vector<std::shared_ptr<FieldData>>;
 		InFieldPtr input_fields;
 		OutFieldPtr output_fields;
 

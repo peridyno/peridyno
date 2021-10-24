@@ -3,6 +3,7 @@
 #include "QtFlowScene.h"
 
 #include "Node.h"
+#include "Nodes/QtNodeWidget.h"
 
 namespace QtNodes
 {
@@ -19,11 +20,14 @@ public:
 	QtModuleFlowScene(std::shared_ptr<DataModelRegistry> registry,
 			QObject * parent = Q_NULLPTR);
 
-	QtModuleFlowScene(QObject * parent = Q_NULLPTR);
+	QtModuleFlowScene(QObject * parent = Q_NULLPTR, QtNodeWidget* node_widget = nullptr);
 
 
 	~QtModuleFlowScene();
 
+public:
+	// push and refresh modules to parent_node's graphicsPipeline
+	void pushModule();
 
 
 public Q_SLOTS:
@@ -33,6 +37,7 @@ public Q_SLOTS:
 
 private:
 	std::weak_ptr<dyno::Node> m_node;
+	QtNodeWidget* m_parent_node;
 };
 
 }

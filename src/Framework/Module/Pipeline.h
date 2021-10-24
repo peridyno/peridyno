@@ -63,6 +63,9 @@ namespace dyno
 		uint sizeOfPersistentModules();
 
 		void pushModule(std::shared_ptr<Module> m);
+		
+		// clear pipeline and module
+		void clear();
 
 		void pushPersistentModule(std::shared_ptr<Module> m);
 
