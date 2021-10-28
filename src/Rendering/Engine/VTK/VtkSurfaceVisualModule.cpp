@@ -53,8 +53,8 @@ public:
 		if (node == NULL || !node->isVisible())	return;
 		
 		auto mesh = std::dynamic_pointer_cast<dyno::TriangleSet<dyno::DataType3f>>(node->getTopologyModule());
-		auto faces = mesh->getTriangles();
-		auto verts = mesh->getPoints();
+		auto& faces = mesh->getTriangles();
+		auto& verts = mesh->getPoints();
 
 		cudaError_t error;
 
@@ -74,7 +74,7 @@ public:
 						
 			// index buffer
 			this->Primitives[PrimitiveTris].IBO;
-			std::vector<unsigned int> indexArray(faces->size() * 3);
+			std::vector<unsigned int> indexArray(faces.size() * 3);
 			this->Primitives[PrimitiveTris].IBO->Upload(indexArray, vtkOpenGLIndexBufferObject::ElementArrayBuffer);
 			this->Primitives[PrimitiveTris].IBO->IndexCount = indexArray.size();
 			vtkOpenGLIndexBufferObject* indexBuffer = this->Primitives[PrimitiveTris].IBO;
@@ -90,7 +90,7 @@ public:
 				void*  cudaPtr = 0;
 				error = cudaGraphicsMapResources(1, &m_cudaIBO);
 				error = cudaGraphicsResourceGetMappedPointer(&cudaPtr, &size, m_cudaIBO);
-				error = cudaMemcpy(cudaPtr, faces->begin(), faces->size() * sizeof(unsigned int) * 3, cudaMemcpyDeviceToDevice);
+				error = cudaMemcpy(cudaPtr, faces.begin(), faces.size() * sizeof(unsigned int) * 3, cudaMemcpyDeviceToDevice);
 				error = cudaGraphicsUnmapResources(1, &m_cudaIBO);
 			}
 		}
