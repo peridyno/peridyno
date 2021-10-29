@@ -15,6 +15,7 @@
 #include <QWidget>
 
 #include "Nodes/QtModuleFlowScene.h"
+#include "Nodes/QtNodeWidget.h"
 
 QT_FORWARD_DECLARE_CLASS(QGridLayout)
 
@@ -28,7 +29,7 @@ namespace dyno
 		Q_OBJECT
 
 	public:
-		explicit PModuleFlowWidget(QWidget *parent = nullptr);
+		explicit PModuleFlowWidget(QWidget *parent = nullptr, QtNodes::QtNodeWidget* node_widget = nullptr);
 		~PModuleFlowWidget();
 
 		//void addActor(vtkActor *actor);

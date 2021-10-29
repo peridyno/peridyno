@@ -196,7 +196,20 @@ propagateData(std::shared_ptr<BlockData> nodeData,
   _nodeGraphicsObject->moveConnections();
 }
 
-
+FBase* 
+QtBlock::
+getField(PortIndex index, PortType type)
+{
+  std::shared_ptr<FieldData> nodeData = nullptr;
+  if (type == PortType::In)
+	  nodeData = std::dynamic_pointer_cast<FieldData>(_nodeDataModel->inData(index));
+  else if (type == PortType::Out)
+	  nodeData = std::dynamic_pointer_cast<FieldData>(_nodeDataModel->outData(index));
+    
+  if (nodeData != nullptr) return nodeData->getField();
+  else return nullptr;
+}
+  
 void
 QtBlock::
 onDataUpdated(PortIndex index)
