@@ -270,6 +270,61 @@ namespace dyno
 
 		EdgeSet<TDataType>::copyFrom(triangleSet);
 	}
-	
+
+	template<typename Coord, typename Triangle>
+	__global__ void TS_SetupVertexNormals(
+		DArray<Coord> normals,
+		DArray<Coord> vertices,
+		DArray<Triangle> triangles,
+		DArrayList<int> triIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= normals.size()) return;
+
+		List<int>& list_i = triIds[tId];
+		int triSize = list_i.size();
+
+		Coord N = Coord(0);
+		for (int ne = 0; ne < triSize; ne++)
+		{
+			int j = list_i[ne];
+			Triangle t = triangles[j];
+
+			Coord v0 = vertices[t[0]];
+			Coord v1 = vertices[t[1]];
+			Coord v2 = vertices[t[2]];
+
+			N += (v1 - v0).cross(v2 - v0);
+		}
+
+		N.normalize();
+
+		normals[tId] = N;
+	}
+
+	template<typename TDataType>
+	void TriangleSet<TDataType>::updateTopology()
+	{
+		if (this->outVertexNormal()->isEmpty())
+			this->outVertexNormal()->allocate();
+
+		auto& vn = this->outVertexNormal()->getData();
+		
+		uint vertSize = this->m_coords.size();
+
+		if (vn.size() != vertSize) {
+			vn.resize(vertSize);
+		}
+		
+		auto& vert2Tri = getVertex2Triangles();
+
+		cuExecute(vertSize,
+			TS_SetupVertexNormals,
+			vn,
+			this->m_coords,
+			m_triangles,
+			vert2Tri);
+	}
+
 	DEFINE_CLASS(TriangleSet);
 }

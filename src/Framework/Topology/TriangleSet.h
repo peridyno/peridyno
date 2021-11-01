@@ -100,7 +100,10 @@ namespace dyno
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 
+		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
+
 	protected:
+		void updateTopology() override;
 
 		DArray<Triangle> m_triangles;
 		DArrayList<int> m_ver2Tri;
