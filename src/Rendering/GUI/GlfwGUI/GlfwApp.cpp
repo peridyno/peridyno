@@ -194,7 +194,8 @@ namespace dyno
 
 			mRenderEngine->draw(&SceneGraph::getInstance());
 
-			mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
+			if(mShowImWindow)
+				mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
 // 			// Draw widgets
 // 			// TODO: maybe move into mImWindow...
 // 			for (auto widget : mWidgets)
@@ -274,6 +275,11 @@ namespace dyno
 	void GlfwApp::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
+	}
+
+	void GlfwApp::toggleImGUI()
+	{
+		mShowImWindow = !mShowImWindow;
 	}
 
 	int GlfwApp::getWidth()
@@ -389,7 +395,6 @@ namespace dyno
 		case GLFW_KEY_SPACE:
 			activeWindow->toggleAnimation();
 			break;
-			break;
 		case GLFW_KEY_LEFT:
 			break;
 		case GLFW_KEY_RIGHT:
@@ -401,6 +406,9 @@ namespace dyno
 		case GLFW_KEY_PAGE_UP:
 			break;
 		case GLFW_KEY_PAGE_DOWN:
+			break;
+		case GLFW_KEY_F1:
+			activeWindow->toggleImGUI();
 			break;
 		default:
 			break;
