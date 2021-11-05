@@ -176,9 +176,17 @@ namespace dyno
 			glfwPollEvents();
 
 			if (mAnimationToggle){
+
+				if (mSaveScreenToggle)
+				{
+					if (SceneGraph::getInstance().getFrameNumber() % mSaveScreenInterval == 0)
+						saveScreen();
+				}
+
 				SceneGraph::getInstance().takeOneFrame();
 				SceneGraph::getInstance().updateGraphicsContext();
 			}
+			
 				
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
