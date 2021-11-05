@@ -260,6 +260,7 @@ namespace dyno
 
 		unsigned char *data = new unsigned char[width * height * 3];  //RGB
 		assert(data);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
 		Image image(width, height, Image::RGB, data);
