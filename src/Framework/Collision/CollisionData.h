@@ -13,11 +13,11 @@ namespace dyno
 		CT_AllObjects = 0xFFFFFFFF,
 		CT_BoxExcluded = 0xFFFFFFFE,
 		CT_TetExcluded = 0xFFFFFFFD,
-		CT_SegmentExcluded = 0xFFFFFFFA,
+		CT_CapsuleExcluded = 0xFFFFFFFA,
 		CT_SphereExcluded = 0xFFFFFFF7,
 		CT_BoxOnly = 0x00000001,
 		CT_TetOnly = 0x00000002,
-		CT_SegmentOnly = 0x00000004,
+		CT_CapsuleOnly = 0x00000004,
 		CT_SphereOnly = 0x00000008,
 		CT_Disabled = 0x00000000
 	};

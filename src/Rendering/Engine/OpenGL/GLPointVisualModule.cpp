@@ -18,6 +18,7 @@ namespace dyno
 		mPointSize = 0.001f;
 		mNumPoints = 1;
 		this->setName("point_renderer");
+		this->inColor()->tagOptional(true);
 	}
 
 	GLPointVisualModule::~GLPointVisualModule()
@@ -94,13 +95,13 @@ namespace dyno
 		mColor.loadCuda(mColorBuffer.begin(), mNumPoints * sizeof(float) * 3);
 	}
 
-	void GLPointVisualModule::paintGL(RenderMode mode)
+	void GLPointVisualModule::paintGL(RenderPass pass)
 	{
 		mShaderProgram.use();
 		mShaderProgram.setFloat("uPointSize", this->getPointSize());
 
 		unsigned int subroutine;
-		if (mode == RenderMode::COLOR)
+		if (pass == RenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", mBaseColor);
 			mShaderProgram.setFloat("uMetallic", mMetallic);
@@ -114,14 +115,14 @@ namespace dyno
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (mode == RenderMode::DEPTH)
+		else if (pass == RenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
 		else
 		{
-			printf("Unknown render mode!\n");
+			printf("Unknown render pass!\n");
 			return;
 		}
 

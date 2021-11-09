@@ -50,7 +50,7 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:
-		virtual void paintGL(RenderMode mode) override;
+		virtual void paintGL(RenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 

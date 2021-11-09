@@ -36,7 +36,7 @@ namespace dyno
 		DEF_ARRAY_IN(Transform3f, Transform, DeviceType::GPU, "");
 
 	protected:
-		virtual void paintGL(RenderMode mode) override;
+		virtual void paintGL(RenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 

@@ -7,28 +7,10 @@
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <array>
+
 namespace dyno 
 {
-	// draw depth for shadow map
-	class DrawDepth : public Action
-	{
-	private:
-		void process(Node* node) override
-		{
-			if (!node->isVisible())
-				return;
-
-			for (auto iter : node->graphicsPipeline()->activeModules())
-			{
-				auto m = dynamic_cast<GLVisualModule*>(iter);
-				if (m && m->isVisible())
-				{
-					m->paintGL(dyno::GLVisualModule::DEPTH);
-				}
-			}
-		}
-	};
-
 
 	ShadowMap::ShadowMap(int w, int h)
 	{
@@ -43,26 +25,47 @@ namespace dyno
 
 	void ShadowMap::initialize()
 	{
+		mShadowTex.format = GL_RG;
+		mShadowTex.internalFormat = GL_RG32F;
+		mShadowTex.borderColor = glm::vec4(1);
+		mShadowTex.maxFilter = GL_LINEAR; 
+		mShadowTex.minFilter = GL_LINEAR;
+		mShadowTex.create();
+
+		mShadowBlur.format = GL_RG;
+		mShadowBlur.internalFormat = GL_RG32F;
+		mShadowBlur.borderColor = glm::vec4(1);
+		mShadowBlur.maxFilter = GL_LINEAR;
+		mShadowBlur.minFilter = GL_LINEAR;
+		mShadowBlur.create();
+
 		mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
 		mShadowDepth.format = GL_DEPTH_COMPONENT;
-		//mShadowDepth.minFilter = GL_NEAREST_MIPMAP_NEAREST;
 		mShadowDepth.create();
 
-		mShadowDepth.resize(width, height, 4);
-		//mShadowDepth.genMipmap(); // need to create mipmap texture
+		mShadowTex.resize(width, height);
+		mShadowBlur.resize(width, height);
+		mShadowDepth.resize(width, height);
 
 		mFramebuffer.create();
+
 		mFramebuffer.bind();
-		glDrawBuffer(GL_NONE);
+		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);
+		mFramebuffer.checkStatus();
+
 		mFramebuffer.unbind();
 
 		// uniform buffers
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW); 
 		mShadowMatrixUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
+		// for blur depth textures
+		mQuad = gl::Mesh::ScreenQuad();
+		mBlurProgram = gl::CreateShaderProgram("screen.vert", "blur.frag");
 	}
 
 	// extract frustum corners from camera projection matrix
-	void getFrustumCorners(const glm::mat4& proj, glm::vec4 corners[8])
+	std::array<glm::vec4, 8> getFrustumCorners(const glm::mat4& proj)
 	{
 		const glm::vec4 p[8] = {
 		   glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f),
@@ -80,21 +83,15 @@ namespace dyno
 		
 		const glm::mat4 invProj = glm::inverse(proj);
 
+		std::array<glm::vec4, 8> corners;
 		for (int i = 0; i < 8; i++)
 		{
 			// camera space corners
 			corners[i] = invProj * p[i];
 			corners[i] /= corners[i].w;
 		}
-	}
 
-	// slice frustum corners and get the points of slice plane
-	void getSplitCorners(const glm::vec4 frustumCorners[8], float split, glm::vec4 p[4])
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			p[i] = glm::mix(frustumCorners[i * 2], frustumCorners[i * 2 + 1], split);
-		}
+		return corners;
 	}
 
 	glm::mat4 getLightView(glm::vec3 lightDir)
@@ -108,94 +105,62 @@ namespace dyno
 		return lightView;
 	}
 
-	struct ShadowMapSplit
+	glm::mat4 getLightProj(glm::mat4 lightView, dyno::SceneGraph* scene, const dyno::RenderParams& rparams)
 	{
-		glm::mat4 projection;
-		float	  minDepth;
-		float     maxDepth;
-	};
+		Vec3f bbox[2] = { scene->getLowerBound(), scene->getUpperBound() };
 
-	std::vector<ShadowMapSplit> getShadowMapSplit(dyno::SceneGraph* scene,
-		const dyno::RenderParams & rparams)
-	{
-		const int NUM_SPLIT = 4;
-
-		std::vector<ShadowMapSplit> split(NUM_SPLIT);
-
-		glm::vec4 corners[8];
-		getFrustumCorners(rparams.proj, corners);
-
-		glm::vec4 splitCorners[NUM_SPLIT + 1][4];
-		float     splitDepth[NUM_SPLIT + 1];
-		
-		for (int i = 0; i <= NUM_SPLIT; i++)
+		glm::vec4 p[8] = {
+			lightView * glm::vec4{bbox[0][0], bbox[0][1], bbox[0][2], 1},
+			lightView * glm::vec4{bbox[0][0], bbox[0][1], bbox[1][2], 1},
+			lightView * glm::vec4{bbox[0][0], bbox[1][1], bbox[0][2], 1},
+			lightView * glm::vec4{bbox[0][0], bbox[1][1], bbox[1][2], 1},
+			lightView * glm::vec4{bbox[1][0], bbox[0][1], bbox[0][2], 1},
+			lightView * glm::vec4{bbox[1][0], bbox[0][1], bbox[1][2], 1},
+			lightView * glm::vec4{bbox[1][0], bbox[1][1], bbox[0][2], 1},
+			lightView * glm::vec4{bbox[1][0], bbox[1][1], bbox[1][2], 1},
+		};
+			   
+		glm::vec4 bmin = p[0];
+		glm::vec4 bmax = p[0];
+		for (int i = 1; i < 8; i++)
 		{
-			getSplitCorners(corners, float(i) / NUM_SPLIT, splitCorners[i]);
-			splitDepth[i] = splitCorners[i][0].z;
+			bmin = glm::min(bmin, p[i]);
+			bmax = glm::max(bmax, p[i]);
 		}
 
-		glm::vec4 bbox[NUM_SPLIT][2];
-		
-		// get bounding box in light space
-		const glm::mat4 lightView = getLightView(rparams.light.mainLightDirection);
-		const glm::mat4 invView = glm::inverse(rparams.view);
-
-		for (int i = 0; i < NUM_SPLIT; i++)
+		// frustrum clamp
+		if (true)
 		{
-			glm::vec4& b0 = bbox[i][0];
-			glm::vec4& b1 = bbox[i][1];
+			std::array<glm::vec4, 8> corners = getFrustumCorners(rparams.proj);
+			glm::mat4 tm = lightView * glm::inverse(rparams.view);
 
-			b0 = glm::vec4(FLT_MAX);
-			b1 = glm::vec4(-FLT_MAX);
-
-			for (int j = 0; j < 4; j++)
+			glm::vec4 fbmin = tm * corners[0];
+			glm::vec4 fbmax = tm * corners[0];
+			for (int i = 1; i < 8; i++)
 			{
-				for (int k = 0; k < 2; k++)
-				{
-					glm::vec4 p = splitCorners[i + k][j];
-					p = lightView * invView * p;
-					b0 = glm::min(b0, p);
-					b1 = glm::max(b1, p);
-				}
+				glm::vec4 c = tm * corners[i];
+				fbmin = glm::min(fbmin, c);
+				fbmax = glm::max(fbmax, c);
 			}
+
+			bmin.x = glm::max(bmin.x, fbmin.x);
+			bmin.y = glm::max(bmin.y, fbmin.y);
+			bmax.x = glm::min(bmax.x, fbmax.x);
+			bmax.y = glm::min(bmax.y, fbmax.y);
 		}
 
-		float zMin = -1.f;
-		float zMax =  1.f;
-
-		if (scene)
-		{
-			// get bounding box of the scene
-			auto p0 = scene->getLowerBound();
-			auto p1 = scene->getUpperBound();
-			glm::vec3 pmin = { p0[0], p0[1], p0[2] };
-			glm::vec3 pmax = { p1[0], p1[1], p1[2] };
-
-			float r = glm::distance(pmin, pmax) * 0.5f;
-
-			glm::vec3 center = (pmin + pmax) * 0.5f;
-			center = glm::vec3(lightView * glm::vec4(center, 1));
-			zMin = - center.z - r;
-			zMax = - center.z + r;
-		}
+		float cx = (bmin.x + bmax.x) * 0.5;
+		float cy = (bmin.y + bmax.y) * 0.5;
+		float d = glm::max(bmax.y - bmin.y, bmax.x - bmin.x) * 0.5f;
 		
-
-		for (int i = 0; i < NUM_SPLIT; i++)
-		{
-			split[i].projection = glm::ortho(bbox[i][0].x, bbox[i][1].x, 
-				bbox[i][0].y, bbox[i][1].y, 
-				zMin, zMax);
-
-			split[i].minDepth = splitDepth[i];
-			split[i].maxDepth = splitDepth[i + 1];
-		}
-
-		return split;
+		glm::mat4 lightProj = glm::ortho(cx - d, cx + d, cy - d, cy + d, -bmax.z, -bmin.z);
+		return lightProj;
 	}
 
-	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
+	void ShadowMap::beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
 	{
-		std::vector<ShadowMapSplit> split = getShadowMapSplit(scene, rparams);
+		glm::mat4 lightView = getLightView(rparams.light.mainLightDirection);
+		glm::mat4 lightProj = getLightProj(lightView, scene, rparams);
 
 		// update light transform infomation
 		struct
@@ -203,62 +168,67 @@ namespace dyno
 			// MVP
 			glm::mat4 model;
 			glm::mat4 view;
-			glm::mat4 projection;
+			glm::mat4 proj;
 			int width;
 			int height;
 		} lightMVP;
 
 		lightMVP.width = width;
 		lightMVP.height = height;
-		lightMVP.model = glm::mat4(1);		
-		lightMVP.view = getLightView(rparams.light.mainLightDirection);
-		
+		lightMVP.model = glm::mat4(1);
+		lightMVP.view = lightView;
+		lightMVP.proj = lightProj;
+
+		mTransformUBO.load(&lightMVP, sizeof(lightMVP));
+		mTransformUBO.bindBufferBase(0);
+
+		// shadow map uniform
+		struct {
+			glm::mat4 transform;
+			float minValue;
+		} shadow;
+		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
+		shadow.minValue = minValue;
+
+		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
+		mShadowMatrixUBO.bindBufferBase(2);
+
+		// draw depth
 		mFramebuffer.bind();
 
-		for (int i = 0; i < 4; i++)
+		// first draw to shadow texture
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+
+		mFramebuffer.clearDepth(1.0);
+		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
+
+		glViewport(0, 0, width, height);
+
+	}
+
+	void ShadowMap::endUpdate() 
+	{		 
+		// blur shadow map		
+		const int blurIters = 1;
+
+		glDisable(GL_DEPTH_TEST);
+		mBlurProgram.use();
+		for (int i = 0; i < blurIters; i++)
 		{
-			//int w = width >> i;
-			//int h = height >> i;
-			lightMVP.projection = split[i].projection;
+			mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
+			mShadowTex.bind(GL_TEXTURE5);
+			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
+			mQuad.draw();
 
-			mTransformUBO.load(&lightMVP, sizeof(lightMVP));
-			mTransformUBO.bindBufferBase(0);
-
-			// draw depth
-			//mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id, i);
-			
-			glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mShadowDepth.id, 0, i);
-
-			mFramebuffer.checkStatus();
-			mFramebuffer.clearDepth(1.0);
-			glViewport(0, 0, width, height);
-			gl::glCheckError();
-			// shadow pass
-			if ((scene != 0) && (scene->getRootNode() != 0))
-			{
-				scene->getRootNode()->traverseTopDown<DrawDepth>();
-			}
+			mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
+			mShadowBlur.bind(GL_TEXTURE5);
+			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+			mQuad.draw();
 		}
+		glEnable(GL_DEPTH_TEST);		
 
 		// bind the shadow texture to the slot
-		mShadowDepth.bind(GL_TEXTURE5);
-
-		// set the cascaded shadowmap matrix and depth
-		struct
-		{
-			glm::mat4	transform[4];
-			float		minDepth[4];
-			float		maxDepth[4];
-		} data;
-
-		for (int i = 0; i < 4; i++)
-		{
-			data.transform[i] = split[i].projection * lightMVP.view * glm::inverse(rparams.view);
-			data.minDepth[i] = fabs(split[i].minDepth);
-			data.maxDepth[i] = fabs(split[i].maxDepth);
-		}
-		mShadowMatrixUBO.load(&data, sizeof(data));
-		mShadowMatrixUBO.bindBufferBase(2);
+		mShadowTex.bind(GL_TEXTURE5);	
 
 	}
 }

@@ -49,62 +49,56 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fragColor.a = 1.0;
 }
 
-layout(index = 1) subroutine(RenderPass) void DepthPass(void)
+layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
 {
-	// do nothing
+	float depth = gl_FragCoord.z;
+	//depth = depth * 0.5 + 0.5;
+
+	float moment1 = depth;
+	float moment2 = depth * depth;
+
+	// Adjusting moments (this is sort of bias per pixel) using partial derivative
+	float dx = dFdx(depth);
+	float dy = dFdy(depth);
+	moment2 += 0.25 * (dx * dx + dy * dy);
+
+	fragColor = vec4(moment1, moment2, 0.0, 0.0);
 }
 
 /***************** ShadowMap *********************/
-layout(std140, binding = 2) uniform ShadowUniformBlock
-{
-	// support up to 4 cascaded shadow map layers
-	mat4 transform[4];
-	vec4 minDepth;
-	vec4 maxDepth;
-	// may have some other data in future
-} shadow;
-
-layout(binding = 5) uniform sampler2DArray shadowDepth;
-//layout(binding = 6) uniform sampler2D shadowColor;
-
-int GetShadowLevel(vec3 pos)
-{
-	float depth = abs(pos.z);
-	for (int i = 0; i < 4; i++)
-	{
-		if (depth < shadow.maxDepth[i])
-			return i;
-	}
-	return 0;
-}
+layout(std140, binding = 2) uniform ShadowUniform{
+	mat4	transform;
+	float	minValue;		// patch to color bleeding
+} uShadowBlock;
+layout(binding = 5) uniform sampler2D uTexShadow;
 
 vec3 GetShadowFactor(vec3 pos)
 {
-	int level = GetShadowLevel(pos);
-
-	vec4 posLightSpace = shadow.transform[level] * vec4(pos, 1);
-	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
+	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
+	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;	// NDC
 	projCoords = projCoords * 0.5 + 0.5;
 
-	float closestDepth = texture(shadowDepth, vec3(projCoords.xy, level)).r;
-	float currentDepth = min(1.0, projCoords.z);
+	// From http://fabiensanglard.net/shadowmappingVSM/index.php
+	float distance = min(1.0, projCoords.z);
+	vec2  moments = texture(uTexShadow, projCoords.xy).rg;
 
-	//float bias = max(0.05 * (1.0 - dot(normal, normalize(light.direction.xyz))), 0.005); 
-	float bias = 0.005;
+	// Surface is fully lit. as the current fragment is before the light occluder
+	if (distance <= moments.x)
+		return vec3(1.0);
 
-	// simple PCF
-	vec3 shadow = vec3(0);
-	vec2 texelSize = 1.0 / textureSize(shadowDepth, 0).xy;
-	for (int x = -1; x <= 1; ++x)
-	{
-		for (int y = -1; y <= 1; ++y)
-		{
-			float pcfDepth = texture(shadowDepth, vec3(projCoords.xy + vec2(x, y) * texelSize, level)).r;
-			float visible = currentDepth - bias > pcfDepth ? 0.0 : 1.0;
-			shadow += visible;
-		}
-	}
-	return clamp(shadow / 9.0, 0, 1);
+	// The fragment is either in shadow or penumbra. We now use chebyshev's upperBound to check
+	// How likely this pixel is to be lit (p_max)
+	float variance = moments.y - (moments.x * moments.x);
+	variance = max(variance, 0.00001);
+
+	float d = distance - moments.x;
+	float p_max = variance / (variance + d * d);
+
+	// simple patch to color bleeding 
+	p_max = (p_max - uShadowBlock.minValue) / (1.0 - uShadowBlock.minValue);
+	p_max = clamp(p_max, 0.0, 1.0);
+
+	return vec3(p_max);
 }
 
 

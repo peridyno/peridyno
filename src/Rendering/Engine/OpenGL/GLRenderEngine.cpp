@@ -24,6 +24,14 @@ namespace dyno
 {
 	class RenderQueue : public Action
 	{
+
+	public:
+		void draw(GLVisualModule::RenderPass pass)
+		{
+			for (GLVisualModule* m : modules)
+				m->paintGL(pass);
+		}
+
 	private:
 		void process(Node* node) override
 		{
@@ -40,7 +48,6 @@ namespace dyno
 				}
 			}
 		}
-	public:
 		std::vector<dyno::GLVisualModule*> modules;
 	};
 
@@ -137,8 +144,19 @@ namespace dyno
 			scene->getRootNode()->traverseTopDown(&renderQueue);
 		}
 
+
 		// update shadow map
-		mShadowMap->update(scene, m_rparams);
+		{
+			mShadowMap->beginUpdate(scene, m_rparams);
+			renderQueue.draw(GLVisualModule::SHADOW);
+
+			if (m_rparams.showGround)
+			{
+				mRenderHelper->drawGround(m_rparams.groudScale, GLVisualModule::SHADOW);
+			}
+
+			mShadowMap->endUpdate();
+		}
 
 		// setup scene transform matrices
 		struct
@@ -165,7 +183,17 @@ namespace dyno
 		mLightUBO.bindBufferBase(1);
 
 		// begin rendering
-		mRenderTarget->bind();
+		bool offscreen = false;
+		if (offscreen)
+		{
+			mRenderTarget->bind();
+		}
+		else
+		{
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			glViewport(0, 0, mRenderTarget->width, mRenderTarget->height);
+		}
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Vec3f c0 = Vec3f(m_rparams.bgColor0.x, m_rparams.bgColor0.y, m_rparams.bgColor0.z);
@@ -173,16 +201,14 @@ namespace dyno
 		mRenderHelper->drawBackground(c0, c1);
 
 		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// render modules
+		renderQueue.draw(GLVisualModule::COLOR);
+		
 		// draw a plane
 		if (m_rparams.showGround)
 		{
 			mRenderHelper->drawGround(m_rparams.groudScale);
-		}
-
-		// render modules
-		for (GLVisualModule* m : renderQueue.modules)
-		{
-			m->paintGL(GLVisualModule::COLOR);
 		}
 
 		// draw scene bounding box
@@ -200,11 +226,13 @@ namespace dyno
 			mRenderHelper->drawAxis();
 		}
 
-		// write back to the framebuffer
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-		mRenderTarget->blit(0);
+		if (offscreen)
+		{
+			// write back to the framebuffer
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			mRenderTarget->blit(0);
+		}
 	}
-
 
 	void GLRenderEngine::resize(int w, int h)
 	{

@@ -134,13 +134,20 @@ tryConnect() const
 
   _block->nodeGraphicsObject().moveConnections();
 
-  // 5) Poke model to initiate data transfer
-
+  // ~~ 5) Poke model to initiate data transfer ~~
+  // 5) dyno:: FBase connect
   auto outNode = _connection->getBlock(PortType::Out);
-  if (outNode)
+  auto inNode = _connection->getBlock(PortType::In);
+  if (outNode && inNode)
   {
     PortIndex outPortIndex = _connection->getPortIndex(PortType::Out);
-    outNode->onDataUpdated(outPortIndex);
+    PortIndex inPortIndex = _connection->getPortIndex(PortType::In);
+
+    auto outField = outNode->getField(outPortIndex, PortType::Out);
+    auto inField = inNode->getField(inPortIndex, PortType::In);
+    
+    outField->connectField(inField);
+    outField->update();
   }
 
   return true;
@@ -158,7 +165,8 @@ disconnect(PortType portToDisconnect) const
     _connection->getPortIndex(portToDisconnect);
 
   BlockState &state = _block->nodeState();
-
+  // TODO: disconnectField
+  
   // clear pointer to Connection in the NodeState
   state.getEntries(portToDisconnect)[portIndex].clear();
 

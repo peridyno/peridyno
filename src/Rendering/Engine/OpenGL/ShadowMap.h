@@ -19,6 +19,8 @@
 #include "gl/Buffer.h"
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
+#include "gl/Program.h"
+#include "gl/Mesh.h"
 
 #include <vector>
 #include <Rendering.h>
@@ -34,12 +36,19 @@ namespace dyno
 
 		void initialize();
 		
-		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+		void beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+		void endUpdate();
 
 	private:
 		// framebuffers
-		gl::Framebuffer	mFramebuffer;
-		gl::Texture2DArray		mShadowDepth;
+		gl::Framebuffer		mFramebuffer;
+		gl::Texture2D		mShadowTex;
+		gl::Texture2D		mShadowDepth;
+		gl::Texture2D		mShadowBlur;
+
+		gl::Program			mBlurProgram;
+		gl::Mesh			mQuad;
+
 
 		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices
 		gl::Buffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices
@@ -47,5 +56,8 @@ namespace dyno
 	public:
 		int				width;
 		int				height;
+
+		// patch to color bleeding, min p_max
+		float			minValue = 0.1f;
 	};
 }

@@ -59,8 +59,6 @@ namespace dyno
 		void initializeJacobian(Real dt);
 		void detectCollisionWithBoundary();
 
-		void init_friction();
-
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
 
@@ -93,6 +91,11 @@ namespace dyno
 
 		DEF_EMPTY_CURRENT_ARRAY(Quaternion, TQuat, DeviceType::GPU, "Quaternion");
 
+		DEF_ARRAY_STATE(CollisionMask, CollisionMask, DeviceType::GPU, "Collision mask for each rigid body");
+
+
+		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
+
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
@@ -116,14 +119,14 @@ namespace dyno
 		DArray<Real> mD;		//diagonal elements of JB
 		DArray<Real> mLambda;	//contact impulse
 
+		DArray<Real> nbrContacts;
+
 		DArray<int> mBoundaryContactCounter;
 		DArray<ContactPair> mBoundaryContacts;
 		DArray<ContactPair> buffer_friction;
 		DArray<ContactPair> mAllConstraints;
 
 	private:
-		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
-
 		//TODO: add collision support with triangular mesh
 		bool have_mesh = false;
 		bool have_mesh_boundary = false;

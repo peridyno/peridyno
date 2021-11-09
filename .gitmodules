@@ -4,3 +4,9 @@
 [submodule "external/eigen"]
 	path = external/eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "external/alembic"]
+	path = external/alembic
+	url = https://hub.fastgit.org/clouddon/alembic.git
+[submodule "external/Imath"]
+	path = external/Imath
+	url = https://hub.fastgit.org/clouddon/Imath.git

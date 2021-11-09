@@ -61,6 +61,7 @@ endif()
 option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
+option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" ON)
 
 option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" ON)
 if(PERIDYNO_PYTHON_BINDING)
@@ -76,6 +77,11 @@ endif()
 add_subdirectory(external/glfw-3.3.0)
 add_subdirectory(external/glad-4.6)
 add_subdirectory(external/imgui)
+
+if(PERIDYNO_LIBRARY_ALEMBIC)
+    add_subdirectory(external/Imath)
+    add_subdirectory(external/alembic/)
+endif()
 
 # VTK rendering support, off by default
 option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)

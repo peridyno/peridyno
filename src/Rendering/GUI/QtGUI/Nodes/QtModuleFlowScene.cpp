@@ -10,6 +10,8 @@
 #include "QtFlowView.h"
 #include "DataModelRegistry.h"
 
+#include "Module/VirtualModule.h"
+
 
 namespace QtNodes
 {
@@ -21,11 +23,11 @@ QtModuleFlowScene::QtModuleFlowScene(std::shared_ptr<DataModelRegistry> registry
 	connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModulePosition);
 }
 
-QtModuleFlowScene::QtModuleFlowScene(QObject * parent)
+QtModuleFlowScene::QtModuleFlowScene(QObject * parent, QtNodeWidget* node_widget)
 	: QtFlowScene(parent)
 {
 	auto classMap = dyno::Object::getClassMap();
-
+	m_parent_node = node_widget;
 	auto ret = std::make_shared<QtNodes::DataModelRegistry>();
 	int id = 0;
 	for (auto const c : *classMap)
@@ -45,8 +47,40 @@ QtModuleFlowScene::QtModuleFlowScene(QObject * parent)
 
 			QString category = QString::fromStdString(module->getModuleType());
 			ret->registerModel<QtNodes::QtModuleWidget>(category, creator);
+		} 
+	}
+	if(node_widget != nullptr) 
+	{
+		// Build virtual module
+		dyno::Node *selectedNode = node_widget->getNode().get();
+		QString str_vir = QString::fromStdString(selectedNode->getClassInfo()->getClassName() + "(virtual)");
+		if(selectedNode != nullptr)
+		{
+			dyno::Object* obj = dyno::Object::createObject("VirtualModule<DataType3f>");
+			dyno::Module* module_vir = dynamic_cast<dyno::Module*>(obj);
+			if(module_vir != nullptr)
+			{
+				module_vir->setName(str_vir.toStdString());
+				auto& fields = selectedNode->getAllFields();
+				for (auto field : fields)
+				{
+					auto fType = field->getFieldType();
+					if(fType == dyno::FieldTypeEnum::Current)
+					{
+						module_vir->addOutputField(field);
+					}
+				}
+				QtNodes::DataModelRegistry::RegistryItemCreator creator = [str_vir, module_vir]() {
+					auto dat = std::make_unique<QtNodes::QtModuleWidget>(module_vir);
+					dat->setName(str_vir);
+					return dat; };
+					
+				QString category = "Virtual";
+				ret->registerModel<QtNodes::QtModuleWidget>(category, creator);		
+			}		
 		}
 	}
+	
 
 	this->setRegistry(ret);
 }
@@ -57,6 +91,41 @@ QtModuleFlowScene::~QtModuleFlowScene()
 
 }
 
+
+void QtModuleFlowScene::pushModule()
+{
+	if (m_parent_node == nullptr) 
+	{
+		return;
+	}
+	dyno::Node *selectedNode = m_parent_node->getNode().get();
+	// clear
+	// selectedNode->graphicsPipeline()->clear();
+	
+	// push
+	auto const & nodes = this->nodes();
+	for (auto const & pair : nodes)
+	{
+		auto const &node = pair.second;
+		auto const &module_widget = dynamic_cast<QtNodes::QtModuleWidget*>(node->nodeDataModel());
+		if (module_widget == nullptr) 
+		{
+			continue;
+		}
+
+		auto const &module = module_widget->getModule();
+		if (module == nullptr) 
+		{
+			continue;
+		}		
+
+		std::string class_name = module->getClassInfo()->getClassName();
+		if(class_name.find("virtual") == std::string::npos)
+		{
+			selectedNode->graphicsPipeline()->pushModule(std::shared_ptr<dyno::Module>(module));		
+		}
+	}
+}
 
 void QtModuleFlowScene::showNodeFlow(Node* node)
 {
