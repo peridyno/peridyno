@@ -22,7 +22,6 @@ void CreateScene()
 	root->loadShpere(Vec3f(0.5, 0.7f, 0.5), 0.08f, 0.005f, false, true);
 
 	std::shared_ptr<Cloth<DataType3f>> cloth = std::make_shared<Cloth<DataType3f>>();
-	cloth->setMass(1.0);
 	cloth->loadParticles("../../data/cloth/cloth.obj");
 	cloth->loadSurface("../../data/cloth/cloth.obj");
 

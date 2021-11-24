@@ -87,16 +87,6 @@ void Node::setDt(Real dt)
 	m_dt = dt;
 }
 
-void Node::setMass(Real mass)
-{
-	m_mass = mass;
-}
-
-Real Node::getMass()
-{
-	return m_mass;
-}
-
 std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 {
 	if (hasAncestor(anc) || anc == nullptr)

@@ -75,9 +75,6 @@ namespace dyno
 
 		void setDt(Real dt);
 
-		void setMass(Real mass);
-		Real getMass();
-
 		// 	Iterator begin();
 		// 	Iterator end();
 
