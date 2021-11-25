@@ -365,7 +365,6 @@ namespace dyno
 		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
 			camera->translateToPoint(x, y);
 		}
-
 	}
 
 	void GlfwApp::cursorEnterCallback(GLFWwindow* window, int entered)
@@ -385,8 +384,15 @@ namespace dyno
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
 
-		if(!activeWindow->mImWindow.cameraLocked())
-			camera->zoom(-OffsetY);
+		if (!activeWindow->mImWindow.cameraLocked())
+		{
+			int state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
+			//If the left control key is pressed, slow the zoom speed. 
+			if (state == GLFW_PRESS)
+				camera->zoom(-0.1*OffsetY);
+			else
+				camera->zoom(-OffsetY);
+		}
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
