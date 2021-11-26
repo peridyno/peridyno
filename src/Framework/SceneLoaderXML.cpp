@@ -66,27 +66,6 @@ namespace dyno
 
 				if (dependence)
 				{
-					if (module->getModuleType() == "CollisionModel")
-					{
-						auto cModel = std::dynamic_pointer_cast<CollisionModel>(module);
-						std::vector<std::string> strs = split(std::string(dependence), std::string(" "));
-						for (int i = 0; i < strs.size(); i++)
-						{
-							if (node->getName() == strs[i])
-							{
-								cModel->addCollidableObject(node->getCollidableObject());
-							}
-							auto children = node->getAncestors();
-							std::list< std::shared_ptr<Node> >::iterator it = children.begin();
-							for (; it != children.end(); it++)
-							{
-								if ((*it)->getName() == strs[i])
-								{
-									cModel->addCollidableObject((*it)->getCollidableObject());
-								}
-							}
-						}
-					}
 				}
 				
 			}
@@ -116,43 +95,8 @@ namespace dyno
 
 	bool SceneLoaderXML::addModule(std::shared_ptr<Node> node, std::shared_ptr<Module> module)
 	{
-		if (module->getModuleType() == "CollisionModel")
-		{
-			node->addCollisionModel(std::dynamic_pointer_cast<CollisionModel>(module));
-			return true;
-		}
-
-		if (module->getModuleType() == "VisualModule")
-		{
-			node->addVisualModule(std::dynamic_pointer_cast<VisualModule>(module));
-			return true;
-		}
-
-		if (module->getModuleType() == "ForceModule")
-		{
-			return true;
-		}
-
-		if (module->getModuleType() == "NumericalModel")
-		{
-			node->setNumericalModel(std::dynamic_pointer_cast<NumericalModel>(module));
-			return true;
-		}
-
 		if (module->getModuleType() == "MechanicalState")
 		{
-			return true;
-		}
-
-		if (module->getModuleType() == "CollidableObject")
-		{
-			node->setCollidableObject(std::dynamic_pointer_cast<CollidableObject>(module));
-			return true;
-		}
-
-		if (module->getModuleType() == "TopologyModule")
-		{
-			node->setTopologyModule(std::dynamic_pointer_cast<TopologyModule>(module));
 			return true;
 		}
 

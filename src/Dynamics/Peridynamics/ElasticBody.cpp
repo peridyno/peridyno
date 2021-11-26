@@ -27,7 +27,7 @@ namespace dyno
 		//Create a node for surface mesh rendering
 		m_surfaceNode = this->template createAncestor<Node>("Mesh");
 
-		auto triSet = m_surfaceNode->template setTopologyModule<TriangleSet<TDataType>>("surface_mesh");
+		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
 		//Set the topology mapping from PointSet to TriangleSet
@@ -46,7 +46,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ElasticBody<TDataType>::translate(Coord t)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->currentTopology()->getDataPtr())->translate(t);
 
 		return ParticleSystem<TDataType>::translate(t);
 	}
@@ -54,7 +54,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ElasticBody<TDataType>::scale(Real s)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->scale(s);
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->currentTopology()->getDataPtr())->scale(s);
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
@@ -102,7 +102,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticBody<TDataType>::loadSurface(std::string filename)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->loadObjFile(filename);
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->currentTopology()->getDataPtr())->loadObjFile(filename);
 	}
 
 

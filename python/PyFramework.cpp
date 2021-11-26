@@ -34,8 +34,7 @@ void pybind_framework(py::module& m)
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
 		.def("set_name", &Node::setName)
-		.def("is_active", &Node::isActive)
-		.def("add_visual_module", (void (Node::*)(std::shared_ptr<VisualModule>)) &Node::addVisualModule);
+		.def("is_active", &Node::isActive);
 
 	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>());

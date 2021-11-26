@@ -105,12 +105,6 @@ namespace dyno
 					}
 
 					node->update();
-
-					auto topoModules = node->getTopologyMappingList();
-					for (std::list<std::shared_ptr<TopologyMapping>>::iterator iter = topoModules.begin(); iter != topoModules.end(); iter++)
-					{
-						(*iter)->update();
-					}
 				}
 			}
 

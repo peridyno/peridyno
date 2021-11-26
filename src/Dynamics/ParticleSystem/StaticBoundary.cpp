@@ -97,7 +97,7 @@ namespace dyno
 		triSet->scale(0.99*scale);
 		triSet->translate(center);
 
-		m_surfaceNode->setTopologyModule(triSet);
+		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
 		return m_surfaceNode;
 	}
@@ -121,7 +121,7 @@ namespace dyno
 		triSet->scale(0.95*r);
 		triSet->translate(center);
 
-		m_surfaceNode->setTopologyModule(triSet);
+		m_surfaceNode->currentTopology()->setDataPtr(triSet);
 
 		m_surfaceNode->setVisible(bVisible);
 	}

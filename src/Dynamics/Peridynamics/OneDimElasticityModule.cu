@@ -88,13 +88,6 @@ namespace dyno
 	OneDimElasticityModule<TDataType>::OneDimElasticityModule()
 		: ConstraintModule()
 	{
-		this->attachField(&m_distance, "distance", "The sampling distance!", false);
-		this->attachField(&m_lambda, "lambda", "Material stiffness!", false);
-		this->attachField(&m_iterNum, "Iterations", "Iteration Number", false);
-
-		this->attachField(&m_position, "position", "Storing the particle positions!", false);
-		this->attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-
 		m_distance.setValue(0.005);
  		m_lambda.setValue(0.1);
 		m_iterNum.setValue(10);

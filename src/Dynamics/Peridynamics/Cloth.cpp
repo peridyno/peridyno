@@ -28,9 +28,10 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(integrator);
 
-		auto nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
+		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->varHorizon()->connect(nbrQuery->inRadius());
 		this->currentPosition()->connect(nbrQuery->inPosition());
+		this->animationPipeline()->pushModule(nbrQuery);
 
 		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
 		this->varHorizon()->connect(elasticity->inHorizon());
@@ -48,9 +49,9 @@ namespace dyno
 		mSurfaceNode = this->template createAncestor<Node>("Mesh");
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		mSurfaceNode->setTopologyModule(triSet);
-
 		this->currentTopology()->setDataPtr(triSet);
+
+		mSurfaceNode->currentTopology()->setDataPtr(triSet);
 	}
 
 	template<typename TDataType>
@@ -62,7 +63,7 @@ namespace dyno
 	template<typename TDataType>
 	bool Cloth<TDataType>::translate(Coord t)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule())->translate(t);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->translate(t);
 
 		return ParticleSystem<TDataType>::translate(t);
 	}
@@ -71,7 +72,7 @@ namespace dyno
 	template<typename TDataType>
 	bool Cloth<TDataType>::scale(Real s)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule())->scale(s);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->scale(s);
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
@@ -90,7 +91,9 @@ namespace dyno
 	{
 		ParticleSystem<TDataType>::resetStates();
 
-		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
+		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+		this->varHorizon()->connect(nbrQuery->inRadius());
+		this->currentPosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
 		if (!this->currentPosition()->isEmpty())
@@ -106,7 +109,7 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::loadSurface(std::string filename)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->getTopologyModule())->loadObjFile(filename);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->loadObjFile(filename);
 	}
 
 	template<typename TDataType>

@@ -11,9 +11,6 @@ namespace dyno
 	FixedPoints<TDataType>::FixedPoints()
 		: ConstraintModule()
 	{
-		this->attachField(&m_position, "position", "Storing the particle positions!", false);
-		this->attachField(&m_velocity, "velocity", "Storing the particle velocities!", false);
-
 	}
 
 	template<typename TDataType>
