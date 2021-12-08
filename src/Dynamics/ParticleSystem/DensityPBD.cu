@@ -141,7 +141,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool DensityPBD<TDataType>::constrain()
+	void DensityPBD<TDataType>::constrain()
 	{
 		int num = this->inPosition()->getElementCount();
 		
@@ -170,8 +170,6 @@ namespace dyno
 		}
 
 		updateVelocity();
-
-		return true;
 	}
 
 

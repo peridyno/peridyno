@@ -119,10 +119,10 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool FixedPoints<TDataType>::constrain()
+	void FixedPoints<TDataType>::constrain()
 	{
 		if (m_fixedPts.size() <= 0)
-			return false;
+			return;
 
 		if (bUpdateRequired)
 		{
@@ -134,8 +134,6 @@ namespace dyno
 		uint pDims = cudaGridSize(m_bFixed.size(), BLOCK_SIZE);
 
 		K_DoFixPoints<Coord> << < pDims, BLOCK_SIZE >> > (m_position.getData(), m_velocity.getData(), m_bFixed, m_fixed_positions);
-
-		return true;
 	}
 
 	template <typename Coord>

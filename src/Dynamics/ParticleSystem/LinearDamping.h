@@ -34,7 +34,7 @@ namespace dyno
 		LinearDamping();
 		~LinearDamping() override;
 
-		bool constrain() override;
+		void constrain() override;
 
 	public:
 		DEF_VAR(Real, DampingCoefficient, 0.9, "");

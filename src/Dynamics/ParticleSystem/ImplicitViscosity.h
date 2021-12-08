@@ -29,7 +29,7 @@ namespace dyno
 		ImplicitViscosity();
 		~ImplicitViscosity() override;
 		
-		bool constrain() override;
+		void constrain() override;
 
 	public:
 		DEF_VAR(Real, Viscosity, 0.05, "");

@@ -20,7 +20,7 @@ namespace dyno {
 		VelocityConstraint();
 		~VelocityConstraint() override;
 		
-		bool constrain() override;
+		void constrain() override;
 
 	public:
 		FVar<Real> m_smoothingLength;

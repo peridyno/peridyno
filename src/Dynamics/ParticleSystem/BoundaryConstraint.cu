@@ -67,7 +67,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool BoundaryConstraint<TDataType>::constrain()
+	void BoundaryConstraint<TDataType>::constrain()
 	{
 		uint pDim = cudaGridSize(m_position.getElementCount(), BLOCK_SIZE);
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
@@ -77,8 +77,6 @@ namespace dyno
 			this->varNormalFriction()->getData(),
 			this->varTangentialFriction()->getData(),
 			getParent()->getDt());
-
-		return true;
 	}
 
 	template<typename TDataType>

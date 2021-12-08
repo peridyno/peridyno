@@ -16,7 +16,7 @@ namespace dyno {
 		BoundaryConstraint();
 		~BoundaryConstraint() override;
 
-		bool constrain() override;
+		void constrain() override;
 
 		bool constrain(DArray<Coord>& position, DArray<Coord>& velocity, Real dt);
 

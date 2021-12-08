@@ -37,7 +37,7 @@ namespace dyno {
 		ElasticityModule();
 		~ElasticityModule() override;
 		
-		bool constrain() override;
+		void constrain() override;
 
 		virtual void solveElasticity();
 

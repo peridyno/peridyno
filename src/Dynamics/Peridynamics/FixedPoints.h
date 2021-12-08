@@ -19,7 +19,7 @@ namespace dyno {
 
 		void clear();
 
-		bool constrain() override;
+		void constrain() override;
 
 		void constrainPositionToPlane(Coord pos, Coord dir);
 
