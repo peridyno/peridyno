@@ -176,9 +176,17 @@ namespace dyno
 			glfwPollEvents();
 
 			if (mAnimationToggle){
+
+				if (mSaveScreenToggle)
+				{
+					if (SceneGraph::getInstance().getFrameNumber() % mSaveScreenInterval == 0)
+						saveScreen();
+				}
+
 				SceneGraph::getInstance().takeOneFrame();
 				SceneGraph::getInstance().updateGraphicsContext();
 			}
+			
 				
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
@@ -194,7 +202,8 @@ namespace dyno
 
 			mRenderEngine->draw(&SceneGraph::getInstance());
 
-			mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
+			if(mShowImWindow)
+				mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
 // 			// Draw widgets
 // 			// TODO: maybe move into mImWindow...
 // 			for (auto widget : mWidgets)
@@ -251,6 +260,7 @@ namespace dyno
 
 		unsigned char *data = new unsigned char[width * height * 3];  //RGB
 		assert(data);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
 		Image image(width, height, Image::RGB, data);
@@ -274,6 +284,11 @@ namespace dyno
 	void GlfwApp::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
+	}
+
+	void GlfwApp::toggleImGUI()
+	{
+		mShowImWindow = !mShowImWindow;
 	}
 
 	int GlfwApp::getWidth()
@@ -350,7 +365,6 @@ namespace dyno
 		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
 			camera->translateToPoint(x, y);
 		}
-
 	}
 
 	void GlfwApp::cursorEnterCallback(GLFWwindow* window, int entered)
@@ -370,8 +384,15 @@ namespace dyno
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->activeCamera();
 
-		if(!activeWindow->mImWindow.cameraLocked())
-			camera->zoom(-OffsetY);
+		if (!activeWindow->mImWindow.cameraLocked())
+		{
+			int state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
+			//If the left control key is pressed, slow the zoom speed. 
+			if (state == GLFW_PRESS)
+				camera->zoom(-0.1*OffsetY);
+			else
+				camera->zoom(-OffsetY);
+		}
 	}
 
 	void GlfwApp::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -389,7 +410,6 @@ namespace dyno
 		case GLFW_KEY_SPACE:
 			activeWindow->toggleAnimation();
 			break;
-			break;
 		case GLFW_KEY_LEFT:
 			break;
 		case GLFW_KEY_RIGHT:
@@ -401,6 +421,9 @@ namespace dyno
 		case GLFW_KEY_PAGE_UP:
 			break;
 		case GLFW_KEY_PAGE_DOWN:
+			break;
+		case GLFW_KEY_F1:
+			activeWindow->toggleImGUI();
 			break;
 		default:
 			break;

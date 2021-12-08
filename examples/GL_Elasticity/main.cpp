@@ -22,7 +22,6 @@ int main()
 	std::shared_ptr<ElasticBody<DataType3f>> bunny = std::make_shared<ElasticBody<DataType3f>>();
 	root->addParticleSystem(bunny);
 
-	bunny->setMass(1.0);
 	bunny->loadParticles("../../data/bunny/bunny_points.obj");
 	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
 	bunny->scale(1.0f);

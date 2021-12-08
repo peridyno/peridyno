@@ -46,13 +46,17 @@ public:
 
 	virtual int getDOF() { return 0; }
 
-	virtual bool updateTopology() { return true; }
-
 	inline void tagAsChanged() { m_topologyChanged = true; }
 	inline void tagAsUnchanged() { m_topologyChanged = false; }
 	inline bool isTopologyChanged() { return m_topologyChanged; }
 
 	std::string getModuleType() override { return "TopologyModule"; }
+
+protected:
+	void updateImpl() override;
+
+	virtual void updateTopology() {};
+
 private:
 	bool m_topologyChanged;
 };

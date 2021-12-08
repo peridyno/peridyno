@@ -59,6 +59,7 @@ namespace dyno {
 		int getSaveScreenInternal() { return mSaveScreenInterval; }
 
 		void toggleAnimation();
+		void toggleImGUI();
 
 		int getWidth();
 		int getHeight();
@@ -119,7 +120,9 @@ namespace dyno {
 		std::string mOutputPath;
 		std::string mWindowTitle;
 
-	public:
+	private:
+		bool mShowImWindow = true;
+
 		ImWindow mImWindow;
     };
 

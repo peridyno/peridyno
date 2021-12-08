@@ -32,8 +32,6 @@ namespace dyno
 
 		void loadSurface(std::string filename);
 
-		void setElastoplasticitySolver(std::shared_ptr<ElastoplasticityModule<TDataType>> solver);
-
 		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
 
 	public:

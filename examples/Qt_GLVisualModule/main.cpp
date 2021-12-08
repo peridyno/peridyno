@@ -29,7 +29,6 @@ void CreateScene()
 
 	std::shared_ptr<ParticleFluid<DataType3f>> fluid = std::make_shared<ParticleFluid<DataType3f>>();
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
-	fluid->setMass(100);
 	root->addParticleSystem(fluid);
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();

@@ -20,18 +20,10 @@
 #include "DeclarePort.h"
 #include "NodePort.h"
 
-#include "Module/NumericalModel.h"
 #include "Module/TopologyModule.h"
-#include "Module/DeviceContext.h"
-#include "Module/ForceModule.h"
-#include "Module/ConstraintModule.h"
+//#include "Module/DeviceContext.h"
 #include "Module/CustomModule.h"
-#include "Module/CollisionModel.h"
-#include "Module/CollidableObject.h"
-#include "Module/VisualModule.h"
 #include "Module/TopologyMapping.h"
-#include "Module/NumericalIntegrator.h"
-#include "Module/ComputeModule.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
 
@@ -75,9 +67,6 @@ namespace dyno
 
 		void setDt(Real dt);
 
-		void setMass(Real mass);
-		Real getMass();
-
 		// 	Iterator begin();
 		// 	Iterator end();
 
@@ -118,9 +107,9 @@ namespace dyno
 		std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
 
 
-		std::shared_ptr<DeviceContext> getContext();
-		void setContext(std::shared_ptr<DeviceContext> context);
-		virtual void setAsCurrentContext();
+// 		std::shared_ptr<DeviceContext> getContext();
+// 		void setContext(std::shared_ptr<DeviceContext> context);
+//		virtual void setAsCurrentContext();
 
 		/**
 		 * @brief Add a module to m_module_list and other special module lists
@@ -212,10 +201,6 @@ namespace dyno
 																												\
 		return module;																							\
 	}
-		NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(TopologyModule)
-			NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(NumericalModel)
-			NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(CollidableObject)
-			NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(NumericalIntegrator)
 
 #define NODE_SET_SPECIAL_MODULE( CLASSNAME, MODULENAME )						\
 	virtual void set##CLASSNAME( std::shared_ptr<CLASSNAME> module) {			\
@@ -223,18 +208,6 @@ namespace dyno
 		MODULENAME = module;													\
 		addToModuleList(module);														\
 	}
-
-			NODE_SET_SPECIAL_MODULE(TopologyModule, m_topology)
-			NODE_SET_SPECIAL_MODULE(NumericalModel, m_numerical_model)
-			NODE_SET_SPECIAL_MODULE(CollidableObject, m_collidable_object)
-			NODE_SET_SPECIAL_MODULE(NumericalIntegrator, m_numerical_integrator)
-
-
-			std::shared_ptr<CollidableObject>		getCollidableObject() { return m_collidable_object; }
-		std::shared_ptr<NumericalModel>			getNumericalModel() { return m_numerical_model; }
-		std::shared_ptr<TopologyModule>			getTopologyModule() { return m_topology; }
-		std::shared_ptr<NumericalIntegrator>	getNumericalIntegrator() { return m_numerical_integrator; }
-
 
 		std::unique_ptr<AnimationPipeline>&		animationPipeline();
 		std::unique_ptr<GraphicsPipeline>&		graphicsPipeline();
@@ -275,20 +248,10 @@ namespace dyno
 	virtual void delete##CLASSNAME( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.remove(module); deleteFromModuleList(module); } \
 	std::list<std::shared_ptr<CLASSNAME>>& get##CLASSNAME##List(){ return SEQUENCENAME;}
 
-		NODE_ADD_SPECIAL_MODULE(ForceModule, m_force_list)
-			NODE_ADD_SPECIAL_MODULE(ConstraintModule, m_constraint_list)
-			NODE_ADD_SPECIAL_MODULE(CollisionModel, m_collision_list)
-			NODE_ADD_SPECIAL_MODULE(VisualModule, m_render_list)
 			NODE_ADD_SPECIAL_MODULE(TopologyMapping, m_topology_mapping_list)
-			NODE_ADD_SPECIAL_MODULE(ComputeModule, m_compute_list)
 			NODE_ADD_SPECIAL_MODULE(CustomModule, m_custom_list)
 
-			NODE_CREATE_SPECIAL_MODULE(ForceModule)
-			NODE_CREATE_SPECIAL_MODULE(ConstraintModule)
-			NODE_CREATE_SPECIAL_MODULE(CollisionModel)
-			NODE_CREATE_SPECIAL_MODULE(VisualModule)
 			NODE_CREATE_SPECIAL_MODULE(TopologyMapping)
-			NODE_CREATE_SPECIAL_MODULE(ComputeModule)
 			NODE_CREATE_SPECIAL_MODULE(CustomModule)
 
 			
@@ -380,12 +343,7 @@ namespace dyno
 	virtual void addTo##CLASSNAME##List( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.push_back(module); } \
 	virtual void deleteFrom##CLASSNAME##List( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.remove(module); } \
 
-		NODE_ADD_SPECIAL_MODULE_LIST(ForceModule, m_force_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(ConstraintModule, m_constraint_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(CollisionModel, m_collision_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(VisualModule, m_render_list)
 			NODE_ADD_SPECIAL_MODULE_LIST(TopologyMapping, m_topology_mapping_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(ComputeModule, m_compute_list)
 			NODE_ADD_SPECIAL_MODULE_LIST(CustomModule, m_custom_list)
 
 
@@ -414,6 +372,8 @@ namespace dyno
 		 */
 		DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
 
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
 	private:
 		bool m_controllable = true;
 
@@ -432,19 +392,12 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Module>> m_module_list;
 
-
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
-
 		//m_topology will be deprecated in the next version
 		std::shared_ptr<TopologyModule> m_topology;
 		/**
 		 * @brief Pointer of a specific module
 		 *
 		 */
-		std::shared_ptr<NumericalModel> m_numerical_model;
-		std::shared_ptr<CollidableObject> m_collidable_object;
-		std::shared_ptr<NumericalIntegrator> m_numerical_integrator;
-
 		std::unique_ptr<AnimationPipeline> m_animation_pipeline;
 		std::unique_ptr<GraphicsPipeline> m_render_pipeline;
 
@@ -452,15 +405,10 @@ namespace dyno
 		 * @brief A module list containg specific modules
 		 *
 		 */
-		std::list<std::shared_ptr<ForceModule>> m_force_list;
-		std::list<std::shared_ptr<ConstraintModule>> m_constraint_list;
-		std::list<std::shared_ptr<ComputeModule>> m_compute_list;
-		std::list<std::shared_ptr<CollisionModel>> m_collision_list;
-		std::list<std::shared_ptr<VisualModule>> m_render_list;
 		std::list<std::shared_ptr<TopologyMapping>> m_topology_mapping_list;
 		std::list<std::shared_ptr<CustomModule>> m_custom_list;
 
-		std::shared_ptr<DeviceContext> m_context;
+		//std::shared_ptr<DeviceContext> m_context;
 
 		std::list<std::shared_ptr<Node>> mAncestors;
 

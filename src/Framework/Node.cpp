@@ -1,6 +1,4 @@
 #include "Node.h"
-#include "NodeIterator.h"
-
 #include "Action.h"
 
 
@@ -22,7 +20,6 @@ Node::Node(std::string name)
 
 Node::~Node()
 {
-	m_render_list.clear();
 	m_module_list.clear();
 }
 
@@ -87,16 +84,6 @@ void Node::setDt(Real dt)
 	m_dt = dt;
 }
 
-void Node::setMass(Real mass)
-{
-	m_mass = mass;
-}
-
-Real Node::getMass()
-{
-	return m_mass;
-}
-
 std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 {
 	if (hasAncestor(anc) || anc == nullptr)
@@ -114,16 +101,6 @@ bool Node::hasAncestor(std::shared_ptr<Node> anc)
 
 	return it == mAncestors.end() ? false : true;
 }
-
-// NodeIterator Node::begin()
-// {
-// 	return NodeIterator(this);
-// }
-// 
-// NodeIterator Node::end()
-// {
-// 	return NodeIterator();
-// }
 
 void Node::removeAncestor(std::shared_ptr<Node> anc)
 {
@@ -188,27 +165,27 @@ void Node::resetStates()
 
 }
 
-std::shared_ptr<DeviceContext> Node::getContext()
-{
-	if (m_context == nullptr)
-	{
-		m_context = TypeInfo::New<DeviceContext>();
-		m_context->setParent(this);
-		addModule(m_context);
-	}
-	return m_context;
-}
-
-void Node::setContext(std::shared_ptr<DeviceContext> context)
-{
-	if (m_context != nullptr)
-	{
-		deleteModule(m_context);
-	}
-
-	m_context = context; 
-	addModule(m_context);
-}
+// std::shared_ptr<DeviceContext> Node::getContext()
+// {
+// 	if (m_context == nullptr)
+// 	{
+// 		m_context = TypeInfo::New<DeviceContext>();
+// 		m_context->setParent(this);
+// 		addModule(m_context);
+// 	}
+// 	return m_context;
+// }
+// 
+// void Node::setContext(std::shared_ptr<DeviceContext> context)
+// {
+// 	if (m_context != nullptr)
+// 	{
+// 		deleteModule(m_context);
+// 	}
+// 
+// 	m_context = context; 
+// 	addModule(m_context);
+// }
 
 std::unique_ptr<AnimationPipeline>& Node::animationPipeline()
 {
@@ -275,41 +252,6 @@ bool Node::addModule(std::shared_ptr<Module> module)
 		auto downModule = TypeInfo::cast<TopologyModule>(module);
 		m_topology = downModule;
 	}
-	else if (std::string("NumericalModel").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<NumericalModel>(module);
-		m_numerical_model = downModule;
-	}
-	else if (std::string("NumericalIntegrator").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<NumericalIntegrator>(module);
-		m_numerical_integrator = downModule;
-	}
-	else if (std::string("ForceModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<ForceModule>(module);
-		this->addToForceModuleList(downModule);
-	}
-	else if (std::string("ConstraintModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<ConstraintModule>(module);
-		this->addToConstraintModuleList(downModule);
-	}
-	else if (std::string("ComputeModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<ComputeModule>(module);
-		this->addToComputeModuleList(downModule);
-	}
-	else if (std::string("CollisionModel").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<CollisionModel>(module);
-		this->addToCollisionModelList(downModule);
-	}
-	else if (std::string("VisualModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<VisualModule>(module);
-		this->addToVisualModuleList(downModule);
-	}
 	else if (std::string("TopologyMapping").compare(mType) == 0)
 	{
 		auto downModule = TypeInfo::cast<TopologyMapping>(module);
@@ -335,39 +277,6 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 	if (std::string("TopologyModule").compare(mType) == 0)
 	{
 		m_topology = nullptr;
-	}
-	else if (std::string("NumericalModel").compare(mType) == 0)
-	{
-		m_numerical_model = nullptr;
-	}
-	else if (std::string("NumericalIntegrator").compare(mType) == 0)
-	{
-		m_numerical_integrator = nullptr;
-	}
-	else if (std::string("ForceModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<ForceModule>(module);
-		this->deleteFromForceModuleList(downModule);
-	}
-	else if (std::string("ConstraintModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<ConstraintModule>(module);
-		this->deleteFromConstraintModuleList(downModule);
-	}
-	else if (std::string("ComputeModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<ComputeModule>(module);
-		this->deleteFromComputeModuleList(downModule);
-	}
-	else if (std::string("CollisionModel").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<CollisionModel>(module);
-		this->deleteFromCollisionModelList(downModule);
-	}
-	else if (std::string("VisualModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<VisualModule>(module);
-		this->deleteFromVisualModuleList(downModule);
 	}
 	else if (std::string("TopologyMapping").compare(mType) == 0)
 	{
@@ -490,10 +399,10 @@ bool Node::addNodePort(NodePort* port)
 	return true;
 }
 
-void Node::setAsCurrentContext()
-{
-	getContext()->enable();
-}
+// void Node::setAsCurrentContext()
+// {
+// 	getContext()->enable();
+// }
 
 // void Node::setTopologyModule(std::shared_ptr<TopologyModule> topology)
 // {

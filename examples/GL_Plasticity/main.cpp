@@ -31,7 +31,6 @@ void CreateScene()
 	root->addParticleSystem(child3);
 
 	child3->setVisible(false);
-	child3->setMass(1.0);
   	child3->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
   	child3->loadSurface("../../data/standard/standard_cube20.obj");
 	child3->scale(0.05);
@@ -47,7 +46,6 @@ void CreateScene()
 	root->addParticleSystem(child2);
 
 	child2->setVisible(false);
-	child2->setMass(1.0);
 	child2->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
 	child2->loadSurface("../../data/standard/standard_cube20.obj");
 	child2->scale(0.05);
