@@ -2,7 +2,7 @@
 
 
 
-![](data\logo\Logo.png)
+![](data/logo/Logo.png)
 
 
 
