@@ -422,6 +422,10 @@ namespace dyno
 			break;
 		case GLFW_KEY_PAGE_DOWN:
 			break;
+		case GLFW_KEY_N:
+			SceneGraph::getInstance().takeOneFrame();
+			SceneGraph::getInstance().updateGraphicsContext();
+			break;
 		case GLFW_KEY_F1:
 			activeWindow->toggleImGUI();
 			break;
