@@ -2,12 +2,6 @@
 #include "Node.h"
 #include "RigidBodyShared.h"
 
-#include "Topology/Primitive3D.h"
-#include "Collision/NeighborElementQuery.h"
-#include "Collision/CollistionDetectionBoundingBox.h"
-
-#include "IterativeConstraintSolver.h"
-
 namespace dyno
 {
 	/*!
@@ -30,6 +24,7 @@ namespace dyno
 
 		typedef typename TContactPair<Real> ContactPair;
 
+
 		RigidBodySystem(std::string name = "RigidBodySystem");
 		virtual ~RigidBodySystem();
 
@@ -50,7 +45,6 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-		void updateStates() override;
 
 		void updateTopology() override;
 
@@ -88,11 +82,7 @@ namespace dyno
 
 		DEF_ARRAY_STATE(CollisionMask, CollisionMask, DeviceType::GPU, "Collision mask for each rigid body");
 
-		DEF_ARRAY_STATE(ContactPair, Contacts, DeviceType::GPU, "");
-
 		DEF_ARRAY_STATE(Matrix, InitialInertia, DeviceType::GPU, "Initial inertia matrix");
-
-		std::shared_ptr<NeighborElementQuery<TDataType>> mElementQuery;
 
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
@@ -106,9 +96,5 @@ namespace dyno
 		DArray<SphereInfo> mDeviceSpheres;
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
-
-	private:
-		std::shared_ptr<IterativeConstraintSolver<TDataType>> iterSolver;
-		std::shared_ptr<CollistionDetectionBoundingBox<TDataType>> cdBV;
 	};
 }

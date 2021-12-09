@@ -11,6 +11,8 @@
 #include <Mapping/DiscreteElementsToTriangleSet.h>
 #include <Mapping/ContactsToEdgeSet.h>
 
+#include "Collision/NeighborElementQuery.h"
+
 using namespace std;
 using namespace dyno;
 

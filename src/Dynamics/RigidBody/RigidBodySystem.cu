@@ -1,5 +1,14 @@
 #include "RigidBodySystem.h"
 
+#include "Topology/Primitive3D.h"
+#include "Collision/NeighborElementQuery.h"
+#include "Collision/CollistionDetectionBoundingBox.h"
+
+#include "IterativeConstraintSolver.h"
+
+//Module headers
+#include "ContactsUnion.h"
+
 
 namespace dyno
 {
@@ -14,13 +23,23 @@ namespace dyno
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
 		this->currentTopology()->setDataPtr(std::make_shared<DiscreteElements<TDataType>>());
 
-		mElementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
-		this->currentTopology()->connect(mElementQuery->inDiscreteElements());
-		this->stateCollisionMask()->connect(mElementQuery->inCollisionMask());
+		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
+		this->currentTopology()->connect(elementQuery->inDiscreteElements());
+		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+		this->animationPipeline()->pushModule(elementQuery);
 
-		iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
+		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
+		this->currentTopology()->connect(cdBV->inDiscreteElements());
+		this->animationPipeline()->pushModule(cdBV);
 
+		auto merge = std::make_shared<ContactsUnion<TDataType>>();
+		elementQuery->outContacts()->connect(merge->inContactsA());
+		cdBV->outContacts()->connect(merge->inContactsB());
+		this->animationPipeline()->pushModule(merge);
+
+		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
 		this->varTimeStep()->connect(iterSolver->inTimeStep());
+		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->stateMass()->connect(iterSolver->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
@@ -28,11 +47,11 @@ namespace dyno
 		this->stateRotationMatrix()->connect(iterSolver->inRotationMatrix());
 		this->stateInertia()->connect(iterSolver->inInertia());
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
-		this->stateContacts()->connect(iterSolver->inContacts());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
 
-		cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
-		this->currentTopology()->connect(cdBV->inDiscreteElements());
+		merge->outContacts()->connect(iterSolver->inContacts());
+
+		this->animationPipeline()->pushModule(iterSolver);
 	}
 
 	template<typename TDataType>
@@ -254,8 +273,6 @@ namespace dyno
 
 		this->stateInitialInertia()->setElementCount(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
-		
-		//mInitialInertia.assign(this->currentInertia()->getData());
 	}
 	
 	template <typename Coord>
@@ -305,35 +322,6 @@ namespace dyno
 		tet[pId].v[1] = rotation[pId + start_tet] * (tet_init[pId].v[1] - center_init) + pos[pId + start_tet];
 		tet[pId].v[2] = rotation[pId + start_tet] * (tet_init[pId].v[2] - center_init) + pos[pId + start_tet];
 		tet[pId].v[3] = rotation[pId + start_tet] * (tet_init[pId].v[3] - center_init) + pos[pId + start_tet];
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::updateStates()
-	{
- 		Real dt = this->varTimeStep()->getData();
-// 		//construct j
-		mElementQuery->update();
-
-		auto& contacts = mElementQuery->outContacts()->getData();
-
-		//detectCollisionWithBoundary();
-		cdBV->update();
-
-		auto& bvContacts = cdBV->outContacts()->getData();
-
-		int sizeOfContacts = bvContacts.size() + contacts.size();
-
-		this->stateContacts()->setElementCount(sizeOfContacts);
-
-		auto& allContacts = this->stateContacts()->getData();
-
-		if (contacts.size() > 0)
-			allContacts.assign(contacts, contacts.size());
-
-		if (bvContacts.size() > 0)
-			allContacts.assign(bvContacts, bvContacts.size(), contacts.size(), 0);
-// 
-		iterSolver->update();
 	}
 
 	template<typename TDataType>
