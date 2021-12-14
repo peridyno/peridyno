@@ -64,10 +64,22 @@ public:									\
 
 #define DEF_ARRAY_STATE(T, name, device, desc) \
 private:									\
-	FArray<T, device> current_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+	FArray<T, device> state_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
 public:									\
-	inline FArray<T, device>* state##name() {return &current_##name;}
+	inline FArray<T, device>* state##name() {return &state_##name;}
 
+
+#define DEF_ARRAY2D_STATE(T, name, device, desc) \
+private:									\
+	FArray2D<T, device> state_##name = FArray2D<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+public:									\
+	inline FArray2D<T, device>* state##name() {return &state_##name;}
+
+#define DEF_ARRAY3D_STATE(T, name, device, desc) \
+private:									\
+	FArray3D<T, device> state_##name = FArray3D<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+public:									\
+	inline FArray3D<T, device>* state##name() {return &state_##name;}
 
 
 #define DEF_EMPTY_CURRENT_ARRAYLIST(T, name, device, desc) \
