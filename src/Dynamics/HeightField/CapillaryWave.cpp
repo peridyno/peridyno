@@ -19,7 +19,7 @@ namespace dyno
 
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(std::string name)
-		: ParticleSystem<TDataType>(name)
+		: Node()
 	{
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->currentPosition()->connect(integrator->inPosition());
@@ -39,7 +39,7 @@ namespace dyno
 		this->currentPosition()->connect(elasticity->inPosition());
 		this->currentVelocity()->connect(elasticity->inVelocity());
 		this->currentRestShape()->connect(elasticity->inRestShape());
-		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
+		//nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(elasticity);
 
 

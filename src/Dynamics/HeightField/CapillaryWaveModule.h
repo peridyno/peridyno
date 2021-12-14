@@ -114,5 +114,13 @@ namespace dyno {
 
 		float2* m_source;				//用于添加船与水交互
 		float* m_weight;
+
+
+		void initialize();
+
+		void initDynamicRegion();
+		void initSource();
+
+		void resetSource();
 	};
 }

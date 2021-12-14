@@ -9,7 +9,7 @@ namespace dyno
 	*	\brief	Peridynamics-based CapillaryWave.
 	*/
 	template<typename TDataType>
-	class CapillaryWave : public ParticleSystem<TDataType>
+	class CapillaryWave : public Node
 	{
 		DECLARE_CLASS_1(CapillaryWave, TDataType)
 	public:
@@ -29,8 +29,6 @@ namespace dyno
 
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
-
-		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;
