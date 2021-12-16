@@ -89,7 +89,7 @@ private:												\
 public:													\
 	inline FArray2D<T, device>* out##name() {return &out_##name;}
 
-#define DEF_ARRAYLIST_IO(T, name, device, desc)		\
+#define DEF_ARRAY2D_IO(T, name, device, desc)		\
 private:												\
 	FArray2D<T, device> io_##name = FArray2D<T, device>(std::string(#name), desc, FieldTypeEnum::IO, this);	\
 public:													\

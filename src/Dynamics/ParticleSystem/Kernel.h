@@ -1,5 +1,7 @@
 #pragma once
 #include "Platform.h"
+#include "DeclareEnum.h"
+
 namespace dyno {
 
 	template<typename Real>
@@ -53,6 +55,17 @@ namespace dyno {
 				return -45.0f / ((Real)M_PI * hh*h) *d*d * this->m_scale;
 			}
 		}
+
+		DYN_FUNC static inline Real weight(const Real r, const Real h, Real scale)
+		{
+			const Real q = r / h;
+			if (q > 1.0f) return 0.0f;
+			else {
+				const Real d = Real(1) - q;
+				const Real hh = h * h;
+				return 15.0f / ((Real)M_PI * hh * h) * d * d * d * scale;
+			}
+		}
 	};
 
 	template<typename Real>
@@ -99,6 +112,15 @@ namespace dyno {
 				const Real dd = Real(1) - q*q;
 				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
 				return -alpha * dd* this->m_scale;
+			}
+		}
+
+		DYN_FUNC static inline Real weight(const Real r, const Real h, const Real scale)
+		{
+			const Real q = r / h;
+			if (q > 1.0f) return 0.0f;
+			else {
+				return scale * (1.0f - q * q);
 			}
 		}
 	};

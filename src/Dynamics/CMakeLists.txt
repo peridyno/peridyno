@@ -43,7 +43,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Dynamics>)
 
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
-    target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+    target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr;--expt-extended-lambda>)
 
     target_link_libraries(${LIB_NAME} PUBLIC ${${LIB_DEPENDENCY}})
 

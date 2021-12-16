@@ -1,5 +1,5 @@
 #pragma once
-#include "Module/ComputeModule.h"
+#include "ParticleApproximation.h"
 
 namespace dyno {
 	/**
@@ -8,7 +8,7 @@ namespace dyno {
 	 * @tparam TDataType 
 	 */
 	template<typename TDataType>
-	class SummationDensity : public virtual ComputeModule
+	class SummationDensity : public virtual ParticleApproximation<TDataType>
 	{
 		DECLARE_CLASS_1(SummationDensity, TDataType)
 	public:
@@ -21,11 +21,9 @@ namespace dyno {
 		void compute() override;
 	
 	protected:
-		void calculateScalingFactor();
-		void calculateParticleMass();
-
 		void compute(DArray<Real>& rho);
 
+	public:
 		void compute(
 			DArray<Real>& rho,
 			DArray<Coord>& pos,
@@ -35,8 +33,8 @@ namespace dyno {
 
 	public:
 		DEF_VAR(Real, RestDensity, 1000, "Rest Density");
-		DEF_VAR_IN(Real, SmoothingLength, "Indicating the smoothing length");
-		DEF_VAR_IN(Real, SamplingDistance, "Indicating the initial sampling distance");
+// 		DEF_VAR_IN(Real, SmoothingLength, "Indicating the smoothing length");
+// 		DEF_VAR_IN(Real, SamplingDistance, "Indicating the initial sampling distance");
 
 		///Define inputs
 		/**
@@ -57,6 +55,8 @@ namespace dyno {
 		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Return the particle density");
 
 	private:
+		void calculateParticleMass();
+
 		Real m_particle_mass;
 		Real m_factor;
 	};

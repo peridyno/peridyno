@@ -118,7 +118,7 @@ namespace dyno
 
 	void SceneGraph::takeOneFrame()
 	{
-		std::cout << "****************Frame " << mFrameNumber << " Started" << std::endl;
+		std::cout << "****************    Frame " << mFrameNumber << " Started    ****************" << std::endl;
 
 		if (mRoot == nullptr)
 		{
@@ -175,7 +175,7 @@ namespace dyno
 
 		mRoot->traverseTopDown<PostProcessing>();
 
-		std::cout << "****************Frame " << mFrameNumber << " Ended" << std::endl << std::endl;
+		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
 
 		mFrameNumber++;
 	}
