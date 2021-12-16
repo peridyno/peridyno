@@ -120,7 +120,7 @@ namespace dyno
 		}
 	}
 
-	void FBase::setCallBackFunc(std::shared_ptr<FCallBackFunc> func)
+	void FBase::attach(std::shared_ptr<FCallBackFunc> func)
 	{
 		//Add the current field as one of the input to the callback function
 		func->addInput(this);

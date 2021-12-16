@@ -91,7 +91,7 @@ public:
 	virtual bool isEmpty() = 0;
 	virtual void update();
 
-	void setCallBackFunc(std::shared_ptr<FCallBackFunc> func);
+	void attach(std::shared_ptr<FCallBackFunc> func);
 
 protected:
 	void setSource(FBase* source);

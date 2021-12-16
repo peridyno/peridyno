@@ -35,25 +35,27 @@ namespace dyno {
 
 		DYN_FUNC inline Real Weight(const Real r, const Real h) override
 		{
-			const Real q = r / h;
-			if (q > 1.0f) return 0.0f;
-			else {
-				const Real d = Real(1) - q;
-				const Real hh = h*h;
-				return 15.0f / ((Real)M_PI * hh * h) * d * d * d * this->m_scale;
-			}
+// 			const Real q = r / h;
+// 			if (q > 1.0f) return 0.0f;
+// 			else {
+// 				const Real d = Real(1) - q;
+// 				const Real hh = h*h;
+// 				return 15.0f / ((Real)M_PI * hh * h) * d * d * d * this->m_scale;
+// 			}
+			return SpikyKernel<Real>::weight(r, h, m_scale);
 		}
 
 		DYN_FUNC inline Real Gradient(const Real r, const Real h) override
 		{
-			const Real q = r / h;
-			if (q > 1.0f) return 0.0;
-			//else if (r==0.0f) return 0.0f;
-			else {
-				const Real d = Real(1) - q;
-				const Real hh = h*h;
-				return -45.0f / ((Real)M_PI * hh*h) *d*d * this->m_scale;
-			}
+// 			const Real q = r / h;
+// 			if (q > 1.0f) return 0.0;
+// 			//else if (r==0.0f) return 0.0f;
+// 			else {
+// 				const Real d = Real(1) - q;
+// 				const Real hh = h*h;
+// 				return -45.0f / ((Real)M_PI * hh*h) *d*d * this->m_scale;
+// 			}
+			return SpikyKernel<Real>::gradient(r, h, m_scale);
 		}
 
 		DYN_FUNC static inline Real weight(const Real r, const Real h, Real scale)
@@ -64,6 +66,18 @@ namespace dyno {
 				const Real d = Real(1) - q;
 				const Real hh = h * h;
 				return 15.0f / ((Real)M_PI * hh * h) * d * d * d * scale;
+			}
+		}
+
+		DYN_FUNC static inline Real gradient(const Real r, const Real h, Real scale)
+		{
+			const Real q = r / h;
+			if (q > 1.0f) return 0.0;
+			//else if (r==0.0f) return 0.0f;
+			else {
+				const Real d = Real(1) - q;
+				const Real hh = h * h;
+				return -45.0f / ((Real)M_PI * hh*h) *d*d * scale;
 			}
 		}
 	};
@@ -96,23 +110,25 @@ namespace dyno {
 
 		DYN_FUNC inline Real Weight(const Real r, const Real h) override
 		{
-			const Real q = r / h;
-			if (q > 1.0f) return 0.0f;
-			else {
-				return (1.0f - q*q) * this->m_scale;
-			}
+// 			const Real q = r / h;
+// 			if (q > 1.0f) return 0.0f;
+// 			else {
+// 				return (1.0f - q*q) * this->m_scale;
+// 			}
+			return SmoothKernel<Real>::weight(r, h, m_scale);
 		}
 
 		DYN_FUNC inline Real Gradient(const Real r, const Real h) override
 		{
-			const Real q = r / h;
-			if (q > Real(1)) return Real(0);
-			else {
-				const Real hh = h*h;
-				const Real dd = Real(1) - q*q;
-				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
-				return -alpha * dd* this->m_scale;
-			}
+// 			const Real q = r / h;
+// 			if (q > Real(1)) return Real(0);
+// 			else {
+// 				const Real hh = h*h;
+// 				const Real dd = Real(1) - q*q;
+// 				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
+// 				return -alpha * dd* this->m_scale;
+// 			}
+			return SmoothKernel<Real>::gradient(r, h, m_scale);
 		}
 
 		DYN_FUNC static inline Real weight(const Real r, const Real h, const Real scale)
@@ -121,6 +137,18 @@ namespace dyno {
 			if (q > 1.0f) return 0.0f;
 			else {
 				return scale * (1.0f - q * q);
+			}
+		}
+
+		DYN_FUNC static inline Real gradient(const Real r, const Real h, const Real scale)
+		{
+			const Real q = r / h;
+			if (q > Real(1)) return Real(0);
+			else {
+				const Real hh = h * h;
+				const Real dd = Real(1) - q * q;
+				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
+				return -alpha * dd* scale;
 			}
 		}
 	};

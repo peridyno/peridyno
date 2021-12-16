@@ -8,13 +8,13 @@ namespace dyno
 	ParticleApproximation<TDataType>::ParticleApproximation()
 		: ComputeModule()
 	{
-		this->inSmoothingLength()->setValue(Real(0.011));
-		this->inSamplingDistance()->setValue(Real(0.005));
+// 		this->inSmoothingLength()->setValue(Real(0.011));
+// 		this->inSamplingDistance()->setValue(Real(0.005));
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ParticleApproximation<TDataType>::calculateScalingFactor, this));
 
-		this->inSmoothingLength()->setCallBackFunc(callback);
-		this->inSamplingDistance()->setCallBackFunc(callback);
+		this->inSmoothingLength()->attach(callback);
+		this->inSamplingDistance()->attach(callback);
 
 		//Should be called after above four parameters are all set, this function will recalculate m_factor
 		//calculateScalingFactor();

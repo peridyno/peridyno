@@ -1,6 +1,4 @@
 #include "SummationDensity.h"
-#include "Node.h"
-#include "Kernel.h"
 
 namespace dyno
 {
@@ -15,8 +13,8 @@ namespace dyno
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SummationDensity<TDataType>::calculateParticleMass, this));
 
-		this->varRestDensity()->setCallBackFunc(callback);
-		this->inSamplingDistance()->setCallBackFunc(callback);
+		this->varRestDensity()->attach(callback);
+		this->inSamplingDistance()->attach(callback);
 
 		//calculateParticleMass();
 	}
@@ -53,32 +51,6 @@ namespace dyno
 			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getData(),
 			m_particle_mass);
-	}
-
-	template<typename Real, typename Coord>
-	__global__ void SD_ComputeDensity(
-		DArray<Real> rhoArr,
-		DArray<Coord> posArr,
-		DArrayList<int> neighbors,
-		Real smoothingLength,
-		Real mass)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posArr.size()) return;
-
-		SpikyKernel<Real> kern;
-		Real r;
-		Real rho_i = Real(0);
-		Coord pos_i = posArr[pId];
-		List<int>& list_i = neighbors[pId];
-		int nbSize = list_i.size();
-		for (int ne = 0; ne < nbSize; ne++)
-		{
-			int j = list_i[ne];
-			r = (pos_i - posArr[j]).norm();
-			rho_i += mass * kern.Weight(r, smoothingLength);
-		}
-		rhoArr[pId] = rho_i;
 	}
 
 	template<typename Real, typename Coord, typename Kernel>
@@ -119,7 +91,7 @@ namespace dyno
 		Real smoothingLength,
 		Real mass)
 	{
-		cuParticleApproximation(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
+		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
 			SD_ComputeDensity,
 			rho,
 			pos,

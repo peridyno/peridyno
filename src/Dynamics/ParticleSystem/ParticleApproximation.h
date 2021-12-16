@@ -21,7 +21,7 @@
 namespace dyno
 {
 
-#define cuParticleApproximation(size, type, scale, Func,...){					\
+#define cuZerothOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
 		if (type == KT_Smooth)											\
 		{																\
@@ -34,6 +34,25 @@ namespace dyno
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::weight(r, h, s);					\
+			};															\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+		}																\
+		cuSynchronize();												\
+	}
+
+#define cuFirstOrder(size, type, scale, Func,...){					\
+		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
+		if (type == KT_Smooth)											\
+		{																\
+			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
+				return SmoothKernel<Real>::gradient(r, h, s);	\
+			};																\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+		}																\
+		else if (type == KT_Spiky)										\
+		{																\
+			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
+				return SpikyKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
 		}																\

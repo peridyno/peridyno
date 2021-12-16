@@ -33,8 +33,6 @@ namespace dyno {
 
 	public:
 		DEF_VAR(Real, RestDensity, 1000, "Rest Density");
-// 		DEF_VAR_IN(Real, SmoothingLength, "Indicating the smoothing length");
-// 		DEF_VAR_IN(Real, SamplingDistance, "Indicating the initial sampling distance");
 
 		///Define inputs
 		/**
