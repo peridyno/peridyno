@@ -106,9 +106,9 @@ namespace dyno {
 		z = 0;
 		for (int i = 0; i < MAX_LEVEL; i++)
 		{
-			x |= (m_key & (1U << 3 * i)) >> 2 * i;
-			y |= (m_key & (1U << 3 * i + 1)) >> (2 * i + 1);
-			z |= (m_key & (1U << 3 * i + 2)) >> (2 * i + 2);
+			x |= (m_key & (1U << DIM * i)) >> 2 * i;
+			y |= (m_key & (1U << DIM * i + 1)) >> (2 * i + 1);
+			z |= (m_key & (1U << DIM * i + 2)) >> (2 * i + 2);
 		}
 
 		x &= ((1U << l) - 1);
@@ -124,15 +124,13 @@ namespace dyno {
 
 	DYN_FUNC bool OctreeNode::operator>=(const OctreeNode& mc2) const
 	{
-		if (isContainedIn(mc2))
-		{
-			return true;
-		}
+		if (mc2.isContainedStrictlyIn(*this))
+			return false;
 
 		auto k1 = m_key;
 		auto k2 = mc2.m_key;
 
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
+		m_level > mc2.m_level ? (k1 = k1 >> DIM * (m_level - mc2.m_level)) : (k2 = k2 >> DIM * (mc2.m_level - m_level));
 
 		return k1 >= k2;
 	}
@@ -147,39 +145,19 @@ namespace dyno {
 		auto k1 = m_key;
 		auto k2 = mc2.m_key;
 
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
+		m_level > mc2.m_level ? (k1 = k1 >> DIM * (m_level - mc2.m_level)) : (k2 = k2 >> DIM * (mc2.m_level - m_level));
 
 		return k1 > k2;
 	}
 
 	DYN_FUNC bool OctreeNode::operator<=(const OctreeNode& mc2) const
 	{
-		if (mc2.isContainedIn(*this))
-		{
-			return true;
-		}
-
-		auto k1 = m_key;
-		auto k2 = mc2.m_key;
-
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
-
-		return k1 <= k2;
+		return ~(*this > mc2);
 	}
 
 	DYN_FUNC bool OctreeNode::operator<(const OctreeNode& mc2) const
 	{
-		if (mc2.isContainedStrictlyIn(*this))
-		{
-			return true;
-		}
-
-		auto k1 = m_key;
-		auto k2 = mc2.m_key;
-
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
-
-		return k1 < k2;
+		return ~(*this >= mc2);
 	}
 
 	DYN_FUNC bool OctreeNode::isContainedIn(const OctreeNode& mc2) const
@@ -202,7 +180,7 @@ namespace dyno {
 			return false;
 		}
 
-		auto k1 = m_key >> 3 * (m_level - mc2.m_level);
+		auto k1 = m_key >> DIM * (m_level - mc2.m_level);
 		auto k2 = mc2.key();
 
 		return k1 == k2;
@@ -214,7 +192,7 @@ namespace dyno {
 		OcKey k1 = m_key;
 		OcKey k2 = mc2.m_key;
 
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
+		m_level > mc2.m_level ? (k1 = k1 >> DIM * (m_level - mc2.m_level)) : (k2 = k2 >> DIM * (mc2.m_level - m_level));
 
 		while (k1 != k2)
 		{
@@ -534,7 +512,7 @@ namespace dyno {
 	{
 		int ret_num = 0;
 
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -559,7 +537,7 @@ namespace dyno {
 				int lc = node.level();
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -580,7 +558,7 @@ namespace dyno {
 	{
 		int ret_num = 0;
 
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -605,7 +583,7 @@ namespace dyno {
 				int lc = node.level();
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -632,7 +610,7 @@ namespace dyno {
 	template<typename TDataType>
 	GPU_FUNC void SparseOctree<TDataType>::reqeustIntersectionIds(int* ids, int& shift, const OcKey key, const Level l)
 	{
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -666,7 +644,7 @@ namespace dyno {
 
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -697,7 +675,7 @@ namespace dyno {
 	template<typename TDataType>
 	GPU_FUNC void SparseOctree<TDataType>::reqeustIntersectionIds(int* ids, int& shift, const OcKey key, const Level l, const AABB box, AABB* data)
 	{
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -730,7 +708,7 @@ namespace dyno {
 				int lc = node.level();
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
