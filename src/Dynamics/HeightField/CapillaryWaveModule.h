@@ -1,8 +1,8 @@
-
 #pragma once
 #include "Module/ConstraintModule.h"
 #include "Peridynamics/NeighborData.h"
 #include "types.h"
+#include "Module/ComputeModule.h"
 namespace dyno {
 
 	/**
@@ -10,7 +10,7 @@ namespace dyno {
 	  *		   For more details, please refer to[He et al. 2017] "Projective Peridynamics for Modeling Versatile Elastoplastic Materials"
 	  */
 	template<typename TDataType>
-	class CapillaryWaveModule : public ConstraintModule
+	class CapillaryWaveModule : public ComputeModule
 	{
 		DECLARE_CLASS_1(CapillaryWaveModule, TDataType)
 
@@ -21,14 +21,16 @@ namespace dyno {
 		typedef TPair<TDataType> NPair;
 
 		CapillaryWaveModule();
-		~CapillaryWaveModule() override;
+		~CapillaryWaveModule();
+
+		void compute() override;
 		
-		void constrain() override;
+		void constrain();
 
 		virtual void solveElasticity();
 
 	protected:
-		void preprocess() override;
+		void preprocess();
 
 		/**
 		 * @brief Correct the particle position with one iteration
@@ -41,13 +43,7 @@ namespace dyno {
 		void computeInverseK();
 
 	public:
-		/**
-		 * @brief Horizon
-		 * A positive number represents the radius of neighborhood for each point
-		 */
-		DEF_VAR_IN(Real, Horizon, "");
 
-		DEF_VAR_IN(Real, TimeStep, "");
 
 		/**
 		 * @brief Particle position
@@ -65,18 +61,10 @@ namespace dyno {
 		 */
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
-		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
+		//DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
 
 	public:
-		/**
-		 * @brief Lame parameters
-		 * m_lambda controls the isotropic part while mu controls the deviatoric part.
-		 */
-		DEF_VAR(Real, Mu, 0.001, "Lame parameters: mu");
 
-		DEF_VAR(Real, Lambda, 0.01, "Lame parameters: lambda");
-
-		DEF_VAR(uint, IterationNumber, 10, "Iteration number");
 
 	protected:
 		DArray<Real> mBulkStiffness;

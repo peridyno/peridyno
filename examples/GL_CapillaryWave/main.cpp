@@ -23,10 +23,10 @@ void CreateScene()
 
 	std::shared_ptr<CapillaryWave<DataType3f>> cloth = std::make_shared<CapillaryWave<DataType3f>>();
 	cloth->loadParticles("../../data/cloth/cloth1.obj");
-	cloth->loadSurface("../../data/cloth/cloth1.obj");
+	//cloth->loadSurface("../../data/cloth/cloth1.obj");
 
-	root->addParticleSystem(cloth);
-
+	//root->addParticleSystem(cloth);
+	/*
 	auto pointRenderer = std::make_shared<GLPointVisualModule>();
 	pointRenderer->setColor(Vec3f(1, 0.2, 1));
 	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
@@ -40,6 +40,7 @@ void CreateScene()
 	cloth->currentTopology()->connect(surfaceRenderer->inTriangleSet());
 	cloth->graphicsPipeline()->pushModule(surfaceRenderer);
 	//cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
+	*/
 }
 
 int main()

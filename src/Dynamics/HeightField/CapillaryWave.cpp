@@ -21,6 +21,7 @@ namespace dyno
 	CapillaryWave<TDataType>::CapillaryWave(std::string name)
 		: Node()
 	{
+		/*
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->currentPosition()->connect(integrator->inPosition());
 		this->currentVelocity()->connect(integrator->inVelocity());
@@ -28,11 +29,12 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(integrator);
 
+		
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->varHorizon()->connect(nbrQuery->inRadius());
 		this->currentPosition()->connect(nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(nbrQuery);
-
+		
 		auto elasticity = std::make_shared<CapillaryWaveModule<TDataType>>();
 		this->varHorizon()->connect(elasticity->inHorizon());
 		this->varTimeStep()->connect(elasticity->inTimeStep());
@@ -42,7 +44,7 @@ namespace dyno
 		//nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(elasticity);
 
-
+		
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
 		//Create a node for surface mesh rendering
@@ -52,6 +54,8 @@ namespace dyno
 		this->currentTopology()->setDataPtr(triSet);
 
 		mSurfaceNode->currentTopology()->setDataPtr(triSet);
+			*/
+	
 	}
 
 	template<typename TDataType>
@@ -60,35 +64,33 @@ namespace dyno
 		
 	}
 
-	template<typename TDataType>
-	bool CapillaryWave<TDataType>::translate(Coord t)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->translate(t);
-
-		return ParticleSystem<TDataType>::translate(t);
-	}
-
-
-	template<typename TDataType>
-	bool CapillaryWave<TDataType>::scale(Real s)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->scale(s);
-
-		return ParticleSystem<TDataType>::scale(s);
-	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateTopology()
 	{
-		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->currentTopology()->getDataPtr());
+		//auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->currentTopology()->getDataPtr());
+		//this->currentTopology()->setDataPtr(triSet);
+		//triSet->getPoints().assign(this->currentPosition()->getData());
 
-		triSet->getPoints().assign(this->currentPosition()->getData());
+		if (!this->currentPosition()->isEmpty())
+		{
+			auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->currentTopology()->getDataPtr());
+			int num = this->currentPosition()->getElementCount();
+			auto& pts = triSet->getPoints();
+			if (num != pts.size())
+			{
+				pts.resize(num);
+			}
+
+			triSet->getPoints().assign(this->currentPosition()->getData());
+		}
 	}
 
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetStates()
 	{
+		/*
 		ParticleSystem<TDataType>::resetStates();
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
@@ -104,6 +106,14 @@ namespace dyno
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
 		}
+		*/
+	}
+
+	template<typename TDataType>
+	void CapillaryWave<TDataType>::loadParticles(std::string filename)
+	{
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		ptSet->loadObjFile(filename);
 	}
 
 	template<typename TDataType>

@@ -20,8 +20,8 @@ namespace dyno
 		CapillaryWave(std::string name = "default");
 		virtual ~CapillaryWave();
 
-		bool translate(Coord t) override;
-		bool scale(Real s) override;
+		
+		void loadParticles(std::string filename);
 
 		void loadSurface(std::string filename);
 
@@ -29,6 +29,19 @@ namespace dyno
 
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
+
+		DEF_EMPTY_CURRENT_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
+
+
+		/**
+		 * @brief Particle velocity
+		 */
+		DEF_EMPTY_CURRENT_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
+
+		/**
+		 * @brief Particle force
+		 */
+		DEF_EMPTY_CURRENT_ARRAY(Force, Coord, DeviceType::GPU, "Force on each particle");
 
 	protected:
 		void resetStates() override;

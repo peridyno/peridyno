@@ -20,7 +20,7 @@
 #endif
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(CapillaryWaveModule, TDataType)
+	//IMPLEMENT_CLASS_1(CapillaryWaveModule, TDataType)
 
 	template<typename Real>
 	__device__ Real D_Weight(Real r, Real h)
@@ -297,10 +297,9 @@ namespace dyno
 	__constant__ float GRAVITY = 9.83219f * 0.5f; //0.5f * Fallbeschleunigung
 	template<typename TDataType>
 	CapillaryWaveModule<TDataType>::CapillaryWaveModule()
-		: ConstraintModule()
 	{
-		this->inHorizon()->setValue(0.0125);
-		this->inNeighborIds()->tagOptional(true);
+		//this->inHorizon()->setValue(0.0125);
+		//this->inNeighborIds()->tagOptional(true);
 
 		int size = 512;
 		float patchLength = 512.0;
@@ -474,50 +473,18 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWaveModule<TDataType>::computeInverseK()
 	{
-	
-		auto& restShapes = this->inRestShape()->getData();
-		uint pDims = cudaGridSize(restShapes.size(), BLOCK_SIZE);
 
-		EM_PrecomputeShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
-			mInvK,
-			restShapes);
-		cuSynchronize();
 	}
 
 	template<typename TDataType>
 	void CapillaryWaveModule<TDataType>::solveElasticity()
 	{
-
-		//Save new positions
-		mPosBuf.assign(this->inPosition()->getData());
-
-		this->computeInverseK();
-
-		int itor = 0;
-		uint maxIterNum = this->varIterationNumber()->getData();
-		while (itor < maxIterNum) {
-			this->enforceElasticity();
-			itor++;
-		}
-
 		//this->updateVelocity();
 	}
 
 	template<typename TDataType>
 	void CapillaryWaveModule<TDataType>::updateVelocity()
 	{
-		
-		int num = this->inPosition()->getElementCount();
-		uint pDims = cudaGridSize(num, BLOCK_SIZE);
-		
-		Real dt = this->inTimeStep()->getData();
-		
-		K_UpdateVelocity << <pDims, BLOCK_SIZE >> > (
-			this->inVelocity()->getData(),
-			mPosBuf,
-			this->inPosition()->getData(),
-			dt);
-		cuSynchronize();
 	}
 
 
@@ -875,6 +842,11 @@ namespace dyno
 			height[i + patchSize * j].z = Dx.y;
 			height[i + patchSize * j].w = Dz.y;
 		}
+	}
+
+	template<typename TDataType>
+	void CapillaryWaveModule<TDataType>::compute()
+	{
 	}
 	DEFINE_CLASS(CapillaryWaveModule);
 }
