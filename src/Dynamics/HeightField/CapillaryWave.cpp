@@ -21,6 +21,8 @@ namespace dyno
 	CapillaryWave<TDataType>::CapillaryWave(std::string name)
 		: Node()
 	{
+		auto capillaryWave = std::make_shared<PointSet<TDataType>>();
+		this->currentTopology()->setDataPtr(capillaryWave);
 		/*
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->currentPosition()->connect(integrator->inPosition());
@@ -90,6 +92,7 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetStates()
 	{
+
 		/*
 		ParticleSystem<TDataType>::resetStates();
 

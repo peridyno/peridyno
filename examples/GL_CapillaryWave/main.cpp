@@ -19,10 +19,10 @@ void CreateScene()
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
 	//root->loadCube(Vec3f(0), Vec3f(10), 0.005f, true);
-	root->loadShpere(Vec3f(0.5, 0.7f, 0.5), 0.08f, 0.005f, false, true);
+	//root->loadShpere(Vec3f(0.5, 0.7f, 0.5), 0.08f, 0.005f, false, true);
 
 	std::shared_ptr<CapillaryWave<DataType3f>> cloth = std::make_shared<CapillaryWave<DataType3f>>();
-	cloth->loadParticles("../../data/cloth/cloth1.obj");
+	cloth->loadParticles("../../data/cloth/cloth.obj");
 	//cloth->loadSurface("../../data/cloth/cloth1.obj");
 
 	//root->addParticleSystem(cloth);

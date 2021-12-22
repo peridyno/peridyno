@@ -55,14 +55,6 @@ namespace dyno {
 			*/
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
-		/**
-		 * @brief Neighboring particles
-		 * 
-		 */
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
-
-		//DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
-
 	public:
 
 

@@ -1,7 +1,7 @@
 #pragma once
-#include "ParticleSystem/ParticleSystem.h"
+//#include "ParticleSystem/ParticleSystem.h"
 #include "Peridynamics/NeighborData.h"
-
+#include "Node.h"
 namespace dyno
 {
 	/*!
@@ -37,11 +37,6 @@ namespace dyno
 		 * @brief Particle velocity
 		 */
 		DEF_EMPTY_CURRENT_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
-
-		/**
-		 * @brief Particle force
-		 */
-		DEF_EMPTY_CURRENT_ARRAY(Force, Coord, DeviceType::GPU, "Force on each particle");
 
 	protected:
 		void resetStates() override;
