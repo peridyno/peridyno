@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "Module.h"
+#include "FCallbackFunc.h"
 
 namespace dyno
 {
@@ -100,9 +101,12 @@ namespace dyno
 
 	void FBase::update()
 	{
-		if (!this->isEmpty() && callbackFunc != nullptr)
+		if (!this->isEmpty())
 		{
-			callbackFunc();
+			for each (auto func in mCallbackFunc)
+			{
+				func->update();
+			}
 		}
 
 		auto& sinks = this->getSinks();
@@ -114,6 +118,14 @@ namespace dyno
 				var->update();
 			}
 		}
+	}
+
+	void FBase::attach(std::shared_ptr<FCallBackFunc> func)
+	{
+		//Add the current field as one of the input to the callback function
+		func->addInput(this);
+
+		mCallbackFunc.push_back(func);
 	}
 
 	bool FBase::isModified()
@@ -144,6 +156,11 @@ namespace dyno
 		{
 			parent->attachField(this, name, description, false);
 		}
+	}
+
+	FBase::~FBase()
+	{
+		mCallbackFunc.clear();
 	}
 
 	FieldTypeEnum FBase::getFieldType()

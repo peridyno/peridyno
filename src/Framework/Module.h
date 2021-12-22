@@ -24,6 +24,7 @@
 #include "DataTypes.h"
 #include "DeclareEnum.h"
 #include "DeclareField.h"
+#include "FCallbackFunc.h"
 #include "FieldTypes.h"
 
 namespace dyno
