@@ -52,11 +52,6 @@ namespace dyno
 		}
 		infile.close();
 
-		DArray<Coord> m_coords2;
-		m_coords2.resize(1);
-
-		m_coords.resize(1);
-
 		std::cout << "Total number of particles: " << vertList.size() << std::endl;
 
 		setPoints(vertList);
@@ -78,7 +73,7 @@ namespace dyno
 	void PointSet<TDataType>::setPoints(std::vector<Coord>& pos)
 	{
 		//printf("%d\n", pos.size());
-		m_coords.resize(1);
+
 		m_coords.resize(pos.size());
 		m_coords.assign(pos);
 

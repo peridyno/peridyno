@@ -21,8 +21,8 @@ namespace dyno
 	CapillaryWave<TDataType>::CapillaryWave(std::string name)
 		: Node()
 	{
-		auto capillaryWave = std::make_shared<PointSet<TDataType>>();
-		this->currentTopology()->setDataPtr(capillaryWave);
+		auto ptSet = std::make_shared<PointSet<TDataType>>();
+		this->currentTopology()->setDataPtr(ptSet);
 		/*
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->currentPosition()->connect(integrator->inPosition());
@@ -45,7 +45,7 @@ namespace dyno
 		this->currentRestShape()->connect(elasticity->inRestShape());
 		//nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(elasticity);
-
+	*/
 		
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
@@ -56,7 +56,7 @@ namespace dyno
 		this->currentTopology()->setDataPtr(triSet);
 
 		mSurfaceNode->currentTopology()->setDataPtr(triSet);
-			*/
+		
 	
 	}
 
