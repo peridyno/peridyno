@@ -25,18 +25,21 @@ namespace dyno
 
 		void setSpace(Real dx, Real dz);
 
-		Real getDx() { return m_dx; }
-		Real getDz() { return m_dz; }
+		Real getDx() { return mDx; }
+		Real getDz() { return mDz; }
 
-		Coord getOrigin() { return origin; }
+		Coord getOrigin() { return mOrigin; }
+
+		uint length();
+		uint width();
 		
 		DArray2D<Real>& getHeights() { return m_height; }
 
 	protected:
-		Coord origin;
+		Coord mOrigin;
 
-		Real m_dx;
-		Real m_dz;
+		Real mDx;
+		Real mDz;
 
 		DArray2D<Real> m_height;
 	};

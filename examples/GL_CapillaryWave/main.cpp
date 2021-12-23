@@ -4,6 +4,8 @@
 
 #include <HeightField/CapillaryWave.h>
 
+#include <Mapping/HeightFieldToTriangleSet.h>
+
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
@@ -16,6 +18,15 @@ void CreateScene()
 	SceneGraph& scene = SceneGraph::getInstance();
 
 	std::shared_ptr<CapillaryWave<DataType3f>> root = scene.createNewScene<CapillaryWave<DataType3f>>();
+
+	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+	root->currentTopology()->connect(mapper->inHeightField());
+	root->graphicsPipeline()->pushModule(mapper);
+
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	sRender->setColor(Vec3f(1, 1, 0));
+	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+	root->graphicsPipeline()->pushModule(sRender);
 }
 
 int main()

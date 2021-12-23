@@ -20,10 +20,8 @@ namespace dyno
 		virtual ~CapillaryWave();
 
 	public:
-		/**
-		 * @brief Particle velocity
-		 */
-		DEF_ARRAY2D_STATE(Coord2D, Velocity, DeviceType::GPU, "Particle velocity");
+
+		DEF_ARRAY2D_STATE(Coord2D, Velocity, DeviceType::GPU, "Height field velocity");
 
 	protected:
 		void resetStates() override;

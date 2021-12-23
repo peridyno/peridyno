@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string.h>
 
+#include "Topology/HeightField.h"
+
 namespace dyno {
 
 //Round a / b to nearest higher integer value
@@ -158,6 +160,9 @@ __global__ void generateDispalcementKernel(
 OceanPatch::OceanPatch(int size, float patchSize, int windType, std::string name)
     : Node(name)
 {
+// 	auto heights = std::make_shared<HeightField<TDataType>>();
+// 	this->currentTopology()->setDataPtr(heights);
+
     std::ifstream input("windparam.txt", std::ios::in);
     for (int i = 0; i <= 12; i++)
     {

@@ -116,17 +116,26 @@ namespace dyno {
 
 		DYN_FUNC inline T operator () (const uint i, const uint j) const
 		{
-			return m_data[i + j* m_pitch];
+			char* addr = (char*)m_data;
+			addr += j * m_pitch;
+
+			return ((T*)addr)[i];
+			//return m_data[i + j* m_pitch];
 		}
 
 		DYN_FUNC inline T& operator () (const uint i, const uint j)
 		{
-			return m_data[i + j* m_pitch];
+			char* addr = (char*)m_data;
+			addr += j * m_pitch;
+
+			return ((T*)addr)[i];
+
+			//return m_data[i + j* m_pitch];
 		}
 
 		DYN_FUNC inline int index(const uint i, const uint j) const
 		{
-			return i + j * m_pitch;
+			return i + j * m_nx;
 		}
 
 		DYN_FUNC inline T operator [] (const uint id) const

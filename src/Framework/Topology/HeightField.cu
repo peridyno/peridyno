@@ -11,6 +11,13 @@ namespace dyno
 	HeightField<TDataType>::HeightField()
 		: TopologyModule()
 	{
+		mDx = Real(0.1);
+		mDz = Real(0.1);
+
+		m_height.resize(128, 128);
+		m_height.reset();
+
+		mOrigin = Coord(-mDx * 64, Real(0), -mDz * 64);
 	}
 
 	template<typename TDataType>
@@ -21,8 +28,20 @@ namespace dyno
 	template<typename TDataType>
 	void HeightField<TDataType>::setSpace(Real dx, Real dz)
 	{
-		m_dx = dx;
-		m_dz = dz;
+		mDx = dx;
+		mDz = dz;
+	}
+
+	template<typename TDataType>
+	uint HeightField<TDataType>::length()
+	{
+		return m_height.nx();
+	}
+
+	template<typename TDataType>
+	uint HeightField<TDataType>::width()
+	{
+		return m_height.ny();
 	}
 
 	template<typename TDataType>
