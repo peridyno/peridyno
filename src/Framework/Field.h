@@ -177,7 +177,26 @@ namespace dyno {
 			auto ref = this->getDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
+
+		void resize(uint nx, uint ny);
 	};
+
+	template<typename T, DeviceType deviceType>
+	void FArray2D<T, deviceType>::resize(uint nx, uint ny)
+	{
+		FBase* topField = this->getTopField();
+		FArray2D<T, deviceType>* derived = dynamic_cast<FArray2D<T, deviceType>*>(topField);
+
+		if (derived->m_data == nullptr)
+		{
+			derived->m_data = std::make_shared<Array2D<T, deviceType>>(nx, ny);
+		}
+		else
+		{
+			derived->m_data->resize(ny, ny);
+		}
+	}
+
 
 	/**
 	 * Define field for Array3D
