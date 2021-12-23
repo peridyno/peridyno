@@ -172,6 +172,11 @@ namespace dyno {
 		typedef FArray2D<T, deviceType>			FieldType;
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray2D);
+
+		inline uint getElementCount() override {
+			auto ref = this->getDataPtr();
+			return ref == nullptr ? 0 : ref->size();
+		}
 	};
 
 	/**

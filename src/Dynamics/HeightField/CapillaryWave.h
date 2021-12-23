@@ -1,7 +1,6 @@
 #pragma once
-//#include "ParticleSystem/ParticleSystem.h"
-#include "Peridynamics/NeighborData.h"
 #include "Node.h"
+
 namespace dyno
 {
 	/*!
@@ -14,36 +13,23 @@ namespace dyno
 		DECLARE_CLASS_1(CapillaryWave, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
-		typedef TPair<TDataType> NPair;
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 4> Coord4D;
 
 		CapillaryWave(std::string name = "default");
 		virtual ~CapillaryWave();
 
-		
-		void loadParticles(std::string filename);
-
-		void loadSurface(std::string filename);
-
-		std::shared_ptr<Node> getSurface();
-
 	public:
-		DEF_VAR(Real, Horizon, 0.01, "Horizon");
-
-		DEF_EMPTY_CURRENT_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
-
-
 		/**
 		 * @brief Particle velocity
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
+		DEF_ARRAY2D_STATE(Coord2D, Velocity, DeviceType::GPU, "Particle velocity");
 
 	protected:
 		void resetStates() override;
 
-		void updateTopology() override;
+		void updateStates() override;
 
-	private:
-		std::shared_ptr<Node> mSurfaceNode;
+		void updateTopology() override;
 	};
 }
