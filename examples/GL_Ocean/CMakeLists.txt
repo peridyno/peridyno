@@ -1,5 +1,5 @@
 if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(PROJECT_NAME GL_CapillaryWave)
+    set(PROJECT_NAME GL_Ocean)
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
 
     file(

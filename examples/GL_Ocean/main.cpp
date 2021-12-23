@@ -2,7 +2,7 @@
 
 #include <SceneGraph.h>
 
-#include <HeightField/CapillaryWave.h>
+#include <HeightField/OceanPatch.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -15,7 +15,7 @@ void CreateScene()
 {
 	SceneGraph& scene = SceneGraph::getInstance();
 
-	std::shared_ptr<CapillaryWave<DataType3f>> root = scene.createNewScene<CapillaryWave<DataType3f>>();
+ 	std::shared_ptr<OceanPatch> root = scene.createNewScene<OceanPatch>(512, 512.0f);
 }
 
 int main()
