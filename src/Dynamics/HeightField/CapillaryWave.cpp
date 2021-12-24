@@ -1,7 +1,7 @@
 #include "CapillaryWave.h"
 
 #include "Topology/HeightField.h"
-
+#include "CapillaryWaveModule.h"
 namespace dyno
 {
 	IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
@@ -10,6 +10,10 @@ namespace dyno
 	CapillaryWave<TDataType>::CapillaryWave(std::string name)
 		: Node()
 	{
+		auto capillaryWaveModule = std::make_shared<CapillaryWaveModule<TDataType>>();
+		this->statePosition()->connect(capillaryWaveModule->statePosition());
+		this->animationPipeline()->pushModule(capillaryWaveModule);
+	
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		this->currentTopology()->setDataPtr(heights);
 	}
@@ -24,6 +28,10 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateTopology()
 	{
+
+		auto heights = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+
+		heights->getHeights().assign(this->statePosition()->getData());
 	}
 
 

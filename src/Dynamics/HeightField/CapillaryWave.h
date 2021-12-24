@@ -21,7 +21,7 @@ namespace dyno
 
 	public:
 
-		DEF_ARRAY2D_STATE(Coord2D, Velocity, DeviceType::GPU, "Height field velocity");
+		DEF_ARRAY2D_STATE(Coord2D, Position, DeviceType::GPU, "Height field velocity");
 
 	protected:
 		void resetStates() override;
