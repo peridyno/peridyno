@@ -257,8 +257,10 @@ void OceanPatch<TDataType>::resetStates()
     //cudaCheck(cudaGraphicsGLRegisterImage(&m_cuda_gradient_texture, m_gradient_texture, GL_TEXTURE_2D, cudaGraphicsMapFlagsWriteDiscard));
 
 	auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+	Real h = m_realPatchSize / mResolution;
 	topo->setExtents(mResolution, mResolution);
-	topo->setGridSpacing(m_realPatchSize / mResolution);
+	topo->setGridSpacing(h);
+	topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
 }
 
 float t = 0.0f;

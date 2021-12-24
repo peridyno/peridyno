@@ -23,12 +23,12 @@ namespace dyno
 		void scale(Coord s);
 		void translate(Coord t);
 
-		void setSpace(Real dx, Real dz);
+//		void setSpace(Real dx, Real dz);
 
 		void setExtents(uint nx, uint ny);
 
-		Real getDx() { return mDx; }
-		Real getDz() { return mDz; }
+// 		Real getDx() { return mDx; }
+// 		Real getDz() { return mDz; }
 
 		Real getGridSpacing() { return mGridSpacing; }
 		void setGridSpacing(Real h) { mGridSpacing = h; }
@@ -44,8 +44,8 @@ namespace dyno
 	protected:
 		Coord mOrigin;
 
-		Real mDx;
-		Real mDz;
+// 		Real mDx;
+// 		Real mDz;
 
 		Real mGridSpacing;
 

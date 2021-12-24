@@ -47,40 +47,18 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Ocean<TDataType>::initialize()
-	{
-		initWholeRegion();
-	}
-
-
-	template<typename TDataType>
 	void Ocean<TDataType>::resetStates()
 	{
 		m_patch->initialize();
-		this->initialize();
-	}
 
+		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
 
+		auto patch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());
 
-	template<typename TDataType>
-	void Ocean<TDataType>::initWholeRegion()
-	{
-		Vec4f* wave = new Vec4f[m_oceanWidth*m_oceanHeight];
-
-		for (int j = 0; j < m_oceanHeight; j++)
-		{
-			for (int i = 0; i < m_oceanWidth; i++)
-			{
-				Vec4f vij;
-				vij.x = (float)i*m_virtualGridSize;
-				vij.y = (float)0;
-				vij.z = (float)j*m_virtualGridSize;
-				vij.w = (float)1;
-				wave[j*m_oceanWidth + i] = vij;
-			}
-		}
-
-		delete[] wave;
+		float h = patch->getGridSpacing();
+		topo->setExtents(Nx * patch->width(), Ny * patch->height());
+		topo->setGridSpacing(h);
+		topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
 	}
 
 	__global__ void O_InitOceanWave(
@@ -116,6 +94,7 @@ namespace dyno
 	void Ocean<TDataType>::animate(float dt)
 	{
 		m_patch->animate(m_eclipsedTime);
+		m_patch->update();
 
 		m_eclipsedTime += dt;
 

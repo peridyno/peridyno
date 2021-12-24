@@ -22,10 +22,12 @@ void CreateScene()
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 	root->currentTopology()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
-	mapper->varFScale()->setValue(0.01);
+
+	mapper->varScale()->setValue(0.01);
+	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setColor(Vec3f(0, 0.2, 1.0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	root->graphicsPipeline()->pushModule(sRender);
 }

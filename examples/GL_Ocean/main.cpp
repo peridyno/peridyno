@@ -20,12 +20,14 @@ void CreateScene()
  	std::shared_ptr<Ocean<DataType3f>> root = scene.createNewScene<Ocean<DataType3f>>();
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-	mapper->varFScale()->setValue(0.01);
+	mapper->varScale()->setValue(0.01);
+	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
+
 	root->currentTopology()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setColor(Vec3f(0, 0.2, 1.0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	root->graphicsPipeline()->pushModule(sRender);
 }

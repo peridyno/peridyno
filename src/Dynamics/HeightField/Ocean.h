@@ -1,7 +1,5 @@
 #pragma once
-#include "types.h"
 #include "OceanPatch.h"
-#include "CapillaryWave.h"
 
 namespace dyno
 {
@@ -11,10 +9,6 @@ namespace dyno
 	public:
 		Ocean();
 		~Ocean();
-
-		void initialize();
-
-		void initWholeRegion();
 
 		void animate(float dt);
 
@@ -43,6 +37,8 @@ namespace dyno
 
 	//	void addOceanTrails(vertex* oceanVertex);
 
+		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "");
+
 	protected:
 		void resetStates() override;
 		void updateStates() override;
@@ -52,10 +48,10 @@ namespace dyno
 		float m_choppiness = 1.0f;
 
 		//初始风级
-		int m_windType = 12;
+		int m_windType = 8;
 
 		//fft纹理分辨率
-		int m_fft_size = 128;
+		int m_fft_size = 512;
 
 		//fft纹理贴图的物理长度 单位米
 		float m_fft_real_size = 2.0f;
@@ -68,12 +64,12 @@ namespace dyno
 
 		float m_eclipsedTime;
 
-		float m_patchSize = 256;
+		float m_patchSize = 512;
 		float m_virtualGridSize;
 		float m_realGridSize;
 
-		int Nx = 1;
-		int Ny = 1;
+		int Nx = 4;
+		int Ny = 4;
 
 	private:
 

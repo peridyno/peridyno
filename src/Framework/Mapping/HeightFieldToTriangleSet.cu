@@ -14,6 +14,7 @@ namespace dyno
 		DArray2D<Coord> displacement,
 		Coord origin,
 		Real h,
+		Coord translation,
 		Real scale)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -24,7 +25,7 @@ namespace dyno
 		Coord di = displacement(i, j);
 		Coord v = Coord(origin.x + i * h + di.x, origin.y + di.y, origin.z + j * h + di.z);
 
-		vertices[i + j * displacement.nx()] = scale * v;
+		vertices[i + j * displacement.nx()] = scale * v + translation;
 	}
 
 	template<typename Triangle>
@@ -76,7 +77,8 @@ namespace dyno
 
 		auto& disp = heights->getDisplacement();
 
-		Real scale = this->varFScale()->getData();
+		Real scale = this->varScale()->getData();
+		Coord translation = this->varTranslation()->getData();
 
 		uint2 dim;
 		dim.x = disp.nx();
@@ -87,6 +89,7 @@ namespace dyno
 			disp,
 			heights->getOrigin(),
 			heights->getGridSpacing(),
+			translation,
 			scale);
 
 		dim.x = disp.nx() - 1;
