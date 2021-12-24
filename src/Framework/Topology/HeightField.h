@@ -25,15 +25,21 @@ namespace dyno
 
 		void setSpace(Real dx, Real dz);
 
+		void setExtents(uint nx, uint ny);
+
 		Real getDx() { return mDx; }
 		Real getDz() { return mDz; }
 
-		Coord getOrigin() { return mOrigin; }
+		Real getGridSpacing() { return mGridSpacing; }
+		void setGridSpacing(Real h) { mGridSpacing = h; }
 
-		uint length();
+		Coord getOrigin() { return mOrigin; }
+		void setOrigin(Coord p) { mOrigin = p; }
+
 		uint width();
-		
-		DArray2D<Real>& getHeights() { return m_height; }
+		uint height();
+
+		DArray2D<Coord>& getDisplacement() { return mDisplacement; }
 
 	protected:
 		Coord mOrigin;
@@ -41,7 +47,9 @@ namespace dyno
 		Real mDx;
 		Real mDz;
 
-		DArray2D<Real> m_height;
+		Real mGridSpacing;
+
+		DArray2D<Coord> mDisplacement;
 	};
 }
 

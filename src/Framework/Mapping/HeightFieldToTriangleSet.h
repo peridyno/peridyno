@@ -22,6 +22,8 @@ namespace dyno
 		DEF_INSTANCE_IN(HeightField<TDataType>, HeightField, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 
+		DEF_VAR(Real, FScale, Real(1), "");
+
 	private:
 		TriangleSet<TDataType> mStandardSphere;
 		TriangleSet<TDataType> mStandardCapsule;

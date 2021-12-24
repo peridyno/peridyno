@@ -11,21 +11,20 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void SetupVerticesForHeightField(
 		DArray<Coord> vertices,
-		DArray2D<Real> height,
+		DArray2D<Coord> displacement,
 		Coord origin,
-		Real dx,
-		Real dz)
+		Real h,
+		Real scale)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
 
-		if (i >= height.nx() || j >= height.ny()) return;
+		if (i >= displacement.nx() || j >= displacement.ny()) return;
 
-		Real h = height(i, j);
+		Coord di = displacement(i, j);
+		Coord v = Coord(origin.x + i * h + di.x, origin.y + di.y, origin.z + j * h + di.z);
 
-		Coord v = Coord(origin.x + i * dx, origin.y + h, origin.z + j * dz);
-
-		vertices[i + j * height.nx()] = v;
+		vertices[i + j * displacement.nx()] = scale * v;
 	}
 
 	template<typename Triangle>
@@ -68,33 +67,35 @@ namespace dyno
 		auto& vertices = triSet->getPoints();
 		auto& indices = triSet->getTriangles();
 
-		int numOfVertices = heights->length() * heights->width();
-		int numOfTriangles = 2 * (heights->length() - 1) * (heights->width() - 1);
+		int numOfVertices = heights->width() * heights->height();
+		int numOfTriangles = 2 * (heights->width() - 1) * (heights->height() - 1);
 
 		vertices.resize(numOfVertices);
 		indices.resize(numOfTriangles);
 
 
-		auto height = heights->getHeights();
+		auto& disp = heights->getDisplacement();
+
+		Real scale = this->varFScale()->getData();
 
 		uint2 dim;
-		dim.x = height.nx();
-		dim.y = height.ny();
+		dim.x = disp.nx();
+		dim.y = disp.ny();
 		cuExecute2D(dim,
 			SetupVerticesForHeightField,
 			vertices,
-			height,
+			disp,
 			heights->getOrigin(),
-			heights->getDx(),
-			heights->getDz());
+			heights->getGridSpacing(),
+			scale);
 
-		dim.x = height.nx() - 1;
-		dim.y = height.ny() - 1;
+		dim.x = disp.nx() - 1;
+		dim.y = disp.ny() - 1;
 		cuExecute2D(dim,
 			SetupTrianglesForHeightField,
 			indices,
-			heights->length(),
-			heights->width());
+			heights->width(),
+			heights->height());
 
 		return true;
 	}

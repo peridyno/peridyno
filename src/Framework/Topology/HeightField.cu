@@ -14,10 +14,12 @@ namespace dyno
 		mDx = Real(0.1);
 		mDz = Real(0.1);
 
-		m_height.resize(128, 128);
-		m_height.reset();
+		mDisplacement.resize(128, 128);
+		mDisplacement.reset();
 
 		mOrigin = Coord(-mDx * 64, Real(0), -mDz * 64);
+
+		mGridSpacing = Real(1);
 	}
 
 	template<typename TDataType>
@@ -33,15 +35,22 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	uint HeightField<TDataType>::length()
+	void HeightField<TDataType>::setExtents(uint nx, uint ny)
 	{
-		return m_height.nx();
+		mDisplacement.resize(nx, ny);
+		mDisplacement.reset();
 	}
 
 	template<typename TDataType>
 	uint HeightField<TDataType>::width()
 	{
-		return m_height.ny();
+		return mDisplacement.nx();
+	}
+
+	template<typename TDataType>
+	uint HeightField<TDataType>::height()
+	{
+		return mDisplacement.ny();
 	}
 
 	template<typename TDataType>

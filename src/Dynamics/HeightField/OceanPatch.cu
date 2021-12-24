@@ -156,14 +156,14 @@ __global__ void generateDispalcementKernel(
     Dzt[id] = ky * idoth;
 }
 
-//
-OceanPatch::OceanPatch(int size, float patchSize, int windType, std::string name)
+template<typename TDataType>
+OceanPatch<TDataType>::OceanPatch(int size, float patchSize, int windType, std::string name)
     : Node(name)
 {
-// 	auto heights = std::make_shared<HeightField<TDataType>>();
-// 	this->currentTopology()->setDataPtr(heights);
+	auto heights = std::make_shared<HeightField<TDataType>>();
+	this->currentTopology()->setDataPtr(heights);
 
-    std::ifstream input("windparam.txt", std::ios::in);
+    std::ifstream input("../../data/windparam.txt", std::ios::in);
     for (int i = 0; i <= 12; i++)
     {
         WindParam param;
@@ -176,43 +176,48 @@ OceanPatch::OceanPatch(int size, float patchSize, int windType, std::string name
         m_params.push_back(param);
     }
 
-    m_size = size;
+    mResolution = size;
 
-    m_spectrumW = size + 1;
-    m_spectrumH = size + 4;
+    mSpectrumWidth = size + 1;
+    mSpectrumHeight = size + 4;
 
     m_windType      = windType;
     m_realPatchSize = patchSize;
     m_windSpeed     = m_params[m_windType].windSpeed;
     A               = m_params[m_windType].A;
     m_maxChoppiness = m_params[m_windType].choppiness;
-    m_choppiness    = m_params[m_windType].choppiness;
+    mChoppiness    = m_params[m_windType].choppiness;
     m_globalShift   = m_params[m_windType].global;
 
     m_h0 = NULL;
     m_ht = NULL;
 
-    initialize();
+    //initialize();
 }
 
-OceanPatch::OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global)
+template<typename TDataType>
+OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global)
 {
-    m_size          = size;
-    m_spectrumW     = size + 1;
-    m_spectrumH     = size + 4;
-    m_realPatchSize = m_size;
+	auto heights = std::make_shared<HeightField<TDataType>>();
+	this->currentTopology()->setDataPtr(heights);
+
+    mResolution          = size;
+    mSpectrumWidth     = size + 1;
+    mSpectrumHeight     = size + 4;
+    m_realPatchSize = mResolution;
     windDir         = wind_dir;
     m_windSpeed     = windSpeed;
     A               = A_p;
     m_maxChoppiness = max_choppiness;
-    m_choppiness    = 1.0f;
+    mChoppiness    = 1.0f;
     m_globalShift   = global;
     m_h0            = NULL;
     m_ht            = NULL;
-    initialize();
+    //initialize();
 }
 
-OceanPatch::~OceanPatch()
+template<typename TDataType>
+OceanPatch<TDataType>::~OceanPatch()
 {
     cudaFree(m_h0);
     cudaFree(m_ht);
@@ -226,11 +231,12 @@ OceanPatch::~OceanPatch()
     //cudaCheck(cudaGraphicsUnregisterResource(m_cuda_gradient_texture));
 }
 
-void OceanPatch::resetStates()
+template<typename TDataType>
+void OceanPatch<TDataType>::resetStates()
 {
-    cufftPlan2d(&fftPlan, m_size, m_size, CUFFT_C2C);
+    cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
 
-    int spectrumSize = m_spectrumW * m_spectrumH * sizeof(Vec2f);
+    int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
     cuSafeCall(cudaMalloc(( void** )&m_h0, spectrumSize));
     //synchronCheck;
     Vec2f* host_h0 = ( Vec2f* )malloc(spectrumSize);
@@ -238,21 +244,26 @@ void OceanPatch::resetStates()
 
     cuSafeCall(cudaMemcpy(m_h0, host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
-    int outputSize = m_size * m_size * sizeof(Vec2f);
+    int outputSize = mResolution * mResolution * sizeof(Vec2f);
     cudaMalloc(( void** )&m_ht, outputSize);
     cudaMalloc(( void** )&m_Dxt, outputSize);
     cudaMalloc(( void** )&m_Dzt, outputSize);
-    cudaMalloc(( void** )&m_displacement, m_size * m_size * sizeof(Vec4f));
-    cuSafeCall(cudaMalloc(( void** )&m_gradient, m_size * m_size * sizeof(Vec4f)));
+    cudaMalloc(( void** )&m_displacement, mResolution * mResolution * sizeof(Vec4f));
+    cuSafeCall(cudaMalloc(( void** )&m_gradient, mResolution * mResolution * sizeof(Vec4f)));
 
     //gl_utility::createTexture(m_size, m_size, GL_RGBA32F, m_displacement_texture, GL_REPEAT, GL_LINEAR, GL_LINEAR, GL_RGBA, GL_FLOAT);
     //cudaCheck(cudaGraphicsGLRegisterImage(&m_cuda_displacement_texture, m_displacement_texture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard));
     //gl_utility::createTexture(m_size, m_size, GL_RGBA32F, m_gradient_texture, GL_REPEAT, GL_LINEAR, GL_LINEAR, GL_RGBA, GL_FLOAT);
     //cudaCheck(cudaGraphicsGLRegisterImage(&m_cuda_gradient_texture, m_gradient_texture, GL_TEXTURE_2D, cudaGraphicsMapFlagsWriteDiscard));
+
+	auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+	topo->setExtents(mResolution, mResolution);
+	topo->setGridSpacing(m_realPatchSize / mResolution);
 }
 
 float t = 0.0f;
-void OceanPatch::updateStates()
+template<typename TDataType>
+void OceanPatch<TDataType>::updateStates()
 {
 	t += 0.016f;
 	this->animate(t);
@@ -280,74 +291,91 @@ __global__ void O_UpdateDisplacement(
     }
 }
 
-__global__ void O_UpdateGradient(Vec4f* displacement, Vec4f* gradiant, int patchSize)
-{
-    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-    unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
-    if (i >= patchSize || j >= patchSize)
-        return;
-    int i_minus_one = (i - 1 + patchSize) % patchSize;
-    int i_plus_one  = (i + 1) % patchSize;
-    int j_minus_one = (j - 1 + patchSize) % patchSize;
-    int j_plus_one  = (j + 1) % patchSize;
-
-    Vec4f Dx                   = (displacement[i_plus_one + j * patchSize] - displacement[i_minus_one + j * patchSize]) / 2;
-    Vec4f Dz                   = (displacement[i + j_plus_one * patchSize] - displacement[i + j_minus_one * patchSize]) / 2;
-    float  la                   = 0.8f;
-    float  Jxx                  = 1 + Dx.x * la;
-    float  Jyy                  = 1 + Dz.z * la;
-    float  Jyx                  = Dx.z * la;
-    float  Jxy                  = Dz.x * la;
-    float  J                    = Jxx * Jyy - Jyx * Jxy;
-    float  breakArea            = fminf(fmaxf((0.7f - J) * 0.5f, 0.0f), 1.0f);
-    float  lastZ                = gradiant[j * patchSize + i].z;
-    float  currentZ             = (lastZ + breakArea) * 0.8f;
-    gradiant[j * patchSize + i] = Vec4f(Dx.y, Dz.y, currentZ, J);
-    //gradiant[i + j*patchSize] = make_float4(Dx.x, Dx.z, Dz.x, Dz.z);
-}
-
-void OceanPatch::animate(float t)
+template<typename TDataType>
+void OceanPatch<TDataType>::animate(float t)
 {
     t = m_fft_flow_speed * t;
     dim3 block(8, 8, 1);
-    dim3 grid(cuda_iDivUp(m_size, block.x), cuda_iDivUp(m_size, block.y), 1);
-    generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, m_spectrumW, m_size, m_size, t, m_realPatchSize);
+    dim3 grid(cuda_iDivUp(mResolution, block.x), cuda_iDivUp(mResolution, block.y), 1);
+    generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
     cuSynchronize();
-    generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, m_size, m_size, m_realPatchSize);
+    generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
     cuSynchronize();
 
     cufftExecC2C(fftPlan, (float2*)m_ht, (float2*)m_ht, CUFFT_INVERSE);
     cufftExecC2C(fftPlan, (float2*)m_Dxt, (float2*)m_Dxt, CUFFT_INVERSE);
     cufftExecC2C(fftPlan, (float2*)m_Dzt, (float2*)m_Dzt, CUFFT_INVERSE);
 
-    int  x = (m_size + 16 - 1) / 16;
-    int  y = (m_size + 16 - 1) / 16;
+    int  x = (mResolution + 16 - 1) / 16;
+    int  y = (mResolution + 16 - 1) / 16;
     dim3 threadsPerBlock(16, 16);
     dim3 blocksPerGrid(x, y);
-    O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, m_size);
-    cuSynchronize();
-    O_UpdateGradient<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_gradient, m_size);
+    O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, mResolution);
     cuSynchronize();
 }
 
-float OceanPatch::getMaxChoppiness()
+template <typename Coord>
+__global__ void O_UpdateTopology(
+	DArray2D<Coord> displacement,
+	Vec4f* dis,
+	float choppiness)
+{
+	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
+	if (i < displacement.nx() && j < displacement.ny())
+	{
+		int id = displacement.index(i, j);
+
+		Vec4f Dij = dis[id];
+
+		Coord v;
+		v.x = choppiness * Dij.x;
+		v.y = Dij.y;
+		v.z = choppiness*Dij.z;
+
+		displacement(i, j) = v;
+	}
+}
+
+template<typename TDataType>
+void OceanPatch<TDataType>::updateTopology()
+{
+	auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+	
+	auto& shifts = topo->getDisplacement();
+		
+	uint2 extent;
+	extent.x = shifts.nx();
+	extent.y = shifts.ny();
+	cuExecute2D(extent,
+		O_UpdateTopology,
+		shifts,
+		m_displacement,
+		mChoppiness);
+}
+
+
+template<typename TDataType>
+float OceanPatch<TDataType>::getMaxChoppiness()
 {
     return m_maxChoppiness;
 }
 
-float OceanPatch::getChoppiness()
+template<typename TDataType>
+float OceanPatch<TDataType>::getChoppiness()
 {
-    return m_choppiness;
+    return mChoppiness;
 }
 
-void OceanPatch::generateH0(Vec2f* h0)
+template<typename TDataType>
+void OceanPatch<TDataType>::generateH0(Vec2f* h0)
 {
-    for (unsigned int y = 0; y <= m_size; y++)
+    for (unsigned int y = 0; y <= mResolution; y++)
     {
-        for (unsigned int x = 0; x <= m_size; x++)
+        for (unsigned int x = 0; x <= mResolution; x++)
         {
-            float kx = (-( int )m_size / 2.0f + x) * (2.0f * CUDART_PI_F / m_realPatchSize);
-            float ky = (-( int )m_size / 2.0f + y) * (2.0f * CUDART_PI_F / m_realPatchSize);
+            float kx = (-( int )mResolution / 2.0f + x) * (2.0f * CUDART_PI_F / m_realPatchSize);
+            float ky = (-( int )mResolution / 2.0f + y) * (2.0f * CUDART_PI_F / m_realPatchSize);
 
             float P = sqrtf(phillips(kx, ky, windDir, m_windSpeed, A, dirDepend));
 
@@ -364,14 +392,15 @@ void OceanPatch::generateH0(Vec2f* h0)
             float h0_re = Er * P * CUDART_SQRT_HALF_F;
             float h0_im = Ei * P * CUDART_SQRT_HALF_F;
 
-            int i   = y * m_spectrumW + x;
+            int i   = y * mSpectrumWidth + x;
             h0[i].x = h0_re;
             h0[i].y = h0_im;
         }
     }
 }
 
-float OceanPatch::phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend)
+template<typename TDataType>
+float OceanPatch<TDataType>::phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend)
 {
     float k_squared = Kx * Kx + Ky * Ky;
 
@@ -402,7 +431,8 @@ float OceanPatch::phillips(float Kx, float Ky, float Vdir, float V, float A, flo
     return phillips;
 }
 
-float OceanPatch::gauss()
+template<typename TDataType>
+float OceanPatch<TDataType>::gauss()
 {
     float u1 = rand() / ( float )RAND_MAX;
     float u2 = rand() / ( float )RAND_MAX;
@@ -415,4 +445,5 @@ float OceanPatch::gauss()
     return sqrtf(-2 * logf(u1)) * cosf(2 * CUDART_PI_F * u2);
 }
 
+DEFINE_CLASS(OceanPatch);
 }  // namespace PhysIKA

@@ -15,10 +15,11 @@ struct WindParam
     float global;
 };
 
+template<typename TDataType>
 class OceanPatch : public Node
 {
 public:
-    OceanPatch(int size, float patchSize, int windType = 8, std::string name = "default");
+    OceanPatch(int size, float patchSize, int windType = 1, std::string name = "default");
     OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global);
     ~OceanPatch();
 
@@ -36,7 +37,7 @@ public:
     //返回网格分辨率
     float getGridSize()
     {
-        return m_size;
+        return mResolution;
     }
     float getGlobalShift()
     {
@@ -44,11 +45,11 @@ public:
     }
     float getGridLength()
     {
-        return m_realPatchSize / m_size;
+        return m_realPatchSize / mResolution;
     }
     void setChoppiness(float value)
     {
-        m_choppiness = value;
+        mChoppiness = value;
     }
 
 	Vec2f* getHeightField()
@@ -76,18 +77,19 @@ protected:
 	void resetStates() override;
 
 	void updateStates() override;
+	void updateTopology() override;
 
 private:
     void  generateH0(Vec2f* h0);
     float gauss();
     float phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend);
 
-    int m_size;
+    int mResolution;
 
-    int m_spectrumW;  //频谱宽度
-    int m_spectrumH;  //频谱长度
+    int mSpectrumWidth;  //频谱宽度
+    int mSpectrumHeight;  //频谱长度
 
-    float m_choppiness;  //设置浪尖的尖锐性，范围0~1
+    float mChoppiness;  //设置浪尖的尖锐性，范围0~1
 
     std::vector<WindParam> m_params;  //不同风力等级下的FFT变换参数
 
