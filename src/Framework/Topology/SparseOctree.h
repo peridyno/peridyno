@@ -98,6 +98,13 @@ namespace dyno {
 		int childs[8];
 	};
 
+	struct NodeCmp
+	{
+		DYN_FUNC bool operator()(const OctreeNode& A, const OctreeNode& B)
+		{
+			return A > B;
+		}
+	};
 
 	template<typename TDataType>
 	class SparseOctree
@@ -119,6 +126,8 @@ namespace dyno {
 
 		void construct(DArray<Coord>& points, Real radius);
 		void construct(DArray<AABB>& aabb);
+
+		void construct(DArray<OctreeNode>& nodes);
 
 		int getLevelMax() { return m_level_max; }
 
