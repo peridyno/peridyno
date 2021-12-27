@@ -17,6 +17,8 @@
 #include <iostream>
 #include "FBase.h"
 #include "Array/Array.h"
+#include "Array/Array2D.h"
+#include "Array/Array3D.h"
 #include "Array/ArrayList.h"
 
 namespace dyno {
@@ -157,6 +159,34 @@ namespace dyno {
 	template<typename T>
 	using DeviceArrayField = FArray<T, DeviceType::GPU>;
 
+
+	/**
+	 * Define field for Array2D
+	 */
+	template<typename T, DeviceType deviceType>
+	class FArray2D : public FBase
+	{
+	public:
+		typedef T								VarType;
+		typedef Array2D<T, deviceType>			DataType;
+		typedef FArray2D<T, deviceType>			FieldType;
+
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArray2D);
+	};
+
+	/**
+	 * Define field for Array3D
+	 */
+	template<typename T, DeviceType deviceType>
+	class FArray3D : public FBase
+	{
+	public:
+		typedef T								VarType;
+		typedef Array3D<T, deviceType>			DataType;
+		typedef FArray3D<T, deviceType>			FieldType;
+
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArray3D);
+	};
 
 	/**
 	 * Define field for Array

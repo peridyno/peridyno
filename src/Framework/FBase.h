@@ -21,6 +21,7 @@
 
 namespace dyno {
 	class OBase;
+	class FCallBackFunc;
 
 	enum FieldTypeEnum
 	{
@@ -38,11 +39,10 @@ namespace dyno {
 */
 class FBase
 {
-	using CallBackFunc = std::function<void()>;
 public:
 	FBase() : m_name("default"), m_description("") {};
 	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, OBase* parent = nullptr);
-	virtual ~FBase() {};
+	virtual ~FBase();
 
 	virtual uint getElementCount() = 0;
 	virtual const std::string getTemplateName() { return std::string(""); }
@@ -91,7 +91,7 @@ public:
 	virtual bool isEmpty() = 0;
 	virtual void update();
 
-	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
+	void attach(std::shared_ptr<FCallBackFunc> func);
 
 protected:
 	void setSource(FBase* source);
@@ -121,7 +121,7 @@ private:
 
 	std::vector<FBase*> mSinks;
 
-	CallBackFunc callbackFunc;
+	std::vector<std::shared_ptr<FCallBackFunc>> mCallbackFunc;
 };
 
 #define DEFINE_FIELD_FUNC(DerivedField, Data, FieldName)						\

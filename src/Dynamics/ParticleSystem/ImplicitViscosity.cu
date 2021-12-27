@@ -76,7 +76,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ImplicitViscosity<TDataType>::constrain()
+	void ImplicitViscosity<TDataType>::constrain()
 	{
 		auto& poss = this->inPosition()->getData();
 		auto& vels = this->inVelocity()->getData();
@@ -109,8 +109,6 @@ namespace dyno
 				h,
 				dt);
 		}
-
-		return true;
 	}
 
 	DEFINE_CLASS(ImplicitViscosity);

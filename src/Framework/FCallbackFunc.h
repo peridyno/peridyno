@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Xiaowei He
+ * Copyright 2021 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,27 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module/ConstraintModule.h"
 
-namespace dyno 
+#include <vector>
+#include <functional>
+
+namespace dyno
 {
-	/**
-	 * @brief A linear damping model
-	 *
-	 * @tparam TDataType
-	 */
-	template<typename TDataType>
-	class LinearDamping : public ConstraintModule
+	class FBase;
+
+	class FCallBackFunc
 	{
-		DECLARE_CLASS_1(LinearDamping, TDataType)
 	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
+		FCallBackFunc(std::function<void()> func);
+		~FCallBackFunc() {};
 
-		LinearDamping();
-		~LinearDamping() override;
+		void update();
 
-		void constrain() override;
+		void addInput(FBase* f);
 
-	public:
-		DEF_VAR(Real, DampingCoefficient, 0.9, "");
+	private:
+		std::function<void()> mCallback;
 
-		/**
-		* @brief Particle velocity
-		*/
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+		std::vector<FBase*> mInputs;
 	};
 }

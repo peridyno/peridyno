@@ -13,35 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
-#include "Module/ConstraintModule.h"
+#include "Collision/CollisionData.h"
+
+#include "Module/ComputeModule.h"
 
 namespace dyno 
 {
-	/**
-	 * @brief A linear damping model
-	 *
-	 * @tparam TDataType
-	 */
 	template<typename TDataType>
-	class LinearDamping : public ConstraintModule
+	class ContactsUnion : public ComputeModule
 	{
-		DECLARE_CLASS_1(LinearDamping, TDataType)
+		DECLARE_CLASS_1(ContactsUnion, TDataType)
 	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
+		typedef typename TContactPair<Real> ContactPair;
 
-		LinearDamping();
-		~LinearDamping() override;
+		ContactsUnion() {};
+		~ContactsUnion() override {};
 
-		void constrain() override;
+		void compute() override;
 
 	public:
-		DEF_VAR(Real, DampingCoefficient, 0.9, "");
+		DEF_ARRAY_IN(ContactPair, ContactsA, DeviceType::GPU, "");
+		DEF_ARRAY_IN(ContactPair, ContactsB, DeviceType::GPU, "");
 
-		/**
-		* @brief Particle velocity
-		*/
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+		DEF_ARRAY_OUT(ContactPair, Contacts, DeviceType::GPU, "");
 	};
 }

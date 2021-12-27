@@ -232,12 +232,10 @@ namespace dyno
 
 	//	int iter = 0;
 	template<typename TDataType>
-	bool ElastoplasticityModule<TDataType>::constrain()
+	void ElastoplasticityModule<TDataType>::constrain()
 	{
 		this->solveElasticity();
 		this->applyPlasticity();
-
-		return true;
 	}
 
 

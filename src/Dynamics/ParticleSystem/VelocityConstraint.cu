@@ -566,7 +566,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool VelocityConstraint<TDataType>::constrain()
+	void VelocityConstraint<TDataType>::constrain()
 	{
 		Real dt = getParent()->getDt();
 
@@ -701,8 +701,6 @@ namespace dyno
 			m_separation,
 			m_smoothingLength.getData(),
 			dt);
-
-		return true;
 	}
 
 	template<typename TDataType>

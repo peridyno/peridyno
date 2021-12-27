@@ -145,11 +145,9 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool OneDimElasticityModule<TDataType>::constrain()
+	void OneDimElasticityModule<TDataType>::constrain()
 	{
 		this->solveElasticity();
-
-		return true;
 	}
 
 

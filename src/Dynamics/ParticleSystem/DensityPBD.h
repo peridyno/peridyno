@@ -21,7 +21,7 @@ namespace dyno {
 		DensityPBD();
 		~DensityPBD() override;
 
-		bool constrain() override;
+		void constrain() override;
 
 		void takeOneIteration();
 

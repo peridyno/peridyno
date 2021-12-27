@@ -377,11 +377,9 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool ElasticityModule<TDataType>::constrain()
+	void ElasticityModule<TDataType>::constrain()
 	{
 		this->solveElasticity();
-
-		return true;
 	}
 
 

@@ -25,7 +25,7 @@ namespace dyno
 		CollisionModel();
 		virtual ~CollisionModel();
 
-		virtual bool isSupport(std::shared_ptr<CollidableObject> obj) = 0;
+		virtual bool isSupport(std::shared_ptr<CollidableObject> obj) { return false; }
 
 		virtual void doCollision() = 0;
 	

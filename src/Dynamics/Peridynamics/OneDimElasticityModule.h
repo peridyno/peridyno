@@ -24,7 +24,7 @@ namespace dyno {
 		OneDimElasticityModule();
 		~OneDimElasticityModule() override;
 		
-		bool constrain() override;
+		void constrain() override;
 
 		void solveElasticity();
 
