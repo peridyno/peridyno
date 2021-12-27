@@ -41,7 +41,7 @@ namespace dyno {
 			h_arr[i].getCoord(level, tnx, tny, tnz);
 			//std::cout << "Poster order: " << i << " " << h_arr[i].key() << " " << tnx << " " << tny << " " << tnz << std::endl;
 			printf("Node %d: key: %d - %d: %d %d %d : ", i, h_arr[i].m_key, level, tnx, tny, tnz);
-			printf(" Data size: %d ; start loc: %d; data loc: %d; first child: %d ", h_arr[i].m_data_size, h_arr[i].m_start_loc, h_arr[i].m_data_loc, h_arr[i].m_first_child_loc);
+			printf(" Data size: %d ; start loc: %d; data loc: %d; first child: %d ", h_arr[i].getDataSize(), h_arr[i].getStartIndex(), h_arr[i].m_data_loc, h_arr[i].m_first_child_loc);
 
 			printf("\n      child: ");
 			for (int j = 0; j < 8; j++)
@@ -253,7 +253,6 @@ namespace dyno {
 		m_level_max = ceil(log2(segments));
 		//if (m_level_max < 1) m_level_max = 1;
 	}
-
 
 	template<typename Real, typename Coord>
 	__global__ void SO_ConstructAABB(
@@ -760,18 +759,6 @@ namespace dyno {
 		aabb.clear();
 	}
 
-
-
-
-
-	struct NodeCmp
-	{
-		DYN_FUNC bool operator()(const OctreeNode& A, const OctreeNode& B)
-		{
-			return A > B;
-		}
-	};
-
 	template<typename Real>
 	DYN_FUNC inline Level SO_ComputeLevel(
 		const AABB box,
@@ -874,8 +861,6 @@ namespace dyno {
 			return 0;
 		}
 
-
-
 		nx_lo = clamp(nx_lo, 0, grid_size - 1);
 		ny_lo = clamp(ny_lo, 0, grid_size - 1);
 		nz_lo = clamp(nz_lo, 0, grid_size - 1);
@@ -957,8 +942,6 @@ namespace dyno {
 		}
 	}
 
-
-
 	__global__ void SO_CountNonRepeatedNodes(
 		DArray<int> counter,
 		DArray<OctreeNode> morton)
@@ -1006,11 +989,10 @@ namespace dyno {
 		if (tId >= non_repeated_node_num) return;
 
 		if (tId < non_repeated_node_num - 1)
-			non_repeated_nodes[tId].m_data_size = non_repeated_nodes[tId + 1].m_start_loc - non_repeated_nodes[tId].m_start_loc;
+			non_repeated_nodes[tId].setDataSize(non_repeated_nodes[tId + 1].getStartIndex() - non_repeated_nodes[tId].getStartIndex());
 		else
-			non_repeated_nodes[tId].m_data_size = total_node_num - non_repeated_nodes[tId].m_start_loc;
+			non_repeated_nodes[tId].setDataSize(total_node_num - non_repeated_nodes[tId].getStartIndex());
 	}
-
 
 	__global__ void SO_GenerateLCA(
 		DArray<OctreeNode> nodes,
@@ -1022,7 +1004,6 @@ namespace dyno {
 
 		nodes[tId + shift] = nodes[tId].leastCommonAncestor(nodes[tId + 1]);
 	}
-
 
 	__global__ void SO_RemoveDuplicativeInternalNodes(
 		DArray<OctreeNode> nodes,
@@ -1154,7 +1135,17 @@ namespace dyno {
 
 		//print(m_all_nodes);
 
+		construct(m_all_nodes);
+
+		data_count.clear();
+		//thrust::sort_by_key(thrust::device, m_key.getDataPtr(), m_key.getDataPtr() + m_key.size(), m_morton.getDataPtr());
+	}
+
+	template<typename TDataType>
+	void SparseOctree<TDataType>::construct(DArray<OctreeNode>& nodes)
+	{
 		/*************** step 2: remove duplicative nodes ****************/
+		int total_node_num = nodes.size();
 
 		DArray<int> duplicates_count;
 		duplicates_count.resize(total_node_num);
@@ -1162,7 +1153,7 @@ namespace dyno {
 		cuExecute(duplicates_count.size(),
 			SO_CountNonRepeatedNodes,
 			duplicates_count,
-			m_all_nodes);
+			nodes);
 
 		int non_duplicative_num = thrust::reduce(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), duplicates_count.begin());
@@ -1171,10 +1162,10 @@ namespace dyno {
 		node_buffer.resize(2 * non_duplicative_num - 1);
 
 		//Remove duplicative nodes, record the first location using node.setStartIndex();
-		cuExecute(m_all_nodes.size(),
+		cuExecute(nodes.size(),
 			SO_RemoveDuplicativeNodes,
 			node_buffer,
-			m_all_nodes,
+			nodes,
 			duplicates_count);
 
 		//print(node_buffer);
@@ -1257,14 +1248,11 @@ namespace dyno {
 
 
 		node_buffer.clear();
-		data_count.clear();
 		node_count.clear();
 		nonRepeatNodes_cpy.clear();
 		aux_nodes.clear();
 		duplicates_count.clear();
-		//thrust::sort_by_key(thrust::device, m_key.getDataPtr(), m_key.getDataPtr() + m_key.size(), m_morton.getDataPtr());
 	}
-
 
 	template<typename TDataType>
 	void SparseOctree<TDataType>::printPostOrderedTree()
