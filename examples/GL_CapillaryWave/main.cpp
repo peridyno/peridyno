@@ -17,7 +17,7 @@ void CreateScene()
 {
 	SceneGraph& scene = SceneGraph::getInstance();
 
-	std::shared_ptr<CapillaryWave<DataType3f>> root = scene.createNewScene<CapillaryWave<DataType3f>>();
+	std::shared_ptr<CapillaryWave<DataType3f>> root = scene.createNewScene<CapillaryWave<DataType3f>>(512);
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 	root->currentTopology()->connect(mapper->inHeightField());
