@@ -18,6 +18,8 @@
 #include "Node.h"
 #include "NodeIterator.h"
 
+#include "Module/InputMouseModule.h"
+
 namespace dyno 
 {
 	class SceneGraph : public OBase
@@ -79,6 +81,9 @@ namespace dyno
 
 		inline Iterator begin() { return NodeIterator(mRoot); }
 		inline Iterator end() { return NodeIterator(nullptr); }
+
+	public:
+		void onMouseEvent(PMouseEvent event);
 
 	public:
 		SceneGraph()

@@ -7,6 +7,7 @@
 
 #include "Image_IO/image_io.h"
 #include "SceneGraph.h"
+#include "Module/InputMouseModule.h"
 #include "Log.h"
 
 #include <Rendering.h>
@@ -335,6 +336,14 @@ namespace dyno
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
+		PMouseEvent mouseEvent;
+		mouseEvent.buttonType = (PButtonType)button;
+		mouseEvent.actionType = (PActionType)action;
+		mouseEvent.x = xpos;
+		mouseEvent.y = ypos;
+
+		SceneGraph::getInstance().onMouseEvent(mouseEvent);
+
 		if (action == GLFW_PRESS)
 		{
 			// if(mOpenCameraRotate)
@@ -356,6 +365,14 @@ namespace dyno
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window); // User Pointer
+
+		PMouseEvent mouseEvent;
+		mouseEvent.buttonType = (PButtonType)activeWindow->getButtonType();
+		mouseEvent.actionType = PActionType::AT_REPEAT;
+		mouseEvent.x = x;
+		mouseEvent.y = y;
+
+		SceneGraph::getInstance().onMouseEvent(mouseEvent);
 
 		auto camera = activeWindow->activeCamera();
 

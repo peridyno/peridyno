@@ -23,14 +23,24 @@ namespace dyno {
 		void constrain() override;
 
 	public:
-		FVar<Real> m_smoothingLength;
+		DEF_VAR(Real, RestDensity, Real(1000), "");
 
-		DeviceArrayField<Coord> m_velocity;
-		DeviceArrayField<Coord> m_position;
+		DEF_VAR_IN(Real, TimeStep, "Time step size");
+
+		DEF_VAR_IN(Real, SamplingDistance, "");
+
+		DEF_VAR_IN(Real, SmoothingLength, "");
+
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
+
+		//FVar<Real> m_smoothingLength;
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+
 		DeviceArrayField<Coord> m_normal;
 		DeviceArrayField<Attribute> m_attribute;
 		
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
+
 
 	protected:
 		bool initializeImpl() override;
@@ -51,8 +61,6 @@ namespace dyno {
 		DArray<Real> m_Aii;
 		DArray<Real> m_AiiFluid;
 		DArray<Real> m_AiiTotal;
-
-		DArray<Real> m_density;
 
 		DArray<Real> m_pressure;
 		DArray<Real> m_divergence;
