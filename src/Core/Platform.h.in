@@ -49,4 +49,9 @@ enum DeviceType
 
 #include "Typedef.inl"
 
+#include <string>
+const inline std::string getAssetPath() {
+	return "${PERIDYNO_ASSET_PATH}/";
+}
+
 //#define SIMULATION2D
