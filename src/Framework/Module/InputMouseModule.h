@@ -16,6 +16,8 @@
 #pragma once
 #include "Module.h"
 
+#include "Topology/Primitive3D.h"
+
 #include <queue>
 
 namespace dyno
@@ -39,6 +41,8 @@ namespace dyno
 		PButtonType buttonType;
 
 		PActionType actionType;
+
+		TRay3D<float> ray;
 
 		float x;
 		float y;
