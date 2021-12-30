@@ -105,9 +105,6 @@ namespace dyno
 		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
 		dim3 blocksPerGrid(x, y);
 
-		// 	Vec4f* oceanVertex = mapOceanVertex();
-		// 	rgb* oceanColor = mapOceanColor();
-
 		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
 
 		auto topoPatch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());

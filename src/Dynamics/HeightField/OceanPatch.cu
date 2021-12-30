@@ -44,7 +44,7 @@ __device__
 }
 
 // generate wave heightfield at time t based on initial heightfield and dispersion relationship
-__global__ void generateSpectrumKernel(Vec2f*      h0,
+__global__ void generateSpectrumKernel(Vec2f* h0,
                                        Vec2f*      ht,
                                        unsigned int in_width,
                                        unsigned int out_width,
@@ -189,10 +189,8 @@ OceanPatch<TDataType>::OceanPatch(int size, float patchSize, int windType, std::
     mChoppiness    = m_params[m_windType].choppiness;
     m_globalShift   = m_params[m_windType].global;
 
-    m_h0 = NULL;
     m_ht = NULL;
 
-    //initialize();
 }
 
 template<typename TDataType>
@@ -211,7 +209,7 @@ OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, flo
     m_maxChoppiness = max_choppiness;
     mChoppiness    = 1.0f;
     m_globalShift   = global;
-    m_h0            = NULL;
+
     m_ht            = NULL;
     //initialize();
 }
@@ -219,16 +217,14 @@ OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, flo
 template<typename TDataType>
 OceanPatch<TDataType>::~OceanPatch()
 {
+
     cudaFree(m_h0);
     cudaFree(m_ht);
     cudaFree(m_Dxt);
     cudaFree(m_Dzt);
     cudaFree(m_displacement);
     cudaFree(m_gradient);
-    //glDeleteTextures(1, &m_displacement_texture);
-    //glDeleteTextures(1, &m_gradient_texture);
-    //cudaCheck(cudaGraphicsUnregisterResource(m_cuda_displacement_texture));
-    //cudaCheck(cudaGraphicsUnregisterResource(m_cuda_gradient_texture));
+
 }
 
 template<typename TDataType>
@@ -238,6 +234,7 @@ void OceanPatch<TDataType>::resetStates()
 
     int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
     cuSafeCall(cudaMalloc(( void** )&m_h0, spectrumSize));
+    //m_h0.resize(mSpectrumWidth, mSpectrumHeight);
     //synchronCheck;
     Vec2f* host_h0 = ( Vec2f* )malloc(spectrumSize);
     generateH0(host_h0);

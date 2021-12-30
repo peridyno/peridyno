@@ -12,10 +12,6 @@ namespace dyno
 
 		void animate(float dt);
 
-		//	void moveDynamicRegion(int nx, int ny);
-		// 	GLuint getDisplacementTextureId() { return m_patch->getDisplacementTextureId(); }
-		// 	GLuint getGradientTextureId() { return m_patch->getGradientTextureId(); }
-
 		float2 getWindDirection() { return make_float2(cosf(m_patch->windDir), sinf(m_patch->windDir)); }
 		float getFftRealSize() { return m_fft_real_size; }
 		int getFftResolution() { return m_fft_size; }
@@ -30,12 +26,6 @@ namespace dyno
 		//返回每个块实际覆盖的距离
 		float getPatchLength();
 		float getGridLength();
-
-		//void addTrail(CapillaryWave* trail);
-
-		//CapillaryWave* getTrail(int i) { if (i < m_trails.size())return m_trails[i]; else return nullptr; }
-
-	//	void addOceanTrails(vertex* oceanVertex);
 
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "");
 
@@ -72,12 +62,9 @@ namespace dyno
 		int Ny = 4;
 
 	private:
-
-		Vec4f* oceanVertex;
+		DArray2D<Vec4f> oceanVertex;
 
 		//fft wave simulation object
 		OceanPatch<DataType3f>* m_patch = nullptr;
-
-		//std::vector<CapillaryWave*> m_trails;
 	};
 }

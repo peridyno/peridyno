@@ -101,7 +101,7 @@ private:
     float m_maxChoppiness;  //设置choppiness上限
     float m_globalShift;    //大尺度偏移幅度
 
-	Vec2f* m_h0;  //初始频谱
+    Vec2f* m_h0;  //初始频谱
 	Vec2f* m_ht;  //当前时刻频谱
 
 	Vec2f* m_Dxt;  //x方向偏移
@@ -110,4 +110,4 @@ private:
     cufftHandle fftPlan;
 };
 
-}  // namespace PhysIKA
+} 
