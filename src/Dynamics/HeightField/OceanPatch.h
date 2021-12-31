@@ -52,16 +52,14 @@ public:
         mChoppiness = value;
     }
 
-	Vec2f* getHeightField()
+	DArray2D<Vec2f> getHeightField()
     {
         return m_ht;
     }
-	Vec4f* getDisplacement()
+    DArray2D <Vec4f> getDisplacement()
     {
         return m_displacement;
     }
-    //GLuint getDisplacementTextureId() { return m_displacement_texture; }
-    //GLuint getGradientTextureId() { return m_gradient_texture; }
 
 public:
     float m_windSpeed = 0;                   //风速
@@ -70,8 +68,8 @@ public:
     float m_fft_real_length = 10;
     float m_fft_flow_speed  = 1.0f;
 
-    Vec4f* m_displacement = nullptr;  // 位移场
-	Vec4f* m_gradient     = nullptr;  // gradient field
+    DArray2D<Vec4f> m_displacement;// = nullptr;  // 位移场
+    DArray2D<Vec4f> m_gradient;// = nullptr;  // gradient field
 
 protected:
 	void resetStates() override;
@@ -81,6 +79,7 @@ protected:
 
 private:
     void  generateH0(Vec2f* h0);
+    CArray2D<Vec2f>  generateH1(CArray2D<Vec2f> h0);
     float gauss();
     float phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend);
 
@@ -101,11 +100,11 @@ private:
     float m_maxChoppiness;  //设置choppiness上限
     float m_globalShift;    //大尺度偏移幅度
 
-    Vec2f* m_h0;  //初始频谱
-	Vec2f* m_ht;  //当前时刻频谱
+    DArray2D<Vec2f> m_h0;  //初始频谱
+    DArray2D<Vec2f> m_ht;  //当前时刻频谱
 
-	Vec2f* m_Dxt;  //x方向偏移
-	Vec2f* m_Dzt;  //z方向偏移
+    DArray2D<Vec2f> m_Dxt;  //x方向偏移
+    DArray2D<Vec2f> m_Dzt;  //z方向偏移
 
     cufftHandle fftPlan;
 };

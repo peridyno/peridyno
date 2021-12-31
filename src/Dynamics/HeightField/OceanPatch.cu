@@ -44,8 +44,8 @@ __device__
 }
 
 // generate wave heightfield at time t based on initial heightfield and dispersion relationship
-__global__ void generateSpectrumKernel(Vec2f* h0,
-                                       Vec2f*      ht,
+__global__ void generateSpectrumKernel(DArray2D<Vec2f> h0,
+                                       DArray2D<Vec2f>      ht,
                                        unsigned int in_width,
                                        unsigned int out_width,
                                        unsigned int out_height,
@@ -127,9 +127,9 @@ __global__ void calculateSlopeKernel(float* h, Vec2f* slopeOut, unsigned int wid
 }
 
 __global__ void generateDispalcementKernel(
-    Vec2f*      ht,
-    Vec2f*      Dxt,
-    Vec2f*      Dzt,
+    DArray2D<Vec2f>      ht,
+    DArray2D<Vec2f>      Dxt,
+    DArray2D<Vec2f>      Dzt,
     unsigned int width,
     unsigned int height,
     float        patchSize)
@@ -189,7 +189,8 @@ OceanPatch<TDataType>::OceanPatch(int size, float patchSize, int windType, std::
     mChoppiness    = m_params[m_windType].choppiness;
     m_globalShift   = m_params[m_windType].global;
 
-    m_ht = NULL;
+    //m_h0 = NULL;
+    //m_ht = NULL;
 
 }
 
@@ -210,7 +211,8 @@ OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, flo
     mChoppiness    = 1.0f;
     m_globalShift   = global;
 
-    m_ht            = NULL;
+    //m_h0 = NULL;
+   // m_ht            = NULL;
     //initialize();
 }
 
@@ -218,12 +220,18 @@ template<typename TDataType>
 OceanPatch<TDataType>::~OceanPatch()
 {
 
-    cudaFree(m_h0);
-    cudaFree(m_ht);
-    cudaFree(m_Dxt);
-    cudaFree(m_Dzt);
-    cudaFree(m_displacement);
-    cudaFree(m_gradient);
+    //cudaFree(m_h0);
+    m_h0.clear();
+    //cudaFree(m_ht);
+    m_ht.clear();
+    //cudaFree(m_Dxt);
+    m_Dxt.clear();
+    //cudaFree(m_Dzt);
+    m_Dzt.clear();
+    //cudaFree(m_displacement);
+    m_displacement.clear();
+    //cudaFree(m_gradient);
+    m_gradient.clear();
 
 }
 
@@ -233,25 +241,30 @@ void OceanPatch<TDataType>::resetStates()
     cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
 
     int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
-    cuSafeCall(cudaMalloc(( void** )&m_h0, spectrumSize));
+    //cuSafeCall(cudaMalloc(( void** )&m_h0, spectrumSize));
     //m_h0.resize(mSpectrumWidth, mSpectrumHeight);
     //synchronCheck;
+    m_h0.resize(mSpectrumWidth, mSpectrumHeight);
+
     Vec2f* host_h0 = ( Vec2f* )malloc(spectrumSize);
     generateH0(host_h0);
 
-    cuSafeCall(cudaMemcpy(m_h0, host_h0, spectrumSize, cudaMemcpyHostToDevice));
+    cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
     int outputSize = mResolution * mResolution * sizeof(Vec2f);
-    cudaMalloc(( void** )&m_ht, outputSize);
-    cudaMalloc(( void** )&m_Dxt, outputSize);
-    cudaMalloc(( void** )&m_Dzt, outputSize);
-    cudaMalloc(( void** )&m_displacement, mResolution * mResolution * sizeof(Vec4f));
-    cuSafeCall(cudaMalloc(( void** )&m_gradient, mResolution * mResolution * sizeof(Vec4f)));
+    //cudaMalloc(( void** )&m_ht, outputSize);
+    m_ht.resize(mResolution, mResolution);
 
-    //gl_utility::createTexture(m_size, m_size, GL_RGBA32F, m_displacement_texture, GL_REPEAT, GL_LINEAR, GL_LINEAR, GL_RGBA, GL_FLOAT);
-    //cudaCheck(cudaGraphicsGLRegisterImage(&m_cuda_displacement_texture, m_displacement_texture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard));
-    //gl_utility::createTexture(m_size, m_size, GL_RGBA32F, m_gradient_texture, GL_REPEAT, GL_LINEAR, GL_LINEAR, GL_RGBA, GL_FLOAT);
-    //cudaCheck(cudaGraphicsGLRegisterImage(&m_cuda_gradient_texture, m_gradient_texture, GL_TEXTURE_2D, cudaGraphicsMapFlagsWriteDiscard));
+    //cudaMalloc(( void** )&m_Dxt, outputSize);
+
+    m_Dxt.resize(mResolution, mResolution);
+    //cudaMalloc(( void** )&m_Dzt, outputSize);
+    m_Dzt.resize(mResolution, mResolution);
+
+    //cudaMalloc(( void** )&m_displacement, mResolution * mResolution * sizeof(Vec4f));
+    m_displacement.resize(mResolution, mResolution);
+    //cuSafeCall(cudaMalloc(( void** )&m_gradient, mResolution * mResolution * sizeof(Vec4f)));
+    m_gradient.resize(mResolution, mResolution);
 
 	auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
 	Real h = m_realPatchSize / mResolution;
@@ -269,10 +282,10 @@ void OceanPatch<TDataType>::updateStates()
 }
 
 __global__ void O_UpdateDisplacement(
-    Vec4f* displacement,
-    Vec2f* Dh,
-    Vec2f* Dx,
-    Vec2f* Dz,
+    DArray2D<Vec4f> displacement,
+    DArray2D<Vec2f> Dh,
+    DArray2D<Vec2f> Dx,
+    DArray2D<Vec2f> Dz,
     int     patchSize)
 {
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -301,9 +314,9 @@ void OceanPatch<TDataType>::animate(float t)
     generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
     cuSynchronize();
 
-    cufftExecC2C(fftPlan, (float2*)m_ht, (float2*)m_ht, CUFFT_INVERSE);
-    cufftExecC2C(fftPlan, (float2*)m_Dxt, (float2*)m_Dxt, CUFFT_INVERSE);
-    cufftExecC2C(fftPlan, (float2*)m_Dzt, (float2*)m_Dzt, CUFFT_INVERSE);
+    cufftExecC2C(fftPlan, (float2*)m_ht.begin(), (float2*)m_ht.begin(), CUFFT_INVERSE);
+    cufftExecC2C(fftPlan, (float2*)m_Dxt.begin(), (float2*)m_Dxt.begin(), CUFFT_INVERSE);
+    cufftExecC2C(fftPlan, (float2*)m_Dzt.begin(), (float2*)m_Dzt.begin(), CUFFT_INVERSE);
 
     int  x = (mResolution + 16 - 1) / 16;
     int  y = (mResolution + 16 - 1) / 16;
@@ -316,7 +329,7 @@ void OceanPatch<TDataType>::animate(float t)
 template <typename Coord>
 __global__ void O_UpdateTopology(
 	DArray2D<Coord> displacement,
-	Vec4f* dis,
+    DArray2D<Vec4f> dis,
 	float choppiness)
 {
 	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -396,6 +409,44 @@ void OceanPatch<TDataType>::generateH0(Vec2f* h0)
             h0[i].y = h0_im;
         }
     }
+}
+
+template<typename TDataType>
+CArray2D<Vec2f> OceanPatch<TDataType>::generateH1(CArray2D<Vec2f> h0)
+{
+    for (unsigned int y = 0; y <= mResolution; y++)
+    {
+        for (unsigned int x = 0; x <= mResolution; x++)
+        {
+            float kx = (-(int)mResolution / 2.0f + x) * (2.0f * CUDART_PI_F / m_realPatchSize);
+            float ky = (-(int)mResolution / 2.0f + y) * (2.0f * CUDART_PI_F / m_realPatchSize);
+
+            float P = sqrtf(phillips(kx, ky, windDir, m_windSpeed, A, dirDepend));
+
+            if (kx == 0.0f && ky == 0.0f)
+            {
+                P = 0.0f;
+            }
+
+            //float Er = urand()*2.0f-1.0f;
+            //float Ei = urand()*2.0f-1.0f;
+            float Er = gauss();
+            float Ei = gauss();
+
+            float h0_re = Er * P * CUDART_SQRT_HALF_F;
+            float h0_im = Ei * P * CUDART_SQRT_HALF_F;
+
+            int i = y * mSpectrumWidth + x;
+           
+            h0(x, y).x = h0_re;
+            h0(x, y).y = h0_im;
+
+        }
+    }
+    CArray2D<Vec2f> h1;
+    h1.resize(h0.nx(), h0.ny());
+    h1.assign(h0);
+    return h0;
 }
 
 template<typename TDataType>

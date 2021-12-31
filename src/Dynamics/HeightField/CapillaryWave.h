@@ -18,6 +18,8 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		
+		//typedef typename TDataType::Coord Coord;
 
 		CapillaryWave(int size, float patchLength, std::string name = "default");
 		virtual ~CapillaryWave();

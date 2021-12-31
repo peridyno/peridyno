@@ -46,10 +46,6 @@ namespace dyno
 	typedef DataTypes<float, Vec3f, Mat3f, Rigid3f> DataType3f;
 	template<> inline const char* DataType3f::getName() { return "DataType3f"; }
 
-	/// 4f DOF, single precision
-	typedef DataTypes<float, Vec4f, Mat4f, Rigid3f> DataType4f;
-	template<> inline const char* DataType4f::getName() { return "DataType4f"; }
-
 	/// 1d DOF, double precision
 	typedef DataTypes<double, float, float, Rigid<double, 1>> DataType1d;
 	template<> inline const char* DataType1d::getName() { return "DataType1d"; }
