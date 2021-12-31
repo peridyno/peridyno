@@ -241,4 +241,37 @@ namespace dyno
 	{
 		mUpperBound = upperBound;
 	}
+
+	void SceneGraph::onMouseEvent(PMouseEvent event)
+	{
+		class MouseEventAct : public Action
+		{
+		public:
+			MouseEventAct(PMouseEvent event) { mMouseEvent = event; }
+			~MouseEventAct() override {}
+
+		private:
+			void process(Node* node) override
+			{
+				if (!node->isVisible())
+					return;
+
+				for (auto iter : node->animationPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<InputMouseModule*>(iter);
+					if (m)
+					{
+						m->enqueueEvent(mMouseEvent);
+					}
+				}
+			}
+
+			PMouseEvent mMouseEvent;
+		};
+
+		MouseEventAct eventAct(event);
+
+		this->getRootNode()->traverseTopDown(&eventAct);
+	}
+
 }

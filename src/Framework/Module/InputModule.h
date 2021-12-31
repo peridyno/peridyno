@@ -9,7 +9,7 @@ namespace dyno
 		InputModule();
 		virtual ~InputModule();
 
-		std::string getModuleType() final { return "OuputModule"; }
+		std::string getModuleType() final { return "InputModule"; }
 	protected:
 		bool m_enabled;
 	};

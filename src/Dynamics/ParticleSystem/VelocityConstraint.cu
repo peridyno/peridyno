@@ -9,6 +9,50 @@
 
 namespace dyno
 {
+	template<typename TDataType>
+	VelocityConstraint<TDataType>::VelocityConstraint()
+		: ConstraintModule()
+		, m_airPressure(Real(0))
+		, m_reduce(NULL)
+		, m_arithmetic(NULL)
+	{
+		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
+
+		this->varRestDensity()->connect(m_densitySum->varRestDensity());
+		this->inSmoothingLength()->connect(m_densitySum->inSmoothingLength());
+		this->inSamplingDistance()->connect(m_densitySum->inSamplingDistance());
+
+		this->inPosition()->connect(m_densitySum->inPosition());
+		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
+	}
+
+	template<typename TDataType>
+	VelocityConstraint<TDataType>::~VelocityConstraint()
+	{
+		m_alpha.clear();
+		m_Aii.clear();
+		m_AiiFluid.clear();
+		m_AiiTotal.clear();
+		m_pressure.clear();
+		m_divergence.clear();
+		m_bSurface.clear();
+
+		m_y.clear();
+		m_r.clear();
+		m_p.clear();
+
+		m_pressure.clear();
+
+		if (m_reduce)
+		{
+			delete m_reduce;
+		}
+		if (m_arithmetic)
+		{
+			delete m_arithmetic;
+		}
+	}
+
 	__device__ inline float kernWeight(const float r, const float h)
 	{
 		const float q = r / h;
@@ -269,8 +313,7 @@ namespace dyno
 		Real tangential,
 		Real restDensity,
 		Real smoothingLength,
-		Real dt
-	)
+		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -367,8 +410,7 @@ namespace dyno
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
 		DArrayList<int> neighbors,
-		Real smoothingLength
-	)
+		Real smoothingLength)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -528,58 +570,170 @@ namespace dyno
 		}
 	}
 
-	template<typename TDataType>
-	VelocityConstraint<TDataType>::VelocityConstraint()
-		: ConstraintModule()
-		, m_airPressure(Real(0))
-		, m_reduce(NULL)
-		, m_arithmetic(NULL)
+	template<typename Coord>
+	__global__ void VC_InitializeNormal(
+		DArray<Coord> normal)
 	{
-		m_smoothingLength.setValue(Real(0.011));
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= normal.size()) return;
+
+		normal[pId] = Coord(0);
+	}
+
+	__global__ void VC_InitializeAttribute(
+		DArray<Attribute> attr)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= attr.size()) return;
+
+		attr[pId].setDynamic();
 	}
 
 	template<typename TDataType>
-	VelocityConstraint<TDataType>::~VelocityConstraint()
+	bool VelocityConstraint<TDataType>::initializeImpl()
 	{
-		m_alpha.clear();
-		m_Aii.clear();
-		m_AiiFluid.clear();
-		m_AiiTotal.clear();
-		m_pressure.clear();
-		m_divergence.clear();
-		m_bSurface.clear();
+		int num = this->inPosition()->getElementCount();
 
-		m_y.clear();
-		m_r.clear();
-		m_p.clear();
+		m_alpha.resize(num);
+		m_Aii.resize(num);
+		m_AiiFluid.resize(num);
+		m_AiiTotal.resize(num);
+		m_pressure.resize(num);
+		m_divergence.resize(num);
+		m_bSurface.resize(num);
 
-		m_pressure.clear();
+		m_y.resize(num);
+		m_r.resize(num);
+		m_p.resize(num);
 
-		if (m_reduce)
-		{
-			delete m_reduce;
-		}
-		if (m_arithmetic)
-		{
-			delete m_arithmetic;
-		}
+		m_pressure.resize(num);
+
+		m_reduce = Reduction<float>::Create(num);
+		m_arithmetic = Arithmetic<float>::Create(num);
+
+
+		uint pDims = cudaGridSize(num, BLOCK_SIZE);
+
+		m_alpha.reset();
+		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
+			m_alpha,
+			this->inPosition()->getData(),
+			m_attribute.getData(),
+			this->inNeighborIds()->getData(),
+			this->inSmoothingLength()->getData());
+
+		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
+
+		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
+			m_alpha,
+			m_maxAlpha);
+
+		m_AiiFluid.reset();
+		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
+			m_AiiFluid,
+			m_alpha,
+			this->inPosition()->getData(),
+			m_attribute.getData(),
+			this->inNeighborIds()->getData(),
+			this->inSmoothingLength()->getData());
+
+		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
+
+		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
+		std::cout << "Max A: " << m_maxA << std::endl;
+
+		m_normal.setElementCount(num);
+		m_attribute.setElementCount(num);
+
+		cuExecute(num,
+			VC_InitializeNormal,
+			m_normal.getData());
+
+		cuExecute(num,
+			VC_InitializeAttribute,
+			m_attribute.getData());
+
+		return true;
 	}
 
 	template<typename TDataType>
 	void VelocityConstraint<TDataType>::constrain()
 	{
-		Real dt = getParent()->getDt();
+		int num = this->inPosition()->getElementCount();
 
-		uint pDims = cudaGridSize(m_position.getElementCount(), BLOCK_SIZE);
+		if (num != m_alpha.size())
+		{
+			m_alpha.resize(num);
+			m_Aii.resize(num);
+			m_AiiFluid.resize(num);
+			m_AiiTotal.resize(num);
+			m_pressure.resize(num);
+			m_divergence.resize(num);
+			m_bSurface.resize(num);
+
+			m_y.resize(num);
+			m_r.resize(num);
+			m_p.resize(num);
+
+			m_pressure.resize(num);
+
+			m_normal.setElementCount(num);
+			m_attribute.setElementCount(num);
+
+			cuExecute(num,
+				VC_InitializeNormal,
+				m_normal.getData());
+
+			cuExecute(num,
+				VC_InitializeAttribute,
+				m_attribute.getData());
+
+			m_reduce = Reduction<float>::Create(num);
+			m_arithmetic = Arithmetic<float>::Create(num);
+
+			uint pDims = cudaGridSize(num, BLOCK_SIZE);
+
+			m_alpha.reset();
+			VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
+				m_alpha,
+				this->inPosition()->getData(),
+				m_attribute.getData(),
+				this->inNeighborIds()->getData(),
+				this->inSmoothingLength()->getData());
+
+			m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
+
+			VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
+				m_alpha,
+				m_maxAlpha);
+
+			m_AiiFluid.reset();
+			VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
+				m_AiiFluid,
+				m_alpha,
+				this->inPosition()->getData(),
+				m_attribute.getData(),
+				this->inNeighborIds()->getData(),
+				this->inSmoothingLength()->getData());
+
+			m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
+
+			std::cout << "Max alpha: " << m_maxAlpha << std::endl;
+			std::cout << "Max A: " << m_maxA << std::endl;
+		}
+
+		Real dt = this->inTimeStep()->getData();
+
+		uint pDims = cudaGridSize(this->inPosition()->getElementCount(), BLOCK_SIZE);
 
 		//compute alpha_i = sigma w_j and A_i = sigma w_ij / r_ij / r_ij
 		m_alpha.reset();
 		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha, 
-			m_position.getData(), 
+			this->inPosition()->getData(),
 			m_attribute.getData(), 
 			this->inNeighborIds()->getData(), 
-			m_smoothingLength.getData());
+			this->inSmoothingLength()->getData());
 		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha, 
 			m_maxAlpha);
@@ -591,10 +745,10 @@ namespace dyno
 			m_AiiFluid, 
 			m_AiiTotal, 
 			m_alpha, 
-			m_position.getData(),
+			this->inPosition()->getData(),
 			m_attribute.getData(),
 			this->inNeighborIds()->getData(),
-			m_smoothingLength.getData());
+			this->inSmoothingLength()->getData());
 
 		m_bSurface.reset();
 		m_Aii.reset();
@@ -603,10 +757,10 @@ namespace dyno
 			m_bSurface, 
 			m_AiiFluid,
 			m_AiiTotal,
-			m_position.getData(),
+			this->inPosition()->getData(),
 			m_attribute.getData(),
 			this->inNeighborIds()->getData(),
-			m_smoothingLength.getData(),
+			this->inSmoothingLength()->getData(),
 			m_maxA);
 
 		int itor = 0;
@@ -618,8 +772,8 @@ namespace dyno
 			m_divergence, 
 			m_alpha, 
 			m_densitySum->outDensity()->getData(),
-			m_position.getData(), 
-			m_velocity.getData(), 
+			this->inPosition()->getData(),
+			this->inVelocity()->getData(), 
 			m_bSurface, 
 			m_normal.getData(), 
 			m_attribute.getData(), 
@@ -627,13 +781,13 @@ namespace dyno
 			m_separation, 
 			m_tangential, 
 			m_restDensity,
-			m_smoothingLength.getData(), 
+			this->inSmoothingLength()->getData(),
 			dt);
 		VC_CompensateSource << <pDims, BLOCK_SIZE >> > (
 			m_divergence, 
-			m_density, 
+			m_densitySum->outDensity()->getData(),
 			m_attribute.getData(), 
-			m_position.getData(), 
+			this->inPosition()->getData(),
 			m_restDensity, 
 			dt);
 		
@@ -644,10 +798,10 @@ namespace dyno
 			m_pressure, 
 			m_Aii, 
 			m_alpha, 
-			m_position.getData(),
+			this->inPosition()->getData(),
 			m_attribute.getData(),
 			this->inNeighborIds()->getData(),
-			m_smoothingLength.getData());
+			this->inSmoothingLength()->getData());
 
 		m_r.reset();
 		Function2Pt::subtract(m_r, m_divergence, m_y);
@@ -664,10 +818,10 @@ namespace dyno
 				m_p, 
 				m_Aii, 
 				m_alpha, 
-				m_position.getData(),
+				this->inPosition()->getData(),
 				m_attribute.getData(),
 				this->inNeighborIds()->getData(),
-				m_smoothingLength.getData());
+				this->inSmoothingLength()->getData());
 
 			float alpha = rr / m_arithmetic->Dot(m_p, m_y);
 			Function2Pt::saxpy(m_pressure, m_p, m_pressure, alpha);
@@ -690,8 +844,8 @@ namespace dyno
 			m_pressure,
 			m_alpha,
 			m_bSurface, 
-			m_position.getData(), 
-			m_velocity.getData(), 
+			this->inPosition()->getData(),
+			this->inVelocity()->getData(),
 			m_normal.getData(), 
 			m_attribute.getData(), 
 			this->inNeighborIds()->getData(),
@@ -699,77 +853,8 @@ namespace dyno
 			m_airPressure,
 			m_tangential,
 			m_separation,
-			m_smoothingLength.getData(),
+			this->inSmoothingLength()->getData(),
 			dt);
-	}
-
-	template<typename TDataType>
-	bool VelocityConstraint<TDataType>::initializeImpl()
-	{
-		if (!isAllFieldsReady())
-		{
-			Log::sendMessage(Log::Error, "VelocityConstraint's fields are not fully initialized!");
-			return false;
-		}
-
-		//TODO: replace
-		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
-		m_smoothingLength.connect(m_densitySum->inSmoothingLength());
-		m_position.connect(m_densitySum->inPosition());
-		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
-		m_densitySum->initialize();
-
-		int num = m_position.getElementCount();
-		m_alpha.resize(num);
-		m_Aii.resize(num);
-		m_AiiFluid.resize(num);
-		m_AiiTotal.resize(num);
-		m_pressure.resize(num);
-		m_divergence.resize(num);
-		m_bSurface.resize(num);
-		m_density.resize(num);
-
-		m_y.resize(num);
-		m_r.resize(num);
-		m_p.resize(num);
-
-		m_pressure.resize(num);
-
-		m_reduce = Reduction<float>::Create(num);
-		m_arithmetic = Arithmetic<float>::Create(num);
-
-
-		uint pDims = cudaGridSize(num, BLOCK_SIZE);
-
-		m_alpha.reset();
-		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
-			m_alpha,
-			m_position.getData(),
-			m_attribute.getData(),
-			this->inNeighborIds()->getData(),
-			m_smoothingLength.getData());
-
-		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
-
-		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
-			m_alpha,
-			m_maxAlpha);
-
-		m_AiiFluid.reset();
-		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
-			m_AiiFluid,
-			m_alpha,
-			m_position.getData(),
-			m_attribute.getData(),
-			this->inNeighborIds()->getData(),
-			m_smoothingLength.getData());
-
-		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
-
-		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
-		std::cout << "Max A: " << m_maxA << std::endl;
-
-		return true;
 	}
 
 	DEFINE_CLASS(VelocityConstraint);

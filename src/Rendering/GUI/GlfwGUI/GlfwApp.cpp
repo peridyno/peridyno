@@ -7,6 +7,7 @@
 
 #include "Image_IO/image_io.h"
 #include "SceneGraph.h"
+#include "Module/InputMouseModule.h"
 #include "Log.h"
 
 #include <Rendering.h>
@@ -335,10 +336,19 @@ namespace dyno
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
+		PMouseEvent mouseEvent;
+		mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
+		mouseEvent.buttonType = (PButtonType)button;
+		mouseEvent.actionType = (PActionType)action;
+		mouseEvent.x = (float)xpos;
+		mouseEvent.y = (float)ypos;
+
+		SceneGraph::getInstance().onMouseEvent(mouseEvent);
+
 		if (action == GLFW_PRESS)
 		{
 			// if(mOpenCameraRotate)
-			camera->registerPoint(xpos, ypos);
+			camera->registerPoint((float)xpos, (float)ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
 		}
 		else
@@ -356,8 +366,16 @@ namespace dyno
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window); // User Pointer
-
 		auto camera = activeWindow->activeCamera();
+
+		PMouseEvent mouseEvent;
+		mouseEvent.ray = camera->castRayInWorldSpace((float)x, (float)y);
+		mouseEvent.buttonType = (PButtonType)activeWindow->getButtonType();
+		mouseEvent.actionType = PActionType::AT_REPEAT;
+		mouseEvent.x = (float)x;
+		mouseEvent.y = (float)y;
+
+		SceneGraph::getInstance().onMouseEvent(mouseEvent);
 
 		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
 			camera->rotateToPoint(x, y);

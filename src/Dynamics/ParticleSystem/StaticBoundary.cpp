@@ -93,7 +93,7 @@ namespace dyno
 		m_surfaceNode->setControllable(false);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
- 		triSet->loadObjFile("../../data/standard/standard_cube.obj");
+ 		triSet->loadObjFile(getAssetPath() + "standard/standard_cube.obj");
 		triSet->scale(0.99*scale);
 		triSet->translate(center);
 
