@@ -7,13 +7,10 @@
 namespace dyno
 {
 	//IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
-
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
 		: Node()
 	{
-		Coord Codddord;
-
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		heights->setExtents(size, size);
 		this->currentTopology()->setDataPtr(heights);
@@ -75,7 +72,6 @@ namespace dyno
 			mChoppiness);	
 	}
 
-
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetStates()
 	{
@@ -90,19 +86,20 @@ namespace dyno
 		this->animationPipeline()->update();
 	}
 
-
-	__global__ void C_InitDynamicRegion(DArray2D<Vec4f> grid, int gridwidth, int gridheight, int pitch, float level)
+	template <typename Coord>
+	__global__ void C_InitDynamicRegion(DArray2D<Coord> grid, int gridwidth, int gridheight, int pitch, float level)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
 		if (x < gridwidth && y < gridheight)
 		{
-			Vec4f gp;
+			Coord gp;
 			gp.x = level;
 			gp.y = 0.0f;
 			gp.z = 0.0f;
 			gp.w = 0.0f;
 
+			
 			grid[y * pitch + x] = gp;
 			//grid2Dwrite(grid, x, y, pitch, gp);
 			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 3.0f;
@@ -125,7 +122,8 @@ namespace dyno
 		}
 	}
 
-	__global__ void C_ImposeBC(DArray2D<Vec4f> grid_next, DArray2D<Vec4f> grid, int width, int height, int pitch)
+	template <typename Coord>
+	__global__ void C_ImposeBC(DArray2D<Coord> grid_next, DArray2D<Coord> grid, int width, int height, int pitch)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -133,32 +131,34 @@ namespace dyno
 		{
 			if (x == 0)
 			{
-				Vec4f a = grid[(y)*pitch + 1];
+				Coord a = grid[(y)*pitch + 1];
 				grid_next[(y)*pitch + x] = a;
 			}
 			else if (x == width - 1)
 			{
-				Vec4f a = grid[(y)*pitch + width - 2];
+				Coord a = grid[(y)*pitch + width - 2];
 				grid_next[(y)*pitch + x] = a;
 			}
 			else if (y == 0)
 			{
-				Vec4f a = grid[(1) * pitch + x];
+				Coord a = grid[(1) * pitch + x];
 				grid_next[(y)*pitch + x] = a;
 			}
 			else if (y == height - 1)
 			{
-				Vec4f a = grid[(height - 2) * pitch + x];
+				Coord a = grid[(height - 2) * pitch + x];
 				grid_next[(y)*pitch + x] = a;
 			}
 			else
 			{
-				Vec4f a = grid[(y)*pitch + x];
+				Coord a = grid[(y)*pitch + x];
 				grid_next[(y)*pitch + x] = a;
 			}
 		}
 	}
-	__host__ __device__ void C_FixShore(Vec4f& l, Vec4f& c, Vec4f& r)
+
+	template <typename Coord>
+	__host__ __device__ void C_FixShore(Coord& l, Coord& c, Coord& r)
 	{
 
 		if (r.x < 0.0f || l.x < 0.0f || c.x < 0.0f)
@@ -177,7 +177,8 @@ namespace dyno
 		c.z = v * h;
 	}
 
-	__host__ __device__ Vec4f C_VerticalPotential(Vec4f gp)
+	template <typename Coord>
+	__host__ __device__ Coord C_VerticalPotential(Coord gp)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -186,7 +187,7 @@ namespace dyno
 		float h4 = h * h * h * h;
 		float v = sqrtf(2.0f) * h * vh / (sqrtf(h4 + max(h4, EPSILON)));
 
-		Vec4f G;
+		Coord G;
 		G.x = v * h;
 		G.y = uh * v;
 		G.z = vh * v + GRAVITY * h * h;
@@ -194,7 +195,8 @@ namespace dyno
 		return G;
 	}
 
-	__device__ Vec4f C_HorizontalPotential(Vec4f gp)
+	template <typename Coord>
+	__device__ Coord C_HorizontalPotential(Coord gp)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -203,7 +205,7 @@ namespace dyno
 		float h4 = h * h * h * h;
 		float u = sqrtf(2.0f) * h * uh / (sqrtf(h4 + max(h4, EPSILON)));
 
-		Vec4f F;
+		Coord F;
 		F.x = u * h;
 		F.y = uh * u + GRAVITY * h * h;
 		F.z = vh * u;
@@ -211,11 +213,12 @@ namespace dyno
 		return F;
 	}
 
-	__device__ Vec4f C_SlopeForce(Vec4f c, Vec4f n, Vec4f e, Vec4f s, Vec4f w)
+	template <typename Coord>
+	__device__ Coord C_SlopeForce(Coord c, Coord n, Coord e, Coord s, Coord w)
 	{
 		float h = max(c.x, 0.0f);
 
-		Vec4f H;
+		Coord H;
 		H.x = 0.0f;
 		H.y = -GRAVITY * h * (e.w - w.w);
 		H.z = -GRAVITY * h * (s.w - n.w);
@@ -223,7 +226,8 @@ namespace dyno
 		return H;
 	}
 
-	__global__ void C_OneWaveStep(DArray2D<Vec4f> grid_next, DArray2D<Vec4f> grid, int width, int height, float timestep, int pitch)
+	template <typename Coord>
+	__global__ void C_OneWaveStep(DArray2D<Coord> grid_next, DArray2D<Coord> grid, int width, int height, float timestep, int pitch)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -233,34 +237,35 @@ namespace dyno
 			int gridx = x + 1;
 			int gridy = y + 1;
 
-			Vec4f center = grid[gridx + pitch * gridy];
+			Coord center = grid[gridx + pitch * gridy];
 
-			Vec4f north = grid[gridx + pitch * (gridy - 1)];
+			Coord north = grid[gridx + pitch * (gridy - 1)];
 
-			Vec4f west = grid[gridx - 1 + pitch * gridy];
+			Coord west = grid[gridx - 1 + pitch * gridy];
 
-			Vec4f south = grid[gridx + pitch * (gridy + 1)];
+			Coord south = grid[gridx + pitch * (gridy + 1)];
 
-			Vec4f east = grid[gridx + 1 + pitch * gridy];
+			Coord east = grid[gridx + 1 + pitch * gridy];
 
 			C_FixShore(west, center, east);
 			C_FixShore(north, center, south);
 
-			Vec4f u_south = 0.5f * (south + center) - timestep * (C_VerticalPotential(south) - C_VerticalPotential(center));
-			Vec4f u_north = 0.5f * (north + center) - timestep * (C_VerticalPotential(center) - C_VerticalPotential(north));
-			Vec4f u_west = 0.5f * (west + center) - timestep * (C_HorizontalPotential(center) - C_HorizontalPotential(west));
-			Vec4f u_east = 0.5f * (east + center) - timestep * (C_HorizontalPotential(east) - C_HorizontalPotential(center));
+			Coord u_south = 0.5f * (south + center) - timestep * (C_VerticalPotential(south) - C_VerticalPotential(center));
+			Coord u_north = 0.5f * (north + center) - timestep * (C_VerticalPotential(center) - C_VerticalPotential(north));
+			Coord u_west = 0.5f * (west + center) - timestep * (C_HorizontalPotential(center) - C_HorizontalPotential(west));
+			Coord u_east = 0.5f * (east + center) - timestep * (C_HorizontalPotential(east) - C_HorizontalPotential(center));
 
-			Vec4f u_center = center + timestep * C_SlopeForce(center, north, east, south, west) - timestep * (C_HorizontalPotential(u_east) - C_HorizontalPotential(u_west)) - timestep * (C_VerticalPotential(u_south) - C_VerticalPotential(u_north));
+			Coord u_center = center + timestep * C_SlopeForce(center, north, east, south, west) - timestep * (C_HorizontalPotential(u_east) - C_HorizontalPotential(u_west)) - timestep * (C_VerticalPotential(u_south) - C_VerticalPotential(u_north));
 			u_center.x = max(0.0f, u_center.x);
 
 			grid_next[gridx + gridy * pitch] = u_center;
 		}
 	}
 
+	template <typename Coord>
 	__global__ void C_InitHeightField(
-		DArray2D<Vec4f> height,
-		DArray2D<Vec4f> grid,
+		DArray2D<Coord> height,
+		DArray2D<Coord> grid,
 		int patchSize,
 		float horizon,
 		float realSize)
@@ -272,7 +277,7 @@ namespace dyno
 			int gridx = i + 1;
 			int gridy = j + 1;
 
-			Vec4f gp = grid[gridx + patchSize * gridy];
+			Coord gp = grid[gridx + patchSize * gridy];
 			height[i + j * patchSize].x = gp.x - horizon;
 
 			float d = sqrtf((i - patchSize / 2) * (i - patchSize / 2) + (j - patchSize / 2) * (j - patchSize / 2));
@@ -284,8 +289,10 @@ namespace dyno
 			// x component stores the original height, y component stores the normalized height, z component stores the X gradient, w component stores the Z gradient;
 		}
 	}
+
+	template <typename Coord>
 	__global__ void C_InitHeightGrad(
-		DArray2D<Vec4f> height,
+		DArray2D<Coord> height,
 		int patchSize)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -297,8 +304,8 @@ namespace dyno
 			int j_minus_one = (j - 1 + patchSize) % patchSize;
 			int j_plus_one = (j + 1) % patchSize;
 
-			Vec4f Dx = (height[i_plus_one + j * patchSize] - height[i_minus_one + j * patchSize]) / 2;
-			Vec4f Dz = (height[i + j_plus_one * patchSize] - height[i + j_minus_one * patchSize]) / 2;
+			Coord Dx = (height[i_plus_one + j * patchSize] - height[i_minus_one + j * patchSize]) / 2;
+			Coord Dz = (height[i + j_plus_one * patchSize] - height[i + j_minus_one * patchSize]) / 2;
 
 			height[i + patchSize * j].z = Dx.y;
 			height[i + patchSize * j].w = Dz.y;
@@ -352,7 +359,6 @@ namespace dyno
 		synchronCheck;
 	}
 
-
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initialize() {
 
@@ -362,7 +368,6 @@ namespace dyno
 
 		initHeightPosition();
 	}
-
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initDynamicRegion() {
@@ -374,7 +379,7 @@ namespace dyno
 		mDeviceGridNext.resize(extNx, extNy);
 		mHeight.resize(simulatedRegionWidth, simulatedRegionHeight);
 
-		gridPitch = simulatedRegionWidth;
+		gridPitch = mResolution;
 
 		int x = (extNx + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
 		int y = (extNy + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
@@ -409,10 +414,9 @@ namespace dyno
 		synchronCheck;
 	}
 
-
-	template <typename Vec4f>
+	template <typename Coord>
 	__global__ void O_InitHeightPosition(
-		DArray2D<Vec4f> displacement,
+		DArray2D<Coord> displacement,
 		float horizon)
 	{
 		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -445,12 +449,9 @@ namespace dyno
 			horizon);
 	}
 
-
-
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetSource()
 	{
-		//cudaMemset(mSource, 0, simulatedRegionWidth * simulatedRegionHeight * sizeof(float2));
 		cudaMemset(mWeight, 0, simulatedRegionWidth * simulatedRegionHeight * sizeof(float));
 	}
 

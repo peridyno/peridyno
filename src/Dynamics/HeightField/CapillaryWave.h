@@ -14,17 +14,15 @@ namespace dyno
 	template<typename TDataType>
 	class CapillaryWave : public Node
 	{
-		//DECLARE_CLASS_1(CapillaryWave, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		
-		//typedef typename TDataType::Coord Coord;
+		typedef typename Vector<float, 4> Coord4;
 
 		CapillaryWave(int size, float patchLength, std::string name = "default");
 		virtual ~CapillaryWave();
 
-		DArray2D<Vec4f> GetHeight() { return mHeight; }
+		DArray2D<Coord4> GetHeight() { return mHeight; }
 	protected:
 		void resetStates() override;
 
@@ -57,10 +55,10 @@ namespace dyno
 		float horizon = 2.0f;			//水面初始高度
 		float* mWeight;
 
-		DArray2D<Vec4f> mHeight;				//高度场
-		DArray2D<Vec4f> mDeviceGrid;		//当前动态区域状态
-		DArray2D<Vec4f> mDeviceGridNext;
-		DArray2D<Vec4f> mDisplacement;   // 位移场
+		DArray2D<Coord4> mHeight;				//高度场
+		DArray2D<Coord4> mDeviceGrid;		//当前动态区域状态
+		DArray2D<Coord4> mDeviceGridNext;
+		DArray2D<Coord4> mDisplacement;   // 位移场
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
 
 	};
