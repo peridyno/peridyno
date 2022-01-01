@@ -20,13 +20,18 @@ namespace dyno {
 
 		void compute() override;
 	
-	protected:
-		void compute(DArray<Real>& rho);
-
 	public:
 		void compute(
 			DArray<Real>& rho,
 			DArray<Coord>& pos,
+			DArrayList<int>& neighbors,
+			Real smoothingLength,
+			Real mass);
+
+		void compute(
+			DArray<Real>& rho,
+			DArray<Coord>& pos,
+			DArray<Coord>& posQueried,
 			DArrayList<int>& neighbors,
 			Real smoothingLength,
 			Real mass);
@@ -39,6 +44,11 @@ namespace dyno {
 		 * @brief Particle positions
 		 */
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
+
+		/**
+		 * @brief Particle positions
+		 */
+		DEF_ARRAY_IN(Coord, Other, DeviceType::GPU, "Particle position");
 
 		/**
 		 * @brief Neighboring particles
