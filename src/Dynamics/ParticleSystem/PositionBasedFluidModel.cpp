@@ -17,6 +17,7 @@ namespace dyno
 		m_smoothingLength.setValue(Real(0.006));
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
 		this->inVelocity()->connect(integrator->inVelocity());
 		this->inForce()->connect(integrator->inForceDensity());

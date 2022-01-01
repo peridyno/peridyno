@@ -73,9 +73,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleIntegrator<TDataType>::updateVelocity()
 	{
-		Real dt = Real(0.001);
-		if(this->getParent() != NULL)
-			dt = getParent()->getDt();
+		Real dt = this->inTimeStep()->getData();
 		Coord gravity = SceneGraph::getInstance().getGravity();
 
 		int total_num = this->inPosition()->getElementCount();
@@ -138,7 +136,7 @@ namespace dyno
 	bool ParticleIntegrator<TDataType>::updatePosition()
 	{
 		//TODO: 
-		Real dt = 0.001;
+		Real dt = this->inTimeStep()->getData();
 // 		if (this->getParent() != NULL)
 // 			dt = getParent()->getDt();
 

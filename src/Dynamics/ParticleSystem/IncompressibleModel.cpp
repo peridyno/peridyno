@@ -18,6 +18,7 @@ namespace dyno
 		m_samplingDistance.setValue(Real(0.005));
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
 		this->inVelocity()->connect(integrator->inVelocity());
 		this->inForce()->connect(integrator->inForceDensity());
