@@ -66,7 +66,6 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= posArr.size()) return;
 
-		SpikyKernel<Real> kern;
 		Real r;
 		Real rho_i = Real(0);
 		Coord pos_i = posArr[pId];
@@ -96,7 +95,6 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= posArr.size()) return;
 
-		SpikyKernel<Real> kern;
 		Real r;
 		Real rho_i = Real(0);
 		Coord pos_i = posArr[pId];

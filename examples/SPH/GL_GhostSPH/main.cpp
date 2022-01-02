@@ -6,7 +6,7 @@
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/GhostParticles.h"
 #include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/IncompressibleFluid.h>
+#include <ParticleSystem/GhostFluid.h>
 
 #include <RigidBody/RigidBody.h>
 
@@ -23,6 +23,65 @@ using namespace dyno;
 
 bool useVTK = false;
 
+std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
+{
+	auto ghost = std::make_shared<GhostParticles<DataType3f>>();
+
+	std::vector<Vec3f> host_pos;
+	std::vector<Vec3f> host_vel;
+	std::vector<Vec3f> host_force;
+	std::vector<Vec3f> host_normal;
+	std::vector<Attribute> host_attribute;
+
+	Vec3f low(-0.2, -0.015, -0.2);
+	Vec3f high(0.2, -0.005, 0.2);
+
+	Real s = 0.005f;
+	int m_iExt = 0;
+
+	float omega = 1.0f;
+	float half_s = -s / 2.0f;
+
+	int num = 0;
+
+	for (float x = low.x - m_iExt * s; x <= high.x + m_iExt * s; x += s) {
+		for (float y = low.y - m_iExt * s; y <= high.y + m_iExt * s; y += s) {
+			for (float z = low.z - m_iExt * s; z <= high.z + m_iExt * s; z += s) {
+				Attribute attri;
+				attri.setFluid();
+				attri.setDynamic();
+
+				host_pos.push_back(Vec3f(x, y, z));
+				host_vel.push_back(Vec3f(0));
+				host_force.push_back(Vec3f(0));
+				host_normal.push_back(Vec3f(0, 1, 0));
+				host_attribute.push_back(attri);
+			}
+		}
+	}
+
+	ghost->currentPosition()->setElementCount(num);
+	ghost->currentVelocity()->setElementCount(num);
+	ghost->currentForce()->setElementCount(num);
+
+	ghost->stateNormal()->setElementCount(num);
+	ghost->stateAttribute()->setElementCount(num);
+
+	ghost->currentPosition()->getDataPtr()->assign(host_pos);
+	ghost->currentVelocity()->getDataPtr()->assign(host_vel);
+	ghost->currentForce()->getDataPtr()->assign(host_force);
+	ghost->stateNormal()->getDataPtr()->assign(host_normal);
+	ghost->stateAttribute()->getDataPtr()->assign(host_attribute);
+
+	host_pos.clear();
+	host_vel.clear();
+	host_force.clear();
+	host_normal.clear();
+	host_attribute.clear();
+
+	return ghost;
+}
+
 void CreateScene(AppBase* app)
 {
 	SceneGraph& scene = SceneGraph::getInstance();
@@ -30,16 +89,15 @@ void CreateScene(AppBase* app)
 	scene.setLowerBound(Vec3f(-0.5, 0, -0.5));
 
 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
-	root->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.02, true);
+	root->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
 	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
 	std::shared_ptr<ParticleSystem<DataType3f>> fluid = std::make_shared<ParticleSystem<DataType3f>>();
-	fluid->loadParticles(Vec3f(-0.0, 0.0, -0.1), Vec3f(0.1, 0.1, 0.1), 0.005);
+	fluid->loadParticles(Vec3f(-0.1, 0.0, -0.1), Vec3f(0.105, 0.1, 0.105), 0.005);
 
-	auto ghost = std::make_shared<GhostParticles<DataType3f>>();
-	ghost->loadPlane();
+	auto ghost = createGhostParticles();
 
-	auto incompressibleFluid = std::make_shared<IncompressibleFluid<DataType3f>>();
+	auto incompressibleFluid = std::make_shared<GhostFluid<DataType3f>>();
 	incompressibleFluid->setFluidParticles(fluid);
 	incompressibleFluid->setBoundaryParticles(ghost);
 
@@ -77,7 +135,7 @@ void CreateScene(AppBase* app)
 	
 	{
 		auto ghostRender = std::make_shared<GLPointVisualModule>();
-		ghostRender->setColor(Vec3f(1, 0, 0));
+		ghostRender->setColor(Vec3f(1, 0.5, 0));
 		ghostRender->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 
 		ghost->currentTopology()->connect(ghostRender->inPointSet());

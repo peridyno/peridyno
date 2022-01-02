@@ -1,13 +1,13 @@
-#include "IncompressibleFluid.h"
+#include "GhostFluid.h"
 
 #include "ProjectionBasedFluidModel.h"
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(IncompressibleFluid, TDataType)
+	IMPLEMENT_CLASS_1(GhostFluid, TDataType)
 
 	template<typename TDataType>
-	IncompressibleFluid<TDataType>::IncompressibleFluid()
+	GhostFluid<TDataType>::GhostFluid()
 		: Node()
 	{
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
@@ -46,7 +46,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void IncompressibleFluid<TDataType>::preUpdateStates()
+	void GhostFluid<TDataType>::preUpdateStates()
 	{
 		auto boundaryParticles	= this->getBoundaryParticles();
 		auto fluidParticles		= this->getFluidParticles();
@@ -119,7 +119,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void IncompressibleFluid<TDataType>::postUpdateStates()
+	void GhostFluid<TDataType>::postUpdateStates()
 	{
 		auto boundaryParticles = this->getBoundaryParticles();
 		auto fluidParticles = this->getFluidParticles();
@@ -147,5 +147,5 @@ namespace dyno
 		}
 	}
 
-	DEFINE_CLASS(IncompressibleFluid);
+	DEFINE_CLASS(GhostFluid);
 }

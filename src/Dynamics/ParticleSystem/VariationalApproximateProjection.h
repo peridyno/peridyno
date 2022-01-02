@@ -73,7 +73,7 @@ namespace dyno
 
 		Real mTangential = 0.1f;
 		Real mSeparation = 0.1f;
-		Real mRestDensity = 1000.0f;
+		//Real mRestDensity = 1000.0f;
 
 		//Refer to "A Nonlocal Variational Particle Framework for Incompressible Free Surface Flows" for their exact meanings
 		DArray<Real> mAlpha;

@@ -385,8 +385,7 @@ namespace dyno
 		DArray<Attribute> attribute,
 		DArray<Coord> position,
 		Real restDensity,
-		Real dt
-	)
+		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= density.size()) return;
@@ -396,7 +395,7 @@ namespace dyno
 		if (density[pId] > restDensity)
 		{
 			Real ratio = (density[pId] - restDensity) / restDensity;
-			atomicAdd(&divergence[pId], 100000.0f*ratio / dt);
+			atomicAdd(&divergence[pId], 5*restDensity * ratio / (dt * dt));
 		}
 	}
 
@@ -876,15 +875,16 @@ namespace dyno
 			this->inNeighborIds()->getData(),
 			mSeparation, 
 			mTangential, 
-			mRestDensity,
+			this->varRestDensity()->getData(),
 			this->inSmoothingLength()->getData(),
 			dt);
+
 		VC_CompensateSource << <pDims, BLOCK_SIZE >> > (
 			mDivergence, 
 			mDensityCalculator->outDensity()->getData(),
 			this->inAttribute()->getData(),
 			this->inPosition()->getData(),
-			mRestDensity, 
+			this->varRestDensity()->getData(),
 			dt);
 		
 		//solve the linear system of equations with a conjugate gradient method.
@@ -960,7 +960,7 @@ namespace dyno
  			this->inVelocity()->getData(),
 			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
-			mRestDensity,
+			this->varRestDensity()->getData(),
 			this->inSmoothingLength()->getData(),
 			dt);
 	}

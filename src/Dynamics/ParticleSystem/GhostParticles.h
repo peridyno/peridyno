@@ -15,14 +15,12 @@ namespace dyno
 		GhostParticles();
 		~GhostParticles() override;
 
-		void loadPlane();
-
 	public:
 		DEF_ARRAY_STATE(Coord, Normal, DeviceType::GPU, "Ghost particle normals");
 
 		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "Particle attributes");
 
 	protected:
-		//void updateTopology() override;
+		void resetStates() override;
 	};
 }
