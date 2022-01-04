@@ -25,6 +25,7 @@ namespace dyno
 		m_horizon.setValue(0.0085);
 
 		m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->varTimeStep()->connect(m_integrator->inTimeStep());
 		this->currentPosition()->connect(m_integrator->inPosition());
 		this->currentVelocity()->connect(m_integrator->inVelocity());
 		this->currentForce()->connect(m_integrator->inForceDensity());

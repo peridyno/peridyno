@@ -1,17 +1,12 @@
 #pragma once
 #include "Node.h"
-//#include "PointRenderModule.h"
 
 namespace dyno
 {
 	template <typename TDataType> class PointSet;
 	/*!
 	*	\class	ParticleSystem
-	*	\brief	Position-based fluids.
-	*
-	*	This class implements a position-based fluid solver.
-	*	Refer to Macklin and Muller's "Position Based Fluids" for details
-	*
+	*	\brief	This class represents the base class for more advanced particle-based nodes.
 	*/
 	template<typename TDataType>
 	class ParticleSystem : public Node
@@ -34,8 +29,6 @@ namespace dyno
 		virtual bool scale(Real s);
 
 	public:
-//		std::shared_ptr<PointRenderModule> getRenderModule();
-
 		/**
 		 * @brief Particle position
 		 */

@@ -1,47 +1,48 @@
-#include <cuda_runtime.h>
-#include "VelocityConstraint.h"
-#include "Node.h"
+#include "VariationalApproximateProjection.h"
 #include "SummationDensity.h"
-#include "Attribute.h"
-#include "Kernel.h"
+
 #include "Algorithm/Function2Pt.h"
-#include "Algorithm/CudaRand.h"
+#include "Algorithm/Functional.h"
+#include "Algorithm/Arithmetic.h"
+#include "Algorithm/Reduction.h"
+
+#include "Kernel.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	VelocityConstraint<TDataType>::VelocityConstraint()
+	VariationalApproximateProjection<TDataType>::VariationalApproximateProjection()
 		: ConstraintModule()
-		, m_airPressure(Real(0))
+		, mAirPressure(Real(0))
 		, m_reduce(NULL)
 		, m_arithmetic(NULL)
 	{
-		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
+		mDensityCalculator = std::make_shared<SummationDensity<TDataType>>();
 
-		this->varRestDensity()->connect(m_densitySum->varRestDensity());
-		this->inSmoothingLength()->connect(m_densitySum->inSmoothingLength());
-		this->inSamplingDistance()->connect(m_densitySum->inSamplingDistance());
+		this->varRestDensity()->connect(mDensityCalculator->varRestDensity());
+		this->inSmoothingLength()->connect(mDensityCalculator->inSmoothingLength());
+		this->inSamplingDistance()->connect(mDensityCalculator->inSamplingDistance());
 
-		this->inPosition()->connect(m_densitySum->inPosition());
-		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
+		this->inPosition()->connect(mDensityCalculator->inPosition());
+		this->inNeighborIds()->connect(mDensityCalculator->inNeighborIds());
 	}
 
 	template<typename TDataType>
-	VelocityConstraint<TDataType>::~VelocityConstraint()
+	VariationalApproximateProjection<TDataType>::~VariationalApproximateProjection()
 	{
-		m_alpha.clear();
-		m_Aii.clear();
-		m_AiiFluid.clear();
-		m_AiiTotal.clear();
-		m_pressure.clear();
-		m_divergence.clear();
-		m_bSurface.clear();
+		mAlpha.clear();
+		mAii.clear();
+		mAiiFluid.clear();
+		mAiiTotal.clear();
+		mPressure.clear();
+		mDivergence.clear();
+		mIsSurface.clear();
 
 		m_y.clear();
 		m_r.clear();
 		m_p.clear();
 
-		m_pressure.clear();
+		mPressure.clear();
 
 		if (m_reduce)
 		{
@@ -384,8 +385,7 @@ namespace dyno
 		DArray<Attribute> attribute,
 		DArray<Coord> position,
 		Real restDensity,
-		Real dt
-	)
+		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= density.size()) return;
@@ -395,7 +395,7 @@ namespace dyno
 		if (density[pId] > restDensity)
 		{
 			Real ratio = (density[pId] - restDensity) / restDensity;
-			atomicAdd(&divergence[pId], 100000.0f*ratio / dt);
+			atomicAdd(&divergence[pId], 5*restDensity * ratio / (dt * dt));
 		}
 	}
 
@@ -441,64 +441,61 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_UpdateVelocityBoundaryCorrected(
-		DArray<Real> pressure,
-		DArray<Real> alpha,
+	__global__ void VC_UpdateVelocity1rd
+	(
+		DArray<Real> preArr,
+		DArray<Real> aiiArr,
 		DArray<bool> bSurface,
-		DArray<Coord> position,
-		DArray<Coord> velocity,
-		DArray<Coord> normal,
-		DArray<Attribute> attribute,
+		DArray<Coord> posArr,
+		DArray<Coord> velArr,
+		DArray<Attribute> attArr,
 		DArrayList<int> neighbors,
 		Real restDensity,
-		Real airPressure,
-		Real sliding,
-		Real separation,
 		Real smoothingLength,
-		Real dt)
+		Real dt
+	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
+		if (pId >= posArr.size()) return;
 
-		if (attribute[pId].isDynamic())
+		if (attArr[pId].isDynamic())
 		{
-			Coord pos_i = position[pId];
-			Real p_i = pressure[pId];
+			Coord pos_i = posArr[pId];
+			Coord b = Coord(0.0f);
+			//glm::mat3 A_i = glm::mat3(0.0f);
+			float p_i = preArr[pId];
+			bool bNearWall = false;
 
-			Real ceo = 1.6f;
-
-			Real invAlpha = 1.0f / alpha[pId];
-			Coord vel_i = velocity[pId];
-			Coord dv_i(0.0f);
-			Real scale = 1.0f*dt / restDensity;
-
+			float total_weight = 0.0f;
 			List<int>& list_i = neighbors[pId];
 			int nbSize = list_i.size();
+			
+			//A_i = glm::mat3();
+
+			float invAii = 1.0f / aiiArr[pId];
+			Coord vel_i = velArr[pId];
+			Coord dv_i = Coord(0.0f);
+			float scale = 0.1f*dt / restDensity;
 			for (int ne = 0; ne < nbSize; ne++)
 			{
 				int j = list_i[ne];
-				Real r = (pos_i - position[j]).norm();
+				Real r = (pos_i - posArr[j]).norm();
 
-				Attribute att_j = attribute[j];
+				Attribute att_j = attArr[j];
 				if (r > EPSILON)
 				{
-					Real weight = -invAlpha*kernWR(r, smoothingLength);
-					Coord dnij = (pos_i - position[j])*(1.0f / r);
-					Coord corrected = dnij;
-					if (corrected.norm() > EPSILON)
-					{
-						corrected = corrected.normalize();
-					}
-					corrected = -scale*weight*corrected;
+					Real weight = -invAii * kernWR(r, smoothingLength);
+					Coord dnij = -scale * (pos_i - posArr[j])*weight*(1.0f / r);
+					Coord corrected = dnij;// Vec2Float(A_i*Float2Vec(dnij));
 
-					Coord dvij = (pressure[j] - pressure[pId])*corrected;
-					Coord dvjj = (pressure[j] + airPressure) * corrected;
-					Coord dvij_sym = 0.5f*(pressure[pId] + pressure[j])*corrected;
+					Real clamp_r = r;
+					Coord dvij = (preArr[j] - preArr[pId])*corrected;
+					Coord dvjj = (preArr[j] +/* const_vc_state.pAir*/0) * corrected;
 
 					//Calculate asymmetric pressure force
 					if (att_j.isDynamic())
 					{
-						if (bSurface[pId])
+						if (bSurface[pId] && !bNearWall)
 						{
 							dv_i += dvjj;
 						}
@@ -506,220 +503,318 @@ namespace dyno
 						{
 							dv_i += dvij;
 						}
-
-						if (bSurface[j])
-						{
-							Coord dvii = -(pressure[pId] + airPressure) * corrected;
-							atomicAdd(&velocity[j][0], ceo*dvii[0]);
-							atomicAdd(&velocity[j][1], ceo*dvii[1]);
-							atomicAdd(&velocity[j][2], ceo*dvii[2]);
-						}
-						else
-						{
-							atomicAdd(&velocity[j][0], ceo*dvij[0]);
-							atomicAdd(&velocity[j][1], ceo*dvij[1]);
-							atomicAdd(&velocity[j][2], ceo*dvij[2]);
-						}
 					}
 					else
 					{
-						Coord dvii = 2.0f*(pressure[pId]) * corrected;
-						if (bSurface[pId])
-						{
-							dv_i += dvii;
-						}
-
-						float weight = 2.0f*invAlpha*kernWeight(r, smoothingLength);
-						Coord nij = (pos_i - position[j]);
-						if (nij.norm() > EPSILON)
-						{
-							nij = nij.normalize();
-						}
-						else
-							nij = Coord(1.0f, 0.0f, 0.0f);
-
-						Coord normal_j = normal[j];
-						Coord dVel = velocity[j] - vel_i;
-						Real magNVel = dVel.dot(normal_j);
-						Coord nVel = magNVel*normal_j;
-						Coord tVel = dVel - nVel;
-						if (magNVel > EPSILON)
-						{
-							dv_i += weight*nij.dot(nVel + sliding*tVel)*nij;
-						}
-						else
-						{
-							dv_i += weight*nij.dot(separation*nVel + sliding*tVel)*nij;
-						}
-
-
-						// 						float weight = 2.0f*invAlpha*kernWRR(r, const_vc_state.smoothingLength);
-						// 						float3 nij = (pos_i - posArr[j]);
-						// 						//printf("Normal: %f %f %f; Position: %f %f %f \n", normal_i.x, normal_i.y, normal_i.z, posArr[j].x, posArr[j].y, posArr[j].z);
-						// 						dv_i += weight*dot(velArr[j] - vel_i, nij)*nij;
+						Real weight = 1.0f*invAii*kernWRR(r, smoothingLength);
+						Coord nij = (pos_i - posArr[j]);
+						dv_i += weight * (velArr[j] - vel_i).dot(nij)*nij;
 					}
 
+					//Stabilize particles under compression state.
+					if (preArr[j] + preArr[pId] > 0.0f)
+					{
+						Real clamp_r = r;
+						Coord dvij = (preArr[pId])*dnij;
+
+						if (att_j.isDynamic())
+						{
+							atomicAdd(&velArr[j].x, -dvij.x);
+							atomicAdd(&velArr[j].y, -dvij.y);
+							atomicAdd(&velArr[j].z, -dvij.z);
+						}
+						atomicAdd(&velArr[pId].x, dvij.x);
+						atomicAdd(&velArr[pId].y, dvij.y);
+						atomicAdd(&velArr[pId].z, dvij.z);
+					}
 				}
 			}
 
-			dv_i *= ceo;
-
-			atomicAdd(&velocity[pId][0], dv_i[0]);
-			atomicAdd(&velocity[pId][1], dv_i[1]);
-			atomicAdd(&velocity[pId][2], dv_i[2]);
+			velArr[pId] += dv_i;
 		}
 	}
 
-	template<typename Coord>
-	__global__ void VC_InitializeNormal(
-		DArray<Coord> normal)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= normal.size()) return;
 
-		normal[pId] = Coord(0);
-	}
+// 	template <typename Real, typename Coord>
+// 	__global__ void VC_UpdateVelocityBoundaryCorrected(
+// 		DArray<Real> pressure,
+// 		DArray<Real> alpha,
+// 		DArray<bool> bSurface,
+// 		DArray<Coord> position,
+// 		DArray<Coord> velocity,
+// 		DArray<Coord> normal,
+// 		DArray<Attribute> attribute,
+// 		DArrayList<int> neighbors,
+// 		Real restDensity,
+// 		Real airPressure,
+// 		Real sliding,
+// 		Real separation,
+// 		Real smoothingLength,
+// 		Real dt)
+// 	{
+// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+// 		if (pId >= position.size()) return;
+// 
+// 		if (attribute[pId].isDynamic())
+// 		{
+// 			Coord pos_i = position[pId];
+// 			Real p_i = pressure[pId];
+// 
+// 			Real ceo = 1.6f;
+// 
+// 			Real invAlpha = 1.0f / alpha[pId];
+// 			Coord vel_i = velocity[pId];
+// 			Coord dv_i(0.0f);
+// 			Real scale = 1.0f*dt / restDensity;
+// 
+// 			List<int>& list_i = neighbors[pId];
+// 			int nbSize = list_i.size();
+// 			for (int ne = 0; ne < nbSize; ne++)
+// 			{
+// 				int j = list_i[ne];
+// 				Real r = (pos_i - position[j]).norm();
+// 
+// 				Attribute att_j = attribute[j];
+// 				if (r > EPSILON)
+// 				{
+// 					Real weight = -invAlpha*kernWR(r, smoothingLength);
+// 					Coord dnij = (pos_i - position[j])*(1.0f / r);
+// 					Coord corrected = dnij;
+// 					if (corrected.norm() > EPSILON)
+// 					{
+// 						corrected = corrected.normalize();
+// 					}
+// 					corrected = -scale*weight*corrected;
+// 
+// 					Coord dvij = (pressure[j] - pressure[pId])*corrected;
+// 					Coord dvjj = (pressure[j] + airPressure) * corrected;
+// 					Coord dvij_sym = 0.5f*(pressure[pId] + pressure[j])*corrected;
+// 
+// 					//Calculate asymmetric pressure force
+// 					if (att_j.isDynamic())
+// 					{
+// 						if (bSurface[pId])
+// 						{
+// 							dv_i += dvjj;
+// 						}
+// 						else
+// 						{
+// 							dv_i += dvij;
+// 						}
+// 
+// 						if (bSurface[j])
+// 						{
+// 							Coord dvii = -(pressure[pId] + airPressure) * corrected;
+// 							atomicAdd(&velocity[j][0], ceo*dvii[0]);
+// 							atomicAdd(&velocity[j][1], ceo*dvii[1]);
+// 							atomicAdd(&velocity[j][2], ceo*dvii[2]);
+// 						}
+// 						else
+// 						{
+// 							atomicAdd(&velocity[j][0], ceo*dvij[0]);
+// 							atomicAdd(&velocity[j][1], ceo*dvij[1]);
+// 							atomicAdd(&velocity[j][2], ceo*dvij[2]);
+// 						}
+// 					}
+// 					else
+// 					{
+// 						Coord dvii = 2.0f*(pressure[pId]) * corrected;
+// 						if (bSurface[pId])
+// 						{
+// 							dv_i += dvii;
+// 						}
+// 
+// 						float weight = 2.0f*invAlpha*kernWeight(r, smoothingLength);
+// 						Coord nij = (pos_i - position[j]);
+// 						if (nij.norm() > EPSILON)
+// 						{
+// 							nij = nij.normalize();
+// 						}
+// 						else
+// 							nij = Coord(1.0f, 0.0f, 0.0f);
+// 
+// 						Coord normal_j = normal[j];
+// 						Coord dVel = velocity[j] - vel_i;
+// 						Real magNVel = dVel.dot(normal_j);
+// 						Coord nVel = magNVel*normal_j;
+// 						Coord tVel = dVel - nVel;
+// 						if (magNVel > EPSILON)
+// 						{
+// 							dv_i += weight*nij.dot(nVel + sliding*tVel)*nij;
+// 						}
+// 						else
+// 						{
+// 							dv_i += weight*nij.dot(separation*nVel + sliding*tVel)*nij;
+// 						}
+// 
+// 
+// 						// 						float weight = 2.0f*invAlpha*kernWRR(r, const_vc_state.smoothingLength);
+// 						// 						float3 nij = (pos_i - posArr[j]);
+// 						// 						//printf("Normal: %f %f %f; Position: %f %f %f \n", normal_i.x, normal_i.y, normal_i.z, posArr[j].x, posArr[j].y, posArr[j].z);
+// 						// 						dv_i += weight*dot(velArr[j] - vel_i, nij)*nij;
+// 					}
+// 
+// 				}
+// 			}
+// 
+// 			dv_i *= ceo;
+// 
+// 			atomicAdd(&velocity[pId][0], dv_i[0]);
+// 			atomicAdd(&velocity[pId][1], dv_i[1]);
+// 			atomicAdd(&velocity[pId][2], dv_i[2]);
+// 		}
+// 	}
 
-	__global__ void VC_InitializeAttribute(
-		DArray<Attribute> attr)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= attr.size()) return;
+// 	template<typename Coord>
+// 	__global__ void VC_InitializeNormal(
+// 		DArray<Coord> normal)
+// 	{
+// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+// 		if (pId >= normal.size()) return;
+// 
+// 		normal[pId] = Coord(0);
+// 	}
+// 
+// 	__global__ void VC_InitializeAttribute(
+// 		DArray<Attribute> attr)
+// 	{
+// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+// 		if (pId >= attr.size()) return;
+// 
+// 		attr[pId].setDynamic();
+// 	}
 
-		attr[pId].setDynamic();
-	}
+// 	template<typename TDataType>
+// 	bool VelocityConstraint<TDataType>::initializeImpl()
+// 	{
+// 		int num = this->inPosition()->getElementCount();
+// 
+// 		m_alpha.resize(num);
+// 		m_Aii.resize(num);
+// 		m_AiiFluid.resize(num);
+// 		m_AiiTotal.resize(num);
+// 		m_pressure.resize(num);
+// 		m_divergence.resize(num);
+// 		m_bSurface.resize(num);
+// 
+// 		m_y.resize(num);
+// 		m_r.resize(num);
+// 		m_p.resize(num);
+// 
+// 		m_pressure.resize(num);
+// 
+// 		m_reduce = Reduction<float>::Create(num);
+// 		m_arithmetic = Arithmetic<float>::Create(num);
+// 
+// 
+// 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
+// 
+// 		m_alpha.reset();
+// 		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
+// 			m_alpha,
+// 			this->inPosition()->getData(),
+// 			this->inAttribute()->getData(),
+// 			this->inNeighborIds()->getData(),
+// 			this->inSmoothingLength()->getData());
+// 
+// 		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
+// 
+// 		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
+// 			m_alpha,
+// 			m_maxAlpha);
+// 
+// 		m_AiiFluid.reset();
+// 		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
+// 			m_AiiFluid,
+// 			m_alpha,
+// 			this->inPosition()->getData(),
+// 			this->inAttribute()->getData(),
+// 			this->inNeighborIds()->getData(),
+// 			this->inSmoothingLength()->getData());
+// 
+// 		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
+// 
+// 		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
+// 		std::cout << "Max A: " << m_maxA << std::endl;
+// 
+// //		m_normal.setElementCount(num);
+// //		m_attribute.setElementCount(num);
+// 
+// // 		cuExecute(num,
+// // 			VC_InitializeNormal,
+// // 			m_normal.getData());
+// 
+// // 		cuExecute(num,
+// // 			VC_InitializeAttribute,
+// // 			m_attribute.getData());
+// 
+// 		return true;
+// 	}
 
 	template<typename TDataType>
-	bool VelocityConstraint<TDataType>::initializeImpl()
+	void VariationalApproximateProjection<TDataType>::constrain()
 	{
 		int num = this->inPosition()->getElementCount();
 
-		m_alpha.resize(num);
-		m_Aii.resize(num);
-		m_AiiFluid.resize(num);
-		m_AiiTotal.resize(num);
-		m_pressure.resize(num);
-		m_divergence.resize(num);
-		m_bSurface.resize(num);
-
-		m_y.resize(num);
-		m_r.resize(num);
-		m_p.resize(num);
-
-		m_pressure.resize(num);
-
-		m_reduce = Reduction<float>::Create(num);
-		m_arithmetic = Arithmetic<float>::Create(num);
-
-
-		uint pDims = cudaGridSize(num, BLOCK_SIZE);
-
-		m_alpha.reset();
-		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
-			m_alpha,
-			this->inPosition()->getData(),
-			m_attribute.getData(),
-			this->inNeighborIds()->getData(),
-			this->inSmoothingLength()->getData());
-
-		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
-
-		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
-			m_alpha,
-			m_maxAlpha);
-
-		m_AiiFluid.reset();
-		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
-			m_AiiFluid,
-			m_alpha,
-			this->inPosition()->getData(),
-			m_attribute.getData(),
-			this->inNeighborIds()->getData(),
-			this->inSmoothingLength()->getData());
-
-		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
-
-		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
-		std::cout << "Max A: " << m_maxA << std::endl;
-
-		m_normal.setElementCount(num);
-		m_attribute.setElementCount(num);
-
-		cuExecute(num,
-			VC_InitializeNormal,
-			m_normal.getData());
-
-		cuExecute(num,
-			VC_InitializeAttribute,
-			m_attribute.getData());
-
-		return true;
-	}
-
-	template<typename TDataType>
-	void VelocityConstraint<TDataType>::constrain()
-	{
-		int num = this->inPosition()->getElementCount();
-
-		if (num != m_alpha.size())
+		if (num != mAlpha.size())
 		{
-			m_alpha.resize(num);
-			m_Aii.resize(num);
-			m_AiiFluid.resize(num);
-			m_AiiTotal.resize(num);
-			m_pressure.resize(num);
-			m_divergence.resize(num);
-			m_bSurface.resize(num);
+			mAlpha.resize(num);
+			mAii.resize(num);
+			mAiiFluid.resize(num);
+			mAiiTotal.resize(num);
+			mPressure.resize(num);
+			mDivergence.resize(num);
+			mIsSurface.resize(num);
 
 			m_y.resize(num);
 			m_r.resize(num);
 			m_p.resize(num);
 
-			m_pressure.resize(num);
+			mPressure.resize(num);
 
-			m_normal.setElementCount(num);
-			m_attribute.setElementCount(num);
+//			m_normal.setElementCount(num);
+			//m_attribute.setElementCount(num);
 
-			cuExecute(num,
-				VC_InitializeNormal,
-				m_normal.getData());
+// 			cuExecute(num,
+// 				VC_InitializeNormal,
+// 				m_normal.getData());
 
-			cuExecute(num,
-				VC_InitializeAttribute,
-				m_attribute.getData());
+// 			cuExecute(num,
+// 				VC_InitializeAttribute,
+// 				m_attribute.getData());
 
 			m_reduce = Reduction<float>::Create(num);
 			m_arithmetic = Arithmetic<float>::Create(num);
 
 			uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
-			m_alpha.reset();
+			mAlpha.reset();
 			VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
-				m_alpha,
+				mAlpha,
 				this->inPosition()->getData(),
-				m_attribute.getData(),
+				this->inAttribute()->getData(),
 				this->inNeighborIds()->getData(),
 				this->inSmoothingLength()->getData());
 
-			m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
+			mAlphaMax = m_reduce->maximum(mAlpha.begin(), mAlpha.size());
 
 			VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
-				m_alpha,
-				m_maxAlpha);
+				mAlpha,
+				mAlphaMax);
 
-			m_AiiFluid.reset();
+			mAiiFluid.reset();
 			VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
-				m_AiiFluid,
-				m_alpha,
+				mAiiFluid,
+				mAlpha,
 				this->inPosition()->getData(),
-				m_attribute.getData(),
+				this->inAttribute()->getData(),
 				this->inNeighborIds()->getData(),
 				this->inSmoothingLength()->getData());
 
-			m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
+			mAMax = m_reduce->maximum(mAiiFluid.begin(), mAiiFluid.size());
 
-			std::cout << "Max alpha: " << m_maxAlpha << std::endl;
-			std::cout << "Max A: " << m_maxA << std::endl;
+			std::cout << "Max alpha: " << mAlphaMax << std::endl;
+			std::cout << "Max A: " << mAMax << std::endl;
 		}
 
 		Real dt = this->inTimeStep()->getData();
@@ -727,84 +822,85 @@ namespace dyno
 		uint pDims = cudaGridSize(this->inPosition()->getElementCount(), BLOCK_SIZE);
 
 		//compute alpha_i = sigma w_j and A_i = sigma w_ij / r_ij / r_ij
-		m_alpha.reset();
+		mAlpha.reset();
 		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
-			m_alpha, 
+			mAlpha, 
 			this->inPosition()->getData(),
-			m_attribute.getData(), 
+			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(), 
 			this->inSmoothingLength()->getData());
 		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
-			m_alpha, 
-			m_maxAlpha);
+			mAlpha, 
+			mAlphaMax);
 
 		//compute the diagonal elements of the coefficient matrix
-		m_AiiFluid.reset();
-		m_AiiTotal.reset();
+		mAiiFluid.reset();
+		mAiiTotal.reset();
 		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
-			m_AiiFluid, 
-			m_AiiTotal, 
-			m_alpha, 
+			mAiiFluid, 
+			mAiiTotal, 
+			mAlpha, 
 			this->inPosition()->getData(),
-			m_attribute.getData(),
+			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getData());
 
-		m_bSurface.reset();
-		m_Aii.reset();
+		mIsSurface.reset();
+		mAii.reset();
 		VC_DetectSurface << <pDims, BLOCK_SIZE >> > (
-			m_Aii, 
-			m_bSurface, 
-			m_AiiFluid,
-			m_AiiTotal,
+			mAii, 
+			mIsSurface, 
+			mAiiFluid,
+			mAiiTotal,
 			this->inPosition()->getData(),
-			m_attribute.getData(),
+			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getData(),
-			m_maxA);
+			mAMax);
 
 		int itor = 0;
 
 		//compute the source term
-		m_densitySum->compute();
-		m_divergence.reset();
+		mDensityCalculator->compute();
+		mDivergence.reset();
 		VC_ComputeDivergence << <pDims, BLOCK_SIZE >> > (
-			m_divergence, 
-			m_alpha, 
-			m_densitySum->outDensity()->getData(),
+			mDivergence, 
+			mAlpha, 
+			mDensityCalculator->outDensity()->getData(),
 			this->inPosition()->getData(),
 			this->inVelocity()->getData(), 
-			m_bSurface, 
-			m_normal.getData(), 
-			m_attribute.getData(), 
+			mIsSurface, 
+			this->inNormal()->getData(), 
+			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
-			m_separation, 
-			m_tangential, 
-			m_restDensity,
+			mSeparation, 
+			mTangential, 
+			this->varRestDensity()->getData(),
 			this->inSmoothingLength()->getData(),
 			dt);
+
 		VC_CompensateSource << <pDims, BLOCK_SIZE >> > (
-			m_divergence, 
-			m_densitySum->outDensity()->getData(),
-			m_attribute.getData(), 
+			mDivergence, 
+			mDensityCalculator->outDensity()->getData(),
+			this->inAttribute()->getData(),
 			this->inPosition()->getData(),
-			m_restDensity, 
+			this->varRestDensity()->getData(),
 			dt);
 		
 		//solve the linear system of equations with a conjugate gradient method.
 		m_y.reset();
 		VC_ComputeAx << <pDims, BLOCK_SIZE >> > (
 			m_y, 
-			m_pressure, 
-			m_Aii, 
-			m_alpha, 
+			mPressure, 
+			mAii, 
+			mAlpha, 
 			this->inPosition()->getData(),
-			m_attribute.getData(),
+			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getData());
 
 		m_r.reset();
-		Function2Pt::subtract(m_r, m_divergence, m_y);
+		Function2Pt::subtract(m_r, mDivergence, m_y);
 		m_p.assign(m_r);
 		Real rr = m_arithmetic->Dot(m_r, m_r);
 		Real err = sqrt(rr / m_r.size());
@@ -816,15 +912,15 @@ namespace dyno
 			VC_ComputeAx << <pDims, BLOCK_SIZE >> > (
 				m_y, 
 				m_p, 
-				m_Aii, 
-				m_alpha, 
+				mAii, 
+				mAlpha, 
 				this->inPosition()->getData(),
-				m_attribute.getData(),
+				this->inAttribute()->getData(),
 				this->inNeighborIds()->getData(),
 				this->inSmoothingLength()->getData());
 
 			float alpha = rr / m_arithmetic->Dot(m_p, m_y);
-			Function2Pt::saxpy(m_pressure, m_p, m_pressure, alpha);
+			Function2Pt::saxpy(mPressure, m_p, mPressure, alpha);
 			Function2Pt::saxpy(m_r, m_y, m_r, -alpha);
 
 			Real rr_old = rr;
@@ -840,22 +936,34 @@ namespace dyno
 		}
 
 		//update the each particle's velocity
-		VC_UpdateVelocityBoundaryCorrected << <pDims, BLOCK_SIZE >> > (
-			m_pressure,
-			m_alpha,
-			m_bSurface, 
+// 		VC_UpdateVelocityBoundaryCorrected << <pDims, BLOCK_SIZE >> > (
+// 			m_pressure,
+// 			m_alpha,
+// 			m_bSurface, 
+// 			this->inPosition()->getData(),
+// 			this->inVelocity()->getData(),
+// 			this->inNormal()->getData(),
+// 			this->inAttribute()->getData(),
+// 			this->inNeighborIds()->getData(),
+// 			m_restDensity,
+// 			m_airPressure,
+// 			m_tangential,
+// 			m_separation,
+// 			this->inSmoothingLength()->getData(),
+// 			dt);
+
+		VC_UpdateVelocity1rd << <pDims, BLOCK_SIZE >> > (
+			mPressure,
+			mAlpha,
+			mIsSurface,
 			this->inPosition()->getData(),
-			this->inVelocity()->getData(),
-			m_normal.getData(), 
-			m_attribute.getData(), 
+ 			this->inVelocity()->getData(),
+			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
-			m_restDensity,
-			m_airPressure,
-			m_tangential,
-			m_separation,
+			this->varRestDensity()->getData(),
 			this->inSmoothingLength()->getData(),
 			dt);
 	}
 
-	DEFINE_CLASS(VelocityConstraint);
+	DEFINE_CLASS(VariationalApproximateProjection);
 }

@@ -1,6 +1,4 @@
 #include "ParticleSystem.h"
-#include "PositionBasedFluidModel.h"
-
 #include "Topology/PointSet.h"
 
 namespace dyno

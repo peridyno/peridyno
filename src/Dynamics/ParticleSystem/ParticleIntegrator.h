@@ -25,6 +25,8 @@ namespace dyno {
 
 	public:
 
+		DEF_VAR_IN(Real, TimeStep, "Time step size");
+
 		/**
 		* @brief Position
 		* Particle position
