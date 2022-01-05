@@ -29,19 +29,18 @@ namespace dyno
 		DArray<int> count,
 		Coord hi,
 		Coord lo,
-		int start_sphere,
-		int start_box,
-		int start_tet,
-		int start_segment)
+		ElementOffset elementOffset)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size() + box.size() + tet.size()) return;
+		if (pId >= count.size()) return;
 
-		if (pId < start_box && pId >= start_sphere)//sphere
+		ElementType eleType = elementOffset.checkElementType(pId);
+
+		if (eleType == ET_SPHERE)//sphere
 		{
 			int cnt = 0;
 
-			Sphere3D sp = sphere[pId - start_sphere];
+			Sphere3D sp = sphere[pId - elementOffset.sphereIndex()];
 
 			Real radius = sp.radius;
 			Coord center = sp.center;
@@ -75,16 +74,16 @@ namespace dyno
 
 			count[pId] = cnt;
 		}
-		else if (pId >= start_box && pId < start_tet)//box
+		else if (eleType == ET_BOX)//box
 		{
 			//int idx = pId - start_box;
 			int cnt = 0;
 			//				int start_i;
-			Coord center = box[pId - start_box].center;
-			Coord u = box[pId - start_box].u;
-			Coord v = box[pId - start_box].v;
-			Coord w = box[pId - start_box].w;
-			Coord extent = box[pId - start_box].extent;
+			Coord center = box[pId - elementOffset.boxIndex()].center;
+			Coord u = box[pId - elementOffset.boxIndex()].u;
+			Coord v = box[pId - elementOffset.boxIndex()].v;
+			Coord w = box[pId - elementOffset.boxIndex()].w;
+			Coord extent = box[pId - elementOffset.boxIndex()].extent;
 			Point3D p[8];
 			p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
 			p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
@@ -132,12 +131,12 @@ namespace dyno
 			}
 			count[pId] = cnt;
 		}
-		else if (pId >= start_tet && pId < start_segment) // tets
+		else if (eleType == ET_TET) // tets
 		{
 			int cnt = 0;
 			int start_i = count[pId];
 
-			Tet3D tet_i = tet[pId - start_tet];
+			Tet3D tet_i = tet[pId - elementOffset.tetIndex()];
 
 			for (int i = 0; i < 4; i++)
 			{
@@ -186,20 +185,19 @@ namespace dyno
 		DArray<ContactPair> nbq,
 		Coord hi,
 		Coord lo,
-		int start_sphere,
-		int start_box,
-		int start_tet,
-		int start_segment)
+		ElementOffset elementOffset)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size() + box.size() + tet.size()) return;
+		if (pId >= count.size()) return;
 
-		if (pId < start_box && pId >= start_sphere)//sphere
+		ElementType eleType = elementOffset.checkElementType(pId);
+
+		if (eleType == ET_SPHERE)//sphere
 		{
 			int cnt = 0;
 			int start_i = count[pId];
 
-			Sphere3D sp = sphere[pId - start_sphere];
+			Sphere3D sp = sphere[pId - elementOffset.sphereIndex()];
 
 			Real radius = sp.radius;
 			Coord center = sp.center;
@@ -267,16 +265,16 @@ namespace dyno
 				cnt++;
 			}
 		}
-		else if (pId >= start_box && pId < start_tet)//box
+		else if (eleType == ET_BOX)//box
 		{
 			//int idx = pId - start_box;
 			int cnt = 0;
 			int start_i = count[pId];
-			Coord center = box[pId - start_box].center;
-			Coord u = box[pId - start_box].u;
-			Coord v = box[pId - start_box].v;
-			Coord w = box[pId - start_box].w;
-			Coord extent = box[pId - start_box].extent;
+			Coord center = box[pId - elementOffset.boxIndex()].center;
+			Coord u = box[pId - elementOffset.boxIndex()].u;
+			Coord v = box[pId - elementOffset.boxIndex()].v;
+			Coord w = box[pId - elementOffset.boxIndex()].w;
+			Coord extent = box[pId - elementOffset.boxIndex()].extent;
 			Point3D p[8];
 			p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
 			p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
@@ -359,15 +357,13 @@ namespace dyno
 				}
 
 			}
-
 		}
-		else if (pId >= start_tet && pId < start_segment) // tets
+		else if (eleType == ET_TET) // tets
 		{
-			//printf("???????\n");
 			int cnt = 0;
 			int start_i = count[pId];
 
-			Tet3D tet_i = tet[pId - start_tet];
+			Tet3D tet_i = tet[pId - elementOffset.tetIndex()];
 
 			for (int i = 0; i < 4; i++)
 			{
@@ -463,10 +459,7 @@ namespace dyno
 				mBoundaryContactCounter,
 				mUpperCorner,
 				mLowerCorner,
-				0,
-				offset.boxIndex(),
-				offset.tetIndex(),
-				offset.capsuleIndex());
+				offset);
 
 			sum += m_reduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
 			m_scan.exclusive(mBoundaryContactCounter, true);
@@ -483,10 +476,7 @@ namespace dyno
 					this->outContacts()->getData(),
 					mUpperCorner,
 					mLowerCorner,
-					0,
-					offset.boxIndex(),
-					offset.tetIndex(),
-					offset.capsuleIndex());
+					offset);
 			}
 		}
 		else

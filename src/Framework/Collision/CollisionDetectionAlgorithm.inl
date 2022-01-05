@@ -1689,4 +1689,34 @@ namespace dyno
 		request(m, tet, box);
 		m.normal *= -1;
 	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphere, const Tet3D& tet)
+	{
+		m.contactCount = 0;
+
+		Point3D c0(sphere.center);
+		Real r0 = sphere.radius;
+
+		Point3D vproj = c0.project(tet);
+		bool bInside = c0.inside(tet);
+
+		Segment3D dir = bInside ? c0 - vproj : vproj - c0;
+		Real sMax = bInside ? -dir.direction().norm() - r0 : dir.direction().norm() - r0;
+
+		if (sMax >= 0)
+			return;
+
+		m.normal = dir.direction().normalize();
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = vproj.origin;
+		m.contactCount = 1;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Sphere3D& sphere)
+	{
+		request(m, sphere, tet);
+		m.normal *= -1;
+	}
 }
