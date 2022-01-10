@@ -34,21 +34,19 @@ namespace dyno
 		heights->setExtents(m_oceanHeight, m_oceanHeight);
 
 		m_choppiness = 1.0f;
-
-		m_patch = new OceanPatch<DataType3f>(m_fft_size, m_patchSize, m_windType);
-
-		m_realGridSize = m_patch->getGridLength();
 	}
 
 	template<typename TDataType>
 	Ocean<TDataType>::~Ocean()
 	{
-		delete m_patch;
+		
 	}
 
 	template<typename TDataType>
 	void Ocean<TDataType>::resetStates()
 	{
+		auto m_patch = this->getOceanPatch();
+
 		m_patch->initialize();
 
 		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
@@ -93,6 +91,8 @@ namespace dyno
 	template<typename TDataType>
 	void Ocean<TDataType>::animate(float dt)
 	{
+		auto m_patch = this->getOceanPatch();
+
 		m_patch->animate(m_eclipsedTime);
 		m_patch->update();
 

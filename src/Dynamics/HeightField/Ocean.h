@@ -12,13 +12,18 @@ namespace dyno
 
 		void animate(float dt);
 
-		float2 getWindDirection() { return make_float2(cosf(m_patch->windDir), sinf(m_patch->windDir)); }
+		float2 getWindDirection() { 
+			auto m_patch = this->getOceanPatch();
+			return make_float2(cosf(m_patch->windDir), sinf(m_patch->windDir)); 
+		}
+		
 		float getFftRealSize() { return m_fft_real_size; }
 		int getFftResolution() { return m_fft_size; }
 		float getChoppiness() { return m_choppiness; }
+
 		void setChoppiness(float chopiness) {
 			m_choppiness = chopiness;
-			m_patch->setChoppiness(m_choppiness);
+			this->getOceanPatch()->setChoppiness(m_choppiness);
 		}
 		//OceanPatch* getOceanPatch() { return m_patch; }
 		int getGridSize() { return m_fft_size; }
@@ -27,7 +32,7 @@ namespace dyno
 		float getPatchLength();
 		float getGridLength();
 
-		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "");
+		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 
 	protected:
 		void resetStates() override;
@@ -63,8 +68,5 @@ namespace dyno
 
 	private:
 		DArray2D<Vec4f> oceanVertex;
-
-		//fft wave simulation object
-		OceanPatch<DataType3f>* m_patch = nullptr;
 	};
 }

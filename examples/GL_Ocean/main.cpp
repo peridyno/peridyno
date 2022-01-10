@@ -19,6 +19,10 @@ void CreateScene()
 
  	std::shared_ptr<Ocean<DataType3f>> root = scene.createNewScene<Ocean<DataType3f>>();
 
+	auto oceanPatch = std::make_shared<OceanPatch<DataType3f>>(512, 512, 4);
+	root->setOceanPatch22(oceanPatch);
+
+
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 	mapper->varScale()->setValue(0.01);
 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
