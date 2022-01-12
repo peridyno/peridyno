@@ -1,6 +1,6 @@
 #pragma once
 #include "OceanPatch.h"
-
+#include "CapillaryWave.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -31,17 +31,20 @@ namespace dyno
 		//返回每个块实际覆盖的距离
 		float getPatchLength();
 		float getGridLength();
+		void addOceanTrails(DArray2D<Vec3f> oceanVertex);
 
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 
+		DEF_NODE_PORTS(CapillaryWave, CapillaryWave<TDataType>, "Capillary Wave");
 	protected:
 		void resetStates() override;
 		void updateStates() override;
 
+
 	public:
 		//挤压波形形成尖浪
 		float m_choppiness = 1.0f;
-
+		
 		//初始风级
 		int m_windType = 8;
 
@@ -67,6 +70,7 @@ namespace dyno
 		int Ny = 4;
 
 	private:
-		DArray2D<Vec4f> oceanVertex;
+		DArray2D<Vec3f> oceanVertex;
+
 	};
 }

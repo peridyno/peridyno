@@ -4,6 +4,7 @@
 
 #include <HeightField/Ocean.h>
 #include <HeightField/OceanPatch.h>
+#include <HeightField/CapillaryWave.h>
 
 #include "Mapping/HeightFieldToTriangleSet.h"
 
@@ -20,7 +21,10 @@ void CreateScene()
  	std::shared_ptr<Ocean<DataType3f>> root = scene.createNewScene<Ocean<DataType3f>>();
 
 	auto oceanPatch = std::make_shared<OceanPatch<DataType3f>>(512, 512, 4);
-	root->setOceanPatch22(oceanPatch);
+	root->setOceanPatch(oceanPatch);
+
+	auto capillaryWave = std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f);
+	root->addCapillaryWave(capillaryWave);
 
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();

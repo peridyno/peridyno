@@ -23,6 +23,25 @@ namespace dyno
 		virtual ~CapillaryWave();
 
 		DArray2D<Coord4> GetHeight() { return mHeight; }
+
+		float getHorizon() { return horizon; }
+
+		void setOriginX(int x) { simulatedOriginX = x; }
+		void setOriginY(int y) { simulatedOriginY = y; }
+
+		int simulatedOriginX = 0;			//动态区域初始x坐标
+		int simulatedOriginY = 0;			//动态区域初始y坐标
+
+		int getOriginX() { return simulatedOriginX; }
+		int getOriginZ() { return simulatedOriginY; }
+
+		int getGridSize() { return simulatedRegionWidth; }
+		float getRealGridSize() { return realGridSize; }
+
+		DArray2D<Coord4> getHeightField() { return mHeight; }
+		Vec2f getOrigin() { return Vec2f(simulatedOriginX * realGridSize, simulatedOriginY * realGridSize); }
+
+
 	protected:
 		void resetStates() override;
 
