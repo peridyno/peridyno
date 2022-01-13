@@ -26,7 +26,6 @@ void CreateScene()
 	auto capillaryWave = std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f);
 	root->addCapillaryWave(capillaryWave);
 
-
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 	mapper->varScale()->setValue(0.01);
 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));

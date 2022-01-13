@@ -31,15 +31,13 @@ namespace dyno
 		//返回每个块实际覆盖的距离
 		float getPatchLength();
 		float getGridLength();
-		void addOceanTrails(DArray2D<Vec3f> oceanVertex);
 
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
-
 		DEF_NODE_PORTS(CapillaryWave, CapillaryWave<TDataType>, "Capillary Wave");
+
 	protected:
 		void resetStates() override;
 		void updateStates() override;
-
 
 	public:
 		//挤压波形形成尖浪
@@ -66,11 +64,8 @@ namespace dyno
 		float m_virtualGridSize;
 		float m_realGridSize;
 
-		int Nx = 4;
-		int Ny = 4;
-
-	private:
-		DArray2D<Vec3f> oceanVertex;
+		int Nx = 2;
+		int Ny = 2;
 
 	};
 }

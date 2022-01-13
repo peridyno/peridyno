@@ -42,37 +42,6 @@ namespace dyno
 		
 	}
 
-	__global__ void O_InitOceanWave2(
-		DArray2D<Vec3f> oceanVertex,
-		DArray2D<Vec3f> displacement)
-	{
-		int i = threadIdx.x + blockIdx.x * blockDim.x;
-		int j = threadIdx.y + blockIdx.y * blockDim.y;
-
-		int width = displacement.nx();
-		int height = displacement.ny();
-
-		if (i < width && j < height)
-		{
-			Vec3f D_ij = displacement(i, j);
-
-			int tiledX = oceanVertex.nx() / displacement.nx();
-			int tiledY = oceanVertex.ny() / displacement.ny();
-			for (int t = 0; t < tiledX; t++)
-			{
-				for (int s = 0; s < tiledY; s++)
-				{
-					int nx = i + t * width;
-					int ny = j + s * height;
-
-					oceanVertex(nx, ny).y += 10;// [ny * oceanWidth + nx] = v;
-					displacement(i, j).y = oceanVertex(nx, ny).y;
-
-				}
-			}
-		}
-	}
-
 	template<typename TDataType>
 	void Ocean<TDataType>::resetStates()
 	{
@@ -89,18 +58,6 @@ namespace dyno
 		topo->setGridSpacing(h);
 		topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
 
-
-
-		int x = (m_fft_size + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (m_fft_size + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
-
-		/*
-		O_InitOceanWave2 << < blocksPerGrid, threadsPerBlock >> > (
-			topo->getDisplacement(),
-			patch->getDisplacement());
-		printf("99999999999999999\n");*/
 	}
 
 	__global__ void O_InitOceanWave(
@@ -132,6 +89,35 @@ namespace dyno
 		}
 	}
 
+	__global__ void O_AddOceanTrails(
+		DArray2D<Vec3f> oceanVertex,
+		DArray2D<Vec3f> CapillaryWave)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		int j = threadIdx.y + blockIdx.y * blockDim.y;
+
+		int width = CapillaryWave.nx();
+		int height = CapillaryWave.ny();
+
+		if (i < width && j < height)
+		{
+			Vec3f C_ij = CapillaryWave(i, j);
+
+			int tiledX = oceanVertex.nx() / CapillaryWave.nx();
+			int tiledY = oceanVertex.ny() / CapillaryWave.ny();
+			for (int t = 0; t < tiledX; t++)
+			{
+				for (int s = 0; s < tiledY; s++)
+				{
+					int nx = i + t * width;
+					int ny = j + s * height;
+
+					oceanVertex(nx, ny) += C_ij;
+				}
+			}
+		}
+	}
+
 	template<typename TDataType>
 	void Ocean<TDataType>::animate(float dt)
 	{
@@ -152,14 +138,20 @@ namespace dyno
 		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
 
 		auto topoPatch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());
-
 		topo->setGridSpacing(topoPatch->getGridSpacing());
 		
 		O_InitOceanWave << < blocksPerGrid, threadsPerBlock >> > (
 			topo->getDisplacement(),
 			topoPatch->getDisplacement());
+		
+		auto capillaryWaves = this->getCapillaryWaves();
+		for(int i = 0; i < capillaryWaves.size(); i++){
+			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->currentTopology()->getDataPtr());
+			O_AddOceanTrails << < blocksPerGrid, threadsPerBlock >> > (
+				topo->getDisplacement(),
+				topoCapillaryWave->getDisplacement());
+		}
 
-		addOceanTrails(topo->getDisplacement());
 	}
 
 	template<typename TDataType>
@@ -180,76 +172,7 @@ namespace dyno
 		return m_patchSize / m_fft_size;
 	}
 
-	__global__ void O_AddCapillaryWave(
-		DArray2D<Vec3f> oceanVertex,
-		DArray2D<Vec4f> heightfield,
-		int waveGridSize,
-		int oceanWidth,
-		int oceanHeight,
-		int originX,
-		int originY,
-		float waveSpacing,
-		float oceanSpacing,
-		float horizon,
-		float realSize)
-	{
-		int i = threadIdx.x + blockIdx.x * blockDim.x;
-		int j = threadIdx.y + blockIdx.y * blockDim.y;
 
-		if (i < waveGridSize && j < waveGridSize)
-		{
-			float d = sqrtf((i - waveGridSize / 2) * (i - waveGridSize / 2) + (j - waveGridSize / 2) * (j - waveGridSize / 2));
-			float q = d / (0.49f * waveGridSize);
-
-			float weight = q < 1.0f ? 1.0f - q * q : 0.0f;
-
-			int oi = (i + originX) * waveSpacing / oceanSpacing;
-			int oj = (j + originY) * waveSpacing / oceanSpacing;
-
-			if (oi > 0 && oi < oceanWidth && oj > 0 && oj < oceanHeight)
-			{
-				int ocean_id = oj * oceanWidth + oi;
-				int hf_id = j * waveGridSize + i;
-				float h_ij = heightfield[hf_id].x;
-				Vec3f o_ij = oceanVertex[ocean_id];
-
-				float value = sin(3.0f * weight * h_ij * 0.5f * M_PI);
-				o_ij.y += realSize * value;// 3.0f*weight*realSize*h_ij;
-
-				oceanVertex[ocean_id] = o_ij;
-			}
-		}
-	}
-
-	template<typename TDataType>
-	void Ocean<TDataType>::addOceanTrails(DArray2D<Vec3f> oceanVertex)
-	{
-
-		int x = (m_fft_size + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (m_fft_size + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
-	
-		auto trails = this->getCapillaryWaves();
-		for (size_t i = 0; i < trails.size(); i++)
-		{
-			auto trail = trails[i];
-	
-			O_AddCapillaryWave << < blocksPerGrid, threadsPerBlock >> > (
-				oceanVertex,
-				trail->getHeightField(),
-				trail->getGridSize(),
-				m_oceanWidth,
-				m_oceanHeight,
-				trail->getOriginX(),
-				trail->getOriginZ(),
-				trail->getRealGridSize(),
-				getGridLength(),
-				trail->getHorizon(),
-				0.5f);
-		}
-
-	}
 	DEFINE_CLASS(Ocean);
 }
 

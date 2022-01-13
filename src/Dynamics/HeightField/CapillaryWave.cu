@@ -56,8 +56,7 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateTopology()
 	{
-		printf("CapillaryWave<TDataType>::updateTopology   ------\n");
-
+		
 		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
 
 		auto& shifts = topo->getDisplacement();
@@ -77,15 +76,12 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetStates()
 	{
-		printf("CapillaryWave<TDataType>::resetStates   ------\n");
 		mDisplacement.resize(mResolution, mResolution);
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateStates()
 	{
-		printf("CapillaryWave<TDataType>::updateStates   ------\n");
-
 		compute();
 		this->animationPipeline()->update();
 	}
@@ -106,7 +102,7 @@ namespace dyno
 			
 			grid[y * pitch + x] = gp;
 			//grid2Dwrite(grid, x, y, pitch, gp);
-			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 3.0f;
+			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 10.0f;
 		}
 	}
 
@@ -365,9 +361,6 @@ namespace dyno
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initialize() {
-
-		printf("CapillaryWave<TDataType>::initialize   ------\n");
-
 		initDynamicRegion();
 
 		initSource();
@@ -434,7 +427,7 @@ namespace dyno
 			displacement(i, j).y = horizon;
 			displacement(i, j).z = 0;
 
-			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500)  displacement(i, j).y = 3.0f;
+			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500)  displacement(i, j).y = 10.0f;
 		}
 	}
 
