@@ -6,6 +6,8 @@
 #include <Vector.h>
 #include <Quat.h>
 
+#include "Topology/Primitive3D.h"
+
 namespace dyno
 {
 	typedef Quat<float> Quat1f;
@@ -35,6 +37,8 @@ namespace dyno
 
 		float clipNear() const { return mNear; }
 		float clipFar() const { return mFar; }
+
+		TRay3D<float> castRayInWorldSpace(float x, float y);
 
 	protected:
 		float mNear;

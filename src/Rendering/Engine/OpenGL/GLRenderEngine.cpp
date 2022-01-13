@@ -24,8 +24,10 @@ namespace dyno
 {
 	class RenderQueue : public Action
 	{
-
 	public:
+		RenderQueue() {};
+		~RenderQueue() override { modules.clear(); }
+
 		void draw(GLVisualModule::RenderPass pass)
 		{
 			for (GLVisualModule* m : modules)
@@ -48,7 +50,7 @@ namespace dyno
 				}
 			}
 		}
-		std::vector<dyno::GLVisualModule*> modules;
+		std::vector<GLVisualModule*> modules;
 	};
 
 	GLRenderEngine::GLRenderEngine()

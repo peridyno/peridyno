@@ -13,6 +13,7 @@ namespace dyno
 		: GroupModule()
 	{
 		auto m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->inTimeStep()->connect(m_integrator->inTimeStep());
 		this->inPosition()->connect(m_integrator->inPosition());
 		this->inVelocity()->connect(m_integrator->inVelocity());
 		this->inForce()->connect(m_integrator->inForceDensity());

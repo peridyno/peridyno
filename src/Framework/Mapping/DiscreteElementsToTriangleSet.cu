@@ -8,8 +8,8 @@ namespace dyno
 	DiscreteElementsToTriangleSet<TDataType>::DiscreteElementsToTriangleSet()
 		: TopologyMapping()
 	{
-		mStandardSphere.loadObjFile("../../data/standard/standard_icosahedron.obj");
-		mStandardCapsule.loadObjFile("../../data/standard/standard_capsule.obj");
+		mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+		mStandardCapsule.loadObjFile(getAssetPath() + "standard/standard_capsule.obj");
 	}
 
 	template<typename Triangle>

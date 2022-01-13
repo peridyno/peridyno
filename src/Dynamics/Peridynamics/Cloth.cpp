@@ -22,6 +22,7 @@ namespace dyno
 		: ParticleSystem<TDataType>(name)
 	{
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->varTimeStep()->connect(integrator->inTimeStep());
 		this->currentPosition()->connect(integrator->inPosition());
 		this->currentVelocity()->connect(integrator->inVelocity());
 		this->currentForce()->connect(integrator->inForceDensity());

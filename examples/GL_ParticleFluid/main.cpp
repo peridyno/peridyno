@@ -62,14 +62,8 @@ void CreateScene(AppBase* app)
 	fluid->graphicsPipeline()->pushModule(colorBar);
 }
 
-#include "ParticleSystem/ParticleApproximation.h"
-
 int main()
 {
-// 	std::shared_ptr<ParticleApproximation<DataType3f>> pa = std::make_shared<ParticleApproximation<DataType3f>>();
-// 	pa->weight();
-
-
 	RenderEngine* engine = new GLRenderEngine;
 
 	GlfwApp window;

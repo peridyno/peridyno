@@ -45,10 +45,10 @@ namespace dyno
 	
 	void Pipeline::clear()
 	{
-		for (auto const &pair : mModuleMap)
-		{
-			mNode->deleteModule(std::shared_ptr<Module>(pair.second));
-		}
+// 		for (auto const &pair : mModuleMap)
+// 		{
+// 			mNode->deleteModule(std::shared_ptr<Module>(pair.second));
+// 		}
 
 		mModuleList.clear();
 		mPersistentModule.clear();
