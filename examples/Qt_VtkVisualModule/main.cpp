@@ -54,11 +54,13 @@ int main()
 {
 	RenderEngine* engine = new VtkRenderEngine;;
 
+	CreateScene();
+
 	QtApp window;
 	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 
-	CreateScene();
+	
 
 	window.mainLoop();
 

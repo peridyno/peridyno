@@ -89,6 +89,11 @@ option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
 # Qt GUI support, off by default
 option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
 
+if(PERIDYNO_Qt5_GUI)
+    add_subdirectory(external/nodeeditor)
+endif()
+
+
 option(PERIDYNO_EXAMPLE "Enable building examples" ON)
 if(PERIDYNO_EXAMPLE)
     add_subdirectory(examples)

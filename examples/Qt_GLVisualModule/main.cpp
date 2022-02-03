@@ -60,11 +60,13 @@ int main()
 {
 	RenderEngine* engine = new GLRenderEngine;
 
+	CreateScene();
+
 	QtApp window;
 	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 	fprintf(stderr, "Begin\n\n\n");
-	CreateScene();
+	
 	// fprintf(stderr, "CreateScene\n\n\n");
 	window.mainLoop();
 
