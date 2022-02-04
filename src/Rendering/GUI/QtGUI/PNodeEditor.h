@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 
-#include "Nodes/QtNodeWidget.h"
+#include "NodeEditor/QtNodeWidget.h"
 
 namespace dyno
 {
@@ -11,7 +11,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		PNodeEditor(QtNodes::QtNodeWidget* node_widget);
+		PNodeEditor(Qt::QtNodeWidget* node_widget);
 
 	private:
 	};

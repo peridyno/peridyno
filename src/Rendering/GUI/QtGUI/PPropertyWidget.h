@@ -8,7 +8,7 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 
-#include "Nodes/QtBlock.h"
+#include "nodes/Node"
 
 #include <vector>
 
@@ -116,7 +116,7 @@ namespace dyno
 		void showProperty(Module* module);
 		void showProperty(Node* node);
 
-		void showBlockProperty(QtNodes::QtBlock& block);
+		void showBlockProperty(Qt::QtNode& block);
 
 		void updateDisplay();
 
