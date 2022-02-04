@@ -14,26 +14,30 @@
 
 #include <QWidget>
 
-#include "QtNodeFlowScene.h"
+#include "QtModuleFlowScene.h"
+#include "QtNodeWidget.h"
 
 QT_FORWARD_DECLARE_CLASS(QGridLayout)
 
 namespace Qt
 {
-	class PNodeFlowWidget : public QWidget
+	class QtModuleFlowWidget : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit PNodeFlowWidget(QWidget *parent = nullptr);
-		~PNodeFlowWidget();
+		explicit QtModuleFlowWidget(QWidget *parent = nullptr, QtNodeWidget* node_widget = nullptr);
+		~QtModuleFlowWidget();
+
+		//void addActor(vtkActor *actor);
+		QtModuleFlowScene* getModuleFlowScene() { return module_scene; }
 
 	signals:
 
 	public:
 		QGridLayout*		m_MainLayout;
 
-		Qt::QtNodeFlowScene* node_scene = nullptr;
+		QtModuleFlowScene* module_scene = nullptr;
 	};
 
 }

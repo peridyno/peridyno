@@ -7,7 +7,7 @@
 #include "nodes/NodeDataModel"
 
 #include "Node.h"
-#include "NodeData.h"
+#include "QtNodeData.h"
 
 #include <iostream>
 
@@ -63,8 +63,8 @@ namespace Qt
 		virtual void updateModule();
 
 	protected:
-		using ExportNodePtr = std::shared_ptr<NodeExportData>;
-		using ImportNodePtr = std::vector<std::shared_ptr<NodeImportData>>;
+		using ExportNodePtr = std::shared_ptr<QtNodeExportData>;
+		using ImportNodePtr = std::vector<std::shared_ptr<QtNodeImportData>>;
 
 		ImportNodePtr im_nodes;
 		ExportNodePtr ex_node;

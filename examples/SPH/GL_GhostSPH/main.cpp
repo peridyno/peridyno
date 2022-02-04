@@ -60,16 +60,16 @@ std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 		}
 	}
 
-	ghost->currentPosition()->setElementCount(num);
-	ghost->currentVelocity()->setElementCount(num);
-	ghost->currentForce()->setElementCount(num);
+	ghost->statePosition()->setElementCount(num);
+	ghost->stateVelocity()->setElementCount(num);
+	ghost->stateForce()->setElementCount(num);
 
 	ghost->stateNormal()->setElementCount(num);
 	ghost->stateAttribute()->setElementCount(num);
 
-	ghost->currentPosition()->getDataPtr()->assign(host_pos);
-	ghost->currentVelocity()->getDataPtr()->assign(host_vel);
-	ghost->currentForce()->getDataPtr()->assign(host_force);
+	ghost->statePosition()->getDataPtr()->assign(host_pos);
+	ghost->stateVelocity()->getDataPtr()->assign(host_vel);
+	ghost->stateForce()->getDataPtr()->assign(host_force);
 	ghost->stateNormal()->getDataPtr()->assign(host_normal);
 	ghost->stateAttribute()->getDataPtr()->assign(host_attribute);
 
@@ -109,7 +109,7 @@ void CreateScene(AppBase* app)
 		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 		colorMapper->varMax()->setValue(5.0f);
 
-		fluid->currentVelocity()->connect(calculateNorm->inVec());
+		fluid->stateVelocity()->connect(calculateNorm->inVec());
 		calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
 		fluid->graphicsPipeline()->pushModule(calculateNorm);

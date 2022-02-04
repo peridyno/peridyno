@@ -55,8 +55,8 @@
 #include <QMainWindow>
 #include <memory>
 
-#include "NodeEditor/PNodeFlowWidget.h"
-#include "NodeEditor/PModuleFlowWidget.h"
+#include "NodeEditor/QtNodeFlowWidget.h"
+#include "NodeEditor/QtModuleFlowWidget.h"
 
 QT_FORWARD_DECLARE_CLASS(QMenu)
 
@@ -127,7 +127,7 @@ namespace dyno
 		QList<QDockWidget *> extraDockWidgets;
 		QMenu *destroyDockWidgetMenu;
 
-		Qt::PNodeFlowWidget*		m_flowView;
+		Qt::QtNodeFlowWidget*		mNodeFlowView;
 		
 		PStatusBar*				m_statusBar;
 		POpenGLWidget*			mOpenGLWidget;

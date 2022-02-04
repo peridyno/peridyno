@@ -6,7 +6,7 @@
 #include "PDockWidget.h"
 
 #include "PPropertyWidget.h"
-#include "NodeEditor/PModuleFlowWidget.h"
+#include "NodeEditor/QtModuleFlowWidget.h"
 
 
 namespace dyno
@@ -14,7 +14,7 @@ namespace dyno
 	PNodeEditor::PNodeEditor(Qt::QtNodeWidget* node_widget)
 		: QMainWindow(nullptr, 0)
 	{
-		Qt::PModuleFlowWidget* moduleFlowView = new Qt::PModuleFlowWidget(nullptr, node_widget);
+		Qt::QtModuleFlowWidget* moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, node_widget);
 		this->setCentralWidget(moduleFlowView);
 
 		//Set up property dock widget
@@ -51,6 +51,6 @@ namespace dyno
 			}			
 		}
 
-//		connect(moduleFlowView->module_scene, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showBlockProperty);
+		connect(moduleFlowView->module_scene, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showBlockProperty);
 	}
 }

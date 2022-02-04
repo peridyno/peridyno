@@ -19,7 +19,7 @@ namespace Qt
 			auto outputs = getOutputFields();
 			for (int i = 0; i < outputs.size(); i++)
 			{
-				output_fields[i] = std::make_shared<FieldData>(outputs[i]);
+				output_fields[i] = std::make_shared<QtFieldData>(outputs[i]);
 			}
 
 			//initialize in ports
@@ -28,7 +28,7 @@ namespace Qt
 			auto inputs = getInputFields();
 			for (int i = 0; i < inputs.size(); i++)
 			{
-				input_fields[i] = std::make_shared<FieldData>(inputs[i]);;
+				input_fields[i] = std::make_shared<QtFieldData>(inputs[i]);;
 				// fprintf(stderr, (input_fields[i].expired()) ? "expired\n" : "nothing!\n");
 			}
 		}
@@ -107,7 +107,7 @@ namespace Qt
 
 	void QtModuleWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
 	{
-		auto field_port = std::dynamic_pointer_cast<FieldData>(data);
+		auto field_port = std::dynamic_pointer_cast<QtFieldData>(data);
 
 		input_fields[portIndex] = field_port;
 

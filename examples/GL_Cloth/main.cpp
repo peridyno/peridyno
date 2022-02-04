@@ -31,7 +31,7 @@ void CreateScene()
 	pointRenderer->setColor(Vec3f(1, 0.2, 1));
 	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 	cloth->currentTopology()->connect(pointRenderer->inPointSet());
-	cloth->currentVelocity()->connect(pointRenderer->inColor());
+	cloth->stateVelocity()->connect(pointRenderer->inColor());
 
 	cloth->graphicsPipeline()->pushModule(pointRenderer);
 	cloth->setVisible(true);

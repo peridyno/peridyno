@@ -10,14 +10,14 @@ namespace Qt
 
 	/// The class can potentially incapsulate any user data which
 	/// need to be transferred within the Node Editor graph
-	class FieldData : public QtNodeData
+	class QtFieldData : public QtNodeData
 	{
 	public:
 
-		FieldData()
+		QtFieldData()
 		{}
 
-		FieldData(FBase* f)
+		QtFieldData(FBase* f)
 			: field(f)
 		{}
 

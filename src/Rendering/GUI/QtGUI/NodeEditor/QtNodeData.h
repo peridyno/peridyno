@@ -10,14 +10,14 @@ namespace Qt
 {
 	/// The class can potentially incapsulate any user data which
 /// need to be transferred within the Node Editor graph
-	class NodeImportData : public QtNodeData
+	class QtNodeImportData : public QtNodeData
 	{
 	public:
 
-		NodeImportData()
+		QtNodeImportData()
 		{}
 
-		NodeImportData(NodePort* n)
+		QtNodeImportData(NodePort* n)
 			: node_port(n)
 		{}
 
@@ -40,14 +40,14 @@ namespace Qt
 	};
 
 
-	class NodeExportData : public QtNodeData
+	class QtNodeExportData : public QtNodeData
 	{
 	public:
 
-		NodeExportData()
+		QtNodeExportData()
 		{}
 
-		NodeExportData(std::shared_ptr<Node> n)
+		QtNodeExportData(std::shared_ptr<Node> n)
 			: export_node(n)
 		{}
 
@@ -64,17 +64,7 @@ namespace Qt
 
 		bool isKindOf(QtNodeData& nodedata) const;
 
-		bool isToDisconnected() {
-			return m_isToDisconnected;
-		}
-
-		void setDisconnected(bool connected) {
-			m_isToDisconnected = connected;
-		}
-
 	private:
-		bool m_isToDisconnected = false;
-
 		std::shared_ptr<Node> export_node = nullptr;
 	};
 }

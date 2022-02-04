@@ -18,9 +18,9 @@ namespace dyno
 
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
 		this->varTimeStep()->connect(peri->inTimeStep());
-		this->currentPosition()->connect(peri->inPosition());
-		this->currentVelocity()->connect(peri->inVelocity());
-		this->currentForce()->connect(peri->inForce());
+		this->statePosition()->connect(peri->inPosition());
+		this->stateVelocity()->connect(peri->inVelocity());
+		this->stateForce()->connect(peri->inForce());
 		this->currentRestShape()->connect(peri->inRestShape());
 		this->animationPipeline()->pushModule(peri);
 
@@ -64,7 +64,7 @@ namespace dyno
 	{
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();
-		pts.assign(this->currentPosition()->getData());
+		pts.assign(this->statePosition()->getData());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
@@ -80,19 +80,19 @@ namespace dyno
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
  		this->varHorizon()->connect(nbrQuery->inRadius());
- 		this->currentPosition()->connect(nbrQuery->inPosition());
+ 		this->statePosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
-		if (!this->currentPosition()->isEmpty())
+		if (!this->statePosition()->isEmpty())
 		{
 			this->currentRestShape()->allocate();
 			auto nbrPtr = this->currentRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
-			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 
 			this->currentReferencePosition()->allocate();
-			this->currentReferencePosition()->getDataPtr()->assign(this->currentPosition()->getData());
+			this->currentReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
 
 			this->currentNeighborIds()->allocate();
 			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());

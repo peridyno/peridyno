@@ -54,8 +54,8 @@ namespace dyno
 
 			for (int i = 0; i < pSys.size(); i++)
 			{
-				DeviceArrayField<Coord>* posFd = pSys[i]->currentPosition();
-				DeviceArrayField<Coord>* velFd = pSys[i]->currentVelocity();
+				DeviceArrayField<Coord>* posFd = pSys[i]->statePosition();
+				DeviceArrayField<Coord>* velFd = pSys[i]->stateVelocity();
 				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
 			}
 		}

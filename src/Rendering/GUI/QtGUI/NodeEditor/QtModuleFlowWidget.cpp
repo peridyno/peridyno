@@ -1,4 +1,4 @@
-#include "PModuleFlowWidget.h"
+#include "QtModuleFlowWidget.h"
 
 //QT
 #include <QGridLayout>
@@ -11,7 +11,7 @@
 
 namespace Qt
 {
-	PModuleFlowWidget::PModuleFlowWidget(QWidget *parent, QtNodeWidget* node_widget) :
+	QtModuleFlowWidget::QtModuleFlowWidget(QWidget *parent, QtNodeWidget* node_widget) :
 		QWidget(parent)
 	{
 		auto menuBar = new QMenuBar();
@@ -42,7 +42,7 @@ namespace Qt
 			module_scene, &QtModuleFlowScene::pushModule);
 	}
 
-	PModuleFlowWidget::~PModuleFlowWidget()
+	QtModuleFlowWidget::~QtModuleFlowWidget()
 	{
 	}
 }

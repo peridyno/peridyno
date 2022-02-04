@@ -35,7 +35,7 @@ void CreateScene()
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 	colorMapper->varMax()->setValue(5.0f);
 
-	fluid->currentVelocity()->connect(calculateNorm->inVec());
+	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
 	fluid->graphicsPipeline()->pushModule(calculateNorm);

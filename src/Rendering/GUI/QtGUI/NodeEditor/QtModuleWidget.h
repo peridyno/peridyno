@@ -6,7 +6,7 @@
 
 #include "nodes/NodeDataModel"
 
-#include "FieldData.h"
+#include "QtFieldData.h"
 #include "Module.h"
 
 #include <iostream>
@@ -64,11 +64,11 @@ namespace Qt
 
 	protected:
 
-		using OutFieldPtr = std::vector<std::shared_ptr<FieldData>>;
+		using OutFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
 		//TODO: why weak_ptr?
 		// using InFieldPtr = std::vector<std::weak_ptr<FieldData>>;
 		
-		using InFieldPtr = std::vector<std::shared_ptr<FieldData>>;
+		using InFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
 		InFieldPtr input_fields;
 		OutFieldPtr output_fields;
 

@@ -37,7 +37,7 @@ void CreateScene()
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	ptRender->setColorMapRange(0, 5);
 
-	fluid->currentVelocity()->connect(calculateNorm->inVec());
+	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	fluid->currentTopology()->connect(ptRender->inPointSet());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 	colorMapper->outColor()->connect(ptRender->inColor());

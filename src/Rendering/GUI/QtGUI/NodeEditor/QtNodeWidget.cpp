@@ -20,11 +20,11 @@ namespace Qt
 			im_nodes.resize(input_num);
 			for (int i = 0; i < inputs.size(); i++)
 			{
-				im_nodes[i] = std::make_shared<NodeImportData>(inputs[i]);
+				im_nodes[i] = std::make_shared<QtNodeImportData>(inputs[i]);
 			}
 
 			//initialize out node ports
-			ex_node = std::make_shared<NodeExportData>(base);
+			ex_node = std::make_shared<QtNodeExportData>(base);
 		}
 
 	}
@@ -98,7 +98,7 @@ namespace Qt
 
 	void QtNodeWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
 	{
-		auto node_port = std::dynamic_pointer_cast<NodeExportData>(data);
+		auto node_port = std::dynamic_pointer_cast<QtNodeExportData>(data);
 
 		if (node_port != nullptr)
 		{
@@ -116,9 +116,6 @@ namespace Qt
 		}
 
 		updateModule();
-
-
-		std::cout << "use count: " << node_port->getNode().use_count() << std::endl;
 	}
 
 

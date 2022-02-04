@@ -19,9 +19,9 @@ namespace dyno
 		this->animationPipeline()->pushModule(pbf);
 
 		this->varTimeStep()->connect(pbf->inTimeStep());
-		this->currentPosition()->connect(pbf->inPosition());
-		this->currentVelocity()->connect(pbf->inVelocity());
-		this->currentForce()->connect(pbf->inForce());
+		this->statePosition()->connect(pbf->inPosition());
+		this->stateVelocity()->connect(pbf->inVelocity());
+		this->stateForce()->connect(pbf->inForce());
 	}
 
 	template<typename TDataType>
@@ -35,7 +35,7 @@ namespace dyno
 	{
 		auto emitters = this->getParticleEmitters();
 
-		int curNum = this->currentPosition()->getElementCount();
+		int curNum = this->statePosition()->getElementCount();
 		int totalNum = curNum;
 		if (emitters.size() > 0)
 		{
@@ -52,20 +52,20 @@ namespace dyno
 
 				if (curNum > 0)
 				{
-					pBuf.assign(this->currentPosition()->getData());
-					vBuf.assign(this->currentVelocity()->getData());
-					fBuf.assign(this->currentForce()->getData());
+					pBuf.assign(this->statePosition()->getData());
+					vBuf.assign(this->stateVelocity()->getData());
+					fBuf.assign(this->stateForce()->getData());
 				}
 
-				this->currentPosition()->setElementCount(totalNum);
-				this->currentVelocity()->setElementCount(totalNum);
-				this->currentForce()->setElementCount(totalNum);
+				this->statePosition()->setElementCount(totalNum);
+				this->stateVelocity()->setElementCount(totalNum);
+				this->stateForce()->setElementCount(totalNum);
 
 				//printf("###### %d\n", this->currentPosition()->getElementCount());
 
-				DArray<Coord>& new_pos = this->currentPosition()->getData();
-				DArray<Coord>& new_vel = this->currentVelocity()->getData();
-				DArray<Coord>& new_force = this->currentForce()->getData();
+				DArray<Coord>& new_pos = this->statePosition()->getData();
+				DArray<Coord>& new_vel = this->stateVelocity()->getData();
+				DArray<Coord>& new_force = this->stateForce()->getData();
 
 				if (curNum > 0)
 				{
