@@ -16,7 +16,6 @@ namespace dyno
 	template<typename TDataType>
 	ParticleSystem<TDataType>::~ParticleSystem()
 	{
-		
 	}
 
 	template<typename TDataType>

@@ -97,7 +97,7 @@ protected:
 	void setSource(FBase* source);
 
 	void addSink(FBase* f);
-	void removeSink(FBase* f);
+	bool removeSink(FBase* f);
 
 	FieldTypeEnum m_fType = FieldTypeEnum::Param;
 

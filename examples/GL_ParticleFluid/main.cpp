@@ -35,13 +35,12 @@ void CreateScene(AppBase* app)
 	root->addParticleSystem(fluid);
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+	fluid->stateVelocity()->connect(calculateNorm->inVec());
+	fluid->graphicsPipeline()->pushModule(calculateNorm);
+
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 	colorMapper->varMax()->setValue(5.0f);
-
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
