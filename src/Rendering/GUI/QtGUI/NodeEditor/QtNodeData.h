@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nodes/NodeDataModel"
+#include "nodes/QNodeDataModel"
 #include "NodePort.h"
 
 using dyno::NodePort;

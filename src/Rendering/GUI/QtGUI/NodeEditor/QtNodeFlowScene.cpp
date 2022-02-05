@@ -1,7 +1,7 @@
 #include "QtNodeFlowScene.h"
 #include "QtNodeWidget.h"
 
-#include "nodes/Node"
+#include "nodes/QNode"
 
 #include "Object.h"
 #include "NodeIterator.h"

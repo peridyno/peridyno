@@ -8,7 +8,7 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 
-#include "nodes/Node"
+#include "nodes/QNode"
 
 #include <vector>
 

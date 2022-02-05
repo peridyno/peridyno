@@ -4,7 +4,7 @@
 #include <QtCore/QJsonObject>
 #include <QtWidgets/QLabel>
 
-#include "nodes/NodeDataModel"
+#include "nodes/QNodeDataModel"
 
 #include "Node.h"
 #include "QtNodeData.h"

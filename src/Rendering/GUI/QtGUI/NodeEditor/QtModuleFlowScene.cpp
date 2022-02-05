@@ -7,7 +7,7 @@
 
 #include "Module/VirtualModule.h"
 
-#include "nodes/Node"
+#include "nodes/QNode"
 
 namespace Qt
 {

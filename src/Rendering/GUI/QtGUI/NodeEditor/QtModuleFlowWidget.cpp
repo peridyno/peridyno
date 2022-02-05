@@ -6,8 +6,8 @@
 #include <QMenuBar>
 
 //Qt Nodes
-#include "nodes/FlowView"
-#include "nodes/DataModelRegistry"
+#include "nodes/QFlowView"
+#include "nodes/QDataModelRegistry"
 
 namespace Qt
 {

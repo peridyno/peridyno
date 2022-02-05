@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nodes/FlowScene"
+#include "nodes/QFlowScene"
 
 #include "Node.h"
 #include "QtNodeWidget.h"

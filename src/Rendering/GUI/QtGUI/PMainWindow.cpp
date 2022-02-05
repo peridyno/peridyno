@@ -95,7 +95,7 @@
 
 #include "NodeEditor/QtModuleFlowScene.h"
 
-#include "nodes/DataModelRegistry"
+#include "nodes/QDataModelRegistry"
 
 #include "Toolbar/TabToolbar.h"
 #include "Toolbar/Page.h"
