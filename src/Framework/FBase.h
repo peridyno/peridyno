@@ -88,6 +88,9 @@ public:
 	FBase* getTopField();
 	FBase* getSource();
 
+	FBase* promoteToOuput();
+	FBase* promoteToInput();
+
 	virtual bool isEmpty() = 0;
 	virtual void update();
 

@@ -8,6 +8,7 @@
 
 #include "Node.h"
 #include "QtNodeData.h"
+#include "QtFieldData.h"
 
 #include <iostream>
 
@@ -46,6 +47,9 @@ namespace Qt
 		std::shared_ptr<QtNodeData> outData(PortIndex port) override;
 		std::shared_ptr<QtNodeData> inData(PortIndex port);
 
+		std::vector<FBase*>& getOutputFields() const;
+		std::vector<FBase*>& getInputFields() const;
+
 		void setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex) override;
 
 		NodeDataType dataType(PortType portType, PortIndex portIndex) const override;
@@ -68,6 +72,11 @@ namespace Qt
 
 		ImportNodePtr im_nodes;
 		ExportNodePtr ex_node;
+
+		using OutFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
+		using InFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
+		InFieldPtr input_fields;
+		OutFieldPtr output_fields;
 
 		std::shared_ptr<Node> m_node = nullptr;
 

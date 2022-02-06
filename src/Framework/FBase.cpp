@@ -27,6 +27,30 @@ namespace dyno
 		return mSource;
 	}
 
+	FBase* FBase::promoteToOuput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (!mOwner->findOutputField(this)) {
+			mOwner->addOutputField(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::promoteToInput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (!mOwner->findInputField(this)) {
+			mOwner->addInputField(this);
+		}
+
+		return this;
+	}
+
 	void FBase::addSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
