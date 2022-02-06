@@ -21,6 +21,8 @@ Node::Node(std::string name)
 Node::~Node()
 {
 	m_module_list.clear();
+
+	mNodePorts.clear();
 }
 
 void Node::setName(std::string name)

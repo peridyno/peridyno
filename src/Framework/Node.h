@@ -40,7 +40,7 @@ namespace dyno
 		using SPtr = std::shared_ptr<T>;
 
 		Node(std::string name = "default");
-		virtual ~Node();
+		~Node() override;
 
 		void setName(std::string name);
 		std::string getName();

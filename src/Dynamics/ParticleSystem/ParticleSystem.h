@@ -13,8 +13,6 @@ namespace dyno
 	{
 		DECLARE_CLASS_1(ParticleSystem, TDataType)
 	public:
-
-		bool self_update = true;
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
