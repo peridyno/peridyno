@@ -106,6 +106,12 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
 
+		/**
+		 * @brief Return all descendants
+		 *
+		 * @return std::list<Node*> descendant list
+		 */
+		std::list<Node*>& getDescendants() {return mDescendants; }
 
 // 		std::shared_ptr<DeviceContext> getContext();
 // 		void setContext(std::shared_ptr<DeviceContext> context);

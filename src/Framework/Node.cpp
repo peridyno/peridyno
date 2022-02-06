@@ -293,7 +293,7 @@ void Node::doTraverseBottomUp(Action* act)
 	auto iter = mAncestors.begin();
 	for (; iter != mAncestors.end(); iter++)
 	{
-		(*iter)->traverseBottomUp(act);
+		(*iter)->doTraverseBottomUp(act);
 	}
 
 	act->process(this);
@@ -348,6 +348,7 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 
 	case FieldTypeEnum::Param:
 		ret = this->addField(field);
+		break;
 
 	default:
 		break;

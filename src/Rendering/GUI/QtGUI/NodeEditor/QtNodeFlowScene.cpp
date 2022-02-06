@@ -67,9 +67,9 @@ namespace Qt
 	{
 		std::map<dyno::ObjectId, QtNode*> nodeMap;
 
-		auto root = scn->getRootNode();
+		//auto root = scn->getRootNode();
 
-		SceneGraph::Iterator it_end(nullptr);
+		//SceneGraph::Iterator it_end(nullptr);
 
 		auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
 		{
@@ -88,7 +88,7 @@ namespace Qt
 			this->nodePlaced(node);
 		};
 
-		for (auto it = scn->begin(); it != it_end; it++)
+		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			addNodeWidget(it.get());
 		}
@@ -139,14 +139,14 @@ namespace Qt
 			}
 		};
 
-		for (auto it = scn->begin(); it != it_end; it++)
+		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			createNodeConnections(it.get());
 		}
 
 		// 	clearScene();
 		// 
-		for (auto it = scn->begin(); it != it_end; it++)
+		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			auto node_ptr = it.get();
 			std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;

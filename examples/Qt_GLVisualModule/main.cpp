@@ -28,6 +28,7 @@ void CreateScene()
 	root->loadSDF("../../data/bowl/bowl.sdf", false);
 
 	std::shared_ptr<ParticleFluid<DataType3f>> fluid = std::make_shared<ParticleFluid<DataType3f>>();
+	scene.addNode(fluid);
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 	root->addParticleSystem(fluid);
 

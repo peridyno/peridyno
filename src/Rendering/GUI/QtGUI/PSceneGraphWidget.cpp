@@ -56,10 +56,10 @@ namespace dyno
 		clear();
 
 		SceneGraph& scenegraph = SceneGraph::getInstance();
-		std::shared_ptr<Node> root = scenegraph.getRootNode();
+		//std::shared_ptr<Node> root = scenegraph.getRootNode();
 
-		if(root != nullptr)
-			root->traverseTopDown<PInsertTreeNodeAction>(this);
+		if(!scenegraph.isEmpty())
+			scenegraph.traverseForward<PInsertTreeNodeAction>(this);
 
 //		PSceneGraphNode* root = new PSceneGraphNode(scenegraph.getRootNode(), this);
 	}

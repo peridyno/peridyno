@@ -186,9 +186,9 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 	// gather visual modules
 	WidgetQueue imWidgetQueue;
 	// enqueue render content
-	if ((scene != 0) && (scene->getRootNode() != 0))
+	if (!scene->isEmpty())
 	{
-		scene->getRootNode()->traverseTopDown(&imWidgetQueue);
+		scene->traverseForward(&imWidgetQueue);
 	}
 
 	for (auto widget : imWidgetQueue.modules)
