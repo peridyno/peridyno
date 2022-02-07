@@ -1,11 +1,10 @@
 #include "Node.h"
 #include "Action.h"
 
+#include "SceneGraph.h"
 
 namespace dyno
 {
-IMPLEMENT_CLASS(Node)
-
 Node::Node(std::string name)
 	: OBase()
 	, m_node_name(name)
@@ -86,6 +85,11 @@ void Node::setDt(Real dt)
 	m_dt = dt;
 }
 
+void Node::setSceneGraph(SceneGraph* scn)
+{
+	mSceneGraph = scn;
+}
+
 std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 {
 	if (hasAncestor(anc) || anc == nullptr)
@@ -94,6 +98,11 @@ std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 	anc->addDescendant(this);
 
 	mAncestors.push_back(anc);
+
+	if (mSceneGraph) {
+		mSceneGraph->markQueueUpdateRequired();
+	}
+
 	return anc;
 }
 

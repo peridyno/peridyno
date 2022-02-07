@@ -30,10 +30,10 @@
 namespace dyno
 {
 	class Action;
+	class SceneGraph;
 
 	class Node : public OBase
 	{
-		DECLARE_CLASS(Node)
 	public:
 
 		template<class T>
@@ -69,6 +69,8 @@ namespace dyno
 
 		// 	Iterator begin();
 		// 	Iterator end();
+
+		void setSceneGraph(SceneGraph* scn);
 
 		Node* getAncestor(std::string name);
 
@@ -424,6 +426,8 @@ namespace dyno
 		std::list<Node*> mDescendants;
 
 		std::vector<NodePort*> mNodePorts;
+
+		SceneGraph* mSceneGraph = nullptr;
 
 		friend class NodePort;
 	};

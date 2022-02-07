@@ -244,6 +244,11 @@ namespace dyno
 		mUpperBound = upperBound;
 	}
 
+	void SceneGraph::markQueueUpdateRequired()
+	{
+		mQueueUpdateRequired = true;
+	}
+
 	void SceneGraph::onMouseEvent(PMouseEvent event)
 	{
 		class MouseEventAct : public Action

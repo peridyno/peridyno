@@ -38,24 +38,15 @@ namespace Qt
 
 		QString	validationMessage() const override;
 
-
 		unsigned int nPorts(PortType portType) const override;
-
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 
-		std::shared_ptr<QtNodeData> outData(PortIndex port) override;
-		std::shared_ptr<QtNodeData> inData(PortIndex port);
-
-		std::vector<FBase*>& getOutputFields() const;
-		std::vector<FBase*>& getInputFields() const;
+		bool tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData) override;
 
 		void setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex) override;
 
-		bool tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData) override;
-
 		NodeDataType dataType(PortType portType, PortIndex portIndex) const override;
-
 
 		QWidget* embeddedWidget() override { return nullptr; }
 
@@ -65,6 +56,11 @@ namespace Qt
 
 		std::shared_ptr<Node> getNode();
 
+		std::shared_ptr<QtNodeData> outData(PortIndex port) override;
+
+		std::vector<FBase*>& getOutputFields() const;
+		std::vector<FBase*>& getInputFields() const;
+
 	protected:
 		virtual void updateModule();
 
@@ -72,15 +68,16 @@ namespace Qt
 		using ExportNodePtr = std::shared_ptr<QtNodeExportData>;
 		using ImportNodePtr = std::vector<std::shared_ptr<QtNodeImportData>>;
 
-		ImportNodePtr im_nodes;
-		ExportNodePtr ex_node;
+		ImportNodePtr mNodeInport;
+		ExportNodePtr mNodeExport;
 
 		using OutFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
 		using InFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
-		InFieldPtr input_fields;
-		OutFieldPtr output_fields;
 
-		std::shared_ptr<Node> m_node = nullptr;
+		InFieldPtr mFieldInport;
+		OutFieldPtr mFieldExport;
+
+		std::shared_ptr<Node> mNode = nullptr;
 
 		NodeValidationState modelValidationState = NodeValidationState::Valid;
 		QString modelValidationError = QString("Missing or incorrect inputs");

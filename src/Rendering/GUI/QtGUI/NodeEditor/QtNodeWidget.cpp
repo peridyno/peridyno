@@ -9,38 +9,38 @@ namespace Qt
 {
 	QtNodeWidget::QtNodeWidget(std::shared_ptr<Node> base)
 	{
-		m_node = base;
+		mNode = base;
 
-		if (m_node != nullptr)
+		if (mNode != nullptr)
 		{
 			//initialize in node ports
-			auto inputs = m_node->getAllNodePorts();
+			auto inputs = mNode->getAllNodePorts();
 			auto input_num = inputs.size();
 
-			im_nodes.resize(input_num);
+			mNodeInport.resize(input_num);
 			for (int i = 0; i < inputs.size(); i++)
 			{
-				im_nodes[i] = std::make_shared<QtNodeImportData>(inputs[i]);
+				mNodeInport[i] = std::make_shared<QtNodeImportData>(inputs[i]);
 			}
 
 			//initialize out node ports
-			ex_node = std::make_shared<QtNodeExportData>(base);
+			mNodeExport = std::make_shared<QtNodeExportData>(base);
 
 			int output_fnum = getOutputFields().size();
-			output_fields.resize(output_fnum);
+			mFieldExport.resize(output_fnum);
 			auto fOutputs = getOutputFields();
 			for (int i = 0; i < fOutputs.size(); i++)
 			{
-				output_fields[i] = std::make_shared<QtFieldData>(fOutputs[i]);
+				mFieldExport[i] = std::make_shared<QtFieldData>(fOutputs[i]);
 			}
 
 			//initialize in ports
 			int input_fnum = getInputFields().size();
-			input_fields.resize(input_fnum);
+			mFieldInport.resize(input_fnum);
 			auto fInputs = getInputFields();
 			for (int i = 0; i < fInputs.size(); i++)
 			{
-				input_fields[i] = std::make_shared<QtFieldData>(fInputs[i]);;
+				mFieldInport[i] = std::make_shared<QtFieldData>(fInputs[i]);;
 			}
 		}
 
@@ -57,11 +57,11 @@ namespace Qt
 
 		if (portType == PortType::In)
 		{
-			result = (unsigned int)m_node->getAllNodePorts().size() + input_fields.size();
+			result = (unsigned int)mNode->getAllNodePorts().size() + mFieldInport.size();
 		}
 		else
 		{
-			result = 1 + output_fields.size();
+			result = 1 + mFieldExport.size();
 		}
 
 		return result;
@@ -72,12 +72,12 @@ namespace Qt
 		switch (portType)
 		{
 		case PortType::In:
-			if (portIndex < im_nodes.size()) {
+			if (portIndex < mNodeInport.size()) {
 				return NodeDataType{ "port", "port", PortShape::Bullet };
 			}
 			else {
 				auto& inputFields = this->getInputFields();
-				std::string str = inputFields[portIndex - im_nodes.size()]->getClassName();
+				std::string str = inputFields[portIndex - mNodeInport.size()]->getClassName();
 
 				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
 			}
@@ -105,22 +105,22 @@ namespace Qt
 	std::shared_ptr<QtNodeData>
 		QtNodeWidget::outData(PortIndex port)
 	{
-		return port == 0 ? std::static_pointer_cast<QtNodeData>(ex_node) : std::static_pointer_cast<QtNodeData>(output_fields[port - 1]);
+		return port == 0 ? std::static_pointer_cast<QtNodeData>(mNodeExport) : std::static_pointer_cast<QtNodeData>(mFieldExport[port - 1]);
 	}
 
-	std::shared_ptr<QtNodeData> QtNodeWidget::inData(PortIndex port)
-	{
-		return port < im_nodes.size() ? std::static_pointer_cast<QtNodeData>(im_nodes[port]) : std::static_pointer_cast<QtNodeData>(input_fields[port - im_nodes.size()]);
-	}
+// 	std::shared_ptr<QtNodeData> QtNodeWidget::inData(PortIndex port)
+// 	{
+// 		return port < mNodeInport.size() ? std::static_pointer_cast<QtNodeData>(mNodeInport[port]) : std::static_pointer_cast<QtNodeData>(mFieldInport[port - mNodeInport.size()]);
+// 	}
 
 	QString QtNodeWidget::caption() const
 	{
-		return dyno::FormatBlockPortName(m_node->getClassInfo()->getClassName());
+		return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
 	}
 
 	QString QtNodeWidget::name() const
 	{
-		return QString::fromStdString(m_node->getClassInfo()->getClassName());
+		return QString::fromStdString(mNode->getClassInfo()->getClassName());
 	}
 
 	bool QtNodeWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
@@ -134,19 +134,19 @@ namespace Qt
 		switch (portType)
 		{
 		case PortType::In:
-			if (portIndex < im_nodes.size()) {
-				return dyno::FormatBlockPortName(m_node->getAllNodePorts()[portIndex]->getPortName());
+			if (portIndex < mNodeInport.size()) {
+				return dyno::FormatBlockPortName(mNode->getAllNodePorts()[portIndex]->getPortName());
 			}
 			else {
 				auto& inputFields = this->getInputFields();
 
-				return dyno::FormatBlockPortName(inputFields[portIndex - im_nodes.size()]->getObjectName());
+				return dyno::FormatBlockPortName(inputFields[portIndex - mNodeInport.size()]->getObjectName());
 			}
 			break;
 
 		case PortType::Out:
 			if (portIndex == 0) {
-				return dyno::FormatBlockPortName(m_node->getClassInfo()->getClassName());
+				return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
 			}
 			else {
 				auto& outputFields = this->getOutputFields();
@@ -170,11 +170,11 @@ namespace Qt
 
 			if (node_port->connectionType() == CntType::Break)
 			{
-				im_nodes[portIndex]->getNodePort()->removeNode(nd);
+				mNodeInport[portIndex]->getNodePort()->removeNode(nd);
 			}
 			else
 			{
-				im_nodes[portIndex]->getNodePort()->addNode(nd);
+				mNodeInport[portIndex]->getNodePort()->addNode(nd);
 			}
 		}
 
@@ -184,16 +184,18 @@ namespace Qt
 
 	bool QtNodeWidget::tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData)
 	{
-		if (portIndex < im_nodes.size())
+		if (portIndex < mNodeInport.size())
 		{
 			try
 			{
-				auto& exNode = std::dynamic_pointer_cast<QtNodeExportData>(nodeData);
-				auto inNode = im_nodes[portIndex];
+				auto& nodeExp = std::dynamic_pointer_cast<QtNodeExportData>(nodeData);
 
-				inNode->getNodePort()->isKindOf(exNode->getNode());
+				if (nodeExp == nullptr)
+					return false;
 
-				return true;
+				auto nodeInp = mNodeInport[portIndex];
+
+				return nodeInp->getNodePort()->isKindOf(nodeExp->getNode());;
 			}
 			catch (std::bad_cast)
 			{
@@ -204,10 +206,14 @@ namespace Qt
 		{
 			try
 			{
-				auto& exField = std::dynamic_pointer_cast<QtFieldData>(nodeData);
-				auto inField = input_fields[portIndex - im_nodes.size()];
+				auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+				if (fieldExp == nullptr)
+					return false;
 
-				return inField->getField()->getClassName() == exField->getField()->getClassName();
+				auto fieldInp = mFieldInport[portIndex - mNodeInport.size()];
+
+				return fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName()
+							&& fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
 			}
 			catch (std::bad_cast)
 			{
@@ -228,7 +234,7 @@ namespace Qt
 
 	std::shared_ptr<Node> QtNodeWidget::getNode()
 	{
-		return m_node;
+		return mNode;
 	}
 
 	QString QtNodeWidget::validationMessage() const
@@ -244,11 +250,11 @@ namespace Qt
 
 	std::vector<FBase*>& QtNodeWidget::getOutputFields() const
 	{
-		return m_node->getOutputFields();
+		return mNode->getOutputFields();
 	}
 
 	std::vector<FBase*>& QtNodeWidget::getInputFields() const
 	{
-		return m_node->getInputFields();
+		return mNode->getInputFields();
 	}
 }

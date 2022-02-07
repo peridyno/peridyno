@@ -84,6 +84,8 @@ namespace dyno
 			mNodeMap[tNode->objectId()] = tNode;
 			mQueueUpdateRequired = true;
 
+			tNode->setSceneGraph(this);
+
 			return tNode;
 		}
 
@@ -119,6 +121,11 @@ namespace dyno
 		}
 
 		inline Iterator end() { return NodeIterator(); }
+
+		/**
+		 * @brief An interface to tell SceneGraph to update the execuation queue
+		 */
+		void markQueueUpdateRequired();
 
 	public:
 		void onMouseEvent(PMouseEvent event);
