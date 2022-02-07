@@ -52,6 +52,8 @@ namespace Qt
 
 		void setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex) override;
 
+		bool tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData) override;
+
 		NodeDataType dataType(PortType portType, PortIndex portIndex) const override;
 
 

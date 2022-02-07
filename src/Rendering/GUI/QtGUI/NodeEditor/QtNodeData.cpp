@@ -2,34 +2,35 @@
 
 namespace Qt
 {
-	bool QtNodeImportData::isKindOf(QtNodeData& nodedata) const
-	{
-		try
-		{
-			auto& out_data = dynamic_cast<QtNodeExportData&>(nodedata);
-		}
-		catch (std::bad_cast)
-		{
-			return false;
-		}
+// 	bool QtNodeImportData::sameType(QtNodeData& nodeData) const
+// 	{
+// 		try
+// 		{
+// 			auto& out_data = dynamic_cast<QtNodeExportData&>(nodeData);
+// 		}
+// 		catch (std::bad_cast)
+// 		{
+// 			return false;
+// 		}
+// 
+// 		auto& out_data = dynamic_cast<QtNodeExportData&>(nodeData);
+// 		return node_port->isKindOf(out_data.getNode());
+// 	}
+// 
+// 	bool QtNodeExportData::sameType(QtNodeData& nodeData) const
+// 	{
+// 		try
+// 		{
+// 			auto& in_data = dynamic_cast<QtNodeImportData&>(nodeData);
+// 		}
+// 		catch (std::bad_cast)
+// 		{
+// 			return false;
+// 		}
+// 
+// 		auto& in_data = dynamic_cast<QtNodeImportData&>(nodeData);
+// 		return in_data.getNodePort()->isKindOf(export_node);
+// 	}
 
-		auto& out_data = dynamic_cast<QtNodeExportData&>(nodedata);
-		return node_port->isKindOf(out_data.getNode());
-	}
-
-	bool QtNodeExportData::isKindOf(QtNodeData& nodedata) const
-	{
-		try
-		{
-			auto& in_data = dynamic_cast<QtNodeImportData&>(nodedata);
-		}
-		catch (std::bad_cast)
-		{
-			return false;
-		}
-
-		auto& in_data = dynamic_cast<QtNodeImportData&>(nodedata);
-		return in_data.getNodePort()->isKindOf(export_node);
-	}
 }
 

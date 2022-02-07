@@ -168,10 +168,9 @@ namespace Qt
 		{
 			auto nd = node_port->getNode();
 
-			if (node_port->isToDisconnected())
+			if (node_port->connectionType() == CntType::Break)
 			{
 				im_nodes[portIndex]->getNodePort()->removeNode(nd);
-				node_port->setDisconnected(false);
 			}
 			else
 			{
@@ -182,6 +181,40 @@ namespace Qt
 		updateModule();
 	}
 
+
+	bool QtNodeWidget::tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData)
+	{
+		if (portIndex < im_nodes.size())
+		{
+			try
+			{
+				auto& exNode = std::dynamic_pointer_cast<QtNodeExportData>(nodeData);
+				auto inNode = im_nodes[portIndex];
+
+				inNode->getNodePort()->isKindOf(exNode->getNode());
+
+				return true;
+			}
+			catch (std::bad_cast)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			try
+			{
+				auto& exField = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+				auto inField = input_fields[portIndex - im_nodes.size()];
+
+				return inField->getField()->getClassName() == exField->getField()->getClassName();
+			}
+			catch (std::bad_cast)
+			{
+				return false;
+			}
+		}
+	}
 
 	NodeValidationState QtNodeWidget::validationState() const
 	{

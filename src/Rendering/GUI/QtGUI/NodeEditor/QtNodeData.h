@@ -31,8 +31,8 @@ namespace Qt
 		NodePort* getNodePort() { return node_port; }
 
 		bool isEmpty() { return node_port == nullptr; }
-
-		bool isKindOf(QtNodeData& nodedata) const;
+// 
+// 		bool sameType(QtNodeData& nodeData) const override;
 
 	private:
 
@@ -62,7 +62,7 @@ namespace Qt
 
 		bool isEmpty() { return export_node == nullptr; }
 
-		bool isKindOf(QtNodeData& nodedata) const;
+// 		bool sameType(QtNodeData& nodeData) const override;
 
 	private:
 		std::shared_ptr<Node> export_node = nullptr;
