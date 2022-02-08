@@ -1,4 +1,5 @@
 #include <QtApp.h>
+#include <GlfwApp.h>
 
 #include <SceneGraph.h>
 
@@ -14,6 +15,8 @@
 
 #include <ImColorbar.h>
 
+#include "GLPointVisualNode.h"
+
 using namespace std;
 using namespace dyno;
 
@@ -23,38 +26,20 @@ void CreateScene()
 	scene.setUpperBound(Vec3f(1.5, 1, 1.5));
 	scene.setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
-	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	root->loadSDF("../../data/bowl/bowl.sdf", false);
-
-	std::shared_ptr<ParticleFluid<DataType3f>> fluid = std::make_shared<ParticleFluid<DataType3f>>();
-	scene.addNode(fluid);
+	auto fluid = scene.addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
-	root->addParticleSystem(fluid);
 
-	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	colorMapper->varMax()->setValue(5.0f);
+	auto visualizer = scene.addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
+	visualizer->setParticles(fluid);
 
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	calculateNorm->outNorm()->connect(colorMapper->inScalar());
+	auto boundary = scene.addNode(std::make_shared<StaticBoundary<DataType3f>>());
+	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
+	boundary->loadSDF("../../data/bowl/bowl.sdf", false);
+	boundary->addParticleSystem(fluid);
 
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
-	fluid->graphicsPipeline()->pushModule(colorMapper);
-
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Vec3f(1, 0, 0));
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	ptRender->setColorMapRange(0, 5);
-	fluid->currentTopology()->connect(ptRender->inPointSet());
-	colorMapper->outColor()->connect(ptRender->inColor());
-	fluid->graphicsPipeline()->pushModule(ptRender);
-
-	// A simple color bar widget for node
-	auto colorBar = std::make_shared<ImColorbar>();
-	colorBar->varMax()->setValue(5.0f);
-	calculateNorm->outNorm()->connect(colorBar->inScalar());
-	fluid->graphicsPipeline()->pushModule(colorBar);
+	auto outTop = fluid->currentTopology()->promoteToOuput();
+	outTop->connect(visualizer->inPointSetIn());
+	outTop->disconnect(visualizer->inPointSetIn());
 }
 
 int main()

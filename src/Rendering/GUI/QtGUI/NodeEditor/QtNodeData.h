@@ -10,14 +10,14 @@ namespace Qt
 {
 	/// The class can potentially incapsulate any user data which
 /// need to be transferred within the Node Editor graph
-	class QtNodeImportData : public QtNodeData
+	class QtImportNode : public QtNodeData
 	{
 	public:
 
-		QtNodeImportData()
+		QtImportNode()
 		{}
 
-		QtNodeImportData(NodePort* n)
+		QtImportNode(NodePort* n)
 			: node_port(n)
 		{}
 
@@ -40,14 +40,14 @@ namespace Qt
 	};
 
 
-	class QtNodeExportData : public QtNodeData
+	class QtExportNode : public QtNodeData
 	{
 	public:
 
-		QtNodeExportData()
+		QtExportNode()
 		{}
 
-		QtNodeExportData(std::shared_ptr<Node> n)
+		QtExportNode(std::shared_ptr<Node> n)
 			: export_node(n)
 		{}
 

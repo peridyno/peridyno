@@ -34,6 +34,9 @@ namespace dyno {
 		virtual std::shared_ptr<Object> objectPointer() = 0;
 		virtual std::shared_ptr<Object> standardObjectPointer() = 0;
 
+		static const std::string className() {
+			return std::string("FInstance");
+		}
 	private:
 
 	};
@@ -55,7 +58,7 @@ namespace dyno {
 			: InstanceBase(name, description, fieldType, parent) {}
 
 		const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }
-		const std::string getClassName() final { return std::string("FInstance"); }
+		const std::string getClassName() final { return InstanceBase::className(); }
 
 		std::shared_ptr<T> getDataPtr() {
 			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getTopField());
@@ -81,7 +84,7 @@ namespace dyno {
 			return this->getDataPtr() == nullptr;
 		}
 
-		bool connect(FBase* dst) {
+		bool connect(FBase* dst) override {
 			InstanceBase* ins = dynamic_cast<InstanceBase*>(dst);
 			if (ins == nullptr) {
 				return false;

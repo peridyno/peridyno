@@ -32,13 +32,13 @@ namespace Qt
 
 			QString str = QString::fromStdString(c.first);
 			auto obj = dyno::Object::createObject(str.toStdString());
-			std::shared_ptr<Node> node(dynamic_cast<Node*>(obj));
+			std::shared_ptr<dyno::Node> node(dynamic_cast<dyno::Node*>(obj));
 
 			if (node != nullptr)
 			{
 				QtDataModelRegistry::RegistryItemCreator creator = [str]() {
 					auto node_obj = dyno::Object::createObject(str.toStdString());
-					std::shared_ptr<Node> new_node(dynamic_cast<Node*>(node_obj));
+					std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 					auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
 					return dat;
 				};
@@ -54,6 +54,7 @@ namespace Qt
 		showSceneGraph(&scn);
 
 		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
+		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
 	}
 
 
@@ -111,8 +112,12 @@ namespace Qt
 						auto node = ports[i]->getNodes()[0];
 						if (node != nullptr)
 						{
-							auto inBlock = nodeMap[node->objectId()];
-							createConnection(*inBlock, 0, *inBlock, i);
+							auto outId = node->objectId();
+							if (nodeMap.find(outId) != nodeMap.end())
+							{
+								auto outBlock = nodeMap[node->objectId()];
+								createConnection(*inBlock, i, *outBlock, 0);
+							}
 						}
 					}
 					else if (dyno::Multiple == pType)
@@ -134,6 +139,40 @@ namespace Qt
 							}
 						}
 						//nodes.clear();
+					}
+				}
+
+				auto fieldInp = nd->getInputFields();
+				for (int i = 0; i < fieldInp.size(); i++)
+				{
+					auto fieldSrc = fieldInp[i]->getSource();
+					if (fieldSrc != nullptr) {
+						auto parSrc = fieldSrc->parent();
+						if (parSrc != nullptr)
+						{
+							Node* nodeSrc = dynamic_cast<Node*>(parSrc);
+
+							auto outId = nodeSrc->objectId();
+							auto fieldsOut = nodeSrc->getOutputFields();
+
+							uint outFieldIndex = 0;
+							bool fieldFound = false;
+							for (auto f : fieldsOut)
+							{
+								if (f == fieldSrc)
+								{
+									fieldFound = true;
+									break;
+								}
+								outFieldIndex++;
+							}
+
+							if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+							{
+								auto outBlock = nodeMap[outId];
+								createConnection(*inBlock, i + ports.size(), *outBlock, 1 + outFieldIndex);
+							}
+						}
 					}
 				}
 			}
@@ -158,4 +197,17 @@ namespace Qt
 	{
 
 	}
+
+	void QtNodeFlowScene::addNodeToSceneGraph(QtNode& n)
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		dyno::SceneGraph::getInstance().addNode(nodeData->getNode());
+	}
+
+	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
+	{
+
+	}
+
 }

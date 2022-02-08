@@ -117,6 +117,11 @@ namespace dyno
 		return this->removeSink(dst);
 	}
 
+	bool FBase::disconnect(FBase* dst)
+	{
+		return this->disconnectField(dst);
+	}
+
 	FBase* FBase::getTopField()
 	{
 		return mSource == nullptr ? this : mSource->getTopField();

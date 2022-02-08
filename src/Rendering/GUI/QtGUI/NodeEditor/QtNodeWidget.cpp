@@ -5,6 +5,9 @@
 
 #include "Common.h"
 
+#include "FInstance.h"
+#include "Field.h"
+
 namespace Qt
 {
 	QtNodeWidget::QtNodeWidget(std::shared_ptr<Node> base)
@@ -20,11 +23,11 @@ namespace Qt
 			mNodeInport.resize(input_num);
 			for (int i = 0; i < inputs.size(); i++)
 			{
-				mNodeInport[i] = std::make_shared<QtNodeImportData>(inputs[i]);
+				mNodeInport[i] = std::make_shared<QtImportNode>(inputs[i]);
 			}
 
 			//initialize out node ports
-			mNodeExport = std::make_shared<QtNodeExportData>(base);
+			mNodeExport = std::make_shared<QtExportNode>(base);
 
 			int output_fnum = getOutputFields().size();
 			mFieldExport.resize(output_fnum);
@@ -162,19 +165,44 @@ namespace Qt
 
 	void QtNodeWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
 	{
-		auto node_port = std::dynamic_pointer_cast<QtNodeExportData>(data);
-
-		if (node_port != nullptr)
+		if (portIndex < mNodeInport.size())
 		{
-			auto nd = node_port->getNode();
+			auto node_port = std::dynamic_pointer_cast<QtExportNode>(data);
 
-			if (node_port->connectionType() == CntType::Break)
+			if (node_port != nullptr)
 			{
-				mNodeInport[portIndex]->getNodePort()->removeNode(nd);
+				auto nd = node_port->getNode();
+
+				if (node_port->connectionType() == CntType::Break)
+				{
+					mNodeInport[portIndex]->getNodePort()->removeNode(nd);
+
+					//TODO: recover the connection state, use a more elegant way in the future
+					data->setConnectionType(CntType::Link);
+				}
+				else
+				{
+					mNodeInport[portIndex]->getNodePort()->addNode(nd);
+				}
 			}
-			else
+		}
+		else
+		{
+			auto fieldData = std::dynamic_pointer_cast<QtFieldData>(data);
+
+			if (fieldData != nullptr)
 			{
-				mNodeInport[portIndex]->getNodePort()->addNode(nd);
+				auto field = fieldData->getField();
+
+				if (fieldData->connectionType() == CntType::Break)
+				{
+					field->disconnect(mFieldInport[portIndex - mNodeInport.size()]->getField());
+					fieldData->setConnectionType(CntType::Link);
+				}
+				else
+				{ 
+					field->connect(mFieldInport[portIndex - mNodeInport.size()]->getField());
+				}
 			}
 		}
 
@@ -188,7 +216,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& nodeExp = std::dynamic_pointer_cast<QtNodeExportData>(nodeData);
+				auto& nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
 
 				if (nodeExp == nullptr)
 					return false;
@@ -212,8 +240,20 @@ namespace Qt
 
 				auto fieldInp = mFieldInport[portIndex - mNodeInport.size()];
 
-				return fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName()
-							&& fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
+				if (fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName())
+				{
+					std::string className = fieldInp->getField()->getClassName();
+					if (className == dyno::InstanceBase::className())
+					{
+						return true;
+					}
+					else
+						return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
+				}
+				else
+				{
+					return false;
+				}
 			}
 			catch (std::bad_cast)
 			{
@@ -229,7 +269,16 @@ namespace Qt
 
 	QtNodeDataModel::ConnectionPolicy QtNodeWidget::portInConnectionPolicy(PortIndex portIndex) const
 	{
-		return ConnectionPolicy::Many;
+		if (portIndex < mNodeInport.size())
+		{
+			auto portType = mNodeInport[portIndex]->getNodePort()->getPortType();
+
+			return portType == dyno::NodePortType::Single ? ConnectionPolicy::One : ConnectionPolicy::Many;
+		}
+		else
+		{
+			return ConnectionPolicy::One;
+		}
 	}
 
 	std::shared_ptr<Node> QtNodeWidget::getNode()

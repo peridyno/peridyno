@@ -165,12 +165,12 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(m_field);
-			slider->setValue((double)f->getData());
+			slider->setValue((double)f->getValue());
 		}
 		else if(template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(m_field);
-			slider->setValue(f->getData());
+			slider->setValue(f->getValue());
 		}
 
 		FormatFieldWidgetName(field->getObjectName());
@@ -393,7 +393,7 @@ namespace dyno
 
 		this->removeAllWidgets();
 
-		std::vector<FBase*>& fields = base->getAllFields();
+		std::vector<FBase*>& fields = base->getParameters();
 
 		for each (FBase* var in fields)
 		{

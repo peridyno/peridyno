@@ -2,34 +2,34 @@
 
 namespace Qt
 {
-	bool QtNodeImportData::sameType(QtNodeData& nodeData) const
+	bool QtImportNode::sameType(QtNodeData& nodeData) const
 	{
 		try
 		{
-			auto& out_data = dynamic_cast<QtNodeExportData&>(nodeData);
+			auto& out_data = dynamic_cast<QtExportNode&>(nodeData);
 		}
 		catch (std::bad_cast)
 		{
 			return false;
 		}
 
-		auto& out_data = dynamic_cast<QtNodeExportData&>(nodeData);
+		auto& out_data = dynamic_cast<QtExportNode&>(nodeData);
 
 		return node_port->isKindOf(out_data.getNode());
 	}
 
-	bool QtNodeExportData::sameType(QtNodeData& nodeData) const
+	bool QtExportNode::sameType(QtNodeData& nodeData) const
 	{
 		try
 		{
-			auto& in_data = dynamic_cast<QtNodeImportData&>(nodeData);
+			auto& in_data = dynamic_cast<QtImportNode&>(nodeData);
 		}
 		catch (std::bad_cast)
 		{
 			return false;
 		}
 
-		auto& in_data = dynamic_cast<QtNodeImportData&>(nodeData);
+		auto& in_data = dynamic_cast<QtImportNode&>(nodeData);
 
 		return in_data.getNodePort()->isKindOf(export_node);
 	}

@@ -11,8 +11,6 @@ namespace dyno
 	{
 		auto ptSet = std::make_shared<PointSet<TDataType>>();
 		this->currentTopology()->setDataPtr(ptSet);
-
-		this->currentTopology()->promoteToOuput();
 	}
 
 	template<typename TDataType>

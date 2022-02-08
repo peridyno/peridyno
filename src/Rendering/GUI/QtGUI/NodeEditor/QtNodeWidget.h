@@ -18,7 +18,6 @@ using dyno::Node;
 namespace Qt
 {
 	/// The model dictates the number of inputs and outputs for the Node.
-	/// In this example it has no logic.
 	class QtNodeWidget : public QtNodeDataModel
 	{
 		Q_OBJECT
@@ -65,8 +64,8 @@ namespace Qt
 		virtual void updateModule();
 
 	protected:
-		using ExportNodePtr = std::shared_ptr<QtNodeExportData>;
-		using ImportNodePtr = std::vector<std::shared_ptr<QtNodeImportData>>;
+		using ExportNodePtr = std::shared_ptr<QtExportNode>;
+		using ImportNodePtr = std::vector<std::shared_ptr<QtImportNode>>;
 
 		ImportNodePtr mNodeInport;
 		ExportNodePtr mNodeExport;

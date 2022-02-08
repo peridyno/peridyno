@@ -358,7 +358,15 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 		break;
 
 	case FieldTypeEnum::Param:
-		ret = this->addField(field);
+		ret = addParameter(field);
+		break;
+
+	case FieldTypeEnum::In:
+		ret = addInputField(field);
+		break;
+
+	case FieldTypeEnum::Out:
+		ret = addOutputField(field);
 		break;
 
 	default:

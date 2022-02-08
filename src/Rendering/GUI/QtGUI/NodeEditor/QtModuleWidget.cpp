@@ -114,7 +114,7 @@ namespace Qt
 		if (field_port != nullptr)
 		{
 			auto in_fields = getInputFields();
-			field_port->getField()->connectField(in_fields[portIndex]);
+			field_port->getField()->connect(in_fields[portIndex]);
 		}
 
 		updateModule();
