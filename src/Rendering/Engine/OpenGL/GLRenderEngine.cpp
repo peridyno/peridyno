@@ -141,7 +141,7 @@ namespace dyno
 		// gather visual modules
 		RenderQueue renderQueue;
 		// enqueue render content
-		if (!scene->isEmpty())
+		if (scene != nullptr && !scene->isEmpty())
 		{
 			scene->traverseForward(&renderQueue);
 		}

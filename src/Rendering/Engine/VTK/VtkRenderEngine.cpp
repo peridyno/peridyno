@@ -31,17 +31,16 @@ struct dyno::GatherVisualModuleAction : public Action
 	{
 		this->engine = engine;
 
+		this->engine->mVisualModules.clear();
 		// enqueue render content
-		if ((scene != 0) && (scene->getRootNode() != 0))
+		if (scene != nullptr && !scene->isEmpty())
 		{
-			scene->getRootNode()->traverseTopDown(this);
+			scene->traverseForward(this);
 		}
 	}
 
 	void process(Node* node) override
 	{
-		this->engine->mVisualModules.clear();
-
 		for (auto iter : node->graphicsPipeline()->activeModules())
 		{
 			auto m = dynamic_cast<VtkVisualModule*>(iter);

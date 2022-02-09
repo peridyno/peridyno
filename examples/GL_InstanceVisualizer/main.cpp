@@ -40,9 +40,9 @@ public:
 
 int main(int, char**)
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto instanceNode = scene.createNewScene<Instances>();
+	auto instanceNode = scn->addNode(std::make_shared<Instances>());
 
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
@@ -50,9 +50,10 @@ int main(int, char**)
 	instanceNode->currentTransforms()->connect(instanceRender->inTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
-	scene.setUpperBound({ 4, 4, 4});
+	scn->setUpperBound({ 4, 4, 4});
 
 	GlfwApp window;
+	window.setSceneGraph(scn);
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

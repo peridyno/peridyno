@@ -7,6 +7,7 @@
 namespace dyno {
 
 	class PMainWindow;
+    class SceneGraph;
 
     class QtApp : public AppBase
     {
@@ -18,6 +19,7 @@ namespace dyno {
         void mainLoop() override;
 
         void setRenderEngine(std::shared_ptr<RenderEngine> engine) override;
+        void setSceneGraph(std::shared_ptr<SceneGraph> scn);
 
         std::shared_ptr<RenderEngine> renderEngine() override;
 

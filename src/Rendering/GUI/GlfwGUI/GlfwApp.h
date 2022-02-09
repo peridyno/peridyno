@@ -70,6 +70,7 @@ namespace dyno {
 
 		std::shared_ptr<RenderEngine> renderEngine() override;
 
+		void setSceneGraph(std::shared_ptr<SceneGraph> scn);
 
 	protected:
 		void initCallbacks();    //init default callbacks

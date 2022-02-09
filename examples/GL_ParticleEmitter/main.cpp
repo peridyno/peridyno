@@ -15,16 +15,16 @@
 using namespace std;
 using namespace dyno;
 
-void CreateScene()
+std::shared_ptr<SceneGraph> createScene()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	//Create a particle emitter
-	auto emitter = std::make_shared<ParticleEmitterSquare<DataType3f>>();
+	auto emitter = scn->addNode(std::make_shared<ParticleEmitterSquare<DataType3f>>());
 	emitter->varLocation()->setValue(Vec3f(0.5f));
 
 	//Create a particle-based fluid solver
-	auto fluid = std::make_shared<ParticleFluid<DataType3f>>();
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
 	fluid->addParticleEmitter(emitter);
 
@@ -47,16 +47,17 @@ void CreateScene()
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
 	//Create a container
-	auto container = scene.createNewScene<StaticBoundary<DataType3f>>();
+	auto container = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	container->loadCube(Vec3f(0.0f), Vec3f(1.0), 0.02, true);
 	container->addParticleSystem(fluid);
+
+	return scn;
 }
 
 int main()
 {
-	CreateScene();
-
 	GlfwApp window;
+	window.setSceneGraph(createScene());
 	window.createWindow(1280, 768);
 	window.mainLoop();
 

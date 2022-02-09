@@ -82,22 +82,22 @@ std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 	return ghost;
 }
 
-void CreateScene(AppBase* app)
+std::shared_ptr<SceneGraph> createScene()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
-	scene.setUpperBound(Vec3f(0.5, 1, 0.5));
-	scene.setLowerBound(Vec3f(-0.5, 0, -0.5));
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
+	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
+	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	root->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
 	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
-	std::shared_ptr<ParticleSystem<DataType3f>> fluid = std::make_shared<ParticleSystem<DataType3f>>();
+	auto fluid = scn->addNode(std::make_shared<ParticleSystem<DataType3f>>());
 	fluid->loadParticles(Vec3f(-0.1, 0.0, -0.1), Vec3f(0.105, 0.1, 0.105), 0.005);
 
-	auto ghost = createGhostParticles();
+	auto ghost = scn->addNode(createGhostParticles());
 
-	auto incompressibleFluid = std::make_shared<GhostFluid<DataType3f>>();
+	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
 	incompressibleFluid->setFluidParticles(fluid);
 	incompressibleFluid->setBoundaryParticles(ghost);
 
@@ -142,15 +142,14 @@ void CreateScene(AppBase* app)
 
 		ghost->graphicsPipeline()->pushModule(ghostRender);
 	}
+
+	return scn;
 }
 
 int main()
 {
 	GlfwApp window;
-
-	CreateScene(&window);
-
-	// window.createWindow(2048, 1152);
+	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

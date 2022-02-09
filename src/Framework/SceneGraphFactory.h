@@ -14,25 +14,40 @@
  * limitations under the License.
  */
 #pragma once
+#include <atomic>
+#include <mutex>
+
 #include "SceneGraph.h"
 
 namespace dyno 
 {
-	class SceneGraphManager : public OBase
+	class SceneGraphFactory
 	{
 	public:
-		~SceneGraphManager() {};
-
-		SceneGraphManager& instance();
+		static SceneGraphFactory* instance();
 
 		std::shared_ptr<SceneGraph> active();
 
+		/**
+		 * @brief Create a new SceneGraph
+		 * 
+		 * @return std::shared_ptr<SceneGraph> 
+		 */
+		std::shared_ptr<SceneGraph> createNewScene();
+
+		void pushScene(std::shared_ptr<SceneGraph> scn);
+
 	private:
-		SceneGraphManager();
+		SceneGraphFactory() = default;
+		~SceneGraphFactory() = default;
+		SceneGraphFactory(const SceneGraphFactory&) = delete;
+		SceneGraphFactory& operator=(const SceneGraphFactory&) = delete;
 
-		uint mActiveId = 0;
+		std::stack<std::shared_ptr<SceneGraph>> mSceneGraphs;
 
-		std::vector<std::shared_ptr<SceneGraph>> mSceneGraphs;
+	private:
+		static std::atomic<SceneGraphFactory*> pInstance;
+		static std::mutex mMutex;
 	};
 
 }

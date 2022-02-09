@@ -20,19 +20,19 @@
 using namespace std;
 using namespace dyno;
 
-void CreateScene()
+std::shared_ptr<SceneGraph> createScene()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
-	scene.setUpperBound(Vec3f(1.5, 1, 1.5));
-	scene.setLowerBound(Vec3f(-0.5, 0, -0.5));
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
+	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto fluid = scene.addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 
-	auto visualizer = scene.addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
+	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
 	visualizer->setParticles(fluid);
 
-	auto boundary = scene.addNode(std::make_shared<StaticBoundary<DataType3f>>());
+	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
 	boundary->loadSDF("../../data/bowl/bowl.sdf", false);
 	boundary->addParticleSystem(fluid);
@@ -40,13 +40,14 @@ void CreateScene()
 	auto outTop = fluid->currentTopology()->promoteToOuput();
 	outTop->connect(visualizer->inPointSetIn());
 	outTop->disconnect(visualizer->inPointSetIn());
+	
+	return scn;
 }
 
 int main()
 {
-	CreateScene();
-
 	QtApp window;
+	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

@@ -4,6 +4,7 @@
 #include "PMainWindow.h"
 #include "Log.h"
 //#include "Rendering/OpenGLContext.h"
+#include "SceneGraphFactory.h"
 
 #include <GLRenderEngine.h>
 
@@ -36,10 +37,16 @@ namespace dyno {
 
 	void QtApp::setRenderEngine(std::shared_ptr<RenderEngine> engine)
 	{
-        //TODO: replace the default render engine
+        //TODO: replace the default render engine with an new one in runtime.
+        mRenderEngine = engine;
 	}
 
-    std::shared_ptr<RenderEngine> QtApp::renderEngine()
+	void QtApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
+	{
+        SceneGraphFactory::instance()->pushScene(scn);
+	}
+
+	std::shared_ptr<RenderEngine> QtApp::renderEngine()
 	{
 		if (mRenderEngine == nullptr)
 			mRenderEngine = std::make_shared<GLRenderEngine>();

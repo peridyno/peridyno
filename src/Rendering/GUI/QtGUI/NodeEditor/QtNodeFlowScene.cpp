@@ -6,7 +6,7 @@
 #include "Object.h"
 #include "NodeIterator.h"
 #include "NodePort.h"
-#include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 
 #include <QtWidgets/QMessageBox>
 
@@ -50,8 +50,8 @@ namespace Qt
 
 		this->setRegistry(ret);
 
-		dyno::SceneGraph& scn = dyno::SceneGraph::getInstance();
-		showSceneGraph(&scn);
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		showSceneGraph(scn.get());
 
 		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
@@ -202,7 +202,9 @@ namespace Qt
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
-		dyno::SceneGraph::getInstance().addNode(nodeData->getNode());
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+
+		scn->addNode(nodeData->getNode());
 	}
 
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)

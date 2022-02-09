@@ -15,6 +15,8 @@
 #include "QtImGui.h"
 #include <ImWidget.h>
 
+#include "SceneGraphFactory.h"
+
 namespace dyno
 {
 
@@ -48,7 +50,9 @@ namespace dyno
 			exit(-1);
 		}
 
-		SceneGraph::getInstance().initialize();
+		auto scn = SceneGraphFactory::instance()->active();
+
+		scn->initialize();
 
 		initializeOpenGLFunctions();
 		QtImGui::initialize(this);
@@ -66,13 +70,14 @@ namespace dyno
 		//QtImGui
 		QtImGui::newFrame();
 		
+		auto scn = SceneGraphFactory::instance()->active();
 		// Draw scene		
-		mRenderEngine->draw(&SceneGraph::getInstance());       
+		mRenderEngine->draw(scn.get());
 
 		// Draw ImGui
 		mRenderEngine->renderParams()->viewport.w = this->width();
 		mRenderEngine->renderParams()->viewport.h = this->height();
-		mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
+		mImWindow.draw(mRenderEngine, scn.get());
 		// Draw widgets
 // 		// TODO: maybe move into mImWindow...
 // 		for (auto widget : mWidgets)
@@ -129,7 +134,7 @@ namespace dyno
 	{
 		PSimulationThread::instance()->startRendering();
 		
-		SceneGraph::getInstance().updateGraphicsContext();
+		SceneGraphFactory::instance()->active()->updateGraphicsContext();
 		update();
 
 		PSimulationThread::instance()->stopRendering();

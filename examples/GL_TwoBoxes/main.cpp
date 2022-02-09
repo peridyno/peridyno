@@ -18,9 +18,9 @@ using namespace dyno;
 
 int main()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	std::shared_ptr<RigidBodySystem<DataType3f>> rigid = scene.createNewScene<RigidBodySystem<DataType3f>>();
+	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
@@ -59,6 +59,7 @@ int main()
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
 	GlfwApp window;
+	window.setSceneGraph(scn);
 	window.createWindow(1280, 768);
 	window.mainLoop();
 

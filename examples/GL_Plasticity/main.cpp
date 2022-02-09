@@ -18,16 +18,13 @@
 using namespace std;
 using namespace dyno;
 
-void CreateScene()
+std::shared_ptr<SceneGraph> createScene()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
-
-	std::shared_ptr<StaticBoundary<DataType3f>> root = scene.createNewScene<StaticBoundary<DataType3f>>();
-// 	root->loadSDF("../data/bar/bar.sdf", false);
-// 	root->translate(Vec3f(0.2f, 0.2f, 0));
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	root->loadCube(Vec3f(0), Vec3f(1), 0.005, true);
 
-	std::shared_ptr<ElastoplasticBody<DataType3f>> child3 = std::make_shared<ElastoplasticBody<DataType3f>>();
+	auto child3 = scn->addNode(std::make_shared<ElastoplasticBody<DataType3f>>());
 	root->addParticleSystem(child3);
 
 	child3->setVisible(false);
@@ -42,7 +39,7 @@ void CreateScene()
 	child3->getSurfaceNode()->currentTopology()->connect(ptRender->inTriangleSet());
 	child3->getSurfaceNode()->graphicsPipeline()->pushModule(ptRender);
 
-	std::shared_ptr<ElasticBody<DataType3f>> child2 = std::make_shared<ElasticBody<DataType3f>>();
+	auto child2 = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
 	root->addParticleSystem(child2);
 
 	child2->setVisible(false);
@@ -55,13 +52,14 @@ void CreateScene()
 	sRender->setColor(Vec3f(1, 1, 1));
 	child2->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
 	child2->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+
+	return scn;
 }
 
 int main()
 {
-	CreateScene();
-
 	GlfwApp window;
+	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
 
