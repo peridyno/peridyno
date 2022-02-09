@@ -93,14 +93,9 @@ void creat_scene_fluid()
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
-	GLRenderEngine* engine = new GLRenderEngine;
-
 	GlfwApp window;
-	window.setRenderEngine(engine);
 	window.createWindow(1280, 768);
 	window.mainLoop();
-
-	delete engine;
 }
 
 int main()

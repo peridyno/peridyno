@@ -44,16 +44,11 @@ void CreateScene()
 
 int main()
 {
-	RenderEngine* engine = new GLRenderEngine;
-
 	CreateScene();
 
 	QtApp window;
-	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 	window.mainLoop();
-
-	delete engine;
 
 	return 0;
 }

@@ -56,14 +56,9 @@ int main()
 {
 	CreateScene();
 
-	GLRenderEngine* engine = new GLRenderEngine;
-
 	GlfwApp window;
-	window.setRenderEngine(engine);
 	window.createWindow(1280, 768);
 	window.mainLoop();
-
-	delete engine;
 
 	return 0;
 }

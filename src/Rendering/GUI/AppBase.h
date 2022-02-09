@@ -15,10 +15,11 @@ namespace dyno
 		virtual void createWindow(int width, int height) {};
 		virtual void mainLoop() = 0;
 
-		virtual void setRenderEngine(RenderEngine* engine) { mRenderEngine = engine; }
+		virtual void setRenderEngine(std::shared_ptr<RenderEngine> engine) { mRenderEngine = engine; }
+		virtual std::shared_ptr<RenderEngine> renderEngine() = 0;
 
 	protected:
-		RenderEngine* mRenderEngine;
+		std::shared_ptr<RenderEngine> mRenderEngine = nullptr;
 	};
 
 }

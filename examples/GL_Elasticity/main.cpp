@@ -35,10 +35,7 @@ int main()
 
 	RenderEngine* engine;
 
-	engine = new GLRenderEngine;
-
 	GlfwApp window;
-	window.setRenderEngine(engine);
 	window.createWindow(1024, 768);
 	window.mainLoop();
 

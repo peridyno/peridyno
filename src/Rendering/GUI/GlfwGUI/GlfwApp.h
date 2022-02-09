@@ -68,7 +68,7 @@ namespace dyno {
 		// 全局样式设定
 		void initializeStyle();
 
-		RenderEngine* renderEngine() { return mRenderEngine; }
+		std::shared_ptr<RenderEngine> renderEngine() override;
 
 
 	protected:

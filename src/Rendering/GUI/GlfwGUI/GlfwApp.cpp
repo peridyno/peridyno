@@ -14,6 +14,8 @@
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
 
+#include <GLRenderEngine.h>
+
 #include <glad/glad.h>
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
@@ -150,7 +152,7 @@ namespace dyno
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 
 		// Jian: initialize rendering engine
-		mRenderEngine->initialize(width, height);
+		renderEngine()->initialize(width, height);
 
 		// Jian: initialize ImWindow
 		mImWindow.initialize(xscale);
@@ -165,6 +167,13 @@ namespace dyno
 		style.PopupRounding = 6.0f;
 	}
 	
+	std::shared_ptr<RenderEngine> GlfwApp::renderEngine()
+	{
+		if (mRenderEngine == nullptr)
+			mRenderEngine = std::make_shared<GLRenderEngine>();
+
+		return mRenderEngine;
+	}
 
 	void GlfwApp::mainLoop()
 	{
@@ -198,13 +207,13 @@ namespace dyno
 			//mRenderEngine->drawGUI();
 			int width, height;
 			glfwGetWindowSize(mWindow, &width, &height);
-			mRenderEngine->renderParams()->viewport.w = width;
-			mRenderEngine->renderParams()->viewport.h = height;
+			renderEngine()->renderParams()->viewport.w = width;
+			renderEngine()->renderParams()->viewport.h = height;
 
-			mRenderEngine->draw(&SceneGraph::getInstance());
+			renderEngine()->draw(&SceneGraph::getInstance());
 
 			if(mShowImWindow)
-				mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
+				mImWindow.draw(renderEngine().get(), &SceneGraph::getInstance());
 // 			// Draw widgets
 // 			// TODO: maybe move into mImWindow...
 // 			for (auto widget : mWidgets)
@@ -250,7 +259,7 @@ namespace dyno
 
 	std::shared_ptr<dyno::Camera> GlfwApp::activeCamera()
 	{
-		return mRenderEngine->camera();
+		return renderEngine()->camera();
 	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const

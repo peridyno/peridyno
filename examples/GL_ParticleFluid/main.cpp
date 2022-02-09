@@ -63,18 +63,12 @@ void CreateScene(AppBase* app)
 
 int main()
 {
-	RenderEngine* engine = new GLRenderEngine;
-
 	GlfwApp window;
-	window.setRenderEngine(engine);
-
 	CreateScene(&window);
 
 	// window.createWindow(2048, 1152);
 	window.createWindow(1024, 768);
 	window.mainLoop();
-	
-	delete engine;
 
 	return 0;
 }
