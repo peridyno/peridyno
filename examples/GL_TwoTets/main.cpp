@@ -17,11 +17,11 @@ using namespace std;
 using namespace dyno;
 
 
-void scene_two_tets()
+std::shared_ptr<SceneGraph> sceneTwoTets()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	std::shared_ptr<RigidBodySystem<DataType3f>> rigid = scene.createNewScene<RigidBodySystem<DataType3f>>();
+	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
@@ -66,14 +66,16 @@ void scene_two_tets()
 	pointRender->setColor(Vec3f(1, 0, 0));
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
+
+	return scn;
 }
 
 
-void scene_tet_box()
+std::shared_ptr<SceneGraph> sceneTetBox()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	std::shared_ptr<RigidBodySystem<DataType3f>> rigid = scene.createNewScene<RigidBodySystem<DataType3f>>();
+	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
@@ -115,21 +117,16 @@ void scene_tet_box()
 	pointRender->setColor(Vec3f(1, 0, 0));
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
+
+	return scn;
 }
 
 int main()
 {
-	//scene_two_tets();
-	scene_tet_box();
-
-	GLRenderEngine* engine = new GLRenderEngine;
-
 	GlfwApp window;
-	window.setRenderEngine(engine);
+	window.setSceneGraph(sceneTetBox());
 	window.createWindow(1280, 768);
 	window.mainLoop();
-
-	delete engine;
 
 	return 0;
 }

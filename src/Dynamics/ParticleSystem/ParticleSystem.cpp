@@ -16,7 +16,6 @@ namespace dyno
 	template<typename TDataType>
 	ParticleSystem<TDataType>::~ParticleSystem()
 	{
-		
 	}
 
 	template<typename TDataType>
@@ -113,17 +112,17 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleSystem<TDataType>::updateTopology()
 	{
-		if (!this->currentPosition()->isEmpty())
+		if (!this->statePosition()->isEmpty())
 		{
 			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
-			int num = this->currentPosition()->getElementCount();
+			int num = this->statePosition()->getElementCount();
 			auto& pts = ptSet->getPoints();
 			if (num != pts.size())
 			{
 				pts.resize(num);
 			}
 
-			pts.assign(this->currentPosition()->getData());
+			pts.assign(this->statePosition()->getData());
 		}
 	}
 
@@ -138,12 +137,12 @@ namespace dyno
 
 		if (pts.size() > 0)
 		{
-			this->currentPosition()->setElementCount(pts.size());
-			this->currentVelocity()->setElementCount(pts.size());
-			this->currentForce()->setElementCount(pts.size());
+			this->statePosition()->setElementCount(pts.size());
+			this->stateVelocity()->setElementCount(pts.size());
+			this->stateForce()->setElementCount(pts.size());
 
-			this->currentPosition()->getData().assign(pts);
-			this->currentVelocity()->getDataPtr()->reset();
+			this->statePosition()->getData().assign(pts);
+			this->stateVelocity()->getDataPtr()->reset();
 		}
 
 		Node::resetStates();

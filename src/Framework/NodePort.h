@@ -101,6 +101,7 @@ namespace dyno {
 				
 					this->addNodeToParent(node);
 					m_nodes[0] = node;
+					m_derived_node = d_node;
 
 					return true;
 				}
@@ -112,6 +113,7 @@ namespace dyno {
 		bool removeNode(std::shared_ptr<Node> node) override
 		{
 			m_nodes[0] = nullptr;
+			m_derived_node = nullptr;
 
 			return true;
 		}

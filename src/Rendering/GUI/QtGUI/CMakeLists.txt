@@ -56,7 +56,7 @@ set_target_properties(${LIB_NAME} PROPERTIES
     
 # target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
 target_link_libraries(${LIB_NAME} PUBLIC
-	Core Framework RenderCore ImWidgets imgui
+	Core Framework RenderCore GLRenderEngine ImWidgets imgui nodes
 	Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg)  
 
 target_include_directories(${LIB_NAME} PUBLIC

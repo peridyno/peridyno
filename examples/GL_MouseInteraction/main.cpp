@@ -42,9 +42,9 @@ public:
 
 int main(int, char**)
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto instanceNode = scene.createNewScene<Instances>();
+	auto instanceNode = scn->addNode(std::make_shared<Instances>());
 
 	//Create a CustomMouseIteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
@@ -58,15 +58,12 @@ int main(int, char**)
 	instanceNode->stateTransforms()->connect(instanceRender->inTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
-	scene.setUpperBound({ 4, 4, 4 });
-	GLRenderEngine* engine = new GLRenderEngine;
+	scn->setUpperBound({ 4, 4, 4 });
 
 	GlfwApp window;
-	window.setRenderEngine(engine);
+	window.setSceneGraph(scn);
 	window.createWindow(1024, 768);
 	window.mainLoop();
-
-	delete engine;
 
 	return 0;
 }

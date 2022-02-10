@@ -30,17 +30,17 @@
 namespace dyno
 {
 	class Action;
+	class SceneGraph;
 
 	class Node : public OBase
 	{
-		DECLARE_CLASS(Node)
 	public:
 
 		template<class T>
 		using SPtr = std::shared_ptr<T>;
 
 		Node(std::string name = "default");
-		virtual ~Node();
+		~Node() override;
 
 		void setName(std::string name);
 		std::string getName();
@@ -69,6 +69,8 @@ namespace dyno
 
 		// 	Iterator begin();
 		// 	Iterator end();
+
+		void setSceneGraph(SceneGraph* scn);
 
 		Node* getAncestor(std::string name);
 
@@ -106,6 +108,12 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
 
+		/**
+		 * @brief Return all descendants
+		 *
+		 * @return std::list<Node*> descendant list
+		 */
+		std::list<Node*>& getDescendants() {return mDescendants; }
 
 // 		std::shared_ptr<DeviceContext> getContext();
 // 		void setContext(std::shared_ptr<DeviceContext> context);
@@ -418,6 +426,8 @@ namespace dyno
 		std::list<Node*> mDescendants;
 
 		std::vector<NodePort*> mNodePorts;
+
+		SceneGraph* mSceneGraph = nullptr;
 
 		friend class NodePort;
 	};

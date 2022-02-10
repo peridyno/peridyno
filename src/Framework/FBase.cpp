@@ -27,6 +27,30 @@ namespace dyno
 		return mSource;
 	}
 
+	FBase* FBase::promoteToOuput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (!mOwner->findOutputField(this)) {
+			mOwner->addOutputField(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::promoteToInput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (!mOwner->findInputField(this)) {
+			mOwner->addInputField(this);
+		}
+
+		return this;
+	}
+
 	void FBase::addSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
@@ -40,7 +64,7 @@ namespace dyno
 		}
 	}
 
-	void FBase::removeSink(FBase* f)
+	bool FBase::removeSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 		
@@ -50,7 +74,10 @@ namespace dyno
 
 //			f->setDerived(false);
 			f->setSource(nullptr);
+
+			return true;
 		}
+		return false;
 	}
 
 	bool FBase::isDerived()
@@ -87,11 +114,12 @@ namespace dyno
 
 	bool FBase::disconnectField(FBase* dst)
 	{
-		if (dst->getSource() == this) {
-			dst->getSource()->removeSink(dst);
-		}
+		return this->removeSink(dst);
+	}
 
-		return true;
+	bool FBase::disconnect(FBase* dst)
+	{
+		return this->disconnectField(dst);
 	}
 
 	FBase* FBase::getTopField()
@@ -160,6 +188,19 @@ namespace dyno
 
 	FBase::~FBase()
 	{
+		//Before deallocating data, fields should be disconnected first
+		FBase* src = this->getSource();
+		if (src != nullptr) {
+			src->disconnectField(this);
+		}
+
+		while (!mSinks.empty()) {
+			auto sink = mSinks.back();
+			sink->setSource(nullptr);
+
+			mSinks.pop_back();
+		}
+
 		mCallbackFunc.clear();
 	}
 

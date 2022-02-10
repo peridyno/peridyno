@@ -22,6 +22,10 @@
 
 namespace dyno 
 {
+	typedef std::list<Node*> NodeList;
+
+	typedef std::map<ObjectId, std::shared_ptr<Node>> NodeMap;
+
 	class SceneGraph : public OBase
 	{
 	public:
@@ -29,11 +33,15 @@ namespace dyno
 
 		~SceneGraph() {};
 
-		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
-		std::shared_ptr<Node> getRootNode() { return mRoot; }
+// 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
+// 		std::shared_ptr<Node> getRootNode() { return mRoot; }
 
 		virtual bool initialize();
 		bool isInitialized() { return mInitialized; }
+		bool isEmpty() {
+			return mNodeMap.size() == 0;
+		}
+
 		void invalid();
 
 		virtual void advance(float dt);
@@ -51,8 +59,34 @@ namespace dyno
 		std::shared_ptr<TNode> createNewScene(Args&& ... args)
 		{
 			std::shared_ptr<TNode> root = TypeInfo::New<TNode>(std::forward<Args>(args)...);
-			mRoot = root;
+			//mRoot = root;
+
+			addNode(root);
+
 			return root;
+		}
+
+		template<class TNode, class ...Args>
+		std::shared_ptr<TNode> addNode(Args&& ... args)
+		{
+			std::shared_ptr<TNode> node = TypeInfo::New<TNode>(std::forward<Args>(args)...);
+
+			return addNode(node);
+		}
+
+		template<class TNode>
+		std::shared_ptr<TNode> addNode(std::shared_ptr<TNode> tNode)
+		{
+			if (tNode == nullptr ||
+				mNodeMap.find(tNode->objectId()) != mNodeMap.end())
+				return nullptr;
+				
+			mNodeMap[tNode->objectId()] = tNode;
+			mQueueUpdateRequired = true;
+
+			tNode->setSceneGraph(this);
+
+			return tNode;
 		}
 
 	public:
@@ -79,11 +113,53 @@ namespace dyno
 		void setLowerBound(Vec3f lowerBound);
 		void setUpperBound(Vec3f upperBound);
 
-		inline Iterator begin() { return NodeIterator(mRoot); }
-		inline Iterator end() { return NodeIterator(nullptr); }
+		inline Iterator begin() { 
+
+			updateExecutionQueue();
+
+			return NodeIterator(mNodeQueue, mNodeMap);
+		}
+
+		inline Iterator end() { return NodeIterator(); }
+
+		/**
+		 * @brief An interface to tell SceneGraph to update the execuation queue
+		 */
+		void markQueueUpdateRequired();
 
 	public:
 		void onMouseEvent(PMouseEvent event);
+
+		/**
+		 * @brief Depth-first tree traversal
+		 *
+		 * @param act 	Operation on the node
+		 */
+		void traverseBackward(Action* act);
+
+		template<class Act, class ... Args>
+		void traverseBackward(Args&& ... args) {
+			Act action(std::forward<Args>(args)...);
+			traverseBackward(&action);
+		}
+
+		/**
+		 * @brief Breadth-first tree traversal
+		 *
+		 * @param act 	Operation on the node
+		 */
+		void traverseForward(Action* act);
+
+		template<class Act, class ... Args>
+		void traverseForward(Args&& ... args) {
+			Act action(std::forward<Args>(args)...);
+			traverseForward(&action);
+		}
+
+	protected:
+		//void retriveExecutionQueue(std::list<Node*>& nQueue);
+
+		void updateExecutionQueue();
 
 	public:
 		SceneGraph()
@@ -96,7 +172,7 @@ namespace dyno
 			, mLowerBound(0, 0, 0)
 			, mUpperBound(1, 1, 1)
 		{
-			mRoot = std::make_shared<Node>();
+			//mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
 		};
 
@@ -123,7 +199,13 @@ namespace dyno
 		Vec3f mUpperBound;
 
 	private:
-		std::shared_ptr<Node> mRoot = nullptr;
+		//std::shared_ptr<Node> mRoot = nullptr;
+
+		bool mQueueUpdateRequired = false;
+
+		NodeMap mNodeMap;
+
+		NodeList mNodeQueue;
 	};
 
 }

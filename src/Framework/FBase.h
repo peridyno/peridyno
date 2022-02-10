@@ -81,12 +81,14 @@ public:
 
 	FieldTypeEnum getFieldType();
 
-
-	bool connectField(FBase* dst);
-	bool disconnectField(FBase* dst);
+	virtual bool connect(FBase* dst) = 0;
+	virtual bool disconnect(FBase* dst);
 
 	FBase* getTopField();
 	FBase* getSource();
+
+	FBase* promoteToOuput();
+	FBase* promoteToInput();
 
 	virtual bool isEmpty() = 0;
 	virtual void update();
@@ -97,7 +99,10 @@ protected:
 	void setSource(FBase* source);
 
 	void addSink(FBase* f);
-	void removeSink(FBase* f);
+	bool removeSink(FBase* f);
+
+	bool connectField(FBase* dst);
+	bool disconnectField(FBase* dst);
 
 	FieldTypeEnum m_fType = FieldTypeEnum::Param;
 
@@ -158,6 +163,11 @@ bool connect(DerivedField* dst)										\
 	this->connectField(dst);										\
 	this->update();													\
 	return true;													\
+}																	\
+bool connect(FBase* dst) override {									\
+	DerivedField* derived = dynamic_cast<DerivedField*>(dst);		\
+	if (derived == nullptr) return false;							\
+	return this->connect(derived);									\
 }																	\
 Data& getData() {													\
 	auto dataPtr = this->getDataPtr();								\

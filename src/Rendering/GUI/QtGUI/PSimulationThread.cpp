@@ -1,6 +1,7 @@
 #include "PSimulationThread.h"
 
 #include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 
 namespace dyno
 {
@@ -37,7 +38,8 @@ namespace dyno
 
 	void PSimulationThread::run()
 	{
-		SceneGraph::getInstance().initialize();
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->initialize();
 
 		int f = 0;
 		while(true && f < max_frames)
@@ -45,7 +47,7 @@ namespace dyno
 			if (!m_rendering && !m_paused)
 			{
 //				m_mutex.lock();
-				SceneGraph::getInstance().takeOneFrame();
+				scn->takeOneFrame();
 
 				f++;
 
@@ -62,7 +64,8 @@ namespace dyno
 
 	void PSimulationThread::reset()
 	{
-		SceneGraph::getInstance().reset();
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->reset();
 	}
 
 	void PSimulationThread::startRendering()

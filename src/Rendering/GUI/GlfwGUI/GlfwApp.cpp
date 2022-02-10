@@ -14,6 +14,9 @@
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
 
+#include <GLRenderEngine.h>
+#include <SceneGraphFactory.h>
+
 #include <glad/glad.h>
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
@@ -150,7 +153,7 @@ namespace dyno
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 
 		// Jian: initialize rendering engine
-		mRenderEngine->initialize(width, height);
+		renderEngine()->initialize(width, height);
 
 		// Jian: initialize ImWindow
 		mImWindow.initialize(xscale);
@@ -165,10 +168,24 @@ namespace dyno
 		style.PopupRounding = 6.0f;
 	}
 	
+	std::shared_ptr<RenderEngine> GlfwApp::renderEngine()
+	{
+		if (mRenderEngine == nullptr)
+			mRenderEngine = std::make_shared<GLRenderEngine>();
+
+		return mRenderEngine;
+	}
+
+	void GlfwApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
+	{
+		SceneGraphFactory::instance()->pushScene(scn);
+	}
 
 	void GlfwApp::mainLoop()
 	{
-		SceneGraph::getInstance().initialize();
+		auto activeScene = SceneGraphFactory::instance()->active();
+
+		activeScene->initialize();
 
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
@@ -180,12 +197,12 @@ namespace dyno
 
 				if (mSaveScreenToggle)
 				{
-					if (SceneGraph::getInstance().getFrameNumber() % mSaveScreenInterval == 0)
+					if (activeScene->getFrameNumber() % mSaveScreenInterval == 0)
 						saveScreen();
 				}
 
-				SceneGraph::getInstance().takeOneFrame();
-				SceneGraph::getInstance().updateGraphicsContext();
+				activeScene->takeOneFrame();
+				activeScene->updateGraphicsContext();
 			}
 			
 				
@@ -198,13 +215,13 @@ namespace dyno
 			//mRenderEngine->drawGUI();
 			int width, height;
 			glfwGetWindowSize(mWindow, &width, &height);
-			mRenderEngine->renderParams()->viewport.w = width;
-			mRenderEngine->renderParams()->viewport.h = height;
+			renderEngine()->renderParams()->viewport.w = width;
+			renderEngine()->renderParams()->viewport.h = height;
 
-			mRenderEngine->draw(&SceneGraph::getInstance());
+			renderEngine()->draw(activeScene.get());
 
 			if(mShowImWindow)
-				mImWindow.draw(mRenderEngine, &SceneGraph::getInstance());
+				mImWindow.draw(renderEngine().get(), activeScene.get());
 // 			// Draw widgets
 // 			// TODO: maybe move into mImWindow...
 // 			for (auto widget : mWidgets)
@@ -250,7 +267,7 @@ namespace dyno
 
 	std::shared_ptr<dyno::Camera> GlfwApp::activeCamera()
 	{
-		return mRenderEngine->camera();
+		return renderEngine()->camera();
 	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
@@ -343,7 +360,9 @@ namespace dyno
 		mouseEvent.x = (float)xpos;
 		mouseEvent.y = (float)ypos;
 
-		SceneGraph::getInstance().onMouseEvent(mouseEvent);
+		auto activeScene = SceneGraphFactory::instance()->active();
+
+		activeScene->onMouseEvent(mouseEvent);
 
 		if (action == GLFW_PRESS)
 		{
@@ -375,7 +394,8 @@ namespace dyno
 		mouseEvent.x = (float)x;
 		mouseEvent.y = (float)y;
 
-		SceneGraph::getInstance().onMouseEvent(mouseEvent);
+		auto activeScene = SceneGraphFactory::instance()->active();
+		activeScene->onMouseEvent(mouseEvent);
 
 		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
 			camera->rotateToPoint(x, y);
@@ -420,6 +440,8 @@ namespace dyno
 		if (action != GLFW_PRESS)
 			return;
 
+		auto activeScene = SceneGraphFactory::instance()->active();
+
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE:
@@ -441,8 +463,8 @@ namespace dyno
 		case GLFW_KEY_PAGE_DOWN:
 			break;
 		case GLFW_KEY_N:
-			SceneGraph::getInstance().takeOneFrame();
-			SceneGraph::getInstance().updateGraphicsContext();
+			activeScene->takeOneFrame();
+			activeScene->updateGraphicsContext();
 			break;
 		case GLFW_KEY_F1:
 			activeWindow->toggleImGUI();

@@ -61,9 +61,10 @@
 #include "PPropertyWidget.h"
 #include "PModuleListWidget.h"
 #include "PSimulationThread.h"
-#include "PNodeFlowWidget.h"
-#include "PModuleFlowWidget.h"
 #include "PNodeEditor.h"
+
+#include "NodeEditor/QtNodeFlowWidget.h"
+#include "NodeEditor/QtModuleFlowWidget.h"
 
 #include <QAction>
 #include <QLayout>
@@ -92,9 +93,9 @@
 #include <QDialog>
 #include <QVBoxLayout>
 
-#include "Nodes/QtFlowView.h"
-#include "Nodes/QtModuleFlowScene.h"
-#include "Nodes/DataModelRegistry.h"
+#include "NodeEditor/QtModuleFlowScene.h"
+
+#include "nodes/QDataModelRegistry"
 
 #include "Toolbar/TabToolbar.h"
 #include "Toolbar/Page.h"
@@ -146,6 +147,15 @@ namespace dyno
 //		connect(m_scenegraphWidget, &PSceneGraphWidget::notifyNodeDoubleClicked, m_moduleFlowView->getModuleFlowScene(), &QtNodes::QtModuleFlowScene::showNodeFlow);
 
 		statusBar()->showMessage(tr("Status Bar"));
+
+		Qt::ConnectionStyle::setConnectionStyle(
+			R"(
+			  {
+				"ConnectionStyle": {
+				  "UseDataDefinedColors": true
+				}
+			  }
+			  )");
 	}
 
 	void PMainWindow::mainLoop()
@@ -390,11 +400,11 @@ namespace dyno
 
 	void PMainWindow::showNodeEditor()
 	{
-		auto nodes = m_flowView->node_scene->selectedNodes();
-		QtNodes::QtNodeWidget* clickedBlock = nullptr;
+		auto nodes = mNodeFlowView->node_scene->selectedNodes();
+		Qt::QtNodeWidget* clickedBlock = nullptr;
 		if (nodes.size() > 0)
 		{
-			clickedBlock = dynamic_cast<QtNodes::QtNodeWidget*>(nodes[0]->nodeDataModel());
+			clickedBlock = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
 		}
 		
 		PNodeEditor* node_editor = new PNodeEditor(clickedBlock);
@@ -444,9 +454,9 @@ namespace dyno
 		nodeEditorDockWidget->setWindowTitle("Node Editor");
 		nodeEditorDockWidget->setWindowIcon(qtIcon);
 		addDockWidget(sets[3].area, nodeEditorDockWidget);
-		m_flowView = new PNodeFlowWidget();
-		m_flowView->setObjectName(QStringLiteral("tabEditor"));
-		nodeEditorDockWidget->setWidget(m_flowView);
+		mNodeFlowView = new Qt::QtNodeFlowWidget();
+		mNodeFlowView->setObjectName(QStringLiteral("tabEditor"));
+		nodeEditorDockWidget->setWidget(mNodeFlowView);
 
 
 
@@ -490,10 +500,10 @@ namespace dyno
 // 		connect(m_scenegraphWidget, SIGNAL(notifyNodeSelected(Node*)), m_propertyWidget, SLOT(showProperty(Node*)));
 // 		connect(m_moduleListWidget, SIGNAL(notifyModuleSelected(Module*)), m_propertyWidget, SLOT(showProperty(Module*)));
 
-		connect(m_flowView->node_scene, &QtNodes::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
+		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
-		connect(m_flowView->node_scene, &QtNodes::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showNodeEditor);
+		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showNodeEditor);
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)

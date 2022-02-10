@@ -44,7 +44,7 @@ void pybind_framework(py::module& m)
 
 	py::class_<SceneGraph>(m, "SceneGraph")
 		.def_static("get_instance", &SceneGraph::getInstance, py::return_value_policy::reference, "Return an instance")
-		.def("set_root_node", &SceneGraph::setRootNode)
+		//.def("set_root_node", &SceneGraph::setRootNode)
 		.def("is_initialized", &SceneGraph::isInitialized)
 		.def("initialize", &SceneGraph::initialize)
 		.def("set_total_time", &SceneGraph::setTotalTime)

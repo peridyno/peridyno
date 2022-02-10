@@ -2,6 +2,7 @@
 
 #include "Node.h"
 #include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 #include "PInsertNodeAction.h"
 
 #include <iostream>
@@ -55,13 +56,10 @@ namespace dyno
 	{
 		clear();
 
-		SceneGraph& scenegraph = SceneGraph::getInstance();
-		std::shared_ptr<Node> root = scenegraph.getRootNode();
+		auto scn = SceneGraphFactory::instance()->active();
 
-		if(root != nullptr)
-			root->traverseTopDown<PInsertTreeNodeAction>(this);
-
-//		PSceneGraphNode* root = new PSceneGraphNode(scenegraph.getRootNode(), this);
+		if(!scn->isEmpty())
+			scn->traverseForward<PInsertTreeNodeAction>(this);
 	}
 
 	void PSceneGraphWidget::nodeClicked(QTreeWidgetItem* item, int index)

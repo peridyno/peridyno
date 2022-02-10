@@ -3,9 +3,10 @@
 #include "Node.h"
 #include "SceneGraph.h"
 
+#include "NodeEditor/QtNodeWidget.h"
+#include "NodeEditor/QtModuleWidget.h"
+
 #include "PCustomWidgets.h"
-#include "Nodes/QtNodeWidget.h"
-#include "Nodes/QtModuleWidget.h"
 
 #include "Common.h"
 
@@ -164,12 +165,12 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(m_field);
-			slider->setValue((double)f->getData());
+			slider->setValue((double)f->getValue());
 		}
 		else if(template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(m_field);
-			slider->setValue(f->getData());
+			slider->setValue(f->getValue());
 		}
 
 		FormatFieldWidgetName(field->getObjectName());
@@ -357,18 +358,18 @@ namespace dyno
 		updateContext(node);
 	}
 
-	void PPropertyWidget::showBlockProperty(QtNodes::QtBlock& block)
+	void PPropertyWidget::showBlockProperty(Qt::QtNode& block)
 	{
 		auto dataModel = block.nodeDataModel();
 
-		auto node = dynamic_cast<QtNodes::QtNodeWidget*>(dataModel);
+		auto node = dynamic_cast<Qt::QtNodeWidget*>(dataModel);
 		if (node != nullptr)
 		{
 			this->showProperty(node->getNode().get());
 		}
 		else
 		{
-			auto module = dynamic_cast<QtNodes::QtModuleWidget*>(dataModel);
+			auto module = dynamic_cast<Qt::QtModuleWidget*>(dataModel);
 			if (module != nullptr)
 			{
 				this->showProperty(module->getModule());
@@ -392,7 +393,7 @@ namespace dyno
 
 		this->removeAllWidgets();
 
-		std::vector<FBase*>& fields = base->getAllFields();
+		std::vector<FBase*>& fields = base->getParameters();
 
 		for each (FBase* var in fields)
 		{

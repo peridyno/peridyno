@@ -1,11 +1,10 @@
 #include "Node.h"
 #include "Action.h"
 
+#include "SceneGraph.h"
 
 namespace dyno
 {
-IMPLEMENT_CLASS(Node)
-
 Node::Node(std::string name)
 	: OBase()
 	, m_node_name(name)
@@ -21,6 +20,8 @@ Node::Node(std::string name)
 Node::~Node()
 {
 	m_module_list.clear();
+
+	mNodePorts.clear();
 }
 
 void Node::setName(std::string name)
@@ -84,6 +85,11 @@ void Node::setDt(Real dt)
 	m_dt = dt;
 }
 
+void Node::setSceneGraph(SceneGraph* scn)
+{
+	mSceneGraph = scn;
+}
+
 std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 {
 	if (hasAncestor(anc) || anc == nullptr)
@@ -92,6 +98,11 @@ std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 	anc->addDescendant(this);
 
 	mAncestors.push_back(anc);
+
+	if (mSceneGraph) {
+		mSceneGraph->markQueueUpdateRequired();
+	}
+
 	return anc;
 }
 
@@ -293,7 +304,7 @@ void Node::doTraverseBottomUp(Action* act)
 	auto iter = mAncestors.begin();
 	for (; iter != mAncestors.end(); iter++)
 	{
-		(*iter)->traverseBottomUp(act);
+		(*iter)->doTraverseBottomUp(act);
 	}
 
 	act->process(this);
@@ -347,7 +358,16 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 		break;
 
 	case FieldTypeEnum::Param:
-		ret = this->addField(field);
+		ret = addParameter(field);
+		break;
+
+	case FieldTypeEnum::In:
+		ret = addInputField(field);
+		break;
+
+	case FieldTypeEnum::Out:
+		ret = addOutputField(field);
+		break;
 
 	default:
 		break;
