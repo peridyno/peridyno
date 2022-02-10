@@ -128,26 +128,27 @@ public:									\
 private:									\
 	SingleNodePort<T> single_##name = SingleNodePort<T>(std::string(#name), desc, this);					\
 public:																										\
-	inline std::shared_ptr<T> get##name() {	return single_##name.getDerivedNode(); }						\
+	inline T* get##name() {	return single_##name.getDerivedNode(); }						\
 																			\
+	SingleNodePort<T>* import##name(){ return &single_##name; }				\
 	void set##name(std::shared_ptr<T> c) {									\
-		single_##name.setDerivedNode(c);									\
+		single_##name.setDerivedNode(c.get());									\
 	}
 
 #define DEF_NODE_PORTS(name, T, desc)				\
 private:									\
 	MultipleNodePort<T> multiple_##name = MultipleNodePort<T>(std::string(#name)+std::string("(s)"), desc, this);					\
 public:									\
-	inline MultipleNodePort<T>* inport##name##s() { return &multiple_##name; }			\
-	inline std::vector<std::shared_ptr<T>>& get##name##s(){return multiple_##name.getDerivedNodes();}				\
+	inline MultipleNodePort<T>* import##name##s() { return &multiple_##name; }			\
+	inline std::vector<T*>& get##name##s(){return multiple_##name.getDerivedNodes();}				\
 														\
 	bool add##name(std::shared_ptr<T> c){				\
-		multiple_##name.addDerivedNode(c);				\
+		multiple_##name.addDerivedNode(c.get());				\
 		return true;									\
 	}													\
 														\
 	bool remove##name(std::shared_ptr<T> c) {			\
-		multiple_##name.removeDerivedNode(c);			\
+		multiple_##name.removeDerivedNode(c.get());			\
 		return true;									\
 	}
 }

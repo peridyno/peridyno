@@ -40,7 +40,7 @@ Node* Node::getAncestor(std::string name)
 	for (auto it = mAncestors.begin(); it != mAncestors.end(); ++it)
 	{
 		if ((*it)->getName() == name)
-			return it->get();
+			return *it;
 	}
 	return NULL;
 }
@@ -90,7 +90,7 @@ void Node::setSceneGraph(SceneGraph* scn)
 	mSceneGraph = scn;
 }
 
-std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
+Node* Node::addAncestor(Node* anc)
 {
 	if (hasAncestor(anc) || anc == nullptr)
 		return nullptr;
@@ -106,14 +106,14 @@ std::shared_ptr<Node> Node::addAncestor(std::shared_ptr<Node> anc)
 	return anc;
 }
 
-bool Node::hasAncestor(std::shared_ptr<Node> anc)
+bool Node::hasAncestor(Node* anc)
 {
 	auto it = find(mAncestors.begin(), mAncestors.end(), anc);
 
 	return it == mAncestors.end() ? false : true;
 }
 
-void Node::removeAncestor(std::shared_ptr<Node> anc)
+void Node::removeAncestor(Node* anc)
 {
 	auto iter = mAncestors.begin();
 	for (; iter != mAncestors.end(); )
@@ -339,6 +339,16 @@ void Node::traverseBottomUp(Action* act)
 void Node::traverseTopDown(Action* act)
 {
 	doTraverseTopDown(act);
+}
+
+bool Node::connect(NodePort* nPort)
+{
+	return nPort->addNode(this);
+}
+
+bool Node::disconnect(NodePort* nPort)
+{
+	return nPort->removeNode(this);
 }
 
 bool Node::attachField(FBase* field, std::string name, std::string desc, bool autoDestroy /*= true*/)

@@ -6,12 +6,12 @@
 
 namespace dyno
 {
-	class PNodeEditor :
+	class PModuleEditor :
 		public QMainWindow
 	{
 		Q_OBJECT
 	public:
-		PNodeEditor(Qt::QtNodeWidget* node_widget);
+		PModuleEditor(Qt::QtNodeWidget* node_widget);
 
 	private:
 	};

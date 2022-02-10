@@ -175,14 +175,14 @@ namespace Qt
 
 				if (node_port->connectionType() == CntType::Break)
 				{
-					mNodeInport[portIndex]->getNodePort()->removeNode(nd);
+					mNodeInport[portIndex]->getNodePort()->removeNode(nd.get());
 
 					//TODO: recover the connection state, use a more elegant way in the future
 					data->setConnectionType(CntType::Link);
 				}
 				else
 				{
-					mNodeInport[portIndex]->getNodePort()->addNode(nd);
+					mNodeInport[portIndex]->getNodePort()->addNode(nd.get());
 				}
 			}
 		}
@@ -223,7 +223,7 @@ namespace Qt
 
 				auto nodeInp = mNodeInport[portIndex];
 
-				return nodeInp->getNodePort()->isKindOf(nodeExp->getNode());;
+				return nodeInp->getNodePort()->isKindOf(nodeExp->getNode().get());;
 			}
 			catch (std::bad_cast)
 			{

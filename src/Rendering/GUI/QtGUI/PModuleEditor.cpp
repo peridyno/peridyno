@@ -1,4 +1,4 @@
-#include "PNodeEditor.h"
+#include "PModuleEditor.h"
 
 #include <QHBoxLayout>
 #include <QDebug>
@@ -11,7 +11,7 @@
 
 namespace dyno
 {
-	PNodeEditor::PNodeEditor(Qt::QtNodeWidget* node_widget)
+	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* node_widget)
 		: QMainWindow(nullptr, 0)
 	{
 		Qt::QtModuleFlowWidget* moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, node_widget);

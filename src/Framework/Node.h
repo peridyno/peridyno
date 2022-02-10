@@ -82,9 +82,9 @@ namespace dyno
 		 * @return std::shared_ptr<TNode> 		return the created child, if name is aleady used, return nullptr.
 		 */
 		template<class TNode>
-		std::shared_ptr<TNode> createAncestor(std::string name)
+		Node* createAncestor(std::string name)
 		{
-			return addAncestor(TypeInfo::New<TNode>(name));
+			return addAncestor(TypeInfo::New<TNode>(name).get());
 		}
 
 		/**
@@ -93,11 +93,11 @@ namespace dyno
 		 * @param Ancestor
 		 * @return std::shared_ptr<Node>
 		 */
-		std::shared_ptr<Node> addAncestor(std::shared_ptr<Node> anc);
+		Node* addAncestor(Node* anc);
 
-		bool hasAncestor(std::shared_ptr<Node> anc);
+		bool hasAncestor(Node* anc);
 
-		void removeAncestor(std::shared_ptr<Node> anc);
+		void removeAncestor(Node* anc);
 
 		void removeAllAncestors();
 
@@ -106,7 +106,7 @@ namespace dyno
 		 *
 		 * @return ListPtr<Node> ancestor list
 		 */
-		std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
+		std::list<Node*>& getAncestors() { return mAncestors; }
 
 		/**
 		 * @brief Return all descendants
@@ -298,6 +298,9 @@ namespace dyno
 			Act action(std::forward<Args>(args)...);
 			doTraverseTopDown(&action);
 		}
+		
+		bool connect(NodePort* nPort);
+		bool disconnect(NodePort* nPort);
 
 		/**
 		 * @brief Attach a field to Node
@@ -418,7 +421,7 @@ namespace dyno
 
 		//std::shared_ptr<DeviceContext> m_context;
 
-		std::list<std::shared_ptr<Node>> mAncestors;
+		std::list<Node*> mAncestors;
 
 		/**
 		 * @brief Storing pointers to descendants

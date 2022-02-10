@@ -288,7 +288,7 @@ namespace dyno
 		auto ancestors = node->getAncestors();
 		for (auto& anc : ancestors) {
 			if (!visited[anc->objectId()]) {
-				DFS(anc.get(), nodeQueue, visited);
+				DFS(anc, nodeQueue, visited);
 			}
 		}
 
@@ -377,4 +377,8 @@ namespace dyno
 		}
 	}
 
+	void SceneGraph::deleteNode(std::shared_ptr<Node> node)
+	{
+
+	}
 }

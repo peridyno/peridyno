@@ -57,11 +57,11 @@
 #include "PIODockWidget.h"
 #include "PLogWidget.h"
 #include "PConsoleWidget.h"
-#include "PSceneGraphWidget.h"
+//#include "PSceneGraphWidget.h"
 #include "PPropertyWidget.h"
-#include "PModuleListWidget.h"
+//#include "PModuleListWidget.h"
 #include "PSimulationThread.h"
-#include "PNodeEditor.h"
+#include "PModuleEditor.h"
 
 #include "NodeEditor/QtNodeFlowWidget.h"
 #include "NodeEditor/QtModuleFlowWidget.h"
@@ -407,7 +407,7 @@ namespace dyno
 			clickedBlock = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
 		}
 		
-		PNodeEditor* node_editor = new PNodeEditor(clickedBlock);
+		PModuleEditor* node_editor = new PModuleEditor(clickedBlock);
 		node_editor->setWindowTitle("Module Flow Editor");
 		node_editor->resize(1024, 600);
 		node_editor->setMinimumSize(512, 360);

@@ -30,12 +30,15 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 
 	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
-	visualizer->setParticles(fluid);
+	//visualizer->setParticles(fluid);
+	fluid->connect(visualizer->importParticleSystem());
 
 	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
 	boundary->loadSDF("../../data/bowl/bowl.sdf", false);
-	boundary->addParticleSystem(fluid);
+	//boundary->addParticleSystem(fluid);
+	fluid->connect(boundary->importParticleSystems());
+	fluid->disconnect(boundary->importParticleSystems());
 
 	auto outTop = fluid->currentTopology()->promoteToOuput();
 	outTop->connect(visualizer->inPointSetIn());

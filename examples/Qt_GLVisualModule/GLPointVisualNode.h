@@ -34,7 +34,7 @@ namespace dyno
 
 		void preUpdateStates() override;
 
-		DEF_NODE_PORT(ParticleSystem<TDataType>, Particles, "Particles");
+		DEF_NODE_PORT(ParticleSystem<TDataType>, ParticleSystem, "Particles");
 
 		DEF_VAR_IN(Real, Test, "");
 
