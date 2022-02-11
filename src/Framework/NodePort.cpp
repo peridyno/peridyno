@@ -27,28 +27,5 @@ namespace dyno
 	{
 		m_nodes.clear();
 	}
-
-	bool NodePort::addNodeToParent(Node* node)
-	{
-		if (!m_parent->hasAncestor(node))
-		{
-			m_parent->addAncestor(node);
-			return true;
-		}
-
-		return false;
-	}
-
-	bool NodePort::removeNodeFromParent(Node* node)
-	{
-		if (m_parent->hasAncestor(node))
-		{
-			m_parent->removeAncestor(node);
-			return true;
-		}
-
-		return false;
-	}
-
 }
 

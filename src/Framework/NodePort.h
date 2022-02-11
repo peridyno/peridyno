@@ -59,10 +59,6 @@ namespace dyno {
 		virtual void clear();
 
 	protected:
-		bool addNodeToParent(Node* node);
-
-		bool removeNodeFromParent(Node* node);
-
 		std::vector<Node*> m_nodes;
 
 	private:
@@ -143,11 +139,9 @@ namespace dyno {
 			if (d_node != nullptr)
 			{
 				if (m_derived_node != nullptr) {
-					this->removeNodeFromParent(dynamic_cast<Node*>(m_derived_node));
 					m_derived_node = nullptr;
 				}
 
-				this->addNodeToParent(dynamic_cast<Node*>(d_node));
 				m_derived_node = d_node;
 				m_nodes[0] = d_node;
 
@@ -157,7 +151,7 @@ namespace dyno {
 			{
 				if (m_derived_node != nullptr)
 				{
-					this->removeNodeFromParent(dynamic_cast<Node*>(m_derived_node));
+					//this->removeNodeFromParent(dynamic_cast<Node*>(m_derived_node));
 					m_derived_node = nullptr;
 					m_nodes[0] = nullptr;
 				}
@@ -167,7 +161,7 @@ namespace dyno {
 		}
 
 	private:
-		T* m_derived_node;
+		T* m_derived_node = nullptr;
 	};
 
 
@@ -219,7 +213,7 @@ namespace dyno {
 				{
 					m_derived_nodes.push_back(d_node);
 
-					this->addNodeToParent(dynamic_cast<Node*>(d_node));
+					//this->addNodeToParent(dynamic_cast<Node*>(d_node));
 
 					return true;
 				}
@@ -249,7 +243,7 @@ namespace dyno {
 				if (it != m_derived_nodes.end())
 				{
 					m_derived_nodes.erase(it);
-					this->removeNodeFromParent(dynamic_cast<Node*>(d_node));
+					//this->removeNodeFromParent(dynamic_cast<Node*>(d_node));
 
 					return true;
 				}

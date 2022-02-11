@@ -103,7 +103,7 @@ namespace Qt
 			{
 				auto inBlock = nodeMap[nd->objectId()];
 
-				auto ports = nd->getAllNodePorts();
+				auto ports = nd->getImportNodes();
 
 				for (int i = 0; i < ports.size(); i++)
 				{
@@ -203,19 +203,27 @@ namespace Qt
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
+		printf("Use count before add: %d \n", nodeData->getNode().use_count());
+
 		if (nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->addNode(nodeData->getNode());
 		}
+
+		printf("Use count after add: %d \n", nodeData->getNode().use_count());
 	}
 
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
+		printf("Use count before: %d \n", nodeData->getNode().use_count());
 		if (nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
+			scn->deleteNode(nodeData->getNode());
 		}
+
+		printf("Use count after: %d \n", nodeData->getNode().use_count());
 	}
 
 }

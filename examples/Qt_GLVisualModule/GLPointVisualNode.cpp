@@ -62,6 +62,7 @@ namespace dyno
 	template<typename TDataType>
 	GLPointVisualNode<TDataType>::~GLPointVisualNode()
 	{
+		printf("GLPointVisualNode released \n");
 	}
 
 	template<typename TDataType>

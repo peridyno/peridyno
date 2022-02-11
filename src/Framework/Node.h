@@ -72,21 +72,6 @@ namespace dyno
 
 		void setSceneGraph(SceneGraph* scn);
 
-		Node* getAncestor(std::string name);
-
-		/**
-		 * @brief Create an ancestor
-		 *
-		 * @tparam TNode 						Node type of the child object
-		 * @param name 							Node name
-		 * @return std::shared_ptr<TNode> 		return the created child, if name is aleady used, return nullptr.
-		 */
-		template<class TNode>
-		Node* createAncestor(std::string name)
-		{
-			return addAncestor(TypeInfo::New<TNode>(name).get());
-		}
-
 		/**
 		 * @brief Add a ancestor
 		 *
@@ -97,16 +82,8 @@ namespace dyno
 
 		bool hasAncestor(Node* anc);
 
-		void removeAncestor(Node* anc);
-
-		void removeAllAncestors();
-
-		/**
-		 * @brief Return all ancestors
-		 *
-		 * @return ListPtr<Node> ancestor list
-		 */
-		std::list<Node*>& getAncestors() { return mAncestors; }
+		std::vector<NodePort*>& getImportNodes() { return mImportNodes; }
+		std::vector<NodePort*>& getExportNodes() { return mExportNodes; }
 
 		/**
 		 * @brief Return all descendants
@@ -314,15 +291,18 @@ namespace dyno
 		 */
 		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 
-		std::vector<NodePort*>& getAllNodePorts() { return mNodePorts; }
+		std::vector<NodePort*>& getAllNodePorts() { return mImportNodes; }
 
-		uint sizeOfNodePorts() const { return (uint)mNodePorts.size(); }
+		uint sizeOfNodePorts() const { return (uint)mImportNodes.size(); }
 		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
 		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
 	
 	protected:
 		virtual void doTraverseBottomUp(Action* act);
 		virtual void doTraverseTopDown(Action* act);
+
+		bool appendExportNode(NodePort* nodePort);
+		bool removeExportNode(NodePort* nodePort);
 
 		virtual void preUpdateStates();
 		virtual void updateStates();
@@ -428,7 +408,9 @@ namespace dyno
 		 */
 		std::list<Node*> mDescendants;
 
-		std::vector<NodePort*> mNodePorts;
+		std::vector<NodePort*> mImportNodes;
+
+		std::vector<NodePort*> mExportNodes;
 
 		SceneGraph* mSceneGraph = nullptr;
 
