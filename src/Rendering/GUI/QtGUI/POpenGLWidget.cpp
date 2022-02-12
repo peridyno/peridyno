@@ -136,8 +136,11 @@ namespace dyno
 
 		PSimulationThread::instance()->startRendering();
 		
+		//Update SceneGraph
 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
-		update();
+
+		//Update QtWidget
+		this->update();
 
 		PSimulationThread::instance()->stopRendering();
 

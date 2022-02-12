@@ -103,7 +103,7 @@ namespace dyno
 	template<typename TDataType>
 	void GLPointVisualNode<TDataType>::resetStates()
 	{
-		this->preUpdateStates();
+		this->update();
 	}
 
 	DEFINE_CLASS(GLPointVisualNode);
