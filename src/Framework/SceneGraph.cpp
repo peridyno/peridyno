@@ -281,14 +281,14 @@ namespace dyno
 		this->traverseForward(&eventAct);
 	}
 
-	void DFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
+	void UpAndDownDFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
 
 		visited[node->objectId()] = true;
 
 		auto ancestors = node->getAncestors();
 		for (auto& anc : ancestors) {
 			if (!visited[anc->objectId()]) {
-				DFS(anc, nodeQueue, visited);
+				UpAndDownDFS(anc, nodeQueue, visited);
 			}
 		}
 
@@ -297,7 +297,7 @@ namespace dyno
 		auto descendents = node->getDescendants();
 		for (auto& des : descendents) {
 			if (!visited[des->objectId()]) {
-				DFS(des, nodeQueue, visited);
+				UpAndDownDFS(des, nodeQueue, visited);
 			}
 		}
 	};
@@ -340,7 +340,7 @@ namespace dyno
 
 				Node* node = n.second.get();
 
-				DFS(node, mNodeQueue, visited);
+				UpAndDownDFS(node, mNodeQueue, visited);
 			}
 		}
 
@@ -381,4 +381,31 @@ namespace dyno
 	{
 
 	}
+
+// 	void DownDFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
+// 
+// 		visited[node->objectId()] = true;
+// 
+// 		auto ancestors = node->getAncestors();
+// 		for (auto& anc : ancestors) {
+// 			if (!visited[anc->objectId()]) {
+// 				UpAndDownDFS(anc, nodeQueue, visited);
+// 			}
+// 		}
+// 
+// 		nodeQueue.push_back(node);
+// 
+// 		auto descendents = node->getDescendants();
+// 		for (auto& des : descendents) {
+// 			if (!visited[des->objectId()]) {
+// 				UpAndDownDFS(des, nodeQueue, visited);
+// 			}
+// 		}
+// 	};
+
+	void SceneGraph::propagateNode(std::shared_ptr<Node> node)
+	{
+		
+	}
+
 }

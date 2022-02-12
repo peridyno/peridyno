@@ -132,12 +132,16 @@ namespace dyno
 
 	void POpenGLWidget::updateGraphicsContext()
 	{
+		makeCurrent();
+
 		PSimulationThread::instance()->startRendering();
 		
 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
 		update();
 
 		PSimulationThread::instance()->stopRendering();
+
+		doneCurrent();
 	}
 
 	std::shared_ptr<Camera> POpenGLWidget::activeCamera()
