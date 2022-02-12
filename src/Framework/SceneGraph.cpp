@@ -285,19 +285,23 @@ namespace dyno
 
 		visited[node->objectId()] = true;
 
-		auto ancestors = node->getAncestors();
-		for (auto& anc : ancestors) {
-			if (!visited[anc->objectId()]) {
-				UpAndDownDFS(anc, nodeQueue, visited);
+		auto imports = node->getImportNodes();
+		for (auto port : imports) {
+			auto& inNodes = port->getNodes();
+			for (auto inNode :  inNodes) {
+				if (inNode != nullptr && !visited[inNode->objectId()]) {
+					DFS(inNode, nodeQueue, visited);
+				}
 			}
 		}
 
 		nodeQueue.push_back(node);
 
-		auto descendents = node->getDescendants();
-		for (auto& des : descendents) {
-			if (!visited[des->objectId()]) {
-				UpAndDownDFS(des, nodeQueue, visited);
+		auto exports = node->getExportNodes();
+		for (auto port : exports) {
+			auto exNode = port->getParent();
+			if (exNode != nullptr && !visited[node->objectId()]) {
+				DFS(exNode, nodeQueue, visited);
 			}
 		}
 	};
@@ -379,7 +383,12 @@ namespace dyno
 
 	void SceneGraph::deleteNode(std::shared_ptr<Node> node)
 	{
+		if (node == nullptr ||
+			mNodeMap.find(node->objectId()) == mNodeMap.end())
+			return;
 
+		mNodeMap.erase(node->objectId());
+		mQueueUpdateRequired = true;
 	}
 
 // 	void DownDFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {

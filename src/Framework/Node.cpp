@@ -21,7 +21,22 @@ Node::~Node()
 {
 	m_module_list.clear();
 
-	mNodePorts.clear();
+	for (auto port : mImportNodes)
+	{
+		auto& nodes = port->getNodes();
+		for (auto node : nodes)
+		{
+			node->disconnect(port);
+		}
+	}
+
+	for (auto port : mExportNodes)
+	{
+		this->disconnect(port);
+	}
+
+	mImportNodes.clear();
+	mExportNodes.clear();
 }
 
 void Node::setName(std::string name)
@@ -32,17 +47,6 @@ void Node::setName(std::string name)
 std::string Node::getName()
 {
 	return m_node_name;
-}
-
-
-Node* Node::getAncestor(std::string name)
-{
-	for (auto it = mAncestors.begin(); it != mAncestors.end(); ++it)
-	{
-		if ((*it)->getName() == name)
-			return *it;
-	}
-	return NULL;
 }
 
 bool Node::isControllable()
@@ -111,33 +115,6 @@ bool Node::hasAncestor(Node* anc)
 	auto it = find(mAncestors.begin(), mAncestors.end(), anc);
 
 	return it == mAncestors.end() ? false : true;
-}
-
-void Node::removeAncestor(Node* anc)
-{
-	auto iter = mAncestors.begin();
-	for (; iter != mAncestors.end(); )
-	{
-		if (*iter == anc)
-		{
-			anc->removeDescendant(this);
-			mAncestors.erase(iter++);
-		}
-		else
-		{
-			++iter;
-		}
-	}
-}
-
-void Node::removeAllAncestors()
-{
-	auto iter = mAncestors.begin();
-	for (; iter != mAncestors.end(); )
-	{
-		(*iter)->removeDescendant(this);
-		mAncestors.erase(iter++);
-	}
 }
 
 void Node::preUpdateStates()
@@ -326,6 +303,30 @@ void Node::doTraverseTopDown(Action* act)
 	act->end(this);
 }
 
+bool Node::appendExportNode(NodePort* nodePort)
+{
+	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
+	if (it != mExportNodes.end()) {
+		return false;
+	}
+
+	mExportNodes.push_back(nodePort);
+
+	return nodePort->addNode(this);
+}
+
+bool Node::removeExportNode(NodePort* nodePort)
+{
+	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
+	if (it == mExportNodes.end()) {
+		return false;
+	}
+
+	mExportNodes.erase(it);
+
+	return nodePort->removeNode(this);
+}
+
 void Node::updateTopology()
 {
 
@@ -343,12 +344,12 @@ void Node::traverseTopDown(Action* act)
 
 bool Node::connect(NodePort* nPort)
 {
-	return nPort->addNode(this);
+	return this->appendExportNode(nPort);
 }
 
 bool Node::disconnect(NodePort* nPort)
 {
-	return nPort->removeNode(this);
+	return this->removeExportNode(nPort);
 }
 
 bool Node::attachField(FBase* field, std::string name, std::string desc, bool autoDestroy /*= true*/)
@@ -424,7 +425,7 @@ void Node::removeDescendant(Node* descent)
 
 bool Node::addNodePort(NodePort* port)
 {
-	mNodePorts.push_back(port);
+	mImportNodes.push_back(port);
 
 	return true;
 }
