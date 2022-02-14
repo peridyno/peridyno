@@ -37,7 +37,7 @@ namespace dyno
 	void PSimulationThread::run()
 	{
 		auto scn = SceneGraphFactory::instance()->active();
-		scn->initialize();
+//		scn->initialize();
 
 		int f = 0;
 		while(true && f < mFrameNum)
