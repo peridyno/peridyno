@@ -14,11 +14,11 @@
 using namespace std;
 using namespace dyno;
 
-void CreateScene()
+std::shared_ptr<SceneGraph> createScene()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
- 	std::shared_ptr<Ocean<DataType3f>> root = scene.createNewScene<Ocean<DataType3f>>();
+	auto root = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 
 	auto oceanPatch = std::make_shared<OceanPatch<DataType3f>>(512, 512, 4);
 	root->setOceanPatch(oceanPatch);
@@ -37,20 +37,16 @@ void CreateScene()
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	root->graphicsPipeline()->pushModule(sRender);
+
+	return scn;
 }
 
 int main()
 {
-	CreateScene();
-
-	RenderEngine* engine = new GLRenderEngine;
-	
 	GlfwApp window;
-	window.setRenderEngine(engine);
+	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
-
-	delete engine;
 
 	return 0;
 }

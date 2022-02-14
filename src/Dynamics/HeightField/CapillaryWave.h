@@ -14,6 +14,7 @@ namespace dyno
 	template<typename TDataType>
 	class CapillaryWave : public Node
 	{
+		DECLARE_CLASS_1(CapillaryWave, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -80,5 +81,7 @@ namespace dyno
 		DArray2D<Coord4> mDisplacement;   // 位移场
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
 
+	private:
+		DEF_NODE_PORTS(ParticleEmitter, ParticleEmitter<TDataType>, "Particle Emitters");
 	};
 }

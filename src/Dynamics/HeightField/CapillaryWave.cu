@@ -6,7 +6,8 @@
 
 namespace dyno
 {
-	//IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
+	IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
+
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
 		: Node()
