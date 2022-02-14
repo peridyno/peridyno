@@ -62,12 +62,13 @@ namespace dyno
 	template<typename TDataType>
 	GLPointVisualNode<TDataType>::~GLPointVisualNode()
 	{
+		printf("GLPointVisualNode released \n");
 	}
 
 	template<typename TDataType>
 	void GLPointVisualNode<TDataType>::preUpdateStates()
 	{
-		if (this->getParticles() == nullptr) {
+		if (this->getParticleSystem() == nullptr) {
 			this->stateVector()->setElementCount(0);
 
 			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
@@ -77,8 +78,8 @@ namespace dyno
 			return;
 		}
 
-		auto& poss = this->getParticles()->statePosition()->getData();
-		auto& vels = this->getParticles()->stateVelocity()->getData();
+		auto& poss = this->getParticleSystem()->statePosition()->getData();
+		auto& vels = this->getParticleSystem()->stateVelocity()->getData();
 
 		this->stateVector()->setElementCount(poss.size());
 
@@ -102,7 +103,7 @@ namespace dyno
 	template<typename TDataType>
 	void GLPointVisualNode<TDataType>::resetStates()
 	{
-		this->preUpdateStates();
+		this->update();
 	}
 
 	DEFINE_CLASS(GLPointVisualNode);

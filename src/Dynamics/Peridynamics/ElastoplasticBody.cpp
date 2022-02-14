@@ -54,7 +54,8 @@ namespace dyno
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 		this->animationPipeline()->pushModule(m_visModule);
 
-		m_surfaceNode = this->template createAncestor<Node>("Mesh");
+		m_surfaceNode = std::make_shared<Node>("Mesh");
+		m_surfaceNode->addAncestor(this);
 		m_surfaceNode->setVisible(false);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();

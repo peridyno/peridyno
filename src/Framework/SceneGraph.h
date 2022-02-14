@@ -89,6 +89,10 @@ namespace dyno
 			return tNode;
 		}
 
+		void deleteNode(std::shared_ptr<Node> node);
+
+		void propagateNode(std::shared_ptr<Node> node);
+
 	public:
 		static SceneGraph& getInstance();
 

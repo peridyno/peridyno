@@ -73,7 +73,7 @@ namespace dyno
 	class PPropertyWidget;
 	class PAnimationWidget;
 	class PModuleListWidget;
-	class PNodeEditor;
+	class PModuleEditor;
 
 	class RenderEngine;
 	class ImWidget;

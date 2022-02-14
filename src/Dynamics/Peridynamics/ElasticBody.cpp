@@ -25,7 +25,8 @@ namespace dyno
 		this->animationPipeline()->pushModule(peri);
 
 		//Create a node for surface mesh rendering
-		m_surfaceNode = this->template createAncestor<Node>("Mesh");
+		m_surfaceNode = std::make_shared<Node>("Mesh");// this->template createAncestor<Node>("Mesh");
+		m_surfaceNode->addAncestor(this);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		m_surfaceNode->currentTopology()->setDataPtr(triSet);

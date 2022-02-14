@@ -101,7 +101,7 @@ std::shared_ptr<SceneGraph> createScene()
 	incompressibleFluid->setFluidParticles(fluid);
 	incompressibleFluid->setBoundaryParticles(ghost);
 
-	root->addAncestor(incompressibleFluid);
+	root->addAncestor(incompressibleFluid.get());
 	root->addParticleSystem(fluid);
 
 	{

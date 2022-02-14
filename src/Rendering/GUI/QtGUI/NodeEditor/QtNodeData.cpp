@@ -15,7 +15,7 @@ namespace Qt
 
 		auto& out_data = dynamic_cast<QtExportNode&>(nodeData);
 
-		return node_port->isKindOf(out_data.getNode());
+		return node_port->isKindOf(out_data.getNode().get());
 	}
 
 	bool QtExportNode::sameType(QtNodeData& nodeData) const
@@ -31,7 +31,7 @@ namespace Qt
 
 		auto& in_data = dynamic_cast<QtImportNode&>(nodeData);
 
-		return in_data.getNodePort()->isKindOf(export_node);
+		return in_data.getNodePort()->isKindOf(export_node.get());
 	}
 }
 
