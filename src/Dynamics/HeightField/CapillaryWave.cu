@@ -2,12 +2,13 @@
 
 #include "Topology/HeightField.h"
 
-#include "cuda_helper_math.h"
-
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
+#define GRAVITY 9.83219 * 0.5
+#define BLOCKSIZE_X 16
+#define BLOCKSIZE_Y 16
 
+	IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
 		: Node(name)
@@ -346,7 +347,7 @@ namespace dyno
 		{
 			C_ImposeBC << < blocksPerGrid1, threadsPerBlock1 >> > (mDeviceGridNext, mDeviceGrid, extNx, extNy, gridPitch);
 			swapDeviceGrid();
-			synchronCheck;
+			//synchronCheck;
 
 			C_OneWaveStep << < blocksPerGrid, threadsPerBlock >> > (
 				mDeviceGridNext,
@@ -356,14 +357,14 @@ namespace dyno
 				1.0f * timestep,
 				gridPitch);
 			swapDeviceGrid();
-			synchronCheck;
+			//synchronCheck;
 		}
 
 		C_InitHeightField << < blocksPerGrid, threadsPerBlock >> > (mHeight, mDeviceGrid, simulatedRegionWidth, horizon, realGridSize);
-		synchronCheck;
+		//synchronCheck;
 
 		C_InitHeightGrad << < blocksPerGrid, threadsPerBlock >> > (mHeight, simulatedRegionWidth);
-		synchronCheck;
+		//synchronCheck;
 	}
 
 	template<typename TDataType>
@@ -394,11 +395,11 @@ namespace dyno
 
 		//init grid with initial values
 		C_InitDynamicRegion << < blocksPerGrid, threadsPerBlock >> > (mDeviceGrid, extNx, extNy, gridPitch, horizon);
-		synchronCheck;
+		//synchronCheck;
 
 		//init grid_next with initial values
 		C_InitDynamicRegion << < blocksPerGrid, threadsPerBlock >> > (mDeviceGridNext, extNx, extNy, gridPitch, horizon);
-		synchronCheck;
+		//synchronCheck;
 
 	}
 
@@ -417,7 +418,7 @@ namespace dyno
 		dim3 blocksPerGrid(x, y);
 		C_InitSource << < blocksPerGrid, threadsPerBlock >> > (mSource, simulatedRegionWidth);
 		resetSource();
-		synchronCheck;
+		//synchronCheck;
 	}
 
 	template <typename Coord>

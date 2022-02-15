@@ -288,24 +288,41 @@ namespace dyno {
     void OceanPatch<TDataType>::animate(float t)
     {
         t = m_fft_flow_speed * t;
-        dim3 block(8, 8, 1);
-        dim3 grid(cuda_iDivUp(mResolution, block.x), cuda_iDivUp(mResolution, block.y), 1);
 
-        generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
-        cuSynchronize();
-        generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
-        cuSynchronize();
+		cuExecute2D(make_uint2(mResolution, mResolution),
+			generateSpectrumKernel,
+			m_h0, 
+			m_ht, 
+			mSpectrumWidth, 
+			mResolution, 
+			mResolution, 
+			t, 
+			m_realPatchSize);
+
+		cuExecute2D(make_uint2(mResolution, mResolution),
+			generateDispalcementKernel,
+			m_ht, 
+			m_Dxt, 
+			m_Dzt, 
+			mResolution, 
+			mResolution, 
+			m_realPatchSize);
+
+//         generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
+//         generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
 
         cufftExecC2C(fftPlan, (float2*)m_ht.begin(), (float2*)m_ht.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dxt.begin(), (float2*)m_Dxt.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dzt.begin(), (float2*)m_Dzt.begin(), CUFFT_INVERSE);
 
-        int  x = (mResolution + 16 - 1) / 16;
-        int  y = (mResolution + 16 - 1) / 16;
-        dim3 threadsPerBlock(16, 16);
-        dim3 blocksPerGrid(x, y);
-        O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, mResolution);
-        cuSynchronize();
+		cuExecute2D(make_uint2(mResolution, mResolution),
+			O_UpdateDisplacement,
+			m_displacement,
+			m_ht,
+			m_Dxt,
+			m_Dzt,
+			mResolution);
+        //O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, mResolution);
     }
 
     template <typename Coord>
@@ -338,10 +355,7 @@ namespace dyno {
 
         auto& shifts = topo->getDisplacement();
 
-        uint2 extent;
-        extent.x = shifts.nx();
-        extent.y = shifts.ny();
-        cuExecute2D(extent,
+        cuExecute2D(make_uint2(shifts.nx(), shifts.ny()),
             O_UpdateTopology,
             shifts,
             m_displacement,

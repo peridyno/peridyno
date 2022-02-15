@@ -1,9 +1,8 @@
 #pragma once
-#include <cuda_runtime.h>
-#include <cufft.h>
-#include <vector>
-#include <math_constants.h>
 #include "Node.h"
+
+#include <cufft.h>
+#include <math_constants.h>
 
 namespace dyno {
 

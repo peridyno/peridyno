@@ -1,10 +1,6 @@
 #pragma once
 #include "Node.h"
-#include <cuda_runtime.h>
-#include <cufft.h>
-#include <vector>
-#include <math_constants.h>
-#include "types.h"
+
 namespace dyno
 {
 	/*!
