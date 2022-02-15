@@ -92,7 +92,8 @@ if(PERIDYNO_LIBRARY_VOLUME)
     build_library(Volume LIB_DEPENDENCY)
 endif()
 
+
 if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(LIB_DEPENDENCY Core IO Framework)
+    set(LIB_DEPENDENCY Core IO Framework cufft)
     build_library(HeightField LIB_DEPENDENCY)
 endif()

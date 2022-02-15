@@ -3,19 +3,14 @@
 
 #include <SceneGraph.h>
 
-#include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/ParticleEmitterSquare.h>
+#include <HeightField/Ocean.h>
+#include <HeightField/OceanPatch.h>
+#include <HeightField/CapillaryWave.h>
 
-#include <Module/CalculateNorm.h>
+#include "Mapping/HeightFieldToTriangleSet.h"
 
 #include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
-#include <ColorMapping.h>
-
-#include <ImColorbar.h>
-
-#include "GLPointVisualNode.h"
+#include <GLSurfaceVisualModule.h>
 
 using namespace std;
 using namespace dyno;
@@ -23,24 +18,20 @@ using namespace dyno;
 std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
-	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
+	auto root = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512.0f, 8));
+	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+	root->currentTopology()->connect(mapper->inHeightField());
+	root->graphicsPipeline()->pushModule(mapper);
 
-	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
-	visualizer->setParticles(fluid);
+	mapper->varScale()->setValue(0.01);
+	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	boundary->loadSDF("../../data/bowl/bowl.sdf", false);
-	boundary->addParticleSystem(fluid);
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	sRender->setColor(Vec3f(0, 0.2, 1.0));
+	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+	root->graphicsPipeline()->pushModule(sRender);
 
-	auto outTop = fluid->currentTopology()->promoteToOuput();
-	outTop->connect(visualizer->inPointSetIn());
-	outTop->disconnect(visualizer->inPointSetIn());
-	
 	return scn;
 }
 
