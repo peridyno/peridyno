@@ -10,7 +10,7 @@ namespace dyno
 
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
-		: Node()
+		: Node(name)
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		heights->setExtents(size, size);
@@ -26,6 +26,12 @@ namespace dyno
 		simulatedRegionHeight = size;
 
 		initialize();
+	}
+	
+	template<typename TDataType>
+	CapillaryWave<TDataType>::CapillaryWave(std::string name)
+		: Node(name)
+	{
 	}
 
 	template<typename TDataType>

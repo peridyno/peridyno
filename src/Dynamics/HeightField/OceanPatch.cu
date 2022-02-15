@@ -8,6 +8,8 @@
 
 namespace dyno {
 
+    IMPLEMENT_CLASS_1(OceanPatch, TDataType)
+
     //Round a / b to nearest higher integer value
     int cuda_iDivUp(int a, int b)
     {
@@ -153,6 +155,12 @@ namespace dyno {
 
         Dxt(x, y) = kx * idoth;
         Dzt(x, y) = ky * idoth;
+    }
+
+    template<typename TDataType>
+    OceanPatch<TDataType>::OceanPatch(std::string name)
+        : Node(name)
+    {
     }
 
     template<typename TDataType>

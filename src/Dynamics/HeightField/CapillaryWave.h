@@ -20,7 +20,9 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename Vector<float, 4> Coord4;
 
-		CapillaryWave(int size, float patchLength, std::string name = "default");
+		CapillaryWave(int size, float patchLength, std::string name = "capillaryWave");
+		CapillaryWave(std::string name = "capillaryWave");
+
 		virtual ~CapillaryWave();
 
 		DArray2D<Coord4> GetHeight() { return mHeight; }
@@ -81,7 +83,8 @@ namespace dyno
 		DArray2D<Coord4> mDisplacement;   // 位移场
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
 
-	private:
-		DEF_NODE_PORTS(ParticleEmitter, ParticleEmitter<TDataType>, "Particle Emitters");
+	public:
+		DEF_VAR_IN(Real, TestIN, "");
+		DEF_VAR_OUT(Real, TestOUT, "");
 	};
 }

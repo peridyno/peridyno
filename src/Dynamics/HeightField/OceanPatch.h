@@ -18,11 +18,13 @@ namespace dyno {
     template<typename TDataType>
     class OceanPatch : public Node
     {
+        DECLARE_CLASS_1(OceanPatch, TDataType)
     public:
         typedef typename Vector<float, 2> Coord;
 
-        OceanPatch(int size, float patchSize, int windType = 1, std::string name = "default");
+        OceanPatch(int size, float patchSize, int windType = 1, std::string name = "OceanPatch");
         OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global);
+        OceanPatch(std::string name = "OceanPatch");
         ~OceanPatch();
 
         void animate(float t);

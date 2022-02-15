@@ -6,6 +6,7 @@ namespace dyno
 	template<typename TDataType>
 	class Ocean : public Node
 	{
+		DECLARE_CLASS_1(Ocean, TDataType)
 	public:
 		Ocean();
 		~Ocean();

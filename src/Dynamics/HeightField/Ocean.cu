@@ -17,6 +17,8 @@
 
 namespace dyno
 {
+	IMPLEMENT_CLASS_1(Ocean, TDataType)
+
 	template<typename TDataType>
 	Ocean<TDataType>::Ocean()
 		: Node()
