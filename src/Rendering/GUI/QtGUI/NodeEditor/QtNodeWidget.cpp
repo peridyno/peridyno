@@ -175,14 +175,16 @@ namespace Qt
 
 				if (node_port->connectionType() == CntType::Break)
 				{
-					mNodeInport[portIndex]->getNodePort()->removeNode(nd.get());
+					//mNodeInport[portIndex]->getNodePort()->removeNode(nd.get());
+					nd->disconnect(mNodeInport[portIndex]->getNodePort());
 
 					//TODO: recover the connection state, use a more elegant way in the future
 					data->setConnectionType(CntType::Link);
 				}
 				else
 				{
-					mNodeInport[portIndex]->getNodePort()->addNode(nd.get());
+					//mNodeInport[portIndex]->getNodePort()->addNode(nd.get());
+					nd->connect(mNodeInport[portIndex]->getNodePort());
 				}
 			}
 		}

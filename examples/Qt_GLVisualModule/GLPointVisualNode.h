@@ -36,7 +36,7 @@ namespace dyno
 
 		DEF_NODE_PORT(ParticleSystem<TDataType>, ParticleSystem, "Particles");
 
-		DEF_VAR_IN(Real, Test, "");
+		//DEF_VAR_IN(Real, Test, "");
 
 		DEF_INSTANCE_IN(PointSet<TDataType>, PointSetIn, "");
 

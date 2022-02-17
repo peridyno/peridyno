@@ -48,9 +48,6 @@ namespace dyno {
 
 		virtual std::vector<Node*>& getNodes() { return m_nodes; }
 
-		virtual bool addNode(Node* node) = 0;
-
-		virtual bool removeNode(Node* node) = 0;
 
 		virtual bool isKindOf(Node* node) = 0;
 
@@ -59,6 +56,10 @@ namespace dyno {
 		virtual void clear();
 
 	protected:
+		virtual bool addNode(Node* node) = 0;
+
+		virtual bool removeNode(Node* node) = 0;
+
 		std::vector<Node*> m_nodes;
 
 	private:
@@ -68,6 +69,8 @@ namespace dyno {
 		std::string m_name;
 		std::string m_description;
 		NodePortType m_portType;
+
+		friend class Node;
 	};
 
 
@@ -82,38 +85,6 @@ namespace dyno {
 			this->getNodes().resize(1);
 		};
 		~SingleNodePort() override { m_nodes[0] = nullptr; }
-
-		bool addNode(Node* node) override
-		{ 
-			auto d_node = dynamic_cast<T*>(node);
-			if (d_node != nullptr)
-			{
-// 				if (m_nodes[0] != node)
-// 				{
-// 					if (m_nodes[0] != nullptr)
-// 					{
-// 						this->removeNodeFromParent(m_nodes[0]);
-// 					}
-// 				
-// 					this->addNodeToParent(node);
-// 					m_nodes[0] = node;
-// 					m_derived_node = d_node;
-// 
-// 					return true;
-// 				}
-				return setDerivedNode(d_node);
-			}
-
-			return false;
-		}
-
-		bool removeNode(Node* node) override
-		{
-			m_nodes[0] = nullptr;
-			m_derived_node = nullptr;
-
-			return true;
-		}
 
 		bool isKindOf(Node* node) override
 		{
@@ -160,6 +131,26 @@ namespace dyno {
 			return false;
 		}
 
+	protected:
+		bool addNode(Node* node) override
+		{
+			auto d_node = dynamic_cast<T*>(node);
+			if (d_node != nullptr)
+			{
+				return setDerivedNode(d_node);
+			}
+
+			return false;
+		}
+
+		bool removeNode(Node* node) override
+		{
+			m_nodes[0] = nullptr;
+			m_derived_node = nullptr;
+
+			return true;
+		}
+
 	private:
 		T* m_derived_node = nullptr;
 	};
@@ -184,26 +175,6 @@ namespace dyno {
 			NodePort::clear();
 		}
 
-		bool addNode(Node* node) override {
-			auto d_node = dynamic_cast<T*>(node);
-			if (d_node != nullptr)
-			{
-// 				auto it = find(m_derived_nodes.begin(), m_derived_nodes.end(), d_node);
-// 
-// 				if (it == m_derived_nodes.end())
-// 				{
-// 					m_derived_nodes.push_back(d_node);
-// 
-// 					this->addNodeToParent(node);
-// 
-// 					return true;
-// 				}
-				addDerivedNode(d_node);
-			}
-
-			return false;
-		}
-
 		bool addDerivedNode(T* d_node) {
 			if (d_node != nullptr)
 			{
@@ -219,18 +190,6 @@ namespace dyno {
 				}
 			}
 
-			return false;
-		}
-
-		bool removeNode(Node* node)  override
-		{
-			auto d_node = dynamic_cast<T*>(node);
-
-			if (d_node != nullptr)
-			{
-				return removeDerivedNode(d_node);
-			}
-		
 			return false;
 		}
 
@@ -272,6 +231,30 @@ namespace dyno {
 		{
 			return m_derived_nodes;
 		}
+
+	protected:
+		bool addNode(Node* node) override {
+			auto d_node = dynamic_cast<T*>(node);
+			if (d_node != nullptr)
+			{
+				addDerivedNode(d_node);
+			}
+
+			return false;
+		}
+
+		bool removeNode(Node* node)  override
+		{
+			auto d_node = dynamic_cast<T*>(node);
+
+			if (d_node != nullptr)
+			{
+				return removeDerivedNode(d_node);
+			}
+
+			return false;
+		}
+
 	private:
 		std::vector<T*> m_derived_nodes;
 	};

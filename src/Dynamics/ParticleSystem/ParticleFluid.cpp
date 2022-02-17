@@ -27,7 +27,7 @@ namespace dyno
 	template<typename TDataType>
 	ParticleFluid<TDataType>::~ParticleFluid()
 	{
-		
+		Log::sendMessage(Log::Info, "ParticleFluid released \n");
 	}
 
 	template<typename TDataType>

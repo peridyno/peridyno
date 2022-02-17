@@ -24,13 +24,13 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	root->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	root->loadSDF("../../data/bowl/bowl.sdf", false);
+	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
+	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
+	boundary->loadSDF("../../data/bowl/bowl.sdf", false);
 
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
-	root->addParticleSystem(fluid);
+	fluid->connect(boundary->importParticleSystems());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
