@@ -40,6 +40,7 @@ namespace dyno
 		bool mReset = false;
 		bool mPaused = true;
 		bool mRendering = false;
+		bool mRunning = true;
 
 		QMutex mMutex;
 	};

@@ -31,7 +31,7 @@ namespace dyno
 
 	void PSimulationThread::stop()
 	{
-		this->exit();
+		mRunning = false;
 	}
 
 	void PSimulationThread::run()
@@ -40,7 +40,7 @@ namespace dyno
 //		scn->initialize();
 
 		int f = 0;
-		while(true && f < mFrameNum)
+		while(mRunning && f < mFrameNum)
 		{
 			if (!mRendering)
 			{
@@ -65,8 +65,6 @@ namespace dyno
 			}
 //			
 		}
-
-		this->stop();
 	}
 
 	void PSimulationThread::reset()
