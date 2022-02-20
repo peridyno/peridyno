@@ -22,7 +22,7 @@ namespace dyno
     template<typename TDataType>
     class VirtualModule : public Module
 	{
-        DECLARE_CLASS_1(VirtualModule, TDataType)
+        DECLARE_TCLASS(VirtualModule, TDataType)
 	public:
         VirtualModule();
 		virtual ~VirtualModule();

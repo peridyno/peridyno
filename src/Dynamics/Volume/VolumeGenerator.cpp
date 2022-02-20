@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(VolumeGenerator, TDataType)
+	IMPLEMENT_TCLASS(VolumeGenerator, TDataType)
 
 	template<typename TDataType>
 	VolumeGenerator<TDataType>::VolumeGenerator()

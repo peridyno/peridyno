@@ -23,7 +23,7 @@ namespace dyno
 	template<typename TDataType>
 	class ParticleWriterABC : public OutputModule
 	{
-		DECLARE_CLASS_1(ParticleWriterABC, TDataType)
+		DECLARE_TCLASS(ParticleWriterABC, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

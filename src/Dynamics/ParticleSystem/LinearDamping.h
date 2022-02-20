@@ -26,7 +26,7 @@ namespace dyno
 	template<typename TDataType>
 	class LinearDamping : public ConstraintModule
 	{
-		DECLARE_CLASS_1(LinearDamping, TDataType)
+		DECLARE_TCLASS(LinearDamping, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -45,5 +45,5 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 	};
 
-	IMPLEMENT_CLASS_1(LinearDamping, TDataType)
+	IMPLEMENT_TCLASS(LinearDamping, TDataType)
 }

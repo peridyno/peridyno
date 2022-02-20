@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(TriangleMeshWriter, TDataType)
+	IMPLEMENT_TCLASS(TriangleMeshWriter, TDataType)
 
 	template<typename TDataType>
 	TriangleMeshWriter<TDataType>::TriangleMeshWriter() : OutputModule()

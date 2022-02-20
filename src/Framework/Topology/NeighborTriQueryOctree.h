@@ -10,7 +10,7 @@ namespace dyno
 	template<typename TDataType>
 	class NeighborTriQueryOctree : public ComputeModule
 	{
-		DECLARE_CLASS_1(NeighborTriQueryOctree, TDataType)
+		DECLARE_TCLASS(NeighborTriQueryOctree, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

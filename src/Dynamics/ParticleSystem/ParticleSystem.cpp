@@ -3,7 +3,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleSystem, TDataType)
+	IMPLEMENT_TCLASS(ParticleSystem, TDataType)
 
 	template<typename TDataType>
 	ParticleSystem<TDataType>::ParticleSystem(std::string name)

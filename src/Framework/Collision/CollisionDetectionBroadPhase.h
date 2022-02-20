@@ -11,7 +11,7 @@ namespace dyno
 	template<typename TDataType>
 	class CollisionDetectionBroadPhase : public CollisionModel
 	{
-		DECLARE_CLASS_1(CollisionDetectionBroadPhase, TDataType)
+		DECLARE_TCLASS(CollisionDetectionBroadPhase, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

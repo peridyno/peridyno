@@ -9,7 +9,7 @@ namespace dyno {
 	template<typename TDataType>
 	class CollidableSDF : public CollidableObject
 	{
-		DECLARE_CLASS_1(CollidableSDF, TDataType)
+		DECLARE_TCLASS(CollidableSDF, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

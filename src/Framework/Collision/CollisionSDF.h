@@ -8,7 +8,7 @@ template <typename> class CollidableSDF;
 template<typename TDataType>
 class CollisionSDF : public CollisionModel
 {
-	DECLARE_CLASS_1(CollisionSDF, TDataType)
+	DECLARE_TCLASS(CollisionSDF, TDataType)
 public:
 	typedef typename TDataType::Real Real;
 	typedef typename TDataType::Coord Coord;

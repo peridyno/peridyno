@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(VolumeMinus, TDataType)
+	IMPLEMENT_TCLASS(VolumeMinus, TDataType)
 
 	template<typename TDataType>
 	VolumeMinus<TDataType>::VolumeMinus()

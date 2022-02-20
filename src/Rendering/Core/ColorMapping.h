@@ -22,7 +22,7 @@ namespace dyno
 	template<typename TDataType>
 	class ColorMapping : public ComputeModule
 	{
-		DECLARE_CLASS_1(ColorMapping, TDataType)
+		DECLARE_TCLASS(ColorMapping, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

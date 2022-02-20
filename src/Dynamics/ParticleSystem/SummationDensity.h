@@ -25,7 +25,7 @@ namespace dyno {
 	template<typename TDataType>
 	class SummationDensity : public virtual ParticleApproximation<TDataType>
 	{
-		DECLARE_CLASS_1(SummationDensity, TDataType)
+		DECLARE_TCLASS(SummationDensity, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -84,5 +84,5 @@ namespace dyno {
 		Real m_factor;
 	};
 
-	IMPLEMENT_CLASS_1(SummationDensity, TDataType)
+	IMPLEMENT_TCLASS(SummationDensity, TDataType)
 }

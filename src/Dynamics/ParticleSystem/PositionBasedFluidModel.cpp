@@ -8,7 +8,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(PositionBasedFluidModel, TDataType)
+	IMPLEMENT_TCLASS(PositionBasedFluidModel, TDataType)
 
 	template<typename TDataType>
 	PositionBasedFluidModel<TDataType>::PositionBasedFluidModel()

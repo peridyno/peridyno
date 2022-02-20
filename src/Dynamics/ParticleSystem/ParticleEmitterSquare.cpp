@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleEmitterSquare, TDataType)
+	IMPLEMENT_TCLASS(ParticleEmitterSquare, TDataType)
 
 		template<typename TDataType>
 	ParticleEmitterSquare<TDataType>::ParticleEmitterSquare(std::string name)

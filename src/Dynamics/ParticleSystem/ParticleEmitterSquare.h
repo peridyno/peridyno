@@ -22,7 +22,7 @@ namespace dyno
 	template<typename TDataType>
 	class ParticleEmitterSquare : public ParticleEmitter<TDataType>
 	{
-		DECLARE_CLASS_1(ParticleEmitterSquare, TDataType)
+		DECLARE_TCLASS(ParticleEmitterSquare, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

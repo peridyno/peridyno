@@ -22,7 +22,7 @@ namespace dyno
 	template<typename TDataType>
 	class GLPointVisualNode : public Node
 	{
-		DECLARE_CLASS_1(GLPointVisualNode, TDataType)
+		DECLARE_TCLASS(GLPointVisualNode, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 

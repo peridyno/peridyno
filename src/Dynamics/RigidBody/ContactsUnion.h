@@ -24,7 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	class ContactsUnion : public ComputeModule
 	{
-		DECLARE_CLASS_1(ContactsUnion, TDataType)
+		DECLARE_TCLASS(ContactsUnion, TDataType)
 	public:
 		typedef typename TContactPair<Real> ContactPair;
 

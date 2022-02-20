@@ -6,7 +6,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(GLPointVisualNode, TDataType)
+	IMPLEMENT_TCLASS(GLPointVisualNode, TDataType)
 
 	template<typename TDataType>
 	GLPointVisualNode<TDataType>::GLPointVisualNode()

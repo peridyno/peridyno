@@ -16,7 +16,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ElastoplasticBody, TDataType)
+	IMPLEMENT_TCLASS(ElastoplasticBody, TDataType)
 
 	template<typename TDataType>
 	ElastoplasticBody<TDataType>::ElastoplasticBody(std::string name)
