@@ -129,13 +129,16 @@ void Node::updateStates()
 
 void Node::update()
 {
-	this->preUpdateStates();
+	if (this->validateInputs())
+	{
+		this->preUpdateStates();
 
-	this->updateStates();
+		this->updateStates();
 
-	this->postUpdateStates();
+		this->postUpdateStates();
 
-	this->updateTopology();
+		this->updateTopology();
+	}
 }
 
 void Node::reset()
@@ -151,6 +154,24 @@ void Node::postUpdateStates()
 void Node::resetStates()
 {
 
+}
+
+bool Node::validateInputs()
+{
+	//If any input field is empty, return false;
+	for each (auto f_in in fields_input)
+	{
+		if (!f_in->isOptional() && f_in->isEmpty())
+		{
+			std::string errMsg = std::string("The field ") + f_in->getObjectName() +
+				std::string(" in Node ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
+
+			std::cout << errMsg << std::endl;
+			return false;
+		}
+	}
+
+	return true;
 }
 
 // std::shared_ptr<DeviceContext> Node::getContext()

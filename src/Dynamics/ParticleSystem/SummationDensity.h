@@ -83,4 +83,6 @@ namespace dyno {
 		Real m_particle_mass;
 		Real m_factor;
 	};
+
+	IMPLEMENT_CLASS_1(SummationDensity, TDataType)
 }

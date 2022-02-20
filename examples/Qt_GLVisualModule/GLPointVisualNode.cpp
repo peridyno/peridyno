@@ -93,11 +93,6 @@ namespace dyno
 
 		ptSet->setPoints(poss);
 		this->stateVector()->getDataPtr()->assign(vels);
-
-		if (this->inPointSetIn()->isEmpty())
-			printf("PointSet not set \n");
-		else
-			printf("PointSet set \n");
 	}
 
 	template<typename TDataType>

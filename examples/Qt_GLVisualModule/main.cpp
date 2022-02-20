@@ -40,7 +40,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto outTop = fluid->currentTopology()->promoteToOuput();
 	outTop->connect(visualizer->inPointSetIn());
-	outTop->disconnect(visualizer->inPointSetIn());
+//	outTop->disconnect(visualizer->inPointSetIn());
 // 	
 	return scn;
 }

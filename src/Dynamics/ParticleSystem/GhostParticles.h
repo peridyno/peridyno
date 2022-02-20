@@ -23,4 +23,6 @@ namespace dyno
 	protected:
 		void resetStates() override;
 	};
+
+	IMPLEMENT_CLASS_1(GhostParticles, TDataType)
 }

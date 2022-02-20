@@ -13,43 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Module/ConstraintModule.h"
 
-namespace dyno 
+#pragma once
+#include "Node.h"
+
+#include "Topology/PointSet.h"
+
+namespace dyno
 {
 	template<typename TDataType>
-	class ImplicitViscosity : public ConstraintModule
+	class InputFieldTest : public Node
 	{
-		DECLARE_CLASS_1(ImplicitViscosity, TDataType)
+		DECLARE_CLASS_1(GLPointVisualNode, TDataType)
 	public:
-		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ImplicitViscosity();
-		~ImplicitViscosity() override;
-		
-		void constrain() override;
+		InputFieldTest();
 
 	public:
-		DEF_VAR(Real, Viscosity, 0.05, "");
+		void updateStates() override;
 
-		DEF_VAR(int, InterationNumber, 3, "");
-
-		DEF_VAR_IN(Real, SmoothingLength, "");
-
-		DEF_VAR_IN(Real, TimeStep, "");
-
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
-
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
-
-	private:
-		DArray<Coord> mVelOld;
-		DArray<Coord> mVelBuf;
+		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
 	};
 
-	IMPLEMENT_CLASS_1(ImplicitViscosity, TDataType)
-}
+	IMPLEMENT_CLASS_1(InputFieldTest, TDataType)
+};

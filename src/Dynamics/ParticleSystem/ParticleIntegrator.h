@@ -58,4 +58,6 @@ namespace dyno {
 		DArray<Coord> m_prePosition;
 		DArray<Coord> m_preVelocity;
 	};
+
+	IMPLEMENT_CLASS_1(ParticleIntegrator, TDataType)
 }

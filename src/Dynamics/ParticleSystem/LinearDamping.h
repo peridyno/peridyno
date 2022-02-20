@@ -44,4 +44,6 @@ namespace dyno
 		*/
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 	};
+
+	IMPLEMENT_CLASS_1(LinearDamping, TDataType)
 }
