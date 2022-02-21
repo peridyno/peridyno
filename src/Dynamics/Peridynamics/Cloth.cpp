@@ -15,7 +15,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(Cloth, TDataType)
+	IMPLEMENT_TCLASS(Cloth, TDataType)
 
 	template<typename TDataType>
 	Cloth<TDataType>::Cloth(std::string name)

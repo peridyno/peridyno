@@ -26,7 +26,7 @@ namespace dyno
 	template<typename TDataType>
 	class IterativeConstraintSolver : public ConstraintModule
 	{
-		DECLARE_CLASS_1(IterativeConstraintSolver, TDataType)
+		DECLARE_TCLASS(IterativeConstraintSolver, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

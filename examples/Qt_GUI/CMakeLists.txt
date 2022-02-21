@@ -42,7 +42,7 @@ if(PERIDYNO_Qt5_GUI)
             Core 
             Framework 
             IO 
-            ParticleSystem  
+            ParticleSystem 
 			RigidBody
             QtGUI
 			GLRenderEngine) 

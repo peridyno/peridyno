@@ -34,6 +34,7 @@ namespace dyno
 	template<typename TDataType>
 	class VariationalApproximateProjection : public ConstraintModule
 	{
+		DECLARE_TCLASS(VariationalApproximateProjection, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -97,4 +98,6 @@ namespace dyno
 
 		std::shared_ptr<SummationDensity<TDataType>> mDensityCalculator;
 	};
+
+	IMPLEMENT_TCLASS(VariationalApproximateProjection, TDataType)
 }

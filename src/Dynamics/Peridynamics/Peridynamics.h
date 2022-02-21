@@ -29,7 +29,7 @@ namespace dyno
 	template<typename TDataType>
 	class Peridynamics : public GroupModule
 	{
-		DECLARE_CLASS_1(Peridynamics, TDataType)
+		DECLARE_TCLASS(Peridynamics, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;

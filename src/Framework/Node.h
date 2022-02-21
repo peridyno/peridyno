@@ -312,6 +312,8 @@ namespace dyno
 
 		virtual void resetStates();
 
+		virtual bool validateInputs();
+
 	private:
 		/**
 		 * @brief Add a descendant

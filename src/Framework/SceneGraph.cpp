@@ -295,6 +295,17 @@ namespace dyno
 			}
 		}
 
+		auto inFields = node->getInputFields();
+		for each (auto f in inFields) {
+			auto* src = f->getSource();
+			if (src != nullptr)	{
+				auto* inNode = dynamic_cast<Node*>(src->parent());
+				if (inNode != nullptr && !visited[inNode->objectId()]) {
+					DFS(inNode, nodeQueue, visited);
+				}
+			}
+		}
+
 		nodeQueue.push_back(node);
 
 		auto exports = node->getExportNodes();
@@ -302,6 +313,19 @@ namespace dyno
 			auto exNode = port->getParent();
 			if (exNode != nullptr && !visited[node->objectId()]) {
 				DFS(exNode, nodeQueue, visited);
+			}
+		}
+
+		auto outFields = node->getOutputFields();
+		for each (auto f in outFields) {
+			auto& sinks = f->getSinks();
+			for each (auto sink in sinks) {
+				if (sink != nullptr) {
+					auto exNode = dynamic_cast<Node*>(sink->parent());
+					if (exNode != nullptr && !visited[node->objectId()]) {
+						DFS(exNode, nodeQueue, visited);
+					}
+				}
 			}
 		}
 	};

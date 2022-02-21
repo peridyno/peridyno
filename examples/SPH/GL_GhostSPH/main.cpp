@@ -88,8 +88,8 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	root->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
+	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+	boundary->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
 	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
 	auto fluid = scn->addNode(std::make_shared<ParticleSystem<DataType3f>>());
@@ -98,11 +98,14 @@ std::shared_ptr<SceneGraph> createScene()
 	auto ghost = scn->addNode(createGhostParticles());
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
-	incompressibleFluid->setFluidParticles(fluid);
-	incompressibleFluid->setBoundaryParticles(ghost);
+	fluid->connect(incompressibleFluid->importFluidParticles());
+	ghost->connect(incompressibleFluid->importBoundaryParticles());
+// 	incompressibleFluid->setFluidParticles(fluid);
+// 	incompressibleFluid->setBoundaryParticles(ghost);
 
-	root->addAncestor(incompressibleFluid.get());
-	root->addParticleSystem(fluid);
+// 	root->addAncestor(incompressibleFluid.get());
+// 	root->addParticleSystem(fluid);
+	incompressibleFluid->connect(boundary->importParticleSystems());
 
 	{
 		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();

@@ -62,7 +62,7 @@ namespace dyno
 	template<typename TDataType>
 	class ParticleApproximation : public ComputeModule
 	{
-		DECLARE_CLASS_1(ParticleApproximation, TDataType)
+		DECLARE_TCLASS(ParticleApproximation, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 

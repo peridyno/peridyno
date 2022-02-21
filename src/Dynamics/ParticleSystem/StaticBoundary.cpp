@@ -8,7 +8,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(StaticBoundary, TDataType)
+	IMPLEMENT_TCLASS(StaticBoundary, TDataType)
 
 	template<typename TDataType>
 	StaticBoundary<TDataType>::StaticBoundary()

@@ -13,37 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Module/ConstraintModule.h"
 
-namespace dyno 
+#pragma once
+#include "Node.h"
+
+#include "Topology/PointSet.h"
+
+namespace dyno
 {
-	/**
-	 * @brief A linear damping model
-	 *
-	 * @tparam TDataType
-	 */
 	template<typename TDataType>
-	class LinearDamping : public ConstraintModule
+	class InputFieldTest : public Node
 	{
-		DECLARE_TCLASS(LinearDamping, TDataType)
+		DECLARE_TCLASS(GLPointVisualNode, TDataType)
 	public:
-		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		LinearDamping();
-		~LinearDamping() override;
-
-		void constrain() override;
+		InputFieldTest();
 
 	public:
-		DEF_VAR(Real, DampingCoefficient, 0.9, "");
+		void updateStates() override;
 
-		/**
-		* @brief Particle velocity
-		*/
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
 	};
 
-	IMPLEMENT_TCLASS(LinearDamping, TDataType)
-}
+	IMPLEMENT_TCLASS(InputFieldTest, TDataType)
+};

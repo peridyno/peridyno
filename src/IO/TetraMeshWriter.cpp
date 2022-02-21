@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(TetraMeshWriter, TDataType)
+	IMPLEMENT_TCLASS(TetraMeshWriter, TDataType)
 
 	template<typename TDataType>
 	TetraMeshWriter<TDataType>::TetraMeshWriter() : OutputModule()

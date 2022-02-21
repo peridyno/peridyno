@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-    IMPLEMENT_CLASS_1(VirtualModule, TDataType)
+    IMPLEMENT_TCLASS(VirtualModule, TDataType)
 
     template<typename TDataType>
     VirtualModule<TDataType>::VirtualModule()

@@ -3,7 +3,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(RigidBody, TDataType)
+	IMPLEMENT_TCLASS(RigidBody, TDataType)
 
 	template<typename TDataType>
 	RigidBody<TDataType>::RigidBody(std::string name)

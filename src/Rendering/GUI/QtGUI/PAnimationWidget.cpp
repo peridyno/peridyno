@@ -66,6 +66,9 @@ namespace dyno
 
 	PAnimationWidget::~PAnimationWidget()
 	{
+		PSimulationThread::instance()->stop();
+		PSimulationThread::instance()->deleteLater();
+		PSimulationThread::instance()->wait();  //必须等待线程结束
 	}
 
 	void PAnimationWidget::toggleSimulation()

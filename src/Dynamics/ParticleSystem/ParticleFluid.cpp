@@ -6,7 +6,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleFluid, TDataType)
+	IMPLEMENT_TCLASS(ParticleFluid, TDataType)
 
 	template<typename TDataType>
 	ParticleFluid<TDataType>::ParticleFluid(std::string name)
@@ -27,7 +27,7 @@ namespace dyno
 	template<typename TDataType>
 	ParticleFluid<TDataType>::~ParticleFluid()
 	{
-		
+		Log::sendMessage(Log::Info, "ParticleFluid released \n");
 	}
 
 	template<typename TDataType>

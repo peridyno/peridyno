@@ -7,7 +7,7 @@ namespace dyno {
 	template<typename TDataType>
 	class CollidableShape : public CollidableObject
 	{
-		DECLARE_CLASS_1(CollidableShape, TDataType)
+		DECLARE_TCLASS(CollidableShape, TDataType)
 	public:
 		CollidableShape();
 

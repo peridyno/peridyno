@@ -21,7 +21,7 @@ namespace dyno
 	template<typename TDataType>
 	class NeighborPointQuery : public ComputeModule
 	{
-		DECLARE_CLASS_1(NeighborPointQuery, TDataType)
+		DECLARE_TCLASS(NeighborPointQuery, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

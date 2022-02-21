@@ -13,7 +13,7 @@ namespace dyno {
 	template<typename TDataType>
 	class DensityPBD : public ConstraintModule
 	{
-		DECLARE_CLASS_1(DensityPBD, TDataType)
+		DECLARE_TCLASS(DensityPBD, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -70,4 +70,6 @@ namespace dyno {
 	private:
 		std::shared_ptr<SummationDensity<TDataType>> m_summation;
 	};
+
+	IMPLEMENT_TCLASS(DensityPBD, TDataType)
 }

@@ -22,7 +22,7 @@ namespace dyno
 	template<typename TDataType>
 	class GLPointVisualNode : public Node
 	{
-		DECLARE_CLASS_1(GLPointVisualNode, TDataType)
+		DECLARE_TCLASS(GLPointVisualNode, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
@@ -36,7 +36,7 @@ namespace dyno
 
 		DEF_NODE_PORT(ParticleSystem<TDataType>, ParticleSystem, "Particles");
 
-		DEF_VAR_IN(Real, Test, "");
+		//DEF_VAR_IN(Real, Test, "");
 
 		DEF_INSTANCE_IN(PointSet<TDataType>, PointSetIn, "");
 

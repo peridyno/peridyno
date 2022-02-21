@@ -21,7 +21,7 @@ namespace dyno
 	template<typename TDataType>
 	class TetraMeshWriter : public OutputModule
 	{
-		DECLARE_CLASS_1(TetraMeshWriter, TDataType)
+		DECLARE_TCLASS(TetraMeshWriter, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;

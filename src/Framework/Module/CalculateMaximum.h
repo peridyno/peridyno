@@ -24,7 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	class CalculateMaximum : public ComputeModule
 	{
-		DECLARE_CLASS_1(CalculateMaximum, TDataType)
+		DECLARE_TCLASS(CalculateMaximum, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 

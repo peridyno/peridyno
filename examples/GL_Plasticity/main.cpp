@@ -21,37 +21,37 @@ using namespace dyno;
 std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	root->loadCube(Vec3f(0), Vec3f(1), 0.005, true);
+	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+	boundary->loadCube(Vec3f(0), Vec3f(1), 0.005, true);
 
-	auto child3 = scn->addNode(std::make_shared<ElastoplasticBody<DataType3f>>());
-	root->addParticleSystem(child3);
+	auto elastoplasticBody = scn->addNode(std::make_shared<ElastoplasticBody<DataType3f>>());
+	elastoplasticBody->connect(boundary->importParticleSystems());
 
-	child3->setVisible(false);
-  	child3->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
-  	child3->loadSurface("../../data/standard/standard_cube20.obj");
-	child3->scale(0.05);
-	child3->translate(Vec3f(0.3, 0.2, 0.5));
-	child3->getSurfaceNode()->setVisible(true);
+	elastoplasticBody->setVisible(false);
+  	elastoplasticBody->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
+  	elastoplasticBody->loadSurface("../../data/standard/standard_cube20.obj");
+	elastoplasticBody->scale(0.05);
+	elastoplasticBody->translate(Vec3f(0.3, 0.2, 0.5));
+	elastoplasticBody->getSurfaceNode()->setVisible(true);
 
 	auto ptRender = std::make_shared<GLSurfaceVisualModule>();
 	ptRender->setColor(Vec3f(0, 1, 1));
-	child3->getSurfaceNode()->currentTopology()->connect(ptRender->inTriangleSet());
-	child3->getSurfaceNode()->graphicsPipeline()->pushModule(ptRender);
+	elastoplasticBody->getSurfaceNode()->currentTopology()->connect(ptRender->inTriangleSet());
+	elastoplasticBody->getSurfaceNode()->graphicsPipeline()->pushModule(ptRender);
 
-	auto child2 = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
-	root->addParticleSystem(child2);
+	auto elasticBody = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
+	boundary->addParticleSystem(elasticBody);
 
-	child2->setVisible(false);
-	child2->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
-	child2->loadSurface("../../data/standard/standard_cube20.obj");
-	child2->scale(0.05);
-	child2->translate(Vec3f(0.5, 0.2, 0.5));
+	elasticBody->setVisible(false);
+	elasticBody->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
+	elasticBody->loadSurface("../../data/standard/standard_cube20.obj");
+	elasticBody->scale(0.05);
+	elasticBody->translate(Vec3f(0.5, 0.2, 0.5));
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(1, 1, 1));
-	child2->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
-	child2->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	elasticBody->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+	elasticBody->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
 
 	return scn;
 }

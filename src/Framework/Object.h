@@ -84,7 +84,7 @@ Object* name::createObject()                   \
 
 #define _STR(s) #s
 
-#define DECLARE_CLASS_1(name, T1) \
+#define DECLARE_TCLASS(name, T1) \
 public: \
     static const ClassInfo ms_classinfo; \
 public:  \
@@ -100,7 +100,7 @@ template<typename T1>		\
 const ClassInfo* name<T1>::getClassInfo() const \
     {return &name<T1>::ms_classinfo;}
 
-#define IMPLEMENT_CLASS_1(name, T1)            \
+#define IMPLEMENT_TCLASS(name, T1)            \
 IMPLEMENT_CLASS_COMMON_1(name, T1, name<T1>::createObject) \
 							\
 template<typename T1>		\

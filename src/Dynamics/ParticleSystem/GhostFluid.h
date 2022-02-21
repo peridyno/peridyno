@@ -14,7 +14,7 @@ namespace dyno
 	template<typename TDataType>
 	class GhostFluid : public Node
 	{
-		DECLARE_CLASS_1(GhostFluid, TDataType)
+		DECLARE_TCLASS(GhostFluid, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

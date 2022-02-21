@@ -130,10 +130,8 @@ private:									\
 public:																										\
 	inline T* get##name() {	return single_##name.getDerivedNode(); }						\
 																			\
-	SingleNodePort<T>* import##name(){ return &single_##name; }				\
-	void set##name(std::shared_ptr<T> c) {									\
-		single_##name.setDerivedNode(c.get());									\
-	}
+	SingleNodePort<T>* import##name(){ return &single_##name; }
+
 
 #define DEF_NODE_PORTS(name, T, desc)				\
 private:									\

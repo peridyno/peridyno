@@ -12,7 +12,7 @@ namespace dyno
 	template<typename TDataType>
 	class SparseNeighborPointQuery : public ComputeModule
 	{
-		DECLARE_CLASS_1(SparseNeighborPointQuery, TDataType)
+		DECLARE_TCLASS(SparseNeighborPointQuery, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

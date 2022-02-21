@@ -20,7 +20,7 @@ int main()
  	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
 
 	auto bunny = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
-	root->addParticleSystem(bunny);
+	bunny->connect(root->importParticleSystems());
 
 	bunny->loadParticles("../../data/bunny/bunny_points.obj");
 	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
@@ -28,10 +28,12 @@ int main()
 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
 	bunny->setVisible(true);
 
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Vec3f(1, 1, 0));
-	bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
-	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	auto pointRenderer = std::make_shared<GLPointVisualModule>();
+	pointRenderer->setColor(Vec3f(1, 0.2, 1));
+	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
+	bunny->currentTopology()->connect(pointRenderer->inPointSet());
+	bunny->stateVelocity()->connect(pointRenderer->inColor());
+	bunny->graphicsPipeline()->pushModule(pointRenderer);
 
 	GlfwApp window;
 	window.setSceneGraph(scn);
