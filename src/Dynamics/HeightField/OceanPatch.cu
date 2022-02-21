@@ -8,7 +8,7 @@
 
 namespace dyno {
 
-    IMPLEMENT_CLASS_1(OceanPatch, TDataType)
+    IMPLEMENT_TCLASS(OceanPatch, TDataType)
 
     //Round a / b to nearest higher integer value
     int cuda_iDivUp(int a, int b)

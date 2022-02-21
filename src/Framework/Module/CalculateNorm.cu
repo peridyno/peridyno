@@ -2,7 +2,7 @@
 
 namespace dyno 
 {
-	IMPLEMENT_CLASS_1(CalculateNorm, TDataType)
+	IMPLEMENT_TCLASS(CalculateNorm, TDataType)
 
 	template <typename Real, typename Coord>
 	__global__ void CN_CalculateNorm(

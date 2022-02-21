@@ -17,7 +17,7 @@ namespace dyno {
     template<typename TDataType>
     class OceanPatch : public Node
     {
-        DECLARE_CLASS_1(OceanPatch, TDataType)
+        DECLARE_TCLASS(OceanPatch, TDataType)
     public:
         typedef typename Vector<float, 2> Coord;
 

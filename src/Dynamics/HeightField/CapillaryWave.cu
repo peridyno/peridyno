@@ -8,7 +8,8 @@ namespace dyno
 #define BLOCKSIZE_X 16
 #define BLOCKSIZE_Y 16
 
-	IMPLEMENT_CLASS_1(CapillaryWave, TDataType)
+	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
+
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
 		: Node(name)

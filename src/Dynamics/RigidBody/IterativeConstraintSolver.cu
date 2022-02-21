@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(IterativeConstraintSolver, TDataType)
+	IMPLEMENT_TCLASS(IterativeConstraintSolver, TDataType)
 
 	template<typename TDataType>
 	IterativeConstraintSolver<TDataType>::IterativeConstraintSolver()
