@@ -6,7 +6,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(Peridynamics, TDataType)
+	IMPLEMENT_TCLASS(Peridynamics, TDataType)
 
 	template<typename TDataType>
 	Peridynamics<TDataType>::Peridynamics()

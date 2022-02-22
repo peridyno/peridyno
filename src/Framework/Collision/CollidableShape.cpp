@@ -2,7 +2,7 @@
 
 namespace dyno {
 
-	IMPLEMENT_CLASS_1(CollidableShape, TDataType)
+	IMPLEMENT_TCLASS(CollidableShape, TDataType)
 
 	template<typename TDataType>
 	CollidableShape<TDataType>::CollidableShape()

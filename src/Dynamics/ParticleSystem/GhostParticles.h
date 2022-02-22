@@ -7,7 +7,7 @@ namespace dyno
 	template<typename TDataType>
 	class GhostParticles : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(GhostParticles, TDataType)
+		DECLARE_TCLASS(GhostParticles, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -23,4 +23,6 @@ namespace dyno
 	protected:
 		void resetStates() override;
 	};
+
+	IMPLEMENT_TCLASS(GhostParticles, TDataType)
 }

@@ -17,11 +17,11 @@ using namespace dyno;
  * 
  */
 
-void creat_scene_fluid()
+std::shared_ptr<SceneGraph> creatScene()
 {
-	SceneGraph& scene = SceneGraph::getInstance();
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	std::shared_ptr<RigidBodySystem<DataType3f>> rigid = scene.createNewScene<RigidBodySystem<DataType3f>>();
+	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
@@ -70,20 +70,15 @@ void creat_scene_fluid()
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
-	GLRenderEngine* engine = new GLRenderEngine;
-
-	GlfwApp window;
-	window.setRenderEngine(engine);
-	window.createWindow(1280, 768);
-	window.mainLoop();
-
-	delete engine;
+	return scn;
 }
 
 int main()
 {
-	creat_scene_fluid();
-	//test_render();
+	GlfwApp window;
+	window.setSceneGraph(creatScene());
+	window.createWindow(1280, 768);
+	window.mainLoop();
 
 	return 0;
 }

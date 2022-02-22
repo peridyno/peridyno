@@ -30,17 +30,17 @@
 namespace dyno
 {
 	class Action;
+	class SceneGraph;
 
 	class Node : public OBase
 	{
-		DECLARE_CLASS(Node)
 	public:
 
 		template<class T>
 		using SPtr = std::shared_ptr<T>;
 
 		Node(std::string name = "default");
-		virtual ~Node();
+		~Node() override;
 
 		void setName(std::string name);
 		std::string getName();
@@ -70,20 +70,7 @@ namespace dyno
 		// 	Iterator begin();
 		// 	Iterator end();
 
-		Node* getAncestor(std::string name);
-
-		/**
-		 * @brief Create an ancestor
-		 *
-		 * @tparam TNode 						Node type of the child object
-		 * @param name 							Node name
-		 * @return std::shared_ptr<TNode> 		return the created child, if name is aleady used, return nullptr.
-		 */
-		template<class TNode>
-		std::shared_ptr<TNode> createAncestor(std::string name)
-		{
-			return addAncestor(TypeInfo::New<TNode>(name));
-		}
+		void setSceneGraph(SceneGraph* scn);
 
 		/**
 		 * @brief Add a ancestor
@@ -91,21 +78,19 @@ namespace dyno
 		 * @param Ancestor
 		 * @return std::shared_ptr<Node>
 		 */
-		std::shared_ptr<Node> addAncestor(std::shared_ptr<Node> anc);
+		Node* addAncestor(Node* anc);
 
-		bool hasAncestor(std::shared_ptr<Node> anc);
+		bool hasAncestor(Node* anc);
 
-		void removeAncestor(std::shared_ptr<Node> anc);
-
-		void removeAllAncestors();
+		std::vector<NodePort*>& getImportNodes() { return mImportNodes; }
+		std::vector<NodePort*>& getExportNodes() { return mExportNodes; }
 
 		/**
-		 * @brief Return all ancestors
+		 * @brief Return all descendants
 		 *
-		 * @return ListPtr<Node> ancestor list
+		 * @return std::list<Node*> descendant list
 		 */
-		std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
-
+		std::list<Node*>& getDescendants() {return mDescendants; }
 
 // 		std::shared_ptr<DeviceContext> getContext();
 // 		void setContext(std::shared_ptr<DeviceContext> context);
@@ -290,6 +275,9 @@ namespace dyno
 			Act action(std::forward<Args>(args)...);
 			doTraverseTopDown(&action);
 		}
+		
+		bool connect(NodePort* nPort);
+		bool disconnect(NodePort* nPort);
 
 		/**
 		 * @brief Attach a field to Node
@@ -303,15 +291,18 @@ namespace dyno
 		 */
 		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 
-		std::vector<NodePort*>& getAllNodePorts() { return mNodePorts; }
+		std::vector<NodePort*>& getAllNodePorts() { return mImportNodes; }
 
-		uint sizeOfNodePorts() const { return (uint)mNodePorts.size(); }
+		uint sizeOfNodePorts() const { return (uint)mImportNodes.size(); }
 		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
 		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
 	
 	protected:
 		virtual void doTraverseBottomUp(Action* act);
 		virtual void doTraverseTopDown(Action* act);
+
+		bool appendExportNode(NodePort* nodePort);
+		bool removeExportNode(NodePort* nodePort);
 
 		virtual void preUpdateStates();
 		virtual void updateStates();
@@ -320,6 +311,8 @@ namespace dyno
 		virtual void updateTopology();
 
 		virtual void resetStates();
+
+		virtual bool validateInputs();
 
 	private:
 		/**
@@ -410,14 +403,18 @@ namespace dyno
 
 		//std::shared_ptr<DeviceContext> m_context;
 
-		std::list<std::shared_ptr<Node>> mAncestors;
+		std::list<Node*> mAncestors;
 
 		/**
 		 * @brief Storing pointers to descendants
 		 */
 		std::list<Node*> mDescendants;
 
-		std::vector<NodePort*> mNodePorts;
+		std::vector<NodePort*> mImportNodes;
+
+		std::vector<NodePort*> mExportNodes;
+
+		SceneGraph* mSceneGraph = nullptr;
 
 		friend class NodePort;
 	};

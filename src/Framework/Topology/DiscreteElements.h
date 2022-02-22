@@ -82,7 +82,7 @@ namespace dyno
 	template<typename TDataType>
 	class DiscreteElements : public TopologyModule
 	{
-		DECLARE_CLASS_1(DiscreteElements, TDataType)
+		DECLARE_TCLASS(DiscreteElements, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

@@ -42,6 +42,7 @@ namespace dyno {
 		uint getElementCount() override { return 1; }
 
 		void setValue(T val);
+		T getValue();
 	};
 
 	template<typename T>
@@ -71,6 +72,16 @@ namespace dyno {
 
 		this->update();
 	}
+
+
+	template<typename T>
+	T FVar<T>::getValue()
+	{
+		std::shared_ptr<T>& data = this->getDataPtr();
+
+		return *data;
+	}
+
 
 	template<typename T>
 	using HostVarField = FVar<T>;

@@ -24,7 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	class CalculateMinimum : public ComputeModule
 	{
-		DECLARE_CLASS_1(CalculateMinimum, TDataType)
+		DECLARE_TCLASS(CalculateMinimum, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 

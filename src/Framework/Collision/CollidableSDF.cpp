@@ -3,7 +3,7 @@
 
 namespace dyno {
 
-	IMPLEMENT_CLASS_1(CollidableSDF, TDataType)
+	IMPLEMENT_TCLASS(CollidableSDF, TDataType)
 
 	template<typename TDataType>
 	CollidableSDF<TDataType>::CollidableSDF()

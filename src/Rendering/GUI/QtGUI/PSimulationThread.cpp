@@ -1,13 +1,14 @@
 #include "PSimulationThread.h"
 
 #include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 
 namespace dyno
 {
 	QWaitCondition m_wait_condition;
 
 	PSimulationThread::PSimulationThread()
-		: max_frames(1000)
+		: mFrameNum(1000)
 	{
 
 	}
@@ -20,64 +21,69 @@ namespace dyno
 
 	void PSimulationThread::pause()
 	{
-		//this->m_mutex.lock();
-		m_paused = true;
+		mPaused = true;
 	}
 
 	void PSimulationThread::resume()
 	{
-		//this->m_mutex.unlock();
-		m_paused = false;
+		mPaused = false;
 	}
 
 	void PSimulationThread::stop()
 	{
-		this->exit();
+		mRunning = false;
 	}
 
 	void PSimulationThread::run()
 	{
-		SceneGraph::getInstance().initialize();
+		auto scn = SceneGraphFactory::instance()->active();
+//		scn->initialize();
 
 		int f = 0;
-		while(true && f < max_frames)
+		while(mRunning && f < mFrameNum)
 		{
-			if (!m_rendering && !m_paused)
+			if (!mRendering)
 			{
-//				m_mutex.lock();
-				SceneGraph::getInstance().takeOneFrame();
+				if (mReset)
+				{
+					scn->reset();
+					mReset = false;
 
-				f++;
+					emit(oneFrameFinished());
+				}
 
-				this->startRendering();
-				emit(oneFrameFinished());
+				if (!mPaused)
+				{
+					scn->takeOneFrame();
 
-//				m_mutex.unlock();
+					f++;
+
+					this->startRendering();
+
+					emit(oneFrameFinished());
+				}
 			}
 //			
 		}
-
-		this->stop();
 	}
 
 	void PSimulationThread::reset()
 	{
-		SceneGraph::getInstance().reset();
+		mReset = true;
 	}
 
 	void PSimulationThread::startRendering()
 	{
-		m_rendering = true;
+		mRendering = true;
 	}
 
 	void PSimulationThread::stopRendering()
 	{
-		m_rendering = false;
+		mRendering = false;
 	}
 
 	void PSimulationThread::setTotalFrames(int num)
 	{
-		max_frames = num;
+		mFrameNum = num;
 	}
-
 }

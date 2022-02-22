@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(VolumeUnion, TDataType)
+	IMPLEMENT_TCLASS(VolumeUnion, TDataType)
 
 	template<typename TDataType>
 	VolumeUnion<TDataType>::VolumeUnion()

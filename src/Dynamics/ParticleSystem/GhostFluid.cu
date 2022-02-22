@@ -52,8 +52,8 @@ namespace dyno
 		auto fluidParticles		= this->getFluidParticles();
 
 		int pNum = 0;
-		pNum += boundaryParticles != nullptr ? boundaryParticles->currentPosition()->getElementCount() : 0;
-		pNum += fluidParticles != nullptr ? fluidParticles->currentPosition()->getElementCount() : 0;
+		pNum += boundaryParticles != nullptr ? boundaryParticles->statePosition()->getElementCount() : 0;
+		pNum += fluidParticles != nullptr ? fluidParticles->statePosition()->getElementCount() : 0;
 
 		if (pNum <= 0)
 			return;
@@ -76,8 +76,8 @@ namespace dyno
 		int offset = 0;
 		if (fluidParticles != nullptr)
 		{
-			auto& fPos = fluidParticles->currentPosition()->getData();
-			auto& fVel = fluidParticles->currentVelocity()->getData();
+			auto& fPos = fluidParticles->statePosition()->getData();
+			auto& fVel = fluidParticles->stateVelocity()->getData();
 			pos.assign(fPos, fPos.size(), 0, 0);
 			vel.assign(fVel, fVel.size(), 0, 0);
 
@@ -89,8 +89,8 @@ namespace dyno
 
 		if (boundaryParticles != nullptr)
 		{
-			auto& bPos = boundaryParticles->currentPosition()->getData();
-			auto& bVel = boundaryParticles->currentVelocity()->getData();
+			auto& bPos = boundaryParticles->statePosition()->getData();
+			auto& bVel = boundaryParticles->stateVelocity()->getData();
 			auto& bNor = boundaryParticles->stateNormal()->getData();
 			pos.assign(bPos, bPos.size(), offset, 0);
 			vel.assign(bVel, bVel.size(), offset, 0);
@@ -130,8 +130,8 @@ namespace dyno
 		int offset = 0;
 		if (fluidParticles != nullptr)
 		{
-			auto& fPos = fluidParticles->currentPosition()->getData();
-			auto& fVel = fluidParticles->currentVelocity()->getData();
+			auto& fPos = fluidParticles->statePosition()->getData();
+			auto& fVel = fluidParticles->stateVelocity()->getData();
 			fPos.assign(pos, fPos.size(), 0, 0);
 			fVel.assign(vel, fVel.size(), 0, 0);
 
@@ -140,8 +140,8 @@ namespace dyno
 
 		if (boundaryParticles != nullptr)
 		{
-			auto& bPos = boundaryParticles->currentPosition()->getData();
-			auto& bVel = boundaryParticles->currentVelocity()->getData();
+			auto& bPos = boundaryParticles->statePosition()->getData();
+			auto& bVel = boundaryParticles->stateVelocity()->getData();
 			bPos.assign(pos, bPos.size(), 0, offset);
 			bVel.assign(vel, bVel.size(), 0, offset);
 		}

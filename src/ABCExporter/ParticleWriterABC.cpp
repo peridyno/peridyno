@@ -13,7 +13,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleWriterABC, TDataType)
+	IMPLEMENT_TCLASS(ParticleWriterABC, TDataType)
 
 	template<typename TDataType>
 	ParticleWriterABC<TDataType>::ParticleWriterABC()

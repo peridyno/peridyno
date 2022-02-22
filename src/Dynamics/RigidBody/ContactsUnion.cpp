@@ -2,7 +2,7 @@
 
 namespace dyno 
 {
-	IMPLEMENT_CLASS_1(ContactsUnion, TDataType)
+	IMPLEMENT_TCLASS(ContactsUnion, TDataType)
 
 	template<typename TDataType>
 	void ContactsUnion<TDataType>::compute()

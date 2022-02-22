@@ -1,12 +1,15 @@
 [submodule "external/pybind11"]
 	path = external/pybind11
-	url = https://hub.fastgit.org/pybind/pybind11.git
+	url = https://mirror.ghproxy.com/https://github.com/pybind/pybind11.git
 [submodule "external/eigen"]
 	path = external/eigen
 	url = https://gitlab.com/libeigen/eigen.git
 [submodule "external/alembic"]
 	path = external/alembic
-	url = https://hub.fastgit.org/clouddon/alembic.git
+	url = https://mirror.ghproxy.com/https://github.com/clouddon/alembic.git
 [submodule "external/Imath"]
 	path = external/Imath
-	url = https://hub.fastgit.org/clouddon/Imath.git
+	url = https://mirror.ghproxy.com/https://github.com/clouddon/Imath.git
+[submodule "external/nodeeditor"]
+	path = external/nodeeditor
+	url = https://mirror.ghproxy.com/https://github.com/clouddon/nodeeditor.git

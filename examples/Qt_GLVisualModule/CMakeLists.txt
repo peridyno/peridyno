@@ -44,6 +44,7 @@ if(PERIDYNO_Qt5_GUI)
             ParticleSystem  
 			RigidBody
             QtGUI
+            GlfwGUI
 			GLRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.

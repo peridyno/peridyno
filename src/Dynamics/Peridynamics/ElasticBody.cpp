@@ -8,7 +8,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ElasticBody, TDataType)
+	IMPLEMENT_TCLASS(ElasticBody, TDataType)
 
 	template<typename TDataType>
 	ElasticBody<TDataType>::ElasticBody(std::string name)
@@ -18,14 +18,15 @@ namespace dyno
 
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
 		this->varTimeStep()->connect(peri->inTimeStep());
-		this->currentPosition()->connect(peri->inPosition());
-		this->currentVelocity()->connect(peri->inVelocity());
-		this->currentForce()->connect(peri->inForce());
+		this->statePosition()->connect(peri->inPosition());
+		this->stateVelocity()->connect(peri->inVelocity());
+		this->stateForce()->connect(peri->inForce());
 		this->currentRestShape()->connect(peri->inRestShape());
 		this->animationPipeline()->pushModule(peri);
 
 		//Create a node for surface mesh rendering
-		m_surfaceNode = this->template createAncestor<Node>("Mesh");
+		m_surfaceNode = std::make_shared<Node>("Mesh");// this->template createAncestor<Node>("Mesh");
+		m_surfaceNode->addAncestor(this);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		m_surfaceNode->currentTopology()->setDataPtr(triSet);
@@ -64,7 +65,7 @@ namespace dyno
 	{
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();
-		pts.assign(this->currentPosition()->getData());
+		pts.assign(this->statePosition()->getData());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
@@ -80,19 +81,19 @@ namespace dyno
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
  		this->varHorizon()->connect(nbrQuery->inRadius());
- 		this->currentPosition()->connect(nbrQuery->inPosition());
+ 		this->statePosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
-		if (!this->currentPosition()->isEmpty())
+		if (!this->statePosition()->isEmpty())
 		{
 			this->currentRestShape()->allocate();
 			auto nbrPtr = this->currentRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
-			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 
 			this->currentReferencePosition()->allocate();
-			this->currentReferencePosition()->getDataPtr()->assign(this->currentPosition()->getData());
+			this->currentReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
 
 			this->currentNeighborIds()->allocate();
 			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());

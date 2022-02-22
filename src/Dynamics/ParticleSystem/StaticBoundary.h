@@ -12,7 +12,7 @@ namespace dyno {
 	template<typename TDataType>
 	class StaticBoundary : public Node
 	{
-		DECLARE_CLASS_1(StaticBoundary, TDataType)
+		DECLARE_TCLASS(StaticBoundary, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

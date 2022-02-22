@@ -7,7 +7,7 @@ namespace dyno
 	template<typename TDataType>
 	class PointSet : public TopologyModule
 	{
-		DECLARE_CLASS_1(PointSet, TDataType)
+		DECLARE_TCLASS(PointSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

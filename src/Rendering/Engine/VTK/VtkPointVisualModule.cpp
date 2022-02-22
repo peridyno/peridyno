@@ -18,6 +18,8 @@
 #include <vtkOpenGLVertexBufferObject.h>
 #include <vtkOpenGLIndexBufferObject.h>
 
+#include "SceneGraphFactory.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -33,8 +35,9 @@ public:
 		// create psedo data, required by the vtkOpenGLPolyDataMapper to render content
 		vtkNew<vtkPoints> points;
 
-		Vec3f bbox0 = SceneGraph::getInstance().getLowerBound();
-		Vec3f bbox1 = SceneGraph::getInstance().getUpperBound();
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		Vec3f bbox0 = scn->getLowerBound();
+		Vec3f bbox1 = scn->getUpperBound();
 		points->InsertNextPoint(bbox0[0], bbox0[1], bbox0[2]);
 		points->InsertNextPoint(bbox1[0], bbox1[1], bbox1[2]);
 

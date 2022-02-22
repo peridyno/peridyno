@@ -7,7 +7,7 @@ namespace dyno
 	template<typename TDataType>
 	class ParticleFluid : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ParticleFluid, TDataType)
+		DECLARE_TCLASS(ParticleFluid, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

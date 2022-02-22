@@ -15,7 +15,7 @@ namespace dyno {
 	template<typename TDataType>
 	class NeighborElementQuery : public ComputeModule
 	{
-		DECLARE_CLASS_1(NeighborElementQuery, TDataType)
+		DECLARE_TCLASS(NeighborElementQuery, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;

@@ -60,37 +60,31 @@ namespace dyno
 		connect(m_startSim, SIGNAL(released()), this, SLOT(toggleSimulation()));
 		connect(m_resetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(PSimulationThread::instance(), SIGNAL(finished()), this, SLOT(simulationFinished()));
+
+		PSimulationThread::instance()->start();
 	}
 
 	PAnimationWidget::~PAnimationWidget()
 	{
+		PSimulationThread::instance()->stop();
+		PSimulationThread::instance()->deleteLater();
+		PSimulationThread::instance()->wait();  //必须等待线程结束
 	}
 
 	void PAnimationWidget::toggleSimulation()
 	{
-		if (m_sim_started)
+		if (m_startSim->isChecked())
 		{
-			if (m_startSim->isChecked())
-			{
-				PSimulationThread::instance()->resume();
-				m_startSim->setText("Pause");
-				m_resetSim->setDisabled(true);
-			}
-			else
-			{
-				PSimulationThread::instance()->pause();
-				m_startSim->setText("Resume");
-				m_resetSim->setDisabled(false);
-			}
+			PSimulationThread::instance()->setTotalFrames(m_end_spinbox->value());
+			PSimulationThread::instance()->resume();
+			m_startSim->setText("Pause");
+			m_resetSim->setDisabled(true);
 		}
 		else
 		{
-			PSimulationThread::instance()->setTotalFrames(m_end_spinbox->value());
-			PSimulationThread::instance()->start();
-			m_startSim->setText("Pause");
-			m_sim_started = true;
-
-			m_resetSim->setDisabled(true);
+			PSimulationThread::instance()->pause();
+			m_startSim->setText("Resume");
+			m_resetSim->setDisabled(false);
 		}
 	}
 

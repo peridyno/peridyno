@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(CollidablePoints, TDataType)
+	IMPLEMENT_TCLASS(CollidablePoints, TDataType)
 
 	template<typename TDataType>
 	CollidablePoints<TDataType>::CollidablePoints()

@@ -2,8 +2,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(SummationDensity, TDataType)
-
 	template<typename TDataType>
 	SummationDensity<TDataType>::SummationDensity()
 		: ParticleApproximation<TDataType>()

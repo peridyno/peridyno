@@ -8,7 +8,7 @@ namespace dyno
 	template<typename TDataType>
 	class ProjectionBasedFluidModel : public GroupModule
 	{
-		DECLARE_CLASS_1(ProjectionBasedFluidModel, TDataType)
+		DECLARE_TCLASS(ProjectionBasedFluidModel, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

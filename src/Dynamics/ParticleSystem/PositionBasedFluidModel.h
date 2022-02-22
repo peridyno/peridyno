@@ -14,7 +14,7 @@ namespace dyno
 	template<typename TDataType>
 	class PositionBasedFluidModel : public GroupModule
 	{
-		DECLARE_CLASS_1(PositionBasedFluidModel, TDataType)
+		DECLARE_TCLASS(PositionBasedFluidModel, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

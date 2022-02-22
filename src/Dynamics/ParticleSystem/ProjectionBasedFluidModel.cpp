@@ -9,7 +9,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ProjectionBasedFluidModel, TDataType)
+	IMPLEMENT_TCLASS(ProjectionBasedFluidModel, TDataType)
 
 	template<typename TDataType>
 	ProjectionBasedFluidModel<TDataType>::ProjectionBasedFluidModel()

@@ -11,7 +11,7 @@ namespace dyno
 	template<typename TDataType>
 	class Cloth : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(Cloth, TDataType)
+		DECLARE_TCLASS(Cloth, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

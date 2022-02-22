@@ -15,7 +15,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(Cloth, TDataType)
+	IMPLEMENT_TCLASS(Cloth, TDataType)
 
 	template<typename TDataType>
 	Cloth<TDataType>::Cloth(std::string name)
@@ -23,22 +23,22 @@ namespace dyno
 	{
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->varTimeStep()->connect(integrator->inTimeStep());
-		this->currentPosition()->connect(integrator->inPosition());
-		this->currentVelocity()->connect(integrator->inVelocity());
-		this->currentForce()->connect(integrator->inForceDensity());
+		this->statePosition()->connect(integrator->inPosition());
+		this->stateVelocity()->connect(integrator->inVelocity());
+		this->stateForce()->connect(integrator->inForceDensity());
 
 		this->animationPipeline()->pushModule(integrator);
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->varHorizon()->connect(nbrQuery->inRadius());
-		this->currentPosition()->connect(nbrQuery->inPosition());
+		this->statePosition()->connect(nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(nbrQuery);
 
 		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
 		this->varHorizon()->connect(elasticity->inHorizon());
 		this->varTimeStep()->connect(elasticity->inTimeStep());
-		this->currentPosition()->connect(elasticity->inPosition());
-		this->currentVelocity()->connect(elasticity->inVelocity());
+		this->statePosition()->connect(elasticity->inPosition());
+		this->stateVelocity()->connect(elasticity->inVelocity());
 		this->currentRestShape()->connect(elasticity->inRestShape());
 		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(elasticity);
@@ -47,7 +47,8 @@ namespace dyno
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
 		//Create a node for surface mesh rendering
-		mSurfaceNode = this->template createAncestor<Node>("Mesh");
+		mSurfaceNode = std::make_shared<Node>("Mesh");
+		mSurfaceNode->addAncestor(this);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		this->currentTopology()->setDataPtr(triSet);
@@ -83,7 +84,7 @@ namespace dyno
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->currentTopology()->getDataPtr());
 
-		triSet->getPoints().assign(this->currentPosition()->getData());
+		triSet->getPoints().assign(this->statePosition()->getData());
 	}
 
 
@@ -94,16 +95,16 @@ namespace dyno
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->varHorizon()->connect(nbrQuery->inRadius());
-		this->currentPosition()->connect(nbrQuery->inPosition());
+		this->statePosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
-		if (!this->currentPosition()->isEmpty())
+		if (!this->statePosition()->isEmpty())
 		{
 			this->currentRestShape()->allocate();
 			auto nbrPtr = this->currentRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
-			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 		}
 	}
 

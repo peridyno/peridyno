@@ -1,11 +1,11 @@
 #include <cuda_runtime.h>
 #include "ParticleIntegrator.h"
 #include "Node.h"
-#include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleIntegrator, TDataType)
+	//IMPLEMENT_CLASS_1(ParticleIntegrator, TDataType)
 
 	template<typename TDataType>
 	ParticleIntegrator<TDataType>::ParticleIntegrator()
@@ -74,7 +74,9 @@ namespace dyno
 	bool ParticleIntegrator<TDataType>::updateVelocity()
 	{
 		Real dt = this->inTimeStep()->getData();
-		Coord gravity = SceneGraph::getInstance().getGravity();
+
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		Coord gravity = scn->getGravity();
 
 		int total_num = this->inPosition()->getElementCount();
 

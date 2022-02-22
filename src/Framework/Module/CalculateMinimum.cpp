@@ -2,7 +2,7 @@
 
 namespace dyno 
 {
-	IMPLEMENT_CLASS_1(CalculateMinimum, TDataType)
+	IMPLEMENT_TCLASS(CalculateMinimum, TDataType)
 
 	template<typename TDataType>
 	void CalculateMinimum<TDataType>::compute()

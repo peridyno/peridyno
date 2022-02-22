@@ -68,8 +68,9 @@ namespace dyno {
 		// 全局样式设定
 		void initializeStyle();
 
-		RenderEngine* renderEngine() { return mRenderEngine; }
+		std::shared_ptr<RenderEngine> renderEngine() override;
 
+		void setSceneGraph(std::shared_ptr<SceneGraph> scn);
 
 	protected:
 		void initCallbacks();    //init default callbacks

@@ -35,12 +35,14 @@ namespace dyno
 	private:
 		PSimulationThread();
 
-		int max_frames;
+		int mFrameNum;
 
-		bool m_paused = false;
-		bool m_rendering = false;
+		bool mReset = false;
+		bool mPaused = true;
+		bool mRendering = false;
+		bool mRunning = true;
 
-		QMutex m_mutex;
+		QMutex mMutex;
 	};
 }
 

@@ -26,7 +26,7 @@ namespace dyno {
 	template<typename TDataType>
 	class ElasticityModule : public ConstraintModule
 	{
-		DECLARE_CLASS_1(ElasticityModule, TDataType)
+		DECLARE_TCLASS(ElasticityModule, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;

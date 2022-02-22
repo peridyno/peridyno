@@ -18,7 +18,7 @@ namespace dyno
 	template<typename TDataType>
 	class ElastoplasticBody : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ElastoplasticBody, TDataType)
+		DECLARE_TCLASS(ElastoplasticBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

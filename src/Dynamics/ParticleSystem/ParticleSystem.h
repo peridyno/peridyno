@@ -11,10 +11,8 @@ namespace dyno
 	template<typename TDataType>
 	class ParticleSystem : public Node
 	{
-		DECLARE_CLASS_1(ParticleSystem, TDataType)
+		DECLARE_TCLASS(ParticleSystem, TDataType)
 	public:
-
-		bool self_update = true;
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
@@ -32,20 +30,19 @@ namespace dyno
 		/**
 		 * @brief Particle position
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "Particle position");
 
 
 		/**
 		 * @brief Particle velocity
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
+		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
 		/**
 		 * @brief Particle force
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Force, Coord, DeviceType::GPU, "Force on each particle");
+		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Force on each particle");
 
-		
 	protected:
 		void updateTopology() override;
 		void resetStates() override;

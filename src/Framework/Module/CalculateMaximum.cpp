@@ -2,7 +2,7 @@
 
 namespace dyno 
 {
-	IMPLEMENT_CLASS_1(CalculateMaximum, TDataType)
+	IMPLEMENT_TCLASS(CalculateMaximum, TDataType)
 
 	template<typename TDataType>
 	void CalculateMaximum<TDataType>::compute()

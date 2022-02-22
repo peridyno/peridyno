@@ -6,7 +6,7 @@ namespace dyno {
 	template<typename TDataType>
 	class FixedPoints : public ConstraintModule
 	{
-		DECLARE_CLASS_1(FixedPoints, TDataType)
+		DECLARE_TCLASS(FixedPoints, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

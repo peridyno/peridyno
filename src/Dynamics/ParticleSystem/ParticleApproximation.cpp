@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ParticleApproximation, TDataType)
+	IMPLEMENT_TCLASS(ParticleApproximation, TDataType)
 
 	template<typename TDataType>
 	ParticleApproximation<TDataType>::ParticleApproximation()
