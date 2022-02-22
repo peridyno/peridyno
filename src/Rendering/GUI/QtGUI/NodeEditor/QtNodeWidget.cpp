@@ -118,7 +118,7 @@ namespace Qt
 
 	QString QtNodeWidget::caption() const
 	{
-		return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
+		return dyno::FormatBlockCaptionName(mNode->getClassInfo()->getClassName());
 	}
 
 	QString QtNodeWidget::name() const
@@ -149,7 +149,8 @@ namespace Qt
 
 		case PortType::Out:
 			if (portIndex == 0) {
-				return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
+				//return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
+				return dyno::FormatBlockPortName("Out");
 			}
 			else {
 				auto& outputFields = this->getOutputFields();
