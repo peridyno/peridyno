@@ -229,6 +229,26 @@ namespace dyno
  		mainLayout->addWidget(m_animationWidget, 0);
 	}
 
+	void PMainWindow::showAboutMsg()
+
+	{
+		QMessageBox msgBox(this);
+
+		msgBox.setWindowTitle("About");
+
+		msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+
+		msgBox.setText("hello world");
+
+		msgBox.setIconPixmap(QPixmap(":/ico/res/ExcelReport.ico"));
+
+
+		msgBox.exec();
+
+		mNodeFlowView->node_scene->addNodeByString("ParticleFluid<DataType3f>");
+
+	}
+
 	void PMainWindow::setupToolBar()
 	{
 		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
@@ -279,12 +299,15 @@ namespace dyno
 		auto pg1 = particlePage->AddGroup("");
 		QAction *particle1 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "Particle 1");
 		pg1->AddAction(QToolButton::DelayedPopup, particle1);
-
+	
 		QAction *particle2 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-bitmap.svg"), "Particle 2");
 		pg1->AddAction(QToolButton::DelayedPopup, particle2);
 
 		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "Particle 3");
 		pg1->AddAction(QToolButton::DelayedPopup, particle3);
+
+		connect(particle3, SIGNAL(triggered()), this, SLOT(showAboutMsg()));
+
 
 
 		tt::Page* heightPage = tt->AddPage(convertIcon(mediaDir + "icon-realwave.svg"), "Height Field ");
@@ -337,6 +360,10 @@ namespace dyno
 		QAction *help1 = new QAction(QPixmap(mediaDir + "Help-browser.png"), "Help");
 		helpg1->AddAction(QToolButton::DelayedPopup, help1);
 	}
+
+
+
+
 
 	void PMainWindow::setupStatusBar()
 	{
@@ -510,6 +537,8 @@ namespace dyno
 	{
 		// 	QLichtThread* m_thread = new QLichtThread(openGLWidget->winId());
 		// 	m_thread->start();
+
+		
 	}
 
 }

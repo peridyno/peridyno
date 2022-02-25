@@ -139,6 +139,10 @@ namespace dyno
 // 		PModuleFlowWidget*		m_moduleFlowView;
 // 		PModuleListWidget*		m_moduleListWidget;
 // 		PSceneGraphWidget*		m_scenegraphWidget;
+
+
+	public slots:
+		void showAboutMsg();
 	};
 
 }
