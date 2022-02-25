@@ -47,15 +47,17 @@ namespace Qt
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}
-
+	
 		this->setRegistry(ret);
 
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 		showSceneGraph(scn.get());
 
-		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
+		/*connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNodeToSceneGraph);
+
+		*/
 	}
 
 
@@ -201,6 +203,7 @@ namespace Qt
 
 	void QtNodeFlowScene::addNodeToSceneGraph(QtNode& n)
 	{
+		
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
 		printf("Use count before add: %d \n", nodeData->getNode().use_count());
@@ -208,9 +211,39 @@ namespace Qt
 		if (nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->addNode(nodeData->getNode());
+
+			_node = nodeData->getNode();
+			nodeData->getNode()->setName("eeeeeeee");
+			std::cout << "ok" << nodeData->getNode()->getName() << std::endl;
 		}
 
 		printf("Use count after add: %d \n", nodeData->getNode().use_count());
+
+		
+
+		std::cout << "ai---------" << std::endl;
+	}
+
+
+	void QtNodeFlowScene::addNodeByString(std::string NodeName) {
+		std::cout << NodeName << std::endl;
+
+		auto node_obj = dyno::Object::createObject(NodeName);
+		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+		auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
+	
+		if (dat != nullptr) {
+			auto scn = dyno::SceneGraphFactory::instance()->active();
+			//scn->addNode(dat->getNode());
+			scn->addNode(_node);
+			
+			std::cout << "ok" << std::endl;
+
+		}
+		else {
+			std::cout << "nullptr" << std::endl;
+		}
+		
 	}
 
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)

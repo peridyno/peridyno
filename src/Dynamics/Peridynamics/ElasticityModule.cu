@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ElasticityModule, TDataType)
+	IMPLEMENT_TCLASS(ElasticityModule, TDataType)
 
 	template<typename Real>
 	__device__ Real D_Weight(Real r, Real h)
