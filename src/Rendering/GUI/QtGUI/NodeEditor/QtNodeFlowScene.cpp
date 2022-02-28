@@ -53,11 +53,11 @@ namespace Qt
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 		showSceneGraph(scn.get());
 
-		/*connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
+		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNodeToSceneGraph);
 
-		*/
+		
 	}
 
 
@@ -96,7 +96,7 @@ namespace Qt
 		{
 			addNodeWidget(it.get());
 		}
-
+		
 		auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
 		{
 			auto inId = nd->objectId();
@@ -180,7 +180,7 @@ namespace Qt
 				}
 			}
 		};
-
+	
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			createNodeConnections(it.get());
@@ -193,7 +193,9 @@ namespace Qt
 			auto node_ptr = it.get();
 			std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
 		}
+
 		nodeMap.clear();
+		
 	}
 
 	void QtNodeFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)
@@ -214,13 +216,14 @@ namespace Qt
 
 			_node = nodeData->getNode();
 			nodeData->getNode()->setName("eeeeeeee");
+
 			std::cout << "ok" << nodeData->getNode()->getName() << std::endl;
 		}
 
 		printf("Use count after add: %d \n", nodeData->getNode().use_count());
-
 		
-
+		
+		
 		std::cout << "ai---------" << std::endl;
 	}
 
@@ -237,11 +240,31 @@ namespace Qt
 			//scn->addNode(dat->getNode());
 			scn->addNode(_node);
 			
-			std::cout << "ok" << std::endl;
-
 		}
 		else {
 			std::cout << "nullptr" << std::endl;
+		}
+
+		auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
+		{
+			auto mId = m->objectId();
+
+			auto type = std::make_unique<QtNodeWidget>(m);
+
+			auto& node = this->createNode(std::move(type));
+
+			//nodeMap[mId] = &node;
+
+			QPointF posView(m->bx(), m->by());
+
+			node.nodeGraphicsObject().setPos(posView);
+
+			this->nodePlaced(node);
+		};
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		for (auto it = scn->begin(); it != scn->end(); it++)
+		{
+			addNodeWidget(it.get());
 		}
 		
 	}
