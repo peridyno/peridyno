@@ -187,10 +187,11 @@ namespace dyno
 		centralWidget->setLayout(mainLayout);
 
 		//Setup views
+		
 		QTabWidget* tabWidget = new QTabWidget();
 		tabWidget->setObjectName(QStringLiteral("tabWidget"));
 		tabWidget->setGeometry(QRect(140, 60, 361, 241));
-
+		
 // 		//VTK-based visualization widget
 // 		m_vtkOpenglWidget = new PVTKOpenGLWidget();
 // 		m_vtkOpenglWidget->setObjectName(QStringLiteral("tabView"));
@@ -212,21 +213,23 @@ namespace dyno
 // 		mOpenGLWidget->layout()->setMargin(0);
 // 		tabWidget->addTab(mOpenGLWidget, QString());
 // 		tabWidget->setTabText(tabWidget->indexOf(mOpenGLWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
+		
 		mainLayout->addWidget(mOpenGLWidget, 1);
-
+		
 		//Setup animation widget
 		m_animationWidget = new PAnimationWidget(this);
 		m_animationWidget->layout()->setMargin(0);
-
+		
 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), mOpenGLWidget, SLOT(updateGraphicsContext()));
-
-// 		QWidget* viewWidget = new QWidget();
-// 		QHBoxLayout* hLayout = new QHBoxLayout();
-// 		viewWidget->setLayout(hLayout);
-// 		hLayout->addWidget(m_vtkOpenglWidget, 1);
-// 		hLayout->addWidget(m_flowView, 1);
+		
+ 	//	QWidget* viewWidget = new QWidget();
+ 	//	QHBoxLayout* hLayout = new QHBoxLayout();
+	//	viewWidget->setLayout(hLayout);
+ 	//	hLayout->addWidget(m_vtkOpenglWidget, 1);
+ 	//	hLayout->addWidget(m_flowView, 1);
 
  		mainLayout->addWidget(m_animationWidget, 0);
+		
 	}
 
 	void PMainWindow::showAboutMsg()
@@ -247,6 +250,18 @@ namespace dyno
 
 		mNodeFlowView->node_scene->addNodeByString("ParticleFluid<DataType3f>");
 
+	}
+
+
+
+	void PMainWindow::addNodeByParticleFluid() {
+		mNodeFlowView->node_scene->addNodeByString("ParticleFluid<DataType3f>");
+	}
+	void PMainWindow::addNodeByParticleSystem() {
+		mNodeFlowView->node_scene->addNodeByString("ParticleSystem<DataType3f>");
+	}
+	void PMainWindow::addNodeByParticleEmt() {
+		mNodeFlowView->node_scene->addNodeByString("ParticleEmitterRound<DataType3f>");
 	}
 
 	void PMainWindow::setupToolBar()
@@ -306,8 +321,9 @@ namespace dyno
 		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "Particle 3");
 		pg1->AddAction(QToolButton::DelayedPopup, particle3);
 
-		connect(particle3, SIGNAL(triggered()), this, SLOT(showAboutMsg()));
-
+		connect(particle3, SIGNAL(triggered()), this, SLOT(addNodeByParticleFluid()));
+		connect(particle2, SIGNAL(triggered()), this, SLOT(addNodeByParticleSystem()));
+		connect(particle1, SIGNAL(triggered()), this, SLOT(addNodeByParticleEmt()));
 
 
 		tt::Page* heightPage = tt->AddPage(convertIcon(mediaDir + "icon-realwave.svg"), "Height Field ");

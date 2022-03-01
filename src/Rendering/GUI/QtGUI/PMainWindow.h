@@ -111,6 +111,10 @@ namespace dyno
 
 		void showMessage();
 
+		void addNodeByParticleFluid();
+		void addNodeByParticleSystem();
+		void addNodeByParticleEmt();
+
 	private:
 		void setCentralView();
 		void setupToolBar();

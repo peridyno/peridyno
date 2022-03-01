@@ -237,17 +237,17 @@ namespace Qt
 	
 		if (dat != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
-			//scn->addNode(dat->getNode());
-			scn->addNode(_node);
+			scn->addNode(dat->getNode());
+			//scn->addNode(_node);
 			
 		}
 		else {
 			std::cout << "nullptr" << std::endl;
 		}
-
+		int mId;
 		auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
 		{
-			auto mId = m->objectId();
+			mId = m->objectId();
 
 			auto type = std::make_unique<QtNodeWidget>(m);
 
@@ -262,11 +262,15 @@ namespace Qt
 			this->nodePlaced(node);
 		};
 		auto scn = dyno::SceneGraphFactory::instance()->active();
+		int x = 0;
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
-			addNodeWidget(it.get());
+			if(x== mId)
+				addNodeWidget(it.get());
+			x++;
+			printf("%d \n", mId);
 		}
-		
+		addNodeWidget(dat->getNode());
 	}
 
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
