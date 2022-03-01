@@ -4,7 +4,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(GhostFluid, TDataType)
+	IMPLEMENT_TCLASS(GhostFluid, TDataType)
 
 	template<typename TDataType>
 	GhostFluid<TDataType>::GhostFluid()

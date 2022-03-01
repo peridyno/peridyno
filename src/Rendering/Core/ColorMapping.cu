@@ -3,7 +3,7 @@
 
 namespace dyno 
 {
-	IMPLEMENT_CLASS_1(ColorMapping, TDataType)
+	IMPLEMENT_TCLASS(ColorMapping, TDataType)
 
 	template <typename Real>
 	__global__ void CM_MapJetColor(

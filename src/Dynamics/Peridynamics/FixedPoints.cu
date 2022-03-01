@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(FixedPoints, TDataType)
+	IMPLEMENT_TCLASS(FixedPoints, TDataType)
 
 	template<typename TDataType>
 	FixedPoints<TDataType>::FixedPoints()

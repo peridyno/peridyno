@@ -12,7 +12,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(RigidBodySystem, TDataType)
+	IMPLEMENT_TCLASS(RigidBodySystem, TDataType)
 
 	typedef typename TOrientedBox3D<Real> Box3D;
 

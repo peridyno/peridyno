@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(HeightField, TDataType)
+	IMPLEMENT_TCLASS(HeightField, TDataType)
 
 	template<typename TDataType>
 	HeightField<TDataType>::HeightField()

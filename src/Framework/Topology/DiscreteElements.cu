@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(DiscreteElements, TDataType)
+	IMPLEMENT_TCLASS(DiscreteElements, TDataType)
 
 	template<typename TDataType>
 	DiscreteElements<TDataType>::DiscreteElements()

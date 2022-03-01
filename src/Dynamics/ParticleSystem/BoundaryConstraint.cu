@@ -6,7 +6,7 @@
 
 namespace dyno
 {
-	//IMPLEMENT_CLASS_1(BoundaryConstraint, TDataType)
+	//IMPLEMENT_TCLASS(BoundaryConstraint, TDataType)
 
 	template<typename TDataType>
 	BoundaryConstraint<TDataType>::BoundaryConstraint()

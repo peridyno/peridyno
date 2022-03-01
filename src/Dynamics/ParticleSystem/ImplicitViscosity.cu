@@ -3,7 +3,7 @@
 
 namespace dyno
 {
-//	IMPLEMENT_CLASS_1(ImplicitViscosity, TDataType)
+//	IMPLEMENT_TCLASS(ImplicitViscosity, TDataType)
 
 	template<typename Real>
 	__device__ Real IV_Weight(const Real r, const Real h)

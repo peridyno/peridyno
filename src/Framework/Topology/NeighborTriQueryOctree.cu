@@ -8,7 +8,7 @@
 namespace dyno
 {
 	
-	IMPLEMENT_CLASS_1(NeighborTriQueryOctree, TDataType)
+	IMPLEMENT_TCLASS(NeighborTriQueryOctree, TDataType)
 
 
 	template<typename TDataType>

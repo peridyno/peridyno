@@ -4,7 +4,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(SparseNeighborPointQuery, TDataType)
+	IMPLEMENT_TCLASS(SparseNeighborPointQuery, TDataType)
 
 		template<typename TDataType>
 	SparseNeighborPointQuery<TDataType>::SparseNeighborPointQuery()
