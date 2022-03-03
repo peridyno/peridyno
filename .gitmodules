@@ -3,7 +3,7 @@
 	url = https://gitee.com/clouddon/pybind11.git
 [submodule "external/eigen"]
 	path = external/eigen
-	url = https://gitlab.com/libeigen/eigen.git
+	url = https://gitee.com/clouddon/eigen.git
 [submodule "external/alembic"]
 	path = external/alembic
 	url = https://gitee.com/clouddon/alembic.git
