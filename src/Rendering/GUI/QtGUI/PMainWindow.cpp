@@ -245,23 +245,12 @@ namespace dyno
 
 		msgBox.setIconPixmap(QPixmap(":/ico/res/ExcelReport.ico"));
 
-
 		msgBox.exec();
 
-		mNodeFlowView->node_scene->addNodeByString("ParticleFluid<DataType3f>");
-
 	}
 
-
-
-	void PMainWindow::addNodeByParticleFluid() {
-		mNodeFlowView->node_scene->addNodeByString("ParticleFluid<DataType3f>");
-	}
-	void PMainWindow::addNodeByParticleSystem() {
-		mNodeFlowView->node_scene->addNodeByString("ParticleSystem<DataType3f>");
-	}
-	void PMainWindow::addNodeByParticleEmt() {
-		mNodeFlowView->node_scene->addNodeByString("ParticleEmitterRound<DataType3f>");
+	void PMainWindow::addNodeByName(std::string name) {
+		mNodeFlowView->node_scene->addNodeByString(name);
 	}
 
 	void PMainWindow::setupToolBar()
@@ -321,9 +310,9 @@ namespace dyno
 		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "Particle 3");
 		pg1->AddAction(QToolButton::DelayedPopup, particle3);
 
-		connect(particle3, SIGNAL(triggered()), this, SLOT(addNodeByParticleFluid()));
-		connect(particle2, SIGNAL(triggered()), this, SLOT(addNodeByParticleSystem()));
-		connect(particle1, SIGNAL(triggered()), this, SLOT(addNodeByParticleEmt()));
+		connect(particle1, &QAction::triggered, this, [=]() {addNodeByName("ParticleEmitterRound<DataType3f>"); });
+		connect(particle2, &QAction::triggered, this, [=]() {addNodeByName("ParticleFluid<DataType3f>"); });
+		connect(particle3, &QAction::triggered, this, [=]() {addNodeByName("ParticleFluid<DataType3f>"); });
 
 
 		tt::Page* heightPage = tt->AddPage(convertIcon(mediaDir + "icon-realwave.svg"), "Height Field ");

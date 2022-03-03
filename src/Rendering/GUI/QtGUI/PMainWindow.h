@@ -111,9 +111,7 @@ namespace dyno
 
 		void showMessage();
 
-		void addNodeByParticleFluid();
-		void addNodeByParticleSystem();
-		void addNodeByParticleEmt();
+		void addNodeByName(std::string name);
 
 	private:
 		void setCentralView();
