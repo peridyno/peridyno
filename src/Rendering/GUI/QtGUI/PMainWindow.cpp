@@ -103,7 +103,7 @@
 #include "Toolbar/SubGroup.h"
 #include "Toolbar/StyleTools.h"
 #include "Toolbar/Builder.h"
-
+#include "ToolBar/ToolBarIcoAndLabel.h"
 #include "Platform.h"
 
 
@@ -272,108 +272,41 @@ namespace dyno
 			return ico;
 		};
 
+		
+		ToolBarPage m_toolBarPage;
 
-		tt::Page* filePage = tt->AddPage(QPixmap(mediaDir + "48px-Document-open.png"), "File");
-	
-		auto fg1 = filePage->AddGroup("");
-		//New action
-		QAction *actionNew = new QAction(QPixmap(mediaDir + "48px-Document-new.png"), "New...");
-		fg1->AddAction(QToolButton::DelayedPopup, actionNew);
-			
-		//Open action
-		QAction *actionOpen = new QAction(QPixmap(mediaDir + "48px-Document-open.png"), "Open");
-		fg1->AddAction(QToolButton::DelayedPopup, actionOpen);
-		//Save action
-		QAction *actionSave = new QAction(QPixmap(mediaDir + "48px-Document-save.png"), "Save");
-		fg1->AddAction(QToolButton::DelayedPopup, actionSave);
-		//Save as action
-		QAction *actionSaveAs = new QAction(QPixmap(mediaDir + "48px-Document-save-as.png"), "Save As");
-		fg1->AddAction(QToolButton::DelayedPopup, actionSaveAs);
+		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
+		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
+			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
 
-		tt::Page* editPage = tt->AddPage(QPixmap(mediaDir + "48px-Preferences-system.png"), "Edit");
-		tt::Group* e1 = editPage->AddGroup("Group 1");
-		QAction *actionSetting = new QAction(QPixmap(mediaDir + "48px-Preferences-system.png"), "Settings");
-		e1->AddAction(QToolButton::DelayedPopup, actionSetting);
+			if (i == 0 || i == 1 || i == 6) {
+				tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.ico[0]), m_tbl.label[0]);
+				auto m_page = MainPage->AddGroup("");
 
-// 		PToolBar *tb = new PToolBar(tr("Tool Bar"), this);
-// 		toolBars.append(tb);
-// 		addToolBar(tb);
+				for (int j = 1; j < m_tbl.ico.size(); j++) {
+					QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
+					m_page->AddAction(QToolButton::DelayedPopup, art);
 
-		tt::Page* particlePage = tt->AddPage(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "Particle System ");
-		auto pg1 = particlePage->AddGroup("");
-		QAction *particle1 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "ParticleEmitterRound");
-		pg1->AddAction(QToolButton::DelayedPopup, particle1);
-	
-		QAction *particle2 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-bitmap.svg"), "ParticleFluid");
-		pg1->AddAction(QToolButton::DelayedPopup, particle2);
+					if (i == 2 || i == 5) {
+						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
+					}
+				}
 
-		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "ParticleSystem");
-		pg1->AddAction(QToolButton::DelayedPopup, particle3);
+			}else{
+				tt::Page* MainPage = tt->AddPage(convertIcon(mediaDir + m_tbl.ico[0]), m_tbl.label[0]);
+				auto m_page = MainPage->AddGroup("");
 
-		QAction* particle4 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "ParticleEmitterSquare");
-		pg1->AddAction(QToolButton::DelayedPopup, particle3);
+				for (int j = 1; j < m_tbl.ico.size(); j++) {
+					QAction* art = new QAction(convertIcon(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
+					m_page->AddAction(QToolButton::DelayedPopup, art);
 
-		connect(particle1, &QAction::triggered, this, [=]() {addNodeByName("ParticleEmitterRound<DataType3f>"); });
-		connect(particle2, &QAction::triggered, this, [=]() {addNodeByName("ParticleFluid<DataType3f>"); });
-		connect(particle3, &QAction::triggered, this, [=]() {addNodeByName("ParticleSystem<DataType3f>"); });
-		connect(particle4, &QAction::triggered, this, [=]() {addNodeByName("ParticleEmitterSquare<DataType3f>"); });
+					if (i == 2 || i == 5) {
+						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
+					}
+				}
+			}
+		}
 
-
-		tt::Page* heightPage = tt->AddPage(convertIcon(mediaDir + "icon-realwave.svg"), "Height Field ");
-		auto hg1 = heightPage->AddGroup("");
-		QAction *wave1 = new QAction(convertIcon(mediaDir + "icon-realwave.svg"), "OceanPach");
-		hg1->AddAction(QToolButton::DelayedPopup, wave1);
-
-		QAction *wave2 = new QAction(convertIcon(mediaDir + "icon-realwave-cresplash.svg"), "Wave 2");
-		hg1->AddAction(QToolButton::DelayedPopup, wave2);
-
-		QAction *wave3 = new QAction(convertIcon(mediaDir + "icon-realwave-objspash.svg"), "Wave 3");
-		hg1->AddAction(QToolButton::DelayedPopup, wave3);
-
-		connect(wave1, &QAction::triggered, this, [=]() {addNodeByName("OceanPach<DataType3f>"); });
-		//Finite element
-		tt::Page* femPage = tt->AddPage(convertIcon(mediaDir + "daemon/icon-demon-vortex.svg"), "Finite Element ");
-		auto femg1 = femPage->AddGroup("");
-		QAction *soft1 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-vortex.svg"), "Soft Body 1");
-		femg1->AddAction(QToolButton::DelayedPopup, soft1);
-
-		QAction *soft2 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-heater.svg"), "Soft Body 2");
-		femg1->AddAction(QToolButton::DelayedPopup, soft2);
-
-		QAction *soft3 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-ellipsoid.svg"), "Soft Body 3");
-		femg1->AddAction(QToolButton::DelayedPopup, soft3);
-
-		QAction *soft4 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-stension.svg"), "Soft Body 4");
-		femg1->AddAction(QToolButton::DelayedPopup, soft4);
-
-
-
-		//Articulated rigids
-		tt::Page* artPage = tt->AddPage(convertIcon(mediaDir + "geometry/icon-geometry-cube.svg"), "Rigid Body ");
-		auto rigidg1 = artPage->AddGroup("");
-		QAction *art1 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-cube.svg"), "Rigid 1");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art1);
-
-		QAction *art2 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-cylinder.svg"), "Rigid 2");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art2);
-
-		QAction *art3 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-rocket.svg"), "Rigid 3");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art3);
-
-		QAction *art4 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-multibody.svg"), "Rigid 4");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art4);
-
-		connect(art1, &QAction::triggered, this, [=]() {addNodeByName("GLPointVisualNode<DataType3f>"); });
-		connect(art2, &QAction::triggered, this, [=]() {addNodeByName("GhostFluid<DataType3f>"); });
-		connect(art3, &QAction::triggered, this, [=]() {addNodeByName("GhostParticles<DataType3f>"); });
-		connect(art4, &QAction::triggered, this, [=]() {addNodeByName("StaticBoundary<DataType3f>"); });
-
-
-
-		tt::Page* helpPage = tt->AddPage(QPixmap(mediaDir + "Help-browser.png"), "Help");
-		auto helpg1 = helpPage->AddGroup("");
-		QAction *help1 = new QAction(QPixmap(mediaDir + "Help-browser.png"), "Help");
-		helpg1->AddAction(QToolButton::DelayedPopup, help1);
 	}
 
 	void PMainWindow::setupStatusBar()
