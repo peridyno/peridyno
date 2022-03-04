@@ -34,5 +34,5 @@ namespace dyno {
 		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
 	};
 
-	//IMPLEMENT_CLASS_1(BoundaryConstraint, TDataType)
+	//IMPLEMENT_TCLASS(BoundaryConstraint, TDataType)
 }

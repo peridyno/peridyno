@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	//IMPLEMENT_CLASS_1(ParticleIntegrator, TDataType)
+	//IMPLEMENT_TCLASS(ParticleIntegrator, TDataType)
 
 	template<typename TDataType>
 	ParticleIntegrator<TDataType>::ParticleIntegrator()
