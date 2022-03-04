@@ -36,12 +36,12 @@ namespace dyno
 		QLabel* label2 = new QLabel("100", this);
 		QLabel* label3 = new QLabel("150", this);
 		QLabel* label4 = new QLabel("200", this);
-		frameLayout->addWidget(label1, 1, 0);
-		frameLayout->addWidget(label2, 1, 1);
-		frameLayout->addWidget(label3, 1, 2);
-		frameLayout->addWidget(label4, 1, 3);*/
+		frameLayout->addWidget(label1, 0, 0);
+		frameLayout->addWidget(label2, 0, 1);
+		frameLayout->addWidget(label3, 0, 2);
+		frameLayout->addWidget(label4, 0, 3);*/
 
-		frameLayout->addWidget(m_slider, 0, 0);
+		frameLayout->addWidget(m_slider, 0, 0, 0 ,3);
 		frameLayout->addWidget(m_end_spinbox, 0, 4);
 
 		connect(m_slider, &PAnimationQSlider::valueChanged, m_end_spinbox,

@@ -310,8 +310,8 @@ namespace dyno
 		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "ParticleSystem");
 		pg1->AddAction(QToolButton::DelayedPopup, particle3);
 
-		QAction* particle4 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "ParticleEmitterSquare");
-		pg1->AddAction(QToolButton::DelayedPopup, particle3);
+		QAction* particle4 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-object.svg"), "ParticleEmitterSquare");
+		pg1->AddAction(QToolButton::DelayedPopup, particle4);
 
 		connect(particle1, &QAction::triggered, this, [=]() {addNodeByName("ParticleEmitterRound<DataType3f>"); });
 		connect(particle2, &QAction::triggered, this, [=]() {addNodeByName("ParticleFluid<DataType3f>"); });
@@ -324,13 +324,15 @@ namespace dyno
 		QAction *wave1 = new QAction(convertIcon(mediaDir + "icon-realwave.svg"), "OceanPach");
 		hg1->AddAction(QToolButton::DelayedPopup, wave1);
 
+		connect(wave1, &QAction::triggered, this, [=]() {addNodeByName("OceanPach<DataType3f>"); }); 
+
 		QAction *wave2 = new QAction(convertIcon(mediaDir + "icon-realwave-cresplash.svg"), "Wave 2");
 		hg1->AddAction(QToolButton::DelayedPopup, wave2);
 
 		QAction *wave3 = new QAction(convertIcon(mediaDir + "icon-realwave-objspash.svg"), "Wave 3");
 		hg1->AddAction(QToolButton::DelayedPopup, wave3);
 
-		connect(wave1, &QAction::triggered, this, [=]() {addNodeByName("OceanPach<DataType3f>"); });
+		
 		//Finite element
 		tt::Page* femPage = tt->AddPage(convertIcon(mediaDir + "daemon/icon-demon-vortex.svg"), "Finite Element ");
 		auto femg1 = femPage->AddGroup("");
