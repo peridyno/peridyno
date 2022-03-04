@@ -33,7 +33,7 @@ namespace dyno
 		void blit(unsigned int attachment = 0);
 		void bind();
 
-	private:
+	public:
 		gl::Framebuffer mFramebuffer;
 
 		// frame color

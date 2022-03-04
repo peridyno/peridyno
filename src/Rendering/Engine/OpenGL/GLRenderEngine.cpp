@@ -1,6 +1,5 @@
 #include "GLRenderEngine.h"
 #include "GLRenderHelper.h"
-#include "GLRenderTarget.h"
 #include "GLVisualModule.h"
 
 #include "Utility.h"
@@ -88,11 +87,6 @@ namespace dyno
 		mShadowMap->initialize();
 		mRenderHelper->initialize();
 
-		mRenderTarget = new GLRenderTarget();
-
-		mRenderTarget->initialize();
-		mRenderTarget->resize(width, height);
-
 		m_camera->setWidth(width);
 		m_camera->setHeight(height);
 		m_camera->registerPoint(0.5f, 0.5f);
@@ -172,8 +166,8 @@ namespace dyno
 		sceneUniformBuffer.model = glm::mat4(1);
 		sceneUniformBuffer.view = m_rparams.view;
 		sceneUniformBuffer.projection = m_rparams.proj;
-		sceneUniformBuffer.width = mRenderTarget->width;
-		sceneUniformBuffer.height = mRenderTarget->height;
+		sceneUniformBuffer.width = m_rparams.viewport.w;
+		sceneUniformBuffer.height = m_rparams.viewport.h;
 
 		mTransformUBO.load(&sceneUniformBuffer, sizeof(sceneUniformBuffer));
 		mTransformUBO.bindBufferBase(0);
@@ -184,17 +178,8 @@ namespace dyno
 		mLightUBO.load(&light, sizeof(light));
 		mLightUBO.bindBufferBase(1);
 
-		// begin rendering
-		bool offscreen = false;
-		if (offscreen)
-		{
-			mRenderTarget->bind();
-		}
-		else
-		{
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-			glViewport(0, 0, mRenderTarget->width, mRenderTarget->height);
-		}
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -228,22 +213,18 @@ namespace dyno
 			mRenderHelper->drawAxis();
 		}
 
-		if (offscreen)
-		{
-			// write back to the framebuffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-			mRenderTarget->blit(0);
-		}
 	}
 
 	void GLRenderEngine::resize(int w, int h)
 	{
-		mRenderTarget->resize(w, h);
 		// set the viewport
 		m_rparams.viewport.x = 0;
 		m_rparams.viewport.y = 0;
 		m_rparams.viewport.w = w;
 		m_rparams.viewport.h = h;
+
+		m_camera->setWidth(w);
+		m_camera->setHeight(h);
 	}
 
 	std::string GLRenderEngine::name()

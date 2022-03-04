@@ -56,6 +56,7 @@ namespace gl {
 
 		virtual void resize(int w, int h);
 		virtual void load(int w, int h, void* data);
+		virtual void dump(void* pixels);
 
 		// OpenGL 4.4+, clear texture
 		virtual void clear(void* value);
