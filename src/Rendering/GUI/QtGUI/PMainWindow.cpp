@@ -241,7 +241,7 @@ namespace dyno
 
 		msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
 
-		msgBox.setText("hello world");
+		msgBox.setText("this is diagWindows");
 
 		msgBox.setIconPixmap(QPixmap(":/ico/res/ExcelReport.ico"));
 
@@ -301,23 +301,27 @@ namespace dyno
 
 		tt::Page* particlePage = tt->AddPage(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "Particle System ");
 		auto pg1 = particlePage->AddGroup("");
-		QAction *particle1 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "Particle 1");
+		QAction *particle1 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "ParticleEmitterRound");
 		pg1->AddAction(QToolButton::DelayedPopup, particle1);
 	
-		QAction *particle2 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-bitmap.svg"), "Particle 2");
+		QAction *particle2 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-bitmap.svg"), "ParticleFluid");
 		pg1->AddAction(QToolButton::DelayedPopup, particle2);
 
-		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "Particle 3");
+		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "ParticleSystem");
+		pg1->AddAction(QToolButton::DelayedPopup, particle3);
+
+		QAction* particle4 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "ParticleEmitterSquare");
 		pg1->AddAction(QToolButton::DelayedPopup, particle3);
 
 		connect(particle1, &QAction::triggered, this, [=]() {addNodeByName("ParticleEmitterRound<DataType3f>"); });
 		connect(particle2, &QAction::triggered, this, [=]() {addNodeByName("ParticleFluid<DataType3f>"); });
-		connect(particle3, &QAction::triggered, this, [=]() {addNodeByName("ParticleFluid<DataType3f>"); });
+		connect(particle3, &QAction::triggered, this, [=]() {addNodeByName("ParticleSystem<DataType3f>"); });
+		connect(particle4, &QAction::triggered, this, [=]() {addNodeByName("ParticleEmitterSquare<DataType3f>"); });
 
 
 		tt::Page* heightPage = tt->AddPage(convertIcon(mediaDir + "icon-realwave.svg"), "Height Field ");
 		auto hg1 = heightPage->AddGroup("");
-		QAction *wave1 = new QAction(convertIcon(mediaDir + "icon-realwave.svg"), "Wave 1");
+		QAction *wave1 = new QAction(convertIcon(mediaDir + "icon-realwave.svg"), "OceanPach");
 		hg1->AddAction(QToolButton::DelayedPopup, wave1);
 
 		QAction *wave2 = new QAction(convertIcon(mediaDir + "icon-realwave-cresplash.svg"), "Wave 2");
@@ -326,7 +330,7 @@ namespace dyno
 		QAction *wave3 = new QAction(convertIcon(mediaDir + "icon-realwave-objspash.svg"), "Wave 3");
 		hg1->AddAction(QToolButton::DelayedPopup, wave3);
 
-
+		connect(wave1, &QAction::triggered, this, [=]() {addNodeByName("OceanPach<DataType3f>"); });
 		//Finite element
 		tt::Page* femPage = tt->AddPage(convertIcon(mediaDir + "daemon/icon-demon-vortex.svg"), "Finite Element ");
 		auto femg1 = femPage->AddGroup("");
@@ -359,16 +363,18 @@ namespace dyno
 		QAction *art4 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-multibody.svg"), "Rigid 4");
 		rigidg1->AddAction(QToolButton::DelayedPopup, art4);
 
+		connect(art1, &QAction::triggered, this, [=]() {addNodeByName("GLPointVisualNode<DataType3f>"); });
+		connect(art2, &QAction::triggered, this, [=]() {addNodeByName("GhostFluid<DataType3f>"); });
+		connect(art3, &QAction::triggered, this, [=]() {addNodeByName("GhostParticles<DataType3f>"); });
+		connect(art4, &QAction::triggered, this, [=]() {addNodeByName("StaticBoundary<DataType3f>"); });
+
+
 
 		tt::Page* helpPage = tt->AddPage(QPixmap(mediaDir + "Help-browser.png"), "Help");
 		auto helpg1 = helpPage->AddGroup("");
 		QAction *help1 = new QAction(QPixmap(mediaDir + "Help-browser.png"), "Help");
 		helpg1->AddAction(QToolButton::DelayedPopup, help1);
 	}
-
-
-
-
 
 	void PMainWindow::setupStatusBar()
 	{

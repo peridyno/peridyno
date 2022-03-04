@@ -213,18 +213,9 @@ namespace Qt
 		if (nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->addNode(nodeData->getNode());
-
-			_node = nodeData->getNode();
-			nodeData->getNode()->setName("eeeeeeee");
-
-			std::cout << "ok" << nodeData->getNode()->getName() << std::endl;
 		}
 
-		printf("Use count after add: %d \n", nodeData->getNode().use_count());
-		
-		
-		
-		std::cout << "ai---------" << std::endl;
+		printf("Use count after add: %d \n", nodeData->getNode().use_count());	
 	}
 
 
@@ -237,9 +228,7 @@ namespace Qt
 	
 		if (dat != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
-			scn->addNode(dat->getNode());
-			//scn->addNode(_node);
-			
+			scn->addNode(dat->getNode());	
 		}
 		else {
 			std::cout << "nullptr" << std::endl;
@@ -253,8 +242,6 @@ namespace Qt
 
 			auto& node = this->createNode(std::move(type));
 
-			//nodeMap[mId] = &node;
-
 			QPointF posView(m->bx(), m->by());
 
 			node.nodeGraphicsObject().setPos(posView);
@@ -265,10 +252,11 @@ namespace Qt
 		int x = 0;
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
-			if(x== mId)
+			if(x== mId){
 				addNodeWidget(it.get());
+				break;
+			}
 			x++;
-			printf("%d \n", mId);
 		}
 		addNodeWidget(dat->getNode());
 	}

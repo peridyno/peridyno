@@ -35,7 +35,6 @@ public Q_SLOTS:
 private:
 	SceneGraph* m_scene = nullptr;
 
-	std::shared_ptr<dyno::Node> _node;
 };
 
 }
