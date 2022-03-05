@@ -103,7 +103,7 @@
 #include "Toolbar/SubGroup.h"
 #include "Toolbar/StyleTools.h"
 #include "Toolbar/Builder.h"
-#include "ToolBar/ToolBarIcoAndLabel.h"
+#include "ToolBar/ToolBarPage.h"
 #include "Platform.h"
 
 
@@ -272,35 +272,40 @@ namespace dyno
 			return ico;
 		};
 
-		
+		//Add ToolBar page
 		ToolBarPage m_toolBarPage;
-
 		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
+
 		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
 			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
 
+			//Add file、edit and help ToolBar tab
 			if (i == 0 || i == 1 || i == 6) {
+				//Add main tab
 				tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.ico[0]), m_tbl.label[0]);
 				auto m_page = MainPage->AddGroup("");
 
 				for (int j = 1; j < m_tbl.ico.size(); j++) {
+					//Add subtabs
 					QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
 					m_page->AddAction(QToolButton::DelayedPopup, art);
 
-					if (i == 2 || i == 5) {
+					if (i == 2 || i == 5) {//add connect event
 						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
 					}
 				}
 
-			}else{
+			}else{ // Add Particle System、 Height Field、 Finite Element、 Rigid Body ToolBar tab
+				//Add main tab
 				tt::Page* MainPage = tt->AddPage(convertIcon(mediaDir + m_tbl.ico[0]), m_tbl.label[0]);
 				auto m_page = MainPage->AddGroup("");
 
 				for (int j = 1; j < m_tbl.ico.size(); j++) {
+					//Add subtabs
 					QAction* art = new QAction(convertIcon(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
 					m_page->AddAction(QToolButton::DelayedPopup, art);
 
-					if (i == 2 || i == 5) {
+					if (i == 2 || i == 5) {//add connect event 
 						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
 					}
 				}

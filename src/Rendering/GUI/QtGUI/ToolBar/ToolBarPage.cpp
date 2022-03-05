@@ -1,9 +1,11 @@
-#include "ToolBarIcoAndLabel.h"
+#include "ToolBarPage.h"
 
 namespace dyno {
 	ToolBarPage::ToolBarPage() {
 
+		//ToolBar file
 		ToolBarIcoAndLabel filePage;
+		//number of filePage
 		filePage.num = 5;
 
 		filePage.label.push_back("File");
@@ -21,7 +23,7 @@ namespace dyno {
 		filePage.label.push_back("Save As");
 		filePage.ico.push_back("48px-Document-save-as.png");
 
-
+		//ToolBar edit
 		ToolBarIcoAndLabel editPage;
 		editPage.num = 2;
 
@@ -31,7 +33,7 @@ namespace dyno {
 		editPage.label.push_back("Settings");
 		editPage.ico.push_back("48px-Preferences-system.png");
 
-
+		//ToolBar particle
 		ToolBarIcoAndLabel particlePage;
 		particlePage.num = 5;
 
@@ -50,7 +52,7 @@ namespace dyno {
 		particlePage.label.push_back("ParticleEmitterSquare");
 		particlePage.ico.push_back("dyverso/icon-emi-object.svg");
 
-
+		//ToolBar height Field
 		ToolBarIcoAndLabel heightPage;
 		heightPage.num = 4;
 		heightPage.label.push_back("Height Field");
@@ -65,7 +67,7 @@ namespace dyno {
 		heightPage.label.push_back("Wave 3");
 		heightPage.ico.push_back("icon-realwave-objspash.svg");
 
-		
+		//ToolBar Finite Element
 		ToolBarIcoAndLabel FinitePage;
 		FinitePage.num = 4;
 		FinitePage.label.push_back("Finite Element");
@@ -80,6 +82,7 @@ namespace dyno {
 		FinitePage.label.push_back("Soft Body 3");
 		FinitePage.ico.push_back("daemon/icon-demon-ellipsoid.svg");
 
+		//ToolBar Rigid Body
 		ToolBarIcoAndLabel RigidPage;
 		RigidPage.num = 5;
 		RigidPage.label.push_back("Rigid Body");
@@ -97,7 +100,7 @@ namespace dyno {
 		RigidPage.label.push_back("StaticBoundary");
 		RigidPage.ico.push_back("geometry/icon-geometry-multibody.svg");
 
-
+		//ToolBar help
 		ToolBarIcoAndLabel helpPage;
 		helpPage.num = 2;
 
@@ -108,6 +111,7 @@ namespace dyno {
 		helpPage.ico.push_back("Help-browser.png");
 
 
+		//Add all the page
 		tbl.push_back(filePage);// 0
 		tbl.push_back(editPage);// 1
 		tbl.push_back(particlePage);//2
