@@ -38,12 +38,15 @@ namespace dyno
 		float clipNear() const { return mNear; }
 		float clipFar() const { return mFar; }
 
+		virtual void setEyePos(const Vec3f& p) = 0;
+		virtual void setTargetPos(const Vec3f& p) = 0;
+
 		TRay3D<float> castRayInWorldSpace(float x, float y);
 
 	protected:
-		float mNear;
-		float mFar;
-		float mFov;
+		float mNear = 0.01f;
+		float mFar = 10.0f;
+		float mFov = 0.0f;
 
 		int mViewportWidth;
 		int mViewportHeight;
