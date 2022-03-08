@@ -8,11 +8,15 @@ namespace dyno {
 	//A tab in the toolbar
 	class ToolBarIcoAndLabel {
 	public:
+		// Page Name
+		QString tabPageName;
+		QString tabPageIco;
+			
 		//number of subtabs
-		int num;
+		int subtabNum;
 		//Icons for subtabs
 		std::vector<QString> ico;
-		//Icons for label
+		//labels for subtabs
 		std::vector<QString> label;
 
 	};

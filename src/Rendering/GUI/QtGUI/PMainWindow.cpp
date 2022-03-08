@@ -280,19 +280,15 @@ namespace dyno
 			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
 
 			//Add file、edit and help ToolBar tab
-			if (i == 0 || i == 1 || i == 6) {
+			if (m_tbl.tabPageName == "File" || m_tbl.tabPageName == "Edit" || m_tbl.tabPageName == "Help") {
 				//Add main tab
 				tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.ico[0]), m_tbl.label[0]);
 				auto m_page = MainPage->AddGroup("");
 
-				for (int j = 1; j < m_tbl.ico.size(); j++) {
+				for (int j = 0; j < m_tbl.ico.size(); j++) {
 					//Add subtabs
 					QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
 					m_page->AddAction(QToolButton::DelayedPopup, art);
-
-					if (i == 2 || i == 5) {//add connect event
-						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
-					}
 				}
 
 			}else{ // Add Particle System、 Height Field、 Finite Element、 Rigid Body ToolBar tab
@@ -300,7 +296,7 @@ namespace dyno
 				tt::Page* MainPage = tt->AddPage(convertIcon(mediaDir + m_tbl.ico[0]), m_tbl.label[0]);
 				auto m_page = MainPage->AddGroup("");
 
-				for (int j = 1; j < m_tbl.ico.size(); j++) {
+				for (int j = 0; j < m_tbl.ico.size(); j++) {
 					//Add subtabs
 					QAction* art = new QAction(convertIcon(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
 					m_page->AddAction(QToolButton::DelayedPopup, art);
@@ -370,7 +366,7 @@ namespace dyno
 	void PMainWindow::showAbout()
 	{
 		QString versoin = QString("Version ") + QString::number(PERIDYNO_VERSION_MAJOR)+QString(".")+ QString::number(PERIDYNO_VERSION_MINOR)+QString(".")+QString::number(PERIDYNO_VERSION_PATCH);
-		QMessageBox::about(this, tr("PhysIKA Studio "), versoin);
+		QMessageBox::about(this, tr("Peridyno Studio "), versoin);
 		return;
 	}
 

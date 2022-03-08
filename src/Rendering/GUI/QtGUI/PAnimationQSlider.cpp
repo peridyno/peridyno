@@ -14,8 +14,8 @@ namespace dyno
 		m_displayLabel->setAlignment(Qt::AlignCenter);
 
 
-		this->setRange(1, 100);
-		this->setSingleStep(1);
+		this->setRange(0, 200);
+		this->setSingleStep(10);
 		this->setOrientation(Qt::Horizontal);
 
 		this->setTickPosition(QSlider::TicksAbove);

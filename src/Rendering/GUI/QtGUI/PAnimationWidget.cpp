@@ -32,17 +32,21 @@ namespace dyno
 
 		m_slider = new PAnimationQSlider(this);
 		
-		/*QLabel* label1 = new QLabel("50", this);
-		QLabel* label2 = new QLabel("100", this);
-		QLabel* label3 = new QLabel("150", this);
-		QLabel* label4 = new QLabel("200", this);
-		frameLayout->addWidget(label1, 0, 0);
-		frameLayout->addWidget(label2, 0, 1);
-		frameLayout->addWidget(label3, 0, 2);
-		frameLayout->addWidget(label4, 0, 3);*/
+		QLabel* label1 = new QLabel("0", this);
+		QLabel* label2 = new QLabel("50", this);
+		QLabel* label3 = new QLabel("100", this);
+		QLabel* label4 = new QLabel("150", this);
+		QLabel* label5 = new QLabel("200", this);
 
-		frameLayout->addWidget(m_slider, 0, 0, 0 ,3);
-		frameLayout->addWidget(m_end_spinbox, 0, 4);
+		frameLayout->addWidget(label1, 1, 0,1,1, Qt::AlignTop | Qt::AlignLeft);
+		frameLayout->addWidget(label2, 1, 1,1,1, Qt::AlignTop | Qt::AlignHCenter);
+		frameLayout->addWidget(label3, 1, 2,1,2, Qt::AlignTop | Qt::AlignHCenter);
+		frameLayout->addWidget(label4, 1, 4,1,1, Qt::AlignTop | Qt::AlignHCenter);
+		frameLayout->addWidget(label5, 1, 5,1,1, Qt::AlignTop | Qt::AlignRight);
+		
+	
+		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
+		//frameLayout->addWidget(m_end_spinbox, 0, 4);
 
 		connect(m_slider, &PAnimationQSlider::valueChanged, m_end_spinbox,
 			[&]() {
@@ -57,8 +61,10 @@ namespace dyno
 
 		m_startSim = new QPushButton("Start");
 		m_resetSim = new QPushButton("Reset");
-		operationLayout->addWidget(m_startSim, 0, 0);
-		operationLayout->addWidget(m_resetSim, 0, 1);
+
+		operationLayout->addWidget(m_end_spinbox, 0, 0);
+		operationLayout->addWidget(m_startSim, 0, 1);
+		operationLayout->addWidget(m_resetSim, 0, 2);
 
 		m_startSim->setCheckable(true);
 
