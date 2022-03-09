@@ -53,8 +53,7 @@ void declare_particle_emitter_square(py::module& m, std::string typestr) {
 	using Parent = dyno::ParticleEmitter<TDataType>;
 	std::string pyclass_name = std::string("ParticleEmitterSquare") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("var_location", &Class::varLocation);
+		.def(py::init<>());
 }
 
 template <typename TDataType>
@@ -64,7 +63,7 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleFluid") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("import_particles_emitters", &Class::importParticleEmitters);
+		.def("import_particles_emitters", &Class::importParticleEmitters, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -94,6 +93,7 @@ void declare_particle_elastic_body(py::module &m, std::string typestr) {
 
 void pybind_particle_system(py::module& m)
 {
+	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
 	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
 
 	declare_static_boundary<dyno::DataType3f>(m, "3f");

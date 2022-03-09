@@ -33,8 +33,8 @@ void declare_color_mapping(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ColorMapping") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_scalar", &Class::inScalar)
-		.def("out_color", &Class::outColor);
+		.def("in_scalar", &Class::inScalar, py::return_value_policy::reference)
+		.def("out_color", &Class::outColor, py::return_value_policy::reference);
 }
 
 void declare_point_visual_module(py::module& m, std::string typestr) {
@@ -43,7 +43,8 @@ void declare_point_visual_module(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GLPointVisualModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_pointset", &Class::inPointSet, py::return_value_policy::copy);
+		.def("in_pointset", &Class::inPointSet, py::return_value_policy::reference)
+		.def("in_color", &Class::inColor, py::return_value_policy::reference);
 }
 
 void pybind_rendering(py::module& m)
