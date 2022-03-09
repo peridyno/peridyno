@@ -1,4 +1,4 @@
 #pragma once
 #include "PyCommon.h"
 
-void pybind_glut_gui(py::module& m);
+void pybind_glfw_gui(py::module& m);

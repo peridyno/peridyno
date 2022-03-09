@@ -194,8 +194,8 @@ namespace dyno
 		addToModuleList(module);														\
 	}
 
-		std::unique_ptr<AnimationPipeline>&		animationPipeline();
-		std::unique_ptr<GraphicsPipeline>&		graphicsPipeline();
+		std::shared_ptr<AnimationPipeline>		animationPipeline();
+		std::shared_ptr<GraphicsPipeline>		graphicsPipeline();
 
 		template<class TModule>
 		std::shared_ptr<TModule> addModule(std::string name)
@@ -391,8 +391,8 @@ namespace dyno
 		 * @brief Pointer of a specific module
 		 *
 		 */
-		std::unique_ptr<AnimationPipeline> m_animation_pipeline;
-		std::unique_ptr<GraphicsPipeline> m_render_pipeline;
+		std::shared_ptr<AnimationPipeline> m_animation_pipeline;
+		std::shared_ptr<GraphicsPipeline> m_render_pipeline;
 
 		/**
 		 * @brief A module list containg specific modules

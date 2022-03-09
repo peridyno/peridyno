@@ -1,6 +1,6 @@
 #include "PyPeridyno.h"
 
-#include "PyGlutGUI.h"
+#include "PyGlfwGUI.h"
 #include "PyCore.h"
 #include "PyFramework.h"
 #include "PyParticleSystem.h"
@@ -13,7 +13,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 
 	m.doc() = "Python binding of Peridyno";
 
-	pybind_glut_gui(m);
+	pybind_glfw_gui(m);
 	pybind_core(m);
 	pybind_framework(m);
 	pybind_particle_system(m);
