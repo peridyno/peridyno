@@ -18,7 +18,7 @@ void declare_multi_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::MultipleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
 	std::string pyclass_name = std::string("MultipleNodePort_") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 }
 
 template <typename TDataType>
@@ -35,7 +35,7 @@ void declare_static_boundary(py::module &m, std::string typestr) {
 		.def("load_sphere", &Class::loadShpere)
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
-		.def("import_particle_systems", &Class::importParticleSystems);
+		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -74,7 +74,8 @@ void declare_particle_system(py::module &m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_particles", (void (Class::*)(Class::Coord lo, Class::Coord hi, Class::Real distance)) &Class::loadParticles);
+		.def("load_particles", (void (Class::*)(Class::Coord lo, Class::Coord hi, Class::Real distance)) &Class::loadParticles)
+		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference);
 }
 
 template <typename TDataType>

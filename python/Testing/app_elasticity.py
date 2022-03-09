@@ -19,12 +19,22 @@ import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()
 
-fluid = dyno.ParticleFluid3f();
+fluid = dyno.ParticleFluid3f()
+scn.add_node(fluid)
 
-boundary = dyno.StaticBoundary3f();
 
-calcNorm = dyno.CalculateNorm3f();
-colorMapper = dyno.ColorMapping3f();
+boundary = dyno.StaticBoundary3f()
+
+calcNorm = dyno.CalculateNorm3f()
+colorMapper = dyno.ColorMapping3f()
+pointRender = dyno.GLPointVisualModule3f()
+
+fluid.state_velocity().connect(calcNorm.in_vec())
+#fluid.current_topology().connect(pointRender.in_pointset())
+
+fluid.graphics_pipeline().push_module(calcNorm)
+fluid.graphics_pipeline().push_module(colorMapper)
+fluid.graphics_pipeline().push_module(pointRender)
 
 fluid.connect(boundary.import_particle_systems())
 

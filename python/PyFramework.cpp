@@ -1,6 +1,8 @@
 #include "PyFramework.h"
 
 #include "Node.h"
+#include "FInstance.h"
+#include "Field.h"
 #include "Module/VisualModule.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
@@ -8,14 +10,18 @@
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"
 
+#include "Topology/PointSet.h"
+
 #include "SceneGraph.h"
 #include "Log.h"
 
 using FBase = dyno::FBase;
+using InstanceBase = dyno::InstanceBase;
 using Node = dyno::Node;
 using NodePort = dyno::NodePort;
 using Module = dyno::Module;
 using ComputeModule = dyno::ComputeModule;
+using TopologyModule = dyno::TopologyModule;
 using Pipeline = dyno::Pipeline;
 using GraphicsPipeline = dyno::GraphicsPipeline;
 using AnimationPipeline = dyno::AnimationPipeline;
@@ -40,7 +46,7 @@ void pybind_log(py::module& m)
 
 
 template<typename T>
-void declare_var(py::module& m, std::string& typestr) {
+void declare_var(py::module& m, std::string typestr) {
 	using Class = FVar<T>;
 	std::string pyclass_name = std::string("FVar") + typestr;
 	py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
@@ -52,15 +58,24 @@ void declare_var(py::module& m, std::string& typestr) {
 }
 
 template<typename T, DeviceType deviceType>
-void declare_array(py::module& m, std::string& typestr) {
-	using Class = FArray<T, deviceType>;
+void declare_array(py::module& m, std::string typestr) {
+	using Class = dyno::FArray<T, deviceType>;
+	using Parent = FBase;
 	std::string pyclass_name = std::string("Array") + typestr;
-	py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+}
+
+template<typename T>
+void declare_instance(py::module& m, std::string typestr) {
+	using Class = dyno::FInstance<T>;
+	using Parent = InstanceBase;
+	std::string pyclass_name = std::string("Instance") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("connect", &Class::connect)
 		.def("disconnect", &Class::disconnect);
 }
-
 
 template <typename TDataType>
 void declare_calculate_norm(py::module& m, std::string typestr) {
@@ -69,8 +84,17 @@ void declare_calculate_norm(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CalculateNorm") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_vec", &Class::inVec)
-		.def("out_norm", &Class::outNorm);
+		.def("in_vec", &Class::inVec, py::return_value_policy::reference)
+		.def("out_norm", &Class::outNorm, py::return_value_policy::reference);
+}
+
+template <typename TDataType>
+void declare_pointset(py::module& m, std::string typestr) {
+	using Class = dyno::PointSet<TDataType>;
+	using Parent = dyno::TopologyModule;
+	std::string pyclass_name = std::string("PointSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
 }
 
 void pybind_framework(py::module& m)
@@ -83,15 +107,31 @@ void pybind_framework(py::module& m)
 		.def("is_active", &Node::isActive)
 		.def("connect", &Node::connect)
 		.def("disconnect", &Node::disconnect)
+		.def("current_topology", &Node::currentTopology, py::return_value_policy::reference)
 		.def("graphics_pipeline", static_cast<std::shared_ptr<GraphicsPipeline> (Node::*)()>(&Node::graphicsPipeline))
 		.def("animation_pipeline", static_cast<std::shared_ptr<AnimationPipeline>(Node::*)()>(&Node::animationPipeline));
 
-	py::class_<NodePort, std::shared_ptr<NodePort>>(m, "NodePort");
+	py::class_<NodePort>(m, "NodePort");
+
+	py::class_<FBase, std::shared_ptr<FBase>>(m, "FBase")
+		.def("connect", &FBase::connect);
+
+	py::class_<InstanceBase, std::shared_ptr<InstanceBase>>(m, "FInstance");
 
 	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>());
 
+	py::class_<Pipeline, std::shared_ptr<Pipeline>>(m, "Pipeline")
+		.def("push_module", &Pipeline::pushModule);
+
+	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr());
+
+	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr());
+
 	py::class_<VisualModule, std::shared_ptr<VisualModule>>(m, "VisualModule")
+		.def(py::init<>());
+
+	py::class_<TopologyModule, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
 		.def(py::init<>());
 
 	py::class_<ComputeModule, std::shared_ptr<ComputeModule>>(m, "ComputeModule");
@@ -114,4 +154,11 @@ void pybind_framework(py::module& m)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
 
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
+
+	declare_pointset<dyno::DataType3f>(m, "3f");
+
+	declare_array<dyno::Vec3f, DeviceType::GPU>(m, "fg");
+
+	declare_instance<TopologyModule>(m, "");
+	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
 }
