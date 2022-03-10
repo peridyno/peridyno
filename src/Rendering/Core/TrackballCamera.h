@@ -17,6 +17,12 @@ namespace dyno
 		void translateToPoint(float x, float y) override;
 		void zoom(float amount) override;
 
+		//TODO: implement
+		void setEyePos(const Vec3f& p) override {};
+
+		//TODO: implement
+		void setTargetPos(const Vec3f& p) override {};
+
 		glm::mat4 getViewMat() override;
 		glm::mat4 getProjMat() override;
 

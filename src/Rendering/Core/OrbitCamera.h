@@ -18,6 +18,10 @@ namespace dyno
 
 		Vec3f getViewDir() const;
 		Vec3f getEyePos() const;
+		Vec3f getTargetPos() const;
+
+		void setEyePos(const Vec3f& p) override;
+		void setTargetPos(const Vec3f& p) override;
 
 		void getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const;
 
@@ -31,20 +35,24 @@ namespace dyno
 		Vec3f getPosition(float x, float y);
 		Quat1f getQuaternion(float x1, float y1, float x2, float y2);
 
-	public:
-		float mRegX;
-		float mRegY;
+		Quat1f getQuaternion(float yaw, float pitch) const;
 
-		float mRotAngle;
+	private:
+		float mRegX = 0.5f;
+		float mRegY = 0.5f;
+
+		//Auxiliary parameters to form a right-hand coordinate or left-hand side coordinate
+		float mRotAngle = 0.0f;
+		Vec3f mRotAxis = Vec3f(0.0f, 1.0f, 0.0f);
+
+		float mYaw = 0.0f;		//along Y
+		float mPitch = 0.0f;	//along axis X of the viewport coordinate system
+
 		float mFocusDist;
-		
-		float mYaw;	//along Y
-		float mPitch;	//along axis X of the viewport coordinate system
 
 		Vec3f mEyePos;
 		Vec3f mTargetPos;
-		Vec3f mRotAxis;
-
+		
 		float mFocusDistMax = 10.0f;
 		float mFocusDistMin = 0.1f;
 

@@ -56,8 +56,10 @@ set_target_properties(${LIB_NAME} PROPERTIES
     
 # target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
 target_link_libraries(${LIB_NAME} PUBLIC
-	Core Framework RenderCore GLRenderEngine ImWidgets imgui nodes
+	Core Framework RenderCore GLRenderEngine ImWidgets imgui
 	Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg)  
+
+target_link_libraries(${LIB_NAME} PRIVATE $<BUILD_INTERFACE:nodes>)  
 
 target_include_directories(${LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>	

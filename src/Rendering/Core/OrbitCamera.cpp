@@ -7,30 +7,75 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 
-
-
 namespace dyno
 {
-
 	OrbitCamera::OrbitCamera() 
 		: Camera()
 	{
 		mFocusDist = 3.0f;
-		mEyePos = Vec3f(1.2f, 0.8f, 2.f);;
-		mTargetPos = Vec3f(0, 0, 0);
-		mRotAngle = 0;
-		mRotAxis = Vec3f(0, 1, 0);
+		mEyePos = Vec3f(0.0f, 0.0f, 3.0f);
 		mFov = 0.90f;
 
-		mRegX = 0.5f;
-		mRegY = 0.5f;
-
-		mYaw = 0.0f;// M_PI / 2.0f;
-		mPitch = 0.0f;//M_PI / 4.0f;
+		this->setClipFar(20.0f);
 	}
 
 	Vec3f OrbitCamera::getEyePos() const {
 		return mEyePos;
+	}
+
+	Vec3f OrbitCamera::getTargetPos() const
+	{
+		return mEyePos + mFocusDist * getViewDir();
+	}
+
+	void OrbitCamera::setEyePos(const Vec3f& p)
+	{
+		Quat1f q(mRotAngle, mRotAxis);
+		q.w = -q.w;
+
+		//Camera coordinate system
+		Vec3f view = q.rotate(Vec3f(0, 0, 1));
+		Vec3f up = q.rotate(Vec3f(0, 1, 0));
+		Vec3f right = q.rotate(Vec3f(1, 0, 0));
+
+		Vec3f tarPos = getTargetPos();
+		
+		Vec3f ND = p - tarPos;
+
+		float d = ND.norm();
+		ND.normalize();
+		if (d > mFocusDistMax) {
+			mEyePos = tarPos - mFocusDistMax * ND;
+		}
+		else {
+			mEyePos = p;
+		}
+
+		mFocusDist = (mEyePos - tarPos).norm();
+		mPitch = acosf(-ND.dot(up)) - M_PI / 2.0f;
+		mYaw = -atan2f(ND.dot(right), ND.dot(view));
+	}
+
+	void OrbitCamera::setTargetPos(const Vec3f& p)
+	{
+		Quat1f q(mRotAngle, mRotAxis);
+		q.w = -q.w;
+
+		//Camera coordinate system
+		Vec3f view = q.rotate(Vec3f(0, 0, 1));
+		Vec3f up = q.rotate(Vec3f(0, 1, 0));
+		Vec3f right = q.rotate(Vec3f(1, 0, 0));
+
+		Vec3f tarPos = p;
+
+		Vec3f ND = mEyePos - tarPos;
+
+		float d = ND.norm();
+		ND.normalize();
+
+		mFocusDist = std::min(mFocusDistMax, (mEyePos - tarPos).norm());
+		mPitch = acosf(-ND.dot(up)) - M_PI / 2.0f;
+		mYaw = -atan2f(ND.dot(right), ND.dot(view));
 	}
 
 	void OrbitCamera::rotate(float dx, float dy)
@@ -38,16 +83,12 @@ namespace dyno
 		float newYaw = mYaw + dx;
 		float newPitch = mPitch + dy;
 
-		Quat1f oldQuat(mRotAngle, mRotAxis);
+		Quat1f oldQuat = getQuaternion(mYaw, mPitch);
 		oldQuat.w = -oldQuat.w;
 		Vec3f curViewdir = oldQuat.rotate(Vec3f(0, 0, -1));
-
 		Vec3f eyeCenter = mEyePos + mFocusDist * curViewdir;
 
-		Quat1f newQuat = Quat1f(newPitch, Vec3f(1.0f, 0.0f, 0.0f)) * Quat1f(newYaw, Vec3f(0.0f, 1.0f, 0.0f));
-
-		newQuat.toRotationAxis(mRotAngle, mRotAxis);
-
+		Quat1f newQuat = getQuaternion(newYaw, newPitch);
 		Quat1f q2 = newQuat;
 		q2.w = -q2.w;
 		Quat1f qFinal = q2;
@@ -62,22 +103,24 @@ namespace dyno
 	}
 
 	Vec3f OrbitCamera::getViewDir() const {
-		Quat1f q(mRotAngle, mRotAxis);
+		Quat1f q = getQuaternion(mYaw, mPitch);
 		q.w = -q.w;
-		Vec3f viewdir = q.rotate(Vec3f(0, 0, 1));
+
+		Vec3f viewdir = q.rotate(Vec3f(0, 0, -1));
 		return viewdir;
 	}
 
 	void OrbitCamera::getCoordSystem(Vec3f &view, Vec3f &up, Vec3f &right) const {
-		Quat1f q(mRotAngle, mRotAxis);
+		Quat1f q = getQuaternion(mYaw, mPitch);
 		q.w = -q.w;
-		view = q.rotate(Vec3f(0, 0, 1));
+
+		view = q.rotate(Vec3f(0, 0, -1));
 		up = q.rotate(Vec3f(0, 1, 0));
-		right = -view.cross(up);
+		right = view.cross(up);
 	}
 
 	void OrbitCamera::translate(const Vec3f translation) {
-		Quat1f q(mRotAngle, mRotAxis);
+		Quat1f q = getQuaternion(mYaw, mPitch);
 		q.w = -q.w;
 
 		Vec3f xax = q.rotate(Vec3f(1, 0, 0));
@@ -90,8 +133,10 @@ namespace dyno
 	}
 
 	void OrbitCamera::zoom(float amount) {
+		Quat1f oldQuat = getQuaternion(mYaw, mPitch);
+
 		// calculate the view direction
-		Quat1f oldQuat(mRotAngle, mRotAxis);
+		//Quat1f oldQuat(mRotAngle, mRotAxis);
 		oldQuat.w = -oldQuat.w;
 		Vec3f curViewdir = oldQuat.rotate(Vec3f(0, 0, -1));
 
@@ -134,6 +179,14 @@ namespace dyno
 		return Quat1f(rotangle, rotaxis);
 	}
 
+	Quat1f OrbitCamera::getQuaternion(float yaw, float pitch) const
+	{
+		Quat1f oldQuat = Quat1f(pitch, Vec3f(1.0f, 0.0f, 0.0f)) * Quat1f(yaw, Vec3f(0.0f, 1.0f, 0.0f));
+		oldQuat.toRotationAxis(float(mRotAngle), Vec3f(mRotAxis));
+
+		return oldQuat;
+	}
+
 	void OrbitCamera::registerPoint(float x, float y) {
 // 		mRegX = x;
 // 		mRegY = y;
@@ -148,7 +201,7 @@ namespace dyno
 		Vec3f rightDir;// = upDir.cross(viewDir).normalize();
 
 		getCoordSystem(viewDir, upDir, rightDir);
-		Vec3f targetPos = mEyePos - mFocusDist * viewDir;
+		Vec3f targetPos = mEyePos + mFocusDist * viewDir;
 
 		return glm::lookAt(mEyePos.data_, targetPos.data_, upDir.data_);
 	}

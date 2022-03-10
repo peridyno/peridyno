@@ -184,7 +184,7 @@ void VtkRenderEngine::initialize(int width, int height)
 
 	m_camera->setWidth(width);
 	m_camera->setHeight(height);
-	m_camera->registerPoint(0.5f, 0.5f);
+	m_camera->registerPoint(float(width) / 2, float(height) / 2);
 	m_camera->translateToPoint(0, 0);
 
 	m_camera->zoom(3.0f);

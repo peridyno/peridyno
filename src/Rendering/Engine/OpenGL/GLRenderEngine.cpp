@@ -87,15 +87,10 @@ namespace dyno
 		mShadowMap->initialize();
 		mRenderHelper->initialize();
 
-		m_camera->setWidth(width);
-		m_camera->setHeight(height);
-		m_camera->registerPoint(0.5f, 0.5f);
-		m_camera->translateToPoint(0, 0);
+		mCamera->setWidth(width);
+		mCamera->setHeight(height);
 
-		m_camera->zoom(3.0f);
-		m_camera->setClipNear(0.01f);
-		m_camera->setClipFar(20.0f);
-
+		mCamera->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
 	}
 
 	void GLRenderEngine::setupCamera()
@@ -103,10 +98,10 @@ namespace dyno
 		switch (mCameraType)
 		{
 		case dyno::Orbit:
-			m_camera = std::make_shared<OrbitCamera>();
+			mCamera = std::make_shared<OrbitCamera>();
 			break;
 		case dyno::TrackBall:
-			m_camera = std::make_shared<TrackballCamera>();
+			mCamera = std::make_shared<TrackballCamera>();
 			break;
 		default:
 			break;
@@ -125,8 +120,8 @@ namespace dyno
 
 	void GLRenderEngine::draw(dyno::SceneGraph* scene)
 	{
-		m_rparams.proj = m_camera->getProjMat();
-		m_rparams.view = m_camera->getViewMat();
+		m_rparams.proj = mCamera->getProjMat();
+		m_rparams.view = mCamera->getViewMat();
 
 		// Graphscrene draw
 		GLint fbo;
@@ -223,8 +218,8 @@ namespace dyno
 		m_rparams.viewport.w = w;
 		m_rparams.viewport.h = h;
 
-		m_camera->setWidth(w);
-		m_camera->setHeight(h);
+		mCamera->setWidth(w);
+		mCamera->setHeight(h);
 	}
 
 	std::string GLRenderEngine::name()
