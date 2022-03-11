@@ -9,7 +9,7 @@
 #include "PyQtGUI.h"
 #include "PyRigidBodySystem.h"
 
-#include "Test.h"
+
 
 // void init_GlutGUI(py::module &);
 // void init_Core(py::module &);
@@ -26,11 +26,5 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_qt_gui(m);
 	pybind_cloth(m);
 	pybind_rigid_body_system(m);
-
-	m.def("MyAdd", &MyAdd);
-
-	py::enum_ <Kind>(m, "king")
-		.value("dog", Dog)
-		.value("cat", Cat);
 	
 }
