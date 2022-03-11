@@ -196,20 +196,20 @@ bool Node::validateInputs()
 // 	addModule(m_context);
 // }
 
-std::unique_ptr<AnimationPipeline>& Node::animationPipeline()
+std::shared_ptr<AnimationPipeline> Node::animationPipeline()
 {
 	if (m_animation_pipeline == nullptr)
 	{
-		m_animation_pipeline = std::make_unique<AnimationPipeline>(this);
+		m_animation_pipeline = std::make_shared<AnimationPipeline>(this);
 	}
 	return m_animation_pipeline;
 }
 
-std::unique_ptr<GraphicsPipeline>& Node::graphicsPipeline()
+std::shared_ptr<GraphicsPipeline> Node::graphicsPipeline()
 {
 	if (m_render_pipeline == nullptr)
 	{
-		m_render_pipeline = std::make_unique<GraphicsPipeline>(this);
+		m_render_pipeline = std::make_shared<GraphicsPipeline>(this);
 	}
 	return m_render_pipeline;
 }

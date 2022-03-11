@@ -26,7 +26,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a particle-based fluid solver
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
-	fluid->addParticleEmitter(emitter);
+	emitter->connect(fluid->importParticleEmitters());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
@@ -49,7 +49,8 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a container
 	auto container = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	container->loadCube(Vec3f(0.0f), Vec3f(1.0), 0.02, true);
-	container->addParticleSystem(fluid);
+	
+	fluid->connect(container->importParticleSystems());
 
 	return scn;
 }

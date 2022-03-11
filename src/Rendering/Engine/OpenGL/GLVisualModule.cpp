@@ -1,5 +1,7 @@
 #include "GLVisualModule.h"
 
+#include "glad/glad.h"
+
 namespace dyno
 {
 	GLVisualModule::GLVisualModule()
@@ -11,6 +13,11 @@ namespace dyno
 	{
 		if (!this->isGLInitialized)
 		{
+			if (!gladLoadGL()) {
+				printf("Failed to load OpenGL context!");
+				exit(-1);
+			}
+
 			isGLInitialized = initializeGL();
 
 			if (!this->isGLInitialized)

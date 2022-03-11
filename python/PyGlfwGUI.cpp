@@ -1,11 +1,13 @@
-#include "PyGlutGUI.h"
+#include "PyGlfwGUI.h"
 
+#include "SceneGraph.h"
 #include "GlfwGUI/GlfwApp.h"
 
-void pybind_glut_gui(py::module& m)
+void pybind_glfw_gui(py::module& m)
 {
 	py::class_<dyno::GlfwApp>(m, "GLApp")
 		.def(py::init())
+		.def("set_scenegraph", &dyno::GlfwApp::setSceneGraph)
 		.def("create_window", &dyno::GlfwApp::createWindow)
 		.def("main_loop", &dyno::GlfwApp::mainLoop)
 		.def("name", &dyno::GlfwApp::name)
