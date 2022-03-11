@@ -180,16 +180,16 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 
 void VtkRenderEngine::initialize(int width, int height)
 {
-	m_camera = std::make_shared<OrbitCamera>();
+	mCamera = std::make_shared<OrbitCamera>();
 
-	m_camera->setWidth(width);
-	m_camera->setHeight(height);
-	m_camera->registerPoint(float(width) / 2, float(height) / 2);
-	m_camera->translateToPoint(0, 0);
+	mCamera->setWidth(width);
+	mCamera->setHeight(height);
+	mCamera->registerPoint(float(width) / 2, float(height) / 2);
+	mCamera->translateToPoint(0, 0);
 
-	m_camera->zoom(3.0f);
-	m_camera->setClipNear(0.01f);
-	m_camera->setClipFar(10.0f);
+	mCamera->zoom(3.0f);
+	mCamera->setClipNear(0.01f);
+	mCamera->setClipFar(10.0f);
 }
 
 void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
