@@ -2,13 +2,6 @@ import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()
 
-emitter = dyno.ParticleEmitterSquare3f()
-emitter.var_location().set_value(dyno.Vector3f([0.5, 0.5, 0.5]))
-scn.add_node(emitter)
-
-fluid = dyno.ParticleFluid3f()
-fluid.load_particles(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([0.2, 0.2, 0.2]), 0.005)
-scn.add_node(fluid)
 
 boundary = dyno.StaticBoundary3f()
 boundary.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1.0, 1.0, 1.0]), 0.02, True)
@@ -36,5 +29,5 @@ fluid.connect(boundary.import_particle_systems())
 
 app = dyno.GLApp()
 app.set_scenegraph(scn)
-app.create_window(800, 600)
+app.create_window(1280, 768)
 app.main_loop()
