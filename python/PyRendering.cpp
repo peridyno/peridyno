@@ -63,9 +63,10 @@ void declare_surface_visual_module(py::module& m, std::string typestr) {
 	using Parent = dyno::GLVisualModule;
 
 	std::string pyclass_name = std::string("GLSurfaceVisualModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>> (m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
+
 
 
 }

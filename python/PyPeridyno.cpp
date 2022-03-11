@@ -7,6 +7,8 @@
 #include "PyRendering.h"
 #include "PyCloth.h"
 #include "PyQtGUI.h"
+#include "PyRigidBodySystem.h"
+
 #include "Test.h"
 
 // void init_GlutGUI(py::module &);
@@ -23,6 +25,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_rendering(m);
 	pybind_qt_gui(m);
 	pybind_cloth(m);
+	pybind_rigid_body_system(m);
 
 	m.def("MyAdd", &MyAdd);
 

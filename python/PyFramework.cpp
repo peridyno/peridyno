@@ -14,6 +14,10 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/EdgeSet.h"
 
+#include "Module/TopologyMapping.h"
+
+#include "Mapping/DiscreteElementsToTriangleSet.h"
+
 #include "SceneGraph.h"
 #include "Log.h"
 
@@ -63,7 +67,8 @@ void declare_array(py::module& m, std::string typestr) {
 	using Parent = FBase;
 	std::string pyclass_name = std::string("Array") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
+		.def(py::init<>())
+		.def("set_elementCount", &Class::setElementCount);
 }
 
 template<typename T>
@@ -113,6 +118,24 @@ void declare_edgeSet(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("EdgeSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>());
+}
+
+template <typename TDataType>
+void declare_discrete_elements_to_triangle_set(py::module& m, std::string typestr) {
+	using Class = dyno::DiscreteElementsToTriangleSet<TDataType>;
+	using Parent = dyno::TopologyMapping;
+	std::string pyclass_name = std::string("DiscreteElementsToTriangleSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_discreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("out_triangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+}
+
+void declare_discrete_topology_mapping(py::module& m, std::string typestr) {
+	using Class = dyno::TopologyMapping;
+	using Parent = dyno::Module;
+	std::string pyclass_name = std::string("TopologyMapping") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 }
 
 void pybind_framework(py::module& m)
@@ -182,7 +205,9 @@ void pybind_framework(py::module& m)
 	declare_edgeSet<dyno::DataType3f>(m, "3f");
 	declare_triangleSet<dyno::DataType3f>(m, "3f");
 
-	
+	declare_discrete_topology_mapping(m, "3f");
+	declare_discrete_elements_to_triangle_set<dyno::DataType3f>(m, "3f");
+
 	declare_var<float>(m, "f");
 	declare_var<dyno::Vec3f>(m, "3f");
 
@@ -193,4 +218,7 @@ void pybind_framework(py::module& m)
 	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
 	declare_instance<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
 	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
+	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
+
+
 }

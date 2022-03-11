@@ -2,30 +2,30 @@ import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()
 
+rigid = dyno.RigidBodySystem3f()
+scn.add_node(rigid)
 
-boundary = dyno.StaticBoundary3f()
-boundary.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1.0, 1.0, 1.0]), 0.02, True)
-scn.add_node(boundary)
+rigidBody = dyno.RigidBodyInfo()
+rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
 
-calcNorm = dyno.CalculateNorm3f()
-colorMapper = dyno.ColorMapping3f()
+box = dyno.BoxInfo()
+box.center = dyno.Vector3f([0.5, 0.1, 0.5])
+box.halfLength = dyno.Vector3f([0.1, 0.1, 0.1])
+rigid.add_box(box, rigidBody, 1)
 
-pointRender = dyno.GLPointVisualModule3f()
-pointRender.set_color(dyno.Vector3f([1, 0, 0]))
-pointRender.set_colorMapMode(pointRender.ColorMapMode.PER_VERTEX_SHADER)
-pointRender.set_colorMapRange(0, 5)
+box.center = dyno.Vector3f([0.5, 0.3, 0.59])
+box.halfLength = dyno.Vector3f([0.1, 0.1, 0.1])
+rigid.add_box(box, rigidBody, 1)
 
-fluid.state_velocity().connect(calcNorm.in_vec())
-fluid.current_topology().connect(pointRender.in_pointSet())
-calcNorm.out_norm().connect(colorMapper.in_scalar())
-colorMapper.out_color().connect(pointRender.in_color())
+mapper = dyno.DiscreteElementsToTriangleSet3f()
+rigid.current_topology().connect(mapper.in_discreteElements())
+rigid.graphics_pipeline().push_module(mapper)
 
-fluid.graphics_pipeline().push_module(calcNorm)
-fluid.graphics_pipeline().push_module(colorMapper)
-fluid.graphics_pipeline().push_module(pointRender)
+sRender = dyno.GLSurfaceVisualModule3f()
+sRender.set_color(dyno.Vector3f([1, 1, 0]))
+mapper.out_triangleSet().connect(sRender.in_triangleSet())
+rigid.graphics_pipeline().push_module(sRender)
 
-emitter.connect(fluid.import_particles_emitters())
-fluid.connect(boundary.import_particle_systems())
 
 app = dyno.GLApp()
 app.set_scenegraph(scn)
