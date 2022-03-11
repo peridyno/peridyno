@@ -16,10 +16,7 @@ scn.add_node(boundary)
 
 calcNorm = dyno.CalculateNorm3f()
 colorMapper = dyno.ColorMapping3f()
-
 pointRender = dyno.GLPointVisualModule3f()
-pointRender.setColor(dyno.Vector3f([1, 0, 0]))
-
 
 fluid.state_velocity().connect(calcNorm.in_vec())
 

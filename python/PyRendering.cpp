@@ -5,7 +5,7 @@
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 #include "glad/glad.h"
-
+#include "Topology/TriangleSet.h"
 using namespace dyno;
 
 
@@ -34,17 +34,40 @@ void declare_color_mapping(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("in_scalar", &Class::inScalar, py::return_value_policy::reference)
-		.def("out_color", &Class::outColor, py::return_value_policy::reference);
+		.def("out_color", &Class::outColor, py::return_value_policy::reference)
+		.def("var_max", &Class::varMax, py::return_value_policy::reference);
 }
 
 void declare_point_visual_module(py::module& m, std::string typestr) {
 	using Class = dyno::GLPointVisualModule;
-	using Parent = dyno::VisualModule;
+	using Parent = dyno::GLVisualModule;
+
 	std::string pyclass_name = std::string("GLPointVisualModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("in_pointset", &Class::inPointSet, py::return_value_policy::reference)
+	py::class_<Class, Parent, std::shared_ptr<Class>> GLPV(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	GLPV.def(py::init<>())
+		.def("in_pointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("set_colorMapMode", &GLPointVisualModule::setColorMapMode)
+		.def("set_colorMapRange", &GLPointVisualModule::setColorMapRange)
 		.def("in_color", &Class::inColor, py::return_value_policy::reference);
+
+
+
+	py::enum_<GLPointVisualModule::ColorMapMode>(GLPV, "ColorMapMode")
+		.value("PER_OBJECT_SHADER", GLPointVisualModule::ColorMapMode::PER_OBJECT_SHADER)
+		.value("PER_VERTEX_SHADER", GLPointVisualModule::ColorMapMode::PER_VERTEX_SHADER);
+	
+}
+
+void declare_surface_visual_module(py::module& m, std::string typestr) {
+	using Class = dyno::GLSurfaceVisualModule;
+	using Parent = dyno::GLVisualModule;
+
+	std::string pyclass_name = std::string("GLSurfaceVisualModule") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>> (m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
+
+
 }
 
 void pybind_rendering(py::module& m)
@@ -77,4 +100,6 @@ void pybind_rendering(py::module& m)
 	declare_color_mapping<dyno::DataType3f>(m, "3f");
 
 	declare_point_visual_module(m, "3f");
+
+	declare_surface_visual_module(m, "3f");
 }

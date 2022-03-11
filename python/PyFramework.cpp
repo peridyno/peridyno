@@ -11,6 +11,8 @@
 #include "Module/ComputeModule.h"
 
 #include "Topology/PointSet.h"
+#include "Topology/TriangleSet.h"
+#include "Topology/EdgeSet.h"
 
 #include "SceneGraph.h"
 #include "Log.h"
@@ -95,6 +97,24 @@ void declare_pointset(py::module& m, std::string typestr) {
 		.def(py::init<>());
 }
 
+template <typename TDataType>
+void declare_triangleSet(py::module& m, std::string typestr) {
+	using Class = dyno::TriangleSet<TDataType>;
+	using Parent = dyno::EdgeSet<TDataType>;
+	std::string pyclass_name = std::string("TriangleSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+}
+
+template <typename TDataType>
+void declare_edgeSet(py::module& m, std::string typestr) {
+	using Class = dyno::EdgeSet<TDataType>;
+	using Parent = dyno::PointSet<TDataType>;
+	std::string pyclass_name = std::string("EdgeSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+}
+
 void pybind_framework(py::module& m)
 {
 	pybind_log(m);
@@ -104,6 +124,7 @@ void pybind_framework(py::module& m)
 		.def("set_name", &Node::setName)
 		.def("is_active", &Node::isActive)
 		.def("connect", &Node::connect)
+		.def("set_visible", &Node::setVisible)
 		.def("disconnect", &Node::disconnect)
 		.def("current_topology", &Node::currentTopology, py::return_value_policy::reference)
 		.def("graphics_pipeline", &Node::graphicsPipeline, py::return_value_policy::reference)
@@ -148,14 +169,20 @@ void pybind_framework(py::module& m)
 		.def("get_frame_number", &SceneGraph::getFrameNumber)
 		.def("set_gravity", &SceneGraph::setGravity)
 		.def("get_gravity", &SceneGraph::getGravity)
-		.def("get_lower_bound", &SceneGraph::getLowerBound)
 		.def("set_upper_bound", &SceneGraph::setUpperBound)
+		.def("get_upper_bound", &SceneGraph::getUpperBound)
+		.def("set_lower_bound", &SceneGraph::setLowerBound)
+		.def("get_lower_bound", &SceneGraph::getLowerBound)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
 
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 
-	declare_pointset<dyno::DataType3f>(m, "3f");
 
+	declare_pointset<dyno::DataType3f>(m, "3f");
+	declare_edgeSet<dyno::DataType3f>(m, "3f");
+	declare_triangleSet<dyno::DataType3f>(m, "3f");
+
+	
 	declare_var<float>(m, "f");
 	declare_var<dyno::Vec3f>(m, "3f");
 
@@ -164,4 +191,6 @@ void pybind_framework(py::module& m)
 
 	declare_instance<TopologyModule>(m, "");
 	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
+	declare_instance<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
+	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
 }
