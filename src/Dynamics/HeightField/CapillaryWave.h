@@ -70,13 +70,13 @@ namespace dyno
 
 		size_t gridPitch;
 
-		float horizon = 2.0f;			//水面初始高度
+		float horizon = 2.0f;			        //水面初始高度
 		float* mWeight;
 
 		DArray2D<Coord4> mHeight;				//高度场
-		DArray2D<Coord4> mDeviceGrid;		//当前动态区域状态
+		DArray2D<Coord4> mDeviceGrid;		    //当前动态区域状态
 		DArray2D<Coord4> mDeviceGridNext;
-		DArray2D<Coord4> mDisplacement;   // 位移场
+		DArray2D<Coord4> mDisplacement;         // 位移场
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
 
 	public:

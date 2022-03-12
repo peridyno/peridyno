@@ -40,6 +40,24 @@ namespace dyno
 		FBase* m_field = nullptr;
 	};
 
+
+	class QBoolFieldWidget2 : public QGroupBox
+	{
+		Q_OBJECT
+	public:
+		QBoolFieldWidget2(FBase* field);
+		~QBoolFieldWidget2() {};
+
+	Q_SIGNALS:
+		void fieldChanged();
+
+	public slots:
+		void changeValue2(int status);
+
+	private:
+		FBase* m_field = nullptr;
+	};
+
 	class QIntegerFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
@@ -132,6 +150,8 @@ namespace dyno
 		QGridLayout* m_scroll_layout;
 
 		std::vector<QWidget*> m_widgets;
+
+		Node* m_node;
 	};
 
 }

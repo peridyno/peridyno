@@ -430,18 +430,15 @@ namespace dyno
 		mNodeFlowView->setObjectName(QStringLiteral("tabEditor"));
 		nodeEditorDockWidget->setWidget(mNodeFlowView);
 
-
-
+		
 		//Set up property dock widget
 		PDockWidget *propertyDockWidget = new PDockWidget(tr(sets[2].name), this, Qt::WindowFlags(sets[2].flags));
 		propertyDockWidget->setWindowTitle("Property Editor");
 		propertyDockWidget->setWindowIcon(qtIcon);
 		addDockWidget(sets[2].area, propertyDockWidget);
-		//windowMenu->addMenu(moduleListDockWidget->colorSwatchMenu());
 		m_propertyWidget = new PPropertyWidget();
-//		m_propertyWidget->setOpenGLWidget(m_vtkOpenglWidget);
 		propertyDockWidget->setWidget(m_propertyWidget);
-
+		
 
 		PIODockWidget *consoleDockWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
 		consoleDockWidget->setWindowIcon(qtIcon);

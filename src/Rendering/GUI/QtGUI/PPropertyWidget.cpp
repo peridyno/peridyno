@@ -10,6 +10,7 @@
 
 #include "Common.h"
 
+
 #include <QGroupBox>
 #include <QLabel>
 #include <QCheckBox>
@@ -19,11 +20,13 @@
 #include <QRegularExpression>
 #include <QMessageBox>
 
+
 namespace dyno
 {
 	QBoolFieldWidget::QBoolFieldWidget(FBase* field)
 		: QGroupBox()
 	{
+
 		m_field = field;
 		FVar<bool>* f = TypeInfo::cast<FVar<bool>>(m_field);
 		if (f == nullptr)
@@ -51,7 +54,6 @@ namespace dyno
 		checkbox->setChecked(f->getData());
 	}
 
-
 	void QBoolFieldWidget::changeValue(int status)
 	{
 		FVar<bool>* f = TypeInfo::cast<FVar<bool>>(m_field);
@@ -77,6 +79,38 @@ namespace dyno
 
 		emit fieldChanged();
 	}
+
+
+	QBoolFieldWidget2::QBoolFieldWidget2(FBase* field)
+		: QGroupBox()
+	{
+
+
+		this->setStyleSheet("border:none");
+		QGridLayout* layout = new QGridLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		QLabel* name = new QLabel();
+		name->setFixedSize(160, 18);
+		name->setText(FormatFieldWidgetName(field->getObjectName()));
+		QCheckBox* checkbox = new QCheckBox();
+		//checkbox->setFixedSize(40, 18);
+		layout->addWidget(name, 0, 0);
+		layout->addWidget(checkbox, 0, 1);
+
+		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(changeValue2(int)));
+	
+	}
+	void QBoolFieldWidget2::changeValue2(int status)
+	{
+		printf("check----\n");
+		
+		emit fieldChanged();
+	}
+	
 
 	QIntegerFieldWidget::QIntegerFieldWidget(FBase* field)
 		: QGroupBox()
@@ -104,6 +138,7 @@ namespace dyno
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
+
 
 		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
 	}
@@ -349,13 +384,15 @@ namespace dyno
 //		clear();
 
 		updateContext(module);
+
 	}
 
 	void PPropertyWidget::showProperty(Node* node)
 	{
 //		clear();
-
+		m_node = node;
 		updateContext(node);
+
 	}
 
 	void PPropertyWidget::showBlockProperty(Qt::QtNode& block)
@@ -379,6 +416,9 @@ namespace dyno
 
 	void PPropertyWidget::updateDisplay()
 	{
+		printf("updateDisplay \n");
+
+	
 //		PVTKOpenGLWidget::getCurrentRenderer()->GetActors()->RemoveAllItems();
 //		SceneGraph::getInstance().draw();
 //		PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
@@ -394,7 +434,7 @@ namespace dyno
 		this->removeAllWidgets();
 
 		std::vector<FBase*>& fields = base->getParameters();
-
+		std::vector<FBase*>& fields2 = base->getAllFields();
 		for each (FBase* var in fields)
 		{
 			if (var != nullptr)
@@ -402,6 +442,26 @@ namespace dyno
 				if (var->getClassName() == std::string("FVar"))
 				{
 					this->addScalarFieldWidget(var);
+				}else if (var->getClassName() == std::string("FArray")){
+					this->addScalarFieldWidget(var);
+				}
+				else if (var->getClassName() == std::string("FArrayList")) {
+					this->addScalarFieldWidget(var);
+				}
+				else if (var->getClassName() == std::string("FInstance")) {
+					this->addScalarFieldWidget(var);
+				}
+			}
+		}
+	
+		for each (FBase * var in fields2)
+		{
+			if (var != nullptr)
+			{
+				if (var->getClassName() == std::string("FInstance"))
+				{
+					this->addScalarFieldWidget(var);
+					
 				}
 			}
 		}
@@ -432,6 +492,15 @@ namespace dyno
 		else if (template_name == std::string(typeid(Vec3f).name()))
 		{
 			this->addWidget(new QVector3FieldWidget(field));
+		}
+
+		std::string className = field->getClassName();
+		 if(className ==std::string("FInstance")) {
+			 field->promoteToOuput();
+			 printf("FInstance--------------\n");
+			 auto fw = new QBoolFieldWidget2(field);
+			 this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
+			 this->addWidget(fw);
 		}
 	}
 

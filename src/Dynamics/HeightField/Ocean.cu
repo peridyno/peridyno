@@ -46,19 +46,21 @@ namespace dyno
 	template<typename TDataType>
 	void Ocean<TDataType>::resetStates()
 	{
+		
 		auto m_patch = this->getOceanPatch();
+		if (m_patch != nullptr){
+			auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
 
-		m_patch->initialize();
+			auto patch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());
+	
+			float h = patch->getGridSpacing();
+			topo->setExtents(Nx * patch->width(), Ny * patch->height());
+			//topo->setGridSpacing(h);
+			topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
 
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
-
-		auto patch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());
-
-		float h = patch->getGridSpacing();
-		topo->setExtents(Nx * patch->width(), Ny * patch->height());
-		topo->setGridSpacing(h);
-		topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
-
+			tmpC = m_patch;
+		
+		}
 	}
 
 	__global__ void O_InitOceanWave(
@@ -124,8 +126,11 @@ namespace dyno
 	{
 		auto m_patch = this->getOceanPatch();
 
+		if (m_patch == NULL) {
+			m_patch = tmpC;
+		}
+
 		m_patch->animate(m_eclipsedTime);
-		m_patch->update();
 
 		m_eclipsedTime += dt;
 
@@ -144,7 +149,7 @@ namespace dyno
 		O_InitOceanWave << < blocksPerGrid, threadsPerBlock >> > (
 			topo->getDisplacement(),
 			topoPatch->getDisplacement());
-		
+		/*
 		auto capillaryWaves = this->getCapillaryWaves();
 		for(int i = 0; i < capillaryWaves.size(); i++){
 			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->currentTopology()->getDataPtr());
@@ -152,12 +157,13 @@ namespace dyno
 				topo->getDisplacement(),
 				topoCapillaryWave->getDisplacement());
 		}
-
+		*/
 	}
 
 	template<typename TDataType>
 	void Ocean<TDataType>::updateStates()
 	{
+
 		this->animate(0.016f);
 	}
 

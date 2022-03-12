@@ -296,7 +296,7 @@ namespace dyno {
 			mResolution, 
 			t, 
 			m_realPatchSize);
-
+        
 		cuExecute2D(make_uint2(mResolution, mResolution),
 			generateDispalcementKernel,
 			m_ht, 
@@ -306,13 +306,13 @@ namespace dyno {
 			mResolution, 
 			m_realPatchSize);
 
-//         generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
-//         generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
+         //generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
+        // generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
 
         cufftExecC2C(fftPlan, (float2*)m_ht.begin(), (float2*)m_ht.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dxt.begin(), (float2*)m_Dxt.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dzt.begin(), (float2*)m_Dzt.begin(), CUFFT_INVERSE);
-
+        
 		cuExecute2D(make_uint2(mResolution, mResolution),
 			O_UpdateDisplacement,
 			m_displacement,
@@ -320,6 +320,7 @@ namespace dyno {
 			m_Dxt,
 			m_Dzt,
 			mResolution);
+            
         //O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, mResolution);
     }
 

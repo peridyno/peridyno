@@ -17,6 +17,7 @@ using namespace dyno;
 
 std::shared_ptr<SceneGraph> createScene()
 {
+	
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto root = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512.0f, 8));
@@ -31,6 +32,8 @@ std::shared_ptr<SceneGraph> createScene()
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	root->graphicsPipeline()->pushModule(sRender);
+	
+
 
 	return scn;
 }

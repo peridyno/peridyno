@@ -43,7 +43,6 @@ namespace dyno
 		mDeviceGridNext.clear();
 		mHeight.clear();
 		mSource.clear();
-		//cudaFree(mWeight);
 	}
 
 	template <typename Coord>
