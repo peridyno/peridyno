@@ -11,8 +11,8 @@ namespace dyno
 		
 		TypeInfo::New<OceanPatch<DataType3f>>();
 		//TypeInfo::New<Ocean<DataType3f>>();
-		//TypeInfo::New<CapillaryWave<DataType3f>>();
-		printf("222222222222222dfdffsdfsdfdsfds\n");
+		TypeInfo::New<CapillaryWave<DataType3f>>();
+
 
 		
 	}

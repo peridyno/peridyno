@@ -10,7 +10,7 @@ namespace dyno
 	template<typename TDataType>
 	class CapillaryWave : public Node
 	{
-		//DECLARE_TCLASS(CapillaryWave, TDataType)
+		DECLARE_TCLASS(CapillaryWave, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -84,5 +84,5 @@ namespace dyno
 		//DEF_VAR_OUT(Real, TestOUT, "");
 	};
 
-	//IMPLEMENT_TCLASS(CapillaryWave, TDataType)
+	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
 }

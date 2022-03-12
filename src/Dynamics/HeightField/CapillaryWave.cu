@@ -43,7 +43,7 @@ namespace dyno
 		mDeviceGridNext.clear();
 		mHeight.clear();
 		mSource.clear();
-		cudaFree(mWeight);
+		//cudaFree(mWeight);
 	}
 
 	template <typename Coord>
@@ -470,5 +470,5 @@ namespace dyno
 		mDeviceGridNext = grid_helper;
 	}
 
-	//DEFINE_CLASS(CapillaryWave);
+	DEFINE_CLASS(CapillaryWave);
 }
