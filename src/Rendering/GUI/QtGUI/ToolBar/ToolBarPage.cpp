@@ -68,10 +68,10 @@ namespace dyno {
 		heightPage.label.push_back("OceanPach");
 		heightPage.ico.push_back("icon-realwave.svg");
 
-		heightPage.label.push_back("Wave 2");
+		heightPage.label.push_back("Ocean");
 		heightPage.ico.push_back("icon-realwave-cresplash.svg");
 
-		heightPage.label.push_back("Wave 3");
+		heightPage.label.push_back("CapillaryWave");
 		heightPage.ico.push_back("icon-realwave-objspash.svg");
 		//--------------------------------------------------
 		
