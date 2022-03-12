@@ -17,7 +17,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(Ocean, TDataType)
 
 	template<typename TDataType>
 	Ocean<TDataType>::Ocean()

@@ -19,5 +19,6 @@ namespace dyno
 		TypeInfo::New<SummationDensity<DataType3f>>();
 		TypeInfo::New<VariationalApproximateProjection<DataType3f>>();
 		//TypeInfo::New<BoundaryConstraint<DataType3f>>();
+
 	}
 }

@@ -8,7 +8,6 @@ namespace dyno
 #define BLOCKSIZE_X 16
 #define BLOCKSIZE_Y 16
 
-	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
 
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
@@ -471,5 +470,5 @@ namespace dyno
 		mDeviceGridNext = grid_helper;
 	}
 
-	DEFINE_CLASS(CapillaryWave);
+	//DEFINE_CLASS(CapillaryWave);
 }

@@ -53,12 +53,14 @@ if(PERIDYNO_Qt5_GUI)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
+			/WHOLEARCHIVE:dynoHeightField-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
+			/WHOLEARCHIVE:dynoHeightField-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()
