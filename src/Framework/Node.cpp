@@ -385,7 +385,7 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 	auto fType = field->getFieldType();
 	switch (field->getFieldType())
 	{
-	case FieldTypeEnum::Current:
+	case FieldTypeEnum::State:
 		ret = this->addField(field);
 		break;
 

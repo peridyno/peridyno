@@ -36,7 +36,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto ptRender = std::make_shared<GLSurfaceVisualModule>();
 	ptRender->setColor(Vec3f(0, 1, 1));
-	elastoplasticBody->getSurfaceNode()->currentTopology()->connect(ptRender->inTriangleSet());
+	elastoplasticBody->getSurfaceNode()->stateTopology()->connect(ptRender->inTriangleSet());
 	elastoplasticBody->getSurfaceNode()->graphicsPipeline()->pushModule(ptRender);
 
 	auto elasticBody = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
@@ -50,7 +50,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(1, 1, 1));
-	elasticBody->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+	elasticBody->getSurfaceNode()->stateTopology()->connect(sRender->inTriangleSet());
 	elasticBody->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
 
 	return scn;

@@ -32,7 +32,7 @@ int main()
 	bool useVTK = true;
 	auto sRender = std::make_shared<VtkSurfaceVisualModule>();
 	sRender->setColor(1, 1, 0);
-	bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
+	bunny->getSurfaceNode()->stateTopology()->connect(sRender->inTriangleSet());
 	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
 
 	GlfwApp window;

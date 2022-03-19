@@ -21,7 +21,7 @@ namespace dyno
 		this->statePosition()->connect(peri->inPosition());
 		this->stateVelocity()->connect(peri->inVelocity());
 		this->stateForce()->connect(peri->inForce());
-		this->currentRestShape()->connect(peri->inRestShape());
+		this->stateRestShape()->connect(peri->inRestShape());
 		this->animationPipeline()->pushModule(peri);
 
 		//Create a node for surface mesh rendering
@@ -29,11 +29,11 @@ namespace dyno
 		m_surfaceNode->addAncestor(this);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		m_surfaceNode->currentTopology()->setDataPtr(triSet);
+		m_surfaceNode->stateTopology()->setDataPtr(triSet);
 
 		//Set the topology mapping from PointSet to TriangleSet
 		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		surfaceMapping->setFrom(ptSet);
 		surfaceMapping->setTo(triSet);
 	}
@@ -47,7 +47,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ElasticBody<TDataType>::translate(Coord t)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->currentTopology()->getDataPtr())->translate(t);
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->stateTopology()->getDataPtr())->translate(t);
 
 		return ParticleSystem<TDataType>::translate(t);
 	}
@@ -55,7 +55,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ElasticBody<TDataType>::scale(Real s)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->currentTopology()->getDataPtr())->scale(s);
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->stateTopology()->getDataPtr())->scale(s);
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
@@ -63,7 +63,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticBody<TDataType>::updateTopology()
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();
 		pts.assign(this->statePosition()->getData());
 
@@ -86,24 +86,24 @@ namespace dyno
 
 		if (!this->statePosition()->isEmpty())
 		{
-			this->currentRestShape()->allocate();
-			auto nbrPtr = this->currentRestShape()->getDataPtr();
+			this->stateRestShape()->allocate();
+			auto nbrPtr = this->stateRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 
-			this->currentReferencePosition()->allocate();
-			this->currentReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
+			this->stateReferencePosition()->allocate();
+			this->stateReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
 
-			this->currentNeighborIds()->allocate();
-			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
+			this->stateNeighborIds()->allocate();
+			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
 		}
 	}
 
 	template<typename TDataType>
 	void ElasticBody<TDataType>::loadSurface(std::string filename)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->currentTopology()->getDataPtr())->loadObjFile(filename);
+		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->stateTopology()->getDataPtr())->loadObjFile(filename);
 	}
 
 

@@ -36,7 +36,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
 	fluid->connect(visualizer->importParticleSystem());
-// 	auto outTop = fluid->currentTopology()->promoteToOuput();
+// 	auto outTop = fluid->stateTopology()->promoteToOuput();
 // 	outTop->connect(visualizer->inPointSetIn());
 //	outTop->disconnect(visualizer->inPointSetIn());
 // 	

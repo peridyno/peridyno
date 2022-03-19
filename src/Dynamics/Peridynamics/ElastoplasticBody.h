@@ -37,7 +37,7 @@ namespace dyno
 	public:
 		FVar<Real> m_horizon;
 
-		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;

@@ -149,7 +149,7 @@ void pybind_framework(py::module& m)
 		.def("connect", &Node::connect)
 		.def("set_visible", &Node::setVisible)
 		.def("disconnect", &Node::disconnect)
-		.def("current_topology", &Node::currentTopology, py::return_value_policy::reference)
+		.def("current_topology", &Node::stateTopology, py::return_value_policy::reference)
 		.def("graphics_pipeline", &Node::graphicsPipeline, py::return_value_policy::reference)
 		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference)
 		.def("var_location", &Node::varLocation, py::return_value_policy::reference);

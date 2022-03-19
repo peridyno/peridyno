@@ -31,7 +31,7 @@ int main()
 	auto pointRenderer = std::make_shared<GLPointVisualModule>();
 	pointRenderer->setColor(Vec3f(1, 0.2, 1));
 	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-	bunny->currentTopology()->connect(pointRenderer->inPointSet());
+	bunny->stateTopology()->connect(pointRenderer->inPointSet());
 	bunny->stateVelocity()->connect(pointRenderer->inColor());
 	bunny->graphicsPipeline()->pushModule(pointRenderer);
 

@@ -62,7 +62,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	rigid->addTet(tet, rigidSphere);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	rigid->currentTopology()->connect(mapper->inDiscreteElements());
+	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();

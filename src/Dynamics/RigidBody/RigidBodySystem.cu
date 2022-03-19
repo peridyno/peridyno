@@ -21,15 +21,15 @@ namespace dyno
 		: Node(name)
 	{
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
-		this->currentTopology()->setDataPtr(std::make_shared<DiscreteElements<TDataType>>());
+		this->stateTopology()->setDataPtr(std::make_shared<DiscreteElements<TDataType>>());
 
 		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
-		this->currentTopology()->connect(elementQuery->inDiscreteElements());
+		this->stateTopology()->connect(elementQuery->inDiscreteElements());
 		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
 		this->animationPipeline()->pushModule(elementQuery);
 
 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
-		this->currentTopology()->connect(cdBV->inDiscreteElements());
+		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->animationPipeline()->pushModule(cdBV);
 
 		auto merge = std::make_shared<ContactsUnion<TDataType>>();
@@ -213,7 +213,7 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::resetStates()
 	{
-		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
+		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 
 		mDeviceBoxes.assign(mHostBoxes);
 		mDeviceSpheres.assign(mHostSpheres);
@@ -327,7 +327,7 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::updateTopology()
 	{
-		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->currentTopology()->getDataPtr());
+		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
