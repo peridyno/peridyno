@@ -22,19 +22,20 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class InputFieldTest : public Node
+	class GLPointVisualNode : public Node
 	{
-		DECLARE_TCLASS(InputFieldTest, TDataType)
+		DECLARE_TCLASS(GLPointVisualNode, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
-		InputFieldTest();
+		GLPointVisualNode();
+		~GLPointVisualNode() override;
 
 	public:
-		void updateStates() override;
+		void resetStates() override;
 
-		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
+		DEF_INSTANCE_IN(PointSet<TDataType>, Points, "A set of points");
+
+		DEF_ARRAY_IN(Coord, Vector, DeviceType::GPU, "");
 	};
-
-	IMPLEMENT_TCLASS(InputFieldTest, TDataType)
 };

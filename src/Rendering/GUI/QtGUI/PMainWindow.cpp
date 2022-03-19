@@ -234,7 +234,7 @@ namespace dyno
 		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
 		addToolBar(Qt::TopToolBarArea, tt);
 
-		QString mediaDir = "../../data/icon/";
+		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
 
 		auto convertIcon = [&](QString path) -> QIcon
 		{

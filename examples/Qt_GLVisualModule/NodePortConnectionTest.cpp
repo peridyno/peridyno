@@ -1,4 +1,4 @@
-#include "GLPointVisualNode.h"
+#include "NodePortConnectionTest.h"
 
 #include <Module/CalculateNorm.h>
 #include <GLPointVisualModule.h>
@@ -6,10 +6,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(GLPointVisualNode, TDataType)
+	IMPLEMENT_TCLASS(NodePortConnectionTest, TDataType)
 
 	template<typename TDataType>
-	GLPointVisualNode<TDataType>::GLPointVisualNode()
+	NodePortConnectionTest<TDataType>::NodePortConnectionTest()
 		: Node()
 	{
 		this->stateTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
@@ -60,13 +60,13 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	GLPointVisualNode<TDataType>::~GLPointVisualNode()
+	NodePortConnectionTest<TDataType>::~NodePortConnectionTest()
 	{
 		printf("GLPointVisualNode released \n");
 	}
 
 	template<typename TDataType>
-	void GLPointVisualNode<TDataType>::preUpdateStates()
+	void NodePortConnectionTest<TDataType>::preUpdateStates()
 	{
 		if (this->getParticleSystem() == nullptr) {
 			this->stateVector()->setElementCount(0);
@@ -96,10 +96,10 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GLPointVisualNode<TDataType>::resetStates()
+	void NodePortConnectionTest<TDataType>::resetStates()
 	{
 		this->update();
 	}
 
-	DEFINE_CLASS(GLPointVisualNode);
+	DEFINE_CLASS(NodePortConnectionTest);
 }

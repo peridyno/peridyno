@@ -20,14 +20,14 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class GLPointVisualNode : public Node
+	class NodePortConnectionTest : public Node
 	{
-		DECLARE_TCLASS(GLPointVisualNode, TDataType)
+		DECLARE_TCLASS(NodePortConnectionTest, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
-		GLPointVisualNode();
-		~GLPointVisualNode() override;
+		NodePortConnectionTest();
+		~NodePortConnectionTest() override;
 
 	public:
 		void resetStates() override;
