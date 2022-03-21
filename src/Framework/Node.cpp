@@ -143,7 +143,9 @@ void Node::update()
 
 void Node::reset()
 {
-	this->resetStates();
+	if (this->validateInputs()) {
+		this->resetStates();
+	}
 }
 
 void Node::postUpdateStates()

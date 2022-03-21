@@ -15,29 +15,28 @@
  */
 
 #pragma once
-#include "Node.h"
+#include <Node.h>
 
-#include "Topology/PointSet.h"
+#include <Topology/TriangleSet.h>
 
 namespace dyno
 {
 	template<typename TDataType>
-	class GLPointVisualNode : public Node
+	class GLSurfaceVisualNode : public Node
 	{
-		DECLARE_TCLASS(GLPointVisualNode, TDataType)
+		DECLARE_TCLASS(GLSurfaceVisualNode, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
-		GLPointVisualNode();
-		~GLPointVisualNode() override;
+		GLSurfaceVisualNode();
+		~GLSurfaceVisualNode() override;
 
 	public:
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "A set of triangles");
+
+	protected:
 		void resetStates() override;
-
-		DEF_INSTANCE_IN(PointSet<TDataType>, Points, "A set of points");
-
-		DEF_ARRAY_IN(Coord, Vector, DeviceType::GPU, "");
 	};
 
-	IMPLEMENT_TCLASS(GLPointVisualNode, TDataType)
+	IMPLEMENT_TCLASS(GLSurfaceVisualNode, TDataType)
 };

@@ -25,15 +25,6 @@ namespace dyno
 
 		void updateTopology() override;
 
-		bool translate(Coord t) override;
-		bool scale(Real s) override;
-
-		void loadSurface(std::string filename);
-
-		std::shared_ptr<PointSetToPointSet<TDataType>> getTopologyMapping();
-
-		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
-
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 

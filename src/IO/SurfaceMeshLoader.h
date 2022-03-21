@@ -23,7 +23,7 @@ namespace dyno
 		DEF_VAR(std::string, FileName, "", "");
 
 	public:
-		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangularMesh, "");
+		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 
 	protected:
 		void resetStates() override;

@@ -2,14 +2,12 @@
 
 #include <SceneGraph.h>
 #include <Peridynamics/ElasticBody.h>
-#include <Peridynamics/Module/ElasticityModule.h>
 
 #include <ParticleSystem/StaticBoundary.h>
 
 // Internal OpenGL Renderer
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
-#include <GLSurfaceVisualModule.h>
 
 using namespace dyno;
 
@@ -23,8 +21,7 @@ int main()
 	auto bunny = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
 	bunny->connect(root->importParticleSystems());
 
-	bunny->loadParticles("../../data/bunny/bunny_points.obj");
-	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
+	bunny->loadParticles(getAssetPath() + "bunny/bunny_points.obj");
 	bunny->scale(1.0f);
 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
 	bunny->setVisible(true);

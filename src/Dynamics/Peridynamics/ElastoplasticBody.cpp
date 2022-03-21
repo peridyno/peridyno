@@ -55,17 +55,6 @@ namespace dyno
 		this->stateVelocity()->connect(m_visModule->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 		this->animationPipeline()->pushModule(m_visModule);
-
-		m_surfaceNode = std::make_shared<Node>("Mesh");
-		m_surfaceNode->addAncestor(this);
-		m_surfaceNode->setVisible(false);
-
-		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		m_surfaceNode->stateTopology()->setDataPtr(triSet);
-
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
-		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(ptSet, triSet);
-		this->addTopologyMapping(surfaceMapping);
 	}
 
 	template<typename TDataType>
@@ -106,28 +95,6 @@ namespace dyno
 		{
 			(*iter)->apply();
 		}
-	}
-
-	template<typename TDataType>
-	void ElastoplasticBody<TDataType>::loadSurface(std::string filename)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->stateTopology()->getDataPtr())->loadObjFile(filename);
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::translate(Coord t)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->stateTopology()->getDataPtr())->translate(t);
-
-		return ParticleSystem<TDataType>::translate(t);
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::scale(Real s)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->stateTopology()->getDataPtr())->scale(s);
-
-		return ParticleSystem<TDataType>::scale(s);
 	}
 
 	DEFINE_CLASS(ElastoplasticBody);
