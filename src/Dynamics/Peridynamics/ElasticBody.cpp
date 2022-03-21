@@ -3,7 +3,9 @@
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
-#include "Peridynamics/Peridynamics.h"
+
+#include "Module/Peridynamics.h"
+
 #include "SharedFunc.h"
 
 namespace dyno

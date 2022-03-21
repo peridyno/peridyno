@@ -7,9 +7,9 @@
 
 #include "Topology/NeighborPointQuery.h"
 
-#include "Peridynamics/ElasticityModule.h"
-#include "Peridynamics/Peridynamics.h"
-#include "Peridynamics/FixedPoints.h"
+#include "Module/ElasticityModule.h"
+#include "Module/Peridynamics.h"
+#include "Module/FixedPoints.h"
 
 #include "SharedFunc.h"
 

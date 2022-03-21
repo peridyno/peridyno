@@ -2,7 +2,8 @@
 
 #include <SceneGraph.h>
 #include <Peridynamics/ElasticBody.h>
-#include <Peridynamics/ElasticityModule.h>
+#include <Peridynamics/Module/ElasticityModule.h>
+
 #include <ParticleSystem/StaticBoundary.h>
 
 // Internal OpenGL Renderer

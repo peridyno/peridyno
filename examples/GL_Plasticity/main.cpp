@@ -8,12 +8,15 @@
 
 #include <Peridynamics/ElastoplasticBody.h>
 #include <Peridynamics/ElasticBody.h>
-#include <Peridynamics/ElasticityModule.h>
+
+#include <Peridynamics/Module/ElasticityModule.h>
 
 #include <RigidBody/RigidBody.h>
 
 #include <GLRenderEngine.h>
 #include <GLSurfaceVisualModule.h>
+
+#include <SurfaceMeshLoader.h>
 
 using namespace std;
 using namespace dyno;
@@ -29,10 +32,13 @@ std::shared_ptr<SceneGraph> createScene()
 
 	elastoplasticBody->setVisible(false);
   	elastoplasticBody->loadParticles(Vec3f(-1.1), Vec3f(1.15), 0.1);
-  	elastoplasticBody->loadSurface("../../data/standard/standard_cube20.obj");
 	elastoplasticBody->scale(0.05);
 	elastoplasticBody->translate(Vec3f(0.3, 0.2, 0.5));
 	elastoplasticBody->getSurfaceNode()->setVisible(true);
+
+	auto surfaceMesh = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
+	surfaceMesh->varFileName()->setValue("../../data/standard/standard_cube20.obj");
+	//elastoplasticBody->loadSurface("../../data/standard/standard_cube20.obj");
 
 	auto ptRender = std::make_shared<GLSurfaceVisualModule>();
 	ptRender->setColor(Vec3f(0, 1, 1));

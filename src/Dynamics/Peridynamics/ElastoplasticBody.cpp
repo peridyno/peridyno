@@ -1,11 +1,13 @@
 #include "ElastoplasticBody.h"
-#include "ElastoplasticityModule.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
-#include "Peridynamics.h"
-#include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
+
+#include "Mapping/PointSetToPointSet.h"
+
+#include "Module/Peridynamics.h"
+#include "Module/ElastoplasticityModule.h"
 
 #include "ParticleSystem/PositionBasedFluidModel.h"
 #include "ParticleSystem/ParticleIntegrator.h"
