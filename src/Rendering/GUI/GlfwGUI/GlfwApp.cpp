@@ -299,6 +299,16 @@ namespace dyno
 	}
 
 
+	void GlfwApp::turnOnVSync()
+	{
+		glfwSwapInterval(1);
+	}
+
+	void GlfwApp::turnOffVSync()
+	{
+		glfwSwapInterval(0);
+	}
+
 	void GlfwApp::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
