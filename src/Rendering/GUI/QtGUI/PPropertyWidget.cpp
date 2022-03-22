@@ -10,7 +10,6 @@
 
 #include "Common.h"
 
-
 #include <QGroupBox>
 #include <QLabel>
 #include <QCheckBox>
@@ -390,7 +389,6 @@ namespace dyno
 	void PPropertyWidget::showProperty(Node* node)
 	{
 //		clear();
-		m_node = node;
 		updateContext(node);
 
 	}
@@ -418,10 +416,9 @@ namespace dyno
 	{
 		printf("updateDisplay \n");
 
-	
-//		PVTKOpenGLWidget::getCurrentRenderer()->GetActors()->RemoveAllItems();
-//		SceneGraph::getInstance().draw();
-//		PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
+		//PVTKOpenGLWidget::getCurrentRenderer()->GetActors()->RemoveAllItems();
+		//SceneGraph::getInstance().updateGraphicsContext();
+		//PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
 	}
 
 	void PPropertyWidget::updateContext(OBase* base)
@@ -497,7 +494,7 @@ namespace dyno
 		std::string className = field->getClassName();
 		 if(className ==std::string("FInstance")) {
 			 field->promoteToOuput();
-			 printf("FInstance--------------\n");
+			 //printf("FInstance--------------\n");
 			 auto fw = new QBoolFieldWidget2(field);
 			 this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
 			 this->addWidget(fw);

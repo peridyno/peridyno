@@ -151,7 +151,6 @@ namespace dyno
 
 		std::vector<QWidget*> m_widgets;
 
-		Node* m_node;
 	};
 
 }

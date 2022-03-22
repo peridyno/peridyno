@@ -37,20 +37,32 @@ std::shared_ptr<SceneGraph> createScene()
 	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
 	fluid->connect(visualizer->importParticleSystem());
  	
-	//auto outTop = visualizer->currentTopology()->promoteToInput();
+	
 	//fluid->stateForce()->promoteToOuput();
  	//outTop->connect(visualizer->inPointSetIn());
 	//outTop->disconnect(visualizer->inPointSetIn());
+
+
+	
+	QtApp window;
+	window.setSceneGraph(scn);
+	//auto outTop = visualizer->currentTopology()->promoteToInput();
+	window.createWindow(1024, 768);
+
+	fluid->stateVelocity()->promoteToInput();
+
+	window.mainLoop();
+
 
 	return scn;
 }
 
 int main()
 {
-	QtApp window;
+	/*QtApp window;
 	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
-	window.mainLoop();
+	window.mainLoop();*/
 	createScene();
 	return 0;
 }
