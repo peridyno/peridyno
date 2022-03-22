@@ -31,7 +31,6 @@ namespace dyno
 	class Camera;
 
 	class SceneGraph;
-	class GLRenderTarget;
 	//HE Xiaowei
 
 	struct Picture;
@@ -69,7 +68,6 @@ namespace dyno
 		GLRenderHelper*	mRenderHelper;
 
 		//HE Xiaowei
-		GLRenderTarget* mRenderTarget;
 		CameraType mCameraType = CameraType::Orbit;
 
 	};

@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-//	IMPLEMENT_CLASS_1(LinearDamping, TDataType)
+//	IMPLEMENT_TCLASS(LinearDamping, TDataType)
 
 	template<typename TDataType>
 	LinearDamping<TDataType>::LinearDamping()

@@ -47,7 +47,7 @@ namespace Qt
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}
-
+	
 		this->setRegistry(ret);
 
 		auto scn = dyno::SceneGraphFactory::instance()->active();
@@ -56,6 +56,8 @@ namespace Qt
 		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNodeToSceneGraph);
+
+		
 	}
 
 
@@ -94,7 +96,7 @@ namespace Qt
 		{
 			addNodeWidget(it.get());
 		}
-
+		
 		auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
 		{
 			auto inId = nd->objectId();
@@ -178,7 +180,7 @@ namespace Qt
 				}
 			}
 		};
-
+	
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			createNodeConnections(it.get());
@@ -191,7 +193,9 @@ namespace Qt
 			auto node_ptr = it.get();
 			std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
 		}
+
 		nodeMap.clear();
+		
 	}
 
 	void QtNodeFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)
@@ -201,6 +205,7 @@ namespace Qt
 
 	void QtNodeFlowScene::addNodeToSceneGraph(QtNode& n)
 	{
+		
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
 		printf("Use count before add: %d \n", nodeData->getNode().use_count());
@@ -210,7 +215,50 @@ namespace Qt
 			scn->addNode(nodeData->getNode());
 		}
 
-		printf("Use count after add: %d \n", nodeData->getNode().use_count());
+		printf("Use count after add: %d \n", nodeData->getNode().use_count());	
+	}
+
+
+	void QtNodeFlowScene::addNodeByString(std::string NodeName) {
+		std::cout << NodeName << std::endl;
+
+		auto node_obj = dyno::Object::createObject(NodeName);
+		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+		auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
+	
+		if (dat != nullptr) {
+			auto scn = dyno::SceneGraphFactory::instance()->active();
+			scn->addNode(dat->getNode());	
+		}
+		else {
+			std::cout << "nullptr" << std::endl;
+		}
+		int mId;
+		auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
+		{
+			mId = m->objectId();
+
+			auto type = std::make_unique<QtNodeWidget>(m);
+
+			auto& node = this->createNode(std::move(type));
+
+			QPointF posView(m->bx(), m->by());
+
+			node.nodeGraphicsObject().setPos(posView);
+
+			this->nodePlaced(node);
+		};
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		int x = 0;
+		for (auto it = scn->begin(); it != scn->end(); it++)
+		{
+			if(x== mId){
+				addNodeWidget(it.get());
+				break;
+			}
+			x++;
+		}
+		addNodeWidget(dat->getNode());
 	}
 
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)

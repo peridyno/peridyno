@@ -6,10 +6,8 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QLineEdit>
-#include <QSlider>
-#include <QScrollBar>
 #include <QIntValidator>
-
+#include <QDebug>
 namespace dyno
 {
 	PAnimationWidget::PAnimationWidget(QWidget *parent) : 
@@ -24,39 +22,55 @@ namespace dyno
 		QLineEdit* startFrame		= new QLineEdit();
 		QLineEdit* endFrame			= new QLineEdit();
 
-		
-
-		m_start_spinbox = new QSpinBox();
-		m_start_spinbox->setFixedSize(60, 25);
-		m_start_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
 		m_end_spinbox = new QSpinBox();
 		m_end_spinbox->setFixedSize(60, 25);
 		m_end_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		m_end_spinbox->setMaximum(99999);
-		m_end_spinbox->setValue(999);
+		m_end_spinbox->setValue(1);
+	
+		QGridLayout* GLayout = new QGridLayout;
 
-		m_sim_scrollbar = new QScrollBar(Qt::Horizontal, this);
-		m_sim_scrollbar->setFixedHeight(25);
-		m_sim_scrollbar->setPageStep(999);
+		m_slider = new PAnimationQSlider(this);
+		
+		QLabel* label1 = new QLabel("0", this);
+		QLabel* label2 = new QLabel("50", this);
+		QLabel* label3 = new QLabel("100", this);
+		QLabel* label4 = new QLabel("150", this);
+		QLabel* label5 = new QLabel("200", this);
 
-		frameLayout->addWidget(m_start_spinbox, 0, 0);
-		frameLayout->addWidget(m_sim_scrollbar, 0, 1);
-		frameLayout->addWidget(m_end_spinbox, 0, 2);
+		frameLayout->addWidget(label1, 1, 0,1,1, Qt::AlignTop | Qt::AlignLeft);
+		frameLayout->addWidget(label2, 1, 1,1,1, Qt::AlignTop | Qt::AlignHCenter);
+		frameLayout->addWidget(label3, 1, 2,1,2, Qt::AlignTop | Qt::AlignHCenter);
+		frameLayout->addWidget(label4, 1, 4,1,1, Qt::AlignTop | Qt::AlignHCenter);
+		frameLayout->addWidget(label5, 1, 5,1,1, Qt::AlignTop | Qt::AlignRight);
+		
+	
+		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
+		//frameLayout->addWidget(m_end_spinbox, 0, 4);
 
+		connect(m_slider, &PAnimationQSlider::valueChanged, m_end_spinbox,
+			[&]() {
+				m_end_spinbox->setValue(m_slider->value());
+			}
+		);
+
+		void(QSpinBox:: * spSignal)(int) = &QSpinBox::valueChanged;
+		connect(m_end_spinbox, spSignal, m_slider, &QSlider::setValue);
+	
 		QGridLayout* operationLayout = new QGridLayout();
 
 		m_startSim = new QPushButton("Start");
 		m_resetSim = new QPushButton("Reset");
-		operationLayout->addWidget(m_startSim, 0, 0);
-		operationLayout->addWidget(m_resetSim, 0, 1);
+
+		operationLayout->addWidget(m_end_spinbox, 0, 0);
+		operationLayout->addWidget(m_startSim, 0, 1);
+		operationLayout->addWidget(m_resetSim, 0, 2);
 
 		m_startSim->setCheckable(true);
 
 		layout->addLayout(frameLayout, 10);
 		layout->addLayout(operationLayout, 1);
-
-
+		
 		connect(m_startSim, SIGNAL(released()), this, SLOT(toggleSimulation()));
 		connect(m_resetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(PSimulationThread::instance(), SIGNAL(finished()), this, SLOT(simulationFinished()));
@@ -98,5 +112,5 @@ namespace dyno
 		m_startSim->setText("Finished");
 		m_startSim->setDisabled(true);
 	}
-
+	
 }

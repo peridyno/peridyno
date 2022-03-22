@@ -79,6 +79,14 @@ namespace gl
 		glCheckError();
 	}
 
+	void Texture2D::dump(void* pixels)
+	{
+		glBindTexture(target, id);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glGetTexImage(target, 0, internalFormat, type, pixels);
+		glCheckError();
+	}
+
 
 	void Texture2D::clear(void* value)
 	{

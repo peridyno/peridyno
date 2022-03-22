@@ -103,7 +103,7 @@
 #include "Toolbar/SubGroup.h"
 #include "Toolbar/StyleTools.h"
 #include "Toolbar/Builder.h"
-
+#include "ToolBar/ToolBarPage.h"
 #include "Platform.h"
 
 
@@ -187,10 +187,11 @@ namespace dyno
 		centralWidget->setLayout(mainLayout);
 
 		//Setup views
+		
 		QTabWidget* tabWidget = new QTabWidget();
 		tabWidget->setObjectName(QStringLiteral("tabWidget"));
 		tabWidget->setGeometry(QRect(140, 60, 361, 241));
-
+		
 // 		//VTK-based visualization widget
 // 		m_vtkOpenglWidget = new PVTKOpenGLWidget();
 // 		m_vtkOpenglWidget->setObjectName(QStringLiteral("tabView"));
@@ -212,21 +213,44 @@ namespace dyno
 // 		mOpenGLWidget->layout()->setMargin(0);
 // 		tabWidget->addTab(mOpenGLWidget, QString());
 // 		tabWidget->setTabText(tabWidget->indexOf(mOpenGLWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
+		
 		mainLayout->addWidget(mOpenGLWidget, 1);
-
+		
 		//Setup animation widget
 		m_animationWidget = new PAnimationWidget(this);
 		m_animationWidget->layout()->setMargin(0);
-
+		
 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), mOpenGLWidget, SLOT(updateGraphicsContext()));
-
-// 		QWidget* viewWidget = new QWidget();
-// 		QHBoxLayout* hLayout = new QHBoxLayout();
-// 		viewWidget->setLayout(hLayout);
-// 		hLayout->addWidget(m_vtkOpenglWidget, 1);
-// 		hLayout->addWidget(m_flowView, 1);
+		
+ 	//	QWidget* viewWidget = new QWidget();
+ 	//	QHBoxLayout* hLayout = new QHBoxLayout();
+	//	viewWidget->setLayout(hLayout);
+ 	//	hLayout->addWidget(m_vtkOpenglWidget, 1);
+ 	//	hLayout->addWidget(m_flowView, 1);
 
  		mainLayout->addWidget(m_animationWidget, 0);
+		
+	}
+
+	void PMainWindow::showAboutMsg()
+
+	{
+		QMessageBox msgBox(this);
+
+		msgBox.setWindowTitle("About");
+
+		msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+
+		msgBox.setText("this is diagWindows");
+
+		msgBox.setIconPixmap(QPixmap(":/ico/res/ExcelReport.ico"));
+
+		msgBox.exec();
+
+	}
+
+	void PMainWindow::addNodeByName(std::string name) {
+		mNodeFlowView->node_scene->addNodeByString(name);
 	}
 
 	void PMainWindow::setupToolBar()
@@ -248,94 +272,42 @@ namespace dyno
 			return ico;
 		};
 
+		//Add ToolBar page
+		ToolBarPage m_toolBarPage;
+		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
 
-		tt::Page* filePage = tt->AddPage(QPixmap(mediaDir + "48px-Document-open.png"), "File");
-	
-		auto fg1 = filePage->AddGroup("");
-		//New action
-		QAction *actionNew = new QAction(QPixmap(mediaDir + "48px-Document-new.png"), "New...");
-		fg1->AddAction(QToolButton::DelayedPopup, actionNew);
-			
-		//Open action
-		QAction *actionOpen = new QAction(QPixmap(mediaDir + "48px-Document-open.png"), "Open");
-		fg1->AddAction(QToolButton::DelayedPopup, actionOpen);
-		//Save action
-		QAction *actionSave = new QAction(QPixmap(mediaDir + "48px-Document-save.png"), "Save");
-		fg1->AddAction(QToolButton::DelayedPopup, actionSave);
-		//Save as action
-		QAction *actionSaveAs = new QAction(QPixmap(mediaDir + "48px-Document-save-as.png"), "Save As");
-		fg1->AddAction(QToolButton::DelayedPopup, actionSaveAs);
+		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
+			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
 
-		tt::Page* editPage = tt->AddPage(QPixmap(mediaDir + "48px-Preferences-system.png"), "Edit");
-		tt::Group* e1 = editPage->AddGroup("Group 1");
-		QAction *actionSetting = new QAction(QPixmap(mediaDir + "48px-Preferences-system.png"), "Settings");
-		e1->AddAction(QToolButton::DelayedPopup, actionSetting);
+			//Add file、edit and help ToolBar tab
+			if (m_tbl.tabPageName == "File" || m_tbl.tabPageName == "Edit" || m_tbl.tabPageName == "Help") {
+				//Add main tab
+				tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
+				auto m_page = MainPage->AddGroup("");
 
-// 		PToolBar *tb = new PToolBar(tr("Tool Bar"), this);
-// 		toolBars.append(tb);
-// 		addToolBar(tb);
+				for (int j = 0; j < m_tbl.ico.size(); j++) {
+					//Add subtabs
+					QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
+					m_page->AddAction(QToolButton::DelayedPopup, art);
+				}
 
-		tt::Page* particlePage = tt->AddPage(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "Particle System ");
-		auto pg1 = particlePage->AddGroup("");
-		QAction *particle1 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-fill.svg"), "Particle 1");
-		pg1->AddAction(QToolButton::DelayedPopup, particle1);
+			}else{ // Add Particle System、 Height Field、 Finite Element、 Rigid Body ToolBar tab
+				//Add main tab
+				tt::Page* MainPage = tt->AddPage(convertIcon(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
+				auto m_page = MainPage->AddGroup("");
 
-		QAction *particle2 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-bitmap.svg"), "Particle 2");
-		pg1->AddAction(QToolButton::DelayedPopup, particle2);
+				for (int j = 0; j < m_tbl.ico.size(); j++) {
+					//Add subtabs
+					QAction* art = new QAction(convertIcon(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
+					m_page->AddAction(QToolButton::DelayedPopup, art);
 
-		QAction *particle3 = new QAction(convertIcon(mediaDir + "dyverso/icon-emi-circle.svg"), "Particle 3");
-		pg1->AddAction(QToolButton::DelayedPopup, particle3);
+					if (i == 2 || i == 5 || i == 3) {//add connect event 
+						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
+					}
+				}
+			}
+		}
 
-
-		tt::Page* heightPage = tt->AddPage(convertIcon(mediaDir + "icon-realwave.svg"), "Height Field ");
-		auto hg1 = heightPage->AddGroup("");
-		QAction *wave1 = new QAction(convertIcon(mediaDir + "icon-realwave.svg"), "Wave 1");
-		hg1->AddAction(QToolButton::DelayedPopup, wave1);
-
-		QAction *wave2 = new QAction(convertIcon(mediaDir + "icon-realwave-cresplash.svg"), "Wave 2");
-		hg1->AddAction(QToolButton::DelayedPopup, wave2);
-
-		QAction *wave3 = new QAction(convertIcon(mediaDir + "icon-realwave-objspash.svg"), "Wave 3");
-		hg1->AddAction(QToolButton::DelayedPopup, wave3);
-
-
-		//Finite element
-		tt::Page* femPage = tt->AddPage(convertIcon(mediaDir + "daemon/icon-demon-vortex.svg"), "Finite Element ");
-		auto femg1 = femPage->AddGroup("");
-		QAction *soft1 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-vortex.svg"), "Soft Body 1");
-		femg1->AddAction(QToolButton::DelayedPopup, soft1);
-
-		QAction *soft2 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-heater.svg"), "Soft Body 2");
-		femg1->AddAction(QToolButton::DelayedPopup, soft2);
-
-		QAction *soft3 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-ellipsoid.svg"), "Soft Body 3");
-		femg1->AddAction(QToolButton::DelayedPopup, soft3);
-
-		QAction *soft4 = new QAction(convertIcon(mediaDir + "daemon/icon-demon-stension.svg"), "Soft Body 4");
-		femg1->AddAction(QToolButton::DelayedPopup, soft4);
-
-
-
-		//Articulated rigids
-		tt::Page* artPage = tt->AddPage(convertIcon(mediaDir + "geometry/icon-geometry-cube.svg"), "Rigid Body ");
-		auto rigidg1 = artPage->AddGroup("");
-		QAction *art1 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-cube.svg"), "Rigid 1");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art1);
-
-		QAction *art2 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-cylinder.svg"), "Rigid 2");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art2);
-
-		QAction *art3 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-rocket.svg"), "Rigid 3");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art3);
-
-		QAction *art4 = new QAction(convertIcon(mediaDir + "geometry/icon-geometry-multibody.svg"), "Rigid 4");
-		rigidg1->AddAction(QToolButton::DelayedPopup, art4);
-
-
-		tt::Page* helpPage = tt->AddPage(QPixmap(mediaDir + "Help-browser.png"), "Help");
-		auto helpg1 = helpPage->AddGroup("");
-		QAction *help1 = new QAction(QPixmap(mediaDir + "Help-browser.png"), "Help");
-		helpg1->AddAction(QToolButton::DelayedPopup, help1);
 	}
 
 	void PMainWindow::setupStatusBar()
@@ -394,7 +366,7 @@ namespace dyno
 	void PMainWindow::showAbout()
 	{
 		QString versoin = QString("Version ") + QString::number(PERIDYNO_VERSION_MAJOR)+QString(".")+ QString::number(PERIDYNO_VERSION_MINOR)+QString(".")+QString::number(PERIDYNO_VERSION_PATCH);
-		QMessageBox::about(this, tr("PhysIKA Studio "), versoin);
+		QMessageBox::about(this, tr("Peridyno Studio "), versoin);
 		return;
 	}
 
@@ -510,6 +482,8 @@ namespace dyno
 	{
 		// 	QLichtThread* m_thread = new QLichtThread(openGLWidget->winId());
 		// 	m_thread->start();
+
+		
 	}
 
 }

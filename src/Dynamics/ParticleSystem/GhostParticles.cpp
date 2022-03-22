@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	//IMPLEMENT_CLASS_1(GhostParticles, TDataType)
+	//IMPLEMENT_TCLASS(GhostParticles, TDataType)
 
 	template<typename TDataType>
 	GhostParticles<TDataType>::GhostParticles()

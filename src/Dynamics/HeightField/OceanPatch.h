@@ -110,5 +110,5 @@ namespace dyno {
 
         cufftHandle fftPlan;
     };
-
+    IMPLEMENT_TCLASS(OceanPatch, TDataType)
 } 

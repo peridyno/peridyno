@@ -9,7 +9,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ElastoplasticityModule, TDataType)
+	IMPLEMENT_TCLASS(ElastoplasticityModule, TDataType)
 
 	template<typename TDataType>
 	ElastoplasticityModule<TDataType>::ElastoplasticityModule()

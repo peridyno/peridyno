@@ -80,7 +80,9 @@ namespace dyno
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
 
 	public:
-		DEF_VAR_IN(Real, TestIN, "");
-		DEF_VAR_OUT(Real, TestOUT, "");
+		//DEF_VAR_IN(Real, TestIN, "");
+		//DEF_VAR_OUT(Real, TestOUT, "");
 	};
+
+	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
 }

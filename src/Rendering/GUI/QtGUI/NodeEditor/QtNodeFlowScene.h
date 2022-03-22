@@ -23,6 +23,7 @@ public:
 
 	~QtNodeFlowScene();
 
+	void addNodeByString(std::string NodeName);
 
 public Q_SLOTS:
 	void showSceneGraph(SceneGraph* scn);
@@ -33,6 +34,7 @@ public Q_SLOTS:
 	void deleteNodeToSceneGraph(QtNode& n);
 private:
 	SceneGraph* m_scene = nullptr;
+
 };
 
 }

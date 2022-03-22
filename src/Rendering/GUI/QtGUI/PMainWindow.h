@@ -111,6 +111,8 @@ namespace dyno
 
 		void showMessage();
 
+		void addNodeByName(std::string name);
+
 	private:
 		void setCentralView();
 		void setupToolBar();
@@ -139,6 +141,10 @@ namespace dyno
 // 		PModuleFlowWidget*		m_moduleFlowView;
 // 		PModuleListWidget*		m_moduleListWidget;
 // 		PSceneGraphWidget*		m_scenegraphWidget;
+
+
+	public slots:
+		void showAboutMsg();
 	};
 
 }

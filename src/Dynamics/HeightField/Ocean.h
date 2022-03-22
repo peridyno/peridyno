@@ -69,4 +69,6 @@ namespace dyno
 		int Ny = 2;
 
 	};
+
+	IMPLEMENT_TCLASS(Ocean, TDataType)
 }
