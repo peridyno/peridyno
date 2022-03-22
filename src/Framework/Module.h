@@ -59,10 +59,6 @@ namespace dyno
 
 		virtual std::string getModuleType() { return "Module"; }
 
-		virtual std::weak_ptr<Module> next() { return m_module_next; }
-
-		void setNext(std::weak_ptr<Module> next_module) { m_module_next = next_module; }
-
 		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 	protected:
 		//TODO: remove this step
@@ -92,8 +88,8 @@ namespace dyno
 		 * @brief Two functions called at the beginning and end of update()
 		 *	used for debug
 		 */
-		virtual void updateStarted() {};
-		virtual void updateEnded() {};
+		virtual void updateStarted();
+		virtual void updateEnded();
 
 	private:
 		Node* m_node;
@@ -101,7 +97,5 @@ namespace dyno
 		bool m_initialized;
 
 		bool m_update_required = true;
-
-		std::weak_ptr<Module> m_module_next;
 	};
 }

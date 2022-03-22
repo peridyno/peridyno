@@ -69,7 +69,7 @@ if(PERIDYNO_PYTHON_BINDING)
     add_subdirectory(python)
 endif()
 
-option(PERIDYNO_TESTS "Enable python binding with pybind11" ON)
+option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
 if(PERIDYNO_TESTS)
     add_subdirectory(external/gtest)
     add_subdirectory(tests)
