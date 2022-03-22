@@ -80,7 +80,7 @@ namespace dyno
 	}
 
 
-	QBoolFieldWidget2::QBoolFieldWidget2(FBase* field)
+	QFInstanceWidget::QFInstanceWidget(FBase* field)
 		: QGroupBox()
 	{
 
@@ -103,9 +103,9 @@ namespace dyno
 		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(changeValue2(int)));
 	
 	}
-	void QBoolFieldWidget2::changeValue2(int status)
+	void QFInstanceWidget::changeValue(int status)
 	{
-		printf("check----\n");
+		printf("QFInstanceWidget check----\n");
 		
 		emit fieldChanged();
 	}
@@ -429,36 +429,24 @@ namespace dyno
 		}
 
 		this->removeAllWidgets();
-
-		std::vector<FBase*>& fields = base->getParameters();
-		std::vector<FBase*>& fields2 = base->getAllFields();
-		for each (FBase* var in fields)
+		
+		std::vector<FBase*>& fields = base->getAllFields();
+		for each (FBase * var in fields)
 		{
 			if (var != nullptr)
 			{
 				if (var->getClassName() == std::string("FVar"))
 				{
 					this->addScalarFieldWidget(var);
-				}else if (var->getClassName() == std::string("FArray")){
-					this->addScalarFieldWidget(var);
+				}
+				else if (var->getClassName() == std::string("FArray")) {
+					//this->addScalarFieldWidget(var);
 				}
 				else if (var->getClassName() == std::string("FArrayList")) {
-					this->addScalarFieldWidget(var);
+					//this->addScalarFieldWidget(var);
 				}
 				else if (var->getClassName() == std::string("FInstance")) {
-					this->addScalarFieldWidget(var);
-				}
-			}
-		}
-	
-		for each (FBase * var in fields2)
-		{
-			if (var != nullptr)
-			{
-				if (var->getClassName() == std::string("FInstance"))
-				{
-					this->addScalarFieldWidget(var);
-					
+					this->addInstanceFieldWidget(var);
 				}
 			}
 		}
@@ -491,19 +479,25 @@ namespace dyno
 			this->addWidget(new QVector3FieldWidget(field));
 		}
 
-		std::string className = field->getClassName();
-		 if(className ==std::string("FInstance")) {
-			 field->promoteToOuput();
-			 //printf("FInstance--------------\n");
-			 auto fw = new QBoolFieldWidget2(field);
-			 this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
-			 this->addWidget(fw);
-		}
+		
 	}
 
 	void PPropertyWidget::addArrayFieldWidget(FBase* field)
 	{
 
+	}
+
+	void PPropertyWidget::addInstanceFieldWidget(FBase* field)
+	{
+		std::string className = field->getClassName();
+		if (className == std::string("FInstance")) {
+			field->promoteToOuput();
+			field->promoteToInput();
+			//printf("FInstance--------------\n");
+			auto fw = new QFInstanceWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
+			this->addWidget(fw);
+		}
 	}
 
 }

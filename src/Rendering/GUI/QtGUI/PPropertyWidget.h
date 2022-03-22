@@ -41,18 +41,18 @@ namespace dyno
 	};
 
 
-	class QBoolFieldWidget2 : public QGroupBox
+	class QFInstanceWidget : public QGroupBox
 	{
 		Q_OBJECT
 	public:
-		QBoolFieldWidget2(FBase* field);
-		~QBoolFieldWidget2() {};
+		QFInstanceWidget(FBase* field);
+		~QFInstanceWidget() {};
 
 	Q_SIGNALS:
 		void fieldChanged();
 
 	public slots:
-		void changeValue2(int status);
+		void changeValue(int status);
 
 	private:
 		FBase* m_field = nullptr;
@@ -143,6 +143,7 @@ namespace dyno
 
 		void addScalarFieldWidget(FBase* field);
 		void addArrayFieldWidget(FBase* field);
+		void addInstanceFieldWidget(FBase* field);
 
 		QVBoxLayout* m_main_layout;
 		QScrollArea* m_scroll_area;
