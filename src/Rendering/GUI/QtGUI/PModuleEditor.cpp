@@ -51,6 +51,6 @@ namespace dyno
 			}			
 		}
 
-		connect(moduleFlowView->module_scene, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showBlockProperty);
+		connect(moduleFlowView->module_scene, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showNodeProperty);
 	}
 }

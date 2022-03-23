@@ -1,5 +1,7 @@
 #include "PLogWidget.h"
 
+#include "Platform.h"
+
 #include <QHeaderView>
 
 #include <QString>
@@ -213,7 +215,7 @@ namespace dyno
 
 	QIcon PLogWidget::getIcon(const QString& name)
 	{
-		return QIcon("../../data/icon/" + name + ".png");
+		return QIcon(QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/" + name + ".png");
 	}
 
 	QSize PLogWidget::sizeHint() const

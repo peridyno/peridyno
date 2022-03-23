@@ -15,7 +15,8 @@
  */
 #pragma once
 #include "Module/GroupModule.h"
-#include "NeighborData.h"
+
+#include "../NeighborData.h"
 
 namespace dyno
 {

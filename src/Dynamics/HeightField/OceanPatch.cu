@@ -166,7 +166,7 @@ namespace dyno {
         : Node(name)
     {
 	    auto heights = std::make_shared<HeightField<TDataType>>();
-	    this->currentTopology()->setDataPtr(heights);
+	    this->stateTopology()->setDataPtr(heights);
 
         std::ifstream input("../../data/windparam.txt", std::ios::in);
         for (int i = 0; i <= 12; i++)
@@ -200,7 +200,7 @@ namespace dyno {
     OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global)
     {
 	    auto heights = std::make_shared<HeightField<TDataType>>();
-	    this->currentTopology()->setDataPtr(heights);
+	    this->stateTopology()->setDataPtr(heights);
 
         mResolution          = size;
         mSpectrumWidth     = size + 1;
@@ -244,7 +244,7 @@ namespace dyno {
         m_displacement.resize(mResolution, mResolution);
         m_gradient.resize(mResolution, mResolution);
 
-	    auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+	    auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 	    Real h = m_realPatchSize / mResolution;
 	    topo->setExtents(mResolution, mResolution);
 	    topo->setGridSpacing(h);
@@ -296,7 +296,7 @@ namespace dyno {
 			mResolution, 
 			t, 
 			m_realPatchSize);
-
+        
 		cuExecute2D(make_uint2(mResolution, mResolution),
 			generateDispalcementKernel,
 			m_ht, 
@@ -306,13 +306,13 @@ namespace dyno {
 			mResolution, 
 			m_realPatchSize);
 
-//         generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
-//         generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
+         //generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
+        // generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
 
         cufftExecC2C(fftPlan, (float2*)m_ht.begin(), (float2*)m_ht.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dxt.begin(), (float2*)m_Dxt.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dzt.begin(), (float2*)m_Dzt.begin(), CUFFT_INVERSE);
-
+        
 		cuExecute2D(make_uint2(mResolution, mResolution),
 			O_UpdateDisplacement,
 			m_displacement,
@@ -320,6 +320,7 @@ namespace dyno {
 			m_Dxt,
 			m_Dzt,
 			mResolution);
+            
         //O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, mResolution);
     }
 
@@ -349,7 +350,7 @@ namespace dyno {
     template<typename TDataType>
     void OceanPatch<TDataType>::updateTopology()
     {
-        auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+        auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
         auto& shifts = topo->getDisplacement();
 

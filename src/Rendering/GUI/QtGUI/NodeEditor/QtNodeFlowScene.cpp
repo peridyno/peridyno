@@ -50,25 +50,24 @@ namespace Qt
 	
 		this->setRegistry(ret);
 
-		auto scn = dyno::SceneGraphFactory::instance()->active();
-		showSceneGraph(scn.get());
+		showSceneGraph();
 
 		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNodeToSceneGraph);
-
-		
 	}
-
 
 	QtNodeFlowScene::~QtNodeFlowScene()
 	{
 		clearScene();
 	}
 
-
-	void QtNodeFlowScene::showSceneGraph(SceneGraph* scn)
+	void QtNodeFlowScene::showSceneGraph()
 	{
+		clearScene();
+
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+
 		std::map<dyno::ObjectId, QtNode*> nodeMap;
 
 		//auto root = scn->getRootNode();
@@ -195,29 +194,36 @@ namespace Qt
 		}
 
 		nodeMap.clear();
-		
+	}
+
+	void QtNodeFlowScene::updateSceneGraph()
+	{
+		disableEditing();
+
+		showSceneGraph();
+
+		enableEditing();
 	}
 
 	void QtNodeFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)
 	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->setBlockCoord(newLocation.x(), newLocation.y());
+		}
 	}
 
 	void QtNodeFlowScene::addNodeToSceneGraph(QtNode& n)
 	{
-		
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
-		printf("Use count before add: %d \n", nodeData->getNode().use_count());
-
-		if (nodeData != nullptr) {
+		if (mEditingEnabled && nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->addNode(nodeData->getNode());
 		}
-
-		printf("Use count after add: %d \n", nodeData->getNode().use_count());	
 	}
-
 
 	void QtNodeFlowScene::addNodeByString(std::string NodeName) {
 		std::cout << NodeName << std::endl;
@@ -228,7 +234,7 @@ namespace Qt
 	
 		if (dat != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
-			scn->addNode(dat->getNode());	
+			scn->addNode(dat->getNode());
 		}
 		else {
 			std::cout << "nullptr" << std::endl;
@@ -261,17 +267,24 @@ namespace Qt
 		addNodeWidget(dat->getNode());
 	}
 
+	void QtNodeFlowScene::enableEditing()
+	{
+		mEditingEnabled = true;
+	}
+
+	void QtNodeFlowScene::disableEditing()
+	{
+		mEditingEnabled = false;
+	}
+
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
-		printf("Use count before: %d \n", nodeData->getNode().use_count());
-		if (nodeData != nullptr) {
+		if (mEditingEnabled && nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->deleteNode(nodeData->getNode());
 		}
-
-		printf("Use count after: %d \n", nodeData->getNode().use_count());
 	}
 
 }

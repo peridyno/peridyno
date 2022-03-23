@@ -258,7 +258,7 @@ namespace dyno
 		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
 		addToolBar(Qt::TopToolBarArea, tt);
 
-		QString mediaDir = "../../data/icon/";
+		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
 
 		auto convertIcon = [&](QString path) -> QIcon
 		{
@@ -430,52 +430,28 @@ namespace dyno
 		mNodeFlowView->setObjectName(QStringLiteral("tabEditor"));
 		nodeEditorDockWidget->setWidget(mNodeFlowView);
 
-
-
 		//Set up property dock widget
 		PDockWidget *propertyDockWidget = new PDockWidget(tr(sets[2].name), this, Qt::WindowFlags(sets[2].flags));
 		propertyDockWidget->setWindowTitle("Property Editor");
 		propertyDockWidget->setWindowIcon(qtIcon);
 		addDockWidget(sets[2].area, propertyDockWidget);
-		//windowMenu->addMenu(moduleListDockWidget->colorSwatchMenu());
 		m_propertyWidget = new PPropertyWidget();
-//		m_propertyWidget->setOpenGLWidget(m_vtkOpenglWidget);
 		propertyDockWidget->setWidget(m_propertyWidget);
-
-
+		
 		PIODockWidget *consoleDockWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
 		consoleDockWidget->setWindowIcon(qtIcon);
 		addDockWidget(sets[1].area, consoleDockWidget);
 		//windowMenu->addMenu(bottomDockWidget->colorSwatchMenu());
 
-		//Set up module widget
-// 		PDockWidget *moduleDockWidget = new PDockWidget(tr(sets[4].name), this, Qt::WindowFlags(sets[4].flags));
-// 		moduleDockWidget->setWindowTitle("Module List");
-// 		moduleDockWidget->setWindowIcon(qtIcon);
-// 		addDockWidget(sets[4].area, moduleDockWidget);
-// 		//windowMenu->addMenu(rightDockWidget->colorSwatchMenu());
-// 		m_moduleListWidget = new PModuleListWidget();
-// 		moduleDockWidget->setWidget(m_moduleListWidget);
-// 
-// 		PDockWidget *sceneDockWidget = new PDockWidget(tr(sets[0].name), this, Qt::WindowFlags(sets[0].flags));
-// 		sceneDockWidget->setWindowTitle("Scene Browser");
-// 		sceneDockWidget->setWindowIcon(qtIcon);
-// 		addDockWidget(sets[0].area, sceneDockWidget);
-// 		//windowMenu->addMenu(leftDockWidget->colorSwatchMenu());
-// 		m_scenegraphWidget = new PSceneGraphWidget();
-// 		sceneDockWidget->setWidget(m_scenegraphWidget);
-
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-// 		connect(m_scenegraphWidget, SIGNAL(notifyNodeSelected(Node*)), m_moduleListWidget, SLOT(updateModule(Node*)));
-// 		connect(m_scenegraphWidget, SIGNAL(notifyNodeSelected(Node*)), m_propertyWidget, SLOT(showProperty(Node*)));
-// 		connect(m_moduleListWidget, SIGNAL(notifyModuleSelected(Module*)), m_propertyWidget, SLOT(showProperty(Module*)));
-
-		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
+		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
 		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showNodeEditor);
+
+		connect(m_propertyWidget, &PPropertyWidget::fieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateSceneGraph);
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)

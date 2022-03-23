@@ -94,7 +94,7 @@ void pybind_rendering(py::module& m)
 		.def(py::init<>())
 		.def("set_node", [](std::shared_ptr<GLSurfaceVisualModuleWrap> r, std::shared_ptr<Node> n)
 			{
-				n->currentTopology()->connect(r->inTriangleSet());
+				n->stateTopology()->connect(r->inTriangleSet());
 				n->graphicsPipeline()->pushModule(r);
 			});
 

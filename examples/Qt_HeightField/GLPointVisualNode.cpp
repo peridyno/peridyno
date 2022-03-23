@@ -12,7 +12,7 @@ namespace dyno
 	GLPointVisualNode<TDataType>::GLPointVisualNode()
 		: Node()
 	{
-		this->currentTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->stateTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 
 		std::vector<Coord> vertList;
 
@@ -32,7 +32,7 @@ namespace dyno
 			}
 		}
 
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		ptSet->setPoints(vertList);
 
 		vertList.clear();
@@ -51,7 +51,7 @@ namespace dyno
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		ptRender->setColorMapRange(0, 5);
 
-		this->currentTopology()->connect(ptRender->inPointSet());
+		this->stateTopology()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 		
 		this->graphicsPipeline()->pushModule(calculateNorm);
@@ -70,7 +70,7 @@ namespace dyno
 		if (this->getParticles() == nullptr) {
 			this->stateVector()->setElementCount(0);
 
-			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 			auto& pts = ptSet->getPoints();
 			pts.resize(0);
 
@@ -82,7 +82,7 @@ namespace dyno
 
 		this->stateVector()->setElementCount(poss.size());
 
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();
 
 		if (poss.size() != pts.size())

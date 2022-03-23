@@ -15,7 +15,7 @@
 
 #include <ImColorbar.h>
 
-#include "GLPointVisualNode.h"
+#include "NodePortConnectionTest.h"
 
 using namespace std;
 using namespace dyno;
@@ -34,12 +34,14 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 	fluid->connect(boundary->importParticleSystems());
 
-	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
+	auto visualizer = scn->addNode(std::make_shared<NodePortConnectionTest<DataType3f>>());
 	fluid->connect(visualizer->importParticleSystem());
-// 	auto outTop = fluid->currentTopology()->promoteToOuput();
-// 	outTop->connect(visualizer->inPointSetIn());
-//	outTop->disconnect(visualizer->inPointSetIn());
-// 	
+ 	
+	//auto outTop = visualizer->stateTopology()->promoteToInput();
+	//fluid->stateForce()->promoteToOuput();
+ 	//outTop->connect(visualizer->inPointSetIn());
+	//outTop->disconnect(visualizer->inPointSetIn());
+
 	return scn;
 }
 
@@ -49,6 +51,6 @@ int main()
 	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
-
+	createScene();
 	return 0;
 }

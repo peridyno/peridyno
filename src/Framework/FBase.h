@@ -29,7 +29,7 @@ namespace dyno {
 		Out,
 		IO,
 		Param,
-		Current,
+		State,
 		Next
 	};
 
@@ -87,8 +87,34 @@ public:
 	FBase* getTopField();
 	FBase* getSource();
 
-	FBase* promoteToOuput();
-	FBase* promoteToInput();
+	/**
+	 * @brief Display a state field as an ouput field
+	 * 
+	 * @return state field
+	 */
+	FBase* promoteOuput();
+
+	/**
+	 * @brief Display a state field as an input field
+	 * 
+	 * @return state field
+	 */
+	FBase* promoteInput();
+
+
+	/**
+	 * @brief Hide a state field from outputs
+	 * 
+	 * @return state field
+	 */
+	FBase* demoteOuput();
+
+		/**
+	 * @brief Hide a state field from inputs
+	 * 
+	 * @return state field
+	 */
+	FBase* demoteInput();
 
 	virtual bool isEmpty() = 0;
 	virtual void update();

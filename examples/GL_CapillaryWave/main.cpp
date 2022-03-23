@@ -20,7 +20,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto root = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-	root->currentTopology()->connect(mapper->inHeightField());
+	root->stateTopology()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
 
 	mapper->varScale()->setValue(0.1);

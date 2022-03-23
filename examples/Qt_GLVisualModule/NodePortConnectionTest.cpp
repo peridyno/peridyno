@@ -1,4 +1,4 @@
-#include "GLPointVisualNode.h"
+#include "NodePortConnectionTest.h"
 
 #include <Module/CalculateNorm.h>
 #include <GLPointVisualModule.h>
@@ -6,13 +6,13 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(GLPointVisualNode, TDataType)
+	IMPLEMENT_TCLASS(NodePortConnectionTest, TDataType)
 
 	template<typename TDataType>
-	GLPointVisualNode<TDataType>::GLPointVisualNode()
+	NodePortConnectionTest<TDataType>::NodePortConnectionTest()
 		: Node()
 	{
-		this->currentTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->stateTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 
 		std::vector<Coord> vertList;
 
@@ -32,7 +32,7 @@ namespace dyno
 			}
 		}
 
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		ptSet->setPoints(vertList);
 
 		vertList.clear();
@@ -51,7 +51,7 @@ namespace dyno
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		ptRender->setColorMapRange(0, 5);
 
-		this->currentTopology()->connect(ptRender->inPointSet());
+		this->stateTopology()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 		
 		this->graphicsPipeline()->pushModule(calculateNorm);
@@ -60,18 +60,18 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	GLPointVisualNode<TDataType>::~GLPointVisualNode()
+	NodePortConnectionTest<TDataType>::~NodePortConnectionTest()
 	{
 		printf("GLPointVisualNode released \n");
 	}
 
 	template<typename TDataType>
-	void GLPointVisualNode<TDataType>::preUpdateStates()
+	void NodePortConnectionTest<TDataType>::preUpdateStates()
 	{
 		if (this->getParticleSystem() == nullptr) {
 			this->stateVector()->setElementCount(0);
 
-			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 			auto& pts = ptSet->getPoints();
 			pts.resize(0);
 
@@ -83,7 +83,7 @@ namespace dyno
 
 		this->stateVector()->setElementCount(poss.size());
 
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();
 
 		if (poss.size() != pts.size())
@@ -96,10 +96,10 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GLPointVisualNode<TDataType>::resetStates()
+	void NodePortConnectionTest<TDataType>::resetStates()
 	{
 		this->update();
 	}
 
-	DEFINE_CLASS(GLPointVisualNode);
+	DEFINE_CLASS(NodePortConnectionTest);
 }

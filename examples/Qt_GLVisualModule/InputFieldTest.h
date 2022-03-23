@@ -24,7 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	class InputFieldTest : public Node
 	{
-		DECLARE_TCLASS(GLPointVisualNode, TDataType)
+		DECLARE_TCLASS(InputFieldTest, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
