@@ -125,7 +125,7 @@ std::shared_ptr<SceneGraph> createScene()
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		ptRender->setColorMapRange(0, 5);
 
-		fluid->currentTopology()->connect(ptRender->inPointSet());
+		fluid->stateTopology()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 
 		fluid->graphicsPipeline()->pushModule(ptRender);
@@ -143,7 +143,7 @@ std::shared_ptr<SceneGraph> createScene()
 		ghostRender->setColor(Vec3f(1, 0.5, 0));
 		ghostRender->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 
-		ghost->currentTopology()->connect(ghostRender->inPointSet());
+		ghost->stateTopology()->connect(ghostRender->inPointSet());
 
 		ghost->graphicsPipeline()->pushModule(ghostRender);
 	}

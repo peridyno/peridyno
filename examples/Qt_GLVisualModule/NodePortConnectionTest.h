@@ -15,26 +15,30 @@
  */
 
 #pragma once
-#include "Node.h"
-
-#include "Topology/PointSet.h"
+#include "ParticleSystem/ParticleSystem.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class InputFieldTest : public Node
+	class NodePortConnectionTest : public Node
 	{
-		DECLARE_TCLASS(InputFieldTest, TDataType)
+		DECLARE_TCLASS(NodePortConnectionTest, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
-		InputFieldTest();
+		NodePortConnectionTest();
+		~NodePortConnectionTest() override;
 
 	public:
-		void updateStates() override;
+		void resetStates() override;
 
-		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
+		void preUpdateStates() override;
+
+		DEF_NODE_PORT(ParticleSystem<TDataType>, ParticleSystem, "Particles");
+
+		DEF_INSTANCE_OUT(PointSet<TDataType>, PointSetOut, "");
+
+	public:
+		DEF_ARRAY_STATE(Coord, Vector, DeviceType::GPU, "");
 	};
-
-	IMPLEMENT_TCLASS(InputFieldTest, TDataType)
 };

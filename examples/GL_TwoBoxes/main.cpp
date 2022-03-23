@@ -34,7 +34,7 @@ int main()
 	rigid->addBox(box, rigidBody);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	rigid->currentTopology()->connect(mapper->inDiscreteElements());
+	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
@@ -44,7 +44,7 @@ int main()
 
 	//TODO: to enable using internal modules inside a node
 	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
-	rigid->currentTopology()->connect(elementQuery->inDiscreteElements());
+	rigid->stateTopology()->connect(elementQuery->inDiscreteElements());
 	rigid->stateCollisionMask()->connect(elementQuery->inCollisionMask());
 	rigid->graphicsPipeline()->pushModule(elementQuery);
 

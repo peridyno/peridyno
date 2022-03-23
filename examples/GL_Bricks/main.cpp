@@ -58,7 +58,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->addTet(tet, rigidSphere);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	rigid->currentTopology()->connect(mapper->inDiscreteElements());
+	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
@@ -69,7 +69,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals
 	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
-	rigid->currentTopology()->connect(elementQuery->inDiscreteElements());
+	rigid->stateTopology()->connect(elementQuery->inDiscreteElements());
 	rigid->stateCollisionMask()->connect(elementQuery->inCollisionMask());
 	rigid->graphicsPipeline()->pushModule(elementQuery);
 

@@ -30,14 +30,14 @@ std::shared_ptr<SceneGraph> createScene()
 	auto pointRenderer = std::make_shared<GLPointVisualModule>();
 	pointRenderer->setColor(Vec3f(1, 0.2, 1));
 	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-	cloth->currentTopology()->connect(pointRenderer->inPointSet());
+	cloth->stateTopology()->connect(pointRenderer->inPointSet());
 	cloth->stateVelocity()->connect(pointRenderer->inColor());
 
 	cloth->graphicsPipeline()->pushModule(pointRenderer);
 	cloth->setVisible(true);
 
 	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
-	cloth->currentTopology()->connect(surfaceRenderer->inTriangleSet());
+	cloth->stateTopology()->connect(surfaceRenderer->inTriangleSet());
 	cloth->graphicsPipeline()->pushModule(surfaceRenderer);
 	//cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
 

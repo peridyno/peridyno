@@ -60,7 +60,7 @@ namespace Qt
 					for (auto field : fields)
 					{
 						auto fType = field->getFieldType();
-						if (fType == dyno::FieldTypeEnum::Current)
+						if (fType == dyno::FieldTypeEnum::State)
 						{
 							module_vir->addOutputField(field);
 						}

@@ -46,7 +46,7 @@ std::shared_ptr<SceneGraph> createScene()
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	ptRender->setColorMapRange(0, 5);
 
-	fluid->currentTopology()->connect(ptRender->inPointSet());
+	fluid->stateTopology()->connect(ptRender->inPointSet());
 	colorMapper->outColor()->connect(ptRender->inColor());
 
 	fluid->graphicsPipeline()->pushModule(ptRender);

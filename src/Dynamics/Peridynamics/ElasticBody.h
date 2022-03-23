@@ -25,23 +25,14 @@ namespace dyno
 
 		void updateTopology() override;
 
-		bool translate(Coord t) override;
-		bool scale(Real s) override;
-
-		void loadSurface(std::string filename);
-
-		std::shared_ptr<PointSetToPointSet<TDataType>> getTopologyMapping();
-
-		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
-
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 
-		DEF_EMPTY_CURRENT_ARRAY(ReferencePosition, Coord, DeviceType::GPU, "Reference position");
+		DEF_ARRAY_STATE(Coord, ReferencePosition, DeviceType::GPU, "Reference position");
 
-		DEF_EMPTY_CURRENT_ARRAYLIST(int, NeighborIds, DeviceType::GPU, "Storing the ids for neighboring particles");
+		DEF_ARRAYLIST_STATE(int, NeighborIds, DeviceType::GPU, "Storing the ids for neighboring particles");
 
-		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;

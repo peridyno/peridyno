@@ -125,6 +125,16 @@ namespace dyno
 		return true;
 	}
 
+	void Module::updateStarted()
+	{
+
+	}
+
+	void Module::updateEnded()
+	{
+
+	}
+
 	bool Module::validateOutputs()
 	{
 		return isOutputCompete();

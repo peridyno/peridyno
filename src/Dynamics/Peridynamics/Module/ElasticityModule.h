@@ -15,7 +15,8 @@
  */
 #pragma once
 #include "Module/ConstraintModule.h"
-#include "NeighborData.h"
+
+#include "Peridynamics/NeighborData.h"
 
 namespace dyno {
 

@@ -25,17 +25,17 @@ public:
 			hTransform.pushBack(tm);
 		}
 
-		this->currentTransforms()->allocate()->assign(hTransform);
+		this->stateTransforms()->allocate()->assign(hTransform);
 
 		std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
 		triSet->loadObjFile("../../data/armadillo/armadillo.obj");
 
-		this->currentTopology()->setDataPtr(triSet);
+		this->stateTopology()->setDataPtr(triSet);
 
 		hTransform.clear();
 	};
 
-	DEF_EMPTY_CURRENT_ARRAY(Transforms, Transform3f, DeviceType::GPU, "Instance transform");
+	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
 };
 
 int main(int, char**)
@@ -46,8 +46,8 @@ int main(int, char**)
 
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
-	instanceNode->currentTopology()->connect(instanceRender->inTriangleSet());
-	instanceNode->currentTransforms()->connect(instanceRender->inTransform());
+	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
+	instanceNode->stateTransforms()->connect(instanceRender->inTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
 	scn->setUpperBound({ 4, 4, 4});

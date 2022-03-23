@@ -32,7 +32,7 @@ public:
 		std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
 		triSet->loadObjFile("../../data/armadillo/armadillo.obj");
 
-		this->currentTopology()->setDataPtr(triSet);
+		this->stateTopology()->setDataPtr(triSet);
 
 		hTransform.clear();
 	};
@@ -49,12 +49,12 @@ int main(int, char**)
 	//Create a CustomMouseIteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
 	auto mouseInterator = std::make_shared<CustomMouseIteraction>();
-	instanceNode->currentTopology()->connect(mouseInterator->inTopology());
+	instanceNode->stateTopology()->connect(mouseInterator->inTopology());
 	instanceNode->animationPipeline()->pushModule(mouseInterator);
 
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
-	instanceNode->currentTopology()->connect(instanceRender->inTriangleSet());
+	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
 	instanceNode->stateTransforms()->connect(instanceRender->inTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 

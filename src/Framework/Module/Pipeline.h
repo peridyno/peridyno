@@ -20,42 +20,9 @@ namespace dyno
 {
 	class Node;
 
-	class ModuleIterator
-	{
-	public:
-		ModuleIterator();
-
-		~ModuleIterator();
-
-		ModuleIterator(const ModuleIterator &iterator);
-
-		ModuleIterator& operator= (const ModuleIterator &iterator);
-
-		bool operator== (const ModuleIterator &iterator) const;
-
-		bool operator!= (const ModuleIterator &iterator) const;
-
-		ModuleIterator& operator++ ();
-		ModuleIterator& operator++ (int);
-
-		std::shared_ptr<Module> operator *();
-
-		Module* operator->();
-
-		Module* get();
-
-	protected:
-
-		std::weak_ptr<Module> module;
-
-		friend class Pipeline;
-	};
-
 	class Pipeline : public Module
 	{
 	public:
-		typedef ModuleIterator Iterator;
-
 		Pipeline(Node* node);
 		virtual ~Pipeline();
 

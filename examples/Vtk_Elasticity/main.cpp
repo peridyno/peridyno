@@ -3,7 +3,7 @@
 #include <SceneGraph.h>
 #include <Log.h>
 #include <Peridynamics/ElasticBody.h>
-#include <Peridynamics/ElasticityModule.h>
+#include <Peridynamics/Module/ElasticityModule.h>
 #include <ParticleSystem/StaticBoundary.h>
 
 // VTK Renderer
@@ -23,17 +23,18 @@ int main()
 	auto bunny = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
 	root->addParticleSystem(bunny);
 
-	bunny->loadParticles("../../data/bunny/bunny_points.obj");
-	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
-	bunny->scale(1.0f);
-	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
-	bunny->setVisible(true);
-
-	bool useVTK = true;
-	auto sRender = std::make_shared<VtkSurfaceVisualModule>();
-	sRender->setColor(1, 1, 0);
-	bunny->getSurfaceNode()->currentTopology()->connect(sRender->inTriangleSet());
-	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	//TODO: fix the compilation errors
+// 	bunny->loadParticles("../../data/bunny/bunny_points.obj");
+// 	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
+// 	bunny->scale(1.0f);
+// 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
+// 	bunny->setVisible(true);
+// 
+// 	bool useVTK = true;
+// 	auto sRender = std::make_shared<VtkSurfaceVisualModule>();
+// 	sRender->setColor(1, 1, 0);
+// 	bunny->getSurfaceNode()->stateTopology()->connect(sRender->inTriangleSet());
+// 	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
 
 	GlfwApp window;
 	window.setRenderEngine(std::make_shared<VtkRenderEngine>());

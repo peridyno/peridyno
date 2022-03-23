@@ -7,9 +7,9 @@
 
 #include "Topology/NeighborPointQuery.h"
 
-#include "Peridynamics/ElasticityModule.h"
-#include "Peridynamics/Peridynamics.h"
-#include "Peridynamics/FixedPoints.h"
+#include "Module/ElasticityModule.h"
+#include "Module/Peridynamics.h"
+#include "Module/FixedPoints.h"
 
 #include "SharedFunc.h"
 
@@ -39,7 +39,7 @@ namespace dyno
 		this->varTimeStep()->connect(elasticity->inTimeStep());
 		this->statePosition()->connect(elasticity->inPosition());
 		this->stateVelocity()->connect(elasticity->inVelocity());
-		this->currentRestShape()->connect(elasticity->inRestShape());
+		this->stateRestShape()->connect(elasticity->inRestShape());
 		nbrQuery->outNeighborIds()->connect(elasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(elasticity);
 
@@ -51,9 +51,9 @@ namespace dyno
 		mSurfaceNode->addAncestor(this);
 
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		this->currentTopology()->setDataPtr(triSet);
+		this->stateTopology()->setDataPtr(triSet);
 
-		mSurfaceNode->currentTopology()->setDataPtr(triSet);
+		mSurfaceNode->stateTopology()->setDataPtr(triSet);
 	}
 
 	template<typename TDataType>
@@ -65,7 +65,7 @@ namespace dyno
 	template<typename TDataType>
 	bool Cloth<TDataType>::translate(Coord t)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->translate(t);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->translate(t);
 
 		return ParticleSystem<TDataType>::translate(t);
 	}
@@ -74,7 +74,7 @@ namespace dyno
 	template<typename TDataType>
 	bool Cloth<TDataType>::scale(Real s)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->scale(s);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->scale(s);
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
@@ -82,7 +82,7 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
-		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->currentTopology()->getDataPtr());
+		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
 		triSet->getPoints().assign(this->statePosition()->getData());
 	}
@@ -100,8 +100,8 @@ namespace dyno
 
 		if (!this->statePosition()->isEmpty())
 		{
-			this->currentRestShape()->allocate();
-			auto nbrPtr = this->currentRestShape()->getDataPtr();
+			this->stateRestShape()->allocate();
+			auto nbrPtr = this->stateRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
@@ -111,7 +111,7 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::loadSurface(std::string filename)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->currentTopology()->getDataPtr())->loadObjFile(filename);
+		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->loadObjFile(filename);
 	}
 
 	template<typename TDataType>

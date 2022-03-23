@@ -58,6 +58,9 @@ namespace dyno {
 		void setSaveScreenInterval(int n) { mSaveScreenInterval = n < 1 ? 1 : n; }
 		int getSaveScreenInternal() { return mSaveScreenInterval; }
 
+		void turnOnVSync();
+		void turnOffVSync();
+
 		void toggleAnimation();
 		void toggleImGUI();
 
