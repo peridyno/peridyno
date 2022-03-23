@@ -1,26 +1,18 @@
 #include <QtApp.h>
-#include <GlfwApp.h>
 
 #include <SceneGraph.h>
 
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/ParticleEmitterSquare.h>
-
-#include <Module/CalculateNorm.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 
-#include <ImColorbar.h>
-
-#include "GLPointVisualNode.h"
-
 using namespace std;
 using namespace dyno;
 
-std::shared_ptr<SceneGraph> createScene()
+
+int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
@@ -29,40 +21,12 @@ std::shared_ptr<SceneGraph> createScene()
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-	fluid->connect(boundary->importParticleSystems());
+	auto outTop = fluid->currentTopology()->promoteToOuput();
 
-	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
-	fluid->connect(visualizer->importParticleSystem());
- 	
-	
-	//fluid->stateForce()->promoteToOuput();
- 	//outTop->connect(visualizer->inPointSetIn());
-	//outTop->disconnect(visualizer->inPointSetIn());
-
-
-	
 	QtApp window;
 	window.setSceneGraph(scn);
-	//auto outTop = visualizer->currentTopology()->promoteToInput();
 	window.createWindow(1024, 768);
-
-	fluid->stateVelocity()->promoteToInput();
-
 	window.mainLoop();
 
-
-	return scn;
-}
-
-int main()
-{
-	/*QtApp window;
-	window.setSceneGraph(createScene());
-	window.createWindow(1024, 768);
-	window.mainLoop();*/
-	createScene();
 	return 0;
 }
