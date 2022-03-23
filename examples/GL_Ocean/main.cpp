@@ -33,7 +33,7 @@ std::shared_ptr<SceneGraph> createScene()
 	mapper->varScale()->setValue(0.2);
 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
 
-	root->currentTopology()->connect(mapper->inHeightField());
+	root->stateTopology()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();

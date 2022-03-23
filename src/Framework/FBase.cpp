@@ -27,7 +27,7 @@ namespace dyno
 		return mSource;
 	}
 
-	FBase* FBase::promoteToOuput()
+	FBase* FBase::promoteOuput()
 	{
 		if (mOwner == nullptr)
 			return nullptr;
@@ -39,13 +39,37 @@ namespace dyno
 		return this;
 	}
 
-	FBase* FBase::promoteToInput()
+	FBase* FBase::promoteInput()
 	{
 		if (mOwner == nullptr)
 			return nullptr;
 
 		if (!mOwner->findInputField(this)) {
 			mOwner->addInputField(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::demoteOuput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (mOwner->findOutputField(this)) {
+			mOwner->removeOutputField(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::demoteInput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (mOwner->findInputField(this)) {
+			mOwner->removeInputField(this);
 		}
 
 		return this;

@@ -25,8 +25,20 @@ public:
 
 	void addNodeByString(std::string NodeName);
 
+	void enableEditing();
+	void disableEditing();
+
 public Q_SLOTS:
-	void showSceneGraph(SceneGraph* scn);
+	/**
+	 * @brief create a QT-based view for the active scene graph.
+	 */
+	void showSceneGraph();
+
+	/**
+	 * @brief Update the view only for the active scene graph, the data model will be changed.
+	 */
+	void updateSceneGraph();
+
 	void moveModulePosition(QtNode& n, const QPointF& newLocation);
 
 	void addNodeToSceneGraph(QtNode& n);
@@ -35,6 +47,7 @@ public Q_SLOTS:
 private:
 	SceneGraph* m_scene = nullptr;
 
+	bool mEditingEnabled = true;
 };
 
 }

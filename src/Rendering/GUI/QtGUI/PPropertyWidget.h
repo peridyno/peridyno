@@ -114,6 +114,23 @@ namespace dyno
 		QDoubleSpinner* spinner3;
 	};
 
+	class QStateFieldWidget : public QGroupBox
+	{
+		Q_OBJECT
+	public:
+		QStateFieldWidget(FBase* field);
+		~QStateFieldWidget() {};
+
+	Q_SIGNALS:
+		void fieldTypeChanged();
+
+	public slots:
+		void tagAsOuput(int status);
+
+	private:
+		FBase* m_field = nullptr;
+	};
+
 	class PPropertyWidget : public QWidget
 	{
 		Q_OBJECT
@@ -129,12 +146,14 @@ namespace dyno
 		QWidget* addWidget(QWidget* widget);
 		void removeAllWidgets();
 
+	signals:
+		void fieldUpdated();
 
 	public slots:
 		void showProperty(Module* module);
 		void showProperty(Node* node);
 
-		void showBlockProperty(Qt::QtNode& block);
+		void showNodeProperty(Qt::QtNode& block);
 
 		void updateDisplay();
 
@@ -145,13 +164,14 @@ namespace dyno
 		void addArrayFieldWidget(FBase* field);
 		void addInstanceFieldWidget(FBase* field);
 
+		void addStateFieldWidget(FBase* field);
+
 		QVBoxLayout* m_main_layout;
 		QScrollArea* m_scroll_area;
 		QWidget * m_scroll_widget;
 		QGridLayout* m_scroll_layout;
 
 		std::vector<QWidget*> m_widgets;
-
 	};
 
 }

@@ -320,6 +320,44 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+	QStateFieldWidget::QStateFieldWidget(FBase* field)
+	{
+		m_field = field;
+
+		this->setStyleSheet("border:none");
+		QGridLayout* layout = new QGridLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		QLabel* name = new QLabel();
+		name->setFixedSize(160, 18);
+		name->setText(FormatFieldWidgetName(field->getObjectName()));
+		layout->addWidget(name, 0, 0);
+
+		QCheckBox* checkbox = new QCheckBox();
+		layout->addWidget(checkbox, 0, 1);
+
+		//TODO: use another way
+		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(tagAsOuput(int)));
+	}
+
+	void QStateFieldWidget::tagAsOuput(int status)
+	{
+		if (status == Qt::Checked)
+		{
+			m_field->promoteOuput();
+		}
+		else
+		{
+			m_field->demoteOuput();
+		}
+		
+
+		fieldTypeChanged();
+	}
+
 	//QWidget-->QVBoxLayout-->QScrollArea-->QWidget-->QGridLayout
 	PPropertyWidget::PPropertyWidget(QWidget *parent)
 		: QWidget(parent)
@@ -344,7 +382,6 @@ namespace dyno
 		
 		m_scroll_area->setWidget(m_scroll_widget);
 
-
 		setMinimumWidth(250);
 		setLayout(m_main_layout);
 	}
@@ -356,7 +393,7 @@ namespace dyno
 
 	QSize PPropertyWidget::sizeHint() const
 	{
-		return QSize(20, 20);
+		return QSize(512, 20);
 	}
 
 	QWidget* PPropertyWidget::addWidget(QWidget* widget)
@@ -393,7 +430,7 @@ namespace dyno
 
 	}
 
-	void PPropertyWidget::showBlockProperty(Qt::QtNode& block)
+	void PPropertyWidget::showNodeProperty(Qt::QtNode& block)
 	{
 		auto dataModel = block.nodeDataModel();
 
@@ -430,26 +467,53 @@ namespace dyno
 
 		this->removeAllWidgets();
 		
+		QGroupBox* mParamGroup = new QGroupBox(tr("Parameters"));
+
+		QVBoxLayout* layoutParam = new QVBoxLayout;
+		mParamGroup->setLayout(layoutParam);
+
 		std::vector<FBase*>& fields = base->getAllFields();
 		for each (FBase * var in fields)
 		{
-			if (var != nullptr)
+			if (var != nullptr && var->getFieldType() == FieldTypeEnum::Param)
 			{
 				if (var->getClassName() == std::string("FVar"))
 				{
 					this->addScalarFieldWidget(var);
 				}
-				else if (var->getClassName() == std::string("FArray")) {
-					//this->addScalarFieldWidget(var);
-				}
-				else if (var->getClassName() == std::string("FArrayList")) {
-					//this->addScalarFieldWidget(var);
-				}
-				else if (var->getClassName() == std::string("FInstance")) {
-					this->addInstanceFieldWidget(var);
-				}
+// 				else if (var->getClassName() == std::string("FArray")) {
+// 					//this->addScalarFieldWidget(var);
+// 				}
+// 				else if (var->getClassName() == std::string("FArrayList")) {
+// 					//this->addScalarFieldWidget(var);
+// 				}
+// 				else if (var->getClassName() == std::string("FInstance")) {
+// 					this->addInstanceFieldWidget(var);
+// 				}
 			}
 		}
+
+		QGroupBox* mStateGroup = new QGroupBox(tr("State Fields"));
+
+		QVBoxLayout* layout = new QVBoxLayout;
+		//layout->setContentsMargins(0, 0, 0, 0);
+		//layout->setSpacing(0);
+
+		mStateGroup->setLayout(layout);
+
+		for each (FBase * var in fields)
+		{
+			if (var != nullptr && var->getFieldType() == FieldTypeEnum::State)
+			{
+				auto widget = new QStateFieldWidget(var);
+
+				connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
+
+				layout->addWidget(widget);
+			}
+		}
+
+		this->addWidget(mStateGroup);
 	}
 
 	void PPropertyWidget::addScalarFieldWidget(FBase* field)
@@ -478,21 +542,20 @@ namespace dyno
 		{
 			this->addWidget(new QVector3FieldWidget(field));
 		}
-
-		
 	}
 
 	void PPropertyWidget::addArrayFieldWidget(FBase* field)
 	{
-
+		auto fw = new QStateFieldWidget(field);
+		this->addWidget(fw);
 	}
 
 	void PPropertyWidget::addInstanceFieldWidget(FBase* field)
 	{
 		std::string className = field->getClassName();
 		if (className == std::string("FInstance")) {
-			field->promoteToOuput();
-			field->promoteToInput();
+			field->promoteOuput();
+			field->promoteInput();
 			//printf("FInstance--------------\n");
 			auto fw = new QFInstanceWidget(field);
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
@@ -500,4 +563,12 @@ namespace dyno
 		}
 	}
 
+	void PPropertyWidget::addStateFieldWidget(FBase* field)
+	{
+		auto widget = new QStateFieldWidget(field);
+
+		connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
+
+		this->addWidget(widget);
+	}
 }

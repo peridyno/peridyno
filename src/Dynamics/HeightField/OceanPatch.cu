@@ -166,7 +166,7 @@ namespace dyno {
         : Node(name)
     {
 	    auto heights = std::make_shared<HeightField<TDataType>>();
-	    this->currentTopology()->setDataPtr(heights);
+	    this->stateTopology()->setDataPtr(heights);
 
         std::ifstream input("../../data/windparam.txt", std::ios::in);
         for (int i = 0; i <= 12; i++)
@@ -200,7 +200,7 @@ namespace dyno {
     OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global)
     {
 	    auto heights = std::make_shared<HeightField<TDataType>>();
-	    this->currentTopology()->setDataPtr(heights);
+	    this->stateTopology()->setDataPtr(heights);
 
         mResolution          = size;
         mSpectrumWidth     = size + 1;
@@ -244,7 +244,7 @@ namespace dyno {
         m_displacement.resize(mResolution, mResolution);
         m_gradient.resize(mResolution, mResolution);
 
-	    auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+	    auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 	    Real h = m_realPatchSize / mResolution;
 	    topo->setExtents(mResolution, mResolution);
 	    topo->setGridSpacing(h);
@@ -350,7 +350,7 @@ namespace dyno {
     template<typename TDataType>
     void OceanPatch<TDataType>::updateTopology()
     {
-        auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+        auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
         auto& shifts = topo->getDisplacement();
 

@@ -15,7 +15,7 @@ namespace dyno
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		heights->setExtents(size, size);
-		this->currentTopology()->setDataPtr(heights);
+		this->stateTopology()->setDataPtr(heights);
 
 		mResolution = size;
 		mChoppiness = 1.0f;
@@ -64,7 +64,7 @@ namespace dyno
 	void CapillaryWave<TDataType>::updateTopology()
 	{
 		
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
 		auto& shifts = topo->getDisplacement();
 
@@ -440,7 +440,7 @@ namespace dyno
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initHeightPosition() {
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
 		auto& shifts = topo->getDisplacement();
 

@@ -23,7 +23,7 @@ namespace dyno
 		: Node()
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
-		this->currentTopology()->setDataPtr(heights);
+		this->stateTopology()->setDataPtr(heights);
 
 		m_eclipsedTime = 0.0f;
 
@@ -49,9 +49,9 @@ namespace dyno
 		
 		auto m_patch = this->getOceanPatch();
 		if (m_patch != nullptr){
-			auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+			auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
-			auto patch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());
+			auto patch = TypeInfo::cast<HeightField<TDataType>>(m_patch->stateTopology()->getDataPtr());
 	
 			float h = patch->getGridSpacing();
 			topo->setExtents(Nx * patch->width(), Ny * patch->height());
@@ -141,9 +141,9 @@ namespace dyno
 		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
 		dim3 blocksPerGrid(x, y);
 
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->currentTopology()->getDataPtr());
+		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
-		auto topoPatch = TypeInfo::cast<HeightField<TDataType>>(m_patch->currentTopology()->getDataPtr());
+		auto topoPatch = TypeInfo::cast<HeightField<TDataType>>(m_patch->stateTopology()->getDataPtr());
 		topo->setGridSpacing(topoPatch->getGridSpacing());
 		
 		O_InitOceanWave << < blocksPerGrid, threadsPerBlock >> > (
@@ -152,7 +152,7 @@ namespace dyno
 		/*
 		auto capillaryWaves = this->getCapillaryWaves();
 		for(int i = 0; i < capillaryWaves.size(); i++){
-			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->currentTopology()->getDataPtr());
+			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->stateTopology()->getDataPtr());
 			O_AddOceanTrails << < blocksPerGrid, threadsPerBlock >> > (
 				topo->getDisplacement(),
 				topoCapillaryWave->getDisplacement());

@@ -5,8 +5,6 @@
 #include <ParticleSystem/ParticleFluid.h>
 
 #include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
-#include <ColorMapping.h>
 
 using namespace std;
 using namespace dyno;
@@ -20,8 +18,6 @@ int main()
 
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
-
-	auto outTop = fluid->currentTopology()->promoteToOuput();
 
 	QtApp window;
 	window.setSceneGraph(scn);

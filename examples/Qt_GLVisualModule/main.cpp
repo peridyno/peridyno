@@ -37,7 +37,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto visualizer = scn->addNode(std::make_shared<NodePortConnectionTest<DataType3f>>());
 	fluid->connect(visualizer->importParticleSystem());
  	
-	//auto outTop = visualizer->currentTopology()->promoteToInput();
+	//auto outTop = visualizer->stateTopology()->promoteToInput();
 	//fluid->stateForce()->promoteToOuput();
  	//outTop->connect(visualizer->inPointSetIn());
 	//outTop->disconnect(visualizer->inPointSetIn());
