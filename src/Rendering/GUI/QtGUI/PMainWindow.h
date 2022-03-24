@@ -107,7 +107,7 @@ namespace dyno
 		void showHelp();
 		void showAbout();
 
-		void showNodeEditor();
+		void showModuleEditor();
 
 		void showMessage();
 

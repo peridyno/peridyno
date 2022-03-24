@@ -370,24 +370,24 @@ namespace dyno
 		return;
 	}
 
-	void PMainWindow::showNodeEditor()
+	void PMainWindow::showModuleEditor()
 	{
 		auto nodes = mNodeFlowView->node_scene->selectedNodes();
-		Qt::QtNodeWidget* clickedBlock = nullptr;
+		Qt::QtNodeWidget* clickedNode = nullptr;
 		if (nodes.size() > 0)
 		{
-			clickedBlock = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
+			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
 		}
 		
-		PModuleEditor* node_editor = new PModuleEditor(clickedBlock);
-		node_editor->setWindowTitle("Module Flow Editor");
-		node_editor->resize(1024, 600);
-		node_editor->setMinimumSize(512, 360);
+		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
+		moduelEditor->setWindowTitle("Module Flow Editor");
+		moduelEditor->resize(1024, 600);
+		moduelEditor->setMinimumSize(512, 360);
 
-		node_editor->setWindowModality(Qt::ApplicationModal);
-		node_editor->setAttribute(Qt::WA_ShowModal, true);
-		node_editor->setAttribute(Qt::WA_DeleteOnClose, true);
-		node_editor->show();
+		moduelEditor->setWindowModality(Qt::ApplicationModal);
+		moduelEditor->setAttribute(Qt::WA_ShowModal, true);
+		moduelEditor->setAttribute(Qt::WA_DeleteOnClose, true);
+		moduelEditor->show();
 	}
 
 	void PMainWindow::showMessage()
@@ -449,7 +449,7 @@ namespace dyno
 		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
-		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showNodeEditor);
+		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
 		connect(m_propertyWidget, &PPropertyWidget::fieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateSceneGraph);
 	}

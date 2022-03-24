@@ -30,14 +30,14 @@ namespace Qt
 		~QtModuleFlowWidget();
 
 		//void addActor(vtkActor *actor);
-		QtModuleFlowScene* getModuleFlowScene() { return module_scene; }
+		QtModuleFlowScene* getModuleFlowScene() { return mModuleFlow; }
 
 	signals:
 
 	public:
-		QGridLayout*		m_MainLayout;
+		QGridLayout*		mLayout;
 
-		QtModuleFlowScene* module_scene = nullptr;
+		QtModuleFlowScene* mModuleFlow = nullptr;
 	};
 
 }
