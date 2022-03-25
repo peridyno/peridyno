@@ -7,8 +7,10 @@
 #include <QScrollArea>
 #include <QGridLayout>
 #include <QVBoxLayout>
+#include <QLabel>
 
 #include "nodes/QNode"
+#include "LockerButton.h"
 
 #include <vector>
 
@@ -160,7 +162,7 @@ namespace dyno
 	private:
 		void updateContext(OBase* base);
 
-		void addScalarFieldWidget(FBase* field);
+		void addScalarFieldWidget(FBase* field, QGridLayout* layout,int j);
 		void addArrayFieldWidget(FBase* field);
 		void addInstanceFieldWidget(FBase* field);
 
@@ -172,6 +174,18 @@ namespace dyno
 		QGridLayout* m_scroll_layout;
 
 		std::vector<QWidget*> m_widgets;
+
+
+		LockerButton* m_sizeButton;
+		LockerButton* m_states;
+		LockerButton* m_positionButton;
+		QWidget* m_sizeWidget;
+		QWidget* m_statesWidget;
+
+		QWidget* m_positionWidget;
+		quint8 m_sizeList;
+		quint8 m_positionList;
+
 	};
 
 }

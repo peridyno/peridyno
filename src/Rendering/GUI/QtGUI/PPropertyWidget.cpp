@@ -19,6 +19,12 @@
 #include <QRegularExpression>
 #include <QMessageBox>
 
+#include <QLineEdit>
+#include <QDoubleValidator>
+#include <QPixmap>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QDoubleSpinBox>
 
 namespace dyno
 {
@@ -391,7 +397,7 @@ namespace dyno
 		
 		m_scroll_area->setWidget(m_scroll_widget);
 
-		setMinimumWidth(250);
+		//setMinimumWidth(250);
 		setLayout(m_main_layout);
 	}
 
@@ -469,46 +475,73 @@ namespace dyno
 
 	void PPropertyWidget::updateContext(OBase* base)
 	{
+
 		if (base == nullptr)
 		{
 			return;
 		}
 
 		this->removeAllWidgets();
-		
-		QGroupBox* mParamGroup = new QGroupBox(tr("Parameters"));
 
-		QVBoxLayout* layoutParam = new QVBoxLayout;
-		mParamGroup->setLayout(layoutParam);
+		QGroupBox* mParamGroup = new QGroupBox();
+		//mParamGroup->setStyleSheet("border:none");
+		QWidget* xxx = new QWidget;
 
+		m_sizeButton = new LockerButton;
+		m_sizeButton->setObjectName("LockerButton");
+		m_sizeButton->SetTextLabel(tr("FVar"));
+		m_sizeButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+		m_sizeButton->setStyleSheet("#LockerButton{background-color:transparent}"
+			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
+			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
+
+	
+
+		// Size Widget
+		m_sizeWidget = new QWidget;
+		//m_sizeWidget->setFixedHeight(100);
+		m_sizeWidget->setVisible(false);
+
+		QLabel* sizeLabel = m_sizeButton->GetTextHandle();
+		sizeLabel->setStyleSheet("QLabel{color:rgba(183,71,42,1)}");
+		sizeLabel->setFont(QFont("大小", 10, QFont::Black));
+
+	
+		QGridLayout* sizeLayout = new QGridLayout;
 		std::vector<FBase*>& fields = base->getAllFields();
+		int j = 0;
 		for each (FBase * var in fields)
 		{
 			if (var != nullptr && var->getFieldType() == FieldTypeEnum::Param)
 			{
 				if (var->getClassName() == std::string("FVar"))
 				{
-					this->addScalarFieldWidget(var);
+					this->addScalarFieldWidget(var, sizeLayout,j);
+					j++;
 				}
-// 				else if (var->getClassName() == std::string("FArray")) {
-// 					//this->addScalarFieldWidget(var);
-// 				}
-// 				else if (var->getClassName() == std::string("FArrayList")) {
-// 					//this->addScalarFieldWidget(var);
-// 				}
-// 				else if (var->getClassName() == std::string("FInstance")) {
-// 					this->addInstanceFieldWidget(var);
-// 				}
 			}
 		}
+		m_sizeWidget->setLayout(sizeLayout);
 
-		QGroupBox* mStateGroup = new QGroupBox(tr("State Fields"));
 
-		QVBoxLayout* layout = new QVBoxLayout;
-		//layout->setContentsMargins(0, 0, 0, 0);
-		//layout->setSpacing(0);
+		m_states = new LockerButton;
+		m_states->setObjectName("LockerButton");
+		m_states->SetTextLabel(tr("Stata"));
+		m_states->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+		m_states->setStyleSheet("#LockerButton{background-color:transparent}"
+			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
+			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
 
-		mStateGroup->setLayout(layout);
+		// Size Widget
+		m_statesWidget = new QWidget;
+		//m_sizeWidget->setFixedHeight(100);
+		m_statesWidget->setVisible(false);
+
+		QLabel* sizeLabel2 = m_states->GetTextHandle();
+		sizeLabel2->setStyleSheet("QLabel{color:rgba(183,71,42,1)}");
+		sizeLabel2->setFont(QFont("大小", 10, QFont::Black));
+
+		QGridLayout* sizeLayout2 = new QGridLayout;
 
 		for each (FBase * var in fields)
 		{
@@ -518,38 +551,127 @@ namespace dyno
 
 				connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
 
-				layout->addWidget(widget);
+				sizeLayout2->addWidget(widget);
 			}
 		}
+		m_statesWidget->setLayout(sizeLayout2);
 
-		this->addWidget(mStateGroup);
+
+		m_positionButton = new LockerButton;
+		m_positionButton->setObjectName("LockerButton");
+		m_positionButton->SetTextLabel(tr("State"));
+		m_positionButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+		m_positionButton->setStyleSheet("#LockerButton{background-color:transparent}"
+			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
+			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
+
+		QLabel* positionLabel = m_positionButton->GetTextHandle();
+		positionLabel->setStyleSheet("QLabel{color:rgba(183,71,42,1)}");
+		positionLabel->setFont(QFont("大小", 10, QFont::Black));
+		// Position Widget
+		m_positionWidget = new QWidget;
+		m_positionWidget->setFixedHeight(100);
+		m_positionWidget->setVisible(false);
+
+		QLabel* titleLabel = new QLabel(tr("location"));
+		QLineEdit* titleEdit = new QLineEdit;
+	
+
+
+		QVBoxLayout* positionLayout = new QVBoxLayout;
+		positionLayout->addWidget(titleLabel);
+		positionLayout->addWidget(titleEdit);
+		m_positionWidget->setLayout(positionLayout);
+
+		QVBoxLayout* vlayout = new QVBoxLayout;
+		vlayout->addWidget(m_sizeButton);
+		vlayout->addWidget(m_sizeWidget);
+
+		vlayout->addWidget(m_states);
+		vlayout->addWidget(m_statesWidget);
+
+		vlayout->addWidget(m_positionButton);
+		vlayout->addWidget(m_positionWidget);
+		vlayout->addStretch();
+		vlayout->setMargin(0);
+		vlayout->setSpacing(0);
+
+		xxx->setLayout(vlayout);
+		addWidget(xxx);
+
+
+		connect(m_sizeButton, &LockerButton::clicked, [this](bool) {
+			if (m_sizeList % 2)
+			{
+				m_sizeButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+				//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
+				m_sizeWidget->setVisible(false);
+			}
+			else
+			{
+				m_sizeButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control-270.png"));
+				m_sizeWidget->setVisible(true);
+			}
+			m_sizeList++; });
+
+		connect(m_states, &LockerButton::clicked, [this](bool) {
+			if (m_sizeList % 2)
+			{
+				m_states->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+				//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
+				m_statesWidget->setVisible(false);
+			}
+			else
+			{
+				m_states->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control-270.png"));
+				m_statesWidget->setVisible(true);
+			}
+			m_sizeList++; });
+
+		connect(m_positionButton, &LockerButton::clicked, [this](bool) {
+			if (m_positionList % 2)
+			{
+				m_positionButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+				m_positionWidget->setVisible(false);
+			}
+			else
+			{
+				m_positionButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control-270.png"));
+				m_positionWidget->setVisible(true);
+			}
+			m_positionList++; });
 	}
 
-	void PPropertyWidget::addScalarFieldWidget(FBase* field)
+	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)
 	{
 		std::string template_name = field->getTemplateName();
+
 		if (template_name == std::string(typeid(bool).name()))
 		{
 			auto fw = new QBoolFieldWidget(field);
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
-
-			this->addWidget(fw);
+			
+			layout->addWidget(fw,j,0);
 		}
 		else if (template_name == std::string(typeid(int).name()))
 		{
 			auto fw = new QIntegerFieldWidget(field);
+
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
 
-			this->addWidget(fw);
+			layout->addWidget(fw, j, 0);
 //			this->addWidget(new QIntegerFieldWidget(new FVar<int>()));
 		}
 		else if (template_name == std::string(typeid(float).name()))
 		{
-			this->addWidget(new QRealFieldWidget(field));
+			auto fw = new QRealFieldWidget(field);
+
+			layout->addWidget(fw ,j, 0);
 		}
 		else if (template_name == std::string(typeid(Vec3f).name()))
 		{
-			this->addWidget(new QVector3FieldWidget(field));
+			auto fw = new QVector3FieldWidget(field);
+			layout->addWidget(fw, j, 0);
 		}
 	}
 
@@ -563,9 +685,6 @@ namespace dyno
 	{
 		std::string className = field->getClassName();
 		if (className == std::string("FInstance")) {
-			field->promoteOuput();
-			field->promoteInput();
-			//printf("FInstance--------------\n");
 			auto fw = new QFInstanceWidget(field);
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
 			this->addWidget(fw);
