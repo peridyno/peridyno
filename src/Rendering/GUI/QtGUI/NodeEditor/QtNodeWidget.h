@@ -60,6 +60,9 @@ namespace Qt
 		std::vector<FBase*>& getOutputFields() const;
 		std::vector<FBase*>& getInputFields() const;
 
+		void enableEditing();
+		void disableEditing();
+
 	protected:
 		virtual void updateModule();
 
@@ -82,6 +85,7 @@ namespace Qt
 		QString modelValidationError = QString("Missing or incorrect inputs");
 
 	private:
+		bool mEditingEnabled = true;
 	};
 
 

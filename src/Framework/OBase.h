@@ -140,7 +140,9 @@ namespace dyno {
 
 		bool findOutputField(FBase* field);
 		bool addOutputField(FBase* field);
+		bool addToOutput(FBase* field);
 		bool removeOutputField(FBase* field);
+		bool removeFromOutput(FBase* field);
 
 		std::vector<FBase*>& getOutputFields() { return fields_output; }
 

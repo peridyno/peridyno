@@ -29,11 +29,11 @@ namespace dyno
 
 	FBase* FBase::promoteOuput()
 	{
-		if (mOwner == nullptr)
+		if (m_fType != FieldTypeEnum::State && mOwner == nullptr)
 			return nullptr;
 
 		if (!mOwner->findOutputField(this)) {
-			mOwner->addOutputField(this);
+			mOwner->addToOutput(this);
 		}
 
 		return this;
@@ -53,11 +53,11 @@ namespace dyno
 
 	FBase* FBase::demoteOuput()
 	{
-		if (mOwner == nullptr)
+		if (m_fType != FieldTypeEnum::State && mOwner == nullptr)
 			return nullptr;
 
 		if (mOwner->findOutputField(this)) {
-			mOwner->removeOutputField(this);
+			mOwner->removeFromOutput(this);
 		}
 
 		return this;

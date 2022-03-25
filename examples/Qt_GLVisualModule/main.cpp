@@ -141,6 +141,6 @@ int main()
 	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
-	createScene();
+
 	return 0;
 }
