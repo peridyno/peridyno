@@ -303,6 +303,18 @@ namespace dyno {
 		return true;
 	}
 
+	bool OBase::addToOutput(FBase* field)
+	{
+		if (findOutputField(field))
+		{
+			return false;
+		}
+
+		fields_output.push_back(field);
+
+		return true;
+	}
+
 	bool OBase::removeOutputField(FBase* field)
 	{
 		if (!findOutputField(field))
@@ -311,6 +323,22 @@ namespace dyno {
 		}
 
 		this->removeField(field);
+
+		auto result = find(fields_output.begin(), fields_output.end(), field);
+		if (result != fields_output.end())
+		{
+			fields_output.erase(result);
+		}
+
+		return true;
+	}
+
+	bool OBase::removeFromOutput(FBase* field)
+	{
+		if (!findOutputField(field))
+		{
+			return false;
+		}
 
 		auto result = find(fields_output.begin(), fields_output.end(), field);
 		if (result != fields_output.end())

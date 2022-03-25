@@ -26,7 +26,7 @@ namespace dyno
 		m_end_spinbox->setFixedSize(60, 25);
 		m_end_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		m_end_spinbox->setMaximum(99999);
-		m_end_spinbox->setValue(1);
+		m_end_spinbox->setValue(1000);
 	
 		QGridLayout* GLayout = new QGridLayout;
 

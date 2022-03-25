@@ -336,8 +336,17 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 		layout->addWidget(name, 0, 0);
 
-		QCheckBox* checkbox = new QCheckBox();
+		QCheckBox* checkbox = new QCheckBox();		
 		layout->addWidget(checkbox, 0, 1);
+
+		if (m_field->parent()->findOutputField(field))
+		{
+			checkbox->setChecked(true);;
+		}
+		else
+		{
+			checkbox->setChecked(false);
+		}
 
 		//TODO: use another way
 		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(tagAsOuput(int)));

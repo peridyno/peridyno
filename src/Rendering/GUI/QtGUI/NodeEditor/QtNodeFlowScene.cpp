@@ -270,11 +270,33 @@ namespace Qt
 	void QtNodeFlowScene::enableEditing()
 	{
 		mEditingEnabled = true;
+
+		auto& allNodes = this->allNodes();
+
+		for each (auto node in allNodes)
+		{
+			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
+			if (model != nullptr)
+			{
+				model->enableEditing();
+			}
+		}
 	}
 
 	void QtNodeFlowScene::disableEditing()
 	{
 		mEditingEnabled = false;
+
+		auto& allNodes = this->allNodes();
+
+		for each (auto node in allNodes)
+		{
+			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
+			if (model != nullptr)
+			{
+				model->disableEditing();
+			}
+		}
 	}
 
 	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
