@@ -47,7 +47,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a topology mapper
 	auto topoMapper = scn->addNode(std::make_shared<PointSetToTriangleSet<DataType3f>>());
 
-	auto outTop = elastoplasticBody->stateTopology()->promoteToOuput();
+	auto outTop = elastoplasticBody->stateTopology()->promoteOuput();
  	outTop->connect(topoMapper->inPointSet());
 	surfaceMeshLoader->outTriangleSet()->connect(topoMapper->inInitialShape());
 
@@ -69,7 +69,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a topology mapper
 	auto topoMapper2 = scn->addNode(std::make_shared<PointSetToTriangleSet<DataType3f>>());
 
-	auto outTop2 = elasticBody->stateTopology()->promoteToOuput();
+	auto outTop2 = elasticBody->stateTopology()->promoteOuput();
 	outTop2->connect(topoMapper2->inPointSet());
 	surfaceMeshLoader2->outTriangleSet()->connect(topoMapper2->inInitialShape());
 

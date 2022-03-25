@@ -107,9 +107,11 @@ namespace dyno
 		void showHelp();
 		void showAbout();
 
-		void showNodeEditor();
+		void showModuleEditor();
 
 		void showMessage();
+
+		void addNodeByName(std::string name);
 
 	private:
 		void setCentralView();
@@ -139,6 +141,10 @@ namespace dyno
 // 		PModuleFlowWidget*		m_moduleFlowView;
 // 		PModuleListWidget*		m_moduleListWidget;
 // 		PSceneGraphWidget*		m_scenegraphWidget;
+
+
+	public slots:
+		void showAboutMsg();
 	};
 
 }

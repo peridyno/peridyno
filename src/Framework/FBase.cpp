@@ -27,25 +27,49 @@ namespace dyno
 		return mSource;
 	}
 
-	FBase* FBase::promoteToOuput()
+	FBase* FBase::promoteOuput()
 	{
-		if (mOwner == nullptr)
+		if (m_fType != FieldTypeEnum::State && mOwner == nullptr)
 			return nullptr;
 
 		if (!mOwner->findOutputField(this)) {
-			mOwner->addOutputField(this);
+			mOwner->addToOutput(this);
 		}
 
 		return this;
 	}
 
-	FBase* FBase::promoteToInput()
+	FBase* FBase::promoteInput()
 	{
 		if (mOwner == nullptr)
 			return nullptr;
 
 		if (!mOwner->findInputField(this)) {
 			mOwner->addInputField(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::demoteOuput()
+	{
+		if (m_fType != FieldTypeEnum::State && mOwner == nullptr)
+			return nullptr;
+
+		if (mOwner->findOutputField(this)) {
+			mOwner->removeFromOutput(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::demoteInput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (mOwner->findInputField(this)) {
+			mOwner->removeInputField(this);
 		}
 
 		return this;

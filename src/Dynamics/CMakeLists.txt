@@ -70,6 +70,7 @@ option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system libra
 option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" ON)
 option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
 option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
+option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY Core IO Framework)
@@ -89,4 +90,10 @@ endif()
 if(PERIDYNO_LIBRARY_VOLUME)
     set(LIB_DEPENDENCY Core IO Framework)
     build_library(Volume LIB_DEPENDENCY)
+endif()
+
+
+if(PERIDYNO_LIBRARY_HEIGHTFIELD)
+    set(LIB_DEPENDENCY Core IO Framework cufft)
+    build_library(HeightField LIB_DEPENDENCY)
 endif()

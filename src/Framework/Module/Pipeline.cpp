@@ -75,6 +75,11 @@ namespace dyno
 		mUpdateEnabled = false;
 	}
 
+	void Pipeline::updateExecutionQueue()
+	{
+		reconstructPipeline();
+	}
+
 	void Pipeline::preprocess()
 	{
 		if (mModuleUpdated)

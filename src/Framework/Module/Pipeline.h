@@ -43,6 +43,8 @@ namespace dyno
 		void enable();
 		void disable();
 
+		void updateExecutionQueue();
+
 	protected:
 		void preprocess() final;
 		void updateImpl() override;

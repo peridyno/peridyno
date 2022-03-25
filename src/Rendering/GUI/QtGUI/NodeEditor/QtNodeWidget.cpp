@@ -166,6 +166,9 @@ namespace Qt
 
 	void QtNodeWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
 	{
+		if (!mEditingEnabled)
+			return;
+
 		if (portIndex < mNodeInport.size())
 		{
 			auto node_port = std::dynamic_pointer_cast<QtExportNode>(data);
@@ -215,6 +218,9 @@ namespace Qt
 
 	bool QtNodeWidget::tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData)
 	{
+		if (!mEditingEnabled)
+			return false;
+
 		if (portIndex < mNodeInport.size())
 		{
 			try
@@ -309,4 +315,15 @@ namespace Qt
 	{
 		return mNode->getInputFields();
 	}
+
+	void QtNodeWidget::enableEditing()
+	{
+		mEditingEnabled = true;
+	}
+
+	void QtNodeWidget::disableEditing()
+	{
+		mEditingEnabled = false;
+	}
+
 }

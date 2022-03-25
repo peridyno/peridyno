@@ -27,6 +27,7 @@ namespace dyno
 		format.setMajorVersion(4);
 		format.setMinorVersion(4);
 		format.setSamples(4);
+		format.setSwapInterval(1);
 		format.setProfile(QSurfaceFormat::CoreProfile);
 		setFormat(format);
 

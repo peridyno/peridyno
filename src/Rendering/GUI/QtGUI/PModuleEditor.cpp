@@ -33,7 +33,7 @@ namespace dyno
 			moduleFlowView->getModuleFlowScene()->showNodeFlow(selectedNode);
 
 			// Here is Node's virtual module
-			auto& scene = moduleFlowView->module_scene;
+			auto& scene = moduleFlowView->mModuleFlow;
 			auto c =selectedNode->getClassInfo();
 			auto type = scene->registry().create(QString::fromStdString(c->m_className + "(virtual)"));
 			
@@ -51,6 +51,6 @@ namespace dyno
 			}			
 		}
 
-		connect(moduleFlowView->module_scene, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showBlockProperty);
+		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showNodeProperty);
 	}
 }

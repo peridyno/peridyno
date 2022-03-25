@@ -44,38 +44,6 @@ namespace Qt
 				ret->registerModel<QtModuleWidget>(category, creator);
 			}
 		}
-		if (node_widget != nullptr)
-		{
-			// Build virtual module
-			dyno::Node* selectedNode = node_widget->getNode().get();
-			QString str_vir = QString::fromStdString(selectedNode->getClassInfo()->getClassName() + "(virtual)");
-			if (selectedNode != nullptr)
-			{
-				dyno::Object* obj = dyno::Object::createObject("VirtualModule<DataType3f>");
-				dyno::Module* module_vir = dynamic_cast<dyno::Module*>(obj);
-				if (module_vir != nullptr)
-				{
-					module_vir->setName(str_vir.toStdString());
-					auto& fields = selectedNode->getAllFields();
-					for (auto field : fields)
-					{
-						auto fType = field->getFieldType();
-						if (fType == dyno::FieldTypeEnum::State)
-						{
-							module_vir->addOutputField(field);
-						}
-					}
-					QtDataModelRegistry::RegistryItemCreator creator = [str_vir, module_vir]() {
-						auto dat = std::make_unique<QtModuleWidget>(module_vir);
-						dat->setName(str_vir);
-						return dat; };
-
-					QString category = "Virtual";
-					ret->registerModel<QtModuleWidget>(category, creator);
-				}
-			}
-		}
-
 
 		this->setRegistry(ret);
 	}
@@ -124,27 +92,24 @@ namespace Qt
 
 	void QtModuleFlowScene::showNodeFlow(Node* node)
 	{
-		return;
-		/*	clearScene();
+			clearScene();
 
 			auto mlist = node->getModuleList();
 
-			auto c = node->getAnimationPipeline()->entry();
+			std::map<dyno::ObjectId, QtNode*> moduleMap;
 
-			std::map<std::string, QtBlock*> moduleMap;
-
-			int mSize = node->getAnimationPipeline()->size();
+			auto& activeModules = node->animationPipeline()->activeModules();
 
 
 			auto addModuleWidget = [&](Module* m) -> void
 			{
-				auto module_name = m->getName();
+				auto mId = m->objectId();
 
-				auto type = std::make_unique<QtNodes::QtModuleWidget>(m);
+				auto type = std::make_unique<QtModuleWidget>(m);
 
 				auto& node = this->createNode(std::move(type));
 
-				moduleMap[module_name] = &node;
+				moduleMap[mId] = &node;
 
 				QPointF posView(m->bx(), m->by());
 
@@ -153,57 +118,80 @@ namespace Qt
 				this->nodePlaced(node);
 			};
 
-			addModuleWidget(node->getMechanicalState().get());
+			//Add a virtual module
+			//addModuleWidget(node->getMechanicalState().get());
 
-			for (; c != node->getAnimationPipeline()->finished(); c++)
+			//Create a virtual module
+			Module* states = new Module;
+			auto& fields = node->getAllFields();
+			for (auto field : fields)
 			{
-				addModuleWidget(c.get());
+				if (field->getFieldType() == dyno::FieldTypeEnum::State)
+				{
+					states->addOutputField(field);
+				}
+			}
+
+			addModuleWidget(states);
+
+			for each (auto m in activeModules)
+			{
+				addModuleWidget(m);
 			}
 
 			auto createModuleConnections = [&](Module* m) -> void
 			{
-				auto out_node = moduleMap[m->getName()];
+				auto inId = m->objectId();
 
-				auto fields = m->getOutputFields();
+				if (moduleMap.find(inId) != moduleMap.end()) {
+					auto inBlock = moduleMap[m->objectId()];
 
-				for (int i = 0; i < fields.size(); i++)
-				{
-					auto sink_fields = fields[i]->getSinks();
-					for (int j = 0; j < sink_fields.size(); j++)
+					auto fieldIn = m->getInputFields();
+
+					for (int i = 0; i < fieldIn.size(); i++)
 					{
-						auto in_module = dynamic_cast<Module*>(sink_fields[j]->parent());
-						if (in_module != nullptr)
-						{
-							auto in_fields = in_module->getInputFields();
-
-							int in_port = -1;
-							for (int t = 0; t < in_fields.size(); t++)
+						auto fieldSrc = fieldIn[i]->getSource();
+						if (fieldSrc != nullptr) {
+							auto parSrc = fieldSrc->parent();
+							if (parSrc != nullptr)
 							{
-								if (sink_fields[j] == in_fields[t])
+								Module* nodeSrc = dynamic_cast<Module*>(parSrc);
+								if (nodeSrc == nullptr)
 								{
-									in_port = t;
-									break;
+									nodeSrc = states;
 								}
-							}
 
-							if (in_port != -1)
-							{
-								auto in_node = moduleMap[in_module->getName()];
+								auto outId = nodeSrc->objectId();
+								auto fieldsOut = nodeSrc->getOutputFields();
 
-								createConnection(*in_node, in_port, *out_node, i);
+								uint outFieldIndex = 0;
+								bool fieldFound = false;
+								for (auto f : fieldsOut)
+								{
+									if (f == fieldSrc)
+									{
+										fieldFound = true;
+										break;
+									}
+									outFieldIndex++;
+								}
+
+								if (fieldFound && moduleMap.find(outId) != moduleMap.end())
+								{
+									auto outBlock = moduleMap[outId];
+									createConnection(*inBlock, i, *outBlock, outFieldIndex);
+								}
 							}
 						}
 					}
 				}
-			};*/
+			};
 
-			//TODO: fix
-		// 	createModuleConnections(node->getMechanicalState().get());
-		// 	c = node->getAnimationPipeline()->entry();
-		// 	for (; c != node->getAnimationPipeline()->finished(); c++)
-		// 	{
-		// 		createModuleConnections(c.get());
-		// 	}
+			auto rit = activeModules.rbegin();
+			while (rit != activeModules.rend()) {
+				createModuleConnections(*rit);
+				rit++;
+			}
 	}
 
 	void QtModuleFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)

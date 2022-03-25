@@ -275,6 +275,9 @@ bool Node::addModule(std::shared_ptr<Module> module)
 void Node::initialize()
 {
 	this->resetStates();
+
+	this->animationPipeline()->updateExecutionQueue();
+	this->graphicsPipeline()->updateExecutionQueue();
 }
 
 bool Node::deleteModule(std::shared_ptr<Module> module)

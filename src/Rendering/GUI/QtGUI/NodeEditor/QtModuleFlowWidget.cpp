@@ -24,22 +24,22 @@ namespace Qt
 		QVBoxLayout *l = new QVBoxLayout(this);
 
 		l->addWidget(menuBar);
-		module_scene = new QtModuleFlowScene(this, node_widget);
-		l->addWidget(new QtFlowView(module_scene));
+		mModuleFlow = new QtModuleFlowScene(this, node_widget);
+		l->addWidget(new QtFlowView(mModuleFlow));
 		l->setContentsMargins(0, 0, 0, 0);
 		l->setSpacing(0);
 
 		QObject::connect(saveAction, &QAction::triggered,
-			module_scene, &QtModuleFlowScene::save);
+			mModuleFlow, &QtModuleFlowScene::save);
 
 		QObject::connect(loadAction, &QAction::triggered,
-			module_scene, &QtModuleFlowScene::load);
+			mModuleFlow, &QtModuleFlowScene::load);
 
 		QObject::connect(clearAction, &QAction::triggered,
-			module_scene, &QtModuleFlowScene::clearScene);
+			mModuleFlow, &QtModuleFlowScene::clearScene);
 
 		QObject::connect(pushAction, &QAction::triggered,
-			module_scene, &QtModuleFlowScene::pushModule);
+			mModuleFlow, &QtModuleFlowScene::pushModule);
 	}
 
 	QtModuleFlowWidget::~QtModuleFlowWidget()
