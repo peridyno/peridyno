@@ -15,14 +15,15 @@ LockerButton::LockerButton(QWidget* parent)
 
     m_textLabel = new QLabel;
     m_textLabel->setStyleSheet("QLabel{background-color:transparent;}");
+    this->setFixedSize(1060, 30);
 
     QHBoxLayout* mainLayout = new QHBoxLayout;
     mainLayout->addWidget(m_imageLabel);
     mainLayout->addWidget(m_textLabel);
+    
     mainLayout->setMargin(0);
-    mainLayout->setSpacing(0);
+    mainLayout->setSpacing(10);
     mainLayout->setAlignment(0);
-    //this->setText("66666666666666666666666666666666666666666666666");
     this->setLayout(mainLayout);
     this->setBackgroundRole(QPalette::Dark);
 }
