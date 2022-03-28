@@ -29,7 +29,6 @@ namespace dyno
 
 	private:
 		QLabel* m_displayLabel;
-
 	};
 }
 

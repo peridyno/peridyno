@@ -28,10 +28,10 @@ public:
     QLabel* GetTextHandle();
 
 private:
-    // 按钮图标
-    QLabel* m_imageLabel;
-    // 按钮文字
-    QLabel* m_textLabel;
+   
+    QLabel* mImageLabel;
+    
+    QLabel* mTextLabel;
 };
 
 #endif // LOCKER_BUTTON_H

@@ -483,14 +483,12 @@ namespace dyno
 
 		this->removeAllWidgets();
 
-		QGroupBox* mParamGroup = new QGroupBox();
-		//mParamGroup->setStyleSheet("border:none");
-		QWidget* xxx = new QWidget;
+		QWidget* mPropertyWidget = new QWidget;
 
 		m_sizeButton = new LockerButton;
 		m_sizeButton->setObjectName("LockerButton");
 		m_sizeButton->SetTextLabel(tr("FVar"));
-		m_sizeButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+		m_sizeButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 		m_sizeButton->setStyleSheet("#LockerButton{background-color:transparent}"
 			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
 			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
@@ -501,9 +499,7 @@ namespace dyno
 		m_sizeWidget = new QWidget;
 		//m_sizeWidget->setFixedHeight(100);
 		m_sizeWidget->setVisible(false);
-
 		QLabel* sizeLabel = m_sizeButton->GetTextHandle();
-		sizeLabel->setStyleSheet("QLabel{color:rgba(183,71,42,1)}");
 		sizeLabel->setFont(QFont("大小", 10, QFont::Black));
 
 	
@@ -526,8 +522,8 @@ namespace dyno
 
 		m_states = new LockerButton;
 		m_states->setObjectName("LockerButton");
-		m_states->SetTextLabel(tr("Stata"));
-		m_states->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+		m_states->SetTextLabel(tr("State"));
+		m_states->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 		m_states->setStyleSheet("#LockerButton{background-color:transparent}"
 			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
 			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
@@ -538,7 +534,6 @@ namespace dyno
 		m_statesWidget->setVisible(false);
 
 		QLabel* sizeLabel2 = m_states->GetTextHandle();
-		sizeLabel2->setStyleSheet("QLabel{color:rgba(183,71,42,1)}");
 		sizeLabel2->setFont(QFont("大小", 10, QFont::Black));
 
 		QGridLayout* sizeLayout2 = new QGridLayout;
@@ -559,28 +554,28 @@ namespace dyno
 
 		m_positionButton = new LockerButton;
 		m_positionButton->setObjectName("LockerButton");
-		m_positionButton->SetTextLabel(tr("State"));
-		m_positionButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+		m_positionButton->SetTextLabel(tr("Location"));
+		m_positionButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 		m_positionButton->setStyleSheet("#LockerButton{background-color:transparent}"
 			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
 			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
 
 		QLabel* positionLabel = m_positionButton->GetTextHandle();
-		positionLabel->setStyleSheet("QLabel{color:rgba(183,71,42,1)}");
 		positionLabel->setFont(QFont("大小", 10, QFont::Black));
 		// Position Widget
 		m_positionWidget = new QWidget;
-		m_positionWidget->setFixedHeight(100);
+		//m_positionWidget->setFixedHeight(100);
 		m_positionWidget->setVisible(false);
 
-		QLabel* titleLabel = new QLabel(tr("location"));
+		QLabel* titleLabel = new QLabel(tr("Location"));
 		QLineEdit* titleEdit = new QLineEdit;
-	
+		QPushButton* open = new QPushButton("open");
 
+		QGridLayout* positionLayout = new QGridLayout;
+		positionLayout->addWidget(titleLabel,0,0);
+		positionLayout->addWidget(titleEdit,0,1);
+		positionLayout->addWidget(open,0,2);
 
-		QVBoxLayout* positionLayout = new QVBoxLayout;
-		positionLayout->addWidget(titleLabel);
-		positionLayout->addWidget(titleEdit);
 		m_positionWidget->setLayout(positionLayout);
 
 		QVBoxLayout* vlayout = new QVBoxLayout;
@@ -597,20 +592,20 @@ namespace dyno
 		vlayout->setMargin(0);
 		vlayout->setSpacing(0);
 
-		xxx->setLayout(vlayout);
-		addWidget(xxx);
+		mPropertyWidget->setLayout(vlayout);
+		addWidget(mPropertyWidget);
 
 
 		connect(m_sizeButton, &LockerButton::clicked, [this](bool) {
 			if (m_sizeList % 2)
 			{
-				m_sizeButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+				m_sizeButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 				//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
 				m_sizeWidget->setVisible(false);
 			}
 			else
 			{
-				m_sizeButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control-270.png"));
+				m_sizeButton->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
 				m_sizeWidget->setVisible(true);
 			}
 			m_sizeList++; });
@@ -618,13 +613,13 @@ namespace dyno
 		connect(m_states, &LockerButton::clicked, [this](bool) {
 			if (m_sizeList % 2)
 			{
-				m_states->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+				m_states->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 				//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
 				m_statesWidget->setVisible(false);
 			}
 			else
 			{
-				m_states->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control-270.png"));
+				m_states->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
 				m_statesWidget->setVisible(true);
 			}
 			m_sizeList++; });
@@ -632,12 +627,12 @@ namespace dyno
 		connect(m_positionButton, &LockerButton::clicked, [this](bool) {
 			if (m_positionList % 2)
 			{
-				m_positionButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control.png"));
+				m_positionButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 				m_positionWidget->setVisible(false);
 			}
 			else
 			{
-				m_positionButton->SetImageLabel(QPixmap("E:/Documents/MyCode/peridyno/data/icon/control-270.png"));
+				m_positionButton->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
 				m_positionWidget->setVisible(true);
 			}
 			m_positionList++; });

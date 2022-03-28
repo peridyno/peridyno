@@ -26,17 +26,17 @@ namespace dyno
 		m_end_spinbox->setFixedSize(60, 25);
 		m_end_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		m_end_spinbox->setMaximum(99999);
-		m_end_spinbox->setValue(1);
+		m_end_spinbox->setValue(2000);
 	
 		QGridLayout* GLayout = new QGridLayout;
 
 		m_slider = new PAnimationQSlider(this);
 		
-		QLabel* label1 = new QLabel("0", this);
-		QLabel* label2 = new QLabel("50", this);
-		QLabel* label3 = new QLabel("100", this);
-		QLabel* label4 = new QLabel("150", this);
-		QLabel* label5 = new QLabel("200", this);
+		QLabel* label1 = new QLabel("0");
+		QLabel* label2 = new QLabel("500");
+		QLabel* label3 = new QLabel("1000");
+		QLabel* label4 = new QLabel("1500");
+		QLabel* label5 = new QLabel("2000");
 
 		frameLayout->addWidget(label1, 1, 0,1,1, Qt::AlignTop | Qt::AlignLeft);
 		frameLayout->addWidget(label2, 1, 1,1,1, Qt::AlignTop | Qt::AlignHCenter);
@@ -46,13 +46,35 @@ namespace dyno
 		
 	
 		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
-		//frameLayout->addWidget(m_end_spinbox, 0, 4);
+		
+
+		//connect(m_end_spinbox, &QSpinBox::valueChanged, this,
+		//	[&]() {
+		//	printf(" m_end_spinbox setvalue-----------\n");
+		//		//int maxValue = m_end_spinbox->value();
+		//		//label2->setText(QString(maxValue / 4));
+		//		//label3->setText(QString(maxValue / 2));
+		//		//label4->setText(QString(maxValue / 4 * 3));
+		//	}
+		//);
+
+		connect(m_end_spinbox, static_cast<void (QSpinBox ::*)(int)>(&QSpinBox::valueChanged), this, [=]() {
+				int maxValue = m_end_spinbox->value();
+				label2->setText(QString::number(maxValue/4));
+				label3->setText(QString::number(maxValue / 2));
+				label4->setText(QString::number(maxValue / 4 *3));
+				label5->setText(QString::number(maxValue));
+
+				m_slider->setRange(0, maxValue);
+		});
 
 		connect(m_slider, &PAnimationQSlider::valueChanged, m_end_spinbox,
 			[&]() {
-				m_end_spinbox->setValue(m_slider->value());
+				//m_end_spinbox->setValue(m_slider->value());
 			}
 		);
+
+	
 
 		void(QSpinBox:: * spSignal)(int) = &QSpinBox::valueChanged;
 		connect(m_end_spinbox, spSignal, m_slider, &QSlider::setValue);
@@ -125,7 +147,6 @@ namespace dyno
 
 	void PAnimationWidget::updateSlider() {
 		int CurrentFrameNum = PSimulationThread::instance()->getCurrentFrameNum();
-		printf("CurrentFrameNum = %d \n", CurrentFrameNum);
 		m_end_spinbox->setValue(CurrentFrameNum);
 		m_slider->setValue(CurrentFrameNum);
 	}
