@@ -584,9 +584,10 @@ namespace dyno
 		m_positionWidget->setLayout(positionLayout);
 
 		QVBoxLayout* vlayout = new QVBoxLayout;
-		vlayout->addWidget(m_sizeButton);
-		vlayout->addWidget(m_sizeWidget);
-
+		if(j!=0){
+			vlayout->addWidget(m_sizeButton);
+			vlayout->addWidget(m_sizeWidget);
+		}
 		vlayout->addWidget(m_states);
 		vlayout->addWidget(m_statesWidget);
 

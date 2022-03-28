@@ -28,14 +28,18 @@ namespace dyno
 
 		void setTotalFrames(int num);
 
+		int getCurrentFrameNum();
+
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
+
 		void oneFrameFinished();
 
 	private:
 		PSimulationThread();
 
 		int mFrameNum;
+		int currentFrameNum;
 
 		bool mReset = false;
 		bool mPaused = true;

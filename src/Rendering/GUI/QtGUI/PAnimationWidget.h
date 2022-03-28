@@ -31,6 +31,8 @@ namespace dyno
 
 		void simulationFinished();
 
+		void updateSlider();
+
 	public:
 		QPushButton*	m_startSim;
 		QPushButton*	m_resetSim;
@@ -43,6 +45,7 @@ namespace dyno
 		bool m_sim_started = false;
 		
 		PAnimationQSlider *m_slider;
+
 	};
 }
 

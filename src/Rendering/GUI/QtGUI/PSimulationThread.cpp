@@ -57,13 +57,15 @@ namespace dyno
 					scn->takeOneFrame();
 
 					f++;
+					currentFrameNum = f;
 
 					this->startRendering();
-
+					
 					emit(oneFrameFinished());
 				}
+				
 			}
-//			
+//	
 		}
 	}
 
@@ -85,5 +87,9 @@ namespace dyno
 	void PSimulationThread::setTotalFrames(int num)
 	{
 		mFrameNum = num;
+	}
+
+	int PSimulationThread::getCurrentFrameNum() {
+		return currentFrameNum;
 	}
 }

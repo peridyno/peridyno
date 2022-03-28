@@ -75,6 +75,8 @@ namespace dyno
 		connect(m_resetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(PSimulationThread::instance(), SIGNAL(finished()), this, SLOT(simulationFinished()));
 
+		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
+
 		PSimulationThread::instance()->start();
 	}
 
@@ -89,7 +91,8 @@ namespace dyno
 	{
 		if (m_startSim->isChecked())
 		{
-			PSimulationThread::instance()->setTotalFrames(m_end_spinbox->value());
+			if(m_startSim->text() == "Start")
+				PSimulationThread::instance()->setTotalFrames(m_end_spinbox->value());
 			PSimulationThread::instance()->resume();
 			m_startSim->setText("Pause");
 			m_resetSim->setDisabled(true);
@@ -100,17 +103,31 @@ namespace dyno
 			m_startSim->setText("Resume");
 			m_resetSim->setDisabled(false);
 		}
+	
 	}
 
 	void PAnimationWidget::resetSimulation()
 	{
 		PSimulationThread::instance()->reset();
+		m_startSim->setText("Start");
+		m_startSim->setEnabled(true);
+
+		m_end_spinbox->setValue(0);
+		m_slider->setValue(0);
 	}
 
 	void PAnimationWidget::simulationFinished()
 	{
 		m_startSim->setText("Finished");
 		m_startSim->setDisabled(true);
+		m_resetSim->setDisabled(false);
+	}
+
+	void PAnimationWidget::updateSlider() {
+		int CurrentFrameNum = PSimulationThread::instance()->getCurrentFrameNum();
+		printf("CurrentFrameNum = %d \n", CurrentFrameNum);
+		m_end_spinbox->setValue(CurrentFrameNum);
+		m_slider->setValue(CurrentFrameNum);
 	}
 	
 }
