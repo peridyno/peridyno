@@ -48,15 +48,6 @@ namespace dyno
 		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
 		
 
-		//connect(m_end_spinbox, &QSpinBox::valueChanged, this,
-		//	[&]() {
-		//	printf(" m_end_spinbox setvalue-----------\n");
-		//		//int maxValue = m_end_spinbox->value();
-		//		//label2->setText(QString(maxValue / 4));
-		//		//label3->setText(QString(maxValue / 2));
-		//		//label4->setText(QString(maxValue / 4 * 3));
-		//	}
-		//);
 
 		connect(m_end_spinbox, static_cast<void (QSpinBox ::*)(int)>(&QSpinBox::valueChanged), this, [=]() {
 				int maxValue = m_end_spinbox->value();

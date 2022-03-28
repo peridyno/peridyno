@@ -13,18 +13,21 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QCheckBox>
-#include <QPushButton>
+
 #include <QSlider>
 #include <QSpinBox>
 #include <QRegularExpression>
 #include <QMessageBox>
 
-#include <QLineEdit>
+
 #include <QDoubleValidator>
 #include <QPixmap>
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QDoubleSpinBox>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QFile>
 
 namespace dyno
 {
@@ -483,159 +486,119 @@ namespace dyno
 
 		this->removeAllWidgets();
 
-		QWidget* mPropertyWidget = new QWidget;
+		QWidget* mWidget = new QWidget;
 
-		m_sizeButton = new LockerButton;
-		m_sizeButton->setObjectName("LockerButton");
-		m_sizeButton->SetTextLabel(tr("FVar"));
-		m_sizeButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
-		m_sizeButton->setStyleSheet("#LockerButton{background-color:transparent}"
-			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
-			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
+		
+		std::string mLabel[3] = { {"FVar" }, {"FState" },  {"Location" } };
+		
+		
 
-	
+		int propertyNum[3];
+		
+		int n = 3;//label number
+		for (int i = 0; i < n; i++) {
+			mPropertyLabel[i] = new LockerButton;
+			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
+			mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control.png"));
+			mPropertyLabel[i]->setStyleSheet("#LockerButton{background-color:transparent}"
+				"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
+				"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
 
-		// Size Widget
-		m_sizeWidget = new QWidget;
-		//m_sizeWidget->setFixedHeight(100);
-		m_sizeWidget->setVisible(false);
-		QLabel* sizeLabel = m_sizeButton->GetTextHandle();
-		sizeLabel->setFont(QFont("大小", 10, QFont::Black));
+			mPropertyWidget[i] = new QWidget;
+			mPropertyWidget[i]->setVisible(false);
 
-	
-		QGridLayout* sizeLayout = new QGridLayout;
+			propertyNum[i] = 0;
+
+			mPropertyLayout[i] = new QGridLayout;
+		}
+
+
 		std::vector<FBase*>& fields = base->getAllFields();
-		int j = 0;
 		for each (FBase * var in fields)
 		{
-			if (var != nullptr && var->getFieldType() == FieldTypeEnum::Param)
-			{
-				if (var->getClassName() == std::string("FVar"))
+			if(var != nullptr){
+				if (var->getFieldType() == FieldTypeEnum::Param)
 				{
-					this->addScalarFieldWidget(var, sizeLayout,j);
-					j++;
+					if (var->getClassName() == std::string("FVar"))
+					{
+						this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
+						propertyNum[0]++;
+					}
 				}
+				else if (var->getFieldType() == FieldTypeEnum::State) {
+					auto widget = new QStateFieldWidget(var);
+					connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
+					mPropertyLayout[1]->addWidget(widget);
+
+					propertyNum[1]++;
+				}
+				
+				//add Location
+				QLabel* titleLabel = new QLabel(tr("Location"));
+				QLineEdit*  titleEdit = new QLineEdit;
+				QPushButton* open = new QPushButton("open");
+				
+				connect(open, &QPushButton::clicked, this, [=]() {
+					QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.txt)"));
+					if (!path.isEmpty()) {
+						QFile file(path);
+						if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+							QMessageBox::warning(this, tr("Read File"),
+								tr("Cannot open file:\n%1").arg(path));
+							return;
+						}
+						titleEdit->setText(path);
+						file.close();
+					}
+					else {
+						QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
+					}
+				});
+
+				mPropertyLayout[2]->addWidget(titleLabel, 0, 0);
+				mPropertyLayout[2]->addWidget(titleEdit, 0, 1);
+				mPropertyLayout[2]->addWidget(open, 0, 2);
+				propertyNum[2]++;
+				
 			}
 		}
-		m_sizeWidget->setLayout(sizeLayout);
-
-
-		m_states = new LockerButton;
-		m_states->setObjectName("LockerButton");
-		m_states->SetTextLabel(tr("State"));
-		m_states->SetImageLabel(QPixmap("../../../data/icon/control.png"));
-		m_states->setStyleSheet("#LockerButton{background-color:transparent}"
-			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
-			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
-
-		// Size Widget
-		m_statesWidget = new QWidget;
-		//m_sizeWidget->setFixedHeight(100);
-		m_statesWidget->setVisible(false);
-
-		QLabel* sizeLabel2 = m_states->GetTextHandle();
-		sizeLabel2->setFont(QFont("大小", 10, QFont::Black));
-
-		QGridLayout* sizeLayout2 = new QGridLayout;
-
-		for each (FBase * var in fields)
-		{
-			if (var != nullptr && var->getFieldType() == FieldTypeEnum::State)
-			{
-				auto widget = new QStateFieldWidget(var);
-
-				connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
-
-				sizeLayout2->addWidget(widget);
-			}
-		}
-		m_statesWidget->setLayout(sizeLayout2);
-
-
-		m_positionButton = new LockerButton;
-		m_positionButton->setObjectName("LockerButton");
-		m_positionButton->SetTextLabel(tr("Location"));
-		m_positionButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
-		m_positionButton->setStyleSheet("#LockerButton{background-color:transparent}"
-			"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
-			"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
-
-		QLabel* positionLabel = m_positionButton->GetTextHandle();
-		positionLabel->setFont(QFont("大小", 10, QFont::Black));
-		// Position Widget
-		m_positionWidget = new QWidget;
-		//m_positionWidget->setFixedHeight(100);
-		m_positionWidget->setVisible(false);
-
-		QLabel* titleLabel = new QLabel(tr("Location"));
-		QLineEdit* titleEdit = new QLineEdit;
-		QPushButton* open = new QPushButton("open");
-
-		QGridLayout* positionLayout = new QGridLayout;
-		positionLayout->addWidget(titleLabel,0,0);
-		positionLayout->addWidget(titleEdit,0,1);
-		positionLayout->addWidget(open,0,2);
-
-		m_positionWidget->setLayout(positionLayout);
-
+	
 		QVBoxLayout* vlayout = new QVBoxLayout;
-		if(j!=0){
-			vlayout->addWidget(m_sizeButton);
-			vlayout->addWidget(m_sizeWidget);
-		}
-		vlayout->addWidget(m_states);
-		vlayout->addWidget(m_statesWidget);
+	
+		for (int i = 0; i < n; i++) {
+			mFlag[i] = false;
 
-		vlayout->addWidget(m_positionButton);
-		vlayout->addWidget(m_positionWidget);
+			if(propertyNum[i] != 0){
+				vlayout->addWidget(mPropertyLabel[i]);
+				mPropertyWidget[i]->setLayout(mPropertyLayout[i]);
+				vlayout->addWidget(mPropertyWidget[i]);
+			}
+
+			connect(mPropertyLabel[i], &LockerButton::clicked, [this,i]() {
+				if (mFlag[i])
+				{
+					mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control.png"));
+					//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
+					mPropertyWidget[i]->setVisible(false);
+				}
+				else
+				{
+					mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
+					mPropertyWidget[i]->setVisible(true);
+				}
+				mFlag[i] = !mFlag[i];
+
+				
+			});
+		}
+
 		vlayout->addStretch();
 		vlayout->setMargin(0);
 		vlayout->setSpacing(0);
 
-		mPropertyWidget->setLayout(vlayout);
-		addWidget(mPropertyWidget);
+		mWidget->setLayout(vlayout);
+		addWidget(mWidget);
 
-
-		connect(m_sizeButton, &LockerButton::clicked, [this](bool) {
-			if (m_sizeList % 2)
-			{
-				m_sizeButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
-				//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
-				m_sizeWidget->setVisible(false);
-			}
-			else
-			{
-				m_sizeButton->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
-				m_sizeWidget->setVisible(true);
-			}
-			m_sizeList++; });
-
-		connect(m_states, &LockerButton::clicked, [this](bool) {
-			if (m_sizeList % 2)
-			{
-				m_states->SetImageLabel(QPixmap("../../../data/icon/control.png"));
-				//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
-				m_statesWidget->setVisible(false);
-			}
-			else
-			{
-				m_states->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
-				m_statesWidget->setVisible(true);
-			}
-			m_sizeList++; });
-
-		connect(m_positionButton, &LockerButton::clicked, [this](bool) {
-			if (m_positionList % 2)
-			{
-				m_positionButton->SetImageLabel(QPixmap("../../../data/icon/control.png"));
-				m_positionWidget->setVisible(false);
-			}
-			else
-			{
-				m_positionButton->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
-				m_positionWidget->setVisible(true);
-			}
-			m_positionList++; });
 	}
 
 	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)

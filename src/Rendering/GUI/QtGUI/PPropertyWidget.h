@@ -13,8 +13,8 @@
 #include "LockerButton.h"
 
 #include <vector>
-
-
+#include <QLineEdit>
+#include <QPushButton>
 
 namespace dyno
 {
@@ -174,17 +174,11 @@ namespace dyno
 		QGridLayout* m_scroll_layout;
 
 		std::vector<QWidget*> m_widgets;
-
-
-		LockerButton* m_sizeButton;
-		LockerButton* m_states;
-		LockerButton* m_positionButton;
-		QWidget* m_sizeWidget;
-		QWidget* m_statesWidget;
-
-		QWidget* m_positionWidget;
-		quint8 m_sizeList;
-		quint8 m_positionList;
+		
+		LockerButton* mPropertyLabel[3];
+		QWidget* mPropertyWidget[3];
+		QGridLayout* mPropertyLayout[3];
+		bool mFlag[3];
 
 	};
 
