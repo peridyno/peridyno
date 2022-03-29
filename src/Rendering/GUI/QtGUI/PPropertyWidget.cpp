@@ -499,7 +499,7 @@ namespace dyno
 		for (int i = 0; i < n; i++) {
 			mPropertyLabel[i] = new LockerButton;
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
-			mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control.png"));
+			mPropertyLabel[i]->SetImageLabel(QPixmap("../../data/icon/control.png"));
 			mPropertyLabel[i]->setStyleSheet("#LockerButton{background-color:transparent}"
 				"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
 				"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
@@ -534,7 +534,7 @@ namespace dyno
 				}
 				
 				//add Location
-				QLabel* titleLabel = new QLabel(tr("Location"));
+				QLabel* titleLabel = new QLabel(tr("Topology"));
 				QLineEdit*  titleEdit = new QLineEdit;
 				QPushButton* open = new QPushButton("open");
 				
@@ -577,13 +577,13 @@ namespace dyno
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this,i]() {
 				if (mFlag[i])
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control.png"));
+					mPropertyLabel[i]->SetImageLabel(QPixmap("../../data/icon/control.png"));
 					//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
 					mPropertyWidget[i]->setVisible(false);
 				}
 				else
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
+					mPropertyLabel[i]->SetImageLabel(QPixmap("../../data/icon/control-270.png"));
 					mPropertyWidget[i]->setVisible(true);
 				}
 				mFlag[i] = !mFlag[i];
