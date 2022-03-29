@@ -329,6 +329,64 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+	QStringFieldWidget::QStringFieldWidget(FBase* field) 
+		: QGroupBox()
+	{
+		m_field = field;
+
+		this->setStyleSheet("border:none");
+		QGridLayout* layout = new QGridLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		QLabel* name = new QLabel();
+		name->setFixedSize(160, 18);
+		name->setText(FormatFieldWidgetName(field->getObjectName()));
+
+		location = new QLineEdit;
+
+		QPushButton* open = new QPushButton("open");
+
+		layout->addWidget(name, 0, 0);
+		//layout->addWidget(location, 0, 1);
+		layout->addWidget(open, 0, 1);
+
+		this->connect(location, SIGNAL(valueChanged(std::string str)), this, SLOT(changeValue(std::string str)));
+
+		connect(open, &QPushButton::clicked, this, [=]() {
+			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.txt)"));
+			if (!path.isEmpty()) {
+				QFile file(path);
+				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+					QMessageBox::warning(this, tr("Read File"),
+						tr("Cannot open file:\n%1").arg(path));
+					return;
+				}
+				location->setText(path);
+				file.close();
+			}
+			else {
+				QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
+			}
+		});
+	}
+
+	void QStringFieldWidget::changeValue(std::string str)
+	{
+		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(m_field);
+		if (f == nullptr)
+		{
+			return;
+		}
+
+		f->setValue(str);
+		f->update();
+
+		emit fieldChanged();
+	}
+
 	QStateFieldWidget::QStateFieldWidget(FBase* field)
 	{
 		m_field = field;
@@ -534,7 +592,7 @@ namespace dyno
 				}
 				
 				//add Location
-				QLabel* titleLabel = new QLabel(tr("Location"));
+				QLabel* titleLabel = new QLabel(tr("Topology"));
 				QLineEdit*  titleEdit = new QLineEdit;
 				QPushButton* open = new QPushButton("open");
 				
@@ -630,6 +688,11 @@ namespace dyno
 		else if (template_name == std::string(typeid(Vec3f).name()))
 		{
 			auto fw = new QVector3FieldWidget(field);
+			layout->addWidget(fw, j, 0);
+		}
+		else if (template_name == std::string(typeid(std::string).name()))
+		{
+			auto fw = new QStringFieldWidget(field);
 			layout->addWidget(fw, j, 0);
 		}
 	}

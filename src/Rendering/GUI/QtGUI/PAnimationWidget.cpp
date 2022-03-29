@@ -56,7 +56,7 @@ namespace dyno
 				label4->setText(QString::number(maxValue / 4 *3));
 				label5->setText(QString::number(maxValue));
 
-				m_slider->setRange(0, maxValue);
+				//m_slider->setRange(0, maxValue);
 		});
 
 		connect(m_slider, &PAnimationQSlider::valueChanged, m_end_spinbox,
@@ -125,7 +125,7 @@ namespace dyno
 		m_startSim->setText("Start");
 		m_startSim->setEnabled(true);
 
-		m_end_spinbox->setValue(0);
+		//m_end_spinbox->setValue(0);
 		m_slider->setValue(0);
 	}
 
@@ -138,8 +138,12 @@ namespace dyno
 
 	void PAnimationWidget::updateSlider() {
 		int CurrentFrameNum = PSimulationThread::instance()->getCurrentFrameNum();
-		m_end_spinbox->setValue(CurrentFrameNum);
-		m_slider->setValue(CurrentFrameNum);
+		//m_end_spinbox->setValue(CurrentFrameNum);
+		if(m_startSim->text()==QString("Start"))
+			m_slider->setValue(0);
+		else
+			m_slider->setValue(CurrentFrameNum);
+
 	}
 	
 }
