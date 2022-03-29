@@ -51,6 +51,12 @@ namespace dyno
 
 		void reset();
 
+		void printNodeInfo(bool enabled);
+		void printModuleInfo(bool enabled);
+
+		bool isNodeInfoPrintable() { return mNodeTiming; }
+		bool isModuleInfoPrintable() { return mModuleTiming; }
+
 		virtual bool load(std::string name);
 
 		virtual void invoke(unsigned char type, unsigned char key, int x, int y) {};
@@ -210,6 +216,9 @@ namespace dyno
 		NodeMap mNodeMap;
 
 		NodeList mNodeQueue;
+
+		bool mNodeTiming = false;
+		bool mModuleTiming = false;
 	};
 
 }

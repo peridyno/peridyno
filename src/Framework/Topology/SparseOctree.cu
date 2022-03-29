@@ -1117,7 +1117,7 @@ namespace dyno {
 		m_all_nodes.resize(total_node_num);
 
 
-		std::cout << MAX_LEVEL << ' ' << m_level_max << std::endl;
+		//std::cout << MAX_LEVEL << ' ' << m_level_max << std::endl;
 
 		//step 1.3: create all octree nodes, record the data location using node.setDataIndex().
 		cuExecute(aabb.size(),
@@ -1130,7 +1130,7 @@ namespace dyno {
 			m_level_max);
 
 		//print(m_all_nodes);
-		std::cout << total_node_num << std::endl;
+		//std::cout << total_node_num << std::endl;
 		thrust::sort(thrust::device, m_all_nodes.begin(), m_all_nodes.begin() + m_all_nodes.size(), NodeCmp());
 
 		//print(m_all_nodes);

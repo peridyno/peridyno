@@ -5,6 +5,11 @@
 #include "Action/ActPostProcessing.h"
 #include "SceneLoaderFactory.h"
 
+#include "Timer.h"
+
+#include <sstream>
+#include <iomanip>
+
 namespace dyno
 {
 	SceneGraph& SceneGraph::getInstance()
@@ -78,9 +83,10 @@ namespace dyno
 		class AdvanceAct : public Action
 		{
 		public:
-			AdvanceAct(float dt, float t) {
+			AdvanceAct(float dt, float t, bool bTiming = false) {
 				mDt = dt; 
 				mElapsedTime = t;
+				mTiming = bTiming;
 			};
 
 			void start(Node* node) override {
@@ -97,6 +103,12 @@ namespace dyno
 					Log::sendMessage(Log::Error, "Node is invalid!");
 					return;
 				}
+
+				GTimer timer;
+				if (mTiming) {
+					timer.start();
+				}
+
 				if (node->isActive())
 				{
 					auto customModules = node->getCustomModuleList();
@@ -107,13 +119,27 @@ namespace dyno
 
 					node->update();
 				}
+
+				if (mTiming) {
+					timer.stop();
+
+					std::stringstream name;
+					std::stringstream ss;
+					name << std::setw(40) << node->getClassInfo()->getClassName();
+					ss << std::setprecision(10) << timer.getEclipsedTime();
+					
+					std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
+					Log::sendMessage(Log::Info, info);
+				}
 			}
 
 			float mDt;
 			float mElapsedTime;
+
+			bool mTiming = false;
 		};	
 
-		this->traverseForward<AdvanceAct>(dt, mElapsedTime);
+		this->traverseForward<AdvanceAct>(dt, mElapsedTime, mNodeTiming);
 
 		mElapsedTime += dt;
 	}
@@ -134,7 +160,7 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				dt = std::min(node->getDt(), dt);
+				dt = min(node->getDt(), dt);
 			}
 
 			float dt;
@@ -210,6 +236,16 @@ namespace dyno
 		this->traverseForward<ResetAct>();
 
 		//m_root->traverseBottomUp();
+	}
+
+	void SceneGraph::printNodeInfo(bool enabled)
+	{
+		mNodeTiming = enabled;
+	}
+
+	void SceneGraph::printModuleInfo(bool enabled)
+	{
+		mModuleTiming = enabled;
 	}
 
 	bool SceneGraph::load(std::string name)

@@ -94,6 +94,11 @@ void Node::setSceneGraph(SceneGraph* scn)
 	mSceneGraph = scn;
 }
 
+SceneGraph* Node::getSceneGraph()
+{
+	return mSceneGraph;
+}
+
 Node* Node::addAncestor(Node* anc)
 {
 	if (hasAncestor(anc) || anc == nullptr)
