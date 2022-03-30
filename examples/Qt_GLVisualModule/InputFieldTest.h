@@ -16,6 +16,7 @@
 
 #pragma once
 #include "Node.h"
+#include "FilePath.h"
 
 #include "Topology/PointSet.h"
 
@@ -32,6 +33,8 @@ namespace dyno
 
 	public:
 		void updateStates() override;
+
+		DEF_VAR(FilePath, FileName, std::string(""), "");
 
 		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
 	};

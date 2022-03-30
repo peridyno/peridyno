@@ -1,6 +1,7 @@
 #include "PPropertyWidget.h"
 #include "Module.h"
 #include "Node.h"
+#include "FilePath.h"
 #include "SceneGraph.h"
 
 #include "NodeEditor/QtNodeWidget.h"
@@ -332,7 +333,7 @@ namespace dyno
 	QStringFieldWidget::QStringFieldWidget(FBase* field) 
 		: QGroupBox()
 	{
-		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(field);
+		FVar<FilePath>* f = TypeInfo::cast<FVar<FilePath>>(field);
 
 		this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
@@ -348,7 +349,7 @@ namespace dyno
 		location = new QLineEdit;
 		//location->setText(QString::fromStdString(f->getValue()));
 		printf("sfddsdfds fs %s \n",f->getValue().c_str());
-		std::string xx = f->getValue();
+		auto& xx = f->getValue();
 
 		QPushButton* open = new QPushButton("open");
 		open->setStyleSheet("QPushButton{background-color:rgba(255,225,225,100%);\
@@ -382,7 +383,7 @@ namespace dyno
 
 	void QStringFieldWidget::changeValue(QString str)
 	{
-		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(m_field);
+		auto f = TypeInfo::cast<FVar<FilePath>>(m_field);
 		if (f == nullptr)
 		{
 			return;
@@ -665,7 +666,7 @@ namespace dyno
 			auto fw = new QVector3FieldWidget(field);
 			layout->addWidget(fw, j, 0);
 		}
-		else if (template_name == std::string(typeid(std::string).name()))
+		else if (template_name == std::string(typeid(FilePath).name()))
 		{
 			auto fw = new QStringFieldWidget(field);
 			layout->addWidget(fw, j, 0);
