@@ -348,8 +348,6 @@ namespace dyno
 		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
 		DEF_VAR(Vec3f, Scale, 0, "Node scale");
 
-		DEF_VAR(std::string, Tolopogy, "", "Tolopogy Location");
-
 		std::string m_node_name;
 
 		/**
