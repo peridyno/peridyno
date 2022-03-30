@@ -1,7 +1,12 @@
 #include "Pipeline.h"
 #include "Node.h"
+#include "SceneGraph.h"
 #include "DirectedAcyclicGraph.h"
 
+#include "Timer.h"
+
+#include <sstream>
+#include <iomanip>
 #include <queue>
 #include <set>
 
@@ -80,6 +85,11 @@ namespace dyno
 		reconstructPipeline();
 	}
 
+	void Pipeline::printModuleInfo(bool enabled)
+	{
+		mTiming = enabled;
+	}
+
 	void Pipeline::preprocess()
 	{
 		if (mModuleUpdated)
@@ -93,9 +103,27 @@ namespace dyno
 	{
 		if (mUpdateEnabled)
 		{
+			GTimer timer;
 			for each (auto m in mModuleList)
 			{
+				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
+					timer.start();
+				}
+
+				//update the module
 				m->update();
+
+				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
+					timer.stop();
+
+					std::stringstream name;
+					std::stringstream ss;
+					name << std::setw(40) << m->getClassInfo()->getClassName();
+					ss << std::setprecision(10) << timer.getEclipsedTime();
+
+					std::string info = "\t Module: " + name.str() + ": \t " + ss.str() + "ms";
+					Log::sendMessage(Log::Info, info);
+				}
 			}
 		}
 	}

@@ -71,6 +71,7 @@ namespace dyno
 		// 	Iterator end();
 
 		void setSceneGraph(SceneGraph* scn);
+		SceneGraph* getSceneGraph();
 
 		/**
 		 * @brief Add a ancestor

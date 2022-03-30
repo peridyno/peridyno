@@ -45,6 +45,8 @@ namespace dyno
 
 		void updateExecutionQueue();
 
+		void printModuleInfo(bool enabled);
+
 	protected:
 		void preprocess() final;
 		void updateImpl() override;
@@ -64,6 +66,8 @@ namespace dyno
 		std::list<Module*> mPersistentModule;
 
 		Node* mNode;
+
+		bool mTiming = false;
 	};
 }
 
