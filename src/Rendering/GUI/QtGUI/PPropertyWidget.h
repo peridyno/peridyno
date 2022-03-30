@@ -127,7 +127,7 @@ namespace dyno
 		void fieldChanged();
 
 	public slots:
-		void changeValue(std::string);
+		void changeValue(QString str);
 
 	private:
 		FBase* m_field = nullptr;

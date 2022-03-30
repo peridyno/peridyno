@@ -332,7 +332,7 @@ namespace dyno
 	QStringFieldWidget::QStringFieldWidget(FBase* field) 
 		: QGroupBox()
 	{
-		m_field = field;
+		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(field);
 
 		this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
@@ -346,14 +346,21 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		location = new QLineEdit;
+		//location->setText(QString::fromStdString(f->getValue()));
+		printf("sfddsdfds fs %s \n",f->getValue().c_str());
+		std::string xx = f->getValue();
 
 		QPushButton* open = new QPushButton("open");
-
+		open->setStyleSheet("QPushButton{background-color:rgba(255,225,225,100%);\
+                             color: black;   border-radius: 10px;  border: 2px groove gray; border-style: outset;}" // 按键本色
+							"QPushButton:hover{background-color:white; color: black;}"  // 鼠标停放时的色彩
+							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }"   // 鼠标按下的色彩
+			);
 		layout->addWidget(name, 0, 0);
-		//layout->addWidget(location, 0, 1);
-		layout->addWidget(open, 0, 1);
+		layout->addWidget(location, 0, 1);
+		layout->addWidget(open, 0, 2);
 
-		this->connect(location, SIGNAL(valueChanged(std::string str)), this, SLOT(changeValue(std::string str)));
+		connect(location, &QLineEdit::textChanged, this, &QStringFieldWidget::changeValue);
 
 		connect(open, &QPushButton::clicked, this, [=]() {
 			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.txt)"));
@@ -373,15 +380,14 @@ namespace dyno
 		});
 	}
 
-	void QStringFieldWidget::changeValue(std::string str)
+	void QStringFieldWidget::changeValue(QString str)
 	{
 		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(m_field);
 		if (f == nullptr)
 		{
 			return;
 		}
-
-		f->setValue(str);
+		f->setValue(str.toStdString());
 		f->update();
 
 		emit fieldChanged();
@@ -545,19 +551,16 @@ namespace dyno
 		this->removeAllWidgets();
 
 		QWidget* mWidget = new QWidget;
-
+	
+		std::string mLabel[2] = { {"FVar" }, {"FState" }};
 		
-		std::string mLabel[3] = { {"FVar" }, {"FState" },  {"Location" } };
+		int propertyNum[2];
 		
-		
-
-		int propertyNum[3];
-		
-		int n = 3;//label number
+		int n = 2;//label number
 		for (int i = 0; i < n; i++) {
 			mPropertyLabel[i] = new LockerButton;
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
-			mPropertyLabel[i]->SetImageLabel(QPixmap("../../data/icon/control.png"));
+			mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 			mPropertyLabel[i]->setStyleSheet("#LockerButton{background-color:transparent}"
 				"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
 				"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
@@ -590,34 +593,6 @@ namespace dyno
 
 					propertyNum[1]++;
 				}
-				
-				//add Location
-				QLabel* titleLabel = new QLabel(tr("Topology"));
-				QLineEdit*  titleEdit = new QLineEdit;
-				QPushButton* open = new QPushButton("open");
-				
-				connect(open, &QPushButton::clicked, this, [=]() {
-					QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.txt)"));
-					if (!path.isEmpty()) {
-						QFile file(path);
-						if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-							QMessageBox::warning(this, tr("Read File"),
-								tr("Cannot open file:\n%1").arg(path));
-							return;
-						}
-						titleEdit->setText(path);
-						file.close();
-					}
-					else {
-						QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
-					}
-				});
-
-				mPropertyLayout[2]->addWidget(titleLabel, 0, 0);
-				mPropertyLayout[2]->addWidget(titleEdit, 0, 1);
-				mPropertyLayout[2]->addWidget(open, 0, 2);
-				propertyNum[2]++;
-				
 			}
 		}
 	
@@ -635,13 +610,13 @@ namespace dyno
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this,i]() {
 				if (mFlag[i])
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap("../../data/icon/control.png"));
+					mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control.png"));
 					//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
 					mPropertyWidget[i]->setVisible(false);
 				}
 				else
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap("../../data/icon/control-270.png"));
+					mPropertyLabel[i]->SetImageLabel(QPixmap("../../../data/icon/control-270.png"));
 					mPropertyWidget[i]->setVisible(true);
 				}
 				mFlag[i] = !mFlag[i];
