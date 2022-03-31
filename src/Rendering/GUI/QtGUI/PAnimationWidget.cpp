@@ -48,27 +48,21 @@ namespace dyno
 		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
 		
 
-
+		
 		connect(m_end_spinbox, static_cast<void (QSpinBox ::*)(int)>(&QSpinBox::valueChanged), this, [=]() {
 				int maxValue = m_end_spinbox->value();
 				label2->setText(QString::number(maxValue/4));
 				label3->setText(QString::number(maxValue / 2));
 				label4->setText(QString::number(maxValue / 4 *3));
 				label5->setText(QString::number(maxValue));
-
-				//m_slider->setRange(0, maxValue);
+				m_slider->setValue(0);
+				m_slider->setRange(0, maxValue);
 		});
-
-		connect(m_slider, &PAnimationQSlider::valueChanged, m_end_spinbox,
-			[&]() {
-				//m_end_spinbox->setValue(m_slider->value());
-			}
-		);
-
+		
 	
 
 		void(QSpinBox:: * spSignal)(int) = &QSpinBox::valueChanged;
-		connect(m_end_spinbox, spSignal, m_slider, &QSlider::setValue);
+		//connect(m_end_spinbox, spSignal, m_slider, &QSlider::setValue);
 	
 		QGridLayout* operationLayout = new QGridLayout();
 

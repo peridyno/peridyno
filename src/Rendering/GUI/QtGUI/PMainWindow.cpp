@@ -434,6 +434,7 @@ namespace dyno
 		PDockWidget *propertyDockWidget = new PDockWidget(tr(sets[2].name), this, Qt::WindowFlags(sets[2].flags));
 		propertyDockWidget->setWindowTitle("Property Editor");
 		propertyDockWidget->setWindowIcon(qtIcon);
+		propertyDockWidget->setMinimumWidth(580);
 		addDockWidget(sets[2].area, propertyDockWidget);
 		m_propertyWidget = new PPropertyWidget();
 		propertyDockWidget->setWidget(m_propertyWidget);

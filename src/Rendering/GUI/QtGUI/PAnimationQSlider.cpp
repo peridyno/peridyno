@@ -9,14 +9,14 @@ namespace dyno
 		QSlider(parent)
 	{
 		m_displayLabel = new QLabel(this);
-		m_displayLabel->setFixedSize(QSize(20, 20));
+		m_displayLabel->setFixedSize(QSize(30, 20));
 
 		m_displayLabel->setAlignment(Qt::AlignCenter);
 
 		this->setRange(0, 2000);
 		this->setSingleStep(100);
 		this->setOrientation(Qt::Horizontal);
-
+		this->setMinimumWidth(180);
 		this->setTickPosition(QSlider::TicksAbove);
 
 	}
