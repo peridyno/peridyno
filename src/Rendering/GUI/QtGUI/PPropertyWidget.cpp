@@ -337,6 +337,8 @@ namespace dyno
 	QStringFieldWidget::QStringFieldWidget(FBase* field) 
 		: QGroupBox()
 	{
+		m_field = field;
+		
 		FVar<FilePath>* f = TypeInfo::cast<FVar<FilePath>>(field);
 
 		this->setStyleSheet("border:none");
@@ -351,14 +353,13 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		location = new QLineEdit;
-		auto& xx = f->getValue();
+		location->setText(QString::fromStdString(f->getValue().string()));
 
 		QPushButton* open = new QPushButton("open");
-		open->setStyleSheet("QPushButton{background-color:rgba(255,225,225,100%);\
-                             color: black;   border-radius: 10px;  border: 2px groove gray; border-style: outset;}" // 按键本色
-							"QPushButton:hover{background-color:white; color: black;}"  // 鼠标停放时的色彩
-							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }"   // 鼠标按下的色彩
-			);
+		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
+							"QPushButton:hover{background-color:white; color: black;}"  
+							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
+
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(location, 0, 1);
 		layout->addWidget(open, 0, 2);
@@ -366,7 +367,7 @@ namespace dyno
 		connect(location, &QLineEdit::textChanged, this, &QStringFieldWidget::changeValue);
 
 		connect(open, &QPushButton::clicked, this, [=]() {
-			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.txt)"));
+			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.obj)"));
 			if (!path.isEmpty()) {
 				QFile file(path);
 				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

@@ -32,29 +32,54 @@ namespace dyno
 
 		m_slider = new PAnimationQSlider(this);
 		
-		QLabel* label1 = new QLabel("0");
-		QLabel* label2 = new QLabel("500");
-		QLabel* label3 = new QLabel("1000");
-		QLabel* label4 = new QLabel("1500");
-		QLabel* label5 = new QLabel("2000");
-
-		frameLayout->addWidget(label1, 1, 0,1,1, Qt::AlignTop | Qt::AlignLeft);
-		frameLayout->addWidget(label2, 1, 1,1,1, Qt::AlignTop | Qt::AlignHCenter);
-		frameLayout->addWidget(label3, 1, 2,1,2, Qt::AlignTop | Qt::AlignHCenter);
-		frameLayout->addWidget(label4, 1, 4,1,1, Qt::AlignTop | Qt::AlignHCenter);
-		frameLayout->addWidget(label5, 1, 5,1,1, Qt::AlignTop | Qt::AlignRight);
-		
 	
-		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
+		QLabel* label0 = new QLabel("0");
+		QLabel* label1 = new QLabel("400");
+		QLabel* label2 = new QLabel("800");
+		QLabel* label3 = new QLabel("1200");
+		QLabel* label4 = new QLabel("1600");
+		QLabel* label5 = new QLabel("2000");
+	
+
+		
+		frameLayout->addWidget(label0, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignLeft);
+		frameLayout->addWidget(label1, 1, 1, 1, 2, Qt::AlignTop | Qt::AlignCenter);
+		frameLayout->addWidget(label2, 1, 3, 1, 2, Qt::AlignTop | Qt::AlignCenter);
+		frameLayout->addWidget(label3, 1, 5, 1, 2, Qt::AlignTop | Qt::AlignCenter);
+		frameLayout->addWidget(label4, 1, 7, 1, 2, Qt::AlignTop | Qt::AlignCenter);
+		frameLayout->addWidget(label5, 1, 9, 1, 1, Qt::AlignTop | Qt::AlignRight);
+
+		frameLayout->addWidget(m_slider, 0, 0, 0 ,10);
 		
 
 		
 		connect(m_end_spinbox, static_cast<void (QSpinBox ::*)(int)>(&QSpinBox::valueChanged), this, [=]() {
+		
 				int maxValue = m_end_spinbox->value();
-				label2->setText(QString::number(maxValue/4));
-				label3->setText(QString::number(maxValue / 2));
-				label4->setText(QString::number(maxValue / 4 *3));
+				if (maxValue < 5)maxValue = 5;
+
+				if (maxValue % 10 != 0) {
+					int division = maxValue / 10;
+					maxValue = (division + 1) * 10;
+				}
+
+				if(maxValue < 50)
+					m_slider->setSingleStep(1);
+				else if(maxValue < 100)
+					m_slider->setSingleStep(5);
+				else if (maxValue < 150)
+					m_slider->setSingleStep(10);
+				else{
+					m_slider->setSingleStep(maxValue/20);
+				}
+					
+
+				label1->setText(QString::number(maxValue / 10 * 2));
+				label2->setText(QString::number(maxValue / 10 * 4));
+				label3->setText(QString::number(maxValue / 10 * 6));
+				label4->setText(QString::number(maxValue / 10 * 8));
 				label5->setText(QString::number(maxValue));
+						
 				m_slider->setValue(0);
 				m_slider->setRange(0, maxValue);
 		});
