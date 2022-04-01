@@ -26,7 +26,7 @@ namespace dyno {
     void QtApp::createWindow(int width, int height)
     {
         m_mainWindow = std::make_shared<PMainWindow>(renderEngine().get());
-        m_mainWindow->resize(1024, 768);
+        m_mainWindow->resize(width, height);
     }
 
     void QtApp::mainLoop()

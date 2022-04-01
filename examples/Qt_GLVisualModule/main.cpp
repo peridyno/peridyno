@@ -41,10 +41,10 @@ std::shared_ptr<SceneGraph> createScene()
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-	fluid->connect(boundary->importParticleSystems());
+// 	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+// 	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
+// 	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
+// 	fluid->connect(boundary->importParticleSystems());
 
 	auto visualizer = scn->addNode(std::make_shared<NodePortConnectionTest<DataType3f>>());
 	fluid->connect(visualizer->importParticleSystem());

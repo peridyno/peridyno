@@ -64,8 +64,6 @@ namespace Qt
 
 	void QtNodeFlowScene::showSceneGraph()
 	{
-		clearScene();
-
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 
 		std::map<dyno::ObjectId, QtNode*> nodeMap;
@@ -199,6 +197,21 @@ namespace Qt
 	void QtNodeFlowScene::updateSceneGraph()
 	{
 		disableEditing();
+
+		clearScene();
+
+		showSceneGraph();
+
+		enableEditing();
+	}
+
+	void QtNodeFlowScene::fieldUpdated(dyno::FBase* field, int status)
+	{
+		disableEditing();
+
+		clearScene();
+
+		auto f = status == Qt::Checked ? field->promoteOuput() : field->demoteOuput();
 
 		showSceneGraph();
 

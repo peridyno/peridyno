@@ -83,7 +83,7 @@ namespace dyno
 
 	QSize QDoubleSpinner::sizeHint() const
 	{
-		return QSize(90, 20);
+		return QSize(30, 20);
 	}
 
 	QDoubleSpinner::QDoubleSpinner(QWidget* pParent /*= NULL*/) :

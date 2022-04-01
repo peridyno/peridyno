@@ -187,13 +187,13 @@ namespace dyno
 		//slider->setFixedSize(80,18);
 		//slider->setRange(m_field->getMin(), m_field->getMax());
 		slider->setRange(0, 1);
-		slider->setMinimumWidth(300);
+		slider->setMinimumWidth(180);
 
 		QLabel* spc = new QLabel();
 		spc->setFixedSize(10, 18);
 
 		QDoubleSpinner* spinner = new QDoubleSpinner;
-		spinner->setFixedSize(50, 18);
+		spinner->setFixedSize(80, 18);
 		//spinner->setRange(m_field->getMin(), m_field->getMax());
 		spinner->setRange(0, 1);
 
@@ -259,12 +259,15 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		spinner1 = new QDoubleSpinner;
+		spinner1->setMinimumWidth(30);
 		spinner1->setRange(m_field->getMin(), m_field->getMax());
 
 		spinner2 = new QDoubleSpinner;
+		spinner2->setMinimumWidth(30);
 		spinner2->setRange(m_field->getMin(), m_field->getMax());
 
 		spinner3 = new QDoubleSpinner;
+		spinner3->setMinimumWidth(30);
 		spinner3->setRange(m_field->getMin(), m_field->getMax());
 
 		layout->addWidget(name, 0, 0);
@@ -427,17 +430,7 @@ namespace dyno
 
 	void QStateFieldWidget::tagAsOuput(int status)
 	{
-		if (status == Qt::Checked)
-		{
-			m_field->promoteOuput();
-		}
-		else
-		{
-			m_field->demoteOuput();
-		}
-		
-
-		fieldTypeChanged();
+		emit stateUpdated(m_field, status);
 	}
 
 	//QWidget-->QVBoxLayout-->QScrollArea-->QWidget-->QGridLayout
@@ -552,7 +545,7 @@ namespace dyno
 
 		QWidget* mWidget = new QWidget;
 
-		std::string mLabel[2] = { {"FVar" }, {"FState" } };
+		std::string mLabel[2] = { {" Control Variables" }, {" State Variables" } };
 
 		int propertyNum[2];
 
@@ -587,10 +580,7 @@ namespace dyno
 					}
 				}
 				else if (var->getFieldType() == FieldTypeEnum::State) {
-					auto widget = new QStateFieldWidget(var);
-					connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
-					mPropertyLayout[1]->addWidget(widget);
-
+					this->addStateFieldWidget(var);
 					propertyNum[1]++;
 				}
 			}
@@ -688,9 +678,7 @@ namespace dyno
 	void PPropertyWidget::addStateFieldWidget(FBase* field)
 	{
 		auto widget = new QStateFieldWidget(field);
-
-		connect(widget, &QStateFieldWidget::fieldTypeChanged, this, &PPropertyWidget::fieldUpdated);
-
-		this->addWidget(widget);
+		connect(widget, &QStateFieldWidget::stateUpdated, this, &PPropertyWidget::fieldUpdated);
+		mPropertyLayout[1]->addWidget(widget);
 	}
 }

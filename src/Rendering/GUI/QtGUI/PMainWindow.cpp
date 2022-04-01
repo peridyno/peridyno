@@ -452,7 +452,7 @@ namespace dyno
 
 		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
-		connect(m_propertyWidget, &PPropertyWidget::fieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateSceneGraph);
+		connect(m_propertyWidget, &PPropertyWidget::fieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::fieldUpdated);
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)

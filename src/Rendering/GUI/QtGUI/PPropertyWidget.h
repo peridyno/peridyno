@@ -143,7 +143,7 @@ namespace dyno
 		~QStateFieldWidget() {};
 
 	Q_SIGNALS:
-		void fieldTypeChanged();
+		void stateUpdated(FBase* field, int status);
 
 	public slots:
 		void tagAsOuput(int status);
@@ -168,7 +168,7 @@ namespace dyno
 		void removeAllWidgets();
 
 	signals:
-		void fieldUpdated();
+		void fieldUpdated(FBase* field, int status);
 
 	public slots:
 		void showProperty(Module* module);

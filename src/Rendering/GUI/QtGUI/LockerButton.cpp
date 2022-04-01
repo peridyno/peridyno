@@ -15,7 +15,7 @@ LockerButton::LockerButton(QWidget* parent)
 
     mTextLabel = new QLabel;
     mTextLabel->setStyleSheet("QLabel{background-color:transparent;}");
-    mTextLabel->setFont(QFont("大小", 10, QFont::Black));
+    //mTextLabel->setFont(QFont("大小", 8, QFont::Black));
 
     QHBoxLayout* mainLayout = new QHBoxLayout;
     mainLayout->addWidget(mImageLabel);

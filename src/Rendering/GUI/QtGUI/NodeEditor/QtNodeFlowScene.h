@@ -3,6 +3,7 @@
 #include "nodes/QFlowScene"
 
 #include "SceneGraph.h"
+#include "FBase.h"
 
 namespace Qt
 {
@@ -38,6 +39,8 @@ public Q_SLOTS:
 	 * @brief Update the view only for the active scene graph, the data model will be changed.
 	 */
 	void updateSceneGraph();
+
+	void fieldUpdated(dyno::FBase* field, int status);
 
 	void moveModulePosition(QtNode& n, const QPointF& newLocation);
 

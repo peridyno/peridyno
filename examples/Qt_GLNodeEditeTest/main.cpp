@@ -21,7 +21,7 @@ int main()
 
 	QtApp window;
 	window.setSceneGraph(scn);
-	window.createWindow(1024, 768);
+	window.createWindow(1360, 768);
 	window.mainLoop();
 
 	return 0;
