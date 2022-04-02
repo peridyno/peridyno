@@ -25,7 +25,6 @@
 #include <QPixmap>
 #include <QHBoxLayout>
 #include <QGridLayout>
-#include <QDoubleSpinBox>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
@@ -241,6 +240,15 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
+		: QDoubleSpinBox(parent)
+	{
+		
+	}
+	void mDoubleSpinBox::wheelEvent(QWheelEvent* event)
+	{
+		
+	}
 
 	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
 		: QGroupBox()
@@ -258,15 +266,15 @@ namespace dyno
 		name->setFixedSize(100, 18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		spinner1 = new QDoubleSpinner;
+		spinner1 = new mDoubleSpinBox;
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(m_field->getMin(), m_field->getMax());
-
-		spinner2 = new QDoubleSpinner;
+	
+		spinner2 = new mDoubleSpinBox;
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(m_field->getMin(), m_field->getMax());
 
-		spinner3 = new QDoubleSpinner;
+		spinner3 = new mDoubleSpinBox;
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(m_field->getMin(), m_field->getMax());
 

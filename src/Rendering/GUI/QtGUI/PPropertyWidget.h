@@ -15,7 +15,7 @@
 #include <vector>
 #include <QLineEdit>
 #include <QPushButton>
-
+#include <QDoubleSpinBox>
 namespace dyno
 {
 	class Node;
@@ -95,6 +95,18 @@ namespace dyno
 	};
 
 
+	class mDoubleSpinBox : public QDoubleSpinBox
+	{
+		Q_OBJECT
+	public:
+		explicit mDoubleSpinBox(QWidget* parent = nullptr);
+	private:
+		//Prohibited to use
+		void wheelEvent(QWheelEvent* event);
+	signals:
+	public slots:
+	};
+
 	class QVector3FieldWidget : public QGroupBox
 	{
 		Q_OBJECT
@@ -111,9 +123,9 @@ namespace dyno
 	private:
 		FBase* m_field = nullptr;
 
-		QDoubleSpinner* spinner1;
-		QDoubleSpinner* spinner2;
-		QDoubleSpinner* spinner3;
+		mDoubleSpinBox* spinner1;
+		mDoubleSpinBox* spinner2;
+		mDoubleSpinBox* spinner3;
 	};
 
 	class QStringFieldWidget : public QGroupBox
