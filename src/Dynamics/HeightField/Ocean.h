@@ -68,7 +68,6 @@ namespace dyno
 		int Nx = 2;
 		int Ny = 2;
 
-		OceanPatch<TDataType>* tmpC;
 	};
 	IMPLEMENT_TCLASS(Ocean, TDataType)
 }

@@ -20,17 +20,15 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto root = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 	
-	auto oceanPatch = std::make_shared<OceanPatch<DataType3f>>(512, 512, 4);
+	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512, 4));
 	oceanPatch->connect(root->importOceanPatch());
-	root->initialize();
-	
-	
-	auto capillaryWave = std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f);
-	//capillaryWave->connect(root->importCapillaryWaves());
+
+	auto capillaryWave = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
+	capillaryWave->connect(root->importCapillaryWaves());
 	
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-	mapper->varScale()->setValue(0.2);
+	mapper->varScale()->setValue(0.01);
 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
 
 	root->stateTopology()->connect(mapper->inHeightField());

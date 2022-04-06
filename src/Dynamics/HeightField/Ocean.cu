@@ -25,7 +25,7 @@ namespace dyno
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		this->stateTopology()->setDataPtr(heights);
 
-		m_eclipsedTime = 0.0f;
+		m_eclipsedTime = 0;
 
 		m_virtualGridSize = 0.1f;
 
@@ -55,10 +55,8 @@ namespace dyno
 	
 			float h = patch->getGridSpacing();
 			topo->setExtents(Nx * patch->width(), Ny * patch->height());
-			//topo->setGridSpacing(h);
+			topo->setGridSpacing(h);
 			topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
-
-			tmpC = m_patch;
 		
 		}
 	}
@@ -126,10 +124,6 @@ namespace dyno
 	{
 		auto m_patch = this->getOceanPatch();
 
-		if (m_patch == NULL) {
-			m_patch = tmpC;
-		}
-
 		m_patch->animate(m_eclipsedTime);
 
 		m_eclipsedTime += dt;
@@ -149,7 +143,7 @@ namespace dyno
 		O_InitOceanWave << < blocksPerGrid, threadsPerBlock >> > (
 			topo->getDisplacement(),
 			topoPatch->getDisplacement());
-		/*
+		
 		auto capillaryWaves = this->getCapillaryWaves();
 		for(int i = 0; i < capillaryWaves.size(); i++){
 			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->stateTopology()->getDataPtr());
@@ -157,7 +151,7 @@ namespace dyno
 				topo->getDisplacement(),
 				topoCapillaryWave->getDisplacement());
 		}
-		*/
+		
 	}
 
 	template<typename TDataType>
