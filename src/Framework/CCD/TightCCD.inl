@@ -219,7 +219,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	inline DYN_FUNC bool VertexFaceCCD(
+	DYN_FUNC bool TightCCD<T>::VertexFaceCCD(
 		const Vector<T, 3>& p0, const Vector<T, 3>& a0, const Vector<T, 3>& b0, const Vector<T, 3>& c0,
 		const Vector<T, 3>& p1, const Vector<T, 3>& a1, const Vector<T, 3>& b1, const Vector<T, 3>& c1,
 		T& time)
@@ -237,7 +237,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	inline DYN_FUNC bool EdgeEdgeCCD(
+	DYN_FUNC bool TightCCD<T>::EdgeEdgeCCD(
 		const Vector<T, 3>& a0, const Vector<T, 3>& b0, const Vector<T, 3>& c0, const Vector<T, 3>& d0,
 		const Vector<T, 3>& a1, const Vector<T, 3>& b1, const Vector<T, 3>& c1, const Vector<T, 3>& d1,
 		T& time)
@@ -252,5 +252,78 @@ namespace dyno
 		Vector<T, 3> v3 = d1 - d0 - v0;
 
 		return CollisionTest(a0, p1, p2, p3, v0, v1, v2, v3, time, 1);
+	}
+
+	template<typename T>
+	DYN_FUNC bool TightCCD<T>::TriangleCCD(TTriangle3D<Real>& s0, TTriangle3D<Real>& s1, TTriangle3D<Real>& t0, TTriangle3D<Real>& t1, Real& toi)
+	{
+		Vector<Real, 3> p[3];
+		p[0] = s0.v[0];
+		p[1] = s0.v[1];
+		p[2] = s0.v[2];
+
+		Vector<Real, 3> pp[3];
+		pp[0] = s1.v[0];
+		pp[1] = s1.v[1];
+		pp[2] = s1.v[2];
+
+		Vector<Real, 3> q[3];
+		q[0] = t0.v[0];
+		q[1] = t0.v[1];
+		q[2] = t0.v[2];
+
+		Vector<Real, 3> qq[3];
+		qq[0] = t1.v[0];
+		qq[1] = t1.v[1];
+		qq[2] = t1.v[2];
+
+		///*
+		//VF
+		bool ret = false;
+		for (int st = 0; st < 3; st++)
+		{
+			Real t = Real(1);
+			bool collided = VertexFaceCCD(
+				p[st], q[0], q[1], q[2],
+				pp[st], qq[0], qq[1], qq[2],
+				t);
+
+			toi = collided ? minimum(t, toi) : toi;
+			ret |= collided;
+		}
+
+		//VF
+		for (int st = 0; st < 3; st++)
+		{
+			Real t = Real(1);
+			bool collided = VertexFaceCCD(q[st], p[0], p[1], p[2],
+				qq[st], pp[0], pp[1], pp[2],
+				t);
+			toi = collided ? minimum(t, toi) : toi;
+			ret |= collided;
+		}
+
+		//EE
+		for (int st = 0; st < 3; st++)
+		{
+			int ind0 = st;
+			int ind1 = (st + 1) % 3;
+			for (int ss = 0; ss < 3; ss++)
+			{
+				int ind2 = st;
+				int ind3 = (st + 1) % 3;
+
+				Real t = Real(1);
+				bool collided = EdgeEdgeCCD(
+					p[ind0], p[ind1], q[ind2], q[ind3],
+					pp[ind0], pp[ind1], qq[ind2], qq[ind3],
+					t);
+
+				toi = collided ? minimum(t, toi) : toi;
+				ret |= collided;
+			}
+		}
+
+		return ret;
 	}
 }
