@@ -279,6 +279,19 @@ namespace dyno
 		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
 			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
 
+			tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
+			auto m_page = MainPage->AddGroup("");
+
+			for (int j = 0; j < m_tbl.ico.size(); j++) {
+				//Add subtabs
+				QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
+				m_page->AddAction(QToolButton::DelayedPopup, art);
+
+				if (i == 2 || i == 5 || i == 3) {//add connect event 
+					connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
+				}
+			}
+			/*
 			//Add file¡¢edit and help ToolBar tab
 			if (m_tbl.tabPageName == "File" || m_tbl.tabPageName == "Edit" || m_tbl.tabPageName == "Help") {
 				//Add main tab
@@ -306,6 +319,7 @@ namespace dyno
 					}
 				}
 			}
+			*/
 		}
 
 	}
