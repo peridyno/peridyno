@@ -60,13 +60,160 @@ namespace dyno
 		}
 	}
 
+	template <typename Coord>
+	__device__ float C_GetU(Coord gp)
+	{
+		float h = max(gp.x, 0.0f);
+		float uh = gp.y;
+
+		float h4 = h * h * h * h;
+		return sqrtf(2.0f) * h * uh / (sqrtf(h4 + max(h4, EPSILON)));
+	}
+
+	template <typename Coord>
+	__device__ float C_GetV(Coord gp)
+	{
+		float h = max(gp.x, 0.0f);
+		float vh = gp.z;
+
+		float h4 = h * h * h * h;
+		return sqrtf(2.0f) * h * vh / (sqrtf(h4 + max(h4, EPSILON)));
+	}
+
+	template <typename Coord>
+	__global__ void C_AddSource(
+		DArray2D<Coord> grid_next,
+		DArray2D<Coord> grid,
+		DArray2D<Vec2f> mSource,
+		int patchSize,
+		int pitchSize)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		int j = threadIdx.y + blockIdx.y * blockDim.y;
+		if (i < patchSize && j < patchSize)
+		{
+			int gx = i + 1;
+			int gy = j + 1;
+
+			Coord gp = grid[ gx + gy * pitchSize];
+			Vec2f s_ij = mSource[i + j * patchSize];
+
+			float h = gp.x;
+			float u = C_GetU(gp);
+			float v = C_GetV(gp);
+			float length = sqrt(s_ij.x * s_ij.x + s_ij.y * s_ij.y);
+			if (length > 0.001f)
+			{
+				u += s_ij.x;
+				v += s_ij.y;
+
+				u *= 0.98f;
+				v *= 0.98f;
+
+				u = min(0.4f, max(-0.4f, u));
+				v = min(0.4f, max(-0.4f, v));
+			}
+
+			gp.x = h;
+			gp.y = u * h;
+			gp.z = v * h;
+
+			grid[gx +gy * pitchSize]= gp;
+		}
+	}
+
+	template<typename TDataType>
+	void CapillaryWave<TDataType>::addSource()
+	{
+		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
+		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
+		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
+		dim3 blocksPerGrid(x, y);
+
+		C_AddSource << < blocksPerGrid, threadsPerBlock >> > (
+			mDeviceGridNext,
+			mDeviceGrid,
+			mSource,
+			simulatedRegionWidth,
+			gridPitch);
+		swapDeviceGrid();
+		
+	}
+
+	template <typename Coord>
+	__global__ void C_MoveSimulatedRegion(
+		DArray2D<Coord> grid_next,
+		DArray2D<Coord> grid,
+		int width,
+		int height,
+		int dx,
+		int dy,
+		int pitch,
+		float horizon)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		int j = threadIdx.y + blockIdx.y * blockDim.y;
+		if (i < width && j < height)
+		{
+			int gx = i + 1;
+			int gy = j + 1;
+	
+			Coord gp = grid[gx + gy * pitch];
+			Coord gp_init = Coord(horizon, 0.0f, 0.0f, gp.w);
+
+			int new_i = i - dx;
+			int new_j = j - dy;
+
+
+			gp = new_i < 0 || new_i >= width ? gp_init : gp;
+			new_i = new_i % width;
+			new_i = new_i < 0 ? width + new_i : new_i;
+
+			gp = new_j < 0 || new_j >= height ? gp_init : gp;
+			new_j = new_j % height;
+			new_j = new_j < 0 ? height + new_j : new_j;
+		
+			grid[(new_j + 1) * pitch + new_i + 1] = gp;
+		}
+	}
+
+	template<typename TDataType>
+	void CapillaryWave<TDataType>::moveDynamicRegion(int nx, int ny)
+	{
+		int extNx = simulatedRegionWidth + 2;
+		int extNy = simulatedRegionHeight + 2;
+		
+		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
+		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
+		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
+		dim3 blocksPerGrid(x, y);
+
+		C_MoveSimulatedRegion << < blocksPerGrid, threadsPerBlock >> > (
+			mDeviceGridNext,
+			mDeviceGrid,
+			simulatedRegionWidth,
+			simulatedRegionHeight,
+			nx,
+			ny,
+			gridPitch,
+			horizon);
+		swapDeviceGrid();
+
+		addSource();
+
+		simulatedOriginX += nx;
+		simulatedOriginY += ny;
+
+		//	std::cout << "Origin X: " << m_simulatedOriginX << " Origin Y: " << m_simulatedOriginY << std::endl;
+	}
+
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateTopology()
 	{
 		
 		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
-		auto& shifts = topo->getDisplacement();
+		auto& shifts = topo->getDisplacement(); 
 
 		uint2 extent;
 		extent.x = shifts.nx();
