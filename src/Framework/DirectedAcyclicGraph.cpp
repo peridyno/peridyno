@@ -80,9 +80,18 @@ namespace dyno {
 		visited[v] = true;
 
 		std::list<ObjectId>::iterator i;
-		for each(auto id in mEdges[v])
+		
+		std::stack<ObjectId> reverseId;
+		for each (auto id in mEdges[v])
+			reverseId.push(id);
+
+		while ((reverseId.empty() == false)) {
+			ObjectId id = reverseId.top();
 			if (!visited[id])
 				topologicalSortUtil(id, visited, stack);
+
+			reverseId.pop();
+		}
 
 		// Push current vertex to stack
 		stack.push(v);
