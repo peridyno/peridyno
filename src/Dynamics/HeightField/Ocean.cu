@@ -61,7 +61,7 @@ namespace dyno
 		}
 	}
 
-	__global__ void O_InitOceanWave(
+	__global__ void InitOceanWave(
 		DArray2D<Vec3f> oceanVertex,
 		DArray2D<Vec3f> displacement)
 	{
@@ -90,7 +90,7 @@ namespace dyno
 		}
 	}
 
-	__global__ void O_AddOceanTrails(
+	__global__ void AddOceanTrails(
 		DArray2D<Vec3f> oceanVertex,
 		DArray2D<Vec3f> CapillaryWave)
 	{
@@ -139,15 +139,19 @@ namespace dyno
 
 		auto topoPatch = TypeInfo::cast<HeightField<TDataType>>(m_patch->stateTopology()->getDataPtr());
 		topo->setGridSpacing(topoPatch->getGridSpacing());
-		
-		O_InitOceanWave << < blocksPerGrid, threadsPerBlock >> > (
+	
+		DArray2D<Vec3f> displacement = topoPatch->getDisplacement();
+		cuExecute2D(make_uint2(displacement.nx(), displacement.ny()),
+			InitOceanWave,
 			topo->getDisplacement(),
-			topoPatch->getDisplacement());
-		
+			displacement);
+
 		auto capillaryWaves = this->getCapillaryWaves();
 		for(int i = 0; i < capillaryWaves.size(); i++){
 			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->stateTopology()->getDataPtr());
-			O_AddOceanTrails << < blocksPerGrid, threadsPerBlock >> > (
+			
+			cuExecute2D(make_uint2(topoCapillaryWave->getDisplacement().nx(), topoCapillaryWave->getDisplacement().ny()),
+				AddOceanTrails,
 				topo->getDisplacement(),
 				topoCapillaryWave->getDisplacement());
 		}
