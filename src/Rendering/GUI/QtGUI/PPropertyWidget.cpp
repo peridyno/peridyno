@@ -337,6 +337,8 @@ namespace dyno
 	QStringFieldWidget::QStringFieldWidget(FBase* field) 
 		: QGroupBox()
 	{
+		m_field = field;
+
 		FVar<FilePath>* f = TypeInfo::cast<FVar<FilePath>>(field);
 
 		this->setStyleSheet("border:none");
@@ -352,6 +354,8 @@ namespace dyno
 
 		location = new QLineEdit;
 		auto& xx = f->getValue();
+
+		location->setText(QString::fromStdString(xx.string()));
 
 		QPushButton* open = new QPushButton("open");
 		open->setStyleSheet("QPushButton{background-color:rgba(255,225,225,100%);\
