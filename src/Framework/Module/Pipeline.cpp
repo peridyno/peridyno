@@ -154,7 +154,7 @@ namespace dyno
 					{
 						ObjectId oId = module->objectId();
 						graph.addEdge(id, oId);
-
+						
 						if (moduleSet.find(oId) == moduleSet.end() && mModuleMap.count(oId) > 0)
 						{
 							moduleSet.insert(oId);
