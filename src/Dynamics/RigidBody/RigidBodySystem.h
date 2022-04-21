@@ -1,7 +1,8 @@
 #pragma once
 #include "Node.h"
 #include "RigidBodyShared.h"
-
+#include <vector>
+#include <iostream>
 namespace dyno
 {
 	/*!
@@ -42,6 +43,9 @@ namespace dyno
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(1));
+
+	
+
 
 	protected:
 		void resetStates() override;
@@ -96,5 +100,20 @@ namespace dyno
 		DArray<SphereInfo> mDeviceSpheres;
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
+
+	public:
+		int m_numOfSamples;
+		DArray2D<Vec3f> m_deviceSamples;
+		DArray2D<Vec3f> m_deviceNormals;
+
+		std::vector<Vec3f> samples;
+		std::vector<Vec3f> normals;
+
+		int getSamplingPointSize() { return m_numOfSamples; }
+
+		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
+		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
+		
+		void loadForcePoints(const char* path);
 	};
 }

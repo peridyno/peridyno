@@ -25,7 +25,6 @@
 #include <QPixmap>
 #include <QHBoxLayout>
 #include <QGridLayout>
-#include <QDoubleSpinBox>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
@@ -241,6 +240,15 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
+		: QDoubleSpinBox(parent)
+	{
+		
+	}
+	void mDoubleSpinBox::wheelEvent(QWheelEvent* event)
+	{
+		
+	}
 
 	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
 		: QGroupBox()
@@ -258,15 +266,15 @@ namespace dyno
 		name->setFixedSize(100, 18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		spinner1 = new QDoubleSpinner;
+		spinner1 = new mDoubleSpinBox;
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(m_field->getMin(), m_field->getMax());
-
-		spinner2 = new QDoubleSpinner;
+	
+		spinner2 = new mDoubleSpinBox;
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(m_field->getMin(), m_field->getMax());
 
-		spinner3 = new QDoubleSpinner;
+		spinner3 = new mDoubleSpinBox;
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(m_field->getMin(), m_field->getMax());
 
@@ -353,16 +361,13 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		location = new QLineEdit;
-		auto& xx = f->getValue();
-
-		location->setText(QString::fromStdString(xx.string()));
+		location->setText(QString::fromStdString(f->getValue().string()));
 
 		QPushButton* open = new QPushButton("open");
-		open->setStyleSheet("QPushButton{background-color:rgba(255,225,225,100%);\
-                             color: black;   border-radius: 10px;  border: 2px groove gray; border-style: outset;}" // 按键本色
-							"QPushButton:hover{background-color:white; color: black;}"  // 鼠标停放时的色彩
-							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }"   // 鼠标按下的色彩
-			);
+		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
+							"QPushButton:hover{background-color:white; color: black;}"  
+							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
+
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(location, 0, 1);
 		layout->addWidget(open, 0, 2);

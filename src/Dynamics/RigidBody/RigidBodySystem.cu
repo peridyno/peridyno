@@ -3,7 +3,7 @@
 #include "Topology/Primitive3D.h"
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
-
+#include <cuda_runtime.h>
 #include "IterativeConstraintSolver.h"
 
 //Module headers
@@ -353,6 +353,73 @@ namespace dyno
 			this->stateRotationMatrix()->getData(),
 			offset.tetIndex());
 	}
+	//myCode---------------------------------
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::loadForcePoints(const char* path)
+	{
+		std::ifstream points_stream(path);
+		if (!points_stream.is_open())
+		{
+			std::cout << "ERROR::IFSTREAM:: Can not open file: " << path << std::endl;
+		}
+
+		float tmpxMin = 999999.0, tmpyMin = 999999.0, tmpzMin = 999999.0;
+		float tmpxMax = -999999.0, tmpyMax = -999999.0, tmpzMax = -999999.0;
+
+		int bj1 = 0;
+		int bj2 = 0;
+
+		std::string str;
+		while (points_stream >> str)
+		{
+			if (std::string("v") == str)
+			{
+				float value1, value2, value3;
+
+				points_stream >> value1;
+				points_stream >> value2;
+				points_stream >> value3;
+
+				Vec3f in;
+				in.x = value1;
+				in.y = value2;
+				in.z = value3;
+
+				samples.push_back(Vec3f(value1, value2, value3));
+			}
+			else if (std::string("vn") == str)
+			{
+				float value1, value2, value3;
+
+				points_stream >> value1;
+				points_stream >> value2;
+				points_stream >> value3;
+
+				float square = value1 * value1 + value2 * value2 + value3 * value3;
+				float len = sqrtf(square);
+				value1 /= len;
+				value2 /= len;
+				value3 /= len;
+
+				normals.push_back(Vec3f(value1, value2, value3));
+			}
+		}
+
+		m_numOfSamples = samples.size();
+
+		int sizeInBytes = m_numOfSamples * sizeof(Vec3f);
+
+		//m_deviceSamples.assign(samples); 
+		//m_deviceNormals.assign(normals);
+
+		//cudaMalloc(&m_deviceSamples, sizeInBytes);
+		//cudaMemcpy(m_deviceSamples, &samples[0], sizeInBytes, cudaMemcpyHostToDevice);
+
+		//cudaMalloc(&m_deviceNormals, sizeInBytes);
+		//cudaMemcpy(m_deviceNormals, &normals[0], sizeInBytes, cudaMemcpyHostToDevice);
+	}
+
+
 
 	DEFINE_CLASS(RigidBodySystem);
 }

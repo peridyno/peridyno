@@ -41,6 +41,8 @@ namespace dyno
 		Vec2f getOrigin() { return Vec2f(simulatedOriginX * realGridSize, simulatedOriginY * realGridSize); }
 
 
+		void addSource();
+		void moveDynamicRegion(int nx, int ny);		//跟随船体移动动态仿真区域
 	protected:
 		void resetStates() override;
 

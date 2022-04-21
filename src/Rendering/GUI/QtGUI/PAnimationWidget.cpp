@@ -15,61 +15,51 @@ namespace dyno
 		m_startSim(nullptr),
 		m_resetSim(nullptr)
 	{
+		totalFrame = 400;
+
 		QHBoxLayout* layout = new QHBoxLayout();
 		setLayout(layout);
 
 		QGridLayout* frameLayout	= new QGridLayout();
-		QLineEdit* startFrame		= new QLineEdit();
-		QLineEdit* endFrame			= new QLineEdit();
 
-		m_end_spinbox = new QSpinBox();
-		m_end_spinbox->setFixedSize(60, 25);
-		m_end_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		m_end_spinbox->setMaximum(99999);
-		m_end_spinbox->setValue(2000);
-	
+
+		m_current_frame_spinbox = new QSpinBox();
+		m_current_frame_spinbox->setFixedSize(60, 25);
+		m_current_frame_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+		m_current_frame_spinbox->setMaximum(1000);
+		m_current_frame_spinbox->setValue(0);
+
 		QGridLayout* GLayout = new QGridLayout;
-
 		m_slider = new PAnimationQSlider(this);
-		
-		QLabel* label1 = new QLabel("0");
-		QLabel* label2 = new QLabel("500");
-		QLabel* label3 = new QLabel("1000");
-		QLabel* label4 = new QLabel("1500");
-		QLabel* label5 = new QLabel("2000");
 
-		frameLayout->addWidget(label1, 1, 0,1,1, Qt::AlignTop | Qt::AlignLeft);
-		frameLayout->addWidget(label2, 1, 1,1,1, Qt::AlignTop | Qt::AlignHCenter);
-		frameLayout->addWidget(label3, 1, 2,1,2, Qt::AlignTop | Qt::AlignHCenter);
-		frameLayout->addWidget(label4, 1, 4,1,1, Qt::AlignTop | Qt::AlignHCenter);
-		frameLayout->addWidget(label5, 1, 5,1,1, Qt::AlignTop | Qt::AlignRight);
-		
-	
-		frameLayout->addWidget(m_slider, 0, 0, 0 ,6);
-		
+		m_slider->setRange(0, totalFrame);
+		m_slider->setSingleStep(totalFrame/20);
 
-		
-		connect(m_end_spinbox, static_cast<void (QSpinBox ::*)(int)>(&QSpinBox::valueChanged), this, [=]() {
-				int maxValue = m_end_spinbox->value();
-				label2->setText(QString::number(maxValue/4));
-				label3->setText(QString::number(maxValue / 2));
-				label4->setText(QString::number(maxValue / 4 *3));
-				label5->setText(QString::number(maxValue));
-				m_slider->setValue(0);
-				m_slider->setRange(0, maxValue);
-		});
-		
-	
+		for (int i = 0; i < labelSize; i++) {
+			label[i] = new  QLabel(QString::number(totalFrame/5 * i));
+			if (i == 0) {
+				frameLayout->addWidget(label[i], 1, 0, 1, 1, Qt::AlignTop | Qt::AlignLeft);
+			}
+			else if (i == labelSize - 1) {
+				frameLayout->addWidget(label[i], 1, (labelSize - 1) * 2 - 1, 1, 1, Qt::AlignTop | Qt::AlignRight);
+			}
+			else {
+				frameLayout->addWidget(label[i], 1, i * 2 - 1, 1, 2, Qt::AlignTop | Qt::AlignCenter);
+			}
+		}
+		frameLayout->addWidget(m_slider, 0, 0, 0 , (labelSize - 1) * 2);
 
-		void(QSpinBox:: * spSignal)(int) = &QSpinBox::valueChanged;
-		//connect(m_end_spinbox, spSignal, m_slider, &QSlider::setValue);
-	
+		// 连接信号槽（相互改变）
+		connect(m_current_frame_spinbox, SIGNAL(valueChanged(int)), m_slider, SLOT(setValue(int)));
+		connect(m_slider, SIGNAL(valueChanged(int)), m_current_frame_spinbox, SLOT(setValue(int)));
+
 		QGridLayout* operationLayout = new QGridLayout();
 
 		m_startSim = new QPushButton("Start");
 		m_resetSim = new QPushButton("Reset");
 
-		operationLayout->addWidget(m_end_spinbox, 0, 0);
+		operationLayout->addWidget(m_current_frame_spinbox, 0, 0);
 		operationLayout->addWidget(m_startSim, 0, 1);
 		operationLayout->addWidget(m_resetSim, 0, 2);
 
@@ -94,21 +84,26 @@ namespace dyno
 		PSimulationThread::instance()->wait();  //必须等待线程结束
 	}
 
+
+
 	void PAnimationWidget::toggleSimulation()
 	{
 		if (m_startSim->isChecked())
 		{
-			if(m_startSim->text() == "Start")
-				PSimulationThread::instance()->setTotalFrames(m_end_spinbox->value());
 			PSimulationThread::instance()->resume();
 			m_startSim->setText("Pause");
 			m_resetSim->setDisabled(true);
+			m_current_frame_spinbox->setEnabled(false);
+			m_slider->setEnabled(false);
 		}
 		else
 		{
 			PSimulationThread::instance()->pause();
 			m_startSim->setText("Resume");
 			m_resetSim->setDisabled(false);
+
+			m_current_frame_spinbox->setEnabled(true);
+			m_slider->setEnabled(true);
 		}
 	
 	}
@@ -119,7 +114,9 @@ namespace dyno
 		m_startSim->setText("Start");
 		m_startSim->setEnabled(true);
 
-		//m_end_spinbox->setValue(0);
+
+		m_current_frame_spinbox->setEnabled(true);
+		m_slider->setEnabled(true);
 		m_slider->setValue(0);
 	}
 
@@ -128,16 +125,24 @@ namespace dyno
 		m_startSim->setText("Finished");
 		m_startSim->setDisabled(true);
 		m_resetSim->setDisabled(false);
+
+		m_current_frame_spinbox->setEnabled(true);
+		m_slider->setEnabled(true);
 	}
 
 	void PAnimationWidget::updateSlider() {
 		int CurrentFrameNum = PSimulationThread::instance()->getCurrentFrameNum();
-		//m_end_spinbox->setValue(CurrentFrameNum);
-		if(m_startSim->text()==QString("Start"))
-			m_slider->setValue(0);
-		else
-			m_slider->setValue(CurrentFrameNum);
-
+	
+		if (CurrentFrameNum > totalFrame) {
+			totalFrame += 200;
+			for (int i = 0; i < labelSize; i++) {
+				label[i]->setText(QString::number(totalFrame / 5 * i));
+			}
+			m_slider->setRange(0, totalFrame);
+			m_slider->setSingleStep(totalFrame / 20);
+		}
+		
+		if(m_startSim->text()!=QString("Start"))  m_slider->setValue(CurrentFrameNum);
 	}
 	
 }
