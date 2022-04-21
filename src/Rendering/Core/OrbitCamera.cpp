@@ -208,7 +208,7 @@ namespace dyno
 
 	glm::mat4 OrbitCamera::getProjMat()
 	{
-		float aspect = float(mViewportWidth) / mViewportHeight;
+		float aspect = std::max(float(mViewportWidth), 1.0f) / std::max(float(mViewportHeight), 1.0f);
 		return glm::perspective(mFov, aspect, mNear, mFar);
 	}
 
