@@ -48,6 +48,8 @@ namespace dyno
 
 		void updateStates() override;
 
+
+
 		void updateTopology() override;
 
 		void initialize();
@@ -80,10 +82,6 @@ namespace dyno
 		DArray2D<Coord4> mDeviceGridNext;
 		DArray2D<Coord4> mDisplacement;         // 位移场
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
-
-	public:
-		//DEF_VAR_IN(Real, TestIN, "");
-		//DEF_VAR_OUT(Real, TestOUT, "");
 	};
 
 	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
