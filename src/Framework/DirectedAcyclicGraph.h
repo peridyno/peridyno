@@ -21,6 +21,8 @@
 #include <stack>
 #include <set>
 #include <vector>
+#include <queue>
+#include <unordered_set>
 
 namespace dyno {
 	/**
@@ -52,6 +54,6 @@ namespace dyno {
 	private:
 		std::vector<ObjectId> mOrderVertices;
 		std::set<ObjectId> mVertices;
-		std::map<ObjectId, std::set<ObjectId>> mEdges;
+		std::map<ObjectId, std::unordered_set<ObjectId>> mEdges;
 	};
 }

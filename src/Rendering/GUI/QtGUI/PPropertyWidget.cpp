@@ -346,7 +346,7 @@ namespace dyno
 		: QGroupBox()
 	{
 		m_field = field;
-		
+
 		FVar<FilePath>* f = TypeInfo::cast<FVar<FilePath>>(field);
 
 		this->setStyleSheet("border:none");
@@ -375,7 +375,7 @@ namespace dyno
 		connect(location, &QLineEdit::textChanged, this, &QStringFieldWidget::changeValue);
 
 		connect(open, &QPushButton::clicked, this, [=]() {
-			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.obj)"));
+			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.*)"));
 			if (!path.isEmpty()) {
 				QFile file(path);
 				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

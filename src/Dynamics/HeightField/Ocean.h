@@ -45,7 +45,7 @@ namespace dyno
 		float m_choppiness = 1.0f;
 		
 		//初始风级
-		int m_windType = 8;
+		//int m_windType = 8;
 
 		//fft纹理分辨率
 		int m_fft_size = 512;
@@ -68,6 +68,8 @@ namespace dyno
 		int Nx = 2;
 		int Ny = 2;
 
+
+		
 	};
 	IMPLEMENT_TCLASS(Ocean, TDataType)
 }

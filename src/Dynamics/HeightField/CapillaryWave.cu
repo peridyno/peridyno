@@ -166,14 +166,15 @@ namespace dyno
 			int new_i = i - dx;
 			int new_j = j - dy;
 
-
-			gp = new_i < 0 || new_i >= width ? gp_init : gp;
+			if (new_i < 0 || new_i >= width) gp = gp_init;
+			
 			new_i = new_i % width;
-			new_i = new_i < 0 ? width + new_i : new_i;
+			if (new_i < 0) new_i = width + new_i;
 
-			gp = new_j < 0 || new_j >= height ? gp_init : gp;
+			if (new_j < 0 || new_j >= height) gp = gp_init;
+
 			new_j = new_j % height;
-			new_j = new_j < 0 ? height + new_j : new_j;
+			if (new_j < 0) new_j = height + new_j;
 		
 			grid[(new_j + 1) * pitch + new_i + 1] = gp;
 		}
