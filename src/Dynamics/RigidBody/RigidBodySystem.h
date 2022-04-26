@@ -115,5 +115,7 @@ namespace dyno
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
 		
 		void loadForcePoints(const char* path);
+
+		void updateVelocityAngule(Vec3f force, Vec3f torque, float dt);
 	};
 }

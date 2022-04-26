@@ -28,7 +28,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto ocean = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 
-	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512, 4));
+	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512, 8));
 	oceanPatch->connect(ocean->importOceanPatch());
 
 	auto capillaryWave = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
@@ -55,7 +55,7 @@ std::shared_ptr<SceneGraph> createScene()
 	BoxInfo box;
 
 
-	box.center = 0.5f * Vec3f(0, 2, 0);
+	box.center = 0.5f * Vec3f(0, 0.5, 0);
 	box.halfLength = Vec3f(0.1, 0.1, 0.1);
 	rigid->addBox(box, rigidBody);
 
@@ -64,20 +64,18 @@ std::shared_ptr<SceneGraph> createScene()
 	rigid->stateTopology()->connect(Rmapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(Rmapper);
 
-
 	auto rRender = std::make_shared<GLWireframeVisualModule>();
 	rRender->setColor(Vec3f(1, 1, 0));
 	Rmapper->outTriangleSet()->connect(rRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(rRender);
-
-
+	
 	//coupling---------------------------------------
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
-	rigid->loadForcePoints("E:/Aircraft/SWE/rescuan.points");
 	rigid->connect(coupling->importRigidBodySystem());
 	ocean->connect(coupling->importOcean());
-	coupling->initialize();
 
+	Rmapper->outTriangleSet()->connect(coupling->inTriangleSet());
+	coupling->initialize();
 
 	return scn;
 }

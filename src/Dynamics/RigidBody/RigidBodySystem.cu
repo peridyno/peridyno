@@ -419,6 +419,73 @@ namespace dyno
 		//cudaMemcpy(m_deviceNormals, &normals[0], sizeInBytes, cudaMemcpyHostToDevice);
 	}
 
+	//template<typename TQuat, typename Coord>
+	__global__ void updateVelocityAngulessss(
+		//DArray<Coord> Velocity,
+		//DArray<Coord> AngularVelocity,
+		//DArray<TQuat> Quaternion,
+		Vec3f force,
+		Vec3f torque,
+		float dt)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= 1) return;
+		printf("m_updateVelocityAngule");
+		/*
+		auto rot = getOrientation();
+		m_velocity += dt * force / m_mass + dt * m_acceleration * rot * glm::vec3(0.0f, 0.0f, -1.0f);
+		m_angularvelocity += dt * m_inverseInertia * glm::transpose(rot) * torque;
+
+		glm::vec3 local_v = glm::transpose(rot) * m_velocity;
+		local_v.x *= 0.5f;
+		local_v.z *= m_damping;
+
+		m_velocity = rot * local_v;
+		m_angularvelocity *= m_damping;
+		*/
+	
+	}
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::updateVelocityAngule(Vec3f force, Vec3f torque, float dt)
+	{
+		DArray<Vec3f> mm_velocity = stateVelocity()->getData();
+		/*
+		cuExecute(mm_velocity.size(),
+			updateVelocityAngulessss,
+			//stateVelocity()->getData(),
+			//stateAngularVelocity()->getData(),
+			//stateQuaternion()->getData(),
+			Vec3f force, 
+			Vec3f torque, 
+			float dt);
+			*/
+
+
+		/*
+		DArray<Vec3f> mm_velocity = stateVelocity()->getData();
+		CArray<Vec3f> cm_velocity;
+		cm_velocity.resize(mm_velocity.size());
+		Vec3f m_velocity = cm_velocity[0];
+
+		DArray<Vec3f> mm_angularvelocity = stateAngularVelocity()->getData();
+		CArray<Vec3f> cm_angularvelocity;
+		cm_angularvelocity.resize(mm_angularvelocity.size());
+		Vec3f m_angularvelocity = cm_angularvelocity[0];
+
+		glm::mat3 rot = getOrientation();
+		m_velocity += dt * force / m_mass + dt * m_acceleration * rot * glm::vec3(0.0f, 0.0f, -1.0f);
+		m_angularvelocity += dt * m_inverseInertia * glm::transpose(rot) * torque;
+
+		glm::vec3 local_v = glm::transpose(rot) * m_velocity;
+		local_v.x *= 0.5f;
+		local_v.z *= m_damping;
+
+		m_velocity = rot * local_v;
+		m_angularvelocity *= m_damping;.
+	*/
+
+
+	}
 
 
 	DEFINE_CLASS(RigidBodySystem);

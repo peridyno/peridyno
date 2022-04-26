@@ -7,6 +7,8 @@
 #include "OceanPatch.h"
 #include "Ocean.h"
 #include "RigidBody\RigidBodySystem.h"
+#include "Topology/TriangleSet.h"
+#include "../Core/Algorithm/Reduction.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -38,6 +40,8 @@ namespace dyno
 		DEF_NODE_PORT(RigidBodySystem<TDataType>, RigidBodySystem, "RigidBodySystem");
 		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
 
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+		
 	protected:
 		void resetStates() override;
 		void updateStates() override;
@@ -71,6 +75,8 @@ namespace dyno
 		Vec3f m_torque_corrector;
 
 		float m_heightScale = 0.2f;
+
+		Reduction<float>* m_reduce;
 	};
 	IMPLEMENT_TCLASS(Coupling, TDataType)
 }
