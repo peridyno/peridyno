@@ -1,5 +1,6 @@
 #pragma once
 #include "Node.h"
+#include "FilePath.h"
 
 #include "Topology/TriangleSet.h"
 
@@ -20,7 +21,7 @@ namespace dyno
 		SurfaceMeshLoader();
 		virtual ~SurfaceMeshLoader();
 
-		DEF_VAR(std::string, FileName, "", "");
+		DEF_VAR(FilePath, FileName, "", "");
 
 	public:
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");

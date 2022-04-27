@@ -13,3 +13,6 @@
 [submodule "external/nodeeditor"]
 	path = external/nodeeditor
 	url = https://gitee.com/clouddon/nodeeditor.git
+[submodule "external/gmsh-fork"]
+	path = external/gmsh-fork
+	url = https://gitee.com/peridyno/gmsh-fork.git

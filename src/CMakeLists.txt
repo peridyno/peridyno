@@ -26,6 +26,10 @@ if(PERIDYNO_LIBRARY_ALEMBIC)
     add_subdirectory(ABCExporter)
 endif()
 
+if(PERIDYNO_LIBRARY_GMSH)
+    add_subdirectory(GmshIO)
+endif()
+
 add_subdirectory(Dynamics)
 
 # Write/install version file

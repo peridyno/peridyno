@@ -63,6 +63,7 @@ option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" ON)
+option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
 
 option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
 if(PERIDYNO_PYTHON_BINDING)
@@ -82,6 +83,10 @@ add_subdirectory(external/imgui)
 if(PERIDYNO_LIBRARY_ALEMBIC)
     add_subdirectory(external/Imath)
     add_subdirectory(external/alembic/)
+endif()
+
+if(PERIDYNO_LIBRARY_GMSH)
+    add_subdirectory(external/gmsh-fork)
 endif()
 
 # VTK rendering support, off by default
