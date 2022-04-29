@@ -51,11 +51,11 @@ std::shared_ptr<SceneGraph> createScene()
 	//rigid------------------------------------------------------------------
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
+	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	BoxInfo box;
 
 
-	box.center = 0.5f * Vec3f(0, 0.5, 0);
+	box.center = 0.5f * Vec3f(0, 0.4, 0);
 	box.halfLength = Vec3f(0.1, 0.1, 0.1);
 	rigid->addBox(box, rigidBody);
 

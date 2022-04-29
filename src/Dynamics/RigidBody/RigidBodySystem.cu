@@ -273,6 +273,13 @@ namespace dyno
 
 		this->stateInitialInertia()->setElementCount(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
+
+
+
+		m_yaw = 0.0f;
+		m_pitch = 0.0f;
+		m_roll = 0.0f;
+		m_recoverSpeed = 0.3f;
 	}
 	
 	template <typename Coord>
@@ -354,139 +361,163 @@ namespace dyno
 			offset.tetIndex());
 	}
 	//myCode---------------------------------
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::loadForcePoints(const char* path)
-	{
-		std::ifstream points_stream(path);
-		if (!points_stream.is_open())
-		{
-			std::cout << "ERROR::IFSTREAM:: Can not open file: " << path << std::endl;
-		}
-
-		float tmpxMin = 999999.0, tmpyMin = 999999.0, tmpzMin = 999999.0;
-		float tmpxMax = -999999.0, tmpyMax = -999999.0, tmpzMax = -999999.0;
-
-		int bj1 = 0;
-		int bj2 = 0;
-
-		std::string str;
-		while (points_stream >> str)
-		{
-			if (std::string("v") == str)
-			{
-				float value1, value2, value3;
-
-				points_stream >> value1;
-				points_stream >> value2;
-				points_stream >> value3;
-
-				Vec3f in;
-				in.x = value1;
-				in.y = value2;
-				in.z = value3;
-
-				samples.push_back(Vec3f(value1, value2, value3));
-			}
-			else if (std::string("vn") == str)
-			{
-				float value1, value2, value3;
-
-				points_stream >> value1;
-				points_stream >> value2;
-				points_stream >> value3;
-
-				float square = value1 * value1 + value2 * value2 + value3 * value3;
-				float len = sqrtf(square);
-				value1 /= len;
-				value2 /= len;
-				value3 /= len;
-
-				normals.push_back(Vec3f(value1, value2, value3));
-			}
-		}
-
-		m_numOfSamples = samples.size();
-
-		int sizeInBytes = m_numOfSamples * sizeof(Vec3f);
-
-		//m_deviceSamples.assign(samples); 
-		//m_deviceNormals.assign(normals);
-
-		//cudaMalloc(&m_deviceSamples, sizeInBytes);
-		//cudaMemcpy(m_deviceSamples, &samples[0], sizeInBytes, cudaMemcpyHostToDevice);
-
-		//cudaMalloc(&m_deviceNormals, sizeInBytes);
-		//cudaMemcpy(m_deviceNormals, &normals[0], sizeInBytes, cudaMemcpyHostToDevice);
-	}
-
-	//template<typename TQuat, typename Coord>
+	
+	template<typename TQuat, typename Matrix>
 	__global__ void updateVelocityAngulessss(
-		//DArray<Coord> Velocity,
-		//DArray<Coord> AngularVelocity,
-		//DArray<TQuat> Quaternion,
+		DArray<Vec3f> m_velocity,
+		DArray<Vec3f> m_angularvelocity,
+		DArray<TQuat> quat,
+		DArray<float> m_mass,
+		DArray<Matrix> m_inertia,
 		Vec3f force,
 		Vec3f torque,
-		float dt)
+		float dt
+		)
 	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= 1) return;
-		printf("m_updateVelocityAngule");
-		/*
-		auto rot = getOrientation();
-		m_velocity += dt * force / m_mass + dt * m_acceleration * rot * glm::vec3(0.0f, 0.0f, -1.0f);
-		m_angularvelocity += dt * m_inverseInertia * glm::transpose(rot) * torque;
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= m_velocity.size()) return;
+		
+		Quat<float> quat1 = Quat<float>(quat[tId].w, quat[tId].x, quat[tId].z, quat[tId].y);
 
-		glm::vec3 local_v = glm::transpose(rot) * m_velocity;
+		Matrix m_rot = quat1.toMatrix3x3();
+
+		m_velocity[0] += dt * force / m_mass[0];// +dt * m_acceleration * m_rot * Vec3f(0.0f, 0.0f, -1.0f);
+		m_angularvelocity[0] +=dt * m_inertia[0].inverse() * m_rot.transpose() * torque;
+
+		Vec3f local_v = m_rot.transpose() * m_velocity[0];
 		local_v.x *= 0.5f;
+		float m_damping = 0.9f;
 		local_v.z *= m_damping;
 
-		m_velocity = rot * local_v;
-		m_angularvelocity *= m_damping;
-		*/
-	
+		m_velocity[0] = m_rot * local_v;
+		m_angularvelocity[0] *= m_damping;
+		//printf("come come le \n");
 	}
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::updateVelocityAngule(Vec3f force, Vec3f torque, float dt)
 	{
 		DArray<Vec3f> mm_velocity = stateVelocity()->getData();
-		/*
+		DArray<Vec3f> mm_AngularVelocity = stateAngularVelocity()->getData();
+		DArray<TQuat> mm_rot = stateQuaternion()->getData();
+		DArray<float> mm_mass = stateMass()->getData();
+		DArray<Matrix> mm_inertia = stateInertia()->getData();
+		
+		//DEF_ARRAY_STATE(Matrix, Inertia
 		cuExecute(mm_velocity.size(),
 			updateVelocityAngulessss,
-			//stateVelocity()->getData(),
-			//stateAngularVelocity()->getData(),
-			//stateQuaternion()->getData(),
-			Vec3f force, 
-			Vec3f torque, 
-			float dt);
-			*/
+			mm_velocity,
+			mm_AngularVelocity,
+			mm_rot,
+			mm_mass,
+			mm_inertia,
+			force, 
+			torque, 
+			dt
+			);
+	}
 
+	template<typename TQuat>
+	__global__ void m_advect(
+		DArray<Vec3f> m_velocity,
+		DArray<Vec3f> m_center,
+		DArray<Vec3f> m_AngularVelocity,
+		DArray<TQuat> m_quaternion,
+		float dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= m_velocity.size()) return;
 
+		m_center[tId] += dt * (m_velocity[tId]);
+		m_quaternion[tId] = m_quaternion[tId] + (0.5f * dt) * Quat<float>(0, m_AngularVelocity[tId].x, m_AngularVelocity[tId].y, m_AngularVelocity[tId].z) * m_quaternion[tId];
+
+		m_quaternion[tId] = m_quaternion[tId] / m_quaternion[tId].norm();
+
+	}
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::getEulerAngle(float& yaw, float& pitch, float& roll)
+	{
+		DArray<TQuat> mm_quaternion = stateQuaternion()->getData();
+		CArray<TQuat> c_quaternion;
+		c_quaternion.resize(mm_quaternion.size());
+		c_quaternion.assign(mm_quaternion);
+
+		TQuat m_quaternion = c_quaternion[0];
+		//该系统实现y轴朝上，标准yaw, pitch, roll则是z轴朝下，因为计算之前需要先绕着x轴旋转90度。
+		Quat<float> quat = m_quaternion * Quat<float>(cos(M_PI / 4.0f), sin(M_PI / 4.0f), 0.0f, 0.0f);
+
+		double sinr_cosp = +2.0 * (quat.w * quat.x + quat.y * quat.z);
+		double cosr_cosp = +1.0 - 2.0 * (quat.x * quat.x + quat.y * quat.y);
+		//减去90度
+		roll = atan2(sinr_cosp, cosr_cosp) - M_PI / 2.0f;
+
+		// pitch (y-axis rotation)
+		double sinp = +2.0 * (quat.w * quat.y - quat.z * quat.x);
+		if (fabs(sinp) >= 1)
+			pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+		else
+			pitch = asin(sinp);
+
+		// yaw (z-axis rotation)
+		double siny_cosp = +2.0 * (quat.w * quat.z + quat.x * quat.y);
+		double cosy_cosp = +1.0 - 2.0 * (quat.y * quat.y + quat.z * quat.z);
+		yaw = atan2(siny_cosp, cosy_cosp);
+	}
+
+	template<typename TQuat>
+	__global__ void m_getQuaternian(
+		DArray<TQuat> m_quaternion,
+		float yaw,
+		float pitch,
+		float roll
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= m_quaternion.size()) return;
 		/*
-		DArray<Vec3f> mm_velocity = stateVelocity()->getData();
-		CArray<Vec3f> cm_velocity;
-		cm_velocity.resize(mm_velocity.size());
-		Vec3f m_velocity = cm_velocity[0];
+		double cy = cos(yaw * 0.5);
+		double sy = sin(yaw * 0.5);
+		double cp = cos(pitch * 0.5);
+		double sp = sin(pitch * 0.5);
+		double cr = cos(roll * 0.5);
+		double sr = sin(roll * 0.5);
 
-		DArray<Vec3f> mm_angularvelocity = stateAngularVelocity()->getData();
-		CArray<Vec3f> cm_angularvelocity;
-		cm_angularvelocity.resize(mm_angularvelocity.size());
-		Vec3f m_angularvelocity = cm_angularvelocity[0];
-
-		glm::mat3 rot = getOrientation();
-		m_velocity += dt * force / m_mass + dt * m_acceleration * rot * glm::vec3(0.0f, 0.0f, -1.0f);
-		m_angularvelocity += dt * m_inverseInertia * glm::transpose(rot) * torque;
-
-		glm::vec3 local_v = glm::transpose(rot) * m_velocity;
-		local_v.x *= 0.5f;
-		local_v.z *= m_damping;
-
-		m_velocity = rot * local_v;
-		m_angularvelocity *= m_damping;.
-	*/
-
+		m_quaternion[0].w = cy * cp * cr + sy * sp * sr;
+		m_quaternion[0].x = cy * cp * sr - sy * sp * cr;
+		m_quaternion[0].y = sy * cp * sr + cy * sp * cr;
+		m_quaternion[0].z = sy * cp * cr - cy * sp * sr;
+		*/
+		m_quaternion[tId] = Quat<float>(yaw, pitch, roll);
 
 	}
 
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::advect(float dt) {
+		DArray<Vec3f> mm_velocity = stateVelocity()->getData();
+		DArray<Vec3f> mm_center = stateCenter()->getData();
+		DArray<Vec3f> mm_AngularVelocity = stateAngularVelocity()->getData();
+		DArray<TQuat> mm_quaternion = stateQuaternion()->getData();
+		cuExecute(mm_velocity.size(),
+			m_advect,
+			mm_velocity,
+			mm_center,
+			mm_AngularVelocity,
+			mm_quaternion,
+			dt
+		);
 
+		getEulerAngle(m_yaw, m_pitch, m_roll);
+		m_roll *= (1.0f - m_recoverSpeed);
+		m_pitch *= (1.0f - m_recoverSpeed);
+
+		cuExecute(mm_quaternion.size(),
+			m_getQuaternian,
+			mm_quaternion,
+			m_yaw,
+			m_pitch,
+			m_roll
+		);
+	}
+	
 	DEFINE_CLASS(RigidBodySystem);
 }

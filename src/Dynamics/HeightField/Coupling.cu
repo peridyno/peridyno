@@ -10,6 +10,9 @@ namespace dyno
 		cudaMemcpy(host, device, n * sizeof(float), cudaMemcpyDeviceToHost);
 		for (int i = 0; i < n; i++) {
 			printf("a[%d] =%f\n", i, host[i]);
+			if (host[i] > 0.005 || host[i] < -0.005) {
+				continue;
+			}
 		}
 		printf("end-----------------\n");
 	}
@@ -85,7 +88,7 @@ namespace dyno
 		int sizeInBytesF = 8 * sizeof(float);
 
 		m_reduce = Reduction<float>::Create(8);
-		m_force_corrected = false;
+		
 		cudaMalloc(&m_forceX, sizeInBytesF);
 		cudaMalloc(&m_forceY, sizeInBytesF);
 		cudaMalloc(&m_forceZ, sizeInBytesF);
@@ -127,7 +130,7 @@ namespace dyno
 		this->animate(0.016f);
 	}
 
-	//__device__ int getDisplacement2(Vec3f pos, DArray2D<Vec4f> ocean, Vec2f origin, float patchSize, int gridSize)
+
 	__device__ Vec4f getDisplacement2(Vec3f pos, DArray2D<Vec4f> oceanPatch, Vec2f origin, float patchSize, int gridSize)
 	{
 		Vec2f uv_i = (Vec2f(pos.x, pos.z) - origin) / patchSize;
@@ -174,7 +177,8 @@ namespace dyno
 		Vec2f origin,
 		int numOfSamples,
 		float patchSize,
-		int gridSize
+		int gridSize, 
+		DArray<Vec3f> velocity
 	)
 	{
 		int pId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -182,10 +186,12 @@ namespace dyno
 		{
 			Vec3f dir_i = samples[pId];
 			Vec3f rotDir = rotation[0] * Vec3f(dir_i.x, dir_i.y, dir_i.z);
-			Vec3f pos_i = boatCenter[0] + rotation[0] * Vec3f(dir_i.x, dir_i.y, dir_i.z);
+			//Vec3f pos_i = boatCenter[0] + rotation[0] * Vec3f(dir_i.x, dir_i.y, dir_i.z);
+			Vec3f pos_i = samples[pId];
 
-			//Vec4f dis_i = getDisplacement2(dir_i, ocean, origin, patchSize, gridSize);
-			//getDisplacement----------------
+
+			//
+			//判断顶点对应的海洋高度
 			Vec2f uv_i = (Vec2f(pos_i.x, pos_i.z) - origin) / patchSize;
 			float u = (uv_i.x - floor(uv_i.x)) * gridSize;
 			float v = (uv_i.y - floor(uv_i.y)) * gridSize;
@@ -211,20 +217,28 @@ namespace dyno
 
 			Vec4f dis_i =  d00 * (1 - fx) * (1 - fy) + d10 * fx * (1 - fy) + d01 * (1 - fx) * fy + d11 * fx * fy;
 			//-------------------------------
-
-
 			dis_i.y *= 1.0f;
 			Vec3f normal_i = normals[pId];
 			Vec3f force_i(0,0,0);
 			Vec3f torque_i(0, 0, 0);
 
+			dis_i.y += 0.2;
+
+			float cha = pos_i.y - dis_i.y;
+
 			if (pos_i.y < dis_i.y)
 			{
-				force_i = 9800.0f * normal_i * (dis_i.y - pos_i.y);
-				torque_i = Vec3f(0.0f, 9800.0f, 0.0f) * (dis_i.y - pos_i.y);
+				//force_i = 9.8f * normal_i * (dis_i.y - pos_i.y);
+				force_i = Vec3f(0.0f, 0.098f, 0.0f) * (dis_i.y - pos_i.y);
+				//torque_i = Vec3f(0.0f, 0.098f, 0.0f) * (dis_i.y - pos_i.y);
+				Vec3f DampingForce = -0.1 * velocity[0];
+				force_i += DampingForce;
+				printf("?????????????\n");
+				printf("%d pointY = %f  OceanY = %f  %f\n ", pId, pos_i.y, dis_i.y, cha);
 			}
+
 			torque_i = rotDir.cross(torque_i);
-			//torque_i = cross(Vec3f(rotDir.x, rotDir.y, rotDir.z), torque_i);
+
 			forceX[pId] = force_i.x;
 			forceY[pId] = force_i.y;
 			forceZ[pId] = force_i.z;
@@ -257,6 +271,7 @@ namespace dyno
 		DArray<Coord> point = inTriangleSet()->getDataPtr()->getPoints();
 		inTriangleSet()->getDataPtr()->updateVertexNormal();
 		//printfDArray(point);
+
 		auto VertexNormal = inTriangleSet()->getDataPtr()->outVertexNormal()->getData();
 		//CArray<Vec3f> CVertexNormal;
 		//CVertexNormal.resize(VertexNormal.size());
@@ -269,6 +284,7 @@ namespace dyno
 		/**/
 		
 		//计算力和力矩
+		
 		C_ComputeForceAndTorque << <pDims, 64 >> > (
 			m_forceX,
 			m_forceY,
@@ -285,9 +301,17 @@ namespace dyno
 			m_origin,
 			8,
 			m_ocean_patch->getPatchSize(),
-			m_ocean_patch->getGridSize()
+			m_ocean_patch->getGridSize(),
+			getRigidBodySystem()->stateVelocity()->getData()
 		);
 		
+		printFloat(m_forceX,8);
+		printFloat(m_forceY,8);
+		printFloat(m_forceZ,8);
+		printFloat(m_torqueX,8);
+		printFloat(m_torqueY,8);
+		printFloat(m_torqueZ,8);
+
 		float fx = m_reduce->accumulate(m_forceX, 8);
 		float fy = m_reduce->accumulate(m_forceY, 8);
 		float fz = m_reduce->accumulate(m_forceZ, 8);
@@ -299,10 +323,7 @@ namespace dyno
 		float h = m_reduce->accumulate(m_sample_heights, 8);
 
 
-
-	
-
-		Vec3f force = Vec3f(fx / num, 0.0f, fz / num);
+		Vec3f force = Vec3f(fx / num, fy/num, fz / num);
 		Vec3f torque = Vec3f(tx / num, ty / num, tz / num);
 		if (!m_force_corrected)
 		{
@@ -311,15 +332,11 @@ namespace dyno
 			m_force_corrected = true;
 		}
 
-		
-		//--------------------------------
-		
+
+	
 		m_boat->updateVelocityAngule(force - m_force_corrector, torque - m_torque_corrector, dt);
-		//	std::cout << "Angular Force: " << tx << " " << ty << " " << tz << std::endl;
-		//m_boat->update(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(tx / num, ty / num, tz / num), dt);
 		//m_boat->advect(dt);
-		//--------------------------------
-		//getRigidBodySystem()->stateCenter()->getData()
+		/*
 		DArray<Vec3f> m_center22 = m_boat->stateCenter()->getData();
 		CArray<Vec3f> center22;
 		center22.resize(1);
@@ -327,20 +344,13 @@ namespace dyno
 
 		float m_heightShift = 0.25f;
 		center22[0].y = h / 8 + m_heightShift;
+
 		m_center22.assign(center22);
-		m_boat->stateCenter()->setValue(m_center22);
+		getRigidBodySystem()->stateCenter()->setValue(m_center22);
 
-		/**/
-	/*	printFloat(m_forceX,8);
-		printFloat(m_forceY,8);
-		printFloat(m_forceZ,8);
-		printFloat(m_torqueX,8);
-		printFloat(m_torqueY,8);
-		printFloat(m_torqueZ,8);*/
-
-
-
+*/
 		printf("Coupling<TDataType>::animate  \n");
+		/**/
 	}
 
 	DEFINE_CLASS(Coupling);
