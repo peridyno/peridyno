@@ -6,6 +6,8 @@ namespace dyno
 	InputFieldTest<TDataType>::InputFieldTest()
 		: Node()
 	{
+		this->varVariable()->setMax(Real(20.0f));
+		this->varVariable()->setMin(Real(-10.0f));
 	}
 
 	template<typename TDataType>
