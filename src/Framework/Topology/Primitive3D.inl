@@ -378,13 +378,12 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TTet3D<Real>& tet, Bool& bInside) const
 	{
-		bInside = true;
+		bInside = inside(tet);
 
 		TPoint3D<Real> closestPt;
 		Real minDist = REAL_MAX;
 		for (int i = 0; i < 4; i++)
 		{
-			TTriangle3D<Real> face = tet.face(i);
 			TPoint3D<Real> q = project(tet.face(i));
 			Real d = (origin - q.origin).normSquared();
 			if (d < minDist)
@@ -392,7 +391,6 @@ namespace dyno
 				minDist = d;
 				closestPt = q;
 			}
-			bInside &= (origin - face.v[0]).dot(face.normal()) < Real(0);
 		}
 
 		return closestPt;
@@ -798,17 +796,22 @@ namespace dyno
 		bool bInside = true;
 
 		TTriangle3D<Real> face;
+		Coord3D normal;
 		face = tet.face(0);
-		bInside &= (origin - face.v[0]).dot(face.normal()) < 0;
+		normal = face.normal();
+		bInside &= (origin - face.v[0]).dot(normal) * (tet.v[0] - face.v[0]).dot(normal) > 0;
 
 		face = tet.face(1);
-		bInside &= (origin - face.v[0]).dot(face.normal()) < 0;
+		normal = face.normal();
+		bInside &= (origin - face.v[0]).dot(normal) * (tet.v[1] - face.v[0]).dot(normal) > 0;
 
 		face = tet.face(2);
-		bInside &= (origin - face.v[0]).dot(face.normal()) < 0;
+		normal = face.normal();
+		bInside &= (origin - face.v[0]).dot(normal) * (tet.v[2] - face.v[0]).dot(normal) > 0;
 
 		face = tet.face(3);
-		bInside &= (origin - face.v[0]).dot(face.normal()) < 0;
+		normal = face.normal();
+		bInside &= (origin - face.v[0]).dot(normal) * (tet.v[3] - face.v[0]).dot(normal) > 0;
 
 		return bInside;
 	}
@@ -3037,8 +3040,8 @@ namespace dyno
 	{
 		v[0] = Coord3D(0);
 		v[1] = Coord3D(1, 0, 0);
-		v[2] = Coord3D(0, 1, 0);
-		v[3] = Coord3D(0, 0, 1);
+		v[2] = Coord3D(0, 0, 1);
+		v[3] = Coord3D(0, 1, 0);
 	}
 
 	template<typename Real>
@@ -3065,16 +3068,16 @@ namespace dyno
 		switch (index)
 		{
 		case 0:
-			return TTriangle3D<Real>(v[0], v[2], v[1]);
+			return TTriangle3D<Real>(v[1], v[3], v[2]);
 			break;
 		case 1:
-			return TTriangle3D<Real>(v[0], v[3], v[2]);
+			return TTriangle3D<Real>(v[0], v[2], v[3]);
 			break;
 		case 2:
-			return TTriangle3D<Real>(v[0], v[1], v[3]);
+			return TTriangle3D<Real>(v[0], v[3], v[1]);
 			break;
 		case 3:
-			return TTriangle3D<Real>(v[1], v[2], v[3]);
+			return TTriangle3D<Real>(v[0], v[1], v[2]);
 			break;
 		default:
 			break;
@@ -3398,6 +3401,64 @@ namespace dyno
 		return abox;
 	}
 
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TTet3D<Real>::circumcenter() const
+	{
+		// Use coordinates relative to point `a' of the tetrahedron.
+
+		// ba = b - a
+		Real ba_x = v[1][0] - v[0][0];
+		Real ba_y = v[1][1] - v[0][1];
+		Real ba_z = v[1][2] - v[0][2];
+
+		// ca = c - a
+		Real ca_x = v[2][0] - v[0][0];
+		Real ca_y = v[2][1] - v[0][1];
+		Real ca_z = v[2][2] - v[0][2];
+
+		// da = d - a
+		Real da_x = v[3][0] - v[0][0];
+		Real da_y = v[3][1] - v[0][1];
+		Real da_z = v[3][2] - v[0][2];
+
+		// Squares of lengths of the edges incident to `a'.
+		Real len_ba = ba_x * ba_x + ba_y * ba_y + ba_z * ba_z;
+		Real len_ca = ca_x * ca_x + ca_y * ca_y + ca_z * ca_z;
+		Real len_da = da_x * da_x + da_y * da_y + da_z * da_z;
+
+		// Cross products of these edges.
+
+		// c cross d
+		Real cross_cd_x = ca_y * da_z - da_y * ca_z;
+		Real cross_cd_y = ca_z * da_x - da_z * ca_x;
+		Real cross_cd_z = ca_x * da_y - da_x * ca_y;
+
+		// d cross b
+		Real cross_db_x = da_y * ba_z - ba_y * da_z;
+		Real cross_db_y = da_z * ba_x - ba_z * da_x;
+		Real cross_db_z = da_x * ba_y - ba_x * da_y;
+
+		// b cross c
+		Real cross_bc_x = ba_y * ca_z - ca_y * ba_z;
+		Real cross_bc_y = ba_z * ca_x - ca_z * ba_x;
+		Real cross_bc_z = ba_x * ca_y - ca_x * ba_y;
+
+		// Calculate the denominator of the formula.
+		Real denominator = 0.5 / (ba_x * cross_cd_x + ba_y * cross_cd_y + ba_z * cross_cd_z);
+
+		// Calculate offset (from `a') of circumcenter.
+		Real circ_x = (len_ba * cross_cd_x + len_ca * cross_db_x + len_da * cross_bc_x) * denominator;
+		Real circ_y = (len_ba * cross_cd_y + len_ca * cross_db_y + len_da * cross_bc_y) * denominator;
+		Real circ_z = (len_ba * cross_cd_z + len_ca * cross_db_z + len_da * cross_bc_z) * denominator;
+
+		return TPoint3D<Real>(circ_x + v[0][0], circ_y + v[0][1], circ_z + v[0][2]);
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TTet3D<Real>::barycenter() const
+	{
+		return TPoint3D<Real>(Real(0.25) * (v[0] + v[1] + v[2] + v[3]));
+	}
 
 	template<typename Real>
 	DYN_FUNC TAlignedBox3D<Real>::TAlignedBox3D()

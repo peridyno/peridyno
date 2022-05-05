@@ -566,6 +566,10 @@ namespace dyno
 
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
+		// http://rodolphe-vaillant.fr/entry/127/find-a-tetrahedron-circumcenter
+		DYN_FUNC TPoint3D<Real> circumcenter() const;
+		DYN_FUNC TPoint3D<Real> barycenter() const;
+
 		Coord3D v[4];
 	};
 
