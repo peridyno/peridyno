@@ -343,7 +343,7 @@ namespace dyno {
 
 	void Reduction<Vec3f>::allocAuxiliaryArray(uint num)
 	{
-		if (m_aux == nullptr)
+		if (m_aux != nullptr)
 		{
 			cudaFree(m_aux);
 		}
@@ -521,7 +521,7 @@ namespace dyno {
 
 	void Reduction<Vec3d>::allocAuxiliaryArray(uint num)
 	{
-		if (m_aux == nullptr)
+		if (m_aux != nullptr)
 		{
 			cudaFree(m_aux);
 		}

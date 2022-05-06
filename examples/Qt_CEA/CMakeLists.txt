@@ -11,6 +11,8 @@ if(PERIDYNO_Qt5_GUI)
         link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui)
     endif()
 
+    link_libraries(${GMSH_EXTERNAL_LIBRARIES})
+
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
     file(
