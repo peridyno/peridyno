@@ -267,6 +267,36 @@ TEST(Tet3D, function) {
 	Tet3D tet1(Coord3D(0), Coord3D(1, 0, 0), Coord3D(0, 0, 1), Coord3D(0, 1, 0));
 	EXPECT_FALSE(tet1.isValid());
 	EXPECT_EQ(tet1.volume(), Real(-1.0f/6.0f));
+
+	Point3D c = tet1.circumcenter();
+	EXPECT_EQ((c.origin - Coord3D(0.5f)).norm() < EPSILON, true);
+
+	Tet3D tet2(Coord3D(1.84683, -0.01341793, -2.8445360000000002), Coord3D(1.83172,  0.080868700000000002, -2.722531), Coord3D(1.8336870000000001,  0.044794059999999997, -2.8555130000000002), Coord3D(1.8130956498821573,  0.0032346277719787972, -2.844774865334295));
+	c = tet2.circumcenter();
+	EXPECT_EQ(c.inside(tet2), false);
+
+	Point3D p0(0.1f, 0.1f, 0.1f);
+	EXPECT_EQ(p0.inside(tet1), true);
+
+	Tet3D tet3(Coord3D(-2.8, -2.8, -2.8), Coord3D(0, 0, 1), Coord3D(0, 1, 0), Coord3D(1, 0, 0));
+	c = tet3.circumcenter();
+	EXPECT_EQ(c.inside(tet3), true);
+
+	Tet3D tet4(Coord3D(1, 0, 0), Coord3D(0), Coord3D(0, 0, 1), Coord3D(0, 1, 0));
+	c = tet4.circumcenter();
+	EXPECT_EQ((c.origin - Coord3D(0.5f)).norm() < EPSILON, true);
+
+	Tet3D tet5(Coord3D(1, 0, 0), Coord3D(-0.8, -0.8, -0.8), Coord3D(0, 1, 0), Coord3D(0, 0, 1));
+	c = tet5.circumcenter();
+	EXPECT_EQ(c.inside(tet5), true);
+
+	Tet3D tet6(Coord3D(1.029422, 0.793586, 0.308014), Coord3D(1.018432, 0.824708, 0.338561), Coord3D(0.994443, 0.767503, 0.318724), Coord3D(1.027653, 0.780213, 0.356668));
+	c = tet6.circumcenter();
+	Point3D bc = tet6.barycenter();
+	Real d = bc.distance(tet6);
+	Real d1 = c.distance(tet6);
+	EXPECT_EQ(c.inside(tet6), false);
+	EXPECT_EQ(bc.inside(tet6), true);
 }
 
 TEST(Sphere3D, distance) {
