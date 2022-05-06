@@ -144,6 +144,8 @@ namespace dyno
 		mesh->setPoints(vertices);
 		mesh->setTriangles(indices);
 
+		mesh->update();
+
 		vertices.clear();
 		indices.clear();
 
