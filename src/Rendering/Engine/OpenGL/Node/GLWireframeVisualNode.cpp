@@ -9,7 +9,7 @@ namespace dyno
 		: Node()
 	{
 		auto sRender = std::make_shared<GLWireframeVisualModule>();
-		sRender->setColor(Vec3f(1, 1, 0));
+		sRender->setColor(Vec3f(0, 0, 0));
 		this->inTriangleSet()->connect(sRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(sRender);
 	}
@@ -18,6 +18,12 @@ namespace dyno
 	GLWireframeVisualNode<TDataType>::~GLWireframeVisualNode()
 	{
 		printf("GLWireframeVisualNode released \n");
+	}
+
+	template<typename TDataType>
+	std::string GLWireframeVisualNode<TDataType>::getNodeType()
+	{
+		return "Visualization";
 	}
 
 	template<typename TDataType>

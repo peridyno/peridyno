@@ -32,6 +32,9 @@ namespace dyno
 		~GLWireframeVisualNode() override;
 
 	public:
+		std::string getNodeType() override;
+
+	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "A set of triangles");
 
 	protected:
