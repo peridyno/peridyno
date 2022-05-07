@@ -47,6 +47,9 @@ public Q_SLOTS:
 	void addNodeToSceneGraph(QtNode& n);
 
 	void deleteNodeToSceneGraph(QtNode& n);
+
+	void reorderAllNodes();
+
 private:
 	SceneGraph* m_scene = nullptr;
 

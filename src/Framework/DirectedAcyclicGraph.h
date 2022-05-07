@@ -46,6 +46,13 @@ namespace dyno {
 
 		size_t sizeOfVertex() const;
 
+
+		//DOTO: implement the Sugiyama layout algorithm, 
+		//reference: 
+		//	https://github.com/gml4gtk/demekgraph 
+		//	https://github.com/gml4gtk/kroketgraph
+		//	https://improbable-emancipation.blogspot.com/2011/09/sugiyama-layout-algorithm-hierarchical.html
+
 	private:
 		// Functions used by topologicalSort
 		void topologicalSortUtil(ObjectId v, std::map<ObjectId, bool>& visited, std::stack<ObjectId>& stack);

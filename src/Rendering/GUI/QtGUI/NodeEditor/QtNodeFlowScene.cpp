@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "NodeIterator.h"
 #include "NodePort.h"
+#include "Action.h"
 #include "SceneGraphFactory.h"
 
 #include <QtWidgets/QMessageBox>
@@ -51,6 +52,7 @@ namespace Qt
 		this->setRegistry(ret);
 
 		showSceneGraph();
+		reorderAllNodes();
 
 		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
@@ -322,4 +324,65 @@ namespace Qt
 		}
 	}
 
+	void QtNodeFlowScene::reorderAllNodes()
+	{
+		auto& _nodes = this->nodes();
+
+		std::map<dyno::ObjectId, QtNode*> nodeMapper;
+
+		for (auto const& _node : _nodes)
+		{
+			auto const& qtNode = _node.second;
+			auto model = qtNode->nodeDataModel();
+
+			auto nodeData = dynamic_cast<QtNodeWidget*>(model);
+
+			if (model != nullptr)
+			{
+				auto node = nodeData->getNode();
+				if (node != nullptr)
+				{
+					nodeMapper[node->objectId()] = qtNode.get();
+				}
+			}
+		}
+
+
+		class AdjustPosition : public dyno::Action
+		{
+		public:
+			AdjustPosition(std::map<dyno::ObjectId, QtNode*>* mapper) { mMapper = mapper; }
+			~AdjustPosition() override {}
+
+		private:
+			void process(Node* node) override
+			{
+				auto id = node->objectId();
+
+				if ((*mMapper)[id] != nullptr)
+				{
+					QtNode* qtNode = (*mMapper)[id];
+					NodeGeometry& geo = qtNode->nodeGeometry();
+
+					node->setBlockCoord(x, y);
+
+					x += geo.width() + 100.0f;
+					//y += geo.height() + 100.0f;
+				}
+			}
+
+			float x = 0.0f;
+			float y = 0.0f;
+
+			std::map<dyno::ObjectId, QtNode*>* mMapper;
+		};
+
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+
+		scn->traverseForward<AdjustPosition>(&nodeMapper);
+
+		nodeMapper.clear();
+
+		updateSceneGraph();
+	}
 }
