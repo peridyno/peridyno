@@ -45,6 +45,8 @@ namespace dyno
 		void setName(std::string name);
 		std::string getName();
 
+		virtual std::string getNodeType();
+
 		bool isControllable();
 
 		void setControllable(bool con);

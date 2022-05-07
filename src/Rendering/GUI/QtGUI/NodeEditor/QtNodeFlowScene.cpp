@@ -43,7 +43,7 @@ namespace Qt
 					return dat;
 				};
 
-				QString category = "Default";// QString::fromStdString(module->getModuleType());
+				QString category = QString::fromStdString(node->getNodeType());
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}

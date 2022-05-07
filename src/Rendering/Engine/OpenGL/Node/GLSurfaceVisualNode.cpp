@@ -22,6 +22,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	std::string GLSurfaceVisualNode<TDataType>::getNodeType()
+	{
+		return "Visualization";
+	}
+
+	template<typename TDataType>
 	void GLSurfaceVisualNode<TDataType>::resetStates()
 	{
 		this->update();

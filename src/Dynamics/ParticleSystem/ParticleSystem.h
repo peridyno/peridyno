@@ -26,6 +26,8 @@ namespace dyno
 		virtual bool translate(Coord t);
 		virtual bool scale(Real s);
 
+		std::string getNodeType() override;
+
 	public:
 		/**
 		 * @brief Particle position
