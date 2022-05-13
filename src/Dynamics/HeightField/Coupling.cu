@@ -160,6 +160,7 @@ namespace dyno
 	}
 
 
+
 	template<typename Matrix>
 	__global__ void C_ComputeForceAndTorque(
 		float* forceX,
@@ -231,10 +232,10 @@ namespace dyno
 				//force_i = 9.8f * normal_i * (dis_i.y - pos_i.y);
 				force_i = Vec3f(0.0f, 0.098f, 0.0f) * (dis_i.y - pos_i.y);
 				//torque_i = Vec3f(0.0f, 0.098f, 0.0f) * (dis_i.y - pos_i.y);
-				Vec3f DampingForce = -0.1 * velocity[0];
+				Vec3f DampingForce(0,-0.1 * velocity[0].y,0);//--------------------------------------------
 				force_i += DampingForce;
-				printf("?????????????\n");
-				printf("%d pointY = %f  OceanY = %f  %f\n ", pId, pos_i.y, dis_i.y, cha);
+				//printf("?????????????\n");
+				//printf("%d pointY = %f  OceanY = %f  %f\n ", pId, pos_i.y, dis_i.y, cha);
 			}
 
 			torque_i = rotDir.cross(torque_i);
@@ -260,7 +261,7 @@ namespace dyno
 		int num =8;
 		int pDims = iDivUp(8, 64);
 
-		auto center = getRigidBodySystem()->stateCenter()->getData();
+		auto m_center = getRigidBodySystem()->stateCenter()->getData();
 		auto rotation = getRigidBodySystem()->stateRotationMatrix();
 			
 		//CArray<Vec3f> CVertexNormal;
@@ -273,7 +274,7 @@ namespace dyno
 		//printfDArray(point);
 
 		auto VertexNormal = inTriangleSet()->getDataPtr()->outVertexNormal()->getData();
-		//CArray<Vec3f> CVertexNormal;
+		//CArray<Vec3f> CVertexNormalpoint;
 		//CVertexNormal.resize(VertexNormal.size());
 		//CVertexNormal.assign(VertexNormal);
 
@@ -305,12 +306,12 @@ namespace dyno
 			getRigidBodySystem()->stateVelocity()->getData()
 		);
 		
-		printFloat(m_forceX,8);
-		printFloat(m_forceY,8);
-		printFloat(m_forceZ,8);
-		printFloat(m_torqueX,8);
-		printFloat(m_torqueY,8);
-		printFloat(m_torqueZ,8);
+		//printFloat(m_forceX,8);
+		//printFloat(m_forceY,8);
+		//printFloat(m_forceZ,8);
+		//printFloat(m_torqueX,8);
+		//printFloat(m_torqueY,8);
+		//printFloat(m_torqueZ,8);
 
 		float fx = m_reduce->accumulate(m_forceX, 8);
 		float fy = m_reduce->accumulate(m_forceY, 8);
@@ -335,23 +336,156 @@ namespace dyno
 
 	
 		m_boat->updateVelocityAngule(force - m_force_corrector, torque - m_torque_corrector, dt);
-		//m_boat->advect(dt);
+
+
+		auto capillaryWaves = getOcean()->getCapillaryWaves();
+		auto m_trail = capillaryWaves[0];
+
+		int originX = m_trail->getOriginX();
+		int originZ = m_trail->getOriginZ();
+
+		float dg = m_trail->getRealGridSize();
+		int gridSize = m_trail->getGridSize();
+		
+
+		CArray<Vec3f> center;
+		center.resize(m_center.size());
+		center.assign(m_center);
+
+		int new_x = floor(center[0].x / dg) - gridSize / 2;
+		int new_z = floor(center[0].z / dg) - gridSize / 2;
+
+		
+		if (abs(new_x - originX) > 20 || abs(new_z - originZ) > 20)
+		{
+			m_trail->setOriginX(new_x);
+			m_trail->setOriginY(new_z);
+		}
+		else
+			m_trail->moveDynamicRegion(new_x - originX, new_z - originZ);
+		
+		m_trail->moveDynamicRegion(0, 0);
+		//m_trail->resetSource();
+		m_trail->updateStates();
+		(m_trail->getmSource()).reset();
+		(m_trail->getWeight()).reset();
+
+		C_ComputeTrail << <pDims, 64 >> > (
+			m_trail->getmSource(),
+			m_trail->getWeight(),//
+			m_trail->getGridSize(),//
+			m_trail->getOrigin(),//
+			m_trail->getRealGridSize(),//
+			point,
+			point.size(),
+			m_boat->stateVelocity()->getData(),
+			m_boat->stateCenter()->getData(),
+			m_boat->stateRotationMatrix()->getData(),//m_boat->getOrientation(), glm::mat3 rotation,
+			m_eclipsedTime);
+
 		/*
-		DArray<Vec3f> m_center22 = m_boat->stateCenter()->getData();
-		CArray<Vec3f> center22;
-		center22.resize(1);
-		center22.assign(m_center22);
+		uint2 extent;
+		extent.x = m_trail->getGridSize();
+		extent.y = m_trail->getGridSize();
 
-		float m_heightShift = 0.25f;
-		center22[0].y = h / 8 + m_heightShift;
-
-		m_center22.assign(center22);
-		getRigidBodySystem()->stateCenter()->setValue(m_center22);
-
+		cuExecute2D(extent,
+			C_NormalizeTrail,
+			m_trail->getmSource(),
+			m_trail->getWeight(),
+			m_trail->getGridSize());
 */
+
+
 		printf("Coupling<TDataType>::animate  \n");
-		/**/
+
 	}
+
+	__global__ void C_NormalizeTrail(
+		DArray2D<Vec2f> trails,
+		DArray2D<float> weights,
+		int trail_size)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		int j = threadIdx.y + blockIdx.y * blockDim.y;
+		if (i < trail_size && j < trail_size)
+		{
+			int id = i + trail_size * j;
+			float w = weights[id];
+			if (w > 1.0f)
+			{
+				trails[id] /= w;
+			}
+		}
+	}
+
+	template<typename Matrix>
+	__global__ void C_ComputeTrail(
+		DArray2D<Vec2f> trails,//mSource
+		DArray2D<float> weights,
+		int trail_size,
+		Vec2f trail_origin,
+		float trail_grid_distance,
+		DArray<Vec3f> samples,
+		int sample_size,
+		DArray<Vec3f> boat_velocity,
+		DArray<Vec3f> boatCenter,
+		DArray<Matrix> boat_rotation,
+		float t)
+	{
+		int pId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (pId < sample_size)
+		{
+			Vec3f dir_i = samples[pId];
+			if (abs(dir_i.z) < 120.0f && abs(dir_i.x) < 30.0f)
+			{
+				Vec3f pos_i = samples[pId]*100;
+				Vec2f local_pi = (Vec2f(pos_i.x, pos_i.z) - trail_origin) / trail_grid_distance;
+				int i = floor(local_pi.x);
+				int j = floor(local_pi.y);
+				
+
+				printf("pos_i %f %f %f  %d %d  \n", pos_i.x, pos_i.y, pos_i.z,i ,j);
+
+
+				Matrix aniso(2.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.5f);
+				aniso = boat_rotation[0] * aniso * boat_rotation[0].transpose();
+
+				boat_velocity[0].x = 5;
+
+				int r = 5;
+				for (int s = i - r; s <= i + r; s++)
+				{
+					for (int t = j - r; t <= j + r; t++)
+					{
+						float dx = s - i;
+						float dz = t - j;
+						Vec3f rotated = Vec3f(dx, 0.0f, dz);
+
+
+						float d = sqrt(rotated.x * rotated.x + rotated.z * rotated.z);
+						if (d < r)
+						{
+							Vec2f dw = (1.0f - d / r) * 0.005f * Vec2f(boat_velocity[0].x, boat_velocity[0].z);
+							atomicAdd(&trails[s + t * trail_size].x, dw.x);
+							atomicAdd(&trails[s + t * trail_size].y, dw.y);
+							atomicAdd(&weights[s + t * trail_size], 1.0f);
+
+						
+							//trails[s + t * trail_size].y = 0.4;
+							//trails[s + t * trail_size].x = 0.4;
+							//printf("dw= %f %f  \n", dw.x , dw.y);
+							//trails[s + t*trail_size] = (1.0f-d/r)*0.03f*make_float2(boat_velocity.x, boat_velocity.y);
+						}
+					}
+				}
+
+
+
+				//printf("trails  %d, %d, %f %f\n", i, j, trails[i + j * trail_size].x, trails[i + j * trail_size].y);
+			}
+		}
+	}
+
 
 	DEFINE_CLASS(Coupling);
 }

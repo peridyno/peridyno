@@ -39,14 +39,18 @@ namespace dyno
 
 		DArray2D<Coord4> getHeightField() { return mHeight; }
 		Vec2f getOrigin() { return Vec2f(simulatedOriginX * realGridSize, simulatedOriginY * realGridSize); }
-
-
+		
 		void addSource();
 		void moveDynamicRegion(int nx, int ny);		//跟随船体移动动态仿真区域
+	
+		DArray2D<Vec2f> getmSource() { return mSource; }
+		DArray2D<float> getWeight() { return mWeight; }
+		
+		void compute();
+		void updateStates() override;
 	protected:
 		void resetStates() override;
 
-		void updateStates() override;
 
 
 
@@ -57,14 +61,13 @@ namespace dyno
 		void initSource();
 		void resetSource();
 		void swapDeviceGrid();
-		void compute();
 		void initHeightPosition();
 
 	public:
 		int mResolution;
 
 		float mChoppiness;  //设置浪尖的尖锐性，范围0~1
-
+	
 	protected:
 		float patchLength;
 		float realGridSize;
@@ -75,13 +78,13 @@ namespace dyno
 		size_t gridPitch;
 
 		float horizon = 2.0f;			        //水面初始高度
-		float* mWeight;
 
 		DArray2D<Coord4> mHeight;				//高度场
 		DArray2D<Coord4> mDeviceGrid;		    //当前动态区域状态
 		DArray2D<Coord4> mDeviceGridNext;
 		DArray2D<Coord4> mDisplacement;         // 位移场
 		DArray2D<Vec2f> mSource;				//用于添加船与水交互
+		DArray2D<float> mWeight;				
 	};
 
 	IMPLEMENT_TCLASS(CapillaryWave, TDataType)

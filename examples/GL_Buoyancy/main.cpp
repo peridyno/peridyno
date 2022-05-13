@@ -64,18 +64,25 @@ std::shared_ptr<SceneGraph> createScene()
 	rigid->stateTopology()->connect(Rmapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(Rmapper);
 
+
 	auto rRender = std::make_shared<GLWireframeVisualModule>();
 	rRender->setColor(Vec3f(1, 1, 0));
 	Rmapper->outTriangleSet()->connect(rRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(rRender);
 	
 	//coupling---------------------------------------
+	auto trail = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
+
+
+
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
 	rigid->connect(coupling->importRigidBodySystem());
 	ocean->connect(coupling->importOcean());
 
 	Rmapper->outTriangleSet()->connect(coupling->inTriangleSet());
 	coupling->initialize();
+
+
 
 	return scn;
 }
