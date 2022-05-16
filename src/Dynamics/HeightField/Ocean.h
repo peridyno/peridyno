@@ -65,8 +65,8 @@ namespace dyno
 		float m_virtualGridSize;
 		float m_realGridSize;
 
-		int Nx = 2;
-		int Ny = 2;
+		int Nx = 1;
+		int Ny = 1;
 
 
 		

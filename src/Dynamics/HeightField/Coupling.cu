@@ -383,7 +383,7 @@ namespace dyno
 			m_boat->stateRotationMatrix()->getData(),//m_boat->getOrientation(), glm::mat3 rotation,
 			m_eclipsedTime);
 
-		/*
+		
 		uint2 extent;
 		extent.x = m_trail->getGridSize();
 		extent.y = m_trail->getGridSize();
@@ -393,7 +393,7 @@ namespace dyno
 			m_trail->getmSource(),
 			m_trail->getWeight(),
 			m_trail->getGridSize());
-*/
+
 
 
 		printf("Coupling<TDataType>::animate  \n");
@@ -436,21 +436,22 @@ namespace dyno
 		if (pId < sample_size)
 		{
 			Vec3f dir_i = samples[pId];
-			if (abs(dir_i.z) < 120.0f && abs(dir_i.x) < 30.0f)
-			{
+			//if (abs(dir_i.z) < 120.0f && abs(dir_i.x) < 30.0f)
+			//{
 				Vec3f pos_i = samples[pId]*100;
 				Vec2f local_pi = (Vec2f(pos_i.x, pos_i.z) - trail_origin) / trail_grid_distance;
 				int i = floor(local_pi.x);
 				int j = floor(local_pi.y);
 				
 
-				printf("pos_i %f %f %f  %d %d  \n", pos_i.x, pos_i.y, pos_i.z,i ,j);
-
+				printf("pos_i=(%f %f %f)  i=%d  j=%d  \n", pos_i.x, pos_i.y, pos_i.z,i ,j);
+				printf("local_pi=(%f, %f) \n", local_pi.x, local_pi.y);
+				printf("trail_origin=%f, trail_grid_distance = %f \n", trail_origin, trail_grid_distance);
 
 				Matrix aniso(2.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.5f);
 				aniso = boat_rotation[0] * aniso * boat_rotation[0].transpose();
 
-				boat_velocity[0].x = 5;
+				boat_velocity[0].x = 3;
 
 				int r = 5;
 				for (int s = i - r; s <= i + r; s++)
@@ -470,7 +471,6 @@ namespace dyno
 							atomicAdd(&trails[s + t * trail_size].y, dw.y);
 							atomicAdd(&weights[s + t * trail_size], 1.0f);
 
-						
 							//trails[s + t * trail_size].y = 0.4;
 							//trails[s + t * trail_size].x = 0.4;
 							//printf("dw= %f %f  \n", dw.x , dw.y);
@@ -482,7 +482,7 @@ namespace dyno
 
 
 				//printf("trails  %d, %d, %f %f\n", i, j, trails[i + j * trail_size].x, trails[i + j * trail_size].y);
-			}
+			//}
 		}
 	}
 

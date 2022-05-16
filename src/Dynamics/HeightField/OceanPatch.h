@@ -112,7 +112,7 @@ namespace dyno {
         cufftHandle fftPlan;
 
 
-        DEF_VAR(int, my_windTypes, 0, "m_windTypesWinds");
+        DEF_VAR(int, my_windTypes, 4, "m_windTypesWinds");
     };
     IMPLEMENT_TCLASS(OceanPatch, TDataType)
 } 
