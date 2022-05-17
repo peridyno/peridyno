@@ -11,33 +11,21 @@
 
 #include "CustomMouseInteraction.h"
 
+#include "Module/MouseIntersect.h"
+
 using namespace dyno;
 
 class Instances : public Node
 {
 public:
 	Instances() {
-		Transform3f tm;
-		CArray<Transform3f> hTransform;
-		for (uint i = 0; i < 5; i++)
-		{
-			tm.translation() = Vec3f(0.4 * i, 0, 0);
-			tm.scale() = Vec3f(1.0 + 0.1*i, 1.0 - 0.1*i, 1.0);
-			tm.rotation() = Quat<float>(i * (-0.2), Vec3f(1, 0, 0)).toMatrix3x3();
-			hTransform.pushBack(tm);
-		}
-
-		this->stateTransforms()->allocate()->assign(hTransform);
 
 		std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
 		triSet->loadObjFile("../../data/armadillo/armadillo.obj");
 
 		this->stateTopology()->setDataPtr(triSet);
 
-		hTransform.clear();
 	};
-
-	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
 };
 
 int main(int, char**)
@@ -52,11 +40,20 @@ int main(int, char**)
 	instanceNode->stateTopology()->connect(mouseInterator->inTopology());
 	instanceNode->animationPipeline()->pushModule(mouseInterator);
 
-	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
+	auto mouseIntersecter = std::make_shared<MouseIntersect<DataType3f>>();
+	mouseInterator->stateMouseRay()->connect(mouseIntersecter->inMouseRay());
+	instanceNode->stateTopology()->connect(mouseIntersecter->inInitialTriangleSet());
+	mouseInterator->stateMouseIntersect()->setDataPtr(mouseIntersecter);
+
+	auto instanceRender = std::make_shared<GLSurfaceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
-	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
-	instanceNode->stateTransforms()->connect(instanceRender->inTransform());
-	instanceNode->graphicsPipeline()->pushModule(instanceRender);
+	mouseIntersecter->stateSelectedTriangleSet()->connect(instanceRender->inTriangleSet());
+	mouseIntersecter->graphicsPipeline()->pushModule(instanceRender);
+
+	auto instanceRender1 = std::make_shared<GLSurfaceVisualModule>();
+	instanceRender1->setColor(Vec3f(0, 1, 1));
+	mouseIntersecter->stateSelectedTriangleSet()->connect(instanceRender1->inTriangleSet());
+	mouseIntersecter->graphicsPipeline()->pushModule(instanceRender1);
 
 	scn->setUpperBound({ 4, 4, 4 });
 

@@ -212,6 +212,13 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void TriangleSet<TDataType>::setTriangles(DArray<Triangle>& triangles)
+	{
+		m_triangles.resize(triangles.size());
+		m_triangles.assign(triangles);
+	}
+
+	template<typename TDataType>
 	void TriangleSet<TDataType>::loadObjFile(std::string filename)
 	{
 		if (filename.size() < 5 || filename.substr(filename.size() - 4) != std::string(".obj")) {
