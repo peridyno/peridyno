@@ -122,7 +122,7 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 				ImGui::EndPopup();
 			}
 
-
+			
 			// Camera Select
 			static int camera_current = 0;
 			const char* camera_name[] = { ICON_FA_CAMERA " Orbit", ICON_FA_CAMERA " TrackBall" };
@@ -135,8 +135,9 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 				for (int n = 0; n < IM_ARRAYSIZE(camera_name); n++)
 				{
 					const bool is_selected = (camera_current == n);
-					if (ImGui::Selectable(camera_name[n], is_selected))
+					if (ImGui::Selectable(camera_name[n], is_selected)) {
 						camera_current = n;
+					}
 					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 					if (is_selected)
 						ImGui::SetItemDefaultFocus();
@@ -145,14 +146,36 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 			}
 			ImGui::endTitle();
 
-			// 					if(CameraType(camera_current) != mCameraType){
-			// 						// TODO 
-			// 						// setCameraType(CameraType(camera_current));
-			// 					}
-								//ImGui::ShowStyleEditor();
-			ImGui::End();
-		}
 
+
+		}
+		{
+			// viewPort Select
+			static int viewPort = 0;
+			const char* viewPort_name[] = { ICON_FA_CAMERA " Perspect", ICON_FA_CAMERA " Ortho" };
+			static ImGuiComboFlags viewPortflags = ImGuiComboFlags_NoArrowButton;
+
+			ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
+			ImGui::beginTitle("viewPort");
+			if (ImGui::BeginCombo("", viewPort_name[viewPort], viewPortflags))
+			{
+				for (int n = 0; n < IM_ARRAYSIZE(viewPort_name); n++)
+				{
+					const bool is_selected = (viewPort == n);
+					if (ImGui::Selectable(viewPort_name[n], is_selected)) {
+						rparams->viewPortflag = n;// 0:Perspect  1:Ortho
+						viewPort = n;
+					}
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::endTitle();
+			ImGui::End();
+
+		}
 		{// Top Right widget
 
 			ImGui::Begin("Top Right widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);

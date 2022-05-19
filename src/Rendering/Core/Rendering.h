@@ -43,6 +43,7 @@ namespace dyno
 			float		_padding = 0.f;
 		} light;
 
+		 
 		// Backcolor gray scale
 		glm::vec3	bgColor0 = glm::vec3(0.2f);
 		glm::vec3	bgColor1 = glm::vec3(0.8f);
@@ -53,6 +54,8 @@ namespace dyno
 
 		bool showAxisHelper = true;
 		bool showSceneBounds = false;
+
+		int viewPortflag = -1;
 	};
 
 	// RenderEngine interface

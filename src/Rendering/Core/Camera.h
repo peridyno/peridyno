@@ -43,6 +43,7 @@ namespace dyno
 
 		TRay3D<float> castRayInWorldSpace(float x, float y);
 
+		int viewPortType = 0;//0:pers 1:ortho
 	protected:
 		float mNear = 0.01f;
 		float mFar = 10.0f;
@@ -50,6 +51,7 @@ namespace dyno
 
 		int mViewportWidth;
 		int mViewportHeight;
+
 	};
 
 }

@@ -33,7 +33,15 @@ namespace dyno
 	glm::mat4 TrackballCamera::getProjMat()
 	{
 		float aspect = std::max(float(mViewportWidth), 1.0f) / std::max(float(mViewportHeight), 1.0f);
-		return glm::perspective(mFov, aspect, mNear, mFar);
+
+		glm::mat4 projection;
+
+		if (viewPortType == 0)//0:pers 1:ortho
+			projection = glm::perspective(mFov, aspect, mNear, mFar);
+		else
+			projection = glm::ortho(float(-1), float(1), float(-mViewportWidth / mViewportHeight), float(mViewportWidth / mViewportHeight), -10.0f, 10.0f);
+		return projection;
+
 	}
 
 	void TrackballCamera::zoom(float amount) 
