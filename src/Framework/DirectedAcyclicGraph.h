@@ -46,12 +46,11 @@ namespace dyno {
 
 		size_t sizeOfVertex() const;
 
+		std::set<ObjectId>& vertices();
 
-		//DOTO: implement the Sugiyama layout algorithm, 
-		//reference: 
-		//	https://github.com/gml4gtk/demekgraph 
-		//	https://github.com/gml4gtk/kroketgraph
-		//	https://improbable-emancipation.blogspot.com/2011/09/sugiyama-layout-algorithm-hierarchical.html
+		std::map<ObjectId, std::unordered_set<ObjectId>>& edges();
+
+		std::map<ObjectId, std::unordered_set<ObjectId>>& reverseEdges();
 
 	private:
 		// Functions used by topologicalSort
@@ -62,5 +61,6 @@ namespace dyno {
 		std::vector<ObjectId> mOrderVertices;
 		std::set<ObjectId> mVertices;
 		std::map<ObjectId, std::unordered_set<ObjectId>> mEdges;
+		std::map<ObjectId, std::unordered_set<ObjectId>> mReverseEdges;
 	};
 }

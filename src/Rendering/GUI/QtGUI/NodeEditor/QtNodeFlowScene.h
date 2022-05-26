@@ -29,6 +29,12 @@ public:
 	void enableEditing();
 	void disableEditing();
 
+	void setDx(float dx) { mDx = dx; }
+	void setDy(float dy) { mDy = dy; }
+
+	float dx() { return mDx; }
+	float dy() { return mDy; }
+
 public Q_SLOTS:
 	/**
 	 * @brief create a QT-based view for the active scene graph.
@@ -48,12 +54,18 @@ public Q_SLOTS:
 
 	void deleteNodeToSceneGraph(QtNode& n);
 
+	/**
+	 * Auto layout for the node graph
+	 */
 	void reorderAllNodes();
 
 private:
 	SceneGraph* m_scene = nullptr;
 
 	bool mEditingEnabled = true;
+
+	float mDx = 100.0f;
+	float mDy = 50.0f;
 };
 
 }
