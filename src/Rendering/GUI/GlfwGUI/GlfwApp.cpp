@@ -159,6 +159,9 @@ namespace dyno
 		mImWindow.initialize(xscale);
 	}
 
+	void GlfwApp::setCameraZoom(float x, float y, float z) {
+		renderEngine()->camera()->zoom(x*y*z);
+	}
 	void GlfwApp::initializeStyle()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -219,7 +222,7 @@ namespace dyno
 			renderEngine()->renderParams()->viewport.h = height;
 
 			renderEngine()->draw(activeScene.get());
-
+		
 			if(mShowImWindow)
 				mImWindow.draw(renderEngine().get(), activeScene.get());
 // 			// Draw widgets
