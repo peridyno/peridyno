@@ -32,6 +32,9 @@ namespace dyno
 		~GLPointVisualNode() override;
 
 	public:
+		std::string getNodeType() override;
+
+	protected:
 		void resetStates() override;
 
 		DEF_INSTANCE_IN(PointSet<TDataType>, Points, "A set of points");

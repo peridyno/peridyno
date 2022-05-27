@@ -286,7 +286,8 @@ namespace dyno
 
 		ids.clear();
 		distance.clear();
-		hashGrid.clear();
+		//hashGrid.clear();
+		hashGrid.release();
 	}
 
 	DEFINE_CLASS(NeighborPointQuery);

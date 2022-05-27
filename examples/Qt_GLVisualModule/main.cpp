@@ -16,6 +16,7 @@
 #include <ImColorbar.h>
 
 #include "NodePortConnectionTest.h"
+#include "InputFieldTest.h"
 
 
 #include <RigidBody/RigidBodySystem.h>
@@ -26,6 +27,8 @@
 #include <Mapping/DiscreteElementsToTriangleSet.h>
 #include <Mapping/ContactsToEdgeSet.h>
 #include <Mapping/ContactsToPointSet.h>
+
+#include "Node/GLPointVisualNode.h"
 
 #include "Collision/NeighborElementQuery.h"
 
@@ -46,13 +49,18 @@ std::shared_ptr<SceneGraph> createScene()
 // 	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 // 	fluid->connect(boundary->importParticleSystems());
 
-	auto visualizer = scn->addNode(std::make_shared<NodePortConnectionTest<DataType3f>>());
-	fluid->connect(visualizer->importParticleSystem());
+	auto testNode = scn->addNode(std::make_shared<NodePortConnectionTest<DataType3f>>());
+	fluid->connect(testNode->importParticleSystem());
  	
-	//auto outTop = visualizer->stateTopology()->promoteToInput();
-	//fluid->stateForce()->promoteToOuput();
- 	//outTop->connect(visualizer->inPointSetIn());
-	//outTop->disconnect(visualizer->inPointSetIn());
+	auto ptVisulizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
+
+	auto outTop = fluid->stateTopology()->promoteOuput();
+	auto outVel = fluid->stateVelocity()->promoteOuput();
+	outTop->connect(ptVisulizer->inPoints());
+	outVel->connect(ptVisulizer->inVector());
+
+	auto nullNode = scn->addNode(std::make_shared<InputFieldTest<DataType3f>>());
+	testNode->outPointSetOut()->connect(nullNode->inPointSet());
 
 	return scn;
 }

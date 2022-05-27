@@ -49,6 +49,11 @@ std::string Node::getName()
 	return m_node_name;
 }
 
+std::string Node::getNodeType()
+{
+	return "Default";
+}
+
 bool Node::isControllable()
 {
 	return m_controllable;

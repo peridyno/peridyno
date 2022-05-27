@@ -19,6 +19,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	std::string ParticleSystem<TDataType>::getNodeType()
+	{
+		return "ParticleSystem";
+	}
+
+	template<typename TDataType>
 	void ParticleSystem<TDataType>::loadParticles(std::string filename)
 	{
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());

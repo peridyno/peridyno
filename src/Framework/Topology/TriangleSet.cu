@@ -348,6 +348,10 @@ namespace dyno
 			this->m_coords,
 			m_triangles,
 			vert2Tri);
+
+		this->updateEdges();
+
+		EdgeSet<TDataType>::updateTopology();
 	}
 
 	DEFINE_CLASS(TriangleSet);

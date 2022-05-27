@@ -183,18 +183,14 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		QDoubleSlider* slider = new QDoubleSlider;
-		//slider->setFixedSize(80,18);
-		//slider->setRange(m_field->getMin(), m_field->getMax());
-		slider->setRange(0, 1);
+		slider->setRange(m_field->getMin(), m_field->getMax());
 		slider->setMinimumWidth(180);
 
 		QLabel* spc = new QLabel();
 		spc->setFixedSize(10, 18);
 
 		QDoubleSpinner* spinner = new QDoubleSpinner;
-		spinner->setFixedSize(80, 18);
-		//spinner->setRange(m_field->getMin(), m_field->getMax());
-		spinner->setRange(0, 1);
+		spinner->setRange(m_field->getMin(), m_field->getMax());
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(slider, 0, 1);
