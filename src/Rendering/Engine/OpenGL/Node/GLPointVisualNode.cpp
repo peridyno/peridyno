@@ -37,6 +37,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	std::string GLPointVisualNode<TDataType>::getNodeType()
+	{
+		return "Visualization";
+	}
+
+	template<typename TDataType>
 	void GLPointVisualNode<TDataType>::resetStates()
 	{
 		this->animationPipeline()->update();
