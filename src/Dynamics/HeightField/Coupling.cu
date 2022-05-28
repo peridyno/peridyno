@@ -72,13 +72,13 @@ namespace dyno
 	template<typename TDataType>
 	Coupling<TDataType>::~Coupling()
 	{
-		cudaFree(m_forceX);
-		cudaFree(m_forceY);
-		cudaFree(m_forceZ);
-		cudaFree(m_torqueX);
-		cudaFree(m_torqueY);
-		cudaFree(m_torqueZ);
-		cudaFree(m_sample_heights);
+		//cudaFree(m_forceX);
+		//cudaFree(m_forceY);
+		//cudaFree(m_forceZ);
+		//cudaFree(m_torqueX);
+		//cudaFree(m_torqueY);
+		//cudaFree(m_torqueZ);
+		//cudaFree(m_sample_heights);
 	}
 
 	template<typename TDataType>

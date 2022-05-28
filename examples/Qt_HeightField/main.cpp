@@ -78,13 +78,11 @@ std::shared_ptr<SceneGraph> createScene()
 	//coupling---------------------------------------
 	auto trail = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
 
-
-
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
 	rigid->connect(coupling->importRigidBodySystem());
 	ocean->connect(coupling->importOcean());
 
-	Rmapper->outTriangleSet()->connect(coupling->inTriangleSet());
+	//Rmapper->outTriangleSet()->connect(coupling->inTriangleSet());
 	coupling->initialize();
 	
 	return scn;
