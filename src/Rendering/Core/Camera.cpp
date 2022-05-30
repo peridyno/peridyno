@@ -2,7 +2,8 @@
 
 namespace dyno
 {
-	TRay3D<float> Camera::castRayInWorldSpace(float x, float y) {
+	TRay3D<float> Camera::castRayInWorldSpace(float x, float y) 
+	{
 		float width = this->viewportWidth();
 		float height = this->viewportHeight();
 

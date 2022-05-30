@@ -36,8 +36,6 @@ namespace dyno {
 		
 		void setWindowSize(int width, int height);
 
-		void setCameraZoom(float x, float y, float z);
-
 		void setButtonType(uint button) { mButtonType = button; }
 		void setButtonMode(uint mode) { mButtonMode = mode; }
 		void setButtonAction(uint action) { mButtonAction = action; }

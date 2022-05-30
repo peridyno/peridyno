@@ -15,6 +15,9 @@
 
 #include <Rendering.h>
 
+#include "OrbitCamera.h"
+#include "TrackballCamera.h"
+
 using namespace dyno;
 
 class WidgetQueue : public Action
@@ -128,6 +131,10 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 			const char* camera_name[] = { ICON_FA_CAMERA " Orbit", ICON_FA_CAMERA " TrackBall" };
 			static ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
 
+			auto cam = engine->camera();
+			int width = cam->viewportWidth();
+			int height = cam->viewportHeight();
+
 			ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
 			ImGui::beginTitle("Camera");
 			if (ImGui::BeginCombo("", camera_name[camera_current], flags))
@@ -136,6 +143,28 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 				{
 					const bool is_selected = (camera_current == n);
 					if (ImGui::Selectable(camera_name[n], is_selected)) {
+						if (n == 0)
+						{
+							auto oc = std::make_shared<OrbitCamera>();
+							oc->setWidth(width);
+							oc->setHeight(height);
+
+							oc->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
+
+							engine->setCamera(oc);
+						}
+						else
+						{
+							auto tc = std::make_shared<TrackballCamera>();
+
+							tc->setWidth(width);
+							tc->setHeight(height);
+
+							tc->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
+
+							engine->setCamera(tc);
+						}
+
 						camera_current = n;
 					}
 					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -150,21 +179,35 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 
 		}
 		{
-			// viewPort Select
-			static int viewPort = 0;
-			const char* viewPort_name[] = { ICON_FA_CAMERA " Perspect", ICON_FA_CAMERA " Ortho" };
+			// Projection Select
+			static int current_projection_type = 0;
+			const char* projection_name[] = { ICON_FA_CAMERA " Perspect", ICON_FA_CAMERA " Ortho" };
 			static ImGuiComboFlags viewPortflags = ImGuiComboFlags_NoArrowButton;
+
+			auto cam = engine->camera();
 
 			ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 4);
 			ImGui::beginTitle("viewPort");
-			if (ImGui::BeginCombo("", viewPort_name[viewPort], viewPortflags))
+			if (ImGui::BeginCombo("", projection_name[current_projection_type], viewPortflags))
 			{
-				for (int n = 0; n < IM_ARRAYSIZE(viewPort_name); n++)
+				for (int n = 0; n < IM_ARRAYSIZE(projection_name); n++)
 				{
-					const bool is_selected = (viewPort == n);
-					if (ImGui::Selectable(viewPort_name[n], is_selected)) {
-						rparams->viewPortflag = n;// 0:Perspect  1:Ortho
-						viewPort = n;
+					const bool is_selected = (current_projection_type == n);
+					if (ImGui::Selectable(projection_name[n], is_selected)) {
+
+						switch (n)
+						{
+						case 0:
+							cam->setProjectionType(Camera::Perspective);
+							break;
+						case 1:
+							cam->setProjectionType(Camera::Orthogonal);
+							break;
+						default:
+							break;
+						}
+
+ 						current_projection_type = n;
 					}
 					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 					if (is_selected)

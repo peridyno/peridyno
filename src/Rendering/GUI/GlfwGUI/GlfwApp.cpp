@@ -159,9 +159,6 @@ namespace dyno
 		mImWindow.initialize(xscale);
 	}
 
-	void GlfwApp::setCameraZoom(float x, float y, float z) {
-		renderEngine()->camera()->zoom(x*y*z);
-	}
 	void GlfwApp::initializeStyle()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();

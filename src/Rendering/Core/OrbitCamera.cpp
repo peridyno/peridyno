@@ -203,7 +203,7 @@ namespace dyno
 		getCoordSystem(viewDir, upDir, rightDir);
 		Vec3f targetPos = mEyePos + mFocusDist * viewDir;
 
-		return glm::lookAt(mEyePos.data_, targetPos.data_, upDir.data_);
+		return glm::lookAt(mEyePos.data_ * mDistanceUnit, targetPos.data_ * mDistanceUnit, upDir.data_);
 	}
 
 	glm::mat4 OrbitCamera::getProjMat()
@@ -212,10 +212,16 @@ namespace dyno
 		
 		glm::mat4 projection;
 
-		if(viewPortType == 0)//0:pers 1:ortho
-			projection = glm::perspective(mFov, aspect, mNear, mFar);
+		if (mProjectionType == Perspective)
+		{
+			projection = glm::perspective(mFov, aspect, mNear * mDistanceUnit, mFar * mDistanceUnit);
+		}
 		else
-			projection = glm::ortho(float(-1), float(1), float(-mViewportWidth/ mViewportHeight), float(mViewportWidth / mViewportHeight), -10.0f, 10.0f);
+		{
+			float half_depth = (mEyePos - mTargetPos).norm() * mDistanceUnit;
+			projection = glm::ortho(-half_depth * aspect, half_depth * aspect, -half_depth, half_depth, -5.0f * half_depth, 5.0f* half_depth);
+		}
+			
 		return projection;
 	}
 

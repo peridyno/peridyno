@@ -20,6 +20,10 @@
 #include "Collision/NeighborElementQuery.h"
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
+
+
+#include "Camera.h"
+
 #define PI 3.14159265
 using namespace dyno;
 
@@ -131,7 +135,7 @@ int main(int, char**)
 	BoxInfo box;
 
 	box.center = 0.5f * Vec3f(0, 0.4, 0);
-	box.halfLength = Vec3f(3.4, 3.4, 3.4);
+	box.halfLength = Vec3f(1.0, 1.0, 1.0);
 	rigid->addBox(box, rigidBody);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
@@ -146,11 +150,11 @@ int main(int, char**)
 	scn->addNode(rigid);
 
 	GlfwApp window;
-
+	
+	//Set the distance unit for the camera, the fault unit is meter
+	window.activeCamera()->setDistanceUnit(3.0f);
 	window.setSceneGraph(scn);
 	window.createWindow(1024, 768);
-
-	window.setCameraZoom(box.halfLength.x, box.halfLength.y , box.halfLength.z);
 
 	window.mainLoop();
 

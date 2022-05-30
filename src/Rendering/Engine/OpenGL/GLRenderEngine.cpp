@@ -207,31 +207,6 @@ namespace dyno
 			glViewport(10, 10, 100, 100);
 			mRenderHelper->drawAxis();
 		}
-		/*
-		if (m_rparams.viewPort != -1) {
-
-			switch (m_rparams.viewPort)
-			{
-			case 0:
-				mCamera = std::make_shared<OrbitCamera>();
-				break;
-			case 1:
-				mCamera = std::make_shared<TrackballCamera>();
-				break;
-			case 2:
-				printf("Orthographic  -------\n");
-				break;
-			default:
-				break;
-			}
-			m_rparams.viewPort = -1;
-		}
-		*/
-
-		if (m_rparams.viewPortflag != -1) {
-			mCamera->viewPortType = m_rparams.viewPortflag;
-			m_rparams.viewPortflag = -1;
-		}
 	}
 
 	void GLRenderEngine::resize(int w, int h)
