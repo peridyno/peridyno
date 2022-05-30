@@ -56,7 +56,8 @@ namespace dyno
 
 		// some render options...
 		bool  showGround = true;
-		float groudScale = 3.f;
+		float planeScale = 3.f;
+		float rulerScale = 1.f;
 
 		bool showAxisHelper = true;
 		bool showSceneBounds = true;

@@ -135,7 +135,7 @@ namespace dyno
 		// draw a plane
 		if (rparams.showGround)
 		{
-			mRenderHelper->drawGround(rparams.groudScale);
+			mRenderHelper->drawGround(rparams.planeScale, rparams.rulerScale);
 		}
 
 		// render modules

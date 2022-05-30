@@ -49,7 +49,7 @@ namespace dyno
 		}
 
 
-		void draw(float scale = 3.f)
+		void draw(float planeScale, float rulerScale)
 		{
 			glEnable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
@@ -57,7 +57,8 @@ namespace dyno
 			mRulerTex.bind(GL_TEXTURE1);
 			
 			mProgram.use();
-			mProgram.setFloat("uScale", scale);
+			mProgram.setFloat("uPlaneScale", planeScale);
+			mProgram.setFloat("uRulerScale", rulerScale);
 
 			mPlane.draw();
 			
@@ -240,10 +241,10 @@ namespace dyno
 		mBackgroundRenderer = new BackgroundRenderer();
 	}
 
-	void RenderHelper::drawGround(float scale)
+	void RenderHelper::drawGround(float planeScale, float rulerScale)
 	{
 		if (mGroundRenderer != NULL)
-			mGroundRenderer->draw(scale);
+			mGroundRenderer->draw(planeScale, rulerScale);
 	}
 
 	void RenderHelper::drawAxis(float lineWidth)
