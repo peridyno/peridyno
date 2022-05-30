@@ -4,82 +4,68 @@
 namespace dyno
 {
 
-NodeIterator::NodeIterator()
-{
-	node_current = nullptr;
-}
-
-
-NodeIterator::NodeIterator(std::shared_ptr<Node> node)
-{
-	node_current = node;
-
-	if (node_current != nullptr)
+	NodeIterator::NodeIterator()
 	{
-		auto children = node_current->getAncestors();
-		for each (auto c in children)
-		{
-			if (c->isControllable())
-			{
-				node_stack.push(c);
-			}
-		}
-	}
-}
-
-
-NodeIterator::~NodeIterator()
-{
-
-}
-
-NodeIterator& NodeIterator::operator++()
-{
-	if (node_stack.empty())
 		node_current = nullptr;
-	else
-	{
-		node_current = node_stack.top();
-		node_stack.pop();
-
-		auto children = node_current->getAncestors();
-		for each (auto c in children)
-		{
-			if (c->isActive())
-			{
-				node_stack.push(c);
-			}
-		}
 	}
 
-	return *this;
-}
+
+	NodeIterator::NodeIterator(std::list<Node*>& nList, std::map<ObjectId, std::shared_ptr<Node>>& nMap)
+	{
+		mNodeList.clear();
+
+		for (auto it = nList.begin(); it != nList.end(); ++it)
+		{
+			if ((*it)->isControllable() && nMap.find((*it)->objectId()) != nMap.end()) {
+				mNodeList.push_back(nMap[(*it)->objectId()]);
+			}
+		}
+
+		node_current = mNodeList.empty() ? nullptr : mNodeList.front();
+
+		if (!mNodeList.empty())
+			mNodeList.pop_front();
+	}
 
 
-NodeIterator& NodeIterator::operator++(int)
-{
-	return operator++();
-}
+	NodeIterator::~NodeIterator()
+	{
 
-std::shared_ptr<Node> NodeIterator::operator->() const
-{
-	return node_current;
-}
+	}
 
-std::shared_ptr<Node> NodeIterator::get() const
-{
-	return node_current;
-}
+	NodeIterator& NodeIterator::operator++()
+	{
+		node_current = mNodeList.empty() ? nullptr : mNodeList.front();
 
-bool NodeIterator::operator!=(const NodeIterator &iterator) const
-{
-	return node_current != iterator.get();
-}
+		if (!mNodeList.empty())
+			mNodeList.pop_front();
 
-bool NodeIterator::operator==(const NodeIterator &iterator) const
-{
-	return node_current == iterator.get();
-}
+		return *this;
+	}
 
 
+	NodeIterator& NodeIterator::operator++(int)
+	{
+		return operator++();
+	}
+
+	std::shared_ptr<Node> NodeIterator::operator->() const
+	{
+		return node_current;
+	}
+
+	std::shared_ptr<Node> NodeIterator::get() const
+	{
+		return node_current;
+	}
+
+	bool NodeIterator::operator!=(const NodeIterator& iterator) const
+	{
+		return node_current != iterator.get();
+	}
+
+	bool NodeIterator::operator==(const NodeIterator& iterator) const
+	{
+		return node_current == iterator.get();
+	}
 }

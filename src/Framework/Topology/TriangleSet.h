@@ -89,18 +89,23 @@ namespace dyno
 		TriangleSet();
 		~TriangleSet();
 
-		DArray<Triangle>* getTriangles() { return &m_triangles; }
+		DArray<Triangle>& getTriangles() { return m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
 
 		DArrayList<int>& getVertex2Triangles();
 
 		void updateEdges();
 
+		void updateVertexNormal();
+
 		void loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 
+		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
+
 	protected:
+		void updateTopology() override;
 
 		DArray<Triangle> m_triangles;
 		DArrayList<int> m_ver2Tri;

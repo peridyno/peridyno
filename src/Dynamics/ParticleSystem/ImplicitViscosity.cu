@@ -3,7 +3,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ImplicitViscosity, TDataType)
+//	IMPLEMENT_TCLASS(ImplicitViscosity, TDataType)
 
 	template<typename Real>
 	__device__ Real IV_Weight(const Real r, const Real h)
@@ -76,7 +76,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ImplicitViscosity<TDataType>::constrain()
+	void ImplicitViscosity<TDataType>::constrain()
 	{
 		auto& poss = this->inPosition()->getData();
 		auto& vels = this->inVelocity()->getData();
@@ -109,8 +109,6 @@ namespace dyno
 				h,
 				dt);
 		}
-
-		return true;
 	}
 
 	DEFINE_CLASS(ImplicitViscosity);

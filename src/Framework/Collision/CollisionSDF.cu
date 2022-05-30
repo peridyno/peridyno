@@ -8,7 +8,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(CollisionSDF, TDataType)
+	IMPLEMENT_TCLASS(CollisionSDF, TDataType)
 
 	template<typename TDataType>
 	CollisionSDF<TDataType>::CollisionSDF()

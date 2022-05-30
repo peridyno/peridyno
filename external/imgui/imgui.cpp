@@ -4443,6 +4443,10 @@ void ImGui::EndFrame()
     memset(g.IO.NavInputs, 0, sizeof(g.IO.NavInputs));
 
     CallContextHooks(&g, ImGuiContextHookType_EndFramePost);
+    // Luo Xukun: right middle click focus (TODO: move to imgui_extend.h)
+    if (!ImGui::GetIO().WantCaptureMouse)
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) || ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
+            ImGui::FocusWindow(NULL);
 }
 
 void ImGui::Render()
@@ -4450,8 +4454,9 @@ void ImGui::Render()
     ImGuiContext& g = *GImGui;
     IM_ASSERT(g.Initialized);
 
-    if (g.FrameCountEnded != g.FrameCount)
-        EndFrame();
+	if (g.FrameCountEnded != g.FrameCount) {
+		EndFrame();
+	}
     g.FrameCountRendered = g.FrameCount;
     g.IO.MetricsRenderWindows = 0;
 
@@ -7326,6 +7331,7 @@ void ImGuiStackSizes::CompareWithCurrentState()
 // Advance cursor given item size for layout.
 // Register minimum needed size so it can extend the bounding box used for auto-fit calculation.
 // See comments in ItemAdd() about how/why the size provided to ItemSize() vs ItemAdd() may often different.
+
 void ImGui::ItemSize(const ImVec2& size, float text_baseline_y)
 {
     ImGuiContext& g = *GImGui;

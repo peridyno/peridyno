@@ -3,12 +3,14 @@
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
-#include "Peridynamics/Peridynamics.h"
+
+#include "Module/Peridynamics.h"
+
 #include "SharedFunc.h"
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ElasticBody, TDataType)
+	IMPLEMENT_TCLASS(ElasticBody, TDataType)
 
 	template<typename TDataType>
 	ElasticBody<TDataType>::ElasticBody(std::string name)
@@ -18,20 +20,23 @@ namespace dyno
 
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
 		this->varTimeStep()->connect(peri->inTimeStep());
-		this->currentPosition()->connect(peri->inPosition());
-		this->currentVelocity()->connect(peri->inVelocity());
-		this->currentForce()->connect(peri->inForce());
-		this->currentRestShape()->connect(peri->inRestShape());
+		this->statePosition()->connect(peri->inPosition());
+		this->stateVelocity()->connect(peri->inVelocity());
+		this->stateForce()->connect(peri->inForce());
+		this->stateRestShape()->connect(peri->inRestShape());
 		this->animationPipeline()->pushModule(peri);
 
 		//Create a node for surface mesh rendering
-		m_surfaceNode = this->template createAncestor<Node>("Mesh");
+		m_surfaceNode = std::make_shared<Node>("Mesh");// this->template createAncestor<Node>("Mesh");
+		m_surfaceNode->addAncestor(this);
 
-		auto triSet = m_surfaceNode->template setTopologyModule<TriangleSet<TDataType>>("surface_mesh");
+		auto triSet = std::make_shared<TriangleSet<TDataType>>();
+		m_surfaceNode->stateTopology()->setDataPtr(triSet);
 
 		//Set the topology mapping from PointSet to TriangleSet
 		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");
-		surfaceMapping->setFrom(this->m_pSet);
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		surfaceMapping->setFrom(ptSet);
 		surfaceMapping->setTo(triSet);
 	}
 
@@ -42,32 +47,11 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ElasticBody<TDataType>::translate(Coord t)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);
-
-		return ParticleSystem<TDataType>::translate(t);
-	}
-
-	template<typename TDataType>
-	bool ElasticBody<TDataType>::scale(Real s)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->scale(s);
-
-		return ParticleSystem<TDataType>::scale(s);
-	}
-
-	template<typename TDataType>
 	void ElasticBody<TDataType>::updateTopology()
 	{
-		auto pts = this->m_pSet->getPoints();
-		pts.assign(this->currentPosition()->getData());
-
-		auto tMappings = this->getTopologyMappingList();
-		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
-		{
-			(*iter)->apply();
-		}
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto& pts = ptSet->getPoints();
+		pts.assign(this->statePosition()->getData());
 	}
 
 	template<typename TDataType>
@@ -77,38 +61,23 @@ namespace dyno
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
  		this->varHorizon()->connect(nbrQuery->inRadius());
- 		this->currentPosition()->connect(nbrQuery->inPosition());
+ 		this->statePosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
-		if (!this->currentPosition()->isEmpty())
+		if (!this->statePosition()->isEmpty())
 		{
-			this->currentRestShape()->allocate();
-			auto nbrPtr = this->currentRestShape()->getDataPtr();
+			this->stateRestShape()->allocate();
+			auto nbrPtr = this->stateRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
-			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 
-			this->currentReferencePosition()->allocate();
-			this->currentReferencePosition()->getDataPtr()->assign(this->currentPosition()->getData());
+			this->stateReferencePosition()->allocate();
+			this->stateReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
 
-			this->currentNeighborIds()->allocate();
-			this->currentNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
+			this->stateNeighborIds()->allocate();
+			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
 		}
-	}
-
-	template<typename TDataType>
-	void ElasticBody<TDataType>::loadSurface(std::string filename)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->loadObjFile(filename);
-	}
-
-
-	template<typename TDataType>
-	std::shared_ptr<PointSetToPointSet<TDataType>> ElasticBody<TDataType>::getTopologyMapping()
-	{
-		auto mapping = this->template getModule<PointSetToPointSet<TDataType>>("surface_mapping");
-
-		return mapping;
 	}
 
 	DEFINE_CLASS(ElasticBody);

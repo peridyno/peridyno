@@ -9,7 +9,7 @@ namespace dyno
 	template<typename TDataType>
 	class HeightField : public TopologyModule
 	{
-		DECLARE_CLASS_1(PointSet, TDataType)
+		DECLARE_TCLASS(PointSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -23,22 +23,33 @@ namespace dyno
 		void scale(Coord s);
 		void translate(Coord t);
 
-		void setSpace(Real dx, Real dz);
+//		void setSpace(Real dx, Real dz);
 
-		Real getDx() { return m_dx; }
-		Real getDz() { return m_dz; }
+		void setExtents(uint nx, uint ny);
 
-		Coord getOrigin() { return origin; }
-		
-		DArray2D<Real>& getHeights() { return m_height; }
+// 		Real getDx() { return mDx; }
+// 		Real getDz() { return mDz; }
+
+		Real getGridSpacing() { return mGridSpacing; }
+		void setGridSpacing(Real h) { mGridSpacing = h; }
+
+		Coord getOrigin() { return mOrigin; }
+		void setOrigin(Coord p) { mOrigin = p; }
+
+		uint width();
+		uint height();
+
+		DArray2D<Coord>& getDisplacement() { return mDisplacement; }
 
 	protected:
-		Coord origin;
+		Coord mOrigin;
 
-		Real m_dx;
-		Real m_dz;
+// 		Real mDx;
+// 		Real mDz;
 
-		DArray2D<Real> m_height;
+		Real mGridSpacing;
+
+		DArray2D<Coord> mDisplacement;
 	};
 }
 

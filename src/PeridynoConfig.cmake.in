@@ -2,10 +2,12 @@ include(CMakeFindDependencyMacro)
 
 set(PERIDYNO_PACKAGE_LIB_CMAKES  "@PERIDYNO_LIB_CMAKES@")
 
-include("${CMAKE_CURRENT_LIST_DIR}/freeglutTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/glewTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/gladTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/imguiTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/glfw3Targets.cmake")
 
 # Add the targets file
 foreach(LIB_CMAKE_NAME IN ITEMS ${PERIDYNO_PACKAGE_LIB_CMAKES})
     include("${CMAKE_CURRENT_LIST_DIR}/${LIB_CMAKE_NAME}")
 endforeach()
+

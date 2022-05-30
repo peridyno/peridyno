@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(VolumeIntersect, TDataType)
+	IMPLEMENT_TCLASS(VolumeIntersect, TDataType)
 
 	template<typename TDataType>
 	VolumeIntersect<TDataType>::VolumeIntersect()

@@ -20,42 +20,9 @@ namespace dyno
 {
 	class Node;
 
-	class ModuleIterator
-	{
-	public:
-		ModuleIterator();
-
-		~ModuleIterator();
-
-		ModuleIterator(const ModuleIterator &iterator);
-
-		ModuleIterator& operator= (const ModuleIterator &iterator);
-
-		bool operator== (const ModuleIterator &iterator) const;
-
-		bool operator!= (const ModuleIterator &iterator) const;
-
-		ModuleIterator& operator++ ();
-		ModuleIterator& operator++ (int);
-
-		std::shared_ptr<Module> operator *();
-
-		Module* operator->();
-
-		Module* get();
-
-	protected:
-
-		std::weak_ptr<Module> module;
-
-		friend class Pipeline;
-	};
-
 	class Pipeline : public Module
 	{
 	public:
-		typedef ModuleIterator Iterator;
-
 		Pipeline(Node* node);
 		virtual ~Pipeline();
 
@@ -63,6 +30,9 @@ namespace dyno
 		uint sizeOfPersistentModules();
 
 		void pushModule(std::shared_ptr<Module> m);
+		
+		// clear pipeline and module
+		void clear();
 
 		void pushPersistentModule(std::shared_ptr<Module> m);
 
@@ -72,6 +42,10 @@ namespace dyno
 
 		void enable();
 		void disable();
+
+		void updateExecutionQueue();
+
+		void printModuleInfo(bool enabled);
 
 	protected:
 		void preprocess() final;
@@ -92,6 +66,8 @@ namespace dyno
 		std::list<Module*> mPersistentModule;
 
 		Node* mNode;
+
+		bool mTiming = false;
 	};
 }
 

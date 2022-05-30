@@ -11,7 +11,7 @@ namespace dyno
 		ConstraintModule();
 		~ConstraintModule() override;
 
-		virtual bool constrain() { return true; }
+		virtual void constrain() = 0;
 
 		std::string getModuleType() override { return "ConstraintModule"; }
 

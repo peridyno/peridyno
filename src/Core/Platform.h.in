@@ -48,5 +48,8 @@ enum DeviceType
 #define PRECISION_FLOAT
 
 #include "Typedef.inl"
+const inline std::string getAssetPath() {
+	return "${PERIDYNO_ASSET_PATH}/";
+}
 
 //#define SIMULATION2D

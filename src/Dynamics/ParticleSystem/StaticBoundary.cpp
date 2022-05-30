@@ -8,7 +8,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(StaticBoundary, TDataType)
+	IMPLEMENT_TCLASS(StaticBoundary, TDataType)
 
 	template<typename TDataType>
 	StaticBoundary<TDataType>::StaticBoundary()
@@ -54,8 +54,8 @@ namespace dyno
 
 			for (int i = 0; i < pSys.size(); i++)
 			{
-				DeviceArrayField<Coord>* posFd = pSys[i]->currentPosition();
-				DeviceArrayField<Coord>* velFd = pSys[i]->currentVelocity();
+				DeviceArrayField<Coord>* posFd = pSys[i]->statePosition();
+				DeviceArrayField<Coord>* velFd = pSys[i]->stateVelocity();
 				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
 			}
 		}
@@ -89,17 +89,7 @@ namespace dyno
 		Coord scale = (hi - lo) / 2;
 		Coord center = (hi + lo) / 2;
 
-		auto m_surfaceNode = this->createAncestor<Node>("cube");
-		m_surfaceNode->setControllable(false);
-
-		auto triSet = std::make_shared<TriangleSet<TDataType>>();
- 		triSet->loadObjFile("../../data/standard/standard_cube.obj");
-		triSet->scale(0.99*scale);
-		triSet->translate(center);
-
-		m_surfaceNode->setTopologyModule(triSet);
-
-		return m_surfaceNode;
+		return nullptr;
 	}
 
 	template<typename TDataType>
@@ -112,18 +102,6 @@ namespace dyno
 		this->varTangentialFriction()->connect(boundary->varTangentialFriction());
 
 		m_obstacles.push_back(boundary);
-
-		//Note: the radius of the standard sphere is 1m
-		auto m_surfaceNode = this->createAncestor<Node>("sphere");
-
-		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		triSet->loadObjFile("../../data/standard/standard_sphere.obj");
-		triSet->scale(0.95*r);
-		triSet->translate(center);
-
-		m_surfaceNode->setTopologyModule(triSet);
-
-		m_surfaceNode->setVisible(bVisible);
 	}
 
 

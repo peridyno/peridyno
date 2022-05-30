@@ -18,7 +18,7 @@ namespace dyno
 	template<typename TDataType>
 	class ElastoplasticBody : public ParticleSystem<TDataType>
 	{
-		DECLARE_CLASS_1(ElastoplasticBody, TDataType)
+		DECLARE_TCLASS(ElastoplasticBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -27,19 +27,10 @@ namespace dyno
 		ElastoplasticBody(std::string name = "default");
 		virtual ~ElastoplasticBody();
 
-		bool translate(Coord t) override;
-		bool scale(Real s) override;
-
-		void loadSurface(std::string filename);
-
-		void setElastoplasticitySolver(std::shared_ptr<ElastoplasticityModule<TDataType>> solver);
-
-		std::shared_ptr<Node> getSurfaceNode() { return m_surfaceNode; }
-
 	public:
 		FVar<Real> m_horizon;
 
-		DEF_EMPTY_CURRENT_ARRAYLIST(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;
@@ -47,8 +38,6 @@ namespace dyno
 		void updateTopology() override;
 
 	private:
-		std::shared_ptr<Node> m_surfaceNode;
-
 		std::shared_ptr<ParticleIntegrator<TDataType>> m_integrator;
 		std::shared_ptr<NeighborPointQuery<TDataType>> m_nbrQuery;
 		std::shared_ptr<ElasticityModule<TDataType>> m_elasticity;

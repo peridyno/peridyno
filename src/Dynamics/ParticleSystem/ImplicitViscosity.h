@@ -21,7 +21,7 @@ namespace dyno
 	template<typename TDataType>
 	class ImplicitViscosity : public ConstraintModule
 	{
-		DECLARE_CLASS_1(ImplicitViscosity, TDataType)
+		DECLARE_TCLASS(ImplicitViscosity, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -29,7 +29,7 @@ namespace dyno
 		ImplicitViscosity();
 		~ImplicitViscosity() override;
 		
-		bool constrain() override;
+		void constrain() override;
 
 	public:
 		DEF_VAR(Real, Viscosity, 0.05, "");
@@ -50,4 +50,6 @@ namespace dyno
 		DArray<Coord> mVelOld;
 		DArray<Coord> mVelBuf;
 	};
+
+	IMPLEMENT_TCLASS(ImplicitViscosity, TDataType)
 }

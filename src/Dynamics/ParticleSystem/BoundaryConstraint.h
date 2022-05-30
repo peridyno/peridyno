@@ -8,7 +8,7 @@ namespace dyno {
 	template<typename TDataType>
 	class BoundaryConstraint : public ConstraintModule
 	{
-		DECLARE_CLASS_1(BoundaryConstraint, TDataType)
+		//DECLARE_CLASS_1(BoundaryConstraint, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -16,7 +16,7 @@ namespace dyno {
 		BoundaryConstraint();
 		~BoundaryConstraint() override;
 
-		bool constrain() override;
+		void constrain() override;
 
 		bool constrain(DArray<Coord>& position, DArray<Coord>& velocity, Real dt);
 
@@ -33,4 +33,6 @@ namespace dyno {
 
 		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
 	};
+
+	//IMPLEMENT_TCLASS(BoundaryConstraint, TDataType)
 }

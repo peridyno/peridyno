@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(TetraMeshWriter, TDataType)
+	IMPLEMENT_TCLASS(TetraMeshWriter, TDataType)
 
 	template<typename TDataType>
 	TetraMeshWriter<TDataType>::TetraMeshWriter() : OutputModule()
@@ -38,7 +38,7 @@ namespace dyno
 		if (this->ptr_TetrahedronSet == nullptr) {
 			return false;
 		}
-		this->ptr_triangles = this->ptr_TetrahedronSet->getTriangles();
+		this->ptr_triangles = &( this->ptr_TetrahedronSet->getTriangles() );
 		this->ptr_tri2tet = &( this->ptr_TetrahedronSet->getTri2Tet() );
 		this->ptr_vertices = &( this->ptr_TetrahedronSet->getPoints() );
 	}

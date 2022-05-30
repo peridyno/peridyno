@@ -9,16 +9,27 @@ namespace dyno {
 			edge.second.clear();
 		}
 		mEdges.clear();
+
+		for each (auto edge in mReverseEdges)
+		{
+			edge.second.clear();
+		}
+		mReverseEdges.clear();
+
 		mVertices.clear();
 		mOrderVertices.clear();
 	}
 
 	void DirectedAcyclicGraph::addEdge(ObjectId v, ObjectId w)
 	{
-		// Add an edge (v, w).
-		mEdges[v].insert(w); 
 		mVertices.insert(v);
 		mVertices.insert(w);
+
+		// Add an edge (v, w).
+		mEdges[v].insert(w); 
+
+		//Add a reverse edge (w, v)
+		mReverseEdges[w].insert(v);
 	}
 
 	std::vector<ObjectId>& DirectedAcyclicGraph::topologicalSort(ObjectId v)
@@ -74,15 +85,39 @@ namespace dyno {
 		return mVertices.size();
 	}
 
+	std::set<dyno::ObjectId>& DirectedAcyclicGraph::vertices()
+	{
+		return mVertices;
+	}
+
+	std::map<dyno::ObjectId, std::unordered_set<dyno::ObjectId>>& DirectedAcyclicGraph::edges()
+	{
+		return mEdges;
+	}
+
+	std::map<dyno::ObjectId, std::unordered_set<dyno::ObjectId>>& DirectedAcyclicGraph::reverseEdges()
+	{
+		return mReverseEdges;
+	}
+
 	void DirectedAcyclicGraph::topologicalSortUtil(ObjectId v, std::map<ObjectId, bool>& visited, std::stack<ObjectId>& stack)
 	{
 		// Mark the current node as visited.
 		visited[v] = true;
 
 		std::list<ObjectId>::iterator i;
-		for each(auto id in mEdges[v])
+		
+		std::stack<ObjectId> reverseId;
+		for each (auto id in mEdges[v])
+			reverseId.push(id);
+
+		while ((reverseId.empty() == false)) {
+			ObjectId id = reverseId.top();
 			if (!visited[id])
 				topologicalSortUtil(id, visited, stack);
+
+			reverseId.pop();
+		}
 
 		// Push current vertex to stack
 		stack.push(v);

@@ -44,11 +44,23 @@ TEST(Octree, Compare)
 	OctreeNode c4(4, 4, 4, 4);
 
 	EXPECT_EQ(c1 < c4, true);
+	EXPECT_EQ(c1 <= c4, true);
+	EXPECT_EQ(c4 >= c1, true);
+	EXPECT_EQ(c4 > c1, true);
+	EXPECT_EQ(c4 == c1, false);
 
 	OctreeNode c5(2, 0, 0, 0);
 	OctreeNode c6(3, 0, 0, 0);
 
 	EXPECT_EQ(c6 > c5, true);
+	EXPECT_EQ(c5 > c6, false);
+	EXPECT_EQ(c5 >= c6, false);
+	EXPECT_EQ(c6 >= c5, true);
+	EXPECT_EQ(c6 > c5, true);
+	EXPECT_EQ(c6 == c5, false);
+
+	EXPECT_EQ(c2 > c5, true);
+	EXPECT_EQ(c2 >= c5, true);
 }
 
 TEST(Octree, Construct)

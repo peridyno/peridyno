@@ -6,7 +6,7 @@ namespace dyno {
 	template<typename TDataType>
 	class ParticleIntegrator : public NumericalIntegrator
 	{
-		DECLARE_CLASS_1(ParticleIntegrator, TDataType)
+		DECLARE_TCLASS(ParticleIntegrator, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;
@@ -24,6 +24,8 @@ namespace dyno {
 		bool updatePosition();
 
 	public:
+
+		DEF_VAR_IN(Real, TimeStep, "Time step size");
 
 		/**
 		* @brief Position
@@ -56,4 +58,6 @@ namespace dyno {
 		DArray<Coord> m_prePosition;
 		DArray<Coord> m_preVelocity;
 	};
+
+	IMPLEMENT_TCLASS(ParticleIntegrator, TDataType)
 }

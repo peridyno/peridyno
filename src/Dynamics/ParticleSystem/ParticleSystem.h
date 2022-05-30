@@ -1,25 +1,18 @@
 #pragma once
 #include "Node.h"
-//#include "PointRenderModule.h"
 
 namespace dyno
 {
 	template <typename TDataType> class PointSet;
 	/*!
 	*	\class	ParticleSystem
-	*	\brief	Position-based fluids.
-	*
-	*	This class implements a position-based fluid solver.
-	*	Refer to Macklin and Muller's "Position Based Fluids" for details
-	*
+	*	\brief	This class represents the base class for more advanced particle-based nodes.
 	*/
 	template<typename TDataType>
 	class ParticleSystem : public Node
 	{
-		DECLARE_CLASS_1(ParticleSystem, TDataType)
+		DECLARE_TCLASS(ParticleSystem, TDataType)
 	public:
-
-		bool self_update = true;
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
@@ -33,33 +26,28 @@ namespace dyno
 		virtual bool translate(Coord t);
 		virtual bool scale(Real s);
 
-	public:
-//		std::shared_ptr<PointRenderModule> getRenderModule();
+		std::string getNodeType() override;
 
+	public:
 		/**
 		 * @brief Particle position
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Position, Coord, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "Particle position");
 
 
 		/**
 		 * @brief Particle velocity
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Velocity, Coord, DeviceType::GPU, "Particle velocity");
+		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
 		/**
 		 * @brief Particle force
 		 */
-		DEF_EMPTY_CURRENT_ARRAY(Force, Coord, DeviceType::GPU, "Force on each particle");
+		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Force on each particle");
 
-		
 	protected:
 		void updateTopology() override;
 		void resetStates() override;
 //		virtual void setVisible(bool visible) override;
-
-	protected:
-		std::shared_ptr<PointSet<TDataType>> m_pSet;
-//		std::shared_ptr<PointRenderModule> m_pointsRender;
 	};
 }

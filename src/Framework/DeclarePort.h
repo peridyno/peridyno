@@ -18,79 +18,44 @@
 namespace dyno
 {
 /**
- * @brief Macro definitions for FVar
- * 
- */
-#define DEF_CURRENT_VAR(name, T, value, desc) \
-private:									\
-	FVar<T> current_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::Current, this);			\
-public:										\
-	inline FVar<T>* current##name() {return &current_##name;}
-
-#define DEF_NEXT_VAR(name, T, value, desc) \
-private:									\
-	FVar<T> next_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::Next, this);			\
-public:										\
-	inline FVar<T>* next##name() {return &next_##name;}
-
-#define DEF_EMPTY_CURRENT_VAR(name, T, desc) \
-private:									\
-	FVar<T> current_##name = FVar<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
-public:										\
-	inline FVar<T>* current##name() {return &current_##name;}
-
-#define DEF_EMPTY_NEXT_VAR(name, T, desc) \
-private:									\
-	FVar<T> next_##name = FVar<T>(std::string(#name), desc, FieldTypeEnum::Next, this);			\
-public:									\
-	inline FVar<T>* next##name() {return &next_##name;}
-
-
-/**
  * @brief Macro definitions for ArrayField
  * 
  */
-#define DEF_EMPTY_CURRENT_ARRAY(name, T, device, desc) \
+#define DEF_ARRAY_STATE(T, name, device, desc) \
 private:									\
-	FArray<T, device> current_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+	FArray<T, device> state_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
-	inline FArray<T, device>* current##name() {return &current_##name;}
+	inline FArray<T, device>* state##name() {return &state_##name;}
 
-#define DEF_EMPTY_NEXT_ARRAY(name, T, device, desc) \
+
+#define DEF_ARRAY2D_STATE(T, name, device, desc) \
 private:									\
-	FArray<T, device> next_##name = FArray<T, device>(std::string(#name), desc, FieldTypeEnum::Next, this);	\
+	FArray2D<T, device> state_##name = FArray2D<T, device>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
-	inline FArray<T, device>* next##name() {return &next_##name;}
+	inline FArray2D<T, device>* state##name() {return &state_##name;}
 
-
-#define DEF_EMPTY_CURRENT_ARRAYLIST(T, name, device, desc) \
+#define DEF_ARRAY3D_STATE(T, name, device, desc) \
 private:									\
-	FArrayList<T, device> current_##name = FArrayList<T, device>(std::string(#name), desc, FieldTypeEnum::Current, this);	\
+	FArray3D<T, device> state_##name = FArray3D<T, device>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
-	inline FArrayList<T, device>* current##name() {return &current_##name;}
+	inline FArray3D<T, device>* state##name() {return &state_##name;}
 
-#define DEF_EMPTY_NEXT_ARRAYLIST(T, name, device, desc) \
+
+#define DEF_ARRAYLIST_STATE(T, name, device, desc) \
 private:									\
-	FArrayList<T, device> next_##name = FArrayList<T, device>(std::string(#name), desc, FieldTypeEnum::Next, this);	\
+	FArrayList<T, device> state_##name = FArrayList<T, device>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
-	inline FArrayList<T, device>* next##name() {return &next_##name;}
+	inline FArrayList<T, device>* state##name() {return &state_##name;}
 
-/**
- * @brief Macro definitions for neighbor list
- * 
- */
-#define DEF_EMPTY_CURRENT_NEIGHBOR_LIST(name, T, desc)		\
+ /**
+  * @brief Macro definitions for instance
+  *
+  */
+#define DEF_INSTANCE_STATE(T, name, desc)		\
 private:									\
-	NeighborField<T> current_##name = NeighborField<T>(std::string(#name), desc, FieldTypeEnum::Current, this, 0, 0);	\
+	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
-	inline NeighborField<T>* current##name() {return &current_##name;}
-
-#define DEF_EMPTY_NEXT_NEIGHBOR_LIST(name, T, desc)		\
-private:									\
-	NeighborField<T> next_##name = NeighborField<T>(std::string(#name), desc, FieldTypeEnum::Next, this, 0, 0);	\
-public:									\
-	inline NeighborField<T>* next##name() {return &next_##name;}
-
+	inline FInstance<T>* state##name() {return &state_##name;}
 
 /**
  * @brief Macro definitions for node ports
@@ -100,26 +65,25 @@ public:									\
 private:									\
 	SingleNodePort<T> single_##name = SingleNodePort<T>(std::string(#name), desc, this);					\
 public:																										\
-	inline std::shared_ptr<T> get##name() {	return single_##name.getDerivedNode(); }						\
+	inline T* get##name() {	return single_##name.getDerivedNode(); }						\
 																			\
-	void set##name(std::shared_ptr<T> c) {									\
-		single_##name.setDerivedNode(c);									\
-	}
+	SingleNodePort<T>* import##name(){ return &single_##name; }
+ 
 
 #define DEF_NODE_PORTS(name, T, desc)				\
 private:									\
 	MultipleNodePort<T> multiple_##name = MultipleNodePort<T>(std::string(#name)+std::string("(s)"), desc, this);					\
 public:									\
-	inline MultipleNodePort<T>* inport##name##s() { return &multiple_##name; }			\
-	inline std::vector<std::shared_ptr<T>>& get##name##s(){return multiple_##name.getDerivedNodes();}				\
+	inline MultipleNodePort<T>* import##name##s() { return &multiple_##name; }			\
+	inline std::vector<T*>& get##name##s(){return multiple_##name.getDerivedNodes();}				\
 														\
 	bool add##name(std::shared_ptr<T> c){				\
-		multiple_##name.addDerivedNode(c);				\
+		multiple_##name.addDerivedNode(c.get());				\
 		return true;									\
 	}													\
 														\
 	bool remove##name(std::shared_ptr<T> c) {			\
-		multiple_##name.removeDerivedNode(c);			\
+		multiple_##name.removeDerivedNode(c.get());			\
 		return true;									\
 	}
 }

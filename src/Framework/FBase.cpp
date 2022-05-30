@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "Module.h"
+#include "FCallbackFunc.h"
 
 namespace dyno
 {
@@ -26,6 +27,54 @@ namespace dyno
 		return mSource;
 	}
 
+	FBase* FBase::promoteOuput()
+	{
+		if (m_fType != FieldTypeEnum::State && mOwner == nullptr)
+			return nullptr;
+
+		if (!mOwner->findOutputField(this)) {
+			mOwner->addToOutput(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::promoteInput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (!mOwner->findInputField(this)) {
+			mOwner->addInputField(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::demoteOuput()
+	{
+		if (m_fType != FieldTypeEnum::State && mOwner == nullptr)
+			return nullptr;
+
+		if (mOwner->findOutputField(this)) {
+			mOwner->removeFromOutput(this);
+		}
+
+		return this;
+	}
+
+	FBase* FBase::demoteInput()
+	{
+		if (mOwner == nullptr)
+			return nullptr;
+
+		if (mOwner->findInputField(this)) {
+			mOwner->removeInputField(this);
+		}
+
+		return this;
+	}
+
 	void FBase::addSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
@@ -39,7 +88,7 @@ namespace dyno
 		}
 	}
 
-	void FBase::removeSink(FBase* f)
+	bool FBase::removeSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 		
@@ -49,7 +98,10 @@ namespace dyno
 
 //			f->setDerived(false);
 			f->setSource(nullptr);
+
+			return true;
 		}
+		return false;
 	}
 
 	bool FBase::isDerived()
@@ -77,7 +129,8 @@ namespace dyno
 		if (dst->getSource() != nullptr && dst->getSource() != this) {
 			dst->getSource()->removeSink(dst);
 		}
-
+		
+		// fprintf(stderr,"%s ----> %s\n",this->m_name.c_str(), dst->m_name.c_str());
 		this->addSink(dst);
 
 		return true;
@@ -85,11 +138,12 @@ namespace dyno
 
 	bool FBase::disconnectField(FBase* dst)
 	{
-		if (dst->getSource() == this) {
-			dst->getSource()->removeSink(dst);
-		}
+		return this->removeSink(dst);
+	}
 
-		return true;
+	bool FBase::disconnect(FBase* dst)
+	{
+		return this->disconnectField(dst);
 	}
 
 	FBase* FBase::getTopField()
@@ -99,9 +153,12 @@ namespace dyno
 
 	void FBase::update()
 	{
-		if (!this->isEmpty() && callbackFunc != nullptr)
+		if (!this->isEmpty())
 		{
-			callbackFunc();
+			for each (auto func in mCallbackFunc)
+			{
+				func->update();
+			}
 		}
 
 		auto& sinks = this->getSinks();
@@ -113,6 +170,14 @@ namespace dyno
 				var->update();
 			}
 		}
+	}
+
+	void FBase::attach(std::shared_ptr<FCallBackFunc> func)
+	{
+		//Add the current field as one of the input to the callback function
+		func->addInput(this);
+
+		mCallbackFunc.push_back(func);
 	}
 
 	bool FBase::isModified()
@@ -143,6 +208,24 @@ namespace dyno
 		{
 			parent->attachField(this, name, description, false);
 		}
+	}
+
+	FBase::~FBase()
+	{
+		//Before deallocating data, fields should be disconnected first
+		FBase* src = this->getSource();
+		if (src != nullptr) {
+			src->disconnectField(this);
+		}
+
+		while (!mSinks.empty()) {
+			auto sink = mSinks.back();
+			sink->setSource(nullptr);
+
+			mSinks.pop_back();
+		}
+
+		mCallbackFunc.clear();
 	}
 
 	FieldTypeEnum FBase::getFieldType()

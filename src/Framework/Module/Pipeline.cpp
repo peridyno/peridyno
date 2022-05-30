@@ -1,7 +1,12 @@
 #include "Pipeline.h"
 #include "Node.h"
+#include "SceneGraph.h"
 #include "DirectedAcyclicGraph.h"
 
+#include "Timer.h"
+
+#include <sstream>
+#include <iomanip>
 #include <queue>
 #include <set>
 
@@ -39,8 +44,22 @@ namespace dyno
 
 		mModuleUpdated = true;
 		mModuleMap[id] = m.get();
-
+		
 		mNode->addModule(m);
+	}
+	
+	void Pipeline::clear()
+	{
+// 		for (auto const &pair : mModuleMap)
+// 		{
+// 			mNode->deleteModule(std::shared_ptr<Module>(pair.second));
+// 		}
+
+		mModuleList.clear();
+		mPersistentModule.clear();
+		mModuleMap.clear();
+		
+		mModuleUpdated = true;
 	}
 
 	void Pipeline::pushPersistentModule(std::shared_ptr<Module> m)
@@ -61,6 +80,16 @@ namespace dyno
 		mUpdateEnabled = false;
 	}
 
+	void Pipeline::updateExecutionQueue()
+	{
+		reconstructPipeline();
+	}
+
+	void Pipeline::printModuleInfo(bool enabled)
+	{
+		mTiming = enabled;
+	}
+
 	void Pipeline::preprocess()
 	{
 		if (mModuleUpdated)
@@ -74,9 +103,27 @@ namespace dyno
 	{
 		if (mUpdateEnabled)
 		{
+			GTimer timer;
 			for each (auto m in mModuleList)
 			{
+				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
+					timer.start();
+				}
+
+				//update the module
 				m->update();
+
+				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
+					timer.stop();
+
+					std::stringstream name;
+					std::stringstream ss;
+					name << std::setw(40) << m->getClassInfo()->getClassName();
+					ss << std::setprecision(10) << timer.getEclipsedTime();
+
+					std::string info = "\t Module: " + name.str() + ": \t " + ss.str() + "ms";
+					Log::sendMessage(Log::Info, info);
+				}
 			}
 		}
 	}
@@ -107,7 +154,7 @@ namespace dyno
 					{
 						ObjectId oId = module->objectId();
 						graph.addEdge(id, oId);
-
+						
 						if (moduleSet.find(oId) == moduleSet.end() && mModuleMap.count(oId) > 0)
 						{
 							moduleSet.insert(oId);
@@ -130,8 +177,6 @@ namespace dyno
 		{
 			Module* m = moduleQueue.front();
 
-			mModuleList.push_back(m);
-
 			auto& outFields = m->getOutputFields();
 			retrieveModules(m->objectId(), outFields);
 
@@ -150,65 +195,4 @@ namespace dyno
 
 		moduleSet.clear();
 	}
-
-	ModuleIterator::ModuleIterator()
-	{
-
-	}
-
-
-	ModuleIterator::ModuleIterator(const ModuleIterator &iterator)
-	{
-		module = iterator.module;
-	}
-
-	ModuleIterator& ModuleIterator::operator++()
-	{
-		module = module.lock()->next();
-
-		return *this;
-	}
-
-	ModuleIterator& ModuleIterator::operator++(int)
-	{
-		return operator++();
-	}
-
-	Module* ModuleIterator::operator->()
-	{
-		return module.lock().get();
-	}
-
-	Module* ModuleIterator::get()
-	{
-		return module.lock().get();
-	}
-
-	std::shared_ptr<Module> ModuleIterator::operator*()
-	{
-		auto m = module.lock();
-		return m;
-	}
-
-	bool ModuleIterator::operator!=(const ModuleIterator &iterator) const
-	{
-		return module.lock() != iterator.module.lock();
-	}
-
-	bool ModuleIterator::operator==(const ModuleIterator &iterator) const
-	{
-		return module.lock() == iterator.module.lock();
-	}
-
-	ModuleIterator& ModuleIterator::operator=(const ModuleIterator &iterator)
-	{
-		module = iterator.module;
-		return *this;
-	}
-
-	ModuleIterator::~ModuleIterator()
-	{
-
-	}
-
 }

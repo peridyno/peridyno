@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(PointSet, TDataType)
+	IMPLEMENT_TCLASS(PointSet, TDataType)
 
 	template<typename TDataType>
 	PointSet<TDataType>::PointSet()
@@ -73,6 +73,7 @@ namespace dyno
 	void PointSet<TDataType>::setPoints(std::vector<Coord>& pos)
 	{
 		//printf("%d\n", pos.size());
+
 		m_coords.resize(pos.size());
 		m_coords.assign(pos);
 

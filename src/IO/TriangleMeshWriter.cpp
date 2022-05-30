@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(TriangleMeshWriter, TDataType)
+	IMPLEMENT_TCLASS(TriangleMeshWriter, TDataType)
 
 	template<typename TDataType>
 	TriangleMeshWriter<TDataType>::TriangleMeshWriter() : OutputModule()
@@ -38,7 +38,7 @@ namespace dyno
 		if (this->ptr_TriangleSet == nullptr) {
 			return false;
 		}
-		this->ptr_triangles = this->ptr_TriangleSet->getTriangles();
+		this->ptr_triangles = &(this->ptr_TriangleSet->getTriangles());
 		this->ptr_vertices = &(this->ptr_TriangleSet->getPoints());
 	}
 

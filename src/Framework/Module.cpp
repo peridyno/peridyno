@@ -16,26 +16,23 @@ namespace dyno
 
 	Module::~Module(void)
 	{
-		//Before deallocating data, fields should be disconnected first
-		for each (auto f in fields_input)
-		{
-			FBase* src = f->getSource();
-			if (src != nullptr) {
-				src->disconnectField(f);
-			}
-		}
-
-		for each (auto f in fields_output)
-		{
-			auto& sinks = f->getSinks();
-			for each (auto sink in sinks)
-			{
-				f->disconnectField(sink);
-			}
-		}
-
-		fields_input.clear();
-		fields_output.clear();
+// 		//Before deallocating data, fields should be disconnected first
+// 		for each (auto f in fields_input)
+// 		{
+// 			FBase* src = f->getSource();
+// 			if (src != nullptr) {
+// 				src->disconnectField(f);
+// 			}
+// 		}
+// 
+// 		for each (auto f in fields_output)
+// 		{
+// 			auto& sinks = f->getSinks();
+// 			for each (auto sink in sinks)
+// 			{
+// 				f->disconnectField(sink);
+// 			}
+// 		}
 	}
 
 	bool Module::initialize()
@@ -51,6 +48,8 @@ namespace dyno
 
 	void Module::update()
 	{
+		this->updateStarted();
+
 		if (!this->validateInputs()) {
 			return;
 		}
@@ -81,6 +80,8 @@ namespace dyno
 		if (!this->validateOutputs()) {
 			return;
 		}
+
+		this->updateEnded();
 	}
 
 	bool Module::validateInputs()
@@ -124,6 +125,16 @@ namespace dyno
 		return true;
 	}
 
+	void Module::updateStarted()
+	{
+
+	}
+
+	void Module::updateEnded()
+	{
+
+	}
+
 	bool Module::validateOutputs()
 	{
 		return isOutputCompete();
@@ -154,135 +165,6 @@ namespace dyno
 	bool Module::isInitialized()
 	{
 		return m_initialized;
-	}
-
-	bool Module::findInputField(FBase* field)
-	{
-		auto result = find(fields_input.begin(), fields_input.end(), field);
-		// return false if no field is found!
-		if (result == fields_input.end())
-		{
-			return false;
-		}
-		return true;
-	}
-
-	bool Module::addInputField(FBase* field)
-	{
-		if (findInputField(field))
-		{
-			return false;
-		}
-
-		this->addField(field);
-
-		fields_input.push_back(field);
-
-		return true;
-	}
-
-	bool Module::removeInputField(FBase* field)
-	{
-		if (!findInputField(field))
-		{
-			return false;
-		}
-
-		this->removeField(field);
-
-		auto result = find(fields_input.begin(), fields_input.end(), field);
-		if (result != fields_input.end())
-		{
-			fields_input.erase(result);
-		}
-
-		return true;
-	}
-
-	bool Module::findOutputField(FBase* field)
-	{
-		auto result = find(fields_output.begin(), fields_output.end(), field);
-		// return false if no field is found!
-		if (result == fields_output.end())
-		{
-			return false;
-		}
-		return true;
-	}
-
-	bool Module::addOutputField(FBase* field)
-	{
-		if (findOutputField(field))
-		{
-			return false;
-		}
-
-		this->addField(field);
-
-		fields_output.push_back(field);
-
-		return true;
-	}
-
-	bool Module::removeOutputField(FBase* field)
-	{
-		if (!findOutputField(field))
-		{
-			return false;
-		}
-
-		this->removeField(field);
-
-		auto result = find(fields_output.begin(), fields_output.end(), field);
-		if (result != fields_output.end())
-		{
-			fields_output.erase(result);
-		}
-
-		return true;
-	}
-
-	bool Module::findParameter(FBase* field)
-	{
-		auto result = find(fields_param.begin(), fields_param.end(), field);
-		// return false if no field is found!
-		if (result == fields_param.end())
-		{
-			return false;
-		}
-		return true;
-	}
-
-	bool Module::addParameter(FBase* field)
-	{
-		if (findParameter(field))
-		{
-			return false;
-		}
-
-		this->addField(field);
-
-		fields_param.push_back(field);
-
-		return true;
-	}
-
-	bool Module::removeParameter(FBase* field)
-	{
-		if (!findParameter(field))
-		{
-			return false;
-		}
-
-		this->removeField(field);
-
-		auto result = find(fields_param.begin(), fields_param.end(), field);
-		if (result != fields_output.end())
-		{
-			fields_param.erase(result);
-		}
-
-		return true;
 	}
 
 	bool Module::initializeImpl()

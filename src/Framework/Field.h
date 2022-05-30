@@ -17,6 +17,8 @@
 #include <iostream>
 #include "FBase.h"
 #include "Array/Array.h"
+#include "Array/Array2D.h"
+#include "Array/Array3D.h"
 #include "Array/ArrayList.h"
 
 namespace dyno {
@@ -40,6 +42,7 @@ namespace dyno {
 		uint getElementCount() override { return 1; }
 
 		void setValue(T val);
+		T getValue();
 	};
 
 	template<typename T>
@@ -67,8 +70,18 @@ namespace dyno {
 			*data = val;
 		}
 
-		//this->update();
+		this->update();
 	}
+
+
+	template<typename T>
+	T FVar<T>::getValue()
+	{
+		std::shared_ptr<T>& data = this->getDataPtr();
+
+		return *data;
+	}
+
 
 	template<typename T>
 	using HostVarField = FVar<T>;
@@ -157,6 +170,58 @@ namespace dyno {
 	template<typename T>
 	using DeviceArrayField = FArray<T, DeviceType::GPU>;
 
+
+	/**
+	 * Define field for Array2D
+	 */
+	template<typename T, DeviceType deviceType>
+	class FArray2D : public FBase
+	{
+	public:
+		typedef T								VarType;
+		typedef Array2D<T, deviceType>			DataType;
+		typedef FArray2D<T, deviceType>			FieldType;
+
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArray2D);
+
+		inline uint getElementCount() override {
+			auto ref = this->getDataPtr();
+			return ref == nullptr ? 0 : ref->size();
+		}
+
+		void resize(uint nx, uint ny);
+	};
+
+	template<typename T, DeviceType deviceType>
+	void FArray2D<T, deviceType>::resize(uint nx, uint ny)
+	{
+		FBase* topField = this->getTopField();
+		FArray2D<T, deviceType>* derived = dynamic_cast<FArray2D<T, deviceType>*>(topField);
+
+		if (derived->m_data == nullptr)
+		{
+			derived->m_data = std::make_shared<Array2D<T, deviceType>>(nx, ny);
+		}
+		else
+		{
+			derived->m_data->resize(ny, ny);
+		}
+	}
+
+
+	/**
+	 * Define field for Array3D
+	 */
+	template<typename T, DeviceType deviceType>
+	class FArray3D : public FBase
+	{
+	public:
+		typedef T								VarType;
+		typedef Array3D<T, deviceType>			DataType;
+		typedef FArray3D<T, deviceType>			FieldType;
+
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArray3D);
+	};
 
 	/**
 	 * Define field for Array

@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(DensityPBD, TDataType)
+//	IMPLEMENT_TCLASS(DensityPBD, TDataType)
 
 	template <typename Real, typename Coord>
 	__global__ void K_ComputeLambdas(
@@ -141,7 +141,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool DensityPBD<TDataType>::constrain()
+	void DensityPBD<TDataType>::constrain()
 	{
 		int num = this->inPosition()->getElementCount();
 		
@@ -170,8 +170,6 @@ namespace dyno
 		}
 
 		updateVelocity();
-
-		return true;
 	}
 
 

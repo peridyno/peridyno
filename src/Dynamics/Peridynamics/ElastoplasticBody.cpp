@@ -1,11 +1,13 @@
 #include "ElastoplasticBody.h"
-#include "ElastoplasticityModule.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
-#include "Peridynamics.h"
-#include "Mapping/PointSetToPointSet.h"
 #include "Topology/NeighborPointQuery.h"
+
+#include "Mapping/PointSetToPointSet.h"
+
+#include "Module/Peridynamics.h"
+#include "Module/ElastoplasticityModule.h"
 
 #include "ParticleSystem/PositionBasedFluidModel.h"
 #include "ParticleSystem/ParticleIntegrator.h"
@@ -16,7 +18,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(ElastoplasticBody, TDataType)
+	IMPLEMENT_TCLASS(ElastoplasticBody, TDataType)
 
 	template<typename TDataType>
 	ElastoplasticBody<TDataType>::ElastoplasticBody(std::string name)
@@ -24,43 +26,35 @@ namespace dyno
 	{
 		m_horizon.setValue(0.0085);
 
-		m_integrator = this->template setNumericalIntegrator<ParticleIntegrator<TDataType>>("integrator");
-		this->currentPosition()->connect(m_integrator->inPosition());
-		this->currentVelocity()->connect(m_integrator->inVelocity());
-		this->currentForce()->connect(m_integrator->inForceDensity());
+		m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->varTimeStep()->connect(m_integrator->inTimeStep());
+		this->statePosition()->connect(m_integrator->inPosition());
+		this->stateVelocity()->connect(m_integrator->inVelocity());
+		this->stateForce()->connect(m_integrator->inForceDensity());
 		this->animationPipeline()->pushModule(m_integrator);
 		
-		m_nbrQuery = this->template addComputeModule<NeighborPointQuery<TDataType>>("neighborhood");
+		m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		m_horizon.connect(m_nbrQuery->inRadius());
-		this->currentPosition()->connect(m_nbrQuery->inPosition());
+		this->statePosition()->connect(m_nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(m_nbrQuery);
 
-		m_plasticity = this->template addConstraintModule<ElastoplasticityModule<TDataType>>("elastoplasticity");
+		m_plasticity = std::make_shared<ElastoplasticityModule<TDataType>>();
 		m_horizon.connect(m_plasticity->inHorizon());
 		this->varTimeStep()->connect(m_plasticity->inTimeStep());
-		this->currentPosition()->connect(m_plasticity->inPosition());
-		this->currentVelocity()->connect(m_plasticity->inVelocity());
-		this->currentRestShape()->connect(m_plasticity->inRestShape());
+		this->statePosition()->connect(m_plasticity->inPosition());
+		this->stateVelocity()->connect(m_plasticity->inVelocity());
+		this->stateRestShape()->connect(m_plasticity->inRestShape());
 		m_nbrQuery->outNeighborIds()->connect(m_plasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(m_plasticity);
 
-		m_visModule = this->template addConstraintModule<ImplicitViscosity<TDataType>>("viscosity");
+		m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
 		m_visModule->varViscosity()->setValue(Real(1));
 		this->varTimeStep()->connect(m_visModule->inTimeStep());
 		m_horizon.connect(m_visModule->inSmoothingLength());
-		this->currentPosition()->connect(m_visModule->inPosition());
-		this->currentVelocity()->connect(m_visModule->inVelocity());
+		this->statePosition()->connect(m_visModule->inPosition());
+		this->stateVelocity()->connect(m_visModule->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
 		this->animationPipeline()->pushModule(m_visModule);
-
-		m_surfaceNode = this->template createAncestor<Node>("Mesh");
-		m_surfaceNode->setVisible(false);
-
-		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		m_surfaceNode->setTopologyModule(triSet);
-
-		std::shared_ptr<PointSetToPointSet<TDataType>> surfaceMapping = std::make_shared<PointSetToPointSet<TDataType>>(this->m_pSet, triSet);
-		this->addTopologyMapping(surfaceMapping);
 	}
 
 	template<typename TDataType>
@@ -74,70 +68,33 @@ namespace dyno
 	{
 		ParticleSystem<TDataType>::resetStates();
 
-		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
+		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+		m_horizon.connect(nbrQuery->inRadius());
+		this->statePosition()->connect(nbrQuery->inPosition());
 		nbrQuery->update();
 
-		if (!this->currentPosition()->isEmpty())
+		if (!this->statePosition()->isEmpty())
 		{
-			this->currentRestShape()->allocate();
-			auto nbrPtr = this->currentRestShape()->getDataPtr();
+			this->stateRestShape()->allocate();
+			auto nbrPtr = this->stateRestShape()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
-			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->currentPosition()->getData());
+			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 		}
 	}
 
 	template<typename TDataType>
 	void ElastoplasticBody<TDataType>::updateTopology()
 	{
-		auto pts = this->m_pSet->getPoints();
-		pts.assign(this->currentPosition()->getData());
+		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto& pts = ptSet->getPoints();
+		pts.assign(this->statePosition()->getData());
 
 		auto tMappings = this->getTopologyMappingList();
 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
 		{
 			(*iter)->apply();
 		}
-	}
-
-	template<typename TDataType>
-	void ElastoplasticBody<TDataType>::loadSurface(std::string filename)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->loadObjFile(filename);
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::translate(Coord t)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->translate(t);
-
-		return ParticleSystem<TDataType>::translate(t);
-	}
-
-	template<typename TDataType>
-	bool ElastoplasticBody<TDataType>::scale(Real s)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(m_surfaceNode->getTopologyModule())->scale(s);
-
-		return ParticleSystem<TDataType>::scale(s);
-	}
-
-
-	template<typename TDataType>
-	void ElastoplasticBody<TDataType>::setElastoplasticitySolver(std::shared_ptr<ElastoplasticityModule<TDataType>> solver)
-	{
-		auto module = this->getModule("elastoplasticity");
-		this->deleteModule(module);
-
-		auto nbrQuery = this->template getModule<NeighborPointQuery<TDataType>>("neighborhood");
-
-		this->currentPosition()->connect(solver->inPosition());
-		this->currentVelocity()->connect(solver->inVelocity());
-		nbrQuery->outNeighborIds()->connect(solver->inNeighborIds());
-		m_horizon.connect(solver->inHorizon());
-
-		solver->setName("elastoplasticity");
-		this->addConstraintModule(solver);
 	}
 
 	DEFINE_CLASS(ElastoplasticBody);

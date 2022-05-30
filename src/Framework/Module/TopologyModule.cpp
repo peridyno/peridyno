@@ -16,4 +16,9 @@ TopologyModule::~TopologyModule()
 {
 }
 
+void TopologyModule::updateImpl()
+{
+	this->updateTopology();
+}
+
 }

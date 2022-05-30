@@ -44,9 +44,22 @@ namespace dyno {
 		return dim == 0 ? 1 : dim;
 	}
 
-	static dim3 cudaGridSize3D(uint3 totalSize, uint blockSize)
+	static uint3 cudaGridSize2D(uint2 totalSize, uint blockSize)
 	{
-		dim3 gridDims;
+		uint3 gridDims;
+		gridDims.x = iDivUp(totalSize.x, blockSize);
+		gridDims.y = iDivUp(totalSize.y, blockSize);
+
+		gridDims.x = gridDims.x == 0 ? 1 : gridDims.x;
+		gridDims.y = gridDims.y == 0 ? 1 : gridDims.y;
+		gridDims.z = 1;
+
+		return gridDims;
+	}
+
+	static uint3 cudaGridSize3D(uint3 totalSize, uint blockSize)
+	{
+		uint3 gridDims;
 		gridDims.x = iDivUp(totalSize.x, blockSize);
 		gridDims.y = iDivUp(totalSize.y, blockSize);
 		gridDims.z = iDivUp(totalSize.z, blockSize);
@@ -58,9 +71,9 @@ namespace dyno {
 		return gridDims;
 	}
 
-	static dim3 cudaGridSize3D(uint3 totalSize, uint3 blockSize)
+	static uint3 cudaGridSize3D(uint3 totalSize, uint3 blockSize)
 	{
-		dim3 gridDims;
+		uint3 gridDims;
 		gridDims.x = iDivUp(totalSize.x, blockSize.x);
 		gridDims.y = iDivUp(totalSize.y, blockSize.y);
 		gridDims.z = iDivUp(totalSize.z, blockSize.z);
@@ -120,6 +133,14 @@ namespace dyno {
 		Func << <pDims, BLOCK_SIZE >> > (				\
 		__VA_ARGS__);									\
 		cuSynchronize();								\
+	}
+
+#define cuExecute2D(size, Func, ...){						\
+		uint3 pDims = cudaGridSize2D(size, 8);				\
+		dim3 threadsPerBlock(8, 8, 1);		\
+		Func << <pDims, threadsPerBlock >> > (				\
+		__VA_ARGS__);										\
+		cuSynchronize();									\
 	}
 
 #define cuExecute3D(size, Func, ...){						\

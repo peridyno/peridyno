@@ -51,12 +51,15 @@ private:									\
 public:									\
 	inline FInstance<T>* out##name() {return &out_##name;}
 
-#define DEF_INSTANCE_STATE(T, name, desc) \
+/**
+ * @brief Macro definitions for instance state
+ *
+ */
+#define DEF_INSTANCE_STATE(T, name, desc)		\
 private:									\
-	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::Current, this);			\
+	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
 	inline FInstance<T>* state##name() {return &state_##name;}
-
 
 /**
 *	Macro definition for input/output of type Array
@@ -79,6 +82,52 @@ private:									\
 public:									\
 	inline FArray<T, device>* in##name() {return &io_##name;}		\
 	inline FArray<T, device>* out##name() {return &io_##name;}
+
+
+/**
+* Macro definition for input/output of type Array2D
+*/
+#define DEF_ARRAY2D_IN(T, name, device, desc)			\
+private:												\
+	FArray2D<T, device> in_##name = FArray2D<T, device>(std::string(#name), desc, FieldTypeEnum::In, this);	\
+public:													\
+	inline FArray2D<T, device>* in##name() {return &in_##name;}
+
+#define DEF_ARRAY2D_OUT(T, name, device, desc)		\
+private:												\
+	FArray2D<T, device> out_##name = FArray2D<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
+public:													\
+	inline FArray2D<T, device>* out##name() {return &out_##name;}
+
+#define DEF_ARRAY2D_IO(T, name, device, desc)		\
+private:												\
+	FArray2D<T, device> io_##name = FArray2D<T, device>(std::string(#name), desc, FieldTypeEnum::IO, this);	\
+public:													\
+	inline FArray2D<T, device>* in##name() {return &io_##name;}	\
+	inline FArray2D<T, device>* out##name() {return &io_##name;}
+
+
+/**
+* Macro definition for input/output of type Array3D
+*/
+#define DEF_ARRAY3D_IN(T, name, device, desc)			\
+private:												\
+	FArray3D<T, device> in_##name = FArray3D<T, device>(std::string(#name), desc, FieldTypeEnum::In, this);	\
+public:													\
+	inline FArray3D<T, device>* in##name() {return &in_##name;}
+
+#define DEF_ARRAY3D_OUT(T, name, device, desc)		\
+private:												\
+	FArray3D<T, device> out_##name = FArray3D<T, device>(std::string(#name), desc, FieldTypeEnum::Out, this);	\
+public:													\
+	inline FArray3D<T, device>* out##name() {return &out_##name;}
+
+#define DEF_ARRAY3D_IO(T, name, device, desc)		\
+private:												\
+	FArray3D<T, device> io_##name = FArray3D<T, device>(std::string(#name), desc, FieldTypeEnum::IO, this);	\
+public:													\
+	inline FArray3D<T, device>* in##name() {return &io_##name;}	\
+	inline FArray3D<T, device>* out##name() {return &io_##name;}
 
 
 /**

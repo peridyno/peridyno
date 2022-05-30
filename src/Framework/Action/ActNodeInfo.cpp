@@ -15,7 +15,7 @@ namespace dyno
 
 	void NodeInfoAct::process(Node* node)
 	{
-		std::cout << node->getName() << std::endl;
+		std::cout << node->getClassInfo()->getClassName() << std::endl;
 	}
 
 }

@@ -35,7 +35,7 @@ namespace dyno {
 	template<typename TDataType>
 	class VolumeGenerator : public Volume<TDataType>
 	{
-		DECLARE_CLASS_1(VolumeGenerator, TDataType)
+		DECLARE_TCLASS(VolumeGenerator, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

@@ -44,8 +44,10 @@ set_target_properties(${LIB_NAME} PROPERTIES
 target_include_directories(${LIB_NAME} PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Framework>
     $<BUILD_INTERFACE:${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/filesystem>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>)
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/filesystem>)
 
 #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
 target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
@@ -78,6 +80,9 @@ install(FILES ${COLLISION_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Frame
 
 file(GLOB FRAMEWORK_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Framework/*.h")
 install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework)
+
+file(GLOB FRAMEWORK_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Module/*.h")
+install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Module)
 
 file(GLOB MAPPING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Mapping/*.h")
 install(FILES ${MAPPING_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework/Mapping)

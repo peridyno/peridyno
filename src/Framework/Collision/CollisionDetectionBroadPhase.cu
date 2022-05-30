@@ -36,7 +36,7 @@ namespace dyno
 		h_arr.clear();
 	};
 
-	IMPLEMENT_CLASS_1(CollisionDetectionBroadPhase, TDataType)
+	IMPLEMENT_TCLASS(CollisionDetectionBroadPhase, TDataType)
 
 		template<typename TDataType>
 	CollisionDetectionBroadPhase<TDataType>::CollisionDetectionBroadPhase()

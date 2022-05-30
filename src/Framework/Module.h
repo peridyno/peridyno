@@ -24,98 +24,78 @@
 #include "DataTypes.h"
 #include "DeclareEnum.h"
 #include "DeclareField.h"
+#include "FCallbackFunc.h"
 #include "FieldTypes.h"
 
 namespace dyno
 {
-class Node;
+	class Node;
 
-class Module : public OBase
-{
-public:
-	Module(std::string name = "default");
+	class Module : public OBase
+	{
+	public:
+		Module(std::string name = "default");
 
-	~Module(void) override;
+		~Module(void) override;
 
-	bool initialize();
+		bool initialize();
 
-	void update();
+		void update();
 
-	void setName(std::string name);
-	void setParent(Node* node);
+		void setName(std::string name);
+		void setParent(Node* node);
 
-	std::string getName();
+		std::string getName();
 
-	Node* getParent() {
-		if (m_node == NULL) {
-			Log::sendMessage(Log::Error, "Parent node is not set!");
+		Node* getParent() {
+			if (m_node == NULL) {
+				Log::sendMessage(Log::Error, "Parent node is not set!");
+			}
+
+			return m_node;
 		}
 
-		return m_node;
-	}
+		bool isInitialized();
 
-	bool isInitialized();
+		virtual std::string getModuleType() { return "Module"; }
 
-	virtual std::string getModuleType() { return "Module"; }
+		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
+	protected:
+		//TODO: remove this step
+		virtual bool initializeImpl();
+		virtual void updateImpl();
 
-	bool findInputField(FBase* field);
-	bool addInputField(FBase* field);
-	bool removeInputField(FBase* field);
 
-	std::vector<FBase*>& getInputFields() { return fields_input; }
+		virtual void preprocess() {};
 
-	bool findOutputField(FBase* field);
-	bool addOutputField(FBase* field);
-	bool removeOutputField(FBase* field);
+		virtual void postprocess() {};
 
-	std::vector<FBase*>& getOutputFields() { return fields_output; }
+		virtual bool validateInputs();
+		virtual bool validateOutputs();
 
-	bool findParameter(FBase* field);
-	bool addParameter(FBase* field);
-	bool removeParameter(FBase* field);
+		virtual bool requireUpdate();
 
-	std::vector<FBase*>& getParameters() { return fields_param; }
+		/**
+		 * @brief Check the completeness of input fields
+		 *
+		 * @return true, if all input fields are appropriately set.
+		 * @return false, if any of the input field is empty.
+		 */
+		bool isInputComplete();
+		bool isOutputCompete();
 
-	virtual std::weak_ptr<Module> next() { return m_module_next; }
+		/**
+		 * @brief Two functions called at the beginning and end of update()
+		 *	used for debug
+		 */
+		virtual void updateStarted();
+		virtual void updateEnded();
 
-	void setNext(std::weak_ptr<Module> next_module) { m_module_next = next_module; }
+	private:
+		Node* m_node;
+		std::string m_module_name;
+		bool m_initialized;
 
-	bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
-protected:
-	//TODO: remove this step
-	virtual bool initializeImpl();
-	virtual void updateImpl();
-	
-
-	virtual void preprocess() {};
-
-	virtual void postprocess() {};
-
-	virtual bool validateInputs();
-	virtual bool validateOutputs();
-
-	virtual bool requireUpdate();
-
-	/**
-	 * @brief Check the completeness of input fields
-	 *
-	 * @return true, if all input fields are appropriately set.
-	 * @return false, if any of the input field is empty.
-	 */
-	bool isInputComplete();
-	bool isOutputCompete();
-
-private:
-	Node* m_node;
-	std::string m_module_name;
-	bool m_initialized;
-
-	bool m_update_required = true;
-
-	std::weak_ptr<Module> m_module_next;
-
-	std::vector<FBase*> fields_input;
-	std::vector<FBase*> fields_output;
-	std::vector<FBase*> fields_param;
-};
+		bool m_update_required = true;
+	};
 }

@@ -19,23 +19,13 @@
 
 namespace dyno
 {
-
-	class ContactPair
-	{
-	public:
-		int id[2];
-
-		Real m_stiffness;
-		Real m_friction;
-	};
-
 	class CollisionModel : public Module
 	{
 	public:
 		CollisionModel();
 		virtual ~CollisionModel();
 
-		virtual bool isSupport(std::shared_ptr<CollidableObject> obj) = 0;
+		virtual bool isSupport(std::shared_ptr<CollidableObject> obj) { return false; }
 
 		virtual void doCollision() = 0;
 	

@@ -5,7 +5,7 @@ namespace dyno {
 	template<typename TDataType>
 	class VolumeIntersect : public Volume<TDataType>
 	{
-		DECLARE_CLASS_1(VolumeIntersect, TDataType)
+		DECLARE_TCLASS(VolumeIntersect, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

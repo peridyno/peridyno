@@ -43,7 +43,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Dynamics>)
 
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
-    target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+    target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr;--expt-extended-lambda>)
 
     target_link_libraries(${LIB_NAME} PUBLIC ${${LIB_DEPENDENCY}})
 
@@ -68,8 +68,9 @@ endmacro()
 
 option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system library" ON)
 option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" ON)
-option(PERIDYNO_LIBRARY_RigidBody "Enable binding the rigid body library" ON)
+option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
 option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
+option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY Core IO Framework)
@@ -81,7 +82,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     endif()
 endif()
 
-if(PERIDYNO_LIBRARY_RigidBody)
+if(PERIDYNO_LIBRARY_RIGIDBODY)
     set(LIB_DEPENDENCY Core IO Framework)
     build_library(RigidBody LIB_DEPENDENCY)
 endif()
@@ -89,4 +90,10 @@ endif()
 if(PERIDYNO_LIBRARY_VOLUME)
     set(LIB_DEPENDENCY Core IO Framework)
     build_library(Volume LIB_DEPENDENCY)
+endif()
+
+
+if(PERIDYNO_LIBRARY_HEIGHTFIELD)
+    set(LIB_DEPENDENCY Core IO Framework cufft)
+    build_library(HeightField LIB_DEPENDENCY)
 endif()

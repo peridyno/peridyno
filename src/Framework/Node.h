@@ -20,38 +20,32 @@
 #include "DeclarePort.h"
 #include "NodePort.h"
 
-#include "Module/NumericalModel.h"
 #include "Module/TopologyModule.h"
-#include "Module/DeviceContext.h"
-#include "Module/ForceModule.h"
-#include "Module/ConstraintModule.h"
+//#include "Module/DeviceContext.h"
 #include "Module/CustomModule.h"
-#include "Module/CollisionModel.h"
-#include "Module/CollidableObject.h"
-#include "Module/VisualModule.h"
 #include "Module/TopologyMapping.h"
-#include "Module/NumericalIntegrator.h"
-#include "Module/ComputeModule.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
 
 namespace dyno
 {
 	class Action;
+	class SceneGraph;
 
 	class Node : public OBase
 	{
-		DECLARE_CLASS(Node)
 	public:
 
 		template<class T>
 		using SPtr = std::shared_ptr<T>;
 
 		Node(std::string name = "default");
-		virtual ~Node();
+		~Node() override;
 
 		void setName(std::string name);
 		std::string getName();
+
+		virtual std::string getNodeType();
 
 		bool isControllable();
 
@@ -75,26 +69,11 @@ namespace dyno
 
 		void setDt(Real dt);
 
-		void setMass(Real mass);
-		Real getMass();
-
 		// 	Iterator begin();
 		// 	Iterator end();
 
-		Node* getAncestor(std::string name);
-
-		/**
-		 * @brief Create an ancestor
-		 *
-		 * @tparam TNode 						Node type of the child object
-		 * @param name 							Node name
-		 * @return std::shared_ptr<TNode> 		return the created child, if name is aleady used, return nullptr.
-		 */
-		template<class TNode>
-		std::shared_ptr<TNode> createAncestor(std::string name)
-		{
-			return addAncestor(TypeInfo::New<TNode>(name));
-		}
+		void setSceneGraph(SceneGraph* scn);
+		SceneGraph* getSceneGraph();
 
 		/**
 		 * @brief Add a ancestor
@@ -102,25 +81,23 @@ namespace dyno
 		 * @param Ancestor
 		 * @return std::shared_ptr<Node>
 		 */
-		std::shared_ptr<Node> addAncestor(std::shared_ptr<Node> anc);
+		Node* addAncestor(Node* anc);
 
-		bool hasAncestor(std::shared_ptr<Node> anc);
+		bool hasAncestor(Node* anc);
 
-		void removeAncestor(std::shared_ptr<Node> anc);
-
-		void removeAllAncestors();
+		std::vector<NodePort*>& getImportNodes() { return mImportNodes; }
+		std::vector<NodePort*>& getExportNodes() { return mExportNodes; }
 
 		/**
-		 * @brief Return all ancestors
+		 * @brief Return all descendants
 		 *
-		 * @return ListPtr<Node> ancestor list
+		 * @return std::list<Node*> descendant list
 		 */
-		std::list<std::shared_ptr<Node>>& getAncestors() { return mAncestors; }
+		std::list<Node*>& getDescendants() {return mDescendants; }
 
-
-		std::shared_ptr<DeviceContext> getContext();
-		void setContext(std::shared_ptr<DeviceContext> context);
-		virtual void setAsCurrentContext();
+// 		std::shared_ptr<DeviceContext> getContext();
+// 		void setContext(std::shared_ptr<DeviceContext> context);
+//		virtual void setAsCurrentContext();
 
 		/**
 		 * @brief Add a module to m_module_list and other special module lists
@@ -212,10 +189,6 @@ namespace dyno
 																												\
 		return module;																							\
 	}
-		NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(TopologyModule)
-			NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(NumericalModel)
-			NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(CollidableObject)
-			NODE_SET_SPECIAL_MODULE_BY_TEMPLATE(NumericalIntegrator)
 
 #define NODE_SET_SPECIAL_MODULE( CLASSNAME, MODULENAME )						\
 	virtual void set##CLASSNAME( std::shared_ptr<CLASSNAME> module) {			\
@@ -224,20 +197,8 @@ namespace dyno
 		addToModuleList(module);														\
 	}
 
-			NODE_SET_SPECIAL_MODULE(TopologyModule, m_topology)
-			NODE_SET_SPECIAL_MODULE(NumericalModel, m_numerical_model)
-			NODE_SET_SPECIAL_MODULE(CollidableObject, m_collidable_object)
-			NODE_SET_SPECIAL_MODULE(NumericalIntegrator, m_numerical_integrator)
-
-
-			std::shared_ptr<CollidableObject>		getCollidableObject() { return m_collidable_object; }
-		std::shared_ptr<NumericalModel>			getNumericalModel() { return m_numerical_model; }
-		std::shared_ptr<TopologyModule>			getTopologyModule() { return m_topology; }
-		std::shared_ptr<NumericalIntegrator>	getNumericalIntegrator() { return m_numerical_integrator; }
-
-
-		std::unique_ptr<AnimationPipeline>&		animationPipeline();
-		std::unique_ptr<GraphicsPipeline>&		graphicsPipeline();
+		std::shared_ptr<AnimationPipeline>		animationPipeline();
+		std::shared_ptr<GraphicsPipeline>		graphicsPipeline();
 
 		template<class TModule>
 		std::shared_ptr<TModule> addModule(std::string name)
@@ -275,20 +236,10 @@ namespace dyno
 	virtual void delete##CLASSNAME( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.remove(module); deleteFromModuleList(module); } \
 	std::list<std::shared_ptr<CLASSNAME>>& get##CLASSNAME##List(){ return SEQUENCENAME;}
 
-		NODE_ADD_SPECIAL_MODULE(ForceModule, m_force_list)
-			NODE_ADD_SPECIAL_MODULE(ConstraintModule, m_constraint_list)
-			NODE_ADD_SPECIAL_MODULE(CollisionModel, m_collision_list)
-			NODE_ADD_SPECIAL_MODULE(VisualModule, m_render_list)
 			NODE_ADD_SPECIAL_MODULE(TopologyMapping, m_topology_mapping_list)
-			NODE_ADD_SPECIAL_MODULE(ComputeModule, m_compute_list)
 			NODE_ADD_SPECIAL_MODULE(CustomModule, m_custom_list)
 
-			NODE_CREATE_SPECIAL_MODULE(ForceModule)
-			NODE_CREATE_SPECIAL_MODULE(ConstraintModule)
-			NODE_CREATE_SPECIAL_MODULE(CollisionModel)
-			NODE_CREATE_SPECIAL_MODULE(VisualModule)
 			NODE_CREATE_SPECIAL_MODULE(TopologyMapping)
-			NODE_CREATE_SPECIAL_MODULE(ComputeModule)
 			NODE_CREATE_SPECIAL_MODULE(CustomModule)
 
 			
@@ -327,6 +278,9 @@ namespace dyno
 			Act action(std::forward<Args>(args)...);
 			doTraverseTopDown(&action);
 		}
+		
+		bool connect(NodePort* nPort);
+		bool disconnect(NodePort* nPort);
 
 		/**
 		 * @brief Attach a field to Node
@@ -340,15 +294,18 @@ namespace dyno
 		 */
 		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 
-		std::vector<NodePort*>& getAllNodePorts() { return mNodePorts; }
+		std::vector<NodePort*>& getAllNodePorts() { return mImportNodes; }
 
-		uint sizeOfNodePorts() const { return (uint)mNodePorts.size(); }
+		uint sizeOfNodePorts() const { return (uint)mImportNodes.size(); }
 		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
 		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
 	
 	protected:
 		virtual void doTraverseBottomUp(Action* act);
 		virtual void doTraverseTopDown(Action* act);
+
+		bool appendExportNode(NodePort* nodePort);
+		bool removeExportNode(NodePort* nodePort);
 
 		virtual void preUpdateStates();
 		virtual void updateStates();
@@ -357,6 +314,8 @@ namespace dyno
 		virtual void updateTopology();
 
 		virtual void resetStates();
+
+		virtual bool validateInputs();
 
 	private:
 		/**
@@ -380,12 +339,7 @@ namespace dyno
 	virtual void addTo##CLASSNAME##List( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.push_back(module); } \
 	virtual void deleteFrom##CLASSNAME##List( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.remove(module); } \
 
-		NODE_ADD_SPECIAL_MODULE_LIST(ForceModule, m_force_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(ConstraintModule, m_constraint_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(CollisionModel, m_collision_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(VisualModule, m_render_list)
 			NODE_ADD_SPECIAL_MODULE_LIST(TopologyMapping, m_topology_mapping_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(ComputeModule, m_compute_list)
 			NODE_ADD_SPECIAL_MODULE_LIST(CustomModule, m_custom_list)
 
 
@@ -414,6 +368,8 @@ namespace dyno
 		 */
 		DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
 
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
 	private:
 		bool m_controllable = true;
 
@@ -432,40 +388,36 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Module>> m_module_list;
 
+		//m_topology will be deprecated in the next version
+		std::shared_ptr<TopologyModule> m_topology;
 		/**
 		 * @brief Pointer of a specific module
 		 *
 		 */
-		std::shared_ptr<TopologyModule> m_topology;
-		std::shared_ptr<NumericalModel> m_numerical_model;
-		std::shared_ptr<CollidableObject> m_collidable_object;
-		std::shared_ptr<NumericalIntegrator> m_numerical_integrator;
-
-		std::unique_ptr<AnimationPipeline> m_animation_pipeline;
-		std::unique_ptr<GraphicsPipeline> m_render_pipeline;
+		std::shared_ptr<AnimationPipeline> m_animation_pipeline;
+		std::shared_ptr<GraphicsPipeline> m_render_pipeline;
 
 		/**
 		 * @brief A module list containg specific modules
 		 *
 		 */
-		std::list<std::shared_ptr<ForceModule>> m_force_list;
-		std::list<std::shared_ptr<ConstraintModule>> m_constraint_list;
-		std::list<std::shared_ptr<ComputeModule>> m_compute_list;
-		std::list<std::shared_ptr<CollisionModel>> m_collision_list;
-		std::list<std::shared_ptr<VisualModule>> m_render_list;
 		std::list<std::shared_ptr<TopologyMapping>> m_topology_mapping_list;
 		std::list<std::shared_ptr<CustomModule>> m_custom_list;
 
-		std::shared_ptr<DeviceContext> m_context;
+		//std::shared_ptr<DeviceContext> m_context;
 
-		std::list<std::shared_ptr<Node>> mAncestors;
+		std::list<Node*> mAncestors;
 
 		/**
 		 * @brief Storing pointers to descendants
 		 */
 		std::list<Node*> mDescendants;
 
-		std::vector<NodePort*> mNodePorts;
+		std::vector<NodePort*> mImportNodes;
+
+		std::vector<NodePort*> mExportNodes;
+
+		SceneGraph* mSceneGraph = nullptr;
 
 		friend class NodePort;
 	};

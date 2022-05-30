@@ -21,6 +21,7 @@
 
 namespace dyno {
 	class OBase;
+	class FCallBackFunc;
 
 	enum FieldTypeEnum
 	{
@@ -28,7 +29,7 @@ namespace dyno {
 		Out,
 		IO,
 		Param,
-		Current,
+		State,
 		Next
 	};
 
@@ -38,11 +39,10 @@ namespace dyno {
 */
 class FBase
 {
-	using CallBackFunc = std::function<void()>;
 public:
 	FBase() : m_name("default"), m_description("") {};
 	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, OBase* parent = nullptr);
-	virtual ~FBase() {};
+	virtual ~FBase();
 
 	virtual uint getElementCount() = 0;
 	virtual const std::string getTemplateName() { return std::string(""); }
@@ -81,23 +81,54 @@ public:
 
 	FieldTypeEnum getFieldType();
 
-
-	bool connectField(FBase* dst);
-	bool disconnectField(FBase* dst);
+	virtual bool connect(FBase* dst) = 0;
+	virtual bool disconnect(FBase* dst);
 
 	FBase* getTopField();
 	FBase* getSource();
 
+	/**
+	 * @brief Display a state field as an ouput field
+	 * 
+	 * @return state field
+	 */
+	FBase* promoteOuput();
+
+	/**
+	 * @brief Display a state field as an input field
+	 * 
+	 * @return state field
+	 */
+	FBase* promoteInput();
+
+
+	/**
+	 * @brief Hide a state field from outputs
+	 * 
+	 * @return state field
+	 */
+	FBase* demoteOuput();
+
+		/**
+	 * @brief Hide a state field from inputs
+	 * 
+	 * @return state field
+	 */
+	FBase* demoteInput();
+
 	virtual bool isEmpty() = 0;
 	virtual void update();
 
-	void setCallBackFunc(CallBackFunc func) { callbackFunc = func; }
+	void attach(std::shared_ptr<FCallBackFunc> func);
 
 protected:
 	void setSource(FBase* source);
 
 	void addSink(FBase* f);
-	void removeSink(FBase* f);
+	bool removeSink(FBase* f);
+
+	bool connectField(FBase* dst);
+	bool disconnectField(FBase* dst);
 
 	FieldTypeEnum m_fType = FieldTypeEnum::Param;
 
@@ -121,7 +152,7 @@ private:
 
 	std::vector<FBase*> mSinks;
 
-	CallBackFunc callbackFunc;
+	std::vector<std::shared_ptr<FCallBackFunc>> mCallbackFunc;
 };
 
 #define DEFINE_FIELD_FUNC(DerivedField, Data, FieldName)						\
@@ -158,6 +189,11 @@ bool connect(DerivedField* dst)										\
 	this->connectField(dst);										\
 	this->update();													\
 	return true;													\
+}																	\
+bool connect(FBase* dst) override {									\
+	DerivedField* derived = dynamic_cast<DerivedField*>(dst);		\
+	if (derived == nullptr) return false;							\
+	return this->connect(derived);									\
 }																	\
 Data& getData() {													\
 	auto dataPtr = this->getDataPtr();								\

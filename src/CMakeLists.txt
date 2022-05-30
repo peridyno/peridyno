@@ -14,13 +14,16 @@ if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)
 endif()
 
-if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
+#if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
 #    add_subdirectory(Graphics)
-    add_subdirectory(RenderEngine)
+#endif()
+
+if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
+    add_subdirectory(Rendering)
 endif()
 
-if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GUI)
-    add_subdirectory(GUI)
+if(PERIDYNO_LIBRARY_ALEMBIC)
+    add_subdirectory(ABCExporter)
 endif()
 
 add_subdirectory(Dynamics)

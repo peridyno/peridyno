@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS_1(LinearDamping, TDataType)
+//	IMPLEMENT_TCLASS(LinearDamping, TDataType)
 
 	template<typename TDataType>
 	LinearDamping<TDataType>::LinearDamping()
@@ -27,7 +27,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool LinearDamping<TDataType>::constrain()
+	void LinearDamping<TDataType>::constrain()
 	{
 		Real coef = this->varDampingCoefficient()->getData();
 		auto& vels = this->inVelocity()->getData();
@@ -37,8 +37,6 @@ namespace dyno
 			LP_Damping,
 			vels,
 			coef);
-
-		return true;
 	}
 
 	DEFINE_CLASS(LinearDamping);

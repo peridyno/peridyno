@@ -15,7 +15,11 @@
  */
 #pragma once
 #include <stack>
+#include <list>
+#include <map>
 #include <memory>
+
+#include "Object.h"
 
 namespace dyno
 {
@@ -26,7 +30,7 @@ namespace dyno
 	{
 	public:
 		NodeIterator();
-		NodeIterator(std::shared_ptr<Node> node);
+		NodeIterator(std::list<Node*>& nList, std::map<ObjectId, std::shared_ptr<Node>>& nMap);
 
 		~NodeIterator();
 		
@@ -41,9 +45,11 @@ namespace dyno
 		std::shared_ptr<Node> get() const;
 
 	protected:
-		std::shared_ptr<Node> node_current;
+		std::shared_ptr<Node> node_current = nullptr;
 
 		std::stack<std::shared_ptr<Node>> node_stack;
+
+		std::list<std::shared_ptr<Node>> mNodeList;
 
 		friend class Node;
 	};

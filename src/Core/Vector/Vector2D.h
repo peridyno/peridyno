@@ -68,7 +68,11 @@ namespace dyno {
 		}
 
 	public:
-		glm::tvec2<T> data_;
+		union
+		{
+			glm::tvec2<T> data_; //default: zero vector
+			struct { T x, y; };
+		};
 	};
 
 	template class Vector<float, 2>;

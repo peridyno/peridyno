@@ -41,7 +41,7 @@ namespace dyno {
 			h_arr[i].getCoord(level, tnx, tny, tnz);
 			//std::cout << "Poster order: " << i << " " << h_arr[i].key() << " " << tnx << " " << tny << " " << tnz << std::endl;
 			printf("Node %d: key: %d - %d: %d %d %d : ", i, h_arr[i].m_key, level, tnx, tny, tnz);
-			printf(" Data size: %d ; start loc: %d; data loc: %d; first child: %d ", h_arr[i].m_data_size, h_arr[i].m_start_loc, h_arr[i].m_data_loc, h_arr[i].m_first_child_loc);
+			printf(" Data size: %d ; start loc: %d; data loc: %d; first child: %d ", h_arr[i].getDataSize(), h_arr[i].getStartIndex(), h_arr[i].m_data_loc, h_arr[i].m_first_child_loc);
 
 			printf("\n      child: ");
 			for (int j = 0; j < 8; j++)
@@ -106,9 +106,9 @@ namespace dyno {
 		z = 0;
 		for (int i = 0; i < MAX_LEVEL; i++)
 		{
-			x |= (m_key & (1U << 3 * i)) >> 2 * i;
-			y |= (m_key & (1U << 3 * i + 1)) >> (2 * i + 1);
-			z |= (m_key & (1U << 3 * i + 2)) >> (2 * i + 2);
+			x |= (m_key & (1U << DIM * i)) >> 2 * i;
+			y |= (m_key & (1U << DIM * i + 1)) >> (2 * i + 1);
+			z |= (m_key & (1U << DIM * i + 2)) >> (2 * i + 2);
 		}
 
 		x &= ((1U << l) - 1);
@@ -124,15 +124,13 @@ namespace dyno {
 
 	DYN_FUNC bool OctreeNode::operator>=(const OctreeNode& mc2) const
 	{
-		if (isContainedIn(mc2))
-		{
-			return true;
-		}
+		if (mc2.isContainedStrictlyIn(*this))
+			return false;
 
 		auto k1 = m_key;
 		auto k2 = mc2.m_key;
 
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
+		m_level > mc2.m_level ? (k1 = k1 >> DIM * (m_level - mc2.m_level)) : (k2 = k2 >> DIM * (mc2.m_level - m_level));
 
 		return k1 >= k2;
 	}
@@ -147,39 +145,19 @@ namespace dyno {
 		auto k1 = m_key;
 		auto k2 = mc2.m_key;
 
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
+		m_level > mc2.m_level ? (k1 = k1 >> DIM * (m_level - mc2.m_level)) : (k2 = k2 >> DIM * (mc2.m_level - m_level));
 
 		return k1 > k2;
 	}
 
 	DYN_FUNC bool OctreeNode::operator<=(const OctreeNode& mc2) const
 	{
-		if (mc2.isContainedIn(*this))
-		{
-			return true;
-		}
-
-		auto k1 = m_key;
-		auto k2 = mc2.m_key;
-
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
-
-		return k1 <= k2;
+		return ~(*this > mc2);
 	}
 
 	DYN_FUNC bool OctreeNode::operator<(const OctreeNode& mc2) const
 	{
-		if (mc2.isContainedStrictlyIn(*this))
-		{
-			return true;
-		}
-
-		auto k1 = m_key;
-		auto k2 = mc2.m_key;
-
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
-
-		return k1 < k2;
+		return ~(*this >= mc2);
 	}
 
 	DYN_FUNC bool OctreeNode::isContainedIn(const OctreeNode& mc2) const
@@ -202,7 +180,7 @@ namespace dyno {
 			return false;
 		}
 
-		auto k1 = m_key >> 3 * (m_level - mc2.m_level);
+		auto k1 = m_key >> DIM * (m_level - mc2.m_level);
 		auto k2 = mc2.key();
 
 		return k1 == k2;
@@ -214,7 +192,7 @@ namespace dyno {
 		OcKey k1 = m_key;
 		OcKey k2 = mc2.m_key;
 
-		m_level > mc2.m_level ? (k1 = k1 >> 3 * (m_level - mc2.m_level)) : (k2 = k2 >> 3 * (mc2.m_level - m_level));
+		m_level > mc2.m_level ? (k1 = k1 >> DIM * (m_level - mc2.m_level)) : (k2 = k2 >> DIM * (mc2.m_level - m_level));
 
 		while (k1 != k2)
 		{
@@ -275,7 +253,6 @@ namespace dyno {
 		m_level_max = ceil(log2(segments));
 		//if (m_level_max < 1) m_level_max = 1;
 	}
-
 
 	template<typename Real, typename Coord>
 	__global__ void SO_ConstructAABB(
@@ -534,7 +511,7 @@ namespace dyno {
 	{
 		int ret_num = 0;
 
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -559,7 +536,7 @@ namespace dyno {
 				int lc = node.level();
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -580,7 +557,7 @@ namespace dyno {
 	{
 		int ret_num = 0;
 
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -605,7 +582,7 @@ namespace dyno {
 				int lc = node.level();
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -632,7 +609,7 @@ namespace dyno {
 	template<typename TDataType>
 	GPU_FUNC void SparseOctree<TDataType>::reqeustIntersectionIds(int* ids, int& shift, const OcKey key, const Level l)
 	{
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -666,7 +643,7 @@ namespace dyno {
 
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -697,7 +674,7 @@ namespace dyno {
 	template<typename TDataType>
 	GPU_FUNC void SparseOctree<TDataType>::reqeustIntersectionIds(int* ids, int& shift, const OcKey key, const Level l, const AABB box, AABB* data)
 	{
-		OcKey mask = 7U << 3 * l;
+		OcKey mask = 7U << DIM * l;
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
@@ -730,7 +707,7 @@ namespace dyno {
 				int lc = node.level();
 				if (lc - lp > 1)
 				{
-					auto k1 = key >> 3 * (l - lc);
+					auto k1 = key >> DIM * (l - lc);
 					auto k2 = node.key();
 					if (!(k1 == k2)) break;
 				}
@@ -781,18 +758,6 @@ namespace dyno {
 
 		aabb.clear();
 	}
-
-
-
-
-
-	struct NodeCmp
-	{
-		DYN_FUNC bool operator()(const OctreeNode& A, const OctreeNode& B)
-		{
-			return A > B;
-		}
-	};
 
 	template<typename Real>
 	DYN_FUNC inline Level SO_ComputeLevel(
@@ -896,8 +861,6 @@ namespace dyno {
 			return 0;
 		}
 
-
-
 		nx_lo = clamp(nx_lo, 0, grid_size - 1);
 		ny_lo = clamp(ny_lo, 0, grid_size - 1);
 		nz_lo = clamp(nz_lo, 0, grid_size - 1);
@@ -979,8 +942,6 @@ namespace dyno {
 		}
 	}
 
-
-
 	__global__ void SO_CountNonRepeatedNodes(
 		DArray<int> counter,
 		DArray<OctreeNode> morton)
@@ -1028,11 +989,10 @@ namespace dyno {
 		if (tId >= non_repeated_node_num) return;
 
 		if (tId < non_repeated_node_num - 1)
-			non_repeated_nodes[tId].m_data_size = non_repeated_nodes[tId + 1].m_start_loc - non_repeated_nodes[tId].m_start_loc;
+			non_repeated_nodes[tId].setDataSize(non_repeated_nodes[tId + 1].getStartIndex() - non_repeated_nodes[tId].getStartIndex());
 		else
-			non_repeated_nodes[tId].m_data_size = total_node_num - non_repeated_nodes[tId].m_start_loc;
+			non_repeated_nodes[tId].setDataSize(total_node_num - non_repeated_nodes[tId].getStartIndex());
 	}
-
 
 	__global__ void SO_GenerateLCA(
 		DArray<OctreeNode> nodes,
@@ -1044,7 +1004,6 @@ namespace dyno {
 
 		nodes[tId + shift] = nodes[tId].leastCommonAncestor(nodes[tId + 1]);
 	}
-
 
 	__global__ void SO_RemoveDuplicativeInternalNodes(
 		DArray<OctreeNode> nodes,
@@ -1158,7 +1117,7 @@ namespace dyno {
 		m_all_nodes.resize(total_node_num);
 
 
-		std::cout << MAX_LEVEL << ' ' << m_level_max << std::endl;
+		//std::cout << MAX_LEVEL << ' ' << m_level_max << std::endl;
 
 		//step 1.3: create all octree nodes, record the data location using node.setDataIndex().
 		cuExecute(aabb.size(),
@@ -1171,12 +1130,22 @@ namespace dyno {
 			m_level_max);
 
 		//print(m_all_nodes);
-		std::cout << total_node_num << std::endl;
+		//std::cout << total_node_num << std::endl;
 		thrust::sort(thrust::device, m_all_nodes.begin(), m_all_nodes.begin() + m_all_nodes.size(), NodeCmp());
 
 		//print(m_all_nodes);
 
+		construct(m_all_nodes);
+
+		data_count.clear();
+		//thrust::sort_by_key(thrust::device, m_key.getDataPtr(), m_key.getDataPtr() + m_key.size(), m_morton.getDataPtr());
+	}
+
+	template<typename TDataType>
+	void SparseOctree<TDataType>::construct(DArray<OctreeNode>& nodes)
+	{
 		/*************** step 2: remove duplicative nodes ****************/
+		int total_node_num = nodes.size();
 
 		DArray<int> duplicates_count;
 		duplicates_count.resize(total_node_num);
@@ -1184,7 +1153,7 @@ namespace dyno {
 		cuExecute(duplicates_count.size(),
 			SO_CountNonRepeatedNodes,
 			duplicates_count,
-			m_all_nodes);
+			nodes);
 
 		int non_duplicative_num = thrust::reduce(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), duplicates_count.begin());
@@ -1193,10 +1162,10 @@ namespace dyno {
 		node_buffer.resize(2 * non_duplicative_num - 1);
 
 		//Remove duplicative nodes, record the first location using node.setStartIndex();
-		cuExecute(m_all_nodes.size(),
+		cuExecute(nodes.size(),
 			SO_RemoveDuplicativeNodes,
 			node_buffer,
-			m_all_nodes,
+			nodes,
 			duplicates_count);
 
 		//print(node_buffer);
@@ -1279,14 +1248,11 @@ namespace dyno {
 
 
 		node_buffer.clear();
-		data_count.clear();
 		node_count.clear();
 		nonRepeatNodes_cpy.clear();
 		aux_nodes.clear();
 		duplicates_count.clear();
-		//thrust::sort_by_key(thrust::device, m_key.getDataPtr(), m_key.getDataPtr() + m_key.size(), m_morton.getDataPtr());
 	}
-
 
 	template<typename TDataType>
 	void SparseOctree<TDataType>::printPostOrderedTree()
