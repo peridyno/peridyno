@@ -74,6 +74,7 @@ namespace dyno
 	class PAnimationWidget;
 	class PModuleListWidget;
 	class PModuleEditor;
+	class PMainToolBar;
 
 	class RenderEngine;
 	class ImWidget;
@@ -137,6 +138,8 @@ namespace dyno
 		
 		PPropertyWidget*		m_propertyWidget;
 		PAnimationWidget*		m_animationWidget;
+
+		PMainToolBar*			mToolBar = nullptr;
 // 
 // 		PModuleFlowWidget*		m_moduleFlowView;
 // 		PModuleListWidget*		m_moduleListWidget;

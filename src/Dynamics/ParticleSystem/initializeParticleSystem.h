@@ -7,6 +7,8 @@ namespace dyno
 	{
 	public:
 		ParticleSystemInitializer();
+
+		void initializeNodeCreators();
 	};
 
 	const static ParticleSystemInitializer particleSystemInitializer;

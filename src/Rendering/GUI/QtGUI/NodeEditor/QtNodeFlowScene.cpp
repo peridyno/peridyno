@@ -325,6 +325,17 @@ namespace Qt
 		}
 	}
 
+	void QtNodeFlowScene::dynoNodePlaced(std::shared_ptr<dyno::Node> node)
+	{
+		if (node == nullptr)
+			return;
+
+		auto qNodeWdiget = std::make_unique<QtNodeWidget>(node);
+		auto& qNode = createNode(std::move(qNodeWdiget));
+
+		emit nodePlaced(qNode);
+	}
+
 	void QtNodeFlowScene::reorderAllNodes()
 	{
 		auto scn = dyno::SceneGraphFactory::instance()->active();

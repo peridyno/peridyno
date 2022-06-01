@@ -54,6 +54,8 @@ public Q_SLOTS:
 
 	void deleteNodeToSceneGraph(QtNode& n);
 
+	void dynoNodePlaced(std::shared_ptr<dyno::Node> node);
+
 	/**
 	 * Auto layout for the node graph
 	 */
