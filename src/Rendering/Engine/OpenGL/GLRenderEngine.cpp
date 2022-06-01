@@ -183,7 +183,7 @@ namespace dyno
 		// draw a plane
 		if (m_rparams.showGround)
 		{
-			mRenderHelper->drawGround(m_rparams.planeScale, m_rparams.rulerScale);
+			mRenderHelper->drawGround(m_rparams.planeScale* mCamera->distanceUnit(), m_rparams.rulerScale* mCamera->distanceUnit());
 		}
 
 		// draw scene bounding box
