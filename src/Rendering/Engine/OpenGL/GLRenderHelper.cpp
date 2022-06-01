@@ -1,4 +1,4 @@
-#include "RenderHelper.h"
+#include "GLRenderHelper.h"
 
 #include "gl/Program.h"
 #include "gl/Mesh.h"
@@ -221,11 +221,11 @@ namespace dyno
 
 
 
-	RenderHelper::RenderHelper()
+	GLRenderHelper::GLRenderHelper()
 	{
 	}
 
-	RenderHelper::~RenderHelper()
+	GLRenderHelper::~GLRenderHelper()
 	{
 		if (mAxisRenderer) delete mAxisRenderer;
 		if (mBBoxRenderer) delete mBBoxRenderer;
@@ -233,7 +233,7 @@ namespace dyno
 		if (mBackgroundRenderer) delete mBackgroundRenderer;
 	}
 
-	void RenderHelper::initialize()
+	void GLRenderHelper::initialize()
 	{
 		mAxisRenderer = new AxisRenderer();
 		mBBoxRenderer = new BBoxRenderer();
@@ -241,25 +241,25 @@ namespace dyno
 		mBackgroundRenderer = new BackgroundRenderer();
 	}
 
-	void RenderHelper::drawGround(float planeScale, float rulerScale)
+	void GLRenderHelper::drawGround(float planeScale, float rulerScale)
 	{
 		if (mGroundRenderer != NULL)
 			mGroundRenderer->draw(planeScale, rulerScale);
 	}
 
-	void RenderHelper::drawAxis(float lineWidth)
+	void GLRenderHelper::drawAxis(float lineWidth)
 	{
 		if (mAxisRenderer != NULL)
 			mAxisRenderer->draw(lineWidth);
 	}
 
-	void RenderHelper::drawBBox(Vec3f p0, Vec3f p1, int type)
+	void GLRenderHelper::drawBBox(Vec3f p0, Vec3f p1, int type)
 	{
 		if (mBBoxRenderer != NULL)
 			mBBoxRenderer->draw(p0, p1, type);
 	}
 
-	void RenderHelper::drawBackground(Vec3f color0, Vec3f color1)
+	void GLRenderHelper::drawBackground(Vec3f color0, Vec3f color1)
 	{
 		if (mBackgroundRenderer != NULL)
 			mBackgroundRenderer->draw(color0, color1);

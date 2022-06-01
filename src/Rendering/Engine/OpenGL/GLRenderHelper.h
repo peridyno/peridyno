@@ -24,11 +24,11 @@ namespace dyno
 	class BBoxRenderer;
 	class GroundRenderer;
 	class BackgroundRenderer;
-	class RenderHelper
+	class GLRenderHelper
 	{
 	public:
-		RenderHelper();
-		~RenderHelper();
+		GLRenderHelper();
+		~GLRenderHelper();
 
 		void initialize();
 
