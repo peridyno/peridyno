@@ -108,13 +108,11 @@ namespace dyno
 			mProgram.use();
 			mAxisVAO.bind();
 
-			glLineWidth(lineWidth);
 			glDisable(GL_DEPTH_TEST);
 			glDrawArrays(GL_LINES, 0, 6);
 			glEnable(GL_DEPTH_TEST);
 
 			mAxisVAO.unbind();
-			gl::glCheckError();
 		}
 
 	private:
