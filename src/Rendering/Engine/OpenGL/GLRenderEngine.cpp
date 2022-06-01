@@ -135,17 +135,10 @@ namespace dyno
 			scene->traverseForward(&renderQueue);
 		}
 
-
 		// update shadow map
 		{
 			mShadowMap->beginUpdate(scene, m_rparams);
 			renderQueue.draw(GLVisualModule::SHADOW);
-
-			if (m_rparams.showGround)
-			{
-				mRenderHelper->drawGround(m_rparams.groudScale, GLVisualModule::SHADOW);
-			}
-
 			mShadowMap->endUpdate();
 		}
 
@@ -190,7 +183,7 @@ namespace dyno
 		// draw a plane
 		if (m_rparams.showGround)
 		{
-			mRenderHelper->drawGround(m_rparams.groudScale);
+			mRenderHelper->drawGround(m_rparams.planeScale, m_rparams.rulerScale);
 		}
 
 		// draw scene bounding box

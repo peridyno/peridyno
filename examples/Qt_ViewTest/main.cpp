@@ -138,6 +138,9 @@ int main(int, char**)
 	box.halfLength = Vec3f(1.0, 1.0, 1.0);
 	rigid->addBox(box, rigidBody);
 
+	scn->setLowerBound(box.center - box.halfLength);
+	scn->setUpperBound(box.center + box.halfLength);
+
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
