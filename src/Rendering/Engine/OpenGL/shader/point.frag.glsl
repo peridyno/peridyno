@@ -61,7 +61,7 @@ vec3 GetViewDir()
 		return vec3(0, 0, 1);
 
 	// perspective projection
-	return normalize(-position);
+	return normalize(-fPosition);
 }
 
 vec3 reinhard_tonemap(vec3 v)
