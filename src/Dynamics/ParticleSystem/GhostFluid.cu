@@ -13,7 +13,7 @@ namespace dyno
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
 		model->varSmoothingLength()->setValue(0.01);
 		
-		this->varTimeStep()->connect(model->inTimeStep());
+		this->stateTimeStep()->connect(model->inTimeStep());
 		this->statePosition()->connect(model->inPosition());
 		this->stateVelocity()->connect(model->inVelocity());
 		this->stateForce()->connect(model->inForce());

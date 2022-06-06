@@ -18,7 +18,7 @@ namespace dyno
 		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
 		this->animationPipeline()->pushModule(pbf);
 
-		this->varTimeStep()->connect(pbf->inTimeStep());
+		this->stateTimeStep()->connect(pbf->inTimeStep());
 		this->statePosition()->connect(pbf->inPosition());
 		this->stateVelocity()->connect(pbf->inVelocity());
 		this->stateForce()->connect(pbf->inForce());

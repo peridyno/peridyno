@@ -344,9 +344,6 @@ namespace dyno
 
 
 	public:
-		DEF_VAR(Real, TimeStep, 0, "Time step size");
-		DEF_VAR(Real, ElapsedTime, 0, "Elapsed Time");
-
 		DEF_VAR(Vec3f, Location, 0, "Node location");
 		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
 		DEF_VAR(Vec3f, Scale, 0, "Node scale");
@@ -368,6 +365,8 @@ namespace dyno
 		 */
 		DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
 
+		DEF_VAR_STATE(Real, ElapsedTime, 0, "Elapsed Time");
+		DEF_VAR_STATE(Real, TimeStep, Real(0.033), "Time step size");
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 
 	private:

@@ -93,8 +93,8 @@ namespace dyno
 				if (node == NULL)
 					return;
 
-				node->varTimeStep()->setValue(mDt);
-				node->varElapsedTime()->setValue(mElapsedTime);
+				node->stateTimeStep()->setValue(mDt);
+				node->stateElapsedTime()->setValue(mElapsedTime);
 			}
 
 			void process(Node* node) override {

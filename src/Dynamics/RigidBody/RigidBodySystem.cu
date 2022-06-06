@@ -38,7 +38,7 @@ namespace dyno
 		this->animationPipeline()->pushModule(merge);
 
 		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
-		this->varTimeStep()->connect(iterSolver->inTimeStep());
+		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->stateMass()->connect(iterSolver->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());

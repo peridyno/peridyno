@@ -22,7 +22,7 @@ namespace dyno
 		: ParticleSystem<TDataType>(name)
 	{
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
-		this->varTimeStep()->connect(integrator->inTimeStep());
+		this->stateTimeStep()->connect(integrator->inTimeStep());
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
 		this->stateForce()->connect(integrator->inForceDensity());
@@ -36,7 +36,7 @@ namespace dyno
 
 		auto elasticity = std::make_shared<ElasticityModule<TDataType>>();
 		this->varHorizon()->connect(elasticity->inHorizon());
-		this->varTimeStep()->connect(elasticity->inTimeStep());
+		this->stateTimeStep()->connect(elasticity->inTimeStep());
 		this->statePosition()->connect(elasticity->inPosition());
 		this->stateVelocity()->connect(elasticity->inVelocity());
 		this->stateRestShape()->connect(elasticity->inRestShape());

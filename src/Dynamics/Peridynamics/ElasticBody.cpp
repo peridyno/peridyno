@@ -19,7 +19,7 @@ namespace dyno
 		this->varHorizon()->setValue(0.0085);
 
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
-		this->varTimeStep()->connect(peri->inTimeStep());
+		this->stateTimeStep()->connect(peri->inTimeStep());
 		this->statePosition()->connect(peri->inPosition());
 		this->stateVelocity()->connect(peri->inVelocity());
 		this->stateForce()->connect(peri->inForce());
