@@ -39,20 +39,20 @@ public Q_SLOTS:
 	/**
 	 * @brief create a QT-based view for the active scene graph.
 	 */
-	void showSceneGraph();
+	void createNodeGraphView();
 
 	/**
 	 * @brief Update the view only for the active scene graph, the data model will be changed.
 	 */
-	void updateSceneGraph();
+	void updateNodeGraphView();
 
 	void fieldUpdated(dyno::FBase* field, int status);
 
-	void moveModulePosition(QtNode& n, const QPointF& newLocation);
+	void addNode(QtNode& n);
 
-	void addNodeToSceneGraph(QtNode& n);
+	void deleteNode(QtNode& n);
 
-	void deleteNodeToSceneGraph(QtNode& n);
+	void moveNode(QtNode& n, const QPointF& newLocation);
 
 	void dynoNodePlaced(std::shared_ptr<dyno::Node> node);
 

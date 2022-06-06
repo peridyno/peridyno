@@ -41,7 +41,7 @@ namespace dyno
 
 			for (auto iter : node->graphicsPipeline()->activeModules())
 			{
-				auto m = dynamic_cast<GLVisualModule*>(iter);
+				auto m = dynamic_cast<GLVisualModule*>(iter.get());
 				if (m && m->isVisible())
 				{
 					//m->update();

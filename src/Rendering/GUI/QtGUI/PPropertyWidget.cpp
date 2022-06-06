@@ -525,7 +525,7 @@ namespace dyno
 			auto module = dynamic_cast<Qt::QtModuleWidget*>(dataModel);
 			if (module != nullptr)
 			{
-				this->showProperty(module->getModule());
+				this->showProperty(module->getModule().get());
 			}
 		}
 	}

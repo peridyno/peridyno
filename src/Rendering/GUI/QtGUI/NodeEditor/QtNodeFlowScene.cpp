@@ -52,12 +52,12 @@ namespace Qt
 	
 		this->setRegistry(ret);
 
-		showSceneGraph();
+		createNodeGraphView();
 		reorderAllNodes();
 
-		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
-		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
-		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNodeToSceneGraph);
+		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
+		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
+		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
@@ -65,7 +65,7 @@ namespace Qt
 		clearScene();
 	}
 
-	void QtNodeFlowScene::showSceneGraph()
+	void QtNodeFlowScene::createNodeGraphView()
 	{
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 
@@ -197,13 +197,13 @@ namespace Qt
 		nodeMap.clear();
 	}
 
-	void QtNodeFlowScene::updateSceneGraph()
+	void QtNodeFlowScene::updateNodeGraphView()
 	{
 		disableEditing();
 
 		clearScene();
 
-		showSceneGraph();
+		createNodeGraphView();
 
 		enableEditing();
 	}
@@ -216,12 +216,12 @@ namespace Qt
 
 		auto f = status == Qt::Checked ? field->promoteOuput() : field->demoteOuput();
 
-		showSceneGraph();
+		createNodeGraphView();
 
 		enableEditing();
 	}
 
-	void QtNodeFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)
+	void QtNodeFlowScene::moveNode(QtNode& n, const QPointF& newLocation)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
@@ -231,7 +231,7 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::addNodeToSceneGraph(QtNode& n)
+	void QtNodeFlowScene::addNode(QtNode& n)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
@@ -315,7 +315,7 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
+	void QtNodeFlowScene::deleteNode(QtNode& n)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
@@ -460,6 +460,6 @@ namespace Qt
 		qtNodeMapper.clear();
 		nodeMapper.clear();
 
-		updateSceneGraph();
+		updateNodeGraphView();
 	}
 }

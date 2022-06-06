@@ -29,7 +29,7 @@ namespace dyno {
 
 		std::shared_ptr<DistanceField3D<TDataType>> getSDF() { return m_sdf; }
 
-		~CollidableSDF() { m_sdf->release(); }
+		~CollidableSDF() { if(m_sdf != nullptr) m_sdf->release(); }
 
 		void updateCollidableObject() override {};
 		void updateMechanicalState() override {};

@@ -30,7 +30,7 @@ private:
 
 		for (auto iter : node->graphicsPipeline()->activeModules())
 		{
-			auto m = dynamic_cast<ImWidget*>(iter);
+			auto m = dynamic_cast<ImWidget*>(iter.get());
 			if (m && m->isVisible())
 			{
 				//m->update();

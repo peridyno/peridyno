@@ -7,7 +7,7 @@
 namespace Qt
 {
 
-	QtModuleWidget::QtModuleWidget(Module* base)
+	QtModuleWidget::QtModuleWidget(std::shared_ptr<Module> base)
 	{
 		m_module = base;
 
@@ -58,7 +58,7 @@ namespace Qt
 
 		std::string name = f->getClassName();
 
-		return NodeDataType{ name.c_str(), name.c_str() };
+		return NodeDataType{ name.c_str(), name.c_str(), PortShape::Point };
 	}
 
 
@@ -68,13 +68,13 @@ namespace Qt
 	}
 
 
-	std::shared_ptr<QtNodeData> QtModuleWidget::inData(PortIndex port)
-	{
-		// weak_ptr.lock() : if ptr is expired then return nullptr.
-		// fprintf(stderr, (input_fields[port].expired()) ? "expired\n" : "nothing!\n");
-		// return std::dynamic_pointer_cast<QtNodeData>(input_fields[port].lock());
-		return std::dynamic_pointer_cast<QtNodeData>(input_fields[port]);
-	}
+// 	std::shared_ptr<QtNodeData> QtModuleWidget::inData(PortIndex port)
+// 	{
+// 		// weak_ptr.lock() : if ptr is expired then return nullptr.
+// 		// fprintf(stderr, (input_fields[port].expired()) ? "expired\n" : "nothing!\n");
+// 		// return std::dynamic_pointer_cast<QtNodeData>(input_fields[port].lock());
+// 		return std::dynamic_pointer_cast<QtNodeData>(input_fields[port]);
+// 	}
 
 	QString QtModuleWidget::caption() const
 	{
@@ -107,28 +107,83 @@ namespace Qt
 
 	void QtModuleWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
 	{
-		auto field_port = std::dynamic_pointer_cast<QtFieldData>(data);
+		if (!mEditingEnabled)
+			return;
 
-		input_fields[portIndex] = field_port;
+		auto fieldData = std::dynamic_pointer_cast<QtFieldData>(data);
 
-		if (field_port != nullptr)
+		if (fieldData != nullptr)
 		{
-			auto in_fields = getInputFields();
-			field_port->getField()->connect(in_fields[portIndex]);
+			auto field = fieldData->getField();
+
+			if (fieldData->connectionType() == CntType::Break)
+			{
+				field->disconnect(input_fields[portIndex]->getField());
+				fieldData->setConnectionType(CntType::Link);
+			}
+			else
+			{
+				field->connect(input_fields[portIndex]->getField());
+			}
 		}
 
 		updateModule();
 	}
 
+	bool QtModuleWidget::tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData)
+	{
+		if (!mEditingEnabled)
+			return false;
+
+		try
+		{
+			auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+			if (fieldExp == nullptr)
+				return false;
+
+			auto fieldInp = input_fields[portIndex];
+
+			if (fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName())
+			{
+				std::string className = fieldInp->getField()->getClassName();
+				if (className == dyno::InstanceBase::className())
+				{
+					return true;
+				}
+				else
+					return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
+			}
+			else
+			{
+				return false;
+			}
+		}
+		catch (std::bad_cast)
+		{
+			return false;
+		}
+
+		return true;
+	}
 
 	NodeValidationState QtModuleWidget::validationState() const
 	{
 		return modelValidationState;
 	}
 
-	Module* QtModuleWidget::getModule()
+	std::shared_ptr<Module> QtModuleWidget::getModule()
 	{
 		return m_module;
+	}
+
+	void QtModuleWidget::enableEditing()
+	{
+		mEditingEnabled = true;
+	}
+
+	void QtModuleWidget::disableEditing()
+	{
+		mEditingEnabled = false;
 	}
 
 	QString QtModuleWidget::validationMessage() const
@@ -142,7 +197,6 @@ namespace Qt
 
 		for (int i = 0; i < input_fields.size(); i++)
 		{
-
 			//auto p = input_fields[i].lock();
 			auto p = input_fields[i];
 

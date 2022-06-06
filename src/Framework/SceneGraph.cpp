@@ -301,7 +301,7 @@ namespace dyno
 
 				for (auto iter : node->animationPipeline()->activeModules())
 				{
-					auto m = dynamic_cast<InputMouseModule*>(iter);
+					auto m = dynamic_cast<InputMouseModule*>(iter.get());
 					if (m)
 					{
 						m->enqueueEvent(mMouseEvent);

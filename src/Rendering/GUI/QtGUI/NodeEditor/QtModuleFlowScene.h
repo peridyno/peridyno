@@ -20,23 +20,33 @@ namespace Qt
 		QtModuleFlowScene(std::shared_ptr<QtDataModelRegistry> registry,
 			QObject* parent = Q_NULLPTR);
 
-		QtModuleFlowScene(QObject* parent = Q_NULLPTR, QtNodeWidget* node_widget = nullptr);
+		QtModuleFlowScene(QObject* parent = Q_NULLPTR, QtNodeWidget* widget = nullptr);
 
 
 		~QtModuleFlowScene();
 
 	public:
-		// push and refresh modules to parent_node's graphicsPipeline
-		void pushModule();
-
+		void enableEditing();
+		void disableEditing();
 
 	public Q_SLOTS:
-		void showNodeFlow(Node* node);
-		void moveModulePosition(QtNode& n, const QPointF& newLocation);
+		void showModuleFlow(Node* node);
 
+		void updateModuleGraphView();
 
+		void reorderAllModules();
+
+		void addModule(QtNode& n);
+
+		void deleteModule(QtNode& n);
+
+		void moveModule(QtNode& n, const QPointF& newLocation);
 	private:
-		std::weak_ptr<dyno::Node> m_node;
-		QtNodeWidget* m_parent_node;
+		std::shared_ptr<dyno::Node> mNode;
+
+		bool mEditingEnabled = true;
+
+		float mDx = 100.0f;
+		float mDy = 50.0f;
 	};
 }

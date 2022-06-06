@@ -5,9 +5,10 @@
 #include "QtModuleWidget.h"
 #include "SceneGraph.h"
 
-#include "Module/VirtualModule.h"
-
 #include "nodes/QNode"
+
+#include "DirectedAcyclicGraph.h"
+#include "AutoLayoutDAG.h"
 
 namespace Qt
 {
@@ -15,14 +16,15 @@ namespace Qt
 		QObject* parent)
 		: QtFlowScene(registry, parent)
 	{
-		connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModulePosition);
+		connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModule);
 	}
 
-	QtModuleFlowScene::QtModuleFlowScene(QObject* parent, QtNodeWidget* node_widget)
+	QtModuleFlowScene::QtModuleFlowScene(QObject* parent, QtNodeWidget* widget)
 		: QtFlowScene(parent)
 	{
+		mNode = widget->getNode();
+
 		auto classMap = dyno::Object::getClassMap();
-		m_parent_node = node_widget;
 		auto ret = std::make_shared<QtDataModelRegistry>();
 		int id = 0;
 		for (auto const c : *classMap)
@@ -31,7 +33,8 @@ namespace Qt
 
 			QString str = QString::fromStdString(c.first);
 			dyno::Object* obj = dyno::Object::createObject(str.toStdString());
-			dyno::Module* module = dynamic_cast<dyno::Module*>(obj);
+			std::shared_ptr<dyno::Module> module(dynamic_cast<dyno::Module*>(obj));
+			//dyno::Module* module = dynamic_cast<dyno::Module*>(obj);
 
 			if (module != nullptr)
 			{
@@ -46,51 +49,58 @@ namespace Qt
 		}
 
 		this->setRegistry(ret);
-	}
 
+		if (mNode != nullptr)
+			showModuleFlow(mNode.get());
+
+		enableEditing();
+
+		reorderAllModules();
+
+		connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModule);
+		connect(this, &QtFlowScene::nodePlaced, this, &QtModuleFlowScene::addModule);
+		connect(this, &QtFlowScene::nodeDeleted, this, &QtModuleFlowScene::deleteModule);
+	}
 
 	QtModuleFlowScene::~QtModuleFlowScene()
 	{
-
+		//To avoid editing the the module flow inside the node when the widget is closed.
+		disableEditing();
 	}
 
-
-	void QtModuleFlowScene::pushModule()
+	void QtModuleFlowScene::enableEditing()
 	{
-		if (m_parent_node == nullptr)
+		mEditingEnabled = true;
+
+		auto& allNodes = this->allNodes();
+
+		for each (auto node in allNodes)
 		{
-			return;
-		}
-		dyno::Node* selectedNode = m_parent_node->getNode().get();
-		// clear
-		// selectedNode->graphicsPipeline()->clear();
-
-		// push
-		auto const& nodes = this->nodes();
-		for (auto const& pair : nodes)
-		{
-			auto const& node = pair.second;
-			auto const& module_widget = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
-			if (module_widget == nullptr)
+			auto model = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
+			if (model != nullptr)
 			{
-				continue;
-			}
-
-			auto const& module = module_widget->getModule();
-			if (module == nullptr)
-			{
-				continue;
-			}
-
-			std::string class_name = module->getClassInfo()->getClassName();
-			if (class_name.find("virtual") == std::string::npos)
-			{
-				selectedNode->graphicsPipeline()->pushModule(std::shared_ptr<dyno::Module>(module));
+				model->enableEditing();
 			}
 		}
 	}
 
-	void QtModuleFlowScene::showNodeFlow(Node* node)
+	void QtModuleFlowScene::disableEditing()
+	{
+		mEditingEnabled = false;
+
+		auto& allNodes = this->allNodes();
+
+		for each (auto node in allNodes)
+		{
+			auto model = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
+			if (model != nullptr)
+			{
+				model->disableEditing();
+			}
+		}
+	}
+
+	void QtModuleFlowScene::showModuleFlow(Node* node)
 	{
 			clearScene();
 
@@ -98,10 +108,10 @@ namespace Qt
 
 			std::map<dyno::ObjectId, QtNode*> moduleMap;
 
-			auto& activeModules = node->animationPipeline()->activeModules();
+			auto& modules = node->animationPipeline()->allModules();
 
 
-			auto addModuleWidget = [&](Module* m) -> void
+			auto addModuleWidget = [&](std::shared_ptr<Module> m) -> void
 			{
 				auto mId = m->objectId();
 
@@ -122,7 +132,7 @@ namespace Qt
 			//addModuleWidget(node->getMechanicalState().get());
 
 			//Create a virtual module
-			Module* states = new Module;
+			std::shared_ptr<Module> states = std::make_shared<Module>();
 			auto& fields = node->getAllFields();
 			for (auto field : fields)
 			{
@@ -134,12 +144,12 @@ namespace Qt
 
 			addModuleWidget(states);
 
-			for each (auto m in activeModules)
+			for each (auto m in modules)
 			{
-				addModuleWidget(m);
+				addModuleWidget(m.second);
 			}
 
-			auto createModuleConnections = [&](Module* m) -> void
+			auto createModuleConnections = [&](std::shared_ptr<Module> m) -> void
 			{
 				auto inId = m->objectId();
 
@@ -158,7 +168,7 @@ namespace Qt
 								Module* nodeSrc = dynamic_cast<Module*>(parSrc);
 								if (nodeSrc == nullptr)
 								{
-									nodeSrc = states;
+									nodeSrc = states.get();
 								}
 
 								auto outId = nodeSrc->objectId();
@@ -187,22 +197,156 @@ namespace Qt
 				}
 			};
 
-			auto rit = activeModules.rbegin();
-			while (rit != activeModules.rend()) {
-				createModuleConnections(*rit);
-				rit++;
+			for each (auto m in modules)
+			{
+				createModuleConnections(m.second);
 			}
+
+// 			auto rit = modules.rbegin();
+// 			while (rit != modules.rend()) {
+// 				createModuleConnections(*rit);
+// 				rit++;
+// 			}
 	}
 
-	void QtModuleFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)
+	void QtModuleFlowScene::moveModule(QtNode& n, const QPointF& newLocation)
 	{
 		QtModuleWidget* mw = dynamic_cast<QtModuleWidget*>(n.nodeDataModel());
 
-		Module* m = mw == nullptr ? nullptr : mw->getModule();
+		auto m = mw == nullptr ? nullptr : mw->getModule();
 
 		if (m != nullptr)
 		{
 			m->setBlockCoord(newLocation.x(), newLocation.y());
+		}
+	}
+
+	void QtModuleFlowScene::updateModuleGraphView()
+	{
+		disableEditing();
+
+		clearScene();
+
+		if (mNode != nullptr)
+			showModuleFlow(mNode.get());
+
+		enableEditing();
+	}
+
+	void QtModuleFlowScene::reorderAllModules()
+	{
+		dyno::DirectedAcyclicGraph graph;
+
+		auto constructDAG = [&](std::shared_ptr<Module> m) -> void
+		{
+			auto inId = m->objectId();
+
+			auto fieldInp = m->getInputFields();
+			for (int i = 0; i < fieldInp.size(); i++)
+			{
+				auto fieldSrc = fieldInp[i]->getSource();
+				if (fieldSrc != nullptr) {
+					auto parSrc = fieldSrc->parent();
+					if (parSrc != nullptr)
+					{
+						Module* nodeSrc = dynamic_cast<Module*>(parSrc);
+
+						if (nodeSrc != nullptr)
+						{
+							auto outId = nodeSrc->objectId();
+							graph.addEdge(outId, inId);
+						}
+					}
+				}
+			}
+		};
+
+		auto& mlists = mNode->animationPipeline()->activeModules();
+
+		for (auto it = mlists.begin(); it != mlists.end(); it++)
+		{
+			constructDAG(*it);
+		}
+
+
+		dyno::AutoLayoutDAG layout(&graph);
+		layout.update();
+
+		//Set up the mapping from ObjectId to QtNode
+		auto& _nodes = this->nodes();
+		std::map<dyno::ObjectId, QtNode*> qtNodeMapper;
+		std::map<dyno::ObjectId, Module*> moduleMapper;
+		for (auto const& _node : _nodes)
+		{
+			auto const& qtNode = _node.second;
+			auto model = qtNode->nodeDataModel();
+
+			auto nodeData = dynamic_cast<QtModuleWidget*>(model);
+
+			if (model != nullptr)
+			{
+				auto m = nodeData->getModule();
+				if (m != nullptr)
+				{
+					qtNodeMapper[m->objectId()] = qtNode.get();
+					moduleMapper[m->objectId()] = m.get();
+				}
+			}
+		}
+
+		//DOTO: optimize the position for the dummy module
+		float offsetX = 400.0f;
+		for (size_t l = 0; l < layout.layerNumber(); l++)
+		{
+			auto& xc = layout.layer(l);
+
+			float offsetY = 0.0f;
+			float xMax = 0.0f;
+			for (size_t index = 0; index < xc.size(); index++)
+			{
+				dyno::ObjectId id = xc[index];
+				if (qtNodeMapper.find(id) != qtNodeMapper.end())
+				{
+					QtNode* qtNode = qtNodeMapper[id];
+					NodeGeometry& geo = qtNode->nodeGeometry();
+
+					float w = geo.width();
+					float h = geo.height();
+
+					xMax = std::max(xMax, w);
+
+					Module* node = moduleMapper[id];
+
+					node->setBlockCoord(offsetX, offsetY);
+
+					offsetY += (h + mDy);
+				}
+			}
+
+			offsetX += (xMax + mDx);
+		}
+
+		qtNodeMapper.clear();
+		moduleMapper.clear();
+
+		updateModuleGraphView();
+	}
+
+	void QtModuleFlowScene::addModule(QtNode& n)
+	{
+		auto nodeData = dynamic_cast<QtModuleWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			mNode->animationPipeline()->pushModule(nodeData->getModule());
+		}
+	}
+
+	void QtModuleFlowScene::deleteModule(QtNode& n)
+	{
+		auto nodeData = dynamic_cast<QtModuleWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			mNode->animationPipeline()->popModule(nodeData->getModule());
 		}
 	}
 }
