@@ -30,7 +30,7 @@ namespace dyno
 		void draw(GLVisualModule::RenderPass pass)
 		{
 			for (GLVisualModule* m : modules)
-				m->paintGL(pass);
+				m->draw(pass);
 		}
 
 	private:
