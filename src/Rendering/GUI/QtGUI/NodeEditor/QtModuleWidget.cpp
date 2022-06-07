@@ -32,6 +32,8 @@ namespace Qt
 				// fprintf(stderr, (input_fields[i].expired()) ? "expired\n" : "nothing!\n");
 			}
 		}
+
+		updateModule();
 	}
 
 	unsigned int
@@ -197,10 +199,7 @@ namespace Qt
 
 		for (int i = 0; i < input_fields.size(); i++)
 		{
-			//auto p = input_fields[i].lock();
-			auto p = input_fields[i];
-
-			hasAllInputs &= (p != nullptr);
+			hasAllInputs &= (!input_fields[i]->getField()->isEmpty());
 		}
 
 		if (hasAllInputs)

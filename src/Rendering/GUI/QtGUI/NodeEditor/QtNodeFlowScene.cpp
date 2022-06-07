@@ -333,6 +333,25 @@ namespace Qt
 		auto qNodeWdiget = std::make_unique<QtNodeWidget>(node);
 		auto& qNode = createNode(std::move(qNodeWdiget));
 
+		//Calculate the position for the newly create node to avoid overlapping
+		auto& _nodes = this->nodes();
+		float y = -10000.0f;
+		for (auto const& _node : _nodes)
+		{
+			NodeGeometry& geo = _node.second->nodeGeometry();
+			QtNodeGraphicsObject& obj = _node.second->nodeGraphicsObject();
+
+			float h = geo.height();
+
+			QPointF pos = obj.pos();
+
+			y = std::max(y, float(pos.y() + h));
+		}
+
+		QPointF posView(0.0f, y + 50.0f);
+
+		qNode.nodeGraphicsObject().setPos(posView);
+
 		emit nodePlaced(qNode);
 	}
 

@@ -6,7 +6,7 @@
 #include "QtNodeWidget.h"
 
 using dyno::Node;
-
+using dyno::Module;
 
 namespace Qt
 {
@@ -45,6 +45,9 @@ namespace Qt
 		std::shared_ptr<dyno::Node> mNode;
 
 		bool mEditingEnabled = true;
+
+		//A virtual module to store all state variables
+		std::shared_ptr<dyno::Module> mStates;
 
 		float mDx = 100.0f;
 		float mDy = 50.0f;

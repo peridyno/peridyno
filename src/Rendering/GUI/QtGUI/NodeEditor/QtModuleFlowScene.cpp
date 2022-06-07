@@ -10,6 +10,18 @@
 #include "DirectedAcyclicGraph.h"
 #include "AutoLayoutDAG.h"
 
+namespace dyno
+{
+	class States : public Module
+	{
+		DECLARE_CLASS(States);
+	public:
+		States() {};
+	};
+
+	IMPLEMENT_CLASS(States);
+}
+
 namespace Qt
 {
 	QtModuleFlowScene::QtModuleFlowScene(std::shared_ptr<QtDataModelRegistry> registry,
@@ -128,21 +140,18 @@ namespace Qt
 				this->nodePlaced(node);
 			};
 
-			//Add a virtual module
-			//addModuleWidget(node->getMechanicalState().get());
-
-			//Create a virtual module
-			std::shared_ptr<Module> states = std::make_shared<Module>();
+			//Create a dummy module to store all state variables
+			mStates = std::make_shared<dyno::States>();
 			auto& fields = node->getAllFields();
 			for (auto field : fields)
 			{
 				if (field->getFieldType() == dyno::FieldTypeEnum::State)
 				{
-					states->addOutputField(field);
+					mStates->addOutputField(field);
 				}
 			}
 
-			addModuleWidget(states);
+			addModuleWidget(mStates);
 
 			for each (auto m in modules)
 			{
@@ -168,7 +177,7 @@ namespace Qt
 								Module* nodeSrc = dynamic_cast<Module*>(parSrc);
 								if (nodeSrc == nullptr)
 								{
-									nodeSrc = states.get();
+									nodeSrc = mStates.get();
 								}
 
 								auto outId = nodeSrc->objectId();
@@ -201,12 +210,6 @@ namespace Qt
 			{
 				createModuleConnections(m.second);
 			}
-
-// 			auto rit = modules.rbegin();
-// 			while (rit != modules.rend()) {
-// 				createModuleConnections(*rit);
-// 				rit++;
-// 			}
 	}
 
 	void QtModuleFlowScene::moveModule(QtNode& n, const QPointF& newLocation)
@@ -239,30 +242,34 @@ namespace Qt
 
 		auto constructDAG = [&](std::shared_ptr<Module> m) -> void
 		{
-			auto inId = m->objectId();
+			auto outId = m->objectId();
 
-			auto fieldInp = m->getInputFields();
-			for (int i = 0; i < fieldInp.size(); i++)
+			auto fieldOut = m->getOutputFields();
+			for (int i = 0; i < fieldOut.size(); i++)
 			{
-				auto fieldSrc = fieldInp[i]->getSource();
-				if (fieldSrc != nullptr) {
-					auto parSrc = fieldSrc->parent();
-					if (parSrc != nullptr)
-					{
-						Module* nodeSrc = dynamic_cast<Module*>(parSrc);
-
-						if (nodeSrc != nullptr)
+				auto& sinks = fieldOut[i]->getSinks();
+				for each (auto sink in sinks)
+				{
+					if (sink != nullptr) {
+						auto parSrc = sink->parent();
+						if (parSrc != nullptr)
 						{
-							auto outId = nodeSrc->objectId();
-							graph.addEdge(outId, inId);
+							Module* nodeSrc = dynamic_cast<Module*>(parSrc);
+
+							if (nodeSrc != nullptr)
+							{
+								auto inId = nodeSrc->objectId();
+								graph.addEdge(outId, inId);
+							}
 						}
 					}
 				}
 			}
 		};
 
-		auto& mlists = mNode->animationPipeline()->activeModules();
+		constructDAG(mStates);
 
+		auto& mlists = mNode->animationPipeline()->activeModules();
 		for (auto it = mlists.begin(); it != mlists.end(); it++)
 		{
 			constructDAG(*it);
@@ -295,7 +302,7 @@ namespace Qt
 		}
 
 		//DOTO: optimize the position for the dummy module
-		float offsetX = 400.0f;
+		float offsetX = 0.0f;
 		for (size_t l = 0; l < layout.layerNumber(); l++)
 		{
 			auto& xc = layout.layer(l);
