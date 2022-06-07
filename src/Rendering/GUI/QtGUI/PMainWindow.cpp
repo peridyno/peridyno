@@ -290,6 +290,11 @@ namespace dyno
 				if (i == 2 || i == 5 || i == 3) {//add connect event 
 					connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
 				}
+				//reoder¹¦ÄÜ
+				if (i == v_IcoAndLabel.size() - 1 && j == 0) {
+					connect(art, &QAction::triggered, this, [=]() {mNodeFlowView->node_scene->reorderAllNodes(); });
+					
+				}
 			}
 			/*
 			//Add file¡¢edit and help ToolBar tab

@@ -188,7 +188,7 @@ static void ShowExampleMenuFile();
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
 static void HelpMarker(const char* desc)
 {
-    ImGui::TextDisabled("(?)");
+    ImGui::TextDisabled("");
     if (ImGui::IsItemHovered())
     {
         ImGui::BeginTooltip();
@@ -6102,6 +6102,50 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
     ImGui::PopItemWidth();
 }
 
+void ImGui::ShowStyle(ImGuiStyle* ref)
+{
+    // You can pass in a reference ImGuiStyle structure to compare to, revert to and save to
+    // (without a reference style pointer, we will use one compared locally as a reference)
+    ImGuiStyle& style = ImGui::GetStyle();
+    static ImGuiStyle ref_saved_style;
+
+    // Default to using internal storage as reference
+    static bool init = true;
+    if (init && ref == NULL)
+        ref_saved_style = style;
+    init = false;
+    if (ref == NULL)
+        ref = &ref_saved_style;
+
+    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+    
+    if (ImGui::ShowStyleSelector("Colors##Selector"))
+        ref_saved_style = style;
+ 
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImFontAtlas* atlas = io.Fonts;
+    for (int i = 0; i < atlas->Fonts.Size; i++)
+    {
+        ImFont* font = atlas->Fonts[i];
+        ImGui::DragFloat("Font scale", &font->Scale, 0.005f, 0.3f, 2.0f, "%.1f");
+    }
+    ImGui::SameLine();
+    HelpMarker(" ");
+
+    // Simplified Settings (expose floating-pointer border sizes as boolean representing 0.0f or 1.0f)
+    if (ImGui::SliderFloat("FrameRounding", &style.FrameRounding, 0.0f, 12.0f, "%.0f"))
+        style.GrabRounding = style.FrameRounding; // Make GrabRounding always the same value as FrameRounding
+    { bool border = (style.WindowBorderSize > 0.0f); if (ImGui::Checkbox("WindowBorder", &border)) { style.WindowBorderSize = border ? 1.0f : 0.0f; } }
+    ImGui::SameLine();
+    { bool border = (style.FrameBorderSize > 0.0f);  if (ImGui::Checkbox("FrameBorder", &border)) { style.FrameBorderSize = border ? 1.0f : 0.0f; } }
+   
+    ImGui::SameLine();  
+    HelpMarker(" ");
+    ImGui::DragFloat("Transparence", &style.Alpha, 0.005f, 0.20f, 1.0f, "%.2f"); // Not exposing zero here so user doesn't "lose" the UI (zero alpha clips all widgets). But application code could have a toggle to switch between zero and non-zero.
+
+}
+
 //-----------------------------------------------------------------------------
 // [SECTION] Example App: Main Menu Bar / ShowExampleAppMainMenuBar()
 //-----------------------------------------------------------------------------
@@ -7659,6 +7703,8 @@ void ImGui::ShowDemoWindow(bool*) {}
 void ImGui::ShowUserGuide() {}
 void ImGui::ShowStyleEditor(ImGuiStyle*) {}
 
+
+void ImGui::ShowStyle(ImGuiStyle*) {}
 #endif
 
 #endif // #ifndef IMGUI_DISABLE

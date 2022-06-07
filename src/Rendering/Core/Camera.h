@@ -47,6 +47,9 @@ namespace dyno
 		virtual void setEyePos(const Vec3f& p) = 0;
 		virtual void setTargetPos(const Vec3f& p) = 0;
 
+		virtual Vec3f getEyePos() const = 0;
+		virtual Vec3f getTargetPos() const = 0;
+
 		TRay3D<float> castRayInWorldSpace(float x, float y);
 
 		void setDistanceUnit(float unit) { mDistanceUnit = unit; }

@@ -105,5 +105,4 @@ namespace dyno
 		
 		registerPoint(xpos, ypos);
 	}
-
 }

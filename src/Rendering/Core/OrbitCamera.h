@@ -17,8 +17,8 @@ namespace dyno
 		void registerPoint(float x, float y) override;
 
 		Vec3f getViewDir() const;
-		Vec3f getEyePos() const;
-		Vec3f getTargetPos() const;
+		Vec3f getEyePos() const override;
+		Vec3f getTargetPos() const override;
 
 		void setEyePos(const Vec3f& p) override;
 		void setTargetPos(const Vec3f& p) override;

@@ -23,6 +23,12 @@ namespace dyno
 		//TODO: implement
 		void setTargetPos(const Vec3f& p) override {};
 
+		//TODO: implement
+		Vec3f getEyePos() const override { return Vec3f(1, 1, 1); };
+
+		//TODO: implement
+		Vec3f getTargetPos() const override { return Vec3f(1, 1, 1);};
+
 		glm::mat4 getViewMat() override;
 		glm::mat4 getProjMat() override;
 
