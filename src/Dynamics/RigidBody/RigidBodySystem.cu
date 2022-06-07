@@ -249,14 +249,14 @@ namespace dyno
 
 		ElementOffset eleOffset = topo->calculateElementOffset();
 
-		this->stateRotationMatrix()->setElementCount(sizeOfRigids);
-		this->stateAngularVelocity()->setElementCount(sizeOfRigids);
-		this->stateCenter()->setElementCount(sizeOfRigids);
-		this->stateVelocity()->setElementCount(sizeOfRigids);
-		this->stateMass()->setElementCount(sizeOfRigids);
-		this->stateInertia()->setElementCount(sizeOfRigids);
-		this->stateQuaternion()->setElementCount(sizeOfRigids);
-		this->stateCollisionMask()->setElementCount(sizeOfRigids);
+		this->stateRotationMatrix()->resize(sizeOfRigids);
+		this->stateAngularVelocity()->resize(sizeOfRigids);
+		this->stateCenter()->resize(sizeOfRigids);
+		this->stateVelocity()->resize(sizeOfRigids);
+		this->stateMass()->resize(sizeOfRigids);
+		this->stateInertia()->resize(sizeOfRigids);
+		this->stateQuaternion()->resize(sizeOfRigids);
+		this->stateCollisionMask()->resize(sizeOfRigids);
 
 		cuExecute(sizeOfRigids,
 			RB_SetupInitialStates,
@@ -271,7 +271,7 @@ namespace dyno
 			mDeviceRigidBodyStates,
 			eleOffset);
 
-		this->stateInitialInertia()->setElementCount(sizeOfRigids);
+		this->stateInitialInertia()->resize(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
 

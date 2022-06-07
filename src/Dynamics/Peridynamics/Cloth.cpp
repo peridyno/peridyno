@@ -46,14 +46,14 @@ namespace dyno
 
 		auto fixed = std::make_shared<FixedPoints<TDataType>>();
 
-		//Create a node for surface mesh rendering
-		mSurfaceNode = std::make_shared<Node>("Mesh");
-		mSurfaceNode->addAncestor(this);
-
-		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		this->stateTopology()->setDataPtr(triSet);
-
-		mSurfaceNode->stateTopology()->setDataPtr(triSet);
+// 		//Create a node for surface mesh rendering
+// 		mSurfaceNode = std::make_shared<Node>("Mesh");
+// 		mSurfaceNode->addAncestor(this);
+// 
+// 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
+// 		this->stateTopology()->setDataPtr(triSet);
+// 
+// 		mSurfaceNode->stateTopology()->setDataPtr(triSet);
 	}
 
 	template<typename TDataType>
@@ -65,7 +65,7 @@ namespace dyno
 	template<typename TDataType>
 	bool Cloth<TDataType>::translate(Coord t)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->translate(t);
+		//TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->translate(t);
 
 		return ParticleSystem<TDataType>::translate(t);
 	}
@@ -74,7 +74,7 @@ namespace dyno
 	template<typename TDataType>
 	bool Cloth<TDataType>::scale(Real s)
 	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->scale(s);
+		//TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->scale(s);
 
 		return ParticleSystem<TDataType>::scale(s);
 	}
@@ -82,7 +82,7 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
-		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto triSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 
 		triSet->getPoints().assign(this->statePosition()->getData());
 	}
@@ -108,17 +108,17 @@ namespace dyno
 		}
 	}
 
-	template<typename TDataType>
-	void Cloth<TDataType>::loadSurface(std::string filename)
-	{
-		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->loadObjFile(filename);
-	}
-
-	template<typename TDataType>
-	std::shared_ptr<Node> Cloth<TDataType>::getSurface()
-	{
-		return mSurfaceNode;
-	}
+// 	template<typename TDataType>
+// 	void Cloth<TDataType>::loadSurface(std::string filename)
+// 	{
+// 		TypeInfo::cast<TriangleSet<TDataType>>(mSurfaceNode->stateTopology()->getDataPtr())->loadObjFile(filename);
+// 	}
+// 
+// 	template<typename TDataType>
+// 	std::shared_ptr<Node> Cloth<TDataType>::getSurface()
+// 	{
+// 		return mSurfaceNode;
+// 	}
 
 	DEFINE_CLASS(Cloth);
 }

@@ -84,7 +84,14 @@ namespace dyno {
 			this->setPortType(NodePortType::Single);
 			this->getNodes().resize(1);
 		};
-		~SingleNodePort() override { m_nodes[0] = nullptr; }
+
+		~SingleNodePort() override {
+			//Disconnect nodes from node ports here instead of inside the destructor of Node to avoid memory leak
+			if (m_nodes[0] != nullptr) {
+				m_nodes[0]->disconnect(this);
+			}
+			m_nodes[0] = nullptr; 
+		}
 
 		bool isKindOf(Node* node) override
 		{
@@ -166,7 +173,15 @@ namespace dyno {
 			this->setPortType(NodePortType::Multiple);
 		};
 
-		~MultipleNodePort() { m_derived_nodes.clear(); }
+		~MultipleNodePort() {
+			//Disconnect nodes from node ports here instead of inside the destructor of Node to avoid memory leak
+			for each (auto node in m_nodes)
+			{
+				node->disconnect(this);
+			}
+
+			m_derived_nodes.clear(); 
+		}
 
 		void clear() override
 		{

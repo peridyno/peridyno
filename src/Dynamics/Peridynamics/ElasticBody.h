@@ -37,7 +37,7 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-	private:
-		std::shared_ptr<Node> m_surfaceNode;
+// 	private:
+// 		std::shared_ptr<Node> m_surfaceNode;
 	};
 }

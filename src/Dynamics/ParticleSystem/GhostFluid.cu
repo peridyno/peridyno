@@ -52,19 +52,19 @@ namespace dyno
 		auto fluidParticles		= this->getFluidParticles();
 
 		int pNum = 0;
-		pNum += boundaryParticles != nullptr ? boundaryParticles->statePosition()->getElementCount() : 0;
-		pNum += fluidParticles != nullptr ? fluidParticles->statePosition()->getElementCount() : 0;
+		pNum += boundaryParticles != nullptr ? boundaryParticles->statePosition()->size() : 0;
+		pNum += fluidParticles != nullptr ? fluidParticles->statePosition()->size() : 0;
 
 		if (pNum <= 0)
 			return;
 
-		if (pNum != this->statePosition()->getElementCount())
+		if (pNum != this->statePosition()->size())
 		{
-			this->statePosition()->setElementCount(pNum);
-			this->stateVelocity()->setElementCount(pNum);
-			this->stateForce()->setElementCount(pNum);
-			this->stateAttribute()->setElementCount(pNum);
-			this->stateNormal()->setElementCount(pNum);
+			this->statePosition()->resize(pNum);
+			this->stateVelocity()->resize(pNum);
+			this->stateForce()->resize(pNum);
+			this->stateAttribute()->resize(pNum);
+			this->stateNormal()->resize(pNum);
 		}
 
 		auto& pos = this->statePosition()->getData();

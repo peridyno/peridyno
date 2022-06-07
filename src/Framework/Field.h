@@ -39,7 +39,7 @@ namespace dyno {
 		FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent);
 		~FVar() override;
 
-		uint getElementCount() override { return 1; }
+		uint size() override { return 1; }
 
 		void setValue(T val);
 		T getValue();
@@ -104,15 +104,17 @@ namespace dyno {
 
 		~FArray() override;
 
-		inline uint getElementCount() override {
+		inline uint size() override {
 			auto ref = this->getDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
-		void setElementCount(uint num);
-
-		void setValue(std::vector<T>& vals);
-		void setValue(DArray<T>& vals);
+		void resize(uint num);
+		void reset();	
+		
+		void assign(const T& val);
+		void assign(std::vector<T>& vals);
+		void assign(DArray<T>& vals);
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -125,23 +127,30 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray<T, deviceType>::setElementCount(uint num)
+	void FArray<T, deviceType>::resize(uint num)
 	{
-		FBase* topField = this->getTopField();
-		FArray<T, deviceType>* derived = dynamic_cast<FArray<T, deviceType>*>(topField);
-
-		if (derived->m_data == nullptr)
-		{
-			derived->m_data = std::make_shared<Array<T, deviceType>>(num);
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr) {
+			data = std::make_shared<Array<T, deviceType>>();
 		}
-		else
-		{
-			derived->m_data->resize(num);
-		}
+		
+		data->resize(num);
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray<T, deviceType>::setValue(std::vector<T>& vals)
+	void dyno::FArray<T, deviceType>::assign(const T& val)
+	{
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array<T, deviceType>>();
+		}
+
+		data->assign(val);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray<T, deviceType>::assign(std::vector<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -153,7 +162,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray<T, deviceType>::setValue(DArray<T>& vals)
+	void FArray<T, deviceType>::assign(DArray<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -162,6 +171,18 @@ namespace dyno {
 		}
 
 		data->assign(vals);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray<T, deviceType>::reset()
+	{
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array<T, deviceType>>();
+		}
+
+		data->reset();
 	}
 
 	template<typename T>
@@ -184,30 +205,66 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray2D);
 
-		inline uint getElementCount() override {
+		inline uint size() override {
 			auto ref = this->getDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
 		void resize(uint nx, uint ny);
+
+		void reset();
+
+		void assign(CArray2D<T>& vals);
+		void assign(DArray2D<T>& vals);
 	};
+
+	template<typename T, DeviceType deviceType>
+	void FArray2D<T, deviceType>::assign(DArray2D<T>& vals)
+	{
+		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array2D<T, deviceType>>();
+		}
+	
+		data->assign(vals);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray2D<T, deviceType>::assign(CArray2D<T>& vals)
+	{
+		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array2D<T, deviceType>>();
+		}
+
+		data->assign(vals);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray2D<T, deviceType>::reset()
+	{
+		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array2D<T, deviceType>>();
+		}
+
+		data->reset();
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArray2D<T, deviceType>::resize(uint nx, uint ny)
 	{
-		FBase* topField = this->getTopField();
-		FArray2D<T, deviceType>* derived = dynamic_cast<FArray2D<T, deviceType>*>(topField);
+		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
 
-		if (derived->m_data == nullptr)
-		{
-			derived->m_data = std::make_shared<Array2D<T, deviceType>>(nx, ny);
+		if (data == nullptr) {
+			data = std::make_shared<Array2D<T, deviceType>>();
 		}
-		else
-		{
-			derived->m_data->resize(ny, ny);
-		}
+		
+		data->resize(ny, ny);
 	}
-
 
 	/**
 	 * Define field for Array3D
@@ -221,7 +278,63 @@ namespace dyno {
 		typedef FArray3D<T, deviceType>			FieldType;
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray3D);
+
+		inline uint size() override {
+			auto ref = this->getDataPtr();
+			return ref == nullptr ? 0 : ref->size();
+		}
+
+		void resize(const uint nx, const uint ny, const uint nz);
+
+		void reset();
+
+		void assign(CArray3D<T>& vals);
+		void assign(DArray3D<T>& vals);
 	};
+
+	template<typename T, DeviceType deviceType>
+	void FArray3D<T, deviceType>::assign(DArray3D<T>& vals)
+	{
+		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<Array3D<T, deviceType>>();
+
+		data->assign(vals);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray3D<T, deviceType>::assign(CArray3D<T>& vals)
+	{
+		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<Array3D<T, deviceType>>();
+
+		data->assign(vals);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray3D<T, deviceType>::reset()
+	{
+		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<Array3D<T, deviceType>>();
+
+		data->reset();
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArray3D<T, deviceType>::resize(const uint nx, const uint ny, const uint nz)
+	{
+		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<Array3D<T, deviceType>>();
+		
+		data->resize(nx, ny, nz);
+	}
 
 	/**
 	 * Define field for Array
@@ -236,9 +349,60 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArrayList);
 
-		inline uint getElementCount() override {
+		inline uint size() override {
 			auto ref = this->getDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
+
+		void resize(uint num);
+
+		void resize(const Array<T, deviceType>& arr);
+
+		void assign(const ArrayList<T, DeviceType::CPU>& src);
+		void assign(const ArrayList<T, DeviceType::GPU>& src);
 	};
+
+	template<typename T, DeviceType deviceType>
+	void FArrayList<T, deviceType>::assign(const ArrayList<T, DeviceType::CPU>& src)
+	{
+		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<ArrayList<T, deviceType>>();
+
+		data->assign(src);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArrayList<T, deviceType>::assign(const ArrayList<T, DeviceType::GPU>& src)
+	{
+		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<ArrayList<T, deviceType>>();
+
+		data->assign(src);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArrayList<T, deviceType>::resize(uint num)
+	{
+		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<ArrayList<T, deviceType>>();
+
+		data->resize(num);
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArrayList<T, deviceType>::resize(const Array<T, deviceType>& arr)
+	{
+		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+
+		if (data == nullptr)
+			data = std::make_shared<ArrayList<T, deviceType>>();
+
+		data->resize(arr);
+	}
 }

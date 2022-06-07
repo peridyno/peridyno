@@ -28,8 +28,8 @@ TEST(BroadPhaseCollisionDetection, doCollision)
 // 	h_aabb_arr2[1].v1 = Vec3f(0.3f, 0.3f, 0.4f);
 
 	CollisionDetectionBroadPhase<DataType3f> collisionModule;
-	collisionModule.inSource()->setValue(h_aabb_arr);
-	collisionModule.inTarget()->setValue(h_aabb_arr);
+	collisionModule.inSource()->assign(h_aabb_arr);
+	collisionModule.inTarget()->assign(h_aabb_arr);
 
 
 	collisionModule.update();

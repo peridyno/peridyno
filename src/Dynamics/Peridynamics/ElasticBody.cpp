@@ -26,18 +26,18 @@ namespace dyno
 		this->stateRestShape()->connect(peri->inRestShape());
 		this->animationPipeline()->pushModule(peri);
 
-		//Create a node for surface mesh rendering
-		m_surfaceNode = std::make_shared<Node>("Mesh");// this->template createAncestor<Node>("Mesh");
-		m_surfaceNode->addAncestor(this);
-
-		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		m_surfaceNode->stateTopology()->setDataPtr(triSet);
-
-		//Set the topology mapping from PointSet to TriangleSet
-		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
-		surfaceMapping->setFrom(ptSet);
-		surfaceMapping->setTo(triSet);
+// 		//Create a node for surface mesh rendering
+// 		m_surfaceNode = std::make_shared<Node>("Mesh");// this->template createAncestor<Node>("Mesh");
+// 		m_surfaceNode->addAncestor(this);
+// 
+// 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
+// 		m_surfaceNode->stateTopology()->setDataPtr(triSet);
+// 
+// 		//Set the topology mapping from PointSet to TriangleSet
+// 		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");
+// 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+// 		surfaceMapping->setFrom(ptSet);
+// 		surfaceMapping->setTo(triSet);
 	}
 
 	template<typename TDataType>

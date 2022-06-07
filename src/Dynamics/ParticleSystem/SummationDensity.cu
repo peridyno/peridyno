@@ -28,8 +28,8 @@ namespace dyno
 			return;
 		}
 
-		if (this->outDensity()->getElementCount() != p_num) {
-			this->outDensity()->setElementCount(p_num);
+		if (this->outDensity()->size() != p_num) {
+			this->outDensity()->resize(p_num);
 		}
 
 		if (this->inOther()->isEmpty()) {

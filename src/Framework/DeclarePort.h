@@ -70,7 +70,7 @@ public:																										\
 	SingleNodePort<T>* import##name(){ return &single_##name; }
  
 
-#define DEF_NODE_PORTS(name, T, desc)				\
+#define DEF_NODE_PORTS(T, name, desc)				\
 private:									\
 	MultipleNodePort<T> multiple_##name = MultipleNodePort<T>(std::string(#name)+std::string("(s)"), desc, this);					\
 public:									\

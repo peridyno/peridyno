@@ -111,7 +111,7 @@ namespace dyno
 		{
 			m_position_buf.assign(m_position.getData());
 
-			int num = m_position.getElementCount();
+			int num = m_position.size();
 			uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 			ODE_SolveElasticityWithPBD << <pDims, BLOCK_SIZE >> > (
@@ -130,7 +130,7 @@ namespace dyno
 	template<typename TDataType>
 	void OneDimElasticityModule<TDataType>::updateVelocity()
 	{
-		int num = m_position.getElementCount();
+		int num = m_position.size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real dt = 0.001;
@@ -160,7 +160,7 @@ namespace dyno
 			return false;
 		}
 
-		int num = m_position.getElementCount();
+		int num = m_position.size();
 		
 // 		m_invK.resize(num);
 // 		m_weights.resize(num);

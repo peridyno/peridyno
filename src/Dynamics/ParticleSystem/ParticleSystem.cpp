@@ -121,7 +121,7 @@ namespace dyno
 		if (!this->statePosition()->isEmpty())
 		{
 			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
-			int num = this->statePosition()->getElementCount();
+			int num = this->statePosition()->size();
 			auto& pts = ptSet->getPoints();
 			if (num != pts.size())
 			{
@@ -143,9 +143,9 @@ namespace dyno
 
 		if (pts.size() > 0)
 		{
-			this->statePosition()->setElementCount(pts.size());
-			this->stateVelocity()->setElementCount(pts.size());
-			this->stateForce()->setElementCount(pts.size());
+			this->statePosition()->resize(pts.size());
+			this->stateVelocity()->resize(pts.size());
+			this->stateForce()->resize(pts.size());
 
 			this->statePosition()->getData().assign(pts);
 			this->stateVelocity()->getDataPtr()->reset();

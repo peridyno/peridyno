@@ -68,7 +68,7 @@ void declare_array(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Array") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_elementCount", &Class::setElementCount);
+		.def("resize", &Class::resize);
 }
 
 template<typename T>

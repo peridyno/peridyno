@@ -279,7 +279,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::applyYielding()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real A = computeA();
@@ -643,7 +643,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::rotateRestShape()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		EM_RotateRestShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
@@ -657,11 +657,11 @@ namespace dyno
 	template<typename TDataType>
 	bool ElastoplasticityModule<TDataType>::initializeImpl()
 	{
-		m_invF.resize(this->inPosition()->getElementCount());
-		m_yiled_I1.resize(this->inPosition()->getElementCount());
-		m_yield_J2.resize(this->inPosition()->getElementCount());
-		m_I1.resize(this->inPosition()->getElementCount());
-		m_bYield.resize(this->inPosition()->getElementCount());
+		m_invF.resize(this->inPosition()->size());
+		m_yiled_I1.resize(this->inPosition()->size());
+		m_yield_J2.resize(this->inPosition()->size());
+		m_I1.resize(this->inPosition()->size());
+		m_bYield.resize(this->inPosition()->size());
 
 		m_bYield.reset();
 

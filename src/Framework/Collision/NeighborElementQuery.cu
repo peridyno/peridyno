@@ -380,8 +380,8 @@ namespace dyno
 		m_broadPhaseCD->setSelfCollision(true);
 
 
-		m_broadPhaseCD->inSource()->setValue(m_queryAABB);
-		m_broadPhaseCD->inTarget()->setValue(m_queriedAABB);
+		m_broadPhaseCD->inSource()->assign(m_queryAABB);
+		m_broadPhaseCD->inTarget()->assign(m_queriedAABB);
 		// 
 		m_broadPhaseCD->update();
 

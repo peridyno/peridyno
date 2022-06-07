@@ -57,8 +57,8 @@ public:
 
 		if (pts.size() > 0)
 		{
-			this->statePosition()->setElementCount(pts.size());
-			this->statePosition()->getData().assign(pts);
+			this->statePosition()->resize(pts.size());
+			this->statePosition()->assign(pts);
 		}
 
 		auto integrator = std::make_shared<ParticleIntegrator<DataType3f>>();
