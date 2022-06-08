@@ -27,29 +27,29 @@ namespace dyno
 		propertyDockWidget->setMinimumWidth(400);
 
 
-		if (node_widget != nullptr)
-		{
-			Node *selectedNode = node_widget->getNode().get();
-			moduleFlowView->getModuleFlowScene()->showNodeFlow(selectedNode);
-
-			// Here is Node's virtual module
-			auto& scene = moduleFlowView->mModuleFlow;
-			auto c =selectedNode->getClassInfo();
-			auto type = scene->registry().create(QString::fromStdString(c->m_className + "(virtual)"));
-			
-			if (type)
-			{
-				auto& vir_module = scene->createNode(std::move(type));
-				// Centered
-				QPointF posView(120, 146);
-				vir_module.nodeGraphicsObject().setPos(posView);
-				scene->nodePlaced(vir_module);
-			}
-			else
-			{
-				qDebug() << "Model not found";
-			}			
-		}
+// 		if (node_widget != nullptr)
+// 		{
+// 			Node *selectedNode = node_widget->getNode().get();
+// 			moduleFlowView->getModuleFlowScene()->showModuleFlow(selectedNode);
+// 
+// 			// Here is Node's virtual module
+// 			auto& scene = moduleFlowView->mModuleFlow;
+// 			auto c =selectedNode->getClassInfo();
+// 			auto type = scene->registry().create(QString::fromStdString(c->m_className + "(virtual)"));
+// 			
+// 			if (type)
+// 			{
+// 				auto& vir_module = scene->createNode(std::move(type));
+// 				// Centered
+// 				QPointF posView(120, 146);
+// 				vir_module.nodeGraphicsObject().setPos(posView);
+// 				scene->nodePlaced(vir_module);
+// 			}
+// 			else
+// 			{
+// 				qDebug() << "Model not found";
+// 			}			
+// 		}
 
 		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showNodeProperty);
 	}

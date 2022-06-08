@@ -13,7 +13,7 @@ namespace dyno
 	TrackballCamera::TrackballCamera() 
 		: Camera()
 	{
-		mCameraPos = Vec3f(1.2f, 0.8f, 2.f);
+		mCameraPos = Vec3f(0.0f, 0.0f, 3.0f);
 		mCameraTarget = Vec3f(0, 0, 0);
 		mCameraUp = Vec3f(0, 1, 0);
 
@@ -33,7 +33,20 @@ namespace dyno
 	glm::mat4 TrackballCamera::getProjMat()
 	{
 		float aspect = std::max(float(mViewportWidth), 1.0f) / std::max(float(mViewportHeight), 1.0f);
-		return glm::perspective(mFov, aspect, mNear, mFar);
+
+		glm::mat4 projection;
+
+		if (mProjectionType == Perspective)
+		{
+			projection = glm::perspective(mFov, aspect, mNear * mDistanceUnit, mFar * mDistanceUnit);
+		}
+		else
+		{
+			float half_depth = (mCameraPos - mCameraTarget).norm() * mDistanceUnit;
+			projection = glm::ortho(-half_depth * aspect, half_depth * aspect, -half_depth, half_depth, -5.0f * half_depth, 5.0f * half_depth);
+		}
+		
+		return projection;
 	}
 
 	void TrackballCamera::zoom(float amount) 
@@ -42,10 +55,10 @@ namespace dyno
 		mFov = std::max(mFov, 0.05f);
 
 		// maybe we want to move forward/backward the camera...
-		//Vec3f viewDir = mCameraPos - mCameraTarget;
-		//Vec3f t = viewDir * (amount / 10.0);
-		//mCameraPos += t;
-		//mCameraTarget += t;
+		Vec3f viewDir = mCameraPos - mCameraTarget;
+		Vec3f t = viewDir * (amount / 10.0);
+		mCameraPos += t;
+		mCameraTarget += t;
 	}
 		
 	void TrackballCamera::registerPoint(float xpos, float ypos) {
@@ -92,5 +105,4 @@ namespace dyno
 		
 		registerPoint(xpos, ypos);
 	}
-
 }

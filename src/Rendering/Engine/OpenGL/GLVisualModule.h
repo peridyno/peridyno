@@ -26,6 +26,12 @@ namespace dyno
 	public:
 		GLVisualModule();
 
+		enum RenderPass
+		{
+			COLOR = 0,
+			SHADOW = 1,
+		};
+
 		// basic Disney PBR material properties
 		void setColor(const Vec3f& color);
 		void setMetallic(float metallic);
@@ -39,18 +45,13 @@ namespace dyno
 
 		virtual bool isTransparent() const;
 
-	public:
-		enum RenderPass
-		{ 
-			COLOR = 0,
-			SHADOW = 1,
-		};
+		void draw(RenderPass pass);
 
+	protected:
 		virtual bool initializeGL() = 0;
 		virtual void updateGL() = 0;
 		virtual void paintGL(RenderPass pass) = 0;
 
-	protected:
 		void updateGraphicsContext() final;
 
 	private:

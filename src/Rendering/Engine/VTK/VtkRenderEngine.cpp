@@ -43,7 +43,7 @@ struct dyno::GatherVisualModuleAction : public Action
 	{
 		for (auto iter : node->graphicsPipeline()->activeModules())
 		{
-			auto m = dynamic_cast<VtkVisualModule*>(iter);
+			auto m = dynamic_cast<VtkVisualModule*>(iter.get());
 			if (m)
 			{
 				this->engine->mVisualModules.push_back(m);

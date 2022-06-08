@@ -41,6 +41,14 @@ namespace Qt
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 
+		/**
+		 * @brief To test whether nodaData can be set as the input data for portIndex
+		 * 
+		 * @param portIndex Input index
+		 * @param nodeData Input data
+		 * @return true 
+		 * @return false 
+		 */
 		bool tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData) override;
 
 		void setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex) override;
@@ -60,7 +68,14 @@ namespace Qt
 		std::vector<FBase*>& getOutputFields() const;
 		std::vector<FBase*>& getInputFields() const;
 
+		/**
+		 * @brief When enabled, the scenegraph can be updated as long as the corresponding GUI is updated.
+		 */
 		void enableEditing();
+		
+		/**
+		 * @brief When disabled, the scenegraph can not be affected by the corresponding GUI.
+		 */
 		void disableEditing();
 
 	protected:

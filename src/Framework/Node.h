@@ -75,25 +75,25 @@ namespace dyno
 		void setSceneGraph(SceneGraph* scn);
 		SceneGraph* getSceneGraph();
 
-		/**
-		 * @brief Add a ancestor
-		 *
-		 * @param Ancestor
-		 * @return std::shared_ptr<Node>
-		 */
-		Node* addAncestor(Node* anc);
-
-		bool hasAncestor(Node* anc);
+// 		/**
+// 		 * @brief Add a ancestor
+// 		 *
+// 		 * @param Ancestor
+// 		 * @return std::shared_ptr<Node>
+// 		 */
+// 		Node* addAncestor(Node* anc);
+// 
+// 		bool hasAncestor(Node* anc);
 
 		std::vector<NodePort*>& getImportNodes() { return mImportNodes; }
 		std::vector<NodePort*>& getExportNodes() { return mExportNodes; }
 
-		/**
-		 * @brief Return all descendants
-		 *
-		 * @return std::list<Node*> descendant list
-		 */
-		std::list<Node*>& getDescendants() {return mDescendants; }
+// 		/**
+// 		 * @brief Return all descendants
+// 		 *
+// 		 * @return std::list<Node*> descendant list
+// 		 */
+// 		std::list<Node*>& getDescendants() {return mDescendants; }
 
 // 		std::shared_ptr<DeviceContext> getContext();
 // 		void setContext(std::shared_ptr<DeviceContext> context);
@@ -255,29 +255,29 @@ namespace dyno
 
 		void reset();
 
-		/**
-		 * @brief Depth-first tree traversal
-		 *
-		 * @param act 	Operation on the node
-		 */
-		void traverseBottomUp(Action* act);
-		template<class Act, class ... Args>
-		void traverseBottomUp(Args&& ... args) {
-			Act action(std::forward<Args>(args)...);
-			doTraverseBottomUp(&action);
-		}
-
-		/**
-		 * @brief Breadth-first tree traversal
-		 *
-		 * @param act 	Operation on the node
-		 */
-		void traverseTopDown(Action* act);
-		template<class Act, class ... Args>
-		void traverseTopDown(Args&& ... args) {
-			Act action(std::forward<Args>(args)...);
-			doTraverseTopDown(&action);
-		}
+// 		/**
+// 		 * @brief Depth-first tree traversal
+// 		 *
+// 		 * @param act 	Operation on the node
+// 		 */
+// 		void traverseBottomUp(Action* act);
+// 		template<class Act, class ... Args>
+// 		void traverseBottomUp(Args&& ... args) {
+// 			Act action(std::forward<Args>(args)...);
+// 			doTraverseBottomUp(&action);
+// 		}
+// 
+// 		/**
+// 		 * @brief Breadth-first tree traversal
+// 		 *
+// 		 * @param act 	Operation on the node
+// 		 */
+// 		void traverseTopDown(Action* act);
+// 		template<class Act, class ... Args>
+// 		void traverseTopDown(Args&& ... args) {
+// 			Act action(std::forward<Args>(args)...);
+// 			doTraverseTopDown(&action);
+// 		}
 		
 		bool connect(NodePort* nPort);
 		bool disconnect(NodePort* nPort);
@@ -296,13 +296,16 @@ namespace dyno
 
 		std::vector<NodePort*>& getAllNodePorts() { return mImportNodes; }
 
-		uint sizeOfNodePorts() const { return (uint)mImportNodes.size(); }
-		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
-		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
+		uint sizeOfNodePorts() { return (uint)mImportNodes.size(); }
+
+		uint sizeOfImportNodes() const;
+		uint sizeOfExportNodes() const { return (uint)mExportNodes.size(); }
+// 		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
+// 		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
 	
 	protected:
-		virtual void doTraverseBottomUp(Action* act);
-		virtual void doTraverseTopDown(Action* act);
+// 		virtual void doTraverseBottomUp(Action* act);
+// 		virtual void doTraverseTopDown(Action* act);
 
 		bool appendExportNode(NodePort* nodePort);
 		bool removeExportNode(NodePort* nodePort);
@@ -318,17 +321,17 @@ namespace dyno
 		virtual bool validateInputs();
 
 	private:
-		/**
-		 * @brief Add a descendant
-		 *
-		 * @param descendant
-		 * @return std::shared_ptr<Node>
-		 */
-		Node* addDescendant(Node* descent);
-
-		bool hasDescendant(Node* descent);
-
-		void removeDescendant(Node* descent);
+// 		/**
+// 		 * @brief Add a descendant
+// 		 *
+// 		 * @param descendant
+// 		 * @return std::shared_ptr<Node>
+// 		 */
+// 		Node* addDescendant(Node* descent);
+// 
+// 		bool hasDescendant(Node* descent);
+// 
+// 		void removeDescendant(Node* descent);
 
 		bool addNodePort(NodePort* port);
 
@@ -344,9 +347,6 @@ namespace dyno
 
 
 	public:
-		DEF_VAR(Real, TimeStep, 0, "Time step size");
-		DEF_VAR(Real, ElapsedTime, 0, "Elapsed Time");
-
 		DEF_VAR(Vec3f, Location, 0, "Node location");
 		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
 		DEF_VAR(Vec3f, Scale, 0, "Node scale");
@@ -368,6 +368,8 @@ namespace dyno
 		 */
 		DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
 
+		DEF_VAR_STATE(Real, ElapsedTime, 0, "Elapsed Time");
+		DEF_VAR_STATE(Real, TimeStep, Real(0.033), "Time step size");
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 
 	private:
@@ -404,14 +406,14 @@ namespace dyno
 		std::list<std::shared_ptr<TopologyMapping>> m_topology_mapping_list;
 		std::list<std::shared_ptr<CustomModule>> m_custom_list;
 
-		//std::shared_ptr<DeviceContext> m_context;
-
-		std::list<Node*> mAncestors;
-
-		/**
-		 * @brief Storing pointers to descendants
-		 */
-		std::list<Node*> mDescendants;
+// 		//std::shared_ptr<DeviceContext> m_context;
+// 
+// 		std::list<Node*> mAncestors;
+// 
+// 		/**
+// 		 * @brief Storing pointers to descendants
+// 		 */
+// 		std::list<Node*> mDescendants;
 
 		std::vector<NodePort*> mImportNodes;
 

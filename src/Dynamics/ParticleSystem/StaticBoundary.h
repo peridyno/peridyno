@@ -43,7 +43,7 @@ namespace dyno {
 		std::vector<std::shared_ptr<RigidBody<TDataType>>> m_rigids;
 		std::vector<std::shared_ptr<ParticleSystem<TDataType>>> m_particleSystems;
 
-		DEF_NODE_PORTS(RigidBody, RigidBody<TDataType>, "A rigid body");
-		DEF_NODE_PORTS(ParticleSystem, ParticleSystem<TDataType>, "Particle Systems");
+		DEF_NODE_PORTS(RigidBody<TDataType>, RigidBody, "A rigid body");
+		DEF_NODE_PORTS(ParticleSystem<TDataType>, ParticleSystem, "Particle Systems");
 	};
 }

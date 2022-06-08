@@ -43,6 +43,7 @@ namespace dyno
 		mDeviceGridNext.clear();
 		mHeight.clear();
 		mSource.clear();
+		mWeight.clear();
 	}
 
 	template <typename Coord>
@@ -82,7 +83,6 @@ namespace dyno
 
 	template <typename Coord>
 	__global__ void AddSource(
-		DArray2D<Coord> grid_next,
 		DArray2D<Coord> grid,
 		DArray2D<Vec2f> mSource,
 		int patchSize,
@@ -98,6 +98,9 @@ namespace dyno
 			Coord gp = grid[ gx + gy * pitchSize];
 			Vec2f s_ij = mSource[i + j * patchSize];
 
+
+			//printf("zhixingle ----------------\n");
+
 			float h = gp.x;
 			float u = C_GetU(gp);
 			float v = C_GetV(gp);
@@ -106,6 +109,10 @@ namespace dyno
 			{
 				u += s_ij.x;
 				v += s_ij.y;
+
+
+				//printf("s_ij %f %f \n", s_ij.x, s_ij.y);
+
 
 				u *= 0.98f;
 				v *= 0.98f;
@@ -133,12 +140,11 @@ namespace dyno
 		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
 			AddSource,
 			mDeviceGridNext,
-			mDeviceGrid,
 			mSource,
 			simulatedRegionWidth,
 			gridPitch);
 
-		swapDeviceGrid();
+		//swapDeviceGrid();
 		
 	}
 
@@ -183,6 +189,7 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::moveDynamicRegion(int nx, int ny)
 	{
+
 		int extNx = simulatedRegionWidth + 2;
 		int extNy = simulatedRegionHeight + 2;
 		
@@ -259,7 +266,7 @@ namespace dyno
 			grid[y * pitch + x] = gp;
 			//grid2Dwrite(grid, x, y, pitch, gp);
 			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 10.0f;
-		}
+		} 
 	}
 
 	__global__ void InitSource(
@@ -575,11 +582,13 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initSource() {
 
-		int sizeInBytes = simulatedRegionWidth * simulatedRegionHeight * sizeof(float2);
+		//int sizeInBytes = simulatedRegionWidth * simulatedRegionHeight * sizeof(float2);
 
 		mSource.resize(simulatedRegionWidth, simulatedRegionHeight);
+		mWeight.resize(simulatedRegionWidth, simulatedRegionHeight);
 
-		cuSafeCall(cudaMalloc(&mWeight, simulatedRegionWidth * simulatedRegionHeight * sizeof(float)));
+
+		//cuSafeCall(cudaMalloc(&mWeight, simulatedRegionWidth * simulatedRegionHeight * sizeof(float)));
 
 		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
 		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
@@ -631,7 +640,9 @@ namespace dyno
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetSource()
 	{
-		cudaMemset(mWeight, 0, simulatedRegionWidth * simulatedRegionHeight * sizeof(float));
+		//cudaMemset(mWeight, 0, simulatedRegionWidth * simulatedRegionHeight * sizeof(float));
+		mWeight.reset();
+		mSource.reset();
 	}
 
 	template<typename TDataType>

@@ -69,7 +69,7 @@ namespace dyno
 	void NodePortConnectionTest<TDataType>::preUpdateStates()
 	{
 		if (this->getParticleSystem() == nullptr) {
-			this->stateVector()->setElementCount(0);
+			this->stateVector()->resize(0);
 
 			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 			auto& pts = ptSet->getPoints();
@@ -81,7 +81,7 @@ namespace dyno
 		auto& poss = this->getParticleSystem()->statePosition()->getData();
 		auto& vels = this->getParticleSystem()->stateVelocity()->getData();
 
-		this->stateVector()->setElementCount(poss.size());
+		this->stateVector()->resize(poss.size());
 
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();

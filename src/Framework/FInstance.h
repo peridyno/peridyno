@@ -105,7 +105,7 @@ namespace dyno {
 			return *dataPtr;
 		}
 
-		uint getElementCount() override { return 1; }
+		uint size() override { return 1; }
 
 	public:
 		std::shared_ptr<Object> objectPointer() final {

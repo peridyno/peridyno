@@ -42,24 +42,6 @@ namespace dyno
 		FBase* m_field = nullptr;
 	};
 
-
-	class QFInstanceWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QFInstanceWidget(FBase* field);
-		~QFInstanceWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(int status);
-
-	private:
-		FBase* m_field = nullptr;
-	};
-
 	class QIntegerFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
@@ -195,7 +177,6 @@ namespace dyno
 
 		void addScalarFieldWidget(FBase* field, QGridLayout* layout,int j);
 		void addArrayFieldWidget(FBase* field);
-		void addInstanceFieldWidget(FBase* field);
 
 		void addStateFieldWidget(FBase* field);
 

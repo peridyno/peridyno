@@ -144,8 +144,6 @@ TEST(TET, collision)
 	EXPECT_EQ(std::abs(manifold.normal[0] - 1.0f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.normal[1]) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.normal[2]) < REAL_EPSILON, true);
-	
-
 
 
 	//box-tet, 5 contact points

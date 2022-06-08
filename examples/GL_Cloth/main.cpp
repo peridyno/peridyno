@@ -23,7 +23,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto cloth = scn->addNode(std::make_shared<Cloth<DataType3f>>());
 	cloth->loadParticles("../../data/cloth/cloth.obj");
-	cloth->loadSurface("../../data/cloth/cloth.obj");
 
 	root->addParticleSystem(cloth);
 

@@ -49,7 +49,6 @@
 ****************************************************************************/
 #include "PMainWindow.h"
 #include "PDockWidget.h"
-#include "PToolBar.h"
 #include "PStatusBar.h"
 #include "POpenGLWidget.h"
 #include "PAnimationWidget.h"
@@ -106,6 +105,7 @@
 #include "ToolBar/ToolBarPage.h"
 #include "Platform.h"
 
+#include "PMainToolBar.h"
 
 // #include "Node/NodeData.hpp"
 // #include "Node/FlowScene.hpp"
@@ -139,11 +139,15 @@ namespace dyno
 		mOpenGLWidget = new POpenGLWidget(engine);
 		setCentralView();
 
-		setupToolBar();
+
 		setupStatusBar();
 //		setupMenuBar();
 		setupAllWidgets();
 
+		setupToolBar();
+
+		
+		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::dynoNodePlaced);
 //		connect(m_scenegraphWidget, &PSceneGraphWidget::notifyNodeDoubleClicked, m_moduleFlowView->getModuleFlowScene(), &QtNodes::QtModuleFlowScene::showNodeFlow);
 
 		statusBar()->showMessage(tr("Status Bar"));
@@ -255,72 +259,47 @@ namespace dyno
 
 	void PMainWindow::setupToolBar()
 	{
-		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
-		addToolBar(Qt::TopToolBarArea, tt);
+		mToolBar = new PMainToolBar(mNodeFlowView, this, 55, 3);
 
-		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
+		addToolBar(Qt::TopToolBarArea, mToolBar);
 
-		auto convertIcon = [&](QString path) -> QIcon
-		{
-			QSvgRenderer svg_render(path);
-			QPixmap pixmap(48, 48);
-			pixmap.fill(Qt::transparent);
-			QPainter painter(&pixmap);
-			svg_render.render(&painter);
-			QIcon ico(pixmap);
-
-			return ico;
-		};
-
-		//Add ToolBar page
-		ToolBarPage m_toolBarPage;
-		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
-
-		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
-			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
-
-			tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
-			auto m_page = MainPage->AddGroup("");
-
-			for (int j = 0; j < m_tbl.ico.size(); j++) {
-				//Add subtabs
-				QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
-				m_page->AddAction(QToolButton::DelayedPopup, art);
-
-				if (i == 2 || i == 5 || i == 3) {//add connect event 
-					connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
-				}
-			}
-			/*
-			//Add file、edit and help ToolBar tab
-			if (m_tbl.tabPageName == "File" || m_tbl.tabPageName == "Edit" || m_tbl.tabPageName == "Help") {
-				//Add main tab
-				tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
-				auto m_page = MainPage->AddGroup("");
-
-				for (int j = 0; j < m_tbl.ico.size(); j++) {
-					//Add subtabs
-					QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
-					m_page->AddAction(QToolButton::DelayedPopup, art);
-				}
-
-			}else{ // Add Particle System、 Height Field、 Finite Element、 Rigid Body ToolBar tab
-				//Add main tab
-				tt::Page* MainPage = tt->AddPage(convertIcon(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
-				auto m_page = MainPage->AddGroup("");
-
-				for (int j = 0; j < m_tbl.ico.size(); j++) {
-					//Add subtabs
-					QAction* art = new QAction(convertIcon(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
-					m_page->AddAction(QToolButton::DelayedPopup, art);
-
-					if (i == 2 || i == 5 || i == 3) {//add connect event 
-						connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
-					}
-				}
-			}
-			*/
-		}
+// 		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
+// 		addToolBar(Qt::TopToolBarArea, tt);
+// 
+// 		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
+// 
+// 		auto convertIcon = [&](QString path) -> QIcon
+// 		{
+// 			QSvgRenderer svg_render(path);
+// 			QPixmap pixmap(48, 48);
+// 			pixmap.fill(Qt::transparent);
+// 			QPainter painter(&pixmap);
+// 			svg_render.render(&painter);
+// 			QIcon ico(pixmap);
+// 
+// 			return ico;
+// 		};
+// 
+// 		//Add ToolBar page
+// 		ToolBarPage m_toolBarPage;
+// 		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
+// 
+// 		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
+// 			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
+// 
+// 			tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
+// 			auto m_page = MainPage->AddGroup("");
+// 
+// 			for (int j = 0; j < m_tbl.ico.size(); j++) {
+// 				//Add subtabs
+// 				QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
+// 				m_page->AddAction(QToolButton::DelayedPopup, art);
+// 
+// 				if (i == 2 || i == 5 || i == 3) {//add connect event 
+// 					connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
+// 				}
+// 			}
+// 		}
 
 	}
 

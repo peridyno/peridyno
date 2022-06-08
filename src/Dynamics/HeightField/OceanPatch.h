@@ -31,6 +31,8 @@ namespace dyno {
         float getMaxChoppiness();
         float getChoppiness();
 
+        void resetWindType();
+
         //返回实际覆盖面积，以m为单位
         float getPatchSize()
         {
@@ -76,10 +78,9 @@ namespace dyno {
 
     protected:
 	    void resetStates() override;
-
 	    void updateStates() override;
 	    void updateTopology() override;
-
+        
     private:
         void  generateH0(Coord* h0);
         float gauss();
@@ -109,6 +110,9 @@ namespace dyno {
         DArray2D<Coord> m_Dzt;  //z方向偏移
 
         cufftHandle fftPlan;
+
+
+        DEF_VAR(int, my_windTypes, 4, "m_windTypesWinds");
     };
     IMPLEMENT_TCLASS(OceanPatch, TDataType)
 } 

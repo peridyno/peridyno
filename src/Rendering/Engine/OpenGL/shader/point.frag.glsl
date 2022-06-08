@@ -54,6 +54,16 @@ void main(void)
 	renderPass();
 }
 
+vec3 GetViewDir()
+{
+	// orthogonal projection
+	if (transform.proj[3][3] == 1.0)
+		return vec3(0, 0, 1);
+
+	// perspective projection
+	return normalize(-fPosition);
+}
+
 vec3 reinhard_tonemap(vec3 v)
 {
 	return v / (1.0f + v);
@@ -173,7 +183,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 vec3 pbr()
 {
 	vec3 N = normalize(fNormal);
-	vec3 V = normalize(-fPosition);
+	vec3 V = GetViewDir();
 
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;

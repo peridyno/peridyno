@@ -40,7 +40,11 @@ namespace dyno
 		{
 			auto cNode = processNode(childNodeXML);
 			if (cNode)
-				node->addAncestor(cNode.get());
+			{
+				//Xiowei He
+				//node->addAncestor(cNode.get());
+			}
+				
 
 			std::cout << childNodeXML->Name() << std::endl;
 			childNodeXML = childNodeXML->NextSiblingElement("Node");

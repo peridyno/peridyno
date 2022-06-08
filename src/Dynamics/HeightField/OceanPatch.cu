@@ -186,14 +186,7 @@ namespace dyno {
         mSpectrumWidth = size + 1;
         mSpectrumHeight = size + 4;
 
-        m_windType      = windType;
         m_realPatchSize = patchSize;
-        m_windSpeed     = m_params[m_windType].windSpeed;
-        A               = m_params[m_windType].A;
-        m_maxChoppiness = m_params[m_windType].choppiness;
-        mChoppiness    = m_params[m_windType].choppiness;
-        m_globalShift   = m_params[m_windType].global;
-
     }
 
     template<typename TDataType>
@@ -226,8 +219,20 @@ namespace dyno {
     }
 
     template<typename TDataType>
+    void OceanPatch<TDataType>::resetWindType()
+    {
+        m_windSpeed = m_params[var_my_windTypes.getValue()].windSpeed;
+        A = m_params[var_my_windTypes.getValue()].A;
+        m_maxChoppiness = m_params[var_my_windTypes.getValue()].choppiness;
+        mChoppiness = m_params[var_my_windTypes.getValue()].choppiness;
+        m_globalShift = m_params[var_my_windTypes.getValue()].global;
+    }
+
+    template<typename TDataType>
     void OceanPatch<TDataType>::resetStates()
     {
+        resetWindType();
+
         cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
 
         int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);

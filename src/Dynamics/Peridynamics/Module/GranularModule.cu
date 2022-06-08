@@ -54,7 +54,7 @@ namespace dyno
 	template<typename TDataType>
 	void GranularModule<TDataType>::computeMaterialStiffness()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		m_densitySum->compute();

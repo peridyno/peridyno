@@ -19,7 +19,7 @@ namespace dyno
 	{
 		if (!this->inPosition()->isEmpty())
 		{
-			int num = this->inPosition()->getElementCount();
+			int num = this->inPosition()->size();
 			
 			m_prePosition.resize(num);
 			m_preVelocity.resize(num);
@@ -78,7 +78,7 @@ namespace dyno
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 		Coord gravity = scn->getGravity();
 
-		int total_num = this->inPosition()->getElementCount();
+		int total_num = this->inPosition()->size();
 
 		if (this->inAttribute()->isEmpty())
 		{
