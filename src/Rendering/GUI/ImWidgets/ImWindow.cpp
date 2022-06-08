@@ -119,6 +119,12 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 			cam->setEyePos(Vec3f(targetPos.x, targetPos.y, -Distance));
 		}
 
+
+		ImGui::Separator();
+		float distanceUnit = cam->distanceUnit();
+		if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
+			cam->setDistanceUnit(distanceUnit);
+		
 		ImGui::EndMenu();
 	}
 
