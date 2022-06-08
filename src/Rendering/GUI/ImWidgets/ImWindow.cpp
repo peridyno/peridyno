@@ -49,7 +49,7 @@ void dyno::ImWindow::initialize(float scale)
 	ImGui::initColorVal();
 }
 
-void ShowMenuFile(RenderEngine* engine)
+void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 {
 	if (ImGui::BeginMenu("Camera")) {
 		auto cam = engine->camera();
@@ -91,59 +91,43 @@ void ShowMenuFile(RenderEngine* engine)
 		ImGui::Separator();
 		Vec3f targetPos = cam->getTargetPos();
 		Vec3f eyePos = cam->getEyePos();
+		float Distance = (targetPos - eyePos).norm();
+
 		if (ImGui::MenuItem("Top", "")) {
-			float Distance = fabsf(targetPos.y - eyePos.y);
-			Distance = Distance > 5 ? Distance : 5;
 			cam->setEyePos(Vec3f(targetPos.x, Distance, targetPos.z));
 			
 		}
 		
 		if (ImGui::MenuItem("Bottom", "")) {
-			float Distance = fabsf(targetPos.y - eyePos.y);
-			Distance = Distance < -5 ? Distance :  - 5;
-			cam->setEyePos(Vec3f(targetPos.x, Distance, targetPos.z));
-
+			cam->setEyePos(Vec3f(targetPos.x, -Distance, targetPos.z));
 		}
 
 		ImGui::Separator();
 		if (ImGui::MenuItem("Left", "")) {
-			std::cout << "targetPos" << targetPos.x << " "  << targetPos.y << " " << targetPos.z << std::endl;
-			std::cout << "eyePos" << eyePos.x << " " << eyePos.y << " " << eyePos.z << std::endl;
-
-			float Distance = fabsf(targetPos.x - eyePos.x);
-			Distance = Distance < -5 ? Distance : -5; 
-			cam->setTargetPos(Vec3f(0, 0, 0));
-			cam->setEyePos(Vec3f(1, 1,0));
-			std::cout << "update eyePos" << Distance << " " << targetPos.y << " " << targetPos.z << std::endl;
+			cam->setEyePos(Vec3f(-Distance, targetPos.y, targetPos.z));
 		}
 		if (ImGui::MenuItem("Right", "")) {
-			float Distance = fabsf(targetPos.x - eyePos.x);
-			Distance = Distance > 1? Distance : 1;
 			cam->setEyePos(Vec3f(Distance, targetPos.y, targetPos.z));
 		}
 
 		ImGui::Separator();
 		if (ImGui::MenuItem("Front", "")) {
-			float Distance = fabsf(targetPos.z - eyePos.z);
-			Distance = Distance > 1 ? Distance : 1;
-			cam->setEyePos(Vec3f(0, 0, Distance));
+			cam->setEyePos(Vec3f(targetPos.x, targetPos.y, Distance));
 		}
 
 		if (ImGui::MenuItem("Back", "")) {
-			float Distance = fabsf(targetPos.z - eyePos.z);
-			Distance = Distance < -1 ? Distance : -1;
-			cam->setEyePos(Vec3f(0, 0, Distance));
+			cam->setEyePos(Vec3f(targetPos.x, targetPos.y, -Distance));
 		}
 
 		ImGui::EndMenu();
 	}
 
 	if (ImGui::BeginMenu("Lighting", "")) {
-		
+
 		RenderParams* rparams = engine->renderParams();
 		float iBgGray[2] = { rparams->bgColor0[0], rparams->bgColor1[0] };
 		RenderParams::Light iLight = rparams->light;
-		
+
 		ImGui::DragFloat2("BG color", iBgGray, 0.01f, 0.0f, 1.0f, "%.2f", 0);
 		rparams->bgColor0 = glm::vec3(iBgGray[0]);
 		rparams->bgColor1 = glm::vec3(iBgGray[1]);
@@ -162,7 +146,7 @@ void ShowMenuFile(RenderEngine* engine)
 		ImGui::endTitle();
 		ImGui::SameLine();
 		ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
-	
+
 		// Light Direction
 		ImGui::Text("Light Dir");
 
@@ -190,16 +174,33 @@ void ShowMenuFile(RenderEngine* engine)
 		iLight.mainLightDirection = glm::vec3(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
 
 		rparams->light = iLight;
-		ImGui::EndMenu();
+
 	}
-	
+	if (ImGui::BeginMenu("Auxiliary", "")) {
+			RenderParams* rparams = engine->renderParams();
+			
+			ImGui::Checkbox("Lock", mDisenableCamera);
+			ImGui::Spacing();
+			
+			ImGui::Checkbox("Ground", &(rparams->showGround));
+			ImGui::Spacing();
+
+			ImGui::Checkbox("Bounds", &(rparams->showSceneBounds));
+			ImGui::Spacing();
+
+			ImGui::Checkbox("AxisHelper", &(rparams->showAxisHelper));
+			ImGui::Spacing();
+
+		ImGui::EndMenu();	
+	}
+
 }
 
-void ShowExampleAppMainMenuBar(RenderEngine* engine)
+void ShowExampleAppMainMenuBar(RenderEngine* engine, bool* mDisenableCamera)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
-		ShowMenuFile(engine);
+		ShowMenuFile(engine, mDisenableCamera);
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -217,7 +218,7 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
 
-		ShowExampleAppMainMenuBar(engine);
+		ShowExampleAppMainMenuBar(engine, &mDisenableCamera);
 		// Bottom Right widget
 		{
 			std::string rEngineName = engine->name();
@@ -229,9 +230,9 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 
 		//----------------------------------------------------------------------------------------------------------------
 		IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
-
+		/*
 		ImGui::Spacing();
-
+		
 		if (ImGui::CollapsingHeader("Style"))
 		{
 			ImGuiIO& io = ImGui::GetIO();
@@ -243,19 +244,9 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 				ImGui::Separator();
 			}
 		}
-		if (ImGui::CollapsingHeader("Auxiliary"))
-		{
-			if (ImGui::BeginTable("split", 3))
-			{
-				ImGui::TableNextColumn(); ImGui::Checkbox("Lock", &mDisenableCamera);
-				ImGui::TableNextColumn(); ImGui::Checkbox("Ground", &(rparams->showGround));
-				ImGui::TableNextColumn(); ImGui::Checkbox("Bounds", &(rparams->showSceneBounds));
-				ImGui::TableNextColumn(); ImGui::Checkbox("AxisHelper", &(rparams->showAxisHelper));
-				ImGui::EndTable();
-			}
-		}
+		*/
 	}
-
+	
 	// Draw custom widgets
 	// gather visual modules
 	WidgetQueue imWidgetQueue;
