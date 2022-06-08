@@ -18,7 +18,7 @@ namespace dyno
 		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
 		this->animationPipeline()->pushModule(pbf);
 
-		this->varTimeStep()->connect(pbf->inTimeStep());
+		this->stateTimeStep()->connect(pbf->inTimeStep());
 		this->statePosition()->connect(pbf->inPosition());
 		this->stateVelocity()->connect(pbf->inVelocity());
 		this->stateForce()->connect(pbf->inForce());
@@ -35,7 +35,7 @@ namespace dyno
 	{
 		auto emitters = this->getParticleEmitters();
 
-		int curNum = this->statePosition()->getElementCount();
+		int curNum = this->statePosition()->size();
 		int totalNum = curNum;
 		if (emitters.size() > 0)
 		{
@@ -57,11 +57,11 @@ namespace dyno
 					fBuf.assign(this->stateForce()->getData());
 				}
 
-				this->statePosition()->setElementCount(totalNum);
-				this->stateVelocity()->setElementCount(totalNum);
-				this->stateForce()->setElementCount(totalNum);
+				this->statePosition()->resize(totalNum);
+				this->stateVelocity()->resize(totalNum);
+				this->stateForce()->resize(totalNum);
 
-				//printf("###### %d\n", this->currentPosition()->getElementCount());
+				//printf("###### %d\n", this->currentPosition()->size());
 
 				DArray<Coord>& new_pos = this->statePosition()->getData();
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();

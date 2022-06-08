@@ -687,7 +687,7 @@ namespace dyno
 // 	template<typename TDataType>
 // 	bool VelocityConstraint<TDataType>::initializeImpl()
 // 	{
-// 		int num = this->inPosition()->getElementCount();
+// 		int num = this->inPosition()->size();
 // 
 // 		m_alpha.resize(num);
 // 		m_Aii.resize(num);
@@ -754,7 +754,7 @@ namespace dyno
 	template<typename TDataType>
 	void VariationalApproximateProjection<TDataType>::constrain()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 
 		if (num != mAlpha.size())
 		{
@@ -819,7 +819,7 @@ namespace dyno
 
 		Real dt = this->inTimeStep()->getData();
 
-		uint pDims = cudaGridSize(this->inPosition()->getElementCount(), BLOCK_SIZE);
+		uint pDims = cudaGridSize(this->inPosition()->size(), BLOCK_SIZE);
 
 		//compute alpha_i = sigma w_j and A_i = sigma w_ij / r_ij / r_ij
 		mAlpha.reset();

@@ -44,7 +44,7 @@ public:
 	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, OBase* parent = nullptr);
 	virtual ~FBase();
 
-	virtual uint getElementCount() = 0;
+	virtual uint size() = 0;
 	virtual const std::string getTemplateName() { return std::string(""); }
 	virtual const std::string getClassName() { return std::string("Field"); }
 

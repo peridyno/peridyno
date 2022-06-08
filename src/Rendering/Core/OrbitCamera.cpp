@@ -30,7 +30,7 @@ namespace dyno
 
 	void OrbitCamera::setEyePos(const Vec3f& p)
 	{
-		Quat1f q(mRotAngle, mRotAxis);
+		Quat1f q(0.0f, mRotAxis);
 		q.w = -q.w;
 
 		//Camera coordinate system
@@ -58,7 +58,7 @@ namespace dyno
 
 	void OrbitCamera::setTargetPos(const Vec3f& p)
 	{
-		Quat1f q(mRotAngle, mRotAxis);
+		Quat1f q(0.0f, mRotAxis);
 		q.w = -q.w;
 
 		//Camera coordinate system

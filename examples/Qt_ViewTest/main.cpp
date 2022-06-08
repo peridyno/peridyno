@@ -57,8 +57,8 @@ public:
 
 		if (pts.size() > 0)
 		{
-			this->statePosition()->setElementCount(pts.size());
-			this->statePosition()->getData().assign(pts);
+			this->statePosition()->resize(pts.size());
+			this->statePosition()->assign(pts);
 		}
 
 		auto integrator = std::make_shared<ParticleIntegrator<DataType3f>>();
@@ -137,6 +137,9 @@ int main(int, char**)
 	box.center = 0.5f * Vec3f(0, 0.4, 0);
 	box.halfLength = Vec3f(1.0, 1.0, 1.0);
 	rigid->addBox(box, rigidBody);
+
+	scn->setLowerBound(box.center - box.halfLength);
+	scn->setUpperBound(box.center + box.halfLength);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());

@@ -43,11 +43,21 @@ namespace dyno
 			return;
 
 		mModuleUpdated = true;
-		mModuleMap[id] = m.get();
+		mModuleMap[id] = m;
 		
 		mNode->addModule(m);
 	}
 	
+	void Pipeline::popModule(std::shared_ptr<Module> m)
+	{
+		ObjectId id = m->objectId();
+
+		mModuleMap.erase(id);
+		mNode->deleteModule(m);
+
+		mModuleUpdated = true;
+	}
+
 	void Pipeline::clear()
 	{
 // 		for (auto const &pair : mModuleMap)
@@ -65,7 +75,7 @@ namespace dyno
 	void Pipeline::pushPersistentModule(std::shared_ptr<Module> m)
 	{
 		mNode->addModule(m);
-		mPersistentModule.push_back(m.get());
+		mPersistentModule.push_back(m);
 
 		mModuleUpdated = true;
 	}
@@ -95,7 +105,6 @@ namespace dyno
 		if (mModuleUpdated)
 		{
 			reconstructPipeline();
-			mModuleUpdated = false;
 		}
 	}
 
@@ -142,6 +151,13 @@ namespace dyno
 		std::queue<Module*> moduleQueue;
 		std::set<ObjectId> moduleSet;
 
+// 		std::map<ObjectId, bool> visited;
+// 
+// 		visited[baseId] = false;
+// 		for (auto& mItor : mModuleMap) {
+// 			visited[mItor.first] = false;
+// 		}
+
 		DirectedAcyclicGraph graph;
 
 		auto retrieveModules = [&](ObjectId id, std::vector<FBase *>& fields) {
@@ -168,19 +184,55 @@ namespace dyno
 		auto& fields = mNode->getAllFields();
 		retrieveModules(baseId, fields);
 
-		for each (auto m in mPersistentModule)
+// 		for each (auto m in mPersistentModule)
+// 		{
+// 			moduleQueue.push(m.get());
+// 		}
+
+		auto flushQueue = [&]()
 		{
-			moduleQueue.push(m);
-		}
+			while (!moduleQueue.empty())
+			{
+				Module* m = moduleQueue.front();
 
-		while (!moduleQueue.empty())
-		{
-			Module* m = moduleQueue.front();
+				auto& outFields = m->getOutputFields();
+				retrieveModules(m->objectId(), outFields);
 
-			auto& outFields = m->getOutputFields();
-			retrieveModules(m->objectId(), outFields);
+				moduleQueue.pop();
+			}
+		};
 
-			moduleQueue.pop();
+		flushQueue();
+
+// 		while (!moduleQueue.empty())
+// 		{
+// 			Module* m = moduleQueue.front();
+// 
+// 			auto& outFields = m->getOutputFields();
+// 			retrieveModules(m->objectId(), outFields);
+// 
+// 			moduleQueue.pop();
+// 		}
+
+// 		while (!moduleQueue.empty())
+// 		{
+// 			Module* m = moduleQueue.front();
+// 
+// 			auto& outFields = m->getOutputFields();
+// 			retrieveModules(m->objectId(), outFields);
+// 
+// 			moduleQueue.pop();
+// 		}
+
+		for (auto m : mModuleMap) {
+			ObjectId oId = m.second->objectId();
+			if (moduleSet.find(oId) == moduleSet.end())
+			{
+				moduleSet.insert(oId);
+				moduleQueue.push(m.second.get());
+
+				flushQueue();
+			}
 		}
 
 		auto& ids = graph.topologicalSort();
@@ -194,5 +246,7 @@ namespace dyno
 		}
 
 		moduleSet.clear();
+
+		mModuleUpdated = false;
 	}
 }

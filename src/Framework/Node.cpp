@@ -21,14 +21,14 @@ Node::~Node()
 {
 	m_module_list.clear();
 
-	for (auto port : mImportNodes)
-	{
-		auto& nodes = port->getNodes();
-		for (auto node : nodes)
-		{
-			node->disconnect(port);
-		}
-	}
+// 	for (auto port : mImportNodes)
+// 	{
+// 		auto& nodes = port->getNodes();
+// 		for (auto node : nodes)
+// 		{
+// 			node->disconnect(port);
+// 		}
+// 	}
 
 	for (auto port : mExportNodes)
 	{
@@ -104,28 +104,28 @@ SceneGraph* Node::getSceneGraph()
 	return mSceneGraph;
 }
 
-Node* Node::addAncestor(Node* anc)
-{
-	if (hasAncestor(anc) || anc == nullptr)
-		return nullptr;
-
-	anc->addDescendant(this);
-
-	mAncestors.push_back(anc);
-
-	if (mSceneGraph) {
-		mSceneGraph->markQueueUpdateRequired();
-	}
-
-	return anc;
-}
-
-bool Node::hasAncestor(Node* anc)
-{
-	auto it = find(mAncestors.begin(), mAncestors.end(), anc);
-
-	return it == mAncestors.end() ? false : true;
-}
+// Node* Node::addAncestor(Node* anc)
+// {
+// 	if (hasAncestor(anc) || anc == nullptr)
+// 		return nullptr;
+// 
+// 	anc->addDescendant(this);
+// 
+// 	mAncestors.push_back(anc);
+// 
+// 	if (mSceneGraph) {
+// 		mSceneGraph->markQueueUpdateRequired();
+// 	}
+// 
+// 	return anc;
+// }
+// 
+// bool Node::hasAncestor(Node* anc)
+// {
+// 	auto it = find(mAncestors.begin(), mAncestors.end(), anc);
+// 
+// 	return it == mAncestors.end() ? false : true;
+// }
 
 void Node::preUpdateStates()
 {
@@ -311,33 +311,33 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 	return ret;
 }
 
-void Node::doTraverseBottomUp(Action* act)
-{
-	act->start(this);
-	auto iter = mAncestors.begin();
-	for (; iter != mAncestors.end(); iter++)
-	{
-		(*iter)->doTraverseBottomUp(act);
-	}
-
-	act->process(this);
-
-	act->end(this);
-}
-
-void Node::doTraverseTopDown(Action* act)
-{
-	act->start(this);
-	act->process(this);
-
-	auto iter = mAncestors.begin();
-	for (; iter != mAncestors.end(); iter++)
-	{
-		(*iter)->doTraverseTopDown(act);
-	}
-
-	act->end(this);
-}
+// void Node::doTraverseBottomUp(Action* act)
+// {
+// 	act->start(this);
+// 	auto iter = mAncestors.begin();
+// 	for (; iter != mAncestors.end(); iter++)
+// 	{
+// 		(*iter)->doTraverseBottomUp(act);
+// 	}
+// 
+// 	act->process(this);
+// 
+// 	act->end(this);
+// }
+// 
+// void Node::doTraverseTopDown(Action* act)
+// {
+// 	act->start(this);
+// 	act->process(this);
+// 
+// 	auto iter = mAncestors.begin();
+// 	for (; iter != mAncestors.end(); iter++)
+// 	{
+// 		(*iter)->doTraverseTopDown(act);
+// 	}
+// 
+// 	act->end(this);
+// }
 
 bool Node::appendExportNode(NodePort* nodePort)
 {
@@ -368,15 +368,15 @@ void Node::updateTopology()
 
 }
 
-void Node::traverseBottomUp(Action* act)
-{
-	doTraverseBottomUp(act);
-}
-
-void Node::traverseTopDown(Action* act)
-{
-	doTraverseTopDown(act);
-}
+// void Node::traverseBottomUp(Action* act)
+// {
+// 	doTraverseBottomUp(act);
+// }
+// 
+// void Node::traverseTopDown(Action* act)
+// {
+// 	doTraverseTopDown(act);
+// }
 
 bool Node::connect(NodePort* nPort)
 {
@@ -428,36 +428,47 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 	return ret;
 }
 
-Node* Node::addDescendant(Node* descent)
+uint Node::sizeOfImportNodes() const
 {
-	if (hasDescendant(descent) || descent == nullptr)
-		return descent;
-
-	mDescendants.push_back(descent);
-	return descent;
-}
-
-bool Node::hasDescendant(Node* descent)
-{
-	auto it = std::find(mDescendants.begin(), mDescendants.end(), descent);
-	return it == mDescendants.end() ? false : true;
-}
-
-void Node::removeDescendant(Node* descent)
-{
-	auto iter = mDescendants.begin();
-	for (; iter != mDescendants.end(); )
+	uint n = 0;
+	for each(auto port in mImportNodes)
 	{
-		if (*iter == descent)
-		{
-			mDescendants.erase(iter++);
-		}
-		else
-		{
-			++iter;
-		}
+		n += port->getNodes().size();
 	}
+
+	return n;
 }
+
+// Node* Node::addDescendant(Node* descent)
+// {
+// 	if (hasDescendant(descent) || descent == nullptr)
+// 		return descent;
+// 
+// 	mDescendants.push_back(descent);
+// 	return descent;
+// }
+// 
+// bool Node::hasDescendant(Node* descent)
+// {
+// 	auto it = std::find(mDescendants.begin(), mDescendants.end(), descent);
+// 	return it == mDescendants.end() ? false : true;
+// }
+// 
+// void Node::removeDescendant(Node* descent)
+// {
+// 	auto iter = mDescendants.begin();
+// 	for (; iter != mDescendants.end(); )
+// 	{
+// 		if (*iter == descent)
+// 		{
+// 			mDescendants.erase(iter++);
+// 		}
+// 		else
+// 		{
+// 			++iter;
+// 		}
+// 	}
+// }
 
 bool Node::addNodePort(NodePort* port)
 {

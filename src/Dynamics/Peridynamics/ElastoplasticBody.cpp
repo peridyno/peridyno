@@ -27,7 +27,7 @@ namespace dyno
 		m_horizon.setValue(0.0085);
 
 		m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
-		this->varTimeStep()->connect(m_integrator->inTimeStep());
+		this->stateTimeStep()->connect(m_integrator->inTimeStep());
 		this->statePosition()->connect(m_integrator->inPosition());
 		this->stateVelocity()->connect(m_integrator->inVelocity());
 		this->stateForce()->connect(m_integrator->inForceDensity());
@@ -40,7 +40,7 @@ namespace dyno
 
 		m_plasticity = std::make_shared<ElastoplasticityModule<TDataType>>();
 		m_horizon.connect(m_plasticity->inHorizon());
-		this->varTimeStep()->connect(m_plasticity->inTimeStep());
+		this->stateTimeStep()->connect(m_plasticity->inTimeStep());
 		this->statePosition()->connect(m_plasticity->inPosition());
 		this->stateVelocity()->connect(m_plasticity->inVelocity());
 		this->stateRestShape()->connect(m_plasticity->inRestShape());
@@ -49,7 +49,7 @@ namespace dyno
 
 		m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
 		m_visModule->varViscosity()->setValue(Real(1));
-		this->varTimeStep()->connect(m_visModule->inTimeStep());
+		this->stateTimeStep()->connect(m_visModule->inTimeStep());
 		m_horizon.connect(m_visModule->inSmoothingLength());
 		this->statePosition()->connect(m_visModule->inPosition());
 		this->stateVelocity()->connect(m_visModule->inVelocity());

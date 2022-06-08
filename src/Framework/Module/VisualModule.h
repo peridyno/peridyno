@@ -40,8 +40,6 @@ namespace dyno
 	protected:
 		void updateImpl() final;
 
-		virtual void display() {};
-
 	private:
 		FVar<bool> m_visible;
 

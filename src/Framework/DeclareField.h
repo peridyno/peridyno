@@ -36,6 +36,12 @@ private:									\
 public:									\
 	inline FVar<T>* out##name() {return &out_##name;}
 
+#define DEF_VAR_STATE(T, name, value, desc) \
+private:									\
+	FVar<T> state_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::State, this);			\
+public:										\
+	inline FVar<T>* state##name() {return &state_##name;}
+
 /**
 *	Macro definition for input/output of type instance
 */

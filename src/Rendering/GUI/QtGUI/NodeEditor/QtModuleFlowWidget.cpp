@@ -19,7 +19,6 @@ namespace Qt
 		auto saveAction = menuBar->addAction("Save..");
 		auto loadAction = menuBar->addAction("Load..");
 		auto clearAction = menuBar->addAction("Clear..");
-		auto pushAction = menuBar->addAction("PushModule..");
 
 		QVBoxLayout *l = new QVBoxLayout(this);
 
@@ -37,9 +36,6 @@ namespace Qt
 
 		QObject::connect(clearAction, &QAction::triggered,
 			mModuleFlow, &QtModuleFlowScene::clearScene);
-
-		QObject::connect(pushAction, &QAction::triggered,
-			mModuleFlow, &QtModuleFlowScene::pushModule);
 	}
 
 	QtModuleFlowWidget::~QtModuleFlowWidget()

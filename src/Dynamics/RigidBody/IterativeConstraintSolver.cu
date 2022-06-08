@@ -170,7 +170,7 @@ namespace dyno
 				mContactNumber);
 		}
 
-		uint num = this->inCenter()->getElementCount();
+		uint num = this->inCenter()->size();
 		cuExecute(num,
 			RB_UpdateVelocity,
 			this->inVelocity()->getData(),
@@ -441,9 +441,9 @@ namespace dyno
 		mEta.resize(sizeOfConstraints);
 		mLambda.resize(sizeOfConstraints);
 
-		mAccel.resize(this->inCenter()->getElementCount() * 2);
+		mAccel.resize(this->inCenter()->size() * 2);
 
-		auto sizeOfRigids = this->inCenter()->getElementCount();
+		auto sizeOfRigids = this->inCenter()->size();
 		mContactNumber.resize(sizeOfRigids);
 
 		mJ.reset();

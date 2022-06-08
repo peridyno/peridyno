@@ -52,12 +52,12 @@ namespace Qt
 	
 		this->setRegistry(ret);
 
-		showSceneGraph();
+		createNodeGraphView();
 		reorderAllNodes();
 
-		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveModulePosition);
-		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNodeToSceneGraph);
-		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNodeToSceneGraph);
+		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
+		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
+		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
@@ -65,7 +65,7 @@ namespace Qt
 		clearScene();
 	}
 
-	void QtNodeFlowScene::showSceneGraph()
+	void QtNodeFlowScene::createNodeGraphView()
 	{
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 
@@ -197,13 +197,13 @@ namespace Qt
 		nodeMap.clear();
 	}
 
-	void QtNodeFlowScene::updateSceneGraph()
+	void QtNodeFlowScene::updateNodeGraphView()
 	{
 		disableEditing();
 
 		clearScene();
 
-		showSceneGraph();
+		createNodeGraphView();
 
 		enableEditing();
 	}
@@ -216,12 +216,12 @@ namespace Qt
 
 		auto f = status == Qt::Checked ? field->promoteOuput() : field->demoteOuput();
 
-		showSceneGraph();
+		createNodeGraphView();
 
 		enableEditing();
 	}
 
-	void QtNodeFlowScene::moveModulePosition(QtNode& n, const QPointF& newLocation)
+	void QtNodeFlowScene::moveNode(QtNode& n, const QPointF& newLocation)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
@@ -231,7 +231,7 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::addNodeToSceneGraph(QtNode& n)
+	void QtNodeFlowScene::addNode(QtNode& n)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
@@ -315,7 +315,7 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::deleteNodeToSceneGraph(QtNode& n)
+	void QtNodeFlowScene::deleteNode(QtNode& n)
 	{
 		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 
@@ -323,6 +323,36 @@ namespace Qt
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->deleteNode(nodeData->getNode());
 		}
+	}
+
+	void QtNodeFlowScene::dynoNodePlaced(std::shared_ptr<dyno::Node> node)
+	{
+		if (node == nullptr)
+			return;
+
+		auto qNodeWdiget = std::make_unique<QtNodeWidget>(node);
+		auto& qNode = createNode(std::move(qNodeWdiget));
+
+		//Calculate the position for the newly create node to avoid overlapping
+		auto& _nodes = this->nodes();
+		float y = -10000.0f;
+		for (auto const& _node : _nodes)
+		{
+			NodeGeometry& geo = _node.second->nodeGeometry();
+			QtNodeGraphicsObject& obj = _node.second->nodeGraphicsObject();
+
+			float h = geo.height();
+
+			QPointF pos = obj.pos();
+
+			y = std::max(y, float(pos.y() + h));
+		}
+
+		QPointF posView(0.0f, y + 50.0f);
+
+		qNode.nodeGraphicsObject().setPos(posView);
+
+		emit nodePlaced(qNode);
 	}
 
 	void QtNodeFlowScene::reorderAllNodes()
@@ -449,6 +479,6 @@ namespace Qt
 		qtNodeMapper.clear();
 		nodeMapper.clear();
 
-		updateSceneGraph();
+		updateNodeGraphView();
 	}
 }

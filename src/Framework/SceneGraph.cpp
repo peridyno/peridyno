@@ -93,8 +93,8 @@ namespace dyno
 				if (node == NULL)
 					return;
 
-				node->varTimeStep()->setValue(mDt);
-				node->varElapsedTime()->setValue(mElapsedTime);
+				node->stateTimeStep()->setValue(mDt);
+				node->stateElapsedTime()->setValue(mElapsedTime);
 			}
 
 			void process(Node* node) override {
@@ -301,7 +301,7 @@ namespace dyno
 
 				for (auto iter : node->animationPipeline()->activeModules())
 				{
-					auto m = dynamic_cast<InputMouseModule*>(iter);
+					auto m = dynamic_cast<InputMouseModule*>(iter.get());
 					if (m)
 					{
 						m->enqueueEvent(mMouseEvent);

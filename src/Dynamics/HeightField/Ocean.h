@@ -34,7 +34,7 @@ namespace dyno
 		float getGridLength();
 
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
-		DEF_NODE_PORTS(CapillaryWave, CapillaryWave<TDataType>, "Capillary Wave");
+		DEF_NODE_PORTS(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
 
 	protected:
 		void resetStates() override;

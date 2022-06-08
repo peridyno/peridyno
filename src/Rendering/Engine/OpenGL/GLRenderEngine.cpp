@@ -30,7 +30,7 @@ namespace dyno
 		void draw(GLVisualModule::RenderPass pass)
 		{
 			for (GLVisualModule* m : modules)
-				m->paintGL(pass);
+				m->draw(pass);
 		}
 
 	private:
@@ -41,7 +41,7 @@ namespace dyno
 
 			for (auto iter : node->graphicsPipeline()->activeModules())
 			{
-				auto m = dynamic_cast<GLVisualModule*>(iter);
+				auto m = dynamic_cast<GLVisualModule*>(iter.get());
 				if (m && m->isVisible())
 				{
 					//m->update();
@@ -135,17 +135,10 @@ namespace dyno
 			scene->traverseForward(&renderQueue);
 		}
 
-
 		// update shadow map
 		{
 			mShadowMap->beginUpdate(scene, m_rparams);
 			renderQueue.draw(GLVisualModule::SHADOW);
-
-			if (m_rparams.showGround)
-			{
-				mRenderHelper->drawGround(m_rparams.groudScale, GLVisualModule::SHADOW);
-			}
-
 			mShadowMap->endUpdate();
 		}
 
@@ -190,7 +183,7 @@ namespace dyno
 		// draw a plane
 		if (m_rparams.showGround)
 		{
-			mRenderHelper->drawGround(m_rparams.groudScale);
+			mRenderHelper->drawGround(m_rparams.planeScale* mCamera->distanceUnit(), m_rparams.rulerScale* mCamera->distanceUnit());
 		}
 
 		// draw scene bounding box

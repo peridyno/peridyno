@@ -17,7 +17,6 @@
 #pragma once
 
 #include "Vector.h"
-#include "GLVisualModule.h"
 
 namespace dyno
 {
@@ -25,7 +24,6 @@ namespace dyno
 	class BBoxRenderer;
 	class GroundRenderer;
 	class BackgroundRenderer;
-
 	class GLRenderHelper
 	{
 	public:
@@ -34,7 +32,7 @@ namespace dyno
 
 		void initialize();
 
-		void drawGround(float scale = 3.f, GLVisualModule::RenderPass pass = GLVisualModule::COLOR);
+		void drawGround(float planeScale, float rulerScale = 1.f);
 		void drawAxis(float lineWidth = 2.f);
 		void drawBBox(Vec3f pmin, Vec3f pmax, int type = 0);
 		void drawBackground(Vec3f color0, Vec3f color1);

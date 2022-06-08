@@ -49,35 +49,24 @@ namespace dyno
 		}
 
 
-		void draw(float scale, GLVisualModule::RenderPass mode)
-		{			
+		void draw(float planeScale, float rulerScale)
+		{
+			glEnable(GL_BLEND);
+			glEnable(GL_CULL_FACE);
+
+			mRulerTex.bind(GL_TEXTURE1);
+			
 			mProgram.use();
-			mProgram.setFloat("uScale", scale);
+			mProgram.setFloat("uPlaneScale", planeScale);
+			mProgram.setFloat("uRulerScale", rulerScale);
 
-			unsigned int subroutine;
-			if (mode == GLVisualModule::COLOR)
-			{
-				subroutine = 0;
-				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+			mPlane.draw();
+			
+			glDisable(GL_CULL_FACE);
+			glDisable(GL_BLEND);
 
-				glEnable(GL_BLEND);
-				glEnable(GL_CULL_FACE);
-				mRulerTex.bind(GL_TEXTURE1);
-
-				mPlane.draw();
-
-				glDisable(GL_CULL_FACE);
-				glDisable(GL_BLEND);
-				
-				// clear depth to get avoid object cross ground
-				glClear(GL_DEPTH_BUFFER_BIT);
-			}
-			else if (mode == GLVisualModule::SHADOW)
-			{
-				subroutine = 1;
-				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-				mPlane.draw();
-			}			
+			// clear depth to get avoid object cross ground
+			glClear(GL_DEPTH_BUFFER_BIT);
 
 			gl::glCheckError();
 		}
@@ -119,14 +108,11 @@ namespace dyno
 			mProgram.use();
 			mAxisVAO.bind();
 
-			//! Since it is deprecated since OpenGL 4.2, we do not allow user set line width now...
-			//glLineWidth(lineWidth);
 			glDisable(GL_DEPTH_TEST);
 			glDrawArrays(GL_LINES, 0, 6);
 			glEnable(GL_DEPTH_TEST);
 
 			mAxisVAO.unbind();
-			gl::glCheckError();
 		}
 
 	private:
@@ -253,10 +239,10 @@ namespace dyno
 		mBackgroundRenderer = new BackgroundRenderer();
 	}
 
-	void GLRenderHelper::drawGround(float scale, GLVisualModule::RenderPass pass)
+	void GLRenderHelper::drawGround(float planeScale, float rulerScale)
 	{
 		if (mGroundRenderer != NULL)
-			mGroundRenderer->draw(scale, pass);
+			mGroundRenderer->draw(planeScale, rulerScale);
 	}
 
 	void GLRenderHelper::drawAxis(float lineWidth)

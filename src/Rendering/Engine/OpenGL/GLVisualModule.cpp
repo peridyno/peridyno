@@ -51,6 +51,16 @@ namespace dyno
 	{
 		return mAlpha < 1.f;
 	}
+
+	void GLVisualModule::draw(RenderPass pass)
+	{
+		if (!this->validateInputs()) {
+			return;
+		}
+
+		this->paintGL(pass);
+	}
+
 }
 
 

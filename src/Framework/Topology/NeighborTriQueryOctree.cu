@@ -31,13 +31,13 @@ namespace dyno
 		if (!this->inPosition()->isEmpty() && !this->inTriPosition()->isEmpty() && !this->inTriangles()->isEmpty())
 		{
 
-			int p_num = this->inPosition()->getElementCount();
+			int p_num = this->inPosition()->size();
 			if (m_queryAABB.size() != p_num)
 			{
 				m_queryAABB.resize(p_num);
 			}
 
-			int t_num = this->inTriangles()->getElementCount();
+			int t_num = this->inTriangles()->size();
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -60,14 +60,14 @@ namespace dyno
 			Real radius = this->inRadius()->getData();
 
 			m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
-			m_broadPhaseCD->inSource()->setValue(m_queryAABB);
-			m_broadPhaseCD->inTarget()->setValue(m_queriedAABB);
+			m_broadPhaseCD->inSource()->assign(m_queryAABB);
+			m_broadPhaseCD->inTarget()->assign(m_queriedAABB);
 
 			m_broadPhaseCD->update();
 
 			auto& nbr = m_broadPhaseCD->outContactList()->getData();
 
-			if (this->outNeighborIds()->getElementCount() != p_num)
+			if (this->outNeighborIds()->size() != p_num)
 			{
 				this->outNeighborIds()->allocate();
 				//this->outNeighborIds()->getData().resize(p_num);

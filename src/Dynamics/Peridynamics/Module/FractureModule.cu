@@ -107,7 +107,7 @@ namespace dyno
 	template<typename TDataType>
 	void FractureModule<TDataType>::applyPlasticity()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real A = this->computeA();

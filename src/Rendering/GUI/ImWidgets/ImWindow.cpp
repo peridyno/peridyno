@@ -31,7 +31,7 @@ private:
 
 		for (auto iter : node->graphicsPipeline()->activeModules())
 		{
-			auto m = dynamic_cast<ImWidget*>(iter);
+			auto m = dynamic_cast<ImWidget*>(iter.get());
 			if (m && m->isVisible())
 			{
 				//m->update();
@@ -55,7 +55,7 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 		auto cam = engine->camera();
 		int width = cam->viewportWidth();
 		int height = cam->viewportHeight();
-		if (ImGui::BeginMenu("use Camera.."))
+		if (ImGui::BeginMenu("Use Camera.."))
 		{
 			if (ImGui::MenuItem("Orbit", "")) {
 				auto oc = std::make_shared<OrbitCamera>();
@@ -89,34 +89,34 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 		}
 
 		ImGui::Separator();
-		Vec3f targetPos = cam->getTargetPos();
+		Vec3f tarPos = cam->getTargetPos();
 		Vec3f eyePos = cam->getEyePos();
-		float Distance = (targetPos - eyePos).norm();
+		float Distance = (tarPos - eyePos).norm();
 
 		if (ImGui::MenuItem("Top", "")) {
-			cam->setEyePos(Vec3f(targetPos.x, Distance, targetPos.z));
-			
+			cam->setEyePos(Vec3f(tarPos.x, tarPos.y + Distance, tarPos.z));
 		}
 		
 		if (ImGui::MenuItem("Bottom", "")) {
-			cam->setEyePos(Vec3f(targetPos.x, -Distance, targetPos.z));
+			cam->setEyePos(Vec3f(tarPos.x, tarPos.y - Distance, tarPos.z));
 		}
 
 		ImGui::Separator();
 		if (ImGui::MenuItem("Left", "")) {
-			cam->setEyePos(Vec3f(-Distance, targetPos.y, targetPos.z));
+			cam->setEyePos(Vec3f(tarPos.x - Distance, tarPos.y, tarPos.z));
 		}
+
 		if (ImGui::MenuItem("Right", "")) {
-			cam->setEyePos(Vec3f(Distance, targetPos.y, targetPos.z));
+			cam->setEyePos(Vec3f(tarPos.x + Distance, tarPos.y, tarPos.z));
 		}
 
 		ImGui::Separator();
 		if (ImGui::MenuItem("Front", "")) {
-			cam->setEyePos(Vec3f(targetPos.x, targetPos.y, Distance));
+			cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z + Distance));
 		}
 
 		if (ImGui::MenuItem("Back", "")) {
-			cam->setEyePos(Vec3f(targetPos.x, targetPos.y, -Distance));
+			cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - Distance));
 		}
 
 
@@ -181,7 +181,9 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 
 		rparams->light = iLight;
 
+		ImGui::EndMenu();
 	}
+
 	if (ImGui::BeginMenu("Auxiliary", "")) {
 			RenderParams* rparams = engine->renderParams();
 			

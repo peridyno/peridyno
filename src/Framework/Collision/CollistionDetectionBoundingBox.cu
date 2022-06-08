@@ -464,7 +464,7 @@ namespace dyno
 			sum += m_reduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
 			m_scan.exclusive(mBoundaryContactCounter, true);
 
-			this->outContacts()->setElementCount(sum);
+			this->outContacts()->resize(sum);
 
 			if (sum > 0) {
 				cuExecute(totalSize,
@@ -480,7 +480,7 @@ namespace dyno
 			}
 		}
 		else
-			this->outContacts()->setElementCount(0);
+			this->outContacts()->resize(0);
 	}
 
 	DEFINE_CLASS(CollistionDetectionBoundingBox);
