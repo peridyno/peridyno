@@ -79,6 +79,8 @@ public:
 	inline float getMax() { return m_max; }
 	inline void setMax(float max_val) { m_max = max_val; }
 
+	inline void setRange(float min_val, float max_val) { m_min = min_val; m_max = max_val; }
+
 	FieldTypeEnum getFieldType();
 
 	virtual bool connect(FBase* dst) = 0;
