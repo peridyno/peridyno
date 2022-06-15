@@ -1,7 +1,7 @@
 #version 440
 
 layout(location = 0) in vec3 in_vert;
-//layout(location = 1) in vec3 in_norm;
+layout(location = 1) in vec3 in_color;
 
 layout (std140, binding=0) uniform TransformUniformBlock
 {
@@ -15,7 +15,7 @@ out VertexData
 	vec3 position;
 	vec3 normal;
 	vec3 velocity;
-	vec3 force;
+	vec3 vColor;
 } vs_out;
    
 void main(void) {
@@ -23,6 +23,7 @@ void main(void) {
 	vec4 cameraPos = transform.view * worldPos;
 
 	vs_out.position = cameraPos.xyz;
+	vs_out.vColor = in_color;
 	
 	//mat4 VP = transform.view * transform.model;
 	//mat4 N = transpose(inverse(VP));
