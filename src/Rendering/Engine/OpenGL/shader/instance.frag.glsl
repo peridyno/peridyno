@@ -6,6 +6,13 @@ in VertexData
 	vec3 normal;
 };
 
+layout(std140, binding = 0) uniform TransformUniformBlock
+{
+	mat4 model;
+	mat4 view;
+	mat4 proj;
+} transform;
+
 layout(std140, binding = 1) uniform LightUniformBlock
 {
 	vec4 ambient;
@@ -26,6 +33,16 @@ layout(location = 0) subroutine uniform RenderPass renderPass;
 
 void main(void) {
 	renderPass();
+}
+
+vec3 GetViewDir()
+{
+	// orthogonal projection
+	if (transform.proj[3][3] == 1.0)
+		return vec3(0, 0, 1);
+
+	// perspective projection
+	return normalize(-position);
 }
 
 vec3 reinhard_tonemap(vec3 v)
@@ -147,7 +164,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 vec3 pbr()
 {
 	vec3 N = normalize(normal);
-	vec3 V = normalize(-position);
+	vec3 V = GetViewDir();
 
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;

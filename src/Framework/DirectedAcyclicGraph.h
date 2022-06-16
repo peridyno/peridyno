@@ -46,6 +46,12 @@ namespace dyno {
 
 		size_t sizeOfVertex() const;
 
+		std::set<ObjectId>& vertices();
+
+		std::map<ObjectId, std::unordered_set<ObjectId>>& edges();
+
+		std::map<ObjectId, std::unordered_set<ObjectId>>& reverseEdges();
+
 	private:
 		// Functions used by topologicalSort
 		void topologicalSortUtil(ObjectId v, std::map<ObjectId, bool>& visited, std::stack<ObjectId>& stack);
@@ -55,5 +61,6 @@ namespace dyno {
 		std::vector<ObjectId> mOrderVertices;
 		std::set<ObjectId> mVertices;
 		std::map<ObjectId, std::unordered_set<ObjectId>> mEdges;
+		std::map<ObjectId, std::unordered_set<ObjectId>> mReverseEdges;
 	};
 }

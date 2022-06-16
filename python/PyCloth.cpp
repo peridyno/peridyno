@@ -12,7 +12,6 @@ void declare_cloth(py::module& m, std::string typestr) {
 		.def("load_particles", py::detail::overload_cast_impl<std::string>()(&Parent::loadParticles))
 		.def("load_particles", py::detail::overload_cast_impl<TDataType::Coord, TDataType::Real, TDataType::Real >()(&Parent::loadParticles))
 		.def("load_particles", py::detail::overload_cast_impl<TDataType::Coord , TDataType::Coord , TDataType::Real>()(&Parent::loadParticles))
-		.def("load_surface", &Class::loadSurface)
 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference);
 
 }

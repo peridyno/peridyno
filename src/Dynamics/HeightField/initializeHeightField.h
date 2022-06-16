@@ -7,6 +7,8 @@ namespace dyno
 	{
 	public:
 		HeightFieldInitializer();
+
+		void initializeNodeCreators();
 	};
 
 	const static HeightFieldInitializer heightFieldInitializer;

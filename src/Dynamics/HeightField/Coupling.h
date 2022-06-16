@@ -5,7 +5,10 @@
 
 #include "CapillaryWave.h"
 #include "OceanPatch.h"
-#include "RigidBody\RigidBody.h"
+#include "Ocean.h"
+#include "RigidBody\RigidBodySystem.h"
+#include "Topology/TriangleSet.h"
+#include "../Core/Algorithm/Reduction.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -13,6 +16,9 @@ namespace dyno
 	{
 		DECLARE_TCLASS(Coupling, TDataType)
 	public:
+
+		typedef typename TDataType::Matrix Matrix;
+		typedef typename TDataType::Coord Coord;
 
 		Coupling(std::string name = "");
 		~Coupling();
@@ -31,8 +37,14 @@ namespace dyno
 
 		Vec2f getLocalBoatCenter();
 
-		DEF_NODE_PORT(RigidBody<TDataType>, RigidBody, "RigidBody");
-		DEF_NODE_PORT(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
+		DEF_NODE_PORT(RigidBodySystem<TDataType>, RigidBodySystem, "RigidBodySystem");
+		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
+
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+		
+	protected:
+		void resetStates() override;
+		void updateStates() override;
 
 	private:
 		Vec2f m_origin;
@@ -63,6 +75,8 @@ namespace dyno
 		Vec3f m_torque_corrector;
 
 		float m_heightScale = 0.2f;
+
+		Reduction<float>* m_reduce;
 	};
 	IMPLEMENT_TCLASS(Coupling, TDataType)
 }

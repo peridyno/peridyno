@@ -62,18 +62,18 @@ std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 		}
 	}
 
-	ghost->statePosition()->setElementCount(num);
-	ghost->stateVelocity()->setElementCount(num);
-	ghost->stateForce()->setElementCount(num);
+	ghost->statePosition()->resize(num);
+	ghost->stateVelocity()->resize(num);
+	ghost->stateForce()->resize(num);
 
-	ghost->stateNormal()->setElementCount(num);
-	ghost->stateAttribute()->setElementCount(num);
+	ghost->stateNormal()->resize(num);
+	ghost->stateAttribute()->resize(num);
 
-	ghost->statePosition()->getDataPtr()->assign(host_pos);
-	ghost->stateVelocity()->getDataPtr()->assign(host_vel);
-	ghost->stateForce()->getDataPtr()->assign(host_force);
-	ghost->stateNormal()->getDataPtr()->assign(host_normal);
-	ghost->stateAttribute()->getDataPtr()->assign(host_attribute);
+	ghost->statePosition()->assign(host_pos);
+	ghost->stateVelocity()->assign(host_vel);
+	ghost->stateForce()->assign(host_force);
+	ghost->stateNormal()->assign(host_normal);
+	ghost->stateAttribute()->assign(host_attribute);
 
 	host_pos.clear();
 	host_vel.clear();

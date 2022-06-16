@@ -34,7 +34,7 @@ namespace dyno
 		float getGridLength();
 
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
-		DEF_NODE_PORTS(CapillaryWave, CapillaryWave<TDataType>, "Capillary Wave");
+		DEF_NODE_PORTS(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
 
 	protected:
 		void resetStates() override;
@@ -45,7 +45,7 @@ namespace dyno
 		float m_choppiness = 1.0f;
 		
 		//初始风级
-		int m_windType = 8;
+		//int m_windType = 8;
 
 		//fft纹理分辨率
 		int m_fft_size = 512;
@@ -65,9 +65,11 @@ namespace dyno
 		float m_virtualGridSize;
 		float m_realGridSize;
 
-		int Nx = 2;
-		int Ny = 2;
+		int Nx = 1;
+		int Ny = 1;
 
+
+		
 	};
 	IMPLEMENT_TCLASS(Ocean, TDataType)
 }

@@ -143,21 +143,21 @@ namespace dyno
 	template<typename TDataType>
 	void DensityPBD<TDataType>::constrain()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		
-		if (m_position_old.size() != this->inPosition()->getElementCount())
-			m_position_old.resize(this->inPosition()->getElementCount());
+		if (m_position_old.size() != this->inPosition()->size())
+			m_position_old.resize(this->inPosition()->size());
 
 		m_position_old.assign(this->inPosition()->getData());
 
-		if (this->outDensity()->getElementCount() != this->inPosition()->getElementCount())
-			this->outDensity()->setElementCount(this->inPosition()->getElementCount());
+		if (this->outDensity()->size() != this->inPosition()->size())
+			this->outDensity()->resize(this->inPosition()->size());
 
-		if (m_deltaPos.size() != this->inPosition()->getElementCount())
-			m_deltaPos.resize(this->inPosition()->getElementCount());
+		if (m_deltaPos.size() != this->inPosition()->size())
+			m_deltaPos.resize(this->inPosition()->size());
 
-		if (m_lamda.size() != this->inPosition()->getElementCount())
-			m_lamda.resize(this->inPosition()->getElementCount());
+		if (m_lamda.size() != this->inPosition()->size())
+			m_lamda.resize(this->inPosition()->size());
 
 		int it = 0;
 
@@ -178,7 +178,7 @@ namespace dyno
 	{
 		Real dt = this->inTimeStep()->getData();
 
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		
@@ -226,7 +226,7 @@ namespace dyno
 	template<typename TDataType>
 	void DensityPBD<TDataType>::updateVelocity()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 
 		Real dt = this->inTimeStep()->getData();
 

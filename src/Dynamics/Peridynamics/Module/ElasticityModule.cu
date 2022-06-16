@@ -285,7 +285,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::enforceElasticity()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		mDisplacement.reset();
@@ -322,7 +322,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::computeMaterialStiffness()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 		EM_InitBulkStiffness << <pDims, BLOCK_SIZE >> > (mBulkStiffness);
@@ -362,7 +362,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::updateVelocity()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real dt = this->inTimeStep()->getData();
@@ -417,7 +417,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticityModule<TDataType>::preprocess()
 	{
-		int num = this->inPosition()->getElementCount();
+		int num = this->inPosition()->size();
 
 		if (num == mInvK.size())
 			return;

@@ -97,6 +97,8 @@ namespace dyno
 
 		void updateEdges();
 
+		void updateVertexNormal();
+
 		void loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);

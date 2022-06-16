@@ -49,17 +49,7 @@ vec3 GetShadowFactor(vec3 pos)
 	return vec3(p_max);
 }
 
-
-subroutine void RenderPass(void);
-layout(location = 0) subroutine uniform RenderPass renderPass;
-
 void main(void) {
-	renderPass();
-}
-
-
-layout(index = 0) subroutine(RenderPass) void ColorPass(void)
-{
 	vec3 shadow = GetShadowFactor(vPosition);
 	vec3 shading = shadow * light.intensity.rgb + light.ambient.rgb;
 	shading = clamp(shading, 0, 1);
@@ -68,18 +58,3 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	FragColor = vec4(shading * f, 0.5);
 }
 
-layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
-{
-	float depth = gl_FragCoord.z;
-	//depth = depth * 0.5 + 0.5;
-
-	float moment1 = depth;
-	float moment2 = depth * depth;
-
-	// Adjusting moments (this is sort of bias per pixel) using partial derivative
-	float dx = dFdx(depth);
-	float dy = dFdy(depth);
-	moment2 += 0.25 * (dx * dx + dy * dy);
-
-	FragColor = vec4(moment1, moment2, 0.0, 0.0);
-}

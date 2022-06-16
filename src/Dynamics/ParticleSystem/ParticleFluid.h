@@ -21,6 +21,6 @@ namespace dyno
 		void preUpdateStates();
 
 	private:
-		DEF_NODE_PORTS(ParticleEmitter, ParticleEmitter<TDataType>, "Particle Emitters");
+		DEF_NODE_PORTS(ParticleEmitter<TDataType>, ParticleEmitter, "Particle Emitters");
 	};
 }

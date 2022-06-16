@@ -8,6 +8,11 @@
 #include "BoundaryConstraint.h"
 #include "VariationalApproximateProjection.h"
 
+#include "ParticleEmitterRound.h"
+#include "ParticleEmitterSquare.h"
+
+#include "NodeFactory.h"
+
 namespace dyno 
 {
 	ParticleSystemInitializer::ParticleSystemInitializer()
@@ -20,5 +25,33 @@ namespace dyno
 		TypeInfo::New<VariationalApproximateProjection<DataType3f>>();
 		//TypeInfo::New<BoundaryConstraint<DataType3f>>();
 
+
+		initializeNodeCreators();
 	}
+
+	void ParticleSystemInitializer::initializeNodeCreators()
+	{
+		NodeFactory* factory = NodeFactory::instance();
+
+		auto group = factory->addGroup(
+			"Particle System", 
+			"Particle System", 
+			"ToolBarIco/ParticleSystem/ParticleSystem.png");
+
+		group->addAction(
+			"Particle Emitter 1", 
+			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
+			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleEmitterRound<DataType3f>>(); });
+
+		group->addAction(
+			"Particle Emitter 2",
+			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
+			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleEmitterSquare<DataType3f>>(); });
+
+		group->addAction(
+			"Particle Fluid",
+			"ToolBarIco/ParticleSystem/ParticleFluid.png",
+			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleSystem<DataType3f>>(); });
+	}
+
 }

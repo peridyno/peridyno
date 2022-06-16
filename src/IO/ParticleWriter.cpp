@@ -38,7 +38,7 @@ namespace dyno
 		std::string filename = mOutpuPath + ss.str() + mOutputPrefix + std::string(".txt");
 		std::ofstream output(filename.c_str(), std::ios::out | std::ios::binary);
 
-		int pNum = this->inPosition()->getElementCount();
+		int pNum = this->inPosition()->size();
 
 		output.write((char*)&pNum, sizeof(int));
 

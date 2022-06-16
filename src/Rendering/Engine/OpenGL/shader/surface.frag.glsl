@@ -5,8 +5,15 @@ in VertexData
 	vec3 position;
 	vec3 normal;
 	vec3 velocity;
-	vec3 force;
+	vec3 vColor;
 };
+
+layout(std140, binding = 0) uniform TransformUniformBlock
+{
+	mat4 model;
+	mat4 view;
+	mat4 proj;
+} transform;
 
 layout(std140, binding = 1) uniform LightUniformBlock
 {
@@ -29,6 +36,16 @@ layout(location = 0) subroutine uniform RenderPass renderPass;
 void main(void) { 
 	renderPass();
 } 
+
+vec3 GetViewDir()
+{
+	// orthogonal projection
+	if(transform.proj[3][3] == 1.0)
+		return vec3(0, 0, 1);
+
+	// perspective projection
+	return normalize(-position);
+}
 
 vec3 reinhard_tonemap(vec3 v)
 {
@@ -150,7 +167,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 vec3 pbr()
 {
 	vec3 N = normalize(normal);
-	vec3 V = normalize(-position);
+	vec3 V = GetViewDir();
 
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;
@@ -158,7 +175,7 @@ vec3 pbr()
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
 	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, uBaseColor, uMetallic);
+	F0 = mix(F0, vColor, uMetallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -199,10 +216,10 @@ vec3 pbr()
 		// add to outgoing radiance Lo
 		//Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-		Lo += GetShadowFactor(position) * (kD * uBaseColor / PI + specular) * radiance * NdotL;
+		Lo += GetShadowFactor(position) * (kD * vColor / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = light.ambient.rgb * light.ambient.a * uBaseColor;
+	vec3 ambient = light.ambient.rgb * light.ambient.a * vColor;
 
 	return ambient + Lo;
 }

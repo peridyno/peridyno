@@ -88,38 +88,6 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-
-	QFInstanceWidget::QFInstanceWidget(FBase* field)
-		: QGroupBox()
-	{
-
-
-		this->setStyleSheet("border:none");
-		QGridLayout* layout = new QGridLayout;
-		layout->setContentsMargins(0, 0, 0, 0);
-		layout->setSpacing(0);
-
-		this->setLayout(layout);
-
-		QLabel* name = new QLabel();
-		name->setFixedSize(100, 18);
-		name->setText(FormatFieldWidgetName(field->getObjectName()));
-		QCheckBox* checkbox = new QCheckBox();
-		//checkbox->setFixedSize(40, 18);
-		layout->addWidget(name, 0, 0);
-		layout->addWidget(checkbox, 0, 1);
-
-		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(changeValue2(int)));
-	
-	}
-	void QFInstanceWidget::changeValue(int status)
-	{
-		printf("QFInstanceWidget check----\n");
-		
-		emit fieldChanged();
-	}
-	
-
 	QIntegerFieldWidget::QIntegerFieldWidget(FBase* field)
 		: QGroupBox()
 	{
@@ -413,12 +381,14 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
-		name->setFixedSize(100, 18);
+		name->setFixedHeight(18);
+		name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 		layout->addWidget(name, 0, 0);
 
 		QCheckBox* checkbox = new QCheckBox();		
-		layout->addWidget(checkbox, 0, 1);
+		checkbox->setFixedSize(18, 18);
+		layout->addWidget(checkbox, 0, 1, Qt::AlignRight);
 
 		if (m_field->parent()->findOutputField(field))
 		{
@@ -525,7 +495,7 @@ namespace dyno
 			auto module = dynamic_cast<Qt::QtModuleWidget*>(dataModel);
 			if (module != nullptr)
 			{
-				this->showProperty(module->getModule());
+				this->showProperty(module->getModule().get());
 			}
 		}
 	}
@@ -571,6 +541,31 @@ namespace dyno
 			mPropertyLayout[i] = new QGridLayout;
 		}
 
+
+		{
+			QGroupBox* title = new QGroupBox;
+			title->setStyleSheet("border:none");
+			QGridLayout* layout = new QGridLayout;
+			layout->setContentsMargins(0, 0, 0, 0);
+			layout->setSpacing(0);
+
+			title->setLayout(layout);
+
+			QLabel* name = new QLabel();
+			name->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
+			name->setFixedHeight(25);
+			name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			name->setText("Name");
+			layout->addWidget(name, 0, 0);
+
+			QLabel* output = new QLabel();
+			output->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
+			output->setFixedSize(56, 25);
+			output->setText("Output");
+			layout->addWidget(output, 0, 1, Qt::AlignRight);
+
+			mPropertyLayout[1]->addWidget(title);
+		}
 
 		std::vector<FBase*>& fields = base->getAllFields();
 		for each (FBase * var in fields)
@@ -668,16 +663,6 @@ namespace dyno
 	{
 		auto fw = new QStateFieldWidget(field);
 		this->addWidget(fw);
-	}
-
-	void PPropertyWidget::addInstanceFieldWidget(FBase* field)
-	{
-		std::string className = field->getClassName();
-		if (className == std::string("FInstance")) {
-			auto fw = new QFInstanceWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
-			this->addWidget(fw);
-		}
 	}
 
 	void PPropertyWidget::addStateFieldWidget(FBase* field)

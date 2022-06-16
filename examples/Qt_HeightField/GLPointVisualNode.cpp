@@ -68,7 +68,7 @@ namespace dyno
 	void GLPointVisualNode<TDataType>::preUpdateStates()
 	{
 		if (this->getParticles() == nullptr) {
-			this->stateVector()->setElementCount(0);
+			this->stateVector()->resize(0);
 
 			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 			auto& pts = ptSet->getPoints();
@@ -80,7 +80,7 @@ namespace dyno
 		auto& poss = this->getParticles()->statePosition()->getData();
 		auto& vels = this->getParticles()->stateVelocity()->getData();
 
-		this->stateVector()->setElementCount(poss.size());
+		this->stateVector()->resize(poss.size());
 
 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 		auto& pts = ptSet->getPoints();

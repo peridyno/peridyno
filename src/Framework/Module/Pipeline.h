@@ -30,14 +30,25 @@ namespace dyno
 		uint sizeOfPersistentModules();
 
 		void pushModule(std::shared_ptr<Module> m);
+
+		void popModule(std::shared_ptr<Module> m);
 		
 		// clear pipeline and module
 		void clear();
 
 		void pushPersistentModule(std::shared_ptr<Module> m);
 
-		std::list<Module*>& activeModules() {
+		std::list<std::shared_ptr<Module>>& activeModules() {
+			if (mModuleUpdated) {
+				reconstructPipeline();
+			}
+
 			return mModuleList;
+		}
+
+		std::map<ObjectId, std::shared_ptr<Module>> allModules()
+		{
+			return mModuleMap;
 		}
 
 		void enable();
@@ -60,10 +71,10 @@ namespace dyno
 		bool mModuleUpdated = false;
 		bool mUpdateEnabled = true;
 
-		std::map<ObjectId, Module*> mModuleMap;
-		std::list<Module*>  mModuleList;
+		std::map<ObjectId, std::shared_ptr<Module>> mModuleMap;
+		std::list<std::shared_ptr<Module>>  mModuleList;
 
-		std::list<Module*> mPersistentModule;
+		std::list<std::shared_ptr<Module>> mPersistentModule;
 
 		Node* mNode;
 

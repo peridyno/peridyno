@@ -44,9 +44,6 @@ namespace dyno
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(1));
 
-	
-
-
 	protected:
 		void resetStates() override;
 
@@ -113,7 +110,15 @@ namespace dyno
 
 		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
-		
-		void loadForcePoints(const char* path);
+
+		void updateVelocityAngule(Vec3f force, Vec3f torque, float dt);
+		void advect(float dt);
+		//float m_damping = 0.9f;
+
+		float m_yaw;
+		float m_pitch;
+		float m_roll;
+		float m_recoverSpeed;
+		void getEulerAngle(float& yaw, float& pitch, float& roll);
 	};
 }

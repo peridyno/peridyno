@@ -49,7 +49,6 @@ std::shared_ptr<SceneGraph> sceneTwoTets()
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
-
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals
 	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();

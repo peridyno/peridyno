@@ -44,7 +44,7 @@ public:
 	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, OBase* parent = nullptr);
 	virtual ~FBase();
 
-	virtual uint getElementCount() = 0;
+	virtual uint size() = 0;
 	virtual const std::string getTemplateName() { return std::string(""); }
 	virtual const std::string getClassName() { return std::string("Field"); }
 
@@ -78,6 +78,8 @@ public:
 
 	inline float getMax() { return m_max; }
 	inline void setMax(float max_val) { m_max = max_val; }
+
+	inline void setRange(float min_val, float max_val) { m_min = min_val; m_max = max_val; }
 
 	FieldTypeEnum getFieldType();
 

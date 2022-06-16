@@ -69,7 +69,7 @@ namespace dyno
 	template<typename TDataType>
 	void BoundaryConstraint<TDataType>::constrain()
 	{
-		uint pDim = cudaGridSize(m_position.getElementCount(), BLOCK_SIZE);
+		uint pDim = cudaGridSize(m_position.size(), BLOCK_SIZE);
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
 			m_position.getData(),
 			m_velocity.getData(),

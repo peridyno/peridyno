@@ -23,9 +23,9 @@ namespace dyno
 		bool translate(Coord t) override;
 		bool scale(Real s) override;
 
-		void loadSurface(std::string filename);
-
-		std::shared_ptr<Node> getSurface();
+// 		void loadSurface(std::string filename);
+// 
+// 		std::shared_ptr<Node> getSurface();
 
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
@@ -36,8 +36,8 @@ namespace dyno
 		void resetStates() override;
 
 		void updateTopology() override;
-
-	private:
-		std::shared_ptr<Node> mSurfaceNode;
+// 
+// 	private:
+// 		std::shared_ptr<Node> mSurfaceNode;
 	};
 }

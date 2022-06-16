@@ -17,6 +17,12 @@ namespace dyno
 		Camera() {};
 		~Camera() {};
 
+		enum ProjectionType
+		{
+			Perspective,
+			Orthogonal
+		};
+
 		virtual glm::mat4 getViewMat() = 0;
 		virtual glm::mat4 getProjMat() = 0;
 
@@ -28,7 +34,7 @@ namespace dyno
 
 		void setWidth(int width) { mViewportWidth = width; }
 		void setHeight(int height) { mViewportHeight = height; }
-
+		
 		void setClipNear(float zNear) { mNear = zNear; }
 		void setClipFar(float zFar) { mFar = zFar; }
 
@@ -41,7 +47,17 @@ namespace dyno
 		virtual void setEyePos(const Vec3f& p) = 0;
 		virtual void setTargetPos(const Vec3f& p) = 0;
 
+		virtual Vec3f getEyePos() const = 0;
+		virtual Vec3f getTargetPos() const = 0;
+
 		TRay3D<float> castRayInWorldSpace(float x, float y);
+
+		void setDistanceUnit(float unit) { mDistanceUnit = unit; }
+
+		float distanceUnit() { return mDistanceUnit; }
+		
+		void setProjectionType(ProjectionType type) { mProjectionType = type; }
+		ProjectionType projectionType() { return mProjectionType; }
 
 	protected:
 		float mNear = 0.01f;
@@ -50,6 +66,11 @@ namespace dyno
 
 		int mViewportWidth;
 		int mViewportHeight;
+
+		ProjectionType mProjectionType = Perspective;	//0:pers 1:ortho
+
+		//Distance unit
+		float mDistanceUnit = 1.0f;
 	};
 
 }

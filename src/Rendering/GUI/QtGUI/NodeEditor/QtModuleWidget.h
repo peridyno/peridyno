@@ -24,7 +24,7 @@ namespace Qt
 		Q_OBJECT
 
 	public:
-		QtModuleWidget(Module* base = nullptr);
+		QtModuleWidget(std::shared_ptr<Module> base = nullptr);
 
 		virtual	~QtModuleWidget() {}
 
@@ -46,9 +46,11 @@ namespace Qt
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 
 		std::shared_ptr<QtNodeData> outData(PortIndex port) override;
-		std::shared_ptr<QtNodeData> inData(PortIndex port);
+		//std::shared_ptr<QtNodeData> inData(PortIndex port);
 
 		void setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex) override;
+
+		bool tryInData(PortIndex portIndex, std::shared_ptr<QtNodeData> nodeData) override;
 
 		NodeDataType dataType(PortType portType, PortIndex portIndex) const override;
 
@@ -57,7 +59,17 @@ namespace Qt
 
 		NodeValidationState validationState() const override;
 
-		Module* getModule();
+		std::shared_ptr<Module> getModule();
+
+		/**
+		 * @brief When enabled, the scenegraph can be updated as long as the corresponding GUI is updated.
+		 */
+		void enableEditing();
+
+		/**
+		 * @brief When disabled, the scenegraph can not be affected by the corresponding GUI.
+		 */
+		void disableEditing();
 
 	protected:
 		virtual void updateModule();
@@ -74,7 +86,7 @@ namespace Qt
 
 		QString m_name;
 
-		Module* m_module = nullptr;
+		std::shared_ptr<Module> m_module = nullptr;
 
 		NodeValidationState modelValidationState = NodeValidationState::Warning;
 		QString modelValidationError = QString("Missing or incorrect inputs");
@@ -85,5 +97,8 @@ namespace Qt
 
 		std::vector<FBase*>& getOutputFields();
 		std::vector<FBase*>& getInputFields();
+
+	private:
+		bool mEditingEnabled = true;
 	};
 }
