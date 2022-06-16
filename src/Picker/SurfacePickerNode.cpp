@@ -1,6 +1,5 @@
 #include "SurfacePickerNode.h"
 #include "CustomMouseInteraction.h"
-#include "MouseIntersect.h"
 #include <iostream>
 
 namespace dyno
