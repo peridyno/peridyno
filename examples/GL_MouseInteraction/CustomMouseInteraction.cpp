@@ -4,9 +4,6 @@ namespace dyno
 {
 	void CustomMouseIteraction::onEvent(PMouseEvent event)
 	{
-		this->stateMouseRay()->getDataPtr()->origin= event.ray.origin;
-		this->stateMouseRay()->getDataPtr()->direction = event.ray.direction;
-		this->stateMouseIntersect()->getDataPtr()->calcIntersect();
 		if (event.actionType == AT_PRESS)
 		{
 			printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
