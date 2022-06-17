@@ -10,32 +10,47 @@ namespace dyno
 	{
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
+		this->isPressed = false;
 	}
 
 	template<typename TDataType>
 	void CustomMouseIteraction<TDataType>::onEvent(PMouseEvent event)
 	{
+		if (camera == nullptr)
+		{
+			this->camera = event.camera;
+		}
 		if (event.actionType == AT_PRESS)
 		{
+			this->camera = event.camera;
+			this->isPressed = true;
 			printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 			this->ray1.origin = event.ray.origin;
 			this->ray1.direction = event.ray.direction;
 			this->x1 = event.x;
 			this->y1 = event.y;
+			this->calcIntersectClick();
 		}
 		else if (event.actionType == AT_RELEASE)
 		{
+			this->isPressed = false;
 			printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 			this->ray2.origin = event.ray.origin;
 			this->ray2.direction = event.ray.direction;
 			this->x2 = event.x;
 			this->y2 = event.y;
-			this->calcIntersectClick();
 		}
 		else
 		{
 			printf("%f %f \n", event.x, event.y);
 			printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+			if (this->isPressed) {
+				this->ray2.origin = event.ray.origin;
+				this->ray2.direction = event.ray.direction;
+				this->x2 = event.x;
+				this->y2 = event.y;
+				this->calcIntersectDrag();
+			}
 		}
 	}
 
@@ -50,8 +65,17 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
-		TPoint3D<Real> p;
-		intersected[pId] = mouseray.intersect(TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]), p);
+		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+		int temp = 0;
+		if (mouseray.direction.dot(t.normal()) <0)
+		{
+			TPoint3D<Real> p;
+			temp = mouseray.intersect(t, p);
+		}
+		if (temp == 1||intersected[pId]==1)
+			intersected[pId] = 1;
+		else
+			intersected[pId] = 0;
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
 	}
 
@@ -64,23 +88,28 @@ namespace dyno
 		TPlane3D<Real> plane13,
 		TPlane3D<Real> plane42,
 		TPlane3D<Real> plane14,
-		TPlane3D<Real> plane32)
+		TPlane3D<Real> plane32,
+		TRay3D<Real> mouseray)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
-		TPoint3D<Real> p1= TPoint3D<Real>(points[triangles[pId].data[0]]);
-		TPoint3D<Real> p2 = TPoint3D<Real>(points[triangles[pId].data[1]]);
-		TPoint3D<Real> p3 = TPoint3D<Real>(points[triangles[pId].data[2]]);
+
+		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
 		bool flag = false;
-		for (int i = 1; i <= 3; i++) {
-			int flag1 = ((points[triangles[pId].data[i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId].data[i]] - plane42.origin).dot(plane42.normal));
-			int flag2 = ((points[triangles[pId].data[i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId].data[i]] - plane32.origin).dot(plane32.normal));
-			if (flag1 > 0 && flag2 > 0)
-				flag = true;
-				break;
+		if (mouseray.direction.dot(t.normal()) < 0) 
+		{
+			for (int i = 0; i < 3; i++) {
+				float temp1 = ((points[triangles[pId].data[i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId].data[i]] - plane42.origin).dot(plane42.normal));
+				float temp2 = ((points[triangles[pId].data[i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId].data[i]] - plane32.origin).dot(plane32.normal));
+				if (temp1 >= 0 && temp2 >= 0)
+				{
+					flag = true;
+					break;
+				}
+			}
 		}
-		if (flag)
+		if (flag || intersected[pId] == 1)
 			intersected[pId] = 1;
 		else
 			intersected[pId] = 0;
@@ -128,7 +157,7 @@ namespace dyno
 			triangles,
 			intersected,
 			unintersected,
-			this->ray2
+			this->ray1
 		);
 
 		DArray<int> intersected_o;
@@ -159,20 +188,18 @@ namespace dyno
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
 	}
 
-	/*template<typename TDataType>
+	template<typename TDataType>
 	void CustomMouseIteraction<TDataType>::calcIntersectDrag()
 	{
-		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
-		auto camera = activeWindow->activeCamera();
 		TRay3D<Real> ray1 = this->ray1;
 		TRay3D<Real> ray2 = this->ray2;
-		TRay3D<Real> ray3 = camera->castRayInWorldSpace((float)x1, (float)y2);
-		TRay3D<Real> ray4 = camera->castRayInWorldSpace((float)x2, (float)y1);
+		TRay3D<Real> ray3 = this->camera->castRayInWorldSpace((float)x1, (float)y2);
+		TRay3D<Real> ray4 = this->camera->castRayInWorldSpace((float)x2, (float)y1);
 
-		TPlane3D<Real> plane13 = TPlane3D<Real>(ray1.origin, ray4.origin - ray1.origin);
-		TPlane3D<Real> plane42 = TPlane3D<Real>(ray4.origin, ray1.origin - ray4.origin);
-		TPlane3D<Real> plane14 = TPlane3D<Real>(ray1.origin, ray3.origin - ray1.origin);
-		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray1.origin - ray3.origin);
+		TPlane3D<Real> plane13 = TPlane3D<Real>(ray1.origin, ray1.direction.cross(ray3.direction));
+		TPlane3D<Real> plane42 = TPlane3D<Real>(ray2.origin, ray2.direction.cross(ray4.direction));
+		TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
+		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 
 		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
 		DArray<Coord> points = initialTriangleSet.getPoints();
@@ -192,7 +219,16 @@ namespace dyno
 			plane13,
 			plane42,
 			plane14,
-			plane32
+			plane32,
+			this->ray2
+		);
+		cuExecute(triangles.size(),
+			CalIntersectedTrisRay,
+			points,
+			triangles,
+			intersected,
+			unintersected,
+			this->ray1
 		);
 
 		DArray<int> intersected_o;
@@ -221,6 +257,6 @@ namespace dyno
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
-	}*/
+	}
 	DEFINE_CLASS(CustomMouseIteraction);
 }

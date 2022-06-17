@@ -27,12 +27,14 @@ namespace dyno
 	protected:
 		void onEvent(PMouseEvent event) override;
 	private:
+		std::shared_ptr<Camera> camera;
 		TRay3D<Real> ray1;
 		TRay3D<Real> ray2;
 		Real x1;
 		Real y1;
 		Real x2;
 		Real y2;
+		bool isPressed;
 	};
 
 	IMPLEMENT_TCLASS(CustomMouseIteraction, TDataType)
