@@ -39,6 +39,10 @@ namespace dyno
 		DArray<Coord>& getPositions() { return mPosition; }
 		DArray<Coord>& getVelocities() { return mVelocity; }
 
+		DEF_VAR(Vec3f, Location, 0, "Node location");
+		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
+		DEF_VAR(Vec3f, Scale, 0, "Node scale");
+
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
 

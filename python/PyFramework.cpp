@@ -151,8 +151,7 @@ void pybind_framework(py::module& m)
 		.def("disconnect", &Node::disconnect)
 		.def("current_topology", &Node::stateTopology, py::return_value_policy::reference)
 		.def("graphics_pipeline", &Node::graphicsPipeline, py::return_value_policy::reference)
-		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference)
-		.def("var_location", &Node::varLocation, py::return_value_policy::reference);
+		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference);
 
 	py::class_<NodePort>(m, "NodePort");
 
