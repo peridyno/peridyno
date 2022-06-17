@@ -26,10 +26,6 @@ if(PERIDYNO_LIBRARY_ALEMBIC)
     add_subdirectory(ABCExporter)
 endif()
 
-if(PERIDYNO_LIBRARY_PICKER)
-    add_subdirectory(Picker)
-endif()
-
 add_subdirectory(Dynamics)
 add_subdirectory(Interaction)
 

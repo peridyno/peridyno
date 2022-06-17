@@ -1,9 +1,7 @@
 #include "CustomMouseInteraction.h"
 #include <thrust/sort.h>
 #include <iostream>
-#include "GlfwApp.h"
 #include <OrbitCamera.h>
-#include <GLFW/glfw3.h>
 
 namespace dyno
 {
