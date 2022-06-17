@@ -347,10 +347,6 @@ namespace dyno
 
 
 	public:
-		DEF_VAR(Vec3f, Location, 0, "Node location");
-		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-		DEF_VAR(Vec3f, Scale, 0, "Node scale");
-
 		std::string m_node_name;
 
 		/**

@@ -6,9 +6,8 @@ namespace dyno
 
 	template<typename TDataType>
 	SurfaceMeshLoader<TDataType>::SurfaceMeshLoader()
-		: Node()
+		: GeometryLoader()
 	{
-
 	}
 
 	template<typename TDataType>

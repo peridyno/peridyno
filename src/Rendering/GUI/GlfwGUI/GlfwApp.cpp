@@ -367,6 +367,7 @@ namespace dyno
 		mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
 		mouseEvent.buttonType = (PButtonType)button;
 		mouseEvent.actionType = (PActionType)action;
+		mouseEvent.camera = camera;
 		mouseEvent.x = (float)xpos;
 		mouseEvent.y = (float)ypos;
 
@@ -401,6 +402,7 @@ namespace dyno
 		mouseEvent.ray = camera->castRayInWorldSpace((float)x, (float)y);
 		mouseEvent.buttonType = (PButtonType)activeWindow->getButtonType();
 		mouseEvent.actionType = PActionType::AT_REPEAT;
+		mouseEvent.camera = camera;
 		mouseEvent.x = (float)x;
 		mouseEvent.y = (float)y;
 

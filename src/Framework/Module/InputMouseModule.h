@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Module.h"
+#include "Camera.h"
 
 #include "Topology/Primitive3D.h"
 
@@ -43,6 +44,8 @@ namespace dyno
 		PActionType actionType;
 
 		TRay3D<float> ray;
+
+		std::shared_ptr<Camera> camera;
 
 		float x;
 		float y;
