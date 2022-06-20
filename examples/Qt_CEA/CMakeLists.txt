@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-if(PERIDYNO_Qt5_GUI)
+if(PERIDYNO_Qt5_GUI AND PERIDYNO_LIBRARY_GMSH)
 
     set(PROJECT_NAME Qt_CEA)
 
