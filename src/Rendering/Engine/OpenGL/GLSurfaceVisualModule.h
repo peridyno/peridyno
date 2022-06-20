@@ -33,6 +33,10 @@ namespace dyno
 	public:
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
+		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
+
+		DEF_VAR(uint, ColorMode, 0, "");
+
 	protected:
 		virtual void paintGL(RenderPass mode) override;
 		virtual void updateGL() override;
@@ -45,7 +49,11 @@ namespace dyno
 
 		GLCudaBuffer	mVertexBuffer;
 		GLCudaBuffer 	mIndexBuffer;
+		GLCudaBuffer	mColor;
+
+		DArray<Vec3f> mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
+		unsigned int	mColorMode = 0;
 	};
 };

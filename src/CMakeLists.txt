@@ -31,6 +31,7 @@ if(PERIDYNO_LIBRARY_GMSH)
 endif()
 
 add_subdirectory(Dynamics)
+add_subdirectory(Interaction)
 
 # Write/install version file
 include(CMakePackageConfigHelpers)

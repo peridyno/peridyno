@@ -1,7 +1,7 @@
 #pragma once
-#include "Node.h"
-#include "FilePath.h"
+#include "GeometryLoader.h"
 
+//Output
 #include "Topology/TriangleSet.h"
 
 namespace dyno
@@ -11,7 +11,7 @@ namespace dyno
 	*	\brief	Load a triangular mesh
 	*/
 	template<typename TDataType>
-	class SurfaceMeshLoader : public Node
+	class SurfaceMeshLoader : public GeometryLoader
 	{
 		DECLARE_TCLASS(SurfaceMeshLoader, TDataType)
 	public:
@@ -20,8 +20,6 @@ namespace dyno
 
 		SurfaceMeshLoader();
 		virtual ~SurfaceMeshLoader();
-
-		DEF_VAR(FilePath, FileName, "", "");
 
 	public:
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");

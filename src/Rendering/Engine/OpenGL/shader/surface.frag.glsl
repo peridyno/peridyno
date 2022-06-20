@@ -5,7 +5,7 @@ in VertexData
 	vec3 position;
 	vec3 normal;
 	vec3 velocity;
-	vec3 force;
+	vec3 vColor;
 };
 
 layout(std140, binding = 0) uniform TransformUniformBlock
@@ -175,7 +175,7 @@ vec3 pbr()
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
 	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, uBaseColor, uMetallic);
+	F0 = mix(F0, vColor, uMetallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -216,10 +216,10 @@ vec3 pbr()
 		// add to outgoing radiance Lo
 		//Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-		Lo += GetShadowFactor(position) * (kD * uBaseColor / PI + specular) * radiance * NdotL;
+		Lo += GetShadowFactor(position) * (kD * vColor / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = light.ambient.rgb * light.ambient.a * uBaseColor;
+	vec3 ambient = light.ambient.rgb * light.ambient.a * vColor;
 
 	return ambient + Lo;
 }
