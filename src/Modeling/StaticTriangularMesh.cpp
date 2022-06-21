@@ -21,6 +21,11 @@ namespace dyno
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
+		if (this->varFileName()->getDataPtr()->string() == "")
+		{
+			return;
+		}
+
 		triSet->loadObjFile(this->varFileName()->getDataPtr()->string());
 
 		triSet->scale(this->varScale()->getData());
