@@ -122,7 +122,7 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 
 		ImGui::Separator();
 		float distanceUnit = cam->distanceUnit();
-		if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
+		if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
 			cam->setDistanceUnit(distanceUnit);
 		
 		ImGui::EndMenu();
