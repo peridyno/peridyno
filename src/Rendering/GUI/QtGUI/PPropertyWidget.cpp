@@ -306,7 +306,84 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-	QStringFieldWidget::QStringFieldWidget(FBase* field) 
+
+	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)
+	{
+		mField = field;
+
+		this->setStyleSheet("border:none");
+		QGridLayout* layout = new QGridLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		QLabel* name = new QLabel();
+		name->setFixedSize(100, 18);
+		name->setText(FormatFieldWidgetName(field->getObjectName()));
+
+		spinner1 = new QSpinBox;
+		spinner1->setMinimumWidth(30);
+		spinner1->setRange(mField->getMin(), mField->getMax());
+
+		spinner2 = new QSpinBox;
+		spinner2->setMinimumWidth(30);
+		spinner2->setRange(mField->getMin(), mField->getMax());
+
+		spinner3 = new QSpinBox;
+		spinner3->setMinimumWidth(30);
+		spinner3->setRange(mField->getMin(), mField->getMax());
+
+		layout->addWidget(name, 0, 0);
+		layout->addWidget(spinner1, 0, 1);
+		layout->addWidget(spinner2, 0, 2);
+		layout->addWidget(spinner3, 0, 3);
+
+
+		std::string template_name = mField->getTemplateName();
+
+		int v1 = 0;
+		int v2 = 0;
+		int v3 = 0;
+
+		if (template_name == std::string(typeid(Vec3i).name()))
+		{
+			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(mField);
+			auto v = f->getData();
+			v1 = v[0];
+			v2 = v[1];
+			v3 = v[2];
+		}
+
+		spinner1->setValue(v1);
+		spinner2->setValue(v2);
+		spinner3->setValue(v3);
+
+		QObject::connect(spinner1, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+		QObject::connect(spinner2, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+		QObject::connect(spinner3, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+	}
+
+
+	void QVector3iFieldWidget::changeValue(int)
+	{
+		int v1 = spinner1->value();
+		int v2 = spinner2->value();
+		int v3 = spinner3->value();
+
+		std::string template_name = mField->getTemplateName();
+
+		if (template_name == std::string(typeid(Vec3i).name()))
+		{
+			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(mField);
+			f->setValue(Vec3i(v1, v2, v3));
+			f->update();
+		}
+
+		emit fieldChanged();
+	}
+
+	QStringFieldWidget::QStringFieldWidget(FBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -466,19 +543,18 @@ namespace dyno
 		m_widgets.clear();
 	}
 
-	void PPropertyWidget::showProperty(Module* module)
+	void PPropertyWidget::showProperty(std::shared_ptr<Module> module)
 	{
-//		clear();
+		updateContext(module.get());
 
-		updateContext(module);
-
+		mSeleted = module;
 	}
 
-	void PPropertyWidget::showProperty(Node* node)
+	void PPropertyWidget::showProperty(std::shared_ptr<Node> node)
 	{
-//		clear();
-		updateContext(node);
+		updateContext(node.get());
 
+		mSeleted = node;
 	}
 
 	void PPropertyWidget::showNodeProperty(Qt::QtNode& block)
@@ -488,25 +564,29 @@ namespace dyno
 		auto node = dynamic_cast<Qt::QtNodeWidget*>(dataModel);
 		if (node != nullptr)
 		{
-			this->showProperty(node->getNode().get());
+			this->showProperty(node->getNode());
 		}
 		else
 		{
 			auto module = dynamic_cast<Qt::QtModuleWidget*>(dataModel);
 			if (module != nullptr)
 			{
-				this->showProperty(module->getModule().get());
+				this->showProperty(module->getModule());
 			}
 		}
 	}
 
-	void PPropertyWidget::updateDisplay()
+	void PPropertyWidget::contentUpdated()
 	{
-		printf("updateDisplay \n");
+		auto node = std::dynamic_pointer_cast<Node>(mSeleted);
 
-		//PVTKOpenGLWidget::getCurrentRenderer()->GetActors()->RemoveAllItems();
-		//SceneGraph::getInstance().updateGraphicsContext();
-		//PVTKOpenGLWidget::getCurrentRenderer()->GetRenderWindow()->Render();
+		if (node != nullptr)
+			emit nodeUpdated(node);
+
+		auto module = std::dynamic_pointer_cast<Module>(mSeleted);
+
+		if (module != nullptr)
+			emit moduleUpdated(module);
 	}
 
 	void PPropertyWidget::updateContext(OBase* base)
@@ -628,7 +708,7 @@ namespace dyno
 		if (template_name == std::string(typeid(bool).name()))
 		{
 			auto fw = new QBoolFieldWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 			
 			layout->addWidget(fw,j,0);
 		}
@@ -636,7 +716,7 @@ namespace dyno
 		{
 			auto fw = new QIntegerFieldWidget(field);
 
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(updateDisplay()));
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
 			layout->addWidget(fw, j, 0);
 //			this->addWidget(new QIntegerFieldWidget(new FVar<int>()));
@@ -650,11 +730,22 @@ namespace dyno
 		else if (template_name == std::string(typeid(Vec3f).name()))
 		{
 			auto fw = new QVector3FieldWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
+			layout->addWidget(fw, j, 0);
+		}
+		else if (template_name == std::string(typeid(Vec3i).name()))
+		{
+			auto fw = new QVector3iFieldWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
 			layout->addWidget(fw, j, 0);
 		}
 		else if (template_name == std::string(typeid(FilePath).name()))
 		{
 			auto fw = new QStringFieldWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
 			layout->addWidget(fw, j, 0);
 		}
 	}
@@ -668,7 +759,7 @@ namespace dyno
 	void PPropertyWidget::addStateFieldWidget(FBase* field)
 	{
 		auto widget = new QStateFieldWidget(field);
-		connect(widget, &QStateFieldWidget::stateUpdated, this, &PPropertyWidget::fieldUpdated);
+		connect(widget, &QStateFieldWidget::stateUpdated, this, &PPropertyWidget::stateFieldUpdated);
 		mPropertyLayout[1]->addWidget(widget);
 	}
 }

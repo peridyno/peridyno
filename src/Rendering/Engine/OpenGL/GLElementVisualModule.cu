@@ -355,7 +355,7 @@ namespace dyno
 		unsigned int subroutine;
 		if (pass == RenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", mBaseColor);
+			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
 			mShaderProgram.setFloat("uMetallic", mMetallic);
 			mShaderProgram.setFloat("uRoughness", mRoughness);
 			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!

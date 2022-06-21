@@ -53,7 +53,7 @@ namespace dyno
 
 		if (this->varColorMode()->getValue() == 0)
 		{
-			RenderTools::setupColor(mColorBuffer, mBaseColor);
+			RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
 		}
 		else
 		{
@@ -63,7 +63,7 @@ namespace dyno
 			}
 			else
 			{
-				RenderTools::setupColor(mColorBuffer, mBaseColor);
+				RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
 			}
 		}
 
@@ -79,7 +79,7 @@ namespace dyno
 		unsigned int subroutine;
 		if (mode == RenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", mBaseColor);
+			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
 			mShaderProgram.setFloat("uMetallic", mMetallic);
 			mShaderProgram.setFloat("uRoughness", mRoughness);
 			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!

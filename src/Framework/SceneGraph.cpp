@@ -238,6 +238,11 @@ namespace dyno
 		//m_root->traverseBottomUp();
 	}
 
+	void SceneGraph::reset(std::shared_ptr<Node> node)
+	{
+		this->traverseForward<ResetAct>(node);
+	}
+
 	void SceneGraph::printNodeInfo(bool enabled)
 	{
 		mNodeTiming = enabled;
@@ -439,6 +444,29 @@ namespace dyno
 			act->process(node);
 			act->end(node);
 		}
+	}
+
+	void SceneGraph::traverseForward(std::shared_ptr<Node> node, Action* act)
+	{
+		std::map<ObjectId, bool> visited;
+		for (auto& nm : mNodeMap) {
+			visited[nm.first] = false;
+		}
+
+		NodeList list;
+		DFS(node.get(), list, visited);
+
+		for (auto it = list.begin(); it != list.end(); ++it)
+		{
+			Node* node = *it;
+
+			act->start(node);
+			act->process(node);
+			act->end(node);
+		}
+
+		list.clear();
+		visited.clear();
 	}
 
 	void SceneGraph::deleteNode(std::shared_ptr<Node> node)

@@ -30,6 +30,8 @@ if(PERIDYNO_Qt5_GUI)
             -Wl,--whole-archive
             Core 
             Framework 
+            Modeling
+            Interaction
             IO 
             ParticleSystem  
             QtGUI
@@ -41,6 +43,8 @@ if(PERIDYNO_Qt5_GUI)
         target_link_libraries(${PROJECT_NAME} PUBLIC
             Core 
             Framework 
+            Modeling
+            Interaction
             IO 
             ParticleSystem 
 			RigidBody
@@ -49,13 +53,17 @@ if(PERIDYNO_Qt5_GUI)
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
+           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoInteraction-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
+           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoInteraction-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
