@@ -63,7 +63,6 @@ namespace dyno
 		return true;
 	}
 
-
 	void GLPointVisualModule::updateGL()
 	{
 		auto pPointSet = this->inPointSet()->getDataPtr();

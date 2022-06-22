@@ -5,6 +5,8 @@
 #include "CubeModel.h"
 #include "SphereModel.h"
 
+#include "CubeSampler.h"
+
 #include "StaticTriangularMesh.h"
 #include "GLSurfaceVisualModule.h"
 
@@ -44,6 +46,13 @@ namespace dyno
 				node->graphicsPipeline()->pushModule(module);
 
 				return node;
+			});
+
+		group->addAction(
+			"Cube Sampler",
+			"48px-Image-x-generic.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<CubeSampler<DataType3f>>();
 			});
 
 		group->addAction(

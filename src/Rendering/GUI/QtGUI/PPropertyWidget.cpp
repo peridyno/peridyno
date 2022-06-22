@@ -724,6 +724,7 @@ namespace dyno
 		else if (template_name == std::string(typeid(float).name()))
 		{
 			auto fw = new QRealFieldWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
 			layout->addWidget(fw ,j, 0);
 		}
