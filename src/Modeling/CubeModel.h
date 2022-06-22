@@ -31,8 +31,6 @@ namespace dyno
 		CubeModel();
 
 	public:
-		DEF_VAR(Coord, Center, 0, "Sphere center");
-
 		DEF_VAR(Vec3f, Length, Real(1), "Edge length");
 
 		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");

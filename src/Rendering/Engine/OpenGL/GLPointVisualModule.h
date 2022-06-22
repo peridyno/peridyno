@@ -38,8 +38,8 @@ namespace dyno
 		GLPointVisualModule();
 		~GLPointVisualModule() override;
 
-		void setPointSize(float size);
-		float getPointSize() const;
+// 		void setPointSize(float size);
+// 		float getPointSize() const;
 
 		void setColorMapMode(ColorMapMode mode);
 		void setColorMapRange(float vmin, float vmax);
@@ -49,8 +49,11 @@ namespace dyno
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
+	public:
+		DEF_VAR(float, PointSize, 0.001f, "Size of rendered particles");
+
 	protected:
-		virtual void paintGL(RenderPass mode) override;
+		virtual void paintGL(RenderPass pass) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
@@ -60,7 +63,6 @@ namespace dyno
 		GLCudaBuffer	mPosition;
 		GLCudaBuffer	mColor;
 
-		float			mPointSize;
 		gl::VertexArray	mVertexArray;
 
 		gl::Program mShaderProgram;

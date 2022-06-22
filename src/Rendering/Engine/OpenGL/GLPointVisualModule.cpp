@@ -15,9 +15,9 @@ namespace dyno
 
 	GLPointVisualModule::GLPointVisualModule()
 	{
-		mPointSize = 0.001f;
 		mNumPoints = 1;
 		this->setName("point_renderer");
+
 		this->inColor()->tagOptional(true);
 	}
 
@@ -26,15 +26,15 @@ namespace dyno
 		mColorBuffer.clear();
 	}
 
-	void GLPointVisualModule::setPointSize(float size)
-	{
-		mPointSize = size;
-	}
-
-	float GLPointVisualModule::getPointSize() const
-	{
-		return mPointSize;
-	}
+// 	void GLPointVisualModule::setPointSize(float size)
+// 	{
+// 		mPointSize = size;
+// 	}
+// 
+// 	float GLPointVisualModule::getPointSize() const
+// 	{
+// 		return mPointSize;
+// 	}
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
@@ -97,7 +97,7 @@ namespace dyno
 	void GLPointVisualModule::paintGL(RenderPass pass)
 	{
 		mShaderProgram.use();
-		mShaderProgram.setFloat("uPointSize", this->getPointSize());
+		mShaderProgram.setFloat("uPointSize", this->varPointSize()->getData());
 
 		unsigned int subroutine;
 		if (pass == RenderPass::COLOR)
