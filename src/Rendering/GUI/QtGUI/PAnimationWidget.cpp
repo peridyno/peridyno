@@ -115,7 +115,7 @@ namespace dyno
 				m_current_frame_spinbox->setEnabled(true);
 				m_slider->setEnabled(true);
 			}else{
-				PSimulationThread::instance()->f = 0;
+				PSimulationThread::instance()->setCurrentFrameNum(0);
 				PSimulationThread::instance()->resume();
 				m_startSim->setText("Pause");
 				m_resetSim->setDisabled(true);

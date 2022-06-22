@@ -41,7 +41,7 @@ namespace dyno
 
 		
 		while(true){
-			while(mRunning && f < mFrameNum)
+			while(mRunning && currentFrameNum < mFrameNum)
 			{
 				if (!mRendering)
 				{
@@ -53,7 +53,8 @@ namespace dyno
 						else {
 							scn->reset(mActiveNode);
 						}
-						f = 0;
+						currentFrameNum = 0;
+
 						mReset = false;
 					
 						emit(oneFrameFinished());
@@ -63,8 +64,7 @@ namespace dyno
 					{
 						scn->takeOneFrame();
 
-						f++;
-						currentFrameNum = f;
+						currentFrameNum++;
 
 						this->startRendering();
 					
@@ -107,5 +107,9 @@ namespace dyno
 
 	int PSimulationThread::getCurrentFrameNum() {
 		return currentFrameNum;
+	}
+
+	void PSimulationThread::setCurrentFrameNum(int f) {
+		currentFrameNum = f;
 	}
 }

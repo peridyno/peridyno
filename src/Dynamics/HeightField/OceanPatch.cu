@@ -159,6 +159,8 @@ namespace dyno {
     OceanPatch<TDataType>::OceanPatch(std::string name)
         : Node(name)
     {
+       
+        OceanPatch(512, 512, 8, name);
     }
 
     template<typename TDataType>
@@ -233,15 +235,17 @@ namespace dyno {
     {
         resetWindType();
 
-        cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
+        //cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
 
         int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
         m_h0.resize(mSpectrumWidth, mSpectrumHeight);
 
-        Vec2f* host_h0 = ( Vec2f* )malloc(spectrumSize);
-        generateH0(host_h0);
+        DArray2D<Coord> host_h0;
+        host_h0.resize(mSpectrumWidth, mSpectrumHeight);
+        host_h0(0, 0) = Vector<float, 2>(10, 10);
+        //generateH0(host_h0);
 
-        cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
+        //cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
         m_ht.resize(mResolution, mResolution);
         m_Dxt.resize(mResolution, mResolution);
@@ -261,7 +265,7 @@ namespace dyno {
     void OceanPatch<TDataType>::updateStates()
     {
 	    t += 0.016f;
-	    this->animate(t);
+	    //this->animate(t);
     }
 
     template<typename Coord>
@@ -358,12 +362,13 @@ namespace dyno {
         auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
         auto& shifts = topo->getDisplacement();
-
+        /*
         cuExecute2D(make_uint2(shifts.nx(), shifts.ny()),
             O_UpdateTopology,
             shifts,
             m_displacement,
             mChoppiness);
+            */
     }
 
     template<typename TDataType>
@@ -379,7 +384,7 @@ namespace dyno {
     }
 
     template<typename TDataType>
-    void OceanPatch<TDataType>::generateH0(Coord* h0)
+    void OceanPatch<TDataType>::generateH0(DArray2D<Coord> h0)
     {
         for (unsigned int y = 0; y <= mResolution; y++)
         {
@@ -401,9 +406,9 @@ namespace dyno {
                 float h0_re = Er * P * CUDART_SQRT_HALF_F;
                 float h0_im = Ei * P * CUDART_SQRT_HALF_F;
 
-                int i   = y * mSpectrumWidth + x;
-                h0[i].x = h0_re;
-                h0[i].y = h0_im;
+                int i = y * mSpectrumWidth + x;
+                //h0(x, y).x = h0_re;
+                //h0(x, y).y = h0_im;
             }
         }
     }

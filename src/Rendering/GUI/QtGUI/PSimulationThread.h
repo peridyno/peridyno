@@ -31,7 +31,8 @@ namespace dyno
 		void setTotalFrames(int num);
 
 		int getCurrentFrameNum();
-		int f = 0;
+
+		void setCurrentFrameNum(int f);
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
 
