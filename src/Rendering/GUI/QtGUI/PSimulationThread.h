@@ -31,7 +31,7 @@ namespace dyno
 		void setTotalFrames(int num);
 
 		int getCurrentFrameNum();
-
+		int f = 0;
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
 
@@ -40,6 +40,8 @@ namespace dyno
 	public slots:
 		void resetNode(std::shared_ptr<Node> node);
 
+
+		
 	private:
 		PSimulationThread();
 

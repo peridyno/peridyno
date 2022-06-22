@@ -28,7 +28,7 @@ namespace dyno
 		m_current_frame_spinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 		m_current_frame_spinbox->setMaximum(1000);
-		m_current_frame_spinbox->setValue(0);
+		m_current_frame_spinbox->setValue(400);
 
 		QGridLayout* GLayout = new QGridLayout;
 		m_slider = new PAnimationQSlider(this);
@@ -50,9 +50,25 @@ namespace dyno
 		}
 		frameLayout->addWidget(m_slider, 0, 0, 0 , (labelSize - 1) * 2);
 
-		// 连接信号槽（相互改变）
-		connect(m_current_frame_spinbox, SIGNAL(valueChanged(int)), m_slider, SLOT(setValue(int)));
-		connect(m_slider, SIGNAL(valueChanged(int)), m_current_frame_spinbox, SLOT(setValue(int)));
+		// 动态改变 Slider
+		void (QSpinBox:: * spSingal)(int) = &QSpinBox::valueChanged;
+		connect(m_current_frame_spinbox, spSingal, [=]() {
+			
+			if (m_current_frame_spinbox->value() % 100 == 0) {
+				totalFrame = m_current_frame_spinbox->value();
+			}
+			else {
+				totalFrame = m_current_frame_spinbox->value() /100;
+				totalFrame = (totalFrame + 1) * 100;
+			}
+
+			for (int i = 0; i < labelSize; i++) {
+				label[i]->setText(QString::number(totalFrame / 5 * i));
+			}
+			m_slider->setRange(0, totalFrame);
+			m_slider->setSingleStep(totalFrame / 20);
+		});
+	
 
 		QGridLayout* operationLayout = new QGridLayout();
 
@@ -88,22 +104,43 @@ namespace dyno
 
 	void PAnimationWidget::toggleSimulation()
 	{
-		if (m_startSim->isChecked())
-		{
-			PSimulationThread::instance()->resume();
-			m_startSim->setText("Pause");
-			m_resetSim->setDisabled(true);
-			m_current_frame_spinbox->setEnabled(false);
-			m_slider->setEnabled(false);
-		}
-		else
-		{
-			PSimulationThread::instance()->pause();
-			m_startSim->setText("Resume");
-			m_resetSim->setDisabled(false);
+		PSimulationThread::instance()->setTotalFrames(m_current_frame_spinbox->value());
+		if (PSimulationThread::instance()->getCurrentFrameNum() >= m_current_frame_spinbox->value()) {
+			if (m_resetSim->isEnabled() == false) {
+				m_startSim->setText("Finished");
+				m_startSim->setDisabled(true);
 
-			m_current_frame_spinbox->setEnabled(true);
-			m_slider->setEnabled(true);
+				m_resetSim->setDisabled(false);
+
+				m_current_frame_spinbox->setEnabled(true);
+				m_slider->setEnabled(true);
+			}else{
+				PSimulationThread::instance()->f = 0;
+				PSimulationThread::instance()->resume();
+				m_startSim->setText("Pause");
+				m_resetSim->setDisabled(true);
+				m_current_frame_spinbox->setEnabled(false);
+				m_slider->setEnabled(false);
+			}
+		}
+		else {
+			if (m_startSim->isChecked())
+			{
+				PSimulationThread::instance()->resume();
+				m_startSim->setText("Pause");
+				m_resetSim->setDisabled(true);
+				m_current_frame_spinbox->setEnabled(false);
+				m_slider->setEnabled(false);
+			}
+			else
+			{	
+				PSimulationThread::instance()->pause();
+				m_startSim->setText("Resume");
+				m_resetSim->setDisabled(false);
+
+				m_current_frame_spinbox->setEnabled(true);
+				m_slider->setEnabled(true);
+			}
 		}
 	
 	}
@@ -114,7 +151,6 @@ namespace dyno
 		m_startSim->setText("Start");
 		m_startSim->setEnabled(true);
 
-
 		m_current_frame_spinbox->setEnabled(true);
 		m_slider->setEnabled(true);
 		m_slider->setValue(0);
@@ -124,12 +160,14 @@ namespace dyno
 	{
 		m_startSim->setText("Finished");
 		m_startSim->setDisabled(true);
+
 		m_resetSim->setDisabled(false);
 
 		m_current_frame_spinbox->setEnabled(true);
 		m_slider->setEnabled(true);
-	}
 
+	}
+	
 	void PAnimationWidget::updateSlider() {
 		int CurrentFrameNum = PSimulationThread::instance()->getCurrentFrameNum();
 	

@@ -112,7 +112,7 @@ namespace dyno
 		inline float getTimeCostPerFrame() { return mFrameCost; }
 		inline float getFrameInterval() { return 1.0f / mFrameRate; }
 		inline int getFrameNumber() { return mFrameNumber; }
-
+		
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
 

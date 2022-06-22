@@ -234,13 +234,14 @@ namespace dyno
 // 		}
 
 		this->traverseForward<ResetAct>();
-
+		this->mFrameNumber = 0;
 		//m_root->traverseBottomUp();
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
 	{
 		this->traverseForward<ResetAct>(node);
+		this->mFrameNumber = 0;
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)

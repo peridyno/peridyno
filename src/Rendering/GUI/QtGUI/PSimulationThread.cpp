@@ -39,37 +39,38 @@ namespace dyno
 		auto scn = SceneGraphFactory::instance()->active();
 //		scn->initialize();
 
-		int f = 0;
-		while(mRunning && f < mFrameNum)
-		{
-			if (!mRendering)
+		
+		while(true){
+			while(mRunning && f < mFrameNum)
 			{
-				if (mReset)
+				if (!mRendering)
 				{
-					if (mActiveNode == nullptr){
-						scn->reset();
-					}
-					else {
-						scn->reset(mActiveNode);
-					}
+					if (mReset)
+					{
+						if (mActiveNode == nullptr){
+							scn->reset();
+						}
+						else {
+							scn->reset(mActiveNode);
+						}
+						f = 0;
+						mReset = false;
 					
-					mReset = false;
+						emit(oneFrameFinished());
+					}
 
-					emit(oneFrameFinished());
-				}
+					if (!mPaused)
+					{
+						scn->takeOneFrame();
 
-				if (!mPaused)
-				{
-					scn->takeOneFrame();
+						f++;
+						currentFrameNum = f;
 
-					f++;
-					currentFrameNum = f;
-
-					this->startRendering();
+						this->startRendering();
 					
-					emit(oneFrameFinished());
+						emit(oneFrameFinished());
+					}
 				}
-				
 			}
 //	
 		}
