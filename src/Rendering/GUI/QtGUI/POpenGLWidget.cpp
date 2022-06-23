@@ -36,6 +36,8 @@ namespace dyno
 		timer.start(16);
 
 		mRenderEngine = engine;
+
+		setFocusPolicy(Qt::StrongFocus);
 	}
 
 	POpenGLWidget::~POpenGLWidget()
