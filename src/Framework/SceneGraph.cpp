@@ -228,14 +228,12 @@ namespace dyno
 
 	void SceneGraph::reset()
 	{
-// 		if (mRoot == nullptr)
-// 		{
-// 			return;
-// 		}
-
 		this->traverseForward<ResetAct>();
+	}
 
-		//m_root->traverseBottomUp();
+	void SceneGraph::reset(std::shared_ptr<Node> node)
+	{
+		this->traverseForward<ResetAct>(node);
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
@@ -317,6 +315,7 @@ namespace dyno
 		this->traverseForward(&eventAct);
 	}
 
+	//Used to traverse the whole scene graph
 	void DFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
 
 		visited[node->objectId()] = true;
@@ -347,7 +346,7 @@ namespace dyno
 		auto exports = node->getExportNodes();
 		for (auto port : exports) {
 			auto exNode = port->getParent();
-			if (exNode != nullptr && !visited[node->objectId()]) {
+			if (exNode != nullptr && !visited[exNode->objectId()]) {
 				DFS(exNode, nodeQueue, visited);
 			}
 		}
@@ -358,8 +357,37 @@ namespace dyno
 			for each (auto sink in sinks) {
 				if (sink != nullptr) {
 					auto exNode = dynamic_cast<Node*>(sink->parent());
-					if (exNode != nullptr && !visited[node->objectId()]) {
+					if (exNode != nullptr && !visited[exNode->objectId()]) {
 						DFS(exNode, nodeQueue, visited);
+					}
+				}
+			}
+		}
+	};
+
+	//Used to traverse the scene graph from a specific node
+	void BFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
+
+		visited[node->objectId()] = true;
+
+		nodeQueue.push_back(node);
+
+		auto exports = node->getExportNodes();
+		for (auto port : exports) {
+			auto exNode = port->getParent();
+			if (exNode != nullptr && !visited[node->objectId()]) {
+				BFS(exNode, nodeQueue, visited);
+			}
+		}
+
+		auto outFields = node->getOutputFields();
+		for each (auto f in outFields) {
+			auto& sinks = f->getSinks();
+			for each (auto sink in sinks) {
+				if (sink != nullptr) {
+					auto exNode = dynamic_cast<Node*>(sink->parent());
+					if (exNode != nullptr && !visited[exNode->objectId()]) {
+						BFS(exNode, nodeQueue, visited);
 					}
 				}
 			}
@@ -439,6 +467,29 @@ namespace dyno
 			act->process(node);
 			act->end(node);
 		}
+	}
+
+	void SceneGraph::traverseForward(std::shared_ptr<Node> node, Action* act)
+	{
+		std::map<ObjectId, bool> visited;
+		for (auto& nm : mNodeMap) {
+			visited[nm.first] = false;
+		}
+
+		NodeList list;
+		BFS(node.get(), list, visited);
+
+		for (auto it = list.begin(); it != list.end(); ++it)
+		{
+			Node* node = *it;
+
+			act->start(node);
+			act->process(node);
+			act->end(node);
+		}
+
+		list.clear();
+		visited.clear();
 	}
 
 	void SceneGraph::deleteNode(std::shared_ptr<Node> node)

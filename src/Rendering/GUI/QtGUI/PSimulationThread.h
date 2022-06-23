@@ -7,6 +7,8 @@
 
 namespace dyno
 {
+	class Node;
+
 	class PSimulationThread : public QThread
 	{
 		Q_OBJECT
@@ -35,6 +37,9 @@ namespace dyno
 
 		void oneFrameFinished();
 
+	public slots:
+		void resetNode(std::shared_ptr<Node> node);
+
 	private:
 		PSimulationThread();
 
@@ -45,6 +50,8 @@ namespace dyno
 		bool mPaused = true;
 		bool mRendering = false;
 		bool mRunning = true;
+
+		std::shared_ptr<Node> mActiveNode = nullptr;
 
 		QMutex mMutex;
 	};

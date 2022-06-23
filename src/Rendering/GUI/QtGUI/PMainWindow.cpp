@@ -148,7 +148,11 @@ namespace dyno
 
 		
 		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::dynoNodePlaced);
-//		connect(m_scenegraphWidget, &PSceneGraphWidget::notifyNodeDoubleClicked, m_moduleFlowView->getModuleFlowScene(), &QtNodes::QtModuleFlowScene::showNodeFlow);
+		connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
+
+		connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
+
+		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), mOpenGLWidget, SLOT(updateGraphicsContext()));
 
 		statusBar()->showMessage(tr("Status Bar"));
 
@@ -223,9 +227,7 @@ namespace dyno
 		//Setup animation widget
 		m_animationWidget = new PAnimationWidget(this);
 		m_animationWidget->layout()->setMargin(0);
-		
-		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), mOpenGLWidget, SLOT(updateGraphicsContext()));
-		
+
  	//	QWidget* viewWidget = new QWidget();
  	//	QHBoxLayout* hLayout = new QHBoxLayout();
 	//	viewWidget->setLayout(hLayout);
@@ -445,7 +447,7 @@ namespace dyno
 
 		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
-		connect(m_propertyWidget, &PPropertyWidget::fieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::fieldUpdated);
+		connect(m_propertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::fieldUpdated);
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)

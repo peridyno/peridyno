@@ -38,7 +38,7 @@ namespace dyno
 		void setRoughness(float roughness);
 		void setAlpha(float alpha);
 
-		Vec3f getColor() const { return mBaseColor; }
+		//Vec3f getColor() const { return mBaseColor; }
 		float getMetallic() const { return mMetallic; }
 		float getRoughness() const { return mRoughness; }
 		float getAlpha() const { return mAlpha; }
@@ -46,6 +46,10 @@ namespace dyno
 		virtual bool isTransparent() const;
 
 		void draw(RenderPass pass);
+
+	public:
+		DEF_VAR(Vec3f, BaseColor, Vec3f(0.8f), "");
+
 
 	protected:
 		virtual bool initializeGL() = 0;
@@ -59,7 +63,6 @@ namespace dyno
 
 	protected:
 		// material properties
-		Vec3f			mBaseColor = Vec3f(0.8f);
 		float			mMetallic = 0.0f;
 		float			mRoughness = 0.5f;
 		float			mAlpha = 1.f;		

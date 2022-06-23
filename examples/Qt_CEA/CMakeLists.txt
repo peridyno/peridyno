@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-if(PERIDYNO_Qt5_GUI)
+if(PERIDYNO_Qt5_GUI AND PERIDYNO_LIBRARY_GMSH)
 
-    set(PROJECT_NAME Qt_GUI)
+    set(PROJECT_NAME Qt_CEA)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
 
@@ -10,6 +10,8 @@ if(PERIDYNO_Qt5_GUI)
         message("Find QT5")
         link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui)
     endif()
+
+    link_libraries(${GMSH_EXTERNAL_LIBRARIES})
 
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/${PROJECT_NAME}")
 
@@ -30,12 +32,9 @@ if(PERIDYNO_Qt5_GUI)
             -Wl,--whole-archive
             Core 
             Framework 
-            Modeling
-            Interaction
             IO 
-            ParticleSystem  
+            GmshIO
             QtGUI
-			RigidBody
 			GLRenderEngine
             -Wl,--no-whole-archive) 
 
@@ -43,30 +42,25 @@ if(PERIDYNO_Qt5_GUI)
         target_link_libraries(${PROJECT_NAME} PUBLIC
             Core 
             Framework 
-            Modeling
-            Interaction
             IO 
-            ParticleSystem 
-			RigidBody
+            GmshIO
             QtGUI
 			GLRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoInteraction-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
+           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
+            /WHOLEARCHIVE:dynoGmshIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
+            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:GLRenderEngined.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoInteraction-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
+           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
+            /WHOLEARCHIVE:dynoGmshIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
+            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:GLRenderEngine.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")
     endif()

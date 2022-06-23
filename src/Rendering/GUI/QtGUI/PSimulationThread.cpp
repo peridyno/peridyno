@@ -46,7 +46,13 @@ namespace dyno
 			{
 				if (mReset)
 				{
-					scn->reset();
+					if (mActiveNode == nullptr){
+						scn->reset();
+					}
+					else {
+						scn->reset(mActiveNode);
+					}
+					
 					mReset = false;
 
 					emit(oneFrameFinished());
@@ -72,6 +78,15 @@ namespace dyno
 	void PSimulationThread::reset()
 	{
 		mReset = true;
+
+		mActiveNode = nullptr;
+	}
+
+	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
+	{
+		mReset = true;
+
+		mActiveNode = node;
 	}
 
 	void PSimulationThread::startRendering()

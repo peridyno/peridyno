@@ -51,6 +51,8 @@ namespace dyno
 
 		void reset();
 
+		void reset(std::shared_ptr<Node> node);
+
 		void printNodeInfo(bool enabled);
 		void printModuleInfo(bool enabled);
 
@@ -164,6 +166,20 @@ namespace dyno
 		void traverseForward(Args&& ... args) {
 			Act action(std::forward<Args>(args)...);
 			traverseForward(&action);
+		}
+
+		/**
+		 * @brief Breadth-first tree traversal starting from a specific node
+		 *
+		 * @param node  Root node
+		 * @param act 	Operation on the node
+		 */
+		void traverseForward(std::shared_ptr<Node> node, Action* act);
+
+		template<class Act, class ... Args>
+		void traverseForward(std::shared_ptr<Node> node, Args&& ... args) {
+			Act action(std::forward<Args>(args)...);
+			traverseForward(node, &action);
 		}
 
 	protected:

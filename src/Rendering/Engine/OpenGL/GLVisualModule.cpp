@@ -29,7 +29,7 @@ namespace dyno
 
 	void GLVisualModule::setColor(const Vec3f& color)
 	{
-		mBaseColor = color;
+		this->varBaseColor()->setValue(color);
 	}
 
 	void GLVisualModule::setMetallic(float m)

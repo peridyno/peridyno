@@ -1,6 +1,8 @@
 #pragma once
 #include "Node.h"
 
+#include "FilePath.h"
+
 namespace dyno
 {
 	/*!
@@ -17,6 +19,6 @@ namespace dyno
 		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
 		DEF_VAR(Vec3f, Scale, 0, "Node scale");
 
-		DEF_VAR(std::string, FileName, "", "");
+		DEF_VAR(FilePath, FileName, "", "");
 	};
 }

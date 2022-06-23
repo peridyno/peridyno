@@ -15,9 +15,9 @@ namespace dyno
 
 	GLPointVisualModule::GLPointVisualModule()
 	{
-		mPointSize = 0.001f;
 		mNumPoints = 1;
 		this->setName("point_renderer");
+
 		this->inColor()->tagOptional(true);
 	}
 
@@ -26,15 +26,15 @@ namespace dyno
 		mColorBuffer.clear();
 	}
 
-	void GLPointVisualModule::setPointSize(float size)
-	{
-		mPointSize = size;
-	}
-
-	float GLPointVisualModule::getPointSize() const
-	{
-		return mPointSize;
-	}
+// 	void GLPointVisualModule::setPointSize(float size)
+// 	{
+// 		mPointSize = size;
+// 	}
+// 
+// 	float GLPointVisualModule::getPointSize() const
+// 	{
+// 		return mPointSize;
+// 	}
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
@@ -63,7 +63,6 @@ namespace dyno
 		return true;
 	}
 
-
 	void GLPointVisualModule::updateGL()
 	{
 		auto pPointSet = this->inPointSet()->getDataPtr();
@@ -77,7 +76,7 @@ namespace dyno
 
 		if (mColorMode == ColorMapMode::PER_OBJECT_SHADER)
 		{
-			RenderTools::setupColor(mColorBuffer, mBaseColor);
+			RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
 		}
 		else
 		{
@@ -87,7 +86,7 @@ namespace dyno
 			}
 			else 
 			{
-				RenderTools::setupColor(mColorBuffer, mBaseColor);
+				RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
 			}
 		}
 
@@ -98,12 +97,12 @@ namespace dyno
 	void GLPointVisualModule::paintGL(RenderPass pass)
 	{
 		mShaderProgram.use();
-		mShaderProgram.setFloat("uPointSize", this->getPointSize());
+		mShaderProgram.setFloat("uPointSize", this->varPointSize()->getData());
 
 		unsigned int subroutine;
 		if (pass == RenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", mBaseColor);
+			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
 			mShaderProgram.setFloat("uMetallic", mMetallic);
 			mShaderProgram.setFloat("uRoughness", mRoughness);
 			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!

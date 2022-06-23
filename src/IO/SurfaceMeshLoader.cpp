@@ -19,6 +19,12 @@ namespace dyno
 	template<typename TDataType>
 	void SurfaceMeshLoader<TDataType>::resetStates()
 	{
+		if (this->varFileName()->getData() == "")
+		{
+			Log::sendMessage(Log::Error, "File name is not set!");
+			return;
+		}
+
 		if (this->outTriangleSet()->getDataPtr() == nullptr) {
 			this->outTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		}
@@ -27,7 +33,7 @@ namespace dyno
 
 		auto topo = this->outTriangleSet()->getDataPtr();
 
-		topo->loadObjFile(filename);
+		topo->loadObjFile(filename.string());
 
 		topo->scale(this->varScale()->getData());
 		topo->translate(this->varLocation()->getData());

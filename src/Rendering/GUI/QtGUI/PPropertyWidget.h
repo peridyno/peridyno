@@ -110,6 +110,27 @@ namespace dyno
 		mDoubleSpinBox* spinner3;
 	};
 
+	class QVector3iFieldWidget : public QGroupBox
+	{
+		Q_OBJECT
+	public:
+		QVector3iFieldWidget(FBase* field);
+		~QVector3iFieldWidget() {};
+
+	Q_SIGNALS:
+		void fieldChanged();
+
+	public slots:
+		void changeValue(int);
+
+	private:
+		FBase* mField = nullptr;
+
+		QSpinBox* spinner1;
+		QSpinBox* spinner2;
+		QSpinBox* spinner3;
+	};
+
 	class QStringFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
@@ -162,15 +183,19 @@ namespace dyno
 		void removeAllWidgets();
 
 	signals:
-		void fieldUpdated(FBase* field, int status);
+		void nodeUpdated(std::shared_ptr<Node> node);
+		void moduleUpdated(std::shared_ptr<Module> node);
+
+		void stateFieldUpdated(FBase* field, int status);
 
 	public slots:
-		void showProperty(Module* module);
-		void showProperty(Node* node);
+		void showProperty(std::shared_ptr<Module> module);
+		void showProperty(std::shared_ptr<Node> node);
 
 		void showNodeProperty(Qt::QtNode& block);
 
-		void updateDisplay();
+		//A slot to receive a message when any field widget is updated
+		void contentUpdated();
 
 	private:
 		void updateContext(OBase* base);
@@ -192,6 +217,7 @@ namespace dyno
 		QGridLayout* mPropertyLayout[3];
 		bool mFlag[3];
 
+		std::shared_ptr<OBase> mSeleted = nullptr;
 	};
 
 }
