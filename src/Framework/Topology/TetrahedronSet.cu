@@ -107,7 +107,7 @@ namespace dyno
 	}
 
 	template<typename Tetrahedron>
-	__global__ void TS_CountTets(
+	__global__ void TetSet_CountTets(
 		DArray<int> counter,
 		DArray<Tetrahedron> tets)
 	{
@@ -123,7 +123,7 @@ namespace dyno
 	}
 
 	template<typename Tetrahedron>
-	__global__ void TS_SetupTetIds(
+	__global__ void TetSet_SetupTetIds(
 		DArrayList<int> tetIds,
 		DArray<Tetrahedron> tets)
 	{
@@ -146,7 +146,7 @@ namespace dyno
 		counter.reset();
 
 		cuExecute(m_tethedrons.size(),
-			TS_CountTets,
+			TetSet_CountTets,
 			counter,
 			m_tethedrons);
 
@@ -154,7 +154,7 @@ namespace dyno
 
 		counter.reset();
 		cuExecute(m_tethedrons.size(),
-			TS_SetupTetIds,
+			TetSet_SetupTetIds,
 			m_ver2Tet,
 			m_tethedrons);
 
@@ -170,7 +170,7 @@ namespace dyno
 	}
 
 	template<typename TKey, typename Tetrahedron>
-	__global__ void TS_SetupKeys(
+	__global__ void TetSet_SetupKeys(
 		DArray<TKey> keys,
 		DArray<int> ids,
 		DArray<Tetrahedron> tets)
@@ -191,7 +191,7 @@ namespace dyno
 	}
 
 	template<typename TKey>
-	__global__ void TS_CountTriangleNumber(
+	__global__ void TetSet_CountTriangleNumber(
 		DArray<int> counter,
 		DArray<TKey> keys) 
 	{
@@ -205,7 +205,7 @@ namespace dyno
 	}
 
 	template<typename Triangle, typename Tri2Tet, typename TKey>
-	__global__ void TS_SetupTriangles(
+	__global__ void TetSet_SetupTriangles(
 		DArray<Triangle> triangles,
 		DArray<Tri2Tet> tri2Tet,
 		DArray<TKey> keys,
@@ -263,6 +263,7 @@ namespace dyno
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::updateTriangles()
 	{
+		
 		uint tetSize = m_tethedrons.size();
 
 		DArray<TKey> keys;
@@ -272,7 +273,7 @@ namespace dyno
 		tetIds.resize(4 * tetSize);
 
 		cuExecute(tetSize,
-			TS_SetupKeys,
+			TetSet_SetupKeys,
 			keys,
 			tetIds,
 			m_tethedrons);
@@ -283,7 +284,7 @@ namespace dyno
 		counter.resize(4 * tetSize);
 
 		cuExecute(keys.size(),
-			TS_CountTriangleNumber,
+			TetSet_CountTriangleNumber,
 			counter,
 			keys);
 
@@ -292,10 +293,12 @@ namespace dyno
 
 		tri2Tet.resize(triNum);
 
+		printf("tetTriSize = %d\n", triNum);
+
 		auto& pTri = this->getTriangles();
 		pTri.resize(triNum);
 		cuExecute(keys.size(),
-			TS_SetupTriangles,
+			TetSet_SetupTriangles,
 			pTri,
 			tri2Tet,
 			keys,
