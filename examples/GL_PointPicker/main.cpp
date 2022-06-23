@@ -65,13 +65,13 @@ int main(int, char**)
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
 	auto instanceRender1 = std::make_shared<GLPointVisualModule>();
-	instanceRender1->setPointSize(0.02f);
+	instanceRender1->varPointSize()->setValue(0.02f);
 	instanceRender1->setColor(Vec3f(1, 0, 0));
 	pointPickerNode->stateSelectedTopology()->connect(instanceRender1->inPointSet());
 	pointPickerNode->graphicsPipeline()->pushModule(instanceRender1);
 
 	auto instanceRender2 = std::make_shared<GLPointVisualModule>();
-	instanceRender2->setPointSize(0.01f);
+	instanceRender2->varPointSize()->setValue(0.01f);
 	instanceRender2->setColor(Vec3f(0, 0, 1));
 	pointPickerNode->stateOtherTopology()->connect(instanceRender2->inPointSet());
 	pointPickerNode->graphicsPipeline()->pushModule(instanceRender2);
