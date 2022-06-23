@@ -1,4 +1,4 @@
-#include "CustomMouseInteraction.h"
+#include "SurfaceInteraction.h"
 #include <thrust/sort.h>
 #include <iostream>
 #include <OrbitCamera.h>
@@ -6,7 +6,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	CustomMouseIteraction<TDataType>::CustomMouseIteraction()
+	 SurfaceIteraction<TDataType>::SurfaceIteraction()
 	{
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
@@ -14,7 +14,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CustomMouseIteraction<TDataType>::onEvent(PMouseEvent event)
+	void SurfaceIteraction<TDataType>::onEvent(PMouseEvent event)
 	{
 		if (camera == nullptr)
 		{
@@ -140,7 +140,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CustomMouseIteraction<TDataType>::calcIntersectClick()
+	void SurfaceIteraction<TDataType>::calcIntersectClick()
 	{
 		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
 		DArray<Coord> points = initialTriangleSet.getPoints();
@@ -189,7 +189,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CustomMouseIteraction<TDataType>::calcIntersectDrag()
+	void SurfaceIteraction<TDataType>::calcIntersectDrag()
 	{
 		TRay3D<Real> ray1 = this->ray1;
 		TRay3D<Real> ray2 = this->ray2;
@@ -258,5 +258,5 @@ namespace dyno
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
 	}
-	DEFINE_CLASS(CustomMouseIteraction);
+	DEFINE_CLASS(SurfaceIteraction);
 }

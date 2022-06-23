@@ -6,23 +6,22 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class CustomMouseIteraction : public InputMouseModule
+	class PointIteraction : public InputMouseModule
 	{
-	DECLARE_TCLASS(CustomMouseIteraction, TDataType)
+		DECLARE_TCLASS(PointIteraction, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
-		CustomMouseIteraction();
-		virtual ~CustomMouseIteraction() {};
+		PointIteraction();
+		virtual ~PointIteraction() {};
 
 		void calcIntersectClick();
 		void calcIntersectDrag();
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
-		DEF_INSTANCE_OUT(TriangleSet<TDataType>, SelectedTriangleSet, "");
-		DEF_INSTANCE_OUT(TriangleSet<TDataType>, OtherTriangleSet, "");
+		DEF_INSTANCE_OUT(PointSet<TDataType>, SelectedPointSet, "");
+		DEF_INSTANCE_OUT(PointSet<TDataType>, OtherPointSet, "");
 
 	protected:
 		void onEvent(PMouseEvent event) override;
@@ -34,8 +33,9 @@ namespace dyno
 		Real y1;
 		Real x2;
 		Real y2;
+		Real r;
 		bool isPressed;
 	};
 
-	IMPLEMENT_TCLASS(CustomMouseIteraction, TDataType)
+	IMPLEMENT_TCLASS(PointIteraction, TDataType)
 }

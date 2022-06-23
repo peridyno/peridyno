@@ -90,6 +90,7 @@ namespace dyno
 		void loadSmeshFile(std::string filename);
 
 		DArray<Edge>& getEdges() {return m_edges;}
+		void setEdges(DArray<Edge>& edges);
 
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
 

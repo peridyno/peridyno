@@ -2,7 +2,7 @@
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 #include "Module/TopologyModule.h"
-#include "CustomMouseInteraction.h"
+#include "SurfaceInteraction.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -16,7 +16,7 @@ namespace dyno
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>,InTopology,"");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTopology, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTopology, "");
-		DEF_INSTANCE_STATE(CustomMouseIteraction<TDataType>, MouseInteractor, "");
+		DEF_INSTANCE_STATE(SurfaceIteraction<TDataType>, MouseInteractor, "");
 
 		SurfacePickerNode(std::string name = "default");
 		~SurfacePickerNode();

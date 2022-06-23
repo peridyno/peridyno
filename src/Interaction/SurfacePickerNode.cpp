@@ -1,5 +1,4 @@
 #include "SurfacePickerNode.h"
-#include "CustomMouseInteraction.h"
 #include <iostream>
 
 namespace dyno
@@ -10,7 +9,7 @@ namespace dyno
 	SurfacePickerNode<TDataType>::SurfacePickerNode(std::string name)
 		:Node(name)
 	{
-		auto mouseInteractor=std::make_shared<CustomMouseIteraction<TDataType>>();
+		auto mouseInteractor=std::make_shared<SurfaceIteraction<TDataType>>();
 		this->stateInTopology()->connect(mouseInteractor->inInitialTriangleSet());
 
 		this->stateSelectedTopology()->connect(mouseInteractor->outSelectedTriangleSet());
@@ -31,7 +30,6 @@ namespace dyno
 		this->stateOtherTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateOtherTopology()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
-		this->stateSelectedTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 	}
 
 	DEFINE_CLASS(SurfacePickerNode);
