@@ -12,6 +12,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TopologyModule::Triangle Triangle;
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>,InTopology,"");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTopology, "");

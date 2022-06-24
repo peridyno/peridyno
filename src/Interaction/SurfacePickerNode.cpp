@@ -29,6 +29,9 @@ namespace dyno
 	{
 		this->stateOtherTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		DArray<Triangle> t;
+		this->stateSelectedTopology()->getDataPtr()->setTriangles(t);
+		std::cout << this->stateSelectedTopology()->getDataPtr()->getTriangles().size()<<std::endl;
 		this->stateOtherTopology()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
 	}
 
