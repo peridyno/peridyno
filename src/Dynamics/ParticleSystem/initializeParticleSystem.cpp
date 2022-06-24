@@ -10,6 +10,8 @@
 
 #include "ParticleEmitterRound.h"
 #include "ParticleEmitterSquare.h"
+#include "ParticleFluid.h"
+#include "StaticBoundary.h"
 
 #include "NodeFactory.h"
 
@@ -51,7 +53,15 @@ namespace dyno
 		group->addAction(
 			"Particle Fluid",
 			"ToolBarIco/ParticleSystem/ParticleFluid.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleSystem<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleFluid<DataType3f>>(); });
+
+		group->addAction(
+			"Boundary",
+			"ToolBarIco/RigidBody/StaticBoundary.png",
+			[=]()->std::shared_ptr<Node> { 
+				auto  boundary = std::make_shared<StaticBoundary<DataType3f>>();
+				boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(0.5, 1, 0.5), 0.02, true);
+				return boundary; });
 	}
 
 }

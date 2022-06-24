@@ -31,6 +31,11 @@ namespace dyno
 		GLSurfaceVisualModule();
 
 	public:
+
+		//bool faceNormal = true;
+
+		DEF_VAR(bool, UsePhongShadingModel, false, "")
+
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
@@ -48,6 +53,7 @@ namespace dyno
 		gl::VertexArray	mVAO;
 
 		GLCudaBuffer	mVertexBuffer;
+		GLCudaBuffer	mNormalBuffer;
 		GLCudaBuffer 	mIndexBuffer;
 		GLCudaBuffer	mColor;
 

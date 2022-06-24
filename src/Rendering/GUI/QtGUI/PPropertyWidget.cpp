@@ -159,6 +159,7 @@ namespace dyno
 
 		QDoubleSpinner* spinner = new QDoubleSpinner;
 		spinner->setRange(m_field->getMin(), m_field->getMax());
+		spinner->setDecimals(3);
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(slider, 0, 1);
