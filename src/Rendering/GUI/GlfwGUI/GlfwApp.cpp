@@ -185,7 +185,7 @@ namespace dyno
 	{
 		auto activeScene = SceneGraphFactory::instance()->active();
 
-		activeScene->initialize();
+		activeScene->reset();
 
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
@@ -202,9 +202,9 @@ namespace dyno
 				}
 
 				activeScene->takeOneFrame();
-				activeScene->updateGraphicsContext();
 			}
 			
+			activeScene->updateGraphicsContext();
 				
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();

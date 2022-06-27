@@ -23,6 +23,13 @@ namespace dyno
 
 		m_reconstuct_all_neighborhood.setValue(false);
 		m_incompressible.setValue(true);
+
+		m_pbdModule = std::make_shared<DensityPBD<TDataType>>();
+		this->inTimeStep()->connect(m_pbdModule->inTimeStep());
+		this->inHorizon()->connect(m_pbdModule->varSmoothingLength());
+		this->inPosition()->connect(m_pbdModule->inPosition());
+		this->inVelocity()->connect(m_pbdModule->inVelocity());
+		this->inNeighborIds()->connect(m_pbdModule->inNeighborIds());
 	}
 
 	__device__ Real Hardening(Real rho)
@@ -234,6 +241,17 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::constrain()
 	{
+		if (m_invF.size() != this->inPosition()->size())
+		{
+			m_invF.resize(this->inPosition()->size());
+			m_yiled_I1.resize(this->inPosition()->size());
+			m_yield_J2.resize(this->inPosition()->size());
+			m_I1.resize(this->inPosition()->size());
+			m_bYield.resize(this->inPosition()->size());
+
+			m_bYield.reset();
+		}
+
 		this->solveElasticity();
 		this->applyPlasticity();
 	}
@@ -653,32 +671,6 @@ namespace dyno
 			this->inHorizon()->getData());
 		cuSynchronize();
 	}
-
-	template<typename TDataType>
-	bool ElastoplasticityModule<TDataType>::initializeImpl()
-	{
-		m_invF.resize(this->inPosition()->size());
-		m_yiled_I1.resize(this->inPosition()->size());
-		m_yield_J2.resize(this->inPosition()->size());
-		m_I1.resize(this->inPosition()->size());
-		m_bYield.resize(this->inPosition()->size());
-
-		m_bYield.reset();
-
-		m_pbdModule = std::make_shared<DensityPBD<TDataType>>();
-		this->inTimeStep()->connect(m_pbdModule->inTimeStep());
-		this->inHorizon()->connect(m_pbdModule->varSmoothingLength());
-		this->inPosition()->connect(m_pbdModule->inPosition());
-		this->inVelocity()->connect(m_pbdModule->inVelocity());
-		this->inNeighborIds()->connect(m_pbdModule->inNeighborIds());
-		m_pbdModule->initialize();
-
-		m_pbdModule->setParent(this->getParent());
-
-
-		return ElasticityModule<TDataType>::initializeImpl();
-	}
-
 
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::setCohesion(Real c)

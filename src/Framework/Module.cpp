@@ -140,9 +140,14 @@ namespace dyno
 		return isOutputCompete();
 	}
 
-	//TODO: check whether any of the input fields is updated
 	bool Module::requireUpdate()
 	{
+		//TODO: check whether a module without any input or control variables is allowed
+		if (fields_input.size() <= 0 && fields_param.size() <= 0)
+		{
+			return true;
+		}
+
 		//check input fields
 		bool modified = false;
 		for each (auto f_in in fields_input)
@@ -156,7 +161,7 @@ namespace dyno
 			modified |= var->isModified();
 		}
 
-		return true;
+		return modified;
 	}
 
 	void Module::setName(std::string name)
