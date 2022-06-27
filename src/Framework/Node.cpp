@@ -145,6 +145,17 @@ void Node::update()
 		this->postUpdateStates();
 
 		this->updateTopology();
+
+		std::vector<FBase*>& fields = this->getAllFields();
+		for each (FBase * var in fields)
+		{
+			if (var != nullptr) {
+				if (var->getFieldType() == FieldTypeEnum::State || var->getFieldType() == FieldTypeEnum::Out)
+				{
+					var->tick();
+				}
+			}
+		}
 	}
 }
 

@@ -23,6 +23,9 @@ namespace dyno {
 
 	using uint = unsigned int;
 
+	using uint64 = unsigned long long;
+	using int64 = signed long long;
+
 #define INVALID -1
 #define M_PI 3.14159265358979323846
 #define M_E 2.71828182845904523536
