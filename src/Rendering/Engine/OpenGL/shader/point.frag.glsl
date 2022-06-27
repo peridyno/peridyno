@@ -237,6 +237,6 @@ vec3 pbr()
 	}
 
 	vec3 ambient = light.ambient.rgb * light.ambient.a * vColor.rgb;
-	vec3 cameraLight = light.camera.rgb * light.camera.a * uBaseColor * abs(dotNV);
+	vec3 cameraLight = light.camera.rgb * light.camera.a * vColor * abs(dotNV);
 	return ambient + cameraLight + Lo;
 }
