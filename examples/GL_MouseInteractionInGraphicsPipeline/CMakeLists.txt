@@ -1,4 +1,4 @@
-set(PROJECT_NAME GL_MouseInteractionInGraphicsPipeline)
+set(PROJECT_NAME GL_MouseInteraction)
 
 set(LIB_SRC main.cpp CustomMouseInteraction.h CustomMouseInteraction.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})

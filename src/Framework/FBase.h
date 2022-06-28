@@ -187,10 +187,6 @@ std::shared_ptr<Data> allocate()									\
 	return data;													\
 }																	\
 \
-bool isEmpty() override {											\
-return this->getDataPtr() == nullptr;								\
-}																	\
-\
 bool connect(DerivedField* dst)										\
 {																	\
 	this->connectField(dst);										\

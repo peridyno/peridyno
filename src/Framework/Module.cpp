@@ -48,6 +48,13 @@ namespace dyno
 
 	void Module::update()
 	{
+		if (!isInitialized())
+		{
+			bool ret = initialize();
+			if (ret == false)
+				return;
+		}
+
 		this->updateStarted();
 
 		if (!this->validateInputs()) {
@@ -142,8 +149,7 @@ namespace dyno
 
 	bool Module::requireUpdate()
 	{
-		//TODO: check whether a module without any input or control variables is allowed
-		if (fields_input.size() <= 0 && fields_param.size() <= 0)
+		if (mUpdateAlways)
 		{
 			return true;
 		}
@@ -180,6 +186,11 @@ namespace dyno
 		return m_module_name;
 	}
 
+	void Module::setUpdateAlways(bool b)
+	{
+		mUpdateAlways = b;
+	}
+
 	bool Module::isInitialized()
 	{
 		return m_initialized;
@@ -187,12 +198,6 @@ namespace dyno
 
 	bool Module::initializeImpl()
 	{
-		if (m_node == nullptr)
-		{
-			Log::sendMessage(Log::Warning, "Parent is not set");
-			return false;
-		}
-
 		return true;
 	}
 

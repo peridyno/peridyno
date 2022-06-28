@@ -26,7 +26,7 @@ namespace dyno
 {
 	class GLWireframeVisualModule : public GLVisualModule
 	{
-		DECLARE_CLASS(GLSurfaceVisualModule)
+		DECLARE_CLASS(GLWireframeVisualModule)
 	public:
 		GLWireframeVisualModule();
 

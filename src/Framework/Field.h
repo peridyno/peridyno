@@ -43,6 +43,10 @@ namespace dyno {
 
 		void setValue(T val);
 		T getValue();
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T>
@@ -117,6 +121,10 @@ namespace dyno {
 		void assign(const T& val);
 		void assign(std::vector<T>& vals);
 		void assign(DArray<T>& vals);
+
+		bool isEmpty() override {
+			return this->size() == 0;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -231,6 +239,10 @@ namespace dyno {
 
 		void assign(CArray2D<T>& vals);
 		void assign(DArray2D<T>& vals);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -313,6 +325,10 @@ namespace dyno {
 
 		void assign(CArray3D<T>& vals);
 		void assign(DArray3D<T>& vals);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -391,6 +407,10 @@ namespace dyno {
 
 		void assign(const ArrayList<T, DeviceType::CPU>& src);
 		void assign(const ArrayList<T, DeviceType::GPU>& src);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>

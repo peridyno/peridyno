@@ -9,6 +9,7 @@ namespace dyno
 	template<typename TDataType>
 	class DiscreteElementsToTriangleSet : public TopologyMapping
 	{
+		DECLARE_TCLASS(DiscreteElementsToTriangleSet, TDataType);
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -26,4 +27,6 @@ namespace dyno
 		TriangleSet<TDataType> mStandardSphere;
 		TriangleSet<TDataType> mStandardCapsule;
 	};
+
+	IMPLEMENT_TCLASS(DiscreteElementsToTriangleSet, TDataType);
 }

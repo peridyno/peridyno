@@ -9,7 +9,7 @@ namespace dyno {
 	template<typename TDataType>
 	class CollistionDetectionBoundingBox : public CollisionModel
 	{
-		DECLARE_TCLASS(CollisionModel, TDataType)
+		DECLARE_TCLASS(CollistionDetectionBoundingBox, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;
@@ -34,4 +34,6 @@ namespace dyno {
 		Reduction<int> m_reduce;
 		Scan m_scan;
 	};
+
+	IMPLEMENT_TCLASS(CollistionDetectionBoundingBox, TDataType)
 }

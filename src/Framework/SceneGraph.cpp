@@ -308,6 +308,15 @@ namespace dyno
 						m->enqueueEvent(mMouseEvent);
 					}
 				}
+
+				for (auto iter : node->graphicsPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<InputMouseModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mMouseEvent);
+					}
+				}
 			}
 
 			PMouseEvent mMouseEvent;
