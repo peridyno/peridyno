@@ -214,8 +214,6 @@ namespace dyno
 
 	void SceneGraph::updateGraphicsContext()
 	{
-		mSync.lock();
-
 		class UpdateGrpahicsContextAct : public Action
 		{
 		public:
@@ -224,9 +222,13 @@ namespace dyno
 			}
 		};
 
-		this->traverseForward<UpdateGrpahicsContextAct>();
+		if (mSync.try_lock())
+		{
+			this->traverseForward<UpdateGrpahicsContextAct>();
 
-		mSync.unlock();
+			mSync.unlock();
+		}
+		
 	}
 
 	void SceneGraph::run()

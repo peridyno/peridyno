@@ -74,6 +74,12 @@ namespace dyno
 
 	void POpenGLWidget::paintGL()
 	{
+		PSimulationThread::instance()->startUpdatingGraphicsContext();
+
+		SceneGraphFactory::instance()->active()->updateGraphicsContext();
+
+		PSimulationThread::instance()->stopUpdatingGraphicsContext();
+
 		//QtImGui
 		QtImGui::newFrame();
 		
@@ -187,22 +193,6 @@ namespace dyno
 			activeCamera()->zoom(-0.001*event->angleDelta().y());
 
 		update();
-	}
-
-	void POpenGLWidget::updateGraphicsContext()
-	{
-		makeCurrent();
-
-		PSimulationThread::instance()->startRendering();
-
-		SceneGraphFactory::instance()->active()->updateGraphicsContext();
-
-		//Update QtWidget
-		update();
-
-		PSimulationThread::instance()->stopRendering();
-
-		doneCurrent();
 	}
 
 	std::shared_ptr<Camera> POpenGLWidget::activeCamera()

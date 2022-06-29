@@ -49,9 +49,6 @@ int main(int, char**)
 	//Create a CustomMouseIteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
 	auto mouseInterator = std::make_shared<CustomMouseIteraction>();
-
-	//To ensure mouseInterator can be still updated if the input fields are not updated.
-	mouseInterator->setUpdateAlways(true);
 	instanceNode->stateTopology()->connect(mouseInterator->inTopology());
 	instanceNode->graphicsPipeline()->pushModule(mouseInterator);
 

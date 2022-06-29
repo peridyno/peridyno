@@ -65,9 +65,6 @@ namespace dyno
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void wheelEvent(QWheelEvent *event) override;
 
-	public slots:
-		void updateGraphicsContext();
-
 	private:
 		std::shared_ptr<Camera> activeCamera();
 
