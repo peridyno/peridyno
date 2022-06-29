@@ -14,7 +14,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>,InTopology,"");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>,InTopology,"");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTopology, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTopology, "");
 		DEF_INSTANCE_STATE(SurfaceIteraction<TDataType>, MouseInteractor, "");

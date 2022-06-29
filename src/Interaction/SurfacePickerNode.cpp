@@ -1,5 +1,4 @@
 #include "SurfacePickerNode.h"
-#include <iostream>
 
 namespace dyno
 {
@@ -10,13 +9,13 @@ namespace dyno
 		:Node(name)
 	{
 		auto mouseInteractor=std::make_shared<SurfaceIteraction<TDataType>>();
-		this->stateInTopology()->connect(mouseInteractor->inInitialTriangleSet());
+		this->inInTopology()->connect(mouseInteractor->inInitialTriangleSet());
 
 		this->stateSelectedTopology()->connect(mouseInteractor->outSelectedTriangleSet());
 		this->stateOtherTopology()->connect(mouseInteractor->outOtherTriangleSet());
+		mouseInteractor->setUpdateAlways(true);
 		this->stateMouseInteractor()->setDataPtr(mouseInteractor);
-
-		this->animationPipeline()->pushModule(mouseInteractor);
+		this->graphicsPipeline()->pushModule(mouseInteractor);
 	}
 
 	template<typename TDataType>
@@ -29,10 +28,8 @@ namespace dyno
 	{
 		this->stateOtherTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		DArray<Triangle> t;
-		this->stateSelectedTopology()->getDataPtr()->setTriangles(t);
-		std::cout << this->stateSelectedTopology()->getDataPtr()->getTriangles().size()<<std::endl;
-		this->stateOtherTopology()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
+		this->stateSelectedTopology()->getDataPtr()->getTriangles().resize(0);
+		this->stateOtherTopology()->getDataPtr()->copyFrom(this->inInTopology()->getData());
 	}
 
 	DEFINE_CLASS(SurfacePickerNode);

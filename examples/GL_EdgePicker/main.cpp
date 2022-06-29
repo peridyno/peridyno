@@ -55,7 +55,7 @@ int main(int, char**)
 
 	//Create a CustomMouseIteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
-	instanceNode->stateTopology()->connect(edgePickerNode->stateInTopology());
+	instanceNode->stateTopology()->connect(edgePickerNode->inInTopology());
 
 
 

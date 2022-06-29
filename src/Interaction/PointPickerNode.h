@@ -13,7 +13,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InTopology, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, InTopology, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, SelectedTopology, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, OtherTopology, "");
 		DEF_INSTANCE_STATE(PointIteraction<TDataType>, MouseInteractor, "");

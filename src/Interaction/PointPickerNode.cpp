@@ -10,13 +10,15 @@ namespace dyno
 		:Node(name)
 	{
 		auto mouseInteractor = std::make_shared<PointIteraction<TDataType>>();
-		this->stateInTopology()->connect(mouseInteractor->inInitialTriangleSet());
+		this->inInTopology()->connect(mouseInteractor->inInitialTriangleSet());
 
 		this->stateSelectedTopology()->connect(mouseInteractor->outSelectedPointSet());
 		this->stateOtherTopology()->connect(mouseInteractor->outOtherPointSet());
+
+		mouseInteractor->setUpdateAlways(true);
 		this->stateMouseInteractor()->setDataPtr(mouseInteractor);
 
-		this->animationPipeline()->pushModule(mouseInteractor);
+		this->graphicsPipeline()->pushModule(mouseInteractor);
 	}
 
 	template<typename TDataType>
@@ -29,7 +31,7 @@ namespace dyno
 	{
 		this->stateOtherTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->stateSelectedTopology()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->stateOtherTopology()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
+		this->stateOtherTopology()->getDataPtr()->copyFrom(this->inInTopology()->getData());
 	}
 
 	DEFINE_CLASS(PointPickerNode);

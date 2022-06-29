@@ -10,13 +10,15 @@ namespace dyno
 		:Node(name)
 	{
 		auto mouseInteractor = std::make_shared<EdgeIteraction<TDataType>>();
-		this->stateInTopology()->connect(mouseInteractor->inInitialTriangleSet());
+		this->inInTopology()->connect(mouseInteractor->inInitialTriangleSet());
 
 		this->stateSelectedTopology()->connect(mouseInteractor->outSelectedEdgeSet());
 		this->stateOtherTopology()->connect(mouseInteractor->outOtherEdgeSet());
+
+		mouseInteractor->setUpdateAlways(true);
 		this->stateMouseInteractor()->setDataPtr(mouseInteractor);
 
-		this->animationPipeline()->pushModule(mouseInteractor);
+		this->graphicsPipeline()->pushModule(mouseInteractor);
 	}
 
 	template<typename TDataType>
@@ -27,10 +29,10 @@ namespace dyno
 	template<typename TDataType>
 	void EdgePickerNode<TDataType>::resetStates()
 	{
-		this->stateInTopology()->getDataPtr()->updateEdges();
+		this->inInTopology()->getDataPtr()->updateEdges();
 		this->stateOtherTopology()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 		this->stateSelectedTopology()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->stateOtherTopology()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
+		this->stateOtherTopology()->getDataPtr()->copyFrom(this->inInTopology()->getData());
 	}
 
 	DEFINE_CLASS(EdgePickerNode);
