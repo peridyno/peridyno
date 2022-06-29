@@ -8,6 +8,7 @@ namespace dyno
 	IterativeConstraintSolver<TDataType>::IterativeConstraintSolver()
 		: ConstraintModule()
 	{
+		this->inContacts()->tagOptional(true);
 	}
 
 	template<typename TDataType>
@@ -150,27 +151,38 @@ namespace dyno
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::constrain()
 	{
-		Real dt = this->inTimeStep()->getData();
-		//construct j
-		initializeJacobian(dt);
-
-		int size_constraints = mAllConstraints.size();
-		for (int i = 0; i < this->varIterationNumber()->getData(); i++)
+		uint num = this->inCenter()->size();
+		if (mAccel.size() != num * 2)
 		{
-			cuExecute(size_constraints,
-				TakeOneJacobiIteration,
-				mLambda,
-				mAccel,
-				mD,
-				mJ,
-				mB,
-				mEta,
-				this->inMass()->getData(),
-				mAllConstraints,
-				mContactNumber);
+			mAccel.resize(num * 2);
 		}
 
-		uint num = this->inCenter()->size();
+		mAccel.reset();
+
+		Real dt = this->inTimeStep()->getData();
+		//construct j
+
+		if (!this->inContacts()->isEmpty())
+		{
+			initializeJacobian(dt);
+
+			int size_constraints = mAllConstraints.size();
+			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
+			{
+				cuExecute(size_constraints,
+					TakeOneJacobiIteration,
+					mLambda,
+					mAccel,
+					mD,
+					mJ,
+					mB,
+					mEta,
+					this->inMass()->getData(),
+					mAllConstraints,
+					mContactNumber);
+			}
+		}
+
 		cuExecute(num,
 			RB_UpdateVelocity,
 			this->inVelocity()->getData(),
@@ -413,6 +425,9 @@ namespace dyno
 	{
 		//int sizeOfContacts = mBoundaryContacts.size() + contacts.size();
 
+		if (this->inContacts()->isEmpty())
+			return;
+
 		auto& contacts = this->inContacts()->getData();
 		int sizeOfContacts = contacts.size();
  		int sizeOfConstraints = sizeOfContacts;
@@ -441,8 +456,6 @@ namespace dyno
 		mEta.resize(sizeOfConstraints);
 		mLambda.resize(sizeOfConstraints);
 
-		mAccel.resize(this->inCenter()->size() * 2);
-
 		auto sizeOfRigids = this->inCenter()->size();
 		mContactNumber.resize(sizeOfRigids);
 
@@ -450,7 +463,6 @@ namespace dyno
 		mB.reset();
 		mD.reset();
 		mEta.reset();
-		mAccel.reset();
 		mLambda.reset();
 		mContactNumber.reset();
 

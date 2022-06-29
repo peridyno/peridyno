@@ -48,6 +48,13 @@ namespace dyno
 
 	void Module::update()
 	{
+		if (!isInitialized())
+		{
+			bool ret = initialize();
+			if (ret == false)
+				return;
+		}
+
 		this->updateStarted();
 
 		if (!this->validateInputs()) {
@@ -67,13 +74,13 @@ namespace dyno
 			//reset input fields
 			for each (auto f_in in fields_input)
 			{
-				f_in->tagModified(false);
+				f_in->tack();
 			}
 
 			//tag all output fields as modifed
 			for each (auto f_out in fields_output)
 			{
-				f_out->tagModified(true);
+				f_out->tick();
 			}
 		}
 
@@ -140,10 +147,27 @@ namespace dyno
 		return isOutputCompete();
 	}
 
-	//TODO: check whether any of the input fields is updated
 	bool Module::requireUpdate()
 	{
-		return true;
+		if (mUpdateAlways)
+		{
+			return true;
+		}
+
+		//check input fields
+		bool modified = false;
+		for each (auto f_in in fields_input)
+		{
+			modified |= f_in->isModified();
+		}
+
+		//check control fields
+		for each (auto var in fields_param)
+		{
+			modified |= var->isModified();
+		}
+
+		return modified;
 	}
 
 	void Module::setName(std::string name)
@@ -162,6 +186,11 @@ namespace dyno
 		return m_module_name;
 	}
 
+	void Module::setUpdateAlways(bool b)
+	{
+		mUpdateAlways = b;
+	}
+
 	bool Module::isInitialized()
 	{
 		return m_initialized;
@@ -169,12 +198,6 @@ namespace dyno
 
 	bool Module::initializeImpl()
 	{
-		if (m_node == nullptr)
-		{
-			Log::sendMessage(Log::Warning, "Parent is not set");
-			return false;
-		}
-
 		return true;
 	}
 

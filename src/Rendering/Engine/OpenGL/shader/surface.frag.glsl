@@ -20,6 +20,7 @@ layout(std140, binding = 1) uniform LightUniformBlock
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
+	vec4 camera;
 } light;
 
 
@@ -220,6 +221,6 @@ vec3 pbr()
 	}
 
 	vec3 ambient = light.ambient.rgb * light.ambient.a * vColor;
-
-	return ambient + Lo;
+	vec3 cameraLight = light.camera.rgb * light.camera.a * uBaseColor * abs(dotNV);
+	return ambient + cameraLight + Lo;
 }

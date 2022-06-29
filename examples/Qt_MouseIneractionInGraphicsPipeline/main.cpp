@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <QtApp.h>
 #include <GLRenderEngine.h>
 
 #include "Array/Array.h"
@@ -22,7 +22,7 @@ public:
 		for (uint i = 0; i < 5; i++)
 		{
 			tm.translation() = Vec3f(0.4 * i, 0, 0);
-			tm.scale() = Vec3f(1.0 + 0.1*i, 1.0 - 0.1*i, 1.0);
+			tm.scale() = Vec3f(1.0 + 0.1 * i, 1.0 - 0.1 * i, 1.0);
 			tm.rotation() = Quat<float>(i * (-0.2), Vec3f(1, 0, 0)).toMatrix3x3();
 			hTransform.pushBack(tm);
 		}
@@ -40,7 +40,7 @@ public:
 	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
 };
 
-int main(int, char**)
+int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
@@ -63,7 +63,7 @@ int main(int, char**)
 
 	scn->setUpperBound({ 4, 4, 4 });
 
-	GlfwApp window;
+	QtApp window;
 	window.setSceneGraph(scn);
 	window.createWindow(1024, 768);
 	window.mainLoop();

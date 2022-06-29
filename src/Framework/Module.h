@@ -47,6 +47,14 @@ namespace dyno
 
 		std::string getName();
 
+		/**
+		 * @brief Set the update strategy for the module
+		 * 
+		 * @param b true, the module will be updated no matter the control and input variables are changed; 
+		 * 			false, the module will updated only when one of the variables are changed.
+		 */
+		void setUpdateAlways(bool b);
+
 		Node* getParent() {
 			if (m_node == NULL) {
 				Log::sendMessage(Log::Error, "Parent node is not set!");
@@ -96,6 +104,6 @@ namespace dyno
 		std::string m_module_name;
 		bool m_initialized;
 
-		bool m_update_required = true;
+		bool mUpdateAlways = false;
 	};
 }

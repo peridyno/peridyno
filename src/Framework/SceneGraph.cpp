@@ -228,12 +228,15 @@ namespace dyno
 
 	void SceneGraph::reset()
 	{
+		mFrameNumber = 0;
 		this->traverseForward<ResetAct>();
+		this->mFrameNumber = 0;
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
 	{
 		this->traverseForward<ResetAct>(node);
+		this->mFrameNumber = 0;
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
@@ -298,6 +301,15 @@ namespace dyno
 					return;
 
 				for (auto iter : node->animationPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<InputMouseModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mMouseEvent);
+					}
+				}
+
+				for (auto iter : node->graphicsPipeline()->activeModules())
 				{
 					auto m = dynamic_cast<InputMouseModule*>(iter.get());
 					if (m)

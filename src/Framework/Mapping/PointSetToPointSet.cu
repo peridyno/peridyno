@@ -187,8 +187,8 @@ namespace dyno
 		auto nbQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 
 		nbQuery->inRadius()->setValue(m_radius);
-		nbQuery->inPosition()->allocate()->assign(m_initFrom->getPoints());
-		nbQuery->inOther()->allocate()->assign(m_initTo->getPoints());
+		nbQuery->inPosition()->assign(m_initFrom->getPoints());
+		nbQuery->inOther()->assign(m_initTo->getPoints());
 
 		nbQuery->update();
 

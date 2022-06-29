@@ -182,12 +182,21 @@ namespace dyno
 
 	bool FBase::isModified()
 	{
-		return m_modified;
+		FBase* topField = this->getTopField();
+
+		return mTackTime < topField->mTickTime;
 	}
 
-	void FBase::tagModified(bool modifed)
+	void FBase::tick()
 	{
-		m_modified = modifed;
+		FBase* topField = this->getTopField();
+
+		topField->mTickTime.mark();
+	}
+
+	void FBase::tack()
+	{
+		this->mTackTime.mark();
 	}
 
 	bool FBase::isOptional()

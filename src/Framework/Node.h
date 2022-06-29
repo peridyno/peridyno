@@ -320,6 +320,8 @@ namespace dyno
 
 		virtual bool validateInputs();
 
+		void tick();
+
 	private:
 // 		/**
 // 		 * @brief Add a descendant

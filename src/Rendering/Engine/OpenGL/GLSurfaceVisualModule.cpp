@@ -25,13 +25,23 @@ namespace dyno
 		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mColor.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mNormalBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		mVAO.bindIndexBuffer(&mIndexBuffer);
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 		mVAO.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mNormalBuffer, 2, 3, GL_FLOAT, 0, 0, 0);
 
+		
 		// create shader program
-		mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		if (!this->varUsePhongShadingModel()->getData())
+		{
+			mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		}
+		else
+		{
+			mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag");
+		}
 
 		return true;
 	}
@@ -70,6 +80,15 @@ namespace dyno
 		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
 		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
 		mColor.loadCuda(mColorBuffer.begin(), mColorBuffer.size() * sizeof(float) * 3);
+
+		if(this->varUsePhongShadingModel()->getData())
+		{
+			if (triSet->outVertexNormal()->isEmpty())
+				triSet->updateVertexNormal();
+
+			auto& normals = triSet->outVertexNormal()->getData();
+			mNormalBuffer.loadCuda(normals.begin(), normals.size() * sizeof(float) * 3);
+		}
 	}
 
 	void GLSurfaceVisualModule::paintGL(RenderPass mode)

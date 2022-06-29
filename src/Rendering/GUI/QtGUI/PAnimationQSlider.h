@@ -15,20 +15,29 @@ namespace dyno
 		Q_OBJECT
 
 	public:
-		 PAnimationQSlider(QWidget* parent = nullptr);
+		PAnimationQSlider(QWidget* parent = nullptr);
+		PAnimationQSlider(int minimum, int maximum, QWidget* parent = nullptr);
 		~PAnimationQSlider();
 
 	signals:
 
 	public slots:
+		void maximumChanged(int val);
+		void minimumChanged(int val);
 
 	protected:
-		virtual void mousePressEvent(QMouseEvent* event);
-		virtual void mouseReleaseEvent(QMouseEvent* event);
-		virtual void mouseMoveEvent(QMouseEvent* event);
+		void paintEvent(QPaintEvent* ev) override;
+		void mousePressEvent(QMouseEvent* event) override;
+		void mouseReleaseEvent(QMouseEvent* event) override;
+		void mouseMoveEvent(QMouseEvent* event) override;
+
+		void resizeEvent(QResizeEvent* event);
 
 	private:
 		QLabel* m_displayLabel;
+
+		int mMaximumTickNum = 15;
+		int mMinimumTickWidth = 20;
 	};
 }
 

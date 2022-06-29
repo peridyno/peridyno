@@ -145,6 +145,8 @@ void Node::update()
 		this->postUpdateStates();
 
 		this->updateTopology();
+
+		this->tick();
 	}
 }
 
@@ -152,6 +154,7 @@ void Node::reset()
 {
 	if (this->validateInputs()) {
 		this->resetStates();
+		this->tick();
 	}
 }
 
@@ -181,6 +184,20 @@ bool Node::validateInputs()
 	}
 
 	return true;
+}
+
+void Node::tick()
+{
+	std::vector<FBase*>& fields = this->getAllFields();
+	for each (FBase * var in fields)
+	{
+		if (var != nullptr) {
+			if (var->getFieldType() == FieldTypeEnum::State || var->getFieldType() == FieldTypeEnum::Out)
+			{
+				var->tick();
+			}
+		}
+	}
 }
 
 // std::shared_ptr<DeviceContext> Node::getContext()

@@ -31,6 +31,7 @@ namespace dyno
 		shape->copyFrom(*initial);
 
 		mPointMapper = std::make_shared<PointSetToPointSet<TDataType>>();
+		mPointMapper->setUpdateAlways(true);
 
 		mPointMapper->setFrom(this->inPointSet()->getDataPtr());
 		mPointMapper->setTo(shape);

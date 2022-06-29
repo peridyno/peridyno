@@ -37,16 +37,16 @@ namespace dyno
 		QPushButton*	m_startSim;
 		QPushButton*	m_resetSim;
 
-		QSpinBox* m_current_frame_spinbox;
+		QSpinBox* mTotalFrameSpinbox;
 
 		QScrollBar*	m_sim_scrollbar;
 
 		bool m_sim_started = false;
 		
-		PAnimationQSlider *m_slider;
+		PAnimationQSlider* mFrameSlider;
 
 	private:
-		int totalFrame;
+		int mTotalFrame;
 		static const int labelSize = 6;
 		QLabel* label[labelSize];
 	};

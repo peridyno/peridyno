@@ -11,6 +11,7 @@ layout(std140, binding = 1) uniform LightUniformBlock
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
+	vec4 camera;
 } light;
 
 /***************** ShadowMap *********************/

@@ -28,14 +28,14 @@ namespace dyno
 
 		group->addAction(
 			"Cube",
-			"48px-Image-x-generic.png",
+			"ToolBarIco/Modeling/Cube.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<CubeModel<DataType3f>>();
 			});
 
 		group->addAction(
 			"Sphere",
-			"48px-Image-x-generic.png",
+			"ToolBarIco/Modeling/Sphere.png",
 			[=]()->std::shared_ptr<Node> {
 				auto node = std::make_shared<SphereModel<DataType3f>>();
 
@@ -50,14 +50,14 @@ namespace dyno
 
 		group->addAction(
 			"Cube Sampler",
-			"48px-Image-x-generic.png",
+			"ToolBarIco/Modeling/CubeSampler.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<CubeSampler<DataType3f>>();
 			});
 
 		group->addAction(
 			"Triangular Mesh",
-			"48px-Image-x-generic.png",
+			"ToolBarIco/Modeling/TriangularMesh.png",
 			[=]()->std::shared_ptr<Node> { 
 				auto node = std::make_shared<StaticTriangularMesh<DataType3f>>();
 

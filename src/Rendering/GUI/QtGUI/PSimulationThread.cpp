@@ -8,7 +8,7 @@ namespace dyno
 	QWaitCondition m_wait_condition;
 
 	PSimulationThread::PSimulationThread()
-		: mFrameNum(1000)
+		: mTotalFrame(1000)
 	{
 
 	}
@@ -37,49 +37,59 @@ namespace dyno
 	void PSimulationThread::run()
 	{
 		auto scn = SceneGraphFactory::instance()->active();
-//		scn->initialize();
 
-		int f = 0;
-		while(mRunning && f < mFrameNum)
+		while (mRunning)
 		{
 			if (!mRendering)
 			{
 				if (mReset)
 				{
-					if (mActiveNode == nullptr){
+					if (mActiveNode == nullptr) {
 						scn->reset();
+
+						mFinished = false;
 					}
 					else {
 						scn->reset(mActiveNode);
 					}
-					
+
 					mReset = false;
 
 					emit(oneFrameFinished());
 				}
 
-				if (!mPaused)
+				if (!mPaused && scn->getFrameNumber() < mTotalFrame)
 				{
 					scn->takeOneFrame();
 
-					f++;
-					currentFrameNum = f;
-
 					this->startRendering();
-					
+
 					emit(oneFrameFinished());
 				}
-				
+				else if (!mFinished && scn->getFrameNumber() >= mTotalFrame)
+				{
+					mPaused = true;
+					mFinished = true;
+
+					emit(simulationFinished());
+				}
 			}
-//	
 		}
 	}
 
-	void PSimulationThread::reset()
+	void PSimulationThread::reset(int num)
 	{
+		this->pause();
+
 		mReset = true;
+		mFinished = true;
+
+		mTotalFrame = num;
 
 		mActiveNode = nullptr;
+
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->setFrameNumber(0);
 	}
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
@@ -101,10 +111,12 @@ namespace dyno
 
 	void PSimulationThread::setTotalFrames(int num)
 	{
-		mFrameNum = num;
+		mTotalFrame = num;
 	}
 
-	int PSimulationThread::getCurrentFrameNum() {
-		return currentFrameNum;
+	int PSimulationThread::getCurrentFrameNum() 
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+		return scn->getFrameNumber();
 	}
 }

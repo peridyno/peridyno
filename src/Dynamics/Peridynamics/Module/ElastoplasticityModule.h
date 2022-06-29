@@ -49,8 +49,6 @@ namespace dyno {
 		void disableIncompressibility();
 
 	protected:
-		bool initializeImpl() override;
-
 		inline Real computeA()
 		{
 			Real phi = m_phi.getData();

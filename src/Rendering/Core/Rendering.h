@@ -41,6 +41,9 @@ namespace dyno
 			float		mainLightScale = 5.f;
 			glm::vec3	mainLightDirection = glm::vec3(0.4f, 0.6f, 0.8f);
 			float		_padding = 0.f;
+			// camera light
+			glm::vec3	cameraLightColor = glm::vec3(0.1f);
+			float		cameraLightScale = 1.f;
 		} light;
 
 		 

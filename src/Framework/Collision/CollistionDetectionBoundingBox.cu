@@ -5,8 +5,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(CollistionDetectionBoundingBox, TDataType)
-
 	typedef typename TOrientedBox3D<Real> Box3D;
 
 	template<typename TDataType>

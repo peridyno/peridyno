@@ -43,6 +43,10 @@ namespace dyno {
 
 		void setValue(T val);
 		T getValue();
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T>
@@ -71,6 +75,8 @@ namespace dyno {
 		}
 
 		this->update();
+
+		this->tick();
 	}
 
 
@@ -115,6 +121,10 @@ namespace dyno {
 		void assign(const T& val);
 		void assign(std::vector<T>& vals);
 		void assign(DArray<T>& vals);
+
+		bool isEmpty() override {
+			return this->size() == 0;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -138,6 +148,8 @@ namespace dyno {
 		}
 		
 		data->resize(num);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -150,6 +162,8 @@ namespace dyno {
 		}
 
 		data->assign(val);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -162,6 +176,8 @@ namespace dyno {
 		}
 
 		data->assign(vals);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -174,6 +190,8 @@ namespace dyno {
 		}
 
 		data->assign(vals);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -186,6 +204,8 @@ namespace dyno {
 		}
 
 		data->reset();
+
+		this->tick();
 	}
 
 	template<typename T>
@@ -219,6 +239,10 @@ namespace dyno {
 
 		void assign(CArray2D<T>& vals);
 		void assign(DArray2D<T>& vals);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -231,6 +255,8 @@ namespace dyno {
 		}
 	
 		data->assign(vals);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -243,6 +269,8 @@ namespace dyno {
 		}
 
 		data->assign(vals);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -255,6 +283,8 @@ namespace dyno {
 		}
 
 		data->reset();
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -267,6 +297,8 @@ namespace dyno {
 		}
 		
 		data->resize(ny, ny);
+
+		this->tick();
 	}
 
 	/**
@@ -293,6 +325,10 @@ namespace dyno {
 
 		void assign(CArray3D<T>& vals);
 		void assign(DArray3D<T>& vals);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -304,6 +340,8 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->assign(vals);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -315,6 +353,8 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->assign(vals);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -326,6 +366,8 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->reset();
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -337,6 +379,8 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 		
 		data->resize(nx, ny, nz);
+
+		this->tick();
 	}
 
 	/**
@@ -363,6 +407,10 @@ namespace dyno {
 
 		void assign(const ArrayList<T, DeviceType::CPU>& src);
 		void assign(const ArrayList<T, DeviceType::GPU>& src);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
 	};
 
 	template<typename T, DeviceType deviceType>
@@ -374,6 +422,8 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->assign(src);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -385,6 +435,8 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->assign(src);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -396,6 +448,8 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->resize(num);
+
+		this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -407,5 +461,7 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->resize(arr);
+
+		this->tick();
 	}
 }

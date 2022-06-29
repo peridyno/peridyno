@@ -15,7 +15,6 @@ namespace dyno
 
 	public:
 		static PSimulationThread* instance();
-		
 
 		void pause();
 		void resume();
@@ -23,7 +22,7 @@ namespace dyno
 
 		void run() override;
 
-		void reset();
+		void reset(int num);
 
 		void startRendering();
 		void stopRendering();
@@ -31,25 +30,27 @@ namespace dyno
 		void setTotalFrames(int num);
 
 		int getCurrentFrameNum();
-
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
 
 		void oneFrameFinished();
+		void simulationFinished();
 
 	public slots:
 		void resetNode(std::shared_ptr<Node> node);
 
+
+		
 	private:
 		PSimulationThread();
 
-		int mFrameNum;
-		int currentFrameNum;
+		int mTotalFrame;
 
 		bool mReset = false;
 		bool mPaused = true;
 		bool mRendering = false;
 		bool mRunning = true;
+		bool mFinished = false;
 
 		std::shared_ptr<Node> mActiveNode = nullptr;
 

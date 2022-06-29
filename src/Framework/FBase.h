@@ -15,6 +15,8 @@
  */
 #pragma once
 #include "Platform.h"
+#include "TimeStamp.h"
+
 #include <typeinfo>
 #include <string>
 #include <functional>
@@ -68,7 +70,9 @@ public:
 	std::vector<FBase*>& getSinks() { return mSinks; }
 
 	bool isModified();
-	void tagModified(bool modifed);
+
+	void tick();
+	void tack();
 
 	bool isOptional();
 	void tagOptional(bool optional);
@@ -146,13 +150,14 @@ private:
 	float m_min = -FLT_MAX;
 	float m_max = FLT_MAX;
 
-	bool m_modified = false;
-
 	OBase* mOwner = nullptr;
 
 	FBase* mSource = nullptr;
 
 	std::vector<FBase*> mSinks;
+
+	TimeStamp mTickTime;
+	TimeStamp mTackTime;
 
 	std::vector<std::shared_ptr<FCallBackFunc>> mCallbackFunc;
 };
@@ -180,10 +185,6 @@ std::shared_ptr<Data> allocate()									\
 		data = std::make_shared<Data>();							\
 	}																\
 	return data;													\
-}																	\
-\
-bool isEmpty() override {											\
-return this->getDataPtr() == nullptr;								\
 }																	\
 \
 bool connect(DerivedField* dst)										\
