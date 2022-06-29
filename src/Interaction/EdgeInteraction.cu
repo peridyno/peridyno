@@ -11,7 +11,6 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
-		this->r = 0.02f;
 	}
 
 	template<typename TDataType>
@@ -154,7 +153,7 @@ namespace dyno
 			intersected,
 			unintersected,
 			this->ray1,
-			this->r
+			this->varInterationRadius()->getData()
 		);
 
 		DArray<int> intersected_o;
@@ -224,7 +223,7 @@ namespace dyno
 			intersected,
 			unintersected,
 			this->ray1,
-			this->r
+			this->varInterationRadius()->getData()
 		);
 
 		DArray<int> intersected_o;

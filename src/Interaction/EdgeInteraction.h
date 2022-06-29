@@ -23,6 +23,7 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
 		DEF_INSTANCE_OUT(EdgeSet<TDataType>, SelectedEdgeSet, "");
 		DEF_INSTANCE_OUT(EdgeSet<TDataType>, OtherEdgeSet, "");
+		DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
 
 	protected:
 		void onEvent(PMouseEvent event) override;
@@ -34,7 +35,6 @@ namespace dyno
 		Real y1;
 		Real x2;
 		Real y2;
-		Real r;
 		bool isPressed;
 	};
 

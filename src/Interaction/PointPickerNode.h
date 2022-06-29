@@ -17,9 +17,12 @@ namespace dyno
 		DEF_INSTANCE_STATE(PointSet<TDataType>, SelectedTopology, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, OtherTopology, "");
 		DEF_INSTANCE_STATE(PointIteraction<TDataType>, MouseInteractor, "");
+		DEF_VAR(Real, InterationRadius, 0.05f, "The radius of interaction");
 
 		PointPickerNode(std::string name = "default");
 		~PointPickerNode();
+
+		std::string getNodeType();
 
 		void resetStates() override;
 	};

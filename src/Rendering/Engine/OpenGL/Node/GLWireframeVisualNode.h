@@ -24,7 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	class GLWireframeVisualNode : public Node
 	{
-		DECLARE_TCLASS(GLSurfaceVisualNode, TDataType)
+		DECLARE_TCLASS(GLWireFrameVisualNode, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 
@@ -35,7 +35,8 @@ namespace dyno
 		std::string getNodeType() override;
 
 	public:
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "A set of triangles");
+		DEF_INSTANCE_IN(EdgeSet<TDataType>, TriangleSet, "A set of triangles or edges");
+		DEF_VAR(Vec3f, Color, Vec3f(0), "Color");
 
 	protected:
 		void resetStates() override;

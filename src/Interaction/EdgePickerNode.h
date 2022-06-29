@@ -17,9 +17,12 @@ namespace dyno
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, SelectedTopology, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, OtherTopology, "");
 		DEF_INSTANCE_STATE(EdgeIteraction<TDataType>, MouseInteractor, "");
+		DEF_VAR(Real, InterationRadius, 0.02f, "The radius of interaction");
 
 		EdgePickerNode(std::string name = "default");
 		~EdgePickerNode();
+
+		std::string getNodeType();
 
 		void resetStates() override;
 	};

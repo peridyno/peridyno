@@ -22,6 +22,8 @@ namespace dyno
 		SurfacePickerNode(std::string name = "default");
 		~SurfacePickerNode();
 
+		std::string getNodeType();
+
 		void resetStates() override;
 	};
 }
