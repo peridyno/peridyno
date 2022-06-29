@@ -10,7 +10,6 @@ namespace dyno
 	PSimulationThread::PSimulationThread()
 		: mTotalFrame(1000)
 	{
-
 	}
 
 	PSimulationThread* PSimulationThread::instance()

@@ -20,6 +20,8 @@
 
 #include "Module/InputMouseModule.h"
 
+#include <mutex>
+
 namespace dyno 
 {
 	typedef std::list<Node*> NodeList;
@@ -237,6 +239,11 @@ namespace dyno
 
 		bool mNodeTiming = false;
 		bool mModuleTiming = false;
+
+		/**
+		 * A  lock to avoid write conflicts between simulation and rendering
+		 */
+		std::mutex mSync;
 	};
 
 }

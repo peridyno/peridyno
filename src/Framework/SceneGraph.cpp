@@ -146,6 +146,8 @@ namespace dyno
 
 	void SceneGraph::takeOneFrame()
 	{
+		mSync.lock();
+
 		std::cout << "****************    Frame " << mFrameNumber << " Started    ****************" << std::endl;
 
 // 		if (mRoot == nullptr)
@@ -206,10 +208,14 @@ namespace dyno
 		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
 
 		mFrameNumber++;
+
+		mSync.unlock();
 	}
 
 	void SceneGraph::updateGraphicsContext()
 	{
+		mSync.lock();
+
 		class UpdateGrpahicsContextAct : public Action
 		{
 		public:
@@ -219,6 +225,8 @@ namespace dyno
 		};
 
 		this->traverseForward<UpdateGrpahicsContextAct>();
+
+		mSync.unlock();
 	}
 
 	void SceneGraph::run()
@@ -228,15 +236,22 @@ namespace dyno
 
 	void SceneGraph::reset()
 	{
+		mSync.lock();
+
 		mFrameNumber = 0;
 		this->traverseForward<ResetAct>();
 		this->mFrameNumber = 0;
+
+		mSync.unlock();
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
 	{
+		mSync.lock();
+
 		this->traverseForward<ResetAct>(node);
-		this->mFrameNumber = 0;
+
+		mSync.unlock();
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
