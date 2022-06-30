@@ -71,6 +71,12 @@ namespace dyno
 			//post processing
 			this->postprocess();
 
+			//reset parameters
+			for each (auto param in fields_param)
+			{
+				param->tack();
+			}
+
 			//reset input fields
 			for each (auto f_in in fields_input)
 			{
