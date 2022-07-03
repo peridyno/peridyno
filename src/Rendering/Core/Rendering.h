@@ -36,11 +36,13 @@ namespace dyno
 			// ambient light
 			glm::vec3	ambientColor = glm::vec3(0.05f);
 			float		ambientScale = 1.f;
+
 			// directional light
 			glm::vec3	mainLightColor = glm::vec3(1.f);
 			float		mainLightScale = 5.f;
 			glm::vec3	mainLightDirection = glm::vec3(0.4f, 0.6f, 0.8f);
-			float		_padding = 0.f;
+			float		mainLightShadow = 1.f;	// 0 - disable shadow; otherwise enable shadow
+
 			// camera light
 			glm::vec3	cameraLightColor = glm::vec3(0.1f);
 			float		cameraLightScale = 1.f;
