@@ -154,7 +154,7 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 		ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 
 		// Light Direction
-		ImGui::Text("Light Dir");
+		ImGui::Text("Main Light Direction");
 
 		glm::mat4 inverse_view = glm::transpose(rparams->view);// view R^-1 = R^T
 		glm::vec3 tmpLightDir = glm::vec3(rparams->view * glm::vec4(iLight.mainLightDirection, 0));
@@ -178,6 +178,11 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 
 		tmpLightDir = glm::vec3(inverse_view * glm::vec4(vL[0], vL[1], vL[2], 0));
 		iLight.mainLightDirection = glm::vec3(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
+
+		// Light Shadow
+		bool shadow = iLight.mainLightShadow != 0;
+		if (ImGui::Checkbox("Main Light Shadow", &shadow))
+			iLight.mainLightShadow = shadow ? 1.f : 0.f;
 
 		rparams->light = iLight;
 

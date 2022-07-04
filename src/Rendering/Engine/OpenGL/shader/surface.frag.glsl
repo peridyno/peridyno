@@ -94,6 +94,8 @@ layout(binding = 5) uniform sampler2D uTexShadow;
 
 vec3 GetShadowFactor(vec3 pos)
 {
+	if (light.direction.w == 0) return vec3(1);
+
 	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;	// NDC
 	projCoords = projCoords * 0.5 + 0.5;
