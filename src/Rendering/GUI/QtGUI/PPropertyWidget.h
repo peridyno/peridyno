@@ -59,6 +59,23 @@ namespace dyno
 		FBase* m_field = nullptr;
 	};
 
+	class QUIntegerFieldWidget : public QGroupBox
+	{
+		Q_OBJECT
+	public:
+		QUIntegerFieldWidget(FBase* field);
+		~QUIntegerFieldWidget() {};
+
+	Q_SIGNALS:
+		void fieldChanged();
+
+	public slots:
+		void changeValue(int);
+
+	private:
+		FBase* m_field = nullptr;
+	};
+
 	class QRealFieldWidget : public QGroupBox
 	{
 		Q_OBJECT

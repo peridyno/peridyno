@@ -6,6 +6,8 @@
 
 namespace dyno
 {
+	class PModuleEditorToolBar;
+
 	class PModuleEditor :
 		public QMainWindow
 	{
@@ -14,6 +16,8 @@ namespace dyno
 		PModuleEditor(Qt::QtNodeWidget* node_widget);
 
 	private:
+
+		PModuleEditorToolBar* mToolBar;
 	};
 }
 

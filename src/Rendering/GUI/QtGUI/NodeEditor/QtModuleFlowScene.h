@@ -7,6 +7,7 @@
 
 using dyno::Node;
 using dyno::Module;
+using dyno::Pipeline;
 
 namespace Qt
 {
@@ -41,8 +42,14 @@ namespace Qt
 		void deleteModule(QtNode& n);
 
 		void moveModule(QtNode& n, const QPointF& newLocation);
+
+		void showAnimationPipeline();
+
+		void showGraphicsPipeline();
+
 	private:
 		std::shared_ptr<dyno::Node> mNode;
+		std::shared_ptr<dyno::Pipeline> mActivePipeline;
 
 		bool mEditingEnabled = true;
 

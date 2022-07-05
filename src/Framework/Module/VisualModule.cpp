@@ -9,8 +9,6 @@ namespace dyno
 		, m_translation(0.0f)
 		, m_rotation(0.0f, 0.0f, 0.0f, 1.0f)
 	{
-		attachField(&m_visible, "visible", "this is a variable indicating whether this module will be rendered on screen!", false);
-		m_visible.setValue(true);
 	}
 
 	VisualModule::~VisualModule()
@@ -19,7 +17,7 @@ namespace dyno
 
 	void VisualModule::setVisible(bool bVisible)
 	{
-		m_visible.setValue(bVisible);
+		this->varVisible()->setValue(bVisible);
 	}
 
 	void VisualModule::rotate(float angle, float x, float y, float z)

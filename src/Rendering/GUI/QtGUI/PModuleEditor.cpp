@@ -3,18 +3,42 @@
 #include <QHBoxLayout>
 #include <QDebug>
 
-#include "PDockWidget.h"
+#include <QHBoxLayout>
+#include <QPainter>
+#include <QPushButton>
+#include <QToolButton>
+#include <QSvgRenderer>
 
-#include "PPropertyWidget.h"
+#include "PDockWidget.h"
+#include "PModuleEditorToolBar.h"
+
+#include "ToolBar/Group.h"
+#include "ToolBar/ToolButtonStyle.h"
+#include "ToolBar/CompactToolButton.h"
+
 #include "NodeEditor/QtModuleFlowWidget.h"
 
+#include "PPropertyWidget.h"
 
 namespace dyno
 {
 	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* node_widget)
 		: QMainWindow(nullptr, 0)
 	{
-		Qt::QtModuleFlowWidget* moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, node_widget);
+		mToolBar = new PModuleEditorToolBar();
+
+		//Set up property dock widget
+		QDockWidget* toolBarDocker = new QDockWidget();
+		this->addDockWidget(Qt::TopDockWidgetArea, toolBarDocker);
+		auto titleBar = toolBarDocker->titleBarWidget();
+		toolBarDocker->setFixedHeight(96);
+		toolBarDocker->setTitleBarWidget(new QWidget());
+		delete titleBar;
+
+		toolBarDocker->setWidget(mToolBar);
+
+
+		auto moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, node_widget);
 		this->setCentralWidget(moduleFlowView);
 
 		//Set up property dock widget
@@ -24,33 +48,12 @@ namespace dyno
 		
 		PPropertyWidget* propertyWidget = new PPropertyWidget();
 		propertyDockWidget->setWidget(propertyWidget);
-		propertyDockWidget->setMinimumWidth(400);
-
-
-// 		if (node_widget != nullptr)
-// 		{
-// 			Node *selectedNode = node_widget->getNode().get();
-// 			moduleFlowView->getModuleFlowScene()->showModuleFlow(selectedNode);
-// 
-// 			// Here is Node's virtual module
-// 			auto& scene = moduleFlowView->mModuleFlow;
-// 			auto c =selectedNode->getClassInfo();
-// 			auto type = scene->registry().create(QString::fromStdString(c->m_className + "(virtual)"));
-// 			
-// 			if (type)
-// 			{
-// 				auto& vir_module = scene->createNode(std::move(type));
-// 				// Centered
-// 				QPointF posView(120, 146);
-// 				vir_module.nodeGraphicsObject().setPos(posView);
-// 				scene->nodePlaced(vir_module);
-// 			}
-// 			else
-// 			{
-// 				qDebug() << "Model not found";
-// 			}			
-// 		}
+		propertyDockWidget->setFixedWidth(360);
 
 		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showNodeProperty);
+
+		connect(mToolBar, &PModuleEditorToolBar::showAnimationPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showAnimationPipeline);
+		connect(mToolBar, &PModuleEditorToolBar::showGraphicsPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showGraphicsPipeline);
+
 	}
 }
