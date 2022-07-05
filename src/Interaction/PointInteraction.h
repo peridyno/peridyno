@@ -6,15 +6,15 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class PointIteraction : public InputMouseModule
+	class PointInteraction : public InputMouseModule
 	{
-		DECLARE_TCLASS(PointIteraction, TDataType)
+		DECLARE_TCLASS(PointInteraction, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		PointIteraction();
-		virtual ~PointIteraction() {};
+		PointInteraction();
+		virtual ~PointInteraction() {};
 
 		void calcIntersectClick();
 		void calcIntersectDrag();
@@ -37,5 +37,5 @@ namespace dyno
 		bool isPressed;
 	};
 
-	IMPLEMENT_TCLASS(PointIteraction, TDataType)
+	IMPLEMENT_TCLASS(PointInteraction, TDataType)
 }

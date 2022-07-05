@@ -8,13 +8,13 @@ namespace dyno
 	SurfacePickerNode<TDataType>::SurfacePickerNode(std::string name)
 		:Node(name)
 	{
-		auto mouseInteractor=std::make_shared<SurfaceIteraction<TDataType>>();
+		auto mouseInteractor=std::make_shared<SurfaceInteraction<TDataType>>();
 		this->inInTopology()->connect(mouseInteractor->inInitialTriangleSet());
 		this->stateSelectedTopology()->connect(mouseInteractor->outSelectedTriangleSet());
 		this->stateOtherTopology()->connect(mouseInteractor->outOtherTriangleSet());
 
 		mouseInteractor->setUpdateAlways(true);
-		this->stateMouseInteractor()->setDataPtr(mouseInteractor);
+		this->mouseInteractor = mouseInteractor;
 		this->graphicsPipeline()->pushModule(mouseInteractor);
 
 		this->stateSelectedTopology()->promoteOuput();

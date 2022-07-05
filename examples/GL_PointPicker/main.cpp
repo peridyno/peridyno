@@ -53,7 +53,7 @@ int main(int, char**)
 
 	auto pointPickerNode = scn->addNode(std::make_shared<PointPickerNode<DataType3f>>());
 
-	//Create a CustomMouseIteraction object to handle the mouse event,
+	//Create a CustomMouseInteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
 	instanceNode->stateTopology()->connect(pointPickerNode->inInTopology());
 

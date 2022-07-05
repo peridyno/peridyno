@@ -6,16 +6,16 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class SurfaceIteraction : public InputMouseModule
+	class SurfaceInteraction : public InputMouseModule
 	{
-	DECLARE_TCLASS(SurfaceIteraction, TDataType)
+	DECLARE_TCLASS(SurfaceInteraction, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
 
-		SurfaceIteraction();
-		virtual ~SurfaceIteraction() {};
+		SurfaceInteraction();
+		virtual ~SurfaceInteraction() {};
 
 		void calcIntersectClick();
 		void calcIntersectDrag();
@@ -37,5 +37,5 @@ namespace dyno
 		bool isPressed;
 	};
 
-	IMPLEMENT_TCLASS(SurfaceIteraction, TDataType)
+	IMPLEMENT_TCLASS(SurfaceInteraction, TDataType)
 }

@@ -6,16 +6,16 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class EdgeIteraction : public InputMouseModule
+	class EdgeInteraction : public InputMouseModule
 	{
-		DECLARE_TCLASS(EdgeIteraction, TDataType)
+		DECLARE_TCLASS(EdgeInteraction, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Edge Edge;
 
-		EdgeIteraction();
-		virtual ~EdgeIteraction() {};
+		EdgeInteraction();
+		virtual ~EdgeInteraction() {};
 
 		void calcIntersectClick();
 		void calcIntersectDrag();
@@ -38,5 +38,5 @@ namespace dyno
 		bool isPressed;
 	};
 
-	IMPLEMENT_TCLASS(EdgeIteraction, TDataType)
+	IMPLEMENT_TCLASS(EdgeInteraction, TDataType)
 }

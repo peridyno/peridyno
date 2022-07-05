@@ -9,14 +9,14 @@ namespace dyno
 	PointPickerNode<TDataType>::PointPickerNode(std::string name)
 		:Node(name)
 	{
-		auto mouseInteractor = std::make_shared<PointIteraction<TDataType>>();
+		auto mouseInteractor = std::make_shared<PointInteraction<TDataType>>();
 		this->inInTopology()->connect(mouseInteractor->inInitialTriangleSet());
 		this->stateSelectedTopology()->connect(mouseInteractor->outSelectedPointSet());
 		this->stateOtherTopology()->connect(mouseInteractor->outOtherPointSet());
 		this->varInterationRadius()->connect(mouseInteractor->varInterationRadius());
 
 		mouseInteractor->setUpdateAlways(true);
-		this->stateMouseInteractor()->setDataPtr(mouseInteractor);
+		this->mouseInteractor = mouseInteractor;
 
 		this->graphicsPipeline()->pushModule(mouseInteractor);
 

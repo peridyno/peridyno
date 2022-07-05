@@ -2,7 +2,7 @@
 
 namespace dyno
 {
-	void CustomMouseIteraction::onEvent(PMouseEvent event)
+	void CustomMouseInteraction::onEvent(PMouseEvent event)
 	{
 		if (event.actionType == AT_PRESS)
 		{

@@ -52,7 +52,7 @@ int main(int, char**)
 
 	auto surfacePickerNode = scn->addNode(std::make_shared<SurfacePickerNode<DataType3f>>());
 
-	//Create a CustomMouseIteraction object to handle the mouse event,
+	//Create a CustomMouseInteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
 	instanceNode->stateTopology()->connect(surfacePickerNode->inInTopology());
 

@@ -17,7 +17,6 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet<TDataType>,InTopology,"");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTopology, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTopology, "");
-		DEF_INSTANCE_STATE(SurfaceIteraction<TDataType>, MouseInteractor, "");
 
 		SurfacePickerNode(std::string name = "default");
 		~SurfacePickerNode();
@@ -25,5 +24,8 @@ namespace dyno
 		std::string getNodeType();
 
 		void resetStates() override;
+
+	private:
+		std::shared_ptr<SurfaceInteraction<TDataType>> mouseInteractor;
 	};
 }

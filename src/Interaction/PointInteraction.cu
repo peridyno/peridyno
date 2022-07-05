@@ -6,7 +6,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	PointIteraction<TDataType>::PointIteraction()
+	PointInteraction<TDataType>::PointInteraction()
 	{
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
@@ -14,7 +14,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointIteraction<TDataType>::onEvent(PMouseEvent event)
+	void PointInteraction<TDataType>::onEvent(PMouseEvent event)
 	{
 		if (camera == nullptr)
 		{
@@ -125,7 +125,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointIteraction<TDataType>::calcIntersectClick()
+	void PointInteraction<TDataType>::calcIntersectClick()
 	{
 		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
 		DArray<Coord> points = initialTriangleSet.getPoints();
@@ -172,7 +172,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointIteraction<TDataType>::calcIntersectDrag()
+	void PointInteraction<TDataType>::calcIntersectDrag()
 	{
 		TRay3D<Real> ray1 = this->ray1;
 		TRay3D<Real> ray2 = this->ray2;
@@ -237,5 +237,5 @@ namespace dyno
 		this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 	}
-	DEFINE_CLASS(PointIteraction);
+	DEFINE_CLASS(PointInteraction);
 }

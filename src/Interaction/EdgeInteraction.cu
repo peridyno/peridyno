@@ -6,7 +6,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	EdgeIteraction<TDataType>::EdgeIteraction()
+	EdgeInteraction<TDataType>::EdgeInteraction()
 	{
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
@@ -14,7 +14,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void EdgeIteraction<TDataType>::onEvent(PMouseEvent event)
+	void EdgeInteraction<TDataType>::onEvent(PMouseEvent event)
 	{
 		if (camera == nullptr)
 		{
@@ -136,7 +136,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void EdgeIteraction<TDataType>::calcIntersectClick()
+	void EdgeInteraction<TDataType>::calcIntersectClick()
 	{
 		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
 		DArray<Edge> edges = initialTriangleSet.getEdges();
@@ -185,7 +185,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void EdgeIteraction<TDataType>::calcIntersectDrag()
+	void EdgeInteraction<TDataType>::calcIntersectDrag()
 	{
 		TRay3D<Real> ray1 = this->ray1;
 		TRay3D<Real> ray2 = this->ray2;
@@ -253,5 +253,5 @@ namespace dyno
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
 	}
-	DEFINE_CLASS(EdgeIteraction);
+	DEFINE_CLASS(EdgeInteraction);
 }

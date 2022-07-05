@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 if(PERIDYNO_Qt5_GUI)
 
-    set(PROJECT_NAME Qt_MouseIneractionInGraphicsPipeline)
+    set(PROJECT_NAME Qt_MouseInteractionInGraphicsPipeline)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
 

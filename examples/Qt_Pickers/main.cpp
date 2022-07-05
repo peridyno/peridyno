@@ -9,6 +9,7 @@
 #include "SurfacePickerNode.h"
 #include "PointPickerNode.h"
 #include "EdgePickerNode.h"
+#include "PickerNode.h"
 
 #include "SurfaceMeshLoader.h"
 
@@ -18,27 +19,29 @@ int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	auto mesh = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
-	auto surfacePickerNode = scn->addNode(std::make_shared<SurfacePickerNode<DataType3f>>());
+	/*auto surfacePickerNode = scn->addNode(std::make_shared<SurfacePickerNode<DataType3f>>());
 	auto edgePickerNode = scn->addNode(std::make_shared<EdgePickerNode<DataType3f>>());
-	auto pointPickerNode = scn->addNode(std::make_shared<PointPickerNode<DataType3f>>());
+	auto pointPickerNode = scn->addNode(std::make_shared<PointPickerNode<DataType3f>>());*/
+	auto pickerNode = scn->addNode(std::make_shared<PickerNode<DataType3f>>());
 
-	auto sRender1 = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
-	auto sRender2 = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
-	auto wRender1 = scn->addNode(std::make_shared<GLWireframeVisualNode<DataType3f>>());
-	auto wRender2 = scn->addNode(std::make_shared<GLWireframeVisualNode<DataType3f>>());
-	auto pRender1 = scn->addNode(std::make_shared<GLCommonPointVisualNode<DataType3f>>());
-	auto pRender2 = scn->addNode(std::make_shared<GLCommonPointVisualNode<DataType3f>>());
+	//auto sRender1 = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
+	//auto sRender2 = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
+	//auto wRender1 = scn->addNode(std::make_shared<GLWireframeVisualNode<DataType3f>>());
+	//auto wRender2 = scn->addNode(std::make_shared<GLWireframeVisualNode<DataType3f>>());
+	//auto pRender1 = scn->addNode(std::make_shared<GLCommonPointVisualNode<DataType3f>>());
+	//auto pRender2 = scn->addNode(std::make_shared<GLCommonPointVisualNode<DataType3f>>());
 
 
 	mesh->varFileName()->setValue("../../data/standard/standard_sphere.obj");
-	mesh->outTriangleSet()->connect(surfacePickerNode->inInTopology());
+	mesh->outTriangleSet()->connect(pickerNode->stateInTopology());
+	/*mesh->outTriangleSet()->connect(surfacePickerNode->inInTopology());
 	mesh->outTriangleSet()->connect(edgePickerNode->inInTopology());
-	mesh->outTriangleSet()->connect(pointPickerNode->inInTopology());     
+	mesh->outTriangleSet()->connect(pointPickerNode->inInTopology());  */   
 
-	edgePickerNode->varInterationRadius()->setValue(0.03f);
-	pointPickerNode->varInterationRadius()->setValue(0.05f);
-
-	surfacePickerNode->stateSelectedTopology()->connect(sRender1->inTriangleSet());
+	/*edgePickerNode->varInterationRadius()->setValue(0.03f);
+	pointPickerNode->varInterationRadius()->setValue(0.05f);*/
+	pickerNode->varInterationRadius()->setValue(0.05f);
+	/*surfacePickerNode->stateSelectedTopology()->connect(sRender1->inTriangleSet());
 	sRender1->varColor()->setValue(Vec3f(0.2, 0.48, 0.75));
 	surfacePickerNode->stateOtherTopology()->connect(sRender2->inTriangleSet());
 	sRender2->varColor()->setValue(Vec3f(0.8, 0.52, 0.25));
@@ -53,7 +56,7 @@ int main()
 	pRender1->varPointSize()->setValue(0.015f);
 	pointPickerNode->stateOtherTopology()->connect(pRender2->inPointSet());
 	pRender2->varColor()->setValue(Vec3f(0, 0, 1.0f));
-	pRender2->varPointSize()->setValue(0.01f);
+	pRender2->varPointSize()->setValue(0.01f);*/
 
 	scn->setUpperBound({ 4, 4, 4 });
 
