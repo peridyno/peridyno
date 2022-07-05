@@ -110,7 +110,7 @@ namespace dyno
 		int numTicks = std::max((maximum() - minimum()) / tickInterval(), 1);
 
 		QFontMetrics fontMetrics = QFontMetrics(this->font());
-
+		
 		if (this->orientation() == Qt::Horizontal) {
 
 			int fontHeight = fontMetrics.height();
@@ -119,11 +119,11 @@ namespace dyno
 
 				int tickNum = minimum() + (tickInterval() * i);
 
-				auto tickX = ((rect.width() / numTicks) * i) - (fontMetrics.width(QString::number(tickNum)) / 2);
+				auto tickX = (((rect.width() - 10.0f) / (maximum() - minimum()))* tickInterval() * i) - (fontMetrics.width(QString::number(tickNum)) / 2);
+
 				auto tickY = (rect.height() + fontHeight) / 2;
 
-				painter->drawText(QPoint(tickX, tickY),
-					QString::number(tickNum));
+				painter->drawText(QPoint(tickX + 6, tickY), QString::number(tickNum));
 			}
 
 		}
@@ -154,11 +154,12 @@ namespace dyno
 
 	void PAnimationQSlider::mouseMoveEvent(QMouseEvent* event)
 	{
-		m_displayLabel->move(8 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 6);
+		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 6);
 		m_displayLabel->setText(QString::number(this->value()));
 	
 		m_displayLabel->setVisible(true);
-		
+		m_displayLabel->setStyleSheet("QLabel{background:#FFFFFF;}");
+		m_displayLabel->setAlignment(Qt::AlignVCenter);
 		QSlider::mouseMoveEvent(event);
 	}
 

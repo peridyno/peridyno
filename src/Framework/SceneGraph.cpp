@@ -240,8 +240,8 @@ namespace dyno
 	{
 		mSync.lock();
 
-		mFrameNumber = 0;
 		this->traverseForward<ResetAct>();
+
 		this->mFrameNumber = 0;
 
 		mSync.unlock();

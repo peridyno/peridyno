@@ -33,7 +33,7 @@ namespace dyno
 		mFrameSlider = new PAnimationQSlider(0, mTotalFrame, this);
 
 		frameLayout->addWidget(mFrameSlider, 0, 0, 0 , (labelSize - 1) * 2);
-	
+
 		QGridLayout* operationLayout = new QGridLayout();
 
 		m_startSim = new QPushButton("Start");
