@@ -31,7 +31,6 @@ namespace dyno
 
 		this->varToggleMultiSelect()->connect(mouseInteractor->varToggleMultiSelect());
 
-		mouseInteractor->setUpdateAlways(true);
 		this->mouseInteractor = mouseInteractor;
 
 		this->stateInTopology()->promoteInput();

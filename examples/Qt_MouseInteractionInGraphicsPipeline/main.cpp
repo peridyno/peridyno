@@ -48,7 +48,7 @@ int main()
 
 	//Create a CustomMouseIteraction object to handle the mouse event,
 	//Press/release the mouse button to show the information
-	auto mouseInterator = std::make_shared<CustomMouseIteraction>();
+	auto mouseInterator = std::make_shared<CustomMouseInteraction>();
 	mouseInterator->setUpdateAlways(true);
 	instanceNode->stateTopology()->connect(mouseInterator->inTopology());
 	instanceNode->graphicsPipeline()->pushModule(mouseInterator);
