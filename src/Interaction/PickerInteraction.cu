@@ -290,6 +290,32 @@ namespace dyno
 		}
 	}
 
+	__global__ void InitializeArray(
+		DArray<int> intersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected.size()) return;
+
+		intersected[pId] = 0;
+	}
+
+	__global__ void MergeIntersectedIndex(
+		DArray<int> intersected1,
+		DArray<int> intersected2,
+		DArray<int> outIntersected,
+		DArray<int> outUnintersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected1.size()) return;
+
+		if (intersected1[pId] == 0 && intersected2[pId] == 0)
+			outIntersected[pId] = 0;
+		else
+			outIntersected[pId] = 1;
+
+		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+	}
+
 	template<typename TDataType>
 	void PickerInteraction<TDataType>::calcSurfaceIntersectClick()
 	{
@@ -310,6 +336,36 @@ namespace dyno
 			unintersected,
 			this->ray1
 		);
+
+		if (this->varToggleMultiSelect()->getData())
+		{
+			if (this->triIntersectedIndex.size() == 0) 
+			{
+				this->triIntersectedIndex.resize(triangles.size());
+				cuExecute(triangles.size(),
+					InitializeArray,
+					this->triIntersectedIndex
+				)
+			}
+			DArray<int> outIntersected;
+			outIntersected.resize(intersected.size());
+			DArray<int> outUnintersected;
+			outUnintersected.resize(unintersected.size());
+			cuExecute(triangles.size(),
+				MergeIntersectedIndex,
+				this->triIntersectedIndex,
+				intersected,
+				outIntersected,
+				outUnintersected
+			);
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+			this->triIntersectedIndex.assign(intersected);
+		}
+		else
+		{
+			this->triIntersectedIndex.resize(0);
+		}
 
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
@@ -337,6 +393,7 @@ namespace dyno
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
+		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
 	}
 
 	template<typename TDataType>
@@ -382,6 +439,37 @@ namespace dyno
 			this->ray1
 		);
 
+		if (this->varToggleMultiSelect()->getData())
+		{
+			if (this->triIntersectedIndex.size() == 0)
+			{
+				this->triIntersectedIndex.resize(triangles.size());
+				cuExecute(triangles.size(),
+					InitializeArray,
+					this->triIntersectedIndex
+				)
+			}
+			DArray<int> outIntersected;
+			outIntersected.resize(intersected.size());
+			DArray<int> outUnintersected;
+			outUnintersected.resize(unintersected.size());
+			cuExecute(triangles.size(),
+				MergeIntersectedIndex,
+				this->triIntersectedIndex,
+				intersected,
+				outIntersected,
+				outUnintersected
+			);
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+			this->triIntersectedIndex.assign(intersected);
+		}
+		else
+		{
+			this->triIntersectedIndex.resize(0);
+		}
+
+
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
 
@@ -408,6 +496,7 @@ namespace dyno
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
+		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
 	}
 
 	template<typename TDataType>
@@ -430,6 +519,36 @@ namespace dyno
 			this->ray1,
 			this->varInterationRadius()->getData()
 		);
+
+		if (this->varToggleMultiSelect()->getData())
+		{
+			if (this->edgeIntersectedIndex.size() == 0)
+			{
+				this->edgeIntersectedIndex.resize(edges.size());
+				cuExecute(edges.size(),
+					InitializeArray,
+					this->edgeIntersectedIndex
+				)
+			}
+			DArray<int> outIntersected;
+			outIntersected.resize(intersected.size());
+			DArray<int> outUnintersected;
+			outUnintersected.resize(unintersected.size());
+			cuExecute(edges.size(),
+				MergeIntersectedIndex,
+				this->edgeIntersectedIndex,
+				intersected,
+				outIntersected,
+				outUnintersected
+			);
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+			this->edgeIntersectedIndex.assign(intersected);
+		}
+		else
+		{
+			this->edgeIntersectedIndex.resize(0);
+		}
 
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
@@ -457,6 +576,7 @@ namespace dyno
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
+		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
 	}
 
 	template<typename TDataType>
@@ -501,6 +621,36 @@ namespace dyno
 			this->varInterationRadius()->getData()
 		);
 
+		if (this->varToggleMultiSelect()->getData())
+		{
+			if (this->edgeIntersectedIndex.size() == 0)
+			{
+				this->edgeIntersectedIndex.resize(edges.size());
+				cuExecute(edges.size(),
+					InitializeArray,
+					this->edgeIntersectedIndex
+				)
+			}
+			DArray<int> outIntersected;
+			outIntersected.resize(intersected.size());
+			DArray<int> outUnintersected;
+			outUnintersected.resize(unintersected.size());
+			cuExecute(edges.size(),
+				MergeIntersectedIndex,
+				this->edgeIntersectedIndex,
+				intersected,
+				outIntersected,
+				outUnintersected
+			);
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+			this->edgeIntersectedIndex.assign(intersected);
+		}
+		else
+		{
+			this->edgeIntersectedIndex.resize(0);
+		}
+
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
 
@@ -527,6 +677,7 @@ namespace dyno
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
+		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
 	}
 
 	template<typename TDataType>
@@ -547,6 +698,36 @@ namespace dyno
 			this->ray1,
 			this->varInterationRadius()->getData()
 		);
+
+		if (this->varToggleMultiSelect()->getData())
+		{
+			if (this->pointIntersectedIndex.size() == 0)
+			{
+				this->pointIntersectedIndex.resize(points.size());
+				cuExecute(points.size(),
+					InitializeArray,
+					this->pointIntersectedIndex
+				)
+			}
+			DArray<int> outIntersected;
+			outIntersected.resize(intersected.size());
+			DArray<int> outUnintersected;
+			outUnintersected.resize(unintersected.size());
+			cuExecute(points.size(),
+				MergeIntersectedIndex,
+				this->pointIntersectedIndex,
+				intersected,
+				outIntersected,
+				outUnintersected
+			);
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+			this->pointIntersectedIndex.assign(intersected);
+		}
+		else
+		{
+			this->pointIntersectedIndex.resize(0);
+		}
 
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
@@ -574,6 +755,7 @@ namespace dyno
 		this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 		this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
+		this->outPointIndex()->getDataPtr()->assign(intersected_o);
 	}
 
 	template<typename TDataType>
@@ -615,6 +797,36 @@ namespace dyno
 			this->varInterationRadius()->getData()
 		);
 
+		if (this->varToggleMultiSelect()->getData())
+		{
+			if (this->pointIntersectedIndex.size() == 0)
+			{
+				this->pointIntersectedIndex.resize(points.size());
+				cuExecute(points.size(),
+					InitializeArray,
+					this->pointIntersectedIndex
+				)
+			}
+			DArray<int> outIntersected;
+			outIntersected.resize(intersected.size());
+			DArray<int> outUnintersected;
+			outUnintersected.resize(unintersected.size());
+			cuExecute(points.size(),
+				MergeIntersectedIndex,
+				this->pointIntersectedIndex,
+				intersected,
+				outIntersected,
+				outUnintersected
+			);
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+			this->pointIntersectedIndex.assign(intersected);
+		}
+		else
+		{
+			this->pointIntersectedIndex.resize(0);
+		}
+
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
 
@@ -641,6 +853,7 @@ namespace dyno
 		this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 		this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
+		this->outPointIndex()->getDataPtr()->assign(intersected_o);
 	}
 
 	template<typename TDataType>

@@ -20,11 +20,16 @@ namespace dyno
 		this->stateOtherEdgeSet()->connect(mouseInteractor->outOtherEdgeSet());
 		this->stateSelectedPointSet()->connect(mouseInteractor->outSelectedPointSet());
 		this->stateOtherPointSet()->connect(mouseInteractor->outOtherPointSet());
+		this->stateTriangleIndex()->connect(mouseInteractor->outTriangleIndex());
+		this->stateEdgeIndex()->connect(mouseInteractor->outEdgeIndex());
+		this->statePointIndex()->connect(mouseInteractor->outPointIndex());
 
 		this->varInterationRadius()->connect(mouseInteractor->varInterationRadius());
 		this->varToggleSurfacePicker()->connect(mouseInteractor->varToggleSurfacePicker());
 		this->varToggleEdgePicker()->connect(mouseInteractor->varToggleEdgePicker());
 		this->varTogglePointPicker()->connect(mouseInteractor->varTogglePointPicker());
+
+		this->varToggleMultiSelect()->connect(mouseInteractor->varToggleMultiSelect());
 
 		mouseInteractor->setUpdateAlways(true);
 		this->mouseInteractor = mouseInteractor;
@@ -82,6 +87,10 @@ namespace dyno
 	{
 		this->stateInTopology()->getDataPtr()->updateEdges();
 
+		this->stateTriangleIndex()->allocate();
+		this->stateEdgeIndex()->allocate();
+		this->statePointIndex()->allocate();
+
 		this->stateOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
@@ -94,7 +103,6 @@ namespace dyno
 		this->stateOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->stateSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->stateOtherPointSet()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
-
 	}
 
 	DEFINE_CLASS(PickerNode);

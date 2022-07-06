@@ -17,15 +17,20 @@ namespace dyno
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InTopology, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTriangleSet, "");
+		DEF_ARRAY_STATE(int,TriangleIndex, DeviceType::GPU, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, SelectedEdgeSet, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, OtherEdgeSet, "");
+		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, SelectedPointSet, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, OtherPointSet, "");
+		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
 
 		DEF_VAR(Real, InterationRadius, 0.05f, "The radius of interaction");
 		DEF_VAR(bool, ToggleSurfacePicker, true, "The toggle for surface picker");
 		DEF_VAR(bool, ToggleEdgePicker, true, "The toggle for edge picker");
 		DEF_VAR(bool, TogglePointPicker, true, "The toggle for point picker");
+
+		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle for multiple selecter");
 
 		DEF_VAR(Vec3f, SelectedTriangleColor, Vec3f(0.2, 0.48, 0.75), "");
 		DEF_VAR(Vec3f, OtherTriangleColor, Vec3f(0.8, 0.52, 0.25), "");
