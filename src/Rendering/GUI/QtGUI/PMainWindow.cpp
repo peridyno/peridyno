@@ -133,7 +133,7 @@ namespace dyno
 	{
 		setObjectName("MainWindow");
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physics simulation platform"));
-		setWindowIcon(QPixmap("../../data/logo3.png"));
+		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo2.png")));
 
 
 		mOpenGLWidget = new POpenGLWidget(engine);
@@ -151,8 +151,6 @@ namespace dyno
 		connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 
 		connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
-
-		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), mOpenGLWidget, SLOT(updateGraphicsContext()));
 
 		statusBar()->showMessage(tr("Status Bar"));
 

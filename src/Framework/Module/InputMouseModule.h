@@ -66,6 +66,8 @@ namespace dyno
 
 		void updateImpl() final;
 
+		bool requireUpdate() override;
+
 		std::queue<PMouseEvent> mEventQueue;
 	};
 }

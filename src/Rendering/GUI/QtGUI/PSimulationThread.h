@@ -24,8 +24,8 @@ namespace dyno
 
 		void reset(int num);
 
-		void startRendering();
-		void stopRendering();
+		void startUpdatingGraphicsContext();
+		void stopUpdatingGraphicsContext();
 
 		void setTotalFrames(int num);
 
@@ -39,8 +39,6 @@ namespace dyno
 	public slots:
 		void resetNode(std::shared_ptr<Node> node);
 
-
-		
 	private:
 		PSimulationThread();
 
@@ -48,9 +46,11 @@ namespace dyno
 
 		bool mReset = false;
 		bool mPaused = true;
-		bool mRendering = false;
+		
 		bool mRunning = true;
 		bool mFinished = false;
+
+		bool mUpdatingGraphicsContext = false;
 
 		std::shared_ptr<Node> mActiveNode = nullptr;
 

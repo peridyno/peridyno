@@ -53,10 +53,6 @@ namespace dyno
 			exit(-1);
 		}
 
-		auto scn = SceneGraphFactory::instance()->active();
-
-		scn->reset();
-
 		initializeOpenGLFunctions();
 		QtImGui::initialize(this);
 
@@ -66,15 +62,23 @@ namespace dyno
 		mRenderEngine->initialize(this->width(), this->height());
 
 		mImWindow.initialize(scale);
+
+		auto scn = SceneGraphFactory::instance()->active();
+
+		if (scn != nullptr)
+		{
+			scn->reset();
+			scn->updateGraphicsContext();
+		}
 	}
 
 	void POpenGLWidget::paintGL()
 	{
-		PSimulationThread::instance()->startRendering();
-		//Update SceneGraph
+		PSimulationThread::instance()->startUpdatingGraphicsContext();
+
 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
 
-		PSimulationThread::instance()->stopRendering();
+		PSimulationThread::instance()->stopUpdatingGraphicsContext();
 
 		//QtImGui
 		QtImGui::newFrame();
@@ -189,23 +193,6 @@ namespace dyno
 			activeCamera()->zoom(-0.001*event->angleDelta().y());
 
 		update();
-	}
-
-	void POpenGLWidget::updateGraphicsContext()
-	{
-// 		makeCurrent();
-// 
-// 		PSimulationThread::instance()->startRendering();
-// 		
-// 		//Update SceneGraph
-// 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
-// 
-// 		//Update QtWidget
-// 		this->update();
-// 
-// 		PSimulationThread::instance()->stopRendering();
-// 
-// 		doneCurrent();
 	}
 
 	std::shared_ptr<Camera> POpenGLWidget::activeCamera()

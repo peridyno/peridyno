@@ -10,7 +10,6 @@ namespace dyno
 	PSimulationThread::PSimulationThread()
 		: mTotalFrame(1000)
 	{
-
 	}
 
 	PSimulationThread* PSimulationThread::instance()
@@ -40,7 +39,7 @@ namespace dyno
 
 		while (mRunning)
 		{
-			if (!mRendering)
+			if (!mUpdatingGraphicsContext)
 			{
 				if (mReset)
 				{
@@ -62,7 +61,7 @@ namespace dyno
 				{
 					scn->takeOneFrame();
 
-					this->startRendering();
+					this->startUpdatingGraphicsContext();
 
 					emit(oneFrameFinished());
 				}
@@ -99,14 +98,14 @@ namespace dyno
 		mActiveNode = node;
 	}
 
-	void PSimulationThread::startRendering()
+	void PSimulationThread::startUpdatingGraphicsContext()
 	{
-		mRendering = true;
+		mUpdatingGraphicsContext = true;
 	}
 
-	void PSimulationThread::stopRendering()
+	void PSimulationThread::stopUpdatingGraphicsContext()
 	{
-		mRendering = false;
+		mUpdatingGraphicsContext = false;
 	}
 
 	void PSimulationThread::setTotalFrames(int num)

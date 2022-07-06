@@ -27,4 +27,11 @@ namespace dyno
 		}
 	}
 
+	bool InputMouseModule::requireUpdate()
+	{
+		bool required = !mEventQueue.empty();
+
+		return required || Module::requireUpdate();
+	}
+
 }
