@@ -136,7 +136,7 @@ namespace dyno
 		}
 
 		// update shadow map
-		{
+		if(m_rparams.light.mainLightShadow != 0.f) {
 			mShadowMap->beginUpdate(scene, m_rparams);
 			renderQueue.draw(GLVisualModule::SHADOW);
 			mShadowMap->endUpdate();

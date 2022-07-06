@@ -114,102 +114,109 @@ namespace Qt
 
 	void QtModuleFlowScene::showModuleFlow(Node* node)
 	{
-			clearScene();
+		clearScene();
 
-			auto mlist = node->getModuleList();
+		if (node == nullptr)
+			return;
 
-			std::map<dyno::ObjectId, QtNode*> moduleMap;
+		auto mlist = node->getModuleList();
 
-			auto& modules = node->animationPipeline()->allModules();
+		std::map<dyno::ObjectId, QtNode*> moduleMap;
+
+		//To show the animation pipeline in default
+		if (mActivePipeline == nullptr)
+			mActivePipeline = node->animationPipeline();
+
+		auto& modules = mActivePipeline->allModules();
 
 
-			auto addModuleWidget = [&](std::shared_ptr<Module> m) -> void
+		auto addModuleWidget = [&](std::shared_ptr<Module> m) -> void
+		{
+			auto mId = m->objectId();
+
+			auto type = std::make_unique<QtModuleWidget>(m);
+
+			auto& node = this->createNode(std::move(type));
+
+			moduleMap[mId] = &node;
+
+			QPointF posView(m->bx(), m->by());
+
+			node.nodeGraphicsObject().setPos(posView);
+
+			this->nodePlaced(node);
+		};
+
+		//Create a dummy module to store all state variables
+		mStates = std::make_shared<dyno::States>();
+		auto& fields = node->getAllFields();
+		for (auto field : fields)
+		{
+			if (field->getFieldType() == dyno::FieldTypeEnum::State)
 			{
-				auto mId = m->objectId();
+				mStates->addOutputField(field);
+			}
+		}
 
-				auto type = std::make_unique<QtModuleWidget>(m);
+		addModuleWidget(mStates);
 
-				auto& node = this->createNode(std::move(type));
+		for each (auto m in modules)
+		{
+			addModuleWidget(m.second);
+		}
 
-				moduleMap[mId] = &node;
+		auto createModuleConnections = [&](std::shared_ptr<Module> m) -> void
+		{
+			auto inId = m->objectId();
 
-				QPointF posView(m->bx(), m->by());
+			if (moduleMap.find(inId) != moduleMap.end()) {
+				auto inBlock = moduleMap[m->objectId()];
 
-				node.nodeGraphicsObject().setPos(posView);
+				auto fieldIn = m->getInputFields();
 
-				this->nodePlaced(node);
-			};
-
-			//Create a dummy module to store all state variables
-			mStates = std::make_shared<dyno::States>();
-			auto& fields = node->getAllFields();
-			for (auto field : fields)
-			{
-				if (field->getFieldType() == dyno::FieldTypeEnum::State)
+				for (int i = 0; i < fieldIn.size(); i++)
 				{
-					mStates->addOutputField(field);
-				}
-			}
-
-			addModuleWidget(mStates);
-
-			for each (auto m in modules)
-			{
-				addModuleWidget(m.second);
-			}
-
-			auto createModuleConnections = [&](std::shared_ptr<Module> m) -> void
-			{
-				auto inId = m->objectId();
-
-				if (moduleMap.find(inId) != moduleMap.end()) {
-					auto inBlock = moduleMap[m->objectId()];
-
-					auto fieldIn = m->getInputFields();
-
-					for (int i = 0; i < fieldIn.size(); i++)
-					{
-						auto fieldSrc = fieldIn[i]->getSource();
-						if (fieldSrc != nullptr) {
-							auto parSrc = fieldSrc->parent();
-							if (parSrc != nullptr)
+					auto fieldSrc = fieldIn[i]->getSource();
+					if (fieldSrc != nullptr) {
+						auto parSrc = fieldSrc->parent();
+						if (parSrc != nullptr)
+						{
+							Module* nodeSrc = dynamic_cast<Module*>(parSrc);
+							if (nodeSrc == nullptr)
 							{
-								Module* nodeSrc = dynamic_cast<Module*>(parSrc);
-								if (nodeSrc == nullptr)
-								{
-									nodeSrc = mStates.get();
-								}
+								nodeSrc = mStates.get();
+							}
 
-								auto outId = nodeSrc->objectId();
-								auto fieldsOut = nodeSrc->getOutputFields();
+							auto outId = nodeSrc->objectId();
+							auto fieldsOut = nodeSrc->getOutputFields();
 
-								uint outFieldIndex = 0;
-								bool fieldFound = false;
-								for (auto f : fieldsOut)
+							uint outFieldIndex = 0;
+							bool fieldFound = false;
+							for (auto f : fieldsOut)
+							{
+								if (f == fieldSrc)
 								{
-									if (f == fieldSrc)
-									{
-										fieldFound = true;
-										break;
-									}
-									outFieldIndex++;
+									fieldFound = true;
+									break;
 								}
+								outFieldIndex++;
+							}
 
-								if (fieldFound && moduleMap.find(outId) != moduleMap.end())
-								{
-									auto outBlock = moduleMap[outId];
-									createConnection(*inBlock, i, *outBlock, outFieldIndex);
-								}
+							if (fieldFound && moduleMap.find(outId) != moduleMap.end())
+							{
+								auto outBlock = moduleMap[outId];
+								createConnection(*inBlock, i, *outBlock, outFieldIndex);
 							}
 						}
 					}
 				}
-			};
-
-			for each (auto m in modules)
-			{
-				createModuleConnections(m.second);
 			}
+		};
+
+		for each (auto m in modules)
+		{
+			createModuleConnections(m.second);
+		}
 	}
 
 	void QtModuleFlowScene::moveModule(QtNode& n, const QPointF& newLocation)
@@ -222,6 +229,26 @@ namespace Qt
 		{
 			m->setBlockCoord(newLocation.x(), newLocation.y());
 		}
+	}
+
+	void QtModuleFlowScene::showAnimationPipeline()
+	{
+		if (mNode == nullptr)
+			return;
+
+		mActivePipeline = mNode->animationPipeline();
+
+		updateModuleGraphView();
+	}
+
+	void QtModuleFlowScene::showGraphicsPipeline()
+	{
+		if (mNode == nullptr)
+			return;
+
+		mActivePipeline = mNode->graphicsPipeline();
+
+		updateModuleGraphView();
 	}
 
 	void QtModuleFlowScene::updateModuleGraphView()

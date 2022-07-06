@@ -27,7 +27,7 @@ namespace dyno
 		virtual ~VisualModule();
 
 		void setVisible(bool bVisible);
-		bool isVisible() { return m_visible.getData(); }
+		bool isVisible() { return this->varVisible()->getData(); }
 
 		void rotate(float angle, float x, float y, float z);
 		void translate(float x, float y, float z);
@@ -41,7 +41,7 @@ namespace dyno
 		void updateImpl() final;
 
 	private:
-		FVar<bool> m_visible;
+		DEF_VAR(bool, Visible, true, "A toggle to control the viability");
 
 		Quat<float> m_rotation;
 		Vec3f m_scale;

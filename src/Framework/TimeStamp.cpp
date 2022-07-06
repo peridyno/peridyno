@@ -1,5 +1,7 @@
 #include "TimeStamp.h"
 
+#include <atomic>
+
 namespace dyno {
 
 	TimeStamp::~TimeStamp()

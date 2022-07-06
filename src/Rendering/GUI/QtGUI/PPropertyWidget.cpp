@@ -92,7 +92,7 @@ namespace dyno
 		: QGroupBox()
 	{
 		m_field = field;
-		FVar<int>* f = TypeInfo::cast<FVar<int>>(m_field);
+		FVar<uint>* f = TypeInfo::cast<FVar<uint>>(m_field);
 		if (f == nullptr)
 		{
 			return;
@@ -123,9 +123,7 @@ namespace dyno
 	{
 		FVar<int>* f = TypeInfo::cast<FVar<int>>(m_field);
 		if (f == nullptr)
-		{
 			return;
-		}
 
 		f->setValue(value);
 		f->update();
@@ -133,6 +131,47 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+	QUIntegerFieldWidget::QUIntegerFieldWidget(FBase* field)
+		: QGroupBox()
+	{
+		m_field = field;
+		FVar<uint>* f = TypeInfo::cast<FVar<uint>>(m_field);
+		if (f == nullptr)
+		{
+			return;
+		}
+
+		this->setStyleSheet("border:none");
+		QGridLayout* layout = new QGridLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		QLabel* name = new QLabel();
+		name->setFixedSize(100, 18);
+		name->setText(FormatFieldWidgetName(field->getObjectName()));
+
+		QSpinBox* spinner = new QSpinBox;
+		spinner->setValue(f->getData());
+
+		layout->addWidget(name, 0, 0);
+		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
+
+		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+	}
+
+	void QUIntegerFieldWidget::changeValue(int value)
+	{
+		FVar<uint>* f = TypeInfo::cast<FVar<uint>>(m_field);
+		if (f == nullptr)
+			return;
+
+		f->setValue(value);
+		f->update();
+
+		emit fieldChanged();
+	}
 
 	QRealFieldWidget::QRealFieldWidget(FBase* field)
 		: QGroupBox()
@@ -720,7 +759,14 @@ namespace dyno
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
 			layout->addWidget(fw, j, 0);
-//			this->addWidget(new QIntegerFieldWidget(new FVar<int>()));
+		}
+		else if (template_name == std::string(typeid(uint).name()))
+		{
+			auto fw = new QUIntegerFieldWidget(field);
+
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
+			layout->addWidget(fw, j, 0);
 		}
 		else if (template_name == std::string(typeid(float).name()))
 		{
