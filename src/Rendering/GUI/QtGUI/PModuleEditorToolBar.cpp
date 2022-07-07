@@ -15,8 +15,9 @@ namespace dyno
 	{
 		mLayout = new QHBoxLayout;
 
-		this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
-		this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/ReOrder.png")), tr("&Realign...")));
+		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
+		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/48px-View-refresh.png")), tr("&Update...")));
+		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/ReOrder.png")), tr("&Realign...")));
 
 		mLayout->addStretch();
 
@@ -29,7 +30,7 @@ namespace dyno
 		connect(mRenderingButton, &QPushButton::released, this, &PModuleEditorToolBar::renderingButtonClicked);
 	}
 
-	void PModuleEditorToolBar::addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu /*= nullptr*/)
+	QAction* PModuleEditorToolBar::addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu /*= nullptr*/)
 	{
 		if (type == QToolButton::MenuButtonPopup)
 		{
@@ -51,6 +52,8 @@ namespace dyno
 				btn->setMenu(menu);
 			mLayout->addWidget(btn);
 		}
+
+		return action;
 	}
 
 	QPushButton* PModuleEditorToolBar::addPushButton(QPixmap& icon, QString text)

@@ -86,7 +86,7 @@ namespace Qt
 
 		QString m_name;
 
-		std::shared_ptr<Module> m_module = nullptr;
+		std::shared_ptr<Module> mModule = nullptr;
 
 		NodeValidationState modelValidationState = NodeValidationState::Warning;
 		QString modelValidationError = QString("Missing or incorrect inputs");

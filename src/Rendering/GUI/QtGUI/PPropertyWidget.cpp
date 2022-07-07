@@ -423,7 +423,7 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-	QStringFieldWidget::QStringFieldWidget(FBase* field)
+	QFilePathWidget::QFilePathWidget(FBase* field)
 		: QGroupBox()
 	{
 		m_field = field;
@@ -453,10 +453,10 @@ namespace dyno
 		layout->addWidget(location, 0, 1);
 		layout->addWidget(open, 0, 2);
 
-		connect(location, &QLineEdit::textChanged, this, &QStringFieldWidget::changeValue);
+		connect(location, &QLineEdit::textChanged, this, &QFilePathWidget::changeValue);
 
 		connect(open, &QPushButton::clicked, this, [=]() {
-			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), ".", tr("Text Files(*.*)"));
+			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getAssetPath()), tr("Text Files(*.*)"));
 			if (!path.isEmpty()) {
 				QFile file(path);
 				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -473,7 +473,7 @@ namespace dyno
 		});
 	}
 
-	void QStringFieldWidget::changeValue(QString str)
+	void QFilePathWidget::changeValue(QString str)
 	{
 		auto f = TypeInfo::cast<FVar<FilePath>>(m_field);
 		if (f == nullptr)
@@ -791,7 +791,7 @@ namespace dyno
 		}
 		else if (template_name == std::string(typeid(FilePath).name()))
 		{
-			auto fw = new QStringFieldWidget(field);
+			auto fw = new QFilePathWidget(field);
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
 			layout->addWidget(fw, j, 0);

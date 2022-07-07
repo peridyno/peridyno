@@ -152,7 +152,8 @@ namespace Qt
 		auto& fields = node->getAllFields();
 		for (auto field : fields)
 		{
-			if (field->getFieldType() == dyno::FieldTypeEnum::State)
+			if (field->getFieldType() == dyno::FieldTypeEnum::State 
+					|| field->getFieldType() == dyno::FieldTypeEnum::In)
 			{
 				mStates->addOutputField(field);
 			}
@@ -265,6 +266,9 @@ namespace Qt
 
 	void QtModuleFlowScene::reorderAllModules()
 	{
+		if (mActivePipeline == nullptr)
+			return;
+
 		dyno::DirectedAcyclicGraph graph;
 
 		auto constructDAG = [&](std::shared_ptr<Module> m) -> void
@@ -296,7 +300,7 @@ namespace Qt
 
 		constructDAG(mStates);
 
-		auto& mlists = mNode->animationPipeline()->activeModules();
+		auto& mlists = mActivePipeline->activeModules();
 		for (auto it = mlists.begin(); it != mlists.end(); it++)
 		{
 			constructDAG(*it);
@@ -368,19 +372,25 @@ namespace Qt
 
 	void QtModuleFlowScene::addModule(QtNode& n)
 	{
+		if (mActivePipeline == nullptr)
+			return;
+
 		auto nodeData = dynamic_cast<QtModuleWidget*>(n.nodeDataModel());
 
 		if (mEditingEnabled && nodeData != nullptr) {
-			mNode->animationPipeline()->pushModule(nodeData->getModule());
+			mActivePipeline->pushModule(nodeData->getModule());
 		}
 	}
 
 	void QtModuleFlowScene::deleteModule(QtNode& n)
 	{
+		if (mActivePipeline == nullptr)
+			return;
+
 		auto nodeData = dynamic_cast<QtModuleWidget*>(n.nodeDataModel());
 
 		if (mEditingEnabled && nodeData != nullptr) {
-			mNode->animationPipeline()->popModule(nodeData->getModule());
+			mActivePipeline->popModule(nodeData->getModule());
 		}
 	}
 }

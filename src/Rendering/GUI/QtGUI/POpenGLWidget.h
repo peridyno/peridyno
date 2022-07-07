@@ -32,6 +32,7 @@ namespace dyno
 	class ImWidget;
 	class RenderEngine;
 	class Camera;
+	class Node;
 
 	enum QButtonState
 	{
@@ -67,6 +68,8 @@ namespace dyno
 
 	public slots:
 		void updateGrpahicsContext();
+
+		void updateGraphicsContext(Node* node);
 
 	private:
 		std::shared_ptr<Camera> activeCamera();

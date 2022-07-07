@@ -13,11 +13,14 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		PModuleEditor(Qt::QtNodeWidget* node_widget);
+		PModuleEditor(Qt::QtNodeWidget* widget);
+
+		PModuleEditorToolBar* toolBar() { return mToolBar; }
+
+	signals:
+		void changed(Node* node);
 
 	private:
-
 		PModuleEditorToolBar* mToolBar;
 	};
 }
-

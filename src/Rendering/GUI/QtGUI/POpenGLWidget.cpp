@@ -208,6 +208,21 @@ namespace dyno
 		doneCurrent();
 	}
 
+	void POpenGLWidget::updateGraphicsContext(Node* node)
+	{
+		makeCurrent();
+
+		PSimulationThread::instance()->startUpdatingGraphicsContext();
+
+		node->graphicsPipeline()->forceUpdate();
+
+		PSimulationThread::instance()->stopUpdatingGraphicsContext();
+
+		update();
+
+		doneCurrent();
+	}
+
 	std::shared_ptr<Camera> POpenGLWidget::activeCamera()
 	{
 		return mRenderEngine->camera();

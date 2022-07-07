@@ -106,6 +106,7 @@
 #include "Platform.h"
 
 #include "PMainToolBar.h"
+#include "PModuleEditorToolBar.h"
 
 // #include "Node/NodeData.hpp"
 // #include "Node/FlowScene.hpp"
@@ -382,6 +383,8 @@ namespace dyno
 		moduelEditor->setAttribute(Qt::WA_ShowModal, true);
 		moduelEditor->setAttribute(Qt::WA_DeleteOnClose, true);
 		moduelEditor->show();
+
+		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
 	}
 
 	void PMainWindow::showMessage()

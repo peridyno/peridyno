@@ -58,6 +58,8 @@ namespace dyno
 
 		void printModuleInfo(bool enabled);
 
+		void forceUpdate();
+
 	protected:
 		void preprocess() final;
 		void updateImpl() override;
