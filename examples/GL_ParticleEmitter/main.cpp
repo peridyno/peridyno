@@ -38,7 +38,7 @@ std::shared_ptr<SceneGraph> createScene()
 	ptRender->setColorMapRange(0, 5);
 
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	fluid->stateTopology()->connect(ptRender->inPointSet());
+	fluid->statePointSet()->connect(ptRender->inPointSet());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 	colorMapper->outColor()->connect(ptRender->inColor());
 

@@ -30,6 +30,8 @@ namespace dyno
 
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
 	protected:
 		void resetStates() override;
 	};

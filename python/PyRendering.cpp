@@ -91,12 +91,7 @@ void pybind_rendering(py::module& m)
 
 	py::class_<GLSurfaceVisualModuleWrap, GLVisualModule, std::shared_ptr<GLSurfaceVisualModuleWrap>>
 		(m, "GLSurfaceVisualModule", py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("set_node", [](std::shared_ptr<GLSurfaceVisualModuleWrap> r, std::shared_ptr<Node> n)
-			{
-				n->stateTopology()->connect(r->inTriangleSet());
-				n->graphicsPipeline()->pushModule(r);
-			});
+		.def(py::init<>());
 
 	declare_color_mapping<dyno::DataType3f>(m, "3f");
 

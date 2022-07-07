@@ -66,6 +66,8 @@ namespace dyno {
             return m_displacement;
         }
 
+        DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
     public:
         float m_windSpeed = 0;                   //风速
         float windDir     = CUDART_PI_F / 3.0f;  //风场方向

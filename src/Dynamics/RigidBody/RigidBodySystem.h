@@ -52,6 +52,8 @@ namespace dyno
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
 
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
 		/**
 		 * @brief Particle position
 		 */

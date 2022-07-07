@@ -1,6 +1,6 @@
 #include "GhostFluid.h"
 
-#include "ProjectionBasedFluidModel.h"
+#include "Module/ProjectionBasedFluidModel.h"
 
 namespace dyno
 {

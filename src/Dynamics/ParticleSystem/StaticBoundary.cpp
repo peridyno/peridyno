@@ -1,7 +1,8 @@
 #include "StaticBoundary.h"
 #include "Log.h"
 #include "Node.h"
-#include "ParticleSystem/BoundaryConstraint.h"
+
+#include "Module/BoundaryConstraint.h"
 
 #include "Topology/DistanceField3D.h"
 #include "Topology/TriangleSet.h"

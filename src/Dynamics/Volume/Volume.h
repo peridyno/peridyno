@@ -18,5 +18,7 @@ namespace dyno {
 		virtual void updateVolume() = 0;
 	public:
 		DEF_INSTANCE_STATE(SignedDistanceField<TDataType>, SDF, "");
+
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 	};
 }

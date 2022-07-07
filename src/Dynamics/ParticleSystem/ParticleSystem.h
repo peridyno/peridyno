@@ -1,9 +1,10 @@
 #pragma once
 #include "Node.h"
 
+#include "Topology/PointSet.h"
+
 namespace dyno
 {
-	template <typename TDataType> class PointSet;
 	/*!
 	*	\class	ParticleSystem
 	*	\brief	This class represents the base class for more advanced particle-based nodes.
@@ -45,9 +46,13 @@ namespace dyno
 		 */
 		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Force on each particle");
 
+		/**
+		 * @brief A topology
+		 */
+		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "Topology");
+
 	protected:
 		void updateTopology() override;
 		void resetStates() override;
-//		virtual void setVisible(bool visible) override;
 	};
 }

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module/ConstraintModule.h"
 
-#include "Attribute.h"
+#include "../Attribute.h"
+
+//Framework
+#include "Module/ConstraintModule.h"
 
 namespace dyno 
 {

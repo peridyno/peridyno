@@ -49,7 +49,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElasticBody<TDataType>::updateTopology()
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		auto& pts = ptSet->getPoints();
 		pts.assign(this->statePosition()->getData());
 	}

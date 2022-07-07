@@ -40,5 +40,7 @@ namespace dyno
 
 	public:
 		DEF_ARRAY_STATE(Coord, Vector, DeviceType::GPU, "");
+
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 	};
 };

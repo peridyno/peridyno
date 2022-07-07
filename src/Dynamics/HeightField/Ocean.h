@@ -36,6 +36,7 @@ namespace dyno
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 		DEF_NODE_PORTS(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
 
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 	protected:
 		void resetStates() override;
 		void updateStates() override;

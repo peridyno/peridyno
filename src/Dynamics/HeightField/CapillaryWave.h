@@ -48,6 +48,9 @@ namespace dyno
 		
 		void compute();
 		void updateStates() override;
+
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
 	protected:
 		void resetStates() override;
 

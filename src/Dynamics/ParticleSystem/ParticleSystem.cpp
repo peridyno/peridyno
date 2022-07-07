@@ -1,4 +1,5 @@
 #include "ParticleSystem.h"
+
 #include "Topology/PointSet.h"
 
 namespace dyno
@@ -10,7 +11,7 @@ namespace dyno
 		: Node(name)
 	{
 		auto ptSet = std::make_shared<PointSet<TDataType>>();
-		this->stateTopology()->setDataPtr(ptSet);
+		this->statePointSet()->setDataPtr(ptSet);
 	}
 
 	template<typename TDataType>
@@ -27,8 +28,7 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleSystem<TDataType>::loadParticles(std::string filename)
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
-		ptSet->loadObjFile(filename);
+		this->statePointSet()->getDataPtr()->loadObjFile(filename);
 	}
 
 	template<typename TDataType>
@@ -54,7 +54,7 @@ namespace dyno
 			}
 		}
 
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		ptSet->setPoints(vertList);
 
 		vertList.clear();
@@ -76,7 +76,7 @@ namespace dyno
 			}
 		}
 
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		ptSet->setPoints(vertList);
 
 		std::cout << "particle number: " << vertList.size() << std::endl;
@@ -87,7 +87,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleSystem<TDataType>::translate(Coord t)
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		ptSet->translate(t);
 
 		return true;
@@ -97,7 +97,7 @@ namespace dyno
 	template<typename TDataType>
 	bool ParticleSystem<TDataType>::scale(Real s)
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		ptSet->scale(s);
 
 		return true;
@@ -120,7 +120,7 @@ namespace dyno
 	{
 		if (!this->statePosition()->isEmpty())
 		{
-			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+			auto ptSet = this->statePointSet()->getDataPtr();
 			int num = this->statePosition()->size();
 			auto& pts = ptSet->getPoints();
 			if (num != pts.size())
@@ -136,7 +136,7 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleSystem<TDataType>::resetStates()
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		if (ptSet == nullptr) return;
 
 		auto pts = ptSet->getPoints();

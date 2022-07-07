@@ -3,7 +3,7 @@
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
 
-#include "ParticleSystem/ParticleIntegrator.h"
+#include "ParticleSystem/Module/ParticleIntegrator.h"
 
 #include "Topology/NeighborPointQuery.h"
 
@@ -82,7 +82,7 @@ namespace dyno
 	template<typename TDataType>
 	void Cloth<TDataType>::updateTopology()
 	{
-		auto triSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto triSet = this->statePointSet()->getDataPtr();
 
 		triSet->getPoints().assign(this->statePosition()->getData());
 	}
