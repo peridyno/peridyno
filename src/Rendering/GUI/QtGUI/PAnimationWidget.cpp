@@ -32,6 +32,13 @@ namespace dyno
 		QGridLayout* GLayout = new QGridLayout;
 		mFrameSlider = new PAnimationQSlider(0, mTotalFrame, this);
 
+		mFrameSlider->setStyleSheet(
+			"QSlider{background-color: #B0B0B0; border-radius: 2px;}"
+			"QSlider::groove:horizontal{height: 20px; margin-top: 0px; margin-bottom: 5px; left: 0px; right: 0px; border:0px; border-radius:0px; border: 1px solid rgb(200, 200, 200); background:rgba(0,0,0,30);}"
+ 			"QSlider::handle:horizontal{width: 10; height: 20px; margin-top: 0px; margin-left: 0px; margin-bottom: 0px; margin-right: 0px; border-radius:3px; border: 1px solid rgb(30, 30, 30); background:rgba(109,109,109,255);}"
+ 			"QSlider::sub-page:horizontal{margin-top: 1px; margin-bottom: 6px; background:rgba(0,149,176,1);}"
+		);
+
 		frameLayout->addWidget(mFrameSlider, 0, 0, 0 , (labelSize - 1) * 2);
 
 		QGridLayout* operationLayout = new QGridLayout();

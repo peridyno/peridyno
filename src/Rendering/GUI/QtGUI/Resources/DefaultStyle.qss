@@ -1,0 +1,9 @@
+*{
+font:15px "宋体";
+color: rgb(22, 22, 22);
+selection-background-color: rgb(255, 255, 255);
+selection-color: rgb(0, 0, 0);
+outline:none;
+}
+QWidget{
+}

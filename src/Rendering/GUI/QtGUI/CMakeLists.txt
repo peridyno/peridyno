@@ -16,7 +16,7 @@ find_package(Qt5 COMPONENTS
 			 Svg)
 
 qt5_add_resources(RESOURCES 
-    ./Resources/resources.qrc
+    ./Resources/DefaultStyle.qrc
     ./Resources/StyleTemplate.qrc)
 
 

@@ -1,6 +1,6 @@
 <RCC version="1.0">
-    <qresource>
-        <file>DefaultStyle.json</file>
+    <qresource prefix="/dyno">
+        <file>DefaultStyle.qss</file>
         <file>convert.png</file>
     </qresource>
 </RCC>

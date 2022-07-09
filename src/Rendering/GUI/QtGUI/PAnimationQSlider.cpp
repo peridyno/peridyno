@@ -123,12 +123,13 @@ namespace dyno
 
 				auto tickY = (rect.height() + fontHeight) / 2;
 
-				painter->drawText(QPoint(tickX + 6, tickY), QString::number(tickNum));
-			}
+				auto tickMarkX = (((rect.width() - 10.0f) / (maximum() - minimum())) * tickInterval() * i);
 
+				painter->drawText(QPoint(tickX + 6, tickY - 5), QString::number(tickNum));
+				painter->drawLine(QPoint(tickMarkX + 6, rect.height() - 3), QPoint(tickMarkX + 6, rect.height()));
+			}
 		}
 		else if (this->orientation() == Qt::Vertical) {
-
 			//do something else for vertical here, I haven't implemented it because I don't need it
 		}
 		else {
@@ -154,8 +155,13 @@ namespace dyno
 
 	void PAnimationQSlider::mouseMoveEvent(QMouseEvent* event)
 	{
-		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 6);
+		QFontMetrics fontMetrics = QFontMetrics(this->font());
+
+		int labelWidth = fontMetrics.width(QString::number(this->value()));
+
+		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 0);
 		m_displayLabel->setText(QString::number(this->value()));
+		m_displayLabel->setFixedWidth(labelWidth);
 	
 		m_displayLabel->setVisible(true);
 		m_displayLabel->setStyleSheet("QLabel{background:#FFFFFF;}");
