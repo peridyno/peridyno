@@ -17,7 +17,8 @@ find_package(Qt5 COMPONENTS
 
 qt5_add_resources(RESOURCES 
     ./Resources/DefaultStyle.qrc
-    ./Resources/StyleTemplate.qrc)
+    ./Resources/StyleTemplate.qrc
+    ./Resources/img/icons.qrc)
 
 
 file(                                                                           
@@ -37,6 +38,13 @@ add_library(${LIB_NAME} STATIC
 	${RESOURCES})
 
 foreach(SRC IN ITEMS ${LIB_SRC})
+    get_filename_component(SRC_PATH "${SRC}" PATH)
+    file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
+    string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
+    source_group("${GROUP_PATH}" FILES "${SRC}")
+endforeach()
+
+foreach(SRC IN ITEMS ${RESOURCES})
     get_filename_component(SRC_PATH "${SRC}" PATH)
     file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
     string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")

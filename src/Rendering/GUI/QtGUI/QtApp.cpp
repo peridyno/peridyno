@@ -30,10 +30,10 @@ namespace dyno {
         m_mainWindow->resize(width, height);
     }
 
-#include <QMessageBox>
     void QtApp::mainLoop()
     {
         QFile file(":/dyno/DefaultStyle.qss");
+        //QFile file(":/dyno/DarkStyle.qss");
         file.open(QIODevice::ReadOnly);
 
         QString style = file.readAll();

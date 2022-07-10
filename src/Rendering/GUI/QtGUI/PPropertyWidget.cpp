@@ -259,7 +259,6 @@ namespace dyno
 	{
 		m_field = field;
 
-		this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -351,7 +350,6 @@ namespace dyno
 	{
 		mField = field;
 
-		this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -431,7 +429,7 @@ namespace dyno
 		FVar<FilePath>* f = TypeInfo::cast<FVar<FilePath>>(field);
 
 		this->setStyleSheet("border:none");
-		QGridLayout* layout = new QGridLayout;
+		QHBoxLayout* layout = new QHBoxLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
 
@@ -445,13 +443,15 @@ namespace dyno
 		location->setText(QString::fromStdString(f->getValue().string()));
 
 		QPushButton* open = new QPushButton("open");
-		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
-							"QPushButton:hover{background-color:white; color: black;}"  
-							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
+// 		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
+// 							"QPushButton:hover{background-color:white; color: black;}"  
+// 							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
+		open->setFixedSize(60, 24);
 
-		layout->addWidget(name, 0, 0);
-		layout->addWidget(location, 0, 1);
-		layout->addWidget(open, 0, 2);
+		layout->addWidget(name, 0);
+		layout->addWidget(location, 1);
+		layout->addWidget(open, 0, 0);
+		layout->setSpacing(5);
 
 		connect(location, &QLineEdit::textChanged, this, &QFilePathWidget::changeValue);
 
@@ -647,8 +647,9 @@ namespace dyno
 		int n = 2;//label number
 		for (int i = 0; i < n; i++) {
 			mPropertyLabel[i] = new LockerButton;
+			mPropertyLabel[i]->setContentsMargins(8, 0, 0, 0);
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
-			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/control-270.png").c_str()));
+			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
 			mPropertyLabel[i]->setStyleSheet("#LockerButton{background-color:transparent}"
 				"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
 				"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
@@ -664,7 +665,7 @@ namespace dyno
 
 		{
 			QGroupBox* title = new QGroupBox;
-			title->setStyleSheet("border:none");
+			//title->setStyleSheet("border:none");
 			QGridLayout* layout = new QGridLayout;
 			layout->setContentsMargins(0, 0, 0, 0);
 			layout->setSpacing(0);
@@ -672,14 +673,14 @@ namespace dyno
 			title->setLayout(layout);
 
 			QLabel* name = new QLabel();
-			name->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
+			//name->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
 			name->setFixedHeight(25);
 			name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 			name->setText("Name");
 			layout->addWidget(name, 0, 0);
 
 			QLabel* output = new QLabel();
-			output->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
+			//output->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
 			output->setFixedSize(56, 25);
 			output->setText("Output");
 			layout->addWidget(output, 0, 1, Qt::AlignRight);
@@ -721,14 +722,14 @@ namespace dyno
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this, i, vlayout]() {
 				if (!mFlag[i])
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/control.png").c_str()));
+					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
 					//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
 					mPropertyWidget[i]->setVisible(false);
 				}
 				else
 				{
 					printf("vlayout->sizeHint().width() - %d \n", vlayout->sizeHint().width());
-					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/control-270.png").c_str()));
+					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
 					mPropertyWidget[i]->setVisible(true);
 				}
 				mFlag[i] = !mFlag[i];

@@ -30,8 +30,8 @@ namespace dyno
 
 		m_displayLabel = new QLabel(this);
 		m_displayLabel->setFixedSize(QSize(30, 20));
-
 		m_displayLabel->setAlignment(Qt::AlignCenter);
+		m_displayLabel->setStyleSheet("background: transparent;");
 
 		this->setTickInterval(50);
 

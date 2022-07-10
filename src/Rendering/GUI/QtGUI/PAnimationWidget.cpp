@@ -23,39 +23,40 @@ namespace dyno
 		QGridLayout* frameLayout	= new QGridLayout();
 
 		mTotalFrameSpinbox = new QSpinBox();
-		mTotalFrameSpinbox->setFixedSize(60, 25);
+		mTotalFrameSpinbox->setFixedSize(60, 29);
 		mTotalFrameSpinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 		mTotalFrameSpinbox->setMaximum(1000000);
 		mTotalFrameSpinbox->setValue(mTotalFrame);
 
 		QGridLayout* GLayout = new QGridLayout;
+		
 		mFrameSlider = new PAnimationQSlider(0, mTotalFrame, this);
-
-		mFrameSlider->setStyleSheet(
-			"QSlider{background-color: #B0B0B0; border-radius: 2px;}"
-			"QSlider::groove:horizontal{height: 20px; margin-top: 0px; margin-bottom: 5px; left: 0px; right: 0px; border:0px; border-radius:0px; border: 1px solid rgb(200, 200, 200); background:rgba(0,0,0,30);}"
- 			"QSlider::handle:horizontal{width: 10; height: 20px; margin-top: 0px; margin-left: 0px; margin-bottom: 0px; margin-right: 0px; border-radius:3px; border: 1px solid rgb(30, 30, 30); background:rgba(109,109,109,255);}"
- 			"QSlider::sub-page:horizontal{margin-top: 1px; margin-bottom: 6px; background:rgba(0,149,176,1);}"
-		);
-
+		mFrameSlider->setObjectName("AnimationSlider");
+		mFrameSlider->setStyleSheet("border-top-right-radius: 0px; border-bottom-right-radius: 0px;");
+		
 		frameLayout->addWidget(mFrameSlider, 0, 0, 0 , (labelSize - 1) * 2);
 
-		QGridLayout* operationLayout = new QGridLayout();
+		QHBoxLayout* operationLayout = new QHBoxLayout();
 
 		m_startSim = new QPushButton("Start");
 		m_resetSim = new QPushButton("Reset");
+		m_startSim->setStyleSheet("padding: 6px;");
+		m_resetSim->setStyleSheet("margin-right: 5px; padding: 6px;");
 
 		m_resetSim->setCheckable(false);
 
-		operationLayout->addWidget(mTotalFrameSpinbox, 0, 0);
-		operationLayout->addWidget(m_startSim, 0, 1);
-		operationLayout->addWidget(m_resetSim, 0, 2);
+		operationLayout->addWidget(mTotalFrameSpinbox, 0);
+		operationLayout->addWidget(m_startSim, 0);
+		operationLayout->addWidget(m_resetSim, 0);
+		operationLayout->setSpacing(5);
 
 		m_startSim->setCheckable(true);
 
 		layout->addLayout(frameLayout, 10);
+		layout->addStretch();
 		layout->addLayout(operationLayout, 1);
+		layout->setSpacing(0);
 		
 		connect(m_startSim, SIGNAL(released()), this, SLOT(toggleSimulation()));
 		connect(m_resetSim, SIGNAL(released()), this, SLOT(resetSimulation()));

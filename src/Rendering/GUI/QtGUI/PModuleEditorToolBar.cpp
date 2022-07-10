@@ -69,9 +69,11 @@ namespace dyno
 
 		QLabel* iconLabel = new QLabel;    
 		QLabel* textLabel = new QLabel;
+
+		iconLabel->setStyleSheet("background: transparent;");
+		textLabel->setStyleSheet("background: transparent;");
+
 		iconLabel->setFixedSize(iconSize, iconSize);
-		iconLabel->setStyleSheet("border:0px solid red;");    
-		textLabel->setStyleSheet("border:0px solid red;");    
 		iconLabel->setPixmap(icon);
 		textLabel->setText(text);
 
@@ -88,10 +90,10 @@ namespace dyno
 		btnLayout->addSpacing(2);
 		button->setLayout(btnLayout);
 
-		button->setStyleSheet(
-			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
-			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
-			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
+// 		button->setStyleSheet(
+// 			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
+// 			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
+// 			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
 
 		mLayout->addWidget(button);
 
