@@ -252,9 +252,10 @@ QSlider::sub-page:horizontal, QSlider::sub-page:vertical {
 QStatusBar, QSpinBox {
 	color:rgb(81,72,65);
 }
-QSpinBox {
+QAbstractSpinBox {
 	background-color: #ffffff;
-    border: 1px solid rgb(120, 120, 120);
+	border-radius: 2px;
+    border: 1px solid rgb(200, 200, 200);
 }
 QScrollBar:horizontal {
 	max-height: 20px;
@@ -502,6 +503,19 @@ QTimeEdit, QToolBox, QToolBox::tab, QToolBox::tab:selected {
 Ubuntu Style Sheet for QT Applications
 Author: Xiaowei HE
 */
+
+QGroupBox {
+  font-weight: bold;
+  border: 1px solid rgb(200,200,200);
+  border-radius: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
 QSlider#AnimationSlider{
     background-color: #B0B0B0; 
     border-radius: 2px;

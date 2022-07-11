@@ -43,7 +43,7 @@ namespace dyno
 
 		//Set up property dock widget
 		PDockWidget *propertyDockWidget = new PDockWidget(tr("Property"), this, Qt::WindowFlags(0));
-		propertyDockWidget->setWindowTitle("Module Property");
+		propertyDockWidget->setWindowTitle("Property");
 		this->addDockWidget(Qt::LeftDockWidgetArea, propertyDockWidget);
 		
 		PPropertyWidget* propertyWidget = new PPropertyWidget();

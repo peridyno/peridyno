@@ -43,7 +43,7 @@ namespace dyno
 		}
 
 		//this->setStyleSheet("border:none");
-		QGridLayout* layout = new QGridLayout;
+		QHBoxLayout* layout = new QHBoxLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
 
@@ -53,9 +53,11 @@ namespace dyno
 		name->setFixedSize(100, 18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 		QCheckBox* checkbox = new QCheckBox();
+		checkbox->setFixedWidth(20);
 		//checkbox->setFixedSize(40, 18);
-		layout->addWidget(name, 0, 0);
-		layout->addWidget(checkbox, 0, 1);
+		layout->addWidget(name, 0);
+		layout->addStretch(1);
+		layout->addWidget(checkbox, 0);
 
 		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(changeValue(int)));
 
@@ -491,7 +493,7 @@ namespace dyno
 		m_field = field;
 
 		//this->setStyleSheet("border:none");
-		QGridLayout* layout = new QGridLayout;
+		QHBoxLayout* layout = new QHBoxLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
 
@@ -501,11 +503,12 @@ namespace dyno
 		name->setFixedHeight(24);
 		name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
-		layout->addWidget(name, 0, 0);
+		layout->addWidget(name, 0);
+		layout->addStretch(1);
 
 		QCheckBox* checkbox = new QCheckBox();		
-		checkbox->setFixedSize(18, 24);
-		layout->addWidget(checkbox, 0, 1, Qt::AlignRight);
+		checkbox->setFixedWidth(20);
+		layout->addWidget(checkbox, 0);
 
 		if (m_field->parent()->findOutputField(field))
 		{
