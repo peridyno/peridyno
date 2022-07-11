@@ -42,7 +42,7 @@ namespace dyno
 			return;
 		}
 
-		this->setStyleSheet("border:none");
+		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -98,7 +98,7 @@ namespace dyno
 			return;
 		}
 
-		this->setStyleSheet("border:none");
+		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -141,7 +141,7 @@ namespace dyno
 			return;
 		}
 
-		this->setStyleSheet("border:none");
+		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -178,7 +178,7 @@ namespace dyno
 	{
 		m_field = field;
 		
-		this->setStyleSheet("border:none");
+		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -428,7 +428,7 @@ namespace dyno
 
 		FVar<FilePath>* f = TypeInfo::cast<FVar<FilePath>>(field);
 
-		this->setStyleSheet("border:none");
+		//this->setStyleSheet("border:none");
 		QHBoxLayout* layout = new QHBoxLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -490,7 +490,7 @@ namespace dyno
 	{
 		m_field = field;
 
-		this->setStyleSheet("border:none");
+		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -498,13 +498,13 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
-		name->setFixedHeight(18);
+		name->setFixedHeight(24);
 		name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 		layout->addWidget(name, 0, 0);
 
 		QCheckBox* checkbox = new QCheckBox();		
-		checkbox->setFixedSize(18, 18);
+		checkbox->setFixedSize(18, 24);
 		layout->addWidget(checkbox, 0, 1, Qt::AlignRight);
 
 		if (m_field->parent()->findOutputField(field))
@@ -650,12 +650,10 @@ namespace dyno
 			mPropertyLabel[i]->setContentsMargins(8, 0, 0, 0);
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
 			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
-			mPropertyLabel[i]->setStyleSheet("#LockerButton{background-color:transparent}"
-				"#LockerButton:hover{background-color:rgba(195,195,195,0.4)}"
-				"#LockerButton:pressed{background-color:rgba(127,127,127,0.4)}");
 
 			mPropertyWidget[i] = new QWidget(this);
 			mPropertyWidget[i]->setVisible(true);
+			mPropertyWidget[i]->setStyleSheet("background-color: transparent;");
 
 			propertyNum[i] = 0;
 
@@ -716,29 +714,26 @@ namespace dyno
 				vlayout->addWidget(mPropertyLabel[i]);
 				mPropertyWidget[i]->setLayout(mPropertyLayout[i]);
 				vlayout->addWidget(mPropertyWidget[i]);
-
 			}
 
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this, i, vlayout]() {
 				if (!mFlag[i])
 				{
 					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
-					//m_sizeList偶数屏蔽Size列表界面，奇数显示Size列表界面
 					mPropertyWidget[i]->setVisible(false);
 				}
 				else
 				{
-					printf("vlayout->sizeHint().width() - %d \n", vlayout->sizeHint().width());
 					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
 					mPropertyWidget[i]->setVisible(true);
 				}
 				mFlag[i] = !mFlag[i];
-
 			});
 		}
 		vlayout->setMargin(0);
 		vlayout->setSpacing(0);
 		mWidget->setLayout(vlayout);
+
 		addWidget(mWidget);
 	}
 

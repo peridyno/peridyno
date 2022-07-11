@@ -340,7 +340,7 @@ namespace dyno
 	void PDockWidget::contextMenuEvent(QContextMenuEvent *event)
 	{
 		event->accept();
-		menu->exec(event->globalPos());
+		//menu->exec(event->globalPos());
 	}
 #endif // QT_NO_CONTEXTMENU
 

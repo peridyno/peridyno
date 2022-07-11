@@ -32,7 +32,7 @@ namespace dyno {
 
     void QtApp::mainLoop()
     {
-        QFile file(":/dyno/DefaultStyle.qss");
+        QFile file(":/dyno/DarkStyle.qss");
         //QFile file(":/dyno/DarkStyle.qss");
         file.open(QIODevice::ReadOnly);
 
