@@ -94,7 +94,7 @@ namespace dyno
 		: QGroupBox()
 	{
 		m_field = field;
-		FVar<uint>* f = TypeInfo::cast<FVar<uint>>(m_field);
+		FVar<int>* f = TypeInfo::cast<FVar<int>>(m_field);
 		if (f == nullptr)
 		{
 			return;
