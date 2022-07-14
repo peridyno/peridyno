@@ -1,7 +1,8 @@
 #include "ElasticityModule.h"
 #include "Node.h"
 #include "Matrix/MatrixFunc.h"
-#include "ParticleSystem/Kernel.h"
+
+#include "ParticleSystem/Module/Kernel.h"
 
 namespace dyno
 {
