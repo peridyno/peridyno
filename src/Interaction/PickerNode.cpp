@@ -12,7 +12,7 @@ namespace dyno
 		:Node(name)
 	{
 		auto mouseInteractor = std::make_shared<PickerInteraction<TDataType>>();
-		this->stateInTopology()->connect(mouseInteractor->inInitialTriangleSet());
+		this->inTopology()->connect(mouseInteractor->inInitialTriangleSet());
 
 		this->stateSelectedTriangleSet()->connect(mouseInteractor->outSelectedTriangleSet());
 		this->stateOtherTriangleSet()->connect(mouseInteractor->outOtherTriangleSet());
@@ -33,7 +33,7 @@ namespace dyno
 
 		this->mouseInteractor = mouseInteractor;
 
-		this->stateInTopology()->promoteInput();
+		this->inTopology()->promoteInput();
 
 		this->graphicsPipeline()->pushModule(mouseInteractor);
 
@@ -88,7 +88,7 @@ namespace dyno
 	template<typename TDataType>
 	void PickerNode<TDataType>::resetStates()
 	{
-		this->stateInTopology()->getDataPtr()->updateEdges();
+		this->inTopology()->getDataPtr()->updateEdges();
 
 		this->stateTriangleIndex()->allocate();
 		this->stateEdgeIndex()->allocate();
@@ -97,15 +97,15 @@ namespace dyno
 		this->stateOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
-		this->stateOtherTriangleSet()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
+		this->stateOtherTriangleSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
 
 		this->stateOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 		this->stateSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->stateOtherEdgeSet()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
+		this->stateOtherEdgeSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
 
 		this->stateOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->stateSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->stateOtherPointSet()->getDataPtr()->copyFrom(this->stateInTopology()->getData());
+		this->stateOtherPointSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
 	}
 
 	DEFINE_CLASS(PickerNode);

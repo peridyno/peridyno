@@ -14,7 +14,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InTopology, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, Topology, "");
+
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTriangleSet, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, SelectedEdgeSet, "");

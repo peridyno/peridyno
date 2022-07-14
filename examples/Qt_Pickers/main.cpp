@@ -33,7 +33,7 @@ int main()
 
 
 	mesh->varFileName()->setValue("../../data/standard/standard_sphere.obj");
-	mesh->outTriangleSet()->connect(pickerNode->stateInTopology());
+	mesh->outTriangleSet()->connect(pickerNode->inTopology());
 	/*mesh->outTriangleSet()->connect(surfacePickerNode->inInTopology());
 	mesh->outTriangleSet()->connect(edgePickerNode->inInTopology());
 	mesh->outTriangleSet()->connect(pointPickerNode->inInTopology());  */   
