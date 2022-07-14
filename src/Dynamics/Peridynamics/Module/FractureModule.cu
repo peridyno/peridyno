@@ -1,6 +1,7 @@
 #include "FractureModule.h"
-#include "ParticleSystem/SummationDensity.h"
-#include "ParticleSystem/Kernel.h"
+
+#include "ParticleSystem/Module/SummationDensity.h"
+#include "ParticleSystem/Module/Kernel.h"
 
 namespace dyno
 {
