@@ -6,9 +6,9 @@
 #include "Node/GLCommonPointVisualNode.h"
 #include "Node/GLWireframeVisualNode.h"
 
-#include "SurfacePickerNode.h"
-#include "PointPickerNode.h"
-#include "EdgePickerNode.h"
+//#include "SurfacePickerNode.h"
+//#include "PointPickerNode.h"
+//#include "EdgePickerNode.h"
 #include "PickerNode.h"
 
 #include "SurfaceMeshLoader.h"

@@ -17,12 +17,12 @@ namespace dyno
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InTopology, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTriangleSet, "");
-		DEF_ARRAY_STATE(int,TriangleIndex, DeviceType::GPU, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, SelectedEdgeSet, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, OtherEdgeSet, "");
-		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, SelectedPointSet, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, OtherPointSet, "");
+		DEF_ARRAY_STATE(int, TriangleIndex, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
 
 		DEF_VAR(Real, InterationRadius, 0.05f, "The radius of interaction");

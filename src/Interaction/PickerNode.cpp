@@ -68,6 +68,10 @@ namespace dyno
 		this->varOtherPointColor()->connect(pointRender2->varBaseColor());
 		this->stateOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
+
+		this->varInterationRadius()->setRange(0.02f , 0.1f);
+		this->varSelectedSize()->setRange(0.0f, 0.05f);
+		this->varOtherSize()->setRange(0.0f,0.05f);
 	}
 
 	template<typename TDataType>
