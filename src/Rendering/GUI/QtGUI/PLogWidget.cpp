@@ -43,18 +43,17 @@ namespace dyno
 		{
 		case Log::Warning:
 		{
-			TextColor = Qt::black;
+			//TextColor = Qt::black;
 			break;
 		}
 
 		case Log::Error:
 		{
 			TextColor = Qt::red;
+			setTextColor(TextColor);
 			break;
 		}
 		}
-
-		setTextColor(TextColor);
 
 		QString text = QString::fromUtf8(m.text.c_str());
 

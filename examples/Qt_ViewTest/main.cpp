@@ -9,7 +9,7 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLInstanceVisualModule.h"
 
-#include "ParticleSystem/ParticleIntegrator.h"
+#include "ParticleSystem/Module/ParticleIntegrator.h"
 
 #include <RigidBody/RigidBodySystem.h>
 
@@ -115,6 +115,8 @@ public:
 
 	DEF_ARRAY_STATE(Vec3f, Position, DeviceType::GPU, "position");
 	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
+
+	DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 };
 
 int main(int, char**)

@@ -96,7 +96,7 @@ TabToolbar::TabToolbar(QWidget* parent, unsigned _groupMaxHeight, unsigned _grou
     cornerLayout->addWidget(hideButton);
     tabBar->setCornerWidget(cornerActions);
 
-    SetStyle(GetDefaultStyle());
+//    SetStyle(GetDefaultStyle());
 }
 
 TabToolbar::~TabToolbar()
@@ -105,12 +105,12 @@ TabToolbar::~TabToolbar()
 
 bool TabToolbar::event(QEvent* event)
 {
-    if(event->type() == QEvent::StyleChange && !ignoreStyleEvent)
-        QTimer::singleShot(0, this, [this]()
-        { // on KDE new palette is not ready yet, wait
-            const QString styleName = (style ? style->objectName() : GetDefaultStyle());
-            SetStyle(styleName);
-        });
+//     if(event->type() == QEvent::StyleChange && !ignoreStyleEvent)
+//         QTimer::singleShot(0, this, [this]()
+//         { // on KDE new palette is not ready yet, wait
+//             const QString styleName = (style ? style->objectName() : GetDefaultStyle());
+//             //SetStyle(styleName);
+//         });
     return QToolBar::event(event);
 }
 

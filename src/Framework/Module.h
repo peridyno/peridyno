@@ -68,6 +68,15 @@ namespace dyno
 		virtual std::string getModuleType() { return "Module"; }
 
 		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
+
+		/**
+		 * @brief Check the completeness of input fields
+		 *
+		 * @return true, if all input fields are appropriately set.
+		 * @return false, if any of the input field is empty.
+		 */
+		bool isInputComplete();
+		bool isOutputCompete();
 	protected:
 		//TODO: remove this step
 		virtual bool initializeImpl();
@@ -82,15 +91,6 @@ namespace dyno
 		virtual bool validateOutputs();
 
 		virtual bool requireUpdate();
-
-		/**
-		 * @brief Check the completeness of input fields
-		 *
-		 * @return true, if all input fields are appropriately set.
-		 * @return false, if any of the input field is empty.
-		 */
-		bool isInputComplete();
-		bool isOutputCompete();
 
 		/**
 		 * @brief Two functions called at the beginning and end of update()

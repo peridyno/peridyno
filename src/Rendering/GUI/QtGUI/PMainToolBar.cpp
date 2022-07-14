@@ -68,7 +68,7 @@ namespace dyno
 			tt::Page* page = this->AddPage(QPixmap(mediaDir + QString::fromStdString(itor->second->icon())), QString::fromStdString(itor->second->caption()));
 			auto& actions = itor->second->actions();
 
-			auto page_group = page->AddGroup("");
+ 			auto page_group = page->AddGroup("");
 			for (size_t i = 0; i < actions.size(); i++)
 			{
 				QAction* act = new QAction(QPixmap(mediaDir + QString::fromStdString(actions[i]->icon())), QString::fromStdString(actions[i]->caption()));

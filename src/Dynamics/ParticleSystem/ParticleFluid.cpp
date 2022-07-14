@@ -1,8 +1,12 @@
 #include "ParticleFluid.h"
-#include "PositionBasedFluidModel.h"
 
+//ParticleSystem
+#include "Module/PositionBasedFluidModel.h"
+#include "Module/SummationDensity.h"
+
+//Topology
 #include "Topology/PointSet.h"
-#include "SummationDensity.h"
+
 
 namespace dyno
 {
@@ -12,9 +16,6 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid(std::string name)
 		: ParticleSystem<TDataType>(name)
 	{
-// 		auto pbf = this->template setNumericalModel<PositionBasedFluidModel<TDataType>>("pbd");
-// 		this->setNumericalModel(pbf);
-
 		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
 		this->animationPipeline()->pushModule(pbf);
 

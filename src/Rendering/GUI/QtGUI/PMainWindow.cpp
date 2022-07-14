@@ -106,15 +106,7 @@
 #include "Platform.h"
 
 #include "PMainToolBar.h"
-
-// #include "Node/NodeData.hpp"
-// #include "Node/FlowScene.hpp"
-// #include "Node/FlowView.hpp"
-// #include "Node/FlowViewStyle.hpp"
-// #include "Node/ConnectionStyle.hpp"
-// #include "Node/DataModelRegistry.hpp"
-
-//#include "models.h"
+#include "PModuleEditorToolBar.h"
 
 namespace dyno
 {
@@ -125,11 +117,8 @@ namespace dyno
 		QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
 		m_statusBar(nullptr),
-		//m_vtkOpenglWidget(nullptr),
 		m_propertyWidget(nullptr),
 		m_animationWidget(nullptr)
-// 		m_scenegraphWidget(nullptr),
-// 		m_moduleListWidget(nullptr)
 	{
 		setObjectName("MainWindow");
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physics simulation platform"));
@@ -261,47 +250,9 @@ namespace dyno
 	void PMainWindow::setupToolBar()
 	{
 		mToolBar = new PMainToolBar(mNodeFlowView, this, 55, 3);
+		mToolBar->setWindowTitle("Tool Bar");
 
 		addToolBar(Qt::TopToolBarArea, mToolBar);
-
-// 		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
-// 		addToolBar(Qt::TopToolBarArea, tt);
-// 
-// 		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
-// 
-// 		auto convertIcon = [&](QString path) -> QIcon
-// 		{
-// 			QSvgRenderer svg_render(path);
-// 			QPixmap pixmap(48, 48);
-// 			pixmap.fill(Qt::transparent);
-// 			QPainter painter(&pixmap);
-// 			svg_render.render(&painter);
-// 			QIcon ico(pixmap);
-// 
-// 			return ico;
-// 		};
-// 
-// 		//Add ToolBar page
-// 		ToolBarPage m_toolBarPage;
-// 		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
-// 
-// 		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
-// 			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
-// 
-// 			tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
-// 			auto m_page = MainPage->AddGroup("");
-// 
-// 			for (int j = 0; j < m_tbl.ico.size(); j++) {
-// 				//Add subtabs
-// 				QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
-// 				m_page->AddAction(QToolButton::DelayedPopup, art);
-// 
-// 				if (i == 2 || i == 5 || i == 3) {//add connect event 
-// 					connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
-// 				}
-// 			}
-// 		}
-
 	}
 
 	void PMainWindow::setupStatusBar()
@@ -382,6 +333,8 @@ namespace dyno
 		moduelEditor->setAttribute(Qt::WA_ShowModal, true);
 		moduelEditor->setAttribute(Qt::WA_DeleteOnClose, true);
 		moduelEditor->show();
+
+		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
 	}
 
 	void PMainWindow::showMessage()
@@ -407,8 +360,8 @@ namespace dyno
 		} sets[] = {
 			{ "SceneGraph", 0, Qt::RightDockWidgetArea },
 			{ "Console", 0, Qt::BottomDockWidgetArea },
-			{ "Property", 0, Qt::LeftDockWidgetArea },
-			{ "NodeEditor", 0, Qt::LeftDockWidgetArea },
+			{ "Property", 0, Qt::RightDockWidgetArea },
+			{ "NodeEditor", 0, Qt::RightDockWidgetArea },
 			{ "Module", 0, Qt::RightDockWidgetArea }
 		};
 		const int setCount = sizeof(sets) / sizeof(Set);

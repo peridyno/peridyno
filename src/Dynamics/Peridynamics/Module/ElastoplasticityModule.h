@@ -11,7 +11,8 @@
  */
 #pragma once
 #include "ElasticityModule.h"
-#include "ParticleSystem/DensityPBD.h"
+
+#include "ParticleSystem/Module/DensityPBD.h"
 
 namespace dyno {
 

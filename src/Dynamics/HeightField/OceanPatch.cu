@@ -240,10 +240,10 @@ namespace dyno {
         int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
         m_h0.resize(mSpectrumWidth, mSpectrumHeight);
 
-        DArray2D<Coord> host_h0;
+        CArray2D<Coord> host_h0;
         host_h0.resize(mSpectrumWidth, mSpectrumHeight);
         host_h0(0, 0) = Vector<float, 2>(10, 10);
-        //generateH0(host_h0);
+        generateH0(host_h0);
 
         //cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
@@ -265,7 +265,7 @@ namespace dyno {
     void OceanPatch<TDataType>::updateStates()
     {
 	    t += 0.016f;
-	    //this->animate(t);
+	    this->animate(t);
     }
 
     template<typename Coord>
@@ -362,13 +362,13 @@ namespace dyno {
         auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
         auto& shifts = topo->getDisplacement();
-        /*
+        
         cuExecute2D(make_uint2(shifts.nx(), shifts.ny()),
             O_UpdateTopology,
             shifts,
             m_displacement,
             mChoppiness);
-            */
+            
     }
 
     template<typename TDataType>
@@ -384,7 +384,7 @@ namespace dyno {
     }
 
     template<typename TDataType>
-    void OceanPatch<TDataType>::generateH0(DArray2D<Coord> h0)
+    void OceanPatch<TDataType>::generateH0(CArray2D<Coord> h0)
     {
         for (unsigned int y = 0; y <= mResolution; y++)
         {
@@ -407,8 +407,8 @@ namespace dyno {
                 float h0_im = Ei * P * CUDART_SQRT_HALF_F;
 
                 int i = y * mSpectrumWidth + x;
-                //h0(x, y).x = h0_re;
-                //h0(x, y).y = h0_im;
+                h0(x, y).x = h0_re;
+                h0(x, y).y = h0_im;
             }
         }
     }

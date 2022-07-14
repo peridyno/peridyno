@@ -22,7 +22,7 @@
 
 namespace dyno
 {
-	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* node_widget)
+	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* widget)
 		: QMainWindow(nullptr, 0)
 	{
 		mToolBar = new PModuleEditorToolBar();
@@ -38,12 +38,12 @@ namespace dyno
 		toolBarDocker->setWidget(mToolBar);
 
 
-		auto moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, node_widget);
+		auto moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, widget);
 		this->setCentralWidget(moduleFlowView);
 
 		//Set up property dock widget
 		PDockWidget *propertyDockWidget = new PDockWidget(tr("Property"), this, Qt::WindowFlags(0));
-		propertyDockWidget->setWindowTitle("Module Property");
+		propertyDockWidget->setWindowTitle("Property");
 		this->addDockWidget(Qt::LeftDockWidgetArea, propertyDockWidget);
 		
 		PPropertyWidget* propertyWidget = new PPropertyWidget();
@@ -55,5 +55,11 @@ namespace dyno
 		connect(mToolBar, &PModuleEditorToolBar::showAnimationPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showAnimationPipeline);
 		connect(mToolBar, &PModuleEditorToolBar::showGraphicsPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showGraphicsPipeline);
 
+		connect(mToolBar->updateAction(), &QAction::triggered, 
+			[=]() {
+				emit changed(widget->getNode().get());
+			});
+
+		connect(mToolBar->reorderAction(), &QAction::triggered, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::reorderAllModules);
 	}
 }

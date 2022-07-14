@@ -29,9 +29,13 @@ namespace dyno
 	public:
 		PModuleEditorToolBar(QWidget* parent = nullptr);
 
-		void addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu = nullptr);
+		QAction* addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu = nullptr);
 
 		QPushButton* addPushButton(QPixmap& icon, QString text);
+
+		QAction* updateAction() { return mActionUpdate; }
+		QAction* saveAction() { return mActionSave; }
+		QAction* reorderAction() { return mActionReorder; }
 
 	signals:
 		void showGraphicsPipeline();
@@ -43,6 +47,10 @@ namespace dyno
 
 	private:
 		QHBoxLayout* mLayout;
+
+		QAction* mActionSave;
+		QAction* mActionReorder;
+		QAction* mActionUpdate;
 
 		QPushButton* mAnimationButton;
 		QPushButton* mRenderingButton;

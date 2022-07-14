@@ -25,6 +25,8 @@
 using namespace std;
 using namespace dyno;
 
+//TODO: this example crashes for some unknown reasons.
+
 std::shared_ptr<SceneGraph> createScene()
 {
 	//Create a scene graph
@@ -47,7 +49,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a topology mapper
 	auto topoMapper = scn->addNode(std::make_shared<PointSetToTriangleSet<DataType3f>>());
 
-	auto outTop = elastoplasticBody->stateTopology()->promoteOuput();
+	auto outTop = elastoplasticBody->statePointSet()->promoteOuput();
  	outTop->connect(topoMapper->inPointSet());
 	surfaceMeshLoader->outTriangleSet()->connect(topoMapper->inInitialShape());
 
@@ -69,7 +71,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a topology mapper
 	auto topoMapper2 = scn->addNode(std::make_shared<PointSetToTriangleSet<DataType3f>>());
 
-	auto outTop2 = elasticBody->stateTopology()->promoteOuput();
+	auto outTop2 = elasticBody->statePointSet()->promoteOuput();
 	outTop2->connect(topoMapper2->inPointSet());
 	surfaceMeshLoader2->outTriangleSet()->connect(topoMapper2->inInitialShape());
 

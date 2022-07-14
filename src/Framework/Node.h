@@ -368,7 +368,6 @@ namespace dyno
 
 		DEF_VAR_STATE(Real, ElapsedTime, 0, "Elapsed Time");
 		DEF_VAR_STATE(Real, TimeStep, Real(0.033), "Time step size");
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 
 	private:
 		bool m_controllable = true;

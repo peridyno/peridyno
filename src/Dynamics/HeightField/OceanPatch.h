@@ -66,6 +66,8 @@ namespace dyno {
             return m_displacement;
         }
 
+        DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
     public:
         float m_windSpeed = 0;                   //风速
         float windDir     = CUDART_PI_F / 3.0f;  //风场方向
@@ -82,7 +84,7 @@ namespace dyno {
 	    void updateTopology() override;
         
     private:
-        void  generateH0(DArray2D<Coord> h0);
+        void  generateH0(CArray2D<Coord> h0);
         float gauss();
         float phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend);
 

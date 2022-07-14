@@ -357,10 +357,14 @@ namespace dyno
 	void PIODockWidget::setupWidgets()
 	{
 		m_ioTabWidget = new PIOTabWidget();
+		m_ioTabWidget->setObjectName("ControlPanel");
 		m_ioTabWidget->setContentsMargins(0, 0, 0, 0);
 		m_ioTabWidget->setTabPosition(QTabWidget::South);
 		m_ioTabWidget->setObjectName(QStringLiteral("tabWidget"));
 		m_ioTabWidget->setGeometry(QRect(140, 60, 361, 241));
+
+		m_ioTabWidget->tabBar()->setObjectName("ControlPanelTabBar");
+
 		//Create log widget
 		PLogWidget* logWidget = new PLogWidget();
 		m_ioTabWidget->addTab(logWidget, QString("Log"));

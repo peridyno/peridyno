@@ -9,12 +9,12 @@
 #include "Module/Peridynamics.h"
 #include "Module/ElastoplasticityModule.h"
 
-#include "ParticleSystem/PositionBasedFluidModel.h"
-#include "ParticleSystem/ParticleIntegrator.h"
-#include "ParticleSystem/DensityPBD.h"
-#include "ParticleSystem/ImplicitViscosity.h"
-#include "SharedFunc.h"
+#include "ParticleSystem/Module/PositionBasedFluidModel.h"
+#include "ParticleSystem/Module/ParticleIntegrator.h"
+#include "ParticleSystem/Module/DensityPBD.h"
+#include "ParticleSystem/Module/ImplicitViscosity.h"
 
+#include "SharedFunc.h"
 
 namespace dyno
 {
@@ -86,7 +86,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticBody<TDataType>::updateTopology()
 	{
-		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
+		auto ptSet = this->statePointSet()->getDataPtr();
 		auto& pts = ptSet->getPoints();
 		pts.assign(this->statePosition()->getData());
 

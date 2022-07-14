@@ -1,11 +1,10 @@
 #pragma once
 #include "Node.h"
 #include "RigidBody/RigidBody.h"
-#include "ParticleSystem/ParticleSystem.h"
+
+#include "ParticleSystem.h"
 
 namespace dyno {
-// 	template <typename TDataType> class RigidBody;
-// 	template <typename TDataType> class ParticleSystem;
 	template <typename TDataType> class DistanceField3D;
 	template <typename TDataType> class BoundaryConstraint;
 
@@ -19,9 +18,6 @@ namespace dyno {
 
 		StaticBoundary();
 		~StaticBoundary() override;
-
-//		bool addRigidBody(std::shared_ptr<RigidBody<TDataType>> child);
-//		bool addParticleSystem(std::shared_ptr<ParticleSystem<TDataType>> child);
 
 		void loadSDF(std::string filename, bool bOutBoundary = false);
 		std::shared_ptr<Node> loadCube(Coord lo, Coord hi, Real distance = 0.005f, bool bOutBoundary = false);

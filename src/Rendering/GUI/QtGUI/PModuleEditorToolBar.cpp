@@ -15,8 +15,9 @@ namespace dyno
 	{
 		mLayout = new QHBoxLayout;
 
-		this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
-		this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/ReOrder.png")), tr("&Realign...")));
+		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
+		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/48px-View-refresh.png")), tr("&Update...")));
+		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/ReOrder.png")), tr("&Realign...")));
 
 		mLayout->addStretch();
 
@@ -29,7 +30,7 @@ namespace dyno
 		connect(mRenderingButton, &QPushButton::released, this, &PModuleEditorToolBar::renderingButtonClicked);
 	}
 
-	void PModuleEditorToolBar::addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu /*= nullptr*/)
+	QAction* PModuleEditorToolBar::addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu /*= nullptr*/)
 	{
 		if (type == QToolButton::MenuButtonPopup)
 		{
@@ -51,6 +52,8 @@ namespace dyno
 				btn->setMenu(menu);
 			mLayout->addWidget(btn);
 		}
+
+		return action;
 	}
 
 	QPushButton* PModuleEditorToolBar::addPushButton(QPixmap& icon, QString text)
@@ -66,9 +69,11 @@ namespace dyno
 
 		QLabel* iconLabel = new QLabel;    
 		QLabel* textLabel = new QLabel;
+
+		iconLabel->setStyleSheet("background: transparent;");
+		textLabel->setStyleSheet("background: transparent;");
+
 		iconLabel->setFixedSize(iconSize, iconSize);
-		iconLabel->setStyleSheet("border:0px solid red;");    
-		textLabel->setStyleSheet("border:0px solid red;");    
 		iconLabel->setPixmap(icon);
 		textLabel->setText(text);
 
@@ -85,10 +90,10 @@ namespace dyno
 		btnLayout->addSpacing(2);
 		button->setLayout(btnLayout);
 
-		button->setStyleSheet(
-			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
-			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
-			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
+// 		button->setStyleSheet(
+// 			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
+// 			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
+// 			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
 
 		mLayout->addWidget(button);
 

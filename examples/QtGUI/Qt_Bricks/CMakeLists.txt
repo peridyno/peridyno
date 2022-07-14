@@ -1,6 +1,16 @@
-if(PERIDYNO_LIBRARY_RIGIDBODY AND PERIDYNO_Qt5_GUI)
+cmake_minimum_required(VERSION 3.10)
+
+if(PERIDYNO_Qt5_GUI)
     set(PROJECT_NAME Qt_Bricks)
-    set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/QtGUI/${PROJECT_NAME}")
+
+    link_directories("${PROJECT_SOURCE_DIR}/Source")
+
+    if(Qt5_FOUND)
+        message("Find QT5")
+        link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui)
+    endif()
+
+    set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/QtGUI/${PROJECT_NAME}")
 
     file(
         GLOB_RECURSE SRC_LIST 
@@ -9,31 +19,49 @@ if(PERIDYNO_LIBRARY_RIGIDBODY AND PERIDYNO_Qt5_GUI)
         "${SRC_DIR}/*.c*"
         "${SRC_DIR}/*.h*"
     )
-
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
     add_executable(${PROJECT_NAME} ${SRC_LIST})
-	target_link_libraries(${PROJECT_NAME} 
-        Core 
-        Framework 
-        IO
-        RigidBody 
-        QtGUI
-        GLRenderEngine)
+    
+    if(UNIX)
+		#the option "-Wl,--whole-archive" is an equivalance to /WHOLEARCHIVE
+        target_link_libraries(${PROJECT_NAME} PUBLIC   
+            -Wl,--whole-archive
+            Core 
+            Framework 
+            IO
+            RigidBody 
+            QtGUI
+            GLRenderEngine
+            -Wl,--no-whole-archive) 
+
+    elseif(WIN32)
+        target_link_libraries(${PROJECT_NAME} PUBLIC
+            Core 
+            Framework 
+            IO
+            RigidBody 
+            QtGUI
+            GLRenderEngine) 
+
+		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
+           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
+            /WHOLEARCHIVE:dynoRigidBody-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
+
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
+           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
+            /WHOLEARCHIVE:dynoRigidBody-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
+    else()
+        message(FATAL_ERROR "Could not set install folders for this platform!")
+    endif()
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/Qt")
-
-    if(WIN32)
-        set_target_properties(${PROJECT_NAME} PROPERTIES
+    set_target_properties(${PROJECT_NAME} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-    elseif(UNIX)
-        if (CMAKE_BUILD_TYPE MATCHES Debug)
-            set_target_properties(${PROJECT_NAME} PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
-        else()
-            set_target_properties(${PROJECT_NAME} PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
-        endif()
-    endif()    
 endif()

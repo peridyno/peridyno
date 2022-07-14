@@ -100,6 +100,13 @@ namespace dyno
 		mTiming = enabled;
 	}
 
+	void Pipeline::forceUpdate()
+	{
+		mModuleUpdated = true;
+
+		this->update();
+	}
+
 	void Pipeline::preprocess()
 	{
 		if (mModuleUpdated)

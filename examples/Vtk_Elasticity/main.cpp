@@ -8,7 +8,7 @@
 
 // VTK Renderer
 #include <VtkRenderEngine.h>
-#include <VtkSurfaceVisualModule.h>
+#include <VtkPointVisualModule.h>
 
 
 using namespace dyno;
@@ -21,20 +21,18 @@ int main()
 	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
 
 	auto bunny = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
-	root->addParticleSystem(bunny);
+	bunny->connect(root->importParticleSystems());
 
-	//TODO: fix the compilation errors
-// 	bunny->loadParticles("../../data/bunny/bunny_points.obj");
-// 	bunny->loadSurface("../../data/bunny/bunny_mesh.obj");
-// 	bunny->scale(1.0f);
-// 	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
-// 	bunny->setVisible(true);
-// 
-// 	bool useVTK = true;
-// 	auto sRender = std::make_shared<VtkSurfaceVisualModule>();
-// 	sRender->setColor(1, 1, 0);
-// 	bunny->getSurfaceNode()->stateTopology()->connect(sRender->inTriangleSet());
-// 	bunny->getSurfaceNode()->graphicsPipeline()->pushModule(sRender);
+	bunny->loadParticles(getAssetPath() + "bunny/bunny_points.obj");
+	bunny->scale(1.0f);
+	bunny->translate(Vec3f(0.5f, 0.1f, 0.5f));
+	bunny->setVisible(true);
+
+	// point
+	auto ptRender = std::make_shared<VtkPointVisualModule>();
+	ptRender->setColor(1, 0, 0);
+	bunny->statePointSet()->connect(ptRender->inPointSet());
+	bunny->graphicsPipeline()->pushModule(ptRender);
 
 	GlfwApp window;
 	window.setRenderEngine(std::make_shared<VtkRenderEngine>());

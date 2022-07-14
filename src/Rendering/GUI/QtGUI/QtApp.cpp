@@ -1,5 +1,6 @@
 #include <QMap>
 #include <QDebug>
+#include <QFile>
 #include "QtApp.h"
 #include "PMainWindow.h"
 #include "Log.h"
@@ -31,6 +32,13 @@ namespace dyno {
 
     void QtApp::mainLoop()
     {
+        QFile file(":/dyno/DarkStyle.qss");
+        //QFile file(":/dyno/DarkStyle.qss");
+        file.open(QIODevice::ReadOnly);
+
+        QString style = file.readAll();
+        m_app->setStyleSheet(style);
+
         m_mainWindow->show();
         m_app->exec();
     }

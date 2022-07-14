@@ -44,7 +44,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto fRender = std::make_shared<VtkFluidVisualModule>();
 	//fRender->setColor(1, 0, 0);
-	fluid->stateTopology()->connect(fRender->inPointSet());
+	fluid->statePointSet()->connect(fRender->inPointSet());
 	fluid->graphicsPipeline()->pushModule(fRender);
 
 	return scn;

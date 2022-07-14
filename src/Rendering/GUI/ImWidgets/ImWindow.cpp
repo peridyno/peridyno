@@ -49,7 +49,7 @@ void dyno::ImWindow::initialize(float scale)
 	ImGui::initColorVal();
 }
 
-void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
+void ShowMenuFile(RenderEngine* engine, SceneGraph* scene, bool* mDisenableCamera)
 {
 	if (ImGui::BeginMenu("Camera")) {
 		auto cam = engine->camera();
@@ -192,28 +192,50 @@ void ShowMenuFile(RenderEngine* engine, bool* mDisenableCamera)
 	if (ImGui::BeginMenu("Auxiliary", "")) {
 			RenderParams* rparams = engine->renderParams();
 			
-			ImGui::Checkbox("Lock", mDisenableCamera);
-			ImGui::Spacing();
-			
-			ImGui::Checkbox("Ground", &(rparams->showGround));
+			ImGui::Checkbox("Lock Camera", mDisenableCamera);
 			ImGui::Spacing();
 
-			ImGui::Checkbox("Bounds", &(rparams->showSceneBounds));
+			ImGui::Checkbox("Show Axis", &(rparams->showAxisHelper));
 			ImGui::Spacing();
 
-			ImGui::Checkbox("AxisHelper", &(rparams->showAxisHelper));
+			ImGui::Checkbox("Show Background", &(rparams->showGround));
 			ImGui::Spacing();
+
+			ImGui::Separator();
+
+			bool canPrintNodeInfo = scene->isNodeInfoPrintable();
+			if (ImGui::Checkbox("Print Node Info", &canPrintNodeInfo))
+				scene->printNodeInfo(canPrintNodeInfo);
+
+			bool canPrintModuleInfo = scene->isModuleInfoPrintable();
+			if (ImGui::Checkbox("Print Module Info", &canPrintModuleInfo))
+				scene->printModuleInfo(canPrintModuleInfo);
+
+			ImGui::Separator();
+
+			ImGui::Checkbox("Show Bounding Box", &(rparams->showSceneBounds));
+			ImGui::Spacing();
+
+			Vec3f lowerBound = scene->getLowerBound();
+			float lo[3] = { lowerBound[0], lowerBound[1], lowerBound[2] };
+			ImGui::InputFloat3("Lower Bound", lo);
+			scene->setLowerBound(Vec3f(lo[0], lo[1], lo[2]));
+
+			Vec3f upperBound = scene->getUpperBound();
+			float up[3] = { upperBound[0], upperBound[1], upperBound[2] };
+			ImGui::InputFloat3("Upper Bound", up);
+			scene->setUpperBound(Vec3f(up[0], up[1], up[2]));
 
 		ImGui::EndMenu();	
 	}
 
 }
 
-void ShowExampleAppMainMenuBar(RenderEngine* engine, bool* mDisenableCamera)
+void ShowExampleAppMainMenuBar(RenderEngine* engine, SceneGraph* scene, bool* mDisenableCamera)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
-		ShowMenuFile(engine, mDisenableCamera);
+		ShowMenuFile(engine, scene, mDisenableCamera);
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -231,7 +253,7 @@ void dyno::ImWindow::draw(RenderEngine* engine, SceneGraph* scene)
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
 
-		ShowExampleAppMainMenuBar(engine, &mDisenableCamera);
+		ShowExampleAppMainMenuBar(engine, scene, &mDisenableCamera);
 		// Bottom Right widget
 		{
 			std::string rEngineName = engine->name();

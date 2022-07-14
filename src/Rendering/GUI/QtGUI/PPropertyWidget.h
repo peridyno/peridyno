@@ -148,12 +148,12 @@ namespace dyno
 		QSpinBox* spinner3;
 	};
 
-	class QStringFieldWidget : public QGroupBox
+	class QFilePathWidget : public QGroupBox
 	{
 		Q_OBJECT
 	public:
-		QStringFieldWidget(FBase* field);
-		~QStringFieldWidget() {};
+		QFilePathWidget(FBase* field);
+		~QFilePathWidget() {};
 
 	Q_SIGNALS:
 		void fieldChanged();

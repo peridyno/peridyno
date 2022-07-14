@@ -1,8 +1,12 @@
 #include "Peridynamics.h"
 
-#include "ParticleSystem/ParticleIntegrator.h"
-#include "Topology/NeighborPointQuery.h"
 #include "ElasticityModule.h"
+
+//ParticleSystem
+#include "ParticleSystem/Module/ParticleIntegrator.h"
+
+#include "Topology/NeighborPointQuery.h"
+
 
 namespace dyno
 {

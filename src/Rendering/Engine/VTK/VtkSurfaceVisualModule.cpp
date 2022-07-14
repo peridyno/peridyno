@@ -52,7 +52,7 @@ public:
 
 		if (node == NULL || !node->isVisible())	return;
 		
-		auto mesh = std::dynamic_pointer_cast<dyno::TriangleSet<dyno::DataType3f>>(node->stateTopology()->getDataPtr());
+		auto mesh = m_module->inTriangleSet()->getDataPtr();
 		auto& faces = mesh->getTriangles();
 		auto& verts = mesh->getPoints();
 

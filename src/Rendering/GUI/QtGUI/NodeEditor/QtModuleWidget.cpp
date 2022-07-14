@@ -9,9 +9,9 @@ namespace Qt
 
 	QtModuleWidget::QtModuleWidget(std::shared_ptr<Module> base)
 	{
-		m_module = base;
+		mModule = base;
 
-		if (m_module != nullptr)
+		if (mModule != nullptr)
 		{
 			//initialize out ports
 			int output_num = getOutputFields().size();
@@ -81,15 +81,15 @@ namespace Qt
 	QString QtModuleWidget::caption() const
 	{
 		//	return m_name;
-		std::string class_name = m_module->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(m_module->getName());
+		std::string class_name = mModule->getClassInfo()->getClassName();
+		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(mModule->getName());
 		else return QString::fromStdString(class_name);		
 	}
 
 	QString QtModuleWidget::name() const
 	{
-		std::string class_name = m_module->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(m_module->getName());
+		std::string class_name = mModule->getClassInfo()->getClassName();
+		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(mModule->getName());
 		else return QString::fromStdString(class_name);
 	}
 
@@ -175,7 +175,7 @@ namespace Qt
 
 	std::shared_ptr<Module> QtModuleWidget::getModule()
 	{
-		return m_module;
+		return mModule;
 	}
 
 	void QtModuleWidget::enableEditing()
@@ -195,12 +195,7 @@ namespace Qt
 
 	void QtModuleWidget::updateModule()
 	{
-		bool hasAllInputs = true;
-
-		for (int i = 0; i < input_fields.size(); i++)
-		{
-			hasAllInputs &= (!input_fields[i]->getField()->isEmpty());
-		}
+		bool hasAllInputs = mModule->isInputComplete();
 
 		if (hasAllInputs)
 		{
@@ -221,16 +216,16 @@ namespace Qt
 
 	FBase* QtModuleWidget::getField(PortType portType, PortIndex portIndex) const
 	{
-		return portType == PortType::In ? m_module->getInputFields()[portIndex] : m_module->getOutputFields()[portIndex];
+		return portType == PortType::In ? mModule->getInputFields()[portIndex] : mModule->getOutputFields()[portIndex];
 	}
 
 	std::vector<FBase*>& QtModuleWidget::getOutputFields()
 	{
-		return m_module->getOutputFields();
+		return mModule->getOutputFields();
 	}
 
 	std::vector<FBase*>& QtModuleWidget::getInputFields()
 	{
-		return m_module->getInputFields();
+		return mModule->getInputFields();
 	}
 }

@@ -44,7 +44,9 @@ static QString GetStyleTemplate()
     if(!styleTemplate.isEmpty())
         return styleTemplate;
 
-    QFile f(":/tt/StyleTemplate.qss");
+    //QFile f(":/qdarkstyle/dark/darkstyle.qss");
+	//QFile f(":/dyno/DarkStyle.qss");
+	QFile f(":/dyno/DefaultStyle.qss");
     f.open(QFile::ReadOnly);
     styleTemplate = f.readAll();
     return styleTemplate;

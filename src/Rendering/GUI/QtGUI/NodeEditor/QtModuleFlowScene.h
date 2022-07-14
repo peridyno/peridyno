@@ -51,12 +51,12 @@ namespace Qt
 		std::shared_ptr<dyno::Node> mNode;
 		std::shared_ptr<dyno::Pipeline> mActivePipeline;
 
-		bool mEditingEnabled = true;
-
 		//A virtual module to store all state variables
 		std::shared_ptr<dyno::Module> mStates;
 
 		float mDx = 100.0f;
 		float mDy = 50.0f;
+
+		bool mEditingEnabled = true;
 	};
 }
