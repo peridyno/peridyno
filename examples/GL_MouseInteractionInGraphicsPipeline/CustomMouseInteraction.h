@@ -1,10 +1,10 @@
 #pragma once
-#include "Module/InputMouseModule.h"
+#include "Module/MouseInputModule.h"
 #include "Module/TopologyModule.h"
 
 namespace dyno
 {
-	class CustomMouseIteraction : public InputMouseModule
+	class CustomMouseIteraction : public MouseInputModule
 	{
 	public:
 		CustomMouseIteraction() {};

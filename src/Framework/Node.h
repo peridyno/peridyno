@@ -255,6 +255,13 @@ namespace dyno
 
 		void reset();
 
+		struct BoundingBox
+		{
+			Vec3f lower = Vec3f(-1);
+			Vec3f upper = Vec3f(1);
+		};
+
+		virtual BoundingBox boundingBox();
 // 		/**
 // 		 * @brief Depth-first tree traversal
 // 		 *
@@ -368,6 +375,8 @@ namespace dyno
 
 		DEF_VAR_STATE(Real, ElapsedTime, 0, "Elapsed Time");
 		DEF_VAR_STATE(Real, TimeStep, Real(0.033), "Time step size");
+
+		DEF_VAR_STATE(uint, FrameNumber, 0, "Frame number");
 
 	private:
 		bool m_controllable = true;

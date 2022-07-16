@@ -158,6 +158,11 @@ void Node::reset()
 	}
 }
 
+Node::BoundingBox Node::boundingBox()
+{
+	return BoundingBox();
+}
+
 void Node::postUpdateStates()
 {
 
@@ -165,7 +170,8 @@ void Node::postUpdateStates()
 
 void Node::resetStates()
 {
-
+	this->stateElapsedTime()->setValue(0.0f);
+	this->stateFrameNumber()->setValue(0);
 }
 
 bool Node::validateInputs()

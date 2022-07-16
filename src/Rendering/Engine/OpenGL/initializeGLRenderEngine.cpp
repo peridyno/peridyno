@@ -5,10 +5,14 @@
 #include "Node/GLPointVisualNode.h"
 #include "Node/GLSurfaceVisualNode.h"
 
+#include "ColorMapping.h"
+
 namespace dyno
 {
 	GLRenderEngineInitializer::GLRenderEngineInitializer()
 	{
+		TypeInfo::New<ColorMapping<DataType3f>>();
+
 		initializeNodeCreators();
 	}
 
