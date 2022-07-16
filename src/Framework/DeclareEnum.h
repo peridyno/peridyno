@@ -17,7 +17,7 @@
 #include <map>
 #include <string>
 
-typedef std::map<int, std::string> enum_map;
+typedef std::map<int, std::string> EnumMap;
 //typedef std::map<std::string, enum_map>	enum_map_list;
 
 #define DECLARE_ENUM(enum_type,...)					\
@@ -26,7 +26,7 @@ enum enum_type{										\
 };													\
 const std::string full_name_##enum_type = #__VA_ARGS__;
 
-bool parse_enum_string(const std::string& enum_str, enum_map& enumKeyValueList);
+bool parse_enum_string(const std::string& enum_str, EnumMap& enumKeyValueList);
 
 
 class PEnum
@@ -51,11 +51,19 @@ public:
 
 	int currentKey() { return m_enum_value; }
 
+	std::string currentString() {
+		return m_enum_map[m_enum_value];
+	}
+
+	void setCurrentKey(int index);
+
+	EnumMap& enumMap() { return m_enum_map; }
+
 private:
 	std::string m_enum_name;
 	int m_enum_value;
 
-	enum_map m_enum_map;
+	EnumMap m_enum_map;
 };
 
 #define DEF_ENUM(enum_type, enum_name, enum_value, desc)				\

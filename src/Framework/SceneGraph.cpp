@@ -12,6 +12,23 @@
 
 namespace dyno
 {
+	class AssignFrameNumberAct : public Action
+	{
+	public:
+		AssignFrameNumberAct(uint num) {
+			mFrameNumber = num;
+		};
+
+		void process(Node* node) override {
+			if (node == NULL)
+				return;
+
+			node->stateFrameNumber()->setValue(mFrameNumber);
+		}
+
+		uint mFrameNumber;
+	};
+
 	SceneGraph& SceneGraph::getInstance()
 	{
 		static SceneGraph m_instance;
@@ -205,6 +222,8 @@ namespace dyno
 
 		this->traverseForward<PostProcessing>();
 
+		this->traverseForward<AssignFrameNumberAct>(mFrameRate);
+
 		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
 
 		mFrameNumber++;
@@ -319,7 +338,7 @@ namespace dyno
 
 				for (auto iter : node->animationPipeline()->activeModules())
 				{
-					auto m = dynamic_cast<InputMouseModule*>(iter.get());
+					auto m = dynamic_cast<MouseInputModule*>(iter.get());
 					if (m)
 					{
 						m->enqueueEvent(mMouseEvent);
@@ -328,7 +347,7 @@ namespace dyno
 
 				for (auto iter : node->graphicsPipeline()->activeModules())
 				{
-					auto m = dynamic_cast<InputMouseModule*>(iter.get());
+					auto m = dynamic_cast<MouseInputModule*>(iter.get());
 					if (m)
 					{
 						m->enqueueEvent(mMouseEvent);
@@ -342,6 +361,11 @@ namespace dyno
 		MouseEventAct eventAct(event);
 
 		this->traverseForward(&eventAct);
+	}
+
+	void SceneGraph::onKeyboardEvent(PKeyboardEvent event)
+	{
+
 	}
 
 	//Used to traverse the whole scene graph

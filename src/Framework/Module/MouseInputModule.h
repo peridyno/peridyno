@@ -14,52 +14,21 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module.h"
-#include "Camera.h"
-
-#include "Topology/Primitive3D.h"
+#include "InputModule.h"
 
 #include <queue>
 
 namespace dyno
 {
-	enum PButtonType
-	{
-		BT_LEFT = 0,
-		BT_RIGHT = 1,
-		BT_MIDDLE = 2,
-	};
-
-	enum PActionType
-	{
-		AT_RELEASE = 0,
-		AT_PRESS = 1,
-		AT_REPEAT = 2
-	};
-
-	struct PMouseEvent 
-	{
-		PButtonType buttonType;
-
-		PActionType actionType;
-
-		TRay3D<float> ray;
-
-		std::shared_ptr<Camera> camera;
-
-		float x;
-		float y;
-	};
-
-	class InputMouseModule : public Module
+	class MouseInputModule : public InputModule
 	{
 	public:
-		InputMouseModule();
-		virtual ~InputMouseModule();
-
-		std::string getModuleType() final { return "InputMouseModule"; }
+		MouseInputModule();
+		~MouseInputModule() override;
 
 		void enqueueEvent(PMouseEvent event);
+
+		DEF_VAR(bool, CacheEvent, true, "If set false, all previous queued events will be dropped");
 
 	protected:
 		virtual void onEvent(PMouseEvent event) {};

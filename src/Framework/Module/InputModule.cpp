@@ -4,7 +4,6 @@ namespace dyno
 {
 	InputModule::InputModule()
 		: Module()
-		, m_enabled(true)
 	{
 
 	}

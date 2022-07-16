@@ -1,12 +1,12 @@
 #pragma once
-#include "Module/InputMouseModule.h"
+#include "Module/MouseInputModule.h"
 #include "Module/TopologyModule.h"
 #include "Topology/TriangleSet.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class PickerInteraction : public InputMouseModule
+	class PickerInteraction : public MouseInputModule
 	{
 		DECLARE_TCLASS(PickerInteraction, TDataType)
 	public:

@@ -18,7 +18,7 @@
 #include "Node.h"
 #include "NodeIterator.h"
 
-#include "Module/InputMouseModule.h"
+#include "Module/MouseInputModule.h"
 
 #include <mutex>
 
@@ -145,6 +145,8 @@ namespace dyno
 
 	public:
 		void onMouseEvent(PMouseEvent event);
+
+		void onKeyboardEvent(PKeyboardEvent event);
 
 		/**
 		 * @brief Depth-first tree traversal

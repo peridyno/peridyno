@@ -1,188 +1,36 @@
-#ifndef QNODEPROPERTYWIDGET_H
-#define QNODEPROPERTYWIDGET_H
-
-#include <QToolBox>
-#include <QWidget>
-#include <QGroupBox>
-#include <QScrollArea>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QLabel>
+/**
+ * Program:   Qt Property Item
+ * Module:    PPropertyWidget.h
+ *
+ * Copyright 2017-2022 Xiaowei He
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#pragma once
+#include "PPropertyItem.h"
 
 #include "nodes/QNode"
-#include "LockerButton.h"
 
-#include <vector>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QDoubleSpinBox>
+class QVBoxLayout;
+class QScrollArea;
+class QGridLayout;
+class LockerButton;
+
 namespace dyno
 {
+	class OBase;
 	class Node;
 	class Module;
-	class OBase;
-	class FBase;
-	class QDoubleSpinner;
-	class PVTKOpenGLWidget;
-
-	class QBoolFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QBoolFieldWidget(FBase* field);
-		~QBoolFieldWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(int status);
-
-	private:
-		FBase* m_field = nullptr;
-	};
-
-	class QIntegerFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QIntegerFieldWidget(FBase* field);
-		~QIntegerFieldWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(int);
-
-	private:
-		FBase* m_field = nullptr;
-	};
-
-	class QUIntegerFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QUIntegerFieldWidget(FBase* field);
-		~QUIntegerFieldWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(int);
-
-	private:
-		FBase* m_field = nullptr;
-	};
-
-	class QRealFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QRealFieldWidget(FBase* field);
-		~QRealFieldWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(double);
-
-	private:
-		FBase* m_field = nullptr;
-	};
-
-
-	class mDoubleSpinBox : public QDoubleSpinBox
-	{
-		Q_OBJECT
-	public:
-		explicit mDoubleSpinBox(QWidget* parent = nullptr);
-	private:
-		//Prohibited to use
-		void wheelEvent(QWheelEvent* event);
-	signals:
-	public slots:
-	};
-
-	class QVector3FieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QVector3FieldWidget(FBase* field);
-		~QVector3FieldWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(double);
-
-	private:
-		FBase* m_field = nullptr;
-
-		mDoubleSpinBox* spinner1;
-		mDoubleSpinBox* spinner2;
-		mDoubleSpinBox* spinner3;
-	};
-
-	class QVector3iFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QVector3iFieldWidget(FBase* field);
-		~QVector3iFieldWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(int);
-
-	private:
-		FBase* mField = nullptr;
-
-		QSpinBox* spinner1;
-		QSpinBox* spinner2;
-		QSpinBox* spinner3;
-	};
-
-	class QFilePathWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QFilePathWidget(FBase* field);
-		~QFilePathWidget() {};
-
-	Q_SIGNALS:
-		void fieldChanged();
-
-	public slots:
-		void changeValue(QString str);
-
-	private:
-		FBase* m_field = nullptr;
-
-		QLineEdit* location;
-	};
-
-	class QStateFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QStateFieldWidget(FBase* field);
-		~QStateFieldWidget() {};
-
-	Q_SIGNALS:
-		void stateUpdated(FBase* field, int status);
-
-	public slots:
-		void tagAsOuput(int status);
-
-	private:
-		FBase* m_field = nullptr;
-	};
 
 	class PPropertyWidget : public QWidget
 	{
@@ -215,19 +63,16 @@ namespace dyno
 		void contentUpdated();
 
 	private:
-		void updateContext(OBase* base);
-
 		void addScalarFieldWidget(FBase* field, QGridLayout* layout,int j);
 		void addArrayFieldWidget(FBase* field);
 
 		void addStateFieldWidget(FBase* field);
 
-		QVBoxLayout* m_main_layout;
-		QScrollArea* m_scroll_area;
-		QWidget * m_scroll_widget;
-		QGridLayout* m_scroll_layout;
+		QVBoxLayout* mMainLayout;
+		QScrollArea* mScrollArea;
+		QGridLayout* mScrollLayout;
 
-		std::vector<QWidget*> m_widgets;
+		std::vector<QWidget*> mPropertyItems;
 		
 		LockerButton* mPropertyLabel[3];
 		QWidget* mPropertyWidget[3];
@@ -236,7 +81,4 @@ namespace dyno
 
 		std::shared_ptr<OBase> mSeleted = nullptr;
 	};
-
 }
-
-#endif // QNODEPROPERTYWIDGET_H
