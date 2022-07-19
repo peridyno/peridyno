@@ -60,6 +60,10 @@ namespace dyno
 		DArray<int> triIntersectedIndex;
 		DArray<int> edgeIntersectedIndex;
 		DArray<int> pointIntersectedIndex;
+
+		DArray<int> tempTriIntersectedIndex;
+		DArray<int> tempEdgeIntersectedIndex;
+		DArray<int> tempPointIntersectedIndex;
 	};
 
 	IMPLEMENT_TCLASS(PickerInteraction, TDataType)

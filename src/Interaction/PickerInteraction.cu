@@ -16,40 +16,47 @@ namespace dyno
 	template<typename TDataType>
 	void PickerInteraction<TDataType>::onEvent(PMouseEvent event)
 	{
-		if (camera == nullptr)
-		{
-			this->camera = event.camera;
-		}
-		if (event.actionType == AT_PRESS)
-		{
-			this->camera = event.camera;
-			this->isPressed = true;
-			printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-			this->ray1.origin = event.ray.origin;
-			this->ray1.direction = event.ray.direction;
-			this->x1 = event.x;
-			this->y1 = event.y;
-			this->calcIntersectClick();
-		}
-		else if (event.actionType == AT_RELEASE)
-		{
-			this->isPressed = false;
-			printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-			this->ray2.origin = event.ray.origin;
-			this->ray2.direction = event.ray.direction;
-			this->x2 = event.x;
-			this->y2 = event.y;
-		}
-		else
-		{
-			printf("%f %f \n", event.x, event.y);
-			printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-			if (this->isPressed) {
+		if (!event.altKeyPressed()) {
+			if (camera == nullptr)
+			{
+				this->camera = event.camera;
+			}
+			this->varToggleMultiSelect()->setValue(false);
+			if (event.controlKeyPressed()) 
+			{
+				this->varToggleMultiSelect()->setValue(true);
+			}
+			if (event.actionType == AT_PRESS)
+			{
+				this->camera = event.camera;
+				this->isPressed = true;
+				printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				this->ray1.origin = event.ray.origin;
+				this->ray1.direction = event.ray.direction;
+				this->x1 = event.x;
+				this->y1 = event.y;
+				this->calcIntersectClick();
+			}
+			else if (event.actionType == AT_RELEASE)
+			{
+				this->isPressed = false;
+				printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 				this->ray2.origin = event.ray.origin;
 				this->ray2.direction = event.ray.direction;
 				this->x2 = event.x;
 				this->y2 = event.y;
-				this->calcIntersectDrag();
+			}
+			else
+			{
+				printf("%f %f \n", event.x, event.y);
+				printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				if (this->isPressed) {
+					this->ray2.origin = event.ray.origin;
+					this->ray2.direction = event.ray.direction;
+					this->x2 = event.x;
+					this->y2 = event.y;
+					this->calcIntersectDrag();
+				}
 			}
 		}
 	}
@@ -324,10 +331,13 @@ namespace dyno
 		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
+		cuExecute(triangles.size(),
+			InitializeArray,
+			intersected
+		);
 		DArray<int> unintersected;
 		unintersected.resize(triangles.size());
 		std::cout << "Triangle Num:" << triangles.size() << std::endl;
-		std::cout << "Point Num:" << points.size() << std::endl;
 		cuExecute(triangles.size(),
 			CalIntersectedTrisRay,
 			points,
@@ -364,7 +374,7 @@ namespace dyno
 		}
 		else
 		{
-			this->triIntersectedIndex.resize(0);
+			this->triIntersectedIndex.assign(intersected);
 		}
 
 		DArray<int> intersected_o;
@@ -389,6 +399,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -414,10 +425,13 @@ namespace dyno
 		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
+		cuExecute(triangles.size(),
+			InitializeArray,
+			intersected
+		);
 		DArray<int> unintersected;
 		unintersected.resize(triangles.size());
 		std::cout << "Triangle Num:" << triangles.size() << std::endl;
-		std::cout << "Point Num:" << points.size() << std::endl;
 		cuExecute(triangles.size(),
 			CalIntersectedTrisBox,
 			points,
@@ -466,7 +480,7 @@ namespace dyno
 		}
 		else
 		{
-			this->triIntersectedIndex.resize(0);
+			this->triIntersectedIndex.assign(intersected);
 		}
 
 
@@ -492,6 +506,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -507,6 +522,10 @@ namespace dyno
 		DArray<Coord> points = initialTriangleSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
+		cuExecute(edges.size(),
+			InitializeArray,
+			intersected
+		);
 		DArray<int> unintersected;
 		unintersected.resize(edges.size());
 		std::cout << "Edge Num:" << edges.size() << std::endl;
@@ -547,7 +566,7 @@ namespace dyno
 		}
 		else
 		{
-			this->edgeIntersectedIndex.resize(0);
+			this->edgeIntersectedIndex.assign(intersected);
 		}
 
 		DArray<int> intersected_o;
@@ -572,6 +591,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
 		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -591,12 +611,16 @@ namespace dyno
 		TPlane3D<Real> plane42 = TPlane3D<Real>(ray2.origin, ray2.direction.cross(ray4.direction));
 		TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
-
+		
 		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
 		DArray<Edge> edges = initialTriangleSet.getEdges();
 		DArray<Coord> points = initialTriangleSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
+		cuExecute(edges.size(),
+			InitializeArray,
+			intersected
+		);
 		DArray<int> unintersected;
 		unintersected.resize(edges.size());
 		std::cout << "Edge Num:" << edges.size() << std::endl;
@@ -648,7 +672,7 @@ namespace dyno
 		}
 		else
 		{
-			this->edgeIntersectedIndex.resize(0);
+			this->edgeIntersectedIndex.assign(intersected);
 		}
 
 		DArray<int> intersected_o;
@@ -673,6 +697,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
 		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -687,6 +712,10 @@ namespace dyno
 		DArray<Coord> points = initialTriangleSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(points.size());
+		cuExecute(points.size(),
+			InitializeArray,
+			intersected
+		);
 		DArray<int> unintersected;
 		unintersected.resize(points.size());
 		std::cout << "Point Num:" << points.size() << std::endl;
@@ -726,9 +755,8 @@ namespace dyno
 		}
 		else
 		{
-			this->pointIntersectedIndex.resize(0);
+			this->pointIntersectedIndex.assign(intersected);
 		}
-
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);
 
@@ -736,6 +764,7 @@ namespace dyno
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Coord> intersected_points;
 		intersected_points.resize(intersected_size);
+		std::cout << intersected_size << std::endl;
 
 		int unintersected_size = thrust::reduce(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), unintersected.begin());
@@ -751,6 +780,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+		std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
 		this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 		this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -775,6 +805,10 @@ namespace dyno
 		DArray<Coord> points = initialTriangleSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(points.size());
+		cuExecute(points.size(),
+			InitializeArray,
+			intersected
+		);
 		DArray<int> unintersected;
 		unintersected.resize(points.size());
 		std::cout << "Point Num:" << points.size() << std::endl;
@@ -824,7 +858,7 @@ namespace dyno
 		}
 		else
 		{
-			this->pointIntersectedIndex.resize(0);
+			this->pointIntersectedIndex.assign(intersected);
 		}
 
 		DArray<int> intersected_o;
@@ -849,6 +883,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+		std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
 		this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 		this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -859,7 +894,6 @@ namespace dyno
 	template<typename TDataType>
 	void PickerInteraction<TDataType>::calcIntersectClick()
 	{
-		std::cout << this->varToggleSurfacePicker()->getData() << std::endl;
 		if (this->varToggleSurfacePicker()->getData())
 			calcSurfaceIntersectClick();
 		if(this->varToggleEdgePicker()->getData())
@@ -871,7 +905,6 @@ namespace dyno
 	template<typename TDataType>
 	void PickerInteraction<TDataType>::calcIntersectDrag()
 	{
-		std::cout << this->varToggleSurfacePicker()->getData() << std::endl;
 		if (this->varToggleSurfacePicker()->getData())
 			calcSurfaceIntersectDrag();
 		if (this->varToggleEdgePicker()->getData())

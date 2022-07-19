@@ -7,7 +7,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(PickerNode, TDataType)
 
-		template<typename TDataType>
+	template<typename TDataType>
 	PickerNode<TDataType>::PickerNode(std::string name)
 		:Node(name)
 	{
