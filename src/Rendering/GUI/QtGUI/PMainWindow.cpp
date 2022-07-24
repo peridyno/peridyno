@@ -319,10 +319,12 @@ namespace dyno
 	{
 		auto nodes = mNodeFlowView->node_scene->selectedNodes();
 		Qt::QtNodeWidget* clickedNode = nullptr;
-		if (nodes.size() > 0)
-		{
+		if (nodes.size() > 0) {
 			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
 		}
+
+		if (clickedNode == nullptr)
+			return;
 		
 		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
 		moduelEditor->setWindowTitle("Module Flow Editor");

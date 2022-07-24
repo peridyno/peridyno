@@ -358,21 +358,6 @@ namespace dyno
 	public:
 		std::string m_node_name;
 
-		/**
-		 * @brief Dynamics indicator
-		 * true: Dynamics is turn on
-		 * false: Dynamics is turned off
-		 */
-		DEF_VAR(bool, Active, true, "Indicating whether the simulation is on for this node!");
-
-
-		/**
-		 * @brief Visibility
-		 * true: the node is visible
-		 * false: the node is invisible
-		 */
-		DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
-
 		DEF_VAR_STATE(Real, ElapsedTime, 0, "Elapsed Time");
 		DEF_VAR_STATE(Real, TimeStep, Real(0.033), "Time step size");
 
@@ -380,6 +365,10 @@ namespace dyno
 
 	private:
 		bool m_controllable = true;
+
+		bool mPhysicsEnabled = true;
+
+		bool mRenderingEnabled = true;
 
 		/**
 		 * @brief Time step size

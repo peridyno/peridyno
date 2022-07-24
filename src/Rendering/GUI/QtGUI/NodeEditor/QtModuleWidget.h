@@ -42,6 +42,7 @@ namespace Qt
 
 		unsigned int nPorts(PortType portType) const override;
 
+		virtual bool hotkeyEnabled() const { return false; }
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 

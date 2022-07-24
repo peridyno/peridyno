@@ -56,6 +56,10 @@ public Q_SLOTS:
 
 	void dynoNodePlaced(std::shared_ptr<dyno::Node> node);
 
+	void enableRendering(QtNode& n, bool checked);
+
+	void enablePhysics(QtNode& n, bool checked);
+
 	/**
 	 * Auto layout for the node graph
 	 */

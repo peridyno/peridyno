@@ -63,22 +63,22 @@ void Node::setControllable(bool con)
 
 bool Node::isActive()
 {
-	return this->varActive()->getData();
+	return mPhysicsEnabled;
 }
 
 void Node::setActive(bool active)
 {
-	this->varActive()->setValue(active);
+	mPhysicsEnabled = active;
 }
 
 bool Node::isVisible()
 {
-	return this->varVisible()->getData();
+	return mRenderingEnabled;
 }
 
 void Node::setVisible(bool visible)
 {
-	this->varVisible()->setValue(visible);
+	mRenderingEnabled = visible;
 }
 
 float Node::getDt()
