@@ -498,7 +498,7 @@ QTimeEdit, QToolBox, QToolBox::tab, QToolBox::tab:selected {
 	color:rgb(81,72,65);
 	background-color: #ffffff;
 }
-
+/*---------------------------------------------------------peridyno--------------------------------------------------------*/
 /*
 Ubuntu Style Sheet for QT Applications
 Author: Xiaowei HE
