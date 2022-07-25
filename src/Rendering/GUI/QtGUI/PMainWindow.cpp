@@ -319,10 +319,12 @@ namespace dyno
 	{
 		auto nodes = mNodeFlowView->node_scene->selectedNodes();
 		Qt::QtNodeWidget* clickedNode = nullptr;
-		if (nodes.size() > 0)
-		{
+		if (nodes.size() > 0) {
 			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
 		}
+
+		if (clickedNode == nullptr)
+			return;
 		
 		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
 		moduelEditor->setWindowTitle("Module Flow Editor");
@@ -335,6 +337,7 @@ namespace dyno
 		moduelEditor->show();
 
 		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
 	}
 
 	void PMainWindow::showMessage()

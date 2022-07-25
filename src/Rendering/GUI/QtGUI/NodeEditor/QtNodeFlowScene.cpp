@@ -58,6 +58,9 @@ namespace Qt
 		connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
+
+		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
+		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
@@ -353,6 +356,26 @@ namespace Qt
 		qNode.nodeGraphicsObject().setPos(posView);
 
 		emit nodePlaced(qNode);
+	}
+
+	void QtNodeFlowScene::enableRendering(QtNode& n, bool checked)
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->setVisible(checked);
+		}
+	}
+
+	void QtNodeFlowScene::enablePhysics(QtNode& n, bool checked)
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->setActive(checked);
+		}
 	}
 
 	void QtNodeFlowScene::reorderAllNodes()
