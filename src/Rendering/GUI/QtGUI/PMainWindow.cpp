@@ -337,6 +337,7 @@ namespace dyno
 		moduelEditor->show();
 
 		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
 	}
 
 	void PMainWindow::showMessage()

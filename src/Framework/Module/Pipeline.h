@@ -60,6 +60,16 @@ namespace dyno
 
 		void forceUpdate();
 
+		/**
+		 * Turn a module output field to a node output node
+		 */
+		void promoteOutputToNode(FBase* base);
+
+		/**
+		 * Withdraw a module output field from the node
+		 */
+		void demoteOutputFromNode(FBase* base);
+
 	protected:
 		void preprocess() final;
 		void updateImpl() override;

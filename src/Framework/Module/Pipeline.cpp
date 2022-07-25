@@ -149,6 +149,22 @@ namespace dyno
 		return true;
 	}
 
+	void Pipeline::promoteOutputToNode(FBase* base)
+	{
+		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
+			return;
+
+		mNode->addOutputField(base);
+	}
+
+	void Pipeline::demoteOutputFromNode(FBase* base)
+	{
+		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
+			return;
+
+		mNode->removeOutputField(base);
+	}
+
 	void Pipeline::reconstructPipeline()
 	{
 		ObjectId baseId = Object::baseId();

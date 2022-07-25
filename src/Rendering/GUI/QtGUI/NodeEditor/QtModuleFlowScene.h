@@ -30,6 +30,9 @@ namespace Qt
 		void enableEditing();
 		void disableEditing();
 
+	Q_SIGNALS:
+		void nodeExportChanged();
+
 	public Q_SLOTS:
 		void showModuleFlow(Node* node);
 
@@ -46,6 +49,11 @@ namespace Qt
 		void showAnimationPipeline();
 
 		void showGraphicsPipeline();
+
+		/**
+		 * pos: screen pos
+		 */
+		void promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos);
 
 	private:
 		std::shared_ptr<dyno::Node> mNode;
