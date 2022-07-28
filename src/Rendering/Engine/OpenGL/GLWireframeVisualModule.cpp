@@ -14,6 +14,7 @@ namespace dyno
 		this->setName("wireframe_renderer");
 	}
 
+
 	bool GLWireframeVisualModule::initializeGL()
 	{
 		// create vertex buffer and vertex array object

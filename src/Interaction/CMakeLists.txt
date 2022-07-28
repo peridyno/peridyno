@@ -27,12 +27,15 @@ endif()
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
 
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 set_target_properties(${LIB_NAME} PROPERTIES
     CUDA_SEPARABLE_COMPILATION OFF)
+
+#To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
+ target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr;--expt-extended-lambda>)
 
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
@@ -57,3 +60,7 @@ install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DI
 get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
 list(APPEND LOCAL_CMAKES_NAMES "${LIB_NAME}Targets.cmake")    
 set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
+
+
+file(GLOB INTERACTION_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+install(FILES ${INTERACTION_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Interaction)

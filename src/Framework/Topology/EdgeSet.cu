@@ -87,5 +87,14 @@ namespace dyno
 		PointSet<TDataType>::copyFrom(edgeSet);
 	}
 
+	template<typename TDataType>
+	void EdgeSet<TDataType>::setEdges(DArray<Edge>& edges)
+	{
+		m_edges.resize(edges.size());
+		m_edges.assign(edges);
+
+		tagAsChanged();
+	}
+
 	DEFINE_CLASS(EdgeSet);
 }

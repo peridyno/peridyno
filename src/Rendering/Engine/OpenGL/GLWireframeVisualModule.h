@@ -29,7 +29,6 @@ namespace dyno
 		DECLARE_CLASS(GLWireframeVisualModule)
 	public:
 		GLWireframeVisualModule();
-
 	public:
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
 

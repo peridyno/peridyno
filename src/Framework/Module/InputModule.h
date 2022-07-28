@@ -172,12 +172,12 @@ namespace dyno
 
 	struct PKeyboardEvent
 	{
-		bool shiftKeyPressed() { return mods & PModifierBits::MB_SHIFT != 0; }
-		bool controlKeyPressed() { return mods & PModifierBits::MB_CONTROL != 0; }
-		bool altKeyPressed() { return mods & PModifierBits::MB_ALT != 0; }
-		bool superKeyPressed() { return mods & PModifierBits::MB_SUPER != 0; }
-		bool capsLockEnabled() { return mods & PModifierBits::MB_CAPS_LOCK != 0; }
-		bool numLockEnabled() { return mods & PModifierBits::MB_NUM_LOCK != 0; }
+		bool shiftKeyPressed() { return (mods & PModifierBits::MB_SHIFT) != 0; }
+		bool controlKeyPressed() { return (mods & PModifierBits::MB_CONTROL) != 0; }
+		bool altKeyPressed() { return (mods & PModifierBits::MB_ALT) != 0; }
+		bool superKeyPressed() { return (mods & PModifierBits::MB_SUPER) != 0; }
+		bool capsLockEnabled() { return (mods & PModifierBits::MB_CAPS_LOCK) != 0; }
+		bool numLockEnabled() { return (mods & PModifierBits::MB_NUM_LOCK) != 0; }
 
 		PKeyboardType key;
 		PActionType action;
@@ -186,12 +186,12 @@ namespace dyno
 
 	struct PMouseEvent
 	{
-		bool shiftKeyPressed() { return mods & PModifierBits::MB_SHIFT != 0; }
-		bool controlKeyPressed() { return mods & PModifierBits::MB_CONTROL != 0; }
-		bool altKeyPressed() { return mods & PModifierBits::MB_ALT != 0; }
-		bool superKeyPressed() { return mods & PModifierBits::MB_SUPER != 0; }
-		bool capsLockEnabled() { return mods & PModifierBits::MB_CAPS_LOCK != 0; }
-		bool numLockEnabled() { return mods & PModifierBits::MB_NUM_LOCK != 0; }
+		bool shiftKeyPressed() { return (mods & PModifierBits::MB_SHIFT) != 0; }
+		bool controlKeyPressed() { return (mods & PModifierBits::MB_CONTROL) != 0; }
+		bool altKeyPressed() { return (mods & PModifierBits::MB_ALT) != 0; }
+		bool superKeyPressed() { return (mods & PModifierBits::MB_SUPER) != 0; }
+		bool capsLockEnabled() { return(mods & PModifierBits::MB_CAPS_LOCK) != 0; }
+		bool numLockEnabled() { return (mods & PModifierBits::MB_NUM_LOCK) != 0; }
 
 		PButtonType buttonType;
 

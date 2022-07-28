@@ -36,7 +36,7 @@ namespace dyno
 
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "A set of triangles");
-
+		DEF_VAR(Vec3f, Color, Vec3f(0.8f), "Color");
 	protected:
 		void resetStates() override;
 	};

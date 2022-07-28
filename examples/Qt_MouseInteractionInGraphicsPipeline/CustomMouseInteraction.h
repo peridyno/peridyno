@@ -4,11 +4,11 @@
 
 namespace dyno
 {
-	class CustomMouseIteraction : public MouseInputModule
+	class CustomMouseInteraction : public MouseInputModule
 	{
 	public:
-		CustomMouseIteraction() {};
-		virtual ~CustomMouseIteraction() {};
+		CustomMouseInteraction() {};
+		virtual ~CustomMouseInteraction() {};
 
 		DEF_INSTANCE_IN(TopologyModule, Topology, "");
 
