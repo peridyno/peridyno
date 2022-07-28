@@ -11,62 +11,64 @@ namespace dyno
 	PickerNode<TDataType>::PickerNode(std::string name)
 		:Node(name)
 	{
-		auto mouseInteractor = std::make_shared<PickerInteraction<TDataType>>();
-		this->inTopology()->connect(mouseInteractor->inInitialTriangleSet());
+		auto surfaceInteractor = std::make_shared<SurfaceInteraction<TDataType>>();
+		auto edgeInteractor = std::make_shared<EdgeInteraction<TDataType>>();
+		auto pointInteractor = std::make_shared<PointInteraction<TDataType>>();
 
-		this->stateSelectedTriangleSet()->connect(mouseInteractor->outSelectedTriangleSet());
-		this->stateOtherTriangleSet()->connect(mouseInteractor->outOtherTriangleSet());
-		this->stateSelectedEdgeSet()->connect(mouseInteractor->outSelectedEdgeSet());
-		this->stateOtherEdgeSet()->connect(mouseInteractor->outOtherEdgeSet());
-		this->stateSelectedPointSet()->connect(mouseInteractor->outSelectedPointSet());
-		this->stateOtherPointSet()->connect(mouseInteractor->outOtherPointSet());
-		this->stateTriangleIndex()->connect(mouseInteractor->outTriangleIndex());
-		this->stateEdgeIndex()->connect(mouseInteractor->outEdgeIndex());
-		this->statePointIndex()->connect(mouseInteractor->outPointIndex());
+		this->inTopology()->connect(surfaceInteractor->inInitialTriangleSet());
+		this->inTopology()->connect(edgeInteractor->inInitialTriangleSet());
+		this->inTopology()->connect(pointInteractor->inInitialTriangleSet());
 
-		this->varInterationRadius()->connect(mouseInteractor->varInterationRadius());
-		this->varToggleSurfacePicker()->connect(mouseInteractor->varToggleSurfacePicker());
-		this->varToggleEdgePicker()->connect(mouseInteractor->varToggleEdgePicker());
-		this->varTogglePointPicker()->connect(mouseInteractor->varTogglePointPicker());
+		this->varInterationRadius()->connect(surfaceInteractor->varInterationRadius());
+		this->varInterationRadius()->connect(edgeInteractor->varInterationRadius());
+		this->varInterationRadius()->connect(pointInteractor->varInterationRadius());
 
-		this->varToggleMultiSelect()->connect(mouseInteractor->varToggleMultiSelect());
+		this->varToggleSurfacePicker()->connect(surfaceInteractor->varTogglePicker());
+		this->varToggleEdgePicker()->connect(edgeInteractor->varTogglePicker());
+		this->varTogglePointPicker()->connect(pointInteractor->varTogglePicker());
 
-		this->mouseInteractor = mouseInteractor;
+		this->stateTriangleIndex()->connect(surfaceInteractor->outTriangleIndex());
+		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
+		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
-		this->inTopology()->promoteInput();
+		this->surfaceInteractor = surfaceInteractor;
+		this->edgeInteractor = edgeInteractor;
+		this->pointInteractor = pointInteractor;
 
-		this->graphicsPipeline()->pushModule(mouseInteractor);
+		this->graphicsPipeline()->pushModule(surfaceInteractor);
+		this->graphicsPipeline()->pushModule(edgeInteractor);
+		this->graphicsPipeline()->pushModule(pointInteractor);
 
 		auto surfaceRender1 = std::make_shared<GLSurfaceVisualModule>();
 		this->varSelectedTriangleColor()->connect(surfaceRender1->varBaseColor());
-		this->stateSelectedTriangleSet()->connect(surfaceRender1->inTriangleSet());
+		this->surfaceInteractor->outSelectedTriangleSet()->connect(surfaceRender1->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender1);
 
 		auto surfaceRender2 = std::make_shared<GLSurfaceVisualModule>();
 		this->varOtherTriangleColor()->connect(surfaceRender2->varBaseColor());
-		this->stateOtherTriangleSet()->connect(surfaceRender2->inTriangleSet());
+		this->surfaceInteractor->outOtherTriangleSet()->connect(surfaceRender2->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender2);
 
 		auto edgeRender1 = std::make_shared<GLWireframeVisualModule>();
 		this->varSelectedEdgeColor()->connect(edgeRender1->varBaseColor());
-		this->stateSelectedEdgeSet()->connect(edgeRender1->inEdgeSet());
+		this->edgeInteractor->outSelectedEdgeSet()->connect(edgeRender1->inEdgeSet());
 		this->graphicsPipeline()->pushModule(edgeRender1);
 
 		auto edgeRender2 = std::make_shared<GLWireframeVisualModule>();
 		this->varOtherEdgeColor()->connect(edgeRender2->varBaseColor());
-		this->stateOtherEdgeSet()->connect(edgeRender2->inEdgeSet());
+		this->edgeInteractor->outOtherEdgeSet()->connect(edgeRender2->inEdgeSet());
 		this->graphicsPipeline()->pushModule(edgeRender2);
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
 		this->varSelectedSize()->connect(pointRender1->varPointSize());
 		this->varSelectedPointColor()->connect(pointRender1->varBaseColor());
-		this->stateSelectedPointSet()->connect(pointRender1->inPointSet());
+		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
 		this->varOtherSize()->connect(pointRender2->varPointSize());
 		this->varOtherPointColor()->connect(pointRender2->varBaseColor());
-		this->stateOtherPointSet()->connect(pointRender2->inPointSet());
+		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 
 		this->varInterationRadius()->setRange(0.02f , 0.1f);
@@ -90,22 +92,22 @@ namespace dyno
 	{
 		this->inTopology()->getDataPtr()->updateEdges();
 
-		this->stateTriangleIndex()->allocate();
-		this->stateEdgeIndex()->allocate();
-		this->statePointIndex()->allocate();
+		this->surfaceInteractor->outTriangleIndex()->allocate();
+		this->edgeInteractor->outEdgeIndex()->allocate();
+		this->pointInteractor->outPointIndex()->allocate();
 
-		this->stateOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->stateSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->stateSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
-		this->stateOtherTriangleSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
+		this->surfaceInteractor->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->surfaceInteractor->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->surfaceInteractor->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
+		this->surfaceInteractor->outOtherTriangleSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
 
-		this->stateOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->stateSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->stateOtherEdgeSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
+		this->edgeInteractor->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->edgeInteractor->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->edgeInteractor->outOtherEdgeSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
 
-		this->stateOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->stateSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->stateOtherPointSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
+		this->pointInteractor->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->pointInteractor->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->pointInteractor->outOtherPointSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
 	}
 
 	DEFINE_CLASS(PickerNode);

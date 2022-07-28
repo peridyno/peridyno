@@ -2,7 +2,9 @@
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 #include "Module/TopologyModule.h"
-#include "PickerInteraction.h"
+#include "SurfaceInteraction.h"
+#include "EdgeInteraction.h"
+#include "PointInteraction.h"
 
 namespace dyno
 {
@@ -16,12 +18,6 @@ namespace dyno
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, Topology, "");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, SelectedTriangleSet, "");
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, OtherTriangleSet, "");
-		DEF_INSTANCE_STATE(EdgeSet<TDataType>, SelectedEdgeSet, "");
-		DEF_INSTANCE_STATE(EdgeSet<TDataType>, OtherEdgeSet, "");
-		DEF_INSTANCE_STATE(PointSet<TDataType>, SelectedPointSet, "");
-		DEF_INSTANCE_STATE(PointSet<TDataType>, OtherPointSet, "");
 		DEF_ARRAY_STATE(int, TriangleIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
@@ -30,8 +26,6 @@ namespace dyno
 		DEF_VAR(bool, ToggleSurfacePicker, true, "The toggle for surface picker");
 		DEF_VAR(bool, ToggleEdgePicker, true, "The toggle for edge picker");
 		DEF_VAR(bool, TogglePointPicker, true, "The toggle for point picker");
-
-		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle for multiple selecter");
 
 		DEF_VAR(Vec3f, SelectedTriangleColor, Vec3f(0.2, 0.48, 0.75), "");
 		DEF_VAR(Vec3f, OtherTriangleColor, Vec3f(0.8, 0.52, 0.25), "");
@@ -51,6 +45,8 @@ namespace dyno
 		void resetStates() override;
 
 	private:
-		std::shared_ptr<PickerInteraction<TDataType>> mouseInteractor;
+		std::shared_ptr<SurfaceInteraction<TDataType>> surfaceInteractor;
+		std::shared_ptr<EdgeInteraction<TDataType>> edgeInteractor;
+		std::shared_ptr<PointInteraction<TDataType>> pointInteractor;
 	};
 }
