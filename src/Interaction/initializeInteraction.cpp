@@ -16,6 +16,6 @@ namespace dyno
 		auto group = factory->addGroup(
 			"Interaction", 
 			"Interaction", 
-			"ToolBarIco/FiniteElement/FiniteElement.png");
+			"ToolBarIco/FiniteElement/SoftBody1.png");
 	}
 }

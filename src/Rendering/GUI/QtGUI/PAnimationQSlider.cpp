@@ -101,9 +101,8 @@ namespace dyno
 	void PAnimationQSlider::paintEvent(QPaintEvent* ev)
 	{
 		QSlider::paintEvent(ev);
-
 		auto painter = new QPainter(this);
-		painter->setPen(QPen(Qt::black));
+		painter->setPen(QPen(QColor(123,123,123),2));
 
 		auto rect = this->geometry();
 
@@ -125,8 +124,8 @@ namespace dyno
 
 				auto tickMarkX = (((rect.width() - 10.0f) / (maximum() - minimum())) * tickInterval() * i);
 
-				painter->drawText(QPoint(tickX + 6, tickY - 5), QString::number(tickNum));
-				painter->drawLine(QPoint(tickMarkX + 6, rect.height() - 3), QPoint(tickMarkX + 6, rect.height()));
+				painter->drawText(QPoint(tickX + 19, tickY - 7), QString::number(tickNum));
+				painter->drawLine(QPoint(tickMarkX + 6, rect.height() - 12), QPoint(tickMarkX + 6, rect.height()));
 			}
 		}
 		else if (this->orientation() == Qt::Vertical) {
@@ -156,16 +155,16 @@ namespace dyno
 	void PAnimationQSlider::mouseMoveEvent(QMouseEvent* event)
 	{
 		QFontMetrics fontMetrics = QFontMetrics(this->font());
+		int labelWidth = fontMetrics.width(QString::number(this->value()))+fontMetrics.width("0");                // 背景标签的宽度为当前帧数字符串宽度加1个字符的宽度
 
-		int labelWidth = fontMetrics.width(QString::number(this->value()));
-
-		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 0);
+		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 2);  //向下偏移2个单位以对齐slider的sub-page
 		m_displayLabel->setText(QString::number(this->value()));
-		m_displayLabel->setFixedWidth(labelWidth);
+		m_displayLabel->setFixedWidth((labelWidth));
 	
 		m_displayLabel->setVisible(true);
-		m_displayLabel->setStyleSheet("QLabel{background:#FFFFFF;}");
+		m_displayLabel->setStyleSheet("QLabel{background:#2b2b2b;color:#ffffff;}");                      //背景标签颜色及帧数文字颜色
 		m_displayLabel->setAlignment(Qt::AlignVCenter);
+		m_displayLabel->setFixedHeight(20);                                          //修改高度以对其Slider的Sub-page
 		QSlider::mouseMoveEvent(event);
 	}
 

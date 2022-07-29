@@ -34,7 +34,8 @@ namespace dyno
 		mFrameSlider = new PAnimationQSlider(0, mTotalFrame, this);
 		mFrameSlider->setObjectName("AnimationSlider");
 		mFrameSlider->setStyleSheet("border-top-right-radius: 0px; border-bottom-right-radius: 0px;");
-		
+		mFrameSlider->setFixedHeight(29);
+
 		frameLayout->addWidget(mFrameSlider, 0, 0, 0 , (labelSize - 1) * 2);
 
 		QHBoxLayout* operationLayout = new QHBoxLayout();

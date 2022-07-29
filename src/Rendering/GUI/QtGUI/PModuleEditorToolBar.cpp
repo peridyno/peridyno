@@ -16,13 +16,16 @@ namespace dyno
 		mLayout = new QHBoxLayout;
 
 		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
-		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_blue.png")), tr("&Update...")));
-		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/ReOrder.png")), tr("&Realign...")));
+		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_green.png")), tr("&Update...")));
+		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/realign_v2.png")), tr("&Realign...")));
 
 		mLayout->addStretch();
 
 		mAnimationButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/animation.png")), "Animation");
 		mRenderingButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/Display.png")), "Rendering");
+
+		mAnimationButton->setObjectName("mAnimationButton");
+		mRenderingButton->setObjectName("mRenderingButton");
 
 		this->setLayout(mLayout);
 
@@ -70,8 +73,8 @@ namespace dyno
 		QLabel* iconLabel = new QLabel;    
 		QLabel* textLabel = new QLabel;
 
-		iconLabel->setStyleSheet("background: transparent;");
-		textLabel->setStyleSheet("background: transparent;");
+		//iconLabel->setStyleSheet("background: transparent;");
+		//textLabel->setStyleSheet("background: transparent;");
 
 		iconLabel->resize(iconSize, iconSize);         //   Fix the bug that the icon was cropped. Change from "setFixedSize" to "resize"
 		iconLabel->setPixmap(icon);

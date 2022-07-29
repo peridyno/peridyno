@@ -30,7 +30,7 @@ LockerButton::LockerButton(QWidget* parent)
 void LockerButton::SetImageLabel(const QPixmap& pixmap)
 {
     mImageLabel->setPixmap(pixmap);
-}
+} 
 
 void LockerButton::SetTextLabel(QString text)
 {
