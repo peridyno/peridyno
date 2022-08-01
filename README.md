@@ -63,11 +63,17 @@ cd peridyo/build
 cmake ..
 ```
 
-# Examples
+# Applications
 
-<img src="data/fluid.png" style="zoom:80%;" />
+With a scene moded by PeriDyno, it can either viewed as a GFLW application, Qt applications or even a web application,  no changes are requred to the codes when we switch between those applications.
 
+- GLFW application
 
+<img src="data/screenshots/glfwapp.png" style="zoom:80%;" />
+
+- Qt application
+
+<img src="data/screenshots/qtapp.png" style="zoom:80%;" />
 
 # License
 
