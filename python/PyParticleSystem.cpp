@@ -46,7 +46,8 @@ void declare_particle_emitter(py::module& m, std::string typestr) {
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("ParticleEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
+		.def(py::init<>())
+		.def("var_location", &Class::varLocation, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
