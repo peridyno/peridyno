@@ -46,7 +46,7 @@ namespace dyno
 			return mModuleList;
 		}
 
-		std::map<ObjectId, std::shared_ptr<Module>> allModules()
+		std::map<ObjectId, std::shared_ptr<Module>>& allModules()
 		{
 			return mModuleMap;
 		}

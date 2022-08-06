@@ -141,17 +141,18 @@ namespace dyno
 
 		connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
+		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
 
 		statusBar()->showMessage(tr("Status Bar"));
 
-		Qt::ConnectionStyle::setConnectionStyle(
-			R"(
-			  {
-				"ConnectionStyle": {
-				  "UseDataDefinedColors": true
-				}
-			  }
-			  )");
+// 		Qt::ConnectionStyle::setConnectionStyle(
+// 			R"(
+// 			  {
+// 				"ConnectionStyle": {
+// 				  "UseDataDefinedColors": true
+// 				}
+// 			  }
+// 			  )");
 	}
 
 	void PMainWindow::mainLoop()

@@ -33,12 +33,82 @@ namespace dyno
 		mRunning = false;
 	}
 
+	void PSimulationThread::createNewScene()
+	{
+		if (mMutex.tryLock(mTimeOut))
+		{
+			SceneGraphFactory::instance()->createNewScene();
+			this->reset(0);
+
+			mMutex.unlock();
+
+			emit sceneGraphChanged();
+		}
+		else
+		{
+			Log::sendMessage(Log::Info, "Time out");
+		}
+	}
+
+	void PSimulationThread::createNewScene(std::shared_ptr<SceneGraph> scn)
+	{
+		if (mMutex.tryLock(mTimeOut))
+		{
+			SceneGraphFactory::instance()->pushScene(scn);
+			this->reset(0);
+
+			mMutex.unlock();
+
+			emit sceneGraphChanged();
+		}
+		else
+		{
+			Log::sendMessage(Log::Info, "Time out");
+		}
+	}
+
+	void PSimulationThread::closeCurrentScene()
+	{
+		if (mMutex.tryLock(mTimeOut))
+		{
+			SceneGraphFactory::instance()->popScene();
+			this->reset(0);
+
+			mMutex.unlock();
+
+			emit sceneGraphChanged();
+		}
+		else
+		{
+			Log::sendMessage(Log::Info, "Time out");
+		}
+	}
+
+	void PSimulationThread::closeAllScenes()
+	{
+		if (mMutex.tryLock(mTimeOut))
+		{
+			SceneGraphFactory::instance()->popAllScenes();
+			this->reset(0);
+
+			mMutex.unlock();
+
+			emit sceneGraphChanged();
+		}
+		else
+		{
+			Log::sendMessage(Log::Info, "Time out");
+		}
+	}
+
 	void PSimulationThread::run()
 	{
-		auto scn = SceneGraphFactory::instance()->active();
-
 		while (mRunning)
 		{
+			mMutex.lock();
+
+			auto scn = SceneGraphFactory::instance()->active();
+
 			if (!mUpdatingGraphicsContext)
 			{
 				if (mReset)
@@ -50,6 +120,8 @@ namespace dyno
 					}
 					else {
 						scn->reset(mActiveNode);
+
+						mActiveNode = nullptr;
 					}
 
 					mReset = false;
@@ -73,6 +145,8 @@ namespace dyno
 					emit(simulationFinished());
 				}
 			}
+
+			mMutex.unlock();
 		}
 	}
 

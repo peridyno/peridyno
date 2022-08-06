@@ -15,10 +15,35 @@ namespace dyno
 
 
 	Q_SIGNALS:
+		void newSceneLoaded();
 		void nodeCreated(std::shared_ptr<Node> node);
+
+	public slots:
+		void newFile();
+		void openFile();
+		void saveFile();
+		void saveAsFile();
+		void closeFile();
+		void closeAllFiles();
 
 	private:
 
+		void setupFileMenu();
+
 		Qt::QtNodeFlowWidget* mNodeFlow = nullptr;
+
+		QAction* mNewFileAct;
+
+		QAction* mOpenFileAct;
+
+		QAction* mSaveFileAct;
+
+		QAction* mSaveAsFileAct;
+
+		QAction* mCloseAct;
+
+		QAction* mCloseAllAct;
+
+		QString mFileName;
 	};
 }

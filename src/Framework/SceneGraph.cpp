@@ -55,6 +55,12 @@ namespace dyno
 		return mGravity;
 	}
 
+	SceneGraph::~SceneGraph()
+	{
+		mNodeMap.clear();
+		mNodeQueue.clear();
+	}
+
 	bool SceneGraph::initialize()
 	{
 		if (mInitialized)

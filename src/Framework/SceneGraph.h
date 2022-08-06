@@ -33,7 +33,7 @@ namespace dyno
 	public:
 		typedef NodeIterator Iterator;
 
-		~SceneGraph() {};
+		~SceneGraph();
 
 // 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
 // 		std::shared_ptr<Node> getRootNode() { return mRoot; }

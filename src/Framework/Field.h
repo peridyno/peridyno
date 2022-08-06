@@ -15,6 +15,8 @@
  */
 #pragma once
 #include <iostream>
+#include <stdlib.h>
+#include <sstream>
 #include "FBase.h"
 #include "Array/Array.h"
 #include "Array/Array2D.h"
@@ -43,6 +45,9 @@ namespace dyno {
 
 		void setValue(T val);
 		T getValue();
+
+		std::string serialize() override { return "Unknown"; }
+		bool deserialize(const std::string& str) override { return false; }
 
 		bool isEmpty() override {
 			return this->getDataPtr() == nullptr;
@@ -465,3 +470,5 @@ namespace dyno {
 		this->tick();
 	}
 }
+
+#include "FSerialization.inl"

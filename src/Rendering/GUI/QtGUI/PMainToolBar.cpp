@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QToolButton>
+#include <QFileDialog>
 #include <QtSvg/QSvgRenderer>
 
 //tool bar
@@ -9,9 +10,14 @@
 #include "ToolBar/Group.h"
 #include "ToolBar/ToolBarPage.h"
 
-#include "NodeFactory.h"
+#include "PSimulationThread.h"
 
-//core
+//Framework
+#include "NodeFactory.h"
+#include "SceneGraphFactory.h"
+#include "SceneLoaderFactory.h"
+
+//Core
 #include "Platform.h"
 
 namespace dyno
@@ -20,6 +26,8 @@ namespace dyno
 		tt::TabToolbar(parent, _groupMaxHeight, _groupRowCount)
 	{
 		mNodeFlow = nodeFlow;
+
+		setupFileMenu();
 
 		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
 
@@ -83,6 +91,92 @@ namespace dyno
 				}
 			}
 		}
+	}
+
+	void PMainToolBar::newFile()
+	{
+		PSimulationThread::instance()->createNewScene();
+		//emit newSceneLoaded();
+	}
+
+	void PMainToolBar::openFile()
+	{
+		mFileName = QFileDialog::getOpenFileName(this, tr("Open New ..."), "", tr("Xml Files (*.xml)"));
+		if (!mFileName.isEmpty()) {
+			auto scnLoader = SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
+			auto scn = scnLoader->load(mFileName.toStdString());
+
+			if (scn) {
+				PSimulationThread::instance()->createNewScene(scn);
+				//SceneGraphFactory::instance()->pushScene(scn);
+			}
+			//emit newSceneLoaded();
+		}
+	}
+
+	void PMainToolBar::saveFile()
+	{
+		if (mFileName.isEmpty())
+			mFileName = QFileDialog::getSaveFileName(this, tr("Save ..."), "", tr("Xml Files (*.xml)"));
+
+		if (!mFileName.isEmpty())
+		{
+			auto scnLoader = SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
+			scnLoader->save(SceneGraphFactory::instance()->active(), mFileName.toStdString());
+		}
+	}
+
+	void PMainToolBar::saveAsFile()
+	{
+		mFileName = QFileDialog::getSaveFileName(this, tr("Save As ..."), "", tr("Xml Files (*.xml)"));
+		if (!mFileName.isEmpty())
+		{
+			auto scnLoader = SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
+			scnLoader->save(SceneGraphFactory::instance()->active(), mFileName.toStdString());
+		}
+	}
+
+	void PMainToolBar::closeFile()
+	{
+		PSimulationThread::instance()->closeCurrentScene();
+	}
+
+	void PMainToolBar::closeAllFiles()
+	{
+		PSimulationThread::instance()->closeAllScenes();
+	}
+
+	void PMainToolBar::setupFileMenu()
+	{
+		QString path = QString::fromStdString(getAssetPath());
+		tt::Page* filePage = this->AddPage(QPixmap(path + "icon/ToolBarIco/File/Open.png"), "File");
+
+		auto fileGroup = filePage->AddGroup("File");
+
+		mNewFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/New.png"), "New");
+		fileGroup->AddAction(QToolButton::DelayedPopup, mNewFileAct);
+
+		mOpenFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/Open.png"), "Open");
+		fileGroup->AddAction(QToolButton::DelayedPopup, mOpenFileAct);
+
+		mSaveFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/Save.png"), "Save");
+		fileGroup->AddAction(QToolButton::DelayedPopup, mSaveFileAct);
+
+		mSaveAsFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/SaveAs.png"), "Save As");
+		fileGroup->AddAction(QToolButton::DelayedPopup, mSaveAsFileAct);
+
+		mCloseAct = new QAction(QPixmap(path + "icon/48px-Image-x-generic.png"), "Close");
+		fileGroup->AddAction(QToolButton::DelayedPopup, mCloseAct);
+
+		mCloseAllAct = new QAction(QPixmap(path + "icon/48px-Image-x-generic.png"), "Close All");
+		fileGroup->AddAction(QToolButton::DelayedPopup, mCloseAllAct);
+
+		connect(mNewFileAct, &QAction::triggered, this, &PMainToolBar::newFile);
+		connect(mOpenFileAct, &QAction::triggered, this, &PMainToolBar::openFile);
+		connect(mSaveFileAct, &QAction::triggered, this, &PMainToolBar::saveFile);
+		connect(mSaveAsFileAct, &QAction::triggered, this, &PMainToolBar::saveAsFile);
+		connect(mCloseAct, &QAction::triggered, this, &PMainToolBar::closeFile);
+		connect(mCloseAllAct, &QAction::triggered, this, &PMainToolBar::closeAllFiles);
 	}
 }
 
