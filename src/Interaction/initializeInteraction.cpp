@@ -18,11 +18,11 @@ namespace dyno
 		auto group = factory->addGroup(
 			"Interaction", 
 			"Interaction", 
-			"ToolBarIco/FiniteElement/SoftBody1.png");
+			"ToolBarIco/Interaction/Interaction.png");
 
 		group->addAction(
 			"Picker",
-			"48px-Image-x-generic.png",
+			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
 			[=]()->std::shared_ptr<Node> { return std::make_shared<PickerNode<DataType3f>>(); });
 	}
 }
