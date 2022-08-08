@@ -31,6 +31,8 @@ namespace dyno
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
+		this->varSelectionType()->connect(surfaceInteractor->varSelectionType());
+
 		this->surfaceInteractor = surfaceInteractor;
 		this->edgeInteractor = edgeInteractor;
 		this->pointInteractor = pointInteractor;
@@ -71,7 +73,8 @@ namespace dyno
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 
-		this->varInterationRadius()->setRange(0.001f , 0.1f);
+		this->varInterationRadius()->setRange(0.001f , 0.2f);
+		this->varInterationRadius()->setValue(0.01f);
 		this->varSelectedSize()->setRange(0.0f, 0.05f);
 		this->varOtherSize()->setRange(0.0f,0.05f);
 	}

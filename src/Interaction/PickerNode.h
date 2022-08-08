@@ -22,10 +22,17 @@ namespace dyno
 		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
 
-		DEF_VAR(Real, InterationRadius, 0.05f, "The radius of interaction");
+		DEF_VAR(Real, InterationRadius, 0.01f, "The radius of interaction");
 		DEF_VAR(bool, ToggleSurfacePicker, true, "The toggle for surface picker");
 		DEF_VAR(bool, ToggleEdgePicker, true, "The toggle for edge picker");
 		DEF_VAR(bool, TogglePointPicker, true, "The toggle for point picker");
+
+		DECLARE_ENUM(PickingSelectionType,
+		Click = 0,
+			Drag = 1,
+			Both = 2
+			);
+		DEF_ENUM(PickingSelectionType, SelectionType, PickingSelectionType::Both, "");
 
 		DEF_VAR(Vec3f, SelectedTriangleColor, Vec3f(0.2, 0.48, 0.75), "");
 		DEF_VAR(Vec3f, OtherTriangleColor, Vec3f(0.8, 0.52, 0.25), "");
