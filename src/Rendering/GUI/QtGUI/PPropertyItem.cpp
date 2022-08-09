@@ -577,6 +577,8 @@ namespace dyno
 		auto& enums = f->getDataPtr()->enumMap();
 
 		f->getDataPtr()->setCurrentKey(mComboxIndexMap[index]);
+		//To notify the field is updated
+		f->update();
 	}
 
 }
