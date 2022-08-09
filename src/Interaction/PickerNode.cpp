@@ -75,6 +75,10 @@ namespace dyno
 		this->varInterationRadius()->setValue(0.01f);
 		this->varSelectedSize()->setRange(0.0f, 0.05f);
 		this->varOtherSize()->setRange(0.0f,0.05f);
+
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingElementType, this));
+
+		this->varPickingElementType()->attach(callback);
 	}
 
 	template<typename TDataType>
@@ -109,6 +113,30 @@ namespace dyno
 		this->pointInteractor->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->pointInteractor->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->pointInteractor->outOtherPointSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
+	}
+
+	template<typename TDataType>
+	void PickerNode<TDataType>::changePickingElementType()
+	{
+		std::cout<<"callback" << std::endl;
+		if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Surface)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(true);
+			this->edgeInteractor->varTogglePicker()->setValue(false);
+			this->pointInteractor->varTogglePicker()->setValue(false);
+		}
+		else if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Edge)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(false);
+			this->edgeInteractor->varTogglePicker()->setValue(true);
+			this->pointInteractor->varTogglePicker()->setValue(false);
+		}
+		else if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Point)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(false);
+			this->edgeInteractor->varTogglePicker()->setValue(false);
+			this->pointInteractor->varTogglePicker()->setValue(true);
+		}
 	}
 
 	DEFINE_CLASS(PickerNode);

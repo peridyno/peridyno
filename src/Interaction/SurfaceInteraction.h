@@ -41,6 +41,7 @@ namespace dyno
 			);
 
 		DEF_ENUM(PickingTypeSelection, SurfacePickingType, PickingTypeSelection::Both, "");
+
 	protected:
 		void onEvent(PMouseEvent event) override;
 	private:
