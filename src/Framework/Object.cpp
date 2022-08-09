@@ -9,7 +9,7 @@ IMPLEMENT_CLASS(Object)
 
 #define BASE_ID 0
 
-std::atomic_uint32_t Object::cId = BASE_ID + 1;
+std::atomic_uint32_t Object::cId {BASE_ID + 1};
 
 Object::Object()
 {

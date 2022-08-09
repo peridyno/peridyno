@@ -110,7 +110,7 @@ namespace dyno
 		DArray<Triangle> m_triangles;
 		DArrayList<int> m_ver2Tri;
 
-		DArray<Edg2Tri> edg2Tri;
+		DArray<::dyno::TopologyModule::Edg2Tri> edg2Tri;
 	};
 }
 

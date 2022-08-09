@@ -41,7 +41,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	ocean->stateTopology()->connect(mapper->inHeightField());
 	ocean->graphicsPipeline()->pushModule(mapper);
-
+/*
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
@@ -81,7 +81,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	Rmapper->outTriangleSet()->connect(coupling->inTriangleSet());
 	coupling->initialize();
-
+*/
 
 
 	return scn;

@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	typedef typename TOrientedBox3D<Real> Box3D;
+	typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 
 	template<typename TDataType>
 	CollistionDetectionBoundingBox<TDataType>::CollistionDetectionBoundingBox()

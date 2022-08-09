@@ -20,7 +20,7 @@ namespace dyno
 		void setHexahedrons(DArray<Hexahedron>& hexahedrons);
 
 		DArray<Hexahedron>& getHexahedrons() { return m_hexahedrons; }
-		DArray<Tri2Tet>& getQua2Hex() { return quad2Hex; }
+		DArray<::dyno::TopologyModule::Tri2Tet>& getQua2Hex() { return quad2Hex; }
 
 		DArrayList<int>& getVer2Hex();
 
@@ -31,10 +31,10 @@ namespace dyno
 		void copyFrom(HexahedronSet<TDataType> hexSet);
 
 	protected:
-		DArray<Hexahedron> m_hexahedrons;
+		DArray<::dyno::TopologyModule::Hexahedron> m_hexahedrons;
 
 	private:
-		DArray<Quad2Hex> quad2Hex;
+		DArray<::dyno::TopologyModule::Quad2Hex> quad2Hex;
 		DArrayList<int> m_ver2Hex;
 	};
 }

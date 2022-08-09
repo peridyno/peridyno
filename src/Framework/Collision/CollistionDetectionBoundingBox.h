@@ -14,7 +14,7 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TAlignedBox3D<Real> AABB;
+		typedef typename ::dyno::TAlignedBox3D<Real> AABB;
 
 		CollistionDetectionBoundingBox();
 		~CollistionDetectionBoundingBox() override;

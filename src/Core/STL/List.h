@@ -22,25 +22,25 @@ namespace dyno
 		DYN_FUNC iterator find(T val);
 
 		DYN_FUNC inline iterator begin() {
-			return m_startLoc;
+			return this->m_startLoc;
 		};
 
 		DYN_FUNC inline iterator end(){
-			return m_startLoc + m_size;
+			return this->m_startLoc + m_size;
 		}
 
 		GPU_FUNC inline T& operator [] (uint id) {
-			return m_startLoc[id];
+			return this->m_startLoc[id];
 		}
 
 		GPU_FUNC inline T& operator [] (uint id) const {
-			return m_startLoc[id];
+			return this->m_startLoc[id];
 		}
 
 		DYN_FUNC void assign(T* beg, int num, int buffer_size) {
-			m_startLoc = beg;
+			this->m_startLoc = beg;
 			m_size = num;
-			m_maxSize = buffer_size;
+			this->m_maxSize = buffer_size;
 		}
 
 		DYN_FUNC void clear();

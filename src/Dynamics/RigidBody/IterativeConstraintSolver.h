@@ -32,8 +32,8 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 		
-		typedef typename Quat<Real> TQuat;
-		typedef typename TContactPair<Real> ContactPair;
+		typedef typename ::dyno::Quat<Real> TQuat;
+		typedef typename ::dyno::TContactPair<Real> ContactPair;
 		
 		IterativeConstraintSolver();
 		~IterativeConstraintSolver();

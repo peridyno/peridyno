@@ -88,9 +88,9 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		typedef typename TSphere3D<Real> Sphere3D;
-		typedef typename TOrientedBox3D<Real> Box3D;
-		typedef typename TTet3D<Real> Tet3D;
+		typedef typename ::dyno::TSphere3D<Real> Sphere3D;
+		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
+		typedef typename ::dyno::TTet3D<Real> Tet3D;
 
 		DiscreteElements();
 		~DiscreteElements() override;

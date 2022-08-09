@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	typedef typename TAlignedBox3D<Real> AABB;
+	typedef typename ::dyno::TAlignedBox3D<Real> AABB;
 
 	template<typename TDataType>
 	class SparseNeighborPointQuery : public ComputeModule

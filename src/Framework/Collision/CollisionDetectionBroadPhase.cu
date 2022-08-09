@@ -364,7 +364,9 @@ namespace dyno
 	{
 		auto& aabb_src = this->inSource()->getData();
 		auto& aabb_tar = this->inTarget()->getData();
-
+		//:dyno::Array<:dyno::AABB, GPU>& aabb_src = this->inSource()->getData();
+		//:dyno::Array<:dyno::AABB, GPU>& aabb_tar = this->inTarget()->getData();
+	
 		if (this->outContactList()->isEmpty()) {
 			this->outContactList()->allocate();
 		}

@@ -48,16 +48,16 @@ namespace ImGui
 
     template<typename T> 
     std::shared_ptr<ImU32[]>  ToImU(T v, int size);
-    template 
+    template<>
     std::shared_ptr<ImU32[]>  ToImU<dyno::Vec3f*>(dyno::Vec3f* v, int size);
-    template 
+    template<>
     std::shared_ptr<ImU32[]>  ToImU<const dyno::Vec3f*>(const dyno::Vec3f* v, int size);
-    template 
+    template<>
     std::shared_ptr<ImU32[]>  ToImU<dyno::DArray<dyno::Vec3f>>(dyno::DArray<dyno::Vec3f> v, int size);
 
-    template 
+    template<>
     bool    ColorBar<std::shared_ptr<ImU32[]>>(const char* label, const float* values, std::shared_ptr<ImU32[]> col, int length);
-    template 
+    template<>
     bool    ColorBar<ImU32*>(const char* label, const float* values, ImU32* col, int length);    
     void initializeStyle(float scale);
 }

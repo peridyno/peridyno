@@ -19,11 +19,11 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		typedef typename TSphere3D<Real> Sphere3D;
-		typedef typename TOrientedBox3D<Real> Box3D;
-		typedef typename Quat<Real> TQuat;
+		typedef typename dyno::TSphere3D<Real> Sphere3D;
+		typedef typename dyno::TOrientedBox3D<Real> Box3D;
+		typedef typename dyno::Quat<Real> TQuat;
 
-		typedef typename TContactPair<Real> ContactPair;
+		typedef typename dyno::TContactPair<Real> ContactPair;
 
 
 		RigidBodySystem(std::string name = "RigidBodySystem");

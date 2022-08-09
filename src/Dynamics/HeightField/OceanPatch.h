@@ -19,7 +19,7 @@ namespace dyno {
     {
         DECLARE_TCLASS(OceanPatch, TDataType)
     public:
-        typedef typename Vector<float, 2> Coord;
+        typedef typename dyno::Vector<float, 2> Coord;
 
         OceanPatch(int size, float patchSize, int windType = 1, std::string name = "OceanPatch");
         OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global);
@@ -33,13 +33,13 @@ namespace dyno {
 
         void resetWindType();
 
-        //·µ»ØÊµ¼Ê¸²¸ÇÃæ»ý£¬ÒÔmÎªµ¥Î»
+        //ï¿½ï¿½ï¿½ï¿½Êµï¿½Ê¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mÎªï¿½ï¿½Î»
         float getPatchSize()
         {
             return m_realPatchSize;
         }
 
-        //·µ»ØÍø¸ñ·Ö±æÂÊ
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½
         float getGridSize()
         {
             return mResolution;
@@ -69,13 +69,13 @@ namespace dyno {
         DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 
     public:
-        float m_windSpeed = 0;                   //·çËÙ
-        float windDir     = CUDART_PI_F / 3.0f;  //·ç³¡·½Ïò
-        int   m_windType;                        //·çÁ¦µÈ¼¶£¬Ä¿Ç°ÉèÖÃÎª0~12
+        float m_windSpeed = 0;                   //ï¿½ï¿½ï¿½ï¿½
+        float windDir     = CUDART_PI_F / 3.0f;  //ï¿½ç³¡ï¿½ï¿½ï¿½ï¿½
+        int   m_windType;                        //ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½Ä¿Ç°ï¿½ï¿½ï¿½ï¿½Îª0~12
         float m_fft_real_length = 10;
         float m_fft_flow_speed  = 1.0f;
 
-        DArray2D<Vec4f> m_displacement;  // Î»ÒÆ³¡
+        DArray2D<Vec4f> m_displacement;  // Î»ï¿½Æ³ï¿½
         DArray2D<Vec4f> m_gradient;      // gradient field
 
     protected:
@@ -90,26 +90,26 @@ namespace dyno {
 
         int mResolution;
 
-        int mSpectrumWidth;  //ÆµÆ×¿í¶È
-        int mSpectrumHeight;  //ÆµÆ×³¤¶È
+        int mSpectrumWidth;  //Æµï¿½×¿ï¿½ï¿½ï¿½
+        int mSpectrumHeight;  //Æµï¿½×³ï¿½ï¿½ï¿½
 
-        float mChoppiness;  //ÉèÖÃÀË¼âµÄ¼âÈñÐÔ£¬·¶Î§0~1
+        float mChoppiness;  //ï¿½ï¿½ï¿½ï¿½ï¿½Ë¼ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½Î§0~1
 
-        std::vector<WindParam> m_params;  //²»Í¬·çÁ¦µÈ¼¶ÏÂµÄFFT±ä»»²ÎÊý
+        std::vector<WindParam> m_params;  //ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½Âµï¿½FFTï¿½ä»»ï¿½ï¿½ï¿½ï¿½
 
-        const float g = 9.81f;          //ÖØÁ¦
-        float       A = 1e-7f;          //²¨µÄËõ·ÅÏµÊý
-        float       m_realPatchSize;    //Êµ¼Ê¸²¸ÇÃæ»ý£¬ÒÔmÎªµ¥Î»
-        float       dirDepend = 0.07f;  //·ç³¤·½ÏòÏà¹ØÐÔ
+        const float g = 9.81f;          //ï¿½ï¿½ï¿½ï¿½
+        float       A = 1e-7f;          //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+        float       m_realPatchSize;    //Êµï¿½Ê¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mÎªï¿½ï¿½Î»
+        float       dirDepend = 0.07f;  //ï¿½ç³¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-        float m_maxChoppiness;  //ÉèÖÃchoppinessÉÏÏÞ
-        float m_globalShift;    //´ó³ß¶ÈÆ«ÒÆ·ù¶È
+        float m_maxChoppiness;  //ï¿½ï¿½ï¿½ï¿½choppinessï¿½ï¿½ï¿½ï¿½
+        float m_globalShift;    //ï¿½ï¿½ß¶ï¿½Æ«ï¿½Æ·ï¿½ï¿½ï¿½
 
-        DArray2D<Coord> m_h0;  //³õÊ¼ÆµÆ×
-        DArray2D<Coord> m_ht;  //µ±Ç°Ê±¿ÌÆµÆ×
+        DArray2D<Coord> m_h0;  //ï¿½ï¿½Ê¼Æµï¿½ï¿½
+        DArray2D<Coord> m_ht;  //ï¿½ï¿½Ç°Ê±ï¿½ï¿½Æµï¿½ï¿½
 
-        DArray2D<Coord> m_Dxt;  //x·½ÏòÆ«ÒÆ
-        DArray2D<Coord> m_Dzt;  //z·½ÏòÆ«ÒÆ
+        DArray2D<Coord> m_Dxt;  //xï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
+        DArray2D<Coord> m_Dzt;  //zï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
 
         cufftHandle fftPlan;
 

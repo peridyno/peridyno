@@ -158,10 +158,15 @@ void ImGui::endTitle(){
     ImGui::PopID();
 }
 
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 template<typename T> 
 std::shared_ptr<ImU32[]> ImGui::ToImU(T v, int size)
 {
-    auto vPtr = std::make_unique<ImU32[]>(size);
+    auto vPtr = make_unique<ImU32[]>(size);
     for(int i = 0; i < size; ++ i)
 		vPtr[i] = IM_COL32(v[i][0], v[i][1], v[i][2], 150);
     return vPtr;

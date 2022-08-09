@@ -12,7 +12,9 @@ if(PERIDYNO_LIBRARY_RIGIDBODY)
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
-    add_executable(${PROJECT_NAME} ${SRC_LIST})
+ find_package(CUDA)
+    cuda_add_library(${PROJECT_NAME} SHARED main.cpp)
+    #add_executable(${PROJECT_NAME}  main.cpp)
 	target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 

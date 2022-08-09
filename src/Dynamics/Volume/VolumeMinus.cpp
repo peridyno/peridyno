@@ -6,7 +6,7 @@ namespace dyno
 
 	template<typename TDataType>
 	VolumeMinus<TDataType>::VolumeMinus()
-		: Volume()
+		//: Volume()
 	{
 	}
 

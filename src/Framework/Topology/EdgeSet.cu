@@ -55,7 +55,7 @@ namespace dyno
 			return;
 
 		DArray<int> counts;
-		counts.resize(m_coords.size());
+		counts.resize(this->m_coords.size());
 		counts.reset();
 		
 		cuExecute(m_edges.size(),
@@ -63,11 +63,11 @@ namespace dyno
 			counts,
 			m_edges);
 
-		m_pointNeighbors.resize(counts);
+		this->m_pointNeighbors.resize(counts);
 
 		cuExecute(m_edges.size(),
 			K_StoreIds,
-			m_pointNeighbors,
+			this->m_pointNeighbors,
 			m_edges);
 
 		counts.clear();

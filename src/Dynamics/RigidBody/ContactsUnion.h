@@ -26,7 +26,7 @@ namespace dyno
 	{
 		DECLARE_TCLASS(ContactsUnion, TDataType)
 	public:
-		typedef typename TContactPair<Real> ContactPair;
+		typedef typename ::dyno::TContactPair<Real> ContactPair;
 
 		ContactsUnion() {};
 		~ContactsUnion() override {};

@@ -1,6 +1,7 @@
-﻿cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
+cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
 
-project(peridyno LANGUAGES CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
+project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
+
 
 # define library version (update: apparently you can also do it in project()!)
 set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
@@ -10,7 +11,8 @@ set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRA
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    #为sln内部projects设置管理folder
 set(CMAKE_CXX_STANDARD 11 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
-
+#set(CMAKE_C_CREATE_STATIC_LIBRARY "")
+#set(CMAKE_C_COMPILE_OBJECT  "")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)                                                         #默认为本项目下各编译目标开启fPIC模式，cuda下面会开启rdc模式
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPILATION MODE")    #默认为本项目下各编译目标指定cuda分离编译模式

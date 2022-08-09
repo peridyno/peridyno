@@ -12,7 +12,8 @@ if(PERIDYNO_LIBRARY_HEIGHTFIELD)
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
-    add_executable(${PROJECT_NAME} ${SRC_LIST})
+
+    add_executable(${PROJECT_NAME} main.cpp)
 	target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 

@@ -155,7 +155,7 @@ namespace dyno
 	{
 		if (!this->isEmpty())
 		{
-			for each (auto func in mCallbackFunc)
+			for(auto func : mCallbackFunc)
 			{
 				func->update();
 			}
@@ -163,7 +163,7 @@ namespace dyno
 
 		auto& sinks = this->getSinks();
 
-		for each (auto var in sinks)
+		for(auto var : sinks)
 		{
 			if (var != nullptr)
 			{

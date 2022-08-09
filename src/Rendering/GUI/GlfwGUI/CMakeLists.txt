@@ -7,7 +7,7 @@ file(
     GLOB_RECURSE LIB_SRC
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
-	"${LIB_SRC_DIR}/*.c*"
+	"${LIB_SRC_DIR}/*.cpp"
     "${LIB_SRC_DIR}/*.*"
 )
 
@@ -41,6 +41,7 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
 
 target_link_libraries(${LIB_NAME} Core Framework IO RenderCore GLRenderEngine ImWidgets glfw imgui)
+#target_link_libraries(${LIB_NAME} Core Framework IO RenderCore GLRenderEngine ImWidgets  imgui)
 
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets
@@ -58,3 +59,4 @@ set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
 
 file(GLOB FILE_QTGUI_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 install(FILES ${FILE_QTGUI_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI/GlfwGUI)
+

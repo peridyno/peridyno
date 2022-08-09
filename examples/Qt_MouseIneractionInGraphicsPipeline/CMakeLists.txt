@@ -22,6 +22,7 @@ if(PERIDYNO_Qt5_GUI)
     )
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
+
     add_executable(${PROJECT_NAME} ${SRC_LIST})
     
     if(UNIX)

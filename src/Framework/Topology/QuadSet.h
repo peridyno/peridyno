@@ -127,8 +127,8 @@ namespace dyno
 		DArray<Quad> m_quads;
 		DArrayList<int> m_ver2Quad;
 
-		DArray<Edg2Quad> edg2Quad;
-		DArray<Tri2Quad> tri2Quad;
+		DArray<::dyno::TopologyModule::Edg2Quad> edg2Quad;
+		DArray<::dyno::TopologyModule::Tri2Quad> tri2Quad;
 	};
 }
 

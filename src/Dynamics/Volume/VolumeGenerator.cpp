@@ -11,7 +11,7 @@ namespace dyno
 
 	template<typename TDataType>
 	VolumeGenerator<TDataType>::VolumeGenerator()
-		: Volume()
+		//: Volume()
 	{
 		this->inPadding()->setValue(10);
 		this->inSpacing()->setValue(0.1);

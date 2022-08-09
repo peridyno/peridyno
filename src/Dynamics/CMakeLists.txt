@@ -65,7 +65,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
     file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
     install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Dynamics/${LIB_NAME})
 endmacro()
-
+       
 option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system library" ON)
 option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" ON)
 option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
@@ -75,12 +75,13 @@ option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY Core IO Framework)
     build_library(ParticleSystem LIB_DEPENDENCY)
+endif()
 
     if(PERIDYNO_LIBRARY_PERIDYNAMICS)
-    set(LIB_DEPENDENCY ParticleSystem)
+    	set(LIB_DEPENDENCY ParticleSystem)
         build_library(Peridynamics LIB_DEPENDENCY)
     endif()
-endif()
+
 
 if(PERIDYNO_LIBRARY_RIGIDBODY)
     set(LIB_DEPENDENCY Core IO Framework)
