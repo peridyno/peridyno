@@ -153,7 +153,7 @@ namespace dyno
 
 		auto fileGroup = filePage->AddGroup("File");
 
-		mNewFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/New.png"), "New");
+		mNewFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/New_v2.png"), "New");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mNewFileAct);
 
 		mOpenFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/Open.png"), "Open");
@@ -165,10 +165,10 @@ namespace dyno
 		mSaveAsFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/SaveAs.png"), "Save As");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mSaveAsFileAct);
 
-		mCloseAct = new QAction(QPixmap(path + "icon/48px-Image-x-generic.png"), "Close");
+		mCloseAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/Close.png"), "Close");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mCloseAct);
 
-		mCloseAllAct = new QAction(QPixmap(path + "icon/48px-Image-x-generic.png"), "Close All");
+		mCloseAllAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/CloseAll.png"), "Close All");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mCloseAllAct);
 
 		connect(mNewFileAct, &QAction::triggered, this, &PMainToolBar::newFile);

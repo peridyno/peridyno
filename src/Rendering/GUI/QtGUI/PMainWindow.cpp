@@ -250,7 +250,7 @@ namespace dyno
 
 	void PMainWindow::setupToolBar()
 	{
-		mToolBar = new PMainToolBar(mNodeFlowView, this, 55, 3);
+		mToolBar = new PMainToolBar(mNodeFlowView, this, 61, 3);
 		mToolBar->setWindowTitle("Tool Bar");
 
 		addToolBar(Qt::TopToolBarArea, mToolBar);
