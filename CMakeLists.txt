@@ -1,7 +1,16 @@
 cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.6/bin/nvcc")
 
 project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
+find_package(CUDA  REQUIRED)
+if(CUDA_FOUND)
+	INCLUDE_DIRECTORIES("/usr/local/cuda-11.6/include/")
+	link_directories("/usr/local/cuda-11.6/lib64")
+	#cuda_add_libraray("/usr/local/cuda-11.4/lib64")
+		
+        set(CUDA_SEPARABLE_COMPILATTON ON)
+endif()
 
 # define library version (update: apparently you can also do it in project()!)
 set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
@@ -105,6 +114,7 @@ option(PERIDYNO_EXAMPLE "Enable building examples" ON)
 if(PERIDYNO_EXAMPLE)
     add_subdirectory(examples)
 endif()
+
 
 add_subdirectory(src)
 
