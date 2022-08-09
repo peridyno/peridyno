@@ -3,9 +3,7 @@ set(PROJECT_NAME GL_InstanceVisualizer)
 set(LIB_SRC main.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})
 
- find_package(CUDA)
-    cuda_add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
-#add_executable(${PROJECT_NAME} ${LIB_SRC})
+add_executable(${PROJECT_NAME} ${LIB_SRC})
 
 if (MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)

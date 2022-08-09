@@ -89,7 +89,7 @@ namespace dyno
 		ImGui::Begin(label, NULL, /*ImGuiWindowFlags_NoMove |*/  ImGuiWindowFlags_NoTitleBar | /*ImGuiWindowFlags_NoBackground |*/ ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 		ImGui::PopStyleColor();
 		ImGui::Text(mTitle);
-		ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
+		//ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
 		ImGui::End();
 	}
 }

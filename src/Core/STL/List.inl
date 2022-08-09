@@ -1,7 +1,6 @@
 #include "Algorithm/SimpleMath.h"
 #include <glm/glm.hpp>
-#include <cuda.h>
-#include <cuda_runtime.h>
+
 namespace dyno
 {
 	template <typename T>
@@ -33,10 +32,10 @@ namespace dyno
 	{
 		//return nullptr if the data buffer is full
 		if (m_size >= this->m_maxSize) return nullptr;
+		
+		//int index = atomicAdd(&(this->m_size), 1);
+		int index = 0;//Onlinux platform, this is a bug, not yet resolved.
 
-		//int index = atomicAdd(&m_size, 1);
-		//int index = atomicAdd(&size, 1);
-		int index = 0;
 		this->m_startLoc[index] = val;
 
 		return this->m_startLoc + index;

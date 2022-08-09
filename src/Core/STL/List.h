@@ -4,6 +4,10 @@
 #include "Platform.h"
 #include "STLBuffer.h"
 
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+//#include <device_atomic_functions.h>
 namespace dyno
 {
 	/**
@@ -23,7 +27,7 @@ namespace dyno
 
 		DYN_FUNC inline iterator begin() {
 			return this->m_startLoc;
-		};
+		}
 
 		DYN_FUNC inline iterator end(){
 			return this->m_startLoc + m_size;

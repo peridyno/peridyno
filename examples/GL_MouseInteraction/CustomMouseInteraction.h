@@ -1,14 +1,14 @@
 #pragma once
-#include "Module/InputMouseModule.h"
+#include "Module/MouseInputModule.h"
 #include "Module/TopologyModule.h"
 
 namespace dyno
 {
-	class CustomMouseIteraction : public InputMouseModule
+	class CustomMouseInteraction : public MouseInputModule
 	{
 	public:
-		CustomMouseIteraction() {};
-		virtual ~CustomMouseIteraction() {};
+		CustomMouseInteraction() {};
+		virtual ~CustomMouseInteraction() {};
 
 		DEF_INSTANCE_IN(TopologyModule, Topology, "");
 

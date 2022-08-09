@@ -13,9 +13,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
 
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
- find_package(CUDA)
-    cuda_add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
-    #add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 #添加编译目标 可执行文件
+    add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 #添加编译目标 可执行文件
 
     target_link_libraries(${PROJECT_NAME} 
         Core 

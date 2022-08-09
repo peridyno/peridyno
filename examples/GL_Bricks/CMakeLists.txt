@@ -1,5 +1,5 @@
-if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(PROJECT_NAME GL_CapillaryWave)
+if(PERIDYNO_LIBRARY_RIGIDBODY)
+    set(PROJECT_NAME GL_Bricks)
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/Examples/${PROJECT_NAME}")
 
     file(
@@ -16,14 +16,13 @@ if(PERIDYNO_LIBRARY_HEIGHTFIELD)
 	target_link_libraries(${PROJECT_NAME} 
         Core 
         Framework 
-        IO 
-        HeightField 
-		GlfwGUI
-        GLRenderEngine
-		)
+        IO
+        RigidBody 
+        GlfwGUI
+        GLRenderEngine)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/HeightField")
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/RigidBody")
 
     if(WIN32)
         set_target_properties(${PROJECT_NAME} PROPERTIES
