@@ -31,8 +31,6 @@ namespace dyno
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
-		this->varSelectionType()->connect(surfaceInteractor->varSelectionType());
-
 		this->surfaceInteractor = surfaceInteractor;
 		this->edgeInteractor = edgeInteractor;
 		this->pointInteractor = pointInteractor;

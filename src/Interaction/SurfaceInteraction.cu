@@ -61,7 +61,8 @@ namespace dyno
 				this->ray1.direction = event.ray.direction;
 				this->x1 = event.x;
 				this->y1 = event.y;
-				this->calcIntersectClick();
+				if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Click)
+					this->calcIntersectClick();
 			}
 			else if (event.actionType == AT_RELEASE)
 			{
@@ -81,7 +82,8 @@ namespace dyno
 					this->ray2.direction = event.ray.direction;
 					this->x2 = event.x;
 					this->y2 = event.y;
-					this->calcIntersectDrag();
+					if(this->varSurfacePickingType()->getValue()== PickingTypeSelection::Both|| this->varSurfacePickingType()->getValue() == PickingTypeSelection::Drag)
+						this->calcIntersectDrag();
 				}
 			}
 		}

@@ -34,6 +34,13 @@ namespace dyno
 
 		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle of multiple selection");
 
+		DECLARE_ENUM(PickingTypeSelection,
+		Click = 0,
+			Drag = 1,
+			Both = 2
+			);
+
+		DEF_ENUM(PickingTypeSelection, SurfacePickingType, PickingTypeSelection::Both, "");
 	protected:
 		void onEvent(PMouseEvent event) override;
 	private:
