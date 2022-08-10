@@ -14,7 +14,7 @@ namespace dyno
 		intersected[pId] = 0;
 	}
 
-	__global__ void SurfaceMergeIntersectedIndex(
+	__global__ void SurfaceMergeIntersectedIndexOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -27,6 +27,40 @@ namespace dyno
 			outIntersected[pId] = 0;
 		else
 			outIntersected[pId] = 1;
+
+		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+	}
+
+	__global__ void SurfaceMergeIntersectedIndexXOR(
+		DArray<int> intersected1,
+		DArray<int> intersected2,
+		DArray<int> outIntersected,
+		DArray<int> outUnintersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected1.size()) return;
+
+		if (intersected1[pId] == intersected2[pId])
+			outIntersected[pId] = 0;
+		else
+			outIntersected[pId] = 1;
+
+		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+	}
+
+	__global__ void SurfaceMergeIntersectedIndexC(
+		DArray<int> intersected1,
+		DArray<int> intersected2,
+		DArray<int> outIntersected,
+		DArray<int> outUnintersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected1.size()) return;
+
+		if (intersected2[pId]==1)
+			outIntersected[pId] = 0;
+		else
+			outIntersected[pId] = intersected1[pId];
 
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
@@ -72,6 +106,8 @@ namespace dyno
 				this->ray2.direction = event.ray.direction;
 				this->x2 = event.x;
 				this->y2 = event.y;
+				if(this->varToggleMultiSelect()->getValue()&&this->varTogglePicker()->getValue())
+					this->mergeIndex();
 			}
 			else
 			{
@@ -312,6 +348,8 @@ namespace dyno
 			this->varInterationRadius()->getData()
 		);
 
+		this->tempTriIntersectedIndex.assign(intersected);
+
 		if (this->varToggleMultiSelect()->getData())
 		{
 			if (this->triIntersectedIndex.size() == 0) 
@@ -326,16 +364,38 @@ namespace dyno
 			outIntersected.resize(intersected.size());
 			DArray<int> outUnintersected;
 			outUnintersected.resize(unintersected.size());
-			cuExecute(triangles.size(),
-				SurfaceMergeIntersectedIndex,
-				this->triIntersectedIndex,
-				intersected,
-				outIntersected,
-				outUnintersected
-			);
+			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+			{
+				cuExecute(triangles.size(),
+					SurfaceMergeIntersectedIndexOR,
+					this->triIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+			{
+				cuExecute(triangles.size(),
+					SurfaceMergeIntersectedIndexXOR,
+					this->triIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+			{
+				cuExecute(triangles.size(),
+					SurfaceMergeIntersectedIndexC,
+					this->triIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
 			intersected.assign(outIntersected);
 			unintersected.assign(outUnintersected);
-			this->triIntersectedIndex.assign(intersected);
 		}
 		else
 		{
@@ -456,6 +516,8 @@ namespace dyno
 			this->ray2
 		);
 
+		this->tempTriIntersectedIndex.assign(intersected);
+
 		if (this->varToggleMultiSelect()->getData())
 		{
 			if (this->triIntersectedIndex.size() == 0)
@@ -470,22 +532,131 @@ namespace dyno
 			outIntersected.resize(intersected.size());
 			DArray<int> outUnintersected;
 			outUnintersected.resize(unintersected.size());
-			cuExecute(triangles.size(),
-				SurfaceMergeIntersectedIndex,
-				this->triIntersectedIndex,
-				intersected,
-				outIntersected,
-				outUnintersected
-			);
+			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+			{
+				cuExecute(triangles.size(),
+					SurfaceMergeIntersectedIndexOR,
+					this->triIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+			{
+				cuExecute(triangles.size(),
+					SurfaceMergeIntersectedIndexXOR,
+					this->triIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+			{
+				cuExecute(triangles.size(),
+					SurfaceMergeIntersectedIndexC,
+					this->triIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
 			intersected.assign(outIntersected);
 			unintersected.assign(outUnintersected);
-			this->triIntersectedIndex.assign(intersected);
+			//this->triIntersectedIndex.assign(intersected);
 		}
 		else
 		{
 			this->triIntersectedIndex.assign(intersected);
 		}
 
+
+		DArray<int> intersected_o;
+		intersected_o.assign(intersected);
+
+		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
+		DArray<Triangle> intersected_triangles;
+		intersected_triangles.resize(intersected_size);
+
+		int unintersected_size = thrust::reduce(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), (int)0, thrust::plus<int>());
+		thrust::exclusive_scan(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), unintersected.begin());
+		DArray<Triangle> unintersected_triangles;
+		unintersected_triangles.resize(unintersected_size);
+
+		cuExecute(triangles.size(),
+			AssignOutTriangles,
+			triangles,
+			intersected_triangles,
+			unintersected_triangles,
+			intersected,
+			unintersected,
+			intersected_o
+		);
+		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
+		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
+		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
+		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+	}
+
+	template<typename TDataType>
+	void SurfaceInteraction<TDataType>::mergeIndex()
+	{
+		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
+		DArray<Coord> points = initialTriangleSet.getPoints();
+		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		DArray<int> intersected;
+		intersected.resize(triangles.size());
+		cuExecute(triangles.size(),
+			SurfaceInitializeArray,
+			intersected
+		);
+		DArray<int> unintersected;
+		unintersected.resize(triangles.size());
+		std::cout << "Triangle Num:" << triangles.size() << std::endl;
+
+		DArray<int> outIntersected;
+		outIntersected.resize(intersected.size());
+		DArray<int> outUnintersected;
+		outUnintersected.resize(unintersected.size());
+
+		if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+		{
+			cuExecute(triangles.size(),
+				SurfaceMergeIntersectedIndexOR,
+				this->triIntersectedIndex,
+				this->tempTriIntersectedIndex,
+				outIntersected,
+				outUnintersected
+			);
+		}
+		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+		{
+			cuExecute(triangles.size(),
+				SurfaceMergeIntersectedIndexXOR,
+				this->triIntersectedIndex,
+				this->tempTriIntersectedIndex,
+				outIntersected,
+				outUnintersected
+			);
+		}
+		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+		{
+			cuExecute(triangles.size(),
+				SurfaceMergeIntersectedIndexC,
+				this->triIntersectedIndex,
+				this->tempTriIntersectedIndex,
+				outIntersected,
+				outUnintersected
+			);
+		}
+
+		intersected.assign(outIntersected);
+		unintersected.assign(outUnintersected);
+		this->triIntersectedIndex.assign(intersected);
 
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);

@@ -23,16 +23,12 @@ namespace dyno
 		void calcSurfaceIntersectClick();
 		void calcSurfaceIntersectDrag();
 
+		void mergeIndex();
+
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, OtherTriangleSet, "");
 		DEF_ARRAY_OUT(int, TriangleIndex, DeviceType::GPU, "");
-
-		DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
-
-		DEF_VAR(bool, TogglePicker, true, "The toggle of surface picker");
-
-		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle of multiple selection");
 
 		DECLARE_ENUM(PickingTypeSelection,
 		Click = 0,
@@ -41,6 +37,20 @@ namespace dyno
 			);
 
 		DEF_ENUM(PickingTypeSelection, SurfacePickingType, PickingTypeSelection::Both, "");
+
+		DECLARE_ENUM(MultiSelectionType,
+		OR = 0,
+			XOR = 1,
+			C = 2
+			);
+
+		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
+
+		DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
+
+		DEF_VAR(bool, TogglePicker, true, "The toggle of surface picker");
+
+		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle of multiple selection");
 
 	protected:
 		void onEvent(PMouseEvent event) override;
