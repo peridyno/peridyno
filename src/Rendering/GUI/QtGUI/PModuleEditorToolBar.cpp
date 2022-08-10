@@ -66,17 +66,20 @@ namespace dyno
 
 		button->setIconSize(QSize(iconSize, iconSize));
 		button->setFixedWidth(160);
+		button->setIcon(icon);//直接调用PushButton的setIcon和setText添加icon和文字，以修复Label布局下文字无法高亮的问题。
+		button->setText(text);//
+
 		button->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
 		button->setCheckable(true);
-
+/*
 		QLabel* iconLabel = new QLabel;    
 		QLabel* textLabel = new QLabel;
 
 		//iconLabel->setStyleSheet("background: transparent;");
 		//textLabel->setStyleSheet("background: transparent;");
 
-		iconLabel->resize(iconSize, iconSize);         //   Fix the bug that the icon was cropped. Change from "setFixedSize" to "resize"
+		iconLabel->resize(iconSize, iconSize);         
 		iconLabel->setPixmap(icon);
 		textLabel->setText(text);
 
@@ -97,7 +100,7 @@ namespace dyno
 // 			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
 // 			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
 // 			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
-
+*/
 		mLayout->addWidget(button);
 
 		return button;

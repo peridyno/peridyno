@@ -1,7 +1,9 @@
 #include "PAnimationWidget.h"
 
 #include "PSimulationThread.h"
+#include "Platform.h"
 
+#include <QString>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QSpinBox>
@@ -13,7 +15,10 @@ namespace dyno
 	PAnimationWidget::PAnimationWidget(QWidget *parent) : 
 		QWidget(parent),
 		m_startSim(nullptr),
-		m_resetSim(nullptr)
+		m_resetSim(nullptr),
+		StartIcon(nullptr),
+		PauseIcon(nullptr),
+		ResetIcon(nullptr)
 	{
 		mTotalFrame = 800;
 
@@ -40,17 +45,23 @@ namespace dyno
 
 		QHBoxLayout* operationLayout = new QHBoxLayout();
 
-		m_startSim = new QPushButton("Start");
-		m_resetSim = new QPushButton("Reset");
+		m_startSim = new QPushButton();
+		m_resetSim = new QPushButton();
 		m_startSim->setStyleSheet("padding: 6px;");
-		m_resetSim->setStyleSheet("margin-right: 5px; padding: 6px;");
+		m_resetSim->setStyleSheet("padding: 6px;");
 
+		StartIcon = new QIcon(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));
+		PauseIcon = new QIcon(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
+		ResetIcon = new QIcon(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
+
+		m_startSim->setIcon(*StartIcon);
+		m_resetSim->setIcon(*ResetIcon);
 		m_resetSim->setCheckable(false);
 
 		operationLayout->addWidget(mTotalFrameSpinbox, 0);
 		operationLayout->addWidget(m_startSim, 0);
 		operationLayout->addWidget(m_resetSim, 0);
-		operationLayout->setSpacing(5);
+		operationLayout->setSpacing(0);
 
 		m_startSim->setCheckable(true);
 
@@ -77,13 +88,15 @@ namespace dyno
 		PSimulationThread::instance()->deleteLater();
 		PSimulationThread::instance()->wait();  //必须等待线程结束
 	}
-
+	
 	void PAnimationWidget::toggleSimulation()
 	{
 		if (m_startSim->isChecked())
 		{
 			PSimulationThread::instance()->resume();
-			m_startSim->setText("Pause");
+			m_startSim->setText("");
+			m_startSim->setIcon(*PauseIcon);
+
 			m_resetSim->setDisabled(true);
 			mTotalFrameSpinbox->setEnabled(false);
 			mFrameSlider->setEnabled(false);
@@ -91,8 +104,10 @@ namespace dyno
 		else
 		{
 			PSimulationThread::instance()->pause();
-			m_startSim->setText("Resume");
+			m_startSim->setText("");
 			m_resetSim->setDisabled(false);
+			m_startSim->setIcon(*StartIcon);
+
 
 			mTotalFrameSpinbox->setEnabled(true);
 			mFrameSlider->setEnabled(true);
@@ -103,9 +118,10 @@ namespace dyno
 	{
 		PSimulationThread::instance()->reset(mTotalFrameSpinbox->value());
 
-		m_startSim->setText("Start");
+		m_startSim->setText("");
 		m_startSim->setEnabled(true);
 		m_startSim->setChecked(false);
+		m_startSim->setIcon(*StartIcon);
 
 		mTotalFrameSpinbox->setEnabled(true);
 		mFrameSlider->setEnabled(true);
