@@ -23,10 +23,6 @@ namespace dyno
 		this->varInterationRadius()->connect(edgeInteractor->varInterationRadius());
 		this->varInterationRadius()->connect(pointInteractor->varInterationRadius());
 
-		this->varToggleSurfacePicker()->connect(surfaceInteractor->varTogglePicker());
-		this->varToggleEdgePicker()->connect(edgeInteractor->varTogglePicker());
-		this->varTogglePointPicker()->connect(pointInteractor->varTogglePicker());
-
 		this->stateTriangleIndex()->connect(surfaceInteractor->outTriangleIndex());
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
@@ -60,21 +56,21 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(edgeRender2);
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
-		this->varSelectedSize()->connect(pointRender1->varPointSize());
+		this->varPointSelectedSize()->connect(pointRender1->varPointSize());
 		this->varSelectedPointColor()->connect(pointRender1->varBaseColor());
 		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
-		this->varOtherSize()->connect(pointRender2->varPointSize());
+		this->varPointOtherSize()->connect(pointRender2->varPointSize());
 		this->varOtherPointColor()->connect(pointRender2->varBaseColor());
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 
 		this->varInterationRadius()->setRange(0.001f , 0.2f);
 		this->varInterationRadius()->setValue(0.01f);
-		this->varSelectedSize()->setRange(0.0f, 0.05f);
-		this->varOtherSize()->setRange(0.0f,0.05f);
+		this->varPointSelectedSize()->setRange(0.0f, 0.05f);
+		this->varPointOtherSize()->setRange(0.0f,0.05f);
 
 		auto callback1 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingElementType, this));
 
@@ -142,6 +138,12 @@ namespace dyno
 		{
 			this->surfaceInteractor->varTogglePicker()->setValue(false);
 			this->edgeInteractor->varTogglePicker()->setValue(false);
+			this->pointInteractor->varTogglePicker()->setValue(true);
+		}
+		else if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::All)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(true);
+			this->edgeInteractor->varTogglePicker()->setValue(true);
 			this->pointInteractor->varTogglePicker()->setValue(true);
 		}
 		resetStates();
