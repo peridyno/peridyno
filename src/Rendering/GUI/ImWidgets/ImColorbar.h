@@ -38,7 +38,7 @@ namespace dyno
 		DEF_ENUM(ColorTable, Type, ColorTable::Jet, "");
 		DEF_VAR(Real, Min, Real(0), "");
 		DEF_VAR(Real, Max, Real(1), "");
-
+		DEF_VAR(std::string, FieldName, "", "");
 		DEF_ARRAY_IN(Real, Scalar, DeviceType::GPU, "");
 		// DEF_ARRAY_IN(Vec3f, Color, DeviceType::CPU, "");
 		// DEF_ARRAY_IN(int, Value, DeviceType::GPU, "");

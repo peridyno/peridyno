@@ -152,6 +152,25 @@ namespace dyno
 		QSpinBox* spinner3;
 	};
 
+	class QStringFieldWidget : public QGroupBox
+	{
+		Q_OBJECT
+	public:
+		QStringFieldWidget(FBase* field);
+		~QStringFieldWidget() {};
+
+	Q_SIGNALS:
+		void fieldChanged();
+
+	public slots:
+		void changeValue(QString str);
+
+	private:
+		FBase* mField = nullptr;
+
+		QLineEdit* fieldname;
+	};
+
 	class QFilePathWidget : public QGroupBox
 	{
 		Q_OBJECT
