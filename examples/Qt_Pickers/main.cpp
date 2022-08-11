@@ -40,7 +40,7 @@ int main()
 
 	/*edgePickerNode->varInterationRadius()->setValue(0.03f);
 	pointPickerNode->varInterationRadius()->setValue(0.05f);*/
-	pickerNode->varInterationRadius()->setValue(0.05f);
+	pickerNode->varInterationRadius()->setValue(0.02f);
 	/*surfacePickerNode->stateSelectedTopology()->connect(sRender1->inTriangleSet());
 	sRender1->varColor()->setValue(Vec3f(0.2, 0.48, 0.75));
 	surfacePickerNode->stateOtherTopology()->connect(sRender2->inTriangleSet());

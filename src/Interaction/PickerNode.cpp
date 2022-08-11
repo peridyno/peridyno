@@ -23,10 +23,6 @@ namespace dyno
 		this->varInterationRadius()->connect(edgeInteractor->varInterationRadius());
 		this->varInterationRadius()->connect(pointInteractor->varInterationRadius());
 
-		this->varToggleSurfacePicker()->connect(surfaceInteractor->varTogglePicker());
-		this->varToggleEdgePicker()->connect(edgeInteractor->varTogglePicker());
-		this->varTogglePointPicker()->connect(pointInteractor->varTogglePicker());
-
 		this->stateTriangleIndex()->connect(surfaceInteractor->outTriangleIndex());
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
@@ -60,20 +56,33 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(edgeRender2);
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
-		this->varSelectedSize()->connect(pointRender1->varPointSize());
+		this->varPointSelectedSize()->connect(pointRender1->varPointSize());
 		this->varSelectedPointColor()->connect(pointRender1->varBaseColor());
 		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
-		this->varOtherSize()->connect(pointRender2->varPointSize());
+		this->varPointOtherSize()->connect(pointRender2->varPointSize());
 		this->varOtherPointColor()->connect(pointRender2->varBaseColor());
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 
-		this->varInterationRadius()->setRange(0.001f , 0.1f);
-		this->varSelectedSize()->setRange(0.0f, 0.05f);
-		this->varOtherSize()->setRange(0.0f,0.05f);
+		this->varInterationRadius()->setRange(0.001f , 0.2f);
+		this->varInterationRadius()->setValue(0.01f);
+		this->varPointSelectedSize()->setRange(0.0f, 0.05f);
+		this->varPointOtherSize()->setRange(0.0f,0.05f);
+
+		auto callback1 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingElementType, this));
+
+		this->varPickingElementType()->attach(callback1);
+
+		auto callback2 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingType, this));
+
+		this->varPickingType()->attach(callback2);
+
+		auto callback3 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changeMultiSelectionType, this));
+
+		this->varMultiSelectionType()->attach(callback3);
 	}
 
 	template<typename TDataType>
@@ -108,6 +117,83 @@ namespace dyno
 		this->pointInteractor->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->pointInteractor->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->pointInteractor->outOtherPointSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
+	}
+
+	template<typename TDataType>
+	void PickerNode<TDataType>::changePickingElementType()
+	{
+		if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Surface)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(true);
+			this->edgeInteractor->varTogglePicker()->setValue(false);
+			this->pointInteractor->varTogglePicker()->setValue(false);
+		}
+		else if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Edge)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(false);
+			this->edgeInteractor->varTogglePicker()->setValue(true);
+			this->pointInteractor->varTogglePicker()->setValue(false);
+		}
+		else if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Point)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(false);
+			this->edgeInteractor->varTogglePicker()->setValue(false);
+			this->pointInteractor->varTogglePicker()->setValue(true);
+		}
+		else if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::All)
+		{
+			this->surfaceInteractor->varTogglePicker()->setValue(true);
+			this->edgeInteractor->varTogglePicker()->setValue(true);
+			this->pointInteractor->varTogglePicker()->setValue(true);
+		}
+		resetStates();
+	}
+
+	template<typename TDataType>
+	void PickerNode<TDataType>::changePickingType()
+	{
+		if (this->varPickingType()->getValue() == PickingTypeSelection::Click)
+		{
+			this->surfaceInteractor->varSurfacePickingType()-> getDataPtr()->setCurrentKey(0);
+			this->edgeInteractor->varEdgePickingType()->getDataPtr()->setCurrentKey(0);
+			this->pointInteractor->varPointPickingType()->getDataPtr()->setCurrentKey(0);
+		}
+		else if (this->varPickingType()->getValue() == PickingTypeSelection::Drag)
+		{
+			this->surfaceInteractor->varSurfacePickingType()->getDataPtr()->setCurrentKey(1);
+			this->edgeInteractor->varEdgePickingType()->getDataPtr()->setCurrentKey(1);
+			this->pointInteractor->varPointPickingType()->getDataPtr()->setCurrentKey(1);
+		}
+		else if (this->varPickingType()->getValue() == PickingTypeSelection::Both)
+		{
+			this->surfaceInteractor->varSurfacePickingType()->getDataPtr()->setCurrentKey(2);
+			this->edgeInteractor->varEdgePickingType()->getDataPtr()->setCurrentKey(2);
+			this->pointInteractor->varPointPickingType()->getDataPtr()->setCurrentKey(2);
+		}
+		resetStates();
+	}
+
+	template<typename TDataType>
+	void PickerNode<TDataType>::changeMultiSelectionType()
+	{
+		if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+		{
+			this->surfaceInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(0);
+			this->edgeInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(0);
+			this->pointInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(0);
+		}
+		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+		{
+			this->surfaceInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);
+			this->edgeInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);
+			this->pointInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);
+		}
+		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+		{
+			this->surfaceInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);
+			this->edgeInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);
+			this->pointInteractor->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);
+		}
 	}
 
 	DEFINE_CLASS(PickerNode);

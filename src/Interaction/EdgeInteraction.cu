@@ -14,7 +14,7 @@ namespace dyno
 		intersected[pId] = 0;
 	}
 
-	__global__ void EdgeMergeIntersectedIndex(
+	__global__ void EdgeMergeIntersectedIndexOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -29,6 +29,101 @@ namespace dyno
 			outIntersected[pId] = 1;
 
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+	}
+
+	__global__ void EdgeMergeIntersectedIndexXOR(
+		DArray<int> intersected1,
+		DArray<int> intersected2,
+		DArray<int> outIntersected,
+		DArray<int> outUnintersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected1.size()) return;
+
+		if (intersected1[pId] == intersected2[pId])
+			outIntersected[pId] = 0;
+		else
+			outIntersected[pId] = 1;
+
+		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+	}
+
+	__global__ void EdgeMergeIntersectedIndexC(
+		DArray<int> intersected1,
+		DArray<int> intersected2,
+		DArray<int> outIntersected,
+		DArray<int> outUnintersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected1.size()) return;
+
+		if (intersected2[pId] == 1)
+			outIntersected[pId] = 0;
+		else
+			outIntersected[pId] = intersected1[pId];
+
+		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+	}
+
+	__global__ void SurfaceInitializeArrayE(
+		DArray<int> intersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected.size()) return;
+
+		intersected[pId] = 0;
+	}
+
+	template <typename Triangle, typename Real, typename Coord>
+	__global__ void CalIntersectedTrisRayE(
+		DArray<Coord> points,
+		DArray<Triangle> triangles,
+		DArray<int> intersected,
+		DArray<int> unintersected,
+		DArray<Coord> interPoints,
+		TRay3D<Real> mouseray)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= triangles.size()) return;
+
+		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+		int temp = 0;
+
+		TPoint3D<Real> p;
+		temp = mouseray.intersect(t, p);
+
+		if (temp == 1 || intersected[pId] == 1)
+		{
+			intersected[pId] = 1;
+			interPoints[pId] = p.origin;
+		}
+		else
+		{
+			intersected[pId] = 0;
+			interPoints[pId] = Vec3f(0);
+		}
+		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+	}
+
+	template <typename Real, typename Coord>
+	__global__ void CalTrisDistanceE(
+		DArray<Coord> interPoints,
+		DArray<Real> trisDistance,
+		DArray<int> intersected,
+		TRay3D<Real> mouseray)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= interPoints.size()) return;
+		if (intersected[pId] != 0)
+		{
+			TPoint3D<Real> origin = TPoint3D<Real>(mouseray.origin);
+			TPoint3D<Real> p = TPoint3D<Real>(interPoints[pId]);
+			trisDistance[pId] = origin.distance(TPoint3D<Real>(p));
+		}
+		else
+		{
+			trisDistance[pId] = 3.4E38;
+		}
 	}
 
 	template<typename TDataType>
@@ -61,7 +156,8 @@ namespace dyno
 				this->ray1.direction = event.ray.direction;
 				this->x1 = event.x;
 				this->y1 = event.y;
-				this->calcIntersectClick();
+				if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Click)
+					this->calcIntersectClick();
 			}
 			else if (event.actionType == AT_RELEASE)
 			{
@@ -71,6 +167,8 @@ namespace dyno
 				this->ray2.direction = event.ray.direction;
 				this->x2 = event.x;
 				this->y2 = event.y;
+				if (this->varToggleMultiSelect()->getValue() && this->varTogglePicker()->getValue())
+					this->mergeIndex();
 			}
 			else
 			{
@@ -81,6 +179,7 @@ namespace dyno
 					this->ray2.direction = event.ray.direction;
 					this->x2 = event.x;
 					this->y2 = event.y;
+				if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Drag)
 					this->calcIntersectDrag();
 				}
 			}
@@ -110,6 +209,73 @@ namespace dyno
 		else
 			intersected[pId] = 0;
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+	}
+
+	template <typename Coord,typename Edge, typename Real>
+	__global__ void CalEdgesDistance(
+		DArray<Coord> points,
+		DArray<Edge> edges,
+		DArray<Real> edgesDistance,
+		DArray<int> intersected,
+		TRay3D<Real> mouseray)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= edges.size()) return;
+
+		TPoint3D<Real> origin = TPoint3D<Real>(mouseray.origin);
+		if (intersected[pId] != 0) 
+		{
+			TSegment3D<Real> s = TSegment3D<Real>(points[edges[pId].data[0]],points[edges[pId].data[1]]);
+			edgesDistance[pId] = origin.distance(s);
+		}
+		else
+		{
+			edgesDistance[pId] = 3.4E38;
+		}
+	}
+
+	__global__ void CalEdgesNearest(
+		int min_index,
+		DArray<int> intersected,
+		DArray<int> unintersected
+	) 
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected.size()) return;
+
+		if (intersected[pId] == 1)
+		{
+			if (pId != min_index)
+			{
+				intersected[pId] = 0;
+				unintersected[pId] = 1;
+			}
+		}
+	}
+
+	template <typename Edge, typename Coord, typename Real>
+	__global__ void FindNearbyEdges(
+		DArray<Coord> points,
+		DArray<Coord> interPoints,
+		DArray<Edge> edges,
+		DArray<int> intersected,
+		DArray<int> unintersected,
+		int min_index_t,
+		Real intersectionRadius)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected.size()) return;
+
+		if (intersected[pId] == 1) 
+		{
+			TSegment3D<Real> s = TSegment3D<Real>(points[edges[pId].data[0]],points[edges[pId].data[1]]);
+			TPoint3D<Real> p = TPoint3D<Real>(interPoints[min_index_t]);
+			if (p.distance(s) > intersectionRadius) 
+			{
+				intersected[pId] = 0;
+				unintersected[pId] = 1;
+			}
+		}
 	}
 
 	template <typename Edge, typename Real, typename Coord>
@@ -164,7 +330,6 @@ namespace dyno
 		else
 		{
 			unintersected_edges[unintersected[pId]] = edges[pId];
-
 		}
 	}
 
@@ -174,6 +339,45 @@ namespace dyno
 		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
 		DArray<Edge> edges = initialTriangleSet.getEdges();
 		DArray<Coord> points = initialTriangleSet.getPoints();
+		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		DArray<int> intersected_t;
+		intersected_t.resize(triangles.size());
+
+		cuExecute(triangles.size(),
+			SurfaceInitializeArrayE,
+			intersected_t
+		);
+		DArray<int> unintersected_t;
+		unintersected_t.resize(triangles.size());
+		std::cout << "Triangle Num:" << triangles.size() << std::endl;
+
+		DArray<Coord> interPoints;
+		interPoints.resize(triangles.size());
+
+		cuExecute(triangles.size(),
+			CalIntersectedTrisRayE,
+			points,
+			triangles,
+			intersected_t,
+			unintersected_t,
+			interPoints,
+			this->ray1
+		);
+
+
+		DArray<Real> trisDistance;
+		trisDistance.resize(interPoints.size());
+
+		cuExecute(interPoints.size(),
+			CalTrisDistanceE,
+			interPoints,
+			trisDistance,
+			intersected_t,
+			this->ray1
+		);
+
+		int min_index_t = thrust::min_element(thrust::device, trisDistance.begin(), trisDistance.begin() + trisDistance.size()) - trisDistance.begin();
+
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
@@ -193,6 +397,19 @@ namespace dyno
 			this->varInterationRadius()->getData()
 		);
 
+		cuExecute(edges.size(),
+			FindNearbyEdges,
+			points,
+			interPoints,
+			edges,
+			intersected,
+			unintersected,
+			min_index_t,
+			this->varInterationRadius()->getData()
+		);
+
+		this->tempEdgeIntersectedIndex.assign(intersected);
+
 		if (this->varToggleMultiSelect()->getData())
 		{
 			if (this->edgeIntersectedIndex.size() == 0)
@@ -207,16 +424,38 @@ namespace dyno
 			outIntersected.resize(intersected.size());
 			DArray<int> outUnintersected;
 			outUnintersected.resize(unintersected.size());
-			cuExecute(edges.size(),
-				EdgeMergeIntersectedIndex,
-				this->edgeIntersectedIndex,
-				intersected,
-				outIntersected,
-				outUnintersected
-			);
+			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+			{
+				cuExecute(edges.size(),
+					EdgeMergeIntersectedIndexOR,
+					this->edgeIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+			{
+				cuExecute(edges.size(),
+					EdgeMergeIntersectedIndexXOR,
+					this->edgeIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+			{
+				cuExecute(edges.size(),
+					EdgeMergeIntersectedIndexC,
+					this->edgeIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
 			intersected.assign(outIntersected);
 			unintersected.assign(outUnintersected);
-			this->edgeIntersectedIndex.assign(intersected);
 		}
 		else
 		{
@@ -299,6 +538,8 @@ namespace dyno
 			this->varInterationRadius()->getData()
 		);
 
+		this->tempEdgeIntersectedIndex.assign(intersected);
+
 		if (this->varToggleMultiSelect()->getData())
 		{
 			if (this->edgeIntersectedIndex.size() == 0)
@@ -313,21 +554,129 @@ namespace dyno
 			outIntersected.resize(intersected.size());
 			DArray<int> outUnintersected;
 			outUnintersected.resize(unintersected.size());
-			cuExecute(edges.size(),
-				EdgeMergeIntersectedIndex,
-				this->edgeIntersectedIndex,
-				intersected,
-				outIntersected,
-				outUnintersected
-			);
+			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+			{
+				cuExecute(edges.size(),
+					EdgeMergeIntersectedIndexOR,
+					this->edgeIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+			{
+				cuExecute(edges.size(),
+					EdgeMergeIntersectedIndexXOR,
+					this->edgeIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+			{
+				cuExecute(edges.size(),
+					EdgeMergeIntersectedIndexC,
+					this->edgeIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
 			intersected.assign(outIntersected);
 			unintersected.assign(outUnintersected);
-			this->edgeIntersectedIndex.assign(intersected);
 		}
 		else
 		{
 			this->edgeIntersectedIndex.assign(intersected);
 		}
+
+		DArray<int> intersected_o;
+		intersected_o.assign(intersected);
+
+		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
+		DArray<Edge> intersected_edges;
+		intersected_edges.resize(intersected_size);
+
+		int unintersected_size = thrust::reduce(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), (int)0, thrust::plus<int>());
+		thrust::exclusive_scan(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), unintersected.begin());
+		DArray<Edge> unintersected_edges;
+		unintersected_edges.resize(unintersected_size);
+
+		cuExecute(edges.size(),
+			AssignOutEdges,
+			edges,
+			intersected_edges,
+			unintersected_edges,
+			intersected,
+			unintersected,
+			intersected_o
+		);
+		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
+		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
+		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
+		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+	}
+
+	template<typename TDataType>
+	void EdgeInteraction<TDataType>::mergeIndex()
+	{
+		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
+		DArray<Edge> edges = initialTriangleSet.getEdges();
+		DArray<Coord> points = initialTriangleSet.getPoints();
+		DArray<int> intersected;
+		intersected.resize(edges.size());
+		cuExecute(edges.size(),
+			EdgeInitializeArray,
+			intersected
+		);
+		DArray<int> unintersected;
+		unintersected.resize(edges.size());
+		std::cout << "Edge Num:" << edges.size() << std::endl;
+
+		DArray<int> outIntersected;
+		outIntersected.resize(intersected.size());
+		DArray<int> outUnintersected;
+		outUnintersected.resize(unintersected.size());
+
+		if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
+		{
+			cuExecute(edges.size(),
+				EdgeMergeIntersectedIndexOR,
+				this->edgeIntersectedIndex,
+				this->tempEdgeIntersectedIndex,
+				outIntersected,
+				outUnintersected
+			);
+		}
+		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
+		{
+			cuExecute(edges.size(),
+				EdgeMergeIntersectedIndexXOR,
+				this->edgeIntersectedIndex,
+				this->tempEdgeIntersectedIndex,
+				outIntersected,
+				outUnintersected
+			);
+		}
+		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+		{
+			cuExecute(edges.size(),
+				EdgeMergeIntersectedIndexC,
+				this->edgeIntersectedIndex,
+				this->tempEdgeIntersectedIndex,
+				outIntersected,
+				outUnintersected
+			);
+		}
+
+		intersected.assign(outIntersected);
+		unintersected.assign(outUnintersected);
+		this->edgeIntersectedIndex.assign(intersected);
 
 		DArray<int> intersected_o;
 		intersected_o.assign(intersected);

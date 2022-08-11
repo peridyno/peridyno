@@ -23,10 +23,28 @@ namespace dyno
 		void calcSurfaceIntersectClick();
 		void calcSurfaceIntersectDrag();
 
+		void mergeIndex();
+
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, OtherTriangleSet, "");
 		DEF_ARRAY_OUT(int, TriangleIndex, DeviceType::GPU, "");
+
+		DECLARE_ENUM(PickingTypeSelection,
+		Click = 0,
+			Drag = 1,
+			Both = 2
+			);
+
+		DEF_ENUM(PickingTypeSelection, SurfacePickingType, PickingTypeSelection::Both, "");
+
+		DECLARE_ENUM(MultiSelectionType,
+		OR = 0,
+			XOR = 1,
+			C = 2
+			);
+
+		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
 		DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
 
