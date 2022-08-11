@@ -5,7 +5,7 @@
 
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/ParticleEmitterSquare.h>
+#include <ParticleSystem/SquareEmitter.h>
 
 #include <Module/CalculateNorm.h>
 
