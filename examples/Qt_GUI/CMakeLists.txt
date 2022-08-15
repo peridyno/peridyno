@@ -36,6 +36,7 @@ if(PERIDYNO_Qt5_GUI)
             ParticleSystem  
             QtGUI
 			RigidBody
+            ImWidgets
 			GLRenderEngine
             -Wl,--no-whole-archive) 
 
@@ -49,6 +50,7 @@ if(PERIDYNO_Qt5_GUI)
             ParticleSystem 
 			RigidBody
             QtGUI
+            ImWidgets
 			GLRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
@@ -59,6 +61,7 @@ if(PERIDYNO_Qt5_GUI)
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:ImWidgetsd.lib
             /WHOLEARCHIVE:RenderCored.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
@@ -68,6 +71,7 @@ if(PERIDYNO_Qt5_GUI)
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:ImWidgetsd.lib
             /WHOLEARCHIVE:RenderCore.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")

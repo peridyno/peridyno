@@ -20,10 +20,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Rendering",
+		auto page = factory->addPage(
 			"Rendering",
 			"ToolBarIco/Node/Display.png");
+
+		auto group = page->addGroup("Rendering");
 
 		group->addAction(
 			"Particle Renderer",

@@ -22,10 +22,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Ocean",
+		auto page = factory->addPage(
 			"Ocean",
 			"ToolBarIco/HeightField/HeightField.png");
+
+		auto group = page->addGroup("Ocean");
 
 		group->addAction(
 			"Ocean Patch",

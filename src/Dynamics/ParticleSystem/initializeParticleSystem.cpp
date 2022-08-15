@@ -8,8 +8,6 @@
 #include "Module/BoundaryConstraint.h"
 #include "Module/VariationalApproximateProjection.h"
 
-#include "ParticleEmitterRound.h"
-#include "ParticleEmitterSquare.h"
 #include "ParticleFluid.h"
 #include "StaticBoundary.h"
 
@@ -35,20 +33,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Particle System", 
+		auto page = factory->addPage(
 			"Particle System", 
 			"ToolBarIco/ParticleSystem/ParticleSystem.png");
 
-		group->addAction(
-			"Particle Emitter 1", 
-			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleEmitterRound<DataType3f>>(); });
-
-		group->addAction(
-			"Particle Emitter 2",
-			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleEmitterSquare<DataType3f>>(); });
+		auto group = page->addGroup("Particle System");
 
 		group->addAction(
 			"Particle Fluid",

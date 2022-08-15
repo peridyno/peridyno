@@ -289,4 +289,26 @@ namespace dyno
 
 		return true;
 	}
+
+	template<>
+	std::string FVar<std::string>::serialize()
+	{
+		if (isEmpty())
+			return "";
+
+		std::string val = this->getValue();
+
+		return val;
+	}
+
+	template<>
+	bool FVar<std::string>::deserialize(const std::string& str)
+	{
+		if (str.empty())
+			return false;
+
+		this->setValue(str);
+
+		return true;
+	}	
 }

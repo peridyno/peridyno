@@ -123,7 +123,7 @@ namespace dyno {
 		ToolBarIcoAndLabel helpPage;
 		// Main Page name and ico
 		helpPage.tabPageName = "Help";
-		helpPage.tabPageIco = "ToolBarIco/Help/Help_v3.png";
+		helpPage.tabPageIco = "ToolBarIco/Help/Help_v2.png";
 		//number of subTabs
 		helpPage.subtabNum = 2;
 		//subTabs
@@ -131,7 +131,7 @@ namespace dyno {
 		helpPage.ico.push_back("ToolBarIco/Help/realign_v2.png");
 
 		helpPage.label.push_back("Help");
-		helpPage.ico.push_back("ToolBarIco/Help/Help_v3.png");
+		helpPage.ico.push_back("ToolBarIco/Help/Help_v2.png");
 		//--------------------------------------------------
 
 		//Add all the page

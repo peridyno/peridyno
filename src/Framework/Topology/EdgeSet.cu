@@ -88,6 +88,14 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void EdgeSet<TDataType>::setEdges(std::vector<Edge>& edges)
+	{
+		m_edges.assign(edges);
+
+		tagAsChanged();
+	}
+
+	template<typename TDataType>
 	void EdgeSet<TDataType>::setEdges(DArray<Edge>& edges)
 	{
 		m_edges.resize(edges.size());

@@ -37,6 +37,10 @@ namespace dyno
 		QPushButton*	m_startSim;
 		QPushButton*	m_resetSim;
 
+		QIcon* StartIcon;
+		QIcon* PauseIcon;
+		QIcon* ResetIcon;
+		
 		QSpinBox* mTotalFrameSpinbox;
 
 		QScrollBar*	m_sim_scrollbar;

@@ -70,24 +70,30 @@ namespace dyno
 		}
 
 		//Add dynamic toolbar page
-		auto& groups = NodeFactory::instance()->nodeGroups();
-		for(auto itor = groups.begin(); itor != groups.end(); itor++)
+		auto& pages = NodeFactory::instance()->nodePages();
+		for(auto iPage = pages.begin(); iPage != pages.end(); iPage++)
 		{
-			tt::Page* page = this->AddPage(QPixmap(mediaDir + QString::fromStdString(itor->second->icon())), QString::fromStdString(itor->second->caption()));
-			auto& actions = itor->second->actions();
+			auto& groups = iPage->second->groups();
 
- 			auto page_group = page->AddGroup("");
-			for (size_t i = 0; i < actions.size(); i++)
+			tt::Page* page = this->AddPage(QPixmap(mediaDir + QString::fromStdString(iPage->second->icon())), QString::fromStdString(iPage->second->caption()));
+
+			for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
 			{
-				QAction* act = new QAction(QPixmap(mediaDir + QString::fromStdString(actions[i]->icon())), QString::fromStdString(actions[i]->caption()));
-				page_group->AddAction(QToolButton::DelayedPopup, act);
+				auto& actions = iGroup->second->actions();
 
-				auto func = actions[i]->action();
+				auto qGroup = page->AddGroup("");
+				for (size_t i = 0; i < actions.size(); i++)
+				{
+					QAction* act = new QAction(QPixmap(mediaDir + QString::fromStdString(actions[i]->icon())), QString::fromStdString(actions[i]->caption()));
+					qGroup->AddAction(QToolButton::DelayedPopup, act);
 
-				if (func != nullptr) {
-					connect(act, &QAction::triggered, [=]() {
-						emit nodeCreated(func());
-						});
+					auto func = actions[i]->action();
+
+					if (func != nullptr) {
+						connect(act, &QAction::triggered, [=]() {
+							emit nodeCreated(func());
+							});
+					}
 				}
 			}
 		}
