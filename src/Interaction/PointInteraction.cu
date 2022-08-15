@@ -198,13 +198,22 @@ namespace dyno
 			{
 				printf("%f %f \n", event.x, event.y);
 				printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-				if (this->isPressed) {
+				if (this->isPressed) 
+				{
 					this->ray2.origin = event.ray.origin;
 					this->ray2.direction = event.ray.direction;
 					this->x2 = event.x;
 					this->y2 = event.y;
-					if (this->varPointPickingType()->getValue() == PickingTypeSelection::Both || this->varPointPickingType()->getValue() == PickingTypeSelection::Drag)
-						this->calcIntersectDrag();
+					if (this->x2 == this->x1 && this->y2 == this->y1)
+					{
+						if (this->varPointPickingType()->getValue() == PickingTypeSelection::Both || this->varPointPickingType()->getValue() == PickingTypeSelection::Click)
+							this->calcIntersectClick();
+					}
+					else 
+					{
+						if (this->varPointPickingType()->getValue() == PickingTypeSelection::Both || this->varPointPickingType()->getValue() == PickingTypeSelection::Drag)
+							this->calcIntersectDrag();
+					}
 				}
 			}
 		}
@@ -359,7 +368,7 @@ namespace dyno
 		{
 			if (this->pointIntersectedIndex.size() == 0)
 			{
-				this->pointIntersectedIndex.resize(points.size());
+				this->pointIntersectedIndex.resize(triangles.size());
 				cuExecute(points.size(),
 					PointInitializeArray,
 					this->pointIntersectedIndex
@@ -369,58 +378,42 @@ namespace dyno
 			outIntersected.resize(intersected.size());
 			DArray<int> outUnintersected;
 			outUnintersected.resize(unintersected.size());
-
-			if (this->varToggleMultiSelect()->getData())
+			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
-				if (this->pointIntersectedIndex.size() == 0)
-				{
-					this->pointIntersectedIndex.resize(triangles.size());
-					cuExecute(points.size(),
-						PointInitializeArray,
-						this->pointIntersectedIndex
-					)
-				}
-				DArray<int> outIntersected;
-				outIntersected.resize(intersected.size());
-				DArray<int> outUnintersected;
-				outUnintersected.resize(unintersected.size());
-				if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
-				{
-					cuExecute(points.size(),
-						PointMergeIntersectedIndexOR,
-						this->pointIntersectedIndex,
-						intersected,
-						outIntersected,
-						outUnintersected
-					);
-				}
-				else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
-				{
-					cuExecute(points.size(),
-						PointMergeIntersectedIndexXOR,
-						this->pointIntersectedIndex,
-						intersected,
-						outIntersected,
-						outUnintersected
-					);
-				}
-				else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
-				{
-					cuExecute(points.size(),
-						PointMergeIntersectedIndexC,
-						this->pointIntersectedIndex,
-						intersected,
-						outIntersected,
-						outUnintersected
-					);
-				}
-				intersected.assign(outIntersected);
-				unintersected.assign(outUnintersected);
+				cuExecute(points.size(),
+					PointMergeIntersectedIndexOR,
+					this->pointIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
 			}
-			else
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
-				this->pointIntersectedIndex.assign(intersected);
+				cuExecute(points.size(),
+					PointMergeIntersectedIndexXOR,
+					this->pointIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
 			}
+			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
+			{
+				cuExecute(points.size(),
+					PointMergeIntersectedIndexC,
+					this->pointIntersectedIndex,
+					intersected,
+					outIntersected,
+					outUnintersected
+				);
+			}
+			intersected.assign(outIntersected);
+			unintersected.assign(outUnintersected);
+		}
+		else
+		{
+			this->pointIntersectedIndex.assign(intersected);
 		}
 			DArray<int> intersected_o;
 			intersected_o.assign(intersected);

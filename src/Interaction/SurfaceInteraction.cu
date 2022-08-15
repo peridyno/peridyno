@@ -113,13 +113,22 @@ namespace dyno
 			{
 				printf("%f %f \n", event.x, event.y);
 				printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-				if (this->isPressed) {
+				if (this->isPressed) 
+				{
 					this->ray2.origin = event.ray.origin;
 					this->ray2.direction = event.ray.direction;
 					this->x2 = event.x;
 					this->y2 = event.y;
-					if(this->varSurfacePickingType()->getValue()== PickingTypeSelection::Both|| this->varSurfacePickingType()->getValue() == PickingTypeSelection::Drag)
-						this->calcIntersectDrag();
+					if (this->x2 == this->x1 && this->y2 == this->y1) 
+					{
+						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Click)
+							this->calcIntersectClick();
+					}
+					else 
+					{
+						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Drag)
+							this->calcIntersectDrag();
+					}
 				}
 			}
 		}
@@ -410,6 +419,8 @@ namespace dyno
 		DArray<Triangle> intersected_triangles;
 		intersected_triangles.resize(intersected_size);
 
+		std::cout << "***intersected_size:***" << intersected_size << std::endl;
+
 		int unintersected_size = thrust::reduce(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), unintersected.begin());
 		DArray<Triangle> unintersected_triangles;
@@ -584,6 +595,8 @@ namespace dyno
 		thrust::exclusive_scan(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), unintersected.begin());
 		DArray<Triangle> unintersected_triangles;
 		unintersected_triangles.resize(unintersected_size);
+
+		std::cout << "###intersected_size:###" << intersected_size << std::endl;
 
 		cuExecute(triangles.size(),
 			AssignOutTriangles,

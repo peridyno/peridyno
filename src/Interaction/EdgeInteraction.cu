@@ -174,13 +174,22 @@ namespace dyno
 			{
 				printf("%f %f \n", event.x, event.y);
 				printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-				if (this->isPressed) {
+				if (this->isPressed)
+				{
 					this->ray2.origin = event.ray.origin;
 					this->ray2.direction = event.ray.direction;
 					this->x2 = event.x;
 					this->y2 = event.y;
-				if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Drag)
-					this->calcIntersectDrag();
+					if (this->x2 == this->x1 && this->y2 == this->y1)
+					{
+						if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Click)
+							this->calcIntersectClick();
+					}
+					else
+					{
+						if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Drag)
+							this->calcIntersectDrag();
+					}
 				}
 			}
 		}
