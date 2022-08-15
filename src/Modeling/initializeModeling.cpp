@@ -27,10 +27,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Modeling", 
+		auto page = factory->addPage(
 			"Modeling", 
 			"ToolBarIco/FiniteElement/FiniteElement.png");
+
+		auto group = page->addGroup("Modeling");
 
 		group->addAction(
 			"Cube",
@@ -76,10 +77,11 @@ namespace dyno
 				return node; 
 			});
 
-		auto particleGroup = factory->addGroup(
-			"Particle System",
+		auto particlePage = factory->addPage(
 			"Particle System",
 			"ToolBarIco/ParticleSystem/ParticleSystem.png");
+
+		auto particleGroup = particlePage->addGroup("Particle System");
 
 		particleGroup->addAction(
 			"Circular Emitter",

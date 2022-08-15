@@ -33,10 +33,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Particle System", 
+		auto page = factory->addPage(
 			"Particle System", 
 			"ToolBarIco/ParticleSystem/ParticleSystem.png");
+
+		auto group = page->addGroup("Particle System");
 
 		group->addAction(
 			"Particle Fluid",
