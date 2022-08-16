@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <UIVisualizer ServiceId="{A452AFEA-3DF6-46BB-9177-C0B08F318025}" Id="1" MenuName="Add to Image Watch"/>
+
+  <Type Name="Eigen::Matrix&lt;*,*,*,*,*,*&gt;">
+    <UIVisualizer ServiceId="{A452AFEA-3DF6-46BB-9177-C0B08F318025}" Id="1" />
+  </Type>
+
+  <!-- Fixed Sized Matrix -->
+  <Type Name="Eigen::Matrix&lt;*,*,*,*,*,*&gt;">
+    <Expand>
+      <Synthetic Name="[type]" Condition='strcmp("int", "$T1") == 0'>
+        <DisplayString>INT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("float", "$T1") == 0'>
+        <DisplayString>FLOAT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("double", "$T1") == 0'>
+        <DisplayString>FLOAT64</DisplayString>
+      </Synthetic>
+
+      <Item Name="[channels]">1</Item>
+      <Item Name="[rows]">$T2</Item>
+      <Item Name="[cols]">$T3</Item>
+
+      <Item Name="[width]" Condition="(Flags%2)">$T3</Item> <!-- Todo: These should be unconditional. width is always equal to cols and height is always equal to rows. Storage order (ColMajor or RowMajor) has nothing to do with it. -->
+      <Item Name="[width]" Condition="!(Flags%2)">$T2</Item>
+
+      <Item Name="[height]" Condition="(Flags%2)">$T2</Item>
+      <Item Name="[height]" Condition="!(Flags%2)">$T3</Item>
+
+      <Item Name="[data]">($T1*)(m_storage.m_data.array)</Item>
+
+      <!-- Note: We can specify a semicolon-separated list of the strides here (supposedly row- and col-strides). But I haven't gotten it to work yet. -->
+      <Synthetic Name="[stride]" Condition="(Flags%2)"> <!-- row major layout -->
+        <DisplayString>{$T3*sizeof($T1)}</DisplayString> <!-- Should be something like: {$T3*sizeof($T1)}; {sizeof($T1)} -->
+      </Synthetic>
+      <Synthetic Name="[stride]" Condition="!(Flags%2)"> <!-- col major layout -->
+        <DisplayString>{$T2*sizeof($T1)}</DisplayString>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <!-- Dynamic Matrix -->
+  <Type Name="Eigen::Matrix&lt;*,-1,-1,*,*,*&gt;">
+    <Expand>
+      <Synthetic Name="[type]" Condition='strcmp("int", "$T1") == 0'>
+        <DisplayString>INT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("float", "$T1") == 0'>
+        <DisplayString>FLOAT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("double", "$T1") == 0'>
+        <DisplayString>FLOAT64</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("__int64", "$T1") == 0'>
+        <DisplayString>INT64</DisplayString>
+      </Synthetic>
+
+      <Item Name="[channels]">1</Item>
+      <Item Name="[rows]">m_storage.m_rows</Item>
+      <Item Name="[cols]">m_storage.m_cols</Item>
+
+      <Item Name="[width]" Condition="(Flags%2)">m_storage.m_cols</Item>
+      <Item Name="[width]" Condition="!(Flags%2)">m_storage.m_rows</Item>
+
+      <Item Name="[height]" Condition="(Flags%2)">m_storage.m_rows</Item>
+      <Item Name="[height]" Condition="!(Flags%2)">m_storage.m_cols</Item>
+
+      <Item Name="[data]">(m_storage.m_data)</Item>
+
+      <Item Name="[stride]" Condition="(Flags%2)">m_storage.m_cols*sizeof($T1)</Item> <!-- row major layout -->
+      <Item Name="[stride]" Condition="!(Flags%2)">m_storage.m_rows*sizeof($T1)</Item> <!-- col major layout -->
+    </Expand>
+  </Type>
+
+  <!-- Dynamic Column Vector -->
+  <Type Name="Eigen::Matrix&lt;*,-1,1,*,*,*&gt;">
+    <Expand>
+      <Synthetic Name="[type]" Condition='strcmp("int", "$T1") == 0'>
+        <DisplayString>INT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("float", "$T1") == 0'>
+        <DisplayString>FLOAT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("double", "$T1") == 0'>
+        <DisplayString>FLOAT64</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("__int64", "$T1") == 0'>
+        <DisplayString>INT64</DisplayString>
+      </Synthetic>
+
+      <Item Name="[channels]">1</Item>
+      <Item Name="[rows]">m_storage.m_rows</Item>
+      <Item Name="[cols]">1</Item>
+
+      <Item Name="[width]" Condition="(Flags%2)">1</Item>
+      <Item Name="[width]" Condition="!(Flags%2)">m_storage.m_rows</Item>
+
+      <Item Name="[height]" Condition="(Flags%2)">m_storage.m_rows</Item>
+      <Item Name="[height]" Condition="!(Flags%2)">1</Item>
+
+      <Item Name="[data]">(m_storage.m_data)</Item>
+
+      <Item Name="[stride]" Condition="(Flags%2)">1*sizeof($T1)</Item> <!-- row major layout -->
+      <Item Name="[stride]" Condition="!(Flags%2)">m_storage.m_rows*sizeof($T1)</Item> <!-- col major layout -->
+    </Expand>
+  </Type>
+
+  <!-- Dynamic Row Vector -->
+  <Type Name="Eigen::Matrix&lt;*,1,-1,*,*,*&gt;">
+    <Expand>
+      <Synthetic Name="[type]" Condition='strcmp("int", "$T1") == 0'>
+        <DisplayString>INT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("float", "$T1") == 0'>
+        <DisplayString>FLOAT32</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("double", "$T1") == 0'>
+        <DisplayString>FLOAT64</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[type]" Condition='strcmp("__int64", "$T1") == 0'>
+        <DisplayString>INT64</DisplayString>
+      </Synthetic>
+
+      <Item Name="[channels]">1</Item>
+      <Item Name="[rows]">1</Item>
+      <Item Name="[cols]">m_storage.m_cols</Item>
+
+      <Item Name="[width]" Condition="(Flags%2)">m_storage.m_cols</Item>
+      <Item Name="[width]" Condition="!(Flags%2)">1</Item>
+
+      <Item Name="[height]" Condition="(Flags%2)">1</Item>
+      <Item Name="[height]" Condition="!(Flags%2)">m_storage.m_cols</Item>
+
+      <Item Name="[data]">(m_storage.m_data)</Item>
+
+      <Item Name="[stride]" Condition="(Flags%2)">m_storage.m_cols*sizeof($T1)</Item> <!-- row major layout -->
+      <Item Name="[stride]" Condition="!(Flags%2)">1*sizeof($T1)</Item> <!-- col major layout -->
+    </Expand>
+  </Type>
+</AutoVisualizer>
