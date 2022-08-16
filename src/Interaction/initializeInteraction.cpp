@@ -15,10 +15,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Interaction", 
+		auto page = factory->addPage(
 			"Interaction", 
 			"ToolBarIco/Interaction/Interaction.png");
+
+		auto group = page->addGroup("Interaction");
 
 		group->addAction(
 			"Picker",

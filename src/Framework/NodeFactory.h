@@ -18,6 +18,7 @@
 #include <mutex>
 
 #include <map>
+#include <unordered_map>
 
 #include "SceneGraph.h"
 
@@ -48,15 +49,39 @@ namespace dyno
 	class NodeGroup
 	{
 	public:
-		NodeGroup(std::string caption, std::string icon) {
+		NodeGroup(std::string caption) {
 			mCaption = caption;
-			mIcon = icon;
 		}
 
+		void addAction(std::shared_ptr<NodeAction> nAct);
 		void addAction(std::string caption, std::string icon, std::function<std::shared_ptr<Node>()> act);
 
 		std::vector<std::shared_ptr<NodeAction>>& actions() {
 			return mActions;
+		}
+
+		std::string caption() { return mCaption; }
+
+	private:
+		std::string mCaption;
+
+		std::vector<std::shared_ptr<NodeAction>> mActions;
+	};
+
+	class NodePage
+	{
+	public:
+		NodePage(std::string caption, std::string icon) {
+			mCaption = caption;
+			mIcon = icon;
+		}
+
+		std::shared_ptr<NodeGroup> addGroup(std::string name);
+
+		bool hasGroup(std::string name);
+
+		std::map<std::string, std::shared_ptr<NodeGroup>>& groups() {
+			return mGroups;
 		}
 
 		std::string icon() { return mIcon; }
@@ -66,7 +91,7 @@ namespace dyno
 		std::string mCaption;
 		std::string mIcon;
 
-		std::vector<std::shared_ptr<NodeAction>> mActions;
+		std::map<std::string, std::shared_ptr<NodeGroup>> mGroups;
 	};
 
 	class NodeFactory
@@ -74,10 +99,12 @@ namespace dyno
 	public:
 		static NodeFactory* instance();
 
-		std::shared_ptr<NodeGroup> addGroup(std::string groupName, std::string caption, std::string icon);
+		std::shared_ptr<NodePage> addPage(std::string name, std::string icon);
 
-		std::map<std::string, std::shared_ptr<NodeGroup>>& nodeGroups() {
-			return mGroups;
+		bool hasPage(std::string name);
+
+		std::map<std::string, std::shared_ptr<NodePage>>& nodePages() {
+			return mPages;
 		}
 
 	private:
@@ -90,7 +117,7 @@ namespace dyno
 		static std::atomic<NodeFactory*> pInstance;
 		static std::mutex mMutex;
 
-		std::map<std::string, std::shared_ptr<NodeGroup>> mGroups;
+		std::map<std::string, std::shared_ptr<NodePage>> mPages;
 	};
 
 }

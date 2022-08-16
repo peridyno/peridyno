@@ -4,7 +4,7 @@
 
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/ParticleEmitterSquare.h>
+#include <ParticleSystem/SquareEmitter.h>
 
 #include <Module/CalculateNorm.h>
 
@@ -20,7 +20,7 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	//Create a particle emitter
-	auto emitter = scn->addNode(std::make_shared<ParticleEmitterSquare<DataType3f>>());
+	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());
 	emitter->varLocation()->setValue(Vec3f(0.5f));
 
 	//Create a particle-based fluid solver

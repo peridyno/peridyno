@@ -41,13 +41,30 @@ namespace dyno
 
 		DEF_VAR(Vec3f, Location, 0, "Node location");
 		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-		DEF_VAR(Vec3f, Scale, 0, "Node scale");
-
+//		DEF_VAR(Vec3f, Scale, 0, "Node scale");
+	
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
 
 	protected:
 		void updateStates() final;
+
+		inline SquareMatrix<Real, 3> rotationMatrix()
+		{
+			auto center = this->varLocation()->getData();
+			auto rot_vec = this->varRotation()->getData();
+
+			Quat<Real> quat = Quat<float>::identity();
+			float x_rad = rot_vec[0] / 180.0f * M_PI;
+			float y_rad = rot_vec[1] / 180.0f * M_PI;
+			float z_rad = rot_vec[2] / 180.0f * M_PI;
+
+			quat = quat * Quat<Real>(x_rad, Coord(1, 0, 0));
+			quat = quat * Quat<Real>(y_rad, Coord(0, 1, 0));
+			quat = quat * Quat<Real>(z_rad, Coord(0, 0, 1));
+
+			return quat.toMatrix3x3();
+		}
 
 	protected:
 		DArray<Coord> mPosition;

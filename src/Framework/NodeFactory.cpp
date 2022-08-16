@@ -26,13 +26,38 @@ namespace dyno
 		mActions.push_back(std::make_shared<NodeAction>(caption, icon, act));
 	}
 
-	std::shared_ptr<dyno::NodeGroup> NodeFactory::addGroup(std::string groupName, std::string caption, std::string icon)
+	void NodeGroup::addAction(std::shared_ptr<NodeAction> nAct)
 	{
-		if (mGroups.find(groupName) == mGroups.end())
+		mActions.push_back(nAct);
+	}
+
+	bool NodePage::hasGroup(std::string name)
+	{
+		return mGroups.find(name) != mGroups.end();
+	}
+
+	std::shared_ptr<dyno::NodeGroup> NodePage::addGroup(std::string name)
+	{
+		if (mGroups.find(name) == mGroups.end())
 		{
-			mGroups[groupName] = std::make_shared<NodeGroup>(caption, icon);
+			mGroups[name] = std::make_shared<NodeGroup>(name);
 		}
 
-		return mGroups[groupName];
+		return mGroups[name];
+	}
+
+	bool NodeFactory::hasPage(std::string name)
+	{
+		return mPages.find(name) != mPages.end();
+	}
+
+	std::shared_ptr<NodePage> NodeFactory::addPage(std::string name, std::string icon)
+	{
+		if (mPages.find(name) == mPages.end())
+		{
+			mPages[name] = std::make_shared<NodePage>(name, icon);
+		}
+
+		return mPages[name];
 	}
 }
