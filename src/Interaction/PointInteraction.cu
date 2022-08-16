@@ -175,7 +175,7 @@ namespace dyno
 			{
 				this->camera = event.camera;
 				this->isPressed = true;
-				printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				//printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 				this->ray1.origin = event.ray.origin;
 				this->ray1.direction = event.ray.direction;
 				this->x1 = event.x;
@@ -186,7 +186,7 @@ namespace dyno
 			else if (event.actionType == AT_RELEASE)
 			{
 				this->isPressed = false;
-				printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				//printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 				this->ray2.origin = event.ray.origin;
 				this->ray2.direction = event.ray.direction;
 				this->x2 = event.x;
@@ -196,8 +196,7 @@ namespace dyno
 			}
 			else
 			{
-				printf("%f %f \n", event.x, event.y);
-				printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				//printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 				if (this->isPressed) 
 				{
 					this->ray2.origin = event.ray.origin;
@@ -305,7 +304,7 @@ namespace dyno
 		);
 		DArray<int> unintersected_t;
 		unintersected_t.resize(triangles.size());
-		std::cout << "Triangle Num:" << triangles.size() << std::endl;
+		//std::cout << "Triangle Num:" << triangles.size() << std::endl;
 
 		DArray<Coord> interPoints;
 		interPoints.resize(triangles.size());
@@ -422,7 +421,6 @@ namespace dyno
 			thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 			DArray<Coord> intersected_points;
 			intersected_points.resize(intersected_size);
-			std::cout << intersected_size << std::endl;
 
 			int unintersected_size = thrust::reduce(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), (int)0, thrust::plus<int>());
 			thrust::exclusive_scan(thrust::device, unintersected.begin(), unintersected.begin() + unintersected.size(), unintersected.begin());
