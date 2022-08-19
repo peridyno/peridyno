@@ -1,6 +1,6 @@
 #include "PyParticleSystem.h"
 
-#include "ParticleSystem/ParticleEmitterSquare.h"
+#include "ParticleSystem/SquareEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 #include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/GhostParticles.h"
@@ -52,9 +52,9 @@ void declare_particle_emitter(py::module& m, std::string typestr) {
 
 template <typename TDataType>
 void declare_particle_emitter_square(py::module& m, std::string typestr) {
-	using Class = dyno::ParticleEmitterSquare<TDataType>;
+	using Class = dyno::SquareEmitter<TDataType>;
 	using Parent = dyno::ParticleEmitter<TDataType>;
-	std::string pyclass_name = std::string("ParticleEmitterSquare") + typestr;
+	std::string pyclass_name = std::string("SquareEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>());
 }
@@ -79,7 +79,8 @@ void declare_particle_system(py::module &m, std::string typestr) {
 		.def("load_particles", (void (Class::*)(Class::Coord lo, Class::Coord hi, Class::Real distance)) & Class::loadParticles)
 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
 		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_force", &Class::stateForce, py::return_value_policy::reference);
+		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
+		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
 
