@@ -144,9 +144,6 @@ namespace dyno {
 	template<typename T, DeviceType deviceType>
 	void FArray<T, deviceType>::resize(uint num)
 	{
-		if (num <= 0)
-			return;
-
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr) {
 			data = std::make_shared<Array<T, deviceType>>();
