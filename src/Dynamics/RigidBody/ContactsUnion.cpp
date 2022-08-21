@@ -5,6 +5,13 @@ namespace dyno
 	IMPLEMENT_TCLASS(ContactsUnion, TDataType)
 
 	template<typename TDataType>
+	ContactsUnion<TDataType>::ContactsUnion()
+	{
+		this->inContactsA()->tagOptional(true);
+		this->inContactsB()->tagOptional(true);
+	}
+
+	template<typename TDataType>
 	void ContactsUnion<TDataType>::compute()
 	{
 		auto inDataA = this->inContactsA()->getDataPtr();
@@ -20,21 +27,15 @@ namespace dyno
 		if (this->outContacts()->size() != total_size)
 			this->outContacts()->resize(total_size);
 
-		auto& outData = this->outContacts()->getData();
+		DArray<ContactPair> outData;
+		if (this->outContacts()->getDataPtr() != nullptr)
+			outData = this->outContacts()->getData();
 
 		if (inDataA != nullptr)
 			outData.assign(*inDataA, inDataA->size());
 
 		if (inDataB != nullptr)
 			outData.assign(*inDataB, inDataB->size(), inDataA->size(), 0);
-	}
-
-	template<typename TDataType>
-	bool ContactsUnion<TDataType>::validateInputs()
-	{
-		bool ret = this->inContactsA()->isEmpty() && this->inContactsB()->isEmpty();
-
-		return !ret;
 	}
 
 	DEFINE_CLASS(ContactsUnion);

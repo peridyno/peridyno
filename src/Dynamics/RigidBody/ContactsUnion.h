@@ -28,7 +28,7 @@ namespace dyno
 	public:
 		typedef typename TContactPair<Real> ContactPair;
 
-		ContactsUnion() {};
+		ContactsUnion();
 		~ContactsUnion() override {};
 
 		void compute() override;
@@ -38,8 +38,5 @@ namespace dyno
 		DEF_ARRAY_IN(ContactPair, ContactsB, DeviceType::GPU, "");
 
 		DEF_ARRAY_OUT(ContactPair, Contacts, DeviceType::GPU, "");
-
-	protected:
-		bool validateInputs() override;
 	};
 }
