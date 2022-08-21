@@ -80,13 +80,13 @@ namespace Qt
 
 	QString QtModuleWidget::caption() const
 	{
-		//	return m_name;
-		return dyno::FormatBlockCaptionName(mModule->caption());
+// 		//	return m_name;
+ 		return dyno::FormatBlockCaptionName(mModule->caption());
 	}
 
 	QString QtModuleWidget::name() const
 	{
-		return QString::fromStdString(mModule->getName());
+		return QString::fromStdString(mModule->caption());
 	}
 
 	bool QtModuleWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
