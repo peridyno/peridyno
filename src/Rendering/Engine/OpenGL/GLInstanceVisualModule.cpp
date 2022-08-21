@@ -14,6 +14,11 @@ namespace dyno
 		this->setName("instance_renderer");
 	}
 
+	std::string GLInstanceVisualModule::caption()
+	{
+		return "Instance Visual Module";
+	}
+
 	bool GLInstanceVisualModule::initializeGL()
 	{
 		// create vertex buffer and vertex array object

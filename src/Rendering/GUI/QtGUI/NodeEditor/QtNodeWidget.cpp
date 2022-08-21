@@ -118,7 +118,7 @@ namespace Qt
 
 	QString QtNodeWidget::caption() const
 	{
-		return dyno::FormatBlockCaptionName(mNode->getClassInfo()->getClassName());
+		return dyno::FormatBlockCaptionName(mNode->caption());
 	}
 
 	QString QtNodeWidget::name() const

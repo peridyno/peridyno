@@ -18,6 +18,11 @@ namespace dyno
 		this->inColor()->tagOptional(true);
 	}
 
+	std::string GLSurfaceVisualModule::caption()
+	{
+		return "Surface Visual Module";
+	}
+
 	bool GLSurfaceVisualModule::initializeGL()
 	{
 		// create vertex buffer and vertex array object

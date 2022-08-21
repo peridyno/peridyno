@@ -31,6 +31,8 @@ namespace dyno
 		GLInstanceVisualModule();
 
 	public:
+		std::string caption() override;
+
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
 		DEF_ARRAY_IN(Transform3f, Transform, DeviceType::GPU, "");

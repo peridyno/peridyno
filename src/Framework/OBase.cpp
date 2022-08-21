@@ -16,6 +16,11 @@ namespace dyno {
 		fields_param.clear();
 	}
 
+	std::string OBase::caption()
+	{
+		return this->getClassInfo()->getClassName();
+	}
+
 	bool OBase::addField(FBase* data)
 	{
 		return addField(data->getObjectName(), data);

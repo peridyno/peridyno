@@ -81,16 +81,12 @@ namespace Qt
 	QString QtModuleWidget::caption() const
 	{
 		//	return m_name;
-		std::string class_name = mModule->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(mModule->getName());
-		else return QString::fromStdString(class_name);		
+		return dyno::FormatBlockCaptionName(mModule->caption());
 	}
 
 	QString QtModuleWidget::name() const
 	{
-		std::string class_name = mModule->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(mModule->getName());
-		else return QString::fromStdString(class_name);
+		return QString::fromStdString(mModule->getName());
 	}
 
 	bool QtModuleWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const

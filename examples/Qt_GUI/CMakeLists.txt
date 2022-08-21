@@ -61,6 +61,7 @@ if(PERIDYNO_Qt5_GUI)
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:GLRenderEngined.lib
             /WHOLEARCHIVE:ImWidgetsd.lib
             /WHOLEARCHIVE:RenderCored.lib")
 
@@ -71,7 +72,8 @@ if(PERIDYNO_Qt5_GUI)
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:ImWidgetsd.lib
+            /WHOLEARCHIVE:GLRenderEngine.lib
+            /WHOLEARCHIVE:ImWidgets.lib
             /WHOLEARCHIVE:RenderCore.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")

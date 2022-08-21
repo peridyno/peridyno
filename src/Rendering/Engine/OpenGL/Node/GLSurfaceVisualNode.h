@@ -32,6 +32,8 @@ namespace dyno
 		~GLSurfaceVisualNode() override;
 
 	public:
+		std::string caption() override;
+
 		std::string getNodeType() override;
 
 	public:

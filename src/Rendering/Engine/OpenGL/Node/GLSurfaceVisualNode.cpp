@@ -21,6 +21,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	std::string dyno::GLSurfaceVisualNode<TDataType>::caption()
+	{
+		return "Surface Visualizer";
+	}
+
+	template<typename TDataType>
 	std::string GLSurfaceVisualNode<TDataType>::getNodeType()
 	{
 		return "Visualization";

@@ -15,6 +15,11 @@ namespace dyno
 	}
 
 
+	std::string GLWireframeVisualModule::caption()
+	{
+		return "Wireframe Visual Module";
+	}
+
 	bool GLWireframeVisualModule::initializeGL()
 	{
 		// create vertex buffer and vertex array object
