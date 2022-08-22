@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 if(PERIDYNO_Qt5_GUI)
-    set(PROJECT_NAME Qt_Bricks)
+    set(PROJECT_NAME Qt_HeightField)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
 
@@ -27,31 +27,38 @@ if(PERIDYNO_Qt5_GUI)
             -Wl,--whole-archive
             Core 
             Framework 
-            IO
-            RigidBody 
+            IO 
+            ParticleSystem  
             QtGUI
-            GLRenderEngine
+			RigidBody
+			GLRenderEngine
+			HeightField
             -Wl,--no-whole-archive) 
 
     elseif(WIN32)
         target_link_libraries(${PROJECT_NAME} PUBLIC
             Core 
             Framework 
-            IO
-            RigidBody 
+            IO 
+            ParticleSystem  
+			RigidBody
             QtGUI
-            GLRenderEngine) 
+            GlfwGUI
+			HeightField
+			GLRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
-            /WHOLEARCHIVE:dynoRigidBody-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
+			/WHOLEARCHIVE:dynoHeightField-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
-            /WHOLEARCHIVE:dynoRigidBody-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
+			/WHOLEARCHIVE:dynoHeightField-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()
@@ -63,3 +70,4 @@ if(PERIDYNO_Qt5_GUI)
     set_target_properties(${PROJECT_NAME} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 endif()
+

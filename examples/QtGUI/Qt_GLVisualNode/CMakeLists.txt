@@ -10,14 +10,12 @@ if(PERIDYNO_Qt5_GUI)
         link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui)
     endif()
 
-    set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/QtGUI/${PROJECT_NAME}")
-
     file(
         GLOB_RECURSE SRC_LIST 
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
-        "${SRC_DIR}/*.c*"
-        "${SRC_DIR}/*.h*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*.c*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
     )
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
