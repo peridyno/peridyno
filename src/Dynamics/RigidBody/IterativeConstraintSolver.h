@@ -34,6 +34,7 @@ namespace dyno
 		
 		typedef typename Quat<Real> TQuat;
 		typedef typename TContactPair<Real> ContactPair;
+		typedef typename TConstraintPair<Real> Constraint;
 		
 		IterativeConstraintSolver();
 		~IterativeConstraintSolver();
@@ -82,6 +83,6 @@ namespace dyno
 
 		DArray<Matrix> mInitialInertia;
 
-		DArray<ContactPair> mAllConstraints;
+		DArray<Constraint> mAllConstraints;
 	};
 }

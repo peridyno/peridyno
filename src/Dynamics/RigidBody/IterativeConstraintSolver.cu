@@ -16,7 +16,7 @@ namespace dyno
 	{
 	}
 
-	template <typename Coord, typename ContactPair>
+	template <typename Coord, typename Constraint>
 	__global__ void TakeOneJacobiIteration(
 		DArray<Real> lambda,
 		DArray<Coord> accel,
@@ -25,7 +25,7 @@ namespace dyno
 		DArray<Coord> B,
 		DArray<Real> eta,
 		DArray<Real> mass,
-		DArray<ContactPair> nbq,
+		DArray<Constraint> nbq,
 		DArray<Real> stepInv)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -38,7 +38,7 @@ namespace dyno
 		{
 			eta_i -= J[4 * pId].dot(accel[idx1 * 2]);
 			eta_i -= J[4 * pId + 1].dot(accel[idx1 * 2 + 1]);
-			if (idx2 != -1)
+			if (idx2 != INVLIDA_ID)
 			{
 				eta_i -= J[4 * pId + 2].dot(accel[idx2 * 2]);
 				eta_i -= J[4 * pId + 3].dot(accel[idx2 * 2 + 1]);
@@ -49,34 +49,23 @@ namespace dyno
 		{
 			Real delta_lambda = eta_i / d[pId];
 			Real stepInverse = stepInv[idx1];
-			if (idx2 != -1)
+			if (idx2 != INVLIDA_ID)
 				stepInverse += stepInv[idx2];
 			delta_lambda *= (1.0f / stepInverse);
 
 			//printf("delta_lambda = %.3lf\n", delta_lambda);
 
-			if (nbq[pId].contactType == ContactType::CT_NONPENETRATION || nbq[pId].contactType == ContactType::CT_BOUDNARY) //	PROJECTION!!!!
+			Real lambda_new = lambda[pId] + delta_lambda;
+
+			if (nbq[pId].type == ConstraintType::CN_NONPENETRATION) //	PROJECTION!!!!
 			{
-				Real lambda_new = lambda[pId] + delta_lambda;
 				if (lambda_new < 0) lambda_new = 0;
 
-				Real mass_i = mass[idx1];
-				if (idx2 != -1)
-					mass_i += mass[idx2];
-
-				if (lambda_new > 25 * (mass_i / 0.1)) lambda_new = 25 * (mass_i / 0.1);
 				delta_lambda = lambda_new - lambda[pId];
 			}
 
-			if (nbq[pId].contactType == ContactType::CT_FRICTION) //	PROJECTION!!!!
+			if (nbq[pId].type == ConstraintType::CN_FRICTION) //	PROJECTION!!!!
 			{
-				Real lambda_new = lambda[pId] + delta_lambda;
-				Real mass_i = mass[idx1];
-				if (idx2 != -1)
-					mass_i += mass[idx2];
-
-				//if ((lambda_new) > 5 * (mass_i)) lambda_new = 5 * (mass_i);
-				//if ((lambda_new) < -5 * (mass_i)) lambda_new = -5 * (mass_i);
 				delta_lambda = lambda_new - lambda[pId];
 			}
 
@@ -92,7 +81,7 @@ namespace dyno
 			atomicAdd(&accel[idx1 * 2 + 1][1], B[4 * pId + 1][1] * delta_lambda);
 			atomicAdd(&accel[idx1 * 2 + 1][2], B[4 * pId + 1][2] * delta_lambda);
 
-			if (idx2 != -1)
+			if (idx2 != INVLIDA_ID)
 			{
 				atomicAdd(&accel[idx2 * 2][0], B[4 * pId + 2][0] * delta_lambda);
 				atomicAdd(&accel[idx2 * 2][1], B[4 * pId + 2][1] * delta_lambda);
@@ -224,106 +213,50 @@ namespace dyno
 		int idx1 = nbc[pId].bodyId1;
 		int idx2 = nbc[pId].bodyId2;
 
-		if (idx1 != -1)
+		if (idx1 != INVLIDA_ID)
 			atomicAdd(&nbrCnt[idx1], 1.0f);
-		if (idx2 != -1)
+		if (idx2 != INVLIDA_ID)
 			atomicAdd(&nbrCnt[idx2], 1.0f);
 	}
 
-	template <typename Coord, typename Matrix, typename ContactPair>
+	template <typename Coord, typename Matrix, typename Constraint>
 	__global__ void CalculateJacobians(
 		DArray<Coord> J,
 		DArray<Coord> B,
 		DArray<Coord> pos,
 		DArray<Matrix> inertia,
 		DArray<Real> mass,
-		DArray<ContactPair> nbc)
+		DArray<Constraint> constraints)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
 
-		int idx1 = nbc[pId].bodyId1;
-		int idx2 = nbc[pId].bodyId2;
+		int idx1 = constraints[pId].bodyId1;
+		int idx2 = constraints[pId].bodyId2;
 
-		//printf("%d %d\n", idx1, idx2);
+		Coord n = constraints[pId].normal1;
+		Coord r1 = constraints[pId].pos1 - pos[idx1];
 
-		if (nbc[pId].contactType == ContactType::CT_NONPENETRATION) // contact, collision
+		J[4 * pId] = n;
+		J[4 * pId + 1] = (r1.cross(n));
+		B[4 * pId] = n / mass[idx1];
+		B[4 * pId + 1] = inertia[idx1].inverse() * (r1.cross(n));
+
+		if (idx2 != INVLIDA_ID)
 		{
-			Coord p1 = nbc[pId].pos1;
-			Coord p2 = nbc[pId].pos2;
-			Coord n = nbc[pId].normal1;
-			Coord r1 = p1 - pos[idx1];
-			Coord r2 = p2 - pos[idx2];
+			Coord r2 = constraints[pId].pos2 - pos[idx2];
 
-			J[4 * pId] = n;
-			J[4 * pId + 1] = (r1.cross(n));
 			J[4 * pId + 2] = -n;
 			J[4 * pId + 3] = -(r2.cross(n));
-
-			B[4 * pId] = n / mass[idx1];
-			B[4 * pId + 1] = inertia[idx1].inverse() * (r1.cross(n));
 			B[4 * pId + 2] = -n / mass[idx2];
 			B[4 * pId + 3] = inertia[idx2].inverse() * (-r2.cross(n));
 		}
-		else if (nbc[pId].contactType == ContactType::CT_BOUDNARY) // boundary
+		else
 		{
-			Coord p1 = nbc[pId].pos1;
-			//	printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d %.3lf %.3lf %.3lf\n", idx1, p1[0], p1[1], p1[2]);
-
-			Coord n = nbc[pId].normal1;
-			Coord r1 = p1 - pos[idx1];
-
-
-			J[4 * pId] = n;
-			J[4 * pId + 1] = (r1.cross(n));
 			J[4 * pId + 2] = Coord(0);
 			J[4 * pId + 3] = Coord(0);
-
-			B[4 * pId] = n / mass[idx1];
-			B[4 * pId + 1] = inertia[idx1].inverse() * (r1.cross(n));
 			B[4 * pId + 2] = Coord(0);
 			B[4 * pId + 3] = Coord(0);
-		}
-		else if (nbc[pId].contactType == ContactType::CT_FRICTION) // friction
-		{
-			Coord p1 = nbc[pId].pos1;
-			//printf("~~~~~~~ %.3lf %.3lf %.3lf\n", p1[0], p1[1], p1[2]);
-
-
-			Coord p2 = Coord(0);
-			if (idx2 != -1)
-				p2 = nbc[pId].pos2;
-
-			Coord n = nbc[pId].normal1;
-			Coord r1 = p1 - pos[idx1];
-			Coord r2 = Coord(0);
-			if (idx2 != -1)
-				r2 = p2 - pos[idx2];
-
-			J[4 * pId] = n;
-			J[4 * pId + 1] = (r1.cross(n));
-			if (idx2 != -1)
-			{
-				J[4 * pId + 2] = -n;
-				J[4 * pId + 3] = -(r2.cross(n));
-			}
-			else
-			{
-				J[4 * pId + 2] = Coord(0);
-				J[4 * pId + 3] = Coord(0);
-			}
-			B[4 * pId] = n / mass[idx1];
-			B[4 * pId + 1] = inertia[idx1].inverse() * (r1.cross(n));
-			if (idx2 != -1)
-			{
-				B[4 * pId + 2] = -n / mass[idx2];
-				B[4 * pId + 3] = inertia[idx2].inverse() * (-r2.cross(n));
-			}
-			else
-			{
-				B[4 * pId + 2] = Coord(0);
-				B[4 * pId + 3] = Coord(0);
-			}
 		}
 	}
 
@@ -346,109 +279,128 @@ namespace dyno
 	}
 
 	// ignore zeta !!!!!!
-	template <typename Coord, typename ContactPair>
+	template <typename Coord, typename Constraint>
 	__global__ void CalculateEta(
 		DArray<Real> eta,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
 		DArray<Coord> J,
 		DArray<Real> mass,
-		DArray<ContactPair> nbq,
+		DArray<Constraint> constraints,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= J.size() / 4) return;
 
-		int idx1 = nbq[pId].bodyId1;
-		int idx2 = nbq[pId].bodyId2;
-		//printf("from ita %d\n", pId);
+		Real invDt = Real(1) / dt;
+
+		//TODO: add user control to beta
+		Real beta = Real(1) / Real(15);
+
+		int idx1 = constraints[pId].bodyId1;
+		int idx2 = constraints[pId].bodyId2;
+
 		Real ita_i = Real(0);
-		if (true) // test dist constraint
+		ita_i -= J[4 * pId].dot(velocity[idx1]);
+		ita_i -= J[4 * pId + 1].dot(angular_velocity[idx1]);
+
+		if (idx2 != INVLIDA_ID)
 		{
-			ita_i -= J[4 * pId].dot(velocity[idx1]);
-			ita_i -= J[4 * pId + 1].dot(angular_velocity[idx1]);
-			if (idx2 != -1)
-			{
-				ita_i -= J[4 * pId + 2].dot(velocity[idx2]);
-				ita_i -= J[4 * pId + 3].dot(angular_velocity[idx2]);
-			}
+			ita_i -= J[4 * pId + 2].dot(velocity[idx2]);
+			ita_i -= J[4 * pId + 3].dot(angular_velocity[idx2]);
 		}
-		eta[pId] = ita_i / dt;
-		if (nbq[pId].contactType == ContactType::CT_NONPENETRATION || nbq[pId].contactType == ContactType::CT_BOUDNARY)
+
+		eta[pId] = ita_i * invDt;
+
+		if (constraints[pId].type == ConstraintType::CN_NONPENETRATION)
 		{
-			eta[pId] += min(nbq[pId].interpenetration, nbq[pId].interpenetration) / dt / dt / 15.0f;
+			eta[pId] += beta * constraints[pId].interpenetration * invDt * invDt;
 		}
 	}
 
-	template <typename ContactPair>
-	__global__ void SetupFrictionConstraints(
-		DArray<ContactPair> nbq,
-		int contact_size)
+	template <typename Contact, typename Constraint>
+	__global__ void SetupConstraints(
+		DArray<Constraint> constraints,
+		DArray<Contact> contacts,
+		int contact_size,
+		bool hasFriction)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= contact_size) return;
 
-		Coord3D n = nbq[pId].normal1;
-		n /= n.norm();
+		constraints[pId].bodyId1 = contacts[pId].bodyId1;
+		constraints[pId].bodyId2 = contacts[pId].bodyId2;
+		constraints[pId].pos1 = contacts[pId].pos1;
+		constraints[pId].pos2 = contacts[pId].pos2;
+		constraints[pId].normal1 = contacts[pId].normal1;
+		constraints[pId].normal2 = contacts[pId].normal2;
+		constraints[pId].interpenetration = contacts[pId].interpenetration;
+		constraints[pId].type = ConstraintType::CN_NONPENETRATION;
 
-		Coord3D n1, n2;
-		if (abs(n[1]) > EPSILON || abs(n[2]) > EPSILON)
+		if (hasFriction)
 		{
-			n1 = Coord3D(0, n[2], -n[1]);
-			n1 /= n1.norm();
-			n2 = n1.cross(n);
-			n2 /= n2.norm();
-		}
-		else if (abs(n[0]) > EPSILON)
-		{
-			n1 = Coord3D(n[2], 0, -n[0]);
-			n1 /= n1.norm();
-			n2 = n1.cross(n);
-			n2 /= n2.norm();
-		}
+			Coord3D n = contacts[pId].normal1;
+			n /= n.norm();
 
-		nbq[pId * 2 + contact_size].bodyId1 = nbq[pId].bodyId1;
-		nbq[pId * 2 + contact_size].bodyId2 = nbq[pId].bodyId2;
-		nbq[pId * 2 + contact_size] = nbq[pId];
-		nbq[pId * 2 + contact_size].contactType = ContactType::CT_FRICTION;
-		nbq[pId * 2 + contact_size].normal1 = n1;
+			Coord3D n1, n2;
+			if (abs(n[1]) > EPSILON || abs(n[2]) > EPSILON)
+			{
+				n1 = Coord3D(0, n[2], -n[1]);
+				n1 /= n1.norm();
+				n2 = n1.cross(n);
+				n2 /= n2.norm();
+			}
+			else if (abs(n[0]) > EPSILON)
+			{
+				n1 = Coord3D(n[2], 0, -n[0]);
+				n1 /= n1.norm();
+				n2 = n1.cross(n);
+				n2 /= n2.norm();
+			}
 
-		nbq[pId * 2 + 1 + contact_size].bodyId1 = nbq[pId].bodyId1;
-		nbq[pId * 2 + 1 + contact_size].bodyId2 = nbq[pId].bodyId2;
-		nbq[pId * 2 + 1 + contact_size] = nbq[pId];
-		nbq[pId * 2 + 1 + contact_size].contactType = ContactType::CT_FRICTION;
-		nbq[pId * 2 + 1 + contact_size].normal1 = n2;
+			constraints[pId * 2 + contact_size].bodyId1 = contacts[pId].bodyId1;
+			constraints[pId * 2 + contact_size].bodyId2 = contacts[pId].bodyId2;
+			constraints[pId * 2 + contact_size].pos1 = contacts[pId].pos1;
+			constraints[pId * 2 + contact_size].pos2 = contacts[pId].pos2;
+			constraints[pId * 2 + contact_size].normal1 = n1;
+			constraints[pId * 2 + contact_size].normal2 = -n1;
+			constraints[pId * 2 + contact_size].type = ConstraintType::CN_FRICTION;
+
+			constraints[pId * 2 + 1 + contact_size].bodyId1 = contacts[pId].bodyId1;
+			constraints[pId * 2 + 1 + contact_size].bodyId2 = contacts[pId].bodyId2;
+			constraints[pId * 2 + 1 + contact_size].pos1 = contacts[pId].pos1;
+			constraints[pId * 2 + 1 + contact_size].pos2 = contacts[pId].pos2;
+			constraints[pId * 2 + 1 + contact_size].normal1 = n2;
+			constraints[pId * 2 + 1 + contact_size].normal2 = -n2;
+			constraints[pId * 2 + 1 + contact_size].type = ConstraintType::CN_FRICTION;
+		}
 	}
 
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::initializeJacobian(Real dt)
 	{
-		//int sizeOfContacts = mBoundaryContacts.size() + contacts.size();
-
 		if (this->inContacts()->isEmpty())
 			return;
 
 		auto& contacts = this->inContacts()->getData();
 		int sizeOfContacts = contacts.size();
+
  		int sizeOfConstraints = sizeOfContacts;
 		if (this->varFrictionEnabled()->getData())
 		{
 			sizeOfConstraints += 2 * sizeOfContacts;
 		}
 
+		if (sizeOfConstraints == 0) return;
+
 		mAllConstraints.resize(sizeOfConstraints);
 
-		if (contacts.size() > 0)
-			mAllConstraints.assign(contacts, contacts.size(), 0, 0);
-
-		if (this->varFrictionEnabled()->getData())
-		{
-			cuExecute(sizeOfContacts,
-				SetupFrictionConstraints,
-				mAllConstraints,
-				sizeOfContacts);
-		}
-
+		cuExecute(sizeOfContacts,
+			SetupConstraints,
+			mAllConstraints,
+			contacts,
+			sizeOfContacts,
+			this->varFrictionEnabled()->getData());
 
 		mJ.resize(4 * sizeOfConstraints);
 		mB.resize(4 * sizeOfConstraints);
@@ -466,21 +418,6 @@ namespace dyno
 		mLambda.reset();
 		mContactNumber.reset();
 
-		if (sizeOfConstraints == 0) return;
-
-// 		if (contacts.size() > 0)
-// 			mAllConstraints.assign(contacts, contacts.size());
-// 
-// 		if (mBoundaryContacts.size() > 0)
-// 			mAllConstraints.assign(mBoundaryContacts, mBoundaryContacts.size(), contacts.size(), 0);
-
-// 		if (this->varFrictionEnabled()->getData())
-// 		{
-// 			cuExecute(sizeOfContacts,
-// 				SetupFrictionConstraints,
-// 				mAllConstraints,
-// 				sizeOfContacts);
-// 		}
 		cuExecute(sizeOfConstraints,
 			CalculateNbrCons,
 			mAllConstraints,
