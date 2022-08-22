@@ -47,6 +47,59 @@ namespace dyno
 		ids[v1].atomicInsert(v0);
 	}
 	
+	template<typename Edge>
+	__global__ void ES_CountEdges(
+		DArray<int> counter,
+		DArray<Edge> edges)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= edges.size()) return;
+
+		Edge t = edges[tId];
+
+		atomicAdd(&counter[t[0]], 1);
+		atomicAdd(&counter[t[1]], 1);
+	}
+
+	template<typename Edge>
+	__global__ void ES_SetupEdgeIds(
+		DArrayList<int> edgeIds,
+		DArray<Edge> edges)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= edges.size()) return;
+
+		Edge t = edges[tId];
+
+		edgeIds[t[0]].atomicInsert(tId);
+		edgeIds[t[1]].atomicInsert(tId);
+	}
+
+	template<typename TDataType>
+	DArrayList<int>& EdgeSet<TDataType>::getVer2Edge()
+	{
+		DArray<int> counter;
+		counter.resize(m_coords.size());
+		counter.reset();
+
+		cuExecute(m_edges.size(),
+			ES_CountEdges,
+			counter,
+			m_edges);
+
+		m_ver2Edge.resize(counter);
+
+		counter.reset();
+		cuExecute(m_edges.size(),
+			ES_SetupEdgeIds,
+			m_ver2Edge,
+			m_edges);
+
+		counter.clear();
+
+		return m_ver2Edge;
+	}
+
 
 	template<typename TDataType>
 	void EdgeSet<TDataType>::updatePointNeighbors()

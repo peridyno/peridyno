@@ -49,7 +49,7 @@ namespace dyno
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::capsuleIndex()
 	{
-		return tetIndex() + this->getCaps().size();
+		return tetIndex() + this->getTets().size();
 	}
 
 	template<typename TDataType>
@@ -119,9 +119,5 @@ namespace dyno
 		m_tris.assign(triangles);
 	}
 
-#ifdef PRECISION_FLOAT
-	template class DiscreteElements<DataType3f>;
-#else
-	template class DiscreteElements<DataType3d>;
-#endif
+	DEFINE_CLASS(DiscreteElements);
 }

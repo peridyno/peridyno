@@ -4,6 +4,7 @@
 
 #include "CubeModel.h"
 #include "SphereModel.h"
+#include "SphereSampler.h"
 
 #include "CubeSampler.h"
 
@@ -29,7 +30,7 @@ namespace dyno
 
 		auto page = factory->addPage(
 			"Modeling", 
-			"ToolBarIco/FiniteElement/FiniteElement.png");
+			"ToolBarIco/Modeling/Modeling.png");
 
 		auto group = page->addGroup("Modeling");
 
@@ -56,10 +57,25 @@ namespace dyno
 			});
 
 		group->addAction(
+			"Sphere Sampler",
+			"ToolBarIco/Modeling/SphereSampler_v3.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<SphereSampler<DataType3f>>();
+			});
+
+
+		group->addAction(
 			"Cube Sampler",
 			"ToolBarIco/Modeling/CubeSampler.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<CubeSampler<DataType3f>>();
+			});
+
+		group->addAction(
+			"Poisson Disk Sampler",
+			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PoissonDiksSampling<DataType3f>>();
 			});
 
 		group->addAction(

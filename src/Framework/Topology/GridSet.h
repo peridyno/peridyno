@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2021 Lixin Ren
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #pragma once
-#include "Sampler.h"
+#include "Module/TopologyModule.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class CubeSampler : public Sampler<TDataType>
+	class GridSet : public TopologyModule
 	{
-		DECLARE_TCLASS(CubeSampler, TDataType);
-
+		DECLARE_TCLASS(GridSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		CubeSampler();
+		GridSet();
+		~GridSet();
 
-	public:
-		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
+		void setUniGrid(int ni, int nj, int nk, Real dxmm, Coord lo_center);
+		void setNijk(int ni, int nj, int nk);
+		void setOrigin(Coord lo_center) { m_origin = lo_center; }
+		void setDx(Real dxmm) { m_dx = dxmm; }
 
-		DEF_VAR_IN(TOrientedBox3D<Real>, Cube,  "");
-
-	protected:
-		void resetStates() override;
+		int getNi() { return m_ni; }
+		int getNj() { return m_nj; }
+		int getNk() { return m_nk; }
+		Coord getOrigin() { return m_origin; }
+		Real getDx() { return m_dx; }
+	private:
+		int m_ni, m_nj, m_nk;
+		Real m_dx;
+		Coord m_origin;
 	};
-
-	IMPLEMENT_TCLASS(CubeSampler, TDataType);
 }
+
+

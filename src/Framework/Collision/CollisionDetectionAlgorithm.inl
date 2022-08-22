@@ -695,6 +695,1059 @@ namespace dyno
 		m.contactCount = 1;
 	}
 
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap0, const Capsule3D& cap1)
+	{
+		m.contactCount = 0;
+
+		Segment3D s0(cap0.segment);
+		Segment3D s1(cap1.segment);
+		Real r0 = cap0.radius + cap1.radius;
+
+		Segment3D dir = s0.proximity(s1);
+
+		dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+
+		Real sMax = dir.direction().norm() - r0;
+		if (sMax >= 0)
+			return;
+
+		m.normal = dir.direction().normalize();
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = dir.v0;
+		m.contactCount = 1;
+	}
+
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphere, const Capsule3D& cap)
+	{
+		m.contactCount = 0;
+
+		Point3D s(sphere.center);
+		Segment3D c(cap.segment);
+		Real r0 = cap.radius + sphere.radius;
+
+		Point3D pos = s.project(c);//pos: capsule
+
+		Segment3D dir = pos - s;
+
+		Real sMax = dir.direction().norm() - r0;
+		if (sMax >= 0)
+			return;
+
+		m.normal = dir.direction().normalize();
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = dir.v0;
+		m.contactCount = 1;
+	}
+
+	template<typename Real>
+	DYN_FUNC inline bool checkOverlapAxis(
+		Real& lowerBoundary1,
+		Real& upperBoundary1,
+		Real& lowerBoundary2,
+		Real& upperBoundary2,
+		Real& intersectionDistance,
+		Real& boundary1,
+		Real& boundary2,
+		const Vector<Real, 3> axisNormal,
+		OrientedBox3D box,
+		Capsule3D cap
+		)
+	{
+
+		//projection to axis
+		Segment3D seg = cap.segment;
+
+		lowerBoundary1 = seg.v0.dot(axisNormal) - cap.radius;
+		upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
+		lowerBoundary1 = glm::min(lowerBoundary1, seg.v1.dot(axisNormal) - cap.radius);
+		upperBoundary1 = glm::max(upperBoundary1, seg.v1.dot(axisNormal) + cap.radius);
+			
+		
+
+		Coord3D center = box.center;
+		Coord3D u = box.u;
+		Coord3D v = box.v;
+		Coord3D w = box.w;
+		Coord3D extent = box.extent;
+		Coord3D p;
+		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
+		lowerBoundary2 = upperBoundary2 = p.dot(axisNormal);
+
+		p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
+		lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
+		upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
+
+		return checkOverlap(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
+	}
+
+	template<typename Real>
+	DYN_FUNC inline bool checkOverlapAxis(
+		Real& lowerBoundary1,
+		Real& upperBoundary1,
+		Real& lowerBoundary2,
+		Real& upperBoundary2,
+		Real& intersectionDistance,
+		Real& boundary1,
+		Real& boundary2,
+		const Vector<Real, 3> axisNormal,
+		Tet3D tet,
+		Capsule3D cap)
+	{
+
+		Segment3D seg = cap.segment;
+		//projection to axis
+
+		lowerBoundary1 = seg.v0.dot(axisNormal) - cap.radius;
+		upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
+		lowerBoundary1 = glm::min(lowerBoundary1, seg.v1.dot(axisNormal) - cap.radius);
+		upperBoundary1 = glm::max(upperBoundary1, seg.v1.dot(axisNormal) + cap.radius);
+
+		for (int i = 0; i < 4; i++)
+		{
+			if (i == 0)
+			{
+				
+				lowerBoundary2 = upperBoundary2 = tet.v[0].dot(axisNormal);
+			}
+			else
+			{
+				lowerBoundary2 = glm::min(lowerBoundary2, tet.v[i].dot(axisNormal));
+				upperBoundary2 = glm::max(upperBoundary2, tet.v[i].dot(axisNormal));
+			}
+		}
+
+		
+		return checkOverlapTetTri(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
+	}
+
+
+	template<typename Real>
+	DYN_FUNC inline void setupContactTets(
+		Real boundary1,
+		Real boundary2,
+		const Vector<Real, 3> axisNormal,
+		TCapsule3D<Real> cap,
+		TOrientedBox3D<Real> box,
+		Real sMax,
+		TManifold<Real>& m)
+	{
+		int cnt1, cnt2;
+		Coord3D boundaryPoints1[4];
+		Coord3D boundaryPoints2[8];
+		cnt1 = cnt2 = 0;
+
+		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+			||
+			abs(cap.segment.v0.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt1++] = cap.segment.v0;
+		if (abs(cap.segment.v1.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+			||
+			abs(cap.segment.v1.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt1++] = cap.segment.v1;
+
+		
+
+		Coord3D center = box.center;
+		Coord3D u = box.u;
+		Coord3D v = box.v;
+		Coord3D w = box.w;
+		Coord3D extent = box.extent;
+		Coord3D p;
+		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
+		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+			boundaryPoints2[cnt2++] = p;
+
+		//printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
+		if (cnt1 == 1 || cnt2 == 1)
+		{
+			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = (cnt1 == 1) ? boundaryPoints1[0] : boundaryPoints2[0];
+			m.contactCount = 1;
+			return;
+		}
+		else if (cnt1 == 2)
+		{
+			Segment3D s1 = cap.segment;
+
+			if (cnt2 == 2)
+			{
+				Segment3D s2(boundaryPoints2[0], boundaryPoints2[1]);
+				Segment3D dir = s1.proximity(s2);//v0: self v1: other
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+				m.contacts[0].penetration = sMax;
+				m.contacts[0].position = dir.v0;
+				m.contactCount = 1;
+				return;
+			}
+			else //cnt2 == 4
+			{
+				//if (cnt2 != 4)
+				//	printf("?????????\n");
+
+
+				for (int tmp_i = 1; tmp_i < 4; tmp_i++)
+					for (int tmp_j = tmp_i + 1; tmp_j < 4; tmp_j++)
+					{
+						if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
+						{
+							int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
+							Coord3D p2 = boundaryPoints2[tmp_i];
+							Coord3D p3 = boundaryPoints2[tmp_j];
+							Coord3D p4 = boundaryPoints2[tmp_k];
+							boundaryPoints2[1] = p2;
+							boundaryPoints2[2] = p3;
+							boundaryPoints2[3] = p4;
+							break;
+						}
+					}
+
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[0][0], boundaryPoints2[0][1], boundaryPoints2[0][2]);
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[1][0], boundaryPoints2[1][1], boundaryPoints2[1][2]);
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[2][0], boundaryPoints2[2][1], boundaryPoints2[2][2]);
+				//printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[3][0], boundaryPoints2[3][1], boundaryPoints2[3][2]);
+
+				m.contactCount = 0;
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+				Triangle3D t2(boundaryPoints2[0], boundaryPoints2[1], boundaryPoints2[2]);
+				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+
+				/*printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
+				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2], dirTmp1.cross(axisNormal)[0], dirTmp1.cross(axisNormal)[1], dirTmp1.cross(axisNormal)[2]);
+				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2], dirTmp2.cross(axisNormal)[0], dirTmp2.cross(axisNormal)[1], dirTmp2.cross(axisNormal)[2]);*/
+
+
+				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s1.v0;
+					m.contactCount++;
+				}
+				if (dirTmp2.cross(axisNormal).norm() < 1e-4)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s1.v1;
+					m.contactCount++;
+				}
+				t2 = Triangle3D(boundaryPoints2[3], boundaryPoints2[1], boundaryPoints2[2]);
+				dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+
+				/*printf("%.3lf %.3lf %.3lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2]);
+				printf("%.3lf %.3lf %.3lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2]);*/
+
+				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s1.v0;
+					m.contactCount++;
+				}
+				if (dirTmp2.cross(axisNormal).norm() < 1e-4)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s1.v1;
+					m.contactCount++;
+				}
+				for (int i = 0; i < 4; i++)
+				{
+					Segment3D s2;
+					if (i < 2)
+						s2 = Segment3D(boundaryPoints2[0], boundaryPoints2[i]);
+					else
+						s2 = Segment3D(boundaryPoints2[3], boundaryPoints2[i - 2]);
+					Segment3D dir = s1.proximity(s2);
+					/*printf("dir: %.3lf %.3lf %.3lf\naxisnormal %.3lf %.3lf %.3lf\n%.6lf\n",
+						dir.direction()[0], dir.direction()[1], dir.direction()[2],
+						axisNormal[0], axisNormal[1], axisNormal[2],
+						dir.direction().normalize().cross(axisNormal).norm());*/
+					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-4)
+					{
+						//printf("Yes\n");
+						if ((dir.v0 - s1.v0).norm() > 1e-4 && (dir.v0 - s1.v1).norm() > 1e-4)
+						{
+							m.contacts[m.contactCount].penetration = sMax;
+							m.contacts[m.contactCount].position = dir.v0;
+							m.contactCount++;
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
+	template<typename Real>
+	DYN_FUNC inline void setupContactTets(
+		Real boundary1,
+		Real boundary2,
+		const Vector<Real, 3> axisNormal,
+		Tet3D tet,
+		Capsule3D cap,
+		Real sMax,
+		TManifold<Real>& m)
+	{
+		int cnt1, cnt2;
+		unsigned char boundaryPoints1[4], boundaryPoints2[4];
+		cnt1 = cnt2 = 0;
+
+
+
+		for (unsigned char i = 0; i < 4; i++)
+		{
+			if (abs(tet.v[i].dot(axisNormal) - boundary1) < abs(sMax))
+				boundaryPoints1[cnt1 ++] = i;
+		}
+
+		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+			||
+			abs(cap.segment.v0.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt2 ++] = 0;
+		
+		if (abs(cap.segment.v1.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+			||
+			abs(cap.segment.v1.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt2++] = 1;
+
+		if (cnt1 == 1)
+		{
+			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = tet.v[boundaryPoints1[0]];
+			m.contactCount = 1;
+			return;
+		}
+		if (cnt2 == 1)
+		{
+			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = boundaryPoints2[0] ? cap.segment.v1 : cap.segment.v0;
+			m.contactCount = 1;
+			return;
+		}
+		else if (cnt1 == 2)
+		{
+			Segment3D s1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]]);
+
+			//if (cnt2 == 2)
+			{
+				Segment3D s2 = cap.segment;
+				Segment3D dir = s1.proximity(s2);//v0: self v1: other
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+				m.contacts[0].penetration = sMax;
+				m.contacts[0].position = dir.v0;
+				m.contactCount = 1;
+				return;
+			}
+		}
+		else if (cnt1 == 3)
+		{
+			Triangle3D t1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]], tet.v[boundaryPoints1[2]]);
+			//if (cnt2 == 2)
+			{
+
+				Segment3D s2 = cap.segment;
+				m.contactCount = 0;
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+
+				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
+				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
+				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s2.v0;
+					m.contactCount++;
+				}
+				if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s2.v1;
+					m.contactCount++;
+				}
+				for (int i = 0; i < 3; i++)
+				{
+					Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
+					Segment3D dir = s2.proximity(s1);
+					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					{
+						if ((dir.v0 - s2.v0).norm() > 1e-5 && (dir.v0 - s2.v1).norm() > 1e-5)
+						{
+							m.contacts[m.contactCount].penetration = sMax;
+							m.contacts[m.contactCount].position = dir.v0;
+							m.contactCount++;
+						}
+					}
+				}
+			}
+			
+		}
+	}
+
+
+	template<typename Real>
+	DYN_FUNC inline void setupContactTetTri(
+		Real boundary1,
+		Real boundary2,
+		const Vector<Real, 3> axisNormal,
+		Tet3D tet,
+		Triangle3D triangle,
+		Real sMax,
+		TManifold<Real>& m)
+	{
+		int cnt1, cnt2;
+		unsigned char boundaryPoints1[4], boundaryPoints2[4];
+		cnt1 = cnt2 = 0;
+
+
+
+		for (unsigned char i = 0; i < 4; i++)
+		{
+			if (abs(tet.v[i].dot(axisNormal) - boundary1) < abs(sMax) + EPSILON)
+				boundaryPoints1[cnt1++] = i;
+		}
+
+		for (unsigned char i = 0; i < 3; i++)
+		{
+			if (abs(triangle.v[i].dot(axisNormal) - boundary2) < abs(sMax) + EPSILON)
+				boundaryPoints2[cnt2++] = i;
+		}
+
+		//printf("cnt1 = %d   cnt2 = %d  smax = %.10lf\n", cnt1, cnt2, sMax);
+
+		if (cnt1 == 1 || cnt2 == 1)
+		{
+			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = (cnt1 == 1) ? tet.v[boundaryPoints1[0]] : triangle.v[boundaryPoints2[0]];
+			m.contactCount = 1;
+			return;
+		}
+		else if (cnt1 == 2)
+		{
+			Segment3D s1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]]);
+
+			if (cnt2 == 2)
+			{
+				Segment3D s2(triangle.v[boundaryPoints2[0]], triangle.v[boundaryPoints2[1]]);
+				Segment3D dir = s1.proximity(s2);//v0: self v1: other
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+				m.contacts[0].penetration = sMax;
+				m.contacts[0].position = dir.v0;
+				m.contactCount = 1;
+				return;
+			}
+			else //cnt2 == 3
+			{
+				m.contactCount = 0;
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+				Triangle3D t2(triangle.v[boundaryPoints2[0]], triangle.v[boundaryPoints2[1]], triangle.v[boundaryPoints2[2]]);
+				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s1.v0;
+					m.contactCount++;
+				}
+				if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s1.v1;
+					m.contactCount++;
+				}
+				for (int i = 0; i < 3; i++)
+				{
+					Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
+					Segment3D dir = s1.proximity(s2);
+					
+					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					{
+						//printf("Yes\n");
+						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+						{
+							m.contacts[m.contactCount].penetration = sMax;
+							m.contacts[m.contactCount].position = dir.v0;
+							m.contactCount++;
+						}
+					}
+				}
+			}
+		}
+		else if (cnt1 == 3)
+		{
+			Triangle3D t1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]], tet.v[boundaryPoints1[2]]);
+			if (cnt2 == 2)
+			{
+
+				Segment3D s2(triangle.v[boundaryPoints2[0]], triangle.v[boundaryPoints2[1]]);
+				m.contactCount = 0;
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+
+				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
+				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
+				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s2.v0;
+					m.contactCount++;
+				}
+				if (dirTmp2.cross(axisNormal).norm() < 1e-5)
+				{
+					m.contacts[m.contactCount].penetration = sMax;
+					m.contacts[m.contactCount].position = s2.v1;
+					m.contactCount++;
+				}
+				for (int i = 0; i < 3; i++)
+				{
+					Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
+					Segment3D dir = s2.proximity(s1);
+					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					{
+						if ((dir.v0 - s2.v0).norm() > 1e-5 && (dir.v0 - s2.v1).norm() > 1e-5)
+						{
+							m.contacts[m.contactCount].penetration = sMax;
+							m.contacts[m.contactCount].position = dir.v0;
+							m.contactCount++;
+						}
+					}
+				}
+			}
+			if (cnt2 == 3)
+			{
+				Triangle3D t1(tet.v[boundaryPoints1[0]], tet.v[boundaryPoints1[1]], tet.v[boundaryPoints1[2]]);
+				Triangle3D t2 = triangle;
+
+				m.contactCount = 0;
+				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+
+				for (int i = 0; i < 3; i++)
+				{
+					if ((Point3D(t1.v[i]).project(t2).origin - t1.v[i]).cross(t2.normal()).norm() < 1e-5)
+					{
+						m.contacts[m.contactCount].penetration = sMax;
+						m.contacts[m.contactCount].position = t1.v[i];
+						m.contactCount++;
+					}
+					if ((Point3D(t2.v[i]).project(t1).origin - t2.v[i]).cross(t1.normal()).norm() < 1e-5)
+					{
+						m.contacts[m.contactCount].penetration = sMax;
+						m.contacts[m.contactCount].position = t2.v[i];
+						m.contactCount++;
+					}
+
+					for (int j = 0; j < 3; j++)
+					{
+						Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
+						Segment3D s2(t2.v[(j + 1) % 3], t2.v[(j + 2) % 3]);
+						Segment3D dir = s1.proximity(s2);
+						if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+						{
+							if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
+							{
+								m.contacts[m.contactCount].penetration = sMax;
+								m.contacts[m.contactCount].position = dir.v0;
+								m.contactCount++;
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Capsule3D& cap)
+	{
+		Segment3D c(cap.segment);
+		Real r0 = cap.radius;
+
+		m.contactCount = 0;
+
+		Real sMax = (Real)INT_MAX;
+		Real sIntersect;
+		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
+		Real l1, u1, l2, u2;
+		Coord3D axis = Coord3D(0, 1, 0);
+		Coord3D axisTmp = axis;
+
+		Real boundary1, boundary2, b1, b2;
+
+		
+
+		//u
+		axisTmp = box.u / box.u.norm();
+		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+		{
+			m.contactCount = 0;
+			return;
+		}
+		else
+		{
+			if (sIntersect < sMax)
+			{
+				sMax = sIntersect;
+				lowerBoundary1 = l1;
+				lowerBoundary2 = l2;
+				upperBoundary1 = u1;
+				upperBoundary2 = u2;
+				boundary1 = b1;
+				boundary2 = b2;
+				axis = axisTmp;
+			}
+		}
+
+
+		//v
+		axisTmp = box.v / box.v.norm();
+		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+		{
+			m.contactCount = 0;
+			return;
+		}
+		else
+		{
+			if (sIntersect < sMax)
+			{
+				sMax = sIntersect;
+				lowerBoundary1 = l1;
+				lowerBoundary2 = l2;
+				upperBoundary1 = u1;
+				upperBoundary2 = u2;
+				boundary1 = b1;
+				boundary2 = b2;
+				axis = axisTmp;
+			}
+		}
+
+		//w
+		axisTmp = box.w / box.w.norm();
+		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+		{
+			m.contactCount = 0;
+			return;
+		}
+		else
+		{
+			if (sIntersect < sMax)
+			{
+				sMax = sIntersect;
+				lowerBoundary1 = l1;
+				lowerBoundary2 = l2;
+				upperBoundary1 = u1;
+				upperBoundary2 = u2;
+				boundary1 = b1;
+				boundary2 = b2;
+				axis = axisTmp;
+			}
+		}
+
+		
+		//dir generated by cross product from capsule and box
+		
+		Coord3D dirCap = c.direction();
+		for (int j = 0; j < 3; j++)
+		{
+			Coord3D boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
+			axisTmp = dirCap.cross(boxDir);
+			if (axisTmp.norm() > EPSILON)
+			{
+				axisTmp /= axisTmp.norm();
+			}
+			else //parallel, choose an arbitary direction
+			{
+				if (abs(dirCap[0]) > EPSILON)
+					axisTmp = Coord3D(dirCap[1], -dirCap[0], 0);
+				else
+					axisTmp = Coord3D(0, dirCap[2], -dirCap[1]);
+				axisTmp /= axisTmp.norm();
+			}
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+			{
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+		}
+		
+		setupContactTets(boundary1, boundary2, axis, cap, box, -sMax, m);
+
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Triangle3D& tri)
+	{
+		m.contactCount = 0;
+
+		Real sMax = (Real)INT_MAX;
+		Real sIntersect;
+		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
+		Real l1, u1, l2, u2;
+		Coord3D axis = Coord3D(0, 1, 0);
+		Coord3D axisTmp = axis;
+
+		Real boundary1, boundary2, b1, b2;
+
+	
+
+		for (int i = 0; i < 4; i++)
+		{
+			//tet face axis i
+			axisTmp = tet.face(i).normal();
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, tri) == false)
+			{
+				//printf("aax\n");
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+		}
+
+
+		//triangle face normal
+		axisTmp = tri.normal();
+		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, tri) == false)
+		{
+			m.contactCount = 0;
+			//printf("bbx\n");
+			return;
+		}
+		else
+		{
+			if (sIntersect < sMax)
+			{
+				sMax = sIntersect;
+				lowerBoundary1 = l1;
+				lowerBoundary2 = l2;
+				upperBoundary1 = u1;
+				upperBoundary2 = u2;
+				boundary1 = b1;
+				boundary2 = b2;
+				axis = axisTmp;
+			}
+		}
+
+		const int segmentIndex[6][2] = {
+		0, 1,
+		0, 2,
+		0, 3,
+		1, 2,
+		1, 3,
+		2, 3
+		};
+
+		const int triIndex[6][2] = {
+		0, 1,
+		0, 2,
+		1, 2
+		};
+
+		for (int i = 0; i < 6; i++)
+			for(int j = 0; j < 3; j ++)
+			{
+				Coord3D dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
+				Coord3D dirTri = tri.v[triIndex[j][0]] - tri.v[triIndex[j][1]];
+				dirTri /= dirTri.norm();
+				dirTet /= dirTet.norm();
+				axisTmp = dirTet.cross(dirTri);
+				if (axisTmp.norm() > EPSILON)
+				{
+					axisTmp /= axisTmp.norm();
+				}
+				else //parallel, choose an arbitary direction
+				{
+					if (abs(dirTet[0]) > EPSILON)
+						axisTmp = Coord3D(dirTet[1], -dirTet[0], 0);
+					else
+						axisTmp = Coord3D(0, dirTet[2], -dirTet[1]);
+					axisTmp /= axisTmp.norm();
+				}
+				if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, tri) == false)
+				{
+					m.contactCount = 0;
+					//printf("ccx\n");
+					return;
+				}
+				else
+				{
+					if (sIntersect < sMax)
+					{
+						sMax = sIntersect;
+						lowerBoundary1 = l1;
+						lowerBoundary2 = l2;
+						upperBoundary1 = u1;
+						upperBoundary2 = u2;
+						boundary1 = b1;
+						boundary2 = b2;
+						axis = axisTmp;
+					}
+				}
+			}
+
+		axisTmp = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4.0f - (tri.v[0] + tri.v[1] + tri.v[2]) / 3.0f;
+		axisTmp /= axisTmp.norm();
+		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, tri) == false)
+		{
+			m.contactCount = 0;
+			//printf("ccx\n");
+			return;
+		}
+		else
+		{
+			if (sIntersect < sMax)
+			{
+				sMax = sIntersect;
+				lowerBoundary1 = l1;
+				lowerBoundary2 = l2;
+				upperBoundary1 = u1;
+				upperBoundary2 = u2;
+				boundary1 = b1;
+				boundary2 = b2;
+				axis = axisTmp;
+			}
+		}
+
+		//printf("YesYes\n");
+		setupContactTetTri(boundary1, boundary2, axis, tet, tri, -sMax, m);
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Triangle3D& tri, const Tet3D& tet)
+	{
+		request(m, tet, tri);
+		m.normal = -m.normal;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const Tet3D& tet)
+	{
+		request(m, tet, cap);
+		m.normal = -m.normal;
+	}
+
+	//Separating Axis Theorem for tets
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
+	{
+		m.contactCount = 0;
+
+		Real sMax = (Real)INT_MAX;
+		Real sIntersect;
+		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
+		Real l1, u1, l2, u2;
+		Coord3D axis = Coord3D(0, 1, 0);
+		Coord3D axisTmp = axis;
+
+		Real boundary1, boundary2, b1, b2;
+
+
+		for (int i = 0; i < 4; i++)
+		{
+			//tet0 face axis i
+			axisTmp = tet.face(i).normal();
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, cap) == false)
+			{
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+			//tet1 face axis i
+			axisTmp = tet.face(i).normal();
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, cap) == false)
+			{
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+		}
+
+		const int segmentIndex[6][2] = {
+		0, 1,
+		0, 2,
+		0, 3,
+		1, 2,
+		1, 3,
+		2, 3
+		};
+
+		axisTmp = cap.segment.direction();
+		if (axisTmp.norm() > EPSILON)
+		{
+			axisTmp /= axisTmp.norm();
+		}
+		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, cap) == false)
+		{
+			m.contactCount = 0;
+			return;
+		}
+		else
+		{
+			if (sIntersect < sMax)
+			{
+				sMax = sIntersect;
+				lowerBoundary1 = l1;
+				lowerBoundary2 = l2;
+				upperBoundary1 = u1;
+				upperBoundary2 = u2;
+				boundary1 = b1;
+				boundary2 = b2;
+				axis = axisTmp;
+			}
+		}
+
+		for (int i = 0; i < 6; i++)
+		{
+			Coord3D dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
+			Coord3D dirCap = cap.segment.direction();
+
+			
+
+			axisTmp = dirTet.cross(dirCap);
+			if (axisTmp.norm() > EPSILON)
+			{
+				axisTmp /= axisTmp.norm();
+			}
+			else //parallel, choose an arbitary direction
+			{
+				if (abs(dirTet[0]) > EPSILON)
+					axisTmp = Coord3D(dirTet[1], -dirTet[0], 0);
+				else
+					axisTmp = Coord3D(0, dirTet[2], -dirTet[1]);
+				axisTmp /= axisTmp.norm();
+			}
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, cap) == false)
+			{
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+		}
+		
+		setupContactTets(boundary1, boundary2, axis, tet, cap, -sMax, m);
+		m.normal *= -1;
+	}
+
 	template<typename Real>
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Sphere3D& sphere)
 	{
@@ -724,7 +1777,73 @@ namespace dyno
 		m.contactCount = 1;
 	}
 
-
+	template<typename Real>
+	DYN_FUNC inline bool checkOverlapTetTri(
+		Real lowerBoundary1,
+		Real upperBoundary1,
+		Real lowerBoundary2,
+		Real upperBoundary2,
+		Real& intersectionDistance,
+		Real& boundary1,
+		Real& boundary2
+	)
+	{
+		if (!((lowerBoundary1 > upperBoundary2) || (lowerBoundary2 > upperBoundary1)))
+		{
+			if (lowerBoundary1 < lowerBoundary2)
+			{
+				if (upperBoundary1 > upperBoundary2)
+				{
+					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
+					{
+						boundary1 = upperBoundary1;
+						boundary2 = lowerBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+					else
+					{
+						boundary1 = lowerBoundary1;
+						boundary2 = upperBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+				}
+				else
+				{
+					intersectionDistance = upperBoundary1 - lowerBoundary2;
+					boundary1 = upperBoundary1;
+					boundary2 = lowerBoundary2;
+				}
+			}
+			else
+			{
+				if (upperBoundary1 > upperBoundary2)
+				{
+					intersectionDistance = upperBoundary2 - lowerBoundary1;
+					boundary1 = lowerBoundary1;
+					boundary2 = upperBoundary2;
+				}
+				else
+				{
+					//intersectionDistance = upperBoundary1 - lowerBoundary1;
+					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
+					{
+						boundary1 = upperBoundary1;
+						boundary2 = lowerBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+					else
+					{
+						boundary1 = lowerBoundary1;
+						boundary2 = upperBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+				}
+			}
+			return true;
+		}
+		intersectionDistance = Real(0.0f);
+		return false;
+	}
 
 
 	template<typename Real>
@@ -829,6 +1948,49 @@ namespace dyno
 			upperBoundary1, upperBoundary2
 			);*/
 		return checkOverlap(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
+	}
+
+
+	template<typename Real>
+	DYN_FUNC inline bool checkOverlapAxis(
+		Real& lowerBoundary1,
+		Real& upperBoundary1,
+		Real& lowerBoundary2,
+		Real& upperBoundary2,
+		Real& intersectionDistance,
+		Real& boundary1,
+		Real& boundary2,
+		const Vector<Real, 3> axisNormal,
+		Tet3D tet,
+		Triangle3D tri)
+	{
+
+		//projection to axis
+		for (int i = 0; i < 4; i++)
+		{
+			if (i == 0)
+			{
+				lowerBoundary1 = upperBoundary1 = tet.v[0].dot(axisNormal);
+			}
+			else
+			{
+				lowerBoundary1 = glm::min(lowerBoundary1, tet.v[i].dot(axisNormal));
+				upperBoundary1 = glm::max(upperBoundary1, tet.v[i].dot(axisNormal));
+			}
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			if(i == 0)
+				lowerBoundary2 = upperBoundary2 = tri.v[i].dot(axisNormal);
+			else
+			{
+				lowerBoundary2 = glm::min(lowerBoundary2, tri.v[i].dot(axisNormal));
+				upperBoundary2 = glm::max(upperBoundary2, tri.v[i].dot(axisNormal));
+			}
+		}
+		
+		return checkOverlapTetTri(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
 	}
 
 
@@ -1714,9 +2876,44 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphere, const Triangle3D& tri)
+	{
+		m.contactCount = 0;
+
+		Point3D c0(sphere.center);
+		Real r0 = sphere.radius;
+
+		Point3D vproj = c0.project(tri);
+		
+
+		Segment3D dir = vproj - c0;
+		Real sMax = dir.direction().norm() - r0;
+
+		if (sMax >= 0)
+			return;
+
+		/*if (dir.direction().norm() < EPSILON)
+			return;*/
+
+		/*if ((dir.direction().normalize().cross(tri.normal().normalize())).norm() > EPSILON)
+			return;*/
+
+		m.normal = dir.direction().normalize();
+		m.contacts[0].penetration = sMax;
+		m.contacts[0].position = vproj.origin;
+		m.contactCount = 1;
+	}
+
+	template<typename Real>
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Sphere3D& sphere)
 	{
 		request(m, sphere, tet);
+		m.normal *= -1;
+	}
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Triangle3D& tri, const Sphere3D& sphere)
+	{
+		request(m, sphere, tri);
 		m.normal *= -1;
 	}
 }

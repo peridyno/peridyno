@@ -534,7 +534,13 @@ namespace dyno
 	DYN_FUNC Real TPoint3D<Real>::distance(const TTriangle3D<Real>& triangle) const
 	{
 		Coord3D q = project(triangle).origin;
-		Real sign = (origin - q).dot(triangle.normal()) < Real(0) ? Real(-1) : Real(1);
+		Real sign;
+		Real sign0 = (origin - q).dot(triangle.normal());
+		if (abs(sign0) < Real(REAL_EPSILON) && (origin - q).norm() > Real(REAL_EPSILON))
+			sign = Real(1);
+		else
+			sign = sign0 < Real(0) ? Real(-1) : Real(1);
+		//Real sign = (origin - q).dot(triangle.normal()) < Real(0) ? Real(-1) : Real(1);
 
 		return sign * (origin - q).norm();
 	}
@@ -1012,12 +1018,12 @@ namespace dyno
 			if (b0 >= (Real)0 && u >= (Real)0 && v >= (Real)0)
 			{
 				// Line parameter for the point of intersection.
-				Real DdE0 = direction.dot(e0);
-				Real DdE1 = direction.dot(e1);
-				Real DdDiff = direction.dot(diff);
+				Real DdE0 = W.dot(e0);
+				Real DdE1 = W.dot(e1);
+				Real DdDiff = W.dot(diff);
 				Real t = u * DdE0 + v * DdE1 - DdDiff;
 
-				return TSegment3D<Real>(origin + t * direction, triangle.v[0] + u * e0 + v * e1);
+				return TSegment3D<Real>(origin + t * W, triangle.v[0] + u * e0 + v * e1);
 			}
 		}
 
@@ -2810,6 +2816,60 @@ namespace dyno
 		return abox;
 	}
 
+
+	template<typename Real>
+	DYN_FUNC Real TTriangle3D<Real>::distanceSquared(const TTriangle3D<Real>& triangle) const
+	{
+		Vector<Real, 3> p[3];
+		p[0] = v[0];
+		p[1] = v[1];
+		p[2] = v[2];
+
+		Vector<Real, 3> q[3];
+		q[0] = triangle.v[0];
+		q[1] = triangle.v[1];
+		q[2] = triangle.v[2];
+
+		//VF
+		Real minD = (q[0] - p[0]).normSquared();
+
+		//EF
+		for (int st = 0; st < 3; st++)
+		{
+			int ind0 = st;
+			int ind1 = (st + 1) % 3;
+			minD = minimum(minD, TSegment3D<Real>(p[ind0], p[ind1]).distanceSquared(triangle));
+		}
+
+		for (int st = 0; st < 3; st++)
+		{
+			int ind0 = st;
+			int ind1 = (st + 1) % 3;
+			minD = minimum(minD, TSegment3D<Real>(q[ind0], q[ind1]).distanceSquared(*this));
+		}
+
+// 		for (int st = 0; st < 3; st++)
+// 		{
+// 			int ind0 = st;
+// 			int ind1 = (st + 1) % 3;
+// 			for (int ss = 0; ss < 3; ss++)
+// 			{
+// 				int ind2 = st;
+// 				int ind3 = (st + 1) % 3;
+// 
+// 				minD = minimum(minD, TSegment3D<Real>(p[ind0], p[ind1]).distanceSquared(TSegment3D<Real>(p[ind2], p[ind3])));
+// 			}
+// 		}
+
+		return minD;
+	}
+
+	template<typename Real>
+	DYN_FUNC Real TTriangle3D<Real>::distance(const TTriangle3D<Real>& triangle) const
+	{
+		return glm::sqrt(distanceSquared(triangle));
+	}
+
 	template<typename Real>
 	DYN_FUNC TRectangle3D<Real>::TRectangle3D()
 	{
@@ -3102,6 +3162,22 @@ namespace dyno
 	DYN_FUNC bool TTet3D<Real>::isValid()
 	{
 		return volume() >= REAL_EPSILON;
+	}
+
+
+	template<typename Real>
+	DYN_FUNC void TTet3D<Real>::expand(Real r)
+	{
+		Coord3D center;
+		center = (v[0] + v[1] + v[2] + v[3]) / 4.0f;
+		for (int idx = 0; idx < 4; idx++)
+		{
+			Coord3D dir = (v[idx] - center);
+			Real rr = dir.norm();
+			dir /= dir.norm();
+			rr += r;
+			v[idx] = dir * rr + center;
+		}
 	}
 
 	template<typename Real>

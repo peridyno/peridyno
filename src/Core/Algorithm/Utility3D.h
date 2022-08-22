@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2021 Lixin Ren
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #pragma once
-#include "Sampler.h"
+#include "Array/Array.h"
+#include "Array/ArrayMap.h"
 
-namespace dyno
+
+namespace dyno 
 {
-	template<typename TDataType>
-	class CubeSampler : public Sampler<TDataType>
-	{
-		DECLARE_TCLASS(CubeSampler, TDataType);
+	template<typename VarType>
+	void multiply_transposedSM_by_vector(DArrayMap<VarType>& matrix_a, DArray<VarType>& a, DArray<VarType>& Aa);
 
-	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
+	template<typename VarType>
+	void multiply_SM_by_vector(DArrayMap<VarType>& matrix_a, DArray<VarType>& a, DArray<VarType>& Aa);
 
-		CubeSampler();
-
-	public:
-		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
-
-		DEF_VAR_IN(TOrientedBox3D<Real>, Cube,  "");
-
-	protected:
-		void resetStates() override;
-	};
-
-	IMPLEMENT_TCLASS(CubeSampler, TDataType);
-}
+}  

@@ -96,8 +96,11 @@ namespace dyno
 
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
 
+		DArrayList<int>& getVer2Edge();
+
 	protected:
 		DArray<Edge> m_edges;
+		DArrayList<int> m_ver2Edge;
 	};
 }
 

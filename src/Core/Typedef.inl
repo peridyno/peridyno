@@ -94,8 +94,8 @@ namespace dyno {
 	static inline void checkCudaError(const char *msg) {
 		cudaError_t err = cudaGetLastError();
 		if (cudaSuccess != err) {
-			//printf( "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);
-			throw std::runtime_error(std::string(msg) + ": " + cudaGetErrorString(err));
+			printf( "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);
+ 			throw std::runtime_error(std::string(msg) + ": " + cudaGetErrorString(err));
 		}
 	}
 
@@ -147,7 +147,7 @@ namespace dyno {
 	}
 
 #define cuExecute3D(size, Func, ...){						\
-		uint3 pDims = cudaGridSize3D(size, 8);		\
+		dim3 pDims = cudaGridSize3D(size, 8);		\
 		dim3 threadsPerBlock(8, 8, 8);		\
 		Func << <pDims, threadsPerBlock >> > (				\
 		__VA_ARGS__);										\

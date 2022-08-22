@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Shusen Liu
+ * Copyright 2022 Xiaowei He & Shusen Liu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,45 +15,23 @@
  */
 
 #pragma once
-#include "ParametricModel.h"
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
+#include "Node.h"
+
+#include "Topology/Primitive3D.h"
+#include "Topology/PointSet.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class SphereModel : public ParametricModel<TDataType>
+	class Sampler : public Node
 	{
-		DECLARE_TCLASS(SphereModel, TDataType);
-
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SphereModel();
+		Sampler();
 
 	public:
-		DEF_VAR(Coord, Center, 0, "Sphere center");
-
-		DEF_VAR(Real, Radius, 0.2, "Sphere radius");
-
-		//DEF_VAR(Real, triangleLength, 0.5, "Length of triangle edge");
-
-		DEF_VAR(Real, Theta, 0.3, "Angle");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
-
-		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
-
-		void disableRender();
-
-	protected:
-		void resetStates() override;
-
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
+		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
 	};
-
-
-
-	IMPLEMENT_TCLASS(SphereModel, TDataType);
 }

@@ -737,8 +737,8 @@ namespace dyno
 // 		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
 // 		std::cout << "Max A: " << m_maxA << std::endl;
 // 
-// //		m_normal.setElementCount(num);
-// //		m_attribute.setElementCount(num);
+// //		m_normal.resize(num);
+// //		m_attribute.resize(num);
 // 
 // // 		cuExecute(num,
 // // 			VC_InitializeNormal,
@@ -772,8 +772,8 @@ namespace dyno
 
 			mPressure.resize(num);
 
-//			m_normal.setElementCount(num);
-			//m_attribute.setElementCount(num);
+//			m_normal.resize(num);
+			//m_attribute.resize(num);
 
 // 			cuExecute(num,
 // 				VC_InitializeNormal,

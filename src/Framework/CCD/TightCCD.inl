@@ -177,6 +177,7 @@ namespace dyno
 		T a3 = STP(v1, v2, v3);
 
 		if (REAL_EQUAL(a1, 0) && REAL_EQUAL(a2, 0) && REAL_EQUAL(a1, 0))
+		//if (a1 == 0 && a2 == 0 && a3 == 0)
 			return false;
 
 		T t[4];
@@ -257,25 +258,36 @@ namespace dyno
 	template<typename T>
 	DYN_FUNC bool TightCCD<T>::TriangleCCD(TTriangle3D<Real>& s0, TTriangle3D<Real>& s1, TTriangle3D<Real>& t0, TTriangle3D<Real>& t1, Real& toi)
 	{
+		Real l0 = s0.maximumEdgeLength();
+		Real l1 = s1.maximumEdgeLength();
+		Real l2 = t0.maximumEdgeLength();
+		Real l3 = t1.maximumEdgeLength();
+
+		Real lmax = maximum(maximum(l0, l1), maximum(l2, l3));
+		if (lmax < REAL_EPSILON)
+			return false;
+
+		Real invL = 1 / lmax;
+
 		Vector<Real, 3> p[3];
-		p[0] = s0.v[0];
-		p[1] = s0.v[1];
-		p[2] = s0.v[2];
+		p[0] = invL * s0.v[0];
+		p[1] = invL * s0.v[1];
+		p[2] = invL * s0.v[2];
 
 		Vector<Real, 3> pp[3];
-		pp[0] = s1.v[0];
-		pp[1] = s1.v[1];
-		pp[2] = s1.v[2];
+		pp[0] = invL * s1.v[0];
+		pp[1] = invL * s1.v[1];
+		pp[2] = invL * s1.v[2];
 
 		Vector<Real, 3> q[3];
-		q[0] = t0.v[0];
-		q[1] = t0.v[1];
-		q[2] = t0.v[2];
+		q[0] = invL * t0.v[0];
+		q[1] = invL * t0.v[1];
+		q[2] = invL * t0.v[2];
 
 		Vector<Real, 3> qq[3];
-		qq[0] = t1.v[0];
-		qq[1] = t1.v[1];
-		qq[2] = t1.v[2];
+		qq[0] = invL * t1.v[0];
+		qq[1] = invL * t1.v[1];
+		qq[2] = invL * t1.v[2];
 
 		///*
 		//VF

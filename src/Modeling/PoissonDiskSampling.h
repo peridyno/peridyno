@@ -19,14 +19,17 @@
 
 #include "Topology/Primitive3D.h"
 #include "Topology/PointSet.h"
-#include "SamplingPoints.h"
-
-
+#include "Sampler.h"
 
 namespace dyno
 {
+	struct GridIndex
+	{
+		int i, j, k;
+	};
+
 	template<typename TDataType>
-	class PoissonDiksSampling : public SamplingPoints<TDataType>
+	class PoissonDiksSampling : public Sampler<TDataType>
 	{
 		DECLARE_TCLASS(PoissonDiksSampling, TDataType);
 
@@ -34,7 +37,6 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		PoissonDiksSampling();
-
 
 		void ConstructGrid();
 
@@ -50,22 +52,30 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-		void searchGrid(Coord point, int& i, int &j, int&k);
+		GridIndex searchGrid(Coord point);
 
 		int indexTransform(int i, int j, int k);
 
+		int pointNumberRecommend();
+
 		std::vector<int> m_grid;
 
-		int gnum;
-		int nx, ny, nz;
+		int gnum;		//total number of grids
+		int nx, ny, nz;		//grid number 
  
-		Coord area_a, area_b;
+		Coord area_a, area_b;	//box 
 
-		Coord seed_point;
+		Coord seed_point;	// Initial point
 
-		Real dx;
+		Real dx;		//resolution of grid 
 
 		std::vector<Coord> points;
+
+		unsigned int desired_points = 15000;	//desired points number
+
+		GridIndex gridIndex;
+
+		unsigned int attempted_Times = 100;
 
 	};
 

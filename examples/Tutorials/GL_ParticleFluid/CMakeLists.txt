@@ -21,6 +21,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         ParticleSystem 
         RigidBody 
         GlfwGUI
+        Modeling
 		GLRenderEngine
 		)
 

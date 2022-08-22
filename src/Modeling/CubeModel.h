@@ -16,7 +16,7 @@
 
 #pragma once
 #include "ParametricModel.h"
-
+#include "GLSurfaceVisualModule.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -40,6 +40,8 @@ namespace dyno
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 
 	protected:
+		std::shared_ptr <GLSurfaceVisualModule> glModule;
+
 		void resetStates() override;
 	};
 

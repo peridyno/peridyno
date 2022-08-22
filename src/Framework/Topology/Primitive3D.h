@@ -397,7 +397,7 @@ namespace dyno
 		inline DYN_FUNC Coord3D startPoint() const { return v0; }
 		inline DYN_FUNC Coord3D endPoint() const { return v1; }
 
-		inline DYN_FUNC Coord3D direction() const { return v1 - v0; }
+		inline DYN_FUNC Coord3D direction() const { return v1 - v0;	}
 
 		inline DYN_FUNC TSegment3D<Real> operator-(void) const;
 
@@ -452,9 +452,12 @@ namespace dyno
 
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
+		DYN_FUNC Real distanceSquared(const TTriangle3D<Real>& triangle) const;
+
+		DYN_FUNC Real distance(const TTriangle3D<Real>& triangle) const;
+
 		Coord3D v[3];
 	};
-
 
 	template<typename Real>
 	class TRectangle3D
@@ -563,7 +566,7 @@ namespace dyno
 		DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 		DYN_FUNC bool intersect(const TTriangle3D<Real>& tri, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 
-
+		DYN_FUNC void expand(Real r);
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
 		// http://rodolphe-vaillant.fr/entry/127/find-a-tetrahedron-circumcenter

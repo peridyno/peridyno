@@ -9,7 +9,6 @@
 #include <Peridynamics/ElastoplasticBody.h>
 #include <Peridynamics/ElasticBody.h>
 
-#include <Peridynamics/Module/ElasticityModule.h>
 
 #include <RigidBody/RigidBody.h>
 

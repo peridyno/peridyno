@@ -25,12 +25,21 @@ namespace dyno
 	enum ContactType
 	{
 		CT_BOUDNARY = 0,
+		CT_INTERNAL,
 		CT_NONPENETRATION,
-		CT_FRICTION,
-		CT_FLUID_STICKINESS,
-		CT_FLUID_NONPENETRATION,
-		CT_LOACL_NONPENETRATION,
 		CT_UNKNOWN
+	};
+
+	enum ConstraintType
+	{
+		CN_NONPENETRATION = 0,
+		CN_FRICTION,
+		CN_FLUID_STICKINESS,
+		CN_FLUID_SLIPINESS,
+		CN_FLUID_NONPENETRATION,
+		CN_GLOBAL_NONPENETRATION,
+		CN_LOACL_NONPENETRATION,
+		CN_UNKNOWN
 	};
 
 	template<typename Real>
@@ -80,6 +89,12 @@ namespace dyno
 
 		int bodyId1;
 		int bodyId2;
+		
+// 		int localId1;
+// 		int localId2;
+// 
+// 		int localTag1;
+// 		int localTag2;
 
 		Real interpenetration = 0.0f;//inter_dist
 
@@ -90,5 +105,53 @@ namespace dyno
 		Vector<Real, 3> normal2;
 
 		ContactType contactType;
+	};
+
+	template<typename Real>
+	class TConstraintPair
+	{
+	public:
+		DYN_FUNC TConstraintPair()
+		{
+			bodyId1 = bodyId2 = INVLIDA_ID;
+			type = CN_UNKNOWN;
+		};
+
+		DYN_FUNC TConstraintPair(
+			int a,
+			int b,
+			ConstraintType type,
+			Vector<Real, 3> p1,
+			Vector<Real, 3> p2,
+			Vector<Real, 3> n1,
+			Vector<Real, 3> n2)
+		{
+			bodyId1 = a;
+			bodyId2 = b;
+			type = type;
+			pos1 = p1;
+			pos2 = p2;
+			normal1 = n1;
+			normal2 = n2;
+		}
+
+		int bodyId1;
+		int bodyId2;
+
+		int localId1;
+		int localId2;
+
+		int localTag1;
+		int localTag2;
+
+		Real interpenetration = 0.0f;//inter_dist
+
+		Vector<Real, 3> pos1;
+		Vector<Real, 3> pos2;
+
+		Vector<Real, 3> normal1;
+		Vector<Real, 3> normal2;
+
+		ConstraintType type;
 	};
 }

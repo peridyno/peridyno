@@ -20,7 +20,7 @@ namespace dyno
 		for (auto iter = mList.begin(); iter != mList.end(); iter++)
 		{
 			//printf("iter %s ::: %s\n", (*iter)->getName(),(*iter)->getModuleType());
-			if (std::string("IOModule").compare((*iter)->getModuleType()) == 0)
+			if (std::string("OutputModule").compare((*iter)->getModuleType()) == 0)
 			{
 				
 				(*iter)->update();

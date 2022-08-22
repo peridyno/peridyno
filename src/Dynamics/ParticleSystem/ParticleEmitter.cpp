@@ -30,6 +30,11 @@ namespace dyno
 		this->generateParticles();
 	}
 
+	template<typename TDataType>
+	std::string ParticleEmitter<TDataType>::getNodeType()
+	{
+		return "Particle Emitters";
+	}
 
 	DEFINE_CLASS(ParticleEmitter);
 }

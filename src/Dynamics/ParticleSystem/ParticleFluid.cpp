@@ -62,8 +62,6 @@ namespace dyno
 				this->stateVelocity()->resize(totalNum);
 				this->stateForce()->resize(totalNum);
 
-				//printf("###### %d\n", this->currentPosition()->size());
-
 				DArray<Coord>& new_pos = this->statePosition()->getData();
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();
 				DArray<Coord>& new_force = this->stateForce()->getData();
@@ -103,9 +101,65 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void ParticleFluid<TDataType>::loadParticleFromNode()
+	{
+		std::cout << "load Particles From Nodes." << std::endl;
+
+		auto ptcNode = this->getInitialStates();
+		int SetNum = ptcNode.size();
+		int totalNum = 0;
+
+		if (SetNum > 0) {
+			for (int i = 0; i < SetNum; i++)
+			{
+				totalNum += ptcNode[i]->statePosition()->size();
+			}
+
+			this->statePosition()->resize(totalNum);
+			this->stateVelocity()->resize(totalNum);
+			this->stateForce()->resize(totalNum);
+			this->stateForce()->reset();
+
+			if (totalNum > 0)
+			{
+				DArray<Coord>& new_pos = this->statePosition()->getData();
+				DArray<Coord>& new_vel = this->stateVelocity()->getData();
+				DArray<Coord>& new_force = this->stateForce()->getData();
+
+				int start = 0;
+				for (int i = 0; i < SetNum; i++)
+				{
+					auto inPos = ptcNode[i]->statePosition()->getDataPtr();
+					auto inVel = ptcNode[i]->stateVelocity()->getDataPtr();
+					if (!inPos->isEmpty())
+					{
+						uint num = inPos->size();
+
+						cudaMemcpy(new_pos.begin() + start, inPos->begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+						cudaMemcpy(new_vel.begin() + start, inVel->begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+
+						start += num;
+					}
+				}
+			}
+		}
+		else {
+			std::cout << "Fluid particle nodes are not set." << std::endl;
+		}
+
+		printf("total num = %d\n", totalNum);
+	}
+
+	template<typename TDataType>
 	void ParticleFluid<TDataType>::resetStates()
 	{
-		ParticleSystem<TDataType>::resetStates();
+		loadParticleFromNode();
+
+		if (!this->statePosition()->isEmpty())
+		{
+			auto points = this->statePointSet()->getDataPtr();
+			points->setPoints(this->statePosition()->getData());
+		}
 	}
 
 	DEFINE_CLASS(ParticleFluid);

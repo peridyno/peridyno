@@ -60,6 +60,7 @@ namespace dyno
 
 	void Pipeline::clear()
 	{
+		//TODO: fix the memeory leak
 // 		for (auto const &pair : mModuleMap)
 // 		{
 // 			mNode->deleteModule(std::shared_ptr<Module>(pair.second));

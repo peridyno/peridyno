@@ -6,12 +6,29 @@ namespace dyno
 {
 	template <typename TDataType>
 	PoissonDiksSampling<TDataType>::PoissonDiksSampling()
-		: SamplingPoints()
+		: Sampler()
 	{
 			this->varSamplingDistance()->setRange(0.001, 1.0);
 
 			area_a = Coord(0.0f);
-			area_b = Coord(1.0f);
+			area_b = Coord(1.5f);
+			desired_points = pointNumberRecommend();
+
+	};
+
+
+	template <typename TDataType>
+	int PoissonDiksSampling<TDataType>::pointNumberRecommend()
+	{
+		int num = 0;
+		Coord box = area_b - area_a;
+		Real r = this->varSamplingDistance()->getData();
+		for(Real d = area_a[0]; d < area_b[0]; d += r)
+			for (Real d = area_a[1]; d < area_b[1]; d += r)
+			{
+				num++;
+			}
+		return num;
 	};
 
 
@@ -24,82 +41,64 @@ namespace dyno
 		{
 			std::cout <<" The smapling distance in Poisson disk sampling module can not be ZERO!!!! " << std::endl;
 			exit(0);
-
 		}
 
 		int dimension = this->varDimension()->getData();
 
-		if (dimension == 2)
-		{
-			nx = abs(area_b[0] - area_a[0]) / dx;
-			ny = abs(area_b[1] - area_a[1]) / dx;
+		nx = abs(area_b[0] - area_a[0]) / dx;
+		ny = abs(area_b[1] - area_a[1]) / dx;
 
-			gnum = nx * ny;
-			m_grid.resize(gnum);
+		gnum = nx * ny;
+		m_grid.resize(gnum);
 
-			for (int i = 0; i < gnum; i++)	m_grid[i] = -1;
-		}
-
+		for (int i = 0; i < gnum; i++)	m_grid[i] = -1;
 	}
 
 
 	template <typename TDataType>
-	void PoissonDiksSampling<TDataType>::searchGrid(Coord point, int& i, int &j, int&k)
+	GridIndex PoissonDiksSampling<TDataType>::searchGrid(Coord point)
 	{
-		if (this->varDimension()->getData() == 2)
-		{
-			i = (int)(point[0]/dx);
-			j = (int)(point[1]/dx);
-			//k = (int)(points[2]/dx);
-		}
+		GridIndex index;
+		index.i = (int)((point[0] - area_a[0]) / dx);
+		index.j = (int)((point[1] - area_a[1]) / dx);
+		index.k = 0;
+		return index;
 	};
 
 
 	template <typename TDataType>
 	int PoissonDiksSampling<TDataType>::indexTransform(int i, int j, int k) 
 	{
-		int num;
-		if (this->varDimension()->getData() == 2)
-		{
-			num = i + j * nx;
-		}
-		return num;
-	}
-	;
+		return i + j * nx;
+	};
 
 	template <typename TDataType>
 	bool PoissonDiksSampling<TDataType>::collisionJudge(Coord point)
 	{
 		bool flag = false;
-		int xi, xj, xk;
 		auto r = this->varSamplingDistance()->getData();
-		searchGrid(point, xi, xj, xk);
+		GridIndex d_index;
+		d_index = searchGrid(point);
 		for(int i = -2; i < 3; i++)
 			for (int j = -2; j < 3; j++)
 			{
 
-				int mi = xi + i;
-				int mj = xj + j;
+				int mi = d_index.i + i;
+				int mj = d_index.j + j;
 				if ((mi > 0) && ( mj > 0) && (mi < nx) && (mj < ny)) 
 				{
-					int index = indexTransform(mi, mj, xk);
+					int index = indexTransform(mi, mj, d_index.k);
 					if (m_grid[index] != -1)
 					{
 						Coord d = (points[m_grid[index]] - point);
 						if (sqrt(d[0] * d[0] + d[1] * d[1]) - r < EPSILON)
 						{
 							flag = true;
-							std::cout << "" << std::endl;
 						}
 					}
-
 				}
-
 			}
-
 		return flag;
-		
-
 	};
 
 
@@ -116,75 +115,50 @@ namespace dyno
 		seed_point = (area_a + (area_b - area_a)) / 2;
 		std::cout << "seed_point " << seed_point << std::endl;
 
-
-
 		points.push_back(seed_point);
 
-		int gi, gj, gk = 0;
-		searchGrid(seed_point, gi, gj, gk);
 
-		std::cout << "Grid index: " << gi << ", " << gj << ", " << gk << std::endl;
-		int index = gi + gj * nx;
-		std::cout << "Index: " << index << ", " << indexTransform(gi, gj, gk);
-
+		gridIndex = searchGrid(seed_point);
+		int index = indexTransform(gridIndex.i, gridIndex.j, gridIndex.k);
 		m_grid[index] = 0;
 
 		int head = 0;
 		int tail = 1;
 
 
-		//for (int i = 0; i < 1000; i++)
-		//{
-		//	Coord temp = Coord(( i * 0.001), 0.5, 0.0f);
-		//	std::cout<< collisionJudge(temp) << ": " << ( i * 0.001 ) <<std::endl;
-		//}
-
-
-		int iii = 0;
-		while ((iii < 100)&&(tail>head))
+		while ( (head < desired_points) && (head < tail ) )
 		{
-			iii++;
 			Coord source = points[head];
 			head++;
 
 			for (int ppp = 0; ppp < 100; ppp++)
 			{
-				Real theta = (Real)(rand()%100) / 100.0f;
-				//std::cout << theta << std::endl;
+				Real theta = (Real)(rand()%100) / 100.0f ;
 				Real dr = (1 + (Real)(rand() % 100) / 100.0f) * r;
 				
+				theta = theta * 2 * 3.1415926535;
+
 				Coord offset = Coord(cos(theta) * dr, sin(theta) * dr, 0.0f);
 
 				Coord new_point = source + offset;
 
-				if ((new_point[0] > area_a[0]) && (new_point[0] < area_b[0])
-					&& (new_point[1] > area_a[1]) && (new_point[1] < area_b[1]))
+				if ((new_point[0] > area_a[0] + 0.01) && (new_point[0] < area_b[0] - 0.01)
+					&& (new_point[1] > area_a[1] + 0.01) && (new_point[1] < area_b[1] - 0.01))
 				{
-					if (collisionJudge(new_point)) {
+					if (!collisionJudge(new_point) && (tail < desired_points)) {
 						points.push_back(new_point);
-						searchGrid(new_point, gi, gj, gk);
-						m_grid[indexTransform(gi, gj, gk)] = points.size() - 1;
+						gridIndex = searchGrid(new_point);
+						m_grid[indexTransform(gridIndex.i, gridIndex.j, gridIndex.k)] = tail;
 						tail++;
-						
-					}
-					else
-					{
-						std::cout << "++++" <<std::endl;
 					}
 				}
-			//	if (collisionJudge(new_point))
-
-
 			}
 		}
 
+		std::cout << "Finish!!!" << std::endl;
 		auto ptSet = this->statePointSet()->getDataPtr();
 
 		ptSet->setPoints(points);
-
-
-
-
 	}
 
 
