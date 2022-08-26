@@ -31,6 +31,7 @@ if(PERIDYNO_Qt5_GUI)
             ParticleSystem  
             QtGUI
 			RigidBody
+            Modeling
 			GLRenderEngine
             -Wl,--no-whole-archive) 
 
@@ -41,6 +42,7 @@ if(PERIDYNO_Qt5_GUI)
             IO 
             ParticleSystem  
 			RigidBody
+            Modeling
             QtGUI
             GlfwGUI
 			GLRenderEngine) 
@@ -51,12 +53,14 @@ if(PERIDYNO_Qt5_GUI)
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:GLRenderEngined.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:GLRenderEngine.lib")
     else()

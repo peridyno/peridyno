@@ -52,7 +52,7 @@ namespace dyno
 
 		QString subStr = match0.hasNext() ? match0.next().captured() : QString("Port");
 
-		QRegularExpression regexp("[A-Z][^A-Z]*");
+		QRegularExpression regexp("[A-Za-z()\\s]*");
 		QRegularExpressionMatchIterator match = regexp.globalMatch(subStr);
 
 		QString ret;

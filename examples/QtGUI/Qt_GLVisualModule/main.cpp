@@ -6,6 +6,7 @@
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/SquareEmitter.h>
+#include <ParticleSystem/MakeParticleSystem.h>
 
 #include <Module/CalculateNorm.h>
 
@@ -32,6 +33,9 @@
 
 #include "Collision/NeighborElementQuery.h"
 
+#include "SphereModel.h"
+#include "SphereSampler.h"
+
 using namespace std;
 using namespace dyno;
 
@@ -41,13 +45,26 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
+	//Create a sphere
+	auto sphere = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	sphere->varLocation()->setValue(Vec3f(0.6, 0.85, 0.5));
+	sphere->varRadius()->setValue(0.1f);
+	sphere->graphicsPipeline()->disable();
 
-// 	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-// 	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-// 	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-// 	fluid->connect(boundary->importParticleSystems());
+	//Create a sampler
+	auto sampler = scn->addNode(std::make_shared<SphereSampler<DataType3f>>());
+	sampler->varSamplingDistance()->setValue(0.005);
+	sampler->graphicsPipeline()->disable();
+
+	sphere->outSphere()->connect(sampler->inSphere());
+
+	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
+
+	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
+
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	//fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
+	initialParticles->connect(fluid->importInitialStates());
 
 	auto testNode = scn->addNode(std::make_shared<NodePortConnectionTest<DataType3f>>());
 	fluid->connect(testNode->importParticleSystem());

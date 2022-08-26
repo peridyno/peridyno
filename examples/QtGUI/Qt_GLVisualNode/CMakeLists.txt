@@ -29,6 +29,7 @@ if(PERIDYNO_Qt5_GUI)
             Framework 
             IO 
             ParticleSystem  
+            Modeling
             QtGUI
 			RigidBody
 			GLRenderEngine
@@ -41,6 +42,7 @@ if(PERIDYNO_Qt5_GUI)
             IO 
             ParticleSystem  
 			RigidBody
+            Modeling
             QtGUI
             GlfwGUI
 			GLRenderEngine) 
@@ -50,12 +52,14 @@ if(PERIDYNO_Qt5_GUI)
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")
