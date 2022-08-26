@@ -16,6 +16,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM AND PERIDYNO_PLUGIN_VTK)
         IO          
         ParticleSystem 
         RigidBody 
+        Modeling
         GlfwGUI
 		VtkRenderEngine
 		)
