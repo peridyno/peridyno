@@ -14,9 +14,6 @@
 
 #include "PoissonDiskSampling.h"
 
-#include "ParticleSystem/CircularEmitter.h"
-#include "ParticleSystem/SquareEmitter.h"
-
 namespace dyno 
 {
 	ModelingInitializer::ModelingInitializer()
@@ -91,38 +88,6 @@ namespace dyno
 				node->graphicsPipeline()->pushModule(module);
 
 				return node; 
-			});
-
-		auto particlePage = factory->addPage(
-			"Particle System",
-			"ToolBarIco/ParticleSystem/ParticleSystem.png");
-
-		auto particleGroup = particlePage->addGroup("Particle System");
-
-		particleGroup->addAction(
-			"Circular Emitter",
-			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
-			[=]()->std::shared_ptr<Node> {
-				auto emitter = std::make_shared<CircularEmitter<DataType3f>>();
-
-				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Vec3f(0, 1, 0));
-				emitter->stateOutline()->connect(wireRender->inEdgeSet());
-				emitter->graphicsPipeline()->pushModule(wireRender);
-				return emitter;
-			});
-
-		particleGroup->addAction(
-			"Square Emitter",
-			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
-			[=]()->std::shared_ptr<Node> { 
-				auto emitter = std::make_shared<SquareEmitter<DataType3f>>();
-
-				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Vec3f(0, 1, 0));
-				emitter->stateOutline()->connect(wireRender->inEdgeSet());
-				emitter->graphicsPipeline()->pushModule(wireRender);
-				return emitter;;
 			});
 	}
 }

@@ -31,9 +31,7 @@ if(PERIDYNO_Qt5_GUI)
             Modeling
             Interaction
             IO 
-            ParticleSystem  
             QtGUI
-			RigidBody
 			GLRenderEngine
             -Wl,--no-whole-archive) 
 
@@ -44,8 +42,6 @@ if(PERIDYNO_Qt5_GUI)
             Modeling
             Interaction
             IO 
-            ParticleSystem 
-			RigidBody
             QtGUI
 			GLRenderEngine) 
 
@@ -54,7 +50,6 @@ if(PERIDYNO_Qt5_GUI)
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoInteraction-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
@@ -62,7 +57,6 @@ if(PERIDYNO_Qt5_GUI)
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoInteraction-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()

@@ -73,7 +73,7 @@ option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework)
+    set(LIB_DEPENDENCY Core IO Framework GLRenderEngine)
     build_library(ParticleSystem LIB_DEPENDENCY)
 
     if(PERIDYNO_LIBRARY_PERIDYNAMICS)

@@ -15,7 +15,7 @@ set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
                       C_STANDARD 99
                       FOLDER "Examples/Tutorials")
 
-target_link_libraries(${PROJECT_NAME} GlfwGUI ParticleSystem GLRenderEngine)
+target_link_libraries(${PROJECT_NAME} GlfwGUI GLRenderEngine)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/Tutorials")
 

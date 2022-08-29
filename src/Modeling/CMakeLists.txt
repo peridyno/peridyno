@@ -42,7 +42,7 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>)
 
-target_link_libraries(${LIB_NAME} Core Framework GLRenderEngine ParticleSystem)
+target_link_libraries(${LIB_NAME} Core Framework GLRenderEngine)
 
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets
