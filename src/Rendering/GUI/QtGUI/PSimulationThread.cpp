@@ -55,6 +55,7 @@ namespace dyno
 		if (mMutex.tryLock(mTimeOut))
 		{
 			SceneGraphFactory::instance()->pushScene(scn);
+			scn->reset();
 			this->reset(0);
 
 			mMutex.unlock();

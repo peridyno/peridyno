@@ -32,7 +32,7 @@ int main()
 	//auto pRender2 = scn->addNode(std::make_shared<GLCommonPointVisualNode<DataType3f>>());
 
 
-	mesh->varFileName()->setValue("../../data/standard/standard_sphere.obj");
+	mesh->varFileName()->setValue(getAssetPath() + "standard/standard_sphere.obj");
 	mesh->outTriangleSet()->connect(pickerNode->inTopology());
 	/*mesh->outTriangleSet()->connect(surfacePickerNode->inInTopology());
 	mesh->outTriangleSet()->connect(edgePickerNode->inInTopology());
