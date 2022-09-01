@@ -32,3 +32,5 @@ buildDebug/*
 *.ipch
 /docs
 /console_log.txt
+/src/Picker/MouseIntersect.cu
+/src/Picker/MouseIntersect.h

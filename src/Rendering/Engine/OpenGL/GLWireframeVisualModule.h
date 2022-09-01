@@ -29,8 +29,9 @@ namespace dyno
 		DECLARE_CLASS(GLWireframeVisualModule)
 	public:
 		GLWireframeVisualModule();
-
 	public:
+		std::string caption() override;
+
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
 
 	protected:

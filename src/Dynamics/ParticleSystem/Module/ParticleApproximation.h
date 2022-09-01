@@ -21,6 +21,44 @@
 namespace dyno
 {
 
+#define cuIntegralAdh(size, type, scale, Func,...){					\
+		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
+		if (type == KT_Smooth)											\
+		{																\
+			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
+				return SmoothKernel<Real>::integral(r, h, s);	\
+			};																\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+		}																\
+		else if (type == KT_Spiky)										\
+		{																\
+			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
+				return SpikyKernel<Real>::integral(r, h, s);					\
+			};															\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+		}																\
+		cuSynchronize();												\
+	}
+
+#define cuIntegral(size, type, scale, Func,...){					\
+		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
+		if (type == KT_Smooth)											\
+		{																\
+			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
+				return SmoothKernel<Real>::integral(r, h, s);	\
+			};																\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+		}																\
+		else if (type == KT_Spiky)										\
+		{																\
+			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
+				return SpikyKernel<Real>::integral(r, h, s);					\
+			};															\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+		}																\
+		cuSynchronize();												\
+	}
+
 #define cuZerothOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
 		if (type == KT_Smooth)											\

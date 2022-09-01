@@ -17,6 +17,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		PointSetToTriangleSet();
+		PointSetToTriangleSet(Real r) : mRadius(r) {};
 		~PointSetToTriangleSet() override;
 
 		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
@@ -31,6 +32,7 @@ namespace dyno
 
 	private:
 		std::shared_ptr<PointSetToPointSet<TDataType>> mPointMapper;
+		Real mRadius = 0.0125;
 	};
 
 	IMPLEMENT_TCLASS(PointSetToTriangleSet, TDataType)

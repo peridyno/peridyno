@@ -91,10 +91,16 @@ namespace dyno
 
 		DArray<Edge>& getEdges() {return m_edges;}
 
+		void setEdges(std::vector<Edge>& edges);
+		void setEdges(DArray<Edge>& edges);
+
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
+
+		DArrayList<int>& getVer2Edge();
 
 	protected:
 		DArray<Edge> m_edges;
+		DArrayList<int> m_ver2Edge;
 	};
 }
 

@@ -27,17 +27,20 @@ namespace dyno
 	template<typename TDataType>
 	void NeighborTriQueryOctree<TDataType>::compute()
 	{
-		//printf("NBR_COMPUTE:\n");
+		//printf("NBR_COMPUTE: Tri\n");
 		if (!this->inPosition()->isEmpty() && !this->inTriPosition()->isEmpty() && !this->inTriangles()->isEmpty())
 		{
 
 			int p_num = this->inPosition()->size();
+			//printf("p_num = %d\n", p_num);
+			if (p_num == 0) return;
 			if (m_queryAABB.size() != p_num)
 			{
 				m_queryAABB.resize(p_num);
 			}
-
+			
 			int t_num = this->inTriangles()->size();
+			if (t_num == 0) return;
 			if (m_queriedAABB.size() != t_num)
 			{
 				m_queriedAABB.resize(t_num);
@@ -70,6 +73,13 @@ namespace dyno
 			if (this->outNeighborIds()->size() != p_num)
 			{
 				this->outNeighborIds()->allocate();
+				DArray<int> nbrNum;
+				nbrNum.resize(p_num);
+				nbrNum.reset();
+				auto& nbrIds = this->outNeighborIds()->getData();
+				nbrIds.resize(nbrNum);
+				nbrNum.clear();
+
 				//this->outNeighborIds()->getData().resize(p_num);
 			}
 			auto& nbrIds = this->outNeighborIds()->getData();
@@ -82,12 +92,13 @@ namespace dyno
 			
 			DArray<int> nbrNum;
 			nbrNum.resize(p_num);
-			
+			nbrNum.reset();
 			//printf("NBR_COMPUTE outContactList(): %d \n", m_broadPhaseCD->outContactList()->getData().size());
 			int sum1 = nbr.elementSize();
 			//printf("NBTQ Octree: outContactList Size(sum1): %d\n", sum1);
 			if (sum1 > 0)
 			{
+				//printf("one %d %d\n", nbrNum.size(), p_num);
 				cuExecute(p_num,
 					NTQ_Narrow_Count,
 					nbr,
@@ -116,7 +127,10 @@ namespace dyno
 					nbrNum.clear();
 					cuSynchronize();
 				}
+
+				//printf("outnbrSize = %d\n", this->outNeighborIds()->size());
 			}
+			
 		}
 		//printf("NBR_COMPUTE end!\n");
 	}
@@ -181,8 +195,8 @@ namespace dyno
 			int j = nbrIds_i[ne];
 			Point3D point(position[tId]);
 			Triangle3D t3d_n(vertex[triangles[j][0]], vertex[triangles[j][1]], vertex[triangles[j][2]]);
-
-			if (point.distance(t3d_n) < radius && point.distance(t3d_n) > EPSILON
+			Real p_dis_t = abs(point.distance(t3d_n));
+			if (p_dis_t< radius && p_dis_t > EPSILON
 				//&& (((point.project(t3d_n).origin - point.origin) / (point.project(t3d_n).origin - point.origin).norm()).cross(t3d_n.normal() / t3d_n.normal().norm())).norm() < 0.001
 				)
 			{

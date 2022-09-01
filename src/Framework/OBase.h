@@ -39,6 +39,13 @@ namespace dyno {
 		~OBase() override;
 
 		/**
+		 * @brief Return the caption
+		 * 
+		 * @return The default value is the class name, overload this virtual function to return a user-defined caption name
+		 */
+		virtual std::string caption();
+
+		/**
 		 * @brief Add a field to Base
 		 * FieldID will be set to the name of Field by default
 		 */

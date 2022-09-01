@@ -9,6 +9,7 @@ if(PERIDYNO_LIBRARY_FRAMEWORK)
     add_subdirectory(Test_Field)
     add_subdirectory(Test_Pipeline)
     add_subdirectory(Test_CCD)
+    add_subdirectory(Test_Serialization)
 endif()
 
 if(PERIDYNO_LIBRARY_VOLUME)

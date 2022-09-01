@@ -8,8 +8,11 @@
 #include "Module/BoundaryConstraint.h"
 #include "Module/VariationalApproximateProjection.h"
 
-#include "ParticleEmitterRound.h"
-#include "ParticleEmitterSquare.h"
+#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/SquareEmitter.h"
+
+#include "GLWireframeVisualModule.h"
+
 #include "ParticleFluid.h"
 #include "StaticBoundary.h"
 
@@ -27,7 +30,6 @@ namespace dyno
 		TypeInfo::New<VariationalApproximateProjection<DataType3f>>();
 		//TypeInfo::New<BoundaryConstraint<DataType3f>>();
 
-
 		initializeNodeCreators();
 	}
 
@@ -35,20 +37,37 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Particle System", 
+		auto page = factory->addPage(
 			"Particle System", 
 			"ToolBarIco/ParticleSystem/ParticleSystem.png");
 
-		group->addAction(
-			"Particle Emitter 1", 
-			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleEmitterRound<DataType3f>>(); });
+		auto group = page->addGroup("Particle System");
 
 		group->addAction(
-			"Particle Emitter 2",
+			"Circular Emitter",
+			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
+			[=]()->std::shared_ptr<Node> {
+				auto emitter = std::make_shared<CircularEmitter<DataType3f>>();
+
+				auto wireRender = std::make_shared<GLWireframeVisualModule>();
+				wireRender->setColor(Vec3f(0, 1, 0));
+				emitter->stateOutline()->connect(wireRender->inEdgeSet());
+				emitter->graphicsPipeline()->pushModule(wireRender);
+				return emitter;
+			});
+
+		group->addAction(
+			"Square Emitter",
 			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleEmitterSquare<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> {
+				auto emitter = std::make_shared<SquareEmitter<DataType3f>>();
+
+				auto wireRender = std::make_shared<GLWireframeVisualModule>();
+				wireRender->setColor(Vec3f(0, 1, 0));
+				emitter->stateOutline()->connect(wireRender->inEdgeSet());
+				emitter->graphicsPipeline()->pushModule(wireRender);
+				return emitter;;
+			});
 
 		group->addAction(
 			"Particle Fluid",

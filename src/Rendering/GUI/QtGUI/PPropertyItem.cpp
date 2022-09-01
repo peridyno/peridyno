@@ -414,6 +414,47 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+	QStringFieldWidget::QStringFieldWidget(FBase* field)
+		: QGroupBox()
+	{
+		mField = field;
+
+		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(field);
+
+		//this->setStyleSheet("border:none");
+		QHBoxLayout* layout = new QHBoxLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		QLabel* name = new QLabel();
+		name->setFixedSize(150, 18);
+		name->setText(FormatFieldWidgetName(field->getObjectName()));
+
+		fieldname = new QLineEdit;
+		fieldname->setText(QString::fromStdString(f->getValue()));
+
+		layout->addWidget(name, 0);
+		layout->addWidget(fieldname, 1);
+		layout->setSpacing(5);
+
+		connect(fieldname, &QLineEdit::textChanged, this, &QStringFieldWidget::changeValue);
+	}
+
+	void QStringFieldWidget::changeValue(QString str)
+	{
+		auto f = TypeInfo::cast<FVar<std::string>>(mField);
+		if (f == nullptr)
+		{
+			return;
+		}
+		f->setValue(str.toStdString());
+		f->update();
+
+		emit fieldChanged();
+	}
+
 	QFilePathWidget::QFilePathWidget(FBase* field)
 		: QGroupBox()
 	{
@@ -577,6 +618,8 @@ namespace dyno
 		auto& enums = f->getDataPtr()->enumMap();
 
 		f->getDataPtr()->setCurrentKey(mComboxIndexMap[index]);
+		//To notify the field is updated
+		f->update();
 	}
 
 }

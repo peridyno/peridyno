@@ -381,6 +381,13 @@ namespace dyno
 
 			layout->addWidget(fw, j, 0);
 		}
+		else if (template_name == std::string(typeid(std::string).name()))
+		{
+			auto fw = new QStringFieldWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
+			layout->addWidget(fw, j, 0);
+		}		
 	}
 
 	void PPropertyWidget::addArrayFieldWidget(FBase* field)

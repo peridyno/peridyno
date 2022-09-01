@@ -3,6 +3,8 @@
 #include "RigidBody/RigidBody.h"
 
 #include "ParticleSystem.h"
+#include "FilePath.h"
+
 
 namespace dyno {
 	template <typename TDataType> class DistanceField3D;
@@ -26,6 +28,7 @@ namespace dyno {
 		void translate(Coord t);
 		void scale(Real s);
 
+		void resetStates();
 	protected:
 		void updateStates() override;
 
@@ -33,6 +36,10 @@ namespace dyno {
 		DEF_VAR(Real, TangentialFriction, 0.0, "Tangential friction");
 		DEF_VAR(Real, NormalFriction, 1.0, "Normal friction");
 
+		DEF_VAR(Vec3f, CubeVertex_lo, Vec3f(0.0f), "Cube");
+		DEF_VAR(Vec3f, CubeVertex_hi, Vec3f(1.0f), "Cube");
+
+		DEF_VAR(FilePath, FileName, "", "");
 
 		std::vector<std::shared_ptr<BoundaryConstraint<TDataType>>> m_obstacles;
 

@@ -129,7 +129,7 @@ namespace dyno {
 			return m_data[id];
 		}
 
-		DYN_FUNC inline size_t size() const { return m_nxy * m_nz; }
+		DYN_FUNC inline size_t size() const { return m_nx * m_ny * m_nz; }
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
 

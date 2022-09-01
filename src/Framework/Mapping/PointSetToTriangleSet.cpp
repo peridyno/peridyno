@@ -35,7 +35,7 @@ namespace dyno
 
 		mPointMapper->setFrom(this->inPointSet()->getDataPtr());
 		mPointMapper->setTo(shape);
-
+		mPointMapper->setSearchingRadius(mRadius);
 		mPointMapper->initialize();
 	}
 

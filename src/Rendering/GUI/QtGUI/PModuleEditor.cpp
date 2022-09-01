@@ -39,6 +39,8 @@ namespace dyno
 
 
 		auto moduleFlowView = new Qt::QtModuleFlowWidget(nullptr, widget);
+
+		mModuleFlowScene = moduleFlowView->getModuleFlowScene();
 		this->setCentralWidget(moduleFlowView);
 
 		//Set up property dock widget

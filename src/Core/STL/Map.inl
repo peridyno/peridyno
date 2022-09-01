@@ -27,12 +27,10 @@ namespace dyno
 		//return the index of the first element that is equel to or biger than val
 		int t = leftBound(pair, m_pairs, m_size);
 
-		//if the element is equel to the val, return the sum of the old element and the new element
+		//if the key is equel, do not insert
 		if (m_pairs[t] == pair)
-		{
-			m_pairs[t].second += pair.second;
 			return m_pairs + t;
-		}
+
 		//insert val to t location
 		for (int j = m_size; j > t; j--)
 		{

@@ -3,6 +3,7 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::resize(const uint n)
 	{
+		if (m_totalNum == n) return;
 		//		assert(n >= 1);
 		if (m_data!=nullptr) clear();
 

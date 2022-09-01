@@ -144,7 +144,7 @@ namespace dyno
 	void DensityPBD<TDataType>::constrain()
 	{
 		int num = this->inPosition()->size();
-		
+
 		if (m_position_old.size() != this->inPosition()->size())
 			m_position_old.resize(this->inPosition()->size());
 
@@ -221,6 +221,7 @@ namespace dyno
 		if (pId >= velArr.size()) return;
 
 		velArr[pId] += (curPos[pId] - prePos[pId]) / dt;
+
 	}
 
 	template<typename TDataType>

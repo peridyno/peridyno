@@ -127,9 +127,10 @@ TEST(Array2D, Copy)
 	DArray2D<int> dArr2d;
 	dArr2d.assign(cArr2d);
 
-	CArray2D<int> cArr2d1, cArr2d2;
-	cArr2d1.assign(dArr2d);
-	EXPECT_EQ(cArr2d1(0, 1), 1);
+	CArray2D<int> cArr2d2;
+	cArr2d2.assign(dArr2d);
+
+	EXPECT_EQ(cArr2d2(0, 1), 1);
 
 	cArr2d2.assign(cArr2d);
 	EXPECT_EQ(cArr2d2(0, 1), 1);
@@ -155,9 +156,9 @@ TEST(Array3D, Copy)
 	DArray3D<int> dArr3d;
 	dArr3d.assign(cArr3d);
 
-	CArray3D<int> cArr3d_1, cArr3d_2;
-	cArr3d_1.assign(dArr3d);
-	cArr3d_2.assign(cArr3d);
+	CArray3D<int> cArr3d_1,cArr3d_2;
+	cArr3d_1.assign(cArr3d);
+	cArr3d_2.assign(dArr3d);
 
 	ind = 0;
 	for (int k = 0; k < 3; k++)

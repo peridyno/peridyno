@@ -4,11 +4,15 @@
 
 #include "CubeModel.h"
 #include "SphereModel.h"
+#include "SphereSampler.h"
 
 #include "CubeSampler.h"
 
 #include "StaticTriangularMesh.h"
+#include "GLWireframeVisualModule.h"
 #include "GLSurfaceVisualModule.h"
+
+#include "PoissonDiskSampling.h"
 
 namespace dyno 
 {
@@ -21,10 +25,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
+		auto page = factory->addPage(
 			"Modeling", 
-			"Modeling", 
-			"ToolBarIco/FiniteElement/FiniteElement.png");
+			"ToolBarIco/Modeling/Modeling.png");
+
+		auto group = page->addGroup("Modeling");
 
 		group->addAction(
 			"Cube",
@@ -49,10 +54,25 @@ namespace dyno
 			});
 
 		group->addAction(
+			"Sphere Sampler",
+			"ToolBarIco/Modeling/SphereSampler_v3.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<SphereSampler<DataType3f>>();
+			});
+
+
+		group->addAction(
 			"Cube Sampler",
 			"ToolBarIco/Modeling/CubeSampler.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<CubeSampler<DataType3f>>();
+			});
+
+		group->addAction(
+			"Poisson Disk Sampler",
+			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PoissonDiksSampling<DataType3f>>();
 			});
 
 		group->addAction(

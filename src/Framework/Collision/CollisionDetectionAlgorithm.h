@@ -15,6 +15,8 @@ namespace dyno
 		using Manifold = TManifold<Real>;
 		using Sphere3D = TSphere3D<Real>;
 		using OBox3D = TOrientedBox3D<Real>;
+		using Capsule3D = TCapsule3D<Real>;
+		using Triangle3D = TTriangle3D<Real>;
 
 		//--------------------------------------------------------------------------------------------------
 		// Resources:
@@ -38,6 +40,33 @@ namespace dyno
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Tet3D& tet);
 
 		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Sphere3D& sphere);
+		
+		//=========================================
+		DYN_FUNC static void request(Manifold& m, const Capsule3D& cap0, const Capsule3D& cap1);//untested
+
+		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Capsule3D& cap);//untested
+
+		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Triangle3D& tri);//untested
+		DYN_FUNC static void request(Manifold& m, const Triangle3D& tri, const Sphere3D& sphere);//untested
+
+
+		DYN_FUNC static void request(Manifold& m, const Triangle3D& tri, const Capsule3D cap); //untested
+
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Capsule3D& cap);//untested
+		DYN_FUNC static void request(Manifold& m, const Capsule3D& cap, const Tet3D& tet);//untested
+
+
+		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Capsule3D& cap);//untested
+
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Triangle3D& tri);
+
+		DYN_FUNC static void request(Manifold& m, const Triangle3D& tri, const Tet3D& tet);
+
+		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Triangle3D& tri);//unfinished
+
+		//=========================================
+
+
 	private:
 		
 

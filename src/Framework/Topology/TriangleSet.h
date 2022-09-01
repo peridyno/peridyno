@@ -91,6 +91,7 @@ namespace dyno
 
 		DArray<Triangle>& getTriangles() { return m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
+		void setTriangles(DArray<Triangle>& triangles);
 
 		DArrayList<int>& getVertex2Triangles();
 

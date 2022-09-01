@@ -20,6 +20,7 @@ namespace dyno
 		void setPoints(std::vector<Coord>& pos);
 		void setPoints(DArray<Coord>& pos);
 		void setSize(int size);
+		void rotate(Coord angle);
 
 		DArray<Coord>& getPoints() { return m_coords; }
 
@@ -31,6 +32,8 @@ namespace dyno
 		void scale(Real s);
 		void scale(Coord s);
 		void translate(Coord t);
+
+		void rotate(Quat<Real> q);
 
 		void loadObjFile(std::string filename);
 

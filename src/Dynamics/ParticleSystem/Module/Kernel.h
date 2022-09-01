@@ -21,6 +21,11 @@ namespace dyno {
 			return Real(0);
 		}
 
+		DYN_FUNC inline virtual Real integral(const Real r, const Real h)
+		{
+			return Real(0);
+		}
+
 	public:
 		Real m_scale = Real(1);
 	};
@@ -58,6 +63,11 @@ namespace dyno {
 			return SpikyKernel<Real>::gradient(r, h, m_scale);
 		}
 
+		DYN_FUNC inline Real integral(const Real r, const Real h) override
+		{
+			return SpikyKernel<Real>::integral(r, h, m_scale);
+		}
+
 		DYN_FUNC static inline Real weight(const Real r, const Real h, Real scale)
 		{
 			const Real q = r / h;
@@ -78,6 +88,17 @@ namespace dyno {
 				const Real d = Real(1) - q;
 				const Real hh = h * h;
 				return -45.0f / ((Real)M_PI * hh*h) *d*d * scale;
+			}
+		}
+
+		DYN_FUNC static inline Real integral(const Real r, const Real h, Real scale)
+		{
+			const Real q = r / h;
+			if (q > 1.0f) return 0.0f;
+			else {
+				const Real qq = q * q;
+				const Real hh = h * h;
+				return -15.0f / ((Real)M_PI * hh) * (q - Real(1.5) * qq + q * qq - Real(0.25) * qq * qq - Real(0.25)) * scale;
 			}
 		}
 	};
@@ -149,6 +170,16 @@ namespace dyno {
 				const Real dd = Real(1) - q * q;
 				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
 				return -alpha * dd* scale;
+			}
+		}
+
+		DYN_FUNC static inline Real integral(const Real r, const Real h, Real scale)
+		{
+			const Real q = r / h;
+			if (q > Real(1)) return Real(0);
+			else {
+				const Real hh = h * h;
+				return 1.0 / (hh * h) * (Real(2) / 3 - q + q * q / Real(3));
 			}
 		}
 	};

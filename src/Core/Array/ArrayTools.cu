@@ -274,7 +274,7 @@ namespace dyno
 
 		mapStartPtr[tId] = map;
 
-		printf("parallel_init_for_map: ArrayTools the ptrpair is: %x \n\n", elementsPtr + index[tId]);
+	    //printf("parallel_init_for_map: ArrayTools the ptrpair is: %x \n\n", elementsPtr + index[tId]);
 	}
 
 	template<int N>

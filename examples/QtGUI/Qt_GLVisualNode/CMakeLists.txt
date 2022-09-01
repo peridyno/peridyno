@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-if(PERIDYNO_Qt5_GUI)
+if(PERIDYNO_Qt5_GUI AND PERIDYNO_LIBRARY_PARTICLESYSTEM AND PERIDYNO_LIBRARY_RIGIDBODY)
     set(PROJECT_NAME Qt_GLVisualNode)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
@@ -10,14 +10,12 @@ if(PERIDYNO_Qt5_GUI)
         link_libraries(Qt5::Widgets Qt5::Core Qt5::Gui)
     endif()
 
-    set(SRC_DIR "${PROJECT_SOURCE_DIR}/examples/QtGUI/${PROJECT_NAME}")
-
     file(
         GLOB_RECURSE SRC_LIST 
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
-        "${SRC_DIR}/*.c*"
-        "${SRC_DIR}/*.h*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*.c*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
     )
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
@@ -31,6 +29,7 @@ if(PERIDYNO_Qt5_GUI)
             Framework 
             IO 
             ParticleSystem  
+            Modeling
             QtGUI
 			RigidBody
 			GLRenderEngine
@@ -43,6 +42,7 @@ if(PERIDYNO_Qt5_GUI)
             IO 
             ParticleSystem  
 			RigidBody
+            Modeling
             QtGUI
             GlfwGUI
 			GLRenderEngine) 
@@ -52,12 +52,14 @@ if(PERIDYNO_Qt5_GUI)
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
            "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
             /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
+            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
             /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")

@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2022 Shusen Liu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 #pragma once
 #include "ParametricModel.h"
+#include "GLSurfaceVisualModule.h"
+#include "GLWireframeVisualModule.h"
 
 namespace dyno
 {
@@ -32,15 +34,26 @@ namespace dyno
 
 	public:
 		DEF_VAR(Coord, Center, 0, "Sphere center");
-		DEF_VAR(Real, Radius, 0, "Sphere radius");
+
+		DEF_VAR(Real, Radius, 0.2, "Sphere radius");
+
+		//DEF_VAR(Real, triangleLength, 0.5, "Length of triangle edge");
+
+		DEF_VAR(Real, Theta, 0.3, "Angle");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
 
+		void disableRender();
+
 	protected:
 		void resetStates() override;
+
+		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
+
+
 
 	IMPLEMENT_TCLASS(SphereModel, TDataType);
 }

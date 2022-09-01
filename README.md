@@ -8,7 +8,7 @@
 
 # Overview
 
-PERIDYNO is a CUDA-based, highly parallal physics engine targeted at providing real-time simulation of physical environments for intelligent agents. 
+PeriDyno is a CUDA-based, highly parallal physics engine targeted at providing real-time simulation of physical environments for intelligent agents. 
 
 # Installation
 
@@ -27,7 +27,7 @@ IDE:
 
 CUDA:
 
-- Latest tests were done based on CUDA Toolkit 11.4, should be compatible will other old version.
+- Latest tests were done based on CUDA Toolkit 11.4, should be compatible will other old versions.
 
 Graphics:
 
@@ -44,7 +44,7 @@ Optional:
 
 ### Installation:
 
-Aside from those optional, other libraries are integrated inside the project to simplify the installation. Use the following git command to down the project as well as other dependences.
+Aside from those optional, other libraries are integrated inside the project to simplify the installation. Use the following git command to download the project as well as other dependences.
 
 ```
 git clone --recursive https://github.com/peridyno/peridyno.git
@@ -63,11 +63,17 @@ cd peridyo/build
 cmake ..
 ```
 
-# Examples
+# Applications
 
-<img src="data/fluid.png" style="zoom:80%;" />
+With a scene moded by PeriDyno, it can either be run as a GFLW application, Qt application or even a web application,  you don't need to change any code when switching between those applications.
 
+- GLFW application
 
+<img src="data/screenshots/glfwapp.png" style="zoom:80%;" />
+
+- Qt application
+
+[<img src="data/screenshots/qtapp.png" style="zoom:80%;" />](https://user-images.githubusercontent.com/66506655/185019397-5753c6a8-c88c-4e5a-aeab-dd837e3836ef.mp4)
 
 # License
 

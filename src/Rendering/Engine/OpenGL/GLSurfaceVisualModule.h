@@ -31,6 +31,7 @@ namespace dyno
 		GLSurfaceVisualModule();
 
 	public:
+		std::string caption() override;
 
 		//bool faceNormal = true;
 

@@ -6,7 +6,7 @@ namespace dyno
 {
 	template <typename T>
 	DYN_FUNC Set<T>::Set()
-		: STLBuffer()
+		: STLBuffer<T>()
 	{
 	}
 

@@ -90,6 +90,9 @@ public:
 	virtual bool connect(FBase* dst) = 0;
 	virtual bool disconnect(FBase* dst);
 
+	virtual std::string serialize() { return ""; }
+	virtual bool deserialize(const std::string& str) { return false; }
+
 	FBase* getTopField();
 	FBase* getSource();
 

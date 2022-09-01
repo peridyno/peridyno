@@ -15,12 +15,16 @@ namespace dyno
 		ParticleFluid(std::string name = "default");
 		virtual ~ParticleFluid();
 
-		void resetStates() override;
+
+		DEF_NODE_PORTS(ParticleEmitter<TDataType>, ParticleEmitter, "Particle Emitters");
+
+		DEF_NODE_PORTS(ParticleSystem<TDataType>, InitialState, "Initial Fluid Particles");
 
 	protected:
+		void resetStates() override;
+
 		void preUpdateStates();
 
-	private:
-		DEF_NODE_PORTS(ParticleEmitter<TDataType>, ParticleEmitter, "Particle Emitters");
+		void loadParticleFromNode();
 	};
 }

@@ -548,7 +548,6 @@ void svd(
 	Stmp3.f = __fadd_rn(Stmp3.f, Stmp4.f);					
 
 	// Swap columns 1-2 if necessary
-
 	Stmp4.ui = (Stmp1.f < Stmp2.f) ? 0xffffffff : 0;	
 	Stmp5.ui = Sa11.ui^Sa12.ui;								
 	Stmp5.ui = Stmp5.ui&Stmp4.ui;							
@@ -599,7 +598,7 @@ void svd(
 	Sv12.f = Sv12.f*Stmp4.f;								
 	Sv22.f = Sv22.f*Stmp4.f;								
 	Sv32.f = Sv32.f*Stmp4.f;								
-
+	
 	// Swap columns 1-3 if necessary
 
 	Stmp4.ui = (Stmp1.f < Stmp3.f) ? 0xffffffff : 0;		
@@ -655,7 +654,7 @@ void svd(
 
 	// Swap columns 2-3 if necessary
 
-	Stmp4.ui = (Stmp2.f < Stmp3.f) ? 0xffffffff : 0;		
+	Stmp4.ui = (Stmp2.f < Stmp3.f) ? 0xffffffff : 0;
 	Stmp5.ui = Sa12.ui^Sa13.ui;								
 	Stmp5.ui = Stmp5.ui&Stmp4.ui;							
 	Sa12.ui = Sa12.ui^Stmp5.ui;								

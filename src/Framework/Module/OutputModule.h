@@ -9,7 +9,7 @@ namespace dyno
 		OutputModule();
 		virtual ~OutputModule();
 
-		std::string getModuleType() override { return "OuputModule"; }
+		std::string getModuleType() override { return "OutputModule"; }
 
 		virtual void flush() {};
 

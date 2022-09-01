@@ -109,6 +109,9 @@ namespace dyno {
 		bool resize(const DArray<int>& counts);
 		bool resize(const uint arraySize, const uint eleSize);
 
+
+		bool resize(uint num);
+
 		template<typename ET2>
 		bool resize(const ArrayList<ET2, DeviceType::GPU>& src);
 

@@ -298,7 +298,6 @@ bool Node::addModule(std::shared_ptr<Module> module)
 		auto downModule = TypeInfo::cast<TopologyMapping>(module);
 		this->addToTopologyMappingList(downModule);
 	}
-
 	return ret;
 }
 
@@ -314,8 +313,6 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 {
 	bool ret = true;
 
-	ret &= deleteFromModuleList(module);
-
 	std::string mType = module->getModuleType();
 
 	if (std::string("TopologyModule").compare(mType) == 0)
@@ -327,6 +324,8 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 		auto downModule = TypeInfo::cast<TopologyMapping>(module);
 		this->deleteFromTopologyMappingList(downModule);
 	}
+
+	ret &= deleteFromModuleList(module);
 		
 	return ret;
 }

@@ -31,8 +31,10 @@ namespace dyno
 		Scan scan;
 		scan.exclusive(m_index);
 
-		m_elements.resize(total_num);
+		//printf("total num 2 = %d\n", total_num);
 
+		m_elements.resize(total_num);
+		
 		parallel_allocate_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
 
 		return true;
@@ -162,6 +164,19 @@ namespace dyno
 		
 		return true;
 	}
+
+	template<class ElementType>
+	bool ArrayList<ElementType, DeviceType::GPU>::resize(uint num)
+	{
+		assert(num > 0);
+
+		m_index.resize(num);
+		m_lists.resize(num);
+
+		return true;
+	}
+
+	
 
 	template<class ElementType>
 	void ArrayList<ElementType, DeviceType::CPU>::clear()

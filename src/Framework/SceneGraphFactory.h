@@ -37,6 +37,9 @@ namespace dyno
 
 		void pushScene(std::shared_ptr<SceneGraph> scn);
 
+		void popScene();
+		void popAllScenes();
+
 	private:
 		SceneGraphFactory() = default;
 		~SceneGraphFactory() = default;

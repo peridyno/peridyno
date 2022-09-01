@@ -10,6 +10,10 @@
 #include "DirectedAcyclicGraph.h"
 #include "AutoLayoutDAG.h"
 
+#include <QtWidgets/QMenu>
+#include <QLineEdit>
+#include <QtWidgets>
+
 namespace dyno
 {
 	class States : public Module
@@ -72,6 +76,8 @@ namespace Qt
 		connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModule);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtModuleFlowScene::addModule);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtModuleFlowScene::deleteModule);
+
+		connect(this, &QtFlowScene::outPortConextMenu, this, &QtModuleFlowScene::promoteOutput);
 	}
 
 	QtModuleFlowScene::~QtModuleFlowScene()
@@ -250,6 +256,38 @@ namespace Qt
 		mActivePipeline = mNode->graphicsPipeline();
 
 		updateModuleGraphView();
+	}
+
+	void QtModuleFlowScene::promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos)
+	{
+		QMenu portMenu;
+
+		portMenu.setObjectName("PortMenu");
+
+		
+		auto exportAction = portMenu.addAction("Export");
+
+		connect(exportAction, &QAction::triggered, [&]()
+			{
+				auto dataModel = dynamic_cast<QtModuleWidget*>(n.nodeDataModel());
+
+				if (dataModel != nullptr)
+				{
+					auto m = dataModel->getModule();
+					if (m != nullptr)
+					{
+						auto fieldOut = m->getOutputFields();
+
+						mActivePipeline->promoteOutputToNode(fieldOut[index]);
+					}
+
+					emit nodeExportChanged();
+				}
+			});
+
+		QPoint p(pos.x(), pos.y());
+
+		portMenu.exec(p);
 	}
 
 	void QtModuleFlowScene::updateModuleGraphView()

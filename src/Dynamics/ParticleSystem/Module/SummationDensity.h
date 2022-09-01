@@ -77,6 +77,10 @@ namespace dyno {
 		 */
 		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Return the particle density");
 
+		Real getParticleMass() {
+			return m_particle_mass;
+		}
+		
 	private:
 		void calculateParticleMass();
 

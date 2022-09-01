@@ -48,5 +48,6 @@ namespace dyno {
 
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
 		std::shared_ptr<DiscreteElements<TDataType>> discreteSet;		
+		int cnt = 0;
 	};
 }

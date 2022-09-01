@@ -42,4 +42,17 @@ namespace dyno
 		mSceneGraphs.push(scn);
 	}
 
+	void SceneGraphFactory::popScene()
+	{
+		mSceneGraphs.pop();
+	}
+
+	void SceneGraphFactory::popAllScenes()
+	{
+		while (!mSceneGraphs.empty())
+		{
+			mSceneGraphs.pop();
+		}
+	}
+
 }
