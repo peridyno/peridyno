@@ -228,7 +228,7 @@ namespace dyno
 
 		this->traverseForward<PostProcessing>();
 
-		this->traverseForward<AssignFrameNumberAct>(mFrameRate);
+		this->traverseForward<AssignFrameNumberAct>(mFrameNumber);
 
 		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
 
