@@ -239,6 +239,12 @@ namespace dyno {
 	{
 		m_all_nodes.clear();
 		m_post_ordered_nodes.clear();
+
+		node_buffer.clear();
+		node_count.clear();
+		nonRepeatNodes_cpy.clear();
+		aux_nodes.clear();
+		duplicates_count.clear();
 	}
 
 	template<typename TDataType>
@@ -1147,7 +1153,6 @@ namespace dyno {
 		/*************** step 2: remove duplicative nodes ****************/
 		int total_node_num = nodes.size();
 
-		DArray<int> duplicates_count;
 		duplicates_count.resize(total_node_num);
 
 		cuExecute(duplicates_count.size(),
@@ -1158,7 +1163,6 @@ namespace dyno {
 		int non_duplicative_num = thrust::reduce(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), (int)0, thrust::plus<int>());
 		thrust::exclusive_scan(thrust::device, duplicates_count.begin(), duplicates_count.begin() + duplicates_count.size(), duplicates_count.begin());
 
-		DArray<OctreeNode> node_buffer;
 		node_buffer.resize(2 * non_duplicative_num - 1);
 
 		//Remove duplicative nodes, record the first location using node.setStartIndex();
@@ -1192,13 +1196,10 @@ namespace dyno {
 		thrust::sort(thrust::device, node_buffer.begin(), node_buffer.begin() + node_buffer.size(), NodeCmp());
 
 		//print(node_buffer);
-
-		DArray<OctreeNode> nonRepeatNodes_cpy;
 		nonRepeatNodes_cpy.resize(node_buffer.size());
 		nonRepeatNodes_cpy.assign(node_buffer);
 
 		//leaf + LCA
-		DArray<int> node_count;
 		node_count.resize(node_buffer.size());
 
 		//step 3.2: remove duplicates
@@ -1220,11 +1221,7 @@ namespace dyno {
 			node_buffer,
 			non_duplicative_num);
 
-
-
 		//print(m_post_ordered_nodes);
-
-		DArray<OctreeNode> aux_nodes;
 		aux_nodes.resize(2 * m_post_ordered_nodes.size() - 1);
 
 		cuExecute(m_post_ordered_nodes.size(),
@@ -1245,13 +1242,6 @@ namespace dyno {
 			aux_nodes);
 
 		//print(m_post_ordered_nodes);
-
-
-		node_buffer.clear();
-		node_count.clear();
-		nonRepeatNodes_cpy.clear();
-		aux_nodes.clear();
-		duplicates_count.clear();
 	}
 
 	template<typename TDataType>

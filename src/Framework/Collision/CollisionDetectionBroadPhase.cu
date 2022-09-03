@@ -3,8 +3,6 @@
 
 namespace dyno
 {
-	typedef unsigned long long int PKey;
-
 	void print(DArray<int> arr)
 	{
 		CArray<int> h_arr;
@@ -36,9 +34,7 @@ namespace dyno
 		h_arr.clear();
 	};
 
-	IMPLEMENT_TCLASS(CollisionDetectionBroadPhase, TDataType)
-
-		template<typename TDataType>
+	template<typename TDataType>
 	CollisionDetectionBroadPhase<TDataType>::CollisionDetectionBroadPhase()
 		: CollisionModel()
 	{
@@ -48,21 +44,36 @@ namespace dyno
 	template<typename TDataType>
 	CollisionDetectionBroadPhase<TDataType>::~CollisionDetectionBroadPhase()
 	{
+		mH.clear();
+		mV0.clear();
+		mV1.clear();
+
+		mCounter.clear();
+		mNewCounter.clear();
+
+		mIds.clear();
+		mKeys.clear();
+
 		octree.release();
 	}
 
-	template<typename Coord>
+	template<typename Real, typename Coord>
 	__global__ void CDBP_SetupCorners(
+		DArray<Real> h,
 		DArray<Coord> v0,
 		DArray<Coord> v1,
-		DArray<AABB> box)
+		DArray<AABB> bbox)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 
-		if (tId >= box.size()) return;
+		if (tId >= bbox.size()) return;
 
-		v0[tId] = box[tId].v0;
-		v1[tId] = box[tId].v1;
+		AABB box = bbox[tId];
+
+		v0[tId] = box.v0;
+		v1[tId] = box.v1;
+
+		h[tId] = max(box.v1[0] - box.v0[0], max(box.v1[1] - box.v0[1], box.v1[2] - box.v0[2]));
 	}
 
 
@@ -371,70 +382,40 @@ namespace dyno
 		
 		auto& contacts = this->outContactList()->getData();
 
-		DArray<Coord> v0_arr;
-		DArray<Coord> v1_arr;
-
-		DArray<Real> h_arr;
-
-		v0_arr.resize(aabb_tar.size());
-		v1_arr.resize(aabb_tar.size());
-		h_arr.resize(aabb_tar.size());
+		mV0.resize(aabb_tar.size());
+		mV1.resize(aabb_tar.size());
+		mH.resize(aabb_tar.size());
 
 		cuExecute(aabb_tar.size(),
 			CDBP_SetupCorners,
-			v0_arr,
-			v1_arr,
+			mH,
+			mV0,
+			mV1,
 			aabb_tar);
 
-		cuExecute(aabb_tar.size(),
-			CDBP_ComputeAABBSize,
-			h_arr,
-			aabb_tar);
-
-		auto min_val = m_reduce_real.minimum(h_arr.begin(), h_arr.size());
-		auto min_v0 = m_reduce_coord.minimum(v0_arr.begin(), v0_arr.size());
-		auto max_v1 = m_reduce_coord.maximum(v1_arr.begin(), v1_arr.size());
-
+		auto min_val = m_reduce_real.minimum(mH.begin(), mH.size());
+		auto min_v0 = m_reduce_coord.minimum(mV0.begin(), mV0.size());
+		auto max_v1 = m_reduce_coord.maximum(mV1.begin(), mV1.size());
 
 		min_val = max(min_val, this->varGridSizeLimit()->getData());
 
-		h_arr.clear();
-		v0_arr.clear();
-		v1_arr.clear();
-
-
 		octree.setSpace(min_v0 - min_val, min_val, max(max_v1[0] - min_v0[0], max(max_v1[1] - min_v0[1], max_v1[2] - min_v0[2])) + 2.0f * min_val);
-		//octree.setSpace(Coord(0,0,0) - min_val, min_val, 1.0f + 2.0f * min_val);
-
 		octree.construct(aabb_tar);
 
-		//if(octree.getLevelMax() > 9)
-		//	octree.printPostOrderedTree();
-
-		DArray<int> counter;
-		counter.resize(aabb_src.size());
-		/*
-		cuExecute(aabb_src.size(),
-			CDBP_RequestIntersectionNumber,
-			counter,
-			aabb_src,
-			octree,
-			self_collision);
-		*/
+		mCounter.resize(aabb_src.size());
 		cuExecute(aabb_src.size(),
 			CDBP_RequestIntersectionNumberRemove,
-			counter,
+			mCounter,
 			aabb_src,
 			aabb_tar,
 			octree,
 			self_collision
 		);
 
-		int total_node_num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size(), (int)0, thrust::plus<int>());
-		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+		int total_node_num = thrust::reduce(thrust::device, mCounter.begin(), mCounter.begin() + mCounter.size(), (int)0, thrust::plus<int>());
+		thrust::exclusive_scan(thrust::device, mCounter.begin(), mCounter.begin() + mCounter.size(), mCounter.begin());
 
-		DArray<int> ids;
-		ids.resize(total_node_num);
+		mIds.resize(total_node_num);
 		/*
 		cuExecute(aabb_src.size(),
 			CDBP_RequestIntersectionIds,
@@ -446,8 +427,8 @@ namespace dyno
 			*/
 		cuExecute(aabb_src.size(),
 			CDBP_RequestIntersectionIdsRemove,
-			ids,
-			counter,
+			mIds,
+			mCounter,
 			aabb_src,
 			aabb_tar,
 			octree,
@@ -456,60 +437,39 @@ namespace dyno
 		// 		print(counter);
 		// 		print(ids);
 
-		DArray<PKey> keys;
-		keys.resize(ids.size());
-
+		mKeys.resize(mIds.size());
 
 		//remove duplicative ids and self id
-		cuExecute(counter.size(),
+		cuExecute(mCounter.size(),
 			CDBP_SetupKeys,
-			keys,
-			ids,
-			counter);
+			mKeys,
+			mIds,
+			mCounter);
 
-		thrust::sort(thrust::device, keys.begin(), keys.begin() + keys.size());
+		thrust::sort(thrust::device, mKeys.begin(), mKeys.begin() + mKeys.size());
 
-		// 		print(keys);
-		// 		print(counter);
-
-		DArray<int> new_count(counter.size());
+		mNewCounter.resize(mCounter.size());
 		cuExecute(aabb_src.size(),
 			CDBP_CountDuplicativeIds,
-			new_count,
-			keys,
-			counter,
+			mNewCounter,
+			mKeys,
+			mCounter,
 			aabb_src,
 			octree,
 			self_collision);
 
-		contacts.resize(new_count);
-
-// 		int ele_num = thrust::reduce(thrust::device, index.begin(), index.begin() + index.size(), (int)0, thrust::plus<int>());
-// 		thrust::exclusive_scan(thrust::device, index.begin(), index.begin() + index.size(), index.begin());
-// 
-// 		elements.resize(ele_num);
+		contacts.resize(mNewCounter);
 
 		cuExecute(aabb_src.size(),
 			CDBP_RemoveDuplicativeIds,
 			contacts,
-			keys,
-			counter,
+			mKeys,
+			mCounter,
 			aabb_src,
 			octree,
 			self_collision);
 
-		/*
-		cuExecute(elements.size(),
-			CDBP_RevertIds,
-			elements);
-			*/
-			//printf("FROM OCT: %d\n", elements.size());
-
-		octree.release();
-		ids.clear();
-		keys.clear();
-		counter.clear();
-		new_count.clear();
+		//octree.release();
 	}
 
 	DEFINE_CLASS(CollisionDetectionBroadPhase);

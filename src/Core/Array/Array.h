@@ -34,7 +34,7 @@ namespace dyno {
 
 		Array(uint num)
 		{
-			m_data.resize((size_t)num);
+			mData.resize((size_t)num);
 		}
 
 		~Array() {};
@@ -48,27 +48,27 @@ namespace dyno {
 
 		void clear();
 
-		inline const T*	begin() const { return m_data.size() == 0 ? nullptr : &m_data[0]; }
-		inline T*	begin() { return m_data.size() == 0 ? nullptr : &m_data[0]; }
+		inline const T*	begin() const { return mData.size() == 0 ? nullptr : &mData[0]; }
+		inline T*	begin() { return mData.size() == 0 ? nullptr : &mData[0]; }
 
 		DeviceType	deviceType() { return DeviceType::CPU; }
 
 		inline T& operator [] (unsigned int id)
 		{
-			return m_data[id];
+			return mData[id];
 		}
 
 		inline const T& operator [] (unsigned int id) const
 		{
-			return m_data[id];
+			return mData[id];
 		}
 
-		inline uint size() const { return (uint)m_data.size(); }
+		inline uint size() const { return (uint)mData.size(); }
 		inline bool isCPU() const { return true; }
 		inline bool isGPU() const { return false; }
-		inline bool isEmpty() const { return m_data.empty(); }
+		inline bool isEmpty() const { return mData.empty(); }
 
-		inline void pushBack(T ele) { m_data.push_back(ele); }
+		inline void pushBack(T ele) { mData.push_back(ele); }
 
 		void assign(const T& val);
 		void assign(uint num, const T& val);
@@ -86,7 +86,7 @@ namespace dyno {
 		}
 
 	private:
-		std::vector<T> m_data;
+		std::vector<T> mData;
 	};
 
 	/*!
@@ -123,23 +123,23 @@ namespace dyno {
 		*/
 		void clear();
 
-		DYN_FUNC inline const T*	begin() const { return m_data; }
-		DYN_FUNC inline T*	begin() { return m_data; }
+		DYN_FUNC inline const T*	begin() const { return mData; }
+		DYN_FUNC inline T*	begin() { return mData; }
 
 		DeviceType	deviceType() { return DeviceType::GPU; }
 
 		GPU_FUNC inline T& operator [] (unsigned int id) {
-			return m_data[id];
+			return mData[id];
 		}
 
 		GPU_FUNC inline T& operator [] (unsigned int id) const {
-			return m_data[id];
+			return mData[id];
 		}
 
-		DYN_FUNC inline uint size() const { return m_totalNum; }
+		DYN_FUNC inline uint size() const { return mTotalNum; }
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
-		DYN_FUNC inline bool isEmpty() const { return m_data == nullptr; }
+		DYN_FUNC inline bool isEmpty() const { return mData == nullptr; }
 
 		void assign(const Array<T, DeviceType::GPU>& src);
 		void assign(const Array<T, DeviceType::CPU>& src);
@@ -160,8 +160,9 @@ namespace dyno {
 		}
 
 	private:
-		T* m_data = 0;
-		uint m_totalNum = 0;
+		T* mData = nullptr;
+		uint mTotalNum = 0;
+		uint mBufferNum = 0;
 	};
 
 	template<typename T>

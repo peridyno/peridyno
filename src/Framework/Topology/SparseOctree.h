@@ -176,5 +176,11 @@ namespace dyno {
 
 		DArray<OctreeNode> m_all_nodes;
 		DArray<OctreeNode> m_post_ordered_nodes;
+
+		DArray<int> duplicates_count;
+		DArray<int> node_count;
+		DArray<OctreeNode> aux_nodes;
+		DArray<OctreeNode> node_buffer;
+		DArray<OctreeNode> nonRepeatNodes_cpy;
 	};
 }

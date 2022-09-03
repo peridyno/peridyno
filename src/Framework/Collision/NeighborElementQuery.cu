@@ -5,6 +5,8 @@
 
 #include "Topology/Primitive3D.h"
 
+#include "Timer.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(NeighborElementQuery, TDataType)
@@ -522,7 +524,7 @@ namespace dyno
 			contacts.resize(0);
 			return;
 		}
-		
+
 		if (m_queriedAABB.size() != t_num)
 		{
 			m_queriedAABB.resize(t_num);
@@ -553,12 +555,10 @@ namespace dyno
 		m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 		m_broadPhaseCD->setSelfCollision(true);
 
-
 		m_broadPhaseCD->inSource()->assign(m_queryAABB);
 		m_broadPhaseCD->inTarget()->assign(m_queriedAABB);
 		// 
 		m_broadPhaseCD->update();
-
 
 		auto& contactList = m_broadPhaseCD->outContactList()->getData();
 
