@@ -108,9 +108,9 @@ namespace dyno {
 
 		T val;
 		if (num > 1)
-			cudaMemcpy(&val, subAux, sizeof(T), cudaMemcpyDeviceToHost);
+			cudaMemcpyAsync(&val, subAux, sizeof(T), cudaMemcpyDeviceToHost);
 		else 
-			cudaMemcpy(&val, pData, sizeof(T), cudaMemcpyDeviceToHost);
+			cudaMemcpyAsync(&val, pData, sizeof(T), cudaMemcpyDeviceToHost);
 
 		return val;
 	}

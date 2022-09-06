@@ -109,7 +109,7 @@ namespace dyno
 		{
 			if (!f_in->isOptional() && f_in->isEmpty())
 			{
-				std::string errMsg = std::string("The field ") + f_in->getObjectName() +
+				std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
 					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
 				std::cout << errMsg << std::endl;
@@ -127,7 +127,7 @@ namespace dyno
 		{
 			if (f_out->isEmpty())
 			{
-				std::string errMsg = std::string("The field ") + f_out->getObjectName() +
+				std::string errMsg = std::string("The output field ") + f_out->getObjectName() +
 					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not prepared!");
 
 				Log::sendMessage(Log::Error, errMsg);

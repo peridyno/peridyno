@@ -139,8 +139,4 @@ namespace dyno {
 	{
 		return Interval<Real>(0, 1, false, false);
 	}
-
-	template class Interval<float>;
-	template class Interval<double>;
-
 } //end of namespace dyno

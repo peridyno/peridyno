@@ -29,6 +29,22 @@
 
 namespace dyno 
 {
+	static void RecieveLogMessage(const Log::Message& m)
+	{
+		switch (m.type)
+		{
+		case Log::Info:
+			std::cout << ">>>: " << m.text << std::endl; break;
+		case Log::Warning:
+			std::cout << "???: " << m.text << std::endl; break;
+		case Log::Error:
+			std::cout << "!!!: " << m.text << std::endl; break;
+		case Log::User:
+			std::cout << ">>>: " << m.text << std::endl; break;
+		default: break;
+		}
+	}
+
 	static void glfw_error_callback(int error, const char* description)
 	{
 		fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -36,6 +52,7 @@ namespace dyno
 
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
 	{
+		Log::setUserReceiver(&RecieveLogMessage);
 	}
 
 	GlfwApp::GlfwApp(int width, int height)

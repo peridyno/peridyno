@@ -8,6 +8,8 @@ namespace dyno
 {
 	typedef typename TAlignedBox3D<Real> AABB;
 
+	typedef unsigned long long int PKey;
+
 	template<typename TDataType>
 	class CollisionDetectionBroadPhase : public CollisionModel
 	{
@@ -44,5 +46,18 @@ namespace dyno
 
 		SparseOctree<TDataType> octree;
 		bool self_collision = false;
+
+		DArray<Real> mH;
+
+		DArray<Coord> mV0;
+		DArray<Coord> mV1;
+
+		DArray<int> mCounter;
+		DArray<int> mNewCounter;
+
+		DArray<int> mIds;
+		DArray<PKey> mKeys;
 	};
+
+	IMPLEMENT_TCLASS(CollisionDetectionBroadPhase, TDataType)
 }

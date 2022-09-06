@@ -42,4 +42,7 @@ namespace dyno {
 		Real v0, v1;
 		bool leftOpen, rightOpen;
 	};
+
 }  //end of namespace dyno
+
+#include "Interval.inl"
