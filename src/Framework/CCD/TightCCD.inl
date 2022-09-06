@@ -322,8 +322,8 @@ namespace dyno
 			int ind1 = (st + 1) % 3;
 			for (int ss = 0; ss < 3; ss++)
 			{
-				int ind2 = st;
-				int ind3 = (st + 1) % 3;
+				int ind2 = ss;
+				int ind3 = (ss + 1) % 3;
 
 				Real t = Real(1);
 				bool collided = EdgeEdgeCCD(
