@@ -111,8 +111,16 @@ namespace dyno
 		Log::setOutput(filename);
 	}
 
+	void PLogWidget::toggleLogging()
+	{
+		mEnableLogging = mEnableLogging ? false : true;
+	}
+
 	void PLogWidget::OnLog(const Log::Message& m)
 	{
+		if (!mEnableLogging)
+			return;
+
 		insertRow(0);
 
 		QIcon ItemIcon;

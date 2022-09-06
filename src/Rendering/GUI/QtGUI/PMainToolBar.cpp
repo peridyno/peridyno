@@ -28,6 +28,7 @@ namespace dyno
 		mNodeFlow = nodeFlow;
 
 		setupFileMenu();
+		setupEditMenu();
 
 		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
 
@@ -171,10 +172,10 @@ namespace dyno
 		mSaveAsFileAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/SaveAs.png"), "Save As");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mSaveAsFileAct);
 
-		mCloseAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/Close.png"), "Close");
+		mCloseAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/CloseSence.png"), "Close");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mCloseAct);
 
-		mCloseAllAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/CloseAll.png"), "Close All");
+		mCloseAllAct = new QAction(QPixmap(path + "icon/ToolBarIco/File/CloseAll_v2.png"), "Close All");
 		fileGroup->AddAction(QToolButton::DelayedPopup, mCloseAllAct);
 
 		connect(mNewFileAct, &QAction::triggered, this, &PMainToolBar::newFile);
@@ -183,6 +184,22 @@ namespace dyno
 		connect(mSaveAsFileAct, &QAction::triggered, this, &PMainToolBar::saveAsFile);
 		connect(mCloseAct, &QAction::triggered, this, &PMainToolBar::closeFile);
 		connect(mCloseAllAct, &QAction::triggered, this, &PMainToolBar::closeAllFiles);
+	}
+
+	void PMainToolBar::setupEditMenu()
+	{
+		QString path = QString::fromStdString(getAssetPath());
+		tt::Page* filePage = this->AddPage(QPixmap(path + "icon/ToolBarIco/Edit/Settings_v2.png"), "Edit");
+
+		auto configGroup = filePage->AddGroup("Config");
+
+		mLogAct = new QAction(QPixmap(path + "icon/ToolBarIco/Edit/Edit.png"), "Log");
+		configGroup->AddAction(QToolButton::DelayedPopup, mLogAct);
+
+		mEditAct = new QAction(QPixmap(path + "icon/ToolBarIco/Edit/Settings_v2.png"), "Settings");
+		configGroup->AddAction(QToolButton::DelayedPopup, mEditAct);
+
+		connect(mLogAct, &QAction::triggered, this, [=]() { emit logActTriggered(); });
 	}
 }
 

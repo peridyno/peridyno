@@ -121,7 +121,7 @@ namespace dyno
 		m_animationWidget(nullptr)
 	{
 		setObjectName("MainWindow");
-		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physics simulation platform"));
+		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physical simulation platform"));
 		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo2.png")));
 
 
@@ -135,7 +135,6 @@ namespace dyno
 
 		setupToolBar();
 
-		
 		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::dynoNodePlaced);
 		connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 
@@ -143,16 +142,9 @@ namespace dyno
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
 
-		statusBar()->showMessage(tr("Status Bar"));
+		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
 
-// 		Qt::ConnectionStyle::setConnectionStyle(
-// 			R"(
-// 			  {
-// 				"ConnectionStyle": {
-// 				  "UseDataDefinedColors": true
-// 				}
-// 			  }
-// 			  )");
+		statusBar()->showMessage(tr("Status Bar"));
 	}
 
 	void PMainWindow::mainLoop()
@@ -312,7 +304,7 @@ namespace dyno
 	void PMainWindow::showAbout()
 	{
 		QString versoin = QString("Version ") + QString::number(PERIDYNO_VERSION_MAJOR)+QString(".")+ QString::number(PERIDYNO_VERSION_MINOR)+QString(".")+QString::number(PERIDYNO_VERSION_PATCH);
-		QMessageBox::about(this, tr("Peridyno Studio "), versoin);
+		QMessageBox::about(this, tr("PeriDyno Studio "), versoin);
 		return;
 	}
 
@@ -390,9 +382,9 @@ namespace dyno
 		m_propertyWidget = new PPropertyWidget();
 		propertyDockWidget->setWidget(m_propertyWidget);
 		
-		PIODockWidget *consoleDockWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
-		consoleDockWidget->setWindowIcon(qtIcon);
-		addDockWidget(sets[1].area, consoleDockWidget);
+		mIoDockerWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
+		mIoDockerWidget->setWindowIcon(qtIcon);
+		addDockWidget(sets[1].area, mIoDockerWidget);
 		//windowMenu->addMenu(bottomDockWidget->colorSwatchMenu());
 
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);

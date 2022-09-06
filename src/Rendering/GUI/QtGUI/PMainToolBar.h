@@ -18,6 +18,8 @@ namespace dyno
 		void newSceneLoaded();
 		void nodeCreated(std::shared_ptr<Node> node);
 
+		void logActTriggered();
+
 	public slots:
 		void newFile();
 		void openFile();
@@ -30,8 +32,11 @@ namespace dyno
 
 		void setupFileMenu();
 
+		void setupEditMenu();
+
 		Qt::QtNodeFlowWidget* mNodeFlow = nullptr;
 
+		//File menu
 		QAction* mNewFileAct;
 
 		QAction* mOpenFileAct;
@@ -43,6 +48,11 @@ namespace dyno
 		QAction* mCloseAct;
 
 		QAction* mCloseAllAct;
+
+		//Edit menu
+		QAction* mLogAct;
+
+		QAction* mEditAct;
 
 		QString mFileName;
 	};
