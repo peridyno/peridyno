@@ -158,9 +158,9 @@ void Node::reset()
 	}
 }
 
-Node::BoundingBox Node::boundingBox()
+NBoundingBox Node::boundingBox()
 {
-	return BoundingBox();
+	return NBoundingBox();
 }
 
 void Node::postUpdateStates()

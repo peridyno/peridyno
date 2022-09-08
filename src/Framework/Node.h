@@ -32,6 +32,40 @@ namespace dyno
 	class Action;
 	class SceneGraph;
 
+	struct NBoundingBox
+	{
+		NBoundingBox() {
+			lower = Vec3f(-1);
+			upper = Vec3f(1);
+		}
+
+		NBoundingBox(Vec3f lo, Vec3f hi) {
+			lower = lo;
+			upper = hi;
+		}
+
+		Vec3f lower = Vec3f(-1);
+		Vec3f upper = Vec3f(1);
+
+		NBoundingBox& join(const NBoundingBox box) {
+			lower = lower.minimum(box.lower);
+			upper = upper.maximum(box.upper);
+
+			return *this;
+		}
+
+		NBoundingBox& intersect(const NBoundingBox box) {
+			lower = lower.maximum(box.lower);
+			upper = upper.minimum(box.upper);
+
+			return *this;
+		}
+
+		float maxLength() {
+			return std::max(upper[0] - lower[0], std::max(upper[1] - lower[1], upper[2] - lower[2]));
+		}
+	};
+
 	class Node : public OBase
 	{
 	public:
@@ -255,13 +289,7 @@ namespace dyno
 
 		void reset();
 
-		struct BoundingBox
-		{
-			Vec3f lower = Vec3f(-1);
-			Vec3f upper = Vec3f(1);
-		};
-
-		virtual BoundingBox boundingBox();
+		virtual NBoundingBox boundingBox();
 // 		/**
 // 		 * @brief Depth-first tree traversal
 // 		 *

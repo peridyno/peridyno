@@ -51,6 +51,8 @@ namespace dyno
 		virtual void updateGraphicsContext();
 		virtual void run();
 
+		NBoundingBox boundingBox();
+
 		void reset();
 
 		void reset(std::shared_ptr<Node> node);
