@@ -126,6 +126,11 @@ namespace Qt
 		return QString::fromStdString(mNode->getClassInfo()->getClassName());
 	}
 
+	QString QtNodeWidget::nodeTips() const
+	{
+		return QString::fromStdString(mNode == nullptr ? "" : mNode->getClassInfo()->getClassName());
+	}
+
 	bool QtNodeWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
 	{
 		Q_UNUSED(portType); Q_UNUSED(portIndex);
@@ -133,6 +138,38 @@ namespace Qt
 	}
 
 	QString QtNodeWidget::portCaption(PortType portType, PortIndex portIndex) const
+	{
+		switch (portType)
+		{
+		case PortType::In:
+			if (portIndex < mNodeInport.size()) {
+				return dyno::FormatBlockPortName(mNode->getImportNodes()[portIndex]->getPortName());
+			}
+			else {
+				auto& inputFields = this->getInputFields();
+
+				return dyno::FormatBlockPortName(inputFields[portIndex - mNodeInport.size()]->getObjectName());
+			}
+			break;
+
+		case PortType::Out:
+			if (portIndex == 0) {
+				//return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
+				return dyno::FormatBlockPortName("Out");
+			}
+			else {
+				auto& outputFields = this->getOutputFields();
+
+				return dyno::FormatBlockPortName(outputFields[portIndex - 1]->getObjectName());
+			}
+			break;
+
+		case PortType::None:
+			break;
+		}
+	}
+
+	QString QtNodeWidget::portTips(PortType portType, PortIndex portIndex) const
 	{
 		switch (portType)
 		{
