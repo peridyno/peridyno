@@ -119,8 +119,26 @@ void ShowMenuFile(RenderEngine* engine, SceneGraph* scene, bool* mDisenableCamer
 			cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - Distance));
 		}
 
-
 		ImGui::Separator();
+		if (ImGui::Button("Auto Focus"))
+		{
+			auto box = scene->boundingBox();
+
+			float len = box.maxLength();
+			Vec3f center = 0.5f * (box.upper + box.lower);
+
+			Vec3f eyePos = cam->getEyePos();
+			Vec3f tarPos = cam->getTargetPos();
+			Vec3f dir = eyePos - tarPos;
+			dir.normalize();
+
+			cam->setEyePos(center + len * dir);
+			cam->setTargetPos(center);
+
+			float unit = std::floor(std::log(len));
+			cam->setDistanceUnit(std::powf(10.0f, unit));
+		}
+
 		float distanceUnit = cam->distanceUnit();
 		if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
 			cam->setDistanceUnit(distanceUnit);

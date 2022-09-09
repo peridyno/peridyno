@@ -16,9 +16,12 @@ namespace dyno
 		QWidget(parent),
 		m_startSim(nullptr),
 		m_resetSim(nullptr),
-		StartIcon(nullptr),
-		PauseIcon(nullptr),
-		ResetIcon(nullptr)
+		StartLabel(nullptr),
+		ResetLabel(nullptr),
+		Starticon(nullptr),
+		Pauseicon(nullptr),
+		Reseticon(nullptr),
+		Finishicon(nullptr)
 	{
 		mTotalFrame = 800;
 
@@ -45,17 +48,23 @@ namespace dyno
 
 		QHBoxLayout* operationLayout = new QHBoxLayout();
 
-		m_startSim = new QPushButton();
+		m_startSim = new QPushButton();								//创建按钮
 		m_resetSim = new QPushButton();
-		m_startSim->setStyleSheet("padding: 6px;");
+		m_startSim->setStyleSheet("padding: 6px;");	
 		m_resetSim->setStyleSheet("padding: 6px;");
 
-		StartIcon = new QIcon(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));
-		PauseIcon = new QIcon(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
-		ResetIcon = new QIcon(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
+		m_startSim->setShortcut(QKeySequence(Qt::Key_Down));		//设置播放快捷键
 
-		m_startSim->setIcon(*StartIcon);
-		m_resetSim->setIcon(*ResetIcon);
+		Starticon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));//设置按钮icon
+		Pauseicon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
+		Reseticon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
+		Finishicon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Finish.png"));
+
+		StartLabel = new QLabel;													//创建QLabel以承载icon
+		PAnimationWidget::buildIconLabel(StartLabel,Starticon, m_startSim, 30);		//构建PushButton上的Label样式
+		ResetLabel = new QLabel;
+		PAnimationWidget::buildIconLabel(ResetLabel, Reseticon, m_resetSim, 30);
+
 		m_resetSim->setCheckable(false);
 
 		operationLayout->addWidget(mTotalFrameSpinbox, 0);
@@ -95,7 +104,8 @@ namespace dyno
 		{
 			PSimulationThread::instance()->resume();
 			m_startSim->setText("");
-			m_startSim->setIcon(*PauseIcon);
+			//m_startSim->setIcon(*PauseIcon);//更新icon状态
+			StartLabel->setPixmap(*Pauseicon);//更新Label上的icon为Pauseicon
 
 			m_resetSim->setDisabled(true);
 			mTotalFrameSpinbox->setEnabled(false);
@@ -106,7 +116,7 @@ namespace dyno
 			PSimulationThread::instance()->pause();
 			m_startSim->setText("");
 			m_resetSim->setDisabled(false);
-			m_startSim->setIcon(*StartIcon);
+			StartLabel->setPixmap(*Starticon);		//更新Label上的icon为Starticon
 
 
 			mTotalFrameSpinbox->setEnabled(true);
@@ -121,7 +131,7 @@ namespace dyno
 		m_startSim->setText("");
 		m_startSim->setEnabled(true);
 		m_startSim->setChecked(false);
-		m_startSim->setIcon(*StartIcon);
+		StartLabel->setPixmap(*Starticon);		//更新Label上的icon为Starticon
 
 		mTotalFrameSpinbox->setEnabled(true);
 		mFrameSlider->setEnabled(true);
@@ -130,7 +140,9 @@ namespace dyno
 
 	void PAnimationWidget::simulationFinished()
 	{
-		m_startSim->setText("Finished");
+		StartLabel->setPixmap(*Finishicon);		//更新Label上的icon为Finishicon
+
+		m_startSim->setText("");
 		m_startSim->setDisabled(true);
 		m_startSim->setChecked(false);
 
@@ -142,5 +154,19 @@ namespace dyno
 	void PAnimationWidget::updateSlider()
 	{
 		mFrameSlider->setValue(PSimulationThread::instance()->getCurrentFrameNum());
+	}
+
+	void PAnimationWidget::buildIconLabel(QLabel* Label, QPixmap* Icon, QPushButton* btn, int size) {
+
+		Label->setScaledContents(true);							//允许图标缩放
+		Label->setStyleSheet("background: transparent;");
+		Label->setPixmap(*Icon);								//指定icon，设置背景透明，设置大小
+		Label->setFixedSize(size,size);
+
+		QHBoxLayout* iconLayout = new QHBoxLayout();			//创建HBoxLayout承载Label
+		iconLayout->addWidget(Label);				
+		iconLayout->setSizeConstraint(QLayout::SetFixedSize);
+		iconLayout->setMargin(0);
+		btn->setLayout(iconLayout);								//将Layout指定给目标Button
 	}
 }

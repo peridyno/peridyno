@@ -68,6 +68,7 @@ namespace dyno
 	class PToolBar;
 	class PStatusBar;
 	class POpenGLWidget;
+	class PIODockWidget;
 	//class PVTKOpenGLWidget;
 	class PSceneGraphWidget;
 	class PPropertyWidget;
@@ -140,6 +141,8 @@ namespace dyno
 		PAnimationWidget*		m_animationWidget;
 
 		PMainToolBar*			mToolBar = nullptr;
+
+		PIODockWidget* mIoDockerWidget = nullptr;
 // 
 // 		PModuleFlowWidget*		m_moduleFlowView;
 // 		PModuleListWidget*		m_moduleListWidget;

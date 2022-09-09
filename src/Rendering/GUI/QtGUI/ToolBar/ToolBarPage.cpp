@@ -16,7 +16,7 @@ namespace dyno {
 // 		filePage.subtabNum = 4;
 // 		//subTabs
 // 		filePage.label.push_back("New");
-// 		filePage.ico.push_back("ToolBarIco/File/New.png");
+// 		filePage.ico.push_back("ToolBarIco/File/New_v2.png");
 // 
 // 		filePage.label.push_back("Open");
 // 		filePage.ico.push_back("ToolBarIco/File/Open.png");
@@ -28,17 +28,17 @@ namespace dyno {
 // 		filePage.ico.push_back("ToolBarIco/File/SaveAs.png");
 		//--------------------------------------------------
 
-		//ToolBar edit--------------------------------------
-		ToolBarIcoAndLabel editPage;
-		// Main Page name and ico
-		editPage.tabPageName = "Edit";
-		editPage.tabPageIco = "ToolBarIco/Edit/Edit.png";
-		//number of subTabs
-		editPage.subtabNum = 1;
-		//subTabs
-		editPage.label.push_back("Settings");
-		editPage.ico.push_back("ToolBarIco/Edit/Settings.png");
-		//--------------------------------------------------
+// 		//ToolBar edit--------------------------------------
+// 		ToolBarIcoAndLabel editPage;
+// 		// Main Page name and ico
+// 		editPage.tabPageName = "Edit";
+// 		editPage.tabPageIco = "ToolBarIco/Edit/Settings_v2.png";
+// 		//number of subTabs
+// 		editPage.subtabNum = 1;
+// 		//subTabs
+// 		editPage.label.push_back("Settings");
+// 		editPage.ico.push_back("ToolBarIco/Edit/Settings_v2.png");
+// 		//--------------------------------------------------
 
 		
 // 		//ToolBar particle----------------------------------
@@ -136,7 +136,7 @@ namespace dyno {
 
 		//Add all the page
 //		tbl.push_back(filePage);// 0
-		tbl.push_back(editPage);// 1
+//		tbl.push_back(editPage);// 1
 		tbl.push_back(helpPage);//6
 
 		//dynamic toolbar

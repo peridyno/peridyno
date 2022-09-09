@@ -7,12 +7,12 @@ void declare_cloth(py::module& m, std::string typestr) {
 	using Parent = dyno::ParticleSystem<TDataType>;
 	std::string pyclass_name = std::string("Cloth") + typestr;
 
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("load_particles", py::detail::overload_cast_impl<std::string>()(&Parent::loadParticles))
-		.def("load_particles", py::detail::overload_cast_impl<TDataType::Coord, TDataType::Real, TDataType::Real >()(&Parent::loadParticles))
-		.def("load_particles", py::detail::overload_cast_impl<TDataType::Coord , TDataType::Coord , TDataType::Real>()(&Parent::loadParticles))
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference);
+// 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+// 		.def(py::init<>())
+// 		.def("load_particles", py::detail::overload_cast_impl<std::string>()(&Parent::loadParticles))
+// 		.def("load_particles", py::detail::overload_cast_impl<TDataType::Coord, TDataType::Real, TDataType::Real >()(&Parent::loadParticles))
+// 		.def("load_particles", py::detail::overload_cast_impl<TDataType::Coord , TDataType::Coord , TDataType::Real>()(&Parent::loadParticles))
+// 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference);
 
 }
 

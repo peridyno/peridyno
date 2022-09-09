@@ -261,6 +261,17 @@ namespace dyno
 
 	}
 
+	dyno::NBoundingBox SceneGraph::boundingBox()
+	{
+		NBoundingBox box;
+		for (auto it = this->begin(); it != this->end(); it++)
+		{
+			box.join(it->boundingBox());
+		}
+
+		return box;
+	}
+
 	void SceneGraph::reset()
 	{
 		mSync.lock();
