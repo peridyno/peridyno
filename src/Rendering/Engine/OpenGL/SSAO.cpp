@@ -18,7 +18,7 @@ namespace dyno
 	void SSAO::initialize()
 	{
 		// shader programs
-		mSSAOProgram = gl::CreateShaderProgram("screen.vert", "ssao.frag");
+		mSSAOProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "ssao.frag");
 
 		// SSAO kernel
 		mSSAOKernelUBO.create(GL_UNIFORM_BUFFER, GL_STATIC_DRAW);

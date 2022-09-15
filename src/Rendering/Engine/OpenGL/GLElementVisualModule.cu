@@ -78,7 +78,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
 
 		printf("aaaaaGL\n");
 		return true;

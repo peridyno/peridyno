@@ -56,7 +56,7 @@ namespace dyno
 		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
 		mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 
-		mShaderProgram = gl::CreateShaderProgram("point.vert", "point.frag");
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("point.vert", "point.frag");
 
 		gl::glCheckError();
 

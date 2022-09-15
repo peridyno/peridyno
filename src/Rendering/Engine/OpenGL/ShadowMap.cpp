@@ -61,7 +61,7 @@ namespace dyno
 
 		// for blur depth textures
 		mQuad = gl::Mesh::ScreenQuad();
-		mBlurProgram = gl::CreateShaderProgram("screen.vert", "blur.frag");
+		mBlurProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blur.frag");
 	}
 
 	// extract frustum corners from camera projection matrix
@@ -94,7 +94,7 @@ namespace dyno
 		return corners;
 	}
 
-	glm::mat4 getLightView(glm::vec3 lightDir)
+	glm::mat4 getLightViewMatrix(glm::vec3 lightDir)
 	{
 		glm::vec3 lightUp = glm::vec3(0, 1, 0);
 		if (glm::length(glm::cross(lightUp, lightDir)) == 0.f)
@@ -105,19 +105,20 @@ namespace dyno
 		return lightView;
 	}
 
-	glm::mat4 getLightProj(glm::mat4 lightView, dyno::SceneGraph* scene, const dyno::RenderParams& rparams)
+	glm::mat4 getLightProjMatrix(glm::mat4 lightView,
+		Vec3f lowerBound,
+		Vec3f upperBound,
+		const dyno::RenderParams& rparams)
 	{
-		Vec3f bbox[2] = { scene->getLowerBound(), scene->getUpperBound() };
-
 		glm::vec4 p[8] = {
-			lightView * glm::vec4{bbox[0][0], bbox[0][1], bbox[0][2], 1},
-			lightView * glm::vec4{bbox[0][0], bbox[0][1], bbox[1][2], 1},
-			lightView * glm::vec4{bbox[0][0], bbox[1][1], bbox[0][2], 1},
-			lightView * glm::vec4{bbox[0][0], bbox[1][1], bbox[1][2], 1},
-			lightView * glm::vec4{bbox[1][0], bbox[0][1], bbox[0][2], 1},
-			lightView * glm::vec4{bbox[1][0], bbox[0][1], bbox[1][2], 1},
-			lightView * glm::vec4{bbox[1][0], bbox[1][1], bbox[0][2], 1},
-			lightView * glm::vec4{bbox[1][0], bbox[1][1], bbox[1][2], 1},
+			lightView * glm::vec4{lowerBound[0], lowerBound[1], lowerBound[2], 1},
+			lightView * glm::vec4{lowerBound[0], lowerBound[1], upperBound[2], 1},
+			lightView * glm::vec4{lowerBound[0], upperBound[1], lowerBound[2], 1},
+			lightView * glm::vec4{lowerBound[0], upperBound[1], upperBound[2], 1},
+			lightView * glm::vec4{upperBound[0], lowerBound[1], lowerBound[2], 1},
+			lightView * glm::vec4{upperBound[0], lowerBound[1], upperBound[2], 1},
+			lightView * glm::vec4{upperBound[0], upperBound[1], lowerBound[2], 1},
+			lightView * glm::vec4{upperBound[0], upperBound[1], upperBound[2], 1},
 		};
 			   
 		glm::vec4 bmin = p[0];
@@ -157,15 +158,16 @@ namespace dyno
 		return lightProj;
 	}
 
-	void ShadowMap::beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
+	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
 	{
-		glm::mat4 lightView = getLightView(rparams.light.mainLightDirection);
-		glm::mat4 lightProj = getLightProj(lightView, scene, rparams);
+		if(rparams.light.mainLightShadow == 0.f || scene == nullptr || scene->isEmpty())
+			return;
+
+		glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
+		glm::mat4 lightProj = getLightProjMatrix(lightView, scene->getLowerBound(), scene->getUpperBound(), rparams);
 
 		// update light transform infomation
-		struct
-		{
-			// MVP
+		struct	{			
 			glm::mat4 model;
 			glm::mat4 view;
 			glm::mat4 proj;
@@ -180,34 +182,47 @@ namespace dyno
 		lightMVP.proj = lightProj;
 
 		mTransformUBO.load(&lightMVP, sizeof(lightMVP));
-		mTransformUBO.bindBufferBase(0);
 
 		// shadow map uniform
 		struct {
 			glm::mat4 transform;
 			float minValue;
 		} shadow;
+
 		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
 		shadow.minValue = minValue;
 
 		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
+
+		mTransformUBO.bindBufferBase(0);
 		mShadowMatrixUBO.bindBufferBase(2);
 
-		// draw depth
-		mFramebuffer.bind();
-
 		// first draw to shadow texture
+		mFramebuffer.bind();
 		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
-
 		mFramebuffer.clearDepth(1.0);
 		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
 		glViewport(0, 0, width, height);
 
-	}
+		// draw scene
+		static class DrawShadow : public Action
+		{
+		private:
+			void process(Node* node) override
+			{
+				if (!node->isVisible())	return;
 
-	void ShadowMap::endUpdate() 
-	{		 
+				for (auto iter : node->graphicsPipeline()->activeModules()) {
+					auto m = dynamic_cast<GLVisualModule*>(iter.get());
+					if (m && m->isVisible()) {
+						m->draw(GLVisualModule::SHADOW);
+					}
+				}
+			}
+		} action;
+		scene->traverseForward(&action);
+
 		// blur shadow map		
 		const int blurIters = 1;
 
@@ -225,11 +240,12 @@ namespace dyno
 			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
 			mQuad.draw();
 		}
-		glEnable(GL_DEPTH_TEST);		
+		glEnable(GL_DEPTH_TEST);
 
 		// bind the shadow texture to the slot
-		mShadowTex.bind(GL_TEXTURE5);	
+		mShadowTex.bind(GL_TEXTURE5);
 
 	}
+
 }
 

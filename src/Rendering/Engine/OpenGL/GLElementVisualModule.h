@@ -7,7 +7,7 @@
 #include "GLVisualModule.h"
 #include "GLCudaBuffer.h"
 #include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 
 
 namespace dyno

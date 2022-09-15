@@ -41,11 +41,11 @@ namespace dyno
 		// create shader program
 		if (!this->varUsePhongShadingModel()->getData())
 		{
-			mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag", "surface.geom");
+			mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
 		}
 		else
 		{
-			mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag");
+			mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag");
 		}
 
 		return true;

@@ -23,6 +23,7 @@
 
 namespace gl {
 
+	// OpenGL shader
 	class Shader : public Object
 	{
 	public:
@@ -33,7 +34,34 @@ namespace gl {
 
 	protected:
 		void create() {};
+	};
 
+	// OpenGL shader program
+	class Program : public Object
+	{
+	public:
+		void create();
+		void release();
+
+		void attachShader(const Shader& shader);
+		bool link();
+
+		void use();
+
+		//
+		void setFloat(const char* name, float v);
+		void setInt(const char* name, int v);
+
+		void setVec4(const char* name, dyno::Vec4f v);
+		void setVec3(const char* name, dyno::Vec3f v);
+		void setVec2(const char* name, dyno::Vec2f v);
+	};
+
+	// Shader factory for creating shader programs
+	class ShaderFactory {
+	public:
+		static bool initialize();
+		static Program createShaderProgram(const char* vs, const char* fs, const char* gs = 0);
 	};
 
 }

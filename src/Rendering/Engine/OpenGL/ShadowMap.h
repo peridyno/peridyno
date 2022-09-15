@@ -19,7 +19,7 @@
 #include "gl/Buffer.h"
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 #include "gl/Mesh.h"
 
 #include <vector>
@@ -36,7 +36,7 @@ namespace dyno
 
 		void initialize();
 		
-		void beginUpdate(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
 		void endUpdate();
 
 	private:

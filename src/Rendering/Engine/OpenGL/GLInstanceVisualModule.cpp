@@ -42,7 +42,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mInstanceBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
 
 		// create shader program
-		mShaderProgram = gl::CreateShaderProgram("instance.vert", "instance.frag", "instance.geom");
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("instance.vert", "instance.frag", "instance.geom");
 
 		// initialize data
 		auto triSet = this->inTriangleSet()->getDataPtr();

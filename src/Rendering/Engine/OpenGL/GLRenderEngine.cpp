@@ -120,27 +120,16 @@ namespace dyno
 
 	void GLRenderEngine::draw(dyno::SceneGraph* scene)
 	{
-		m_rparams.proj = mCamera->getProjMat();
-		m_rparams.view = mCamera->getViewMat();
-
-		// Graphscrene draw
+		// preserve current framebuffer
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
-		// gather visual modules
-		RenderQueue renderQueue;
-		// enqueue render content
-		if (scene != nullptr && !scene->isEmpty())
-		{
-			scene->traverseForward(&renderQueue);
-		}
+		// update render parameters
+		m_rparams.proj = mCamera->getProjMat();
+		m_rparams.view = mCamera->getViewMat();
 
 		// update shadow map
-		if(m_rparams.light.mainLightShadow != 0.f) {
-			mShadowMap->beginUpdate(scene, m_rparams);
-			renderQueue.draw(GLVisualModule::SHADOW);
-			mShadowMap->endUpdate();
-		}
+		mShadowMap->update(scene, m_rparams);
 
 		// setup scene transform matrices
 		struct
@@ -171,21 +160,27 @@ namespace dyno
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// draw background color
 		Vec3f c0 = Vec3f(m_rparams.bgColor0.x, m_rparams.bgColor0.y, m_rparams.bgColor0.z);
 		Vec3f c1 = Vec3f(m_rparams.bgColor1.x, m_rparams.bgColor1.y, m_rparams.bgColor1.z);
 		mRenderHelper->drawBackground(c0, c1);
 
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-		// render modules
-		renderQueue.draw(GLVisualModule::COLOR);
-		
-		// draw a plane
+		// draw a ruler plane, since it's opacity
 		if (m_rparams.showGround)
 		{
-			mRenderHelper->drawGround(m_rparams.planeScale* mCamera->distanceUnit(), m_rparams.rulerScale* mCamera->distanceUnit());
+			mRenderHelper->drawGround(
+				m_rparams.planeScale * mCamera->distanceUnit(),
+				m_rparams.rulerScale * mCamera->distanceUnit());
 		}
 
+		// render visual modules
+		RenderQueue renderQueue;
+		// enqueue render content
+		if (scene != nullptr && !scene->isEmpty()) {
+			scene->traverseForward(&renderQueue);
+		}
+		renderQueue.draw(GLVisualModule::COLOR);
+		
 		// draw scene bounding box
 		if (m_rparams.showSceneBounds && scene != 0)
 		{
