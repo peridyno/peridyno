@@ -71,22 +71,22 @@ namespace dyno
 		mInstanceBuffer.loadCuda(transforms.begin(), transforms.size() * sizeof(Transform3f));
 	}
 
-	void GLInstanceVisualModule::paintGL(RenderPass pass)
+	void GLInstanceVisualModule::paintGL(GLRenderPass pass)
 	{
 		mShaderProgram.use();
 
 		unsigned int subroutine;
-		if (pass == RenderPass::COLOR)
+		if (pass == GLRenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", mMetallic);
-			mShaderProgram.setFloat("uRoughness", mRoughness);
-			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
+			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
 
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == RenderPass::SHADOW)
+		else if (pass == GLRenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

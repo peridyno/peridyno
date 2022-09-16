@@ -94,18 +94,18 @@ namespace dyno
 		mColor.loadCuda(mColorBuffer.begin(), mNumPoints * sizeof(float) * 3);
 	}
 
-	void GLPointVisualModule::paintGL(RenderPass pass)
+	void GLPointVisualModule::paintGL(GLRenderPass pass)
 	{
 		mShaderProgram.use();
 		mShaderProgram.setFloat("uPointSize", this->varPointSize()->getData());
 
 		unsigned int subroutine;
-		if (pass == RenderPass::COLOR)
+		if (pass == GLRenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", mMetallic);
-			mShaderProgram.setFloat("uRoughness", mRoughness);
-			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
+			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
 
 			mShaderProgram.setInt("uColorMode", mColorMode);
 			mShaderProgram.setFloat("uColorMin", mColorMin);
@@ -114,7 +114,7 @@ namespace dyno
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == RenderPass::SHADOW)
+		else if (pass == GLRenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

@@ -96,22 +96,22 @@ namespace dyno
 		}
 	}
 
-	void GLSurfaceVisualModule::paintGL(RenderPass mode)
+	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)
 	{
 		mShaderProgram.use();
 
 		unsigned int subroutine;
-		if (mode == RenderPass::COLOR)
+		if (mode == GLRenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", mMetallic);
-			mShaderProgram.setFloat("uRoughness", mRoughness);
-			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
+			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
 
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (mode == RenderPass::SHADOW)
+		else if (mode == GLRenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

@@ -27,7 +27,7 @@ namespace dyno
 		RenderQueue() {};
 		~RenderQueue() override { modules.clear(); }
 
-		void draw(GLVisualModule::RenderPass pass)
+		void draw(GLRenderPass pass)
 		{
 			for (GLVisualModule* m : modules)
 				m->draw(pass);
@@ -179,7 +179,7 @@ namespace dyno
 		if (scene != nullptr && !scene->isEmpty()) {
 			scene->traverseForward(&renderQueue);
 		}
-		renderQueue.draw(GLVisualModule::COLOR);
+		renderQueue.draw(GLRenderPass::COLOR);
 		
 		// draw scene bounding box
 		if (m_rparams.showSceneBounds && scene != 0)

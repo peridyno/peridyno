@@ -44,13 +44,13 @@ namespace dyno
 		DEF_VAR(uint, ColorMode, 0, "");
 
 	protected:
-		virtual void paintGL(RenderPass mode) override;
+		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
 	private:
 
-		gl::Program mShaderProgram;
+		gl::Program		mShaderProgram;
 		gl::VertexArray	mVAO;
 
 		GLCudaBuffer	mVertexBuffer;
@@ -58,7 +58,7 @@ namespace dyno
 		GLCudaBuffer 	mIndexBuffer;
 		GLCudaBuffer	mColor;
 
-		DArray<Vec3f> mColorBuffer;
+		DArray<Vec3f>	mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
 		unsigned int	mColorMode = 0;

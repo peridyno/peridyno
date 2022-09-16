@@ -53,7 +53,7 @@ namespace dyno
 		DEF_VAR(float, PointSize, 0.001f, "Size of rendered particles");
 
 	protected:
-		virtual void paintGL(RenderPass pass) override;
+		virtual void paintGL(GLRenderPass pass) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 

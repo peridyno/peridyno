@@ -34,25 +34,27 @@ namespace dyno
 
 	void GLVisualModule::setMetallic(float m)
 	{
-		this->mMetallic = m;
+		this->varMetallic()->setValue(m);
 	}
 
 	void GLVisualModule::setRoughness(float r)
 	{
-		this->mRoughness = r;
+		this->varRoughness()->setValue(r);
 	}
 
 	void GLVisualModule::setAlpha(float alpha)
 	{
-		mAlpha = alpha;
+		this->varAlpha()->setValue(alpha);
 	}
 
 	bool GLVisualModule::isTransparent() const
 	{
-		return mAlpha < 1.f;
+		// we need to copy the alpha since it doesn't provide const interface...
+		auto alpha = this->var_Alpha;
+		return alpha.getValue() < 1.f;
 	}
 
-	void GLVisualModule::draw(RenderPass pass)
+	void GLVisualModule::draw(GLRenderPass pass)
 	{
 		if (!this->validateInputs()) {
 			return;

@@ -216,7 +216,7 @@ namespace dyno
 				for (auto iter : node->graphicsPipeline()->activeModules()) {
 					auto m = dynamic_cast<GLVisualModule*>(iter.get());
 					if (m && m->isVisible()) {
-						m->draw(GLVisualModule::SHADOW);
+						m->draw(GLRenderPass::SHADOW);
 					}
 				}
 			}
