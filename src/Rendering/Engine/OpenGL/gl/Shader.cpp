@@ -42,8 +42,11 @@ namespace gl {
 			(std::istreambuf_iterator<char>()));
 		const char* source = content.c_str();
 
-		return createFromSource(type, content);
-		return true;
+		if (createFromSource(type, content))
+			return true;
+
+		printf("Failed to compile shader from file: %s\n", file.c_str());
+		return false;
 	}
 
 	void Shader::release()
@@ -161,6 +164,8 @@ namespace gl {
 			const std::string& src = ShaderSource.at(vs);
 			if (vshader.createFromSource(GL_VERTEX_SHADER, src))
 				program.attachShader(vshader);
+			else
+				printf("Failed to compile shader: %s\n", vs);
 		}
 
 		if (fs != 0)
@@ -168,6 +173,8 @@ namespace gl {
 			const std::string& src = ShaderSource.at(fs);
 			if (fshader.createFromSource(GL_FRAGMENT_SHADER, src))
 				program.attachShader(fshader);
+			else
+				printf("Failed to compile shader: %s\n", fs);
 		}
 
 		if (gs != 0)
@@ -175,9 +182,14 @@ namespace gl {
 			const std::string& src = ShaderSource.at(gs);
 			if (gshader.createFromSource(GL_GEOMETRY_SHADER, src))
 				program.attachShader(gshader);
+			else
+				printf("Failed to compile shader: %s\n", gs);
 		}
 
-		program.link();
+		if (!program.link())
+		{
+			printf("Failed to link shader program: %s\n", fs);
+		}
 
 		vshader.release();
 		fshader.release();

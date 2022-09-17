@@ -20,11 +20,16 @@
 #include <vector>
 
 #include <Rendering.h>
+
 #include "gl/Buffer.h"
+#include "gl/Texture.h"
+#include "gl/Framebuffer.h"
+
 
 namespace dyno
 {
 	class SSAO;
+	class FXAA;
 	class ShadowMap;
 	class GLRenderHelper;
 
@@ -55,17 +60,24 @@ namespace dyno
 
 	private:
 		void setupCamera();
-		void initUniformBuffers();
+		void setupInternalFramebuffer();
 
 	private:
+		// internal framebuffer
+		gl::Framebuffer	  mFramebuffer;
+		gl::Texture2D	  mColorTex;
+		gl::Texture2D	  mDepthTex;
+		gl::Texture2D	  mIndexTex;
 
-		// uniform buffer for matrices
+		// uniform buffers
 		gl::Buffer		mTransformUBO;
 		gl::Buffer		mLightUBO;
 		
 		SSAO*			mSSAO;
 		ShadowMap*		mShadowMap;
 		GLRenderHelper*	mRenderHelper;
+		FXAA*			mFXAAFilter;
+
 
 		//HE Xiaowei
 		CameraType mCameraType = CameraType::Orbit;

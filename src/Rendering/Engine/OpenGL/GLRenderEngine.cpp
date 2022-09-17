@@ -5,6 +5,7 @@
 #include "Utility.h"
 #include "ShadowMap.h"
 #include "SSAO.h"
+#include "FXAA.h"
 
 // dyno
 #include "SceneGraph.h"
@@ -57,6 +58,7 @@ namespace dyno
 		mRenderHelper = new GLRenderHelper();
 		mShadowMap = new ShadowMap(2048, 2048);
 		mSSAO = new SSAO;
+		mFXAAFilter = new FXAA;
 
 		setupCamera();
 	}
@@ -66,6 +68,7 @@ namespace dyno
 		delete mRenderHelper;
 		delete mShadowMap;
 		delete mSSAO;
+		delete mFXAAFilter;
 	}
 
 	void GLRenderEngine::initialize(int width, int height)
@@ -81,16 +84,22 @@ namespace dyno
 		glDepthFunc(GL_LEQUAL);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		initUniformBuffers();
+		setupInternalFramebuffer();
+
+		// create uniform block for transform
+		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		// create uniform block for light
+		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		gl::glCheckError();
 
 		mSSAO->initialize();
 		mShadowMap->initialize();
 		mRenderHelper->initialize();
-
-		mCamera->setWidth(width);
-		mCamera->setHeight(height);
+		mFXAAFilter->initialize();
 
 		mCamera->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
+
+		this->resize(width, height);
 	}
 
 	void GLRenderEngine::setupCamera()
@@ -108,13 +117,43 @@ namespace dyno
 		}
 	}
 
-	void GLRenderEngine::initUniformBuffers()
+	void GLRenderEngine::setupInternalFramebuffer()
 	{
-		// create uniform block for transform
-		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-		// create uniform block for light
-		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		// create textures
+		mColorTex.maxFilter = GL_LINEAR;
+		mColorTex.minFilter = GL_LINEAR;
+		mColorTex.create();
+		mColorTex.resize(1, 1);
 
+		mDepthTex.internalFormat = GL_DEPTH_COMPONENT32;
+		mDepthTex.format = GL_DEPTH_COMPONENT;
+		mDepthTex.create();
+		mDepthTex.resize(1, 1);
+
+		// index
+		mIndexTex.internalFormat = GL_RGBA32I;
+		mIndexTex.format = GL_RGBA_INTEGER;
+		mIndexTex.type = GL_INT;
+		mIndexTex.create();
+		mIndexTex.resize(1, 1);
+
+		// create framebuffer
+		mFramebuffer.create();
+
+		// bind framebuffer texture
+		mFramebuffer.bind();
+		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mDepthTex.id);
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mColorTex.id);
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT1, mIndexTex.id);
+
+		const GLenum buffers[] = {
+			GL_COLOR_ATTACHMENT0,
+			GL_COLOR_ATTACHMENT1
+		};
+		mFramebuffer.drawBuffers(2, buffers);
+
+		mFramebuffer.checkStatus();
+		mFramebuffer.unbind();
 		gl::glCheckError();
 	}
 
@@ -155,9 +194,9 @@ namespace dyno
 		mLightUBO.load(&light, sizeof(light));
 		mLightUBO.bindBufferBase(1);
 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		
+		mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
 		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// draw background color
@@ -195,6 +234,28 @@ namespace dyno
 			glViewport(10, 10, 100, 100);
 			mRenderHelper->drawAxis();
 		}
+
+		// draw to final framebuffer with fxaa filter
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
+		
+		if (m_rparams.useFXAA)
+		{
+			mColorTex.bind(GL_TEXTURE1);
+			mFXAAFilter->apply(m_rparams.viewport.w, m_rparams.viewport.h);
+		}
+		else
+		{
+			mFramebuffer.bind(GL_READ_FRAMEBUFFER);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+			glBlitFramebuffer(
+				0, 0, m_rparams.viewport.w, m_rparams.viewport.h,
+				0, 0, m_rparams.viewport.w, m_rparams.viewport.h,
+				GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		}
+
+		gl::glCheckError();
 	}
 
 	void GLRenderEngine::resize(int w, int h)
@@ -207,6 +268,12 @@ namespace dyno
 
 		mCamera->setWidth(w);
 		mCamera->setHeight(h);
+
+		// resize internal framebuffer
+		mColorTex.resize(w, h);
+		mDepthTex.resize(w, h);
+		mIndexTex.resize(w, h);
+		gl::glCheckError();
 	}
 
 	std::string GLRenderEngine::name()

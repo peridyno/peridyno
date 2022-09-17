@@ -47,9 +47,9 @@ namespace gl
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
-	void Framebuffer::bind()
+	void Framebuffer::bind(unsigned int target)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, id);
+		glBindFramebuffer(target, id);
 	}
 
 	void Framebuffer::unbind()
@@ -59,7 +59,6 @@ namespace gl
 
 	void Framebuffer::setTexture2D(unsigned int attachment, unsigned int tex, int level)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, id);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, tex, level);
 		glCheckError();
 	}
