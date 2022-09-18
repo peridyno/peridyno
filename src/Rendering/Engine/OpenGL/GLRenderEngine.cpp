@@ -22,37 +22,6 @@
 
 namespace dyno
 {
-	class RenderQueue : public Action
-	{
-	public:
-		RenderQueue() {};
-		~RenderQueue() override { modules.clear(); }
-
-		void draw(GLRenderPass pass)
-		{
-			for (GLVisualModule* m : modules)
-				m->draw(pass);
-		}
-
-	private:
-		void process(Node* node) override
-		{
-			if (!node->isVisible())
-				return;
-
-			for (auto iter : node->graphicsPipeline()->activeModules())
-			{
-				auto m = dynamic_cast<GLVisualModule*>(iter.get());
-				if (m && m->isVisible())
-				{
-					//m->update();
-					modules.push_back(m);
-				}
-			}
-		}
-		std::vector<GLVisualModule*> modules;
-	};
-
 	GLRenderEngine::GLRenderEngine()
 	{
 		mRenderHelper = new GLRenderHelper();
@@ -86,6 +55,11 @@ namespace dyno
 
 		setupInternalFramebuffer();
 
+		// OIT
+		setupTransparencyPass();
+
+		mScreenQuad = gl::Mesh::ScreenQuad();
+
 		// create uniform block for transform
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		// create uniform block for light
@@ -100,6 +74,35 @@ namespace dyno
 		mCamera->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
 
 		this->resize(width, height);
+	}
+
+	void GLRenderEngine::setupTransparencyPass()
+	{
+		mFreeNodeIdx.create(GL_ATOMIC_COUNTER_BUFFER, GL_DYNAMIC_DRAW);
+		mFreeNodeIdx.allocate(sizeof(int));
+
+		mLinkedListBuffer.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+		struct _Node
+		{
+			glm::vec4 color;
+			float	  depth;
+			unsigned int next;
+			float	  _pad0;
+			float     _pad1;
+		};
+		mLinkedListBuffer.allocate(sizeof(_Node) * MAX_OIT_NODES);
+
+		// transparency
+		mHeadIndexTex.internalFormat = GL_R32UI;
+		mHeadIndexTex.format = GL_RED_INTEGER;
+		mHeadIndexTex.type = GL_UNSIGNED_INT;
+		mHeadIndexTex.wrapS = GL_CLAMP_TO_EDGE;
+		mHeadIndexTex.wrapT = GL_CLAMP_TO_EDGE;
+		mHeadIndexTex.create();
+		mHeadIndexTex.resize(1, 1);
+
+
+		mBlendProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blend.frag");
 	}
 
 	void GLRenderEngine::setupCamera()
@@ -119,9 +122,12 @@ namespace dyno
 
 	void GLRenderEngine::setupInternalFramebuffer()
 	{
-		// create textures
+		// create render textures
 		mColorTex.maxFilter = GL_LINEAR;
 		mColorTex.minFilter = GL_LINEAR;
+		mColorTex.format = GL_RGBA;
+		mColorTex.internalFormat = GL_RGBA;
+		mColorTex.type = GL_BYTE;
 		mColorTex.create();
 		mColorTex.resize(1, 1);
 
@@ -213,13 +219,67 @@ namespace dyno
 		}
 
 		// render visual modules
-		RenderQueue renderQueue;
-		// enqueue render content
+		struct RenderQueue : public Action {
+			void process(Node* node) override
+			{
+				if (!node->isVisible())	return;
+				for (auto iter : node->graphicsPipeline()->activeModules())	{
+					auto m = dynamic_cast<GLVisualModule*>(iter.get());
+					if (m && m->isVisible()) {
+						modules.push_back(m);
+					}
+				}
+			}
+			std::vector<GLVisualModule*> modules;
+		} renderQueue;
+
+		// enqueue modules for rendering
 		if (scene != nullptr && !scene->isEmpty()) {
 			scene->traverseForward(&renderQueue);
 		}
-		renderQueue.draw(GLRenderPass::COLOR);
-		
+
+		// render opacity objects
+		for (auto m : renderQueue.modules) {
+			if(!m->isTransparent())	m->draw(GLRenderPass::COLOR);
+		}
+
+		// render transparency objects
+		{
+			// reset free node index
+			const int zero = 0;
+			mFreeNodeIdx.load((void*)&zero, sizeof(int));
+			// reset head index
+			const int clear = 0xFFFFFFFF;
+			mHeadIndexTex.clear((void*)&clear);
+
+			glBindImageTexture(0, mHeadIndexTex.id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
+			mFreeNodeIdx.bindBufferBase(0);
+			mLinkedListBuffer.bindBufferBase(0);
+
+			// draw to no attachments
+			mFramebuffer.drawBuffers(0, 0);
+			glDepthMask(false);
+			for (auto m : renderQueue.modules) {
+				if (m->isTransparent())	m->draw(GLRenderPass::TRANSPARENCY);
+			}
+
+			glDepthMask(true);
+			const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0 };
+			mFramebuffer.drawBuffers(1, attachments);
+
+			mBlendProgram.use();
+
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
+
+			mScreenQuad.draw();
+
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			glDisable(GL_BLEND);
+			glEnable(GL_DEPTH_TEST);
+		}
+
 		// draw scene bounding box
 		if (m_rparams.showSceneBounds && scene != 0)
 		{
@@ -237,12 +297,13 @@ namespace dyno
 
 		// draw to final framebuffer with fxaa filter
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
-		
+				
 		if (m_rparams.useFXAA)
 		{
-			mColorTex.bind(GL_TEXTURE1);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
+
+			mColorTex.bind(GL_TEXTURE1);			
 			mFXAAFilter->apply(m_rparams.viewport.w, m_rparams.viewport.h);
 		}
 		else
@@ -257,6 +318,7 @@ namespace dyno
 
 		gl::glCheckError();
 	}
+
 
 	void GLRenderEngine::resize(int w, int h)
 	{
@@ -273,6 +335,10 @@ namespace dyno
 		mColorTex.resize(w, h);
 		mDepthTex.resize(w, h);
 		mIndexTex.resize(w, h);
+
+		// transparency
+		mHeadIndexTex.resize(w, h);
+
 		gl::glCheckError();
 	}
 

@@ -67,6 +67,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setAlpha(0.5f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 

@@ -16,7 +16,6 @@
 
 #pragma once
 
-
 #include "gl/Shader.h"
 #include "gl/Mesh.h"
 

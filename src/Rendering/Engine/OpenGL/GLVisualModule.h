@@ -47,7 +47,7 @@ namespace dyno
 		DEF_VAR(Vec3f, BaseColor, Vec3f(0.8f), "");
 		DEF_VAR(Real, Metallic, 0.0f, "");
 		DEF_VAR(Real, Roughness, 0.5f, "");
-		DEF_VAR(Real, Alpha, 0.5f, "");
+		DEF_VAR(Real, Alpha, 1.0f, "");
 
 	protected:
 		virtual bool initializeGL() = 0;

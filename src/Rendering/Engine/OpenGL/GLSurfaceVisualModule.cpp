@@ -98,29 +98,33 @@ namespace dyno
 
 	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)
 	{
-		mShaderProgram.use();
 
 		unsigned int subroutine;
 		if (mode == GLRenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
-
 			subroutine = 0;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
 		else if (mode == GLRenderPass::SHADOW)
 		{
 			subroutine = 1;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+		}
+		else if (mode == GLRenderPass::TRANSPARENCY)
+		{
+			subroutine = 2;
 		}
 		else
 		{
-			printf("Unknown render mode!\n");
+			printf("GLSurfaceVisualModule: Unknown render mode!\n");
 			return;
 		}
+
+		mShaderProgram.use();
+		mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
+		mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+		mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+		mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
+
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 
 		mVAO.bind();
 		glDrawElements(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0);
