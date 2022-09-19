@@ -10,7 +10,8 @@ namespace dyno
 	SkeletonLoader<TDataType>::SkeletonLoader()
 		: Node()
 	{
-
+		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
+		this->stateTopology()->setDataPtr(defaultTopo);
 	}
 
 	template<typename TDataType>
@@ -161,6 +162,7 @@ namespace dyno
 	{
 		auto filename = this->varFileName()->getData();
 		std::string filepath = filename.string();
+		m_jointMap.clear();
 		initFBX(filepath.c_str());
 		getNodes(*g_scene);
 	}
@@ -218,7 +220,7 @@ namespace dyno
 	template<typename TDataType>
 	void SkeletonLoader<TDataType>::resetStates()
 	{
-
+		loadFBX();
 		if (m_jointMap.empty())
 		{
 			printf("Load Skeleton failed.");
@@ -237,6 +239,10 @@ namespace dyno
 			
 			int id_joint = 0;
 			int id_cap = 0;
+			m_capLists.clear();
+			m_T.clear();
+			m_R.clear();
+
 			for (auto joint : m_jointMap)
 			{
 				for (auto joint_son : joint->children)
@@ -282,6 +288,26 @@ namespace dyno
 			this->outPosU()->allocate();
 			this->outPosU()->getData().resize(m_numCaps);
 			this->outPosU()->getData().assign(v1);
+			
+		}
+
+		// Init Capsule Topology
+		{
+			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
+			mHostCap3D.clear();
+			for (auto& cap : m_capLists)
+			{
+				Capsule3D cap3d;
+				cap3d.radius = this->varRadius()->getData();
+				cap3d.segment.v0 = cap.v0;
+				cap3d.segment.v1 = cap.v1;
+				mHostCap3D.push_back(cap3d);
+			}		
+
+			auto& caps = topo->getCaps();
+			caps.resize(mHostCap3D.size());
+			caps.assign(mHostCap3D);
+
 		}
 	}
 
@@ -312,6 +338,7 @@ namespace dyno
 			joint->getGlobalCoord();
 		}
 
+		// Update Bone
 		{
 			int index = 0;
 			std::vector<Coord> v0;
@@ -343,7 +370,22 @@ namespace dyno
 			this->outRotate()->getData().assign(m_R);
 
 			this->outPosV()->getData().assign(v0);
-			this->outPosU()->getData().assign(v1);		
+			this->outPosU()->getData().assign(v1);
+		}
+		
+		// Update Capsule Topology
+		{
+			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
+			int index = 0;
+			for (auto& cap : m_capLists)
+			{
+				auto &cap3d = mHostCap3D[index++];
+				cap3d.segment.v0 = cap.v0;
+				cap3d.segment.v1 = cap.v1;
+			}		
+
+			auto& caps = topo->getCaps();
+			caps.assign(mHostCap3D);
 		}
     }
 

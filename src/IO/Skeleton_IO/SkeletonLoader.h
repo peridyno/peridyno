@@ -16,12 +16,13 @@
 #pragma once
 #include "Node.h"
 
+#include "Topology/Primitive3D.h"
+#include "Topology/DiscreteElements.h"
 #include "Topology/JointTree.h"
+
 #include "FilePath.h"
 
 #include "ofbx.h"
-
-
 
 namespace dyno
 {
@@ -64,6 +65,12 @@ namespace dyno
 		void copyVecT(Coord &dest, ofbx::Vec3 src){dest = Coord(src.x, src.y, src.z);}
 
 	public:
+		DEF_VAR(Real, Radius, 0.0075 , " Radius of Capsule")
+		/**
+		* @brief Capsule Topology
+		*/	
+		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
         DEF_ARRAY_OUT(JCapsule, Capsule, DeviceType::GPU, "Capsule <V, U> Detail");
 
         // DEF_ARRAY_OUT(Coord, Velocity, DeviceType::GPU, "Capsule Velocity");
@@ -82,9 +89,14 @@ namespace dyno
 
         JointList m_jointMap;
 
+
 		std::vector<JCapsule> m_capLists;
 		std::vector<Quat<Real>> m_T;
 		std::vector<Quat<Real>> m_R;
+
+		std::vector<Capsule3D> mHostCap3D;
+		// DArray<Capsule3D> mDeviceCaps;
+		
 
         int m_numCaps = 0;
 		int m_numjoints = 0;
