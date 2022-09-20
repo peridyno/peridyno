@@ -276,9 +276,26 @@ namespace dyno
 	{
 		mSync.lock();
 
-		this->traverseForward<ResetAct>();
+		class ResetNodeAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				if (node == NULL) {
+					Log::sendMessage(Log::Error, "Node is invalid!");
+					return;
+				}
 
-		this->mFrameNumber = 0;
+				node->stateFrameNumber()->setValue(0);
+				node->stateElapsedTime()->setValue(0.0f);
+
+				node->reset();
+			}
+		};
+
+		this->traverseForward<ResetNodeAct>();
+
+		mElapsedTime = 0.0f;
+		mFrameNumber = 0;
 
 		mSync.unlock();
 	}
