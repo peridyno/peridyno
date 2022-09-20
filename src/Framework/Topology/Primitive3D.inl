@@ -36,11 +36,10 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::operator=(const Coord3D& p)
+	DYN_FUNC TPoint3D<Real>& TPoint3D<Real>::operator=(const Coord3D& p)
 	{
-		TPoint3D<Real> pt;
-		pt.origin = p;
-		return pt;
+		origin = p;
+		return *this;
 	}
 
 	template<typename Real>
@@ -3037,6 +3036,71 @@ namespace dyno
 	DYN_FUNC bool TSphere3D<Real>::isValid()
 	{
 		return radius >= REAL_EPSILON;
+	}
+
+//***********************  Cylinder3D  **************************
+		template<typename Real>
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D()
+	{
+		center = Coord3D(0);
+		radius = 0.3;
+		row = 4;
+		columns = 24;
+		height = 0.9;
+		end_segment = 3;
+	}
+
+	template<typename Real>
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Real& radius_, const Real& row_, const Real& columns_, const Real& height_, const Real& end_segment_, const Coord3D& center_)
+	{
+		radius = radius_;
+		row = row_;
+		columns = columns_;
+		height = height_;
+		end_segment = end_segment_;
+		center = center_;
+	}
+
+	template<typename Real>
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const TCylinder3D<Real>& tour)
+	{
+		radius = tour.radius;
+		row = tour.row;
+		columns = tour.columns;
+		height = tour.height;
+		center = tour.center;
+	}
+
+	//***********************  Cone3D  **************************
+		template<typename Real>
+	DYN_FUNC TCone3D<Real>::TCone3D()
+	{
+		radius = 0.3;
+		row = 4;
+		columns = 24;
+		height = 0.9;
+
+	}
+
+
+	template<typename Real>
+	DYN_FUNC TCone3D<Real>::TCone3D( const Real& radius_, const Real& row_, const Real& columns_, const Real& height_)
+	{
+		radius = radius_;
+		row = row_;
+		columns = columns_;
+		height = height_;
+
+	}
+
+	template<typename Real>
+	DYN_FUNC TCone3D<Real>::TCone3D(const TCone3D<Real>& Cone)
+	{
+		radius = Cone.radius;
+		row = Cone.row;
+		columns = Cone.columns;
+		height = Cone.height;
+
 	}
 
 
