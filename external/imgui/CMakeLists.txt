@@ -5,7 +5,7 @@ file(GLOB_RECURSE IMGUI_SRC
      "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
 	 "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-add_library(imgui STATIC ${IMGUI_SRC})
+add_library(imgui SHARED ${IMGUI_SRC})
 set_target_properties(imgui PROPERTIES
     OUTPUT_NAME "imgui-1.8.3")
 

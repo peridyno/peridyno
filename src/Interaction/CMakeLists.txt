@@ -10,7 +10,7 @@ file(
 )
 
 if(WIN32)
-    add_library(${LIB_NAME} STATIC ${LIB_SRC})
+    add_library(${LIB_NAME} SHARED ${LIB_SRC})
 elseif(UNIX)
     add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 endif()

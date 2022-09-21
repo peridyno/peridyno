@@ -5,7 +5,7 @@ add_definitions(-DTT_BUILDING_DLL)
 set(LIB_NAME QtGUI)
 set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(CMAKE_AUTOMOC ON)                                                                   # 开启自动moc功能
+set(CMAKE_AUTOMOC ON)                                                                   # 弢�启自动moc功能
 set(CMAKE_AUTOUIC ON) 
 
 find_package(Qt5 COMPONENTS
@@ -22,7 +22,7 @@ qt5_add_resources(RESOURCES
 
 
 file(                                                                           
-    GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取所有源文件list
+    GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取扢�有源文件list
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
     "${LIB_SRC_DIR}/*.c*"
@@ -33,7 +33,7 @@ file(
 	"${LIB_SRC_DIR}/ToolBar/*.c*"
 )
 
-add_library(${LIB_NAME} STATIC 
+add_library(${LIB_NAME} SHARED 
 	${LIB_SRC} 
 	${RESOURCES})
 

@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
 
-project(peridyno LANGUAGES CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
+project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
 # define library version (update: apparently you can also do it in project()!)
 set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)

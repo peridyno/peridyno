@@ -5089,6 +5089,16 @@ static void SetWindowConditionAllowFlags(ImGuiWindow* window, ImGuiCond flags, b
     window->SetWindowCollapsedAllowFlags = enabled ? (window->SetWindowCollapsedAllowFlags | flags) : (window->SetWindowCollapsedAllowFlags & ~flags);
 }
 
+ImGuiWindow* ImGui::GetCurrentWindowRead()
+{ 
+    ImGuiContext& g = *GImGui; return g.CurrentWindow; 
+}
+
+ImGuiWindow* ImGui::GetCurrentWindow()
+{
+    ImGuiContext& g = *GImGui; g.CurrentWindow->WriteAccessed = true; return g.CurrentWindow;
+}
+
 ImGuiWindow* ImGui::FindWindowByID(ImGuiID id)
 {
     ImGuiContext& g = *GImGui;

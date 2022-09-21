@@ -3,7 +3,7 @@ set(LIB_NAME ImWidgets)
 file(GLOB_RECURSE LIB_SRC *.cpp *.h */*.cpp */*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})
 
-add_library(${LIB_NAME} STATIC ${LIB_SRC})
+add_library(${LIB_NAME} SHARED ${LIB_SRC})
 
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/GUI")
 

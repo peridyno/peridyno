@@ -64,7 +64,7 @@ namespace dyno {
 		/*!
 		 *	\brief	Get the filename of log.
 		 */
-		static const std::string& getOutput() { return outputFile; }
+		static const std::string& getOutput();
 
 		/*!
 		 *	\brief	Add a new message to log.
@@ -77,17 +77,17 @@ namespace dyno {
 		/*!
 		 *	\brief	Get the list of all of the logged messages.
 		 */
-		static std::list<Message>& getMessages() { return messages; }
+		static std::list<Message>& getMessages();
 
 		/*!
 		 *	\brief	Get the last logged message.
 		 */
-		static const Message& getLastMessage() { return messages.back(); }
+		static const Message& getLastMessage();
 
 		/*!
 		 *	\brief	Set user function to receive newly sent messages to logger.
 		 */
-		static void setUserReceiver(void (*userFunc)(const Message&)) { receiver = userFunc; }
+		static void setUserReceiver(void (*userFunc)(const Message&));
 
 		/*!
 		 *	\brief	Set minimum level of message to be logged to file.
