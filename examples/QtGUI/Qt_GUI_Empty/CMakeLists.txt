@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
 if(PERIDYNO_Qt5_GUI)
-    set(PROJECT_NAME Qt_Bricks)
+
+    set(PROJECT_NAME Qt_GUI_Empty)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
 
@@ -17,7 +18,7 @@ if(PERIDYNO_Qt5_GUI)
         "${CMAKE_CURRENT_SOURCE_DIR}/*.c*"
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
     )
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
     add_executable(${PROJECT_NAME} ${SRC_LIST})
     
@@ -25,22 +26,29 @@ if(PERIDYNO_Qt5_GUI)
 		#the option "-Wl,--whole-archive" is an equivalance to /WHOLEARCHIVE
         target_link_libraries(${PROJECT_NAME} PUBLIC   
             -Wl,--whole-archive
-            Core 
-            Framework 
-            IO
-            RigidBody 
             QtGUI
-            GLRenderEngine
+            Modeling
+            Interaction
+            IO
+            Volume
+            ParticleSystem
             -Wl,--no-whole-archive) 
 
     elseif(WIN32)
         target_link_libraries(${PROJECT_NAME} PUBLIC
-            Core 
-            Framework 
-            IO
-            RigidBody 
+            Modeling
             QtGUI
-            GLRenderEngine) 
+            Interaction
+            Volume
+            ParticleSystem
+            IO) 
+
+        #/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
+            "/WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib")
+
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
+            "/WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")
     endif()
@@ -50,3 +58,4 @@ if(PERIDYNO_Qt5_GUI)
     set_target_properties(${PROJECT_NAME} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 endif()
+

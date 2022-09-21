@@ -39,21 +39,6 @@ if(PERIDYNO_Qt5_GUI)
             IO
             QtGUI
             GLRenderEngine) 
-
-		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
-            /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:GLRenderEngined.lib
-            /WHOLEARCHIVE:RenderCored.lib")
-
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
-            /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:GLRenderEngine.lib
-            /WHOLEARCHIVE:RenderCore.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")
     endif()
