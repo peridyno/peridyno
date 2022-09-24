@@ -103,6 +103,29 @@ namespace Qt
 		return dyno::FormatBlockPortName(name);
 	}
 
+	QString QtModuleWidget::nodeTips() const
+	{
+		std::string tip = "Class: ";
+		tip += mModule->getClassInfo()->getClassName();
+
+		return QString::fromStdString(tip);
+	}
+
+	QString QtModuleWidget::portTips(PortType portType, PortIndex portIndex) const
+	{
+		dyno::FBase* f = this->getField(portType, portIndex);
+		
+		auto fieldTip = [&](FBase* f) -> QString {
+			std::string tip;
+			tip += "Class: " + f->getClassName() + "\n";
+			tip += "Template: " + f->getTemplateName() + "\n";
+
+			return QString::fromStdString(tip);
+		};
+
+		return fieldTip(f);
+	}
+
 	void QtModuleWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
 	{
 		if (!mEditingEnabled)

@@ -66,7 +66,7 @@ namespace dyno
 			mColorBuffer.resize(vertices.size());
 		}
 
-		if (this->varColorMode()->getValue() == 0)
+		if (this->varColorMode()->getValue() == EColorMode::CM_Object)
 		{
 			RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
 		}

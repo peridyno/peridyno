@@ -88,10 +88,10 @@ namespace dyno
 			int id;
 			Tetrahedron tet;
 			data >> id >> tet[0] >> tet[1] >> tet[2] >> tet[3];
-			tet[0] -= 1;
-			tet[1] -= 1;
-			tet[2] -= 1;
-			tet[3] -= 1;
+			tet[0] -= 0;
+			tet[1] -= 0;
+			tet[2] -= 0;
+			tet[3] -= 0;
 			tets.push_back(tet);
 
 			tris.push_back(Triangle(tet[0], tet[1], tet[2]));

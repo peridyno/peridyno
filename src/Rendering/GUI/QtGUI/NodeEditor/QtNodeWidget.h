@@ -33,7 +33,11 @@ namespace Qt
 
 		QString name() const override;
 
+		QString	nodeTips() const override;
+
 		QString	portCaption(PortType portType, PortIndex portIndex) const override;
+
+		QString	portTips(PortType portType, PortIndex portIndex) const override;
 
 		QString	validationMessage() const override;
 

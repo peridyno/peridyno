@@ -27,3 +27,4 @@ namespace dyno
 			[=]()->std::shared_ptr<Node> { return std::make_shared<PickerNode<DataType3f>>(); });
 	}
 }
+//
