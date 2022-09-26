@@ -14,8 +14,7 @@ in VertexData
 	vec3 color;
 } fs_in;
 
-// PBR evaluation
-uniform vec3  uBaseColor;
+// material properties
 uniform float uMetallic;
 uniform float uRoughness;
 uniform float uAlpha;

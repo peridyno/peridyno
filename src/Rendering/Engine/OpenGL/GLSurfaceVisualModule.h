@@ -37,9 +37,9 @@ namespace dyno
 			CM_Object = 0,
 			CM_Vertex = 1);
 
-		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Shading mode");
+		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 
-		DEF_VAR(bool, UsePhongShadingModel, false, "")
+		DEF_VAR(bool, UseVertexNormal, false, "")
 
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
@@ -53,16 +53,13 @@ namespace dyno
 	private:
 
 		gl::Program		mShaderProgram;
-		gl::VertexArray	mVAO;
 
+		gl::VertexArray	mVAO;
+		GLCudaBuffer 	mIndexBuffer;
 		GLCudaBuffer	mVertexBuffer;
 		GLCudaBuffer	mNormalBuffer;
-		GLCudaBuffer 	mIndexBuffer;
-		GLCudaBuffer	mColor;
-
-		DArray<Vec3f>	mColorBuffer;
+		GLCudaBuffer	mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
-		unsigned int	mColorMode = 0;
 	};
 };
