@@ -35,9 +35,7 @@ namespace dyno
 		~ShadowMap();
 
 		void initialize();
-		
 		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
-		void endUpdate();
 
 	private:
 		// framebuffers

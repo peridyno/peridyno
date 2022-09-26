@@ -160,87 +160,88 @@ namespace dyno
 
 	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
 	{
-		if(rparams.light.mainLightShadow == 0.f || scene == nullptr || scene->isEmpty())
-			return;
-
-		glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
-		glm::mat4 lightProj = getLightProjMatrix(lightView, scene->getLowerBound(), scene->getUpperBound(), rparams);
-
-		// update light transform infomation
-		struct	{			
-			glm::mat4 model;
-			glm::mat4 view;
-			glm::mat4 proj;
-			int width;
-			int height;
-		} lightMVP;
-
-		lightMVP.width = width;
-		lightMVP.height = height;
-		lightMVP.model = glm::mat4(1);
-		lightMVP.view = lightView;
-		lightMVP.proj = lightProj;
-
-		mTransformUBO.load(&lightMVP, sizeof(lightMVP));
-
-		// shadow map uniform
-		struct {
-			glm::mat4 transform;
-			float minValue;
-		} shadow;
-
-		shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
-		shadow.minValue = minValue;
-
-		mShadowMatrixUBO.load(&shadow, sizeof(shadow));
-
-		mTransformUBO.bindBufferBase(0);
-		mShadowMatrixUBO.bindBufferBase(2);
-
-		// first draw to shadow texture
+		// initialization
 		mFramebuffer.bind();
 		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
 		mFramebuffer.clearDepth(1.0);
 		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
-		glViewport(0, 0, width, height);
-
-		// draw scene
-		static class DrawShadow : public Action
+		if (rparams.light.mainLightShadow > 0.f	&& 
+			scene != nullptr && !scene->isEmpty())
 		{
-		private:
-			void process(Node* node) override
-			{
-				if (!node->isVisible())	return;
+			glViewport(0, 0, width, height);
 
-				for (auto iter : node->graphicsPipeline()->activeModules()) {
-					auto m = dynamic_cast<GLVisualModule*>(iter.get());
-					if (m && m->isVisible()) {
-						m->draw(GLRenderPass::SHADOW);
+			glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
+			glm::mat4 lightProj = getLightProjMatrix(lightView, scene->getLowerBound(), scene->getUpperBound(), rparams);
+
+			// update light transform infomation
+			struct {
+				glm::mat4 model;
+				glm::mat4 view;
+				glm::mat4 proj;
+				int width;
+				int height;
+			} lightMVP;
+
+			lightMVP.width = width;
+			lightMVP.height = height;
+			lightMVP.model = glm::mat4(1);
+			lightMVP.view = lightView;
+			lightMVP.proj = lightProj;
+
+			mTransformUBO.load(&lightMVP, sizeof(lightMVP));
+
+			// shadow map uniform
+			struct {
+				glm::mat4 transform;
+				float minValue;
+			} shadow;
+
+			shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
+			shadow.minValue = minValue;
+
+			mShadowMatrixUBO.load(&shadow, sizeof(shadow));
+
+			mTransformUBO.bindBufferBase(0);
+			mShadowMatrixUBO.bindBufferBase(2);
+
+			// draw objects to shadow texture
+			static class DrawShadow : public Action
+			{
+			private:
+				void process(Node* node) override
+				{
+					if (!node->isVisible())	return;
+
+					for (auto iter : node->graphicsPipeline()->activeModules()) {
+						auto m = dynamic_cast<GLVisualModule*>(iter.get());
+						if (m && m->isVisible()) {
+							m->draw(GLRenderPass::SHADOW);
+						}
 					}
 				}
+			} action;
+			scene->traverseForward(&action);
+
+			// blur shadow map		
+			const int blurIters = 1;
+
+			glDisable(GL_DEPTH_TEST);
+			mBlurProgram.use();
+			for (int i = 0; i < blurIters; i++)
+			{
+				mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
+				mShadowTex.bind(GL_TEXTURE5);
+				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
+				mQuad.draw();
+
+				mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
+				mShadowBlur.bind(GL_TEXTURE5);
+				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+				mQuad.draw();
 			}
-		} action;
-		scene->traverseForward(&action);
-
-		// blur shadow map		
-		const int blurIters = 1;
-
-		glDisable(GL_DEPTH_TEST);
-		mBlurProgram.use();
-		for (int i = 0; i < blurIters; i++)
-		{
-			mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
-			mShadowTex.bind(GL_TEXTURE5);
-			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
-			mQuad.draw();
-
-			mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
-			mShadowBlur.bind(GL_TEXTURE5);
-			mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
-			mQuad.draw();
+			glEnable(GL_DEPTH_TEST);
 		}
-		glEnable(GL_DEPTH_TEST);
 
 		// bind the shadow texture to the slot
 		mShadowTex.bind(GL_TEXTURE5);
