@@ -17,8 +17,9 @@
 namespace dyno 
 {
 	ModelingInitializer::ModelingInitializer()
+		: IPlugin()
 	{
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void ModelingInitializer::initializeNodeCreators()

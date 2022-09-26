@@ -83,7 +83,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
-	//Visualize contact points
+	//Visualize contact pointsD
 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);

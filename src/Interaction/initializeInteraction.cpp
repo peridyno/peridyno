@@ -8,7 +8,7 @@ namespace dyno
 {
 	InteractionInitializer::InteractionInitializer()
 	{
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void InteractionInitializer::initializeNodeCreators()
