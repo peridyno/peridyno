@@ -48,6 +48,9 @@ int main(int, char**)
 
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
+	instanceRender->setAlpha(0.5f);
+	instanceRender->varUseVertexNormal()->setValue(true);
+
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
 	instanceNode->stateTransforms()->connect(instanceRender->inTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);

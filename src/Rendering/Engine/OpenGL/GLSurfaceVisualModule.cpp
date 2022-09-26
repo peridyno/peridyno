@@ -86,7 +86,6 @@ namespace dyno
 
 	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)
 	{
-
 		unsigned int subroutine;
 		if (mode == GLRenderPass::COLOR) {
 			subroutine = 0;

@@ -9,7 +9,7 @@ namespace dyno
 {
 	IMPLEMENT_CLASS(GLInstanceVisualModule)
 
-		GLInstanceVisualModule::GLInstanceVisualModule()
+	GLInstanceVisualModule::GLInstanceVisualModule()
 	{
 		this->setName("instance_renderer");
 	}
@@ -25,82 +25,73 @@ namespace dyno
 		mVAO.create();
 		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-		mInstanceBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mColorBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mNormalBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		mVAO.bindIndexBuffer(&mIndexBuffer);
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mNormalBuffer, 2, 3, GL_FLOAT, 0, 0, 0);
 
+
+		mInstanceBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		// bind the translation vector
-		mVAO.bindVertexBuffer(&mInstanceBuffer, 1, 3, GL_FLOAT, sizeof(Transform3f), 0, 1);
-
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), 0, 1);
 		// bind the scale vector
-		mVAO.bindVertexBuffer(&mInstanceBuffer, 2, 3, GL_FLOAT, sizeof(Transform3f), sizeof(Vec3f), 1);
-
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), sizeof(Vec3f), 1);
 		// bind the rotation matrix
- 		mVAO.bindVertexBuffer(&mInstanceBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), 2 * sizeof(Vec3f), 1);
-		mVAO.bindVertexBuffer(&mInstanceBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), 3 * sizeof(Vec3f), 1);
-		mVAO.bindVertexBuffer(&mInstanceBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
+ 		mVAO.bindVertexBuffer(&mInstanceBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), 2 * sizeof(Vec3f), 1);
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), 3 * sizeof(Vec3f), 1);
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("instance.vert", "instance.frag", "instance.geom");
-
-		// initialize data
-		auto triSet = this->inTriangleSet()->getDataPtr();
-
-		auto& triangles = triSet->getTriangles();
-		auto& vertices = triSet->getPoints();
-
- 		auto& transforms = this->inTransform()->getData();
- 		mInstanceCount = transforms.size();
-
-		mVertexCount = vertices.size();
-		mIndexCount = triangles.size() * 3;
-		//mVertexCount = triangles.size() * 3;
-
-		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("instance.vert", "surface.frag", "surface.geom");
 
 		return true;
 	}
 
 	void GLInstanceVisualModule::updateGL()
 	{
+		// TODO: check if geometry need to update?
+		GLSurfaceVisualModule::updateGL();
+
+		// update instance transforms
 		auto& transforms = this->inTransform()->getData();
 		mInstanceCount = transforms.size();
-
 		mInstanceBuffer.loadCuda(transforms.begin(), transforms.size() * sizeof(Transform3f));
 	}
 
-	void GLInstanceVisualModule::paintGL(GLRenderPass pass)
+	void GLInstanceVisualModule::paintGL(GLRenderPass mode)
 	{
-		mShaderProgram.use();
-
 		unsigned int subroutine;
-		if (pass == GLRenderPass::COLOR)
-		{
-			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
-
+		if (mode == GLRenderPass::COLOR) {
 			subroutine = 0;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == GLRenderPass::SHADOW)
-		{
+		else if (mode == GLRenderPass::SHADOW) {
 			subroutine = 1;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else
-		{
-			printf("Unknown render pass!\n");
+		else if (mode == GLRenderPass::TRANSPARENCY) {
+			subroutine = 2;
+		}
+		else {
+			printf("GLSurfaceVisualModule: Unknown render mode!\n");
 			return;
 		}
 
-		mVAO.bind();
-		glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, mInstanceCount);
-		mVAO.unbind();
+		mShaderProgram.use();
 
+		// setup uniforms
+		mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+		mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+		mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
+		mShaderProgram.setInt("uVertexNormal", this->varUseVertexNormal()->getData());
+
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+
+		mVAO.bind();
+		glDrawElementsInstanced(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0, mInstanceCount);
+		mVAO.unbind();
+	
 		gl::glCheckError();
 	}
 }

@@ -50,7 +50,7 @@ namespace dyno
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
-	private:
+	protected:
 
 		gl::Program		mShaderProgram;
 
