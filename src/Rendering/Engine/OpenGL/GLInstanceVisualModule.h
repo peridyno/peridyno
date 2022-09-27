@@ -15,16 +15,12 @@
  */
 
 #pragma once
-#include "Topology/TriangleSet.h"
 
-#include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
-#include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "GLSurfaceVisualModule.h"
 
 namespace dyno
 {
-	class GLInstanceVisualModule : public GLVisualModule
+	class GLInstanceVisualModule : public GLSurfaceVisualModule
 	{
 		DECLARE_CLASS(GLInstanceVisualModule)
 	public:
@@ -33,27 +29,16 @@ namespace dyno
 	public:
 		std::string caption() override;
 
-		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
-
 		DEF_ARRAY_IN(Transform3f, Transform, DeviceType::GPU, "");
 
 	protected:
-		virtual void paintGL(RenderPass mode) override;
+		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
 	private:
 
-		gl::Program mShaderProgram;
-		gl::VertexArray	mVAO;
-
-		GLCudaBuffer	mVertexBuffer;
-		GLCudaBuffer 	mIndexBuffer;
 		GLCudaBuffer	mInstanceBuffer;
-
-		unsigned int	mVertexCount = 0;
-		unsigned int	mIndexCount = 0;
-
 		unsigned int	mInstanceCount = 0;
 	};
 };

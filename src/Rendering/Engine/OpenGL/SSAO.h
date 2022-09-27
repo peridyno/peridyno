@@ -20,7 +20,7 @@
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 
 namespace dyno 
 {

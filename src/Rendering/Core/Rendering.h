@@ -62,6 +62,7 @@ namespace dyno
 		bool showSceneBounds = false;
 
 		int viewPortflag = -1;
+		bool useFXAA = true;
 	};
 
 	// RenderEngine interface

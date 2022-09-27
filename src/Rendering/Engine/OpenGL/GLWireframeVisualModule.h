@@ -20,7 +20,7 @@
 #include "GLVisualModule.h"
 #include "GLCudaBuffer.h"
 #include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 
 namespace dyno
 {
@@ -35,7 +35,7 @@ namespace dyno
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
 
 	protected:
-		virtual void paintGL(RenderPass mode) override;
+		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 

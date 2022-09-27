@@ -99,7 +99,7 @@ namespace dyno
 	// GL 3.0 + GLSL 130
 		const char* glsl_version = "#version 130";
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
@@ -236,7 +236,7 @@ namespace dyno
 			renderEngine()->renderParams()->viewport.h = height;
 
 			renderEngine()->draw(activeScene.get());
-		
+
 			if(mShowImWindow)
 				mImWindow.draw(renderEngine().get(), activeScene.get());
 // 			// Draw widgets
@@ -246,6 +246,22 @@ namespace dyno
 // 				widget->update();
 // 				widget->paint();
 // 			}
+
+			// draw a pick rect
+			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&
+				mButtonAction == GLFW_PRESS &&
+				mButtonMode == 0) {
+				double xpos, ypos;
+				glfwGetCursorPos(mWindow, &xpos, &ypos);
+
+				ImVec2 pMin = { fminf(xpos, mCursorPosX), fminf(ypos, mCursorPosY) };
+				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };				
+
+				// fill
+				ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
+				// border
+				ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -370,15 +386,30 @@ namespace dyno
 
 	void GlfwApp::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
+
+		// handle picking
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
+			activeWindow->getButtonAction() == GLFW_PRESS &&
+			activeWindow->getButtonMode() == 0 &&
+			action == GLFW_RELEASE) {
+
+			// in picking
+			printf("Picking: (%f, %f) - (%f, %f)\n",
+				activeWindow->getCursorPosX(), activeWindow->getCursorPosY(),
+				xpos, ypos);
+
+			
+		}
+
 		auto camera = activeWindow->activeCamera();
 
 		activeWindow->setButtonType(button);
 		activeWindow->setButtonAction(action);
 		activeWindow->setButtonMode(mods);
-
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
@@ -407,8 +438,11 @@ namespace dyno
 			activeWindow->setButtonState(GLFW_UP);
 		}
 
-		if (action != GLFW_PRESS)
-			return;
+		// update cursor position record
+		if (action == GLFW_PRESS)
+			activeWindow->setCursorPos(xpos, ypos);
+		else
+			activeWindow->setCursorPos(-1, -1);
 	}
 
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)

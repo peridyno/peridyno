@@ -20,7 +20,7 @@
 #include "GLVisualModule.h"
 #include "GLCudaBuffer.h"
 #include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 
 namespace dyno
 {
@@ -53,7 +53,7 @@ namespace dyno
 		DEF_VAR(float, PointSize, 0.001f, "Size of rendered particles");
 
 	protected:
-		virtual void paintGL(RenderPass pass) override;
+		virtual void paintGL(GLRenderPass pass) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 

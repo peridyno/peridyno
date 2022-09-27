@@ -16,37 +16,31 @@
 
 #pragma once
 
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "gl/Buffer.h"
+#include "gl/Shader.h"
+#include "gl/Mesh.h"
 
 namespace dyno
 {
-	class GLRenderTarget
+	class FXAA
 	{
 	public:
-		GLRenderTarget();
-		~GLRenderTarget();
+		FXAA();
+		~FXAA();
 
 		void initialize();
-		void resize(int w, int h);
-		void blit(unsigned int attachment = 0);
-		void bind();
+		void apply(int width, int height);
 
 	public:
-		gl::Framebuffer mFramebuffer;
+		float RelativeContrastThreshold;
+		float HardContrastThreshold;
+		float SubpixelBlendLimit;
+		float SubpixelContrastThreshold;
+		int EndpointSearchIterations;
+		bool UseHighQualityEndpoints;
 
-		// frame color
-		gl::Texture2D	  mColorTex;
-		// frame depth
-		gl::Texture2D	  mDepthTex;
-		// node id
-		gl::Texture2D	  mNodeIDTex;
-		
+	private:
 
-		int width;
-		int height;
-
-		friend class GLRenderEngine;
+		gl::Program		mShaderProgram;
+		gl::Mesh		mScreenQuad;
 	};
 }

@@ -20,11 +20,18 @@
 #include <vector>
 
 #include <Rendering.h>
+
 #include "gl/Buffer.h"
+#include "gl/Texture.h"
+#include "gl/Framebuffer.h"
+#include "gl/Shader.h"
+#include "gl/Mesh.h"
+
 
 namespace dyno
 {
 	class SSAO;
+	class FXAA;
 	class ShadowMap;
 	class GLRenderHelper;
 
@@ -48,6 +55,7 @@ namespace dyno
 		~GLRenderEngine();
 			   
 		virtual void initialize(int width, int height) override;
+		void setupTransparencyPass();
 		virtual void draw(dyno::SceneGraph* scene) override;
 		virtual void resize(int w, int h) override;
 
@@ -55,17 +63,32 @@ namespace dyno
 
 	private:
 		void setupCamera();
-		void initUniformBuffers();
+		void setupInternalFramebuffer();
 
 	private:
+		// internal framebuffer
+		gl::Framebuffer	mFramebuffer;
+		gl::Texture2D	mColorTex;
+		gl::Texture2D	mDepthTex;
+		gl::Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
 
-		// uniform buffer for matrices
+		// for linked-list OIT
+		gl::Buffer		mFreeNodeIdx;
+		gl::Buffer		mLinkedListBuffer;
+		gl::Texture2D	mHeadIndexTex;
+		const int		MAX_OIT_NODES = 1024 * 1024 * 8;
+		gl::Program		mBlendProgram;
+		gl::Mesh		mScreenQuad;
+
+
+		// uniform buffers
 		gl::Buffer		mTransformUBO;
 		gl::Buffer		mLightUBO;
 		
 		SSAO*			mSSAO;
 		ShadowMap*		mShadowMap;
 		GLRenderHelper*	mRenderHelper;
+		FXAA*			mFXAAFilter;
 
 		//HE Xiaowei
 		CameraType mCameraType = CameraType::Orbit;

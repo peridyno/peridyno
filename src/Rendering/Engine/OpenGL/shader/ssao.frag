@@ -12,7 +12,7 @@ layout(binding=3) uniform sampler2D texture3;
 // SSAO noise tex
 layout(binding=4) uniform sampler2D texNoise;
 
-in  vec2 texcoord;
+in  vec2 texCoord;
 out vec3 FragOut;
 
 layout (std140, binding=0) uniform TransformUniformBlock
@@ -30,18 +30,18 @@ layout (std140, binding=3) uniform SSAOKernel
 
 void main(void) { 
 
-	vec4 v0 = texture(texture0, texcoord);
+	vec4 v0 = texture(texture0, texCoord);
 	
 
 	// discard invalid pixel...
 	if(v0.r == 1.0)	
 		discard;
 		
-	vec3 normal = texture(texture2, texcoord).xyz;
-	vec3 fragPos = texture(texture3, texcoord).xyz;	
+	vec3 normal = texture(texture2, texCoord).xyz;
+	vec3 fragPos = texture(texture3, texCoord).xyz;	
 		
 	vec2 noiseScale = textureSize(texture0, 0) * vec2(1.0 / 4.0);	
-	vec3 randomVec = texture(texNoise, texcoord * noiseScale).xyz;
+	vec3 randomVec = texture(texNoise, texCoord * noiseScale).xyz;
 
 	vec3 tangent   = normalize(randomVec - normal * dot(randomVec, normal));
 	vec3 bitangent = cross(normal, tangent);

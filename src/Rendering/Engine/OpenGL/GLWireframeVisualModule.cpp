@@ -31,7 +31,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::CreateShaderProgram("line.vert", "line.frag", "line.geom");
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "line.frag", "line.geom");
 
 		return true;
 	}
@@ -49,7 +49,7 @@ namespace dyno
 		mIndexBuffer.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
 	}
 
-	void GLWireframeVisualModule::paintGL(RenderPass pass)
+	void GLWireframeVisualModule::paintGL(GLRenderPass pass)
 	{
 		mShaderProgram.use();
 
@@ -57,14 +57,14 @@ namespace dyno
 
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 
-		if (pass == RenderPass::COLOR)
+		if (pass == GLRenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", mMetallic);
-			mShaderProgram.setFloat("uRoughness", mRoughness);
-			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
+			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
 		}
-		else if (pass == RenderPass::SHADOW)
+		else if (pass == GLRenderPass::SHADOW)
 		{
 			// lines should cast shadow?
 		}
