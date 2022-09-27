@@ -288,12 +288,6 @@ namespace dyno
 			auto p1 = scene->getUpperBound();
 			mRenderHelper->drawBBox(p0, p1);
 		}
-		// draw axis
-		if (m_rparams.showAxisHelper)
-		{
-			glViewport(10, 10, 100, 100);
-			mRenderHelper->drawAxis();
-		}
 
 		// draw to final framebuffer with fxaa filter
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
@@ -314,6 +308,13 @@ namespace dyno
 				0, 0, m_rparams.viewport.w, m_rparams.viewport.h,
 				0, 0, m_rparams.viewport.w, m_rparams.viewport.h,
 				GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		}
+
+		// draw axis
+		if (m_rparams.showAxisHelper)
+		{
+			glViewport(10, 10, 100, 100);
+			mRenderHelper->drawAxis();
 		}
 
 		gl::glCheckError();
