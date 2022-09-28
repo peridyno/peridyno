@@ -34,14 +34,10 @@ namespace dyno
 	class FXAA;
 	class ShadowMap;
 	class GLRenderHelper;
-
-	class Camera;
+	class GLVisualModule;
 
 	class SceneGraph;
-	//HE Xiaowei
-
-	struct Picture;
-	
+	//HE Xiaowei		
 	enum CameraType
 	{
 		Orbit = 0,
@@ -55,15 +51,24 @@ namespace dyno
 		~GLRenderEngine();
 			   
 		virtual void initialize(int width, int height) override;
-		void setupTransparencyPass();
 		virtual void draw(dyno::SceneGraph* scene) override;
 		virtual void resize(int w, int h) override;
 
 		virtual std::string name() override;
 
+		// get the selected nodes on given rect area
+		std::vector<Node*>	select(int x, int y, int w, int h) override;
+
 	private:
 		void setupCamera();
 		void setupInternalFramebuffer();
+		void setupTransparencyPass();
+
+		void updateRenderModules(dyno::SceneGraph* scene);
+
+	private:
+		std::vector<GLVisualModule*> mRenderModules;
+		std::vector<Node*>			 mRenderNodes;
 
 	private:
 		// internal framebuffer
@@ -84,6 +89,7 @@ namespace dyno
 		// uniform buffers
 		gl::Buffer		mTransformUBO;
 		gl::Buffer		mLightUBO;
+		gl::Buffer		mVariableUBO;
 		
 		SSAO*			mSSAO;
 		ShadowMap*		mShadowMap;

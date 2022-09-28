@@ -8,11 +8,13 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 
 namespace dyno
 {
 	class SceneGraph;
+	class Node;
 	class Camera;
 
 	struct RenderParams
@@ -72,6 +74,8 @@ namespace dyno
 		virtual void initialize(int width, int height) = 0;
 		virtual void draw(SceneGraph* scene) = 0;
 		virtual void resize(int w, int h) = 0;
+
+		virtual std::vector<Node*> select(int x, int y, int w, int h) = 0;
 
 		// TODO: re-organize
 		RenderParams* renderParams() { return &m_rparams; }

@@ -398,11 +398,16 @@ namespace dyno
 			action == GLFW_RELEASE) {
 
 			// in picking
-			printf("Picking: (%f, %f) - (%f, %f)\n",
-				activeWindow->getCursorPosX(), activeWindow->getCursorPosY(),
-				xpos, ypos);
+			int x = fmin(xpos, activeWindow->getCursorPosX());
+			int y = fmin(ypos, activeWindow->getCursorPosY());
+			int w = fabs(xpos - activeWindow->getCursorPosX());
+			int h = fabs(ypos - activeWindow->getCursorPosY());
 
-			
+			auto nodes = activeWindow->mRenderEngine->select(x, y, w, h);
+
+			printf("Picking: (%.0f, %.0f) - (%.0f, %.0f), %d nodes selected...\n",
+				activeWindow->getCursorPosX(), activeWindow->getCursorPosY(),
+				xpos, ypos, nodes.size());
 		}
 
 		auto camera = activeWindow->activeCamera();

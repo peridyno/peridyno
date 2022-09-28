@@ -20,6 +20,7 @@ uniform float uRoughness;
 uniform float uAlpha;
 
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out int  fragIndex;
 
 subroutine void RenderPass(void);
 layout(location = 0) subroutine uniform RenderPass renderPass;
@@ -140,6 +141,9 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 {
 	fragColor.rgb = Shade();
 	fragColor.a = 1.0;
+	
+	// store index
+	fragIndex = uVars.index;
 }
 
 layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
@@ -153,6 +157,7 @@ struct NodeType
 	vec4	color;
 	float	depth;
 	uint	nextIndex;
+	int		index;
 };
 
 // enable early-z
@@ -186,6 +191,7 @@ layout(index = 2) subroutine(RenderPass) void TransparencyLinkedList(void)
 		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), uAlpha);
 		nodes[freeNodeIndex].depth = gl_FragCoord.z;
 		nodes[freeNodeIndex].nextIndex = nextIndex;
+		nodes[freeNodeIndex].index = uVars.index;
 	}
 	// No output to the framebuffer.
 }

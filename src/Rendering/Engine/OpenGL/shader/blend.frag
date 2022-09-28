@@ -1,11 +1,11 @@
 #version 440
 
-
 struct NodeType
 {
 	vec4  color;
 	float depth;
 	uint  nextIndex;
+	int   index;
 };
 
 layout(binding = 0, r32ui) uniform uimage2D u_headIndex;
@@ -14,7 +14,8 @@ layout(binding = 0, std430) buffer LinkedList
 	NodeType nodes[];
 };
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out int  fragIndex;
 
 #define MAX_FRAGMENTS 128
 uint fragmentIndices[MAX_FRAGMENTS];
@@ -60,6 +61,7 @@ void main(void)
 		float alpha = 1 - factor;
 
 		fragColor = vec4(color / alpha, alpha);
+		fragIndex = nodes[fragmentIndices[numberFragments - 1]].index;
 	}
 	else
 	{

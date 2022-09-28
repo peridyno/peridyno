@@ -86,6 +86,10 @@ namespace dyno
 		mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
 		mShaderProgram.setInt("uVertexNormal", this->varUseVertexNormal()->getData());
 
+		// color
+		auto color = this->varBaseColor()->getData();
+		glVertexAttrib3f(1, color[0], color[1], color[2]);
+
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 
 		mVAO.bind();

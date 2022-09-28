@@ -19,6 +19,7 @@
 
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
+#include <set>
 
 namespace dyno
 {
@@ -64,6 +65,8 @@ namespace dyno
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		// create uniform block for light
 		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		// create uniform bnlock for global variables
+		mVariableUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		gl::glCheckError();
 
 		mSSAO->initialize();
@@ -82,15 +85,15 @@ namespace dyno
 		mFreeNodeIdx.allocate(sizeof(int));
 
 		mLinkedListBuffer.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
-		struct _Node
+		struct NodeType
 		{
 			glm::vec4 color;
 			float	  depth;
 			unsigned int next;
-			float	  _pad0;
-			float     _pad1;
+			unsigned int idx0;
+			unsigned int idx1;
 		};
-		mLinkedListBuffer.allocate(sizeof(_Node) * MAX_OIT_NODES);
+		mLinkedListBuffer.allocate(sizeof(NodeType) * MAX_OIT_NODES);
 
 		// transparency
 		mHeadIndexTex.internalFormat = GL_R32UI;
@@ -100,7 +103,6 @@ namespace dyno
 		mHeadIndexTex.wrapT = GL_CLAMP_TO_EDGE;
 		mHeadIndexTex.create();
 		mHeadIndexTex.resize(1, 1);
-
 
 		mBlendProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blend.frag");
 	}
@@ -137,9 +139,11 @@ namespace dyno
 		mDepthTex.resize(1, 1);
 
 		// index
-		mIndexTex.internalFormat = GL_RGBA32I;
-		mIndexTex.format = GL_RGBA_INTEGER;
-		mIndexTex.type = GL_INT;
+		mIndexTex.internalFormat = GL_R32I;
+		mIndexTex.format = GL_RED_INTEGER;
+		mIndexTex.type   = GL_INT;
+		//mIndexTex.wrapS = GL_CLAMP_TO_EDGE;
+		//mIndexTex.wrapT = GL_CLAMP_TO_EDGE;
 		mIndexTex.create();
 		mIndexTex.resize(1, 1);
 
@@ -163,8 +167,38 @@ namespace dyno
 		gl::glCheckError();
 	}
 
+	void GLRenderEngine::updateRenderModules(dyno::SceneGraph* scene)
+	{
+		// render visual modules
+		struct RenderQueue : public Action {
+			void process(Node* node) override
+			{
+				if (!node->isVisible())	return;
+				for (auto iter : node->graphicsPipeline()->activeModules()) {
+					auto m = dynamic_cast<GLVisualModule*>(iter.get());
+					if (m && m->isVisible()) {
+						modules.push_back(m);
+						nodes.push_back(node);
+					}
+				}
+			}
+			std::vector<GLVisualModule*> modules;
+			std::vector<Node*>			 nodes;
+		} action;
+
+		// enqueue modules for rendering
+		if (scene != nullptr && !scene->isEmpty()) {
+			scene->traverseForward(&action);
+		}
+
+		mRenderModules = action.modules;
+		mRenderNodes   = action.nodes;
+	}
+
 	void GLRenderEngine::draw(dyno::SceneGraph* scene)
 	{
+		updateRenderModules(scene);
+
 		// preserve current framebuffer
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
@@ -199,12 +233,15 @@ namespace dyno
 		light.mainLightDirection = glm::vec3(m_rparams.view * glm::vec4(light.mainLightDirection, 0));
 		mLightUBO.load(&light, sizeof(light));
 		mLightUBO.bindBufferBase(1);
-
-		
+						
 		mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
-		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// clear color and depth
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// clear index buffer
+		//GLint clearIndex[]{11, -1, -1, -1};
+		//glClearBufferiv(GL_COLOR, 1, clearIndex);
+		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
 		// draw background color
 		Vec3f c0 = Vec3f(m_rparams.bgColor0.x, m_rparams.bgColor0.y, m_rparams.bgColor0.z);
 		Vec3f c1 = Vec3f(m_rparams.bgColor1.x, m_rparams.bgColor1.y, m_rparams.bgColor1.z);
@@ -218,29 +255,16 @@ namespace dyno
 				m_rparams.rulerScale * mCamera->distanceUnit());
 		}
 
-		// render visual modules
-		struct RenderQueue : public Action {
-			void process(Node* node) override
-			{
-				if (!node->isVisible())	return;
-				for (auto iter : node->graphicsPipeline()->activeModules())	{
-					auto m = dynamic_cast<GLVisualModule*>(iter.get());
-					if (m && m->isVisible()) {
-						modules.push_back(m);
-					}
-				}
-			}
-			std::vector<GLVisualModule*> modules;
-		} renderQueue;
-
-		// enqueue modules for rendering
-		if (scene != nullptr && !scene->isEmpty()) {
-			scene->traverseForward(&renderQueue);
-		}
+		mVariableUBO.bindBufferBase(2);
 
 		// render opacity objects
-		for (auto m : renderQueue.modules) {
-			if(!m->isTransparent())	m->draw(GLRenderPass::COLOR);
+		for (int i = 0; i < mRenderModules.size(); i++) {
+
+			if (!mRenderModules[i]->isTransparent())
+			{
+				mVariableUBO.load(&i, sizeof(i));
+				mRenderModules[i]->draw(GLRenderPass::COLOR);
+			}
 		}
 
 		// render transparency objects
@@ -259,13 +283,19 @@ namespace dyno
 			// draw to no attachments
 			mFramebuffer.drawBuffers(0, 0);
 			glDepthMask(false);
-			for (auto m : renderQueue.modules) {
-				if (m->isTransparent())	m->draw(GLRenderPass::TRANSPARENCY);
+
+			for (int i = 0; i < mRenderModules.size(); i++) {
+
+				if (mRenderModules[i]->isTransparent())
+				{
+					mVariableUBO.load(&i, sizeof(i));
+					mRenderModules[i]->draw(GLRenderPass::TRANSPARENCY);
+				}
 			}
 
 			glDepthMask(true);
-			const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0 };
-			mFramebuffer.drawBuffers(1, attachments);
+			const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+			mFramebuffer.drawBuffers(2, attachments);
 
 			mBlendProgram.use();
 
@@ -346,6 +376,37 @@ namespace dyno
 	std::string GLRenderEngine::name()
 	{
 		return std::string("Native OpenGL");
+	}
+
+	std::vector<Node*> GLRenderEngine::select(int x, int y, int w, int h)
+	{
+		// TODO: check valid input
+		w = std::max(1, w);
+		h = std::max(1, h);
+
+		// read pixels
+		std::vector<int> indices(w * h);
+
+		mFramebuffer.bind(GL_READ_FRAMEBUFFER);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(x, m_rparams.viewport.h - (y + h) - 1, w, h, GL_RED_INTEGER, GL_INT, indices.data());
+		gl::glCheckError();
+
+		std::set<int> temp(indices.begin(), indices.end());
+
+		std::vector<Node*> result;
+
+		if (!temp.empty()) {
+			for (int i : temp) {
+				if(i >= 0 && i < mRenderNodes.size())
+					result.push_back(mRenderNodes[i]);
+			}
+		}
+
+		//printf("Select: (%d, %d) - %d x %d, %d nodes.\n", x, y, w, h, result.size());
+
+		return result;
 	}
 
 }
