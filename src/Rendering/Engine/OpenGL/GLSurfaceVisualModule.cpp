@@ -53,6 +53,7 @@ namespace dyno
 		// position
 		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
 
+		mVAO.bind();
 		// vertex or object color
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
 			!this->inColor()->isEmpty() && 
@@ -63,9 +64,7 @@ namespace dyno
 		}
 		else
 		{
-			auto color = this->varBaseColor()->getData();
 			glDisableVertexArrayAttrib(mVAO.id, 1);
-			glVertexAttrib3f(1, color[0], color[1], color[2]);
 		}
 
 		// normal
@@ -81,7 +80,7 @@ namespace dyno
 		{
 			glDisableVertexArrayAttrib(mVAO.id, 2);
 		}
-
+		mVAO.unbind();
 	}
 
 	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)
@@ -108,6 +107,10 @@ namespace dyno
 		mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
 		mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
 		mShaderProgram.setInt("uVertexNormal", this->varUseVertexNormal()->getData());
+
+		// color
+		auto color = this->varBaseColor()->getData();
+		glVertexAttrib3f(1, color[0], color[1], color[2]);
 
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 
