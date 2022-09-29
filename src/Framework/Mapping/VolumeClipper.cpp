@@ -9,10 +9,6 @@ namespace dyno
 		: Node()
 	{
 		auto levelSet = std::make_shared<SignedDistanceField<TDataType>>();
-		auto& sdf = levelSet->getSDF();
-
-		sdf.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-
 		this->inLevelSet()->setDataPtr(levelSet);
 	}
 
@@ -28,6 +24,7 @@ namespace dyno
 		auto eulerAngles = this->varRotation()->getData();
 
 		auto levelSet = this->inLevelSet()->getDataPtr()->getSDF();
+		levelSet.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
 		Quat<Real> q = Quat<Real>::fromEulerAngles(eulerAngles[0], eulerAngles[1], eulerAngles[2]);
 

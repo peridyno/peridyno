@@ -9,13 +9,9 @@ namespace dyno
 		: Node()
 	{
 		auto levelSet = std::make_shared<SignedDistanceField<TDataType>>();
-		auto& sdf = levelSet->getSDF();
-
-		sdf.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
+		this->inLevelSet()->setDataPtr(levelSet);
 
 		this->varGridSpacing()->setRange(0.001, 1.0);
-
-		this->inLevelSet()->setDataPtr(levelSet);
 	}
 
 	template<typename TDataType>
@@ -30,6 +26,7 @@ namespace dyno
 		auto isoValue = this->varIsoValue()->getData();
 
 		auto& sdf = sdfTopo->getSDF();
+		sdf.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
 		Coord lowerBound = sdf.lowerBound();
 		Coord upperBound = sdf.upperBound();

@@ -4,7 +4,8 @@ using namespace dyno;
 int main()
 {
 	QtApp window;
-	window.createWindow(1366, 800);
+	//Will not load the plugins
+	window.createWindow(1366, 800, false);
 	window.mainLoop();
 
 	return 0;

@@ -6,7 +6,7 @@ namespace dyno
 {
 	RigidBodyInitializer::RigidBodyInitializer()
 	{
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void RigidBodyInitializer::initializeNodeCreators()

@@ -17,7 +17,8 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPIL
 set(CUDA_ARCH_FLAGS 60 CACHE STRING "cuda architectures" FORCE)                                 #默认为所有cuda代码生成computability7.0下二进制代码
 
 set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
-file(COPY "data/" DESTINATION "data")
+set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/plugin"  CACHE PATH "" FORCE)
+#file(COPY "data/" DESTINATION "data")
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})

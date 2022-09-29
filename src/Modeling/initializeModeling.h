@@ -13,7 +13,7 @@ namespace dyno
 }
 
 DYNO_PLUGIN_EXPORT
-auto initPlugin() -> void
+auto initDynoPlugin() -> void
 {
 	static dyno::ModelingInitializer particleSystemInitializer;
 }

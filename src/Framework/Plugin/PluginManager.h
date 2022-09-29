@@ -26,8 +26,6 @@ namespace dyno
 	public:
 		Plugin() {}
 
-		explicit Plugin(std::string file);
-
 		~Plugin();
 
 		Plugin(Plugin const&) = delete;
@@ -43,12 +41,14 @@ namespace dyno
 
 		void unload();
 
+		static std::shared_ptr<Plugin> load(std::string file);
+
 	private:
 		/** @brief Function pointer to DLL entry-point */
 		using PluginEntryFunc = IPlugin * (*) ();
 
 		/** @brief Name of DLL entry point that a Plugin should export */
-		static constexpr const char* PluginEntryName = "initPlugin";
+		static constexpr const char* PluginEntryName = "initDynoPlugin";
 
 		/** @brief Shared library handle */
 		void* mHnd = nullptr;
@@ -74,14 +74,16 @@ namespace dyno
 
 		std::string getExtension() const;
 
-		IPlugin* loadPlugin(const std::string& pluginName);
+		bool loadPlugin(const std::string& pluginName);
 
-		IPlugin* getPlugin(const char* pluginName);
+		void loadPluginByPath(const std::string& pathName);
+
+		std::shared_ptr<Plugin> getPlugin(const char* pluginName);
 
 	private:
 		PluginManager() {};
 
-		using PluginMap = std::map<std::string, Plugin>;
+		using PluginMap = std::map<std::string, std::shared_ptr<Plugin>>;
 
 		static std::atomic<PluginManager*> pInstance;
 		static std::mutex mMutex;

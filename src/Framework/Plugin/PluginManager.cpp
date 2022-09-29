@@ -1,27 +1,40 @@
 #include "PluginManager.h"
 
+#include <ghc/fs_std.hpp>
+
+#include <iostream>
+
 namespace dyno
 {
-	Plugin::Plugin(std::string file)
+	std::shared_ptr<Plugin> Plugin::load(std::string file)
 	{
-		mFile = std::move(file);
+		std::shared_ptr<Plugin> plugin = std::make_shared<Plugin>();
+		plugin->mFile = file;
+
 #if !defined(_WIN32)
-		mHnd = ::dlopen(mFile.c_str(), RTLD_LAZY);
+		plugin->mHnd = ::dlopen(file.c_str(), RTLD_LAZY);
 #else
-		mHnd = (void*) ::LoadLibraryA(mFile.c_str());
+		plugin->mHnd = (void*) ::LoadLibraryA(file.c_str());
 #endif 
-		mIsLoaded = true;
-		assert(mHnd != nullptr);
+		if (plugin->mHnd == nullptr) {
+			return nullptr;
+		}
+
+		plugin->mIsLoaded = true;
 #if !defined(_WIN32)
 		auto dllEntryPoint =
-			reinterpret_cast<PluginEntryFunc>(dlsym(mHnd, PluginEntryName));
+			reinterpret_cast<PluginEntryFunc>(dlsym(plugin->mHnd, PluginEntryName));
 #else
 		auto dllEntryPoint =
-			reinterpret_cast<PluginEntryFunc>(GetProcAddress((HMODULE)mHnd, PluginEntryName));
+			reinterpret_cast<PluginEntryFunc>(GetProcAddress((HMODULE)plugin->mHnd, PluginEntryName));
 #endif 
-		assert(dllEntryPoint != nullptr);
+		if (dllEntryPoint == nullptr) {
+			return nullptr;
+		}
 		// Retrieve plugin metadata from DLL entry-point function 
-		mEntryPoint = dllEntryPoint();
+		plugin->mEntryPoint = dllEntryPoint();
+
+		return plugin;
 	}
 
 	Plugin::Plugin(Plugin&& rhs)
@@ -102,20 +115,41 @@ namespace dyno
 		return ext;
 	}
 
-	IPlugin* PluginManager::loadPlugin(const std::string& pluginName)
+	bool PluginManager::loadPlugin(const std::string& pluginName)
 	{
-		std::string fileName = pluginName + getExtension();
-		mPlugins[pluginName] = Plugin(fileName);
+		auto plugin = Plugin::load(pluginName);
+		if (plugin != nullptr)
+		{
+			std::cout << "\033[32m\033[1m" << "[Plugin]: loading " << pluginName << " in success " << "\033[0m" << std::endl;
+			mPlugins[pluginName] = plugin;
 
-		return mPlugins[pluginName].getInfo();
+			return true;
+		}
+		else
+		{
+			std::cout << "\033[31m\033[1m" << "[Plugin]: loading " << pluginName << " in failure " << "\033[0m" << std::endl;
+
+			return false;
+		}
 	}
 
-	IPlugin* PluginManager::getPlugin(const char* pluginName)
+	void PluginManager::loadPluginByPath(const std::string& pathName)
+	{
+		for (const auto& entry : ghc::filesystem::directory_iterator(pathName))
+		{
+			if (entry.path().extension() == getExtension())
+			{
+				loadPlugin(entry.path().string());
+			}
+		}
+	}
+
+	std::shared_ptr<Plugin> PluginManager::getPlugin(const char* pluginName)
 	{
 		auto it = mPlugins.find(pluginName);
 		if (it == mPlugins.end())
 			return nullptr;
 
-		return it->second.getInfo();
+		return it->second;
 	}
 }

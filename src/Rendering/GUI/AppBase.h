@@ -12,7 +12,7 @@ namespace dyno
 		AppBase() {};
 		~AppBase() {};
 
-		virtual void createWindow(int width, int height) {};
+		virtual void createWindow(int width, int height, bool usePlugin = false) {};
 		virtual void mainLoop() = 0;
 
 		virtual void setRenderEngine(std::shared_ptr<RenderEngine> engine) { mRenderEngine = engine; }

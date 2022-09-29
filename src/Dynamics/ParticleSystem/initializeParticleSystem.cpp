@@ -22,15 +22,7 @@ namespace dyno
 {
 	ParticleSystemInitializer::ParticleSystemInitializer()
 	{
-		TypeInfo::New<LinearDamping<DataType3f>>();
-		TypeInfo::New<ParticleIntegrator<DataType3f>>();
-		TypeInfo::New<ImplicitViscosity<DataType3f>>();
-		TypeInfo::New<DensityPBD<DataType3f>>();
-		TypeInfo::New<SummationDensity<DataType3f>>();
-		TypeInfo::New<VariationalApproximateProjection<DataType3f>>();
-		//TypeInfo::New<BoundaryConstraint<DataType3f>>();
-
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void ParticleSystemInitializer::initializeNodeCreators()

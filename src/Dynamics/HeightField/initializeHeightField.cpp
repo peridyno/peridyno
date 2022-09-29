@@ -10,12 +10,7 @@ namespace dyno
 {
 	HeightFieldInitializer::HeightFieldInitializer()
 	{
-		
-		TypeInfo::New<OceanPatch<DataType3f>>();
-		//TypeInfo::New<Ocean<DataType3f>>();
-		TypeInfo::New<CapillaryWave<DataType3f>>();
-
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void HeightFieldInitializer::initializeNodeCreators()

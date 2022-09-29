@@ -14,7 +14,7 @@ namespace dyno
 
 
 DYNO_PLUGIN_EXPORT
-auto initPlugin() -> void
+auto initDynoPlugin() -> void
 {
 	static dyno::InteractionInitializer interactionInitializer;
 }

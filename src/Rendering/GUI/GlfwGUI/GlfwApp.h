@@ -24,7 +24,7 @@ namespace dyno {
 		GlfwApp(int width, int height);
         ~GlfwApp();
 
-        void createWindow(int width, int height) override;
+        void createWindow(int width, int height, bool usePlugin = false) override;
 
         void mainLoop() override;
 

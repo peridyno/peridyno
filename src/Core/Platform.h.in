@@ -52,4 +52,8 @@ const inline std::string getAssetPath() {
 	return "${PERIDYNO_ASSET_PATH}/";
 }
 
+const inline std::string getPluginPath() {
+	return "${PERIDYNO_PLUGIN_PATH}/";
+}
+
 //#define SIMULATION2D

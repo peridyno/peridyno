@@ -4,8 +4,9 @@
 #include "QtApp.h"
 #include "PMainWindow.h"
 #include "Log.h"
-//#include "Rendering/OpenGLContext.h"
+
 #include "SceneGraphFactory.h"
+#include "Plugin/PluginManager.h"
 
 #include <GLRenderEngine.h>
 
@@ -24,8 +25,17 @@ namespace dyno {
 
     }
 
-    void QtApp::createWindow(int width, int height)
+    void QtApp::createWindow(int width, int height, bool usePlugin)
     {
+        if (usePlugin)
+        {
+#ifdef NDEBUG
+			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Release");
+#else
+			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Debug");
+#endif // DEBUG
+        }
+
         m_mainWindow = std::make_shared<PMainWindow>(renderEngine().get());
         m_mainWindow->resize(width, height);
     }

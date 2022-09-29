@@ -32,6 +32,9 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
     set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine/Dynamics")
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
+
+    set_target_properties(${LIB_NAME} PROPERTIES 
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugin)
     
     set_target_properties(${LIB_NAME} PROPERTIES
         OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
