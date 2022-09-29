@@ -2,8 +2,6 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
-#include <TriangleMeshWriter.h>
-
 
 namespace dyno
 {
