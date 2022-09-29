@@ -35,15 +35,15 @@ namespace dyno
 		CylinderModel();
 
 	public:
-		DEF_VAR(int, Columns, 24, "Cylinder Columns");
+		DEF_VAR(unsigned, Columns, 24, "Cylinder Columns");
 
-		DEF_VAR(int, Row, 4, "Cylinder Row");
+		DEF_VAR(unsigned, Row, 4, "Cylinder Row");
 
-		DEF_VAR(Real, Radius, 0.3, "Cylinder radius");
+		DEF_VAR(unsigned, EndSegment, 3, "Cylinder EndSegment");
+
+		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
 
 		DEF_VAR(Real, Height, 0.9, "Cylinder Height");
-
-		DEF_VAR(Coord3D, Center, 0.9, "Cylinder Center");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
