@@ -32,22 +32,26 @@ namespace dyno
 
 		void setTriangleSetPtr(std::shared_ptr<TriangleSet<TDataType>> ptr_triangles) { this->ptr_TriangleSet = ptr_triangles;  this->updatePtr(); }
 		bool updatePtr();
+		bool updatePtr(TriangleSet<TDataType> triangle_set);
 
 		bool outputSurfaceMesh();
+		bool outputSurfaceMesh(TriangleSet<TDataType> triangleset );
 
 	protected:
 		void updateImpl() override;
 
 	public:
-
+		DEF_VAR_IN(unsigned, FrameNumber, "Input FrameNumber");
+		DEF_INSTANCE_IN (TriangleSet<TDataType>, TriangleSet, "Input TriangleSet");
 
 	protected:
+		int time_idx = 0;
 		int m_output_index = 0;
 		int max_output_files = 10000;
-		int idle_frame_num = 9;		//output one file of [num] frames
+		int idle_frame_num = 3;		//output one file of [num] frames
 		int current_idle_frame = 0;
-		std::string output_path = "D:/Model/tmp";
-		std::string name_prefix = "defaut_";
+		std::string output_path = "G:/TEMP";
+		std::string name_prefix = "cup";
 		std::string file_postfix = ".obj";
 
 		DArray<Triangle>* ptr_triangles;
