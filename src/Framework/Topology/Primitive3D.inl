@@ -1,4 +1,4 @@
-//#include "Primitive3D.h"
+#include "Primitive3D.h"
 #include "Algorithm/SimpleMath.h"
 #include "Interval.h"
 #include <glm/glm.hpp>
