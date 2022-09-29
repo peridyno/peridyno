@@ -122,7 +122,7 @@ namespace dyno
 	{
 		setObjectName("MainWindow");
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physical simulation platform"));
-		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo2.png")));
+		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo5.png")));
 
 
 		mOpenGLWidget = new POpenGLWidget(engine);

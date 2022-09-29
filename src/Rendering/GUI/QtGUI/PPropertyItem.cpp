@@ -135,7 +135,6 @@ namespace dyno
 		{
 			return;
 		}
-
 		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
@@ -148,6 +147,7 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		QSpinBox* spinner = new QSpinBox;
+		spinner->setMaximum(1000000);
 		spinner->setValue(f->getData());
 
 		layout->addWidget(name, 0, 0);
