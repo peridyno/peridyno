@@ -60,12 +60,14 @@ namespace dyno
 			this->inColor()->getDataPtr()->size() == vertices.size())
 		{
 			auto color = this->inColor()->getData();
-			mColorBuffer.loadCuda(color.begin(), color.size() * sizeof(float) * 3);
+			mColorBuffer.loadCuda(color.begin(), color.size() * sizeof(float) * 3); 
 		}
 		else
 		{
-			glDisableVertexArrayAttrib(mVAO.id, 1);
+			glDisableVertexAttribArray(1);
 		}
+
+		gl::glCheckError();
 
 		// normal
 		if(this->varUseVertexNormal()->getData())
@@ -78,7 +80,7 @@ namespace dyno
 		}
 		else
 		{
-			glDisableVertexArrayAttrib(mVAO.id, 2);
+			glDisableVertexAttribArray(2);
 		}
 		mVAO.unbind();
 	}

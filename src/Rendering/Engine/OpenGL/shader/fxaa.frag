@@ -1,5 +1,8 @@
 #version 400
 
+
+layout(location = 0) out vec4 fragColor;
+
 //VTK::System::Dec
 
 /*=========================================================================
@@ -223,7 +226,7 @@ int nvidiaEndpointSearch(vec2 posC, float lumC, float lumHC, float lengthSign,
     }
 
 #ifdef FXAA_DEBUG_EDGE_NUM_STEPS
-  gl_FragData[0] = vec4(float(stepsN) / float(EndpointSearchIterations), 0.f,
+  fragColor = vec4(float(stepsN) / float(EndpointSearchIterations), 0.f,
                         float(stepsP) / float(EndpointSearchIterations), 1.f);
   return FXAA_ABORT_EDGE_AA;
 #endif // FXAA_DEBUG_EDGE_NUM_STEPS
@@ -310,16 +313,16 @@ int nvidiaEndpointSearch(vec2 posC, float lumC, float lumHC, float lengthSign,
     float maxDistance = EndpointSearchIterations;
     if (nearestEndpointIsN)
       {
-      gl_FragData[0] = vec4(1.f - dstN / maxDistance, 0.f, 0.f, 1.f);
+      fragColor = vec4(1.f - dstN / maxDistance, 0.f, 0.f, 1.f);
       }
     else
       {
-      gl_FragData[0] = vec4(0.f, 0.f, 1.f - dstP / maxDistance, 1.f);
+      fragColor = vec4(0.f, 0.f, 1.f - dstP / maxDistance, 1.f);
       }
     }
   else
     {
-    gl_FragData[0] = vec4(1.f, 1.f, 0.f, 1.f);
+    fragColor = vec4(1.f, 1.f, 0.f, 1.f);
     }
   return FXAA_ABORT_EDGE_AA;
 #endif // FXAA_DEBUG_EDGE_DISTANCE
@@ -331,7 +334,7 @@ int nvidiaEndpointSearch(vec2 posC, float lumC, float lumHC, float lengthSign,
 #ifdef FXAA_DEBUG_EDGE_SAMPLE_OFFSET
   if (needEdgeAA)
     { // x2, since the max value is 0.5:
-    gl_FragData[0] = vec4(-2.f * dst * invNegSpanLength, 0.f, 0.f, 1.f);
+    fragColor = vec4(-2.f * dst * invNegSpanLength, 0.f, 0.f, 1.f);
     return FXAA_ABORT_EDGE_AA;
     }
 #endif // FXAA_DEBUG_EDGE_SAMPLE_OFFSET
@@ -466,7 +469,7 @@ int vtkEndpointSearch(vec2 posC, float lumC, float lumHC, float lengthSign,
     }
 
 #ifdef FXAA_DEBUG_EDGE_NUM_STEPS
-  gl_FragData[0] = vec4(float(stepsN) / float(EndpointSearchIterations), 0.f,
+  fragColor = vec4(float(stepsN) / float(EndpointSearchIterations), 0.f,
                         float(stepsP) / float(EndpointSearchIterations), 1.f);
   return FXAA_ABORT_EDGE_AA;
 #endif // FXAA_DEBUG_EDGE_NUM_STEPS
@@ -500,16 +503,16 @@ int vtkEndpointSearch(vec2 posC, float lumC, float lumHC, float lengthSign,
     float maxDistance = EndpointSearchIterations;
     if (nearestEndpointIsN)
       {
-      gl_FragData[0] = vec4(1.f - dstN / maxDistance, 0.f, 0.f, 1.f);
+      fragColor = vec4(1.f - dstN / maxDistance, 0.f, 0.f, 1.f);
       }
     else
       {
-      gl_FragData[0] = vec4(0.f, 0.f, 1.f - dstP / maxDistance, 1.f);
+      fragColor = vec4(0.f, 0.f, 1.f - dstP / maxDistance, 1.f);
       }
     }
   else
     {
-    gl_FragData[0] = vec4(1.f, 1.f, 0.f, 1.f);
+    fragColor = vec4(1.f, 1.f, 0.f, 1.f);
     }
   return FXAA_ABORT_EDGE_AA;
 #endif // FXAA_DEBUG_EDGE_DISTANCE
@@ -521,7 +524,7 @@ int vtkEndpointSearch(vec2 posC, float lumC, float lumHC, float lengthSign,
 #ifdef FXAA_DEBUG_EDGE_SAMPLE_OFFSET
   if (needEdgeAA)
     { // x2, since the max value is 0.5:
-    gl_FragData[0] = vec4(-2.f * dst * invNegSpanLength, 0.f, 0.f, 1.f);
+    fragColor = vec4(-2.f * dst * invNegSpanLength, 0.f, 0.f, 1.f);
     return FXAA_ABORT_EDGE_AA;
     }
 #endif // FXAA_DEBUG_EDGE_SAMPLE_OFFSET
@@ -595,7 +598,7 @@ void main()
   // the current pixel:
   if (lumRange < lumThresh)
     {
-    gl_FragData[0] = vec4(rgbC, centerSample.a); // original color
+    fragColor = vec4(rgbC, centerSample.a); // original color
     return;
     }
 
@@ -657,11 +660,11 @@ void main()
 #ifdef FXAA_DEBUG_SUBPIXEL_ALIASING
   if (blendSub > 0.f)
     {
-    gl_FragData[0] = vec4(vec3(blendSub / SubpixelBlendLimit), 1.f);
+    fragColor = vec4(vec3(blendSub / SubpixelBlendLimit), 1.f);
     }
   else
     {
-    gl_FragData[0] = vec4(rgbC, 1.f);
+    fragColor = vec4(rgbC, 1.f);
     }
   return;
 #endif // FXAA_DEBUG_SUBPIXEL_ALIASING
@@ -705,7 +708,7 @@ void main()
   bool horzSpan = edgeHorz >= edgeVert;
 
 #ifdef FXAA_DEBUG_EDGE_DIRECTION
-  gl_FragData[0] = horzSpan ? vec4(0.f, 0.f, 1.f, 1.f)
+  fragColor = horzSpan ? vec4(0.f, 0.f, 1.f, 1.f)
                             : vec4(1.f, 0.f, 0.f, 1.f);
   return;
 #endif // FXAA_DEBUG_EDGE_DIRECTION
@@ -787,5 +790,5 @@ void main()
 #endif // FXAA_DEBUG_ONLY_EDGE_AA
 
   // Blend the edgeAA and subpixelAA results together:
-  gl_FragData[0] = vec4(mix(rgbEdgeAA, rgbSub, blendSub), centerSample.a);
+  fragColor = vec4(mix(rgbEdgeAA, rgbSub, blendSub), centerSample.a);
 }
