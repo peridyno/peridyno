@@ -45,6 +45,8 @@ namespace dyno {
 		 */
 		virtual std::string caption();
 
+		virtual std::string description();
+
 		/**
 		 * @brief Add a field to Base
 		 * FieldID will be set to the name of Field by default
