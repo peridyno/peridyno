@@ -33,15 +33,17 @@ namespace dyno
 	public:
 		std::string caption() override;
 
-		//bool faceNormal = true;
+		DECLARE_ENUM(EColorMode,
+			CM_Object = 0,
+			CM_Vertex = 1);
+
+		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Shading mode");
 
 		DEF_VAR(bool, UsePhongShadingModel, false, "")
 
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
-
-		DEF_VAR(uint, ColorMode, 0, "");
 
 	protected:
 		virtual void paintGL(RenderPass mode) override;

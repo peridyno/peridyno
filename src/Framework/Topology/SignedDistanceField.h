@@ -22,13 +22,14 @@ namespace dyno {
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SignedDistanceField() {};
 
 		DistanceField3D<TDataType>& getSDF() { return distanceField; }
 
-	public:
+		void setSDF(DistanceField3D<TDataType> dis) { distanceField = dis;}
 
 	private:
 		DistanceField3D<TDataType> distanceField;
+
+
 	};
 }
