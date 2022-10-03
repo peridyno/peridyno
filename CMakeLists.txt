@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.6/bin/nvcc")
 
 project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
