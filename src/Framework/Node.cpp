@@ -63,22 +63,22 @@ void Node::setControllable(bool con)
 
 bool Node::isActive()
 {
-	return this->varActive()->getData();
+	return mPhysicsEnabled;
 }
 
 void Node::setActive(bool active)
 {
-	this->varActive()->setValue(active);
+	mPhysicsEnabled = active;
 }
 
 bool Node::isVisible()
 {
-	return this->varVisible()->getData();
+	return mRenderingEnabled;
 }
 
 void Node::setVisible(bool visible)
 {
-	this->varVisible()->setValue(visible);
+	mRenderingEnabled = visible;
 }
 
 float Node::getDt()
@@ -158,6 +158,11 @@ void Node::reset()
 	}
 }
 
+NBoundingBox Node::boundingBox()
+{
+	return NBoundingBox();
+}
+
 void Node::postUpdateStates()
 {
 
@@ -165,7 +170,8 @@ void Node::postUpdateStates()
 
 void Node::resetStates()
 {
-
+	this->stateElapsedTime()->setValue(0.0f);
+	this->stateFrameNumber()->setValue(0);
 }
 
 bool Node::validateInputs()
@@ -292,7 +298,6 @@ bool Node::addModule(std::shared_ptr<Module> module)
 		auto downModule = TypeInfo::cast<TopologyMapping>(module);
 		this->addToTopologyMappingList(downModule);
 	}
-
 	return ret;
 }
 
@@ -308,8 +313,6 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 {
 	bool ret = true;
 
-	ret &= deleteFromModuleList(module);
-
 	std::string mType = module->getModuleType();
 
 	if (std::string("TopologyModule").compare(mType) == 0)
@@ -321,6 +324,8 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 		auto downModule = TypeInfo::cast<TopologyMapping>(module);
 		this->deleteFromTopologyMappingList(downModule);
 	}
+
+	ret &= deleteFromModuleList(module);
 		
 	return ret;
 }

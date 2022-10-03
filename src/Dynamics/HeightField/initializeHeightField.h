@@ -1,15 +1,18 @@
 #pragma once
-#include <Object.h>
+#include <Plugin/PluginInterface.h>
 
 namespace dyno
 {
-	class HeightFieldInitializer : public Object
+	class HeightFieldInitializer : public IPlugin
 	{
 	public:
 		HeightFieldInitializer();
 
 		void initializeNodeCreators();
 	};
+}
 
-	const static HeightFieldInitializer heightFieldInitializer;
+DYNO_PLUGIN_EXPORT
+auto initDynoPlugin() -> void
+{
 }

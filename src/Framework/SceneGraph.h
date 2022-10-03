@@ -18,7 +18,7 @@
 #include "Node.h"
 #include "NodeIterator.h"
 
-#include "Module/InputMouseModule.h"
+#include "Module/MouseInputModule.h"
 
 #include <mutex>
 
@@ -33,7 +33,7 @@ namespace dyno
 	public:
 		typedef NodeIterator Iterator;
 
-		~SceneGraph() {};
+		~SceneGraph();
 
 // 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
 // 		std::shared_ptr<Node> getRootNode() { return mRoot; }
@@ -50,6 +50,8 @@ namespace dyno
 		virtual void takeOneFrame();
 		virtual void updateGraphicsContext();
 		virtual void run();
+
+		NBoundingBox boundingBox();
 
 		void reset();
 
@@ -145,6 +147,8 @@ namespace dyno
 
 	public:
 		void onMouseEvent(PMouseEvent event);
+
+		void onKeyboardEvent(PKeyboardEvent event);
 
 		/**
 		 * @brief Depth-first tree traversal

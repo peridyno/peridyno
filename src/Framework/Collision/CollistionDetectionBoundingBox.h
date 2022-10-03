@@ -28,8 +28,9 @@ namespace dyno {
 	private:
 		DArray<int> mBoundaryContactCounter;
 
-		Coord mUpperCorner = Coord(100, 5, 100);//(0.4925,0.4925,0.4925);
-		Coord mLowerCorner = Coord(-100, 0, -100);//(0.0075,0.0075,0.0075);
+		Coord mUpperCorner = Coord(100);//(0.4925,0.4925,0.4925);
+		//Coord mLowerCorner = Coord(-100);//(0.0075,0.0075,0.0075);
+		Coord mLowerCorner = Coord(-100, 0, -100);
 
 		Reduction<int> m_reduce;
 		Scan m_scan;

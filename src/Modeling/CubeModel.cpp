@@ -14,11 +14,11 @@ namespace dyno
 
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
-		auto module = std::make_shared<GLSurfaceVisualModule>();
-		module->setColor(Vec3f(0.8, 0.52, 0.25));
-		module->setVisible(true);
-		this->stateQuadSet()->connect(module->inTriangleSet());
-		this->graphicsPipeline()->pushModule(module);
+		glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		glModule->setVisible(true);
+		this->stateQuadSet()->connect(glModule->inTriangleSet());
+		this->graphicsPipeline()->pushModule(glModule);
 
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateQuadSet()->connect(wireframe->inEdgeSet());

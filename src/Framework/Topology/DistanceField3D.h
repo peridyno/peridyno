@@ -60,6 +60,12 @@ namespace dyno {
 		 */
 		GPU_FUNC void getDistance(const Coord &p, Real &d, Coord &normal);
 
+		DYN_FUNC uint nx() { return m_distance.nx(); }
+
+		DYN_FUNC uint ny() { return m_distance.ny(); }
+
+		DYN_FUNC uint nz() { return m_distance.nz(); }
+
 	public:
 		/**
 		 * @brief load signed distance field from a file
@@ -77,6 +83,19 @@ namespace dyno {
 
 		void setSpace(const Coord p0, const Coord p1, int nbx, int nby, int nbz);
 
+		inline Coord lowerBound() { return m_left; }
+
+		inline Coord upperBound() { return Coord(m_left[0] + m_distance.nx() * m_h[0], m_left[1] + m_distance.ny() * m_h[1], m_left[2] + m_distance.nz() * m_h[2]); }
+
+
+		DArray3D<Real>& getMDistance() { return m_distance; }
+
+		void setDistance(CArray3D<Real>& distance) {
+			m_distance.assign(distance);
+		}
+
+		Coord getH() { return m_h; }
+		
 	private:
 		GPU_FUNC inline Real lerp(Real a, Real b, Real alpha) const {
 			return (1.0f - alpha)*a + alpha *b;
@@ -168,5 +187,4 @@ namespace dyno {
 
 		d = (1.0f - gamma) * dxy0 + gamma * dxy1;
 	}
-
 }

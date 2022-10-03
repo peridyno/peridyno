@@ -108,15 +108,6 @@
 #include "PMainToolBar.h"
 #include "PModuleEditorToolBar.h"
 
-// #include "Node/NodeData.hpp"
-// #include "Node/FlowScene.hpp"
-// #include "Node/FlowView.hpp"
-// #include "Node/FlowViewStyle.hpp"
-// #include "Node/ConnectionStyle.hpp"
-// #include "Node/DataModelRegistry.hpp"
-
-//#include "models.h"
-
 namespace dyno
 {
 	Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
@@ -126,14 +117,11 @@ namespace dyno
 		QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
 		m_statusBar(nullptr),
-		//m_vtkOpenglWidget(nullptr),
 		m_propertyWidget(nullptr),
 		m_animationWidget(nullptr)
-// 		m_scenegraphWidget(nullptr),
-// 		m_moduleListWidget(nullptr)
 	{
 		setObjectName("MainWindow");
-		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physics simulation platform"));
+		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physical simulation platform"));
 		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo2.png")));
 
 
@@ -147,23 +135,16 @@ namespace dyno
 
 		setupToolBar();
 
-		
 		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::dynoNodePlaced);
 		connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 
 		connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
+		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
+
+		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
 
 		statusBar()->showMessage(tr("Status Bar"));
-
-		Qt::ConnectionStyle::setConnectionStyle(
-			R"(
-			  {
-				"ConnectionStyle": {
-				  "UseDataDefinedColors": true
-				}
-			  }
-			  )");
 	}
 
 	void PMainWindow::mainLoop()
@@ -261,48 +242,10 @@ namespace dyno
 
 	void PMainWindow::setupToolBar()
 	{
-		mToolBar = new PMainToolBar(mNodeFlowView, this, 55, 3);
+		mToolBar = new PMainToolBar(mNodeFlowView, this, 61, 3);
+		mToolBar->setWindowTitle("Tool Bar");
 
 		addToolBar(Qt::TopToolBarArea, mToolBar);
-
-// 		tt::TabToolbar* tt = new tt::TabToolbar(this, 55, 3);
-// 		addToolBar(Qt::TopToolBarArea, tt);
-// 
-// 		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
-// 
-// 		auto convertIcon = [&](QString path) -> QIcon
-// 		{
-// 			QSvgRenderer svg_render(path);
-// 			QPixmap pixmap(48, 48);
-// 			pixmap.fill(Qt::transparent);
-// 			QPainter painter(&pixmap);
-// 			svg_render.render(&painter);
-// 			QIcon ico(pixmap);
-// 
-// 			return ico;
-// 		};
-// 
-// 		//Add ToolBar page
-// 		ToolBarPage m_toolBarPage;
-// 		std::vector<ToolBarIcoAndLabel> v_IcoAndLabel = m_toolBarPage.tbl;
-// 
-// 		for (int i = 0; i < v_IcoAndLabel.size(); i++) {
-// 			ToolBarIcoAndLabel m_tbl = v_IcoAndLabel[i];
-// 
-// 			tt::Page* MainPage = tt->AddPage(QPixmap(mediaDir + m_tbl.tabPageIco), m_tbl.tabPageName);
-// 			auto m_page = MainPage->AddGroup("");
-// 
-// 			for (int j = 0; j < m_tbl.ico.size(); j++) {
-// 				//Add subtabs
-// 				QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);;
-// 				m_page->AddAction(QToolButton::DelayedPopup, art);
-// 
-// 				if (i == 2 || i == 5 || i == 3) {//add connect event 
-// 					connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
-// 				}
-// 			}
-// 		}
-
 	}
 
 	void PMainWindow::setupStatusBar()
@@ -361,7 +304,7 @@ namespace dyno
 	void PMainWindow::showAbout()
 	{
 		QString versoin = QString("Version ") + QString::number(PERIDYNO_VERSION_MAJOR)+QString(".")+ QString::number(PERIDYNO_VERSION_MINOR)+QString(".")+QString::number(PERIDYNO_VERSION_PATCH);
-		QMessageBox::about(this, tr("Peridyno Studio "), versoin);
+		QMessageBox::about(this, tr("PeriDyno Studio "), versoin);
 		return;
 	}
 
@@ -369,10 +312,12 @@ namespace dyno
 	{
 		auto nodes = mNodeFlowView->node_scene->selectedNodes();
 		Qt::QtNodeWidget* clickedNode = nullptr;
-		if (nodes.size() > 0)
-		{
+		if (nodes.size() > 0) {
 			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
 		}
+
+		if (clickedNode == nullptr)
+			return;
 		
 		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
 		moduelEditor->setWindowTitle("Module Flow Editor");
@@ -385,6 +330,7 @@ namespace dyno
 		moduelEditor->show();
 
 		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
 	}
 
 	void PMainWindow::showMessage()
@@ -410,8 +356,8 @@ namespace dyno
 		} sets[] = {
 			{ "SceneGraph", 0, Qt::RightDockWidgetArea },
 			{ "Console", 0, Qt::BottomDockWidgetArea },
-			{ "Property", 0, Qt::LeftDockWidgetArea },
-			{ "NodeEditor", 0, Qt::LeftDockWidgetArea },
+			{ "Property", 0, Qt::RightDockWidgetArea },
+			{ "NodeEditor", 0, Qt::RightDockWidgetArea },
 			{ "Module", 0, Qt::RightDockWidgetArea }
 		};
 		const int setCount = sizeof(sets) / sizeof(Set);
@@ -436,9 +382,9 @@ namespace dyno
 		m_propertyWidget = new PPropertyWidget();
 		propertyDockWidget->setWidget(m_propertyWidget);
 		
-		PIODockWidget *consoleDockWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
-		consoleDockWidget->setWindowIcon(qtIcon);
-		addDockWidget(sets[1].area, consoleDockWidget);
+		mIoDockerWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
+		mIoDockerWidget->setWindowIcon(qtIcon);
+		addDockWidget(sets[1].area, mIoDockerWidget);
 		//windowMenu->addMenu(bottomDockWidget->colorSwatchMenu());
 
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);

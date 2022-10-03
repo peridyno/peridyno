@@ -6,17 +6,18 @@ namespace dyno
 {
 	RigidBodyInitializer::RigidBodyInitializer()
 	{
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void RigidBodyInitializer::initializeNodeCreators()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Rigid Body Dynamics",
+		auto page = factory->addPage(
 			"Rigid Body Dynamics",
 			"ToolBarIco/ParticleSystem/ParticleSystem.png");
+
+		auto group = page->addGroup("Rigid Body Dynamics");
 
 		group->addAction(
 			"GhostFluid",

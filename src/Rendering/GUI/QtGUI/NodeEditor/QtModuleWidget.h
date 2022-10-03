@@ -37,11 +37,16 @@ namespace Qt
 
 		QString	portCaption(PortType portType, PortIndex portIndex) const override;
 
+		QString	nodeTips() const override;
+
+		QString	portTips(PortType portType, PortIndex portIndex) const override;
+
 		QString	validationMessage() const override;
 
 
 		unsigned int nPorts(PortType portType) const override;
 
+		virtual bool hotkeyEnabled() const { return false; }
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 

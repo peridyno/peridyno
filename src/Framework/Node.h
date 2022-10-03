@@ -32,6 +32,40 @@ namespace dyno
 	class Action;
 	class SceneGraph;
 
+	struct NBoundingBox
+	{
+		NBoundingBox() {
+			lower = Vec3f(-1);
+			upper = Vec3f(1);
+		}
+
+		NBoundingBox(Vec3f lo, Vec3f hi) {
+			lower = lo;
+			upper = hi;
+		}
+
+		Vec3f lower = Vec3f(-1);
+		Vec3f upper = Vec3f(1);
+
+		NBoundingBox& join(const NBoundingBox box) {
+			lower = lower.minimum(box.lower);
+			upper = upper.maximum(box.upper);
+
+			return *this;
+		}
+
+		NBoundingBox& intersect(const NBoundingBox box) {
+			lower = lower.maximum(box.lower);
+			upper = upper.minimum(box.upper);
+
+			return *this;
+		}
+
+		float maxLength() {
+			return std::max(upper[0] - lower[0], std::max(upper[1] - lower[1], upper[2] - lower[2]));
+		}
+	};
+
 	class Node : public OBase
 	{
 	public:
@@ -255,6 +289,7 @@ namespace dyno
 
 		void reset();
 
+		virtual NBoundingBox boundingBox();
 // 		/**
 // 		 * @brief Depth-first tree traversal
 // 		 *
@@ -351,26 +386,17 @@ namespace dyno
 	public:
 		std::string m_node_name;
 
-		/**
-		 * @brief Dynamics indicator
-		 * true: Dynamics is turn on
-		 * false: Dynamics is turned off
-		 */
-		DEF_VAR(bool, Active, true, "Indicating whether the simulation is on for this node!");
-
-
-		/**
-		 * @brief Visibility
-		 * true: the node is visible
-		 * false: the node is invisible
-		 */
-		DEF_VAR(bool, Visible, true, "Indicating whether the node is visible!");
-
 		DEF_VAR_STATE(Real, ElapsedTime, 0, "Elapsed Time");
 		DEF_VAR_STATE(Real, TimeStep, Real(0.033), "Time step size");
 
+		DEF_VAR_STATE(uint, FrameNumber, 0, "Frame number");
+
 	private:
 		bool m_controllable = true;
+
+		bool mPhysicsEnabled = true;
+
+		bool mRenderingEnabled = true;
 
 		/**
 		 * @brief Time step size

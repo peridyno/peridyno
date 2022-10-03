@@ -13,7 +13,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
     )
 
     if(WIN32)
-        add_library(${LIB_NAME} STATIC ${LIB_SRC})
+        add_library(${LIB_NAME} SHARED ${LIB_SRC})
     elseif(UNIX)
         add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
     endif()
@@ -32,6 +32,9 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
     set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine/Dynamics")
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
+
+    set_target_properties(${LIB_NAME} PROPERTIES 
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugin)
     
     set_target_properties(${LIB_NAME} PROPERTIES
         OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
@@ -73,15 +76,14 @@ option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework)
+    set(LIB_DEPENDENCY Core IO Framework GLRenderEngine)
     build_library(ParticleSystem LIB_DEPENDENCY)
 endif()
 
-    if(PERIDYNO_LIBRARY_PERIDYNAMICS)
-    	set(LIB_DEPENDENCY ParticleSystem)
-        build_library(Peridynamics LIB_DEPENDENCY)
-    endif()
-
+if(PERIDYNO_LIBRARY_PERIDYNAMICS)
+    set(LIB_DEPENDENCY ParticleSystem)
+    build_library(Peridynamics LIB_DEPENDENCY)
+endif()
 
 if(PERIDYNO_LIBRARY_RIGIDBODY)
     set(LIB_DEPENDENCY Core IO Framework)
@@ -95,6 +97,6 @@ endif()
 
 
 if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(LIB_DEPENDENCY Core IO Framework cufft)
+    set(LIB_DEPENDENCY Core IO Framework RigidBody cufft)
     build_library(HeightField LIB_DEPENDENCY)
 endif()

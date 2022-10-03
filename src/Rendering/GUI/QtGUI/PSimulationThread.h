@@ -8,6 +8,7 @@
 namespace dyno
 {
 	class Node;
+	class SceneGraph;
 
 	class PSimulationThread : public QThread
 	{
@@ -19,6 +20,13 @@ namespace dyno
 		void pause();
 		void resume();
 		void stop();
+
+		void createNewScene();
+		void createNewScene(std::shared_ptr<SceneGraph> scn);
+
+		void closeCurrentScene();
+
+		void closeAllScenes();
 
 		void run() override;
 
@@ -32,6 +40,8 @@ namespace dyno
 		int getCurrentFrameNum();
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
+
+		void sceneGraphChanged();
 
 		void oneFrameFinished();
 		void simulationFinished();
@@ -53,6 +63,8 @@ namespace dyno
 		bool mUpdatingGraphicsContext = false;
 
 		std::shared_ptr<Node> mActiveNode = nullptr;
+
+		int mTimeOut = 10000;
 
 		QMutex mMutex;
 	};

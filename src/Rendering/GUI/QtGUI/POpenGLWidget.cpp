@@ -19,7 +19,6 @@
 
 namespace dyno
 {
-
 	POpenGLWidget::POpenGLWidget(RenderEngine* engine)
 	{
 		QSurfaceFormat format;
@@ -106,7 +105,7 @@ namespace dyno
 		mRenderEngine->resize(w, h);
 	}
 
-	PButtonType mappingButtonType(QMouseEvent* event)
+	PButtonType mappingMouseButton(QMouseEvent* event)
 	{
 		if (event->buttons().testFlag(Qt::LeftButton))
 		{
@@ -122,6 +121,24 @@ namespace dyno
 		}
 	}
 
+	PModifierBits mappingModifierBits(Qt::KeyboardModifiers mods)
+	{
+		if (mods == Qt::ControlModifier)
+		{
+			return PModifierBits::MB_CONTROL;
+		}
+		else if (mods == Qt::ShiftModifier)
+		{
+			return PModifierBits::MB_SHIFT;
+		}
+		else if (mods == Qt::AltModifier)
+		{
+			return PModifierBits::MB_ALT;
+		}
+		else
+			return PModifierBits::MB_NO_MODIFIER;
+	}
+
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
 		activeCamera()->registerPoint(event->x(), event->y());
@@ -129,8 +146,9 @@ namespace dyno
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = activeCamera()->castRayInWorldSpace((float)event->x(), (float)event->y());
-		mouseEvent.buttonType = mappingButtonType(event);
+		mouseEvent.buttonType = mappingMouseButton(event);
 		mouseEvent.actionType = PActionType::AT_PRESS;
+		mouseEvent.mods = mappingModifierBits(event->modifiers());
 		mouseEvent.camera = activeCamera();
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
@@ -148,8 +166,9 @@ namespace dyno
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = activeCamera()->castRayInWorldSpace((float)event->x(), (float)event->y());
-		mouseEvent.buttonType = mappingButtonType(event);
+		mouseEvent.buttonType = mappingMouseButton(event);
 		mouseEvent.actionType = PActionType::AT_RELEASE;
+		mouseEvent.mods = mappingModifierBits(event->modifiers());
 		mouseEvent.camera = activeCamera();
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
@@ -163,17 +182,26 @@ namespace dyno
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
 	{
-		if (event->buttons().testFlag(Qt::LeftButton) && mButtonState == QBUTTON_DOWN && !mImWindow.cameraLocked()) {
+		if (event->buttons().testFlag(Qt::LeftButton) &&
+			mButtonState == QBUTTON_DOWN &&
+			event->modifiers() == Qt::AltModifier &&
+			!mImWindow.cameraLocked())
+		{
 			activeCamera()->rotateToPoint(event->x(), event->y());
 		}
-		else if (event->buttons().testFlag(Qt::RightButton) && mButtonState == QBUTTON_DOWN && !mImWindow.cameraLocked()) {
+		else if (event->buttons().testFlag(Qt::RightButton) &&
+			mButtonState == QBUTTON_DOWN &&
+			event->modifiers() == Qt::AltModifier &&
+			!mImWindow.cameraLocked())
+		{
 			activeCamera()->translateToPoint(event->x(), event->y());
 		}
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = activeCamera()->castRayInWorldSpace((float)event->x(), (float)event->y());
-		mouseEvent.buttonType = mappingButtonType(event);
+		mouseEvent.buttonType = mappingMouseButton(event);
 		mouseEvent.actionType = PActionType::AT_REPEAT;
+		mouseEvent.mods = mappingModifierBits(event->modifiers());
 		mouseEvent.camera = activeCamera();
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
@@ -188,7 +216,7 @@ namespace dyno
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
 		if(!mImWindow.cameraLocked())
-			activeCamera()->zoom(-0.001*event->angleDelta().y());
+			activeCamera()->zoom(-0.001*event->angleDelta().x());
 
 		update();
 	}

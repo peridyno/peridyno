@@ -192,6 +192,11 @@ namespace dyno
 		this->setWindowTitle(m_ioTabWidget->tabText(index));
 	}
 
+	void PIODockWidget::toggleLogging()
+	{
+		mLogWidget->toggleLogging();
+	}
+
 #ifndef QT_NO_CONTEXTMENU
 	void PIODockWidget::contextMenuEvent(QContextMenuEvent *event)
 	{
@@ -357,18 +362,22 @@ namespace dyno
 	void PIODockWidget::setupWidgets()
 	{
 		m_ioTabWidget = new PIOTabWidget();
+		m_ioTabWidget->setObjectName("ControlPanel");
 		m_ioTabWidget->setContentsMargins(0, 0, 0, 0);
 		m_ioTabWidget->setTabPosition(QTabWidget::South);
 		m_ioTabWidget->setObjectName(QStringLiteral("tabWidget"));
 		m_ioTabWidget->setGeometry(QRect(140, 60, 361, 241));
-		//Create log widget
-		PLogWidget* logWidget = new PLogWidget();
-		m_ioTabWidget->addTab(logWidget, QString("Log"));
-		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(logWidget), QApplication::translate("MainWindow", "Log", Q_NULLPTR));
 
-		PConsoleWidget* consoleWidget = new PConsoleWidget();
-		m_ioTabWidget->addTab(consoleWidget, QString("Console"));
-		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(consoleWidget), QApplication::translate("MainWindow", "Console", Q_NULLPTR));
+		m_ioTabWidget->tabBar()->setObjectName("ControlPanelTabBar");
+
+		//Create log widget
+		mLogWidget = new PLogWidget();
+		m_ioTabWidget->addTab(mLogWidget, QString("Log"));
+		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mLogWidget), QApplication::translate("MainWindow", "Log", Q_NULLPTR));
+
+		mConsoleWidget = new PConsoleWidget();
+		m_ioTabWidget->addTab(mConsoleWidget, QString("Console"));
+		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mConsoleWidget), QApplication::translate("MainWindow", "Console", Q_NULLPTR));
 		this->setWidget(m_ioTabWidget);
 
 		QObject::connect(m_ioTabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));

@@ -10,22 +10,18 @@ namespace dyno
 {
 	HeightFieldInitializer::HeightFieldInitializer()
 	{
-		
-		TypeInfo::New<OceanPatch<DataType3f>>();
-		//TypeInfo::New<Ocean<DataType3f>>();
-		TypeInfo::New<CapillaryWave<DataType3f>>();
-
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void HeightFieldInitializer::initializeNodeCreators()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
-			"Ocean",
+		auto page = factory->addPage(
 			"Ocean",
 			"ToolBarIco/HeightField/HeightField.png");
+
+		auto group = page->addGroup("Ocean");
 
 		group->addAction(
 			"Ocean Patch",

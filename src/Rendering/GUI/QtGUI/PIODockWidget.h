@@ -60,6 +60,8 @@ QT_FORWARD_DECLARE_CLASS(QMenu)
 namespace dyno
 {
 	class PIOTabWidget;
+	class PLogWidget;
+	class PConsoleWidget;
 
 	class PIODockWidget : public QDockWidget
 	{
@@ -70,6 +72,12 @@ namespace dyno
 
 		void setCustomSizeHint(const QSize &size);
 		QMenu *colorSwatchMenu() const { return menu; }
+
+		PLogWidget* logWidget() { return mLogWidget; }
+		PConsoleWidget* consoleWidget() { return mConsoleWidget; }
+
+	public slots:
+		void toggleLogging();
 
 	protected:
 #ifndef QT_NO_CONTEXTMENU
@@ -132,6 +140,9 @@ namespace dyno
 
 		QMainWindow *mainWindow;
 		PIOTabWidget* m_ioTabWidget;
+
+		PLogWidget* mLogWidget;
+		PConsoleWidget* mConsoleWidget;
 	};
 }
 

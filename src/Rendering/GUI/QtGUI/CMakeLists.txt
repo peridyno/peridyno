@@ -5,7 +5,7 @@ add_definitions(-DTT_BUILDING_DLL)
 set(LIB_NAME QtGUI)
 set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(CMAKE_AUTOMOC ON)                                                                   # 开启自动moc功能
+set(CMAKE_AUTOMOC ON)                                                                   # 弢�启自动moc功能
 set(CMAKE_AUTOUIC ON) 
 
 find_package(Qt5 COMPONENTS
@@ -16,12 +16,13 @@ find_package(Qt5 COMPONENTS
 			 Svg)
 
 qt5_add_resources(RESOURCES 
-    ./Resources/resources.qrc
-    ./Resources/StyleTemplate.qrc)
+    ./Resources/DefaultStyle.qrc
+    ./Resources/StyleTemplate.qrc
+    ./Resources/img/icons.qrc)
 
 
 file(                                                                           
-    GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取所有源文件list
+    GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取扢�有源文件list
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
     "${LIB_SRC_DIR}/*.c*"
@@ -32,11 +33,18 @@ file(
 	"${LIB_SRC_DIR}/ToolBar/*.c*"
 )
 
-add_library(${LIB_NAME} STATIC 
+add_library(${LIB_NAME} SHARED 
 	${LIB_SRC} 
 	${RESOURCES})
 
 foreach(SRC IN ITEMS ${LIB_SRC})
+    get_filename_component(SRC_PATH "${SRC}" PATH)
+    file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
+    string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
+    source_group("${GROUP_PATH}" FILES "${SRC}")
+endforeach()
+
+foreach(SRC IN ITEMS ${RESOURCES})
     get_filename_component(SRC_PATH "${SRC}" PATH)
     file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
     string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")

@@ -118,12 +118,22 @@ namespace Qt
 
 	QString QtNodeWidget::caption() const
 	{
-		return dyno::FormatBlockCaptionName(mNode->getClassInfo()->getClassName());
+		return dyno::FormatBlockCaptionName(mNode->caption());
 	}
 
 	QString QtNodeWidget::name() const
 	{
 		return QString::fromStdString(mNode->getClassInfo()->getClassName());
+	}
+
+	QString QtNodeWidget::nodeTips() const
+	{
+		auto cls = mNode->getClassInfo();
+
+		std::string tip = "Class Name: ";
+		tip += cls->getClassName() + "\n";
+
+		return QString::fromStdString(tip);
 	}
 
 	bool QtNodeWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
@@ -156,6 +166,48 @@ namespace Qt
 				auto& outputFields = this->getOutputFields();
 
 				return dyno::FormatBlockPortName(outputFields[portIndex - 1]->getObjectName());
+			}
+			break;
+
+		case PortType::None:
+			break;
+		}
+	}
+
+	QString QtNodeWidget::portTips(PortType portType, PortIndex portIndex) const
+	{
+		std::string tip;
+
+		auto nodeTip = [&](Node* node) -> QString {
+			return QString::fromStdString(node->getClassInfo()->getClassName());
+		};
+
+		auto fieldTip = [&](FBase* f) -> QString {
+			tip += "Class: " + f->getClassName() + "\n";
+			tip += "Template: " + f->getTemplateName() + "\n";
+
+			return QString::fromStdString(tip);
+		};
+
+		switch (portType)
+		{
+		case PortType::In:
+			if (portIndex < mNodeInport.size()) {
+				return dyno::FormatBlockPortName(mNode->getImportNodes()[portIndex]->getPortName());
+			}
+			else {
+				auto& inputFields = this->getInputFields();
+				return fieldTip(inputFields[portIndex - mNodeInport.size()]);
+			}
+			break;
+
+		case PortType::Out:
+			if (portIndex == 0) {
+				return nodeTip(mNode.get());
+			}
+			else {
+				auto& outputFields = this->getOutputFields();
+				return fieldTip(outputFields[portIndex - 1]);
 			}
 			break;
 

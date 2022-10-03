@@ -81,7 +81,8 @@ Group::Group(const QString& name, QWidget* parent) : QFrame(parent)
     groupName->setProperty("TTGroupName", QVariant(true));
     groupName->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
     groupName->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    groupName->adjustSize();
+    //groupName->adjustSize();
+    groupName->setFixedHeight(12);
 
     outerLayout->addWidget(groupName);
 
@@ -106,11 +107,13 @@ SubGroup* Group::AddSubGroup(SubGroup::Align align)
 QFrame* Group::CreateSeparator()
 {
     QFrame* separator = new QFrame(this);
+    separator->setObjectName("Separator");
     separator->setProperty("TTSeparator", QVariant(true));
     separator->setAutoFillBackground(false);
     separator->setFrameShadow(QFrame::Plain);
     separator->setLineWidth(1);
     separator->setMidLineWidth(0);
+    separator->setFixedWidth(1);
     separator->setFrameShape(QFrame::VLine);
     return separator;
 }
@@ -137,7 +140,7 @@ void Group::AddAction(QToolButton::ToolButtonPopupMode type, QAction* action, QM
         btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
         btn->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
         btn->setPopupMode(type);
-        btn->setStyle(new TTToolButtonStyle());
+        //btn->setStyle(new TTToolButtonStyle());
         if(menu)
             btn->setMenu(menu);
         innerLayout->addWidget(btn);

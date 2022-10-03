@@ -1,12 +1,14 @@
 #pragma once
-#include "Node.h"
+#include "SceneGraph.h"
 
 namespace dyno {
 
 	class SceneLoader
 	{
 	public:
-		virtual std::shared_ptr<Node> load(const std::string filename) { return nullptr; }
+		virtual std::shared_ptr<SceneGraph> load(const std::string filename) { return nullptr; }
+
+		virtual bool save(std::shared_ptr<SceneGraph> scn, const std::string filename) { return false; }
 
 		virtual bool canLoadFileByName(const std::string filename) {
 			std::string str = filename;

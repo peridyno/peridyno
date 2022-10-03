@@ -15,7 +15,7 @@ std::string earse_spacing(const std::string& str)
 }
 
 
-bool parse_enum_string(const std::string& enum_str, enum_map& enumKeyValueList)
+bool parse_enum_string(const std::string& enum_str, EnumMap& enumKeyValueList)
 {
 	std::vector<std::string> enum_value_list;
 
@@ -47,7 +47,7 @@ bool parse_enum_string(const std::string& enum_str, enum_map& enumKeyValueList)
 		{
 			char tmpKeyValue[64] = { '\0' };
 			std::string tmpValue_;
-			str_enum_field_name = str_enum_field.substr(0, nPos - 1);
+			str_enum_field_name = str_enum_field.substr(0, nPos);
 
 			tmpValue_ = str_enum_field.substr(nPos + 1, (*itor).length());
 			sscanf(tmpValue_.c_str(), "%[^LlUu]", tmpKeyValue);
@@ -78,3 +78,11 @@ bool parse_enum_string(const std::string& enum_str, enum_map& enumKeyValueList)
 	return true;
 }
 
+void PEnum::setCurrentKey(int index)
+{
+	if (m_enum_map.find(index) == m_enum_map.end())
+		return;
+
+	m_enum_value = index;
+	m_enum_name = m_enum_map[index];
+}

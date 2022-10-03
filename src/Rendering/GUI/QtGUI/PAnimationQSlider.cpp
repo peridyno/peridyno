@@ -30,8 +30,8 @@ namespace dyno
 
 		m_displayLabel = new QLabel(this);
 		m_displayLabel->setFixedSize(QSize(30, 20));
-
 		m_displayLabel->setAlignment(Qt::AlignCenter);
+		m_displayLabel->setStyleSheet("background: transparent;");
 
 		this->setTickInterval(50);
 
@@ -101,16 +101,15 @@ namespace dyno
 	void PAnimationQSlider::paintEvent(QPaintEvent* ev)
 	{
 		QSlider::paintEvent(ev);
-
 		auto painter = new QPainter(this);
-		painter->setPen(QPen(Qt::black));
+		painter->setPen(QPen(QColor(123,123,123),2));
 
 		auto rect = this->geometry();
 
 		int numTicks = std::max((maximum() - minimum()) / tickInterval(), 1);
 
 		QFontMetrics fontMetrics = QFontMetrics(this->font());
-
+		
 		if (this->orientation() == Qt::Horizontal) {
 
 			int fontHeight = fontMetrics.height();
@@ -119,16 +118,17 @@ namespace dyno
 
 				int tickNum = minimum() + (tickInterval() * i);
 
-				auto tickX = ((rect.width() / numTicks) * i) - (fontMetrics.width(QString::number(tickNum)) / 2);
+				auto tickX = (((rect.width() - 10.0f) / (maximum() - minimum()))* tickInterval() * i) - (fontMetrics.width(QString::number(tickNum)) / 2);
+
 				auto tickY = (rect.height() + fontHeight) / 2;
 
-				painter->drawText(QPoint(tickX, tickY),
-					QString::number(tickNum));
-			}
+				auto tickMarkX = (((rect.width() - 10.0f) / (maximum() - minimum())) * tickInterval() * i);
 
+				painter->drawText(QPoint(tickX + 19, tickY - 7), QString::number(tickNum));
+				painter->drawLine(QPoint(tickMarkX + 6, rect.height() - 12), QPoint(tickMarkX + 6, rect.height()));
+			}
 		}
 		else if (this->orientation() == Qt::Vertical) {
-
 			//do something else for vertical here, I haven't implemented it because I don't need it
 		}
 		else {
@@ -154,11 +154,17 @@ namespace dyno
 
 	void PAnimationQSlider::mouseMoveEvent(QMouseEvent* event)
 	{
-		m_displayLabel->move(8 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 6);
+		QFontMetrics fontMetrics = QFontMetrics(this->font());
+		int labelWidth = fontMetrics.width(QString::number(this->value()))+fontMetrics.width("0");                // 背景标签的宽度为当前帧数字符串宽度加1个字符的宽度
+
+		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 2);  //向下偏移2个单位以对齐slider的sub-page
 		m_displayLabel->setText(QString::number(this->value()));
+		m_displayLabel->setFixedWidth((labelWidth));
 	
 		m_displayLabel->setVisible(true);
-		
+		m_displayLabel->setStyleSheet("QLabel{background:#2b2b2b;color:#ffffff;}");                      //背景标签颜色及帧数文字颜色
+		m_displayLabel->setAlignment(Qt::AlignVCenter);
+		m_displayLabel->setFixedHeight(20);                                          //修改高度以对其Slider的Sub-page
 		QSlider::mouseMoveEvent(event);
 	}
 

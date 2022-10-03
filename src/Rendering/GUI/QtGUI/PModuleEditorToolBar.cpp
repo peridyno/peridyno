@@ -16,13 +16,16 @@ namespace dyno
 		mLayout = new QHBoxLayout;
 
 		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
-		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/48px-View-refresh.png")), tr("&Update...")));
-		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/ReOrder.png")), tr("&Realign...")));
+		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_green.png")), tr("&Update...")));
+		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/realign_v2.png")), tr("&Realign...")));
 
 		mLayout->addStretch();
 
-		mAnimationButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/Help.png")), "Animation");
-		mRenderingButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Help/Help.png")), "Rendering");
+		mAnimationButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/animation.png")), "Animation");
+		mRenderingButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/Display.png")), "Rendering");
+
+		mAnimationButton->setObjectName("mAnimationButton");
+		mRenderingButton->setObjectName("mRenderingButton");
 
 		this->setLayout(mLayout);
 
@@ -63,15 +66,20 @@ namespace dyno
 
 		button->setIconSize(QSize(iconSize, iconSize));
 		button->setFixedWidth(160);
+		button->setIcon(icon);//直接调用PushButton的setIcon和setText添加icon和文字，以修复Label布局下文字无法高亮的问题。
+		button->setText(text);//
+
 		button->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
 		button->setCheckable(true);
-
+/*
 		QLabel* iconLabel = new QLabel;    
 		QLabel* textLabel = new QLabel;
-		iconLabel->setFixedSize(iconSize, iconSize);
-		iconLabel->setStyleSheet("border:0px solid red;");    
-		textLabel->setStyleSheet("border:0px solid red;");    
+
+		//iconLabel->setStyleSheet("background: transparent;");
+		//textLabel->setStyleSheet("background: transparent;");
+
+		iconLabel->resize(iconSize, iconSize);         
 		iconLabel->setPixmap(icon);
 		textLabel->setText(text);
 
@@ -88,11 +96,11 @@ namespace dyno
 		btnLayout->addSpacing(2);
 		button->setLayout(btnLayout);
 
-		button->setStyleSheet(
-			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
-			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
-			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
-
+// 		button->setStyleSheet(
+// 			"QPushButton{border: 1px solid #dcdfe6; padding: 10px; border-radius: 5px; background-color: #ffffff;}"
+// 			"QPushButton:hover{background-color: #ecf5ff; color: #409eff;}"
+// 			"QPushButton:checked{border: 1px solid #3a8ee6; color: #409eff;}");
+*/
 		mLayout->addWidget(button);
 
 		return button;

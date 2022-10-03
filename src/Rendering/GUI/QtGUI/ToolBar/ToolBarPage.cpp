@@ -7,38 +7,38 @@ namespace dyno {
 
 		QTextCodec* codec = QTextCodec::codecForName("GB2312");
 
-		//ToolBar file----------------------------------
-		ToolBarIcoAndLabel filePage;
-		// Main Page name and ico
-		filePage.tabPageName = "File";
-		filePage.tabPageIco = "ToolBarIco/File/Open.png";
-		//number of subTabs
-		filePage.subtabNum = 4;
-		//subTabs
-		filePage.label.push_back("New");
-		filePage.ico.push_back("ToolBarIco/File/New.png");
-
-		filePage.label.push_back("Open");
-		filePage.ico.push_back("ToolBarIco/File/Open.png");
-
-		filePage.label.push_back("Save");
-		filePage.ico.push_back("ToolBarIco/File/Save.png");
-
-		filePage.label.push_back("Save As");
-		filePage.ico.push_back("ToolBarIco/File/SaveAs.png");
+// 		//ToolBar file----------------------------------
+// 		ToolBarIcoAndLabel filePage;
+// 		// Main Page name and ico
+// 		filePage.tabPageName = "File";
+// 		filePage.tabPageIco = "ToolBarIco/File/Open.png";
+// 		//number of subTabs
+// 		filePage.subtabNum = 4;
+// 		//subTabs
+// 		filePage.label.push_back("New");
+// 		filePage.ico.push_back("ToolBarIco/File/New_v2.png");
+// 
+// 		filePage.label.push_back("Open");
+// 		filePage.ico.push_back("ToolBarIco/File/Open.png");
+// 
+// 		filePage.label.push_back("Save");
+// 		filePage.ico.push_back("ToolBarIco/File/Save.png");
+// 
+// 		filePage.label.push_back("Save As");
+// 		filePage.ico.push_back("ToolBarIco/File/SaveAs.png");
 		//--------------------------------------------------
 
-		//ToolBar edit--------------------------------------
-		ToolBarIcoAndLabel editPage;
-		// Main Page name and ico
-		editPage.tabPageName = "Edit";
-		editPage.tabPageIco = "ToolBarIco/Edit/Edit.png";
-		//number of subTabs
-		editPage.subtabNum = 1;
-		//subTabs
-		editPage.label.push_back("Settings");
-		editPage.ico.push_back("ToolBarIco/Edit/Settings.png");
-		//--------------------------------------------------
+// 		//ToolBar edit--------------------------------------
+// 		ToolBarIcoAndLabel editPage;
+// 		// Main Page name and ico
+// 		editPage.tabPageName = "Edit";
+// 		editPage.tabPageIco = "ToolBarIco/Edit/Settings_v2.png";
+// 		//number of subTabs
+// 		editPage.subtabNum = 1;
+// 		//subTabs
+// 		editPage.label.push_back("Settings");
+// 		editPage.ico.push_back("ToolBarIco/Edit/Settings_v2.png");
+// 		//--------------------------------------------------
 
 		
 // 		//ToolBar particle----------------------------------
@@ -123,20 +123,20 @@ namespace dyno {
 		ToolBarIcoAndLabel helpPage;
 		// Main Page name and ico
 		helpPage.tabPageName = "Help";
-		helpPage.tabPageIco = "ToolBarIco/Help/Help.png";
+		helpPage.tabPageIco = "ToolBarIco/Help/Help_v2.png";
 		//number of subTabs
 		helpPage.subtabNum = 2;
 		//subTabs
 		helpPage.label.push_back("ReOrder");
-		helpPage.ico.push_back("ToolBarIco/Help/ReOrder.png");
+		helpPage.ico.push_back("ToolBarIco/Help/realign_v2.png");
 
 		helpPage.label.push_back("Help");
-		helpPage.ico.push_back("ToolBarIco/Help/Help.png");
+		helpPage.ico.push_back("ToolBarIco/Help/Help_v2.png");
 		//--------------------------------------------------
 
 		//Add all the page
-		tbl.push_back(filePage);// 0
-		tbl.push_back(editPage);// 1
+//		tbl.push_back(filePage);// 0
+//		tbl.push_back(editPage);// 1
 		tbl.push_back(helpPage);//6
 
 		//dynamic toolbar

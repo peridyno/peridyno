@@ -12,6 +12,23 @@
 
 namespace dyno
 {
+	class AssignFrameNumberAct : public Action
+	{
+	public:
+		AssignFrameNumberAct(uint num) {
+			mFrameNumber = num;
+		};
+
+		void process(Node* node) override {
+			if (node == NULL)
+				return;
+
+			node->stateFrameNumber()->setValue(mFrameNumber);
+		}
+
+		uint mFrameNumber;
+	};
+
 	SceneGraph& SceneGraph::getInstance()
 	{
 		static SceneGraph m_instance;
@@ -36,6 +53,12 @@ namespace dyno
 	Vec3f SceneGraph::getGravity()
 	{
 		return mGravity;
+	}
+
+	SceneGraph::~SceneGraph()
+	{
+		mNodeMap.clear();
+		mNodeQueue.clear();
 	}
 
 	bool SceneGraph::initialize()
@@ -205,6 +228,8 @@ namespace dyno
 
 		this->traverseForward<PostProcessing>();
 
+		this->traverseForward<AssignFrameNumberAct>(mFrameNumber);
+
 		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
 
 		mFrameNumber++;
@@ -236,13 +261,41 @@ namespace dyno
 
 	}
 
+	dyno::NBoundingBox SceneGraph::boundingBox()
+	{
+		NBoundingBox box;
+		for (auto it = this->begin(); it != this->end(); it++)
+		{
+			box.join(it->boundingBox());
+		}
+
+		return box;
+	}
+
 	void SceneGraph::reset()
 	{
 		mSync.lock();
 
+		class ResetNodeAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				if (node == NULL) {
+					Log::sendMessage(Log::Error, "Node is invalid!");
+					return;
+				}
+
+				node->stateFrameNumber()->setValue(0);
+				node->stateElapsedTime()->setValue(0.0f);
+
+				node->reset();
+			}
+		};
+
+		this->traverseForward<ResetNodeAct>();
+
+		mElapsedTime = 0.0f;
 		mFrameNumber = 0;
-		this->traverseForward<ResetAct>();
-		this->mFrameNumber = 0;
 
 		mSync.unlock();
 	}
@@ -319,7 +372,7 @@ namespace dyno
 
 				for (auto iter : node->animationPipeline()->activeModules())
 				{
-					auto m = dynamic_cast<InputMouseModule*>(iter.get());
+					auto m = dynamic_cast<MouseInputModule*>(iter.get());
 					if (m)
 					{
 						m->enqueueEvent(mMouseEvent);
@@ -328,7 +381,7 @@ namespace dyno
 
 				for (auto iter : node->graphicsPipeline()->activeModules())
 				{
-					auto m = dynamic_cast<InputMouseModule*>(iter.get());
+					auto m = dynamic_cast<MouseInputModule*>(iter.get());
 					if (m)
 					{
 						m->enqueueEvent(mMouseEvent);
@@ -342,6 +395,11 @@ namespace dyno
 		MouseEventAct eventAct(event);
 
 		this->traverseForward(&eventAct);
+	}
+
+	void SceneGraph::onKeyboardEvent(PKeyboardEvent event)
+	{
+
 	}
 
 	//Used to traverse the whole scene graph

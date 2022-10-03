@@ -1,4 +1,5 @@
 #include "FractureModule.h"
+
 #include "ParticleSystem/Module/SummationDensity.h"
 #include "ParticleSystem/Module/Kernel.h"
 

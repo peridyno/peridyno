@@ -80,17 +80,13 @@ namespace Qt
 
 	QString QtModuleWidget::caption() const
 	{
-		//	return m_name;
-		std::string class_name = mModule->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(mModule->getName());
-		else return QString::fromStdString(class_name);		
+// 		//	return m_name;
+ 		return dyno::FormatBlockCaptionName(mModule->caption());
 	}
 
 	QString QtModuleWidget::name() const
 	{
-		std::string class_name = mModule->getClassInfo()->getClassName();
-		if(class_name.find("VirtualModule") != std::string::npos) return QString::fromStdString(mModule->getName());
-		else return QString::fromStdString(class_name);
+		return QString::fromStdString(mModule->caption());
 	}
 
 	bool QtModuleWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
@@ -105,6 +101,29 @@ namespace Qt
 		std::string name = f->getObjectName();
 
 		return dyno::FormatBlockPortName(name);
+	}
+
+	QString QtModuleWidget::nodeTips() const
+	{
+		std::string tip = "Class: ";
+		tip += mModule->getClassInfo()->getClassName();
+
+		return QString::fromStdString(tip);
+	}
+
+	QString QtModuleWidget::portTips(PortType portType, PortIndex portIndex) const
+	{
+		dyno::FBase* f = this->getField(portType, portIndex);
+		
+		auto fieldTip = [&](FBase* f) -> QString {
+			std::string tip;
+			tip += "Class: " + f->getClassName() + "\n";
+			tip += "Template: " + f->getTemplateName() + "\n";
+
+			return QString::fromStdString(tip);
+		};
+
+		return fieldTip(f);
 	}
 
 	void QtModuleWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)

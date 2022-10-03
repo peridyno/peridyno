@@ -59,7 +59,7 @@ namespace dyno
 				DeviceArrayField<Coord>* velFd = pSys[i]->stateVelocity();
 				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
 			}
-		}
+		} 
 	}
 
 	template<typename TDataType>
@@ -122,6 +122,14 @@ namespace dyno
 		{
 			m_obstacles[i]->m_cSDF->translate(t);
 		}
+	}
+
+
+
+	template<typename TDataType>
+	void StaticBoundary<TDataType>::resetStates()
+	{
+		auto filename = this->varFileName()->getData();
 	}
 
 	DEFINE_CLASS(StaticBoundary);

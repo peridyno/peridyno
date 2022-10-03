@@ -15,15 +15,12 @@
  */
 
 #pragma once
-#include "Node.h"
-
-#include "Topology/Primitive3D.h"
-#include "Topology/PointSet.h"
+#include "Sampler.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class CubeSampler : public Node
+	class CubeSampler : public Sampler<TDataType>
 	{
 		DECLARE_TCLASS(CubeSampler, TDataType);
 
@@ -35,8 +32,6 @@ namespace dyno
 
 	public:
 		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
-
-		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
 
 		DEF_VAR_IN(TOrientedBox3D<Real>, Cube,  "");
 

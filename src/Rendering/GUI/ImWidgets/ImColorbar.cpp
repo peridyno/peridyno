@@ -11,7 +11,7 @@ namespace dyno
 	{
 		this->setName("im_colorbar");
 
-		mTitle = "Velocity";
+		// mTitle = "Velocity";
 	}
 
 	ImColorbar::~ImColorbar()
@@ -88,7 +88,9 @@ namespace dyno
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ExColorsVal[ImGui::ImGuiExColVal_WindowTopBg_1]);
 		ImGui::Begin(label, NULL, /*ImGuiWindowFlags_NoMove |*/  ImGuiWindowFlags_NoTitleBar | /*ImGuiWindowFlags_NoBackground |*/ ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 		ImGui::PopStyleColor();
-		ImGui::Text(mTitle);
+		ImGui::Text(this->varFieldName()->getData().c_str());
+		//ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
+		//ImGui::Text(mTitle);
 		//ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
 		ImGui::End();
 	}

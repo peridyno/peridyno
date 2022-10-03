@@ -5,10 +5,14 @@
 #include "Node/GLPointVisualNode.h"
 #include "Node/GLSurfaceVisualNode.h"
 
+#include "ColorMapping.h"
+
 namespace dyno
 {
 	GLRenderEngineInitializer::GLRenderEngineInitializer()
 	{
+		TypeInfo::New<ColorMapping<DataType3f>>();
+
 		initializeNodeCreators();
 	}
 
@@ -16,10 +20,11 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
+		auto page = factory->addPage(
 			"Rendering",
-			"Rendering",
-			"ToolBarIco/HeightField/HeightField.png");
+			"ToolBarIco/Node/Display.png");
+
+		auto group = page->addGroup("Rendering");
 
 		group->addAction(
 			"Particle Renderer",
@@ -28,7 +33,7 @@ namespace dyno
 
 		group->addAction(
 			"Surface Renderer",
-			"ToolBarIco/HeightField/HeightField.png",
+			"ToolBarIco/Rendering/SurfaceRender_v2.png",
 			[=]()->std::shared_ptr<Node> { return std::make_shared<GLSurfaceVisualNode<DataType3f>>(); });
 	}
 

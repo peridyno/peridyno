@@ -18,6 +18,11 @@ namespace dyno
 		this->inColor()->tagOptional(true);
 	}
 
+	std::string GLSurfaceVisualModule::caption()
+	{
+		return "Surface Visual Module";
+	}
+
 	bool GLSurfaceVisualModule::initializeGL()
 	{
 		// create vertex buffer and vertex array object
@@ -61,7 +66,7 @@ namespace dyno
 			mColorBuffer.resize(vertices.size());
 		}
 
-		if (this->varColorMode()->getValue() == 0)
+		if (this->varColorMode()->getValue() == EColorMode::CM_Object)
 		{
 			RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
 		}

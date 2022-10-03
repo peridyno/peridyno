@@ -110,8 +110,7 @@ bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2
         size*=window->FontWindowScale*ImGui::GetIO().FontGlobalScale;
     }
 
-    ImGuiContext& g = *GImGui;
-    const ImGuiStyle& style = g.Style;
+    const ImGuiStyle& style = GetStyle();
 
     const ImGuiID id = window->GetID(label);
     const ImVec2 textSize = ImGui::CalcTextSize(label,NULL,true);
@@ -181,18 +180,18 @@ template<typename T>
 bool ImGui::ColorBar(const char* label, const float* values, const T col, int length)
 {
 	if (col == nullptr ) return false;
-	ImGuiContext& g = *GImGui;
+//	ImGuiContext* g = GetCurrentContext();
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
         return false;
 
     ImDrawList* draw_list = window->DrawList;
-    ImGuiStyle& style = g.Style;
-    ImGuiIO& io = g.IO;
+    ImGuiStyle& style = GetStyle();
+    ImGuiIO& io = GetIO();
     ImGuiID id = window->GetID(label);
     
     const float width = CalcItemWidth();
-    g.NextItemData.ClearFlags();
+    //g->NextItemData.ClearFlags();
 
     PushID(label);
     BeginGroup();

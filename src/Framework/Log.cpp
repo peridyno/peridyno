@@ -50,6 +50,10 @@ namespace dyno
 		}
 	}
 
+	const Log::Message& Log::getLastMessage()
+	{
+		return messages.back();
+	}
 
 	void Log::setOutput(const std::string& filename)
 	{
@@ -66,9 +70,25 @@ namespace dyno
 			sendMessage(Error, "Cannot create/open '" + filename + "' for logging");
 	}
 
+	const std::string& Log::getOutput()
+	{
+		return outputFile;
+
+	}
+
+	std::list<Log::Message>& Log::getMessages()
+	{ 
+		return messages; 
+	}
+
 	void Log::setLevel(MessageType level)
 	{
 		logLevel = level;
+	}
+
+	void Log::setUserReceiver(void (*userFunc)(const Message&))
+	{
+		receiver = userFunc;
 	}
 
 

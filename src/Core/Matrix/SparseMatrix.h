@@ -28,7 +28,7 @@ namespace dyno
 		typedef DArrayMap<VarType> SparseM;
 		typedef DArray<VarType> SparseV;
 
-		SparseMatrix(SparseM& s_matrix, SparseV& s_b);
+		SparseMatrix() {};
 
 		/*!
 		*	\brief	Do not release memory here, call clear() explicitly.
@@ -40,12 +40,15 @@ namespace dyno
 		*/
 		void clear();
 
+		void assign_cgls(CArray<VarType>& s_b, std::vector<std::map<int, VarType>>& s_matrix, std::vector<std::map<int, VarType>>& s_matrix_transposed);
+
 	    void CGLS(int i_max, VarType threshold);
 		
 		const SparseV& X() const { return my_x; }
 
 	private:
 		SparseM my_A;
+		SparseM my_transposedA;
 
 		SparseV my_x;
 		SparseV my_b;

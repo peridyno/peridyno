@@ -7,7 +7,7 @@
 
 #include "Image_IO/image_io.h"
 #include "SceneGraph.h"
-#include "Module/InputMouseModule.h"
+#include "Module/MouseInputModule.h"
 #include "Log.h"
 
 #include <Rendering.h>
@@ -29,6 +29,22 @@
 
 namespace dyno 
 {
+	static void RecieveLogMessage(const Log::Message& m)
+	{
+		switch (m.type)
+		{
+		case Log::Info:
+			std::cout << ">>>: " << m.text << std::endl; break;
+		case Log::Warning:
+			std::cout << "???: " << m.text << std::endl; break;
+		case Log::Error:
+			std::cout << "!!!: " << m.text << std::endl; break;
+		case Log::User:
+			std::cout << ">>>: " << m.text << std::endl; break;
+		default: break;
+		}
+	}
+
 	static void glfw_error_callback(int error, const char* description)
 	{
 		fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -36,6 +52,7 @@ namespace dyno
 
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
 	{
+		Log::setUserReceiver(&RecieveLogMessage);
 	}
 
 	GlfwApp::GlfwApp(int width, int height)
@@ -55,7 +72,7 @@ namespace dyno
 
 	}
 
-	void GlfwApp::createWindow(int width, int height)
+	void GlfwApp::createWindow(int width, int height, bool usePlugin)
 	{
 		mWindowTitle = std::string("PeriDyno ") + std::to_string(PERIDYNO_VERSION_MAJOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_MINOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_PATCH);
 
@@ -367,6 +384,7 @@ namespace dyno
 		mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
 		mouseEvent.buttonType = (PButtonType)button;
 		mouseEvent.actionType = (PActionType)action;
+		mouseEvent.mods = (PModifierBits)activeWindow->getButtonMode();
 		mouseEvent.camera = camera;
 		mouseEvent.x = (float)xpos;
 		mouseEvent.y = (float)ypos;
@@ -402,6 +420,7 @@ namespace dyno
 		mouseEvent.ray = camera->castRayInWorldSpace((float)x, (float)y);
 		mouseEvent.buttonType = (PButtonType)activeWindow->getButtonType();
 		mouseEvent.actionType = PActionType::AT_REPEAT;
+		mouseEvent.mods = (PModifierBits)activeWindow->getButtonMode();
 		mouseEvent.camera = camera;
 		mouseEvent.x = (float)x;
 		mouseEvent.y = (float)y;
@@ -409,10 +428,19 @@ namespace dyno
 		auto activeScene = SceneGraphFactory::instance()->active();
 		activeScene->onMouseEvent(mouseEvent);
 
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
+		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
+			activeWindow->getButtonState() == GLFW_DOWN &&
+			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
+			!activeWindow->mImWindow.cameraLocked()) 
+		{
 			camera->rotateToPoint(x, y);
 		}
-		else if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && activeWindow->getButtonState() == GLFW_DOWN && !activeWindow->mImWindow.cameraLocked()) {
+		else if (
+			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && 
+			activeWindow->getButtonState() == GLFW_DOWN && 
+			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
+			!activeWindow->mImWindow.cameraLocked()) 
+		{
 			camera->translateToPoint(x, y);
 		}
 	}
@@ -437,10 +465,11 @@ namespace dyno
 		if (!activeWindow->mImWindow.cameraLocked())
 		{
 			int state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
+			int altState = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
 			//If the left control key is pressed, slow the zoom speed. 
-			if (state == GLFW_PRESS)
+			if (state == GLFW_PRESS && altState == GLFW_PRESS)
 				camera->zoom(-0.1*OffsetY);
-			else
+			else if (altState == GLFW_PRESS)
 				camera->zoom(-OffsetY);
 		}
 	}
@@ -449,10 +478,16 @@ namespace dyno
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
 
-		if (action != GLFW_PRESS)
-			return;
+		PKeyboardEvent keyEvent;
+		keyEvent.key = (PKeyboardType)key;
+		keyEvent.action = (PActionType)action;
+		keyEvent.mods = (PModifierBits)mods;
 
 		auto activeScene = SceneGraphFactory::instance()->active();
+		activeScene->onKeyboardEvent(keyEvent);
+
+		if (action != GLFW_PRESS)
+			return;
 
 		switch (key)
 		{

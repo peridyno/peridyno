@@ -1,15 +1,20 @@
 #pragma once
-#include <Object.h>
+#include <Plugin/PluginInterface.h>
 
 namespace dyno 
 {
-	class InteractionInitializer : public Object
+	class InteractionInitializer : public IPlugin
 	{
 	public:
 		InteractionInitializer();
 
 		void initializeNodeCreators();
 	};
+}
 
-	const static InteractionInitializer particleSystemInitializer;
+
+DYNO_PLUGIN_EXPORT
+auto initDynoPlugin() -> void
+{
+	static dyno::InteractionInitializer interactionInitializer;
 }

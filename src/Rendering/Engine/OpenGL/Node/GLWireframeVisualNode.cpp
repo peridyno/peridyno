@@ -8,10 +8,10 @@ namespace dyno
 	GLWireframeVisualNode<TDataType>::GLWireframeVisualNode()
 		: Node()
 	{
-		auto sRender = std::make_shared<GLWireframeVisualModule>();
-		sRender->setColor(Vec3f(0, 0, 0));
-		this->inTriangleSet()->connect(sRender->inEdgeSet());
-		this->graphicsPipeline()->pushModule(sRender);
+		auto wRender = std::make_shared<GLWireframeVisualModule>();
+		this->varColor()->connect(wRender->varBaseColor());
+		this->inTriangleSet()->connect(wRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wRender);
 	}
 
 	template<typename TDataType>

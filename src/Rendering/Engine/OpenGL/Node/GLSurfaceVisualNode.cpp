@@ -9,9 +9,8 @@ namespace dyno
 		: Node()
 	{
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Vec3f(1, 1, 0));
+		this->varColor()->connect(sRender->varBaseColor());
 		this->inTriangleSet()->connect(sRender->inTriangleSet());
-
 		this->graphicsPipeline()->pushModule(sRender);
 	}
 
@@ -19,6 +18,12 @@ namespace dyno
 	GLSurfaceVisualNode<TDataType>::~GLSurfaceVisualNode()
 	{
 		printf("GLSurfaceVisualNode released \n");
+	}
+
+	template<typename TDataType>
+	std::string dyno::GLSurfaceVisualNode<TDataType>::caption()
+	{
+		return "Surface Visualizer";
 	}
 
 	template<typename TDataType>

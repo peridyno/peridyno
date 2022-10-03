@@ -13,6 +13,7 @@ namespace dyno
 		DYN_FUNC Attribute() { 
 			m_tag = 0; 
 			this->setDynamic();
+			this->setObjectId(OBJECTID_INVALID);
 		}
 
 		DYN_FUNC ~Attribute() {};
@@ -36,12 +37,13 @@ namespace dyno
 
 		enum ObjectID
 		{
-			OBJECTID_MASK = 0x000000FF
+			OBJECTID_MASK = 0x000000FF,
+			OBJECTID_INVALID = 0x000000FF,
 		};
 
 		DYN_FUNC inline void setMaterialType(MaterialType type) { m_tag = ((~MATERIAL_MASK) & m_tag) | type; }
 		DYN_FUNC inline void setKinematicType(KinematicType type) { m_tag = ((~KINEMATIC_MASK) & m_tag) | type; }
-		DYN_FUNC inline void setObjectId(unsigned id) { m_tag = ((~OBJECTID_MASK) & m_tag) | id; }
+		DYN_FUNC inline void setObjectId(unsigned id) { m_tag = ((~OBJECTID_MASK) & m_tag) | ((OBJECTID_MASK)& id); }
 
 		DYN_FUNC inline MaterialType materialType() { return (MaterialType)(m_tag&MATERIAL_MASK); }
 		DYN_FUNC inline KinematicType kinematicType() { return (KinematicType)(m_tag&KINEMATIC_MASK); }

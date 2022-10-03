@@ -1,15 +1,19 @@
 #pragma once
-#include <Object.h>
+#include <Plugin/PluginInterface.h>
 
 namespace dyno 
 {
-	class ModelingInitializer : public Object
+	class ModelingInitializer : public IPlugin
 	{
 	public:
 		ModelingInitializer();
 
-		void initializeNodeCreators();
+		void initializeNodeCreators() override;
 	};
+}
 
-	const static ModelingInitializer particleSystemInitializer;
+DYNO_PLUGIN_EXPORT
+auto initDynoPlugin() -> void
+{
+	static dyno::ModelingInitializer particleSystemInitializer;
 }

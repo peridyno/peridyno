@@ -2,20 +2,29 @@
 
 #include "NodeFactory.h"
 
+#include "PickerNode.h"
+
 namespace dyno 
 {
 	InteractionInitializer::InteractionInitializer()
 	{
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void InteractionInitializer::initializeNodeCreators()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
-		auto group = factory->addGroup(
+		auto page = factory->addPage(
 			"Interaction", 
-			"Interaction", 
-			"ToolBarIco/FiniteElement/FiniteElement.png");
+			"ToolBarIco/Interaction/Interaction.png");
+
+		auto group = page->addGroup("Interaction");
+
+		group->addAction(
+			"Picker",
+			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
+			[=]()->std::shared_ptr<Node> { return std::make_shared<PickerNode<DataType3f>>(); });
 	}
 }
+//

@@ -60,6 +60,7 @@ namespace dyno
 
 	void Pipeline::clear()
 	{
+		//TODO: fix the memeory leak
 // 		for (auto const &pair : mModuleMap)
 // 		{
 // 			mNode->deleteModule(std::shared_ptr<Module>(pair.second));
@@ -147,6 +148,22 @@ namespace dyno
 	bool Pipeline::requireUpdate()
 	{
 		return true;
+	}
+
+	void Pipeline::promoteOutputToNode(FBase* base)
+	{
+		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
+			return;
+
+		mNode->addOutputField(base);
+	}
+
+	void Pipeline::demoteOutputFromNode(FBase* base)
+	{
+		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
+			return;
+
+		mNode->removeOutputField(base);
 	}
 
 	void Pipeline::reconstructPipeline()

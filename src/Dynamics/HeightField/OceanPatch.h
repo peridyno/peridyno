@@ -84,7 +84,7 @@ namespace dyno {
 	    void updateTopology() override;
         
     private:
-        void  generateH0(DArray2D<Coord> h0);
+        void  generateH0(CArray2D<Coord> h0);
         float gauss();
         float phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend);
 

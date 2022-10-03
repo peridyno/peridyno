@@ -43,18 +43,17 @@ namespace dyno
 		{
 		case Log::Warning:
 		{
-			TextColor = Qt::black;
+			//TextColor = Qt::black;
 			break;
 		}
 
 		case Log::Error:
 		{
 			TextColor = Qt::red;
+			setTextColor(TextColor);
 			break;
 		}
 		}
-
-		setTextColor(TextColor);
 
 		QString text = QString::fromUtf8(m.text.c_str());
 
@@ -112,8 +111,16 @@ namespace dyno
 		Log::setOutput(filename);
 	}
 
+	void PLogWidget::toggleLogging()
+	{
+		mEnableLogging = mEnableLogging ? false : true;
+	}
+
 	void PLogWidget::OnLog(const Log::Message& m)
 	{
+		if (!mEnableLogging)
+			return;
+
 		insertRow(0);
 
 		QIcon ItemIcon;

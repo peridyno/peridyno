@@ -15,7 +15,7 @@ namespace dyno {
         QtApp(int argc = 0, char **argv = NULL);
         ~QtApp();
 
-        void createWindow(int width, int height) override;
+        void createWindow(int width, int height, bool usePlugin = true) override;
         void mainLoop() override;
 
         void setRenderEngine(std::shared_ptr<RenderEngine> engine) override;

@@ -1,15 +1,19 @@
 #pragma once
-#include <Object.h>
+#include <Plugin/PluginInterface.h>
 
 namespace dyno
 {
-	class RigidBodyInitializer : public Object
+	class RigidBodyInitializer : public IPlugin
 	{
 	public:
 		RigidBodyInitializer();
 
 		void initializeNodeCreators();
 	};
+}
 
-	const static RigidBodyInitializer heightFieldInitializer;
+DYNO_PLUGIN_EXPORT
+auto initDynoPlugin() -> void
+{
+	static dyno::RigidBodyInitializer rigidBodyInitializer;
 }

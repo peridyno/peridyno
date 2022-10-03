@@ -171,5 +171,67 @@ namespace dyno
 // 		cuSynchronize();
 	}
 
+	template <typename Coord>
+	__global__ void PS_Rotate(
+		DArray<Coord> vertex,
+		Coord theta,
+		Coord origin
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= vertex.size()) return;
+		//return;
+		Coord pos = vertex[pId];
+
+		Real x = pos[0];
+		Real y = pos[1];
+		Real z = pos[2];
+
+		pos[1] = y * cos(theta[1]) - z * sin(theta[1]);
+		pos[2] = y * sin(theta[1]) + z * cos(theta[1]);
+
+		x = pos[0];
+		y = pos[1];
+		z = pos[2];
+
+		pos[0] = x * cos(theta[0]) - y * sin(theta[0]);
+		pos[1] = x * sin(theta[0]) + y * cos(theta[0]);
+
+		x = pos[0];
+		y = pos[1];
+		z = pos[2];
+
+		pos[2] = z * cos(theta[2]) - x * sin(theta[2]);
+		pos[0] = z * sin(theta[2]) + x * cos(theta[2]);
+
+		vertex[pId] = pos;
+	}
+
+
+	template<typename TDataType>
+	void PointSet<TDataType>::rotate(Coord angle)
+	{
+		cuExecute(m_coords.size(), PS_Rotate, m_coords, angle, Coord(0.0f));
+	}
+
+	template <typename Coord>
+	__global__ void PS_Rotate(
+		DArray<Coord> vertex,
+		Quat<Real> q)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= vertex.size()) return;
+		Mat3f rot = q.toMatrix3x3();
+
+		vertex[pId] = rot * vertex[pId];
+	}
+
+
+	template<typename TDataType>
+	void PointSet<TDataType>::rotate(Quat<Real> q)
+	{
+		cuExecute(m_coords.size(), PS_Rotate, m_coords, q);
+	}
+
 	DEFINE_CLASS(PointSet);
 }

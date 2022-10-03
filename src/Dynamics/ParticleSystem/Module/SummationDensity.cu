@@ -9,7 +9,8 @@ namespace dyno
 	{
 		this->varRestDensity()->setValue(Real(1000));
 
-		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SummationDensity<TDataType>::calculateParticleMass, this));
+		auto callback = std::make_shared<FCallBackFunc>(
+			std::bind(&SummationDensity<TDataType>::calculateParticleMass, this));
 
 		this->varRestDensity()->attach(callback);
 		this->inSamplingDistance()->attach(callback);

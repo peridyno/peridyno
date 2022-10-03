@@ -46,7 +46,7 @@ namespace dyno
 			return mModuleList;
 		}
 
-		std::map<ObjectId, std::shared_ptr<Module>> allModules()
+		std::map<ObjectId, std::shared_ptr<Module>>& allModules()
 		{
 			return mModuleMap;
 		}
@@ -59,6 +59,16 @@ namespace dyno
 		void printModuleInfo(bool enabled);
 
 		void forceUpdate();
+
+		/**
+		 * Turn a module output field to a node output node
+		 */
+		void promoteOutputToNode(FBase* base);
+
+		/**
+		 * Withdraw a module output field from the node
+		 */
+		void demoteOutputFromNode(FBase* base);
 
 	protected:
 		void preprocess() final;

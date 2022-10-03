@@ -1,16 +1,16 @@
 ﻿set(LIB_NAME Modeling)
 
-set(LIB_SRC_DIR "${PROJECT_SOURCE_DIR}/src/${LIB_NAME}")
+#set(LIB_SRC_DIR "${PROJECT_SOURCE_DIR}/src/${LIB_NAME}")
 file(
     GLOB_RECURSE LIB_SRC 
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
-    "${LIB_SRC_DIR}/*.c*"
-    "${LIB_SRC_DIR}/*.h*"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.c*"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 )
 
 if(WIN32)
-    add_library(${LIB_NAME} STATIC ${LIB_SRC})
+    add_library(${LIB_NAME} SHARED ${LIB_SRC})
 elseif(UNIX)
     add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 endif()
@@ -18,7 +18,7 @@ endif()
 if(WIN32)
     foreach(SRC IN ITEMS ${LIB_SRC})
         get_filename_component(SRC_PATH "${SRC}" PATH)
-        file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
+        file(RELATIVE_PATH SRC_PATH_REL "${CMAKE_CURRENT_SOURCE_DIR}" "${SRC_PATH}")
         string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
         source_group("${GROUP_PATH}" FILES "${SRC}")
     endforeach()
@@ -28,6 +28,9 @@ file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOU
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+
+set_target_properties(${LIB_NAME} PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugin)
 
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")

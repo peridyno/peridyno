@@ -81,7 +81,8 @@ namespace dyno
 	template <typename Real> class TTet3D;
 	template <typename Real> class TAlignedBox3D;
 	template <typename Real> class TOrientedBox3D;
-
+	template <typename Real> class TCylinder3D;
+	template <typename Real> class TCone3D;
 	template<typename Real>
 	class TPoint3D
 	{
@@ -90,7 +91,7 @@ namespace dyno
 		DYN_FUNC TPoint3D(const Real& c0, const Real& c1, const Real& c2);
 		DYN_FUNC TPoint3D(const TPoint3D& pt);
 
-		DYN_FUNC TPoint3D operator = (const Coord3D& p);
+		DYN_FUNC TPoint3D& operator = (const Coord3D& p);
 
 		explicit DYN_FUNC TPoint3D(const Real& val);
 		explicit DYN_FUNC TPoint3D(const Coord3D& pos);
@@ -397,7 +398,7 @@ namespace dyno
 		inline DYN_FUNC Coord3D startPoint() const { return v0; }
 		inline DYN_FUNC Coord3D endPoint() const { return v1; }
 
-		inline DYN_FUNC Coord3D direction() const { return v1 - v0; }
+		inline DYN_FUNC Coord3D direction() const { return v1 - v0;	}
 
 		inline DYN_FUNC TSegment3D<Real> operator-(void) const;
 
@@ -452,9 +453,12 @@ namespace dyno
 
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
+		DYN_FUNC Real distanceSquared(const TTriangle3D<Real>& triangle) const;
+
+		DYN_FUNC Real distance(const TTriangle3D<Real>& triangle) const;
+
 		Coord3D v[3];
 	};
-
 
 	template<typename Real>
 	class TRectangle3D
@@ -525,6 +529,42 @@ namespace dyno
 	};
 
 	template<typename Real>
+	class TCylinder3D
+	{
+	public:
+		DYN_FUNC TCylinder3D();
+		DYN_FUNC TCylinder3D(const Real& radius, const Real& row, const Real &columns, const Real &height, const Real& end_segment_, const Coord3D& center_);
+		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& Cylinder);
+		DYN_FUNC Real volume();
+
+		DYN_FUNC bool isValid();
+		Coord3D center;
+		Real radius;
+		Real row;
+		Real columns;
+		Real height;
+		Real end_segment;
+	};
+
+	template<typename Real>
+	class TCone3D
+	{
+	public:
+		DYN_FUNC TCone3D();
+		DYN_FUNC TCone3D(const Real& radius, const Real& row, const Real& columns, const Real& height);
+		DYN_FUNC TCone3D(const TCone3D<Real>& Cone);
+		DYN_FUNC Real volume();
+
+		DYN_FUNC bool isValid();
+
+		Real radius;
+		Real row;
+		Real columns;
+		Real height;
+
+	};
+
+	template<typename Real>
 	class TCapsule3D
 	{
 	public:
@@ -563,7 +603,7 @@ namespace dyno
 		DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 		DYN_FUNC bool intersect(const TTriangle3D<Real>& tri, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 
-
+		DYN_FUNC void expand(Real r);
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
 		// http://rodolphe-vaillant.fr/entry/127/find-a-tetrahedron-circumcenter
@@ -662,6 +702,9 @@ namespace dyno
 	template class TTet3D<float>;
 	template class TAlignedBox3D<float>;
 	template class TOrientedBox3D<float>;
+	template class TCylinder3D<float>;
+	template class TCone3D<float>;
+
 	//convenient typedefs 
 	typedef TPoint3D<float> Point3D;
 	typedef TLine3D<float> Line3D;
@@ -676,6 +719,8 @@ namespace dyno
 	typedef TTet3D<float> Tet3D;
 	typedef TAlignedBox3D<float> AlignedBox3D;
 	typedef TOrientedBox3D<float> OrientedBox3D;
+	typedef TCylinder3D<float> Cylinder3D;
+	typedef TCone3D<float> Cone3D;
 #else
 	template class TPoint3D<double>;
 	template class TLine3D<double>;
@@ -690,6 +735,9 @@ namespace dyno
 	template class TTet3D<double>;
 	template class TAlignedBox3D<double>;
 	template class TOrientedBox3D<double>;
+	template class TCylinder3D<double>;
+	template class TCone3D<double>;
+
 	//convenient typedefs 
 	typedef TPoint3D<double> Point3D;
 	typedef TLine3D<double> Line3D;
@@ -704,6 +752,9 @@ namespace dyno
 	typedef TTet3D<double> Tet3D;
 	typedef TAlignedBox3D<double> AlignedBox3D;
 	typedef TOrientedBox3D<double> OrientedBox3D;
+	typedef TCylinder3D<double> Cylinder3D;
+	typedef TCone3D<double> Cone3D;
+
 #endif
 
 }

@@ -67,6 +67,8 @@ namespace dyno
 
 		static void setOutput(std::string filename);
 
+		void toggleLogging();
+
 	protected:
 		void contextMenuEvent(QContextMenuEvent* pContextMenuEvent);
 
@@ -78,6 +80,9 @@ namespace dyno
 // 		void OnLogProgress(const QString& Event, const float& Progress);
 		void OnClear(void);
 		void OnClearAll(void);
+
+	private:
+		bool mEnableLogging = false;
 	};
 
 }

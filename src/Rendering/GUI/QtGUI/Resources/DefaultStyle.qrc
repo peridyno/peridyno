@@ -1,0 +1,7 @@
+<RCC version="1.0">
+    <qresource prefix="/dyno">
+        <file>DefaultStyle.qss</file>
+        <file>DarkStyle.qss</file>
+        <file>convert.png</file>
+    </qresource>
+</RCC>
