@@ -176,8 +176,7 @@ ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
     return IM_COL32((*v)[0] * 255, (*v)[1] * 255, (*v)[2] * 255, 150);
 }
 
-template<typename T> 
-bool ImGui::ColorBar(const char* label, const float* values, const T col, int length)
+bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
 {
 	if (col == nullptr ) return false;
 //	ImGuiContext* g = GetCurrentContext();

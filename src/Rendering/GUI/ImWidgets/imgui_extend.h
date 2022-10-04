@@ -34,9 +34,8 @@ namespace ImGui
     // SampleButton 可自定义形状按钮
     IMGUI_API void          sampleButton(const char* label, bool *v);
     // ColorBar 
-    template<typename T> 
-    IMGUI_API bool          ColorBar(const char* label, const float* values, T col, int length);
 
+    IMGUI_API bool          ColorBar(char* label, float* values, ImU32* col, int length);
 
     // Get ID without label showing
     IMGUI_API void          beginTitle(const char* label);
@@ -55,9 +54,11 @@ namespace ImGui
     template<>
     std::shared_ptr<ImU32[]>  ToImU<dyno::DArray<dyno::Vec3f>>(dyno::DArray<dyno::Vec3f> v, int size);
 
-    template<>
-    bool    ColorBar<std::shared_ptr<ImU32[]>>(const char* label, const float* values, std::shared_ptr<ImU32[]> col, int length);
-    template<>
-    bool    ColorBar<ImU32*>(const char* label, const float* values, ImU32* col, int length);    
+// 	template<>
+// 	bool    ColorBar<std::shared_ptr<ImU32[]>>(char* label, float* values, std::shared_ptr<ImU32[]>* col, int length);
+// 
+// 	template<>
+// 	bool    ColorBar<ImU32>(char* label, float* values, ImU32* col, int length);
+
     void initializeStyle(float scale);
 }
