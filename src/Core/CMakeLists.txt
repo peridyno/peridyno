@@ -98,4 +98,6 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h"  DESTINATION ${PERIDYNO_I
 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7/" DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7/)
 
-target_link_libraries(${LIB_NAME} "/usr/local/cuda-11.6/lib64/libcudart.so")
+if(UNIX)
+    target_link_libraries(${LIB_NAME} "/usr/local/cuda-11.6/lib64/libcudart.so")
+endif(UNIX)

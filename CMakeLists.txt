@@ -1,14 +1,16 @@
-cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
+﻿cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
 
 project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
 find_package(CUDA  REQUIRED)
 if(CUDA_FOUND)
+if(UNIX)
 	INCLUDE_DIRECTORIES("/usr/local/cuda-11.6/include/")
 	link_directories("/usr/local/cuda-11.6/lib64")
+endif()
 	#cuda_add_libraray("/usr/local/cuda-11.4/lib64")
 		
-        set(CUDA_SEPARABLE_COMPILATTON ON)
+    set(CUDA_SEPARABLE_COMPILATTON ON)
 endif()
 
 # define library version (update: apparently you can also do it in project()!)
