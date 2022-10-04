@@ -185,7 +185,7 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				dt = min((float)node->getDt(), dt);
+				dt = node->getDt() < dt ? node->getDt() : dt;
 			}
 
 			float dt;

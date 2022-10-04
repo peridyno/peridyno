@@ -2,15 +2,13 @@
 
 project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
-find_package(CUDA  REQUIRED)
+find_package(CUDA REQUIRED)
 if(CUDA_FOUND)
-if(UNIX)
-	INCLUDE_DIRECTORIES("/usr/local/cuda-11.6/include/")
-	link_directories("/usr/local/cuda-11.6/lib64")
-endif()
-	#cuda_add_libraray("/usr/local/cuda-11.4/lib64")
-		
-    set(CUDA_SEPARABLE_COMPILATTON ON)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+    link_libraries(${CUDA_LIBRARIES})
+else()
+    message("Cuda not found")
 endif()
 
 # define library version (update: apparently you can also do it in project()!)

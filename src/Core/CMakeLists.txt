@@ -10,8 +10,6 @@ file(
 	"${LIB_SRC_DIR}/*.inl"
 )
 
-
-
 if(${LIB_NAME} STREQUAL "Core")
     list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/tinyxml/tinyxml2.cpp")
     list(FILTER LIB_SRC EXCLUDE REGEX Platform.h.in)
@@ -97,7 +95,3 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Platform.h.in" "${CMAKE_CURRENT_SOUR
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h"  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/)
 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7/" DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7/)
-
-if(UNIX)
-    target_link_libraries(${LIB_NAME} "/usr/local/cuda-11.6/lib64/libcudart.so")
-endif(UNIX)
