@@ -405,7 +405,7 @@ namespace dyno {
 
 		void resize(uint num);
 
-		void resize(const Array<T, deviceType>& arr);
+		void resize(const Array<int, deviceType>& arr);
 
 		void assign(const ArrayList<T, DeviceType::CPU>& src);
 		void assign(const ArrayList<T, DeviceType::GPU>& src);
@@ -455,7 +455,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArrayList<T, deviceType>::resize(const Array<T, deviceType>& arr)
+	void FArrayList<T, deviceType>::resize(const Array<int, deviceType>& arr)
 	{
 		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
 

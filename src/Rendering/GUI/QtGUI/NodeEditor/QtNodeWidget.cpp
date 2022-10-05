@@ -128,12 +128,7 @@ namespace Qt
 
 	QString QtNodeWidget::nodeTips() const
 	{
-		auto cls = mNode->getClassInfo();
-
-		std::string tip = "Class Name: ";
-		tip += cls->getClassName() + "\n";
-
-		return QString::fromStdString(tip);
+		return QString::fromStdString(mNode->description());
 	}
 
 	bool QtNodeWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const

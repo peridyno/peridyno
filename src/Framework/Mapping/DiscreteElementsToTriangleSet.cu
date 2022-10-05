@@ -146,6 +146,99 @@ namespace dyno
 		indices[indexOffset + tId] = Triangle(tIndex[0] + vertexOffset, tIndex[1] + vertexOffset, tIndex[2] + vertexOffset);
 	}
 
+	__global__ void SetupRotateForCapsuleInstances(
+		DArray<Capsule3D> capsuleInstances,
+		DArray<Mat3f> rot)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= capsuleInstances.size()) return;
+
+		Capsule3D capsule = capsuleInstances[tId];
+		Vec3f dir = capsule.segment.direction().normalize();
+		// Z (0, 0, 1)
+		float cos2 = dir[2];
+		float cos1 = sqrtf((1 + cos2) / 2.0); 
+		float sin1 = sqrtf((1 - cos2) / 2.0);
+		Vec3f axis = Vec3f(-dir[1], dir[0], 0).normalize();
+		Quat<float> q(axis.x * sin1, axis.y * sin1, axis.z * sin1, cos1);
+		if (tId == -1)//DEBUG
+		{
+			printf("cos (%f %f %f)\n", cos2, cos1, sin1);
+			printf("dir (%f %f %f)\n", dir[0], dir[1], dir[2]);
+		}
+		rot[tId] = q.toMatrix3x3();
+	}
+
+	__global__ void SetupVerticesForCapsuleInstances(
+		DArray<Vec3f> vertices,
+		DArray<Vec3f> capsuleVertices,
+		DArray<Capsule3D> capsuleInstances,
+		DArray<Mat3f> rot,
+		uint pointOffset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= capsuleInstances.size() * capsuleVertices.size()) return;
+
+
+		uint instanceId = tId / capsuleVertices.size();
+		uint vertexId = tId % capsuleVertices.size();
+
+		Capsule3D capsule = capsuleInstances[instanceId];
+		float r = capsule.radius;
+		float h = (capsule.segment.length() / 2.0f) - r;
+		Vec3f center = (capsule.segment.v0 +  capsule.segment.v1 ) / 2.0f; 
+
+		Vec3f v = capsuleVertices[vertexId];
+		Vec3f orignZ = Vec3f(0, 0, 1);
+		Vec3f newZ = Vec3f(0, 0, h);
+		if (v.z >= 1) // 上半球
+		{
+			vertices[pointOffset + tId] = rot[instanceId] * ((v - orignZ) * r + newZ) + center;
+		}
+		else if (v.z <= -1) // 下半球
+		{
+			vertices[pointOffset + tId] = rot[instanceId] * ((v + orignZ) * r - newZ) + center;
+		}
+		else // 圆柱
+		{
+			vertices[pointOffset + tId] = rot[instanceId] * (v * Vec3f(r, r, h)) + center;
+		}
+		if (tId == -1) //DEBUG
+		{
+			printf("[%f %f]\n", r, h);
+			printf("v: (%f,%f,%f) \n", v.x, v.y, v.z);
+			printf("center: (%f,%f,%f) \n", center.x, center.y, center.z);
+			printf("ver: (%f,%f,%f) \n", vertices[pointOffset + tId].x, vertices[pointOffset + tId].y, vertices[pointOffset + tId].z);
+		}		
+	}
+
+	template<typename Triangle>
+	__global__ void SetupIndicesForCapsuleInstances(
+		DArray<Triangle> indices,
+		DArray<Triangle> capsuleIndices,
+		DArray<Capsule3D> capsuleInstances,
+		uint vertexSize,						//vertex size of the instance sphere 
+		uint indexOffset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= capsuleInstances.size() * capsuleIndices.size()) return;
+
+		uint instanceId = tId / capsuleIndices.size();
+		uint indexId = tId % capsuleIndices.size();
+
+		int vertexOffset = indexOffset + instanceId * vertexSize;
+		
+		Triangle tIndex = capsuleIndices[indexId];
+		indices[indexOffset + tId] = Triangle(tIndex[0] + vertexOffset, tIndex[1] + vertexOffset, tIndex[2] + vertexOffset);
+
+		if (tId == -1) //DEBUG
+		{
+			printf("tIndex [%d %d %d]\n", tIndex[0], tIndex[1], tIndex[2]);
+			printf("%d\n", vertexOffset);
+		}
+
+	}
+
 	template<typename TDataType>
 	bool DiscreteElementsToTriangleSet<TDataType>::apply()
 	{
@@ -156,18 +249,22 @@ namespace dyno
 
 		auto inTopo = this->inDiscreteElements()->getDataPtr();
 
+		DArray<Mat3f> capsuleRotates;
 		//printf("====================================================== inside box update\n");
 		auto& sphereInstances = inTopo->getSpheres();
+		auto& capsuleInstances = inTopo->getCaps();
 		auto& boxes = inTopo->getBoxes();
 		auto& tets = inTopo->getTets();
-		auto& caps = inTopo->getCaps();
 		auto& tris = inTopo->getTris();
+		// TODO : caps
+
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
 		int numOfSpheres = sphereInstances.size();
+		int numofCaps = capsuleInstances.size();
 		int numOfBoxes = boxes.size();
 		int numOfTets = tets.size();
-
+		
 		auto triSet = this->outTriangleSet()->getDataPtr();
 
 		auto& vertices = triSet->getPoints();
@@ -176,11 +273,16 @@ namespace dyno
 		auto& sphereVertices = mStandardSphere.getPoints();
 		auto& sphereIndices = mStandardSphere.getTriangles();
 
-		int numOfVertices = 8 * numOfBoxes + 4 * numOfTets + sphereVertices.size() * numOfSpheres;
-		int numOfTriangles = 12 * numOfBoxes + 4 * numOfTets + sphereIndices.size() * numOfSpheres;
+		auto& capsuleVertices = mStandardCapsule.getPoints();
+		auto& capsuleIndices = mStandardCapsule.getTriangles();
+		
+		int numOfVertices = 8 * numOfBoxes + 4 * numOfTets + sphereVertices.size() * numOfSpheres + capsuleVertices.size() * numofCaps;
+		int numOfTriangles = 12 * numOfBoxes + 4 * numOfTets + sphereIndices.size() * numOfSpheres + capsuleIndices.size() * numofCaps;
 
 		vertices.resize(numOfVertices);
 		indices.resize(numOfTriangles);
+
+		capsuleRotates.resize(numofCaps);
 
 		uint vertexOffset = 0;
 		uint indexOffset = 0;
@@ -202,6 +304,31 @@ namespace dyno
 
 		vertexOffset += numOfSpheres * sphereVertices.size();
 		indexOffset += numOfSpheres * sphereIndices.size();
+		
+		// Capsule
+		cuExecute(numofCaps,
+			SetupRotateForCapsuleInstances,
+			capsuleInstances,
+			capsuleRotates);
+		
+		cuExecute(numofCaps * capsuleVertices.size(),
+			SetupVerticesForCapsuleInstances,
+			vertices,
+			capsuleVertices,
+			capsuleInstances,
+			capsuleRotates,
+			vertexOffset);
+
+		cuExecute(numofCaps * capsuleIndices.size(),
+			SetupIndicesForCapsuleInstances,
+			indices,
+			capsuleIndices,
+			capsuleInstances,
+			capsuleVertices.size(),
+			indexOffset);
+
+		vertexOffset += numofCaps * capsuleVertices.size();
+		indexOffset += numofCaps * capsuleIndices.size();
 
 		cuExecute(numOfBoxes,
 			SetupCubeInstances,

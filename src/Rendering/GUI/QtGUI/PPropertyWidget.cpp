@@ -94,10 +94,12 @@ namespace dyno
 			mPropertyLabel[i]->setContentsMargins(8, 0, 0, 0);
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
 			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+			mPropertyLabel[i]->GetTextHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+			mPropertyLabel[i]->GetImageHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
 			mPropertyWidget[i] = new QWidget(this);
 			mPropertyWidget[i]->setVisible(true);
-			mPropertyWidget[i]->setStyleSheet("background-color: transparent;");
+			mPropertyWidget[i]->setStyleSheet("background-color: transparent;");//"color:red;background-color:green;"
 
 			propertyNum[i] = 0;
 
@@ -155,6 +157,15 @@ namespace dyno
 				mPropertyWidget[i]->setLayout(mPropertyLayout[i]);
 				vlayout->addWidget(mPropertyWidget[i]);
 			}
+			else
+			{
+				vlayout->addWidget(mPropertyLabel[i]);
+				mPropertyWidget[i]->setLayout(mPropertyLayout[i]);
+				vlayout->addWidget(mPropertyWidget[i]);
+				//以下为是否再属性栏显示 StateVariables
+				mPropertyWidget[i]->setVisible(false);
+				mPropertyLabel[i]->setVisible(false);
+			}
 
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this, i, vlayout]() {
 				if (!mFlag[i])
@@ -198,10 +209,13 @@ namespace dyno
 			mPropertyLabel[i]->setContentsMargins(8, 0, 0, 0);
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
 			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+			mPropertyLabel[i]->GetTextHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+			mPropertyLabel[i]->GetImageHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
 			mPropertyWidget[i] = new QWidget(this);
 			mPropertyWidget[i]->setVisible(true);
 			mPropertyWidget[i]->setStyleSheet("background-color: transparent;");
+
 
 			propertyNum[i] = 0;
 

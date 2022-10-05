@@ -112,21 +112,21 @@ namespace dyno
 				if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha - theta + PI / 2 > EPSILON ))
 				{
 					int cd = 2 * PI / theta;
-					triangle.push_back(TopologyModule::Triangle(face_id, face_id + 1, face_id - cd));
+					triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, face_id + 1));
 				}
 				else if ((d_beta + theta - 2 * PI > EPSILON) && (d_alpha - theta + PI / 2 > EPSILON))
 				{
 					int cd = 2 * PI / theta;
-					triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, face_id - 2 * cd - 1));
+					triangle.push_back(TopologyModule::Triangle(face_id, face_id - 2 * cd - 1, face_id - cd));
 				}
 				else if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha - theta + PI / 2 < EPSILON))
 				{
-					triangle.push_back(TopologyModule::Triangle(face_id, face_id + 1, vertices.size() - 2));
+					triangle.push_back(TopologyModule::Triangle(face_id, vertices.size() - 2, face_id + 1));
 				}
 				else if ((d_beta + theta - 2 * PI >= EPSILON) && (d_alpha - theta + PI / 2 < EPSILON))
 				{
 					int cd = 2 * PI / theta;
-					triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, vertices.size() - 2));
+					triangle.push_back(TopologyModule::Triangle(face_id, vertices.size() - 2, face_id - cd));
 				}
 
 				face_id++;

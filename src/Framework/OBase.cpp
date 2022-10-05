@@ -21,6 +21,17 @@ namespace dyno {
 		return this->getClassInfo()->getClassName();
 	}
 
+	std::string OBase::description()
+	{
+		auto cls = this->getClassInfo();
+
+		std::string tip = "Class Name: ";
+		tip += cls->getClassName() + "\n";
+		tip += "Description: none \n";
+
+		return tip;
+	}
+
 	bool OBase::addField(FBase* data)
 	{
 		return addField(data->getObjectName(), data);
