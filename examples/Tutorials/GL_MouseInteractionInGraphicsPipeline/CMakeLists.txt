@@ -13,11 +13,24 @@ set(GUI_ONLY_BINARIES ${PROJECT_NAME})
 
 set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
                       C_STANDARD 99
-                      FOLDER "Examples/Tutorials")
+                      FOLDER "Examples/Tutorials")                
 
 target_link_libraries(${PROJECT_NAME} GlfwGUI GLRenderEngine)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/Tutorials")
+
+if(WIN32)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()      
 
 if (MSVC)
     # Tell MSVC to use main instead of WinMain for Windows subsystem executables

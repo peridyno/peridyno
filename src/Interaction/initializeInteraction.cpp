@@ -28,3 +28,8 @@ namespace dyno
 	}
 }
 //
+
+PERIDYNO_API void Interaction::initDynoPlugin()
+{
+
+}

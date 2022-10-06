@@ -1,7 +1,7 @@
 #pragma once
 #include <Plugin/PluginInterface.h>
 
-DYNO_PLUGIN_EXPORT
+PERIDYNO_API
 auto initDynoPlugin() -> void
 {
 }

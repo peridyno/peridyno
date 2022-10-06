@@ -18,8 +18,16 @@ namespace dyno
 		return m_version.data();
 	}
 
-	void IPlugin::initialize()
+	bool IPlugin::initialize()
 	{
-		this->initializeNodeCreators();
+		if (!mInitialized)
+		{
+			this->initializeNodeCreators();
+			mInitialized = true;
+
+			return true;
+		}
+
+		return false;
 	}
 }

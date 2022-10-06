@@ -20,9 +20,27 @@
 
 namespace dyno 
 {
-	ParticleSystemInitializer::ParticleSystemInitializer()
+	std::atomic<ParticleSystemInitializer*> ParticleSystemInitializer::gInstance;
+	std::mutex ParticleSystemInitializer::gMutex;
+
+	IPlugin* ParticleSystemInitializer::instance()
 	{
-		this->initialize();
+		ParticleSystemInitializer* ins = gInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(gMutex);
+			ins = gInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new ParticleSystemInitializer();
+				gInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
+	}
+
+	ParticleSystemInitializer::ParticleSystemInitializer()
+		: IPlugin()
+	{
 	}
 
 	void ParticleSystemInitializer::initializeNodeCreators()
@@ -75,4 +93,14 @@ namespace dyno
 				return boundary; });
 	}
 
+}
+
+PERIDYNO_API void PaticleSystem::initDynoPlugin()
+{
+	dyno::ParticleSystemInitializer::instance()->initialize();
+}
+
+bool PaticleSystem::initStaticPlugin()
+{
+	return dyno::ParticleSystemInitializer::instance()->initialize();
 }

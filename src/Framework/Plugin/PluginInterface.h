@@ -3,14 +3,10 @@
 #include <map>
 #include <vector>
 
-/** Macro makes a symbol visible. */
-#if defined(_WIN32)
-  // MS-Windows NT 
-  #define DYNO_PLUGIN_EXPORT extern "C" __declspec(dllexport) 
-#else
-  // Unix-like OSes
-  #define DYNO_PLUGIN_EXPORT extern "C" __attribute__ ((visibility ("default")))
-#endif 
+#include <atomic>
+#include <mutex>
+
+#include <Platform.h>
 
 namespace dyno
 {
@@ -25,7 +21,7 @@ namespace dyno
 		/** Get Plugin Version */
 		const char* version() const;
 
-		void initialize();
+		bool initialize();
 
 		virtual void initializeNodeCreators() {};
 
@@ -35,5 +31,7 @@ namespace dyno
 
 		/** Plugin version */
 		std::string m_version;
+
+		bool mInitialized = false;
 	};
 }

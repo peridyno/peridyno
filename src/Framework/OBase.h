@@ -45,6 +45,9 @@ namespace dyno {
 		 */
 		virtual std::string caption();
 
+		/**
+		 * @brief Return a description for the node or module, override this function to support user-defined description
+		 */
 		virtual std::string description();
 
 		/**

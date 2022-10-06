@@ -36,6 +36,8 @@
 #include "SphereModel.h"
 #include "SphereSampler.h"
 
+#include "Plugin/PluginManager.h"
+
 using namespace std;
 using namespace dyno;
 

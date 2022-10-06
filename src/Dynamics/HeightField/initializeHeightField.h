@@ -12,7 +12,7 @@ namespace dyno
 	};
 }
 
-DYNO_PLUGIN_EXPORT
+PERIDYNO_API
 auto initDynoPlugin() -> void
 {
 }

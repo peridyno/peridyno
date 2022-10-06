@@ -10,10 +10,11 @@ namespace dyno
 
 		void initializeNodeCreators() override;
 	};
+
+	//const static ModelingInitializer modelingInitializer;
 }
 
-DYNO_PLUGIN_EXPORT
-auto initDynoPlugin() -> void
+namespace Modeling
 {
-	static dyno::ModelingInitializer particleSystemInitializer;
+	PERIDYNO_API void initDynoPlugin();
 }

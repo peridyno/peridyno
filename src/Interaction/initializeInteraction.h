@@ -12,9 +12,7 @@ namespace dyno
 	};
 }
 
-
-DYNO_PLUGIN_EXPORT
-auto initDynoPlugin() -> void
+namespace Interaction
 {
-	static dyno::InteractionInitializer interactionInitializer;
+	PERIDYNO_API void initDynoPlugin();
 }

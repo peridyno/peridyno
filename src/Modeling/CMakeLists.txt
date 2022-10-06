@@ -29,13 +29,25 @@ set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
-set_target_properties(${LIB_NAME} PROPERTIES 
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugin)
-
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 set_target_properties(${LIB_NAME} PROPERTIES
     CUDA_SEPARABLE_COMPILATION OFF)
+
+add_compile_definitions(PERIDYNO_API_EXPORTS)
+
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
 
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
@@ -72,7 +84,6 @@ install(FILES ${SMESH_IO_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/IO/Sme
 
 file(GLOB GMSH_IO_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Gmsh_IO/*.h")
 install(FILES ${GMSH_IO_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/IO/Gmsh_IO)
-
 
 file(GLOB SURFACE_MESH_IO_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Surface_Mesh_IO/*.h")
 install(FILES ${SURFACE_MESH_IO_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/IO/Surface_Mesh_IO)

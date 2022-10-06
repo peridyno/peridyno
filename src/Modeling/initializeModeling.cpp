@@ -126,3 +126,8 @@ namespace dyno
 			});
 	}
 }
+
+PERIDYNO_API void Modeling::initDynoPlugin()
+{
+
+}

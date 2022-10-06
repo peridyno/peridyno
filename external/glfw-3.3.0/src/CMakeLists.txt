@@ -89,6 +89,19 @@ set_target_properties(glfw PROPERTIES
 
 set_target_properties(glfw PROPERTIES FOLDER "ThirdParty")
 
+if(WIN32)
+    set_target_properties(glfw PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(glfw PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(glfw PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
+
 if (CMAKE_VERSION VERSION_EQUAL "3.1.0" OR
     CMAKE_VERSION VERSION_GREATER "3.1.0")
 

@@ -22,12 +22,8 @@ if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
     add_subdirectory(Rendering)
 endif()
 
-if(PERIDYNO_LIBRARY_ALEMBIC)
-    add_subdirectory(ABCExporter)
-endif()
-
-if(PERIDYNO_LIBRARY_GMSH)
-    add_subdirectory(GmshIO)
+if(PERIDYNO_LIBRARY_PLUGIN)
+    add_subdirectory(Plugin)
 endif()
 
 add_subdirectory(Dynamics)

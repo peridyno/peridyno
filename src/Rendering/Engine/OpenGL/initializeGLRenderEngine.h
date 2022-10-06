@@ -1,9 +1,9 @@
 #pragma once
-#include <Object.h>
+#include "Plugin/PluginInterface.h"
 
 namespace dyno
 {
-	class GLRenderEngineInitializer : public Object
+	class GLRenderEngineInitializer : public IPlugin
 	{
 	public:
 		GLRenderEngineInitializer();
@@ -12,4 +12,9 @@ namespace dyno
 	};
 
 	const static GLRenderEngineInitializer renderEngineInitializer;
+}
+
+PERIDYNO_API
+auto initDynoPlugin() -> void
+{
 }

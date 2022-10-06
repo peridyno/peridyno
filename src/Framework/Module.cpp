@@ -3,14 +3,11 @@
 
 namespace dyno
 {
-
 	Module::Module(std::string name)
-		: m_node(nullptr)
+		: OBase()  
+		, m_node(nullptr)
 		, m_initialized(false)
 	{
-		//	attachField(&m_module_name, "module_name", "Module name", false);
-
-		//	m_module_name.setValue(name);
 		m_module_name = name;
 	}
 
