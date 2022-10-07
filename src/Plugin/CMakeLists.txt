@@ -80,3 +80,7 @@ endif()
 if(PERIDYNO_LIBRARY_GMSH)
     add_subdirectory(GmshIO)
 endif()
+
+if(PERIDYNO_LIBRARY_FBX)
+    add_subdirectory(SkeletonLoader)
+endif()

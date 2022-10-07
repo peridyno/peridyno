@@ -89,8 +89,9 @@ add_subdirectory(external/glad-4.6)
 add_subdirectory(external/imgui)
 
 if(PERIDYNO_LIBRARY_PLUGIN)
-    option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" ON)
+    option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" OFF)
     option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
+    option(PERIDYNO_LIBRARY_FBX "Enable binding the FBX library" OFF)
 
     if(PERIDYNO_LIBRARY_ALEMBIC)
         add_subdirectory(external/Imath)
