@@ -48,7 +48,7 @@ namespace dyno
 		if (object.getType() != ofbx::Object::Type::ANIMATION_CURVE_NODE) return;
 		if (strlen(object.name) != 1) return;
 		auto AnimObject = (ofbx::AnimationCurveNode*)&object;
-		TDataType::Real d[3];
+		Real d[3];
 		d[0] = AnimObject->getAnimationDX();
 		d[1] = AnimObject->getAnimationDY();
 		d[2] = AnimObject->getAnimationDZ();
@@ -203,7 +203,7 @@ namespace dyno
 	template<typename TDataType>
 	bool SkeletonLoader<TDataType>::scale(Real s)
 	{
-		m_jointMap[0]->scale(s);
+		this->m_jointMap[0]->scale(s);
 		
 		return true;
 	}
@@ -211,7 +211,7 @@ namespace dyno
 	template<typename TDataType>
 	bool SkeletonLoader<TDataType>::translate(Coord t)
 	{
-		m_jointMap[0]->translate(t);
+		this->m_jointMap[0]->translate(t);
 		return true;
 	}
 
@@ -231,7 +231,7 @@ namespace dyno
 		{
 			std::vector<Coord> v0;
 			std::vector<Coord> v1;
-			for (auto joint : m_jointMap)
+			for (auto joint : this->m_jointMap)
 			{
 				joint->getGlobalQuat();
 				joint->getGlobalCoord();
@@ -243,7 +243,7 @@ namespace dyno
 			m_T.clear();
 			m_R.clear();
 
-			for (auto joint : m_jointMap)
+			for (auto joint : this->m_jointMap)
 			{
 				for (auto joint_son : joint->children)
 				{
@@ -314,14 +314,14 @@ namespace dyno
 	template<typename TDataType>
 	void SkeletonLoader<TDataType>::updateTopology()
 	{
-		if (m_jointMap.empty())
+		if (this->m_jointMap.empty())
 		{
 			printf("Load Skeleton failed.");
 			return;
 		}		
 		
         //Animation
-        for (auto joint : m_jointMap)
+        for (auto joint : this->m_jointMap)
         {
 			// static int first = 0;
 			// if(first < 7)
@@ -343,7 +343,7 @@ namespace dyno
 			int index = 0;
 			std::vector<Coord> v0;
 			std::vector<Coord> v1;			
-			for (auto joint : m_jointMap)
+			for (auto joint : this->m_jointMap)
 			{
 				for (auto joint_son : joint->children)
 				{

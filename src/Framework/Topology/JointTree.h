@@ -39,7 +39,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix; 
-		typedef typename Mat4f Mat;
+		typedef typename ::dyno::Mat4f Mat;
         
         JointTree();
         ~JointTree();

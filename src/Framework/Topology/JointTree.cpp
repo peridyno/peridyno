@@ -82,13 +82,13 @@ namespace dyno
     void JointTree<TDataType>::getGlobalTransform()
     {
         // 注意顺序
-        this->GlobalTransform = getTransform(this->CurTranslation, this->CurRotation, this->CurScaling);
+        this->GlobalTransform = this->getTransform(this->CurTranslation, this->CurRotation, this->CurScaling);
         if(this->parent != nullptr)
             this->GlobalTransform = this->parent->GlobalTransform * this->GlobalTransform;
         else
         {
             //Pre
-            this->GlobalTransform = getTransform(this->PreTranslation, this->PreRotation, this->PreScaling) * this->GlobalTransform;
+            this->GlobalTransform = this->getTransform(this->PreTranslation, this->PreRotation, this->PreScaling) * this->GlobalTransform;
         }
         //DEBUG
 		// printf("Mat:\n");
