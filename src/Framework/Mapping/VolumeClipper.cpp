@@ -34,7 +34,7 @@ namespace dyno
 
 		DArray<int> voxelVertNum(nx * ny * nz);
 
-		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(voxelVertNum, this->inLevelSet()->getDataPtr()->getSDF(), TPlane3D<Real>(center, q.rotate(Coord(0, 1, 0))));
+		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(voxelVertNum, levelSet, TPlane3D<Real>(center, q.rotate(Coord(0, 1, 0))));
 
 		Reduction<int> reduce;
 		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());

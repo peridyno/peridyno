@@ -12,11 +12,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
         "${LIB_SRC_DIR}/*.h*"
     )
 
-    if(WIN32)
-        add_library(${LIB_NAME} SHARED ${LIB_SRC})
-    elseif(UNIX)
-        add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
-    endif()
+    add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
     foreach(SRC IN ITEMS ${LIB_SRC}) 
         get_filename_component(SRC_PATH "${SRC}" PATH)

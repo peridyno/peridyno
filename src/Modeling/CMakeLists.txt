@@ -9,11 +9,7 @@ file(
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 )
 
-if(WIN32)
-    add_library(${LIB_NAME} SHARED ${LIB_SRC})
-elseif(UNIX)
-    add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
-endif()
+add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
 if(WIN32)
     foreach(SRC IN ITEMS ${LIB_SRC})
