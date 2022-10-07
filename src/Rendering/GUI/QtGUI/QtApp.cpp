@@ -27,9 +27,6 @@ namespace dyno {
 
     void QtApp::createWindow(int width, int height, bool usePlugin)
     {
-        m_mainWindow = std::make_shared<PMainWindow>(renderEngine().get());
-        m_mainWindow->resize(width, height);
-
 		if (usePlugin)
 		{
 #ifdef NDEBUG
@@ -38,6 +35,9 @@ namespace dyno {
 			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Debug");
 #endif // DEBUG
 		}
+
+        m_mainWindow = std::make_shared<PMainWindow>(renderEngine().get());
+        m_mainWindow->resize(width, height);
     }
 
     void QtApp::mainLoop()

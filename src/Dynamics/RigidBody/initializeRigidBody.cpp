@@ -36,3 +36,8 @@ namespace dyno
 	}
 
 }
+
+PERIDYNO_API dyno::PluginEntry* RigidBody::initDynoPlugin()
+{
+	return nullptr;
+}

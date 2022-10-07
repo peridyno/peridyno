@@ -4,3 +4,8 @@
 #include "Module/ElastoplasticityModule.h"
 #include "Module/FractureModule.h"
 #include "Module/GranularModule.h"
+
+PERIDYNO_API bool Peridynamics::initDynoPlugin()
+{
+	return false;
+}

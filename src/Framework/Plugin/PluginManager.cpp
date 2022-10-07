@@ -45,7 +45,7 @@ namespace dyno
 		mEntryPoint = std::move(rhs.mEntryPoint);
 	}
 
-	IPlugin* Plugin::getInfo() const
+	PluginEntry* Plugin::getInfo() const
 	{
 		return mEntryPoint;
 	}

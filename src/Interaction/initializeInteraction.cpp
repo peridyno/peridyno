@@ -6,12 +6,29 @@
 
 namespace dyno 
 {
-	InteractionInitializer::InteractionInitializer()
+	std::atomic<InteractionInitializer*> InteractionInitializer::gInstance;
+	std::mutex InteractionInitializer::gMutex;
+
+	PluginEntry* InteractionInitializer::instance()
 	{
-		this->initialize();
+		InteractionInitializer* ins = gInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(gMutex);
+			ins = gInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new InteractionInitializer();
+				ins->setName("Interaction");
+				ins->setVersion("1.0");
+				ins->setDescription("A interaction library");
+
+				gInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
 	}
 
-	void InteractionInitializer::initializeNodeCreators()
+	void InteractionInitializer::initializeActions()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
@@ -24,12 +41,24 @@ namespace dyno
 		group->addAction(
 			"Picker",
 			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
-			[=]()->std::shared_ptr<Node> { return std::make_shared<PickerNode<DataType3f>>(); });
+
+		[=]()->std::shared_ptr<Node> { return std::make_shared<PickerNode<DataType3f>>(); });
 	}
 }
 //
 
-PERIDYNO_API void Interaction::initDynoPlugin()
+dyno::PluginEntry* Interaction::initStaticPlugin()
 {
+	if (dyno::InteractionInitializer::instance()->initialize())
+		return dyno::InteractionInitializer::instance();
 
+	return nullptr;
+}
+
+PERIDYNO_API dyno::PluginEntry* Interaction::initDynoPlugin()
+{
+	if (dyno::InteractionInitializer::instance()->initialize())
+		return dyno::InteractionInitializer::instance();
+
+	return nullptr;
 }

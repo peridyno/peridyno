@@ -1,7 +1,7 @@
 #pragma once
-#include <Plugin/PluginInterface.h>
+#include <Plugin/PluginEntry.h>
 
-PERIDYNO_API
-auto initDynoPlugin() -> void
+namespace Peridynamics
 {
+	PERIDYNO_API bool initDynoPlugin();
 }

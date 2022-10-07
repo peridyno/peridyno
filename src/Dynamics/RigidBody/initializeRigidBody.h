@@ -1,9 +1,9 @@
 #pragma once
-#include <Plugin/PluginInterface.h>
+#include <Plugin/PluginEntry.h>
 
 namespace dyno
 {
-	class RigidBodyInitializer : public IPlugin
+	class RigidBodyInitializer : public PluginEntry
 	{
 	public:
 		RigidBodyInitializer();
@@ -12,8 +12,7 @@ namespace dyno
 	};
 }
 
-PERIDYNO_API
-auto initDynoPlugin() -> void
+namespace RigidBody
 {
-	static dyno::RigidBodyInitializer rigidBodyInitializer;
+	PERIDYNO_API dyno::PluginEntry* initDynoPlugin();
 }

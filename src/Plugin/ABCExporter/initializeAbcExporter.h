@@ -1,7 +1,7 @@
 #pragma once
-#include <Plugin/PluginInterface.h>
+#include <Plugin/PluginEntry.h>
 
-PERIDYNO_API
-auto initDynoPlugin() -> void
+namespace ABCExporter
 {
+	PERIDYNO_API dyno::PluginEntry* initDynoPlugin();
 }

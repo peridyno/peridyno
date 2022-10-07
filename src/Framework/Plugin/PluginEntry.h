@@ -10,10 +10,10 @@
 
 namespace dyno
 {
-	struct IPlugin
+	struct PluginEntry
 	{
 	public:
-		IPlugin();
+		PluginEntry();
 
 		/** Get Plugin Name */
 		const char* name() const;
@@ -21,16 +21,31 @@ namespace dyno
 		/** Get Plugin Version */
 		const char* version() const;
 
+		/** Get Plugin Description */
+		const char* description() const;
+
+		void setName(std::string pluginName);
+
+		void setVersion(std::string pluginVersion);
+
+		void setDescription(std::string desc);
+
 		bool initialize();
 
+	protected:
 		virtual void initializeNodeCreators() {};
 
-	public:
+		virtual void initializeActions() {};
+
+	private:
 		/** Plugin name */
-		std::string m_name;
+		std::string mName;
 
 		/** Plugin version */
-		std::string m_version;
+		std::string mVersion;
+
+		/** Plugin description */
+		std::string mDescription;
 
 		bool mInitialized = false;
 	};

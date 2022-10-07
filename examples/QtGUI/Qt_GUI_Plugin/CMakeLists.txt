@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 if(PERIDYNO_Qt5_GUI AND PERIDYNO_LIBRARY_PARTICLESYSTEM AND PERIDYNO_LIBRARY_RIGIDBODY)
 
-    set(PROJECT_NAME Qt_GUI)
+    set(PROJECT_NAME Qt_GUI_Plugin)
 
     link_directories("${PROJECT_SOURCE_DIR}/Source")
 

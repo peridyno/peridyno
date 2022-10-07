@@ -1,9 +1,9 @@
 #pragma once
-#include "Plugin/PluginInterface.h"
+#include "Plugin/PluginEntry.h"
 
 namespace dyno
 {
-	class GLRenderEngineInitializer : public IPlugin
+	class GLRenderEngineInitializer : public PluginEntry
 	{
 	public:
 		GLRenderEngineInitializer();

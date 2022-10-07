@@ -6,7 +6,7 @@
 #include <atomic>
 #include <mutex>
 
-#include "PluginInterface.h"
+#include "PluginEntry.h"
 
 // Unix
 #if defined(_WIN32)
@@ -35,7 +35,7 @@ namespace dyno
 
 		Plugin& operator=(Plugin&& rhs);
 
-		IPlugin* getInfo() const;
+		PluginEntry* getInfo() const;
 
 		bool isLoaded() const;
 
@@ -45,7 +45,7 @@ namespace dyno
 
 	private:
 		/** @brief Function pointer to DLL entry-point */
-		using PluginEntryFunc = IPlugin * (*) ();
+		using PluginEntryFunc = PluginEntry * (*) ();
 
 		/** @brief Name of DLL entry point that a Plugin should export */
 		static constexpr const char* PluginEntryName = "initDynoPlugin";
@@ -60,7 +60,7 @@ namespace dyno
 		bool         mIsLoaded = false;
 
 		/** @brief Pointer to shared library factory class returned by the DLL entry-point function */
-		IPlugin* mEntryPoint = nullptr;
+		PluginEntry* mEntryPoint = nullptr;
 	};
 
 	/** 

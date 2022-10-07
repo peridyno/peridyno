@@ -1,18 +1,27 @@
 #pragma once
-#include <Plugin/PluginInterface.h>
+#include <Plugin/PluginEntry.h>
 
 namespace dyno
 {
-	class HeightFieldInitializer : public IPlugin
+	class HeightFieldInitializer : public PluginEntry
 	{
 	public:
+		static PluginEntry* instance();
+
+	protected:
+		void initializeNodeCreators() override;
+
+	private:
 		HeightFieldInitializer();
 
-		void initializeNodeCreators();
+		static std::atomic<HeightFieldInitializer*> gInstance;
+		static std::mutex gMutex;
 	};
 }
 
-PERIDYNO_API
-auto initDynoPlugin() -> void
+namespace HeightField
 {
+	dyno::PluginEntry* initStaticPlugin();
+
+	PERIDYNO_API dyno::PluginEntry* initDynoPlugin();
 }

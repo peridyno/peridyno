@@ -1,15 +1,15 @@
 #pragma once
-#include <Platform.h>
-#include <Plugin/PluginInterface.h>
+#include <Plugin/PluginEntry.h>
 
 namespace dyno 
 {
-	class ParticleSystemInitializer : public IPlugin
+	class ParticleSystemInitializer : public PluginEntry
 	{
 	public:
-		static IPlugin* instance();
+		static PluginEntry* instance();
 
-		void initializeNodeCreators();
+	protected:
+		void initializeActions() override;
 
 	private:
 		ParticleSystemInitializer();
@@ -21,8 +21,8 @@ namespace dyno
 
 namespace PaticleSystem
 {
-	bool initStaticPlugin();
+	dyno::PluginEntry* initStaticPlugin();
 
-	PERIDYNO_API void initDynoPlugin();
+	PERIDYNO_API dyno::PluginEntry* initDynoPlugin();
 }
 

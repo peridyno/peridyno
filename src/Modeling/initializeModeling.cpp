@@ -18,13 +18,29 @@
 
 namespace dyno 
 {
-	ModelingInitializer::ModelingInitializer()
-		: IPlugin()
+	std::atomic<ModelingInitializer*> ModelingInitializer::gInstance;
+	std::mutex ModelingInitializer::gMutex;
+
+	PluginEntry* ModelingInitializer::instance()
 	{
-		this->initialize();
+		ModelingInitializer* ins = gInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(gMutex);
+			ins = gInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new ModelingInitializer();
+				ins->setName("Modeling");
+				ins->setVersion("1.0");
+				ins->setDescription("A modeling library");
+
+				gInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
 	}
 
-	void ModelingInitializer::initializeNodeCreators()
+	void ModelingInitializer::initializeActions()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
@@ -127,7 +143,18 @@ namespace dyno
 	}
 }
 
-PERIDYNO_API void Modeling::initDynoPlugin()
+dyno::PluginEntry* Modeling::initStaticPlugin()
 {
+	if (dyno::ModelingInitializer::instance()->initialize())
+		return dyno::ModelingInitializer::instance();
 
+	return nullptr;
+}
+
+PERIDYNO_API dyno::PluginEntry* Modeling::initDynoPlugin()
+{
+	if (dyno::ModelingInitializer::instance()->initialize())
+		return dyno::ModelingInitializer::instance();
+
+	return nullptr;
 }
