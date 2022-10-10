@@ -2,6 +2,7 @@
 #include "ElastoplasticityModule.h"
 #include "Node.h"
 #include "Matrix/MatrixFunc.h"
+//#include "ParticleSystem/Kernel.h"
 #include "ParticleSystem/Module/Kernel.h"
 #include <thrust/scan.h>
 #include <thrust/reduce.h>

@@ -10,7 +10,7 @@
 namespace dyno
 {
 	IMPLEMENT_TCLASS(NeighborElementQuery, TDataType)
-		typedef typename TOrientedBox3D<Real> Box3D;
+		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 
 	struct ContactId
 	{

@@ -177,7 +177,7 @@ void Node::resetStates()
 bool Node::validateInputs()
 {
 	//If any input field is empty, return false;
-	for each (auto f_in in fields_input)
+	for(auto f_in : fields_input)
 	{
 		if (!f_in->isOptional() && f_in->isEmpty())
 		{
@@ -195,7 +195,7 @@ bool Node::validateInputs()
 void Node::tick()
 {
 	std::vector<FBase*>& fields = this->getAllFields();
-	for each (FBase * var in fields)
+	for(FBase * var : fields)
 	{
 		if (var != nullptr) {
 			if (var->getFieldType() == FieldTypeEnum::State || var->getFieldType() == FieldTypeEnum::Out)
@@ -450,7 +450,7 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 uint Node::sizeOfImportNodes() const
 {
 	uint n = 0;
-	for each(auto port in mImportNodes)
+	for(auto port : mImportNodes)
 	{
 		n += port->getNodes().size();
 	}

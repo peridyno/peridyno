@@ -1,13 +1,7 @@
 #pragma once
-#include <Object.h>
+#include <Plugin/PluginEntry.h>
 
-namespace dyno 
+namespace Peridynamics
 {
-	class PeridynamicsInitializer : public Object
-	{
-	public:
-		PeridynamicsInitializer();
-	};
-
-	const static PeridynamicsInitializer peridynamicsInitializer;
+	PERIDYNO_API bool initDynoPlugin();
 }

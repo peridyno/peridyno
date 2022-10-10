@@ -4,13 +4,13 @@ namespace dyno {
 
 	DirectedAcyclicGraph::~DirectedAcyclicGraph()
 	{
-		for each (auto edge in mEdges)
+		for(auto edge : mEdges)
 		{
 			edge.second.clear();
 		}
 		mEdges.clear();
 
-		for each (auto edge in mReverseEdges)
+		for(auto edge : mReverseEdges)
 		{
 			edge.second.clear();
 		}
@@ -39,7 +39,7 @@ namespace dyno {
 		int num = sizeOfVertex();
 		// Mark all the vertices as not visited
 		std::map<ObjectId, bool> visited;
-		for each(auto id in mVertices)
+		for(auto id : mVertices)
 		{
 			visited[id] = false;
 		}
@@ -60,12 +60,12 @@ namespace dyno {
 		int num = sizeOfVertex();
 		// Mark all the vertices as not visited
 		std::map<ObjectId, bool> visited;
-		for each(auto id in mVertices)
+		for(auto id : mVertices)
 		{
 			visited[id] = false;
 		}
 
-		for each(auto id in mVertices)
+		for(auto id : mVertices)
 			if (visited[id] == false)
 				topologicalSortUtil(id, visited, stack);
 
@@ -108,7 +108,7 @@ namespace dyno {
 		std::list<ObjectId>::iterator i;
 		
 		std::stack<ObjectId> reverseId;
-		for each (auto id in mEdges[v])
+		for(auto id : mEdges[v])
 			reverseId.push(id);
 
 		while ((reverseId.empty() == false)) {
@@ -131,7 +131,7 @@ namespace dyno {
 
 		// Recur for all the vertices adjacent
 		std::list<ObjectId>::iterator i;
-		for each(auto id in mEdges[v])
+		for(auto id : mEdges[v])
 			if (!visited[id])
 				topologicalSortUtil(id, visited);
 	}

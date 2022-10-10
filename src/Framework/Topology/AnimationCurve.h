@@ -1,6 +1,8 @@
 #pragma once
 #include "Array/ArrayList.h"
 
+typedef long long LongLong;
+
 namespace dyno{
 
     #define FBXTIME 46186158000L
@@ -13,17 +15,17 @@ namespace dyno{
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename Mat4f Mat;
+		typedef typename ::dyno::Mat4f Mat;
 
 		AnimationCurve();
         AnimationCurve(int size, Real dx, Real dy, Real dz);
 		~AnimationCurve();
 
-        void set(int index, const std::vector<long long>& tim, const std::vector<Real>& val);
+        void set(int index, const std::vector<LongLong>& tim, const std::vector<Real>& val);
 
         // 转换为FBXTIME
-        Real fbxTimeToSeconds(long long value){return Real(value) / FBXTIME * ANIM_SPEED;}
-        long long secondsToFbxTime(Real value){return long long (value * ANIM_SPEED * FBXTIME);}
+        Real fbxTimeToSeconds(LongLong value){return Real(value) / FBXTIME * ANIM_SPEED;}
+        LongLong secondsToFbxTime(Real value){return LongLong(value * ANIM_SPEED * FBXTIME);}
 
         void setInitVal(Coord init){
             m_initVal[0] = init[0];
@@ -44,7 +46,7 @@ namespace dyno{
         int m_cur[3];
         Real m_initVal[3];
         Real m_endVal[3];
-        std::vector<long long> m_times[3]; // 若不存在曲线，则只有一个 [0]
+        std::vector<LongLong> m_times[3]; // 若不存在曲线，则只有一个 [0]
         std::vector<Real> m_values[3]; 
 	};
 }

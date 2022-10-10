@@ -809,6 +809,74 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC inline bool checkOverlapTetTri(
+		Real lowerBoundary1,
+		Real upperBoundary1,
+		Real lowerBoundary2,
+		Real upperBoundary2,
+		Real& intersectionDistance,
+		Real& boundary1,
+		Real& boundary2
+	)
+	{
+		if (!((lowerBoundary1 > upperBoundary2) || (lowerBoundary2 > upperBoundary1)))
+		{
+			if (lowerBoundary1 < lowerBoundary2)
+			{
+				if (upperBoundary1 > upperBoundary2)
+				{
+					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
+					{
+						boundary1 = upperBoundary1;
+						boundary2 = lowerBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+					else
+					{
+						boundary1 = lowerBoundary1;
+						boundary2 = upperBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+				}
+				else
+				{
+					intersectionDistance = upperBoundary1 - lowerBoundary2;
+					boundary1 = upperBoundary1;
+					boundary2 = lowerBoundary2;
+				}
+			}
+			else
+			{
+				if (upperBoundary1 > upperBoundary2)
+				{
+					intersectionDistance = upperBoundary2 - lowerBoundary1;
+					boundary1 = lowerBoundary1;
+					boundary2 = upperBoundary2;
+				}
+				else
+				{
+					//intersectionDistance = upperBoundary1 - lowerBoundary1;
+					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
+					{
+						boundary1 = upperBoundary1;
+						boundary2 = lowerBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+					else
+					{
+						boundary1 = lowerBoundary1;
+						boundary2 = upperBoundary2;
+						intersectionDistance = abs(boundary1 - boundary2);
+					}
+				}
+			}
+			return true;
+		}
+		intersectionDistance = Real(0.0f);
+		return false;
+	}
+
+	template<typename Real>
 	DYN_FUNC inline bool checkOverlapAxis(
 		Real& lowerBoundary1,
 		Real& upperBoundary1,
@@ -1778,75 +1846,6 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC inline bool checkOverlapTetTri(
-		Real lowerBoundary1,
-		Real upperBoundary1,
-		Real lowerBoundary2,
-		Real upperBoundary2,
-		Real& intersectionDistance,
-		Real& boundary1,
-		Real& boundary2
-	)
-	{
-		if (!((lowerBoundary1 > upperBoundary2) || (lowerBoundary2 > upperBoundary1)))
-		{
-			if (lowerBoundary1 < lowerBoundary2)
-			{
-				if (upperBoundary1 > upperBoundary2)
-				{
-					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
-					{
-						boundary1 = upperBoundary1;
-						boundary2 = lowerBoundary2;
-						intersectionDistance = abs(boundary1 - boundary2);
-					}
-					else
-					{
-						boundary1 = lowerBoundary1;
-						boundary2 = upperBoundary2;
-						intersectionDistance = abs(boundary1 - boundary2);
-					}
-				}
-				else
-				{
-					intersectionDistance = upperBoundary1 - lowerBoundary2;
-					boundary1 = upperBoundary1;
-					boundary2 = lowerBoundary2;
-				}
-			}
-			else
-			{
-				if (upperBoundary1 > upperBoundary2)
-				{
-					intersectionDistance = upperBoundary2 - lowerBoundary1;
-					boundary1 = lowerBoundary1;
-					boundary2 = upperBoundary2;
-				}
-				else
-				{
-					//intersectionDistance = upperBoundary1 - lowerBoundary1;
-					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
-					{
-						boundary1 = upperBoundary1;
-						boundary2 = lowerBoundary2;
-						intersectionDistance = abs(boundary1 - boundary2);
-					}
-					else
-					{
-						boundary1 = lowerBoundary1;
-						boundary2 = upperBoundary2;
-						intersectionDistance = abs(boundary1 - boundary2);
-					}
-				}
-			}
-			return true;
-		}
-		intersectionDistance = Real(0.0f);
-		return false;
-	}
-
-
-	template<typename Real>
 	DYN_FUNC inline bool checkOverlap(
 		Real lowerBoundary1,
 		Real upperBoundary1,
@@ -1990,7 +1989,7 @@ namespace dyno
 			}
 		}
 		
-		return checkOverlapTetTri(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
+		return false;//(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
 	}
 
 

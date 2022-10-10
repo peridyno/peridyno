@@ -175,7 +175,7 @@ namespace dyno {
 
 		~MultipleNodePort() {
 			//Disconnect nodes from node ports here instead of inside the destructor of Node to avoid memory leak
-			for each (auto node in m_nodes)
+			for(auto node : m_nodes)
 			{
 				node->disconnect(this);
 			}

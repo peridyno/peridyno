@@ -5,6 +5,8 @@
 #include "CubeModel.h"
 #include "SphereModel.h"
 #include "SphereSampler.h"
+#include "CylinderModel.h"
+#include "ConeModel.h"
 
 #include "CubeSampler.h"
 
@@ -16,12 +18,29 @@
 
 namespace dyno 
 {
-	ModelingInitializer::ModelingInitializer()
+	std::atomic<ModelingInitializer*> ModelingInitializer::gInstance;
+	std::mutex ModelingInitializer::gMutex;
+
+	PluginEntry* ModelingInitializer::instance()
 	{
-		initializeNodeCreators();
+		ModelingInitializer* ins = gInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(gMutex);
+			ins = gInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new ModelingInitializer();
+				ins->setName("Modeling");
+				ins->setVersion("1.0");
+				ins->setDescription("A modeling library");
+
+				gInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
 	}
 
-	void ModelingInitializer::initializeNodeCreators()
+	void ModelingInitializer::initializeActions()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
@@ -43,6 +62,38 @@ namespace dyno
 			"ToolBarIco/Modeling/Sphere.png",
 			[=]()->std::shared_ptr<Node> {
 				auto node = std::make_shared<SphereModel<DataType3f>>();
+
+				auto module = std::make_shared<GLSurfaceVisualModule>();
+				module->setColor(Vec3f(0.8, 0.52, 0.25));
+				module->setVisible(true);
+				node->stateTriangleSet()->connect(module->inTriangleSet());
+				node->graphicsPipeline()->pushModule(module);
+
+				return node;
+			});
+
+
+		group->addAction(
+			"Cylinder",
+			"ToolBarIco/Modeling/Cylinder.png",
+			[=]()->std::shared_ptr<Node> {
+				auto node = std::make_shared<CylinderModel<DataType3f>>();
+
+				auto module = std::make_shared<GLSurfaceVisualModule>();
+				module->setColor(Vec3f(0.8, 0.52, 0.25));
+				module->setVisible(true);
+				node->stateTriangleSet()->connect(module->inTriangleSet());
+				node->graphicsPipeline()->pushModule(module);
+
+				return node;
+			});
+
+
+		group->addAction(
+			"Cone",
+			"ToolBarIco/Modeling/Cone.png",
+			[=]()->std::shared_ptr<Node> {
+				auto node = std::make_shared<ConeModel<DataType3f>>();
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
 				module->setColor(Vec3f(0.8, 0.52, 0.25));
@@ -90,4 +141,20 @@ namespace dyno
 				return node; 
 			});
 	}
+}
+
+dyno::PluginEntry* Modeling::initStaticPlugin()
+{
+	if (dyno::ModelingInitializer::instance()->initialize())
+		return dyno::ModelingInitializer::instance();
+
+	return nullptr;
+}
+
+PERIDYNO_API dyno::PluginEntry* Modeling::initDynoPlugin()
+{
+	if (dyno::ModelingInitializer::instance()->initialize())
+		return dyno::ModelingInitializer::instance();
+
+	return nullptr;
 }

@@ -1,5 +1,6 @@
 #include "ImWindow.h"
 
+#include <cmath>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 
@@ -136,7 +137,7 @@ void ShowMenuFile(RenderEngine* engine, SceneGraph* scene, bool* mDisenableCamer
 			cam->setTargetPos(center);
 
 			float unit = std::floor(std::log(len));
-			cam->setDistanceUnit(std::powf(10.0f, unit));
+			cam->setDistanceUnit(std::pow(10.0f, (float)unit));
 		}
 
 		float distanceUnit = cam->distanceUnit();

@@ -7,6 +7,32 @@
 
 namespace dyno
 {
+	template<typename Triangle, typename Tri2Tet, typename TKey>
+	__global__ void TetSet_SetupTriangles(
+		DArray<Triangle> triangles,
+		DArray<Tri2Tet> tri2Tet,
+		DArray<TKey> keys,
+		DArray<int> counter,
+		DArray<int> tetIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= keys.size()) return;
+
+		int shift = counter[tId];
+		if (tId == 0 || keys[tId] != keys[tId - 1])
+		{
+			TKey key = keys[tId];
+			triangles[shift] = Triangle(key[0], key[1], key[2]);
+
+			Tri2Tet t2T(EMPTY, EMPTY);
+			t2T[0] = tetIds[tId];
+
+			if (tId + 1 < keys.size() && keys[tId + 1] == key)
+				t2T[1] = tetIds[tId + 1];
+
+			tri2Tet[shift] = t2T;
+		}
+	}
 	template<typename TDataType>
 	TetrahedronSet<TDataType>::TetrahedronSet()
 		: TriangleSet<TDataType>()
@@ -142,7 +168,7 @@ namespace dyno
 	DArrayList<int>& TetrahedronSet<TDataType>::getVer2Tet()
 	{
 		DArray<int> counter;
-		counter.resize(m_coords.size());
+		counter.resize(this->m_coords.size());
 		counter.reset();
 
 		cuExecute(m_tethedrons.size(),
@@ -204,32 +230,7 @@ namespace dyno
 			counter[tId] = 0;
 	}
 
-	template<typename Triangle, typename Tri2Tet, typename TKey>
-	__global__ void TetSet_SetupTriangles(
-		DArray<Triangle> triangles,
-		DArray<Tri2Tet> tri2Tet,
-		DArray<TKey> keys,
-		DArray<int> counter,
-		DArray<int> tetIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= keys.size()) return;
-
-		int shift = counter[tId];
-		if (tId == 0 || keys[tId] != keys[tId - 1])
-		{
-			TKey key = keys[tId];
-			triangles[shift] = Triangle(key[0], key[1], key[2]);
-
-			Tri2Tet t2T(EMPTY, EMPTY);
-			t2T[0] = tetIds[tId];
-
-			if (tId + 1 < keys.size() && keys[tId + 1] == key)
-				t2T[1] = tetIds[tId + 1];
-
-			tri2Tet[shift] = t2T;
-		}
-	}
+	
 
 	template<typename TKey>
 	void printTKey(DArray<TKey> keys, int maxLength) {

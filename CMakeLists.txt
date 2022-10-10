@@ -1,23 +1,34 @@
 ﻿cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
 
-project(peridyno LANGUAGES CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
+project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
+
+find_package(CUDA REQUIRED)
+if(CUDA_FOUND)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+    link_libraries(${CUDA_LIBRARIES})
+else()
+    message("Cuda not found")
+endif()
 
 # define library version (update: apparently you can also do it in project()!)
 set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
-set(PERIDYNO_LIBRARY_VERSION_MINOR 6 CACHE STRING "peridyno minor version" FORCE)
-set(PERIDYNO_LIBRARY_VERSION_PATCH 1 CACHE STRING "patch version of peridyno" FORCE)
+set(PERIDYNO_LIBRARY_VERSION_MINOR 7 CACHE STRING "peridyno minor version" FORCE)
+set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    #为sln内部projects设置管理folder
 set(CMAKE_CXX_STANDARD 11 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
-
+#set(CMAKE_C_CREATE_STATIC_LIBRARY "")
+#set(CMAKE_C_COMPILE_OBJECT  "")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)                                                         #默认为本项目下各编译目标开启fPIC模式，cuda下面会开启rdc模式
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPILATION MODE")    #默认为本项目下各编译目标指定cuda分离编译模式
 set(CUDA_ARCH_FLAGS 60 CACHE STRING "cuda architectures" FORCE)                                 #默认为所有cuda代码生成computability7.0下二进制代码
 
 set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
-file(COPY "data/" DESTINATION "data")
+set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/plugin"  CACHE PATH "" FORCE)
+#file(COPY "data/" DESTINATION "data")
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
@@ -61,9 +72,7 @@ endif()
 option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" ON)
-option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
-
+option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
 option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
 if(PERIDYNO_PYTHON_BINDING)
     add_subdirectory(python)
@@ -79,13 +88,19 @@ add_subdirectory(external/glfw-3.3.0)
 add_subdirectory(external/glad-4.6)
 add_subdirectory(external/imgui)
 
-if(PERIDYNO_LIBRARY_ALEMBIC)
-    add_subdirectory(external/Imath)
-    add_subdirectory(external/alembic/)
-endif()
+if(PERIDYNO_LIBRARY_PLUGIN)
+    option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" OFF)
+    option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
+    option(PERIDYNO_LIBRARY_FBX "Enable binding the FBX library" OFF)
 
-if(PERIDYNO_LIBRARY_GMSH)
-    add_subdirectory(external/gmsh-fork)
+    if(PERIDYNO_LIBRARY_ALEMBIC)
+        add_subdirectory(external/Imath)
+        add_subdirectory(external/alembic/)
+    endif()
+
+    if(PERIDYNO_LIBRARY_GMSH)
+        add_subdirectory(external/gmsh-fork)
+    endif()
 endif()
 
 # VTK rendering support, off by default
@@ -102,6 +117,7 @@ option(PERIDYNO_EXAMPLE "Enable building examples" ON)
 if(PERIDYNO_EXAMPLE)
     add_subdirectory(examples)
 endif()
+
 
 add_subdirectory(src)
 

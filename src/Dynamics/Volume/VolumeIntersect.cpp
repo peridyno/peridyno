@@ -6,7 +6,7 @@ namespace dyno
 
 	template<typename TDataType>
 	VolumeIntersect<TDataType>::VolumeIntersect()
-		: Volume()
+		//: Volume()
 	{
 	}
 

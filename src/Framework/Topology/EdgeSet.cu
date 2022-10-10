@@ -79,7 +79,7 @@ namespace dyno
 	DArrayList<int>& EdgeSet<TDataType>::getVer2Edge()
 	{
 		DArray<int> counter;
-		counter.resize(m_coords.size());
+		counter.resize(this->m_coords.size());
 		counter.reset();
 
 		cuExecute(m_edges.size(),
@@ -108,7 +108,7 @@ namespace dyno
 			return;
 
 		DArray<int> counts;
-		counts.resize(m_coords.size());
+		counts.resize(this->m_coords.size());
 		counts.reset();
 		
 		cuExecute(m_edges.size(),
@@ -116,11 +116,11 @@ namespace dyno
 			counts,
 			m_edges);
 
-		m_pointNeighbors.resize(counts);
+		this->m_pointNeighbors.resize(counts);
 
 		cuExecute(m_edges.size(),
 			K_StoreIds,
-			m_pointNeighbors,
+			this->m_pointNeighbors,
 			m_edges);
 
 		counts.clear();
@@ -145,7 +145,7 @@ namespace dyno
 	{
 		m_edges.assign(edges);
 
-		tagAsChanged();
+		this->tagAsChanged();
 	}
 
 	template<typename TDataType>
@@ -154,7 +154,7 @@ namespace dyno
 		m_edges.resize(edges.size());
 		m_edges.assign(edges);
 
-		tagAsChanged();
+		this->tagAsChanged();
 	}
 
 	DEFINE_CLASS(EdgeSet);

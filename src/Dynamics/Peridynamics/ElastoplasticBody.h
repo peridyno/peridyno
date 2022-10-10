@@ -1,7 +1,7 @@
 #pragma once
-#include "Particlesystem/ParticleSystem.h"
+//#include "Particlesystem/ParticleSystem.h"
 #include "NeighborData.h"
-
+#include "ParticleSystem/ParticleSystem.h"
 namespace dyno
 {
 	template<typename> class NeighborPointQuery;

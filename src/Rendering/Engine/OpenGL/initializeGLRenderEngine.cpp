@@ -11,9 +11,7 @@ namespace dyno
 {
 	GLRenderEngineInitializer::GLRenderEngineInitializer()
 	{
-		TypeInfo::New<ColorMapping<DataType3f>>();
-
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void GLRenderEngineInitializer::initializeNodeCreators()

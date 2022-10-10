@@ -61,38 +61,38 @@ namespace dyno
 
 #define cuZerothOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == 0)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::weight(r, h, s);	\
 			};																\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == 1)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::weight(r, h, s);					\
 			};															\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
 		cuSynchronize();												\
 	}
 
 #define cuFirstOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == 0)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::gradient(r, h, s);	\
 			};																\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == 1)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::gradient(r, h, s);					\
 			};															\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
 		cuSynchronize();												\
 	}

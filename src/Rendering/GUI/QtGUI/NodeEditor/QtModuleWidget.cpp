@@ -105,10 +105,7 @@ namespace Qt
 
 	QString QtModuleWidget::nodeTips() const
 	{
-		std::string tip = "Class: ";
-		tip += mModule->getClassInfo()->getClassName();
-
-		return QString::fromStdString(tip);
+		return QString::fromStdString(mModule->description());
 	}
 
 	QString QtModuleWidget::portTips(PortType portType, PortIndex portIndex) const

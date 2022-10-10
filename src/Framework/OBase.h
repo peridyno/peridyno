@@ -46,6 +46,11 @@ namespace dyno {
 		virtual std::string caption();
 
 		/**
+		 * @brief Return a description for the node or module, override this function to support user-defined description
+		 */
+		virtual std::string description();
+
+		/**
 		 * @brief Add a field to Base
 		 * FieldID will be set to the name of Field by default
 		 */

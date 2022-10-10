@@ -12,6 +12,8 @@
 #include <vector_types.h>
 #include <vector_functions.h>
 #include <iostream>
+#include <stdexcept>
+#include <limits>
 
 #ifdef PRECISION_FLOAT
 typedef float Real;
@@ -119,7 +121,7 @@ namespace dyno {
 		cudaError_t err = cudaGetLastError();	\
 		if (err != cudaSuccess)					\
 		{										\
-			sprintf_s(str, "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);		\
+			sprintf(str, "CUDA error: %d : %s at %s:%d \n", err, cudaGetErrorString(err), __FILE__, __LINE__);		\
 			throw std::runtime_error(std::string(str));																\
 		}																											\
 	}

@@ -5,13 +5,7 @@
 #include "Module/FractureModule.h"
 #include "Module/GranularModule.h"
 
-namespace dyno 
+PERIDYNO_API bool Peridynamics::initDynoPlugin()
 {
-	PeridynamicsInitializer::PeridynamicsInitializer()
-	{
-		TypeInfo::New<ElasticityModule<DataType3f>>();
-		TypeInfo::New<ElastoplasticityModule<DataType3f>>();
-		TypeInfo::New<FractureModule<DataType3f>>();
-		TypeInfo::New<GranularModule<DataType3f>>();
-	}
+	return false;
 }

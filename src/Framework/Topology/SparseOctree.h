@@ -10,7 +10,7 @@ namespace dyno {
 	typedef unsigned long long int OcKey;
 	typedef unsigned short Level;
 
-	typedef typename TAlignedBox3D<Real> AABB;
+	typedef typename ::dyno::TAlignedBox3D<Real> AABB;
 
 #define MAX_LEVEL 15
 #define DIM 3

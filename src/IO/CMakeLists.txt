@@ -14,7 +14,7 @@ if(${LIB_NAME} STREQUAL "IO")
 endif()
 
 if(WIN32)
-    add_library(${LIB_NAME} STATIC ${LIB_SRC})
+    add_library(${LIB_NAME} SHARED ${LIB_SRC})
 elseif(UNIX)
     add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 endif()
@@ -31,12 +31,25 @@ endif()
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 set_target_properties(${LIB_NAME} PROPERTIES
     CUDA_SEPARABLE_COMPILATION OFF)
+
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
 
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files

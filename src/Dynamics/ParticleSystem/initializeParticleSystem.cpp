@@ -20,20 +20,34 @@
 
 namespace dyno 
 {
-	ParticleSystemInitializer::ParticleSystemInitializer()
-	{
-		TypeInfo::New<LinearDamping<DataType3f>>();
-		TypeInfo::New<ParticleIntegrator<DataType3f>>();
-		TypeInfo::New<ImplicitViscosity<DataType3f>>();
-		TypeInfo::New<DensityPBD<DataType3f>>();
-		TypeInfo::New<SummationDensity<DataType3f>>();
-		TypeInfo::New<VariationalApproximateProjection<DataType3f>>();
-		//TypeInfo::New<BoundaryConstraint<DataType3f>>();
+	std::atomic<ParticleSystemInitializer*> ParticleSystemInitializer::gInstance;
+	std::mutex ParticleSystemInitializer::gMutex;
 
-		initializeNodeCreators();
+	PluginEntry* ParticleSystemInitializer::instance()
+	{
+		ParticleSystemInitializer* ins = gInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(gMutex);
+			ins = gInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new ParticleSystemInitializer();
+				ins->setName("Particle System");
+				ins->setVersion("1.0");
+				ins->setDescription("A particle system library");
+
+				gInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
 	}
 
-	void ParticleSystemInitializer::initializeNodeCreators()
+	ParticleSystemInitializer::ParticleSystemInitializer()
+		: PluginEntry()
+	{
+	}
+
+	void ParticleSystemInitializer::initializeActions()
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
@@ -82,5 +96,20 @@ namespace dyno
 				boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(0.5, 1, 0.5), 0.02, true);
 				return boundary; });
 	}
+}
 
+PERIDYNO_API dyno::PluginEntry* PaticleSystem::initDynoPlugin()
+{
+	if (dyno::ParticleSystemInitializer::instance()->initialize())
+		return dyno::ParticleSystemInitializer::instance();
+
+	return nullptr;
+}
+
+dyno::PluginEntry* PaticleSystem::initStaticPlugin()
+{
+	if (dyno::ParticleSystemInitializer::instance()->initialize())
+		return dyno::ParticleSystemInitializer::instance();
+
+	return nullptr;
 }

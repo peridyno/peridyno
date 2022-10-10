@@ -56,7 +56,7 @@ namespace dyno{
 			}
 		}
 
-		for each (auto line in facelets)
+		for(auto line : facelets)
 		{
 			std::stringstream data(line);
 

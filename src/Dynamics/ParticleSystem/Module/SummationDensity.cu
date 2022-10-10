@@ -117,7 +117,7 @@ namespace dyno
 		Real smoothingLength,
 		Real mass)
 	{
-		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
+		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			SD_ComputeDensity,
 			rho,
 			pos,
@@ -129,7 +129,7 @@ namespace dyno
 	template<typename TDataType>
 	void SummationDensity<TDataType>::compute(DArray<Real>& rho, DArray<Coord>& pos, DArray<Coord>& posQueried, DArrayList<int>& neighbors, Real smoothingLength, Real mass)
 	{
-		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
+		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			SD_ComputeDensity,
 			rho,
 			pos,

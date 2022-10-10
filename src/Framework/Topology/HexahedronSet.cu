@@ -88,7 +88,7 @@ namespace dyno
 	DArrayList<int>& HexahedronSet<TDataType>::getVer2Hex()
 	{
 		DArray<int> counter;
-		counter.resize(m_coords.size());
+		counter.resize(this->m_coords.size());
 		counter.reset();
 
 		cuExecute(m_hexahedrons.size(),

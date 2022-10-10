@@ -71,7 +71,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& TriangleSet<TDataType>::getVertex2Triangles()
 	{
-		DArray<int> counter(m_coords.size());
+		DArray<int> counter(this->m_coords.size());
 		counter.reset();
 
 		cuExecute(m_triangles.size(),

@@ -14,7 +14,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(RigidBodySystem, TDataType)
 
-	typedef typename TOrientedBox3D<Real> Box3D;
+	typedef typename dyno::TOrientedBox3D<Real> Box3D;
 
 	template<typename TDataType>
 	RigidBodySystem<TDataType>::RigidBodySystem(std::string name)
@@ -170,7 +170,7 @@ namespace dyno
 	}
 
 	__global__ void SetupBoxes(
-		DArray<Box3D> box3d,
+		DArray<dyno::Box3D> box3d,
 		DArray<BoxInfo> boxInfo)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -443,12 +443,12 @@ namespace dyno
 		c_quaternion.assign(mm_quaternion);
 
 		TQuat m_quaternion = c_quaternion[0];
-		//该系统实现y轴朝上，标准yaw, pitch, roll则是z轴朝下，因为计算之前需要先绕着x轴旋转90度。
+		//锟斤拷系统实锟斤拷y锟结朝锟较ｏ拷锟斤拷准yaw, pitch, roll锟斤拷锟斤拷z锟结朝锟铰ｏ拷锟斤拷为锟斤拷锟斤拷之前锟斤拷要锟斤拷锟斤拷锟斤拷x锟斤拷锟斤拷转90锟饺★拷
 		Quat<float> quat = m_quaternion * Quat<float>(cos(M_PI / 4.0f), sin(M_PI / 4.0f), 0.0f, 0.0f);
 
 		double sinr_cosp = +2.0 * (quat.w * quat.x + quat.y * quat.z);
 		double cosr_cosp = +1.0 - 2.0 * (quat.x * quat.x + quat.y * quat.y);
-		//减去90度
+		//锟斤拷去90锟斤拷
 		roll = atan2(sinr_cosp, cosr_cosp) - M_PI / 2.0f;
 
 		// pitch (y-axis rotation)

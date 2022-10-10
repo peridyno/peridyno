@@ -2,7 +2,7 @@ set(LIB_NAME RenderCore)
 
 file(GLOB_RECURSE SOURCES *.cpp *.h *.cu)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
-add_library(${LIB_NAME} STATIC ${SOURCES})
+add_library(${LIB_NAME} SHARED ${SOURCES})
 
 target_link_libraries(${LIB_NAME} PRIVATE Core Framework)
 
@@ -17,9 +17,22 @@ target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-rel
 
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering")
+
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
 
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets

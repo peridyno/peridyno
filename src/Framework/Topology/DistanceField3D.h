@@ -60,11 +60,11 @@ namespace dyno {
 		 */
 		GPU_FUNC void getDistance(const Coord &p, Real &d, Coord &normal);
 
-		GPU_FUNC uint nx() { return m_distance.nx(); }
+		DYN_FUNC uint nx() { return m_distance.nx(); }
 
-		GPU_FUNC uint ny() { return m_distance.ny(); }
+		DYN_FUNC uint ny() { return m_distance.ny(); }
 
-		GPU_FUNC uint nz() { return m_distance.nz(); }
+		DYN_FUNC uint nz() { return m_distance.nz(); }
 
 	public:
 		/**

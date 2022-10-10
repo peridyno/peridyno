@@ -6,7 +6,7 @@ namespace dyno
 
 	template<typename TDataType>
 	VolumeUnion<TDataType>::VolumeUnion()
-		: Volume()
+		//: Volume()
 	{
 	}
 

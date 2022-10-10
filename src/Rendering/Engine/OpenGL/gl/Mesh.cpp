@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <vector>
 
+#include <math.h>
+
 namespace gl
 {
 

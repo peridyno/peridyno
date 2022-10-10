@@ -121,7 +121,7 @@ namespace dyno
 		if (mUpdateEnabled)
 		{
 			GTimer timer;
-			for each (auto m in mModuleList)
+			for(auto m : mModuleList)
 			{
 				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
 					timer.start();
@@ -185,9 +185,9 @@ namespace dyno
 		DirectedAcyclicGraph graph;
 
 		auto retrieveModules = [&](ObjectId id, std::vector<FBase *>& fields) {
-			for each (auto f in fields) {
+			for(auto f : fields) {
 				auto& sinks = f->getSinks();
-				for each (auto sink in sinks)
+				for(auto sink : sinks)
 				{
 					Module* module = dynamic_cast<Module*>(sink->parent());
 					if (module != nullptr)
@@ -261,7 +261,7 @@ namespace dyno
 
 		auto& ids = graph.topologicalSort();
 
-		for each (auto id in ids)
+		for(auto id : ids)
 		{
 			if (mModuleMap.count(id) > 0)
 			{

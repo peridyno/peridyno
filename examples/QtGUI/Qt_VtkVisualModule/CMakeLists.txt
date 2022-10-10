@@ -47,19 +47,19 @@ if(PERIDYNO_Qt5_GUI AND PERIDYNO_PLUGIN_VTK AND PERIDYNO_LIBRARY_PARTICLESYSTEM)
             VtkRenderEngine) 
 
 		#/WHOLEARCHIVE is used to link unused static variables for visual studio, which is necessary for auto class registration.
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
-            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
-            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
+        # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG           
+        #    "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}d.lib 
+        #     /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}d.lib
+        #     /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}d.lib
+        #     /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}d.lib
+        #     /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}d.lib")
 
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
-           "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
-            /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
-            /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
+        # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE 
+        #    "/WHOLEARCHIVE:dynoFramework-${PERIDYNO_LIBRARY_VERSION}.lib 
+        #     /WHOLEARCHIVE:dynoParticleSystem-${PERIDYNO_LIBRARY_VERSION}.lib
+        #     /WHOLEARCHIVE:dynoIO-${PERIDYNO_LIBRARY_VERSION}.lib
+        #     /WHOLEARCHIVE:dynoModeling-${PERIDYNO_LIBRARY_VERSION}.lib
+        #     /WHOLEARCHIVE:dynoQtGUI-${PERIDYNO_LIBRARY_VERSION}.lib")
     else()
         message(FATAL_ERROR "Could not set install folders for this platform!")
     endif()

@@ -5095,10 +5095,10 @@ GHC_INLINE const filesystem::path& directory_entry::path() const noexcept
     return _path;
 }
 
-GHC_INLINE directory_entry::operator const filesystem::path&() const noexcept
-{
-    return _path;
-}
+// GHC_INLINE directory_entry::operator const filesystem::path&() const noexcept
+// {
+//     return _path;
+// }
 
 #ifdef GHC_WITH_EXCEPTIONS
 GHC_INLINE file_type directory_entry::status_file_type() const

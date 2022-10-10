@@ -36,7 +36,7 @@ namespace dyno
 
 	void GroupModule::updateImpl()
 	{
-		for each (auto m in mModuleList) {
+		for(auto m : mModuleList) {
 			m->update();
 		}
 	}
@@ -53,9 +53,9 @@ namespace dyno
 		DirectedAcyclicGraph graph;
 
 		auto retrieveModules = [&](ObjectId id, std::vector<FBase *>& fields) {
-			for each (auto f in fields) {
+			for(auto f : fields) {
 				auto& sinks = f->getSinks();
-				for each (auto sink in sinks)
+				for(auto sink : sinks)
 				{
 					Module* module = dynamic_cast<Module*>(sink->parent());
 					if (module != nullptr)
@@ -76,7 +76,7 @@ namespace dyno
 		auto& fields = this->getInputFields();
 		retrieveModules(baseId, fields);
 
-		for each (auto m in mPersistentModule)
+		for(auto m : mPersistentModule)
 		{
 			moduleQueue.push(m.get());
 		}
@@ -96,7 +96,7 @@ namespace dyno
 
 		auto& ids = graph.topologicalSort();
 
-		for each (auto id in ids)
+		for(auto id : ids)
 		{
 			if (mModuleMap.count(id) > 0)
 			{

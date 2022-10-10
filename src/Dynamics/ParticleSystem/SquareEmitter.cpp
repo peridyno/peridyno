@@ -62,11 +62,11 @@ namespace dyno
 
 		if (pos_list.size() > 0)
 		{
-			mPosition.resize(pos_list.size());
-			mVelocity.resize(pos_list.size());
+			this->mPosition.resize(pos_list.size());
+			this->mVelocity.resize(pos_list.size());
 
-			mPosition.assign(pos_list);
-			mVelocity.assign(vel_list);
+			this->mPosition.assign(pos_list);
+			this->mVelocity.assign(vel_list);
 		}
 
 

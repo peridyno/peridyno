@@ -6,7 +6,7 @@ namespace dyno
 {
 	RigidBodyInitializer::RigidBodyInitializer()
 	{
-		initializeNodeCreators();
+		this->initialize();
 	}
 
 	void RigidBodyInitializer::initializeNodeCreators()
@@ -35,4 +35,9 @@ namespace dyno
 			nullptr);
 	}
 
+}
+
+PERIDYNO_API dyno::PluginEntry* RigidBody::initDynoPlugin()
+{
+	return nullptr;
 }

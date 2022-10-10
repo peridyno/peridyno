@@ -21,7 +21,7 @@ namespace dyno
 		void setTetrahedrons(DArray<Tetrahedron>& tetrahedrons);
 
 		DArray<Tetrahedron>& getTetrahedrons() { return m_tethedrons; }
-		DArray<Tri2Tet>& getTri2Tet() { return tri2Tet; }
+		DArray<::dyno::TopologyModule::Tri2Tet>& getTri2Tet() { return tri2Tet; }
 
 		DArrayList<int>& getVer2Tet();
 
@@ -35,7 +35,7 @@ namespace dyno
 		DArray<Tetrahedron> m_tethedrons;
 
 	private:
-		DArray<Tri2Tet> tri2Tet;
+		DArray<::dyno::TopologyModule::Tri2Tet> tri2Tet;
 		DArrayList<int> m_ver2Tet;
 	};
 }

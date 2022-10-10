@@ -5,11 +5,16 @@
 #include "GLRenderEngine.h"
 #include "Utility.h"
 
+#include "Topology/Primitive3D.h"
+#include "Array/Array.h"
+
+
 namespace dyno
 {
+	//typedef typename TSphere3D<Real> Sphere3D;
+	typedef TOrientedBox3D<Real> Box3D;
+
 	IMPLEMENT_CLASS(GLElementVisualModule)
-	typedef typename TSphere3D<Real> Sphere3D;
-	typedef typename TOrientedBox3D<Real> Box3D;
 	
 	__constant__ int offset3[36][3] = {
 		1, 1, 1, //7

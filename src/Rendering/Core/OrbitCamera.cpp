@@ -182,7 +182,11 @@ namespace dyno
 	Quat1f OrbitCamera::getQuaternion(float yaw, float pitch) const
 	{
 		Quat1f oldQuat = Quat1f(pitch, Vec3f(1.0f, 0.0f, 0.0f)) * Quat1f(yaw, Vec3f(0.0f, 1.0f, 0.0f));
-		oldQuat.toRotationAxis(float(mRotAngle), Vec3f(mRotAxis));
+		
+		float rotAngle = mRotAngle;
+		Vec3f rotAxis = mRotAxis;
+
+		oldQuat.toRotationAxis(rotAngle, rotAxis);
 
 		return oldQuat;
 	}

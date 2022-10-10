@@ -19,6 +19,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 namespace dyno {
 

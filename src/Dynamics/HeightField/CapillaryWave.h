@@ -14,7 +14,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename Vector<float, 4> Coord4;
+		typedef typename dyno::Vector<float, 4> Coord4;
 
 		CapillaryWave(int size, float patchLength, std::string name = "capillaryWave");
 		CapillaryWave(std::string name = "capillaryWave");
@@ -28,8 +28,8 @@ namespace dyno
 		void setOriginX(int x) { simulatedOriginX = x; }
 		void setOriginY(int y) { simulatedOriginY = y; }
 
-		int simulatedOriginX = 0;			//¶¯Ì¬ÇøÓò³õÊ¼x×ø±ê
-		int simulatedOriginY = 0;			//¶¯Ì¬ÇøÓò³õÊ¼y×ø±ê
+		int simulatedOriginX = 0;			//ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼xï¿½ï¿½ï¿½ï¿½
+		int simulatedOriginY = 0;			//ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼yï¿½ï¿½ï¿½ï¿½
 
 		int getOriginX() { return simulatedOriginX; }
 		int getOriginZ() { return simulatedOriginY; }
@@ -41,7 +41,7 @@ namespace dyno
 		Vec2f getOrigin() { return Vec2f(simulatedOriginX * realGridSize, simulatedOriginY * realGridSize); }
 		
 		void addSource();
-		void moveDynamicRegion(int nx, int ny);		//¸úËæ´¬ÌåÒÆ¶¯¶¯Ì¬·ÂÕæÇøÓò
+		void moveDynamicRegion(int nx, int ny);		//ï¿½ï¿½ï¿½æ´¬ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 		DArray2D<Vec2f> getmSource() { return mSource; }
 		DArray2D<float> getWeight() { return mWeight; }
@@ -69,7 +69,7 @@ namespace dyno
 	public:
 		int mResolution;
 
-		float mChoppiness;  //ÉèÖÃÀË¼âµÄ¼âÈñÐÔ£¬·¶Î§0~1
+		float mChoppiness;  //ï¿½ï¿½ï¿½ï¿½ï¿½Ë¼ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½Î§0~1
 	
 	protected:
 		float patchLength;
@@ -80,13 +80,13 @@ namespace dyno
 
 		size_t gridPitch;
 
-		float horizon = 2.0f;			        //Ë®Ãæ³õÊ¼¸ß¶È
+		float horizon = 2.0f;			        //Ë®ï¿½ï¿½ï¿½Ê¼ï¿½ß¶ï¿½
 
-		DArray2D<Coord4> mHeight;				//¸ß¶È³¡
-		DArray2D<Coord4> mDeviceGrid;		    //µ±Ç°¶¯Ì¬ÇøÓò×´Ì¬
+		DArray2D<Coord4> mHeight;				//ï¿½ß¶È³ï¿½
+		DArray2D<Coord4> mDeviceGrid;		    //ï¿½ï¿½Ç°ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½×´Ì¬
 		DArray2D<Coord4> mDeviceGridNext;
-		DArray2D<Coord4> mDisplacement;         // Î»ÒÆ³¡
-		DArray2D<Vec2f> mSource;				//ÓÃÓÚÌí¼Ó´¬ÓëË®½»»¥
+		DArray2D<Coord4> mDisplacement;         // Î»ï¿½Æ³ï¿½
+		DArray2D<Vec2f> mSource;				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó´ï¿½ï¿½ï¿½Ë®ï¿½ï¿½ï¿½ï¿½
 		DArray2D<float> mWeight;				
 	};
 

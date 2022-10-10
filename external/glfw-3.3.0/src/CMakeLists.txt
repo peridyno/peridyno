@@ -79,7 +79,7 @@ if (CMAKE_VERSION VERSION_LESS "3.16" AND APPLE)
                                 LANGUAGE C)
 endif()
 
-add_library(glfw ${glfw_SOURCES} ${glfw_HEADERS})
+add_library(glfw SHARED ${glfw_SOURCES} ${glfw_HEADERS})
 set_target_properties(glfw PROPERTIES
                       OUTPUT_NAME ${GLFW_LIB_NAME}
                       VERSION ${GLFW_VERSION_MAJOR}.${GLFW_VERSION_MINOR}
@@ -88,6 +88,19 @@ set_target_properties(glfw PROPERTIES
                       FOLDER "GLFW3")
 
 set_target_properties(glfw PROPERTIES FOLDER "ThirdParty")
+
+if(WIN32)
+    set_target_properties(glfw PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(glfw PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(glfw PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
 
 if (CMAKE_VERSION VERSION_EQUAL "3.1.0" OR
     CMAKE_VERSION VERSION_GREATER "3.1.0")

@@ -6,7 +6,7 @@ namespace dyno
 {
 	template <typename TDataType>
 	PoissonDiksSampling<TDataType>::PoissonDiksSampling()
-		: Sampler()
+		: Sampler<TDataType>()
 	{
 			this->varSamplingDistance()->setRange(0.001, 1.0);
 

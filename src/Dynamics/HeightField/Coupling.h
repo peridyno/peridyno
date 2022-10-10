@@ -6,7 +6,7 @@
 #include "CapillaryWave.h"
 #include "OceanPatch.h"
 #include "Ocean.h"
-#include "RigidBody\RigidBodySystem.h"
+#include "RigidBody/RigidBodySystem.h"
 #include "Topology/TriangleSet.h"
 #include "../Core/Algorithm/Reduction.h"
 namespace dyno
@@ -66,7 +66,7 @@ namespace dyno
 		float* m_torqueY;
 		float* m_torqueZ;
 
-		//²ÉÑùµã¶ÔÓ¦µÄº£Ãæ¸ß¶È
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Äºï¿½ï¿½ï¿½ß¶ï¿½
 		float* m_sample_heights;
 
 		bool m_force_corrected;

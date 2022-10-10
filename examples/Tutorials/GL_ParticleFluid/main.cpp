@@ -16,8 +16,8 @@
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
-#include "CubeModel.h"
-#include "CubeSampler.h"
+#include <CubeModel.h>
+#include <CubeSampler.h>
 
 using namespace std;
 using namespace dyno;

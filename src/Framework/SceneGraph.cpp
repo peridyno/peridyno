@@ -185,7 +185,7 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				dt = min(node->getDt(), dt);
+				dt = node->getDt() < dt ? node->getDt() : dt;
 			}
 
 			float dt;
@@ -418,7 +418,7 @@ namespace dyno
 		}
 
 		auto inFields = node->getInputFields();
-		for each (auto f in inFields) {
+		for(auto f : inFields) {
 			auto* src = f->getSource();
 			if (src != nullptr)	{
 				auto* inNode = dynamic_cast<Node*>(src->parent());
@@ -439,9 +439,9 @@ namespace dyno
 		}
 
 		auto outFields = node->getOutputFields();
-		for each (auto f in outFields) {
+		for(auto f : outFields) {
 			auto& sinks = f->getSinks();
-			for each (auto sink in sinks) {
+			for(auto sink : sinks) {
 				if (sink != nullptr) {
 					auto exNode = dynamic_cast<Node*>(sink->parent());
 					if (exNode != nullptr && !visited[exNode->objectId()]) {
@@ -468,9 +468,9 @@ namespace dyno
 		}
 
 		auto outFields = node->getOutputFields();
-		for each (auto f in outFields) {
+		for(auto f : outFields) {
 			auto& sinks = f->getSinks();
-			for each (auto sink in sinks) {
+			for(auto sink : sinks) {
 				if (sink != nullptr) {
 					auto exNode = dynamic_cast<Node*>(sink->parent());
 					if (exNode != nullptr && !visited[exNode->objectId()]) {

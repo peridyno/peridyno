@@ -9,10 +9,6 @@ namespace dyno
 		: Node()
 	{
 		auto levelSet = std::make_shared<SignedDistanceField<TDataType>>();
-		auto& sdf = levelSet->getSDF();
-
-		sdf.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-
 		this->inLevelSet()->setDataPtr(levelSet);
 	}
 
@@ -28,6 +24,7 @@ namespace dyno
 		auto eulerAngles = this->varRotation()->getData();
 
 		auto levelSet = this->inLevelSet()->getDataPtr()->getSDF();
+		levelSet.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
 		Quat<Real> q = Quat<Real>::fromEulerAngles(eulerAngles[0], eulerAngles[1], eulerAngles[2]);
 
@@ -37,7 +34,7 @@ namespace dyno
 
 		DArray<int> voxelVertNum(nx * ny * nz);
 
-		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(voxelVertNum, this->inLevelSet()->getDataPtr()->getSDF(), TPlane3D<Real>(center, q.rotate(Coord(0, 1, 0))));
+		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(voxelVertNum, levelSet, TPlane3D<Real>(center, q.rotate(Coord(0, 1, 0))));
 
 		Reduction<int> reduce;
 		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());

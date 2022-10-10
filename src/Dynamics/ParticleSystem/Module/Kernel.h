@@ -47,7 +47,7 @@ namespace dyno {
 // 				const Real hh = h*h;
 // 				return 15.0f / ((Real)M_PI * hh * h) * d * d * d * this->m_scale;
 // 			}
-			return SpikyKernel<Real>::weight(r, h, m_scale);
+			return SpikyKernel<Real>::weight(r, h, this->m_scale);
 		}
 
 		DYN_FUNC inline Real Gradient(const Real r, const Real h) override
@@ -60,12 +60,12 @@ namespace dyno {
 // 				const Real hh = h*h;
 // 				return -45.0f / ((Real)M_PI * hh*h) *d*d * this->m_scale;
 // 			}
-			return SpikyKernel<Real>::gradient(r, h, m_scale);
+			return SpikyKernel<Real>::gradient(r, h, this->m_scale);
 		}
 
 		DYN_FUNC inline Real integral(const Real r, const Real h) override
 		{
-			return SpikyKernel<Real>::integral(r, h, m_scale);
+			return SpikyKernel<Real>::integral(r, h, this->m_scale);
 		}
 
 		DYN_FUNC static inline Real weight(const Real r, const Real h, Real scale)
@@ -136,7 +136,7 @@ namespace dyno {
 // 			else {
 // 				return (1.0f - q*q) * this->m_scale;
 // 			}
-			return SmoothKernel<Real>::weight(r, h, m_scale);
+			return SmoothKernel<Real>::weight(r, h, this->m_scale);
 		}
 
 		DYN_FUNC inline Real Gradient(const Real r, const Real h) override
@@ -149,7 +149,7 @@ namespace dyno {
 // 				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
 // 				return -alpha * dd* this->m_scale;
 // 			}
-			return SmoothKernel<Real>::gradient(r, h, m_scale);
+			return SmoothKernel<Real>::gradient(r, h, this->m_scale);
 		}
 
 		DYN_FUNC static inline Real weight(const Real r, const Real h, const Real scale)

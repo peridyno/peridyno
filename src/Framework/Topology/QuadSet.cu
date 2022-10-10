@@ -7,6 +7,21 @@
 
 namespace dyno
 {
+
+	template<typename TKey>
+	__global__ void TS_CountTriangleNumber(
+		DArray<int> counter,
+		DArray<TKey> keys)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= keys.size()) return;
+
+		if (tId == 0 || keys[tId] != keys[tId - 1])
+			counter[tId] = 1;
+		else
+			counter[tId] = 0;
+	}
+	
 	template<typename TDataType>
 	QuadSet<TDataType>::QuadSet()
 		: TriangleSet<TDataType>()
@@ -53,7 +68,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& QuadSet<TDataType>::getVertex2Quads()
 	{
-		DArray<int> counter(m_coords.size());
+		DArray<int> counter(this->m_coords.size());
 		counter.reset();
 
 		cuExecute(m_quads.size(),
@@ -273,6 +288,25 @@ namespace dyno
 		EdgeSet<TDataType>::updateTopology();
 	}
 
+	template<typename TKey, typename Quad>
+	__global__ void TS_SetupKeys(
+		DArray<TKey> keys,
+		DArray<int> ids,
+		DArray<Quad> quads)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= quads.size()) return;
+
+		Quad quad = quads[tId];
+		keys[2 * tId] = TKey(quad[0], quad[1], quad[2]);
+		keys[2 * tId + 1] = TKey(quad[0], quad[2], quad[3]);
+	
+
+		ids[2 * tId] = tId;
+		ids[2 * tId + 1] = tId;
+	
+	}
+
 	template<typename TDataType>
 	void QuadSet<TDataType>::updateTriangles()
 	{
@@ -323,19 +357,6 @@ namespace dyno
 		this->updateEdges();
 	}
 
-	template<typename TKey>
-	__global__ void TS_CountTriangleNumber(
-		DArray<int> counter,
-		DArray<TKey> keys)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= keys.size()) return;
-
-		if (tId == 0 || keys[tId] != keys[tId - 1])
-			counter[tId] = 1;
-		else
-			counter[tId] = 0;
-	}
 
 	template<typename Triangle, typename Tri2Quad, typename TKey>
 	__global__ void TS_SetupTriangles(
@@ -365,24 +386,7 @@ namespace dyno
 		}
 	}
 
-	template<typename TKey, typename Quad>
-	__global__ void TS_SetupKeys(
-		DArray<TKey> keys,
-		DArray<int> ids,
-		DArray<Quad> quads)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= quads.size()) return;
-
-		Quad quad = quads[tId];
-		keys[2 * tId] = TKey(quad[0], quad[1], quad[2]);
-		keys[2 * tId + 1] = TKey(quad[0], quad[2], quad[3]);
 	
-
-		ids[2 * tId] = tId;
-		ids[2 * tId + 1] = tId;
-	
-	}
 
 	DEFINE_CLASS(QuadSet);
 }
