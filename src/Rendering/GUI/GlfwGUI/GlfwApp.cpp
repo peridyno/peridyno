@@ -255,12 +255,15 @@ namespace dyno
 				glfwGetCursorPos(mWindow, &xpos, &ypos);
 
 				ImVec2 pMin = { fminf(xpos, mCursorPosX), fminf(ypos, mCursorPosY) };
-				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };				
+				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };			
 
-				// fill
-				ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
-				// border
-				ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+				// visible rectangle
+				if (pMin.x != pMax.x || pMin.y != pMax.y) {
+					// fill
+					ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
+					// border
+					ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+				}
 			}
 
 			ImGui::Render();
@@ -403,11 +406,15 @@ namespace dyno
 			int w = fabs(xpos - activeWindow->getCursorPosX());
 			int h = fabs(ypos - activeWindow->getCursorPosY());
 
-			auto nodes = activeWindow->mRenderEngine->select(x, y, w, h);
+			auto items = activeWindow->mRenderEngine->select(x, y, w, h);
 
-			printf("Picking: (%.0f, %.0f) - (%.0f, %.0f), %d nodes selected...\n",
+			printf("Picking: (%.0f, %.0f) - (%.0f, %.0f), %d items...\n",
 				activeWindow->getCursorPosX(), activeWindow->getCursorPosY(),
-				xpos, ypos, nodes.size());
+				xpos, ypos, items.size());
+
+			for (auto item : items) {
+				printf("  Node: %s, instance(%d)\n", item.node->getName().c_str(), item.instance);
+			}
 		}
 
 		auto camera = activeWindow->activeCamera();

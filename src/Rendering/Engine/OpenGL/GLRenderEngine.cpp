@@ -12,6 +12,8 @@
 #include "Action.h"
 
 // GLM
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -19,7 +21,7 @@
 
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
-#include <set>
+#include <unordered_set>
 
 namespace dyno
 {
@@ -139,8 +141,8 @@ namespace dyno
 		mDepthTex.resize(1, 1);
 
 		// index
-		mIndexTex.internalFormat = GL_R32I;
-		mIndexTex.format = GL_RED_INTEGER;
+		mIndexTex.internalFormat = GL_RGBA32I;
+		mIndexTex.format = GL_RGBA_INTEGER;
 		mIndexTex.type   = GL_INT;
 		//mIndexTex.wrapS = GL_CLAMP_TO_EDGE;
 		//mIndexTex.wrapT = GL_CLAMP_TO_EDGE;
@@ -378,35 +380,39 @@ namespace dyno
 		return std::string("Native OpenGL");
 	}
 
-	std::vector<Node*> GLRenderEngine::select(int x, int y, int w, int h)
+	std::vector<SelectionItem> GLRenderEngine::select(int x, int y, int w, int h)
 	{
 		// TODO: check valid input
 		w = std::max(1, w);
 		h = std::max(1, h);
 
 		// read pixels
-		std::vector<int> indices(w * h);
+		std::vector<glm::ivec4> indices(w * h);
 
 		mFramebuffer.bind(GL_READ_FRAMEBUFFER);
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
 		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(x, m_rparams.viewport.h - (y + h) - 1, w, h, GL_RED_INTEGER, GL_INT, indices.data());
+		glReadPixels(x, m_rparams.viewport.h - (y + h) - 1, w, h, GL_RGBA_INTEGER, GL_INT, indices.data());
 		gl::glCheckError();
 
-		std::set<int> temp(indices.begin(), indices.end());
+		// use unordered set to get unique id
+		std::unordered_set<glm::ivec4> uniqueIdx(indices.begin(), indices.end());
 
-		std::vector<Node*> result;
+		std::vector<SelectionItem> items;
 
-		if (!temp.empty()) {
-			for (int i : temp) {
-				if(i >= 0 && i < mRenderNodes.size())
-					result.push_back(mRenderNodes[i]);
+		for (glm::ivec4 i : uniqueIdx) {
+			int nodeIdx = i.x;
+
+			if (nodeIdx >= 0 && nodeIdx < mRenderNodes.size()) {
+				SelectionItem item;
+				item.node = mRenderNodes[nodeIdx];
+				item.instance = i.y;
+
+				items.push_back(item);
 			}
 		}
 
-		//printf("Select: (%d, %d) - %d x %d, %d nodes.\n", x, y, w, h, result.size());
-
-		return result;
+		return items;
 	}
 
 }

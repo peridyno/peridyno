@@ -22,6 +22,8 @@
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
+#include <DeclarePort.h>
+
 namespace dyno
 {
 	class GLSurfaceVisualModule : public GLVisualModule
@@ -45,6 +47,10 @@ namespace dyno
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
+		// for instanced rendering
+		DEF_ARRAY_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(Vec3f, InstanceColor, DeviceType::GPU, "");
+
 	protected:
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
@@ -61,5 +67,9 @@ namespace dyno
 		GLCudaBuffer	mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
+
+		// for instanced rendering
+		GLCudaBuffer	mInstanceBuffer;
+		unsigned int	mInstanceCount = 0;
 	};
 };

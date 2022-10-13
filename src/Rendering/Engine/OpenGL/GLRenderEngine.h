@@ -57,7 +57,7 @@ namespace dyno
 		virtual std::string name() override;
 
 		// get the selected nodes on given rect area
-		std::vector<Node*>	select(int x, int y, int w, int h) override;
+		std::vector<SelectionItem>	select(int x, int y, int w, int h) override;
 
 	private:
 		void setupCamera();

@@ -4,7 +4,7 @@ in vec2 vTexCoord;
 in vec3 vPosition;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out int  fragIndex;
+layout(location = 1) out ivec4 fragIndices;
 
 layout(binding = 1) uniform sampler2D uRulerTex;
 
@@ -62,6 +62,6 @@ void main(void) {
 	f = clamp(0.5 - f, 0.0, 1.0);
 
 	fragColor = vec4(shading * f, 0.5);	
-    fragIndex = -1;
+    fragIndices = ivec4(-1);
 }
 

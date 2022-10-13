@@ -11,7 +11,6 @@ file(APPEND ${SHADER_HEADER_FILE} "const std::map<std::string, std::string> Shad
 set(_IN_FILES ${SHADER_FILES} ${ARGN}) 
 
 foreach(SHADER_FILE ${_IN_FILES})	
-	message("Process: ${SHADER_FILE}")
 	# get variable name from file name
 	get_filename_component(VAR_NAME ${SHADER_FILE} NAME)
 	file(APPEND ${SHADER_HEADER_FILE} "//// ${VAR_NAME} ////\n")

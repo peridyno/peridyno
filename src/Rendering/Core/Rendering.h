@@ -67,6 +67,11 @@ namespace dyno
 		bool useFXAA = true;
 	};
 
+	struct SelectionItem {
+		Node* node = 0;
+		int   instance = -1;
+	};
+
 	// RenderEngine interface
 	class RenderEngine
 	{
@@ -75,7 +80,7 @@ namespace dyno
 		virtual void draw(SceneGraph* scene) = 0;
 		virtual void resize(int w, int h) = 0;
 
-		virtual std::vector<Node*> select(int x, int y, int w, int h) = 0;
+		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) = 0;
 
 		// TODO: re-organize
 		RenderParams* renderParams() { return &m_rparams; }

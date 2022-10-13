@@ -1,21 +1,11 @@
 #version 440
 
-struct NodeType
-{
-	vec4  color;
-	float depth;
-	uint  nextIndex;
-	int   index;
-};
+#extension GL_ARB_shading_language_include : require
 
-layout(binding = 0, r32ui) uniform uimage2D u_headIndex;
-layout(binding = 0, std430) buffer LinkedList
-{
-	NodeType nodes[];
-};
+#include "transparent.glsl"
 
-layout(location = 0) out vec4 fragColor;
-layout(location = 1) out int  fragIndex;
+layout(location = 0) out vec4  fragColor;
+layout(location = 1) out ivec4 fragIndices;
 
 #define MAX_FRAGMENTS 128
 uint fragmentIndices[MAX_FRAGMENTS];
@@ -61,7 +51,9 @@ void main(void)
 		float alpha = 1 - factor;
 
 		fragColor = vec4(color / alpha, alpha);
-		fragIndex = nodes[fragmentIndices[numberFragments - 1]].index;
+
+		fragIndices.r = nodes[fragmentIndices[numberFragments - 1]].geometryID;
+		fragIndices.g = nodes[fragmentIndices[numberFragments - 1]].instanceID;
 	}
 	else
 	{

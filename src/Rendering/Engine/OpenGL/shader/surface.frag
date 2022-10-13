@@ -6,12 +6,14 @@
 #include "pbr.glsl"
 #include "shadow.glsl"
 #include "postprocess.glsl"
+#include "transparent.glsl"
 
 in VertexData
 {
 	vec3 position;
 	vec3 normal;
 	vec3 color;
+    flat int instanceID;
 } fs_in;
 
 // material properties
@@ -20,7 +22,7 @@ uniform float uRoughness;
 uniform float uAlpha;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out int  fragIndex;
+layout(location = 1) out ivec4 fragIndices;
 
 subroutine void RenderPass(void);
 layout(location = 0) subroutine uniform RenderPass renderPass;
@@ -143,7 +145,8 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fragColor.a = 1.0;
 	
 	// store index
-	fragIndex = uVars.index;
+	fragIndices.r = uVars.index;
+	fragIndices.g = fs_in.instanceID;
 }
 
 layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
@@ -151,30 +154,6 @@ layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
 	fragColor = vec4(GetShadowMoments(), 0.0, 0.0);
 }
 
-// OIT - Linked List
-struct NodeType
-{
-	vec4	color;
-	float	depth;
-	uint	nextIndex;
-	int		index;
-};
-
-// enable early-z
-layout(early_fragment_tests) in;
-
-#define BINDING_ATOMIC_FREE_INDEX 0
-#define BINDING_IMAGE_HEAD_INDEX 0
-#define BINDING_BUFFER_LINKED_LIST 0
-
-layout(binding = BINDING_ATOMIC_FREE_INDEX) uniform atomic_uint u_freeNodeIndex;
-layout(binding = BINDING_IMAGE_HEAD_INDEX, r32ui) uniform uimage2D u_headIndex;
-layout(binding = BINDING_BUFFER_LINKED_LIST, std430) buffer LinkedList
-{
-	NodeType nodes[];
-};
-
-uniform uint uMaxNodes = 1024 * 1024 * 8;
 
 layout(index = 2) subroutine(RenderPass) void TransparencyLinkedList(void)
 {
@@ -191,7 +170,8 @@ layout(index = 2) subroutine(RenderPass) void TransparencyLinkedList(void)
 		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), uAlpha);
 		nodes[freeNodeIndex].depth = gl_FragCoord.z;
 		nodes[freeNodeIndex].nextIndex = nextIndex;
-		nodes[freeNodeIndex].index = uVars.index;
+		nodes[freeNodeIndex].geometryID = uVars.index;
+		nodes[freeNodeIndex].instanceID = fs_in.instanceID;
 	}
 	// No output to the framebuffer.
 }
