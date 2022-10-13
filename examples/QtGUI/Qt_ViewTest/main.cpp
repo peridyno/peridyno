@@ -7,7 +7,6 @@
 #include <math.h>
 #include "SceneGraph.h"
 #include "GLSurfaceVisualModule.h"
-#include "GLInstanceVisualModule.h"
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 

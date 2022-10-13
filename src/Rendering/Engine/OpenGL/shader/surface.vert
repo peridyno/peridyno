@@ -28,6 +28,9 @@ uniform bool uVertexNormal = false;
 uniform bool uInstanced = false;
 
 void main(void) {
+	vs_out.color = in_color;
+	vs_out.instanceID = -1;
+
 	vec3 position = in_vert;
 
 	if(uInstanced) {
@@ -35,14 +38,14 @@ void main(void) {
 		vec3 scaled = in_scaling * in_vert;
 		vec3 rotated = in_rotation * scaled;
 		position = rotated + in_translation;
+		
+		vs_out.instanceID = gl_InstanceID;
 	}
 
 	vec4 worldPos = uTransform.model * vec4(position, 1.0);
 	vec4 cameraPos = uTransform.view * worldPos;
 
 	vs_out.position = cameraPos.xyz;
-	vs_out.color = in_color;
-	vs_out.instanceID = gl_InstanceID;
 
 	if(uVertexNormal)
 	{

@@ -9,6 +9,7 @@ struct GLFWwindow;
 namespace dyno {
 
 	class Camera;
+	class Node;
 	struct Picture;
 
 	enum ButtonState
@@ -128,6 +129,9 @@ namespace dyno {
 		bool mShowImWindow = true;
 
 		ImWindow mImWindow;
+
+		// current selected node
+		Node* currNode = 0;
     };
 
 }

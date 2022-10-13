@@ -408,12 +408,26 @@ namespace dyno
 
 			auto items = activeWindow->mRenderEngine->select(x, y, w, h);
 
+			// print selected result...
 			printf("Picking: (%.0f, %.0f) - (%.0f, %.0f), %d items...\n",
 				activeWindow->getCursorPosX(), activeWindow->getCursorPosY(),
 				xpos, ypos, items.size());
 
-			for (auto item : items) {
-				printf("  Node: %s, instance(%d)\n", item.node->getName().c_str(), item.instance);
+			if (!items.empty()) {
+				auto node = items[0].node;
+				int instance = items[0].instance;
+
+				auto bbox = node->boundingBox();
+
+				printf("  Node: %s, bbox = (%.3f, %.3f, %.3f) - (%.3f, %.3f, %.3f)\n", node->getName().c_str(),
+					bbox.lower[0], bbox.lower[1], bbox.lower[2],
+					bbox.upper[0], bbox.upper[1], bbox.upper[2]);
+
+				// set selected node
+				activeWindow->currNode = node;
+			}
+			else {
+				activeWindow->currNode = 0;
 			}
 		}
 
