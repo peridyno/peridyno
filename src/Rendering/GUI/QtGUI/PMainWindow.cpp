@@ -113,7 +113,7 @@ namespace dyno
 	Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
 	PMainWindow::PMainWindow(
-		RenderEngine* engine, 
+		QtApp* app,
 		QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
 		m_statusBar(nullptr),
@@ -125,7 +125,7 @@ namespace dyno
 		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo5.png")));
 
 
-		mOpenGLWidget = new POpenGLWidget(engine);
+		mOpenGLWidget = new POpenGLWidget(app);
 		setCentralView();
 
 

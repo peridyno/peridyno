@@ -17,9 +17,12 @@
 
 #include "SceneGraphFactory.h"
 
+#include <GLRenderEngine.h>
+#include "QtApp.h"
+
 namespace dyno
 {
-	POpenGLWidget::POpenGLWidget(RenderEngine* engine)
+	POpenGLWidget::POpenGLWidget(QtApp* app)
 	{
 		QSurfaceFormat format;
 		format.setDepthBufferSize(24);
@@ -34,7 +37,7 @@ namespace dyno
 		QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
 		timer.start(16);
 
-		mRenderEngine = engine;
+		mApp = app;
 
 		setFocusPolicy(Qt::StrongFocus);
 	}
@@ -55,11 +58,15 @@ namespace dyno
 		initializeOpenGLFunctions();
 		QtImGui::initialize(this);
 
-		//mRenderEngine = new RenderEngine();
+		// initialize render engine
+		if (mApp->getRenderEngine() == 0) {
+			auto engine = std::make_shared<GLRenderEngine>();
+			mApp->setRenderEngine(engine);
+			engine->initialize(256, 256);
+		}
+
 		// Get Context scale
 		float scale = QGuiApplication::primaryScreen()->logicalDotsPerInchX() / 96.0;
-		mRenderEngine->initialize(this->width(), this->height());
-
 		mImWindow.initialize(scale);
 
 		auto scn = SceneGraphFactory::instance()->active();
@@ -76,14 +83,21 @@ namespace dyno
 		//QtImGui
 		QtImGui::newFrame();
 		
-		auto scn = SceneGraphFactory::instance()->active();
 		// Draw scene		
-		mRenderEngine->draw(scn.get());
+		auto engine = mApp->getRenderEngine();
+		auto camera = mApp->getCamera();
+		auto scene  = mApp->getSceneGraph();
+		auto rparams = engine->renderParams();
+
+		rparams->proj = camera->getProjMat();
+		rparams->view = camera->getViewMat();
+		//engine->renderParams()->viewport.w = this->width();
+		//engine->renderParams()->viewport.h = this->height();
+
+		engine->draw(scene.get());
 
 		// Draw ImGui
-		mRenderEngine->renderParams()->viewport.w = this->width();
-		mRenderEngine->renderParams()->viewport.h = this->height();
-		mImWindow.draw(mRenderEngine, scn.get());
+		mImWindow.draw(mApp);
 		// Draw widgets
 // 		// TODO: maybe move into mImWindow...
 // 		for (auto widget : mWidgets)
@@ -99,10 +113,12 @@ namespace dyno
 
 	void POpenGLWidget::resizeGL(int w, int h)
 	{
-		activeCamera()->setWidth(w);
-		activeCamera()->setHeight(h);
+		auto engine = mApp->getRenderEngine();
+		engine->resize(w, h);
 
-		mRenderEngine->resize(w, h);
+		auto camera = mApp->getCamera();
+		camera->setWidth(w);
+		camera->setHeight(h);
 	}
 
 	PButtonType mappingMouseButton(QMouseEvent* event)
@@ -141,15 +157,17 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
-		activeCamera()->registerPoint(event->x(), event->y());
+
+		auto camera = mApp->getCamera();
+		camera->registerPoint(event->x(), event->y());
 		mButtonState = QButtonState::QBUTTON_DOWN;
 
 		PMouseEvent mouseEvent;
-		mouseEvent.ray = activeCamera()->castRayInWorldSpace((float)event->x(), (float)event->y());
+		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
 		mouseEvent.buttonType = mappingMouseButton(event);
 		mouseEvent.actionType = PActionType::AT_PRESS;
 		mouseEvent.mods = mappingModifierBits(event->modifiers());
-		mouseEvent.camera = activeCamera();
+		mouseEvent.camera = camera;
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
 
@@ -162,14 +180,16 @@ namespace dyno
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
+		auto camera = mApp->getCamera();
+
 		mButtonState = QButtonState::QBUTTON_UP;
 
 		PMouseEvent mouseEvent;
-		mouseEvent.ray = activeCamera()->castRayInWorldSpace((float)event->x(), (float)event->y());
+		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
 		mouseEvent.buttonType = mappingMouseButton(event);
 		mouseEvent.actionType = PActionType::AT_RELEASE;
 		mouseEvent.mods = mappingModifierBits(event->modifiers());
-		mouseEvent.camera = activeCamera();
+		mouseEvent.camera = camera;
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
 
@@ -182,27 +202,29 @@ namespace dyno
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
 	{
+		auto camera = mApp->getCamera();
+
 		if (event->buttons().testFlag(Qt::LeftButton) &&
 			mButtonState == QBUTTON_DOWN &&
 			event->modifiers() == Qt::AltModifier &&
 			!mImWindow.cameraLocked())
 		{
-			activeCamera()->rotateToPoint(event->x(), event->y());
+			camera->rotateToPoint(event->x(), event->y());
 		}
 		else if (event->buttons().testFlag(Qt::RightButton) &&
 			mButtonState == QBUTTON_DOWN &&
 			event->modifiers() == Qt::AltModifier &&
 			!mImWindow.cameraLocked())
 		{
-			activeCamera()->translateToPoint(event->x(), event->y());
+			camera->translateToPoint(event->x(), event->y());
 		}
 
 		PMouseEvent mouseEvent;
-		mouseEvent.ray = activeCamera()->castRayInWorldSpace((float)event->x(), (float)event->y());
+		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
 		mouseEvent.buttonType = mappingMouseButton(event);
 		mouseEvent.actionType = PActionType::AT_REPEAT;
 		mouseEvent.mods = mappingModifierBits(event->modifiers());
-		mouseEvent.camera = activeCamera();
+		mouseEvent.camera = camera;
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
 
@@ -216,7 +238,7 @@ namespace dyno
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
 		if(!mImWindow.cameraLocked())
-			activeCamera()->zoom(-0.001*event->angleDelta().x());
+			mApp->getCamera()->zoom(-0.001*event->angleDelta().x());
 
 		update();
 	}
@@ -249,11 +271,6 @@ namespace dyno
 		update();
 
 		doneCurrent();
-	}
-
-	std::shared_ptr<Camera> POpenGLWidget::activeCamera()
-	{
-		return mRenderEngine->camera();
 	}
 
 }

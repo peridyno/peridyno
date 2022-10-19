@@ -35,14 +35,7 @@ namespace dyno
 	class ShadowMap;
 	class GLRenderHelper;
 	class GLVisualModule;
-
 	class SceneGraph;
-	//HE Xiaowei		
-	enum CameraType
-	{
-		Orbit = 0,
-		TrackBall
-	};
 
 	class GLRenderEngine : public RenderEngine
 	{
@@ -60,7 +53,6 @@ namespace dyno
 		std::vector<SelectionItem>	select(int x, int y, int w, int h) override;
 
 	private:
-		void setupCamera();
 		void setupInternalFramebuffer();
 		void setupTransparencyPass();
 
@@ -95,9 +87,6 @@ namespace dyno
 		ShadowMap*		mShadowMap;
 		GLRenderHelper*	mRenderHelper;
 		FXAA*			mFXAAFilter;
-
-		//HE Xiaowei
-		CameraType mCameraType = CameraType::Orbit;
 
 	};
 };

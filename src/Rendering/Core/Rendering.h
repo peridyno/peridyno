@@ -84,16 +84,10 @@ namespace dyno
 
 		// TODO: re-organize
 		RenderParams* renderParams() { return &m_rparams; }
-		std::shared_ptr<Camera> camera() { return mCamera; }
-		void setCamera(std::shared_ptr<Camera> cam) { mCamera = cam; }
 
 		virtual std::string name() = 0;
 	protected:
 		RenderParams m_rparams;
-
-		// current active camera
-		std::shared_ptr<Camera> mCamera;
-
 	};
 };
 

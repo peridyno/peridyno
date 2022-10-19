@@ -31,8 +31,6 @@ namespace dyno
 		mShadowMap = new ShadowMap(2048, 2048);
 		mSSAO = new SSAO;
 		mFXAAFilter = new FXAA;
-
-		setupCamera();
 	}
 
 	GLRenderEngine::~GLRenderEngine()
@@ -46,7 +44,7 @@ namespace dyno
 	void GLRenderEngine::initialize(int width, int height)
 	{
 		if (!gladLoadGL()) {
-			printf("Failed to load OpenGL!");
+			printf("Failed to load OpenGL context!");
 			exit(-1);
 		}
 
@@ -75,8 +73,6 @@ namespace dyno
 		mShadowMap->initialize();
 		mRenderHelper->initialize();
 		mFXAAFilter->initialize();
-
-		mCamera->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
 
 		this->resize(width, height);
 	}
@@ -107,20 +103,6 @@ namespace dyno
 		mBlendProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blend.frag");
 	}
 
-	void GLRenderEngine::setupCamera()
-	{
-		switch (mCameraType)
-		{
-		case dyno::Orbit:
-			mCamera = std::make_shared<OrbitCamera>();
-			break;
-		case dyno::TrackBall:
-			mCamera = std::make_shared<TrackballCamera>();
-			break;
-		default:
-			break;
-		}
-	}
 
 	void GLRenderEngine::setupInternalFramebuffer()
 	{
@@ -203,10 +185,6 @@ namespace dyno
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
-		// update render parameters
-		m_rparams.proj = mCamera->getProjMat();
-		m_rparams.view = mCamera->getViewMat();
-
 		// update shadow map
 		mShadowMap->update(scene, m_rparams);
 
@@ -250,9 +228,7 @@ namespace dyno
 		// draw a ruler plane, since it's opacity
 		if (m_rparams.showGround)
 		{
-			mRenderHelper->drawGround(
-				m_rparams.planeScale * mCamera->distanceUnit(),
-				m_rparams.rulerScale * mCamera->distanceUnit());
+			mRenderHelper->drawGround(m_rparams.planeScale, m_rparams.rulerScale);
 		}
 
 		mVariableUBO.bindBufferBase(2);
@@ -358,9 +334,6 @@ namespace dyno
 		m_rparams.viewport.y = 0;
 		m_rparams.viewport.w = w;
 		m_rparams.viewport.h = h;
-
-		mCamera->setWidth(w);
-		mCamera->setHeight(h);
 
 		// resize internal framebuffer
 		mColorTex.resize(w, h);

@@ -156,7 +156,7 @@ int main(int, char**)
 	GlfwApp window;
 	
 	//Set the distance unit for the camera, the fault unit is meter
-	window.activeCamera()->setDistanceUnit(3.0f);
+	window.getCamera()->setDistanceUnit(3.0f);
 	window.setSceneGraph(scn);
 	window.createWindow(1024, 768);
 

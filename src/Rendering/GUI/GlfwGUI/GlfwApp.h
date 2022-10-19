@@ -22,7 +22,6 @@ namespace dyno {
     {
     public:
         GlfwApp(int argc = 0, char **argv = NULL);
-		GlfwApp(int width, int height);
         ~GlfwApp();
 
         void createWindow(int width, int height, bool usePlugin = false) override;
@@ -47,7 +46,6 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		std::shared_ptr<Camera> activeCamera();
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -72,9 +70,7 @@ namespace dyno {
 		// 全局样式设定
 		void initializeStyle();
 
-		std::shared_ptr<RenderEngine> renderEngine() override;
-
-		void setSceneGraph(std::shared_ptr<SceneGraph> scn);
+		void setSceneGraph(std::shared_ptr<SceneGraph> scn) override;
 
 	protected:
 		void initCallbacks();    //init default callbacks

@@ -55,11 +55,16 @@ namespace dyno
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
 	{
 		Log::setUserReceiver(&RecieveLogMessage);
-	}
 
-	GlfwApp::GlfwApp(int width, int height)
-	{
-		this->createWindow(width, height);
+		// create render engine
+		mRenderEngine = std::make_shared<GLRenderEngine>();
+
+		// create a default camera
+		mCamera = std::make_shared<OrbitCamera>();
+		mCamera->setWidth(64);
+		mCamera->setHeight(64);
+		mCamera->registerPoint(0, 0);
+		mCamera->rotateToPoint(-32, 12);
 	}
 
 	GlfwApp::~GlfwApp()
@@ -71,7 +76,6 @@ namespace dyno
 
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
-
 	}
 
 	void GlfwApp::createWindow(int width, int height, bool usePlugin)
@@ -171,11 +175,13 @@ namespace dyno
 		float xscale, yscale;
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 
-		// Jian: initialize rendering engine
-		renderEngine()->initialize(width, height);
+		// initialize rendering engine
+		mRenderEngine->initialize(width, height);
 
 		// Jian: initialize ImWindow
 		mImWindow.initialize(xscale);
+
+		this->setWindowSize(width, height);
 	}
 
 	void GlfwApp::initializeStyle()
@@ -187,16 +193,9 @@ namespace dyno
 		style.PopupRounding = 6.0f;
 	}
 	
-	std::shared_ptr<RenderEngine> GlfwApp::renderEngine()
-	{
-		if (mRenderEngine == nullptr)
-			mRenderEngine = std::make_shared<GLRenderEngine>();
-
-		return mRenderEngine;
-	}
-
 	void GlfwApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
 	{
+		AppBase::setSceneGraph(scn);
 		SceneGraphFactory::instance()->pushScene(scn);
 	}
 
@@ -225,22 +224,18 @@ namespace dyno
 			
 			activeScene->updateGraphicsContext();
 				
+			mRenderEngine->renderParams()->proj = mCamera->getProjMat();
+			mRenderEngine->renderParams()->view = mCamera->getViewMat();
+			mRenderEngine->draw(activeScene.get());
+
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			//mRenderEngine->begin();
-			//mRenderEngine->drawGUI();
-			int width, height;
-			glfwGetWindowSize(mWindow, &width, &height);
-			renderEngine()->renderParams()->viewport.w = width;
-			renderEngine()->renderParams()->viewport.h = height;
-
-			renderEngine()->draw(activeScene.get());
-
 			if(mShowImWindow)
-				mImWindow.draw(renderEngine().get(), activeScene.get());
+				mImWindow.draw(this);
+
 // 			// Draw widgets
 // 			// TODO: maybe move into mImWindow...
 // 			for (auto widget : mWidgets)
@@ -251,8 +246,8 @@ namespace dyno
 
 			if (currNode) {
 
-				auto view = renderEngine()->renderParams()->view;
-				auto proj = renderEngine()->renderParams()->proj;
+				auto view = getRenderEngine()->renderParams()->view;
+				auto proj = getRenderEngine()->renderParams()->proj;
 
 				ImGuiIO& io = ImGui::GetIO();
 				ImGuizmo::BeginFrame();
@@ -277,7 +272,8 @@ namespace dyno
 			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&
 				mButtonAction == GLFW_PRESS &&
 				mButtonMode == 0 && 
-				!ImGuizmo::IsUsing()) {
+				!ImGuizmo::IsUsing() &&
+				!ImGui::GetIO().WantCaptureMouse) {
 				double xpos, ypos;
 				glfwGetCursorPos(mWindow, &xpos, &ypos);
 
@@ -324,13 +320,9 @@ namespace dyno
 
 	void GlfwApp::setWindowSize(int width, int height)
 	{
-		activeCamera()->setWidth(width);
-		activeCamera()->setHeight(height);
-	}
-
-	std::shared_ptr<dyno::Camera> GlfwApp::activeCamera()
-	{
-		return renderEngine()->camera();
+		getCamera()->setWidth(width);
+		getCamera()->setHeight(height);
+		getRenderEngine()->resize(width, height);
 	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
@@ -384,12 +376,12 @@ namespace dyno
 
 	int GlfwApp::getWidth()
 	{
-		return activeCamera()->viewportWidth();
+		return getCamera()->viewportWidth();
 	}
 
 	int GlfwApp::getHeight()
 	{
-		return activeCamera()->viewportHeight();
+		return getCamera()->viewportHeight();
 	}
 
 	void GlfwApp::initCallbacks()
@@ -458,7 +450,7 @@ namespace dyno
 			}
 		}
 
-		auto camera = activeWindow->activeCamera();
+		auto camera = activeWindow->getCamera();
 
 		activeWindow->setButtonType(button);
 		activeWindow->setButtonAction(action);
@@ -501,7 +493,7 @@ namespace dyno
 	void GlfwApp::cursorPosCallback(GLFWwindow* window, double x, double y)
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window); // User Pointer
-		auto camera = activeWindow->activeCamera();
+		auto camera = activeWindow->getCamera();
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = camera->castRayInWorldSpace((float)x, (float)y);
@@ -547,7 +539,7 @@ namespace dyno
 	void GlfwApp::scrollCallback(GLFWwindow* window, double offsetX, double OffsetY)
 	{
 		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
-		auto camera = activeWindow->activeCamera();
+		auto camera = activeWindow->getCamera();
 
 		if (!activeWindow->mImWindow.cameraLocked())
 		{
@@ -610,10 +602,8 @@ namespace dyno
 
 	void GlfwApp::reshapeCallback(GLFWwindow* window, int w, int h)
 	{
-		GlfwApp* activeWindow = (GlfwApp*)glfwGetWindowUserPointer(window);
-		activeWindow->setWindowSize(w, h);
-
-		activeWindow->renderEngine()->resize(w, h);
+		GlfwApp* app = (GlfwApp*)glfwGetWindowUserPointer(window);
+		app->setWindowSize(w, h);
 	}
 
 }
