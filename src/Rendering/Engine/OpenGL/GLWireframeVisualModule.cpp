@@ -51,6 +51,9 @@ namespace dyno
 
 	void GLWireframeVisualModule::paintGL(GLRenderPass pass)
 	{
+		if (mDrawCount == 0)
+			return;
+
 		mShaderProgram.use();
 
 		unsigned int subroutine = (unsigned int)pass;

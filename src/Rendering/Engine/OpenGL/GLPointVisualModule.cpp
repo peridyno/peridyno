@@ -15,7 +15,7 @@ namespace dyno
 
 	GLPointVisualModule::GLPointVisualModule()
 	{
-		mNumPoints = 1;
+		mNumPoints = 0;
 		this->setName("point_renderer");
 
 		this->inColor()->tagOptional(true);
@@ -96,6 +96,9 @@ namespace dyno
 
 	void GLPointVisualModule::paintGL(GLRenderPass pass)
 	{
+		if (mNumPoints == 0)
+			return;
+
 		mShaderProgram.use();
 		mShaderProgram.setFloat("uPointSize", this->varPointSize()->getData());
 
