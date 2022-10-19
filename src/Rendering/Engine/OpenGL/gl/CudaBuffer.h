@@ -15,24 +15,22 @@
  */
 
 #pragma once
-#include "gl/Buffer.h"
+#include "Buffer.h"
 
 struct cudaGraphicsResource;
-namespace dyno
+namespace gl
 {
-	class GLCudaBuffer : public gl::Buffer
+	class CudaBuffer : public gl::Buffer
 	{
 	public:
-		void release();
+		virtual void release() override;
 
 		virtual void allocate(int size);
-		//void load(void* data, int size, int offset = 0);
 
-		void  loadCuda(void* devicePtr, int size);
-		void* mapCuda();
-		void  unmapCuda();
+		void  loadCuda(void* src, int size);
 
 	private:
-		cudaGraphicsResource* resource = 0;
+		cudaGraphicsResource*	resource = 0; 
+		void*					devicePtr = 0;
 	};
 }

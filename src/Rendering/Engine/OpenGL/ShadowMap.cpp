@@ -6,6 +6,7 @@
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <array>
 
@@ -25,19 +26,29 @@ namespace dyno
 
 	void ShadowMap::initialize()
 	{
+		const glm::vec4 border = glm::vec4(1);
+
 		mShadowTex.format = GL_RG;
 		mShadowTex.internalFormat = GL_RG32F;
-		mShadowTex.borderColor = glm::vec4(1);
 		mShadowTex.maxFilter = GL_LINEAR; 
 		mShadowTex.minFilter = GL_LINEAR;
 		mShadowTex.create();
 
+		// setup border
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(border));
+
 		mShadowBlur.format = GL_RG;
 		mShadowBlur.internalFormat = GL_RG32F;
-		mShadowBlur.borderColor = glm::vec4(1);
 		mShadowBlur.maxFilter = GL_LINEAR;
 		mShadowBlur.minFilter = GL_LINEAR;
 		mShadowBlur.create();
+
+		// setup border
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(border));
 
 		mShadowDepth.internalFormat = GL_DEPTH_COMPONENT32;
 		mShadowDepth.format = GL_DEPTH_COMPONENT;

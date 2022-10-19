@@ -129,37 +129,6 @@ namespace gl
 		return vao;
 	}
 
-	Mesh Mesh::AABB(glm::vec3 p0, glm::vec3 p1)
-	{
-		std::vector<float> vertices = {
-			p0.x, p0.y, p0.z,
-			p0.x, p0.y, p1.z,
-			p1.x, p0.y, p1.z,
-			p1.x, p0.y, p0.z,
-
-			p0.x, p1.y, p0.z,
-			p0.x, p1.y, p1.z,
-			p1.x, p1.y, p1.z,
-			p1.x, p1.y, p0.z,
-		};
-
-		std::vector<unsigned int> indices = {
-			0, 1, 2, 2, 3, 0, // bottom
-			7, 6, 5, 5, 4, 7, // top
-			4, 5, 1, 1, 0, 4, // left
-			3, 2, 6, 6, 7, 3, // right
-			0, 3, 7, 7, 4, 0, // front
-			5, 6, 2, 2, 1, 5, // back
-		};
-
-		Mesh vao;
-		vao.create();
-		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
-		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
-		vao.mDrawCount = indices.size();
-		return vao;
-	}
-
 	Mesh Mesh::ScreenQuad()
 	{
 		std::vector<float> vertices = {

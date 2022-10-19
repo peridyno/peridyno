@@ -33,8 +33,6 @@ namespace dyno
 				}
 			}
 
-			mRulerTex.wrapS = GL_REPEAT;
-			mRulerTex.wrapT = GL_REPEAT;
 			mRulerTex.minFilter = GL_LINEAR_MIPMAP_LINEAR;
 			mRulerTex.maxFilter = GL_LINEAR;
 			mRulerTex.format = GL_RED;

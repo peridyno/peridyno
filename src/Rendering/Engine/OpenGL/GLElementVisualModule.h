@@ -5,7 +5,7 @@
 #include "Topology/DiscreteElements.h"
 
 #include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
+#include "gl/CudaBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
@@ -38,8 +38,8 @@ namespace dyno
 		gl::Program mShaderProgram;
 		gl::VertexArray	mVAO;
 
-		GLCudaBuffer	mVertexBuffer;
-		GLCudaBuffer 	mIndexBuffer;
+		gl::CudaBuffer	mVertexBuffer;
+		gl::CudaBuffer 	mIndexBuffer;
 
 		unsigned int	mDrawCount = 0;
 

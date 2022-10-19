@@ -101,8 +101,6 @@ namespace dyno
 		mHeadIndexTex.internalFormat = GL_R32UI;
 		mHeadIndexTex.format = GL_RED_INTEGER;
 		mHeadIndexTex.type = GL_UNSIGNED_INT;
-		mHeadIndexTex.wrapS = GL_CLAMP_TO_EDGE;
-		mHeadIndexTex.wrapT = GL_CLAMP_TO_EDGE;
 		mHeadIndexTex.create();
 		mHeadIndexTex.resize(1, 1);
 

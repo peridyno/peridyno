@@ -18,9 +18,10 @@
 #include "Topology/PointSet.h"
 
 #include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
+#include "gl/CudaBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
+
 
 namespace dyno
 {
@@ -60,8 +61,8 @@ namespace dyno
 	private:
 		unsigned int	mNumPoints;
 
-		GLCudaBuffer	mPosition;
-		GLCudaBuffer	mColor;
+		gl::CudaBuffer	mPosition;
+		gl::CudaBuffer	mColor;
 
 		gl::VertexArray	mVertexArray;
 

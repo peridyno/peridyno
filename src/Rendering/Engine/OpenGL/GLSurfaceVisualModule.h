@@ -18,7 +18,7 @@
 #include "Topology/TriangleSet.h"
 
 #include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
+#include "gl/CudaBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
@@ -61,15 +61,15 @@ namespace dyno
 		gl::Program		mShaderProgram;
 
 		gl::VertexArray	mVAO;
-		GLCudaBuffer 	mIndexBuffer;
-		GLCudaBuffer	mVertexBuffer;
-		GLCudaBuffer	mNormalBuffer;
-		GLCudaBuffer	mColorBuffer;
+		gl::CudaBuffer 	mIndexBuffer;
+		gl::CudaBuffer	mVertexBuffer;
+		gl::CudaBuffer	mNormalBuffer;
+		gl::CudaBuffer	mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
 
 		// for instanced rendering
-		GLCudaBuffer	mInstanceBuffer;
+		gl::CudaBuffer	mInstanceBuffer;
 		unsigned int	mInstanceCount = 0;
 	};
 };

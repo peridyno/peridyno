@@ -59,8 +59,6 @@ namespace dyno
 
 		mSSAONoiseTex.format = GL_RGB;
 		mSSAONoiseTex.internalFormat = GL_RGB32F;
-		mSSAONoiseTex.wrapS = GL_REPEAT;
-		mSSAONoiseTex.wrapT = GL_REPEAT;
 		mSSAONoiseTex.create();
 		mSSAONoiseTex.load(4, 4, &ssaoNoise[0]);
 	}
