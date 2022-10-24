@@ -23,18 +23,8 @@ namespace dyno
 
 	GLPointVisualModule::~GLPointVisualModule()
 	{
-		mColorBuffer.clear();
-	}
 
-// 	void GLPointVisualModule::setPointSize(float size)
-// 	{
-// 		mPointSize = size;
-// 	}
-// 
-// 	float GLPointVisualModule::getPointSize() const
-// 	{
-// 		return mPointSize;
-// 	}
+	}
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
@@ -70,28 +60,22 @@ namespace dyno
 		auto& xyz = pPointSet->getPoints();
 		mNumPoints = xyz.size();
 
-		if (mColorBuffer.size() != mNumPoints) {
-			mColorBuffer.resize(mNumPoints);
-		}
-
-		if (mColorMode == ColorMapMode::PER_OBJECT_SHADER)
+		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
+			&& !this->inColor()->isEmpty() 
+			&& this->inColor()->getDataPtr()->size() == mNumPoints)
 		{
-			RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
+			auto color = this->inColor()->getData();
+			mColor.loadCuda(color.begin(), mNumPoints * sizeof(float) * 3);
 		}
 		else
 		{
-			if (!this->inColor()->isEmpty() && this->inColor()->getDataPtr()->size() == mNumPoints)
-			{
-				mColorBuffer.assign(this->inColor()->getData());
-			}
-			else 
-			{
-				RenderTools::setupColor(mColorBuffer, this->varBaseColor()->getData());
-			}
+			mVertexArray.bind();
+			glDisableVertexAttribArray(1);
+			mVertexArray.unbind();
 		}
 
+
 		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
-		mColor.loadCuda(mColorBuffer.begin(), mNumPoints * sizeof(float) * 3);
 	}
 
 	void GLPointVisualModule::paintGL(GLRenderPass pass)
@@ -126,6 +110,12 @@ namespace dyno
 		{
 			printf("Unknown render pass!\n");
 			return;
+		}
+
+		// per-object color color
+		if (mColorMode == ColorMapMode::PER_OBJECT_SHADER) {
+			auto color = this->varBaseColor()->getData();
+			glVertexAttrib3f(1, color[0], color[1], color[2]);
 		}
 
 		mVertexArray.bind();

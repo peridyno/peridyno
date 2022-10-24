@@ -39,9 +39,6 @@ namespace dyno
 		GLPointVisualModule();
 		~GLPointVisualModule() override;
 
-// 		void setPointSize(float size);
-// 		float getPointSize() const;
-
 		void setColorMapMode(ColorMapMode mode);
 		void setColorMapRange(float vmin, float vmax);
 
@@ -66,12 +63,11 @@ namespace dyno
 
 		gl::VertexArray	mVertexArray;
 
-		gl::Program mShaderProgram;
+		gl::Program		mShaderProgram;
 
 		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
 		float			mColorMin = 0.f;
 		float			mColorMax = 1.f;
 
-		DArray<Vec3f> mColorBuffer;
 	};
 };
