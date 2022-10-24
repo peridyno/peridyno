@@ -54,6 +54,8 @@ void main(void)
 
 		fragIndices.r = nodes[fragmentIndices[numberFragments - 1]].geometryID;
 		fragIndices.g = nodes[fragmentIndices[numberFragments - 1]].instanceID;
+
+		gl_FragDepth = nodes[fragmentIndices[numberFragments - 1]].depth;
 	}
 	else
 	{

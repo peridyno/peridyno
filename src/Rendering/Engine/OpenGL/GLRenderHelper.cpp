@@ -49,9 +49,6 @@ namespace dyno
 
 		void draw(float planeScale, float rulerScale)
 		{
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-
 			mRulerTex.bind(GL_TEXTURE1);
 			
 			mProgram.use();
@@ -59,12 +56,6 @@ namespace dyno
 			mProgram.setFloat("uRulerScale", rulerScale);
 
 			mPlane.draw();
-			
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_BLEND);
-
-			// clear depth to get avoid object cross ground
-			glClear(GL_DEPTH_BUFFER_BIT);
 
 			gl::glCheckError();
 		}

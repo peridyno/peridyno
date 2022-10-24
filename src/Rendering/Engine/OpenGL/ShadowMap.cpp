@@ -214,7 +214,7 @@ namespace dyno
 			mShadowMatrixUBO.load(&shadow, sizeof(shadow));
 
 			mTransformUBO.bindBufferBase(0);
-			mShadowMatrixUBO.bindBufferBase(2);
+			mShadowMatrixUBO.bindBufferBase(3);
 
 			// draw objects to shadow texture
 			static class DrawShadow : public Action

@@ -224,13 +224,7 @@ namespace dyno
 		Vec3f c0 = Vec3f(m_rparams.bgColor0.x, m_rparams.bgColor0.y, m_rparams.bgColor0.z);
 		Vec3f c1 = Vec3f(m_rparams.bgColor1.x, m_rparams.bgColor1.y, m_rparams.bgColor1.z);
 		mRenderHelper->drawBackground(c0, c1);
-
-		// draw a ruler plane, since it's opacity
-		if (m_rparams.showGround)
-		{
-			mRenderHelper->drawGround(m_rparams.planeScale, m_rparams.rulerScale);
-		}
-
+		
 		mVariableUBO.bindBufferBase(2);
 
 		// render opacity objects
@@ -258,8 +252,8 @@ namespace dyno
 
 			// draw to no attachments
 			mFramebuffer.drawBuffers(0, 0);
-			glDepthMask(false);
 
+			glDepthMask(false);
 			for (int i = 0; i < mRenderModules.size(); i++) {
 
 				if (mRenderModules[i]->isTransparent())
@@ -269,7 +263,15 @@ namespace dyno
 				}
 			}
 
+			// draw a ruler plane
+			if (m_rparams.showGround)
+			{
+				mRenderHelper->drawGround(m_rparams.planeScale, m_rparams.rulerScale);
+			}
+
 			glDepthMask(true);
+
+			// blend alpha
 			const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 			mFramebuffer.drawBuffers(2, attachments);
 
@@ -285,6 +287,7 @@ namespace dyno
 			glDisable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
 		}
+
 
 		// draw scene bounding box
 		if (m_rparams.showSceneBounds && scene != 0)
