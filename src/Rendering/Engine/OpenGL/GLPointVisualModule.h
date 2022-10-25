@@ -40,7 +40,6 @@ namespace dyno
 		~GLPointVisualModule() override;
 
 		void setColorMapMode(ColorMapMode mode);
-		void setColorMapRange(float vmin, float vmax);
 
 	public:
 		DEF_INSTANCE_IN(PointSet<DataType3f>, PointSet, "");
@@ -56,18 +55,15 @@ namespace dyno
 		virtual bool initializeGL() override;
 
 	private:
-		unsigned int	mNumPoints;
-
-		gl::CudaBuffer	mPosition;
-		gl::CudaBuffer	mColor;
 
 		gl::VertexArray	mVertexArray;
+		gl::CudaBuffer	mPosition;
+		gl::CudaBuffer	mColor;
+		unsigned int	mNumPoints;
 
 		gl::Program		mShaderProgram;
 
 		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
-		float			mColorMin = 0.f;
-		float			mColorMax = 1.f;
 
 	};
 };

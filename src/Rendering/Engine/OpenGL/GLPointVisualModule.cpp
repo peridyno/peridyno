@@ -31,12 +31,6 @@ namespace dyno
 		mColorMode = mode;
 	}
 
-	void GLPointVisualModule::setColorMapRange(float vmin, float vmax)
-	{
-		mColorMin = vmin;
-		mColorMax = vmax;
-	}
-
 	bool GLPointVisualModule::initializeGL()
 	{
 		mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
@@ -75,7 +69,6 @@ namespace dyno
 		}
 		mVertexArray.unbind();
 
-
 		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
 	}
 
@@ -90,14 +83,9 @@ namespace dyno
 		unsigned int subroutine;
 		if (pass == GLRenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
 			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
 			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
 			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
-
-			mShaderProgram.setInt("uColorMode", mColorMode);
-			mShaderProgram.setFloat("uColorMin", mColorMin);
-			mShaderProgram.setFloat("uColorMax", mColorMax);
 
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
@@ -106,6 +94,11 @@ namespace dyno
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+		}
+		else if (pass == GLRenderPass::TRANSPARENCY)
+		{
+			printf("WARNING: GLPointVisualModule does not support transparency!\n");
+			return;
 		}
 		else
 		{
