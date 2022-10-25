@@ -60,19 +60,20 @@ namespace dyno
 		auto& xyz = pPointSet->getPoints();
 		mNumPoints = xyz.size();
 
+		mVertexArray.bind();
 		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty() 
 			&& this->inColor()->getDataPtr()->size() == mNumPoints)
 		{
 			auto color = this->inColor()->getData();
 			mColor.loadCuda(color.begin(), mNumPoints * sizeof(float) * 3);
+			mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{
-			mVertexArray.bind();
 			glDisableVertexAttribArray(1);
-			mVertexArray.unbind();
 		}
+		mVertexArray.unbind();
 
 
 		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
@@ -113,10 +114,8 @@ namespace dyno
 		}
 
 		// per-object color color
-		if (mColorMode == ColorMapMode::PER_OBJECT_SHADER) {
-			auto color = this->varBaseColor()->getData();
-			glVertexAttrib3f(1, color[0], color[1], color[2]);
-		}
+		auto color = this->varBaseColor()->getData();
+		glVertexAttrib3f(1, color[0], color[1], color[2]);
 
 		mVertexArray.bind();
 		glDrawArrays(GL_POINTS, 0, mNumPoints);
