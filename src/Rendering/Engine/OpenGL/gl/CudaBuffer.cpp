@@ -53,6 +53,7 @@ namespace gl
 		}
 
 		cudaMemcpy(this->devicePtr, src, size, cudaMemcpyDeviceToDevice);
+		cudaStreamSynchronize(0);
 	}
 
 }
