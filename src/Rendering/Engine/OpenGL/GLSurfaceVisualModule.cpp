@@ -12,6 +12,8 @@ namespace dyno
 		this->setName("surface_renderer");
 
 		this->inColor()->tagOptional(true);
+		this->inInstanceTransform()->tagOptional(true);
+		this->inInstanceColor()->tagOptional(true);
 	}
 
 	std::string GLSurfaceVisualModule::caption()
@@ -87,14 +89,14 @@ namespace dyno
 		}
 
 		// update instance transforms
-		auto transforms = this->state_InstanceTransform.getDataPtr();
+		auto transforms = this->inInstanceTransform()->getDataPtr();
 
 		if (transforms) {
 			mInstanceCount = transforms->size();
 			mInstanceBuffer.loadCuda(transforms->begin(), transforms->size() * sizeof(Transform3f));
 
 			// instance colors if available
-			auto colors = this->state_InstanceColor.getDataPtr();
+			auto colors = this->inInstanceColor()->getDataPtr();
 			if (colors && colors->size() == mInstanceCount) {
 				mColorBuffer.loadCuda(colors->begin(), colors->size() * sizeof(Vec3f));
 				mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, sizeof(Vec3f), 0, 1);

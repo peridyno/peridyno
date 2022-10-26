@@ -47,7 +47,7 @@ public:
 
 	void setSurfaceVisualModule(std::shared_ptr<GLSurfaceVisualModule> m) {
 		topology.connect(m->inTriangleSet());
-		transform.connect(m->stateInstanceTransform());
+		transform.connect(m->inInstanceTransform());
 
 		this->graphicsPipeline()->pushModule(m);
 	}

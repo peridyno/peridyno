@@ -57,7 +57,7 @@ int main()
 	auto instanceRender = std::make_shared<GLSurfaceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
-	instanceNode->stateTransforms()->connect(instanceRender->stateInstanceTransform());
+	instanceNode->stateTransforms()->connect(instanceRender->inInstanceTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
 	scn->setUpperBound({ 4, 4, 4 });
