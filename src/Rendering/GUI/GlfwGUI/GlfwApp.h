@@ -72,6 +72,8 @@ namespace dyno {
 
 		void setSceneGraph(std::shared_ptr<SceneGraph> scn) override;
 
+		ImWindow* imWindow() { return &mImWindow; }
+
 	protected:
 		void initCallbacks();    //init default callbacks
 

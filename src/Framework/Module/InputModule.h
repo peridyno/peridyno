@@ -23,6 +23,7 @@ namespace dyno
 {
 	enum PButtonType
 	{
+		BT_UNKOWN = -1,
 		BT_LEFT = 0,
 		BT_RIGHT = 1,
 		BT_MIDDLE = 2,
@@ -30,6 +31,7 @@ namespace dyno
 
 	enum PActionType
 	{
+		AT_UNKOWN = -1,
 		AT_RELEASE = 0,
 		AT_PRESS = 1,
 		AT_REPEAT = 2

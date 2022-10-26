@@ -20,6 +20,10 @@
 #include "OrbitCamera.h"
 #include "TrackballCamera.h"
 
+#include "imgui.h"
+
+#include "ImGuizmo.h"
+
 using namespace dyno;
 
 class WidgetQueue : public Action
@@ -316,8 +320,64 @@ void dyno::ImWindow::draw(AppBase* app)
 		widget->update();
 		widget->paint();
 	}
+
+	drawSelectedRegion();
 }
 
+void ImWindow::mouseMoveEvent(const PMouseEvent& event)
+{
+	mCurX = event.x;
+	mCurY = event.y;
+
+	mDrawingBox = true;
+}
+
+void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
+{
+	mRegX = -1;
+	mRegY = -1;
+
+	mCurX = -1;
+	mCurY = -1;
+
+	mButtonType = BT_UNKOWN;
+	mButtonAction = AT_UNKOWN;
+	mButtonMode = MB_NO_MODIFIER;
+
+	mDrawingBox = false;
+}
+
+void ImWindow::mousePressEvent(const PMouseEvent& event)
+{
+	mRegX = event.x;
+	mRegY = event.y;
+
+	mButtonAction = event.actionType;
+	mButtonType = event.buttonType;
+	mButtonMode = event.mods;
+}
+
+void ImWindow::drawSelectedRegion()
+{
+	if (mDrawingBox &&
+		mButtonType == BT_LEFT &&
+		mButtonAction == AT_PRESS &&
+		mButtonMode == MB_NO_MODIFIER &&
+		!ImGuizmo::IsUsing() &&
+		!ImGui::GetIO().WantCaptureMouse) {
+
+		ImVec2 pMin = { fminf(mRegX, mCurX), fminf(mRegY, mCurY) };
+		ImVec2 pMax = { fmaxf(mRegX, mCurX), fmaxf(mRegY, mCurY) };
+
+		// visible rectangle
+		if (pMin.x != pMax.x || pMin.y != pMax.y) {
+			// fill
+			ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
+			// border
+			ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+		}
+	}
+}
 
 bool ImWindow::cameraLocked()
 {

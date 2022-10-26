@@ -268,26 +268,26 @@ namespace dyno
 				}
 			}
 
-			// draw a pick rect
-			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&
-				mButtonAction == GLFW_PRESS &&
-				mButtonMode == 0 && 
-				!ImGuizmo::IsUsing() &&
-				!ImGui::GetIO().WantCaptureMouse) {
-				double xpos, ypos;
-				glfwGetCursorPos(mWindow, &xpos, &ypos);
-
-				ImVec2 pMin = { fminf(xpos, mCursorPosX), fminf(ypos, mCursorPosY) };
-				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };			
-
-				// visible rectangle
-				if (pMin.x != pMax.x || pMin.y != pMax.y) {
-					// fill
-					ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
-					// border
-					ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
-				}
-			}
+// 			// draw a pick rect
+// 			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&
+// 				mButtonAction == GLFW_PRESS &&
+// 				mButtonMode == 0 && 
+// 				!ImGuizmo::IsUsing() &&
+// 				!ImGui::GetIO().WantCaptureMouse) {
+// 				double xpos, ypos;
+// 				glfwGetCursorPos(mWindow, &xpos, &ypos);
+// 
+// 				ImVec2 pMin = { fminf(xpos, mCursorPosX), fminf(ypos, mCursorPosY) };
+// 				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };			
+// 
+// 				// visible rectangle
+// 				if (pMin.x != pMax.x || pMin.y != pMax.y) {
+// 					// fill
+// 					ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
+// 					// border
+// 					ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+// 				}
+// 			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -474,6 +474,8 @@ namespace dyno
 			// if(mOpenCameraRotate)
 			camera->registerPoint((float)xpos, (float)ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
+
+			activeWindow->imWindow()->mousePressEvent(mouseEvent);
 		}
 		else
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -481,7 +483,10 @@ namespace dyno
 		if (action == GLFW_RELEASE)
 		{
 			activeWindow->setButtonState(GLFW_UP);
+
+			activeWindow->imWindow()->mouseReleaseEvent(mouseEvent);
 		}
+
 
 		// update cursor position record
 		if (action == GLFW_PRESS)
@@ -522,6 +527,8 @@ namespace dyno
 		{
 			camera->translateToPoint(x, y);
 		}
+
+		activeWindow->imWindow()->mouseMoveEvent(mouseEvent);
 	}
 
 	void GlfwApp::cursorEnterCallback(GLFWwindow* window, int entered)

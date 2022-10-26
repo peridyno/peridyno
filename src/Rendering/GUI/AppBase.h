@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include "SceneGraphFactory.h"
+
 namespace dyno
 {
 	class SceneGraph;
@@ -24,13 +26,11 @@ namespace dyno
 		virtual std::shared_ptr<Camera> getCamera() { return mCamera; }
 		virtual void setCamera(std::shared_ptr<Camera> camera) { mCamera = camera; }
 
-		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return mSceneGraph; }
-		virtual void setSceneGraph(std::shared_ptr<SceneGraph> scene) { mSceneGraph = scene; }
+		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return SceneGraphFactory::instance()->active(); }
+		virtual void setSceneGraph(std::shared_ptr<SceneGraph> scene) { SceneGraphFactory::instance()->pushScene(scene); }
 
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
 		std::shared_ptr<Camera>			mCamera;
-		std::shared_ptr<SceneGraph>		mSceneGraph;
 	};
-
 }

@@ -157,7 +157,6 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
-
 		auto camera = mApp->getCamera();
 		camera->registerPoint(event->x(), event->y());
 		mButtonState = QButtonState::QBUTTON_DOWN;
@@ -174,6 +173,8 @@ namespace dyno
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		activeScene->onMouseEvent(mouseEvent);
+
+		mImWindow.mousePressEvent(mouseEvent);
 
 		updateGrpahicsContext();
 	}
@@ -196,6 +197,8 @@ namespace dyno
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		activeScene->onMouseEvent(mouseEvent);
+
+		mImWindow.mouseReleaseEvent(mouseEvent);
 
 		updateGrpahicsContext();
 	}
@@ -231,6 +234,8 @@ namespace dyno
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		activeScene->onMouseEvent(mouseEvent);
+
+		mImWindow.mouseMoveEvent(mouseEvent);
 
 		updateGrpahicsContext();
 	}
