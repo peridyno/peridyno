@@ -6,7 +6,7 @@
 #include "Node.h"
 
 #include "SceneGraph.h"
-#include "GLSurfaceVisualModule.h"
+#include "GLInstanceVisualModule.h"
 
 using namespace dyno;
 
@@ -55,14 +55,14 @@ int main(int, char**)
 	auto instanceNode = scn->addNode(std::make_shared<Instances>());
 
 	// config instance rendering
-	auto instanceRender = std::make_shared<GLSurfaceVisualModule>();
+	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
 	//instanceRender->setAlpha(0.5f);
 	//instanceRender->varUseVertexNormal()->setValue(true);
 
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
-	instanceNode->stateTransforms()->connect(instanceRender->stateInstanceTransform());
-	instanceNode->stateColors()->connect(instanceRender->stateInstanceColor());
+	instanceNode->stateTransforms()->connect(instanceRender->inInstanceTransform());
+	instanceNode->stateColors()->connect(instanceRender->inInstanceColor());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
 	scn->setUpperBound({ 4, 4, 4});

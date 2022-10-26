@@ -33,7 +33,7 @@ namespace dyno
 		GLSurfaceVisualModule();
 
 	public:
-		std::string caption() override;
+		virtual std::string caption() override;
 
 		DECLARE_ENUM(EColorMode,
 			CM_Object = 0,
@@ -48,8 +48,8 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 		// for instanced rendering
-		DEF_ARRAY_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "");
-		DEF_ARRAY_STATE(Vec3f, InstanceColor, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Transform3f, InstanceTransform, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, InstanceColor, DeviceType::GPU, "");
 
 	protected:
 		virtual void paintGL(GLRenderPass mode) override;
