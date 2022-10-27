@@ -15,7 +15,6 @@ namespace dyno
 {
 	class SceneGraph;
 	class Node;
-	class Camera;
 
 	struct RenderParams
 	{
@@ -62,9 +61,6 @@ namespace dyno
 
 		bool showAxisHelper = true;
 		bool showSceneBounds = false;
-
-		int viewPortflag = -1;
-		bool useFXAA = true;
 	};
 
 	struct SelectionItem {
@@ -77,17 +73,14 @@ namespace dyno
 	{
 	public:
 		virtual void initialize(int width, int height) = 0;
-		virtual void draw(SceneGraph* scene) = 0;
+		virtual void draw(SceneGraph* scene, const RenderParams& rparams) = 0;
 		virtual void resize(int w, int h) = 0;
 
 		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) = 0;
 
-		// TODO: re-organize
-		RenderParams* renderParams() { return &m_rparams; }
-
+	public:
 		virtual std::string name() = 0;
-	protected:
-		RenderParams m_rparams;
+
 	};
 };
 

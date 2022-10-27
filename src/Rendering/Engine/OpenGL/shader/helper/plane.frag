@@ -37,7 +37,7 @@ void main(void) {
 		nodes[freeNodeIndex].color = vec4(shading * f, 0.5);
 		nodes[freeNodeIndex].depth = gl_FragCoord.z;
 		nodes[freeNodeIndex].nextIndex = nextIndex;
-		nodes[freeNodeIndex].geometryID = uVars.index;
+		nodes[freeNodeIndex].geometryID = -1;
 		nodes[freeNodeIndex].instanceID = -1;
 	}
 }

@@ -224,9 +224,9 @@ namespace dyno
 			
 			activeScene->updateGraphicsContext();
 				
-			mRenderEngine->renderParams()->proj = mCamera->getProjMat();
-			mRenderEngine->renderParams()->view = mCamera->getViewMat();
-			mRenderEngine->draw(activeScene.get());
+			mRenderParams.proj = mCamera->getProjMat();
+			mRenderParams.view = mCamera->getViewMat();
+			mRenderEngine->draw(activeScene.get(), mRenderParams);
 
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
@@ -246,8 +246,8 @@ namespace dyno
 
 			if (currNode) {
 
-				auto view = getRenderEngine()->renderParams()->view;
-				auto proj = getRenderEngine()->renderParams()->proj;
+				auto view = getRenderParams().view;
+				auto proj = getRenderParams().proj;
 
 				ImGuiIO& io = ImGui::GetIO();
 				ImGuizmo::BeginFrame();
@@ -318,12 +318,6 @@ namespace dyno
 	}
 
 
-	void GlfwApp::setWindowSize(int width, int height)
-	{
-		getCamera()->setWidth(width);
-		getCamera()->setHeight(height);
-		getRenderEngine()->resize(width, height);
-	}
 
 	bool GlfwApp::saveScreen(const std::string &file_name) const
 	{
@@ -421,18 +415,18 @@ namespace dyno
 
 			// in picking
 			int x = fmin(xpos, activeWindow->getCursorPosX());
-			int y = fmin(ypos, activeWindow->getCursorPosY());
+			int y = fmax(ypos, activeWindow->getCursorPosY());
 			int w = fabs(xpos - activeWindow->getCursorPosX());
 			int h = fabs(ypos - activeWindow->getCursorPosY());
+			// flip y to texture space...
+			y = activeWindow->getHeight() - y - 1;
 
 			auto items = activeWindow->mRenderEngine->select(x, y, w, h);
-
 			// print selected result...
-			printf("Picking: (%.0f, %.0f) - (%.0f, %.0f), %d items...\n",
-				activeWindow->getCursorPosX(), activeWindow->getCursorPosY(),
-				xpos, ypos, items.size());
+			printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
 
 			if (!items.empty()) {
+				// pick the last one?
 				auto node = items[0].node;
 				int instance = items[0].instance;
 
