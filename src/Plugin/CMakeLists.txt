@@ -72,7 +72,7 @@ endmacro()
        
 option(PERIDYNO_LIBRARY_ABCExporter "Enable binding the abc exporter library" ON)
 
-if(PERIDYNO_LIBRARY_ABCExporter)
+if(PERIDYNO_LIBRARY_ALEMBIC AND PERIDYNO_LIBRARY_ABCExporter)
     set(LIB_DEPENDENCY Core Framework Alembic)
     build_library(ABCExporter LIB_DEPENDENCY)
 endif()
