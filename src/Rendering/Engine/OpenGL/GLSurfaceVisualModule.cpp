@@ -10,10 +10,7 @@ namespace dyno
 	GLSurfaceVisualModule::GLSurfaceVisualModule()
 	{
 		this->setName("surface_renderer");
-
 		this->inColor()->tagOptional(true);
-		this->inInstanceTransform()->tagOptional(true);
-		this->inInstanceColor()->tagOptional(true);
 	}
 
 	std::string GLSurfaceVisualModule::caption()
@@ -88,40 +85,18 @@ namespace dyno
 			glDisableVertexAttribArray(2);
 		}
 
-		// update instance transforms
-		auto transforms = this->inInstanceTransform()->getDataPtr();
+		mInstanceCount = 0;
 
-		if (transforms) {
-			mInstanceCount = transforms->size();
-			mInstanceBuffer.loadCuda(transforms->begin(), transforms->size() * sizeof(Transform3f));
+		// unbind instance buffer
+		glDisableVertexAttribArray(3);
+		glDisableVertexAttribArray(4);
+		glDisableVertexAttribArray(5);
+		glDisableVertexAttribArray(6);
+		glDisableVertexAttribArray(7);
 
-			// instance colors if available
-			auto colors = this->inInstanceColor()->getDataPtr();
-			if (colors && colors->size() == mInstanceCount) {
-				mColorBuffer.loadCuda(colors->begin(), colors->size() * sizeof(Vec3f));
-				mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, sizeof(Vec3f), 0, 1);
-			}
-
-			// bind the translation vector
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), 0, 1);
-			// bind the scale vector
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), sizeof(Vec3f), 1);
-			// bind the rotation matrix
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), 2 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), 3 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
-		}
-		else {
-			mInstanceCount = 0;
-
-			// unbind instance buffer
-			glDisableVertexAttribArray(3);
-			glDisableVertexAttribArray(4);
-			glDisableVertexAttribArray(5);
-			glDisableVertexAttribArray(6);
-			glDisableVertexAttribArray(7);
-		}
 		mVAO.unbind();
+
+	
 	}
 
 	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)

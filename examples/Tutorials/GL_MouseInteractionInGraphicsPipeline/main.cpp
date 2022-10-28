@@ -6,7 +6,7 @@
 #include "Node.h"
 
 #include "SceneGraph.h"
-#include "GLSurfaceVisualModule.h"
+#include "GLInstanceVisualModule.h"
 #include "CustomMouseInteraction.h"
 #include "Algorithm/Reduction.h"
 
@@ -45,7 +45,7 @@ public:
 		transformCPU = tm;
 	}
 
-	void setSurfaceVisualModule(std::shared_ptr<GLSurfaceVisualModule> m) {
+	void setSurfaceVisualModule(std::shared_ptr<GLInstanceVisualModule> m) {
 		topology.connect(m->inTriangleSet());
 		transform.connect(m->inInstanceTransform());
 
@@ -101,7 +101,7 @@ int main(int, char**)
 		node->setMesh(triSet);
 		node->setTransform(tm);
 
-		auto sm = std::make_shared<GLSurfaceVisualModule>();
+		auto sm = std::make_shared<GLInstanceVisualModule>();
 		sm->setColor(Vec3f(i * 0.2f, i * 0.2f, 1.f - i * 0.1f));
 		sm->setAlpha(0.8f);
 
