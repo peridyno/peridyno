@@ -1,0 +1,100 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "SharedDataInFluid.glsl"
+
+layout(std430, binding = 0) buffer VelUOut {
+	float vel_u[ ];
+};
+
+layout(std430, binding = 1) buffer VelVOut {
+	float vel_v[ ];
+};
+
+layout(std430, binding = 2) buffer VelWOut {
+	float vel_w[ ];
+};
+
+layout(std430, binding = 3) buffer PressureIn {
+	float pressure[ ];
+};
+
+layout(std430, binding = 4) buffer MassIn {
+	float mass[ ];
+};
+
+layout(std430, binding = 5) buffer SDFIn {
+	float boundarySDF[ ];
+};
+
+layout (binding = 6) uniform UBO {
+	Array3DInfo arrayInfo;
+} params;
+
+layout (push_constant) uniform PushConsts {
+    float dt;
+};
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+    Array3DInfo aMassInfo = params.arrayInfo;
+    uint i = id.x;
+    uint j = id.y;
+    uint k = id.z;
+	if (!inside(i, j, k, aMassInfo)) 
+		return;
+
+    uint nx = aMassInfo.nx;
+    uint ny = aMassInfo.ny;
+    uint nz = aMassInfo.nz;
+    uint nxy = aMassInfo.nxy;
+
+    Array3DInfo aUInfo = params.arrayInfo;  aUInfo.nx = nx+1;   aUInfo.nxy = aUInfo.nx * aUInfo.ny;
+    Array3DInfo aVInfo = params.arrayInfo;  aVInfo.ny = ny+1;   aVInfo.nxy = aVInfo.nx * aVInfo.ny;
+    Array3DInfo aWInfo = params.arrayInfo;  aWInfo.nz = nz+1;   aWInfo.nxy = aWInfo.nx * aWInfo.ny;
+
+    if (i == 0) { vel_u[INDEX(i, j, k, aUInfo)] = 0.0; }
+    if (i == nx - 1) { vel_u[INDEX(i + 1, j, k, aUInfo)] = 0.0; }
+    if (j == 0) { vel_v[INDEX(i, j, k, aVInfo)] = 0.0; }
+    if (j == ny - 1) { vel_v[INDEX(i, j + 1, k, aVInfo)] = 0.0; }
+    if (k == 0) { vel_w[INDEX(i, j, k, aWInfo)] = 0.0; }
+    if (k == nz - 1) { vel_w[INDEX(i, j, k + 1, aWInfo)] = 0.0; }
+    
+    uint index = INDEX(i, j, k, aMassInfo);
+    
+    float m_ijk = mass[index];
+    float s_ijk = CalculateBoundaryFraction(boundarySDF[index], DEF_H);
+
+    float h = DEF_H;
+
+    if(i > 0)
+    {
+        float c = 0.5f*(mass[index - 1] + m_ijk);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[index - 1], DEF_H));
+        c = c > 1.0 ? 1.0 : c;
+        c = c < 0.0 ? 0.0 : c;
+        vel_u[INDEX(i, j, k, aUInfo)] -= dt*(pressure[index] - pressure[index - 1]) / h / CalculateDensity(c, s);
+    }
+    
+    if(j > 0)
+    {
+        float c = 0.5f*(m_ijk + mass[index - nx]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[index - nx], DEF_H));
+        c = c > 1.0 ? 1.0 : c;
+        c = c < 0.0 ? 0.0 : c;
+        vel_v[INDEX(i, j, k, aVInfo)] -= dt*(pressure[index] - pressure[index - nx]) / h / CalculateDensity(c, s);
+    }
+    
+    if(k > 0)
+    {
+        float c = 0.5f*(m_ijk + mass[index - nxy]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[index - nxy], DEF_H));
+        c = c > 1.0 ? 1.0 : c;
+        c = c < 0.0 ? 0.0 : c;
+        vel_w[INDEX(i, j, k, aWInfo)] -= dt*(pressure[index] - pressure[index - nxy]) / h / CalculateDensity(c, s);
+    }
+}

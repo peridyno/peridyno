@@ -1,0 +1,75 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_shader_atomic_float : enable
+#include "SharedData.glsl"
+
+layout(std430, binding = 0) buffer AccelIn {
+	vec3 accel[ ];
+};
+
+layout(std430, binding = 1) buffer LambdaIn {
+	float lambda[ ];
+};
+
+layout(std430, binding = 2) buffer BIn {
+	vec3 B[ ];
+};
+
+layout(std430, binding = 3) buffer ContactsIn {
+	ContactPair contacts[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+    uint contactCount;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.contactCount) 
+		return;
+
+	int id0 = contacts[index].id0;
+    int id1 = contacts[index].id1;
+    uint cType = contacts[index].cType;
+
+	float lambda_i = lambda[index];
+
+	vec3 B1 = lambda_i*B[4*index];
+	vec3 B2 = lambda_i*B[4*index + 1];
+	vec3 B3 = lambda_i*B[4*index + 2];
+	vec3 B4 = lambda_i*B[4*index + 3];
+
+	// accel[2*id0] += J1;
+	// accel[2*id0 + 1] = J2; 
+	// atomicAdd(accel[2*id0].x, B1.x);
+	// atomicAdd(accel[2*id0].y, B1.y);
+	// atomicAdd(accel[2*id0].z, B1.z);
+
+	accel[2*id0] += B1;
+
+	// atomicAdd(accel[2*id0 + 1].x, B2.x);
+	// atomicAdd(accel[2*id0 + 1].y, B2.y);
+	// atomicAdd(accel[2*id0 + 1].z, B2.z);
+
+	accel[2*id0 + 1] += B2;
+
+	if (id1 != INVALID_ID) {
+		// accel[2*id1] += J3;
+		// accel[2*id1 + 1] = J4; 
+		// atomicAdd(accel[2*id1].x, B3.x);
+		// atomicAdd(accel[2*id1].y, B3.y);
+		// atomicAdd(accel[2*id1].z, B3.z);
+
+		// atomicAdd(accel[2*id1 + 1].x, B4.x);
+		// atomicAdd(accel[2*id1 + 1].y, B4.y);
+		// atomicAdd(accel[2*id1 + 1].z, B4.z);
+
+		accel[2*id1] += B3;
+		accel[2*id1 + 1] += B4;
+	}
+}

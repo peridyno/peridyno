@@ -1,0 +1,95 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "../rigidbody/SharedData.glsl"
+#include "CollisionDetection.glsl"
+#include "../math/Quat.glsl"
+
+layout(std430, binding = 0) buffer NumOut {
+	int num[ ];
+};
+
+layout(std430, binding = 1) buffer PairIn {
+	uvec2 pairIds[ ];
+};
+
+layout(std430, binding = 2) buffer BoxIn {
+	Box boxes[ ];
+};
+
+layout(std430, binding = 3) buffer CapsuleIn {
+	Capsule capsules[ ];
+};
+
+layout(std430, binding = 4) buffer SphereIn {
+	Sphere spheres[ ];
+};
+
+layout(std430, binding = 5) buffer ShapeTypeIn {
+	ShapeType sType[ ];
+};
+
+layout (binding = 6) uniform UniformOffset {
+	ElementOffset eleOffset;
+} params;
+
+layout (push_constant) uniform PushConsts {
+    uint contactNum;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.contactNum) 
+		return;
+
+	uvec2 pair_i = pairIds[index];
+	ElementOffset eleOffset = params.eleOffset;
+
+	ShapeType sA = sType[pair_i.x];
+	ShapeType sB = sType[pair_i.y];
+
+	Manifold m;
+	m.contactCount = 0;
+	if((ST_Box & sA) > 0 && (ST_Box & sB) > 0)
+	{
+		OBBtoOBB(m, boxes[pair_i.x], boxes[pair_i.y]);
+		num[index] = m.contactCount;
+		//debugPrintfEXT("%u: %u %u \n", index, sA, sB);
+	}
+	else if((ST_Sphere & sA) > 0 && (ST_Sphere & sB) > 0)
+	{
+		SpheretoSphere(m, spheres[pair_i.x - eleOffset.capsule_bound], spheres[pair_i.y - eleOffset.capsule_bound]);
+		num[index] = m.contactCount;
+	}
+	else if((ST_Segement & sA) > 0 && (ST_Segement & sB) > 0)
+	{
+		CapsuletoCapsule(m, capsules[pair_i.x - eleOffset.box_bound], capsules[pair_i.y - eleOffset.box_bound]);
+		num[index] = m.contactCount;
+	}
+	else if(((ST_Sphere & sA) > 0 && (ST_Segement & sB) > 0) || ((ST_Segement & sA) > 0 && (ST_Sphere & sB) > 0))
+	{
+		uint iA = (ST_Sphere & sA) > 0 ? pair_i.x : pair_i.y;
+		uint iB = (ST_Sphere & sA) > 0 ? pair_i.y : pair_i.x;
+		SpheretoCapsule(m, spheres[iA - eleOffset.capsule_bound], capsules[iB - eleOffset.box_bound]);
+		num[index] = m.contactCount;
+	}
+	else if(((ST_Sphere & sA) > 0 && (ST_Box & sB) > 0) || ((ST_Box & sA) > 0 && (ST_Sphere & sB) > 0))
+	{
+		uint iA = (ST_Sphere & sA) > 0 ? pair_i.x : pair_i.y;
+		uint iB = (ST_Sphere & sA) > 0 ? pair_i.y : pair_i.x;
+		SpheretoBox(m, spheres[iA - eleOffset.capsule_bound], boxes[iB]);
+		num[index] = m.contactCount;
+	}
+	else if(((ST_Segement & sA) > 0 && (ST_Box & sB) > 0) || ((ST_Box & sA) > 0 && (ST_Segement & sB) > 0))
+	{
+		uint iA = (ST_Segement & sA) > 0 ? pair_i.x : pair_i.y;
+		uint iB = (ST_Segement & sA) > 0 ? pair_i.y : pair_i.x;
+		CapsuletoBox(m, capsules[iA - eleOffset.box_bound], boxes[iB]);
+		num[index] = m.contactCount;
+	}
+}

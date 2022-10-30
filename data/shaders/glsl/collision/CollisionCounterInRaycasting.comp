@@ -1,0 +1,129 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+
+#include "../rigidbody/SharedData.glsl"
+#include "../math/Primitive3D.glsl"
+#include "../math/Quat.glsl"
+
+layout(std430, binding = 0) buffer CenterIn {
+	int count[ ];
+};
+
+layout(std430, binding = 1) buffer BoxOut {
+	Box boxes[ ];
+};
+
+layout(std430, binding = 2) buffer CapsuleOut {
+	Capsule capsules[ ];
+};
+
+layout(std430, binding = 3) buffer SphereOut {
+	Sphere spheres[ ];
+};
+
+layout (binding = 4) uniform UniformOffset {
+	ElementOffset eleOffset;
+};
+
+layout (binding = 5) uniform UniformRay {
+	Ray3D ray;
+};
+
+layout (local_size_x = 64) in;
+
+layout (push_constant) uniform PushConsts {
+	uint totalNum;
+} pushConsts;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.totalNum) 
+		return;
+
+	ElementOffset offset = eleOffset;
+	
+	Ray3D rayPrime;
+
+	vec4 quat;
+	vec3 center;
+	AABB3D abox;
+	uint shapeType = ST_Other;
+	if(index < eleOffset.box_bound)
+	{
+		uint bId = index;
+		Box box_i = boxes[bId];
+		vec3 halfLength = box_i.halfLength.xyz;
+
+		quat =  box_i.rot;
+		center = box_i.center.xyz;
+
+		abox.v0 = -halfLength;
+		abox.v1 = halfLength;
+
+		//rotate ray
+		vec4 quat_inverse = quat;
+		quat_inverse.w = -quat.w;
+		rayPrime.origin = quat_rotate(quat_inverse, ray.origin - center);
+		rayPrime.direction = quat_rotate(quat_inverse, ray.direction);
+
+		//collision detection
+		Segment3D interSeg;
+		if(intersect(interSeg, rayPrime, abox) > 0)
+		{
+			count[index] = 1;
+		}
+		else
+			count[index] = 0;
+	}
+	else if(index < eleOffset.capsule_bound)
+	{
+        uint cId = index - eleOffset.box_bound;
+		Capsule capsule_i = capsules[cId];
+
+		quat =  capsule_i.rot;
+		center = capsule_i.center.xyz;
+
+		abox.v0 = -vec3(capsule_i.halfLength, capsule_i.radius, capsule_i.radius);
+		abox.v1 = vec3(capsule_i.halfLength, capsule_i.radius, capsule_i.radius);
+
+		//rotate ray
+		vec4 quat_inverse = quat;
+		quat_inverse.w = -quat.w;
+		rayPrime.origin = quat_rotate(quat_inverse, ray.origin - center);
+		rayPrime.direction = quat_rotate(quat_inverse, ray.direction);
+
+		//collision detection
+		Segment3D interSeg;
+		if(intersect(interSeg, rayPrime, abox) > 0)
+		{
+			count[index] = 1;
+		}
+		else
+			count[index] = 0;
+	}
+    else
+	{
+		uint sId = index - eleOffset.capsule_bound;
+		Sphere sphere_i = spheres[sId];
+
+		Sphere3D sphere3d;
+		sphere3d.center = sphere_i.center;
+		sphere3d.radius = sphere_i.radius;
+
+		//rotate ray
+		rayPrime = ray;
+
+		//collision detection
+		Segment3D interSeg;
+		if(intersect(interSeg, rayPrime, sphere3d) > 0)
+		{
+			count[index] = 1;
+		}
+		else
+			count[index] = 0;
+	}
+}

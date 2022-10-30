@@ -1,0 +1,81 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "../rigidbody/SharedData.glsl"
+#include "../math/Quat.glsl"
+
+layout(std430, binding = 0) buffer ConstraintsOut {
+	ConstraintPair constraints[ ];
+};
+
+layout(std430, binding = 1) buffer ContactsIn {
+	ContactPair contacts[ ];
+};
+
+layout(std430, binding = 2) buffer CenterIn {
+	vec3 centers[ ];
+};
+
+layout(std430, binding = 3) buffer QuatIn {
+	vec4 quats[ ];
+};
+
+layout (binding = 4) uniform CNT {
+    uint contactCount;
+};
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= contactCount) 
+		return;
+
+    ContactPair contact_i = contacts[index];
+    ConstraintPair constraint_i;
+
+    constraint_i.id0 = contact_i.id0;
+    constraint_i.id1 = contact_i.id1;
+
+    constraint_i.posDOF = 0;
+    constraint_i.rotDOF = 3;
+    constraint_i.distance = 0;
+
+    vec4 p0 = contact_i.pos0 + 0.5 * contact_i.distance * contact_i.normal0;
+    vec4 p1 = contact_i.pos0 - 0.5 * contact_i.distance * contact_i.normal0;
+
+    constraint_i.r0 = vec4(quat_rotate(quat_conj(quats[contact_i.id0]), p0.xyz - centers[contact_i.id0]), 0);
+    constraint_i.r1 = constraint_i.id1 >= 0 ? vec4(quat_rotate(quat_conj(quats[contact_i.id1]), p1.xyz - centers[contact_i.id1]), 0) : p1;
+
+    // vec3 dd = contact_i.pos0.xyz - centers[contact_i.id0];
+    // debugPrintfEXT("distance: %f \n", contact_i.distance);
+
+    // vec4 quat0 = quat_mul(constraint_i.frame0, quats[contact_i.id0]);
+	// vec4 quat1 = quat_mul(constraint_i.frame1, quats[contact_i.id1]);	
+
+	// vec3 r0 = quat_rotate(quat0, constraint_i.r0.xyz);
+	// vec3 r1 = quat_rotate(quat1, constraint_i.r1.xyz);
+
+	// vec3 r = centers[contact_i.id1] + r1 - centers[contact_i.id0] - r0;
+
+	// if(index == 0)
+	// {
+    //     debugPrintfEXT("constraint_i.r0: %d %f %f %f \n", constraint_i.id0, constraint_i.r0.x, constraint_i.r0.y, constraint_i.r0.z);
+    //     debugPrintfEXT("constraint_i.r1: %d %f %f %f \n", constraint_i.id1, constraint_i.r1.x, constraint_i.r1.y, constraint_i.r1.z);
+
+    //     debugPrintfEXT("quat0: %f %f %f %f \n", constraint_i.r0.x, constraint_i.r0.y, constraint_i.r0.z, constraint_i.r0.w);
+    //     debugPrintfEXT("quat1: %f %f %f %f \n", constraint_i.r1.x, constraint_i.r1.y, constraint_i.r1.z, constraint_i.r0.w);
+
+    //     debugPrintfEXT("r0: %f %f %f \n", r0.x, r0.y, r0.z);
+    //     debugPrintfEXT("r1: %f %f %f \n", r1.x, r1.y, r1.z);
+
+    //     debugPrintfEXT("before: %f %f %f \n", constraint_i.r0.x, constraint_i.r0.y, constraint_i.r0.z);
+    //     debugPrintfEXT("after: %f %f %f \n", r0.x, r0.y, r0.z);
+    //     debugPrintfEXT("r: %f \n", r);
+	// }
+
+    constraints[index] = constraint_i;
+}

@@ -1,0 +1,63 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../math/Quat.glsl"
+#include "SharedDataHeightField.glsl"
+
+layout(std430, binding = 0) buffer Height{
+	vec4 height[];
+};
+
+layout(std430, binding = 1) buffer DeviceGrid{
+	vec4 deviceGrid[];
+};
+
+layout(binding = 2) uniform HeightInfo{
+	Array2DInfo heightInfo;
+}params1;
+
+layout(binding = 3) uniform DeviceGridInfo{
+	Array2DInfo deviceGridInfo;
+}params2;
+
+layout(binding = 4) uniform OtherInfo{
+	vec2 otherInfo;
+}pushConsts;
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+
+void main(){
+	uvec3 id = gl_GlobalInvocationID; 
+	uint i = id.x;
+	uint j = id.y;
+	
+	Array2DInfo HeightArrayInfo = params1.heightInfo;
+	if (!inside(i, j, HeightArrayInfo)) 
+		return;
+	uint patchSize = HeightArrayInfo.ny;
+	
+	Array2DInfo deviceInfo = params2.deviceGridInfo;	
+	
+	vec2 otherInfo = pushConsts.otherInfo;
+	float horizon = otherInfo.x;
+	float realSize = otherInfo.y;
+	
+	uint index = INDEX(i, j, HeightArrayInfo);
+
+
+		
+	uint gridx = i + 1;
+	uint gridy = j + 1;
+
+	vec4 gp;
+	gp = deviceGrid[INDEX(gridx, gridy, deviceInfo)];
+	
+	height[index].x = gp.x - horizon;
+
+	float d = sqrt((i - patchSize / 2)*(i - patchSize / 2) + (j - patchSize / 2)*(j - patchSize / 2));
+	float q = d / (0.49*patchSize);
+
+	float weight = q < 1.0 ? 1.0 - q * q : 0.0;
+	height[index].y = 1.3 * realSize * sin(3.0f*weight*height[index].x*0.5*M_PI);
+
+}

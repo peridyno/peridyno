@@ -19,26 +19,26 @@ namespace dyno
 
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>::SquareMatrix(T x00, T x01, T x02, T x10, T x11, T x12, T x20, T x21, T x22)
-		: data_(x00, x10, x20,
-			x01, x11, x21,
-			x02, x12, x22)
 	{
-
+		data_[0] = Vector<T, 3>(x00, x10, x20);
+		data_[1] = Vector<T, 3>(x01, x11, x21);
+		data_[2] = Vector<T, 3>(x02, x12, x22);
 	}
 
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>::SquareMatrix(const Vector<T, 3> &row1, const Vector<T, 3> &row2, const Vector<T, 3> &row3)
-		:data_(row1[0], row2[0], row3[0],
-			row1[1], row2[1], row3[1],
-			row1[2], row2[2], row3[2])
 	{
-
+		data_[0] = Vector<T, 3>(row1[0], row2[0], row3[0]);
+		data_[1] = Vector<T, 3>(row1[1], row2[1], row3[1]);
+		data_[2] = Vector<T, 3>(row1[2], row2[2], row3[2]);
 	}
 
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>::SquareMatrix(const SquareMatrix<T, 3>& mat)
 	{
-		data_ = mat.data_;
+		data_[0] = mat.data_[0];
+		data_[1] = mat.data_[1];
+		data_[2] = mat.data_[2];
 	}
 
 	template <typename T>
@@ -98,7 +98,9 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator+= (const SquareMatrix<T, 3> &mat2)
 	{
-		data_ += mat2.data_;
+		data_[0] += mat2.data_[0];
+		data_[1] += mat2.data_[1];
+		data_[2] += mat2.data_[2];
 		return *this;
 	}
 
@@ -111,14 +113,18 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator-= (const SquareMatrix<T, 3> &mat2)
 	{
-		data_ -= mat2.data_;
+		data_[0] -= mat2.data_[0];
+		data_[1] -= mat2.data_[1];
+		data_[2] -= mat2.data_[2];
 		return *this;
 	}
 
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator=(const SquareMatrix<T, 3> &mat2)
 	{
-		data_ = mat2.data_;
+		data_[0] = mat2.data_[0];
+		data_[1] = mat2.data_[1];
+		data_[2] = mat2.data_[2];
 		return *this;
 	}
 
@@ -143,7 +149,9 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator*= (const T& scale)
 	{
-		data_ *= scale;
+		data_[0] *= scale;
+		data_[1] *= scale;
+		data_[2] *= scale;
 		return *this;
 	}
 
@@ -166,7 +174,17 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator*= (const SquareMatrix<T, 3> &mat2)
 	{
-		data_ *= mat2.data_;
+		SquareMatrix<T, 3> t = transpose();
+		(*this)(0, 0) = t.data_[0].dot(mat2.data_[0]);
+		(*this)(0, 1) = t.data_[0].dot(mat2.data_[1]);
+		(*this)(0, 2) = t.data_[0].dot(mat2.data_[2]);
+		(*this)(1, 0) = t.data_[1].dot(mat2.data_[0]);
+		(*this)(1, 1) = t.data_[1].dot(mat2.data_[1]);
+		(*this)(1, 2) = t.data_[1].dot(mat2.data_[2]);
+		(*this)(2, 0) = t.data_[2].dot(mat2.data_[0]);
+		(*this)(2, 1) = t.data_[2].dot(mat2.data_[1]);
+		(*this)(2, 2) = t.data_[2].dot(mat2.data_[2]);
+
 		return *this;
 	}
 
@@ -179,20 +197,29 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator/= (const SquareMatrix<T, 3> &mat2)
 	{
-		data_ *= glm::inverse(mat2.data_);
+		SquareMatrix<T, 3> t = SquareMatrix<T, 3>(*this) * mat2.inverse();
+		*this = t;
+
 		return *this;
 	}
 
 	template <typename T>
 	DYN_FUNC const SquareMatrix<T, 3> SquareMatrix<T, 3>::operator/ (const T& scale) const
 	{
-		return SquareMatrix<T, 3>(*this) /= scale;
+		SquareMatrix<T, 3> res;
+		res.data_[0] = data_[0] / scale;
+		res.data_[1] = data_[1] / scale;
+		res.data_[2] = data_[2] / scale;
+
+		return res;
 	}
 
 	template <typename T>
 	DYN_FUNC SquareMatrix<T, 3>& SquareMatrix<T, 3>::operator/= (const T& scale)
 	{
-		data_ /= scale;
+		data_[0] /= scale;
+		data_[1] /= scale;
+		data_[2] /= scale;
 		return *this;
 	}
 
@@ -200,7 +227,9 @@ namespace dyno
 	DYN_FUNC const SquareMatrix<T, 3> SquareMatrix<T, 3>::operator- (void) const
 	{
 		SquareMatrix<T, 3> res;
-		res.data_ = -data_;
+		res.data_[0] = -data_[0];
+		res.data_[1] = -data_[1];
+		res.data_[2] = -data_[2];
 		return res;
 	}
 
@@ -208,15 +237,36 @@ namespace dyno
 	DYN_FUNC const SquareMatrix<T, 3> SquareMatrix<T, 3>::transpose() const
 	{
 		SquareMatrix<T, 3> res;
-		res.data_ = glm::transpose(data_);
+		res.data_[0][0] = data_[0][0];
+		res.data_[0][1] = data_[1][0];
+		res.data_[0][2] = data_[2][0];
+
+		res.data_[1][0] = data_[0][1];
+		res.data_[1][1] = data_[1][1];
+		res.data_[1][2] = data_[2][1];
+
+		res.data_[2][0] = data_[0][2];
+		res.data_[2][1] = data_[1][2];
+		res.data_[2][2] = data_[2][2];
+
 		return res;
 	}
 
 	template <typename T>
 	DYN_FUNC const SquareMatrix<T, 3> SquareMatrix<T, 3>::inverse() const
 	{
+		T OneOverDeterminant = static_cast<T>(1) / determinant();
+
 		SquareMatrix<T, 3> res;
-		res.data_ = glm::inverse(data_);
+		res.data_[0][0] = +(data_[1][1] * data_[2][2] - data_[2][1] * data_[1][2]) * OneOverDeterminant;
+		res.data_[1][0] = -(data_[1][0] * data_[2][2] - data_[2][0] * data_[1][2]) * OneOverDeterminant;
+		res.data_[2][0] = +(data_[1][0] * data_[2][1] - data_[2][0] * data_[1][1]) * OneOverDeterminant;
+		res.data_[0][1] = -(data_[0][1] * data_[2][2] - data_[2][1] * data_[0][2]) * OneOverDeterminant;
+		res.data_[1][1] = +(data_[0][0] * data_[2][2] - data_[2][0] * data_[0][2]) * OneOverDeterminant;
+		res.data_[2][1] = -(data_[0][0] * data_[2][1] - data_[2][0] * data_[0][1]) * OneOverDeterminant;
+		res.data_[0][2] = +(data_[0][1] * data_[1][2] - data_[1][1] * data_[0][2]) * OneOverDeterminant;
+		res.data_[1][2] = -(data_[0][0] * data_[1][2] - data_[1][0] * data_[0][2]) * OneOverDeterminant;
+		res.data_[2][2] = +(data_[0][0] * data_[1][1] - data_[1][0] * data_[0][1]) * OneOverDeterminant;
 
 		return res;
 	}
@@ -224,7 +274,9 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC T SquareMatrix<T, 3>::determinant() const
 	{
-		return glm::determinant(data_);
+		return data_[0][0] * (data_[1][1] * data_[2][2] - data_[2][1] * data_[1][2])
+			 - data_[1][0] * (data_[0][1] * data_[2][2] - data_[2][1] * data_[0][2])
+			 + data_[2][0] * (data_[0][1] * data_[1][2] - data_[1][1] * data_[0][2]);
 	}
 
 	template <typename T>

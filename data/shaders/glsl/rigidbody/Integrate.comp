@@ -1,0 +1,24 @@
+#version 450
+
+layout(std430, binding = 0) buffer boxIn {
+	vec3 center[ ];
+};
+
+layout (local_size_x = 64) in;
+
+layout (push_constant) uniform PushConsts {
+	uint boxCount;
+} pushConsts;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.boxCount) 
+		return;
+
+	vec3 c_i = center[index];
+
+	center[index] = c_i + vec3(0.0, 0.01, 0.0);
+}

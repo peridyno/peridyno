@@ -1,0 +1,75 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "../array/ArrayList.glsl"
+
+layout(std430, binding = 0) buffer NewPosOut {
+	vec3 newPos[ ];
+};
+
+layout(std430, binding = 1) buffer CurrentPosIn {
+	vec3 curPos[ ];
+};
+
+layout(std430, binding = 2) buffer RestPosIn {
+	vec3 restPos[ ];
+};
+
+layout(std430, binding = 3) buffer RadixIn {
+	uint radix[ ];
+};
+
+layout(std430, binding = 4) buffer ElementIn {
+	uint elements[ ];
+};
+
+layout (binding = 5) uniform UBO {
+	ArrayListInfo aListInfo;
+};
+
+layout (push_constant) uniform PushConsts {
+    uint vertexCount;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+
+uint getSize(uint index, ArrayListInfo info)
+{
+    return index == info.arraySize - 1 ? info.totalSize - radix[index] : radix[index + 1] - radix[index];
+}
+
+uint getNeighborId(uint i, uint j)
+{
+    return elements[radix[i]+j];
+}
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.vertexCount) 
+		return;
+
+    uint num = getSize(index, aListInfo);
+
+    uint start = radix[index];
+    vec3 restPos_i = restPos[index];
+    vec3 curPos_i = curPos[index];
+    
+    vec3 force = vec3(0);
+    for(uint ne = 0; ne < num; ne++)
+    {
+        uint j = getNeighborId(index, ne);
+
+        vec3 restPos_j = restPos[j];
+        vec3 curPos_j = curPos[j];
+
+        vec3 curPos_ij = curPos_j - curPos_i;
+        vec3 restPos_ij = restPos_j - restPos_i;
+        force += (length(curPos_ij) - length(restPos_ij)) * curPos_ij / length(curPos_ij);
+    }
+
+    newPos[index] = newPos[index] + 0.01*force;
+}

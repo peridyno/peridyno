@@ -1,0 +1,22 @@
+#version 450
+
+layout(std430, binding = 0) buffer ScalarIO {
+	float scalar[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+    uint num;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.num) 
+		return;
+
+    scalar[index] = 0;
+}        

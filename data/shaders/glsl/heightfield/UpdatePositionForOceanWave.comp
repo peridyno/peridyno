@@ -1,0 +1,34 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../math/Quat.glsl"
+#include "SharedDataHeightField.glsl"
+
+layout(std430, binding = 0) buffer OceanVertex{
+	vec4 oceanVertex[];
+};
+
+layout(binding = 1) buffer NewVertex {
+	vec3 data[];
+};
+
+layout(binding = 2) uniform Translation{
+	vec3 translation;
+};
+
+layout(push_constant) uniform PushConsts
+{
+  int n;
+} consts;
+
+layout (local_size_x = 256) in;
+
+
+void main(){
+	uint index = gl_GlobalInvocationID.x;
+	if(index > consts.n) return;
+	
+	data[index].x = translation.x + oceanVertex[index].x;
+	data[index].y = translation.y - oceanVertex[index].y;
+	data[index].z = translation.z + oceanVertex[index].z;
+	//data[index].pos.w = oceanVertex[index].w;	
+}

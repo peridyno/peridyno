@@ -1,0 +1,40 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../math/Quat.glsl"
+#include "SharedDataHeightField.glsl"
+
+layout(std430, binding = 0) buffer DeviceGrid {
+	vec4 deviceGrid[ ];
+};
+
+layout (binding = 1) uniform UBO {
+	Array2DInfo arrayInfo;
+} params;
+
+layout (push_constant) uniform Horizon {
+	float horizon;
+} pushConsts;
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+	uint x = id.x;
+	uint y = id.y;
+	
+	Array2DInfo DeviceGridInfo = params.arrayInfo;
+	if (!inside(x, y, DeviceGridInfo)) 
+		return;
+
+	uint index = INDEX(x, y, DeviceGridInfo);
+
+		
+	deviceGrid[index].x = pushConsts.horizon;
+	deviceGrid[index].y = 0;
+	deviceGrid[index].z = 0;
+	deviceGrid[index].w = 0;
+		
+	if((x-256)*(x-256)+(y-256)*(y-256) <=2500)  deviceGrid[index].x = 2.5;
+	
+}

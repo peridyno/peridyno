@@ -1,0 +1,117 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#extension GL_EXT_shader_atomic_float : enable
+#include "SharedDataInFluid.glsl"
+
+layout(std430, binding = 0) buffer DensityOut {
+	float dst[ ];
+};
+
+layout(std430, binding = 1) buffer NormalIn {
+	vec3 normals[ ];
+};
+
+layout(std430, binding = 2) buffer DensityIn {
+	float src[ ];
+};
+
+layout(std430, binding = 3) buffer VelUIn {
+	float vel_u[ ];
+};
+
+layout(std430, binding = 4) buffer VelVIn {
+	float vel_v[ ];
+};
+
+layout(std430, binding = 5) buffer VelWIn {
+	float vel_w[ ];
+};
+
+layout (binding = 6) uniform UBO {
+	Array3DInfo arrayInfo;
+} params;
+
+layout (push_constant) uniform PushConsts {
+    float dt;
+};
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID;
+
+    Array3DInfo aInfo = params.arrayInfo;
+    uint i = id.x;
+    uint j = id.y;
+    uint k = id.z;
+	if (!inside(i, j, k, aInfo)) 
+		return;
+
+    uint nx = aInfo.nx;
+    uint ny = aInfo.ny;
+    uint nz = aInfo.nz;
+    uint nxy = aInfo.nxy;
+
+    Array3DInfo aUInfo = params.arrayInfo;  aUInfo.nx = nx+1;   aUInfo.nxy = aUInfo.nx * aUInfo.ny;
+    Array3DInfo aVInfo = params.arrayInfo;  aVInfo.ny = ny+1;   aVInfo.nxy = aVInfo.nx * aVInfo.ny;
+    Array3DInfo aWInfo = params.arrayInfo;  aWInfo.nz = nz+1;   aWInfo.nxy = aWInfo.nx * aWInfo.ny;
+
+    uint i_plus = clamp(i + 1, 0, nx - 1);
+    uint j_plus = clamp(j + 1, 0, ny - 1);
+    uint k_plus = clamp(k + 1, 0, nz - 1);
+
+    uint k0 = INDEX(i, j, k, aInfo), k1;
+    vec3 n0 = normals[k0], n1;
+    float c1, c0, dc, ceo = FLUID_BETA / DEF_H;
+
+    float weight = 0.0f;
+
+    //-----------------------------------------------------------------------
+    //i and i+1
+    if (i < nx - 1)
+    {
+        k1 = INDEX(i_plus, j, k, aInfo);
+        n1 = normals[k1];
+
+        c1 = src[k1] * (1.0f - src[k1])*n1.x / DEF_OMEGA;
+        c0 = src[k0] * (1.0f - src[k0])*n0.x / DEF_OMEGA;
+
+        dc = 0.5f*(c1 + c0)*ceo*dt;
+
+        weight = SharpeningWeight(vel_u[INDEX(i + 1, j, k, aUInfo)]*dt / DEF_H);
+        atomicAdd(dst[k0], -weight*dc);
+        atomicAdd(dst[k1], weight*dc);
+    }
+    //j and j+1
+    if (j < ny - 1)
+    {
+        k1 = INDEX(i, j_plus, k, aInfo);
+        n1 = normals[k1];
+
+        c1 = src[k1] * (1.0f - src[k1])*n1.y / DEF_OMEGA;
+        c0 = src[k0] * (1.0f - src[k0])*n0.y / DEF_OMEGA;
+
+        dc = 0.5f*(c1 + c0)*ceo*dt;
+
+        weight = SharpeningWeight(vel_v[INDEX(i, j + 1, k, aVInfo)]*dt / DEF_H);
+        atomicAdd(dst[k0], -weight*dc);
+        atomicAdd(dst[k1], weight*dc);
+    }
+    //k and k+1
+    if (k < nz - 1)
+    {
+        k1 = INDEX(i, j, k_plus, aInfo);
+        n1 = normals[k1];
+
+        c1 = src[k1] * (1.0f - src[k1])*n1.z / DEF_OMEGA;
+        c0 = src[k0] * (1.0f - src[k0])*n0.z / DEF_OMEGA;
+
+        dc = 0.5f*(c1 + c0)*ceo*dt;
+
+        weight = SharpeningWeight(vel_w[INDEX(i, j, k + 1, aWInfo)]*dt / DEF_H);
+        atomicAdd(dst[k0], -weight*dc);
+        atomicAdd(dst[k1], weight*dc);
+    }
+}

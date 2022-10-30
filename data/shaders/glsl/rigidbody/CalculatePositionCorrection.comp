@@ -1,0 +1,67 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "SharedData.glsl"
+#include "../math/Quat.glsl"
+
+layout(std430, binding = 0) buffer CorrPosOut {
+	vec3 corrPos[ ];
+};
+
+layout(std430, binding = 1) buffer CenterIn {
+	vec3 center[ ];
+};
+
+layout(std430, binding = 2) buffer QuatIn {
+	vec4 quat[ ];
+};
+
+layout(std430, binding = 3) buffer ConstraintsIn {
+	ConstraintPair constraints[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+    uint constraintCount;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.constraintCount) 
+		return;
+
+	ConstraintPair cp = constraints[index];
+	int id0 = cp.id0;
+	int id1 = cp.id1;
+
+	vec4 quat0 = quat_mul(cp.frame0, quat[id0]);
+	vec4 quat1 = quat_mul(cp.frame1, quat[id1]);
+
+	vec3 r0 = quat_rotate(quat0, cp.r0.xyz);
+	vec3 r1 = quat_rotate(quat1, cp.r1.xyz);
+	vec3 r = center[id1] + r1 - center[id0] - r0;
+
+	if (cp.posDOF == 0u) { // P2P(distance), Hinge, ConeTwist, Fixed
+		float d = length(r);
+		corrPos[index] = (d >= EPSILON ? 1.0f - cp.distance / d : 0.0f) * r;
+	}
+	else if (cp.posDOF == 1u) { // Slider
+		vec3 n0 = quat_rotate(quat0, cp.n00.xyz);
+		float pr = dot(r, n0);
+		vec3 prn0 = pr * n0;
+		// apply linear limits
+		corrPos[index] = r - clamp(pr, cp.lowerPos[0], cp.upperPos[0]) * n0;
+		r0 += prn0;
+	}
+	else { // Gen6DOF
+		vec3 rr = quat_rotate(quat_inverse(quat0), r); // r in frame 0
+		corrPos[index] = r - quat_rotate(quat0, clamp(rr, cp.lowerPos.xyz, cp.upperPos.xyz));
+		r0 += r;
+	}
+
+	constraints[index].r00.xyz = r0;
+	constraints[index].r11.xyz = r1;
+}

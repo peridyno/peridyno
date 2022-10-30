@@ -120,7 +120,11 @@ namespace dyno
 	{
 		if (mUpdateEnabled)
 		{
+#ifdef CUDA_BACKEND
 			GTimer timer;
+#else
+			CTimer timer;
+#endif // CUDA_BACKEND
 			for(auto m : mModuleList)
 			{
 				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
@@ -136,7 +140,7 @@ namespace dyno
 					std::stringstream name;
 					std::stringstream ss;
 					name << std::setw(40) << m->getClassInfo()->getClassName();
-					ss << std::setprecision(10) << timer.getEclipsedTime();
+					ss << std::setprecision(10) << timer.getElapsedTime();
 
 					std::string info = "\t Module: " + name.str() + ": \t " + ss.str() + "ms";
 					Log::sendMessage(Log::Info, info);

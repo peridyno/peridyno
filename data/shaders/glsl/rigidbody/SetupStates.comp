@@ -1,0 +1,126 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "SharedData.glsl"
+#include "../math/Quat.glsl"
+
+layout(std430, binding = 0) buffer boxIn {
+	BodyDef boxes[ ];
+};
+
+layout(std430, binding = 1) buffer CenterOut {
+	vec3 center[ ];
+};
+
+layout(std430, binding = 2) buffer MassOut {
+	float mass[ ];
+};
+
+layout(std430, binding = 3) buffer MassInvOut {
+	float massInv[ ];
+};
+
+layout(std430, binding = 4) buffer VelocityOut {
+	vec3 velocity[ ];
+};
+
+layout(std430, binding = 5) buffer AngularVelocityOut {
+	vec3 angularVelocity[ ];
+};
+
+layout(std430, binding = 6) buffer ForceExtOut {
+	vec3 forceExt[ ];
+};
+
+layout(std430, binding = 7) buffer TorqueExtOut {
+	vec3 torqueExt[ ];
+};
+
+layout(std430, binding = 8) buffer GravityOut {
+	vec3 gravity[ ];
+};
+
+layout(std430, binding = 9) buffer QuatOut {
+	vec4 quat[ ];
+};
+
+layout(std430, binding = 10) buffer InertiaOut {
+	mat3 inertia[ ];
+};
+
+layout(std430, binding = 11) buffer InertiaInvOut {
+	mat3 inertiaInv[ ];
+};
+
+layout(std430, binding = 12) buffer InertiaWorldInvOut {
+	mat3 inertiaWorldInv[ ];
+};
+
+layout(std430, binding = 13) buffer FrictionOut {
+	float friction[ ];
+};
+
+layout(std430, binding = 14) buffer ResOut {
+	float restitution[ ];
+};
+
+layout(std430, binding = 15) buffer BodyTypeOut {
+	uint type[ ];
+};
+
+layout(std430, binding = 16) buffer NumJointsOut {
+	uint nJoints[ ];
+};
+
+layout(std430, binding = 17) buffer CollisionMaskOut {
+	uint mask[ ];
+};
+
+layout(std430, binding = 18) buffer ShapeTypeOut {
+	uint shapeType[ ];
+};
+
+layout (local_size_x = 64) in;
+
+layout (push_constant) uniform PushConsts {
+	uint boxCount;
+} pushConsts;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.boxCount) 
+		return;
+
+	type[index] = boxes[index].type;
+	mass[index] = boxes[index].mass;
+	massInv[index] = 1.0f / boxes[index].mass * float(type[index] != Static);
+
+	center[index] = boxes[index].position.xyz;
+	velocity[index] = boxes[index].linearVelocity.xyz;
+	angularVelocity[index] = boxes[index].angularVelocity.xyz;
+	forceExt[index] = boxes[index].extForce.xyz;
+	torqueExt[index] = boxes[index].extTorque.xyz;
+	gravity[index] = boxes[index].gravity.xyz;
+
+	quat[index] = boxes[index].quat;
+
+	mat3 R = quat_to_mat3(boxes[index].quat);
+	mat3 I = boxes[index].inertia;
+	mat3 invI = inverse(I) * float(type[index] != Static);
+
+	inertia[index] = I;
+	inertiaInv[index] = invI;
+	inertiaWorldInv[index] = R*invI*transpose(R);
+
+	friction[index] = boxes[index].friction;
+	restitution[index] = boxes[index].restitution;
+
+	nJoints[index] = boxes[index].nJoints;
+	mask[index] = boxes[index].cType;
+	shapeType[index] = boxes[index].sType;
+
+	debugPrintfEXT("%d %f %f %f \n %f %f %f \n %f %f %f \n", index, boxes[index].inertia[0][0], boxes[index].inertia[0][1], boxes[index].inertia[0][2], boxes[index].inertia[1][0], boxes[index].inertia[1][1], boxes[index].inertia[1][2], boxes[index].inertia[2][0], boxes[index].inertia[2][1], boxes[index].inertia[2][2]);
+}

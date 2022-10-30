@@ -1,5 +1,6 @@
 #include "Field.h"
 #include "DeclareEnum.h"
+#include "Vector.h"
 
 namespace dyno 
 {

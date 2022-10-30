@@ -1,0 +1,36 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "SharedDataInElasticBody.glsl"
+
+layout(std430, binding = 0) buffer VelocityInout {
+	vec3 velocity[ ];
+};
+
+layout(std430, binding = 1) buffer CurrentPos {
+	vec3 curPos[ ];
+};
+
+layout(std430, binding = 2) buffer PreviousPos {
+	vec3 prePos[ ];
+};
+
+layout (binding = 3) uniform Parameters {
+	SolverParams params;
+};
+
+layout (push_constant) uniform PushConsts {
+    uint vertexCount;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.vertexCount) 
+		return;
+
+    velocity[index] = params.damping*(velocity[index] + (curPos[index] - prePos[index]) / params.dt);
+}

@@ -1,0 +1,103 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../math/Quat.glsl"
+#include "SharedDataHeightField.glsl"
+
+layout(std430, binding = 0) buffer OceanVertex{
+	vec4 oceanVertex[];
+};
+
+layout(std430, binding = 1) buffer Displacement {
+	vec4 displacement[];
+};
+
+layout(binding = 2) uniform OceanInfo{
+	Array2DInfo oceanInfo;
+};
+
+layout(binding = 3) uniform PatchInfo{
+	Array2DInfo patchInfo;
+};
+
+layout(binding = 4) uniform OtherArrayInfo{
+	WaveParameters otherArrayInfo;
+}params2;
+
+
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+
+vec4 getdisplacementDataById(int id){
+	vec4 D = displacement[id];
+	
+	return D;
+}
+void main(){
+	uvec3 threadId = gl_GlobalInvocationID; 
+	uint i = threadId.x;
+	uint j = threadId.y;
+	
+	Array2DInfo Info = patchInfo;
+	if (!inside(i, j, Info)) 
+		return;
+	int width = int(Info.nx);
+	int height = int(Info.ny);
+	
+	WaveParameters OtherInfo = params2.otherArrayInfo;
+	float choppiness = OtherInfo.choppiness;
+	float realSize = OtherInfo.realGridSize;
+	float virtualSize = OtherInfo.virtualGridSize;
+	float globalShift = OtherInfo.globalShift;
+	
+	uint tiledX = oceanInfo.nx / patchInfo.nx;
+	uint tiledY = oceanInfo.ny / patchInfo.ny;
+	
+	const float largeScale = 0.001f;
+
+	int id = int(INDEX(i, j, Info));
+	
+	
+	vec4 D_ij = getdisplacementDataById(id);
+	
+	
+	float scaledSize = realSize *virtualSize;
+	vec4 v;
+	
+	for (uint t = 0; t < tiledX; t++)
+	{
+		for (uint s = 0; s < tiledY; s++)
+		{
+			int ix = int(i + t*width);
+			int iy = int(j + s*height);
+
+			float tx = ix * largeScale;
+			float ty = iy * largeScale;
+
+			float fx = tx - floor(tx);
+			float fy = ty - floor(ty);
+			fx *= (width - 1);
+			fy *= (width - 1);
+			int lx = int(floor(fx));
+			int ly = int(floor(fy));
+
+			fx -= lx;
+			fy -= ly;
+
+			int id = lx + ly*width;
+			vec4 d00 = getdisplacementDataById(id);
+			vec4 d10 = getdisplacementDataById(id+1);
+			vec4 d01 = getdisplacementDataById(id + width);
+			vec4 d11 = getdisplacementDataById(id + width + 1);
+
+			vec4 df = d00*(1 - fx)*(1 - fy) + d10*fx*(1 - fy) + d01*(1 - fx)*fy + d11*fx*fy;
+
+			v.x = ix * scaledSize + choppiness* scaledSize * D_ij.x +df.x * scaledSize * globalShift;
+			v.y = D_ij.y*scaledSize + df.y * scaledSize * globalShift;
+			v.z = iy * scaledSize + choppiness*scaledSize*D_ij.z +df.y * scaledSize * globalShift;
+
+			oceanVertex[iy * oceanInfo.nx + ix] = v;
+		}
+	}
+
+}

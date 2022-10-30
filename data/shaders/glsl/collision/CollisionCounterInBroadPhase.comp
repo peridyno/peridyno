@@ -1,0 +1,50 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "CollisionDetectionInBroadPhase.glsl"
+#include "../math/Quat.glsl"
+
+layout(std430, binding = 0) buffer NumOut {
+	int num[ ];
+};
+
+layout(std430, binding = 1) buffer BoxIn {
+	AlignedBox3D boxes[ ];
+};
+
+layout(std430, binding = 2) buffer CollisionTypeIn {
+	CollisionType cType[ ];
+};
+
+layout(std430, binding = 3) buffer ShapeTypeIn {
+	ShapeType sType[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+    uint boxCount;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.boxCount) 
+		return;
+
+    int num_i = 0;
+    AlignedBox3D box_i = boxes[index];
+    CollisionType cType_i = cType[index];
+    ShapeType sType_i = sType[index];
+    for(uint j = index + 1; j < pushConsts.boxCount; j++)
+    {
+        CollisionType cType_j = cType[j];
+        ShapeType sType_j = sType[j];
+
+        if(filterCollision(box_i, boxes[j], cType_i, cType_j, sType_i, sType_j))
+            num_i++;
+    }
+
+    num[index] = num_i;
+}

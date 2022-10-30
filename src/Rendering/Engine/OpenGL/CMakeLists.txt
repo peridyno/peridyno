@@ -33,6 +33,7 @@ add_library(${LIB_NAME} SHARED ${SOURCES} ${SHADER_FILES} ${SHADER_HEADER_FILE})
 target_link_libraries(${LIB_NAME} PUBLIC
 	Core 
 	Framework 
+	Topology
 	RenderCore 
 	glad 
 	imgui)

@@ -1,0 +1,135 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../math/Quat.glsl"
+#include "SharedDataHeightField.glsl"
+#extension GL_EXT_debug_printf : enable
+layout(std430, binding = 0) buffer DeviceGridNext{
+	vec4 deviceGridNext[];
+};
+
+layout(std430, binding = 1) buffer DeviceGrid{
+	vec4 deviceGrid[];
+};
+
+layout(binding = 2) uniform DeviceGridArray2DInfo{
+	Array2DInfo deviceInfo;
+}params;
+
+layout (push_constant) uniform Timestep{
+	float timestep;
+} pushConsts;
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+vec4[3] FixShore(vec4 l, vec4 c, vec4 r){
+	vec4 tmp[3];
+	if (r.x < 0.0f || l.x < 0.0f || c.x < 0.0f)
+	{
+		c.x = c.x + l.x + r.x;
+		c.x = max(0.0f, c.x);
+		l.x = 0.0f;
+		r.x = 0.0f;
+	}
+	float h = c.x;
+	float h4 = h * h * h * h;
+	float v = sqrt(2.0f) * h * c.y / (sqrt(h4 + max(h4, EPSILON)));
+	float u = sqrt(2.0f) * h * c.z / (sqrt(h4 + max(h4, EPSILON)));
+
+	c.y = u * h;
+	c.z = v * h;
+	
+	tmp[0] = l;
+	tmp[1] = c;
+	tmp[2] = r;
+	
+	return tmp;
+	
+}
+
+vec4 VerticalPotential(vec4 gp)
+{
+	float h = max(gp.x, 0.0f);
+	float uh = gp.y;
+	float vh = gp.z;
+
+	float h4 = h * h * h * h;
+	float v = sqrt(2.0f) * h * vh / (sqrt(h4 + max(h4, EPSILON)));
+
+	vec4 G;
+	G.x = v * h;
+	G.y = uh * v;
+	G.z = vh * v + GRAVITY * h * h;
+	G.w = 0.0f;
+	return G;
+}
+
+vec4 HorizontalPotential(vec4 gp)
+{
+	float h = max(gp.x, 0.0f);
+	float uh = gp.y;
+	float vh = gp.z;
+
+	float h4 = h * h * h * h;
+	float u = sqrt(2.0f) * h * uh / (sqrt(h4 + max(h4, EPSILON)));
+
+	vec4 F;
+	F.x = u * h;
+	F.y = uh * u + GRAVITY * h * h;
+	F.z = vh * u;
+	F.w = 0.0f;
+	return F;
+}
+vec4 SlopeForce(vec4 c, vec4 n, vec4 e, vec4 s, vec4 w)
+{
+	float h = max(c.x, 0.0f);
+
+	vec4 H;
+	H.x = 0.0f;
+	H.y = -GRAVITY * h * (e.w - w.w);
+	H.z = -GRAVITY * h * (s.w - n.w);
+	H.w = 0.0f;
+	return H;
+}
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+	uint x = id.x;
+	uint y = id.y;
+
+	Array2DInfo DeviceGridInfo = params.deviceInfo;
+	if (!inside(x, y, DeviceGridInfo)) 
+		return;
+
+	uint gridx = x + 1;
+	uint gridy = y + 1;
+
+	vec4 center, north, west, south, east;
+	center = deviceGrid[INDEX(gridx, gridy, DeviceGridInfo)];
+	north = deviceGrid[INDEX(gridx, gridy - 1, DeviceGridInfo)];
+	west = deviceGrid[INDEX(gridx - 1, gridy, DeviceGridInfo)];
+	south = deviceGrid[INDEX(gridx, gridy + 1, DeviceGridInfo)];
+	east = deviceGrid[INDEX(gridx + 1, gridy, DeviceGridInfo)];
+
+	vec4 tmp[3];
+	tmp = FixShore(west, center, east);
+	west = tmp[0];
+	center = tmp[1];
+	east = tmp[2];
+	
+	
+	tmp = FixShore(north, center, south);
+	north = tmp[0];
+	center = tmp[1];
+	south = tmp[2];
+
+	vec4 u_south = 0.5f * (south + center) - pushConsts.timestep * (VerticalPotential(south) - VerticalPotential(center));
+	vec4 u_north = 0.5f * (north + center) - pushConsts.timestep * (VerticalPotential(center) - VerticalPotential(north));
+	vec4 u_west =  0.5f * (west + center) - pushConsts.timestep * (HorizontalPotential(center) - HorizontalPotential(west));
+	vec4 u_east  = 0.5f * (east + center) - pushConsts.timestep * (HorizontalPotential(east) - HorizontalPotential(center));
+	
+
+	vec4 u_center = center + pushConsts.timestep * SlopeForce(center, north, east, south, west) - pushConsts.timestep * (HorizontalPotential(u_east) - HorizontalPotential(u_west)) - pushConsts.timestep * (VerticalPotential(u_south) - VerticalPotential(u_north));
+	u_center.x = max(0, u_center.x);
+
+	deviceGridNext[INDEX(gridx, gridy, DeviceGridInfo)] = u_center;
+}

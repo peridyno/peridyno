@@ -1,0 +1,65 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "SharedData.glsl"
+
+layout(std430, binding = 0) buffer CallBackIdOut {
+	int callBackId[ ];
+};
+
+layout(std430, binding = 1) buffer Key0Out {
+	int key0[ ];
+};
+
+layout(std430, binding = 2) buffer Value0Out {
+	int  value0[ ];
+};
+
+layout(std430, binding = 3) buffer Value1Out {
+	int  value1[ ];
+};
+
+layout(std430, binding = 4) buffer ContactIn {
+    ContactPair contacts[ ];
+};
+
+layout (binding=5) uniform Parameters {
+	uint size;
+} parameters;
+
+layout (push_constant) uniform PushConsts {
+	uint contactCount;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= parameters.size)
+		return;
+
+	key0[index] = 0;
+	
+    ContactPair contact_i = contacts[index];
+
+    int _id0 = contact_i.id0;
+    int _id1 = contact_i.id1;
+	
+	value0[index] = _id0;
+	value1[index] = _id1;
+	
+	
+	if(_id0 == contacts[index+1].id0 && _id1 == contacts[index+1].id1)
+	   return;
+	 
+	for(uint i = 0 ; i < pushConsts.contactCount ; i++){
+		if(callBackId[i] == _id0 || callBackId[i] == _id1){	
+		
+			key0[index] = 1;
+			
+		}
+	}
+	
+}

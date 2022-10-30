@@ -7,10 +7,12 @@
 
 #include <assert.h>
 #include <stdio.h>
+#ifdef CUDA_BACKEND
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <vector_types.h>
 #include <vector_functions.h>
+#endif // CUDA_BACKEDN
 #include <iostream>
 #include <stdexcept>
 #include <limits>
@@ -37,6 +39,7 @@ namespace dyno {
 	constexpr Real REAL_MIN = (std::numeric_limits<Real>::min)();
 	constexpr uint BLOCK_SIZE = 64;
 
+#ifdef CUDA_BACKEND
 	static uint iDivUp(uint a, uint b)
 	{
 		return (a % b != 0) ? (a / b + 1) : (a / b);
@@ -156,6 +159,7 @@ namespace dyno {
 		cuSynchronize();									\
 	}
 
+#endif
 
 	class Bool
 	{

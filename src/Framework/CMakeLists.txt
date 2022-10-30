@@ -1,7 +1,6 @@
 ﻿set(LIB_NAME Framework)
 
-#set(LIB_SRC_DIR "${PROJECT_SOURCE_DIR}/src/${LIB_NAME}")
-file(                                                                           #利用glob命令读取所有源文件list
+file(
     GLOB_RECURSE LIB_SRC 
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
@@ -9,6 +8,8 @@ file(                                                                           
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 	"${CMAKE_CURRENT_SOURCE_DIR}/*.inl"
 )
+
+list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/tinyxml/tinyxml2.cpp")
 
 add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
@@ -24,6 +25,9 @@ endif()
 if(WIN32)
     target_compile_options(${LIB_NAME} PRIVATE -Xcompiler "/wd 4819") 
 endif()
+
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
+add_compile_definitions(_ENABLE_EXTENDED_ALIGNED_STORAGE)
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")

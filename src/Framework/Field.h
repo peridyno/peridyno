@@ -18,10 +18,13 @@
 #include <stdlib.h>
 #include <sstream>
 #include "FBase.h"
-#include "Array/Array.h"
-#include "Array/Array2D.h"
-#include "Array/Array3D.h"
-#include "Array/ArrayList.h"
+
+#ifdef CUDA_BACKEND
+	#include "Array/Array.h"
+	#include "Array/Array2D.h"
+	#include "Array/Array3D.h"
+	#include "Array/ArrayList.h"
+#endif
 
 namespace dyno {
 	/*!
@@ -100,6 +103,7 @@ namespace dyno {
 	template<typename T>
 	using DeviceVarField = FVar<T>;
 
+#ifdef CUDA_BACKEND
 	/**
 	 * Define field for Array
 	 */
@@ -466,6 +470,7 @@ namespace dyno {
 
 		this->tick();
 	}
+#endif
 }
 
 //#nclude "FSerialization.inl"

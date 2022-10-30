@@ -1,0 +1,118 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "SharedDataInFluid.glsl"
+
+layout(std430, binding = 0) buffer DensityOut {
+	float dst[ ];
+};
+
+layout(std430, binding = 1) buffer DensityIn {
+	float src[ ];
+};
+
+layout(std430, binding = 2) buffer VelocityIn {
+	vec3 velocity[ ];
+};
+
+layout (binding = 3) uniform UBO {
+	Array3DInfo arrayInfo;
+} params;
+
+layout (push_constant) uniform PushConsts {
+    float dt;
+};
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+    Array3DInfo aInfo = params.arrayInfo;
+    uint i = id.x;
+    uint j = id.y;
+    uint k = id.z;
+	if (!inside(i, j, k, aInfo)) 
+		return;
+
+    uint nx = aInfo.nx;
+    uint ny = aInfo.ny;
+    uint nz = aInfo.nz;
+    uint nxy = aInfo.nxy;
+
+    uint index = INDEX(i, j, k, aInfo);
+
+    vec3 vel_ijk = velocity[index];
+			
+    uint ix, iy, iz;
+    float fx, fy, fz;
+    float w000, w100, w010, w001, w111, w011, w101, w110;
+
+    fx = i - vel_ijk.x*dt;
+    fy = j - vel_ijk.y*dt;
+    fz = k - vel_ijk.z*dt;
+
+    if (fx < 0.0) fx = 0.0;
+    if (fx > nx - 1) fx = nx - 1.0;
+    if (fy < 0.0) fy = 0.0f;
+    if (fy > ny - 1) fy = ny - 1.0;
+    if (fz < 0.0) fz = 0.0f;
+    if (fz > nz - 1) fz = nz - 1.0;
+
+    ix = uint(fx);      iy = uint(fy);		iz = uint(fz);
+    fx -= ix;			fy -= iy;			fz -= iz;
+
+    if (ix == nx - 1) { ix = nx - 2; fx = 1.0; }
+    if (iy == ny - 1) { iy = ny - 2; fy = 1.0; }
+    if (iz == nz - 1) { iz = nz - 2; fz = 1.0; }
+
+    w000 = (1.0f - fx)*(1.0f - fy)*(1.0f - fz);
+    w100 = fx*(1.0f - fy)*(1.0f - fz);
+    w010 = (1.0f - fx)*fy*(1.0f - fz);
+    w001 = (1.0f - fx)*(1.0f - fy)*fz;
+    w111 = fx*fy*fz;
+    w011 = (1.0f - fx)*fy*fz;
+    w101 = fx*(1.0f - fy)*fz;
+    w110 = fx*fy*(1.0f - fz);
+
+    uint k0 = INDEX(ix, iy, iz, aInfo);
+
+    vec3 vel = w000*velocity[k0] + w100*velocity[k0 + 1] +
+        w010*velocity[k0 + nx] + w001*velocity[k0 + nxy] +
+        w111*velocity[k0 + 1 + nx + nxy] + w011*velocity[k0 + nx + nxy] +
+        w101*velocity[k0 + 1 + nxy] + w110*velocity[k0 + 1 + nx];
+
+    vel_ijk = (vel + vel_ijk) * 0.5f;
+    fx = i - vel_ijk.x*dt;
+    fy = j - vel_ijk.y*dt;
+    fz = k - vel_ijk.z*dt;
+
+    if (fx < 0.0) fx = 0.0;
+    if (fx > nx - 1) fx = nx - 1.0;
+    if (fy < 0.0) fy = 0.0f;
+    if (fy > ny - 1) fy = ny - 1.0;
+    if (fz < 0.0) fz = 0.0f;
+    if (fz > nz - 1) fz = nz - 1.0;
+
+    ix = uint(fx);      iy = uint(fy);		iz = uint(fz);
+    fx -= ix;			fy -= iy;			fz -= iz;
+
+    if (ix == nx - 1) { ix = nx - 2; fx = 1.0; }
+    if (iy == ny - 1) { iy = ny - 2; fy = 1.0; }
+    if (iz == nz - 1) { iz = nz - 2; fz = 1.0; }
+
+    w000 = (1.0f - fx)*(1.0f - fy)*(1.0f - fz);
+    w100 = fx*(1.0f - fy)*(1.0f - fz);
+    w010 = (1.0f - fx)*fy*(1.0f - fz);
+    w001 = (1.0f - fx)*(1.0f - fy)*fz;
+    w111 = fx*fy*fz;
+    w011 = (1.0f - fx)*fy*fz;
+    w101 = fx*(1.0f - fy)*fz;
+    w110 = fx*fy*(1.0f - fz);
+
+    k0 = INDEX(ix, iy, iz, aInfo);
+
+    dst[index] = w000*src[k0] + w100*src[k0 + 1] + w010*src[k0 + nx] + w001*src[k0 + nxy]
+        + w111*src[k0 + 1 + nx + nxy] + w011*src[k0 + nx + nxy] + w101*src[k0 + 1 + nxy] + w110*src[k0 + 1 + nx];
+}

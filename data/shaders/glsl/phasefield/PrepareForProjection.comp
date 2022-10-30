@@ -1,0 +1,172 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "SharedDataInFluid.glsl"
+
+layout(std430, binding = 0) buffer CoefOut {
+	Coefficent coefMatrix[ ];
+};
+
+layout(std430, binding = 1) buffer RHSOut {
+	float RHS[ ];
+};
+
+layout(std430, binding = 2) buffer VelUIn {
+	float vel_u[ ];
+};
+
+layout(std430, binding = 3) buffer VelVIn {
+	float vel_v[ ];
+};
+
+layout(std430, binding = 4) buffer VelWIn {
+	float vel_w[ ];
+};
+
+layout(std430, binding = 5) buffer MassIn {
+	float mass[ ];
+};
+
+layout(std430, binding = 6) buffer SDFIn {
+	float boundarySDF[ ];
+};
+
+layout (binding = 7) uniform UBO {
+	Array3DInfo arrayInfo;
+} params;
+
+layout (push_constant) uniform PushConsts {
+    float dt;
+};
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+    Array3DInfo aMassInfo = params.arrayInfo;
+    uint i = id.x;
+    uint j = id.y;
+    uint k = id.z;
+	if (!inside(i, j, k, aMassInfo)) 
+		return;
+
+    uint nx = aMassInfo.nx;
+    uint ny = aMassInfo.ny;
+    uint nz = aMassInfo.nz;
+    uint nxy = aMassInfo.nxy;
+
+    Array3DInfo aUInfo = params.arrayInfo;  aUInfo.nx = nx+1;   aUInfo.nxy = aUInfo.nx * aUInfo.ny;
+    Array3DInfo aVInfo = params.arrayInfo;  aVInfo.ny = ny+1;   aVInfo.nxy = aVInfo.nx * aVInfo.ny;
+    Array3DInfo aWInfo = params.arrayInfo;  aWInfo.nz = nz+1;   aWInfo.nxy = aWInfo.nx * aWInfo.ny;
+
+    uint index = INDEX(i, j, k, aMassInfo);
+
+    float h = DEF_H;
+    float hh = h*h;
+
+    float div_ijk = 0.0f;
+
+    Coefficent A_ijk;
+
+    A_ijk.a = 0.0f;
+    A_ijk.x0 = 0.0f;
+    A_ijk.x1 = 0.0f;
+    A_ijk.y0 = 0.0f;
+    A_ijk.y1 = 0.0f;
+    A_ijk.z0 = 0.0f;
+    A_ijk.z1 = 0.0f;
+
+    float m_ijk = mass[index];
+    float s_ijk = CalculateBoundaryFraction(boundarySDF[index], DEF_H);
+
+    if (i+1 < nx) {
+        float c = 0.5f*(m_ijk + mass[INDEX(i+1, j, k, aMassInfo)]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[INDEX(i+1, j, k, aMassInfo)], DEF_H));
+        c = c > 1.0f ? 1.0f : c;
+        c = c < 0.0f ? 0.0f : c;
+        float term = dt / hh / CalculateDensity(c, s);
+
+        A_ijk.a += term;
+        A_ijk.x1 += term;
+    }
+    div_ijk -= vel_u[INDEX(i+1, j, k, aUInfo)] / h;
+
+    //left neighbour
+    if (i-1 >= 0) {
+        float c = 0.5f*(m_ijk + mass[INDEX(i-1, j, k, aMassInfo)]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[INDEX(i-1, j, k, aMassInfo)], DEF_H));
+        c = c > 1.0f ? 1.0f : c;
+        c = c < 0.0f ? 0.0f : c;
+        float term = dt / hh / CalculateDensity(c, s);
+
+        A_ijk.a += term;
+        A_ijk.x0 += term;
+    }
+    div_ijk += vel_u[INDEX(i, j, k, aUInfo)] / h;
+
+    //top neighbour
+    if (j+1 < ny) {
+        float c = 0.5f*(m_ijk + mass[INDEX(i, j+1, k, aMassInfo)]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[INDEX(i, j+1, k, aMassInfo)], DEF_H));
+        c = c > 1.0f ? 1.0f : c;
+        c = c < 0.0f ? 0.0f : c;
+        float term = dt / hh / CalculateDensity(c, s);
+
+        A_ijk.a += term;
+        A_ijk.y1 += term;
+    }
+    div_ijk -= vel_v[INDEX(i, j+1, k, aVInfo)] / h;
+
+    //bottom neighbour
+    if (j-1 >= 0) {
+        float c = 0.5f*(m_ijk + mass[INDEX(i, j-1, k, aMassInfo)]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[INDEX(i, j-1, k, aMassInfo)], DEF_H));
+        c = c > 1.0f ? 1.0f : c;
+        c = c < 0.0f ? 0.0f : c;
+        float term = dt / hh / CalculateDensity(c, s);
+
+        A_ijk.a += term;
+        A_ijk.y0 += term;
+    }
+    div_ijk += vel_v[INDEX(i, j, k, aVInfo)] / h;
+
+
+    //far neighbour
+    if (k+1 < nz) {
+        float c = 0.5f*(m_ijk + mass[INDEX(i, j, k+1, aMassInfo)]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[INDEX(i, j, k+1, aMassInfo)], DEF_H));
+        c = c > 1.0f ? 1.0f : c;
+        c = c < 0.0f ? 0.0f : c;
+        float term = dt / hh / CalculateDensity(c, s);
+
+        A_ijk.a += term;
+        A_ijk.z1 += term;
+    }
+    div_ijk -= vel_w[INDEX(i, j, k+1, aWInfo)] / h;
+
+    //near neighbour
+    if (k-1 >= 0) {
+        float c = 0.5f*(m_ijk + mass[INDEX(i, j, k-1, aMassInfo)]);
+        float s = 0.5f*(s_ijk + CalculateBoundaryFraction(boundarySDF[INDEX(i, j, k-1, aMassInfo)], DEF_H));
+        c = c > 1.0f ? 1.0f : c;
+        c = c < 0.0f ? 0.0f : c;
+        float term = dt / hh / CalculateDensity(c, s);
+
+        A_ijk.a += term;
+        A_ijk.z0 += term;
+    }
+    div_ijk += vel_w[INDEX(i, j, k, aWInfo)] / h;
+
+    if (m_ijk + s_ijk> 1.0)
+    {
+        div_ijk += 0.5f*pow((m_ijk + s_ijk - 1.0f), 1.0f) / dt;
+    }
+
+    coefMatrix[index] = A_ijk;
+    RHS[index] = div_ijk;
+
+    // if(abs(div_ijk) > 0)
+    //     debugPrintfEXT("Div %u %u %u: %f \n", i, j, k, div_ijk);
+}

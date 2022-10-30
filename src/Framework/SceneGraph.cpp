@@ -3,6 +3,9 @@
 #include "Action/ActReset.h"
 #include "Action/ActNodeInfo.h"
 #include "Action/ActPostProcessing.h"
+
+#include "Module/VisualModule.h"
+
 #include "SceneLoaderFactory.h"
 
 #include "Timer.h"
@@ -127,7 +130,13 @@ namespace dyno
 					return;
 				}
 
+#ifdef CUDA_BACKEND
 				GTimer timer;
+#else
+				CTimer timer;
+#endif // CUDA_BACKEND
+
+				
 				if (mTiming) {
 					timer.start();
 				}
@@ -149,7 +158,7 @@ namespace dyno
 					std::stringstream name;
 					std::stringstream ss;
 					name << std::setw(40) << node->getClassInfo()->getClassName();
-					ss << std::setprecision(10) << timer.getEclipsedTime();
+					ss << std::setprecision(10) << timer.getElapsedTime();
 					
 					std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
 					Log::sendMessage(Log::Info, info);
@@ -255,7 +264,7 @@ namespace dyno
 		}
 		
 	}
-
+	
 	void SceneGraph::run()
 	{
 

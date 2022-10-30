@@ -1,0 +1,76 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "SharedDataInFluid.glsl"
+
+layout(std430, binding = 0) buffer DensityOut {
+	float dst[ ];
+};
+
+layout(std430, binding = 1) buffer NormalIn {
+	vec3 normals[ ];
+};
+
+layout(std430, binding = 2) buffer DensityIn {
+	float src[ ];
+};
+
+layout(std430, binding = 3) buffer VelWIn {
+	float vel_w[ ];
+};
+
+layout (binding = 4) uniform UBO {
+	Array3DInfo arrayInfo;
+} params;
+
+layout (push_constant) uniform PushConsts {
+    float dt;
+};
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID;
+
+    Array3DInfo aInfo = params.arrayInfo;
+    uint i = id.x;
+    uint j = id.y;
+    uint k = id.z;
+	if (!inside(i, j, k, aInfo)) 
+		return;
+
+    uint nx = aInfo.nx;
+    uint ny = aInfo.ny;
+    uint nz = aInfo.nz;
+    uint nxy = aInfo.nxy;
+
+    Array3DInfo aWInfo = params.arrayInfo;  aWInfo.nz = nz+1;   aWInfo.nxy = aWInfo.nx * aWInfo.ny;
+
+    uint k_plus = clamp(k + 1, 0, nz - 1);
+
+    uint k0, k1;
+    vec3 n0, n1;
+    float c1, c0, dc;
+
+    float ceo = FLUID_BETA/DEF_H;
+    k0 = INDEX(i, j, k, aInfo);
+
+    float weight = 0.0f;
+
+    //k and k+1
+    if (k < nz - 1)
+    {
+        k1 = INDEX(i, j, k_plus, aInfo);
+
+        n0 = normals[k0];
+        n1 = normals[k1];
+
+        c1 = src[k1] * (1.0f - src[k1])*n1.z / DEF_OMEGA;
+        c0 = src[k0] * (1.0f - src[k0])*n0.z / DEF_OMEGA;
+
+        dc = 0.5f*(c1 + c0)*ceo*dt;
+
+        weight = SharpeningWeight(vel_w[INDEX(i, j, k + 1, aWInfo)]*dt / DEF_H);
+        dst[k0] -= weight*dc;
+    }
+}

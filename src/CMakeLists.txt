@@ -27,8 +27,12 @@ if(PERIDYNO_LIBRARY_PLUGIN)
 endif()
 
 add_subdirectory(Dynamics)
-add_subdirectory(Interaction)
-add_subdirectory(Modeling)
+add_subdirectory(Topology)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    add_subdirectory(Interaction)
+    add_subdirectory(Modeling)
+endif()
 
 # Write/install version file
 include(CMakePackageConfigHelpers)
@@ -42,5 +46,4 @@ get_property(PERIDYNO_LIB_CMAKES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
 configure_file(PeridynoConfig.cmake.in PeridynoConfig.cmake @ONLY)
 install(FILES   "${CMAKE_CURRENT_BINARY_DIR}/PeridynoConfig.cmake"
                 ${version_file}
-        DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
-        )
+        DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR})
