@@ -44,7 +44,7 @@ target_include_directories(glslang-default-resource-limits
 set(SOURCES StandAlone.cpp DirStackFileIncluder.h)
 
 add_executable(glslangValidator ${SOURCES})
-set_property(TARGET glslangValidator PROPERTY FOLDER tools)
+set_property(TARGET glslangValidator PROPERTY FOLDER glslang)
 glslang_set_link_args(glslangValidator)
 
 set(LIBRARIES

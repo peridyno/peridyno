@@ -258,6 +258,7 @@ else()
 	if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 		add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glslang)
 		add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
+		set_property(TARGET CompileShader PROPERTY FOLDER glslang)
 	endif()
 
 	option(PHOENIX_Tests "Enable building px tests" ON)
