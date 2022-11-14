@@ -1,4 +1,6 @@
 #include "imgui_extend.h"
+#include "Math/SimpleMath.h"
+
 namespace ImGui{
 ImVec4      ExColorsVal[ImGuiExColVal_COUNT];
 };

@@ -172,7 +172,11 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	    add_subdirectory(examples)
 	endif()
 
-else()
+elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+
+	add_subdirectory(external/glfw-3.3.0)
+	add_subdirectory(external/glad-4.6)
+	add_subdirectory(external/imgui)
 
 	# Use FindVulkan module added with CMAKE 3.7
 	if (NOT CMAKE_VERSION VERSION_LESS 3.7.0)
@@ -270,6 +274,37 @@ else()
 	option(PHOENIX_Examples "Enable building examples" ON)
 	if(PHOENIX_Examples)
 	    add_subdirectory(examples)
+	endif()
+else()
+	option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
+	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
+	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
+	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
+	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
+	if(PERIDYNO_PYTHON_BINDING)
+		add_subdirectory(python)
+	endif()
+
+	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
+	if(PERIDYNO_TESTS)
+		add_subdirectory(external/gtest)
+		add_subdirectory(tests)
+	endif()
+
+	add_subdirectory(external/glfw-3.3.0)
+	add_subdirectory(external/glad-4.6)
+	add_subdirectory(external/imgui)
+
+	# Qt GUI support, off by default
+	option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
+
+	if(PERIDYNO_Qt5_GUI)
+		add_subdirectory(external/nodeeditor)
+	endif()
+
+	option(PERIDYNO_EXAMPLE "Enable building examples" ON)
+	if(PERIDYNO_EXAMPLE)
+		add_subdirectory(examples)
 	endif()
 endif()
 

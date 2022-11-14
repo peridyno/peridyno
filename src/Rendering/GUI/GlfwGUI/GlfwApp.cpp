@@ -5,7 +5,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef CUDA_BACKEND
 #include "Image_IO/image_io.h"
+#endif // CUAD_BACKEND
+
 #include "SceneGraph.h"
 #include "Module/MouseInputModule.h"
 #include "Log.h"
@@ -336,11 +339,17 @@ namespace dyno
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
+
+#ifdef CUDA_BACKEND
 		Image image(width, height, Image::RGB, data);
 		image.flipVertically();
 		bool status = ImageIO::save(file_name, &image);
 		delete[] data;
 		return status;
+#else
+		return false;
+#endif
+		
 	}
 
 	bool GlfwApp::saveScreen()

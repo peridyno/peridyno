@@ -1,5 +1,5 @@
 //#include "Primitive3D.h"
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 #include "Interval.h"
 #include <glm/glm.hpp>
 

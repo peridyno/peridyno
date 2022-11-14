@@ -1,6 +1,6 @@
 #pragma once
 #include "Platform.h"
-#include "SimpleMath.h"
+#include "Math/SimpleMath.h"
 
 
 namespace dyno

@@ -27,16 +27,33 @@ execute_process(
 )
 
 file(GLOB_RECURSE SOURCES *.cpp *.h *.c *.cu)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU" OR "${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/Node/*.*")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/Module/*.*")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/gl/CudaBuffer.h")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/gl/CudaBuffer.cpp")
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 add_library(${LIB_NAME} SHARED ${SOURCES} ${SHADER_FILES} ${SHADER_HEADER_FILE})
 
-target_link_libraries(${LIB_NAME} PUBLIC
-	Core 
-	Framework 
-	Topology
-	RenderCore 
-	glad 
-	imgui)
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU")
+    target_link_libraries(${LIB_NAME} PUBLIC
+	    Core 
+	    Framework 
+	    RenderCore 
+	    glad 
+	    imgui)
+else()
+    target_link_libraries(${LIB_NAME} PUBLIC
+	    Core 
+	    Framework 
+	    Topology
+	    RenderCore 
+	    glad 
+	    imgui)
+endif()
 
 target_include_directories(${LIB_NAME} 
 	PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
@@ -69,6 +86,7 @@ endif()
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 target_include_directories(${LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Module>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
 
