@@ -1,0 +1,48 @@
+#include <GlfwApp.h>
+
+#include <SceneGraph.h>
+#include <GLSurfaceVisualModule.h>
+
+#include "Cloth.h"
+
+using namespace px;
+
+std::shared_ptr<dyno::SceneGraph> createScene()
+{
+	auto scene = std::make_shared<dyno::SceneGraph>();
+
+	auto cloth = scene->addNode(std::make_shared<Cloth>());
+
+	cloth->loadObjFile("../../../data/bunny/sparse_bunny_mesh.obj");
+
+	auto clothRender = std::make_shared<dyno::GLSurfaceVisualModule>();
+	cloth->stateTopology()->connect(clothRender->inTriangleSet());
+	cloth->graphicsPipeline()->pushModule(clothRender);
+
+	return scene;
+}
+
+int main(int, char**)
+{
+	px::VkSystem* vkSys = px::VkSystem::instance();
+	vkSys->enabledInstanceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
+	vkSys->enabledInstanceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME);
+
+	vkSys->enabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+	vkSys->enabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
+#ifdef WIN32
+	vkSys->enabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
+	vkSys->enabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
+#else
+	vkSys->enabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
+	vkSys->enabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
+#endif
+
+	vkSys->initialize(true);
+
+	GlfwApp window;
+	window.createWindow(1024, 768);
+	window.setSceneGraph(createScene());
+	window.mainLoop();
+	return 0;
+}

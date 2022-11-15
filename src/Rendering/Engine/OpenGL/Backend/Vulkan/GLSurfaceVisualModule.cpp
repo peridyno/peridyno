@@ -1,7 +1,7 @@
 #include "GLSurfaceVisualModule.h"
 #include "Utility.h"
 
-#include "gl/VulkanBuffer.h"
+#include "VulkanBuffer.h"
 
 #include <glad/glad.h>
 

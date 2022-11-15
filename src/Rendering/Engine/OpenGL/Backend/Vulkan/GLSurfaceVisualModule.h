@@ -19,7 +19,7 @@
 
 #include "GLVisualModule.h"
 #include "gl/VertexArray.h"
-#include "gl/VulkanBuffer.h"
+#include "VulkanBuffer.h"
 #include "gl/Shader.h"
 
 #include <DeclarePort.h>

@@ -1,6 +1,6 @@
-set(PROJECT_NAME GL_GlfwGUI)
+set(PROJECT_NAME App_GLSurfaceVisualModule)
 
-set(LIB_SRC main.cpp)
+set(LIB_SRC Cloth.h Cloth.cpp main.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})
 
 add_executable(${PROJECT_NAME} ${LIB_SRC})
@@ -17,7 +17,7 @@ set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
 
 target_link_libraries(${PROJECT_NAME} GlfwGUI GLRenderEngine)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/Tutorials")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
 set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
 if(WIN32)

@@ -1,5 +1,5 @@
 #include "ColorMapping.h"
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 
 namespace dyno 
 {

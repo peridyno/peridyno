@@ -18,7 +18,7 @@
 #include "Topology/PointSet.h"
 
 #include "GLVisualModule.h"
-#include "gl/CudaBuffer.h"
+#include "CudaBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
