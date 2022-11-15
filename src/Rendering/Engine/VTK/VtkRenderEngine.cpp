@@ -180,16 +180,16 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 
 void VtkRenderEngine::initialize(int width, int height)
 {
-	mCamera = std::make_shared<OrbitCamera>();
-
-	mCamera->setWidth(width);
-	mCamera->setHeight(height);
-	mCamera->registerPoint(float(width) / 2, float(height) / 2);
-	mCamera->translateToPoint(0, 0);
-
-	mCamera->zoom(3.0f);
-	mCamera->setClipNear(0.01f);
-	mCamera->setClipFar(10.0f);
+// 	mCamera = std::make_shared<OrbitCamera>();
+// 
+// 	mCamera->setWidth(width);
+// 	mCamera->setHeight(height);
+// 	mCamera->registerPoint(float(width) / 2, float(height) / 2);
+// 	mCamera->translateToPoint(0, 0);
+// 
+// 	mCamera->zoom(3.0f);
+// 	mCamera->setClipNear(0.01f);
+// 	mCamera->setClipFar(10.0f);
 }
 
 void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
@@ -258,9 +258,9 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, offscreen->GetFBOIndex());
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		// TODO: we should not rely on camera width/height
-		auto camera = RenderEngine::camera();
-		int w = camera->viewportWidth();
-		int h = camera->viewportHeight();
+
+		int w = this->renderParams()->viewport.w;
+		int h = this->renderParams()->viewport.h;
 		glBlitFramebuffer(
 			0, 0, w, h,
 			0, 0, w, h,
@@ -269,10 +269,21 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 
 }
 
-
 void dyno::VtkRenderEngine::resize(int w, int h)
 {
-	// TODO...
+	// set the viewport
+	this->renderParams()->viewport.x = 0;
+	this->renderParams()->viewport.y = 0;
+	this->renderParams()->viewport.w = w;
+	this->renderParams()->viewport.h = h;
+}
+
+std::vector<dyno::SelectionItem> dyno::VtkRenderEngine::select(int x, int y, int w, int h)
+{
+	//TODO:...
+	std::vector<SelectionItem> items;
+
+	return items;
 }
 
 std::string VtkRenderEngine::name()
@@ -326,14 +337,12 @@ void VtkRenderEngine::setScene(dyno::SceneGraph * scene)
 void dyno::VtkRenderEngine::setCamera()
 {
 	// setup camera
-	auto camera = RenderEngine::camera();
-	
-	glm::dmat4 view = camera->getViewMat();
-	glm::dmat4 proj = camera->getProjMat();
+	glm::dmat4 view = this->renderParams()->view;
+	glm::dmat4 proj = this->renderParams()->proj;
 
 	mVtkCamera->SetViewTransformMatrix(glm::value_ptr(view));
 	mVtkCamera->SetProjectionTransformMatrix(glm::value_ptr(proj));
 
 	// set window size..
-	mVtkWindow->SetSize(camera->viewportWidth(), camera->viewportHeight());	
+	mVtkWindow->SetSize(this->renderParams()->viewport.w, this->renderParams()->viewport.h);
 }
