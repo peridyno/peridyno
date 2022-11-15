@@ -1,7 +1,7 @@
 #include "GmshGenerator.h"
 
 #include <vector>
-#include <gmsh-fork/gmsh.h>
+#include <gmsh.h>
 
 namespace dyno
 {
