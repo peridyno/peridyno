@@ -82,9 +82,21 @@ namespace dyno
 				this->camera = event.camera;
 			}
 			this->varToggleMultiSelect()->setValue(false);
-			if (event.controlKeyPressed()) 
+			if (event.shiftKeyPressed()||event.controlKeyPressed()) 
 			{
 				this->varToggleMultiSelect()->setValue(true);
+				if (event.shiftKeyPressed() && !event.controlKeyPressed())
+				{
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(0);
+				}
+				else if (!event.shiftKeyPressed() && event.controlKeyPressed())
+				{
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
+				}
+				else if(event.shiftKeyPressed() && event.controlKeyPressed())
+				{
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
+				}
 			}
 			if (event.actionType == AT_PRESS)
 			{
@@ -139,50 +151,30 @@ namespace dyno
 		DArray<Triangle> triangles,
 		DArray<int> intersected,
 		DArray<int> unintersected,
-		DArray<Coord> interPoints,
+		DArray<Real> planeDistance,
 		TRay3D<Real> mouseray)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
 		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+		TPlane3D<Real> pl = TPlane3D<Real>(points[triangles[pId].data[0]], t.normal());
 		int temp = 0;
-		
+
 		TPoint3D<Real> p;
 		temp = mouseray.intersect(t, p);
 
-		if (temp == 1 || intersected[pId] == 1)
+		if (temp == 1)
 		{
 			intersected[pId] = 1;
-			interPoints[pId] = p.origin;
+			planeDistance[pId] = abs(TPoint3D<Real>(mouseray.origin[0], mouseray.origin[1], mouseray.origin[2]).distance(pl));
 		}
 		else 
 		{
 			intersected[pId] = 0;
-			interPoints[pId] = Vec3f(0);
+			planeDistance[pId] = 3.4E38;
 		}
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
-	}
-
-	template <typename Real, typename Coord>
-	__global__ void CalTrisDistance(
-		DArray<Coord> interPoints,
-		DArray<Real> trisDistance,
-		DArray<int> intersected,
-		TRay3D<Real> mouseray)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= interPoints.size()) return;
-		if (intersected[pId] !=0) 
-		{
-			TPoint3D<Real> origin = TPoint3D<Real>(mouseray.origin);
-			TPoint3D<Real> p = TPoint3D<Real>(interPoints[pId]);
-			trisDistance[pId] = origin.distance(TPoint3D<Real>(p));
-		}
-		else
-		{
-			trisDistance[pId] = 3.4E38;
-		}
 	}
 
 	__global__ void CalTrisNearest(
@@ -203,39 +195,6 @@ namespace dyno
 		}
 	}
 
-	template <typename Triangle, typename Coord, typename Real>
-	__global__ void FindNearbyTris(
-		DArray<Coord> points,
-		DArray<Triangle> triangles,
-		DArray<Coord> interPoints,
-		DArray<int> intersected,
-		DArray<int> unintersected,
-		int min_index,
-		Real intersectionRadius)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= intersected.size()) return;
-
-			TPoint3D<Real> p = TPoint3D<Real>(interPoints[min_index]);
-			TSegment3D<Real> s1 = TSegment3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]]);
-			TSegment3D<Real> s2 = TSegment3D<Real>(points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
-			TSegment3D<Real> s3 = TSegment3D<Real>(points[triangles[pId].data[2]], points[triangles[pId].data[0]]);
-
-			Real d1 = p.distance(s1);
-			Real d2 = p.distance(s2);
-			Real d3 = p.distance(s3);
-			if (!(d1 > intersectionRadius && d2 > intersectionRadius && d3 > intersectionRadius) || intersected[pId]==1)
-			{
-				intersected[pId] = 1;
-				unintersected[pId] = 0;
-			}
-			else
-			{
-				intersected[pId] = 0;
-				unintersected[pId] = 1;
-			}
-	}
-
 	template <typename Triangle, typename Real, typename Coord>
 	__global__ void CalIntersectedTrisBox(
 		DArray<Coord> points,
@@ -251,21 +210,79 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
-
 		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+		TSegment3D<Real> s1 = TSegment3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]]);
+		TSegment3D<Real> s2 = TSegment3D<Real>(points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+		TSegment3D<Real> s3 = TSegment3D<Real>(points[triangles[pId].data[2]], points[triangles[pId].data[0]]);
+
 		bool flag = false;
-		//if (mouseray.direction.dot(t.normal()) < 0)
-		//{
-			for (int i = 0; i < 3; i++) {
-				float temp1 = ((points[triangles[pId].data[i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId].data[i]] - plane42.origin).dot(plane42.normal));
-				float temp2 = ((points[triangles[pId].data[i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId].data[i]] - plane32.origin).dot(plane32.normal));
-				if (temp1 >= 0 && temp2 >= 0)
-				{
-					flag = true;
-					break;
-				}
+		TPoint3D<Real> p;
+		bool temp11 = s1.intersect(plane13, p);
+		temp11 = temp11 && (((p.origin - plane14.origin).dot(plane14.normal)) * ((p.origin - plane32.origin).dot(plane32.normal))) > 0;
+		if (temp11)
+			flag = true;
+		bool temp12 = s1.intersect(plane42, p);
+		temp12 = temp12 && (((p.origin - plane14.origin).dot(plane14.normal)) * ((p.origin - plane32.origin).dot(plane32.normal))) > 0;
+		if (temp12)
+			flag = true;
+		bool temp13 = s1.intersect(plane14, p);
+		temp13 = temp13 && (((p.origin - plane13.origin).dot(plane13.normal)) * ((p.origin - plane42.origin).dot(plane42.normal))) > 0;
+		if (temp13)
+			flag = true;
+		bool temp14 = s1.intersect(plane32, p);
+		temp14 = temp14 && (((p.origin - plane13.origin).dot(plane13.normal)) * ((p.origin - plane42.origin).dot(plane42.normal))) > 0;
+		if (temp14)
+			flag = true;
+		bool temp21 = s2.intersect(plane13, p);
+		temp21 = temp21 && (((p.origin - plane14.origin).dot(plane14.normal)) * ((p.origin - plane32.origin).dot(plane32.normal))) > 0;
+		if (temp21)
+			flag = true;
+		bool temp22 = s2.intersect(plane42, p);
+		temp22 = temp22 && (((p.origin - plane14.origin).dot(plane14.normal)) * ((p.origin - plane32.origin).dot(plane32.normal))) > 0;
+		if (temp22)
+			flag = true;
+		bool temp23 = s2.intersect(plane14, p);
+		temp23 = temp23 && (((p.origin - plane13.origin).dot(plane13.normal)) * ((p.origin - plane42.origin).dot(plane42.normal))) > 0;
+		if (temp23)
+			flag = true;
+		bool temp24 = s2.intersect(plane32, p);
+		temp24 = temp24 && (((p.origin - plane13.origin).dot(plane13.normal)) * ((p.origin - plane42.origin).dot(plane42.normal))) > 0;
+		if (temp24)
+			flag = true;
+		bool temp31 = s3.intersect(plane13, p);
+		temp31 = temp31 && (((p.origin - plane14.origin).dot(plane14.normal)) * ((p.origin - plane32.origin).dot(plane32.normal))) > 0;
+		if (temp31)
+			flag = true;
+		bool temp32 = s3.intersect(plane42, p);
+		temp32 = temp32 && (((p.origin - plane14.origin).dot(plane14.normal)) * ((p.origin - plane32.origin).dot(plane32.normal))) > 0;
+		if (temp32)
+			flag = true;
+		bool temp33 = s3.intersect(plane14, p);
+		temp33 = temp33 && (((p.origin - plane13.origin).dot(plane13.normal)) * ((p.origin - plane42.origin).dot(plane42.normal))) > 0;
+		if (temp33)
+			flag = true;
+		bool temp34 = s3.intersect(plane32, p);
+		temp34 = temp34 && (((p.origin - plane13.origin).dot(plane13.normal)) * ((p.origin - plane42.origin).dot(plane42.normal))) > 0;
+		if (temp34)
+			flag = true;
+
+		for (int i = 0; i < 3; i++) 
+		{
+			float temp1 = ((points[triangles[pId].data[i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId].data[i]] - plane42.origin).dot(plane42.normal));
+			float temp2 = ((points[triangles[pId].data[i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId].data[i]] - plane32.origin).dot(plane32.normal));
+			if (temp1 >= 0 && temp2 >= 0)
+			{
+				flag = flag || true;
+				break;
 			}
-		//}
+		}
+
+		int temp = mouseray.intersect(t, p);
+		if (temp == 1)
+		{
+			flag = flag || true;
+		}
+		
 		if (flag || intersected[pId] == 1)
 			intersected[pId] = 1;
 		else
@@ -311,8 +328,8 @@ namespace dyno
 		unintersected.resize(triangles.size());
 		std::cout << "Triangle Num:" << triangles.size() << std::endl;
 
-		DArray<Coord> interPoints;
-		interPoints.resize(triangles.size());
+		DArray<Real> planeDistance;
+		planeDistance.resize(triangles.size());
 
 		cuExecute(triangles.size(),
 			CalIntersectedTrisRay,
@@ -320,23 +337,11 @@ namespace dyno
 			triangles,
 			intersected,
 			unintersected,
-			interPoints,
+			planeDistance,
 			this->ray1
 		);
 
-
-		DArray<Real> trisDistance;
-		trisDistance.resize(interPoints.size());
-
-		cuExecute(interPoints.size(),
-			CalTrisDistance,
-			interPoints,
-			trisDistance,
-			intersected,
-			this->ray1
-		);
-
-		int min_index = thrust::min_element(thrust::device, trisDistance.begin(), trisDistance.begin() + trisDistance.size()) - trisDistance.begin();
+		int min_index = thrust::min_element(thrust::device, planeDistance.begin(), planeDistance.begin() + planeDistance.size()) - planeDistance.begin();
 
 		cuExecute(intersected.size(),
 			CalTrisNearest,
@@ -345,22 +350,11 @@ namespace dyno
 			unintersected
 		);
 
-		cuExecute(triangles.size(),
-			FindNearbyTris,
-			points,
-			triangles,
-			interPoints,
-			intersected,
-			unintersected,
-			min_index,
-			this->varInterationRadius()->getData()
-		);
-
 		this->tempTriIntersectedIndex.assign(intersected);
 
 		if (this->varToggleMultiSelect()->getData())
 		{
-			if (this->triIntersectedIndex.size() == 0) 
+			if (this->triIntersectedIndex.size() == 0)
 			{
 				this->triIntersectedIndex.resize(triangles.size());
 				cuExecute(triangles.size(),
@@ -444,8 +438,16 @@ namespace dyno
 	template<typename TDataType>
 	void SurfaceInteraction<TDataType>::calcSurfaceIntersectDrag()
 	{
-		TRay3D<Real> ray1 = this->ray1;
-		TRay3D<Real> ray2 = this->ray2;
+		if (x1 == x2)
+		{
+			x2 += 1.0f;
+		}
+		if (y1 == y2)
+		{
+			y2 += 1.0f;
+		}
+		TRay3D<Real> ray1 = this->camera->castRayInWorldSpace((float)x1, (float)y1);
+		TRay3D<Real> ray2 = this->camera->castRayInWorldSpace((float)x2, (float)y2);
 		TRay3D<Real> ray3 = this->camera->castRayInWorldSpace((float)x1, (float)y2);
 		TRay3D<Real> ray4 = this->camera->castRayInWorldSpace((float)x2, (float)y1);
 
@@ -466,50 +468,6 @@ namespace dyno
 		DArray<int> unintersected;
 		unintersected.resize(triangles.size());
 		std::cout << "Triangle Num:" << triangles.size() << std::endl;
-
-		DArray<Coord> interPoints;
-		interPoints.resize(triangles.size());
-
-		cuExecute(triangles.size(),
-			CalIntersectedTrisRay,
-			points,
-			triangles,
-			intersected,
-			unintersected,
-			interPoints,
-			this->ray1
-		);
-
-		DArray<Real> trisDistance;
-		trisDistance.resize(interPoints.size());
-
-		cuExecute(interPoints.size(),
-			CalTrisDistance,
-			interPoints,
-			trisDistance,
-			intersected,
-			this->ray1
-		);
-
-		int min_index = thrust::min_element(thrust::device, trisDistance.begin(), trisDistance.begin() + trisDistance.size()) - trisDistance.begin();
-
-		cuExecute(intersected.size(),
-			CalTrisNearest,
-			min_index,
-			intersected,
-			unintersected
-		);
-
-		cuExecute(triangles.size(),
-			FindNearbyTris,
-			points,
-			triangles,
-			interPoints,
-			intersected,
-			unintersected,
-			min_index,
-			this->varInterationRadius()->getData()
-		);
 
 		cuExecute(triangles.size(),
 			CalIntersectedTrisBox,

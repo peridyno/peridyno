@@ -47,9 +47,9 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		DEF_VAR(Real, InterationRadius, 0.01f, "The radius of interaction");
+		DEF_VAR(Real, InterationRadius, 0.002f, "The radius of interaction");
 
-		DEF_VAR(Real, PointSelectedSize, 0.02f, "");
+		DEF_VAR(Real, PointSelectedSize, 0.012f, "");
 		DEF_VAR(Real, PointOtherSize, 0.01f, "");
 
 		DEF_VAR(Vec3f, SelectedTriangleColor, Vec3f(0.2, 0.48, 0.75), "");
