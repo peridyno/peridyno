@@ -1,6 +1,6 @@
 set(PROJECT_NAME GL_GlfwGUI)
 
-set(LIB_SRC main.cpp)
+set(LIB_SRC Cloth.h Cloth.cpp main.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})
 
 add_executable(${PROJECT_NAME} ${LIB_SRC})

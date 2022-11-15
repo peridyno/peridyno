@@ -67,10 +67,10 @@ namespace px {
 		VkPhysicalDeviceFeatures enabledFeatures{};
 		void* deviceCreatepNextChain = nullptr;
 
+		
+	public:
 		std::vector<const char*> enabledDeviceExtensions;
-
 		std::vector<const char*> enabledInstanceExtensions;
 
-		std::vector<std::string> supportedInstanceExtensions;
 	};
 }

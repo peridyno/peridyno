@@ -207,6 +207,8 @@ namespace px {
 
 		// Get extensions supported by the instance and store for later use
 		uint32_t extCount = 0;
+		std::vector<std::string> supportedInstanceExtensions;
+
 		vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
 		if (extCount > 0)
 		{
