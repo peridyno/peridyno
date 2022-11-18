@@ -261,8 +261,41 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
 	if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 		add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glslang)
-		add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
-		set_property(TARGET CompileShader PROPERTY FOLDER glslang)
+		
+		# for cmake version 3.19 and later, we can directly use system's glslc executable
+		if(EXISTS ${Vulkan_GLSLC_EXECUTABLE})
+
+			file(GLOB_RECURSE SHADER_SOURCES 
+				"${PROJECT_SOURCE_DIR}/data/shaders/glsl/*.vert"
+				"${PROJECT_SOURCE_DIR}/data/shaders/glsl/*.frag"
+				#"${PROJECT_SOURCE_DIR}/data/shaders/glsl/*.glsl"
+				"${PROJECT_SOURCE_DIR}/data/shaders/glsl/*.comp"
+				)		
+			source_group(TREE "${PROJECT_SOURCE_DIR}/data/shaders/glsl" FILES ${SHADER_SOURCES})
+
+			set(SHADER_OUTPUT_FILES "")
+		
+			foreach(file IN ITEMS ${SHADER_SOURCES})
+				
+				set(SHADER_OUTPUT "${file}.spv")
+				add_custom_command(
+					OUTPUT "${SHADER_OUTPUT}"
+					COMMAND "${Vulkan_GLSLC_EXECUTABLE}" "${file}" -O --target-env=vulkan1.2 -o "${SHADER_OUTPUT}"
+					DEPENDS "${file}"
+				)
+				list(APPEND SHADER_OUTPUT_FILES ${SHADER_OUTPUT})
+
+			endforeach()
+
+			# maybe we prefer to use a 'Shaders' project...
+			add_custom_target(CompileShader ALL SOURCES ${SHADER_SOURCES} DEPENDS ${SHADER_OUTPUT_FILES})
+
+		else()
+			# use python script...
+			add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
+			set_property(TARGET CompileShader PROPERTY FOLDER glslang)
+		endif()
+		
 	endif()
 
 	option(PHOENIX_Tests "Enable building px tests" ON)
