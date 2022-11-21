@@ -96,4 +96,21 @@ namespace dyno
 		return ret;
 	}
 
+	QString FormatDescription(std::string name)
+	{
+		QTextCodec* codec = QTextCodec::codecForName("GB2312");
+
+		QString desc = codec->toUnicode(name.c_str());
+
+// 		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+// 
+// 		//If the string contains Chinese, show all the original string without splitting
+// 		if (isChinese)
+// 		{
+// 			return qName;
+// 		}
+
+		return desc;
+	}
+
 }
