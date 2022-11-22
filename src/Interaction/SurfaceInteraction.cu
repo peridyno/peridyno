@@ -130,7 +130,7 @@ namespace dyno
 					this->ray2.direction = event.ray.direction;
 					this->x2 = event.x;
 					this->y2 = event.y;
-					if (this->x2 == this->x1 && this->y2 == this->y1) 
+					if (abs(this->x2 - this->x1) <= 3 && abs(this->y2 - this->y1) <= 3)
 					{
 						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Click)
 							this->calcIntersectClick();
@@ -312,6 +312,78 @@ namespace dyno
 		}
 	}
 
+	template <typename Triangle, typename Coord, typename Real>
+	__global__ void NeighborTrisDiffuse(
+		DArray<Triangle> triangles,
+		DArray<Coord> points,
+		DArray<int> intersected,
+		DArray<int> unintersected,
+		Real diffusionAngle)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		int j = threadIdx.y + blockIdx.y * blockDim.y;
+		if (i >= triangles.size() || j >= triangles.size()) return;
+
+		if (intersected[i] == 1)
+		{
+			if ((triangles[i][0] == triangles[j][0] && triangles[i][1] == triangles[j][1]) ||
+				(triangles[i][0] == triangles[j][1] && triangles[i][1] == triangles[j][0]) ||
+				(triangles[i][0] == triangles[j][0] && triangles[i][1] == triangles[j][2]) ||
+				(triangles[i][0] == triangles[j][2] && triangles[i][1] == triangles[j][0]) ||
+				(triangles[i][0] == triangles[j][1] && triangles[i][1] == triangles[j][2]) ||
+				(triangles[i][0] == triangles[j][2] && triangles[i][1] == triangles[j][1]) ||
+
+				(triangles[i][0] == triangles[j][0] && triangles[i][2] == triangles[j][1]) ||
+				(triangles[i][0] == triangles[j][1] && triangles[i][2] == triangles[j][0]) ||
+				(triangles[i][0] == triangles[j][0] && triangles[i][2] == triangles[j][2]) ||
+				(triangles[i][0] == triangles[j][2] && triangles[i][2] == triangles[j][0]) ||
+				(triangles[i][0] == triangles[j][1] && triangles[i][2] == triangles[j][2]) ||
+				(triangles[i][0] == triangles[j][2] && triangles[i][2] == triangles[j][1]) ||
+
+				(triangles[i][1] == triangles[j][0] && triangles[i][2] == triangles[j][1]) ||
+				(triangles[i][1] == triangles[j][1] && triangles[i][2] == triangles[j][0]) ||
+				(triangles[i][1] == triangles[j][0] && triangles[i][2] == triangles[j][2]) ||
+				(triangles[i][1] == triangles[j][2] && triangles[i][2] == triangles[j][0]) ||
+				(triangles[i][1] == triangles[j][1] && triangles[i][2] == triangles[j][2]) ||
+				(triangles[i][1] == triangles[j][2] && triangles[i][2] == triangles[j][1])
+				)
+			{
+				TTriangle3D<Real> t1 = TTriangle3D<Real>(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
+				TTriangle3D<Real> t2 = TTriangle3D<Real>(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
+				if (t1.normal().dot(t2.normal()) >= cosf(diffusionAngle))
+				{
+					if (intersected[j] == 0 && unintersected[j] == 1)
+					{
+						intersected[j] = 1;
+						unintersected[j] = 0;
+					}
+				}
+			}
+		}
+	}
+
+	template <typename Triangle, typename Coord, typename Real>
+	__global__ void VisibleFilter(
+		DArray<Triangle> triangles,
+		DArray<Coord> points,
+		DArray<int> intersected,
+		DArray<int> unintersected,
+		TRay3D<Real> mouseray)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= triangles.size()) return;
+
+		if (intersected[pId] == 1)
+		{
+			TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+			if (mouseray.direction.dot(t.normal()) >= 0)
+			{
+				intersected[pId] = 0;
+				unintersected[pId] = 1;
+			}
+		}
+	}
+
 	template<typename TDataType>
 	void SurfaceInteraction<TDataType>::calcSurfaceIntersectClick()
 	{
@@ -349,6 +421,36 @@ namespace dyno
 			intersected,
 			unintersected
 		);
+
+		if (this->varToggleFlood()->getValue())
+		{
+			int intersected_size_t_o = 0;
+			int intersected_size_t = 1;
+			while (intersected_size_t > intersected_size_t_o && intersected_size_t < triangles.size())
+			{
+				intersected_size_t_o = intersected_size_t;
+				cuExecute2D(make_uint2(triangles.size(), triangles.size()),
+					NeighborTrisDiffuse,
+					triangles,
+					points,
+					intersected,
+					unintersected,
+					this->varFloodAngle()->getValue());
+				intersected_size_t = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+			}
+		}
+
+		if (this->varToggleVisibleFilter()->getValue())
+		{
+			cuExecute(triangles.size(),
+				VisibleFilter,
+				triangles,
+				points,
+				intersected,
+				unintersected,
+				this->ray1
+			);
+		}
 
 		this->tempTriIntersectedIndex.assign(intersected);
 
@@ -481,6 +583,18 @@ namespace dyno
 			plane32,
 			this->ray2
 		);
+
+		if (this->varToggleVisibleFilter()->getValue())
+		{
+			cuExecute(triangles.size(),
+				VisibleFilter,
+				triangles,
+				points,
+				intersected,
+				unintersected,
+				this->ray1
+			);
+		}
 
 		this->tempTriIntersectedIndex.assign(intersected);
 

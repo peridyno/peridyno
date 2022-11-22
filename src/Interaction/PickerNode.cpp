@@ -19,6 +19,10 @@ namespace dyno
 		this->inTopology()->connect(edgeInteractor->inInitialTriangleSet());
 		this->inTopology()->connect(pointInteractor->inInitialTriangleSet());
 
+		this->varFloodAngle()->connect(surfaceInteractor->varFloodAngle());
+		this->varToggleFlood()->connect(surfaceInteractor->varToggleFlood());
+		this->varToggleVisibleFilter()->connect(surfaceInteractor->varToggleVisibleFilter());
+
 		this->varInterationRadius()->connect(surfaceInteractor->varInterationRadius());
 		this->varInterationRadius()->connect(edgeInteractor->varInterationRadius());
 		this->varInterationRadius()->connect(pointInteractor->varInterationRadius());
@@ -36,11 +40,13 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(pointInteractor);
 
 		auto surfaceRender1 = std::make_shared<GLSurfaceVisualModule>();
+		surfaceRender1->varAlpha()->setValue(0.95f);
 		this->varSelectedTriangleColor()->connect(surfaceRender1->varBaseColor());
 		this->surfaceInteractor->outSelectedTriangleSet()->connect(surfaceRender1->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender1);
 
 		auto surfaceRender2 = std::make_shared<GLSurfaceVisualModule>();
+		surfaceRender2->varAlpha()->setValue(0.85f);
 		this->varOtherTriangleColor()->connect(surfaceRender2->varBaseColor());
 		this->surfaceInteractor->outOtherTriangleSet()->connect(surfaceRender2->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender2);
@@ -69,8 +75,9 @@ namespace dyno
 
 		this->varInterationRadius()->setRange(0.001f , 0.2f);
 		this->varInterationRadius()->setValue(0.01f);
-		this->varPointSelectedSize()->setRange(0.0f, 0.05f);
-		this->varPointOtherSize()->setRange(0.0f,0.05f);
+		this->varPointSelectedSize()->setRange(0.0f, 0.1f);
+		this->varPointOtherSize()->setRange(0.0f,0.1f);
+		this->varFloodAngle()->setRange(0.0f, M_PI);
 
 		auto callback1 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingElementType, this));
 

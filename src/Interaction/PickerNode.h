@@ -47,6 +47,12 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
+		DEF_VAR(bool, ToggleFlood, true, "The toggle of surface flood selection");
+
+		DEF_VAR(bool, ToggleVisibleFilter, true, "The toggle of visible filter");
+
+		DEF_VAR(Real, FloodAngle, 0.05f, "The angle limit of surface flood selection");
+
 		DEF_VAR(Real, InterationRadius, 0.002f, "The radius of interaction");
 
 		DEF_VAR(Real, PointSelectedSize, 0.012f, "");
