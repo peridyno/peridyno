@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	__global__ void EdgeInitializeArray(
+	__global__ void EI_EdgeInitializeArray(
 		DArray<int> intersected)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -14,7 +14,7 @@ namespace dyno
 		intersected[pId] = 0;
 	}
 
-	__global__ void EdgeMergeIntersectedIndexOR(
+	__global__ void  EI_EdgeMergeIntersectedIndexOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -31,7 +31,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void EdgeMergeIntersectedIndexXOR(
+	__global__ void  EI_EdgeMergeIntersectedIndexXOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -48,7 +48,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void EdgeMergeIntersectedIndexC(
+	__global__ void  EI_EdgeMergeIntersectedIndexC(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -146,7 +146,7 @@ namespace dyno
 	}
 
 	template <typename Edge, typename Real, typename Coord>
-	__global__ void CalIntersectedEdgesRay(
+	__global__ void  EI_CalIntersectedEdgesRay(
 		DArray<Coord> points,
 		DArray<Edge> edges,
 		DArray<int> intersected,
@@ -179,7 +179,7 @@ namespace dyno
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
 	}
 
-	__global__ void CalEdgesNearest(
+	__global__ void  EI_CalEdgesNearest(
 		int min_index,
 		DArray<int> intersected,
 		DArray<int> unintersected
@@ -199,7 +199,7 @@ namespace dyno
 	}
 
 	template <typename Edge, typename Real, typename Coord>
-	__global__ void CalIntersectedEdgesBox(
+	__global__ void  EI_CalIntersectedEdgesBox(
 		DArray<Coord> points,
 		DArray<Edge> edges,
 		DArray<int> intersected,
@@ -262,7 +262,7 @@ namespace dyno
 	}
 
 	template <typename Edge>
-	__global__ void AssignOutEdges(
+	__global__ void  EI_AssignOutEdges(
 		DArray<Edge> edges,
 		DArray<Edge> intersected_edges,
 		DArray<Edge> unintersected_edges,
@@ -293,7 +293,7 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
-			EdgeInitializeArray,
+			EI_EdgeInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
@@ -304,7 +304,7 @@ namespace dyno
 		lineDistance.resize(edges.size());
 
 		cuExecute(edges.size(),
-			CalIntersectedEdgesRay,
+			EI_CalIntersectedEdgesRay,
 			points,
 			edges,
 			intersected,
@@ -317,7 +317,7 @@ namespace dyno
 		int min_index = thrust::min_element(thrust::device, lineDistance.begin(), lineDistance.begin() + lineDistance.size()) - lineDistance.begin();
 
 		cuExecute(intersected.size(),
-			CalEdgesNearest,
+			EI_CalEdgesNearest,
 			min_index,
 			intersected,
 			unintersected
@@ -331,7 +331,7 @@ namespace dyno
 			{
 				this->edgeIntersectedIndex.resize(edges.size());
 				cuExecute(edges.size(),
-					EdgeInitializeArray,
+					EI_EdgeInitializeArray,
 					this->edgeIntersectedIndex
 				)
 			}
@@ -342,7 +342,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(edges.size(),
-					EdgeMergeIntersectedIndexOR,
+					EI_EdgeMergeIntersectedIndexOR,
 					this->edgeIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -352,7 +352,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(edges.size(),
-					EdgeMergeIntersectedIndexXOR,
+					EI_EdgeMergeIntersectedIndexXOR,
 					this->edgeIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -362,7 +362,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(edges.size(),
-					EdgeMergeIntersectedIndexC,
+					EI_EdgeMergeIntersectedIndexC,
 					this->edgeIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -391,7 +391,7 @@ namespace dyno
 		unintersected_edges.resize(unintersected_size);
 
 		cuExecute(edges.size(),
-			AssignOutEdges,
+			EI_AssignOutEdges,
 			edges,
 			intersected_edges,
 			unintersected_edges,
@@ -434,14 +434,14 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
-			EdgeInitializeArray,
+			EI_EdgeInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
 		unintersected.resize(edges.size());
 		std::cout << "Edge Num:" << edges.size() << std::endl;
 		cuExecute(edges.size(),
-			CalIntersectedEdgesBox,
+			EI_CalIntersectedEdgesBox,
 			points,
 			edges,
 			intersected,
@@ -462,7 +462,7 @@ namespace dyno
 			{
 				this->edgeIntersectedIndex.resize(edges.size());
 				cuExecute(edges.size(),
-					EdgeInitializeArray,
+					EI_EdgeInitializeArray,
 					this->edgeIntersectedIndex
 				)
 			}
@@ -473,7 +473,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(edges.size(),
-					EdgeMergeIntersectedIndexOR,
+					EI_EdgeMergeIntersectedIndexOR,
 					this->edgeIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -483,7 +483,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(edges.size(),
-					EdgeMergeIntersectedIndexXOR,
+					EI_EdgeMergeIntersectedIndexXOR,
 					this->edgeIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -493,7 +493,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(edges.size(),
-					EdgeMergeIntersectedIndexC,
+					EI_EdgeMergeIntersectedIndexC,
 					this->edgeIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -522,7 +522,7 @@ namespace dyno
 		unintersected_edges.resize(unintersected_size);
 
 		cuExecute(edges.size(),
-			AssignOutEdges,
+			EI_AssignOutEdges,
 			edges,
 			intersected_edges,
 			unintersected_edges,
@@ -547,7 +547,7 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
-			EdgeInitializeArray,
+			EI_EdgeInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
@@ -562,7 +562,7 @@ namespace dyno
 		if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 		{
 			cuExecute(edges.size(),
-				EdgeMergeIntersectedIndexOR,
+				EI_EdgeMergeIntersectedIndexOR,
 				this->edgeIntersectedIndex,
 				this->tempEdgeIntersectedIndex,
 				outIntersected,
@@ -572,7 +572,7 @@ namespace dyno
 		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 		{
 			cuExecute(edges.size(),
-				EdgeMergeIntersectedIndexXOR,
+				EI_EdgeMergeIntersectedIndexXOR,
 				this->edgeIntersectedIndex,
 				this->tempEdgeIntersectedIndex,
 				outIntersected,
@@ -582,7 +582,7 @@ namespace dyno
 		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 		{
 			cuExecute(edges.size(),
-				EdgeMergeIntersectedIndexC,
+				EI_EdgeMergeIntersectedIndexC,
 				this->edgeIntersectedIndex,
 				this->tempEdgeIntersectedIndex,
 				outIntersected,
@@ -608,7 +608,7 @@ namespace dyno
 		unintersected_edges.resize(unintersected_size);
 
 		cuExecute(edges.size(),
-			AssignOutEdges,
+			EI_AssignOutEdges,
 			edges,
 			intersected_edges,
 			unintersected_edges,

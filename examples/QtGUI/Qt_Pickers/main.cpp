@@ -19,17 +19,21 @@ int main()
 
 	auto mesh1 = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
 	mesh1->varFileName()->setValue(getAssetPath() + "standard/standard_sphere.obj");
+	//mesh1->outTriangleSet()->connect(pickerNode->inTopology()); 
 
 	auto cylinder = scn->addNode(std::make_shared<CylinderModel<DataType3f>>());
 	cylinder->setVisible(false);
+	cylinder->stateTriangleSet()->connect(pickerNode->inTopology());
 
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cube->setVisible(false);
+	cube->varSegments()->setValue(Vec3i((uint)4, (uint)4, (uint)4));
+	//cube->stateQuadSet()->connect(pickerNode->inTopology());
 
 	auto mesh2 = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
 	mesh2->varFileName()->setValue(getAssetPath() + "submarine/submarine.obj");
+	//mesh2->outTriangleSet()->connect(pickerNode->inTopology()); 
 
-	mesh1->outTriangleSet()->connect(pickerNode->inTopology()); 
 	pickerNode->varInterationRadius()->setValue(0.02f);
 	scn->setUpperBound({ 4, 4, 4 });
 

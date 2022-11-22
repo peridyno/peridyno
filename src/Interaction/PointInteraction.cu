@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	__global__ void PointInitializeArray(
+	__global__ void PI_PointInitializeArray(
 		DArray<int> intersected)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -14,7 +14,7 @@ namespace dyno
 		intersected[pId] = 0;
 	}
 
-	__global__ void PointMergeIntersectedIndexOR(
+	__global__ void PI_PointMergeIntersectedIndexOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -31,7 +31,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void PointMergeIntersectedIndexXOR(
+	__global__ void PI_PointMergeIntersectedIndexXOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -48,7 +48,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void PointMergeIntersectedIndexC(
+	__global__ void PI_PointMergeIntersectedIndexC(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -146,7 +146,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void CalIntersectedPointsRay(
+	__global__ void PI_CalIntersectedPointsRay(
 		DArray<Coord> points,
 		DArray<int> intersected,
 		DArray<int> unintersected,
@@ -173,7 +173,7 @@ namespace dyno
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
 	}
 
-	__global__ void CalPointsNearest(
+	__global__ void PI_CalPointsNearest(
 		int min_index,
 		DArray<int> intersected,
 		DArray<int> unintersected
@@ -194,7 +194,7 @@ namespace dyno
 
 
 	template <typename Real, typename Coord>
-	__global__ void CalIntersectedPointsBox(
+	__global__ void PI_CalIntersectedPointsBox(
 		DArray<Coord> points,
 		DArray<int> intersected,
 		DArray<int> unintersected,
@@ -227,7 +227,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__global__ void AssignOutPoints(
+	__global__ void PI_AssignOutPoints(
 		DArray<Coord> points,
 		DArray<Coord> intersected_points,
 		DArray<Coord> unintersected_points,
@@ -257,7 +257,7 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(points.size());
 		cuExecute(points.size(),
-			PointInitializeArray,
+			PI_PointInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
@@ -268,7 +268,7 @@ namespace dyno
 		pointDistance.resize(points.size());
 
 		cuExecute(points.size(),
-			CalIntersectedPointsRay,
+			PI_CalIntersectedPointsRay,
 			points,
 			intersected,
 			unintersected,
@@ -280,7 +280,7 @@ namespace dyno
 		int min_index = thrust::min_element(thrust::device, pointDistance.begin(), pointDistance.begin() + pointDistance.size()) - pointDistance.begin();
 
 		cuExecute(intersected.size(),
-			CalPointsNearest,
+			PI_CalPointsNearest,
 			min_index,
 			intersected,
 			unintersected
@@ -294,7 +294,7 @@ namespace dyno
 			{
 				this->pointIntersectedIndex.resize(points.size());
 				cuExecute(points.size(),
-					PointInitializeArray,
+					PI_PointInitializeArray,
 					this->pointIntersectedIndex
 				)
 			}
@@ -305,7 +305,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexOR,
+					PI_PointMergeIntersectedIndexOR,
 					this->pointIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -315,7 +315,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexXOR,
+					PI_PointMergeIntersectedIndexXOR,
 					this->pointIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -325,7 +325,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexC,
+					PI_PointMergeIntersectedIndexC,
 					this->pointIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -353,7 +353,7 @@ namespace dyno
 			unintersected_points.resize(unintersected_size);
 
 			cuExecute(points.size(),
-				AssignOutPoints,
+				PI_AssignOutPoints,
 				points,
 				intersected_points,
 				unintersected_points,
@@ -395,14 +395,14 @@ namespace dyno
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
-				PointInitializeArray,
+				PI_PointInitializeArray,
 				intersected
 			);
 			DArray<int> unintersected;
 			unintersected.resize(points.size());
 			std::cout << "Point Num:" << points.size() << std::endl;
 			cuExecute(points.size(),
-				CalIntersectedPointsBox,
+				PI_CalIntersectedPointsBox,
 				points,
 				intersected,
 				unintersected,
@@ -422,7 +422,7 @@ namespace dyno
 				{
 					this->pointIntersectedIndex.resize(points.size());
 					cuExecute(points.size(),
-						PointInitializeArray,
+						PI_PointInitializeArray,
 						this->pointIntersectedIndex
 					)
 				}
@@ -433,7 +433,7 @@ namespace dyno
 				if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 				{
 					cuExecute(points.size(),
-						PointMergeIntersectedIndexOR,
+						PI_PointMergeIntersectedIndexOR,
 						this->pointIntersectedIndex,
 						intersected,
 						outIntersected,
@@ -443,7 +443,7 @@ namespace dyno
 				else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 				{
 					cuExecute(points.size(),
-						PointMergeIntersectedIndexXOR,
+						PI_PointMergeIntersectedIndexXOR,
 						this->pointIntersectedIndex,
 						intersected,
 						outIntersected,
@@ -453,7 +453,7 @@ namespace dyno
 				else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 				{
 					cuExecute(points.size(),
-						PointMergeIntersectedIndexC,
+						PI_PointMergeIntersectedIndexC,
 						this->pointIntersectedIndex,
 						intersected,
 						outIntersected,
@@ -482,7 +482,7 @@ namespace dyno
 			unintersected_points.resize(unintersected_size);
 
 			cuExecute(points.size(),
-				AssignOutPoints,
+				PI_AssignOutPoints,
 				points,
 				intersected_points,
 				unintersected_points,
@@ -506,7 +506,7 @@ namespace dyno
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
-				PointInitializeArray,
+				PI_PointInitializeArray,
 				intersected
 			);
 			DArray<int> unintersected;
@@ -521,7 +521,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexOR,
+					PI_PointMergeIntersectedIndexOR,
 					this->pointIntersectedIndex,
 					this->tempPointIntersectedIndex,
 					outIntersected,
@@ -531,7 +531,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexXOR,
+					PI_PointMergeIntersectedIndexXOR,
 					this->pointIntersectedIndex,
 					this->tempPointIntersectedIndex,
 					outIntersected,
@@ -541,7 +541,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexC,
+					PI_PointMergeIntersectedIndexC,
 					this->pointIntersectedIndex,
 					this->tempPointIntersectedIndex,
 					outIntersected,
@@ -567,7 +567,7 @@ namespace dyno
 			unintersected_points.resize(unintersected_size);
 
 			cuExecute(points.size(),
-				AssignOutPoints,
+				PI_AssignOutPoints,
 				points,
 				intersected_points,
 				unintersected_points,

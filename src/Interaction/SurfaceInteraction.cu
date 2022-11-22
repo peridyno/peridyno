@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	__global__ void SurfaceInitializeArray(
+	__global__ void SI_SurfaceInitializeArray(
 		DArray<int> intersected)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -14,7 +14,7 @@ namespace dyno
 		intersected[pId] = 0;
 	}
 
-	__global__ void SurfaceMergeIntersectedIndexOR(
+	__global__ void SI_SurfaceMergeIntersectedIndexOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -31,7 +31,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void SurfaceMergeIntersectedIndexXOR(
+	__global__ void SI_SurfaceMergeIntersectedIndexXOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -48,7 +48,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void SurfaceMergeIntersectedIndexC(
+	__global__ void SI_SurfaceMergeIntersectedIndexC(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -146,7 +146,7 @@ namespace dyno
 	}
 
 	template <typename Triangle, typename Real, typename Coord>
-	__global__ void CalIntersectedTrisRay(
+	__global__ void SI_CalIntersectedTrisRay(
 		DArray<Coord> points,
 		DArray<Triangle> triangles,
 		DArray<int> intersected,
@@ -177,7 +177,7 @@ namespace dyno
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
 	}
 
-	__global__ void CalTrisNearest(
+	__global__ void SI_CalTrisNearest(
 		int min_index,
 		DArray<int> intersected,
 		DArray<int> unintersected)
@@ -196,7 +196,7 @@ namespace dyno
 	}
 
 	template <typename Triangle, typename Real, typename Coord>
-	__global__ void CalIntersectedTrisBox(
+	__global__ void SI_CalIntersectedTrisBox(
 		DArray<Coord> points,
 		DArray<Triangle> triangles,
 		DArray<int> intersected,
@@ -291,7 +291,7 @@ namespace dyno
 	}
 
 	template <typename Triangle>
-	__global__ void AssignOutTriangles(
+	__global__ void SI_AssignOutTriangles(
 		DArray<Triangle> triangles,
 		DArray<Triangle> intersected_triangles,
 		DArray<Triangle> unintersected_triangles,
@@ -313,7 +313,7 @@ namespace dyno
 	}
 
 	template <typename Triangle, typename Coord, typename Real>
-	__global__ void NeighborTrisDiffuse(
+	__global__ void SI_NeighborTrisDiffuse(
 		DArray<Triangle> triangles,
 		DArray<Coord> points,
 		DArray<int> intersected,
@@ -363,7 +363,7 @@ namespace dyno
 	}
 
 	template <typename Triangle, typename Coord, typename Real>
-	__global__ void VisibleFilter(
+	__global__ void SI_VisibleFilter(
 		DArray<Triangle> triangles,
 		DArray<Coord> points,
 		DArray<int> intersected,
@@ -393,7 +393,7 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
-			SurfaceInitializeArray,
+			SI_SurfaceInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
@@ -404,7 +404,7 @@ namespace dyno
 		planeDistance.resize(triangles.size());
 
 		cuExecute(triangles.size(),
-			CalIntersectedTrisRay,
+			SI_CalIntersectedTrisRay,
 			points,
 			triangles,
 			intersected,
@@ -416,7 +416,7 @@ namespace dyno
 		int min_index = thrust::min_element(thrust::device, planeDistance.begin(), planeDistance.begin() + planeDistance.size()) - planeDistance.begin();
 
 		cuExecute(intersected.size(),
-			CalTrisNearest,
+			SI_CalTrisNearest,
 			min_index,
 			intersected,
 			unintersected
@@ -430,7 +430,7 @@ namespace dyno
 			{
 				intersected_size_t_o = intersected_size_t;
 				cuExecute2D(make_uint2(triangles.size(), triangles.size()),
-					NeighborTrisDiffuse,
+					SI_NeighborTrisDiffuse,
 					triangles,
 					points,
 					intersected,
@@ -443,7 +443,7 @@ namespace dyno
 		if (this->varToggleVisibleFilter()->getValue())
 		{
 			cuExecute(triangles.size(),
-				VisibleFilter,
+				SI_VisibleFilter,
 				triangles,
 				points,
 				intersected,
@@ -460,7 +460,7 @@ namespace dyno
 			{
 				this->triIntersectedIndex.resize(triangles.size());
 				cuExecute(triangles.size(),
-					SurfaceInitializeArray,
+					SI_SurfaceInitializeArray,
 					this->triIntersectedIndex
 				)
 			}
@@ -471,7 +471,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(triangles.size(),
-					SurfaceMergeIntersectedIndexOR,
+					SI_SurfaceMergeIntersectedIndexOR,
 					this->triIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -481,7 +481,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(triangles.size(),
-					SurfaceMergeIntersectedIndexXOR,
+					SI_SurfaceMergeIntersectedIndexXOR,
 					this->triIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -491,7 +491,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(triangles.size(),
-					SurfaceMergeIntersectedIndexC,
+					SI_SurfaceMergeIntersectedIndexC,
 					this->triIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -520,7 +520,7 @@ namespace dyno
 		unintersected_triangles.resize(unintersected_size);
 
 		cuExecute(triangles.size(),
-			AssignOutTriangles,
+			SI_AssignOutTriangles,
 			triangles,
 			intersected_triangles,
 			unintersected_triangles,
@@ -564,7 +564,7 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
-			SurfaceInitializeArray,
+			SI_SurfaceInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
@@ -572,7 +572,7 @@ namespace dyno
 		std::cout << "Triangle Num:" << triangles.size() << std::endl;
 
 		cuExecute(triangles.size(),
-			CalIntersectedTrisBox,
+			SI_CalIntersectedTrisBox,
 			points,
 			triangles,
 			intersected,
@@ -587,7 +587,7 @@ namespace dyno
 		if (this->varToggleVisibleFilter()->getValue())
 		{
 			cuExecute(triangles.size(),
-				VisibleFilter,
+				SI_VisibleFilter,
 				triangles,
 				points,
 				intersected,
@@ -604,7 +604,7 @@ namespace dyno
 			{
 				this->triIntersectedIndex.resize(triangles.size());
 				cuExecute(triangles.size(),
-					SurfaceInitializeArray,
+					SI_SurfaceInitializeArray,
 					this->triIntersectedIndex
 				)
 			}
@@ -615,7 +615,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(triangles.size(),
-					SurfaceMergeIntersectedIndexOR,
+					SI_SurfaceMergeIntersectedIndexOR,
 					this->triIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -625,7 +625,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(triangles.size(),
-					SurfaceMergeIntersectedIndexXOR,
+					SI_SurfaceMergeIntersectedIndexXOR,
 					this->triIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -635,7 +635,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(triangles.size(),
-					SurfaceMergeIntersectedIndexC,
+					SI_SurfaceMergeIntersectedIndexC,
 					this->triIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -666,7 +666,7 @@ namespace dyno
 		unintersected_triangles.resize(unintersected_size);
 
 		cuExecute(triangles.size(),
-			AssignOutTriangles,
+			SI_AssignOutTriangles,
 			triangles,
 			intersected_triangles,
 			unintersected_triangles,
@@ -691,7 +691,7 @@ namespace dyno
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
-			SurfaceInitializeArray,
+			SI_SurfaceInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
@@ -706,7 +706,7 @@ namespace dyno
 		if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 		{
 			cuExecute(triangles.size(),
-				SurfaceMergeIntersectedIndexOR,
+				SI_SurfaceMergeIntersectedIndexOR,
 				this->triIntersectedIndex,
 				this->tempTriIntersectedIndex,
 				outIntersected,
@@ -716,7 +716,7 @@ namespace dyno
 		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 		{
 			cuExecute(triangles.size(),
-				SurfaceMergeIntersectedIndexXOR,
+				SI_SurfaceMergeIntersectedIndexXOR,
 				this->triIntersectedIndex,
 				this->tempTriIntersectedIndex,
 				outIntersected,
@@ -726,7 +726,7 @@ namespace dyno
 		else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 		{
 			cuExecute(triangles.size(),
-				SurfaceMergeIntersectedIndexC,
+				SI_SurfaceMergeIntersectedIndexC,
 				this->triIntersectedIndex,
 				this->tempTriIntersectedIndex,
 				outIntersected,
@@ -752,7 +752,7 @@ namespace dyno
 		unintersected_triangles.resize(unintersected_size);
 
 		cuExecute(triangles.size(),
-			AssignOutTriangles,
+			SI_AssignOutTriangles,
 			triangles,
 			intersected_triangles,
 			unintersected_triangles,
