@@ -54,6 +54,8 @@ namespace dyno
 
 		virtual std::string name() override;
 
+		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) override;
+
 	private:
 		void setScene(dyno::SceneGraph* scene);
 		void setCamera();

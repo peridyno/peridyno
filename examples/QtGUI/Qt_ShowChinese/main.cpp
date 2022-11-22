@@ -10,6 +10,7 @@ using namespace dyno;
 
 class ChineseNode : public Node
 {
+	DECLARE_CLASS(ChineseNode);
 public:
 	ChineseNode() {
 		this->varScalar()->setObjectName("标量");
@@ -25,10 +26,20 @@ public:
 		return "测试中文";
 	}
 
+	std::string description() override {
+		return "这是一个中文节点";
+	}
+
+	std::string getNodeType() override {
+		return "中文节点";
+	}
+
 	DEF_VAR(float, Scalar, 1.0f, "Define a scalar");
 
 	DEF_VAR(Vec3f, Vector, 0.0f, "Define a vector");
 };
+
+IMPLEMENT_CLASS(ChineseNode);
 
 int main()
 {
