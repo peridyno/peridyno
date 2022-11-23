@@ -14,7 +14,7 @@ endif()
 # define library version (update: apparently you can also do it in project()!)
 set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
 set(PERIDYNO_LIBRARY_VERSION_MINOR 7 CACHE STRING "peridyno minor version" FORCE)
-set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
+set(PERIDYNO_LIBRARY_VERSION_PATCH 1 CACHE STRING "patch version of peridyno" FORCE)
 set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    #为sln内部projects设置管理folder
@@ -89,9 +89,10 @@ add_subdirectory(external/glad-4.6)
 add_subdirectory(external/imgui)
 
 if(PERIDYNO_LIBRARY_PLUGIN)
-    option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the alembic library" OFF)
+    option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the abc exporter library" ON)
     option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
     option(PERIDYNO_LIBRARY_FBX "Enable binding the FBX library" OFF)
+    
 
     if(PERIDYNO_LIBRARY_ALEMBIC)
         add_subdirectory(external/Imath)

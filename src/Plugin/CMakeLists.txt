@@ -51,36 +51,43 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
 
     target_link_libraries(${LIB_NAME} PUBLIC ${${LIB_DEPENDENCY}})
 
-    install(TARGETS ${LIB_NAME}
-        EXPORT ${LIB_NAME}Targets
-        RUNTIME  DESTINATION  ${PERIDYNO_RUNTIME_INSTALL_DIR}
-        LIBRARY  DESTINATION  ${PERIDYNO_LIBRARY_INSTALL_DIR}
-        ARCHIVE  DESTINATION  ${PERIDYNO_ARCHIVE_INSTALL_DIR}
-        )
+    # install(TARGETS ${LIB_NAME}
+    #     EXPORT ${LIB_NAME}Targets
+    #     RUNTIME  DESTINATION  ${PERIDYNO_RUNTIME_INSTALL_DIR}
+    #     LIBRARY  DESTINATION  ${PERIDYNO_LIBRARY_INSTALL_DIR}
+    #     ARCHIVE  DESTINATION  ${PERIDYNO_ARCHIVE_INSTALL_DIR}
+    #     )
 
-    install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
-        FILE ${LIB_NAME}Targets.cmake)
+    # install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
+    #     FILE ${LIB_NAME}Targets.cmake)
 
-    #Append ${LIB_NAME}Targets.cmake to the global list, which will be include in PeridynoConfig.cmake
-    get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
-    list(APPEND LOCAL_CMAKES_NAMES "${LIB_NAME}Targets.cmake")    
-    set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
+    # #Append ${LIB_NAME}Targets.cmake to the global list, which will be include in PeridynoConfig.cmake
+    # get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
+    # list(APPEND LOCAL_CMAKES_NAMES "${LIB_NAME}Targets.cmake")    
+    # set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
 
-    file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
-    install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Plugin/${LIB_NAME})
+    # file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
+    # install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Plugin/${LIB_NAME})
 endmacro()
        
-option(PERIDYNO_LIBRARY_ABCExporter "Enable binding the abc exporter library" ON)
-
-if(PERIDYNO_LIBRARY_ABCExporter)
+if(PERIDYNO_LIBRARY_ALEMBIC)
     set(LIB_DEPENDENCY Core Framework Alembic)
     build_library(ABCExporter LIB_DEPENDENCY)
 endif()
 
 if(PERIDYNO_LIBRARY_GMSH)
-    add_subdirectory(GmshIO)
+    if(WIN32)
+        set(LIB_DEPENDENCY Core Framework GmshLib winmm wsock32 ws2_32 psapi)
+    elseif(UNIX)
+        set(LIB_DEPENDENCY Core Framework GmshLib)
+    endif()
+
+    include_directories("${CMAKE_SOURCE_DIR}/external/gmsh-fork/api")
+
+    build_library(GmshIO LIB_DEPENDENCY)
 endif()
 
 if(PERIDYNO_LIBRARY_FBX)
-    add_subdirectory(SkeletonLoader)
+    set(LIB_DEPENDENCY Core Framework)
+    build_library(SkeletonLoader LIB_DEPENDENCY)
 endif()

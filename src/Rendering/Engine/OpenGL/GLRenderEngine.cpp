@@ -75,6 +75,7 @@ namespace dyno
 		mFXAAFilter->initialize();
 
 		this->resize(width, height);
+
 	}
 
 	void GLRenderEngine::setupTransparencyPass()

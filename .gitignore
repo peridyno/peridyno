@@ -34,3 +34,7 @@ buildDebug/*
 /console_log.txt
 /src/Picker/MouseIntersect.cu
 /src/Picker/MouseIntersect.h
+/config/ImathConfig.cmake
+/config/ImathConfig.h
+/config/ImathConfigVersion.cmake
+/config/ImathTargets.cmake
