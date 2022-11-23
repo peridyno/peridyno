@@ -226,7 +226,17 @@ namespace dyno
 				
 			mRenderParams.proj = mCamera->getProjMat();
 			mRenderParams.view = mCamera->getViewMat();
+
+			// Jian SHI: hack for unit scaling...
+			float planeScale = mRenderParams.planeScale;
+			float rulerScale = mRenderParams.rulerScale;
+			mRenderParams.planeScale *= mCamera->distanceUnit();
+			mRenderParams.rulerScale *= mCamera->distanceUnit();
+
 			mRenderEngine->draw(activeScene.get(), mRenderParams);
+
+			mRenderParams.planeScale = planeScale;
+			mRenderParams.rulerScale = rulerScale;
 
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();

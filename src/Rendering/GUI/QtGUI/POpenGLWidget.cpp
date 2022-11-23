@@ -94,7 +94,17 @@ namespace dyno
 		rparams.viewport.w = this->width();
 		rparams.viewport.h = this->height();
 
+
+		// Jian SHI: hack for unit scaling...
+		float planeScale = rparams.planeScale;
+		float rulerScale = rparams.rulerScale;
+		rparams.planeScale *= mApp->getCamera()->distanceUnit();
+		rparams.rulerScale *= mApp->getCamera()->distanceUnit();
+
 		engine->draw(scene.get(), rparams);
+
+		rparams.planeScale = planeScale;
+		rparams.rulerScale = rulerScale;
 
 		// Draw ImGui
 		mImWindow.draw(mApp);
