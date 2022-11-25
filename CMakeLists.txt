@@ -1,5 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
 
+include(cmake/modules.cmake)
+
 project(peridyno LANGUAGES C CXX CUDA)                                                             #指定本项目的编译语言为C++、CUDA
 
 find_package(CUDA REQUIRED)
