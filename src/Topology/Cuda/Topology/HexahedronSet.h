@@ -26,14 +26,13 @@ namespace dyno
 
 		void getVolume(DArray<Real>& volume);
 
-		void updateQuads();
-
 		void copyFrom(HexahedronSet<TDataType> hexSet);
 
 	protected:
-		DArray<::dyno::TopologyModule::Hexahedron> m_hexahedrons;
+		void updateQuads() override;
 
 	private:
+		DArray<::dyno::TopologyModule::Hexahedron> m_hexahedrons;
 		DArray<::dyno::TopologyModule::Quad2Hex> quad2Hex;
 		DArrayList<int> m_ver2Hex;
 	};

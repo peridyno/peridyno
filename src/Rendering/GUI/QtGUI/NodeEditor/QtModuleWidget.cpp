@@ -105,7 +105,7 @@ namespace Qt
 
 	QString QtModuleWidget::nodeTips() const
 	{
-		return QString::fromStdString(mModule->description());
+		return dyno::FormatDescription(mModule->description());
 	}
 
 	QString QtModuleWidget::portTips(PortType portType, PortIndex portIndex) const

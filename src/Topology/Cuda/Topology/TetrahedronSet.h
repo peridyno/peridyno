@@ -27,14 +27,13 @@ namespace dyno
 
 		void getVolume(DArray<Real>& volume);
 
-		void updateTriangles();
-
 		void copyFrom(TetrahedronSet<TDataType> tetSet);
 
 	protected:
-		DArray<Tetrahedron> m_tethedrons;
+		void updateTriangles() override;
 
 	private:
+		DArray<Tetrahedron> m_tethedrons;
 		DArray<::dyno::TopologyModule::Tri2Tet> tri2Tet;
 		DArrayList<int> m_ver2Tet;
 	};

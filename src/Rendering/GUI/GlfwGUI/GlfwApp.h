@@ -34,8 +34,6 @@ namespace dyno {
 		double getCursorPosX();
 		double getCursorPosY();
 		
-		void setWindowSize(int width, int height);
-
 		void setButtonType(uint button) { mButtonType = button; }
 		void setButtonMode(uint mode) { mButtonMode = mode; }
 		void setButtonAction(uint action) { mButtonAction = action; }

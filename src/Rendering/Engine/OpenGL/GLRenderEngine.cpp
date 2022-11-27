@@ -178,7 +178,7 @@ namespace dyno
 		mRenderNodes   = action.nodes;
 	}
 
-	void GLRenderEngine::draw(dyno::SceneGraph* scene)
+	void GLRenderEngine::draw(dyno::SceneGraph* scene, const RenderParams& rparams)
 	{
 		updateRenderModules(scene);
 
@@ -187,7 +187,7 @@ namespace dyno
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
 		// update shadow map
-		mShadowMap->update(scene, m_rparams);
+		mShadowMap->update(scene, rparams);
 
 		// setup scene transform matrices
 		struct
@@ -199,17 +199,17 @@ namespace dyno
 			int height;
 		} sceneUniformBuffer;
 		sceneUniformBuffer.model = glm::mat4(1);
-		sceneUniformBuffer.view = m_rparams.view;
-		sceneUniformBuffer.projection = m_rparams.proj;
-		sceneUniformBuffer.width = m_rparams.viewport.w;
-		sceneUniformBuffer.height = m_rparams.viewport.h;
+		sceneUniformBuffer.view = rparams.view;
+		sceneUniformBuffer.projection = rparams.proj;
+		sceneUniformBuffer.width = rparams.viewport.w;
+		sceneUniformBuffer.height = rparams.viewport.h;
 
 		mTransformUBO.load(&sceneUniformBuffer, sizeof(sceneUniformBuffer));
 		mTransformUBO.bindBufferBase(0);
 
 		// setup light block
-		RenderParams::Light light = m_rparams.light;
-		light.mainLightDirection = glm::vec3(m_rparams.view * glm::vec4(light.mainLightDirection, 0));
+		RenderParams::Light light = rparams.light;
+		light.mainLightDirection = glm::vec3(rparams.view * glm::vec4(light.mainLightDirection, 0));
 		mLightUBO.load(&light, sizeof(light));
 		mLightUBO.bindBufferBase(1);
 						
@@ -220,10 +220,10 @@ namespace dyno
 		// clear index buffer
 		//GLint clearIndex[]{11, -1, -1, -1};
 		//glClearBufferiv(GL_COLOR, 1, clearIndex);
-		glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
+		glViewport(0, 0, rparams.viewport.w, rparams.viewport.h);
 		// draw background color
-		Vec3f c0 = Vec3f(m_rparams.bgColor0.x, m_rparams.bgColor0.y, m_rparams.bgColor0.z);
-		Vec3f c1 = Vec3f(m_rparams.bgColor1.x, m_rparams.bgColor1.y, m_rparams.bgColor1.z);
+		Vec3f c0 = Vec3f(rparams.bgColor0.x, rparams.bgColor0.y, rparams.bgColor0.z);
+		Vec3f c1 = Vec3f(rparams.bgColor1.x, rparams.bgColor1.y, rparams.bgColor1.z);
 		mRenderHelper->drawBackground(c0, c1);
 		
 		mVariableUBO.bindBufferBase(2);
@@ -265,9 +265,9 @@ namespace dyno
 			}
 
 			// draw a ruler plane
-			if (m_rparams.showGround)
+			if (rparams.showGround)
 			{
-				mRenderHelper->drawGround(m_rparams.planeScale, m_rparams.rulerScale);
+				mRenderHelper->drawGround(rparams.planeScale, rparams.rulerScale);
 			}
 
 			glDepthMask(true);
@@ -291,7 +291,7 @@ namespace dyno
 
 
 		// draw scene bounding box
-		if (m_rparams.showSceneBounds && scene != 0)
+		if (rparams.showSceneBounds && scene != 0)
 		{
 			// get bounding box of the scene
 			auto p0 = scene->getLowerBound();
@@ -302,26 +302,26 @@ namespace dyno
 		// draw to final framebuffer with fxaa filter
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 				
-		if (m_rparams.useFXAA)
+		if (bEnableFXAA)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glViewport(0, 0, m_rparams.viewport.w, m_rparams.viewport.h);
+			glViewport(0, 0, rparams.viewport.w, rparams.viewport.h);
 
 			mColorTex.bind(GL_TEXTURE1);			
-			mFXAAFilter->apply(m_rparams.viewport.w, m_rparams.viewport.h);
+			mFXAAFilter->apply(rparams.viewport.w, rparams.viewport.h);
 		}
 		else
 		{
 			mFramebuffer.bind(GL_READ_FRAMEBUFFER);
 			glReadBuffer(GL_COLOR_ATTACHMENT0);
 			glBlitFramebuffer(
-				0, 0, m_rparams.viewport.w, m_rparams.viewport.h,
-				0, 0, m_rparams.viewport.w, m_rparams.viewport.h,
+				0, 0, rparams.viewport.w, rparams.viewport.h,
+				0, 0, rparams.viewport.w, rparams.viewport.h,
 				GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		}
 
 		// draw axis
-		if (m_rparams.showAxisHelper)
+		if (rparams.showAxisHelper)
 		{
 			glViewport(10, 10, 100, 100);
 			mRenderHelper->drawAxis();
@@ -334,10 +334,10 @@ namespace dyno
 	void GLRenderEngine::resize(int w, int h)
 	{
 		// set the viewport
-		m_rparams.viewport.x = 0;
-		m_rparams.viewport.y = 0;
-		m_rparams.viewport.w = w;
-		m_rparams.viewport.h = h;
+		//rparams.viewport.x = 0;
+		//rparams.viewport.y = 0;
+		//rparams.viewport.w = w;
+		//rparams.viewport.h = h;
 
 		// resize internal framebuffer
 		mColorTex.resize(w, h);
@@ -367,7 +367,7 @@ namespace dyno
 		mFramebuffer.bind(GL_READ_FRAMEBUFFER);
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
 		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(x, m_rparams.viewport.h - (y + h) - 1, w, h, GL_RGBA_INTEGER, GL_INT, indices.data());
+		glReadPixels(x, y, w, h, GL_RGBA_INTEGER, GL_INT, indices.data());
 		gl::glCheckError();
 
 		// use unordered set to get unique id

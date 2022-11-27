@@ -8,20 +8,6 @@
 namespace dyno
 {
 
-	template<typename TKey>
-	__global__ void TS_CountTriangleNumber(
-		DArray<int> counter,
-		DArray<TKey> keys)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= keys.size()) return;
-
-		if (tId == 0 || keys[tId] != keys[tId - 1])
-			counter[tId] = 1;
-		else
-			counter[tId] = 0;
-	}
-	
 	template<typename TDataType>
 	QuadSet<TDataType>::QuadSet()
 		: TriangleSet<TDataType>()
@@ -202,15 +188,13 @@ namespace dyno
 		keys.clear();
 	}
 
-
-
 	template<typename TDataType>
 	void QuadSet<TDataType>::setQuads(std::vector<Quad>& quads)
 	{
 		m_quads.resize(quads.size());
 		m_quads.assign(quads);
 
-		this->updateTriangles();
+		//this->updateTriangles();
 	}
 
 
@@ -263,6 +247,14 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::updateTopology()
 	{
+		this->updateQuads();
+
+		TriangleSet<TDataType>::updateTopology();
+	}
+
+	template<typename TDataType>
+	void QuadSet<TDataType>::updateVertexNormal()
+	{
 		if (this->outVertexNormal()->isEmpty())
 			this->outVertexNormal()->allocate();
 
@@ -282,29 +274,19 @@ namespace dyno
 			this->m_coords,
 			m_quads,
 			vert2Quad);
-
-		this->updateEdges();
-
-		EdgeSet<TDataType>::updateTopology();
 	}
 
-	template<typename TKey, typename Quad>
-	__global__ void TS_SetupKeys(
-		DArray<TKey> keys,
-		DArray<int> ids,
+	template<typename Triangle, typename Quad>
+	__global__ void TS_SetupTriangles(
+		DArray<Triangle> triangles,
 		DArray<Quad> quads)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= quads.size()) return;
 
 		Quad quad = quads[tId];
-		keys[2 * tId] = TKey(quad[0], quad[1], quad[2]);
-		keys[2 * tId + 1] = TKey(quad[0], quad[2], quad[3]);
-	
-
-		ids[2 * tId] = tId;
-		ids[2 * tId + 1] = tId;
-	
+		triangles[2 * tId] = Triangle(quad[0], quad[1], quad[2]);
+		triangles[2 * tId + 1] = Triangle(quad[0], quad[2], quad[3]);
 	}
 
 	template<typename TDataType>
@@ -312,81 +294,14 @@ namespace dyno
 	{
 		uint quadSize = m_quads.size();
 
-		DArray<TKey> keys;
-		DArray<int> quadIds;
-
-		keys.resize(2 * quadSize);
-		quadIds.resize(2 * quadSize);
+		auto& pTri = this->getTriangles();
+		pTri.resize(2 * quadSize);
 
 		cuExecute(quadSize,
-			TS_SetupKeys,
-			keys,
-			quadIds,
-			m_quads);
-
-		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), quadIds.begin());
-
-		DArray<int> counter;
-		counter.resize(2 * quadSize);
-
-		cuExecute(keys.size(),
-			TS_CountTriangleNumber,
-			counter,
-			keys);
-
-		int triNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
-		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
-
-		tri2Quad.resize(triNum);
-
-		auto& pTri = this->getTriangles();
-		pTri.resize(triNum);
-
-		cuExecute(keys.size(),
 			TS_SetupTriangles,
 			pTri,
-			tri2Quad,
-			keys,
-			counter,
-			quadIds);
-
-		counter.clear();
-		quadIds.clear();
-		keys.clear();
-
-		this->updateEdges();
+			m_quads);
 	}
-
-
-	template<typename Triangle, typename Tri2Quad, typename TKey>
-	__global__ void TS_SetupTriangles(
-		DArray<Triangle> triangles,
-		DArray<Tri2Quad> tri2Quad,
-		DArray<TKey> keys,
-		DArray<int> counter,
-		DArray<int> quadIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= keys.size()) return;
-
-		int shift = counter[tId];
-		if (tId == 0 || keys[tId] != keys[tId - 1])
-		{
-			TKey key = keys[tId];
-			triangles[shift] = Triangle(key[0], key[1], key[2]);
-
-			Tri2Quad t2Q(EMPTY, EMPTY);
-			t2Q[0] = quadIds[tId];
-
-			if (tId + 1 < keys.size() && keys[tId + 1] == key)
-				t2Q[1] = quadIds[tId + 1];
-
-			tri2Quad[shift] = t2Q;
-
-		}
-	}
-
-	
 
 	DEFINE_CLASS(QuadSet);
 }

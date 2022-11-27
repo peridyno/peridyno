@@ -216,7 +216,7 @@ namespace dyno
 		quadSet->setPoints(vertices);
 		quadSet->setQuads(quads);
 
-		quadSet->updateTriangles();
+		//quadSet->updateTriangles();
 		quadSet->update();
 
 		indexTop.clear();

@@ -1,5 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.10)                                                            #指定CMake的最低版本为3.10。若版本过低，请自行升级CMake
 
+include(cmake/modules.cmake)
+
 set(PERIDYNO_GPU_BACKEND "CUDA" CACHE STRING "GPU Backend")
 set_property(CACHE PERIDYNO_GPU_BACKEND PROPERTY STRINGS "CUDA;Vulkan;NoGPU")
 

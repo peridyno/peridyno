@@ -87,14 +87,24 @@ namespace dyno
 		auto engine = mApp->getRenderEngine();
 		auto camera = mApp->getCamera();
 		auto scene  = mApp->getSceneGraph();
-		auto rparams = engine->renderParams();
+		auto& rparams = mApp->getRenderParams();
 
-		rparams->proj = camera->getProjMat();
-		rparams->view = camera->getViewMat();
-		//engine->renderParams()->viewport.w = this->width();
-		//engine->renderParams()->viewport.h = this->height();
+		rparams.proj = camera->getProjMat();
+		rparams.view = camera->getViewMat();
+		rparams.viewport.w = this->width();
+		rparams.viewport.h = this->height();
 
-		engine->draw(scene.get());
+
+		// Jian SHI: hack for unit scaling...
+		float planeScale = rparams.planeScale;
+		float rulerScale = rparams.rulerScale;
+		rparams.planeScale *= mApp->getCamera()->distanceUnit();
+		rparams.rulerScale *= mApp->getCamera()->distanceUnit();
+
+		engine->draw(scene.get(), rparams);
+
+		rparams.planeScale = planeScale;
+		rparams.rulerScale = rulerScale;
 
 		// Draw ImGui
 		mImWindow.draw(mApp);

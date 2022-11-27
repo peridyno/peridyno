@@ -99,7 +99,7 @@ namespace dyno
 	template<typename TDataType>
 	void PickerNode<TDataType>::resetStates()
 	{
-		this->inTopology()->getDataPtr()->updateEdges();
+//		this->inTopology()->getDataPtr()->update();
 
 		this->surfaceInteractor->outTriangleIndex()->allocate();
 		this->edgeInteractor->outEdgeIndex()->allocate();
