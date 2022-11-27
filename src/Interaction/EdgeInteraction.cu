@@ -91,11 +91,11 @@ namespace dyno
 				}
 				else if (!event.shiftKeyPressed() && event.controlKeyPressed())
 				{
-					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
 				}
 				else if (event.shiftKeyPressed() && event.controlKeyPressed())
 				{
-					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
 				}
 			}
 			if (event.actionType == AT_PRESS)
@@ -286,9 +286,9 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeInteraction<TDataType>::calcEdgeIntersectClick()
 	{
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Edge> edges = initialTriangleSet.getEdges();
-		DArray<Coord> points = initialTriangleSet.getPoints();
+		EdgeSet<TDataType> initialEdgeSet = this->inInitialEdgeSet()->getData();
+		DArray<Edge> edges = initialEdgeSet.getEdges();
+		DArray<Coord> points = initialEdgeSet.getPoints();
 
 		DArray<int> intersected;
 		intersected.resize(edges.size());
@@ -400,9 +400,9 @@ namespace dyno
 			intersected_o
 		);
 		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
-		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
-		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
 		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
 	}
@@ -428,9 +428,9 @@ namespace dyno
 		TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 		
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Edge> edges = initialTriangleSet.getEdges();
-		DArray<Coord> points = initialTriangleSet.getPoints();
+		EdgeSet<TDataType> initialEdgeSet = this->inInitialEdgeSet()->getData();
+		DArray<Edge> edges = initialEdgeSet.getEdges();
+		DArray<Coord> points = initialEdgeSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
@@ -531,9 +531,9 @@ namespace dyno
 			intersected_o
 		);
 		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
-		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
-		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
 		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
 	}
@@ -541,9 +541,9 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeInteraction<TDataType>::mergeIndex()
 	{
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Edge> edges = initialTriangleSet.getEdges();
-		DArray<Coord> points = initialTriangleSet.getPoints();
+		EdgeSet<TDataType> initialEdgeSet = this->inInitialEdgeSet()->getData();
+		DArray<Edge> edges = initialEdgeSet.getEdges();
+		DArray<Coord> points = initialEdgeSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
@@ -617,9 +617,9 @@ namespace dyno
 			intersected_o
 		);
 		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
-		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
-		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialTriangleSet);
+		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
 		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
 	}

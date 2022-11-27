@@ -16,18 +16,18 @@ namespace dyno
 		auto pointInteractor = std::make_shared<PointInteraction<TDataType>>();
 
 		this->inTopology()->connect(surfaceInteractor->inInitialTriangleSet());
-		this->inTopology()->connect(edgeInteractor->inInitialTriangleSet());
-		this->inTopology()->connect(pointInteractor->inInitialTriangleSet());
+		this->inTopology()->connect(edgeInteractor->inInitialEdgeSet());
+		this->inTopology()->connect(pointInteractor->inInitialPointSet());
 
 		this->varFloodAngle()->connect(surfaceInteractor->varFloodAngle());
 		this->varToggleFlood()->connect(surfaceInteractor->varToggleFlood());
+		this->varToggleQuad()->connect(surfaceInteractor->varToggleQuad());
 		this->varToggleVisibleFilter()->connect(surfaceInteractor->varToggleVisibleFilter());
 
-		this->varInterationRadius()->connect(surfaceInteractor->varInterationRadius());
 		this->varInterationRadius()->connect(edgeInteractor->varInterationRadius());
 		this->varInterationRadius()->connect(pointInteractor->varInterationRadius());
 
-		this->stateTriangleIndex()->connect(surfaceInteractor->outTriangleIndex());
+		this->stateTriQuadIndex()->connect(surfaceInteractor->outTriangleIndex());
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 

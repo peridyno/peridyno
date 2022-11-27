@@ -57,7 +57,7 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= intersected1.size()) return;
 
-		if (intersected2[pId]==1)
+		if (intersected2[pId] == 1)
 			outIntersected[pId] = 0;
 		else
 			outIntersected[pId] = intersected1[pId];
@@ -82,7 +82,7 @@ namespace dyno
 				this->camera = event.camera;
 			}
 			this->varToggleMultiSelect()->setValue(false);
-			if (event.shiftKeyPressed()||event.controlKeyPressed()) 
+			if (event.shiftKeyPressed() || event.controlKeyPressed())
 			{
 				this->varToggleMultiSelect()->setValue(true);
 				if (event.shiftKeyPressed() && !event.controlKeyPressed())
@@ -91,11 +91,11 @@ namespace dyno
 				}
 				else if (!event.shiftKeyPressed() && event.controlKeyPressed())
 				{
-					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);
 				}
-				else if(event.shiftKeyPressed() && event.controlKeyPressed())
+				else if (event.shiftKeyPressed() && event.controlKeyPressed())
 				{
-					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
 				}
 			}
 			if (event.actionType == AT_PRESS)
@@ -118,13 +118,13 @@ namespace dyno
 				this->ray2.direction = event.ray.direction;
 				this->x2 = event.x;
 				this->y2 = event.y;
-				if(this->varToggleMultiSelect()->getValue()&&this->varTogglePicker()->getValue())
+				if (this->varToggleMultiSelect()->getValue() && this->varTogglePicker()->getValue())
 					this->mergeIndex();
 			}
 			else
 			{
 				//printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-				if (this->isPressed) 
+				if (this->isPressed)
 				{
 					this->ray2.origin = event.ray.origin;
 					this->ray2.direction = event.ray.direction;
@@ -135,7 +135,7 @@ namespace dyno
 						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Click)
 							this->calcIntersectClick();
 					}
-					else 
+					else
 					{
 						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Drag)
 							this->calcIntersectDrag();
@@ -151,14 +151,13 @@ namespace dyno
 		DArray<Triangle> triangles,
 		DArray<int> intersected,
 		DArray<int> unintersected,
-		DArray<Real> planeDistance,
+		DArray<Real> triDistance,
 		TRay3D<Real> mouseray)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
 		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
-		TPlane3D<Real> pl = TPlane3D<Real>(points[triangles[pId].data[0]], t.normal());
 		int temp = 0;
 
 		TPoint3D<Real> p;
@@ -167,12 +166,12 @@ namespace dyno
 		if (temp == 1)
 		{
 			intersected[pId] = 1;
-			planeDistance[pId] = abs(TPoint3D<Real>(mouseray.origin[0], mouseray.origin[1], mouseray.origin[2]).distance(pl));
+			triDistance[pId] = (mouseray.origin - p.origin).norm();
 		}
-		else 
+		else
 		{
 			intersected[pId] = 0;
-			planeDistance[pId] = 3.4E38;
+			triDistance[pId] = 3.4E38;
 		}
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
 	}
@@ -266,7 +265,7 @@ namespace dyno
 		if (temp34)
 			flag = true;
 
-		for (int i = 0; i < 3; i++) 
+		for (int i = 0; i < 3; i++)
 		{
 			float temp1 = ((points[triangles[pId].data[i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId].data[i]] - plane42.origin).dot(plane42.normal));
 			float temp2 = ((points[triangles[pId].data[i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId].data[i]] - plane32.origin).dot(plane32.normal));
@@ -282,7 +281,7 @@ namespace dyno
 		{
 			flag = flag || true;
 		}
-		
+
 		if (flag || intersected[pId] == 1)
 			intersected[pId] = 1;
 		else
@@ -384,6 +383,51 @@ namespace dyno
 		}
 	}
 
+	__global__ void SI_Tri2Quad(
+		DArray<int> intersected,
+		DArray<int> unintersected)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected.size()) return;
+
+		if (intersected[pId] == 1)
+		{
+			if (pId % 2 == 1)
+			{
+				if (intersected[pId - 1] == 0)
+				{
+					intersected[pId - 1] = 1;
+					unintersected[pId - 1] = 0;
+				}
+			}
+			else 
+			{
+
+				if (intersected[pId + 1] == 0)
+				{
+					intersected[pId + 1] = 1;
+					unintersected[pId + 1] = 0;
+				}
+			}
+		}
+	}
+
+	__global__ void SI_QuadOutput(
+		DArray<int> intersected_o,
+		DArray<int> intersected_q
+	) 
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected_o.size()) return;
+
+
+		intersected_q[pId / 2] = 0;
+		if (intersected_o[pId] == 1)
+		{
+			intersected_q[pId / 2] = 1;
+		}
+	}
+
 	template<typename TDataType>
 	void SurfaceInteraction<TDataType>::calcSurfaceIntersectClick()
 	{
@@ -400,8 +444,8 @@ namespace dyno
 		unintersected.resize(triangles.size());
 		std::cout << "Triangle Num:" << triangles.size() << std::endl;
 
-		DArray<Real> planeDistance;
-		planeDistance.resize(triangles.size());
+		DArray<Real> triDistance;
+		triDistance.resize(triangles.size());
 
 		cuExecute(triangles.size(),
 			SI_CalIntersectedTrisRay,
@@ -409,11 +453,11 @@ namespace dyno
 			triangles,
 			intersected,
 			unintersected,
-			planeDistance,
+			triDistance,
 			this->ray1
 		);
 
-		int min_index = thrust::min_element(thrust::device, planeDistance.begin(), planeDistance.begin() + planeDistance.size()) - planeDistance.begin();
+		int min_index = thrust::min_element(thrust::device, triDistance.begin(), triDistance.begin() + triDistance.size()) - triDistance.begin();
 
 		cuExecute(intersected.size(),
 			SI_CalTrisNearest,
@@ -450,6 +494,15 @@ namespace dyno
 				unintersected,
 				this->ray1
 			);
+		}
+
+		if (this->varToggleQuad()->getValue())
+		{
+			cuExecute(triangles.size(),
+				SI_Tri2Quad,
+				intersected,
+				unintersected
+			)
 		}
 
 		this->tempTriIntersectedIndex.assign(intersected);
@@ -529,6 +582,18 @@ namespace dyno
 			intersected_o
 		);
 
+		if (this->varToggleQuad()->getValue())
+		{
+			DArray<int> intersected_q;
+			intersected_q.resize(triangles.size() / 2);
+			cuExecute(triangles.size(),
+				SI_QuadOutput,
+				intersected_o,
+				intersected_q
+			);
+			intersected_o.assign(intersected_q);
+		}
+
 		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
@@ -594,6 +659,15 @@ namespace dyno
 				unintersected,
 				this->ray1
 			);
+		}
+
+		if (this->varToggleQuad()->getValue())
+		{
+			cuExecute(triangles.size(),
+				SI_Tri2Quad,
+				intersected,
+				unintersected
+			)
 		}
 
 		this->tempTriIntersectedIndex.assign(intersected);
@@ -674,6 +748,19 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
+
+		if (this->varToggleQuad()->getValue())
+		{
+			DArray<int> intersected_q;
+			intersected_q.resize(triangles.size() / 2);
+			cuExecute(triangles.size(),
+				SI_QuadOutput,
+				intersected_o,
+				intersected_q
+			);
+			intersected_o.assign(intersected_q);
+		}
+
 		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);

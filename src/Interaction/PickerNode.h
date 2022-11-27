@@ -18,7 +18,7 @@ namespace dyno
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, Topology, "");
 
-		DEF_ARRAY_STATE(int, TriangleIndex, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(int, TriQuadIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
 
@@ -47,7 +47,9 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		DEF_VAR(bool, ToggleFlood, true, "The toggle of surface flood selection");
+		DEF_VAR(bool, ToggleQuad, true, "The toggle of quad selection");
+
+		DEF_VAR(bool, ToggleFlood, false, "The toggle of surface flood selection");
 
 		DEF_VAR(bool, ToggleVisibleFilter, true, "The toggle of visible filter");
 

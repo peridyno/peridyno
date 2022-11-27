@@ -91,11 +91,11 @@ namespace dyno
 				}
 				else if (!event.shiftKeyPressed() && event.controlKeyPressed())
 				{
-					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
 				}
 				else if (event.shiftKeyPressed() && event.controlKeyPressed())
 				{
-					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
 				}
 			}
 			if (event.actionType == AT_PRESS)
@@ -251,8 +251,8 @@ namespace dyno
 	template<typename TDataType>
 	void PointInteraction<TDataType>::calcPointIntersectClick()
 	{
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
+		PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
+		DArray<Coord> points = initialPointSet.getPoints();
 
 		DArray<int> intersected;
 		intersected.resize(points.size());
@@ -362,9 +362,9 @@ namespace dyno
 				intersected_o
 			);
 			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
-			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
-			this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
 		}
@@ -390,8 +390,8 @@ namespace dyno
 			TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 			TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 
-			TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-			DArray<Coord> points = initialTriangleSet.getPoints();
+			PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
+			DArray<Coord> points = initialPointSet.getPoints();
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
@@ -491,9 +491,9 @@ namespace dyno
 				intersected_o
 			);
 			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
-			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
-			this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
 		}
@@ -501,8 +501,8 @@ namespace dyno
 		template<typename TDataType>
 		void PointInteraction<TDataType>::mergeIndex()
 		{
-			TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-			DArray<Coord> points = initialTriangleSet.getPoints();
+			PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
+			DArray<Coord> points = initialPointSet.getPoints();
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
@@ -576,9 +576,9 @@ namespace dyno
 				intersected_o
 			);
 			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
-			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
-			this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
 		}
