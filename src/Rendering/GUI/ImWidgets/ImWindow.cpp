@@ -65,7 +65,7 @@ void dyno::ImWindow::draw(AppBase* app)
 {
 	auto engine = app->getRenderEngine();
 	auto scene  = app->getSceneGraph();
-	auto rparams = engine->renderParams();
+	auto rparams = app->getRenderParams();
 	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
@@ -172,13 +172,12 @@ void dyno::ImWindow::draw(AppBase* app)
 
 			if (ImGui::BeginMenu("Lighting", "")) {
 
-				RenderParams* rparams = engine->renderParams();
-				float iBgGray[2] = { rparams->bgColor0[0], rparams->bgColor1[0] };
-				RenderParams::Light iLight = rparams->light;
+				float iBgGray[2] = { rparams.bgColor0[0], rparams.bgColor1[0] };
+				RenderParams::Light iLight = rparams.light;
 
 				ImGui::DragFloat2("BG color", iBgGray, 0.01f, 0.0f, 1.0f, "%.2f", 0);
-				rparams->bgColor0 = glm::vec3(iBgGray[0]);
-				rparams->bgColor1 = glm::vec3(iBgGray[1]);
+				rparams.bgColor0 = glm::vec3(iBgGray[0]);
+				rparams.bgColor1 = glm::vec3(iBgGray[1]);
 
 				ImGui::Text("Ambient Light");
 
@@ -198,8 +197,8 @@ void dyno::ImWindow::draw(AppBase* app)
 				// Light Direction
 				ImGui::Text("Main Light Direction");
 
-				glm::mat4 inverse_view = glm::transpose(rparams->view);// view R^-1 = R^T
-				glm::vec3 tmpLightDir = glm::vec3(rparams->view * glm::vec4(iLight.mainLightDirection, 0));
+				glm::mat4 inverse_view = glm::transpose(rparams.view);// view R^-1 = R^T
+				glm::vec3 tmpLightDir = glm::vec3(rparams.view * glm::vec4(iLight.mainLightDirection, 0));
 				vec3 vL(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
 
 				ImGui::beginTitle("Light dir");
@@ -226,21 +225,20 @@ void dyno::ImWindow::draw(AppBase* app)
 				if (ImGui::Checkbox("Main Light Shadow", &shadow))
 					iLight.mainLightShadow = shadow ? 1.f : 0.f;
 
-				rparams->light = iLight;
+				rparams.light = iLight;
 
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Auxiliary", "")) {
-				RenderParams* rparams = engine->renderParams();
 
 				ImGui::Checkbox("Lock Camera", &mDisenableCamera);
 				ImGui::Spacing();
 
-				ImGui::Checkbox("Show Axis", &(rparams->showAxisHelper));
+				ImGui::Checkbox("Show Axis", &(rparams.showAxisHelper));
 				ImGui::Spacing();
 
-				ImGui::Checkbox("Show Background", &(rparams->showGround));
+				ImGui::Checkbox("Show Background", &(rparams.showGround));
 				ImGui::Spacing();
 
 				ImGui::Separator();
@@ -256,7 +254,7 @@ void dyno::ImWindow::draw(AppBase* app)
 
 					ImGui::Separator();
 
-					ImGui::Checkbox("Show Bounding Box", &(rparams->showSceneBounds));
+					ImGui::Checkbox("Show Bounding Box", &(rparams.showSceneBounds));
 					ImGui::Spacing();
 
 					Vec3f lowerBound = scene->getLowerBound();
@@ -283,7 +281,7 @@ void dyno::ImWindow::draw(AppBase* app)
 			std::string rEngineName = engine->name();
 			ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 			ImGui::Text("Rendered by %s: %.1f FPS", rEngineName.c_str(), ImGui::GetIO().Framerate);
-			ImGui::SetWindowPos(ImVec2(rparams->viewport.w - ImGui::GetWindowSize().x, rparams->viewport.h - ImGui::GetWindowSize().y));
+			ImGui::SetWindowPos(ImVec2(rparams.viewport.w - ImGui::GetWindowSize().x, rparams.viewport.h - ImGui::GetWindowSize().y));
 			ImGui::End();
 		}
 

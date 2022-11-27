@@ -44,7 +44,7 @@ namespace dyno
 		~GLRenderEngine();
 			   
 		virtual void initialize(int width, int height) override;
-		virtual void draw(dyno::SceneGraph* scene) override;
+		virtual void draw(dyno::SceneGraph* scene, const RenderParams& rparams) override;
 		virtual void resize(int w, int h) override;
 
 		virtual std::string name() override;
@@ -86,6 +86,9 @@ namespace dyno
 		SSAO*			mSSAO;
 		ShadowMap*		mShadowMap;
 		GLRenderHelper*	mRenderHelper;
+
+		// anti-aliasing
+		bool			bEnableFXAA = true;
 		FXAA*			mFXAAFilter;
 
 	};

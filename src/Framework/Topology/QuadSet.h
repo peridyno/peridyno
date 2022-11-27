@@ -112,23 +112,26 @@ namespace dyno
 
 		DArrayList<int>& getVertex2Quads();
 
-		void updateEdges();
-
 		//void loadObjFile(std::string filename);
 
 		void copyFrom(QuadSet<TDataType>& quadSet);
-		void updateTriangles();
-
+		
 		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
 
 	protected:
 		void updateTopology() override;
 
+		void updateEdges() override;
+
+		void updateTriangles() override;
+		void updateVertexNormal() override;
+
+		virtual void updateQuads() {};
+
 		DArray<Quad> m_quads;
 		DArrayList<int> m_ver2Quad;
 
 		DArray<::dyno::TopologyModule::Edg2Quad> edg2Quad;
-		DArray<::dyno::TopologyModule::Tri2Quad> tri2Quad;
 	};
 }
 

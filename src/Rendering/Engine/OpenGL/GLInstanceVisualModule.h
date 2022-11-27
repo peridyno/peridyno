@@ -27,5 +27,13 @@ namespace dyno
 		GLInstanceVisualModule();
 		virtual std::string caption() override;
 
+	public:
+		// for instanced rendering
+		DEF_ARRAY_IN(Transform3f, InstanceTransform, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, InstanceColor, DeviceType::GPU, "");
+
+	protected:
+		virtual void updateGL() override;
+
 	};
 };

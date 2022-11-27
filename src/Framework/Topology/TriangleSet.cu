@@ -336,27 +336,9 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateTopology()
 	{
-		if (this->outVertexNormal()->isEmpty())
-			this->outVertexNormal()->allocate();
+		this->updateTriangles();
 
-		auto& vn = this->outVertexNormal()->getData();
-		
-		uint vertSize = this->m_coords.size();
-
-		if (vn.size() != vertSize) {
-			vn.resize(vertSize);
-		}
-		
-		auto& vert2Tri = getVertex2Triangles();
-
-		cuExecute(vertSize,
-			TS_SetupVertexNormals,
-			vn,
-			this->m_coords,
-			m_triangles,
-			vert2Tri);
-
-		this->updateEdges();
+		this->updateVertexNormal();
 
 		EdgeSet<TDataType>::updateTopology();
 	}

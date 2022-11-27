@@ -270,7 +270,7 @@ namespace dyno
 		
 		//获取正方体的顶点
 		DArray<Coord> point = inTriangleSet()->getDataPtr()->getPoints();
-		inTriangleSet()->getDataPtr()->updateVertexNormal();
+		inTriangleSet()->getDataPtr()->update();
 		//printfDArray(point);
 
 		auto VertexNormal = inTriangleSet()->getDataPtr()->outVertexNormal()->getData();

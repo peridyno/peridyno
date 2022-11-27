@@ -192,19 +192,19 @@ void VtkRenderEngine::initialize(int width, int height)
 // 	mCamera->setClipFar(10.0f);
 }
 
-void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
+void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene, const RenderParams& rparams)
 {
 	mVtkWindow->GetState()->ResetFramebufferBindings();
 	mVtkWindow->GetState()->ResetGLViewportState();
 
 	setScene(scene);
-	setCamera();
+	setCamera(rparams);
 
 	// set light
 	{
-		glm::vec3 lightClr = m_rparams.light.mainLightColor;
-		glm::vec3 lightDir = m_rparams.light.mainLightDirection * 100.f;		
-		glm::vec3 ambient = m_rparams.light.ambientColor * m_rparams.light.ambientScale;		
+		glm::vec3 lightClr = rparams.light.mainLightColor;
+		glm::vec3 lightDir = rparams.light.mainLightDirection * 100.f;
+		glm::vec3 ambient = rparams.light.ambientColor * rparams.light.ambientScale;
 
 		mVtkLight->SetColor(lightClr.r, lightClr.g, lightClr.b);
 		mVtkLight->SetAmbientColor(ambient.r, ambient.g, ambient.b);
@@ -222,8 +222,8 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 	
 	// background
 	{
-		glm::vec3 color0 = m_rparams.bgColor0;
-		glm::vec3 color1 = m_rparams.bgColor1;
+		glm::vec3 color0 = rparams.bgColor0;
+		glm::vec3 color1 = rparams.bgColor1;
 		mVtkRenderer->SetBackground(color0.x, color0.y, color0.b);
 		mVtkRenderer->SetBackground2(color1.x, color1.y, color1.b);
 	}
@@ -240,10 +240,10 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 			item->getVolume()->SetVisibility(item->isVisible());
 	}
 
-	mPlaneActor->SetVisibility(m_rparams.showGround);
-	mPlaneWireFrameActor->SetVisibility(m_rparams.showGround);
+	mPlaneActor->SetVisibility(rparams.showGround);
+	mPlaneWireFrameActor->SetVisibility(rparams.showGround);
 
-	mBoxActor->SetVisibility(m_rparams.showSceneBounds);
+	mBoxActor->SetVisibility(rparams.showSceneBounds);
 
 	// with vtk_glew.h, we directly use OpenGL functions here
 	GLint currFBO;
@@ -259,8 +259,8 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		// TODO: we should not rely on camera width/height
 
-		int w = this->renderParams()->viewport.w;
-		int h = this->renderParams()->viewport.h;
+		int w = rparams.viewport.w;
+		int h = rparams.viewport.h;
 		glBlitFramebuffer(
 			0, 0, w, h,
 			0, 0, w, h,
@@ -272,10 +272,10 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene)
 void dyno::VtkRenderEngine::resize(int w, int h)
 {
 	// set the viewport
-	this->renderParams()->viewport.x = 0;
-	this->renderParams()->viewport.y = 0;
-	this->renderParams()->viewport.w = w;
-	this->renderParams()->viewport.h = h;
+// 	this->renderParams()->viewport.x = 0;
+// 	this->renderParams()->viewport.y = 0;
+// 	this->renderParams()->viewport.w = w;
+// 	this->renderParams()->viewport.h = h;
 }
 
 std::vector<dyno::SelectionItem> dyno::VtkRenderEngine::select(int x, int y, int w, int h)
@@ -334,15 +334,15 @@ void VtkRenderEngine::setScene(dyno::SceneGraph * scene)
 }
 
 
-void dyno::VtkRenderEngine::setCamera()
+void dyno::VtkRenderEngine::setCamera(const RenderParams& rparams)
 {
 	// setup camera
-	glm::dmat4 view = this->renderParams()->view;
-	glm::dmat4 proj = this->renderParams()->proj;
+	glm::dmat4 view = rparams.view;
+	glm::dmat4 proj = rparams.proj;
 
 	mVtkCamera->SetViewTransformMatrix(glm::value_ptr(view));
 	mVtkCamera->SetProjectionTransformMatrix(glm::value_ptr(proj));
 
 	// set window size..
-	mVtkWindow->SetSize(this->renderParams()->viewport.w, this->renderParams()->viewport.h);
+	mVtkWindow->SetSize(rparams.viewport.w, rparams.viewport.h);
 }
