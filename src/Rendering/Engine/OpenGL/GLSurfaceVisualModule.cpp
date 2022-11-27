@@ -76,7 +76,8 @@ namespace dyno
 		{
 			// update vertex normal
 			if (triSet->outVertexNormal()->isEmpty())
-				triSet->updateVertexNormal();
+				triSet->update();
+
 			auto& normals = triSet->outVertexNormal()->getData();
 			mNormalBuffer.loadCuda(normals.begin(), normals.size() * sizeof(float) * 3);
 		}

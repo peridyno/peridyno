@@ -11,6 +11,7 @@ namespace dyno
 	PointSet<TDataType>::PointSet()
 		: TopologyModule()
 	{
+		this->setUpdateAlways(true);
 	}
 
 	template<typename TDataType>
@@ -225,7 +226,6 @@ namespace dyno
 
 		vertex[pId] = rot * vertex[pId];
 	}
-
 
 	template<typename TDataType>
 	void PointSet<TDataType>::rotate(Quat<Real> q)

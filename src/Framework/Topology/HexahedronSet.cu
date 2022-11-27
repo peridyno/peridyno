@@ -259,8 +259,8 @@ namespace dyno
 		keys.clear();
 
 		
-		this->updateTriangles();
-		this->updateEdges();
+// 		this->updateTriangles();
+// 		this->updateEdges();
 	}
 
 

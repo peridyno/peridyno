@@ -157,5 +157,11 @@ namespace dyno
 		this->tagAsChanged();
 	}
 
+	template<typename TDataType>
+	void EdgeSet<TDataType>::updateTopology()
+	{
+		this->updateEdges();
+	}
+
 	DEFINE_CLASS(EdgeSet);
 }

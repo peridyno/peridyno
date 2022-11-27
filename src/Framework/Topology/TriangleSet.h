@@ -95,10 +95,6 @@ namespace dyno
 
 		DArrayList<int>& getVertex2Triangles();
 
-		void updateEdges();
-
-		void updateVertexNormal();
-
 		void loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
@@ -108,6 +104,12 @@ namespace dyno
 	protected:
 		void updateTopology() override;
 
+		void updateEdges() override;
+
+		virtual void updateTriangles() {};
+		virtual void updateVertexNormal();
+
+	private:
 		DArray<Triangle> m_triangles;
 		DArrayList<int> m_ver2Tri;
 
