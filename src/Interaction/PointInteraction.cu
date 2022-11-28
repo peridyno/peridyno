@@ -5,7 +5,7 @@
 
 namespace dyno
 {
-	__global__ void PointInitializeArray(
+	__global__ void PI_PointInitializeArray(
 		DArray<int> intersected)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -14,92 +14,7 @@ namespace dyno
 		intersected[pId] = 0;
 	}
 
-	__global__ void SurfaceInitializeArrayP(
-		DArray<int> intersected)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= intersected.size()) return;
-
-		intersected[pId] = 0;
-	}
-
-	template <typename Triangle, typename Real, typename Coord>
-	__global__ void CalIntersectedTrisRayP(
-		DArray<Coord> points,
-		DArray<Triangle> triangles,
-		DArray<int> intersected,
-		DArray<int> unintersected,
-		DArray<Coord> interPoints,
-		TRay3D<Real> mouseray)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= triangles.size()) return;
-
-		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
-		int temp = 0;
-
-		TPoint3D<Real> p;
-		temp = mouseray.intersect(t, p);
-
-		if (temp == 1 || intersected[pId] == 1)
-		{
-			intersected[pId] = 1;
-			interPoints[pId] = p.origin;
-		}
-		else
-		{
-			intersected[pId] = 0;
-			interPoints[pId] = Vec3f(0);
-		}
-		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
-	}
-
-	template <typename Real, typename Coord>
-	__global__ void CalTrisDistanceP(
-		DArray<Coord> interPoints,
-		DArray<Real> trisDistance,
-		DArray<int> intersected,
-		TRay3D<Real> mouseray)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= interPoints.size()) return;
-		if (intersected[pId] != 0)
-		{
-			TPoint3D<Real> origin = TPoint3D<Real>(mouseray.origin);
-			TPoint3D<Real> p = TPoint3D<Real>(interPoints[pId]);
-			trisDistance[pId] = origin.distance(TPoint3D<Real>(p));
-		}
-		else
-		{
-			trisDistance[pId] = 3.4E38;
-		}
-	}
-
-	template <typename Coord, typename Real>
-	__global__ void FindNearbyPoints(
-		DArray<Coord> points,
-		DArray<Coord> interPoints,
-		DArray<int> intersected,
-		DArray<int> unintersected,
-		int min_index_t,
-		Real intersectionRadius)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= intersected.size()) return;
-
-		if (intersected[pId] == 1)
-		{
-			TPoint3D<Real> p1 = TPoint3D<Real>(points[pId]);
-			TPoint3D<Real> p2 = TPoint3D<Real>(interPoints[min_index_t]);
-			if (p1.distance(p2) > intersectionRadius)
-			{
-				intersected[pId] = 0;
-				unintersected[pId] = 1;
-			}
-		}
-	}
-
-	__global__ void PointMergeIntersectedIndexOR(
+	__global__ void PI_PointMergeIntersectedIndexOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -116,7 +31,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void PointMergeIntersectedIndexXOR(
+	__global__ void PI_PointMergeIntersectedIndexXOR(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -133,7 +48,7 @@ namespace dyno
 		outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
 	}
 
-	__global__ void PointMergeIntersectedIndexC(
+	__global__ void PI_PointMergeIntersectedIndexC(
 		DArray<int> intersected1,
 		DArray<int> intersected2,
 		DArray<int> outIntersected,
@@ -167,9 +82,21 @@ namespace dyno
 				this->camera = event.camera;
 			}
 			this->varToggleMultiSelect()->setValue(false);
-			if (event.controlKeyPressed())
+			if (event.shiftKeyPressed() || event.controlKeyPressed())
 			{
 				this->varToggleMultiSelect()->setValue(true);
+				if (event.shiftKeyPressed() && !event.controlKeyPressed())
+				{
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(0);
+				}
+				else if (!event.shiftKeyPressed() && event.controlKeyPressed())
+				{
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(1);;
+				}
+				else if (event.shiftKeyPressed() && event.controlKeyPressed())
+				{
+					this->varMultiSelectionType()->getDataPtr()->setCurrentKey(2);;
+				}
 			}
 			if (event.actionType == AT_PRESS)
 			{
@@ -219,10 +146,11 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void CalIntersectedPointsRay(
+	__global__ void PI_CalIntersectedPointsRay(
 		DArray<Coord> points,
 		DArray<int> intersected,
 		DArray<int> unintersected,
+		DArray<Real> pointDistance,
 		TRay3D<Real> mouseray,
 		Real radius)
 	{
@@ -233,21 +161,49 @@ namespace dyno
 		TSegment3D<Real> seg;
 		int temp = mouseray.intersect(sphere, seg);
 		if (temp > 0 || intersected[pId] == 1)
+		{
 			intersected[pId] = 1;
+			pointDistance[pId] = abs(TPoint3D<Real>(points[pId][0], points[pId][1], points[pId][2]).distance(TPoint3D<Real>(mouseray.origin[0], mouseray.origin[1], mouseray.origin[2])));
+		}
 		else
+		{
 			intersected[pId] = 0;
+			pointDistance[pId] = 3.4E38;
+		}
 		unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
 	}
 
+	__global__ void PI_CalPointsNearest(
+		int min_index,
+		DArray<int> intersected,
+		DArray<int> unintersected
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intersected.size()) return;
+
+		if (intersected[pId] == 1)
+		{
+			if (pId != min_index)
+			{
+				intersected[pId] = 0;
+				unintersected[pId] = 1;
+			}
+		}
+	}
+
+
 	template <typename Real, typename Coord>
-	__global__ void CalIntersectedPointsBox(
+	__global__ void PI_CalIntersectedPointsBox(
 		DArray<Coord> points,
 		DArray<int> intersected,
 		DArray<int> unintersected,
 		TPlane3D<Real> plane13,
 		TPlane3D<Real> plane42,
 		TPlane3D<Real> plane14,
-		TPlane3D<Real> plane32)
+		TPlane3D<Real> plane32,
+		Real radius,
+		TRay3D<Real> mouseray)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= points.size()) return;
@@ -258,6 +214,11 @@ namespace dyno
 		if (temp1 >= 0 && temp2 >= 0)
 			flag = true;
 
+		TSphere3D<Real> sphere = TSphere3D<Real>(points[pId], radius);
+		TSegment3D<Real> seg;
+		int temp = mouseray.intersect(sphere, seg);
+		if (temp > 0)
+			flag = flag || true;
 		if (flag || intersected[pId] == 1)
 			intersected[pId] = 1;
 		else
@@ -266,7 +227,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__global__ void AssignOutPoints(
+	__global__ void PI_AssignOutPoints(
 		DArray<Coord> points,
 		DArray<Coord> intersected_points,
 		DArray<Coord> unintersected_points,
@@ -284,81 +245,45 @@ namespace dyno
 		else
 		{
 			unintersected_points[unintersected[pId]] = points[pId];
-
 		}
 	}
 
 	template<typename TDataType>
 	void PointInteraction<TDataType>::calcPointIntersectClick()
 	{
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
-
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
-		DArray<int> intersected_t;
-		intersected_t.resize(triangles.size());
-
-		cuExecute(triangles.size(),
-			SurfaceInitializeArrayP,
-			intersected_t
-		);
-		DArray<int> unintersected_t;
-		unintersected_t.resize(triangles.size());
-		//std::cout << "Triangle Num:" << triangles.size() << std::endl;
-
-		DArray<Coord> interPoints;
-		interPoints.resize(triangles.size());
-
-		cuExecute(triangles.size(),
-			CalIntersectedTrisRayP,
-			points,
-			triangles,
-			intersected_t,
-			unintersected_t,
-			interPoints,
-			this->ray1
-		);
-
-
-		DArray<Real> trisDistance;
-		trisDistance.resize(interPoints.size());
-
-		cuExecute(interPoints.size(),
-			CalTrisDistanceP,
-			interPoints,
-			trisDistance,
-			intersected_t,
-			this->ray1
-		);
-
-		int min_index_t = thrust::min_element(thrust::device, trisDistance.begin(), trisDistance.begin() + trisDistance.size()) - trisDistance.begin();
+		PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
+		DArray<Coord> points = initialPointSet.getPoints();
 
 		DArray<int> intersected;
 		intersected.resize(points.size());
 		cuExecute(points.size(),
-			PointInitializeArray,
+			PI_PointInitializeArray,
 			intersected
 		);
 		DArray<int> unintersected;
 		unintersected.resize(points.size());
 		std::cout << "Point Num:" << points.size() << std::endl;
+
+		DArray<Real> pointDistance;
+		pointDistance.resize(points.size());
+
 		cuExecute(points.size(),
-			CalIntersectedPointsRay,
+			PI_CalIntersectedPointsRay,
 			points,
 			intersected,
 			unintersected,
+			pointDistance,
 			this->ray1,
 			this->varInterationRadius()->getData()
 		);
 
-		cuExecute(points.size(),
-			FindNearbyPoints,
-			points,
-			interPoints,
+		int min_index = thrust::min_element(thrust::device, pointDistance.begin(), pointDistance.begin() + pointDistance.size()) - pointDistance.begin();
+
+		cuExecute(intersected.size(),
+			PI_CalPointsNearest,
+			min_index,
 			intersected,
-			unintersected,
-			min_index_t,
-			this->varInterationRadius()->getData()
+			unintersected
 		);
 
 		this->tempPointIntersectedIndex.assign(intersected);
@@ -367,9 +292,9 @@ namespace dyno
 		{
 			if (this->pointIntersectedIndex.size() == 0)
 			{
-				this->pointIntersectedIndex.resize(triangles.size());
+				this->pointIntersectedIndex.resize(points.size());
 				cuExecute(points.size(),
-					PointInitializeArray,
+					PI_PointInitializeArray,
 					this->pointIntersectedIndex
 				)
 			}
@@ -380,7 +305,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexOR,
+					PI_PointMergeIntersectedIndexOR,
 					this->pointIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -390,7 +315,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexXOR,
+					PI_PointMergeIntersectedIndexXOR,
 					this->pointIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -400,7 +325,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexC,
+					PI_PointMergeIntersectedIndexC,
 					this->pointIntersectedIndex,
 					intersected,
 					outIntersected,
@@ -428,7 +353,7 @@ namespace dyno
 			unintersected_points.resize(unintersected_size);
 
 			cuExecute(points.size(),
-				AssignOutPoints,
+				PI_AssignOutPoints,
 				points,
 				intersected_points,
 				unintersected_points,
@@ -437,9 +362,9 @@ namespace dyno
 				intersected_o
 			);
 			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
-			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
-			this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
 		}
@@ -447,8 +372,16 @@ namespace dyno
 		template<typename TDataType>
 		void PointInteraction<TDataType>::calcPointIntersectDrag()
 		{
-			TRay3D<Real> ray1 = this->ray1;
-			TRay3D<Real> ray2 = this->ray2;
+			if (x1 == x2)
+			{
+				x2 += 1.0f;
+			}
+			if (y1 == y2)
+			{
+				y2 += 1.0f;
+			}
+			TRay3D<Real> ray1 = this->camera->castRayInWorldSpace((float)x1, (float)y1);
+			TRay3D<Real> ray2 = this->camera->castRayInWorldSpace((float)x2, (float)y2);
 			TRay3D<Real> ray3 = this->camera->castRayInWorldSpace((float)x1, (float)y2);
 			TRay3D<Real> ray4 = this->camera->castRayInWorldSpace((float)x2, (float)y1);
 
@@ -457,34 +390,28 @@ namespace dyno
 			TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 			TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 
-			TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-			DArray<Coord> points = initialTriangleSet.getPoints();
+			PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
+			DArray<Coord> points = initialPointSet.getPoints();
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
-				PointInitializeArray,
+				PI_PointInitializeArray,
 				intersected
 			);
 			DArray<int> unintersected;
 			unintersected.resize(points.size());
 			std::cout << "Point Num:" << points.size() << std::endl;
 			cuExecute(points.size(),
-				CalIntersectedPointsBox,
+				PI_CalIntersectedPointsBox,
 				points,
 				intersected,
 				unintersected,
 				plane13,
 				plane42,
 				plane14,
-				plane32
-			);
-			cuExecute(points.size(),
-				CalIntersectedPointsRay,
-				points,
-				intersected,
-				unintersected,
-				this->ray1,
-				this->varInterationRadius()->getData()
+				plane32,
+				this->varInterationRadius()->getData(),
+				this->ray1
 			);
 
 			this->tempPointIntersectedIndex.assign(intersected);
@@ -495,7 +422,7 @@ namespace dyno
 				{
 					this->pointIntersectedIndex.resize(points.size());
 					cuExecute(points.size(),
-						PointInitializeArray,
+						PI_PointInitializeArray,
 						this->pointIntersectedIndex
 					)
 				}
@@ -506,7 +433,7 @@ namespace dyno
 				if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 				{
 					cuExecute(points.size(),
-						PointMergeIntersectedIndexOR,
+						PI_PointMergeIntersectedIndexOR,
 						this->pointIntersectedIndex,
 						intersected,
 						outIntersected,
@@ -516,7 +443,7 @@ namespace dyno
 				else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 				{
 					cuExecute(points.size(),
-						PointMergeIntersectedIndexXOR,
+						PI_PointMergeIntersectedIndexXOR,
 						this->pointIntersectedIndex,
 						intersected,
 						outIntersected,
@@ -526,7 +453,7 @@ namespace dyno
 				else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 				{
 					cuExecute(points.size(),
-						PointMergeIntersectedIndexC,
+						PI_PointMergeIntersectedIndexC,
 						this->pointIntersectedIndex,
 						intersected,
 						outIntersected,
@@ -555,7 +482,7 @@ namespace dyno
 			unintersected_points.resize(unintersected_size);
 
 			cuExecute(points.size(),
-				AssignOutPoints,
+				PI_AssignOutPoints,
 				points,
 				intersected_points,
 				unintersected_points,
@@ -564,9 +491,9 @@ namespace dyno
 				intersected_o
 			);
 			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
-			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
-			this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
 		}
@@ -574,12 +501,12 @@ namespace dyno
 		template<typename TDataType>
 		void PointInteraction<TDataType>::mergeIndex()
 		{
-			TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-			DArray<Coord> points = initialTriangleSet.getPoints();
+			PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
+			DArray<Coord> points = initialPointSet.getPoints();
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
-				PointInitializeArray,
+				PI_PointInitializeArray,
 				intersected
 			);
 			DArray<int> unintersected;
@@ -594,7 +521,7 @@ namespace dyno
 			if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexOR,
+					PI_PointMergeIntersectedIndexOR,
 					this->pointIntersectedIndex,
 					this->tempPointIntersectedIndex,
 					outIntersected,
@@ -604,7 +531,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::XOR)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexXOR,
+					PI_PointMergeIntersectedIndexXOR,
 					this->pointIntersectedIndex,
 					this->tempPointIntersectedIndex,
 					outIntersected,
@@ -614,7 +541,7 @@ namespace dyno
 			else if (this->varMultiSelectionType()->getValue() == MultiSelectionType::C)
 			{
 				cuExecute(points.size(),
-					PointMergeIntersectedIndexC,
+					PI_PointMergeIntersectedIndexC,
 					this->pointIntersectedIndex,
 					this->tempPointIntersectedIndex,
 					outIntersected,
@@ -640,7 +567,7 @@ namespace dyno
 			unintersected_points.resize(unintersected_size);
 
 			cuExecute(points.size(),
-				AssignOutPoints,
+				PI_AssignOutPoints,
 				points,
 				intersected_points,
 				unintersected_points,
@@ -649,9 +576,9 @@ namespace dyno
 				intersected_o
 			);
 			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
-			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
-			this->outOtherPointSet()->getDataPtr()->copyFrom(initialTriangleSet);
+			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
 		}

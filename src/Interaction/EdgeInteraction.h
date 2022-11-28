@@ -25,7 +25,7 @@ namespace dyno
 
 		void mergeIndex();
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
+		DEF_INSTANCE_IN(EdgeSet<TDataType>, InitialEdgeSet, "");
 		DEF_INSTANCE_OUT(EdgeSet<TDataType>, SelectedEdgeSet, "");
 		DEF_INSTANCE_OUT(EdgeSet<TDataType>, OtherEdgeSet, "");
 		DEF_ARRAY_OUT(int, EdgeIndex, DeviceType::GPU, "");

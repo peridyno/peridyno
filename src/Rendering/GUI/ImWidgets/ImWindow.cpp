@@ -360,7 +360,7 @@ void ImWindow::drawSelectedRegion()
 	if (mDrawingBox &&
 		mButtonType == BT_LEFT &&
 		mButtonAction == AT_PRESS &&
-		mButtonMode == MB_NO_MODIFIER &&
+		mButtonMode != MB_ALT &&
 		!ImGuizmo::IsUsing() &&
 		!ImGui::GetIO().WantCaptureMouse) {
 
