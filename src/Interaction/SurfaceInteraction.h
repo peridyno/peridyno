@@ -46,11 +46,19 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
+		//DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
+
+		DEF_VAR(Real, FloodAngle, 0.0f, "The angle limit of flood selection");
 
 		DEF_VAR(bool, TogglePicker, true, "The toggle of surface picker");
 
 		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle of multiple selection");
+
+		DEF_VAR(bool, ToggleFlood, false, "The toggle of flood selection");
+
+		DEF_VAR(bool, ToggleVisibleFilter, false, "The toggle of visible filter");
+
+		DEF_VAR(bool, ToggleQuad, false, "The toggle of quad selection");
 
 	protected:
 		void onEvent(PMouseEvent event) override;

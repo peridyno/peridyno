@@ -25,7 +25,7 @@ namespace dyno
 
 		void mergeIndex();
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
+		DEF_INSTANCE_IN(PointSet<TDataType>, InitialPointSet, "");
 		DEF_INSTANCE_OUT(PointSet<TDataType>, SelectedPointSet, "");
 		DEF_INSTANCE_OUT(PointSet<TDataType>, OtherPointSet, "");
 		DEF_ARRAY_OUT(int, PointIndex, DeviceType::GPU, "");
