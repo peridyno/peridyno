@@ -65,7 +65,7 @@ void dyno::ImWindow::draw(AppBase* app)
 {
 	auto engine = app->getRenderEngine();
 	auto scene  = app->getSceneGraph();
-	auto rparams = app->getRenderParams();
+	auto& rparams = app->getRenderParams();
 	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
