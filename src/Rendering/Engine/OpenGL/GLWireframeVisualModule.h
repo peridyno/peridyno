@@ -40,13 +40,29 @@ namespace dyno
 		virtual bool initializeGL() override;
 
 	private:
+		// we use a cylinder to show line segment
+		void createCylinder();
+		
+	private:
 
-		gl::Program mShaderProgram;
-		gl::VertexArray	mVAO;
+		gl::Program		mShaderProgram;
 
-		gl::CudaBuffer	mVertexBuffer;
-		gl::CudaBuffer 	mIndexBuffer;
+		gl::CudaBuffer	mPoints;
+		gl::CudaBuffer 	mEdges;
 
-		unsigned int	mDrawCount = 0;
+		unsigned int	mNumEdges = 0;
+
+		float			mRadius = 0.003f;
+
+		// cylinder
+		struct {
+			gl::VertexArray	vao;
+			gl::Buffer		vertices;
+			gl::Buffer		normals;
+			gl::Buffer		indices;
+			unsigned int	drawCount;
+			// number of sectors for create cylinder
+			int				nSectors = 16;
+		} mCylinder;
 	};
 };
