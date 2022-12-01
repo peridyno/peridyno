@@ -7,6 +7,10 @@ namespace dyno
 	GLVisualModule::GLVisualModule()
 	{
 		this->setName("GLVisualModule");
+
+		this->varMetallic()->setRange(0, 1);
+		this->varRoughness()->setRange(0, 1);
+		this->varAlpha()->setRange(0, 1);
 	}
 
 	void GLVisualModule::updateGraphicsContext()

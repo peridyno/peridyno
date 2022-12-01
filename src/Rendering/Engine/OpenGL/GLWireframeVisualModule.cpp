@@ -12,6 +12,7 @@ namespace dyno
 	GLWireframeVisualModule::GLWireframeVisualModule()
 	{
 		this->setName("wireframe_renderer");
+		this->varRadius()->setRange(0.001, 0.01);
 	}
 
 
@@ -75,7 +76,7 @@ namespace dyno
 			return;
 		}
 
-		mShaderProgram.setFloat("uRadius", mRadius);
+		mShaderProgram.setFloat("uRadius", this->varRadius()->getData());
 
 		mPoints.bindBufferBase(1);
 		mEdges.bindBufferBase(2);

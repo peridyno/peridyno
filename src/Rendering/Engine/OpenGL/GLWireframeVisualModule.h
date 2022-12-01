@@ -32,8 +32,10 @@ namespace dyno
 	public:
 		std::string caption() override;
 
+	public:
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
 
+		DEF_VAR(float, Radius, 0.003, "Cylinder radius");
 	protected:
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
@@ -51,8 +53,6 @@ namespace dyno
 		gl::CudaBuffer 	mEdges;
 
 		unsigned int	mNumEdges = 0;
-
-		float			mRadius = 0.003f;
 
 		// cylinder
 		struct {
