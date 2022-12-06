@@ -16,8 +16,8 @@ namespace dyno
 		this->inTopology()->connect(edgeInteractor->inInitialEdgeSet());
 		this->inTopology()->connect(pointInteractor->inInitialPointSet());
 
-		this->varInterationRadius()->connect(edgeInteractor->varInterationRadius());
-		this->varInterationRadius()->connect(pointInteractor->varInterationRadius());
+		this->varInteractionRadius()->connect(edgeInteractor->varInteractionRadius());
+		this->varInteractionRadius()->connect(pointInteractor->varInteractionRadius());
 
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
@@ -29,29 +29,31 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(pointInteractor);
 
 		auto edgeRender1 = std::make_shared<GLWireframeVisualModule>();
-		this->varSelectedEdgeColor()->connect(edgeRender1->varBaseColor());
+		this->varEdgeSelectedSize()->connect(edgeRender1->varRadius());
+		edgeRender1->setColor(Vec3f(0.8f, 0.0f, 0.0f));
 		this->edgeInteractor->outSelectedEdgeSet()->connect(edgeRender1->inEdgeSet());
 		this->graphicsPipeline()->pushModule(edgeRender1);
 
 		auto edgeRender2 = std::make_shared<GLWireframeVisualModule>();
-		this->varOtherEdgeColor()->connect(edgeRender2->varBaseColor());
+		this->varEdgeOtherSize()->connect(edgeRender2->varRadius());
+		edgeRender2->setColor(Vec3f(0.0f));
 		this->edgeInteractor->outOtherEdgeSet()->connect(edgeRender2->inEdgeSet());
 		this->graphicsPipeline()->pushModule(edgeRender2);
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
 		this->varPointSelectedSize()->connect(pointRender1->varPointSize());
-		this->varSelectedPointColor()->connect(pointRender1->varBaseColor());
+		pointRender1->setColor(Vec3f(1.0f, 0, 0));
 		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
 		this->varPointOtherSize()->connect(pointRender2->varPointSize());
-		this->varOtherPointColor()->connect(pointRender2->varBaseColor());
+		pointRender2->setColor(Vec3f(0, 0, 1.0f));
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 
-		this->varInterationRadius()->setRange(0.001f, 0.2f);
-		this->varInterationRadius()->setValue(0.01f);
+		this->varInteractionRadius()->setRange(0.001f, 0.2f);
+		this->varInteractionRadius()->setValue(0.01f);
 		this->varPointSelectedSize()->setRange(0.0f, 0.1f);
 		this->varPointOtherSize()->setRange(0.0f, 0.1f);
 

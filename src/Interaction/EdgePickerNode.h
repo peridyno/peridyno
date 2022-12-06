@@ -45,15 +45,13 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		DEF_VAR(Real, InterationRadius, 0.002f, "The radius of interaction");
+		DEF_VAR(Real, InteractionRadius, 0.002f, "The radius of interaction");
 
-		DEF_VAR(Real, PointSelectedSize, 0.012f, "");
-		DEF_VAR(Real, PointOtherSize, 0.01f, "");
+		DEF_VAR(Real, PointSelectedSize, 0.006f, "");
+		DEF_VAR(Real, PointOtherSize, 0.005f, "");
 
-		DEF_VAR(Vec3f, SelectedEdgeColor, Vec3f(0.8f, 0.0f, 0.0f), "");
-		DEF_VAR(Vec3f, OtherEdgeColor, Vec3f(0.0f), "");
-		DEF_VAR(Vec3f, SelectedPointColor, Vec3f(1.0f, 0, 0), "");
-		DEF_VAR(Vec3f, OtherPointColor, Vec3f(0, 0, 1.0f), "");
+		DEF_VAR(Real, EdgeSelectedSize, 0.002f, "");
+		DEF_VAR(Real, EdgeOtherSize, 0.0015, "");
 
 		EdgePickerNode(std::string name = "default");
 		~EdgePickerNode();

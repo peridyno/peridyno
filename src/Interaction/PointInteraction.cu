@@ -108,7 +108,10 @@ namespace dyno
 				this->x1 = event.x;
 				this->y1 = event.y;
 				if (this->varPointPickingType()->getValue() == PickingTypeSelection::Both || this->varPointPickingType()->getValue() == PickingTypeSelection::Click)
+				{
 					this->calcIntersectClick();
+					this->printInfoClick();
+				}
 			}
 			else if (event.actionType == AT_RELEASE)
 			{
@@ -119,7 +122,10 @@ namespace dyno
 				this->x2 = event.x;
 				this->y2 = event.y;
 				if (this->varToggleMultiSelect()->getValue() && this->varTogglePicker()->getValue())
+				{
 					this->mergeIndex();
+					this->printInfoDragRelease();
+				}
 			}
 			else
 			{
@@ -138,7 +144,10 @@ namespace dyno
 					else 
 					{
 						if (this->varPointPickingType()->getValue() == PickingTypeSelection::Both || this->varPointPickingType()->getValue() == PickingTypeSelection::Drag)
+						{
 							this->calcIntersectDrag();
+							this->printInfoDragging();
+						}
 					}
 				}
 			}
@@ -262,7 +271,7 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(points.size());
-		std::cout << "Point Num:" << points.size() << std::endl;
+		this->tempNumT = points.size();
 
 		DArray<Real> pointDistance;
 		pointDistance.resize(points.size());
@@ -274,7 +283,7 @@ namespace dyno
 			unintersected,
 			pointDistance,
 			this->ray1,
-			this->varInterationRadius()->getData()
+			this->varInteractionRadius()->getData()
 		);
 
 		int min_index = thrust::min_element(thrust::device, pointDistance.begin(), pointDistance.begin() + pointDistance.size()) - pointDistance.begin();
@@ -361,7 +370,7 @@ namespace dyno
 				unintersected,
 				intersected_o
 			);
-			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
+			this->tempNumS = intersected_size;
 			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
@@ -400,7 +409,7 @@ namespace dyno
 			);
 			DArray<int> unintersected;
 			unintersected.resize(points.size());
-			std::cout << "Point Num:" << points.size() << std::endl;
+			this->tempNumT = points.size();
 			cuExecute(points.size(),
 				PI_CalIntersectedPointsBox,
 				points,
@@ -410,7 +419,7 @@ namespace dyno
 				plane42,
 				plane14,
 				plane32,
-				this->varInterationRadius()->getData(),
+				this->varInteractionRadius()->getData(),
 				this->ray1
 			);
 
@@ -490,7 +499,7 @@ namespace dyno
 				unintersected,
 				intersected_o
 			);
-			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
+			this->tempNumS = intersected_size;
 			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
@@ -511,7 +520,7 @@ namespace dyno
 			);
 			DArray<int> unintersected;
 			unintersected.resize(points.size());
-			std::cout << "Points Num:" << points.size() << std::endl;
+			this->tempNumT = points.size();
 
 			DArray<int> outIntersected;
 			outIntersected.resize(intersected.size());
@@ -575,12 +584,39 @@ namespace dyno
 				unintersected,
 				intersected_o
 			);
-			std::cout << "Selected Points Num:" << intersected_points.size() << std::endl;
+			this->tempNumS = intersected_size;
 			this->outSelectedPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
 			this->outPointIndex()->getDataPtr()->assign(intersected_o);
+		}
+
+		template<typename TDataType>
+		void PointInteraction<TDataType>::printInfoClick()
+		{
+			std::cout << "----------point picking: click----------" << std::endl;
+			std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+			std::cout << "Interation radius:" << this->varInteractionRadius()->getValue() << std::endl;
+			std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
+		}
+
+		template<typename TDataType>
+		void PointInteraction<TDataType>::printInfoDragging()
+		{
+			std::cout << "----------point picking: dragging----------" << std::endl;
+			std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+			std::cout << "Interation radius:" << this->varInteractionRadius()->getValue() << std::endl;
+			std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
+		}
+
+		template<typename TDataType>
+		void PointInteraction<TDataType>::printInfoDragRelease()
+		{
+			std::cout << "----------point picking: drag release----------" << std::endl;
+			std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+			std::cout << "Interation radius:" << this->varInteractionRadius()->getValue() << std::endl;
+			std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
 		}
 
 		template<typename TDataType>

@@ -108,7 +108,10 @@ namespace dyno
 				this->x1 = event.x;
 				this->y1 = event.y;
 				if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Click)
+				{
 					this->calcIntersectClick();
+					this->printInfoClick();
+				}
 			}
 			else if (event.actionType == AT_RELEASE)
 			{
@@ -119,7 +122,10 @@ namespace dyno
 				this->x2 = event.x;
 				this->y2 = event.y;
 				if (this->varToggleMultiSelect()->getValue() && this->varTogglePicker()->getValue())
+				{
 					this->mergeIndex();
+					this->printInfoDragRelease();
+				}
 			}
 			else
 			{
@@ -138,7 +144,10 @@ namespace dyno
 					else
 					{
 						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Drag)
+						{
 							this->calcIntersectDrag();
+							this->printInfoDragging();
+						}
 					}
 				}
 			}
@@ -442,7 +451,7 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(triangles.size());
-		std::cout << "Triangle Num:" << triangles.size() << std::endl;
+		this->tempNumT = triangles.size();
 
 		DArray<Real> triDistance;
 		triDistance.resize(triangles.size());
@@ -479,7 +488,7 @@ namespace dyno
 					points,
 					intersected,
 					unintersected,
-					this->varFloodAngle()->getValue());
+					this->varFloodAngle()->getValue()/180.0f*M_PI);
 				intersected_size_t = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
 			}
 		}
@@ -594,7 +603,7 @@ namespace dyno
 			intersected_o.assign(intersected_q);
 		}
 
-		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
+		this->tempNumS = intersected_size;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -634,7 +643,7 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(triangles.size());
-		std::cout << "Triangle Num:" << triangles.size() << std::endl;
+		this->tempNumT = triangles.size();
 
 		cuExecute(triangles.size(),
 			SI_CalIntersectedTrisBox,
@@ -761,7 +770,7 @@ namespace dyno
 			intersected_o.assign(intersected_q);
 		}
 
-		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
+		this->tempNumS = intersected_size;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
@@ -783,7 +792,7 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(triangles.size());
-		std::cout << "Triangle Num:" << triangles.size() << std::endl;
+		this->tempNumT = triangles.size();
 
 		DArray<int> outIntersected;
 		outIntersected.resize(intersected.size());
@@ -847,12 +856,36 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
-		std::cout << "Selected Triangles Num:" << intersected_triangles.size() << std::endl;
+		this->tempNumS = intersected_size;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
 		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+	}
+
+	template<typename TDataType>
+	void SurfaceInteraction<TDataType>::printInfoClick()
+	{
+		std::cout << "----------surface picking: click----------" << std::endl;
+		std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+		std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
+	}
+
+	template<typename TDataType>
+	void SurfaceInteraction<TDataType>::printInfoDragging()
+	{
+		std::cout << "----------surface picking: dragging----------" << std::endl;
+		std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+		std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
+	}
+
+	template<typename TDataType>
+	void SurfaceInteraction<TDataType>::printInfoDragRelease()
+	{
+		std::cout << "----------surface picking: drag release----------" << std::endl;
+		std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+		std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
 	}
 
 	template<typename TDataType>
