@@ -5,7 +5,7 @@
 
 #define ENABLE_VALIDATION true
 
-using namespace px;
+using namespace dyno;
 std::shared_ptr<dyno::SceneGraph> createScene()
 {
 	auto scene = std::make_shared<dyno::SceneGraph>();
@@ -27,7 +27,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
-	px::VkSystem::instance()->initialize();
+	VkSystem::instance()->initialize();
 	vulkanExample = new VkApp(ENABLE_VALIDATION);
 	vulkanExample->setSceneGraph(createScene());
 	vulkanExample->setWindowTitle("Rigid body simulation");

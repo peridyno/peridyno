@@ -1,6 +1,6 @@
 #include "PointSet.h"
 
-namespace px
+namespace dyno
 {
 	PointSet::PointSet()
 		: TopologyModule()

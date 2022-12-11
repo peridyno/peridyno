@@ -5,7 +5,7 @@
 
 #define WORKGROUP_SIZE 64
 
-namespace px
+namespace dyno
 {
 	CollisionDetectionBroadPhase::CollisionDetectionBroadPhase()
 		: dyno::CollisionModel()

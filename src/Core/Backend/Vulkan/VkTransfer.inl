@@ -1,7 +1,7 @@
 #include <assert.h>
 #include "VkContext.h"
 
-namespace px
+namespace dyno
 {
 	template<typename T>
 	bool vkTransfer(VkHostArray<T>& dst, const VkDeviceArray<T>& src)

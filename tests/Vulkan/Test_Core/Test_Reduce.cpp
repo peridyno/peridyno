@@ -4,7 +4,7 @@
 #include "VkTransfer.h"
 #include "Catalyzer/VkReduce.h"
 
-using namespace px;
+using namespace dyno;
 
 TEST(VkReduce, reduce)
 {

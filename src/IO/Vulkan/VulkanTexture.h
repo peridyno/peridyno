@@ -40,7 +40,7 @@ public:
 	VkDescriptorImageInfo& descriptorInfo() { return descriptor; }
 
 protected:
-	px::VkContext*		ctx;
+	dyno::VkContext*		ctx;
 	VkImage               image;
 	VkImageLayout         imageLayout;
 	VkDeviceMemory        deviceMemory;

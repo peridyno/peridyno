@@ -4,7 +4,7 @@
 #include "VkDeviceArray2D.h"
 #include "VkFFT_Defs.h"
 
-namespace px
+namespace dyno
 {
 	enum VkFFT_Type
 	{

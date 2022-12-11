@@ -4,7 +4,7 @@
 
 #include "VkContext.h"
 
-namespace px {
+namespace dyno {
 
 	/*!
 	*	\enum	ArgumentType

@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-namespace px
+namespace dyno
 {
 
 void Smesh::loadFile(string filename)

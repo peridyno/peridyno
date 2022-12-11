@@ -18,7 +18,7 @@ namespace vks
 {	
 	Buffer::Buffer()
 	{
-		auto ctx = px::VkSystem::instance()->currentContext();
+		auto ctx = dyno::VkSystem::instance()->currentContext();
 
 		if (ctx == VK_NULL_HANDLE) {
 			vks::tools::exitFatal("Vulkan libraray should be initialized first! \n", 0);

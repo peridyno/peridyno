@@ -4,7 +4,7 @@
 #include "Node.h"
 #include "Shape.h"
 
-namespace px 
+namespace dyno
 {
 	UniformGridRenderer::UniformGridRenderer()
 		: VkGraphicsPipeline()
@@ -15,7 +15,7 @@ namespace px
 	{
 	};
 
-	std::vector<Box> hBox;
+	std::vector<px::Box> hBox;
 	bool UniformGridRenderer::initializeImpl()
 	{
 		auto uGrid = std::dynamic_pointer_cast<UniformGrid3D>(this->inTopology()->getDataPtr());
@@ -24,7 +24,7 @@ namespace px
 
 		dyno::Vec3f uo = uGrid->orgin();
 
-		Box b;
+		px::Box b;
 		b.halfLength = dyno::Vec3f(0.5*uGrid->spacing());
 		for (int k = 0; k < uGrid->nz(); k++)
 		{
@@ -51,7 +51,7 @@ namespace px
 		this->addKernel(
 			"SetupBox",
 			std::make_shared<VkProgram>(
-				BUFFER(Box),			//boxes for rendering
+				BUFFER(px::Box),			//boxes for rendering
 				BUFFER3D(float),		//density
 				UNIFORM(GridInfo),		//grid info
 				CONSTANT(uint32_t))			//number of total grid cells
@@ -83,7 +83,7 @@ namespace px
 		}
 	}
 
-	void UniformGridRenderer::initBoxes(VkDeviceArray<Box>& boxes)
+	void UniformGridRenderer::initBoxes(VkDeviceArray<px::Box>& boxes)
 	{
 		int vertSize = sizeof(CUBE_VERTICES) / sizeof(Vertex);
 		int indexSize = sizeof(CUBE_INDICES) / sizeof(uint32_t);

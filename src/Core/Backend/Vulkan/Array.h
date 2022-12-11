@@ -4,7 +4,7 @@
 #include "Platform.h"
 #include "VkDeviceArray.h"
 
-namespace px {
+namespace dyno {
 
 	template<typename T, DeviceType deviceType = DeviceType::GPU>
 	class Array

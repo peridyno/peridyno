@@ -3,7 +3,7 @@
 #include "VkProgram.h"
 
 using uint = unsigned int;
-namespace px {
+namespace dyno {
 	/*! TODO:
 	*  \brief implement functions for reducing a range to a single value
 	*/

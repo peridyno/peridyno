@@ -1,6 +1,6 @@
 #include "VkConstant.h"
 
-namespace px {
+namespace dyno {
 
 	template<typename T>
 	VkConstant<T>::VkConstant()

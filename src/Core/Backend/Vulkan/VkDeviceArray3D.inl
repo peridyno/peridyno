@@ -1,4 +1,4 @@
-namespace px {
+namespace dyno {
 
 	template<typename T>
 	VkDeviceArray3D<T>::~VkDeviceArray3D()

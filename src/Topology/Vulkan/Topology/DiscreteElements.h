@@ -3,7 +3,7 @@
 #include "Primitive/Primitive3D.h"
 #include "Module/TopologyModule.h"
 
-namespace px
+namespace dyno
 {
 	struct ElementOffset
 	{
@@ -18,22 +18,22 @@ namespace px
 		DiscreteElements();
 		~DiscreteElements() override;
 
-		void setBoxes(std::vector<Box> boxes);
-		void setSpheres(std::vector<Sphere> spheres);
-		void setCapsules(std::vector<Capsule> capsules);
+		void setBoxes(std::vector<px::Box> boxes);
+		void setSpheres(std::vector<px::Sphere> spheres);
+		void setCapsules(std::vector<px::Capsule> capsules);
 
-		VkDeviceArray<Box>& getBoxes() { return mBoxes; }
-		VkDeviceArray<Sphere>& getSpheres() { return mSpheres; }
-		VkDeviceArray<Capsule>& getCapsules() { return mCapsules; }
+		VkDeviceArray<px::Box>& getBoxes() { return mBoxes; }
+		VkDeviceArray<px::Sphere>& getSpheres() { return mSpheres; }
+		VkDeviceArray<px::Capsule>& getCapsules() { return mCapsules; }
 
 		ElementOffset getElementOffset();
 
 		uint32_t getTotalElementSize();
 
 	private:
-		VkDeviceArray<Box> mBoxes;
-		VkDeviceArray<Capsule> mCapsules;
-		VkDeviceArray<Sphere> mSpheres;
+		VkDeviceArray<px::Box> mBoxes;
+		VkDeviceArray<px::Capsule> mCapsules;
+		VkDeviceArray<px::Sphere> mSpheres;
 	};
 }
 

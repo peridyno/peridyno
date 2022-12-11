@@ -1,7 +1,7 @@
 #pragma once
 #include "EdgeSet.h"
 
-namespace px
+namespace dyno
 {
 	class TriangleSet : public EdgeSet
 	{

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace px {
+namespace dyno {
 
 	VkSystem* VkSystem::instance()
 	{

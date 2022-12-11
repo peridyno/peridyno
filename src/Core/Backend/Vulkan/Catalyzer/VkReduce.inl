@@ -2,7 +2,7 @@
 #include "VkTransfer.h"
 #include "VkConstant.h"
 
-namespace px {
+namespace dyno {
 
 	inline int SizeOfNextLevel(int size, int localSize)
 	{

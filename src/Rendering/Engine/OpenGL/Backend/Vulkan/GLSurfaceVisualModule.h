@@ -45,7 +45,7 @@ namespace dyno
 
 		DEF_VAR(bool, UseVertexNormal, false, "")
 
-		DEF_INSTANCE_IN(px::TriangleSet, TriangleSet, "");
+		DEF_INSTANCE_IN(TriangleSet, TriangleSet, "");
 
 		//DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 

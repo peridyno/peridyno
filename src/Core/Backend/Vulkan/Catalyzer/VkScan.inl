@@ -1,6 +1,6 @@
 #include "VkTransfer.h"
 
-namespace px {
+namespace dyno {
 	inline int ScanSizeOfNextLevel(int size, int localSize)
 	{
 		return (size + localSize) / localSize;

@@ -150,7 +150,7 @@ public:
 	/** @brief Last frame time measured using a high performance timer (if available) */
 	float frameTimer = 1.0f;
 
-	px::VkContext* ctx;
+	dyno::VkContext* ctx;
 
 	/** @brief Example settings that can be changed e.g. by command line arguments */
 	struct Settings {

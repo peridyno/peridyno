@@ -9,7 +9,8 @@
 #include <android_native_app_glue.h>
 #endif
 
-namespace px {
+namespace dyno 
+{
 	class VkContext;
 
 	class VkSystem {

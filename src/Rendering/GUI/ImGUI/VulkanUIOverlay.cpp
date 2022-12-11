@@ -50,7 +50,7 @@ namespace vks
 		ImGuiIO& io = ImGui::GetIO();
 		io.FontGlobalScale = scale;
 
-		ctx = px::VkSystem::instance()->currentContext();
+		ctx = dyno::VkSystem::instance()->currentContext();
 
 		vertexBuffer = std::make_shared<vks::Buffer>();
 		indexBuffer = std::make_shared<vks::Buffer>();

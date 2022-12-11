@@ -4,9 +4,8 @@
 #include "Vector.h"
 #include "Module/TopologyModule.h"
 
-namespace px{
-
-
+namespace dyno
+{
 	class Smesh {
 
 	public:

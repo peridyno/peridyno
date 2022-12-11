@@ -57,7 +57,7 @@ namespace vkglTF
 		Texture();
 		~Texture();
 
-		px::VkContext* ctx;
+		dyno::VkContext* ctx;
 		VkImage image;
 		VkImageLayout imageLayout;
 		VkDeviceMemory deviceMemory;
@@ -77,7 +77,7 @@ namespace vkglTF
 	*/
 	class Material {
 	public:
-		px::VkContext* ctx;
+		dyno::VkContext* ctx;
 		enum AlphaMode { ALPHAMODE_OPAQUE, ALPHAMODE_MASK, ALPHAMODE_BLEND };
 		AlphaMode alphaMode = ALPHAMODE_OPAQUE;
 		float alphaCutoff = 1.0f;
@@ -95,7 +95,7 @@ namespace vkglTF
 
 		VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
-		Material(px::VkContext* device) : ctx(device) {};
+		Material(dyno::VkContext* device) : ctx(device) {};
 		void createDescriptorSet(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags);
 	};
 
@@ -147,7 +147,7 @@ namespace vkglTF
 		} uniformBlock;
 
 	protected:
-		px::VkContext* ctx;
+		dyno::VkContext* ctx;
 	};
 
 	/*
@@ -279,7 +279,7 @@ namespace vkglTF
 		void createEmptyTexture(VkQueue transferQueue);
 	
 	protected:
-		px::VkContext* ctx;
+		dyno::VkContext* ctx;
 
 	public:
 		VkDescriptorPool descriptorPool;

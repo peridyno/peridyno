@@ -9,7 +9,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace px
+namespace dyno
 {
 	// SSBO cloth grid particle declaration
 	struct Particle {

@@ -1,7 +1,7 @@
 #pragma once
 #include "TriangleSet.h"
 
-namespace px
+namespace dyno
 {
 	class TetrahedronSet : public TriangleSet
 	{
@@ -11,7 +11,7 @@ namespace px
 
 		void updateTopology() override;
 	public:
-		VkDeviceArray<dyno::TopologyModule::Tetrahedron> mTetrahedronIndex;
+		VkDeviceArray<TopologyModule::Tetrahedron> mTetrahedronIndex;
 	};
 }
 

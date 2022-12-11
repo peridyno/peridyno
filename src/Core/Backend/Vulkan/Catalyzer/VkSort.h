@@ -5,7 +5,7 @@
 //SortType
 #define UP   0 //1,2,3,4,5
 #define DOWN 1 //5,4,3,2,1
-namespace px {
+namespace dyno {
 	/*! TODO:
 	*  \brief implement functions for reorganizing ranges into sorted order
 	*/

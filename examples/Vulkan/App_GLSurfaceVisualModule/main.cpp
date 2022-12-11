@@ -5,11 +5,11 @@
 
 #include "Cloth.h"
 
-using namespace px;
+using namespace dyno;
 
-std::shared_ptr<dyno::SceneGraph> createScene()
+std::shared_ptr<SceneGraph> createScene()
 {
-	auto scene = std::make_shared<dyno::SceneGraph>();
+	auto scene = std::make_shared<SceneGraph>();
 
 	auto cloth = scene->addNode(std::make_shared<Cloth>());
 
@@ -24,7 +24,7 @@ std::shared_ptr<dyno::SceneGraph> createScene()
 
 int main(int, char**)
 {
-	px::VkSystem* vkSys = px::VkSystem::instance();
+	VkSystem* vkSys = VkSystem::instance();
 	vkSys->enabledInstanceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
 	vkSys->enabledInstanceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME);
 

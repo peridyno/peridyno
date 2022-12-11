@@ -2,7 +2,7 @@
 #include "VkVariable.h"
 #include "VulkanBuffer.h"
 
-namespace px {
+namespace dyno {
 
 	struct HostArray2DInfo
 	{

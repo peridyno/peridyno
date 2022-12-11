@@ -5,7 +5,7 @@
 #include "VkDeviceArray2D.h"
 #include "VkDeviceArray3D.h"
 
-namespace px 
+namespace dyno 
 {
 	template<typename T>
 	bool vkTransfer(VkHostArray<T>& dst, const VkDeviceArray<T>& src);

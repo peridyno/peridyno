@@ -7,7 +7,7 @@
 #define INCLUSIVESCAN   1 
 
 using uint = unsigned int;
-namespace px {
+namespace dyno {
 	/*! TODO:
 	*  \brief implement functions for computing prefix sums
 	*/

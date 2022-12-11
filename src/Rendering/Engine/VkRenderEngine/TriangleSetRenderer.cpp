@@ -2,7 +2,7 @@
 #include "VkTransfer.h"
 #include "Node.h"
 
-namespace px 
+namespace dyno
 {
 	TriangleSetRenderer::TriangleSetRenderer()
 		: VkVisualModule()
@@ -106,7 +106,7 @@ namespace px
 
 		// Binding description
 		std::vector<VkVertexInputBindingDescription> inputBindings = {
-			vks::initializers::vertexInputBindingDescription(0, sizeof(px::Vertex), VK_VERTEX_INPUT_RATE_VERTEX)
+			vks::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX)
 		};
 
 		// Attribute descriptions

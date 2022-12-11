@@ -3,7 +3,7 @@
 #include "VkDeviceArray.h"
 #include "Particle.h"
 
-namespace px
+namespace dyno
 {
 	class PointSet : public dyno::TopologyModule
 	{

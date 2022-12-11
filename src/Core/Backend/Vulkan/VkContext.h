@@ -11,7 +11,7 @@
 VK_DEFINE_HANDLE(VmaAllocator)
 VK_DEFINE_HANDLE(VmaPool)
 
-namespace px {
+namespace dyno {
 
 	class VkContext
 	{

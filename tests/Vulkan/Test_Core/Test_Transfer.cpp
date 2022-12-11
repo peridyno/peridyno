@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "VkTransfer.h"
 #include <numeric>
-using namespace px;
+using namespace dyno;
 
 TEST(VkTransfer, copy)
 {

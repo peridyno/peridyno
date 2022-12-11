@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "VkProgram.h"
 
-using namespace px;
+using namespace dyno;
 
 TEST(VkProgram, iDivUp)
 {

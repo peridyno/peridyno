@@ -4,15 +4,15 @@
 #include "Catalyzer/VkReduce.h"
 #include "Catalyzer/VkScan.h"
 
-namespace px
+namespace dyno
 {
 	struct AlignedBox3D
 	{
-		dyno::Vec3f v0;
-		dyno::Vec3f v1;
+		Vec3f v0;
+		Vec3f v1;
 	};
 
-	class CollisionDetectionBroadPhase : public dyno::CollisionModel
+	class CollisionDetectionBroadPhase : public CollisionModel
 	{
 	public:
 		CollisionDetectionBroadPhase();

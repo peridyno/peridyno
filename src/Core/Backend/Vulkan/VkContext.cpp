@@ -3,7 +3,7 @@
 #define VMA_IMPLEMENTATION
 #include "VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
-namespace px {
+namespace dyno {
 	/**
 * Default constructor
 *

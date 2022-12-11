@@ -1,7 +1,7 @@
 #include "TriangleSet.h"
 #include "VkTransfer.h"
 
-namespace px
+namespace dyno
 {
 
 	TriangleSet::TriangleSet()

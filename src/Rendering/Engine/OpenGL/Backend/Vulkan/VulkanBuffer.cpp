@@ -17,7 +17,7 @@
 using namespace gl;
 
 void createExternalVulkanBuffer(
-    px::VkContext* ctx,
+    dyno::VkContext* ctx,
     VkDeviceSize size, 
     VkBufferUsageFlags usage, 
     VkMemoryPropertyFlags properties, 
@@ -97,8 +97,8 @@ void VulkanBuffer::allocate(int size) {
 	std::cout << "allocate buffer: " << this->size << " -> " << size << " bytes" << std::endl;
 	this->size = size;
 
-	px::VkSystem*  vkSys = px::VkSystem::instance();
-	px::VkContext* vkCtx = vkSys->currentContext();
+	dyno::VkSystem*  vkSys = dyno::VkSystem::instance();
+    dyno::VkContext* vkCtx = vkSys->currentContext();
 
     vkDestroyBuffer(vkCtx->deviceHandle(), buffer, 0);
     vkFreeMemory(vkCtx->deviceHandle(), memory, 0);
@@ -145,7 +145,7 @@ void VulkanBuffer::load(VkBuffer src, int size) {
 	}
 
     // copy
-    px::VkContext* vkCtx = px::VkSystem::instance()->currentContext();
+    dyno::VkContext* vkCtx = dyno::VkSystem::instance()->currentContext();
 
     if (copyCmd == VK_NULL_HANDLE) {
         copyCmd = vkCtx->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);

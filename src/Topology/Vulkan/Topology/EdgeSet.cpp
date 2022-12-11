@@ -1,6 +1,6 @@
 #include "EdgeSet.h"
 
-namespace px
+namespace dyno
 {
 	EdgeSet::EdgeSet()
 		: PointSet()

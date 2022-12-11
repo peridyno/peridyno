@@ -2,7 +2,7 @@
 #include "VkTransfer.h"
 #include "Primitive/Primitive3D.h"
 
-namespace px 
+namespace dyno
 {
 	VkGraphicsPipeline::VkGraphicsPipeline()
 		: VkVisualModule()
@@ -108,7 +108,7 @@ namespace px
 
 		// Binding description
 		std::vector<VkVertexInputBindingDescription> inputBindings = {
-			vks::initializers::vertexInputBindingDescription(0, sizeof(px::Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
+			vks::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
 			vks::initializers::vertexInputBindingDescription(1, sizeof(px::Box), VK_VERTEX_INPUT_RATE_INSTANCE)
 
 		};
@@ -119,9 +119,9 @@ namespace px
 			vks::initializers::vertexInputAttributeDescription(0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)),
 			vks::initializers::vertexInputAttributeDescription(0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)),
 
-			vks::initializers::vertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Box, center)),
-			vks::initializers::vertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Box, halfLength)),
-			vks::initializers::vertexInputAttributeDescription(1, 5, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Box, rot))
+			vks::initializers::vertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32_SFLOAT, offsetof(px::Box, center)),
+			vks::initializers::vertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32_SFLOAT, offsetof(px::Box, halfLength)),
+			vks::initializers::vertexInputAttributeDescription(1, 5, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(px::Box, rot))
 		};
 
 		// Assign to vertex buffer
@@ -148,7 +148,7 @@ namespace px
 		shaderStages[0] = loadShader(getShadersPath() + "graphics/renderSphere.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 
 		inputBindings = {
-			vks::initializers::vertexInputBindingDescription(0, sizeof(px::Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
+			vks::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
 			vks::initializers::vertexInputBindingDescription(1, sizeof(px::Sphere), VK_VERTEX_INPUT_RATE_INSTANCE)
 
 		};
@@ -158,9 +158,9 @@ namespace px
 			vks::initializers::vertexInputAttributeDescription(0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)),
 			vks::initializers::vertexInputAttributeDescription(0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)),
 
-			vks::initializers::vertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Sphere, rot)),
-			vks::initializers::vertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Sphere, center)),
-			vks::initializers::vertexInputAttributeDescription(1, 5, VK_FORMAT_R32_SFLOAT, offsetof(Sphere, radius))
+			vks::initializers::vertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(px::Sphere, rot)),
+			vks::initializers::vertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32_SFLOAT, offsetof(px::Sphere, center)),
+			vks::initializers::vertexInputAttributeDescription(1, 5, VK_FORMAT_R32_SFLOAT, offsetof(px::Sphere, radius))
 		};
 		inputState.pVertexBindingDescriptions = inputBindings.data();
 		inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(inputAttributes.size());
@@ -173,7 +173,7 @@ namespace px
 		shaderStages[0] = loadShader(getShadersPath() + "graphics/renderCapsule.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 
 		inputBindings = {
-			vks::initializers::vertexInputBindingDescription(0, sizeof(px::Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
+			vks::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
 			vks::initializers::vertexInputBindingDescription(1, sizeof(px::Capsule), VK_VERTEX_INPUT_RATE_INSTANCE)
 
 		};
@@ -183,10 +183,10 @@ namespace px
 			vks::initializers::vertexInputAttributeDescription(0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)),
 			vks::initializers::vertexInputAttributeDescription(0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)),
 
-			vks::initializers::vertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Capsule, rot)),
-			vks::initializers::vertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Capsule, center)),
-			vks::initializers::vertexInputAttributeDescription(1, 5, VK_FORMAT_R32_SFLOAT, offsetof(Capsule, halfLength)),
-			vks::initializers::vertexInputAttributeDescription(1, 6, VK_FORMAT_R32_SFLOAT, offsetof(Capsule, radius))
+			vks::initializers::vertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(px::Capsule, rot)),
+			vks::initializers::vertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32_SFLOAT, offsetof(px::Capsule, center)),
+			vks::initializers::vertexInputAttributeDescription(1, 5, VK_FORMAT_R32_SFLOAT, offsetof(px::Capsule, halfLength)),
+			vks::initializers::vertexInputAttributeDescription(1, 6, VK_FORMAT_R32_SFLOAT, offsetof(px::Capsule, radius))
 		};
 		inputState.pVertexBindingDescriptions = inputBindings.data();
 		inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(inputAttributes.size());

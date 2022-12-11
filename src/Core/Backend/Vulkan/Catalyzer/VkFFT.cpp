@@ -4,7 +4,7 @@
 
 #include "VkFFT_Utils.h"
 
-namespace px
+namespace dyno
 {
 	VkFFT::VkFFT()
 	{

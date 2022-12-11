@@ -23,7 +23,7 @@ void VkApp::renderFrame()
 
 std::string VkApp::getWindowTitle()
 {
-	std::string device(px::VkSystem::instance()->getDeviceProperties().deviceName);
+	std::string device(dyno::VkSystem::instance()->getDeviceProperties().deviceName);
 	std::string windowTitle;
 	windowTitle = title + " - " + device;
 	if (!settings.overlay) {
@@ -313,7 +313,7 @@ void VkApp::updateOverlay()
 	ImGui::SetNextWindowSize(ImVec2(0, 0));
 	ImGui::Begin("Vulkan Example", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 	ImGui::TextUnformatted(title.c_str());
-	ImGui::TextUnformatted(px::VkSystem::instance()->getDeviceProperties().deviceName);
+	ImGui::TextUnformatted(dyno::VkSystem::instance()->getDeviceProperties().deviceName);
 	ImGui::Text("%.2f ms/frame (%.1d fps)", (1000.0f / lastFPS), lastFPS);
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -420,7 +420,7 @@ VkApp::VkApp(bool enableValidation)
 	camera.setTranslation(glm::vec3(0.0f, 0.0f, -5.0f));
 	settings.overlay = true;
 
-	ctx = px::VkSystem::instance()->currentContext();
+	ctx = dyno::VkSystem::instance()->currentContext();
 }
 
 VkApp::~VkApp()
@@ -475,7 +475,7 @@ bool VkApp::initVulkan()
 	VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(ctx->physicalDevice, &depthFormat);
 	assert(validDepthFormat);
 
-	swapChain.connect(px::VkSystem::instance()->instanceHandle(), ctx->physicalDevice, ctx->deviceHandle());
+	swapChain.connect(dyno::VkSystem::instance()->instanceHandle(), ctx->physicalDevice, ctx->deviceHandle());
 
 	// Create synchronization objects
 	VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();

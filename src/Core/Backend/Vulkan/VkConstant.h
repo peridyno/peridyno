@@ -1,7 +1,7 @@
 #pragma once
 #include "VkVariable.h"
 
-namespace px {
+namespace dyno {
 
 	template<typename T>
 	class VkConstant : public VkVariable

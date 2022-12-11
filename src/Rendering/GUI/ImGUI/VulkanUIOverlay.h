@@ -33,7 +33,7 @@ namespace vks
 	class UIOverlay 
 	{
 	protected:
-		px::VkContext *ctx;
+		dyno::VkContext *ctx;
 
 	public:
 		VkSampleCountFlagBits rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;

@@ -1,6 +1,6 @@
 #include "UniformGrid.h"
 
-namespace px {
+namespace dyno {
 
 	UniformGrid3D::UniformGrid3D()
 	{

@@ -3,7 +3,7 @@
 
 #include <assert.h>
 
-namespace px
+namespace dyno
 {
 	VkProgram::~VkProgram()
 	{
@@ -265,8 +265,8 @@ namespace px
 
 	VkMultiProgram::VkMultiProgram()
 	{
-		auto inst = px::VkSystem::instance();
-		ctx = px::VkSystem::instance()->currentContext();
+		auto inst = VkSystem::instance();
+		ctx = VkSystem::instance()->currentContext();
 
 		// Create the command pool
 		VkCommandPoolCreateInfo cmdPoolInfo = {};

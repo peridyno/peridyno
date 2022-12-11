@@ -1,7 +1,7 @@
 #include "TetrahedronSet.h"
 #include "VkTransfer.h"
 
-namespace px
+namespace dyno
 {
 	TetrahedronSet::TetrahedronSet()
 	{

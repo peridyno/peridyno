@@ -1,7 +1,7 @@
 #include "DiscreteElements.h"
 #include "VkTransfer.h"
 
-namespace px
+namespace dyno
 {
 	DiscreteElements::DiscreteElements()
 		: TopologyModule()
@@ -12,7 +12,7 @@ namespace px
 	{
 	}
 
-	void DiscreteElements::setBoxes(std::vector<Box> boxes)
+	void DiscreteElements::setBoxes(std::vector<px::Box> boxes)
 	{
 		if (boxes.size() == 0)
 			return;
@@ -21,7 +21,7 @@ namespace px
 		vkTransfer(mBoxes, boxes);
 	}
 
-	void DiscreteElements::setSpheres(std::vector<Sphere> spheres)
+	void DiscreteElements::setSpheres(std::vector<px::Sphere> spheres)
 	{
 		if (spheres.size() == 0)
 			return;
@@ -30,7 +30,7 @@ namespace px
 		vkTransfer(mSpheres, spheres);
 	}
 
-	void DiscreteElements::setCapsules(std::vector<Capsule> capsules)
+	void DiscreteElements::setCapsules(std::vector<px::Capsule> capsules)
 	{
 		if (capsules.size() == 0)
 			return;

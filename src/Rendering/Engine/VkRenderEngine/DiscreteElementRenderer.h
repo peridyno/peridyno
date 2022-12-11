@@ -5,7 +5,7 @@
 
 using namespace dyno;
 
-namespace px 
+namespace dyno
 {
 	class DiscreteElementRenderer : public VkGraphicsPipeline
 	{
@@ -21,9 +21,9 @@ namespace px
 		void updateGraphicsContext() override;
 
 	private:
-		void initBoxes(VkDeviceArray<Box>& boxex);
-		void initSpheres(VkDeviceArray<Sphere>& spheres);
-		void initCapsules(VkDeviceArray<Capsule>& capsules);
+		void initBoxes(VkDeviceArray<px::Box>& boxex);
+		void initSpheres(VkDeviceArray<px::Sphere>& spheres);
+		void initCapsules(VkDeviceArray<px::Capsule>& capsules);
 
 		std::shared_ptr<VkProgram> setupFacets;
 		VkConstant<uint32_t> mBoxNumber;

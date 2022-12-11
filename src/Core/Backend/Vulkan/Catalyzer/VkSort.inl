@@ -1,7 +1,7 @@
 
 #include "VkTransfer.h"
 
-namespace px {
+namespace dyno {
 	
 	inline int ComputeAddZeroSize(int OriginalSize) {
 		int AddZeroSize = 2;

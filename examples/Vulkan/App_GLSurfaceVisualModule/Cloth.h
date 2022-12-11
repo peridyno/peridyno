@@ -11,7 +11,7 @@
 
 using namespace dyno;
 
-namespace px
+namespace dyno
 {
 	class VkProgram;
 

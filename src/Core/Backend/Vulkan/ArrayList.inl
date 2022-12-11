@@ -2,7 +2,7 @@
 #include "Catalyzer/VkScan.h"
 #include "Catalyzer/VkReduce.h"
 
-namespace px {
+namespace dyno {
 	template<typename T>
 	CArrayList<T>::CArrayList()
 	{

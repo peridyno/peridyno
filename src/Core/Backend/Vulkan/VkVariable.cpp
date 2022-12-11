@@ -1,7 +1,7 @@
 #include "VkVariable.h"
 #include "VkSystem.h"
 
-namespace px {
+namespace dyno {
 
 	VkVariable::VkVariable()
 	{

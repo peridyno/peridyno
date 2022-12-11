@@ -3,7 +3,7 @@
 #include "VkTransfer.h"
 #include "Catalyzer/VkSort.h"
 
-using namespace px;
+using namespace dyno;
 
 TEST(VkSort, sort)
 {

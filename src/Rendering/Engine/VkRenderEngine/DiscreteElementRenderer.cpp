@@ -4,7 +4,7 @@
 #include "Node.h"
 #include "Shape.h"
 
-namespace px 
+namespace dyno
 {
 	DiscreteElementRenderer::DiscreteElementRenderer()
 		: VkGraphicsPipeline()
@@ -56,7 +56,7 @@ namespace px
 		}
 	}
 
-	void DiscreteElementRenderer::initBoxes(VkDeviceArray<Box>& boxes)
+	void DiscreteElementRenderer::initBoxes(VkDeviceArray<px::Box>& boxes)
 	{
 		int vertSize = sizeof(CUBE_VERTICES) / sizeof(Vertex);
 		int indexSize = sizeof(CUBE_INDICES) / sizeof(uint32_t);
@@ -74,7 +74,7 @@ namespace px
 		mCubeInstanceData.resize(boxes.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	}
 
-	void DiscreteElementRenderer::initSpheres(VkDeviceArray<Sphere>& spheres)
+	void DiscreteElementRenderer::initSpheres(VkDeviceArray<px::Sphere>& spheres)
 	{
 		int vertSize = sizeof(SPHERE_VERTICES) / sizeof(Vertex);
 		int indexSize = sizeof(SPHERE_INDICES) / sizeof(uint32_t);
@@ -92,7 +92,7 @@ namespace px
 		mSphereInstanceData.resize(spheres.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	}
 
-	void DiscreteElementRenderer::initCapsules(VkDeviceArray<Capsule>& capsules)
+	void DiscreteElementRenderer::initCapsules(VkDeviceArray<px::Capsule>& capsules)
 	{
 		int vertSize = sizeof(SPHERE_VERTICES) / sizeof(Vertex);
 		int indexSize = sizeof(SPHERE_INDICES) / sizeof(uint32_t);

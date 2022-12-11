@@ -1,6 +1,6 @@
 #include "Array.h"
 
-namespace px {
+namespace dyno {
 
 	template<typename T, DeviceType deviceType /*= DeviceType::GPU*/>
 	Array<T, deviceType>::Array()

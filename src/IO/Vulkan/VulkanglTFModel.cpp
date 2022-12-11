@@ -43,7 +43,7 @@ bool loadImageDataFuncEmpty(tinygltf::Image* image, const int imageIndex, std::s
 
 vkglTF::Texture::Texture()
 {
-	ctx = px::VkSystem::instance()->currentContext();
+	ctx = dyno::VkSystem::instance()->currentContext();
 
 	if (ctx == VK_NULL_HANDLE) {
 		vks::tools::exitFatal("Vulkan libraray should be initialized first! \n", 0);
@@ -493,7 +493,7 @@ void vkglTF::Primitive::setDimensions(glm::vec3 min, glm::vec3 max) {
 	glTF mesh
 */
 vkglTF::Mesh::Mesh(glm::mat4 matrix) {
-	ctx = px::VkSystem::instance()->currentContext();
+	ctx = dyno::VkSystem::instance()->currentContext();
 
 	if (ctx == VK_NULL_HANDLE) {
 		vks::tools::exitFatal("Vulkan libraray should be initialized first before mesh is created! \n", 0);
@@ -737,7 +737,7 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 
 vkglTF::Model::Model()
 {
-	ctx = px::VkSystem::instance()->currentContext();
+	ctx = dyno::VkSystem::instance()->currentContext();
 
 	if (ctx == VK_NULL_HANDLE) {
 		vks::tools::exitFatal("Vulkan libraray should be initialized first before Model is created! \n", 0);

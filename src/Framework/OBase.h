@@ -42,8 +42,8 @@ namespace dyno {
 		typedef std::map<FieldID, FBase*> FieldMap;
 
 #ifdef VK_BACKEND
-		typedef std::map<ProgramID, std::shared_ptr<px::VkProgram>> ProgramMap;
-		typedef std::map<ProgramID, std::shared_ptr<px::VkMultiProgram>> MultiProgramMap;
+		typedef std::map<ProgramID, std::shared_ptr<VkProgram>> ProgramMap;
+		typedef std::map<ProgramID, std::shared_ptr<VkMultiProgram>> MultiProgramMap;
 #endif // VK_BACKEND
 
 		OBase() : Object() {};
@@ -176,13 +176,13 @@ namespace dyno {
 		std::vector<FBase*>& getParameters() { return fields_param; }
 
 #ifdef VK_BACKEND
-		std::shared_ptr<px::VkProgram> addKernel(ProgramID programId, std::shared_ptr<px::VkProgram> prog);
+		std::shared_ptr<VkProgram> addKernel(ProgramID programId, std::shared_ptr<VkProgram> prog);
 
-		std::shared_ptr<px::VkProgram> kernel(ProgramID programId);
+		std::shared_ptr<VkProgram> kernel(ProgramID programId);
 
-		px::VkMultiProgram& createKernelGroup(ProgramID programId);
+		VkMultiProgram& createKernelGroup(ProgramID programId);
 
-		px::VkMultiProgram& kernelGroup(ProgramID programId);
+		VkMultiProgram& kernelGroup(ProgramID programId);
 
 	protected:
 		ProgramMap Kernels;

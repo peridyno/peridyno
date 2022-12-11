@@ -5,7 +5,7 @@
 #include "VkTransfer.h"
 #include "Catalyzer/VkScan.h"
 
-using namespace px;
+using namespace dyno;
 
 TEST(VkScan, scan)
 {

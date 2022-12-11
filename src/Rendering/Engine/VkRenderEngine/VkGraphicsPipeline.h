@@ -10,7 +10,7 @@
 #include "VkVisualModule.h"
 #include "Primitive/Primitive3D.h"
 
-namespace px {
+namespace dyno {
 
 	struct Vertex
 	{
@@ -97,15 +97,15 @@ namespace px {
 
 		VkDeviceArray<Vertex> mCubeVertex;
 		VkDeviceArray<uint32_t> mCubeIndex;
-		VkDeviceArray<Box> mCubeInstanceData;
+		VkDeviceArray<px::Box> mCubeInstanceData;
 
 		VkDeviceArray<Vertex> mSphereVertex;
 		VkDeviceArray<uint32_t> mSphereIndex;
-		VkDeviceArray<Sphere> mSphereInstanceData;
+		VkDeviceArray<px::Sphere> mSphereInstanceData;
 
 		VkDeviceArray<Vertex> mCapsuleVertex;
 		VkDeviceArray<uint32_t> mCapsuleIndex;
-		VkDeviceArray<Capsule> mCapsuleInstanceData;
+		VkDeviceArray<px::Capsule> mCapsuleInstanceData;
 
 		VkUniform<GraphicsUBO> mUniform;
 	};

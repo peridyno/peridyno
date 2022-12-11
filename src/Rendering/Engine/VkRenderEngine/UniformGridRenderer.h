@@ -6,7 +6,7 @@
 
 using namespace dyno;
 
-namespace px 
+namespace dyno
 {
 	class UniformGridRenderer : public VkGraphicsPipeline
 	{
@@ -25,9 +25,9 @@ namespace px
 		VkDeviceArray3D<float>* mDensity = nullptr;
 
 	private:
-		void initBoxes(VkDeviceArray<Box>& boxex);
+		void initBoxes(VkDeviceArray<px::Box>& boxex);
 
-		VkDeviceArray<Box> mBoxes;
+		VkDeviceArray<px::Box> mBoxes;
 	};
 }
 

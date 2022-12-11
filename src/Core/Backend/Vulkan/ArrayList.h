@@ -2,7 +2,7 @@
 #include "VkDeviceArray.h"
 #include "VkUniform.h"
 
-namespace px {
+namespace dyno {
 
 	struct ArrayListInfo
 	{

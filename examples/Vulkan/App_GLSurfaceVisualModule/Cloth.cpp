@@ -14,7 +14,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace px
+namespace dyno
 {
 #define WORKGROUP_SIZE 64
 

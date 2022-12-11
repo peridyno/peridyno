@@ -1,6 +1,6 @@
 #include "VkUniform.h"
 
-namespace px {
+namespace dyno {
 
 	template<typename T>
 	VkUniform<T>::VkUniform()

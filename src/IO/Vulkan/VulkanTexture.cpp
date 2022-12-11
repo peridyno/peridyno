@@ -14,7 +14,7 @@ namespace vks
 
 	Texture::Texture()
 	{
-		ctx = px::VkSystem::instance()->currentContext();
+		ctx = dyno::VkSystem::instance()->currentContext();
 
 		if (ctx == VK_NULL_HANDLE) {
 			vks::tools::exitFatal("Vulkan libraray should be initialized first before Texture is created! \n", 0);

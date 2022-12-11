@@ -13,7 +13,7 @@
 
 using namespace dyno;
 
-namespace px {
+namespace dyno {
 
 	struct Vertex
 	{
