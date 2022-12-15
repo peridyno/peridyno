@@ -75,10 +75,12 @@ int main(int, char**)
 	auto instanceNode = scn->addNode(std::make_shared<HexahedronNode>());
 
 	// wireframe rendering
-	auto instanceRender = std::make_shared<GLWireframeVisualModule>();
-	instanceRender->setColor(Vec3f(0, 1, 0));
-	instanceNode->stateHexahedrons()->connect(instanceRender->inEdgeSet());
-	instanceNode->graphicsPipeline()->pushModule(instanceRender);
+	auto edgeRender = std::make_shared<GLWireframeVisualModule>();
+	edgeRender->setColor(Vec3f(0, 1, 0));
+	edgeRender->setEdgeMode(GLWireframeVisualModule::LINE);
+	edgeRender->varLineWidth()->setValue(2.f);
+	instanceNode->stateHexahedrons()->connect(edgeRender->inEdgeSet());
+	instanceNode->graphicsPipeline()->pushModule(edgeRender);
 
 // 	auto ptRender = std::make_shared<GLPointVisualModule>();
 // 	ptRender->setColor(Vec3f(1, 0, 0));

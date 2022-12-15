@@ -27,42 +27,37 @@ namespace dyno
 	class GLWireframeVisualModule : public GLVisualModule
 	{
 		DECLARE_CLASS(GLWireframeVisualModule)
+
+	public:		
+		// render as lines or cylinder
+		enum EEdgeMode {
+			LINE = 0,
+			CYLINDER = 1
+		};
+
 	public:
 		GLWireframeVisualModule();
-	public:
 		std::string caption() override;
+		void setEdgeMode(EEdgeMode mode);
 
-	public:
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
+		DEF_VAR(float, Radius, 0.003f, "Cylinder radius");
+		DEF_VAR(float, LineWidth, 1.f, "Line width");
 
-		DEF_VAR(float, Radius, 0.003, "Cylinder radius");
 	protected:
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-
-	private:
-		// we use a cylinder to show line segment
-		void createCylinder();
-		
+				
 	private:
 
 		gl::Program		mShaderProgram;
 
+		gl::VertexArray	mVAO;
 		gl::CudaBuffer	mPoints;
 		gl::CudaBuffer 	mEdges;
-
 		unsigned int	mNumEdges = 0;
 
-		// cylinder
-		struct {
-			gl::VertexArray	vao;
-			gl::Buffer		vertices;
-			gl::Buffer		normals;
-			gl::Buffer		indices;
-			unsigned int	drawCount;
-			// number of sectors for create cylinder
-			int				nSectors = 16;
-		} mCylinder;
+		EEdgeMode		mEdgeMode = EEdgeMode::CYLINDER;
 	};
 };
