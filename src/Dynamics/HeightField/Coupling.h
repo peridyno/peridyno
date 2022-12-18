@@ -66,7 +66,7 @@ namespace dyno
 		float* m_torqueY;
 		float* m_torqueZ;
 
-		//�������Ӧ�ĺ���߶�
+		
 		float* m_sample_heights;
 
 		bool m_force_corrected;

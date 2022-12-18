@@ -68,9 +68,6 @@ namespace dyno
 
 		int Nx = 1;
 		int Ny = 1;
-
-
-		
 	};
 	IMPLEMENT_TCLASS(Ocean, TDataType)
 }

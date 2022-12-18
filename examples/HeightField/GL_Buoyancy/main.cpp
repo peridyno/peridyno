@@ -28,7 +28,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto ocean = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 
-	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512, 8));
+	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>(512, 512, 0));
 	oceanPatch->connect(ocean->importOceanPatch());
 
 	auto capillaryWave = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));

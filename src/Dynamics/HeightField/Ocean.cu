@@ -3,6 +3,7 @@
 #include <cufft.h>
 
 #include "Topology/HeightField.h"
+#include <Mapping/HeightFieldToTriangleSet.h>
 
 #define BLOCKSIZE_X 16
 #define BLOCKSIZE_Y 16
@@ -40,24 +41,24 @@ namespace dyno
 	template<typename TDataType>
 	Ocean<TDataType>::~Ocean()
 	{
-		
+
 	}
 
 	template<typename TDataType>
 	void Ocean<TDataType>::resetStates()
 	{
-		
+
 		auto m_patch = this->getOceanPatch();
-		if (m_patch != nullptr){
+		if (m_patch != nullptr) {
 			auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
 			auto patch = TypeInfo::cast<HeightField<TDataType>>(m_patch->stateTopology()->getDataPtr());
-	
+
 			float h = patch->getGridSpacing();
 			topo->setExtents(Nx * patch->width(), Ny * patch->height());
 			topo->setGridSpacing(h);
-			topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
-		
+			topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
+
 		}
 	}
 
@@ -139,7 +140,7 @@ namespace dyno
 
 		auto topoPatch = TypeInfo::cast<HeightField<TDataType>>(m_patch->stateTopology()->getDataPtr());
 		topo->setGridSpacing(topoPatch->getGridSpacing());
-	
+
 		DArray2D<Vec3f> displacement = topoPatch->getDisplacement();
 		cuExecute2D(make_uint2(displacement.nx(), displacement.ny()),
 			InitOceanWave,
@@ -147,15 +148,15 @@ namespace dyno
 			displacement);
 
 		auto capillaryWaves = this->getCapillaryWaves();
-		for(int i = 0; i < capillaryWaves.size(); i++){
+		for (int i = 0; i < capillaryWaves.size(); i++) {
 			auto topoCapillaryWave = TypeInfo::cast<HeightField<TDataType>>(capillaryWaves[i]->stateTopology()->getDataPtr());
-			
+
 			cuExecute2D(make_uint2(topoCapillaryWave->getDisplacement().nx(), topoCapillaryWave->getDisplacement().ny()),
 				AddOceanTrails,
 				topo->getDisplacement(),
 				topoCapillaryWave->getDisplacement());
 		}
-		
+
 	}
 
 	template<typename TDataType>

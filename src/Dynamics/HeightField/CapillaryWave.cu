@@ -1,6 +1,6 @@
 ﻿#include "CapillaryWave.h"
 
-#include "Topology/HeightField.h"
+#include <Mapping/HeightFieldToTriangleSet.h>
 
 namespace dyno
 {
@@ -13,6 +13,10 @@ namespace dyno
 	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
 		: Node(name)
 	{
+		//heights = std::make_shared<HeightField<TDataType>>();
+		//int size = this->varSize()->getData();
+		//float patchLength = this->varPatchLength()->getData();
+
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		heights->setExtents(size, size);
 		this->stateTopology()->setDataPtr(heights);
@@ -27,12 +31,31 @@ namespace dyno
 		simulatedRegionHeight = size;
 
 		initialize();
+
 	}
-	
+
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave(std::string name)
 		: Node(name)
 	{
+		int size = this->varSize()->getData();
+		float patchLength = this->varPatchLength()->getData();
+
+		auto heights = std::make_shared<HeightField<TDataType>>();
+		heights->setExtents(size, size);
+		this->stateTopology()->setDataPtr(heights);
+
+		mResolution = size;
+		mChoppiness = 1.0f;
+
+		patchLength = patchLength;
+		realGridSize = patchLength / size;
+
+		simulatedRegionWidth = size;
+		simulatedRegionHeight = size;
+
+		initialize();
+
 	}
 
 	template<typename TDataType>
@@ -95,11 +118,8 @@ namespace dyno
 			int gx = i + 1;
 			int gy = j + 1;
 
-			Coord gp = grid[ gx + gy * pitchSize];
+			Coord gp = grid[gx + gy * pitchSize];
 			Vec2f s_ij = mSource[i + j * patchSize];
-
-
-			//printf("zhixingle ----------------\n");
 
 			float h = gp.x;
 			float u = C_GetU(gp);
@@ -109,10 +129,6 @@ namespace dyno
 			{
 				u += s_ij.x;
 				v += s_ij.y;
-
-
-				//printf("s_ij %f %f \n", s_ij.x, s_ij.y);
-
 
 				u *= 0.98f;
 				v *= 0.98f;
@@ -125,7 +141,7 @@ namespace dyno
 			gp.y = u * h;
 			gp.z = v * h;
 
-			grid[gx +gy * pitchSize]= gp;
+			grid[gx + gy * pitchSize] = gp;
 		}
 	}
 
@@ -145,7 +161,7 @@ namespace dyno
 			gridPitch);
 
 		//swapDeviceGrid();
-		
+
 	}
 
 	template <typename Coord>
@@ -165,7 +181,7 @@ namespace dyno
 		{
 			int gx = i + 1;
 			int gy = j + 1;
-	
+
 			Coord gp = grid[gx + gy * pitch];
 			Coord gp_init = Coord(horizon, 0.0f, 0.0f, gp.w);
 
@@ -173,7 +189,7 @@ namespace dyno
 			int new_j = j - dy;
 
 			if (new_i < 0 || new_i >= width) gp = gp_init;
-			
+
 			new_i = new_i % width;
 			if (new_i < 0) new_i = width + new_i;
 
@@ -181,7 +197,7 @@ namespace dyno
 
 			new_j = new_j % height;
 			if (new_j < 0) new_j = height + new_j;
-		
+
 			grid[(new_j + 1) * pitch + new_i + 1] = gp;
 		}
 	}
@@ -192,7 +208,7 @@ namespace dyno
 
 		int extNx = simulatedRegionWidth + 2;
 		int extNy = simulatedRegionHeight + 2;
-		
+
 		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
 		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
 		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
@@ -221,26 +237,26 @@ namespace dyno
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateTopology()
-	{		
+	{
 		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
-		auto& shifts = topo->getDisplacement(); 
+		auto& shifts = topo->getDisplacement();
 
 		uint2 extent;
 		extent.x = shifts.nx();
 		extent.y = shifts.ny();
-	
+
 		cuExecute2D(extent,
 			O_UpdateTopology,
 			shifts,
 			mHeight,
-			mChoppiness);	
+			mChoppiness);
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetStates()
 	{
-		mDisplacement.resize(mResolution, mResolution);
+		
 	}
 
 	template<typename TDataType>
@@ -265,8 +281,8 @@ namespace dyno
 
 			grid[y * pitch + x] = gp;
 			//grid2Dwrite(grid, x, y, pitch, gp);
-			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 10.0f;
-		} 
+			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 5.0f;
+		}
 	}
 
 	__global__ void InitSource(
@@ -500,10 +516,10 @@ namespace dyno
 		{
 			cuExecute2D(make_uint2(extNx, extNy),
 				ImposeBC,
-				mDeviceGridNext, 
-				mDeviceGrid, 
+				mDeviceGridNext,
+				mDeviceGrid,
 				extNx,
-				extNy, 
+				extNy,
 				gridPitch);
 
 			swapDeviceGrid();
@@ -522,15 +538,15 @@ namespace dyno
 
 		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
 			InitHeightField,
-			mHeight, 
-			mDeviceGrid, 
-			simulatedRegionWidth, 
-			horizon, 
+			mHeight,
+			mDeviceGrid,
+			simulatedRegionWidth,
+			horizon,
 			realGridSize);
 
 		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
 			InitHeightGrad,
-			mHeight, 
+			mHeight,
 			simulatedRegionWidth);
 	}
 
@@ -545,7 +561,6 @@ namespace dyno
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initDynamicRegion() {
-
 		int extNx = simulatedRegionWidth + 2;
 		int extNy = simulatedRegionHeight + 2;
 
@@ -563,30 +578,28 @@ namespace dyno
 		//init grid with initial values
 		cuExecute2D(make_uint2(extNx, extNy),
 			InitDynamicRegion,
-			mDeviceGrid, 
-			extNx, 
-			extNy, 
+			mDeviceGrid,
+			extNx,
+			extNy,
 			gridPitch,
 			horizon);
 
 		//init grid_next with initial values
 		cuExecute2D(make_uint2(extNx, extNy),
 			InitDynamicRegion,
-			mDeviceGridNext, 
-			extNx, 
-			extNy, 
-			gridPitch, 
+			mDeviceGridNext,
+			extNx,
+			extNy,
+			gridPitch,
 			horizon);
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::initSource() {
-
 		//int sizeInBytes = simulatedRegionWidth * simulatedRegionHeight * sizeof(float2);
 
 		mSource.resize(simulatedRegionWidth, simulatedRegionHeight);
 		mWeight.resize(simulatedRegionWidth, simulatedRegionHeight);
-
 
 		//cuSafeCall(cudaMalloc(&mWeight, simulatedRegionWidth * simulatedRegionHeight * sizeof(float)));
 
@@ -597,7 +610,7 @@ namespace dyno
 
 		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
 			InitSource,
-			mSource, 
+			mSource,
 			simulatedRegionWidth);
 
 		resetSource();
@@ -617,7 +630,7 @@ namespace dyno
 			displacement(i, j).y = horizon;
 			displacement(i, j).z = 0;
 
-			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500)  displacement(i, j).y = 10.0f;
+			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500)  displacement(i, j).y = 5.0f;
 		}
 	}
 

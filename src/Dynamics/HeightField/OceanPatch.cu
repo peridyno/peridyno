@@ -38,31 +38,31 @@ namespace dyno {
     // generate wave heightfield at time t based on initial heightfield and dispersion relationship
     template <typename Coord>
     __global__ void generateSpectrumKernel(DArray2D<Coord> h0,
-                                           DArray2D<Coord> ht,
-                                           unsigned int    in_width,
-                                           unsigned int    out_width,
-                                           unsigned int    out_height,
-                                           float           t,
-                                           float           patchSize)
+        DArray2D<Coord> ht,
+        unsigned int    in_width,
+        unsigned int    out_width,
+        unsigned int    out_height,
+        float           t,
+        float           patchSize)
     {
-        unsigned int x         = blockIdx.x * blockDim.x + threadIdx.x;
-        unsigned int y         = blockIdx.y * blockDim.y + threadIdx.y;
-        unsigned int in_index  = y * in_width + x;
+        unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+        unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
+        unsigned int in_index = y * in_width + x;
         unsigned int in_mindex = (out_height - y) * in_width + (out_width - x);  // mirrored
         unsigned int out_index = y * out_width + x;
 
         // calculate wave vector
         Coord k;
-        k.x = (-( int )out_width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
-        k.y = (-( int )out_width / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
+        k.x = (-(int)out_width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
+        k.y = (-(int)out_width / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
 
         // calculate dispersion w(k)
         float k_len = sqrtf(k.x * k.x + k.y * k.y);
-        float w     = sqrtf(9.81f * k_len);
+        float w = sqrtf(9.81f * k_len);
 
         if ((x < out_width) && (y < out_height))
         {
-            Coord h0_k  = h0[in_index];
+            Coord h0_k = h0[in_index];
             Coord h0_mk = h0[in_mindex];
 
             // output frequency-space complex values
@@ -72,9 +72,9 @@ namespace dyno {
 
     // update height map values based on output of FFT
     template <typename Coord>
-    __global__ void updateHeightmapKernel(float*       heightMap,
-                                          Coord*       ht,
-                                          unsigned int width)
+    __global__ void updateHeightmapKernel(float* heightMap,
+        Coord* ht,
+        unsigned int width)
     {
         unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
         unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -88,9 +88,9 @@ namespace dyno {
 
     // update height map values based on output of FFT
     template <typename Coord>
-    __global__ void updateHeightmapKernel_y(float*       heightMap,
-                                            Coord*       ht,
-                                            unsigned int width)
+    __global__ void updateHeightmapKernel_y(float* heightMap,
+        Coord* ht,
+        unsigned int width)
     {
         unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
         unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -104,10 +104,10 @@ namespace dyno {
 
     // generate slope by partial differences in spatial domain
     template <typename Coord>
-    __global__ void calculateSlopeKernel(float*       h, 
-                                         Coord*      slopeOut,
-                                         unsigned int width, 
-                                         unsigned int height)
+    __global__ void calculateSlopeKernel(float* h,
+        Coord* slopeOut,
+        unsigned int width,
+        unsigned int height)
     {
         unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
         unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -133,13 +133,13 @@ namespace dyno {
         unsigned int height,
         float        patchSize)
     {
-        unsigned int x  = blockIdx.x * blockDim.x + threadIdx.x;
-        unsigned int y  = blockIdx.y * blockDim.y + threadIdx.y;
+        unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+        unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
         unsigned int id = y * width + x;
 
         // calculate wave vector
-        float kx        = (-( int )width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
-        float ky        = (-( int )height / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
+        float kx = (-(int)width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
+        float ky = (-(int)height / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
         float k_squared = kx * kx + ky * ky;
         if (k_squared == 0.0f)
         {
@@ -159,18 +159,48 @@ namespace dyno {
     OceanPatch<TDataType>::OceanPatch(std::string name)
         : Node(name)
     {
-       
-        OceanPatch(512, 512, 8, name);
+        int size = 512;
+        float patchSize = 512;
+
+
+        auto heights = std::make_shared<HeightField<TDataType>>();
+        this->stateTopology()->setDataPtr(heights);
+
+        std::ifstream input(getAssetPath() + "windparam.txt", std::ios::in);
+        for (int i = 0; i <= 12; i++)
+        {
+            WindParam param;
+            int       dummy;
+            input >> dummy;
+            input >> param.windSpeed;
+            input >> param.A;
+            input >> param.choppiness;
+            input >> param.global;
+            m_params.push_back(param);
+        }
+
+        mResolution = size;
+        mSpectrumWidth = size + 1;
+        mSpectrumHeight = size + 4;
+        m_realPatchSize = patchSize;
+
+        cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
+
+        auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
+        Real h = m_realPatchSize / mResolution;
+        topo->setExtents(mResolution, mResolution);
+        topo->setGridSpacing(h);
+        topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
     }
 
     template<typename TDataType>
     OceanPatch<TDataType>::OceanPatch(int size, float patchSize, int windType, std::string name)
         : Node(name)
     {
-	    auto heights = std::make_shared<HeightField<TDataType>>();
-	    this->stateTopology()->setDataPtr(heights);
+        auto heights = std::make_shared<HeightField<TDataType>>();
+        this->stateTopology()->setDataPtr(heights);
 
-        std::ifstream input("../../data/windparam.txt", std::ios::in);
+        std::ifstream input(getAssetPath() + "windparam.txt", std::ios::in);
         for (int i = 0; i <= 12; i++)
         {
             WindParam param;
@@ -188,64 +218,24 @@ namespace dyno {
         mSpectrumWidth = size + 1;
         mSpectrumHeight = size + 4;
 
+
         m_realPatchSize = patchSize;
-    }
 
-    template<typename TDataType>
-    OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global)
-    {
-	    auto heights = std::make_shared<HeightField<TDataType>>();
-	    this->stateTopology()->setDataPtr(heights);
+        this->varWindType()->setValue(windType);
 
-        mResolution          = size;
-        mSpectrumWidth     = size + 1;
-        mSpectrumHeight     = size + 4;
-        m_realPatchSize = mResolution;
-        windDir         = wind_dir;
-        m_windSpeed     = windSpeed;
-        A               = A_p;
-        m_maxChoppiness = max_choppiness;
-        mChoppiness    = 1.0f;
-        m_globalShift   = global;
-    }
 
-    template<typename TDataType>
-    OceanPatch<TDataType>::~OceanPatch()
-    {     
-        m_h0.clear();
-        m_ht.clear();
-        m_Dxt.clear();  
-        m_Dzt.clear();     
-        m_displacement.clear();
-        m_gradient.clear();
-    }
 
-    template<typename TDataType>
-    void OceanPatch<TDataType>::resetWindType()
-    {
-        m_windSpeed = m_params[var_my_windTypes.getValue()].windSpeed;
-        A = m_params[var_my_windTypes.getValue()].A;
-        m_maxChoppiness = m_params[var_my_windTypes.getValue()].choppiness;
-        mChoppiness = m_params[var_my_windTypes.getValue()].choppiness;
-        m_globalShift = m_params[var_my_windTypes.getValue()].global;
-    }
-
-    template<typename TDataType>
-    void OceanPatch<TDataType>::resetStates()
-    {
         resetWindType();
 
-        //cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
+        cufftPlan2d(&fftPlan, mResolution, mResolution, CUFFT_C2C);
 
         int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
         m_h0.resize(mSpectrumWidth, mSpectrumHeight);
 
-        CArray2D<Coord> host_h0;
-        host_h0.resize(mSpectrumWidth, mSpectrumHeight);
-        host_h0(0, 0) = Vector<float, 2>(10, 10);
+        Vec2f* host_h0 = (Vec2f*)malloc(spectrumSize);
         generateH0(host_h0);
 
-        //cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
+        cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
         m_ht.resize(mResolution, mResolution);
         m_Dxt.resize(mResolution, mResolution);
@@ -253,19 +243,81 @@ namespace dyno {
         m_displacement.resize(mResolution, mResolution);
         m_gradient.resize(mResolution, mResolution);
 
-	    auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
-	    Real h = m_realPatchSize / mResolution;
-	    topo->setExtents(mResolution, mResolution);
-	    topo->setGridSpacing(h);
-	    topo->setOrigin(Vec3f(-0.5*h*topo->width(), 0, -0.5*h*topo->height()));
+        auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
+        Real h = m_realPatchSize / mResolution;
+        topo->setExtents(mResolution, mResolution);
+        topo->setGridSpacing(h);
+        topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
+
+    }
+
+    template<typename TDataType>
+    OceanPatch<TDataType>::OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global)
+    {
+        auto heights = std::make_shared<HeightField<TDataType>>();
+        this->stateTopology()->setDataPtr(heights);
+
+        mResolution = size;
+        mSpectrumWidth = size + 1;
+        mSpectrumHeight = size + 4;
+        m_realPatchSize = mResolution;
+        windDir = wind_dir;
+        this->varWindSpeed()->setValue(windSpeed);
+        A = A_p;
+        m_maxChoppiness = max_choppiness;
+        mChoppiness = 1.0f;
+        m_globalShift = global;
+    }
+
+    template<typename TDataType>
+    OceanPatch<TDataType>::~OceanPatch()
+    {
+        m_h0.clear();
+        m_ht.clear();
+        m_Dxt.clear();
+        m_Dzt.clear();
+        m_displacement.clear();
+        m_gradient.clear();
+    }
+
+    template<typename TDataType>
+    void OceanPatch<TDataType>::resetWindType()
+    {
+        int windType = this->varWindType()->getData();
+        this->varWindSpeed()->setValue(m_params[windType].windSpeed);
+        A = m_params[windType].A;
+        m_maxChoppiness = m_params[windType].choppiness;
+        mChoppiness = m_params[windType].choppiness;
+        m_globalShift = m_params[windType].global;
+    }
+
+    template<typename TDataType>
+    void OceanPatch<TDataType>::resetStates()
+    {
+        resetWindType();
+
+        int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Vec2f);
+        m_h0.resize(mSpectrumWidth, mSpectrumHeight);
+
+        Vec2f* host_h0 = (Vec2f*)malloc(spectrumSize);
+        generateH0(host_h0);
+
+        cuSafeCall(cudaMemcpy(m_h0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
+
+        m_ht.resize(mResolution, mResolution);
+        m_Dxt.resize(mResolution, mResolution);
+        m_Dzt.resize(mResolution, mResolution);
+        m_displacement.resize(mResolution, mResolution);
+        m_gradient.resize(mResolution, mResolution);
+
     }
 
     float t = 0.0f;
     template<typename TDataType>
     void OceanPatch<TDataType>::updateStates()
     {
-	    t += 0.016f;
-	    this->animate(t);
+        t += 0.016f;
+        this->animate(t);
     }
 
     template<typename Coord>
@@ -283,9 +335,9 @@ namespace dyno {
             int id = i + j * patchSize;
 
             float sign_correction = ((i + j) & 0x01) ? -1.0f : 1.0f;
-            float h_ij            = sign_correction * Dh[id].x;
-            float x_ij            = sign_correction * Dx[id].x;
-            float z_ij            = sign_correction * Dz[id].x;
+            float h_ij = sign_correction * Dh[id].x;
+            float x_ij = sign_correction * Dx[id].x;
+            float z_ij = sign_correction * Dz[id].x;
 
             displacement(i, j) = Vec4f(x_ij, h_ij, z_ij, 0);
         }
@@ -296,41 +348,40 @@ namespace dyno {
     {
         t = m_fft_flow_speed * t;
 
-		cuExecute2D(make_uint2(mResolution, mResolution),
-			generateSpectrumKernel,
-			m_h0, 
-			m_ht, 
-			mSpectrumWidth, 
-			mResolution, 
-			mResolution, 
-			t, 
-			m_realPatchSize);
-        
-		cuExecute2D(make_uint2(mResolution, mResolution),
-			generateDispalcementKernel,
-			m_ht, 
-			m_Dxt, 
-			m_Dzt, 
-			mResolution, 
-			mResolution, 
-			m_realPatchSize);
+        cuExecute2D(make_uint2(mResolution, mResolution),
+            generateSpectrumKernel,
+            m_h0,
+            m_ht,
+            mSpectrumWidth,
+            mResolution,
+            mResolution,
+            t,
+            m_realPatchSize);
+        cuSynchronize();
 
-         //generateSpectrumKernel<<<grid, block>>>(m_h0, m_ht, mSpectrumWidth, mResolution, mResolution, t, m_realPatchSize);
-        // generateDispalcementKernel<<<grid, block>>>(m_ht, m_Dxt, m_Dzt, mResolution, mResolution, m_realPatchSize);
+        cuExecute2D(make_uint2(mResolution, mResolution),
+            generateDispalcementKernel,
+            m_ht,
+            m_Dxt,
+            m_Dzt,
+            mResolution,
+            mResolution,
+            m_realPatchSize);
+        cuSynchronize();
 
         cufftExecC2C(fftPlan, (float2*)m_ht.begin(), (float2*)m_ht.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dxt.begin(), (float2*)m_Dxt.begin(), CUFFT_INVERSE);
         cufftExecC2C(fftPlan, (float2*)m_Dzt.begin(), (float2*)m_Dzt.begin(), CUFFT_INVERSE);
-        
-		cuExecute2D(make_uint2(mResolution, mResolution),
-			O_UpdateDisplacement,
-			m_displacement,
-			m_ht,
-			m_Dxt,
-			m_Dzt,
-			mResolution);
-            
-        //O_UpdateDisplacement<<<blocksPerGrid, threadsPerBlock>>>(m_displacement, m_ht, m_Dxt, m_Dzt, mResolution);
+
+
+        cuExecute2D(make_uint2(mResolution, mResolution),
+            O_UpdateDisplacement,
+            m_displacement,
+            m_ht,
+            m_Dxt,
+            m_Dzt,
+            mResolution);
+        cuSynchronize();
     }
 
     template <typename Coord>
@@ -348,12 +399,13 @@ namespace dyno {
             Vec4f Dij = dis[id];
 
             Coord v;
-            v.x = choppiness * Dij.x;
-            v.y = Dij.y;
-            v.z = choppiness * Dij.z;
+            v[0] = choppiness * Dij[0];
+            v[1] = Dij[1];
+            v[2] = choppiness * Dij[2];
 
             displacement(i, j) = v;
         }
+
     }
 
     template<typename TDataType>
@@ -362,13 +414,16 @@ namespace dyno {
         auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
 
         auto& shifts = topo->getDisplacement();
-        
-        cuExecute2D(make_uint2(shifts.nx(), shifts.ny()),
+
+        uint2 extent;
+        extent.x = shifts.nx();
+        extent.y = shifts.ny();
+        cuExecute2D(extent,
             O_UpdateTopology,
             shifts,
             m_displacement,
             mChoppiness);
-            
+
     }
 
     template<typename TDataType>
@@ -384,16 +439,16 @@ namespace dyno {
     }
 
     template<typename TDataType>
-    void OceanPatch<TDataType>::generateH0(CArray2D<Coord> h0)
+    void OceanPatch<TDataType>::generateH0(Coord* h0)
     {
         for (unsigned int y = 0; y <= mResolution; y++)
         {
             for (unsigned int x = 0; x <= mResolution; x++)
             {
-                float kx = (-( int )mResolution / 2.0f + x) * (2.0f * CUDART_PI_F / m_realPatchSize);
-                float ky = (-( int )mResolution / 2.0f + y) * (2.0f * CUDART_PI_F / m_realPatchSize);
+                float kx = (-(int)mResolution / 2.0f + x) * (2.0f * CUDART_PI_F / m_realPatchSize);
+                float ky = (-(int)mResolution / 2.0f + y) * (2.0f * CUDART_PI_F / m_realPatchSize);
 
-                float P = sqrtf(phillips(kx, ky, windDir, m_windSpeed, A, dirDepend));
+                float P = sqrtf(phillips(kx, ky, windDir, this->varWindSpeed()->getData(), A, dirDepend));
 
                 if (kx == 0.0f && ky == 0.0f)
                 {
@@ -407,8 +462,8 @@ namespace dyno {
                 float h0_im = Ei * P * CUDART_SQRT_HALF_F;
 
                 int i = y * mSpectrumWidth + x;
-                h0(x, y).x = h0_re;
-                h0(x, y).y = h0_im;
+                h0[i].x = h0_re;
+                h0[i].y = h0_im;
             }
         }
     }
@@ -426,8 +481,8 @@ namespace dyno {
         // largest possible wave from constant wind of velocity v
         float L = V * V / g;
 
-        float k_x     = Kx / sqrtf(k_squared);
-        float k_y     = Ky / sqrtf(k_squared);
+        float k_x = Kx / sqrtf(k_squared);
+        float k_y = Ky / sqrtf(k_squared);
         float w_dot_k = k_x * cosf(Vdir) + k_y * sinf(Vdir);
 
         float phillips = A * expf(-1.0f / (k_squared * L * L)) / (k_squared * k_squared) * w_dot_k * w_dot_k;
@@ -444,8 +499,8 @@ namespace dyno {
     template<typename TDataType>
     float OceanPatch<TDataType>::gauss()
     {
-        float u1 = rand() / ( float )RAND_MAX;
-        float u2 = rand() / ( float )RAND_MAX;
+        float u1 = rand() / (float)RAND_MAX;
+        float u2 = rand() / (float)RAND_MAX;
 
         if (u1 < 1e-6f)
         {
@@ -456,4 +511,4 @@ namespace dyno {
     }
 
     DEFINE_CLASS(OceanPatch);
-}  
+}

@@ -1,12 +1,23 @@
+/**
+ * Copyright 2017-2022 hanxingyixue
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
 #include "Node.h"
-
+#include "Topology/HeightField.h"
 namespace dyno
 {
-	/*!
-	*	\class	CapillaryWave
-	*	\brief	Peridynamics-based CapillaryWave.
-	*/
 	template<typename TDataType>
 	class CapillaryWave : public Node
 	{
@@ -28,8 +39,8 @@ namespace dyno
 		void setOriginX(int x) { simulatedOriginX = x; }
 		void setOriginY(int y) { simulatedOriginY = y; }
 
-		int simulatedOriginX = 0;			//��̬�����ʼx����
-		int simulatedOriginY = 0;			//��̬�����ʼy����
+		int simulatedOriginX = 0;			
+		int simulatedOriginY = 0;			
 
 		int getOriginX() { return simulatedOriginX; }
 		int getOriginZ() { return simulatedOriginY; }
@@ -39,13 +50,13 @@ namespace dyno
 
 		DArray2D<Coord4> getHeightField() { return mHeight; }
 		Vec2f getOrigin() { return Vec2f(simulatedOriginX * realGridSize, simulatedOriginY * realGridSize); }
-		
+
 		void addSource();
-		void moveDynamicRegion(int nx, int ny);		//���洬���ƶ���̬��������
-	
+		void moveDynamicRegion(int nx, int ny);		
+
 		DArray2D<Vec2f> getmSource() { return mSource; }
 		DArray2D<float> getWeight() { return mWeight; }
-		
+
 		void compute();
 		void updateStates() override;
 
@@ -53,9 +64,6 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-
-
-
 
 		void updateTopology() override;
 
@@ -69,8 +77,8 @@ namespace dyno
 	public:
 		int mResolution;
 
-		float mChoppiness;  //�����˼�ļ����ԣ���Χ0~1
-	
+		float mChoppiness;  
+
 	protected:
 		float patchLength;
 		float realGridSize;
@@ -80,14 +88,20 @@ namespace dyno
 
 		size_t gridPitch;
 
-		float horizon = 2.0f;			        //ˮ���ʼ�߶�
+		float horizon = 2.0f;			        
 
-		DArray2D<Coord4> mHeight;				//�߶ȳ�
-		DArray2D<Coord4> mDeviceGrid;		    //��ǰ��̬����״̬
+		DArray2D<Coord4> mHeight;				
+		DArray2D<Coord4> mDeviceGrid;		    
 		DArray2D<Coord4> mDeviceGridNext;
-		DArray2D<Coord4> mDisplacement;         // λ�Ƴ�
-		DArray2D<Vec2f> mSource;				//�������Ӵ���ˮ����
-		DArray2D<float> mWeight;				
+		DArray2D<Coord4> mDisplacement;         
+		DArray2D<Vec2f> mSource;				
+		DArray2D<float> mWeight;
+
+	public:
+		DEF_VAR(int, Size, 512, "");
+		DEF_VAR(float, PatchLength, 512.0f, "");
+
+		//std::shared_ptr<HeightField<TDataType>> heights;	
 	};
 
 	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
