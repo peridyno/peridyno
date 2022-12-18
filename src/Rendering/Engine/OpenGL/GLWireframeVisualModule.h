@@ -30,19 +30,19 @@ namespace dyno
 
 	public:		
 		// render as lines or cylinder
-		enum EEdgeMode {
+		DECLARE_ENUM(EEdgeMode,
 			LINE = 0,
-			CYLINDER = 1
-		};
+			CYLINDER = 1);
 
 	public:
 		GLWireframeVisualModule();
 		std::string caption() override;
-		void setEdgeMode(EEdgeMode mode);
 
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
 		DEF_VAR(float, Radius, 0.003f, "Cylinder radius");
 		DEF_VAR(float, LineWidth, 1.f, "Line width");
+
+		DEF_ENUM(EEdgeMode, RenderMode, EEdgeMode::LINE, "");
 
 	protected:
 		virtual void paintGL(GLRenderPass mode) override;
@@ -57,7 +57,5 @@ namespace dyno
 		gl::CudaBuffer	mPoints;
 		gl::CudaBuffer 	mEdges;
 		unsigned int	mNumEdges = 0;
-
-		EEdgeMode		mEdgeMode = EEdgeMode::CYLINDER;
 	};
 };

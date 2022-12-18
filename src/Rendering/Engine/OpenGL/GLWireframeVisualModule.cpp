@@ -21,11 +21,6 @@ namespace dyno
 		return "Wireframe Visual Module";
 	}
 
-	void GLWireframeVisualModule::setEdgeMode(EEdgeMode mode)
-	{
-		mEdgeMode = mode;
-	}
-
 	bool GLWireframeVisualModule::initializeGL()
 	{
 		mVAO.create();
@@ -89,7 +84,7 @@ namespace dyno
 		int mode;
 		glGetIntegerv(GL_POLYGON_MODE, &mode);
 
-		if (mEdgeMode == EEdgeMode::LINE)
+		if (this->varRenderMode()->getDataPtr()->currentKey() == EEdgeMode::LINE)
 		{
 			// draw as lines
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -112,6 +107,4 @@ namespace dyno
 
 		gl::glCheckError();
 	}
-
-
 }

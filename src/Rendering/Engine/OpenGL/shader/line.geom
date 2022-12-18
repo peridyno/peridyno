@@ -85,7 +85,9 @@ void cylinder() {
 
 	const float	len = length(p1 - p0);
 	const vec3	scale = vec3(uRadius, uRadius, len);
-	const float sectorStep = 2 * M_PI / nSectors;
+
+	const float fSectors = nSectors;
+	const float sectorStep = 2 * M_PI / fSectors;
 
 	for (int i = 0; i < nSectors; i++) {
 

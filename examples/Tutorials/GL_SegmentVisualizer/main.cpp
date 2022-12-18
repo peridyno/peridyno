@@ -77,7 +77,7 @@ int main(int, char**)
 	// wireframe rendering
 	auto edgeRender = std::make_shared<GLWireframeVisualModule>();
 	edgeRender->setColor(Vec3f(0, 1, 0));
-	edgeRender->setEdgeMode(GLWireframeVisualModule::LINE);
+	edgeRender->varRenderMode()->getDataPtr()->setCurrentKey(GLWireframeVisualModule::LINE);
 	edgeRender->varLineWidth()->setValue(2.f);
 	instanceNode->stateHexahedrons()->connect(edgeRender->inEdgeSet());
 	instanceNode->graphicsPipeline()->pushModule(edgeRender);
