@@ -125,7 +125,7 @@ namespace dyno
 	{
 		auto m_patch = this->getOceanPatch();
 
-		m_patch->animate(m_eclipsedTime);
+//		m_patch->animate(m_eclipsedTime);
 
 		m_eclipsedTime += dt;
 

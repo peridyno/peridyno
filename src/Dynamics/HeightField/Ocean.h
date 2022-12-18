@@ -15,17 +15,17 @@ namespace dyno
 
 		float2 getWindDirection() { 
 			auto m_patch = this->getOceanPatch();
-			return make_float2(cosf(m_patch->windDir), sinf(m_patch->windDir)); 
+			return make_float2(cosf(m_patch->varWindDirection()->getData()), sinf(m_patch->varWindDirection()->getData()));
 		}
 		
 		float getFftRealSize() { return m_fft_real_size; }
 		int getFftResolution() { return m_fft_size; }
 		float getChoppiness() { return m_choppiness; }
 
-		void setChoppiness(float chopiness) {
-			m_choppiness = chopiness;
-			this->getOceanPatch()->setChoppiness(m_choppiness);
-		}
+// 		void setChoppiness(float chopiness) {
+// 			m_choppiness = chopiness;
+// 			this->getOceanPatch()->setChoppiness(m_choppiness);
+// 		}
 		//OceanPatch* getOceanPatch() { return m_patch; }
 		int getGridSize() { return m_fft_size; }
 

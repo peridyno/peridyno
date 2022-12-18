@@ -279,7 +279,7 @@ namespace dyno
 		//CVertexNormal.assign(VertexNormal);
 
 		//获取海洋的高度
-		DArray2D<Vec4f> Oceandisplacement = getOcean()->getOceanPatch()->getDisplacement();
+		DArray2D<Vec4f> Oceandisplacement = getOcean()->getOceanPatch()->stateDisplacement()->getData();
 		auto m_ocean_patch = getOcean()->getOceanPatch();
 		//printfDArray2D(Oceandisplacement)
 		/**/
@@ -301,8 +301,8 @@ namespace dyno
 			m_boat->stateRotationMatrix()->getData(),//m_boat->getOrientation(), glm::mat3 rotation,
 			m_origin,
 			8,
-			m_ocean_patch->getPatchSize(),
-			m_ocean_patch->getGridSize(),
+			m_ocean_patch->varPatchSize()->getData(),
+			m_ocean_patch->varResolution()->getData(),
 			getRigidBodySystem()->stateVelocity()->getData()
 		);
 		
@@ -463,7 +463,7 @@ namespace dyno
 						Vec3f rotated = Vec3f(dx, 0.0f, dz);
 
 
-						float d = sqrt(rotated.x * rotated.x + rotated.z * rotated.z);
+						float d = Vec2f(rotated.x, rotated.z).norm();
 						if (d < r)
 						{
 							Vec2f dw = (1.0f - d / r) * 0.005f * Vec2f(boat_velocity[0].x, boat_velocity[0].z);
