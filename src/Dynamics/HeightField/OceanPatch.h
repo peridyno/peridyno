@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-#include <cuda_runtime.h>
 #include <cufft.h>
 #include <vector>
-#include <math_constants.h>
 #include "Node.h"
 
 #include "Complex.h"
@@ -38,6 +36,7 @@ namespace dyno {
         DECLARE_TCLASS(OceanPatch, TDataType)
     public:
         typedef typename TDataType::Real Real;
+        typedef typename TDataType::Coord Coord;
         typedef typename Complex<Real> Complex;
 
         OceanPatch();
@@ -46,14 +45,16 @@ namespace dyno {
     public:
 		DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
 
-        DEF_VAR(Real, WindDirection, CUDART_PI_F / 3.0f, "Wind direction");
+        DEF_VAR(Real, WindDirection, Real(60), "Wind direction");
 
         DEF_VAR(uint, Resolution, 512, "");
 
         DEF_VAR(Real, PatchSize, Real(512), "Real patch size");
 
+        DEF_VAR(Real, TimeScale, Real(1), "");
+
     public:
-		DEF_ARRAY2D_STATE(Vec4f, Displacement, DeviceType::GPU, "");
+		DEF_ARRAY2D_STATE(Coord, Displacement, DeviceType::GPU, "");
 
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 
@@ -64,41 +65,30 @@ namespace dyno {
         void postUpdateStates() override;
 
     private:
-        void animate(float t);
         void generateH0(Complex* h0);
-        float gauss();
-        float phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend);
         void resetWindType();
 
-        //int mResolution = 512;
+        std::vector<WindParam> mParams;  //A set of pre-defined configurations
 
-        int mSpectrumWidth;  //频谱宽度
-        int mSpectrumHeight;  //频谱长度
+		DArray2D<Complex> mH0;  //初始频谱
+		DArray2D<Complex> mHt;  //当前时刻频谱
 
-        Real mChoppiness;  //设置浪尖的尖锐性，范围0~1
-
-        std::vector<WindParam> m_params;  //不同风力等级下的FFT变换参数
+		DArray2D<Complex> mDxt;  //x方向偏移
+		DArray2D<Complex> mDzt;  //z方向偏移
 
         const Real g = 9.81f;          //重力
-        Real       A = 1e-7f;          //波的缩放系数
         
-        Real       dirDepend = 0.07f;  //风长方向相关性
+        Real mDirDepend = 0.07f;  //风长方向相关性
 
-        Real m_maxChoppiness;  //设置choppiness上限
-        Real m_globalShift;    //大尺度偏移幅度
+        Real mAmplitude = 1e-7f;          //波的缩放系数
         Real mWindSpeed = 1.0f;
-
-        DArray2D<Complex> mH0;  //初始频谱
-        DArray2D<Complex> mHt;  //当前时刻频谱
-
-        DArray2D<Complex> mDxt;  //x方向偏移
-        DArray2D<Complex> mDzt;  //z方向偏移
+        Real mChoppiness;  //设置浪尖的尖锐性，范围0~1
+        Real mGlobalShift;    //大尺度偏移幅度
 
         cufftHandle fftPlan;
 
-		//float m_windSpeed = 4;                   //风速
-
-        Real m_fft_flow_speed = 1.0f;
+		int mSpectrumWidth;  //频谱宽度
+		int mSpectrumHeight;  //频谱长度
     };
 
 	IMPLEMENT_TCLASS(OceanPatch, TDataType)

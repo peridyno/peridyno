@@ -41,7 +41,7 @@ namespace dyno
 
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 
-		DEF_VAR(bool, UseVertexNormal, false, "")
+		DEF_VAR(bool, UseVertexNormal, false, "");
 
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 

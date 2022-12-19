@@ -62,7 +62,7 @@ namespace dyno
 
 }
 
-dyno::PluginEntry* HeightField::initStaticPlugin()
+dyno::PluginEntry* HeightFieldLibrary::initStaticPlugin()
 {
 	if (dyno::HeightFieldInitializer::instance()->initialize())
 		return dyno::HeightFieldInitializer::instance();
@@ -70,7 +70,7 @@ dyno::PluginEntry* HeightField::initStaticPlugin()
 	return nullptr;
 }
 
-PERIDYNO_API dyno::PluginEntry* HeightField::initDynoPlugin()
+PERIDYNO_API dyno::PluginEntry* HeightFieldLibrary::initDynoPlugin()
 {
 	if (dyno::HeightFieldInitializer::instance()->initialize())
 		return dyno::HeightFieldInitializer::instance();

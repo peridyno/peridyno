@@ -18,7 +18,7 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto root = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
-	root->varWindType()->setValue(10);
+	root->varWindType()->setValue(8);
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 	root->stateTopology()->connect(mapper->inHeightField());
@@ -29,6 +29,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
+	sRender->varUseVertexNormal()->setValue(true);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	root->graphicsPipeline()->pushModule(sRender);
 
