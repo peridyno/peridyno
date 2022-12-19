@@ -7,6 +7,7 @@
 #include "OceanPatch.h"
 #include "Ocean.h"
 #include "RigidBody/RigidBodySystem.h"
+#include "Boat.h"
 #include "Topology/TriangleSet.h"
 #include "../Core/Algorithm/Reduction.h"
 namespace dyno
@@ -23,24 +24,10 @@ namespace dyno
 		Coupling(std::string name = "");
 		~Coupling();
 
-		void initialize();
-
 		void animate(float dt);
 
-		void setHeightShift(float shift);
-
-		void setBoatMatrix(glm::dmat4 mat, float dt);
-		//glm::dmat4 getBoatMatrix();
-
-		void steer(float degree);
-		void propel(float acceleration);
-
-		Vec2f getLocalBoatCenter();
-
-		DEF_NODE_PORT(RigidBodySystem<TDataType>, RigidBodySystem, "RigidBodySystem");
+		DEF_NODE_PORT(Boat<TDataType>, Boat, "Boat");
 		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 		
 	protected:
 		void resetStates() override;

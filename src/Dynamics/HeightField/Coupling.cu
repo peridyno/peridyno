@@ -67,6 +67,21 @@ namespace dyno
 		m_prePos = Vec3f(0, 0, 0);
 
 		m_name = name;
+
+
+		int sizeInBytesF = 8 * sizeof(float);
+
+		m_reduce = Reduction<float>::Create(8);
+
+		cudaMalloc(&m_forceX, sizeInBytesF);
+		cudaMalloc(&m_forceY, sizeInBytesF);
+		cudaMalloc(&m_forceZ, sizeInBytesF);
+		cudaMalloc(&m_torqueX, sizeInBytesF);
+		cudaMalloc(&m_torqueY, sizeInBytesF);
+		cudaMalloc(&m_torqueZ, sizeInBytesF);
+
+		cudaMalloc(&m_sample_heights, sizeInBytesF);
+	
 	}
 
 	template<typename TDataType>
@@ -79,36 +94,6 @@ namespace dyno
 		//cudaFree(m_torqueY);
 		//cudaFree(m_torqueZ);
 		//cudaFree(m_sample_heights);
-	}
-
-	template<typename TDataType>
-	void Coupling<TDataType>::initialize()
-	{
-	
-		int sizeInBytesF = 8 * sizeof(float);
-
-		m_reduce = Reduction<float>::Create(8);
-		
-		cudaMalloc(&m_forceX, sizeInBytesF);
-		cudaMalloc(&m_forceY, sizeInBytesF);
-		cudaMalloc(&m_forceZ, sizeInBytesF);
-		cudaMalloc(&m_torqueX, sizeInBytesF);
-		cudaMalloc(&m_torqueY, sizeInBytesF);
-		cudaMalloc(&m_torqueZ, sizeInBytesF);
-
-		cudaMalloc(&m_sample_heights, sizeInBytesF);
-		/*
-
-		glm::vec3 center = boat->getCenter();
-
-
-		float dg = m_trail->getRealGridSize();
-
-		int nx = center.x / dg - m_trail->getGridSize() / 2;
-		int ny = center.z / dg - m_trail->getGridSize() / 2;
-
-		m_trail->setOriginX(nx);
-		m_trail->setOriginY(ny);	*/
 	}
 
 
@@ -229,13 +214,9 @@ namespace dyno
 
 			if (pos_i.y < dis_i.y)
 			{
-				//force_i = 9.8f * normal_i * (dis_i.y - pos_i.y);
 				force_i = Vec3f(0.0f, 0.098f, 0.0f) * (dis_i.y - pos_i.y);
-				//torque_i = Vec3f(0.0f, 0.098f, 0.0f) * (dis_i.y - pos_i.y);
-				Vec3f DampingForce(0,-0.1 * velocity[0].y,0);//--------------------------------------------
+				Vec3f DampingForce(0,-0.1 * velocity[0].y,0);
 				force_i += DampingForce;
-				//printf("?????????????\n");
-				//printf("%d pointY = %f  OceanY = %f  %f\n ", pId, pos_i.y, dis_i.y, cha);
 			}
 
 			torque_i = rotDir.cross(torque_i);
@@ -253,39 +234,26 @@ namespace dyno
 	template<typename TDataType>
 	void Coupling<TDataType>::animate(float dt)
 	{
+		
 		m_eclipsedTime += dt;
 
 		//synchronCheck;
 	
-		auto m_boat = getRigidBodySystem();
+		auto m_boat = getBoat();
 		int num =8;
 		int pDims = iDivUp(8, 64);
 
-		auto m_center = getRigidBodySystem()->stateCenter()->getData();
-		auto rotation = getRigidBodySystem()->stateRotationMatrix();
+		auto m_center = getBoat()->stateCenter()->getData();
+		auto rotation = getBoat()->stateRotationMatrix();
 			
-		//CArray<Vec3f> CVertexNormal;
-		//CVertexNormal.resize(center.size());
-		//CVertexNormal.assign(center);
-		
-		//获取正方体的顶点
-		DArray<Coord> point = inTriangleSet()->getDataPtr()->getPoints();
-		inTriangleSet()->getDataPtr()->update();
-		//printfDArray(point);
-
-		auto VertexNormal = inTriangleSet()->getDataPtr()->outVertexNormal()->getData();
-		//CArray<Vec3f> CVertexNormalpoint;
-		//CVertexNormal.resize(VertexNormal.size());
-		//CVertexNormal.assign(VertexNormal);
 
 		//获取海洋的高度
 		DArray2D<Coord> Oceandisplacement = getOcean()->getOceanPatch()->stateDisplacement()->getData();
 		auto m_ocean_patch = getOcean()->getOceanPatch();
 		//printfDArray2D(Oceandisplacement)
-		/**/
 		
 		//计算力和力矩
-		
+		/*
 		C_ComputeForceAndTorque << <pDims, 64 >> > (
 			m_forceX,
 			m_forceY,
@@ -294,7 +262,6 @@ namespace dyno
 			m_torqueY,
 			m_torqueZ,
 			m_sample_heights,
-			VertexNormal,
 			point,
 			Oceandisplacement,
 			m_boat->stateCenter()->getData(),//	m_boat->getCenter(), glm::vec3 boatCenter,   size == 1
@@ -332,11 +299,8 @@ namespace dyno
 			m_torque_corrector = torque;
 			m_force_corrected = true;
 		}
-
-
 	
 		m_boat->updateVelocityAngule(force - m_force_corrector, torque - m_torque_corrector, dt);
-
 
 		auto capillaryWaves = getOcean()->getCapillaryWaves();
 		auto m_trail = capillaryWaves[0];
@@ -394,10 +358,10 @@ namespace dyno
 			m_trail->getWeight(),
 			m_trail->getGridSize());
 
-
+*/
 
 		printf("Coupling<TDataType>::animate  \n");
-
+		
 	}
 
 	__global__ void C_NormalizeTrail(

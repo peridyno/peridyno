@@ -82,6 +82,7 @@ option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" O
 option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
 option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
+option(PERIDYNO_LIBRARY_MODELING "Enable binding the Modeling library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY Core IO Framework GLRenderEngine)
@@ -105,6 +106,6 @@ endif()
 
 
 if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(LIB_DEPENDENCY Core IO Framework RigidBody cufft)
+    set(LIB_DEPENDENCY Core IO Framework RigidBody cufft Modeling)
     build_library(HeightField LIB_DEPENDENCY)
 endif()

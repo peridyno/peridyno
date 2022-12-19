@@ -6,7 +6,7 @@
 #include <HeightField/OceanPatch.h>
 #include <HeightField/CapillaryWave.h>
 #include <HeightField/Coupling.h>
-#include <RigidBody/RigidBodySystem.h>
+#include <HeightField/Boat.h>
 
 #include "Mapping/HeightFieldToTriangleSet.h"
 #include <Mapping/DiscreteElementsToTriangleSet.h>
@@ -16,6 +16,7 @@
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
+
 #include <GLWireframeVisualModule.h>
 
 #include "Collision/NeighborElementQuery.h"
@@ -24,6 +25,7 @@ using namespace dyno;
 
 std::shared_ptr<SceneGraph> createScene()
 {
+	
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto ocean = scn->addNode(std::make_shared<Ocean<DataType3f>>());
@@ -42,48 +44,21 @@ std::shared_ptr<SceneGraph> createScene()
 	ocean->stateTopology()->connect(mapper->inHeightField());
 	ocean->graphicsPipeline()->pushModule(mapper);
 
+
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	ocean->graphicsPipeline()->pushModule(sRender);
-
-
-	//rigid------------------------------------------------------------------
-	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	BoxInfo box;
-
-
-	box.center = 0.5f * Vec3f(0, 0.4, 0);
-	box.halfLength = Vec3f(0.1, 0.1, 0.1);
-	rigid->addBox(box, rigidBody);
-
-
-	auto Rmapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	rigid->stateTopology()->connect(Rmapper->inDiscreteElements());
-	rigid->graphicsPipeline()->pushModule(Rmapper);
-
-
-	auto rRender = std::make_shared<GLWireframeVisualModule>();
-	rRender->setColor(Vec3f(1, 1, 0));
-	Rmapper->outTriangleSet()->connect(rRender->inEdgeSet());
-	rigid->graphicsPipeline()->pushModule(rRender);
 	
-	//coupling---------------------------------------
-	auto trail = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
 
+	auto boat = scn->addNode(std::make_shared<Boat<DataType3f>>());
+	boat->varFileName()->setValue(getAssetPath() + "bunny/sparse_bunny_mesh.obj");
 
-
+	
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
-	rigid->connect(coupling->importRigidBodySystem());
+	boat->connect(coupling->importBoat());
 	ocean->connect(coupling->importOcean());
-
-	Rmapper->outTriangleSet()->connect(coupling->inTriangleSet());
-	coupling->initialize();
-
-
-
+	
 	return scn;
 }
 
