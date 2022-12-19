@@ -172,7 +172,7 @@ namespace dyno
 		float* sampleHeights,
 		DArray<Vec3f> normals,
 		DArray<Vec3f> samples,
-		DArray2D<Vec4f> ocean,
+		DArray2D<Vec3f> ocean,
 		DArray<Vec3f> boatCenter,
 		DArray<Matrix> rotation,
 		Vec2f origin,
@@ -211,12 +211,12 @@ namespace dyno
 				fy = 1.0f;
 			}
 			int id = i + j * gridSize;
-			Vec4f d00 = ocean[id];
-			Vec4f d10 = ocean[id + 1];
-			Vec4f d01 = ocean[id + gridSize];
-			Vec4f d11 = ocean[id + gridSize + 1];
+			Vec3f d00 = ocean[id];
+			Vec3f d10 = ocean[id + 1];
+			Vec3f d01 = ocean[id + gridSize];
+			Vec3f d11 = ocean[id + gridSize + 1];
 
-			Vec4f dis_i =  d00 * (1 - fx) * (1 - fy) + d10 * fx * (1 - fy) + d01 * (1 - fx) * fy + d11 * fx * fy;
+			Vec3f dis_i =  d00 * (1 - fx) * (1 - fy) + d10 * fx * (1 - fy) + d01 * (1 - fx) * fy + d11 * fx * fy;
 			//-------------------------------
 			dis_i.y *= 1.0f;
 			Vec3f normal_i = normals[pId];
@@ -279,7 +279,7 @@ namespace dyno
 		//CVertexNormal.assign(VertexNormal);
 
 		//获取海洋的高度
-		DArray2D<Vec4f> Oceandisplacement = getOcean()->getOceanPatch()->stateDisplacement()->getData();
+		DArray2D<Coord> Oceandisplacement = getOcean()->getOceanPatch()->stateDisplacement()->getData();
 		auto m_ocean_patch = getOcean()->getOceanPatch();
 		//printfDArray2D(Oceandisplacement)
 		/**/

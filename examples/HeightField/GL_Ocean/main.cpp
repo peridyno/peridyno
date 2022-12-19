@@ -18,9 +18,11 @@ std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto root = scn->addNode(std::make_shared<Ocean<DataType3f>>());
-	
 	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
+
+	auto root = scn->addNode(std::make_shared<Ocean<DataType3f>>());
+	root->varExtentX()->setValue(2);
+	root->varExtentZ()->setValue(2);
 	oceanPatch->connect(root->importOceanPatch());
 
 	auto capillaryWave = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
