@@ -7,7 +7,7 @@ namespace dyno
 		: Node()
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
-		this->stateTopology()->setDataPtr(heights);
+		this->stateHeightField()->setDataPtr(heights);
 	}
 
 	template<typename TDataType>
@@ -25,8 +25,8 @@ namespace dyno
 		auto Nx = this->varExtentX()->getData();
 		auto Nz = this->varExtentZ()->getData();
 
-		auto patchHeights = TypeInfo::cast<HeightField<TDataType>>(patch->stateTopology()->getDataPtr());
-		auto oceanHeights = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
+		auto patchHeights = patch->stateHeightField()->getDataPtr();
+		auto oceanHeights = this->stateHeightField()->getDataPtr();
 
 		Real h = patchHeights->getGridSpacing();
 		oceanHeights->setExtents(Nx * patchHeights->width(), Nz * patchHeights->height());
@@ -95,9 +95,9 @@ namespace dyno
 	{
 		auto patch = this->getOceanPatch();
 
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
+		auto topo = this->stateHeightField()->getDataPtr();
 
-		auto patchHeights = TypeInfo::cast<HeightField<TDataType>>(patch->stateTopology()->getDataPtr());
+		auto patchHeights = patch->stateHeightField()->getDataPtr();
 
 		DArray2D<Coord>& patchDisp = patchHeights->getDisplacement();
 		cuExecute2D(make_uint2(patchDisp.nx(), patchDisp.ny()),

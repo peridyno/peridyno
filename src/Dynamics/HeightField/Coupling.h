@@ -1,15 +1,25 @@
+/**
+ * Copyright 2017-2022 Xiaowei He
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
-#include <vector>
-#include <iostream>
-#include <string.h>
 
-#include "CapillaryWave.h"
-#include "OceanPatch.h"
 #include "Ocean.h"
-#include "RigidBody/RigidBodySystem.h"
-#include "Boat.h"
-#include "Topology/TriangleSet.h"
-#include "../Core/Algorithm/Reduction.h"
+#include "RigidBody/RigidMesh.h"
+
+#include "Algorithm/Reduction.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -18,52 +28,27 @@ namespace dyno
 		DECLARE_TCLASS(Coupling, TDataType)
 	public:
 
-		typedef typename TDataType::Matrix Matrix;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TDataType::Matrix Matrix;
 
-		Coupling(std::string name = "");
+		Coupling();
 		~Coupling();
 
-		void animate(float dt);
-
-		DEF_NODE_PORT(Boat<TDataType>, Boat, "Boat");
+		DEF_NODE_PORT(RigidMesh<TDataType>, RigidMesh, "Boat");
 		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
 		
+		DEF_VAR(Real, Dragging, Real(0.98), "");
+
 	protected:
 		void resetStates() override;
 		void updateStates() override;
 
 	private:
-		Vec2f m_origin;
+		DArray<Coord> mForce;
+		DArray<Coord> mTorque;
 
-		Vec3f m_prePos;
-
-		std::string m_name;
-		float m_heightShift;
-
-		float m_eclipsedTime;
-
-		//	float3* m_oceanCentroid;			//fft displacement at the center of boat
-
-		float* m_forceX;					//forces at sample points
-		float* m_forceY;
-		float* m_forceZ;
-
-		float* m_torqueX;					//torques at sample points
-		float* m_torqueY;
-		float* m_torqueZ;
-
-		
-		float* m_sample_heights;
-
-		bool m_force_corrected;
-
-		Vec3f m_force_corrector;
-		Vec3f m_torque_corrector;
-
-		float m_heightScale = 0.2f;
-
-		Reduction<float>* m_reduce;
+		Reduction<Coord> mReduce;
 	};
+
 	IMPLEMENT_TCLASS(Coupling, TDataType)
 }

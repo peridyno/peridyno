@@ -82,7 +82,7 @@ namespace dyno
         : Node()
     {
         auto heights = std::make_shared<HeightField<TDataType>>();
-        this->stateTopology()->setDataPtr(heights);
+        this->stateHeightField()->setDataPtr(heights);
 
         std::ifstream input(getAssetPath() + "windparam.txt", std::ios::in);
         for (int i = 0; i <= 12; i++)
@@ -143,7 +143,7 @@ namespace dyno
 		mDzt.resize(res, res);
 		this->stateDisplacement()->resize(res, res);
 
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
+		auto topo = this->stateHeightField()->getDataPtr();
 		Real h = this->varPatchSize()->getData() / res;
 		topo->setExtents(res, res);
 		topo->setGridSpacing(h);
@@ -155,7 +155,7 @@ namespace dyno
     template<typename TDataType>
     void OceanPatch<TDataType>::updateStates()
     {
-        Real timeScaled = this->varTimeScale()->getData() * this->stateElapsedTime()->getData() * 16;
+        Real timeScaled = this->varTimeScale()->getData() * this->stateElapsedTime()->getData();
 
 		uint res = this->varResolution()->getData();
 
@@ -194,7 +194,7 @@ namespace dyno
 	template<typename TDataType>
 	void OceanPatch<TDataType>::postUpdateStates()
 	{
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
+		auto topo = this->stateHeightField()->getDataPtr();
 
 		auto& shifts = topo->getDisplacement();
 

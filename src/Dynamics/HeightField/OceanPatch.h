@@ -19,6 +19,7 @@
 #include "Node.h"
 
 #include "Complex.h"
+#include "Topology/HeightField.h"
 
 namespace dyno {
 
@@ -56,7 +57,7 @@ namespace dyno {
     public:
 		DEF_ARRAY2D_STATE(Coord, Displacement, DeviceType::GPU, "");
 
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
 
     protected:
         void resetStates() override;

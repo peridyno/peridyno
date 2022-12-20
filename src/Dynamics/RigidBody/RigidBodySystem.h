@@ -59,6 +59,8 @@ namespace dyno
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(1));
 
+		Real getDt() override { return 0.001; }
+
 	protected:
 		void resetStates() override;
 
