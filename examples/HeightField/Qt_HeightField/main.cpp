@@ -33,11 +33,11 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto root = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-	root->stateTopology()->connect(mapper->inHeightField());
+	root->stateHeightField()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
 
-	mapper->varScale()->setValue(0.01);
-	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
+// 	mapper->varScale()->setValue(0.01);
+// 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
@@ -52,6 +52,7 @@ int main()
 	HeightFieldLibrary::initStaticPlugin();
 
 	QtApp window;
+	window.getCamera()->setDistanceUnit(52);
 	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();

@@ -106,25 +106,22 @@ namespace dyno
 			patchDisp);
 
 		auto& waves = this->getCapillaryWaves();
-		if (waves.size() > 0)
-		{
-			for (int i = 0; i < waves.size(); i++) {
-				auto wave = TypeInfo::cast<HeightField<TDataType>>(waves[i]->stateTopology()->getDataPtr());
+		for (int i = 0; i < waves.size(); i++) {
+			auto wave = TypeInfo::cast<HeightField<TDataType>>(waves[i]->stateTopology()->getDataPtr());
 
-				auto& waveDisp = wave->getDisplacement();
+			auto& waveDisp = wave->getDisplacement();
 
-				cuExecute2D(make_uint2(waveDisp.nx(), waveDisp.ny()),
-					O_AddOceanTrails,
-					topo->getDisplacement(),
-					waveDisp);
-			}
+			cuExecute2D(make_uint2(waveDisp.nx(), waveDisp.ny()),
+				O_AddOceanTrails,
+				topo->getDisplacement(),
+				waveDisp);
 		}
 	}
 
 	template<typename TDataType>
 	bool Ocean<TDataType>::validateInputs()
 	{
-		return this->importOceanPatch() != nullptr;
+		return this->getOceanPatch() != nullptr;
 	}
 
 	DEFINE_CLASS(Ocean);

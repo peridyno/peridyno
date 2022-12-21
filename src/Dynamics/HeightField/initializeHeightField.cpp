@@ -4,6 +4,9 @@
 #include "CapillaryWave.h"
 #include "OceanPatch.h"
 
+#include "Mapping/HeightFieldToTriangleSet.h"
+#include "GLSurfaceVisualModule.h"
+
 #include "NodeFactory.h"
 
 namespace dyno
@@ -47,12 +50,41 @@ namespace dyno
 		group->addAction(
 			"Ocean Patch",
 			"ToolBarIco/HeightField/OceanPatch.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<OceanPatch<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> { 
+				auto patch = std::make_shared<OceanPatch<DataType3f>>();
+
+				auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+				patch->stateHeightField()->connect(mapper->inHeightField());
+				patch->graphicsPipeline()->pushModule(mapper);
+
+				auto sRender = std::make_shared<GLSurfaceVisualModule>();
+				sRender->setColor(Vec3f(0, 0.2, 1.0));
+				sRender->varUseVertexNormal()->setValue(true);
+				mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+				patch->graphicsPipeline()->pushModule(sRender);
+
+				return patch;
+			});
 
 		group->addAction(
 			"Ocean",
 			"ToolBarIco/HeightField/Ocean.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<Ocean<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> { 
+				auto ocean = std::make_shared<Ocean<DataType3f>>();
+				ocean->varExtentX()->setValue(2);
+				ocean->varExtentZ()->setValue(2);
+
+				auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+				ocean->stateHeightField()->connect(mapper->inHeightField());
+				ocean->graphicsPipeline()->pushModule(mapper);
+
+				auto sRender = std::make_shared<GLSurfaceVisualModule>();
+				sRender->setColor(Vec3f(0, 0.2, 1.0));
+				mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+				ocean->graphicsPipeline()->pushModule(sRender);
+
+				return ocean;
+			});
 
 		group->addAction(
 			"CapillaryWave",

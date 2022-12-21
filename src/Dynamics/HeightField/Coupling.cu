@@ -13,6 +13,8 @@ namespace dyno
 	template<typename TDataType>
 	Coupling<TDataType>::~Coupling()
 	{
+		mForce.clear();
+		mTorque.clear();
 	}
 
 	template<typename TDataType>

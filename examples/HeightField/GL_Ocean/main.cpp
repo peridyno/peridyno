@@ -30,10 +30,10 @@ std::shared_ptr<SceneGraph> createScene()
 	
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-	mapper->varScale()->setValue(0.01);
-	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
+// 	mapper->varScale()->setValue(0.01);
+// 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
 
-	root->stateTopology()->connect(mapper->inHeightField());
+	root->stateHeightField()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
@@ -47,6 +47,7 @@ std::shared_ptr<SceneGraph> createScene()
 int main()
 {
 	GlfwApp window;
+	window.getCamera()->setDistanceUnit(52);
 	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();
