@@ -7,37 +7,11 @@
 
 namespace dyno
 {
-	template<typename Triangle, typename Tri2Tet, typename TKey>
-	__global__ void TetSet_SetupTriangles(
-		DArray<Triangle> triangles,
-		DArray<Tri2Tet> tri2Tet,
-		DArray<TKey> keys,
-		DArray<int> counter,
-		DArray<int> tetIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= keys.size()) return;
-
-		int shift = counter[tId];
-		if (tId == 0 || keys[tId] != keys[tId - 1])
-		{
-			TKey key = keys[tId];
-			triangles[shift] = Triangle(key[0], key[1], key[2]);
-
-			Tri2Tet t2T(EMPTY, EMPTY);
-			t2T[0] = tetIds[tId];
-
-			if (tId + 1 < keys.size() && keys[tId + 1] == key)
-				t2T[1] = tetIds[tId + 1];
-
-			tri2Tet[shift] = t2T;
-		}
-	}
 	template<typename TDataType>
 	TetrahedronSet<TDataType>::TetrahedronSet()
 		: TriangleSet<TDataType>()
 	{
-		
+
 	}
 
 	template<typename TDataType>
@@ -99,7 +73,7 @@ namespace dyno
 			nodes.push_back(v);
 		}
 
-		
+
 		std::getline(infile_ele, line);
 		std::stringstream ss_ele(line);
 
@@ -195,10 +169,26 @@ namespace dyno
 
 	}
 
+	struct Info
+	{
+		DYN_FUNC Info() {
+			tetId = EMPTY;
+			tIndex = TopologyModule::Triangle(EMPTY, EMPTY, EMPTY);
+		}
+
+		DYN_FUNC Info(int id, TopologyModule::Triangle index) {
+			tetId = id;
+			tIndex = index;
+		};
+
+		int tetId;
+		TopologyModule::Triangle tIndex;
+	};
+
 	template<typename TKey, typename Tetrahedron>
 	__global__ void TetSet_SetupKeys(
 		DArray<TKey> keys,
-		DArray<int> ids,
+		DArray<Info> ids,
 		DArray<Tetrahedron> tets)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -210,16 +200,16 @@ namespace dyno
 		keys[4 * tId + 2] = TKey(tet[2], tet[3], tet[0]);
 		keys[4 * tId + 3] = TKey(tet[3], tet[0], tet[1]);
 
-		ids[4 * tId] = tId;
-		ids[4 * tId + 1] = tId;
-		ids[4 * tId + 2] = tId;
-		ids[4 * tId + 3] = tId;
+		ids[4 * tId] = Info(tId, TopologyModule::Triangle(tet[0], tet[1], tet[2]));
+		ids[4 * tId + 1] = Info(tId, TopologyModule::Triangle(tet[1], tet[2], tet[3]));
+		ids[4 * tId + 2] = Info(tId, TopologyModule::Triangle(tet[2], tet[3], tet[0]));
+		ids[4 * tId + 3] = Info(tId, TopologyModule::Triangle(tet[3], tet[0], tet[1]));
 	}
 
 	template<typename TKey>
 	__global__ void TetSet_CountTriangleNumber(
 		DArray<int> counter,
-		DArray<TKey> keys) 
+		DArray<TKey> keys)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= keys.size()) return;
@@ -230,7 +220,32 @@ namespace dyno
 			counter[tId] = 0;
 	}
 
-	
+	template<typename Triangle, typename Tri2Tet, typename TKey>
+	__global__ void TetSet_SetupTriangles(
+		DArray<Triangle> triangles,
+		DArray<Tri2Tet> tri2Tet,
+		DArray<TKey> keys,
+		DArray<int> counter,
+		DArray<Info> tetIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= keys.size()) return;
+
+		int shift = counter[tId];
+		if (tId == 0 || keys[tId] != keys[tId - 1])
+		{
+			TKey key = keys[tId];
+			triangles[shift] = tetIds[tId].tIndex;
+
+			Tri2Tet t2T(EMPTY, EMPTY);
+			t2T[0] = tetIds[tId].tetId;
+
+			if (tId + 1 < keys.size() && keys[tId + 1] == key)
+				t2T[1] = tetIds[tId + 1].tetId;
+
+			tri2Tet[shift] = t2T;
+		}
+	}
 
 	template<typename TKey>
 	void printTKey(DArray<TKey> keys, int maxLength) {
@@ -264,11 +279,11 @@ namespace dyno
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::updateTriangles()
 	{
-		
+
 		uint tetSize = m_tethedrons.size();
 
 		DArray<TKey> keys;
-		DArray<int> tetIds;
+		DArray<Info> tetIds;
 
 		keys.resize(4 * tetSize);
 		tetIds.resize(4 * tetSize);
@@ -293,8 +308,6 @@ namespace dyno
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
 		tri2Tet.resize(triNum);
-
-		printf("tetTriSize = %d\n", triNum);
 
 		auto& pTri = this->getTriangles();
 		pTri.resize(triNum);
