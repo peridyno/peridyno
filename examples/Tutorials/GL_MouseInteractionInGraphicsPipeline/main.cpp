@@ -41,7 +41,8 @@ public:
 	}
 
 	void setTransform(const Transform3f& tm) {
-		transform.assign(std::vector<Transform3f>{tm});
+		std::vector<Transform3f> tsf{tm};
+		transform.assign(tsf);
 		transformCPU = tm;
 	}
 

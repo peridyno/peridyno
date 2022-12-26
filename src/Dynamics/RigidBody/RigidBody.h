@@ -19,7 +19,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename Quat<Real> Quat;
+		typedef typename dyno::Quat<Real> Quat;
 
 		RigidBody();
 		virtual ~RigidBody();

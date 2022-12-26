@@ -108,7 +108,10 @@ namespace dyno
 				this->x1 = event.x;
 				this->y1 = event.y;
 				if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Click)
+				{
 					this->calcIntersectClick();
+					this->printInfoClick();
+				}
 			}
 			else if (event.actionType == AT_RELEASE)
 			{
@@ -119,7 +122,10 @@ namespace dyno
 				this->x2 = event.x;
 				this->y2 = event.y;
 				if (this->varToggleMultiSelect()->getValue() && this->varTogglePicker()->getValue())
+				{
 					this->mergeIndex();
+					this->printInfoDragRelease();
+				}
 			}
 			else
 			{
@@ -138,7 +144,10 @@ namespace dyno
 					else
 					{
 						if (this->varEdgePickingType()->getValue() == PickingTypeSelection::Both || this->varEdgePickingType()->getValue() == PickingTypeSelection::Drag)
+						{
 							this->calcIntersectDrag();
+							this->printInfoDragging();
+						}
 					}
 				}
 			}
@@ -290,6 +299,7 @@ namespace dyno
 		DArray<Edge> edges = initialEdgeSet.getEdges();
 		DArray<Coord> points = initialEdgeSet.getPoints();
 
+		this->tempNumT = edges.size();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
@@ -298,7 +308,6 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(edges.size());
-		std::cout << "Edge Num:" << edges.size() << std::endl;
 
 		DArray<Real> lineDistance;
 		lineDistance.resize(edges.size());
@@ -311,7 +320,7 @@ namespace dyno
 			unintersected,
 			lineDistance,
 			this->ray1,
-			this->varInterationRadius()->getData()
+			this->varInteractionRadius()->getData()
 		);
 
 		int min_index = thrust::min_element(thrust::device, lineDistance.begin(), lineDistance.begin() + lineDistance.size()) - lineDistance.begin();
@@ -390,6 +399,7 @@ namespace dyno
 		DArray<Edge> unintersected_edges;
 		unintersected_edges.resize(unintersected_size);
 
+		this->tempNumS = intersected_size;
 		cuExecute(edges.size(),
 			EI_AssignOutEdges,
 			edges,
@@ -399,7 +409,6 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
-		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
 		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
@@ -439,7 +448,7 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(edges.size());
-		std::cout << "Edge Num:" << edges.size() << std::endl;
+		this->tempNumT = edges.size();
 		cuExecute(edges.size(),
 			EI_CalIntersectedEdgesBox,
 			points,
@@ -450,7 +459,7 @@ namespace dyno
 			plane42,
 			plane14,
 			plane32,
-			this->varInterationRadius()->getData(),
+			this->varInteractionRadius()->getData(),
 			this->ray1
 		);
 
@@ -530,7 +539,7 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
-		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
+		this->tempNumS = intersected_size;
 		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
@@ -552,7 +561,7 @@ namespace dyno
 		);
 		DArray<int> unintersected;
 		unintersected.resize(edges.size());
-		std::cout << "Edge Num:" << edges.size() << std::endl;
+		this->tempNumT = edges.size();
 
 		DArray<int> outIntersected;
 		outIntersected.resize(intersected.size());
@@ -616,12 +625,39 @@ namespace dyno
 			unintersected,
 			intersected_o
 		);
-		std::cout << "Selected Edges Num:" << intersected_edges.size() << std::endl;
+		this->tempNumS = intersected_size;
 		this->outSelectedEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
 		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+	}
+
+	template<typename TDataType>
+	void EdgeInteraction<TDataType>::printInfoClick()
+	{
+		std::cout << "----------edge picking: click----------" << std::endl;
+		std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+		std::cout << "Interation radius:" << this->varInteractionRadius()->getValue() << std::endl;
+		std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
+	}
+
+	template<typename TDataType>
+	void EdgeInteraction<TDataType>::printInfoDragging()
+	{
+		std::cout << "----------edge picking: dragging----------" << std::endl;
+		std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+		std::cout << "Interation radius:" << this->varInteractionRadius()->getValue() << std::endl;
+		std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
+	}
+
+	template<typename TDataType>
+	void EdgeInteraction<TDataType>::printInfoDragRelease()
+	{
+		std::cout << "----------edge picking: drag release----------" << std::endl;
+		std::cout << "multiple picking: " << this->varToggleMultiSelect()->getValue() << std::endl;
+		std::cout << "Interation radius:" << this->varInteractionRadius()->getValue() << std::endl;
+		std::cout << "selected num/ total num:" << this->tempNumS << "/" << this->tempNumT << std::endl;
 	}
 
 	template<typename TDataType>
