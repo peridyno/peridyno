@@ -31,6 +31,10 @@ namespace dyno
 			unsigned int h;
 		} viewport;
 
+		// framebuffer size
+		unsigned int width  = 1;
+		unsigned int height = 1;
+
 		// illumination settings
 		struct Light
 		{
@@ -72,15 +76,13 @@ namespace dyno
 	class RenderEngine
 	{
 	public:
-		virtual void initialize(int width, int height) = 0;
-		virtual void draw(SceneGraph* scene, const RenderParams& rparams) = 0;
-		virtual void resize(int w, int h) = 0;
+		virtual void initialize() = 0;
+		virtual void terminate() = 0;
 
+		virtual void draw(SceneGraph* scene, const RenderParams& rparams) = 0;
 		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) = 0;
 
-	public:
-		virtual std::string name() = 0;
-
+		virtual std::string name() const = 0;
 	};
 };
 

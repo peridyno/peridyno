@@ -31,6 +31,7 @@ namespace dyno
 		DECLARE_CLASS(GLSurfaceVisualModule)
 	public:
 		GLSurfaceVisualModule();
+		~GLSurfaceVisualModule();
 
 	public:
 		virtual std::string caption() override;
@@ -51,10 +52,11 @@ namespace dyno
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
+		virtual void destroyGL() override;
 
 	protected:
 
-		gl::Program		mShaderProgram;
+		gl::Program*	mShaderProgram;
 
 		gl::VertexArray	mVAO;
 		gl::CudaBuffer 	mIndexBuffer;

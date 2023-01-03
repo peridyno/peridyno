@@ -22,26 +22,21 @@
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
 #include <unordered_set>
+#include <memory>
 
 namespace dyno
 {
 	GLRenderEngine::GLRenderEngine()
 	{
-		mRenderHelper = new GLRenderHelper();
-		mShadowMap = new ShadowMap(2048, 2048);
-		mSSAO = new SSAO;
-		mFXAAFilter = new FXAA;
+
 	}
 
 	GLRenderEngine::~GLRenderEngine()
 	{
-		delete mRenderHelper;
-		delete mShadowMap;
-		delete mSSAO;
-		delete mFXAAFilter;
+
 	}
 
-	void GLRenderEngine::initialize(int width, int height)
+	void GLRenderEngine::initialize()
 	{
 		if (!gladLoadGL()) {
 			printf("Failed to load OpenGL context!");
@@ -59,8 +54,6 @@ namespace dyno
 		// OIT
 		setupTransparencyPass();
 
-		mScreenQuad = gl::Mesh::ScreenQuad();
-
 		// create uniform block for transform
 		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		// create uniform block for light
@@ -69,13 +62,47 @@ namespace dyno
 		mVariableUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		gl::glCheckError();
 
-		mSSAO->initialize();
-		mShadowMap->initialize();
-		mRenderHelper->initialize();
-		mFXAAFilter->initialize();
+		// create a screen quad
+		mScreenQuad = gl::Mesh::ScreenQuad();
 
-		this->resize(width, height);
+		mRenderHelper = new GLRenderHelper();
+		mShadowMap = new ShadowMap(2048, 2048);
+		mFXAAFilter = new FXAA;
 
+	}
+
+	void GLRenderEngine::terminate()
+	{
+		// release render modules
+		for (auto m : mRenderModules) {
+			m->destroyGL();
+		}
+
+		// release framebuffer
+		mFramebuffer.release();
+		mColorTex.release();
+		mDepthTex.release();
+		mIndexTex.release();
+
+		// release linked-list OIT objects
+		mFreeNodeIdx.release();
+		mLinkedListBuffer.release();
+		mHeadIndexTex.release();
+		mBlendProgram->release();
+		delete mBlendProgram;
+
+		// release uniform buffers
+		mTransformUBO.release();
+		mLightUBO.release();
+		mVariableUBO.release();
+
+		// release other objects
+		mScreenQuad->release();
+		delete mScreenQuad;
+
+		delete mRenderHelper;
+		delete mShadowMap;
+		delete mFXAAFilter;
 	}
 
 	void GLRenderEngine::setupTransparencyPass()
@@ -158,15 +185,15 @@ namespace dyno
 			{
 				if (!node->isVisible())	return;
 				for (auto iter : node->graphicsPipeline()->activeModules()) {
-					auto m = dynamic_cast<GLVisualModule*>(iter.get());
-					if (m && m->isVisible()) {
+					auto m = std::dynamic_pointer_cast<GLVisualModule>(iter);
+					if (m) {
 						modules.push_back(m);
 						nodes.push_back(node);
 					}
 				}
 			}
-			std::vector<GLVisualModule*> modules;
-			std::vector<Node*>			 nodes;
+			std::vector<std::shared_ptr<GLVisualModule>>	modules;
+			std::vector<Node*>								nodes;
 		} action;
 
 		// enqueue modules for rendering
@@ -174,8 +201,17 @@ namespace dyno
 			scene->traverseForward(&action);
 		}
 
+		for (auto m : mRenderModules) {
+			// release GL resource for unreferenced visual module
+			if (std::find(action.modules.begin(), action.modules.end(), m) == action.modules.end())
+			{
+				m->destroyGL();
+			}
+		}
+
 		mRenderModules = action.modules;
 		mRenderNodes   = action.nodes;
+
 	}
 
 	void GLRenderEngine::draw(dyno::SceneGraph* scene, const RenderParams& rparams)
@@ -185,6 +221,9 @@ namespace dyno
 		// preserve current framebuffer
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+
+		// update framebuffer size
+		resizeFramebuffer(rparams.width, rparams.height);
 
 		// update shadow map
 		mShadowMap->update(scene, rparams);
@@ -276,13 +315,13 @@ namespace dyno
 			const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 			mFramebuffer.drawBuffers(2, attachments);
 
-			mBlendProgram.use();
+			mBlendProgram->use();
 
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
 
-			mScreenQuad.draw();
+			mScreenQuad->draw();
 
 			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 			glDisable(GL_BLEND);
@@ -331,14 +370,8 @@ namespace dyno
 	}
 
 
-	void GLRenderEngine::resize(int w, int h)
+	void GLRenderEngine::resizeFramebuffer(int w, int h)
 	{
-		// set the viewport
-		//rparams.viewport.x = 0;
-		//rparams.viewport.y = 0;
-		//rparams.viewport.w = w;
-		//rparams.viewport.h = h;
-
 		// resize internal framebuffer
 		mColorTex.resize(w, h);
 		mDepthTex.resize(w, h);
@@ -350,7 +383,7 @@ namespace dyno
 		gl::glCheckError();
 	}
 
-	std::string GLRenderEngine::name()
+	std::string GLRenderEngine::name() const
 	{
 		return std::string("Native OpenGL");
 	}

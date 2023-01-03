@@ -23,7 +23,6 @@ namespace dyno
 
 	GLPointVisualModule::~GLPointVisualModule()
 	{
-
 	}
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
@@ -45,6 +44,21 @@ namespace dyno
 		gl::glCheckError();
 
 		return true;
+	}
+
+	void GLPointVisualModule::destroyGL()
+	{
+		if (isGLInitialized)
+		{
+			mShaderProgram->release();
+			delete mShaderProgram;
+
+			mPosition.release();
+			mColor.release();
+			mVertexArray.release();
+
+			isGLInitialized = false;
+		}
 	}
 
 	void GLPointVisualModule::updateGL()
@@ -77,15 +91,15 @@ namespace dyno
 		if (mNumPoints == 0)
 			return;
 
-		mShaderProgram.use();
-		mShaderProgram.setFloat("uPointSize", this->varPointSize()->getData());
+		mShaderProgram->use();
+		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getData());
 
 		unsigned int subroutine;
 		if (pass == GLRenderPass::COLOR)
 		{
-			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
 
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

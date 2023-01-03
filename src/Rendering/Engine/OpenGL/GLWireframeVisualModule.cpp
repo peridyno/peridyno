@@ -15,6 +15,10 @@ namespace dyno
 		this->varRadius()->setRange(0.001, 0.01);
 	}
 
+	GLWireframeVisualModule::~GLWireframeVisualModule()
+	{
+	}
+
 
 	std::string GLWireframeVisualModule::caption()
 	{
@@ -37,6 +41,21 @@ namespace dyno
 		return true;
 	}
 
+	void GLWireframeVisualModule::destroyGL()
+	{
+		if (isGLInitialized)
+		{
+			mShaderProgram->release();
+			delete mShaderProgram;
+
+			mVAO.release();
+			mPoints.release();
+			mEdges.release();
+
+			isGLInitialized = false;
+		}
+	}
+
 
 	void GLWireframeVisualModule::updateGL()
 	{
@@ -56,7 +75,7 @@ namespace dyno
 		if (mNumEdges == 0)
 			return;
 
-		mShaderProgram.use();
+		mShaderProgram->use();
 
 		unsigned int subroutine = (unsigned int)pass;
 
@@ -64,10 +83,10 @@ namespace dyno
 
 		if (pass == GLRenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
+			mShaderProgram->setVec3("uBaseColor", this->varBaseColor()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
 		}
 		else if (pass == GLRenderPass::SHADOW)
 		{
@@ -90,13 +109,13 @@ namespace dyno
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glLineWidth(this->varLineWidth()->getData());
 
-			mShaderProgram.setInt("uEdgeMode", 0);
+			mShaderProgram->setInt("uEdgeMode", 0);
 		}
 		else
 		{
 			// draw as cylinders
-			mShaderProgram.setInt("uEdgeMode", 1);
-			mShaderProgram.setFloat("uRadius", this->varRadius()->getData());
+			mShaderProgram->setInt("uEdgeMode", 1);
+			mShaderProgram->setFloat("uRadius", this->varRadius()->getData());
 		}
 
 		mVAO.bind();		

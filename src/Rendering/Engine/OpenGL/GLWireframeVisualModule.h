@@ -36,6 +36,8 @@ namespace dyno
 
 	public:
 		GLWireframeVisualModule();
+		~GLWireframeVisualModule();
+
 		std::string caption() override;
 
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
@@ -48,10 +50,11 @@ namespace dyno
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
+		virtual void destroyGL() override;
 				
 	private:
 
-		gl::Program		mShaderProgram;
+		gl::Program*	mShaderProgram;
 
 		gl::VertexArray	mVAO;
 		gl::CudaBuffer	mPoints;

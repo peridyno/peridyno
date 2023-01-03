@@ -11,7 +11,10 @@ namespace gl
 
 	void Framebuffer::release()
 	{
-		glDeleteFramebuffers(1, &id);
+		glDeleteFramebuffers(1, &id);		
+		
+		// reset object id
+		id = GL_INVALID_INDEX;
 	}
 
 	int Framebuffer::checkStatus()

@@ -46,6 +46,10 @@ namespace dyno
 	{
 		timer.stop();
 		//delete mRenderEngine;
+		
+		makeCurrent();
+		mApp->getRenderEngine()->terminate();
+		doneCurrent();
 	}
 
 	void POpenGLWidget::initializeGL()
@@ -62,7 +66,7 @@ namespace dyno
 		if (mApp->getRenderEngine() == 0) {
 			auto engine = std::make_shared<GLRenderEngine>();
 			mApp->setRenderEngine(engine);
-			engine->initialize(256, 256);
+			engine->initialize();
 		}
 
 		// Get Context scale
@@ -91,8 +95,6 @@ namespace dyno
 
 		rparams.proj = camera->getProjMat();
 		rparams.view = camera->getViewMat();
-		rparams.viewport.w = this->width();
-		rparams.viewport.h = this->height();
 
 
 		// Jian SHI: hack for unit scaling...
@@ -123,12 +125,7 @@ namespace dyno
 
 	void POpenGLWidget::resizeGL(int w, int h)
 	{
-		auto engine = mApp->getRenderEngine();
-		engine->resize(w, h);
-
-		auto camera = mApp->getCamera();
-		camera->setWidth(w);
-		camera->setHeight(h);
+		mApp->setWindowSize(w, h);
 	}
 
 	PButtonType mappingMouseButton(QMouseEvent* event)

@@ -7,8 +7,9 @@
 namespace gl 
 {
 
-	Texture::Texture()
+	Texture2D::Texture2D()
 	{
+		this->target = GL_TEXTURE_2D;
 		// default value...
 		this->format = GL_RGBA;
 		this->internalFormat = GL_RGBA32F;
@@ -19,7 +20,7 @@ namespace gl
 	}
 
 
-	void Texture::create()
+	void Texture2D::create()
 	{
 		if (target == -1) {
 			std::cerr << "Failed to create texture, wrong target id: " << target << std::endl;
@@ -34,39 +35,36 @@ namespace gl
 		glCheckError();
 	}
 
-	void Texture::release()
+	void Texture2D::release()
 	{
 		glDeleteTextures(1, &id);
+		// reset object id
+		id = GL_INVALID_INDEX;
 	}
 
-	void Texture::bind()
+	void Texture2D::bind()
 	{
 		glBindTexture(target, id);
 	}
 
-	void Texture::bind(int slot)
+	void Texture2D::bind(int slot)
 	{
 		glActiveTexture(slot);
 		glBindTexture(target, id);
 	}
 
-	void Texture::unbind()
+	void Texture2D::unbind()
 	{
 		glBindTexture(target, 0);
 		glCheckError();
 	}
 
-	void Texture::dump(void* pixels)
+	void Texture2D::dump(void* pixels)
 	{
 		glBindTexture(target, id);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTexImage(target, 0, internalFormat, type, pixels);
 		glCheckError();
-	}
-
-	Texture2D::Texture2D()
-	{
-		this->target = GL_TEXTURE_2D;
 	}
 
 	void Texture2D::resize(int w, int h)
@@ -98,18 +96,5 @@ namespace gl
 		glCheckError();
 	}
 
-
-	Texture2DArray::Texture2DArray()
-	{
-		this->target = GL_TEXTURE_2D_ARRAY;
-	}
-
-
-	void Texture2DArray::resize(int w, int h, int layers)
-	{
-		glBindTexture(target, id);
-		glTexImage3D(target, 0, internalFormat, w, h, layers, 0, format, type, 0);
-		glCheckError();
-	}
 }
 

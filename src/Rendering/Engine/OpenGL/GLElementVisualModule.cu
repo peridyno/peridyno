@@ -89,6 +89,10 @@ namespace dyno
 		return true;
 	}
 
+	void GLElementVisualModule::destroyGL()
+	{
+	}
+
 	void GLElementVisualModule::updateStarted()
 	{
 		std::cout << "Update for GLElementVisualModule started!" << std::endl;
@@ -353,17 +357,21 @@ namespace dyno
 
 	}
 
+	GLElementVisualModule::~GLElementVisualModule()
+	{
+	}
+
 	void GLElementVisualModule::paintGL(GLRenderPass pass)
 	{
-		mShaderProgram.use();
+		mShaderProgram->use();
 
 		unsigned int subroutine;
 		if (pass == GLRenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());	
+			mShaderProgram->setVec3("uBaseColor", this->varBaseColor()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());	
 
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

@@ -11,18 +11,18 @@ namespace gl
 	void Mesh::create()
 	{
 		VertexArray::create();
-		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
-		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-		bindIndexBuffer(&mIndexBuffer);
-		bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
+		ibo.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+		vbo.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		bindIndexBuffer(&ibo);
+		bindVertexBuffer(&vbo, 0, 3, GL_FLOAT, 0, 0, 0);
 	}
 
 	void Mesh::release()
 	{
 		unbind();
 		// release buffers
-		mVertexBuffer.release();
-		mIndexBuffer.release();
+		vbo.release();
+		ibo.release();
 
 		// release VAO
 		VertexArray::release();
@@ -34,13 +34,13 @@ namespace gl
 		this->bind();
 
 		if (instance > 0)
-			glDrawElementsInstanced(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0, instance);
+			glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0, instance);
 		else
-			glDrawElements(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
 	}
 
 	// helper functions
-	Mesh Mesh::Sphere(float radius, int sectorCount, int stackCount)
+	Mesh* Mesh::Sphere(float radius, int sectorCount, int stackCount)
 	{	// create sphere
 		// http://www.songho.ca/opengl/gl_sphere.html
 
@@ -121,15 +121,15 @@ namespace gl
 			}
 		}
 
-		Mesh vao;
-		vao.create();
-		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
-		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
-		vao.mDrawCount = indices.size();
-		return vao;
+		Mesh* mesh = new Mesh;
+		mesh->create();
+		mesh->vbo.load(vertices.data(), vertices.size() * sizeof(float));
+		mesh->ibo.load(indices.data(), indices.size() * sizeof(unsigned int));
+		mesh->count = indices.size();
+		return mesh;
 	}
 
-	Mesh Mesh::ScreenQuad()
+	Mesh* Mesh::ScreenQuad()
 	{
 		std::vector<float> vertices = {
 			-1, -1, 0,
@@ -143,15 +143,15 @@ namespace gl
 			2, 3, 1
 		};
 
-		Mesh vao;
-		vao.create();
-		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
-		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
-		vao.mDrawCount = indices.size();
-		return vao;
+		Mesh* mesh = new Mesh;
+		mesh->create();
+		mesh->vbo.load(vertices.data(), vertices.size() * sizeof(float));
+		mesh->ibo.load(indices.data(), indices.size() * sizeof(unsigned int));
+		mesh->count = indices.size();
+		return mesh;
 	}
 
-	Mesh Mesh::Plane(float scale)
+	Mesh* Mesh::Plane(float scale)
 	{
 		std::vector<float> vertices = {
 			-scale, 0, -scale,
@@ -165,11 +165,11 @@ namespace gl
 			2, 1, 3
 		};
 
-		Mesh vao;
-		vao.create();
-		vao.mVertexBuffer.load(vertices.data(), vertices.size() * sizeof(float));
-		vao.mIndexBuffer.load(indices.data(), indices.size() * sizeof(unsigned int));
-		vao.mDrawCount = indices.size();
-		return vao;
+		Mesh* mesh = new Mesh;
+		mesh->create();
+		mesh->vbo.load(vertices.data(), vertices.size() * sizeof(float));
+		mesh->ibo.load(indices.data(), indices.size() * sizeof(unsigned int));
+		mesh->count = indices.size();
+		return mesh;
 	}
 }

@@ -22,6 +22,7 @@ namespace gl
 {
 	class CudaBuffer : public gl::Buffer
 	{
+		GL_OBJECT(CudaBuffer)
 	public:
 		virtual void release() override;
 

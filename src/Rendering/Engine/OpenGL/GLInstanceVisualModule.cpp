@@ -13,6 +13,10 @@ namespace dyno {
 		this->inInstanceTransform()->tagOptional(false);
 	}
 
+	GLInstanceVisualModule::~GLInstanceVisualModule()
+	{
+	}
+
 	std::string GLInstanceVisualModule::caption()
 	{
 		return "Instance Visual Module";

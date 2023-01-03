@@ -12,32 +12,35 @@ namespace dyno
 		, EndpointSearchIterations(12)
 		, UseHighQualityEndpoints(true)
 	{
+		mScreenQuad = gl::Mesh::ScreenQuad();
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "fxaa.frag");
 	}
 
 	FXAA::~FXAA()
 	{
-	}
-
-	void FXAA::initialize()
-	{
-		mScreenQuad = gl::Mesh::ScreenQuad();
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "fxaa.frag");
-
+		if (mScreenQuad) {
+			mScreenQuad->release();
+			delete mScreenQuad;
+		}
+		if (mShaderProgram) {
+			mShaderProgram->release();
+			delete mShaderProgram;
+		}
 	}
 
 	void FXAA::apply(int width, int height)
 	{
-		mShaderProgram.use();
+		mShaderProgram->use();
 
-		mShaderProgram.setInt("Input", 1); // GL_TEXTURE1
-		mShaderProgram.setVec2("InvTexSize", { 1.f / width, 1.f / height });
+		mShaderProgram->setInt("Input", 1); // GL_TEXTURE1
+		mShaderProgram->setVec2("InvTexSize", { 1.f / width, 1.f / height });
 
-		mShaderProgram.setInt("EndpointSearchIterations", EndpointSearchIterations);
-		mShaderProgram.setFloat("RelativeContrastThreshold", RelativeContrastThreshold);
-		mShaderProgram.setFloat("HardContrastThreshold", HardContrastThreshold);
-		mShaderProgram.setFloat("SubpixelBlendLimit", SubpixelBlendLimit);
-		mShaderProgram.setFloat("SubpixelContrastThreshold", SubpixelContrastThreshold);
+		mShaderProgram->setInt("EndpointSearchIterations", EndpointSearchIterations);
+		mShaderProgram->setFloat("RelativeContrastThreshold", RelativeContrastThreshold);
+		mShaderProgram->setFloat("HardContrastThreshold", HardContrastThreshold);
+		mShaderProgram->setFloat("SubpixelBlendLimit", SubpixelBlendLimit);
+		mShaderProgram->setFloat("SubpixelContrastThreshold", SubpixelContrastThreshold);
 		
-		mScreenQuad.draw();
+		mScreenQuad->draw();
 	}
 }

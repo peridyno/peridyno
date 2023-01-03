@@ -13,22 +13,32 @@ namespace dyno
 		this->varAlpha()->setRange(0, 1);
 	}
 
+	GLVisualModule::~GLVisualModule()
+	{
+		if (isGLInitialized) {
+			printf("Warning: %s not released!\n", getName().c_str());
+		}
+	}
+
 	void GLVisualModule::updateGraphicsContext()
 	{
-		if (!this->isGLInitialized)
-		{
-			if (!gladLoadGL()) {
-				printf("Failed to load OpenGL context!");
-				exit(-1);
-			}
+		//printf("UpdateGraphicsContext\n");
+		//if (!this->isGLInitialized)
+		//{
+		//	if (!gladLoadGL()) {
+		//		printf("Failed to load OpenGL context!\n");
+		//		exit(-1);
+		//	}
 
-			isGLInitialized = initializeGL();
+		//	isGLInitialized = initializeGL();
 
-			if (!this->isGLInitialized)
-				return;
-		}
+		//	if (!this->isGLInitialized)
+		//		return;
+		//}
 
-		this->updateGL();
+		//this->updateGL();
+
+		this->changed = clock::now();
 	}
 
 	void GLVisualModule::setColor(const Vec3f& color)
@@ -60,11 +70,24 @@ namespace dyno
 
 	void GLVisualModule::draw(GLRenderPass pass)
 	{
-		if (!this->validateInputs()) {
+		if (!this->validateInputs() || !this->isVisible()) {
 			return;
 		}
 
-		this->paintGL(pass);
+		if (!this->isGLInitialized) {
+			this->isGLInitialized = this->initializeGL();
+		}
+
+		if (this->isGLInitialized) {
+			// check update
+			if (changed > updated) {
+				this->updateGL();
+				updated = clock::now();
+			}
+
+			this->paintGL(pass);
+		}
+
 	}
 
 }

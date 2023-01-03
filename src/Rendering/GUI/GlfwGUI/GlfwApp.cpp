@@ -176,7 +176,7 @@ namespace dyno
 		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 
 		// initialize rendering engine
-		mRenderEngine->initialize(width, height);
+		mRenderEngine->initialize();
 
 		// Jian: initialize ImWindow
 		mImWindow.initialize(xscale);
@@ -304,6 +304,8 @@ namespace dyno
 
 			glfwSwapBuffers(mWindow);
 		}
+
+		mRenderEngine->terminate();
 	}
 
 	const std::string& GlfwApp::name() const

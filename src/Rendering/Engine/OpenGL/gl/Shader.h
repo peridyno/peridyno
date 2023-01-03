@@ -26,8 +26,8 @@ namespace gl {
 	// OpenGL shader
 	class Shader : public Object
 	{
+		GL_OBJECT(Shader)
 	public:
-		Shader() {}
 		bool createFromFile(unsigned int type, const std::string& path);
 		bool createFromSource(unsigned int type, const std::string& src);
 		void release();
@@ -39,6 +39,7 @@ namespace gl {
 	// OpenGL shader program
 	class Program : public Object
 	{
+		GL_OBJECT(Program)
 	public:
 		void create();
 		void release();
@@ -61,7 +62,7 @@ namespace gl {
 	class ShaderFactory {
 	public:
 		static bool initialize();
-		static Program createShaderProgram(const char* vs, const char* fs, const char* gs = 0);
+		static Program* createShaderProgram(const char* vs, const char* fs, const char* gs = 0);
 	};
 
 }

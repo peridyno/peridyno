@@ -8,6 +8,7 @@ namespace gl
 	void Buffer::create()
 	{
 		glGenBuffers(1, &id);
+		glCheckError();
 	}
 
 	void Buffer::create(int target, int usage)
@@ -22,6 +23,9 @@ namespace gl
 	{
 		glDeleteBuffers(1, &id);
 		glCheckError();
+
+		// reset object id
+		id = GL_INVALID_INDEX;
 	}
 
 	void Buffer::bind()

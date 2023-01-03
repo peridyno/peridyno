@@ -13,24 +13,13 @@
 namespace dyno 
 {
 
-	ShadowMap::ShadowMap(int w, int h)
-	{
-		width = w;
-		height = h;
-	}
-
-	ShadowMap::~ShadowMap()
-	{
-
-	}
-
-	void ShadowMap::initialize()
+	ShadowMap::ShadowMap(int w, int h): width(w), height(h)
 	{
 		const glm::vec4 border = glm::vec4(1);
 
 		mShadowTex.format = GL_RG;
 		mShadowTex.internalFormat = GL_RG32F;
-		mShadowTex.maxFilter = GL_LINEAR; 
+		mShadowTex.maxFilter = GL_LINEAR;
 		mShadowTex.minFilter = GL_LINEAR;
 		mShadowTex.create();
 
@@ -67,13 +56,31 @@ namespace dyno
 		mFramebuffer.unbind();
 
 		// uniform buffers
-		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW); 
+		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		mShadowMatrixUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
 		// for blur depth textures
 		mQuad = gl::Mesh::ScreenQuad();
 		mBlurProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blur.frag");
 	}
+
+	ShadowMap::~ShadowMap()
+	{
+		mFramebuffer.release();
+		mShadowTex.release();
+		mShadowDepth.release();
+		mShadowBlur.release();
+
+		mTransformUBO.release();
+		mShadowMatrixUBO.release();
+
+		mQuad->release();
+		delete mQuad;
+
+		mBlurProgram->release();
+		delete mBlurProgram;
+	}
+
 
 	// extract frustum corners from camera projection matrix
 	std::array<glm::vec4, 8> getFrustumCorners(const glm::mat4& proj)
@@ -238,18 +245,18 @@ namespace dyno
 			const int blurIters = 1;
 
 			glDisable(GL_DEPTH_TEST);
-			mBlurProgram.use();
+			mBlurProgram->use();
 			for (int i = 0; i < blurIters; i++)
 			{
-				mBlurProgram.setVec2("uScale", { 1.f / width, 0.f / height });
+				mBlurProgram->setVec2("uScale", { 1.f / width, 0.f / height });
 				mShadowTex.bind(GL_TEXTURE5);
 				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
-				mQuad.draw();
+				mQuad->draw();
 
-				mBlurProgram.setVec2("uScale", { 0.f / width, 1.f / height });
+				mBlurProgram->setVec2("uScale", { 0.f / width, 1.f / height });
 				mShadowBlur.bind(GL_TEXTURE5);
 				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
-				mQuad.draw();
+				mQuad->draw();
 			}
 			glEnable(GL_DEPTH_TEST);
 		}
