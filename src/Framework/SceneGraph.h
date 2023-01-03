@@ -245,9 +245,14 @@ namespace dyno
 		bool mModuleTiming = false;
 
 		/**
-		 * A  lock to avoid write conflicts between simulation and rendering
+		 * A  lock to guarantee consistency across threads
 		 */
 		std::mutex mSync;
+
+	public:
+		void lock() { mSync.lock(); }
+		void unlock() { mSync.unlock(); }
+
 	};
 
 }

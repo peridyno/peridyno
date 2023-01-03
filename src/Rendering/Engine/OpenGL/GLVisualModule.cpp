@@ -70,24 +70,9 @@ namespace dyno
 
 	void GLVisualModule::draw(GLRenderPass pass)
 	{
-		if (!this->validateInputs() || !this->isVisible()) {
-			return;
-		}
-
-		if (!this->isGLInitialized) {
-			this->isGLInitialized = this->initializeGL();
-		}
-
-		if (this->isGLInitialized) {
-			// check update
-			if (changed > updated) {
-				this->updateGL();
-				updated = clock::now();
-			}
-
+		if (this->validateInputs() && this->isVisible() && this->isGLInitialized) {
 			this->paintGL(pass);
 		}
-
 	}
 
 }

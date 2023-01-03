@@ -247,13 +247,9 @@ namespace dyno
 			}
 		};
 
-		if (mSync.try_lock())
-		{
-			this->traverseForward<UpdateGrpahicsContextAct>();
-
-			mSync.unlock();
-		}
-		
+		mSync.lock();
+		this->traverseForward<UpdateGrpahicsContextAct>();
+		mSync.unlock();		
 	}
 
 	void SceneGraph::run()

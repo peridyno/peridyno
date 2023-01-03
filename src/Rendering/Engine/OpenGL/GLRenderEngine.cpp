@@ -103,6 +103,7 @@ namespace dyno
 		delete mRenderHelper;
 		delete mShadowMap;
 		delete mFXAAFilter;
+
 	}
 
 	void GLRenderEngine::setupTransparencyPass()
@@ -211,6 +212,32 @@ namespace dyno
 
 		mRenderModules = action.modules;
 		mRenderNodes   = action.nodes;
+
+		// initialize modules
+		for (auto m : mRenderModules) {
+			if (!m->isGLInitialized)
+				m->isGLInitialized = m->initializeGL();
+
+			if (!m->isGLInitialized)
+				printf("Warning: failed to initialize %s\n", m->getName().c_str());
+		}
+
+		// update if necessary, note that we need to lock scenegraph for data consistency
+		{
+			scene->lock();
+			for (auto m : mRenderModules) {
+				if (m->isGLInitialized)
+				{
+					// check update
+					if (m->changed > m->updated) {
+						m->updateGL();
+						m->updated = GLVisualModule::clock::now();
+					}
+				}
+			}
+
+			scene->unlock();
+		}
 
 	}
 
