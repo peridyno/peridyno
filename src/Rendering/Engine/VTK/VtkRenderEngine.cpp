@@ -178,7 +178,7 @@ dyno::VtkRenderEngine::VtkRenderEngine()
 	}
 }
 
-void VtkRenderEngine::initialize(int width, int height)
+void VtkRenderEngine::initialize()
 {
 // 	mCamera = std::make_shared<OrbitCamera>();
 // 
@@ -192,7 +192,12 @@ void VtkRenderEngine::initialize(int width, int height)
 // 	mCamera->setClipFar(10.0f);
 }
 
-void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene, const RenderParams& rparams)
+void VtkRenderEngine::terminate()
+{
+
+}
+
+void VtkRenderEngine::draw(dyno::SceneGraph * scene, const RenderParams& rparams)
 {
 	mVtkWindow->GetState()->ResetFramebufferBindings();
 	mVtkWindow->GetState()->ResetGLViewportState();
@@ -269,16 +274,7 @@ void dyno::VtkRenderEngine::draw(dyno::SceneGraph * scene, const RenderParams& r
 
 }
 
-void dyno::VtkRenderEngine::resize(int w, int h)
-{
-	// set the viewport
-// 	this->renderParams()->viewport.x = 0;
-// 	this->renderParams()->viewport.y = 0;
-// 	this->renderParams()->viewport.w = w;
-// 	this->renderParams()->viewport.h = h;
-}
-
-std::vector<dyno::SelectionItem> dyno::VtkRenderEngine::select(int x, int y, int w, int h)
+std::vector<dyno::SelectionItem> VtkRenderEngine::select(int x, int y, int w, int h)
 {
 	//TODO:...
 	std::vector<SelectionItem> items;
@@ -286,7 +282,7 @@ std::vector<dyno::SelectionItem> dyno::VtkRenderEngine::select(int x, int y, int
 	return items;
 }
 
-std::string VtkRenderEngine::name()
+std::string VtkRenderEngine::name() const
 {
 	return std::string("VTK");
 }

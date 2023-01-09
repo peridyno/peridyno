@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 #set(LIB_NAMES GlutGUI QtGUI)
 
-include_directories(
-	${CMAKE_SOURCE_DIR}/Source
-	${CMAKE_CURRENT_SOURCE_DIR}
-)                                                              
-
 add_subdirectory(ImWidgets)
 add_subdirectory(GlfwGUI)
 
