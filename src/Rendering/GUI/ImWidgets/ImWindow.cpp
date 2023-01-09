@@ -9,13 +9,13 @@
 #include "imGuIZMO.quat/imGuIZMOquat.h"
 //dyno
 #include "Action.h"
-#include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 
 //ImWidgets
 #include "ImWidget.h"
 
-#include <Rendering.h>
-#include <AppBase.h>
+#include <RenderEngine.h>
+#include <RenderWindow.h>
 
 #include "OrbitCamera.h"
 #include "TrackballCamera.h"
@@ -55,16 +55,16 @@ void dyno::ImWindow::initialize(float scale)
 	ImGui::initColorVal();
 }
 
-void ShowMenuFile(AppBase* app, SceneGraph* scene, bool* mDisenableCamera)
+void ShowMenuFile(RenderWindow* app, SceneGraph* scene, bool* mDisenableCamera)
 {
 
 }
 
 
-void dyno::ImWindow::draw(AppBase* app)
+void ImWindow::draw(RenderWindow* app)
 {
 	auto engine = app->getRenderEngine();
-	auto scene  = app->getSceneGraph();
+	auto scene  = SceneGraphFactory::instance()->active();
 	auto& rparams = app->getRenderParams();
 	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.

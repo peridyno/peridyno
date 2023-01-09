@@ -19,7 +19,7 @@
 #include <memory>
 #include <vector>
 
-#include <Rendering.h>
+#include <RenderEngine.h>
 
 #include "gl/Buffer.h"
 #include "gl/Texture.h"

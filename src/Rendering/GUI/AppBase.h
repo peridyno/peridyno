@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "SceneGraphFactory.h"
-#include "Rendering.h"
+#include "RenderEngine.h"
 
 namespace dyno
 {
@@ -17,37 +17,7 @@ namespace dyno
 		virtual void createWindow(int width, int height, bool usePlugin = false) {};
 		virtual void mainLoop() = 0;
 
-		virtual std::shared_ptr<RenderEngine> getRenderEngine() { return mRenderEngine; }
-		virtual void setRenderEngine(std::shared_ptr<RenderEngine> engine) { mRenderEngine = engine; }
-
-		virtual std::shared_ptr<Camera> getCamera() { return mCamera; }
-		virtual void setCamera(std::shared_ptr<Camera> camera) { mCamera = camera; }
-
 		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return SceneGraphFactory::instance()->active(); }
 		virtual void setSceneGraph(std::shared_ptr<SceneGraph> scene) { SceneGraphFactory::instance()->pushScene(scene); }
-
-		RenderParams& getRenderParams() { return mRenderParams; }
-		void		  setRenderParams(const RenderParams& rparams) { mRenderParams = rparams; }
-
-		virtual void setWindowSize(int w, int h) 
-		{
-			// TODO: handle viewport size by case
-			mRenderParams.viewport.x = 0;
-			mRenderParams.viewport.y = 0;
-			mRenderParams.viewport.w = w;
-			mRenderParams.viewport.h = h;
-
-			mRenderParams.width = w;
-			mRenderParams.height = h;
-
-			mCamera->setWidth(w);
-			mCamera->setHeight(h);			
-		}
-
-	protected:
-		std::shared_ptr<RenderEngine>	mRenderEngine;
-		RenderParams					mRenderParams;
-
-		std::shared_ptr<Camera>			mCamera;
 	};
 }

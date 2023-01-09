@@ -23,7 +23,7 @@
 #include "gl/Mesh.h"
 
 #include <vector>
-#include <Rendering.h>
+#include <RenderEngine.h>
 
 namespace dyno
 {

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Rendering.h>
+#include <RenderEngine.h>
 
 #include <vtkExternalOpenGLRenderer.h>
 #include <vtkExternalOpenGLRenderWindow.h>

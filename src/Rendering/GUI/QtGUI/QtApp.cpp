@@ -18,12 +18,6 @@ namespace dyno {
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
-
-        mCamera = std::make_shared<OrbitCamera>();
-        mCamera->setWidth(64);
-        mCamera->setHeight(64);
-        mCamera->registerPoint(0, 0);
-        mCamera->rotateToPoint(-32, 12);
     }
 
     QtApp::~QtApp()

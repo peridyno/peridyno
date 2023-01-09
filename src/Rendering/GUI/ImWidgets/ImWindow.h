@@ -7,14 +7,14 @@
 
 namespace dyno
 {
-	class AppBase;
+	class RenderWindow;
 	class SceneGraph;
 
 	class ImWindow
 	{
 	public:
 		void initialize(float scale);
-		void draw(AppBase* app);
+		void draw(RenderWindow* app);
 
 		void mousePressEvent(const PMouseEvent& event);
 		void mouseReleaseEvent(const PMouseEvent& event);
