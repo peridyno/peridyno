@@ -122,10 +122,10 @@ std::shared_ptr<SceneGraph> sceneTetBox()
 
 int main()
 {
-	GlfwApp window;
-	window.setSceneGraph(sceneTetBox());
-	window.createWindow(1280, 768);
-	window.mainLoop();
+	GlfwApp app;
+	app.setSceneGraph(sceneTetBox());
+	app.initialize(1280, 768);
+	app.mainLoop();
 
 	return 0;
 }

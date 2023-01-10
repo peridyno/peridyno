@@ -50,11 +50,11 @@ std::shared_ptr<SceneGraph> createClipper()
 
 int main()
 {
-	QtApp window;
+	QtApp app;
 
-	window.setSceneGraph(createClipper());
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	app.setSceneGraph(createClipper());
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

@@ -35,7 +35,7 @@ namespace dyno
 			mCamera->rotateToPoint(-32, 12);
 		}
 
-		virtual void createWindow(int width, int height, bool usePlugin = false) {};
+		virtual void initialize(int width, int height) {};
 		virtual void mainLoop() = 0;
 
 		virtual std::shared_ptr<RenderEngine> getRenderEngine() { return mRenderEngine; }

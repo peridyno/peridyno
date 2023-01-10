@@ -66,10 +66,10 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp window;
-	window.setSceneGraph(createScene());
-	window.createWindow(1280, 768);
-	window.mainLoop();
+	GlfwApp app;
+	app.setSceneGraph(createScene());
+	app.initialize(1280, 768);
+	app.mainLoop();
 
 	return 0;
 }

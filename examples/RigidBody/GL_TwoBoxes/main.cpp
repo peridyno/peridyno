@@ -81,10 +81,10 @@ int main()
 	//contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	//rigid->graphicsPipeline()->pushModule(wireRender);
 
-	GlfwApp window;
-	window.setSceneGraph(scn);
-	window.createWindow(1280, 768);
-	window.mainLoop();
+	GlfwApp app;
+	app.setSceneGraph(scn);
+	app.initialize(1280, 768);
+	app.mainLoop();
 
 	return 0;
 }

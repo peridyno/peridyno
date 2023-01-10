@@ -72,7 +72,7 @@ namespace dyno
 		glfwTerminate();
 	}
 
-	void GlfwRenderWindow::createWindow(int width, int height, bool usePlugin)
+	void GlfwRenderWindow::initialize(int width, int height)
 	{
 		mWindowTitle = std::string("PeriDyno ") + std::to_string(PERIDYNO_VERSION_MAJOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_MINOR) + std::string(".") + std::to_string(PERIDYNO_VERSION_PATCH);
 

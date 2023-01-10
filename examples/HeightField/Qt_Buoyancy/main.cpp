@@ -120,7 +120,7 @@ std::shared_ptr<SceneGraph> createScene()
 int main()
 {
 	QtApp app;
-	app.resize(1024, 768);
+	app.initialize(1024, 768);
 
 	app.setSceneGraph(createScene());
 

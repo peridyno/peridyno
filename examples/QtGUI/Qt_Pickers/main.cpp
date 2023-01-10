@@ -60,10 +60,10 @@ int main()
 	pickerNode->varInteractionRadius()->setValue(0.02f);
 	scn->setUpperBound({ 4, 4, 4 });
 
-	QtApp window;
-	window.setSceneGraph(scn);
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	QtApp app;
+	app.setSceneGraph(scn);
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

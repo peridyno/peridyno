@@ -14,7 +14,7 @@ namespace dyno
 		AppBase() {};
 		~AppBase() {};
 
-		virtual void createWindow(int width, int height, bool usePlugin = false) {};
+		virtual void initialize(int width, int height, bool usePlugin = false) {};
 		virtual void mainLoop() = 0;
 
 		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return SceneGraphFactory::instance()->active(); }

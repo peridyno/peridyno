@@ -154,7 +154,7 @@ int main(int, char**)
 	scn->addNode(rigid);
 
 	GlfwApp app;
-	app.resize(1024, 768);
+	app.initialize(1024, 768);
 
 	app.setSceneGraph(scn);
 

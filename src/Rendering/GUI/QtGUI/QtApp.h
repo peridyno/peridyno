@@ -16,9 +16,7 @@ namespace dyno {
         QtApp(int argc = 0, char **argv = NULL);
         ~QtApp();
 
-        void resize(int width, int height, bool usePlugin = true);
-
-        void createWindow(int width, int height, bool usePlugin = true) override;
+        void initialize(int width, int height, bool usePlugin = true) override;
         void mainLoop() override;
 
         void setSceneGraph(std::shared_ptr<SceneGraph> scn);
@@ -26,8 +24,8 @@ namespace dyno {
         RenderWindow* renderWindow();
 
     private:
-        std::shared_ptr<QApplication> m_app;
-        std::shared_ptr<PMainWindow> m_mainWindow;
+        std::shared_ptr<QApplication> mQApp;
+        std::shared_ptr<PMainWindow> mMainWindow;
     };
 
 }

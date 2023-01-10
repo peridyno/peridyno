@@ -24,7 +24,7 @@ namespace dyno {
 		GlfwRenderWindow(int argc = 0, char **argv = NULL);
         ~GlfwRenderWindow();
 
-        void createWindow(int width, int height, bool usePlugin = false) override;
+        void initialize(int width, int height) override;
 
         void mainLoop() override;
 

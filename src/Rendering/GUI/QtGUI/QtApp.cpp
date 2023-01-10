@@ -14,8 +14,8 @@
 namespace dyno {
     QtApp::QtApp(int argc, char **argv)
     {
-        m_mainWindow = nullptr;
-        m_app = std::make_shared<QApplication>(argc, argv);
+        mMainWindow = nullptr;
+        mQApp = std::make_shared<QApplication>(argc, argv);
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
@@ -26,22 +26,7 @@ namespace dyno {
 
     }
 
-	void QtApp::resize(int width, int height, bool usePlugin /*= true*/)
-	{
-		if (usePlugin)
-		{
-#ifdef NDEBUG
-			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Release");
-#else
-			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Debug");
-#endif // DEBUG
-		}
-
-		m_mainWindow = std::make_shared<PMainWindow>(this);
-		m_mainWindow->resize(width, height);
-	}
-
-	void QtApp::createWindow(int width, int height, bool usePlugin)
+	void QtApp::initialize(int width, int height, bool usePlugin)
     {
 		if (usePlugin)
 		{
@@ -52,8 +37,8 @@ namespace dyno {
 #endif // DEBUG
 		}
 
-        m_mainWindow = std::make_shared<PMainWindow>(this);
-        m_mainWindow->resize(width, height);
+        mMainWindow = std::make_shared<PMainWindow>(this);
+        mMainWindow->resize(width, height);
     }
 
     void QtApp::mainLoop()
@@ -63,10 +48,10 @@ namespace dyno {
         file.open(QIODevice::ReadOnly);
 
         QString style = file.readAll();
-        m_app->setStyleSheet(style);
+        mQApp->setStyleSheet(style);
 
-        m_mainWindow->show();
-        m_app->exec();
+        mMainWindow->show();
+        mQApp->exec();
     }
 
 	void QtApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
@@ -77,7 +62,7 @@ namespace dyno {
 
     RenderWindow* QtApp::renderWindow()
 	{
-        return dynamic_cast<RenderWindow*>(m_mainWindow->openglWidget());
+        return dynamic_cast<RenderWindow*>(mMainWindow->openglWidget());
 	}
 
 }

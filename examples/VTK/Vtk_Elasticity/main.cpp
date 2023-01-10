@@ -35,7 +35,7 @@ int main()
 	bunny->graphicsPipeline()->pushModule(ptRender);
 
 	GlfwApp app;
-	app.resize(1024, 768);
+	app.initialize(1024, 768);
 
 	app.setSceneGraph(scn);
 	app.renderWindow()->setRenderEngine(std::make_shared<VtkRenderEngine>());
