@@ -119,11 +119,15 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	QtApp window;
-	window.getCamera()->setDistanceUnit(50);
-	window.setSceneGraph(createScene());
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	QtApp app;
+	app.resize(1024, 768);
+
+	app.setSceneGraph(createScene());
+
+	//Set the distance unit for the camera, the fault unit is meter
+	app.renderWindow()->getCamera()->setUnitScale(50.0);
+
+	app.mainLoop();
 
 	return 0;
 }

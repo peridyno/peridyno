@@ -3,6 +3,7 @@
 #include <QFile>
 #include "QtApp.h"
 #include "PMainWindow.h"
+#include "POpenGLWidget.h"
 #include "Log.h"
 
 #include "SceneGraphFactory.h"
@@ -25,7 +26,22 @@ namespace dyno {
 
     }
 
-    void QtApp::createWindow(int width, int height, bool usePlugin)
+	void QtApp::resize(int width, int height, bool usePlugin /*= true*/)
+	{
+		if (usePlugin)
+		{
+#ifdef NDEBUG
+			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Release");
+#else
+			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Debug");
+#endif // DEBUG
+		}
+
+		m_mainWindow = std::make_shared<PMainWindow>(this);
+		m_mainWindow->resize(width, height);
+	}
+
+	void QtApp::createWindow(int width, int height, bool usePlugin)
     {
 		if (usePlugin)
 		{
@@ -57,6 +73,11 @@ namespace dyno {
 	{
         AppBase::setSceneGraph(scn);
         SceneGraphFactory::instance()->pushScene(scn);
+	}
+
+    RenderWindow* QtApp::renderWindow()
+	{
+        return dynamic_cast<RenderWindow*>(m_mainWindow->openglWidget());
 	}
 
 }

@@ -34,12 +34,13 @@ int main()
 	bunny->statePointSet()->connect(ptRender->inPointSet());
 	bunny->graphicsPipeline()->pushModule(ptRender);
 
-	GlfwApp window;
-	window.setRenderEngine(std::make_shared<VtkRenderEngine>());
-	window.setSceneGraph(scn);
+	GlfwApp app;
+	app.resize(1024, 768);
 
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	app.setSceneGraph(scn);
+	app.renderWindow()->setRenderEngine(std::make_shared<VtkRenderEngine>());
+
+	app.mainLoop();
 
 	return 0;
 }

@@ -158,14 +158,14 @@ void ImWindow::draw(RenderWindow* app)
 						cam->setTargetPos(center);
 
 						float unit = std::floor(std::log(len));
-						cam->setDistanceUnit(std::pow(10.0f, (float)unit));
+						cam->setUnitScale(std::pow(10.0f, (float)unit));
 					}
 
 				}
 
-				float distanceUnit = cam->distanceUnit();
+				float distanceUnit = cam->unitScale();
 				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
-					cam->setDistanceUnit(distanceUnit);
+					cam->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
 			}

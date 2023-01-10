@@ -74,11 +74,13 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	QtApp window;
-	window.setRenderEngine(std::make_shared<VtkRenderEngine>());
-	window.setSceneGraph(createScene());
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	QtApp app;
+	app.resize(1024, 768);
+
+	app.setSceneGraph(createScene());
+	app.renderWindow()->setRenderEngine(std::make_shared<VtkRenderEngine>());
+
+	app.mainLoop();
 
 	return 0;
 }

@@ -14,6 +14,22 @@ namespace dyno
 
 	void GlfwApp::createWindow(int width, int height, bool usePlugin)
 	{
+		std::cout << "createWindow() will be depreciated in the near future, please use resize() instead" << std::endl;
+
+		mRenderWindow = std::make_shared<GlfwRenderWindow>();
+
+		mRenderWindow->createWindow(width, height);
+	}
+
+	void GlfwApp::createWindow(int width, int height, std::shared_ptr<RenderEngine> engine)
+	{
+		mRenderWindow = std::make_shared<GlfwRenderWindow>();
+		mRenderWindow->setRenderEngine(engine);
+		mRenderWindow->createWindow(width, height);
+	}
+
+	void GlfwApp::resize(int width, int height)
+	{
 		mRenderWindow = std::make_shared<GlfwRenderWindow>();
 
 		mRenderWindow->createWindow(width, height);

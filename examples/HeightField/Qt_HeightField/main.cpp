@@ -51,11 +51,13 @@ int main()
 {
 	HeightFieldLibrary::initStaticPlugin();
 
-	QtApp window;
-	window.getCamera()->setDistanceUnit(52);
-	window.setSceneGraph(createScene());
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	QtApp app;
+	app.resize(1024, 768);
+
+	app.setSceneGraph(createScene());
+	app.renderWindow()->getCamera()->setUnitScale(52);
+
+	app.mainLoop();
 
 	return 0;
 }

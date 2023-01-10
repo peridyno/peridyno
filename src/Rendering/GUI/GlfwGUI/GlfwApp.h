@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Platform.h>
+#include <RenderWindow.h>
 #include <ImWindow.h>
 
 #include "AppBase.h"
@@ -19,6 +20,11 @@ namespace dyno {
         ~GlfwApp();
 
         void createWindow(int width, int height, bool usePlugin = false) override;
+        void createWindow(int width, int height, std::shared_ptr<RenderEngine> engine);
+
+        void resize(int width, int height);
+
+        std::shared_ptr<RenderWindow> renderWindow() { return mRenderWindow; }
 
         void mainLoop() override;
 
