@@ -98,8 +98,8 @@ namespace dyno
 		// Jian SHI: hack for unit scaling...
 		float planeScale = rparams.planeScale;
 		float rulerScale = rparams.rulerScale;
-		rparams.planeScale *= this->getCamera()->distanceUnit();
-		rparams.rulerScale *= this->getCamera()->distanceUnit();
+		rparams.planeScale *= this->getCamera()->unitScale();
+		rparams.rulerScale *= this->getCamera()->unitScale();
 
 		engine->draw(scene.get(), rparams);
 
