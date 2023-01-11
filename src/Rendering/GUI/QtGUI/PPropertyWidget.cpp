@@ -106,32 +106,6 @@ namespace dyno
 			mPropertyLayout[i] = new QGridLayout;
 		}
 
-
-		{
-			QGroupBox* title = new QGroupBox;
-			//title->setStyleSheet("border:none");
-			QGridLayout* layout = new QGridLayout;
-			layout->setContentsMargins(0, 0, 0, 0);
-			layout->setSpacing(0);
-
-			title->setLayout(layout);
-
-			QLabel* name = new QLabel();
-			//name->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
-			name->setFixedHeight(25);
-			name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-			name->setText("Name");
-			layout->addWidget(name, 0, 0);
-
-			QLabel* output = new QLabel();
-			//output->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
-			output->setFixedSize(56, 25);
-			output->setText("Output");
-			layout->addWidget(output, 0, 1, Qt::AlignRight);
-
-			mPropertyLayout[1]->addWidget(title);
-		}
-
 		std::vector<FBase*>& fields = module->getAllFields();
 		for each (FBase * var in fields)
 		{
@@ -241,7 +215,7 @@ namespace dyno
 
 			QLabel* output = new QLabel();
 			//output->setStyleSheet("font: bold; background-color: rgb(230, 230, 230);");
-			output->setFixedSize(56, 25);
+			output->setFixedSize(64, 25);
 			output->setText("Output");
 			layout->addWidget(output, 0, 1, Qt::AlignRight);
 
