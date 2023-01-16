@@ -2,7 +2,7 @@
 
 #include "VkTransfer.h"
 #include "Node.h"
-#include "Shape.h"
+#include "Topology/Shape.h"
 
 namespace dyno
 {

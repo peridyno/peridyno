@@ -11,7 +11,7 @@ using namespace dyno;
 
 TEST(Array, CPU)
 {
-	CArray<int> cArr;
+	CArray<uint> cArr;
 
 	cArr.pushBack(1);
 	cArr.pushBack(2);
@@ -19,7 +19,7 @@ TEST(Array, CPU)
 	EXPECT_EQ(cArr.size(), 2);
 	std::cout << cArr;
 
-	DArray<int> gArr;	
+	DArray<uint> gArr;	
 	gArr.assign(cArr);
 
 	EXPECT_EQ(gArr.size(), 2);

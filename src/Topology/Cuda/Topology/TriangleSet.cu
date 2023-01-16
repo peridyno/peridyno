@@ -40,7 +40,7 @@ namespace dyno
 
 	template<typename Triangle>
 	__global__ void TS_CountTriangles(
-		DArray<int> counter,
+		DArray<uint> counter,
 		DArray<Triangle> triangles)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -71,7 +71,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& TriangleSet<TDataType>::getVertex2Triangles()
 	{
-		DArray<int> counter(this->m_coords.size());
+		DArray<uint> counter(this->m_coords.size());
 		counter.reset();
 
 		cuExecute(m_triangles.size(),

@@ -17,7 +17,7 @@ set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
 
 target_link_libraries(${PROJECT_NAME} GlfwGUI GLRenderEngine)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/Tutorials")
 set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
 if(WIN32)

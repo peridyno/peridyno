@@ -5,37 +5,130 @@
 namespace dyno
 {
 	template<class ElementType>
-	void ArrayList<ElementType, DeviceType::GPU>::clear()
+	class ArrayList<ElementType, DeviceType::GPU>
 	{
-		m_index.clear();
-		m_elements.clear();
-		m_lists.clear();
+	public:
+		ArrayList()
+		{
+		};
+
+		/*!
+		*	\brief	Do not release memory here, call clear() explicitly.
+		*/
+		~ArrayList() {};
+
+		/**
+		 * @brief Pre-allocate GPU space for
+		 *
+		 * @param counts
+		 * @return true
+		 * @return false
+		 */
+		bool resize(const DArray<uint>& counts);
+		bool resize(const uint arraySize, const uint eleSize);
+
+
+		bool resize(uint num);
+
+		template<typename ET2>
+		bool resize(const ArrayList<ET2, DeviceType::GPU>& src);
+
+		DYN_FUNC inline uint size() const { return mLists.size(); }
+		DYN_FUNC inline uint elementSize() const { return mElements.size(); }
+
+		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id) {
+			return mLists[id];
+		}
+
+		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id) const {
+			return mLists[id];
+		}
+
+		DYN_FUNC inline bool isCPU() const { return false; }
+		DYN_FUNC inline bool isGPU() const { return true; }
+		DYN_FUNC inline bool isEmpty() const { return mIndex.size() == 0; }
+
+		void clear();
+
+		void assign(const ArrayList<ElementType, DeviceType::GPU>& src);
+		void assign(const ArrayList<ElementType, DeviceType::CPU>& src);
+		void assign(const std::vector<std::vector<ElementType>>& src);
+
+		friend std::ostream& operator<<(std::ostream& out, const ArrayList<ElementType, DeviceType::GPU>& aList)
+		{
+			ArrayList<ElementType, DeviceType::CPU> hList;
+			hList.assign(aList);
+			out << hList;
+
+			return out;
+		}
+
+		const DArray<uint>& index() const { return mIndex; }
+		const DArray<ElementType>& elements() const { return mElements; }
+		const DArray<List<ElementType>>& lists() const { return mLists; }
+
+		/*!
+		*	\brief	To avoid erroneous shallow copy.
+		*/
+		ArrayList<ElementType, DeviceType::GPU>& operator=(const ArrayList<ElementType, DeviceType::GPU>&) = delete;
+
+	private:
+		DArray<uint> mIndex;
+		DArray<ElementType> mElements;
+
+		DArray<List<ElementType>> mLists;
+	};
+
+	template<typename ElementType>
+	using DArrayList = ArrayList<ElementType, DeviceType::GPU>;
+
+	template<class ElementType>
+	void ArrayList<ElementType, DeviceType::CPU>::assign(const ArrayList<ElementType, DeviceType::GPU>& src)
+	{
+		mIndex.assign(src.index());
+		mElements.assign(src.elements());
+
+		mLists.assign(src.lists());
+
+		//redirect the element address
+		for (int i = 0; i < src.size(); i++)
+		{
+			mLists[i].reserve(mElements.begin() + mIndex[i], mLists[i].size());
+		}
 	}
 
 	template<class ElementType>
-	bool ArrayList<ElementType, DeviceType::GPU>::resize(const DArray<int>& counts)
+	void ArrayList<ElementType, DeviceType::GPU>::clear()
+	{
+		mIndex.clear();
+		mElements.clear();
+		mLists.clear();
+	}
+
+	template<class ElementType>
+	bool ArrayList<ElementType, DeviceType::GPU>::resize(const DArray<uint>& counts)
 	{
 		assert(counts.size() > 0);
 
-		if (m_index.size() != counts.size())
+		if (mIndex.size() != counts.size())
 		{
-			m_index.resize(counts.size());
-			m_lists.resize(counts.size());
+			mIndex.resize(counts.size());
+			mLists.resize(counts.size());
 		}
 
-		m_index.assign(counts);
+		mIndex.assign(counts);
 
-		Reduction<int> reduce;
-		int total_num = reduce.accumulate(m_index.begin(), m_index.size());
+		Reduction<uint> reduce;
+		uint total_num = reduce.accumulate(mIndex.begin(), mIndex.size());
 
-		Scan scan;
-		scan.exclusive(m_index);
+		Scan<uint> scan;
+		scan.exclusive(mIndex);
 
 		//printf("total num 2 = %d\n", total_num);
 
-		m_elements.resize(total_num);
+		mElements.resize(total_num);
 		
-		parallel_allocate_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
+		parallel_allocate_for_list<sizeof(ElementType)>(mLists.begin(), mElements.begin(), mElements.size(), mIndex);
 
 		return true;
 	}
@@ -47,26 +140,26 @@ namespace dyno
 		assert(arraySize > 0);
 		assert(eleSize > 0);
 
-		if (m_index.size() != arraySize)
+		if (mIndex.size() != arraySize)
 		{
-			m_index.resize(arraySize);
-			m_lists.resize(arraySize);
+			mIndex.resize(arraySize);
+			mLists.resize(arraySize);
 		}
 
-		CArray<int> hIndex;
+		CArray<uint> hIndex;
 		hIndex.resize(arraySize);
 		int accNum = 0;
 		for (size_t i = 0; i < arraySize; i++)
 		{
-			hIndex[i] = (int)accNum;
+			hIndex[i] = (uint)accNum;
 			accNum += eleSize;
 		}
 
-		m_index.assign(hIndex);
+		mIndex.assign(hIndex);
 
-		m_elements.resize(arraySize*eleSize);
+		mElements.resize(arraySize*eleSize);
 
-		parallel_allocate_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
+		parallel_allocate_for_list<sizeof(ElementType)>(mLists.begin(), mElements.begin(), mElements.size(), mIndex);
 
 		return true;
 	}
@@ -75,16 +168,16 @@ namespace dyno
 	template<typename ET2>
 	bool ArrayList<ElementType, DeviceType::GPU>::resize(const ArrayList<ET2, DeviceType::GPU>& src) {
 		uint arraySize = src.size();
-		if (m_index.size() != arraySize)
+		if (mIndex.size() != arraySize)
 		{
-			m_index.resize(arraySize);
-			m_lists.resize(arraySize);
+			mIndex.resize(arraySize);
+			mLists.resize(arraySize);
 		}
 
-		m_index.assign(src.index());
-		m_elements.resize(src.elementSize());
+		mIndex.assign(src.index());
+		mElements.resize(src.elementSize());
 
-		parallel_allocate_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
+		parallel_allocate_for_list<sizeof(ElementType)>(mLists.begin(), mElements.begin(), mElements.size(), mIndex);
 
 		return true;
 	}
@@ -92,39 +185,39 @@ namespace dyno
 	template<class ElementType>
 	void ArrayList<ElementType, DeviceType::GPU>::assign(const ArrayList<ElementType, DeviceType::GPU>& src)
 	{
-		m_index.assign(src.index());
-		m_elements.assign(src.elements());
+		mIndex.assign(src.index());
+		mElements.assign(src.elements());
 
-		m_lists.assign(src.lists());
+		mLists.assign(src.lists());
 
 		//redirect the element address
-		parallel_init_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
+		parallel_init_for_list<sizeof(ElementType)>(mLists.begin(), mElements.begin(), mElements.size(), mIndex);
 	}
 
 	template<class ElementType>
 	void ArrayList<ElementType, DeviceType::GPU>::assign(const ArrayList<ElementType, DeviceType::CPU>& src)
 	{
-		m_index.assign(src.index());
-		m_elements.assign(src.elements());
+		mIndex.assign(src.index());
+		mElements.assign(src.elements());
 
-		m_lists.assign(src.lists());
+		mLists.assign(src.lists());
 
 		//redirect the element address
-		parallel_init_for_list<sizeof(ElementType)>(m_lists.begin(), m_elements.begin(), m_elements.size(), m_index);
+		parallel_init_for_list<sizeof(ElementType)>(mLists.begin(), mElements.begin(), mElements.size(), mIndex);
 	}
 
 	template<class ElementType>
 	void ArrayList<ElementType, DeviceType::GPU>::assign(const std::vector<std::vector<ElementType>>& src)
 	{
 		size_t indNum = src.size();
-		CArray<int> hIndex(indNum);
+		CArray<uint> hIndex(indNum);
 
 		CArray<ElementType> hElements;
 
 		size_t eleNum = 0;
 		for (int i = 0; i < src.size(); i++)
 		{
-			hIndex[i] = (int)eleNum;
+			hIndex[i] = (uint)eleNum;
 			eleNum += src[i].size();
 
 			for (int j = 0; j < src[i].size(); j++)
@@ -136,9 +229,9 @@ namespace dyno
 		CArray<List<ElementType>> lists;
 		lists.resize(indNum);
 			
-		m_index.assign(hIndex);
-		m_elements.assign(hElements);
-		ElementType* stAdr = m_elements.begin();
+		mIndex.assign(hIndex);
+		mElements.assign(hElements);
+		ElementType* stAdr = mElements.begin();
 
 		eleNum = 0;
 		for (int i = 0; i < src.size(); i++)
@@ -151,7 +244,7 @@ namespace dyno
 			eleNum += src[i].size();
 		}
 
-		m_lists.assign(lists);
+		mLists.assign(lists);
 	}
 
 	template<class ElementType>
@@ -159,8 +252,8 @@ namespace dyno
 	{
 		assert(num > 0);
 
-		m_index.resize(num);
-		m_lists.resize(num);
+		mIndex.resize(num);
+		mLists.resize(num);
 		
 		return true;
 	}
@@ -170,60 +263,9 @@ namespace dyno
 	{
 		assert(num > 0);
 
-		m_index.resize(num);
-		m_lists.resize(num);
+		mIndex.resize(num);
+		mLists.resize(num);
 
 		return true;
-	}
-
-	
-
-	template<class ElementType>
-	void ArrayList<ElementType, DeviceType::CPU>::clear()
-	{
-		for (int i = 0; i < m_lists.size(); i++)
-		{
-			m_lists[i].clear();
-		}
-
-		m_lists.clear();
-		m_index.clear();
-		m_elements.clear();
-	}
-
-	template<class ElementType>
-	uint ArrayList<ElementType, DeviceType::CPU>::elementSize()
-	{
-		return m_elements.size();
-	}
-
-	template<class ElementType>
-	void ArrayList<ElementType, DeviceType::CPU>::assign(const ArrayList<ElementType, DeviceType::CPU>& src)
-	{
-		m_index.assign(src.index());
-		m_elements.assign(src.elements());
-
-		m_lists.assign(src.lists());
-
-		//redirect the element address
-		for (uint i = 0; i < src.size(); i++)
-		{
-			m_lists[i].reserve(m_elements.begin() + m_index[i], m_lists[i].size());
-		}
-	}
-
-	template<class ElementType>
-	void ArrayList<ElementType, DeviceType::CPU>::assign(const ArrayList<ElementType, DeviceType::GPU>& src)
-	{
-		m_index.assign(src.index());
-		m_elements.assign(src.elements());
-
-		m_lists.assign(src.lists());
-
-		//redirect the element address
-		for (int i = 0; i < src.size(); i++)
-		{
-			m_lists[i].reserve(m_elements.begin() + m_index[i], m_lists[i].size());
-		}
 	}
 }

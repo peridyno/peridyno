@@ -9,11 +9,14 @@ namespace dyno
 		TriangleSet();
 		~TriangleSet() override;
 
+	protected:
 		void updateTopology() override;
 
-		VkDeviceArray<uint32_t> mIndex;
+		virtual void updateTriangles();
+
 	public:
-		VkDeviceArray<dyno::TopologyModule::Triangle> mTriangleIndex;
+		DArray<Triangle> mTriangleIndex;
+		DArray<uint32_t> mIndex;
 	};
 }
 

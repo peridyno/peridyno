@@ -52,8 +52,8 @@ namespace dyno
 		DArray<Coord> mV0;
 		DArray<Coord> mV1;
 
-		DArray<int> mCounter;
-		DArray<int> mNewCounter;
+		DArray<uint> mCounter;
+		DArray<uint> mNewCounter;
 
 		DArray<int> mIds;
 		DArray<PKey> mKeys;

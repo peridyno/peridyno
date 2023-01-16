@@ -65,8 +65,8 @@ namespace dyno
 		auto& indices = triSet->mIndex;
 		auto& vertices = triSet->mPoints;
 
-		mVertexBuffer->load(vertices.bufferHandle(), vertices.bufferSize());
-		mIndexBuffer->load(indices.bufferHandle(), indices.bufferSize());
+		mVertexBuffer->load(vertices.buffer(), vertices.bufferSize());
+		mIndexBuffer->load(indices.buffer(), indices.bufferSize());
 
 		mDrawCount = indices.size() * 3;
 

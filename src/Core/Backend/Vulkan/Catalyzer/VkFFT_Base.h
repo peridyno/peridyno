@@ -34,6 +34,13 @@
 #define VKFFT_BACKEND 0
 #include <inttypes.h>
 #if(VKFFT_BACKEND==0)
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#include <android/native_activity.h>
+#include <android/asset_manager.h>
+#include <android_native_app_glue.h>
+#include <sys/system_properties.h>
+#include "VulkanAndroid.h"
+#endif
 #include "vulkan/vulkan.h"
 #include "glslang_c_interface.h"
 #elif(VKFFT_BACKEND==1)
@@ -24418,6 +24425,8 @@ static inline VkFFTResult initializeVkFFT(VkFFTApplication* app, VkFFTConfigurat
 		app->configuration.swapTo3Stage4Step = 0;
 		break;
 	case 0x8086://INTEL
+	case 0x13BE://ARM
+	case 0x5143://Qualcomm
 		app->configuration.coalescedMemory = (app->configuration.halfPrecision) ? 128 : 64;
 		app->configuration.useLUT = 1;
 		app->configuration.warpSize = 32;

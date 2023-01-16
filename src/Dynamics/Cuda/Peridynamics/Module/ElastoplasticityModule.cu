@@ -394,7 +394,7 @@ namespace dyno
 
 	template <typename NPair>
 	__global__ void PM_ReconfigureRestShape(
-		DArray<int> nbSize,
+		DArray<uint> nbSize,
 		DArray<bool> bYield,
 		DArrayList<int> neighborhood,
 		DArrayList<NPair> restShape)
@@ -511,7 +511,7 @@ namespace dyno
 		}
 
 
-		DArray<int> index(this->inPosition()->getDataPtr()->size());
+		DArray<uint> index(this->inPosition()->getDataPtr()->size());
 
 		cuExecute(index.size(),
 			PM_ReconfigureRestShape,

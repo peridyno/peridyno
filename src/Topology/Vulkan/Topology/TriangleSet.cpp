@@ -16,10 +16,18 @@ namespace dyno
 
 	void TriangleSet::updateTopology()
 	{
+		this->updateTriangles();
+
+		EdgeSet::updateTopology();
+	}
+
+	void TriangleSet::updateTriangles()
+	{
+		//TODO: this is temporary, should be removed later
 		std::vector<Triangle> triSet(mTriangleIndex.size());
 		std::vector<uint32_t> triIndex;
 
-		vkTransfer(triSet, mTriangleIndex);
+		vkTransfer(triSet, *mTriangleIndex.handle());
 		for (size_t i = 0; i < triSet.size(); i++)
 		{
 			uint32_t v0 = triSet[i][0];
@@ -33,7 +41,8 @@ namespace dyno
 
 		mIndex.resize(triIndex.size());
 
-		vkTransfer(mIndex, triIndex);
+		//vkTransfer(mIndex, triIndex);
+		mIndex.assign(triIndex);
 
 		triIndex.clear();
 	}

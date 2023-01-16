@@ -9,9 +9,11 @@ namespace dyno
 		TetrahedronSet();
 		~TetrahedronSet() override;
 
+	protected:
 		void updateTopology() override;
+	
 	public:
-		VkDeviceArray<TopologyModule::Tetrahedron> mTetrahedronIndex;
+		DArray<TopologyModule::Tetrahedron> mTetrahedronIndex;
 	};
 }
 

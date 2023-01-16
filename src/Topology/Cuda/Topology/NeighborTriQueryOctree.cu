@@ -73,7 +73,7 @@ namespace dyno
 			if (this->outNeighborIds()->size() != p_num)
 			{
 				this->outNeighborIds()->allocate();
-				DArray<int> nbrNum;
+				DArray<uint> nbrNum;
 				nbrNum.resize(p_num);
 				nbrNum.reset();
 				auto& nbrIds = this->outNeighborIds()->getData();
@@ -90,7 +90,7 @@ namespace dyno
 			
 			//new
 			
-			DArray<int> nbrNum;
+			DArray<uint> nbrNum;
 			nbrNum.resize(p_num);
 			nbrNum.reset();
 			//printf("NBR_COMPUTE outContactList(): %d \n", m_broadPhaseCD->outContactList()->getData().size());
@@ -180,12 +180,12 @@ namespace dyno
 		DArray<Coord> position,
 		DArray<Coord> vertex,
 		DArray<TopologyModule::Triangle> triangles,
-		DArray<int> count,
+		DArray<uint> count,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= position.size()) return;
-		int cnt = 0;
+		uint cnt = 0;
 		
 		List<int>& nbrIds_i = nbr[tId];
 		int nbSize = nbrIds_i.size();  

@@ -21,7 +21,9 @@ namespace dyno
 		std::vector<dyno::TopologyModule::Triangle> triangles;
 
 		//TODO: atomic operations are not supported yet, replace the following implementation with a parallel algorithm later.
-		vkTransfer(tets, mTetrahedronIndex);
+		vkTransfer(tets, *mTetrahedronIndex.handle());
+		//tets.assign(mTetrahedronIndex);
+
 		for (size_t i = 0; i < tets.size(); i++)
 		{
 			uint32_t v0 = tets[i][0];
@@ -54,8 +56,10 @@ namespace dyno
 		mIndex.resize(tris.size());
 		mTriangleIndex.resize(triangles.size());
 
-		vkTransfer(mIndex, tris);
-		vkTransfer(mTriangleIndex, triangles);
+		//vkTransfer(mIndex, tris);
+		mIndex.assign(tris);
+		//vkTransfer(mTriangleIndex, triangles);
+		mTriangleIndex.assign(triangles);
 
 		tets.clear();
 		tris.clear();

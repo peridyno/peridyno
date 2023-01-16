@@ -33,7 +33,7 @@ namespace dyno {
 		Coord mLowerCorner = Coord(-100, 0, -100);
 
 		Reduction<int> m_reduce;
-		Scan m_scan;
+		Scan<int> m_scan;
 	};
 
 	IMPLEMENT_TCLASS(CollistionDetectionBoundingBox, TDataType)

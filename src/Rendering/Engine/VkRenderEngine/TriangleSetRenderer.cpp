@@ -229,7 +229,7 @@ namespace dyno
 			return false;
 
 		this->mIndex.resize(triSet->mIndex.size());
-		vkTransfer(this->mIndex, triSet->mIndex);
+		vkTransfer(this->mIndex, *triSet->mIndex.handle());
 
 		this->mVertex.resize(3 * triSet->mTriangleIndex.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		this->mIndex.resize(3 * triSet->mTriangleIndex.size());
@@ -240,7 +240,7 @@ namespace dyno
 		particleNumber.setValue(triSet->mTriangleIndex.size());
 		dim3 groupSize = vkDispatchSize(triSet->mTriangleIndex.size(), 32);
 		program->begin();
-		program->enqueue(groupSize, &this->mVertex, &this->mIndex, &triSet->mPoints, &triSet->mIndex, &this->particleNumber);
+		program->enqueue(groupSize, &this->mVertex, &this->mIndex, triSet->mPoints.handle(), triSet->mIndex.handle(), &this->particleNumber);
 		program->end();
 
 		program->update();

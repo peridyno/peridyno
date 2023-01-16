@@ -113,7 +113,7 @@ namespace dyno
 
 		if (m_scan == nullptr)
 		{
-			m_scan = new Scan();
+			m_scan = new Scan<int>();
 		}
 		m_scan->exclusive(index, num);
 

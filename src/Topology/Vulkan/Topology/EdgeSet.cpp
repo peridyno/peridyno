@@ -10,4 +10,10 @@ namespace dyno
 	EdgeSet::~EdgeSet()
 	{
 	}
+
+	void EdgeSet::updateTopology()
+	{
+		this->updateEdges();
+	}
+
 }

@@ -18,15 +18,15 @@
 
 namespace dyno
 {
-	template<int N>
-	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<int>& index);
+	template<uint N>
+	void parallel_allocate_for_list(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 
-	template<int N>
-	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, DArray<int>& index);
+	template<uint N>
+	void parallel_init_for_list(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 
-	template<int N>
-	void parallel_allocate_for_map(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template<uint N>
+	void parallel_allocate_for_map(void* maps, void* elements, size_t ele_size, DArray<uint>& index);
 
-	template<int N>
-	void parallel_init_for_map(void* maps, void* elements, size_t ele_size, DArray<int>& index);
+	template<uint N>
+	void parallel_init_for_map(void* maps, void* elements, size_t ele_size, DArray<uint>& index);
 }

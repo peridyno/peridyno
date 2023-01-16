@@ -27,6 +27,7 @@ namespace dyno
 		return this->m_startLoc + m_size - 1;;
 	}
 
+#ifdef CUDA_BACKEND
 	template <typename T>
 	GPU_FUNC T* List<T>::atomicInsert(T val)
 	{
@@ -40,8 +41,7 @@ namespace dyno
 
 		return this->m_startLoc + index;
 	}
-
-
+#endif
 
 	template <typename T>
 	DYN_FUNC void List<T>::clear()

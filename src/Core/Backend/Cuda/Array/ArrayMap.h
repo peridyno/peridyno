@@ -73,7 +73,7 @@ namespace dyno {
 			return out;
 		}
 
-		const CArray<int>& index() const { return m_index; }
+		const CArray<uint>& index() const { return m_index; }
 		const CArray<Pair<int,ElementType>>& elements() const { return m_elements; }
 		const CArray<Map<int,ElementType>>& maps() const { return m_maps; }
 
@@ -83,7 +83,7 @@ namespace dyno {
 		ArrayMap<ElementType, DeviceType::CPU>& operator=(const ArrayMap<ElementType, DeviceType::CPU> &) = delete;
 
 	private:
-		CArray<int> m_index;
+		CArray<uint> m_index;
 		CArray<Pair<int,ElementType>> m_elements;
 
 		CArray<Map<int,ElementType>> m_maps;
@@ -109,7 +109,7 @@ namespace dyno {
 		 * @return true
 		 * @return false
 		 */
-		bool resize(const DArray<int> counts);
+		bool resize(const DArray<uint> counts);
 		bool resize(const uint arraySize, const uint eleSize);
 
 		template<typename ET2>
@@ -145,7 +145,7 @@ namespace dyno {
 			return out;
 		}
 
-		const DArray<int>& index() const { return m_index; }
+		const DArray<uint>& index() const { return m_index; }
 		const DArray<Pair<int,ElementType>>& elements() const { return m_elements; }
 		const DArray<Map<int,ElementType>>& maps() const { return m_maps; }
 
@@ -155,7 +155,7 @@ namespace dyno {
 		ArrayMap<ElementType, DeviceType::GPU>& operator=(const ArrayMap<ElementType, DeviceType::GPU> &) = delete;
 
 	private:
-		DArray<int> m_index;
+		DArray<uint> m_index;
 		DArray<Pair<int,ElementType>> m_elements;
 
 		DArray<Map<int,ElementType>> m_maps;

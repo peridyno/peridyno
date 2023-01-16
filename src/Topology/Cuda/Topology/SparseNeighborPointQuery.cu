@@ -20,7 +20,7 @@ namespace dyno
 
 	template<typename Coord, typename TDataType>
 	__global__ void CDBP_RequestIntersectionNumber(
-		DArray<int> count,
+		DArray<uint> count,
 		DArray<Coord> points,
 		Real radius,
 		SparseOctree<TDataType> octree)
@@ -41,7 +41,7 @@ namespace dyno
 	__global__ void CDBP_RequestIntersectionIds(
 		DArrayList<int> lists,
 		DArray<int> ids,
-		DArray<int> count,
+		DArray<uint> count,
 		DArray<Coord> points,
 		Real radius,
 		SparseOctree<TDataType> octree)
@@ -70,7 +70,7 @@ namespace dyno
 
 	template<typename Real, typename Coord>
 	__global__ void CDBP_RequestNeighborSize(
-		DArray<int> counter,
+		DArray<uint> counter,
 		DArray<Coord> srcPoints,
 		DArray<Coord> tarPoints,
 		DArrayList<int> lists,
@@ -155,7 +155,7 @@ namespace dyno
 		octree.setSpace(min_v0, this->inRadius()->getData(), maximum(max_v1[0] - min_v0[0], maximum(max_v1[1] - min_v0[1], max_v1[2] - min_v0[2])));
 		octree.construct(pTar, 0);
 
-		DArray<int> counter(numSrc);
+		DArray<uint> counter(numSrc);
 
 		cuExecute(numSrc,
 			CDBP_RequestIntersectionNumber,
@@ -180,7 +180,7 @@ namespace dyno
 			this->inRadius()->getData(),
 			octree);
 
-		DArray<int> neighbor_counter(numSrc);
+		DArray<uint> neighbor_counter(numSrc);
 		cuExecute(numSrc,
 			CDBP_RequestNeighborSize,
 			neighbor_counter,

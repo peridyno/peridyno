@@ -46,7 +46,7 @@ namespace dyno
 
 	template<typename Hexahedron>
 	__global__ void HS_CountHexs(
-		DArray<int> counter,
+		DArray<uint> counter,
 		DArray<Hexahedron> hexs)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -87,7 +87,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& HexahedronSet<TDataType>::getVer2Hex()
 	{
-		DArray<int> counter;
+		DArray<uint> counter;
 		counter.resize(this->m_coords.size());
 		counter.reset();
 

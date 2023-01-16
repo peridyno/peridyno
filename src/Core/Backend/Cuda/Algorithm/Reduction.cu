@@ -168,6 +168,7 @@ namespace dyno {
 	template class Reduction<int>;
 	template class Reduction<float>;
 	template class Reduction<double>;
+	template class Reduction<uint>;
 
 	Reduction<Vec3f>::Reduction()
 		: m_num(0)

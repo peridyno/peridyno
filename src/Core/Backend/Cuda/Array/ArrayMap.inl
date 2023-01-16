@@ -14,7 +14,7 @@ namespace dyno
 	}
 
 	template<class ElementType>
-	bool ArrayMap<ElementType, DeviceType::GPU>::resize(const DArray<int> counts)
+	bool ArrayMap<ElementType, DeviceType::GPU>::resize(const DArray<uint> counts)
 	{
 		assert(counts.size() > 0);
 
@@ -26,10 +26,10 @@ namespace dyno
 
 		m_index.assign(counts);
 
-		Reduction<int> reduce;
+		Reduction<uint> reduce;
 		int total_num = reduce.accumulate(m_index.begin(), m_index.size());
 
-		Scan scan;
+		Scan<uint> scan;
 		scan.exclusive(m_index);
 
 		m_elements.resize(total_num);
@@ -52,12 +52,12 @@ namespace dyno
 			m_maps.resize(arraySize);
 		}
 
-		CArray<int> hIndex;
+		CArray<uint> hIndex;
 		hIndex.resize(arraySize);
 		int accNum = 0;
 		for (size_t i = 0; i < arraySize; i++)
 		{
-			hIndex[i] = (int)accNum;
+			hIndex[i] = (uint)accNum;
 			accNum += eleSize;
 		}
 
@@ -116,14 +116,14 @@ namespace dyno
 	void ArrayMap<ElementType, DeviceType::GPU>::assign(std::vector<std::map<int,ElementType>>& src)
 	{
 		size_t indNum = src.size();
-		CArray<int> hIndex(indNum);
+		CArray<uint> hIndex(indNum);
 
 		CArray<Pair<int,ElementType>> hElements;
 
 		size_t eleNum = 0;
 		for (int i = 0; i < src.size(); i++)
 		{
-			hIndex[i] = (int)eleNum;
+			hIndex[i] = (uint)eleNum;
 			eleNum += src[i].size();
 
 			if (src[i].size() > 0)

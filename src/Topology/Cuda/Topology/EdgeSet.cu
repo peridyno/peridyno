@@ -20,7 +20,7 @@ namespace dyno
 	}
 
 	__global__ void K_CountNumber(
-		DArray<int> num,
+		DArray<uint> num,
 		DArray<TopologyModule::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -49,7 +49,7 @@ namespace dyno
 	
 	template<typename Edge>
 	__global__ void ES_CountEdges(
-		DArray<int> counter,
+		DArray<uint> counter,
 		DArray<Edge> edges)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -78,7 +78,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& EdgeSet<TDataType>::getVer2Edge()
 	{
-		DArray<int> counter;
+		DArray<uint> counter;
 		counter.resize(this->m_coords.size());
 		counter.reset();
 
@@ -107,7 +107,7 @@ namespace dyno
 		if (this->m_coords.isEmpty())
 			return;
 
-		DArray<int> counts;
+		DArray<uint> counts;
 		counts.resize(this->m_coords.size());
 		counts.reset();
 		

@@ -30,6 +30,7 @@
 #elif defined(__ANDROID__)
 #include "VulkanAndroid.h"
 #include <android/asset_manager.h>
+#include "Platform.h"
 #endif
 
 // Custom define for better code readability
@@ -59,8 +60,6 @@
 	}																									\
 }
 #endif
-
-const std::string getAssetPath();
 
 template<typename T>
 std::string getDynamicSpvFile(const std::string &fileName)

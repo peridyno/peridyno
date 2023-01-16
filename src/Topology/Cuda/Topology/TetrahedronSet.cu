@@ -108,7 +108,7 @@ namespace dyno
 
 	template<typename Tetrahedron>
 	__global__ void TetSet_CountTets(
-		DArray<int> counter,
+		DArray<uint> counter,
 		DArray<Tetrahedron> tets)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -141,7 +141,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& TetrahedronSet<TDataType>::getVer2Tet()
 	{
-		DArray<int> counter;
+		DArray<uint> counter;
 		counter.resize(this->m_coords.size());
 		counter.reset();
 

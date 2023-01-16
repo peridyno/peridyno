@@ -73,7 +73,7 @@ namespace dyno {
 			}
 
 		}
-
+		return true;
 	}
 
 	bool OBase::addFieldAlias(FieldID name, FBase* data, FieldMap& fieldAlias)
@@ -93,6 +93,7 @@ namespace dyno {
 			}
 
 		}
+		return true;
 	}
 
 	bool OBase::findField(FBase* data)

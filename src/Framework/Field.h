@@ -19,10 +19,15 @@
 #include <sstream>
 #include "FBase.h"
 
+#include "Array/Array.h"
+
 #ifdef CUDA_BACKEND
-	#include "Array/Array.h"
 	#include "Array/Array2D.h"
 	#include "Array/Array3D.h"
+	#include "Array/ArrayList.h"
+#endif
+
+#ifdef VK_BACKEND
 	#include "Array/ArrayList.h"
 #endif
 
@@ -103,10 +108,9 @@ namespace dyno {
 	template<typename T>
 	using DeviceVarField = FVar<T>;
 
-#ifdef CUDA_BACKEND
 	/**
-	 * Define field for Array
-	 */
+ * Define field for Array
+ */
 	template<typename T, DeviceType deviceType>
 	class FArray : public FBase
 	{
@@ -125,11 +129,16 @@ namespace dyno {
 		}
 
 		void resize(uint num);
-		void reset();	
-		
+		void reset();
+
+		void clear();
+
 		void assign(const T& val);
 		void assign(std::vector<T>& vals);
+#ifndef NO_BACKEND
 		void assign(DArray<T>& vals);
+#endif
+		void assign(CArray<T>& vals);
 
 		bool isEmpty() override {
 			return this->size() == 0;
@@ -152,7 +161,7 @@ namespace dyno {
 		if (data == nullptr) {
 			data = std::make_shared<Array<T, deviceType>>();
 		}
-		
+
 		data->resize(num);
 
 		this->tick();
@@ -187,6 +196,21 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
+	void FArray<T, deviceType>::assign(CArray<T>& vals)
+	{
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array<T, deviceType>>();
+		}
+
+		data->assign(vals);
+
+		this->tick();
+	}
+
+#ifndef NO_BACKEND
+	template<typename T, DeviceType deviceType>
 	void FArray<T, deviceType>::assign(DArray<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
@@ -199,6 +223,7 @@ namespace dyno {
 
 		this->tick();
 	}
+#endif
 
 	template<typename T, DeviceType deviceType>
 	void FArray<T, deviceType>::reset()
@@ -214,13 +239,27 @@ namespace dyno {
 		this->tick();
 	}
 
+	template<typename T, DeviceType deviceType>
+	void FArray<T, deviceType>::clear()
+	{
+		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array<T, deviceType>>();
+		}
+
+		data->clear();
+
+		this->tick();
+	}
+
 	template<typename T>
 	using HostArrayField = FArray<T, DeviceType::CPU>;
 
 	template<typename T>
 	using DeviceArrayField = FArray<T, DeviceType::GPU>;
 
-
+#ifdef CUDA_BACKEND
 	/**
 	 * Define field for Array2D
 	 */
@@ -470,6 +509,170 @@ namespace dyno {
 
 		this->tick();
 	}
+#endif
+
+#ifdef VK_BACKEND
+// 	/**
+// 	 * Define field for Array
+// 	 */
+// 	template<typename T, DeviceType deviceType>
+// 	class FArray : public FBase
+// 	{
+// 	public:
+// 		typedef T							VarType;
+// 		typedef Array<T, deviceType>		DataType;
+// 		typedef FArray<T, deviceType>		FieldType;
+// 
+// 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray);
+// 
+// 		~FArray() override;
+// 
+// 		inline uint size() override {
+// 			auto ref = this->getDataPtr();
+// 			return ref == nullptr ? 0 : ref->size();
+// 		}
+// 
+// 		void resize(uint num);
+// 		void reset();
+// 		void clear();
+// 
+// 		bool isEmpty() override {
+// 			return this->size() == 0;
+// 		}
+// 	};
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	FArray<T, deviceType>::~FArray()
+// 	{
+// 		if (m_data.use_count() == 1)
+// 		{
+// 			m_data->clear();
+// 		}
+// 	}
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	void FArray<T, deviceType>::resize(uint num)
+// 	{
+// 		std::shared_ptr<DataType>& data = this->getDataPtr();
+// 		if (data == nullptr) {
+// 			data = std::make_shared<DataType>();
+// 		}
+// 
+// 		data->resize(num);
+// 
+// 		this->tick();
+// 	}
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	void FArray<T, deviceType>::reset()
+// 	{
+// 		std::shared_ptr<DataType>& data = this->getDataPtr();
+// 		if (data == nullptr)
+// 		{
+// 			data = std::make_shared<DataType>();
+// 		}
+// 
+// 		data->reset();
+// 
+// 		this->tick();
+// 	}
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	void FArray<T, deviceType>::clear()
+// 	{
+// 		std::shared_ptr<DataType>& data = this->getDataPtr();
+// 		if (data == nullptr) {
+// 			data = std::make_shared<DataType>();
+// 		}
+// 
+// 		data->clear();
+// 
+// 		this->tick();
+// 	}
+
+
+	/**
+	 * Define field for Array
+	 */
+	template<typename T, DeviceType deviceType>
+	class FArrayList : public FBase
+	{
+	public:
+		typedef T								VarType;
+		typedef ArrayList<T, deviceType>		DataType;
+		typedef FArrayList<T, deviceType>	FieldType;
+
+		DEFINE_FIELD_FUNC(FieldType, DataType, FArrayList);
+
+		inline uint size() override {
+			auto ref = this->getDataPtr();
+			return ref == nullptr ? 0 : ref->size();
+		}
+
+// 		void resize(uint num);
+// 
+// 		void resize(const Array<int, deviceType>& arr);
+// 
+// 		void assign(const ArrayList<T, DeviceType::CPU>& src);
+// 		void assign(const ArrayList<T, DeviceType::GPU>& src);
+
+		bool isEmpty() override {
+			return this->getDataPtr() == nullptr;
+		}
+	};
+
+// 	template<typename T, DeviceType deviceType>
+// 	void FArrayList<T, deviceType>::assign(const ArrayList<T, DeviceType::CPU>& src)
+// 	{
+// 		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+// 
+// 		if (data == nullptr)
+// 			data = std::make_shared<ArrayList<T, deviceType>>();
+// 
+// 		data->assign(src);
+// 
+// 		this->tick();
+// 	}
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	void FArrayList<T, deviceType>::assign(const ArrayList<T, DeviceType::GPU>& src)
+// 	{
+// 		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+// 
+// 		if (data == nullptr)
+// 			data = std::make_shared<ArrayList<T, deviceType>>();
+// 
+// 		data->assign(src);
+// 
+// 		this->tick();
+// 	}
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	void FArrayList<T, deviceType>::resize(uint num)
+// 	{
+// 		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+// 
+// 		if (data == nullptr)
+// 			data = std::make_shared<ArrayList<T, deviceType>>();
+// 
+// 		data->resize(num);
+// 
+// 		this->tick();
+// 	}
+// 
+// 	template<typename T, DeviceType deviceType>
+// 	void FArrayList<T, deviceType>::resize(const Array<int, deviceType>& arr)
+// 	{
+// 		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+// 
+// 		if (data == nullptr)
+// 			data = std::make_shared<ArrayList<T, deviceType>>();
+// 
+// 		data->resize(arr);
+// 
+// 		this->tick();
+// 	}
+
 #endif
 }
 

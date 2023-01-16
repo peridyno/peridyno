@@ -2,7 +2,8 @@
 #include "VkVariable.h"
 #include "VulkanBuffer.h"
 
-namespace dyno {
+namespace dyno
+{
 	template<typename T>
 	class VkDeviceArray : public VkVariable
 	{

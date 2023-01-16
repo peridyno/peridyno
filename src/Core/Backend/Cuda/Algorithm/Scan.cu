@@ -1,4 +1,5 @@
 #include "Scan.h"
+#include "SharedMemory.h"
 
 namespace dyno
 {
@@ -9,12 +10,13 @@ namespace dyno
 	int SCAN_THREADS_PER_BLOCK = 512;
 	int SCAN_ELEMENTS_PER_BLOCK = SCAN_THREADS_PER_BLOCK * 2;
 
-	Scan::Scan()
+	template<typename T>
+	Scan<T>::Scan()
 	{
 	}
 
-
-	Scan::~Scan()
+	template<typename T>
+	Scan<T>::~Scan()
 	{
 		m_buffer.clear();
 
@@ -25,7 +27,8 @@ namespace dyno
 		}
 	}
 
-	void Scan::exclusive(DArray<int>& output, DArray<int>& input, bool bcao)
+	template<typename T>
+	void Scan<T>::exclusive(DArray<T>& output, DArray<T>& input, bool bcao)
 	{
 		assert(input.size() == output.size());
 
@@ -37,7 +40,8 @@ namespace dyno
 		}
 	}
 
-	void Scan::exclusive(DArray<int>& data, bool bcao /*= true*/)
+	template<typename T>
+	void Scan<T>::exclusive(DArray<T>& data, bool bcao /*= true*/)
 	{
 		if (m_buffer.size() != data.size())
 		{
@@ -48,19 +52,21 @@ namespace dyno
 		this->exclusive(data, m_buffer, bcao);
 	}
 
-	void Scan::exclusive(int* data, size_t length, bool bcao /*= true*/)
+	template<typename T>
+	void Scan<T>::exclusive(T* data, size_t length, bool bcao /*= true*/)
 	{
 		if (m_buffer.size() != length)
 		{
 			m_buffer.resize(length);
 		}
 
-		cudaMemcpy(m_buffer.begin(), data, length*sizeof(int), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(m_buffer.begin(), data, length*sizeof(T), cudaMemcpyDeviceToDevice);
 
 		this->exclusive(data, m_buffer.begin(), length, bcao);
 	}
 
-	void Scan::exclusive(int* output, int* input, size_t length, bool bcao /*= true*/)
+	template<typename T>
+	void Scan<T>::exclusive(T* output, T* input, size_t length, bool bcao /*= true*/)
 	{
 		if (length > SCAN_ELEMENTS_PER_BLOCK) {
 			scanLargeDeviceArray(output, input, length, bcao, 0);
@@ -70,9 +76,13 @@ namespace dyno
 		}
 	}
 
-	__global__ void k_prescan_arbitrary(int *output, int *input, size_t n, int powerOfTwo)
+	template<typename T>
+	__global__ void k_prescan_arbitrary(T *output, T *input, size_t n, int powerOfTwo)
 	{
-		extern __shared__ int temp[];// allocated on invocation
+		//extern __shared__ T temp[];// allocated on invocation
+		SharedMemory<T> shared_mem;
+		T* temp = shared_mem.getPointer();
+
 		int threadID = threadIdx.x;
 
 		int ai = threadID;
@@ -135,8 +145,12 @@ namespace dyno
 		}
 	}
 
-	__global__ void k_prescan_arbitrary_unoptimized(int *output, int *input, size_t n, int powerOfTwo) {
-		extern __shared__ int temp[];// allocated on invocation
+	template<typename T>
+	__global__ void k_prescan_arbitrary_unoptimized(T *output, T *input, size_t n, int powerOfTwo) {
+		//extern __shared__ T temp[];// allocated on invocation
+		SharedMemory<T> shared_mem;
+		T* temp = shared_mem.getPointer();
+
 		int threadID = threadIdx.x;
 
 		if (threadID < n) {
@@ -185,7 +199,8 @@ namespace dyno
 		}
 	}
 
-	__global__ void k_add(int *output, size_t length, int *n) {
+	template<typename T>
+	__global__ void k_add(T *output, size_t length, T *n) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * length;
@@ -193,7 +208,8 @@ namespace dyno
 		output[blockOffset + threadID] += n[blockID];
 	}
 
-	__global__ void k_add(int *output, size_t length, int *n1, int *n2) {
+	template<typename T>
+	__global__ void k_add(T *output, size_t length, T *n1, T *n2) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * length;
@@ -201,7 +217,8 @@ namespace dyno
 		output[blockOffset + threadID] += n1[blockID] + n2[blockID];
 	}
 
-	void Scan::scanLargeDeviceArray(int *d_out, int *d_in, size_t length, bool bcao, size_t level)
+	template<typename T>
+	void Scan<T>::scanLargeDeviceArray(T *d_out, T *d_in, size_t length, bool bcao, size_t level)
 	{
 		size_t remainder = length % (SCAN_ELEMENTS_PER_BLOCK);
 		if (remainder == 0) {
@@ -213,7 +230,7 @@ namespace dyno
 			scanLargeEvenDeviceArray(d_out, d_in, lengthMultiple, bcao, level);
 
 			// scan the remaining elements and add the (inclusive) last element of the large scan to this
-			int *startOfOutputArray = &(d_out[lengthMultiple]);
+			T *startOfOutputArray = &(d_out[lengthMultiple]);
 			scanSmallDeviceArray(startOfOutputArray, &(d_in[lengthMultiple]), remainder, bcao);
 
 			k_add << <1, (unsigned int)remainder >> > (startOfOutputArray, remainder, &(d_in[lengthMultiple - 1]), &(d_out[lengthMultiple - 1]));
@@ -221,22 +238,26 @@ namespace dyno
 		}
 	}
 
-	void Scan::scanSmallDeviceArray(int *d_out, int *d_in, size_t length, bool bcao)
+	template<typename T>
+	void Scan<T>::scanSmallDeviceArray(T *d_out, T *d_in, size_t length, bool bcao)
 	{
 		size_t powerOfTwo = nextPowerOfTwo(length);
 
 		if (bcao) {
-			k_prescan_arbitrary << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(int) >> > (d_out, d_in, length, powerOfTwo);
+			k_prescan_arbitrary << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(T) >> > (d_out, d_in, length, powerOfTwo);
 			cuSynchronize();
 		}
 		else {
-			k_prescan_arbitrary_unoptimized << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(int) >> > (d_out, d_in, length, powerOfTwo);
+			k_prescan_arbitrary_unoptimized << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(T) >> > (d_out, d_in, length, powerOfTwo);
 			cuSynchronize();
 		}
 	}
 
-	__global__ void k_prescan_large(int *output, int *input, int n, int *sums) {
-		extern __shared__ int temp[];
+	template<typename T>
+	__global__ void k_prescan_large(T *output, T *input, int n, T *sums) {
+		//extern __shared__ T temp[];
+		SharedMemory<T> shared_mem;
+		T* temp = shared_mem.getPointer();
 
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
@@ -294,12 +315,16 @@ namespace dyno
 		output[blockOffset + bi] = temp[bi + bankOffsetB];
 	}
 
-	__global__ void k_prescan_large_unoptimized(int *output, int *input, int n, int *sums) {
+	template<typename T>
+	__global__ void k_prescan_large_unoptimized(T *output, T *input, int n, T *sums) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * n;
 
-		extern __shared__ int temp[];
+		//extern __shared__ T temp[];
+		SharedMemory<T> shared_mem;
+		T* temp = shared_mem.getPointer();
+
 		temp[2 * threadID] = input[blockOffset + (2 * threadID)];
 		temp[2 * threadID + 1] = input[blockOffset + (2 * threadID) + 1];
 
@@ -342,16 +367,17 @@ namespace dyno
 		output[blockOffset + (2 * threadID) + 1] = temp[2 * threadID + 1];
 	}
 
-	void Scan::scanLargeEvenDeviceArray(int *output, int *input, size_t length, bool bcao, size_t level)
+	template<typename T>
+	void Scan<T>::scanLargeEvenDeviceArray(T *output, T *input, size_t length, bool bcao, size_t level)
 	{
 		const int blocks = length / SCAN_ELEMENTS_PER_BLOCK;
-		const int sharedMemArraySize = SCAN_ELEMENTS_PER_BLOCK * sizeof(int);
+		const int sharedMemArraySize = SCAN_ELEMENTS_PER_BLOCK * sizeof(T);
 
 		//The following code is used to avoid malloc GPU memory for each call
 		if (level < SCAN_LEVEL)
 		{
 			const int blocks = length / SCAN_ELEMENTS_PER_BLOCK;
-			const int sharedMemArraySize = SCAN_ELEMENTS_PER_BLOCK * sizeof(int);
+			const int sharedMemArraySize = SCAN_ELEMENTS_PER_BLOCK * sizeof(T);
 
 			if (m_sums[level].size() != blocks)
 			{
@@ -383,9 +409,9 @@ namespace dyno
 		}
 		else
 		{
-			int *d_sums, *d_incr;
-			cudaMalloc((void **)&d_sums, blocks * sizeof(int));
-			cudaMalloc((void **)&d_incr, blocks * sizeof(int));
+			T *d_sums, *d_incr;
+			cudaMalloc((void **)&d_sums, blocks * sizeof(T));
+			cudaMalloc((void **)&d_incr, blocks * sizeof(T));
 
 			if (bcao) {
 				k_prescan_large << <blocks, SCAN_THREADS_PER_BLOCK, 2 * sharedMemArraySize >> > (output, input, SCAN_ELEMENTS_PER_BLOCK, d_sums);
@@ -414,12 +440,14 @@ namespace dyno
 		}
 	}
 
-	bool Scan::isPowerOfTwo(size_t x)
+	template<typename T>
+	bool Scan<T>::isPowerOfTwo(size_t x)
 	{
 		return x && !(x & (x - 1));
 	}
 
-	size_t Scan::nextPowerOfTwo(size_t x)
+	template<typename T>
+	size_t Scan<T>::nextPowerOfTwo(size_t x)
 	{
 		int power = 1;
 		while (power < x) {
@@ -428,5 +456,7 @@ namespace dyno
 		return power;
 	}
 
+	template class Scan<int>;
+	template class Scan<uint>;
 }
 

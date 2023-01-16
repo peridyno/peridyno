@@ -53,7 +53,7 @@ namespace dyno
 		Reduction<int> reduce;
 		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());
 
-		Scan scan;
+		Scan<int> scan;
 		scan.exclusive(voxelVertNum.begin(), voxelVertNum.size());
 
 		DArray<Coord> vertices(totalVNum);

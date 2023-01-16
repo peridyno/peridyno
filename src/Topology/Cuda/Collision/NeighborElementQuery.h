@@ -43,7 +43,7 @@ namespace dyno {
 		DArray<AABB> m_queryAABB;
 		DArray<AABB> m_queriedAABB;
 
-		Scan m_scan;
+		Scan<int> m_scan;
 		Reduction<int> m_reduce;
 
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;

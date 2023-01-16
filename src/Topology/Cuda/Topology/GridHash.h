@@ -80,7 +80,7 @@ namespace dyno{
 		int* counter = nullptr;
 		int* index = nullptr;
 
-		Scan* m_scan = nullptr;
+		Scan<int>* m_scan = nullptr;
 		Reduction<int>* m_reduce = nullptr;
 	};
 }

@@ -176,6 +176,13 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
+	set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
+	option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
+	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
+	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
+	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
+	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
+	
 	add_subdirectory(external/glfw-3.3.0)
 	add_subdirectory(external/glad-4.6)
 	add_subdirectory(external/imgui)
@@ -304,6 +311,10 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	if(PHOENIX_Tests)
 	    add_subdirectory(external/gtest)
 	    add_subdirectory(Tests)
+	endif()
+
+	if(PERIDYNO_Qt5_GUI)
+		add_subdirectory(external/nodeeditor)
 	endif()
 
 	option(PHOENIX_Examples "Enable building examples" ON)

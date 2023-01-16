@@ -6,7 +6,6 @@
 #include "VkDeviceArray3D.h"
 #include "VkUniform.h"
 #include "VkConstant.h"
-#include "Particle.h"
 #include <memory>
 #include <map>
 

@@ -48,46 +48,52 @@ namespace dyno
 
 	void CollisionDetectionBroadPhase::doCollision()
 	{
-		bool rebuilding = VK_BUFFER_REALLOCATED == counter.resize(mAABB.size());
-		startIndex.resize(mAABB.size());
+		uint num = this->inBoundingBox()->size();
 
-		VkConstant<uint32_t> constAABBSize(mAABB.size());
+		if (counter.size() != num){
+			counter.resize(num);
+			startIndex.resize(num);
+		}
+
+		VkConstant<uint32_t> constAABBSize(num);
 
 		if (true)
 		{
 			kernel("CollisionCounterInBroadPhase")->begin();
 			kernel("CollisionCounterInBroadPhase")->enqueue(
-				vkDispatchSize(mAABB.size(), WORKGROUP_SIZE),
-				&counter,
-				&mAABB,
-				mCollisionType,
-				mShapeType,
+				vkDispatchSize(num, WORKGROUP_SIZE),
+				counter.handle(),
+				this->inBoundingBox()->getDataPtr()->handle(),
+				this->inCollisionMask()->getDataPtr()->handle(),
+				this->inShapeType()->getDataPtr()->handle(),
 				&constAABBSize);
 			kernel("CollisionCounterInBroadPhase")->end();
 		}
 		kernel("CollisionCounterInBroadPhase")->update();
 		
-		int totalSize = vkr->reduce(counter);
+		int totalSize = vkr->reduce(*counter.handle());
 
 		if (totalSize <= 0) {
-			mContactList.reset();
+			this->outContacts()->clear();
 			return;
 		}
 
-		vks->scan(startIndex, counter, EXCLUSIVESCAN);
+		vks->scan(*startIndex.handle(), *counter.handle(), EXCLUSIVESCAN);
 
-		rebuilding |= VK_BUFFER_REALLOCATED == mContactList.resize(totalSize);
+		if (this->outContacts()->size() != totalSize) {
+			this->outContacts()->resize(totalSize);
+		}
 
 		if (true)
 		{
 			kernel("CollisionDetectionInBroadPhase")->begin();
 			kernel("CollisionDetectionInBroadPhase")->enqueue(
-				vkDispatchSize(mAABB.size(), WORKGROUP_SIZE),
-				&mContactList,
-				&startIndex,
-				&mAABB,
-				mCollisionType,
-				mShapeType,
+				vkDispatchSize(num, WORKGROUP_SIZE),
+				this->outContacts()->getDataPtr()->handle(),
+				startIndex.handle(),
+				this->inBoundingBox()->getDataPtr()->handle(),
+				this->inCollisionMask()->getDataPtr()->handle(),
+				this->inShapeType()->getDataPtr()->handle(),
 				&constAABBSize);
 			kernel("CollisionDetectionInBroadPhase")->end();
 		}

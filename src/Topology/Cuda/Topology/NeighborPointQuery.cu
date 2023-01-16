@@ -60,7 +60,7 @@ namespace dyno
 
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_CalNeighborSize(
-		DArray<int> count,
+		DArray<uint> count,
 		DArray<Coord> position_new,
 		DArray<Coord> position, 
 		GridHash<TDataType> hash, 
@@ -152,7 +152,7 @@ namespace dyno
 		hashGrid.clear();
 		hashGrid.construct(points);
 
-		DArray<int> counter(other.size());
+		DArray<uint> counter(other.size());
 		cuExecute(other.size(),
 			K_CalNeighborSize,
 			counter,

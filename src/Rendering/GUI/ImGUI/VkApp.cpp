@@ -468,7 +468,7 @@ VkApp::~VkApp()
 bool VkApp::initVulkan()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-	vks::android::loadVulkanFunctions(px::VkSystem::instance()->instanceHandle());
+	vks::android::loadVulkanFunctions(dyno::VkSystem::instance()->instanceHandle());
 #endif
 
 	// Find a suitable depth format

@@ -83,10 +83,12 @@ namespace dyno
 		topo->mPoints.resize(vertList.size());
 		topo->mTriangleIndex.resize(faceList.size());
 
-		vkTransfer(topo->mPoints, vertList);
-		vkTransfer(topo->mTriangleIndex, faceList);
+		//vkTransfer(topo->mPoints, vertList);
+		topo->mPoints.assign(vertList);
+		//vkTransfer(topo->mTriangleIndex, faceList);
+		topo->mTriangleIndex.assign(faceList);
 
-		topo->updateTopology();
+		topo->update();
 
 		vertList.clear();
 		faceList.clear();

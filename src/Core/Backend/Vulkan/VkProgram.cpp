@@ -300,6 +300,7 @@ namespace dyno
 
 	void VkMultiProgram::add(std::string name, std::shared_ptr<VkProgram> program)
 	{
+		assert(program != nullptr);
 		mPrograms[name] = program;
 		program->setVkCommandBuffer(commandBuffers);
 	}

@@ -56,7 +56,7 @@ namespace dyno
 		DArray<AABB> m_queryAABB;
 		DArray<AABB> m_queriedAABB;
 
-		Reduction<int> m_reduce;
+		Reduction<uint> m_reduce;
 
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
 	};

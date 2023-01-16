@@ -12,7 +12,7 @@ namespace dyno
 		uint32_t sphere_bound;
 	};
 
-	class DiscreteElements : public dyno::TopologyModule
+	class DiscreteElements : public TopologyModule
 	{
 	public:
 		DiscreteElements();

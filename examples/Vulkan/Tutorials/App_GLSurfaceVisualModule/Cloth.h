@@ -3,9 +3,8 @@
 #include "VkDeviceArray.h"
 #include "VkHostArray.h"
 #include "VkConstant.h"
-#include "ArrayList.h"
+#include "Array/ArrayList.h"
 
-#include "Particle.h"
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 
@@ -22,7 +21,7 @@ namespace dyno
 	*	This class implements a simple cloth.
 	*
 	*/
-	class Cloth : public dyno::Node
+	class Cloth : public Node
 	{
 	public:
 		Cloth(std::string name = "default");
