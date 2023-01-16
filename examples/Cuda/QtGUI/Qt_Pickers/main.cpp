@@ -18,9 +18,10 @@ int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	//auto mesh1 = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
-	//mesh1->varFileName()->setValue(getAssetPath() + "standard/standard_sphere.obj");
-	//mesh1->outTriangleSet()->connect(pickerNode->inTopology()); 
+	/*auto pickerNode = scn->addNode(std::make_shared<PickerNode<DataType3f>>());
+	auto mesh1 = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
+	mesh1->varFileName()->setValue(getAssetPath() + "standard/standard_sphere.obj");
+	mesh1->outTriangleSet()->connect(pickerNode->inTopology()); */
 
 	//auto cylinder = scn->addNode(std::make_shared<CylinderModel<DataType3f>>());
 	//cylinder->setVisible(false);
@@ -56,13 +57,13 @@ int main()
 	//mesh2->varFileName()->setValue(getAssetPath() + "submarine/submarine.obj");
 	//mesh2->outTriangleSet()->connect(pickerNode->inTopology()); 
 
-	pickerNode->varInterationRadius()->setValue(0.02f);
+	pickerNode->varInteractionRadius()->setValue(0.02f);
 	scn->setUpperBound({ 4, 4, 4 });
 
-	QtApp window;
-	window.setSceneGraph(scn);
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	QtApp app;
+	app.setSceneGraph(scn);
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

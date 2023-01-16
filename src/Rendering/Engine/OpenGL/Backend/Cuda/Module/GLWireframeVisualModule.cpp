@@ -12,6 +12,11 @@ namespace dyno
 	GLWireframeVisualModule::GLWireframeVisualModule()
 	{
 		this->setName("wireframe_renderer");
+		this->varRadius()->setRange(0.001, 0.01);
+	}
+
+	GLWireframeVisualModule::~GLWireframeVisualModule()
+	{
 	}
 
 
@@ -22,19 +27,35 @@ namespace dyno
 
 	bool GLWireframeVisualModule::initializeGL()
 	{
-		// create vertex buffer and vertex array object
 		mVAO.create();
-		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
-		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
+		mEdges.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+		mPoints.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+
+		mVAO.bindIndexBuffer(&mEdges);
+		mVAO.bindVertexBuffer(&mPoints, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "line.frag", "line.geom");
-
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
+		
 		return true;
 	}
+
+	void GLWireframeVisualModule::destroyGL()
+	{
+		if (isGLInitialized)
+		{
+			mShaderProgram->release();
+			delete mShaderProgram;
+
+			mVAO.release();
+			mPoints.release();
+			mEdges.release();
+
+			isGLInitialized = false;
+		}
+	}
+
 
 	void GLWireframeVisualModule::updateGL()
 	{
@@ -43,18 +64,18 @@ namespace dyno
 		auto& edges = edgeSet->getEdges();
 		auto& vertices = edgeSet->getPoints();
 
-		mDrawCount = edges.size() * 2;
+		mNumEdges = edges.size();
 
-		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-		mIndexBuffer.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
+		mPoints.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
+		mEdges.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
 	}
 
 	void GLWireframeVisualModule::paintGL(GLRenderPass pass)
 	{
-		if (mDrawCount == 0)
+		if (mNumEdges == 0)
 			return;
 
-		mShaderProgram.use();
+		mShaderProgram->use();
 
 		unsigned int subroutine = (unsigned int)pass;
 
@@ -62,14 +83,14 @@ namespace dyno
 
 		if (pass == GLRenderPass::COLOR)
 		{
-			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
+			mShaderProgram->setVec3("uBaseColor", this->varBaseColor()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
 		}
 		else if (pass == GLRenderPass::SHADOW)
 		{
-			// lines should cast shadow?
+			// cast shadow?
 		}
 		else
 		{
@@ -77,9 +98,31 @@ namespace dyno
 			return;
 		}
 
-		mVAO.bind();
-		glDrawElements(GL_LINES, mDrawCount, GL_UNSIGNED_INT, 0);
-		mVAO.unbind();
+
+		// preserve previous polygon mode
+		int mode;
+		glGetIntegerv(GL_POLYGON_MODE, &mode);
+
+		if (this->varRenderMode()->getDataPtr()->currentKey() == EEdgeMode::LINE)
+		{
+			// draw as lines
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glLineWidth(this->varLineWidth()->getData());
+
+			mShaderProgram->setInt("uEdgeMode", 0);
+		}
+		else
+		{
+			// draw as cylinders
+			mShaderProgram->setInt("uEdgeMode", 1);
+			mShaderProgram->setFloat("uRadius", this->varRadius()->getData());
+		}
+
+		mVAO.bind();		
+		glDrawElements(GL_LINES, mNumEdges * 2, GL_UNSIGNED_INT, 0);
+
+		// restore polygon mode
+		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		gl::glCheckError();
 	}

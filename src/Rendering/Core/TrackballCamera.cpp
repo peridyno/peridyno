@@ -38,11 +38,11 @@ namespace dyno
 
 		if (mProjectionType == Perspective)
 		{
-			projection = glm::perspective(mFov, aspect, mNear * mDistanceUnit, mFar * mDistanceUnit);
+			projection = glm::perspective(mFov, aspect, mNear * mUnitScale, mFar * mUnitScale);
 		}
 		else
 		{
-			float half_depth = (mCameraPos - mCameraTarget).norm() * mDistanceUnit;
+			float half_depth = (mCameraPos - mCameraTarget).norm() * mUnitScale;
 			projection = glm::ortho(-half_depth * aspect, half_depth * aspect, -half_depth, half_depth, -5.0f * half_depth, 5.0f * half_depth);
 		}
 		

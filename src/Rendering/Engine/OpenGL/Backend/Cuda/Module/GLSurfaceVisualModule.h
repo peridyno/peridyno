@@ -31,6 +31,7 @@ namespace dyno
 		DECLARE_CLASS(GLSurfaceVisualModule)
 	public:
 		GLSurfaceVisualModule();
+		~GLSurfaceVisualModule();
 
 	public:
 		virtual std::string caption() override;
@@ -41,7 +42,7 @@ namespace dyno
 
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 
-		DEF_VAR(bool, UseVertexNormal, false, "")
+		DEF_VAR(bool, UseVertexNormal, false, "");
 
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
@@ -51,10 +52,11 @@ namespace dyno
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
+		virtual void destroyGL() override;
 
 	protected:
 
-		gl::Program		mShaderProgram;
+		gl::Program*	mShaderProgram;
 
 		gl::VertexArray	mVAO;
 		gl::CudaBuffer 	mIndexBuffer;

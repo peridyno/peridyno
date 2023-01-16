@@ -22,7 +22,7 @@ TEST(Reduction, accumulate)
 	float accVal = reduce.accumulate(dArr.begin(), dArr.size());
 	float minVal = reduce.minimum(dArr.begin(), dArr.size());
 	timer.stop();
-	std::cout << "Reduce Time: " << timer.getEclipsedTime() << std::endl;
+	std::cout << "Reduce Time: " << timer.getElapsedTime() << std::endl;
 
 
 	EXPECT_EQ(abs(accVal - 6.0f) < EPSILON, true);

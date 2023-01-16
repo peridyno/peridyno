@@ -108,16 +108,16 @@ namespace dyno
 			return;
 		}
 
-		mShaderProgram.use();
+		mShaderProgram->use();
 
 		// setup uniforms
-		mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-		mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-		mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
-		mShaderProgram.setInt("uVertexNormal", this->varUseVertexNormal()->getData());
+		mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
+		mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
+		mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
+		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getData());
 
 		// instanced rendering?
-		mShaderProgram.setInt("uInstanced", mInstanceCount > 0);
+		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
 
 		// color
 		auto color = this->varBaseColor()->getData();

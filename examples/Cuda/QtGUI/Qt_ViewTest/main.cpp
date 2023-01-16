@@ -153,14 +153,15 @@ int main(int, char**)
 
 	scn->addNode(rigid);
 
-	GlfwApp window;
-	
-	//Set the distance unit for the camera, the fault unit is meter
-	window.getCamera()->setDistanceUnit(3.0f);
-	window.setSceneGraph(scn);
-	window.createWindow(1024, 768);
+	GlfwApp app;
+	app.initialize(1024, 768);
 
-	window.mainLoop();
+	app.setSceneGraph(scn);
+
+	//Set the distance unit for the camera, the fault unit is meter
+	app.renderWindow()->getCamera()->setUnitScale(3.0f);
+
+	app.mainLoop();
 
 	return 0;
 }

@@ -1,8 +1,25 @@
+/**
+ * Copyright 2017-2022 hanxingyixue
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
+#include <cufft.h>
+#include <vector>
 #include "Node.h"
 
-#include <cufft.h>
-#include <math_constants.h>
+#include "Complex.h"
+#include "Topology/HeightField.h"
 
 namespace dyno {
 
@@ -19,102 +36,61 @@ namespace dyno {
     {
         DECLARE_TCLASS(OceanPatch, TDataType)
     public:
-        typedef typename dyno::Vector<float, 2> Coord;
+        typedef typename TDataType::Real Real;
+        typedef typename TDataType::Coord Coord;
+        typedef typename Complex<Real> Complex;
 
-        OceanPatch(int size, float patchSize, int windType = 1, std::string name = "OceanPatch");
-        OceanPatch(int size, float wind_dir, float windSpeed, float A_p, float max_choppiness, float global);
-        OceanPatch(std::string name = "OceanPatch");
+        OceanPatch();
         ~OceanPatch();
 
-        void animate(float t);
+    public:
+		DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
 
-        float getMaxChoppiness();
-        float getChoppiness();
+        DEF_VAR(Real, WindDirection, Real(60), "Wind direction");
 
-        void resetWindType();
+        DEF_VAR(uint, Resolution, 512, "");
 
-        //����ʵ�ʸ����������mΪ��λ
-        float getPatchSize()
-        {
-            return m_realPatchSize;
-        }
+        DEF_VAR(Real, PatchSize, Real(512), "Real patch size");
 
-        //��������ֱ���
-        float getGridSize()
-        {
-            return mResolution;
-        }
-        float getGlobalShift()
-        {
-            return m_globalShift;
-        }
-        float getGridLength()
-        {
-            return m_realPatchSize / mResolution;
-        }
-        void setChoppiness(float value)
-        {
-            mChoppiness = value;
-        }
-
-	    DArray2D<Coord> getHeightField()
-        {
-            return m_ht;
-        }
-        DArray2D <Vec4f> getDisplacement()
-        {
-            return m_displacement;
-        }
-
-        DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+        DEF_VAR(Real, TimeScale, Real(1), "");
 
     public:
-        float m_windSpeed = 0;                   //����
-        float windDir     = CUDART_PI_F / 3.0f;  //�糡����
-        int   m_windType;                        //�����ȼ���Ŀǰ����Ϊ0~12
-        float m_fft_real_length = 10;
-        float m_fft_flow_speed  = 1.0f;
+		DEF_ARRAY2D_STATE(Coord, Displacement, DeviceType::GPU, "");
 
-        DArray2D<Vec4f> m_displacement;  // λ�Ƴ�
-        DArray2D<Vec4f> m_gradient;      // gradient field
+		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
 
     protected:
-	    void resetStates() override;
-	    void updateStates() override;
-	    void updateTopology() override;
-        
+        void resetStates() override;
+
+        void updateStates() override;
+        void postUpdateStates() override;
+
     private:
-        void  generateH0(CArray2D<Coord> h0);
-        float gauss();
-        float phillips(float Kx, float Ky, float Vdir, float V, float A, float dir_depend);
+        void generateH0(Complex* h0);
+        void resetWindType();
 
-        int mResolution;
+        std::vector<WindParam> mParams;  //A set of pre-defined configurations
 
-        int mSpectrumWidth;  //Ƶ�׿���
-        int mSpectrumHeight;  //Ƶ�׳���
+		DArray2D<Complex> mH0;  //初始频谱
+		DArray2D<Complex> mHt;  //当前时刻频谱
 
-        float mChoppiness;  //�����˼�ļ����ԣ���Χ0~1
+		DArray2D<Complex> mDxt;  //x方向偏移
+		DArray2D<Complex> mDzt;  //z方向偏移
 
-        std::vector<WindParam> m_params;  //��ͬ�����ȼ��µ�FFT�任����
+        const Real g = 9.81f;          //重力
+        
+        Real mDirDepend = 0.07f;  //风长方向相关性
 
-        const float g = 9.81f;          //����
-        float       A = 1e-7f;          //��������ϵ��
-        float       m_realPatchSize;    //ʵ�ʸ����������mΪ��λ
-        float       dirDepend = 0.07f;  //�糤���������
-
-        float m_maxChoppiness;  //����choppiness����
-        float m_globalShift;    //��߶�ƫ�Ʒ���
-
-        DArray2D<Coord> m_h0;  //��ʼƵ��
-        DArray2D<Coord> m_ht;  //��ǰʱ��Ƶ��
-
-        DArray2D<Coord> m_Dxt;  //x����ƫ��
-        DArray2D<Coord> m_Dzt;  //z����ƫ��
+        Real mAmplitude = 1e-7f;          //波的缩放系数
+        Real mWindSpeed = 1.0f;
+        Real mChoppiness;  //设置浪尖的尖锐性，范围0~1
+        Real mGlobalShift;    //大尺度偏移幅度
 
         cufftHandle fftPlan;
 
-
-        DEF_VAR(int, my_windTypes, 4, "m_windTypesWinds");
+		int mSpectrumWidth;  //频谱宽度
+		int mSpectrumHeight;  //频谱长度
     };
-    IMPLEMENT_TCLASS(OceanPatch, TDataType)
-} 
+
+	IMPLEMENT_TCLASS(OceanPatch, TDataType)
+}

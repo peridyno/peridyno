@@ -54,9 +54,12 @@ namespace dyno
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
+		//TODO:
+		virtual void destroyGL() {};
+
 	protected:
 
-		gl::Program		mShaderProgram;
+		gl::Program*			mShaderProgram;
 
 		gl::VertexArray	mVAO;
 

@@ -46,10 +46,10 @@ int main()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	auto nickname = scn->addNode(std::make_shared<ChineseNode>());
 
-	QtApp window;
-	window.setSceneGraph(scn);
-	window.createWindow(1366, 800);
-	window.mainLoop();
+	QtApp app;
+	app.setSceneGraph(scn);
+	app.initialize(1366, 800);
+	app.mainLoop();
 
 	return 0;
 }

@@ -55,6 +55,9 @@ namespace gl {
 			return;
 		glDeleteShader(id);
 		glCheckError();
+
+		// reset object id
+		id = GL_INVALID_INDEX;
 	}
 
 
@@ -66,6 +69,9 @@ namespace gl {
 	void Program::release()
 	{
 		glDeleteProgram(id);
+
+		// reset object id
+		id = GL_INVALID_INDEX;
 	}
 
 	void Program::attachShader(const Shader& shader)
@@ -130,16 +136,16 @@ namespace gl {
 		if (initialized)
 			return true;
 
-		printf("Initialize ShaderFactory...\n");
+		printf("[ShaderFactory] Loading shaders...\n");
 
 		// pre load shader code snippets
+		const char* suffix = ".glsl";
 		for (const auto& pair : ShaderSource) {
-			std::string str = "/" + pair.first;
-			const char* suffix = ".glsl";
-			if (std::string::npos != str.rfind(suffix, str.length() - 5, 5))
+			std::string key = "/" + pair.first;
+			std::string src = pair.second;
+			if (std::string::npos != key.rfind(suffix, key.length() - 5, 5))
 			{
-				printf("%s\n", pair.first.c_str());
-				glNamedStringARB(GL_SHADER_INCLUDE_ARB, str.length(), str.c_str(), pair.second.length(), pair.second.c_str());
+				glNamedStringARB(GL_SHADER_INCLUDE_ARB, key.length(), key.c_str(), src.length(), src.c_str());
 			}
 		}
 
@@ -148,12 +154,12 @@ namespace gl {
 	}
 
 
-	Program ShaderFactory::createShaderProgram(const char* vs, const char* fs, const char* gs)
+	Program* ShaderFactory::createShaderProgram(const char* vs, const char* fs, const char* gs)
 	{
 		ShaderFactory::initialize();
 
-		Program program;
-		program.create();
+		Program* program = new Program;
+		program->create();
 
 		Shader vshader;
 		Shader fshader;
@@ -163,7 +169,7 @@ namespace gl {
 		{
 			const std::string& src = ShaderSource.at(vs);
 			if (vshader.createFromSource(GL_VERTEX_SHADER, src))
-				program.attachShader(vshader);
+				program->attachShader(vshader);
 			else
 				printf("Failed to compile shader: %s\n", vs);
 		}
@@ -172,7 +178,7 @@ namespace gl {
 		{
 			const std::string& src = ShaderSource.at(fs);
 			if (fshader.createFromSource(GL_FRAGMENT_SHADER, src))
-				program.attachShader(fshader);
+				program->attachShader(fshader);
 			else
 				printf("Failed to compile shader: %s\n", fs);
 		}
@@ -181,12 +187,12 @@ namespace gl {
 		{
 			const std::string& src = ShaderSource.at(gs);
 			if (gshader.createFromSource(GL_GEOMETRY_SHADER, src))
-				program.attachShader(gshader);
+				program->attachShader(gshader);
 			else
 				printf("Failed to compile shader: %s\n", gs);
 		}
 
-		if (!program.link())
+		if (!program->link())
 		{
 			printf("Failed to link shader program: %s\n", fs);
 		}
@@ -194,6 +200,7 @@ namespace gl {
 		vshader.release();
 		fshader.release();
 		gshader.release();
+
 		return program;
 	}
 }

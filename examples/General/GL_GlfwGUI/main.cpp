@@ -2,12 +2,12 @@
 
 #include <SceneGraph.h>
 
-using namespace px;
+using namespace dyno;
 
 int main(int, char**)
 {
-	dyno::GlfwApp window;
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	GlfwApp app;
+	app.initialize(1024, 768);
+	app.mainLoop();
 	return 0;
 }

@@ -24,13 +24,6 @@ namespace dyno
 	{
 	}
 
-// 	template<typename TDataType>
-// 	void HeightField<TDataType>::setSpace(Real dx, Real dz)
-// 	{
-// 		mDx = dx;
-// 		mDz = dz;
-// 	}
-
 	template<typename TDataType>
 	void HeightField<TDataType>::setExtents(uint nx, uint ny)
 	{

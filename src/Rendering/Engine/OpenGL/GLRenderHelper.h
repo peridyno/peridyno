@@ -30,8 +30,6 @@ namespace dyno
 		GLRenderHelper();
 		~GLRenderHelper();
 
-		void initialize();
-
 		void drawGround(float planeScale, float rulerScale = 1.f);
 		void drawAxis(float lineWidth = 2.f);
 		void drawBBox(Vec3f pmin, Vec3f pmax, int type = 0);

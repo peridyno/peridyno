@@ -3,6 +3,7 @@
 #include <QFile>
 #include "QtApp.h"
 #include "PMainWindow.h"
+#include "POpenGLWidget.h"
 #include "Log.h"
 
 #include "SceneGraphFactory.h"
@@ -13,17 +14,11 @@
 namespace dyno {
     QtApp::QtApp(int argc, char **argv)
     {
-        m_mainWindow = nullptr;
-        m_app = std::make_shared<QApplication>(argc, argv);
+        mMainWindow = nullptr;
+        mQApp = std::make_shared<QApplication>(argc, argv);
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
-
-        mCamera = std::make_shared<OrbitCamera>();
-        mCamera->setWidth(64);
-        mCamera->setHeight(64);
-        mCamera->registerPoint(0, 0);
-        mCamera->rotateToPoint(-32, 12);
     }
 
     QtApp::~QtApp()
@@ -31,7 +26,7 @@ namespace dyno {
 
     }
 
-    void QtApp::createWindow(int width, int height, bool usePlugin)
+	void QtApp::initialize(int width, int height, bool usePlugin)
     {
 		if (usePlugin)
 		{
@@ -42,8 +37,8 @@ namespace dyno {
 #endif // DEBUG
 		}
 
-        m_mainWindow = std::make_shared<PMainWindow>(this);
-        m_mainWindow->resize(width, height);
+        mMainWindow = std::make_shared<PMainWindow>(this);
+        mMainWindow->resize(width, height);
     }
 
     void QtApp::mainLoop()
@@ -53,16 +48,21 @@ namespace dyno {
         file.open(QIODevice::ReadOnly);
 
         QString style = file.readAll();
-        m_app->setStyleSheet(style);
+        mQApp->setStyleSheet(style);
 
-        m_mainWindow->show();
-        m_app->exec();
+        mMainWindow->show();
+        mQApp->exec();
     }
 
 	void QtApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
 	{
         AppBase::setSceneGraph(scn);
         SceneGraphFactory::instance()->pushScene(scn);
+	}
+
+    RenderWindow* QtApp::renderWindow()
+	{
+        return dynamic_cast<RenderWindow*>(mMainWindow->openglWidget());
 	}
 
 }

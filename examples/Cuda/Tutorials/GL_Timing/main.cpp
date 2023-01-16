@@ -123,10 +123,10 @@ int main()
 {
 	Log::setUserReceiver(&RecieveLogMessage);
 
-	GlfwApp window;
-	window.setSceneGraph(creatBricks());
-	window.createWindow(1280, 768);
-	window.mainLoop();
+	GlfwApp app;
+	app.setSceneGraph(creatBricks());
+	app.initialize(1280, 768);
+	app.mainLoop();
 
 	return 0;
 }

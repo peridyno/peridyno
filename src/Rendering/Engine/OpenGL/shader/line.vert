@@ -1,24 +1,29 @@
 #version 440
 
+#extension GL_ARB_shading_language_include : require
+
+#include "common.glsl"
+
 layout(location = 0) in vec3 in_vert;
 
-layout (std140, binding=0) uniform TransformUniformBlock
+out VertexData
 {
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-} transform;
-
-out VertexData {
 	vec3 position;
 	vec3 normal;
+	vec3 color;
+	int  instanceID;	// not used for this type
 } vs_out;
 
-void main(void) {
-	vec4 worldPos = transform.model * vec4(in_vert, 1.0);
-	vec4 cameraPos = transform.view * worldPos;
+// we treat color as per-vertex
+uniform vec3 uBaseColor;
 
+void main(void) {
+
+	vec4 worldPos = uTransform.model * vec4(in_vert, 1.0);
+	vec4 cameraPos = uTransform.view * worldPos;
 	vs_out.position = cameraPos.xyz;
 
-	gl_Position = transform.proj * cameraPos;  
+	vs_out.color = uBaseColor;
+
+	gl_Position = uTransform.proj * cameraPos;  
 }

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Rendering.h>
+#include <RenderEngine.h>
 
 #include <vtkExternalOpenGLRenderer.h>
 #include <vtkExternalOpenGLRenderWindow.h>
@@ -48,11 +48,11 @@ namespace dyno
 	public:
 		VtkRenderEngine();
 
-		virtual void initialize(int width, int height) override;
+		virtual void initialize() override;
+		virtual void terminate() override;
 		virtual void draw(dyno::SceneGraph* scene, const RenderParams& rparams) override;
-		virtual void resize(int w, int h) override;
 
-		virtual std::string name() override;
+		virtual std::string name() const override;
 
 		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) override;
 
@@ -99,7 +99,7 @@ namespace dyno
 		} mRenderPasses;
 
 
-		dyno::SceneGraph* m_scene = NULL;
+		SceneGraph* m_scene = NULL;
 
 		friend struct GatherVisualModuleAction;
 	};

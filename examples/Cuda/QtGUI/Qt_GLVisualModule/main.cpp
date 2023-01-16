@@ -164,10 +164,10 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 int main()
 {
-	QtApp window;
-	window.setSceneGraph(createScene());
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	QtApp app;
+	app.setSceneGraph(createScene());
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

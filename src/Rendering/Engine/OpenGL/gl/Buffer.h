@@ -22,6 +22,7 @@ namespace gl
 {
 	class Buffer : public Object
 	{
+		GL_OBJECT(Buffer)
 	public:
 		virtual void create(int target, int usage);
 		virtual void release() override;

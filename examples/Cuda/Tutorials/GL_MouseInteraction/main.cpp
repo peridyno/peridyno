@@ -60,10 +60,10 @@ int main(int, char**)
 
 	scn->setUpperBound({ 4, 4, 4 });
 
-	GlfwApp window;
-	window.setSceneGraph(scn);
-	window.createWindow(1024, 768);
-	window.mainLoop();
+	GlfwApp app;
+	app.setSceneGraph(scn);
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

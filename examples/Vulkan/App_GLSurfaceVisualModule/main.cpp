@@ -40,9 +40,11 @@ int main(int, char**)
 
 	vkSys->initialize(true);
 
-	GlfwApp window;
-	window.createWindow(1024, 768);
-	window.setSceneGraph(createScene());
-	window.mainLoop();
+	GlfwApp app;
+
+	app.setSceneGraph(createScene());
+	app.initialize(1024, 768);
+	
+	app.mainLoop();
 	return 0;
 }

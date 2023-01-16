@@ -5,7 +5,7 @@
 #include "Topology/DiscreteElements.h"
 
 #include "GLVisualModule.h"
-#include "gl/CudaBuffer.h"
+#include "CudaBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
@@ -18,6 +18,7 @@ namespace dyno
 		DECLARE_CLASS(GLElementVisualModule)
 	public:
 		GLElementVisualModule();
+		~GLElementVisualModule();
 
 	public:
 		std::shared_ptr<DiscreteElements<DataType3f>> discreteSet;
@@ -29,13 +30,14 @@ namespace dyno
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
+		virtual void destroyGL() override;
 
 		void updateStarted() override;
 		void updateEnded() override;
 
 	private:
 
-		gl::Program mShaderProgram;
+		gl::Program* mShaderProgram;
 		gl::VertexArray	mVAO;
 
 		gl::CudaBuffer	mVertexBuffer;

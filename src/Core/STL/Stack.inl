@@ -1,4 +1,4 @@
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 #include <glm/glm.hpp>
 
 namespace dyno

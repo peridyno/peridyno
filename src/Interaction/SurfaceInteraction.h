@@ -25,6 +25,10 @@ namespace dyno
 
 		void mergeIndex();
 
+		void printInfoClick();
+		void printInfoDragging();
+		void printInfoDragRelease();
+
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, OtherTriangleSet, "");
@@ -46,9 +50,9 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		//DEF_VAR(Real, InterationRadius, 0.01, "The radius of interaction");
+		//DEF_VAR(Real, InteractionRadius, 0.01, "The radius of interaction");
 
-		DEF_VAR(Real, FloodAngle, 0.0f, "The angle limit of flood selection");
+		DEF_VAR(Real, FloodAngle, 0.5f, "The angle limit of flood selection");
 
 		DEF_VAR(bool, TogglePicker, true, "The toggle of surface picker");
 
@@ -64,13 +68,10 @@ namespace dyno
 		void onEvent(PMouseEvent event) override;
 	private:
 		std::shared_ptr<Camera> camera;
-		TRay3D<Real> ray1;
-		TRay3D<Real> ray2;
-		Real x1;
-		Real y1;
-		Real x2;
-		Real y2;
+		TRay3D<Real> ray1, ray2;
+		Real x1, y1, x2, y2;
 		bool isPressed;
+		int tempNumT, tempNumS;
 
 		DArray<int> triIntersectedIndex;
 

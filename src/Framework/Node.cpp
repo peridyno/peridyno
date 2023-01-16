@@ -8,7 +8,7 @@ namespace dyno
 Node::Node(std::string name)
 	: OBase()
 	, m_node_name(name)
-	, m_dt(0.001f)
+	, m_dt(0.016f)
 	, m_mass(1.0f)
 {
 }

@@ -19,7 +19,7 @@ namespace dyno
 	};
 }
 
-namespace HeightField
+namespace HeightFieldLibrary
 {
 	dyno::PluginEntry* initStaticPlugin();
 

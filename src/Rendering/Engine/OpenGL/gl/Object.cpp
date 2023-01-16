@@ -5,8 +5,14 @@
 
 #include <glad/glad.h>
 
+std::string base_name(const std::string& path)
+{
+	return path.substr(path.find_last_of("/\\") + 1);
+}
+
 namespace gl
 {
+
 	GLenum glCheckError_(const char* file, int line)
 	{
 		GLenum errorCode;
@@ -24,7 +30,7 @@ namespace gl
 			case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 			}
 
-			std::cout << "GL Error: " << error << ": " << file << ", " << line << std::endl;
+			std::cerr << "GL Error: " << error << ": " << base_name(file) << ", " << line << std::endl;
 		}
 		return errorCode;
 	}

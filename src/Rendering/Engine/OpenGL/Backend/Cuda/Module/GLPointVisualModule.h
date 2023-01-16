@@ -37,7 +37,7 @@ namespace dyno
 		};
 
 		GLPointVisualModule();
-		~GLPointVisualModule() override;
+		~GLPointVisualModule();
 
 		void setColorMapMode(ColorMapMode mode);
 
@@ -53,6 +53,7 @@ namespace dyno
 		virtual void paintGL(GLRenderPass pass) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
+		virtual void destroyGL() override;
 
 	private:
 
@@ -61,7 +62,7 @@ namespace dyno
 		gl::CudaBuffer	mColor;
 		unsigned int	mNumPoints;
 
-		gl::Program		mShaderProgram;
+		gl::Program*	mShaderProgram = 0;
 
 		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
 

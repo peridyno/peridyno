@@ -105,6 +105,6 @@ endif()
 
 
 if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(LIB_DEPENDENCY Core IO Framework Topology RigidBody cufft)
+    set(LIB_DEPENDENCY Core IO Framework Topology RigidBody GLRenderEngine cufft)
     build_library(HeightField LIB_DEPENDENCY)
 endif()

@@ -1,5 +1,5 @@
-if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(PROJECT_NAME GL_Buoyancy)
+if(PERIDYNO_Qt5_GUI AND PERIDYNO_LIBRARY_HEIGHTFIELD)
+    set(PROJECT_NAME Qt_Buoyancy)
 
     file(
         GLOB_RECURSE SRC_LIST 
@@ -18,7 +18,7 @@ if(PERIDYNO_LIBRARY_HEIGHTFIELD)
         IO 
         HeightField 
 		RigidBody 
-		GlfwGUI
+		QtGUI
         GLRenderEngine
 		)
 

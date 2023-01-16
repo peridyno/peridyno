@@ -3,9 +3,9 @@ using namespace dyno;
 
 int main()
 {
-	QtApp window;
-	window.createWindow(1366, 800);
-	window.mainLoop();
+	QtApp app;
+	app.initialize(1366, 800);
+	app.mainLoop();
 
 	return 0;
 }

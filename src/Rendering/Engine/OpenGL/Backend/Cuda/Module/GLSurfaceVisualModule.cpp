@@ -13,6 +13,10 @@ namespace dyno
 		this->inColor()->tagOptional(true);
 	}
 
+	GLSurfaceVisualModule::~GLSurfaceVisualModule()
+	{
+	}
+
 	std::string GLSurfaceVisualModule::caption()
 	{
 		return "Surface Visual Module";
@@ -39,6 +43,26 @@ namespace dyno
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
 
 		return true;
+	}
+
+	void GLSurfaceVisualModule::destroyGL()
+	{
+		if (isGLInitialized)
+		{
+			mShaderProgram->release();
+			delete mShaderProgram;
+			mShaderProgram = 0;
+
+			mVAO.release();
+			mIndexBuffer.release();
+			mVertexBuffer.release();
+			mNormalBuffer.release();
+			mColorBuffer.release();
+			
+			mInstanceBuffer.release();
+
+			isGLInitialized = false;
+		}
 	}
 
 	void GLSurfaceVisualModule::updateGL()
@@ -74,9 +98,8 @@ namespace dyno
 		// normal
 		if(this->varUseVertexNormal()->getData())
 		{
-			// update vertex normal
-			if (triSet->outVertexNormal()->isEmpty())
-				triSet->update();
+			//TODO: optimize the performance
+			triSet->update();
 
 			auto& normals = triSet->outVertexNormal()->getData();
 			mNormalBuffer.loadCuda(normals.begin(), normals.size() * sizeof(float) * 3);
@@ -120,16 +143,16 @@ namespace dyno
 			return;
 		}
 
-		mShaderProgram.use();
+		mShaderProgram->use();
 
 		// setup uniforms
-		mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
-		mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
-		mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());
-		mShaderProgram.setInt("uVertexNormal", this->varUseVertexNormal()->getData());
+		mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
+		mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
+		mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
+		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getData());
 
 		// instanced rendering?
-		mShaderProgram.setInt("uInstanced", mInstanceCount > 0);
+		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
 
 		// color
 		auto color = this->varBaseColor()->getData();

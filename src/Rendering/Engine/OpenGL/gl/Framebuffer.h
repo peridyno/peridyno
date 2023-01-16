@@ -22,6 +22,7 @@ namespace gl
 {
 	class Framebuffer : public Object
 	{
+		GL_OBJECT(Framebuffer)
 	public:
 		void create() override;
 		void release() override;

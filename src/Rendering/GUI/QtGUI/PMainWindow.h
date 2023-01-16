@@ -96,6 +96,8 @@ namespace dyno
 		void mainLoop();
 		void createWindow(int width, int height);
 
+		POpenGLWidget* openglWidget() { return mOpenGLWidget; }
+
 	public slots:
 		//File menu
 		void newScene();
