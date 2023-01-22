@@ -292,9 +292,9 @@ namespace Qt
 	{
 		mEditingEnabled = true;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -308,9 +308,9 @@ namespace Qt
 	{
 		mEditingEnabled = false;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)

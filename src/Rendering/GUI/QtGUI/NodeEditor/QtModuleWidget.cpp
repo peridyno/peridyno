@@ -155,7 +155,7 @@ namespace Qt
 
 		try
 		{
-			auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+			auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
 			if (fieldExp == nullptr)
 				return false;
 

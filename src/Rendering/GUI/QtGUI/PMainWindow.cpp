@@ -95,13 +95,12 @@
 #include "NodeEditor/QtModuleFlowScene.h"
 
 #include "nodes/QDataModelRegistry"
-
-#include "Toolbar/TabToolbar.h"
-#include "Toolbar/Page.h"
-#include "Toolbar/Group.h"
-#include "Toolbar/SubGroup.h"
-#include "Toolbar/StyleTools.h"
-#include "Toolbar/Builder.h"
+#include "ToolBar/TabToolbar.h"
+#include "ToolBar/Page.h"
+#include "ToolBar/Group.h"
+#include "ToolBar/SubGroup.h"
+#include "ToolBar/StyleTools.h"
+#include "ToolBar/Builder.h"
 #include "ToolBar/ToolBarPage.h"
 #include "Platform.h"
 
@@ -110,7 +109,7 @@
 
 namespace dyno
 {
-	Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
+	//Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
 	PMainWindow::PMainWindow(
 		QtApp* app,

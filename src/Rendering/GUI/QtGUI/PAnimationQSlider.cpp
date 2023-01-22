@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QPainter>
-
+#include <cmath>
 namespace dyno
 {
 	PAnimationQSlider::PAnimationQSlider(QWidget* parent):

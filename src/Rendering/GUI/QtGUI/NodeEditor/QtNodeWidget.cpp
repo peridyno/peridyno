@@ -273,7 +273,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
+				auto nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
 
 				if (nodeExp == nullptr)
 					return false;
@@ -291,7 +291,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+				auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
 				if (fieldExp == nullptr)
 					return false;
 
