@@ -1,5 +1,5 @@
 if(PERIDYNO_LIBRARY_RIGIDBODY)
-    set(PROJECT_NAME GL_TwoBoxes)
+    set(PROJECT_NAME GL_Collision)
 
     file(
         GLOB_RECURSE SRC_LIST 

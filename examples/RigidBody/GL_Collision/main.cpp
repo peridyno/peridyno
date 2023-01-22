@@ -5,10 +5,12 @@
 #include <RigidBody/RigidBodySystem.h>
 
 #include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
+#include <GLWireframeVisualModule.h>
+#include <GLPointVisualModule.h>
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
+#include <Mapping/ContactsToEdgeSet.h>
 #include <Mapping/ContactsToPointSet.h>
 
 #include "Collision/NeighborElementQuery.h"
@@ -16,28 +18,69 @@
 using namespace std;
 using namespace dyno;
 
+void createTwoBoxes(std::shared_ptr<SceneGraph>& scn) {
+	{
+		auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
-std::shared_ptr<SceneGraph> sceneTwoTets()
-{
-	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+		RigidBodyInfo rigidBody;
+		rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+		BoxInfo box;
+		box.center = Vec3f(-0.3, 0.1, 0.5);
+		box.halfLength = Vec3f(0.1, 0.1, 0.1);
+		rigid->addBox(box, rigidBody);
 
+		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		rigid->stateTopology()->connect(mapper->inDiscreteElements());
+		rigid->graphicsPipeline()->pushModule(mapper);
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Vec3f(1, 1, 0));
+		sRender->setAlpha(0.8f);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		rigid->graphicsPipeline()->pushModule(sRender);
+
+	}
+
+	{
+		auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
+
+		RigidBodyInfo rigidBody;
+		rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+		BoxInfo box;
+		box.center = Vec3f(-0.3, 0.3, 0.59);
+		box.halfLength = Vec3f(0.1, 0.1, 0.1);
+		rigid->addBox(box, rigidBody);
+
+		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		rigid->stateTopology()->connect(mapper->inDiscreteElements());
+		rigid->graphicsPipeline()->pushModule(mapper);
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Vec3f(0, 1, 1));
+		sRender->setAlpha(0.8f);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		rigid->graphicsPipeline()->pushModule(sRender);
+	}
+}
+
+void createTwoTets(std::shared_ptr<SceneGraph>& scn) {
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
-
+	
 	TetInfo tet0;
-	tet0.v[0] = Vec3f(0.5f, 0.1f, 0.5f);
-	tet0.v[1] = Vec3f(0.5f, 0.2f, 0.5f);
-	tet0.v[2] = Vec3f(0.6f, 0.1f, 0.5f);
-	tet0.v[3] = Vec3f(0.5f, 0.1f, 0.6f);
+	tet0.v[0] = Vec3f(0.45f, 0.3f, 0.45f);
+	tet0.v[1] = Vec3f(0.45f, 0.55f, 0.45f);
+	tet0.v[2] = Vec3f(0.7f, 0.3f, 0.45f);
+	tet0.v[3] = Vec3f(0.45f, 0.3f, 0.7f);
 	rigid->addTet(tet0, rigidBody);
 
 	TetInfo tet1;
-	tet1.v[0] = Vec3f(0.5f, 0.3f, 0.5f);
-	tet1.v[1] = Vec3f(0.5f, 0.4f, 0.5f);
-	tet1.v[2] = Vec3f(0.6f, 0.3f, 0.5f);
-	tet1.v[3] = Vec3f(0.5f, 0.3f, 0.6f);
+	tet1.v[0] = Vec3f(0.45f, 0.0f, 0.45f);
+	tet1.v[1] = Vec3f(0.45f, 0.25f, 0.45f);
+	tet1.v[2] = Vec3f(0.7f, 0.0f, 0.45f);
+	tet1.v[3] = Vec3f(0.45f, 0.0f, 0.7f);
 	rigid->addTet(tet1, rigidBody);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
@@ -65,29 +108,23 @@ std::shared_ptr<SceneGraph> sceneTwoTets()
 	pointRender->setColor(Vec3f(1, 0, 0));
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
-
-	return scn;
 }
 
-
-std::shared_ptr<SceneGraph> sceneTetBox()
-{
-	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
+void createTetBox(std::shared_ptr<SceneGraph>& scn) {
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
 	BoxInfo box;
-	box.center = Vec3f(0.5, 0.1, 0.5);
+	box.center = Vec3f(1.3, 0.1, 0.5);
 	box.halfLength = Vec3f(0.1, 0.1, 0.1);
 	rigid->addBox(box, rigidBody);
 
 	TetInfo tet0;
-	tet0.v[0] = Vec3f(0.45f, 0.25f, 0.45f);
-	tet0.v[1] = Vec3f(0.45f, 0.5f, 0.45f);
-	tet0.v[2] = Vec3f(0.7f, 0.25f, 0.45f);
-	tet0.v[3] = Vec3f(0.45f, 0.25f, 0.7f);
+	tet0.v[0] = Vec3f(1.25f, 0.25f, 0.45f);
+	tet0.v[1] = Vec3f(1.25f, 0.5f, 0.45f);
+	tet0.v[2] = Vec3f(1.5f, 0.25f, 0.45f);
+	tet0.v[3] = Vec3f(1.25f, 0.25f, 0.7f);
 	rigid->addTet(tet0, rigidBody);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
@@ -117,15 +154,23 @@ std::shared_ptr<SceneGraph> sceneTetBox()
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
+}
+
+std::shared_ptr<SceneGraph> creatScene(){
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	createTwoBoxes(scn);
+	createTwoTets(scn);
+	createTetBox(scn);
 	return scn;
 }
 
+
 int main()
-{
-	GlfwApp window;
-	window.setSceneGraph(sceneTetBox());
-	window.createWindow(1280, 768);
-	window.mainLoop();
+{	
+	GlfwApp app;
+	app.setSceneGraph(creatScene());
+	app.createWindow(1280, 768);
+	app.mainLoop();
 
 	return 0;
 }
