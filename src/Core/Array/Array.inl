@@ -76,7 +76,7 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const std::vector<T>& src, const uint count, const uint dstOffset, const uint srcOffset)
 	{
-		cuSafeCall(cudaMemcpy(mData + dstOffset, src.begin() + srcOffset, count * sizeof(T), cudaMemcpyHostToDevice));
+		cuSafeCall(cudaMemcpy(mData + dstOffset, src.data() + srcOffset, count * sizeof(T), cudaMemcpyHostToDevice));
 	}
 
 	template<typename T>
