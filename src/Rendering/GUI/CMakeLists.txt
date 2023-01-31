@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 
-#set(LIB_NAMES GlutGUI QtGUI)
+include_directories("${CMAKE_SOURCE_DIR}/src")                                                              #默认为本项目下各编译目标添加Source/ 目录
 
-add_subdirectory(ImWidgets)
-add_subdirectory(GlfwGUI)
-
-if(PERIDYNO_Qt5_GUI)
-    add_subdirectory(QtGUI)
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+    add_subdirectory(ImGUI)
 endif()
 
-file(GLOB FILE_GUI_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-install(FILES ${FILE_GUI_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI)
+add_subdirectory(GlfwGUI)
+add_subdirectory(ImWidgets)
+
+    if(PERIDYNO_Qt5_GUI)
+	    add_subdirectory(QtGUI)
+	endif()

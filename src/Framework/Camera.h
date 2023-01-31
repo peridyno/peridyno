@@ -6,7 +6,7 @@
 #include <Vector.h>
 #include <Quat.h>
 
-#include "Topology/Primitive3D.h"
+#include "Primitive/Primitive3D.h"
 
 namespace dyno
 {

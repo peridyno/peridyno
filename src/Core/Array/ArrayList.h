@@ -17,6 +17,8 @@
 #include <vector>
 #include <iostream>
 
+#include "Platform.h"
+
 #include "STL/List.h"
 #include "Array/Array.h"
 
@@ -32,27 +34,35 @@ namespace dyno {
 
 		bool resize(uint num);
 
-		inline uint size() const { return m_lists.size(); }
+		inline uint size() const { return mLists.size(); }
 		uint elementSize();
+
+		uint size(uint id)
+		{
+			return id == mIndex.size() - 1 ? mElements.size() - mIndex[id] : mIndex[id + 1] - mIndex[id];
+		}
 
 		inline List<ElementType>& operator [] (unsigned int id)
 		{
-			return m_lists[id];
+			return mLists[id];
 		}
 
 		inline const List<ElementType>& operator [] (unsigned int id) const
 		{
-			return m_lists[id];
+			return mLists[id];
 		}
 
 		inline bool isCPU() const { return true; }
 		inline bool isGPU() const { return false; }
-		inline bool isEmpty() const { return m_lists.empty(); }
+		inline bool isEmpty() const { return mLists.empty(); }
 
 		void clear();
 
 		void assign(const ArrayList<ElementType, DeviceType::CPU>& src);
+
+	#ifndef NO_BACKEND
 		void assign(const ArrayList<ElementType, DeviceType::GPU>& src);
+	#endif
 
 		friend std::ostream& operator<<(std::ostream &out, const ArrayList<ElementType, DeviceType::CPU>& aList)
 		{
@@ -70,9 +80,9 @@ namespace dyno {
 			return out;
 		}
 
-		const CArray<int>& index() const { return m_index; }
-		const CArray<ElementType>& elements() const { return m_elements; }
-		const CArray<List<ElementType>>& lists() const { return m_lists; }
+		const CArray<uint>& index() const { return mIndex; }
+		const CArray<ElementType>& elements() const { return mElements; }
+		const CArray<List<ElementType>>& lists() const { return mLists; }
 
 		/*!
 		 *	\brief	To avoid erroneous shallow copy.
@@ -80,92 +90,54 @@ namespace dyno {
 		ArrayList<ElementType, DeviceType::CPU>& operator=(const ArrayList<ElementType, DeviceType::CPU> &) = delete;
 
 	private:
-		CArray<int> m_index;
-		CArray<ElementType> m_elements;
+		CArray<uint> mIndex;
+		CArray<ElementType> mElements;
 
-		CArray<List<ElementType>> m_lists;
+		CArray<List<ElementType>> mLists;
 	};
 
 	template<class ElementType>
-	class ArrayList<ElementType, DeviceType::GPU>
+	void ArrayList<ElementType, DeviceType::CPU>::clear()
 	{
-	public:
-		ArrayList()
+		for (int i = 0; i < mLists.size(); i++)
 		{
-		};
-
-		/*!
-		*	\brief	Do not release memory here, call clear() explicitly.
-		*/
-		~ArrayList() {};
-
-		/**
-		 * @brief Pre-allocate GPU space for
-		 *
-		 * @param counts
-		 * @return true
-		 * @return false
-		 */
-		bool resize(const DArray<int>& counts);
-		bool resize(const uint arraySize, const uint eleSize);
-
-
-		bool resize(uint num);
-
-		template<typename ET2>
-		bool resize(const ArrayList<ET2, DeviceType::GPU>& src);
-
-		DYN_FUNC inline uint size() const { return m_lists.size(); }
-		DYN_FUNC inline uint elementSize() const { return m_elements.size(); }
-
-		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id) {
-			return m_lists[id];
+			mLists[i].clear();
 		}
 
-		GPU_FUNC inline List<ElementType>& operator [] (unsigned int id) const {
-			return m_lists[id];
-		}
+		mLists.clear();
+		mIndex.clear();
+		mElements.clear();
+	}
 
-		DYN_FUNC inline bool isCPU() const { return false; }
-		DYN_FUNC inline bool isGPU() const { return true; }
-		DYN_FUNC inline bool isEmpty() const { return m_index.size() == 0; }
+	template<class ElementType>
+	uint ArrayList<ElementType, DeviceType::CPU>::elementSize()
+	{
+		return mElements.size();
+	}
 
-		void clear();
+	template<class ElementType>
+	void ArrayList<ElementType, DeviceType::CPU>::assign(const ArrayList<ElementType, DeviceType::CPU>& src)
+	{
+		mIndex.assign(src.index());
+		mElements.assign(src.elements());
 
-		void assign(const ArrayList<ElementType, DeviceType::GPU>& src);
-		void assign(const ArrayList<ElementType, DeviceType::CPU>& src);
-		void assign(const std::vector<std::vector<ElementType>>& src);
+		mLists.assign(src.lists());
 
-		friend std::ostream& operator<<(std::ostream &out, const ArrayList<ElementType, DeviceType::GPU>& aList)
+		//redirect the element address
+		for (uint i = 0; i < src.size(); i++)
 		{
-			ArrayList<ElementType, DeviceType::CPU> hList;
-			hList.assign(aList);
-			out << hList;
-
-			return out;
+			mLists[i].reserve(mElements.begin() + mIndex[i], mLists[i].size());
 		}
-
-		const DArray<int>& index() const { return m_index; }
-		const DArray<ElementType>& elements() const { return m_elements; }
-		const DArray<List<ElementType>>& lists() const { return m_lists; }
-
-		/*!
-		*	\brief	To avoid erroneous shallow copy.
-		*/
-		ArrayList<ElementType, DeviceType::GPU>& operator=(const ArrayList<ElementType, DeviceType::GPU> &) = delete;
-
-	private:
-		DArray<int> m_index;
-		DArray<ElementType> m_elements;
-
-		DArray<List<ElementType>> m_lists;
-	};
-
-	template<typename T>
-	using DArrayList = ArrayList<T, DeviceType::GPU>;
+	}
 
 	template<typename T>
 	using CArrayList = ArrayList<T, DeviceType::CPU>;
 }
 
-#include "ArrayList.inl"
+#ifdef CUDA_BACKEND
+	#include "Backend/Cuda/Array/ArrayList.inl"
+#endif
+
+#ifdef VK_BACKEND
+	#include "Backend/Vulkan/Array/ArrayList.inl"
+#endif

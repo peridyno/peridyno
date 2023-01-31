@@ -2,10 +2,12 @@
 
 #include "NodeFactory.h"
 
+#ifdef CUDA_BACKEND
 #include "Node/GLPointVisualNode.h"
 #include "Node/GLSurfaceVisualNode.h"
 
 #include "ColorMapping.h"
+#endif // CUDA_BACKEND
 
 namespace dyno
 {
@@ -24,6 +26,7 @@ namespace dyno
 
 		auto group = page->addGroup("Rendering");
 
+#ifdef CUDA_BACKEND
 		group->addAction(
 			"Particle Renderer",
 			"ToolBarIco/RigidBody/GhostParticles.png",
@@ -33,6 +36,7 @@ namespace dyno
 			"Surface Renderer",
 			"ToolBarIco/Rendering/SurfaceRender_v2.png",
 			[=]()->std::shared_ptr<Node> { return std::make_shared<GLSurfaceVisualNode<DataType3f>>(); });
+#endif // CUDA_BACKEND
 	}
 
 }

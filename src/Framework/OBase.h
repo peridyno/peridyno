@@ -18,6 +18,11 @@
 #include "FBase.h"
 #include "Object.h"
 
+#ifdef VK_BACKEND
+#include "VkProgram.h"
+#endif // VK_BACKEND
+
+
 namespace dyno {
 	/**
 	*  \brief Base class for modules
@@ -28,12 +33,18 @@ namespace dyno {
 	*/
 
 	typedef std::string FieldID;
+	typedef std::string ProgramID;
 
 	class OBase : public Object
 	{
 	public:
 		typedef std::vector<FBase*> FieldVector;
 		typedef std::map<FieldID, FBase*> FieldMap;
+
+#ifdef VK_BACKEND
+		typedef std::map<ProgramID, std::shared_ptr<VkProgram>> ProgramMap;
+		typedef std::map<ProgramID, std::shared_ptr<VkMultiProgram>> MultiProgramMap;
+#endif // VK_BACKEND
 
 		OBase() : Object() {};
 		~OBase() override;
@@ -163,6 +174,20 @@ namespace dyno {
 		bool removeParameter(FBase* field);
 
 		std::vector<FBase*>& getParameters() { return fields_param; }
+
+#ifdef VK_BACKEND
+		std::shared_ptr<VkProgram> addKernel(ProgramID programId, std::shared_ptr<VkProgram> prog);
+
+		std::shared_ptr<VkProgram> kernel(ProgramID programId);
+
+		VkMultiProgram& createKernelGroup(ProgramID programId);
+
+		VkMultiProgram& kernelGroup(ProgramID programId);
+
+	protected:
+		ProgramMap Kernels;
+		MultiProgramMap MultiKernels;
+#endif
 
 	private:
 		float block_x = 0.0f;

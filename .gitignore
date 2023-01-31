@@ -38,3 +38,5 @@ buildDebug/*
 /config/ImathConfig.h
 /config/ImathConfigVersion.cmake
 /config/ImathTargets.cmake
+*.comp.spv
+*.spv

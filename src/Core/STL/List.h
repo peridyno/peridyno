@@ -4,9 +4,10 @@
 #include "Platform.h"
 #include "STLBuffer.h"
 
-
+#ifdef CUDA_BACKEND
 #include <cuda.h>
 #include <cuda_runtime.h>
+#endif
 //#include <device_atomic_functions.h>
 namespace dyno
 {
@@ -52,7 +53,10 @@ namespace dyno
 		DYN_FUNC uint size();
 
 		DYN_FUNC inline iterator insert(T val);
+
+#ifdef CUDA_BACKEND
 		GPU_FUNC inline iterator atomicInsert(T val);
+#endif
 
 		DYN_FUNC inline T front();
 		DYN_FUNC inline T back();

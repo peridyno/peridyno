@@ -77,8 +77,13 @@ namespace dyno {
 	public:
 		union
 		{
+#ifdef VK_BACKEND
+			DYN_ALIGN_16 glm::tvec3<T> data_; //default: zero vector
+			struct { T x, y, z, dummy; };
+#else
 			glm::tvec3<T> data_; //default: zero vector
 			struct { T x, y, z; };
+#endif // VK_BACKEND
 		};
 	};
 

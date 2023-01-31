@@ -4,6 +4,12 @@
 
 namespace dyno {
 
+#if(defined(__NVCC__))
+#	define DYN_ALIGN_16 __align__(16) 
+#else
+#	define DYN_ALIGN_16 alignas(16)
+#endif
+
 	template<typename T>
 	class VectorBase
 	{
