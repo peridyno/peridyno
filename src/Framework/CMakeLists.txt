@@ -29,6 +29,19 @@ endif()
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 add_compile_definitions(_ENABLE_EXTENDED_ALIGNED_STORAGE)
 
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
+
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)

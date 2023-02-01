@@ -74,6 +74,19 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 add_compile_definitions(_ENABLE_EXTENDED_ALIGNED_STORAGE)
 
 if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
+
+if(WIN32)
     target_compile_options(${LIB_NAME} PRIVATE -Xcompiler "/wd 4819") 
 endif()
 
