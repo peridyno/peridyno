@@ -22,12 +22,6 @@ namespace gl
 			cudaGraphicsUnregisterResource(resource);
 		}
 		cudaGraphicsGLRegisterBuffer(&resource, id, cudaGraphicsRegisterFlagsWriteDiscard);
-
-		// map cuda resource
-		size_t size0;
-		cudaGraphicsMapResources(1, &resource);
-		cudaGraphicsResourceGetMappedPointer(&devicePtr, &size0, resource);
-
 	}
 
 
@@ -37,7 +31,6 @@ namespace gl
 
 		if (resource != 0)
 		{
-			cudaGraphicsUnmapResources(1, &resource);
 			cudaGraphicsUnregisterResource(resource);
 		}
 	}
@@ -52,7 +45,16 @@ namespace gl
 			allocate(size);
 		}
 
-		cudaMemcpy(this->devicePtr, src, size, cudaMemcpyDeviceToDevice);
+		// map cuda resource
+		size_t size0;
+		void* devicePtr = 0;
+		cudaGraphicsMapResources(1, &resource);
+		cudaGraphicsResourceGetMappedPointer(&devicePtr, &size0, resource);
+
+		cudaMemcpy(devicePtr, src, size, cudaMemcpyDefault);
+
+		cudaGraphicsUnmapResources(1, &resource);
+
 		cudaStreamSynchronize(0);
 	}
 

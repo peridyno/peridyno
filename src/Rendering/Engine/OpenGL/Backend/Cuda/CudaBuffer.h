@@ -32,6 +32,5 @@ namespace gl
 
 	private:
 		cudaGraphicsResource*	resource = 0; 
-		void*					devicePtr = 0;
 	};
 }
