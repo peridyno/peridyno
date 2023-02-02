@@ -224,19 +224,21 @@ namespace dyno
 
 		// update if necessary, note that we need to lock scenegraph for data consistency
 		{
-			scene->lock();
-			for (auto m : mRenderModules) {
-				if (m->isGLInitialized)
-				{
-					// check update
-					if (m->changed > m->updated) {
-						m->updateGL();
-						m->updated = GLVisualModule::clock::now();
+			if (scene->try_lock())
+			{
+				for (auto m : mRenderModules) {
+					if (m->isGLInitialized)
+					{
+						// check update
+						if (m->changed > m->updated) {
+							m->updateGL();
+							m->updated = GLVisualModule::clock::now();
+						}
 					}
 				}
-			}
 
-			scene->unlock();
+				scene->unlock();
+			}
 		}
 
 	}
