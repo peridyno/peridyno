@@ -224,7 +224,7 @@ namespace dyno
 
 		// update if necessary, note that we need to lock scenegraph for data consistency
 		{
-			if (scene->try_lock())
+			scene->lock();
 			{
 				for (auto m : mRenderModules) {
 					if (m->isGLInitialized)
@@ -236,9 +236,8 @@ namespace dyno
 						}
 					}
 				}
-
-				scene->unlock();
 			}
+			scene->unlock();
 		}
 
 	}
