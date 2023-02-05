@@ -77,6 +77,6 @@ namespace dyno {
 		DArray<Real> m_yield_J2;
 		DArray<Real> m_I1;
 
-		std::shared_ptr<DensityPBD<TDataType>> m_pbdModule;
+		std::shared_ptr<DensityPBD<TDataType>> mDensityPBD;
 	};
 }

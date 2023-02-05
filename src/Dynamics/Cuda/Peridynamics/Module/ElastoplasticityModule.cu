@@ -25,12 +25,13 @@ namespace dyno
 		m_reconstuct_all_neighborhood.setValue(false);
 		m_incompressible.setValue(true);
 
-		m_pbdModule = std::make_shared<DensityPBD<TDataType>>();
-		this->inTimeStep()->connect(m_pbdModule->inTimeStep());
-		this->inHorizon()->connect(m_pbdModule->varSmoothingLength());
-		this->inPosition()->connect(m_pbdModule->inPosition());
-		this->inVelocity()->connect(m_pbdModule->inVelocity());
-		this->inNeighborIds()->connect(m_pbdModule->inNeighborIds());
+		mDensityPBD = std::make_shared<DensityPBD<TDataType>>();
+		mDensityPBD->varIterationNumber()->setValue(1);
+		this->inTimeStep()->connect(mDensityPBD->inTimeStep());
+		this->inHorizon()->connect(mDensityPBD->varSmoothingLength());
+		this->inPosition()->connect(mDensityPBD->inPosition());
+		this->inVelocity()->connect(mDensityPBD->inVelocity());
+		this->inNeighborIds()->connect(mDensityPBD->inNeighborIds());
 	}
 
 	__device__ Real Hardening(Real rho)
@@ -265,16 +266,13 @@ namespace dyno
 
 		this->computeInverseK();
 
-		m_pbdModule->varIterationNumber()->setValue(1);
-
 		int iter = 0;
 		int total = this->varIterationNumber()->getData();
 		while (iter < total)
 		{
 			this->enforceElasticity();
-			if (m_incompressible.getData() == true)
-			{
-				m_pbdModule->constrain();
+			if (m_incompressible.getData() == true) {
+				mDensityPBD->update();
 			}
 			
 			iter++;
@@ -310,7 +308,7 @@ namespace dyno
 			m_yield_J2,
 			m_I1,
 			this->inPosition()->getData(),
-			m_pbdModule->outDensity()->getData(),
+			mDensityPBD->outDensity()->getData(),
 			this->mBulkStiffness,
 			this->inRestShape()->getData(),
 			this->inHorizon()->getData(),
