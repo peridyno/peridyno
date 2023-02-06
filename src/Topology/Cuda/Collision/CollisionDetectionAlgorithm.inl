@@ -2086,6 +2086,7 @@ namespace dyno
 		//printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
 		if (cnt1 == 1 || cnt2 == 1)
 		{
+			
 			m.normal = (boundary1 > boundary2) ? axisNormal : - axisNormal;
 			m.contacts[0].penetration = sMax;
 			m.contacts[0].position = (cnt1 == 1) ? tet1.v[boundaryPoints1[0]] : tet2.v[boundaryPoints2[0]];
@@ -2113,6 +2114,7 @@ namespace dyno
 				Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
 				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
 				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+				
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
@@ -2125,6 +2127,7 @@ namespace dyno
 					m.contacts[m.contactCount].position = s1.v1;
 					m.contactCount++;
 				}
+				
 				for (int i = 0; i < 3; i++)
 				{
 					Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
@@ -2133,7 +2136,11 @@ namespace dyno
 						dir.direction()[0], dir.direction()[1], dir.direction()[2],
 						axisNormal[0], axisNormal[1], axisNormal[2],
 						dir.direction().normalize().cross(axisNormal).norm());*/
-					if ( (!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) ||
+						(
+						(dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+							))
+					//if(dir.norm() < 1e5)
 					{
 						//printf("Yes\n");
 						if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
@@ -2159,6 +2166,7 @@ namespace dyno
 				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
 				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
+
 				{
 					m.contacts[m.contactCount].penetration = sMax;
 					m.contacts[m.contactCount].position = s2.v0;
@@ -2170,11 +2178,15 @@ namespace dyno
 					m.contacts[m.contactCount].position = s2.v1;
 					m.contactCount++;
 				}
+				
 				for (int i = 0; i < 3; i++)
 				{
 					Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
 					Segment3D dir = s2.proximity(s1);
-					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+					if ((!dir.isValid()) ||
+						(
+						(dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+						))
 					{
 						if ((dir.v0 - s2.v0).norm() > 1e-5 && (dir.v0 - s2.v1).norm() > 1e-5)
 						{
@@ -2207,13 +2219,19 @@ namespace dyno
 						m.contacts[m.contactCount].position = t2.v[i];
 						m.contactCount++;
 					}
-
+					
 					for (int j = 0; j < 3; j++)
 					{
 						Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
 						Segment3D s2(t2.v[(j + 1) % 3], t2.v[(j + 2) % 3]);
 						Segment3D dir = s1.proximity(s2);
-						if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
+						
+
+						if ((!dir.isValid()) ||
+							(
+							(dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+							)
+							)
 						{
 							if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
 							{
@@ -2223,6 +2241,7 @@ namespace dyno
 							}
 						}
 					}
+					
 				}
 
 			}
