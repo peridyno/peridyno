@@ -51,6 +51,9 @@ namespace dyno
 			Real stepInverse = stepInv[idx1];
 			if (idx2 != INVLIDA_ID)
 				stepInverse += stepInv[idx2];
+
+			if (stepInverse > 10)
+				stepInverse = 10.0f;
 			delta_lambda *= (1.0f / stepInverse);
 
 			//printf("delta_lambda = %.3lf\n", delta_lambda);
@@ -295,7 +298,7 @@ namespace dyno
 		Real invDt = Real(1) / dt;
 
 		//TODO: add user control to beta
-		Real beta = Real(1) / Real(15);
+		Real beta = Real(1) / Real(4);
 
 		int idx1 = constraints[pId].bodyId1;
 		int idx2 = constraints[pId].bodyId2;

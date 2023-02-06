@@ -44,7 +44,7 @@ namespace dyno
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
 
-		DEF_VAR(uint, IterationNumber, 10, "");
+		DEF_VAR(uint, IterationNumber, 30, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
