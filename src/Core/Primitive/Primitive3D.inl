@@ -3009,6 +3009,7 @@ namespace dyno
 	DYN_FUNC TSphere3D<Real>::TSphere3D()
 	{
 		center = Coord3D(0);
+		rotation = Quat<Real>();
 		radius = 1;
 	}
 
@@ -3016,6 +3017,15 @@ namespace dyno
 	DYN_FUNC TSphere3D<Real>::TSphere3D(const Coord3D& c, const Real& r)
 	{
 		center = c;
+		rotation = Quat<Real>();
+		radius = r < 0 ? 0 : r;
+	}
+
+	template<typename Real>
+	DYN_FUNC dyno::TSphere3D<Real>::TSphere3D(const Coord3D& c, const Quat<Real>& rot, const Real& r)
+	{
+		center = c;
+		rotation = rot;
 		radius = r < 0 ? 0 : r;
 	}
 
@@ -3023,6 +3033,7 @@ namespace dyno
 	DYN_FUNC TSphere3D<Real>::TSphere3D(const TSphere3D& sphere)
 	{
 		center = sphere.center;
+		rotation = sphere.rotation;
 		radius = sphere.radius;
 	}
 

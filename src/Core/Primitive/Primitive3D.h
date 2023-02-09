@@ -566,6 +566,7 @@ namespace dyno
 	public:
 		DYN_FUNC TSphere3D();
 		DYN_FUNC TSphere3D(const Coord3D& c, const Real& r);
+		DYN_FUNC TSphere3D(const Coord3D& c, const Quat<Real>& rot, const Real& r);
 		DYN_FUNC TSphere3D(const TSphere3D<Real>& sphere);
 
 		DYN_FUNC Real volume();
@@ -574,8 +575,9 @@ namespace dyno
 
 		DYN_FUNC TAlignedBox3D<Real> aabb();
 
-		Real radius;
 		Coord3D center;
+		Quat<Real> rotation;
+		Real radius;
 	};
 
 	template<typename Real>

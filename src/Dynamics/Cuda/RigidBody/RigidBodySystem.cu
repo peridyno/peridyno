@@ -195,6 +195,7 @@ namespace dyno
 
 		sphere3d[tId].radius = sphereInfo[tId].radius;
 		sphere3d[tId].center = sphereInfo[tId].center;
+		sphere3d[tId].rotation = sphereInfo[tId].rot;
 	}
 
 	__global__ void SetupTets(
@@ -282,16 +283,19 @@ namespace dyno
 		m_recoverSpeed = 0.3f;
 	}
 	
-	template <typename Coord>
+	template <typename Real, typename Coord>
 	__global__ void UpdateSpheres(
 		DArray<Sphere3D> sphere,
+		DArray<SphereInfo> sphere_init,
 		DArray<Coord> pos,
+		DArray<Quat<Real>> quat,
 		int start_sphere)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= sphere.size()) return;
 
 		sphere[pId].center = pos[pId + start_sphere];
+		sphere[pId].rotation = quat[pId + start_sphere];
 	}
 
 	template <typename Coord, typename Matrix>
@@ -349,7 +353,9 @@ namespace dyno
 		cuExecute(mDeviceBoxes.size(),
 			UpdateSpheres,
 			discreteSet->getSpheres(),
+			mDeviceSpheres,
 			this->stateCenter()->getData(),
+			this->stateQuaternion()->getData(),
 			offset.sphereIndex());
 
 		cuExecute(mDeviceTets.size(),

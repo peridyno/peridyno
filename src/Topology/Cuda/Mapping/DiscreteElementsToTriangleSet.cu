@@ -123,7 +123,7 @@ namespace dyno
 		Sphere3D sphere = sphereInstances[instanceId];
 
 		Vec3f v = sphereVertices[vertexId];
-		vertices[pointOffset + tId] = sphere.center + sphere.radius * v;
+		vertices[pointOffset + tId] = sphere.center + sphere.radius * sphere.rotation.rotate(v);
 	}
 
 	template<typename Triangle>

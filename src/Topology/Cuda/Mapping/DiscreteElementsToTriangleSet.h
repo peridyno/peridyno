@@ -21,6 +21,7 @@ namespace dyno
 
 	public:
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
+
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 
 	private:
