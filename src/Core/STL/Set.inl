@@ -62,13 +62,13 @@ namespace dyno
 	}
 
 	template <typename T>
-	DYN_FUNC size_t Set<T>::size()
+	DYN_FUNC uint Set<T>::size()
 	{
 		return m_size;
 	}
 
 	template <typename T>
-	DYN_FUNC size_t Set<T>::count(T val)
+	DYN_FUNC uint Set<T>::count(T val)
 	{
 		return find(val) ? 1 : 0;
 	}

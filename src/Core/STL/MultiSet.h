@@ -36,8 +36,8 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC size_t size();
-		DYN_FUNC size_t count(T val);
+		DYN_FUNC uint size();
+		DYN_FUNC uint count(T val);
 
 		DYN_FUNC iterator insert(T val);
 		DYN_FUNC bool empty();
@@ -46,7 +46,7 @@ namespace dyno
 		DYN_FUNC void erase(iterator val_ptr);
 
 	private:
-		int m_size = 0;
+		uint m_size = 0;
 	};
 
 }

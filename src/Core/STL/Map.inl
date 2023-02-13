@@ -49,7 +49,7 @@ namespace dyno
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC int Map<MKey, T>::size()
+	DYN_FUNC uint Map<MKey, T>::size()
 	{
 		return m_size;
 	}

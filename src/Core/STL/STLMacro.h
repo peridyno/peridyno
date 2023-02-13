@@ -19,7 +19,7 @@ namespace dyno
 	 *		   case 3: return maxSize if target is not in the array
 	 */
 	template<typename T>
-	DYN_FUNC int leftBound(T target, T* startLoc, size_t maxSize)
+	DYN_FUNC int leftBound(T target, T* startLoc, uint maxSize)
 	{
 		int left = 0;
 		int right = (int)maxSize;
@@ -51,7 +51,7 @@ namespace dyno
 	 *		   case 3: return -1 if target is not in the array
 	 */
 	template<typename T>
-	DYN_FUNC int rightBound(T target, T* startLoc, size_t maxSize)
+	DYN_FUNC int rightBound(T target, T* startLoc, uint maxSize)
 	{
 		if (maxSize == 0) return -1;
 		int left = 0, right = (int)maxSize;

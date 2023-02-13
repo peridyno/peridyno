@@ -44,16 +44,16 @@ namespace dyno
 	}
 
 	template <typename T>
-	DYN_FUNC size_t Stack<T>::size()
+	DYN_FUNC uint Stack<T>::size()
 	{
 		return m_size;
 	}
 
 	template <typename T>
-	DYN_FUNC size_t Stack<T>::count(T val)
+	DYN_FUNC uint Stack<T>::count(T val)
 	{
-		size_t ind = 0;
-		size_t num = 0;
+		uint ind = 0;
+		uint num = 0;
 		while (ind < m_size)
 		{
 			if(m_startLoc[ind] == val)

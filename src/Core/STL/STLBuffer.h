@@ -23,7 +23,7 @@ namespace dyno
 			m_maxSize = buffer_size;
 		}
 
-		DYN_FUNC int max_size() { return m_maxSize; }
+		DYN_FUNC uint max_size() { return m_maxSize; }
 
 // 		DYN_FUNC inline T& operator[] (unsigned int) { return m_startLoc[i]; }
 // 		DYN_FUNC inline const T& operator[] (unsigned int) const { return m_startLoc[i]; }
@@ -33,7 +33,7 @@ namespace dyno
 			return m_startLoc + m_maxSize;
 		}
 
-		size_t m_maxSize = 0;
+		uint m_maxSize = 0;
 		
 		T* m_startLoc = nullptr;
 	};

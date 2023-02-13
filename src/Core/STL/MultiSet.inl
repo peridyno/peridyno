@@ -50,13 +50,13 @@ namespace dyno
 	}
 
 	template <typename T>
-	DYN_FUNC size_t MultiSet<T>::size()
+	DYN_FUNC uint MultiSet<T>::size()
 	{
 		return m_size;
 	}
 
 	template <typename T>
-	DYN_FUNC size_t MultiSet<T>::count(T val)
+	DYN_FUNC uint MultiSet<T>::count(T val)
 	{
 		int ind = leftBound(val, m_startLoc, m_size);
 		if (ind >= m_size) return 0;
