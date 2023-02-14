@@ -3,6 +3,8 @@
 
 using namespace dyno;
 
+using Coord3D = Vector<Real, 3>;
+
 TEST(Point3D, distance)
 {
 	Sphere3D sphere(Coord3D(0), 1);
@@ -112,7 +114,7 @@ TEST(Line3D, distance) {
 	Line3D line_111_1(Coord3D(2, 0, 2), Coord3D(2, 1, -2));
 	EXPECT_EQ(line_111_1.distanceSquared(box), (Real(2)));
 
-	Coord3D vec(0);
+	Vector<Real, 3> vec(0);
 	vec.normalize();
 	EXPECT_EQ(vec.norm(), (Real(0)));
 

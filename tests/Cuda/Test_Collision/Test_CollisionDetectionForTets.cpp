@@ -6,6 +6,7 @@
 
 using namespace dyno;
 
+using Coord3D = Vector<Real, 3>;
 
 TEST(TET, collision)
 {

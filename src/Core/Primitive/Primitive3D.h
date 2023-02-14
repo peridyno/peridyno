@@ -75,29 +75,8 @@ namespace dyno
 	// 	#define  REAL_EPSILON_SQUARED 1e-20
 	// #endif
 
-#ifdef PRECISION_FLOAT
-	typedef Vec2f Coord2D;
-	typedef Vec3f Coord3D;
-	typedef Mat3f Matrix3D;
-#else
-	typedef Vec2d Coord2D;
-	typedef Vec3d Coord3D;
-	typedef Mat3d Matrix3D;
-#endif
-
 	constexpr Real REAL_EPSILON = (std::numeric_limits<Real>::epsilon)();
 	constexpr Real REAL_EPSILON_SQUARED = REAL_EPSILON * REAL_EPSILON;
-
-
-#ifdef PRECISION_FLOAT
-	typedef Vec2f Coord2D;
-	typedef Vec3f Coord3D;
-	typedef Mat3f Matrix3D;
-#else
-	typedef Vec2d Coord2D;
-	typedef Vec3d Coord3D;
-	typedef Mat3d Matrix3D;
-#endif
 
 	/**
 	 * @brief 0D geometric primitive in three-dimensional space
@@ -133,9 +112,15 @@ namespace dyno
 	template <typename Real> class TOrientedBox3D;
 	template <typename Real> class TCylinder3D;
 	template <typename Real> class TCone3D;
+
+
 	template<typename Real>
 	class TPoint3D
 	{
+	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
 	public:
 		DYN_FUNC TPoint3D();
 		DYN_FUNC TPoint3D(const Real& c0, const Real& c1, const Real& c2);
@@ -283,6 +268,10 @@ namespace dyno
 	class TLine3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TLine3D();
 		/**
 		 * @brief
@@ -353,6 +342,10 @@ namespace dyno
 	class TRay3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TRay3D();
 
 		struct Param
@@ -408,6 +401,10 @@ namespace dyno
 	class TSegment3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TSegment3D();
 		DYN_FUNC TSegment3D(const Coord3D& p0, const Coord3D& p1);
 		DYN_FUNC TSegment3D(const TSegment3D<Real>& segment);
@@ -462,6 +459,10 @@ namespace dyno
 	class TPlane3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TPlane3D();
 		DYN_FUNC TPlane3D(const Coord3D& pos, const Coord3D n);
 		DYN_FUNC TPlane3D(const TPlane3D& plane);
@@ -479,6 +480,10 @@ namespace dyno
 	template<typename Real>
 	class TTriangle3D
 	{
+	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
 	public:
 		DYN_FUNC TTriangle3D();
 		DYN_FUNC TTriangle3D(const Coord3D& p0, const Coord3D& p1, const Coord3D& p2);
@@ -514,6 +519,10 @@ namespace dyno
 	class TRectangle3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TRectangle3D();
 		DYN_FUNC TRectangle3D(const Coord3D& c, const Coord3D& a0, const Coord3D& a1, const Coord2D& ext);
 		DYN_FUNC TRectangle3D(const TRectangle3D<Real>& rectangle);
@@ -547,6 +556,10 @@ namespace dyno
 	class TDisk3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TDisk3D();
 		DYN_FUNC TDisk3D(const Coord3D& c, const Coord3D& n, const Real& r);
 		DYN_FUNC TDisk3D(const TDisk3D<Real>& circle);
@@ -563,6 +576,10 @@ namespace dyno
 	template<typename Real>
 	class TSphere3D
 	{
+	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
 	public:
 		DYN_FUNC TSphere3D();
 		DYN_FUNC TSphere3D(const Coord3D& c, const Real& r);
@@ -584,6 +601,10 @@ namespace dyno
 	class TCylinder3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TCylinder3D();
 		DYN_FUNC TCylinder3D(const Real& radius, const Real& row, const Real &columns, const Real &height, const Real& end_segment_, const Coord3D& center_);
 		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& Cylinder);
@@ -602,6 +623,10 @@ namespace dyno
 	class TCone3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
+	public:
 		DYN_FUNC TCone3D();
 		DYN_FUNC TCone3D(const Real& radius, const Real& row, const Real& columns, const Real& height);
 		DYN_FUNC TCone3D(const TCone3D<Real>& Cone);
@@ -619,6 +644,10 @@ namespace dyno
 	template<typename Real>
 	class TCapsule3D
 	{
+	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+
 	public:
 		DYN_FUNC TCapsule3D();
 		DYN_FUNC TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r);
@@ -640,6 +669,11 @@ namespace dyno
 	template<typename Real>
 	class TTet3D
 	{
+	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename SquareMatrix<Real, 3> Matrix3D;
+
 	public:
 		DYN_FUNC TTet3D();
 		DYN_FUNC TTet3D(const Coord3D& v0, const Coord3D& v1, const Coord3D& v2, const Coord3D& v3);
@@ -669,6 +703,11 @@ namespace dyno
 	class TAlignedBox3D
 	{
 	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename SquareMatrix<Real, 3> Matrix3D;
+
+	public:
 		DYN_FUNC TAlignedBox3D();
 		DYN_FUNC TAlignedBox3D(const Coord3D& p0, const Coord3D& p1);
 		DYN_FUNC TAlignedBox3D(const TAlignedBox3D<Real>& box);
@@ -688,6 +727,11 @@ namespace dyno
 	template<typename Real>
 	class TOrientedBox3D
 	{
+	public:
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename SquareMatrix<Real, 3> Matrix3D;
+
 	public:
 		DYN_FUNC TOrientedBox3D();
 

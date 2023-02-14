@@ -2740,7 +2740,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC Coord3D TTriangle3D<Real>::normal() const
+	DYN_FUNC typename TTriangle3D<Real>::Coord3D TTriangle3D<Real>::normal() const
 	{
 		Coord3D n = (v[1] - v[0]).cross(v[2] - v[0]);
 		if (n.norm() > REAL_EPSILON_SQUARED)
@@ -2784,7 +2784,7 @@ namespace dyno
 
 
 	template<typename Real>
-	DYN_FUNC Coord3D TTriangle3D<Real>::computeLocation(const Param& bary) const
+	DYN_FUNC typename TTriangle3D<Real>::Coord3D TTriangle3D<Real>::computeLocation(const Param& bary) const
 	{
 		Coord3D d0 = v[1] - v[0];
 		Coord3D d1 = v[2] - v[0];
@@ -2930,7 +2930,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC Coord3D TRectangle3D<Real>::normal() const
+	DYN_FUNC typename TRectangle3D<Real>::Coord3D TRectangle3D<Real>::normal() const
 	{
 		return axis[0].cross(axis[1]);
 	}

@@ -62,7 +62,7 @@ namespace dyno
 
 		
 		uint counter = 0;
-		Coord3D Location;
+		Coord Location;
 		Real angle = PI / 180 * 360 / columns_i;
 		Real temp_angle = angle;
 		Real x, y, z;

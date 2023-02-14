@@ -6,6 +6,8 @@
 
 using namespace dyno;
 
+using Coord3D = Vector<Real, 3>;
+
 TEST(Sphere, collision)
 {
 	using Box = TOrientedBox3D<float>;
