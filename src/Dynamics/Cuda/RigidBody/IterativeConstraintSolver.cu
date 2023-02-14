@@ -342,20 +342,20 @@ namespace dyno
 
 		if (hasFriction)
 		{
-			Coord3D n = contacts[pId].normal1;
+			Vector<Real, 3> n = contacts[pId].normal1;
 			n /= n.norm();
 
-			Coord3D n1, n2;
+			Vector<Real, 3> n1, n2;
 			if (abs(n[1]) > EPSILON || abs(n[2]) > EPSILON)
 			{
-				n1 = Coord3D(0, n[2], -n[1]);
+				n1 = Vector<Real, 3>(0, n[2], -n[1]);
 				n1 /= n1.norm();
 				n2 = n1.cross(n);
 				n2 /= n2.norm();
 			}
 			else if (abs(n[0]) > EPSILON)
 			{
-				n1 = Coord3D(n[2], 0, -n[0]);
+				n1 = Vector<Real, 3>(n[2], 0, -n[0]);
 				n1 /= n1.norm();
 				n2 = n1.cross(n);
 				n2 /= n2.norm();

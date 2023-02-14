@@ -1515,7 +1515,7 @@ namespace dyno
 		return TSegment3D<Real>(p, q);
 	}
 
-	// 	DYN_FUNC Segment3D Line3D::proximity(const Segment3D& segment) const
+	// 	DYN_FUNC TSegment3D<Real> TLine3D<Real>::proximity(const TSegment3D<Real>& segment) const
 // 	{
 // 
 // 	}
@@ -1708,7 +1708,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC int TLine3D<Real>::intersect(const TTet3D<Real>& tet, TSegment3D<Real>& interSeg) const
 	{
-		Point3D p1, p2;
+		TPoint3D<Real> p1, p2;
 
 		bool tmp1 = false;
 		for (int i = 0; i < 4; i++)
@@ -1722,7 +1722,7 @@ namespace dyno
 
 				if (p2.distance(p1) > EPSILON)
 				{
-					interSeg = Segment3D(p1.origin, p2.origin);
+					interSeg = TSegment3D<Real>(p1.origin, p2.origin);
 					return true;
 				}
 			}
@@ -2420,11 +2420,11 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TSegment3D<Real> TSegment3D<Real>::proximity(const TTet3D<Real>& tet) const
 	{
-		Segment3D pq = proximity(tet.face(0));
+		TSegment3D<Real> pq = proximity(tet.face(0));
 
 		for (int i = 1; i < 4; i++)
 		{
-			Segment3D tmp = proximity(tet.face(i));
+			TSegment3D<Real> tmp = proximity(tet.face(i));
 			if (tmp.length() < pq.length())
 				pq = tmp;
 		}
@@ -3272,27 +3272,27 @@ namespace dyno
 		Real inter_dist_0 = 0.0f;
 		Coord3D p11, p22, interNorm_0;
 
-		Segment3D s[18];
-		s[0] = Segment3D(v[0], v[1]);
-		s[1] = Segment3D(v[0], v[2]);
-		s[2] = Segment3D(v[0], v[3]);
-		s[3] = Segment3D(v[1], v[2]);
-		s[4] = Segment3D(v[1], v[3]);
-		s[5] = Segment3D(v[2], v[3]);
+		TSegment3D<Real> s[18];
+		s[0] = TSegment3D<Real>(v[0], v[1]);
+		s[1] = TSegment3D<Real>(v[0], v[2]);
+		s[2] = TSegment3D<Real>(v[0], v[3]);
+		s[3] = TSegment3D<Real>(v[1], v[2]);
+		s[4] = TSegment3D<Real>(v[1], v[3]);
+		s[5] = TSegment3D<Real>(v[2], v[3]);
 
-		s[6] = Segment3D(v[0], (v[1] + v[2]) / 2.0f);
-		s[7] = Segment3D(v[0], (v[1] + v[3]) / 2.0f);
-		s[8] = Segment3D(v[0], (v[3] + v[2]) / 2.0f);
-		s[9] = Segment3D(v[1], (v[3] + v[2]) / 2.0f);
-		s[10] = Segment3D(v[1], (v[0] + v[2]) / 2.0f);
-		s[11] = Segment3D(v[1], (v[0] + v[3]) / 2.0f);
+		s[6] = TSegment3D<Real>(v[0], (v[1] + v[2]) / 2.0f);
+		s[7] = TSegment3D<Real>(v[0], (v[1] + v[3]) / 2.0f);
+		s[8] = TSegment3D<Real>(v[0], (v[3] + v[2]) / 2.0f);
+		s[9] = TSegment3D<Real>(v[1], (v[3] + v[2]) / 2.0f);
+		s[10] = TSegment3D<Real>(v[1], (v[0] + v[2]) / 2.0f);
+		s[11] = TSegment3D<Real>(v[1], (v[0] + v[3]) / 2.0f);
 
-		s[12] = Segment3D(v[2], (v[1] + v[0]) / 2.0f);
-		s[13] = Segment3D(v[2], (v[1] + v[3]) / 2.0f);
-		s[14] = Segment3D(v[2], (v[0] + v[3]) / 2.0f);
-		s[15] = Segment3D(v[3], (v[1] + v[2]) / 2.0f);
-		s[16] = Segment3D(v[3], (v[0] + v[2]) / 2.0f);
-		s[17] = Segment3D(v[3], (v[1] + v[0]) / 2.0f);
+		s[12] = TSegment3D<Real>(v[2], (v[1] + v[0]) / 2.0f);
+		s[13] = TSegment3D<Real>(v[2], (v[1] + v[3]) / 2.0f);
+		s[14] = TSegment3D<Real>(v[2], (v[0] + v[3]) / 2.0f);
+		s[15] = TSegment3D<Real>(v[3], (v[1] + v[2]) / 2.0f);
+		s[16] = TSegment3D<Real>(v[3], (v[0] + v[2]) / 2.0f);
+		s[17] = TSegment3D<Real>(v[3], (v[1] + v[0]) / 2.0f);
 
 
 
@@ -3300,8 +3300,8 @@ namespace dyno
 		{
 			if (i >= 6 && !(inter_dist_0 < -0.000f))
 				break;
-			Line3D l_i = Line3D(s[i].v0, s[i].direction());
-			Segment3D tmp_seg;
+			TLine3D<Real> l_i = TLine3D<Real>(s[i].v0, s[i].direction());
+			TSegment3D<Real> tmp_seg;
 
 			if (l_i.intersect(tet, tmp_seg))
 			{
@@ -3317,18 +3317,18 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = maximum(left, 0.0f);
+				left = maximum(left, Real(0));
 				right = minimum(right, maxx);
 
 				p1 = s[i].v0 + ((left + right) / 2.0f * s[i].direction().normalize());
 				Bool tmp_bool;
-				p2 = Point3D(p1).project(tet, tmp_bool).origin;//
+				p2 = TPoint3D<Real>(p1).project(tet, tmp_bool).origin;//
 				interDist = -(p1 - p2).norm();
 
 				if (need_distance)
 				{
 					Coord3D p11 = s[i].v0 + left * s[i].direction().normalize();
-					Coord3D p22 = Point3D(p11).project(tet, tmp_bool).origin;
+					Coord3D p22 = TPoint3D<Real>(p11).project(tet, tmp_bool).origin;
 					if ((p11 - p22).norm() > abs(interDist))
 					{
 						p1 = p11; p2 = p22;
@@ -3336,7 +3336,7 @@ namespace dyno
 					}
 
 					p11 = s[i].v0 + right * s[i].direction().normalize();
-					p22 = Point3D(p11).project(tet, tmp_bool).origin;
+					p22 = TPoint3D<Real>(p11).project(tet, tmp_bool).origin;
 					if ((p11 - p22).norm() > abs(interDist))
 					{
 						p1 = p11; p2 = p22;
@@ -3395,17 +3395,17 @@ namespace dyno
 		Real inter_dist_0 = 0.0f;
 		Coord3D p11, p22, interNorm_0;
 
-		Segment3D s[18];
+		TSegment3D<Real> s[18];
 
-		s[0] = Segment3D(tri.v[0], tri.v[1]);
-		s[1] = Segment3D(tri.v[0], tri.v[2]);
-		s[2] = Segment3D(tri.v[0], tri.v[2]);
+		s[0] = TSegment3D<Real>(tri.v[0], tri.v[1]);
+		s[1] = TSegment3D<Real>(tri.v[0], tri.v[2]);
+		s[2] = TSegment3D<Real>(tri.v[0], tri.v[2]);
 
 		for (int i = 0; i < 3; i++)
 		{
 
-			Line3D l_i = Line3D(s[i].v0, s[i].direction());
-			Segment3D tmp_seg;
+			TLine3D<Real> l_i = TLine3D<Real>(s[i].v0, s[i].direction());
+			TSegment3D<Real> tmp_seg;
 
 			if (l_i.intersect(tet, tmp_seg))
 			{
@@ -3421,17 +3421,17 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = maximum(left, 0.0f);
+				left = maximum(left, Real(0));
 				right = minimum(right, maxx);
 
 				p2 = s[i].v0 + ((left + right) / 2.0f * s[i].direction().normalize());
 				Bool tmp_bool;
-				p1 = Point3D(p2).project(tet, tmp_bool).origin;//
+				p1 = TPoint3D<Real>(p2).project(tet, tmp_bool).origin;//
 				interDist = -(p1 - p2).norm();
 
 
 				Coord3D p11 = s[i].v0 + left * s[i].direction().normalize();
-				Coord3D p22 = Point3D(p11).project(tet, tmp_bool).origin;
+				Coord3D p22 = TPoint3D<Real>(p11).project(tet, tmp_bool).origin;
 				if ((p11 - p22).norm() > abs(interDist))
 				{
 					p2 = p11; p1 = p22;
@@ -3439,7 +3439,7 @@ namespace dyno
 				}
 
 				p11 = s[i].v0 + right * s[i].direction().normalize();
-				p22 = Point3D(p11).project(tet, tmp_bool).origin;
+				p22 = TPoint3D<Real>(p11).project(tet, tmp_bool).origin;
 				if ((p11 - p22).norm() > abs(interDist))
 				{
 					p2 = p11; p1 = p22;
@@ -3473,34 +3473,34 @@ namespace dyno
 			return true;
 		}
 
-		s[0] = Segment3D(v[0], v[1]);
-		s[1] = Segment3D(v[0], v[2]);
-		s[2] = Segment3D(v[0], v[3]);
-		s[3] = Segment3D(v[1], v[2]);
-		s[4] = Segment3D(v[1], v[3]);
-		s[5] = Segment3D(v[2], v[3]);
+		s[0] = TSegment3D<Real>(v[0], v[1]);
+		s[1] = TSegment3D<Real>(v[0], v[2]);
+		s[2] = TSegment3D<Real>(v[0], v[3]);
+		s[3] = TSegment3D<Real>(v[1], v[2]);
+		s[4] = TSegment3D<Real>(v[1], v[3]);
+		s[5] = TSegment3D<Real>(v[2], v[3]);
 
-		s[6] = Segment3D(v[0], (v[1] + v[2]) / 2.0f);
-		s[7] = Segment3D(v[0], (v[1] + v[3]) / 2.0f);
-		s[8] = Segment3D(v[0], (v[3] + v[2]) / 2.0f);
-		s[9] = Segment3D(v[1], (v[3] + v[2]) / 2.0f);
-		s[10] = Segment3D(v[1], (v[0] + v[2]) / 2.0f);
-		s[11] = Segment3D(v[1], (v[0] + v[3]) / 2.0f);
+		s[6] = TSegment3D<Real>(v[0], (v[1] + v[2]) / 2.0f);
+		s[7] = TSegment3D<Real>(v[0], (v[1] + v[3]) / 2.0f);
+		s[8] = TSegment3D<Real>(v[0], (v[3] + v[2]) / 2.0f);
+		s[9] = TSegment3D<Real>(v[1], (v[3] + v[2]) / 2.0f);
+		s[10] = TSegment3D<Real>(v[1], (v[0] + v[2]) / 2.0f);
+		s[11] = TSegment3D<Real>(v[1], (v[0] + v[3]) / 2.0f);
 
-		s[12] = Segment3D(v[2], (v[1] + v[0]) / 2.0f);
-		s[13] = Segment3D(v[2], (v[1] + v[3]) / 2.0f);
-		s[14] = Segment3D(v[2], (v[0] + v[3]) / 2.0f);
-		s[15] = Segment3D(v[3], (v[1] + v[2]) / 2.0f);
-		s[16] = Segment3D(v[3], (v[0] + v[2]) / 2.0f);
-		s[17] = Segment3D(v[3], (v[1] + v[0]) / 2.0f);
+		s[12] = TSegment3D<Real>(v[2], (v[1] + v[0]) / 2.0f);
+		s[13] = TSegment3D<Real>(v[2], (v[1] + v[3]) / 2.0f);
+		s[14] = TSegment3D<Real>(v[2], (v[0] + v[3]) / 2.0f);
+		s[15] = TSegment3D<Real>(v[3], (v[1] + v[2]) / 2.0f);
+		s[16] = TSegment3D<Real>(v[3], (v[0] + v[2]) / 2.0f);
+		s[17] = TSegment3D<Real>(v[3], (v[1] + v[0]) / 2.0f);
 
 
 
 		for (int i = 0; i < 18; i++)
 		{
 
-			Line3D l_i = Line3D(s[i].v0, s[i].direction());
-			Point3D tmp_point;
+			TLine3D<Real> l_i = TLine3D<Real>(s[i].v0, s[i].direction());
+			TPoint3D<Real> tmp_point;
 
 			if (l_i.intersect(tri, tmp_point))
 			{
@@ -3515,7 +3515,7 @@ namespace dyno
 					p1 = s[i].v0;
 				else
 					p1 = s[i].v1;
-				p2 = tmp_point.origin;//Point3D(p1).project(tet, tmp_bool).origin;
+				p2 = tmp_point.origin;//TPoint3D<Real>(p1).project(tet, tmp_bool).origin;
 				interDist = -(p1 - p2).norm();
 				Coord3D dir = (p1 - p2) / interDist;
 				interNorm = dir;
@@ -3876,27 +3876,27 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC bool TOrientedBox3D<Real>::point_intersect(const TOrientedBox3D<Real>& OBB, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const
 	{
-		Point3D p[8];
-		p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
-		p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
-		p[2] = Point3D(center - u * extent[0] + v * extent[1] - w * extent[2]);
-		p[3] = Point3D(center - u * extent[0] + v * extent[1] + w * extent[2]);
-		p[4] = Point3D(center + u * extent[0] - v * extent[1] - w * extent[2]);
-		p[5] = Point3D(center + u * extent[0] - v * extent[1] + w * extent[2]);
-		p[6] = Point3D(center + u * extent[0] + v * extent[1] - w * extent[2]);
-		p[7] = Point3D(center + u * extent[0] + v * extent[1] + w * extent[2]);
+		TPoint3D<Real> p[8];
+		p[0] = TPoint3D<Real>(center - u * extent[0] - v * extent[1] - w * extent[2]);
+		p[1] = TPoint3D<Real>(center - u * extent[0] - v * extent[1] + w * extent[2]);
+		p[2] = TPoint3D<Real>(center - u * extent[0] + v * extent[1] - w * extent[2]);
+		p[3] = TPoint3D<Real>(center - u * extent[0] + v * extent[1] + w * extent[2]);
+		p[4] = TPoint3D<Real>(center + u * extent[0] - v * extent[1] - w * extent[2]);
+		p[5] = TPoint3D<Real>(center + u * extent[0] - v * extent[1] + w * extent[2]);
+		p[6] = TPoint3D<Real>(center + u * extent[0] + v * extent[1] - w * extent[2]);
+		p[7] = TPoint3D<Real>(center + u * extent[0] + v * extent[1] + w * extent[2]);
 
-		Segment3D s[12];
-		s[0] = Segment3D(p[0].origin, p[1].origin); s[1] = Segment3D(p[0].origin, p[2].origin); s[2] = Segment3D(p[0].origin, p[4].origin);
-		s[3] = Segment3D(p[3].origin, p[1].origin); s[4] = Segment3D(p[3].origin, p[2].origin); s[5] = Segment3D(p[3].origin, p[7].origin);
-		s[6] = Segment3D(p[6].origin, p[7].origin); s[7] = Segment3D(p[6].origin, p[2].origin); s[8] = Segment3D(p[6].origin, p[4].origin);
-		s[9] = Segment3D(p[5].origin, p[7].origin); s[10] = Segment3D(p[5].origin, p[1].origin); s[11] = Segment3D(p[5].origin, p[4].origin);
+		TSegment3D<Real> s[12];
+		s[0] = TSegment3D<Real>(p[0].origin, p[1].origin); s[1] = TSegment3D<Real>(p[0].origin, p[2].origin); s[2] = TSegment3D<Real>(p[0].origin, p[4].origin);
+		s[3] = TSegment3D<Real>(p[3].origin, p[1].origin); s[4] = TSegment3D<Real>(p[3].origin, p[2].origin); s[5] = TSegment3D<Real>(p[3].origin, p[7].origin);
+		s[6] = TSegment3D<Real>(p[6].origin, p[7].origin); s[7] = TSegment3D<Real>(p[6].origin, p[2].origin); s[8] = TSegment3D<Real>(p[6].origin, p[4].origin);
+		s[9] = TSegment3D<Real>(p[5].origin, p[7].origin); s[10] = TSegment3D<Real>(p[5].origin, p[1].origin); s[11] = TSegment3D<Real>(p[5].origin, p[4].origin);
 
 		int min_idx1 = -1;
 		int min_idx2 = -1;
 		Real distance = 1.0f;
 
-		Plane3D plane1, plane2;
+		TPlane3D<Real> plane1, plane2;
 		Coord3D axis;
 		Real inter;
 
@@ -3917,8 +3917,8 @@ namespace dyno
 		Real inter_u = minimum(minimum(max_u + OBB.extent[0], OBB.extent[0] - min_u), minimum(2 * OBB.extent[0], max_u - min_u));
 		axis = OBB.u;
 		inter = inter_u;
-		plane1 = Plane3D((OBB.center + OBB.u * OBB.extent[0]), OBB.u);
-		plane2 = Plane3D((OBB.center - OBB.u * OBB.extent[0]), -OBB.u);
+		plane1 = TPlane3D<Real>((OBB.center + OBB.u * OBB.extent[0]), OBB.u);
+		plane2 = TPlane3D<Real>((OBB.center - OBB.u * OBB.extent[0]), -OBB.u);
 
 		//check v axis
 		Real min_v, max_v;
@@ -3939,8 +3939,8 @@ namespace dyno
 		{
 			axis = OBB.v;
 			inter = inter_v;
-			plane1 = Plane3D((OBB.center + OBB.v * OBB.extent[1]), OBB.v);
-			plane2 = Plane3D((OBB.center - OBB.v * OBB.extent[1]), -OBB.v);
+			plane1 = TPlane3D<Real>((OBB.center + OBB.v * OBB.extent[1]), OBB.v);
+			plane2 = TPlane3D<Real>((OBB.center - OBB.v * OBB.extent[1]), -OBB.v);
 		}
 
 		//check w axis
@@ -3962,8 +3962,8 @@ namespace dyno
 		{
 			axis = OBB.w;
 			inter = inter_w;
-			plane1 = Plane3D((OBB.center + OBB.w * OBB.extent[2]), OBB.w);
-			plane2 = Plane3D((OBB.center - OBB.w * OBB.extent[2]), -OBB.w);
+			plane1 = TPlane3D<Real>((OBB.center + OBB.w * OBB.extent[2]), OBB.w);
+			plane2 = TPlane3D<Real>((OBB.center - OBB.w * OBB.extent[2]), -OBB.w);
 		}
 
 		//printf("$$$$$$$$$$$$$$$$$$$$ INSIDE CHECKPOINT\n");
@@ -3980,10 +3980,10 @@ namespace dyno
 
 		for (int i = 0; i < 12; i++)
 		{
-			Segment3D tmp;
+			TSegment3D<Real> tmp;
 			if (s[i].intersect(OBB, tmp))
 			{
-				Point3D inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
+				TPoint3D<Real> inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
 				Real tmp_distance = -minimum(abs(inp.distance(plane1)), abs(inp.distance(plane2)));
 				if (tmp_distance < distance)
 				{
@@ -4002,14 +4002,14 @@ namespace dyno
 		if (distance > EPSILON) return false;
 		interDist = distance;
 
-		Point3D pt;
+		TPoint3D<Real> pt;
 		if (min_idx1 != -1)
 			pt = p[min_idx1];
 		else
 		{
-			Segment3D tmp;
+			TSegment3D<Real> tmp;
 			s[min_idx2].intersect(OBB, tmp);
-			pt = Point3D((tmp.startPoint() + tmp.endPoint()) / 2.0f);
+			pt = TPoint3D<Real>((tmp.startPoint() + tmp.endPoint()) / 2.0f);
 		}
 
 
@@ -4032,51 +4032,51 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC bool TOrientedBox3D<Real>::point_intersect(const TTet3D<Real>& TET, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const
 	{
-		Point3D p[8];
-		p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
-		p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
-		p[2] = Point3D(center - u * extent[0] + v * extent[1] - w * extent[2]);
-		p[3] = Point3D(center - u * extent[0] + v * extent[1] + w * extent[2]);
-		p[4] = Point3D(center + u * extent[0] - v * extent[1] - w * extent[2]);
-		p[5] = Point3D(center + u * extent[0] - v * extent[1] + w * extent[2]);
-		p[6] = Point3D(center + u * extent[0] + v * extent[1] - w * extent[2]);
-		p[7] = Point3D(center + u * extent[0] + v * extent[1] + w * extent[2]);
+		TPoint3D<Real> p[8];
+		p[0] = TPoint3D<Real>(center - u * extent[0] - v * extent[1] - w * extent[2]);
+		p[1] = TPoint3D<Real>(center - u * extent[0] - v * extent[1] + w * extent[2]);
+		p[2] = TPoint3D<Real>(center - u * extent[0] + v * extent[1] - w * extent[2]);
+		p[3] = TPoint3D<Real>(center - u * extent[0] + v * extent[1] + w * extent[2]);
+		p[4] = TPoint3D<Real>(center + u * extent[0] - v * extent[1] - w * extent[2]);
+		p[5] = TPoint3D<Real>(center + u * extent[0] - v * extent[1] + w * extent[2]);
+		p[6] = TPoint3D<Real>(center + u * extent[0] + v * extent[1] - w * extent[2]);
+		p[7] = TPoint3D<Real>(center + u * extent[0] + v * extent[1] + w * extent[2]);
 
-		Segment3D s[12];
-		s[0] = Segment3D(p[0].origin, p[1].origin); s[1] = Segment3D(p[0].origin, p[2].origin); s[2] = Segment3D(p[0].origin, p[4].origin);
-		s[3] = Segment3D(p[3].origin, p[1].origin); s[4] = Segment3D(p[3].origin, p[2].origin); s[5] = Segment3D(p[3].origin, p[7].origin);
-		s[6] = Segment3D(p[6].origin, p[7].origin); s[7] = Segment3D(p[6].origin, p[2].origin); s[8] = Segment3D(p[6].origin, p[4].origin);
-		s[9] = Segment3D(p[5].origin, p[7].origin); s[10] = Segment3D(p[5].origin, p[1].origin); s[11] = Segment3D(p[5].origin, p[4].origin);
+		TSegment3D<Real> s[12];
+		s[0] = TSegment3D<Real>(p[0].origin, p[1].origin); s[1] = TSegment3D<Real>(p[0].origin, p[2].origin); s[2] = TSegment3D<Real>(p[0].origin, p[4].origin);
+		s[3] = TSegment3D<Real>(p[3].origin, p[1].origin); s[4] = TSegment3D<Real>(p[3].origin, p[2].origin); s[5] = TSegment3D<Real>(p[3].origin, p[7].origin);
+		s[6] = TSegment3D<Real>(p[6].origin, p[7].origin); s[7] = TSegment3D<Real>(p[6].origin, p[2].origin); s[8] = TSegment3D<Real>(p[6].origin, p[4].origin);
+		s[9] = TSegment3D<Real>(p[5].origin, p[7].origin); s[10] = TSegment3D<Real>(p[5].origin, p[1].origin); s[11] = TSegment3D<Real>(p[5].origin, p[4].origin);
 
-		Segment3D s_tet[18];
-		s_tet[0] = Segment3D(TET.v[0], TET.v[1]);
-		s_tet[1] = Segment3D(TET.v[0], TET.v[2]);
-		s_tet[2] = Segment3D(TET.v[0], TET.v[3]);
-		s_tet[3] = Segment3D(TET.v[1], TET.v[2]);
-		s_tet[4] = Segment3D(TET.v[1], TET.v[3]);
-		s_tet[5] = Segment3D(TET.v[2], TET.v[3]);
+		TSegment3D<Real> s_tet[18];
+		s_tet[0] = TSegment3D<Real>(TET.v[0], TET.v[1]);
+		s_tet[1] = TSegment3D<Real>(TET.v[0], TET.v[2]);
+		s_tet[2] = TSegment3D<Real>(TET.v[0], TET.v[3]);
+		s_tet[3] = TSegment3D<Real>(TET.v[1], TET.v[2]);
+		s_tet[4] = TSegment3D<Real>(TET.v[1], TET.v[3]);
+		s_tet[5] = TSegment3D<Real>(TET.v[2], TET.v[3]);
 
-		s_tet[6] = Segment3D(TET.v[0], (TET.v[1] + TET.v[2]) / 2.0f);
-		s_tet[7] = Segment3D(TET.v[0], (TET.v[1] + TET.v[3]) / 2.0f);
-		s_tet[8] = Segment3D(TET.v[0], (TET.v[3] + TET.v[2]) / 2.0f);
-		s_tet[9] = Segment3D(TET.v[1], (TET.v[3] + TET.v[2]) / 2.0f);
-		s_tet[10] = Segment3D(TET.v[1], (TET.v[0] + TET.v[2]) / 2.0f);
-		s_tet[11] = Segment3D(TET.v[1], (TET.v[0] + TET.v[3]) / 2.0f);
+		s_tet[6] = TSegment3D<Real>(TET.v[0], (TET.v[1] + TET.v[2]) / 2.0f);
+		s_tet[7] = TSegment3D<Real>(TET.v[0], (TET.v[1] + TET.v[3]) / 2.0f);
+		s_tet[8] = TSegment3D<Real>(TET.v[0], (TET.v[3] + TET.v[2]) / 2.0f);
+		s_tet[9] = TSegment3D<Real>(TET.v[1], (TET.v[3] + TET.v[2]) / 2.0f);
+		s_tet[10] = TSegment3D<Real>(TET.v[1], (TET.v[0] + TET.v[2]) / 2.0f);
+		s_tet[11] = TSegment3D<Real>(TET.v[1], (TET.v[0] + TET.v[3]) / 2.0f);
 
-		s_tet[12] = Segment3D(TET.v[2], (TET.v[1] + TET.v[0]) / 2.0f);
-		s_tet[13] = Segment3D(TET.v[2], (TET.v[1] + TET.v[3]) / 2.0f);
-		s_tet[14] = Segment3D(TET.v[2], (TET.v[0] + TET.v[3]) / 2.0f);
-		s_tet[15] = Segment3D(TET.v[3], (TET.v[1] + TET.v[2]) / 2.0f);
-		s_tet[16] = Segment3D(TET.v[3], (TET.v[0] + TET.v[2]) / 2.0f);
-		s_tet[17] = Segment3D(TET.v[3], (TET.v[1] + TET.v[0]) / 2.0f);
+		s_tet[12] = TSegment3D<Real>(TET.v[2], (TET.v[1] + TET.v[0]) / 2.0f);
+		s_tet[13] = TSegment3D<Real>(TET.v[2], (TET.v[1] + TET.v[3]) / 2.0f);
+		s_tet[14] = TSegment3D<Real>(TET.v[2], (TET.v[0] + TET.v[3]) / 2.0f);
+		s_tet[15] = TSegment3D<Real>(TET.v[3], (TET.v[1] + TET.v[2]) / 2.0f);
+		s_tet[16] = TSegment3D<Real>(TET.v[3], (TET.v[0] + TET.v[2]) / 2.0f);
+		s_tet[17] = TSegment3D<Real>(TET.v[3], (TET.v[1] + TET.v[0]) / 2.0f);
 
 
 		interDist = 0.0f;
 		//obb intersect tet
 		for (int i = 0; i < 12; i++)
 		{
-			Line3D l_i = Line3D(s[i].v0, s[i].direction());
-			Segment3D tmp_seg;
+			TLine3D<Real> l_i = TLine3D<Real>(s[i].v0, s[i].direction());
+			TSegment3D<Real> tmp_seg;
 
 			if (l_i.intersect(TET, tmp_seg))
 			{
@@ -4092,13 +4092,13 @@ namespace dyno
 				Real maxx = (s[i].v1 - s[i].v0).dot(s[i].direction().normalize());
 				if (right < 0 || left > maxx)
 					continue;
-				left = maximum(left, 0.0f);
+				left = maximum(left, Real(0));
 				right = minimum(right, maxx);
 
 				Bool tmp_bool;
 
 				Coord3D p11 = s[i].v0 + ((left + right) / 2.0f * s[i].direction().normalize());
-				Coord3D p22 = Point3D(p11).project(TET, tmp_bool).origin;//
+				Coord3D p22 = TPoint3D<Real>(p11).project(TET, tmp_bool).origin;//
 
 
 				if ((p11 - p22).norm() > abs(interDist))
@@ -4108,7 +4108,7 @@ namespace dyno
 					p2 = p22;
 				}
 				p11 = s[i].v0 + left * s[i].direction().normalize();
-				p22 = Point3D(p11).project(TET, tmp_bool).origin;
+				p22 = TPoint3D<Real>(p11).project(TET, tmp_bool).origin;
 				if ((p11 - p22).norm() > abs(interDist))
 				{
 					p1 = p11; p2 = p22;
@@ -4116,7 +4116,7 @@ namespace dyno
 				}
 
 				p11 = s[i].v0 + right * s[i].direction().normalize();
-				p22 = Point3D(p11).project(TET, tmp_bool).origin;
+				p22 = TPoint3D<Real>(p11).project(TET, tmp_bool).origin;
 				if ((p11 - p22).norm() > abs(interDist))
 				{
 					p1 = p11; p2 = p22;
@@ -4126,16 +4126,16 @@ namespace dyno
 
 			}
 		}
-		OrientedBox3D OBB(center, u, v, w, extent);
+		TOrientedBox3D<Real> OBB(center, u, v, w, extent);
 		for (int i = 0; i < 18; i++)
 		{
-			Segment3D tmp;
+			TSegment3D<Real> tmp;
 
 			if (s_tet[i].intersect(OBB, tmp))
 			{
-				Point3D inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
-				Point3D sp(tmp.startPoint());
-				Point3D ep(tmp.endPoint());
+				TPoint3D<Real> inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
+				TPoint3D<Real> sp(tmp.startPoint());
+				TPoint3D<Real> ep(tmp.endPoint());
 				if (abs(inp.distance(OBB)) > abs(interDist))
 				{
 					p2 = inp.origin;
@@ -4166,42 +4166,42 @@ namespace dyno
 	DYN_FUNC bool TOrientedBox3D<Real>::point_intersect(const TTriangle3D<Real>& TRI, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2) const
 	{
 
-		Segment3D s_tri[3];
-		s_tri[0] = Segment3D(TRI.v[0], TRI.v[1]);
-		s_tri[1] = Segment3D(TRI.v[0], TRI.v[2]);
-		s_tri[2] = Segment3D(TRI.v[2], TRI.v[1]);
+		TSegment3D<Real> s_tri[3];
+		s_tri[0] = TSegment3D<Real>(TRI.v[0], TRI.v[1]);
+		s_tri[1] = TSegment3D<Real>(TRI.v[0], TRI.v[2]);
+		s_tri[2] = TSegment3D<Real>(TRI.v[2], TRI.v[1]);
 
 		interDist = 0.0f;
 		//obb intersect tet
 
-		Point3D p[8];
-		p[0] = Point3D(center - u * extent[0] - v * extent[1] - w * extent[2]);
-		p[1] = Point3D(center - u * extent[0] - v * extent[1] + w * extent[2]);
-		p[2] = Point3D(center - u * extent[0] + v * extent[1] - w * extent[2]);
-		p[3] = Point3D(center - u * extent[0] + v * extent[1] + w * extent[2]);
-		p[4] = Point3D(center + u * extent[0] - v * extent[1] - w * extent[2]);
-		p[5] = Point3D(center + u * extent[0] - v * extent[1] + w * extent[2]);
-		p[6] = Point3D(center + u * extent[0] + v * extent[1] - w * extent[2]);
-		p[7] = Point3D(center + u * extent[0] + v * extent[1] + w * extent[2]);
+		TPoint3D<Real> p[8];
+		p[0] = TPoint3D<Real>(center - u * extent[0] - v * extent[1] - w * extent[2]);
+		p[1] = TPoint3D<Real>(center - u * extent[0] - v * extent[1] + w * extent[2]);
+		p[2] = TPoint3D<Real>(center - u * extent[0] + v * extent[1] - w * extent[2]);
+		p[3] = TPoint3D<Real>(center - u * extent[0] + v * extent[1] + w * extent[2]);
+		p[4] = TPoint3D<Real>(center + u * extent[0] - v * extent[1] - w * extent[2]);
+		p[5] = TPoint3D<Real>(center + u * extent[0] - v * extent[1] + w * extent[2]);
+		p[6] = TPoint3D<Real>(center + u * extent[0] + v * extent[1] - w * extent[2]);
+		p[7] = TPoint3D<Real>(center + u * extent[0] + v * extent[1] + w * extent[2]);
 
-		Segment3D s[12];
-		s[0] = Segment3D(p[0].origin, p[1].origin); s[1] = Segment3D(p[0].origin, p[2].origin); s[2] = Segment3D(p[0].origin, p[4].origin);
-		s[3] = Segment3D(p[3].origin, p[1].origin); s[4] = Segment3D(p[3].origin, p[2].origin); s[5] = Segment3D(p[3].origin, p[7].origin);
-		s[6] = Segment3D(p[6].origin, p[7].origin); s[7] = Segment3D(p[6].origin, p[2].origin); s[8] = Segment3D(p[6].origin, p[4].origin);
-		s[9] = Segment3D(p[5].origin, p[7].origin); s[10] = Segment3D(p[5].origin, p[1].origin); s[11] = Segment3D(p[5].origin, p[4].origin);
+		TSegment3D<Real> s[12];
+		s[0] = TSegment3D<Real>(p[0].origin, p[1].origin); s[1] = TSegment3D<Real>(p[0].origin, p[2].origin); s[2] = TSegment3D<Real>(p[0].origin, p[4].origin);
+		s[3] = TSegment3D<Real>(p[3].origin, p[1].origin); s[4] = TSegment3D<Real>(p[3].origin, p[2].origin); s[5] = TSegment3D<Real>(p[3].origin, p[7].origin);
+		s[6] = TSegment3D<Real>(p[6].origin, p[7].origin); s[7] = TSegment3D<Real>(p[6].origin, p[2].origin); s[8] = TSegment3D<Real>(p[6].origin, p[4].origin);
+		s[9] = TSegment3D<Real>(p[5].origin, p[7].origin); s[10] = TSegment3D<Real>(p[5].origin, p[1].origin); s[11] = TSegment3D<Real>(p[5].origin, p[4].origin);
 
 
 
-		OrientedBox3D OBB(center, u, v, w, extent);
+		TOrientedBox3D<Real> OBB(center, u, v, w, extent);
 		for (int i = 0; i < 3; i++)
 		{
-			Segment3D tmp;
+			TSegment3D<Real> tmp;
 
 			if (s_tri[i].intersect(OBB, tmp))
 			{
-				Point3D inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
-				Point3D sp(tmp.startPoint());
-				Point3D ep(tmp.endPoint());
+				TPoint3D<Real> inp((tmp.startPoint() + tmp.endPoint()) / 2.0f);
+				TPoint3D<Real> sp(tmp.startPoint());
+				TPoint3D<Real> ep(tmp.endPoint());
 				if (abs(inp.distance(OBB)) > abs(interDist))
 				{
 					p2 = inp.origin;
@@ -4228,12 +4228,12 @@ namespace dyno
 
 		for (int i = 0; i < 12; i++)
 		{
-			Point3D tmp_point;
+			TPoint3D<Real> tmp_point;
 			if (s[i].intersect(TRI, tmp_point))
 			{
-				Point3D tmp_p1;// = s[i].startPoint();
-				Point3D tmp_p2;// = s[i].endPoint();
-				if (tmp_point.distance(Point3D(s[i].startPoint())) < tmp_point.distance(Point3D(s[i].endPoint())))
+				TPoint3D<Real> tmp_p1;// = s[i].startPoint();
+				TPoint3D<Real> tmp_p2;// = s[i].endPoint();
+				if (tmp_point.distance(TPoint3D<Real>(s[i].startPoint())) < tmp_point.distance(TPoint3D<Real>(s[i].endPoint())))
 				{
 					tmp_p1 = s[i].endPoint();
 					tmp_p2 = s[i].startPoint();

@@ -407,10 +407,10 @@ namespace dyno
 	{
 		m.contactCount = 0;
 
-		Coord3D v = box1.center - box0.center;
+		Vector<Real, 3> v = box1.center - box0.center;
 
-		Coord3D eA = box0.extent;
-		Coord3D eB = box1.extent;
+		Vector<Real, 3> eA = box0.extent;
+		Vector<Real, 3> eB = box1.extent;
 
 		Matrix3D rotA;
 		rotA.setCol(0, box0.u);
@@ -443,7 +443,7 @@ namespace dyno
 		Matrix3D absC_t = absC.transpose();
 
 		// Vector from center A to center B in A's space
-		Coord3D t = rotA.transpose() * v;
+		Vector<Real, 3> t = rotA.transpose() * v;
 
 		// Query states
 		Real s;
@@ -453,9 +453,9 @@ namespace dyno
 		int aAxis = ~0;
 		int bAxis = ~0;
 		int eAxis = ~0;
-		Coord3D nA;
-		Coord3D nB;
-		Coord3D nE;
+		Vector<Real, 3> nA;
+		Vector<Real, 3> nB;
+		Vector<Real, 3> nE;
 
 		// Face axis checks
 
@@ -499,63 +499,63 @@ namespace dyno
 			rA = eA.y * absC(2, 0) + eA.z * absC(1, 0);
 			rB = eB.y * absC(0, 2) + eB.z * absC(0, 1);
 			s = abs(t.z * C(1, 0) - t.y * C(2, 0)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 6, s, Coord3D(float(0.0), -C(2, 0), C(1, 0))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 6, s, Vector<Real, 3>(float(0.0), -C(2, 0), C(1, 0))))
 				return;
 
 			// Cross( a.x, b.y )
 			rA = eA.y * absC(2, 1) + eA.z * absC(1, 1);
 			rB = eB.x * absC(0, 2) + eB.z * absC(0, 0);
 			s = abs(t.z * C(1, 1) - t.y * C(2, 1)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 7, s, Coord3D(float(0.0), -C(2, 1), C(1, 1))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 7, s, Vector<Real, 3>(float(0.0), -C(2, 1), C(1, 1))))
 				return;
 
 			// Cross( a.x, b.z )
 			rA = eA.y * absC(2, 2) + eA.z * absC(1, 2);
 			rB = eB.x * absC(0, 1) + eB.y * absC(0, 0);
 			s = abs(t.z * C(1, 2) - t.y * C(2, 2)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 8, s, Coord3D(float(0.0), -C(2, 2), C(1, 2))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 8, s, Vector<Real, 3>(float(0.0), -C(2, 2), C(1, 2))))
 				return;
 
 			// Cross( a.y, b.x )
 			rA = eA.x * absC(2, 0) + eA.z * absC(0, 0);
 			rB = eB.y * absC(1, 2) + eB.z * absC(1, 1);
 			s = abs(t.x * C(2, 0) - t.z * C(0, 0)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 9, s, Coord3D(C(2, 0), float(0.0), -C(0, 0))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 9, s, Vector<Real, 3>(C(2, 0), float(0.0), -C(0, 0))))
 				return;
 
 			// Cross( a.y, b.y )
 			rA = eA.x * absC(2, 1) + eA.z * absC(0, 1);
 			rB = eB.x * absC(1, 2) + eB.z * absC(1, 0);
 			s = abs(t.x * C(2, 1) - t.z * C(0, 1)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 10, s, Coord3D(C(2, 1), float(0.0), -C(0, 1))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 10, s, Vector<Real, 3>(C(2, 1), float(0.0), -C(0, 1))))
 				return;
 
 			// Cross( a.y, b.z )
 			rA = eA.x * absC(2, 2) + eA.z * absC(0, 2);
 			rB = eB.x * absC(1, 1) + eB.y * absC(1, 0);
 			s = abs(t.x * C(2, 2) - t.z * C(0, 2)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 11, s, Coord3D(C(2, 2), float(0.0), -C(0, 2))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 11, s, Vector<Real, 3>(C(2, 2), float(0.0), -C(0, 2))))
 				return;
 
 			// Cross( a.z, b.x )
 			rA = eA.x * absC(1, 0) + eA.y * absC(0, 0);
 			rB = eB.y * absC(2, 2) + eB.z * absC(2, 1);
 			s = abs(t.y * C(0, 0) - t.x * C(1, 0)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 12, s, Coord3D(-C(1, 0), C(0, 0), float(0.0))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 12, s, Vector<Real, 3>(-C(1, 0), C(0, 0), float(0.0))))
 				return;
 
 			// Cross( a.z, b.y )
 			rA = eA.x * absC(1, 1) + eA.y * absC(0, 1);
 			rB = eB.x * absC(2, 2) + eB.z * absC(2, 0);
 			s = abs(t.y * C(0, 1) - t.x * C(1, 1)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 13, s, Coord3D(-C(1, 1), C(0, 1), float(0.0))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 13, s, Vector<Real, 3>(-C(1, 1), C(0, 1), float(0.0))))
 				return;
 
 			// Cross( a.z, b.z )
 			rA = eA.x * absC(1, 2) + eA.y * absC(0, 2);
 			rB = eB.x * absC(2, 1) + eB.y * absC(2, 0);
 			s = abs(t.y * C(0, 2) - t.x * C(1, 2)) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 14, s, Coord3D(-C(1, 2), C(0, 2), float(0.0))))
+			if (trackEdgeAxis(eAxis, eMax, nE, 14, s, Vector<Real, 3>(-C(1, 2), C(0, 2), float(0.0))))
 				return;
 		}
 
@@ -564,7 +564,7 @@ namespace dyno
 		const float kAbsTol = float(0.01);
 		int axis;
 		float sMax;
-		Coord3D n;
+		Vector<Real, 3> n;
 		float faceMax = std::max(aMax, bMax);
 		if (kRelTol * eMax > faceMax + kAbsTol)
 		{
@@ -601,8 +601,8 @@ namespace dyno
 		{
 			Transform3D rtx;
 			Transform3D itx;
-			Coord3D eR;
-			Coord3D eI;
+			Vector<Real, 3> eR;
+			Vector<Real, 3> eI;
 			bool flip;
 
 			if (axis < 3)
@@ -628,7 +628,7 @@ namespace dyno
 			computeIncidentFace(incident, itx, eI, n);
 			unsigned char clipEdges[4];
 			Matrix3D basis;
-			Coord3D e;
+			Vector<Real, 3> e;
 			computeReferenceEdgesAndBasis(clipEdges, &basis, &e, eR, rtx, n, axis);
 
 			// Clip the incident face against the reference face side planes
@@ -656,12 +656,12 @@ namespace dyno
 			if (n.dot(v) < float(0.0))
 				n = -n;
 
-			Coord3D PA, QA;
-			Coord3D PB, QB;
+			Vector<Real, 3> PA, QA;
+			Vector<Real, 3> PB, QB;
 			computeSupportEdge(PA, QA, rotA, box0.center, eA, n);
 			computeSupportEdge(PB, QB, rotB, box1.center, eB, -n);
 
-			Coord3D CA, CB;
+			Vector<Real, 3> CA, CB;
 			edgesContact(CA, CB, PA, QA, PB, QB);
 
 			m.normal = n;
@@ -768,12 +768,12 @@ namespace dyno
 			
 		
 
-		Coord3D center = box.center;
-		Coord3D u = box.u;
-		Coord3D v = box.v;
-		Coord3D w = box.w;
-		Coord3D extent = box.extent;
-		Coord3D p;
+		Vector<Real, 3> center = box.center;
+		Vector<Real, 3> u = box.u;
+		Vector<Real, 3> v = box.v;
+		Vector<Real, 3> w = box.w;
+		Vector<Real, 3> extent = box.extent;
+		Vector<Real, 3> p;
 		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
 		lowerBoundary2 = upperBoundary2 = p.dot(axisNormal);
 
@@ -928,8 +928,8 @@ namespace dyno
 		TManifold<Real>& m)
 	{
 		int cnt1, cnt2;
-		Coord3D boundaryPoints1[4];
-		Coord3D boundaryPoints2[8];
+		Vector<Real, 3> boundaryPoints1[4];
+		Vector<Real, 3> boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
 		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
@@ -943,12 +943,12 @@ namespace dyno
 
 		
 
-		Coord3D center = box.center;
-		Coord3D u = box.u;
-		Coord3D v = box.v;
-		Coord3D w = box.w;
-		Coord3D extent = box.extent;
-		Coord3D p;
+		Vector<Real, 3> center = box.center;
+		Vector<Real, 3> u = box.u;
+		Vector<Real, 3> v = box.v;
+		Vector<Real, 3> w = box.w;
+		Vector<Real, 3> extent = box.extent;
+		Vector<Real, 3> p;
 		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
 		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
@@ -1016,9 +1016,9 @@ namespace dyno
 						if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
 						{
 							int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
-							Coord3D p2 = boundaryPoints2[tmp_i];
-							Coord3D p3 = boundaryPoints2[tmp_j];
-							Coord3D p4 = boundaryPoints2[tmp_k];
+							Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
+							Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
+							Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
 							boundaryPoints2[1] = p2;
 							boundaryPoints2[2] = p3;
 							boundaryPoints2[3] = p4;
@@ -1034,8 +1034,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				Triangle3D t2(boundaryPoints2[0], boundaryPoints2[1], boundaryPoints2[2]);
-				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
-				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
 
 				/*printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
 				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2], dirTmp1.cross(axisNormal)[0], dirTmp1.cross(axisNormal)[1], dirTmp1.cross(axisNormal)[2]);
@@ -1174,8 +1174,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
-				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
-				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
@@ -1265,8 +1265,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				Triangle3D t2(triangle.v[boundaryPoints2[0]], triangle.v[boundaryPoints2[1]], triangle.v[boundaryPoints2[2]]);
-				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
-				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
@@ -1307,8 +1307,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
-				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
-				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
@@ -1392,8 +1392,8 @@ namespace dyno
 		Real sIntersect;
 		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
 		Real l1, u1, l2, u2;
-		Coord3D axis = Coord3D(0, 1, 0);
-		Coord3D axisTmp = axis;
+		Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
+		Vector<Real, 3> axisTmp = axis;
 
 		Real boundary1, boundary2, b1, b2;
 
@@ -1469,10 +1469,10 @@ namespace dyno
 		
 		//dir generated by cross product from capsule and box
 		
-		Coord3D dirCap = c.direction();
+		Vector<Real, 3> dirCap = c.direction();
 		for (int j = 0; j < 3; j++)
 		{
-			Coord3D boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
+			Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
 			axisTmp = dirCap.cross(boxDir);
 			if (axisTmp.norm() > EPSILON)
 			{
@@ -1481,9 +1481,9 @@ namespace dyno
 			else //parallel, choose an arbitary direction
 			{
 				if (abs(dirCap[0]) > EPSILON)
-					axisTmp = Coord3D(dirCap[1], -dirCap[0], 0);
+					axisTmp = Vector<Real, 3>(dirCap[1], -dirCap[0], 0);
 				else
-					axisTmp = Coord3D(0, dirCap[2], -dirCap[1]);
+					axisTmp = Vector<Real, 3>(0, dirCap[2], -dirCap[1]);
 				axisTmp /= axisTmp.norm();
 			}
 			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
@@ -1520,8 +1520,8 @@ namespace dyno
 		Real sIntersect;
 		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
 		Real l1, u1, l2, u2;
-		Coord3D axis = Coord3D(0, 1, 0);
-		Coord3D axisTmp = axis;
+		Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
+		Vector<Real, 3> axisTmp = axis;
 
 		Real boundary1, boundary2, b1, b2;
 
@@ -1595,8 +1595,8 @@ namespace dyno
 		for (int i = 0; i < 6; i++)
 			for(int j = 0; j < 3; j ++)
 			{
-				Coord3D dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
-				Coord3D dirTri = tri.v[triIndex[j][0]] - tri.v[triIndex[j][1]];
+				Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
+				Vector<Real, 3> dirTri = tri.v[triIndex[j][0]] - tri.v[triIndex[j][1]];
 				dirTri /= dirTri.norm();
 				dirTet /= dirTet.norm();
 				axisTmp = dirTet.cross(dirTri);
@@ -1607,9 +1607,9 @@ namespace dyno
 				else //parallel, choose an arbitary direction
 				{
 					if (abs(dirTet[0]) > EPSILON)
-						axisTmp = Coord3D(dirTet[1], -dirTet[0], 0);
+						axisTmp = Vector<Real, 3>(dirTet[1], -dirTet[0], 0);
 					else
-						axisTmp = Coord3D(0, dirTet[2], -dirTet[1]);
+						axisTmp = Vector<Real, 3>(0, dirTet[2], -dirTet[1]);
 					axisTmp /= axisTmp.norm();
 				}
 				if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, tri) == false)
@@ -1685,8 +1685,8 @@ namespace dyno
 		Real sIntersect;
 		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
 		Real l1, u1, l2, u2;
-		Coord3D axis = Coord3D(0, 1, 0);
-		Coord3D axisTmp = axis;
+		Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
+		Vector<Real, 3> axisTmp = axis;
 
 		Real boundary1, boundary2, b1, b2;
 
@@ -1773,8 +1773,8 @@ namespace dyno
 
 		for (int i = 0; i < 6; i++)
 		{
-			Coord3D dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
-			Coord3D dirCap = cap.segment.direction();
+			Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
+			Vector<Real, 3> dirCap = cap.segment.direction();
 
 			
 
@@ -1786,9 +1786,9 @@ namespace dyno
 			else //parallel, choose an arbitary direction
 			{
 				if (abs(dirTet[0]) > EPSILON)
-					axisTmp = Coord3D(dirTet[1], -dirTet[0], 0);
+					axisTmp = Vector<Real, 3>(dirTet[1], -dirTet[0], 0);
 				else
-					axisTmp = Coord3D(0, dirTet[2], -dirTet[1]);
+					axisTmp = Vector<Real, 3>(0, dirTet[2], -dirTet[1]);
 				axisTmp /= axisTmp.norm();
 			}
 			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, cap) == false)
@@ -2019,12 +2019,12 @@ namespace dyno
 			}
 		}
 
-		Coord3D center = box.center;
-		Coord3D u = box.u;
-		Coord3D v = box.v;
-		Coord3D w = box.w;
-		Coord3D extent = box.extent;
-		Coord3D p;
+		Vector<Real, 3> center = box.center;
+		Vector<Real, 3> u = box.u;
+		Vector<Real, 3> v = box.v;
+		Vector<Real, 3> w = box.w;
+		Vector<Real, 3> extent = box.extent;
+		Vector<Real, 3> p;
 		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
 		lowerBoundary2 = upperBoundary2 = p.dot(axisNormal);
 		
@@ -2112,8 +2112,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
-				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
-				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
 				
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
 				{
@@ -2163,8 +2163,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				
-				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
-				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
 				if (dirTmp1.cross(axisNormal).norm() < 1e-5)
 
 				{
@@ -2261,7 +2261,7 @@ namespace dyno
 	{
 		int cnt1, cnt2;
 		unsigned char boundaryPoints1[4];
-		Coord3D boundaryPoints2[8];
+		Vector<Real, 3> boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
 
@@ -2272,12 +2272,12 @@ namespace dyno
 				boundaryPoints1[cnt1++] = i;
 		}
 
-		Coord3D center = box.center;
-		Coord3D u = box.u;
-		Coord3D v = box.v;
-		Coord3D w = box.w;
-		Coord3D extent = box.extent;
-		Coord3D p;
+		Vector<Real, 3> center = box.center;
+		Vector<Real, 3> u = box.u;
+		Vector<Real, 3> v = box.v;
+		Vector<Real, 3> w = box.w;
+		Vector<Real, 3> extent = box.extent;
+		Vector<Real, 3> p;
 		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
 		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
@@ -2345,9 +2345,9 @@ namespace dyno
 							if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
 							{
 								int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
-								Coord3D p2 = boundaryPoints2[tmp_i];
-								Coord3D p3 = boundaryPoints2[tmp_j];
-								Coord3D p4 = boundaryPoints2[tmp_k];
+								Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
+								Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
+								Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
 								boundaryPoints2[1] = p2;
 								boundaryPoints2[2] = p3;
 								boundaryPoints2[3] = p4;
@@ -2363,8 +2363,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				Triangle3D t2(boundaryPoints2[0], boundaryPoints2[1], boundaryPoints2[2]);
-				Coord3D dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
-				Coord3D dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
 
 				/*printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
 				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2], dirTmp1.cross(axisNormal)[0], dirTmp1.cross(axisNormal)[1], dirTmp1.cross(axisNormal)[2]);
@@ -2440,8 +2440,8 @@ namespace dyno
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
-				Coord3D dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
-				Coord3D dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
+				Vector<Real, 3> dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
+				Vector<Real, 3> dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
 				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
 				{
 					m.contacts[m.contactCount].penetration = sMax;
@@ -2484,9 +2484,9 @@ namespace dyno
 						if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
 						{
 							int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
-							Coord3D p2 = boundaryPoints2[tmp_i];
-							Coord3D p3 = boundaryPoints2[tmp_j];
-							Coord3D p4 = boundaryPoints2[tmp_k];
+							Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
+							Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
+							Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
 							boundaryPoints2[1] = p2;
 							boundaryPoints2[2] = p3;
 							boundaryPoints2[3] = p4;
@@ -2594,8 +2594,8 @@ namespace dyno
 		Real sIntersect;
 		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
 		Real l1, u1, l2, u2;
-		Coord3D axis = Coord3D(0, 1, 0);
-		Coord3D axisTmp = axis;
+		Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
+		Vector<Real, 3> axisTmp = axis;
 
 		Real boundary1, boundary2, b1, b2;
 
@@ -2662,8 +2662,8 @@ namespace dyno
 		for(int i = 0; i < 6; i ++)
 			for (int j = 0; j < 6; j++)
 			{
-				Coord3D dirTet1 = tet0.v[segmentIndex[i][0]] - tet0.v[segmentIndex[i][1]];
-				Coord3D dirTet2 = tet1.v[segmentIndex[j][0]] - tet1.v[segmentIndex[j][1]];
+				Vector<Real, 3> dirTet1 = tet0.v[segmentIndex[i][0]] - tet0.v[segmentIndex[i][1]];
+				Vector<Real, 3> dirTet2 = tet1.v[segmentIndex[j][0]] - tet1.v[segmentIndex[j][1]];
 				axisTmp = dirTet1.cross(dirTet2);
 				if (axisTmp.norm() > EPSILON)
 				{
@@ -2672,9 +2672,9 @@ namespace dyno
 				else //parallel, choose an arbitary direction
 				{
 					if (abs(dirTet1[0]) > EPSILON)
-						axisTmp = Coord3D(dirTet1[1], -dirTet1[0], 0);
+						axisTmp = Vector<Real, 3>(dirTet1[1], -dirTet1[0], 0);
 					else
-						axisTmp = Coord3D(0, dirTet1[2], -dirTet1[1]);
+						axisTmp = Vector<Real, 3>(0, dirTet1[2], -dirTet1[1]);
 					axisTmp /= axisTmp.norm();
 				}
 				if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
@@ -2713,8 +2713,8 @@ namespace dyno
 		Real sIntersect;
 		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
 		Real l1, u1, l2, u2;
-		Coord3D axis = Coord3D(0, 1, 0);
-		Coord3D axisTmp = axis;
+		Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
+		Vector<Real, 3> axisTmp = axis;
 
 		Real boundary1, boundary2, b1, b2;
 
@@ -2822,10 +2822,10 @@ namespace dyno
 		//dir generated by cross product from tet and box
 		for (int i = 0; i < 6; i++)
 		{
-			Coord3D dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
+			Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
 			for(int j = 0; j < 3; j ++)
 			{ 
-				Coord3D boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
+				Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
 				axisTmp = dirTet.cross(boxDir);
 				if (axisTmp.norm() > EPSILON)
 				{
@@ -2834,9 +2834,9 @@ namespace dyno
 				else //parallel, choose an arbitary direction
 				{
 					if (abs(dirTet[0]) > EPSILON)
-						axisTmp = Coord3D(dirTet[1], -dirTet[0], 0);
+						axisTmp = Vector<Real, 3>(dirTet[1], -dirTet[0], 0);
 					else
-						axisTmp = Coord3D(0, dirTet[2], -dirTet[1]);
+						axisTmp = Vector<Real, 3>(0, dirTet[2], -dirTet[1]);
 					axisTmp /= axisTmp.norm();
 				}
 				if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet, box) == false)

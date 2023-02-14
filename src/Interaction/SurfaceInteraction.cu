@@ -356,8 +356,9 @@ namespace dyno
 				(triangles[i][1] == triangles[j][2] && triangles[i][2] == triangles[j][1])
 				)
 			{
-				TTriangle3D<Real> t1 = TTriangle3D<Real>(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
-				TTriangle3D<Real> t2 = TTriangle3D<Real>(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
+				TTriangle3D<Real> t1(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
+				TTriangle3D<Real> t2(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
+
 				if (t1.normal().dot(t2.normal()) >= cosf(diffusionAngle))
 				{
 					if (intersected[j] == 0 && unintersected[j] == 1)
@@ -488,7 +489,7 @@ namespace dyno
 					points,
 					intersected,
 					unintersected,
-					this->varFloodAngle()->getValue()/180.0f*M_PI);
+					Real(this->varFloodAngle()->getValue()/180.0f*M_PI));
 				intersected_size_t = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
 			}
 		}

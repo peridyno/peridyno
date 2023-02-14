@@ -784,7 +784,6 @@ namespace dyno
 		Coord3D extent;
 	};
 
-#ifdef PRECISION_FLOAT
 	template class TPoint3D<float>;
 	template class TLine3D<float>;
 	template class TRay3D<float>;
@@ -801,6 +800,23 @@ namespace dyno
 	template class TCylinder3D<float>;
 	template class TCone3D<float>;
 
+	template class TPoint3D<double>;
+	template class TLine3D<double>;
+	template class TRay3D<double>;
+	template class TSegment3D<double>;
+	template class TPlane3D<double>;
+	template class TTriangle3D<double>;
+	template class TRectangle3D<double>;
+	template class TDisk3D<double>;
+	template class TSphere3D<double>;
+	template class TCapsule3D<double>;
+	template class TTet3D<double>;
+	template class TAlignedBox3D<double>;
+	template class TOrientedBox3D<double>;
+	template class TCylinder3D<double>;
+	template class TCone3D<double>;
+
+#ifdef PRECISION_FLOAT
 	//convenient typedefs 
 	typedef TPoint3D<float> Point3D;
 	typedef TLine3D<float> Line3D;
@@ -818,22 +834,6 @@ namespace dyno
 	typedef TCylinder3D<float> Cylinder3D;
 	typedef TCone3D<float> Cone3D;
 #else
-	template class TPoint3D<double>;
-	template class TLine3D<double>;
-	template class TRay3D<double>;
-	template class TSegment3D<double>;
-	template class TPlane3D<double>;
-	template class TTriangle3D<double>;
-	template class TRectangle3D<double>;
-	template class TDisk3D<double>;
-	template class TSphere3D<double>;
-	template class TCapsule3D<double>;
-	template class TTet3D<double>;
-	template class TAlignedBox3D<double>;
-	template class TOrientedBox3D<double>;
-	template class TCylinder3D<double>;
-	template class TCone3D<double>;
-
 	//convenient typedefs 
 	typedef TPoint3D<double> Point3D;
 	typedef TLine3D<double> Line3D;

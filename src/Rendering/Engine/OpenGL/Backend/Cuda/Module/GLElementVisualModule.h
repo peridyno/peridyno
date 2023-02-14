@@ -13,6 +13,9 @@
 namespace dyno
 {
 	template<typename TDataType> class DiscreteElements;
+
+	typedef typename Vector<float, 3> Coord3D;
+
 	class GLElementVisualModule : public GLVisualModule
 	{
 		DECLARE_CLASS(GLElementVisualModule)
