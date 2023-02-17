@@ -31,7 +31,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "line.frag", "line.geom");
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
 
 		return true;
 	}
