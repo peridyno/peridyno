@@ -184,7 +184,6 @@ namespace dyno
 		struct RenderQueue : public Action {
 			void process(Node* node) override
 			{
-				if (!node->isVisible())	return;
 				for (auto iter : node->graphicsPipeline()->activeModules()) {
 					auto m = std::dynamic_pointer_cast<GLVisualModule>(iter);
 					if (m) {
@@ -298,7 +297,7 @@ namespace dyno
 		// render opacity objects
 		for (int i = 0; i < mRenderModules.size(); i++) {
 
-			if (!mRenderModules[i]->isTransparent())
+			if (mRenderNodes[i]->isVisible() && !mRenderModules[i]->isTransparent())
 			{
 				mVariableUBO.load(&i, sizeof(i));
 				mRenderModules[i]->draw(GLRenderPass::COLOR);
@@ -324,7 +323,7 @@ namespace dyno
 			glDepthMask(false);
 			for (int i = 0; i < mRenderModules.size(); i++) {
 
-				if (mRenderModules[i]->isTransparent())
+				if (mRenderNodes[i]->isVisible() && mRenderModules[i]->isTransparent())
 				{
 					mVariableUBO.load(&i, sizeof(i));
 					mRenderModules[i]->draw(GLRenderPass::TRANSPARENCY);
