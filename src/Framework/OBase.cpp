@@ -32,6 +32,11 @@ namespace dyno {
 		return tip;
 	}
 
+	std::string OBase::getName()
+	{
+		return "";
+	}
+
 	bool OBase::addField(FBase* data)
 	{
 		return addField(data->getObjectName(), data);
