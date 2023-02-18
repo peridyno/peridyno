@@ -20,7 +20,7 @@ using namespace dyno;
 #include "Vector.h"
 
 /**
- * @brief This example demonstrates the connection between nodes.
+ * @brief This example demonstrates the connection between nodes. Go to Edit->Logging to show notifications.
  */
 
 class Data : public Object {
@@ -29,13 +29,13 @@ public:
 	~Data() override {};
 };
 
-class Source : public Node
+class SourceA : public Node
 {
-	DECLARE_CLASS(Source);
+	DECLARE_CLASS(SourceA);
 public:
-	Source() {
+	SourceA() {
 	};
-	~Source() override {};
+	~SourceA() override {};
 
 	DEF_INSTANCE_OUT(Data, Data, "Output");
 
@@ -43,7 +43,24 @@ protected:
 	void resetStates() {};
 };
 
-IMPLEMENT_CLASS(Source);
+IMPLEMENT_CLASS(SourceA);
+
+
+class SourceB : public Node
+{
+	DECLARE_CLASS(SourceB);
+public:
+	SourceB() {
+	};
+	~SourceB() override {};
+
+	DEF_INSTANCE_OUT(Data, Data, "Output");
+
+protected:
+	void resetStates() {};
+};
+
+IMPLEMENT_CLASS(SourceB);
 
 class Target : public Node
 {
@@ -53,7 +70,9 @@ public:
 	};
 	~Target() override {};
 
-	DEF_NODE_PORTS(Source, Source, "");
+	DEF_NODE_PORTS(SourceA, SourceA, "");
+
+	DEF_NODE_PORT(SourceB, SourceB, "");
 
 	DEF_INSTANCE_IN(Data, Data, "Input");
 
@@ -66,14 +85,22 @@ IMPLEMENT_CLASS(Target);
 int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	auto source1 = scn->addNode(std::make_shared<Source>());
-	source1->setName("Source1");
 
-	auto source2 = scn->addNode(std::make_shared<Source>());
-	source2->setName("Source2");
+	auto source1 = scn->addNode(std::make_shared<SourceA>());
+	source1->setName("s1");
+
+	auto source2 = scn->addNode(std::make_shared<SourceA>());
+	source2->setName("s2");
+
+	auto source3 = scn->addNode(std::make_shared<SourceB>());
+	source3->setName("s3");
 
 	auto target1 = scn->addNode(std::make_shared<Target>());
-	target1->setName("Target");
+	target1->setName("t1");
+
+	source1->connect(target1->importSourceAs());
+	source2->connect(target1->importSourceAs());
+	source3->connect(target1->importSourceB());
 
 	source1->outData()->connect(target1->inData());
 

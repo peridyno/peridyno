@@ -358,15 +358,42 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 // 	act->end(this);
 // }
 
+
+std::string FormatConnectionInfo(Node* node, NodePort* port, bool connecting, bool succeeded)
+{
+	Node* pOut = port != nullptr ? port->getParent() : nullptr;
+
+	std::string capIn = node->caption();
+	std::string capOut = pOut != nullptr ? pOut->caption() : "";
+
+	std::string nameIn = node->getName();
+	std::string nameOut = port != nullptr ? port->getPortName() : "";
+
+	if (connecting)
+	{
+		std::string message1 = capIn + ":" + nameIn + " is connected to " + capOut + ":" + nameOut;
+		std::string message2 = capIn + ":" + nameIn + " cannot be connected to " + capOut + ":" + nameOut;
+		return succeeded ? message1 : message2;
+	}
+	else
+	{
+		std::string message1 = capIn + ":" + nameIn + " is disconnected from " + capOut + ":" + nameOut;
+		std::string message2 = capIn + ":" + nameIn + " cannot be disconnected from " + capOut + ":" + nameOut;
+		return succeeded ? message1 : message2;
+	}
+}
+
 bool Node::appendExportNode(NodePort* nodePort)
 {
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it != mExportNodes.end()) {
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, false));
 		return false;
 	}
 
 	mExportNodes.push_back(nodePort);
 
+	Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, true));
 	return nodePort->addNode(this);
 }
 
@@ -374,11 +401,13 @@ bool Node::removeExportNode(NodePort* nodePort)
 {
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it == mExportNodes.end()) {
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, false));
 		return false;
 	}
 
 	mExportNodes.erase(it);
 
+	Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, true));
 	return nodePort->removeNode(this);
 }
 

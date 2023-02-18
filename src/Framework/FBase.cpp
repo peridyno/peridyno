@@ -19,14 +19,14 @@ namespace dyno
 
 		if (connecting) 
 		{
-			std::string message1 = capIn + " " + nameIn + " is connected to " + capOut + " " + nameOut;
-			std::string message2 = capIn + " " + nameIn + " cannot be connected to " + capOut + " " + nameOut;
+			std::string message1 = capIn + ":" + nameIn + " is connected to " + capOut + ":" + nameOut;
+			std::string message2 = capIn + ":" + nameIn + " cannot be connected to " + capOut + ":" + nameOut;
 			return succeeded ? message1 : message2;
 		}
 		else
 		{
-			std::string message1 = capIn + " " + nameIn + " is disconnected from " + capOut + " " + nameOut;
-			std::string message2 = capIn + " " + nameIn + " cannot be disconnected from " + capOut + " " + nameOut;
+			std::string message1 = capIn + ":" + nameIn + " is disconnected from " + capOut + ":" + nameOut;
+			std::string message2 = capIn + ":" + nameIn + " cannot be disconnected from " + capOut + ":" + nameOut;
 			return succeeded ? message1 : message2;
 		}
 	}

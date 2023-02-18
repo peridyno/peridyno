@@ -193,7 +193,7 @@ namespace dyno
 
 		auto configGroup = filePage->AddGroup("Config");
 
-		mLogAct = new QAction(QPixmap(path + "icon/ToolBarIco/Edit/Edit.png"), "Log");
+		mLogAct = new QAction(QPixmap(path + "icon/ToolBarIco/Edit/Edit.png"), "Logging");
 		mLogAct->setCheckable(true);
 		configGroup->AddAction(QToolButton::DelayedPopup, mLogAct);
 
