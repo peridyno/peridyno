@@ -77,7 +77,7 @@ namespace dyno
 		~Node() override;
 
 		void setName(std::string name);
-		std::string getName();
+		std::string getName() override;
 
 		virtual std::string getNodeType();
 

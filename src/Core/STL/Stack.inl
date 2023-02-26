@@ -34,7 +34,7 @@ namespace dyno
 			//cout << "Stack is empty!" << endl;
 
 		//else return the data at the top
-		m_size--;
+		m_size = m_size > 0 ? m_size - 1 : 0;
 	}
 
 	template <typename T>
@@ -67,7 +67,7 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC bool Stack<T>::empty()
 	{
-		return m_startLoc == nullptr;
+		return m_size == 0;
 	}
 }
 

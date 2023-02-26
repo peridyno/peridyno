@@ -61,6 +61,8 @@ namespace dyno {
 		 */
 		virtual std::string description();
 
+		virtual std::string getName();
+
 		/**
 		 * @brief Add a field to Base
 		 * FieldID will be set to the name of Field by default

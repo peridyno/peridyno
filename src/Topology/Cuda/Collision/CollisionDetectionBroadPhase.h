@@ -1,8 +1,9 @@
 #pragma once
 #include "Module/CollisionModel.h"
+
 #include "Algorithm/Reduction.h"
 #include "Primitive/Primitive3D.h"
-#include "Topology/SparseOctree.h"
+
 
 namespace dyno
 {
@@ -31,6 +32,12 @@ namespace dyno
 		}
 
 	public:
+		DECLARE_ENUM(EStructure,
+			BVH = 0,
+			Octree = 1);
+
+		DEF_ENUM(EStructure, AccelerationStructure, EStructure::BVH, "Acceleration structure");
+
 		DEF_VAR(Real, GridSizeLimit, 0.005, "Limit the smallest grid size");
 
 		DEF_ARRAY_IN(AABB, Source, DeviceType::GPU, "");
@@ -39,12 +46,14 @@ namespace dyno
 
 		DEF_ARRAYLIST_OUT(int, ContactList, DeviceType::GPU, "Contact pairs");
 
+	private:
+		void doCollisionWithSparseOctree();
+		void doCollisionWithLinearBVH();
 
 	private:
 		Reduction<Real> m_reduce_real;
 		Reduction<Coord> m_reduce_coord;
 
-		SparseOctree<TDataType> octree;
 		bool self_collision = false;
 
 		DArray<Real> mH;

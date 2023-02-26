@@ -76,6 +76,7 @@ namespace Qt
 		{
 		case PortType::In:
 			if (portIndex < mNodeInport.size()) {
+				//TODO: return more accurate description
 				return NodeDataType{ "port", "port", PortShape::Bullet };
 			}
 			else {
@@ -88,6 +89,7 @@ namespace Qt
 
 		case PortType::Out:
 			if (portIndex == 0) {
+				//TODO: return more accurate description
 				return NodeDataType{ "port", "port", PortShape::Bullet };
 			}
 			else {
