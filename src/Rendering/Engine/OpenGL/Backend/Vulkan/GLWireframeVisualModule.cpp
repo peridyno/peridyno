@@ -28,7 +28,7 @@ namespace dyno
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 4, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
