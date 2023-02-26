@@ -1,4 +1,10 @@
 #include "CollisionDetectionBroadPhase.h"
+
+#include "Topology/SparseOctree.h"
+#include "Topology/LinearBVH.h"
+
+#include "Timer.h"
+
 #include <thrust/sort.h>
 
 namespace dyno
@@ -53,8 +59,6 @@ namespace dyno
 
 		mIds.clear();
 		mKeys.clear();
-
-		octree.release();
 	}
 
 	template<typename Real, typename Coord>
@@ -373,15 +377,30 @@ namespace dyno
 	template<typename TDataType>
 	void CollisionDetectionBroadPhase<TDataType>::doCollision()
 	{
+		auto type = this->varAccelerationStructure()->getDataPtr()->currentKey();
+		switch (type)
+		{
+		case EStructure::BVH:
+			doCollisionWithLinearBVH();
+		case EStructure::Octree:
+			doCollisionWithSparseOctree();
+		default:
+			break;
+		}
+	}
+
+	template<typename TDataType>
+	void CollisionDetectionBroadPhase<TDataType>::doCollisionWithSparseOctree()
+	{
 		auto& aabb_src = this->inSource()->getData();
 		auto& aabb_tar = this->inTarget()->getData();
 		//:dyno::Array<:dyno::AABB, GPU>& aabb_src = this->inSource()->getData();
 		//:dyno::Array<:dyno::AABB, GPU>& aabb_tar = this->inTarget()->getData();
-	
+
 		if (this->outContactList()->isEmpty()) {
 			this->outContactList()->allocate();
 		}
-		
+
 		auto& contacts = this->outContactList()->getData();
 
 		mV0.resize(aabb_tar.size());
@@ -401,6 +420,7 @@ namespace dyno
 
 		min_val = max(min_val, this->varGridSizeLimit()->getData());
 
+		SparseOctree<TDataType> octree;
 		octree.setSpace(min_v0 - min_val, min_val, max(max_v1[0] - min_v0[0], max(max_v1[1] - min_v0[1], max_v1[2] - min_v0[2])) + 2.0f * min_val);
 		octree.construct(aabb_tar);
 
@@ -471,7 +491,87 @@ namespace dyno
 			octree,
 			self_collision);
 
-		//octree.release();
+		CArrayList<int> hContacts;
+		hContacts.assign(contacts);
+
+		octree.release();
+	}
+
+	template<typename TDataType, typename AABB>
+	__global__ void CDBP_RequestIntersectionNumberBVH(
+		DArray<uint> count,
+		DArray<AABB> aabbs,
+		LinearBVH<TDataType> bvh,
+		bool self_collision)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= aabbs.size()) return;
+
+		if (self_collision)
+			count[tId] = bvh.requestIntersectionNumber(aabbs[tId], tId);
+		else
+			count[tId] = bvh.requestIntersectionNumber(aabbs[tId]);
+	}
+
+
+	template<typename TDataType, typename AABB>
+	__global__ void CDBP_RequestIntersectionIdsBVH(
+		DArrayList<int> idLists,
+		DArray<AABB> aabbs,
+		LinearBVH<TDataType> bvh,
+		bool self_collision)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= aabbs.size()) return;
+
+		if (self_collision)
+			bvh.requestIntersectionIds(idLists[tId], aabbs[tId], tId);
+		else
+			bvh.requestIntersectionIds(idLists[tId], aabbs[tId]);
+	}
+
+	template<typename TDataType>
+	void CollisionDetectionBroadPhase<TDataType>::doCollisionWithLinearBVH()
+	{
+		auto& aabb_src = this->inSource()->getData();
+		auto& aabb_tar = this->inTarget()->getData();
+
+		if (this->outContactList()->isEmpty()) {
+			this->outContactList()->allocate();
+		}
+
+		auto& contacts = this->outContactList()->getData();
+
+		LinearBVH<TDataType> bvh;
+		bvh.construct(aabb_tar);
+
+		mCounter.resize(aabb_src.size());
+		cuExecute(aabb_src.size(),
+			CDBP_RequestIntersectionNumberBVH,
+			mCounter,
+			aabb_src,
+			bvh,
+			self_collision);
+
+// 		CArray<uint> hCounter;
+// 		hCounter.assign(mCounter);
+// 		for (int i = 0; i < hCounter.size(); i++)
+// 			std::cout << "Num: " << hCounter[i] << std::endl;
+// 		hCounter.clear();
+
+		contacts.resize(mCounter);
+
+		cuExecute(aabb_src.size(),
+			CDBP_RequestIntersectionIdsBVH,
+			contacts,
+			aabb_src,
+			bvh,
+			self_collision);
+
+// 		CArrayList<int> hContacts;
+// 		hContacts.assign(contacts);
+
+		bvh.release();
 	}
 
 	DEFINE_CLASS(CollisionDetectionBroadPhase);

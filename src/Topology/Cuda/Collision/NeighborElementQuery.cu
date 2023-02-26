@@ -562,6 +562,8 @@ namespace dyno
 
 		auto& contactList = m_broadPhaseCD->outContactList()->getData();
 
+		if (contactList.size() == 0) return;
+
 		DArray<int> count(contactList.size());
 		cuExecute(contactList.size(),
 			CCL_CountListSize,

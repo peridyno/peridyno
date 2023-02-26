@@ -3670,6 +3670,33 @@ namespace dyno
 		return true;
 	}
 
+
+	template<typename Real>
+	DYN_FUNC bool TAlignedBox3D<Real>::checkOverlap(const TAlignedBox3D<Real>& abox) const
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (v1[i] <= abox.v0[i] || v0[i] >= abox.v1[i])
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TAlignedBox3D<Real>::merge(const TAlignedBox3D<Real>& aabb) const
+	{
+		TAlignedBox3D<Real> ret;
+		ret.v0 = v0.minimum(aabb.v0);
+		ret.v1 = v1.maximum(aabb.v1);
+
+		return ret;
+	}
+
+
 	template<typename Real>
 	DYN_FUNC bool TAlignedBox3D<Real>::meshInsert(const TTriangle3D<Real>& tri) const
 	{

@@ -32,6 +32,16 @@ TEST(Set, insert)
 	EXPECT_EQ(stack.top(), 11);
 	EXPECT_EQ(stack.count(11), 3);
 
+	EXPECT_EQ(stack.empty(), false);
+	stack.pop();
+	stack.pop();
+	stack.pop();
+	EXPECT_EQ(stack.empty(), false);
+	stack.pop();
+	EXPECT_EQ(stack.empty(), true);
+	stack.pop();
+	EXPECT_EQ(stack.empty(), true);
+
 	List<int> list;
 	list.reserve(buf, 10);
 	list.insert(10);//head->10
