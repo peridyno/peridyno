@@ -4,7 +4,6 @@
 #include "GLWireframeVisualModule.h"
 
 
-
 namespace dyno
 {
 	template<typename TDataType>

@@ -19,9 +19,6 @@
 
 #include "Primitive/Primitive3D.h"
 
-#include "Topology/TriangleSet.h"
-#include "Topology/QuadSet.h"
-
 namespace dyno
 {
 	template<typename TDataType>

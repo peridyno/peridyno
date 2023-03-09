@@ -15,7 +15,10 @@
  */
 
 #pragma once
-#include "ParametricModel.h"
+#include "Node/ParametricModel.h"
+
+#include "Topology/TriangleSet.h"
+
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 

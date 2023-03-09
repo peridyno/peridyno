@@ -1,9 +1,9 @@
 #include "SphereModel.h"
 
+#include "Primitive/Primitive3D.h"
+
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
-
-
 
 namespace dyno
 {
@@ -18,7 +18,15 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varRadius()->attach(callback);
+		this->varTheta()->attach(callback);
+		
 		glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
 		glModule->setVisible(true);
@@ -29,12 +37,61 @@ namespace dyno
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
-
-
 	}
 
 	template<typename TDataType>
 	void SphereModel<TDataType>::resetStates()
+	{
+		varChanged();
+	}
+
+	template<typename TDataType>
+	void SphereModel<TDataType>::disableRender() {
+		glModule->setVisible(false);
+	};
+
+	template<typename TDataType>
+	NBoundingBox SphereModel<TDataType>::boundingBox()
+	{
+		auto center = this->varLocation()->getData();
+		auto rot = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto radius = this->varRadius()->getData();
+
+		Coord length(radius);
+		length[0] *= scale[0];
+		length[1] *= scale[1];
+		length[2] *= scale[2];
+
+		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+
+		q.normalize();
+
+		TOrientedBox3D<Real> box;
+		box.center = center;
+		box.u = q.rotate(Coord(1, 0, 0));
+		box.v = q.rotate(Coord(0, 1, 0));
+		box.w = q.rotate(Coord(0, 0, 1));
+		box.extent = length;
+
+		auto AABB = box.aabb();
+		auto& v0 = AABB.v0;
+		auto& v1 = AABB.v1;
+		
+
+		NBoundingBox ret;
+		ret.lower = Vec3f(v0.x, v0.y, v0.z);
+		ret.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return ret;
+	}
+
+
+	template<typename TDataType>
+	void SphereModel<TDataType>::varChanged()
 	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
@@ -44,7 +101,7 @@ namespace dyno
 		auto theta = this->varTheta()->getData();
 
 
-		radius *= (sqrt(scale[0]* scale[0] + scale[1]* scale[1] + scale[2]* scale[2]));
+		radius *= (sqrt(scale[0] * scale[0] + scale[1] * scale[1] + scale[2] * scale[2]));
 
 		TSphere3D<Real> ball;
 		ball.center = center;
@@ -62,12 +119,12 @@ namespace dyno
 
 		Coord point(0.0f);
 
-		for (float d_alpha = -PI/2 + theta/2; d_alpha < PI/2; d_alpha += theta )
+		for (float d_alpha = -PI / 2 + theta / 2; d_alpha < PI / 2; d_alpha += theta)
 		{
 			point[1] = center[1] + radius * sin(d_alpha);
 
 			//std::cout << "theta " << da << std::endl;
-			for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta )
+			for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta)
 			{
 				point[0] = center[0] + (cos(d_alpha) * radius) * sin(d_beta);
 				point[2] = center[2] + (cos(d_alpha) * radius) * cos(d_beta);
@@ -81,21 +138,21 @@ namespace dyno
 
 
 		int face_id = 0;
-		for (float d_alpha = -PI / 2 + theta/2; d_alpha < PI / 2; d_alpha += theta)
+		for (float d_alpha = -PI / 2 + theta / 2; d_alpha < PI / 2; d_alpha += theta)
 		{
 
 
 			for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta)
 			{
-				if ((d_beta + theta - 2 * PI < EPSILON)&&(d_alpha + theta < PI / 2))
+				if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha + theta < PI / 2))
 				{
 					int cd = 2 * PI / theta;
-					triangle.push_back(TopologyModule::Triangle(face_id, face_id+1, face_id + cd + 1));
+					triangle.push_back(TopologyModule::Triangle(face_id, face_id + 1, face_id + cd + 1));
 				}
-				else if((d_beta + theta - 2 * PI >= EPSILON) && (d_alpha + theta < PI / 2))
+				else if ((d_beta + theta - 2 * PI >= EPSILON) && (d_alpha + theta < PI / 2))
 				{
 					int cd = 2 * PI / theta;
-					triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd , face_id + cd + 1));
+					triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, face_id + cd + 1));
 				}
 				else if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha + theta >= PI / 2))
 				{
@@ -109,7 +166,7 @@ namespace dyno
 
 
 
-				if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha - theta + PI / 2 > EPSILON ))
+				if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha - theta + PI / 2 > EPSILON))
 				{
 					int cd = 2 * PI / theta;
 					triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, face_id + 1));
@@ -141,11 +198,6 @@ namespace dyno
 		vertices.clear();
 		triangle.clear();
 	}
-
-	template<typename TDataType>
-	void SphereModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	DEFINE_CLASS(SphereModel);
 }
