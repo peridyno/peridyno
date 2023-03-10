@@ -68,6 +68,18 @@ namespace dyno
 		auto callback3 = std::make_shared<FCallBackFunc>(std::bind(&EdgePickerNode<TDataType>::changeMultiSelectionType, this));
 
 		this->varMultiSelectionType()->attach(callback3);
+
+		this->edgeInteractor->outEdgeIndex()->allocate();
+		this->pointInteractor->outPointIndex()->allocate();
+
+		this->edgeInteractor->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->edgeInteractor->outOtherEdgeSet()->getDataPtr()->getEdges().resize(0);
+		this->edgeInteractor->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->edgeInteractor->outSelectedEdgeSet()->getDataPtr()->getEdges().resize(0);
+		this->pointInteractor->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->pointInteractor->outOtherPointSet()->getDataPtr()->getPoints().resize(0);
+		this->pointInteractor->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->pointInteractor->outSelectedPointSet()->getDataPtr()->getPoints().resize(0);
 	}
 
 	template<typename TDataType>
