@@ -24,6 +24,8 @@
 
 #include "ImGuizmo.h"
 
+#include <Node/ParametricModel.h>
+
 using namespace dyno;
 
 class WidgetQueue : public Action
@@ -272,6 +274,20 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Edit", "")) {
+
+				if (ImGui::RadioButton("Translate", mEditMode == 0))
+					mEditMode = 0;
+
+				if (ImGui::RadioButton("Scale", mEditMode == 1))
+					mEditMode = 1;
+
+				if (ImGui::RadioButton("Rotate", mEditMode == 2))
+					mEditMode = 2;				
+
+				ImGui::EndMenu();
+			}
+
 
 			ImGui::EndMainMenuBar();
 		}
@@ -320,6 +336,77 @@ void ImWindow::draw(RenderWindow* app)
 	}
 
 	drawSelectedRegion();
+
+	// current active node
+	// 
+	// TODO: type conversion...
+	auto* node = dynamic_cast<ParametricModel<DataType3f>*>(app->currNode);
+
+	// TODO: parameterized operation
+	auto nodeOp = ImGuizmo::TRANSLATE;
+
+	switch (mEditMode) {
+	case 0:
+		nodeOp = ImGuizmo::TRANSLATE;
+		break;
+	case 1:
+		nodeOp = ImGuizmo::SCALE;
+		break;
+	case 2:
+		nodeOp = ImGuizmo::ROTATE;
+		break;
+	default:
+		break;
+	}
+
+	if (node!= 0) {
+		auto view = rparams.view;
+		auto proj = rparams.proj;
+
+		// TODO: handle ImGuizmo frame properly
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuizmo::BeginFrame();
+		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+		glm::mat4 tm(1.f);
+
+		{
+			// build transform matrix
+
+			auto location = node->varLocation()->getData();
+			tm[3][0] = location[0];
+			tm[3][1] = location[1];
+			tm[3][2] = location[2];
+
+			auto scale = node->varScale()->getData();
+			tm[0][0] = scale[0];
+			tm[1][1] = scale[1];
+			tm[2][2] = scale[2];
+
+			// TODO: rotation...
+		}
+				
+
+		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, &tm[0][0], NULL, NULL, NULL, NULL))
+		{
+			// apply
+			if (nodeOp == ImGuizmo::TRANSLATE) {
+				node->varLocation()->setValue(Vec3f(tm[3][0], tm[3][1], tm[3][2]));
+			}
+
+			if (nodeOp == ImGuizmo::SCALE) {
+				node->varScale()->setValue(Vec3f(tm[0][0], tm[1][1], tm[2][2]));
+			}
+
+			if (nodeOp == ImGuizmo::ROTATE) {
+				// TODO: rotation...
+			}
+
+			// notify the update of node?
+			node->update();
+		}
+
+	}	
 }
 
 void ImWindow::mouseMoveEvent(const PMouseEvent& event)

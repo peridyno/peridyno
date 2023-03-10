@@ -15,7 +15,10 @@
  */
 
 #pragma once
-#include "ParametricModel.h"
+#include "Node/ParametricModel.h"
+
+#include "Topology/QuadSet.h"
+
 #include "GLSurfaceVisualModule.h"
 namespace dyno
 {

@@ -18,6 +18,7 @@
 
 #include <GLRenderEngine.h>
 #include "QtApp.h"
+#include "ImGuizmo.h"
 
 namespace dyno
 {
@@ -162,9 +163,12 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
+		mButtonState = QButtonState::QBUTTON_DOWN;
+		mCursorX = event->x();
+		mCursorY = event->y();
+
 		auto camera = this->getCamera();
 		camera->registerPoint(event->x(), event->y());
-		mButtonState = QButtonState::QBUTTON_DOWN;
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
@@ -186,6 +190,35 @@ namespace dyno
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
+		// do picking
+		if(event->modifiers() == 0 && event->button() == Qt::LeftButton 
+			&& !ImGuizmo::IsUsing()
+			&& !ImGui::GetIO().WantCaptureMouse)
+		{
+			int x = event->x();
+			int y = event->y();
+
+			int w = std::abs(mCursorX - x);
+			int h = std::abs(mCursorY - y);
+			x = std::min(mCursorX, x);
+			y = std::min(mCursorY, y);
+			y = this->height() - y - 1;
+
+			makeCurrent();
+			auto items = mRenderEngine->select(x, y, w, h);
+			doneCurrent();
+
+			// print selected result...
+			printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
+
+			// pick the last one?
+			if (!items.empty())
+				currNode = items[0].node;
+			else
+				currNode = 0;
+		}
+
+
 		auto camera = this->getCamera();
 
 		mButtonState = QButtonState::QBUTTON_UP;

@@ -37,6 +37,8 @@ namespace dyno
 
 		bool mDrawingBox = false;
 
+		int  mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
+
 		PButtonType mButtonType = BT_UNKOWN;
 		PActionType	mButtonAction = AT_UNKOWN;
 		PModifierBits mButtonMode = MB_NO_MODIFIER;

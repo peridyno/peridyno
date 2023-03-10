@@ -124,8 +124,6 @@ namespace dyno {
 
 		ImWindow mImWindow;
 
-		// current selected node
-		Node* currNode = 0;
     };
 
 }

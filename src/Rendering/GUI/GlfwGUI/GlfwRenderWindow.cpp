@@ -244,29 +244,7 @@ namespace dyno
 // 				widget->paint();
 // 			}
 
-			if (currNode) {
 
-				auto view = getRenderParams().view;
-				auto proj = getRenderParams().proj;
-
-				ImGuiIO& io = ImGui::GetIO();
-				ImGuizmo::BeginFrame();
-				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-				// TODO: node transform interface?
-				glm::mat4 transform(1.f);
-
-				auto bbox = currNode->boundingBox();
-				auto center = (bbox.lower + bbox.upper) * 0.5f;
-				transform[3][0] = center[0];
-				transform[3][1] = center[1];
-				transform[3][2] = center[2];
-
-				if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], ImGuizmo::TRANSLATE, ImGuizmo::WORLD, &transform[0][0], NULL, NULL, NULL, NULL))
-				{
-					// TODO: apply transform
-				}
-			}
 
 // 			// draw a pick rect
 // 			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&

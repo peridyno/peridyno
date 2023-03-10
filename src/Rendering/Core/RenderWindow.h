@@ -67,5 +67,10 @@ namespace dyno
 		RenderParams					mRenderParams;
 
 		std::shared_ptr<Camera>			mCamera;
+
+	public:
+		// current active(selected) node
+		Node*							currNode = 0;
+
 	};
 };
