@@ -5,10 +5,7 @@ set(PERIDYNO_LIB_CMAKES "")
 set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES "")
 
 add_subdirectory(Core)
-
-if(PERIDYNO_LIBRARY_FRAMEWORK)
-    add_subdirectory(Framework)
-endif()
+add_subdirectory(Framework)
 
 if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)

@@ -203,7 +203,7 @@ namespace dyno
 			, mFrameNumber(0)
 			, mFrameCost(0)
 			, mInitialized(false)
-			, mLowerBound(0, 0, 0)
+			, mLowerBound(-1, -1, -1)
 			, mUpperBound(1, 1, 1)
 		{
 			//mRoot = std::make_shared<Node>();
