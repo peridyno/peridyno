@@ -8,8 +8,6 @@
 #include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/GhostFluid.h>
 
-#include <RigidBody/RigidBody.h>
-
 #include <Module/CalculateNorm.h>
 
 #include <GLRenderEngine.h>
