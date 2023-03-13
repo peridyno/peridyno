@@ -124,6 +124,8 @@ else()
     message(FATAL_ERROR "Could not set install folders for this platform!")
 endif()
 
+option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
+
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
