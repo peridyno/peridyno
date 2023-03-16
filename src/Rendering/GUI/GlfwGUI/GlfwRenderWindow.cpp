@@ -214,16 +214,13 @@ namespace dyno
 			
 			activeScene->updateGraphicsContext();
 				
-			mRenderParams.proj = mCamera->getProjMat();
-			mRenderParams.view = mCamera->getViewMat();
-
 			// Jian SHI: hack for unit scaling...
 			float planeScale = mRenderParams.planeScale;
 			float rulerScale = mRenderParams.rulerScale;
 			mRenderParams.planeScale *= mCamera->unitScale();
 			mRenderParams.rulerScale *= mCamera->unitScale();
 
-			mRenderEngine->draw(activeScene.get(), mRenderParams);
+			mRenderEngine->draw(activeScene.get(), mCamera.get(), mRenderParams);
 
 			mRenderParams.planeScale = planeScale;
 			mRenderParams.rulerScale = rulerScale;

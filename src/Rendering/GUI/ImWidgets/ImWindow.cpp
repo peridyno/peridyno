@@ -67,6 +67,8 @@ void ImWindow::draw(RenderWindow* app)
 {
 	auto engine = app->getRenderEngine();
 	auto scene  = SceneGraphFactory::instance()->active();
+	auto camera = app->getCamera();
+
 	auto& rparams = app->getRenderParams();
 	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
@@ -199,8 +201,9 @@ void ImWindow::draw(RenderWindow* app)
 				// Light Direction
 				ImGui::Text("Main Light Direction");
 
-				glm::mat4 inverse_view = glm::transpose(rparams.view);// view R^-1 = R^T
-				glm::vec3 tmpLightDir = glm::vec3(rparams.view * glm::vec4(iLight.mainLightDirection, 0));
+				glm::mat4 view = camera->getViewMat();
+				glm::mat4 inverse_view = glm::transpose(view);// view R^-1 = R^T
+				glm::vec3 tmpLightDir = glm::vec3(view * glm::vec4(iLight.mainLightDirection, 0));
 				vec3 vL(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
 
 				ImGui::beginTitle("Light dir");
@@ -297,7 +300,6 @@ void ImWindow::draw(RenderWindow* app)
 			std::string rEngineName = engine->name();
 			ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 			ImGui::Text("Rendered by %s: %.1f FPS", rEngineName.c_str(), ImGui::GetIO().Framerate);
-			ImGui::SetWindowPos(ImVec2(rparams.viewport.w - ImGui::GetWindowSize().x, rparams.viewport.h - ImGui::GetWindowSize().y));
 			ImGui::End();
 		}
 
@@ -360,8 +362,9 @@ void ImWindow::draw(RenderWindow* app)
 	}
 
 	if (node!= 0) {
-		auto view = rparams.view;
-		auto proj = rparams.proj;
+		
+		auto view = camera->getViewMat();
+		auto proj = camera->getProjMat();
 
 		// TODO: handle ImGuizmo frame properly
 		ImGuiIO& io = ImGui::GetIO();
