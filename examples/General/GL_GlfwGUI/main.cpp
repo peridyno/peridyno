@@ -1,7 +1,5 @@
 #include <GlfwApp.h>
 
-#include <SceneGraph.h>
-
 using namespace dyno;
 
 int main(int, char**)

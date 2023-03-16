@@ -12,10 +12,16 @@
 #include "CubeModel.h"
 #include "CubeSampler.h"
 
+#include "initializeModeling.h"
+#include "initializeInteraction.h"
+
 using namespace dyno;
 
 int main()
 {
+	Modeling::initStaticPlugin();
+	Interaction::initStaticPlugin();
+
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	/*auto pickerNode = scn->addNode(std::make_shared<PickerNode<DataType3f>>());

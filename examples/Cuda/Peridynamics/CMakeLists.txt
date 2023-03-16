@@ -11,8 +11,6 @@ ENDMACRO()
 
 SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
-if(PERIDYNO_Qt5_GUI)
-  FOREACH(subdir ${SUBDIRS})
-    add_subdirectory(${subdir})
-  ENDFOREACH()
-endif()
+FOREACH(subdir ${SUBDIRS})
+  add_subdirectory(${subdir})
+ENDFOREACH()
