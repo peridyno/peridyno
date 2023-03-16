@@ -184,7 +184,7 @@ namespace dyno
 		name->setFixedHeight(24);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		QDoubleSlider* slider = new QDoubleSlider;
+		slider = new QDoubleSlider;
 		slider->setRange(mField->getMin(), mField->getMax());
 		slider->setMinimumWidth(60);
 
@@ -215,6 +215,20 @@ namespace dyno
 		}
 
 		FormatFieldWidgetName(field->getObjectName());
+
+		if (mField != nullptr)
+		{
+			callback = std::make_shared<FCallBackFunc>(std::bind(&QRealFieldWidget::fieldUpdated, this));
+			mField->attach(callback);
+		}
+	}
+
+	QRealFieldWidget::~QRealFieldWidget()
+	{
+		if (mField != nullptr)
+		{
+			mField->detach(callback);
+		}
 	}
 
 	void QRealFieldWidget::changeValue(double value)
@@ -235,6 +249,21 @@ namespace dyno
 		}
 
 		emit fieldChanged();
+	}
+
+	void QRealFieldWidget::fieldUpdated()
+	{
+		std::string template_name = mField->getTemplateName();
+		if (template_name == std::string(typeid(float).name()))
+		{
+			FVar<float>* f = TypeInfo::cast<FVar<float>>(mField);
+			slider->setValue((double)f->getValue());
+		}
+		else if (template_name == std::string(typeid(double).name()))
+		{
+			FVar<double>* f = TypeInfo::cast<FVar<double>>(mField);
+			slider->setValue(f->getValue());
+		}
 	}
 
 	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
@@ -311,8 +340,20 @@ namespace dyno
 		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
+
+		if (mField != nullptr)
+		{
+			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3FieldWidget::fieldUpdated, this));
+			mField->attach(callback);
+		}
 	}
 
+	QVector3FieldWidget::~QVector3FieldWidget()
+	{
+		if (mField != nullptr) {
+			mField->detach(callback);
+		}
+	}
 
 	void QVector3FieldWidget::changeValue(double value)
 	{
@@ -338,6 +379,37 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+
+	void QVector3FieldWidget::fieldUpdated()
+	{
+		std::string template_name = mField->getTemplateName();
+
+		double v1 = 0;
+		double v2 = 0;
+		double v3 = 0;
+
+		if (template_name == std::string(typeid(Vec3f).name()))
+		{
+			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(mField);
+			auto v = f->getData();
+			v1 = v[0];
+			v2 = v[1];
+			v3 = v[2];
+		}
+		else if (template_name == std::string(typeid(Vec3d).name()))
+		{
+			FVar<Vec3d>* f = TypeInfo::cast<FVar<Vec3d>>(mField);
+			auto v = f->getData();
+
+			v1 = v[0];
+			v2 = v[1];
+			v3 = v[2];
+		}
+
+		spinner1->setValue(v1);
+		spinner2->setValue(v2);
+		spinner3->setValue(v3);
+	}
 
 	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)
 	{
@@ -385,6 +457,14 @@ namespace dyno
 			v2 = v[1];
 			v3 = v[2];
 		}
+		else if (template_name == std::string(typeid(Vec3u).name()))
+		{
+			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(mField);
+			auto v = f->getData();
+			v1 = v[0];
+			v2 = v[1];
+			v3 = v[2];
+		}
 
 		spinner1->setValue(v1);
 		spinner2->setValue(v2);
@@ -393,8 +473,22 @@ namespace dyno
 		QObject::connect(spinner1, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
 		QObject::connect(spinner3, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+
+
+		if (mField != nullptr)
+		{
+			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3iFieldWidget::fieldUpdated, this));
+			mField->attach(callback);
+		}
 	}
 
+
+	QVector3iFieldWidget::~QVector3iFieldWidget()
+	{
+		if (mField != nullptr) {
+			mField->detach(callback);
+		}
+	}
 
 	void QVector3iFieldWidget::changeValue(int)
 	{
@@ -410,8 +504,44 @@ namespace dyno
 			f->setValue(Vec3i(v1, v2, v3));
 			f->update();
 		}
+		else if (template_name == std::string(typeid(Vec3u).name()))
+		{
+			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(mField);
+			f->setValue(Vec3u(v1, v2, v3));
+			f->update();
+		}
 
 		emit fieldChanged();
+	}
+
+	void QVector3iFieldWidget::fieldUpdated()
+	{
+		std::string template_name = mField->getTemplateName();
+
+		int v1 = 0;
+		int v2 = 0;
+		int v3 = 0;
+
+		if (template_name == std::string(typeid(Vec3i).name()))
+		{
+			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(mField);
+			auto v = f->getData();
+			v1 = v[0];
+			v2 = v[1];
+			v3 = v[2];
+		}
+		else if (template_name == std::string(typeid(Vec3u).name()))
+		{
+			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(mField);
+			auto v = f->getData();
+			v1 = v[0];
+			v2 = v[1];
+			v3 = v[2];
+		}
+
+		spinner1->setValue(v1);
+		spinner2->setValue(v2);
+		spinner3->setValue(v3);
 	}
 
 	QStringFieldWidget::QStringFieldWidget(FBase* field)
