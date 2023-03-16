@@ -58,7 +58,6 @@ namespace dyno
 		float planeScale = 3.f;
 		float rulerScale = 1.f;
 
-		bool showAxisHelper = true;
 		bool showSceneBounds = false;
 	};
 

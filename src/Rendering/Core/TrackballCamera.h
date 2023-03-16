@@ -34,16 +34,16 @@ namespace dyno
 		void zoom(float amount) override;
 
 		//TODO: implement
-		void setEyePos(const Vec3f& p) override {};
+		void setEyePos(const Vec3f& p) override { mCameraPos = p; };
 
 		//TODO: implement
-		void setTargetPos(const Vec3f& p) override {};
+		void setTargetPos(const Vec3f& p) override { mCameraTarget = p; };
 
 		//TODO: implement
-		Vec3f getEyePos() const override { return Vec3f(1, 1, 1); };
+		Vec3f getEyePos() const override { return mCameraPos; };
 
 		//TODO: implement
-		Vec3f getTargetPos() const override { return Vec3f(1, 1, 1);};
+		Vec3f getTargetPos() const override { return mCameraTarget;};
 
 		glm::mat4 getViewMat() override;
 		glm::mat4 getProjMat() override;

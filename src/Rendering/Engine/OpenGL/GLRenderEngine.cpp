@@ -386,13 +386,6 @@ namespace dyno
 				GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		}
 
-		// draw axis
-		if (rparams.showAxisHelper)
-		{
-			glViewport(10, 10, 100, 100);
-			mRenderHelper->drawAxis();
-		}
-
 		gl::glCheckError();
 	}
 

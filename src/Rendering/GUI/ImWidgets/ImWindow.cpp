@@ -4,6 +4,8 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "imgui_extend.h"
 #include "picture.h"
 #include "imGuIZMO.quat/imGuIZMOquat.h"
@@ -70,6 +72,13 @@ void ImWindow::draw(RenderWindow* app)
 	auto camera = app->getCamera();
 
 	auto& rparams = app->getRenderParams();
+
+	ImGuiIO& io = ImGui::GetIO();
+
+
+	// Initialize ImGuizmo frame
+	ImGuizmo::BeginFrame();
+	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
@@ -77,28 +86,20 @@ void ImWindow::draw(RenderWindow* app)
 		{
 
 			if (ImGui::BeginMenu("Camera")) {
-				auto cam = app->getCamera();
-				int width = cam->viewportWidth();
-				int height = cam->viewportHeight();
 				if (ImGui::BeginMenu("Use Camera.."))
 				{
 					if (ImGui::MenuItem("Orbit", "")) {
 						auto oc = std::make_shared<OrbitCamera>();
-						oc->setWidth(width);
-						oc->setHeight(height);
-
+						oc->setWidth(camera->viewportWidth());
+						oc->setHeight(camera->viewportHeight());
 						oc->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
-
 						app->setCamera(oc);
 					}
 					if (ImGui::MenuItem("Trackball", "")) {
 						auto tc = std::make_shared<TrackballCamera>();
-
-						tc->setWidth(width);
-						tc->setHeight(height);
-
+						tc->setWidth(camera->viewportWidth());
+						tc->setHeight(camera->viewportHeight());
 						tc->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
-
 						app->setCamera(tc);
 					}
 					ImGui::EndMenu();
@@ -106,42 +107,42 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Perspective", "")) {
-					cam->setProjectionType(Camera::Perspective);
+					camera->setProjectionType(Camera::Perspective);
 
 				}
 				if (ImGui::MenuItem("Orthogonal", "")) {
-					cam->setProjectionType(Camera::Orthogonal);
+					camera->setProjectionType(Camera::Orthogonal);
 				}
 
 				ImGui::Separator();
-				Vec3f tarPos = cam->getTargetPos();
-				Vec3f eyePos = cam->getEyePos();
-				float Distance = (tarPos - eyePos).norm();
+				Vec3f tarPos = camera->getTargetPos();
+				Vec3f eyePos = camera->getEyePos();
+				float distance = (tarPos - eyePos).norm();
 
 				if (ImGui::MenuItem("Top", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y + Distance, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y + distance, tarPos.z));
 				}
 
 				if (ImGui::MenuItem("Bottom", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y - Distance, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y - distance, tarPos.z));
 				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Left", "")) {
-					cam->setEyePos(Vec3f(tarPos.x - Distance, tarPos.y, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x - distance, tarPos.y, tarPos.z));
 				}
 
 				if (ImGui::MenuItem("Right", "")) {
-					cam->setEyePos(Vec3f(tarPos.x + Distance, tarPos.y, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x + distance, tarPos.y, tarPos.z));
 				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Front", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z + Distance));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z + distance));
 				}
 
 				if (ImGui::MenuItem("Back", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - Distance));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - distance));
 				}
 
 				ImGui::Separator();
@@ -153,23 +154,23 @@ void ImWindow::draw(RenderWindow* app)
 						float len = box.maxLength();
 						Vec3f center = 0.5f * (box.upper + box.lower);
 
-						Vec3f eyePos = cam->getEyePos();
-						Vec3f tarPos = cam->getTargetPos();
+						Vec3f eyePos = camera->getEyePos();
+						Vec3f tarPos = camera->getTargetPos();
 						Vec3f dir = eyePos - tarPos;
 						dir.normalize();
 
-						cam->setEyePos(center + len * dir);
-						cam->setTargetPos(center);
+						camera->setEyePos(center + len * dir);
+						camera->setTargetPos(center);
 
 						float unit = std::floor(std::log(len));
-						cam->setUnitScale(std::pow(10.0f, (float)unit));
+						camera->setUnitScale(std::pow(10.0f, (float)unit));
 					}
 
 				}
 
-				float distanceUnit = cam->unitScale();
+				float distanceUnit = camera->unitScale();
 				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
-					cam->setUnitScale(distanceUnit);
+					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
 			}
@@ -240,7 +241,7 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Checkbox("Lock Camera", &mDisenableCamera);
 				ImGui::Spacing();
 
-				ImGui::Checkbox("Show Axis", &(rparams.showAxisHelper));
+				ImGui::Checkbox("Show View Manipulator", &mViewManipulator);
 				ImGui::Spacing();
 
 				ImGui::Checkbox("Show Background", &(rparams.showGround));
@@ -300,6 +301,8 @@ void ImWindow::draw(RenderWindow* app)
 			std::string rEngineName = engine->name();
 			ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 			ImGui::Text("Rendered by %s: %.1f FPS", rEngineName.c_str(), ImGui::GetIO().Framerate);
+
+			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, io.DisplaySize.y - ImGui::GetWindowSize().y));
 			ImGui::End();
 		}
 
@@ -322,6 +325,16 @@ void ImWindow::draw(RenderWindow* app)
 		*/
 	}
 	
+	// draw a rect for selection area 
+	drawSelectedRegion();
+
+	// current active node
+	drawNodeManipulator(app->currNode, camera->getViewMat(), camera->getProjMat());
+
+	// view manipulator
+	if(mViewManipulator)
+		drawViewManipulator(camera.get());
+	
 	// Draw custom widgets
 	// gather visual modules
 	WidgetQueue imWidgetQueue;
@@ -336,13 +349,58 @@ void ImWindow::draw(RenderWindow* app)
 		widget->update();
 		widget->paint();
 	}
+}
 
-	drawSelectedRegion();
+void ImWindow::mouseMoveEvent(const PMouseEvent& event)
+{
+	mCurX = event.x;
+	mCurY = event.y;
+}
 
-	// current active node
-	// 
+void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
+{
+	// reset mouse status
+	mCurX = mRegX = -1;
+	mCurY = mRegY = -1;
+	mButtonType = BT_UNKOWN;
+	mButtonAction = AT_UNKOWN;
+	mButtonMode = MB_NO_MODIFIER;
+}
+
+void ImWindow::mousePressEvent(const PMouseEvent& event)
+{
+	mCurX = mRegX = event.x;
+	mCurY = mRegY = event.y;
+	mButtonAction = event.actionType;
+	mButtonType = event.buttonType;
+	mButtonMode = event.mods;
+}
+
+void ImWindow::drawSelectedRegion()
+{
+	if (mButtonType == BT_LEFT &&
+		mButtonAction == AT_PRESS &&
+		mButtonMode != MB_ALT &&
+		!ImGuizmo::IsUsing() &&
+		!ImGui::GetIO().WantCaptureMouse) {
+
+		ImVec2 pMin = { fminf(mRegX, mCurX), fminf(mRegY, mCurY) };
+		ImVec2 pMax = { fmaxf(mRegX, mCurX), fmaxf(mRegY, mCurY) };
+
+		// visible rectangle
+		if (pMin.x != pMax.x || pMin.y != pMax.y) {
+			// fill
+			ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
+			// border
+			ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+		}
+	}
+}
+
+void dyno::ImWindow::drawNodeManipulator(Node* n, glm::mat4 view, glm::mat4 proj)
+{
 	// TODO: type conversion...
-	auto* node = dynamic_cast<ParametricModel<DataType3f>*>(app->currNode);
+	auto* node = dynamic_cast<ParametricModel<DataType3f>*>(n);
 
 	// TODO: parameterized operation
 	auto nodeOp = ImGuizmo::TRANSLATE;
@@ -361,15 +419,7 @@ void ImWindow::draw(RenderWindow* app)
 		break;
 	}
 
-	if (node!= 0) {
-		
-		auto view = camera->getViewMat();
-		auto proj = camera->getProjMat();
-
-		// TODO: handle ImGuizmo frame properly
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuizmo::BeginFrame();
-		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+	if (node != 0) {
 
 		glm::mat4 tm(1.f);
 
@@ -388,7 +438,7 @@ void ImWindow::draw(RenderWindow* app)
 
 			// TODO: rotation...
 		}
-				
+
 
 		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, &tm[0][0], NULL, NULL, NULL, NULL))
 		{
@@ -409,61 +459,37 @@ void ImWindow::draw(RenderWindow* app)
 			node->update();
 		}
 
-	}	
+	}
 }
 
-void ImWindow::mouseMoveEvent(const PMouseEvent& event)
+void dyno::ImWindow::drawViewManipulator(Camera* camera)
 {
-	mCurX = event.x;
-	mCurY = event.y;
+	glm::mat4 view = camera->getViewMat();
+	float dist = (camera->getEyePos() - camera->getTargetPos()).norm();
 
-	mDrawingBox = true;
-}
+	ImGuizmo::ViewManipulate(&view[0][0], dist, 
+		ImVec2(0, camera->viewportHeight() - 100), 
+		ImVec2(100, 100),
+		0);
 
-void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
-{
-	mRegX = -1;
-	mRegY = -1;
+	glm::mat4 invView = glm::inverse(view);
+	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1);	
 
-	mCurX = -1;
-	mCurY = -1;
+	// for trackball camera, also update up direction
+	TrackballCamera* cam = dynamic_cast<TrackballCamera*>(camera);
+	if (cam) {
+		glm::vec4 up = invView * glm::vec4(0, 1, 0, 0);
+		cam->mCameraUp = {up.x, up.y, up.z};
 
-	mButtonType = BT_UNKOWN;
-	mButtonAction = AT_UNKOWN;
-	mButtonMode = MB_NO_MODIFIER;
+		cam->setEyePos({ eye.x, eye.y, eye.z });
+	}
+	else
+	{
+		OrbitCamera* cam = dynamic_cast<OrbitCamera*>(camera);
+		// for orbit camera, simply set eye position...
+		cam->setEyePos({ eye.x, eye.y, eye.z });
 
-	mDrawingBox = false;
-}
-
-void ImWindow::mousePressEvent(const PMouseEvent& event)
-{
-	mRegX = event.x;
-	mRegY = event.y;
-
-	mButtonAction = event.actionType;
-	mButtonType = event.buttonType;
-	mButtonMode = event.mods;
-}
-
-void ImWindow::drawSelectedRegion()
-{
-	if (mDrawingBox &&
-		mButtonType == BT_LEFT &&
-		mButtonAction == AT_PRESS &&
-		mButtonMode != MB_ALT &&
-		!ImGuizmo::IsUsing() &&
-		!ImGui::GetIO().WantCaptureMouse) {
-
-		ImVec2 pMin = { fminf(mRegX, mCurX), fminf(mRegY, mCurY) };
-		ImVec2 pMax = { fmaxf(mRegX, mCurX), fmaxf(mRegY, mCurY) };
-
-		// visible rectangle
-		if (pMin.x != pMax.x || pMin.y != pMax.y) {
-			// fill
-			ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
-			// border
-			ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
-		}
+		// TODO: fix the problem when view along the rotation axis
 	}
 }
 
