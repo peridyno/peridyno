@@ -25,20 +25,21 @@ namespace dyno
 
 	private:
 		void drawSelectedRegion();
+		void drawNodeManipulator(Node* node, glm::mat4 view, glm::mat4 proj);
+		void drawViewManipulator(Camera* camera);
 
 	private:
 		bool mDisenableCamera = false;
+		bool mViewManipulator = true;
 
-		int mRegX = -1;
-		int mRegY = -1;
-
-		int mCurX = -1;
-		int mCurY = -1;
-
-		bool mDrawingBox = false;
 
 		int  mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
 
+		// cursor status
+		int mRegX = -1;
+		int mRegY = -1;
+		int mCurX = -1;
+		int mCurY = -1;
 		PButtonType mButtonType = BT_UNKOWN;
 		PActionType	mButtonAction = AT_UNKOWN;
 		PModifierBits mButtonMode = MB_NO_MODIFIER;

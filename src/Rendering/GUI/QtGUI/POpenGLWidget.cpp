@@ -92,17 +92,13 @@ namespace dyno
 		auto& rparams = this->getRenderParams();
 		auto scene = SceneGraphFactory::instance()->active();
 
-		rparams.proj = camera->getProjMat();
-		rparams.view = camera->getViewMat();
-
-
 		// Jian SHI: hack for unit scaling...
 		float planeScale = rparams.planeScale;
 		float rulerScale = rparams.rulerScale;
 		rparams.planeScale *= this->getCamera()->unitScale();
 		rparams.rulerScale *= this->getCamera()->unitScale();
 
-		engine->draw(scene.get(), rparams);
+		engine->draw(scene.get(), camera.get(), rparams);
 
 		rparams.planeScale = planeScale;
 		rparams.rulerScale = rulerScale;

@@ -126,7 +126,7 @@ namespace dyno
 	glm::mat4 getLightProjMatrix(glm::mat4 lightView,
 		Vec3f lowerBound,
 		Vec3f upperBound,
-		const dyno::RenderParams& rparams)
+		Camera* camera)
 	{
 		glm::vec4 p[8] = {
 			lightView * glm::vec4{lowerBound[0], lowerBound[1], lowerBound[2], 1},
@@ -148,10 +148,10 @@ namespace dyno
 		}
 
 		// frustrum clamp
-		if (true)
+		if (camera != 0)
 		{
-			std::array<glm::vec4, 8> corners = getFrustumCorners(rparams.proj);
-			glm::mat4 tm = lightView * glm::inverse(rparams.view);
+			std::array<glm::vec4, 8> corners = getFrustumCorners(camera->getProjMat());
+			glm::mat4 tm = lightView * glm::inverse(camera->getViewMat());
 
 			glm::vec4 fbmin = tm * corners[0];
 			glm::vec4 fbmax = tm * corners[0];
@@ -176,7 +176,7 @@ namespace dyno
 		return lightProj;
 	}
 
-	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams & rparams)
+	void ShadowMap::update(dyno::SceneGraph* scene, Camera* camera, const dyno::RenderParams & rparams)
 	{
 		// initialization
 		mFramebuffer.bind();
@@ -190,7 +190,7 @@ namespace dyno
 			glViewport(0, 0, width, height);
 
 			glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
-			glm::mat4 lightProj = getLightProjMatrix(lightView, scene->getLowerBound(), scene->getUpperBound(), rparams);
+			glm::mat4 lightProj = getLightProjMatrix(lightView, scene->getLowerBound(), scene->getUpperBound(), camera);
 
 			// update light transform infomation
 			struct {
@@ -215,7 +215,7 @@ namespace dyno
 				float minValue;
 			} shadow;
 
-			shadow.transform = lightProj * lightView * glm::inverse(rparams.view);
+			shadow.transform = lightProj * lightView * glm::inverse(camera->getViewMat());
 			shadow.minValue = minValue;
 
 			mShadowMatrixUBO.load(&shadow, sizeof(shadow));

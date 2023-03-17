@@ -49,15 +49,6 @@ namespace dyno
 
 		virtual void setWindowSize(int w, int h)
 		{
-			// TODO: handle viewport size by case
-			mRenderParams.viewport.x = 0;
-			mRenderParams.viewport.y = 0;
-			mRenderParams.viewport.w = w;
-			mRenderParams.viewport.h = h;
-
-			mRenderParams.width = w;
-			mRenderParams.height = h;
-
 			mCamera->setWidth(w);
 			mCamera->setHeight(h);
 		}

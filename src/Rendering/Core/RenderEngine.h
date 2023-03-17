@@ -25,25 +25,10 @@ namespace dyno
 {
 	class SceneGraph;
 	class Node;
+	class Camera;
 
 	struct RenderParams
-	{
-		// camera matrices
-		glm::mat4	view;
-		glm::mat4	proj;
-
-		// viewport
-		struct Viewport
-		{
-			unsigned int x = 0;
-			unsigned int y = 0;
-			unsigned int w;
-			unsigned int h;
-		} viewport;
-
-		// framebuffer size
-		unsigned int width  = 1;
-		unsigned int height = 1;
+	{		
 
 		// illumination settings
 		struct Light
@@ -73,7 +58,6 @@ namespace dyno
 		float planeScale = 3.f;
 		float rulerScale = 1.f;
 
-		bool showAxisHelper = true;
 		bool showSceneBounds = false;
 	};
 
@@ -89,7 +73,7 @@ namespace dyno
 		virtual void initialize() = 0;
 		virtual void terminate() = 0;
 
-		virtual void draw(SceneGraph* scene, const RenderParams& rparams) = 0;
+		virtual void draw(SceneGraph* scene, Camera* camera, const RenderParams& rparams) = 0;
 		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) = 0;
 
 		virtual std::string name() const = 0;

@@ -241,7 +241,7 @@ namespace dyno
 
 	}
 
-	void GLRenderEngine::draw(dyno::SceneGraph* scene, const RenderParams& rparams)
+	void GLRenderEngine::draw(dyno::SceneGraph* scene, Camera* camera, const RenderParams& rparams)
 	{
 		updateRenderModules(scene);
 
@@ -250,10 +250,10 @@ namespace dyno
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
 		// update framebuffer size
-		resizeFramebuffer(rparams.width, rparams.height);
+		resizeFramebuffer(camera->viewportWidth(), camera->viewportHeight());
 
 		// update shadow map
-		mShadowMap->update(scene, rparams);
+		mShadowMap->update(scene, camera, rparams);
 
 		// setup scene transform matrices
 		struct
@@ -265,17 +265,17 @@ namespace dyno
 			int height;
 		} sceneUniformBuffer;
 		sceneUniformBuffer.model = glm::mat4(1);
-		sceneUniformBuffer.view = rparams.view;
-		sceneUniformBuffer.projection = rparams.proj;
-		sceneUniformBuffer.width = rparams.viewport.w;
-		sceneUniformBuffer.height = rparams.viewport.h;
+		sceneUniformBuffer.view = camera->getViewMat();
+		sceneUniformBuffer.projection = camera->getProjMat();
+		sceneUniformBuffer.width = camera->viewportWidth();
+		sceneUniformBuffer.height = camera->viewportHeight();
 
 		mTransformUBO.load(&sceneUniformBuffer, sizeof(sceneUniformBuffer));
 		mTransformUBO.bindBufferBase(0);
 
 		// setup light block
 		RenderParams::Light light = rparams.light;
-		light.mainLightDirection = glm::vec3(rparams.view * glm::vec4(light.mainLightDirection, 0));
+		light.mainLightDirection = glm::vec3(camera->getViewMat() * glm::vec4(light.mainLightDirection, 0));
 		mLightUBO.load(&light, sizeof(light));
 		mLightUBO.bindBufferBase(1);
 						
@@ -286,7 +286,7 @@ namespace dyno
 		// clear index buffer
 		//GLint clearIndex[]{11, -1, -1, -1};
 		//glClearBufferiv(GL_COLOR, 1, clearIndex);
-		glViewport(0, 0, rparams.viewport.w, rparams.viewport.h);
+		glViewport(0, 0, camera->viewportWidth(), camera->viewportHeight());
 		// draw background color
 		Vec3f c0 = Vec3f(rparams.bgColor0.x, rparams.bgColor0.y, rparams.bgColor0.z);
 		Vec3f c1 = Vec3f(rparams.bgColor1.x, rparams.bgColor1.y, rparams.bgColor1.z);
@@ -371,26 +371,19 @@ namespace dyno
 		if (bEnableFXAA)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glViewport(0, 0, rparams.viewport.w, rparams.viewport.h);
+			glViewport(0, 0, camera->viewportWidth(), camera->viewportHeight());
 
 			mColorTex.bind(GL_TEXTURE1);			
-			mFXAAFilter->apply(rparams.viewport.w, rparams.viewport.h);
+			mFXAAFilter->apply(camera->viewportWidth(), camera->viewportHeight());
 		}
 		else
 		{
 			mFramebuffer.bind(GL_READ_FRAMEBUFFER);
 			glReadBuffer(GL_COLOR_ATTACHMENT0);
 			glBlitFramebuffer(
-				0, 0, rparams.viewport.w, rparams.viewport.h,
-				0, 0, rparams.viewport.w, rparams.viewport.h,
+				0, 0, camera->viewportWidth(), camera->viewportHeight(),
+				0, 0, camera->viewportWidth(), camera->viewportHeight(),
 				GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		}
-
-		// draw axis
-		if (rparams.showAxisHelper)
-		{
-			glViewport(10, 10, 100, 100);
-			mRenderHelper->drawAxis();
 		}
 
 		gl::glCheckError();
