@@ -37,6 +37,8 @@ namespace gl
 			glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0, instance);
 		else
 			glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+
+		this->unbind();
 	}
 
 	// helper functions
