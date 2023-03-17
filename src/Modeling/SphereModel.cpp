@@ -136,12 +136,9 @@ namespace dyno
 		vertices.push_back(Coord(center[0], -radius + center[1], center[2]));
 		vertices.push_back(Coord(center[0], radius + center[1], center[2]));
 
-
 		int face_id = 0;
 		for (float d_alpha = -PI / 2 + theta / 2; d_alpha < PI / 2; d_alpha += theta)
 		{
-
-
 			for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta)
 			{
 				if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha + theta < PI / 2))
