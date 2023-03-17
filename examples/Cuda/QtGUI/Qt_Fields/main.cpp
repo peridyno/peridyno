@@ -33,6 +33,10 @@ public:
 	};
 	~Fields() {};
 
+	DECLARE_ENUM(ENum,
+		Key0 = 0,
+		Key1 = 1);
+
 public:
 	DEF_VAR(bool, Boolean, false, "Define a boolean field");
 
@@ -41,6 +45,8 @@ public:
 	DEF_VAR(float, Float, 1.0f, "Define a float field");
 
 	DEF_VAR(Vec3f, Vector, Vec3f(1.0f), "Define a vector field");
+
+	DEF_ENUM(ENum, Enum, ENum::Key0, "Define an enum");
 
 	DEF_ARRAY_IN(float, FloatArray, DeviceType::GPU, "Define a float array as input");
 
