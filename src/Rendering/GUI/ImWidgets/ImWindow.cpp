@@ -420,45 +420,30 @@ void dyno::ImWindow::drawNodeManipulator(Node* n, glm::mat4 view, glm::mat4 proj
 	}
 
 	if (node != 0) {
-
-		glm::mat4 tm(1.f);
-
+		float m[16];
+		// build transform matrix
 		{
-			// build transform matrix
-
-			auto location = node->varLocation()->getData();
-			tm[3][0] = location[0];
-			tm[3][1] = location[1];
-			tm[3][2] = location[2];
-
-			auto scale = node->varScale()->getData();
-			tm[0][0] = scale[0];
-			tm[1][1] = scale[1];
-			tm[2][2] = scale[2];
-
-			// TODO: rotation...
+			auto t = node->varLocation()->getData();
+			auto s = node->varScale()->getData();
+			auto r = node->varRotation()->getData();			
+			ImGuizmo::RecomposeMatrixFromComponents(t.getDataPtr(), r.getDataPtr(), s.getDataPtr(), m);
 		}
 
-
-		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, &tm[0][0], NULL, NULL, NULL, NULL))
+		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, m, NULL, NULL, NULL, NULL))
 		{
+			float t[3], s[3], r[3];
+			ImGuizmo::DecomposeMatrixToComponents(m, t, r, s);
 			// apply
-			if (nodeOp == ImGuizmo::TRANSLATE) {
-				node->varLocation()->setValue(Vec3f(tm[3][0], tm[3][1], tm[3][2]));
-			}
-
-			if (nodeOp == ImGuizmo::SCALE) {
-				node->varScale()->setValue(Vec3f(tm[0][0], tm[1][1], tm[2][2]));
-			}
-
-			if (nodeOp == ImGuizmo::ROTATE) {
-				// TODO: rotation...
-			}
+			if (nodeOp == ImGuizmo::TRANSLATE) 
+				node->varLocation()->setValue(Vec3f(t[0], t[1], t[2]));
+			if (nodeOp == ImGuizmo::SCALE) 
+				node->varScale()->setValue(Vec3f(s[0], s[1], s[2]));
+			if (nodeOp == ImGuizmo::ROTATE) 
+				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
 
 			// notify the update of node?
 			node->update();
 		}
-
 	}
 }
 
