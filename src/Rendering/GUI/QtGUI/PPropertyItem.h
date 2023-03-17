@@ -99,9 +99,9 @@ namespace dyno
 	public slots:
 		void changeValue(double);
 
+	private:
 		void fieldUpdated();
 
-	private:
 		FBase* mField = nullptr;
 
 		QDoubleSlider* slider = nullptr;
@@ -135,9 +135,9 @@ namespace dyno
 	public slots:
 		void changeValue(double);
 
+	private:
 		void fieldUpdated();
 
-	private:
 		FBase* mField = nullptr;
 
 		mDoubleSpinBox* spinner1;
@@ -160,9 +160,9 @@ namespace dyno
 	public slots:
 		void changeValue(int);
 
+	private:
 		void fieldUpdated();
 
-	private:
 		FBase* mField = nullptr;
 
 		QSpinBox* spinner1;
