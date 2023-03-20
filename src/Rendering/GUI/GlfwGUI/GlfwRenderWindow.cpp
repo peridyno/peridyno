@@ -405,7 +405,7 @@ namespace dyno
 
 			auto items = activeWindow->mRenderEngine->select(x, y, w, h);
 			// print selected result...
-			printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
+			//printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
 
 			if (!items.empty()) {
 				// pick the last one?

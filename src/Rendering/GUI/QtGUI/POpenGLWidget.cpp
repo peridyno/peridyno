@@ -205,7 +205,7 @@ namespace dyno
 			doneCurrent();
 
 			// print selected result...
-			printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
+			//printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
 
 			// pick the last one?
 			if (!items.empty())
