@@ -50,6 +50,8 @@ namespace dyno
 		DEF_VAR(float, PointSize, 0.001f, "Size of rendered particles");
 
 	protected:
+		virtual void updateGraphicsContext() override;
+
 		virtual void paintGL(GLRenderPass pass) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
@@ -65,6 +67,10 @@ namespace dyno
 		gl::Program*	mShaderProgram = 0;
 
 		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
+
+		// data copy
+		DArray<Vec3f> points;
+		DArray<Vec3f> colors;
 
 	};
 };

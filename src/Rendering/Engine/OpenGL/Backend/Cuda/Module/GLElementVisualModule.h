@@ -30,6 +30,8 @@ namespace dyno
 		DEF_VAR_IN(float, TimeStep, "dt");
 
 	protected:
+		virtual void updateGraphicsContext() override;
+
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;

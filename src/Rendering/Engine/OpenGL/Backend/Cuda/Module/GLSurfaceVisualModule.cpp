@@ -67,13 +67,10 @@ namespace dyno
 
 	void GLSurfaceVisualModule::updateGL()
 	{
-		auto triSet = this->inTriangleSet()->getDataPtr();
+		// acquire data update lock
+		updateMutex.lock();
 
-		auto& triangles = triSet->getTriangles();
-		auto& vertices = triSet->getPoints();
-
-		mDrawCount = triangles.size() * 3;
-		
+		mDrawCount = triangles.size() * 3;		
 		// index
 		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
 		// position
@@ -82,11 +79,10 @@ namespace dyno
 		mVAO.bind();
 		// vertex or object color
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
-			!this->inColor()->isEmpty() && 
-			this->inColor()->getDataPtr()->size() == vertices.size())
+			!colors.isEmpty() && colors.size() == vertices.size())
 		{
-			auto color = this->inColor()->getData();
-			mColorBuffer.loadCuda(color.begin(), color.size() * sizeof(float) * 3); 
+			mColorBuffer.loadCuda(colors.begin(), colors.size() * sizeof(float) * 3);
+			mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{
@@ -98,11 +94,8 @@ namespace dyno
 		// normal
 		if(this->varUseVertexNormal()->getData())
 		{
-			//TODO: optimize the performance
-			triSet->update();
-
-			auto& normals = triSet->outVertexNormal()->getData();
 			mNormalBuffer.loadCuda(normals.begin(), normals.size() * sizeof(float) * 3);
+			mVAO.bindVertexBuffer(&mNormalBuffer, 2, 3, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{
@@ -120,7 +113,37 @@ namespace dyno
 
 		mVAO.unbind();
 
-	
+		// release data update lock
+		updateMutex.unlock();
+	}
+
+	void GLSurfaceVisualModule::updateGraphicsContext()
+	{
+		updateMutex.lock();
+
+		// update data
+
+		auto triSet = this->inTriangleSet()->getDataPtr();
+
+		triangles.assign(triSet->getTriangles());
+		vertices.assign(triSet->getPoints());
+
+		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
+			!this->inColor()->isEmpty() &&
+			this->inColor()->getDataPtr()->size() == vertices.size())
+		{
+			colors.assign(this->inColor()->getData());
+		}
+
+		if (this->varUseVertexNormal()->getData())
+		{			
+			//TODO: optimize the performance
+			triSet->update();
+			normals.assign(triSet->outVertexNormal()->getData());
+		}
+
+		GLVisualModule::updateGraphicsContext();
+		updateMutex.unlock();
 	}
 
 	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)

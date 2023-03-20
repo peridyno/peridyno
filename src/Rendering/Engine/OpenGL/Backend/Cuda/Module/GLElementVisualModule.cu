@@ -236,7 +236,28 @@ namespace dyno
 
 	void GLElementVisualModule::updateGL()
 	{
-		/*auto triSet = this->inTriangleSet()->getDataPtr();
+		updateMutex.lock();
+		mDrawCount = triangles.size() * 3;
+
+		if (mDrawCount > 0)
+		{
+			mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
+			mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
+		}
+
+		updateMutex.unlock();
+	}
+
+	GLElementVisualModule::~GLElementVisualModule()
+	{
+	}
+
+	void GLElementVisualModule::updateGraphicsContext()
+	{
+		updateMutex.lock();
+
+		// update data
+				/*auto triSet = this->inTriangleSet()->getDataPtr();
 
 		auto triangles = triSet->getTriangles();
 		auto vertices = triSet->getPoints();
@@ -265,10 +286,10 @@ namespace dyno
 		int num_triangle = 100 * num_sphere + 12 * num_box + 4 * num_tet;
 		if (vertices.size() != 3 * num_triangle)
 		{
-			
+
 
 			vertices.resize(3 * num_triangle);
-			
+
 
 			mapping.resize(num_triangle);
 			mapping_shape.resize(num_triangle);
@@ -302,9 +323,9 @@ namespace dyno
 				v,
 				w,
 				ext_box
-				);
+			);
 
-			
+
 
 			/*Mix_Setup_Sphere << <pDimsSphere, BLOCK_SIZE >> > (
 				m_spheres,
@@ -343,22 +364,14 @@ namespace dyno
 				);
 			cuSynchronize();
 
-
-			mDrawCount = num_triangle * 3;
-
-			mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-			mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
-
 			/*m_triangleRender->setVertexArray(vertices);
 			m_triangleRender->setColorArray(colors);
 			m_triangleRender->setNormalArray(normals);
 			have_triangles = true;*/
 		}
 
-	}
-
-	GLElementVisualModule::~GLElementVisualModule()
-	{
+		GLVisualModule::updateGraphicsContext();
+		updateMutex.unlock();
 	}
 
 	void GLElementVisualModule::paintGL(GLRenderPass pass)

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <chrono>
+#include <mutex>
 #include <Module/VisualModule.h>
 
 namespace dyno
@@ -69,5 +70,8 @@ namespace dyno
 		clock::time_point changed;
 		// the timestamp when GL resource is updated by updateGL
 		clock::time_point updated;
+
+		// mutex for sync data
+		std::mutex	updateMutex;
 	};
 };

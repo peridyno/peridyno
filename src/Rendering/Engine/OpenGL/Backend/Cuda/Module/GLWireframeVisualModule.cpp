@@ -59,15 +59,27 @@ namespace dyno
 
 	void GLWireframeVisualModule::updateGL()
 	{
-		auto edgeSet = this->inEdgeSet()->getDataPtr();
-
-		auto& edges = edgeSet->getEdges();
-		auto& vertices = edgeSet->getPoints();
+		updateMutex.lock();
 
 		mNumEdges = edges.size();
 
 		mPoints.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
 		mEdges.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
+
+		updateMutex.unlock();
+	}
+
+	void GLWireframeVisualModule::updateGraphicsContext()
+	{
+		updateMutex.lock();
+
+		// copy data
+		auto edgeSet = this->inEdgeSet()->getDataPtr();
+		edges.assign(edgeSet->getEdges());
+		vertices.assign(edgeSet->getPoints());
+
+		GLVisualModule::updateGraphicsContext();
+		updateMutex.unlock();
 	}
 
 	void GLWireframeVisualModule::paintGL(GLRenderPass pass)

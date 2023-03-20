@@ -221,22 +221,16 @@ namespace dyno
 				printf("Warning: failed to initialize %s\n", m->getName().c_str());
 		}
 
-		// update if necessary, note that we need to lock scenegraph for data consistency
-		{
-			scene->lock();
+		// update if necessary
+		for (auto m : mRenderModules) {
+			if (m->isGLInitialized)
 			{
-				for (auto m : mRenderModules) {
-					if (m->isGLInitialized)
-					{
-						// check update
-						if (m->changed > m->updated) {
-							m->updateGL();
-							m->updated = GLVisualModule::clock::now();
-						}
-					}
+				// check update
+				if (m->changed > m->updated) {
+					m->updateGL();
+					m->updated = GLVisualModule::clock::now();
 				}
 			}
-			scene->unlock();
 		}
 
 	}

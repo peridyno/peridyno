@@ -63,18 +63,15 @@ namespace dyno
 
 	void GLPointVisualModule::updateGL()
 	{
-		auto pPointSet = this->inPointSet()->getDataPtr();
+		updateMutex.lock();
 
-		auto& xyz = pPointSet->getPoints();
-		mNumPoints = xyz.size();
+		mNumPoints = points.size();
 
 		mVertexArray.bind();
 		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
-			&& !this->inColor()->isEmpty() 
-			&& this->inColor()->getDataPtr()->size() == mNumPoints)
+			&& !colors.isEmpty() && colors.size() == mNumPoints)
 		{
-			auto color = this->inColor()->getData();
-			mColor.loadCuda(color.begin(), mNumPoints * sizeof(float) * 3);
+			mColor.loadCuda(colors.begin(), mNumPoints * sizeof(float) * 3);
 			mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 		}
 		else
@@ -83,7 +80,34 @@ namespace dyno
 		}
 		mVertexArray.unbind();
 
-		mPosition.loadCuda(xyz.begin(), mNumPoints * sizeof(float) * 3);
+		mPosition.loadCuda(points.begin(), mNumPoints * sizeof(float) * 3);
+
+		updateMutex.unlock();
+	}
+
+	void GLPointVisualModule::updateGraphicsContext()
+	{
+		updateMutex.lock();
+
+		// update data
+
+		auto pPointSet = this->inPointSet()->getDataPtr();
+
+		points.assign(pPointSet->getPoints());
+
+		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
+			&& !this->inColor()->isEmpty()
+			&& this->inColor()->getDataPtr()->size() == mNumPoints)
+		{
+			colors.assign(this->inColor()->getData());
+		}
+		else
+		{
+			glDisableVertexAttribArray(1);
+		}
+
+		GLVisualModule::updateGraphicsContext();
+		updateMutex.unlock();
 	}
 
 	void GLPointVisualModule::paintGL(GLRenderPass pass)
