@@ -96,14 +96,9 @@ namespace dyno
 		points.assign(pPointSet->getPoints());
 
 		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
-			&& !this->inColor()->isEmpty()
-			&& this->inColor()->getDataPtr()->size() == mNumPoints)
+			&& !this->inColor()->isEmpty())
 		{
 			colors.assign(this->inColor()->getData());
-		}
-		else
-		{
-			glDisableVertexAttribArray(1);
 		}
 
 		GLVisualModule::updateGraphicsContext();
