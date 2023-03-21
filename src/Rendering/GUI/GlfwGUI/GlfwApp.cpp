@@ -14,6 +14,12 @@ namespace dyno
 
 	void GlfwApp::initialize(int width, int height, bool usePlugin)
 	{
+		//A hack to address the slow launching problem
+#ifdef CUDA_BACKEND
+		cudaSetDevice(0);
+		cudaFree(0);
+#endif // CUDA_BACKEND
+
 		mRenderWindow = std::make_shared<GlfwRenderWindow>();
 
 		mRenderWindow->initialize(width, height);
