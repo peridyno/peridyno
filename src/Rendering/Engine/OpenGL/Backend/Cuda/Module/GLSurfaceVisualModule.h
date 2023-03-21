@@ -49,6 +49,8 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:
+		virtual void updateGraphicsContext() override;
+
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
@@ -69,5 +71,12 @@ namespace dyno
 		// for instanced rendering
 		gl::CudaBuffer	mInstanceBuffer;
 		unsigned int	mInstanceCount = 0;
+
+		// copy data
+		DArray<TopologyModule::Triangle>	triangles;
+		DArray<Vec3f>						vertices;
+		DArray<Vec3f>						normals;
+		DArray<Vec3f>						colors;
+
 	};
 };

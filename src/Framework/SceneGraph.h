@@ -249,11 +249,6 @@ namespace dyno
 		 */
 		std::mutex mSync;
 
-	public:
-		void lock() { mSync.lock(); }
-		bool try_lock() { return mSync.try_lock(); }
-		void unlock() { mSync.unlock(); }
-
 	};
 
 }

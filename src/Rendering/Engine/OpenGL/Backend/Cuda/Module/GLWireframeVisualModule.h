@@ -47,6 +47,8 @@ namespace dyno
 		DEF_ENUM(EEdgeMode, RenderMode, EEdgeMode::LINE, "");
 
 	protected:
+		virtual void updateGraphicsContext() override;
+
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
@@ -60,5 +62,9 @@ namespace dyno
 		gl::CudaBuffer	mPoints;
 		gl::CudaBuffer 	mEdges;
 		unsigned int	mNumEdges = 0;
+
+		// deep copy of input data
+		DArray<TopologyModule::Edge>	edges;
+		DArray<Vec3f>					vertices;
 	};
 };

@@ -35,7 +35,12 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, InstanceColor, DeviceType::GPU, "");
 
 	protected:
+
+		virtual void updateGraphicsContext() override;
 		virtual void updateGL() override;
 
+		// copy of data
+		DArray<Transform3f> instanceTransforms;
+		DArray<Vec3f>		instanceColors;
 	};
 };
