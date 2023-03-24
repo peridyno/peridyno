@@ -121,9 +121,10 @@ int main()
 {
 	QtApp app;
 
-	app.initialize(1024, 768);
-
 	app.setSceneGraph(createScene());
+
+	app.initialize(1024, 768);
+	
 	//Set the distance unit for the camera, the fault unit is meter
 	app.renderWindow()->getCamera()->setUnitScale(50.0);
 

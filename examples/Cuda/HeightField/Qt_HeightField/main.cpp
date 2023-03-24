@@ -51,9 +51,8 @@ int main()
 	HeightFieldLibrary::initStaticPlugin();
 
 	QtApp app;
-	app.initialize(1024, 768);
-
 	app.setSceneGraph(createScene());
+	app.initialize(1024, 768);
 	app.renderWindow()->getCamera()->setUnitScale(52);
 
 	app.mainLoop();

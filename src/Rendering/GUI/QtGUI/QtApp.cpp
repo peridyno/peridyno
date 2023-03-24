@@ -14,6 +14,15 @@
 namespace dyno {
     QtApp::QtApp(int argc, char **argv)
     {
+#ifdef CUDA_BACKEND
+        auto status = cudaSetDevice(0);
+		if (status != cudaSuccess) {
+			fprintf(stderr, "CUDA initialization failed!  Do you have a CUDA-capable GPU installed?");
+			exit(0);
+		}
+        cudaFree(0);
+#endif // CUDA_BACKEND
+
         mMainWindow = nullptr;
         mQApp = std::make_shared<QApplication>(argc, argv);
 
@@ -29,10 +38,6 @@ namespace dyno {
 	void QtApp::initialize(int width, int height, bool usePlugin)
     {
         //A hack to address the slow launching problem
-#ifdef CUDA_BACKEND
-		cudaSetDevice(0);
-		cudaFree(0);
-#endif // CUDA_BACKEND
 
 		if (usePlugin)
 		{
