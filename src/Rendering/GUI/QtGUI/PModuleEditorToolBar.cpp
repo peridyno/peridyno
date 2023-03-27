@@ -59,7 +59,7 @@ namespace dyno
 		return action;
 	}
 
-	QPushButton* PModuleEditorToolBar::addPushButton(QPixmap& icon, QString text)
+	QPushButton* PModuleEditorToolBar::addPushButton(QPixmap icon, QString text)
 	{
 		const int iconSize = 48;
 		QPushButton* button = new QPushButton;

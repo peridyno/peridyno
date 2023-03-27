@@ -6,9 +6,7 @@
 #include "Node.h"
 
 #include "SceneGraph.h"
-#include "GLSurfaceVisualModule.h"
 #include "GLInstanceVisualModule.h"
-
 #include "CustomMouseInteraction.h"
 
 using namespace dyno;
@@ -57,7 +55,7 @@ int main(int, char**)
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
 	instanceRender->setColor(Vec3f(0, 1, 0));
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
-	instanceNode->stateTransforms()->connect(instanceRender->inTransform());
+	instanceNode->stateTransforms()->connect(instanceRender->inInstanceTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);
 
 	scn->setUpperBound({ 4, 4, 4 });

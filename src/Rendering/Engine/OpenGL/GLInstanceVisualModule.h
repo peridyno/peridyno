@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Xiaowei He (xiaowei@iscas.ac.cn)
+ * Copyright 2017-2022 Jian SHI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,45 +15,25 @@
  */
 
 #pragma once
-#include "Topology/TriangleSet.h"
 
-#include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
-#include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "GLSurfaceVisualModule.h"
 
 namespace dyno
 {
-	class GLInstanceVisualModule : public GLVisualModule
+	class GLInstanceVisualModule : public GLSurfaceVisualModule
 	{
-		DECLARE_CLASS(GLInstanceVisualModule)
+		DECLARE_CLASS(GLSurfaceVisualModule)
 	public:
 		GLInstanceVisualModule();
+		virtual std::string caption() override;
 
 	public:
-		std::string caption() override;
-
-		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
-
-		DEF_ARRAY_IN(Transform3f, Transform, DeviceType::GPU, "");
+		// for instanced rendering
+		DEF_ARRAY_IN(Transform3f, InstanceTransform, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, InstanceColor, DeviceType::GPU, "");
 
 	protected:
-		virtual void paintGL(RenderPass mode) override;
 		virtual void updateGL() override;
-		virtual bool initializeGL() override;
 
-	private:
-
-		gl::Program mShaderProgram;
-		gl::VertexArray	mVAO;
-
-		GLCudaBuffer	mVertexBuffer;
-		GLCudaBuffer 	mIndexBuffer;
-		GLCudaBuffer	mInstanceBuffer;
-
-		unsigned int	mVertexCount = 0;
-		unsigned int	mIndexCount = 0;
-
-		unsigned int	mInstanceCount = 0;
 	};
 };

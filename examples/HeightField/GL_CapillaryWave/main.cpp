@@ -17,14 +17,14 @@ std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto root = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
+	auto root = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>());
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 	root->stateTopology()->connect(mapper->inHeightField());
 	root->graphicsPipeline()->pushModule(mapper);
 
-	mapper->varScale()->setValue(0.1);
-	mapper->varTranslation()->setValue(Vec3f(-2, 0.2, -2));
+// 	mapper->varScale()->setValue(0.1);
+// 	mapper->varTranslation()->setValue(Vec3f(-2, 0.2, -2));
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(0, 0.2, 1.0));
@@ -37,6 +37,7 @@ std::shared_ptr<SceneGraph> createScene()
 int main()
 {
 	GlfwApp window;
+	window.getCamera()->setDistanceUnit(20);
 	window.setSceneGraph(createScene());
 	window.createWindow(1024, 768);
 	window.mainLoop();

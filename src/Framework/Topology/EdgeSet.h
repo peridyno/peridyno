@@ -99,6 +99,14 @@ namespace dyno
 		DArrayList<int>& getVer2Edge();
 
 	protected:
+		/**
+		 * Override updateEdges to update edges in a special way
+		 */
+		virtual void updateEdges() {};
+
+		void updateTopology() override;
+
+	protected:
 		DArray<Edge> m_edges;
 		DArrayList<int> m_ver2Edge;
 	};

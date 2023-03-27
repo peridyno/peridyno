@@ -1,5 +1,6 @@
 #include "Algorithm/SimpleMath.h"
 #include <glm/glm.hpp>
+#include "Topology/Primitive3D.h"
 
 namespace dyno
 {
@@ -106,7 +107,7 @@ namespace dyno
 	template <typename Real>
 	DYN_FUNC bool Complex<Real>::operator==(const Complex<Real> &other) const
 	{
-		if (glm::abs(m_real - other.m_real) < REAL_EPSILON && glm::abs(m_imag - other.m_imag) < REAL_EPSILON) {
+		if (glm::abs(m_real - other.m_real) < dyno::REAL_EPSILON && glm::abs(m_imag - other.m_imag) < dyno::REAL_EPSILON) {
 			return true;
 		}
 		else {

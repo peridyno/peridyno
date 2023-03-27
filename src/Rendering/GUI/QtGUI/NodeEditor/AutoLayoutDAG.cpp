@@ -1,5 +1,6 @@
 #include "AutoLayoutDAG.h"
-
+#include <cmath>
+#include <algorithm>
 namespace dyno 
 {
 	AutoLayoutDAG::AutoLayoutDAG(DirectedAcyclicGraph* dag)
@@ -9,15 +10,15 @@ namespace dyno
 		auto& vertices = pDAG->vertices();
 		auto& edges = pDAG->edges();
 
-		for each (auto v in vertices)
+		for  (auto v : vertices)
 		{
 			mVertices.insert(v);
 		}
 
-		for each (auto it in edges)
+		for  (auto it : edges)
 		{
 			ObjectId v = it.first;
-			for each (auto w in it.second)
+			for  (auto w : it.second)
 			{
 				// Add an edge (v, w).
 				mEdges[v].insert(w);
@@ -30,13 +31,13 @@ namespace dyno
 
 	AutoLayoutDAG::~AutoLayoutDAG()
 	{
-		for each (auto it in mEdges)
+		for  (auto it : mEdges)
 		{
 			it.second.clear();
 		}
 		mEdges.clear();
 
-		for each (auto it in mReverseEdges)
+		for  (auto it : mReverseEdges)
 		{
 			it.second.clear();
 		}
@@ -71,7 +72,7 @@ namespace dyno
 		std::queue<ObjectId> activeId;
 
 		//Push vertices that have not outgoing edges into a queue
-		for each (auto v in mVertices)
+		for  (auto v : mVertices)
 		{
 			if (mEdges[v].size() == 0) {
 				mLayers[v] = maxLayer;
@@ -93,7 +94,7 @@ namespace dyno
 			// Mark the current node as visited.
 			visited[v] = true;
 
-			for each (auto vid in mReverseEdges[v])
+			for  (auto vid : mReverseEdges[v])
 			{
 				if (!visited[vid] && !isActive[vid]) {
 					activeId.push(vid);
@@ -102,7 +103,7 @@ namespace dyno
 			}
 
 			int l = maxLayer;
-			for each (auto vid in mEdges[v])
+			for  (auto vid : mEdges[v])
 			{
 				l = std::min(mLayers[vid], l);
 			}
@@ -115,7 +116,7 @@ namespace dyno
 			ObjectId v = activeId.front();
 
 			bool isReady = true;
-			for each (auto w in mEdges[v])
+			for  (auto w : mEdges[v])
 			{
 				if (!visited[w])
 				{
@@ -143,12 +144,12 @@ namespace dyno
 		}
 
 		int minLayler = maxLayer;
-		for each (auto v in mVertices)
+		for  (auto v : mVertices)
 		{
 			minLayler = std::min(minLayler, mLayers[v]);
 		}
 
-		for each (auto v in mVertices)
+		for  (auto v : mVertices)
 		{
 			mLayers[v] -= minLayler;
 		}
@@ -159,7 +160,7 @@ namespace dyno
 	void AutoLayoutDAG::addDummyVertices()
 	{
 		ObjectId radixId = Object::baseId();
-		for each (auto v in mVertices)
+		for  (auto v : mVertices)
 		{
 			radixId = std::max(v, radixId);
 		}
@@ -168,10 +169,10 @@ namespace dyno
 
 		std::map<ObjectId, std::unordered_set<ObjectId>> mNewEdges(mEdges);
 
-		for each (auto it in mEdges)
+		for  (auto it : mEdges)
 		{
 			ObjectId v = it.first;
-			for each (auto w in it.second)
+			for(auto w : it.second)
 			{
 				int edgeLength = mLayers[w] - mLayers[v];
 
@@ -222,7 +223,7 @@ namespace dyno
 		};
 
 		//Initialize weighted nodes and the x-coordinates for all vertices
-		for each (auto  v in mVertices)
+		for(auto  v : mVertices)
 		{
 			WNode ln = { v, 1.0f };
 			
@@ -241,7 +242,7 @@ namespace dyno
 				{
 					float sum = 0.0f;
 					ObjectId v = weightedNodes[l][i].id;
-					for each (auto w in mReverseEdges[v])
+					for(auto w : mReverseEdges[v])
 					{
 						sum += mXCoordinate[w];
 					}
@@ -266,7 +267,7 @@ namespace dyno
 				{
 					float sum = 0.0f;
 					ObjectId v = weightedNodes[l][i].id;
-					for each (auto w in mEdges[v])
+					for(auto w : mEdges[v])
 					{
 						sum += mXCoordinate[w];
 					}
@@ -290,7 +291,7 @@ namespace dyno
 		//Construct layers
 		for (size_t l = 0; l < weightedNodes.size(); l++)
 		{
-			for each (auto n in weightedNodes[l])
+			for(auto n : weightedNodes[l])
 			{
 				mNodeLayers[l].push_back(n.id);
 			}

@@ -18,7 +18,7 @@ namespace dyno
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, Topology, "");
 
-		DEF_ARRAY_STATE(int, TriangleIndex, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(int, TriQuadIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
 
@@ -47,17 +47,21 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		DEF_VAR(Real, InterationRadius, 0.01f, "The radius of interaction");
+		DEF_VAR(bool, ToggleQuad, true, "The toggle of quad selection");
 
-		DEF_VAR(Real, PointSelectedSize, 0.02f, "");
-		DEF_VAR(Real, PointOtherSize, 0.01f, "");
+		DEF_VAR(bool, ToggleFlood, false, "The toggle of surface flood selection");
 
-		DEF_VAR(Vec3f, SelectedTriangleColor, Vec3f(0.2, 0.48, 0.75), "");
-		DEF_VAR(Vec3f, OtherTriangleColor, Vec3f(0.8, 0.52, 0.25), "");
-		DEF_VAR(Vec3f, SelectedEdgeColor, Vec3f(0.8f, 0.0f, 0.0f), "");
-		DEF_VAR(Vec3f, OtherEdgeColor, Vec3f(0.0f), "");
-		DEF_VAR(Vec3f, SelectedPointColor, Vec3f(1.0f, 0, 0), "");
-		DEF_VAR(Vec3f, OtherPointColor, Vec3f(0, 0, 1.0f), "");
+		DEF_VAR(bool, ToggleVisibleFilter, true, "The toggle of visible filter");
+
+		DEF_VAR(Real, FloodAngle, 1.0f, "The angle limit of surface flood selection");
+
+		DEF_VAR(Real, InteractionRadius, 0.002f, "The radius of interaction");
+
+		DEF_VAR(Real, PointSelectedSize, 0.006f, "");
+		DEF_VAR(Real, PointOtherSize, 0.005f, "");
+
+		DEF_VAR(Real, EdgeSelectedSize, 0.002f, "");
+		DEF_VAR(Real, EdgeOtherSize, 0.0015, "");
 
 		PickerNode(std::string name = "default");
 		~PickerNode();

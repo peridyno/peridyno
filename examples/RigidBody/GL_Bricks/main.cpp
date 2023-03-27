@@ -63,6 +63,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setAlpha(0.5f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -79,7 +80,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Vec3f(0, 1, 0));
+	wireRender->setColor(Vec3f(0, 0, 1));
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
@@ -90,6 +91,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
 	pointRender->setColor(Vec3f(1, 0, 0));
+	pointRender->varPointSize()->setValue(0.003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 

@@ -23,20 +23,19 @@ namespace gl
 	class Mesh : public VertexArray
 	{
 	public:
-		virtual void create();
-		virtual void release();
+		virtual void create() override;
+		virtual void release() override;
 
 		virtual void draw(int instance = 0);
 
 	public:
 		static Mesh Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
-		static Mesh AABB(glm::vec3 p0, glm::vec3 p1);
 		static Mesh ScreenQuad();
 		static Mesh Plane(float scale);
 
 	private:
 		Buffer	mVertexBuffer;
 		Buffer	mIndexBuffer;
-		int			mDrawCount;
+		int		mDrawCount;
 	};
 }

@@ -8,7 +8,7 @@
 #include "SceneGraphFactory.h"
 #include "Plugin/PluginManager.h"
 
-#include <GLRenderEngine.h>
+#include <OrbitCamera.h>
 
 namespace dyno {
     QtApp::QtApp(int argc, char **argv)
@@ -18,6 +18,12 @@ namespace dyno {
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
+
+        mCamera = std::make_shared<OrbitCamera>();
+        mCamera->setWidth(64);
+        mCamera->setHeight(64);
+        mCamera->registerPoint(0, 0);
+        mCamera->rotateToPoint(-32, 12);
     }
 
     QtApp::~QtApp()
@@ -36,7 +42,7 @@ namespace dyno {
 #endif // DEBUG
 		}
 
-        m_mainWindow = std::make_shared<PMainWindow>(renderEngine().get());
+        m_mainWindow = std::make_shared<PMainWindow>(this);
         m_mainWindow->resize(width, height);
     }
 
@@ -53,23 +59,10 @@ namespace dyno {
         m_app->exec();
     }
 
-	void QtApp::setRenderEngine(std::shared_ptr<RenderEngine> engine)
-	{
-        //TODO: replace the default render engine with an new one in runtime.
-        mRenderEngine = engine;
-	}
-
 	void QtApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
 	{
+        AppBase::setSceneGraph(scn);
         SceneGraphFactory::instance()->pushScene(scn);
-	}
-
-	std::shared_ptr<RenderEngine> QtApp::renderEngine()
-	{
-		if (mRenderEngine == nullptr)
-			mRenderEngine = std::make_shared<GLRenderEngine>();
-
-		return mRenderEngine;
 	}
 
 }

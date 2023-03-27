@@ -20,26 +20,22 @@
 #include <vector>
 
 #include <Rendering.h>
+
 #include "gl/Buffer.h"
+#include "gl/Texture.h"
+#include "gl/Framebuffer.h"
+#include "gl/Shader.h"
+#include "gl/Mesh.h"
+
 
 namespace dyno
 {
 	class SSAO;
+	class FXAA;
 	class ShadowMap;
 	class GLRenderHelper;
-
-	class Camera;
-
+	class GLVisualModule;
 	class SceneGraph;
-	//HE Xiaowei
-
-	struct Picture;
-	
-	enum CameraType
-	{
-		Orbit = 0,
-		TrackBall
-	};
 
 	class GLRenderEngine : public RenderEngine
 	{
@@ -48,27 +44,52 @@ namespace dyno
 		~GLRenderEngine();
 			   
 		virtual void initialize(int width, int height) override;
-		virtual void draw(dyno::SceneGraph* scene) override;
+		virtual void draw(dyno::SceneGraph* scene, const RenderParams& rparams) override;
 		virtual void resize(int w, int h) override;
 
 		virtual std::string name() override;
 
-	private:
-		void setupCamera();
-		void initUniformBuffers();
+		// get the selected nodes on given rect area
+		std::vector<SelectionItem>	select(int x, int y, int w, int h) override;
 
 	private:
+		void setupInternalFramebuffer();
+		void setupTransparencyPass();
 
-		// uniform buffer for matrices
+		void updateRenderModules(dyno::SceneGraph* scene);
+
+	private:
+		std::vector<GLVisualModule*> mRenderModules;
+		std::vector<Node*>			 mRenderNodes;
+
+	private:
+		// internal framebuffer
+		gl::Framebuffer	mFramebuffer;
+		gl::Texture2D	mColorTex;
+		gl::Texture2D	mDepthTex;
+		gl::Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
+
+		// for linked-list OIT
+		gl::Buffer		mFreeNodeIdx;
+		gl::Buffer		mLinkedListBuffer;
+		gl::Texture2D	mHeadIndexTex;
+		const int		MAX_OIT_NODES = 1024 * 1024 * 8;
+		gl::Program		mBlendProgram;
+		gl::Mesh		mScreenQuad;
+
+
+		// uniform buffers
 		gl::Buffer		mTransformUBO;
 		gl::Buffer		mLightUBO;
+		gl::Buffer		mVariableUBO;
 		
 		SSAO*			mSSAO;
 		ShadowMap*		mShadowMap;
 		GLRenderHelper*	mRenderHelper;
 
-		//HE Xiaowei
-		CameraType mCameraType = CameraType::Orbit;
+		// anti-aliasing
+		bool			bEnableFXAA = true;
+		FXAA*			mFXAAFilter;
 
 	};
 };

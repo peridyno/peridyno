@@ -29,10 +29,8 @@
 
 namespace dyno
 {
-	class ImWidget;
-	class RenderEngine;
-	class Camera;
 	class Node;
+	class QtApp;
 
 	enum QButtonState
 	{
@@ -53,7 +51,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		POpenGLWidget(RenderEngine* engine);
+		POpenGLWidget(QtApp* app);
 		~POpenGLWidget();
 
 	protected:
@@ -72,9 +70,8 @@ namespace dyno
 		void updateGraphicsContext(Node* node);
 
 	private:
-		std::shared_ptr<Camera> activeCamera();
 
-		RenderEngine* mRenderEngine;
+		QtApp* mApp;
 
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		// Qt

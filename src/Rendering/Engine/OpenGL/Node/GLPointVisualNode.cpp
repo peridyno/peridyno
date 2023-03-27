@@ -20,7 +20,6 @@ namespace dyno
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		this->varColor()->connect(ptRender->varBaseColor());
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-		ptRender->setColorMapRange(0, 5);
 
 		this->inPoints()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());

@@ -49,14 +49,16 @@ namespace dyno
 		VtkRenderEngine();
 
 		virtual void initialize(int width, int height) override;
-		virtual void draw(dyno::SceneGraph* scene) override; 
+		virtual void draw(dyno::SceneGraph* scene, const RenderParams& rparams) override;
 		virtual void resize(int w, int h) override;
 
 		virtual std::string name() override;
 
+		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) override;
+
 	private:
 		void setScene(dyno::SceneGraph* scene);
-		void setCamera();
+		void setCamera(const RenderParams& rparams);
 
 	private:
 		bool m_useOffScreen = true;

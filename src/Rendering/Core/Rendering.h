@@ -8,12 +8,13 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 
 namespace dyno
 {
 	class SceneGraph;
-	class Camera;
+	class Node;
 
 	struct RenderParams
 	{
@@ -60,8 +61,11 @@ namespace dyno
 
 		bool showAxisHelper = true;
 		bool showSceneBounds = false;
+	};
 
-		int viewPortflag = -1;
+	struct SelectionItem {
+		Node* node = 0;
+		int   instance = -1;
 	};
 
 	// RenderEngine interface
@@ -69,20 +73,13 @@ namespace dyno
 	{
 	public:
 		virtual void initialize(int width, int height) = 0;
-		virtual void draw(SceneGraph* scene) = 0;
+		virtual void draw(SceneGraph* scene, const RenderParams& rparams) = 0;
 		virtual void resize(int w, int h) = 0;
 
-		// TODO: re-organize
-		RenderParams* renderParams() { return &m_rparams; }
-		std::shared_ptr<Camera> camera() { return mCamera; }
-		void setCamera(std::shared_ptr<Camera> cam) { mCamera = cam; }
+		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) = 0;
 
+	public:
 		virtual std::string name() = 0;
-	protected:
-		RenderParams m_rparams;
-
-		// current active camera
-		std::shared_ptr<Camera> mCamera;
 
 	};
 };

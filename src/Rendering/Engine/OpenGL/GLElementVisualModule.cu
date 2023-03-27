@@ -83,7 +83,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::CreateShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
 
 		printf("aaaaaGL\n");
 		return true;
@@ -353,22 +353,22 @@ namespace dyno
 
 	}
 
-	void GLElementVisualModule::paintGL(RenderPass pass)
+	void GLElementVisualModule::paintGL(GLRenderPass pass)
 	{
 		mShaderProgram.use();
 
 		unsigned int subroutine;
-		if (pass == RenderPass::COLOR)
+		if (pass == GLRenderPass::COLOR)
 		{
 			mShaderProgram.setVec3("uBaseColor", this->varBaseColor()->getData());
-			mShaderProgram.setFloat("uMetallic", mMetallic);
-			mShaderProgram.setFloat("uRoughness", mRoughness);
-			mShaderProgram.setFloat("uAlpha", mAlpha);	// not implemented!
+			mShaderProgram.setFloat("uMetallic", this->varMetallic()->getData());
+			mShaderProgram.setFloat("uRoughness", this->varRoughness()->getData());
+			mShaderProgram.setFloat("uAlpha", this->varAlpha()->getData());	
 
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == RenderPass::SHADOW)
+		else if (pass == GLRenderPass::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

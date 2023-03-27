@@ -9,6 +9,7 @@ struct GLFWwindow;
 namespace dyno {
 
 	class Camera;
+	class Node;
 	struct Picture;
 
 	enum ButtonState
@@ -21,7 +22,6 @@ namespace dyno {
     {
     public:
         GlfwApp(int argc = 0, char **argv = NULL);
-		GlfwApp(int width, int height);
         ~GlfwApp();
 
         void createWindow(int width, int height, bool usePlugin = false) override;
@@ -34,8 +34,6 @@ namespace dyno {
 		double getCursorPosX();
 		double getCursorPosY();
 		
-		void setWindowSize(int width, int height);
-
 		void setButtonType(uint button) { mButtonType = button; }
 		void setButtonMode(uint mode) { mButtonMode = mode; }
 		void setButtonAction(uint action) { mButtonAction = action; }
@@ -46,7 +44,6 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-		std::shared_ptr<Camera> activeCamera();
 
 		//save screenshot to file
 		bool saveScreen(const std::string &file_name) const;  //save to file with given name
@@ -71,9 +68,9 @@ namespace dyno {
 		// 全局样式设定
 		void initializeStyle();
 
-		std::shared_ptr<RenderEngine> renderEngine() override;
+		void setSceneGraph(std::shared_ptr<SceneGraph> scn) override;
 
-		void setSceneGraph(std::shared_ptr<SceneGraph> scn);
+		ImWindow* imWindow() { return &mImWindow; }
 
 	protected:
 		void initCallbacks();    //init default callbacks
@@ -128,6 +125,9 @@ namespace dyno {
 		bool mShowImWindow = true;
 
 		ImWindow mImWindow;
+
+		// current selected node
+		Node* currNode = 0;
     };
 
 }

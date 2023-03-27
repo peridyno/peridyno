@@ -49,6 +49,8 @@ namespace dyno
 		virtual bool scale(Real s);
 		virtual bool rotate(Quat<Real> q);
 		std::string getNodeType() override;
+
+		Real getDt() override { return 0.001; }
 		
 	public:
 		/**

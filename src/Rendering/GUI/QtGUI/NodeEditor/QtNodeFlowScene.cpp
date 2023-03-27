@@ -3,6 +3,8 @@
 
 #include "nodes/QNode"
 
+#include "Common.h"
+
 #include "Object.h"
 #include "NodeIterator.h"
 #include "NodePort.h"
@@ -45,7 +47,7 @@ namespace Qt
 					return dat;
 				};
 
-				QString category = QString::fromStdString(node->getNodeType());
+				QString category = dyno::FormatBlockCaptionName(node->getNodeType());
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}
@@ -290,9 +292,9 @@ namespace Qt
 	{
 		mEditingEnabled = true;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -306,9 +308,9 @@ namespace Qt
 	{
 		mEditingEnabled = false;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)

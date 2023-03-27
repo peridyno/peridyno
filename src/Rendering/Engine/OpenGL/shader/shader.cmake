@@ -11,19 +11,19 @@ file(APPEND ${SHADER_HEADER_FILE} "const std::map<std::string, std::string> Shad
 set(_IN_FILES ${SHADER_FILES} ${ARGN}) 
 
 foreach(SHADER_FILE ${_IN_FILES})	
-	message("Process: ${SHADER_FILE}")
 	# get variable name from file name
-	get_filename_component(VAR_NAME ${SHADER_FILE} NAME_WLE)		
-	# string(REGEX REPLACE "[/.]" "_" VAR_NAME ${VAR_NAME})		
-	# get shader source content
-	file(READ ${SHADER_FILE} CONTENTS)			
-	# write string
-	
+	get_filename_component(VAR_NAME ${SHADER_FILE} NAME)
 	file(APPEND ${SHADER_HEADER_FILE} "//// ${VAR_NAME} ////\n")
 	file(APPEND ${SHADER_HEADER_FILE} "{ \"${VAR_NAME}\",\n")
-	file(APPEND ${SHADER_HEADER_FILE} "R\"====(\n")
-	file(APPEND ${SHADER_HEADER_FILE} "${CONTENTS}")
-	file(APPEND ${SHADER_HEADER_FILE} ")====\"},\n\n")		
+	
+	file(STRINGS ${SHADER_FILE} LINES)
+    foreach(LINE ${LINES})
+		string(REPLACE "\"" "\\\"" LINE "${LINE}")
+		file(APPEND ${SHADER_HEADER_FILE} "\"")
+		file(APPEND ${SHADER_HEADER_FILE} "${LINE}")
+		file(APPEND ${SHADER_HEADER_FILE} "\\n\"\n")
+	endforeach()
+	file(APPEND ${SHADER_HEADER_FILE} "},\n\n")	
 endforeach()	
 # close variable
 file(APPEND ${SHADER_HEADER_FILE} "};\n\n")

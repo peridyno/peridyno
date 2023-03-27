@@ -123,7 +123,6 @@ std::shared_ptr<SceneGraph> createScene()
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->setColor(Vec3f(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-		ptRender->setColorMapRange(0, 5);
 
 		fluid->statePointSet()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());

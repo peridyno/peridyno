@@ -18,9 +18,11 @@
 #include "Topology/TriangleSet.h"
 
 #include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
+#include "gl/CudaBuffer.h"
 #include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
+
+#include <DeclarePort.h>
 
 namespace dyno
 {
@@ -31,38 +33,39 @@ namespace dyno
 		GLSurfaceVisualModule();
 
 	public:
-		std::string caption() override;
+		virtual std::string caption() override;
 
 		DECLARE_ENUM(EColorMode,
 			CM_Object = 0,
 			CM_Vertex = 1);
 
-		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Shading mode");
+		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 
-		DEF_VAR(bool, UsePhongShadingModel, false, "")
+		DEF_VAR(bool, UseVertexNormal, false, "");
 
 		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:
-		virtual void paintGL(RenderPass mode) override;
+		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
 
-	private:
+	protected:
 
-		gl::Program mShaderProgram;
+		gl::Program		mShaderProgram;
+
 		gl::VertexArray	mVAO;
-
-		GLCudaBuffer	mVertexBuffer;
-		GLCudaBuffer	mNormalBuffer;
-		GLCudaBuffer 	mIndexBuffer;
-		GLCudaBuffer	mColor;
-
-		DArray<Vec3f> mColorBuffer;
+		gl::CudaBuffer 	mIndexBuffer;
+		gl::CudaBuffer	mVertexBuffer;
+		gl::CudaBuffer	mNormalBuffer;
+		gl::CudaBuffer	mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
-		unsigned int	mColorMode = 0;
+
+		// for instanced rendering
+		gl::CudaBuffer	mInstanceBuffer;
+		unsigned int	mInstanceCount = 0;
 	};
 };

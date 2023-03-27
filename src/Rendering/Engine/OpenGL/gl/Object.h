@@ -18,11 +18,16 @@
 
 namespace gl
 {
+	/*
+	 * Base OpenGL object with ID and create/release interface
+	 */
 	class Object
 	{
 	protected:
 		virtual void create() = 0;
 		virtual void release() = 0;
+
+		virtual bool isValid() const { return id != 0xFFFFFFFF; }
 
 	public:
 		unsigned int id = 0xFFFFFFFF;

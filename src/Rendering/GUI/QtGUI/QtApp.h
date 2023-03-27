@@ -18,10 +18,7 @@ namespace dyno {
         void createWindow(int width, int height, bool usePlugin = true) override;
         void mainLoop() override;
 
-        void setRenderEngine(std::shared_ptr<RenderEngine> engine) override;
         void setSceneGraph(std::shared_ptr<SceneGraph> scn);
-
-        std::shared_ptr<RenderEngine> renderEngine() override;
 
     private:
         std::shared_ptr<QApplication> m_app;

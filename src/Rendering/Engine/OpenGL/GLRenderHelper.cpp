@@ -1,6 +1,6 @@
 #include "GLRenderHelper.h"
 
-#include "gl/Program.h"
+#include "gl/Shader.h"
 #include "gl/Mesh.h"
 #include "gl/Texture.h"
 
@@ -14,7 +14,7 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mProgram = gl::CreateShaderProgram("plane.vert", "plane.frag");
+			mProgram = gl::ShaderFactory::createShaderProgram("plane.vert", "plane.frag");
 			mPlane = gl::Mesh::Plane(1.f);
 
 			// create ruler texture
@@ -33,8 +33,6 @@ namespace dyno
 				}
 			}
 
-			mRulerTex.wrapS = GL_REPEAT;
-			mRulerTex.wrapT = GL_REPEAT;
 			mRulerTex.minFilter = GL_LINEAR_MIPMAP_LINEAR;
 			mRulerTex.maxFilter = GL_LINEAR;
 			mRulerTex.format = GL_RED;
@@ -51,9 +49,6 @@ namespace dyno
 
 		void draw(float planeScale, float rulerScale)
 		{
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-
 			mRulerTex.bind(GL_TEXTURE1);
 			
 			mProgram.use();
@@ -61,12 +56,6 @@ namespace dyno
 			mProgram.setFloat("uRulerScale", rulerScale);
 
 			mPlane.draw();
-			
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_BLEND);
-
-			// clear depth to get avoid object cross ground
-			glClear(GL_DEPTH_BUFFER_BIT);
 
 			gl::glCheckError();
 		}
@@ -82,7 +71,7 @@ namespace dyno
 	public:
 		AxisRenderer()
 		{
-			mProgram = gl::CreateShaderProgram("axis.vert", "axis.frag");
+			mProgram = gl::ShaderFactory::createShaderProgram("axis.vert", "axis.frag");
 
 			mAxisVBO.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 			float vertices[] = {
@@ -126,7 +115,7 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mProgram = gl::CreateShaderProgram("bbox.vert", "bbox.frag");
+			mProgram = gl::ShaderFactory::createShaderProgram("bbox.vert", "bbox.frag");
 			mCubeVBO.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 			mCubeVBO.load(0, 8 * 3 * sizeof(float));
 			mCubeVAO.create();
@@ -199,7 +188,7 @@ namespace dyno
 		{
 			// create a quad object
 			mScreenQuad = gl::Mesh::ScreenQuad();
-			mBackgroundProgram = gl::CreateShaderProgram("screen.vert", "background.frag");
+			mBackgroundProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "background.frag");
 		}
 
 		void draw(Vec3f color0, Vec3f color1)
@@ -209,6 +198,8 @@ namespace dyno
 			mBackgroundProgram.setVec3("uColor0", color0);
 			mBackgroundProgram.setVec3("uColor1", color1);
 			mScreenQuad.draw();
+
+			glClear(GL_DEPTH_BUFFER_BIT);
 		}
 
 	private:

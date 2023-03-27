@@ -175,6 +175,61 @@ namespace dyno
 		hashGrid.release();
 	}
 	
+
+	template <typename T> __device__ void inline swap_on_device(T& a, T& b) {
+		T c(a); a = b; b = c;
+	}
+
+	template <typename T>
+	__device__ void heapify_up(int* keys, T* vals, int child)
+	{
+		int parent = (child - 1) / 2;
+		while (child > 0)
+		{
+			if (vals[child] > vals[parent])
+			{
+				swap_on_device(vals[child], vals[parent]);
+				swap_on_device(keys[child], keys[parent]);
+
+				child = parent;
+				parent = (child - 1) / 2;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	template <typename T>
+	__device__ void heapify_down(int* keys, T* vals, int node, int size) {
+		int j = node;
+		while (true) {
+			int left = 2 * j + 1;
+			int right = 2 * j + 2;
+			int largest = j;
+			if (left<size && vals[left]>vals[largest]) {
+				largest = left;
+			}
+			if (right<size && vals[right]>vals[largest]) {
+				largest = right;
+			}
+			if (largest == j) return;
+			swap_on_device(vals[j], vals[largest]);
+			swap_on_device(keys[j], keys[largest]);
+			j = largest;
+		}
+	}
+
+	template <typename T>
+	__device__ void heap_sort(int* keys, T* vals, int size) {
+		while (size) {
+			swap_on_device(vals[0], vals[size - 1]);
+			swap_on_device(keys[0], keys[size - 1]);
+			heapify_down(keys, vals, 0, --size);
+		}
+	}
+
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void K_ComputeNeighborFixed(
 		DArrayList<int> nbrIds, 
@@ -189,8 +244,14 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position_new.size()) return;
 
+		//TODO: used shared memory for speedup
 		int* ids(heapIDs.begin() + pId * sizeLimit);// = new int[nbrLimit];
 		Real* distance(heapDistance.begin() + pId * sizeLimit);// = new Real[nbrLimit];
+
+		for (int i = 0; i < sizeLimit; i++) {
+			ids[i] = INT_MAX;
+			distance[i] = REAL_MAX;
+		}
 
 		Coord pos_ijk = position_new[pId];
 		int3 gId3 = hash.getIndex3(pos_ijk);
@@ -210,32 +271,29 @@ namespace dyno
 						{
 							ids[counter] = nbId;
 							distance[counter] = d_ij;
+
+							heapify_up(ids, distance, counter);
 							counter++;
 						}
 						else
 						{
-							int maxId = 0;
-							float maxDist = distance[0];
-							for (int ne = 1; ne < sizeLimit; ne++)
+							if (d_ij < distance[0])
 							{
-								if (maxDist < distance[ne])
-								{
-									maxDist = distance[ne];
-									maxId = ne;
-								}
-							}
-							if (d_ij < distance[maxId])
-							{
-								distance[maxId] = d_ij;
-								ids[maxId] = nbId;
+								ids[0] = nbId;
+								distance[0] = d_ij;
+
+								heapify_down(ids, distance, 0, counter);
 							}
 						}
+						
 					}
 				}
 			}
 		}
 
 		List<int>& list_i = nbrIds[pId];
+
+		heap_sort(ids, distance, counter);
 		for (int bId = 0; bId < counter; bId++)
 		{
 			list_i.insert(ids[bId]);

@@ -349,7 +349,7 @@ namespace dyno
 			vertexOffset,
 			indexOffset);
 
-		this->outTriangleSet()->getDataPtr()->updateEdges();
+		this->outTriangleSet()->getDataPtr()->update();
 
 		return true;
 	}

@@ -18,35 +18,44 @@
 #include "Topology/EdgeSet.h"
 
 #include "GLVisualModule.h"
-#include "GLCudaBuffer.h"
+#include "gl/CudaBuffer.h"
 #include "gl/VertexArray.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 
 namespace dyno
 {
 	class GLWireframeVisualModule : public GLVisualModule
 	{
 		DECLARE_CLASS(GLWireframeVisualModule)
+
+	public:		
+		// render as lines or cylinder
+		DECLARE_ENUM(EEdgeMode,
+			LINE = 0,
+			CYLINDER = 1);
+
 	public:
 		GLWireframeVisualModule();
-	public:
 		std::string caption() override;
 
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
+		DEF_VAR(float, Radius, 0.003f, "Cylinder radius");
+		DEF_VAR(float, LineWidth, 1.f, "Line width");
+
+		DEF_ENUM(EEdgeMode, RenderMode, EEdgeMode::LINE, "");
 
 	protected:
-		virtual void paintGL(RenderPass mode) override;
+		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-
+				
 	private:
 
-		gl::Program mShaderProgram;
+		gl::Program		mShaderProgram;
+
 		gl::VertexArray	mVAO;
-
-		GLCudaBuffer	mVertexBuffer;
-		GLCudaBuffer 	mIndexBuffer;
-
-		unsigned int	mDrawCount = 0;
+		gl::CudaBuffer	mPoints;
+		gl::CudaBuffer 	mEdges;
+		unsigned int	mNumEdges = 0;
 	};
 };

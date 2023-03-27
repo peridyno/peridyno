@@ -12,11 +12,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
         "${LIB_SRC_DIR}/*.h*"
     )
 
-    if(WIN32)
-        add_library(${LIB_NAME} SHARED ${LIB_SRC})
-    elseif(UNIX)
-        add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
-    endif()
+    add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
     foreach(SRC IN ITEMS ${LIB_SRC}) 
         get_filename_component(SRC_PATH "${SRC}" PATH)
@@ -86,6 +82,7 @@ option(PERIDYNO_LIBRARY_PERIDYNAMICS "Enable binding the peridynamics library" O
 option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
 option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
+option(PERIDYNO_LIBRARY_MODELING "Enable binding the Modeling library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY Core IO Framework GLRenderEngine)
@@ -109,6 +106,6 @@ endif()
 
 
 if(PERIDYNO_LIBRARY_HEIGHTFIELD)
-    set(LIB_DEPENDENCY Core IO Framework RigidBody cufft)
+    set(LIB_DEPENDENCY Core IO Framework RigidBody cufft Modeling)
     build_library(HeightField LIB_DEPENDENCY)
 endif()

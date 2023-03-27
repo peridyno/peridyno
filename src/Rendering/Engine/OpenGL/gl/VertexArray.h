@@ -17,15 +17,14 @@
 #pragma once
 
 #include "Buffer.h"
-#include <glm/vec3.hpp>
 
 namespace gl
 {
 	class VertexArray : public Object
 	{
 	public:
-		virtual void create();
-		virtual void release();
+		virtual void create() override;
+		virtual void release() override;
 
 		virtual void bind();
 		virtual void unbind();

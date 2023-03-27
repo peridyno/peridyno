@@ -587,7 +587,7 @@ namespace dyno
 		auto& enums = f->getDataPtr()->enumMap();
 		int num = 0;
 		int curIndex = 0;
-		for each(auto e in enums)
+		for (auto e : enums)
 		{
 			mComboxIndexMap[num] = e.first;
 			combox->addItem(QString::fromStdString(e.second));

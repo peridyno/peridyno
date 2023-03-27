@@ -13,8 +13,3 @@ namespace dyno
 
 	const static GLRenderEngineInitializer renderEngineInitializer;
 }
-
-PERIDYNO_API
-auto initDynoPlugin() -> void
-{
-}

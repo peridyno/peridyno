@@ -133,7 +133,7 @@ namespace dyno
 		}
 
 		std::vector<FBase*>& fields = module->getAllFields();
-		for each (FBase * var in fields)
+		for  (FBase * var : fields)
 		{
 			if (var != nullptr) {
 				if (var->getFieldType() == FieldTypeEnum::Param)
@@ -249,7 +249,7 @@ namespace dyno
 		}
 
 		std::vector<FBase*>& fields = node->getAllFields();
-		for each (FBase * var in fields)
+		for  (FBase * var : fields)
 		{
 			if (var != nullptr) {
 				if (var->getFieldType() == FieldTypeEnum::Param)

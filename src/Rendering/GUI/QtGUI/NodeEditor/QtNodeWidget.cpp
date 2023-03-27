@@ -123,12 +123,13 @@ namespace Qt
 
 	QString QtNodeWidget::name() const
 	{
-		return QString::fromStdString(mNode->getClassInfo()->getClassName());
+		return dyno::FormatBlockCaptionName(mNode->caption());
+		//return QString::fromStdString(mNode->getClassInfo()->getClassName());
 	}
 
 	QString QtNodeWidget::nodeTips() const
 	{
-		return QString::fromStdString(mNode->description());
+		return dyno::FormatDescription(mNode->description());
 	}
 
 	bool QtNodeWidget::portCaptionVisible(PortType portType, PortIndex portIndex) const
@@ -272,7 +273,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
+				auto nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
 
 				if (nodeExp == nullptr)
 					return false;
@@ -290,7 +291,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+				auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
 				if (fieldExp == nullptr)
 					return false;
 
