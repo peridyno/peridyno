@@ -12,7 +12,10 @@ namespace gl
 
 	void VertexArray::release()
 	{
-		glDeleteVertexArrays(1, &id);
+		glDeleteVertexArrays(1, &id);		
+		
+		// reset object id
+		id = GL_INVALID_INDEX;
 	}
 
 	void VertexArray::bind()

@@ -23,6 +23,7 @@ target_link_libraries(${LIB_NAME} PUBLIC
 	Core 
 	Framework 
 	RenderCore
+    Topology
 	${VTK_LIBRARIES}
 )
 

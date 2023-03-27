@@ -1,5 +1,5 @@
 #include "Interval.h"
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 
 namespace dyno {
 

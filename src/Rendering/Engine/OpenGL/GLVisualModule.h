@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <chrono>
+#include <mutex>
 #include <Module/VisualModule.h>
 
 namespace dyno
@@ -32,6 +34,7 @@ namespace dyno
 	{
 	public:
 		GLVisualModule();
+		~GLVisualModule();
 
 		// basic Disney PBR material properties
 		void setColor(const Vec3f& color);
@@ -50,14 +53,25 @@ namespace dyno
 		DEF_VAR(Real, Alpha, 1.0f, "");
 
 	protected:
+		virtual void updateGraphicsContext();
+
 		virtual bool initializeGL() = 0;
+		virtual void destroyGL() = 0;
 		virtual void updateGL() = 0;
 		virtual void paintGL(GLRenderPass pass) = 0;
 
-		void updateGraphicsContext() final;
+		friend class GLRenderEngine;
 
-	private:
+	protected:
 		bool isGLInitialized = false;
 	
+		using clock=std::chrono::high_resolution_clock;
+		// the timestamp when graphics context is changed by calling updateGraphicsContext
+		clock::time_point changed;
+		// the timestamp when GL resource is updated by updateGL
+		clock::time_point updated;
+
+		// mutex for sync data
+		std::mutex	updateMutex;
 	};
 };

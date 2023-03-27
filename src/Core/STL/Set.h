@@ -33,8 +33,8 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC size_t size();
-		DYN_FUNC size_t count(T val);
+		DYN_FUNC uint size();
+		DYN_FUNC uint count(T val);
 
 		DYN_FUNC T* insert(T val);
 		DYN_FUNC bool empty();
@@ -44,7 +44,7 @@ namespace dyno
 
 
 	private:
-		size_t m_size = 0;
+		uint m_size = 0;
 	};
 
 

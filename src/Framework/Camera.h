@@ -6,7 +6,7 @@
 #include <Vector.h>
 #include <Quat.h>
 
-#include "Topology/Primitive3D.h"
+#include "Primitive/Primitive3D.h"
 
 namespace dyno
 {
@@ -52,9 +52,9 @@ namespace dyno
 
 		TRay3D<float> castRayInWorldSpace(float x, float y);
 
-		void setDistanceUnit(float unit) { mDistanceUnit = unit; }
+		void setUnitScale(float unit) { mUnitScale = unit; }
 
-		float distanceUnit() { return mDistanceUnit; }
+		float unitScale() { return mUnitScale; }
 		
 		void setProjectionType(ProjectionType type) { mProjectionType = type; }
 		ProjectionType projectionType() { return mProjectionType; }
@@ -70,7 +70,7 @@ namespace dyno
 		ProjectionType mProjectionType = Perspective;	//0:pers 1:ortho
 
 		//Distance unit
-		float mDistanceUnit = 1.0f;
+		float mUnitScale = 1.0f;
 	};
 
 }

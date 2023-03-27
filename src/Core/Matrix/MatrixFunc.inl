@@ -1,6 +1,9 @@
 #include "Vector.h"
 #include "Matrix.h"
-#include "svd3_cuda.h"
+
+#ifdef CUDA_BACKEND
+	#include "SparseMatrix/svd3_cuda.h"
+#endif // CUDA_BACKEND
 
 namespace dyno
 {
@@ -77,6 +80,7 @@ namespace dyno
 
 	}
 
+#ifdef CUDA_BACKEND
 	template<typename Real>
 	DYN_FUNC void polarDecomposition(const SquareMatrix<Real, 3> &A, SquareMatrix<Real, 3> &R, SquareMatrix<Real, 3> &U, SquareMatrix<Real, 3> &D, SquareMatrix<Real, 3> &V)
 	{
@@ -177,9 +181,9 @@ namespace dyno
 		{
 			Vector<Real, 3> col_0 = R.col(maxCol);
 			col_0 = col_0.normalize();
-			R.setCol(maxCol, col_0);
 			if (R.col((maxCol + 1) % 3).normSquared() > R.col((maxCol + 2) % 3).normSquared())
 			{
+			R.setCol(maxCol, col_0);
 				Vector<Real, 3> col_1 = R.col((maxCol + 1) % 3);
 				col_1 = col_1.normalize();
 				R.setCol((maxCol + 1) % 3, col_1);
@@ -216,7 +220,7 @@ namespace dyno
 		*/
 
 	}
-
+#endif
 
 	template<typename Real>
 	DYN_FUNC void polarDecomposition(const SquareMatrix<Real, 3> &A, SquareMatrix<Real, 3> &R, SquareMatrix<Real, 3> &U, SquareMatrix<Real, 3> &D)

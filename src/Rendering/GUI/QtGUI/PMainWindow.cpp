@@ -124,7 +124,7 @@ namespace dyno
 		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo5.png")));
 
 
-		mOpenGLWidget = new POpenGLWidget(app);
+		mOpenGLWidget = new POpenGLWidget();
 		setCentralView();
 
 

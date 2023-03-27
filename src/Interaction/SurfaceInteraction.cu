@@ -166,7 +166,7 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
-		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId][0]], points[triangles[pId][1]], points[triangles[pId][2]]);
 		int temp = 0;
 
 		TPoint3D<Real> p;
@@ -218,10 +218,10 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= triangles.size()) return;
 
-		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
-		TSegment3D<Real> s1 = TSegment3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]]);
-		TSegment3D<Real> s2 = TSegment3D<Real>(points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
-		TSegment3D<Real> s3 = TSegment3D<Real>(points[triangles[pId].data[2]], points[triangles[pId].data[0]]);
+		TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId][0]], points[triangles[pId][1]], points[triangles[pId][2]]);
+		TSegment3D<Real> s1 = TSegment3D<Real>(points[triangles[pId][0]], points[triangles[pId][1]]);
+		TSegment3D<Real> s2 = TSegment3D<Real>(points[triangles[pId][1]], points[triangles[pId][2]]);
+		TSegment3D<Real> s3 = TSegment3D<Real>(points[triangles[pId][2]], points[triangles[pId][0]]);
 
 		bool flag = false;
 		TPoint3D<Real> p;
@@ -276,8 +276,8 @@ namespace dyno
 
 		for (int i = 0; i < 3; i++)
 		{
-			float temp1 = ((points[triangles[pId].data[i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId].data[i]] - plane42.origin).dot(plane42.normal));
-			float temp2 = ((points[triangles[pId].data[i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId].data[i]] - plane32.origin).dot(plane32.normal));
+			float temp1 = ((points[triangles[pId][i]] - plane13.origin).dot(plane13.normal)) * ((points[triangles[pId][i]] - plane42.origin).dot(plane42.normal));
+			float temp2 = ((points[triangles[pId][i]] - plane14.origin).dot(plane14.normal)) * ((points[triangles[pId][i]] - plane32.origin).dot(plane32.normal));
 			if (temp1 >= 0 && temp2 >= 0)
 			{
 				flag = flag || true;
@@ -356,8 +356,9 @@ namespace dyno
 				(triangles[i][1] == triangles[j][2] && triangles[i][2] == triangles[j][1])
 				)
 			{
-				TTriangle3D<Real> t1 = TTriangle3D<Real>(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
-				TTriangle3D<Real> t2 = TTriangle3D<Real>(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
+				TTriangle3D<Real> t1(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
+				TTriangle3D<Real> t2(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
+
 				if (t1.normal().dot(t2.normal()) >= cosf(diffusionAngle))
 				{
 					if (intersected[j] == 0 && unintersected[j] == 1)
@@ -383,7 +384,7 @@ namespace dyno
 
 		if (intersected[pId] == 1)
 		{
-			TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId].data[0]], points[triangles[pId].data[1]], points[triangles[pId].data[2]]);
+			TTriangle3D<Real> t = TTriangle3D<Real>(points[triangles[pId][0]], points[triangles[pId][1]], points[triangles[pId][2]]);
 			if (mouseray.direction.dot(t.normal()) >= 0)
 			{
 				intersected[pId] = 0;
@@ -488,7 +489,7 @@ namespace dyno
 					points,
 					intersected,
 					unintersected,
-					this->varFloodAngle()->getValue()/180.0f*M_PI);
+					Real(this->varFloodAngle()->getValue()/180.0f*M_PI));
 				intersected_size_t = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
 			}
 		}

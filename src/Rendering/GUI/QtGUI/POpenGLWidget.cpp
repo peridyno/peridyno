@@ -3,7 +3,6 @@
 #include "POpenGLWidget.h"
 #include "PSimulationThread.h"
 
-#include <Rendering.h>
 #include <SceneGraph.h>
 #include <OrbitCamera.h>
 
@@ -19,10 +18,12 @@
 
 #include <GLRenderEngine.h>
 #include "QtApp.h"
+#include "ImGuizmo.h"
 
 namespace dyno
 {
-	POpenGLWidget::POpenGLWidget(QtApp* app)
+	POpenGLWidget::POpenGLWidget()
+		: RenderWindow()
 	{
 		QSurfaceFormat format;
 		format.setDepthBufferSize(24);
@@ -37,8 +38,6 @@ namespace dyno
 		QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
 		timer.start(16);
 
-		mApp = app;
-
 		setFocusPolicy(Qt::StrongFocus);
 	}
 
@@ -46,6 +45,10 @@ namespace dyno
 	{
 		timer.stop();
 		//delete mRenderEngine;
+		
+		makeCurrent();
+		this->getRenderEngine()->terminate();
+		doneCurrent();
 	}
 
 	void POpenGLWidget::initializeGL()
@@ -59,10 +62,10 @@ namespace dyno
 		QtImGui::initialize(this);
 
 		// initialize render engine
-		if (mApp->getRenderEngine() == 0) {
+		if (this->getRenderEngine() == 0) {
 			auto engine = std::make_shared<GLRenderEngine>();
-			mApp->setRenderEngine(engine);
-			engine->initialize(256, 256);
+			this->setRenderEngine(engine);
+			engine->initialize();
 		}
 
 		// Get Context scale
@@ -82,32 +85,26 @@ namespace dyno
 	{
 		//QtImGui
 		QtImGui::newFrame();
-		
+
 		// Draw scene		
-		auto engine = mApp->getRenderEngine();
-		auto camera = mApp->getCamera();
-		auto scene  = mApp->getSceneGraph();
-		auto& rparams = mApp->getRenderParams();
-
-		rparams.proj = camera->getProjMat();
-		rparams.view = camera->getViewMat();
-		rparams.viewport.w = this->width();
-		rparams.viewport.h = this->height();
-
+		auto engine = this->getRenderEngine();
+		auto camera = this->getCamera();
+		auto& rparams = this->getRenderParams();
+		auto scene = SceneGraphFactory::instance()->active();
 
 		// Jian SHI: hack for unit scaling...
 		float planeScale = rparams.planeScale;
 		float rulerScale = rparams.rulerScale;
-		rparams.planeScale *= mApp->getCamera()->distanceUnit();
-		rparams.rulerScale *= mApp->getCamera()->distanceUnit();
+		rparams.planeScale *= this->getCamera()->unitScale();
+		rparams.rulerScale *= this->getCamera()->unitScale();
 
-		engine->draw(scene.get(), rparams);
+		engine->draw(scene.get(), camera.get(), rparams);
 
 		rparams.planeScale = planeScale;
 		rparams.rulerScale = rulerScale;
 
 		// Draw ImGui
-		mImWindow.draw(mApp);
+		mImWindow.draw(this);
 		// Draw widgets
 // 		// TODO: maybe move into mImWindow...
 // 		for (auto widget : mWidgets)
@@ -123,12 +120,7 @@ namespace dyno
 
 	void POpenGLWidget::resizeGL(int w, int h)
 	{
-		auto engine = mApp->getRenderEngine();
-		engine->resize(w, h);
-
-		auto camera = mApp->getCamera();
-		camera->setWidth(w);
-		camera->setHeight(h);
+		this->setWindowSize(w, h);
 	}
 
 	PButtonType mappingMouseButton(QMouseEvent* event)
@@ -167,9 +159,12 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
-		auto camera = mApp->getCamera();
-		camera->registerPoint(event->x(), event->y());
 		mButtonState = QButtonState::QBUTTON_DOWN;
+		mCursorX = event->x();
+		mCursorY = event->y();
+
+		auto camera = this->getCamera();
+		camera->registerPoint(event->x(), event->y());
 
 		PMouseEvent mouseEvent;
 		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
@@ -191,7 +186,36 @@ namespace dyno
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
-		auto camera = mApp->getCamera();
+		// do picking
+		if(event->modifiers() == 0 && event->button() == Qt::LeftButton 
+			&& !ImGuizmo::IsUsing()
+			&& !ImGui::GetIO().WantCaptureMouse)
+		{
+			int x = event->x();
+			int y = event->y();
+
+			int w = std::abs(mCursorX - x);
+			int h = std::abs(mCursorY - y);
+			x = std::min(mCursorX, x);
+			y = std::min(mCursorY, y);
+			y = this->height() - y - 1;
+
+			makeCurrent();
+			auto items = mRenderEngine->select(x, y, w, h);
+			doneCurrent();
+
+			// print selected result...
+			//printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
+
+			// pick the last one?
+			if (!items.empty())
+				currNode = items[0].node;
+			else
+				currNode = 0;
+		}
+
+
+		auto camera = this->getCamera();
 
 		mButtonState = QButtonState::QBUTTON_UP;
 
@@ -215,7 +239,7 @@ namespace dyno
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
 	{
-		auto camera = mApp->getCamera();
+		auto camera = this->getCamera();
 
 		if (event->buttons().testFlag(Qt::LeftButton) &&
 			mButtonState == QBUTTON_DOWN &&
@@ -253,7 +277,7 @@ namespace dyno
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
 		if(!mImWindow.cameraLocked())
-			mApp->getCamera()->zoom(-0.001*event->angleDelta().x());
+			this->getCamera()->zoom(-0.001*event->angleDelta().x());
 
 		update();
 	}

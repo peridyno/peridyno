@@ -4,18 +4,20 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "imgui_extend.h"
 #include "picture.h"
 #include "imGuIZMO.quat/imGuIZMOquat.h"
 //dyno
 #include "Action.h"
-#include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 
 //ImWidgets
 #include "ImWidget.h"
 
-#include <Rendering.h>
-#include <AppBase.h>
+#include <RenderEngine.h>
+#include <RenderWindow.h>
 
 #include "OrbitCamera.h"
 #include "TrackballCamera.h"
@@ -23,6 +25,8 @@
 #include "imgui.h"
 
 #include "ImGuizmo.h"
+
+#include <Node/ParametricModel.h>
 
 using namespace dyno;
 
@@ -55,17 +59,26 @@ void dyno::ImWindow::initialize(float scale)
 	ImGui::initColorVal();
 }
 
-void ShowMenuFile(AppBase* app, SceneGraph* scene, bool* mDisenableCamera)
+void ShowMenuFile(RenderWindow* app, SceneGraph* scene, bool* mDisenableCamera)
 {
 
 }
 
 
-void dyno::ImWindow::draw(AppBase* app)
+void ImWindow::draw(RenderWindow* app)
 {
 	auto engine = app->getRenderEngine();
-	auto scene  = app->getSceneGraph();
+	auto scene  = SceneGraphFactory::instance()->active();
+	auto camera = app->getCamera();
+
 	auto& rparams = app->getRenderParams();
+
+	ImGuiIO& io = ImGui::GetIO();
+
+
+	// Initialize ImGuizmo frame
+	ImGuizmo::BeginFrame();
+	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 	
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
@@ -73,28 +86,20 @@ void dyno::ImWindow::draw(AppBase* app)
 		{
 
 			if (ImGui::BeginMenu("Camera")) {
-				auto cam = app->getCamera();
-				int width = cam->viewportWidth();
-				int height = cam->viewportHeight();
 				if (ImGui::BeginMenu("Use Camera.."))
 				{
 					if (ImGui::MenuItem("Orbit", "")) {
 						auto oc = std::make_shared<OrbitCamera>();
-						oc->setWidth(width);
-						oc->setHeight(height);
-
+						oc->setWidth(camera->viewportWidth());
+						oc->setHeight(camera->viewportHeight());
 						oc->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
-
 						app->setCamera(oc);
 					}
 					if (ImGui::MenuItem("Trackball", "")) {
 						auto tc = std::make_shared<TrackballCamera>();
-
-						tc->setWidth(width);
-						tc->setHeight(height);
-
+						tc->setWidth(camera->viewportWidth());
+						tc->setHeight(camera->viewportHeight());
 						tc->setEyePos(Vec3f(1.5f, 1.0f, 1.5f));
-
 						app->setCamera(tc);
 					}
 					ImGui::EndMenu();
@@ -102,42 +107,42 @@ void dyno::ImWindow::draw(AppBase* app)
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Perspective", "")) {
-					cam->setProjectionType(Camera::Perspective);
+					camera->setProjectionType(Camera::Perspective);
 
 				}
 				if (ImGui::MenuItem("Orthogonal", "")) {
-					cam->setProjectionType(Camera::Orthogonal);
+					camera->setProjectionType(Camera::Orthogonal);
 				}
 
 				ImGui::Separator();
-				Vec3f tarPos = cam->getTargetPos();
-				Vec3f eyePos = cam->getEyePos();
-				float Distance = (tarPos - eyePos).norm();
+				Vec3f tarPos = camera->getTargetPos();
+				Vec3f eyePos = camera->getEyePos();
+				float distance = (tarPos - eyePos).norm();
 
 				if (ImGui::MenuItem("Top", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y + Distance, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y + distance, tarPos.z));
 				}
 
 				if (ImGui::MenuItem("Bottom", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y - Distance, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y - distance, tarPos.z));
 				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Left", "")) {
-					cam->setEyePos(Vec3f(tarPos.x - Distance, tarPos.y, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x - distance, tarPos.y, tarPos.z));
 				}
 
 				if (ImGui::MenuItem("Right", "")) {
-					cam->setEyePos(Vec3f(tarPos.x + Distance, tarPos.y, tarPos.z));
+					camera->setEyePos(Vec3f(tarPos.x + distance, tarPos.y, tarPos.z));
 				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Front", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z + Distance));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z + distance));
 				}
 
 				if (ImGui::MenuItem("Back", "")) {
-					cam->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - Distance));
+					camera->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - distance));
 				}
 
 				ImGui::Separator();
@@ -149,23 +154,23 @@ void dyno::ImWindow::draw(AppBase* app)
 						float len = box.maxLength();
 						Vec3f center = 0.5f * (box.upper + box.lower);
 
-						Vec3f eyePos = cam->getEyePos();
-						Vec3f tarPos = cam->getTargetPos();
+						Vec3f eyePos = camera->getEyePos();
+						Vec3f tarPos = camera->getTargetPos();
 						Vec3f dir = eyePos - tarPos;
 						dir.normalize();
 
-						cam->setEyePos(center + len * dir);
-						cam->setTargetPos(center);
+						camera->setEyePos(center + len * dir);
+						camera->setTargetPos(center);
 
 						float unit = std::floor(std::log(len));
-						cam->setDistanceUnit(std::pow(10.0f, (float)unit));
+						camera->setUnitScale(std::pow(10.0f, (float)unit));
 					}
 
 				}
 
-				float distanceUnit = cam->distanceUnit();
+				float distanceUnit = camera->unitScale();
 				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
-					cam->setDistanceUnit(distanceUnit);
+					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
 			}
@@ -197,8 +202,9 @@ void dyno::ImWindow::draw(AppBase* app)
 				// Light Direction
 				ImGui::Text("Main Light Direction");
 
-				glm::mat4 inverse_view = glm::transpose(rparams.view);// view R^-1 = R^T
-				glm::vec3 tmpLightDir = glm::vec3(rparams.view * glm::vec4(iLight.mainLightDirection, 0));
+				glm::mat4 view = camera->getViewMat();
+				glm::mat4 inverse_view = glm::transpose(view);// view R^-1 = R^T
+				glm::vec3 tmpLightDir = glm::vec3(view * glm::vec4(iLight.mainLightDirection, 0));
 				vec3 vL(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
 
 				ImGui::beginTitle("Light dir");
@@ -235,7 +241,7 @@ void dyno::ImWindow::draw(AppBase* app)
 				ImGui::Checkbox("Lock Camera", &mDisenableCamera);
 				ImGui::Spacing();
 
-				ImGui::Checkbox("Show Axis", &(rparams.showAxisHelper));
+				ImGui::Checkbox("Show View Manipulator", &mViewManipulator);
 				ImGui::Spacing();
 
 				ImGui::Checkbox("Show Background", &(rparams.showGround));
@@ -272,6 +278,20 @@ void dyno::ImWindow::draw(AppBase* app)
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Edit", "")) {
+
+				if (ImGui::RadioButton("Translate", mEditMode == 0))
+					mEditMode = 0;
+
+				if (ImGui::RadioButton("Scale", mEditMode == 1))
+					mEditMode = 1;
+
+				if (ImGui::RadioButton("Rotate", mEditMode == 2))
+					mEditMode = 2;				
+
+				ImGui::EndMenu();
+			}
+
 
 			ImGui::EndMainMenuBar();
 		}
@@ -281,7 +301,8 @@ void dyno::ImWindow::draw(AppBase* app)
 			std::string rEngineName = engine->name();
 			ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 			ImGui::Text("Rendered by %s: %.1f FPS", rEngineName.c_str(), ImGui::GetIO().Framerate);
-			ImGui::SetWindowPos(ImVec2(rparams.viewport.w - ImGui::GetWindowSize().x, rparams.viewport.h - ImGui::GetWindowSize().y));
+
+			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, io.DisplaySize.y - ImGui::GetWindowSize().y));
 			ImGui::End();
 		}
 
@@ -304,6 +325,16 @@ void dyno::ImWindow::draw(AppBase* app)
 		*/
 	}
 	
+	// draw a rect for selection area 
+	drawSelectedRegion();
+
+	// current active node
+	drawNodeManipulator(app->currNode, camera->getViewMat(), camera->getProjMat());
+
+	// view manipulator
+	if(mViewManipulator)
+		drawViewManipulator(camera.get());
+	
 	// Draw custom widgets
 	// gather visual modules
 	WidgetQueue imWidgetQueue;
@@ -318,38 +349,28 @@ void dyno::ImWindow::draw(AppBase* app)
 		widget->update();
 		widget->paint();
 	}
-
-	drawSelectedRegion();
 }
 
 void ImWindow::mouseMoveEvent(const PMouseEvent& event)
 {
 	mCurX = event.x;
 	mCurY = event.y;
-
-	mDrawingBox = true;
 }
 
 void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
 {
-	mRegX = -1;
-	mRegY = -1;
-
-	mCurX = -1;
-	mCurY = -1;
-
+	// reset mouse status
+	mCurX = mRegX = -1;
+	mCurY = mRegY = -1;
 	mButtonType = BT_UNKOWN;
 	mButtonAction = AT_UNKOWN;
 	mButtonMode = MB_NO_MODIFIER;
-
-	mDrawingBox = false;
 }
 
 void ImWindow::mousePressEvent(const PMouseEvent& event)
 {
-	mRegX = event.x;
-	mRegY = event.y;
-
+	mCurX = mRegX = event.x;
+	mCurY = mRegY = event.y;
 	mButtonAction = event.actionType;
 	mButtonType = event.buttonType;
 	mButtonMode = event.mods;
@@ -357,10 +378,9 @@ void ImWindow::mousePressEvent(const PMouseEvent& event)
 
 void ImWindow::drawSelectedRegion()
 {
-	if (mDrawingBox &&
-		mButtonType == BT_LEFT &&
+	if (mButtonType == BT_LEFT &&
 		mButtonAction == AT_PRESS &&
-		mButtonMode != MB_ALT &&
+		mButtonMode == MB_SHIFT &&
 		!ImGuizmo::IsUsing() &&
 		!ImGui::GetIO().WantCaptureMouse) {
 
@@ -374,6 +394,91 @@ void ImWindow::drawSelectedRegion()
 			// border
 			ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
 		}
+	}
+}
+
+void dyno::ImWindow::drawNodeManipulator(Node* n, glm::mat4 view, glm::mat4 proj)
+{
+	// TODO: type conversion...
+	auto* node = dynamic_cast<ParametricModel<DataType3f>*>(n);
+
+	// TODO: parameterized operation
+	auto nodeOp = ImGuizmo::TRANSLATE;
+
+	switch (mEditMode) {
+	case 0:
+		nodeOp = ImGuizmo::TRANSLATE;
+		break;
+	case 1:
+		nodeOp = ImGuizmo::SCALE;
+		break;
+	case 2:
+		nodeOp = ImGuizmo::ROTATE;
+		break;
+	default:
+		break;
+	}
+
+	if (node != 0) {
+		float m[16];
+		// build transform matrix
+		{
+			auto t = node->varLocation()->getData();
+			auto s = node->varScale()->getData();
+			auto r = node->varRotation()->getData();			
+			ImGuizmo::RecomposeMatrixFromComponents(t.getDataPtr(), r.getDataPtr(), s.getDataPtr(), m);
+		}
+
+		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, m, NULL, NULL, NULL, NULL))
+		{
+			float t[3], s[3], r[3];
+			ImGuizmo::DecomposeMatrixToComponents(m, t, r, s);
+			// apply
+			if (nodeOp == ImGuizmo::TRANSLATE) 
+				node->varLocation()->setValue(Vec3f(t[0], t[1], t[2]));
+			if (nodeOp == ImGuizmo::SCALE) 
+				node->varScale()->setValue(Vec3f(s[0], s[1], s[2]));
+			if (nodeOp == ImGuizmo::ROTATE) 
+				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
+
+			// notify the update of node?
+			node->update();
+		}
+	}
+}
+
+void dyno::ImWindow::drawViewManipulator(Camera* camera)
+{
+	glm::mat4 view = camera->getViewMat();
+	glm::mat4 view0 = view;
+	float dist = (camera->getEyePos() - camera->getTargetPos()).norm();
+
+	ImGuizmo::ViewManipulate(&view[0][0], dist, 
+		ImVec2(0, camera->viewportHeight() - 100), 
+		ImVec2(100, 100),
+		0);
+
+	// if nothing changes
+	if (view == view0) return;
+
+	glm::mat4 invView = glm::inverse(view);
+	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1);	
+
+	// for trackball camera, also update up direction
+	TrackballCamera* cam = dynamic_cast<TrackballCamera*>(camera);
+	if (cam) {
+		glm::vec4 up = invView * glm::vec4(0, 1, 0, 0);
+		cam->mCameraUp = {up.x, up.y, up.z};
+
+		cam->setEyePos({ eye.x, eye.y, eye.z });
+	}
+	else
+	{
+		OrbitCamera* cam = dynamic_cast<OrbitCamera*>(camera);
+		// for orbit camera, simply set eye position...
+		cam->setEyePos({ eye.x, eye.y, eye.z });
+
+		// TODO: fix the problem when view along the rotation axis
 	}
 }
 

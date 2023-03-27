@@ -47,6 +47,11 @@ namespace dyno
 		auto callback3 = std::make_shared<FCallBackFunc>(std::bind(&PointPickerNode<TDataType>::changeMultiSelectionType, this));
 
 		this->varMultiSelectionType()->attach(callback3);
+
+		this->pointInteractor->outPointIndex()->allocate();
+
+		this->pointInteractor->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->pointInteractor->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 	}
 
 	template<typename TDataType>

@@ -2199,6 +2199,14 @@ QToolButton:pressed{
 	font-weight: bold;
 	color:#ffffff;
 }
+QToolButton:checked{
+	border: 1px solid black;
+	padding: 2px;
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(107, 107, 107, 255), stop:1 rgba(157, 157, 157, 255));
+	border-width:1px 1px 2px 1px;
+	font-weight: bold;
+	color:#aaaaaa;
+}
 QToolButton:disabled{
 	border-style: outset;
 	border-width: 2px;
@@ -2303,7 +2311,7 @@ QCheckBox::indicator:unchecked {
 /*---------------------------------------------------------------------------------*/
 
 
-/*-------------------------------------------------×é¼þ½çÃæ°´Å¥----------------------------------------------------*/
+/*-------------------------------------------------ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ°´Å¥----------------------------------------------------*/
 QPushButton#mAnimationButton QLabel, QPushButton#mRenderingButton QLabel{
 
 	background: transparent;

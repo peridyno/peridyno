@@ -24,13 +24,13 @@
 #include <QTimer>
 
 //#include <GL/glu.h>
-#include <Rendering.h>
+#include <RenderEngine.h>
+#include <RenderWindow.h>
 #include <ImWindow.h>
 
 namespace dyno
 {
 	class Node;
-	class QtApp;
 
 	enum QButtonState
 	{
@@ -45,14 +45,17 @@ namespace dyno
 		QBUTTON_UNKNOWN
 	};
 
-	class POpenGLWidget
+	class POpenGLWidget 
 		: public QOpenGLWidget
 		, private QOpenGLExtraFunctions
+		, public RenderWindow
 	{
 		Q_OBJECT
 	public:
-		POpenGLWidget(QtApp* app);
+		POpenGLWidget();
 		~POpenGLWidget();
+
+		void mainLoop() override {};
 
 	protected:
 		void initializeGL() override;		
@@ -71,9 +74,10 @@ namespace dyno
 
 	private:
 
-		QtApp* mApp;
-
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
+		int			 mCursorX = -1;
+		int			 mCursorY = -1;
+		
 		// Qt
 		QTimer timer;
 

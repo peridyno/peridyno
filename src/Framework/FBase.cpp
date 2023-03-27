@@ -6,6 +6,31 @@
 
 namespace dyno
 {
+	std::string FormatConnectionInfo(FBase* fin, FBase* fout, bool connecting, bool succeeded)
+	{
+		OBase* pIn = fin != nullptr ? fin->parent() : nullptr;
+		OBase* pOut = fout != nullptr ? fout->parent() : nullptr;
+
+		std::string capIn = pIn != nullptr ? pIn->caption() : "";
+		std::string capOut = pOut != nullptr ? pOut->caption() : "";
+
+		std::string nameIn = pIn != nullptr ? pIn->getName() : "";
+		std::string nameOut = pOut != nullptr ? pOut->getName() : "";
+
+		if (connecting) 
+		{
+			std::string message1 = capIn + ":" + nameIn + " is connected to " + capOut + ":" + nameOut;
+			std::string message2 = capIn + ":" + nameIn + " cannot be connected to " + capOut + ":" + nameOut;
+			return succeeded ? message1 : message2;
+		}
+		else
+		{
+			std::string message1 = capIn + ":" + nameIn + " is disconnected from " + capOut + ":" + nameOut;
+			std::string message2 = capIn + ":" + nameIn + " cannot be disconnected from " + capOut + ":" + nameOut;
+			return succeeded ? message1 : message2;
+		}
+	}
+
 	void FBase::setParent(OBase* owner)
 	{
 		mOwner = owner;
@@ -85,7 +110,13 @@ namespace dyno
 
 //			f->setDerived(true);
 			f->setSource(this);
+
+			Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, true, true));
+
+			return;
 		}
+
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, true, false));
 	}
 
 	bool FBase::removeSink(FBase* f)
@@ -99,8 +130,13 @@ namespace dyno
 //			f->setDerived(false);
 			f->setSource(nullptr);
 
+			Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, false, true));
+
 			return true;
 		}
+
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, false, false));
+
 		return false;
 	}
 
@@ -178,6 +214,19 @@ namespace dyno
 		func->addInput(this);
 
 		mCallbackFunc.push_back(func);
+	}
+
+	void FBase::detach(std::shared_ptr<FCallBackFunc> func)
+	{
+		if (func == nullptr)
+			return;
+
+		auto it = std::find(mCallbackFunc.begin(), mCallbackFunc.end(), func);
+
+		if (it != mCallbackFunc.end())
+		{
+			mCallbackFunc.erase(it);
+		}
 	}
 
 	bool FBase::isModified()

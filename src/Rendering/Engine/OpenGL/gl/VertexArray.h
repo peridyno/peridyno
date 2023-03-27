@@ -22,6 +22,7 @@ namespace gl
 {
 	class VertexArray : public Object
 	{
+		GL_OBJECT(VertexArray)
 	public:
 		virtual void create() override;
 		virtual void release() override;

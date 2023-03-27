@@ -5,7 +5,11 @@
 #include <windows.h>
 #endif
 
-#include <cuda_runtime.h>
+#include "Platform.h"
+
+#ifdef CUDA_BACKEND
+	#include <cuda_runtime.h>
+#endif
 #include <iostream>
 
 namespace dyno 
@@ -27,6 +31,7 @@ namespace dyno
 #endif
 	};
 
+#ifdef CUDA_BACKEND
 	class GTimer
 	{
 	private:
@@ -41,8 +46,9 @@ namespace dyno
 		void start();
 		void stop();
 
-		float getEclipsedTime();
+		float getElapsedTime();
 
 		void outputString(char* str);
 	};
+#endif
 } //end of namespace dyno

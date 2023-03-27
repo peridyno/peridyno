@@ -63,7 +63,7 @@ namespace Qt
 
 		NodeValidationState validationState() const override;
 
-		QtNodeDataModel::ConnectionPolicy portInConnectionPolicy(PortIndex portIndex) const;
+		QtNodeDataModel::ConnectionPolicy portInConnectionPolicy(PortIndex portIndex) const override;
 
 		std::shared_ptr<Node> getNode();
 

@@ -1,6 +1,6 @@
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 #include <glm/glm.hpp>
-#include "Topology/Primitive3D.h"
+#include "Primitive/Primitive3D.h"
 
 namespace dyno
 {

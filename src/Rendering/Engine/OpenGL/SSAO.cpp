@@ -8,15 +8,7 @@ namespace dyno
 	SSAO::SSAO()
 	{
 		mWidth = mHeight = 0;
-	}
 
-	SSAO::~SSAO()
-	{
-
-	}
-
-	void SSAO::initialize()
-	{
 		// shader programs
 		mSSAOProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "ssao.frag");
 
@@ -63,6 +55,11 @@ namespace dyno
 		mSSAONoiseTex.load(4, 4, &ssaoNoise[0]);
 	}
 
+	SSAO::~SSAO()
+	{
+
+	}
+
 	void SSAO::resize(unsigned int w, unsigned int h)
 	{
 		if (w == mWidth && h == mHeight)
@@ -70,8 +67,6 @@ namespace dyno
 
 		mWidth = w;
 		mHeight = h;
-
-		// resize texture
 	}
 }
 

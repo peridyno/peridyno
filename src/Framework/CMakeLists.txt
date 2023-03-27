@@ -1,7 +1,6 @@
 ﻿set(LIB_NAME Framework)
 
-#set(LIB_SRC_DIR "${PROJECT_SOURCE_DIR}/src/${LIB_NAME}")
-file(                                                                           #利用glob命令读取所有源文件list
+file(
     GLOB_RECURSE LIB_SRC 
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
@@ -9,6 +8,8 @@ file(                                                                           
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 	"${CMAKE_CURRENT_SOURCE_DIR}/*.inl"
 )
+
+list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/tinyxml/tinyxml2.cpp")
 
 add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
@@ -25,15 +26,8 @@ if(WIN32)
     target_compile_options(${LIB_NAME} PRIVATE -Xcompiler "/wd 4819") 
 endif()
 
-file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
- 
-set_target_properties(${LIB_NAME} PROPERTIES
-    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
-set_target_properties(${LIB_NAME} PROPERTIES
-    CUDA_SEPARABLE_COMPILATION ON)
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
+add_compile_definitions(_ENABLE_EXTENDED_ALIGNED_STORAGE)
 
 if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES
@@ -47,6 +41,16 @@ elseif(UNIX)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
     endif()
 endif()
+
+file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+ 
+set_target_properties(${LIB_NAME} PROPERTIES
+    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
+set_target_properties(${LIB_NAME} PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON)
 
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files

@@ -41,8 +41,8 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC size_t size();
-		DYN_FUNC size_t count(MKey key);
+		DYN_FUNC uint size();
+		DYN_FUNC uint count(MKey key);
 
 		DYN_FUNC inline T& operator[] (MKey key);
 		DYN_FUNC inline const T& operator[] (MKey key) const;
@@ -51,10 +51,10 @@ namespace dyno
 		DYN_FUNC bool empty();
 
 	private:
-		size_t m_size = 0;
+		uint m_size = 0;
 
 		Pair<MKey, T>* m_startLoc = nullptr;
-		int m_maxSize = 0;
+		uint m_maxSize = 0;
 	};
 
 }

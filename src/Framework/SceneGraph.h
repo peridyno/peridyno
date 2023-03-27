@@ -203,7 +203,7 @@ namespace dyno
 			, mFrameNumber(0)
 			, mFrameCost(0)
 			, mInitialized(false)
-			, mLowerBound(0, 0, 0)
+			, mLowerBound(-1, -1, -1)
 			, mUpperBound(1, 1, 1)
 		{
 			//mRoot = std::make_shared<Node>();
@@ -245,9 +245,10 @@ namespace dyno
 		bool mModuleTiming = false;
 
 		/**
-		 * A  lock to avoid write conflicts between simulation and rendering
+		 * A  lock to guarantee consistency across threads
 		 */
 		std::mutex mSync;
+
 	};
 
 }

@@ -23,19 +23,20 @@
 #include "gl/Mesh.h"
 
 #include <vector>
-#include <Rendering.h>
+#include <RenderEngine.h>
 
 namespace dyno
 {
+	class Camera;
 	class SceneGraph;
+
 	class ShadowMap
 	{
 	public:
 		ShadowMap(int w = 1024, int h = 1024);
 		~ShadowMap();
 
-		void initialize();
-		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+		void update(dyno::SceneGraph* scene, Camera* camera, const dyno::RenderParams& rparams);
 
 	private:
 		// framebuffers
@@ -44,8 +45,8 @@ namespace dyno
 		gl::Texture2D		mShadowDepth;
 		gl::Texture2D		mShadowBlur;
 
-		gl::Program			mBlurProgram;
-		gl::Mesh			mQuad;
+		gl::Program*		mBlurProgram;
+		gl::Mesh*			mQuad;
 
 
 		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices

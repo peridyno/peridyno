@@ -20,22 +20,24 @@
 
 namespace gl
 {
+	// basic triangle mesh object
 	class Mesh : public VertexArray
 	{
+		GL_OBJECT(Mesh)
 	public:
 		virtual void create() override;
 		virtual void release() override;
-
 		virtual void draw(int instance = 0);
 
 	public:
-		static Mesh Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
-		static Mesh ScreenQuad();
-		static Mesh Plane(float scale);
+		// static methods to create common mesh object
+		static Mesh* Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
+		static Mesh* ScreenQuad();
+		static Mesh* Plane(float scale);
 
 	private:
-		Buffer	mVertexBuffer;
-		Buffer	mIndexBuffer;
-		int		mDrawCount;
+		Buffer	vbo;
+		Buffer	ibo;
+		int		count;
 	};
 }

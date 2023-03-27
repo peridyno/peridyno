@@ -27,7 +27,6 @@ namespace dyno
 		FXAA();
 		~FXAA();
 
-		void initialize();
 		void apply(int width, int height);
 
 	public:
@@ -40,7 +39,7 @@ namespace dyno
 
 	private:
 
-		gl::Program		mShaderProgram;
-		gl::Mesh		mScreenQuad;
+		gl::Program*	mShaderProgram;
+		gl::Mesh*		mScreenQuad = 0;
 	};
 }

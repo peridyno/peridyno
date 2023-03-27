@@ -28,6 +28,5 @@ namespace dyno
 		virtual ~VirtualModule();
 
 		std::string getModuleType() override { return "VirtualModule"; }
-
 	};
 }

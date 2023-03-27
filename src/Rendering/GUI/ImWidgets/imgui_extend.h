@@ -51,8 +51,11 @@ namespace ImGui
     std::shared_ptr<ImU32[]>  ToImU<dyno::Vec3f*>(dyno::Vec3f* v, int size);
     template<>
     std::shared_ptr<ImU32[]>  ToImU<const dyno::Vec3f*>(const dyno::Vec3f* v, int size);
+
+#ifdef CUDA_BACKEND
     template<>
     std::shared_ptr<ImU32[]>  ToImU<dyno::DArray<dyno::Vec3f>>(dyno::DArray<dyno::Vec3f> v, int size);
+#endif
 
 // 	template<>
 // 	bool    ColorBar<std::shared_ptr<ImU32[]>>(char* label, float* values, std::shared_ptr<ImU32[]>* col, int length);

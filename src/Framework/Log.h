@@ -110,4 +110,9 @@ namespace dyno {
 	#define LogDebug(DESC) Log::sendMessage(Log::DebugInfo, DESC)
 #endif
 
+#ifdef __ANDROID__
+#define LOG_DEBUG(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "PhysicsEngine", __VA_ARGS__))
+#else
+#define LOG_DEBUG(...) printf(__VA_ARGS__)
+#endif
 }

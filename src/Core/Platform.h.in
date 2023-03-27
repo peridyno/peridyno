@@ -25,9 +25,9 @@
 #define PERIDYNO_API PERIDYNO_IMPORT
 #endif
 
-#define PERIDYNO_COMPILER_CUDA
+#define ${GPU_BACKEND}
 
-#if(defined(PERIDYNO_COMPILER_CUDA))
+#if(defined(CUDA_BACKEND))
 #include <cuda_runtime.h>
 #	define DYN_FUNC __device__ __host__ 
 #	define GPU_FUNC __device__ 
@@ -49,7 +49,13 @@ enum DeviceType
 
 #include "Typedef.inl"
 const inline std::string getAssetPath() {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	return "";
+#elif defined(VK_EXAMPLE_DATA_DIR)
+	return VK_EXAMPLE_DATA_DIR;
+#else
 	return "${PERIDYNO_ASSET_PATH}/";
+#endif
 }
 
 const inline std::string getPluginPath() {

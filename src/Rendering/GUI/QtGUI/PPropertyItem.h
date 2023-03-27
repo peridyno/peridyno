@@ -22,12 +22,18 @@
 #include <QLineEdit>
 #include <QDoubleSpinBox>
 
+#include <memory>
+
+#include "FCallbackFunc.h"
+
 namespace dyno
 {
 	class Node;
 	class Module;
 	class FBase;
+
 	class QDoubleSpinner;
+	class QDoubleSlider;
 
 	class QBoolFieldWidget : public QGroupBox
 	{
@@ -85,7 +91,7 @@ namespace dyno
 		Q_OBJECT
 	public:
 		QRealFieldWidget(FBase* field);
-		~QRealFieldWidget() {};
+		~QRealFieldWidget();
 
 	Q_SIGNALS:
 		void fieldChanged();
@@ -94,7 +100,13 @@ namespace dyno
 		void changeValue(double);
 
 	private:
+		void fieldUpdated();
+
 		FBase* mField = nullptr;
+
+		QDoubleSlider* slider = nullptr;
+
+		std::shared_ptr<FCallBackFunc> callback = nullptr;
 	};
 
 
@@ -115,7 +127,7 @@ namespace dyno
 		Q_OBJECT
 	public:
 		QVector3FieldWidget(FBase* field);
-		~QVector3FieldWidget() {};
+		~QVector3FieldWidget();
 
 	Q_SIGNALS:
 		void fieldChanged();
@@ -124,11 +136,15 @@ namespace dyno
 		void changeValue(double);
 
 	private:
+		void fieldUpdated();
+
 		FBase* mField = nullptr;
 
 		mDoubleSpinBox* spinner1;
 		mDoubleSpinBox* spinner2;
 		mDoubleSpinBox* spinner3;
+
+		std::shared_ptr<FCallBackFunc> callback = nullptr;
 	};
 
 	class QVector3iFieldWidget : public QGroupBox
@@ -136,7 +152,7 @@ namespace dyno
 		Q_OBJECT
 	public:
 		QVector3iFieldWidget(FBase* field);
-		~QVector3iFieldWidget() {};
+		~QVector3iFieldWidget();
 
 	Q_SIGNALS:
 		void fieldChanged();
@@ -145,11 +161,15 @@ namespace dyno
 		void changeValue(int);
 
 	private:
+		void fieldUpdated();
+
 		FBase* mField = nullptr;
 
 		QSpinBox* spinner1;
 		QSpinBox* spinner2;
 		QSpinBox* spinner3;
+
+		std::shared_ptr<FCallBackFunc> callback = nullptr;
 	};
 
 	class QStringFieldWidget : public QGroupBox

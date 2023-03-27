@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/mat3x3.hpp>
+#include "Vector.h"
 #include "SquareMatrix.h"
 
 namespace dyno {
@@ -74,7 +75,7 @@ namespace dyno {
 		DYN_FUNC T* getDataPtr() { return &data_[0].x; }
 
 	protected:
-		glm::tmat3x3<T> data_; //default: zero matrix
+		Vector<T, 3> data_[3]; //default: zero matrix
 	};
 
 	//make * operator commutative
