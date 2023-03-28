@@ -11,7 +11,7 @@
 
 namespace dyno
 {
-	//typedef typename TSphere3D<Real> Sphere3D;
+	//typedef  TSphere3D<Real> Sphere3D;
 	typedef TOrientedBox3D<Real> Box3D;
 
 	IMPLEMENT_CLASS(GLElementVisualModule)

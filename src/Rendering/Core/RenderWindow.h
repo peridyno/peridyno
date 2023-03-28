@@ -25,7 +25,7 @@ namespace dyno
 	class RenderWindow
 	{
 	public:
-		RenderWindow::RenderWindow()
+		RenderWindow()
 		{
 			// create a default camera
 			mCamera = std::make_shared<OrbitCamera>();

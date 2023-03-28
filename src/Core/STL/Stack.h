@@ -22,11 +22,11 @@ namespace dyno
 		//DYN_FUNC iterator find(T val);
 
 		DYN_FUNC inline iterator begin() {
-			return m_startLoc;
+			return ::dyno::STLBuffer<T>::m_startLoc;
 		};
 
 		DYN_FUNC inline iterator end(){
-			return m_startLoc + m_size;
+			return ::dyno::STLBuffer<T>::m_startLoc + m_size;
 		}
 
 		DYN_FUNC void clear();
