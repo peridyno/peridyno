@@ -30,20 +30,32 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
+
+		DECLARE_ENUM(SphereMode,
+			Theta = 0,
+			RowAndColumns = 1);
+
+
 		SphereModel();
 
 	public:
 		DEF_VAR(Coord, Center, 0, "Sphere center");
 
-		DEF_VAR(Real, Radius, 0.2, "Sphere radius");
+		DEF_VAR(Real, Radius, 1, "Sphere radius");
 
 		//DEF_VAR(Real, triangleLength, 0.5, "Length of triangle edge");
+
+		DEF_ENUM(SphereMode, SphereMode, SphereMode::RowAndColumns, "ScaleMode");
 
 		DEF_VAR(Real, Theta, 0.3, "Angle");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
+
+		DEF_VAR(unsigned, Columns, 50, "Sphere Columns");
+
+		DEF_VAR(unsigned, Row, 50, "Sphere Row");
 
 		void disableRender();
 
