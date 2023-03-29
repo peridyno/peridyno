@@ -451,7 +451,7 @@ void dyno::ImWindow::drawViewManipulator(Camera* camera)
 {
 	glm::mat4 view = camera->getViewMat();
 	glm::mat4 view0 = view;
-	float dist = (camera->getEyePos() - camera->getTargetPos()).norm();
+	float dist = (camera->getEyePos() - camera->getTargetPos()).norm() * camera->unitScale();
 
 	ImGuizmo::ViewManipulate(&view[0][0], dist, 
 		ImVec2(0, camera->viewportHeight() - 100), 
@@ -462,7 +462,7 @@ void dyno::ImWindow::drawViewManipulator(Camera* camera)
 	if (view == view0) return;
 
 	glm::mat4 invView = glm::inverse(view);
-	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1);	
+	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1) / camera->unitScale();
 
 	// for trackball camera, also update up direction
 	TrackballCamera* cam = dynamic_cast<TrackballCamera*>(camera);
