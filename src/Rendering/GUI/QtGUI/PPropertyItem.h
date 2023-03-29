@@ -133,6 +133,10 @@ namespace dyno
 		QDoubleSpinBox* DSB1;
 		QDoubleSpinBox* DSB2;
 		QDoubleSpinBox* DSB3;
+
+		QSpinBox* SB1;
+		QSpinBox* SB2;
+		QSpinBox* SB3;
 		bool shiftPress = 0;
 
 	Q_SIGNALS:
@@ -169,6 +173,10 @@ namespace dyno
 		QDoubleSpinBox* SpinBox1;
 		QDoubleSpinBox* SpinBox2;
 		QDoubleSpinBox* SpinBox3;
+
+		QSpinBox* SBox1;
+		QSpinBox* SBox2;
+		QSpinBox* SBox3;
 
 	Q_SIGNALS:
 		void DiaValueChange(double);
