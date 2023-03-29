@@ -772,7 +772,12 @@ namespace dyno
 		for (int i = 0; i < 5; i++)
 		{
 			button[i]->SpinBoxData = v;
+
+			button[i]->Data1 = SpinBox1->value();
+			button[i]->Data2 = SpinBox2->value();
+			button[i]->Data3 = SpinBox3->value();
 		}
+
 	}
 
 	void ValueDialog::mouseMoveEvent(QMouseEvent* event)
@@ -825,7 +830,7 @@ namespace dyno
 		SpinBoxData = SpinBoxData + sub;
 
 		emit Release(SpinBoxData);
-		//parentDialog->close();
+
 	}
 
 }
