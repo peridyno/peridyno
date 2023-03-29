@@ -129,6 +129,7 @@ public:
 	virtual void update();
 
 	void attach(std::shared_ptr<FCallBackFunc> func);
+	void detach(std::shared_ptr<FCallBackFunc> func);
 
 protected:
 	void setSource(FBase* source);

@@ -180,6 +180,16 @@ namespace dyno
 		mCallbackFunc.push_back(func);
 	}
 
+	void FBase::detach(std::shared_ptr<FCallBackFunc> func)
+	{
+		auto it = std::find(mCallbackFunc.begin(), mCallbackFunc.end(), func);
+
+		if (it != mCallbackFunc.end())
+		{
+			mCallbackFunc.erase(it);
+		}
+	}
+
 	bool FBase::isModified()
 	{
 		FBase* topField = this->getTopField();
