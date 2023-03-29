@@ -578,11 +578,9 @@ namespace dyno
 		name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 		layout->addWidget(name, 0);
-		layout->addStretch(1);
 
 		QComboBox* combox = new QComboBox;
-		combox->setFixedHeight(24);
-		combox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+		combox->setMaximumWidth(256);
 
 		auto& enums = f->getDataPtr()->enumMap();
 		int num = 0;
