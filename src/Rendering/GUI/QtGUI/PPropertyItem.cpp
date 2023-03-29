@@ -247,6 +247,44 @@ namespace dyno
 		
 	}
 
+	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event) 
+
+	{
+		QDoubleSpinBox::mousePressEvent(event);
+		if (event->button() == Qt::MidButton) {
+			
+			ValueModify = new ValueDialog(this->value());
+
+			connect(ValueModify, SIGNAL(DiaValueChange(double)), this, SLOT(ModifyValue(double)));
+		}
+
+		
+	}
+
+	void mDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
+	{
+		QDoubleSpinBox::mouseReleaseEvent(event);
+		if (event->button() == Qt::MidButton) {
+			//ValueModify->hide();
+			if (!ValueModify->isEnabled())
+			{
+			}
+		}
+
+	}
+
+	void mDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)
+	{
+		QDoubleSpinBox::mouseMoveEvent(event);
+
+	}
+
+	void mDoubleSpinBox::ModifyValue(double v)
+	{
+
+		this->setValue(v);
+	}
+
 	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
 		: QGroupBox()
 	{
@@ -311,6 +349,7 @@ namespace dyno
 		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
+
 	}
 
 
@@ -619,5 +658,91 @@ namespace dyno
 		//To notify the field is updated
 		f->update();
 	}
+
+
+	ValueDialog::ValueDialog(double Data,QWidget* parent) :
+		QDialog(parent)
+	{
+		//¹¹½¨²Ëµ¥
+		QVBoxLayout* VLayout = new QVBoxLayout;
+		float power = 0.1;
+
+		for (int i = 0; i < 5; i++)
+		{
+			button[i] = new ValueButton;
+
+			power *= 0.1;
+			
+			std::string s = std::to_string(power * 1000);
+			QString text = QString::fromStdString(s);
+
+			button[i]->setText(text);
+			button[i]->setFixedWidth(200);
+			button[i]->setFixedHeight(40);
+			button[i]->adjustSize();
+			//button[i]->setAlignment(Qt::AlignHCenter| Qt::AlignVCenter);
+			button[i]->setStyleSheet("QLabel{color:white;background-color:#346792;border: 1px solid #000000;border-radius:3px; padding: 0px;}");
+
+			button[i]->defaultValue = power * 1000;
+			button[i]->SpinBoxData = Data;
+
+			VLayout->addWidget(button[i]);
+
+			connect(button[i],SIGNAL(ValueChange(double)), this, SLOT(ModifyValue(double)));
+		}
+		VLayout->setSpacing(0);
+
+		this->setLayout(VLayout);
+		//this->setWindowFlags( Qt::ToolTip);
+		this->move(QCursor().pos().x() - button[1]->rect().width() / 2, QCursor().pos().y() - button[1]->rect().height() * 5 / 2 - 5);
+
+		this->setMouseTracking(true);
+		this->hasMouseTracking();
+		this->setAttribute(Qt::WA_Hover, true);
+
+		this->show();
+		
+	}
+	void ValueDialog::ModifyValue(double v) 
+	{
+		emit DiaValueChange(v);
+
+	}
+	void ValueDialog::mouseMoveEvent(QMouseEvent* event)
+	{
+
+	}
+
+	void ValueButton::mouseMoveEvent(QMouseEvent* event)
+	{
+		EndX = QCursor().pos().x();
+		temp = (EndX - StartX) / 10;
+		sub = defaultValue * temp;
+
+		str = std::to_string(sub);
+		text = QString::fromStdString(str);
+		this->setText(text);
+		emit ValueChange(SpinBoxData + sub);
+				
+	}
+
+	ValueButton::ValueButton(QWidget* parent) :
+		QPushButton(parent) 
+	{
+		
+	}
+
+	void ValueButton::mousePressEvent(QMouseEvent* event)
+	{
+		StartX = QCursor().pos().x();
+	}
+	void ValueButton::mouseReleaseEvent(QMouseEvent* event)
+	{
+		str = std::to_string(defaultValue);
+		text = QString::fromStdString(str);
+		this->setText(text);
+		SpinBoxData = SpinBoxData + sub;
+	}
+	
 
 }

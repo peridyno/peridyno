@@ -21,6 +21,11 @@
 
 #include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QMouseEvent>
+#include <QDialog>
+#include <QLabel>
+#include "qgraphicsitem.h"
+#include <QPushButton>
 
 namespace dyno
 {
@@ -97,17 +102,85 @@ namespace dyno
 		FBase* mField = nullptr;
 	};
 
+	class ValueButton : public QPushButton
+	{
+		Q_OBJECT
+
+	public:
+		explicit ValueButton(QWidget* parent = nullptr);
+
+		void mouseMoveEvent(QMouseEvent* event) override;
+
+		void mousePressEvent(QMouseEvent* event) override;
+
+		void mouseReleaseEvent(QMouseEvent* event) override;
+
+		double SpinBoxData = 0;
+		double defaultValue = 0;
+		double finalValue = 0;
+		int StartX = 0;
+		int EndX = 0;
+
+	Q_SIGNALS:
+		void ValueChange(double);
+
+	private:
+		double sub = 0;
+		int temp = 0;
+		std::string str;
+		QString text;
+	};
+
+
+	class ValueDialog : public QDialog 
+	{
+		Q_OBJECT
+
+	public:
+		explicit ValueDialog(QWidget* parent = nullptr);
+
+		ValueDialog(double Data,QWidget* parent = nullptr);
+
+		void mouseMoveEvent(QMouseEvent* event) override;
+
+		ValueButton* button[5];
+
+	Q_SIGNALS:
+		void DiaValueChange(double);
+
+
+	public slots:
+		void ModifyValue(double);
+
+
+
+	private:
+
+	};
 
 	class mDoubleSpinBox : public QDoubleSpinBox
 	{
 		Q_OBJECT
 	public:
 		explicit mDoubleSpinBox(QWidget* parent = nullptr);
+
+		ValueDialog* ValueModify;
+
+		bool ModifyByDialog;
+
 	private:
 		//Prohibited to use
 		void wheelEvent(QWheelEvent* event);
+
+		void mousePressEvent(QMouseEvent* event) override;
+
+		void mouseReleaseEvent(QMouseEvent* event) override;
+
+		void mouseMoveEvent(QMouseEvent* event) override;
+		
 	signals:
 	public slots:
+		void ModifyValue(double);
 	};
 
 	class QVector3FieldWidget : public QGroupBox
@@ -222,4 +295,8 @@ namespace dyno
 	private:
 		FBase* mField = nullptr;
 	};
+
+
+
+
 }
