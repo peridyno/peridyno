@@ -50,6 +50,9 @@ namespace dyno
 
 		DEF_INSTANCE_IN(PointSet<TDataType>,PointSet,"")
 
+		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
+
+
 		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
 		void disableRender();

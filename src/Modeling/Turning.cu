@@ -322,6 +322,22 @@ namespace dyno
 		}
 
 
+
+		if (this->varReverseNormal()->getData() == true)
+		{
+			int trinum = triangle.size();
+			for (int i = 0; i < trinum; i++)
+			{
+				int temp;
+				temp = triangle[i][0];
+				triangle[i][0] = triangle[i][2];
+				triangle[i][2] = temp;
+			}
+		}
+
+
+
+
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
