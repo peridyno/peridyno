@@ -263,14 +263,6 @@ namespace dyno
 
 	void mDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
 	{
-		QDoubleSpinBox::mouseReleaseEvent(event);
-		if (event->button() == Qt::MidButton) {
-			//ValueModify->hide();
-			if (!ValueModify->isEnabled())
-			{
-			}
-		}
-
 	}
 
 	void mDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)
@@ -685,7 +677,7 @@ namespace dyno
 
 			button[i]->defaultValue = power * 1000;
 			button[i]->SpinBoxData = Data;
-
+			button[i]->parentDialog = this;
 			VLayout->addWidget(button[i]);
 
 			connect(button[i],SIGNAL(ValueChange(double)), this, SLOT(ModifyValue(double)));
@@ -705,6 +697,10 @@ namespace dyno
 
 		this->show();
 		
+	}
+	void ValueDialog::mouseReleaseEvent(QMouseEvent* event) 
+	{
+		this->close();
 	}
 
 	void ValueDialog::ModifyValue(double v) 
@@ -756,7 +752,7 @@ namespace dyno
 		SpinBoxData = SpinBoxData + sub;
 
 		emit Release(SpinBoxData);
-
+		parentDialog->close();
 	}
 
 	

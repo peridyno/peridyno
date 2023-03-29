@@ -120,6 +120,7 @@ namespace dyno
 		double finalValue = 0;
 		int StartX = 0;
 		int EndX = 0;
+		QDialog* parentDialog;
 
 	Q_SIGNALS:
 		void ValueChange(double);
@@ -144,6 +145,8 @@ namespace dyno
 		ValueDialog(double Data,QWidget* parent = nullptr);
 
 		void mouseMoveEvent(QMouseEvent* event) override;
+
+		void mouseReleaseEvent(QMouseEvent* event) override;
 
 		ValueButton* button[5];
 
