@@ -295,26 +295,26 @@ namespace dyno
 
 						if ((i + 1) % columns == 0)
 						{
-							triangle.push_back(TopologyModule::Triangle(i + temp, i - (columns - 1) + temp, i - (columns - 1) + columns + temp));
-							triangle.push_back(TopologyModule::Triangle(i - (columns - 1) + columns + temp, i + columns + temp, i + temp));
+							triangle.push_back(TopologyModule::Triangle(i - (columns - 1) + columns + temp, i - (columns - 1) + temp, i + temp));
+							triangle.push_back(TopologyModule::Triangle(i + temp, i + columns + temp, i + 1  + temp));
 							//std::cout << i + temp << "," << x * columns + temp << "," << (x + 1) * columns + temp << std::endl;
 
 						}
 						else
 						{
-							triangle.push_back(TopologyModule::Triangle(i + temp, i + 1 + temp, i + columns + temp));
-							triangle.push_back(TopologyModule::Triangle(i + 1 + temp, i + columns + 1 + temp, i + columns + temp));
+							triangle.push_back(TopologyModule::Triangle(i + columns + temp, i + 1 + temp, i + temp));
+							triangle.push_back(TopologyModule::Triangle(i + columns + temp, i + columns + 1 + temp, i + 1 + temp));
 						}
 						//¶ËÃæ
 						if (x == fortriNum - 1)
 						{
 							if ((i + 1) % columns != 0)
 							{
-								triangle.push_back(TopologyModule::Triangle(i + temp + columns, i + temp + columns + 1, vertices.size() - 1));
+								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, i + temp + columns + 1, i + temp + columns));
 							}
 							else
 							{
-								triangle.push_back(TopologyModule::Triangle(i + temp + columns, temp + columns, vertices.size() - 1));
+								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, temp + columns,i + temp + columns));
 							}
 						}
 					}
@@ -329,11 +329,11 @@ namespace dyno
 						{
 							if ((i + 1) % columns != 0)
 							{
-								triangle.push_back(TopologyModule::Triangle(i + temp + columns, i + temp + columns + 1, vertices.size() - 1));
+								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, i + temp + columns + 1, i + temp + columns));
 							}
 							else
 							{
-								triangle.push_back(TopologyModule::Triangle(i + temp + columns, temp + columns, vertices.size() - 1));
+								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, temp + columns, i + temp + columns));
 							}
 						}
 					}
@@ -345,13 +345,13 @@ namespace dyno
 						int temp = (fortriNum + 1) * columns;
 						if ((i + 1) % columns == 0) 
 						{
-							triangle.push_back(TopologyModule::Triangle(i, i - columns + 1, temp + i));
-							triangle.push_back(TopologyModule::Triangle(temp + i, i - columns + 1, temp + i - columns + 1));
+							triangle.push_back(TopologyModule::Triangle(temp + i, i - columns + 1, i));
+							triangle.push_back(TopologyModule::Triangle(temp + i - columns + 1, i - columns + 1, temp + i));
 						}
 						else 
 						{
-							triangle.push_back(TopologyModule::Triangle(i, i + 1, temp + i));
-							triangle.push_back(TopologyModule::Triangle(temp + i, i + 1, temp + 1 + i));
+							triangle.push_back(TopologyModule::Triangle(temp + i, i + 1, i));
+							triangle.push_back(TopologyModule::Triangle(temp + 1 + i, i + 1, temp + i));
 
 						}
 					}
@@ -363,23 +363,24 @@ namespace dyno
 
 			//±ä»»
 
-			//Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			//	* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			//	* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
 
-			//q.normalize();
+			Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+				* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+				* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
 
-			//auto RV = [&](const Coord& v)->Coord {
-			//	return center + q.rotate(v - center);
-			//};
+			q.normalize();
 
-			//int numpt = vertices.size();
+			auto RV = [&](const Coord& v)->Coord {
+				return center + q.rotate(v - center);
+			};
 
-			//for (int i = 0; i < numpt; i++)
-			//{
-			//	vertices[i][1] -= 1 * radius / 3;
-			//	vertices[i] = RV(vertices[i] * scale + RV(center));
-			//}
+			int numpt = vertices.size();
+
+			for (int i = 0; i < numpt; i++)
+			{
+
+				vertices[i] = RV(vertices[i] * scale + RV(center));
+			}
 
 
 		
