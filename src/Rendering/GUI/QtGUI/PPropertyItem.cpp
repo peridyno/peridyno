@@ -383,6 +383,7 @@ namespace dyno
 		QLabel* name = new QLabel();
 		name->setFixedSize(100, 18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
+		name->setWordWrap(true);
 
 		spinner1 = new QSpinBox;
 		spinner1->setMinimumWidth(30);
@@ -674,7 +675,7 @@ namespace dyno
 			button[i]->adjustSize();
 			//button[i]->setAlignment(Qt::AlignHCenter| Qt::AlignVCenter);
 			button[i]->setStyleSheet("QLabel{color:white;background-color:#346792;border: 1px solid #000000;border-radius:3px; padding: 0px;}");
-
+			button[i]->StartX = QCursor().pos().x();
 			button[i]->defaultValue = power * 1000;
 			button[i]->SpinBoxData = Data;
 			button[i]->parentDialog = this;
@@ -686,14 +687,14 @@ namespace dyno
 		VLayout->setSpacing(0);
 
 		this->setLayout(VLayout);
-		this->setWindowFlags( Qt::WindowStaysOnTopHint|	Qt::WindowCloseButtonHint);
+		this->setWindowFlags( Qt::WindowStaysOnTopHint | Qt::WindowCloseButtonHint | Qt::Popup);
 		this->move(QCursor().pos().x() - button[1]->rect().width() / 2, QCursor().pos().y() - button[1]->rect().height() * 5 / 2 - 5);
 
 		this->setMouseTracking(true);
 		this->hasMouseTracking();
 		this->setAttribute(Qt::WA_Hover, true);
 
-		this->setWindowTitle("Parameter change panel");
+		this->setWindowTitle("Property Editor");
 
 		this->show();
 		
