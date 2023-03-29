@@ -16,6 +16,9 @@
 
 #pragma once
 #include "ParametricModel.h"
+
+#include "Topology/TriangleSet.h"
+
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
@@ -59,8 +62,13 @@ namespace dyno
 
 		void disableRender();
 
+		NBoundingBox boundingBox() override;
+
 	protected:
 		void resetStates() override;
+
+	private:
+		void varChanged();
 
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};

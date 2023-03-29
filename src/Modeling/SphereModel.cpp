@@ -1,6 +1,6 @@
 #include "SphereModel.h"
 
-#include "Primitive/Primitive3D.h"
+#include "Topology/Primitive3D.h"
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
