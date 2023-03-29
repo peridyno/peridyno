@@ -1,10 +1,10 @@
 #include "SphereModel.h"
 
+#include "Primitive/Primitive3D.h"
+
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
-
-
 
 namespace dyno
 {
@@ -21,7 +21,15 @@ namespace dyno
 		this->varRow()->setRange(8, 10000);
 		this->varColumns()->setRange(8, 10000);
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		//this->varRadius()->attach(callback);
+		//this->varTheta()->attach(callback);
+		
 		glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
 		glModule->setVisible(true);
@@ -29,23 +37,64 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(glModule);
 
 
-		//auto glPointModule = std::make_shared<GLPointVisualModule>();
-		//glPointModule->setColor(Vec3f(0.8, 0, 0));
-		//glPointModule->setVisible(true);
-		//glPointModule->varPointSize()->setValue(0.01);
-		//this->stateTriangleSet()->connect(glPointModule->inPointSet());
-		//this->graphicsPipeline()->pushModule(glPointModule);
-
-
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
-
-		this->stateTriangleSet()->promoteOuput();
 	}
 
 	template<typename TDataType>
 	void SphereModel<TDataType>::resetStates()
+	{
+		varChanged();
+	}
+
+	template<typename TDataType>
+	void SphereModel<TDataType>::disableRender() {
+		glModule->setVisible(false);
+	};
+
+	template<typename TDataType>
+	NBoundingBox SphereModel<TDataType>::boundingBox()
+	{
+		auto center = this->varLocation()->getData();
+		auto rot = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto radius = this->varRadius()->getData();
+
+		Coord length(radius);
+		length[0] *= scale[0];
+		length[1] *= scale[1];
+		length[2] *= scale[2];
+
+		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+
+		q.normalize();
+
+		TOrientedBox3D<Real> box;
+		box.center = center;
+		box.u = q.rotate(Coord(1, 0, 0));
+		box.v = q.rotate(Coord(0, 1, 0));
+		box.w = q.rotate(Coord(0, 0, 1));
+		box.extent = length;
+
+		auto AABB = box.aabb();
+		auto& v0 = AABB.v0;
+		auto& v1 = AABB.v1;
+		
+
+		NBoundingBox ret;
+		ret.lower = Vec3f(v0.x, v0.y, v0.z);
+		ret.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return ret;
+	}
+
+
+	template<typename TDataType>
+	void SphereModel<TDataType>::varChanged()
 	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
@@ -356,52 +405,43 @@ namespace dyno
 						}
 					}
 
-
 			}
-
-
-
-			//±ä»»
-
-
-			Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-				* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-				* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
-
-			q.normalize();
-
-			auto RV = [&](const Coord& v)->Coord {
-				return center + q.rotate(v - center);
-			};
-
-			int numpt = vertices.size();
-
-			for (int i = 0; i < numpt; i++)
-			{
-
-				vertices[i] = RV(vertices[i] * scale + RV(center));
-			}
-
-
-		
 
 		}
+
+		//±ä»»
+
+
+		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+
+		q.normalize();
+
+		auto RV = [&](const Coord& v)->Coord {
+			return center + q.rotate(v - center);
+		};
+
+		int numpt = vertices.size();
+
+		for (int i = 0; i < numpt; i++)
+		{
+
+			vertices[i] = RV(vertices[i] * scale + RV(center));
+		}
+
 		triangleSet->setPoints(vertices);
 
 		
 		triangleSet->setTriangles(triangle);
 
-		//triangleSet->update();
+		triangleSet->update();
 
 		vertices.clear();
 		triangle.clear();
 		//triangle.clear();
 	}
 
-	template<typename TDataType>
-	void SphereModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	DEFINE_CLASS(SphereModel);
 }
