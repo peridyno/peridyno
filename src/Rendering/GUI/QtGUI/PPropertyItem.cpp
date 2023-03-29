@@ -2,6 +2,7 @@
 #include "Module.h"
 #include "Node.h"
 #include "FilePath.h"
+#include "SceneGraphFactory.h"
 
 #include "Common.h"
 #include "PCustomWidgets.h"
@@ -172,7 +173,7 @@ namespace dyno
 		: QGroupBox()
 	{
 		mField = field;
-		
+
 		//this->setStyleSheet("border:none");
 		QHBoxLayout* layout = new QHBoxLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
@@ -208,7 +209,7 @@ namespace dyno
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(mField);
 			slider->setValue((double)f->getValue());
 		}
-		else if(template_name == std::string(typeid(double).name()))
+		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(mField);
 			slider->setValue(f->getValue());
@@ -237,28 +238,44 @@ namespace dyno
 		emit fieldChanged();
 	}
 
+
 	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
 		: QDoubleSpinBox(parent)
 	{
-		
+
 	}
 	void mDoubleSpinBox::wheelEvent(QWheelEvent* event)
 	{
-		
+
 	}
 
-	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event) 
+	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event)
 
 	{
 		QDoubleSpinBox::mousePressEvent(event);
 		if (event->button() == Qt::MidButton) {
-			
+
 			ValueModify = new ValueDialog(this->value());
+
+			ValueModify->SpinBox1 = this->DSB1;
+			ValueModify->SpinBox2 = this->DSB2;
+			ValueModify->SpinBox3 = this->DSB3;
+			for (size_t i = 0; i < 5; i++)
+			{
+				ValueModify->button[i]->DSB1 = DSB1;
+				ValueModify->button[i]->DSB2 = DSB2;
+				ValueModify->button[i]->DSB3 = DSB3;
+
+				ValueModify->button[i]->Data1 = DSB1->value();
+				ValueModify->button[i]->Data2 = DSB2->value();
+				ValueModify->button[i]->Data3 = DSB3->value();
+			}
+
 
 			connect(ValueModify, SIGNAL(DiaValueChange(double)), this, SLOT(ModifyValue(double)));
 		}
 
-		
+
 	}
 
 	void mDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
@@ -295,7 +312,7 @@ namespace dyno
 		spinner1 = new mDoubleSpinBox;
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(mField->getMin(), mField->getMax());
-	
+
 		spinner2 = new mDoubleSpinBox;
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(mField->getMin(), mField->getMax());
@@ -303,6 +320,16 @@ namespace dyno
 		spinner3 = new mDoubleSpinBox;
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(mField->getMin(), mField->getMax());
+
+		spinner1->DSB1 = spinner1;
+		spinner1->DSB2 = spinner2;
+		spinner1->DSB3 = spinner3;
+		spinner2->DSB1 = spinner1;
+		spinner2->DSB2 = spinner2;
+		spinner2->DSB3 = spinner3;
+		spinner3->DSB1 = spinner1;
+		spinner3->DSB2 = spinner2;
+		spinner3->DSB3 = spinner3;
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner1, 0, 1);
@@ -509,9 +536,9 @@ namespace dyno
 		location->setText(QString::fromStdString(f->getValue().string()));
 
 		QPushButton* open = new QPushButton("open");
-// 		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
-// 							"QPushButton:hover{background-color:white; color: black;}"  
-// 							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
+		// 		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
+		// 							"QPushButton:hover{background-color:white; color: black;}"  
+		// 							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
 		open->setFixedSize(60, 24);
 
 		layout->addWidget(name, 0);
@@ -536,7 +563,7 @@ namespace dyno
 			else {
 				QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
 			}
-		});
+			});
 	}
 
 	void QFilePathWidget::changeValue(QString str)
@@ -570,7 +597,7 @@ namespace dyno
 		layout->addWidget(name, 0);
 		layout->addStretch(1);
 
-		QCheckBox* checkbox = new QCheckBox();		
+		QCheckBox* checkbox = new QCheckBox();
 		checkbox->setFixedWidth(20);
 		layout->addWidget(checkbox, 0);
 
@@ -617,7 +644,7 @@ namespace dyno
 		auto& enums = f->getDataPtr()->enumMap();
 		int num = 0;
 		int curIndex = 0;
-		for each(auto e in enums)
+		for each (auto e in enums)
 		{
 			mComboxIndexMap[num] = e.first;
 			combox->addItem(QString::fromStdString(e.second));
@@ -653,7 +680,7 @@ namespace dyno
 	}
 
 
-	ValueDialog::ValueDialog(double Data,QWidget* parent) :
+	ValueDialog::ValueDialog(double Data, QWidget* parent) :
 		QDialog(parent)
 	{
 		//¹¹½¨²Ëµ¥
@@ -665,7 +692,7 @@ namespace dyno
 			button[i] = new ValueButton;
 
 			power *= 0.1;
-			
+
 			std::string s = std::to_string(power * 1000);
 			QString text = QString::fromStdString(s);
 
@@ -681,13 +708,13 @@ namespace dyno
 			button[i]->parentDialog = this;
 			VLayout->addWidget(button[i]);
 
-			connect(button[i],SIGNAL(ValueChange(double)), this, SLOT(ModifyValue(double)));
+			connect(button[i], SIGNAL(ValueChange(double)), this, SLOT(ModifyValue(double)));
 			connect(button[i], SIGNAL(Release(double)), this, SLOT(initData(double)));
 		}
 		VLayout->setSpacing(0);
 
 		this->setLayout(VLayout);
-		this->setWindowFlags( Qt::WindowStaysOnTopHint | Qt::WindowCloseButtonHint | Qt::Popup);
+		this->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::WindowCloseButtonHint | Qt::Popup);
 		this->move(QCursor().pos().x() - button[1]->rect().width() / 2, QCursor().pos().y() - button[1]->rect().height() * 5 / 2 - 5);
 
 		this->setMouseTracking(true);
@@ -697,16 +724,40 @@ namespace dyno
 		this->setWindowTitle("Property Editor");
 
 		this->show();
-		
+
 	}
-	void ValueDialog::mouseReleaseEvent(QMouseEvent* event) 
+	void ValueDialog::mouseReleaseEvent(QMouseEvent* event)
 	{
 		this->close();
 	}
 
-	void ValueDialog::ModifyValue(double v) 
+	void ValueDialog::ModifyValue(double v)
 	{
 		emit DiaValueChange(v);
+	}
+	void  ValueDialog::keyPressEvent(QKeyEvent* event)
+	{
+		printf("dialog\n");
+		QDialog::keyPressEvent(event);
+		if (event->key() == Qt::Key_Shift)
+		{
+			for (size_t i = 0; i < 5; i++)
+			{
+				this->button[i]->shiftPress = true;
+			}
+		}
+	}
+	void  ValueDialog::keyReleaseEvent(QKeyEvent* event)
+	{
+		printf("dialog\n");
+		QDialog::keyReleaseEvent(event);
+		if (event->key() == Qt::Key_Shift)
+		{
+			for (size_t i = 0; i < 5; i++)
+			{
+				this->button[i]->shiftPress = false;
+			}
+		}
 	}
 
 	void ValueDialog::initData(double v)
@@ -731,14 +782,28 @@ namespace dyno
 		str = std::to_string(sub);
 		text = QString::fromStdString(str);
 		this->setText(text);
+		
+		if (shiftPress)
+		{
+			double p = (SpinBoxData+sub)/SpinBoxData;
+			
+			double d1 = DSB1->value();
+			double d2 = DSB2->value();
+			double d3 = DSB3->value();
+
+			DSB1->setValue(Data1 * p);
+			DSB2->setValue(Data2 * p);
+			DSB3->setValue(Data3 * p);
+		}
 		emit ValueChange(SpinBoxData + sub);
-				
+		SceneGraphFactory::instance()->active()->reset();
+
 	}
 
 	ValueButton::ValueButton(QWidget* parent) :
-		QPushButton(parent) 
+		QPushButton(parent)
 	{
-		
+
 	}
 
 	void ValueButton::mousePressEvent(QMouseEvent* event)
@@ -756,6 +821,5 @@ namespace dyno
 		parentDialog->close();
 	}
 
-	
-
 }
+

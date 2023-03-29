@@ -26,6 +26,7 @@
 #include <QLabel>
 #include "qgraphicsitem.h"
 #include <QPushButton>
+#include <QKeyEvent>
 
 namespace dyno
 {
@@ -92,6 +93,8 @@ namespace dyno
 		QRealFieldWidget(FBase* field);
 		~QRealFieldWidget() {};
 
+
+
 	Q_SIGNALS:
 		void fieldChanged();
 
@@ -115,12 +118,22 @@ namespace dyno
 
 		void mouseReleaseEvent(QMouseEvent* event) override;
 
+
 		double SpinBoxData = 0;
+
+		double Data1 = 0;
+		double Data2 = 0;
+		double Data3 = 0;
+
 		double defaultValue = 0;
 		double finalValue = 0;
 		int StartX = 0;
 		int EndX = 0;
 		QDialog* parentDialog;
+		QDoubleSpinBox* DSB1;
+		QDoubleSpinBox* DSB2;
+		QDoubleSpinBox* DSB3;
+		bool shiftPress = 0;
 
 	Q_SIGNALS:
 		void ValueChange(double);
@@ -148,7 +161,14 @@ namespace dyno
 
 		void mouseReleaseEvent(QMouseEvent* event) override;
 
+		void keyPressEvent(QKeyEvent* event) override;
+		void keyReleaseEvent(QKeyEvent* event) override;
+
 		ValueButton* button[5];
+
+		QDoubleSpinBox* SpinBox1;
+		QDoubleSpinBox* SpinBox2;
+		QDoubleSpinBox* SpinBox3;
 
 	Q_SIGNALS:
 		void DiaValueChange(double);
@@ -172,6 +192,10 @@ namespace dyno
 		ValueDialog* ValueModify;
 
 		bool ModifyByDialog;
+
+		QDoubleSpinBox* DSB1;
+		QDoubleSpinBox* DSB2;
+		QDoubleSpinBox* DSB3;
 
 	private:
 		//Prohibited to use
