@@ -207,6 +207,9 @@ namespace dyno
 
 		void mouseMoveEvent(QMouseEvent* event) override;
 		
+		void buildDialog();
+
+		void contextMenuEvent(QContextMenuEvent* event) override;
 	signals:
 	public slots:
 		void ModifyValue(double);

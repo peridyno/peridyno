@@ -242,37 +242,43 @@ namespace dyno
 	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
 		: QDoubleSpinBox(parent)
 	{
-
+		this->lineEdit()->setMouseTracking(true);
 	}
 	void mDoubleSpinBox::wheelEvent(QWheelEvent* event)
 	{
 
 	}
+	void mDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) 
+	{
+		buildDialog();
 
+	}
+	void mDoubleSpinBox::buildDialog() 
+	{
+		ValueModify = new ValueDialog(this->value());
+
+		ValueModify->SpinBox1 = this->DSB1;
+		ValueModify->SpinBox2 = this->DSB2;
+		ValueModify->SpinBox3 = this->DSB3;
+		for (size_t i = 0; i < 5; i++)
+		{
+			ValueModify->button[i]->DSB1 = DSB1;
+			ValueModify->button[i]->DSB2 = DSB2;
+			ValueModify->button[i]->DSB3 = DSB3;
+
+			ValueModify->button[i]->Data1 = DSB1->value();
+			ValueModify->button[i]->Data2 = DSB2->value();
+			ValueModify->button[i]->Data3 = DSB3->value();
+		}
+		connect(ValueModify, SIGNAL(DiaValueChange(double)), this, SLOT(ModifyValue(double)));
+	}
 	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event)
 
 	{
 		QDoubleSpinBox::mousePressEvent(event);
-		if (event->button() == Qt::MidButton) {
+		if (event->button() == Qt::RightButton) {
 
-			ValueModify = new ValueDialog(this->value());
-
-			ValueModify->SpinBox1 = this->DSB1;
-			ValueModify->SpinBox2 = this->DSB2;
-			ValueModify->SpinBox3 = this->DSB3;
-			for (size_t i = 0; i < 5; i++)
-			{
-				ValueModify->button[i]->DSB1 = DSB1;
-				ValueModify->button[i]->DSB2 = DSB2;
-				ValueModify->button[i]->DSB3 = DSB3;
-
-				ValueModify->button[i]->Data1 = DSB1->value();
-				ValueModify->button[i]->Data2 = DSB2->value();
-				ValueModify->button[i]->Data3 = DSB3->value();
-			}
-
-
-			connect(ValueModify, SIGNAL(DiaValueChange(double)), this, SLOT(ModifyValue(double)));
+			buildDialog();
 		}
 
 
@@ -706,6 +712,7 @@ namespace dyno
 			button[i]->defaultValue = power * 1000;
 			button[i]->SpinBoxData = Data;
 			button[i]->parentDialog = this;
+
 			VLayout->addWidget(button[i]);
 
 			connect(button[i], SIGNAL(ValueChange(double)), this, SLOT(ModifyValue(double)));
@@ -728,7 +735,7 @@ namespace dyno
 	}
 	void ValueDialog::mouseReleaseEvent(QMouseEvent* event)
 	{
-		this->close();
+		//this->close();
 	}
 
 	void ValueDialog::ModifyValue(double v)
@@ -818,7 +825,7 @@ namespace dyno
 		SpinBoxData = SpinBoxData + sub;
 
 		emit Release(SpinBoxData);
-		parentDialog->close();
+		//parentDialog->close();
 	}
 
 }
