@@ -35,7 +35,7 @@ namespace ImGui
     IMGUI_API void          sampleButton(const char* label, bool *v);
     // ColorBar 
 
-    IMGUI_API bool          ColorBar(char* label, float* values, ImU32* col, int length);
+    IMGUI_API bool          ColorBar(char* label, float* values, ImU32* col, int length, int num_type);
 
     // Get ID without label showing
     IMGUI_API void          beginTitle(const char* label);

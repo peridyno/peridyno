@@ -178,7 +178,7 @@ ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
     return IM_COL32((*v)[0] * 255, (*v)[1] * 255, (*v)[2] * 255, 150);
 }
 
-bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
+bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length, int num_type)
 {
 	if (col == nullptr ) return false;
 //	ImGuiContext* g = GetCurrentContext();
@@ -197,9 +197,9 @@ bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
     PushID(label);
     BeginGroup();
 
-    float text_width = GetFrameHeight() * 2;
+    float text_width = GetFrameHeight() * 3;
     float text_height = GetFrameHeight();
-    float bars_width = GetFrameHeight();
+    float bars_width = GetFrameHeight() * 1.5;
     float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
     float offset_width = bars_width * 0.2;
     ImVec2 bar_pos = window->DC.CursorPos;
@@ -225,7 +225,10 @@ bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
 
         if (values != nullptr){
             char buf[20];
-            sprintf(buf,"%.3f", values[i]);
+            if (num_type == 0) // Decimal 
+                sprintf(buf,"%-6.4f", values[i]);
+            else               // Exponential  
+                sprintf(buf,"%-6.2e", values[i]);
             draw_list->AddText(ImVec2(bar_pos.x + bars_width + offset_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
         }
     }
