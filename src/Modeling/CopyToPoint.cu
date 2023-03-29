@@ -45,7 +45,7 @@ namespace dyno
 
 		auto VertexIn = this->inTriangleSetIn()->getData().getPoints();
 		auto TriangleIn = this->inTriangleSetIn()->getData().getTriangles();
-		auto target = this->inTargetTriangleSet()->getData().getPoints();
+		auto target = this->inTargetPointSet()->getData().getPoints();
 
 
 		std::vector<Coord> vertices;
@@ -63,21 +63,21 @@ namespace dyno
 		unsigned CopyNumber = c_target.size();
 
 		Coord Location;
-		//构建vertices及triangle
-		for (int i = 0; i < lengthV; i++)
-		{
-			Location = { c_point[i][0], c_point[i][1], c_point[i][2] };
-			vertices.push_back( Location );
-		}
-		for (int i = 0; i < lengthT; i++)
-		{
-			triangle.push_back(TopologyModule::Triangle(c_triangle[i][0], c_triangle[i][1], c_triangle[i][2]));
-		}
+		////构建vertices及triangle
+		//for (int i = 0; i < lengthV; i++)
+		//{
+		//	Location = { c_point[i][0], c_point[i][1], c_point[i][2] };
+		//	vertices.push_back( Location );
+		//}
+		//for (int i = 0; i < lengthT; i++)
+		//{
+		//	triangle.push_back(TopologyModule::Triangle(c_triangle[i][0], c_triangle[i][1], c_triangle[i][2]));
+		//}
 
 
 		//构建Copy多边形
 		//顶点
-		if (!this->inTargetTriangleSet()->isEmpty()) 
+		if (!this->inTargetPointSet()->isEmpty()) 
 		{
 
 			for(int i = 0;i < CopyNumber; i++)

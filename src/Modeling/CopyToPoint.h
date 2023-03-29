@@ -46,7 +46,7 @@ namespace dyno
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSetIn,"")
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TargetTriangleSet, "");
+		DEF_INSTANCE_IN(PointSet<TDataType>, TargetPointSet, "");
 		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
 		void disableRender();
