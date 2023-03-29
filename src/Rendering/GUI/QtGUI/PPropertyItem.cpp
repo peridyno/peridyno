@@ -689,25 +689,37 @@ namespace dyno
 			VLayout->addWidget(button[i]);
 
 			connect(button[i],SIGNAL(ValueChange(double)), this, SLOT(ModifyValue(double)));
+			connect(button[i], SIGNAL(Release(double)), this, SLOT(initData(double)));
 		}
 		VLayout->setSpacing(0);
 
 		this->setLayout(VLayout);
-		//this->setWindowFlags( Qt::ToolTip);
+		this->setWindowFlags( Qt::WindowStaysOnTopHint|	Qt::WindowCloseButtonHint);
 		this->move(QCursor().pos().x() - button[1]->rect().width() / 2, QCursor().pos().y() - button[1]->rect().height() * 5 / 2 - 5);
 
 		this->setMouseTracking(true);
 		this->hasMouseTracking();
 		this->setAttribute(Qt::WA_Hover, true);
 
+		this->setWindowTitle("Parameter change panel");
+
 		this->show();
 		
 	}
+
 	void ValueDialog::ModifyValue(double v) 
 	{
 		emit DiaValueChange(v);
-
 	}
+
+	void ValueDialog::initData(double v)
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			button[i]->SpinBoxData = v;
+		}
+	}
+
 	void ValueDialog::mouseMoveEvent(QMouseEvent* event)
 	{
 
@@ -742,7 +754,11 @@ namespace dyno
 		text = QString::fromStdString(str);
 		this->setText(text);
 		SpinBoxData = SpinBoxData + sub;
+
+		emit Release(SpinBoxData);
+
 	}
+
 	
 
 }

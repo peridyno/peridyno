@@ -123,6 +123,8 @@ namespace dyno
 
 	Q_SIGNALS:
 		void ValueChange(double);
+	Q_SIGNALS:
+		void Release(double);
 
 	private:
 		double sub = 0;
@@ -152,7 +154,7 @@ namespace dyno
 	public slots:
 		void ModifyValue(double);
 
-
+		void initData(double);
 
 	private:
 
