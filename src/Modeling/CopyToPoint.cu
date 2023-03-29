@@ -105,7 +105,7 @@ namespace dyno
 				//	RealScale = scale * 1 / (i + 1);
 				//}
 
-				for (int j = 0; j < lengthV; j++)
+			for (int j = 0; j < lengthV; j++)
 				{
 					Location = { c_point[j][0], c_point[j][1], c_point[j][2] };
 

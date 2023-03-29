@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
+#include "ParametricModel.h"
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
