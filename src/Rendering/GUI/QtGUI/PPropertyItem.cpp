@@ -322,6 +322,7 @@ namespace dyno
 
 	void mDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
 	{
+		QDoubleSpinBox::mouseReleaseEvent(event);
 	}
 
 	void mDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)

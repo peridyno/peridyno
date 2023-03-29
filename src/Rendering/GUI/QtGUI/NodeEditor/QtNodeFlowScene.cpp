@@ -12,6 +12,7 @@
 #include "SceneGraphFactory.h"
 
 #include <QtWidgets/QMessageBox>
+#include "iostream"
 
 namespace Qt
 {
@@ -390,10 +391,16 @@ namespace Qt
 
 		auto constructDAG = [&](std::shared_ptr<Node> nd) -> void
 		{
+			
 			auto inId = nd->objectId();
 
 			auto ports = nd->getImportNodes();
 
+			graph.addOtherVertices(inId);
+			graph.removeID();
+
+			bool NodeConnection = false;
+			bool FieldConnection = false;
 			for (int i = 0; i < ports.size(); i++)
 			{
 				dyno::NodePortType pType = ports[i]->getPortType();
@@ -405,6 +412,8 @@ namespace Qt
 						auto outId = node->objectId();
 						
 						graph.addEdge(outId, inId);
+
+						graph.removeID(outId, inId);
 					}
 				}
 				else if (dyno::Multiple == pType)
@@ -415,16 +424,20 @@ namespace Qt
 						if (nodes[j] != nullptr)
 						{
 							auto outId = nodes[j]->objectId();
-							
+
 							graph.addEdge(outId, inId);
+							graph.removeID(outId, inId);
+
 						}
 					}
 					//nodes.clear();
 				}
+
 			}
 
+
 			auto fieldInp = nd->getInputFields();
-			for (int i = 0; i < fieldInp.size(); i++)
+			for (int i = 0; i < fieldInp.size(); i++)//遍历每个Node的Inputfield
 			{
 				auto fieldSrc = fieldInp[i]->getSource();
 				if (fieldSrc != nullptr) {
@@ -436,14 +449,21 @@ namespace Qt
 						auto outId = nodeSrc->objectId();
 						
 						graph.addEdge(outId, inId);
+
+						graph.removeID(outId, inId);
+
 					}
 				}
 			}
-		};
 
+			
+
+		};
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
+
 			constructDAG(it.get());
+
 		}
 
 
@@ -471,6 +491,7 @@ namespace Qt
 				}
 			}
 		}
+		float tempOffsetY = 0.0f;
 
 		float offsetX = 0.0f;
 		for (size_t l = 0; l < layout.layerNumber(); l++)
@@ -497,11 +518,47 @@ namespace Qt
 					node->setBlockCoord(offsetX, offsetY);
 
 					offsetY += (h + mDy);
+					
 				}
 			}
 
 			offsetX += (xMax + mDx);
+
+			tempOffsetY = std::max(tempOffsetY,offsetY);
+			
+
+
 		}
+
+		//离散节点的排序
+		auto otherVertices = layout.getOtherVertices();
+		float width = 0;
+		float heigth = 0;
+		std::set<dyno::ObjectId>::iterator it;
+
+		float ofstY = tempOffsetY;
+		float ofstX = 0;
+		for (it = otherVertices.begin(); it != otherVertices.end(); it++)
+		{
+			dyno::ObjectId id = *it;
+			printf("离散排序%d\n", id);
+			if (qtNodeMapper.find(id) != qtNodeMapper.end())
+			{
+				QtNode* qtNode = qtNodeMapper[id];
+				NodeGeometry& geo = qtNode->nodeGeometry();
+				width = geo.width();
+				heigth = geo.height();
+
+				Node* node = nodeMapper[id];
+
+				
+				node->setBlockCoord(ofstX, ofstY);
+				ofstX += width + mDx;
+
+			}
+
+		}
+
 
 		qtNodeMapper.clear();
 		nodeMapper.clear();
