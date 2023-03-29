@@ -153,9 +153,6 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-		triangleSet->updateEdges();
-		triangleSet->updateVertexNormal();
-
 
 		triangleSet->update();
 
