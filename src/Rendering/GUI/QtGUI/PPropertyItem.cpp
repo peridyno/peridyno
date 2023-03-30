@@ -217,11 +217,11 @@ namespace dyno
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 
-		if (mField != nullptr)
-		{
-			callback = std::make_shared<FCallBackFunc>(std::bind(&QRealFieldWidget::fieldUpdated, this));
-			mField->attach(callback);
-		}
+// 		if (mField != nullptr)
+// 		{
+// 			callback = std::make_shared<FCallBackFunc>(std::bind(&QRealFieldWidget::fieldUpdated, this));
+// 			mField->attach(callback);
+// 		}
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -555,11 +555,11 @@ namespace dyno
 		QObject::connect(spinner3, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
 
 
-		if (mField != nullptr)
-		{
-			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3iFieldWidget::fieldUpdated, this));
-			mField->attach(callback);
-		}
+// 		if (mField != nullptr)
+// 		{
+// 			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3iFieldWidget::fieldUpdated, this));
+// 			mField->attach(callback);
+// 		}
 	}
 
 
