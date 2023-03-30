@@ -18,7 +18,17 @@ namespace dyno
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CylinderModel<TDataType>::varChanged, this));
 
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varColumns()->attach(callback);
+		this->varEndSegment()->attach(callback);
+		this->varRow()->attach(callback);
+		this->varRadius()->attach(callback);
+		this->varHeight()->attach(callback);
 
 		glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
@@ -37,6 +47,18 @@ namespace dyno
 	template<typename TDataType>
 	void CylinderModel<TDataType>::resetStates()
 	{
+		varChanged();
+	}
+
+
+	template<typename TDataType>
+	void CylinderModel<TDataType>::disableRender() {
+		glModule->setVisible(false);
+	};
+
+	template<typename TDataType>
+	void CylinderModel<TDataType>::varChanged() 
+	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
@@ -46,7 +68,7 @@ namespace dyno
 		auto columns = this->varColumns()->getData();
 		auto height = this->varHeight()->getData();
 		auto end_segment = this->varEndSegment()->getData();
-		
+
 		TCylinder3D<Real> tube;
 		tube.row = row;
 		tube.columns = columns;
@@ -59,7 +81,7 @@ namespace dyno
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
 		Real PI = 3.1415926535;
-		
+
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
@@ -68,7 +90,7 @@ namespace dyno
 		int row_i = int(row);
 
 		uint counter = 0;
-		Coord3D Location;
+		Coord Location;
 		Real angle = PI / 180 * 360 / columns_i;
 		Real temp_angle = angle;
 
@@ -90,7 +112,7 @@ namespace dyno
 		}
 
 		//以下是底部及上部点的构建
-		
+
 		int pt_side_len = vertices.size();
 
 		for (int i = 1; i <= end_segment; i++)
@@ -134,7 +156,7 @@ namespace dyno
 
 				if (faceid != columns_i - 1)
 				{
-					
+
 					triangle.push_back(TopologyModule::Triangle(columns_i + faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
 					triangle.push_back(TopologyModule::Triangle(columns_i + 1 + faceid + rowl * columns_i, columns_i + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
 				}
@@ -212,7 +234,7 @@ namespace dyno
 						triangle.push_back(TopologyModule::Triangle(temp - columns + 1, temp, pt_len));	//生成底面最内圈最后一个面
 
 					}
-					 
+
 				}
 			}
 
@@ -296,33 +318,19 @@ namespace dyno
 		for (int i = 0; i < numpt; i++)
 		{
 			vertices[i][1] -= height / 2;
-			vertices[i] =RV( vertices[i] * scale + RV( center ));
+			vertices[i] = RV(vertices[i] * scale + RV(center));
 		}
 
 
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-		triangleSet->updateEdges();
-		triangleSet->updateVertexNormal();
-
-
 		triangleSet->update();
-
-
 
 		vertices.clear();
 		triangle.clear();
-		
 
 	}
-
-
-	template<typename TDataType>
-	void CylinderModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
-
 
 
 	DEFINE_CLASS(CylinderModel);

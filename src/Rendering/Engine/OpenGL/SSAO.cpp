@@ -8,17 +8,9 @@ namespace dyno
 	SSAO::SSAO()
 	{
 		mWidth = mHeight = 0;
-	}
 
-	SSAO::~SSAO()
-	{
-
-	}
-
-	void SSAO::initialize()
-	{
 		// shader programs
-		mSSAOProgram = gl::CreateShaderProgram("screen.vert", "ssao.frag");
+		mSSAOProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "ssao.frag");
 
 		// SSAO kernel
 		mSSAOKernelUBO.create(GL_UNIFORM_BUFFER, GL_STATIC_DRAW);
@@ -59,10 +51,13 @@ namespace dyno
 
 		mSSAONoiseTex.format = GL_RGB;
 		mSSAONoiseTex.internalFormat = GL_RGB32F;
-		mSSAONoiseTex.wrapS = GL_REPEAT;
-		mSSAONoiseTex.wrapT = GL_REPEAT;
 		mSSAONoiseTex.create();
 		mSSAONoiseTex.load(4, 4, &ssaoNoise[0]);
+	}
+
+	SSAO::~SSAO()
+	{
+
 	}
 
 	void SSAO::resize(unsigned int w, unsigned int h)
@@ -72,8 +67,6 @@ namespace dyno
 
 		mWidth = w;
 		mHeight = h;
-
-		// resize texture
 	}
 }
 

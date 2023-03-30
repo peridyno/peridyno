@@ -49,7 +49,7 @@ namespace dyno
 #endif
 	}
 
-
+#ifdef CUDA_BACKEND
 	GTimer::GTimer()
 	{
 		milliseconds = 0.0f;
@@ -73,13 +73,14 @@ namespace dyno
 		cudaEventElapsedTime(&milliseconds, m_start, m_stop);
 	}
 
-	float GTimer::getEclipsedTime()
+	float GTimer::getElapsedTime()
 	{
 		return milliseconds;
 	}
 
 	void GTimer::outputString(char* str)
 	{
-		std::cout << str << ": " << getEclipsedTime() << std::endl;
+		std::cout << str << ": " << getElapsedTime() << std::endl;
 	}
+#endif
 } // end of namespace dyno

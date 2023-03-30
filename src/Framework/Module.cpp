@@ -3,14 +3,11 @@
 
 namespace dyno
 {
-
 	Module::Module(std::string name)
-		: m_node(nullptr)
+		: OBase()  
+		, m_node(nullptr)
 		, m_initialized(false)
 	{
-		//	attachField(&m_module_name, "module_name", "Module name", false);
-
-		//	m_module_name.setValue(name);
 		m_module_name = name;
 	}
 
@@ -72,19 +69,19 @@ namespace dyno
 			this->postprocess();
 
 			//reset parameters
-			for each (auto param in fields_param)
+			for(auto param : fields_param)
 			{
 				param->tack();
 			}
 
 			//reset input fields
-			for each (auto f_in in fields_input)
+			for(auto f_in : fields_input)
 			{
 				f_in->tack();
 			}
 
 			//tag all output fields as modifed
-			for each (auto f_out in fields_output)
+			for(auto f_out : fields_output)
 			{
 				f_out->tick();
 			}
@@ -105,7 +102,7 @@ namespace dyno
 	bool Module::isInputComplete()
 	{
 		//If any input field is empty, return false;
-		for each (auto f_in in fields_input)
+		for(auto f_in : fields_input)
 		{
 			if (!f_in->isOptional() && f_in->isEmpty())
 			{
@@ -123,7 +120,7 @@ namespace dyno
 	bool Module::isOutputCompete()
 	{
 		//If any output field is empty, return false;
-		for each (auto f_out in fields_output)
+		for(auto f_out : fields_output)
 		{
 			if (f_out->isEmpty())
 			{
@@ -162,13 +159,13 @@ namespace dyno
 
 		//check input fields
 		bool modified = false;
-		for each (auto f_in in fields_input)
+		for(auto f_in : fields_input)
 		{
 			modified |= f_in->isModified();
 		}
 
 		//check control fields
-		for each (auto var in fields_param)
+		for(auto var : fields_param)
 		{
 			modified |= var->isModified();
 		}

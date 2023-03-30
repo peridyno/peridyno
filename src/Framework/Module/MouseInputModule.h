@@ -28,7 +28,7 @@ namespace dyno
 
 		void enqueueEvent(PMouseEvent event);
 
-		DEF_VAR(bool, CacheEvent, true, "If set false, all previous queued events will be dropped");
+		DEF_VAR(bool, CacheEvent, false, "If set false, all previous queued events will be dropped");
 
 	protected:
 		virtual void onEvent(PMouseEvent event) {};

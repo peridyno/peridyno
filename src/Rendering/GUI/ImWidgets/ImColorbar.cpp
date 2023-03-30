@@ -41,15 +41,17 @@ namespace dyno
 		if (!this->inScalar()->isEmpty())
 		{
 			auto pScalar = this->inScalar()->getData();
-			auto min_v = m_reduce_real.minimum(pScalar.begin(), pScalar.size());
-			auto max_v = m_reduce_real.maximum(pScalar.begin(), pScalar.size());
+			// bool pFixed = this->varFixed()->getData();
+			bool pFixed = false;
+			float lowLimit = this->varMin()->getData();
+			float upLimit = this->varMax()->getData();			
+			float min_v = (pFixed)? lowLimit : m_reduce_real.minimum(pScalar.begin(), pScalar.size());
+			float max_v = (pFixed)? upLimit : m_reduce_real.maximum(pScalar.begin(), pScalar.size());
 			
 			mNum = 6 + 1;
 			
 			//assert(std::is_same<float, Real>::value);
-
-			float lowLimit = this->varMin()->getData();
-			float upLimit = this->varMax()->getData();
+			
 			float dv = (max_v - min_v) / mNum;
 			if(this->varType()->getData() == ColorTable::Jet)
 			{
@@ -89,7 +91,10 @@ namespace dyno
 		ImGui::Begin(label, NULL, /*ImGuiWindowFlags_NoMove |*/  ImGuiWindowFlags_NoTitleBar | /*ImGuiWindowFlags_NoBackground |*/ ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 		ImGui::PopStyleColor();
 		ImGui::Text(this->varFieldName()->getData().c_str());
-		ImGui::ColorBar<ImU32*>("ColorBar", mVal, mCol, mNum);
+		int num_type = 0;
+		if (this->varNumberType()->getData() == NumberTypeSelection::Dec) num_type = 0;
+		if (this->varNumberType()->getData() == NumberTypeSelection::Exp) num_type = 1;
+		ImGui::ColorBar("ColorBar", mVal, mCol, mNum, num_type);
 		ImGui::End();
 	}
 }

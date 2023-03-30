@@ -32,6 +32,11 @@ namespace dyno {
 		return tip;
 	}
 
+	std::string OBase::getName()
+	{
+		return "";
+	}
+
 	bool OBase::addField(FBase* data)
 	{
 		return addField(data->getObjectName(), data);
@@ -73,7 +78,7 @@ namespace dyno {
 			}
 
 		}
-
+		return true;
 	}
 
 	bool OBase::addFieldAlias(FieldID name, FBase* data, FieldMap& fieldAlias)
@@ -93,6 +98,7 @@ namespace dyno {
 			}
 
 		}
+		return true;
 	}
 
 	bool OBase::findField(FBase* data)
@@ -408,4 +414,41 @@ namespace dyno {
 		return true;
 	}
 
+#ifdef VK_BACKEND
+	std::shared_ptr<VkProgram> OBase::addKernel(ProgramID programId, std::shared_ptr<VkProgram> prog)
+	{
+		ProgramMap::iterator result = Kernels.find(programId);
+		assert(result == Kernels.end());
+
+		Kernels[programId] = prog;
+
+		return prog;
+	}
+
+	VkMultiProgram& OBase::createKernelGroup(ProgramID programId)
+	{
+		auto inst = VkSystem::instance();
+		MultiProgramMap::iterator result = MultiKernels.find(programId);
+		if (result != MultiKernels.end())
+		{
+			std::cout << "Warning: Kernel " << programId << " already exists, be sure you want to replace the original with a new one" << std::endl;
+		}
+
+		inst = VkSystem::instance();
+		std::shared_ptr<VkMultiProgram> prog = std::make_shared<VkMultiProgram>();
+		MultiKernels[programId] = prog;
+
+		return *MultiKernels[programId];
+	}
+
+	VkMultiProgram& OBase::kernelGroup(ProgramID programId)
+	{
+		return *MultiKernels[programId];
+	}
+
+	std::shared_ptr<VkProgram> OBase::kernel(ProgramID programId)
+	{
+		return Kernels[programId];
+	}
+#endif
 }

@@ -8,7 +8,7 @@ namespace dyno
 Node::Node(std::string name)
 	: OBase()
 	, m_node_name(name)
-	, m_dt(0.001f)
+	, m_dt(0.016f)
 	, m_mass(1.0f)
 {
 }
@@ -177,7 +177,7 @@ void Node::resetStates()
 bool Node::validateInputs()
 {
 	//If any input field is empty, return false;
-	for each (auto f_in in fields_input)
+	for(auto f_in : fields_input)
 	{
 		if (!f_in->isOptional() && f_in->isEmpty())
 		{
@@ -195,7 +195,7 @@ bool Node::validateInputs()
 void Node::tick()
 {
 	std::vector<FBase*>& fields = this->getAllFields();
-	for each (FBase * var in fields)
+	for(FBase * var : fields)
 	{
 		if (var != nullptr) {
 			if (var->getFieldType() == FieldTypeEnum::State || var->getFieldType() == FieldTypeEnum::Out)
@@ -358,15 +358,42 @@ bool Node::deleteModule(std::shared_ptr<Module> module)
 // 	act->end(this);
 // }
 
+
+std::string FormatConnectionInfo(Node* node, NodePort* port, bool connecting, bool succeeded)
+{
+	Node* pOut = port != nullptr ? port->getParent() : nullptr;
+
+	std::string capIn = node->caption();
+	std::string capOut = pOut != nullptr ? pOut->caption() : "";
+
+	std::string nameIn = node->getName();
+	std::string nameOut = port != nullptr ? port->getPortName() : "";
+
+	if (connecting)
+	{
+		std::string message1 = capIn + ":" + nameIn + " is connected to " + capOut + ":" + nameOut;
+		std::string message2 = capIn + ":" + nameIn + " cannot be connected to " + capOut + ":" + nameOut;
+		return succeeded ? message1 : message2;
+	}
+	else
+	{
+		std::string message1 = capIn + ":" + nameIn + " is disconnected from " + capOut + ":" + nameOut;
+		std::string message2 = capIn + ":" + nameIn + " cannot be disconnected from " + capOut + ":" + nameOut;
+		return succeeded ? message1 : message2;
+	}
+}
+
 bool Node::appendExportNode(NodePort* nodePort)
 {
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it != mExportNodes.end()) {
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, false));
 		return false;
 	}
 
 	mExportNodes.push_back(nodePort);
 
+	Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, true));
 	return nodePort->addNode(this);
 }
 
@@ -374,11 +401,13 @@ bool Node::removeExportNode(NodePort* nodePort)
 {
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it == mExportNodes.end()) {
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, false));
 		return false;
 	}
 
 	mExportNodes.erase(it);
 
+	Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, true));
 	return nodePort->removeNode(this);
 }
 
@@ -450,7 +479,7 @@ bool Node::attachField(FBase* field, std::string name, std::string desc, bool au
 uint Node::sizeOfImportNodes() const
 {
 	uint n = 0;
-	for each(auto port in mImportNodes)
+	for(auto port : mImportNodes)
 	{
 		n += port->getNodes().size();
 	}

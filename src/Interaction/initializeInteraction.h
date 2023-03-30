@@ -1,15 +1,27 @@
 #pragma once
-#include <Object.h>
+#include <Plugin/PluginEntry.h>
 
 namespace dyno 
 {
-	class InteractionInitializer : public Object
+	class InteractionInitializer : public PluginEntry
 	{
 	public:
-		InteractionInitializer();
+		static PluginEntry* instance();
 
-		void initializeNodeCreators();
+	protected:
+		void initializeActions() override;
+
+	private:
+		InteractionInitializer() {};
+
+		static std::atomic<InteractionInitializer*> gInstance;
+		static std::mutex gMutex;
 	};
+}
 
-	const static InteractionInitializer particleSystemInitializer;
+namespace Interaction
+{
+	dyno::PluginEntry* initStaticPlugin();
+
+	PERIDYNO_API dyno::PluginEntry* initDynoPlugin();
 }

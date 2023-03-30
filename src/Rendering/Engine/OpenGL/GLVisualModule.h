@@ -16,21 +16,25 @@
 
 #pragma once
 
+#include <chrono>
+#include <mutex>
 #include <Module/VisualModule.h>
-#include <glm/vec3.hpp>
 
 namespace dyno
 {
+	// render pass
+	enum class GLRenderPass
+	{
+		COLOR  = 0,			// common color pass(opacity)
+		SHADOW = 1,			// shadow map pass
+		TRANSPARENCY = 2,	// transparency pass
+	};
+
 	class GLVisualModule : public VisualModule
 	{
 	public:
 		GLVisualModule();
-
-		enum RenderPass
-		{
-			COLOR = 0,
-			SHADOW = 1,
-		};
+		~GLVisualModule();
 
 		// basic Disney PBR material properties
 		void setColor(const Vec3f& color);
@@ -38,33 +42,36 @@ namespace dyno
 		void setRoughness(float roughness);
 		void setAlpha(float alpha);
 
-		//Vec3f getColor() const { return mBaseColor; }
-		float getMetallic() const { return mMetallic; }
-		float getRoughness() const { return mRoughness; }
-		float getAlpha() const { return mAlpha; }
-
 		virtual bool isTransparent() const;
 
-		void draw(RenderPass pass);
+		void draw(GLRenderPass pass);
 
 	public:
 		DEF_VAR(Vec3f, BaseColor, Vec3f(0.8f), "");
-
+		DEF_VAR(Real, Metallic, 0.0f, "");
+		DEF_VAR(Real, Roughness, 0.5f, "");
+		DEF_VAR(Real, Alpha, 1.0f, "");
 
 	protected:
+		virtual void updateGraphicsContext();
+
 		virtual bool initializeGL() = 0;
+		virtual void destroyGL() = 0;
 		virtual void updateGL() = 0;
-		virtual void paintGL(RenderPass pass) = 0;
+		virtual void paintGL(GLRenderPass pass) = 0;
 
-		void updateGraphicsContext() final;
-
-	private:
-		bool isGLInitialized = false;
+		friend class GLRenderEngine;
 
 	protected:
-		// material properties
-		float			mMetallic = 0.0f;
-		float			mRoughness = 0.5f;
-		float			mAlpha = 1.f;		
+		bool isGLInitialized = false;
+	
+		using clock=std::chrono::high_resolution_clock;
+		// the timestamp when graphics context is changed by calling updateGraphicsContext
+		clock::time_point changed;
+		// the timestamp when GL resource is updated by updateGL
+		clock::time_point updated;
+
+		// mutex for sync data
+		std::mutex	updateMutex;
 	};
 };

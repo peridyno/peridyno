@@ -45,7 +45,7 @@ namespace dyno
 		void setName(std::string name);
 		void setParent(Node* node);
 
-		std::string getName();
+		std::string getName() override;
 
 		/**
 		 * @brief Set the update strategy for the module

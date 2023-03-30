@@ -3,7 +3,12 @@ set(LIB_NAME ImWidgets)
 file(GLOB_RECURSE LIB_SRC *.cpp *.h */*.cpp */*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIB_SRC})
 
-add_library(${LIB_NAME} STATIC ${LIB_SRC})
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU" OR "${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+    list(FILTER LIB_SRC EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/ImColorbar.h")
+    list(FILTER LIB_SRC EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/ImColorbar.cpp")
+endif()
+
+add_library(${LIB_NAME} SHARED ${LIB_SRC})
 
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/GUI")
 
@@ -14,6 +19,19 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/GUI>)
 	
 target_link_libraries(${LIB_NAME} Core Framework imgui RenderCore)
+
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
 
 target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 

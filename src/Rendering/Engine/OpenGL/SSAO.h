@@ -20,7 +20,7 @@
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
-#include "gl/Program.h"
+#include "gl/Shader.h"
 
 namespace dyno 
 {
@@ -30,23 +30,22 @@ namespace dyno
 		SSAO();
 		~SSAO();
 
-		void initialize();
 		void resize(unsigned int w, unsigned int h);
 
 	private:
 
-		// SSAO
-		gl::Buffer		mSSAOKernelUBO;
-		gl::Texture2D		mSSAONoiseTex;
-		gl::Program mSSAOProgram;
+		gl::Program*		mSSAOProgram;
 
-		gl::Framebuffer	mDepthFramebuffer;
+		gl::Buffer			mSSAOKernelUBO;
+		gl::Texture2D		mSSAONoiseTex;
+
+		gl::Framebuffer		mDepthFramebuffer;
 		gl::Texture2D		mDepthTex;
 
-		gl::Framebuffer	mSSAOFramebuffer;
+		gl::Framebuffer		mSSAOFramebuffer;
 		gl::Texture2D		mSSAOTex;
 
-		gl::Framebuffer	mSSAOFilterFramebuffer;
+		gl::Framebuffer		mSSAOFilterFramebuffer;
 		gl::Texture2D		mSSAOFilterTex;
 
 		unsigned int	mWidth;

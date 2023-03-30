@@ -1,6 +1,6 @@
 #include "SphereModel.h"
 
-#include "Topology/Primitive3D.h"
+#include "Primitive/Primitive3D.h"
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -27,8 +27,8 @@ namespace dyno
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
 
-		//this->varRadius()->attach(callback);
-		//this->varTheta()->attach(callback);
+		this->varRadius()->attach(callback);
+		this->varTheta()->attach(callback);
 		
 		glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
@@ -96,6 +96,7 @@ namespace dyno
 	template<typename TDataType>
 	void SphereModel<TDataType>::varChanged()
 	{
+
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
@@ -411,7 +412,6 @@ namespace dyno
 
 		//±ä»»
 
-
 		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
 			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
 			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
@@ -429,16 +429,16 @@ namespace dyno
 
 			vertices[i] = RV(vertices[i] * scale + RV(center));
 		}
-
 		triangleSet->setPoints(vertices);
-
 		
 		triangleSet->setTriangles(triangle);
 
 		triangleSet->update();
 
 		vertices.clear();
+
 		triangle.clear();
+
 		//triangle.clear();
 	}
 

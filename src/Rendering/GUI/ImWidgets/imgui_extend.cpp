@@ -1,4 +1,6 @@
 #include "imgui_extend.h"
+#include "Math/SimpleMath.h"
+
 namespace ImGui{
 ImVec4      ExColorsVal[ImGuiExColVal_COUNT];
 };
@@ -110,8 +112,7 @@ bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2
         size*=window->FontWindowScale*ImGui::GetIO().FontGlobalScale;
     }
 
-    ImGuiContext& g = *GImGui;
-    const ImGuiStyle& style = g.Style;
+    const ImGuiStyle& style = GetStyle();
 
     const ImGuiID id = window->GetID(label);
     const ImVec2 textSize = ImGui::CalcTextSize(label,NULL,true);
@@ -158,10 +159,15 @@ void ImGui::endTitle(){
     ImGui::PopID();
 }
 
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 template<typename T> 
 std::shared_ptr<ImU32[]> ImGui::ToImU(T v, int size)
 {
-    auto vPtr = std::make_unique<ImU32[]>(size);
+    auto vPtr = make_unique<ImU32[]>(size);
     for(int i = 0; i < size; ++ i)
 		vPtr[i] = IM_COL32(v[i][0], v[i][1], v[i][2], 150);
     return vPtr;
@@ -172,29 +178,28 @@ ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
     return IM_COL32((*v)[0] * 255, (*v)[1] * 255, (*v)[2] * 255, 150);
 }
 
-template<typename T> 
-bool ImGui::ColorBar(const char* label, const float* values, const T col, int length)
+bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length, int num_type)
 {
 	if (col == nullptr ) return false;
-	ImGuiContext& g = *GImGui;
+//	ImGuiContext* g = GetCurrentContext();
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
         return false;
 
     ImDrawList* draw_list = window->DrawList;
-    ImGuiStyle& style = g.Style;
-    ImGuiIO& io = g.IO;
+    ImGuiStyle& style = GetStyle();
+    ImGuiIO& io = GetIO();
     ImGuiID id = window->GetID(label);
     
     const float width = CalcItemWidth();
-    g.NextItemData.ClearFlags();
+    //g->NextItemData.ClearFlags();
 
     PushID(label);
     BeginGroup();
 
-    float text_width = GetFrameHeight() * 2;
+    float text_width = GetFrameHeight() * 3;
     float text_height = GetFrameHeight();
-    float bars_width = GetFrameHeight();
+    float bars_width = GetFrameHeight() * 1.5;
     float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
     float offset_width = bars_width * 0.2;
     ImVec2 bar_pos = window->DC.CursorPos;
@@ -220,7 +225,10 @@ bool ImGui::ColorBar(const char* label, const float* values, const T col, int le
 
         if (values != nullptr){
             char buf[20];
-            sprintf(buf,"%.3f", values[i]);
+            if (num_type == 0) // Decimal 
+                sprintf(buf,"%-6.4f", values[i]);
+            else               // Exponential  
+                sprintf(buf,"%-6.2e", values[i]);
             draw_list->AddText(ImVec2(bar_pos.x + bars_width + offset_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
         }
     }

@@ -15,7 +15,6 @@
  */
 #pragma once
 #define GLM_FORCE_PURE
-#include <vector_types.h>
 #include "Vector.h"
 #include "Matrix.h"
 #include "Rigid/rigid.h"

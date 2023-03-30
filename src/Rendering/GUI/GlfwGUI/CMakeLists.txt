@@ -7,12 +7,12 @@ file(
     GLOB_RECURSE LIB_SRC
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
-	"${LIB_SRC_DIR}/*.c*"
+	"${LIB_SRC_DIR}/*.cpp"
     "${LIB_SRC_DIR}/*.*"
 )
 
 if(WIN32)
-    add_library(${LIB_NAME} STATIC ${LIB_SRC})
+    add_library(${LIB_NAME} SHARED ${LIB_SRC})
 elseif(UNIX)
     add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 endif()
@@ -34,13 +34,32 @@ set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
+
 target_include_directories(${LIB_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
 
-target_link_libraries(${LIB_NAME} Core Framework IO RenderCore GLRenderEngine ImWidgets glfw imgui)
+#TODO: include a general IO library
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    target_link_libraries(${LIB_NAME} Core Framework IO RenderCore GLRenderEngine ImWidgets glfw imgui)
+else()
+    target_link_libraries(${LIB_NAME} Core Framework RenderCore GLRenderEngine ImWidgets glfw imgui)
+endif()
+
 
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets
@@ -58,3 +77,4 @@ set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
 
 file(GLOB FILE_QTGUI_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 install(FILES ${FILE_QTGUI_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI/GlfwGUI)
+

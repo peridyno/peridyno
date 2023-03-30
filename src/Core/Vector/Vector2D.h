@@ -80,6 +80,7 @@ namespace dyno {
 
 	typedef Vector<float, 2> Vec2f;
 	typedef Vector<double, 2> Vec2d;
+	typedef Vector<uint32_t, 2> Vec2u;
 
 } //end of namespace dyno
 

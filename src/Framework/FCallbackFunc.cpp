@@ -12,7 +12,7 @@ namespace dyno
 
 	void FCallBackFunc::update()
 	{
-		for each (auto f in mInputs)
+		for(auto f : mInputs)
 		{
 			if (f->isEmpty())
 				return;

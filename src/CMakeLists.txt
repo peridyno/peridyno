@@ -5,10 +5,7 @@ set(PERIDYNO_LIB_CMAKES "")
 set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES "")
 
 add_subdirectory(Core)
-
-if(PERIDYNO_LIBRARY_FRAMEWORK)
-    add_subdirectory(Framework)
-endif()
+add_subdirectory(Framework)
 
 if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)
@@ -22,17 +19,17 @@ if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
     add_subdirectory(Rendering)
 endif()
 
-if(PERIDYNO_LIBRARY_ALEMBIC)
-    add_subdirectory(ABCExporter)
-endif()
-
-if(PERIDYNO_LIBRARY_GMSH)
-    add_subdirectory(GmshIO)
+if(PERIDYNO_LIBRARY_PLUGIN)
+    add_subdirectory(Plugin)
 endif()
 
 add_subdirectory(Dynamics)
-add_subdirectory(Interaction)
-add_subdirectory(Modeling)
+add_subdirectory(Topology)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    add_subdirectory(Interaction)
+    add_subdirectory(Modeling)
+endif()
 
 # Write/install version file
 include(CMakePackageConfigHelpers)
@@ -46,5 +43,4 @@ get_property(PERIDYNO_LIB_CMAKES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
 configure_file(PeridynoConfig.cmake.in PeridynoConfig.cmake @ONLY)
 install(FILES   "${CMAKE_CURRENT_BINARY_DIR}/PeridynoConfig.cmake"
                 ${version_file}
-        DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
-        )
+        DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR})

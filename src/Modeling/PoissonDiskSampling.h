@@ -17,7 +17,7 @@
 #pragma once
 #include "Node.h"
 
-#include "Topology/Primitive3D.h"
+#include "Primitive/Primitive3D.h"
 #include "Topology/PointSet.h"
 #include "Sampler.h"
 

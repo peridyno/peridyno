@@ -19,27 +19,23 @@
 #include <memory>
 #include <vector>
 
-#include <Rendering.h>
+#include <RenderEngine.h>
+
 #include "gl/Buffer.h"
+#include "gl/Texture.h"
+#include "gl/Framebuffer.h"
+#include "gl/Shader.h"
+#include "gl/Mesh.h"
+
 
 namespace dyno
 {
 	class SSAO;
+	class FXAA;
 	class ShadowMap;
 	class GLRenderHelper;
-
-	class Camera;
-
+	class GLVisualModule;
 	class SceneGraph;
-	//HE Xiaowei
-
-	struct Picture;
-	
-	enum CameraType
-	{
-		Orbit = 0,
-		TrackBall
-	};
 
 	class GLRenderEngine : public RenderEngine
 	{
@@ -47,28 +43,55 @@ namespace dyno
 		GLRenderEngine();
 		~GLRenderEngine();
 			   
-		virtual void initialize(int width, int height) override;
-		virtual void draw(dyno::SceneGraph* scene) override;
-		virtual void resize(int w, int h) override;
+		virtual void initialize() override;
+		virtual void terminate() override;
 
-		virtual std::string name() override;
+		virtual void draw(dyno::SceneGraph* scene, Camera* camera, const RenderParams& rparams) override;
+
+		virtual std::string name() const override;
+
+		// get the selected nodes on given rect area
+		std::vector<SelectionItem>	select(int x, int y, int w, int h) override;
 
 	private:
-		void setupCamera();
-		void initUniformBuffers();
+		void setupInternalFramebuffer();
+		void resizeFramebuffer(int w, int h);
+		
+		void setupTransparencyPass();
+
+		void updateRenderModules(dyno::SceneGraph* scene);
 
 	private:
+		std::vector<std::shared_ptr<GLVisualModule>> mRenderModules;
 
-		// uniform buffer for matrices
+		std::vector<Node*> mRenderNodes;
+
+	private:
+		// internal framebuffer
+		gl::Framebuffer	mFramebuffer;
+		gl::Texture2D	mColorTex;
+		gl::Texture2D	mDepthTex;
+		gl::Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
+
+		// for linked-list OIT
+		const int		MAX_OIT_NODES = 1024 * 1024 * 8;
+		gl::Buffer		mFreeNodeIdx;
+		gl::Buffer		mLinkedListBuffer;
+		gl::Texture2D	mHeadIndexTex;
+		gl::Program*	mBlendProgram;
+
+		gl::Mesh*		mScreenQuad = 0;
+
+		// uniform buffers
 		gl::Buffer		mTransformUBO;
 		gl::Buffer		mLightUBO;
-		
-		SSAO*			mSSAO;
-		ShadowMap*		mShadowMap;
-		GLRenderHelper*	mRenderHelper;
+		gl::Buffer		mVariableUBO;
 
-		//HE Xiaowei
-		CameraType mCameraType = CameraType::Orbit;
+		GLRenderHelper* mRenderHelper;
+		ShadowMap*		mShadowMap;
+		// anti-aliasing
+		bool			bEnableFXAA = true;
+		FXAA*			mFXAAFilter;
 
 	};
 };

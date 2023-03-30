@@ -48,3 +48,4 @@ namespace dyno
 		Vec3f m_translation;
 	};
 }
+

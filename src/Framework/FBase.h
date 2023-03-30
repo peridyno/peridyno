@@ -20,6 +20,7 @@
 #include <typeinfo>
 #include <string>
 #include <functional>
+#include <cfloat>
 
 namespace dyno {
 	class OBase;

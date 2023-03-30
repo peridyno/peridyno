@@ -23,17 +23,46 @@
 
 namespace gl {
 
+	// OpenGL shader
 	class Shader : public Object
 	{
+		GL_OBJECT(Shader)
 	public:
-		Shader() {}
 		bool createFromFile(unsigned int type, const std::string& path);
 		bool createFromSource(unsigned int type, const std::string& src);
 		void release();
 
 	protected:
 		void create() {};
+	};
 
+	// OpenGL shader program
+	class Program : public Object
+	{
+		GL_OBJECT(Program)
+	public:
+		void create();
+		void release();
+
+		void attachShader(const Shader& shader);
+		bool link();
+
+		void use();
+
+		//
+		void setFloat(const char* name, float v);
+		void setInt(const char* name, int v);
+
+		void setVec4(const char* name, dyno::Vec4f v);
+		void setVec3(const char* name, dyno::Vec3f v);
+		void setVec2(const char* name, dyno::Vec2f v);
+	};
+
+	// Shader factory for creating shader programs
+	class ShaderFactory {
+	public:
+		static bool initialize();
+		static Program* createShaderProgram(const char* vs, const char* fs, const char* gs = 0);
 	};
 
 }

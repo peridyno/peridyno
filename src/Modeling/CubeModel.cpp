@@ -20,6 +20,16 @@ namespace dyno
 		this->stateQuadSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CubeModel<TDataType>::varChanged, this));
+
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varSegments()->attach(callback);
+		this->varLength()->attach(callback);
+
+
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateQuadSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
@@ -40,6 +50,12 @@ namespace dyno
 	template<typename TDataType>
 	void CubeModel<TDataType>::resetStates()
 	{
+		varChanged();
+	}
+
+	template<typename TDataType>
+	void CubeModel<TDataType>::varChanged() 
+	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
@@ -50,9 +66,9 @@ namespace dyno
 		length[1] *= scale[1];
 		length[2] *= scale[2];
 
-		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0)) 
-						* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0)) 
-						* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
 
 		q.normalize();
 
@@ -64,7 +80,7 @@ namespace dyno
 		box.extent = 0.5 * length;
 
 		this->outCube()->setValue(box);
-		
+
 		auto segments = this->varSegments()->getData();
 
 		auto quadSet = this->stateQuadSet()->getDataPtr();
@@ -216,13 +232,15 @@ namespace dyno
 		quadSet->setPoints(vertices);
 		quadSet->setQuads(quads);
 
-		quadSet->updateTriangles();
+		//quadSet->updateTriangles();
 		quadSet->update();
 
 		indexTop.clear();
 		vertices.clear();
 		quads.clear();
+	
 	}
+
 
 	DEFINE_CLASS(CubeModel);
 }

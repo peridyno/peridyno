@@ -182,7 +182,11 @@ namespace dyno
 	Quat1f OrbitCamera::getQuaternion(float yaw, float pitch) const
 	{
 		Quat1f oldQuat = Quat1f(pitch, Vec3f(1.0f, 0.0f, 0.0f)) * Quat1f(yaw, Vec3f(0.0f, 1.0f, 0.0f));
-		oldQuat.toRotationAxis(float(mRotAngle), Vec3f(mRotAxis));
+		
+		float rotAngle = mRotAngle;
+		Vec3f rotAxis = mRotAxis;
+
+		oldQuat.toRotationAxis(rotAngle, rotAxis);
 
 		return oldQuat;
 	}
@@ -203,7 +207,7 @@ namespace dyno
 		getCoordSystem(viewDir, upDir, rightDir);
 		Vec3f targetPos = mEyePos + mFocusDist * viewDir;
 
-		return glm::lookAt(mEyePos.data_ * mDistanceUnit, targetPos.data_ * mDistanceUnit, upDir.data_);
+		return glm::lookAt(mEyePos.data_ * mUnitScale, targetPos.data_ * mUnitScale, upDir.data_);
 	}
 
 	glm::mat4 OrbitCamera::getProjMat()
@@ -214,11 +218,11 @@ namespace dyno
 
 		if (mProjectionType == Perspective)
 		{
-			projection = glm::perspective(mFov, aspect, mNear * mDistanceUnit, mFar * mDistanceUnit);
+			projection = glm::perspective(mFov, aspect, mNear * mUnitScale, mFar * mUnitScale);
 		}
 		else
 		{
-			float half_depth = (mEyePos - mTargetPos).norm() * mDistanceUnit;
+			float half_depth = (mEyePos - mTargetPos).norm() * mUnitScale;
 			projection = glm::ortho(-half_depth * aspect, half_depth * aspect, -half_depth, half_depth, -5.0f * half_depth, 5.0f* half_depth);
 		}
 			

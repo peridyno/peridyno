@@ -155,7 +155,6 @@ namespace dyno
 	{
 		this->pause();
 
-		mReset = true;
 		mFinished = true;
 
 		mTotalFrame = num;
@@ -164,13 +163,17 @@ namespace dyno
 
 		auto scn = SceneGraphFactory::instance()->active();
 		scn->setFrameNumber(0);
+
+		//Note: should set mReset at the end
+		mReset = true;
 	}
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
-		mReset = true;
-
 		mActiveNode = node;
+
+		//Note: should set mReset at the end
+		mReset = true;
 	}
 
 	void PSimulationThread::startUpdatingGraphicsContext()

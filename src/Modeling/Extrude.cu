@@ -74,7 +74,7 @@ namespace dyno
 		int ptn = pointsize;
 
 		uint counter = 0;
-		Coord3D Location;
+		Vec3f Location;
 
 		//auto pointset = this->inPointSet()->getData().getPoints();
 		PointSet<TDataType> s;

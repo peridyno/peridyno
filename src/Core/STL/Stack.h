@@ -31,18 +31,18 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC size_t size();
+		DYN_FUNC uint size();
 
 		DYN_FUNC T top();
 		DYN_FUNC void push(T val);
 		DYN_FUNC void pop();
 		DYN_FUNC bool empty();
 
-		DYN_FUNC size_t count(T val);
+		DYN_FUNC uint count(T val);
 
 
 	private:
-		size_t m_size = 0;
+		uint m_size = 0;
 	};
 }
 

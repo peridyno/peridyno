@@ -3,17 +3,28 @@
 #include <QFile>
 #include "QtApp.h"
 #include "PMainWindow.h"
+#include "POpenGLWidget.h"
 #include "Log.h"
-//#include "Rendering/OpenGLContext.h"
-#include "SceneGraphFactory.h"
 
-#include <GLRenderEngine.h>
+#include "SceneGraphFactory.h"
+#include "Plugin/PluginManager.h"
+
+#include <OrbitCamera.h>
 
 namespace dyno {
     QtApp::QtApp(int argc, char **argv)
     {
-        m_mainWindow = nullptr;
-        m_app = std::make_shared<QApplication>(argc, argv);
+#ifdef CUDA_BACKEND
+        auto status = cudaSetDevice(0);
+		if (status != cudaSuccess) {
+			fprintf(stderr, "CUDA initialization failed!  Do you have a CUDA-capable GPU installed?");
+			exit(0);
+		}
+        cudaFree(0);
+#endif // CUDA_BACKEND
+
+        mMainWindow = nullptr;
+        mQApp = std::make_shared<QApplication>(argc, argv);
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
@@ -24,10 +35,21 @@ namespace dyno {
 
     }
 
-    void QtApp::createWindow(int width, int height)
+	void QtApp::initialize(int width, int height, bool usePlugin)
     {
-        m_mainWindow = std::make_shared<PMainWindow>(renderEngine().get());
-        m_mainWindow->resize(width, height);
+        //A hack to address the slow launching problem
+
+		if (usePlugin)
+		{
+#ifdef NDEBUG
+			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Release");
+#else
+			PluginManager::instance()->loadPluginByPath(getPluginPath() + "Debug");
+#endif // DEBUG
+		}
+
+        mMainWindow = std::make_shared<PMainWindow>(this);
+        mMainWindow->resize(width, height);
     }
 
     void QtApp::mainLoop()
@@ -37,29 +59,21 @@ namespace dyno {
         file.open(QIODevice::ReadOnly);
 
         QString style = file.readAll();
-        m_app->setStyleSheet(style);
+        mQApp->setStyleSheet(style);
 
-        m_mainWindow->show();
-        m_app->exec();
+        mMainWindow->show();
+        mQApp->exec();
     }
-
-	void QtApp::setRenderEngine(std::shared_ptr<RenderEngine> engine)
-	{
-        //TODO: replace the default render engine with an new one in runtime.
-        mRenderEngine = engine;
-	}
 
 	void QtApp::setSceneGraph(std::shared_ptr<SceneGraph> scn)
 	{
+        AppBase::setSceneGraph(scn);
         SceneGraphFactory::instance()->pushScene(scn);
 	}
 
-	std::shared_ptr<RenderEngine> QtApp::renderEngine()
+    RenderWindow* QtApp::renderWindow()
 	{
-		if (mRenderEngine == nullptr)
-			mRenderEngine = std::make_shared<GLRenderEngine>();
-
-		return mRenderEngine;
+        return dynamic_cast<RenderWindow*>(mMainWindow->openglWidget());
 	}
 
 }

@@ -35,7 +35,14 @@ namespace dyno
 		ImVec2 getCoord() const;
 
 	public:
+		DECLARE_ENUM(NumberTypeSelection,
+			Dec = 0,
+			Exp = 1);
+			
+		DEF_ENUM(NumberTypeSelection, NumberType, NumberTypeSelection::Dec, "");
+		
 		DEF_ENUM(ColorTable, Type, ColorTable::Jet, "");
+		//DEF_VAR(bool, Fixed, false, "");
 		DEF_VAR(Real, Min, Real(0), "");
 		DEF_VAR(Real, Max, Real(1), "");
 		DEF_VAR(std::string, FieldName, "", "");

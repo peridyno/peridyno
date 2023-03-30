@@ -22,11 +22,12 @@ namespace gl
 {
 	class Framebuffer : public Object
 	{
+		GL_OBJECT(Framebuffer)
 	public:
 		void create() override;
 		void release() override;
 
-		void bind();
+		void bind(unsigned int target = 0x8CA9);	// default bind to GL_DRAW_FRAMEBUFFER
 		void unbind();
 
 		void clearColor(float r = 0.f, float g = 0.f, float b = 0.f, float a = 1.f);

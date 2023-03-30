@@ -17,61 +17,43 @@
 #pragma once
 
 #include "Object.h"
-#include <glm/glm.hpp>
 
 namespace gl {
 
-	class Texture : public Object
+	class Texture2D : public Object
 	{
+		GL_OBJECT(Texture2D)
 	public:
-		virtual void create();
-		virtual void release();
+		Texture2D();
+
+		virtual void create() override;
+		virtual void release() override;
 
 		virtual void bind();
 		virtual void unbind();
 
 		virtual void bind(int slot);
 
+		virtual void dump(void* pixels);
+
+		virtual void resize(int w, int h);
+		virtual void load(int w, int h, void* data);
+
+		// OpenGL 4.4+, clear texture
+		virtual void clear(void* value);
+
+		void genMipmap();
+
 	public:
-		unsigned int target;
+		unsigned int target = -1;
+
 		unsigned int internalFormat;
 		unsigned int format;
 		unsigned int type;
 
 		unsigned int minFilter;
 		unsigned int maxFilter;
-		unsigned int wrapS;
-		unsigned int wrapT;
 
-		glm::vec4	 borderColor;
-	};
-
-
-	class Texture2D : public Texture
-	{
-	public:
-		Texture2D();
-
-		virtual void create();
-
-		virtual void resize(int w, int h);
-		virtual void load(int w, int h, void* data);
-		virtual void dump(void* pixels);
-
-		// OpenGL 4.4+, clear texture
-		virtual void clear(void* value);
-
-		void genMipmap();
-	};
-
-
-	class Texture2DArray : public Texture
-	{
-	public:
-		Texture2DArray();
-
-		virtual void create();
-		virtual void resize(int w, int h, int layers);
 	};
 
 }

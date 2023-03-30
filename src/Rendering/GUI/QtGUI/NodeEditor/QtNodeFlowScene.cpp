@@ -3,6 +3,8 @@
 
 #include "nodes/QNode"
 
+#include "Common.h"
+
 #include "Object.h"
 #include "NodeIterator.h"
 #include "NodePort.h"
@@ -46,7 +48,7 @@ namespace Qt
 					return dat;
 				};
 
-				QString category = QString::fromStdString(node->getNodeType());
+				QString category = dyno::FormatBlockCaptionName(node->getNodeType());
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}

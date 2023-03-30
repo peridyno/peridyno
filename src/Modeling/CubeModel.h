@@ -15,7 +15,10 @@
  */
 
 #pragma once
-#include "ParametricModel.h"
+#include "Node/ParametricModel.h"
+
+#include "Topology/QuadSet.h"
+
 #include "GLSurfaceVisualModule.h"
 namespace dyno
 {
@@ -43,6 +46,10 @@ namespace dyno
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 
 		void resetStates() override;
+
+	private:
+		void varChanged();
+
 	};
 
 	IMPLEMENT_TCLASS(CubeModel, TDataType);

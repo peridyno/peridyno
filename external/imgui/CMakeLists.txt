@@ -5,11 +5,24 @@ file(GLOB_RECURSE IMGUI_SRC
      "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
 	 "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-add_library(imgui STATIC ${IMGUI_SRC})
+add_library(imgui SHARED ${IMGUI_SRC})
 set_target_properties(imgui PROPERTIES
     OUTPUT_NAME "imgui-1.8.3")
 
 set_target_properties(imgui PROPERTIES FOLDER "ThirdParty")
+
+if(WIN32)
+    set_target_properties(imgui PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(imgui PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(imgui PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
 
 target_include_directories(imgui PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)

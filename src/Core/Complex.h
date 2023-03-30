@@ -27,6 +27,9 @@ namespace dyno
 		DYN_FUNC Real realPart() const { return m_real; }
 		DYN_FUNC Real imagPart() const { return m_imag; }
 
+		DYN_FUNC Real& realPart() { return m_real; }
+		DYN_FUNC Real& imagPart() { return m_imag; }
+
 		DYN_FUNC Complex<Real> conjugate() const;
 		DYN_FUNC Real norm() const;
 		DYN_FUNC Real normSquared() const;

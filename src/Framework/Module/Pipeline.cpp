@@ -120,8 +120,12 @@ namespace dyno
 	{
 		if (mUpdateEnabled)
 		{
+#ifdef CUDA_BACKEND
 			GTimer timer;
-			for each (auto m in mModuleList)
+#else
+			CTimer timer;
+#endif // CUDA_BACKEND
+			for(auto m : mModuleList)
 			{
 				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
 					timer.start();
@@ -136,7 +140,7 @@ namespace dyno
 					std::stringstream name;
 					std::stringstream ss;
 					name << std::setw(40) << m->getClassInfo()->getClassName();
-					ss << std::setprecision(10) << timer.getEclipsedTime();
+					ss << std::setprecision(10) << timer.getElapsedTime();
 
 					std::string info = "\t Module: " + name.str() + ": \t " + ss.str() + "ms";
 					Log::sendMessage(Log::Info, info);
@@ -185,9 +189,9 @@ namespace dyno
 		DirectedAcyclicGraph graph;
 
 		auto retrieveModules = [&](ObjectId id, std::vector<FBase *>& fields) {
-			for each (auto f in fields) {
+			for(auto f : fields) {
 				auto& sinks = f->getSinks();
-				for each (auto sink in sinks)
+				for(auto sink : sinks)
 				{
 					Module* module = dynamic_cast<Module*>(sink->parent());
 					if (module != nullptr)
@@ -261,7 +265,7 @@ namespace dyno
 
 		auto& ids = graph.topologicalSort();
 
-		for each (auto id in ids)
+		for(auto id : ids)
 		{
 			if (mModuleMap.count(id) > 0)
 			{

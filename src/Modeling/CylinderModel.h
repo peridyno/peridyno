@@ -15,7 +15,8 @@
  */
 
 #pragma once
-#include "ParametricModel.h"
+#include "Node/ParametricModel.h"
+
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
@@ -53,6 +54,9 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+
+		void varChanged();
+
 
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};

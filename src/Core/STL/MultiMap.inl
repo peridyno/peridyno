@@ -1,4 +1,4 @@
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 #include <glm/glm.hpp>
 
 #include "STLMacro.h"
@@ -73,13 +73,13 @@ namespace dyno
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC size_t MultiMap<MKey, T>::size()
+	DYN_FUNC uint MultiMap<MKey, T>::size()
 	{
 		return m_size;
 	}
 
 	template <typename MKey, typename T>
-	DYN_FUNC size_t MultiMap<MKey, T>::count(MKey key)
+	DYN_FUNC uint MultiMap<MKey, T>::count(MKey key)
 	{
 		int ind = leftBound(Pair<MKey, T>(key, T(0)), m_startLoc, m_size);
 		if (ind >= m_size) return 0;

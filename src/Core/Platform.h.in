@@ -12,22 +12,22 @@
 #endif
 
 #if ((defined _WIN32) || (defined(__MINGW32__) || defined(__CYGWIN__))) && defined(PERIDYNO_DLL)
-#define PERIDYNO_EXPORT __declspec(dllexport)
-#define PERIDYNO_IMPORT __declspec(dllimport)
+#define PERIDYNO_EXPORT extern "C" __declspec(dllexport)
+#define PERIDYNO_IMPORT extern "C" __declspec(dllimport)
 #else
 #define PERIDYNO_EXPORT
 #define PERIDYNO_IMPORT
 #endif
 
-#if defined(PERIDYNO_API_COMPILE)
-#define PERIDYNOApi PERIDYNO_EXPORT
+#if defined(PERIDYNO_API_EXPORTS)
+#define PERIDYNO_API PERIDYNO_EXPORT
 #else
-#define PERIDYNOAPI PERIDYNO_IMPORT
+#define PERIDYNO_API PERIDYNO_IMPORT
 #endif
 
-#define PERIDYNO_COMPILER_CUDA
+#define ${GPU_BACKEND}
 
-#if(defined(PERIDYNO_COMPILER_CUDA))
+#if(defined(CUDA_BACKEND))
 #include <cuda_runtime.h>
 #	define DYN_FUNC __device__ __host__ 
 #	define GPU_FUNC __device__ 
@@ -49,7 +49,17 @@ enum DeviceType
 
 #include "Typedef.inl"
 const inline std::string getAssetPath() {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	return "";
+#elif defined(VK_EXAMPLE_DATA_DIR)
+	return VK_EXAMPLE_DATA_DIR;
+#else
 	return "${PERIDYNO_ASSET_PATH}/";
+#endif
+}
+
+const inline std::string getPluginPath() {
+	return "${PERIDYNO_PLUGIN_PATH}/";
 }
 
 //#define SIMULATION2D

@@ -19,7 +19,7 @@ namespace dyno
 
 		DYN_FUNC Map();
 
-		DYN_FUNC void reserve(Pair<MKey, T>* buf, int maxSize)
+		DYN_FUNC void reserve(Pair<MKey, T>* buf, uint maxSize)
 		{
 			m_pairs = buf;
 			m_maxSize = maxSize;
@@ -33,7 +33,7 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC int size();
+		DYN_FUNC uint size();
 
 		DYN_FUNC iterator insert(Pair<MKey, T> pair);
 		DYN_FUNC bool empty();
@@ -57,10 +57,10 @@ namespace dyno
 		DYN_FUNC void erase(iterator val_ptr);
 
 	private:
-		int m_size = 0;
+		uint m_size = 0;
 
 		Pair<MKey, T>* m_pairs = nullptr;
-		int m_maxSize = 0;
+		uint m_maxSize = 0;
 	};
 }
 

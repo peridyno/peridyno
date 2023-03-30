@@ -104,7 +104,7 @@ namespace dyno
 
 			//write control variables
 			auto& params = node->getParameters();
-			for each (auto var in params)
+			for (auto var : params)
 			{
 				tinyxml2::XMLElement* field = doc.NewElement("Field");
 				field->SetAttribute("Name", var->getObjectName().c_str());
@@ -178,7 +178,7 @@ namespace dyno
 				uint radix = 0;
 
 				auto& activeModules = pipeline->activeModules();
-				for each (auto m in activeModules){
+				for (auto m : activeModules){
 					tinyxml2::XMLElement* moduleXml = doc.NewElement("Module");
 					moduleXml->SetAttribute("Class", m->getClassInfo()->getClassName().c_str());
 					moduleXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(m->bx(), m->by())).c_str());
@@ -189,7 +189,7 @@ namespace dyno
 
 					//write control variables
 					auto& params = m->getParameters();
-					for each (auto var in params)
+					for (auto var : params)
 					{
 						tinyxml2::XMLElement* field = doc.NewElement("Field");
 						field->SetAttribute("Name", var->getObjectName().c_str());
@@ -209,7 +209,7 @@ namespace dyno
 				tinyxml2::XMLElement* moduleConnectionsXml = doc.NewElement("Connections");
 				pipelineXml->InsertEndChild(moduleConnectionsXml);
 
-				for each (auto m in activeModules)
+				for (auto m : activeModules)
 				{
 					auto& fieldIn = m->getInputFields();
 					for (int i = 0; i < fieldIn.size(); i++)
@@ -337,7 +337,7 @@ namespace dyno
 
 		std::map<std::string, FBase*> str2Field;
 		auto& params = node->getParameters();
-		for each (auto var in params) {
+		for (auto var : params) {
 			str2Field[var->getObjectName()] = var;
 		}
 		tinyxml2::XMLElement* varsXmls = nodeXML->FirstChildElement("Variables");
@@ -406,7 +406,7 @@ namespace dyno
 
 					std::map<std::string, FBase*> str2Field;
 					auto& params = module->getParameters();
-					for each (auto var in params) {
+					for (auto var : params) {
 						str2Field[var->getObjectName()] = var;
 					}
 

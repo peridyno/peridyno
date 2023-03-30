@@ -75,7 +75,7 @@ namespace dyno
 		int row_i = pointsize;
 
 		uint counter = 0;
-		Coord3D Location;
+		Vec3f Location;
 		Real angle = PI / 180 * 360 / columns_i;
 		Real temp_angle = angle;
 		
@@ -341,8 +341,8 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-		triangleSet->updateEdges();
-		triangleSet->updateVertexNormal();
+		//triangleSet->updateEdges();
+		//triangleSet->updateVertexNormal();
 
 
 		triangleSet->update();

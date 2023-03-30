@@ -32,6 +32,10 @@
 
 #include "FCallbackFunc.h"
 
+#include <memory>
+
+#include "FCallbackFunc.h"
+
 namespace dyno
 {
 	class Node;

@@ -22,9 +22,10 @@ namespace gl
 {
 	class Buffer : public Object
 	{
+		GL_OBJECT(Buffer)
 	public:
 		virtual void create(int target, int usage);
-		virtual void release();
+		virtual void release() override;
 
 		void bind();
 		void unbind();
@@ -36,7 +37,7 @@ namespace gl
 		void bindBufferBase(int idx);
 
 	private:
-		virtual void create();
+		virtual void create() override;
 
 	protected:
 		int target = -1;

@@ -77,7 +77,7 @@ namespace dyno
 	class PModuleEditor;
 	class PMainToolBar;
 
-	class RenderEngine;
+	class QtApp;
 	class ImWidget;
 
 //	QT_FORWARD_DECLARE_CLASS(QLichtWidget)
@@ -89,12 +89,14 @@ namespace dyno
 	public:
 		typedef QMap<QString, QSize> CustomSizeHintMap;
 
-		explicit PMainWindow(RenderEngine* engine,
+		explicit PMainWindow(QtApp* app,
 			QWidget *parent = Q_NULLPTR,
 			Qt::WindowFlags flags = 0);
 
 		void mainLoop();
 		void createWindow(int width, int height);
+
+		POpenGLWidget* openglWidget() { return mOpenGLWidget; }
 
 	public slots:
 		//File menu

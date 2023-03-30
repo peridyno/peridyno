@@ -5,7 +5,11 @@ set(SHADER_HEADER_FILE ${CMAKE_BINARY_DIR}/shader_header.h)
 set(SHADER_BUILD_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/shader/shader.cmake)
 set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shader)
 
-file(GLOB_RECURSE SHADER_FILES ${SHADER_SOURCE_DIR}/*.glsl)
+file(GLOB_RECURSE SHADER_FILES 
+	${SHADER_SOURCE_DIR}/*.glsl 
+	${SHADER_SOURCE_DIR}/*.vert 
+	${SHADER_SOURCE_DIR}/*.frag 
+	${SHADER_SOURCE_DIR}/*.geom)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHADER_FILES})
 
 add_custom_command(
@@ -18,16 +22,39 @@ add_custom_command(
 # 	DEPENDS ${SHADER_HEADER_FILE}
 # )
 
-file(GLOB_RECURSE SOURCES *.cpp *.h *.c *.cu)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
-add_library(${LIB_NAME} STATIC ${SOURCES} ${SHADER_FILES} ${SHADER_HEADER_FILE})
+execute_process(
+	COMMAND ${CMAKE_COMMAND} "-DSHADER_FILES=${SHADER_FILES}" "-DSHADER_HEADER_FILE=${SHADER_HEADER_FILE}" -P ${SHADER_BUILD_SCRIPT}
+)
 
-target_link_libraries(${LIB_NAME} PUBLIC
-	Core 
-	Framework 
-	RenderCore 
-	glad 
-	imgui)
+file(GLOB_RECURSE SOURCES *.cpp *.h *.c *.cu)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/Backend/*.*")
+elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/*.*")
+elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan/*.*")
+endif()
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
+add_library(${LIB_NAME} SHARED ${SOURCES} ${SHADER_FILES} ${SHADER_HEADER_FILE})
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU")
+    target_link_libraries(${LIB_NAME} PUBLIC
+	    Core 
+	    Framework 
+	    RenderCore 
+	    glad 
+	    imgui)
+else()
+    target_link_libraries(${LIB_NAME} PUBLIC
+	    Core 
+	    Framework 
+	    Topology
+	    RenderCore 
+	    glad 
+	    imgui)
+endif()
 
 target_include_directories(${LIB_NAME} 
 	PRIVATE ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
@@ -40,13 +67,47 @@ target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-rel
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "60")
+set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
-#To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
-target_include_directories(${LIB_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
+add_compile_definitions(PERIDYNO_API_EXPORTS)
+
+if(WIN32)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+elseif(UNIX)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+    else()
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+    endif()
+endif()
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU")
+    target_include_directories(${LIB_NAME} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
+elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+    target_include_directories(${LIB_NAME} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan/Module>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
+elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
+    target_include_directories(${LIB_NAME} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Module>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
+endif()
+
 
 #add_dependencies(${LIB_NAME} BuildShaderHeader)
 install(TARGETS ${LIB_NAME}
@@ -74,3 +135,4 @@ install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/
 
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/shader/helper/*.*")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/shader/helpler)
+

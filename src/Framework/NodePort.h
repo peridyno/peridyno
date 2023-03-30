@@ -51,6 +51,8 @@ namespace dyno {
 
 		virtual bool isKindOf(Node* node) = 0;
 
+		virtual bool hasNode(Node* node) = 0;
+
 		inline Node* getParent() { return m_parent; }
 
 		virtual void clear();
@@ -95,7 +97,12 @@ namespace dyno {
 
 		bool isKindOf(Node* node) override
 		{
-			return nullptr != dynamic_cast<T*>(node);
+			return nullptr != dynamic_cast<T*>(node) && !hasNode(node);
+		}
+
+		bool hasNode(Node* node)
+		{
+			return m_derived_node == dynamic_cast<T*>(node);
 		}
 
 		std::vector<Node*>& getNodes() override
@@ -175,7 +182,7 @@ namespace dyno {
 
 		~MultipleNodePort() {
 			//Disconnect nodes from node ports here instead of inside the destructor of Node to avoid memory leak
-			for each (auto node in m_nodes)
+			for(auto node : m_nodes)
 			{
 				node->disconnect(this);
 			}
@@ -228,7 +235,19 @@ namespace dyno {
 
 		bool isKindOf(Node* node) override
 		{
-			return nullptr != dynamic_cast<T*>(node);
+			return nullptr != dynamic_cast<T*>(node) && !hasNode(node);
+		}
+
+		bool NodePort::hasNode(Node* node)
+		{
+			auto derived = dynamic_cast<T*>(node);
+			for (auto n : m_derived_nodes)
+			{
+				if (n == derived)
+					return true;
+			}
+
+			return false;
 		}
 
 		std::vector<Node*>& getNodes() override

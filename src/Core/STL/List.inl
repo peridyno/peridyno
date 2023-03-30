@@ -1,4 +1,4 @@
-#include "Algorithm/SimpleMath.h"
+#include "Math/SimpleMath.h"
 #include <glm/glm.hpp>
 
 namespace dyno
@@ -19,27 +19,29 @@ namespace dyno
 	DYN_FUNC T* List<T>::insert(T val)
 	{
 		//return nullptr if the data buffer is full
-		if (m_size >= m_maxSize) return nullptr;
+		if (m_size >= this->m_maxSize) return nullptr;
 
-		m_startLoc[m_size] = val;
+		this->m_startLoc[m_size] = val;
 		m_size++;
 
-		return m_startLoc + m_size - 1;;
+		return this->m_startLoc + m_size - 1;;
 	}
 
+#ifdef CUDA_BACKEND
 	template <typename T>
 	GPU_FUNC T* List<T>::atomicInsert(T val)
 	{
 		//return nullptr if the data buffer is full
-		if (m_size >= m_maxSize) return nullptr;
+		if (m_size >= this->m_maxSize) return nullptr;
+		
+		int index = atomicAdd(&(this->m_size), 1);
+		//int index = 0;//Onlinux platform, this is a bug, not yet resolved.
 
-		int index = atomicAdd(&m_size, 1);
-		m_startLoc[index] = val;
+		this->m_startLoc[index] = val;
 
-		return m_startLoc + index;
+		return this->m_startLoc + index;
 	}
-
-
+#endif
 
 	template <typename T>
 	DYN_FUNC void List<T>::clear()
@@ -56,19 +58,19 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC bool List<T>::empty()
 	{
-		return m_startLoc == nullptr;
+		return this->m_startLoc == nullptr;
 	}
 
 	template <typename T>
 	DYN_FUNC T List<T>::front()
 	{
-		return m_startLoc[0];
+		return this->m_startLoc[0];
 	}
 
 	template <typename T>
 	DYN_FUNC T List<T>::back()
 	{
-		return m_startLoc[m_size - 1];
+		return this->m_startLoc[m_size - 1];
 	}
 }
 

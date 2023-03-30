@@ -3,23 +3,21 @@
 #include <vector>
 #include <memory>
 
+#include "SceneGraphFactory.h"
+#include "RenderEngine.h"
+
 namespace dyno
 {
-	class ImWidget;
-	class RenderEngine;
+	class SceneGraph;
 	class AppBase {
 	public:
 		AppBase() {};
 		~AppBase() {};
 
-		virtual void createWindow(int width, int height) {};
+		virtual void initialize(int width, int height, bool usePlugin = false) {};
 		virtual void mainLoop() = 0;
 
-		virtual void setRenderEngine(std::shared_ptr<RenderEngine> engine) { mRenderEngine = engine; }
-		virtual std::shared_ptr<RenderEngine> renderEngine() = 0;
-
-	protected:
-		std::shared_ptr<RenderEngine> mRenderEngine = nullptr;
+		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return SceneGraphFactory::instance()->active(); }
+		virtual void setSceneGraph(std::shared_ptr<SceneGraph> scene) { SceneGraphFactory::instance()->pushScene(scene); }
 	};
-
 }
