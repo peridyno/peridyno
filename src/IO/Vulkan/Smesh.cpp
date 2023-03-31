@@ -1,4 +1,4 @@
-#include "smesh.h"
+#include "Smesh.h"
 #include <string.h>
 #include <fstream>
 #include <iostream>

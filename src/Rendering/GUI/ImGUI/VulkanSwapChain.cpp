@@ -15,6 +15,8 @@
 void VulkanSwapChain::initSurface(void* platformHandle, void* platformWindow)
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 void VulkanSwapChain::initSurface(ANativeWindow* window)
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+void VulkanSwapChain::initSurface(xcb_window_t xcbWindow)
 #endif
 {
 	VkResult err = VK_SUCCESS;
@@ -31,6 +33,11 @@ void VulkanSwapChain::initSurface(ANativeWindow* window)
 	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
 	surfaceCreateInfo.window = window;
 	err = vkCreateAndroidSurfaceKHR(instance, &surfaceCreateInfo, NULL, &surface);
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+	VkXcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.window = xcbWindow;
+	vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
 #endif
 
 	if (err != VK_SUCCESS) {
