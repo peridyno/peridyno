@@ -104,13 +104,10 @@ namespace dyno
 				//{
 				//	RealScale = scale * 1 / (i + 1);
 				//}
-				std::cout << "Copy Number :" << CopyNumber << std::endl;
-				std::cout << "i = " << i << "ctarget[i] = " << c_target[i] << "-->" << Location[0] << "--" << Location[1] << "--" << Location[2] << std::endl;
 
 			for (int j = 0; j < lengthV; j++)
 				{
 					Location = { c_point[j][0], c_point[j][1], c_point[j][2] };
-					std::cout << "j = " << j << "cpoint = " << "-->" << c_point[j][0] << "**" << c_point[j][1] << "**" << c_point[j][2] << std::endl;
 
 					//Location = RV(Location * RealScale) + center * (i+1);//Ìí¼Ó±ä»»RV(Location * RealScale + RV(center * (i + 1)))
 					Location = Location + c_target[i];
