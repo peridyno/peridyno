@@ -22,6 +22,9 @@ namespace dyno
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
+		this->varToggleIndexOutput()->connect(edgeInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->connect(pointInteractor->varToggleIndexOutput());
+
 		this->edgeInteractor = edgeInteractor;
 		this->pointInteractor = pointInteractor;
 

@@ -53,6 +53,8 @@ namespace dyno
 		DEF_VAR(Real, EdgeSelectedSize, 0.002f, "");
 		DEF_VAR(Real, EdgeOtherSize, 0.0015, "");
 
+		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
+
 		EdgePickerNode(std::string name = "default");
 		~EdgePickerNode();
 
