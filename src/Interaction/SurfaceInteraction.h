@@ -33,6 +33,7 @@ namespace dyno
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, SelectedTriangleSet, "");
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, OtherTriangleSet, "");
 		DEF_ARRAY_OUT(int, TriangleIndex, DeviceType::GPU, "");
+		DEF_ARRAY_OUT(int, Sur2PointIndex, DeviceType::GPU, "");
 
 		DECLARE_ENUM(PickingTypeSelection,
 		Click = 0,
@@ -63,6 +64,8 @@ namespace dyno
 		DEF_VAR(bool, ToggleVisibleFilter, false, "The toggle of visible filter");
 
 		DEF_VAR(bool, ToggleQuad, false, "The toggle of quad selection");
+
+		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
 	protected:
 		void onEvent(PMouseEvent event) override;

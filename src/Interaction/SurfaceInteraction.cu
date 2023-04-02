@@ -303,6 +303,7 @@ namespace dyno
 		DArray<Triangle> triangles,
 		DArray<Triangle> intersected_triangles,
 		DArray<Triangle> unintersected_triangles,
+		DArray<int> outTriangleIndex,
 		DArray<int> intersected,
 		DArray<int> unintersected,
 		DArray<int> intersected_o)
@@ -313,6 +314,7 @@ namespace dyno
 		if (intersected_o[pId] == 1)
 		{
 			intersected_triangles[intersected[pId]] = triangles[pId];
+			outTriangleIndex[intersected[pId]] = pId;
 		}
 		else
 		{
@@ -359,7 +361,7 @@ namespace dyno
 				TTriangle3D<Real> t1(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
 				TTriangle3D<Real> t2(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
 
-				if (t1.normal().dot(t2.normal()) >= cosf(diffusionAngle))
+				if (abs(t1.normal().dot(t2.normal())) >= cosf(diffusionAngle))
 				{
 					if (intersected[j] == 0 && unintersected[j] == 1)
 					{
@@ -428,15 +430,63 @@ namespace dyno
 	) 
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= intersected_o.size()) return;
+		if (pId >= intersected_q.size()) return;
 
-
-		intersected_q[pId / 2] = 0;
-		if (intersected_o[pId] == 1)
+		intersected_q[pId] = 0;
+		if (intersected_o[pId*2] == 1||intersected_o[pId*2+1]==1)
 		{
-			intersected_q[pId / 2] = 1;
+			intersected_q[pId] = 1;
 		}
 	}
+
+	__global__ void SI_QuadIndexOutput(
+		DArray<int> outTriangleIndex,
+		DArray<int> outQuadIndex
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= outQuadIndex.size()) return;
+
+		outQuadIndex[pId] = outTriangleIndex[pId * 2] / 2;
+	}
+
+	__global__ void SI_InitialS2PSelected(
+		DArray<int> s2PSelected)
+	{
+		int pId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (pId >= s2PSelected.size()) return;
+
+		s2PSelected[pId] = 0;
+	}
+
+	template <typename Triangle>
+	__global__ void SI_Surface2Point(
+		DArray<Triangle> triangles,
+		DArray<int> outTriangleIndex,
+		DArray<int> s2PSelected) 
+	{
+		int pId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (pId >= outTriangleIndex.size()) return;
+
+		s2PSelected[triangles[outTriangleIndex[pId]][0]] = 1;
+		s2PSelected[triangles[outTriangleIndex[pId]][1]] = 1;
+		s2PSelected[triangles[outTriangleIndex[pId]][2]] = 1;
+	}
+
+	__global__ void SI_s2PIndexOut(
+		DArray<int> s2PIndex,
+		DArray<int> s2PIndex_o,
+		DArray<int> s2PIndexOut)
+	{
+		int pId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (pId >= s2PIndex.size()) return;
+
+		if (s2PIndex_o[pId] == 1)
+		{
+			s2PIndexOut[s2PIndex[pId]] = pId;
+		}
+	}
+
 
 	template<typename TDataType>
 	void SurfaceInteraction<TDataType>::calcSurfaceIntersectClick()
@@ -573,6 +623,8 @@ namespace dyno
 		intersected_o.assign(intersected);
 
 		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		DArray<int> outTriangleIndex;
+		outTriangleIndex.resize(intersected_size);
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Triangle> intersected_triangles;
 		intersected_triangles.resize(intersected_size);
@@ -587,9 +639,39 @@ namespace dyno
 			triangles,
 			intersected_triangles,
 			unintersected_triangles,
+			outTriangleIndex,
 			intersected,
 			unintersected,
 			intersected_o
+		);
+
+		DArray<int> s2PSelected;
+		s2PSelected.resize(points.size());
+
+		cuExecute(points.size(),
+			SI_InitialS2PSelected,
+			s2PSelected
+		);
+
+		cuExecute(outTriangleIndex.size(),
+			SI_Surface2Point,
+			triangles,
+			outTriangleIndex,
+			s2PSelected
+		);
+		int s2PSelectedSize = thrust::reduce(thrust::device, s2PSelected.begin(), s2PSelected.begin() + s2PSelected.size(), (int)0, thrust::plus<int>());
+		DArray<int> s2PSelected_o;
+		s2PSelected_o.assign(s2PSelected);
+
+		thrust::exclusive_scan(thrust::device, s2PSelected.begin(), s2PSelected.begin() + s2PSelected.size(), s2PSelected.begin());
+
+		DArray<int> s2PSelectedIndex;
+		s2PSelectedIndex.resize(s2PSelectedSize);
+		cuExecute(s2PSelected.size(),
+			SI_s2PIndexOut,
+			s2PSelected,
+			s2PSelected_o,
+			s2PSelectedIndex
 		);
 
 		if (this->varToggleQuad()->getValue())
@@ -602,6 +684,15 @@ namespace dyno
 				intersected_q
 			);
 			intersected_o.assign(intersected_q);
+
+			DArray<int> outQuadIndex;
+			outQuadIndex.resize(outTriangleIndex.size()/2);
+			cuExecute(outQuadIndex.size(),
+				SI_QuadIndexOutput,
+				outTriangleIndex,
+				outQuadIndex
+			);
+			outTriangleIndex.assign(outQuadIndex);
 		}
 
 		this->tempNumS = intersected_size;
@@ -609,7 +700,16 @@ namespace dyno
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
-		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+		if (this->varToggleIndexOutput()->getValue())
+		{
+			this->outTriangleIndex()->getDataPtr()->assign(outTriangleIndex);
+			this->outSur2PointIndex()->getDataPtr()->assign(s2PSelectedIndex);
+		}
+		else
+		{
+			this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+			this->outSur2PointIndex()->getDataPtr()->assign(s2PSelected_o);
+		}
 	}
 
 	template<typename TDataType>
@@ -740,6 +840,8 @@ namespace dyno
 		intersected_o.assign(intersected);
 
 		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		DArray<int> outTriangleIndex;
+		outTriangleIndex.resize(intersected_size);
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Triangle> intersected_triangles;
 		intersected_triangles.resize(intersected_size);
@@ -754,9 +856,39 @@ namespace dyno
 			triangles,
 			intersected_triangles,
 			unintersected_triangles,
+			outTriangleIndex,
 			intersected,
 			unintersected,
 			intersected_o
+		);
+
+		DArray<int> s2PSelected;
+		s2PSelected.resize(points.size());
+
+		cuExecute(points.size(),
+			SI_InitialS2PSelected,
+			s2PSelected
+		);
+
+		cuExecute(outTriangleIndex.size(),
+			SI_Surface2Point,
+			triangles,
+			outTriangleIndex,
+			s2PSelected
+		);
+		int s2PSelectedSize = thrust::reduce(thrust::device, s2PSelected.begin(), s2PSelected.begin() + s2PSelected.size(), (int)0, thrust::plus<int>());
+		DArray<int> s2PSelected_o;
+		s2PSelected_o.assign(s2PSelected);
+
+		thrust::exclusive_scan(thrust::device, s2PSelected.begin(), s2PSelected.begin() + s2PSelected.size(), s2PSelected.begin());
+
+		DArray<int> s2PSelectedIndex;
+		s2PSelectedIndex.resize(s2PSelectedSize);
+		cuExecute(s2PSelected.size(),
+			SI_s2PIndexOut,
+			s2PSelected,
+			s2PSelected_o,
+			s2PSelectedIndex
 		);
 
 		if (this->varToggleQuad()->getValue())
@@ -769,6 +901,15 @@ namespace dyno
 				intersected_q
 			);
 			intersected_o.assign(intersected_q);
+
+			DArray<int> outQuadIndex;
+			outQuadIndex.resize(outTriangleIndex.size() / 2);
+			cuExecute(outQuadIndex.size(),
+				SI_QuadIndexOutput,
+				outTriangleIndex,
+				outQuadIndex
+			);
+			outTriangleIndex.assign(outQuadIndex);
 		}
 
 		this->tempNumS = intersected_size;
@@ -776,7 +917,16 @@ namespace dyno
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
-		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+		if (this->varToggleIndexOutput()->getValue())
+		{
+			this->outTriangleIndex()->getDataPtr()->assign(outTriangleIndex);
+			this->outSur2PointIndex()->getDataPtr()->assign(s2PSelectedIndex);
+		}
+		else
+		{
+			this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+			this->outSur2PointIndex()->getDataPtr()->assign(s2PSelected_o);
+		}
 	}
 
 	template<typename TDataType>
@@ -839,6 +989,8 @@ namespace dyno
 		intersected_o.assign(intersected);
 
 		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		DArray<int> outTriangleIndex;
+		outTriangleIndex.resize(intersected_size);
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Triangle> intersected_triangles;
 		intersected_triangles.resize(intersected_size);
@@ -853,16 +1005,56 @@ namespace dyno
 			triangles,
 			intersected_triangles,
 			unintersected_triangles,
+			outTriangleIndex,
 			intersected,
 			unintersected,
 			intersected_o
 		);
+
+		DArray<int> s2PSelected;
+		s2PSelected.resize(points.size());
+
+		cuExecute(points.size(),
+			SI_InitialS2PSelected,
+			s2PSelected
+		);
+
+		cuExecute(outTriangleIndex.size(),
+			SI_Surface2Point,
+			triangles,
+			outTriangleIndex,
+			s2PSelected
+		);
+		int s2PSelectedSize = thrust::reduce(thrust::device, s2PSelected.begin(), s2PSelected.begin() + s2PSelected.size(), (int)0, thrust::plus<int>());
+		DArray<int> s2PSelected_o;
+		s2PSelected_o.assign(s2PSelected);
+
+		thrust::exclusive_scan(thrust::device, s2PSelected.begin(), s2PSelected.begin() + s2PSelected.size(), s2PSelected.begin());
+
+		DArray<int> s2PSelectedIndex;
+		s2PSelectedIndex.resize(s2PSelectedSize);
+		cuExecute(s2PSelected.size(),
+			SI_s2PIndexOut,
+			s2PSelected,
+			s2PSelected_o,
+			s2PSelectedIndex
+		);
+
 		this->tempNumS = intersected_size;
 		this->outSelectedTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outSelectedTriangleSet()->getDataPtr()->setTriangles(intersected_triangles);
 		this->outOtherTriangleSet()->getDataPtr()->copyFrom(initialTriangleSet);
 		this->outOtherTriangleSet()->getDataPtr()->setTriangles(unintersected_triangles);
-		this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+		if (this->varToggleIndexOutput()->getValue())
+		{
+			this->outTriangleIndex()->getDataPtr()->assign(outTriangleIndex);
+			this->outSur2PointIndex()->getDataPtr()->assign(s2PSelectedIndex);
+		}
+		else
+		{
+			this->outTriangleIndex()->getDataPtr()->assign(intersected_o);
+			this->outSur2PointIndex()->getDataPtr()->assign(s2PSelected_o);
+		}
 	}
 
 	template<typename TDataType>

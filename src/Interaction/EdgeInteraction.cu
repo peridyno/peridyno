@@ -275,6 +275,7 @@ namespace dyno
 		DArray<Edge> edges,
 		DArray<Edge> intersected_edges,
 		DArray<Edge> unintersected_edges,
+		DArray<int> outEdgeIndex,
 		DArray<int> intersected,
 		DArray<int> unintersected,
 		DArray<int> intersected_o)
@@ -285,6 +286,7 @@ namespace dyno
 		if (intersected_o[pId] == 1)
 		{
 			intersected_edges[intersected[pId]] = edges[pId];
+			outEdgeIndex[intersected[pId]] = pId;
 		}
 		else
 		{
@@ -390,6 +392,8 @@ namespace dyno
 		intersected_o.assign(intersected);
 
 		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		DArray<int> outEdgeIndex;
+		outEdgeIndex.resize(intersected_size);
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Edge> intersected_edges;
 		intersected_edges.resize(intersected_size);
@@ -405,6 +409,7 @@ namespace dyno
 			edges,
 			intersected_edges,
 			unintersected_edges,
+			outEdgeIndex,
 			intersected,
 			unintersected,
 			intersected_o
@@ -413,7 +418,14 @@ namespace dyno
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
-		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+		if (this->varToggleIndexOutput()->getValue())
+		{
+			this->outEdgeIndex()->getDataPtr()->assign(outEdgeIndex);
+		}
+		else
+		{
+			this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+		}
 	}
 
 	template<typename TDataType>
@@ -521,6 +533,8 @@ namespace dyno
 		intersected_o.assign(intersected);
 
 		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		DArray<int> outEdgeIndex;
+		outEdgeIndex.resize(intersected_size);
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Edge> intersected_edges;
 		intersected_edges.resize(intersected_size);
@@ -535,6 +549,7 @@ namespace dyno
 			edges,
 			intersected_edges,
 			unintersected_edges,
+			outEdgeIndex,
 			intersected,
 			unintersected,
 			intersected_o
@@ -544,7 +559,14 @@ namespace dyno
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
-		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+		if (this->varToggleIndexOutput()->getValue())
+		{
+			this->outEdgeIndex()->getDataPtr()->assign(outEdgeIndex);
+		}
+		else
+		{
+			this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+		}
 	}
 
 	template<typename TDataType>
@@ -607,6 +629,8 @@ namespace dyno
 		intersected_o.assign(intersected);
 
 		int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+		DArray<int> outEdgeIndex;
+		outEdgeIndex.resize(intersected_size);
 		thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 		DArray<Edge> intersected_edges;
 		intersected_edges.resize(intersected_size);
@@ -621,6 +645,7 @@ namespace dyno
 			edges,
 			intersected_edges,
 			unintersected_edges,
+			outEdgeIndex,
 			intersected,
 			unintersected,
 			intersected_o
@@ -630,7 +655,14 @@ namespace dyno
 		this->outSelectedEdgeSet()->getDataPtr()->setEdges(intersected_edges);
 		this->outOtherEdgeSet()->getDataPtr()->copyFrom(initialEdgeSet);
 		this->outOtherEdgeSet()->getDataPtr()->setEdges(unintersected_edges);
-		this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+		if (this->varToggleIndexOutput()->getData())
+		{
+			this->outEdgeIndex()->getDataPtr()->assign(outEdgeIndex);
+		}
+		else
+		{
+			this->outEdgeIndex()->getDataPtr()->assign(intersected_o);
+		}
 	}
 
 	template<typename TDataType>
