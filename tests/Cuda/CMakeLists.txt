@@ -15,3 +15,5 @@ endif()
 if(PERIDYNO_LIBRARY_VOLUME)
     add_subdirectory(Test_Volume)
 endif()
+
+add_subdirectory(Homework)
