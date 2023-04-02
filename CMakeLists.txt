@@ -135,7 +135,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	    add_subdirectory(python)
 	endif()
 
-	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
+	option(PERIDYNO_TESTS "Enable python binding with pybind11" ON)
 	if(PERIDYNO_TESTS)
 	    add_subdirectory(external/gtest)
 	    add_subdirectory(tests)
