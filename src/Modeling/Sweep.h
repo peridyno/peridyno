@@ -19,6 +19,7 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "Ramp.h"
 
 namespace dyno
 {
