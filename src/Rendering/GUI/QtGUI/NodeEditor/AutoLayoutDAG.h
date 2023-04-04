@@ -31,6 +31,10 @@ namespace dyno {
 
 		size_t layerNumber() { return mLayerNum; }
 
+		size_t OtherVerticesSize() { return OtherVertices.size(); }
+
+		std::set<ObjectId>& getOtherVertices() {return OtherVertices;}
+
 		std::vector<ObjectId>& layer(size_t l) { return mNodeLayers[l]; }
 
 	protected:
@@ -51,8 +55,9 @@ namespace dyno {
 		std::map<ObjectId, int> mXCoordinate;
 
 		std::vector<std::vector<ObjectId>> mNodeLayers;
-
 		size_t mLayerNum = 0;
+
+		std::set<ObjectId> OtherVertices;
 
 		int mIterNum = 1;
 	};

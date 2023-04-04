@@ -53,7 +53,7 @@ namespace dyno
 		m_startSim->setStyleSheet("padding: 6px;");	
 		m_resetSim->setStyleSheet("padding: 6px;");
 
-		m_startSim->setShortcut(QKeySequence(Qt::Key_Down));		//设置播放快捷键
+		m_startSim->setShortcut(QKeySequence(Qt::Key_Space));		//设置播放快捷键
 
 		Starticon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));//设置按钮icon
 		Pauseicon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));

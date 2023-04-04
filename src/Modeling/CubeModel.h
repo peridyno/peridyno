@@ -46,6 +46,10 @@ namespace dyno
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 
 		void resetStates() override;
+
+	private:
+		void varChanged();
+
 	};
 
 	IMPLEMENT_TCLASS(CubeModel, TDataType);

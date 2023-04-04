@@ -16,52 +16,58 @@
 
 #pragma once
 #include "Node/ParametricModel.h"
-
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+
 
 namespace dyno
 {
 
 
 	template<typename TDataType>
-	class CylinderModel : public ParametricModel<TDataType>
+	class CopyModel : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(CylinderModel, TDataType);
+		DECLARE_TCLASS(CopyModel, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		CylinderModel();
+		CopyModel();
+
+		DECLARE_ENUM(ScaleMode,
+			Power = 0,
+			Multiply = 1);
 
 	public:
-		DEF_VAR(unsigned, Columns, 24, "Cylinder Columns");
 
-		DEF_VAR(unsigned, Row, 4, "Cylinder Row");
 
-		DEF_VAR(unsigned, EndSegment, 3, "Cylinder EndSegment");
+		DEF_VAR(unsigned, TotalNumber, 3, "CopyNumber");
 
-		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
+		DEF_VAR(Coord, CopyTransform, 0, "CopyTransform");
 
-		DEF_VAR(Real, Height, 0.9, "Cylinder Height");
+		DEF_VAR(Coord, CopyRotation, 0, "CopyRotation");
+
+		DEF_VAR(Coord, CopyScale, 1, "CopyScale");
+
+		DEF_ENUM(ScaleMode, ScaleMode, ScaleMode::Power, "ScaleMode");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSetIn,"")
+
+
+		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
 		void disableRender();
 
 	protected:
 		void resetStates() override;
 
-		void varChanged();
-
-
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 
 
 
-	IMPLEMENT_TCLASS(CylinderModel, TDataType);
+	IMPLEMENT_TCLASS(CopyModel, TDataType);
 }

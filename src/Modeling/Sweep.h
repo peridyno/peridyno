@@ -19,49 +19,50 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "Ramp.h"
 
 namespace dyno
 {
 
 
 	template<typename TDataType>
-	class CylinderModel : public ParametricModel<TDataType>
+	class SweepModel : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(CylinderModel, TDataType);
+		DECLARE_TCLASS(SweepModel, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		CylinderModel();
+		SweepModel();
 
 	public:
-		DEF_VAR(unsigned, Columns, 24, "Cylinder Columns");
-
-		DEF_VAR(unsigned, Row, 4, "Cylinder Row");
-
-		DEF_VAR(unsigned, EndSegment, 3, "Cylinder EndSegment");
 
 		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
 
-		DEF_VAR(Real, Height, 0.9, "Cylinder Height");
-
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
+		DEF_INSTANCE_IN(PointSet<TDataType>, Spline, "")
+
+		DEF_INSTANCE_IN(PointSet<TDataType>, Curve, "")
+
+		DEF_VAR(Ramp,CurveRamp,Ramp::BorderMode::Close,"");
+
+		DEF_VAR(bool,useRamp,false,"");
 
 		void disableRender();
+
+		Vec3f RealScale();
 
 	protected:
 		void resetStates() override;
 
-		void varChanged();
-
-
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
+		float currentIndex = 0;
+		float totalIndex = 0;
 	};
 
 
 
-	IMPLEMENT_TCLASS(CylinderModel, TDataType);
+	IMPLEMENT_TCLASS(SweepModel, TDataType);
 }

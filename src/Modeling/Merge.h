@@ -16,52 +16,49 @@
 
 #pragma once
 #include "Node/ParametricModel.h"
-
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+
 
 namespace dyno
 {
 
 
 	template<typename TDataType>
-	class CylinderModel : public ParametricModel<TDataType>
+	class Merge : public Node
 	{
-		DECLARE_TCLASS(CylinderModel, TDataType);
+		DECLARE_TCLASS(Merge, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		CylinderModel();
+		Merge();
 
 	public:
-		DEF_VAR(unsigned, Columns, 24, "Cylinder Columns");
-
-		DEF_VAR(unsigned, Row, 4, "Cylinder Row");
-
-		DEF_VAR(unsigned, EndSegment, 3, "Cylinder EndSegment");
-
-		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
-
-		DEF_VAR(Real, Height, 0.9, "Cylinder Height");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet01, "")
+
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "")
+
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "")
+
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "")
+
+
+		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
 		void disableRender();
 
 	protected:
 		void resetStates() override;
 
-		void varChanged();
-
-
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 
 
 
-	IMPLEMENT_TCLASS(CylinderModel, TDataType);
+	IMPLEMENT_TCLASS(Merge, TDataType);
 }
