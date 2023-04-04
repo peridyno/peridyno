@@ -51,7 +51,7 @@ namespace dyno
 		virtual std::string name() const override;
 
 		// get the selected nodes on given rect area
-		std::vector<SelectionItem>	select(int x, int y, int w, int h) override;
+		Selection select(int x, int y, int w, int h) override;
 
 	private:
 		void setupInternalFramebuffer();
@@ -62,9 +62,18 @@ namespace dyno
 		void updateRenderModules(dyno::SceneGraph* scene);
 
 	private:
-		std::vector<std::shared_ptr<GLVisualModule>> mRenderModules;
 
-		std::vector<Node*> mRenderNodes;
+		// objects to render
+		struct RenderItem {
+			std::shared_ptr<Node>			node;
+			std::shared_ptr<GLVisualModule> visualModule;
+
+			bool operator==(const RenderItem& item) {
+				return node == item.node && visualModule == item.visualModule;
+			}
+		};
+
+		std::vector<RenderItem> mRenderItems;
 
 	private:
 		// internal framebuffer
