@@ -26,10 +26,11 @@ namespace dyno
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
-
 		this->varRadius()->attach(callback);
 		this->varTheta()->attach(callback);
-		
+		this->varRow()->attach(callback);
+		this->varSphereMode()->attach(callback);
+
 		glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
 		glModule->setVisible(true);
@@ -135,20 +136,20 @@ namespace dyno
 
 			for (float d_alpha = -PI/2 + theta/2; d_alpha < PI/2; d_alpha += theta )
 			{
-				point[1] = center[1] + radius * sin(d_alpha);
+				point[1] = radius * sin(d_alpha);
 
 				for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta )
 				{
-					point[0] = center[0] + (cos(d_alpha) * radius) * sin(d_beta);
-					point[2] = center[2] + (cos(d_alpha) * radius) * cos(d_beta);
+					point[0] = (cos(d_alpha) * radius) * sin(d_beta);
+					point[2] = (cos(d_alpha) * radius) * cos(d_beta);
 					vertices.push_back(point);
 
 				}
 
 			}
 
-			vertices.push_back(Coord(center[0], -radius + center[1], center[2]));
-			vertices.push_back(Coord(center[0], radius + center[1], center[2]));
+			vertices.push_back(Coord(0, -radius , 0));
+			vertices.push_back(Coord(0, radius , 0));
 
 
 			int face_id = 0;
