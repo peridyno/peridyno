@@ -403,27 +403,7 @@ namespace dyno
 			// flip y to texture space...
 			y = activeWindow->getHeight() - y - 1;
 
-			auto items = activeWindow->mRenderEngine->select(x, y, w, h);
-			// print selected result...
-			//printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
-
-			if (!items.empty()) {
-				// pick the last one?
-				auto node = items[0].node;
-				int instance = items[0].instance;
-
-				auto bbox = node->boundingBox();
-
-				printf("  Node: %s, bbox = (%.3f, %.3f, %.3f) - (%.3f, %.3f, %.3f)\n", node->getName().c_str(),
-					bbox.lower[0], bbox.lower[1], bbox.lower[2],
-					bbox.upper[0], bbox.upper[1], bbox.upper[2]);
-
-				// set selected node
-				activeWindow->currNode = node;
-			}
-			else {
-				activeWindow->currNode = 0;
-			}
+			const auto& selection = activeWindow->select(x, y, w, h);
 		}
 
 		auto camera = activeWindow->getCamera();

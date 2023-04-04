@@ -396,6 +396,25 @@ namespace dyno
 		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
 		connect(m_propertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::fieldUpdated);
+
+		// between OpenGL and property widget
+		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
+			m_propertyWidget->showProperty(node);
+			// TODO: high light selected node in node editor
+			});
+
+
+		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
+			{
+				auto model = n.nodeDataModel();
+				auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
+
+				if (widget != nullptr)
+				{
+					mOpenGLWidget->select(widget->getNode());
+					mOpenGLWidget->update();
+				}
+			});
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)

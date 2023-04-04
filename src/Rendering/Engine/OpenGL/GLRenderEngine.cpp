@@ -74,8 +74,8 @@ namespace dyno
 	void GLRenderEngine::terminate()
 	{
 		// release render modules
-		for (auto m : mRenderModules) {
-			m->destroyGL();
+		for (auto item : mRenderItems) {
+			item.visualModule->destroyGL();
 		}
 
 		// release framebuffer
@@ -180,55 +180,49 @@ namespace dyno
 
 	void GLRenderEngine::updateRenderModules(dyno::SceneGraph* scene)
 	{
-		// render visual modules
-		struct RenderQueue : public Action {
-			void process(Node* node) override
-			{
-				for (auto iter : node->graphicsPipeline()->activeModules()) {
-					auto m = std::dynamic_pointer_cast<GLVisualModule>(iter);
-					if (m) {
-						modules.push_back(m);
-						nodes.push_back(node);
-					}
+
+		std::vector<RenderItem> items;
+
+		for (auto iter = scene->begin(); iter != scene->end(); iter++) {
+			auto node = iter.get();
+
+			for (auto m : node->graphicsPipeline()->activeModules()) {
+				auto vm = std::dynamic_pointer_cast<GLVisualModule>(m);
+				if (vm) {
+					items.push_back({ node, vm });
 				}
 			}
-			std::vector<std::shared_ptr<GLVisualModule>>	modules;
-			std::vector<Node*>								nodes;
-		} action;
-
-		// enqueue modules for rendering
-		if (scene != nullptr && !scene->isEmpty()) {
-			scene->traverseForward(&action);
 		}
 
-		for (auto m : mRenderModules) {
+		
+		for (auto item : mRenderItems) {
 			// release GL resource for unreferenced visual module
-			if (std::find(action.modules.begin(), action.modules.end(), m) == action.modules.end())
+			if (std::find(items.begin(), items.end(), item) == items.end())
 			{
-				m->destroyGL();
+				item.visualModule->destroyGL();
 			}
 		}
 
-		mRenderModules = action.modules;
-		mRenderNodes   = action.nodes;
+		mRenderItems = items;
+
 
 		// initialize modules
-		for (auto m : mRenderModules) {
-			if (!m->isGLInitialized)
-				m->isGLInitialized = m->initializeGL();
+		for (auto item : mRenderItems) {
+			if (!item.visualModule->isGLInitialized)
+				item.visualModule->isGLInitialized = item.visualModule->initializeGL();
 
-			if (!m->isGLInitialized)
-				printf("Warning: failed to initialize %s\n", m->getName().c_str());
+			if (!item.visualModule->isGLInitialized)
+				printf("Warning: failed to initialize %s\n", item.visualModule->getName().c_str());
 		}
 
 		// update if necessary
-		for (auto m : mRenderModules) {
-			if (m->isGLInitialized)
+		for (auto item : mRenderItems) {
+			if (item.visualModule->isGLInitialized)
 			{
 				// check update
-				if (m->changed > m->updated) {
-					m->updateGL();
-					m->updated = GLVisualModule::clock::now();
+				if (item.visualModule->changed > item.visualModule->updated) {
+					item.visualModule->updateGL();
+					item.visualModule->updated = GLVisualModule::clock::now();
 				}
 			}
 		}
@@ -289,12 +283,12 @@ namespace dyno
 		mVariableUBO.bindBufferBase(2);
 
 		// render opacity objects
-		for (int i = 0; i < mRenderModules.size(); i++) {
+		for (int i = 0; i < mRenderItems.size(); i++) {
 
-			if (mRenderNodes[i]->isVisible() && !mRenderModules[i]->isTransparent())
+			if (mRenderItems[i].node->isVisible() && !mRenderItems[i].visualModule->isTransparent())
 			{
 				mVariableUBO.load(&i, sizeof(i));
-				mRenderModules[i]->draw(GLRenderPass::COLOR);
+				mRenderItems[i].visualModule->draw(GLRenderPass::COLOR);
 			}
 		}
 
@@ -315,12 +309,12 @@ namespace dyno
 			mFramebuffer.drawBuffers(0, 0);
 
 			glDepthMask(false);
-			for (int i = 0; i < mRenderModules.size(); i++) {
+			for (int i = 0; i < mRenderItems.size(); i++) {
 
-				if (mRenderNodes[i]->isVisible() && mRenderModules[i]->isTransparent())
+				if (mRenderItems[i].node->isVisible() && mRenderItems[i].visualModule->isTransparent())
 				{
 					mVariableUBO.load(&i, sizeof(i));
-					mRenderModules[i]->draw(GLRenderPass::TRANSPARENCY);
+					mRenderItems[i].visualModule->draw(GLRenderPass::TRANSPARENCY);
 				}
 			}
 
@@ -402,7 +396,7 @@ namespace dyno
 		return std::string("Native OpenGL");
 	}
 
-	std::vector<SelectionItem> GLRenderEngine::select(int x, int y, int w, int h)
+	Selection GLRenderEngine::select(int x, int y, int w, int h)
 	{
 		// TODO: check valid input
 		w = std::max(1, w);
@@ -420,21 +414,23 @@ namespace dyno
 		// use unordered set to get unique id
 		std::unordered_set<glm::ivec4> uniqueIdx(indices.begin(), indices.end());
 
-		std::vector<SelectionItem> items;
+		Selection result;
+		result.x = x;
+		result.y = y;
+		result.w = w;
+		result.h = h;
 
-		for (glm::ivec4 i : uniqueIdx) {
-			int nodeIdx = i.x;
+		for (const auto& idx : uniqueIdx) {
+			const int nodeIdx = idx.x;
+			const int instIdx = idx.y;
+			const int primIdx = idx.z;
 
-			if (nodeIdx >= 0 && nodeIdx < mRenderNodes.size()) {
-				SelectionItem item;
-				item.node = mRenderNodes[nodeIdx];
-				item.instance = i.y;
-
-				items.push_back(item);
+			if (nodeIdx >= 0 && nodeIdx < mRenderItems.size()) {
+				result.items.push_back({mRenderItems[nodeIdx].node,	instIdx, primIdx});
 			}
 		}
 
-		return items;
+		return result;
 	}
 
 }
