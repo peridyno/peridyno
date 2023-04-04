@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "Node.h"
 #include "FilePath.h"
+#include "Ramp.h"
 #include "SceneGraph.h"
 
 //Node editor
@@ -358,6 +359,13 @@ namespace dyno
 		else if (template_name == std::string(typeid(FilePath).name()))
 		{
 			auto fw = new QFilePathWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
+			layout->addWidget(fw, j, 0);
+		}
+		else if (template_name == std::string(typeid(Ramp).name()))
+		{
+			auto fw = new QRampWidget(field);
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
 			layout->addWidget(fw, j, 0);
