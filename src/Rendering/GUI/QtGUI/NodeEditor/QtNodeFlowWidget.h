@@ -28,11 +28,13 @@ namespace Qt
 		explicit QtNodeFlowWidget(QWidget *parent = nullptr);
 		~QtNodeFlowWidget();
 
+		inline QtNodeFlowScene* flowScene() { return node_scene; }
+
 	signals:
 
-	public:
+	private:
 		QGridLayout*		m_MainLayout;
 
-		Qt::QtNodeFlowScene* node_scene = nullptr;
+		QtNodeFlowScene* node_scene = nullptr;
 	};
 }
