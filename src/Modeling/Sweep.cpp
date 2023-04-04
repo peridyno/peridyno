@@ -45,13 +45,14 @@ namespace dyno
 	template<typename TDataType>
 	void SweepModel<TDataType>::resetStates()
 	{
+
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
 
 		auto radius = this->varRadius()->getData();
 		
-		auto VertexIn = this->inCurve1()->getData().getPoints();
+		auto VertexIn = this->inSpline()->getData().getPoints();
 
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
@@ -63,8 +64,9 @@ namespace dyno
 		c_point1.assign(VertexIn);
 
 		int lengthV = VertexIn.size();
+		totalIndex = lengthV;
 		//Curve2环形曲线 曲线点
-		auto VertexIn2 = this->inCurve2()->getData().getPoints();
+		auto VertexIn2 = this->inCurve()->getData().getPoints();
 
 		CArray<Coord> c_point2;
 		c_point2.assign(VertexIn2);
@@ -85,11 +87,9 @@ namespace dyno
 		//建立四元数以进行递归变换
 
 
-
-
 		for (size_t i = 0; i < lengthV; i++) 
 		{
-			
+			currentIndex = i;
 			Location2 = { c_point1[i][0], c_point1[i][1], c_point1[i][2] };
 			
 			int next = i + 1;
@@ -144,7 +144,7 @@ namespace dyno
 
 				Location1 = { c_point2[k][0], c_point2[k][1], c_point2[k][2] };
 				
-
+				
 
 
 				Location1 = RV(Location1 * RealScale()) + Location2;//
@@ -244,7 +244,12 @@ namespace dyno
 		auto radius = this->varRadius()->getData();
 		//后续可以修改这个变换以起到使sweep细节更丰富的目的
 		Vec3f s = Vec3f(1*radius ,1* radius ,1 *radius);
-		
+		if (this->varuseRamp()->getData() == true) 
+		{
+			float pr = this->varCurveRamp()->getDataPtr()->getCurveValueByX(currentIndex / totalIndex);
+			std::cout << "采样值为" << pr << std::endl;
+			if (pr != -1) { s = s * pr;}
+		}
 		return s;
 	}
 

@@ -19,39 +19,33 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "Ramp.h"
 
 namespace dyno
 {
 
 
 	template<typename TDataType>
-	class SweepModel : public ParametricModel<TDataType>
+	class PointFromCurve : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(SweepModel, TDataType);
+		DECLARE_TCLASS(PointFromCurve, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SweepModel();
+		PointFromCurve();
 
 	public:
 
-		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
+		DEF_VAR(Real, UniformScale, 1, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_IN(PointSet<TDataType>, Spline, "")
-
-		DEF_INSTANCE_IN(PointSet<TDataType>, Curve, "")
-
-		DEF_VAR(Ramp,CurveRamp,Ramp::BorderMode::Close,"");
-
-		DEF_VAR(bool,useRamp,false,"");
+		DEF_VAR(Ramp,CurveRamp,Ramp::BorderMode::Open,"");
 
 		void disableRender();
 
-		Vec3f RealScale();
 
 	protected:
 		void resetStates() override;
@@ -63,5 +57,5 @@ namespace dyno
 
 
 
-	IMPLEMENT_TCLASS(SweepModel, TDataType);
+	IMPLEMENT_TCLASS(PointFromCurve, TDataType);
 }
