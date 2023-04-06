@@ -24,6 +24,11 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
 
+
+		DECLARE_ENUM(OutputType,
+		 TriangleMesh= 0,
+		 PointCloud = 1);
+
 		TriangleMeshWriter();
 		virtual ~TriangleMeshWriter();
 
@@ -33,17 +38,19 @@ namespace dyno
 		void setTriangleSetPtr(std::shared_ptr<TriangleSet<TDataType>> ptr_triangles) { this->ptr_TriangleSet = ptr_triangles;  this->updatePtr(); }
 		bool updatePtr();
 		bool updatePtr(TriangleSet<TDataType> triangle_set);
+		bool updatePtr(PointSet<TDataType> point_set);
 
 		bool outputSurfaceMesh();
 		bool outputSurfaceMesh(TriangleSet<TDataType> triangleset );
+		bool outputPointCloud(PointSet<TDataType> pointset);
 
 	protected:
 		void updateImpl() override;
 
 	public:
 		DEF_VAR_IN(unsigned, FrameNumber, "Input FrameNumber");
-		DEF_INSTANCE_IN (TriangleSet<TDataType>, TriangleSet, "Input TriangleSet");
-
+		DEF_INSTANCE_IN (TopologyModule, Topology, "Input TriangleSet");
+		DEF_ENUM(OutputType,OutputType,OutputType::TriangleMesh,"OutputType")
 	protected:
 		int time_idx = 0;
 		int m_output_index = 0;
