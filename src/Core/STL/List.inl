@@ -35,7 +35,7 @@ namespace dyno
 		if (m_size >= this->m_maxSize) return nullptr;
 		
 		
-		int index = atomicAdd(&(this->m_size), 1+val-val);
+		int index = atomicAdd(&(this->m_size), 1+(val-val));
 		//int index = atomicAdd(&(this->m_size), 1);
 		//int index = 0;//Onlinux platform, this is a bug, not yet resolved.
 
