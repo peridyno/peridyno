@@ -34,6 +34,28 @@
 
 namespace dyno
 {
+	QFieldWidget::QFieldWidget(FBase* field)
+	{
+		mField = field;
+		if (mField != nullptr)
+		{
+			auto callback = std::make_shared<FCallBackFunc>(std::bind(&QFieldWidget::syncValueFromField, this));
+			mField->attach(callback);
+		};
+	}
+
+	QFieldWidget::~QFieldWidget()
+	{
+		if (mField != nullptr) {
+			mField->detach(callback);
+		}
+	}
+
+	void QFieldWidget::syncValueFromField()
+	{
+		emit syncWidget();
+	}
+
 	QBoolFieldWidget::QBoolFieldWidget(FBase* field)
 		: QGroupBox()
 	{
@@ -343,10 +365,8 @@ namespace dyno
 	}
 
 	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
-		: QGroupBox()
+		: QFieldWidget(field)
 	{
-		mField = field;
-
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSpacing(0);
@@ -418,19 +438,10 @@ namespace dyno
 		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 
 		QObject::connect(this, SIGNAL(syncWidget()), this, SLOT(updateWidget()));
-
-		if (mField != nullptr)
-		{
-			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3FieldWidget::syncValueFromField, this));
-			mField->attach(callback);
-		}
 	}
 
 	QVector3FieldWidget::~QVector3FieldWidget()
 	{
-		if (mField != nullptr) {
-			mField->detach(callback);
-		}
 	}
 
 	void QVector3FieldWidget::changeValue(double value)
@@ -492,11 +503,6 @@ namespace dyno
 		spinner1->blockSignals(false);
 		spinner2->blockSignals(false);
 		spinner3->blockSignals(false);
-	}
-
-	void QVector3FieldWidget::syncValueFromField()
-	{
-		emit syncWidget();
 	}
 
 	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)
@@ -1320,8 +1326,5 @@ namespace dyno
 		}
 
 	}
-
-
-
 }
 
