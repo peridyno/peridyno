@@ -43,7 +43,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#set(CMAKE_C_COMPILE_OBJECT  "")
 
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)                                                         #默认为本项目下各编译目标开启fPIC模式，cuda下面会开启rdc模式
-	set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPILATION MODE")    #默认为本项目下各编译目标指定cuda分离编译模式
+	#set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPILATION MODE")    #默认为本项目下各编译目标指定cuda分离编译模式
 	set(CUDA_ARCH_FLAGS 60 CACHE STRING "cuda architectures" FORCE)                                 #默认为所有cuda代码生成computability7.0下二进制代码
 
 	set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
@@ -246,7 +246,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 					COMMAND ${WAYLAND_SCANNER} private-code ${protocol_dir}/stable/xdg-shell/xdg-shell.xml ${CMAKE_BINARY_DIR}/xdg-shell-protocol.c)
 			include_directories(${CMAKE_BINARY_DIR})
 		ELSE(USE_D2D_WSI)
-			find_package(XCB REQUIRED)
+			#find_package(XCB REQUIRED)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_XCB_KHR")
 		ENDIF(USE_D2D_WSI)
 	ELSEIF(APPLE)
@@ -297,12 +297,12 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 			endforeach()
 
 			# maybe we prefer to use a 'Shaders' project...
-			add_custom_target(CompileShader ALL SOURCES ${SHADER_SOURCES} DEPENDS ${SHADER_OUTPUT_FILES})
+			#add_custom_target(CompileShader ALL SOURCES ${SHADER_SOURCES} DEPENDS ${SHADER_OUTPUT_FILES})
 
 		else()
-			# use python script...
-			add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
-			set_property(TARGET CompileShader PROPERTY FOLDER glslang)
+			# use python script... -> donot need python script 
+			#add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
+			#set_property(TARGET CompileShader PROPERTY FOLDER glslang)
 		endif()
 		
 	endif()
@@ -310,7 +310,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	option(PHOENIX_Tests "Enable building px tests" ON)
 	if(PHOENIX_Tests)
 	    add_subdirectory(external/gtest)
-	    add_subdirectory(Tests)
+	    add_subdirectory(tests)
 	endif()
 
 	if(PERIDYNO_Qt5_GUI)

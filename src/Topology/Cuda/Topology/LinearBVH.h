@@ -54,8 +54,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename ::dyno::TAlignedBox3D<Real> AABB;
-		typedef typename BVHNode Node;
-		typedef typename Node* NodePtr;
+		typedef typename ::dyno::BVHNode Node;
+		typedef typename ::dyno::BVHNode* NodePtr;
 
 		LinearBVH();
 		~LinearBVH();

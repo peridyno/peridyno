@@ -67,7 +67,7 @@ public:
 		hTransform.clear();
 	};
 
-	void Instances::resetStates(){
+	void resetStates(){
 
 		auto& mPoints = this->statePosition()->getData();
 		CArray<Vec3f> cPoints;
@@ -82,7 +82,7 @@ public:
 		this->updateTopology();
 	}
 
-	void Instances::updateStates() {
+	void updateStates() {
 
 		auto& mPoints = this->statePosition()->getData();
 
@@ -105,7 +105,7 @@ public:
 	}
 
 
-	void Instances::updateTopology()
+	void updateTopology()
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<DataType3f>>(this->stateTopology()->getDataPtr());
 

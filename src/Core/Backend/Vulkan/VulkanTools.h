@@ -31,6 +31,8 @@
 #include "VulkanAndroid.h"
 #include <android/asset_manager.h>
 #include "Platform.h"
+#elif defined(__GNUC__) || defined(__clang__)
+#include "Platform.h"
 #endif
 
 // Custom define for better code readability

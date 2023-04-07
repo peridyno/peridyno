@@ -1,6 +1,6 @@
 #ifndef VKFFT_UTILS_H
 #define VKFFT_UTILS_H
-#include "vkFFT_Base.h"
+#include "VkFFT_Base.h"
 #include <vector>
 typedef struct {
 	uint64_t X;
