@@ -45,19 +45,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		QFieldWidget(FBase* field);
-		~QFieldWidget();
-
-	signals:
-		void syncWidget();
-
-	private:
-		void syncValueFromField();
-
-		std::shared_ptr<FCallBackFunc> callback = nullptr;
-
-	protected:
-		FBase* mField = nullptr;
+		QFieldWidget(FBase* field) {};
 	};
 
 	class QBoolFieldWidget : public QGroupBox
@@ -254,7 +242,7 @@ namespace dyno
 		void ModifyValue(double);
 	};
 
-	class QVector3FieldWidget : public QFieldWidget
+	class QVector3FieldWidget : public QGroupBox
 	{
 		Q_OBJECT
 	public:
@@ -263,15 +251,22 @@ namespace dyno
 
 	Q_SIGNALS:
 		void fieldChanged();
+		void syncWidget();
 
 	public slots:
 		void changeValue(double);
 		void updateWidget();
 
 	private:
+		void syncValueFromField();
+
+		FBase* mField = nullptr;
+
 		mDoubleSpinBox* spinner1;
 		mDoubleSpinBox* spinner2;
 		mDoubleSpinBox* spinner3;
+
+		std::shared_ptr<FCallBackFunc> callback = nullptr;
 	};
 
 	class QVector3iFieldWidget : public QGroupBox
