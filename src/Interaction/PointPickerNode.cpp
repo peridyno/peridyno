@@ -19,6 +19,8 @@ namespace dyno
 
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
+		this->varToggleIndexOutput()->connect(pointInteractor->varToggleIndexOutput());
+
 		this->pointInteractor = pointInteractor;
 
 		this->graphicsPipeline()->pushModule(pointInteractor);

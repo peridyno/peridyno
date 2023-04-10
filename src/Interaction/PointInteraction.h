@@ -56,6 +56,8 @@ namespace dyno
 
 		DEF_VAR(bool, ToggleMultiSelect, false, "The toggle of multiple selection");
 
+		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
+
 	protected:
 		void onEvent(PMouseEvent event) override;
 	private:

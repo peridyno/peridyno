@@ -1805,6 +1805,88 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC int TLine3D<Real>::intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const
+	{
+		if (!isValid())
+		{
+			return 0;
+		}
+
+		Real t0 = -REAL_MAX;
+		Real t1 = REAL_MAX;
+
+		auto clip = [](Real denom, Real numer, Real& t0, Real& t1) -> bool
+		{
+			if (denom > REAL_EPSILON)
+			{
+				if (numer > denom * t1)
+				{
+					return false;
+				}
+				if (numer > denom * t0)
+				{
+					t0 = numer / denom;
+				}
+				return true;
+			}
+			else if (denom < -REAL_EPSILON)
+			{
+				if (numer > denom * t0)
+				{
+					return false;
+				}
+				if (numer > denom * t1)
+				{
+					t1 = numer / denom;
+				}
+				return true;
+			}
+			else
+			{
+				return numer <= -REAL_EPSILON;
+			}
+		};
+
+		Coord3D boxCenter = obb.center;
+		Coord3D boxExtent = obb.extent;
+
+		Coord3D offset = origin - boxCenter;
+		Coord3D lineDir = direction;
+		lineDir.normalize();
+
+		Real du = lineDir.dot(obb.u);
+		Real dv = lineDir.dot(obb.v);
+		Real dw = lineDir.dot(obb.w);
+
+		Real offset_u = offset.dot(obb.u);
+		Real offset_v = offset.dot(obb.v);
+		Real offset_w = offset.dot(obb.w);
+
+		if (clip(+du, -offset_u - boxExtent[0], t0, t1) &&
+			clip(-du, +offset_u - boxExtent[0], t0, t1) &&
+			clip(+dv, -offset_v - boxExtent[1], t0, t1) &&
+			clip(-dv, +offset_v - boxExtent[1], t0, t1) &&
+			clip(+dw, -offset_w - boxExtent[2], t0, t1) &&
+			clip(-dw, +offset_w - boxExtent[2], t0, t1))
+		{
+			if (t1 > t0)
+			{
+				interSeg.v0 = origin + t0 * lineDir;
+				interSeg.v1 = origin + t1 * lineDir;
+				return 2;
+			}
+			else
+			{
+				interSeg.v0 = origin + t0 * lineDir;
+				interSeg.v1 = interSeg.v0;
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
+	template<typename Real>
 	DYN_FUNC Real TLine3D<Real>::parameter(const Coord3D& pos) const
 	{
 		Coord3D l = pos - origin;
@@ -2188,6 +2270,37 @@ namespace dyno
 		int interNum = TLine3D<Real>(origin, direction).intersect(abox, interSeg);
 		if (interNum == 0)
 		{
+			return 0;
+		}
+
+		Real t0 = parameter(interSeg.startPoint());
+		Real t1 = parameter(interSeg.endPoint());
+
+		Interval<Real> iRay(0, REAL_MAX, false, true);
+
+		if (iRay.inside(t0))
+		{
+			interSeg.v0 = origin + iRay.leftLimit() * direction;
+			interSeg.v1 = origin + iRay.rightLimit() * direction;
+			return 2;
+		}
+		else if (iRay.inside(t1))
+		{
+			interSeg.v0 = origin + iRay.leftLimit() * direction;
+			interSeg.v1 = interSeg.v0;
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC int TRay3D<Real>::intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const
+	{
+		int interNum = TLine3D<Real>(origin, direction).intersect(obb, interSeg);
+		if (interNum == 0) {
 			return 0;
 		}
 

@@ -65,7 +65,7 @@ namespace dyno
 
 				//reoder¹¦ÄÜ
 				if (i == v_IcoAndLabel.size() - 1 && j == 0) {
-					connect(art, &QAction::triggered, this, [=]() {mNodeFlow->node_scene->reorderAllNodes(); });
+					connect(art, &QAction::triggered, this, [=]() {mNodeFlow->flowScene()->reorderAllNodes(); });
 				}
 			}
 		}

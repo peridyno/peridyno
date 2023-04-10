@@ -152,6 +152,9 @@ TEST(Line3D, distance) {
 	EXPECT_EQ(seg_inter_1.intersect(abox1, segTmp), 0);
 	EXPECT_EQ(seg_inter_2.intersect(abox1, segTmp), 1);
 	EXPECT_EQ(seg_inter_3.intersect(abox1, segTmp), 2);
+
+	OrientedBox3D obb;
+	EXPECT_EQ(line.intersect(obb, segTmp), 2);
 }
 
 TEST(Ray3D, distance) {

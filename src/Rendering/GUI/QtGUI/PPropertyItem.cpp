@@ -226,11 +226,11 @@ namespace dyno
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 
-// 		if (mField != nullptr)
-// 		{
-// 			callback = std::make_shared<FCallBackFunc>(std::bind(&QRealFieldWidget::fieldUpdated, this));
-// 			mField->attach(callback);
-// 		}
+		if (mField != nullptr)
+		{
+			callback = std::make_shared<FCallBackFunc>(std::bind(&QRealFieldWidget::syncValueFromField, this));
+			mField->attach(callback);
+		}
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -261,7 +261,7 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-	void QRealFieldWidget::fieldUpdated()
+	void QRealFieldWidget::syncValueFromField()
 	{
 		std::string template_name = mField->getTemplateName();
 		if (template_name == std::string(typeid(float).name()))
@@ -280,8 +280,6 @@ namespace dyno
 			slider->setValue(f->getValue());
 			slider->blockSignals(false);
 		}
-
-		emit fieldChanged();
 	}
 
 	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
@@ -421,9 +419,11 @@ namespace dyno
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 
+		QObject::connect(this, SIGNAL(syncWidget()), this, SLOT(updateWidget()));
+
 		if (mField != nullptr)
 		{
-			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3FieldWidget::fieldUpdated, this));
+			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3FieldWidget::syncValueFromField, this));
 			mField->attach(callback);
 		}
 	}
@@ -457,8 +457,7 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-
-	void QVector3FieldWidget::fieldUpdated()
+	void QVector3FieldWidget::updateWidget()
 	{
 		std::string template_name = mField->getTemplateName();
 
@@ -495,8 +494,11 @@ namespace dyno
 		spinner1->blockSignals(false);
 		spinner2->blockSignals(false);
 		spinner3->blockSignals(false);
+	}
 
-		emit fieldChanged();
+	void QVector3FieldWidget::syncValueFromField()
+	{
+		emit syncWidget();
 	}
 
 	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)
@@ -564,11 +566,11 @@ namespace dyno
 		QObject::connect(spinner3, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
 
 
-// 		if (mField != nullptr)
-// 		{
-// 			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3iFieldWidget::fieldUpdated, this));
-// 			mField->attach(callback);
-// 		}
+		if (mField != nullptr)
+		{
+			callback = std::make_shared<FCallBackFunc>(std::bind(&QVector3iFieldWidget::syncValueFromField, this));
+			mField->attach(callback);
+		}
 	}
 
 
@@ -603,7 +605,7 @@ namespace dyno
 		emit fieldChanged();
 	}
 
-	void QVector3iFieldWidget::fieldUpdated()
+	void QVector3iFieldWidget::syncValueFromField()
 	{
 		std::string template_name = mField->getTemplateName();
 
@@ -639,8 +641,6 @@ namespace dyno
 		spinner1->blockSignals(false);
 		spinner2->blockSignals(false);
 		spinner3->blockSignals(false);
-
-		emit fieldChanged();
 	}
 
 	QStringFieldWidget::QStringFieldWidget(FBase* field)

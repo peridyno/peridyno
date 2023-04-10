@@ -24,12 +24,18 @@ namespace dyno
 		this->varToggleQuad()->connect(surfaceInteractor->varToggleQuad());
 		this->varToggleVisibleFilter()->connect(surfaceInteractor->varToggleVisibleFilter());
 
+		this->varToggleIndexOutput()->connect(surfaceInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->connect(edgeInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->connect(pointInteractor->varToggleIndexOutput());
+
 		this->varInteractionRadius()->connect(edgeInteractor->varInteractionRadius());
 		this->varInteractionRadius()->connect(pointInteractor->varInteractionRadius());
 
 		this->stateTriQuadIndex()->connect(surfaceInteractor->outTriangleIndex());
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
+
+		this->stateSur2PointIndex()->connect(surfaceInteractor->outSur2PointIndex());
 
 		this->surfaceInteractor = surfaceInteractor;
 		this->edgeInteractor = edgeInteractor;
@@ -98,6 +104,7 @@ namespace dyno
 		this->surfaceInteractor->outTriangleIndex()->allocate();
 		this->edgeInteractor->outEdgeIndex()->allocate();
 		this->pointInteractor->outPointIndex()->allocate();
+		this->surfaceInteractor->outSur2PointIndex()->allocate();
 
 		this->surfaceInteractor->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->surfaceInteractor->outOtherTriangleSet()->getDataPtr()->getTriangles().resize(0);

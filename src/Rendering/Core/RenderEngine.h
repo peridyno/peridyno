@@ -61,9 +61,20 @@ namespace dyno
 		bool showSceneBounds = false;
 	};
 
-	struct SelectionItem {
-		Node* node = 0;
-		int   instance = -1;
+	// data structure for mouse selection
+	struct Selection {
+
+		struct Item {
+			std::shared_ptr<Node> node = 0;
+			int   instance = -1;
+			int	  primitive = -1;
+		};
+
+		int x = -1;
+		int y = -1;
+		int w = -1;
+		int h = -1;
+		std::vector<Item> items;
 	};
 
 	// RenderEngine interface
@@ -74,7 +85,9 @@ namespace dyno
 		virtual void terminate() = 0;
 
 		virtual void draw(SceneGraph* scene, Camera* camera, const RenderParams& rparams) = 0;
-		virtual std::vector<SelectionItem> select(int x, int y, int w, int h) = 0;
+
+
+		virtual Selection select(int x, int y, int w, int h) = 0;
 
 		virtual std::string name() const = 0;
 	};

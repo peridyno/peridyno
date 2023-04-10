@@ -329,7 +329,7 @@ void ImWindow::draw(RenderWindow* app)
 	drawSelectedRegion();
 
 	// current active node
-	drawNodeManipulator(app->currNode, camera->getViewMat(), camera->getProjMat());
+	drawNodeManipulator(app->getCurrentSelectedNode(), camera->getViewMat(), camera->getProjMat());
 
 	// view manipulator
 	if(mViewManipulator)
@@ -397,10 +397,10 @@ void ImWindow::drawSelectedRegion()
 	}
 }
 
-void dyno::ImWindow::drawNodeManipulator(Node* n, glm::mat4 view, glm::mat4 proj)
+void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view, glm::mat4 proj)
 {
 	// TODO: type conversion...
-	auto* node = dynamic_cast<ParametricModel<DataType3f>*>(n);
+	auto node = std::dynamic_pointer_cast<ParametricModel<DataType3f>>(n);
 
 	// TODO: parameterized operation
 	auto nodeOp = ImGuizmo::TRANSLATE;

@@ -21,6 +21,7 @@ namespace dyno
 		DEF_ARRAY_STATE(int, TriQuadIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(int, Sur2PointIndex, DeviceType::GPU, "");
 
 		DECLARE_ENUM(PickingElementTypeSelection,
 		Surface = 0,
@@ -52,6 +53,8 @@ namespace dyno
 		DEF_VAR(bool, ToggleFlood, false, "The toggle of surface flood selection");
 
 		DEF_VAR(bool, ToggleVisibleFilter, true, "The toggle of visible filter");
+
+		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
 		DEF_VAR(Real, FloodAngle, 1.0f, "The angle limit of surface flood selection");
 

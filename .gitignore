@@ -40,3 +40,8 @@ buildDebug/*
 /config/ImathTargets.cmake
 *.comp.spv
 *.spv
+
+
+.idea/
+cmake-build-*
+build-*

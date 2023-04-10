@@ -41,6 +41,13 @@ namespace dyno
 	class QDoubleSpinner;
 	class QDoubleSlider;
 
+	class QFieldWidget : public QGroupBox
+	{
+		Q_OBJECT
+	public:
+		QFieldWidget(FBase* field) {};
+	};
+
 	class QBoolFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
@@ -108,7 +115,7 @@ namespace dyno
 		void changeValue(double);
 
 	private:
-		void fieldUpdated();
+		void syncValueFromField();
 
 		FBase* mField = nullptr;
 
@@ -244,12 +251,14 @@ namespace dyno
 
 	Q_SIGNALS:
 		void fieldChanged();
+		void syncWidget();
 
 	public slots:
 		void changeValue(double);
+		void updateWidget();
 
 	private:
-		void fieldUpdated();
+		void syncValueFromField();
 
 		FBase* mField = nullptr;
 
@@ -274,7 +283,7 @@ namespace dyno
 		void changeValue(int);
 
 	private:
-		void fieldUpdated();
+		void syncValueFromField();
 
 		FBase* mField = nullptr;
 
