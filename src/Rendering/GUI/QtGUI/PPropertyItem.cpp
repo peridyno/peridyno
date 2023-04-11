@@ -211,11 +211,13 @@ namespace dyno
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(mField);
 			slider->setValue((double)f->getValue());
+			spinner->setValue((double)f->getValue());
 		}
 		else if(template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(mField);
 			slider->setValue(f->getValue());
+			spinner->setValue(f->getValue());
 		}
 
 		FormatFieldWidgetName(field->getObjectName());

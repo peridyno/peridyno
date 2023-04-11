@@ -287,6 +287,8 @@ namespace dyno
 		 */
 		void update();
 
+		void updateGraphicsContext();
+
 		void reset();
 
 		virtual NBoundingBox boundingBox();
