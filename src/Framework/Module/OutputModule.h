@@ -21,6 +21,6 @@ namespace dyno
 
 		DEF_VAR(unsigned, Start, 1, "FramStep");
 		DEF_VAR(unsigned, End, 1000, "FramStep");
-		DEF_VAR(unsigned, FramStep, 1, "FramStep");
+		DEF_VAR(unsigned, FrameStep, 1, "FramStep");
 	};
 }

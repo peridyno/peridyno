@@ -217,7 +217,7 @@ namespace dyno
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(mField);
 			slider->setValue(f->getValue());
-			spinner->setValue((double)f->getValue());
+			spinner->setValue(f->getValue());
 		}
 
 		FormatFieldWidgetName(field->getObjectName());

@@ -442,7 +442,7 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
 
 			// notify the update of node?
-			node->update();
+			node->updateGraphicsContext();
 		}
 	}
 }

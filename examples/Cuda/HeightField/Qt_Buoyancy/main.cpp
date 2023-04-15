@@ -93,25 +93,18 @@ std::shared_ptr<SceneGraph> createScene()
 	ocean->graphicsPipeline()->pushModule(sRender);
 
 	auto boat = scn->addNode(std::make_shared<RigidMesh<DataType3f>>());
-	boat->varScale()->setValue(Vec3f(5));
 	boat->varDensity()->setValue(150.0f);
-	boat->stateVelocity()->setValue(Vec3f(10, 0, 0));
-	boat->varEnvelopeName()->setValue(getAssetPath() + "obj/boat_boundary.obj");
-	boat->varMeshName()->setValue(getAssetPath() + "obj/boat_mesh.obj");
+	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
+// 	boat->varEnvelopeName()->setValue(getAssetPath() + "obj/boat_boundary.obj");
+// 	boat->varMeshName()->setValue(getAssetPath() + "obj/boat_mesh.obj");
 
 	auto dragging = std::make_shared<DragBoat<DataType3f>>();
 	boat->stateVelocity()->connect(dragging->inVelocity());
 	boat->stateQuaternion()->connect(dragging->inQuaternion());
 	boat->animationPipeline()->pushModule(dragging);
-
-	auto rigidMeshRender = std::make_shared<GLSurfaceVisualModule>();
-	rigidMeshRender->setColor(Vec3f(0.8, 0.8, 0.8));
-	boat->stateMesh()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
-	boat->graphicsPipeline()->pushModule(rigidMeshRender);
-
 	
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
-	boat->connect(coupling->importRigidMesh());
+	boat->connect(coupling->importRigidMeshs());
 	ocean->connect(coupling->importOcean());
 	
 	return scn;
@@ -126,7 +119,7 @@ int main()
 	app.initialize(1024, 768);
 	
 	//Set the distance unit for the camera, the fault unit is meter
-	app.renderWindow()->getCamera()->setUnitScale(50.0);
+	app.renderWindow()->getCamera()->setUnitScale(10.0);
 
 	app.mainLoop();
 

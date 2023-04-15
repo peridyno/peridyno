@@ -7,7 +7,7 @@ namespace dyno
 
 	template<typename TDataType>
 	RigidBody<TDataType>::RigidBody()
-		: Node()
+		: ParametricModel<TDataType>()
 	{
 	}
 
