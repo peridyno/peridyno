@@ -35,13 +35,12 @@ class ConstructLinearBVH : public ComputeModule
 
 public:
 	ConstructLinearBVH() {};
-	~ConstructLinearBVH() override {};
+	~ConstructLinearBVH() override { bvh.release(); }
 
 	void compute() override
 	{
 		auto& inAABB = this->inAABB()->getData();
 
-		LinearBVH<TDataType> bvh;
 		bvh.construct(inAABB);
 
 		this->outAABB()->assign(bvh.getSortedAABBs());
@@ -50,6 +49,9 @@ public:
 	DEF_ARRAY_IN(AABB, AABB, DeviceType::GPU, "");
 
 	DEF_ARRAY_OUT(AABB, AABB, DeviceType::GPU, "");
+
+private:
+	LinearBVH<TDataType> bvh;
 };
 
 IMPLEMENT_TCLASS(ConstructLinearBVH, TDataType)
