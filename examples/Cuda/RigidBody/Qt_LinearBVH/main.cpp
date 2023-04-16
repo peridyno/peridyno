@@ -19,6 +19,10 @@
 using namespace std;
 using namespace dyno;
 
+/**
+ * This example demonstrates how to construct linear BVH given a set of AABBs
+ */
+
 
 template<typename TDataType>
 class ConstructLinearBVH : public ComputeModule

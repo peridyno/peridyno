@@ -32,7 +32,7 @@ using namespace std;
 using namespace dyno;
 
 /**
- * This example demonstrates how to compute and visualize the distance between a point and an oriented bounding box
+ * This example demonstrates how to compute the contact manifold between two OBBs
  */
 
 
