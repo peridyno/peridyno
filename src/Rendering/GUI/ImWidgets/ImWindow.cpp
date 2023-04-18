@@ -72,7 +72,7 @@ void ImWindow::draw(RenderWindow* app)
 	auto camera = app->getCamera();
 
 	auto& rparams = app->getRenderParams();
-
+	float menu_y = 0.f;
 	ImGuiIO& io = ImGui::GetIO();
 
 
@@ -277,7 +277,7 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::EndMenu();
 			}
-
+			/*
 			if (ImGui::BeginMenu("Edit", "")) {
 
 				if (ImGui::RadioButton("Translate", mEditMode == 0))
@@ -291,9 +291,33 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::EndMenu();
 			}
-
+			*/
+			menu_y = ImGui::GetWindowSize().y;
 
 			ImGui::EndMainMenuBar();
+		}
+		
+		// Right Sidebar
+		{
+			
+
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36 / 255.0, 36 / 255.0, 36 / 255.0, 255 / 255.0));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 5.f));
+			ImGui::Begin("Right Sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			
+			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ARROWS_ALT, "Translate", mEditMode == 0))
+				mEditMode = 0;
+			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ALT, "Scale", mEditMode == 1))
+				mEditMode = 1;
+			if (ImGui::radioWithIconButton(ICON_FA_GLOBE, "Rotate", mEditMode == 2))
+				mEditMode = 2;
+			ImGui::Separator(); // --------
+
+			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
+			ImGui::End();	
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar(2);
 		}
 
 		// Bottom Right widget
