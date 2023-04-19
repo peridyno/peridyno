@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.h"
+#include "Node/ParametricModel.h"
 
 #include "Quat.h"
 
@@ -12,7 +12,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class RigidBody : public Node
+	class RigidBody : public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(RigidBody, TDataType)
 	public:
@@ -22,7 +22,7 @@ namespace dyno
 		typedef typename dyno::Quat<Real> Quat;
 
 		RigidBody();
-		virtual ~RigidBody();
+		~RigidBody() override;
 
 	public:
 		DEF_VAR(Coord, Gravity, Coord(0.0, -9.8, 0.0), "Gravity");

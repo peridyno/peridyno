@@ -13,6 +13,7 @@ namespace dyno
 	TriangleMeshWriter<TDataType>::TriangleMeshWriter() : OutputModule()
 	{
 		this->varEnd()->setRange(1, 100000);
+		
 
 	}
 
@@ -53,6 +54,14 @@ namespace dyno
 		this->ptr_vertices = &(triangle_set.getPoints());
 	}
 
+	template<typename TDataType>
+	bool TriangleMeshWriter<TDataType>::updatePtr(PointSet<TDataType> point_set)
+	{
+		if (&point_set == nullptr) {
+			return false;
+		}
+		this->ptr_vertices = &(point_set.getPoints());
+	}
 
 	template<typename TDataType>
 	bool TriangleMeshWriter<TDataType>::outputSurfaceMesh()
@@ -109,7 +118,7 @@ namespace dyno
 	template<typename TDataType>
 	bool TriangleMeshWriter<TDataType>::outputSurfaceMesh(TriangleSet<TDataType> triangleset)
 	{	
-		auto frame_step = this->varFramStep()->getData();
+		auto frame_step = this->varFrameStep()->getData();
 		auto current_frame = this->inFrameNumber()->getData();
 		auto out_number = this->inFrameNumber()->getData();
 
@@ -165,6 +174,67 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	bool TriangleMeshWriter<TDataType>::outputPointCloud(PointSet<TDataType> pointset)
+	{
+		
+		int ptNum = pointset.getPointSize(); 
+		std::cout << "verticesNum:  " << ptNum << std::endl;
+
+		printf("输出点云\n");
+
+		auto frame_step = this->varFrameStep()->getData();
+		auto current_frame = this->inFrameNumber()->getData();
+		auto out_number = this->inFrameNumber()->getData();
+
+		if (current_frame % frame_step != 0)
+		{
+			printf("跳过该帧\n");
+			return false;
+		}
+
+		if (frame_step > 1)
+		{
+			out_number = floor(current_frame / frame_step);
+		}
+
+
+		std::stringstream ss; ss << out_number;
+		std::string filename = this->varOutputPath()->getData() + this->varPrefix()->getData() + ss.str() + this->file_postfix;
+		std::ofstream output(filename.c_str(), std::ios::out);
+
+		std::cout << filename << std::endl;
+
+		if (!output.is_open()) {
+			printf("------Triangle Mesh Writer: open file failed \n");
+			return false;
+		}
+
+		std::cout << "------Pointcloud Writer Action!------ " << std::endl;
+
+		// update pointer, 
+		this->updatePtr(pointset);
+
+		CArray<Coord> host_vertices;
+
+		host_vertices.resize((*(this->ptr_vertices)).size());
+
+		host_vertices.assign(*(this->ptr_vertices));
+
+		for (uint i = 0; i < host_vertices.size(); ++i) {
+			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;
+		}
+
+
+		host_vertices.clear();
+
+		this->m_output_index++;
+
+		return true;
+	}
+
+
+
+	template<typename TDataType>
 	void TriangleMeshWriter<TDataType>::updateImpl()
 	{
 		//printf("===========Triangle Mesh Writer============\n");
@@ -174,18 +244,32 @@ namespace dyno
 		//if (this->current_idle_frame <= 0) {
 			//this->current_idle_frame = this->idle_frame_num;
 
-		this->outputSurfaceMesh();
+		//this->outputSurfaceMesh();
 
 		//}
 		//else {
 		//	this->current_idle_frame--;
 		//}
-		
+
 		if (this->inFrameNumber()->getData() > this->varEnd()->getData()) { return; }
 		else if (this->inFrameNumber()->getData() < this->varStart()->getData()) { return; }
-		else 
+		else if (this->varOutputType()->getData() == OutputType::TriangleMesh) 
 		{
-			this->outputSurfaceMesh(this->inTriangleSet()->getData());
+
+			auto TriSet = TypeInfo::cast<TriangleSet<TDataType>>(this->inTopology()->getDataPtr());
+			this->ptr_vertices = &(TriSet->getPoints());
+			this->ptr_triangles = &(TriSet->getTriangles());
+
+			this->outputSurfaceMesh(*TriSet);
+
+		}
+		else if (this->varOutputType()->getData() == OutputType::PointCloud)
+		{
+			auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->inTopology()->getDataPtr());
+			this->ptr_vertices = &(ptSet->getPoints());
+
+			this->outputPointCloud(*ptSet);
+
 		}
 
 

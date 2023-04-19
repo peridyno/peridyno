@@ -29,7 +29,7 @@ __global__ void HitBoxes(
 
 	TSegment3D<float> seg;
 
-	if (ray.intersect(box[tId].aabb(), seg) > 0)
+	if (ray.intersect(box[tId], seg) > 0)
 	{
 		velocites[tId + boxIndex] += 10.0f * ray.direction;
 	};

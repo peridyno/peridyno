@@ -67,10 +67,15 @@ namespace dyno
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void wheelEvent(QWheelEvent *event) override;
 
+		void onSelected(const Selection& s) override;
+
 	public slots:
 		void updateGrpahicsContext();
-
 		void updateGraphicsContext(Node* node);
+
+	signals:
+		void nodeSelected(std::shared_ptr<Node> node);
+
 
 	private:
 

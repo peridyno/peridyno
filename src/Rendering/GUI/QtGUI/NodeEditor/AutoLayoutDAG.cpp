@@ -9,13 +9,20 @@ namespace dyno
 
 		auto& vertices = pDAG->vertices();
 		auto& edges = pDAG->edges();
+		auto& OtherVerticesDirect = pDAG->getOtherVertices();
 
 		for  (auto v : vertices)
 		{
 			mVertices.insert(v);
 		}
 
-		for  (auto it : edges)
+		for each (auto s in OtherVerticesDirect)
+		{
+			OtherVertices.insert(s);
+
+		}
+
+		for each (auto it in edges)
 		{
 			ObjectId v = it.first;
 			for  (auto w : it.second)
@@ -65,7 +72,6 @@ namespace dyno
 	void AutoLayoutDAG::constructHierarchy()
 	{
 		int maxLayer = mVertices.size();
-
 		std::map<ObjectId, bool> visited;
 		std::map<ObjectId, bool> isActive;
 

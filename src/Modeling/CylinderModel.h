@@ -55,6 +55,9 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
+		void varChanged();
+
+
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 

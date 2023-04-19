@@ -319,13 +319,18 @@ namespace dyno
 		DYN_FUNC Real distanceSquared(const TAlignedBox3D<Real>& box) const;
 		DYN_FUNC Real distanceSquared(const TOrientedBox3D<Real>& obb) const;
 
-
+		/**
+		 * @brief intersection tests
+		 * 
+		 * @return 0 if there is no intersection
+		 */
 		DYN_FUNC int intersect(const TPlane3D<Real>& plane, TPoint3D<Real>& interPt) const;
 		DYN_FUNC int intersect(const TTriangle3D<Real>& triangle, TPoint3D<Real>& interPt) const;
 
 		DYN_FUNC int intersect(const TSphere3D<Real>& sphere, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TTet3D<Real>& tet, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TAlignedBox3D<Real>& abox, TSegment3D<Real>& interSeg) const;
+		DYN_FUNC int intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const;
 
 
 		DYN_FUNC Real parameter(const Coord3D& pos) const;
@@ -386,6 +391,7 @@ namespace dyno
 		DYN_FUNC int intersect(const TSphere3D<Real>& sphere, TSegment3D<Real>& interSeg) const;
 
 		DYN_FUNC int intersect(const TAlignedBox3D<Real>& abox, TSegment3D<Real>& interSeg) const;
+		DYN_FUNC int intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const;
 
 		DYN_FUNC Real parameter(const Coord3D& pos) const;
 

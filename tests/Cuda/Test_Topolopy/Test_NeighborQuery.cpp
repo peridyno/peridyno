@@ -15,7 +15,7 @@ TEST(NeighborPointQuery, findNeighbors1D)
 	}
 
 	nQuery.inRadius()->setValue(1.01f);
-	nQuery.inPosition()->allocate()->assign(points);
+	nQuery.inPosition()->assign(points);
 	nQuery.update();
 
 	auto& nbrIds = nQuery.outNeighborIds()->getData();
@@ -42,7 +42,7 @@ TEST(NeighborPointQuery, findNeighbors)
 	}
 
 	nQuery.inRadius()->setValue(0.12f);
-	nQuery.inPosition()->allocate()->assign(points);
+	nQuery.inPosition()->assign(points);
 	nQuery.update();
 
 	auto& nbrIds = nQuery.outNeighborIds()->getData();
@@ -54,7 +54,7 @@ TEST(NeighborPointQuery, findNeighbors)
 
 	CArray<Vec3f> points2;
 	points2.pushBack(Vec3f(0.2f));
-	nQuery.inOther()->allocate()->assign(points2);
+	nQuery.inOther()->assign(points2);
 	nQuery.update();
 
 	host_nbrIds.assign(nbrIds);

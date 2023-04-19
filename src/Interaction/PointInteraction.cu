@@ -240,6 +240,7 @@ namespace dyno
 		DArray<Coord> points,
 		DArray<Coord> intersected_points,
 		DArray<Coord> unintersected_points,
+		DArray<int> outPointIndex,
 		DArray<int> intersected,
 		DArray<int> unintersected,
 		DArray<int> intersected_o)
@@ -250,6 +251,7 @@ namespace dyno
 		if (intersected_o[pId] == 1)
 		{
 			intersected_points[intersected[pId]] = points[pId];
+			outPointIndex[intersected[pId]] = pId;
 		}
 		else
 		{
@@ -352,6 +354,8 @@ namespace dyno
 			intersected_o.assign(intersected);
 
 			int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+			DArray<int> outPointIndex;
+			outPointIndex.resize(intersected_size);
 			thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 			DArray<Coord> intersected_points;
 			intersected_points.resize(intersected_size);
@@ -366,6 +370,7 @@ namespace dyno
 				points,
 				intersected_points,
 				unintersected_points,
+				outPointIndex,
 				intersected,
 				unintersected,
 				intersected_o
@@ -375,7 +380,14 @@ namespace dyno
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
-			this->outPointIndex()->getDataPtr()->assign(intersected_o);
+			if (this->varToggleIndexOutput()->getValue())
+			{
+				this->outPointIndex()->getDataPtr()->assign(outPointIndex);
+			}
+			else
+			{
+				this->outPointIndex()->getDataPtr()->assign(intersected_o);
+			}
 		}
 
 		template<typename TDataType>
@@ -481,6 +493,8 @@ namespace dyno
 			intersected_o.assign(intersected);
 
 			int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+			DArray<int> outPointIndex;
+			outPointIndex.resize(intersected_size);
 			thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 			DArray<Coord> intersected_points;
 			intersected_points.resize(intersected_size);
@@ -495,6 +509,7 @@ namespace dyno
 				points,
 				intersected_points,
 				unintersected_points,
+				outPointIndex,
 				intersected,
 				unintersected,
 				intersected_o
@@ -504,7 +519,14 @@ namespace dyno
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
-			this->outPointIndex()->getDataPtr()->assign(intersected_o);
+			if (this->varToggleIndexOutput()->getValue())
+			{
+				this->outPointIndex()->getDataPtr()->assign(outPointIndex);
+			}
+			else
+			{
+				this->outPointIndex()->getDataPtr()->assign(intersected_o);
+			}
 		}
 
 		template<typename TDataType>
@@ -566,6 +588,8 @@ namespace dyno
 			intersected_o.assign(intersected);
 
 			int intersected_size = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
+			DArray<int> outPointIndex;
+			outPointIndex.resize(intersected_size);
 			thrust::exclusive_scan(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), intersected.begin());
 			DArray<Coord> intersected_points;
 			intersected_points.resize(intersected_size);
@@ -580,6 +604,7 @@ namespace dyno
 				points,
 				intersected_points,
 				unintersected_points,
+				outPointIndex,
 				intersected,
 				unintersected,
 				intersected_o
@@ -589,7 +614,14 @@ namespace dyno
 			this->outSelectedPointSet()->getDataPtr()->setPoints(intersected_points);
 			this->outOtherPointSet()->getDataPtr()->copyFrom(initialPointSet);
 			this->outOtherPointSet()->getDataPtr()->setPoints(unintersected_points);
-			this->outPointIndex()->getDataPtr()->assign(intersected_o);
+			if (this->varToggleIndexOutput()->getValue())
+			{
+				this->outPointIndex()->getDataPtr()->assign(outPointIndex);
+			}
+			else
+			{
+				this->outPointIndex()->getDataPtr()->assign(intersected_o);
+			}
 		}
 
 		template<typename TDataType>

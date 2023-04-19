@@ -39,6 +39,7 @@ namespace dyno
 		DEF_VAR(Real, InteractionRadius, 0.002f, "The radius of interaction");
 		DEF_VAR(Real, PointSelectedSize, 0.012f, "");
 		DEF_VAR(Real, PointOtherSize, 0.01f, "");
+		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
 		PointPickerNode(std::string name = "default");
 		~PointPickerNode();

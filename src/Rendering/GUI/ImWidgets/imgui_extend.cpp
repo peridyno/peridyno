@@ -1,4 +1,5 @@
 #include "imgui_extend.h"
+#include "Platform.h"
 #include "Math/SimpleMath.h"
 
 namespace ImGui{
@@ -16,7 +17,7 @@ void ImGui::EndHorizontal(){
     window->DC.LayoutType = ImGuiLayoutType_Vertical;
 }
 
-void ImGui::sampleButton(const char* label, bool *v)
+void ImGui::exampleButton(const char* label, bool *v)
 {
     float padding = 10.0f;
     float bounding = 1.0f;
@@ -30,13 +31,13 @@ void ImGui::sampleButton(const char* label, bool *v)
 
     float radius = bound_size.y * 0.30f;
 
-    // 透明的按钮
+    // Button
     if (ImGui::InvisibleButton(label, bound_size))
         *v = !*v;
     ImVec4 col_bf4;
     ImGuiStyle& style = ImGui::GetStyle();
 
-    // 颜色自定义
+    // Custom color
     if (ImGui::IsItemActivated()) col_bf4 = *v ? style.Colors[40] : style.Colors[23];
     else if (ImGui::IsItemHovered()) col_bf4 =  *v ? style.Colors[42] : style.Colors[24];
     else col_bf4 = *v ? style.Colors[41] : style.Colors[22];
@@ -45,10 +46,40 @@ void ImGui::sampleButton(const char* label, bool *v)
     ImU32 col_text = IM_COL32(255, 255, 255, 255);
     ImU32 col_bound = IM_COL32(0,0,0,255);
     
-    // 绘制矩形形状
+    // draw Rectangle
     draw_list->AddRect(p, ImVec2(p.x + bound_size.x, p.y + bound_size.y), col_bound , radius);
     draw_list->AddRectFilled(p_button, ImVec2(p_button.x + button_size.x, p_button.y + button_size.y), col_bg, radius);
     draw_list->AddText(p_label, col_text, label);
+}
+
+
+
+bool ImGui::radioWithIconButton(const char* label, const char* tooltip, bool v)
+{
+    bool res = false;
+    if (v == true)
+    {
+        ImGui::Button(label);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(tooltip);
+    }
+    else
+    {
+        ImGui::PushID(label);
+        ImGui::PushStyleColor(ImGuiCol_Button, ExColorsVal[ImGuiExColVal_Button_1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ExColorsVal[ImGuiExColVal_ButtonHovered_1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ExColorsVal[ImGuiExColVal_ButtonActive_1]);
+        if (ImGui::Button(label))
+        {
+            res = true;
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(tooltip);
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+        
+    }
+    return res;
 }
 
 void ImGui::toggleButton(ImTextureID texId, const char* label, bool *v)
@@ -150,12 +181,12 @@ bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2
 }
 
 void ImGui::beginTitle(const char* label){
-    // 避免label输出，ImGui ID压入栈中
+    // Avoid outputting label，push ImGui ID into stack
     ImGui::PushID(label);
 }
 
 void ImGui::endTitle(){
-    // ImGui ID弹栈
+    // Pop ImGui ID
     ImGui::PopID();
 }
 
@@ -178,7 +209,7 @@ ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
     return IM_COL32((*v)[0] * 255, (*v)[1] * 255, (*v)[2] * 255, 150);
 }
 
-bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
+bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length, int num_type)
 {
 	if (col == nullptr ) return false;
 //	ImGuiContext* g = GetCurrentContext();
@@ -197,9 +228,9 @@ bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
     PushID(label);
     BeginGroup();
 
-    float text_width = GetFrameHeight() * 2;
+    float text_width = GetFrameHeight() * 3;
     float text_height = GetFrameHeight();
-    float bars_width = GetFrameHeight();
+    float bars_width = GetFrameHeight() * 1.5;
     float bars_height = ImMax(bars_width * 1, width - 1 * (bars_width + style.ItemInnerSpacing.x)); // Saturation/Value picking box
     float offset_width = bars_width * 0.2;
     ImVec2 bar_pos = window->DC.CursorPos;
@@ -225,7 +256,10 @@ bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length)
 
         if (values != nullptr){
             char buf[20];
-            sprintf(buf,"%.3f", values[i]);
+            if (num_type == 0) // Decimal 
+                sprintf(buf,"%-6.4f", values[i]);
+            else               // Exponential  
+                sprintf(buf,"%-6.2e", values[i]);
             draw_list->AddText(ImVec2(bar_pos.x + bars_width + offset_width,  bar_pos.y + i * (bars_height / grid_count)), IM_COL32(255,255,255,255),buf);
         }
     }
@@ -287,4 +321,5 @@ void ImGui::initColorVal()
     ExColorsVal[ImGuiExColVal_ButtonHovered_1]      = ImVec4(230/255.0, 179/255.0,   0/255.0, 255/255.0);
     ExColorsVal[ImGuiExColVal_ButtonActive_1]       = ImVec4(255/255.0, 153/255.0,   0/255.0, 255/255.0);
     ExColorsVal[ImGuiExColVal_WindowTopBg_1]        = ImVec4(  0/255.0,   0/255.0,   0/255.0,  10/255.0);
+    ExColorsVal[ImGuiExColVal_WindowMenuBg_1]       = ImVec4( 36/255.0,  36/255.0,  36/255.0, 255/255.0);
 }

@@ -168,6 +168,13 @@ void Node::postUpdateStates()
 
 }
 
+void Node::updateGraphicsContext()
+{
+	this->graphicsPipeline()->update();
+
+	this->tick();
+}
+
 void Node::resetStates()
 {
 	this->stateElapsedTime()->setValue(0.0f);

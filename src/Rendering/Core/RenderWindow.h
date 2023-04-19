@@ -16,8 +16,6 @@
 
 #pragma once
 #include "RenderEngine.h"
-#include "OrbitCamera.h"
-#include "TrackballCamera.h"
 
 namespace dyno
 {
@@ -25,18 +23,10 @@ namespace dyno
 	class RenderWindow
 	{
 	public:
-		RenderWindow()
-		{
-			// create a default camera
-			mCamera = std::make_shared<OrbitCamera>();
-			mCamera->setWidth(64);
-			mCamera->setHeight(64);
-			mCamera->registerPoint(0, 0);
-			mCamera->rotateToPoint(-32, 12);
-		}
+		RenderWindow();
 
-		virtual void initialize(int width, int height) {};
-		virtual void mainLoop() = 0;
+		virtual void initialize(int width, int height) {}
+		virtual void mainLoop() {}
 
 		virtual std::shared_ptr<RenderEngine> getRenderEngine() { return mRenderEngine; }
 		virtual void setRenderEngine(std::shared_ptr<RenderEngine> engine) { mRenderEngine = engine; }
@@ -47,11 +37,7 @@ namespace dyno
 		RenderParams& getRenderParams() { return mRenderParams; }
 		void		  setRenderParams(const RenderParams& rparams) { mRenderParams = rparams; }
 
-		virtual void setWindowSize(int w, int h)
-		{
-			mCamera->setWidth(w);
-			mCamera->setHeight(h);
-		}
+		virtual void setWindowSize(int w, int h);
 
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
@@ -59,9 +45,22 @@ namespace dyno
 
 		std::shared_ptr<Camera>			mCamera;
 
+	
+	// interface for node picking
 	public:
-		// current active(selected) node
-		Node*							currNode = 0;
+		// do region selection
+		virtual const Selection& select(int x, int y, int w, int h);
+
+		// set current selection (single)
+		virtual void select(std::shared_ptr<Node> node, int instance = -1, int primitive = -1);
+
+		virtual std::shared_ptr<Node> getCurrentSelectedNode();
+
+	protected:
+		// callback when node is picked by mouse event
+		virtual void onSelected(const Selection& s);
+
+		Selection selectedObject;
 
 	};
 };

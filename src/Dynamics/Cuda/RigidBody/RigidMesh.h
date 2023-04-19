@@ -19,13 +19,9 @@ namespace dyno
 		~RigidMesh();
 
 	public:
-		DEF_VAR(FilePath, EnvelopeName, "", "");
+		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
 
-		DEF_VAR(FilePath, MeshName, "", "");
-
-		DEF_VAR(Coord, Location, 0, "Location");
-		DEF_VAR(Coord, Rotation, 0, "Rotation");
-		DEF_VAR(Coord, Scale, Coord(1), "Scale");
+		DEF_VAR(FilePath, MeshName, getAssetPath() + "obj/boat_mesh.obj", "");
 
 		DEF_VAR(Real, Density, Real(1000), "Density");
 
@@ -39,6 +35,9 @@ namespace dyno
 		void resetStates() override;
 
 		void updateStates() override;
+
+	private:
+		void transform();
 	};
 
 	IMPLEMENT_TCLASS(RigidMesh, TDataType)

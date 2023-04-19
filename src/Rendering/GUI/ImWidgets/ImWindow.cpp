@@ -72,7 +72,7 @@ void ImWindow::draw(RenderWindow* app)
 	auto camera = app->getCamera();
 
 	auto& rparams = app->getRenderParams();
-
+	float menu_y = 0.f;
 	ImGuiIO& io = ImGui::GetIO();
 
 
@@ -277,7 +277,7 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::EndMenu();
 			}
-
+			/*
 			if (ImGui::BeginMenu("Edit", "")) {
 
 				if (ImGui::RadioButton("Translate", mEditMode == 0))
@@ -291,9 +291,33 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::EndMenu();
 			}
-
+			*/
+			menu_y = ImGui::GetWindowSize().y;
 
 			ImGui::EndMainMenuBar();
+		}
+		
+		// Right Sidebar
+		{
+			
+
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36 / 255.0, 36 / 255.0, 36 / 255.0, 255 / 255.0));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 5.f));
+			ImGui::Begin("Right Sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			
+			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ARROWS_ALT, "Translate", mEditMode == 0))
+				mEditMode = 0;
+			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ALT, "Scale", mEditMode == 1))
+				mEditMode = 1;
+			if (ImGui::radioWithIconButton(ICON_FA_GLOBE, "Rotate", mEditMode == 2))
+				mEditMode = 2;
+			ImGui::Separator(); // --------
+
+			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
+			ImGui::End();	
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar(2);
 		}
 
 		// Bottom Right widget
@@ -329,7 +353,7 @@ void ImWindow::draw(RenderWindow* app)
 	drawSelectedRegion();
 
 	// current active node
-	drawNodeManipulator(app->currNode, camera->getViewMat(), camera->getProjMat());
+	drawNodeManipulator(app->getCurrentSelectedNode(), camera->getViewMat(), camera->getProjMat());
 
 	// view manipulator
 	if(mViewManipulator)
@@ -397,10 +421,10 @@ void ImWindow::drawSelectedRegion()
 	}
 }
 
-void dyno::ImWindow::drawNodeManipulator(Node* n, glm::mat4 view, glm::mat4 proj)
+void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view, glm::mat4 proj)
 {
 	// TODO: type conversion...
-	auto* node = dynamic_cast<ParametricModel<DataType3f>*>(n);
+	auto node = std::dynamic_pointer_cast<ParametricModel<DataType3f>>(n);
 
 	// TODO: parameterized operation
 	auto nodeOp = ImGuizmo::TRANSLATE;
@@ -442,7 +466,7 @@ void dyno::ImWindow::drawNodeManipulator(Node* n, glm::mat4 view, glm::mat4 proj
 				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
 
 			// notify the update of node?
-			node->update();
+			node->updateGraphicsContext();
 		}
 	}
 }
@@ -451,7 +475,7 @@ void dyno::ImWindow::drawViewManipulator(Camera* camera)
 {
 	glm::mat4 view = camera->getViewMat();
 	glm::mat4 view0 = view;
-	float dist = (camera->getEyePos() - camera->getTargetPos()).norm();
+	float dist = (camera->getEyePos() - camera->getTargetPos()).norm() * camera->unitScale();
 
 	ImGuizmo::ViewManipulate(&view[0][0], dist, 
 		ImVec2(0, camera->viewportHeight() - 100), 
@@ -462,7 +486,7 @@ void dyno::ImWindow::drawViewManipulator(Camera* camera)
 	if (view == view0) return;
 
 	glm::mat4 invView = glm::inverse(view);
-	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1);	
+	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1) / camera->unitScale();
 
 	// for trackball camera, also update up direction
 	TrackballCamera* cam = dynamic_cast<TrackballCamera*>(camera);

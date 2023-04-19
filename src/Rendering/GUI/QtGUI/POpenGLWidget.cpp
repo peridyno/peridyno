@@ -187,7 +187,8 @@ namespace dyno
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
 		// do picking
-		if(event->modifiers() == 0 && event->button() == Qt::LeftButton 
+		if( (event->modifiers() == 0 || event->modifiers() == Qt::ShiftModifier)
+			&& event->button() == Qt::LeftButton 
 			&& !ImGuizmo::IsUsing()
 			&& !ImGui::GetIO().WantCaptureMouse)
 		{
@@ -198,20 +199,12 @@ namespace dyno
 			int h = std::abs(mCursorY - y);
 			x = std::min(mCursorX, x);
 			y = std::min(mCursorY, y);
+			// flip y
 			y = this->height() - y - 1;
 
 			makeCurrent();
-			auto items = mRenderEngine->select(x, y, w, h);
+			const auto& selection = this->select(x, y, w, h);
 			doneCurrent();
-
-			// print selected result...
-			//printf("Picking: (%d, %d) - (%d, %d), %d items...\n", x, y, w, h, items.size());
-
-			// pick the last one?
-			if (!items.empty())
-				currNode = items[0].node;
-			else
-				currNode = 0;
 		}
 
 
@@ -280,6 +273,15 @@ namespace dyno
 			this->getCamera()->zoom(-0.001*event->angleDelta().x());
 
 		update();
+	}
+
+	void POpenGLWidget::onSelected(const Selection& s)
+	{
+		if (s.items.empty())
+			return;
+
+		emit this->nodeSelected(s.items[0].node);
+
 	}
 
 	void POpenGLWidget::updateGrpahicsContext()

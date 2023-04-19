@@ -25,7 +25,7 @@ namespace dyno
 
 	private:
 		void drawSelectedRegion();
-		void drawNodeManipulator(Node* node, glm::mat4 view, glm::mat4 proj);
+		void drawNodeManipulator(std::shared_ptr<Node> node, glm::mat4 view, glm::mat4 proj);
 		void drawViewManipulator(Camera* camera);
 
 	private:

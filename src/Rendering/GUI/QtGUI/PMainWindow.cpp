@@ -93,6 +93,7 @@
 #include <QVBoxLayout>
 
 #include "NodeEditor/QtModuleFlowScene.h"
+#include "NodeEditor/QtNodeWidget.h"
 
 #include "nodes/QDataModelRegistry"
 #include "ToolBar/TabToolbar.h"
@@ -134,12 +135,12 @@ namespace dyno
 
 		setupToolBar();
 
-		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::dynoNodePlaced);
+		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::dynoNodePlaced);
 		connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 
 		connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
-		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
+		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
 		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
 
@@ -236,7 +237,7 @@ namespace dyno
 	}
 
 	void PMainWindow::addNodeByName(std::string name) {
-		mNodeFlowView->node_scene->addNodeByString(name);
+		mNodeFlowView->flowScene()->addNodeByString(name);
 	}
 
 	void PMainWindow::setupToolBar()
@@ -309,7 +310,7 @@ namespace dyno
 
 	void PMainWindow::showModuleEditor()
 	{
-		auto nodes = mNodeFlowView->node_scene->selectedNodes();
+		auto nodes = mNodeFlowView->flowScene()->selectedNodes();
 		Qt::QtNodeWidget* clickedNode = nullptr;
 		if (nodes.size() > 0) {
 			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
@@ -329,7 +330,7 @@ namespace dyno
 		moduelEditor->show();
 
 		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
-		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::updateNodeGraphView);
+		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 	}
 
 	void PMainWindow::showMessage()
@@ -389,12 +390,39 @@ namespace dyno
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
-		connect(mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
-		connect(m_propertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->node_scene, &Qt::QtNodeFlowScene::fieldUpdated);
+		connect(m_propertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::fieldUpdated);
+
+		// between OpenGL and property widget
+		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
+			m_propertyWidget->showProperty(node);
+			// TODO: high light selected node in node editor
+			auto& qNodes = mNodeFlowView->flowScene()->allNodes();
+			for (auto qNode : qNodes)
+			{
+				if (dynamic_cast<Qt::QtNodeWidget*>(qNode->nodeDataModel())->getNode() == node)
+					qNode->nodeGraphicsObject().setSelected(true);
+				else
+					qNode->nodeGraphicsObject().setSelected(false);
+			}
+			});
+
+
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
+			{
+				auto model = n.nodeDataModel();
+				auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
+
+				if (widget != nullptr)
+				{
+					mOpenGLWidget->select(widget->getNode());
+					mOpenGLWidget->update();
+				}
+			});
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)

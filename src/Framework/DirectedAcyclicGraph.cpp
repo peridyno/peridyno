@@ -1,4 +1,5 @@
 #include "DirectedAcyclicGraph.h"
+#include <iostream>
 
 namespace dyno {
 
@@ -134,6 +135,39 @@ namespace dyno {
 		for(auto id : mEdges[v])
 			if (!visited[id])
 				topologicalSortUtil(id, visited);
+	}
+
+	void DirectedAcyclicGraph::addOtherVertices(ObjectId v)
+	{
+		OtherVertices.insert(v);
+
+	}
+
+	void DirectedAcyclicGraph::addtoRemoveList(ObjectId v)
+	{
+		RemoveList.insert(v);
+	}
+
+	void DirectedAcyclicGraph::removeID(ObjectId v, ObjectId w)
+	{
+		addtoRemoveList(v);
+		addtoRemoveList(w);
+
+		std::set<ObjectId>::iterator itList;
+
+		for (itList = RemoveList.begin(); itList != RemoveList.end();)
+		{
+			auto temp = *itList;
+
+			if (OtherVertices.count(*itList))
+			{
+				OtherVertices.erase(temp);
+			}
+			itList++;
+		}
+
+
+
 	}
 
 }

@@ -324,13 +324,15 @@ namespace dyno
 		}
 
 		auto& vert2Tri = getVertex2Triangles();
-
+		printf("start TS_SetupVertexNormals\n ");
 		cuExecute(vertSize,
 			TS_SetupVertexNormals,
 			vn,
 			this->m_coords,
 			m_triangles,
 			vert2Tri);
+		printf("end TS_SetupVertexNormals\n ");
+
 	}
 
 	template<typename TDataType>

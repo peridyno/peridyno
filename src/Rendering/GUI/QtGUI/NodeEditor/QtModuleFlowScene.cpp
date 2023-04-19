@@ -240,7 +240,9 @@ namespace Qt
 
 	void QtModuleFlowScene::showAnimationPipeline()
 	{
-		if (mNode == nullptr)
+		auto pipeline = mNode->animationPipeline();
+
+		if (mNode == nullptr || mActivePipeline == pipeline)
 			return;
 
 		mActivePipeline = mNode->animationPipeline();
@@ -250,12 +252,19 @@ namespace Qt
 
 	void QtModuleFlowScene::showGraphicsPipeline()
 	{
-		if (mNode == nullptr)
+		auto pipeline = mNode->graphicsPipeline();
+
+		if (mNode == nullptr || mActivePipeline == pipeline)
 			return;
 
 		mActivePipeline = mNode->graphicsPipeline();
 
 		updateModuleGraphView();
+
+		if (mReorderGraphicsPipeline) {
+			reorderAllModules();
+			mReorderGraphicsPipeline = false;
+		}
 	}
 
 	void QtModuleFlowScene::promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos)
