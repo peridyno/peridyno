@@ -16,6 +16,16 @@
 #include <QScrollArea>
 #include <QGridLayout>
 
+#include "PropertyItem/QVector3iFieldWidget.h"
+#include "PropertyItem/QVector3FieldWidget.h"
+#include "PropertyItem/QBoolFieldWidget.h"
+#include "PropertyItem/QIntegerFieldWidget.h"
+#include "PropertyItem/QFilePathWidget.h"
+#include "PropertyItem/QRealFieldWidget.h"
+#include "PropertyItem/QEnumFieldWidget.h"
+#include "PropertyItem/QRampWidget.h"
+#include "PropertyItem/QStateFieldWidget.h"
+
 namespace dyno
 {
 	//QWidget-->QVBoxLayout-->QScrollArea-->QWidget-->QGridLayout

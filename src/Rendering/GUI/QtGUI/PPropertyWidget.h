@@ -17,8 +17,6 @@
  * limitations under the License.
  */
 #pragma once
-#include "PPropertyItem.h"
-
 #include "nodes/QNode"
 
 class QVBoxLayout;
@@ -30,6 +28,7 @@ namespace dyno
 {
 	class OBase;
 	class Node;
+	class FBase;
 	class Module;
 
 	class PPropertyWidget : public QWidget

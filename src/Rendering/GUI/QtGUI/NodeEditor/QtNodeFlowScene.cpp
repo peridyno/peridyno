@@ -3,7 +3,7 @@
 
 #include "nodes/QNode"
 
-#include "Common.h"
+#include "Format.h"
 
 #include "Object.h"
 #include "NodeIterator.h"

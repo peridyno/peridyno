@@ -218,7 +218,7 @@ namespace dyno
 
 	void FBase::detach(std::shared_ptr<FCallBackFunc> func)
 	{
-		if (func == nullptr)
+		if (func == nullptr || mCallbackFunc.size() <= 0)
 			return;
 
 		auto it = std::find(mCallbackFunc.begin(), mCallbackFunc.end(), func);

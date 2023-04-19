@@ -41,6 +41,8 @@ namespace dyno
 
 		SphereModel();
 
+		std::string caption() override { return "Sphere"; }
+
 	public:
 		DEF_VAR(Coord, Center, 0, "Sphere center");
 
