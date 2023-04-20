@@ -84,6 +84,11 @@ namespace Qt
  		return dyno::FormatBlockCaptionName(mModule->caption());
 	}
 
+	bool QtModuleWidget::captionVisible() const
+	{
+		return mModule->captionVisible();
+	}
+
 	QString QtModuleWidget::name() const
 	{
 		return QString::fromStdString(mModule->caption());

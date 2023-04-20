@@ -52,9 +52,16 @@ namespace dyno {
 		/**
 		 * @brief Return the caption
 		 * 
-		 * @return The default value is the class name, overload this virtual function to return a user-defined caption name
+		 * @return The default value is the class name, override this virtual function to return a user-defined caption name
 		 */
 		virtual std::string caption();
+
+		/**
+		 * @brief Whether to hide the caption in the GUI
+		 * 
+		 * @return the default value true, override this function support customized behaviors
+		 */
+		virtual bool captionVisible();
 
 		/**
 		 * @brief Return a description for the node or module, override this function to support user-defined description

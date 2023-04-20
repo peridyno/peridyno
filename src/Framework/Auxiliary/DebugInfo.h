@@ -39,7 +39,7 @@ namespace dyno
 	{
 		DECLARE_CLASS(PrintInt);
 	public:
-		PrintInt() {};
+		PrintInt();
 
 		DEF_VAR_IN(int, Int, "Input value");
 
@@ -52,7 +52,7 @@ namespace dyno
 	{
 		DECLARE_CLASS(PrintUnsigned);
 	public:
-		PrintUnsigned() {};
+		PrintUnsigned();
 
 		DEF_VAR_IN(uint, Unsigned, "Input value");
 
@@ -65,7 +65,7 @@ namespace dyno
 	{
 		DECLARE_CLASS(PrintFloat);
 	public:
-		PrintFloat() {};
+		PrintFloat();
 		~PrintFloat() {};
 
 		DEF_VAR_IN(float, Float, "Input value");

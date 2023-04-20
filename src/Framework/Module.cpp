@@ -152,7 +152,7 @@ namespace dyno
 
 	bool Module::requireUpdate()
 	{
-		if (mUpdateAlways)
+		if (this->varForceUpdate()->getData())
 		{
 			return true;
 		}
@@ -191,7 +191,7 @@ namespace dyno
 
 	void Module::setUpdateAlways(bool b)
 	{
-		mUpdateAlways = b;
+		this->varForceUpdate()->setValue(b);
 	}
 
 	bool Module::isInitialized()
