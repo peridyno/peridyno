@@ -144,10 +144,10 @@ namespace dyno
 			}
 		}
 		else {
-			std::cout << "Fluid particle nodes are not set." << std::endl;
+			this->statePosition()->resize(0);
+			this->stateVelocity()->resize(0);
+			this->stateForce()->resize(0);
 		}
-
-		printf("total num = %d\n", totalNum);
 	}
 
 	template<typename TDataType>
@@ -159,6 +159,11 @@ namespace dyno
 		{
 			auto points = this->statePointSet()->getDataPtr();
 			points->setPoints(this->statePosition()->getData());
+		}
+		else
+		{
+			auto points = this->statePointSet()->getDataPtr();
+			points->clear();
 		}
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Node.h"
+#include "Node/ParametricModel.h"
 
 namespace dyno
 {
@@ -23,16 +23,14 @@ namespace dyno
 	*	\brief	
 	*/
 	template<typename TDataType>
-	class ParticleEmitter : public Node
+	class ParticleEmitter : public ParametricModel<TDataType>
 	{
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ParticleEmitter(std::string name = "particle emitter");
+		ParticleEmitter();
 		virtual ~ParticleEmitter();
-
-		virtual void generateParticles();
 
 		uint sizeOfParticles() { return mPosition.size(); }
 
@@ -42,16 +40,14 @@ namespace dyno
 		std::string getNodeType() override;
 
 	public:
-		DEF_VAR(Vec3f, Location, 0, "Node location");
-		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-//		DEF_VAR(Vec3f, Scale, 0, "Node scale");
-	
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
-		DEF_VAR(Coord, InitialVelocity, Coord(0, -1, 0), "Initial velocity");
+		//DEF_VAR(Coord, InitialVelocity, Coord(0, -1, 0), "Initial velocity");
 
 	protected:
 		void updateStates() final;
+		
+		virtual void generateParticles();
 
 		inline SquareMatrix<Real, 3> rotationMatrix()
 		{

@@ -12,6 +12,11 @@
 #include "ParticleSystem/SquareEmitter.h"
 
 #include "GLWireframeVisualModule.h"
+#include "GLPointVisualModule.h"
+
+#include "Module/CalculateNorm.h"
+
+#include "ColorMapping.h"
 
 #include "ParticleFluid.h"
 #include "StaticBoundary.h"
@@ -86,7 +91,29 @@ namespace dyno
 		group->addAction(
 			"Particle Fluid",
 			"ToolBarIco/ParticleSystem/ParticleFluid.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<ParticleFluid<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> { 
+				auto fluid = std::make_shared<ParticleFluid<DataType3f>>();
+
+				auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+				fluid->stateVelocity()->connect(calculateNorm->inVec());
+				fluid->graphicsPipeline()->pushModule(calculateNorm);
+
+				auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+				colorMapper->varMax()->setValue(5.0f);
+				calculateNorm->outNorm()->connect(colorMapper->inScalar());
+				fluid->graphicsPipeline()->pushModule(colorMapper);
+
+				auto ptRender = std::make_shared<GLPointVisualModule>();
+				ptRender->setColor(Vec3f(1, 0, 0));
+				ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+
+				fluid->statePointSet()->connect(ptRender->inPointSet());
+				colorMapper->outColor()->connect(ptRender->inColor());
+
+				fluid->graphicsPipeline()->pushModule(ptRender);
+
+				return fluid; 
+			});
 
 		group->addAction(
 			"Boundary",

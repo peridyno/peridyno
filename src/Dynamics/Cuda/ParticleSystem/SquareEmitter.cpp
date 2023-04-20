@@ -6,8 +6,8 @@
 namespace dyno
 {
 	template<typename TDataType>
-	SquareEmitter<TDataType>::SquareEmitter(std::string name)
-		: ParticleEmitter<TDataType>(name)
+	SquareEmitter<TDataType>::SquareEmitter()
+		: ParticleEmitter<TDataType>()
 	{
 		srand(time(0));
 
@@ -18,6 +18,15 @@ namespace dyno
 		this->varHeight()->setRange(0.01, 10.0f);
 
 		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SquareEmitter<TDataType>::tranformChanged, this));
+
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varWidth()->attach(callback);
+		this->varHeight()->attach(callback);
 	}
 
 	template<typename TDataType>
@@ -29,18 +38,21 @@ namespace dyno
 	void SquareEmitter<TDataType>::generateParticles()
 	{
 		auto sampling_distance = this->varSamplingDistance()->getData();
+
 		if (sampling_distance < EPSILON)
 			sampling_distance = Real(0.005);
+
 		auto center = this->varLocation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto quat = this->computeQuaternion();
+
+		Transform<Real, 3> tr(center, quat.toMatrix3x3(), scale);
 
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
-		auto rot_vec = this->varRotation()->getData();
-
-		auto rot_mat = this->rotationMatrix();
-
-		Coord v0 = this->varVelocityMagnitude()->getData()*rot_mat*Vec3f(0, -1, 0);
+		Coord v0 = this->varVelocityMagnitude()->getData()*quat.rotate(Vec3f(0, -1, 0));
 
 		auto w = 0.5 * this->varWidth()->getData();
 		auto h = 0.5 * this->varHeight()->getData();
@@ -50,11 +62,9 @@ namespace dyno
 			for (Real z = -h; z <= h; z += sampling_distance)
 			{
 				Coord p = Coord(x, 0, z);
-				if (rand() % 40 == 0)
+				if (rand() % 5 == 0)
 				{
-					//Coord q = cos(angle) * p + (1 - cos(angle)) * (p.dot(axis)) * axis + sin(angle) * axis.cross(p);
-					Coord q = rot_mat * p;
-					pos_list.push_back(q + center);
+					pos_list.push_back(tr * p);
 					vel_list.push_back(v0);
 				}
 			}
@@ -75,21 +85,23 @@ namespace dyno
 	}
 	
 	template<typename TDataType>
-	void SquareEmitter<TDataType>::resetStates()
+	void SquareEmitter<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Edge> edges;
 
 		auto center = this->varLocation()->getData();
-		auto rot_vec = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto quat = this->computeQuaternion();
 
 		auto w = this->varWidth()->getData();
 		auto h = this->varHeight()->getData();
 
-		auto rot_mat = this->rotationMatrix();
+		Transform<Real, 3> tr(Coord(0), quat.toMatrix3x3(), scale);
 
-		auto Nx = 0.5 * w * rot_mat * Coord(1, 0, 0);
-		auto Nz = 0.5 * h * rot_mat * Coord(0, 0, 1);
+		auto Nx = tr * Coord(0.5 * w, 0, 0);
+		auto Nz = tr * Coord(0, 0, 0.5 * h);
 
 		vertices.push_back(center + Nx + Nz);
 		vertices.push_back(center + Nx - Nz);
@@ -108,6 +120,13 @@ namespace dyno
 
 		vertices.clear();
 		edges.clear();
+	}
+
+
+	template<typename TDataType>
+	void SquareEmitter<TDataType>::resetStates()
+	{
+		tranformChanged();
 	}
 
 	DEFINE_CLASS(SquareEmitter);

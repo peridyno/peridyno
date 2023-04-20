@@ -37,6 +37,8 @@ namespace dyno
 
 		void loadObjFile(std::string filename);
 
+		void clear();
+
 	protected:
 		DArray<Coord> m_coords;
 		DArrayList<int> m_pointNeighbors;

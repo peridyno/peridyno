@@ -28,19 +28,20 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		CircularEmitter(std::string name = "particleEmitter");
+		CircularEmitter();
 		virtual ~CircularEmitter();
 		
 	public:
-		DEF_VAR(Real, Radius, 0.05, "Emitter radius");
+		DEF_VAR(Real, Radius, 0.1, "Emitter radius");
 
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, Outline, "Outline of the emitter");
 
-	protected:
+	private:
 		void resetStates() override;
 
-	private:
 		void generateParticles() override;
+
+		void tranformChanged();
 	};
 
 	IMPLEMENT_TCLASS(CircularEmitter, TDataType)

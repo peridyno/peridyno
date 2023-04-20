@@ -20,6 +20,9 @@ namespace dyno
 		this->inColor()->tagOptional(true);
 
 		this->varPointSize()->setRange(0.001f, 1.0f);
+
+
+		this->varForceUpdate()->setValue(true);
 	}
 
 	GLPointVisualModule::~GLPointVisualModule()

@@ -233,5 +233,13 @@ namespace dyno
 		cuExecute(m_coords.size(), PS_Rotate, m_coords, q);
 	}
 
+
+	template<typename TDataType>
+	void PointSet<TDataType>::clear()
+	{
+		m_coords.clear();
+		m_pointNeighbors.clear();
+	}
+
 	DEFINE_CLASS(PointSet);
 }
