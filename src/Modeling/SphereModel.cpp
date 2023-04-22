@@ -23,6 +23,7 @@ namespace dyno
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
+
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
@@ -437,10 +438,8 @@ namespace dyno
 		triangleSet->update();
 
 		vertices.clear();
-
 		triangle.clear();
 
-		//triangle.clear();
 	}
 
 

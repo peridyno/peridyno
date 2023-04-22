@@ -1,6 +1,9 @@
 #include "StaticTriangularMesh.h"
 
 #include "Topology/TriangleSet.h"
+#include <iostream>
+#include <sys/stat.h>
+
 
 namespace dyno
 {
@@ -20,7 +23,7 @@ namespace dyno
 	void StaticTriangularMesh<TDataType>::resetStates()
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
-
+		
 		if (this->varFileName()->getDataPtr()->string() == "")
 			return;
 
@@ -28,6 +31,7 @@ namespace dyno
 
 		triSet->scale(this->varScale()->getData());
 		triSet->translate(this->varLocation()->getData());
+		triSet->rotate(this->varRotation()->getData() * PI / 180);
 
 		Node::resetStates();
 
@@ -61,7 +65,40 @@ namespace dyno
 	template<typename TDataType>
 	void StaticTriangularMesh<TDataType>::updateStates()
 	{
-		//printf("update static boundary\n");
+
+
+		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
+
+		if (this->varSequence()->getData() == true)
+		{
+
+
+		std::string filename = this->varFileName()->getDataPtr()->string();
+		int num_ = filename.rfind("_");
+
+		filename.replace(num_+1, filename.length()-4-(num_+1), std::to_string(this->stateFrameNumber()->getData()));
+
+
+		struct stat buffer;
+		bool isvaid = (stat(filename.c_str(), &buffer) == 0);
+
+			if (isvaid)
+			{
+				triSet->loadObjFile(filename);
+
+				triSet->scale(this->varScale()->getData());
+				triSet->translate(this->varLocation()->getData());
+				triSet->rotate(this->varRotation()->getData() * PI / 180);
+
+				initPos.resize(triSet->getPoints().size());
+				initPos.assign(triSet->getPoints());
+				center = this->varCenter()->getData();
+				centerInit = center;
+			}
+
+
+		}
+
 
 		Coord velocity = this->varVelocity()->getData();
 		Coord angularVelocity = this->varAngularVelocity()->getData();
@@ -77,8 +114,6 @@ namespace dyno
 		rotMat = rotQuat.toMatrix3x3();
 
 		center += velocity * dt;
-
-		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
 		cuExecute(triSet->getPoints().size(),
 			K_InitKernelFunctionMesh,

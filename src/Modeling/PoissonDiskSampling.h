@@ -20,6 +20,8 @@
 #include "Primitive/Primitive3D.h"
 #include "Topology/PointSet.h"
 #include "Sampler.h"
+#include "FilePath.h"
+#include "Topology/DistanceField3D.h"
 
 namespace dyno
 {
@@ -29,32 +31,51 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	class PoissonDiksSampling : public Sampler<TDataType>
+	class PoissonDiskSampling : public Sampler<TDataType>
 	{
-		DECLARE_TCLASS(PoissonDiksSampling, TDataType);
+		DECLARE_TCLASS(PoissonDiskSampling, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		PoissonDiksSampling();
+		PoissonDiskSampling();
 
 		void ConstructGrid();
 
+		bool collisionJudge2D(Coord point);
 		bool collisionJudge(Coord point);
 
+		bool loadSdf();
 
-		DEF_VAR(Real, SamplingDistance, 0.01, "Sampling distance");
 
-		DEF_VAR(int, Dimension, 2, "Dimensions of sampling erea ");
+		DEF_VAR(Real, SamplingDistance, 0.005, "Sampling distance");
 
-		DEF_VAR(int, PointsNumber, 2, "Desired samples");
+		DEF_VAR(int, Dimension, 3, "Dimensions of sampling erea ");
+
+		DEF_VAR(Coord, Box_a, 0.0f, "Lower boudary of the sampling area");
+		DEF_VAR(Coord, Box_b, 0.1f, "Upper boundary of the sampling area");
+
+		//.SDF file
+		DEF_VAR(FilePath, SdfFileName, "", "");
+
+		Real lerp(Real a, Real b, Real alpha);
+
+		Real getDistanceFromSDF(Coord &p, Coord &normal);
+
+		std::shared_ptr<DistanceField3D<TDataType>>  getSDF() {
+			return m_SDF;
+		}
+
+		Coord getOnePointInsideSDF();
+	private:
 
 	protected:
+
 		void resetStates() override;
 
 		GridIndex searchGrid(Coord point);
-
 		int indexTransform(int i, int j, int k);
+
 
 		int pointNumberRecommend();
 
@@ -71,17 +92,29 @@ namespace dyno
 
 		std::vector<Coord> points;
 
-		unsigned int desired_points = 15000;	//desired points number
+		unsigned int desired_points;	
 
 		GridIndex gridIndex;
 
-		unsigned int attempted_Times = 100;
+		unsigned int attempted_Times = 10;
+
+		std::shared_ptr<DistanceField3D<TDataType>> m_SDF;
+
+		bool SDF_flag = false;
+
+		DArray<Real> m_dist;  
+
+
+		//SDF in host.
+		CArray3D<Real> host_dist;
+		Coord m_h;
+		Coord m_left;
 
 	};
 
 
 
 
-	IMPLEMENT_TCLASS(PoissonDiksSampling, TDataType);
+	IMPLEMENT_TCLASS(PoissonDiskSampling, TDataType);
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuzhong Guo
+ * Copyright 2022 Shusen Liu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #include "Node/ParametricModel.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "GLPointVisualModule.h"
 
 
 namespace dyno
@@ -25,46 +26,46 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class Merge : public Node
+	class TransformModel : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(Merge, TDataType);
+		DECLARE_TCLASS(TransformModel, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Merge();
+		enum inputType
+		{
+			Point_ = 0,
+			Edge_ = 1,
+			Triangle_ = 2,
+			Null_ = 3
+		};
+
+		TransformModel();
 
 	public:
+		//DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "")
+		DEF_INSTANCE_IN(TopologyModule, Topology, "")
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet01, "")
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "")
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "")
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "")
+		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
+		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "");
 		
-		DECLARE_ENUM(UpdateMode,
-			Reset = 0,
-			Tick = 1);
-
-		DEF_ENUM(UpdateMode ,UpdateMode,UpdateMode::Reset,"");
-
-		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
-
+		inputType inType = inputType::Null_;
 		void disableRender();
-		void preUpdateStates()override;
-		void MergeCPU();
+		void Transform();
+
 	protected:
 		void resetStates() override;
-
+		
 		std::shared_ptr <GLSurfaceVisualModule> glModule;
+		std::shared_ptr <GLWireframeVisualModule> glWireModule;
+		std::shared_ptr <GLPointVisualModule> glPointModule;
+
 	};
 
 
 
-	IMPLEMENT_TCLASS(Merge, TDataType);
+	IMPLEMENT_TCLASS(TransformModel, TDataType);
 }

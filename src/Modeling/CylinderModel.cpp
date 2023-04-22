@@ -12,8 +12,8 @@ namespace dyno
 
 		this->varRow()->setRange(2, 50);
 		this->varColumns()->setRange(3, 50);
-		this->varRadius()->setRange(0.001f, 10.0f);
-		this->varHeight()->setRange(0.001f, 10.0f);
+		this->varRadius()->setRange(0.001f, 100.0f);
+		this->varHeight()->setRange(0.001f, 100.0f);
 		this->varEndSegment()->setRange(2, 39);
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
@@ -115,7 +115,7 @@ namespace dyno
 
 		int pt_side_len = vertices.size();
 
-		for (int i = 1; i <= end_segment; i++)
+		for (int i = 1; i < end_segment; i++)
 		{
 			float offset = i / (float(end_segment) - i);
 
@@ -128,7 +128,7 @@ namespace dyno
 
 		}
 
-		for (int i = 1; i <= end_segment; i++)
+		for (int i = 1; i < end_segment; i++)
 		{
 			float offset = i / (float(end_segment) - i);
 
@@ -173,7 +173,7 @@ namespace dyno
 
 		//以下是底面和顶面的构建
 		//侧面原有的点数，pt_side_len,
-
+		
 		int pt_len = vertices.size() - 2;
 		int top_pt_len = vertices.size() - 2 - pt_side_len;
 		int addnum = 0;
@@ -239,6 +239,7 @@ namespace dyno
 			}
 
 		}
+
 		//*************************上部************************//
 
 		for (int s = 0; s < end_segment; s++)  //内部循环遍历每一圈每一列
@@ -252,14 +253,16 @@ namespace dyno
 					//****************先判断是否是最外一圈，是的话与侧面序号相接*****************//
 					if (s == 0)
 					{
-						temp = i + pt_side_len - columns;  //i为0-columns的序号，“+ x * (pt_side_len - columns)”作为侧面序号的变化量，最终得出侧面 上、下一圈的序号
-						addnum = columns + end_segment * columns;
+						temp = i + pt_side_len - columns;  //i为0-columns的序号，“+ x * (pt_side_len - columns)”作为侧面序号的变化量，最终得出侧面 上、下一圈的序号  
+						addnum =  end_segment * columns; //
 					}
 					else
 					{
-						temp = pt_side_len + columns * (end_segment - 1) + i + unsigned(s) * columns;
+						temp = pt_side_len + i + unsigned(s - 1) * columns + columns * (end_segment - 1);
 						addnum = columns;
+
 					}
+
 					//****************是否是最后一列，是的话首尾序号相接，防止连接点换行*****************//
 					if (i != columns - 1)
 					{
@@ -283,7 +286,7 @@ namespace dyno
 
 				for (int z = 0; z < columns; z++)
 				{
-					temp = pt_side_len + z + unsigned(s - 1) * columns + end_segment * columns;
+					temp = pt_side_len + z + unsigned(s - 1) * columns + columns * (end_segment - 1);
 					if (z != columns - 1)
 					{
 						triangle.push_back(TopologyModule::Triangle(pt_len + 1, temp, temp + 1));	//生成底面最内圈
@@ -324,6 +327,10 @@ namespace dyno
 
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
+
+//		triangleSet->updateEdges();
+//		triangleSet->updateVertexNormal();
+
 
 		triangleSet->update();
 

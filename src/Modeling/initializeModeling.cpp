@@ -9,10 +9,12 @@
 #include "ConeModel.h"
 
 #include "CubeSampler.h"
+#include "SphereSampler.h"
 
 #include "StaticTriangularMesh.h"
 #include "GLWireframeVisualModule.h"
 #include "GLSurfaceVisualModule.h"
+#include "Turning.h"
 
 #include "PoissonDiskSampling.h"
 
@@ -72,7 +74,6 @@ namespace dyno
 				return node;
 			});
 
-
 		group->addAction(
 			"Cylinder",
 			"ToolBarIco/Modeling/Cylinder.png",
@@ -87,13 +88,11 @@ namespace dyno
 
 				return node;
 			});
-
-
 		group->addAction(
 			"Cone",
 			"ToolBarIco/Modeling/Cone.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<ConeModel<DataType3f>>();
+				auto node = std::make_shared<ConeModel<DataType3f>>(); 
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
 				module->setColor(Vec3f(0.8, 0.52, 0.25));
@@ -103,6 +102,15 @@ namespace dyno
 
 				return node;
 			});
+
+
+		group->addAction(
+			"Turning Model",
+			"ToolBarIco/Modeling/Turn.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<TurningModel<DataType3f>>();
+			});
+
 
 		group->addAction(
 			"Sphere Sampler",
@@ -123,23 +131,11 @@ namespace dyno
 			"Poisson Disk Sampler",
 			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
 			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<PoissonDiksSampling<DataType3f>>();
+				return std::make_shared<PoissonDiskSampling<DataType3f>>();
 			});
 
-		group->addAction(
-			"Triangular Mesh",
-			"ToolBarIco/Modeling/TriangularMesh.png",
-			[=]()->std::shared_ptr<Node> { 
-				auto node = std::make_shared<StaticTriangularMesh<DataType3f>>();
 
-				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Vec3f(0.8, 0.52, 0.25));
-				module->setVisible(true);
-				node->stateTopology()->connect(module->inTriangleSet());
-				node->graphicsPipeline()->pushModule(module);
 
-				return node; 
-			});
 	}
 }
 

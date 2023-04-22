@@ -87,7 +87,7 @@ namespace dyno
 
 		//以下是底部及上部点的构建
 
-		for (int i = 1; i <= row_i; i++)
+		for (int i = 1; i < row_i; i++)
 		{
 			float offset = i / (float(row_i) - i);
 
@@ -100,7 +100,7 @@ namespace dyno
 
 		}
 
-		for (int i = 1; i <= row_i; i++)
+		for (int i = 1; i < row_i; i++)
 		{
 			float offset = i / (float(row_i) - i);
 
@@ -223,11 +223,11 @@ namespace dyno
 					if (s == 0)
 					{
 						temp = i + pt_side_len - columns;  //i为0-columns的序号，“+ x * (pt_side_len - columns)”作为侧面序号的变化量，最终得出侧面 上、下一圈的序号
-						addnum = columns + row_i * columns;
+						addnum = row_i * columns;
 					}
 					else
 					{
-						temp = pt_side_len + columns * (row_i - 1) + i + unsigned(s) * columns;
+						temp = pt_side_len + i + unsigned(s - 1) * columns + columns * (row_i - 1);
 						addnum = columns;
 					}
 					//****************是否是最后一列，是的话首尾序号相接，防止连接点换行*****************//
@@ -253,7 +253,7 @@ namespace dyno
 
 				for (int z = 0; z < columns; z++)
 				{
-					temp = pt_side_len + z + unsigned(s - 1) * columns + row_i * columns;
+					temp = pt_side_len + z + unsigned(s - 1) * columns + columns * (row_i - 1);
 					if (z != columns - 1)
 					{
 						triangle.push_back(TopologyModule::Triangle(pt_len + 1, temp, temp + 1));	//生成底面最内圈
@@ -274,6 +274,10 @@ namespace dyno
 
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
+
+//		triangleSet->updateEdges();
+//		triangleSet->updateVertexNormal();
+
 
 		triangleSet->update();
 

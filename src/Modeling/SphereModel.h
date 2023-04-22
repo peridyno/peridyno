@@ -24,6 +24,8 @@
 
 namespace dyno
 {
+
+
 	template<typename TDataType>
 	class SphereModel : public ParametricModel<TDataType>
 	{
@@ -50,9 +52,9 @@ namespace dyno
 
 		//DEF_VAR(Real, triangleLength, 0.5, "Length of triangle edge");
 
-		DEF_ENUM(SphereMode, SphereMode, SphereMode::RowAndColumns, "ScaleMode");
+		DEF_ENUM(SphereMode, SphereMode, SphereMode::Theta, "ScaleMode");
 
-		DEF_VAR(Real, Theta, 0.3, "Angle");
+		DEF_VAR(Real, Theta, 0.15, "Angle");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
