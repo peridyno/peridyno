@@ -84,6 +84,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Scene boundary
 	auto boundary = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	boundary->varFileName()->setValue(getAssetPath() + "standard/standard_cube2.obj");
+	boundary->graphicsPipeline()->disable();
 
 	//SFI node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
@@ -110,7 +111,7 @@ int main()
 {
 	GlfwApp window;
 	window.setSceneGraph(createScene());
-	window.initialize(1280, 768);
+	window.initialize(1024, 768);
 	window.mainLoop();
 
 	return 0;

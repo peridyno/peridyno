@@ -3,7 +3,6 @@
 #include "SceneGraph.h"
 #include "Log.h"
 
-#include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/SquareEmitter.h"
 #include "ParticleSystem/CircularEmitter.h"
@@ -25,9 +24,7 @@
 #include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
 
-#include "ParticleEmitterCoffee.h"
 #include "ParticleSystem/MakeParticleSystem.h"
-//#include "ParticleWriterABC.h"
 
 #include "StaticTriangularMesh.h"
 
@@ -354,17 +351,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//scene.setGravity(Vec3f(0, -7.0, 0));
 	scn->setUpperBound(Vec3f(2.5, 2.5, 2.5));
 	scn->setLowerBound(Vec3f(-2.5, 0, -2.5));
-//	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	//**********
-/*
-	auto emitter0 = scn->addNode(std::make_shared<ParticleEmitterCoffee<DataType3f>>());
-	emitter0->varLocation()->setValue(Vec3f(0.0, 0.3, 0.0));//-0.045, 0.58, 0.003
-	emitter0->varInitialVelocity()->setValue(Vec3f(-0.3, 0, 0));
 
-	auto emitter1 = scn->addNode(std::make_shared<ParticleEmitterCoffee<DataType3f>>());
-	emitter1->varLocation()->setValue(Vec3f(-0.1, 0.3, 0.0));//-0.045, 0.58, 0.003
-	emitter1->varInitialVelocity()->setValue(Vec3f(0.3, 0, 0));
-*/
 	auto loader = scn->addNode(std::make_shared<LoadParticles<DataType3f>>());
 	loader->loadParticles(
 		Vec3f(-0.16, 0.15, 0.015), 0.018,
@@ -392,34 +379,6 @@ std::shared_ptr<SceneGraph> createScene()
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	//emitter->connect(fluid->importParticleEmitters());
 	loader->connect(fluid->importInitialStates());
-
-	//**********particle rendering with velocity
-	/*auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	colorMapper->varMax()->setValue(5.0f);
-
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Vec3f(1, 0, 0));
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	ptRender->setColorMapRange(0, 5);
-
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-	colorMapper->outColor()->connect(ptRender->inColor());
-	fluid->stateTopology()->connect(ptRender->inPointSet());
-
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
-	fluid->graphicsPipeline()->pushModule(colorMapper);
-	fluid->graphicsPipeline()->pushModule(ptRender);*/
-
-	//ABC writer
-	/*auto abcWriter = std::make_shared<ParticleWriterABC<DataType3f>>();
-	fluid->statePosition()->connect(abcWriter->inPosition());
-	fluid->stateVelocity()->connect(abcWriter->inVelocity());
-	calculateNorm->outNorm()->connect(abcWriter->inColor());
-	fluid->graphicsPipeline()->pushModule(abcWriter);*/
-	
 
 	////neighbor query
 	auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
