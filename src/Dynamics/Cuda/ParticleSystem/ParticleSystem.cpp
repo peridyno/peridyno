@@ -7,8 +7,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ParticleSystem, TDataType)
 
 	template<typename TDataType>
-	ParticleSystem<TDataType>::ParticleSystem(std::string name)
-		: Node(name)
+	ParticleSystem<TDataType>::ParticleSystem()
+		: Node()
 	{
 		auto ptSet = std::make_shared<PointSet<TDataType>>();
 		this->statePointSet()->setDataPtr(ptSet);

@@ -33,6 +33,8 @@ namespace dyno
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateQuadSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
+
+		this->stateQuadSet()->promoteOuput();
 	}
 
 	struct Index2D

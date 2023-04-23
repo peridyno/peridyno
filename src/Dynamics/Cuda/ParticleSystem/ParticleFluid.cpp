@@ -13,8 +13,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ParticleFluid, TDataType)
 
 	template<typename TDataType>
-	ParticleFluid<TDataType>::ParticleFluid(std::string name)
-		: ParticleSystem<TDataType>(name)
+	ParticleFluid<TDataType>::ParticleFluid()
+		: ParticleSystem<TDataType>()
 	{
 		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
 		this->animationPipeline()->pushModule(pbf);

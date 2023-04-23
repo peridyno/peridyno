@@ -83,7 +83,7 @@ namespace dyno
 	bool BoundaryConstraint<TDataType>::constrain(DArray<Coord>& position, DArray<Coord>& velocity, Real dt)
 	{
 		uint pDim = cudaGridSize(position.size(), BLOCK_SIZE);
-		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
+ 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
 			position,
 			velocity,
 			*m_cSDF,

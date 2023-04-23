@@ -13,8 +13,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ElasticBody, TDataType)
 
 	template<typename TDataType>
-	ElasticBody<TDataType>::ElasticBody(std::string name)
-		: ParticleSystem<TDataType>(name)
+	ElasticBody<TDataType>::ElasticBody()
+		: ParticleSystem<TDataType>()
 	{
 		this->varHorizon()->setValue(0.0085);
 

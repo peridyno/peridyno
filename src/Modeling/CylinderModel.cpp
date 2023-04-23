@@ -3,6 +3,8 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
+
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -41,7 +43,7 @@ namespace dyno
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
 
-
+		this->stateTriangleSet()->promoteOuput();
 	}
 
 	template<typename TDataType>

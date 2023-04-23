@@ -7,6 +7,8 @@
 #include "SphereSampler.h"
 #include "CylinderModel.h"
 #include "ConeModel.h"
+#include "Turning.h"
+#include "Merge.h"
 
 #include "CubeSampler.h"
 #include "SphereSampler.h"
@@ -113,6 +115,14 @@ namespace dyno
 
 
 		group->addAction(
+			"Merge",
+			"ToolBarIco/Modeling/CubeCombo.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<Merge<DataType3f>>();
+			});
+
+
+		group->addAction(
 			"Sphere Sampler",
 			"ToolBarIco/Modeling/SphereSampler_v3.png",
 			[=]()->std::shared_ptr<Node> {
@@ -133,7 +143,6 @@ namespace dyno
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<PoissonDiskSampling<DataType3f>>();
 			});
-
 
 
 	}

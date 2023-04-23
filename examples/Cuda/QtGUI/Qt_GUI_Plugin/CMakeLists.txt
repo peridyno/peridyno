@@ -3,6 +3,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Modeling
         Interaction
         ParticleSystem
+        SemiAnalyticalScheme
         QtGUI)
     add_example(Qt_GUI_Plugin Qt LIB_DEPENDENCY)
 endif()

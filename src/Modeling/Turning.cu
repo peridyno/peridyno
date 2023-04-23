@@ -3,15 +3,12 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
-
-
 namespace dyno
 {
 	template<typename TDataType>
 	TurningModel<TDataType>::TurningModel()
 		: ParametricModel<TDataType>()
 	{
-
 		//this->varRow()->setRange(2, 50);
 		this->varColumns()->setRange(3, 50);
 		this->varRadius()->setRange(-10.0f, 10.0f);
@@ -32,7 +29,7 @@ namespace dyno
 		//auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		//this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		//this->graphicsPipeline()->pushModule(wireframe);
-
+		this->stateTriangleSet()->promoteOuput();
 
 	}
 
@@ -341,18 +338,10 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-//		triangleSet->updateEdges();
-//		triangleSet->updateVertexNormal();
-
-
 		triangleSet->update();
-
-
 
 		vertices.clear();
 		triangle.clear();
-		
-
 	}
 
 

@@ -52,12 +52,12 @@ namespace dyno
 
 		for (size_t t = 0; t < m_obstacles.size(); t++)
 		{
-
 			for (int i = 0; i < pSys.size(); i++)
 			{
-				DeviceArrayField<Coord>* posFd = pSys[i]->statePosition();
-				DeviceArrayField<Coord>* velFd = pSys[i]->stateVelocity();
-				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
+				auto posFd = pSys[i]->statePosition();
+				auto velFd = pSys[i]->stateVelocity();
+				if (!posFd->isEmpty() && !velFd->isEmpty())
+					m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
 			}
 		} 
 	}

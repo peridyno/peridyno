@@ -30,11 +30,11 @@ namespace dyno
 		DECLARE_CLASS(GLPointVisualModule)
 	public:
 
-		enum ColorMapMode
-		{
+
+		DECLARE_ENUM(ColorMapMode,
 			PER_OBJECT_SHADER = 0,	// use constant color
 			PER_VERTEX_SHADER = 1
-		};
+		);
 
 		GLPointVisualModule();
 		~GLPointVisualModule();
@@ -48,6 +48,8 @@ namespace dyno
 
 	public:
 		DEF_VAR(float, PointSize, 0.001f, "Size of rendered particles");
+
+		DEF_ENUM(ColorMapMode, ColorMode, ColorMapMode::PER_OBJECT_SHADER, "Color Mode");
 
 	protected:
 		virtual void updateGraphicsContext() override;
@@ -65,8 +67,6 @@ namespace dyno
 		unsigned int	mNumPoints;
 
 		gl::Program*	mShaderProgram = 0;
-
-		ColorMapMode	mColorMode = ColorMapMode::PER_OBJECT_SHADER;
 
 		// data copy
 		DArray<Vec3f> points;

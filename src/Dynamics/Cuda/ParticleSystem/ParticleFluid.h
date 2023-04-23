@@ -2,6 +2,8 @@
 #include "ParticleSystem.h"
 #include "ParticleEmitter.h"
 
+#include "Topology/PointSet.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -12,7 +14,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ParticleFluid(std::string name = "default");
+		ParticleFluid();
 		virtual ~ParticleFluid();
 
 

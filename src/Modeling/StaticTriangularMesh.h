@@ -1,5 +1,6 @@
 #pragma once
-#include "Node.h"
+#include "Node/ParametricModel.h"
+
 #include "Topology/TriangleSet.h"
 #include "Field.h"
 #include "FilePath.h"
@@ -15,7 +16,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class StaticTriangularMesh : public Node
+	class StaticTriangularMesh : public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(StaticTriangularMesh, TDataType)
 	public:
@@ -31,21 +32,20 @@ namespace dyno
 		//void update() override;
 
 	public:
-		DEF_VAR(Vec3f, Location, 0, "Node location");
-		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-		DEF_VAR(Vec3f, Scale, Vec3f(1.0f), "Node scale");
-
 		DEF_VAR(FilePath, FileName, "", "");
 		//DEF_VAR(std::string, InputPath, "", "");
 
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
-
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet_IN, "");
 		DEF_VAR(bool, Sequence, false, "Import Sequence");
+
 		DEF_VAR(Coord, Velocity, Coord(0), "");
 		DEF_VAR(Coord, Center, Coord(0), "");
 		DEF_VAR(Coord, AngularVelocity, Coord(0), "");
 
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+
+		DEF_VAR(bool, ConvertInput, false, "ConvertInput");
 		//DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 	protected:

@@ -31,7 +31,7 @@ namespace dyno
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
-		mColorMode = mode;
+		this->varColorMode()->getDataPtr()->setCurrentKey(mode);
 	}
 
 	bool GLPointVisualModule::initializeGL()
@@ -72,7 +72,7 @@ namespace dyno
 		mNumPoints = points.size();
 
 		mVertexArray.bind();
-		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !colors.isEmpty() && colors.size() == mNumPoints)
 		{
 			mColor.loadCuda(colors.begin(), mNumPoints * sizeof(float) * 3);
@@ -99,7 +99,7 @@ namespace dyno
 
 		points.assign(pPointSet->getPoints());
 
-		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
 			colors.assign(this->inColor()->getData());
