@@ -32,12 +32,11 @@ namespace dyno
 		this->varRadius()->attach(callback);
 		this->varHeight()->attach(callback);
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
-
 
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
@@ -51,12 +50,6 @@ namespace dyno
 	{
 		varChanged();
 	}
-
-
-	template<typename TDataType>
-	void CylinderModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	template<typename TDataType>
 	void CylinderModel<TDataType>::varChanged() 

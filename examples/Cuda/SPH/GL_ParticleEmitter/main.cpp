@@ -33,7 +33,7 @@ std::shared_ptr<SceneGraph> createScene()
 	colorMapper->varMax()->setValue(5.0f);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Vec3f(1, 0, 0));
+	ptRender->setColor(Color(1, 0, 0));
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
 	fluid->stateVelocity()->connect(calculateNorm->inVec());

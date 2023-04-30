@@ -24,7 +24,7 @@ namespace dyno
 		this->inTriangleSet_IN()->tagOptional(true);
 
 		auto surfaceRender = std::make_shared<GLSurfaceVisualModule>();
-		surfaceRender->setColor(Vec3f(0.8, 0.52, 0.25));
+		surfaceRender->setColor(Color(0.8f, 0.52f, 0.25f));
 		surfaceRender->setVisible(true);
 		this->stateTopology()->connect(surfaceRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender);

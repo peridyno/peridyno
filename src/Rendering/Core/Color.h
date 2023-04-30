@@ -8,7 +8,12 @@ namespace dyno
 	{
 	public:
 		DYN_FUNC Color() { r = 0.0f; g = 0.0f; b = 0.0f; }
-		DYN_FUNC Color(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
+
+		explicit DYN_FUNC Color(float c) { r = c; g = c; b = c; }
+
+		//explicit DYN_FUNC Color(int _r, int _g, int _b) { r = float(_r) / 255; g = float(_g) / 255; float(_b) / 255; }
+
+		explicit DYN_FUNC Color(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
 
 		DYN_FUNC ~Color() {};
 
@@ -63,6 +68,12 @@ namespace dyno
 				break;
 			}
 		}
+
+		static Color Red() { return Color(1.0f, 0.0f, 0.0f); }
+		static Color Green() { return Color(0.0f, 1.0f, 0.0f); }
+		static Color Blue() { return Color(0.0f, 0.0f, 1.0f); }
+		static Color Black() { return Color(0.0f, 0.0f, 0.0f); }
+		static Color White() { return Color(1.0f, 1.0f, 1.0f); }
 
 		float r;
 		float g;

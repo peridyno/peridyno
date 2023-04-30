@@ -50,15 +50,10 @@ namespace dyno
 
 		DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
-		void disableRender();
-
 	protected:
 		void resetStates() override;
 
 		void varChanged();
-
-
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 
 

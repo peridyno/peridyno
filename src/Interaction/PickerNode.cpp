@@ -46,38 +46,38 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(pointInteractor);
 
 		auto surfaceRender1 = std::make_shared<GLSurfaceVisualModule>();
-		surfaceRender1->setColor(Vec3f(0.2f, 0.48f, 0.75f));
+		surfaceRender1->setColor(Color(0.2f, 0.48f, 0.75f));
 		surfaceRender1->varAlpha()->setValue(0.95f);
 		this->surfaceInteractor->outSelectedTriangleSet()->connect(surfaceRender1->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender1);
 
 		auto surfaceRender2 = std::make_shared<GLSurfaceVisualModule>();
-		surfaceRender2->setColor(Vec3f(0.8f, 0.52f, 0.25f));
+		surfaceRender2->setColor(Color(0.8f, 0.52f, 0.25f));
 		surfaceRender2->varAlpha()->setValue(0.85f);
 		this->surfaceInteractor->outOtherTriangleSet()->connect(surfaceRender2->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender2);
 
 		auto edgeRender1 = std::make_shared<GLWireframeVisualModule>();
 		this->varEdgeSelectedSize()->connect(edgeRender1->varRadius());
-		edgeRender1->setColor(Vec3f(0.8f, 0.0f, 0.0f));
+		edgeRender1->setColor(Color(0.8f, 0.0f, 0.0f));
 		this->edgeInteractor->outSelectedEdgeSet()->connect(edgeRender1->inEdgeSet());
 		this->graphicsPipeline()->pushModule(edgeRender1);
 
 		auto edgeRender2 = std::make_shared<GLWireframeVisualModule>();
 		this->varEdgeOtherSize()->connect(edgeRender2->varRadius());
-		edgeRender2->setColor(Vec3f(0.0f));
+		edgeRender2->setColor(Color(0.0f));
 		this->edgeInteractor->outOtherEdgeSet()->connect(edgeRender2->inEdgeSet());
 		this->graphicsPipeline()->pushModule(edgeRender2);
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
 		this->varPointSelectedSize()->connect(pointRender1->varPointSize());
-		pointRender1->setColor(Vec3f(1.0f, 0, 0));
+		pointRender1->setColor(Color(1.0f, 0.0f, 0.0f));
 		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
 		this->varPointOtherSize()->connect(pointRender2->varPointSize());
-		pointRender2->setColor(Vec3f(0, 0, 1.0f));
+		pointRender2->setColor(Color(0.0f, 0.0f, 1.0f));
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 

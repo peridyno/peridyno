@@ -29,10 +29,10 @@ namespace dyno
 		~QVector3FieldWidget() override;
 
 	public slots:
-		//Called when the field is updated
+		//Called when the widget is updated
 		void updateField(double);
 
-		//Called when the widget is updated
+		//Called when the field is updated
 		void updateWidget();
 
 	private:

@@ -17,8 +17,8 @@ namespace dyno
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
@@ -286,11 +286,6 @@ namespace dyno
 		vertices.clear();
 		triangle.clear();
 	}
-
-	template<typename TDataType>
-	void ConeModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	DEFINE_CLASS(ConeModel);
 }

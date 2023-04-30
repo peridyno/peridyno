@@ -417,7 +417,7 @@ std::shared_ptr<SceneGraph> createScene()
 	boundaryMesh->varScale()->setValue(Vec3f(1 / 5.0));
 
 	auto meshRenderer = std::make_shared<GLSurfaceVisualModule>();
-	meshRenderer->setColor(Vec3f(0.26, 0.25, 0.25));
+	meshRenderer->setColor(Color(0.26f, 0.25f, 0.25f));
 	meshRenderer->setVisible(true);
 	boundaryMesh->stateTopology()->connect(meshRenderer->inTriangleSet());
 	boundaryMesh->graphicsPipeline()->pushModule(meshRenderer);

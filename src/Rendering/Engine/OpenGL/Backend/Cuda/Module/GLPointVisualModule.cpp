@@ -145,7 +145,7 @@ namespace dyno
 
 		// per-object color color
 		auto color = this->varBaseColor()->getData();
-		glVertexAttrib3f(1, color[0], color[1], color[2]);
+		glVertexAttrib3f(1, color.r, color.g, color.b);
 
 		mVertexArray.bind();
 		glDrawArrays(GL_POINTS, 0, mNumPoints);

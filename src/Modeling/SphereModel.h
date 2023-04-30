@@ -45,6 +45,8 @@ namespace dyno
 
 		std::string caption() override { return "Sphere"; }
 
+		NBoundingBox boundingBox() override;
+
 	public:
 		DEF_VAR(Coord, Center, 0, "Sphere center");
 
@@ -64,17 +66,11 @@ namespace dyno
 
 		DEF_VAR(unsigned, Row, 50, "Sphere Row");
 
-		void disableRender();
-
-		NBoundingBox boundingBox() override;
-
 	protected:
 		void resetStates() override;
 
 	private:
 		void varChanged();
-
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 
 

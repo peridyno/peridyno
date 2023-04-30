@@ -95,7 +95,8 @@ namespace dyno
 
 		if (pass == GLRenderPass::COLOR)
 		{
-			mShaderProgram->setVec3("uBaseColor", this->varBaseColor()->getData());
+			Color c = this->varBaseColor()->getData();
+			mShaderProgram->setVec3("uBaseColor", Vec3f(c.r, c.g, c.b));
 			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
 			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
 			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());

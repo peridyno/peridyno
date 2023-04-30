@@ -16,7 +16,7 @@ namespace dyno
 		this->stateEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 
 		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 
 		glWireModule = std::make_shared<GLWireframeVisualModule>();

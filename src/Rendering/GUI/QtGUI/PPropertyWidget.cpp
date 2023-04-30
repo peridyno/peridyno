@@ -25,6 +25,7 @@
 #include "PropertyItem/QEnumFieldWidget.h"
 #include "PropertyItem/QRampWidget.h"
 #include "PropertyItem/QStateFieldWidget.h"
+#include "PropertyItem/QColorWidget.h"
 
 namespace dyno
 {
@@ -393,7 +394,14 @@ namespace dyno
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
 			layout->addWidget(fw, j, 0);
-		}		
+		}
+		else if (template_name == std::string(typeid(Color).name()))
+		{
+			auto fw = new QColorWidget(field);
+			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
+			layout->addWidget(fw, j, 0);
+		}
 	}
 
 	void PPropertyWidget::addArrayFieldWidget(FBase* field)
