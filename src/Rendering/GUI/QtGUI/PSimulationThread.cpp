@@ -3,6 +3,8 @@
 #include "SceneGraph.h"
 #include "SceneGraphFactory.h"
 
+#include "NodeEditor/QtNodeWidget.h"
+
 namespace dyno
 {
 	QWaitCondition m_wait_condition;
@@ -174,6 +176,18 @@ namespace dyno
 
 		//Note: should set mReset at the end
 		mReset = true;
+	}
+
+	void PSimulationThread::resetQtNode(Qt::QtNode& node)
+	{
+		auto model = node.nodeDataModel();
+		auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
+
+		if (widget != nullptr)
+		{
+			mActiveNode = widget->getNode();
+			mReset = true;
+		}
 	}
 
 	void PSimulationThread::startUpdatingGraphicsContext()

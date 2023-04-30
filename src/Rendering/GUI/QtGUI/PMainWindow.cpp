@@ -135,10 +135,12 @@ namespace dyno
 
 		setupToolBar();
 
-		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::dynoNodePlaced);
-		connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
+		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
-		connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
+		//connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
+
+		//connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
