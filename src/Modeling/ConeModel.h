@@ -52,9 +52,10 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+
+	private:
+		void varChanged();
 	};
-
-
 
 	IMPLEMENT_TCLASS(ConeModel, TDataType);
 }

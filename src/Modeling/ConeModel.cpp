@@ -27,12 +27,28 @@ namespace dyno
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
 
-		this->stateTriangleSet()->promoteOuput();
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ConeModel<TDataType>::varChanged, this));
 
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varColumns()->attach(callback);
+		this->varRow()->attach(callback);
+		this->varRadius()->attach(callback);
+		this->varHeight()->attach(callback);
+
+		this->stateTriangleSet()->promoteOuput();
 	}
 
 	template<typename TDataType>
 	void ConeModel<TDataType>::resetStates()
+	{
+		varChanged();
+	}
+
+	template<typename TDataType>
+	void ConeModel<TDataType>::varChanged()
 	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
@@ -54,14 +70,14 @@ namespace dyno
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
 		Real PI = 3.1415926535;
-		
+
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
 		int columns_i = int(columns);
 		int row_i = int(row);
 
-		
+
 		uint counter = 0;
 		Coord Location;
 		Real angle = PI / 180 * 360 / columns_i;
@@ -137,7 +153,7 @@ namespace dyno
 
 		for (int i = 0; i < numpt; i++)
 		{
-			vertices[i][1] -= 1*height / 3;
+			vertices[i][1] -= 1 * height / 3;
 			vertices[i] = RV(vertices[i] * scale + RV(center));
 		}
 
@@ -206,7 +222,7 @@ namespace dyno
 						triangle.push_back(TopologyModule::Triangle(temp - columns + 1, temp, pt_len));	//生成底面最内圈最后一个面
 
 					}
-					 
+
 				}
 			}
 
@@ -277,8 +293,8 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-//		triangleSet->updateEdges();
-//		triangleSet->updateVertexNormal();
+		//		triangleSet->updateEdges();
+		//		triangleSet->updateVertexNormal();
 
 
 		triangleSet->update();
