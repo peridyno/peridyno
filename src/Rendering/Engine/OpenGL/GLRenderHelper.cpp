@@ -77,59 +77,6 @@ namespace dyno
 		gl::Program*		mProgram;
 	};
 
-	class AxisRenderer
-	{
-	public:
-		AxisRenderer()
-		{
-			mProgram = gl::ShaderFactory::createShaderProgram("axis.vert", "axis.frag");
-
-			mAxisVBO.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-			float vertices[] = {
-				// +x			// color...
-				0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-				1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-				// +y
-				0.f, 0.f, 0.f, 0.f, 1.f, 0.f,
-				0.f, 1.f, 0.f, 0.f, 1.f, 0.f,
-				// +z
-				0.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-				0.f, 0.f, 1.f, 0.f, 0.f, 1.f,
-			};
-			mAxisVBO.load(vertices, sizeof(vertices) * 4);
-
-			mAxisVAO.create();
-			mAxisVAO.bindVertexBuffer(&mAxisVBO, 0, 3, GL_FLOAT, sizeof(vertices) / 6, 0, 0);
-			mAxisVAO.bindVertexBuffer(&mAxisVBO, 1, 3, GL_FLOAT, sizeof(vertices) / 6, sizeof(float) * 3, 0);
-		}
-
-		~AxisRenderer()
-		{
-			mProgram->release();
-			delete mProgram;
-
-			mAxisVBO.release();
-			mAxisVAO.release();
-		}
-
-		void draw(float lineWidth = 2.f)
-		{
-			mProgram->use();
-			mAxisVAO.bind();
-
-			glDisable(GL_DEPTH_TEST);
-			glDrawArrays(GL_LINES, 0, 6);
-			glEnable(GL_DEPTH_TEST);
-
-			mAxisVAO.unbind();
-		}
-
-	private:
-		gl::VertexArray	mAxisVAO;
-		gl::Buffer		mAxisVBO;
-		gl::Program*	mProgram;
-	};
-
 	class BBoxRenderer
 	{
 	public:
@@ -248,7 +195,6 @@ namespace dyno
 
 	GLRenderHelper::GLRenderHelper()
 	{
-		mAxisRenderer = new AxisRenderer();
 		mBBoxRenderer = new BBoxRenderer();
 		mGroundRenderer = new GroundRenderer();
 		mBackgroundRenderer = new BackgroundRenderer();
@@ -256,7 +202,6 @@ namespace dyno
 
 	GLRenderHelper::~GLRenderHelper()
 	{
-		if (mAxisRenderer) delete mAxisRenderer;
 		if (mBBoxRenderer) delete mBBoxRenderer;
 		if (mGroundRenderer) delete mGroundRenderer;
 		if (mBackgroundRenderer) delete mBackgroundRenderer;
@@ -266,12 +211,6 @@ namespace dyno
 	{
 		if (mGroundRenderer != NULL)
 			mGroundRenderer->draw(planeScale, rulerScale);
-	}
-
-	void GLRenderHelper::drawAxis(float lineWidth)
-	{
-		if (mAxisRenderer != NULL)
-			mAxisRenderer->draw(lineWidth);
 	}
 
 	void GLRenderHelper::drawBBox(Vec3f p0, Vec3f p1, int type)
