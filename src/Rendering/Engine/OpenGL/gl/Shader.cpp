@@ -136,18 +136,18 @@ namespace gl {
 		if (initialized)
 			return true;
 
-		printf("[ShaderFactory] Loading shaders...\n");
+		//printf("[ShaderFactory] Loading shaders...\n");
 
-		// pre load shader code snippets
-		const char* suffix = ".glsl";
-		for (const auto& pair : ShaderSource) {
-			std::string key = "/" + pair.first;
-			std::string src = pair.second;
-			if (std::string::npos != key.rfind(suffix, key.length() - 5, 5))
-			{
-				glNamedStringARB(GL_SHADER_INCLUDE_ARB, key.length(), key.c_str(), src.length(), src.c_str());
-			}
-		}
+		//// pre load shader code snippets
+		//const char* suffix = ".glsl";
+		//for (const auto& pair : ShaderSource) {
+		//	std::string key = "/" + pair.first;
+		//	std::string src = pair.second;
+		//	if (std::string::npos != key.rfind(suffix, key.length() - 5, 5))
+		//	{
+		//		glNamedStringARB(GL_SHADER_INCLUDE_ARB, key.length(), key.c_str(), src.length(), src.c_str());
+		//	}
+		//}
 
 		initialized = true;
 		return initialized;

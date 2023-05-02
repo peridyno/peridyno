@@ -1,8 +1,33 @@
 #version 440
 
-#extension GL_ARB_shading_language_include : require
+/*
+* Common uniform blocks
+*/
 
-#include "common.glsl"
+layout(std140, binding = 0) uniform Transforms
+{
+	mat4 model;
+	mat4 view;
+	mat4 proj;
+
+	// TODO: move to other place...
+	int width;
+	int height;
+} uTransform;
+
+layout(std140, binding = 1) uniform Lights
+{
+	vec4 ambient;
+	vec4 intensity;
+	vec4 direction;
+	vec4 camera;
+} uLight;
+
+layout(std140, binding = 2) uniform Variables
+{
+	int index;
+} uVars;
+
 
 layout(location = 0) in vec3 in_vert;
 layout(location = 1) in vec3 in_color;
