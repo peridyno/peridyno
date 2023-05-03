@@ -28,9 +28,6 @@ namespace dyno
 		QIntegerFieldWidget(FBase* field);
 		~QIntegerFieldWidget() override {};
 
-	Q_SIGNALS:
-		void fieldChanged();
-
 	public slots:
 		void changeValue(int);
 	};
@@ -41,9 +38,6 @@ namespace dyno
 	public:
 		QUIntegerFieldWidget(FBase* field);
 		~QUIntegerFieldWidget() override {};
-
-	Q_SIGNALS:
-		void fieldChanged();
 
 	public slots:
 		void changeValue(int);

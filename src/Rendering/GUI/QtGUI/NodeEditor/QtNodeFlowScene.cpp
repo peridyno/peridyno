@@ -331,7 +331,7 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::dynoNodePlaced(std::shared_ptr<dyno::Node> node)
+	void QtNodeFlowScene::createQtNode(std::shared_ptr<dyno::Node> node)
 	{
 		if (node == nullptr)
 			return;

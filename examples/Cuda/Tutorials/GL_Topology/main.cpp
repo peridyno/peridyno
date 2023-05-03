@@ -30,14 +30,14 @@ public:
 
 		//Point visualizer
 		auto pointRender = std::make_shared<GLPointVisualModule>();
-		pointRender->varBaseColor()->setValue(Vec3f(1.0f, 0.0f, 0.0));
+		pointRender->varBaseColor()->setValue(Color(1.0f, 0.0f, 0.0));
 		pointRender->varPointSize()->setValue(0.02f);
 		this->stateTriangles()->connect(pointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender);
 
 		//Wireframe visualizer
 		auto edgeRender = std::make_shared<GLWireframeVisualModule>();
-		edgeRender->varBaseColor()->setValue(Vec3f(0, 1, 0));
+		edgeRender->varBaseColor()->setValue(Color(0, 1, 0));
 		edgeRender->varRenderMode()->getDataPtr()->setCurrentKey(GLWireframeVisualModule::LINE);
 		edgeRender->varLineWidth()->setValue(3.f);
 		this->stateTriangles()->connect(edgeRender->inEdgeSet());
@@ -45,7 +45,7 @@ public:
 
 		//Triangle visualizer
 		auto triRender = std::make_shared<GLSurfaceVisualModule>();
-		triRender->varBaseColor()->setValue(Vec3f(0, 0, 1));
+		triRender->varBaseColor()->setValue(Color(0, 0, 1));
 		this->stateTriangles()->connect(triRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(triRender);
 	};

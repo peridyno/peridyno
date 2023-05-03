@@ -14,11 +14,15 @@ namespace dyno
 
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateQuadSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
+
+		auto wireframe = std::make_shared<GLWireframeVisualModule>();
+		this->stateQuadSet()->connect(wireframe->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wireframe);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CubeModel<TDataType>::varChanged, this));
 
@@ -28,11 +32,6 @@ namespace dyno
 
 		this->varSegments()->attach(callback);
 		this->varLength()->attach(callback);
-
-
-		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateQuadSet()->connect(wireframe->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireframe);
 
 		this->stateQuadSet()->promoteOuput();
 	}

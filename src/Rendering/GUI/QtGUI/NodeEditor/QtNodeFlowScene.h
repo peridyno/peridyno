@@ -54,7 +54,7 @@ public Q_SLOTS:
 
 	void moveNode(QtNode& n, const QPointF& newLocation);
 
-	void dynoNodePlaced(std::shared_ptr<dyno::Node> node);
+	void createQtNode(std::shared_ptr<dyno::Node> node);
 
 	void enableRendering(QtNode& n, bool checked);
 

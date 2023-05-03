@@ -11,7 +11,7 @@ namespace dyno
 		this->statePointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 
 		auto glModule = std::make_shared<GLPointVisualModule>();
-		glModule->setColor(Vec3f(0.25, 0.52, 0.8));
+		glModule->setColor(Color(0.25f, 0.52f, 0.8f));
 		glModule->setVisible(true);
 		glModule->varPointSize()->setValue(0.005);
 		this->statePointSet()->connect(glModule->inPointSet());

@@ -40,9 +40,6 @@ namespace dyno
 			return;
 
 		f->setValue(value);
-		f->update();
-
-		emit fieldChanged();
 	}
 
 	QUIntegerFieldWidget::QUIntegerFieldWidget(FBase* field)
@@ -53,6 +50,7 @@ namespace dyno
 		{
 			return;
 		}
+
 		//this->setStyleSheet("border:none");
 		QGridLayout* layout = new QGridLayout;
 		layout->setContentsMargins(0, 0, 0, 0);
@@ -81,9 +79,6 @@ namespace dyno
 			return;
 
 		f->setValue(value);
-		f->update();
-
-		emit fieldChanged();
 	}
 }
 

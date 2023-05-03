@@ -69,7 +69,7 @@ namespace dyno
 				auto emitter = std::make_shared<CircularEmitter<DataType3f>>();
 
 				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Vec3f(0, 1, 0));
+				wireRender->setColor(Color(0, 1, 0));
 				emitter->stateOutline()->connect(wireRender->inEdgeSet());
 				emitter->graphicsPipeline()->pushModule(wireRender);
 				return emitter;
@@ -82,7 +82,7 @@ namespace dyno
 				auto emitter = std::make_shared<SquareEmitter<DataType3f>>();
 
 				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Vec3f(0, 1, 0));
+				wireRender->setColor(Color(0, 1, 0));
 				emitter->stateOutline()->connect(wireRender->inEdgeSet());
 				emitter->graphicsPipeline()->pushModule(wireRender);
 				return emitter;;
@@ -104,7 +104,7 @@ namespace dyno
 				fluid->graphicsPipeline()->pushModule(colorMapper);
 
 				auto ptRender = std::make_shared<GLPointVisualModule>();
-				ptRender->setColor(Vec3f(1, 0, 0));
+				ptRender->setColor(Color(1, 0, 0));
 				ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
 				fluid->statePointSet()->connect(ptRender->inPointSet());

@@ -58,7 +58,7 @@ namespace dyno
 				patch->graphicsPipeline()->pushModule(mapper);
 
 				auto sRender = std::make_shared<GLSurfaceVisualModule>();
-				sRender->setColor(Vec3f(0, 0.2, 1.0));
+				sRender->setColor(Color(0, 0.2, 1.0));
 				sRender->varUseVertexNormal()->setValue(true);
 				mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 				patch->graphicsPipeline()->pushModule(sRender);
@@ -79,7 +79,7 @@ namespace dyno
 				ocean->graphicsPipeline()->pushModule(mapper);
 
 				auto sRender = std::make_shared<GLSurfaceVisualModule>();
-				sRender->setColor(Vec3f(0, 0.2, 1.0));
+				sRender->setColor(Color(0, 0.2, 1.0));
 				mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 				ocean->graphicsPipeline()->pushModule(sRender);
 

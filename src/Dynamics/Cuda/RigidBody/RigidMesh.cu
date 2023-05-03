@@ -22,7 +22,7 @@ namespace dyno
 		this->varRotation()->attach(callback);
 
 		auto rigidMeshRender = std::make_shared<GLSurfaceVisualModule>();
-		rigidMeshRender->setColor(Vec3f(0.8, 0.8, 0.8));
+		rigidMeshRender->setColor(Color(0.8f, 0.8f, 0.8f));
 		this->stateMesh()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(rigidMeshRender);
 	}

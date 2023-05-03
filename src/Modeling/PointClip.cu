@@ -32,7 +32,7 @@ namespace dyno
 		glpoint = std::make_shared<GLPointVisualModule>();
 
 		surface->setAlpha(0.4);
-		surface->setColor(Vec3f(0,0,0));
+		surface->setColor(Color(0,0,0));
 		this->stateClipPlane()->connect(surface->inTriangleSet());
 ;
 		glpoint->setColor(this->varPointColor()->getData());

@@ -50,15 +50,12 @@ namespace dyno
 
 		DEF_VAR_OUT(TCone3D<Real>, Cone, "");
 
-		void disableRender();
-
 	protected:
 		void resetStates() override;
 
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
+	private:
+		void varChanged();
 	};
-
-
 
 	IMPLEMENT_TCLASS(ConeModel, TDataType);
 }

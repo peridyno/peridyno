@@ -44,7 +44,7 @@ namespace dyno
 		DEF_VAR(Real, PlaneSize, 10, "");
 		DEF_VAR(bool, Reverse, false, "");
 		DEF_VAR(Real, PointSize, 0.008, "");
-		DEF_VAR(Vec3f,PointColor,Vec3f(1,0,0),"");
+		DEF_VAR(Color,PointColor,Color(1,0,0),"");
 		DEF_VAR(bool, ShowPlane, false, "");
 
 

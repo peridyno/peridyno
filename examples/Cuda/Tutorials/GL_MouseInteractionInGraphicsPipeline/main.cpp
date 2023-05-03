@@ -103,7 +103,7 @@ int main(int, char**)
 		node->setTransform(tm);
 
 		auto sm = std::make_shared<GLInstanceVisualModule>();
-		sm->setColor(Vec3f(i * 0.2f, i * 0.2f, 1.f - i * 0.1f));
+		sm->setColor(Color(i * 0.2f, i * 0.2f, 1.f - i * 0.1f));
 		sm->setAlpha(0.8f);
 
 		node->setSurfaceVisualModule(sm);

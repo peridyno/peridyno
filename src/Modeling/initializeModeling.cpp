@@ -65,44 +65,20 @@ namespace dyno
 			"Sphere",
 			"ToolBarIco/Modeling/Sphere.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<SphereModel<DataType3f>>();
-
-				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Vec3f(0.8, 0.52, 0.25));
-				module->setVisible(true);
-				node->stateTriangleSet()->connect(module->inTriangleSet());
-				node->graphicsPipeline()->pushModule(module);
-
-				return node;
+				return std::make_shared<SphereModel<DataType3f>>();
 			});
 
 		group->addAction(
 			"Cylinder",
 			"ToolBarIco/Modeling/Cylinder.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<CylinderModel<DataType3f>>();
-
-				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Vec3f(0.8, 0.52, 0.25));
-				module->setVisible(true);
-				node->stateTriangleSet()->connect(module->inTriangleSet());
-				node->graphicsPipeline()->pushModule(module);
-
-				return node;
+				return std::make_shared<CylinderModel<DataType3f>>();
 			});
 		group->addAction(
 			"Cone",
 			"ToolBarIco/Modeling/Cone.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<ConeModel<DataType3f>>(); 
-
-				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Vec3f(0.8, 0.52, 0.25));
-				module->setVisible(true);
-				node->stateTriangleSet()->connect(module->inTriangleSet());
-				node->graphicsPipeline()->pushModule(module);
-
-				return node;
+				return std::make_shared<ConeModel<DataType3f>>();
 			});
 
 
