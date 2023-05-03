@@ -61,12 +61,17 @@ namespace dyno
 		void draw(float planeScale, float rulerScale)
 		{
 			mRulerTex.bind(GL_TEXTURE1);
+
+			glEnable(GL_BLEND); 
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			
 			mProgram->use();
 			mProgram->setFloat("uPlaneScale", planeScale);
 			mProgram->setFloat("uRulerScale", rulerScale);
 
 			mPlane->draw();
+
+			glDisable(GL_BLEND);
 
 			gl::glCheckError();
 		}
