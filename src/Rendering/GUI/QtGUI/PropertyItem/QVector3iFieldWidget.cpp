@@ -84,13 +84,11 @@ namespace dyno
 		{
 			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(field());
 			f->setValue(Vec3i(v1, v2, v3));
-			f->update();
 		}
 		else if (template_name == std::string(typeid(Vec3u).name()))
 		{
 			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(field());
 			f->setValue(Vec3u(v1, v2, v3));
-			f->update();
 		}
 	}
 
