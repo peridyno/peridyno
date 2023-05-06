@@ -7,6 +7,8 @@
 
 #include <QVBoxLayout>
 
+#include <memory>
+
 namespace dyno
 {
 	QFieldWidget::QFieldWidget(FBase* field)
@@ -29,6 +31,11 @@ namespace dyno
 
 	void QFieldWidget::syncValueFromField()
 	{
+		auto node = dynamic_cast<Node*>(mField->parent());
+		if (node != nullptr) {
+			node->updateGraphicsContext();
+		}
+
 		emit fieldChanged();
 	}
 
