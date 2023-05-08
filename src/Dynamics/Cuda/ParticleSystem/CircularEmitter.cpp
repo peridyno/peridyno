@@ -12,7 +12,6 @@ namespace dyno
 		srand(time(0));
 
 		this->varRadius()->setRange(0.0, 10.0);
-		this->varSamplingDistance()->setRange(0.001, 1.0);
 
 		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 
