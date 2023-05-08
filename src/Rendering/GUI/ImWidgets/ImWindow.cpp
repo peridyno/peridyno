@@ -162,7 +162,7 @@ void ImWindow::draw(RenderWindow* app)
 						camera->setEyePos(center + len * dir);
 						camera->setTargetPos(center);
 
-						float unit = std::floor(std::log(len));
+						float unit = std::floor(std::log10(len));
 						camera->setUnitScale(std::pow(10.0f, (float)unit));
 					}
 
