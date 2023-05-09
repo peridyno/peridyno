@@ -11,26 +11,6 @@ namespace dyno
 	TriangleSet<TDataType>::TriangleSet()
 		: EdgeSet<TDataType>()
 	{
-		std::vector<Coord> positions;
-		std::vector<Triangle> triangles;
-		Real dx = Real(0.1);
-		int Nx = 11;
-		int Nz = 11;
-
-		for (int k = 0; k < Nz; k++) {
-			for (int i = 0; i < Nx; i++) {
-				positions.push_back(Coord(Real(i*dx), Real(0.0), Real(k*dx)));
-				if (k < Nz - 1 && i < Nx - 1)
-				{
-					Triangle tri1(i + k*Nx, i + 1 + k*Nx, i + 1 + (k + 1)*Nx);
-					Triangle tri2(i + k*Nx, i + 1 + (k + 1)*Nx, i + (k + 1)*Nx);
-					triangles.push_back(tri1);
-					triangles.push_back(tri2);
-				}
-			}
-		}
-		this->setPoints(positions);
-		this->setTriangles(triangles);
 	}
 
 	template<typename TDataType>

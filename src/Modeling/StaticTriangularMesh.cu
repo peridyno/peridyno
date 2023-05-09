@@ -3,9 +3,6 @@
 #include "GLSurfaceVisualModule.h"
 
 #include "Topology/TriangleSet.h"
-#include <iostream>
-#include <sys/stat.h>
-
 
 namespace dyno
 {
@@ -17,11 +14,8 @@ namespace dyno
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		this->stateTopology()->setDataPtr(triSet);
-		this->outTriangleSet()->setDataPtr(triSet);
 
-		this->inTriangleSet_IN()->setDataPtr(triSet);
-
-		this->inTriangleSet_IN()->tagOptional(true);
+		this->stateInitialTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto surfaceRender = std::make_shared<GLSurfaceVisualModule>();
 		surfaceRender->setColor(Color(0.8f, 0.52f, 0.25f));
@@ -29,44 +23,46 @@ namespace dyno
 		this->stateTopology()->connect(surfaceRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender);
 
+		auto callFileLoader = std::make_shared<FCallBackFunc>(
+			[=]() {
+				auto initTopo = this->stateInitialTopology()->getDataPtr();
+				auto curTopo = this->stateTopology()->getDataPtr();
 
-	}
+				std::string fileName = this->varFileName()->getDataPtr()->string();
 
-	template<typename TDataType>
-	void StaticTriangularMesh<TDataType>::resetStates()
-	{
-		if (!(this->varConvertInput()->getData()))
-		{
-		
-		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
-		
-		if (this->varFileName()->getDataPtr()->string() == "")
-			return;
+				if (fileName != "")
+				{
+					initTopo->loadObjFile(fileName);
+					curTopo->copyFrom(*initTopo);
 
-		triSet->loadObjFile(this->varFileName()->getDataPtr()->string());
+					curTopo->scale(this->varScale()->getData());
+					curTopo->rotate(this->varRotation()->getData() * M_PI / 180);
+					curTopo->translate(this->varLocation()->getData());
+				}
+			}
+		);
+		this->varFileName()->attach(callFileLoader);
 
-		triSet->scale(this->varScale()->getData());
-		triSet->translate(this->varLocation()->getData());
-		triSet->rotate(this->varRotation()->getData() * PI / 180);
+		auto transform = std::make_shared<FCallBackFunc>(
+			[=]() {
+				auto initTopo = this->stateInitialTopology()->getDataPtr();
+				auto curTopo = this->stateTopology()->getDataPtr();
 
+				curTopo->copyFrom(*initTopo);
+				curTopo->scale(this->varScale()->getData());
+				curTopo->rotate(this->varRotation()->getData() * M_PI / 180);
+				curTopo->translate(this->varLocation()->getData());
+			}
+		);
+		this->varLocation()->attach(transform);
+		this->varScale()->attach(transform);
+		this->varRotation()->attach(transform);
 
+		this->outTriangleSet()->setDataPtr(triSet);
 
-		initPos.resize(triSet->getPoints().size());
-		initPos.assign(triSet->getPoints());
-		center = this->varCenter()->getData();
-		centerInit = center;
-		
-		}
-		else
-		{
-		auto intri = this->inTriangleSet_IN()->getDataPtr();
-		this->outTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		auto outtri = this->outTriangleSet()->getDataPtr();
-		outtri->copyFrom(*intri);
+		this->inTriangleSet_IN()->setDataPtr(triSet);
 
-		}
-
-		Node::resetStates();
+		this->inTriangleSet_IN()->tagOptional(true);
 	}
 
 	template <typename Coord, typename Matrix>
@@ -126,7 +122,7 @@ namespace dyno
 
 					triSet->scale(this->varScale()->getData());
 					triSet->translate(this->varLocation()->getData());
-					triSet->rotate(this->varRotation()->getData() * PI / 180);
+					triSet->rotate(this->varRotation()->getData() * M_PI / 180);
 
 					initPos.resize(triSet->getPoints().size());
 					initPos.assign(triSet->getPoints());

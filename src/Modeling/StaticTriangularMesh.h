@@ -20,7 +20,6 @@ namespace dyno
 	{
 		DECLARE_TCLASS(StaticTriangularMesh, TDataType)
 	public:
-
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
@@ -28,8 +27,6 @@ namespace dyno
 		typedef typename ::dyno::Quat<Real> TQuat;
 
 		StaticTriangularMesh();
-
-		//void update() override;
 
 	public:
 		DEF_VAR(FilePath, FileName, "", "");
@@ -43,17 +40,16 @@ namespace dyno
 		DEF_VAR(Coord, Center, Coord(0), "");
 		DEF_VAR(Coord, AngularVelocity, Coord(0), "");
 
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InitialTopology, "Initial topology");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Topology, "Transformed Topology");
 
 		DEF_VAR(bool, ConvertInput, false, "ConvertInput");
 		//DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 	protected:
-		void resetStates() override;
 		void updateStates() override;
 
 	private:
-		
 
 		Quat<Real> rotQuat = Quat<Real>();
 		Matrix rotMat;
@@ -62,6 +58,5 @@ namespace dyno
 
 		Coord center;
 		Coord centerInit;
-		Real PI = 3.1415926535;
 	};
 }

@@ -107,9 +107,13 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
+		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
-		name->setText(FormatFieldWidgetName(field->getObjectName()));
-		name->setWordWrap(true);
+		QFontMetrics fontMetrics(name->font());
+		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
+		name->setText(elide);
+		//Set label tips
+		name->setToolTip(str);
 
 		spinner1 = new QSpinBox;
 		spinner1->setMinimumWidth(30);
