@@ -14,7 +14,7 @@ namespace dyno
 	{
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
@@ -32,9 +32,6 @@ namespace dyno
 		glModule3->setVisible(false);
 		this->stateTriangleSet()->connect(glModule3->inEdgeSet());
 		this->graphicsPipeline()->pushModule(glModule3);
-
-
-
 	}
 
 	template<typename TDataType>
@@ -124,7 +121,6 @@ namespace dyno
 				}
 		
 			}
-
 		}
 
 		//ΥϋΜε±δ»»
@@ -156,22 +152,9 @@ namespace dyno
 
 		triangleSet->update();
 
-
-
 		vertices.clear();
 		triangle.clear();
-		
-
 	}
-
-
-	template<typename TDataType>
-	void CopyModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
-
-
-
 
 	DEFINE_CLASS(CopyModel);
 }

@@ -19,13 +19,8 @@
 
 #include "Topology/TriangleSet.h"
 
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
-
 namespace dyno
 {
-
-
 	template<typename TDataType>
 	class ConeModel : public ParametricModel<TDataType>
 	{
@@ -36,6 +31,8 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		ConeModel();
+
+		std::string caption() override { return "Cone"; }
 
 	public:
 		DEF_VAR(unsigned, Columns, 24, "Cone Columns");

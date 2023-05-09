@@ -19,11 +19,8 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
-
 namespace dyno
 {
-
-
 	template<typename TDataType>
 	class ExtrudeModel : public ParametricModel<TDataType>
 	{
@@ -52,19 +49,9 @@ namespace dyno
 
 		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
 
-
-		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
-
-		void disableRender();
-
 	protected:
 		void resetStates() override;
-
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
-
 	};
-
-
 
 	IMPLEMENT_TCLASS(ExtrudeModel, TDataType);
 }

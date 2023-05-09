@@ -33,6 +33,10 @@ namespace dyno
 
 		CubeModel();
 
+		std::string caption() override { return "Cube"; }
+
+		NBoundingBox boundingBox() override;
+
 	public:
 		DEF_VAR(Vec3f, Length, Real(1), "Edge length");
 

@@ -49,6 +49,23 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	NBoundingBox CubeModel<TDataType>::boundingBox()
+	{
+		NBoundingBox bound;
+
+		auto box = this->outCube()->getData();
+		auto aabb = box.aabb();
+
+		Coord v0 = aabb.v0;
+		Coord v1 = aabb.v1;
+
+		bound.lower = Vec3f(v0.x, v0.y, v0.z);
+		bound.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return bound;
+	}
+
+	template<typename TDataType>
 	void CubeModel<TDataType>::resetStates()
 	{
 		varChanged();
