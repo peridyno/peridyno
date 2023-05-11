@@ -9,8 +9,11 @@ namespace dyno
 	PlaneModel<TDataType>::PlaneModel()
 		: ParametricModel<TDataType>()
 	{
-		this->varLength()->setRange(0.01, 100.0f);
-		this->varSegments()->setRange(1, 100);
+		this->varLengthX()->setRange(0.01, 50.0f);
+		this->varLengthZ()->setRange(0.01, 50.0f);
+
+		this->varSegmentX()->setRange(1, 100);
+		this->varSegmentZ()->setRange(1, 100);
 
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
@@ -30,8 +33,11 @@ namespace dyno
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
 
-		this->varSegments()->attach(callback);
-		this->varLength()->attach(callback);
+		this->varSegmentX()->attach(callback);
+		this->varSegmentZ()->attach(callback);
+
+		this->varLengthX()->attach(callback);
+		this->varLengthZ()->attach(callback);
 
 		this->stateQuadSet()->promoteOuput();
 	}
@@ -98,9 +104,17 @@ namespace dyno
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
 
-		auto segments = this->varSegments()->getData();
+		auto segmentX = this->varSegmentX()->getData();
+		auto segmentZ = this->varSegmentZ()->getData();
+
 		auto quadSet = this->stateQuadSet()->getDataPtr();
-		auto length = this->varLength()->getData();
+		auto lengthX = this->varLengthX()->getData();
+		auto lengthZ = this->varLengthZ()->getData();
+
+
+
+		Vec3f length = Vec3f(lengthX,1,lengthZ);
+		Vec3i segments = Vec3i(segmentX, 1, segmentZ);
 
 		length[0] *= scale[0];
 		length[1] *= scale[1];
@@ -112,7 +126,7 @@ namespace dyno
 
 		q.normalize();
 
-		TGrid3D<Real> grid = TGrid3D<Real>(this->varLength()->getData(),this->varSegments()->getData());
+		TGrid3D<Real> grid = TGrid3D<Real>(length,segments);
 		grid.length = length * scale;
 		grid.segment = segments;
 		grid.center = center;

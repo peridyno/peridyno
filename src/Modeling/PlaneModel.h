@@ -38,9 +38,11 @@ namespace dyno
 		NBoundingBox boundingBox() override;
 
 	public:
-		DEF_VAR(Vec3f, Length, Real(1), "Edge length");
+		DEF_VAR(Real, LengthX, Real(1), "length X");
+		DEF_VAR(Real, LengthZ, Real(1), "length Z");
 
-		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");
+		DEF_VAR(unsigned, SegmentX, unsigned(1), "Segment X");
+		DEF_VAR(unsigned, SegmentZ, unsigned(1), "Segment Z");
 
 		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
 
