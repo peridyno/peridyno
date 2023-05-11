@@ -2,6 +2,7 @@
 
 #include "NodeFactory.h"
 
+#include "PlaneModel.h"
 #include "CubeModel.h"
 #include "SphereModel.h"
 #include "SphereSampler.h"
@@ -55,6 +56,13 @@ namespace dyno
 			"ToolBarIco/Modeling/Modeling.png");
 
 		auto group = page->addGroup("Modeling");
+
+		group->addAction(
+			"Plane",
+			"ToolBarIco/Modeling/Plane.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PlaneModel<DataType3f>>();
+			});
 
 		group->addAction(
 			"Cube",

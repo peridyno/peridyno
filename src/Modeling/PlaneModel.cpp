@@ -51,18 +51,38 @@ namespace dyno
 	template<typename TDataType>
 	NBoundingBox PlaneModel<TDataType>::boundingBox()
 	{
-		NBoundingBox bound;
+		auto center = this->varLocation()->getData();
+		auto rot = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
 
-		auto box = this->outCube()->getData();
-		auto aabb = box.aabb();
+		Coord length;
+		length[0] *= scale[0];
+		length[1] = 1;
+		length[2] *= scale[2];
 
-		Coord v0 = aabb.v0;
-		Coord v1 = aabb.v1;
+		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
 
-		bound.lower = Vec3f(v0.x, v0.y, v0.z);
-		bound.upper = Vec3f(v1.x, v1.y, v1.z);
+		q.normalize();
 
-		return bound;
+		TOrientedBox3D<Real> box;
+		box.center = center;
+		box.u = q.rotate(Coord(1, 0, 0));
+		box.v = q.rotate(Coord(0, 1, 0));
+		box.w = q.rotate(Coord(0, 0, 1));
+		box.extent = length;
+
+		auto AABB = box.aabb();
+		auto& v0 = AABB.v0;
+		auto& v1 = AABB.v1;
+
+
+		NBoundingBox ret;
+		ret.lower = Vec3f(v0.x, v0.y, v0.z);
+		ret.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return ret;
 	}
 
 	template<typename TDataType>
@@ -78,6 +98,8 @@ namespace dyno
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
 
+		auto segments = this->varSegments()->getData();
+		auto quadSet = this->stateQuadSet()->getDataPtr();
 		auto length = this->varLength()->getData();
 
 		length[0] *= scale[0];
@@ -90,18 +112,14 @@ namespace dyno
 
 		q.normalize();
 
-		TOrientedBox3D<Real> box;
-		box.center = center;
-		box.u = q.rotate(Coord(1, 0, 0));
-		box.v = q.rotate(Coord(0, 1, 0));
-		box.w = q.rotate(Coord(0, 0, 1));
-		box.extent = 0.5 * length;
+		TGrid3D<Real> grid = TGrid3D<Real>(this->varLength()->getData(),this->varSegments()->getData());
+		grid.length = length * scale;
+		grid.segment = segments;
+		grid.center = center;
+		grid.rotation = q;
 
-		this->outCube()->setValue(box);
+		this->outGrid()->setValue(grid);
 
-		auto segments = this->varSegments()->getData();
-
-		auto quadSet = this->stateQuadSet()->getDataPtr();
 
 		uint nyz = 2 * (segments[1] + segments[2]);
 
@@ -153,7 +171,7 @@ namespace dyno
 				v2 = indexBottom[Index2DPlane(nx + 1, nz + 1)];
 				v3 = indexBottom[Index2DPlane(nx, nz + 1)];
 
-				quads.push_back(TopologyModule::Quad(v3, v2, v1, v0));
+				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
 			}
 		}
 
