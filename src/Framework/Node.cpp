@@ -61,6 +61,16 @@ void Node::setControllable(bool con)
 	m_controllable = con;
 }
 
+bool Node::canExported()
+{
+	return mExported;
+}
+
+void Node::allowExported(bool ex)
+{
+	mExported = ex;
+}
+
 bool Node::isActive()
 {
 	return mPhysicsEnabled;
@@ -435,6 +445,12 @@ void Node::updateTopology()
 
 bool Node::connect(NodePort* nPort)
 {
+	if (!canExported())
+	{
+		Log::sendMessage(Log::Error, this->getClassInfo()->getClassName() + "can not be exported");
+		return false;
+	}
+
 	return this->appendExportNode(nPort);
 }
 

@@ -89,16 +89,22 @@ namespace dyno
 		TriangleSet();
 		~TriangleSet();
 
-		DArray<Triangle>& getTriangles() { return m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
 		void setTriangles(DArray<Triangle>& triangles);
 
+		DArray<Triangle>& getTriangles() { return m_triangles; }
 		DArrayList<int>& getVertex2Triangles();
 
 		void loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 
+		std::shared_ptr<TriangleSet<TDataType>> 
+			merge(TriangleSet<TDataType>& ts);
+
+		bool isEmpty() override;
+
+	public:
 		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
 
 	protected:

@@ -1,36 +1,104 @@
 #include "SemiAnalyticalSFINode.h"
+#include "SemiAnalyticalSharedFunc.h"
+
 //#include "PBFM.h"
 #include "SemiAnalyticalSurfaceTensionModel.h"
 #include "SemiAnalyticalPositionBasedFluidModel.h"
 #include "ParticleSystem/ParticleSystem.h"
 
-namespace  dyno
+#include "ParticleSystem/Module/ParticleIntegrator.h"
+#include "ParticleSystem/Module/ImplicitViscosity.h"
+
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriQueryOctree.h"
+
+#include "ParticleShifting.h"
+
+#include "Auxiliary/DataSource.h"
+
+namespace dyno
 {
 	IMPLEMENT_TCLASS(SemiAnalyticalSFINode, TDataType)
 
 	template<typename TDataType>
-	SemiAnalyticalSFINode<TDataType>::SemiAnalyticalSFINode(std::string name)
-		: Node(name)
+	SemiAnalyticalSFINode<TDataType>::SemiAnalyticalSFINode()
+		: Node()
 	{
- 		auto m_pbfModule = std::make_shared<SemiAnalyticalSurfaceTensionModel<DataType3f>>();
-		
-		this->stateTimeStep()->connect(m_pbfModule->inTimeStep());
-		this->varSurfaceTension()->connect(m_pbfModule->varSurfaceTension());
-		this->varAdhesionIntensity()->connect(m_pbfModule->varAdhesionIntensity());
-		this->varRestDensity()->connect(m_pbfModule->varRestDensity());
+//  		auto semi = std::make_shared<SemiAnalyticalSurfaceTensionModel<DataType3f>>();
+// 		
+// 		this->stateTimeStep()->connect(semi->inTimeStep());
+// 
+// 		this->statePosition()->connect(semi->inPosition());
+// 		this->stateVelocity()->connect(semi->inVelocity());
+// 		this->stateForceDensity()->connect(semi->inForceDensity());
+// 		this->stateAttribute()->connect(semi->inAttribute());
+// 
+// 		this->stateTriangleIndex()->connect(semi->inTriangleInd());
+// 		this->stateTriangleVertex()->connect(semi->inTriangleVer());
+// 
+// 		this->animationPipeline()->pushModule(semi);
 
-		this->statePosition()->connect(m_pbfModule->inPosition());
-		this->stateVelocity()->connect(m_pbfModule->inVelocity());
-		this->stateForceDensity()->connect(m_pbfModule->inForceDensity());
-		this->stateAttribute()->connect(m_pbfModule->inAttribute());
+		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
+		smoothingLength->varValue()->setValue(Real(0.012));
+		this->animationPipeline()->pushModule(smoothingLength);
 
-		this->stateTriangleIndex()->connect(m_pbfModule->inTriangleInd());
-		this->stateTriangleVertex()->connect(m_pbfModule->inTriangleVer());
 
-		this->animationPipeline()->pushModule(m_pbfModule);
+		//this->varSmoothingLength()->setValue(Real(0.012));//0.006
 
-		
-		
+		//integrator
+		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->stateTimeStep()->connect(integrator->inTimeStep());
+		this->statePosition()->connect(integrator->inPosition());
+		this->stateVelocity()->connect(integrator->inVelocity());
+		this->stateForceDensity()->connect(integrator->inForceDensity());
+		this->animationPipeline()->pushModule(integrator);
+
+		//neighbor query
+		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+		smoothingLength->outFloating()->connect(nbrQuery->inRadius());
+		this->statePosition()->connect(nbrQuery->inPosition());
+		this->animationPipeline()->pushModule(nbrQuery);
+
+		//triangle neighbor
+		auto nbrQueryTri = std::make_shared<NeighborTriQueryOctree<TDataType>>();
+		smoothingLength->outFloating()->connect(nbrQueryTri->inRadius());
+		this->statePosition()->connect(nbrQueryTri->inPosition());
+		this->stateTriangleVertex()->connect(nbrQueryTri->inTriPosition());
+		this->stateTriangleIndex()->connect(nbrQueryTri->inTriangles());
+		this->animationPipeline()->pushModule(nbrQueryTri);
+
+		//mesh collision
+		auto meshCollision = std::make_shared<TriangularMeshConstraint<TDataType>>();
+		this->stateTimeStep()->connect(meshCollision->inTimeStep());
+		this->statePosition()->connect(meshCollision->inPosition());
+		this->stateVelocity()->connect(meshCollision->inVelocity());
+		this->stateTriangleVertex()->connect(meshCollision->inTriangleVertex());
+		this->stateTriangleIndex()->connect(meshCollision->inTriangleIndex());
+		nbrQueryTri->outNeighborIds()->connect(meshCollision->inTriangleNeighborIds());
+		this->animationPipeline()->pushModule(meshCollision);
+
+		//viscosity
+		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+		viscosity->varViscosity()->setValue(Real(0.5));//0.5
+		this->stateTimeStep()->connect(viscosity->inTimeStep());
+		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
+		this->statePosition()->connect(viscosity->inPosition());
+		this->stateVelocity()->connect(viscosity->inVelocity());
+		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+		this->animationPipeline()->pushModule(viscosity);
+
+		//particle shifting
+		auto pshiftModule = std::make_shared<ParticleShifting<TDataType>>();
+		this->stateTimeStep()->connect(pshiftModule->inTimeStep());
+		this->statePosition()->connect(pshiftModule->inPosition());
+		this->stateVelocity()->connect(pshiftModule->inVelocity());
+		nbrQuery->outNeighborIds()->connect(pshiftModule->inNeighborIds());
+		this->stateTriangleVertex()->connect(pshiftModule->inTriangleVer());
+		this->stateTriangleIndex()->connect(pshiftModule->inTriangleInd());
+		this->stateAttribute()->connect(pshiftModule->inAttribute());
+		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
+		this->animationPipeline()->pushModule(pshiftModule);
+
 	}
 
 	template<typename TDataType>
@@ -40,103 +108,14 @@ namespace  dyno
 	}
 
 	template<typename TDataType>
-	void SemiAnalyticalSFINode<TDataType>::preUpdateStates()
+	bool SemiAnalyticalSFINode<TDataType>::validateInputs()
 	{
-		auto& particleSystems = this->getParticleSystems();
+		auto inBoundary = this->inTriangleSet()->getDataPtr();
+		bool validateBoundary = inBoundary != nullptr && !inBoundary->isEmpty();
 
-		int cur_num = this->statePosition()->size();
+		bool ret = Node::validateInputs();
 
-		if (particleSystems.size() > 0)
-		{
-			int new_num = 0;
-			for (int i = 0; i < particleSystems.size(); i++)
-			{
-				new_num += particleSystems[i]->statePosition()->size();
-			}
-
-			if (new_num != cur_num)
-			{
-				this->statePosition()->resize(new_num);
-				this->stateVelocity()->resize(new_num);
-				this->stateForceDensity()->resize(new_num);
-				this->stateAttribute()->resize(new_num);
-			}
-			if (this->statePosition()->size() <= 0)
-				return;
-
-			auto& new_pos = this->statePosition()->getData();
-			auto& new_vel = this->stateVelocity()->getData();
-			auto& new_force = this->stateForceDensity()->getData();
-
-			//TODO: remove the follow code to improve performance
-			CArray<Attribute> hostAttribute;
-			hostAttribute.resize(statePosition()->size());
-			for (int i = 0; i < statePosition()->size(); i++)
-			{
-				hostAttribute[i].setFluid();
-				hostAttribute[i].setDynamic();
-			}
-			this->stateAttribute()->getDataPtr()->assign(hostAttribute);
-
-
-			int start = 0;
-			for (int i = 0; i < particleSystems.size(); i++)//update particle system
-			{
-				DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
-				DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-				DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
-				int num = points.size();
-
-				new_pos.assign(points, num, start);
-				new_vel.assign(vels, num, start);
-				new_force.assign(forces, num, start);
-
-				start += num;
-			}
-		}
-		
-		auto& boundaryMeshes = this->getBoundaryMeshs();
-		int start_vertex = 0;
-		for (int i = 0; i < boundaryMeshes.size(); i++)
-		{
-			auto triSet = boundaryMeshes[i]->outTriangleSet()->getDataPtr();
-
-			auto& vertex_position = triSet->getPoints();///!!!
-
-			int num_vertex = vertex_position.size();
-
-			cudaMemcpy(this->stateTriangleVertex()->getData().begin() + start_vertex, vertex_position.begin(), num_vertex * sizeof(Coord), cudaMemcpyDeviceToDevice);
-
-			start_vertex += num_vertex;
-		}
-	}
-
-	template<typename TDataType>
-	void SemiAnalyticalSFINode<TDataType>::postUpdateStates()
-	{
-		auto& particleSystems = this->getParticleSystems();
-
-		if (particleSystems.size() <= 0 || this->stateVelocity()->size() <= 0)
-			return;
-
-		auto& new_pos = this->statePosition()->getData();
-		auto& new_vel = this->stateVelocity()->getData();
-		auto& new_force = this->stateForceDensity()->getData();
-		
-		uint start = 0;
-		for (int i = 0; i < particleSystems.size(); i++)//extend current particles
-		{
-			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
-			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-			DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
-			int num = points.size();
-
-			points.assign(new_pos, num, 0, start);
-			vels.assign(new_vel, num, 0, start);
-			forces.assign(new_force, num, 0, start);
-
-			start += num;
-		}
+		return ret && validateBoundary;
 	}
 
 	template<typename TDataType>
@@ -159,139 +138,125 @@ namespace  dyno
 		}
 
 		auto& particleSystems = this->getParticleSystems();
-		auto& boundaryMeshes = this->getBoundaryMeshs();
 
 		//add particle system
-		int total_num = 0;
+		int pNum = 0;
+		for (int i = 0; i < particleSystems.size(); i++) {
+			pNum += particleSystems[i]->statePosition()->size();
+		}
+
+		this->statePosition()->resize(pNum);
+		this->stateVelocity()->resize(pNum);
+		this->stateForceDensity()->resize(pNum);
+		this->stateAttribute()->resize(pNum);
+
+		DArray<Coord>& allpoints = this->statePosition()->getData();
+		DArray<Coord>& allvels = this->stateVelocity()->getData();
+		DArray<Attribute>& allattrs = this->stateAttribute()->getData();
+
+		int offset = 0;
 		for (int i = 0; i < particleSystems.size(); i++)
 		{
-			total_num += particleSystems[i]->statePosition()->size();
-		}
-		//printf("total particles: %d\n", total_num);
+			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
+			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
 
+			int num = points.size();
+			bool fixx = false;
 
-		if (total_num > 0)
-		{
-			this->stateVelocity()->resize(total_num);
-			this->statePosition()->resize(total_num);
-			this->stateForceDensity()->resize(total_num);
-			this->stateAttribute()->resize(total_num);
+			
+			allpoints.assign(points, num, 0, offset);
+			allvels.assign(vels, num, 0, offset);
 
-
-			int start = 0;
-			DArray<Coord>& allpoints = this->statePosition()->getData();
-			DArray<Attribute>& allattrs = this->stateAttribute()->getData();
-
-			std::vector<Attribute> attributeList;
-			int sumTri = 0;
-			int offset = 0;
-
-			for (int i = 0; i < particleSystems.size(); i++)
-			{
-				DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
-				DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-
-				int num = points.size();
-				bool fixx = false;
-
-				if (!(particleSystems[i]->getName().c_str()[0] == 'f')) // solid
-				{
-					for (int j = 0; j < num; j++)
-					{
-						Attribute a = Attribute();
-
-
-						if (fixx)
-						{
-							a.setRigid();
-							a.setFixed();
-						}
-						else
-						{
-							a.setRigid();
-							a.setFixed();
-						}
-
-						attributeList.push_back(a);
-					}
-				}
-				else//fluid
-				{
-					for (int j = 0; j < num; j++)
-					{
-						Attribute a = Attribute();
-						a.setFluid();
-
-						a.setDynamic();
-
-						attributeList.push_back(a);
-					}
-				}
-
-
-				cudaMemcpy(allpoints.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-				cudaMemcpy(this->stateVelocity()->getData().begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-
-				start += num;
-			}
-			this->stateAttribute()->getDataPtr()->assign(attributeList);
-			attributeList.clear();
+			offset += num;
 		}
 		
+		SetupAttributesForSFI(allattrs);
 
-		//add triangles
-		int total_tri = 0;
-		int total_tri_pos = 0;
-		for (int i = 0; i < boundaryMeshes.size(); i++)
+		auto triSet = this->inTriangleSet()->getDataPtr();
+		this->stateTriangleVertex()->assign(triSet->getPoints());
+		this->stateTriangleIndex()->assign(triSet->getTriangles());
+	}
+
+	template<typename TDataType>
+	void SemiAnalyticalSFINode<TDataType>::preUpdateStates()
+	{
+		auto& particleSystems = this->getParticleSystems();
+
+		int cur_num = this->statePosition()->size();
+
+		if (particleSystems.size() == 0)
+			return;
+
+		int new_num = 0;
+		for (int i = 0; i < particleSystems.size(); i++)
 		{
-			auto triSet = boundaryMeshes[i]->outTriangleSet()->getDataPtr();
-
-			if (triSet != nullptr)
-			{
-				total_tri += triSet->getTriangles().size();
-				total_tri_pos += triSet->getPoints().size();
-			}
+			new_num += particleSystems[i]->statePosition()->size();
 		}
 
-		if (total_tri > 0 && total_tri_pos > 0)
+		if (new_num != cur_num)
 		{
-			this->stateTriangleIndex()->resize(total_tri);
-			this->stateTriangleVertex()->resize(total_tri_pos);
+			this->statePosition()->resize(new_num);
+			this->stateVelocity()->resize(new_num);
+			this->stateForceDensity()->resize(new_num);
+			this->stateAttribute()->resize(new_num);
+		}
 
-			//printf("total triangles: %d\n", total_tri);
+		if (this->statePosition()->size() <= 0)
+			return;
 
-			int start_vertex = 0;
-			int start_triangle = 0;
+		auto& new_pos = this->statePosition()->getData();
+		auto& new_vel = this->stateVelocity()->getData();
+		auto& new_force = this->stateForceDensity()->getData();
+		auto& new_atti = this->stateAttribute()->getData();
 
-			for (int i = 0; i < boundaryMeshes.size(); i++)
-			{
-				auto triSet = boundaryMeshes[i]->outTriangleSet()->getDataPtr();
+		int offset = 0;
+		for (int i = 0; i < particleSystems.size(); i++)//update particle system
+		{
+			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
+			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
+			DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
+			int num = points.size();
 
-				auto& vertex_position = triSet->getPoints();///!!!
+			new_pos.assign(points, num, offset);
+			new_vel.assign(vels, num, offset);
 
-				int num_vertex = vertex_position.size();
+			offset += num;
+		}
 
-				cudaMemcpy(this->stateTriangleVertex()->getData().begin() + start_vertex, vertex_position.begin(), num_vertex * sizeof(Coord), cudaMemcpyDeviceToDevice);
+		this->stateForceDensity()->reset();
+		SetupAttributesForSFI(new_atti);
+		
+		auto triSet = this->inTriangleSet()->getDataPtr();
+		this->stateTriangleVertex()->assign(triSet->getPoints());
+		this->stateTriangleIndex()->assign(triSet->getTriangles());
+	}
 
-				auto& triangle_index = triSet->getTriangles();
-				int num_triangle = triangle_index.size();
+	template<typename TDataType>
+	void SemiAnalyticalSFINode<TDataType>::postUpdateStates()
+	{
+		auto& particleSystems = this->getParticleSystems();
 
-				CArray<Triangle> host_triangle;
-				host_triangle.resize(num_triangle);
-				host_triangle.assign(triangle_index);
-				for (int j = 0; j < num_triangle; j++)
-				{
-					host_triangle[j][0] += start_vertex;
-					host_triangle[j][1] += start_vertex;
-					host_triangle[j][2] += start_vertex;
-				}
+		if (particleSystems.size() <= 0 || this->stateVelocity()->size() <= 0)
+			return;
 
-				cudaMemcpy(this->stateTriangleIndex()->getData().begin() + start_triangle, host_triangle.begin(), num_triangle * sizeof(Triangle), cudaMemcpyHostToDevice);
-				host_triangle.clear();
+		auto& new_pos = this->statePosition()->getData();
+		auto& new_vel = this->stateVelocity()->getData();
+		auto& new_force = this->stateForceDensity()->getData();
+		
+		uint offset = 0;
+		for (int i = 0; i < particleSystems.size(); i++)//extend current particles
+		{
+			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
+			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
+			DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
+			
+			int num = points.size();
 
-				start_vertex += num_vertex;
-				start_triangle += num_triangle;
-			}
+			points.assign(new_pos, num, 0, offset);
+			vels.assign(new_vel, num, 0, offset);
+			forces.assign(new_force, num, 0, offset);
+
+			offset += num;
 		}
 	}
 

@@ -116,6 +116,9 @@ namespace dyno
 
 		void copyFrom(QuadSet<TDataType>& quadSet);
 		
+		bool isEmpty() override;
+
+	public:
 		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
 
 	protected:

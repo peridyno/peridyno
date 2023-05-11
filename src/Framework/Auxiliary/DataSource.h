@@ -77,4 +77,33 @@ namespace dyno
 
 		DEF_VAR_OUT(Vec3d, Vector3d, "");
 	};
+
+	template<typename TDataType>
+	class FloatingNumber : public DataSource
+	{
+		DECLARE_TCLASS(FloatingNumber, TDataType);
+	public:
+		typedef typename TDataType::Real Real;
+
+		FloatingNumber();
+
+		DEF_VAR(Real, Value, Real(0), "Initial value");
+
+		DEF_VAR_OUT(Real, Floating, "");
+	};
+
+	template<typename TDataType>
+	class Vector3Source : public DataSource
+	{
+		DECLARE_TCLASS(Vector3Source, TDataType);
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		Vector3Source();
+
+		DEF_VAR(Coord, Value, Real(0), "Initial value");
+
+		DEF_VAR_OUT(Coord, Vector, "");
+	};
 }

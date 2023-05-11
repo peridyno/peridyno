@@ -3,7 +3,7 @@
 
 #include "Algorithm/Reduction.h"
 
-#include "SparseOctree.h"
+#include "Topology/SparseOctree.h"
 
 namespace dyno
 {

@@ -5,8 +5,8 @@
 #include "ParticleSystem/Module/DensityPBD.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
-#include "Topology/NeighborPointQuery.h"
-#include "Topology/NeighborTriQueryOctree.h"
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriQueryOctree.h"
 #include "TriangularMeshConstraint.h"
 //#include "ParticleShifting.h"
 #include "ParticleShifting.h"

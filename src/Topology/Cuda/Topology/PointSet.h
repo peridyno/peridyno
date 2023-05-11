@@ -37,6 +37,8 @@ namespace dyno
 
 		void loadObjFile(std::string filename);
 
+		virtual bool isEmpty();
+
 		void clear();
 
 	protected:

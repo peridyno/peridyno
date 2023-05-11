@@ -5,7 +5,7 @@
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/ElasticityModule.h"
 #include "Module/Peridynamics.h"

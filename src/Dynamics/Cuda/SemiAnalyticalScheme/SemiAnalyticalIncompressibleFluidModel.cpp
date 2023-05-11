@@ -10,8 +10,8 @@
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
-#include "Topology/NeighborPointQuery.h"
-#include "Topology/NeighborTriQueryOctree.h"
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriQueryOctree.h"
 
 #include "SemiAnalyticalIncompressibilityModule.h"
 #include "Node.h"
@@ -20,7 +20,7 @@ namespace dyno {
 
 	IMPLEMENT_TCLASS(SemiAnalyticalIncompressibleFluidModel, TDataType)
 
-		template <typename TDataType>
+	template <typename TDataType>
 	SemiAnalyticalIncompressibleFluidModel<TDataType>::SemiAnalyticalIncompressibleFluidModel()
 		: GroupModule()
 		, m_restRho(Real(1000))

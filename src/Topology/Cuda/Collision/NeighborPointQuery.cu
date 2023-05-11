@@ -40,6 +40,8 @@ namespace dyno
 		: ComputeModule()
 	{
 		this->inOther()->tagOptional(true);
+
+		this->varSizeLimit()->setRange(0, 100);
 	}
 
 	template<typename TDataType>

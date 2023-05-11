@@ -85,6 +85,14 @@ namespace dyno
 
 		void setControllable(bool con);
 
+		bool canExported();
+
+		/**
+		 * @brief To allow exporting the node
+		 *
+		 * @param if true, the node can be exported, otherwise not
+		 */
+		void allowExported(bool ex);
 
 		/// Check the state of dynamics
 		virtual bool isActive();
@@ -399,6 +407,8 @@ namespace dyno
 		bool mPhysicsEnabled = true;
 
 		bool mRenderingEnabled = true;
+
+		bool mExported = true;
 
 		/**
 		 * @brief Time step size

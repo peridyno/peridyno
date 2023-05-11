@@ -13,20 +13,20 @@ namespace dyno
 		: ParametricModel<TDataType>()
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		this->stateTopology()->setDataPtr(triSet);
+		this->stateTriangleSet()->setDataPtr(triSet);
 
-		this->stateInitialTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->stateInitialTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto surfaceRender = std::make_shared<GLSurfaceVisualModule>();
 		surfaceRender->setColor(Color(0.8f, 0.52f, 0.25f));
 		surfaceRender->setVisible(true);
-		this->stateTopology()->connect(surfaceRender->inTriangleSet());
+		this->stateTriangleSet()->connect(surfaceRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender);
 
 		auto callFileLoader = std::make_shared<FCallBackFunc>(
 			[=]() {
-				auto initTopo = this->stateInitialTopology()->getDataPtr();
-				auto curTopo = this->stateTopology()->getDataPtr();
+				auto initTopo = this->stateInitialTriangleSet()->getDataPtr();
+				auto curTopo = this->stateTriangleSet()->getDataPtr();
 
 				std::string fileName = this->varFileName()->getDataPtr()->string();
 
@@ -45,8 +45,8 @@ namespace dyno
 
 		auto transform = std::make_shared<FCallBackFunc>(
 			[=]() {
-				auto initTopo = this->stateInitialTopology()->getDataPtr();
-				auto curTopo = this->stateTopology()->getDataPtr();
+				auto initTopo = this->stateInitialTriangleSet()->getDataPtr();
+				auto curTopo = this->stateTriangleSet()->getDataPtr();
 
 				curTopo->copyFrom(*initTopo);
 				curTopo->scale(this->varScale()->getData());

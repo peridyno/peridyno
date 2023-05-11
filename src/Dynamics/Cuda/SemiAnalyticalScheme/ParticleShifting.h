@@ -12,11 +12,11 @@ namespace dyno {
 
 	class ParticleShifting : public virtual ParticleApproximation<TDataType>
 	{
+		DECLARE_TCLASS(ParticleShifting, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-
 
 
 		ParticleShifting();
@@ -51,7 +51,7 @@ namespace dyno {
 
 		DEF_VAR(Real, Bulk, Real(0.5), "bulk");
 
-		DEF_VAR(Real, SurfaceTension, Real(0.055), "surface tension");
+		DEF_VAR(Real, SurfaceTension, Real(0.03), "surface tension");
 
 		DEF_VAR(Real, AdhesionIntensity, Real(30.0), "adhesion");
 

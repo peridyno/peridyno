@@ -29,6 +29,8 @@ namespace dyno
 
 		void copyFrom(TetrahedronSet<TDataType> tetSet);
 
+		bool isEmpty() override;
+
 	protected:
 		void updateTriangles() override;
 

@@ -98,6 +98,8 @@ namespace dyno
 
 		DArrayList<int>& getVer2Edge();
 
+		bool isEmpty() override;
+
 	protected:
 		/**
 		 * Override updateEdges to update edges in a special way

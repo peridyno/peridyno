@@ -2,7 +2,7 @@
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Mapping/PointSetToPointSet.h"
 

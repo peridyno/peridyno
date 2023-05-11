@@ -27,7 +27,7 @@ namespace dyno
 	public:
 		DEF_VAR(FilePath, FileName, "", "");
 		
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InitialTopology, "Initial topology");
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Topology, "Transformed Topology");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, InitialTriangleSet, "Initial topology");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "Transformed Topology");
 	};
 }

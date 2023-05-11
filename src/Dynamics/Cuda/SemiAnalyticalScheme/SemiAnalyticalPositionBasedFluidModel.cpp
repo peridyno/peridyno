@@ -11,8 +11,8 @@
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "ParticleSystem/Module/DensityPBD.h"
 
-#include "Topology/NeighborPointQuery.h"
-#include "Topology/NeighborTriQueryOctree.h"
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriQueryOctree.h"
 
 namespace dyno {
 	IMPLEMENT_TCLASS(SemiAnalyticalPositionBasedFluidModel, TDataType)

@@ -1,7 +1,9 @@
 #include "FBase.h"
 #include <algorithm>
 
+#include "Node.h"
 #include "Module.h"
+
 #include "FCallbackFunc.h"
 
 namespace dyno
@@ -164,6 +166,13 @@ namespace dyno
 	{
 		if (dst->getSource() != nullptr && dst->getSource() != this) {
 			dst->getSource()->removeSink(dst);
+		}
+
+		//If state is connected to an input field of the other node, the field should be exported
+		Node* node = dynamic_cast<Node*>(dst->parent());
+		if (m_fType == FieldTypeEnum::State && node !=nullptr)
+		{
+			this->promoteOuput();
 		}
 		
 		// fprintf(stderr,"%s ----> %s\n",this->m_name.c_str(), dst->m_name.c_str());

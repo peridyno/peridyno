@@ -20,6 +20,8 @@
 
 #include "PoissonDiskSampling.h"
 
+#include "Mapping/MergeTriangleSet.h"
+
 namespace dyno 
 {
 	std::atomic<ModelingInitializer*> ModelingInitializer::gInstance;
@@ -94,7 +96,7 @@ namespace dyno
 			"Merge",
 			"ToolBarIco/Modeling/CubeCombo.png",
 			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<Merge<DataType3f>>();
+				return std::make_shared<MergeTriangleSet<DataType3f>>();
 			});
 
 

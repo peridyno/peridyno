@@ -1,7 +1,7 @@
 #include "PointSetToPointSet.h"
 
 #include "Matrix/MatrixFunc.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 template <typename Real>
 DYN_FUNC inline Real PP_Weight(const Real r, const Real h)

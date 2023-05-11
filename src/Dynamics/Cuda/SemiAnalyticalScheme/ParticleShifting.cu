@@ -1,10 +1,12 @@
 #include "ParticleShifting.h"
 #include "Node.h"
 #include "SemiAnalyticalSummationDensity.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 #include "IntersectionArea.h"
 
 namespace dyno {
+
+	IMPLEMENT_TCLASS(ParticleShifting, TDataType)
 
 	__device__ inline Real KernSpikyGradient(const Real r, const Real h)
 	{
