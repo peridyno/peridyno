@@ -24,6 +24,8 @@
 
 namespace dyno
 {
+
+
 	template<typename TDataType>
 	class SphereModel : public ParametricModel<TDataType>
 	{
@@ -41,6 +43,10 @@ namespace dyno
 
 		SphereModel();
 
+		std::string caption() override { return "Sphere"; }
+
+		NBoundingBox boundingBox() override;
+
 	public:
 		DEF_VAR(Coord, Center, 0, "Sphere center");
 
@@ -48,9 +54,9 @@ namespace dyno
 
 		//DEF_VAR(Real, triangleLength, 0.5, "Length of triangle edge");
 
-		DEF_ENUM(SphereMode, SphereMode, SphereMode::RowAndColumns, "ScaleMode");
+		DEF_ENUM(SphereMode, SphereMode, SphereMode::Theta, "ScaleMode");
 
-		DEF_VAR(Real, Theta, 0.3, "Angle");
+		DEF_VAR(Real, Theta, 0.15, "Angle");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
@@ -60,17 +66,11 @@ namespace dyno
 
 		DEF_VAR(unsigned, Row, 50, "Sphere Row");
 
-		void disableRender();
-
-		NBoundingBox boundingBox() override;
-
 	protected:
 		void resetStates() override;
 
 	private:
 		void varChanged();
-
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 
 

@@ -15,8 +15,8 @@ namespace dyno
 	template<typename TDataType>
 	EdgeSet<TDataType>::~EdgeSet()
 	{
-		
-
+		m_edges.clear();
+		m_ver2Edge.clear();
 	}
 
 	__global__ void K_CountNumber(
@@ -161,6 +161,12 @@ namespace dyno
 	void EdgeSet<TDataType>::updateTopology()
 	{
 		this->updateEdges();
+	}
+
+	template<typename TDataType>
+	bool EdgeSet<TDataType>::isEmpty()
+	{
+		return m_edges.size() == 0 && PointSet<TDataType>::isEmpty();
 	}
 
 	DEFINE_CLASS(EdgeSet);

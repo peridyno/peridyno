@@ -17,6 +17,8 @@
 #pragma once
 #include "Node.h"
 
+#include "Quat.h"
+
 #include "Primitive/Primitive3D.h"
 
 namespace dyno
@@ -29,6 +31,17 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		ParametricModel();
+
+		Quat<Real> computeQuaternion()
+		{
+			auto rot = this->varRotation()->getData();
+
+			Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
+				* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
+				* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+
+			return q;
+		}
 
 	public:
 		DEF_VAR(Coord, Location, 0, "Node location");

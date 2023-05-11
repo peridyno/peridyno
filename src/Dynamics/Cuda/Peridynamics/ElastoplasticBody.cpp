@@ -2,7 +2,7 @@
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Mapping/PointSetToPointSet.h"
 
@@ -21,8 +21,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ElastoplasticBody, TDataType)
 
 	template<typename TDataType>
-	ElastoplasticBody<TDataType>::ElastoplasticBody(std::string name)
-		: ParticleSystem<TDataType>(name)
+	ElastoplasticBody<TDataType>::ElastoplasticBody()
+		: ParticleSystem<TDataType>()
 	{
 		m_horizon.setValue(0.0085);
 

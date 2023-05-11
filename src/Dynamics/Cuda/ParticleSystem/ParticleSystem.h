@@ -17,7 +17,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ParticleSystem(std::string name = "default");
+		ParticleSystem();
 		virtual ~ParticleSystem();
 
 		void loadParticles(Coord lo, Coord hi, Real distance);

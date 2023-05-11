@@ -34,7 +34,7 @@ namespace dyno
 		Coupling();
 		~Coupling();
 
-		DEF_NODE_PORT(RigidMesh<TDataType>, RigidMesh, "Boat");
+		DEF_NODE_PORTS(RigidMesh<TDataType>, RigidMesh, "Boat");
 		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
 		
 		DEF_VAR(Real, Dragging, Real(0.98), "");

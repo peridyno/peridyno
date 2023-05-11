@@ -3,7 +3,7 @@
 
 #include "nodes/QNode"
 
-#include "Common.h"
+#include "Format.h"
 
 #include "Object.h"
 #include "NodeIterator.h"
@@ -293,9 +293,9 @@ namespace Qt
 	{
 		mEditingEnabled = true;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -309,9 +309,9 @@ namespace Qt
 	{
 		mEditingEnabled = false;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -331,7 +331,7 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::dynoNodePlaced(std::shared_ptr<dyno::Node> node)
+	void QtNodeFlowScene::createQtNode(std::shared_ptr<dyno::Node> node)
 	{
 		if (node == nullptr)
 			return;

@@ -58,6 +58,8 @@ public:
 	void initSurface(void* platformHandle, void* platformWindow);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 	void initSurface(ANativeWindow* window);
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+	void initSurface(xcb_window_t xcbWindow);
 #endif
 	void connect(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device);
 	void create(uint32_t* width, uint32_t* height, bool vsync = false);

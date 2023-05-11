@@ -16,7 +16,7 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.3, 0.25));
+		glModule->setColor(Color(0.8f, 0.3f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
@@ -27,14 +27,33 @@ namespace dyno
 		this->inTriangleSet04()->tagOptional(true);
 
 		auto ptModule = std::make_shared<GLPointVisualModule>();
+		ptModule->setVisible(false);
 		this->stateTriangleSet()->connect(ptModule->inPointSet());
 		this->graphicsPipeline()->pushModule(ptModule);
 		ptModule->varPointSize()->setValue(0.01);
-
+		
+		this->stateTriangleSet()->promoteOuput();
 	}
 
 	template<typename TDataType>
 	void Merge<TDataType>::resetStates()
+	{
+		MergeCPU();
+
+	}
+	template<typename TDataType>
+	void Merge<TDataType>::preUpdateStates()
+	{
+		Node::preUpdateStates();
+		if (this->varUpdateMode()->getData() == UpdateMode::Tick) 
+		{
+			MergeCPU();
+		}
+
+	
+	}
+	template<typename TDataType>
+	void Merge<TDataType>::MergeCPU() 
 	{
 		TriangleSet<TDataType> TriangleSet01;
 		TriangleSet<TDataType> TriangleSet02;
@@ -58,16 +77,17 @@ namespace dyno
 		CArray<Coord> c_point03;
 		DArray<Coord> d_point04;
 		CArray<Coord> c_point04;
-
 		std::vector<TopologyModule::Triangle> triangle;
 		std::vector<Coord>point;
+		printf("初始化变量\n");
 
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
+		printf("auto triangleSet\n");
 
 		int addtri = 0;
 		int addpt = 0;
 
-		if (!this->inTriangleSet01()->isEmpty()) 
+		if (!this->inTriangleSet01()->isEmpty())
 		{
 			TriangleSet01.copyFrom(this->inTriangleSet01()->getData());
 		}
@@ -83,6 +103,7 @@ namespace dyno
 		{
 			TriangleSet04.copyFrom(this->inTriangleSet04()->getData());
 		}
+		printf("TriangleSet.copyFrom\n");
 
 		if (!this->inTriangleSet01()->isEmpty())
 		{
@@ -100,20 +121,19 @@ namespace dyno
 			for (int i = 0; i < ptsize01; i++)
 			{
 				point.push_back(c_point01[i]);
-				//std::cout << "miao" << std::endl;
 			}
 
-			
+
 
 			int trisize01 = d_triangle01.size();
 			for (int i = 0; i < trisize01; i++)
-			{ 
+			{
 				triangle.push_back(c_triangle01[i]);
 			}
 
 			addpt = addpt + ptsize01;
 			addtri = addtri + trisize01;
-			std::cout << "addpt:  " << addpt << std::endl;
+
 		}
 
 		if (!this->inTriangleSet02()->isEmpty())
@@ -132,10 +152,9 @@ namespace dyno
 			for (int i = 0; i < ptsize02; i++)
 			{
 				point.push_back(c_point02[i]);
-				//std::cout << "two" << std::endl;
 			}
 
-			
+
 
 			int trisize02 = d_triangle02.size();
 			for (int i = 0; i < trisize02; i++)
@@ -143,7 +162,7 @@ namespace dyno
 				triangle.push_back(TopologyModule::Triangle(c_triangle02[i][0] + addpt, c_triangle02[i][1] + addpt, c_triangle02[i][2] + addpt));//c_triangle02[i][0] + addpt, c_triangle02[i][1] + addpt, c_triangle02[i][2] + addpt
 			}
 
-			addpt = addpt + ptsize02;//
+			addpt = addpt + ptsize02;
 			addtri = addtri + trisize02;
 
 		}
@@ -164,7 +183,6 @@ namespace dyno
 			for (int i = 0; i < ptsize03; i++)
 			{
 				point.push_back(c_point03[i]);
-				//std::cout << "two" << std::endl;
 			}
 
 
@@ -175,7 +193,7 @@ namespace dyno
 				triangle.push_back(TopologyModule::Triangle(c_triangle03[i][0] + addpt, c_triangle03[i][1] + addpt, c_triangle03[i][2] + addpt));//c_triangle02[i][0] + addpt, c_triangle02[i][1] + addpt, c_triangle02[i][2] + addpt
 			}
 
-			addpt = addpt + ptsize03;//
+			addpt = addpt + ptsize03;
 			addtri = addtri + trisize03;
 
 		}
@@ -196,7 +214,6 @@ namespace dyno
 			for (int i = 0; i < ptsize04; i++)
 			{
 				point.push_back(c_point04[i]);
-				//std::cout << "two" << std::endl;
 			}
 
 
@@ -207,41 +224,35 @@ namespace dyno
 				triangle.push_back(TopologyModule::Triangle(c_triangle04[i][0] + addpt, c_triangle04[i][1] + addpt, c_triangle04[i][2] + addpt));//c_triangle02[i][0] + addpt, c_triangle02[i][1] + addpt, c_triangle02[i][2] + addpt
 			}
 
-			addpt = addpt + ptsize04;//
+			addpt = addpt + ptsize04;
 			addtri = addtri + trisize04;
 
 		}
 
-		int ps = point.size();
-		int ts = triangle.size();
-
-		std::cout << ps <<std::endl;
-		std::cout << ts << std::endl;
-		//TriangleSet<TDataType> ss;
-		//ss.getTriangles();
-		//ss.setTriangles();
-		//ss.setPoints();
-
-		//PointSet<TDataType> pp;
-		//pp.getPoints();
-		//pp.setPoints();
-
-
-
+		printf("update PT\n");
 		triangleSet->setPoints(point);
 		triangleSet->setTriangles(triangle);
+		printf("Set\n");
 
 
-		triangleSet->update();
+		//triangleSet->update();
 
+		printf("update\n");
 
 
 		point.clear();
 		triangle.clear();
-		
+		c_point01.clear();
+		c_point02.clear();
+		c_point03.clear();
+		c_point04.clear();
+		c_triangle01.clear();
+		c_triangle02.clear();
+		c_triangle03.clear();
+		c_triangle04.clear();
+		printf("clear\n");
 
 	}
-
 
 	template<typename TDataType>
 	void Merge<TDataType>::disableRender() {

@@ -6,15 +6,22 @@
 namespace dyno
 {
 	template<typename TDataType>
-	CircularEmitter<TDataType>::CircularEmitter(std::string name)
-		: ParticleEmitter<TDataType>(name)
+	CircularEmitter<TDataType>::CircularEmitter()
+		: ParticleEmitter<TDataType>()
 	{
 		srand(time(0));
 
 		this->varRadius()->setRange(0.0, 10.0);
-		this->varSamplingDistance()->setRange(0.001, 1.0);
 
 		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CircularEmitter<TDataType>::tranformChanged, this));
+
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varRadius()->attach(callback);
 	}
 
 	template<typename TDataType>
@@ -31,30 +38,35 @@ namespace dyno
 		if (sampling_distance < EPSILON)
 			sampling_distance = 0.005;
 
-		auto center		= this->varLocation()->getData();
-		auto rot_vec	= this->varRotation()->getData();
-		auto r			= this->varRadius()->getData();
+		auto center = this->varLocation()->getData();
+		auto scale = this->varScale()->getData();
+		auto quat = this->computeQuaternion();
+
+		auto r = this->varRadius()->getData();
 
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
-		auto rot_mat = this->rotationMatrix();
+		Real velMag = this->varVelocityMagnitude()->getData();
+		Coord v0 = velMag * quat.rotate(Vec3f(0, -1, 0));
 
-		Coord v0 = this->varVelocityMagnitude()->getData()*rot_mat*Vec3f(0, -1, 0);
+		Transform<Real, 3> tr(center, quat.toMatrix3x3(), scale);
 
-		Real lo = -r;
-		Real hi = r;
+		Real a = r * scale.x;
+		Real b = r * scale.z;
 
-		for (Real x = lo; x <= hi; x += sampling_distance)
+		Real invA2 = Real(1) / (a * a);
+		Real invB2 = Real(1) / (b * b);
+
+		for (Real x = -a; x <= a; x += sampling_distance)
 		{
-			for (Real y = lo; y <= hi; y += sampling_distance)
+			for (Real z = -b; z <= b; z += sampling_distance)
 			{
-				Coord p = Coord(x, 0, y);
-				if ((p - Coord(0)).norm() < r && rand() % 40 == 0)
+				if ((x * x * invA2 + z * z * invB2) < 1 && rand() % 5 == 0)
 				{
-					//Coord q = cos(angle) * p + (1 - cos(angle)) * (p.dot(axis)) * axis + sin(angle) * axis.cross(p);
-					Coord q = rot_mat * p;
-					pos_list.push_back(q + center);
+					Coord p = Coord(x / scale.x, 0, z / scale.z);
+
+					pos_list.push_back(tr * p);
 					vel_list.push_back(v0);
 				}
 			}
@@ -67,24 +79,25 @@ namespace dyno
 			this->mPosition.assign(pos_list);
 			this->mVelocity.assign(vel_list);
 		}
-	
-		
+
 		pos_list.clear();
 		vel_list.clear();
 	}
 
 
 	template<typename TDataType>
-	void CircularEmitter<TDataType>::resetStates()
+	void CircularEmitter<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Edge> edges;
 
 		auto center = this->varLocation()->getData();
-		auto rot_vec = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
+		auto quat = this->computeQuaternion();
+
 		auto r = this->varRadius()->getData();
 
-		auto rot_mat = this->rotationMatrix();
+		Transform<Real, 3> tr(center, quat.toMatrix3x3(), scale);
 
 		int segNum = 36;
 		Real deltaTheta = 2 * M_PI / segNum;
@@ -94,7 +107,7 @@ namespace dyno
 			Real x = r * sin(i * deltaTheta);
 			Real z = r * cos(i * deltaTheta);
 
-			vertices.push_back(center + rot_mat * Coord(x, 0, z));
+			vertices.push_back(tr * Coord(x, 0, z));
 			edges.push_back(TopologyModule::Edge(i, (i + 1) % segNum));
 		}
 
@@ -105,6 +118,12 @@ namespace dyno
 
 		vertices.clear();
 		edges.clear();
+	}
+
+	template<typename TDataType>
+	void CircularEmitter<TDataType>::resetStates()
+	{
+		tranformChanged();
 	}
 
 	DEFINE_CLASS(CircularEmitter);

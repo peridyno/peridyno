@@ -276,7 +276,6 @@ namespace dyno
 
 	//--------------------------------------------------------------------------------------------------
 	// Resources (also see q3BoxtoBox's resources):
-	// http://www.randygaul.net/2013/10/27/sutherland-hodgman-clipping/
 	template<typename Real>
 	DYN_FUNC int clip(ClipVertex* outVerts, float* outDepths, const Vector<Real, 3>& rPos, const Vector<Real, 3>& e, unsigned char* clipEdges, const SquareMatrix<Real, 3>& basis, ClipVertex* incident)
 	{

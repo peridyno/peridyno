@@ -67,7 +67,7 @@ public:
 		hTransform.clear();
 	};
 
-	void Instances::resetStates(){
+	void resetStates(){
 
 		auto& mPoints = this->statePosition()->getData();
 		CArray<Vec3f> cPoints;
@@ -82,7 +82,7 @@ public:
 		this->updateTopology();
 	}
 
-	void Instances::updateStates() {
+	void updateStates() {
 
 		auto& mPoints = this->statePosition()->getData();
 
@@ -105,7 +105,7 @@ public:
 	}
 
 
-	void Instances::updateTopology()
+	void updateTopology()
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<DataType3f>>(this->stateTopology()->getDataPtr());
 
@@ -147,7 +147,7 @@ int main(int, char**)
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Vec3f(1, 1, 0));
+	sRender->setColor(Color(1, 1, 0));
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 

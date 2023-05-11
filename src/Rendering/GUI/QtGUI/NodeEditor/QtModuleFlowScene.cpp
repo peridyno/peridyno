@@ -90,9 +90,9 @@ namespace Qt
 	{
 		mEditingEnabled = true;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -106,9 +106,9 @@ namespace Qt
 	{
 		mEditingEnabled = false;
 
-		auto& allNodes = this->allNodes();
+		auto allNodes = this->allNodes();
 
-		for each (auto node in allNodes)
+		for  (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -167,7 +167,7 @@ namespace Qt
 
 		addModuleWidget(mStates);
 
-		for each (auto m in modules)
+		for  (auto m : modules)
 		{
 			addModuleWidget(m.second);
 		}
@@ -220,7 +220,7 @@ namespace Qt
 			}
 		};
 
-		for each (auto m in modules)
+		for  (auto m : modules)
 		{
 			createModuleConnections(m.second);
 		}
@@ -240,7 +240,9 @@ namespace Qt
 
 	void QtModuleFlowScene::showAnimationPipeline()
 	{
-		if (mNode == nullptr)
+		auto pipeline = mNode->animationPipeline();
+
+		if (mNode == nullptr || mActivePipeline == pipeline)
 			return;
 
 		mActivePipeline = mNode->animationPipeline();
@@ -250,12 +252,19 @@ namespace Qt
 
 	void QtModuleFlowScene::showGraphicsPipeline()
 	{
-		if (mNode == nullptr)
+		auto pipeline = mNode->graphicsPipeline();
+
+		if (mNode == nullptr || mActivePipeline == pipeline)
 			return;
 
 		mActivePipeline = mNode->graphicsPipeline();
 
 		updateModuleGraphView();
+
+		if (mReorderGraphicsPipeline) {
+			reorderAllModules();
+			mReorderGraphicsPipeline = false;
+		}
 	}
 
 	void QtModuleFlowScene::promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos)
@@ -317,7 +326,7 @@ namespace Qt
 			for (int i = 0; i < fieldOut.size(); i++)
 			{
 				auto& sinks = fieldOut[i]->getSinks();
-				for each (auto sink in sinks)
+				for  (auto sink : sinks)
 				{
 					if (sink != nullptr) {
 						auto parSrc = sink->parent();

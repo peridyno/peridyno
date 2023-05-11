@@ -238,7 +238,7 @@ namespace dyno {
 			return nullptr != dynamic_cast<T*>(node) && !hasNode(node);
 		}
 
-		bool NodePort::hasNode(Node* node)
+		bool hasNode(Node* node)
 		{
 			auto derived = dynamic_cast<T*>(node);
 			for (auto n : m_derived_nodes)

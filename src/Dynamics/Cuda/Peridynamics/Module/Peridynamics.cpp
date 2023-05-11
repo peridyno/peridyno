@@ -5,7 +5,7 @@
 //ParticleSystem
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 
 namespace dyno

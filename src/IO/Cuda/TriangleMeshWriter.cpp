@@ -118,7 +118,7 @@ namespace dyno
 	template<typename TDataType>
 	bool TriangleMeshWriter<TDataType>::outputSurfaceMesh(TriangleSet<TDataType> triangleset)
 	{	
-		auto frame_step = this->varFramStep()->getData();
+		auto frame_step = this->varFrameStep()->getData();
 		auto current_frame = this->inFrameNumber()->getData();
 		auto out_number = this->inFrameNumber()->getData();
 

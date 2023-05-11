@@ -212,6 +212,12 @@ namespace dyno
 		EdgeSet<TDataType>::copyFrom(quadSet);
 	}
 
+	template<typename TDataType>
+	bool QuadSet<TDataType>::isEmpty()
+	{
+		return m_quads.size() == 0 && TriangleSet<TDataType>::isEmpty();
+	}
+
 	template<typename Coord, typename Quad>
 	__global__ void QS_SetupVertexNormals(
 		DArray<Coord> normals,

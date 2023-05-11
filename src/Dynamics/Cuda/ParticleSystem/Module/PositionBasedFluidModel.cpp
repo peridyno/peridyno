@@ -4,7 +4,8 @@
 #include "SummationDensity.h"
 #include "DensityPBD.h"
 #include "ImplicitViscosity.h"
-#include "Topology/NeighborPointQuery.h"
+
+#include "Collision/NeighborPointQuery.h"
 
 namespace dyno
 {
@@ -37,7 +38,7 @@ namespace dyno
 		this->pushModule(density);
 		
 		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
-		viscosity->varViscosity()->setValue(Real(0.5));
+		viscosity->varViscosity()->setValue(Real(1.0));
 		this->inTimeStep()->connect(viscosity->inTimeStep());
 		m_smoothingLength.connect(viscosity->inSmoothingLength());
 		this->inPosition()->connect(viscosity->inPosition());

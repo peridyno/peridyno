@@ -27,7 +27,7 @@ std::shared_ptr<SceneGraph> createScene()
 	root->addParticleSystem(cloth);
 
 	auto pointRenderer = std::make_shared<GLPointVisualModule>();
-	pointRenderer->setColor(Vec3f(1, 0.2, 1));
+	pointRenderer->setColor(Color(1, 0.2, 1));
 	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 	cloth->statePointSet()->connect(pointRenderer->inPointSet());
 	cloth->stateVelocity()->connect(pointRenderer->inColor());

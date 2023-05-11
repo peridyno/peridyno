@@ -14,11 +14,15 @@ namespace dyno
 
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateQuadSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
+
+		auto wireframe = std::make_shared<GLWireframeVisualModule>();
+		this->stateQuadSet()->connect(wireframe->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wireframe);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CubeModel<TDataType>::varChanged, this));
 
@@ -29,10 +33,7 @@ namespace dyno
 		this->varSegments()->attach(callback);
 		this->varLength()->attach(callback);
 
-
-		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateQuadSet()->connect(wireframe->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireframe);
+		this->stateQuadSet()->promoteOuput();
 	}
 
 	struct Index2D
@@ -45,6 +46,23 @@ namespace dyno
 	bool operator<(const Index2D& lhs, const Index2D& rhs)
 	{
 		return lhs.x != rhs.x ? lhs.x < rhs.x : lhs.y < rhs.y;
+	}
+
+	template<typename TDataType>
+	NBoundingBox CubeModel<TDataType>::boundingBox()
+	{
+		NBoundingBox bound;
+
+		auto box = this->outCube()->getData();
+		auto aabb = box.aabb();
+
+		Coord v0 = aabb.v0;
+		Coord v1 = aabb.v1;
+
+		bound.lower = Vec3f(v0.x, v0.y, v0.z);
+		bound.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return bound;
 	}
 
 	template<typename TDataType>

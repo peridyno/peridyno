@@ -17,7 +17,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef TPair<TDataType> NPair;
 
-		Cloth(std::string name = "default");
+		Cloth();
 		virtual ~Cloth();
 
 		bool translate(Coord t) override;

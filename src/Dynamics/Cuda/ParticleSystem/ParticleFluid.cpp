@@ -13,8 +13,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ParticleFluid, TDataType)
 
 	template<typename TDataType>
-	ParticleFluid<TDataType>::ParticleFluid(std::string name)
-		: ParticleSystem<TDataType>(name)
+	ParticleFluid<TDataType>::ParticleFluid()
+		: ParticleSystem<TDataType>()
 	{
 		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
 		this->animationPipeline()->pushModule(pbf);
@@ -144,10 +144,10 @@ namespace dyno
 			}
 		}
 		else {
-			std::cout << "Fluid particle nodes are not set." << std::endl;
+			this->statePosition()->resize(0);
+			this->stateVelocity()->resize(0);
+			this->stateForce()->resize(0);
 		}
-
-		printf("total num = %d\n", totalNum);
 	}
 
 	template<typename TDataType>
@@ -159,6 +159,11 @@ namespace dyno
 		{
 			auto points = this->statePointSet()->getDataPtr();
 			points->setPoints(this->statePosition()->getData());
+		}
+		else
+		{
+			auto points = this->statePointSet()->getDataPtr();
+			points->clear();
 		}
 	}
 

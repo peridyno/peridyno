@@ -163,7 +163,9 @@ def findGlslang():
         full_path = os.path.join(exe_dir, exe_name)
         if isExe(full_path):
             return full_path
-
+   
+    #if os is linux platom
+    #return "/usr/bin/glslangValidator"
     sys.exit("Could not find DXC executable on PATH, and was not specified with --dxc")
 
 glslang_path = findGlslang()

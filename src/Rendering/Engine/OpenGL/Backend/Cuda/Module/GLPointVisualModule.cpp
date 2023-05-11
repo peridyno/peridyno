@@ -17,8 +17,12 @@ namespace dyno
 	{
 		mNumPoints = 0;
 		this->setName("point_renderer");
-
 		this->inColor()->tagOptional(true);
+
+		this->varPointSize()->setRange(0.001f, 1.0f);
+
+
+		this->varForceUpdate()->setValue(true);
 	}
 
 	GLPointVisualModule::~GLPointVisualModule()
@@ -27,7 +31,7 @@ namespace dyno
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
-		mColorMode = mode;
+		this->varColorMode()->getDataPtr()->setCurrentKey(mode);
 	}
 
 	bool GLPointVisualModule::initializeGL()
@@ -68,7 +72,7 @@ namespace dyno
 		mNumPoints = points.size();
 
 		mVertexArray.bind();
-		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !colors.isEmpty() && colors.size() == mNumPoints)
 		{
 			mColor.loadCuda(colors.begin(), mNumPoints * sizeof(float) * 3);
@@ -95,7 +99,7 @@ namespace dyno
 
 		points.assign(pPointSet->getPoints());
 
-		if (mColorMode == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
 			colors.assign(this->inColor()->getData());
@@ -141,7 +145,7 @@ namespace dyno
 
 		// per-object color color
 		auto color = this->varBaseColor()->getData();
-		glVertexAttrib3f(1, color[0], color[1], color[2]);
+		glVertexAttrib3f(1, color.r, color.g, color.b);
 
 		mVertexArray.bind();
 		glDrawArrays(GL_POINTS, 0, mNumPoints);

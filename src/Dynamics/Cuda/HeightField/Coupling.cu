@@ -105,57 +105,60 @@ namespace dyno
 	{
 		Real dt = this->stateTimeStep()->getData();
 
-		auto mesh = this->getRigidMesh();
+		auto boats = this->getRigidMeshs();
 		auto ocean = this->getOcean();
 
-		auto& triangles = mesh->stateEnvelope()->getData();
+		for (auto mesh : boats)
+		{
+			auto& triangles = mesh->stateEnvelope()->getData();
 
-		Real mass = mesh->stateMass()->getData();
-		Coord center = mesh->stateCenter()->getData();
-		Coord velocity = mesh->stateVelocity()->getData();
-		Coord angular_velocity = mesh->stateAngularVelocity()->getData();
-		Matrix inertia = mesh->stateInertia()->getData();
+			Real mass = mesh->stateMass()->getData();
+			Coord center = mesh->stateCenter()->getData();
+			Coord velocity = mesh->stateVelocity()->getData();
+			Coord angular_velocity = mesh->stateAngularVelocity()->getData();
+			Matrix inertia = mesh->stateInertia()->getData();
 
-		Coord gravity = mesh->varGravity()->getData();
+			Coord gravity = mesh->varGravity()->getData();
 
-		auto& vertices = triangles.getPoints();
-		auto& indices = triangles.getTriangles();
+			auto& vertices = triangles.getPoints();
+			auto& indices = triangles.getTriangles();
 
-		uint num = indices.size();
+			uint num = indices.size();
 
-		if (mForce.size() != num){
-			mForce.resize(num);
-			mTorque.resize(num);
+			if (mForce.size() != num) {
+				mForce.resize(num);
+				mTorque.resize(num);
+			}
+
+			auto heights = ocean->stateHeightField()->getDataPtr();
+			auto& displacements = heights->getDisplacement();
+			Coord origin = heights->getOrigin();
+			Real h = heights->getGridSpacing();
+
+			cuExecute(num,
+				C_ComputeForceAndTorque,
+				mForce,
+				mTorque,
+				vertices,
+				indices,
+				displacements,
+				center,
+				gravity,
+				origin,
+				h,
+				Real(1000));
+
+			Coord F_total = mReduce.accumulate(mForce.begin(), mForce.size());
+			Coord T_total = mReduce.accumulate(mTorque.begin(), mTorque.size());
+
+			velocity += dt * F_total / mass;
+			angular_velocity += dt * inertia.inverse() * T_total;
+
+			velocity *= this->varDragging()->getData();
+			angular_velocity *= this->varDragging()->getData();
+
+			mesh->stateVelocity()->setValue(velocity);
 		}
-
-		auto heights = ocean->stateHeightField()->getDataPtr();
-		auto& displacements = heights->getDisplacement();
-		Coord origin = heights->getOrigin();
-		Real h = heights->getGridSpacing();
-
-		cuExecute(num,
-			C_ComputeForceAndTorque,
-			mForce,
-			mTorque,
-			vertices,
-			indices,
-			displacements,
-			center,
-			gravity,
-			origin,
-			h,
-			Real(1000));
-
-		Coord F_total = mReduce.accumulate(mForce.begin(), mForce.size());
-		Coord T_total = mReduce.accumulate(mTorque.begin(), mTorque.size());
-
-		velocity += dt * F_total / mass;
-		angular_velocity += dt * inertia.inverse() * T_total;
-
-		velocity *= this->varDragging()->getData();
-		angular_velocity *= this->varDragging()->getData();
-
-		mesh->stateVelocity()->setValue(velocity);
 	}
 
 	DEFINE_CLASS(Coupling);

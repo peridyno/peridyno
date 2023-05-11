@@ -23,6 +23,7 @@ namespace dyno
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
+
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
@@ -31,8 +32,8 @@ namespace dyno
 		this->varRow()->attach(callback);
 		this->varSphereMode()->attach(callback);
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
@@ -48,11 +49,6 @@ namespace dyno
 	{
 		varChanged();
 	}
-
-	template<typename TDataType>
-	void SphereModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	template<typename TDataType>
 	NBoundingBox SphereModel<TDataType>::boundingBox()
@@ -437,10 +433,8 @@ namespace dyno
 		triangleSet->update();
 
 		vertices.clear();
-
 		triangle.clear();
 
-		//triangle.clear();
 	}
 
 

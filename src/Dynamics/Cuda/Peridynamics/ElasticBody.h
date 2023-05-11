@@ -20,7 +20,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef TPair<TDataType> NPair;
 
-		ElasticBody(std::string name = "default");
+		ElasticBody();
 		virtual ~ElasticBody();
 
 		void updateTopology() override;

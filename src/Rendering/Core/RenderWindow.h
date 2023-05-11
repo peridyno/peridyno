@@ -23,7 +23,7 @@ namespace dyno
 	class RenderWindow
 	{
 	public:
-		RenderWindow::RenderWindow();
+		RenderWindow();
 
 		virtual void initialize(int width, int height) {}
 		virtual void mainLoop() {}

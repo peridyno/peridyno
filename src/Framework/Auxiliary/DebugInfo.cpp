@@ -10,6 +10,11 @@ namespace dyno
 		this->print();
 	}
 
+	PrintInt::PrintInt()
+	{
+		this->varForceUpdate()->setValue(true);
+	}
+
 	void PrintInt::print()
 	{
 		std::ostringstream oss;
@@ -18,12 +23,22 @@ namespace dyno
 		Log::sendMessage(Log::Info, oss.str());
 	}
 
+	PrintUnsigned::PrintUnsigned()
+	{
+		this->varForceUpdate()->setValue(true);
+	}
+
 	void PrintUnsigned::print()
 	{
 		std::ostringstream oss;
 		oss << this->inUnsigned()->getData();
 
 		Log::sendMessage(Log::Info, oss.str());
+	}
+
+	PrintFloat::PrintFloat()
+	{
+		this->varForceUpdate()->setValue(true);
 	}
 
 	void PrintFloat::print()

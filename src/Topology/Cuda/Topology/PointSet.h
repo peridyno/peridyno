@@ -37,6 +37,10 @@ namespace dyno
 
 		void loadObjFile(std::string filename);
 
+		virtual bool isEmpty();
+
+		void clear();
+
 	protected:
 		DArray<Coord> m_coords;
 		DArrayList<int> m_pointNeighbors;

@@ -4,9 +4,6 @@
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
 
-
-
-
 namespace dyno
 {
 	template<typename TDataType>
@@ -22,23 +19,21 @@ namespace dyno
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
-
-
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto glModule2 = std::make_shared<GLPointVisualModule>();
-		glModule2->setColor(Vec3f(1, 0.1, 0.1));
+		glModule2->setColor(Color(1, 0.1, 0.1));
 		//glModule2->setVisible(false);
 		glModule2->varPointSize()->setValue(0.01);
 		this->stateTriangleSet()->connect(glModule2->inPointSet());
 		this->graphicsPipeline()->pushModule(glModule2);
 
 		auto glModule3 = std::make_shared<GLWireframeVisualModule>();
-		glModule3->setColor(Vec3f(0, 0, 0));
+		glModule3->setColor(Color(0, 0, 0));
 		//glModule3->setVisible(false);
 		this->stateTriangleSet()->connect(glModule3->inEdgeSet());
 		this->graphicsPipeline()->pushModule(glModule3);
@@ -208,15 +203,6 @@ namespace dyno
 
 
 	}
-
-
-	template<typename TDataType>
-	void ExtrudeModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
-
-
-
 
 	DEFINE_CLASS(ExtrudeModel);
 }

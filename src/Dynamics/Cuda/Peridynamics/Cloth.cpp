@@ -5,7 +5,7 @@
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/ElasticityModule.h"
 #include "Module/Peridynamics.h"
@@ -18,8 +18,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(Cloth, TDataType)
 
 	template<typename TDataType>
-	Cloth<TDataType>::Cloth(std::string name)
-		: ParticleSystem<TDataType>(name)
+	Cloth<TDataType>::Cloth()
+		: ParticleSystem<TDataType>()
 	{
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());

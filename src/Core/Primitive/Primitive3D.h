@@ -118,8 +118,8 @@ namespace dyno
 	class TPoint3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TPoint3D();
@@ -268,8 +268,8 @@ namespace dyno
 	class TLine3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TLine3D();
@@ -347,8 +347,8 @@ namespace dyno
 	class TRay3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TRay3D();
@@ -407,8 +407,8 @@ namespace dyno
 	class TSegment3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TSegment3D();
@@ -465,8 +465,8 @@ namespace dyno
 	class TPlane3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TPlane3D();
@@ -487,8 +487,8 @@ namespace dyno
 	class TTriangle3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TTriangle3D();
@@ -525,8 +525,8 @@ namespace dyno
 	class TRectangle3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TRectangle3D();
@@ -562,8 +562,8 @@ namespace dyno
 	class TDisk3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TDisk3D();
@@ -583,8 +583,8 @@ namespace dyno
 	class TSphere3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TSphere3D();
@@ -607,8 +607,8 @@ namespace dyno
 	class TCylinder3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCylinder3D();
@@ -629,8 +629,8 @@ namespace dyno
 	class TCone3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCone3D();
@@ -651,8 +651,8 @@ namespace dyno
 	class TCapsule3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCapsule3D();
@@ -676,9 +676,9 @@ namespace dyno
 	class TTet3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
-		typedef typename SquareMatrix<Real, 3> Matrix3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
+		typedef  SquareMatrix<Real, 3> Matrix3D;
 
 	public:
 		DYN_FUNC TTet3D();
@@ -709,9 +709,9 @@ namespace dyno
 	class TAlignedBox3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
-		typedef typename SquareMatrix<Real, 3> Matrix3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
+		typedef  SquareMatrix<Real, 3> Matrix3D;
 
 	public:
 		DYN_FUNC TAlignedBox3D();
@@ -738,9 +738,9 @@ namespace dyno
 	class TOrientedBox3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
-		typedef typename SquareMatrix<Real, 3> Matrix3D;
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
+		typedef  SquareMatrix<Real, 3> Matrix3D;
 
 	public:
 		DYN_FUNC TOrientedBox3D();

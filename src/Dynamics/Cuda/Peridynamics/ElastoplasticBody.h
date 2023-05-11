@@ -24,7 +24,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef TPair<TDataType> NPair;
 
-		ElastoplasticBody(std::string name = "default");
+		ElastoplasticBody();
 		virtual ~ElastoplasticBody();
 
 	public:

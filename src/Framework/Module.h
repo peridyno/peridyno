@@ -47,14 +47,6 @@ namespace dyno
 
 		std::string getName() override;
 
-		/**
-		 * @brief Set the update strategy for the module
-		 * 
-		 * @param b true, the module will be updated no matter the control and input variables are changed; 
-		 * 			false, the module will updated only when one of the variables are changed.
-		 */
-		void setUpdateAlways(bool b);
-
 		Node* getParent() {
 			if (m_node == NULL) {
 				Log::sendMessage(Log::Error, "Parent node is not set!");
@@ -77,6 +69,19 @@ namespace dyno
 		 */
 		bool isInputComplete();
 		bool isOutputCompete();
+
+
+	public:
+		DEF_VAR(bool, ForceUpdate, false, "");
+
+		/**
+		 * @brief Set the update strategy for the module
+		 *
+		 * @param b true, the module will be updated no matter the control and input variables are changed;
+		 * 			false, the module will updated only when one of the variables are changed.
+		 */
+		void setUpdateAlways(bool b);
+
 	protected:
 		//TODO: remove this step
 		virtual bool initializeImpl();
@@ -103,7 +108,5 @@ namespace dyno
 		Node* m_node;
 		std::string m_module_name;
 		bool m_initialized;
-
-		bool mUpdateAlways = false;
 	};
 }

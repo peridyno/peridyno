@@ -8,4 +8,4 @@ add_test(NAME ${TEST_PROJECT} COMMAND ${TEST_PROJECT})
 
 set_target_properties(${TEST_PROJECT} PROPERTIES FOLDER "Tests")
 
-target_link_libraries(${TEST_PROJECT} PUBLIC gtest Core)
+target_link_libraries(${TEST_PROJECT} PUBLIC gtest Core glslang)

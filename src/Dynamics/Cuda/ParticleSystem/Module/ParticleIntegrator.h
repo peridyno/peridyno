@@ -55,10 +55,7 @@ namespace dyno {
 	protected:
 		void updateImpl() override;
 
-	private:
-		DArray<Coord> m_prePosition;
-		DArray<Coord> m_preVelocity;
-		int cnt = 0;
+	
 	};
 
 	IMPLEMENT_TCLASS(ParticleIntegrator, TDataType)

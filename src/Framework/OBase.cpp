@@ -21,6 +21,11 @@ namespace dyno {
 		return this->getClassInfo()->getClassName();
 	}
 
+	bool OBase::captionVisible()
+	{
+		return true;
+	}
+
 	std::string OBase::description()
 	{
 		auto cls = this->getClassInfo();

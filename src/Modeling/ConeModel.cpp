@@ -17,8 +17,8 @@ namespace dyno
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
-		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
@@ -27,10 +27,28 @@ namespace dyno
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ConeModel<TDataType>::varChanged, this));
+
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varColumns()->attach(callback);
+		this->varRow()->attach(callback);
+		this->varRadius()->attach(callback);
+		this->varHeight()->attach(callback);
+
+		this->stateTriangleSet()->promoteOuput();
 	}
 
 	template<typename TDataType>
 	void ConeModel<TDataType>::resetStates()
+	{
+		varChanged();
+	}
+
+	template<typename TDataType>
+	void ConeModel<TDataType>::varChanged()
 	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
@@ -52,14 +70,14 @@ namespace dyno
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
 		Real PI = 3.1415926535;
-		
+
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
 		int columns_i = int(columns);
 		int row_i = int(row);
 
-		
+
 		uint counter = 0;
 		Coord Location;
 		Real angle = PI / 180 * 360 / columns_i;
@@ -87,7 +105,7 @@ namespace dyno
 
 		//以下是底部及上部点的构建
 
-		for (int i = 1; i <= row_i; i++)
+		for (int i = 1; i < row_i; i++)
 		{
 			float offset = i / (float(row_i) - i);
 
@@ -100,7 +118,7 @@ namespace dyno
 
 		}
 
-		for (int i = 1; i <= row_i; i++)
+		for (int i = 1; i < row_i; i++)
 		{
 			float offset = i / (float(row_i) - i);
 
@@ -135,7 +153,7 @@ namespace dyno
 
 		for (int i = 0; i < numpt; i++)
 		{
-			vertices[i][1] -= 1*height / 3;
+			vertices[i][1] -= 1 * height / 3;
 			vertices[i] = RV(vertices[i] * scale + RV(center));
 		}
 
@@ -204,7 +222,7 @@ namespace dyno
 						triangle.push_back(TopologyModule::Triangle(temp - columns + 1, temp, pt_len));	//生成底面最内圈最后一个面
 
 					}
-					 
+
 				}
 			}
 
@@ -223,11 +241,11 @@ namespace dyno
 					if (s == 0)
 					{
 						temp = i + pt_side_len - columns;  //i为0-columns的序号，“+ x * (pt_side_len - columns)”作为侧面序号的变化量，最终得出侧面 上、下一圈的序号
-						addnum = columns + row_i * columns;
+						addnum = row_i * columns;
 					}
 					else
 					{
-						temp = pt_side_len + columns * (row_i - 1) + i + unsigned(s) * columns;
+						temp = pt_side_len + i + unsigned(s - 1) * columns + columns * (row_i - 1);
 						addnum = columns;
 					}
 					//****************是否是最后一列，是的话首尾序号相接，防止连接点换行*****************//
@@ -253,7 +271,7 @@ namespace dyno
 
 				for (int z = 0; z < columns; z++)
 				{
-					temp = pt_side_len + z + unsigned(s - 1) * columns + row_i * columns;
+					temp = pt_side_len + z + unsigned(s - 1) * columns + columns * (row_i - 1);
 					if (z != columns - 1)
 					{
 						triangle.push_back(TopologyModule::Triangle(pt_len + 1, temp, temp + 1));	//生成底面最内圈
@@ -275,16 +293,15 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
+		//		triangleSet->updateEdges();
+		//		triangleSet->updateVertexNormal();
+
+
 		triangleSet->update();
 
 		vertices.clear();
 		triangle.clear();
 	}
-
-	template<typename TDataType>
-	void ConeModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	DEFINE_CLASS(ConeModel);
 }

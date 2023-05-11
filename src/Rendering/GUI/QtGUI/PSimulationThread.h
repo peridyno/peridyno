@@ -5,6 +5,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include <nodes/QNode>
+
 namespace dyno
 {
 	class Node;
@@ -48,6 +50,7 @@ namespace dyno
 
 	public slots:
 		void resetNode(std::shared_ptr<Node> node);
+		void resetQtNode(Qt::QtNode& node);
 
 	private:
 		PSimulationThread();

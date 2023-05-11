@@ -3,15 +3,12 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
-
-
 namespace dyno
 {
 	template<typename TDataType>
 	TurningModel<TDataType>::TurningModel()
 		: ParametricModel<TDataType>()
 	{
-
 		//this->varRow()->setRange(2, 50);
 		this->varColumns()->setRange(3, 50);
 		this->varRadius()->setRange(-10.0f, 10.0f);
@@ -23,7 +20,7 @@ namespace dyno
 
 
 		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Vec3f(0.8, 0.52, 0.25));
+		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
@@ -32,7 +29,7 @@ namespace dyno
 		//auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		//this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		//this->graphicsPipeline()->pushModule(wireframe);
-
+		this->stateTriangleSet()->promoteOuput();
 
 	}
 
@@ -75,7 +72,7 @@ namespace dyno
 		int row_i = pointsize;
 
 		uint counter = 0;
-		Vec3f Location;
+		Coord Location;
 		Real angle = PI / 180 * 360 / columns_i;
 		Real temp_angle = angle;
 		
@@ -341,18 +338,10 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-		//triangleSet->updateEdges();
-		//triangleSet->updateVertexNormal();
-
-
 		triangleSet->update();
-
-
 
 		vertices.clear();
 		triangle.clear();
-		
-
 	}
 
 

@@ -47,7 +47,7 @@ namespace dyno
 		calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Vec3f(1, 0, 0));
+		ptRender->setColor(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
 		this->stateTopology()->connect(ptRender->inPointSet());

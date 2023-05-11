@@ -2,7 +2,7 @@
 
 #include "Module.h"
 
-#include "Common.h"
+#include "Format.h"
 
 namespace Qt
 {
@@ -84,6 +84,11 @@ namespace Qt
  		return dyno::FormatBlockCaptionName(mModule->caption());
 	}
 
+	bool QtModuleWidget::captionVisible() const
+	{
+		return mModule->captionVisible();
+	}
+
 	QString QtModuleWidget::name() const
 	{
 		return QString::fromStdString(mModule->caption());
@@ -155,7 +160,7 @@ namespace Qt
 
 		try
 		{
-			auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+			auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
 			if (fieldExp == nullptr)
 				return false;
 

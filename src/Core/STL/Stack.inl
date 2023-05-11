@@ -11,7 +11,7 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC T Stack<T>::top()
 	{
-		return m_startLoc[m_size-1];
+		return ::dyno::STLBuffer<T>::m_startLoc[m_size-1];
 	}
 
 	template <typename T>
@@ -22,7 +22,7 @@ namespace dyno
 			//cout<<"Stack is full!"<<endl;
 
 		//if not full add to the end
-		m_startLoc[m_size] = val;
+		::dyno::STLBuffer<T>::m_startLoc[m_size] = val;
 		m_size++;
 	}
 
@@ -56,7 +56,7 @@ namespace dyno
 		uint num = 0;
 		while (ind < m_size)
 		{
-			if(m_startLoc[ind] == val)
+			if(::dyno::STLBuffer<T>::m_startLoc[ind] == val)
 				num++;
 			ind++;
 		}

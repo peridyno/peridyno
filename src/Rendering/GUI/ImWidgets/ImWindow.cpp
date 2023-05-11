@@ -72,7 +72,7 @@ void ImWindow::draw(RenderWindow* app)
 	auto camera = app->getCamera();
 
 	auto& rparams = app->getRenderParams();
-
+	float menu_y = 0.f;
 	ImGuiIO& io = ImGui::GetIO();
 
 
@@ -146,27 +146,6 @@ void ImWindow::draw(RenderWindow* app)
 				}
 
 				ImGui::Separator();
-				if (ImGui::Button("Auto Focus"))
-				{
-					if (scene) {
-						auto box = scene->boundingBox();
-
-						float len = box.maxLength();
-						Vec3f center = 0.5f * (box.upper + box.lower);
-
-						Vec3f eyePos = camera->getEyePos();
-						Vec3f tarPos = camera->getTargetPos();
-						Vec3f dir = eyePos - tarPos;
-						dir.normalize();
-
-						camera->setEyePos(center + len * dir);
-						camera->setTargetPos(center);
-
-						float unit = std::floor(std::log(len));
-						camera->setUnitScale(std::pow(10.0f, (float)unit));
-					}
-
-				}
 
 				float distanceUnit = camera->unitScale();
 				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
@@ -277,7 +256,7 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::EndMenu();
 			}
-
+			/*
 			if (ImGui::BeginMenu("Edit", "")) {
 
 				if (ImGui::RadioButton("Translate", mEditMode == 0))
@@ -291,9 +270,56 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::EndMenu();
 			}
-
+			*/
+			menu_y = ImGui::GetWindowSize().y;
 
 			ImGui::EndMainMenuBar();
+		}
+		
+		// Right Sidebar
+		{
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36 / 255.0, 36 / 255.0, 36 / 255.0, 255 / 255.0));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 5.f));
+			ImGui::Begin("Right Sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			
+			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ARROWS_ALT, "Translate", mEditMode == 0))
+				mEditMode = 0;
+			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ALT, "Scale", mEditMode == 1))
+				mEditMode = 1;
+			if (ImGui::radioWithIconButton(ICON_FA_GLOBE, "Rotate", mEditMode == 2))
+				mEditMode = 2;
+			ImGui::Separator(); // --------
+
+			if (ImGui::Button("A", ImVec2(27, 27)))
+			{
+				if (scene) {
+					auto node = app->getCurrentSelectedNode();
+					auto box = node != nullptr ? node->boundingBox() : scene->boundingBox();
+
+					float len = std::max(box.maxLength(), 0.001f);
+					Vec3f center = 0.5f * (box.upper + box.lower);
+
+					Vec3f eyePos = camera->getEyePos();
+					Vec3f tarPos = camera->getTargetPos();
+					Vec3f dir = eyePos - tarPos;
+					dir.normalize();
+
+					float unit = len;
+
+					Vec3f target = center / unit;
+					Vec3f eye = target + 2.2f * dir;
+					camera->setEyePos(eye);
+					camera->setTargetPos(target);
+
+					camera->setUnitScale(unit);
+				}
+			}
+
+			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
+			ImGui::End();	
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar(2);
 		}
 
 		// Bottom Right widget
@@ -442,7 +468,7 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
 
 			// notify the update of node?
-			node->update();
+			node->updateGraphicsContext();
 		}
 	}
 }

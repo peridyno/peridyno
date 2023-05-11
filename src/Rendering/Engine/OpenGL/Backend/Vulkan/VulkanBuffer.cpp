@@ -130,9 +130,9 @@ void VulkanBuffer::allocate(int size) {
 #ifdef WIN32
     glImportMemoryWin32HandleEXT(memoryObject, req.size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
 #else
-    glImportMemoryFdEXT(bufGl.memoryObject, req.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, bufGl.fd);
+    //glImportMemoryFdEXT(bufGl.memoryObject, req.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, bufGl.fd);
     // fd got consumed
-    bufGl.fd = -1;
+    //bufGl.fd = -1;
 #endif
     glNamedBufferStorageMemEXT(id, req.size, memoryObject, 0);
 

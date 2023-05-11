@@ -38,7 +38,7 @@ namespace dyno {
     public:
         typedef typename TDataType::Real Real;
         typedef typename TDataType::Coord Coord;
-        typedef typename Complex<Real> Complex;
+        typedef typename ::dyno::Complex<Real> Complex;
 
         OceanPatch();
         ~OceanPatch();

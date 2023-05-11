@@ -3,12 +3,11 @@
 namespace dyno
 {
 	template<typename TDataType>
-	ParticleEmitter<TDataType>::ParticleEmitter(std::string name)
-		: Node(name)
+	ParticleEmitter<TDataType>::ParticleEmitter()
+		: ParametricModel<TDataType>()
 	{
-// 		this->varScale()->setValue(Vec3f(1, 1, 1));
-// 		this->varScale()->setMin(0.01);
-// 		this->varScale()->setMax(100.0f);
+		this->varVelocityMagnitude()->setRange(Real(0), Real(10));
+		this->varSamplingDistance()->setRange(Real(0.001), Real(1.0));
 	}
 
 	template<typename TDataType>

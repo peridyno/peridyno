@@ -165,10 +165,10 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	include_directories(${CMAKE_SOURCE_DIR}/external/glslang/glslang/Include)
 
 	if(WIN32)
-    	target_link_libraries(${LIB_NAME} ${Vulkan_LIBRARY} ${WINLIBS} glslang)
-	else(WIN32)
-	    target_link_libraries(${LIB_NAME} ${Vulkan_LIBRARY} ${XCB_LIBRARIES} ${WAYLAND_CLIENT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-	endif(WIN32)
+    	    target_link_libraries(${LIB_NAME} ${Vulkan_LIBRARY} ${WINLIBS} glslang)
+	else(UNIX)
+	    target_link_libraries(${LIB_NAME} ${Vulkan_LIBRARY} ${XCB_LIBRARIES} ${WAYLAND_CLIENT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} glslang)
+	endif()
 
 
     	install(TARGETS ${LIB_NAME}

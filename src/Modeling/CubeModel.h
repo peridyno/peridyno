@@ -33,6 +33,10 @@ namespace dyno
 
 		CubeModel();
 
+		std::string caption() override { return "Cube"; }
+
+		NBoundingBox boundingBox() override;
+
 	public:
 		DEF_VAR(Vec3f, Length, Real(1), "Edge length");
 
@@ -43,8 +47,6 @@ namespace dyno
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 
 	protected:
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
-
 		void resetStates() override;
 
 	private:

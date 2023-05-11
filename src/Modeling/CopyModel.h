@@ -16,14 +16,11 @@
 
 #pragma once
 #include "Node/ParametricModel.h"
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
 
+#include "Topology/TriangleSet.h"
 
 namespace dyno
 {
-
-
 	template<typename TDataType>
 	class CopyModel : public ParametricModel<TDataType>
 	{
@@ -40,8 +37,6 @@ namespace dyno
 			Multiply = 1);
 
 	public:
-
-
 		DEF_VAR(unsigned, TotalNumber, 3, "CopyNumber");
 
 		DEF_VAR(Coord, CopyTransform, 0, "CopyTransform");
@@ -56,18 +51,9 @@ namespace dyno
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSetIn,"")
 
-
-		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
-
-		void disableRender();
-
 	protected:
 		void resetStates() override;
-
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
-
-
 
 	IMPLEMENT_TCLASS(CopyModel, TDataType);
 }

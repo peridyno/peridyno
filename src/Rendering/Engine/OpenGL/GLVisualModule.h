@@ -20,6 +20,8 @@
 #include <mutex>
 #include <Module/VisualModule.h>
 
+#include <Color.h>
+
 namespace dyno
 {
 	// render pass
@@ -37,7 +39,7 @@ namespace dyno
 		~GLVisualModule();
 
 		// basic Disney PBR material properties
-		void setColor(const Vec3f& color);
+		void setColor(const Color& color);
 		void setMetallic(float metallic);
 		void setRoughness(float roughness);
 		void setAlpha(float alpha);
@@ -47,7 +49,7 @@ namespace dyno
 		void draw(GLRenderPass pass);
 
 	public:
-		DEF_VAR(Vec3f, BaseColor, Vec3f(0.8f), "");
+		DEF_VAR(Color, BaseColor, Color(0.8f, 0.8f, 0.8f), "");
 		DEF_VAR(Real, Metallic, 0.0f, "");
 		DEF_VAR(Real, Roughness, 0.5f, "");
 		DEF_VAR(Real, Alpha, 1.0f, "");

@@ -341,5 +341,11 @@ namespace dyno
 		TriangleSet<TDataType>::copyFrom(tetSet);
 	}
 
+	template<typename TDataType>
+	bool TetrahedronSet<TDataType>::isEmpty()
+	{
+		return m_tethedrons.size() && TriangleSet<TDataType>::isEmpty();
+	}
+
 	DEFINE_CLASS(TetrahedronSet);
 }

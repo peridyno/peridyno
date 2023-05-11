@@ -32,6 +32,9 @@ namespace Qt
 
 		QString caption() const override;
 
+		/// whether to hide caption in GUI
+		bool captionVisible() const override;
+
 		QString name() const override;
 		void setName(QString name) { m_name = name; }
 

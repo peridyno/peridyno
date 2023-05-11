@@ -2,7 +2,8 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "Topology/NeighborPointQuery.h"
+
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/Peridynamics.h"
 
@@ -13,8 +14,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ElasticBody, TDataType)
 
 	template<typename TDataType>
-	ElasticBody<TDataType>::ElasticBody(std::string name)
-		: ParticleSystem<TDataType>(name)
+	ElasticBody<TDataType>::ElasticBody()
+		: ParticleSystem<TDataType>()
 	{
 		this->varHorizon()->setValue(0.0085);
 

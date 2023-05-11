@@ -11,31 +11,14 @@ namespace dyno
 	TriangleSet<TDataType>::TriangleSet()
 		: EdgeSet<TDataType>()
 	{
-		std::vector<Coord> positions;
-		std::vector<Triangle> triangles;
-		Real dx = Real(0.1);
-		int Nx = 11;
-		int Nz = 11;
-
-		for (int k = 0; k < Nz; k++) {
-			for (int i = 0; i < Nx; i++) {
-				positions.push_back(Coord(Real(i*dx), Real(0.0), Real(k*dx)));
-				if (k < Nz - 1 && i < Nx - 1)
-				{
-					Triangle tri1(i + k*Nx, i + 1 + k*Nx, i + 1 + (k + 1)*Nx);
-					Triangle tri2(i + k*Nx, i + 1 + (k + 1)*Nx, i + (k + 1)*Nx);
-					triangles.push_back(tri1);
-					triangles.push_back(tri2);
-				}
-			}
-		}
-		this->setPoints(positions);
-		this->setTriangles(triangles);
 	}
 
 	template<typename TDataType>
 	TriangleSet<TDataType>::~TriangleSet()
 	{
+		m_triangles.clear();
+		m_ver2Tri.clear();
+		edg2Tri.clear();
 	}
 
 	template<typename Triangle>
@@ -278,6 +261,61 @@ namespace dyno
 		EdgeSet<TDataType>::copyFrom(triangleSet);
 	}
 
+	template<typename Triangle>
+	__global__ void TS_UpdateIndex(
+		DArray<Triangle> indices,
+		uint vertexOffset,
+		uint indexOffset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= indices.size() - indexOffset) return;
+
+		Triangle t = indices[indexOffset + tId];
+		t[0] += vertexOffset;
+		t[1] += vertexOffset;
+		t[2] += vertexOffset;
+
+		indices[indexOffset + tId] = t;
+	}
+
+	template<typename TDataType>
+	std::shared_ptr<TriangleSet<TDataType>> TriangleSet<TDataType>::merge(TriangleSet<TDataType>& ts)
+	{
+		auto ret = std::make_shared<TriangleSet<TDataType>>();
+
+		auto& vertices = ret->getPoints();
+		auto& indices = ret->getTriangles();
+
+		uint vNum0 = m_coords.size();
+		uint vNum1 = ts.getPoints().size();
+
+		uint tNum0 = m_triangles.size();
+		uint tNum1 = ts.getTriangles().size();
+
+		vertices.resize(vNum0 + vNum1);
+		indices.resize(tNum0 + tNum1);
+
+		vertices.assign(m_coords, vNum0, 0, 0);
+		vertices.assign(ts.getPoints(), vNum1, vNum0, 0);
+
+		indices.assign(m_triangles, tNum0, 0, 0);
+		indices.assign(ts.getTriangles(), tNum1, tNum0, 0);
+
+		cuExecute(tNum1,
+			TS_UpdateIndex,
+			indices,
+			vNum0,
+			tNum0);
+
+		return ret;
+	}
+
+	template<typename TDataType>
+	bool TriangleSet<TDataType>::isEmpty()
+	{
+		return m_triangles.size() == 0 && EdgeSet<TDataType>::isEmpty();
+	}
+
 	template<typename Coord, typename Triangle>
 	__global__ void TS_SetupVertexNormals(
 		DArray<Coord> normals,
@@ -324,15 +362,12 @@ namespace dyno
 		}
 
 		auto& vert2Tri = getVertex2Triangles();
-		printf("start TS_SetupVertexNormals\n ");
 		cuExecute(vertSize,
 			TS_SetupVertexNormals,
 			vn,
 			this->m_coords,
 			m_triangles,
 			vert2Tri);
-		printf("end TS_SetupVertexNormals\n ");
-
 	}
 
 	template<typename TDataType>

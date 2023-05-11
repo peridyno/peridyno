@@ -2,6 +2,7 @@
 using namespace dyno;
 
 #include "ParticleSystem/initializeParticleSystem.h"
+#include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 #include "initializeModeling.h"
 #include "initializeInteraction.h"
 
@@ -12,6 +13,7 @@ using namespace dyno;
 int main()
 {
 	PaticleSystem::initStaticPlugin();
+	SemiAnalyticalScheme::initStaticPlugin();
 	Modeling::initStaticPlugin();
 	Interaction::initStaticPlugin();
 

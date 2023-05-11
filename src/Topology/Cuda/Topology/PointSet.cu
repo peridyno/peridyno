@@ -17,6 +17,8 @@ namespace dyno
 	template<typename TDataType>
 	PointSet<TDataType>::~PointSet()
 	{
+		m_coords.clear();
+		m_pointNeighbors.clear();
 	}
 
 	template<typename TDataType>
@@ -231,6 +233,19 @@ namespace dyno
 	void PointSet<TDataType>::rotate(Quat<Real> q)
 	{
 		cuExecute(m_coords.size(), PS_Rotate, m_coords, q);
+	}
+
+	template<typename TDataType>
+	bool PointSet<TDataType>::isEmpty()
+	{
+		return m_coords.size() == 0;
+	}
+
+	template<typename TDataType>
+	void PointSet<TDataType>::clear()
+	{
+		m_coords.clear();
+		m_pointNeighbors.clear();
 	}
 
 	DEFINE_CLASS(PointSet);

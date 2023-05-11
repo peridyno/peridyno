@@ -30,6 +30,7 @@ if(PERIDYNO_Qt5_GUI AND PERIDYNO_LIBRARY_HEIGHTFIELD AND PERIDYNO_LIBRARY_PARTIC
             IO 
             ParticleSystem  
             QtGUI
+            GlfwGUI
 			RigidBody
 			GLRenderEngine
 			Peridynamics

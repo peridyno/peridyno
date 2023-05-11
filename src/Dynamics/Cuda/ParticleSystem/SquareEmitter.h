@@ -28,20 +28,23 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SquareEmitter(std::string name = "particleEmitter");
+		SquareEmitter();
 		virtual ~SquareEmitter();
-
-		void generateParticles() override;
 
 		//void advance(Real dt) override;
 	public:
-		DEF_VAR(Real, Width, 0.05, "Emitter width");
-		DEF_VAR(Real, Height, 0.05, "Emitter height");
+		DEF_VAR(Real, Width, 0.1, "Emitter width");
+		DEF_VAR(Real, Height, 0.1, "Emitter height");
 
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, Outline, "Outline of the emitter");
 
 	protected:
 		void resetStates() override;
+
+		void generateParticles() override;
+
+	private:
+		void tranformChanged();
 	};
 
 	IMPLEMENT_TCLASS(SquareEmitter, TDataType)

@@ -3,7 +3,7 @@
 #include "Node.h"
 #include "NodePort.h"
 
-#include "Common.h"
+#include "Format.h"
 
 #include "FInstance.h"
 #include "Field.h"
@@ -64,7 +64,14 @@ namespace Qt
 		}
 		else
 		{
-			result = 1 + mFieldExport.size();
+			if (mNode->canExported())
+			{
+				result = 1 + mFieldExport.size();
+			}
+			else
+			{
+				result = mFieldExport.size();
+			}
 		}
 
 		return result;
@@ -88,16 +95,27 @@ namespace Qt
 			break;
 
 		case PortType::Out:
-			if (portIndex == 0) {
-				//TODO: return more accurate description
-				return NodeDataType{ "port", "port", PortShape::Bullet };
+			if (mNode->canExported())
+			{
+				if (portIndex == 0) {
+					//TODO: return more accurate description
+					return NodeDataType{ "port", "port", PortShape::Bullet };
+				}
+				else {
+					auto& outputFields = this->getOutputFields();
+					std::string str = outputFields[portIndex - 1]->getClassName();
+
+					return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+				}
 			}
-			else {
+			else
+			{
 				auto& outputFields = this->getOutputFields();
-				std::string str = outputFields[portIndex - 1]->getClassName();
+				std::string str = outputFields[portIndex]->getClassName();
 
 				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
 			}
+			
 			break;
 
 		case PortType::None:
@@ -110,7 +128,10 @@ namespace Qt
 	std::shared_ptr<QtNodeData>
 		QtNodeWidget::outData(PortIndex port)
 	{
-		return port == 0 ? std::static_pointer_cast<QtNodeData>(mNodeExport) : std::static_pointer_cast<QtNodeData>(mFieldExport[port - 1]);
+		if (mNode->canExported())
+			return port == 0 ? std::static_pointer_cast<QtNodeData>(mNodeExport) : std::static_pointer_cast<QtNodeData>(mFieldExport[port - 1]);
+		else
+			return std::static_pointer_cast<QtNodeData>(mFieldExport[port]);
 	}
 
 // 	std::shared_ptr<QtNodeData> QtNodeWidget::inData(PortIndex port)
@@ -156,14 +177,23 @@ namespace Qt
 			break;
 
 		case PortType::Out:
-			if (portIndex == 0) {
-				//return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
-				return dyno::FormatBlockPortName("Out");
+			if (mNode->canExported())
+			{
+				if (portIndex == 0) {
+					//return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
+					return dyno::FormatBlockPortName("Out");
+				}
+				else {
+					auto& outputFields = this->getOutputFields();
+
+					return dyno::FormatBlockPortName(outputFields[portIndex - 1]->getObjectName());
+				}
 			}
-			else {
+			else
+			{
 				auto& outputFields = this->getOutputFields();
 
-				return dyno::FormatBlockPortName(outputFields[portIndex - 1]->getObjectName());
+				return dyno::FormatBlockPortName(outputFields[portIndex]->getObjectName());
 			}
 			break;
 
@@ -200,13 +230,22 @@ namespace Qt
 			break;
 
 		case PortType::Out:
-			if (portIndex == 0) {
-				return nodeTip(mNode.get());
+			if (mNode->canExported())
+			{
+				if (portIndex == 0) {
+					return nodeTip(mNode.get());
+				}
+				else {
+					auto& outputFields = this->getOutputFields();
+					return fieldTip(outputFields[portIndex - 1]);
+				}
 			}
-			else {
+			else
+			{
 				auto& outputFields = this->getOutputFields();
-				return fieldTip(outputFields[portIndex - 1]);
+				return fieldTip(outputFields[portIndex]);
 			}
+
 			break;
 
 		case PortType::None:
@@ -275,7 +314,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
+				auto nodeExp = std::dynamic_pointer_cast<QtExportNode>(nodeData);
 
 				if (nodeExp == nullptr)
 					return false;
@@ -293,7 +332,7 @@ namespace Qt
 		{
 			try
 			{
-				auto& fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+				auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
 				if (fieldExp == nullptr)
 					return false;
 
@@ -354,7 +393,6 @@ namespace Qt
 	{
 		modelValidationState = NodeValidationState::Valid;
 	}
-
 
 	std::vector<FBase*>& QtNodeWidget::getOutputFields() const
 	{

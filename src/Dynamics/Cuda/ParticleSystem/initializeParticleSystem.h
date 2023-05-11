@@ -8,8 +8,8 @@ namespace dyno
 	public:
 		static PluginEntry* instance();
 
-	protected:
-		void initializeActions() override;
+		protected:
+			void initializeActions() override;
 
 	private:
 		ParticleSystemInitializer();

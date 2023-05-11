@@ -31,7 +31,7 @@ namespace dyno
 
 		QAction* addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu = nullptr);
 
-		QPushButton* addPushButton(QPixmap& icon, QString text);
+		QPushButton* addPushButton(QPixmap icon, QString text);
 
 		QAction* updateAction() { return mActionUpdate; }
 		QAction* saveAction() { return mActionSave; }

@@ -5,12 +5,15 @@
 namespace dyno
 {
 	GLVisualModule::GLVisualModule()
+		: VisualModule()
 	{
 		this->setName("GLVisualModule");
 
 		this->varMetallic()->setRange(0, 1);
 		this->varRoughness()->setRange(0, 1);
 		this->varAlpha()->setRange(0, 1);
+
+		this->varBaseColor()->setObjectName("Color");
 	}
 
 	GLVisualModule::~GLVisualModule()
@@ -41,7 +44,7 @@ namespace dyno
 		this->changed = clock::now();
 	}
 
-	void GLVisualModule::setColor(const Vec3f& color)
+	void GLVisualModule::setColor(const Color& color)
 	{
 		this->varBaseColor()->setValue(color);
 	}

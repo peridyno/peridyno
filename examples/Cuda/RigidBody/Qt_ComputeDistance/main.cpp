@@ -165,7 +165,7 @@ public:
 
 		auto pointRender = std::make_shared<GLPointVisualModule>();
 		pointRender->varPointSize()->setValue(0.02);
-		pointRender->varBaseColor()->setValue(Vec3f(1.0f, 0.0f, 0.0f));
+		pointRender->varBaseColor()->setValue(Color(1.0f, 0.0f, 0.0f));
 		computeDistance->outEdgeSet()->connect(pointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender);
 

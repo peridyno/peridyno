@@ -27,13 +27,13 @@ namespace dyno
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
 		this->varPointSelectedSize()->connect(pointRender1->varPointSize());
-		pointRender1->setColor(Vec3f(1.0f, 0, 0));
+		pointRender1->setColor(Color(1.0f, 0.0f, 0.0f));
 		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
 		this->varPointOtherSize()->connect(pointRender2->varPointSize());
-		pointRender2->setColor(Vec3f(0, 0, 1.0f));
+		pointRender2->setColor(Color(0.0f, 0.0f, 1.0f));
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 
