@@ -111,14 +111,11 @@ namespace dyno
 		auto lengthX = this->varLengthX()->getData();
 		auto lengthZ = this->varLengthZ()->getData();
 
-
-
 		Vec3f length = Vec3f(lengthX,1,lengthZ);
 		Vec3i segments = Vec3i(segmentX, 1, segmentZ);
 
-		length[0] *= scale[0];
-		length[1] *= scale[1];
-		length[2] *= scale[2];
+		lengthX *= scale[0];
+		lengthZ *= scale[2];
 
 		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
 			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
@@ -126,48 +123,27 @@ namespace dyno
 
 		q.normalize();
 
-		TGrid3D<Real> grid = TGrid3D<Real>(length,segments);
-		grid.length = length * scale;
-		grid.segment = segments;
-		grid.center = center;
-		grid.rotation = q;
-
-		this->outGrid()->setValue(grid);
-
-
-		uint nyz = 2 * (segments[1] + segments[2]);
-
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Quad> quads;
 
-		Real dx = length[0] / segments[0];
-		Real dy = length[1] / segments[1];
-		Real dz = length[2] / segments[2];
-
-		std::map<Index2DPlane, uint> indexTop;
-		std::map<Index2DPlane, uint> indexBottom;
+		Real dx = lengthX / segmentX;
+		Real dz = lengthZ / segmentZ;
 
 		//A lambda function to rotate a vertex
 		auto RV = [&](const Coord& v)->Coord {
-			return center + q.rotate(v - center);
+			return center + q.rotate(v);
 		};
 
 
-		uint counter = 0;
 		Real x, y, z;
-		
-
 		//Bottom
-		y = center[1];
-		for (int nx = 0; nx < segments[0]+1; nx++)
+		for (int nz = 0; nz <= segmentZ; nz++)
 		{
-			for (int nz = 0; nz < segments[2]+1; nz++)
+			for (int nx = 0; nx <= segmentX; nx++)
 			{
-				indexBottom[Index2DPlane(nx, nz)] = vertices.size();
-
-				x = nx * dx - length[0] / 2;
-				z = nz * dz - length[2] / 2;
-				vertices.push_back(RV(Coord(x, y, z)));
+				x = nx * dx - lengthX / 2;
+				z = nz * dz - lengthZ / 2;
+				vertices.push_back(RV(Coord(x, Real(0), z)));
 			}
 		}
 
@@ -176,14 +152,14 @@ namespace dyno
 		int v2;
 		int v3;
 
-		for (int nx = 0; nx < segments[0]; nx++)
+		for (int nz = 0; nz < segmentZ; nz++)
 		{
-			for (int nz = 0; nz < segments[2]; nz++)
+			for (int nx = 0; nx < segmentX; nx++)
 			{
-				v0 = indexBottom[Index2DPlane(nx, nz)];
-				v1 = indexBottom[Index2DPlane(nx + 1, nz)];
-				v2 = indexBottom[Index2DPlane(nx + 1, nz + 1)];
-				v3 = indexBottom[Index2DPlane(nx, nz + 1)];
+				v0 = nx + nz * (segmentX + 1);
+				v1 = nx + 1 + nz * (segmentX + 1);;
+				v2 = nx + 1 + (nz + 1) * (segmentX + 1);;
+				v3 = nx + (nz + 1) * (segmentX + 1);;
 
 				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
 			}
@@ -192,11 +168,8 @@ namespace dyno
 
 		quadSet->setPoints(vertices);
 		quadSet->setQuads(quads);
-
-		//quadSet->updateTriangles();
 		quadSet->update();
 
-		indexTop.clear();
 		vertices.clear();
 		quads.clear();
 	

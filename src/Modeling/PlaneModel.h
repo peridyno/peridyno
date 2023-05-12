@@ -46,8 +46,6 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
 
-		DEF_VAR_OUT(TGrid3D<Real>, Grid,  "");
-
 	protected:
 		void resetStates() override;
 
