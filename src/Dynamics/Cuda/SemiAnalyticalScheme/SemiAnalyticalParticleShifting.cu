@@ -1,12 +1,41 @@
-#include "ParticleShifting.h"
-#include "Node.h"
+#include "SemiAnalyticalParticleShifting.h"
+
 #include "SemiAnalyticalSummationDensity.h"
-#include "Collision/NeighborPointQuery.h"
+
 #include "IntersectionArea.h"
 
 namespace dyno {
 
-	IMPLEMENT_TCLASS(ParticleShifting, TDataType)
+	IMPLEMENT_TCLASS(SemiAnalyticalParticleShifting, TDataType)
+
+	template<typename TDataType>
+	SemiAnalyticalParticleShifting<TDataType>::SemiAnalyticalParticleShifting()
+		: ParticleApproximation<TDataType>()
+	{
+		this->varInertia()->setValue(Real(0.1));
+		this->varBulk()->setValue(Real(0.5));
+		this->inSmoothingLength()->setValue(Real(0.0125));//0.0125
+		this->inSamplingDistance()->setValue(Real(0.005));
+
+		mCalculateDensity = std::make_shared<SemiAnalyticalSummationDensity<TDataType>>();
+		this->inSmoothingLength()->connect(mCalculateDensity->inSmoothingLength());
+		this->inPosition()->connect(mCalculateDensity->inPosition());
+		this->inNeighborIds()->connect(mCalculateDensity->inNeighborIds());
+		this->inNeighborTriIds()->connect(mCalculateDensity->inNeighborTriIds());
+		this->inTriangleInd()->connect(mCalculateDensity->inTriangleInd());
+		this->inTriangleVer()->connect(mCalculateDensity->inTriangleVer());
+		this->varRestDensity()->connect(mCalculateDensity->varRestDensity());
+
+		mCalculateDensity->inSamplingDistance()->setValue(Real(0.005));
+	};
+
+	template<typename TDataType>
+	SemiAnalyticalParticleShifting<TDataType>::~SemiAnalyticalParticleShifting()
+	{
+		mLambda.clear();
+		mDeltaPos.clear();
+		mPosBuf.clear();
+	};
 
 	__device__ inline Real KernSpikyGradient(const Real r, const Real h)
 	{
@@ -56,26 +85,23 @@ namespace dyno {
 		return w / r / r;
 	}
 
-
-
 	template <typename Real, typename Coord>
-	__global__ void PR_ComputeC_boundary(
-		DArray<Coord> position,
-		DArray<Coord> Adhesion,
+	__global__ void SAPS_ComputeBoundaryGradient(
+		DArray<Coord> adhesion,
 		DArray<Real> totalW,
-		DArray<Coord> TriDir,
+		DArray<Coord> dir,
+		DArray<Coord> position,
 		DArrayList<int> neighbors,
 		DArrayList<int> neighborTri,
 		DArray<Triangle> m_triangle_index,
 		DArray<Coord> positionTri,
-		Real smoothingLength,
-		Real energyDepth)
+		Real smoothingLength)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
 
 		Coord pos_i = position[pId];
-		Coord Tri_direction(0);//normal direction of boundaries£¨weighted sum of the triangle mesh norm£©
+		Coord Tri_direction(0);
 		Coord numerator(0);
 
 		List<int>& nbrIds_i = neighbors[pId];
@@ -83,7 +109,6 @@ namespace dyno {
 
 		List<int>& nbrTriIds_i = neighborTri[pId];
 		int nbSizeTri = nbrTriIds_i.size();
-		
 
 		Real AreaB;
 		for (int ne = 0; ne < nbSizeTri; ne++)
@@ -161,21 +186,19 @@ namespace dyno {
 					* AreaSum * n_PL.dot(Min_Pt)//£¨n_s¡¤d_n£©*As
 					/ AreaB;//A0
 
-				
 				numerator += EP_ij * boundNorm;
 				totalW[pId] += totalWeight;//denominator
 
 			}
 		}
 		
-		if (Tri_direction.norm() > EPSILON)
-		{
+		if (Tri_direction.norm() > EPSILON) {
 			Tri_direction /= Tri_direction.norm();
 		}
 		else  Tri_direction = Coord(0);
 
-		TriDir[pId] = Tri_direction;
-		Adhesion[pId] = numerator;
+		dir[pId] = Tri_direction;
+		adhesion[pId] = numerator;
 	}
 
 	template <typename Real, typename Coord>
@@ -195,7 +218,6 @@ namespace dyno {
 		Real surfaceTension,
 		Real adhesion)
 	{
-
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;
 		if (!attArr[pId].isDynamic()) return;
@@ -222,24 +244,13 @@ namespace dyno {
 		Real total_weight2 = 0.0f;
 		Coord grad3(0);
 		Real total_weight3 = 0.0f;
-		Coord grad4(0);
-		Real total_weight4(0);
-		
-		if (totalW.size() > 0)
-			total_weight4 = totalW[pId];
 
-		if (Adhesion[pId].norm() > 0 && Adhesion.size() > 0)
-		{
-			grad4 = Adhesion[pId];
-		}
-
-		List<int>& nbrIds_i = neighbors[pId];
-		int nbSize = nbrIds_i.size();
-
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
 
 		for (int ne = 0; ne < nbSize; ne++)
 		{
-			int j = nbrIds_i[ne];
+			int j = list_i[ne];
 			Coord pos_j = curPos[j];
 			Real r = (pos_i - pos_j).norm();
 
@@ -259,13 +270,29 @@ namespace dyno {
 		//printf("totalW: %f\n", total_weight4);
 		total_weight2 = total_weight2 < EPSILON ? 1.0f : total_weight2;
 		total_weight3 = total_weight3 < EPSILON ? 1.0f : total_weight3;
-		total_weight4 = total_weight4 < EPSILON ? 1.0f : total_weight4;
-
 		
 		grad2 /= total_weight2;
 		grad3 /= total_weight3;
-		grad4 /= total_weight4;
 		
+		
+		//bulk energy
+		for (int ne = 0; ne < nbSize; ne++)
+		{
+			int j = list_i[ne];
+			Coord pos_j = curPos[j];
+			Real r = (pos_i - pos_j).norm();
+
+			if (r > EPSILON)
+			{
+				Real weight2 = -mass * KernSpikyGradient(r, h);
+				Coord g2_ij = (weight2 / total_weight2) * (pos_i - pos_j) * (1.0f / r);
+				atomicAdd(&grads[j][0], -w2 * g2_ij[0]);
+				atomicAdd(&grads[j][1], -w2 * g2_ij[1]);
+				atomicAdd(&grads[j][2], -w2 * g2_ij[2]);
+			}
+		}
+
+		//Surface tension
 		Coord nGrad3;
 		if (grad3.norm() > EPSILON)
 		{
@@ -273,38 +300,28 @@ namespace dyno {
 			nGrad3 = grad3 / temp;
 		}
 
-
 		Real energy = grad3.dot(grad3);
+		
+		//Adhesion
+		Coord grad4(0);
+		Real total_weight4(0);
+
+		if (totalW.size() > 0)
+			total_weight4 = totalW[pId];
+
+		if (Adhesion[pId].norm() > 0 && Adhesion.size() > 0) {
+			grad4 = Adhesion[pId];
+		}
+
+		total_weight4 = total_weight4 < EPSILON ? 1.0f : total_weight4;
+		grad4 /= total_weight4;
 
 		Coord nGrad4;
-		//printf("gnorm: %f\n", grad4.norm());
-		if (grad4.norm() > 0)
-		{
-			Real temp2 = grad4.norm();
-			nGrad4 = grad4 / temp2;
+		if (grad4.norm() > 0) {
+			nGrad4 = grad4 / grad4.norm();
 		}
 
-		Real energy_solid(0);
-		if (grad4.norm() > 0)
-			energy_solid = grad4.dot(grad4);
-
-
-		for (int ne = 0; ne < nbSize; ne++)
-		{
-			int j = nbrIds_i[ne];
-			Coord pos_j = curPos[j];
-			Real r = (pos_i - pos_j).norm();
-
-			if (r > EPSILON)
-			{
-				Real weight2 = -mass * KernSpikyGradient(r, h);
-				Coord g2_ij = (weight2 / total_weight2)*(pos_i - pos_j) * (1.0f / r);
-				atomicAdd(&grads[j][0], -w2 * g2_ij[0]);
-				atomicAdd(&grads[j][1], -w2 * g2_ij[1]);
-				atomicAdd(&grads[j][2], -w2 * g2_ij[2]);
-			}
-		}
-		
+		Real energy_solid = grad4.dot(grad4);
 		Coord shift4 = w4 * energy_solid*nGrad4;
 		
 		Real max_ax = abs(shift4[0]);
@@ -325,7 +342,7 @@ namespace dyno {
 	}
 
 	template <typename Coord>
-	__global__ void PR_AddDPosition(
+	__global__ void SAPS_UpdatePosition(
 		DArray<Coord> grads,
 		DArray<Coord> curPos,
 		DArray<Attribute> attArr)
@@ -333,19 +350,19 @@ namespace dyno {
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;
 		if (!attArr[pId].isDynamic()) return;
+		
 		curPos[pId] += grads[pId];
 	}
 
-	template <typename Coord>
-	__global__ void PR_UpdateVelocity(
+	template <typename Real, typename Coord>
+	__global__ void SAPS_UpdateVelocity(
 		DArray<Coord> velArr,
 		DArray<Coord> curArr,
 		DArray<Coord> originArr,
 		DArray<Attribute> attArr,
 		DArray<Coord> TriDir,//normal of boundary
-		float dt)
+		Real dt)
 	{
-
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velArr.size()) return;
 
@@ -364,7 +381,7 @@ namespace dyno {
 			boundary_vec[1] = 1.0f - abs(boundary_vec[1]);
 			boundary_vec[2] = 1.0f - abs(boundary_vec[2]);
 
-			velArr[pId] += 1.0f*(curArr[pId] - originArr[pId]) / dt;
+			velArr[pId] += (curArr[pId] - originArr[pId]) / dt;
 
 			//*********boundary friction part
 			if (boundary_vec.norm() > 0) {
@@ -380,48 +397,12 @@ namespace dyno {
 					velArr[pId][2] *= boundary_vec[2];
 				else
 					velArr[pId][2] *= fr;
-
-				//printf("boun_vec: %f, %f, %f,  dis: %f\n", boundary_vec[0], boundary_vec[1], boundary_vec[2], TriDis[pId]);
 			}
-
-
 		}
 	}
 
 	template<typename TDataType>
-	ParticleShifting<TDataType>::ParticleShifting()
-		: ParticleApproximation<TDataType>()
-		, mIterationNumber(10)
-		, mEnergyDepth(0.003)//0.003
-	{
-		this->varInertia()->setValue(Real(0.1));
-		this->varBulk()->setValue(Real(0.5));
-		this->inSmoothingLength()->setValue(Real(0.0125));//0.0125
-		this->inSamplingDistance()->setValue(Real(0.005));
-
-		mCalculateDensity = std::make_shared<SemiAnalyticalSummationDensity<TDataType>>();
-		this->inSmoothingLength()->connect(mCalculateDensity->inSmoothingLength());
-		inPosition()->connect(mCalculateDensity->inPosition());
-		inNeighborIds()->connect(mCalculateDensity->inNeighborIds());
-		inNeighborTriIds()->connect(mCalculateDensity->inNeighborTriIds());
-		inTriangleInd()->connect(mCalculateDensity->inTriangleInd());
-		inTriangleVer()->connect(mCalculateDensity->inTriangleVer());
-		varRestDensity()->connect(mCalculateDensity->varRestDensity());
-
-		mCalculateDensity->inSamplingDistance()->setValue(Real(0.005));
-
-	};
-
-	template<typename TDataType>
-	ParticleShifting<TDataType>::~ParticleShifting()
-	{
-		mLambda.clear();
-		mDeltaPos.clear();
-		mPosBuf.clear();
-	};
-
-	template<typename TDataType>
-	void ParticleShifting<TDataType>::compute()
+	void SemiAnalyticalParticleShifting<TDataType>::compute()
 	{
 		Real dt = this->inTimeStep()->getData();
 
@@ -446,27 +427,26 @@ namespace dyno {
 
 		mPosBuf.assign(inPosition()->getData());
 
-		int it = 0;
-		while (it < mIterationNumber)
+		int iter = 0;
+		uint maxIter = this->varInterationNumber()->getData();
+		while (iter++ < maxIter)
 		{
 			mDeltaPos.reset();
 
 			mCalculateDensity->update();
 
 			if (this->inNeighborTriIds()->getData().size() > 0) {
-
 				cuExecute(num,
-					PR_ComputeC_boundary,
-					this->inPosition()->getData(),
+					SAPS_ComputeBoundaryGradient,
 					mAdhesionEP,
 					mTotalW,
 					mBoundaryDir,
+					this->inPosition()->getData(),
 					this->inNeighborIds()->getData(),
 					this->inNeighborTriIds()->getData(),
 					this->inTriangleInd()->getData(),
 					this->inTriangleVer()->getData(),
-					this->inSmoothingLength()->getData(),
-					mEnergyDepth);
+					this->inSmoothingLength()->getData());
 			}
 
 			cuExecute(num,
@@ -487,24 +467,21 @@ namespace dyno {
 				this->varAdhesionIntensity()->getData());
 
 			cuExecute(num,
-				PR_AddDPosition,
+				SAPS_UpdatePosition,
 				mDeltaPos,
 				this->inPosition()->getData(),
 				this->inAttribute()->getData());
-
-			it++;
 		}
 
 		cuExecute(num,
-			PR_UpdateVelocity,
+			SAPS_UpdateVelocity,
 			this->inVelocity()->getData(),
 			this->inPosition()->getData(),
 			mPosBuf,
 			this->inAttribute()->getData(),
 			mBoundaryDir,
 			dt);
-
 	};
 
-	DEFINE_CLASS(ParticleShifting);
+	DEFINE_CLASS(SemiAnalyticalParticleShifting);
 }

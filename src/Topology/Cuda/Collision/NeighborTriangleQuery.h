@@ -8,21 +8,25 @@ namespace dyno
 	template<typename TDataType> class CollisionDetectionBroadPhase;
 
 	template<typename TDataType>
-	class NeighborTriQueryOctree : public ComputeModule
+	class NeighborTriangleQuery : public ComputeModule
 	{
-		DECLARE_TCLASS(NeighborTriQueryOctree, TDataType)
+		DECLARE_TCLASS(NeighborTriangleQuery, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
 
-		NeighborTriQueryOctree();
-		~NeighborTriQueryOctree() override;
+		NeighborTriangleQuery();
+		~NeighborTriangleQuery() override;
 		
 		void compute() override;
 
 	public:
-		//DEF_VAR(SizeLimit, uint, 0, "Maximum number of neighbors");
+		DECLARE_ENUM(Spatial,
+			BVH = 0,
+			OCTREE = 1);
+
+		DEF_ENUM(Spatial, Spatial, Spatial::BVH, "");
 
 		/**
 		* @brief Search radius
@@ -53,11 +57,11 @@ namespace dyno
 		DEF_ARRAYLIST_OUT(int, NeighborIds, DeviceType::GPU, "Return neighbor ids");
 
 	private:
-		DArray<AABB> m_queryAABB;
-		DArray<AABB> m_queriedAABB;
+		DArray<AABB> mQueryAABB;
+		DArray<AABB> mQueriedAABB;
 
-		Reduction<uint> m_reduce;
+		Reduction<uint> mReduce;
 
-		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
+		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> mBroadPhaseCD;
 	};
 }

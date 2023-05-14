@@ -44,7 +44,7 @@ namespace dyno
 	template <typename TDataType>
 	class DensityPBD;
 	template<typename TDataType>
-	class NeighborTriQueryOctree;
+	class NeighborTriangleQuery;
 	template <typename TDataType>
 	class TriangularMeshConstraint;
 	template <typename TDataType>
@@ -145,6 +145,6 @@ namespace dyno
 		std::shared_ptr<ParticleIntegrator<TDataType>> m_integrator;            //!< integrator, update particle velocity and position
 		std::shared_ptr<NeighborPointQuery<TDataType>>      m_nbrQueryPoint;         //!< neighbor list for particle pairs
 
-		std::shared_ptr<NeighborTriQueryOctree<TDataType>> m_nbrQueryTri;       //!< neighbor list for particle-triangle
+		std::shared_ptr<NeighborTriangleQuery<TDataType>> m_nbrQueryTri;       //!< neighbor list for particle-triangle
 	};
 }  // namespace dyno

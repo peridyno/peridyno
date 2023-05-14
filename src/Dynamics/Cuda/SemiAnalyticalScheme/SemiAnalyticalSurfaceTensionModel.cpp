@@ -6,10 +6,10 @@
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
 #include "Collision/NeighborPointQuery.h"
-#include "Collision/NeighborTriQueryOctree.h"
+#include "Collision/NeighborTriangleQuery.h"
 #include "TriangularMeshConstraint.h"
 //#include "ParticleShifting.h"
-#include "ParticleShifting.h"
+#include "SemiAnalyticalParticleShifting.h"
 #include "ComputeParticleAnisotropy.h"
 
 namespace dyno
@@ -37,7 +37,7 @@ namespace dyno
 		this->pushModule(nbrQuery);
 
 		//triangle neighbor
-		auto nbrQueryTri = std::make_shared<NeighborTriQueryOctree<TDataType>>();
+		auto nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		this->varSmoothingLength()->connect(nbrQueryTri->inRadius());
 		this->inPosition()->connect(nbrQueryTri->inPosition());
 		this->inTriangleVer()->connect(nbrQueryTri->inTriPosition());
@@ -65,7 +65,7 @@ namespace dyno
 		this->pushModule(viscosity);
 
 		//particle shifting
-		auto pshiftModule = std::make_shared<ParticleShifting<TDataType>>();
+		auto pshiftModule = std::make_shared<SemiAnalyticalParticleShifting<TDataType>>();
 		this->inTimeStep()->connect(pshiftModule->inTimeStep());
 		this->inPosition()->connect(pshiftModule->inPosition());
 		this->inVelocity()->connect(pshiftModule->inVelocity());

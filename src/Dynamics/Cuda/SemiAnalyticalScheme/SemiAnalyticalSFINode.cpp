@@ -10,9 +10,9 @@
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
 #include "Collision/NeighborPointQuery.h"
-#include "Collision/NeighborTriQueryOctree.h"
+#include "Collision/NeighborTriangleQuery.h"
 
-#include "ParticleShifting.h"
+#include "SemiAnalyticalParticleShifting.h"
 
 #include "Auxiliary/DataSource.h"
 
@@ -24,26 +24,9 @@ namespace dyno
 	SemiAnalyticalSFINode<TDataType>::SemiAnalyticalSFINode()
 		: Node()
 	{
-//  		auto semi = std::make_shared<SemiAnalyticalSurfaceTensionModel<DataType3f>>();
-// 		
-// 		this->stateTimeStep()->connect(semi->inTimeStep());
-// 
-// 		this->statePosition()->connect(semi->inPosition());
-// 		this->stateVelocity()->connect(semi->inVelocity());
-// 		this->stateForceDensity()->connect(semi->inForceDensity());
-// 		this->stateAttribute()->connect(semi->inAttribute());
-// 
-// 		this->stateTriangleIndex()->connect(semi->inTriangleInd());
-// 		this->stateTriangleVertex()->connect(semi->inTriangleVer());
-// 
-// 		this->animationPipeline()->pushModule(semi);
-
 		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
 		smoothingLength->varValue()->setValue(Real(0.012));
 		this->animationPipeline()->pushModule(smoothingLength);
-
-
-		//this->varSmoothingLength()->setValue(Real(0.012));//0.006
 
 		//integrator
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
@@ -60,7 +43,7 @@ namespace dyno
 		this->animationPipeline()->pushModule(nbrQuery);
 
 		//triangle neighbor
-		auto nbrQueryTri = std::make_shared<NeighborTriQueryOctree<TDataType>>();
+		auto nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		smoothingLength->outFloating()->connect(nbrQueryTri->inRadius());
 		this->statePosition()->connect(nbrQueryTri->inPosition());
 		this->stateTriangleVertex()->connect(nbrQueryTri->inTriPosition());
@@ -88,7 +71,7 @@ namespace dyno
 		this->animationPipeline()->pushModule(viscosity);
 
 		//particle shifting
-		auto pshiftModule = std::make_shared<ParticleShifting<TDataType>>();
+		auto pshiftModule = std::make_shared<SemiAnalyticalParticleShifting<TDataType>>();
 		this->stateTimeStep()->connect(pshiftModule->inTimeStep());
 		this->statePosition()->connect(pshiftModule->inPosition());
 		this->stateVelocity()->connect(pshiftModule->inVelocity());
