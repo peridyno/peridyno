@@ -14,7 +14,7 @@ namespace dyno
 
 	template<typename TDataType>
 	ElastoplasticityModule<TDataType>::ElastoplasticityModule()
-		: ElasticityModule<TDataType>()
+		: LinearElasticitySolver<TDataType>()
 	{
 		this->attachField(&m_c, "c", "cohesion!", false);
 		this->attachField(&m_phi, "phi", "friction angle!", false);

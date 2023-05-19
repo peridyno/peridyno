@@ -1,6 +1,6 @@
 #include "Peridynamics.h"
 
-#include "ElasticityModule.h"
+#include "LinearElasticitySolver.h"
 
 //ParticleSystem
 #include "ParticleSystem/Module/ParticleIntegrator.h"
@@ -28,13 +28,13 @@ namespace dyno
 		this->inPosition()->connect(m_nbrQuery->inPosition());
 		this->pushModule(m_nbrQuery);
 
-		auto m_elasticity = std::make_shared<ElasticityModule<TDataType>>();
+		auto m_elasticity = std::make_shared<LinearElasticitySolver<TDataType>>();
 		this->varHorizon()->connect(m_elasticity->inHorizon());
 		this->inTimeStep()->connect(m_elasticity->inTimeStep());
 		this->inPosition()->connect(m_elasticity->inPosition());
 		this->inVelocity()->connect(m_elasticity->inVelocity());
 		this->inRestShape()->connect(m_elasticity->inRestShape());
-		m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
+		//m_nbrQuery->outNeighborIds()->connect(m_elasticity->inNeighborIds());
 		this->pushModule(m_elasticity);
 	}
 

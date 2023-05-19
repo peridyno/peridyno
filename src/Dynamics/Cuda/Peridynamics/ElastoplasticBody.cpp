@@ -9,6 +9,8 @@
 #include "Module/Peridynamics.h"
 #include "Module/ElastoplasticityModule.h"
 
+#include "Auxiliary/DataSource.h"
+
 #include "ParticleSystem/Module/PositionBasedFluidModel.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/DensityPBD.h"
@@ -24,22 +26,23 @@ namespace dyno
 	ElastoplasticBody<TDataType>::ElastoplasticBody()
 		: ParticleSystem<TDataType>()
 	{
-		m_horizon.setValue(0.0085);
+		auto horizon = std::make_shared<FloatingNumber<TDataType>>();
+		horizon->varValue()->setValue(Real(0.0085));
 
-		m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		auto m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(m_integrator->inTimeStep());
 		this->statePosition()->connect(m_integrator->inPosition());
 		this->stateVelocity()->connect(m_integrator->inVelocity());
 		this->stateForce()->connect(m_integrator->inForceDensity());
 		this->animationPipeline()->pushModule(m_integrator);
 		
-		m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		m_horizon.connect(m_nbrQuery->inRadius());
+		auto m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+		horizon->outFloating()->connect(m_nbrQuery->inRadius());
 		this->statePosition()->connect(m_nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(m_nbrQuery);
 
-		m_plasticity = std::make_shared<ElastoplasticityModule<TDataType>>();
-		m_horizon.connect(m_plasticity->inHorizon());
+		auto m_plasticity = std::make_shared<ElastoplasticityModule<TDataType>>();
+		horizon->outFloating()->connect(m_plasticity->inHorizon());
 		this->stateTimeStep()->connect(m_plasticity->inTimeStep());
 		this->statePosition()->connect(m_plasticity->inPosition());
 		this->stateVelocity()->connect(m_plasticity->inVelocity());
@@ -47,10 +50,10 @@ namespace dyno
 		m_nbrQuery->outNeighborIds()->connect(m_plasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(m_plasticity);
 
-		m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
+		auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
 		m_visModule->varViscosity()->setValue(Real(1));
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
-		m_horizon.connect(m_visModule->inSmoothingLength());
+		horizon->outFloating()->connect(m_visModule->inSmoothingLength());
 		this->statePosition()->connect(m_visModule->inPosition());
 		this->stateVelocity()->connect(m_visModule->inVelocity());
 		m_nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());

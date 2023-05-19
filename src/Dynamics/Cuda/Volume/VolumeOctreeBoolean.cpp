@@ -17,6 +17,20 @@ namespace dyno
 	VolumeOctreeBoolean<TDataType>::VolumeOctreeBoolean()
 		: VolumeOctree<TDataType>()
 	{
+		auto connect = std::make_shared<FCallBackFunc>(
+			[=]() {
+				auto vol0 = this->getOctreeA();
+				auto vol1 = this->getOctreeB();
+				if (vol0 != nullptr && vol1 != nullptr)
+				{
+					vol0->setVisible(false);
+					vol1->setVisible(false);
+				}
+			}
+		);
+
+		this->importOctreeA()->attach(connect);
+		this->importOctreeB()->attach(connect);
 	}
 
 	template<typename TDataType>

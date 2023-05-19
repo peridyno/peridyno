@@ -8,10 +8,6 @@ file(
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 )
 
-if(${LIB_NAME} STREQUAL "IO")
-    list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/tinyxml/tinyxml2.cpp")
-endif()
-
 if(WIN32)
     add_library(${LIB_NAME} SHARED ${LIB_SRC})
 elseif(UNIX)

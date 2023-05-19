@@ -79,7 +79,7 @@ namespace dyno
 		CArray<Coord> c_point04;
 		std::vector<TopologyModule::Triangle> triangle;
 		std::vector<Coord>point;
-		printf("初始化变量\n");
+		printf("Initial\n");
 
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 		printf("auto triangleSet\n");

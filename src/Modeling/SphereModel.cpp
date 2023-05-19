@@ -12,7 +12,7 @@ namespace dyno
 	SphereModel<TDataType>::SphereModel()
 		: ParametricModel<TDataType>()
 	{
-		this->varRadius()->setRange(0.001f, 10.0f);
+		this->varRadius()->setRange(0.001f, 100.0f);
 
 		this->varTheta()->setRange(0.001f, 1.5f);
 
@@ -42,6 +42,9 @@ namespace dyno
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
+
+		this->stateTriangleSet()->promoteOuput();
+
 	}
 
 	template<typename TDataType>
@@ -106,6 +109,8 @@ namespace dyno
 
 		auto mode = this->varSphereMode()->getData();
 
+		if (row <= 5) { printf("Invalid Row Values!\n"); return; }
+		if (columns <= 5) { printf("Invalid Column Values!\n");  return; }
 
 		//radius *= (sqrt(scale[0] * scale[0] + scale[1] * scale[1] + scale[2] * scale[2]));
 
@@ -300,6 +305,7 @@ namespace dyno
 			int fortriNum;
 			if (row % 2 == 0) { fortriNum = (row - 4) / 2; }
 			else { fortriNum = (row - 3) / 2; }
+			printf("fortrinum:%d\n", fortriNum);
 			for (int x = 0; x < fortriNum; x++)//(row - 2)
 			{
 				for (int i = 0; i < columns; i++)
@@ -385,26 +391,27 @@ namespace dyno
 						}
 					}
 				}
-				//中段连接处
-
-					for (int i = 0; i < columns; i++)
-					{
-						int temp = (fortriNum + 1) * columns;
-						if ((i + 1) % columns == 0) 
-						{
-							triangle.push_back(TopologyModule::Triangle(temp + i, i - columns + 1, i));
-							triangle.push_back(TopologyModule::Triangle(temp + i - columns + 1, i - columns + 1, temp + i));
-						}
-						else 
-						{
-							triangle.push_back(TopologyModule::Triangle(temp + i, i + 1, i));
-							triangle.push_back(TopologyModule::Triangle(temp + 1 + i, i + 1, temp + i));
-
-						}
-					}
+				
 
 			}
+			//中段连接处
+			printf("columns:%d\n", columns);
 
+			for (int i = 0; i < columns; i++)
+			{
+				int temp = (fortriNum + 1) * columns;
+				if ((i + 1) % columns == 0)
+				{
+					triangle.push_back(TopologyModule::Triangle(temp + i, i - columns + 1, i));
+					triangle.push_back(TopologyModule::Triangle(temp + i - columns + 1, i - columns + 1, temp + i));
+				}
+				else
+				{
+					triangle.push_back(TopologyModule::Triangle(temp + i, i + 1, i));
+					triangle.push_back(TopologyModule::Triangle(temp + 1 + i, i + 1, temp + i));
+
+				}
+			}
 		}
 
 		//变换

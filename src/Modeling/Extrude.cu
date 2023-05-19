@@ -56,7 +56,7 @@ namespace dyno
 		//auto end_segment = this->varEndSegment()->getData();
 
 		int pointsize = this->inPointSet()->getData().getPointSize();
-		std::cout << "输入点个数： " << pointsize << std::endl;
+		std::cout << "Point number： " << pointsize << std::endl;
 
 
 		Real PI = 3.1415926535;

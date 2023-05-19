@@ -19,7 +19,6 @@
 
 #include "Topology/QuadSet.h"
 
-#include "GLSurfaceVisualModule.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -43,6 +42,8 @@ namespace dyno
 		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");
 
 		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
+
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 

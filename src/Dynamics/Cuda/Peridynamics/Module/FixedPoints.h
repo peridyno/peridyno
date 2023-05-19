@@ -19,6 +19,8 @@ namespace dyno {
 
 		void clear();
 
+	protected:
+		
 		void constrain() override;
 
 		void constrainPositionToPlane(Coord pos, Coord dir);
@@ -27,12 +29,19 @@ namespace dyno {
 		/**
 		* @brief Particle position
 		*/
-		DeviceArrayField<Coord> m_position;
+		//DeviceArrayField<Coord> m_position;
 
 		/**
 		* @brief Particle velocity
 		*/
-		DeviceArrayField<Coord> m_velocity;
+		//DeviceArrayField<Coord> m_velocity;
+
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
+
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+
+		DeviceArrayField<int> FixedIds;
+		DeviceArrayField<Coord> FixedPos;
 
 	protected:
 		virtual bool initializeImpl() override;

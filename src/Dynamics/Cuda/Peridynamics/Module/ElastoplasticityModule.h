@@ -10,14 +10,14 @@
  * 
  */
 #pragma once
-#include "ElasticityModule.h"
+#include "LinearElasticitySolver.h"
 
 #include "ParticleSystem/Module/DensityPBD.h"
 
 namespace dyno {
 
 	template<typename TDataType>
-	class ElastoplasticityModule : public ElasticityModule<TDataType>
+	class ElastoplasticityModule : public LinearElasticitySolver<TDataType>
 	{
 		DECLARE_TCLASS(ElastoplasticityModule, TDataType)
 	public:
@@ -48,6 +48,8 @@ namespace dyno {
 
 		void enableIncompressibility();
 		void disableIncompressibility();
+
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
 	protected:
 		inline Real computeA()

@@ -454,6 +454,8 @@ bool Node::connect(NodePort* nPort)
 		return false;
 	}
 
+	nPort->notify();
+
 	return this->appendExportNode(nPort);
 }
 

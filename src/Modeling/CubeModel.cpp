@@ -14,6 +14,8 @@ namespace dyno
 
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
+		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
@@ -33,7 +35,8 @@ namespace dyno
 		this->varSegments()->attach(callback);
 		this->varLength()->attach(callback);
 
-		this->stateQuadSet()->promoteOuput();
+	 	this->stateQuadSet()->promoteOuput();
+		this->stateTriangleSet()->promoteOuput();
 	}
 
 	struct Index2D
@@ -256,7 +259,19 @@ namespace dyno
 		indexTop.clear();
 		vertices.clear();
 		quads.clear();
-	
+
+
+		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateQuadSet()->getDataPtr());
+		auto TriangleSet = this->stateTriangleSet()->getDataPtr();
+		DArray<Coord>triP;
+		DArray<TopologyModule::Triangle>triT;
+		triP.assign(triSet->getPoints());
+		triT.assign(triSet->getTriangles());
+
+		TriangleSet->setPoints(triP);
+		TriangleSet->setTriangles(triT);
+		TriangleSet->update();
+
 	}
 
 

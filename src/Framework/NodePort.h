@@ -21,6 +21,7 @@
 namespace dyno {
 
 	class Node;
+	class FCallBackFunc;
 
 
 	enum NodePortType
@@ -57,10 +58,15 @@ namespace dyno {
 
 		virtual void clear();
 
+		void attach(std::shared_ptr<FCallBackFunc> func);
+
 	protected:
 		virtual bool addNode(Node* node) = 0;
 
 		virtual bool removeNode(Node* node) = 0;
+
+		//To call all callback function if connected
+		virtual void notify();
 
 		std::vector<Node*> m_nodes;
 
@@ -71,6 +77,8 @@ namespace dyno {
 		std::string m_name;
 		std::string m_description;
 		NodePortType m_portType;
+
+		std::vector<std::shared_ptr<FCallBackFunc>> mCallbackFunc;
 
 		friend class Node;
 	};

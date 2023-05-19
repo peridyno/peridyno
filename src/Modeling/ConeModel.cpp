@@ -26,6 +26,8 @@ namespace dyno
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
+		this->stateTriangleSet()->promoteOuput();
+
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ConeModel<TDataType>::varChanged, this));
 

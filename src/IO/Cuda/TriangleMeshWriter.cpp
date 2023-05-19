@@ -26,12 +26,14 @@ namespace dyno
 	void TriangleMeshWriter<TDataType>::setNamePrefix(std::string prefix)
 	{
 		this->name_prefix = prefix;
+		this->varPrefix()->setValue(this->name_prefix);
 	}
 
 	template<typename TDataType>
 	void TriangleMeshWriter<TDataType>::setOutputPath(std::string path)
 	{
 		this->output_path = path;
+		this->varOutputPath()->setValue(this->output_path);
 	}
 
 	template<typename TDataType>
@@ -66,6 +68,7 @@ namespace dyno
 	template<typename TDataType>
 	bool TriangleMeshWriter<TDataType>::outputSurfaceMesh()
 	{
+		printf("------Triangle Mesh Writer: in here \n");
 		if (time_idx % 3 != 0)
 		{
 			time_idx++;
@@ -79,7 +82,7 @@ namespace dyno
 		}
 
 		std::stringstream ss; ss << m_output_index;
-		std::string filename = output_path + "/" + this->name_prefix + ss.str() + this->file_postfix;
+		std::string filename = output_path + this->name_prefix + ss.str() + this->file_postfix;
 		std::ofstream output(filename.c_str(), std::ios::out);
 
 		if (!output.is_open()) {
@@ -135,7 +138,7 @@ namespace dyno
 
 
 		std::stringstream ss; ss << out_number;
-		std::string filename = this->varOutputPath()->getData() + "/" + this->varPrefix()->getData() + ss.str() + this->file_postfix;
+		std::string filename = this->varOutputPath()->getData() + this->varPrefix()->getData() + ss.str() + this->file_postfix;
 		std::ofstream output(filename.c_str(), std::ios::out);
 		
 		std::cout << filename << std::endl;

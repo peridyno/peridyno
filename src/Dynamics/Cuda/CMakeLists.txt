@@ -92,7 +92,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
 endif()
 
 if(PERIDYNO_LIBRARY_PERIDYNAMICS)
-    set(LIB_DEPENDENCY Topology ParticleSystem)
+    set(LIB_DEPENDENCY IO Topology ParticleSystem Interaction)
     build_library(Peridynamics LIB_DEPENDENCY)
 endif()
 

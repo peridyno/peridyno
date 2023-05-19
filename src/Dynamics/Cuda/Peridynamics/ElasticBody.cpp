@@ -76,8 +76,8 @@ namespace dyno
 			this->stateReferencePosition()->allocate();
 			this->stateReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
 
-			this->stateNeighborIds()->allocate();
-			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
+// 			this->stateNeighborIds()->allocate();
+// 			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
 		}
 	}
 

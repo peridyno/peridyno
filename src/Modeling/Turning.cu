@@ -48,7 +48,7 @@ namespace dyno
 
 		this->inPointSet()->getData().getPointSize();
 		int pointsize = this->inPointSet()->getData().getPointSize();
-		std::cout << "输入点个数： " << pointsize << std::endl;
+		std::cout << "Point number： " << pointsize << std::endl;
 
 
 		//TCylinder3D<Real> tube;

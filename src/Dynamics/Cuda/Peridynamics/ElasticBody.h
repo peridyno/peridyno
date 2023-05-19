@@ -1,6 +1,6 @@
 #pragma once
 #include "ParticleSystem/ParticleSystem.h"
-#include "NeighborData.h"
+#include "SharedDataInPeridynamics.h"
 
 namespace dyno
 {
@@ -29,8 +29,6 @@ namespace dyno
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 
 		DEF_ARRAY_STATE(Coord, ReferencePosition, DeviceType::GPU, "Reference position");
-
-		DEF_ARRAYLIST_STATE(int, NeighborIds, DeviceType::GPU, "Storing the ids for neighboring particles");
 
 		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
 
