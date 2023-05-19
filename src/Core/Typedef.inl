@@ -27,6 +27,7 @@ namespace dyno {
 
 	using uint = unsigned int;
 
+	using uchar = unsigned char;
 	using uint64 = unsigned long long;
 	using int64 = signed long long;
 

@@ -18,7 +18,7 @@ namespace dyno
 
 		DYN_FUNC STLBuffer() {};
 		
-		DYN_FUNC void reserve(T* beg, size_t buffer_size) {
+		DYN_FUNC void reserve(T* beg, uint buffer_size) {
 			m_startLoc = beg;
 			m_maxSize = buffer_size;
 		}
