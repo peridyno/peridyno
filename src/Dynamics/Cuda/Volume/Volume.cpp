@@ -10,6 +10,7 @@ namespace dyno
  		auto sdf = std::make_shared<SignedDistanceField<TDataType>>();
 // 		this->setTopologyModule(TypeInfo::cast<TopologyModule>(sdf));
 		this->stateTopology()->setDataPtr(TypeInfo::cast<TopologyModule>(sdf));
+
 	}
 
 	template<typename TDataType>

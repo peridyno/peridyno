@@ -39,31 +39,38 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TopologyModule::Triangle Triangle;
 
 		VolumeGenerator();
 		~VolumeGenerator() override;
 
-		void load(std::string filename);
+		void loadClosedSurface();
 
-		void updateVolume() override;
+		void load(std::string filename);
+//		void updateVolume() override;
+
+	protected:
+		void resetStates() override;
 
 	public:
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, ClosedSurface, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+
+		DEF_INSTANCE_OUT(SignedDistanceField<TDataType>, GenSDF, "");
 
 		DEF_VAR_IN(Real, Spacing, "");
 
 		DEF_VAR_IN(uint, Padding, "");
-
 	public:
 		void makeLevelSet();
 
+		CArray<Vec3ui> faceList;
+		CArray<Coord> vertList;
+		
 		int ni;
 		int nj;
 		int nk;
-
-		CArray<Vec3ui> faceList;
-		CArray<Vec3f> vertList;
 		Vec3f origin;
-		CArray3f phi;
+		Vec3f maxPoint;
+		CArray3f phi; 
 	};
 }

@@ -100,7 +100,7 @@ if(PERIDYNO_LIBRARY_RIGIDBODY)
 endif()
 
 if(PERIDYNO_LIBRARY_VOLUME)
-    set(LIB_DEPENDENCY Core IO Framework Topology)
+    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine)
     build_library(Volume LIB_DEPENDENCY)
 endif()
 

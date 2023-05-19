@@ -15,7 +15,8 @@ namespace dyno {
 		Volume();
 		~Volume() override;
 
-		virtual void updateVolume() = 0;
+		virtual void updateVolume() {};
+
 	public:
 		DEF_INSTANCE_STATE(SignedDistanceField<TDataType>, SDF, "");
 

@@ -19,7 +19,11 @@
 #include "ColorMapping.h"
 
 #include "ParticleFluid.h"
-#include "StaticBoundary.h"
+
+#include "SphereSampler.h"
+#include "CubeSampler.h"
+#include "SphereSampler.h"
+#include "PoissonDiskSampling.h"
 
 #include "NodeFactory.h"
 
@@ -117,12 +121,26 @@ namespace dyno
 			});
 
 		group->addAction(
-			"Boundary",
-			"ToolBarIco/RigidBody/StaticBoundary.png",
-			[=]()->std::shared_ptr<Node> { 
-				auto  boundary = std::make_shared<StaticBoundary<DataType3f>>();
-				boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(0.5, 1, 0.5), 0.02, true);
-				return boundary; });
+			"Sphere Sampler",
+			"ToolBarIco/Modeling/SphereSampler_v3.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<SphereSampler<DataType3f>>();
+			});
+
+
+		group->addAction(
+			"Cube Sampler",
+			"ToolBarIco/Modeling/CubeSampler.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<CubeSampler<DataType3f>>();
+			});
+
+		group->addAction(
+			"Poisson Disk Sampler",
+			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PoissonDiskSampling<DataType3f>>();
+			});
 	}
 }
 
