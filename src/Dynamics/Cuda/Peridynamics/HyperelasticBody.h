@@ -5,7 +5,7 @@
 
 #include "Peridynamics/TetrahedralSystem.h"
 
-#include "SharedDataInPeridynamics.h"
+#include "Bond.h"
 #include "EnergyDensityFunction.h"
 #include "FilePath.h"
 
@@ -23,7 +23,7 @@ namespace dyno
 
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 		typedef typename TopologyModule::Tetrahedron Tetrahedron;
 		
 		HyperelasticBody();
@@ -67,7 +67,7 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Real, Volume, DeviceType::GPU, "");
 
-		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "");
+		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_STATE(Real, VolumePair, DeviceType::GPU, "");
 

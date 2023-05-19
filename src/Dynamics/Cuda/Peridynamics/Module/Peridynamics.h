@@ -16,7 +16,7 @@
 #pragma once
 #include "Module/GroupModule.h"
 
-#include "../SharedDataInPeridynamics.h"
+#include "../Bond.h"
 
 namespace dyno
 {
@@ -35,7 +35,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		Peridynamics();
 		~Peridynamics() override {};
@@ -49,7 +49,7 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Force, DeviceType::GPU, "");
 
-		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_IN(Bond, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 	};

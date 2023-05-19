@@ -399,27 +399,27 @@ namespace dyno
 	}
 
 
-	template<typename Coord, typename NPair>
+	template<typename Coord, typename Bond>
 	__global__ void SetRestShape(
 		DArray<Coord> restPos,
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		DArrayList<int> lists)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;
 
 
-		List<NPair>& list_i = restShapes[pId];
+		List<Bond>& list_i = restShapes[pId];
 
 		List<int> list = lists[pId];
 
-		list_i.insert(NPair(pId, restPos[pId]));
+		list_i.insert(Bond(pId, restPos[pId]));
 
 		for (auto it = list.begin(); it != list.end(); it++)
 		{
 			int j = *it;
 
-			list_i.insert(NPair(j, restPos[j]));
+			list_i.insert(Bond(j, restPos[j]));
 		}
 
 

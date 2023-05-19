@@ -17,19 +17,19 @@
 #include "Array/Array.h"
 #include "Array/ArrayList.h"
 
-#include "SharedDataInPeridynamics.h"
+#include "Bond.h"
 #include "DataTypes.h"
 
 namespace dyno {
-	template<typename Coord, typename NPair>
+	template<typename Coord, typename Bond>
 	void constructRestShape(
-		DArrayList<NPair>& shape,
+		DArrayList<Bond>& shape,
 		DArrayList<int>& nbr,
 		DArray<Coord>& pos);
 
-	template<typename Coord, typename NPair>
+	template<typename Coord, typename Bond>
 	void constructRestShapeWithSelf(
-		DArrayList<NPair>& shape,
+		DArrayList<Bond>& shape,
 		DArrayList<int>& nbr,
 		DArray<Coord>& pos);
 }

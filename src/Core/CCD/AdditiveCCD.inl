@@ -44,7 +44,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	DYN_FUNC T additiveCCD<T>::DistanceVF(
+	DYN_FUNC T AdditiveCCD<T>::DistanceVF(
 		const Vector<T, 3>& x,
 		const Vector<T, 3>& y0,
 		const Vector<T, 3>& y1,
@@ -69,7 +69,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	DYN_FUNC Vector<T, 3> additiveCCD<T>::DistanceVF_v(
+	DYN_FUNC Vector<T, 3> AdditiveCCD<T>::DistanceVF_v(
 		const Vector<T, 3>& x,
 		const Vector<T, 3>& y0,
 		const Vector<T, 3>& y1,
@@ -247,7 +247,7 @@ namespace dyno
 
 
 	template<typename T>
-	DYN_FUNC Vector<T, 3> additiveCCD<T>::DistanceEE(
+	DYN_FUNC Vector<T, 3> AdditiveCCD<T>::DistanceEE(
 		const Vector<T, 3>& x0, const Vector<T, 3>& x1,
 		const Vector<T, 3>& y0, const Vector<T, 3>& y1,
 		T* para)
@@ -443,7 +443,7 @@ namespace dyno
 
 	//edge(x0,x1), edge(x2,x3)
 	template<typename T>
-	DYN_FUNC T additiveCCD<T>::SquareDistanceEE(
+	DYN_FUNC T AdditiveCCD<T>::SquareDistanceEE(
 		const Vector<T, 3>& x0, const Vector<T, 3>& x1,
 		const Vector<T, 3>& x2, const Vector<T, 3>& x3) {
 		
@@ -454,7 +454,7 @@ namespace dyno
 	
 	//tri(x0,x1,x2), vex(x3)
 	template<typename T>
-	DYN_FUNC T additiveCCD<T>::SquareDistanceVF(const Vector<T, 3>& x0, const Vector<T, 3>& x1, const Vector<T, 3>& x2,
+	DYN_FUNC T AdditiveCCD<T>::SquareDistanceVF(const Vector<T, 3>& x0, const Vector<T, 3>& x1, const Vector<T, 3>& x2,
 		const Vector<T, 3>& x3) {
 		
 		 Vector<T, 3> signedD = DistanceVF_v(x3, x0, x1, x2, nullptr);
@@ -466,7 +466,7 @@ namespace dyno
 	}
 	
 	template<typename T>
-	DYN_FUNC bool additiveCCD<T>::VertexFaceCCD(
+	DYN_FUNC bool AdditiveCCD<T>::VertexFaceCCD(
 		const Vector<T, 3>& x0, const Vector<T, 3>& x1, const Vector<T, 3>& x2, const Vector<T, 3>& x3,
 		const Vector<T, 3>& y0, const Vector<T, 3>& y1, const Vector<T, 3>& y2, const Vector<T, 3>& y3,
 		T& time, T invL) {
@@ -523,7 +523,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	DYN_FUNC bool additiveCCD<T>::EdgeEdgeCCD(
+	DYN_FUNC bool AdditiveCCD<T>::EdgeEdgeCCD(
 		const Vector<T, 3>& x0, const Vector<T, 3>& x1, const Vector<T, 3>& x2, const Vector<T, 3>& x3,
 		const Vector<T, 3>& y0, const Vector<T, 3>& y1, const Vector<T, 3>& y2, const Vector<T, 3>& y3,
 		T& time, T invL)
@@ -598,7 +598,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	DYN_FUNC bool additiveCCD<T>::TriangleCCD(TTriangle3D<Real>& s0, TTriangle3D<Real>& s1, TTriangle3D<Real>& t0, TTriangle3D<Real>& t1, Real& toi)
+	DYN_FUNC bool AdditiveCCD<T>::TriangleCCD(TTriangle3D<Real>& s0, TTriangle3D<Real>& s1, TTriangle3D<Real>& t0, TTriangle3D<Real>& t1, Real& toi)
 	{
 		Real l0 = s0.maximumEdgeLength();
 		Real l1 = s1.maximumEdgeLength();
@@ -686,7 +686,7 @@ namespace dyno
 
 
 	template<typename T>
-	DYN_FUNC void additiveCCD<T>::projectClosePoint(
+	DYN_FUNC void AdditiveCCD<T>::projectClosePoint(
 		const TTriangle3D<Real>& s, const TTriangle3D<Real>& t,
 		Vector<T, 3>& first, Vector<T, 3>& second) {
 

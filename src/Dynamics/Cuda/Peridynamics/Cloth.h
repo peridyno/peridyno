@@ -1,6 +1,6 @@
 #pragma once
 #include "TriangularSystem.h"
-#include "SharedDataInPeridynamics.h"
+#include "Bond.h"
 
 namespace dyno
 {
@@ -15,7 +15,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		Cloth();
 		~Cloth() override;
@@ -25,7 +25,7 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Coord, OldPosition, DeviceType::GPU, "");
 
-		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;

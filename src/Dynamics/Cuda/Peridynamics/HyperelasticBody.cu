@@ -285,9 +285,9 @@ namespace dyno
 		index[pId] = lists[pId].size() + 1;
 	}
 
-	template<typename Coord, typename NPair, typename Tetrahedron>
+	template<typename Coord, typename Bond, typename Tetrahedron>
 	__global__ void SetRestShape(
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		DArrayList<Real> volume,
 		DArrayList<int> ver2tet,
 		DArrayList<int> lists,
@@ -298,7 +298,7 @@ namespace dyno
 		if (pId >= lists.size()) return;
 
 
-		List<NPair>& list_i = restShapes[pId];
+		List<Bond>& list_i = restShapes[pId];
 		List<Real>& vol_i = volume[pId];
 		List<int>& tets_i = ver2tet[pId];
 
@@ -306,7 +306,7 @@ namespace dyno
 		//if(pId == 10)
 		//printf("**** %d %.3lf  %.3lf  %.3lf \n", pId, restPos[pId][0], restPos[pId][1], restPos[pId][2]);
 
-		list_i.insert(NPair(pId, tetVertex[pId]));
+		list_i.insert(Bond(pId, tetVertex[pId]));
 		vol_i.insert(Real(0.00001));
 		for (auto it = list.begin(); it != list.end(); it++)
 		{
@@ -329,7 +329,7 @@ namespace dyno
 			Real minVol = Real(0.00001);
 			vol_ij = maximum(vol_ij, minVol); //0.000123;// 
 
-			list_i.insert(NPair(j, tetVertex[j]));
+			list_i.insert(Bond(j, tetVertex[j]));
 			vol_i.insert(vol_ij);
 
 //			printf("%f Nei size: %d \n", vol_ij, tets_i.size());

@@ -1,5 +1,5 @@
 #pragma once
-#include "../SharedDataInPeridynamics.h"
+#include "../Bond.h"
 #include "../EnergyDensityFunction.h"
 
 #include "ParticleSystem/Attribute.h"
@@ -17,7 +17,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		SemiImplicitHyperelasticitySolver();
 		~SemiImplicitHyperelasticitySolver() override;

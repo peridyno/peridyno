@@ -3,7 +3,7 @@
 #include "Primitive/Primitive3D.h"
 #include "Topology/SparseOctree.h"
 
-#include "CCD/additiveCCD.h"
+#include "CCD/AdditiveCCD.h"
 #include "CCD/TightCCD.h"
 #include "Vector.h"
 #define eps (2e-1)
@@ -135,7 +135,7 @@ namespace dyno
 
 				Real toi = Real(1.0);
 
-				auto ccdPhase = additiveCCD<Real>(thickness, collisionRefactor, 0.95);
+				auto ccdPhase = AdditiveCCD<Real>(thickness, collisionRefactor, 0.95);
 				bool collided = ccdPhase.TriangleCCD(tri_old_i, tri_new_i, tri_old_j, tri_new_j, toi);
 				
 				time = collided ? minimum(time, toi) : time;
@@ -226,7 +226,7 @@ __global__ void CR_Update_Distance(
 	Triangle t_i = triangles[tId];
 	TTriangle3D<Real> tri_i(vertexNew[t_i[0]], vertexNew[t_i[1]], vertexNew[t_i[2]]);
 	int nbSize = list_i.size();
-	auto ccdPhase = additiveCCD<Real>();
+	auto ccdPhase = AdditiveCCD<Real>();
 	List<Coord>& fi = firstTri[tId];
 	List<Coord>& se = secondTri[tId];
 	for (int ne = 0; ne < nbSize; ++ne) {

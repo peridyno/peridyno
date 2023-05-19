@@ -31,14 +31,14 @@
 namespace dyno
 {
 	template<typename T>
-	class additiveCCD
+	class AdditiveCCD
 	{
 	public:
 
-		DYN_FUNC additiveCCD(T xi_, T s_, T tc_) 
+		DYN_FUNC AdditiveCCD(T xi_, T s_, T tc_) 
 			: xi(xi_), s(s_), tc(tc_) {
 		};
-		DYN_FUNC additiveCCD() = default;
+		DYN_FUNC AdditiveCCD() = default;
 		//default: this is a normal CCD board phrase as thickness = 0, that return TOI as distance >0; TOI in[0,1]
 		//with CA strategy.
 

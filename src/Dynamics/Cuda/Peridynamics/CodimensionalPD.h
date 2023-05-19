@@ -3,7 +3,7 @@
 #include "ParticleSystem/Attribute.h"
 #include "ParticleSystem/ParticleSystem.h"
 #include "Peridynamics/TriangularSystem.h"
-#include "Peridynamics/SharedDataInPeridynamics.h"
+#include "Peridynamics/Bond.h"
 #include "Peridynamics/EnergyDensityFunction.h"
 
 
@@ -22,7 +22,7 @@ namespace dyno
 
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		CodimensionalPD(std::string name = "default");
 		CodimensionalPD( Real xi, Real E , Real kb, Real timeSetp=1e-3, std::string name = "default");
@@ -90,7 +90,7 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Coord, MarchPosition, DeviceType::GPU, "");
 
-		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "");
+		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "");
 		
 		DEF_VAR_STATE(Real, MaxLength, DeviceType::GPU, "");
 

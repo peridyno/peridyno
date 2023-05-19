@@ -16,7 +16,7 @@
 #pragma once
 #include "Module/ConstraintModule.h"
 
-#include "Peridynamics/NeighborData.h"
+#include "Peridynamics/Bond.h"
 
 namespace dyno {
 
@@ -33,7 +33,7 @@ namespace dyno {
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		ElasticityModule();
 		~ElasticityModule() override;
@@ -80,7 +80,7 @@ namespace dyno {
 		 */
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
-		DEF_ARRAYLIST_IN(NPair, RestShape, DeviceType::GPU, "Reference shape");
+		DEF_ARRAYLIST_IN(Bond, RestShape, DeviceType::GPU, "Reference shape");
 
 	public:
 		/**

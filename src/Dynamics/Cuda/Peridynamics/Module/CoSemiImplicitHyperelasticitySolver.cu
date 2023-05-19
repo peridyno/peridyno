@@ -124,7 +124,7 @@ namespace dyno
 		y_next[pId] = y_current[pId] + alpha * grad[pId];
 	}
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void HM_Compute1DEnergy(
 		DArray<Real> energy,
 		DArray<Coord> energyGradient,
@@ -133,7 +133,7 @@ namespace dyno
 		DArray<Real> volume,
 		DArray<bool> validOfK,
 		DArray<Coord> eigenValues,
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -155,7 +155,7 @@ namespace dyno
 
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes[pId][ne];
+			Bond np_j = restShapes[pId][ne];
 			int j = np_j.index;
 			Coord pos_current_j = pos_current[j];
 			Real r = (np_j.pos - rest_pos_i).norm();
@@ -208,7 +208,7 @@ namespace dyno
 		next_X[pId] = omega * (next_X[pId] - prev_X[pId]) + prev_X[pId];
 	}
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void HM_ComputeStepLength(
 		DArray<Real> stepLength,
 		DArray<Coord> gradient,
@@ -216,7 +216,7 @@ namespace dyno
 		DArray<Real> volume,
 		DArray<Matrix> A,
 		DArray<Real> energy,
-		DArrayList<NPair> restShapes)
+		DArrayList<Bond> restShapes)
 	{
 		int pId = blockDim.x * blockIdx.x + threadIdx.x;
 		if (pId >= stepLength.size())	return;
@@ -245,18 +245,18 @@ namespace dyno
 			atts[pId].setFixed();
 	}
 
-	template <typename Coord, typename NPair>
+	template <typename Coord, typename Bond>
 	__global__ void K_UpdateRestShape(
-		DArrayList<NPair> shape,
+		DArrayList<Bond> shape,
 		DArrayList<int> nbr,
 		DArray<Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
 
-		NPair np;
+		Bond np;
 
-		List<NPair>& rest_shape_i = shape[pId];
+		List<Bond>& rest_shape_i = shape[pId];
 		List<int>& list_id_i = nbr[pId];
 		int nbSize = list_id_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
@@ -269,7 +269,7 @@ namespace dyno
 			rest_shape_i.insert(np);
 			if (pId == j)
 			{
-				NPair np_0 = rest_shape_i[0];
+				Bond np_0 = rest_shape_i[0];
 				rest_shape_i[0] = np;
 				rest_shape_i[ne] = np_0;
 			}
@@ -353,7 +353,7 @@ namespace dyno
 	}
 
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void HM_ComputeF(
 		DArray<Matrix> F,
 		DArray<Coord> eigens,
@@ -363,7 +363,7 @@ namespace dyno
 		DArray<Matrix> matV,
 		DArray<Matrix> Rots,
 		DArray<Coord> position,
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		Real horizon,
 		Real const strainLimit,
 		DArray<Coord> restNorm, 
@@ -391,7 +391,7 @@ namespace dyno
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes[pId][ne];
+			Bond np_j = restShapes[pId][ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -406,7 +406,7 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes[pId][ne];
+			Bond np_j = restShapes[pId][ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -597,7 +597,7 @@ namespace dyno
 	}
 
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void HM_JacobiStepNonsymmetric(
 		DArray<Coord> source,
 		DArray<Matrix> A,
@@ -609,7 +609,7 @@ namespace dyno
 		DArray<bool> validOfK,
 		DArray<Matrix> F,
 		Real k_bend,
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		Real horizon,
 		DArray<Real> volume,
 		Real dt,
@@ -625,7 +625,7 @@ namespace dyno
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes[pId][ne];
+			Bond np_j = restShapes[pId][ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -685,7 +685,7 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShapes[pId][ne];
+			Bond np_j = restShapes[pId][ne];
 			int j = np_j.index;
 			Coord y_pre_j = y_pre[j];
 			Real r = (np_j.pos - y_rest_i).norm();
