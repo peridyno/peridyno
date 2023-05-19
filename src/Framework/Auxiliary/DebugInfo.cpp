@@ -48,4 +48,18 @@ namespace dyno
 
 		Log::sendMessage(Log::Info, oss.str());
 	}
+
+	PrintVector::PrintVector()
+	{
+		this->varForceUpdate()->setValue(true);
+	}
+
+	void PrintVector::print()
+	{
+		std::ostringstream oss;
+		auto vec = this->inVector()->getData();
+		oss << vec.x << " " << vec.y << " " << vec.z;
+
+		Log::sendMessage(Log::Info, oss.str());
+	}
 }

@@ -1,5 +1,4 @@
 #include "Field.h"
-#include "DeclareEnum.h"
 #include "Vector.h"
 
 namespace dyno 
@@ -238,55 +237,6 @@ namespace dyno
 		double z = std::stod(substr);
 
 		this->setValue(Vec3d(x, y, z));
-
-		return true;
-	}
-
-// 	template<>
-// 	std::string FVar<FilePath>::serialize()
-// 	{
-// 		if (isEmpty())
-// 			return "";
-// 
-// 		FilePath val = this->getValue();
-// 
-// 		return val.string();
-// 	}
-// 
-// 	template<>
-// 	bool FVar<FilePath>::deserialize(const std::string& str)
-// 	{
-// 		if (str.empty())
-// 			return false;
-// 
-// 		this->setValue(str);
-// 
-// 		return true;
-// 	}
-
-	template<>
-	std::string FVar<PEnum>::serialize()
-	{
-		if (isEmpty())
-			return "";
-
-		int key = this->getDataPtr()->currentKey();
-
-		std::stringstream ss;
-		ss << key;
-
-		return ss.str();
-	}
-
-	template<>
-	bool FVar<PEnum>::deserialize(const std::string& str)
-	{
-		if (str.empty())
-			return false;
-
-		int key = std::stod(str);
-
-		this->getDataPtr()->setCurrentKey(key);
 
 		return true;
 	}

@@ -89,6 +89,11 @@ bool Node::isVisible()
 void Node::setVisible(bool visible)
 {
 	mRenderingEnabled = visible;
+
+	if (visible)
+		this->graphicsPipeline()->enable();
+	else
+		this->graphicsPipeline()->disable();
 }
 
 float Node::getDt()
@@ -155,8 +160,6 @@ void Node::update()
 		this->postUpdateStates();
 
 		this->updateTopology();
-
-		this->tick();
 	}
 }
 
@@ -164,6 +167,8 @@ void Node::reset()
 {
 	if (this->validateInputs()) {
 		this->resetStates();
+
+		//When the node is reset, call tick() to force updating all modules
 		this->tick();
 	}
 }
@@ -181,8 +186,6 @@ void Node::postUpdateStates()
 void Node::updateGraphicsContext()
 {
 	this->graphicsPipeline()->update();
-
-	this->tick();
 }
 
 void Node::resetStates()

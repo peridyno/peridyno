@@ -178,6 +178,8 @@ namespace dyno
 		// fprintf(stderr,"%s ----> %s\n",this->m_name.c_str(), dst->m_name.c_str());
 		this->addSink(dst);
 
+		this->update();
+
 		return true;
 	}
 

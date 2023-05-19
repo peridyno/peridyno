@@ -365,6 +365,9 @@ namespace dyno
 
 		virtual bool validateInputs();
 
+		/**
+		 * @brief notify all state and output fields are updated
+		 */
 		void tick();
 
 	private:

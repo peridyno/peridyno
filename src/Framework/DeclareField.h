@@ -57,6 +57,12 @@ private:									\
 public:									\
 	inline FInstance<T>* out##name() {return &out_##name;}
 
+#define DEF_INSTANCE_IO(T, name, desc) \
+private:									\
+	FInstance<T> io_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::IO, this);			\
+public:									\
+	inline FInstance<T>* io##name() {return &io_##name;}
+
 /**
  * @brief Macro definitions for instance state
  *
