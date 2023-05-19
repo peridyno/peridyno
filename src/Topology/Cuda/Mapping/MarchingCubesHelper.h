@@ -66,5 +66,34 @@ namespace dyno
 			DArray<int>& vertNum,
 			DistanceField3D<TDataType>& sdf,
 			TPlane3D<Real> plane);
+
+
+		static void countVerticeNumberForOctree(
+			DArray<uint>& num,
+			DArray<Coord>& vertices,
+			DArray<Real>& sdfs,
+			Real isoValue);
+
+		static void constructTrianglesForOctree(
+			DArray<Coord>& triangleVertices,
+			DArray<TopologyModule::Triangle>& triangles,
+			DArray<uint>& num,
+			DArray<Coord>& cellVertices,
+			DArray<Real>& sdfs,
+			Real isoValue);
+
+		static void countVerticeNumberForOctreeClipper(
+			DArray<uint>& num,
+			DArray<Coord>& vertices,
+			TPlane3D<Real> plane);
+
+		static void constructTrianglesForOctreeClipper(
+			DArray<Real>& vertSDFs,
+			DArray<Coord>& triangleVertices,
+			DArray<TopologyModule::Triangle>& triangles,
+			DArray<uint>& num,
+			DArray<Coord>& cellVertices,
+			DArray<Real>& sdfs,
+			TPlane3D<Real> plane);
 	};
 }

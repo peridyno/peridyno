@@ -26,9 +26,8 @@ namespace dyno
 
 		int getPointSize() { return m_coords.size(); };
 
-		DArrayList<int>* getPointNeighbors();
-		virtual void updatePointNeighbors();
-
+		DArrayList<int>& getPointNeighbors();
+	
 		void scale(Real s);
 		void scale(Coord s);
 		void translate(Coord t);
@@ -42,6 +41,10 @@ namespace dyno
 		void clear();
 
 	protected:
+		void updateTopology() override;
+
+		virtual void updatePointNeighbors();
+
 		DArray<Coord> m_coords;
 		DArrayList<int> m_pointNeighbors;
 	};

@@ -30,12 +30,13 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		MarchingCubes();
+
 		~MarchingCubes() override;
 
 	public:
 		DEF_VAR(Real, IsoValue, Real(0), "Iso value");
 
-		DEF_VAR(Real, GridSpacing, Real(0.01), "");
+		DEF_VAR(Real, GridSpacing, Real(0.05), "");
 
 		DEF_INSTANCE_IN(SignedDistanceField<TDataType>, LevelSet, "A 3D signed distance field");
 
@@ -43,6 +44,11 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+
+		void updateStates() override;
+
+	private:
+		void constructSurfaceMesh();
 	};
 
 	IMPLEMENT_TCLASS(MarchingCubes, TDataType)

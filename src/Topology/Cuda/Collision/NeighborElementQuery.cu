@@ -139,9 +139,10 @@ namespace dyno
 		return true;
 	}
 
-	template<typename Box3D>
+	template<typename Box3D, typename ContactPair>
 	__global__ void NEQ_Narrow_Count(
 		DArray<int> count,
+		DArray<ContactPair> nbr_cons,
 		DArray<ContactId> nbr,
 		DArray<CollisionMask> mask,
 		DArray<Box3D> boxes,
@@ -270,6 +271,46 @@ namespace dyno
 		}
 		
 		count[tId] = manifold.contactCount;
+
+		int offset = 8 * tId;
+		for (int n = 0; n < manifold.contactCount; n++)
+		{
+			ContactPair cp;
+
+			//if(abs(idx.body))
+
+			cp.pos1 = manifold.contacts[n].position;
+			cp.pos2 = manifold.contacts[n].position;
+			cp.normal1 = -manifold.normal;
+			cp.normal2 = manifold.normal;
+			cp.bodyId1 = ids.bodyId1;
+			cp.bodyId2 = ids.bodyId2;
+			cp.contactType = ContactType::CT_NONPENETRATION;
+			cp.interpenetration = -manifold.contacts[n].penetration;
+			nbr_cons[offset + n] = cp;
+		}
+	}
+
+	template<typename ContactPair>
+	__global__ void NEQ_Narrow_Set(
+		DArray<ContactPair> nbr_cons,
+		DArray<ContactPair> nbr_cons_all,
+		DArray<ContactId> nbr,
+		DArray<int> prefix,
+		DArray<int> sum)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= nbr.size()) return;
+
+		ContactId ids = nbr[tId];
+		
+
+		int offset = prefix[tId];
+		int size = sum[tId];
+		for (int n = 0; n < size; n++)
+		{
+			nbr_cons[offset + n] = nbr_cons_all[8 * tId + n];
+		}
 	}
 
 	template<typename Box3D, typename ContactPair>
@@ -590,13 +631,21 @@ namespace dyno
 		Real zero = 0;
 
 		DArray<int> contactNum;
+		DArray<int> contactNumCpy;
 
 		contactNum.resize(deviceIds.size());
 		contactNum.reset();
+		contactNumCpy.resize(deviceIds.size());
+		contactNumCpy.reset();
+
+		DArray<TContactPair<Real>> nbr_cons_tmp;
+		nbr_cons_tmp.resize(deviceIds.size() * 8);
+		nbr_cons_tmp.reset();
 
 		cuExecute(deviceIds.size(),
 			NEQ_Narrow_Count,
 			contactNum,
+			nbr_cons_tmp,
 			deviceIds,
 			inMask,
 			inTopo->getBoxes(),
@@ -609,6 +658,8 @@ namespace dyno
 			inTopo->getTris(),
 			elementOffset);
 
+		contactNumCpy.assign(contactNum);
+		
 		int sum = m_reduce.accumulate(contactNum.begin(), contactNum.size());
 
 		auto& contacts = this->outContacts()->getData();
@@ -618,6 +669,14 @@ namespace dyno
 		if (sum > 0)
 		{
 			cuExecute(deviceIds.size(),
+				NEQ_Narrow_Set,
+				contacts,
+				nbr_cons_tmp,
+				deviceIds,
+				contactNum,
+				contactNumCpy);
+
+			/*cuExecute(deviceIds.size(),
 				NEQ_Narrow_Set,
 				contacts,
 				deviceIds,
@@ -631,11 +690,12 @@ namespace dyno
 				inTopo->getCaps(),
 				inTopo->getTris(),
 				contactNum,
-				elementOffset);
+				elementOffset);*/
 		}
-
+		contactNumCpy.clear();
 		contactNum.clear();
 		deviceIds.clear();
+		nbr_cons_tmp.clear();
 	}
 
 	DEFINE_CLASS(NeighborElementQuery);

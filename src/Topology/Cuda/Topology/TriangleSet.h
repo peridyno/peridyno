@@ -1,5 +1,6 @@
 #pragma once
 #include "EdgeSet.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 
 namespace dyno
 {
@@ -92,8 +93,23 @@ namespace dyno
 		void setTriangles(std::vector<Triangle>& triangles);
 		void setTriangles(DArray<Triangle>& triangles);
 
-		DArray<Triangle>& getTriangles() { return m_triangles; }
+		/**
+		 * @brief return all triangle indices
+		 */
+		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 		DArrayList<int>& getVertex2Triangles();
+		DArray<Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
+
+		/**
+		 * @brief update the index from triangle id to edges ids
+		 */
+		void updateTriangle2Edge();
+
+		void updateEdgeNormal(DArray<Coord>& edgeNormal);
+		void updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal);
+		DArray<Coord>& getEdgeNormal() { return m_edgeNormal; }
+		DArray<Coord>& getVertexNormal() { return m_vertexNormal; }
+
 
 		void loadObjFile(std::string filename);
 
@@ -116,10 +132,14 @@ namespace dyno
 		virtual void updateVertexNormal();
 
 	private:
-		DArray<Triangle> m_triangles;
-		DArrayList<int> m_ver2Tri;
+		DArray<Triangle> mTriangleIndex;
+		DArrayList<int> mVer2Tri;
 
 		DArray<::dyno::TopologyModule::Edg2Tri> edg2Tri;
+		DArray<::dyno::TopologyModule::Tri2Edg> tri2Edg;
+
+		DArray<Coord> m_edgeNormal;
+		DArray<Coord> m_vertexNormal;//Angle weighted vertex normal
 	};
 }
 

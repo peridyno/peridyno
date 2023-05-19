@@ -137,6 +137,8 @@ namespace dyno
 		m_edges.resize(edgeSet.m_edges.size());
 		m_edges.assign(edgeSet.m_edges);
 
+		m_ver2Edge.assign(edgeSet.m_ver2Edge);
+
 		PointSet<TDataType>::copyFrom(edgeSet);
 	}
 
@@ -161,6 +163,8 @@ namespace dyno
 	void EdgeSet<TDataType>::updateTopology()
 	{
 		this->updateEdges();
+
+		PointSet<TDataType>::updateTopology();
 	}
 
 	template<typename TDataType>

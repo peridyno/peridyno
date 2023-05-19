@@ -138,7 +138,6 @@ namespace dyno
 		ids[6 * tId + 3] = tId;
 		ids[6 * tId + 4] = tId;
 		ids[6 * tId + 5] = tId;
-
 	}
 
 	template<typename QKey>

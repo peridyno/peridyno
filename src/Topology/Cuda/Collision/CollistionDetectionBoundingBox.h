@@ -22,18 +22,19 @@ namespace dyno {
 		void doCollision() override;
 
 	public:
+		DEF_VAR(Coord, UpperBound, Coord(100), "An upper bound for the bounding box");
+
+		DEF_VAR(Coord, LowerBound, Coord(-100, 0, -100), "A lower bound for the bounding box");
+
+	public:
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
 	private:
 		DArray<int> mBoundaryContactCounter;
 
-		Coord mUpperCorner = Coord(100);//(0.4925,0.4925,0.4925);
-		//Coord mLowerCorner = Coord(-100);//(0.0075,0.0075,0.0075);
-		Coord mLowerCorner = Coord(-100, 0, -100);
-
-		Reduction<int> m_reduce;
-		Scan<int> m_scan;
+		Reduction<int> mReduce;
+		Scan<int> mScan;
 	};
 
 	IMPLEMENT_TCLASS(CollistionDetectionBoundingBox, TDataType)
