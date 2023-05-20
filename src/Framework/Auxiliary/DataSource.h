@@ -30,54 +30,6 @@ namespace dyno
 		std::string getModuleType() override { return "Variables"; }
 	};
 
-	//float
-	class FloatSource : public DataSource
-	{
-		DECLARE_CLASS(FloatSource);
-	public:
-		FloatSource();
-
-		DEF_VAR(float, Value, 0.0f, "Initial value");
-
-		DEF_VAR_OUT(float, Float, "");
-	};
-
-	//double
-	class DoubleSource : public DataSource
-	{
-		DECLARE_CLASS(DoubleSource);
-	public:
-		DoubleSource();
-
-		DEF_VAR(double, Value, 0.0, "Initial value");
-
-		DEF_VAR_OUT(double, Double, "");
-	};
-
-	//Vec3f
-	class Vec3fSource : public DataSource
-	{
-		DECLARE_CLASS(Vec3fSource);
-	public:
-		Vec3fSource();
-
-		DEF_VAR(Vec3f, Value, Vec3f(0.0f), "Initial value");
-
-		DEF_VAR_OUT(Vec3f, Vector3f, "");
-	};
-
-	//Vec3f
-	class Vec3dSource : public DataSource
-	{
-		DECLARE_CLASS(Vec3dSource);
-	public:
-		Vec3dSource();
-
-		DEF_VAR(Vec3d, Value, Vec3d(0.0), "Initial value");
-
-		DEF_VAR_OUT(Vec3d, Vector3d, "");
-	};
-
 	template<typename TDataType>
 	class FloatingNumber : public DataSource
 	{

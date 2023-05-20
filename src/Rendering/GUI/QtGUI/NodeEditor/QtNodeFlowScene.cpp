@@ -64,6 +64,7 @@ namespace Qt
 
 		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
 		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
+		//connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
@@ -176,10 +177,12 @@ namespace Qt
 								outFieldIndex++;
 							}
 
+							if (nodeSrc->canExported()) outFieldIndex++;
+
 							if (fieldFound && nodeMap.find(outId) != nodeMap.end())
 							{
 								auto outBlock = nodeMap[outId];
-								createConnection(*inBlock, i + ports.size(), *outBlock, 1 + outFieldIndex);
+								createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
 							}
 						}
 					}
@@ -384,6 +387,12 @@ namespace Qt
 				node->animationPipeline()->disable();
 		}
 	}
+
+	void QtNodeFlowScene::Key2_Signal(QtNode& n, bool checked)
+	{
+		printf("Key2_Signal\n");
+	}
+	
 
 	void QtNodeFlowScene::reorderAllNodes()
 	{

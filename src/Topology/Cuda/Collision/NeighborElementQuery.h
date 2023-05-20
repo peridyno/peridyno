@@ -40,14 +40,14 @@ namespace dyno {
 
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
 	private:
-		DArray<AABB> m_queryAABB;
-		DArray<AABB> m_queriedAABB;
+		DArray<AABB> mQueryAABB;
+		DArray<AABB> mQueriedAABB;
 
-		Scan<int> m_scan;
-		Reduction<int> m_reduce;
+		Scan<int> mScan;
+		Reduction<int> mReduce;
 
-		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> m_broadPhaseCD;
-		std::shared_ptr<DiscreteElements<TDataType>> discreteSet;		
+		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> mBroadPhaseCD;
+		std::shared_ptr<DiscreteElements<TDataType>> mDiscreteElements;		
 		int cnt = 0;
 	};
 }

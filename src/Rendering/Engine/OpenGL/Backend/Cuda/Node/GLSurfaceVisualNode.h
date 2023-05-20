@@ -28,7 +28,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Coord Coord;
 
-		GLSurfaceVisualNode();
+		GLSurfaceVisualNode(bool phong = false);
 		~GLSurfaceVisualNode() override;
 
 	public:

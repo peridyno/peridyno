@@ -419,6 +419,11 @@ bool Node::appendExportNode(NodePort* nodePort)
 
 bool Node::removeExportNode(NodePort* nodePort)
 {
+	//TODO: this is a hack, otherwise the app will crash
+	if (mExportNodes.size() == 0) {
+		return false;
+	}
+
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it == mExportNodes.end()) {
 		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, false));

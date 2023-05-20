@@ -24,7 +24,7 @@ namespace dyno
 	{
 		this->inRadius()->setValue(Real(0.011));
 
-		m_broadPhaseCD = std::make_shared<CollisionDetectionBroadPhase<TDataType>>();
+		mBroadPhaseCD = std::make_shared<CollisionDetectionBroadPhase<TDataType>>();
 		//fout.open("data_Oct_without_arrange.txt");
 	}
 
@@ -566,20 +566,20 @@ namespace dyno
 			return;
 		}
 
-		if (m_queriedAABB.size() != t_num)
+		if (mQueriedAABB.size() != t_num)
 		{
-			m_queriedAABB.resize(t_num);
+			mQueriedAABB.resize(t_num);
 		}
-		if (m_queryAABB.size() != t_num)
+		if (mQueryAABB.size() != t_num)
 		{
-			m_queryAABB.resize(t_num);
+			mQueryAABB.resize(t_num);
 		}
 		//printf("=========== ============= INSIDE SELF COLLISION %d\n", t_num);
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
 		cuExecute(t_num,
 			NEQ_SetupAABB,
-			m_queriedAABB,
+			mQueriedAABB,
 			inTopo->getBoxes(),
 			inTopo->getSpheres(),
 			inTopo->getTets(),
@@ -588,20 +588,20 @@ namespace dyno
 			elementOffset,
 			boundary_expand);
 
-		m_queryAABB.assign(m_queriedAABB);
+		mQueryAABB.assign(mQueriedAABB);
 
 
 		Real radius = this->inRadius()->getData();
 
-		m_broadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
-		m_broadPhaseCD->setSelfCollision(true);
+		mBroadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
+		mBroadPhaseCD->setSelfCollision(true);
 
-		m_broadPhaseCD->inSource()->assign(m_queryAABB);
-		m_broadPhaseCD->inTarget()->assign(m_queriedAABB);
+		mBroadPhaseCD->inSource()->assign(mQueryAABB);
+		mBroadPhaseCD->inTarget()->assign(mQueriedAABB);
 		// 
-		m_broadPhaseCD->update();
+		mBroadPhaseCD->update();
 
-		auto& contactList = m_broadPhaseCD->outContactList()->getData();
+		auto& contactList = mBroadPhaseCD->outContactList()->getData();
 
 		if (contactList.size() == 0) return;
 
@@ -611,12 +611,12 @@ namespace dyno
 			count,
 			contactList);
 
-		int totalSize = m_reduce.accumulate(count.begin(), count.size());
+		int totalSize = mReduce.accumulate(count.begin(), count.size());
 
 		if (totalSize <= 0)
 			return;
 
-		m_scan.exclusive(count);
+		mScan.exclusive(count);
 
 		DArray<ContactId> deviceIds(totalSize);
 
@@ -660,10 +660,10 @@ namespace dyno
 
 		contactNumCpy.assign(contactNum);
 		
-		int sum = m_reduce.accumulate(contactNum.begin(), contactNum.size());
+		int sum = mReduce.accumulate(contactNum.begin(), contactNum.size());
 
 		auto& contacts = this->outContacts()->getData();
-		m_scan.exclusive(contactNum, true);
+		mScan.exclusive(contactNum, true);
 		contacts.resize(sum);
 		contacts.reset();
 		if (sum > 0)

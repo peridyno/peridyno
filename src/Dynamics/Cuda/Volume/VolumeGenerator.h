@@ -28,7 +28,7 @@ namespace dyno {
 	typedef CArray3D<int> CArray3i;
 
 	/**
-	 * @brief This is a GPU-based implementation of grid-based signed distance field 
+	 * @brief This is a CPU-based implementation of grid-based signed distance field 
 	 *			(level set) generator for triangle meshes.
 	 * 		  For more details, please refer to Robert Bridson's website (www.cs.ubc.ca/~rbridson).
 	 */

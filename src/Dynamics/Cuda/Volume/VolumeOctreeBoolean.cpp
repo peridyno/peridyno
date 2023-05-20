@@ -154,6 +154,51 @@ namespace dyno
 	template<typename TDataType>
 	void VolumeOctreeBoolean<TDataType>::updateStates()
 	{
+		
+//		getLeafsValue();
+	}
+
+
+
+
+	template<typename TDataType>
+	void VolumeOctreeBoolean<TDataType>::updateSignOperation()
+	{
+		DArray<Coord> leaf_nodes;
+		DArray<int> leaf_index;
+		DArray<Real> leaf_value_a;
+		DArray<Real> leaf_value_b;
+
+		auto m_octree_a = this->getOctreeA();
+		auto m_octree_b = this->getOctreeB();
+
+		auto& octree_inter_value = this->stateSDFTopology()->getDataPtr()->getSdfValues();
+		auto octree_inter = this->stateSDFTopology()->getDataPtr();
+
+		DArray<Coord> leaf_normal_a,leaf_normal_b;
+		octree_inter->getLeafs(leaf_nodes, leaf_index);
+		m_octree_a->stateSDFTopology()->getDataPtr()->getSignDistance(leaf_nodes, leaf_value_a,leaf_normal_a);
+		m_octree_b->stateSDFTopology()->getDataPtr()->getSignDistance(leaf_nodes, leaf_value_b,leaf_normal_b);
+		leaf_normal_a.clear();
+		leaf_normal_b.clear();
+
+		auto booleanType = this->varBooleanType()->getDataPtr()->currentKey();
+		VolumeHelper<TDataType>::updateBooleanSigned(
+			octree_inter_value,
+			leaf_index,
+			leaf_value_a,
+			leaf_value_b,
+			booleanType);
+
+		leaf_nodes.clear();
+		leaf_index.clear();
+		leaf_value_a.clear();
+		leaf_value_b.clear();
+	}
+
+	template<typename TDataType>
+	void VolumeOctreeBoolean<TDataType>::resetStates()
+	{
 		auto booleanType = this->varBooleanType()->getDataPtr()->currentKey();
 		int level = this->varLevelNumber()->getData();
 		initParameter();
@@ -692,51 +737,6 @@ namespace dyno
 		gridT_normal.clear();
 
 		updateSignOperation();
-//		getLeafsValue();
-	}
-
-
-
-
-	template<typename TDataType>
-	void VolumeOctreeBoolean<TDataType>::updateSignOperation()
-	{
-		DArray<Coord> leaf_nodes;
-		DArray<int> leaf_index;
-		DArray<Real> leaf_value_a;
-		DArray<Real> leaf_value_b;
-
-		auto m_octree_a = this->getOctreeA();
-		auto m_octree_b = this->getOctreeB();
-
-		auto& octree_inter_value = this->stateSDFTopology()->getDataPtr()->getSdfValues();
-		auto octree_inter = this->stateSDFTopology()->getDataPtr();
-
-		DArray<Coord> leaf_normal_a,leaf_normal_b;
-		octree_inter->getLeafs(leaf_nodes, leaf_index);
-		m_octree_a->stateSDFTopology()->getDataPtr()->getSignDistance(leaf_nodes, leaf_value_a,leaf_normal_a);
-		m_octree_b->stateSDFTopology()->getDataPtr()->getSignDistance(leaf_nodes, leaf_value_b,leaf_normal_b);
-		leaf_normal_a.clear();
-		leaf_normal_b.clear();
-
-		auto booleanType = this->varBooleanType()->getDataPtr()->currentKey();
-		VolumeHelper<TDataType>::updateBooleanSigned(
-			octree_inter_value,
-			leaf_index,
-			leaf_value_a,
-			leaf_value_b,
-			booleanType);
-
-		leaf_nodes.clear();
-		leaf_index.clear();
-		leaf_value_a.clear();
-		leaf_value_b.clear();
-	}
-
-	template<typename TDataType>
-	void VolumeOctreeBoolean<TDataType>::resetStates()
-	{
-		this->update();
 	}
 
 	template<typename TDataType>

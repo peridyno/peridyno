@@ -21,6 +21,10 @@
 
 namespace dyno 
 {
+	/**
+	 * @brief This is a GPU-based implementation of algebraic adaptive signed distance field (AASDF).
+	 * 		  For more details, please refer to "Algebraic Adaptive Signed Distance Field on GPU" by [Ren et.al. 2022].
+	 */
 	template<typename TDataType>
 	class VolumeOctreeGenerator :public VolumeOctree<TDataType>
 	{
@@ -39,7 +43,7 @@ namespace dyno
 		Coord lowerBound() override { return m_origin; }
 		Coord upperBound() override { return m_origin + this->varSpacing()->getData() * Coord(m_nx, m_ny, m_nz); }
 
-	private:
+	public:
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "The triangles of closed surface");
 		

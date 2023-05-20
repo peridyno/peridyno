@@ -14,13 +14,13 @@ class Source : public Node
 	DECLARE_CLASS(Source);
 public:
 	Source() {
-		auto floatSource = std::make_shared<FloatSource>();
+		auto floating = std::make_shared<FloatingNumber<DataType3f>>();
 
 		auto printFloat = std::make_shared<PrintFloat>();
 
-		floatSource->outFloat()->connect(printFloat->inFloat());
+		floating->outFloating()->connect(printFloat->inFloat());
 
-		this->animationPipeline()->pushModule(floatSource);
+		this->animationPipeline()->pushModule(floating);
 		this->animationPipeline()->pushModule(printFloat);
 	};
 
