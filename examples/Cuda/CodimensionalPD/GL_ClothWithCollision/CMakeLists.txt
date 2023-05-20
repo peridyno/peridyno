@@ -1,0 +1,12 @@
+if(PERIDYNO_LIBRARY_PERIDYNAMICS AND PERIDYNO_Qt5_GUI)
+    set(LIB_DEPENDENCY 
+        Core 
+        Framework 
+        IO 
+        Peridynamics
+        Multiphysics
+        GlfwGUI
+        GLRenderEngine
+        Interaction)
+    add_example(GL_ClothWithCollision CodimensionalPD LIB_DEPENDENCY)
+endif()

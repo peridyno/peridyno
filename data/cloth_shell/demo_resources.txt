@@ -1,0 +1,29 @@
+demo-clothDrop: mesh_drop.obj
+
+demo-shootingCloth: shootingCloth.obj
+
+demo-rotateCylinder: cylinder800.obj for smooth model or cylinder400.obj for less smooth model.
+
+demo-realTimeCloth_v1: v1/cloth_highMesh.obj
+rendering: v1/woman_model.obj
+sdf: v1/woman_v1.sdf
+sdf generating: woman_v1.obj
+
+demo-realTimeCloth_v2: cloth_v2.obj
+rendering: woman_model.obj / woman_model_smaller.obj
+sdf: woman_v2.sdf
+sdf generating: woman_v2.obj
+
+demo-clothOnTable: mesh40k_1_h90.obj
+rendering: table.obj
+sdf: table.sdf
+sdf generating: tableSDF.3dm 0.025 transform
+
+
+demo-clothOverBall_1: cloth_size_17/cloth_40k_1.obj  or  cloth_size_17_alt/cloth_40k_1.obj
+demo-clothOverBall_3: cloth_size_17/cloth_40k_3.obj  or  cloth_size_17_alt/cloth_40k_3.obj
+demo-clothOverBall_6: cloth_size_17/cloth_40k_6.obj  or  cloth_size_17_alt/cloth_40k_6.obj
+Noted that alternated triangle mesh is natual.
+rendering: ball/ball_model.obj
+sdf: ball/ball_small_size_15.sdf
+sdf generating: ball/ball_small_size_15.obj
