@@ -16,3 +16,6 @@
 [submodule "external/gmsh-fork"]
 	path = external/gmsh-fork
 	url = https://gitee.com/peridyno/gmsh-fork.git
+[submodule "external/tinyobjloader"]
+	path = external/tinyobjloader
+	url = https://gitee.com/bigshark151/tinyobjloader.git
