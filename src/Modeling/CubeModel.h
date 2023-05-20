@@ -37,7 +37,7 @@ namespace dyno
 		NBoundingBox boundingBox() override;
 
 	public:
-		DEF_VAR(Vec3f, Length, Real(1), "Edge length");
+		DEF_VAR(Coord, Length, Real(1), "Edge length");
 
 		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");
 

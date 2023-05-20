@@ -37,6 +37,9 @@ namespace dyno
 
 	 	this->stateQuadSet()->promoteOuput();
 		this->stateTriangleSet()->promoteOuput();
+
+		//Do not export the node
+		this->allowExported(false);
 	}
 
 	struct Index2D

@@ -1,6 +1,5 @@
 #pragma once
 #include "EdgeSet.h"
-#include "tinyobjloader/tiny_obj_loader.h"
 
 namespace dyno
 {
