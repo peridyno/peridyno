@@ -120,7 +120,7 @@ namespace dyno
 				std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
 					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-				std::cout << errMsg << std::endl;
+				Log::sendMessage(Log::Error, errMsg);
 				return false;
 			}
 		}

@@ -204,7 +204,7 @@ bool Node::validateInputs()
 			std::string errMsg = std::string("The field ") + f_in->getObjectName() +
 				std::string(" in Node ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-			std::cout << errMsg << std::endl;
+			Log::sendMessage(Log::Info, errMsg);
 			return false;
 		}
 	}
