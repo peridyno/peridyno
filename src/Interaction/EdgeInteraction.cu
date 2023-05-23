@@ -71,6 +71,10 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
+		this->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->outOtherEdgeSet()->getDataPtr()->getEdges().resize(0);
+		this->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->outSelectedEdgeSet()->getDataPtr()->getEdges().resize(0);
 	}
 
 	template<typename TDataType>

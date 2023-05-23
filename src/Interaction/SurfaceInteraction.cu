@@ -71,6 +71,11 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
+
+		this->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->outOtherTriangleSet()->getDataPtr()->getTriangles().resize(0);
+		this->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
 	}
 
 	template<typename TDataType>

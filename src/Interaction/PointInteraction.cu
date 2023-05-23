@@ -71,6 +71,11 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
+
+		this->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->outOtherPointSet()->getDataPtr()->getPoints().resize(0);
+		this->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->outSelectedPointSet()->getDataPtr()->getPoints().resize(0);
 	}
 
 	template<typename TDataType>

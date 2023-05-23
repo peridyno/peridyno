@@ -18,9 +18,6 @@ namespace dyno
 	template<typename TDataType>
 	TriangleSet<TDataType>::~TriangleSet()
 	{
-		mTriangleIndex.clear();
-		mVer2Tri.clear();
-		edg2Tri.clear();
 	}
 
 	template<typename Triangle>

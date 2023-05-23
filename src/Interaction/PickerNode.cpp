@@ -105,15 +105,6 @@ namespace dyno
 		this->edgeInteractor->outEdgeIndex()->allocate();
 		this->pointInteractor->outPointIndex()->allocate();
 		this->surfaceInteractor->outSur2PointIndex()->allocate();
-
-		this->surfaceInteractor->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->surfaceInteractor->outOtherTriangleSet()->getDataPtr()->getTriangles().resize(0);
-		this->surfaceInteractor->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->surfaceInteractor->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
-		this->edgeInteractor->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->edgeInteractor->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->pointInteractor->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->pointInteractor->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 	}
 
 	template<typename TDataType>
