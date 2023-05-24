@@ -15,6 +15,8 @@ namespace dyno
 	template<typename TDataType>
 	EdgeSet<TDataType>::~EdgeSet()
 	{
+		m_edges.clear();
+		m_ver2Edge.clear();
 	}
 
 	__global__ void K_CountNumber(

@@ -18,6 +18,9 @@ namespace dyno
 	template<typename TDataType>
 	TriangleSet<TDataType>::~TriangleSet()
 	{
+		mTriangleIndex.clear();
+		mVer2Tri.clear();
+		edg2Tri.clear();
 	}
 
 	template<typename Triangle>
@@ -147,7 +150,7 @@ namespace dyno
 	void TriangleSet<TDataType>::updateTriangle2Edge()
 	{
 		if (edg2Tri.size() == 0)
-			updateEdges();
+			TriangleSet<TDataType>::updateEdges();
 
 		uint edgSize = edg2Tri.size();
 

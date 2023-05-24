@@ -17,6 +17,8 @@ namespace dyno
 	template<typename TDataType>
 	PointSet<TDataType>::~PointSet()
 	{
+		m_coords.clear();
+		m_pointNeighbors.clear();
 	}
 
 	template<typename TDataType>
