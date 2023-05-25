@@ -88,6 +88,9 @@ namespace dyno {
 			if (mData == nullptr) {
 				mData = std::make_shared<T>();
 			}
+
+			this->tick();
+
 			return mData;
 		}
 

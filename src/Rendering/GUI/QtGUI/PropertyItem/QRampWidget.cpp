@@ -18,14 +18,14 @@ namespace dyno
 		}
 
 		//构建枚举列表
-		int curIndex = int(f->getDataPtr()->mode);
-		int enumNum = f->getDataPtr()->count;
+		int curIndex = int(f->getValue().mode);
+		int enumNum = f->getValue().count;
 
 		QComboBox* combox = new QComboBox;
 		combox->setMaximumWidth(256);
 		for (size_t i = 0; i < enumNum; i++)
 		{
-			auto enumName = f->getDataPtr()->DirectionStrings[i];
+			auto enumName = f->getValue().DirectionStrings[i];
 
 			combox->addItem(QString::fromStdString(enumName));
 		}
@@ -49,9 +49,9 @@ namespace dyno
 
 		QDrawLabel* DrawLabel = new QDrawLabel();
 		DrawLabel->setMode(combox->currentIndex());
-		DrawLabel->setBorderMode(int(f->getDataPtr()->Bordermode));
+		DrawLabel->setBorderMode(int(f->getValue().Bordermode));
 		DrawLabel->setField(f);
-		DrawLabel->copyFromField(f->getDataPtr()->Originalcoord);
+		DrawLabel->copyFromField(f->getValue().Originalcoord);
 		
 		connect(combox, SIGNAL(currentIndexChanged(int)), DrawLabel, SLOT(changeValue(int)));
 

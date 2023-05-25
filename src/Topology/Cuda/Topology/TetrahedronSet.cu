@@ -328,7 +328,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType> tetSet)
+	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType>& tetSet)
 	{
 		m_tethedrons.resize(tetSet.m_tethedrons.size());
 		m_tethedrons.assign(tetSet.m_tethedrons);

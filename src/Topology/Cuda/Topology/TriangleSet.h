@@ -87,7 +87,7 @@ namespace dyno
 		typedef typename TopologyModule::Triangle Triangle;
 
 		TriangleSet();
-		~TriangleSet();
+		~TriangleSet() override;
 
 		void setTriangles(std::vector<Triangle>& triangles);
 		void setTriangles(DArray<Triangle>& triangles);

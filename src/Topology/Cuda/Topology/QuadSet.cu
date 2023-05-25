@@ -17,6 +17,9 @@ namespace dyno
 	template<typename TDataType>
 	QuadSet<TDataType>::~QuadSet()
 	{
+		m_quads.clear();
+		m_ver2Quad.clear();
+		edg2Quad.clear();
 	}
 
 	template<typename Quad>

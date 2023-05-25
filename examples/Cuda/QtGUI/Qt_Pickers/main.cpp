@@ -41,23 +41,23 @@ int main()
 	cube1->stateQuadSet()->connect(pickerNode->inTopology());
 	cube1->stateQuadSet()->promoteOuput();
 
-	auto pointPickerNode = scn->addNode(std::make_shared<PointPickerNode<DataType3f>>());
-	auto cube2 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube2->varLocation()->setValue(Vec3f(-1.25f, 0.0f, 1.25f));
-	cube2->setVisible(false);
-	cube2->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
-	auto cubeSampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
-	cube2->outCube()->connect(cubeSampler->inCube());
-	cubeSampler->statePointSet()->connect(pointPickerNode->inTopology());
-	cubeSampler->statePointSet()->promoteOuput();
-
-	auto edgePickerNode = scn->addNode(std::make_shared<EdgePickerNode<DataType3f>>());
-	auto cube3 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube3->varLocation()->setValue(Vec3f(1.25f, 0.0f, -1.25f));
-	cube3->setVisible(false);
-	cube3->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
-	cube3->stateQuadSet()->connect(edgePickerNode->inTopology());
-	cube3->stateQuadSet()->promoteOuput();
+// 	auto pointPickerNode = scn->addNode(std::make_shared<PointPickerNode<DataType3f>>());
+// 	auto cube2 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+// 	cube2->varLocation()->setValue(Vec3f(-1.25f, 0.0f, 1.25f));
+// 	cube2->setVisible(false);
+// 	cube2->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
+// 	auto cubeSampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+// 	cube2->outCube()->connect(cubeSampler->inCube());
+// 	cubeSampler->statePointSet()->connect(pointPickerNode->inTopology());
+// 	cubeSampler->statePointSet()->promoteOuput();
+// 
+// 	auto edgePickerNode = scn->addNode(std::make_shared<EdgePickerNode<DataType3f>>());
+// 	auto cube3 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+// 	cube3->varLocation()->setValue(Vec3f(1.25f, 0.0f, -1.25f));
+// 	cube3->setVisible(false);
+// 	cube3->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
+// 	cube3->stateQuadSet()->connect(edgePickerNode->inTopology());
+// 	cube3->stateQuadSet()->promoteOuput();
 
 	//auto mesh2 = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
 	//mesh2->varFileName()->setValue(getAssetPath() + "submarine/submarine.obj");

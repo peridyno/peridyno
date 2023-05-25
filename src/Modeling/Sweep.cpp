@@ -246,7 +246,7 @@ namespace dyno
 		Vec3f s = Vec3f(1*radius ,1* radius ,1 *radius);
 		if (this->varuseRamp()->getData() == true) 
 		{
-			float pr = this->varCurveRamp()->getDataPtr()->getCurveValueByX(currentIndex / totalIndex);
+			float pr = this->varCurveRamp()->getValue().getCurveValueByX(currentIndex / totalIndex);
 			std::cout << "采样值为" << pr << std::endl;
 			if (pr != -1) { s = s * pr;}
 		}

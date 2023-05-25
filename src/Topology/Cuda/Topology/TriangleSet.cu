@@ -21,6 +21,9 @@ namespace dyno
 		mTriangleIndex.clear();
 		mVer2Tri.clear();
 		edg2Tri.clear();
+		tri2Edg.clear();
+		m_edgeNormal.clear();
+		m_vertexNormal.clear();
 	}
 
 	template<typename Triangle>

@@ -66,6 +66,25 @@ namespace dyno {
 			return this->constDataPtr() == nullptr;
 		}
 
+		bool connect(FieldType* dst)
+		{
+			this->connectField(dst);
+			return true;
+		}
+
+		bool connect(FBase* dst) override {
+			FieldType* derived = dynamic_cast<FieldType*>(dst);
+			if (derived == nullptr) return false;
+			return this->connect(derived);
+		}
+
+		DataType getData() {
+			auto dataPtr = this->constDataPtr();
+			assert(dataPtr != nullptr);
+			return *dataPtr;
+		}
+
+	private:
 		std::shared_ptr<DataType>& getDataPtr()
 		{
 			FBase* topField = this->getTopField();
@@ -80,27 +99,7 @@ namespace dyno {
 			return derived->m_data;
 		}
 
-		bool connect(FieldType* dst)
-		{
-			this->connectField(dst);
-			return true;
-		}
-
-		bool connect(FBase* dst) override {
-			FieldType* derived = dynamic_cast<FieldType*>(dst);
-			if (derived == nullptr) return false;
-			return this->connect(derived);
-		}
-
-		DataType& getData() {
-			auto dataPtr = this->getDataPtr();
-			assert(dataPtr != nullptr);
-			return *dataPtr;
-		}
-
-	private:
 		std::shared_ptr<DataType> m_data = nullptr;
-	public:
 	};
 
 	template<typename T>
@@ -130,7 +129,7 @@ namespace dyno {
 
 		this->update();
 
-		//this->tick();
+		this->tick();
 	}
 
 

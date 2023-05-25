@@ -48,8 +48,8 @@ namespace dyno
 		auto scale = this->varScale()->getData();
 		auto uniformScale = this->varUniformScale()->getData();
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
-		auto Ramp = this->varCurveRamp()->getDataPtr();
-		auto floatCoord = Ramp->MyCoord;
+		auto Ramp = this->varCurveRamp()->getValue();
+		auto floatCoord = Ramp.MyCoord;
 		int length = floatCoord.size();
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
