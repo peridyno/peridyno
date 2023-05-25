@@ -153,7 +153,7 @@ namespace dyno
 	void TriangleSet<TDataType>::updateTriangle2Edge()
 	{
 		if (edg2Tri.size() == 0)
-			updateEdges();
+			this->updateEdges();
 
 		uint edgSize = edg2Tri.size();
 

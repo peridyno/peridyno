@@ -98,6 +98,7 @@ namespace dyno
 		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 		DArrayList<int>& getVertex2Triangles();
 		DArray<Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
+		DArray<Edg2Tri>& getEdge2Triangle() { return edg2Tri; }
 
 		/**
 		 * @brief update the index from triangle id to edges ids
