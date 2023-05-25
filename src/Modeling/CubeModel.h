@@ -17,6 +17,7 @@
 #pragma once
 #include "Node/ParametricModel.h"
 
+#include "Topology/TriangleSet.h"
 #include "Topology/QuadSet.h"
 
 namespace dyno
@@ -41,9 +42,9 @@ namespace dyno
 
 		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");
 
-		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
-
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
+
+		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
 
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 

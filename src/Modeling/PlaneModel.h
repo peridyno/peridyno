@@ -17,9 +17,9 @@
 #pragma once
 #include "Node/ParametricModel.h"
 
+#include "Topology/TriangleSet.h"
 #include "Topology/QuadSet.h"
 
-#include "GLSurfaceVisualModule.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -43,6 +43,8 @@ namespace dyno
 
 		DEF_VAR(unsigned, SegmentX, unsigned(1), "Segment X");
 		DEF_VAR(unsigned, SegmentZ, unsigned(1), "Segment Z");
+
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
 
