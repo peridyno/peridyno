@@ -1,27 +1,30 @@
-#include "PickerNode.h"
+#include "QuadPickerNode.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(PickerNode, TDataType)
+	IMPLEMENT_TCLASS(QuadPickerNode, TDataType)
 
 	template<typename TDataType>
-	PickerNode<TDataType>::PickerNode(std::string name)
+	QuadPickerNode<TDataType>::QuadPickerNode(std::string name)
 		:Node(name)
 	{
 		auto surfaceInteractor = std::make_shared<SurfaceInteraction<TDataType>>();
 		auto edgeInteractor = std::make_shared<EdgeInteraction<TDataType>>();
 		auto pointInteractor = std::make_shared<PointInteraction<TDataType>>();
 
-		this->inTopology()->connect(surfaceInteractor->inInitialTriangleSet());
+		mapper = std::make_shared<QuadSetToTriangleSet<TDataType>>();
+		this->inTopology()->connect(mapper->inQuadSet());
+		mapper->outTriangleSet()->connect(surfaceInteractor->inInitialTriangleSet());
+		this->graphicsPipeline()->pushModule(mapper);
+
 		this->inTopology()->connect(edgeInteractor->inInitialEdgeSet());
 		this->inTopology()->connect(pointInteractor->inInitialPointSet());
 
 		this->varFloodAngle()->connect(surfaceInteractor->varFloodAngle());
 		this->varToggleFlood()->connect(surfaceInteractor->varToggleFlood());
-		this->varToggleQuad()->connect(surfaceInteractor->varToggleQuad());
 		this->varToggleVisibleFilter()->connect(surfaceInteractor->varToggleVisibleFilter());
 
 		this->varToggleIndexOutput()->connect(surfaceInteractor->varToggleIndexOutput());
@@ -31,9 +34,10 @@ namespace dyno
 		this->varInteractionRadius()->connect(edgeInteractor->varInteractionRadius());
 		this->varInteractionRadius()->connect(pointInteractor->varInteractionRadius());
 
-		this->stateTriQuadIndex()->connect(surfaceInteractor->outTriangleIndex());
+		this->stateQuadIndex()->connect(surfaceInteractor->outTriangleIndex());
 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
+		surfaceInteractor->varToggleQuad()->setValue(true);
 
 		this->stateSur2PointIndex()->connect(surfaceInteractor->outSur2PointIndex());
 
@@ -89,15 +93,15 @@ namespace dyno
 		this->varEdgeOtherSize()->setRange(0.0f, 0.5f);
 		this->varFloodAngle()->setRange(0.0f, 180.0f);
 
-		auto callback1 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingElementType, this));
+		auto callback1 = std::make_shared<FCallBackFunc>(std::bind(&QuadPickerNode<TDataType>::changePickingElementType, this));
 
 		this->varPickingElementType()->attach(callback1);
 
-		auto callback2 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changePickingType, this));
+		auto callback2 = std::make_shared<FCallBackFunc>(std::bind(&QuadPickerNode<TDataType>::changePickingType, this));
 
 		this->varPickingType()->attach(callback2);
 
-		auto callback3 = std::make_shared<FCallBackFunc>(std::bind(&PickerNode<TDataType>::changeMultiSelectionType, this));
+		auto callback3 = std::make_shared<FCallBackFunc>(std::bind(&QuadPickerNode<TDataType>::changeMultiSelectionType, this));
 
 		this->varMultiSelectionType()->attach(callback3);
 
@@ -108,20 +112,21 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	PickerNode<TDataType>::~PickerNode()
+	QuadPickerNode<TDataType>::~QuadPickerNode()
 	{
 	}
 
 	template<typename TDataType>
-	std::string PickerNode<TDataType>::getNodeType()
+	std::string QuadPickerNode<TDataType>::getNodeType()
 	{
 		return "Interaction";
 	}
 
 	template<typename TDataType>
-	void PickerNode<TDataType>::resetStates()
+	void QuadPickerNode<TDataType>::resetStates()
 	{
 		this->inTopology()->getDataPtr()->update();
+		this->mapper->update();
 
 		this->surfaceInteractor->outTriangleIndex()->allocate();
 		this->edgeInteractor->outEdgeIndex()->allocate();
@@ -130,7 +135,7 @@ namespace dyno
 		this->surfaceInteractor->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->surfaceInteractor->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->surfaceInteractor->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
-		this->surfaceInteractor->outOtherTriangleSet()->getDataPtr()->copyFrom(this->inTopology()->getData());
+		this->surfaceInteractor->outOtherTriangleSet()->getDataPtr()->copyFrom(this->mapper->outTriangleSet()->getData());
 
 		this->edgeInteractor->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 		this->edgeInteractor->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
@@ -142,7 +147,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PickerNode<TDataType>::changePickingElementType()
+	void QuadPickerNode<TDataType>::changePickingElementType()
 	{
 		if (this->varPickingElementType()->getValue() == PickingElementTypeSelection::Surface)
 		{
@@ -172,7 +177,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PickerNode<TDataType>::changePickingType()
+	void QuadPickerNode<TDataType>::changePickingType()
 	{
 		if (this->varPickingType()->getValue() == PickingTypeSelection::Click)
 		{
@@ -196,7 +201,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PickerNode<TDataType>::changeMultiSelectionType()
+	void QuadPickerNode<TDataType>::changeMultiSelectionType()
 	{
 		if (this->varMultiSelectionType()->getValue() == MultiSelectionType::OR)
 		{
@@ -218,5 +223,5 @@ namespace dyno
 		}
 	}
 
-	DEFINE_CLASS(PickerNode);
+	DEFINE_CLASS(QuadPickerNode);
 }

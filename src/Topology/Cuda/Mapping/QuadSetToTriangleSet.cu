@@ -46,6 +46,8 @@ namespace dyno
 			tris,
 			quads);
 
+		this->outTriangleSet()->update();
+
 		return true;
 	}
 
