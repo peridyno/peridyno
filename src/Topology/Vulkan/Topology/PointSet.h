@@ -10,6 +10,8 @@ namespace dyno
 		PointSet();
 		~PointSet() override;
 
+		DArray<Vec3f>& getPoints() { return mPoints; }
+
 	public:
 		DArray<Vec3f> mPoints;
 	};

@@ -18,12 +18,11 @@
 #include "Topology/TriangleSet.h"
 
 #include "GLVisualModule.h"
+#include "gl/GPUBuffer.h"
 #include "gl/VertexArray.h"
-#include "VulkanBuffer.h"
 #include "gl/Shader.h"
 
 #include <DeclarePort.h>
-#include <Topology/TriangleSet.h>
 
 namespace dyno
 {
@@ -43,35 +42,56 @@ namespace dyno
 
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 
-		DEF_VAR(bool, UseVertexNormal, false, "")
+		DEF_VAR(bool, UseVertexNormal, false, "");
 
+#ifdef CUDA_BACKEND
+		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
+#endif
+
+#ifdef  VK_BACKEND
 		DEF_INSTANCE_IN(TriangleSet, TriangleSet, "");
+#endif
 
-		//DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:
+		virtual void updateGraphicsContext() override;
+
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-
-		//TODO:
-		virtual void destroyGL() {};
+		virtual void destroyGL() override;
 
 	protected:
 
-		gl::Program*			mShaderProgram;
-
+		gl::Program*	mShaderProgram;
 		gl::VertexArray	mVAO;
 
-		gl::VulkanBuffer* 		mIndexBuffer;
-		gl::VulkanBuffer*		mVertexBuffer;
-		gl::VulkanBuffer*		mNormalBuffer;
-		gl::VulkanBuffer*		mColorBuffer;
-
-		unsigned int	mDrawCount = 0;
+#ifdef CUDA_BACKEND
+		gl::CudaBuffer 	mIndexBuffer;
+		gl::CudaBuffer	mVertexBuffer;
+		gl::CudaBuffer	mNormalBuffer;
+		gl::CudaBuffer	mColorBuffer;
 
 		// for instanced rendering
-		gl::VulkanBuffer*		mInstanceBuffer;
+		gl::CudaBuffer	mInstanceBuffer;
+#endif
+
+#ifdef  VK_BACKEND
+		gl::VulkanBuffer mIndexBuffer;
+		gl::VulkanBuffer mVertexBuffer;
+		gl::VulkanBuffer mNormalBuffer;
+		gl::VulkanBuffer mColorBuffer;
+#endif // DEBUG
+
+		unsigned int	mDrawCount = 0;
 		unsigned int	mInstanceCount = 0;
+
+		// copy data
+		DArray<TopologyModule::Triangle>	triangles;
+		DArray<Vec3f>						vertices;
+		DArray<Vec3f>						normals;
+		DArray<Vec3f>						colors;
+
 	};
 };

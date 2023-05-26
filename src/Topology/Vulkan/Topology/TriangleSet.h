@@ -9,6 +9,8 @@ namespace dyno
 		TriangleSet();
 		~TriangleSet() override;
 
+		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
+
 	protected:
 		void updateTopology() override;
 

@@ -2,12 +2,19 @@
 #include "GLRenderEngine.h"
 
 #include <Utility.h>
-#include <RenderTools.h>
 
 // opengl
 #include <glad/glad.h>
+
+#ifdef CUDA_BACKEND
 // cuda
 #include <cuda_gl_interop.h>
+#endif
+
+#ifdef VK_BACKEND
+
+#endif // VK_BACKEND
+
 
 namespace dyno
 {
@@ -36,12 +43,14 @@ namespace dyno
 
 	bool GLPointVisualModule::initializeGL()
 	{
+		uint vecSize = sizeof(Vec3f) / sizeof(float);
+
 		mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mColor.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		mVertexArray.create();
-		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
-		mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
 
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("point.vert", "point.frag");
 
@@ -69,14 +78,23 @@ namespace dyno
 	{
 		updateMutex.lock();
 
+		uint vecSize = sizeof(Vec3f) / sizeof(float);
+
 		mNumPoints = points.size();
 
 		mVertexArray.bind();
 		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !colors.isEmpty() && colors.size() == mNumPoints)
 		{
+#ifdef CUDA_BACKEND
 			mColor.loadCuda(colors.begin(), mNumPoints * sizeof(float) * 3);
-			mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
+#endif
+
+#ifdef VK_BACKEND
+			mColor.load(colors.buffer(), colors.bufferSize());
+#endif
+
+			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{
@@ -84,7 +102,13 @@ namespace dyno
 		}
 		mVertexArray.unbind();
 
+#ifdef CUDA_BACKEND
 		mPosition.loadCuda(points.begin(), mNumPoints * sizeof(float) * 3);
+#endif
+
+#ifdef VK_BACKEND
+		mPosition.load(points.buffer(), points.bufferSize());
+#endif
 
 		updateMutex.unlock();
 	}

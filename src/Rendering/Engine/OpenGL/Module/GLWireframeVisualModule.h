@@ -15,10 +15,11 @@
  */
 
 #pragma once
+#include "Platform.h"
 #include "Topology/EdgeSet.h"
 
 #include "GLVisualModule.h"
-#include "VulkanBuffer.h"
+#include "gl/GPUBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
@@ -27,27 +28,61 @@ namespace dyno
 	class GLWireframeVisualModule : public GLVisualModule
 	{
 		DECLARE_CLASS(GLWireframeVisualModule)
+
+	public:		
+		// render as lines or cylinder
+		DECLARE_ENUM(EEdgeMode,
+			LINE = 0,
+			CYLINDER = 1);
+
 	public:
 		GLWireframeVisualModule();
-	public:
+		~GLWireframeVisualModule();
+
 		std::string caption() override;
 
+#ifdef CUDA_BACKEND
+		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
+#endif
+
+#ifdef  VK_BACKEND
 		DEF_INSTANCE_IN(EdgeSet, EdgeSet, "");
+#endif // DEBUG
+
+		
+		DEF_VAR(float, Radius, 0.003f, "Cylinder radius");
+		DEF_VAR(float, LineWidth, 1.f, "Line width");
+
+		DEF_ENUM(EEdgeMode, RenderMode, EEdgeMode::LINE, "");
 
 	protected:
+		virtual void updateGraphicsContext() override;
+
 		virtual void paintGL(GLRenderPass mode) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-		virtual void destroyGL() override {};
-
+		virtual void destroyGL() override;
+				
 	private:
 
-		gl::Program* mShaderProgram;
+		gl::Program*	mShaderProgram;
+
 		gl::VertexArray	mVAO;
 
+#ifdef CUDA_BACKEND
+		gl::CudaBuffer	mVertexBuffer;
+		gl::CudaBuffer 	mIndexBuffer;
+#endif // DEBUG
+
+#ifdef  VK_BACKEND
 		gl::VulkanBuffer mVertexBuffer;
 		gl::VulkanBuffer mIndexBuffer;
+#endif
 
-		unsigned int	mDrawCount = 0;
+		unsigned int	mNumEdges = 0;
+
+		// deep copy of input data
+		DArray<TopologyModule::Edge>	edges;
+		DArray<Vec3f>					vertices;
 	};
 };

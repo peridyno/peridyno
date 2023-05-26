@@ -5,7 +5,7 @@
 #include "Topology/DiscreteElements.h"
 
 #include "GLVisualModule.h"
-#include "CudaBuffer.h"
+#include "gl/GPUBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 

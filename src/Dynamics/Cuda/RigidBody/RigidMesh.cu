@@ -48,10 +48,10 @@ namespace dyno
 
 		Coord center(0);
 
-		if (this->varEnvelopeName()->getDataPtr()->string() != "") {
+		if (this->varEnvelopeName()->getValue() != "") {
 			auto initEnvlope = this->stateInitialEnvelope()->getDataPtr();
 
-			initEnvlope->loadObjFile(this->varEnvelopeName()->getDataPtr()->string());
+			initEnvlope->loadObjFile(this->varEnvelopeName()->getValue().string());
 
 			auto points = initEnvlope->getPoints();
 
@@ -89,10 +89,10 @@ namespace dyno
 			this->stateInitialInertia()->setValue(inertia);
 		}
 
-		if (this->varMeshName()->getDataPtr()->string() != "") {
+		if (this->varMeshName()->getValue() != "") {
 			auto initMesh = this->stateInitialMesh()->getDataPtr();
 
-			initMesh->loadObjFile(this->varMeshName()->getDataPtr()->string());
+			initMesh->loadObjFile(this->varMeshName()->getValue().string());
 			initMesh->translate(-center);
 
 			auto curMesh = this->stateMesh()->getDataPtr();
@@ -138,7 +138,7 @@ namespace dyno
 			* dyno::Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
 			* dyno::Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
 
-		if (this->varEnvelopeName()->getDataPtr()->string() != "") {
+		if (this->varEnvelopeName()->getValue().string() != "") {
 			auto initEnvlope = this->stateInitialEnvelope()->getDataPtr();
 
 			auto curEnvlope = this->stateEnvelope()->getDataPtr();
@@ -148,7 +148,7 @@ namespace dyno
 			curEnvlope->translate(location);
 		}
 
-		if (this->varMeshName()->getDataPtr()->string() != "") {
+		if (this->varMeshName()->getValue().string() != "") {
 			auto initMesh = this->stateInitialMesh()->getDataPtr();
 
 			auto curMesh = this->stateMesh()->getDataPtr();

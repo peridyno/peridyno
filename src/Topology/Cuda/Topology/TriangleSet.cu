@@ -22,8 +22,6 @@ namespace dyno
 		mVer2Tri.clear();
 		edg2Tri.clear();
 		tri2Edg.clear();
-		m_edgeNormal.clear();
-		m_vertexNormal.clear();
 	}
 
 	template<typename Triangle>
@@ -448,24 +446,19 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateVertexNormal()
 	{
-		if (this->outVertexNormal()->isEmpty())
-			this->outVertexNormal()->allocate();
-
-		auto& vn = this->outVertexNormal()->getData();
-
 		uint vertSize = this->m_coords.size();
 
 		if (vertSize <= 0)
 			return;
 
-		if (vn.size() != vertSize) {
-			vn.resize(vertSize);
+		if (mVertexNormal.size() != vertSize) {
+			mVertexNormal.resize(vertSize);
 		}
 
 		auto& vert2Tri = getVertex2Triangles();
 		cuExecute(vertSize,
 			TS_SetupVertexNormals,
-			vn,
+			mVertexNormal,
 			this->m_coords,
 			mTriangleIndex,
 			vert2Tri);
@@ -583,8 +576,6 @@ namespace dyno
 			this->m_coords,
 			mTriangleIndex,
 			edg2Tri);
-
-		m_edgeNormal.assign(edgeNormal);
 	}
 
 	template<typename TDataType>
