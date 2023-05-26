@@ -81,7 +81,9 @@ namespace dyno
 			{
 				auto posFd = pSys[i]->statePosition();
 				auto velFd = pSys[i]->stateVelocity();
-				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
+
+				if(!posFd->isEmpty() && velFd->isEmpty())
+					m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
 			}
 
 			auto triSys = this->getTriangularSystems();
@@ -89,7 +91,9 @@ namespace dyno
 			{
 				auto posFd = triSys[i]->statePosition();
 				auto velFd = triSys[i]->stateVelocity();
-				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
+
+				if (!posFd->isEmpty() && velFd->isEmpty())
+					m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
 			}
 
 			auto tetSys = this->getTetrahedralSystems();
@@ -97,15 +101,10 @@ namespace dyno
 			{
 				auto posFd = tetSys[i]->statePosition();
 				auto velFd = tetSys[i]->stateVelocity();
-				m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
-			}
-		}
 
-		Real dl = 0.0005f;
-		if (total_lifting < 0.825)
-		{
-			this->translate(Coord(0.0f, dl, 0.0f));
-			total_lifting += dl;
+				if (!posFd->isEmpty() && velFd->isEmpty())
+					m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
+			}
 		}
 	}
 

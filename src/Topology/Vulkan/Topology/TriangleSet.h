@@ -11,6 +11,9 @@ namespace dyno
 
 		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 
+		//TODO: fix the hack
+		DArray<uint32_t>& getVulkanIndex() { return mIndex; }
+
 	protected:
 		void updateTopology() override;
 

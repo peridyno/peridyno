@@ -37,7 +37,7 @@ namespace dyno
 
 	public:
 		GLWireframeVisualModule();
-		~GLWireframeVisualModule();
+		~GLWireframeVisualModule() override;
 
 		std::string caption() override;
 

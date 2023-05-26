@@ -82,6 +82,8 @@ namespace dyno
 		gl::VulkanBuffer mVertexBuffer;
 		gl::VulkanBuffer mNormalBuffer;
 		gl::VulkanBuffer mColorBuffer;
+
+		DArray<uint>	indices;
 #endif // DEBUG
 
 		unsigned int	mDrawCount = 0;

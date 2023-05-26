@@ -17,6 +17,11 @@ namespace dyno
 
 	GLWireframeVisualModule::~GLWireframeVisualModule()
 	{
+// 		edges.clear();
+// 		vertices.clear();
+
+// 		mVertexBuffer.release();
+// 		mIndexBuffer.release();
 	}
 
 

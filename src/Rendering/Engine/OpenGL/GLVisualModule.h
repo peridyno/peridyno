@@ -36,7 +36,7 @@ namespace dyno
 	{
 	public:
 		GLVisualModule();
-		~GLVisualModule();
+		~GLVisualModule() override;
 
 		// basic Disney PBR material properties
 		void setColor(const Color& color);

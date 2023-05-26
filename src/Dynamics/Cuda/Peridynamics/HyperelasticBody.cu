@@ -90,28 +90,41 @@ namespace dyno
 	void HyperelasticBody<TDataType>::setEnergyModel(XuModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Xuetal);
-		this->varEnergyModel()->getDataPtr()->xuModel = model;
+		auto models = this->varEnergyModel()->getValue();
+		models.xuModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
 		this->varEnergyType()->setValue(NeoHooekean);
-		this->varEnergyModel()->getDataPtr()->neohookeanModel = model;
+		auto models = this->varEnergyModel()->getValue();
+		models.neohookeanModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(LinearModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Linear);
-		this->varEnergyModel()->getDataPtr()->linearModel = model;
+		auto models = this->varEnergyModel()->getValue();
+		models.linearModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(StVKModel<Real> model)
 	{
 		this->varEnergyType()->setValue(StVK);
-		this->varEnergyModel()->getDataPtr()->stvkModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.stvkModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>

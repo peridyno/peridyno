@@ -15,6 +15,15 @@ namespace dyno
 
 	GLSurfaceVisualModule::~GLSurfaceVisualModule()
 	{
+// 		mIndexBuffer.release();
+// 		mVertexBuffer.release();
+// 		mNormalBuffer.release();
+// 		mColorBuffer.release();
+// 
+// 		triangles.clear();
+// 		vertices.clear();
+// 		normals.clear();
+// 		colors.clear();
 	}
 
 	std::string GLSurfaceVisualModule::caption()
@@ -89,9 +98,9 @@ namespace dyno
 
 #ifdef  VK_BACKEND
 		mVertexBuffer.load(vertices.buffer(), vertices.bufferSize());
-		mIndexBuffer.load(triangles.buffer(), triangles.bufferSize());
+		mIndexBuffer.load(indices.buffer(), indices.bufferSize());
 
-		mDrawCount = triangles.size() * 3;
+		mDrawCount = indices.size();
 #endif // DEBUG
 
 
@@ -100,7 +109,15 @@ namespace dyno
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
 			!colors.isEmpty() && colors.size() == vertices.size())
 		{
+#ifdef CUDA_BACKEND
+			mColorBuffer.loadCuda(colors.begin(), colors.size() * sizeof(float) * 3);
+#endif
+
+#ifdef VK_BACKEND
 			mColorBuffer.load(colors.buffer(), colors.bufferSize());
+#endif // VK_BACKEND
+
+
 			mVAO.bindVertexBuffer(&mColorBuffer, 1, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		else
@@ -151,7 +168,15 @@ namespace dyno
 
 		auto triSet = this->inTriangleSet()->getDataPtr();
 
+#ifdef  CUDA_BACKEND
 		triangles.assign(triSet->getTriangles());
+#endif
+
+#ifdef VK_BACKEND
+		indices.assign(triSet->getVulkanIndex());
+#endif // VK_BACKEND
+
+
 		vertices.assign(triSet->getPoints());
 
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&

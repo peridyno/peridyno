@@ -34,6 +34,11 @@ namespace dyno
 
 	GLPointVisualModule::~GLPointVisualModule()
 	{
+// 		points.clear();
+// 		colors.clear();
+// 
+// 		mPosition.release();
+// 		mColor.release();
 	}
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
