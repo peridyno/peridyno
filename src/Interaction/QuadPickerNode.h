@@ -1,24 +1,25 @@
 #pragma once
 #include "Node.h"
-#include "Topology/TriangleSet.h"
+#include "Topology/QuadSet.h"
 #include "Module/TopologyModule.h"
 #include "SurfaceInteraction.h"
 #include "EdgeInteraction.h"
 #include "PointInteraction.h"
+#include "Mapping/QuadSetToTriangleSet.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class PickerNode : public Node
+	class QuadPickerNode : public Node
 	{
-		DECLARE_TCLASS(PickerNode, TDataType)
+		DECLARE_TCLASS(QuadPickerNode, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, Topology, "");
+		DEF_INSTANCE_IN(QuadSet<TDataType>, Topology, "");
 
-		DEF_ARRAY_STATE(int, TriQuadIndex, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(int, QuadIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, EdgeIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, PointIndex, DeviceType::GPU, "");
 		DEF_ARRAY_STATE(int, Sur2PointIndex, DeviceType::GPU, "");
@@ -48,8 +49,6 @@ namespace dyno
 
 		DEF_ENUM(MultiSelectionType, MultiSelectionType, MultiSelectionType::OR, "");
 
-		DEF_VAR(bool, ToggleQuad, true, "The toggle of quad selection");
-
 		DEF_VAR(bool, ToggleFlood, false, "The toggle of surface flood selection");
 
 		DEF_VAR(bool, ToggleVisibleFilter, true, "The toggle of visible filter");
@@ -66,8 +65,8 @@ namespace dyno
 		DEF_VAR(Real, EdgeSelectedSize, 0.002f, "");
 		DEF_VAR(Real, EdgeOtherSize, 0.0015, "");
 
-		PickerNode(std::string name = "default");
-		~PickerNode();
+		QuadPickerNode(std::string name = "default");
+		~QuadPickerNode();
 
 		std::string getNodeType();
 
@@ -81,5 +80,6 @@ namespace dyno
 		std::shared_ptr<SurfaceInteraction<TDataType>> surfaceInteractor;
 		std::shared_ptr<EdgeInteraction<TDataType>> edgeInteractor;
 		std::shared_ptr<PointInteraction<TDataType>> pointInteractor;
+		std::shared_ptr<QuadSetToTriangleSet<TDataType>> mapper;
 	};
 }
