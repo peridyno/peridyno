@@ -17,6 +17,11 @@ namespace dyno
 
 	GLWireframeVisualModule::~GLWireframeVisualModule()
 	{
+// 		edges.clear();
+// 		vertices.clear();
+
+// 		mVertexBuffer.release();
+// 		mIndexBuffer.release();
 	}
 
 
@@ -29,11 +34,13 @@ namespace dyno
 	{
 		mVAO.create();
 
-		mEdges.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
-		mPoints.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
-		mVAO.bindIndexBuffer(&mEdges);
-		mVAO.bindVertexBuffer(&mPoints, 0, 3, GL_FLOAT, 0, 0, 0);
+		uint vecSize = sizeof(Vec3f) / sizeof(float);
+
+		mVAO.bindIndexBuffer(&mIndexBuffer);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
@@ -49,8 +56,8 @@ namespace dyno
 			delete mShaderProgram;
 
 			mVAO.release();
-			mPoints.release();
-			mEdges.release();
+			mVertexBuffer.release();
+			mIndexBuffer.release();
 
 			isGLInitialized = false;
 		}
@@ -63,8 +70,15 @@ namespace dyno
 
 		mNumEdges = edges.size();
 
-		mPoints.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-		mEdges.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
+#ifdef CUDA_BACKEND
+		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
+		mIndexBuffer.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
+#endif
+
+#ifdef  VK_BACKEND
+		mVertexBuffer.load(vertices.buffer(), vertices.bufferSize());
+		mIndexBuffer.load(edges.buffer(), edges.bufferSize());
+#endif // DEBUG
 
 		updateMutex.unlock();
 	}

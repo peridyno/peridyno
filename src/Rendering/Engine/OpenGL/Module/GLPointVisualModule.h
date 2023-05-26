@@ -18,7 +18,7 @@
 #include "Topology/PointSet.h"
 
 #include "GLVisualModule.h"
-#include "CudaBuffer.h"
+#include "gl/GPUBuffer.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
 
@@ -42,7 +42,14 @@ namespace dyno
 		void setColorMapMode(ColorMapMode mode);
 
 	public:
+#ifdef CUDA_BACKEND
 		DEF_INSTANCE_IN(PointSet<DataType3f>, PointSet, "");
+#endif
+
+#ifdef VK_BACKEND
+		DEF_INSTANCE_IN(PointSet, PointSet, "");
+#endif // VK_BACKEND
+
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
@@ -62,8 +69,17 @@ namespace dyno
 	private:
 
 		gl::VertexArray	mVertexArray;
+
+#ifdef CUDA_BACKEND
 		gl::CudaBuffer	mPosition;
 		gl::CudaBuffer	mColor;
+#endif
+
+#ifdef VK_BACKEND
+		gl::VulkanBuffer	mPosition;
+		gl::VulkanBuffer	mColor;
+#endif
+
 		unsigned int	mNumPoints;
 
 		gl::Program*	mShaderProgram = 0;

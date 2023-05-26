@@ -15,11 +15,21 @@
  */
 
 #pragma once
-#include "gl/Buffer.h"
+#include "Platform.h"
 
-struct cudaGraphicsResource;
+#include "Buffer.h"
+
+#ifdef CUDA_BACKEND
+	struct cudaGraphicsResource;
+#endif
+
+#ifdef VK_BACKEND
+#include <VkDeviceArray.h>
+#endif
+
 namespace gl
 {
+#ifdef CUDA_BACKEND
 	class CudaBuffer : public gl::Buffer
 	{
 		GL_OBJECT(CudaBuffer)
@@ -31,6 +41,35 @@ namespace gl
 		void  loadCuda(void* src, int size);
 
 	private:
-		cudaGraphicsResource*	resource = 0; 
+		cudaGraphicsResource* resource = 0;
 	};
+#endif // CUDA_BACKEND
+
+#ifdef VK_BACKEND
+	class VulkanBuffer : public gl::Buffer
+	{
+	public:
+
+		void create(int target, int usage) override;
+		void release() override;
+
+		void allocate(int size) override;
+		void load(VkBuffer src, int size);
+
+	private:
+		VkBuffer		buffer = VK_NULL_HANDLE;
+		VkDeviceMemory	memory = VK_NULL_HANDLE;
+		VkCommandBuffer copyCmd = VK_NULL_HANDLE;
+
+	private:
+
+#ifdef WIN32
+		HANDLE handle = nullptr;  // The Win32 handle
+#else
+		int fd = -1;
+#endif
+		unsigned int memoryObject = 0;  // OpenGL memory object
+
+	};
+#endif	//VK_BACKEND
 }

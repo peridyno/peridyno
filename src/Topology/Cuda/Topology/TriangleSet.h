@@ -100,6 +100,8 @@ namespace dyno
 		DArray<Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
 		DArray<Edg2Tri>& getEdge2Triangle() { return edg2Tri; }
 
+		DArray<Coord>& getVertexNormals() { return mVertexNormal; }
+
 		/**
 		 * @brief update the index from triangle id to edges ids
 		 */
@@ -107,8 +109,6 @@ namespace dyno
 
 		void updateEdgeNormal(DArray<Coord>& edgeNormal);
 		void updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal);
-		DArray<Coord>& getEdgeNormal() { return m_edgeNormal; }
-		DArray<Coord>& getVertexNormal() { return m_vertexNormal; }
 
 
 		void loadObjFile(std::string filename);
@@ -119,9 +119,6 @@ namespace dyno
 			merge(TriangleSet<TDataType>& ts);
 
 		bool isEmpty() override;
-
-	public:
-		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
 
 	protected:
 		void updateTopology() override;
@@ -138,8 +135,7 @@ namespace dyno
 		DArray<::dyno::TopologyModule::Edg2Tri> edg2Tri;
 		DArray<::dyno::TopologyModule::Tri2Edg> tri2Edg;
 
-		DArray<Coord> m_edgeNormal;
-		DArray<Coord> m_vertexNormal;//Angle weighted vertex normal
+		DArray<Coord> mVertexNormal;
 	};
 }
 
