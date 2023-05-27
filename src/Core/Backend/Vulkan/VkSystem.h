@@ -68,7 +68,8 @@ namespace dyno
 		VkPhysicalDeviceFeatures enabledFeatures{};
 		void* deviceCreatepNextChain = nullptr;
 
-		
+		VkDebugUtilsMessengerEXT debugUtilsMessenger = nullptr;
+				
 	public:
 		std::vector<const char*> enabledDeviceExtensions;
 		std::vector<const char*> enabledInstanceExtensions;
