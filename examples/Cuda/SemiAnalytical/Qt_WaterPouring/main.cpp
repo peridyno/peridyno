@@ -72,7 +72,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sphere->varScale()->setValue(Vec3f(0.2f, 0.2f, 0.2f));
 
 	auto merge = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
-	plane->stateQuadSet()->connect(merge->inFirst());
+	plane->stateTriangleSet()->connect(merge->inFirst());
 	sphere->stateTriangleSet()->connect(merge->inSecond());
 
 	//SFI node
