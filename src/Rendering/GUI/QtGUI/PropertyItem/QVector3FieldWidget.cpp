@@ -14,8 +14,13 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
+		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
-		name->setText(FormatFieldWidgetName(field->getObjectName()));
+		QFontMetrics fontMetrics(name->font());
+		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
+		name->setText(elide);
+		//Set label tips
+		name->setToolTip(str);
 
 		spinner1 = new mDoubleSpinBox;
 		spinner1->setMinimumWidth(30);
@@ -43,7 +48,7 @@ namespace dyno
 		layout->addWidget(spinner1, 0, 1);
 		layout->addWidget(spinner2, 0, 2);
 		layout->addWidget(spinner3, 0, 3);
-
+		layout->setSpacing(3);
 
 		std::string template_name = field->getTemplateName();
 

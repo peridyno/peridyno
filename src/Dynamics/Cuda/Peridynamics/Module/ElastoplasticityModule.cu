@@ -14,7 +14,7 @@ namespace dyno
 
 	template<typename TDataType>
 	ElastoplasticityModule<TDataType>::ElastoplasticityModule()
-		: ElasticityModule<TDataType>()
+		: LinearElasticitySolver<TDataType>()
 	{
 		this->attachField(&m_c, "c", "cohesion!", false);
 		this->attachField(&m_phi, "phi", "friction angle!", false);
@@ -49,7 +49,7 @@ namespace dyno
 			return 1.0f;
 	}
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ComputeInvariants(
 		DArray<bool> bYield,
 		DArray<Real> yield_I1,
@@ -58,7 +58,7 @@ namespace dyno
 		DArray<Coord> position,
 		DArray<Real> density,
 		DArray<Real> bulk_stiffiness,
-		DArrayList<NPair> restShape,
+		DArrayList<Bond> restShape,
 		Real horizon,
 		Real A,
 		Real B,
@@ -74,7 +74,7 @@ namespace dyno
 
 		Real s_A = weaking*A;
 
-		List<NPair>& rest_shape_i = restShape[i];
+		List<Bond>& rest_shape_i = restShape[i];
 		Coord rest_pos_i = rest_shape_i[0].pos;
 		Coord cur_pos_i = position[i];
 
@@ -85,7 +85,7 @@ namespace dyno
 		Real total_weight = Real(0);
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			NPair np_j = rest_shape_i[ne];
+			Bond np_j = rest_shape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 			int j = np_j.index;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -113,7 +113,7 @@ namespace dyno
 
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			NPair np_j = rest_shape_i[ne];
+			Bond np_j = rest_shape_i[ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -180,18 +180,18 @@ namespace dyno
 		arrI1[i] = I1_i;
 	}
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ApplyYielding(
 		DArray<Real> yield_I1,
 		DArray<Real> yield_J2,
 		DArray<Real> arrI1,
 		DArray<Coord> position,
-		DArrayList<NPair> restShape)
+		DArrayList<Bond> restShape)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (i >= position.size()) return;
 
-		List<NPair>& rest_shape_i = restShape[i];
+		List<Bond>& rest_shape_i = restShape[i];
 		Coord rest_pos_i = rest_shape_i[0].pos;
 		Coord pos_i = position[i];
 
@@ -203,7 +203,7 @@ namespace dyno
 		int size_i = rest_shape_i.size();
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = rest_shape_i[ne];
+			Bond np_j = rest_shape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 			int j = np_j.index;
 
@@ -226,7 +226,7 @@ namespace dyno
 			Coord D_dev = p.norm()*dir_q - new_q;
 			//Coord D_dev = p - new_q;
 
-			NPair new_np_j;
+			Bond new_np_j;
 
 			//Coord new_rest_pos_j = rest_pos_j + yield_I1_i * D_iso + yield_J2_i * D_dev;
 			Coord new_rest_pos_j = rest_pos_j + (yield_I1_i + yield_I1_j) / 2 * D_iso + (yield_J2_i + yield_J2_j) / 2 * D_dev;
@@ -302,7 +302,7 @@ namespace dyno
 		Real A = computeA();
 		Real B = computeB();
 
-		PM_ComputeInvariants<Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
+		PM_ComputeInvariants<Real, Coord, Matrix, Bond> << <pDims, BLOCK_SIZE >> > (
 			m_bYield,
 			m_yiled_I1,
 			m_yield_J2,
@@ -318,7 +318,7 @@ namespace dyno
 			this->varLambda()->getData());
 		cuSynchronize();
 		// 
-		PM_ApplyYielding<Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
+		PM_ApplyYielding<Real, Coord, Matrix, Bond> << <pDims, BLOCK_SIZE >> > (
 			m_yiled_I1,
 			m_yield_J2,
 			m_I1,
@@ -328,9 +328,9 @@ namespace dyno
 	}
 
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ReconstructRestShape(
-		DArrayList<NPair> new_rest_shape,
+		DArrayList<Bond> new_rest_shape,
 		DArray<bool> bYield,
 		DArray<Coord> position,
 		DArray<Real> I1,
@@ -338,15 +338,15 @@ namespace dyno
 		DArray<Real> J2_yield,
 		DArray<Matrix> invF,
 		DArrayList<int> neighborhood,
-		DArrayList<NPair> restShape,
+		DArrayList<Bond> restShape,
 		Real horizon)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (i >= new_rest_shape.size()) return;
 
 		List<int>& list_i = neighborhood[i];
-		List<NPair>& list_np_i = restShape[i];
-		List<NPair>& new_list_np_i = new_rest_shape[i];
+		List<Bond>& list_np_i = restShape[i];
+		List<Bond>& new_list_np_i = new_rest_shape[i];
 
 		// update neighbors
 		if (!bYield[i])
@@ -356,7 +356,7 @@ namespace dyno
 			int new_size = list_np_i.size();
 			for (int ne = 0; ne < new_size; ne++)
 			{
-				NPair pair = list_np_i[ne];
+				Bond pair = list_np_i[ne];
 				new_list_np_i.insert(pair);
 			}
 		}
@@ -367,7 +367,7 @@ namespace dyno
 
 			Matrix invF_i = invF[i];
 
-			NPair np;
+			Bond np;
 			for (int ne = 0; ne < nbSize; ne++)
 			{
 				int j = list_i[ne];
@@ -380,7 +380,7 @@ namespace dyno
 
 				if (i == j)
 				{
-					NPair np_0 = new_list_np_i[0];
+					Bond np_0 = new_list_np_i[0];
 					new_list_np_i[0] = np;
 					new_list_np_i[ne] = np_0;
 				}
@@ -390,12 +390,12 @@ namespace dyno
 		bYield[i] = false;
 	}
 
-	template <typename NPair>
+	template <typename Bond>
 	__global__ void PM_ReconfigureRestShape(
 		DArray<uint> nbSize,
 		DArray<bool> bYield,
 		DArrayList<int> neighborhood,
-		DArrayList<NPair> restShape)
+		DArrayList<Bond> restShape)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (i >= nbSize.size()) return;
@@ -408,11 +408,11 @@ namespace dyno
 		}
 	}
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ComputeInverseDeformation(
 		DArray<Matrix> invF,
 		DArray<Coord> position,
-		DArrayList<NPair> restShape,
+		DArrayList<Bond> restShape,
 		Real horizon)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -425,12 +425,12 @@ namespace dyno
 		Matrix curM(0);
 		Matrix refM(0);
 
-		List<NPair>& list_np_i = restShape[i];
+		List<Bond>& list_np_i = restShape[i];
 		Coord rest_pos_i = list_np_i[0].pos;
 		int size_i = list_np_i.size();
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = list_np_i[ne];
+			Bond np_j = list_np_i[ne];
 			int j = np_j.index;
 			Coord rest_j = np_j.pos;
 			Real r = (rest_j - rest_pos_i).norm();
@@ -519,7 +519,7 @@ namespace dyno
 			this->inRestShape()->getData());
 
 
-		DArrayList<NPair> newNeighborList;
+		DArrayList<Bond> newNeighborList;
 		newNeighborList.resize(index);
 
 		cuExecute(m_invF.size(),
@@ -578,11 +578,11 @@ namespace dyno
 	}
 
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void EM_RotateRestShape(
 		DArray<Coord> position,
 		DArray<bool> bYield,
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		Real smoothingLength)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -590,7 +590,7 @@ namespace dyno
 
 		SmoothKernel<Real> kernSmooth;
 
-		List<NPair>& rest_shape_i = restShapes[pId];
+		List<Bond>& rest_shape_i = restShapes[pId];
 		Coord rest_pos_i = rest_shape_i[0].pos;
 		int size_i = rest_shape_i.size();
 
@@ -600,7 +600,7 @@ namespace dyno
 		Matrix invK_i(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = rest_shape_i[ne];
+			Bond np_j = rest_shape_i[ne];
 			int j = np_j.index;
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_pos_i - rest_pos_j).norm();
@@ -647,7 +647,7 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = rest_shape_i[ne];
+			Bond np_j = rest_shape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 
 			Coord new_rest_pos_j = rest_pos_i + R*(rest_pos_j - rest_pos_i);
@@ -663,7 +663,7 @@ namespace dyno
 		int num = this->inPosition()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
-		EM_RotateRestShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
+		EM_RotateRestShape <Real, Coord, Matrix, Bond> << <pDims, BLOCK_SIZE >> > (
 			this->inPosition()->getData(),
 			m_bYield,
 			this->inRestShape()->getData(),

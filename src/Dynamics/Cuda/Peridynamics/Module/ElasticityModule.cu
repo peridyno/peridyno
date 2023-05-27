@@ -18,22 +18,22 @@ namespace dyno
 	}
 
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void EM_PrecomputeShape(
 		DArray<Matrix> invK,
-		DArrayList<NPair> restShapes)
+		DArrayList<Bond> restShapes)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= invK.size()) return;
 
-		List<NPair>& restShape_i = restShapes[pId];
-		NPair np_i = restShape_i[0];
+		List<Bond>& restShape_i = restShapes[pId];
+		Bond np_i = restShape_i[0];
 		Coord rest_i = np_i.pos;
 		int size_i = restShape_i.size();
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShape_i[ne];
+			Bond np_j = restShape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_i - rest_pos_j).norm();
 
@@ -46,7 +46,7 @@ namespace dyno
 		Matrix mat_i = Matrix(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShape_i[ne];
+			Bond np_j = restShape_i[ne];
 			Coord rest_j = np_j.pos;
 			Real r = (rest_i - rest_j).norm();
 
@@ -97,14 +97,14 @@ namespace dyno
 		invK[pId] = mat_i;
 	}
 
-	template <typename Real, typename Coord, typename Matrix, typename NPair>
+	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void EM_EnforceElasticity(
 		DArray<Coord> delta_position,
 		DArray<Real> weights,
 		DArray<Real> bulkCoefs,
 		DArray<Matrix> invK,
 		DArray<Coord> position,
-		DArrayList<NPair> restShapes,
+		DArrayList<Bond> restShapes,
 		Real mu,
 		Real lambda)
 	{
@@ -112,8 +112,8 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
 
-		List<NPair>& restShape_i = restShapes[pId];
-		NPair np_i = restShape_i[0];
+		List<Bond>& restShape_i = restShapes[pId];
+		Bond np_i = restShape_i[0];
 		Coord rest_i = np_i.pos;
 		int size_i = restShape_i.size();
 
@@ -126,7 +126,7 @@ namespace dyno
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShape_i[ne];
+			Bond np_j = restShape_i[ne];
 			Coord rest_pos_j = np_j.pos;
 			Real r = (rest_i - rest_pos_j).norm();
 
@@ -140,7 +140,7 @@ namespace dyno
 		Matrix deform_i = Matrix(0.0f);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShape_i[ne];
+			Bond np_j = restShape_i[ne];
 			Coord rest_j = np_j.pos;
 			int j = np_j.index;
 
@@ -191,7 +191,7 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			NPair np_j = restShape_i[ne];
+			Bond np_j = restShape_i[ne];
 			Coord rest_j = np_j.pos;
 			int j = np_j.index;
 
@@ -336,7 +336,7 @@ namespace dyno
 		auto& restShapes = this->inRestShape()->getData();
 		uint pDims = cudaGridSize(restShapes.size(), BLOCK_SIZE);
 
-		EM_PrecomputeShape <Real, Coord, Matrix, NPair> << <pDims, BLOCK_SIZE >> > (
+		EM_PrecomputeShape <Real, Coord, Matrix, Bond> << <pDims, BLOCK_SIZE >> > (
 			mInvK,
 			restShapes);
 		cuSynchronize();
@@ -384,18 +384,18 @@ namespace dyno
 	}
 
 
-	template <typename Coord, typename NPair>
+	template <typename Coord, typename Bond>
 	__global__ void K_UpdateRestShape(
-		DArrayList<NPair> shape,
+		DArrayList<Bond> shape,
 		DArrayList<int> nbr,
 		DArray<Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
 
-		NPair np;
+		Bond np;
 
-		List<NPair>& rest_shape_i = shape[pId];
+		List<Bond>& rest_shape_i = shape[pId];
 		List<int>& list_id_i = nbr[pId];
 		int nbSize = list_id_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
@@ -408,7 +408,7 @@ namespace dyno
 			rest_shape_i.insert(np);
 			if (pId == j)
 			{
-				NPair np_0 = rest_shape_i[0];
+				Bond np_0 = rest_shape_i[0];
 				rest_shape_i[0] = np;
 				rest_shape_i[ne] = np_0;
 			}

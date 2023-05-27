@@ -30,51 +30,32 @@ namespace dyno
 		std::string getModuleType() override { return "Variables"; }
 	};
 
-	//float
-	class FloatSource : public DataSource
+	template<typename TDataType>
+	class FloatingNumber : public DataSource
 	{
-		DECLARE_CLASS(FloatSource);
+		DECLARE_TCLASS(FloatingNumber, TDataType);
 	public:
-		FloatSource();
+		typedef typename TDataType::Real Real;
 
-		DEF_VAR(float, Value, 0.0f, "Initial value");
+		FloatingNumber();
 
-		DEF_VAR_OUT(float, Float, "");
+		DEF_VAR(Real, Value, Real(0), "Initial value");
+
+		DEF_VAR_OUT(Real, Floating, "");
 	};
 
-	//double
-	class DoubleSource : public DataSource
+	template<typename TDataType>
+	class Vector3Source : public DataSource
 	{
-		DECLARE_CLASS(DoubleSource);
+		DECLARE_TCLASS(Vector3Source, TDataType);
 	public:
-		DoubleSource();
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
 
-		DEF_VAR(double, Value, 0.0, "Initial value");
+		Vector3Source();
 
-		DEF_VAR_OUT(double, Double, "");
-	};
+		DEF_VAR(Coord, Value, Real(0), "Initial value");
 
-	//Vec3f
-	class Vec3fSource : public DataSource
-	{
-		DECLARE_CLASS(Vec3fSource);
-	public:
-		Vec3fSource();
-
-		DEF_VAR(Vec3f, Value, Vec3f(0.0f), "Initial value");
-
-		DEF_VAR_OUT(Vec3f, Vector3f, "");
-	};
-
-	//Vec3f
-	class Vec3dSource : public DataSource
-	{
-		DECLARE_CLASS(Vec3dSource);
-	public:
-		Vec3dSource();
-
-		DEF_VAR(Vec3d, Value, Vec3d(0.0), "Initial value");
-
-		DEF_VAR_OUT(Vec3d, Vector3d, "");
+		DEF_VAR_OUT(Coord, Vector, "");
 	};
 }

@@ -61,6 +61,16 @@ void Node::setControllable(bool con)
 	m_controllable = con;
 }
 
+bool Node::canExported()
+{
+	return mExported;
+}
+
+void Node::allowExported(bool ex)
+{
+	mExported = ex;
+}
+
 bool Node::isActive()
 {
 	return mPhysicsEnabled;
@@ -79,6 +89,11 @@ bool Node::isVisible()
 void Node::setVisible(bool visible)
 {
 	mRenderingEnabled = visible;
+
+	if (visible)
+		this->graphicsPipeline()->enable();
+	else
+		this->graphicsPipeline()->disable();
 }
 
 float Node::getDt()
@@ -145,8 +160,6 @@ void Node::update()
 		this->postUpdateStates();
 
 		this->updateTopology();
-
-		this->tick();
 	}
 }
 
@@ -154,6 +167,8 @@ void Node::reset()
 {
 	if (this->validateInputs()) {
 		this->resetStates();
+
+		//When the node is reset, call tick() to force updating all modules
 		this->tick();
 	}
 }
@@ -171,8 +186,6 @@ void Node::postUpdateStates()
 void Node::updateGraphicsContext()
 {
 	this->graphicsPipeline()->update();
-
-	this->tick();
 }
 
 void Node::resetStates()
@@ -191,7 +204,7 @@ bool Node::validateInputs()
 			std::string errMsg = std::string("The field ") + f_in->getObjectName() +
 				std::string(" in Node ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-			std::cout << errMsg << std::endl;
+			Log::sendMessage(Log::Info, errMsg);
 			return false;
 		}
 	}
@@ -406,6 +419,11 @@ bool Node::appendExportNode(NodePort* nodePort)
 
 bool Node::removeExportNode(NodePort* nodePort)
 {
+	//TODO: this is a hack, otherwise the app will crash
+	if (mExportNodes.size() == 0) {
+		return false;
+	}
+
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it == mExportNodes.end()) {
 		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, false));
@@ -435,6 +453,14 @@ void Node::updateTopology()
 
 bool Node::connect(NodePort* nPort)
 {
+	if (!canExported())
+	{
+		Log::sendMessage(Log::Error, this->getClassInfo()->getClassName() + "can not be exported");
+		return false;
+	}
+
+	nPort->notify();
+
 	return this->appendExportNode(nPort);
 }
 

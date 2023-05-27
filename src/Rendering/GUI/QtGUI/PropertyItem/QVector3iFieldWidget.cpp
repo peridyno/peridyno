@@ -13,10 +13,15 @@ namespace dyno
 
 		this->setLayout(layout);
 
+		//Label
 		QLabel* name = new QLabel();
+		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
-		name->setText(FormatFieldWidgetName(field->getObjectName()));
-		name->setWordWrap(true);
+		QFontMetrics fontMetrics(name->font());
+		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
+		name->setText(elide);
+		//Set label tips
+		name->setToolTip(str);
 
 		spinner1 = new QSpinBox;
 		spinner1->setMinimumWidth(30);
@@ -34,6 +39,7 @@ namespace dyno
 		layout->addWidget(spinner1, 0, 1);
 		layout->addWidget(spinner2, 0, 2);
 		layout->addWidget(spinner3, 0, 3);
+		layout->setSpacing(3);
 
 		std::string template_name = field->getTemplateName();
 		int v1 = 0;
@@ -84,13 +90,11 @@ namespace dyno
 		{
 			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(field());
 			f->setValue(Vec3i(v1, v2, v3));
-			f->update();
 		}
 		else if (template_name == std::string(typeid(Vec3u).name()))
 		{
 			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(field());
 			f->setValue(Vec3u(v1, v2, v3));
-			f->update();
 		}
 	}
 

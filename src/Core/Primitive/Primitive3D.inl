@@ -3227,6 +3227,44 @@ namespace dyno
 
 	}
 
+	//***********************  Grid3D  **************************
+	template<typename Real>
+	DYN_FUNC TGrid3D<Real>::TGrid3D()
+	{
+		length = Vec3f(1,1,1);
+		segment = Vec3i(1,1,1);
+		center = Coord3D(0, 0, 0);
+		rotation = Quat<Real>();
+	}
+
+
+	template<typename Real>
+	DYN_FUNC TGrid3D<Real>::TGrid3D(const Vec3f& length_, const Vec3i& segment_)
+	{
+		length = length_;
+		segment = segment_;
+		center = Coord3D(0,0,0);
+		rotation = Quat<Real>();
+	}
+
+	template<typename Real>
+	DYN_FUNC TGrid3D<Real>::TGrid3D(const Vec3f& length_, const Vec3i& segment_, const Coord3D& center_, const Quat<Real>& rotation_)
+	{
+		length = length_;
+		segment = segment_;
+		center = center_;
+		rotation = rotation_;
+	}
+	
+	template<typename Real>
+	DYN_FUNC TGrid3D<Real>::TGrid3D(const TGrid3D<Real>& grid)
+	{
+		length = grid.length;
+		segment = grid.segment;
+		center = grid.center;
+		rotation = grid.rotation;
+		
+	}
 
 	template<typename Real>
 	DYN_FUNC TAlignedBox3D<Real> TSphere3D<Real>::aabb()

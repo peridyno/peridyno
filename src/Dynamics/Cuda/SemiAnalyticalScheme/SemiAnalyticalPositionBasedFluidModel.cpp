@@ -11,8 +11,8 @@
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "ParticleSystem/Module/DensityPBD.h"
 
-#include "Topology/NeighborPointQuery.h"
-#include "Topology/NeighborTriQueryOctree.h"
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriangleQuery.h"
 
 namespace dyno {
 	IMPLEMENT_TCLASS(SemiAnalyticalPositionBasedFluidModel, TDataType)
@@ -23,18 +23,13 @@ namespace dyno {
 	{
 		this->varSmoothingLength()->setValue(Real(0.0125));
 
-		//initGhostBoundary();
-		//printf("INSIDE\n");
-		Start.setValue(30000000);
-		//m_flip.resize(this->inPosition()->size());
-
 		auto m_nbrQueryPoint = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->varSmoothingLength()->connect(m_nbrQueryPoint->inRadius());
 		this->inPosition()->connect(m_nbrQueryPoint->inPosition());
 		this->pushModule(m_nbrQueryPoint);
 		//m_nbrQueryPoint->initialize();
 
-		auto m_nbrQueryTri = std::make_shared<NeighborTriQueryOctree<TDataType>>();
+		auto m_nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		this->varSmoothingLength()->connect(m_nbrQueryTri->inRadius());
 		this->inPosition()->connect(m_nbrQueryTri->inPosition());
 		this->inTriangleVertex()->connect(m_nbrQueryTri->inTriPosition());
@@ -50,7 +45,6 @@ namespace dyno {
 		m_nbrQueryTri->outNeighborIds()->connect(m_pbdModule2->inNeighborTriangleIds());
 		this->inTriangleIndex()->connect(m_pbdModule2->inTriangleIndex());
 		this->inTriangleVertex()->connect(m_pbdModule2->inTriangleVertex());
-		Start.connect(&m_pbdModule2->Start);
 		this->pushModule(m_pbdModule2);
 
 		auto m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();

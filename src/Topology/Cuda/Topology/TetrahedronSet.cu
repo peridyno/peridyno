@@ -328,7 +328,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType> tetSet)
+	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType>& tetSet)
 	{
 		m_tethedrons.resize(tetSet.m_tethedrons.size());
 		m_tethedrons.assign(tetSet.m_tethedrons);
@@ -339,6 +339,12 @@ namespace dyno
 		m_ver2Tet.assign(tetSet.m_ver2Tet);
 
 		TriangleSet<TDataType>::copyFrom(tetSet);
+	}
+
+	template<typename TDataType>
+	bool TetrahedronSet<TDataType>::isEmpty()
+	{
+		return m_tethedrons.size() && TriangleSet<TDataType>::isEmpty();
 	}
 
 	DEFINE_CLASS(TetrahedronSet);

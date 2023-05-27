@@ -5,7 +5,7 @@
 #include "SummationDensity.h"
 
 #include "ImplicitViscosity.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 namespace dyno
 {

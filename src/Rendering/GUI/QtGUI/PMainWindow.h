@@ -57,6 +57,7 @@
 
 #include "NodeEditor/QtNodeFlowWidget.h"
 #include "NodeEditor/QtModuleFlowWidget.h"
+#include "../../external/nodeeditor/include/nodes/internal/QtNode.hpp"
 
 QT_FORWARD_DECLARE_CLASS(QMenu)
 
@@ -112,6 +113,8 @@ namespace dyno
 		void showAbout();
 
 		void showModuleEditor();
+		void openModuleEditor(Qt::QtNode& n);
+		void ModifyModuleEditor(PModuleEditor* moduelEditor);
 
 		void showMessage();
 

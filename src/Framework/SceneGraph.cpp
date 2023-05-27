@@ -268,7 +268,7 @@ namespace dyno
 
 	}
 
-	dyno::NBoundingBox SceneGraph::boundingBox()
+	NBoundingBox SceneGraph::boundingBox()
 	{
 		NBoundingBox box;
 		for (auto it = this->begin(); it != this->end(); it++)

@@ -23,11 +23,7 @@ namespace dyno
 	class ImColorbar : public ImWidget
 	{
 		DECLARE_CLASS(ImColorbar)
-	public:
-		DECLARE_ENUM(ColorTable,
-			Jet = 0,
-			Heat = 1);
-			
+	public:			
 		ImColorbar();
 		~ImColorbar() override;
 
@@ -35,17 +31,41 @@ namespace dyno
 		ImVec2 getCoord() const;
 
 	public:
+		DECLARE_ENUM(ColorTable,
+			Jet = 0,
+			Heat = 1);
+	
+		/**
+		 * @brief 颜色映射方式
+		 */
+		DEF_ENUM(ColorTable, Type, ColorTable::Jet, "");
+
+
 		DECLARE_ENUM(NumberTypeSelection,
 			Dec = 0,
 			Exp = 1);
 			
 		DEF_ENUM(NumberTypeSelection, NumberType, NumberTypeSelection::Dec, "");
-		
-		DEF_ENUM(ColorTable, Type, ColorTable::Jet, "");
-		//DEF_VAR(bool, Fixed, false, "");
+
+		/**
+		 * @brief 是否固定颜色范围为上下限
+		 */
+		DEF_VAR(bool, Isfix, false, "");
+
+		/**
+		 * @brief 颜色映射上下限
+		 */
 		DEF_VAR(Real, Min, Real(0), "");
 		DEF_VAR(Real, Max, Real(1), "");
+
+		/**
+		 * @brief 颜色条名字
+		 */
 		DEF_VAR(std::string, FieldName, "", "");
+
+		/**
+		 * @brief 用于生成颜色范围
+		 */		
 		DEF_ARRAY_IN(Real, Scalar, DeviceType::GPU, "");
 		// DEF_ARRAY_IN(Vec3f, Color, DeviceType::CPU, "");
 		// DEF_ARRAY_IN(int, Value, DeviceType::GPU, "");

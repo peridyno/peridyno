@@ -60,6 +60,8 @@ public Q_SLOTS:
 
 	void enablePhysics(QtNode& n, bool checked);
 
+	void Key2_Signal(QtNode& n, bool checked);
+
 	/**
 	 * Auto layout for the node graph
 	 */

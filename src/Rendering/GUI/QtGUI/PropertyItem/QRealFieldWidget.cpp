@@ -24,13 +24,14 @@ namespace dyno
 
 		QDoubleSpinner* spinner = new QDoubleSpinner;
 		spinner->setRange(field->getMin(), field->getMax());
-		spinner->setFixedWidth(80);
+		spinner->setFixedWidth(100);
 		spinner->setDecimals(3);
 
 		layout->addWidget(name, 0);
 		layout->addWidget(slider, 1);
 		layout->addStretch();
 		layout->addWidget(spinner, 2);
+		layout->setSpacing(3);
 
 		std::string template_name = field->getTemplateName();
 		if (template_name == std::string(typeid(float).name()))

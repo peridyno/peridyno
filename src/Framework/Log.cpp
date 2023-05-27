@@ -50,11 +50,6 @@ namespace dyno
 		}
 	}
 
-	const Log::Message& Log::getLastMessage()
-	{
-		return messages.back();
-	}
-
 	void Log::setOutput(const std::string& filename)
 	{
 		LogDebug("Setting output log file: " + filename);

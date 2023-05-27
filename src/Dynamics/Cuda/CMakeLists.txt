@@ -84,13 +84,15 @@ option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
 option(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME "Enable binding the semi-analycial scheme library" ON)
 
+option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
+
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine)
+    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine)
     build_library(ParticleSystem LIB_DEPENDENCY)
 endif()
 
 if(PERIDYNO_LIBRARY_PERIDYNAMICS)
-    set(LIB_DEPENDENCY Topology ParticleSystem)
+    set(LIB_DEPENDENCY IO Topology ParticleSystem Interaction)
     build_library(Peridynamics LIB_DEPENDENCY)
 endif()
 
@@ -100,7 +102,7 @@ if(PERIDYNO_LIBRARY_RIGIDBODY)
 endif()
 
 if(PERIDYNO_LIBRARY_VOLUME)
-    set(LIB_DEPENDENCY Core IO Framework Topology)
+    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine)
     build_library(Volume LIB_DEPENDENCY)
 endif()
 
@@ -113,4 +115,9 @@ endif()
 if(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME)
     set(LIB_DEPENDENCY Modeling ParticleSystem)
     build_library(SemiAnalyticalScheme LIB_DEPENDENCY)
+endif()
+
+if(PERIDYNO_LIBRARY_MULTIPHYSICS)
+	set(LIB_DEPENDENCY ParticleSystem Peridynamics RigidBody Volume)
+    build_library(Multiphysics LIB_DEPENDENCY)
 endif()

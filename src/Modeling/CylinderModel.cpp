@@ -3,8 +3,6 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
-
-
 namespace dyno
 {
 	template<typename TDataType>
@@ -323,15 +321,10 @@ namespace dyno
 		triangleSet->setPoints(vertices);
 		triangleSet->setTriangles(triangle);
 
-//		triangleSet->updateEdges();
-//		triangleSet->updateVertexNormal();
-
-
 		triangleSet->update();
 
 		vertices.clear();
 		triangle.clear();
-
 	}
 
 

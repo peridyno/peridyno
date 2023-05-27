@@ -27,5 +27,19 @@ namespace dyno
 	{
 		m_nodes.clear();
 	}
+
+	void NodePort::attach(std::shared_ptr<FCallBackFunc> func)
+	{
+		mCallbackFunc.push_back(func);
+	}
+
+	void NodePort::notify()
+	{
+		for (auto func : mCallbackFunc)
+		{
+			func->update();
+		}
+	}
+
 }
 

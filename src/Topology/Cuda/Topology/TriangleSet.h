@@ -87,19 +87,38 @@ namespace dyno
 		typedef typename TopologyModule::Triangle Triangle;
 
 		TriangleSet();
-		~TriangleSet();
+		~TriangleSet() override;
 
-		DArray<Triangle>& getTriangles() { return m_triangles; }
 		void setTriangles(std::vector<Triangle>& triangles);
 		void setTriangles(DArray<Triangle>& triangles);
 
+		/**
+		 * @brief return all triangle indices
+		 */
+		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 		DArrayList<int>& getVertex2Triangles();
+		DArray<Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
+		DArray<Edg2Tri>& getEdge2Triangle() { return edg2Tri; }
+
+		DArray<Coord>& getVertexNormals() { return mVertexNormal; }
+
+		/**
+		 * @brief update the index from triangle id to edges ids
+		 */
+		void updateTriangle2Edge();
+
+		void updateEdgeNormal(DArray<Coord>& edgeNormal);
+		void updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal);
+
 
 		void loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 
-		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
+		std::shared_ptr<TriangleSet<TDataType>> 
+			merge(TriangleSet<TDataType>& ts);
+
+		bool isEmpty() override;
 
 	protected:
 		void updateTopology() override;
@@ -110,10 +129,13 @@ namespace dyno
 		virtual void updateVertexNormal();
 
 	private:
-		DArray<Triangle> m_triangles;
-		DArrayList<int> m_ver2Tri;
+		DArray<Triangle> mTriangleIndex;
+		DArrayList<int> mVer2Tri;
 
 		DArray<::dyno::TopologyModule::Edg2Tri> edg2Tri;
+		DArray<::dyno::TopologyModule::Tri2Edg> tri2Edg;
+
+		DArray<Coord> mVertexNormal;
 	};
 }
 

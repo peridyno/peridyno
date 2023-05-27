@@ -567,7 +567,18 @@ namespace dyno {
 
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
-		ret_num += node.getDataSize();
+		//ret_num += node.getDataSize();
+		int nd_size = node.getDataSize();
+		int t_id = node.getStartIndex();
+		AABB tmp_box;
+		for (int t = 0; t < nd_size; t++)
+		{
+			if (box.intersect(data[m_all_nodes[t_id + t].getDataIndex()], tmp_box))
+			{
+				ret_num++;
+			}
+			
+		}
 
 
 		int lp = node.level();
@@ -685,12 +696,17 @@ namespace dyno {
 		OctreeNode node = m_post_ordered_nodes[m_post_ordered_nodes.size() - 1];
 
 		int nd_size = node.getDataSize();
-
+		AABB tmp_box;
 		int t_id = node.getStartIndex();
 		for (int t = 0; t < nd_size; t++)
 		{
-			ids[shift] = m_all_nodes[t_id + t].getDataIndex();
-			shift++;
+			if (box.intersect(data[m_all_nodes[t_id + t].getDataIndex()], tmp_box))
+			{
+				ids[shift] = m_all_nodes[t_id + t].getDataIndex();
+				shift++;
+			}
+			//ids[shift] = m_all_nodes[t_id + t].getDataIndex();
+			//shift++;
 		}
 		//printf("level = %d, shift = %d\n", 0, shift);
 		int lp = node.level();
@@ -772,7 +788,7 @@ namespace dyno {
 		int level_max)
 	{
 		Real len_max = maximum(box.length(0), maximum(box.length(1), box.length(2)));
-		//len_max /= 4.0f;
+		len_max /= 8.0f;
 		return level_max - clamp(int(ceil(log2(len_max / h_min))), 0, level_max);
 	}
 
@@ -1102,7 +1118,7 @@ namespace dyno {
 	template<typename TDataType>
 	void SparseOctree<TDataType>::construct(DArray<AABB>& aabb)
 	{
-		DArray<int> data_count;
+		
 		data_count.resize(aabb.size());
 
 
@@ -1143,7 +1159,7 @@ namespace dyno {
 
 		construct(m_all_nodes);
 
-		data_count.clear();
+		//data_count.clear();
 		//thrust::sort_by_key(thrust::device, m_key.getDataPtr(), m_key.getDataPtr() + m_key.size(), m_morton.getDataPtr());
 	}
 

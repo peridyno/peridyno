@@ -42,6 +42,9 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Vector, DeviceType::GPU, "");
 
 		DEF_VAR(Vec3f, Color, Vec3f(0,0,0.8f), "Color");
+
+	public:
+		Real pointSize = 0.001f;
 	};
 
 	IMPLEMENT_TCLASS(GLPointVisualNode, TDataType)

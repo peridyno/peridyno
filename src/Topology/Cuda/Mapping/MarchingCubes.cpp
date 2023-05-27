@@ -8,9 +8,6 @@ namespace dyno
 	MarchingCubes<TDataType>::MarchingCubes()
 		: Node()
 	{
-		auto levelSet = std::make_shared<SignedDistanceField<TDataType>>();
-		this->inLevelSet()->setDataPtr(levelSet);
-
 		this->varGridSpacing()->setRange(0.001, 1.0);
 	}
 
@@ -19,15 +16,16 @@ namespace dyno
 	{
 	}
 
+
 	template<typename TDataType>
-	void MarchingCubes<TDataType>::resetStates()
+	void MarchingCubes<TDataType>::constructSurfaceMesh()
 	{
+
 		auto sdfTopo = this->inLevelSet()->getDataPtr();
 		auto isoValue = this->varIsoValue()->getData();
 
 		auto& sdf = sdfTopo->getSDF();
-		sdf.loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-
+		
 		Coord lowerBound = sdf.lowerBound();
 		Coord upperBound = sdf.upperBound();
 
@@ -40,7 +38,8 @@ namespace dyno
 		DArray3D<Real> distances(nx + 1, ny + 1, nz + 1);
 		DArray<int> voxelVertNum(nx * ny * nz);
 
-		MarchingCubesHelper<TDataType>::reconstructSDF(distances,
+		MarchingCubesHelper<TDataType>::reconstructSDF(
+			distances,
 			lowerBound,
 			h,
 			sdf);
@@ -81,6 +80,20 @@ namespace dyno
 		voxelVertNum.clear();
 		vertices.clear();
 		triangles.clear();
+	}
+
+
+	template<typename TDataType>
+	void MarchingCubes<TDataType>::resetStates()
+	{
+		this->constructSurfaceMesh();
+	}
+
+
+	template<typename TDataType>
+	void MarchingCubes<TDataType>::updateStates()
+	{
+		this->constructSurfaceMesh();
 	}
 
 	DEFINE_CLASS(MarchingCubes);

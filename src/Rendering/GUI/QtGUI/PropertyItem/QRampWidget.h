@@ -88,14 +88,14 @@ namespace dyno
 		void setField(FVar<Ramp>* f) { field = f; }
 		void copyFromField(std::vector<Ramp::MyCoord2D> coord01) 
 		{
-			auto ff = field->getDataPtr();
+			auto ff = field->getValue();
 			if (coord01.size()) 
 			{
 				for (auto it : coord01)
 				{
 					Coord0_1 s;
 					s.set(it.x, it.y);
-					reSortCoordArray.push_back(ZeroOneToCoord(s,ff->oMinX, ff->oMaxX, ff->oMinY, ff->oMaxY));
+					reSortCoordArray.push_back(ZeroOneToCoord(s,ff.oMinX, ff.oMaxX, ff.oMinY, ff.oMaxY));
 					//printf("RCApush值：%d\n", ZeroOneToCoord(s, ff->oMinX, ff->oMaxX, ff->oMinY, ff->oMaxY).x, ZeroOneToCoord(s, ff->oMinX, ff->oMaxX, ff->oMinY, ff->oMaxY).y);
 				}
 				printf("拷贝的RCA大小%d\n", reSortCoordArray.size());
@@ -114,7 +114,7 @@ namespace dyno
 		}
 		void copyFromField(std::vector<Ramp::OriginalCoord> coord01)
 		{
-			auto ff = field->getDataPtr();
+			auto ff = field->getValue();
 			if (coord01.size())
 			{
 				for (auto it : coord01)
@@ -143,18 +143,18 @@ namespace dyno
 		void updateFloatCoordArray() { floatCoord.clear(); for (auto it : reSortCoordArray) { floatCoord.push_back(CoordTo0_1Value(it)); } }
 		void CoordtoField(std::vector<Coord0_1> CA, FVar<Ramp>* f) 
 		{	
-			auto s = f->getDataPtr();
-			s->clearMyCoord();
+			auto s = f->getValue();
+			s.clearMyCoord();
 			for (auto it : CA) 
 			{
-				s->addItemMyCoord(it.x,it.y);
+				s.addItemMyCoord(it.x,it.y);
 
 			}
 			for (auto it : CoordArray)
 			{
-				s->addItemOriginalCoord(it.x, it.y);
+				s.addItemOriginalCoord(it.x, it.y);
 			}
-			s->setOriginalCoord(minX,maxX,minY,maxY);
+			s.setOriginalCoord(minX,maxX,minY,maxY);
 		}
 		Coord0_1 CoordTo0_1Value(MyCoord& coord) 
 		{//曲线坐标转换到0-1浮点值，并反转Y轴

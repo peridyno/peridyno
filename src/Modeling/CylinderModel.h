@@ -35,6 +35,8 @@ namespace dyno
 
 		CylinderModel();
 
+		std::string caption() override { return "Cylinder"; }
+
 	public:
 		DEF_VAR(unsigned, Columns, 24, "Cylinder Columns");
 
@@ -55,8 +57,6 @@ namespace dyno
 
 		void varChanged();
 	};
-
-
 
 	IMPLEMENT_TCLASS(CylinderModel, TDataType);
 }

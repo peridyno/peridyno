@@ -9,7 +9,7 @@
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/CalculateNorm.h"
 
@@ -403,33 +403,26 @@ std::shared_ptr<SceneGraph> createScene()
 
 	fluid->graphicsPipeline()->pushModule(instanceRender);
 
-
 	//**********Add Nodes
 	fluid->animationPipeline()->disable();
-	//fluid->addParticleEmitter(emitter0);
-	//fluid->addParticleEmitter(emitter1);
-	fluid->setActive(true);
 
 	//**********Boundary 2
-	auto boundaryMesh = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
-	boundaryMesh->varFileName()->setValue(getAssetPath() + "bar/pipe.obj");
-	boundaryMesh->varLocation()->setValue(Vec3f(Vec3f(0.0, 0.0, 0.0)));
-	boundaryMesh->varScale()->setValue(Vec3f(1 / 5.0));
+	auto pipe = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	pipe->varFileName()->setValue(getAssetPath() + "bar/pipe.obj");
+	pipe->varLocation()->setValue(Vec3f(Vec3f(0.0, 0.0, 0.0)));
+	pipe->varScale()->setValue(Vec3f(1 / 5.0));
 
 	auto meshRenderer = std::make_shared<GLSurfaceVisualModule>();
 	meshRenderer->setColor(Color(0.26f, 0.25f, 0.25f));
 	meshRenderer->setVisible(true);
-	boundaryMesh->stateTopology()->connect(meshRenderer->inTriangleSet());
-	boundaryMesh->graphicsPipeline()->pushModule(meshRenderer);
+	pipe->stateTriangleSet()->connect(meshRenderer->inTriangleSet());
+	pipe->graphicsPipeline()->pushModule(meshRenderer);
 
 	//**********Solid Fluid Interaction Node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
-	sfi->surfaceTensionSet(0.03);
-	sfi->AdhesionIntensitySet(0.1);
-	sfi->RestDensitySet(1000);
 
 	fluid->connect(sfi->importParticleSystems());
-	boundaryMesh->connect(sfi->importBoundaryMeshs());
+	pipe->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	return scn;
 }

@@ -17,6 +17,8 @@ namespace dyno
 	template<typename TDataType>
 	PointSet<TDataType>::~PointSet()
 	{
+		m_coords.clear();
+		m_pointNeighbors.clear();
 	}
 
 	template<typename TDataType>
@@ -68,6 +70,7 @@ namespace dyno
 			m_coords.resize(pointSet.getPointSize());
 		}
 		m_coords.assign(pointSet.getPoints());
+		m_pointNeighbors.assign(pointSet.m_pointNeighbors);
 	}
 
 	template<typename TDataType>
@@ -98,11 +101,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	DArrayList<int>* PointSet<TDataType>::getPointNeighbors()
+	DArrayList<int>& PointSet<TDataType>::getPointNeighbors()
 	{
-		this->updatePointNeighbors();
-
-		return &m_pointNeighbors;
+		return m_pointNeighbors;
 	}
 
 	template<typename TDataType>
@@ -110,6 +111,12 @@ namespace dyno
 	{
 		if (m_coords.isEmpty())
 			return;
+	}
+
+	template<typename TDataType>
+	void dyno::PointSet<TDataType>::updateTopology()
+	{
+		this->updatePointNeighbors();
 	}
 
 	template <typename Real, typename Coord>
@@ -233,6 +240,11 @@ namespace dyno
 		cuExecute(m_coords.size(), PS_Rotate, m_coords, q);
 	}
 
+	template<typename TDataType>
+	bool PointSet<TDataType>::isEmpty()
+	{
+		return m_coords.size() == 0;
+	}
 
 	template<typename TDataType>
 	void PointSet<TDataType>::clear()

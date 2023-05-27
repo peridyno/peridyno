@@ -3,6 +3,8 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
+#include "Mapping/QuadSetToTriangleSet.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -14,10 +16,16 @@ namespace dyno
 
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
+		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+
+		auto q2t = std::make_shared<QuadSetToTriangleSet<TDataType>>();
+		this->stateQuadSet()->connect(q2t->inQuadSet());
+		this->graphicsPipeline()->pushModule(q2t);
+
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
-		this->stateQuadSet()->connect(glModule->inTriangleSet());
+		q2t->outTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
@@ -33,7 +41,11 @@ namespace dyno
 		this->varSegments()->attach(callback);
 		this->varLength()->attach(callback);
 
-		this->stateQuadSet()->promoteOuput();
+	 	this->stateQuadSet()->promoteOuput();
+		this->stateTriangleSet()->promoteOuput();
+
+		//Do not export the node
+		this->allowExported(false);
 	}
 
 	struct Index2D
@@ -46,6 +58,23 @@ namespace dyno
 	bool operator<(const Index2D& lhs, const Index2D& rhs)
 	{
 		return lhs.x != rhs.x ? lhs.x < rhs.x : lhs.y < rhs.y;
+	}
+
+	template<typename TDataType>
+	NBoundingBox CubeModel<TDataType>::boundingBox()
+	{
+		NBoundingBox bound;
+
+		auto box = this->outCube()->getData();
+		auto aabb = box.aabb();
+
+		Coord v0 = aabb.v0;
+		Coord v1 = aabb.v1;
+
+		bound.lower = Vec3f(v0.x, v0.y, v0.z);
+		bound.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return bound;
 	}
 
 	template<typename TDataType>
@@ -84,12 +113,11 @@ namespace dyno
 
 		auto segments = this->varSegments()->getData();
 
-		auto quadSet = this->stateQuadSet()->getDataPtr();
-
 		uint nyz = 2 * (segments[1] + segments[2]);
 
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Quad> quads;
+		std::vector<TopologyModule::Triangle> triangles;
 
 		Real dx = length[0] / segments[0];
 		Real dy = length[1] / segments[1];
@@ -102,6 +130,8 @@ namespace dyno
 		auto RV = [&](const Coord& v)->Coord {
 			return center + q.rotate(v - center);
 		};
+
+		int v0, v1, v2, v3;
 
 		//Rim
 		uint counter = 0;
@@ -166,10 +196,26 @@ namespace dyno
 			{
 				for (int t = 0; t < nyz - 1; t++)
 				{
-					quads.push_back(TopologyModule::Quad(counter + t, counter + t + 1, counter + t + nyz + 1, counter + t + nyz));
+					v0 = counter + t;
+					v1 = counter + t + 1;
+					v2 = counter + t + nyz + 1;
+					v3 = counter + t + nyz;
+
+					quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+
+					triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
+					triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
 				}
 
-				quads.push_back(TopologyModule::Quad(counter + nyz - 1, counter, counter + nyz, counter + 2 * nyz - 1));
+				v0 = counter + nyz - 1;
+				v1 = counter;
+				v2 = counter + nyz;
+				v3 = counter + 2 * nyz - 1;
+
+				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+
+				triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
+				triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
 			}
 
 			counter += nyz;
@@ -189,7 +235,6 @@ namespace dyno
 			}
 		}
 
-		int v0, v1, v2, v3;
 		for (int ny = 0; ny < segments[1]; ny++)
 		{
 			for (int nz = 0; nz < segments[2]; nz++)
@@ -200,6 +245,9 @@ namespace dyno
 				v3 = indexTop[Index2D(ny, nz + 1)];
 
 				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+
+				triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
+				triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
 			}
 		}
 
@@ -227,19 +275,27 @@ namespace dyno
 				v3 = indexBottom[Index2D(ny, nz + 1)];
 
 				quads.push_back(TopologyModule::Quad(v3, v2, v1, v0));
+
+				triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
+				triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
 			}
 		}
 
-		quadSet->setPoints(vertices);
-		quadSet->setQuads(quads);
+		auto qs = this->stateQuadSet()->getDataPtr();
+		qs->setPoints(vertices);
+		qs->setQuads(quads);
+		qs->update();
 
-		//quadSet->updateTriangles();
-		quadSet->update();
+		auto ts = this->stateTriangleSet()->getDataPtr();
+		ts->setPoints(vertices);
+		ts->setTriangles(triangles);
+		ts->update();
 
 		indexTop.clear();
+		indexBottom.clear();
 		vertices.clear();
 		quads.clear();
-	
+		triangles.clear();
 	}
 
 

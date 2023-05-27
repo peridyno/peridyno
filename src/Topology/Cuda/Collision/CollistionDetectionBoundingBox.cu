@@ -438,12 +438,15 @@ namespace dyno
 	template<typename TDataType>
 	void CollistionDetectionBoundingBox<TDataType>::doCollision()
 	{
+		int sum = 0;
+
+		auto upperBound = this->varUpperBound()->getData();
+		auto lowerBound = this->varLowerBound()->getData();
+
 		auto discreteSet = this->inDiscreteElements()->getDataPtr();
 		uint totalSize = discreteSet->totalSize();
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
-
-		int sum = 0;
 
 		mBoundaryContactCounter.resize(discreteSet->totalSize());
 		mBoundaryContactCounter.reset();
@@ -455,12 +458,12 @@ namespace dyno
 				discreteSet->getBoxes(),
 				discreteSet->getTets(),
 				mBoundaryContactCounter,
-				mUpperCorner,
-				mLowerCorner,
+				upperBound,
+				lowerBound,
 				offset);
 
-			sum += m_reduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
-			m_scan.exclusive(mBoundaryContactCounter, true);
+			sum += mReduce.accumulate(mBoundaryContactCounter.begin(), mBoundaryContactCounter.size());
+			mScan.exclusive(mBoundaryContactCounter, true);
 
 			this->outContacts()->resize(sum);
 
@@ -472,8 +475,8 @@ namespace dyno
 					discreteSet->getTets(),
 					mBoundaryContactCounter,
 					this->outContacts()->getData(),
-					mUpperCorner,
-					mLowerCorner,
+					upperBound,
+					lowerBound,
 					offset);
 			}
 		}

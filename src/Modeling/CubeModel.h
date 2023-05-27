@@ -17,9 +17,9 @@
 #pragma once
 #include "Node/ParametricModel.h"
 
+#include "Topology/TriangleSet.h"
 #include "Topology/QuadSet.h"
 
-#include "GLSurfaceVisualModule.h"
 namespace dyno
 {
 	template<typename TDataType>
@@ -33,10 +33,16 @@ namespace dyno
 
 		CubeModel();
 
+		std::string caption() override { return "Cube"; }
+
+		NBoundingBox boundingBox() override;
+
 	public:
-		DEF_VAR(Vec3f, Length, Real(1), "Edge length");
+		DEF_VAR(Coord, Length, Real(1), "Edge length");
 
 		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");
+
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
 

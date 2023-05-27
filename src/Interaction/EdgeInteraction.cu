@@ -71,6 +71,11 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
+		
+		this->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->outOtherEdgeSet()->getDataPtr()->getEdges().resize(0);
+		this->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->outSelectedEdgeSet()->getDataPtr()->getEdges().resize(0);
 	}
 
 	template<typename TDataType>
@@ -297,9 +302,9 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeInteraction<TDataType>::calcEdgeIntersectClick()
 	{
-		EdgeSet<TDataType> initialEdgeSet = this->inInitialEdgeSet()->getData();
-		DArray<Edge> edges = initialEdgeSet.getEdges();
-		DArray<Coord> points = initialEdgeSet.getPoints();
+		auto& initialEdgeSet = this->inInitialEdgeSet()->getData();
+		auto& edges = initialEdgeSet.getEdges();
+		auto& points = initialEdgeSet.getPoints();
 
 		this->tempNumT = edges.size();
 		DArray<int> intersected;
@@ -449,9 +454,9 @@ namespace dyno
 		TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 		
-		EdgeSet<TDataType> initialEdgeSet = this->inInitialEdgeSet()->getData();
-		DArray<Edge> edges = initialEdgeSet.getEdges();
-		DArray<Coord> points = initialEdgeSet.getPoints();
+		auto& initialEdgeSet = this->inInitialEdgeSet()->getData();
+		auto& edges = initialEdgeSet.getEdges();
+		auto& points = initialEdgeSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),
@@ -572,9 +577,9 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeInteraction<TDataType>::mergeIndex()
 	{
-		EdgeSet<TDataType> initialEdgeSet = this->inInitialEdgeSet()->getData();
-		DArray<Edge> edges = initialEdgeSet.getEdges();
-		DArray<Coord> points = initialEdgeSet.getPoints();
+		auto& initialEdgeSet = this->inInitialEdgeSet()->getData();
+		auto& edges = initialEdgeSet.getEdges();
+		auto& points = initialEdgeSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
 		cuExecute(edges.size(),

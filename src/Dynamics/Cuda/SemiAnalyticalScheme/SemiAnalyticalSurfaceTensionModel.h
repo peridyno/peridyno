@@ -31,9 +31,6 @@ namespace dyno
 		DEF_VAR(Real, SmoothingLength, Real(0.006), "smoothing length");//0.006
 		DEF_VAR_IN(Real, TimeStep, "Time step size!");
 
-
-		
-
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, ForceDensity, DeviceType::GPU, "");
@@ -46,7 +43,6 @@ namespace dyno
 		DEF_VAR(Real, SurfaceTension, Real(0.055), "surface tension");
 		DEF_VAR(Real, AdhesionIntensity, Real(30.0), "adhesion");
 		DEF_VAR(Real, RestDensity, Real(1000), "Rest Density");
-
 
 		DeviceArrayField<int> m_flip;
 		DeviceArrayField<Coord> m_velocity_mod;

@@ -87,11 +87,15 @@ endif()
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU")
     target_include_directories(${LIB_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Module>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Node>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
     target_include_directories(${LIB_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Module>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Node>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan/Module>
@@ -101,6 +105,8 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
     target_include_directories(${LIB_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Module>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Node>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Module>

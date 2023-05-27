@@ -24,12 +24,29 @@ namespace dyno
 	template<typename TDataType>
 	bool FixedPoints<TDataType>::initializeImpl()
 	{
-		if (m_position.isEmpty() || m_velocity.isEmpty())
+		printf("initialized!!!!!! %d %d\n", FixedIds.size(), this->inPosition()->size());
+		if (this->inPosition()->isEmpty() || this->inVelocity()->isEmpty())
 		{
 			std::cout << "Exception: " << std::string("FixedPoints's fields are not fully initialized!") << "\n";
 			return false;
 		}
 
+		CArray<int> hostFixedIds;
+		CArray<Coord> hostFixedPos;
+
+		hostFixedIds.resize(FixedIds.size());
+		hostFixedPos.resize(FixedPos.size());
+
+		hostFixedIds.assign(FixedIds.getData());
+		hostFixedPos.assign(FixedPos.getData());
+
+		for (int i = 0; i < hostFixedIds.size(); i++)
+		{
+			addFixedPoint(hostFixedIds[i], hostFixedPos[i]);
+		}
+
+		hostFixedIds.clear();
+		hostFixedPos.clear();
 		return true;
 	}
 
@@ -37,7 +54,7 @@ namespace dyno
 	template<typename TDataType>
 	void FixedPoints<TDataType>::updateContext()
 	{
-		int totalNum = m_position.getData().size();
+		int totalNum = this->inPosition()->getData().size();
 		if (m_bFixed.size() != totalNum)
 		{
 			m_bFixed_host.resize(totalNum);
@@ -121,6 +138,8 @@ namespace dyno
 	template<typename TDataType>
 	void FixedPoints<TDataType>::constrain()
 	{
+		//printf("fixed points!!!!!! %d\n", m_fixedPts.size());
+
 		if (m_fixedPts.size() <= 0)
 			return;
 
@@ -133,8 +152,9 @@ namespace dyno
 
 		uint pDims = cudaGridSize(m_bFixed.size(), BLOCK_SIZE);
 
-		K_DoFixPoints<Coord> << < pDims, BLOCK_SIZE >> > (m_position.getData(), m_velocity.getData(), m_bFixed, m_fixed_positions);
+		K_DoFixPoints<Coord> << < pDims, BLOCK_SIZE >> > (this->inPosition()->getData(), this->inVelocity()->getData(), m_bFixed, m_fixed_positions);
 	}
+	
 
 	template <typename Coord>
 	__global__ void K_DoPlaneConstrain(
@@ -157,7 +177,7 @@ namespace dyno
 	{
 		uint pDims = cudaGridSize(m_bFixed.size(), BLOCK_SIZE);
 
-		K_DoPlaneConstrain<< < pDims, BLOCK_SIZE >> > (m_position.getData(), pos, dir);
+		K_DoPlaneConstrain<< < pDims, BLOCK_SIZE >> > (this->inPosition()->getData(), pos, dir);
 	}
 
 	DEFINE_CLASS(FixedPoints);

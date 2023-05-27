@@ -1,6 +1,6 @@
 #pragma once
-#include "ParticleSystem/ParticleSystem.h"
-#include "NeighborData.h"
+#include "TriangularSystem.h"
+#include "Bond.h"
 
 namespace dyno
 {
@@ -9,35 +9,30 @@ namespace dyno
 	*	\brief	Peridynamics-based cloth.
 	*/
 	template<typename TDataType>
-	class Cloth : public ParticleSystem<TDataType>
+	class Cloth : public TriangularSystem<TDataType>
 	{
 		DECLARE_TCLASS(Cloth, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		Cloth();
-		virtual ~Cloth();
-
-		bool translate(Coord t) override;
-		bool scale(Real s) override;
-
-// 		void loadSurface(std::string filename);
-// 
-// 		std::shared_ptr<Node> getSurface();
+		~Cloth() override;
 
 	public:
-		DEF_VAR(Real, Horizon, 0.01, "Horizon");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "Input");
 
-		DEF_ARRAYLIST_STATE(NPair, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAY_STATE(Coord, OldPosition, DeviceType::GPU, "");
+
+		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;
 
-		void updateTopology() override;
-// 
-// 	private:
-// 		std::shared_ptr<Node> mSurfaceNode;
+		void preUpdateStates() override;
+
+	private:
+		
 	};
 }

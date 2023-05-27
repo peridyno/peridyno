@@ -19,13 +19,8 @@
 
 #include "Topology/TriangleSet.h"
 
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
-
 namespace dyno
 {
-
-
 	template<typename TDataType>
 	class SphereModel : public ParametricModel<TDataType>
 	{
@@ -34,12 +29,6 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-
-
-		DECLARE_ENUM(SphereMode,
-			Theta = 0,
-			RowAndColumns = 1);
-
 
 		SphereModel();
 
@@ -52,7 +41,9 @@ namespace dyno
 
 		DEF_VAR(Real, Radius, 1, "Sphere radius");
 
-		//DEF_VAR(Real, triangleLength, 0.5, "Length of triangle edge");
+		DECLARE_ENUM(SphereMode,
+			Theta = 0,
+			RowAndColumns = 1);
 
 		DEF_ENUM(SphereMode, SphereMode, SphereMode::Theta, "ScaleMode");
 

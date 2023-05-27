@@ -56,6 +56,8 @@ namespace dyno
 	signals:
 		void fieldChanged();
 
+	public slots:
+
 	private:
 		FBase* mField = nullptr;
 

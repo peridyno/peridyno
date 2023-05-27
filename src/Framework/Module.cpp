@@ -59,6 +59,13 @@ namespace dyno
 		}
 
 		if (this->requireUpdate()) {
+
+			//reset input fields
+			for (auto f_in : fields_input)
+			{
+				f_in->tack();
+			}
+
 			//pre processing
 			this->preprocess();
 
@@ -74,10 +81,14 @@ namespace dyno
 				param->tack();
 			}
 
-			//reset input fields
-			for(auto f_in : fields_input)
+			//TODO: a hack, if the input to be modified, use FieldTypeEnum::IO instead 
+			for (auto f_in : fields_input)
 			{
-				f_in->tack();
+				auto f_src = f_in->getTopField();
+				if (f_src->getFieldType() == FieldTypeEnum::State && f_in->getFieldType() == FieldTypeEnum::In)
+				{
+					f_src->tick();
+				}
 			}
 
 			//tag all output fields as modifed
@@ -109,7 +120,7 @@ namespace dyno
 				std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
 					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-				std::cout << errMsg << std::endl;
+				Log::sendMessage(Log::Error, errMsg);
 				return false;
 			}
 		}
@@ -221,6 +232,10 @@ namespace dyno
 		switch (field->getFieldType())
 		{
 		case FieldTypeEnum::In:
+			ret = addInputField(field);
+			break;
+
+		case FieldTypeEnum::IO:
 			ret = addInputField(field);
 			break;
 

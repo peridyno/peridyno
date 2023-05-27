@@ -2,7 +2,8 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/PointSet.h"
 #include "Mapping/PointSetToPointSet.h"
-#include "Topology/NeighborPointQuery.h"
+
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/Peridynamics.h"
 
@@ -75,8 +76,8 @@ namespace dyno
 			this->stateReferencePosition()->allocate();
 			this->stateReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
 
-			this->stateNeighborIds()->allocate();
-			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
+// 			this->stateNeighborIds()->allocate();
+// 			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
 		}
 	}
 

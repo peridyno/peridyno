@@ -2202,10 +2202,10 @@ QToolButton:pressed{
 QToolButton:checked{
 	border: 1px solid black;
 	padding: 2px;
-	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(107, 107, 107, 255), stop:1 rgba(157, 157, 157, 255));
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 #43719a, stop:1 #699fc4);
 	border-width:1px 1px 2px 1px;
 	font-weight: bold;
-	color:#aaaaaa;
+	color:rgb(255,255,255);
 }
 QToolButton:disabled{
 	border-style: outset;

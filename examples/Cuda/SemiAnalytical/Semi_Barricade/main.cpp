@@ -10,9 +10,9 @@
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Mapping/MergeTriangleSet.h"
 
-#include "ParticleWriter.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/CalculateNorm.h"
 
@@ -21,8 +21,6 @@
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 #include <GLInstanceVisualModule.h>
-
-#include <GLRenderEngine.h>
 
 #include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
@@ -78,7 +76,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sRenderf->setColor(Color(0.8f, 0.52f, 0.25f));
 	sRenderf->setVisible(true);
 	sRenderf->varUseVertexNormal()->setValue(true);	// use generated smooth normal
-	barricade->stateTopology()->connect(sRenderf->inTriangleSet());
+	barricade->stateTriangleSet()->connect(sRenderf->inTriangleSet());
 	barricade->graphicsPipeline()->pushModule(sRenderf);
 
 	//Scene boundary
@@ -100,9 +98,13 @@ std::shared_ptr<SceneGraph> createScene()
 	sfi->stateTriangleIndex()->connect(pbd->inTriangleIndex());
 	sfi->animationPipeline()->pushModule(pbd);
 
+	auto merge = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
+	boundary->stateTriangleSet()->connect(merge->inFirst());
+	barricade->stateTriangleSet()->connect(merge->inSecond());
+
 	fluid->connect(sfi->importParticleSystems());
-	barricade->connect(sfi->importBoundaryMeshs());
-	boundary->connect(sfi->importBoundaryMeshs());
+	//barricade->connect(sfi->importBoundaryMeshs());
+	merge->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	return scn;
 }

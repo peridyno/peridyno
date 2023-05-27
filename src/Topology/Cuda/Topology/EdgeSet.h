@@ -85,8 +85,6 @@ namespace dyno
 		EdgeSet();
 		~EdgeSet() override;
 
-		void updatePointNeighbors() override;
-
 		void loadSmeshFile(std::string filename);
 
 		DArray<Edge>& getEdges() {return m_edges;}
@@ -98,6 +96,8 @@ namespace dyno
 
 		DArrayList<int>& getVer2Edge();
 
+		bool isEmpty() override;
+
 	protected:
 		/**
 		 * Override updateEdges to update edges in a special way
@@ -105,6 +105,8 @@ namespace dyno
 		virtual void updateEdges() {};
 
 		void updateTopology() override;
+
+		void updatePointNeighbors() override;
 
 	protected:
 		DArray<Edge> m_edges;

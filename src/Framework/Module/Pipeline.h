@@ -32,6 +32,22 @@ namespace dyno
 		void pushModule(std::shared_ptr<Module> m);
 
 		void popModule(std::shared_ptr<Module> m);
+
+		/**
+		 * Return the first module with TModule type
+		 */
+		template<class TModule>
+		std::shared_ptr<TModule> findFirstModule()
+		{
+			auto& modules = this->activeModules();
+			for (auto m : modules)
+			{
+				auto child = TypeInfo::cast<TModule>(m);
+				if (child != nullptr)
+					return child;
+			}
+			return nullptr;
+		}
 		
 		// clear pipeline and module
 		void clear();

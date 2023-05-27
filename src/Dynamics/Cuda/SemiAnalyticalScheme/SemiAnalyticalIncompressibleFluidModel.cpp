@@ -10,8 +10,8 @@
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
-#include "Topology/NeighborPointQuery.h"
-#include "Topology/NeighborTriQueryOctree.h"
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriangleQuery.h"
 
 #include "SemiAnalyticalIncompressibilityModule.h"
 #include "Node.h"
@@ -20,7 +20,7 @@ namespace dyno {
 
 	IMPLEMENT_TCLASS(SemiAnalyticalIncompressibleFluidModel, TDataType)
 
-		template <typename TDataType>
+	template <typename TDataType>
 	SemiAnalyticalIncompressibleFluidModel<TDataType>::SemiAnalyticalIncompressibleFluidModel()
 		: GroupModule()
 		, m_restRho(Real(1000))
@@ -40,7 +40,7 @@ namespace dyno {
 		m_particle_force_density.connect(m_integrator->inForceDensity());
 		//m_integrator->initialize();
 
-		m_nbrQueryTri = std::make_shared<NeighborTriQueryOctree<TDataType>>();
+		m_nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		m_smoothing_length.connect(m_nbrQueryTri->inRadius());
 		this->m_particle_position.connect(m_nbrQueryTri->inPosition());
 		this->m_triangle_vertex.connect(m_nbrQueryTri->inTriPosition());

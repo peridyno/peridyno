@@ -8,7 +8,6 @@
 namespace dyno
 {
 	typedef typename ::dyno::TAlignedBox3D<Real> AABB;
-
 	typedef unsigned long long int PKey;
 
 	template<typename TDataType>

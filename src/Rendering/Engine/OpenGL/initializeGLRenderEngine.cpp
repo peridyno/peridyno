@@ -38,5 +38,4 @@ namespace dyno
 			[=]()->std::shared_ptr<Node> { return std::make_shared<GLSurfaceVisualNode<DataType3f>>(); });
 #endif // CUDA_BACKEND
 	}
-
 }

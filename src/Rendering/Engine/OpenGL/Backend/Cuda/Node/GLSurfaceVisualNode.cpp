@@ -5,7 +5,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	GLSurfaceVisualNode<TDataType>::GLSurfaceVisualNode()
+	GLSurfaceVisualNode<TDataType>::GLSurfaceVisualNode(bool phong = false)
 		: Node()
 	{
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();

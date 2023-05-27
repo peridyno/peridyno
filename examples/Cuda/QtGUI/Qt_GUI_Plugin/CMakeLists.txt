@@ -1,9 +1,11 @@
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY
         Modeling
-        Interaction
+        RigidBody
         ParticleSystem
+        Peridynamics
         SemiAnalyticalScheme
+        Multiphysics
         QtGUI)
     add_example(Qt_GUI_Plugin Qt LIB_DEPENDENCY)
 endif()

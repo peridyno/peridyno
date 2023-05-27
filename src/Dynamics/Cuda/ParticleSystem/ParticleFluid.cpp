@@ -1,8 +1,15 @@
 #include "ParticleFluid.h"
 
 //ParticleSystem
-#include "Module/PositionBasedFluidModel.h"
-#include "Module/SummationDensity.h"
+#include "Module/ParticleIntegrator.h"
+#include "Module/ImplicitViscosity.h"
+#include "Module/DensityPBD.h"
+
+//Framework
+#include "Auxiliary/DataSource.h"
+
+//Collision
+#include "Collision/NeighborPointQuery.h"
 
 //Topology
 #include "Topology/PointSet.h"
@@ -16,13 +23,38 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid()
 		: ParticleSystem<TDataType>()
 	{
-		auto pbf = std::make_shared<PositionBasedFluidModel<TDataType>>();
-		this->animationPipeline()->pushModule(pbf);
+		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
+		smoothingLength->varValue()->setValue(Real(0.006));
+		this->animationPipeline()->pushModule(smoothingLength);
 
-		this->stateTimeStep()->connect(pbf->inTimeStep());
-		this->statePosition()->connect(pbf->inPosition());
-		this->stateVelocity()->connect(pbf->inVelocity());
-		this->stateForce()->connect(pbf->inForce());
+		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		this->stateTimeStep()->connect(integrator->inTimeStep());
+		this->statePosition()->connect(integrator->inPosition());
+		this->stateVelocity()->connect(integrator->inVelocity());
+		this->stateForce()->connect(integrator->inForceDensity());
+		this->animationPipeline()->pushModule(integrator);
+
+		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+		smoothingLength->outFloating()->connect(nbrQuery->inRadius());
+		this->statePosition()->connect(nbrQuery->inPosition());
+		this->animationPipeline()->pushModule(nbrQuery);
+
+		auto density = std::make_shared<DensityPBD<TDataType>>();
+		smoothingLength->outFloating()->connect(density->varSmoothingLength());
+		this->stateTimeStep()->connect(density->inTimeStep());
+		this->statePosition()->connect(density->inPosition());
+		this->stateVelocity()->connect(density->inVelocity());
+		nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
+		this->animationPipeline()->pushModule(density);
+
+		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+		viscosity->varViscosity()->setValue(Real(1.0));
+		this->stateTimeStep()->connect(viscosity->inTimeStep());
+		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
+		this->statePosition()->connect(viscosity->inPosition());
+		this->stateVelocity()->connect(viscosity->inVelocity());
+		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+		this->animationPipeline()->pushModule(viscosity);
 	}
 
 	template<typename TDataType>
@@ -60,24 +92,27 @@ namespace dyno
 
 				this->statePosition()->resize(totalNum);
 				this->stateVelocity()->resize(totalNum);
+
+				//Currently, the force is simply set to zero
 				this->stateForce()->resize(totalNum);
+				this->stateForce()->reset();
 
 				DArray<Coord>& new_pos = this->statePosition()->getData();
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();
-				DArray<Coord>& new_force = this->stateForce()->getData();
 
+				//Assign attributes from intial states
 				if (curNum > 0)
 				{
-					cudaMemcpy(new_pos.begin(), pBuf.begin(), curNum * sizeof(Coord), cudaMemcpyDeviceToDevice);
-					cudaMemcpy(new_vel.begin(), vBuf.begin(), curNum * sizeof(Coord), cudaMemcpyDeviceToDevice);
-					cudaMemcpy(new_force.begin(), fBuf.begin(), curNum * sizeof(Coord), cudaMemcpyDeviceToDevice);
+					new_pos.assign(pBuf, curNum, 0, 0);
+					new_vel.assign(vBuf, curNum, 0, 0);
 
 					pBuf.clear();
 					vBuf.clear();
 					fBuf.clear();
 				}
 
-				int start = curNum;
+				//Assign attributes from emitters
+				int offset = curNum;
 				for (int i = 0; i < emitters.size(); i++)
 				{
 					int num = emitters[i]->sizeOfParticles();
@@ -85,15 +120,11 @@ namespace dyno
 					{
 						DArray<Coord>& points = emitters[i]->getPositions();
 						DArray<Coord>& vels = emitters[i]->getVelocities();
-						DArray<Coord> fors(num);
-						fors.reset();
 
-						cudaMemcpy(new_pos.begin() + start, points.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(new_vel.begin() + start, vels.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(new_force.begin() + start, fors.begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						fors.clear();
+						new_pos.assign(points, num, offset, 0);
+						new_vel.assign(vels, num, offset, 0);
 
-						start += num;
+						offset += num;
 					}
 				}
 			}
@@ -101,18 +132,17 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleFluid<TDataType>::loadParticleFromNode()
+	void ParticleFluid<TDataType>::loadInitialStates()
 	{
-		std::cout << "load Particles From Nodes." << std::endl;
+		auto initials = this->getInitialStates();
 
-		auto ptcNode = this->getInitialStates();
-		int SetNum = ptcNode.size();
-		int totalNum = 0;
+		if (initials.size() > 0) 
+		{
+			int totalNum = 0;
 
-		if (SetNum > 0) {
-			for (int i = 0; i < SetNum; i++)
+			for (int i = 0; i < initials.size(); i++)
 			{
-				totalNum += ptcNode[i]->statePosition()->size();
+				totalNum += initials[i]->statePosition()->size();
 			}
 
 			this->statePosition()->resize(totalNum);
@@ -126,19 +156,19 @@ namespace dyno
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();
 				DArray<Coord>& new_force = this->stateForce()->getData();
 
-				int start = 0;
-				for (int i = 0; i < SetNum; i++)
+				int offset = 0;
+				for (int i = 0; i < initials.size(); i++)
 				{
-					auto inPos = ptcNode[i]->statePosition()->getDataPtr();
-					auto inVel = ptcNode[i]->stateVelocity()->getDataPtr();
+					auto inPos = initials[i]->statePosition()->getDataPtr();
+					auto inVel = initials[i]->stateVelocity()->getDataPtr();
 					if (!inPos->isEmpty())
 					{
 						uint num = inPos->size();
 
-						cudaMemcpy(new_pos.begin() + start, inPos->begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
-						cudaMemcpy(new_vel.begin() + start, inVel->begin(), num * sizeof(Coord), cudaMemcpyDeviceToDevice);
+						new_pos.assign(*inPos, num, offset, 0);
+						new_vel.assign(*inVel, num, offset, 0);
 
-						start += num;
+						offset += num;
 					}
 				}
 			}
@@ -153,7 +183,7 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleFluid<TDataType>::resetStates()
 	{
-		loadParticleFromNode();
+		loadInitialStates();
 
 		if (!this->statePosition()->isEmpty())
 		{

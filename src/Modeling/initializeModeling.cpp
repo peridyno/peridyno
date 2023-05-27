@@ -2,23 +2,20 @@
 
 #include "NodeFactory.h"
 
+#include "PlaneModel.h"
 #include "CubeModel.h"
 #include "SphereModel.h"
-#include "SphereSampler.h"
 #include "CylinderModel.h"
 #include "ConeModel.h"
 #include "Turning.h"
 #include "Merge.h"
-
-#include "CubeSampler.h"
-#include "SphereSampler.h"
 
 #include "StaticTriangularMesh.h"
 #include "GLWireframeVisualModule.h"
 #include "GLSurfaceVisualModule.h"
 #include "Turning.h"
 
-#include "PoissonDiskSampling.h"
+#include "Mapping/MergeTriangleSet.h"
 
 namespace dyno 
 {
@@ -53,6 +50,13 @@ namespace dyno
 			"ToolBarIco/Modeling/Modeling.png");
 
 		auto group = page->addGroup("Modeling");
+
+		group->addAction(
+			"Plane",
+			"ToolBarIco/Modeling/Plane.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PlaneModel<DataType3f>>();
+			});
 
 		group->addAction(
 			"Cube",
@@ -94,33 +98,8 @@ namespace dyno
 			"Merge",
 			"ToolBarIco/Modeling/CubeCombo.png",
 			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<Merge<DataType3f>>();
+				return std::make_shared<MergeTriangleSet<DataType3f>>();
 			});
-
-
-		group->addAction(
-			"Sphere Sampler",
-			"ToolBarIco/Modeling/SphereSampler_v3.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<SphereSampler<DataType3f>>();
-			});
-
-
-		group->addAction(
-			"Cube Sampler",
-			"ToolBarIco/Modeling/CubeSampler.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<CubeSampler<DataType3f>>();
-			});
-
-		group->addAction(
-			"Poisson Disk Sampler",
-			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<PoissonDiskSampling<DataType3f>>();
-			});
-
-
 	}
 }
 
