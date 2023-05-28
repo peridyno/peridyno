@@ -30,6 +30,8 @@ namespace dyno {
 
 		const std::string& name() const;
 
+		void setWindowTitle(const std::string& title);
+
 		void setCursorPos(double x, double y);
 		double getCursorPosX();
 		double getCursorPosY();
