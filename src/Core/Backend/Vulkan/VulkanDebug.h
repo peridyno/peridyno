@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 #include "vulkan/vulkan.h"
 
@@ -100,3 +101,5 @@ namespace vks
 		void setEventName(VkDevice device, VkEvent _event, const char * name);
 	};
 }
+
+#endif
