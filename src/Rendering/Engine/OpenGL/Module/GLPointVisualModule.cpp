@@ -85,6 +85,15 @@ namespace dyno
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
+#ifdef VK_BACKEND
+		if (mNumPoints != points.size())
+		{
+			mPosition.release();
+			mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+			mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		}
+#endif
+
 		mNumPoints = points.size();
 
 		mVertexArray.bind();
@@ -96,6 +105,10 @@ namespace dyno
 #endif
 
 #ifdef VK_BACKEND
+			mColor.release();
+			mColor.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
+
 			mColor.load(colors.buffer(), colors.bufferSize());
 #endif
 

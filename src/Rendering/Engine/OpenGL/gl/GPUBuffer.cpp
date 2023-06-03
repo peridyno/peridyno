@@ -206,6 +206,12 @@ namespace gl
 	}
 
 	void VulkanBuffer::load(VkBuffer src, int size) {
+
+		if (src == nullptr || size <= 0) {
+			this->release();
+			return;
+		}
+
 		if (size > this->size) {
 			this->allocate(size);
 		}
