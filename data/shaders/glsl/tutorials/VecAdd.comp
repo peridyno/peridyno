@@ -1,0 +1,30 @@
+#version 430
+
+layout(std430, binding = 0) buffer VecA {
+	float A[ ];
+};
+
+layout(std430, binding = 1) buffer VecB {
+	float B[ ];
+};
+
+layout(std430, binding = 2) buffer VecC {
+	float C[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint count;
+} pushConsts;
+
+layout (local_size_x = 128) in;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.count) 
+		return;
+
+    C[index] = A[index] + B[index];
+}

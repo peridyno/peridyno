@@ -11,6 +11,16 @@ namespace dyno
 	{
 	}
 
+	void EdgeSet::setEdges(const DArray<Edge>& edges)
+	{
+		mEdgeIndex.assign(edges);
+	}
+
+	void EdgeSet::setEdges(const std::vector<Edge>& edges)
+	{
+		mEdgeIndex.assign(edges);
+	}
+
 	void EdgeSet::updateTopology()
 	{
 		this->updateEdges();

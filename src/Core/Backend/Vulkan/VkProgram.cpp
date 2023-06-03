@@ -202,9 +202,9 @@ namespace dyno
 	{
 		//Create pipeline layout
 		std::vector<VkPushConstantRange> pushConstantRanges;
-		for (size_t i = 0; i < mConstArgs.size(); i++)
+		for (size_t i = 0; i < mFormalConstants.size(); i++)
 		{
-			pushConstantRanges.push_back(vks::initializers::pushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, mConstArgs[i]->bufferSize(), i));
+			pushConstantRanges.push_back(vks::initializers::pushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, mFormalConstants[i]->bufferSize(), i));
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo =
@@ -232,6 +232,18 @@ namespace dyno
 		assert(shaderStage.module != VK_NULL_HANDLE);
 		shaderModules.push_back(shaderStage.module);
 		return shaderStage;
+	}
+
+	void VkProgram::pushFormalParameter(VkVariable* arg)
+	{
+		mFormalParamters.push_back(arg);
+	}
+
+	void VkProgram::pushFormalConstant(VkVariable* arg)
+	{
+		mFormalConstants.push_back(arg);
+		
+		this->pushFormalParameter(arg);
 	}
 
 	void VkProgram::pushArgument(VkVariable* arg)

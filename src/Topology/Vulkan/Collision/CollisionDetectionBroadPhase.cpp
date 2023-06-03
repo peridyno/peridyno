@@ -20,7 +20,7 @@ namespace dyno
 				BUFFER(AlignedBox3D),		//AABB
 				BUFFER(uint32_t),			//collision type
 				BUFFER(uint32_t),			//shape type
-				UNIFORM(uint32_t))				//number of AABBs
+				CONSTANT(uint32_t))				//number of AABBs
 		);
 		kernel("CollisionCounterInBroadPhase")->load(getAssetPath() + "shaders/glsl/collision/CollisionCounterInBroadPhase.comp.spv");
 
@@ -32,7 +32,7 @@ namespace dyno
 				BUFFER(AlignedBox3D),		//AABB
 				BUFFER(uint32_t),			//collision type
 				BUFFER(uint32_t),			//shape type
-				UNIFORM(uint32_t))				//number of AABBs
+				CONSTANT(uint32_t))				//number of AABBs
 		);
 		kernel("CollisionDetectionInBroadPhase")->load(getAssetPath() + "shaders/glsl/collision/CollisionDetectionInBroadPhase.comp.spv");
 	}

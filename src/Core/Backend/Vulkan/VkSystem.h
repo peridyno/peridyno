@@ -55,7 +55,7 @@ namespace dyno
 		bool validation;
 		bool useMemoryPool = true;
 		std::string name = "Vulkan";
-		uint32_t apiVersion = VK_API_VERSION_1_1;
+		uint32_t apiVersion = VK_API_VERSION_1_2;
 
 		/*!
 		 *	\brief	Vulkan instance, stores all per-application states.

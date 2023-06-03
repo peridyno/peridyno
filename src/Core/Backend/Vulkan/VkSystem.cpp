@@ -108,56 +108,6 @@ namespace dyno {
 		// Select physical device to be used for the Vulkan example
 		// Defaults to the first device unless specified by command line
 		uint32_t selectedDevice = 0;
-/*
-#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
-		// GPU selection via command line argument
-		for (size_t i = 0; i < args.size(); i++)
-		{
-			// Select GPU
-			if ((args[i] == std::string("-g")) || (args[i] == std::string("-gpu")))
-			{
-				char* endptr;
-				uint32_t index = strtol(args[i + 1], &endptr, 10);
-				if (endptr != args[i + 1])
-				{
-					if (index > gpuCount - 1)
-					{
-						std::cerr << "Selected device index " << index << " is out of range, reverting to device 0 (use -listgpus to show available Vulkan devices)" << "\n";
-					}
-					else
-					{
-						std::cout << "Selected Vulkan device " << index << "\n";
-						selectedDevice = index;
-					}
-				};
-				break;
-			}
-			// List available GPUs
-			if (args[i] == std::string("-listgpus"))
-			{
-				uint32_t gpuCount = 0;
-				VK_CHECK_RESULT(vkEnumeratePhysicalDevices(vkInstance, &gpuCount, nullptr));
-				if (gpuCount == 0)
-				{
-					std::cerr << "No Vulkan devices found!" << "\n";
-				}
-				else
-				{
-					// Enumerate devices
-					std::cout << "Available Vulkan devices" << "\n";
-					std::vector<VkPhysicalDevice> devices(gpuCount);
-					VK_CHECK_RESULT(vkEnumeratePhysicalDevices(vkInstance, &gpuCount, devices.data()));
-					for (uint32_t j = 0; j < gpuCount; j++) {
-						VkPhysicalDeviceProperties deviceProperties;
-						vkGetPhysicalDeviceProperties(devices[j], &deviceProperties);
-						std::cout << "Device [" << j << "] : " << deviceProperties.deviceName << std::endl;
-						std::cout << " Type: " << vks::tools::physicalDeviceTypeString(deviceProperties.deviceType) << "\n";
-						std::cout << " API: " << (deviceProperties.apiVersion >> 22) << "." << ((deviceProperties.apiVersion >> 12) & 0x3ff) << "." << (deviceProperties.apiVersion & 0xfff) << "\n";
-					}
-				}
-			}
-		}
-#endif*/
 
 		physicalDevice = physicalDevices[selectedDevice];
 
@@ -322,8 +272,18 @@ namespace dyno {
 			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
 			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-
 		debugCreateInfo.pfnUserCallback = debugUtilsMessengerCallback;
+
+		// also enable shader debug print
+		VkValidationFeatureEnableEXT enabled[] = { VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
+		VkValidationFeaturesEXT validationFeatures{};
+		validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+		validationFeatures.enabledValidationFeatureCount = 1;
+		validationFeatures.pEnabledValidationFeatures = enabled;
+		validationFeatures.disabledValidationFeatureCount = 0;
+		validationFeatures.pDisabledValidationFeatures = nullptr;
+
+		debugCreateInfo.pNext = &validationFeatures;
 
 		if (validation)
 		{
@@ -351,14 +311,7 @@ namespace dyno {
 				std::cerr << "Validation layer VK_LAYER_KHRONOS_validation not present, validation is disabled";
 				instanceCreateInfo.enabledLayerCount = 0;
 				instanceCreateInfo.pNext = nullptr;
-			}
-
-			//features.disabledValidationFeatureCount = 0;
-			//features.enabledValidationFeatureCount = 1;
-			//features.pDisabledValidationFeatures = nullptr;
-			//features.pEnabledValidationFeatures = enabled;
-			//features.pNext = instanceCreateInfo.pNext;
-			
+			}			
 		}
 		VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &vkInstance);
 

@@ -1,0 +1,30 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+layout(std430, binding = 0) buffer IndexOut {
+	int indexOut[ ];
+};
+
+layout(std430, binding = 1) buffer IndexIn {
+	ivec3 indexIn[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+	uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.num) 
+		return;
+
+	ivec3 index3 = indexIn[index];
+	indexOut[3*index] = index3.x;
+	indexOut[3*index+1] = index3.y;
+	indexOut[3*index+2] = index3.z;
+}

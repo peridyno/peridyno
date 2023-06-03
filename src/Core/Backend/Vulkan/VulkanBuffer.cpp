@@ -16,15 +16,15 @@
 
 namespace vks
 {	
-	Buffer::Buffer()
+	Buffer::Buffer(VkDevice dev)
 	{
 		auto ctx = dyno::VkSystem::instance()->currentContext();
 
-		if (ctx == VK_NULL_HANDLE) {
-			vks::tools::exitFatal("Vulkan libraray should be initialized first! \n", 0);
+		if (dev == nullptr && ctx == VK_NULL_HANDLE) {
+			vks::tools::exitFatal("Vulkan library should be initialized first! \n", 0);
 		}
 
-		device = ctx->deviceHandle();
+		device = dev == nullptr ? ctx->deviceHandle() : dev;
 	}
 
 

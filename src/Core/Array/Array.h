@@ -82,6 +82,7 @@ namespace dyno {
 	#endif
 
 		void assign(const Array<T, DeviceType::CPU>& src);
+		void assign(const std::vector<T>& src);
 
 		friend std::ostream& operator<<(std::ostream &out, const Array<T, DeviceType::CPU>& cArray)
 		{
@@ -122,6 +123,15 @@ namespace dyno {
 			this->resize(src.size());
 
 		memcpy(this->begin(), src.begin(), src.size() * sizeof(T));
+	}
+
+	template<typename T>
+	void Array<T, DeviceType::CPU>::assign(const std::vector<T>& src)
+	{
+		if (mData.size() != src.size())
+			this->resize(src.size());
+
+		mData.assign(src.begin(), src.end());
 	}
 
 	template<typename T>
