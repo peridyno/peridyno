@@ -68,21 +68,9 @@ namespace dyno
 		gl::Program*	mShaderProgram;
 
 		gl::VertexArray	mVAO;
-
-#ifdef CUDA_BACKEND
-		gl::CudaBuffer	mVertexBuffer;
-		gl::CudaBuffer 	mIndexBuffer;
-#endif // DEBUG
-
-#ifdef  VK_BACKEND
-		gl::VulkanBuffer mVertexBuffer;
-		gl::VulkanBuffer mIndexBuffer;
-#endif
-
+		gl::XBuffer		mVertexBuffer;
+		gl::XBuffer		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 
-		// deep copy of input data
-		DArray<TopologyModule::Edge>	edges;
-		DArray<Vec3f>					vertices;
 	};
 };

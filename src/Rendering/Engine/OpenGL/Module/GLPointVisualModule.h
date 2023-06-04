@@ -70,23 +70,11 @@ namespace dyno
 
 		gl::VertexArray	mVertexArray;
 
-#ifdef CUDA_BACKEND
-		gl::CudaBuffer	mPosition;
-		gl::CudaBuffer	mColor;
-#endif
-
-#ifdef VK_BACKEND
-		gl::VulkanBuffer	mPosition;
-		gl::VulkanBuffer	mColor;
-#endif
+		gl::XBuffer		mPosition;
+		gl::XBuffer		mColor;
 
 		unsigned int	mNumPoints;
-
 		gl::Program*	mShaderProgram = 0;
-
-		// data copy
-		DArray<Vec3f> points;
-		DArray<Vec3f> colors;
 
 	};
 };

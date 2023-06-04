@@ -88,73 +88,34 @@ namespace dyno
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
-#ifdef CUDA_BACKEND
-		mDrawCount = triangles.size() * 3;
-		// index
-		mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
-		// position
-		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-#endif
-
-#ifdef  VK_BACKEND
-		mVertexBuffer.load(vertices.buffer(), vertices.bufferSize());
-		mIndexBuffer.load(indices.buffer(), indices.bufferSize());
-
-		mDrawCount = indices.size();
-#endif // DEBUG
-
+		mVertexBuffer.mapGL();
+		mIndexBuffer.mapGL();
+		// need to rebind
+		mVAO.bindIndexBuffer(&mIndexBuffer);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
 		mVAO.bind();
-		// vertex or object color
-		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
-			!colors.isEmpty() && colors.size() == vertices.size())
-		{
-#ifdef CUDA_BACKEND
-			mColorBuffer.loadCuda(colors.begin(), colors.size() * sizeof(float) * 3);
-#endif
-
-#ifdef VK_BACKEND
-			mColorBuffer.load(colors.buffer(), colors.bufferSize());
-#endif // VK_BACKEND
-
-
-			mVAO.bindVertexBuffer(&mColorBuffer, 1, vecSize, GL_FLOAT, 0, 0, 0);
-		}
-		else
-		{
-			glDisableVertexAttribArray(1);
-		}
-
-		gl::glCheckError();
-
-		// normal
-		if(this->varUseVertexNormal()->getValue())
-		{
-#ifdef CUDA_BACKEND
-			mNormalBuffer.loadCuda(normals.begin(), normals.size() * sizeof(float) * 3);
-#endif
-
-#ifdef  VK_BACKEND
-			mNormalBuffer.load(normals.buffer(), normals.bufferSize());
-#endif // DEBUG
-
-			mVAO.bindVertexBuffer(&mNormalBuffer, 2, vecSize, GL_FLOAT, 0, 0, 0);
-		}
-		else
-		{
-			glDisableVertexAttribArray(2);
-		}
-
-		mInstanceCount = 0;
-
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
 		// unbind instance buffer
 		glDisableVertexAttribArray(3);
 		glDisableVertexAttribArray(4);
 		glDisableVertexAttribArray(5);
 		glDisableVertexAttribArray(6);
 		glDisableVertexAttribArray(7);
-
 		mVAO.unbind();
+
+		// vertex color
+		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex) {
+			mColorBuffer.mapGL();
+			mVAO.bindVertexBuffer(&mColorBuffer, 1, vecSize, GL_FLOAT, 0, 0, 0);
+		}
+		// vertex normal
+		if(this->varUseVertexNormal()->getValue()) {
+			mNormalBuffer.mapGL();
+			mVAO.bindVertexBuffer(&mNormalBuffer, 2, vecSize, GL_FLOAT, 0, 0, 0);
+		}
+		gl::glCheckError();
 
 		// release data update lock
 		updateMutex.unlock();
@@ -169,29 +130,35 @@ namespace dyno
 		auto triSet = this->inTriangleSet()->getDataPtr();
 
 #ifdef  CUDA_BACKEND
-		triangles.assign(triSet->getTriangles());
-#endif
+		auto indices = triSet->getTriangles();
+		mDrawCount = indices.size() * 3;
+#endif // CUDA_BACKEND
 
 #ifdef VK_BACKEND
-		indices.assign(triSet->getVulkanIndex());
+		auto indices = triSet->getVulkanIndex();
+		mDrawCount = indices.size();
 #endif // VK_BACKEND
 
+		mIndexBuffer.load(indices);
 
-		vertices.assign(triSet->getPoints());
+		auto vertices = triSet->getPoints();
+		mVertexBuffer.load(vertices);
 
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
 			!this->inColor()->isEmpty() &&
 			this->inColor()->getDataPtr()->size() == vertices.size())
 		{
-			colors.assign(this->inColor()->getData());
+			auto colors = this->inColor()->getData();
+			mColorBuffer.load(colors);
 		}
 
 		if (this->varUseVertexNormal()->getData())
 		{			
 			//TODO: optimize the performance
+#ifdef CUDA_BACKEND
 			triSet->update();
-#ifdef  CUDA_BACKEND
-			normals.assign(triSet->getVertexNormals());
+			auto normals = triSet->getVertexNormals();
+			mNormalBuffer.load(normals);
 #endif
 		}
 

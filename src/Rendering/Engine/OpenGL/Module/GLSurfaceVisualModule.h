@@ -67,33 +67,16 @@ namespace dyno
 		gl::Program*	mShaderProgram;
 		gl::VertexArray	mVAO;
 
-#ifdef CUDA_BACKEND
-		gl::CudaBuffer 	mIndexBuffer;
-		gl::CudaBuffer	mVertexBuffer;
-		gl::CudaBuffer	mNormalBuffer;
-		gl::CudaBuffer	mColorBuffer;
-
-		// for instanced rendering
-		gl::CudaBuffer	mInstanceBuffer;
-#endif
-
-#ifdef  VK_BACKEND
-		gl::VulkanBuffer mIndexBuffer;
-		gl::VulkanBuffer mVertexBuffer;
-		gl::VulkanBuffer mNormalBuffer;
-		gl::VulkanBuffer mColorBuffer;
-
-		DArray<uint>	indices;
-#endif // DEBUG
+		gl::XBuffer		mIndexBuffer;
+		gl::XBuffer		mVertexBuffer;
+		gl::XBuffer		mNormalBuffer;
+		gl::XBuffer		mColorBuffer;
 
 		unsigned int	mDrawCount = 0;
-		unsigned int	mInstanceCount = 0;
 
-		// copy data
-		DArray<TopologyModule::Triangle>	triangles;
-		DArray<Vec3f>						vertices;
-		DArray<Vec3f>						normals;
-		DArray<Vec3f>						colors;
+		// for instanced rendering
+		gl::XBuffer		mInstanceBuffer;
+		unsigned int	mInstanceCount = 0;
 
 	};
 };

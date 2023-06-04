@@ -38,7 +38,6 @@ namespace dyno
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
-
 		mVAO.bindIndexBuffer(&mIndexBuffer);
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
@@ -68,17 +67,12 @@ namespace dyno
 	{
 		updateMutex.lock();
 
-		mNumEdges = edges.size();
+		mVertexBuffer.mapGL();
+		mIndexBuffer.mapGL();
 
-#ifdef CUDA_BACKEND
-		mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-		mIndexBuffer.loadCuda(edges.begin(), edges.size() * sizeof(unsigned int) * 2);
-#endif
-
-#ifdef  VK_BACKEND
-		mVertexBuffer.load(vertices.buffer(), vertices.bufferSize());
-		mIndexBuffer.load(edges.buffer(), edges.bufferSize());
-#endif // DEBUG
+		uint vecSize = sizeof(Vec3f) / sizeof(float);
+		mVAO.bindIndexBuffer(&mIndexBuffer);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
 		updateMutex.unlock();
 	}
@@ -89,12 +83,17 @@ namespace dyno
 
 		// copy data
 		auto edgeSet = this->inEdgeSet()->getDataPtr();
-		edges.assign(edgeSet->getEdges());
-		vertices.assign(edgeSet->getPoints());
+		auto edges = edgeSet->getEdges();
+		auto vertices = edgeSet->getPoints();
+
+		mVertexBuffer.load(vertices);
+		mIndexBuffer.load(edges);
+		mNumEdges = edges.size();
 
 		GLVisualModule::updateGraphicsContext();
 		updateMutex.unlock();
 	}
+
 
 	void GLWireframeVisualModule::paintGL(GLRenderPass pass)
 	{

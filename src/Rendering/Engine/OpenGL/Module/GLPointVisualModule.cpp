@@ -85,48 +85,21 @@ namespace dyno
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
-#ifdef VK_BACKEND
-		if (mNumPoints != points.size())
-		{
-			mPosition.release();
-			mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-			mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
-		}
-#endif
+		mPosition.mapGL();
+		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
-		mNumPoints = points.size();
-
-		mVertexArray.bind();
 		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
-			&& !colors.isEmpty() && colors.size() == mNumPoints)
+			&& !this->inColor()->isEmpty())
 		{
-#ifdef CUDA_BACKEND
-			mColor.loadCuda(colors.begin(), mNumPoints * sizeof(float) * 3);
-#endif
-
-#ifdef VK_BACKEND
-			mColor.release();
-			mColor.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
-
-			mColor.load(colors.buffer(), colors.bufferSize());
-#endif
-
+			mColor.mapGL();
 			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{
+			mVertexArray.bind();
 			glDisableVertexAttribArray(1);
+			mVertexArray.unbind();
 		}
-		mVertexArray.unbind();
-
-#ifdef CUDA_BACKEND
-		mPosition.loadCuda(points.begin(), mNumPoints * sizeof(float) * 3);
-#endif
-
-#ifdef VK_BACKEND
-		mPosition.load(points.buffer(), points.bufferSize());
-#endif
 
 		updateMutex.unlock();
 	}
@@ -134,20 +107,26 @@ namespace dyno
 	void GLPointVisualModule::updateGraphicsContext()
 	{
 		updateMutex.lock();
-
 		// update data
-
 		auto pPointSet = this->inPointSet()->getDataPtr();
+		auto points = pPointSet->getPoints();
 
-		points.assign(pPointSet->getPoints());
+		mNumPoints = points.size();
 
-		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
-			&& !this->inColor()->isEmpty())
+		if (mNumPoints > 0)
 		{
-			colors.assign(this->inColor()->getData());
+			mPosition.load(points);
+
+			if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
+				&& !this->inColor()->isEmpty())
+			{
+				auto colors = this->inColor()->getData();
+				mColor.load(colors);
+			}
+
+			GLVisualModule::updateGraphicsContext();
 		}
 
-		GLVisualModule::updateGraphicsContext();
 		updateMutex.unlock();
 	}
 
