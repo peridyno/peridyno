@@ -52,6 +52,7 @@ namespace gl
 	void XBuffer::allocate(int size) 
 	{
 		std::cout << "allocate buffer: " << this->size << " -> " << size << " bytes" << std::endl;
+		this->resized = true;
 
 #ifdef CUDA_BACKEND
 		if (buffer)
@@ -59,7 +60,6 @@ namespace gl
 		cudaMalloc(&buffer, size); 
 		cudaStreamSynchronize(0);
 		this->size = size;
-		this->needRemap = true;
 #endif // CUDA_BACKEND
 
 #ifdef VK_BACKEND
@@ -135,8 +135,6 @@ namespace gl
 		// TODO: for linux and other OS
 #endif  
 
-		// after allocate, the resource should be remap
-		needRemap = true;
 #endif
 	}
 
@@ -181,26 +179,30 @@ namespace gl
 		if (size > this->size || size < (this->size / 4)) {
 			this->allocate(size * 2);
 		}
+
 		cudaMemcpy(buffer, src, size, cudaMemcpyDeviceToDevice);
-		cudaStreamSynchronize(0);
+		//cudaStreamSynchronize(0);
 	}
 #endif
 
 
 	void XBuffer::mapGL()
 	{
-		if (!needRemap)
-			return;
 
 #ifdef CUDA_BACKEND
 		
-		// resize buffer...		
-		glBindBuffer(target, id);
-		glBufferData(target, size, 0, usage);
-		glBindBuffer(target, 0);
+		if (resized)
+		{
+			resized = false;
+			// resize buffer...		
+			glBindBuffer(target, id);
+			glBufferData(target, size, 0, usage);
+			glBindBuffer(target, 0);
 
-		// register the cuda resource after resize...
-		if (resource == 0) {
+			// register the cuda resource after resize...
+			if (resource != 0) {
+				cudaGraphicsUnregisterResource(resource);
+			}
 			cudaGraphicsGLRegisterBuffer(&resource, id, cudaGraphicsRegisterFlagsWriteDiscard);
 		}
 
@@ -208,15 +210,18 @@ namespace gl
 		void* devicePtr = 0;
 		cudaGraphicsMapResources(1, &resource);
 		cudaGraphicsResourceGetMappedPointer(&devicePtr, &size0, resource);
-		cudaMemcpy(devicePtr, buffer, size, cudaMemcpyDefault);
+		cudaMemcpy(devicePtr, buffer, size, cudaMemcpyDeviceToDevice);
 		cudaGraphicsUnmapResources(1, &resource);
-		cudaStreamSynchronize(0);
+		//(cudaStreamSynchronize(0);
 
 #endif // CUDA_BACKEND
 
 
-
 #ifdef VK_BACKEND
+
+		if (!resized)
+			return;
+		resized = false;
 
 		// it seems that we need to re-create buffer and memory object...
 		glDeleteBuffers(1, &id);

@@ -79,8 +79,8 @@ namespace gl
 
 		void loadCuda(void* src, int size);
 #endif
-		// dirty flag for remap OpenGL buffer and Memory object
-		bool needRemap = false;
 
+		// resize flag
+		bool resized = false;
 	};
 }
