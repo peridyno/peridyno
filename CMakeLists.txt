@@ -5,6 +5,7 @@ include(cmake/modules.cmake)
 set(PERIDYNO_GPU_BACKEND "CUDA" CACHE STRING "GPU Backend")
 set_property(CACHE PERIDYNO_GPU_BACKEND PROPERTY STRINGS "CUDA;Vulkan;NoGPU")
 
+set(PERIDYNO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 set(SUPPORTED_LANGUAGES "CXX;C")
 set(GPU_BACKEND "NO_BACKEND")
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
@@ -46,7 +47,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPILATION MODE")    #默认为本项目下各编译目标指定cuda分离编译模式
 	set(CUDA_ARCH_FLAGS 60 CACHE STRING "cuda architectures" FORCE)                                 #默认为所有cuda代码生成computability7.0下二进制代码
 
-	set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
+	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
 	set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/plugin"  CACHE PATH "" FORCE)
 	#file(COPY "data/" DESTINATION "data")
 else()
@@ -177,7 +178,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
-	set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
+	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
@@ -199,7 +200,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
 	IF(WIN32)
 		IF (NOT Vulkan_FOUND)
-			find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${CMAKE_SOURCE_DIR}/libs/vulkan)
+			find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${PERIDYNO_ROOT}/libs/vulkan)
 			IF (Vulkan_LIBRARY)
 				set(Vulkan_FOUND ON)
 				MESSAGE("Using bundled Vulkan library version")
@@ -270,7 +271,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
 
 	if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
-		add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glslang)
+		add_subdirectory(${PERIDYNO_ROOT}/external/glslang)
 		
 		# for cmake version 3.19 and later, we can directly use system's glslc executable
 		if(EXISTS ${Vulkan_GLSLC_EXECUTABLE})

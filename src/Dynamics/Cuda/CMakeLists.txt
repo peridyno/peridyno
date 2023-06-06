@@ -50,7 +50,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
     endif()
 
     target_include_directories(${LIB_NAME} PUBLIC 
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Dynamics/Cuda>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Dynamics/Cuda>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Dynamics/Cuda>)
 
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."

@@ -101,11 +101,11 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
     #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
     target_include_directories(${LIB_NAME} PUBLIC 
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Core>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Core/Backend/Cuda>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/eigen>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Core>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Core/Backend/Cuda>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external/eigen>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external/glm-0.9.9.7>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7>)
