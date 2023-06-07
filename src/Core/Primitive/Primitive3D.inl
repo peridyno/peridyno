@@ -3167,103 +3167,68 @@ namespace dyno
 	DYN_FUNC TCylinder3D<Real>::TCylinder3D()
 	{
 		center = Coord3D(0);
-		radius = 0.3;
-		row = 4;
-		columns = 24;
-		height = 0.9;
-		end_segment = 3;
+		height = Real(1);
+		radius = Real(0.5);
+
+		rotation = Quat<Real>();
+		scale = Coord3D(1);
 	}
 
 	template<typename Real>
-	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Real& radius_, const Real& row_, const Real& columns_, const Real& height_, const Real& end_segment_, const Coord3D& center_)
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot, const Coord3D& s)
 	{
-		radius = radius_;
-		row = row_;
-		columns = columns_;
-		height = height_;
-		end_segment = end_segment_;
-		center = center_;
+		center = c;
+		height = h;
+		radius = r;
+
+		rotation = rot;
+		scale = s;
 	}
 
 	template<typename Real>
-	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const TCylinder3D<Real>& tour)
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const TCylinder3D<Real>& cylinder)
 	{
-		radius = tour.radius;
-		row = tour.row;
-		columns = tour.columns;
-		height = tour.height;
-		center = tour.center;
+		center = cylinder.center;
+		height = cylinder.height;
+		radius = cylinder.radius;
+
+		rotation = cylinder.rotation;
+		scale = cylinder.scale;
 	}
 
 	//***********************  Cone3D  **************************
 		template<typename Real>
 	DYN_FUNC TCone3D<Real>::TCone3D()
 	{
-		radius = 0.3;
-		row = 4;
-		columns = 24;
-		height = 0.9;
+		center = Coord3D(0);
+		height = Real(1);
+		radius = Real(0.5);
 
-	}
-
-
-	template<typename Real>
-	DYN_FUNC TCone3D<Real>::TCone3D( const Real& radius_, const Real& row_, const Real& columns_, const Real& height_)
-	{
-		radius = radius_;
-		row = row_;
-		columns = columns_;
-		height = height_;
-
-	}
-
-	template<typename Real>
-	DYN_FUNC TCone3D<Real>::TCone3D(const TCone3D<Real>& Cone)
-	{
-		radius = Cone.radius;
-		row = Cone.row;
-		columns = Cone.columns;
-		height = Cone.height;
-
-	}
-
-	//***********************  Grid3D  **************************
-	template<typename Real>
-	DYN_FUNC TGrid3D<Real>::TGrid3D()
-	{
-		length = Vec3f(1,1,1);
-		segment = Vec3i(1,1,1);
-		center = Coord3D(0, 0, 0);
 		rotation = Quat<Real>();
+		scale = Coord3D(1);
 	}
 
 
 	template<typename Real>
-	DYN_FUNC TGrid3D<Real>::TGrid3D(const Vec3f& length_, const Vec3i& segment_)
+	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1))
 	{
-		length = length_;
-		segment = segment_;
-		center = Coord3D(0,0,0);
-		rotation = Quat<Real>();
+		center = c;
+		height = h;
+		radius = r;
+
+		rotation = rot;
+		scale = s;
 	}
 
 	template<typename Real>
-	DYN_FUNC TGrid3D<Real>::TGrid3D(const Vec3f& length_, const Vec3i& segment_, const Coord3D& center_, const Quat<Real>& rotation_)
+	DYN_FUNC TCone3D<Real>::TCone3D(const TCone3D<Real>& cone)
 	{
-		length = length_;
-		segment = segment_;
-		center = center_;
-		rotation = rotation_;
-	}
-	
-	template<typename Real>
-	DYN_FUNC TGrid3D<Real>::TGrid3D(const TGrid3D<Real>& grid)
-	{
-		length = grid.length;
-		segment = grid.segment;
-		center = grid.center;
-		rotation = grid.rotation;
-		
+		center = cone.center;
+		height = cone.height;
+		radius = cone.radius;
+
+		rotation = cone.rotation;
+		scale = cone.scale;
 	}
 
 	template<typename Real>

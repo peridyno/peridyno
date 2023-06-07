@@ -608,69 +608,42 @@ namespace dyno
 	class TCylinder3D
 	{
 	public:
-		typedef  Vector<Real, 2> Coord2D;
 		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCylinder3D();
-		DYN_FUNC TCylinder3D(const Real& radius, const Real& row, const Real &columns, const Real &height, const Real& end_segment_, const Coord3D& center_);
-		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& Cylinder);
-		DYN_FUNC Real volume();
+		DYN_FUNC TCylinder3D(const Coord3D& c, const Real& h, const Real &r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1));
+		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& cylinder);
+		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height * scale[0] * scale[1] * scale[2]; }
 
-		DYN_FUNC bool isValid();
 		Coord3D center;
-		Real radius;
-		Real row;
-		Real columns;
 		Real height;
-		Real end_segment;
+		Real radius;
+
+		Coord3D scale;
+		Quat<Real> rotation;
 	};
 
 	template<typename Real>
 	class TCone3D
 	{
 	public:
-		typedef  Vector<Real, 2> Coord2D;
 		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCone3D();
-		DYN_FUNC TCone3D(const Real& radius, const Real& row, const Real& columns, const Real& height);
-		DYN_FUNC TCone3D(const TCone3D<Real>& Cone);
-		DYN_FUNC Real volume();
+		DYN_FUNC TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1));
+		DYN_FUNC TCone3D(const TCone3D<Real>& cone);
+		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height / Real(3); }
 
-		DYN_FUNC bool isValid();
-
-		Real radius;
-		Real row;
-		Real columns;
-		Real height;
-
-	};
-
-
-	template<typename Real>
-	class TGrid3D
-	{
-	public:
-		typedef  Vector<Real, 2> Coord2D;
-		typedef  Vector<Real, 3> Coord3D;
-
-	public:
-		DYN_FUNC TGrid3D();
-		DYN_FUNC TGrid3D(const Vec3f& length, const Vec3i& segment);
-		DYN_FUNC TGrid3D(const Vec3f& length, const Vec3i& segment, const Coord3D& center, const Quat<Real>& rotation);
-
-		DYN_FUNC TGrid3D(const TGrid3D& grid);
-
-		DYN_FUNC bool isValid() const;
-
-		Vec3f length;
-		Vec3i segment;
+		//Center of the bottom circle
 		Coord3D center;
+		Real height;
+		Real radius;
+
+		Coord3D scale;
 		Quat<Real> rotation;
 	};
-
 
 	template<typename Real>
 	class TCapsule3D
@@ -834,7 +807,6 @@ namespace dyno
 	template class TOrientedBox3D<float>;
 	template class TCylinder3D<float>;
 	template class TCone3D<float>;
-	template class TGrid3D<float>;
 
 	template class TPoint3D<double>;
 	template class TLine3D<double>;
@@ -851,7 +823,6 @@ namespace dyno
 	template class TOrientedBox3D<double>;
 	template class TCylinder3D<double>;
 	template class TCone3D<double>;
-	template class TGrid3D<double>;
 
 #ifdef PRECISION_FLOAT
 	//convenient typedefs 
@@ -870,8 +841,6 @@ namespace dyno
 	typedef TOrientedBox3D<float> OrientedBox3D;
 	typedef TCylinder3D<float> Cylinder3D;
 	typedef TCone3D<float> Cone3D;
-	typedef TGrid3D<float> Grid3D;
-
 #else
 	//convenient typedefs 
 	typedef TPoint3D<double> Point3D;
@@ -889,10 +858,7 @@ namespace dyno
 	typedef TOrientedBox3D<double> OrientedBox3D;
 	typedef TCylinder3D<double> Cylinder3D;
 	typedef TCone3D<double> Cone3D;
-	typedef TGrid3D<double> Grid3D;
-
 #endif
-
 }
 
 #include "Primitive3D.inl"

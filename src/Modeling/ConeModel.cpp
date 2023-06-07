@@ -61,14 +61,6 @@ namespace dyno
 		auto columns = this->varColumns()->getData();
 		auto height = this->varHeight()->getData();
 
-		TCone3D<Real> cone;
-		cone.row = row;
-		cone.columns = columns;
-		cone.radius = radius;
-		cone.height = height;
-
-		this->outCone()->setValue(cone);
-
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
 		Real PI = 3.1415926535;
@@ -303,6 +295,15 @@ namespace dyno
 
 		vertices.clear();
 		triangle.clear();
+
+		//Setup the geometric primitive
+		TCone3D<Real> cone;
+		cone.center = center;
+		cone.height = height;
+		cone.radius = radius;
+		cone.scale = scale;
+		cone.rotation = q;
+		this->outCone()->setValue(cone);
 	}
 
 	DEFINE_CLASS(ConeModel);
