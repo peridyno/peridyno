@@ -24,7 +24,7 @@ namespace dyno
 	void DragSurfaceInteraction<TDataType>::onEvent(PMouseEvent event)
 	{
 		
-		if (!event.altKeyPressed()) {
+		if (!event.altKeyPressed() && event.controlKeyPressed()) {
 			if (camera == nullptr)
 			{
 				this->camera = event.camera;
@@ -219,9 +219,10 @@ namespace dyno
 		
 	{
 		
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& points = initialTriangleSet.getPoints();
+		auto& triangles = initialTriangleSet.getTriangles();
+
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
@@ -325,8 +326,8 @@ namespace dyno
 		movement.resize(1);
 		movement.assign(movement_c);
 
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& triangles = initialTriangleSet.getTriangles();
 
 		cuExecute(this->intersected_triangles.size(),
 			DS_SetupVelocity,
@@ -410,8 +411,8 @@ namespace dyno
 		DArray<Coord> movement;
 		movement.resize(1);
 		movement.assign(movement_c);
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& triangles = initialTriangleSet.getTriangles();
 
 		cuExecute(this->intersected_triangles.size(),
 			DS_SetupVelocity,
@@ -459,8 +460,8 @@ namespace dyno
 
 	template<typename TDataType>
 	void DragSurfaceInteraction<TDataType>::setTriFixed() {
-		TriangleSet<TDataType> TriSet = this->inInitialTriangleSet()->getData();
-		DArray<Triangle> triangles = TriSet.getTriangles();
+		auto& TriSet = this->inInitialTriangleSet()->getData();
+		auto& triangles = TriSet.getTriangles();
 		int tNum = triangles.size();
 		cuExecute(tNum,
 			DS_FixedPoint,

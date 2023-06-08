@@ -8,7 +8,7 @@
 #include "Module/CoSemiImplicitHyperelasticitySolver.h"
 #include "Module/DamplingParticleIntegrator.h"
 
-#include "SurfaceInteraction.h"
+
 #include "Module/DragSurfaceInteraction.h"
 #include "Module/DragVertexInteraction.h"
 
