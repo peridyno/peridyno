@@ -39,7 +39,7 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, InitialTriangleSet, "");
 
 		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
-
+		
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
@@ -52,7 +52,6 @@ namespace dyno
 	protected:
 
 		void onEvent(PMouseEvent event) override;
-
 	private:
 		std::shared_ptr<Camera> camera;
 		TRay3D<Real> ray1;
@@ -62,7 +61,7 @@ namespace dyno
 		Real x2;
 		Real y2;
 		bool isPressed;
-
+		bool needInit = true;
 		DArray<int> verIntersectedIndex; //reference for all vertex, int: 0,1
 		DArray<int> intersected_vertex; // reference for intersected list, int: vId
 		DArray<Attribute> restoreAttribute; 

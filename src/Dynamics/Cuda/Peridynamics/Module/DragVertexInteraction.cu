@@ -13,14 +13,19 @@ namespace dyno
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
 		this->intersectionCenter.resize(1);
-
+		this->needInit = true;
 	}
 
 	template<typename TDataType>
 	void DragVertexInteraction<TDataType>::onEvent(PMouseEvent event)
 	{
-		
-		if (!event.altKeyPressed() && event.controlKeyPressed()) {
+		if (this->needInit) {
+			this->restoreAttribute.assign(this->inAttribute()->getData());
+			needInit = false;
+			this->varCacheEvent()->setValue(true);
+		}
+
+		if (!event.altKeyPressed()) {
 			if (camera == nullptr)
 			{
 				this->camera = event.camera;
@@ -34,12 +39,11 @@ namespace dyno
 				this->ray1.direction = event.ray.direction;
 				this->x1 = event.x;
 				this->y1 = event.y;
-				this->restoreAttribute.assign(this->inAttribute()->getData());
-
+				
 				this->InteractionClick();
 				printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 			}
-			else if (event.actionType == AT_RELEASE)
+			else if (event.actionType == AT_RELEASE && this->isPressed)
 			{
 				this->isPressed = false;
 				this->cancelVelocity();
