@@ -188,6 +188,14 @@ namespace dyno
 
 	struct PMouseEvent
 	{
+		bool operator==(const PMouseEvent& event) {
+			return buttonType == event.buttonType && actionType == event.actionType && mods == event.mods;
+		};
+
+		bool operator!=(const PMouseEvent& event) {
+			return buttonType != event.buttonType || actionType == event.actionType || mods == event.mods;
+		};
+
 		bool shiftKeyPressed() { return (mods & PModifierBits::MB_SHIFT) != 0; }
 		bool controlKeyPressed() { return (mods & PModifierBits::MB_CONTROL) != 0; }
 		bool altKeyPressed() { return (mods & PModifierBits::MB_ALT) != 0; }

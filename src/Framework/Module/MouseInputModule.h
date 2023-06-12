@@ -17,6 +17,7 @@
 #include "InputModule.h"
 
 #include <queue>
+#include <mutex>
 
 namespace dyno
 {
@@ -38,5 +39,8 @@ namespace dyno
 		bool requireUpdate() override;
 
 		std::queue<PMouseEvent> mEventQueue;
+
+	private:
+		std::mutex	mMutex;
 	};
 }
