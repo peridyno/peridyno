@@ -54,6 +54,7 @@ namespace dyno
 		void onEvent(PMouseEvent event) override;
 
 	private:
+		bool needInit = true;
 		std::shared_ptr<Camera> camera;
 		TRay3D<Real> ray1;
 		TRay3D<Real> ray2;

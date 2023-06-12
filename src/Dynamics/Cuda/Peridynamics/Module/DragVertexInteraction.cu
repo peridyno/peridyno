@@ -13,13 +13,18 @@ namespace dyno
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
 		this->intersectionCenter.resize(1);
-
+		this->needInit = true;
 	}
 
 	template<typename TDataType>
 	void DragVertexInteraction<TDataType>::onEvent(PMouseEvent event)
 	{
-		
+		if (this->needInit) {
+			this->restoreAttribute.assign(this->inAttribute()->getData());
+			needInit = false;
+			this->varCacheEvent()->setValue(true);
+		}
+
 		if (!event.altKeyPressed()) {
 			if (camera == nullptr)
 			{
@@ -34,18 +39,17 @@ namespace dyno
 				this->ray1.direction = event.ray.direction;
 				this->x1 = event.x;
 				this->y1 = event.y;
-				this->restoreAttribute.assign(this->inAttribute()->getData());
-
+				
 				this->InteractionClick();
-				//printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				printf("Mouse pressed: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 			}
-			else if (event.actionType == AT_RELEASE)
+			else if (event.actionType == AT_RELEASE && this->isPressed)
 			{
 				this->isPressed = false;
 				this->cancelVelocity();
 				this->inAttribute()->getData().assign(this->restoreAttribute);
 				this->intersectionCenter.reset();
-				//printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+				printf("Mouse released: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 				
 			}
 			else //pressed while moving(drag action) or just moving
@@ -64,7 +68,7 @@ namespace dyno
 					else 
 					{
 						this->InteractionDrag();
-						//printf("Mouse repeated Draging: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
+						printf("Mouse repeated Draging: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 							
 					}
 					//swap
@@ -207,9 +211,9 @@ namespace dyno
 	void DragVertexInteraction<TDataType>::calcVertexInteractClick()
 	{
 		
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& points = initialTriangleSet.getPoints();
+		auto& triangles = initialTriangleSet.getTriangles();
 		DArray<int> intersected_t;
 		intersected_t.resize(triangles.size());
 
