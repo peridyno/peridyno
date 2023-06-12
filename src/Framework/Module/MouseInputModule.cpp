@@ -16,19 +16,23 @@ namespace dyno
 	{
 		mMutex.lock();
 
-		if (!this->varCacheEvent()->getData()) {
+		if (this->varCacheEvent()->getValue()) {
 			while (!mEventQueue.empty()) {
-				auto e = mEventQueue.front();
+				auto e = mEventQueue.back();
 				if (e == event)
 				{
-					mEventQueue.pop();
+					mEventQueue.pop_back();
 				}
 				else
 					break;
 			}	
 		}
+		else
+		{
+			while (!mEventQueue.empty()) mEventQueue.pop_front();
+		}
 
-		mEventQueue.push(event);
+		mEventQueue.push_back(event);
 
 		mMutex.unlock();
 	}
@@ -40,7 +44,7 @@ namespace dyno
 		{
 			onEvent(mEventQueue.front());
 
-			mEventQueue.pop();
+			mEventQueue.pop_front();
 		}
 		mMutex.unlock();
 	}
