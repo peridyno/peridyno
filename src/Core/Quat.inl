@@ -307,9 +307,9 @@ namespace dyno
 			w = s * Real(0.5);
 			if (s != 0.0)
 				s = Real(0.5) / s;
-			x = s * (matrix(1, 2) - matrix(2, 1));
-			y = s * (matrix(2, 0) - matrix(0, 2));
-			z = s * (matrix(0, 1) - matrix(1, 0));
+			x = s * (matrix(2, 1) - matrix(1, 2));
+			y = s * (matrix(0, 2) - matrix(2, 0));
+			z = s * (matrix(1, 0) - matrix(0, 1));
 		}
 		else
 		{
@@ -324,9 +324,9 @@ namespace dyno
 			q[i] = s * Real(0.5);
 			if (s != 0.0)
 				s = Real(0.5) / s;
-			q[3] = s * (matrix(j, k) - matrix(k, j));
-			q[j] = s * (matrix(i, j) - matrix(j, i));
-			q[k] = s * (matrix(i, k) - matrix(k, i));
+			q[3] = s * (matrix(k, j) - matrix(j, k));
+			q[j] = s * (matrix(j, i) - matrix(i, j));
+			q[k] = s * (matrix(k, i) - matrix(i, k));
 			x = q[0];
 			y = q[1];
 			z = q[2];
@@ -344,9 +344,9 @@ namespace dyno
 			w = s * Real(0.5);
 			if (s != 0.0)
 				s = Real(0.5) / s;
-			x = s * (matrix(1, 2) - matrix(2, 1));
-			y = s * (matrix(2, 0) - matrix(0, 2));
-			z = s * (matrix(0, 1) - matrix(1, 0));
+			x = s * (matrix(2, 1) - matrix(1, 2));
+			y = s * (matrix(0, 2) - matrix(2, 0));
+			z = s * (matrix(1, 0) - matrix(0, 1));
 		}
 		else
 		{
@@ -361,9 +361,9 @@ namespace dyno
 			q[i] = s * Real(0.5);
 			if (s != 0.0)
 				s = Real(0.5) / s;
-			q[3] = s * (matrix(j, k) - matrix(k, j));
-			q[j] = s * (matrix(i, j) - matrix(j, i));
-			q[k] = s * (matrix(i, k) - matrix(k, i));
+			q[3] = s * (matrix(k, j) - matrix(j, k));
+			q[j] = s * (matrix(j, i) - matrix(i, j));
+			q[k] = s * (matrix(k, i) - matrix(i, k));
 			x = q[0];
 			y = q[1];
 			z = q[2];
