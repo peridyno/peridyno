@@ -6,9 +6,9 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
     add_subdirectory(ImGUI)
 endif()
 
-add_subdirectory(GlfwGUI)
 add_subdirectory(ImWidgets)
+add_subdirectory(GlfwGUI)
 
-    if(PERIDYNO_Qt5_GUI)
-	    add_subdirectory(QtGUI)
-	endif()
+if(PERIDYNO_Qt5_GUI)
+    add_subdirectory(QtGUI)
+endif()

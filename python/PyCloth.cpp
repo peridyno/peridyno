@@ -4,7 +4,7 @@
 template <typename TDataType>
 void declare_cloth(py::module& m, std::string typestr) {
 	using Class = dyno::Cloth<TDataType>;
-	using Parent = dyno::ParticleSystem<TDataType>;
+	using Parent = dyno::TriangularSystem<TDataType>;
 	std::string pyclass_name = std::string("Cloth") + typestr;
 
 // 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

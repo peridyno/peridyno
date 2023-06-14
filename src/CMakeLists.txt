@@ -7,29 +7,30 @@ set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES "")
 add_subdirectory(Core)
 add_subdirectory(Framework)
 
+add_subdirectory(Topology)
+
 if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)
+endif()
+
+if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
+    add_subdirectory(Rendering)
+endif()
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    add_subdirectory(Interaction)
+    add_subdirectory(Modeling)
 endif()
 
 #if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
 #    add_subdirectory(Graphics)
 #endif()
 
-if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
-    add_subdirectory(Rendering)
-endif()
-
 if(PERIDYNO_LIBRARY_PLUGIN)
     add_subdirectory(Plugin)
 endif()
 
 add_subdirectory(Dynamics)
-add_subdirectory(Topology)
-
-if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-    add_subdirectory(Interaction)
-    add_subdirectory(Modeling)
-endif()
 
 # Write/install version file
 include(CMakePackageConfigHelpers)

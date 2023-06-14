@@ -3,6 +3,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS AND PERIDYNO_Qt5_GUI)
         Core 
         Framework 
         IO 
+        Modeling
         Peridynamics
         Multiphysics
 		QtGUI

@@ -176,6 +176,9 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	    add_subdirectory(examples)
 	endif()
 
+	file(GLOB FILESYSTEM_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/external/filesystem/ghc/*.*")
+	install(FILES ${FILESYSTEM_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/filesystem/ghc)
+
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
 	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)

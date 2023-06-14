@@ -4,7 +4,6 @@
 
 #include "ParticleSystem/ParticleSystem.h"
 
-#include "StaticTriangularMesh.h"
 #include "SemiAnalyticalSFINode.h"
 
 #include "ComputeParticleAnisotropy.h"

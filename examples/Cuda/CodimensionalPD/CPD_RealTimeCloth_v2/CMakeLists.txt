@@ -16,6 +16,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
         Core 
         Framework 
         IO 
+        Modeling
         Peridynamics
         Multiphysics
 	    GlfwGUI

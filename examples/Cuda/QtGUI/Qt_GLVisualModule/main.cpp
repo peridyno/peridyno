@@ -33,7 +33,7 @@
 #include "Collision/NeighborElementQuery.h"
 
 #include "SphereModel.h"
-#include "SphereSampler.h"
+#include "ParticleSystem/SphereSampler.h"
 
 #include "Plugin/PluginManager.h"
 

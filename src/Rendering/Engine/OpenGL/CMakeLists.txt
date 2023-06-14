@@ -114,7 +114,10 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
         $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend/Cuda>
         $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend/Cuda/Module>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Module>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda/Module>)
 endif()
 
 
@@ -136,6 +139,9 @@ set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL)
 
+file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Module/*.h")
+install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Module)
+
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/gl/*.h")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/gl)
 
@@ -144,4 +150,12 @@ install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/
 
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/shader/helper/*.*")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/shader/helpler)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Module/*.h")
+    install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda/Module)
+
+    file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Node/*.h")
+    install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda/Node)
+endif()
 

@@ -51,7 +51,7 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
 
     target_include_directories(${LIB_NAME} PUBLIC 
         $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Dynamics/Cuda>
-        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Dynamics/Cuda>)
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Dynamics>)
 
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
     target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr;--expt-extended-lambda>)
@@ -87,7 +87,7 @@ option(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME "Enable binding the semi-analycial 
 option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine)
+    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine)
     build_library(ParticleSystem LIB_DEPENDENCY)
 endif()
 
@@ -113,7 +113,7 @@ if(PERIDYNO_LIBRARY_HEIGHTFIELD)
 endif()
 
 if(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME)
-    set(LIB_DEPENDENCY Modeling ParticleSystem)
+    set(LIB_DEPENDENCY ParticleSystem)
     build_library(SemiAnalyticalScheme LIB_DEPENDENCY)
 endif()
 

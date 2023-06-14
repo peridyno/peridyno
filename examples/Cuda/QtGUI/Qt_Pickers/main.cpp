@@ -11,7 +11,8 @@
 
 #include "CylinderModel.h"
 #include "CubeModel.h"
-#include "CubeSampler.h"
+
+#include "ParticleSystem/CubeSampler.h"
 
 #include "initializeModeling.h"
 #include "initializeInteraction.h"
