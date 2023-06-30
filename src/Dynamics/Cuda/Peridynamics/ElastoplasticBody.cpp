@@ -44,9 +44,9 @@ namespace dyno
 		auto m_plasticity = std::make_shared<ElastoplasticityModule<TDataType>>();
 		horizon->outFloating()->connect(m_plasticity->inHorizon());
 		this->stateTimeStep()->connect(m_plasticity->inTimeStep());
-		this->statePosition()->connect(m_plasticity->inPosition());
+		this->statePosition()->connect(m_plasticity->inY());
 		this->stateVelocity()->connect(m_plasticity->inVelocity());
-		this->stateRestShape()->connect(m_plasticity->inRestShape());
+		this->stateRestShape()->connect(m_plasticity->inBonds());
 		m_nbrQuery->outNeighborIds()->connect(m_plasticity->inNeighborIds());
 		this->animationPipeline()->pushModule(m_plasticity);
 
@@ -64,6 +64,30 @@ namespace dyno
 	ElastoplasticBody<TDataType>::~ElastoplasticBody()
 	{
 		
+	}
+
+	template<typename TDataType>
+	void ElastoplasticBody<TDataType>::loadParticles(Coord lo, Coord hi, Real distance)
+	{
+		std::vector<Coord> vertList;
+		for (Real x = lo[0]; x <= hi[0]; x += distance)
+		{
+			for (Real y = lo[1]; y <= hi[1]; y += distance)
+			{
+				for (Real z = lo[2]; z <= hi[2]; z += distance)
+				{
+					Coord p = Coord(x, y, z);
+					vertList.push_back(Coord(x, y, z));
+				}
+			}
+		}
+
+		auto ptSet = this->statePointSet()->getDataPtr();
+		ptSet->setPoints(vertList);
+
+		std::cout << "particle number: " << vertList.size() << std::endl;
+
+		vertList.clear();
 	}
 
 	template<typename TDataType>

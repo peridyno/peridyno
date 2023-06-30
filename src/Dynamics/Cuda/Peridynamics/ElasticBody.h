@@ -1,5 +1,6 @@
 #pragma once
 #include "ParticleSystem/ParticleSystem.h"
+
 #include "Bond.h"
 
 namespace dyno
@@ -21,21 +22,43 @@ namespace dyno
 		typedef typename TBond<TDataType> Bond;
 
 		ElasticBody();
-		virtual ~ElasticBody();
+		~ElasticBody() override;
 
-		void updateTopology() override;
+		void loadParticles(std::string filename);
+
+		void loadParticles(Coord lo, Coord hi, Real distance);
+
+		bool translate(Coord t) {
+			auto ptSet = this->statePointSet()->getDataPtr();
+			ptSet->translate(t);
+
+			return true;
+		}
+
+		bool scale(Real s) {
+			auto ptSet = this->statePointSet()->getDataPtr();
+			ptSet->scale(s);
+
+			return true;
+		}
+
+		bool rotate(Quat<Real> q) {
+			auto ptSet = this->statePointSet()->getDataPtr();
+			ptSet->rotate(q);
+
+			return true;
+		}
 
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 
 		DEF_ARRAY_STATE(Coord, ReferencePosition, DeviceType::GPU, "Reference position");
 
-		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_STATE(Bond, Bonds, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;
 
-// 	private:
-// 		std::shared_ptr<Node> m_surfaceNode;
+		void updateTopology() override;
 	};
 }

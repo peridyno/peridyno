@@ -10,23 +10,6 @@ namespace dyno
 	{
 	}
 
-
-// 	template<typename TDataType>
-// 	bool GranularModule<TDataType>::initializeImpl()
-// 	{
-// 		//TODO: replace
-// 		m_densitySum = std::make_shared<SummationDensity<TDataType>>();
-// 
-// 		this->inHorizon()->connect(m_densitySum->inSmoothingLength());
-// 		this->inPosition()->connect(m_densitySum->inPosition());
-// 		this->inNeighborIds()->connect(m_densitySum->inNeighborIds());
-// 
-// 		m_densitySum->initialize();
-// 
-// 		return ElastoplasticityModule<TDataType>::initializeImpl();
-// 	}
-
-
 	__device__ Real Hardening(Real rho, Real restRho)
 	{
 		if (rho >= restRho)
@@ -55,7 +38,7 @@ namespace dyno
 	template<typename TDataType>
 	void GranularModule<TDataType>::computeMaterialStiffness()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		m_densitySum->compute();

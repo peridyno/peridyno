@@ -49,11 +49,12 @@ namespace dyno
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
 		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
 		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
-		this->statePosition()->connect(hyperElasticity->inPosition());
+		this->stateRestPosition()->connect(hyperElasticity->inX());
+		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
 		this->stateRestNorm()->connect(hyperElasticity->inRestNorm());
 		this->stateNorm()->connect(hyperElasticity->inNorm());
-		this->stateRestShape()->connect(hyperElasticity->inRestShape());
+		this->stateRestShape()->connect(hyperElasticity->inBonds());
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateMaxLength()->connect(hyperElasticity->inUnit());
 		this->stateOldPosition()->connect(hyperElasticity->inOldPosition());
@@ -130,11 +131,12 @@ namespace dyno
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
 		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
 		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
-		this->statePosition()->connect(hyperElasticity->inPosition());
+		this->stateRestPosition()->connect(hyperElasticity->inX());
+		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
 		this->stateRestNorm()->connect(hyperElasticity->inRestNorm());
 		this->stateNorm()->connect(hyperElasticity->inNorm());
-		this->stateRestShape()->connect(hyperElasticity->inRestShape());
+		this->stateRestShape()->connect(hyperElasticity->inBonds());
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateMaxLength()->connect(hyperElasticity->inUnit());
 		this->stateOldPosition()->connect(hyperElasticity->inOldPosition());
@@ -373,7 +375,7 @@ namespace dyno
 
 		
 		this->stateRestPosition()->resize(vNum);
-		this->stateRestPosition()->getData().assign(triSet->getPoints(), triSet->getPoints().size());
+		this->stateRestPosition()->assign(triSet->getPoints());
 
 		this->stateVerticesRef()->resize(vNum);
 		this->stateVerticesRef()->getData().assign(triSet->getPoints(), triSet->getPoints().size());

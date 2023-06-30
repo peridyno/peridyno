@@ -61,15 +61,16 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Coord, RestPosition, DeviceType::GPU, "");
 
+		DEF_ARRAYLIST_STATE(Bond, Bonds, DeviceType::GPU, "");
+
+		DEF_ARRAYLIST_STATE(Real, VolumePair, DeviceType::GPU, "");
+
+
 		DEF_ARRAY_STATE(Matrix, VertexRotation, DeviceType::GPU, "");
 
 		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "");
 
 		DEF_ARRAY_STATE(Real, Volume, DeviceType::GPU, "");
-
-		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "");
-
-		DEF_ARRAYLIST_STATE(Real, VolumePair, DeviceType::GPU, "");
 
 		DEF_VAR(bool, NeighborSearchingAdjacent, true, "");
 

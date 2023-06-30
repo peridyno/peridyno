@@ -21,30 +21,48 @@ namespace dyno
 
 		auto peri = std::make_shared<Peridynamics<TDataType>>();
 		this->stateTimeStep()->connect(peri->inTimeStep());
-		this->statePosition()->connect(peri->inPosition());
+		this->stateReferencePosition()->connect(peri->inX());
+		this->statePosition()->connect(peri->inY());
 		this->stateVelocity()->connect(peri->inVelocity());
 		this->stateForce()->connect(peri->inForce());
-		this->stateRestShape()->connect(peri->inRestShape());
+		this->stateBonds()->connect(peri->inBonds());
 		this->animationPipeline()->pushModule(peri);
-
-// 		//Create a node for surface mesh rendering
-// 		m_surfaceNode = std::make_shared<Node>("Mesh");// this->template createAncestor<Node>("Mesh");
-// 		m_surfaceNode->addAncestor(this);
-// 
-// 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-// 		m_surfaceNode->stateTopology()->setDataPtr(triSet);
-// 
-// 		//Set the topology mapping from PointSet to TriangleSet
-// 		auto surfaceMapping = this->template addTopologyMapping<PointSetToPointSet<TDataType>>("surface_mapping");
-// 		auto ptSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
-// 		surfaceMapping->setFrom(ptSet);
-// 		surfaceMapping->setTo(triSet);
 	}
 
 	template<typename TDataType>
 	ElasticBody<TDataType>::~ElasticBody()
 	{
 		
+	}
+
+	template<typename TDataType>
+	void ElasticBody<TDataType>::loadParticles(std::string filename)
+	{
+		this->statePointSet()->getDataPtr()->loadObjFile(filename);
+	}
+
+	template<typename TDataType>
+	void ElasticBody<TDataType>::loadParticles(Coord lo, Coord hi, Real distance)
+	{
+		std::vector<Coord> vertList;
+		for (Real x = lo[0]; x <= hi[0]; x += distance)
+		{
+			for (Real y = lo[1]; y <= hi[1]; y += distance)
+			{
+				for (Real z = lo[2]; z <= hi[2]; z += distance)
+				{
+					Coord p = Coord(x, y, z);
+					vertList.push_back(Coord(x, y, z));
+				}
+			}
+		}
+
+		auto ptSet = this->statePointSet()->getDataPtr();
+		ptSet->setPoints(vertList);
+
+		std::cout << "particle number: " << vertList.size() << std::endl;
+
+		vertList.clear();
 	}
 
 	template<typename TDataType>
@@ -67,17 +85,13 @@ namespace dyno
 
 		if (!this->statePosition()->isEmpty())
 		{
-			this->stateRestShape()->allocate();
-			auto nbrPtr = this->stateRestShape()->getDataPtr();
+			this->stateBonds()->allocate();
+			auto nbrPtr = this->stateBonds()->getDataPtr();
 			nbrPtr->resize(nbrQuery->outNeighborIds()->getData());
 
 			constructRestShape(*nbrPtr, nbrQuery->outNeighborIds()->getData(), this->statePosition()->getData());
 
-			this->stateReferencePosition()->allocate();
-			this->stateReferencePosition()->getDataPtr()->assign(this->statePosition()->getData());
-
-// 			this->stateNeighborIds()->allocate();
-// 			this->stateNeighborIds()->getDataPtr()->assign(nbrQuery->outNeighborIds()->getData());
+			this->stateReferencePosition()->assign(this->statePosition()->getData());
 		}
 	}
 

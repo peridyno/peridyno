@@ -54,6 +54,5 @@ namespace dyno
 	protected:
 		void updateTopology() override;
 		void resetStates() override;
-//		virtual void setVisible(bool visible) override;
 	};
 }

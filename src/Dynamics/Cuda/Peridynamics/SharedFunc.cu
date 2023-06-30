@@ -4,7 +4,7 @@ namespace dyno
 {
 	template <typename Coord, typename Bond>
 	__global__ void K_UpdateRestShape(
-		DArrayList<Bond> shape,
+		DArrayList<Bond> bonds,
 		DArrayList<int> nbr,
 		DArray<Coord> pos)
 	{
@@ -13,23 +13,23 @@ namespace dyno
 
 		Bond np;
 
-		List<Bond>& rest_shape_i = shape[pId];
+		List<Bond>& bonds_i = bonds[pId];
 		List<int>& list_id_i = nbr[pId];
 		int nbSize = list_id_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
 			int j = list_id_i[ne];
-			np.index = j;
-			np.pos = pos[j];
-			np.weight = 1;
+			np.idx = j;
+			np.xi = pos[j] - pos[pId];
+//			np.weight = 1;
 
-			rest_shape_i.insert(np);
-			if (pId == j)
-			{
-				Bond np_0 = rest_shape_i[0];
-				rest_shape_i[0] = np;
-				rest_shape_i[ne] = np_0;
-			}
+			bonds_i.insert(np);
+// 			if (pId == j)
+// 			{
+// 				Bond np_0 = rest_shape_i[0];
+// 				rest_shape_i[0] = np;
+// 				rest_shape_i[ne] = np_0;
+// 			}
 		}
 	}
 
@@ -51,24 +51,24 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= nbr.size()) return;
 
-		num[tId] = nbr[tId].size() + 1;
+		num[tId] = nbr[tId].size();
 	}
 
-	template <typename Coord, typename Bond>
-	__global__ void K_UpdateRestShapeSelf(
-		DArrayList<Bond> shape,
-		DArray<Coord> pos)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= pos.size()) return;
-
-		Bond np;
-		np.index = tId;
-		np.pos = pos[tId];
-		np.weight = 1;
-
-		shape[tId].insert(np);
-	}
+// 	template <typename Coord, typename Bond>
+// 	__global__ void K_UpdateRestShapeSelf(
+// 		DArrayList<Bond> shape,
+// 		DArray<Coord> pos)
+// 	{
+// 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+// 		if (tId >= pos.size()) return;
+// 
+// 		Bond np;
+// 		np.index = tId;
+// 		np.pos = pos[tId];
+// 		np.weight = 1;
+// 
+// 		shape[tId].insert(np);
+// 	}
 
 	template<typename Coord, typename Bond>
 	void constructRestShapeWithSelf(DArrayList<Bond>& shape, DArrayList<int>& nbr, DArray<Coord>& pos)
@@ -82,10 +82,10 @@ namespace dyno
 
 		shape.resize(num);
 
-		cuExecute(nbr.size(),
-			K_UpdateRestShapeSelf,
-			shape,
-			pos);
+// 		cuExecute(nbr.size(),
+// 			K_UpdateRestShapeSelf,
+// 			shape,
+// 			pos);
 
 		cuExecute(nbr.size(),
 			K_UpdateRestShape,

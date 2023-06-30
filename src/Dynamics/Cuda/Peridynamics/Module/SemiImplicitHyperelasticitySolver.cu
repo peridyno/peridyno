@@ -134,26 +134,27 @@ namespace dyno
 	__global__ void HM_Compute1DEnergy(
 		DArray<Real> energy,
 		DArray<Coord> energyGradient,
-		DArray<Coord> pos_current,
+		DArray<Coord> X,
+		DArray<Coord> Y,
 		DArray<Matrix> F,
 		DArray<Real> volume,
 		DArray<bool> validOfK,
 		DArray<Coord> eigenValues,
-		DArrayList<Bond> restShapes,
+		DArrayList<Bond> bonds,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= energy.size()) return;
 
-		Coord pos_current_i = pos_current[pId];
+		Coord y_i = Y[pId];
 
 		Real totalEnergy = 0.0f;
 		Coord totalEnergyGradient = Coord(0);
 		Real V_i = volume[pId];
 
-		int size_i = restShapes[pId].size();
+		int size_i = bonds[pId].size();
 
-		Coord rest_pos_i = restShapes[pId][0].pos;
+		Coord x_i = X[pId];
 		Coord eigen_value_i = eigenValues[pId];
 		bool valid_i = validOfK[pId];
 
@@ -161,21 +162,21 @@ namespace dyno
 
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
-			Coord pos_current_j = pos_current[j];
-			Real r = (np_j.pos - rest_pos_i).norm();
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
+			Coord y_j = Y[j];
+			Real r = bond_ij.xi.norm();
 
 			Real V_j = volume[j];
 
 			if (r > EPSILON)
 			{
-				Real norm_ij = (pos_current_j - pos_current_i).norm();
+				Real norm_ij = (y_j - y_i).norm();
 				Real lambda_ij = norm_ij / r;
 
 				Real deltaEnergy;
 				Coord deltaEnergyGradient;
-				Coord dir_ij = norm_ij < EPSILON ? Coord(0) : (pos_current_i - pos_current_j) / (r);
+				Coord dir_ij = norm_ij < EPSILON ? Coord(0) : (y_i - y_j) / (r);
 
 				if (type == StVK) {
 					deltaEnergy = V_j * ENERGY_FUNC.stvkModel.getEnergy(lambda_ij, lambda_ij, lambda_ij);
@@ -350,18 +351,18 @@ namespace dyno
 		DArray<Matrix> matU,
 		DArray<Matrix> matV,
 		DArray<Matrix> Rots,
-		DArray<Coord> position,
-		DArrayList<Bond> restShapes,
+		DArray<Coord> X,
+		DArray<Coord> Y,
+		DArrayList<Bond> bonds,
 		Real strainLimiting,
 		Real horizon)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
+		if (pId >= Y.size()) return;
 		/*if (pId % 100 == 0)
 			printf("%d %d \n", pId, pId);*/
 
-		Coord rest_pos_i = restShapes[pId][0].pos;
-		int size_i = restShapes[pId].size();
+		Coord x_i = X[pId];
 
 		Real total_weight = Real(0);
 		Matrix matL_i(0);
@@ -370,19 +371,16 @@ namespace dyno
 #ifdef DEBUG_INFO
 		if (pId == 497)
 		{
-			printf("Position in HM_ComputeF %d: %f %f %f \n", pId, position[pId][0], position[pId][1], position[pId][2]);
+			printf("Position in HM_ComputeF %d: %f %f %f \n", pId, Y[pId][0], Y[pId][1], Y[pId][2]);
 		}
 #endif // DEBUG_INFO
 		
-		Real maxDist = Real(0);
-		for (int ne = 0; ne < size_i; ne++)
-		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+		List<Bond>& bonds_i = bonds[pId];
 
-			maxDist = max(maxDist, r);
+		Real maxDist = Real(0);
+		for (int ne = 0; ne < bonds_i.size(); ne++)
+		{
+			maxDist = max(maxDist, bonds_i[ne].xi.norm());
 		}
 		maxDist = maxDist < EPSILON ? Real(1) : maxDist;
 
@@ -392,23 +390,17 @@ namespace dyno
 		printf("Max distance %d: %f \n", pId, maxDist);
 #endif // DEBUG_INFO
 
-		for (int ne = 0; ne < size_i; ne++)
+		for (int ne = 0; ne < bonds_i.size(); ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
-
-			//if (pId == 42341)
-			//{
-			// //	printf("Rest %d: %f %f %f \n", ne, rest_pos_j[0], rest_pos_j[1], rest_pos_j[2]);
-			//}
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_i - x_j).norm();
 
 			if (r > EPSILON)
 			{
-
-				Coord p = (position[j] - position[pId]) / maxDist;
-				Coord q = (rest_pos_j - rest_pos_i) / maxDist;
+				Coord p = (Y[j] - Y[pId]) / maxDist;
+				Coord q = (x_j - x_i) / maxDist;
 				//Real weight = D_Weight(r, horizon);
 				Real weight = 1.;
 
@@ -425,7 +417,7 @@ namespace dyno
 #ifdef DEBUG_INFO
 				if (pId == 497)
 				{
-					printf("%d Neighbor %d: %f %f %f \n", pId, j, position[j][0], position[j][1], position[j][2]);
+					printf("%d Neighbor %d: %f %f %f \n", pId, j, Y[j][0], Y[j][1], Y[j][2]);
 				}
 #endif // DEBUG_INFO
 			}
@@ -589,7 +581,8 @@ namespace dyno
 		DArray<Coord> eigen,
 		DArray<bool> validOfK,
 		DArray<Matrix> F,
-		DArrayList<Bond> restShapes,
+		DArray<Coord> X,
+		DArrayList<Bond> bonds,
 		Real horizon,
 		DArray<Real> volume,
 		DArrayList<Real> volumePair,
@@ -599,26 +592,10 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_pre.size()) return;
 
-		Coord rest_pos_i = restShapes[pId][0].pos;
-		int size_i = restShapes[pId].size();
+		Coord x_i = X[pId];
+		int size_i = bonds[pId].size();
 
-		// 		Real minDist = Real(1000.0f);
-		// 		for (int ne = 0; ne < size_i; ne++)
-		// 		{
-		// 			Bond np_j = restShapes[pId][ne];
-		// 			int j = np_j.index;
-		// 			Coord rest_pos_j = np_j.pos;
-		// 			Real r = (rest_pos_i - rest_pos_j).norm();
-		// 
-		// 			maxDist = max(maxDist, r);
-		// 		}
-		// 		maxDist = maxDist < EPSILON ? Real(1) : maxDist;
-
-				//TODO: verify whether kappa is enough
 		Real kappa = 4 / (3 * M_PI * horizon * horizon * horizon);
-
-		//		printf("%f \n", kappa);
-
 		Real lambda_i1 = eigen[pId][0];
 		Real lambda_i2 = eigen[pId][1];
 		Real lambda_i3 = eigen[pId][2];
@@ -673,7 +650,6 @@ namespace dyno
 		Matrix F_i = F[pId];
 
 		Coord y_pre_i = y_pre[pId];
-		Coord y_rest_i = restShapes[pId][0].pos;
 
 		bool K_valid = validOfK[pId];
 
@@ -682,22 +658,17 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
 			Coord y_pre_j = y_pre[j];
-			Real r = (np_j.pos - y_rest_i).norm();
+			Real r = bond_ij.xi.norm();
 
 			if (r > EPSILON)
 			{
 				Real weight_ij = 1.;
 				//Real Vol_j = volume[j];
 				Real V_ij = volumePair[pId][ne];
-				//V_ij = maximum(V_ij, Real(0.00001));
-				//V_ij = minimum(V_ij, volume[pId] * 50);
-				//V_ij = Real(0.00001);
-				if(V_ij < 0.0000001f)
-				//if(pId % 100 == 0)
-				printf("%d   volume %.10lf      %.10lf %.10lf %.10lf\n", pId, V_ij, np_j.pos[0], np_j.pos[1], np_j.pos[2]);
 
 				Coord y_ij = y_pre_i - y_pre_j;
 
@@ -753,7 +724,7 @@ namespace dyno
 
 				Coord dir_ij = lambda > EPSILON ? y_ij.normalize() : Coord(1, 0, 0);
 
-				Coord x_ij = K_valid_ij ? y_rest_i - np_j.pos : dir_ij * (y_rest_i - np_j.pos).norm();
+				Coord x_ij = K_valid_ij ? x_i - x_j : dir_ij * (x_i - x_j).norm();
 
 				Coord ds_ij = sw_ij * PK1_ij * y_pre_j + sw_ij * PK2_ij * x_ij;
 				Coord ds_ji = sw_ij * PK1_ij * y_pre_i - sw_ij * PK2_ij * x_ij;
@@ -834,7 +805,7 @@ namespace dyno
 	template<typename TDataType>
 	void SemiImplicitHyperelasticitySolver<TDataType>::resizeAllFields()
 	{
-		uint num = this->inPosition()->size();
+		uint num = this->inY()->size();
 
 		if (m_F.size() == num)
 			return;
@@ -884,7 +855,7 @@ namespace dyno
 
 		resizeAllFields();
 
-		int numOfParticles = this->inPosition()->size();
+		int numOfParticles = this->inY()->size();
 		uint pDims = cudaGridSize(numOfParticles, BLOCK_SIZE);
 
 		std::cout << "enforceElasticity " << numOfParticles << std::endl;
@@ -895,9 +866,9 @@ namespace dyno
 
 		/**************************** Jacobi method ************************************************/
 		// initialize y_now, y_next_iter
-		y_current.assign(this->inPosition()->getData());
-		y_next.assign(this->inPosition()->getData());
-		mPosBuf.assign(this->inPosition()->getData());
+		y_current.assign(this->inY()->getData());
+		y_next.assign(this->inY()->getData());
+		mPosBuf.assign(this->inY()->getData());
 
 		// do Jacobi method Loop
 		bool convergeFlag = false; // converge or not
@@ -921,8 +892,9 @@ namespace dyno
 				m_matU,
 				m_matV,
 				m_matR,
+				this->inX()->getData(),
 				y_current,
-				this->inRestShape()->getData(),
+				this->inBonds()->getData(),
 				this->varStrainLimiting()->getData(),
 				this->inHorizon()->getData());
 			cuSynchronize();
@@ -937,7 +909,8 @@ namespace dyno
 				m_eigenValues,
 				m_validOfK,
 				m_F,
-				this->inRestShape()->getData(),
+				this->inX()->getData(),
+				this->inBonds()->getData(),
 				this->inHorizon()->getData(),
 				this->inVolume()->getData(),
 				this->inVolumePair()->getData(),
@@ -968,12 +941,13 @@ namespace dyno
 				HM_Compute1DEnergy,
 				m_energy,
 				mEnergyGradient,
+				this->inX()->getData(),
 				y_current,
 				m_F,
 				this->inVolume()->getData(),
 				m_validOfK,
 				m_eigenValues,
-				this->inRestShape()->getData(),
+				this->inBonds()->getData(),
 				this->inEnergyType()->getData());
 			
 			m_alphaCompute = this->varIsAlphaComputed()->getData();
@@ -986,7 +960,7 @@ namespace dyno
 					this->inVolume()->getData(),
 					m_A,
 					m_energy,
-					this->inRestShape()->getData());
+					this->inBonds()->getData());
 
 				cuExecute(m_gradient.size(),
 					HM_ComputeCurrentPosition,
@@ -1012,9 +986,9 @@ namespace dyno
 			iterCount++;
 		}
 
-		cuExecute(this->inPosition()->getDataPtr()->size(),
+		cuExecute(this->inY()->getDataPtr()->size(),
 			test_HM_UpdatePosition,
-			this->inPosition()->getData(),
+			this->inY()->getData(),
 			this->inVelocity()->getData(),
 			y_next,
 			mPosBuf,

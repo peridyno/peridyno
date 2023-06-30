@@ -65,9 +65,14 @@ namespace dyno {
 		DEF_VAR_IN(Real, TimeStep, "");
 
 		/**
-		 * @brief Particle position
+		 * @brief Reference position
 		 */
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_IN(Coord, X, DeviceType::GPU, "Rest Pos");
+
+		/**
+		 * @brief Deformed position
+		 */
+		DEF_ARRAY_IN(Coord, Y, DeviceType::GPU, "Particle position");
 
 		/**
 			* @brief Particle velocity
@@ -80,7 +85,7 @@ namespace dyno {
 		 */
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
-		DEF_ARRAYLIST_IN(Bond, RestShape, DeviceType::GPU, "Reference shape");
+		DEF_ARRAYLIST_IN(Bond, Bonds, DeviceType::GPU, "Reference shape");
 
 	public:
 		/**
