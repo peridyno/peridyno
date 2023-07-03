@@ -3210,7 +3210,7 @@ namespace dyno
 
 
 	template<typename Real>
-	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1))
+	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot, const Coord3D& s)
 	{
 		center = c;
 		height = h;

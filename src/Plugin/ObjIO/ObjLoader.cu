@@ -30,7 +30,7 @@ namespace dyno
 
 		surfacerender = std::make_shared<GLSurfaceVisualModule>();
 		surfacerender->setVisible(true);
-		surfacerender->setColor(Vec3f(0.8, 0.52, 0.25));
+		surfacerender->setColor(Color(0.8, 0.52, 0.25));
 
 		this->stateTopology()->connect(surfacerender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfacerender);
@@ -42,9 +42,9 @@ namespace dyno
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
-		if (this->varFileName()->getDataPtr()->string() == "")
+		if (this->varFileName()->constDataPtr()->string() == "")
 			return;
-		std::string filename = this->varFileName()->getDataPtr()->string();
+		std::string filename = this->varFileName()->constDataPtr()->string();
 		loadObj(*triSet,filename);
 		triSet->scale(this->varScale()->getData());
 		triSet->translate(this->varLocation()->getData());
@@ -86,7 +86,7 @@ namespace dyno
 
 		if (this->varSequence()->getData() == true)
 		{
-			std::string filename = this->varFileName()->getDataPtr()->string();
+			std::string filename = this->varFileName()->constDataPtr()->string();
 			int num_ = filename.rfind("_");
 
 			filename.replace(num_ + 1, filename.length() - 4 - (num_ + 1), std::to_string(this->stateFrameNumber()->getData()));

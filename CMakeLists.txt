@@ -147,17 +147,11 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	add_subdirectory(external/imgui)
 
 	if(PERIDYNO_LIBRARY_PLUGIN)
-		option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the abc exporter library" ON)
-		option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
-		option(PERIDYNO_LIBRARY_FBX "Enable binding the FBX library" OFF)
+		option(PERIDYNO_PLUGIN_ALEMBIC "Enable binding the abc exporter library" OFF)
 		
 		if(PERIDYNO_LIBRARY_ALEMBIC)
 			add_subdirectory(external/Imath)
 			add_subdirectory(external/alembic/)
-		endif()
-
-		if(PERIDYNO_LIBRARY_GMSH)
-			add_subdirectory(external/gmsh-fork)
 		endif()
 	endif()
 
