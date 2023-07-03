@@ -325,8 +325,8 @@ namespace dyno
 			if (s != 0.0)
 				s = Real(0.5) / s;
 			q[3] = s * (matrix(k, j) - matrix(j, k));
-			q[j] = s * (matrix(j, i) - matrix(i, j));
-			q[k] = s * (matrix(k, i) - matrix(i, k));
+			q[j] = s * (matrix(j, i) + matrix(i, j));
+			q[k] = s * (matrix(k, i) + matrix(i, k));
 			x = q[0];
 			y = q[1];
 			z = q[2];
@@ -362,8 +362,8 @@ namespace dyno
 			if (s != 0.0)
 				s = Real(0.5) / s;
 			q[3] = s * (matrix(k, j) - matrix(j, k));
-			q[j] = s * (matrix(j, i) - matrix(i, j));
-			q[k] = s * (matrix(k, i) - matrix(i, k));
+			q[j] = s * (matrix(j, i) + matrix(i, j));
+			q[k] = s * (matrix(k, i) + matrix(i, k));
 			x = q[0];
 			y = q[1];
 			z = q[2];
