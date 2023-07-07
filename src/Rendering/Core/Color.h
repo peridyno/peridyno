@@ -1,9 +1,10 @@
-#pragma once
+#pragma oncera
 
 #include <Platform.h>
 
 namespace dyno
 {
+
 	class Color
 	{
 	public:
@@ -78,5 +79,44 @@ namespace dyno
 		float r;
 		float g;
 		float b;
+		
 	};
+	 
+	template<>
+	std::string FVar<Color>::serialize()
+	{
+		if (isEmpty())
+			return "";
+
+		dyno::Color val = this->getValue();
+
+		std::stringstream ss;
+		ss << val.r << " " << val.g << " " << val.b;
+
+		return ss.str();
+	}
+
+	template<>
+	bool FVar<Color>::deserialize(const std::string& str)
+	{
+		if (str.empty())
+			return false;
+
+		std::stringstream ss(str);
+		std::string substr;
+
+		ss >> substr;
+		double x = std::stod(substr);
+
+		ss >> substr;
+		double y = std::stod(substr);
+
+		ss >> substr;
+		double z = std::stod(substr);
+
+		this->setValue(Color(x, y, z));
+
+		return true;
+	}
+
 }
