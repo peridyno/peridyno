@@ -84,15 +84,15 @@ namespace dyno {
 			return *dataPtr;
 		}
 
-	private:
-		std::shared_ptr<DataType>& getDataPtr()
+		std::shared_ptr<DataType>& constDataPtr()
 		{
 			FBase* topField = this->getTopField();
 			FieldType* derived = dynamic_cast<FieldType*>(topField);
 			return derived->m_data;
 		}
 
-		std::shared_ptr<DataType>& constDataPtr()
+	private:
+		std::shared_ptr<DataType>& getDataPtr()
 		{
 			FBase* topField = this->getTopField();
 			FieldType* derived = dynamic_cast<FieldType*>(topField);
