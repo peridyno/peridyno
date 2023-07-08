@@ -5,6 +5,8 @@
 #include <imgui_impl_opengl3.h>
 
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "imgui_extend.h"
 #include "picture.h"
@@ -428,46 +430,61 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 	// TODO: type conversion...
 	auto node = std::dynamic_pointer_cast<ParametricModel<DataType3f>>(n);
 
-	// TODO: parameterized operation
-	auto nodeOp = ImGuizmo::TRANSLATE;
+	if (!node) return;
+
+	// get original transform
+	dyno::Vec3f t0 = node->varLocation()->getData();
+	dyno::Vec3f r0 = node->varRotation()->getData();
+	dyno::Vec3f s0 = node->varScale()->getData();
+
+	auto op   = ImGuizmo::TRANSLATE;
+	auto mode = ImGuizmo::WORLD;
 
 	switch (mEditMode) {
 	case 0:
-		nodeOp = ImGuizmo::TRANSLATE;
+		op = ImGuizmo::TRANSLATE;
 		break;
 	case 1:
-		nodeOp = ImGuizmo::SCALE;
+		op = ImGuizmo::SCALE;
+		mode = ImGuizmo::LOCAL;
 		break;
 	case 2:
-		nodeOp = ImGuizmo::ROTATE;
+		op = ImGuizmo::ROTATE;
+		r0 = { 0, 0, 0 };
 		break;
 	default:
 		break;
 	}
-
 	if (node != 0) {
-		float m[16];
+
 		// build transform matrix
+		glm::mat4 m;
+		ImGuizmo::RecomposeMatrixFromComponents(t0.getDataPtr(), r0.getDataPtr(), s0.getDataPtr(), &m[0][0]);
+		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], op, mode, &m[0][0], NULL, NULL, NULL, NULL))
 		{
-			auto t = node->varLocation()->getData();
-			auto s = node->varScale()->getData();
-			auto r = node->varRotation()->getData();			
-			ImGuizmo::RecomposeMatrixFromComponents(t.getDataPtr(), r.getDataPtr(), s.getDataPtr(), m);
-		}
+			dyno::Vec3f t1;
+			dyno::Vec3f r1;
+			dyno::Vec3f s1;
 
-		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, m, NULL, NULL, NULL, NULL))
-		{
-			float t[3], s[3], r[3];
-			ImGuizmo::DecomposeMatrixToComponents(m, t, r, s);
-			// apply
-			if (nodeOp == ImGuizmo::TRANSLATE) 
-				node->varLocation()->setValue(Vec3f(t[0], t[1], t[2]));
-			if (nodeOp == ImGuizmo::SCALE) 
-				node->varScale()->setValue(Vec3f(s[0], s[1], s[2]));
-			if (nodeOp == ImGuizmo::ROTATE) 
-				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
+			ImGuizmo::DecomposeMatrixToComponents(&m[0][0], t1.getDataPtr(), r1.getDataPtr(), s1.getDataPtr());
 
-			// notify the update of node?
+			if (op == ImGuizmo::SCALE) {
+				// scale apply in local space
+				node->varScale()->setValue(s1);
+			}
+			if (op == ImGuizmo::TRANSLATE) {
+				node->varLocation()->setValue(t1);
+			}
+
+			if (op == ImGuizmo::ROTATE) {
+				r0 = node->varRotation()->getData();
+				// TODO: properly assign delta rotation to node
+				// r1 is rotation angle (degree) along x/y/z axis
+				r1 += r0;
+				node->varRotation()->setValue(r1);
+
+			}
+
 			node->updateGraphicsContext();
 		}
 	}
