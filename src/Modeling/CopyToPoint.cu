@@ -135,9 +135,7 @@ namespace dyno
 		auto rott = this->varRotation()->getData();
 		auto scalet= this->varScale()->getData();
 
-		Quat<Real> qt = Quat<Real>(M_PI * rott[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rott[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rott[2] / 180, Coord(0, 0, 1));
+		Quat<Real> qt = computeQuaternion();
 
 		qt.normalize();
 
