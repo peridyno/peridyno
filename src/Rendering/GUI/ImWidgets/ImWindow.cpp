@@ -450,13 +450,11 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 		break;
 	case 2:
 		op = ImGuizmo::ROTATE;
-		r0 = { 0, 0, 0 };
 		break;
 	default:
 		break;
 	}
 	if (node != 0) {
-
 		// build transform matrix
 		glm::mat4 m;
 		ImGuizmo::RecomposeMatrixFromComponents(t0.getDataPtr(), r0.getDataPtr(), s0.getDataPtr(), &m[0][0]);
@@ -477,12 +475,7 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 			}
 
 			if (op == ImGuizmo::ROTATE) {
-				r0 = node->varRotation()->getData();
-				// TODO: properly assign delta rotation to node
-				// r1 is rotation angle (degree) along x/y/z axis
-				r1 += r0;
 				node->varRotation()->setValue(r1);
-
 			}
 
 			node->updateGraphicsContext();
