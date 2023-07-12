@@ -6,6 +6,9 @@
 
 #include "Module/VisualModule.h"
 
+#include "Module/MouseInputModule.h"
+#include "Module/KeyboardInputModule.h"
+
 #include "SceneLoaderFactory.h"
 
 #include "Timer.h"
@@ -406,7 +409,43 @@ namespace dyno
 
 	void SceneGraph::onKeyboardEvent(PKeyboardEvent event)
 	{
+		class KeyboardEventAct : public Action
+		{
+		public:
+			KeyboardEventAct(PKeyboardEvent event) { mKeyboardEvent = event; }
+			~KeyboardEventAct() override {}
 
+		private:
+			void process(Node* node) override
+			{
+				if (!node->isVisible())
+					return;
+
+				for (auto iter : node->animationPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<KeyboardInputModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mKeyboardEvent);
+					}
+				}
+
+				for (auto iter : node->graphicsPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<KeyboardInputModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mKeyboardEvent);
+					}
+				}
+			}
+
+			PKeyboardEvent mKeyboardEvent;
+		};
+
+		KeyboardEventAct eventAct(event);
+
+		this->traverseForward(&eventAct);
 	}
 
 	//Used to traverse the whole scene graph

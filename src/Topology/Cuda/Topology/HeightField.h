@@ -16,7 +16,7 @@ namespace dyno
 		HeightField();
 		~HeightField() override;
 
-		void copyFrom(HeightField<TDataType>& pointSet);
+		void copyFrom(HeightField<TDataType>& hf);
 
 		void scale(Real s);
 		void scale(Coord s);

@@ -44,7 +44,7 @@ namespace dyno {
         ~OceanPatch();
 
     public:
-		DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
+        DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
 
         DEF_VAR(Real, WindDirection, Real(60), "Wind direction");
 
@@ -55,9 +55,9 @@ namespace dyno {
         DEF_VAR(Real, TimeScale, Real(1), "");
 
     public:
-		DEF_ARRAY2D_STATE(Coord, Displacement, DeviceType::GPU, "");
+        DEF_ARRAY2D_STATE(Coord, Displacement, DeviceType::GPU, "");
 
-		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
+        DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
 
     protected:
         void resetStates() override;
@@ -71,14 +71,14 @@ namespace dyno {
 
         std::vector<WindParam> mParams;  //A set of pre-defined configurations
 
-		DArray2D<Complex> mH0;  //初始频谱
-		DArray2D<Complex> mHt;  //当前时刻频谱
+        DArray2D<Complex> mH0;  //初始频谱
+        DArray2D<Complex> mHt;  //当前时刻频谱
 
-		DArray2D<Complex> mDxt;  //x方向偏移
-		DArray2D<Complex> mDzt;  //z方向偏移
+        DArray2D<Complex> mDxt;  //x方向偏移
+        DArray2D<Complex> mDzt;  //z方向偏移
 
         const Real g = 9.81f;          //重力
-        
+
         Real mDirDepend = 0.07f;  //风长方向相关性
 
         Real mAmplitude = 1e-7f;          //波的缩放系数
@@ -88,9 +88,9 @@ namespace dyno {
 
         cufftHandle fftPlan;
 
-		int mSpectrumWidth;  //频谱宽度
-		int mSpectrumHeight;  //频谱长度
+        int mSpectrumWidth;  //频谱宽度
+        int mSpectrumHeight;  //频谱长度
     };
 
-	IMPLEMENT_TCLASS(OceanPatch, TDataType)
+    IMPLEMENT_TCLASS(OceanPatch, TDataType)
 }

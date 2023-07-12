@@ -57,7 +57,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& TriangleSet<TDataType>::getVertex2Triangles()
 	{
-		DArray<uint> counter(this->m_coords.size());
+		DArray<uint> counter(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(mTriangleIndex.size(),
@@ -304,7 +304,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TriangleSet<TDataType>::loadObjFile(std::string filename)
+	bool TriangleSet<TDataType>::loadObjFile(std::string filename)
 	{
 		std::vector<Coord> vertList;
 		std::vector<Triangle> faceList;
@@ -319,7 +319,7 @@ namespace dyno
 
 		bool succeed = tinyobj::LoadObj(&myattrib, &myshape, &mymat, &mywarn, &myerr, fname, nullptr ,true, true);
 		if (!succeed)
-			return;
+			return false;
 
 		for (int i = 0; i < myattrib.GetVertices().size() / 3; i++)
 		{
@@ -341,6 +341,8 @@ namespace dyno
 		faceList.clear();
 		myshape.clear();
 		mymat.clear();
+
+		return true;
 	}
 
 	template<typename TDataType>
@@ -382,7 +384,7 @@ namespace dyno
 		auto& vertices = ret->getPoints();
 		auto& indices = ret->getTriangles();
 
-		uint vNum0 = m_coords.size();
+		uint vNum0 = mCoords.size();
 		uint vNum1 = ts.getPoints().size();
 
 		uint tNum0 = mTriangleIndex.size();
@@ -391,7 +393,7 @@ namespace dyno
 		vertices.resize(vNum0 + vNum1);
 		indices.resize(tNum0 + tNum1);
 
-		vertices.assign(m_coords, vNum0, 0, 0);
+		vertices.assign(mCoords, vNum0, 0, 0);
 		vertices.assign(ts.getPoints(), vNum1, vNum0, 0);
 
 		indices.assign(mTriangleIndex, tNum0, 0, 0);
@@ -446,7 +448,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateVertexNormal()
 	{
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		if (vertSize <= 0)
 			return;
@@ -459,7 +461,7 @@ namespace dyno
 		cuExecute(vertSize,
 			TS_SetupVertexNormals,
 			mVertexNormal,
-			this->m_coords,
+			this->mCoords,
 			mTriangleIndex,
 			vert2Tri);
 	}
@@ -516,7 +518,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal)
 	{
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		vertexNormal.resize(vertSize);
 
@@ -525,7 +527,7 @@ namespace dyno
 		cuExecute(vertSize,
 			TS_SetupAngleWeightedVertexNormals,
 			vertexNormal,
-			this->m_coords,
+			this->mCoords,
 			mTriangleIndex,
 			vert2Tri);
 	}
@@ -573,7 +575,7 @@ namespace dyno
 		cuExecute(edg2Tri.size(),
 			TS_SetupEdgeNormals,
 			edgeNormal,
-			this->m_coords,
+			this->mCoords,
 			mTriangleIndex,
 			edg2Tri);
 	}

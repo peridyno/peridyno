@@ -21,9 +21,11 @@
 #include <HeightField/OceanPatch.h>
 #include <HeightField/Coupling.h>
 
-#include "Module/ComputeModule.h"
+#include <HeightField/Vessel.h>
 
-#include <RigidBody/RigidMesh.h>
+#include <HeightField/initializeHeightField.h>
+
+#include "Module/ComputeModule.h"
 
 #include "Mapping/HeightFieldToTriangleSet.h"
 
@@ -36,38 +38,6 @@ using namespace dyno;
 /**
  * @brief An example to demonstrate the coupling between a boat and the ocean
  */
-
-template<typename TDataType>
-class DragBoat : public ComputeModule
-{
-public:
-	typedef typename TDataType::Real Real;
-	typedef typename TDataType::Coord Coord;
-	typedef typename TDataType::Matrix Matrix;
-
-	DragBoat() {};
-	virtual ~DragBoat() {};
-
-	DEF_VAR_IN(Coord, Velocity, "Velocity");
-
-	DEF_VAR_IN(Quat<Real>, Quaternion, "Rotation");
-
-protected:
-	void compute() override
-	{
-		auto quat = this->inQuaternion()->getData();
-
-		Coord vel = this->inVelocity()->getData();
-
-		Matrix rot = quat.toMatrix3x3();
-
-		Coord vel_prime = rot.transpose() * vel;
-
-		vel_prime[2] = 1.0;
-
-		this->inVelocity()->setValue(rot * vel_prime);
-	}
-};
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -92,19 +62,14 @@ std::shared_ptr<SceneGraph> createScene()
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	ocean->graphicsPipeline()->pushModule(sRender);
 
-	auto boat = scn->addNode(std::make_shared<RigidMesh<DataType3f>>());
+	auto boat = scn->addNode(std::make_shared<Vessel<DataType3f>>());
 	boat->varDensity()->setValue(150.0f);
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
 // 	boat->varEnvelopeName()->setValue(getAssetPath() + "obj/boat_boundary.obj");
 // 	boat->varMeshName()->setValue(getAssetPath() + "obj/boat_mesh.obj");
 
-	auto dragging = std::make_shared<DragBoat<DataType3f>>();
-	boat->stateVelocity()->connect(dragging->inVelocity());
-	boat->stateQuaternion()->connect(dragging->inQuaternion());
-	boat->animationPipeline()->pushModule(dragging);
-	
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
-	boat->connect(coupling->importRigidMeshs());
+	boat->connect(coupling->importVessels());
 	ocean->connect(coupling->importOcean());
 	
 	return scn;
@@ -112,6 +77,8 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
+	HeightFieldLibrary::initStaticPlugin();
+
 	QtApp app;
 
 	app.setSceneGraph(createScene());

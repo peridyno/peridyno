@@ -20,18 +20,21 @@ namespace dyno
 		void setPoints(std::vector<Coord>& pos);
 		void setPoints(DArray<Coord>& pos);
 		void setSize(int size);
-		void rotate(Coord angle);
+		
 
-		DArray<Coord>& getPoints() { return m_coords; }
+		int getPointSize() { return mCoords.size(); };
 
-		int getPointSize() { return m_coords.size(); };
-
-		DArrayList<int>& getPointNeighbors();
-	
+		/**
+		 * @brief Return the lower and upper bounds for all points
+		 */
+		void requestBoundingBox(Coord& lo, Coord& hi);
+		
+		//Transform
 		void scale(Real s);
 		void scale(Coord s);
 		void translate(Coord t);
 
+		void rotate(Coord angle);
 		void rotate(Quat<Real> q);
 
 		void loadObjFile(std::string filename);
@@ -40,13 +43,29 @@ namespace dyno
 
 		void clear();
 
+		/**
+		 * @brief Return the array of points
+		 */
+		DArray<Coord>& getPoints() { return mCoords; }
+
+		/**
+		 * @brief Return the neighbor lists of points
+		 */
+		DArrayList<int>& getPointNeighbors();
+
 	protected:
 		void updateTopology() override;
 
 		virtual void updatePointNeighbors();
 
-		DArray<Coord> m_coords;
-		DArrayList<int> m_pointNeighbors;
+		DArray<Coord> mCoords;
+
+		/**
+		 * @brief Neighbor list storing neighborings ids. 
+		 * 
+		 * Note the lists is empty in default, each derived class should implement its own way to construct the neighbor lists
+		 */
+		DArrayList<int> mNeighborLists;
 	};
 }
 

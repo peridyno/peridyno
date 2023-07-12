@@ -17,8 +17,8 @@ namespace dyno
 	template<typename TDataType>
 	PointSet<TDataType>::~PointSet()
 	{
-		m_coords.clear();
-		m_pointNeighbors.clear();
+		mCoords.clear();
+		mNeighborLists.clear();
 	}
 
 	template<typename TDataType>
@@ -26,13 +26,13 @@ namespace dyno
 	{
 		if (filename.size() < 5 || filename.substr(filename.size() - 4) != std::string(".obj")) {
 			std::cerr << "Error: Expected OBJ file with filename of the form <name>.obj.\n";
-			exit(-1);
+			return;
 		}
 
 		std::ifstream infile(filename);
 		if (!infile) {
 			std::cerr << "Failed to open. Terminating.\n";
-			exit(-1);
+			return;
 		}
 
 		int ignored_lines = 0;
@@ -65,21 +65,15 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::copyFrom(PointSet<TDataType>& pointSet)
 	{
-		if (m_coords.size() != pointSet.getPointSize())
-		{
-			m_coords.resize(pointSet.getPointSize());
-		}
-		m_coords.assign(pointSet.getPoints());
-		m_pointNeighbors.assign(pointSet.m_pointNeighbors);
+		mCoords.assign(pointSet.getPoints());
+		mNeighborLists.assign(pointSet.mNeighborLists);
 	}
 
 	template<typename TDataType>
 	void PointSet<TDataType>::setPoints(std::vector<Coord>& pos)
 	{
-		//printf("%d\n", pos.size());
-
-		m_coords.resize(pos.size());
-		m_coords.assign(pos);
+		mCoords.resize(pos.size());
+		mCoords.assign(pos);
 
 		tagAsChanged();
 	}
@@ -87,8 +81,8 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::setPoints(DArray<Coord>& pos)
 	{
-		m_coords.resize(pos.size());
-		m_coords.assign(pos);
+		mCoords.resize(pos.size());
+		mCoords.assign(pos);
 
 		tagAsChanged();
 	}
@@ -96,20 +90,20 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::setSize(int size)
 	{
-		m_coords.resize(size);
-		m_coords.reset();
+		mCoords.resize(size);
+		mCoords.reset();
 	}
 
 	template<typename TDataType>
 	DArrayList<int>& PointSet<TDataType>::getPointNeighbors()
 	{
-		return m_pointNeighbors;
+		return mNeighborLists;
 	}
 
 	template<typename TDataType>
 	void PointSet<TDataType>::updatePointNeighbors()
 	{
-		if (m_coords.isEmpty())
+		if (mCoords.isEmpty())
 			return;
 	}
 
@@ -117,6 +111,14 @@ namespace dyno
 	void dyno::PointSet<TDataType>::updateTopology()
 	{
 		this->updatePointNeighbors();
+	}
+
+	template<typename TDataType>
+	void PointSet<TDataType>::requestBoundingBox(Coord& lo, Coord& hi)
+	{
+		Reduction<Coord> reduce;
+		lo = reduce.minimum(mCoords.begin(), mCoords.size());
+		hi = reduce.maximum(mCoords.begin(), mCoords.size());
 	}
 
 	template <typename Real, typename Coord>
@@ -133,7 +135,7 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::scale(Real s)
 	{
-		cuExecute(m_coords.size(), PS_Scale, m_coords, s);
+		cuExecute(mCoords.size(), PS_Scale, mCoords, s);
 	}
 
 	template <typename Coord>
@@ -151,7 +153,7 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::scale(Coord s)
 	{
-		cuExecute(m_coords.size(), PS_Scale, m_coords, s);
+		cuExecute(mCoords.size(), PS_Scale, mCoords, s);
 	}
 
 	template <typename Coord>
@@ -169,14 +171,7 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::translate(Coord t)
 	{
-		cuExecute(m_coords.size(), PS_Translate, m_coords, t);
-
-// 		uint pDims = cudaGridSize(m_coords.size(), BLOCK_SIZE);
-// 
-// 		PS_Translate << <pDims, BLOCK_SIZE >> > (
-// 			m_coords,
-// 			t);
-// 		cuSynchronize();
+		cuExecute(mCoords.size(), PS_Translate, mCoords, t);
 	}
 
 	template <typename Coord>
@@ -219,7 +214,7 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::rotate(Coord angle)
 	{
-		cuExecute(m_coords.size(), PS_Rotate, m_coords, angle, Coord(0.0f));
+		cuExecute(mCoords.size(), PS_Rotate, mCoords, angle, Coord(0.0f));
 	}
 
 	template <typename Coord>
@@ -237,20 +232,20 @@ namespace dyno
 	template<typename TDataType>
 	void PointSet<TDataType>::rotate(Quat<Real> q)
 	{
-		cuExecute(m_coords.size(), PS_Rotate, m_coords, q);
+		cuExecute(mCoords.size(), PS_Rotate, mCoords, q);
 	}
 
 	template<typename TDataType>
 	bool PointSet<TDataType>::isEmpty()
 	{
-		return m_coords.size() == 0;
+		return mCoords.size() == 0;
 	}
 
 	template<typename TDataType>
 	void PointSet<TDataType>::clear()
 	{
-		m_coords.clear();
-		m_pointNeighbors.clear();
+		mCoords.clear();
+		mNeighborLists.clear();
 	}
 
 	DEFINE_CLASS(PointSet);

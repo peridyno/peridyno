@@ -18,7 +18,7 @@
 #include "Node.h"
 #include "NodeIterator.h"
 
-#include "Module/MouseInputModule.h"
+#include "Module/InputModule.h"
 
 #include <mutex>
 
