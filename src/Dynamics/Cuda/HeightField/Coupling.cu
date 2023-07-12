@@ -105,10 +105,10 @@ namespace dyno
 	{
 		Real dt = this->stateTimeStep()->getData();
 
-		auto boats = this->getRigidMeshs();
+		auto vessels = this->getVessels();
 		auto ocean = this->getOcean();
 
-		for (auto mesh : boats)
+		for (auto mesh : vessels)
 		{
 			auto& triangles = mesh->stateEnvelope()->getData();
 

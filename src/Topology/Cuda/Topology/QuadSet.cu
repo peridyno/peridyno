@@ -57,7 +57,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& QuadSet<TDataType>::getVertex2Quads()
 	{
-		DArray<uint> counter(this->m_coords.size());
+		DArray<uint> counter(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(m_quads.size(),
@@ -269,7 +269,7 @@ namespace dyno
 
 		auto& vn = this->outVertexNormal()->getData();
 
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		if (vn.size() != vertSize) {
 			vn.resize(vertSize);
@@ -280,7 +280,7 @@ namespace dyno
 		cuExecute(vertSize,
 			QS_SetupVertexNormals,
 			vn,
-			this->m_coords,
+			this->mCoords,
 			m_quads,
 			vert2Quad);
 	}

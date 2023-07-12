@@ -111,7 +111,7 @@ namespace dyno
 		void updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal);
 
 
-		void loadObjFile(std::string filename);
+		bool loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 

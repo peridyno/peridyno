@@ -142,7 +142,7 @@ namespace dyno
 	DArrayList<int>& TetrahedronSet<TDataType>::getVer2Tet()
 	{
 		DArray<uint> counter;
-		counter.resize(this->m_coords.size());
+		counter.resize(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(m_tethedrons.size(),

@@ -1,4 +1,4 @@
-﻿macro(add_plugin LIB_NAME LIB_DEPENDENCY)
+macro(add_plugin LIB_NAME LIB_DEPENDENCY)
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
     file(                                                                           

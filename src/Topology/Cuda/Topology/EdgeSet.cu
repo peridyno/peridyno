@@ -79,7 +79,7 @@ namespace dyno
 	DArrayList<int>& EdgeSet<TDataType>::getVer2Edge()
 	{
 		DArray<uint> counter;
-		counter.resize(this->m_coords.size());
+		counter.resize(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(m_edges.size(),
@@ -104,11 +104,11 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeSet<TDataType>::updatePointNeighbors()
 	{
-		if (this->m_coords.isEmpty())
+		if (this->mCoords.isEmpty())
 			return;
 
 		DArray<uint> counts;
-		counts.resize(this->m_coords.size());
+		counts.resize(this->mCoords.size());
 		counts.reset();
 		
 		cuExecute(m_edges.size(),
@@ -116,11 +116,11 @@ namespace dyno
 			counts,
 			m_edges);
 
-		this->m_pointNeighbors.resize(counts);
+		this->mNeighborLists.resize(counts);
 
 		cuExecute(m_edges.size(),
 			K_StoreIds,
-			this->m_pointNeighbors,
+			this->mNeighborLists,
 			m_edges);
 
 		counts.clear();
