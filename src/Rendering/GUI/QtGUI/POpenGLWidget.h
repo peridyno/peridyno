@@ -20,7 +20,11 @@
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
-#include <QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#else
+	#include <QOpenGLWidget>
+#endif
 #include <QTimer>
 
 //#include <GL/glu.h>

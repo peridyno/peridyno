@@ -1,5 +1,6 @@
 #include "QFilePathWidget.h"
 
+#include "Field.h"
 #include "FilePath.h"
 
 #include <QHBoxLayout>
@@ -84,7 +85,7 @@ namespace dyno
 
 		layout->addWidget(name, 0);
 		layout->addWidget(location, 1);
-		layout->addWidget(open, 0, 0);
+		layout->addWidget(open, 2);
 		layout->setSpacing(3);
 
 		connect(location, &QLineEdit::textChanged, this, &QFilePathWidget::updateField);

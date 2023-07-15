@@ -86,7 +86,11 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QDebug>
-#include <QtWidgets/QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#else
+	#include <QtWidgets/QOpenGLWidget>
+#endif
 #include <QtSvg/QSvgRenderer>
 #include <QHBoxLayout>
 #include <QDialog>
@@ -96,6 +100,7 @@
 #include "NodeEditor/QtNodeWidget.h"
 
 #include "nodes/QDataModelRegistry"
+#include "nodes/QNode"
 #include "ToolBar/TabToolbar.h"
 #include "ToolBar/Page.h"
 #include "ToolBar/Group.h"
@@ -207,7 +212,7 @@ namespace dyno
 		
 		//Setup animation widget
 		m_animationWidget = new PAnimationWidget(this);
-		m_animationWidget->layout()->setMargin(0);
+		m_animationWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
  	//	QWidget* viewWidget = new QWidget();
  	//	QHBoxLayout* hLayout = new QHBoxLayout();
@@ -433,7 +438,7 @@ namespace dyno
 		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
 			m_propertyWidget->showProperty(node);
 			// TODO: high light selected node in node editor
-			auto& qNodes = mNodeFlowView->flowScene()->allNodes();
+			auto qNodes = mNodeFlowView->flowScene()->allNodes();
 			for (auto qNode : qNodes)
 			{
 				if (dynamic_cast<Qt::QtNodeWidget*>(qNode->nodeDataModel())->getNode() == node)

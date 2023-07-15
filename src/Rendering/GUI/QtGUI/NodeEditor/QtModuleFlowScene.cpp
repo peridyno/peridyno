@@ -125,7 +125,7 @@ namespace Qt
 		if (node == nullptr)
 			return;
 
-		auto mlist = node->getModuleList();
+		auto& mlist = node->getModuleList();
 
 		std::map<dyno::ObjectId, QtNode*> moduleMap;
 

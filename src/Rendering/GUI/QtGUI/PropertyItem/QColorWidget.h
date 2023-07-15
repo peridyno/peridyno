@@ -19,9 +19,6 @@
 #pragma once
 #include "QFieldWidget.h"
 
-//RenderCore
-#include "Color.h"
-
 namespace dyno
 {
 	class QColorButton : public QPushButton

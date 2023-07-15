@@ -12,7 +12,7 @@ namespace dyno
 
 		QString qName = codec->toUnicode(name.c_str());
 
-		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+		bool isChinese = qName.contains(QRegularExpression("[\\x4e00-\\x9fa5]+"));
 
 		//If the string contains Chinese, show all the original string without splitting
 		if (isChinese)
@@ -40,7 +40,7 @@ namespace dyno
 
 		QString qName = codec->toUnicode(name.c_str());
 
-		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+		bool isChinese = qName.contains(QRegularExpression("[\\x4e00-\\x9fa5]+"));
 
 		//If the string contains Chinese, show all the original string without splitting
 		if (isChinese)
@@ -71,7 +71,7 @@ namespace dyno
 
 		QString qName = codec->toUnicode(name.c_str());
 
-		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+		bool isChinese = qName.contains(QRegularExpression("[\\x4e00-\\x9fa5]+"));
 
 		//If the string contains Chinese, show all the original string without splitting
 		if (isChinese)

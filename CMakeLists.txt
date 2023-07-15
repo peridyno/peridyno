@@ -23,14 +23,14 @@ endif()
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
 
-    find_package(CUDA REQUIRED)
-    if(CUDA_FOUND)
-        include_directories(${CUDA_INCLUDE_DIRS})
-        link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
-        link_libraries(${CUDA_LIBRARIES})
-    else()
-        message("Cuda not found")
-    endif()      
+    #find_package(CUDA REQUIRED)
+    # if(CUDA_FOUND)
+    #     include_directories(${CUDA_INCLUDE_DIRS})
+    #     link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+    #     link_libraries(${CUDA_LIBRARIES})
+    # else()
+    #     message("Cuda not found")
+    # endif()      
 
 	# define library version (update: apparently you can also do it in project()!)
 	set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
@@ -39,7 +39,8 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    #为sln内部projects设置管理folder
-	set(CMAKE_CXX_STANDARD 11 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
+	set(CMAKE_CXX_STANDARD 17 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	#set(CMAKE_C_CREATE_STATIC_LIBRARY "")
 	#set(CMAKE_C_COMPILE_OBJECT  "")
 

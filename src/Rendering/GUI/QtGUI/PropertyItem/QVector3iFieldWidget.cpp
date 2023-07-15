@@ -2,6 +2,8 @@
 
 #include <QGridLayout>
 
+#include "Field.h"
+
 namespace dyno
 {
 	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)

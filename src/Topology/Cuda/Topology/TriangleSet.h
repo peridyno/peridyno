@@ -97,8 +97,9 @@ namespace dyno
 		 */
 		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 		DArrayList<int>& getVertex2Triangles();
-		DArray<Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
-		DArray<Edg2Tri>& getEdge2Triangle() { return edg2Tri; }
+
+		DArray<TopologyModule::Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
+		DArray<TopologyModule::Edg2Tri>& getEdge2Triangle() { return edg2Tri; }
 
 		DArray<Coord>& getVertexNormals() { return mVertexNormal; }
 

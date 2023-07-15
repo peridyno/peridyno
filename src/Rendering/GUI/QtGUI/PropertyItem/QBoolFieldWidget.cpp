@@ -4,6 +4,7 @@
 #include <QCheckBox>
 #include <QLabel>
 
+#include "Field.h"
 #include "Format.h"
 
 namespace dyno

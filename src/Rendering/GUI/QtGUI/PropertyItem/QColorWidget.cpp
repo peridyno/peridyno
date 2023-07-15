@@ -4,6 +4,9 @@
 #include <QPainter>
 #include <QColorDialog>
 
+//RenderCore
+#include "Color.h"
+
 namespace dyno
 {
 	QColorButton::QColorButton(QWidget* pParent) :

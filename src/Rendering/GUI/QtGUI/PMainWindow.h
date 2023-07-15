@@ -92,7 +92,7 @@ namespace dyno
 
 		explicit PMainWindow(QtApp* app,
 			QWidget *parent = Q_NULLPTR,
-			Qt::WindowFlags flags = 0);
+			Qt::WindowFlags flags = Qt::WindowFlags());
 
 		void mainLoop();
 		void createWindow(int width, int height);

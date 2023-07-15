@@ -64,7 +64,7 @@ namespace dyno
 		Q_OBJECT
 
 	public:
-		explicit PDockWidget(const QString &colorName, QMainWindow *parent = Q_NULLPTR, Qt::WindowFlags flags = 0);
+		explicit PDockWidget(const QString &colorName, QMainWindow *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
 
 		void setCustomSizeHint(const QSize &size);
 		QMenu *colorSwatchMenu() const { return menu; }
@@ -125,29 +125,6 @@ namespace dyno
 
 		QMainWindow *mainWindow;
 	};
-
-	class BlueTitleBar : public QWidget
-	{
-		Q_OBJECT
-	public:
-		explicit BlueTitleBar(QWidget *parent = Q_NULLPTR);
-
-		QSize sizeHint() const override { return minimumSizeHint(); }
-		QSize minimumSizeHint() const override;
-
-	protected:
-		void paintEvent(QPaintEvent *event) override;
-		void mouseReleaseEvent(QMouseEvent *event) override;
-
-	public slots:
-		void updateMask();
-
-	private:
-		const QPixmap leftPm;
-		const QPixmap centerPm;
-		const QPixmap rightPm;
-	};
-
 }
 
 #endif // COLORSWATCH_H

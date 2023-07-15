@@ -166,7 +166,7 @@ namespace dyno
 		QHBoxLayout* iconLayout = new QHBoxLayout();			//创建HBoxLayout承载Label
 		iconLayout->addWidget(Label);				
 		iconLayout->setSizeConstraint(QLayout::SetFixedSize);
-		iconLayout->setMargin(0);
+		iconLayout->setContentsMargins(0, 0, 0, 0);
 		btn->setLayout(iconLayout);								//将Layout指定给目标Button
 	}
 }

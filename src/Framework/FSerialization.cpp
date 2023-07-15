@@ -1,3 +1,5 @@
+#include "Field.h"
+
 namespace dyno 
 {
 	template<>
@@ -280,5 +282,15 @@ namespace dyno
 		this->setValue(str);
 
 		return true;
-	}	
+	}
+
+	template class FVar<bool>;
+	template class FVar<int>;
+	template class FVar<uint>;
+	template class FVar<float>;
+	template class FVar<double>;
+	template class FVar<Vec3f>;
+	template class FVar<Vec3d>;
+	template class FVar<Vec3i>;
+	template class FVar<std::string>;
 }

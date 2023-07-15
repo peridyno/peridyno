@@ -129,11 +129,11 @@ namespace dyno
 		{
 			return PButtonType::BT_LEFT;
 		}
-		else if (event->buttons().testFlag(Qt::MidButton))
+		else if (event->buttons().testFlag(Qt::MiddleButton))
 		{
 			return PButtonType::BT_MIDDLE;
 		}
-		else if (event->buttons().testFlag(Qt::MidButton))
+		else if (event->buttons().testFlag(Qt::RightButton))
 		{
 			return PButtonType::BT_RIGHT;
 		}

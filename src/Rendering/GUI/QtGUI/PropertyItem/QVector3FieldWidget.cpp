@@ -2,6 +2,8 @@
 
 #include <QVBoxLayout>
 
+#include "Field.h"
+
 namespace dyno
 {
 	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
