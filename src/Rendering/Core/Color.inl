@@ -1,5 +1,5 @@
-#ifdef COLOR_SERIALIZATION
-//#define COLOR_SERIALIZATION
+#ifndef COLOR_SERIALIZATION
+#define COLOR_SERIALIZATION
 
 #include "Field.h"
 
