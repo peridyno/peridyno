@@ -5,6 +5,7 @@
 #include <QColorDialog>
 
 //RenderCore
+#define COLOR_SERIALIZATION
 #include "Color.h"
 
 namespace dyno
