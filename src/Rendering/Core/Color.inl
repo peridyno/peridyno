@@ -6,7 +6,7 @@
 namespace dyno
 {
 	template<>
-	std::string FVar<Color>::serialize() override
+	std::string FVar<Color>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -20,7 +20,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<Color>::deserialize(const std::string& str) override
+	bool FVar<Color>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
