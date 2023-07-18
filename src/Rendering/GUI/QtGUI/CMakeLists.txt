@@ -132,8 +132,10 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
 
-# fix error for linking
-target_link_options(${LIB_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/FORCE:MULTIPLE>)
+if(WIN32)
+    # fix error for linking
+    target_link_options(${LIB_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/FORCE:MULTIPLE>)
+endif()
 
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets

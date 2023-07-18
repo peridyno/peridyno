@@ -140,19 +140,13 @@ namespace dyno
 		
 		PStatusBar*				m_statusBar;
 		POpenGLWidget*			mOpenGLWidget;
-		//PVTKOpenGLWidget*		m_vtkOpenglWidget;
-		
+
 		PPropertyWidget*		m_propertyWidget;
 		PAnimationWidget*		m_animationWidget;
 
 		PMainToolBar*			mToolBar = nullptr;
 
 		PIODockWidget* mIoDockerWidget = nullptr;
-// 
-// 		PModuleFlowWidget*		m_moduleFlowView;
-// 		PModuleListWidget*		m_moduleListWidget;
-// 		PSceneGraphWidget*		m_scenegraphWidget;
-
 
 	public slots:
 		void showAboutMsg();

@@ -56,7 +56,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		POpenGLWidget();
+		POpenGLWidget(QWidget* parent = nullptr);
 		~POpenGLWidget();
 
 		void mainLoop() override {};

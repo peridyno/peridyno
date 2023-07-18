@@ -22,8 +22,9 @@
 
 namespace dyno
 {
-	POpenGLWidget::POpenGLWidget()
+	POpenGLWidget::POpenGLWidget(QWidget* parent)
 		: RenderWindow()
+		, QOpenGLWidget(parent)
 	{
 		QSurfaceFormat format;
 		format.setDepthBufferSize(24);
@@ -120,7 +121,9 @@ namespace dyno
 
 	void POpenGLWidget::resizeGL(int w, int h)
 	{
-		this->setWindowSize(w, h);
+		qreal ratio = devicePixelRatio();
+
+		this->setWindowSize(floor(w * ratio), floor(h * ratio));
 	}
 
 	PButtonType mappingMouseButton(QMouseEvent* event)
