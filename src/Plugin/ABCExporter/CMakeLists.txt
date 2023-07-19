@@ -1,6 +1,4 @@
-﻿option(PERIDYNO_PLUGIN_ALEMBIC "Enable binding the ABC exporter library" OFF)
-		
-if(PERIDYNO_PLUGIN_ALEMBIC)
+﻿if(PERIDYNO_PLUGIN_ALEMBIC)
     set(LIB_DEPENDENCY Core Framework Topology Alembic)
     add_plugin(ABCExporter LIB_DEPENDENCY)
 endif()

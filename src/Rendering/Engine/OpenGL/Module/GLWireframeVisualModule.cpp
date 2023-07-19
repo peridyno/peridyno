@@ -86,11 +86,16 @@ namespace dyno
 		auto edges = edgeSet->getEdges();
 		auto vertices = edgeSet->getPoints();
 
-		mVertexBuffer.load(vertices);
-		mIndexBuffer.load(edges);
 		mNumEdges = edges.size();
 
-		GLVisualModule::updateGraphicsContext();
+		if (mNumEdges > 0)
+		{
+			mVertexBuffer.load(vertices);
+			mIndexBuffer.load(edges);
+
+			GLVisualModule::updateGraphicsContext();
+		}
+
 		updateMutex.unlock();
 	}
 

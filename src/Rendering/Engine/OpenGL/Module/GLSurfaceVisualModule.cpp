@@ -139,30 +139,34 @@ namespace dyno
 		mDrawCount = indices.size();
 #endif // VK_BACKEND
 
-		mIndexBuffer.load(indices);
-
-		auto vertices = triSet->getPoints();
-		mVertexBuffer.load(vertices);
-
-		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
-			!this->inColor()->isEmpty() &&
-			this->inColor()->getDataPtr()->size() == vertices.size())
+		if (mDrawCount > 0)
 		{
-			auto colors = this->inColor()->getData();
-			mColorBuffer.load(colors);
-		}
+			mIndexBuffer.load(indices);
 
-		if (this->varUseVertexNormal()->getData())
-		{			
-			//TODO: optimize the performance
+			auto vertices = triSet->getPoints();
+			mVertexBuffer.load(vertices);
+
+			if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
+				!this->inColor()->isEmpty() &&
+				this->inColor()->getDataPtr()->size() == vertices.size())
+			{
+				auto colors = this->inColor()->getData();
+				mColorBuffer.load(colors);
+			}
+
+			if (this->varUseVertexNormal()->getData())
+			{
+				//TODO: optimize the performance
 #ifdef CUDA_BACKEND
-			triSet->update();
-			auto normals = triSet->getVertexNormals();
-			mNormalBuffer.load(normals);
+				triSet->update();
+				auto normals = triSet->getVertexNormals();
+				mNormalBuffer.load(normals);
 #endif
-		}
+			}
 
-		GLVisualModule::updateGraphicsContext();
+			GLVisualModule::updateGraphicsContext();
+		}
+		
 		updateMutex.unlock();
 	}
 
