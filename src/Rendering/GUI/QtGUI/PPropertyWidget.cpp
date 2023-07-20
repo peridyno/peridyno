@@ -88,7 +88,7 @@ namespace dyno
 		mPropertyItems.clear();
 	}
 
-	void PPropertyWidget::showProperty(std::shared_ptr<Module> module)
+	void PPropertyWidget::showModuleProperty(std::shared_ptr<Module> module)
 	{
 		if (module == nullptr)
 			return;
@@ -177,7 +177,7 @@ namespace dyno
 		mSeleted = module;
 	}
 
-	void PPropertyWidget::showProperty(std::shared_ptr<Node> node)
+	void PPropertyWidget::showNodeProperty(std::shared_ptr<Node> node)
 	{
 		if (node == nullptr)
 			return;
@@ -288,21 +288,21 @@ namespace dyno
 		mSeleted = node;
 	}
 
-	void PPropertyWidget::showNodeProperty(Qt::QtNode& block)
+	void PPropertyWidget::showProperty(Qt::QtNode& block)
 	{
 		auto dataModel = block.nodeDataModel();
 
 		auto node = dynamic_cast<Qt::QtNodeWidget*>(dataModel);
 		if (node != nullptr)
 		{
-			this->showProperty(node->getNode());
+			this->showNodeProperty(node->getNode());
 		}
 		else
 		{
 			auto module = dynamic_cast<Qt::QtModuleWidget*>(dataModel);
 			if (module != nullptr)
 			{
-				this->showProperty(module->getModule());
+				this->showModuleProperty(module->getModule());
 			}
 		}
 	}

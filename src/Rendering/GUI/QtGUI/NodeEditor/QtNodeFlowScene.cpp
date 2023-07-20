@@ -380,11 +380,11 @@ namespace Qt
 
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
-			//node->setActive(checked);
-			if (checked)
-				node->animationPipeline()->enable();
-			else
-				node->animationPipeline()->disable();
+			node->setActive(checked);
+// 			if (checked)
+// 				node->animationPipeline()->enable();
+// 			else
+// 				node->animationPipeline()->disable();
 		}
 	}
 

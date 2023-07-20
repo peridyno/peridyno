@@ -155,7 +155,8 @@ void Node::update()
 	{
 		this->preUpdateStates();
 
-		this->updateStates();
+		if (mPhysicsEnabled)
+			this->updateStates();
 
 		this->postUpdateStates();
 
