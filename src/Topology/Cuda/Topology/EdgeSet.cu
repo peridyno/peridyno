@@ -15,8 +15,8 @@ namespace dyno
 	template<typename TDataType>
 	EdgeSet<TDataType>::~EdgeSet()
 	{
-		m_edges.clear();
-		m_ver2Edge.clear();
+		mEdges.clear();
+		mVer2Edge.clear();
 	}
 
 	__global__ void K_CountNumber(
@@ -82,27 +82,26 @@ namespace dyno
 		counter.resize(this->mCoords.size());
 		counter.reset();
 
-		cuExecute(m_edges.size(),
+		cuExecute(mEdges.size(),
 			ES_CountEdges,
 			counter,
-			m_edges);
+			mEdges);
 
-		m_ver2Edge.resize(counter);
+		mVer2Edge.resize(counter);
 
 		counter.reset();
-		cuExecute(m_edges.size(),
+		cuExecute(mEdges.size(),
 			ES_SetupEdgeIds,
-			m_ver2Edge,
-			m_edges);
+			mVer2Edge,
+			mEdges);
 
 		counter.clear();
 
-		return m_ver2Edge;
+		return mVer2Edge;
 	}
 
-
 	template<typename TDataType>
-	void EdgeSet<TDataType>::updatePointNeighbors()
+	void EdgeSet<TDataType>::requestPointNeighbors(DArrayList<int>& lists)
 	{
 		if (this->mCoords.isEmpty())
 			return;
@@ -110,18 +109,18 @@ namespace dyno
 		DArray<uint> counts;
 		counts.resize(this->mCoords.size());
 		counts.reset();
-		
-		cuExecute(m_edges.size(),
+
+		cuExecute(mEdges.size(),
 			K_CountNumber,
 			counts,
-			m_edges);
+			mEdges);
 
-		this->mNeighborLists.resize(counts);
+		lists.resize(counts);
 
-		cuExecute(m_edges.size(),
+		cuExecute(mEdges.size(),
 			K_StoreIds,
-			this->mNeighborLists,
-			m_edges);
+			lists,
+			mEdges);
 
 		counts.clear();
 	}
@@ -134,10 +133,10 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeSet<TDataType>::copyFrom(EdgeSet<TDataType>& edgeSet)
 	{
-		m_edges.resize(edgeSet.m_edges.size());
-		m_edges.assign(edgeSet.m_edges);
+		mEdges.resize(edgeSet.mEdges.size());
+		mEdges.assign(edgeSet.mEdges);
 
-		m_ver2Edge.assign(edgeSet.m_ver2Edge);
+		mVer2Edge.assign(edgeSet.mVer2Edge);
 
 		PointSet<TDataType>::copyFrom(edgeSet);
 	}
@@ -145,7 +144,7 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeSet<TDataType>::setEdges(std::vector<Edge>& edges)
 	{
-		m_edges.assign(edges);
+		mEdges.assign(edges);
 
 		this->tagAsChanged();
 	}
@@ -153,8 +152,8 @@ namespace dyno
 	template<typename TDataType>
 	void EdgeSet<TDataType>::setEdges(DArray<Edge>& edges)
 	{
-		m_edges.resize(edges.size());
-		m_edges.assign(edges);
+		mEdges.resize(edges.size());
+		mEdges.assign(edges);
 
 		this->tagAsChanged();
 	}
@@ -170,7 +169,7 @@ namespace dyno
 	template<typename TDataType>
 	bool EdgeSet<TDataType>::isEmpty()
 	{
-		return m_edges.size() == 0 && PointSet<TDataType>::isEmpty();
+		return mEdges.size() == 0 && PointSet<TDataType>::isEmpty();
 	}
 
 	DEFINE_CLASS(EdgeSet);

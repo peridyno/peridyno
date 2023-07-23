@@ -18,7 +18,6 @@ namespace dyno
 	PointSet<TDataType>::~PointSet()
 	{
 		mCoords.clear();
-		mNeighborLists.clear();
 	}
 
 	template<typename TDataType>
@@ -66,7 +65,6 @@ namespace dyno
 	void PointSet<TDataType>::copyFrom(PointSet<TDataType>& pointSet)
 	{
 		mCoords.assign(pointSet.getPoints());
-		mNeighborLists.assign(pointSet.mNeighborLists);
 	}
 
 	template<typename TDataType>
@@ -92,25 +90,6 @@ namespace dyno
 	{
 		mCoords.resize(size);
 		mCoords.reset();
-	}
-
-	template<typename TDataType>
-	DArrayList<int>& PointSet<TDataType>::getPointNeighbors()
-	{
-		return mNeighborLists;
-	}
-
-	template<typename TDataType>
-	void PointSet<TDataType>::updatePointNeighbors()
-	{
-		if (mCoords.isEmpty())
-			return;
-	}
-
-	template<typename TDataType>
-	void dyno::PointSet<TDataType>::updateTopology()
-	{
-		this->updatePointNeighbors();
 	}
 
 	template<typename TDataType>
@@ -245,7 +224,6 @@ namespace dyno
 	void PointSet<TDataType>::clear()
 	{
 		mCoords.clear();
-		mNeighborLists.clear();
 	}
 
 	DEFINE_CLASS(PointSet);

@@ -107,7 +107,7 @@ namespace dyno
 		QuadSet();
 		~QuadSet();
 
-		DArray<Quad>& getQuads() { return m_quads; }
+		DArray<Quad>& getQuads() { return mQuads; }
 		void setQuads(std::vector<Quad>& quads);
 
 		DArrayList<int>& getVertex2Quads();
@@ -130,10 +130,11 @@ namespace dyno
 
 		virtual void updateQuads() {};
 
-		DArray<Quad> m_quads;
-		DArrayList<int> m_ver2Quad;
+	private:
+		DArray<Quad> mQuads;
+		DArrayList<int> mVer2Quad;
 
-		DArray<::dyno::TopologyModule::Edg2Quad> edg2Quad;
+		DArray<::dyno::TopologyModule::Edg2Quad> mEdg2Quad;
 	};
 }
 

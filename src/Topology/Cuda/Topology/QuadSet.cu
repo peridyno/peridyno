@@ -17,9 +17,9 @@ namespace dyno
 	template<typename TDataType>
 	QuadSet<TDataType>::~QuadSet()
 	{
-		m_quads.clear();
-		m_ver2Quad.clear();
-		edg2Quad.clear();
+		mQuads.clear();
+		mVer2Quad.clear();
+		mEdg2Quad.clear();
 	}
 
 	template<typename Quad>
@@ -60,22 +60,22 @@ namespace dyno
 		DArray<uint> counter(this->mCoords.size());
 		counter.reset();
 
-		cuExecute(m_quads.size(),
+		cuExecute(mQuads.size(),
 			QS_CountQuads,
 			counter,
-			m_quads);
+			mQuads);
 
-		m_ver2Quad.resize(counter);
+		mVer2Quad.resize(counter);
 
 		counter.reset();
-		cuExecute(m_quads.size(),
+		cuExecute(mQuads.size(),
 			QS_SetupQuadIds,
-			m_ver2Quad,
-			m_quads);
+			mVer2Quad,
+			mQuads);
 
 		counter.clear();
 
-		return m_ver2Quad;
+		return mVer2Quad;
 	}
 
 	template<typename EKey, typename Quad>
@@ -148,7 +148,7 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::updateEdges()
 	{
-		uint quadSize = m_quads.size();
+		uint quadSize = mQuads.size();
 		DArray<EKey> keys;
 		DArray<int> quadIds;
 
@@ -159,7 +159,7 @@ namespace dyno
 			QS_SetupKeys,
 			keys,
 			quadIds,
-			m_quads);
+			mQuads);
 
 		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), quadIds.begin());
 
@@ -174,14 +174,14 @@ namespace dyno
 		int edgeNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
-		edg2Quad.resize(edgeNum);
+		mEdg2Quad.resize(edgeNum);
 
 		auto& pEdges = this->getEdges();
 		pEdges.resize(edgeNum);
 		cuExecute(keys.size(),
 			QS_SetupEdges,
 			pEdges,
-			edg2Quad,
+			mEdg2Quad,
 			keys,
 			counter,
 			quadIds);
@@ -194,8 +194,8 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::setQuads(std::vector<Quad>& quads)
 	{
-		m_quads.resize(quads.size());
-		m_quads.assign(quads);
+		mQuads.resize(quads.size());
+		mQuads.assign(quads);
 
 		//this->updateTriangles();
 	}
@@ -204,13 +204,13 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::copyFrom(QuadSet<TDataType>& quadSet)
 	{
-		m_ver2Quad.assign(quadSet.m_ver2Quad);
+		mVer2Quad.assign(quadSet.mVer2Quad);
 
-		m_quads.resize(quadSet.m_quads.size());
-		m_quads.assign(quadSet.m_quads);
+		mQuads.resize(quadSet.mQuads.size());
+		mQuads.assign(quadSet.mQuads);
 
-		edg2Quad.resize(quadSet.edg2Quad.size());
-		edg2Quad.assign(quadSet.edg2Quad);
+		mEdg2Quad.resize(quadSet.mEdg2Quad.size());
+		mEdg2Quad.assign(quadSet.mEdg2Quad);
 
 		EdgeSet<TDataType>::copyFrom(quadSet);
 	}
@@ -218,7 +218,7 @@ namespace dyno
 	template<typename TDataType>
 	bool QuadSet<TDataType>::isEmpty()
 	{
-		return m_quads.size() == 0 && EdgeSet<TDataType>::isEmpty();
+		return mQuads.size() == 0 && EdgeSet<TDataType>::isEmpty();
 	}
 
 	template<typename Coord, typename Quad>
@@ -281,7 +281,7 @@ namespace dyno
 			QS_SetupVertexNormals,
 			vn,
 			this->mCoords,
-			m_quads,
+			mQuads,
 			vert2Quad);
 	}
 
