@@ -42,7 +42,7 @@ namespace dyno
 
 	template<typename TDataType>
 	CollisionDetectionBroadPhase<TDataType>::CollisionDetectionBroadPhase()
-		: CollisionModel()
+		: ComputeModule()
 	{
 		this->varGridSizeLimit()->setValue(0.01);
 	}
@@ -375,7 +375,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CollisionDetectionBroadPhase<TDataType>::doCollision()
+	void CollisionDetectionBroadPhase<TDataType>::compute()
 	{
 		auto type = this->varAccelerationStructure()->getDataPtr()->currentKey();
 		switch (type)

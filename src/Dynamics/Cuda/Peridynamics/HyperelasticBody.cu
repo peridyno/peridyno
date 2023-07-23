@@ -353,7 +353,9 @@ namespace dyno
 		auto tetSet = TypeInfo::cast<TetrahedronSet<TDataType>>(this->stateTetrahedronSet()->getDataPtr());
 		if (tetSet == nullptr) return;
 
-		auto neighbors = tetSet->getPointNeighbors();
+		DArrayList<int> neighbors;
+		tetSet->requestPointNeighbors(neighbors);
+
 		auto ver2tet = tetSet->getVer2Tet();
 		printf("+++++++");
 		auto& restPos = this->stateRestPosition()->getData();
@@ -395,6 +397,8 @@ namespace dyno
 			neighbors,
 			restPos,
 			tetSet->getTetrahedrons());
+
+		neighbors.clear();
 	}
 
 	template<typename Real, typename Coord, typename Tetrahedron>

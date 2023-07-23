@@ -4,8 +4,8 @@
 
 namespace dyno
 {
-	template<typename DataType3f>
-	class StructuredPointSet : public PointSet<DataType3f>
+	template<typename TDataType>
+	class StructuredPointSet : public PointSet<TDataType>
 	{
 	public:
 		StructuredPointSet();
