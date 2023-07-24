@@ -38,21 +38,26 @@ namespace dyno
 
 	public:
 
-		DEF_VAR(Real, UniformScale, 1, "");
+		DEF_VAR(Real, UniformScale, 1, "Uniform Scale");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
+		DEF_VAR(Ramp,Curve,Ramp::BorderMode::Open,"");
 
-		DEF_VAR(Ramp,CurveRamp,Ramp::BorderMode::Open,"");
+		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "Points");
 
-		void disableRender();
+		DEF_INSTANCE_OUT(EdgeSet<TDataType>, EdgeSet, "Curve");
+
 
 
 	protected:
 		void resetStates() override;
 
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
 		float currentIndex = 0;
 		float totalIndex = 0;
+
+
+	private:
+		void varChanged();
+
 	};
 
 
