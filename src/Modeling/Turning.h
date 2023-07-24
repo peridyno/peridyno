@@ -18,6 +18,7 @@
 #include "Node/ParametricModel.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "Ramp.h"
 
 
 namespace dyno
@@ -38,13 +39,9 @@ namespace dyno
 	public:
 		DEF_VAR(unsigned, Columns, 24, "Turning Columns");
 
-		//DEF_VAR(unsigned, Row, 4, "Cylinder Row");
-
 		DEF_VAR(unsigned, EndSegment, 2, "Turning EndSegment");
 
 		DEF_VAR(Real, Radius, 0, "Turning radius");
-
-		//DEF_VAR(Real, Height, 0.9, "Cylinder Height");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
@@ -52,15 +49,17 @@ namespace dyno
 
 		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
 
+		DEF_VAR(bool, UseRamp, false, "");
 
-		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
+		DEF_VAR(Ramp, Curve, Ramp::BorderMode::Open, "");
 
 		void disableRender();
 
 	protected:
 		void resetStates() override;
 
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
+	private:
+		void varChanged();
 	};
 
 
