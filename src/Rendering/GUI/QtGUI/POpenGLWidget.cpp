@@ -159,6 +159,7 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
+
 		mButtonState = QButtonState::QBUTTON_DOWN;
 		mCursorX = event->x();
 		mCursorY = event->y();
@@ -175,6 +176,11 @@ namespace dyno
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
 
+		if (event->button() == Qt::RightButton)
+		{
+			mtempCursorX = event->x();
+		}
+
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		activeScene->onMouseEvent(mouseEvent);
@@ -187,6 +193,8 @@ namespace dyno
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
 		// do picking
+
+
 		if( (event->modifiers() == 0 || event->modifiers() == Qt::ShiftModifier)
 			&& event->button() == Qt::LeftButton 
 			&& !ImGuizmo::IsUsing()
@@ -221,6 +229,8 @@ namespace dyno
 		mouseEvent.x = (float)event->x();
 		mouseEvent.y = (float)event->y();
 
+
+
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		activeScene->onMouseEvent(mouseEvent);
@@ -239,9 +249,17 @@ namespace dyno
 			event->modifiers() == Qt::AltModifier &&
 			!mImWindow.cameraLocked())
 		{
-			camera->rotateToPoint(event->x(), event->y());
+			camera->rotateToPoint(event->x(), event->y()); 
 		}
 		else if (event->buttons().testFlag(Qt::RightButton) &&
+			mButtonState == QBUTTON_DOWN &&
+			event->modifiers() == Qt::AltModifier &&
+			!mImWindow.cameraLocked())
+		{
+			camera->zoom(-0.005*float(event->x()-mtempCursorX));
+			mtempCursorX = event->x();
+		}
+		else if (event->buttons().testFlag(Qt::MiddleButton) &&
 			mButtonState == QBUTTON_DOWN &&
 			event->modifiers() == Qt::AltModifier &&
 			!mImWindow.cameraLocked())
