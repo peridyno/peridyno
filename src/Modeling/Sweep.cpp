@@ -3,6 +3,7 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
+#include "EarClipper.h"
 
 
 
@@ -180,6 +181,9 @@ namespace dyno
 
 		}
 
+		//fill cap
+
+		//auto VertexIn2 = this->inCurve()->getData().getPoints();
 
 		for (int i = 0; i < lengthV2; i++) 
 		{
