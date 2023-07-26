@@ -32,14 +32,13 @@ namespace dyno
 
 		ExtrudeModel();
 
+		void varChanged();
+
+		void displayChanged();
+
 	public:
-		//DEF_VAR(unsigned, Columns, 24, "Columns");
 
 		DEF_VAR(unsigned, Row, 4, "Row");
-
-		//DEF_VAR(unsigned, EndSegment, 2, "EndSegment");
-
-		//DEF_VAR(Real, Radius, 0, "Turning radius");
 
 		DEF_VAR(Real, Height, 1, "Height");
 
@@ -49,9 +48,13 @@ namespace dyno
 
 		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
 
+
 	protected:
 		void resetStates() override;
+
+
 	};
 
 	IMPLEMENT_TCLASS(ExtrudeModel, TDataType);
 }
+
