@@ -48,7 +48,7 @@ endmacro()
 macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
     set(PROJECT_NAME ${EXAMPLE_NAME})
 
-    file(                                                                                                       #利用glob命令读取所有源文件list
+    file(  
         GLOB_RECURSE SRC_LIST 
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
@@ -58,13 +58,13 @@ macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
 
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_LIST})
 
-    add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 #添加编译目标 可执行文件
+    add_executable(${PROJECT_NAME} ${SRC_LIST})                                                                 
 
     target_link_libraries(${PROJECT_NAME} 
         ${${LIB_DEPENDENCY}})
 
-    file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  #判断当前project在根目录下的相对路径
-    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/${GROUP_NAME}")                              #为project设定folder目录
+    file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/${GROUP_NAME}") 
     #    set(EXECUTABLE_OUTPUT_PATH  ${CMAKE_CURRENT_BINARY_DIR}/bin/)
 
     if(WIN32)
