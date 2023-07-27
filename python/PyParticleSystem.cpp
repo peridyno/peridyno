@@ -8,9 +8,11 @@
 #include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/Module/ElasticityModule.h"
 
-
+#include "ParticleSystem/CircularEmitter.h"
 
 #include "RigidBody/RigidBody.h"
+
+
 
 using Node = dyno::Node;
 using NodePort = dyno::NodePort;
@@ -80,7 +82,9 @@ void declare_particle_system(py::module &m, std::string typestr) {
 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
 		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
 		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference)
+        //没找到对应的topology？我暂时用的是statePointSet替代跑通一下。。
+		.def("current_topology", &Class::statePointSet, py::return_value_policy::reference);
 }
 
 
@@ -124,6 +128,19 @@ void declare_func(py::module& m, std::string typestr) {
 	using Class = dyno::Attribute;
 }
 
+// class: CircularEmitter   - for example_2: Qt_WaterPouring
+template <typename TDataType>
+void declare_circular_emitter(py::module& m, std::string typestr) {
+	using Class = dyno::CircularEmitter<TDataType>;
+	using Parent = dyno::ParticleEmitter<TDataType>;
+	std::string pyclass_name = std::string("CircularEmitter") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_location", &Class::varLocation, py::return_value_policy::reference);
+}
+
+
+
 void pybind_particle_system(py::module& m)
 {
 	declare_func(m, "");
@@ -144,5 +161,6 @@ void pybind_particle_system(py::module& m)
 
 	
 	declare_ghost_particlesm<dyno::DataType3f>(m, "3f");
+    
+	declare_circular_emitter<dyno::DataType3f>(m, "3f");
 }
-
