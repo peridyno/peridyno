@@ -1,6 +1,5 @@
 #include <QtApp.h>
 #include "initializeModeling.h"
-#include "initializeInteraction.h"
 
 #include "CubeModel.h"
 #include "Merge.h"
@@ -119,7 +118,7 @@ int main()
 
 
 	Modeling::initStaticPlugin();
-	Interaction::initStaticPlugin();
+
 	QtApp app;
 	app.setSceneGraph(scn);
 	app.initialize(1366, 768);
