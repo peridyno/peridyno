@@ -25,17 +25,18 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class SplitSimplexSet : public Node
+	class MergeSimplexSet : public Node
 	{
-		DECLARE_TCLASS(SplitSimplexSet, TDataType)
+		DECLARE_TCLASS(MergeSimplexSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SplitSimplexSet();
-		~SplitSimplexSet() override;
+		MergeSimplexSet();
+		~MergeSimplexSet() override;
 
 	public:
+
 		DEF_INSTANCE_IN(EdgeSet<TDataType>, EdgeSet, "Input EdgeSet");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "Input TriangleSet");
@@ -48,5 +49,5 @@ namespace dyno
 		void resetStates() override;
 	};
 
-	IMPLEMENT_TCLASS(SplitSimplexSet, TDataType)
+	IMPLEMENT_TCLASS(MergeSimplexSet, TDataType)
 }

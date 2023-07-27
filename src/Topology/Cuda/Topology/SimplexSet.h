@@ -36,6 +36,10 @@ namespace dyno
 
 		bool isEmpty() override;
 
+		void setSegments(const DArray<Edge>& segments) { mSegmentIndex.assign(segments); }
+		void setTriangles(const DArray<Triangle>& triangles) { mTriangleIndex.assign(triangles); }
+		void setTetrahedrons(const DArray<Tetrahedron>& tetrahedrons) { mTetrahedronSet.assign(tetrahedrons); }
+
 	protected:
 		void updateTopology() override;
 
