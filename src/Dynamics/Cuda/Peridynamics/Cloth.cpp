@@ -39,9 +39,10 @@ namespace dyno
 		auto elasticity = std::make_shared<LinearElasticitySolver<TDataType>>();
 		horizon->outFloating()->connect(elasticity->inHorizon());
 		this->stateTimeStep()->connect(elasticity->inTimeStep());
-		this->statePosition()->connect(elasticity->inPosition());
+		this->stateRestPosition()->connect(elasticity->inX());
+		this->statePosition()->connect(elasticity->inY());
 		this->stateVelocity()->connect(elasticity->inVelocity());
-		this->stateRestShape()->connect(elasticity->inRestShape());
+		this->stateBonds()->connect(elasticity->inBonds());
 		this->animationPipeline()->pushModule(elasticity);
 	}
 
@@ -71,14 +72,14 @@ namespace dyno
 		this->statePosition()->assign(pts);
 		this->stateVelocity()->reset();
 
-		if (this->stateRestShape()->isEmpty())
-		{
-			this->stateRestShape()->allocate();
+		if (this->stateBonds()->isEmpty()) {
+			this->stateBonds()->allocate();
 		}
 		
-		auto nbrPtr = this->stateRestShape()->getDataPtr();
+		auto nbrPtr = this->stateBonds()->getDataPtr();
 
 		this->stateOldPosition()->assign(this->statePosition()->getData());
+		this->stateRestPosition()->assign(this->statePosition()->getData());
 
 		constructRestShapeWithSelf(*nbrPtr, nbr, this->statePosition()->getData());
 	}

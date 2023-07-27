@@ -48,8 +48,8 @@ namespace dyno
 		auto scale = this->varScale()->getData();
 		auto uniformScale = this->varUniformScale()->getData();
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
-		auto Ramp = this->varCurveRamp()->getDataPtr();
-		auto floatCoord = Ramp->MyCoord;
+		auto Ramp = this->varCurveRamp()->getValue();
+		auto floatCoord = Ramp.MyCoord;
 		int length = floatCoord.size();
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
@@ -71,9 +71,7 @@ namespace dyno
 
 		//±ä»»
 
-		Quat<Real> q2 = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q2 = computeQuaternion();
 
 		q2.normalize();
 

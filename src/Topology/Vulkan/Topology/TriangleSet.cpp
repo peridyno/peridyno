@@ -6,7 +6,15 @@ namespace dyno
 
 	TriangleSet::TriangleSet()
 	{
-		
+		this->addKernel(
+			"SetupTriangleIndices",
+			std::make_shared<VkProgram>(
+				BUFFER(uint32_t),			//int: height
+				BUFFER(Triangle),       //in:  CapillaryTexture
+				CONSTANT(uint)			//in:  horizon & realSize
+				)
+		);
+		kernel("SetupTriangleIndices")->load(getAssetPath() + "shaders/glsl/topology/SetupTriangleIndices.comp.spv");
 	}
 
 	TriangleSet::~TriangleSet()
@@ -23,28 +31,14 @@ namespace dyno
 
 	void TriangleSet::updateTriangles()
 	{
-		//TODO: this is temporary, should be removed later
-		std::vector<Triangle> triSet(mTriangleIndex.size());
-		std::vector<uint32_t> triIndex;
+		uint num = mTriangleIndex.size();
 
-		vkTransfer(triSet, *mTriangleIndex.handle());
-		for (size_t i = 0; i < triSet.size(); i++)
-		{
-			uint32_t v0 = triSet[i][0];
-			uint32_t v1 = triSet[i][1];
-			uint32_t v2 = triSet[i][2];
+		mIndex.resize(3 * num);
 
-			triIndex.push_back(v2);
-			triIndex.push_back(v1);
-			triIndex.push_back(v0);
-		}
-
-		mIndex.resize(triIndex.size());
-
-		//vkTransfer(mIndex, triIndex);
-		mIndex.assign(triIndex);
-
-		triIndex.clear();
+		kernel("SetupTriangleIndices")->flush(
+			vkDispatchSize(num, 64),
+			mIndex.handle(),
+			mTriangleIndex.handle(),
+			&VkConstant<uint>(num));
 	}
-
 }

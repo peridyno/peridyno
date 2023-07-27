@@ -62,16 +62,9 @@ namespace dyno
 		auto height = this->varHeight()->getData();
 		auto end_segment = this->varEndSegment()->getData();
 
-		TCylinder3D<Real> tube;
-		tube.row = row;
-		tube.columns = columns;
-		tube.radius = radius;
-		tube.height = height;
-		tube.end_segment = end_segment;
-
-		this->outCylinder()->setValue(tube);
-
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
+
+
 
 		Real PI = 3.1415926535;
 
@@ -299,9 +292,7 @@ namespace dyno
 
 		//±ä»»
 
-		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q = computeQuaternion();
 
 		q.normalize();
 
@@ -325,6 +316,15 @@ namespace dyno
 
 		vertices.clear();
 		triangle.clear();
+
+		//Setup the geometric primitive
+		TCylinder3D<Real> cylinder;
+		cylinder.center = center;
+		cylinder.height = height;
+		cylinder.radius = radius;
+		cylinder.scale = scale;
+		cylinder.rotation = q;
+		this->outCylinder()->setValue(cylinder);
 	}
 
 

@@ -1,0 +1,38 @@
+#version 450
+
+layout(std430, binding = 0) buffer vx {
+	float x[ ];
+};
+
+layout(std430, binding = 1) buffer vy {
+	float y[ ];
+};
+
+layout(std430, binding = 2) buffer vz {
+	float z[ ];
+};
+
+layout(std430, binding = 2) buffer Vector {
+	vec3 vec[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+    uint count;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uvec3 id = gl_GlobalInvocationID; 
+
+	uint index = id.x;
+	if (index >= pushConsts.count) 
+		return;
+
+	vec3 v = vec[index];
+
+    x[index] = v.x;
+	y[index] = v.y;
+	z[index] = v.z;
+}

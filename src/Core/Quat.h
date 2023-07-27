@@ -102,9 +102,9 @@ namespace dyno
 
 		DYN_FUNC static inline Quat<Real> identity() { return Quat<Real>(0, 0, 0, 1); }
 		DYN_FUNC static inline Quat<Real> fromEulerAngles(const Real& yaw, const Real& pitch, const Real& roll) {
-			return Quat<Real>(M_PI * yaw / 180, Vector<Real, 3>(1, 0, 0))
-				 * Quat<Real>(M_PI * pitch / 180, Vector<Real, 3>(0, 1, 0))
-				 * Quat<Real>(M_PI * roll / 180, Vector<Real, 3>(0, 0, 1));
+			return Quat<Real>(Real(M_PI) * yaw / 180, Vector<Real, 3>(Real(1), Real(0), Real(0)))
+				 * Quat<Real>(Real(M_PI) * pitch / 180, Vector<Real, 3>(Real(0), Real(1), Real(0)))
+				 * Quat<Real>(Real(M_PI) * roll / 180, Vector<Real, 3>(Real(0), Real(0), Real(1)));
 		}
 
 	public:

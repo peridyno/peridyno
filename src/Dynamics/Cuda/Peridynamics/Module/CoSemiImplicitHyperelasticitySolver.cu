@@ -35,7 +35,7 @@ namespace dyno
 	template<typename TDataType>
 	void CoSemiImplicitHyperelasticitySolver<TDataType>::initializeVolume()
 	{
-		int numOfParticles = this->inPosition()->getData().size();
+		int numOfParticles = this->inY()->getData().size();
 		uint pDims = cudaGridSize(numOfParticles, BLOCK_SIZE);
 		std::cout << "dev: " << numOfParticles << " particles\n";
 		HM_InitVolume << <pDims, BLOCK_SIZE >> > (m_volume, m_objectVolume, m_objectVolumeSet, m_particleVolume, m_particleVolumeSet);
@@ -128,12 +128,13 @@ namespace dyno
 	__global__ void HM_Compute1DEnergy(
 		DArray<Real> energy,
 		DArray<Coord> energyGradient,
+		DArray<Coord> X,
 		DArray<Coord> pos_current,
 		DArray<Matrix> F,
 		DArray<Real> volume,
 		DArray<bool> validOfK,
 		DArray<Coord> eigenValues,
-		DArrayList<Bond> restShapes,
+		DArrayList<Bond> bonds,
 		EnergyType type)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -145,20 +146,21 @@ namespace dyno
 		Coord totalEnergyGradient = Coord(0);
 		Real V_i = volume[pId];
 
-		int size_i = restShapes[pId].size();
+		int size_i = bonds[pId].size();
 
-		Coord rest_pos_i = restShapes[pId][0].pos;
+		Coord x_i = X[pId];
 		Coord eigen_value_i = eigenValues[pId];
 		bool valid_i = validOfK[pId];
 
 		Matrix F_i = F[pId];
 
-		for (int ne = 1; ne < size_i; ne++)
+		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
 			Coord pos_current_j = pos_current[j];
-			Real r = (np_j.pos - rest_pos_i).norm();
+			Coord x_j = X[j];
+			Real r = (x_j - x_i).norm();
 
 			Real V_j = volume[j];
 
@@ -216,7 +218,7 @@ namespace dyno
 		DArray<Real> volume,
 		DArray<Matrix> A,
 		DArray<Real> energy,
-		DArrayList<Bond> restShapes)
+		DArrayList<Bond> bonds)
 	{
 		int pId = blockDim.x * blockIdx.x + threadIdx.x;
 		if (pId >= stepLength.size())	return;
@@ -228,7 +230,7 @@ namespace dyno
 
 		Real alpha = deltaE_i < EPSILON || deltaE_i < energy_i ? Real(1) : energy_i / deltaE_i;
 
-		alpha /= Real(1 + restShapes[pId].size());
+		alpha /= Real(1 + bonds[pId].size());
 
 		stepLength[pId] = alpha;
 	}
@@ -362,18 +364,19 @@ namespace dyno
 		DArray<Matrix> matU,
 		DArray<Matrix> matV,
 		DArray<Matrix> Rots,
-		DArray<Coord> position,
-		DArrayList<Bond> restShapes,
+		DArray<Coord> X,
+		DArray<Coord> Y,
+		DArrayList<Bond> bonds,
 		Real horizon,
 		Real const strainLimit,
 		DArray<Coord> restNorm, 
 		DArray<Coord> Norm)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
+		if (pId >= Y.size()) return;
 
-		Coord rest_pos_i = restShapes[pId][0].pos;
-		int size_i = restShapes[pId].size();
+		Coord x_i = X[pId];
+		int size_i = bonds[pId].size();
 		Real total_weight = Real(0);
 		Matrix matL_i(0);
 		Matrix matK_i(0);
@@ -383,7 +386,7 @@ namespace dyno
 #ifdef DEBUG_INFO
 		if (pId == 497)
 		{
-			printf("Position in HM_ComputeF %d: %f %f %f \n", pId, position[pId][0], position[pId][1], position[pId][2]);
+			printf("Position in HM_ComputeF %d: %f %f %f \n", pId, Y[pId][0], Y[pId][1], Y[pId][2]);
 		}
 #endif // DEBUG_INFO
 		//printf("%d %d \n", pId, size_i);
@@ -391,10 +394,10 @@ namespace dyno
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
+			Coord y_j = X[j];
+			Real r = (x_i - y_j).norm();
 
 			maxDist = max(maxDist, r);
 		}
@@ -406,17 +409,17 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_i - x_j).norm();
 
 			if (r > EPSILON)
 			{
 				Real weight = Real(1);
 
-				Coord p = (position[j] - position[pId]) / maxDist;
-				Coord q = (rest_pos_j - rest_pos_i) / maxDist;
+				Coord p = (Y[j] - Y[pId]) / maxDist;
+				Coord q = (x_j - x_i) / maxDist;
 			
 
 				matL_i(0, 0) += p[0] * q[0] * weight; matL_i(0, 1) += p[0] * q[1] * weight; matL_i(0, 2) += p[0] * q[2] * weight;
@@ -433,7 +436,7 @@ namespace dyno
 #ifdef DEBUG_INFO
 				if (pId == 497)
 				{
-					printf("%d Neighbor %d: %f %f %f \n", pId, j, position[j][0], position[j][1], position[j][2]);
+					printf("%d Neighbor %d: %f %f %f \n", pId, j, Y[j][0], Y[j][1], Y[j][2]);
 				}
 #endif // DEBUG_INFO
 			}
@@ -601,6 +604,7 @@ namespace dyno
 	__global__ void HM_JacobiStepNonsymmetric(
 		DArray<Coord> source,
 		DArray<Matrix> A,
+		DArray<Coord> X,
 		DArray<Coord> y_pre,
 		DArray<Matrix> matU,
 		DArray<Matrix> matV,
@@ -609,7 +613,7 @@ namespace dyno
 		DArray<bool> validOfK,
 		DArray<Matrix> F,
 		Real k_bend,
-		DArrayList<Bond> restShapes,
+		DArrayList<Bond> bonds,
 		Real horizon,
 		DArray<Real> volume,
 		Real dt,
@@ -619,16 +623,16 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= y_pre.size()) return;
 
-		Coord rest_pos_i = restShapes[pId][0].pos;
-		int size_i = restShapes[pId].size();
+		Coord x_i = X[pId];
+		int size_i = bonds[pId].size();
 	
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_i - x_j).norm();
 
 			maxDist = max(maxDist, r);
 		}
@@ -676,7 +680,6 @@ namespace dyno
 		Matrix F_i = F[pId];
 
 		Coord y_pre_i = y_pre[pId];
-		Coord y_rest_i = restShapes[pId][0].pos;
 
 		bool K_valid = validOfK[pId];
 
@@ -685,10 +688,11 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShapes[pId][ne];
-			int j = np_j.index;
+			Bond bond_ij = bonds[pId][ne];
+			int j = bond_ij.idx;
 			Coord y_pre_j = y_pre[j];
-			Real r = (np_j.pos - y_rest_i).norm();
+			Coord x_j = X[j];
+			Real r = (x_j - x_i).norm();
 
 			if (r > EPSILON)
 			{
@@ -736,13 +740,13 @@ namespace dyno
 				{
 					Real standardVol = 0.0025f * 0.005f;
 
-					PK1_ij *= (y_rest_i - np_j.pos).normSquared() / standardVol;
-					PK2_ij *= (y_rest_i - np_j.pos).normSquared() / standardVol;
+					PK1_ij *= (x_i - x_j).normSquared() / standardVol;
+					PK2_ij *= (x_i - x_j).normSquared() / standardVol;
 				}
 				
 				Coord dir_ij = lambda > EPSILON ? y_ij.normalize() : Coord(1, 0, 0);
 
-				Coord x_ij = K_valid_ij ? y_rest_i - np_j.pos : dir_ij * (y_rest_i - np_j.pos).norm();
+				Coord x_ij = K_valid_ij ? x_i - x_j : dir_ij * (x_i - x_j).norm();
 
 				Matrix F_i_1 = F_i.inverse();
 				Matrix F_i_T = F_i_1.transpose();
@@ -865,7 +869,7 @@ namespace dyno
 	void CoSemiImplicitHyperelasticitySolver<TDataType>::resizeAllFields()
 	{
 
-		uint num = this->inPosition()->getData().size();
+		uint num = this->inY()->getData().size();
 
 		if (m_F.size() == num)
 			return;
@@ -914,18 +918,16 @@ namespace dyno
 		m_reduce = Reduction<Real>::Create(num);
 
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->inTriangularMesh()->getDataPtr());
-		triSet->getPoints().assign(this->inPosition()->getData());
+		triSet->getPoints().assign(this->inY()->getData());
 		triSet->updateAngleWeightedVertexNormal(this->inNorm()->getData());
-	
 	}
 
 	template<typename TDataType>
 	void CoSemiImplicitHyperelasticitySolver<TDataType>::enforceHyperelasticity()
 	{
-
 		resizeAllFields();
 
-		int numOfParticles = this->inPosition()->getData().size();
+		int numOfParticles = this->inY()->getData().size();
 		uint pDims = cudaGridSize(numOfParticles, BLOCK_SIZE);
 
 		std::cout << "enforceElasticity Particles: " << numOfParticles << std::endl;
@@ -938,9 +940,9 @@ namespace dyno
 
 		/*====================================== Jacobi method ======================================*/
 		// initialize y_now, y_next_iter
-		y_current.assign(this->inPosition()->getData());
-		this->inMarchPosition()->getData().assign(this->inPosition()->getData());
-		mPosBuf.assign(this->inPosition()->getData());
+		y_current.assign(this->inY()->getData());
+		this->inMarchPosition()->getData().assign(this->inY()->getData());
+		mPosBuf.assign(this->inY()->getData());
 
 
 		// do Jacobi method Loop
@@ -964,8 +966,9 @@ namespace dyno
 					m_matU,
 					m_matV,
 					m_matR,
+					this->inX()->getData(),
 					y_current,
-					this->inRestShape()->getData(),
+					this->inBonds()->getData(),
 					this->inHorizon()->getData(),
 					(Real const)0.3,
 					this->inRestNorm()->getData(),
@@ -975,6 +978,7 @@ namespace dyno
 				HM_JacobiStepNonsymmetric << <pDims, BLOCK_SIZE >> > (
 					m_source,
 					m_A,
+					this->inX()->getData(),
 					y_current,
 					m_matU,
 					m_matV,
@@ -983,7 +987,7 @@ namespace dyno
 					m_validOfK,
 					m_F,
 					this->k_bend,
-					this->inRestShape()->getData(),
+					this->inBonds()->getData(),
 					this->inHorizon()->getData(),
 					m_volume,
 					this->inTimeStep()->getData(),
@@ -1016,12 +1020,13 @@ namespace dyno
 						HM_Compute1DEnergy,
 						m_energy,
 						mEnergyGradient,
+						this->inX()->getData(),
 						y_current,
 						m_F,
 						m_volume,
 						m_validOfK,
 						m_eigenValues,
-						this->inRestShape()->getData(),
+						this->inBonds()->getData(),
 						this->inEnergyType()->getData());
 
 					cuExecute(m_alpha.size(),
@@ -1032,7 +1037,7 @@ namespace dyno
 						m_volume,
 						m_A,
 						m_energy,
-						this->inRestShape()->getData());
+						this->inBonds()->getData());
 
 					cuExecute(m_gradient.size(),
 						HM_ComputeCurrentPosition,
@@ -1080,8 +1085,9 @@ namespace dyno
 				m_matU,
 				m_matV,
 				m_matR,
+				this->inX()->getData(),
 				y_current,
-				this->inRestShape()->getData(),
+				this->inBonds()->getData(),
 				this->inHorizon()->getData(),
 				(Real const)0.3,
 				this->inRestNorm()->getData(),
@@ -1091,6 +1097,7 @@ namespace dyno
 			HM_JacobiStepNonsymmetric << <pDims, BLOCK_SIZE >> > (
 				m_source,
 				m_A,
+				this->inX()->getData(),
 				y_current,
 				m_matU,
 				m_matV,
@@ -1099,7 +1106,7 @@ namespace dyno
 				m_validOfK,
 				m_F,
 				this->k_bend,
-				this->inRestShape()->getData(),
+				this->inBonds()->getData(),
 				this->inHorizon()->getData(),
 				m_volume,
 				this->inTimeStep()->getData(),
@@ -1131,12 +1138,13 @@ namespace dyno
 					HM_Compute1DEnergy,
 					m_energy,
 					mEnergyGradient,
+					this->inX()->getData(),
 					y_current,
 					m_F,
 					m_volume,
 					m_validOfK,
 					m_eigenValues,
-					this->inRestShape()->getData(),
+					this->inBonds()->getData(),
 					this->inEnergyType()->getData());
 
 				cuExecute(m_alpha.size(),
@@ -1147,7 +1155,7 @@ namespace dyno
 					m_volume,
 					m_A,
 					m_energy,
-					this->inRestShape()->getData());
+					this->inBonds()->getData());
 
 				cuExecute(m_gradient.size(),
 					HM_ComputeCurrentPosition,
@@ -1174,8 +1182,7 @@ namespace dyno
 					mContactRule->constrain();
 				}
 			}
-				
-		
+
 			iterCount++;
 		}
 		
@@ -1183,9 +1190,9 @@ namespace dyno
 		printf("========= Enforcement elastic run %d iteration =======\n", iterCount);
 	
 
-		cuExecute(this->inPosition()->getDataPtr()->size(),
+		cuExecute(this->inY()->getDataPtr()->size(),
 			test_HM_UpdatePosition,
-			this->inPosition()->getData(),
+			this->inY()->getData(),
 			this->inVelocity()->getData(),
 			this->inMarchPosition()->getData(),
 			mPosBuf,

@@ -15,16 +15,17 @@ namespace dyno
 		this->varSegmentX()->setRange(1, 100);
 		this->varSegmentZ()->setRange(1, 100);
 
+		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
-		this->stateQuadSet()->connect(glModule->inTriangleSet());
+		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateQuadSet()->connect(wireframe->inEdgeSet());
+		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PlaneModel<TDataType>::varChanged, this));
@@ -39,6 +40,7 @@ namespace dyno
 		this->varLengthX()->attach(callback);
 		this->varLengthZ()->attach(callback);
 
+		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
 	}
 
@@ -66,9 +68,7 @@ namespace dyno
 		length[1] = 1;
 		length[2] *= scale[2];
 
-		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q = computeQuaternion();
 
 		q.normalize();
 
@@ -107,7 +107,6 @@ namespace dyno
 		auto segmentX = this->varSegmentX()->getData();
 		auto segmentZ = this->varSegmentZ()->getData();
 
-		auto quadSet = this->stateQuadSet()->getDataPtr();
 		auto lengthX = this->varLengthX()->getData();
 		auto lengthZ = this->varLengthZ()->getData();
 
@@ -117,14 +116,13 @@ namespace dyno
 		lengthX *= scale[0];
 		lengthZ *= scale[2];
 
-		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q = computeQuaternion();
 
 		q.normalize();
 
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Quad> quads;
+		std::vector<TopologyModule::Triangle> triangles;
 
 		Real dx = lengthX / segmentX;
 		Real dz = lengthZ / segmentZ;
@@ -162,19 +160,32 @@ namespace dyno
 				v3 = nx + (nz + 1) * (segmentX + 1);;
 
 				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+
+				if ((nx + nz) % 2 == 0){
+					triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
+					triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
+				}
+				else{
+					triangles.push_back(TopologyModule::Triangle(v0, v1, v3));
+					triangles.push_back(TopologyModule::Triangle(v1, v2, v3));
+				}
 			}
 		}
 
+		auto qs = this->stateQuadSet()->getDataPtr();
+		qs->setPoints(vertices);
+		qs->setQuads(quads);
+		qs->update();
 
-		quadSet->setPoints(vertices);
-		quadSet->setQuads(quads);
-		quadSet->update();
+		auto ts = this->stateTriangleSet()->getDataPtr();
+		ts->setPoints(vertices);
+		ts->setTriangles(triangles);
+		ts->update();
 
 		vertices.clear();
 		quads.clear();
-	
+		triangles.clear();
 	}
-
 
 	DEFINE_CLASS(PlaneModel);
 }

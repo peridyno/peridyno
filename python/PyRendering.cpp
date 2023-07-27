@@ -47,7 +47,6 @@ void declare_point_visual_module(py::module& m, std::string typestr) {
 	GLPV.def(py::init<>())
 		.def("in_pointSet", &Class::inPointSet, py::return_value_policy::reference)
 		.def("set_colorMapMode", &GLPointVisualModule::setColorMapMode)
-		.def("set_colorMapRange", &GLPointVisualModule::setColorMapRange)
 		.def("in_color", &Class::inColor, py::return_value_policy::reference);
 
 

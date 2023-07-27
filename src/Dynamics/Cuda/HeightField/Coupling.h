@@ -16,7 +16,7 @@
 #pragma once
 
 #include "Ocean.h"
-#include "RigidBody/RigidMesh.h"
+#include "Vessel.h"
 
 #include "Algorithm/Reduction.h"
 
@@ -27,17 +27,17 @@ namespace dyno
 	{
 		DECLARE_TCLASS(Coupling, TDataType)
 	public:
-
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
 		Coupling();
-		~Coupling();
+		~Coupling() override;
 
-		DEF_NODE_PORTS(RigidMesh<TDataType>, RigidMesh, "Boat");
-		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
-		
+	public:
 		DEF_VAR(Real, Dragging, Real(0.98), "");
+
+		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
+		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
 
 	protected:
 		void resetStates() override;

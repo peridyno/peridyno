@@ -1,6 +1,6 @@
 set(LIB_NAME RenderCore)
 
-file(GLOB_RECURSE SOURCES *.cpp *.h *.cu)
+file(GLOB_RECURSE SOURCES *.cpp *.h *.cu *.inl)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 add_library(${LIB_NAME} SHARED ${SOURCES})
 

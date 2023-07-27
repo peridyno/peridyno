@@ -21,20 +21,20 @@ namespace dyno
 	{
 		Node::updateStates();
 
-		Real dt = this->stateTimeStep()->getData();
+		Real dt = this->stateTimeStep()->getValue();
 
-		auto& center = this->stateCenter()->getData();
-		auto& trans_velocity = this->stateVelocity()->getData();
-		auto& angular_velocity = this->stateAngularVelocity()->getData();
+		auto center = this->stateCenter()->getValue();
+		auto trans_velocity = this->stateVelocity()->getValue();
+		auto angular_velocity = this->stateAngularVelocity()->getValue();
 
-		auto& quat = this->stateQuaternion()->getData();
+		auto quat = this->stateQuaternion()->getValue();
 
-		auto& rot = this->stateRotationMatrix()->getData();
+		auto rot = this->stateRotationMatrix()->getValue();
 
-		auto& inertia = this->stateInertia()->getData();
-		auto& initial_inertia = this->stateInitialInertia()->getData();
+		auto inertia = this->stateInertia()->getValue();
+		auto initial_inertia = this->stateInitialInertia()->getValue();
 
-		trans_velocity += this->varGravity()->getData() * dt;
+		trans_velocity += this->varGravity()->getValue() * dt;
 		center += trans_velocity * dt;
 
 		quat = quat.normalize();
@@ -45,6 +45,12 @@ namespace dyno
 			* quat;
 
 		inertia = rot * initial_inertia * rot.inverse();
+
+		this->stateCenter()->setValue(center);
+		this->stateVelocity()->setValue(trans_velocity);
+		this->stateQuaternion()->setValue(quat);
+		this->stateRotationMatrix()->setValue(rot);
+		this->stateInertia()->setValue(inertia);
 	}
 
 	DEFINE_CLASS(RigidBody);

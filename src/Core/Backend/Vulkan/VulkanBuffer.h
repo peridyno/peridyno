@@ -19,7 +19,7 @@ VK_DEFINE_HANDLE(VmaAllocation)
 VK_DEFINE_HANDLE(VmaAllocator)
 
 namespace vks
-{	
+{
 	/**
 	* @brief Encapsulates access to a Vulkan buffer backed up by device memory
 	* @note To be filled by an external source like the VulkanDevice
@@ -27,7 +27,7 @@ namespace vks
 	class Buffer
 	{
 	public:
-		Buffer();
+		Buffer(VkDevice dev = nullptr);
 		~Buffer();
 		VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		void unmap();

@@ -181,13 +181,21 @@ namespace dyno
 		bool capsLockEnabled() { return (mods & PModifierBits::MB_CAPS_LOCK) != 0; }
 		bool numLockEnabled() { return (mods & PModifierBits::MB_NUM_LOCK) != 0; }
 
-		PKeyboardType key;
-		PActionType action;
-		PModifierBits mods;
+		PKeyboardType key =  PKEY_UNKNOWN;
+		PActionType action = AT_UNKOWN;
+		PModifierBits mods = MB_NO_MODIFIER;
 	};
 
 	struct PMouseEvent
 	{
+		bool operator==(const PMouseEvent& event) {
+			return buttonType == event.buttonType && actionType == event.actionType && mods == event.mods;
+		};
+
+		bool operator!=(const PMouseEvent& event) {
+			return buttonType != event.buttonType || actionType == event.actionType || mods == event.mods;
+		};
+
 		bool shiftKeyPressed() { return (mods & PModifierBits::MB_SHIFT) != 0; }
 		bool controlKeyPressed() { return (mods & PModifierBits::MB_CONTROL) != 0; }
 		bool altKeyPressed() { return (mods & PModifierBits::MB_ALT) != 0; }

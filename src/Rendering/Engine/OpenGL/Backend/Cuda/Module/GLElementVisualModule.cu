@@ -241,8 +241,8 @@ namespace dyno
 
 		if (mDrawCount > 0)
 		{
-			mVertexBuffer.loadCuda(vertices.begin(), vertices.size() * sizeof(float) * 3);
-			mIndexBuffer.loadCuda(triangles.begin(), triangles.size() * sizeof(unsigned int) * 3);
+			mVertexBuffer.load(vertices);
+			mIndexBuffer.load(triangles);
 		}
 
 		updateMutex.unlock();

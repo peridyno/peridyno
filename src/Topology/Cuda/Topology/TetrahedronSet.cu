@@ -142,7 +142,7 @@ namespace dyno
 	DArrayList<int>& TetrahedronSet<TDataType>::getVer2Tet()
 	{
 		DArray<uint> counter;
-		counter.resize(this->m_coords.size());
+		counter.resize(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(m_tethedrons.size(),
@@ -328,7 +328,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType> tetSet)
+	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType>& tetSet)
 	{
 		m_tethedrons.resize(tetSet.m_tethedrons.size());
 		m_tethedrons.assign(tetSet.m_tethedrons);

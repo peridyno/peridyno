@@ -23,9 +23,11 @@ namespace dyno
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "Input");
 
+		DEF_ARRAY_STATE(Coord, RestPosition, DeviceType::GPU, "");
+
 		DEF_ARRAY_STATE(Coord, OldPosition, DeviceType::GPU, "");
 
-		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "Storing neighbors");
+		DEF_ARRAYLIST_STATE(Bond, Bonds, DeviceType::GPU, "Storing neighbors");
 
 	protected:
 		void resetStates() override;

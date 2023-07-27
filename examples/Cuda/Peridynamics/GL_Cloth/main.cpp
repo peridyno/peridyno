@@ -29,7 +29,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto cloth = scn->addNode(std::make_shared<Cloth<DataType3f>>());
 	cloth->setDt(0.001f);
-	plane->stateQuadSet()->connect(cloth->inTriangleSet());
+	plane->stateTriangleSet()->connect(cloth->inTriangleSet());
 	//cloth->loadSurface(getAssetPath() + "cloth_shell/mesh_80_80.obj");
 
 	auto root = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());

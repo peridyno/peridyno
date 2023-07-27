@@ -7,7 +7,7 @@
 namespace dyno 
 {
 	template<typename TDataType>
-	class RigidMesh : public RigidBody<TDataType>
+	class RigidMesh : virtual public RigidBody<TDataType>
 	{
 		DECLARE_TCLASS(RigidMesh, TDataType)
 	public:
@@ -16,7 +16,7 @@ namespace dyno
 		typedef typename TDataType::Matrix Matrix;
 
 		RigidMesh();
-		~RigidMesh();
+		~RigidMesh() override;
 
 	public:
 		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");

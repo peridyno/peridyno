@@ -66,8 +66,11 @@ target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-rel
 #Tell the required compilers to enable device linking on the library target.
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/Engine")
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+endif()
 
 add_compile_definitions(PERIDYNO_API_EXPORTS)
 
@@ -86,26 +89,35 @@ endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "NoGPU")
     target_include_directories(${LIB_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Module>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Node>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
     target_include_directories(${LIB_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Vulkan/Module>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Module>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Node>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend/Vulkan>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend/Vulkan/Module>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
     target_include_directories(${LIB_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Module>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Module>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Node>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend/Cuda>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/Engine/OpenGL/Backend/Cuda/Module>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>)
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Module>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda/Module>)
 endif()
 
 
@@ -127,6 +139,9 @@ set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL)
 
+file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Module/*.h")
+install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Module)
+
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/gl/*.h")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/gl)
 
@@ -135,4 +150,12 @@ install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/
 
 file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/shader/helper/*.*")
 install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/shader/helpler)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Module/*.h")
+    install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda/Module)
+
+    file(GLOB CORE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Node/*.h")
+    install(FILES ${CORE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/Engine/OpenGL/Backend/Cuda/Node)
+endif()
 

@@ -135,16 +135,16 @@ namespace dyno
 
 	void PluginManager::loadPluginByPath(const std::string& pathName)
 	{
-		ghc::filesystem::path file_path(pathName);
+		fs::path file_path(pathName);
 
 		std::error_code error;
-		auto file_status = ghc::filesystem::status(file_path, error);
-		if (!ghc::filesystem::exists(file_status)) {
+		auto file_status = fs::status(file_path, error);
+		if (!fs::exists(file_status)) {
 			std::cout << "Plugin path do not exist !" << std::endl;
 			return;
 		}
 
-		for (const auto& entry : ghc::filesystem::directory_iterator(pathName))
+		for (const auto& entry : fs::directory_iterator(pathName))
 		{
 			if (entry.path().extension() == getExtension())
 			{

@@ -266,8 +266,13 @@ namespace dyno
 		light.mainLightDirection = glm::vec3(camera->getViewMat() * glm::vec4(light.mainLightDirection, 0));
 		mLightUBO.load(&light, sizeof(light));
 		mLightUBO.bindBufferBase(1);
-						
+		// transform uniform block
+		mVariableUBO.bindBufferBase(2);
+
+		const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
 		mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
+		mFramebuffer.drawBuffers(2, attachments);
 
 		// clear color and depth
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -275,14 +280,14 @@ namespace dyno
 		//GLint clearIndex[]{11, -1, -1, -1};
 		//glClearBufferiv(GL_COLOR, 1, clearIndex);
 		glViewport(0, 0, camera->viewportWidth(), camera->viewportHeight());
+
 		// draw background color
+		// it would also clear index buffer...
 		Vec3f c0 = Vec3f(rparams.bgColor0.x, rparams.bgColor0.y, rparams.bgColor0.z);
 		Vec3f c1 = Vec3f(rparams.bgColor1.x, rparams.bgColor1.y, rparams.bgColor1.z);
 		mRenderHelper->drawBackground(c0, c1);
-		
-		mVariableUBO.bindBufferBase(2);
-
-		// render opacity objects
+				
+		// first we render opacity objects
 		for (int i = 0; i < mRenderItems.size(); i++) {
 
 			if (mRenderItems[i].node->isVisible() && !mRenderItems[i].visualModule->isTransparent())
@@ -290,6 +295,14 @@ namespace dyno
 				mVariableUBO.load(&i, sizeof(i));
 				mRenderItems[i].visualModule->draw(GLRenderPass::COLOR);
 			}
+		}
+
+		// draw a ground grid (xy-plane)
+		// since the grid is transparent, we should handle it before drawing transparent nodes
+		if (rparams.showGround)
+		{
+			mFramebuffer.drawBuffers(1, attachments);
+			mRenderHelper->drawGround(rparams.planeScale, rparams.rulerScale);
 		}
 
 		// render transparency objects
@@ -318,16 +331,9 @@ namespace dyno
 				}
 			}
 
-			// draw a ruler plane
-			if (rparams.showGround)
-			{
-				mRenderHelper->drawGround(rparams.planeScale, rparams.rulerScale);
-			}
-
 			glDepthMask(true);
 
 			// blend alpha
-			const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 			mFramebuffer.drawBuffers(2, attachments);
 
 			mBlendProgram->use();
@@ -342,11 +348,12 @@ namespace dyno
 			glDisable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
 		}
-
+		
 
 		// draw scene bounding box
 		if (rparams.showSceneBounds && scene != 0)
 		{
+			mFramebuffer.drawBuffers(1, attachments);
 			// get bounding box of the scene
 			auto p0 = scene->getLowerBound();
 			auto p1 = scene->getUpperBound();
@@ -355,13 +362,14 @@ namespace dyno
 
 		// draw to final framebuffer with fxaa filter
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-				
+			
 		if (bEnableFXAA)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(0, 0, camera->viewportWidth(), camera->viewportHeight());
 
-			mColorTex.bind(GL_TEXTURE1);			
+			mColorTex.bind(GL_TEXTURE1);
+			mDepthTex.bind(GL_TEXTURE2);
 			mFXAAFilter->apply(camera->viewportWidth(), camera->viewportHeight());
 		}
 		else

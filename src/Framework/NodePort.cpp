@@ -41,5 +41,10 @@ namespace dyno
 		}
 	}
 
+	void disconnect(Node* node, NodePort* port)
+	{
+		node->disconnect(port);
+	}
+
 }
 

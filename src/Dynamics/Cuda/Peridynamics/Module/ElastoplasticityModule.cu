@@ -29,7 +29,7 @@ namespace dyno
 		mDensityPBD->varIterationNumber()->setValue(1);
 		this->inTimeStep()->connect(mDensityPBD->inTimeStep());
 		this->inHorizon()->connect(mDensityPBD->varSmoothingLength());
-		this->inPosition()->connect(mDensityPBD->inPosition());
+		this->inY()->connect(mDensityPBD->inPosition());
 		this->inVelocity()->connect(mDensityPBD->inVelocity());
 		this->inNeighborIds()->connect(mDensityPBD->inNeighborIds());
 	}
@@ -55,10 +55,11 @@ namespace dyno
 		DArray<Real> yield_I1,
 		DArray<Real> yield_J2,
 		DArray<Real> arrI1,
-		DArray<Coord> position,
+		DArray<Coord> X,
+		DArray<Coord> Y,
 		DArray<Real> density,
 		DArray<Real> bulk_stiffiness,
-		DArrayList<Bond> restShape,
+		DArrayList<Bond> bonds,
 		Real horizon,
 		Real A,
 		Real B,
@@ -66,7 +67,7 @@ namespace dyno
 		Real lambda)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (i >= position.size()) return;
+		if (i >= Y.size()) return;
 
 		CorrectedKernel<Real> kernSmooth;
 
@@ -74,26 +75,27 @@ namespace dyno
 
 		Real s_A = weaking*A;
 
-		List<Bond>& rest_shape_i = restShape[i];
-		Coord rest_pos_i = rest_shape_i[0].pos;
-		Coord cur_pos_i = position[i];
+		List<Bond>& bonds_i = bonds[i];
+		Coord x_i = X[i];
+		Coord y_i = Y[i];
 
 		Real I1_i = 0.0f;
 		Real J2_i = 0.0f;
 		//compute the first and second invariants of the deformation state, i.e., I1 and J2
-		int size_i = rest_shape_i.size();
+		int size_i = bonds_i.size();
 		Real total_weight = Real(0);
-		for (int ne = 1; ne < size_i; ne++)
+		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			Coord rest_pos_j = np_j.pos;
-			int j = np_j.index;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			
+			Real r = (x_i - x_j).norm();
 
 			if (r > 0.01*horizon)
 			{
 				Real weight = kernSmooth.Weight(r, horizon);
-				Coord p = (position[j] - cur_pos_i);
+				Coord p = (Y[j] - y_i);
 				Real ratio_ij = p.norm() / r;
 
 				I1_i += weight*ratio_ij;
@@ -111,17 +113,17 @@ namespace dyno
 			I1_i = 1.0f;
 		}
 
-		for (int ne = 1; ne < size_i; ne++)
+		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_i - x_j).norm();
 
 			if (r > 0.01*horizon)
 			{
 				Real weight = kernSmooth.Weight(r, horizon);
-				Vec3f p = (position[j] - cur_pos_i);
+				Vec3f p = (Y[j] - y_i);
 				Real ratio_ij = p.norm() / r;
 				J2_i = (ratio_ij - I1_i)*(ratio_ij - I1_i)*weight;
 			}
@@ -185,36 +187,38 @@ namespace dyno
 		DArray<Real> yield_I1,
 		DArray<Real> yield_J2,
 		DArray<Real> arrI1,
-		DArray<Coord> position,
-		DArrayList<Bond> restShape)
+		DArray<Coord> X,
+		DArray<Coord> Y,
+		DArrayList<Bond> bonds)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (i >= position.size()) return;
+		if (i >= Y.size()) return;
 
-		List<Bond>& rest_shape_i = restShape[i];
-		Coord rest_pos_i = rest_shape_i[0].pos;
-		Coord pos_i = position[i];
+		List<Bond>& bonds_i = bonds[i];
+		Coord x_i = X[i];
+		Coord y_i = Y[i];
 
 		Real yield_I1_i = yield_I1[i];
 		Real yield_J2_i = yield_J2[i];
 		Real I1_i = arrI1[i];
 
 		//add permanent deformation
-		int size_i = rest_shape_i.size();
+		int size_i = bonds_i.size();
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			Coord rest_pos_j = np_j.pos;
-			int j = np_j.index;
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			
 
 			Real yield_I1_j = yield_I1[j];
 			Real yield_J2_j = yield_J2[j];
 			Real I1_j = arrI1[j];
 
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Real r = (x_i - x_j).norm();
 
-			Coord p = (position[j] - pos_i);
-			Coord q = (rest_pos_j - rest_pos_i);
+			Coord p = (Y[j] - y_i);
+			Coord q = (x_j - x_i);
 
 			//Coord new_q = q*I1_i;
 			Coord new_q = q*(I1_i + I1_j) / 2;
@@ -226,30 +230,29 @@ namespace dyno
 			Coord D_dev = p.norm()*dir_q - new_q;
 			//Coord D_dev = p - new_q;
 
-			Bond new_np_j;
+			Bond newBond_ij;
 
 			//Coord new_rest_pos_j = rest_pos_j + yield_I1_i * D_iso + yield_J2_i * D_dev;
-			Coord new_rest_pos_j = rest_pos_j + (yield_I1_i + yield_I1_j) / 2 * D_iso + (yield_J2_i + yield_J2_j) / 2 * D_dev;
+			Coord new_rest_pos_j = x_j + (yield_I1_i + yield_I1_j) / 2 * D_iso + (yield_J2_i + yield_J2_j) / 2 * D_dev;
 
-			new_np_j.pos = new_rest_pos_j;
-			new_np_j.index = j;
-			rest_shape_i[ne] = new_np_j;
+			newBond_ij.xi = new_rest_pos_j - x_i;
+			newBond_ij.idx = j;
+			bonds_i[ne] = newBond_ij;
 		}
 
 	}
-
 
 	//	int iter = 0;
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::constrain()
 	{
-		if (m_invF.size() != this->inPosition()->size())
+		if (m_invF.size() != this->inY()->size())
 		{
-			m_invF.resize(this->inPosition()->size());
-			m_yiled_I1.resize(this->inPosition()->size());
-			m_yield_J2.resize(this->inPosition()->size());
-			m_I1.resize(this->inPosition()->size());
-			m_bYield.resize(this->inPosition()->size());
+			m_invF.resize(this->inY()->size());
+			m_yiled_I1.resize(this->inY()->size());
+			m_yield_J2.resize(this->inY()->size());
+			m_I1.resize(this->inY()->size());
+			m_bYield.resize(this->inY()->size());
 
 			m_bYield.reset();
 		}
@@ -262,7 +265,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::solveElasticity()
 	{
-		this->mPosBuf.assign(this->inPosition()->getData());
+		this->mPosBuf.assign(this->inY()->getData());
 
 		this->computeInverseK();
 
@@ -296,7 +299,7 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::applyYielding()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real A = computeA();
@@ -307,10 +310,11 @@ namespace dyno
 			m_yiled_I1,
 			m_yield_J2,
 			m_I1,
-			this->inPosition()->getData(),
+			this->inX()->getData(),
+			this->inY()->getData(),
 			mDensityPBD->outDensity()->getData(),
 			this->mBulkStiffness,
-			this->inRestShape()->getData(),
+			this->inBonds()->getData(),
 			this->inHorizon()->getData(),
 			A,
 			B,
@@ -322,48 +326,48 @@ namespace dyno
 			m_yiled_I1,
 			m_yield_J2,
 			m_I1,
-			this->inPosition()->getData(),
-			this->inRestShape()->getData());
+			this->inX()->getData(),
+			this->inY()->getData(),
+			this->inBonds()->getData());
 		cuSynchronize();
 	}
 
 
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ReconstructRestShape(
-		DArrayList<Bond> new_rest_shape,
+		DArrayList<Bond> newBonds,
 		DArray<bool> bYield,
-		DArray<Coord> position,
+		DArray<Coord> X,
+		DArray<Coord> Y,
 		DArray<Real> I1,
 		DArray<Real> I1_yield,
 		DArray<Real> J2_yield,
 		DArray<Matrix> invF,
 		DArrayList<int> neighborhood,
-		DArrayList<Bond> restShape,
+		DArrayList<Bond> bonds,
 		Real horizon)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (i >= new_rest_shape.size()) return;
+		if (i >= newBonds.size()) return;
 
 		List<int>& list_i = neighborhood[i];
-		List<Bond>& list_np_i = restShape[i];
-		List<Bond>& new_list_np_i = new_rest_shape[i];
+		List<Bond>& bonds_i = bonds[i];
+		List<Bond>& newBonds_i = newBonds[i];
 
 		// update neighbors
 		if (!bYield[i])
 		{
-			Coord rest_pos_i = list_np_i[0].pos;
-
-			int new_size = list_np_i.size();
+			int new_size = bonds_i.size();
 			for (int ne = 0; ne < new_size; ne++)
 			{
-				Bond pair = list_np_i[ne];
-				new_list_np_i.insert(pair);
+				Bond pair = bonds_i[ne];
+				newBonds_i.insert(pair);
 			}
 		}
 		else
 		{
 			int nbSize = list_i.size();
-			Coord pos_i = position[i];
+			Coord y_i = Y[i];
 
 			Matrix invF_i = invF[i];
 
@@ -373,17 +377,17 @@ namespace dyno
 				int j = list_i[ne];
 				Matrix invF_j = invF[j];
 
-				np.index = j;
-				np.pos = pos_i + 0.5*(invF_i + invF_j)*(position[j] - pos_i);
+				np.idx = j;
+				np.xi = 0.5*(invF_i + invF_j)*(Y[j] - y_i);
 
-				new_list_np_i.insert(np);
+				newBonds_i.insert(np);
 
-				if (i == j)
-				{
-					Bond np_0 = new_list_np_i[0];
-					new_list_np_i[0] = np;
-					new_list_np_i[ne] = np_0;
-				}
+// 				if (i == j)
+// 				{
+// 					Bond np_0 = new_list_np_i[0];
+// 					new_list_np_i[0] = np;
+// 					new_list_np_i[ne] = np_0;
+// 				}
 			}
 		}
 
@@ -411,8 +415,9 @@ namespace dyno
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ComputeInverseDeformation(
 		DArray<Matrix> invF,
-		DArray<Coord> position,
-		DArrayList<Bond> restShape,
+		DArray<Coord> X,
+		DArray<Coord> Y,
+		DArrayList<Bond> bonds,
 		Real horizon)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -425,22 +430,22 @@ namespace dyno
 		Matrix curM(0);
 		Matrix refM(0);
 
-		List<Bond>& list_np_i = restShape[i];
-		Coord rest_pos_i = list_np_i[0].pos;
-		int size_i = list_np_i.size();
+		List<Bond>& bonds_i = bonds[i];
+		Coord x_i = X[i];
+		int size_i = bonds_i.size();
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = list_np_i[ne];
-			int j = np_j.index;
-			Coord rest_j = np_j.pos;
-			Real r = (rest_j - rest_pos_i).norm();
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_j - x_i).norm();
 
 			if (r > EPSILON)
 			{
 				Real weight = kernSmooth.Weight(r, horizon);
 
-				Coord p = (position[j] - position[i]) / horizon;
-				Coord q = (rest_j - rest_pos_i) / horizon;
+				Coord p = (Y[j] - Y[i]) / horizon;
+				Coord q = (x_j - x_i) / horizon;
 
 				curM(0, 0) += p[0] * p[0] * weight; curM(0, 1) += p[0] * p[1] * weight; curM(0, 2) += p[0] * p[2] * weight;
 				curM(1, 0) += p[1] * p[0] * weight; curM(1, 1) += p[1] * p[1] * weight; curM(1, 2) += p[1] * p[2] * weight;
@@ -499,7 +504,7 @@ namespace dyno
 	{
 		//constructRestShape(m_neighborhood.getData(), m_position.getData());
 
-		auto& pts = this->inPosition()->getData();
+		auto& pts = this->inY()->getData();
 		
 		if (m_reconstuct_all_neighborhood.getData())
 		{
@@ -508,43 +513,43 @@ namespace dyno
 				m_bYield);
 		}
 
-
-		DArray<uint> index(this->inPosition()->getDataPtr()->size());
+		DArray<uint> index(this->inY()->getDataPtr()->size());
 
 		cuExecute(index.size(),
 			PM_ReconfigureRestShape,
 			index,
 			m_bYield,
 			this->inNeighborIds()->getData(),
-			this->inRestShape()->getData());
+			this->inBonds()->getData());
 
-
-		DArrayList<Bond> newNeighborList;
-		newNeighborList.resize(index);
+		DArrayList<Bond> newBonds;
+		newBonds.resize(index);
 
 		cuExecute(m_invF.size(),
 			PM_ComputeInverseDeformation,
 			m_invF,
-			this->inPosition()->getData(),
-			this->inRestShape()->getData(),
+			this->inX()->getData(),
+			this->inY()->getData(),
+			this->inBonds()->getData(),
 			this->inHorizon()->getData());
 
-		cuExecute(newNeighborList.size(),
+		cuExecute(newBonds.size(),
 			PM_ReconstructRestShape,
-			newNeighborList,
+			newBonds,
 			m_bYield,
-			this->inPosition()->getData(),
+			this->inX()->getData(),
+			this->inY()->getData(),
 			m_I1,
 			m_yiled_I1,
 			m_yield_J2,
 			m_invF,
 			this->inNeighborIds()->getData(),
-			this->inRestShape()->getData(),
+			this->inBonds()->getData(),
 			this->inHorizon()->getData());
 
-		this->inRestShape()->getDataPtr()->assign(newNeighborList);
+		this->inBonds()->getDataPtr()->assign(newBonds);
 
-		newNeighborList.clear();
+		newBonds.clear();
 		index.clear();
 		cuSynchronize();
 	}
@@ -580,19 +585,20 @@ namespace dyno
 
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void EM_RotateRestShape(
-		DArray<Coord> position,
+		DArray<Coord> X,
+		DArray<Coord> Y,
 		DArray<bool> bYield,
-		DArrayList<Bond> restShapes,
+		DArrayList<Bond> bonds,
 		Real smoothingLength)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
+		if (pId >= Y.size()) return;
 
 		SmoothKernel<Real> kernSmooth;
 
-		List<Bond>& rest_shape_i = restShapes[pId];
-		Coord rest_pos_i = rest_shape_i[0].pos;
-		int size_i = rest_shape_i.size();
+		List<Bond>& bonds_i = bonds[pId];
+		Coord x_i = X[pId];
+		int size_i = bonds_i.size();
 
 		//			cout << i << " " << rids[shape_i.ids[shape_i.idx]] << endl;
 		Real total_weight = 0.0f;
@@ -600,18 +606,18 @@ namespace dyno
 		Matrix invK_i(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_i - x_j).norm();
 
 			if (r > EPSILON)
 			{
 				Real weight = kernSmooth.Weight(r, smoothingLength);
 
-				Coord p = (position[j] - position[pId]) / smoothingLength;
+				Coord p = (Y[j] - Y[pId]) / smoothingLength;
 				//Vec3f q = (shape_i.pos[ne] - rest_i)*(1.0f/r)*weight;
-				Coord q = (rest_pos_j - rest_pos_i) / smoothingLength;
+				Coord q = (x_j - x_i) / smoothingLength;
 
 				mat_i(0, 0) += p[0] * q[0] * weight; mat_i(0, 1) += p[0] * q[1] * weight; mat_i(0, 2) += p[0] * q[2] * weight;
 				mat_i(1, 0) += p[1] * q[0] * weight; mat_i(1, 1) += p[1] * q[1] * weight; mat_i(1, 2) += p[1] * q[2] * weight;
@@ -647,12 +653,12 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			Coord rest_pos_j = np_j.pos;
+			Bond bond_ij = bonds_i[ne];
+			Coord rest_pos_j = X[bond_ij.idx];
 
-			Coord new_rest_pos_j = rest_pos_i + R*(rest_pos_j - rest_pos_i);
-			np_j.pos = new_rest_pos_j;
-			rest_shape_i[ne] = np_j;
+			Coord new_rest_pos_j = x_i + R*(rest_pos_j - x_i);
+			bond_ij.xi = new_rest_pos_j - x_i;
+			bonds_i[ne] = bond_ij;
 		}
 	}
 
@@ -660,13 +666,14 @@ namespace dyno
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::rotateRestShape()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		EM_RotateRestShape <Real, Coord, Matrix, Bond> << <pDims, BLOCK_SIZE >> > (
-			this->inPosition()->getData(),
+			this->inX()->getData(),
+			this->inY()->getData(),
 			m_bYield,
-			this->inRestShape()->getData(),
+			this->inBonds()->getData(),
 			this->inHorizon()->getData());
 		cuSynchronize();
 	}

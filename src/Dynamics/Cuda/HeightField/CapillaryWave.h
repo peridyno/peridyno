@@ -83,8 +83,8 @@ namespace dyno
 		float patchLength;
 		float realGridSize;
 
-		float simulatedRegionWidth;
-		float simulatedRegionHeight;
+		int simulatedRegionWidth;
+		int simulatedRegionHeight;
 
 		size_t gridPitch;
 

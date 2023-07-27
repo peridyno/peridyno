@@ -16,6 +16,8 @@
 #include <QScrollArea>
 #include <QGridLayout>
 
+#include "Color.h"
+
 #include "PropertyItem/QVector3iFieldWidget.h"
 #include "PropertyItem/QVector3FieldWidget.h"
 #include "PropertyItem/QBoolFieldWidget.h"
@@ -39,7 +41,6 @@ namespace dyno
 
 		mMainLayout->setContentsMargins(0, 0, 0, 0);
 		mMainLayout->setSpacing(0);
-		mMainLayout->setMargin(0);
 		mMainLayout->addWidget(mScrollArea);
 
 		mScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -48,7 +49,7 @@ namespace dyno
 
 		mScrollLayout = new QGridLayout;
 		mScrollLayout->setAlignment(Qt::AlignTop);
-		mScrollLayout->setMargin(0);
+		mScrollLayout->setContentsMargins(0, 0, 0, 0);
 		
 		QWidget * m_scroll_widget = new QWidget;
 		m_scroll_widget->setLayout(mScrollLayout);
@@ -167,7 +168,7 @@ namespace dyno
 				mFlag[i] = !mFlag[i];
 				});
 		}
-		vlayout->setMargin(0);
+		vlayout->setContentsMargins(0, 0, 0, 0);
 		vlayout->setSpacing(0);
 		mWidget->setLayout(vlayout);
 
@@ -278,7 +279,7 @@ namespace dyno
 				mFlag[i] = !mFlag[i];
 				});
 		}
-		vlayout->setMargin(0);
+		vlayout->setContentsMargins(0, 0, 0, 0);
 		vlayout->setSpacing(0);
 		mWidget->setLayout(vlayout);
 

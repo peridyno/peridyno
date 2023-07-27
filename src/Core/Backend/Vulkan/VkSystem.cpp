@@ -19,9 +19,12 @@ namespace dyno {
 
 	VkSystem::~VkSystem()
 	{
-		if (validation)
+		if (validation && debugUtilsMessenger != nullptr)
 		{
-			vks::debug::freeDebugCallback(vkInstance);
+			auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vkInstance, "vkDestroyDebugUtilsMessengerEXT");
+			if (func != nullptr) {
+				func(vkInstance, debugUtilsMessenger, nullptr);
+			}
 		}
 
 		if (ctx != nullptr) {
@@ -82,9 +85,9 @@ namespace dyno {
 		{
 			// The report flags determine what type of messages for the layers will be displayed
 			// For validating (debugging) an application the error and warning bits should suffice
-			VkDebugReportFlagsEXT debugReportFlags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+			//VkDebugReportFlagsEXT debugReportFlags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
 			// Additional flags include performance info, loader and layer debug messages, etc.
-			vks::debug::setupDebugging(vkInstance, debugReportFlags, VK_NULL_HANDLE);
+			//vks::debug::setupDebugging(vkInstance, debugReportFlags, VK_NULL_HANDLE);
 		}
 
 		// Physical device
@@ -105,56 +108,6 @@ namespace dyno {
 		// Select physical device to be used for the Vulkan example
 		// Defaults to the first device unless specified by command line
 		uint32_t selectedDevice = 0;
-/*
-#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
-		// GPU selection via command line argument
-		for (size_t i = 0; i < args.size(); i++)
-		{
-			// Select GPU
-			if ((args[i] == std::string("-g")) || (args[i] == std::string("-gpu")))
-			{
-				char* endptr;
-				uint32_t index = strtol(args[i + 1], &endptr, 10);
-				if (endptr != args[i + 1])
-				{
-					if (index > gpuCount - 1)
-					{
-						std::cerr << "Selected device index " << index << " is out of range, reverting to device 0 (use -listgpus to show available Vulkan devices)" << "\n";
-					}
-					else
-					{
-						std::cout << "Selected Vulkan device " << index << "\n";
-						selectedDevice = index;
-					}
-				};
-				break;
-			}
-			// List available GPUs
-			if (args[i] == std::string("-listgpus"))
-			{
-				uint32_t gpuCount = 0;
-				VK_CHECK_RESULT(vkEnumeratePhysicalDevices(vkInstance, &gpuCount, nullptr));
-				if (gpuCount == 0)
-				{
-					std::cerr << "No Vulkan devices found!" << "\n";
-				}
-				else
-				{
-					// Enumerate devices
-					std::cout << "Available Vulkan devices" << "\n";
-					std::vector<VkPhysicalDevice> devices(gpuCount);
-					VK_CHECK_RESULT(vkEnumeratePhysicalDevices(vkInstance, &gpuCount, devices.data()));
-					for (uint32_t j = 0; j < gpuCount; j++) {
-						VkPhysicalDeviceProperties deviceProperties;
-						vkGetPhysicalDeviceProperties(devices[j], &deviceProperties);
-						std::cout << "Device [" << j << "] : " << deviceProperties.deviceName << std::endl;
-						std::cout << " Type: " << vks::tools::physicalDeviceTypeString(deviceProperties.deviceType) << "\n";
-						std::cout << " API: " << (deviceProperties.apiVersion >> 22) << "." << ((deviceProperties.apiVersion >> 12) & 0x3ff) << "." << (deviceProperties.apiVersion & 0xfff) << "\n";
-					}
-				}
-			}
-		}
-#endif*/
 
 		physicalDevice = physicalDevices[selectedDevice];
 
@@ -185,6 +138,46 @@ namespace dyno {
 		}
 
 		return true;
+	}
+
+	VKAPI_ATTR VkBool32 VKAPI_CALL debugUtilsMessengerCallback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+		void* pUserData)
+	{
+		// Select prefix depending on flags passed to the callback
+		const char* prefix = "\033[0;31mUNKNOWN\033[0m";
+
+		if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+			prefix = "\033[0;34mVERBOSE\033[0m";
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+			prefix = "\033[0;32mINFO   \033[0m";
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+			prefix = "\033[0;33mWARNING\033[0m";
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+			prefix = "\033[0;31mERROR  \033[0m";
+		}
+
+#if defined(__ANDROID__)
+		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+			LOGE("%s[%d][%s] : %s\n", prefix.c_str(), pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
+		}
+		else {
+			LOGD("%s[%d][%s] : %s\n", prefix.c_str(), pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
+		}
+#else
+		printf("[%s][%d][%s] : %s\n", prefix, pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
+#endif
+
+
+		// The return value of this callback controls whether the Vulkan call that caused the validation message will be aborted or not
+		// We return VK_FALSE as we DON'T want Vulkan calls that cause a validation message to abort
+		// If you instead want to have calls abort, pass in VK_TRUE and the function will return VK_ERROR_VALIDATION_FAILED_EXT 
+		return VK_FALSE;
 	}
 
 	VkResult VkSystem::createVulkanInstance()
@@ -256,6 +249,7 @@ namespace dyno {
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceCreateInfo.pNext = NULL;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
+				
 		if (instanceExtensions.size() > 0)
 		{
 			if (validation)
@@ -265,6 +259,32 @@ namespace dyno {
 			instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
 			instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
 		}
+
+
+		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+		debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debugCreateInfo.messageSeverity = 
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debugCreateInfo.messageType = 
+			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
+			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debugCreateInfo.pfnUserCallback = debugUtilsMessengerCallback;
+
+		// also enable shader debug print
+		VkValidationFeatureEnableEXT enabled[] = { VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
+		VkValidationFeaturesEXT validationFeatures{};
+		validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+		validationFeatures.enabledValidationFeatureCount = 1;
+		validationFeatures.pEnabledValidationFeatures = enabled;
+		validationFeatures.disabledValidationFeatureCount = 0;
+		validationFeatures.pDisabledValidationFeatures = nullptr;
+
+		debugCreateInfo.pNext = &validationFeatures;
+
 		if (validation)
 		{
 			// The VK_LAYER_KHRONOS_validation contains all current validation functionality.
@@ -285,22 +305,29 @@ namespace dyno {
 			if (validationLayerPresent) {
 				instanceCreateInfo.ppEnabledLayerNames = &validationLayerName;
 				instanceCreateInfo.enabledLayerCount = 1;
+				instanceCreateInfo.pNext = &debugCreateInfo;
 			}
 			else {
 				std::cerr << "Validation layer VK_LAYER_KHRONOS_validation not present, validation is disabled";
-			}
-
-			VkValidationFeatureEnableEXT enabled[] = { VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
-			VkValidationFeaturesEXT features{ VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT };
-			features.disabledValidationFeatureCount = 0;
-			features.enabledValidationFeatureCount = 1;
-			features.pDisabledValidationFeatures = nullptr;
-			features.pEnabledValidationFeatures = enabled;
-			features.pNext = instanceCreateInfo.pNext;
-			instanceCreateInfo.pNext = &features;
-			
+				instanceCreateInfo.enabledLayerCount = 0;
+				instanceCreateInfo.pNext = nullptr;
+			}			
 		}
-		return vkCreateInstance(&instanceCreateInfo, nullptr, &vkInstance);
+		VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &vkInstance);
+
+		if (result == VK_SUCCESS && validation) {
+			// create debug message callback
+			auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vkInstance, "vkCreateDebugUtilsMessengerEXT");
+
+			if (func != nullptr) {
+				VkResult r = func(vkInstance, &debugCreateInfo, nullptr, &debugUtilsMessenger);
+
+				if (r != VK_SUCCESS) {
+					std::cerr << "Failed to create VkDebugUtilsMessengerEXT" << std::endl;
+				}
+			}
+		}
+		return result;
 	}
 
 }

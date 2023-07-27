@@ -1,5 +1,4 @@
 #pragma once
-
 #include <Platform.h>
 
 namespace dyno
@@ -78,5 +77,8 @@ namespace dyno
 		float r;
 		float g;
 		float b;
+		
 	};
 }
+
+#include "Color.inl"

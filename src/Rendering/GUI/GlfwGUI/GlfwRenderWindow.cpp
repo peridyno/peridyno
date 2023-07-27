@@ -278,6 +278,11 @@ namespace dyno
 		return mWindowTitle;
 	}
 
+	void GlfwRenderWindow::setWindowTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(mWindow, title.c_str());
+	}
+
 	void GlfwRenderWindow::setCursorPos(double x, double y)
 	{
 		mCursorPosX = x;

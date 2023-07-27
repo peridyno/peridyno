@@ -1,7 +1,5 @@
 #include "GlfwApp.h"
 
-#include "GlfwRenderWindow.h"
-
 namespace dyno 
 {
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
@@ -32,4 +30,10 @@ namespace dyno
 	{
 		mRenderWindow->mainLoop();
 	}
+
+	void GlfwApp::setWindowTitle(const std::string& title)
+	{
+		mRenderWindow->setWindowTitle(title);
+	}
+
 }

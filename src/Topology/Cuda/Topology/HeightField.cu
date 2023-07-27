@@ -22,6 +22,7 @@ namespace dyno
 	template<typename TDataType>
 	HeightField<TDataType>::~HeightField()
 	{
+		mDisplacement.clear();
 	}
 
 	template<typename TDataType>
@@ -44,10 +45,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void HeightField<TDataType>::copyFrom(HeightField<TDataType>& pointSet)
+	void HeightField<TDataType>::copyFrom(HeightField<TDataType>& hf)
 	{
+		mOrigin = hf.mOrigin;
+		mGridSpacing = hf.mGridSpacing;
+		mDisplacement.assign(hf.mDisplacement);
 	}
-
 
 	template <typename Real, typename Coord>
 	__global__ void PS_Scale(

@@ -66,20 +66,6 @@ namespace dyno {
 			return this->constDataPtr() == nullptr;
 		}
 
-		std::shared_ptr<DataType>& getDataPtr()
-		{
-			FBase* topField = this->getTopField();
-			FieldType* derived = dynamic_cast<FieldType*>(topField);
-			return derived->m_data;
-		}
-
-		std::shared_ptr<DataType>& constDataPtr()
-		{
-			FBase* topField = this->getTopField();
-			FieldType* derived = dynamic_cast<FieldType*>(topField);
-			return derived->m_data;
-		}
-
 		bool connect(FieldType* dst)
 		{
 			this->connectField(dst);
@@ -92,15 +78,28 @@ namespace dyno {
 			return this->connect(derived);
 		}
 
-		DataType& getData() {
-			auto dataPtr = this->getDataPtr();
+		DataType getData() {
+			auto dataPtr = this->constDataPtr();
 			assert(dataPtr != nullptr);
 			return *dataPtr;
 		}
 
+		std::shared_ptr<DataType>& constDataPtr()
+		{
+			FBase* topField = this->getTopField();
+			FieldType* derived = dynamic_cast<FieldType*>(topField);
+			return derived->m_data;
+		}
+
 	private:
+		std::shared_ptr<DataType>& getDataPtr()
+		{
+			FBase* topField = this->getTopField();
+			FieldType* derived = dynamic_cast<FieldType*>(topField);
+			return derived->m_data;
+		}
+
 		std::shared_ptr<DataType> m_data = nullptr;
-	public:
 	};
 
 	template<typename T>
@@ -130,7 +129,7 @@ namespace dyno {
 
 		this->update();
 
-		//this->tick();
+		this->tick();
 	}
 
 
@@ -717,4 +716,4 @@ namespace dyno {
 #endif
 }
 
-//#nclude "FSerialization.inl"
+#include "FSerialization.inl"

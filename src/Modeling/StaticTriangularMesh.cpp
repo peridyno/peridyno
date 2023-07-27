@@ -28,7 +28,7 @@ namespace dyno
 				auto initTopo = this->stateInitialTriangleSet()->getDataPtr();
 				auto curTopo = this->stateTriangleSet()->getDataPtr();
 
-				std::string fileName = this->varFileName()->getDataPtr()->string();
+				std::string fileName = this->varFileName()->getValue().string();
 
 				if (fileName != "")
 				{

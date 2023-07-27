@@ -1,5 +1,4 @@
-//#include "FilePath.h"
-#include "DeclareEnum.h"
+#include "Field.h"
 
 namespace dyno 
 {
@@ -264,33 +263,6 @@ namespace dyno
 // 	}
 
 	template<>
-	std::string FVar<PEnum>::serialize()
-	{
-		if (isEmpty())
-			return "";
-
-		int key = this->getDataPtr()->currentKey();
-
-		std::stringstream ss;
-		ss << key;
-
-		return ss.str();
-	}
-
-	template<>
-	bool FVar<PEnum>::deserialize(const std::string& str)
-	{
-		if (str.empty())
-			return false;
-
-		int key = std::stod(str);
-
-		this->getDataPtr()->setCurrentKey(key);
-
-		return true;
-	}
-
-	template<>
 	std::string FVar<std::string>::serialize()
 	{
 		if (isEmpty())
@@ -310,5 +282,15 @@ namespace dyno
 		this->setValue(str);
 
 		return true;
-	}	
+	}
+
+	template class FVar<bool>;
+	template class FVar<int>;
+	template class FVar<uint>;
+	template class FVar<float>;
+	template class FVar<double>;
+	template class FVar<Vec3f>;
+	template class FVar<Vec3d>;
+	template class FVar<Vec3i>;
+	template class FVar<std::string>;
 }

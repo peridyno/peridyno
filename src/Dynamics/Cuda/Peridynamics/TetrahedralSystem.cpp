@@ -1,8 +1,9 @@
 #include "TetrahedralSystem.h"
-#include "Topology/PointSet.h"
-#include "Primitive/Primitive3D.h"
-#include "Topology/TetrahedronSet.h"
 
+#include "Primitive/Primitive3D.h"
+
+#include "Topology/PointSet.h"
+#include "Topology/TetrahedronSet.h"
 
 #include "Smesh_IO/smesh.h"
 #include "Gmsh_IO/gmsh.h"
@@ -24,7 +25,6 @@ namespace dyno
 	{
 	}
 
-	
 	template<typename TDataType>
 	void TetrahedralSystem<TDataType>::loadVertexFromGmshFile(std::string filename)
 	{
@@ -42,7 +42,6 @@ namespace dyno
 	template<typename TDataType>
 	void TetrahedralSystem<TDataType>::loadVertexFromFile(std::string filename)
 	{
-		
 		Smesh meshLoader;
 		meshLoader.loadNodeFile(filename + ".node");
 		//meshLoader.loadTriangleFile(filename + ".face");

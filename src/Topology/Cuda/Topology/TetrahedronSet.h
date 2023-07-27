@@ -27,7 +27,7 @@ namespace dyno
 
 		void getVolume(DArray<Real>& volume);
 
-		void copyFrom(TetrahedronSet<TDataType> tetSet);
+		void copyFrom(TetrahedronSet<TDataType>& tetSet);
 
 		bool isEmpty() override;
 

@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "TriangleSet.h"
+#include "EdgeSet.h"
 
 namespace dyno
 {
@@ -97,7 +97,7 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	class QuadSet : public TriangleSet<TDataType>
+	class QuadSet : public EdgeSet<TDataType>
 	{
 	public:
 		typedef typename TDataType::Real Real;
@@ -126,8 +126,7 @@ namespace dyno
 
 		void updateEdges() override;
 
-		void updateTriangles() override;
-		void updateVertexNormal() override;
+		void updateVertexNormal();
 
 		virtual void updateQuads() {};
 

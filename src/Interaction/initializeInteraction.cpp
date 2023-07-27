@@ -2,9 +2,12 @@
 
 #include "NodeFactory.h"
 
-#include "PickerNode.h"
+#include "QuadPickerNode.h"
+#include "TrianglePickerNode.h"
+#include "EdgePickerNode.h"
+#include "PointPickerNode.h"
 
-namespace dyno 
+namespace dyno
 {
 	std::atomic<InteractionInitializer*> InteractionInitializer::gInstance;
 	std::mutex InteractionInitializer::gMutex;
@@ -33,16 +36,34 @@ namespace dyno
 		NodeFactory* factory = NodeFactory::instance();
 
 		auto page = factory->addPage(
-			"Interaction", 
+			"Interaction",
 			"ToolBarIco/Interaction/Interaction.png");
 
 		auto group = page->addGroup("Interaction");
 
 		group->addAction(
-			"Picker",
+			"QuadPicker",
 			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
 
-		[=]()->std::shared_ptr<Node> { return std::make_shared<PickerNode<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> { return std::make_shared<QuadPickerNode<DataType3f>>(); });
+
+		group->addAction(
+			"TrianglePicker",
+			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
+
+			[=]()->std::shared_ptr<Node> { return std::make_shared<TrianglePickerNode<DataType3f>>(); });
+
+		group->addAction(
+			"EdgePicker",
+			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
+
+			[=]()->std::shared_ptr<Node> { return std::make_shared<EdgePickerNode<DataType3f>>(); });
+
+		group->addAction(
+			"PointPicker",
+			"ToolBarIco/Interaction/Picker.png",//48px-Image-x-generic.png
+
+			[=]()->std::shared_ptr<Node> { return std::make_shared<PointPickerNode<DataType3f>>(); });
 	}
 }
 //

@@ -71,6 +71,11 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
+
+		this->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->outOtherTriangleSet()->getDataPtr()->getTriangles().resize(0);
+		this->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
 	}
 
 	template<typename TDataType>
@@ -326,47 +331,31 @@ namespace dyno
 	__global__ void SI_NeighborTrisDiffuse(
 		DArray<Triangle> triangles,
 		DArray<Coord> points,
+		DArray<TopologyModule::Tri2Edg> tri2Edg,
+		DArray<TopologyModule::Edg2Tri> edg2Tri,
 		DArray<int> intersected,
 		DArray<int> unintersected,
 		Real diffusionAngle)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
-		int j = threadIdx.y + blockIdx.y * blockDim.y;
-		if (i >= triangles.size() || j >= triangles.size()) return;
+		if (i >= triangles.size()) return;
 
 		if (intersected[i] == 1)
 		{
-			if ((triangles[i][0] == triangles[j][0] && triangles[i][1] == triangles[j][1]) ||
-				(triangles[i][0] == triangles[j][1] && triangles[i][1] == triangles[j][0]) ||
-				(triangles[i][0] == triangles[j][0] && triangles[i][1] == triangles[j][2]) ||
-				(triangles[i][0] == triangles[j][2] && triangles[i][1] == triangles[j][0]) ||
-				(triangles[i][0] == triangles[j][1] && triangles[i][1] == triangles[j][2]) ||
-				(triangles[i][0] == triangles[j][2] && triangles[i][1] == triangles[j][1]) ||
-
-				(triangles[i][0] == triangles[j][0] && triangles[i][2] == triangles[j][1]) ||
-				(triangles[i][0] == triangles[j][1] && triangles[i][2] == triangles[j][0]) ||
-				(triangles[i][0] == triangles[j][0] && triangles[i][2] == triangles[j][2]) ||
-				(triangles[i][0] == triangles[j][2] && triangles[i][2] == triangles[j][0]) ||
-				(triangles[i][0] == triangles[j][1] && triangles[i][2] == triangles[j][2]) ||
-				(triangles[i][0] == triangles[j][2] && triangles[i][2] == triangles[j][1]) ||
-
-				(triangles[i][1] == triangles[j][0] && triangles[i][2] == triangles[j][1]) ||
-				(triangles[i][1] == triangles[j][1] && triangles[i][2] == triangles[j][0]) ||
-				(triangles[i][1] == triangles[j][0] && triangles[i][2] == triangles[j][2]) ||
-				(triangles[i][1] == triangles[j][2] && triangles[i][2] == triangles[j][0]) ||
-				(triangles[i][1] == triangles[j][1] && triangles[i][2] == triangles[j][2]) ||
-				(triangles[i][1] == triangles[j][2] && triangles[i][2] == triangles[j][1])
-				)
+			TTriangle3D<Real> t0, t1;
+			t0 = TTriangle3D<Real>(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
+			for (int ii = 0; ii < 3; ii++)
 			{
-				TTriangle3D<Real> t1(points[triangles[i][0]], points[triangles[i][1]], points[triangles[i][2]]);
-				TTriangle3D<Real> t2(points[triangles[j][0]], points[triangles[j][1]], points[triangles[j][2]]);
-
-				if (abs(t1.normal().dot(t2.normal())) >= cosf(diffusionAngle))
+				for (int iii = 0; iii < 2; iii++)
 				{
-					if (intersected[j] == 0 && unintersected[j] == 1)
+					if (intersected[edg2Tri[tri2Edg[i][ii]][iii]] != 1)
 					{
-						intersected[j] = 1;
-						unintersected[j] = 0;
+						t1 = TTriangle3D<Real>(points[triangles[edg2Tri[tri2Edg[i][ii]][iii]][0]], points[triangles[edg2Tri[tri2Edg[i][ii]][iii]][1]], points[triangles[edg2Tri[tri2Edg[i][ii]][iii]][2]]);
+						if (abs(t0.normal().dot(t1.normal())) >= cosf(diffusionAngle))
+						{
+							intersected[edg2Tri[tri2Edg[i][ii]][iii]] = 1;
+							unintersected[edg2Tri[tri2Edg[i][ii]][iii]] = 0;
+						}
 					}
 				}
 			}
@@ -491,9 +480,9 @@ namespace dyno
 	template<typename TDataType>
 	void SurfaceInteraction<TDataType>::calcSurfaceIntersectClick()
 	{
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& points = initialTriangleSet.getPoints();
+		auto& triangles = initialTriangleSet.getTriangles();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
@@ -528,18 +517,26 @@ namespace dyno
 
 		if (this->varToggleFlood()->getValue())
 		{
+			auto& Tri2Edg = initialTriangleSet.getTriangle2Edge();
+			auto& Edge2Tri = initialTriangleSet.getEdge2Triangle();
+			Edge2Tri.resize(0);
+			initialTriangleSet.updateTriangle2Edge();
 			int intersected_size_t_o = 0;
 			int intersected_size_t = 1;
 			while (intersected_size_t > intersected_size_t_o && intersected_size_t < triangles.size())
 			{
 				intersected_size_t_o = intersected_size_t;
-				cuExecute2D(make_uint2(triangles.size(), triangles.size()),
+
+				cuExecute(triangles.size(),
 					SI_NeighborTrisDiffuse,
 					triangles,
 					points,
+					Tri2Edg,
+					Edge2Tri,
 					intersected,
 					unintersected,
 					Real(this->varFloodAngle()->getValue()/180.0f*M_PI));
+
 				intersected_size_t = thrust::reduce(thrust::device, intersected.begin(), intersected.begin() + intersected.size(), (int)0, thrust::plus<int>());
 			}
 		}
@@ -733,9 +730,9 @@ namespace dyno
 		TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& points = initialTriangleSet.getPoints();
+		auto& triangles = initialTriangleSet.getTriangles();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
@@ -932,9 +929,9 @@ namespace dyno
 	template<typename TDataType>
 	void SurfaceInteraction<TDataType>::mergeIndex()
 	{
-		TriangleSet<TDataType> initialTriangleSet = this->inInitialTriangleSet()->getData();
-		DArray<Coord> points = initialTriangleSet.getPoints();
-		DArray<Triangle> triangles = initialTriangleSet.getTriangles();
+		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
+		auto& points = initialTriangleSet.getPoints();
+		auto& triangles = initialTriangleSet.getTriangles();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),

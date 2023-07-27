@@ -5,6 +5,7 @@ include(cmake/modules.cmake)
 set(PERIDYNO_GPU_BACKEND "CUDA" CACHE STRING "GPU Backend")
 set_property(CACHE PERIDYNO_GPU_BACKEND PROPERTY STRINGS "CUDA;Vulkan;NoGPU")
 
+set(PERIDYNO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 set(SUPPORTED_LANGUAGES "CXX;C")
 set(GPU_BACKEND "NO_BACKEND")
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
@@ -22,23 +23,24 @@ endif()
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
 
-    find_package(CUDA REQUIRED)
-    if(CUDA_FOUND)
-        include_directories(${CUDA_INCLUDE_DIRS})
-        link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
-        link_libraries(${CUDA_LIBRARIES})
-    else()
-        message("Cuda not found")
-    endif()      
+    #find_package(CUDA REQUIRED)
+    # if(CUDA_FOUND)
+    #     include_directories(${CUDA_INCLUDE_DIRS})
+    #     link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+    #     link_libraries(${CUDA_LIBRARIES})
+    # else()
+    #     message("Cuda not found")
+    # endif()      
 
 	# define library version (update: apparently you can also do it in project()!)
 	set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_MINOR 8 CACHE STRING "peridyno minor version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_PATCH 2 CACHE STRING "patch version of peridyno" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_MINOR 9 CACHE STRING "peridyno minor version" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 	set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    #为sln内部projects设置管理folder
-	set(CMAKE_CXX_STANDARD 11 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
+	set(CMAKE_CXX_STANDARD 17 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	#set(CMAKE_C_CREATE_STATIC_LIBRARY "")
 	#set(CMAKE_C_COMPILE_OBJECT  "")
 
@@ -46,7 +48,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#set(CMAKE_CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "DEFAULT SET SEPERABLE COMPILATION MODE")    #默认为本项目下各编译目标指定cuda分离编译模式
 	set(CUDA_ARCH_FLAGS 60 CACHE STRING "cuda architectures" FORCE)                                 #默认为所有cuda代码生成computability7.0下二进制代码
 
-	set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
+	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
 	set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/plugin"  CACHE PATH "" FORCE)
 	#file(COPY "data/" DESTINATION "data")
 else()
@@ -146,16 +148,15 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	add_subdirectory(external/imgui)
 
 	if(PERIDYNO_LIBRARY_PLUGIN)
-		option(PERIDYNO_LIBRARY_ALEMBIC "Enable binding the abc exporter library" ON)
-		option(PERIDYNO_LIBRARY_GMSH "Enable binding the Gmsh library" OFF)
-		option(PERIDYNO_LIBRARY_FBX "Enable binding the FBX library" OFF)
+		option(PERIDYNO_PLUGIN_ALEMBIC "Enable binding the abc exporter library" OFF)
+		option(PERIDYNO_PLUGIN_GMSH "Enable binding the Gmsh library" OFF)
 		
-		if(PERIDYNO_LIBRARY_ALEMBIC)
+		if(PERIDYNO_PLUGIN_ALEMBIC)
 			add_subdirectory(external/Imath)
 			add_subdirectory(external/alembic/)
 		endif()
 
-		if(PERIDYNO_LIBRARY_GMSH)
+		if(PERIDYNO_PLUGIN_GMSH)
 			add_subdirectory(external/gmsh-fork)
 		endif()
 	endif()
@@ -163,9 +164,9 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	# VTK rendering support, off by default
 	option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
 	# Qt GUI support, off by default
-	option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
+	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" OFF)
 
-	if(PERIDYNO_Qt5_GUI)
+	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
 	endif()
 
@@ -175,9 +176,12 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	    add_subdirectory(examples)
 	endif()
 
+	file(GLOB FILESYSTEM_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/external/filesystem/ghc/*.*")
+	install(FILES ${FILESYSTEM_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/filesystem/ghc)
+
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
-	set(PERIDYNO_ASSET_PATH "${CMAKE_SOURCE_DIR}/data" CACHE PATH "" FORCE)
+	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
@@ -199,7 +203,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
 	IF(WIN32)
 		IF (NOT Vulkan_FOUND)
-			find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${CMAKE_SOURCE_DIR}/libs/vulkan)
+			find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${PERIDYNO_ROOT}/libs/vulkan)
 			IF (Vulkan_LIBRARY)
 				set(Vulkan_FOUND ON)
 				MESSAGE("Using bundled Vulkan library version")
@@ -268,8 +272,9 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-switch-enum")
 	endif()
 
+
 	if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
-		add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glslang)
+		add_subdirectory(${PERIDYNO_ROOT}/external/glslang)
 		
 		# for cmake version 3.19 and later, we can directly use system's glslc executable
 		if(EXISTS ${Vulkan_GLSLC_EXECUTABLE})
@@ -297,12 +302,12 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 			endforeach()
 
 			# maybe we prefer to use a 'Shaders' project...
-			#add_custom_target(CompileShader ALL SOURCES ${SHADER_SOURCES} DEPENDS ${SHADER_OUTPUT_FILES})
+			add_custom_target(CompileShader ALL SOURCES ${SHADER_SOURCES} DEPENDS ${SHADER_OUTPUT_FILES})
 
 		else()
 			# use python script... -> donot need python script 
-			#add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
-			#set_property(TARGET CompileShader PROPERTY FOLDER glslang)
+			add_custom_target(CompileShader ALL COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/data/shaders/glsl/compileshaders.py)
+			set_property(TARGET CompileShader PROPERTY FOLDER glslang)
 		endif()
 		
 	endif()
@@ -313,7 +318,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	    add_subdirectory(tests)
 	endif()
 
-	if(PERIDYNO_Qt5_GUI)
+	if(PERIDYNO_QT_GUI)
 		add_subdirectory(external/nodeeditor)
 	endif()
 
@@ -341,9 +346,9 @@ else()
 	add_subdirectory(external/imgui)
 
 	# Qt GUI support, off by default
-	option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
+	option(PERIDYNO_QT_GUI "Enable building Qt-based applications" OFF)
 
-	if(PERIDYNO_Qt5_GUI)
+	if(PERIDYNO_QT_GUI)
 		add_subdirectory(external/nodeeditor)
 	endif()
 

@@ -14,21 +14,39 @@ namespace dyno
 
 	void MouseInputModule::enqueueEvent(PMouseEvent event)
 	{
-		if (!this->varCacheEvent()->getData()) {
-			while (!mEventQueue.empty()) mEventQueue.pop();
+		mMutex.lock();
+
+		if (this->varCacheEvent()->getValue()) {
+			while (!mEventQueue.empty()) {
+				auto e = mEventQueue.back();
+				if (e == event)
+				{
+					mEventQueue.pop_back();
+				}
+				else
+					break;
+			}	
+		}
+		else
+		{
+			while (!mEventQueue.empty()) mEventQueue.pop_front();
 		}
 
-		mEventQueue.push(event);
+		mEventQueue.push_back(event);
+
+		mMutex.unlock();
 	}
 
 	void MouseInputModule::updateImpl()
 	{
+		mMutex.lock();
 		if (!mEventQueue.empty())
 		{
 			onEvent(mEventQueue.front());
 
-			mEventQueue.pop();
+			mEventQueue.pop_front();
 		}
+		mMutex.unlock();
 	}
 
 	bool MouseInputModule::requireUpdate()

@@ -28,7 +28,6 @@
 #include <QLabel>
 
 //PeriDyno
-#include "Field.h"
 #include "Format.h"
 #include "FCallBackFunc.h"
 
@@ -119,7 +118,7 @@ namespace dyno
 		Q_OBJECT
 
 	public:
-		explicit ValueDialog(QWidget* parent = nullptr);
+		explicit ValueDialog(QWidget* parent = nullptr) {};
 
 		ValueDialog(double Data,QWidget* parent = nullptr);
 

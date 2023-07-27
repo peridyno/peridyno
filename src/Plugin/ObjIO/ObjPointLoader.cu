@@ -27,7 +27,7 @@ namespace dyno
 		std::shared_ptr<GLPointVisualModule>ptrender(pointrender);
 		
 		pointrender->setVisible(true);
-		pointrender->setColor(Vec3f(1, 0, 0));
+		pointrender->setColor(Color(1, 0, 0));
 		pointrender->varPointSize()->setValue(this->varRadius()->getData());
 		pointrender->varPointSize()->setValue(varRadius()->getData()/100);
 
@@ -42,7 +42,7 @@ namespace dyno
 		auto pointSet = TypeInfo::cast<PointSet<TDataType>>(this->stateTopology()->getDataPtr());
 
 
-		std::string filename = this->varFileName()->getDataPtr()->string();
+		std::string filename = this->varFileName()->constDataPtr()->string();
 
 		loadObj(*pointSet, filename);
 		pointSet->scale(this->varScale()->getData());
@@ -88,7 +88,7 @@ namespace dyno
 
 		if (this->varSequence()->getData() == true)
 		{
-			std::string filename = this->varFileName()->getDataPtr()->string();
+			std::string filename = this->varFileName()->constDataPtr()->string();
 			int num_ = filename.rfind("_");
 
 			filename.replace(num_ + 1, filename.length() - 4 - (num_ + 1), std::to_string(this->stateFrameNumber()->getData()));

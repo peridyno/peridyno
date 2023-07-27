@@ -20,7 +20,11 @@
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
-#include <QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#else
+	#include <QOpenGLWidget>
+#endif
 #include <QTimer>
 
 //#include <GL/glu.h>
@@ -52,7 +56,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		POpenGLWidget();
+		POpenGLWidget(QWidget* parent = nullptr);
 		~POpenGLWidget();
 
 		void mainLoop() override {};

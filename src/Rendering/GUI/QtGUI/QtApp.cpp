@@ -71,9 +71,15 @@ namespace dyno {
         SceneGraphFactory::instance()->pushScene(scn);
 	}
 
-    RenderWindow* QtApp::renderWindow()
+	void QtApp::setWindowTitle(const std::string& str)
+	{
+        mMainWindow->setWindowTitle(QString::fromStdString(str));
+	}
+
+	RenderWindow* QtApp::renderWindow()
 	{
         return dynamic_cast<RenderWindow*>(mMainWindow->openglWidget());
 	}
 
 }
+ 

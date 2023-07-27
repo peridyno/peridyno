@@ -21,6 +21,29 @@ namespace dyno
 		ElastoplasticBody();
 		~ElastoplasticBody() override;
 
+		void loadParticles(Coord lo, Coord hi, Real distance);
+
+		bool translate(Coord t) {
+			auto ptSet = this->statePointSet()->getDataPtr();
+			ptSet->translate(t);
+
+			return true;
+		}
+
+		bool scale(Real s) {
+			auto ptSet = this->statePointSet()->getDataPtr();
+			ptSet->scale(s);
+
+			return true;
+		}
+
+		bool rotate(Quat<Real> q) {
+			auto ptSet = this->statePointSet()->getDataPtr();
+			ptSet->rotate(q);
+
+			return true;
+		}
+
 	public:
 		FVar<Real> m_horizon;
 

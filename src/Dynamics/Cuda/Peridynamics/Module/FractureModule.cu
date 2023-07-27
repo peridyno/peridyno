@@ -12,12 +12,12 @@ namespace dyno
 		this->setCohesion(0.001);
 	}
 
-
 	template <typename Real, typename Coord, typename Bond>
 	__global__ void PM_ComputeInvariants(
 		DArray<Real> bulk_stiffiness,
-		DArray<Coord> position,
-		DArrayList<Bond> restShape,
+		DArray<Coord> X,
+		DArray<Coord> Y,
+		DArrayList<Bond> bonds,
 		Real horizon,
 		Real A,
 		Real B,
@@ -25,32 +25,34 @@ namespace dyno
 		Real lambda)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (i >= position.size()) return;
+		if (i >= Y.size()) return;
 
 		CorrectedKernel<Real> kernSmooth;
 
 		Real s_A = A;
 
-		List<Bond>& rest_shape_i = restShape[i];
-		Coord rest_pos_i = rest_shape_i[0].pos;
-		Coord cur_pos_i = position[i];
+		List<Bond>& bonds_i = bonds[i];
+		Coord x_i = X[i];
+		Coord y_i = Y[i];
 
 		Real I1_i = 0.0f;
 		Real J2_i = 0.0f;
+
 		//compute the first and second invariants of the deformation state, i.e., I1 and J2
-		int size_i = rest_shape_i.size();
+		int size_i = bonds_i.size();
 		Real total_weight = Real(0);
 		for (int ne = 1; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			Coord rest_pos_j = np_j.pos;
-			int j = np_j.index;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			
+			Real r = (x_i - x_j).norm();
 
 			if (r > 0.01*horizon)
 			{
 				Real weight = kernSmooth.Weight(r, horizon);
-				Coord p = (position[j] - cur_pos_i);
+				Coord p = (Y[j] - y_i);
 				Real ratio_ij = p.norm() / r;
 
 				I1_i += weight*ratio_ij;
@@ -68,17 +70,17 @@ namespace dyno
 			I1_i = 1.0f;
 		}
 
-		for (int ne = 1; ne < size_i; ne++)
+		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = rest_shape_i[ne];
-			int j = np_j.index;
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_pos_i - rest_pos_j).norm();
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
+			Coord x_j = X[j];
+			Real r = (x_i - x_j).norm();
 
 			if (r > 0.01*horizon)
 			{
 				Real weight = kernSmooth.Weight(r, horizon);
-				Vec3f p = (position[j] - cur_pos_i);
+				Vec3f p = (Y[j] - y_i);
 				Real ratio_ij = p.norm() / r;
 				J2_i = (ratio_ij - I1_i)*(ratio_ij - I1_i)*weight;
 			}
@@ -108,7 +110,7 @@ namespace dyno
 	template<typename TDataType>
 	void FractureModule<TDataType>::applyPlasticity()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real A = this->computeA();
@@ -116,8 +118,9 @@ namespace dyno
 
 		PM_ComputeInvariants<< <pDims, BLOCK_SIZE >> > (
 			this->mBulkStiffness,
-			this->inPosition()->getData(),
-			this->inRestShape()->getData(),
+			this->inX()->getData(),
+			this->inY()->getData(),
+			this->inBonds()->getData(),
 			this->inHorizon()->getData(),
 			A,
 			B,

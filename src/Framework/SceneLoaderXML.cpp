@@ -89,7 +89,6 @@ namespace dyno
 
 			radix++;
 		}
-
 		for (itor = scn->begin(); itor != scn->end(); itor++)
 		{
 			auto node = itor.get();
@@ -120,8 +119,40 @@ namespace dyno
 			nodeXml->InsertEndChild(nodeConnectionsXml);
 
 			auto ports = node->getImportNodes();
+			//--------------------7.7:增加对ports类型的处理------------------------：
+			for (int i = 0; i < ports.size(); i++)
+			{
+				auto NodesSrc = ports[i]->getNodes();
+				bool fieldFound = false;
+				Node* nSrcPar = nullptr;
+				for (auto nSrc : NodesSrc) 
+				{
+					auto nSrcExports = nSrc->getExportNodes();
+					for (auto x : nSrcExports)
+					{
+						if (x == ports[i])
+						{
+							fieldFound = true;
+							nSrcPar = nSrc;
+						}
+					}
+				}
+				if (fieldFound&&nSrcPar!=nullptr) {
+					
+					tinyxml2::XMLElement* connection = doc.NewElement("Connection");
+					connection->SetAttribute("SourceId", indices[nSrcPar->objectId()]);
+					connection->SetAttribute("From", 0);
+					connection->SetAttribute("TargetId", indices[node->objectId()]);
+					connection->SetAttribute("To", uint(i));
+					nodeConnectionsXml->InsertEndChild(connection);
+				}
+				
+			}
+
+			//------------------------------------------------------------
 
 			auto fieldInp = node->getInputFields();
+
 			for (int i = 0; i < fieldInp.size(); i++)
 			{
 				auto fieldSrc = fieldInp[i]->getSource();
@@ -130,26 +161,24 @@ namespace dyno
 					if (parSrc != nullptr)
 					{
 						Node* nodeSrc = dynamic_cast<Node*>(parSrc);
-
 						auto outId = nodeSrc->objectId();
 						auto fieldsOut = nodeSrc->getOutputFields();
-
 						uint outFieldIndex = 0;
 						bool fieldFound = false;
-						for (auto f : fieldsOut)
+						
+						for(outFieldIndex=0; outFieldIndex< fieldsOut.size(); outFieldIndex++)
 						{
-							if (f == fieldSrc)
+							if (fieldsOut[outFieldIndex] == fieldSrc)
 							{
 								fieldFound = true;
 								break;
 							}
-							outFieldIndex++;
-						}
 
+						}
 						if (fieldFound) {
 							tinyxml2::XMLElement* connection = doc.NewElement("Connection");
 							connection->SetAttribute("SourceId", indices[parSrc->objectId()]);
-							connection->SetAttribute("From", 1 + outFieldIndex);
+							connection->SetAttribute("From", 1 +outFieldIndex);
 							connection->SetAttribute("TargetId", indices[node->objectId()]);
 							connection->SetAttribute("To", uint(i + ports.size()));
 							nodeConnectionsXml->InsertEndChild(connection);
@@ -157,6 +186,7 @@ namespace dyno
 					}
 				}
 			}
+			
 
 			auto& fields = node->getAllFields();
 			std::vector<FBase*> fieldsOut;
@@ -166,8 +196,28 @@ namespace dyno
 				{
 					fieldsOut.push_back(field);
 				}
+				else if (field->getFieldType() == dyno::FieldTypeEnum::In)
+				{
+					auto fieldSrc = field->getSource();
+					if (fieldSrc != nullptr) {
+	
+						auto parSrc = fieldSrc->parent();
+						if (parSrc != nullptr)
+						{
+							Module* src = dynamic_cast<Module*>(parSrc);
+							if (src == nullptr)
+							{
+								Node* srcNode = dynamic_cast<Node*>(parSrc);
+								if (srcNode != nullptr)
+								{
+									fieldsOut.push_back(field);
+								}
+							}
+						}
+					}
+				}
 			}
-
+			/**/
 			//Insert animation pipeline
 			auto savePipeline = [&](std::shared_ptr<Pipeline> pipeline, const char* tag) {
 				tinyxml2::XMLElement* pipelineXml = doc.NewElement(tag);
@@ -204,7 +254,6 @@ namespace dyno
 					moduleMap[m->objectId()] = m;
 					radix++;
 				}
-
 				//write connections
 				tinyxml2::XMLElement* moduleConnectionsXml = doc.NewElement("Connections");
 				pipelineXml->InsertEndChild(moduleConnectionsXml);
@@ -223,11 +272,11 @@ namespace dyno
 								if (src != nullptr)
 								{
 									auto outId = src->objectId();
-									auto fieldsOut = src->getOutputFields();
+									auto srcfieldsOut = src->getOutputFields();
 
 									uint outFieldIndex = 0;
 									bool fieldFound = false;
-									for (auto f : fieldsOut)
+									for (auto f : srcfieldsOut)
 									{
 										if (f == fieldSrc)
 										{
@@ -249,13 +298,14 @@ namespace dyno
 										moduleConnectionsXml->InsertEndChild(moduleConnectionXml);
 									}
 								}
-								else {
+								else {//每个模块里面第一个
 									Node* src = dynamic_cast<Node*>(parSrc);
 
 									if (src != nullptr)
 									{
 										uint outFieldIndex = 0;
 										bool fieldFound = false;
+										auto n=src->getModuleList().size();
 										for (auto f : fieldsOut)
 										{
 											if (f == fieldSrc)
@@ -263,7 +313,7 @@ namespace dyno
 												fieldFound = true;
 												break;
 											}
-											outFieldIndex++;
+												outFieldIndex++;
 										}
 
 										if (fieldFound)
@@ -359,19 +409,21 @@ namespace dyno
 		 */
 		tinyxml2::XMLElement* cnnXmls = nodeXML->FirstChildElement("Connections");
 		tinyxml2::XMLElement* connectionXml = cnnXmls->FirstChildElement("Connection");
-		while (connectionXml)
+		
+		while (connectionXml) 
 		{
 			ConnectionInfo info;
-
+			
 			info.src = atoi(connectionXml->Attribute("SourceId"));
 			info.dst = atoi(connectionXml->Attribute("TargetId"));
 
 			info.id0 = atoi(connectionXml->Attribute("From"));
 			info.id1 = atoi(connectionXml->Attribute("To"));
-
+			
 			infoVec.push_back(info);
 
-			connectionXml = connectionXml->NextSiblingElement("Node");
+			
+			connectionXml = connectionXml->NextSiblingElement("Connection");
 		}
 
 		mConnectionInfo.push_back(infoVec);
@@ -386,8 +438,13 @@ namespace dyno
 			{
 				states.push_back(field);
 			}
+			else if (field->getFieldType() == dyno::FieldTypeEnum::In )
+			{
+				
+				states.push_back(field);
+							
+			}
 		}
-
 		/**
 		 * Construct the animation pipeline
 		 */
@@ -451,6 +508,7 @@ namespace dyno
 			int id0 = atoi(animationConnectionXml->Attribute("From"));
 			int id1 = atoi(animationConnectionXml->Attribute("To"));
 
+			//关于-1接口编号的处理：因为中间节点内部的States模块里的部分输入变量类型是Input而不是State。所以在前面的states数组里加上了Input类型的Fields
 			FBase* fout = src == -1 ? states[id0] : animationModules[src]->getOutputFields()[id0];
 			FBase* fin = animationModules[dst]->getInputFields()[id1];
 
@@ -492,10 +550,14 @@ namespace dyno
 			int id0 = atoi(renderingConnectionXml->Attribute("From"));
 			int id1 = atoi(renderingConnectionXml->Attribute("To"));
 
-			FBase* fout = src == -1 ? states[id0] : renderingModules[src]->getOutputFields()[id0];
-			FBase* fin = renderingModules[dst]->getInputFields()[id1];
+			if (id0 < states.size())
+			{
+				FBase* fout = src == -1 ? states[id0] : renderingModules[src]->getOutputFields()[id0];
+				FBase* fin = renderingModules[dst]->getInputFields()[id1];
 
-			fout->connect(fin);
+				fout->connect(fin);
+			}
+			
 
 			renderingConnectionXml = renderingConnectionXml->NextSiblingElement("Connection");
 		}

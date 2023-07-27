@@ -71,6 +71,11 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
+
+		this->outOtherPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->outOtherPointSet()->getDataPtr()->getPoints().resize(0);
+		this->outSelectedPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->outSelectedPointSet()->getDataPtr()->getPoints().resize(0);
 	}
 
 	template<typename TDataType>
@@ -262,8 +267,8 @@ namespace dyno
 	template<typename TDataType>
 	void PointInteraction<TDataType>::calcPointIntersectClick()
 	{
-		PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
-		DArray<Coord> points = initialPointSet.getPoints();
+		auto& initialPointSet = this->inInitialPointSet()->getData();
+		auto& points = initialPointSet.getPoints();
 
 		DArray<int> intersected;
 		intersected.resize(points.size());
@@ -411,8 +416,8 @@ namespace dyno
 			TPlane3D<Real> plane14 = TPlane3D<Real>(ray4.origin, ray1.direction.cross(ray4.direction));
 			TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 
-			PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
-			DArray<Coord> points = initialPointSet.getPoints();
+			auto& initialPointSet = this->inInitialPointSet()->getData();
+			auto& points = initialPointSet.getPoints();
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),
@@ -532,8 +537,8 @@ namespace dyno
 		template<typename TDataType>
 		void PointInteraction<TDataType>::mergeIndex()
 		{
-			PointSet<TDataType> initialPointSet = this->inInitialPointSet()->getData();
-			DArray<Coord> points = initialPointSet.getPoints();
+			auto& initialPointSet = this->inInitialPointSet()->getData();
+			auto& points = initialPointSet.getPoints();
 			DArray<int> intersected;
 			intersected.resize(points.size());
 			cuExecute(points.size(),

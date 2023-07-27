@@ -23,7 +23,7 @@
 namespace dyno
 {
 	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* widget)
-		: QMainWindow(nullptr, 0)
+		: QMainWindow(nullptr)
 	{
 		mToolBar = new PModuleEditorToolBar();
 

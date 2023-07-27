@@ -2,6 +2,8 @@
 
 #include <QGridLayout>
 
+#include "Field.h"
+
 namespace dyno
 {
 	QIntegerFieldWidget::QIntegerFieldWidget(FBase* field)

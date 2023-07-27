@@ -21,23 +21,21 @@ namespace dyno
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void EM_PrecomputeShape(
 		DArray<Matrix> invK,
-		DArrayList<Bond> restShapes)
+		DArray<Coord> X,
+		DArrayList<Bond> bonds)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= invK.size()) return;
 
-		List<Bond>& restShape_i = restShapes[pId];
-		Bond np_i = restShape_i[0];
-		Coord rest_i = np_i.pos;
-		int size_i = restShape_i.size();
+		List<Bond>& bonds_i = bonds[pId];
+
+		Coord rest_i = X[pId];
+
+		int size_i = bonds_i.size();
 		Real maxDist = Real(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShape_i[ne];
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_i - rest_pos_j).norm();
-
-			maxDist = max(maxDist, r);
+			maxDist = max(maxDist, bonds_i[ne].xi.norm());
 		}
 		maxDist = maxDist < EPSILON ? Real(1) : maxDist;
 		Real smoothingLength = maxDist;
@@ -46,8 +44,10 @@ namespace dyno
 		Matrix mat_i = Matrix(0);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShape_i[ne];
-			Coord rest_j = np_j.pos;
+			Bond bond_ij = bonds_i[ne];
+
+			int j = bond_ij.idx;
+			Coord rest_j = X[j];
 			Real r = (rest_i - rest_j).norm();
 
 			if (r > EPSILON)
@@ -69,16 +69,6 @@ namespace dyno
 		}
 
 		Matrix R(0), U(0), D(0), V(0);
-
-// 		if (pId == 0)
-// 		{
-// 			printf("EM_PrecomputeShape**************************************");
-// 
-// 			printf("K: \n %f %f %f \n %f %f %f \n %f %f %f \n\n\n",
-// 				mat_i(0, 0), mat_i(0, 1), mat_i(0, 2),
-// 				mat_i(1, 0), mat_i(1, 1), mat_i(1, 2),
-// 				mat_i(2, 0), mat_i(2, 1), mat_i(2, 2));
-// 		}
 
 		polarDecomposition(mat_i, R, U, D, V);
 
@@ -103,34 +93,29 @@ namespace dyno
 		DArray<Real> weights,
 		DArray<Real> bulkCoefs,
 		DArray<Matrix> invK,
-		DArray<Coord> position,
-		DArrayList<Bond> restShapes,
+		DArray<Coord> X,
+		DArray<Coord> Y,
+		DArrayList<Bond> bonds,
 		Real mu,
 		Real lambda)
 	{
-
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
+		if (pId >= Y.size()) return;
 
-		List<Bond>& restShape_i = restShapes[pId];
-		Bond np_i = restShape_i[0];
-		Coord rest_i = np_i.pos;
-		int size_i = restShape_i.size();
+		List<Bond>& bonds_i = bonds[pId];
+		Coord rest_i = X[pId];
+		
 
-		Coord cur_pos_i = position[pId];
-
+		Coord cur_pos_i = Y[pId];
 		Coord accPos = Coord(0);
 		Real accA = Real(0);
 		Real bulk_i = bulkCoefs[pId];
 
 		Real maxDist = Real(0);
+		int size_i = bonds_i.size();
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShape_i[ne];
-			Coord rest_pos_j = np_j.pos;
-			Real r = (rest_i - rest_pos_j).norm();
-
-			maxDist = max(maxDist, r);
+			maxDist = max(maxDist, bonds_i[ne].xi.norm());
 		}
 		maxDist = maxDist < EPSILON ? Real(1) : maxDist;
 		Real horizon = maxDist;
@@ -140,17 +125,17 @@ namespace dyno
 		Matrix deform_i = Matrix(0.0f);
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShape_i[ne];
-			Coord rest_j = np_j.pos;
-			int j = np_j.index;
+			Bond bond_ij = bonds_i[ne];
+			int j = bond_ij.idx;
 
+			Coord rest_j = X[j];
 			Real r = (rest_j - rest_i).norm();
 
 			if (r > EPSILON)
 			{
 				Real weight = D_Weight(r, horizon);
 
-				Coord p = (position[j] - position[pId]) / horizon;
+				Coord p = (Y[j] - Y[pId]) / horizon;
 				Coord q = (rest_j - rest_i) / horizon*weight;
 
 				deform_i(0, 0) += p[0] * q[0]; deform_i(0, 1) += p[0] * q[1]; deform_i(0, 2) += p[0] * q[2];
@@ -191,11 +176,12 @@ namespace dyno
 
 		for (int ne = 0; ne < size_i; ne++)
 		{
-			Bond np_j = restShape_i[ne];
-			Coord rest_j = np_j.pos;
-			int j = np_j.index;
+			Bond bond_ij = bonds_i[ne];
+			
+			int j = bond_ij.idx;
+			Coord rest_j = X[j];
 
-			Coord cur_pos_j = position[j];
+			Coord cur_pos_j = Y[j];
 			Real r = (rest_j - rest_i).norm();
 
 			if (r > 0.01f*horizon)
@@ -209,12 +195,12 @@ namespace dyno
 				rest_dir_ij = rest_dir_ij.norm() > EPSILON ? rest_dir_ij.normalize() : Coord(0, 0, 0);
 
 				Real mu_ij = mu*bulk_i* D_Weight(r, horizon);
-				Coord mu_pos_ij = position[j] + r*rest_dir_ij;
-				Coord mu_pos_ji = position[pId] - r*rest_dir_ij;
+				Coord mu_pos_ij = Y[j] + r*rest_dir_ij;
+				Coord mu_pos_ji = Y[pId] - r*rest_dir_ij;
 
 				Real lambda_ij = lambda*bulk_i*D_Weight(r, horizon);
-				Coord lambda_pos_ij = position[j] + r*cur_dir_ij;
-				Coord lambda_pos_ji = position[pId] - r*cur_dir_ij;
+				Coord lambda_pos_ij = Y[j] + r*cur_dir_ij;
+				Coord lambda_pos_ji = Y[pId] - r*cur_dir_ij;
 
 				Coord delta_pos_ij = mu_ij*mu_pos_ij + lambda_ij*lambda_pos_ij;
 				Real delta_weight_ij = mu_ij + lambda_ij;
@@ -286,7 +272,7 @@ namespace dyno
 	template<typename TDataType>
 	void LinearElasticitySolver<TDataType>::enforceElasticity()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		mDisplacement.reset();
@@ -297,14 +283,15 @@ namespace dyno
 			mWeights,
 			mBulkStiffness,
 			mInvK,
-			this->inPosition()->getData(),
-			this->inRestShape()->getData(),
+			this->inX()->getData(),
+			this->inY()->getData(),
+			this->inBonds()->getData(),
 			this->varMu()->getData(),
 			this->varLambda()->getData());
 		cuSynchronize();
 
 		K_UpdatePosition << <pDims, BLOCK_SIZE >> > (
-			this->inPosition()->getData(),
+			this->inY()->getData(),
 			mPosBuf,
 			mDisplacement,
 			mWeights);
@@ -323,7 +310,7 @@ namespace dyno
 	template<typename TDataType>
 	void LinearElasticitySolver<TDataType>::computeMaterialStiffness()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 		EM_InitBulkStiffness << <pDims, BLOCK_SIZE >> > (mBulkStiffness);
@@ -333,11 +320,12 @@ namespace dyno
 	template<typename TDataType>
 	void LinearElasticitySolver<TDataType>::computeInverseK()
 	{
-		auto& restShapes = this->inRestShape()->getData();
+		auto& restShapes = this->inBonds()->getData();
 		uint pDims = cudaGridSize(restShapes.size(), BLOCK_SIZE);
 
 		EM_PrecomputeShape <Real, Coord, Matrix, Bond> << <pDims, BLOCK_SIZE >> > (
 			mInvK,
+			this->inX()->getData(),
 			restShapes);
 		cuSynchronize();
 	}
@@ -346,7 +334,7 @@ namespace dyno
 	void LinearElasticitySolver<TDataType>::solveElasticity()
 	{
 		//Save new positions
-		mPosBuf.assign(this->inPosition()->getData());
+		mPosBuf.assign(this->inY()->getData());
 
 		this->computeInverseK();
 
@@ -363,7 +351,7 @@ namespace dyno
 	template<typename TDataType>
 	void LinearElasticitySolver<TDataType>::updateVelocity()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 		Real dt = this->inTimeStep()->getData();
@@ -371,7 +359,7 @@ namespace dyno
 		K_UpdateVelocity << <pDims, BLOCK_SIZE >> > (
 			this->inVelocity()->getData(),
 			mPosBuf,
-			this->inPosition()->getData(),
+			this->inY()->getData(),
 			dt);
 		cuSynchronize();
 	}
@@ -418,7 +406,7 @@ namespace dyno
 	template<typename TDataType>
 	void LinearElasticitySolver<TDataType>::preprocess()
 	{
-		int num = this->inPosition()->size();
+		int num = this->inY()->size();
 
 		if (num == mInvK.size())
 			return;

@@ -199,9 +199,7 @@ namespace dyno
 
 		//变换
 
-		Quat<Real> q2 = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q2 = computeQuaternion();
 
 		q2.normalize();
 
@@ -246,7 +244,7 @@ namespace dyno
 		Vec3f s = Vec3f(1*radius ,1* radius ,1 *radius);
 		if (this->varuseRamp()->getData() == true) 
 		{
-			float pr = this->varCurveRamp()->getDataPtr()->getCurveValueByX(currentIndex / totalIndex);
+			float pr = this->varCurveRamp()->getValue().getCurveValueByX(currentIndex / totalIndex);
 			std::cout << "采样值为" << pr << std::endl;
 			if (pr != -1) { s = s * pr;}
 		}

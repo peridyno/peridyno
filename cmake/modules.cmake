@@ -1,6 +1,5 @@
-﻿#foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
 macro(add_plugin LIB_NAME LIB_DEPENDENCY)
-    set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}")
+    set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
     file(                                                                           
         GLOB_RECURSE LIB_SRC
@@ -10,11 +9,7 @@ macro(add_plugin LIB_NAME LIB_DEPENDENCY)
         "${LIB_SRC_DIR}/*.h*"
     )
 
-    if(WIN32)
-        add_library(${LIB_NAME} SHARED ${LIB_SRC})
-    elseif(UNIX)
-        add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
-    endif()
+    add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
     foreach(SRC IN ITEMS ${LIB_SRC}) 
         get_filename_component(SRC_PATH "${SRC}" PATH)
@@ -27,7 +22,7 @@ macro(add_plugin LIB_NAME LIB_DEPENDENCY)
         target_compile_options(${LIB_NAME} PRIVATE -Xcompiler "/wd 4819") 
     endif()
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine/Plugin")
+    set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Plugins")
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCH_FLAGS})
     set_target_properties(${LIB_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugin)
@@ -48,26 +43,7 @@ macro(add_plugin LIB_NAME LIB_DEPENDENCY)
     target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr;--expt-extended-lambda>)
 
     target_link_libraries(${LIB_NAME} PUBLIC ${${LIB_DEPENDENCY}})
-
-    install(TARGETS ${LIB_NAME}
-        EXPORT ${LIB_NAME}Targets
-        RUNTIME  DESTINATION  ${PERIDYNO_RUNTIME_INSTALL_DIR}
-        LIBRARY  DESTINATION  ${PERIDYNO_LIBRARY_INSTALL_DIR}
-        ARCHIVE  DESTINATION  ${PERIDYNO_ARCHIVE_INSTALL_DIR}
-        )
-
-    install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
-        FILE ${LIB_NAME}Targets.cmake)
-
-    #Append ${LIB_NAME}Targets.cmake to the global list, which will be include in PeridynoConfig.cmake
-    get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
-    list(APPEND LOCAL_CMAKES_NAMES "${LIB_NAME}Targets.cmake")    
-    set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
-
-    file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
-    install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Plugin/${LIB_NAME})
 endmacro()
-
 
 macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
     set(PROJECT_NAME ${EXAMPLE_NAME})

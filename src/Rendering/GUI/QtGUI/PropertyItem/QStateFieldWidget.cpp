@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QCheckBox>
 
+#include "Field.h"
 #include "Node.h"
 
 namespace dyno

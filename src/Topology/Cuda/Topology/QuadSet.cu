@@ -10,13 +10,16 @@ namespace dyno
 
 	template<typename TDataType>
 	QuadSet<TDataType>::QuadSet()
-		: TriangleSet<TDataType>()
+		: EdgeSet<TDataType>()
 	{
 	}
 
 	template<typename TDataType>
 	QuadSet<TDataType>::~QuadSet()
 	{
+		m_quads.clear();
+		m_ver2Quad.clear();
+		edg2Quad.clear();
 	}
 
 	template<typename Quad>
@@ -54,7 +57,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& QuadSet<TDataType>::getVertex2Quads()
 	{
-		DArray<uint> counter(this->m_coords.size());
+		DArray<uint> counter(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(m_quads.size(),
@@ -215,7 +218,7 @@ namespace dyno
 	template<typename TDataType>
 	bool QuadSet<TDataType>::isEmpty()
 	{
-		return m_quads.size() == 0 && TriangleSet<TDataType>::isEmpty();
+		return m_quads.size() == 0 && EdgeSet<TDataType>::isEmpty();
 	}
 
 	template<typename Coord, typename Quad>
@@ -255,7 +258,7 @@ namespace dyno
 	{
 		this->updateQuads();
 
-		TriangleSet<TDataType>::updateTopology();
+		EdgeSet<TDataType>::updateTopology();
 	}
 
 	template<typename TDataType>
@@ -266,7 +269,7 @@ namespace dyno
 
 		auto& vn = this->outVertexNormal()->getData();
 
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		if (vn.size() != vertSize) {
 			vn.resize(vertSize);
@@ -277,36 +280,9 @@ namespace dyno
 		cuExecute(vertSize,
 			QS_SetupVertexNormals,
 			vn,
-			this->m_coords,
+			this->mCoords,
 			m_quads,
 			vert2Quad);
-	}
-
-	template<typename Triangle, typename Quad>
-	__global__ void TS_SetupTriangles(
-		DArray<Triangle> triangles,
-		DArray<Quad> quads)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= quads.size()) return;
-
-		Quad quad = quads[tId];
-		triangles[2 * tId] = Triangle(quad[0], quad[1], quad[2]);
-		triangles[2 * tId + 1] = Triangle(quad[0], quad[2], quad[3]);
-	}
-
-	template<typename TDataType>
-	void QuadSet<TDataType>::updateTriangles()
-	{
-		uint quadSize = m_quads.size();
-
-		auto& pTri = this->getTriangles();
-		pTri.resize(2 * quadSize);
-
-		cuExecute(quadSize,
-			TS_SetupTriangles,
-			pTri,
-			m_quads);
 	}
 
 	DEFINE_CLASS(QuadSet);

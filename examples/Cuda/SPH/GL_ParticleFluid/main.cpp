@@ -17,7 +17,8 @@
 #include <ImColorbar.h>
 
 #include <CubeModel.h>
-#include <CubeSampler.h>
+
+#include <ParticleSystem/CubeSampler.h>
 
 using namespace std;
 using namespace dyno;

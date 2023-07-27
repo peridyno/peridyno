@@ -8,7 +8,7 @@
 #include "Module/CoSemiImplicitHyperelasticitySolver.h"
 #include "Module/DamplingParticleIntegrator.h"
 
-#include "SurfaceInteraction.h"
+
 #include "Module/DragSurfaceInteraction.h"
 #include "Module/DragVertexInteraction.h"
 
@@ -49,11 +49,12 @@ namespace dyno
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
 		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
 		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
-		this->statePosition()->connect(hyperElasticity->inPosition());
+		this->stateRestPosition()->connect(hyperElasticity->inX());
+		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
 		this->stateRestNorm()->connect(hyperElasticity->inRestNorm());
 		this->stateNorm()->connect(hyperElasticity->inNorm());
-		this->stateRestShape()->connect(hyperElasticity->inRestShape());
+		this->stateRestShape()->connect(hyperElasticity->inBonds());
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateMaxLength()->connect(hyperElasticity->inUnit());
 		this->stateOldPosition()->connect(hyperElasticity->inOldPosition());
@@ -130,11 +131,12 @@ namespace dyno
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
 		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
 		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
-		this->statePosition()->connect(hyperElasticity->inPosition());
+		this->stateRestPosition()->connect(hyperElasticity->inX());
+		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
 		this->stateRestNorm()->connect(hyperElasticity->inRestNorm());
 		this->stateNorm()->connect(hyperElasticity->inNorm());
-		this->stateRestShape()->connect(hyperElasticity->inRestShape());
+		this->stateRestShape()->connect(hyperElasticity->inBonds());
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateMaxLength()->connect(hyperElasticity->inUnit());
 		this->stateOldPosition()->connect(hyperElasticity->inOldPosition());
@@ -204,35 +206,55 @@ namespace dyno
 	void CodimensionalPD<TDataType>::setEnergyModel(XuModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Xuetal);
-		this->varEnergyModel()->getDataPtr()->xuModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.xuModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
 		this->varEnergyType()->setValue(NeoHooekean);
-		this->varEnergyModel()->getDataPtr()->neohookeanModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.neohookeanModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(LinearModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Linear);
-		this->varEnergyModel()->getDataPtr()->linearModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.linearModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(StVKModel<Real> model)
 	{
 		this->varEnergyType()->setValue(StVK);
-		this->varEnergyModel()->getDataPtr()->stvkModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.stvkModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(FiberModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Fiber);
-		this->varEnergyModel()->getDataPtr()->fiberModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.fiberModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
@@ -353,7 +375,7 @@ namespace dyno
 
 		
 		this->stateRestPosition()->resize(vNum);
-		this->stateRestPosition()->getData().assign(triSet->getPoints(), triSet->getPoints().size());
+		this->stateRestPosition()->assign(triSet->getPoints());
 
 		this->stateVerticesRef()->resize(vNum);
 		this->stateVerticesRef()->getData().assign(triSet->getPoints(), triSet->getPoints().size());

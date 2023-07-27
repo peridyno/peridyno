@@ -82,7 +82,7 @@ namespace dyno
 				auto node = std::make_shared<OBJExporter<DataType3f>>();
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Vec3f(0.8, 0.52, 0.25));
+				module->setColor(Color(0.8, 0.52, 0.25));
 				module->setVisible(true);
 				//node->stateTopology()->connect(module->inTriangleSet());
 				node->graphicsPipeline()->pushModule(module);
@@ -98,7 +98,7 @@ namespace dyno
 				auto node = std::make_shared<PlyExporter<DataType3f>>();
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Vec3f(0.8, 0.52, 0.25));
+				module->setColor(Color(0.8, 0.52, 0.25));
 				module->setVisible(true);
 				node->graphicsPipeline()->pushModule(module);
 

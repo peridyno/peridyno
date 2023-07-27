@@ -45,10 +45,11 @@ namespace dyno
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
 		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
 		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
-		this->statePosition()->connect(hyperElasticity->inPosition());
+		this->stateRestPosition()->connect(hyperElasticity->inX());
+		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
 		this->stateVolume()->connect(hyperElasticity->inVolume());
-		this->stateRestShape()->connect(hyperElasticity->inRestShape());
+		this->stateBonds()->connect(hyperElasticity->inBonds());
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateVolumePair()->connect(hyperElasticity->inVolumePair());
 		this->varAlphaComputed()->connect(hyperElasticity->varIsAlphaComputed());
@@ -90,28 +91,41 @@ namespace dyno
 	void HyperelasticBody<TDataType>::setEnergyModel(XuModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Xuetal);
-		this->varEnergyModel()->getDataPtr()->xuModel = model;
+		auto models = this->varEnergyModel()->getValue();
+		models.xuModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
 		this->varEnergyType()->setValue(NeoHooekean);
-		this->varEnergyModel()->getDataPtr()->neohookeanModel = model;
+		auto models = this->varEnergyModel()->getValue();
+		models.neohookeanModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(LinearModel<Real> model)
 	{
 		this->varEnergyType()->setValue(Linear);
-		this->varEnergyModel()->getDataPtr()->linearModel = model;
+		auto models = this->varEnergyModel()->getValue();
+		models.linearModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(StVKModel<Real> model)
 	{
 		this->varEnergyType()->setValue(StVK);
-		this->varEnergyModel()->getDataPtr()->stvkModel = model;
+
+		auto models = this->varEnergyModel()->getValue();
+		models.stvkModel = model;
+
+		this->varEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
@@ -282,7 +296,7 @@ namespace dyno
 		if (pId >= lists.size()) return;
 
 		//printf("size_0 %d\n", lists[pId].size() + 1);
-		index[pId] = lists[pId].size() + 1;
+		index[pId] = lists[pId].size();
 	}
 
 	template<typename Coord, typename Bond, typename Tetrahedron>
@@ -297,17 +311,13 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= lists.size()) return;
 
+		Coord v_i = tetVertex[pId];
 
 		List<Bond>& list_i = restShapes[pId];
 		List<Real>& vol_i = volume[pId];
 		List<int>& tets_i = ver2tet[pId];
 
 		List<int> list = lists[pId];
-		//if(pId == 10)
-		//printf("**** %d %.3lf  %.3lf  %.3lf \n", pId, restPos[pId][0], restPos[pId][1], restPos[pId][2]);
-
-		list_i.insert(Bond(pId, tetVertex[pId]));
-		vol_i.insert(Real(0.00001));
 		for (auto it = list.begin(); it != list.end(); it++)
 		{
 			int j = *it;
@@ -329,10 +339,8 @@ namespace dyno
 			Real minVol = Real(0.00001);
 			vol_ij = maximum(vol_ij, minVol); //0.000123;// 
 
-			list_i.insert(Bond(j, tetVertex[j]));
+			list_i.insert(Bond(j, tetVertex[j] - v_i));
 			vol_i.insert(vol_ij);
-
-//			printf("%f Nei size: %d \n", vol_ij, tets_i.size());
 		}
 		
 		int size_i = restShapes[pId].size();
@@ -351,8 +359,8 @@ namespace dyno
 		auto& restPos = this->stateRestPosition()->getData();
 		//printf("------");
 		//this->stateRestShape()->resize(restPos.size());
-		if(this->stateRestShape()->isEmpty())
-			this->stateRestShape()->allocate();
+		if(this->stateBonds()->isEmpty())
+			this->stateBonds()->allocate();
 
 		if (this->stateVolumePair()->isEmpty())
 		{
@@ -360,12 +368,12 @@ namespace dyno
 		}
 
 		//printf("aaaaaaaa");
-		auto nbrPtr = this->stateRestShape()->getDataPtr();
+		auto nbrPtr = this->stateBonds()->getDataPtr();
 		//printf("bbbbbbbb");
 		nbrPtr->resize(restPos.size());
 
-		auto index = this->stateRestShape()->getData().index();
-		auto elements = this->stateRestShape()->getData().elements();
+		auto index = this->stateBonds()->getData().index();
+		auto elements = this->stateBonds()->getData().elements();
 
 		DArray<uint> index_temp;
 		index_temp.resize(index.size());
@@ -376,12 +384,12 @@ namespace dyno
 			neighbors);
 
 
-		this->stateRestShape()->getData().resize(index_temp);
+		this->stateBonds()->getData().resize(index_temp);
 		this->stateVolumePair()->getDataPtr()->resize(index_temp);
 
 		cuExecute(neighbors.size(),
 			SetRestShape,
-			stateRestShape()->getData(),
+			stateBonds()->getData(),
 			stateVolumePair()->getData(),
 			ver2tet,
 			neighbors,
