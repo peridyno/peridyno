@@ -2,7 +2,7 @@ import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()
 
-emitter = dyno.ParticleEmitterSquare3f()
+emitter = dyno.SquareEmitter3f()
 emitter.var_location().set_value(dyno.Vector3f([0.5, 0.5, 0.5]))
 scn.add_node(emitter)
 
@@ -18,7 +18,7 @@ calcNorm = dyno.CalculateNorm3f()
 colorMapper = dyno.ColorMapping3f()
 
 pointRender = dyno.GLPointVisualModule3f()
-pointRender.set_color(dyno.Vector3f([1, 0, 0]))
+pointRender.set_color(dyno.Color(1, 0, 0))
 pointRender.set_colorMapMode(pointRender.ColorMapMode.PER_VERTEX_SHADER)
 pointRender.set_colorMapRange(0, 5)
 
@@ -36,5 +36,5 @@ fluid.connect(boundary.import_particle_systems())
 
 app = dyno.GLApp()
 app.set_scenegraph(scn)
-app.create_window(800, 600)
+app.initialize(800, 600, True)
 app.main_loop()
