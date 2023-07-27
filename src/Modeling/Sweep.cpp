@@ -64,6 +64,7 @@ namespace dyno
 	{
 		varChanged();
 		displayChanged();
+		printf("resetStates  sweep \n");
 	}
 
 	template<typename TDataType>
@@ -75,8 +76,16 @@ namespace dyno
 
 		auto radius = this->varRadius()->getData();
 		
-		if (this->inSpline()->isEmpty()) { return; }
-		if (this->inCurve()->isEmpty()) { return; }
+		if (this->inSpline()->isEmpty())
+		{ 
+			printf("inSpline  empty \n");
+			return; 
+		}
+		if (this->inCurve()->isEmpty()) 
+		{ 
+			printf("inCurve  empty \n");
+			return; 
+		}
 
 		auto SplineIn = this->inSpline()->getData().getPoints();
 
@@ -140,6 +149,11 @@ namespace dyno
 			vb.normalize();
 
 			Vec3f Axis = va.cross(vb);
+			if (Axis == Vec3f(0, 0, 0)) 
+			{
+				Axis = Vec3f(0,1,0);
+				printf("in a line\n");
+			}
 			Axis.normalize();
 
 			Real angle =-1 * acos(va.dot(vb));
