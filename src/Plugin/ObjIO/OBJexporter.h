@@ -42,11 +42,7 @@ namespace dyno
 		DEF_ENUM(OutputType, OutputType, TriangleMesh, "OutputType");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet")
-		//DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSe, "TriangleSet");
 
-		//DEF_NODE_PORTS(Node, Topology, "Topology");
-		//DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
-		//DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 	protected:
 		void resetStates() override;

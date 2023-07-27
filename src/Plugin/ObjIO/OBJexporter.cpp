@@ -43,7 +43,7 @@ namespace dyno
 		ExportModule->varEnd()->setValue(this->varEndFrame()->getData());
 	}
 
-
+	//reset
 	template<typename TDataType>
 	void OBJExporter<TDataType>::resetStates() 
 	{
