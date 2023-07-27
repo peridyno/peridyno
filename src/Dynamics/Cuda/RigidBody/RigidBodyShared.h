@@ -56,6 +56,23 @@ namespace dyno
 
 		Vector<Real, 3> v[4];
 	};
+	// Custom get and set functions for v member
+	static void set_v(TetInfo& obj, const std::vector<Vec3f>& values) {
+		if (values.size() != 4) {
+			throw std::runtime_error("TetInfo.v must be a list of 4 Vec3f elements.");
+		}
+		for (size_t i = 0; i < 4; ++i) {
+			obj.v[i] = values[i];
+		}
+	}
+
+	static std::vector<Vec3f> get_v(const TetInfo& obj) {
+		std::vector<Vec3f> values;
+		for (size_t i = 0; i < 4; ++i) {
+			values.push_back(obj.v[i]);
+		}
+		return values;
+	}
 
 	struct CapsuleInfo
 	{
