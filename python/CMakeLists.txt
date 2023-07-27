@@ -24,7 +24,7 @@ endif()
 
 link_libraries(Core Framework IO)
 link_libraries(GlfwGUI)
-link_libraries(ParticleSystem RigidBody Peridynamics GLRenderEngine)
+link_libraries(ParticleSystem RigidBody Peridynamics GLRenderEngine Modeling Topology)
 
 file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
 file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
