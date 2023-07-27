@@ -1,6 +1,6 @@
 #include <QtApp.h>
 
-#include "TrianglePickerNode.h"
+//#include "TrianglePickerNode.h"
 #include "initializeModeling.h"
 #include "PointFromCurve.h"
 #include "../Plugin/ObjIO/OBJexporter.h"
@@ -26,7 +26,7 @@ int main()
 	//sphere->varScale()->setValue(Vec3f(0.2,0.2,0.2));
 	//auto extrude = scn->addNode(std::make_shared<PolyExtrude<DataType3f>>());
 
-	auto picker = scn->addNode(std::make_shared<TrianglePickerNode<DataType3f>>());
+	//auto picker = scn->addNode(std::make_shared<TrianglePickerNode<DataType3f>>());
 	//picker->stateTriQuadIndex()->promoteOuput()->connect(extrude->inPrimId());
 
 	//sphere->stateTriangleSet()->promoteOuput()->connect(extrude->inTriangleSet());
