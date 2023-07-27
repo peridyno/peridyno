@@ -40,7 +40,6 @@ namespace dyno
 		DEF_VAR(Vec3f, Scale, Vec3f(1.0f), "Node scale");
 
 		DEF_VAR(FilePath, FileName, "", "");
-		//DEF_VAR(std::string, InputPath, "", "");
 
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 

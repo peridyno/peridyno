@@ -17,8 +17,6 @@ namespace dyno
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		
-		//triSet->getTriangles().clear();
-		//triSet->getVertex2Triangles().clear();
 		std::vector<Coord> vertList;
 		std::vector<TopologyModule::Triangle> faceList;
 
