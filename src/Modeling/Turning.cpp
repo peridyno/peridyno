@@ -25,13 +25,6 @@ namespace dyno
 
 		this->stateTriangleSet()->promoteOuput();
 
-		auto tempRamp = this->varCurve()->getValue();
-
-		tempRamp.setDisplayUseRamp(true);
-		this->varCurve()->setValue(tempRamp); 
-
-		std::cout<<"turning display useRamp  : "<< this->varCurve()->getValue().displayUseRamp << std::endl;
-
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&TurningModel<TDataType>::varChanged, this));
 
 		this->varLocation()->attach(callback);
