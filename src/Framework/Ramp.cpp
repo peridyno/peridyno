@@ -451,15 +451,6 @@ namespace dyno {
 		setInterpMode(false);
 	}
 
-	void Ramp::setDisplayUseRamp(bool v) 
-	{
-		this->displayUseRamp = v;
-	}
-
-	void Ramp::setUseRamp(bool v)
-	{
-		this->useRamp = v;
-	}
 
 	void Ramp::setInterpMode(bool useBezier)
 	{

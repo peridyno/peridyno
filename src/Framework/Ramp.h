@@ -131,8 +131,7 @@ namespace dyno {
 
 			this->lockSize = ramp.lockSize;
 			this->useCurve = ramp.useCurve;
-			this->displayUseRamp = ramp.displayUseRamp;
-			this->useRamp = ramp.useRamp;
+
 			this->useSquard = ramp.useSquard;
 			this->curveClose = ramp.curveClose;
 			this->resample = ramp.resample;
@@ -253,9 +252,6 @@ namespace dyno {
 		float segment = 10;
 		float resampleResolution = 20;
 
-
-		bool displayUseRamp = false;   // Display UseRamp checkbox for RampWidget;
-		bool useRamp = false;    // Enable curve data ,enabled when displayEnable is true
 
 	private:
 		float xLess = 1;
