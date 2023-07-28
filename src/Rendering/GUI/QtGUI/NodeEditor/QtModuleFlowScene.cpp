@@ -75,7 +75,7 @@ namespace Qt
 
 		connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModule);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtModuleFlowScene::addModule);
-		connect(this, &QtFlowScene::nodeDeleted, this, &QtModuleFlowScene::deleteModule);
+//		connect(this, &QtFlowScene::nodeDeleted, this, &QtModuleFlowScene::deleteModule);
 
 		connect(this, &QtFlowScene::outPortConextMenu, this, &QtModuleFlowScene::promoteOutput);
 	}

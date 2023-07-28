@@ -483,7 +483,7 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 	}
 }
 
-void dyno::ImWindow::drawViewManipulator(Camera* camera)
+void ImWindow::drawViewManipulator(Camera* camera)
 {
 	glm::mat4 view = camera->getViewMat();
 	glm::mat4 view0 = view;

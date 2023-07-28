@@ -15,8 +15,16 @@
 #include "Topology/EdgeSet.h"
 
 #include "Module/TopologyMapping.h"
+#include "PlaneModel.h"
+#include "SphereModel.h"
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
+
+
+#include "ParticleSystem/ParticleSystem.h"
+#include "ParticleSystem/Module/ParticleIntegrator.h"
+#include "ParticleSystem/Module/ImplicitViscosity.h"
+
 
 #include "SceneGraph.h"
 #include "Log.h"
@@ -138,6 +146,103 @@ void declare_discrete_topology_mapping(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 }
 
+
+//------------------------- New ------------------------------
+
+#include "SphereModel.h"
+template <typename TDataType>
+void declare_sphere_model(py::module& m, std::string typestr) {
+	using Class = dyno::SphereModel<TDataType>;
+	using Parent = dyno::ParametricModel<TDataType>;
+	std::string pyclass_name = std::string("SphereModel") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
+		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
+		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
+
+}
+
+template <typename TDataType>
+void declare_parametric_model(py::module& m, std::string typestr) {
+	using Class = dyno::ParametricModel<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("ParametricModel") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+}
+
+
+#include "PlaneModel.h"
+template <typename TDataType>
+void declare_plane_model(py::module& m, std::string typestr) {
+	using Class = dyno::PlaneModel<TDataType>;
+	using Parent = dyno::ParametricModel<TDataType>;
+	std::string pyclass_name = std::string("PlaneModel") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
+		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
+		
+}
+
+#include "Mapping/MergeTriangleSet.h"
+template <typename TDataType>
+void declare_merge_triangle_set(py::module& m, std::string typestr) {
+	using Class = dyno::MergeTriangleSet<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("MergeTriangleSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("in_first", &Class::inFirst, py::return_value_policy::reference)
+		.def("in_second", &Class::inSecond, py::return_value_policy::reference);
+
+}
+
+#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
+template <typename TDataType>
+void declare_semiAnalyticalSFI_node(py::module& m, std::string typestr) {
+	using Class = dyno::SemiAnalyticalSFINode<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
+		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
+}
+
+//Init_static_plugin  - for example_3 WaterPouring
+#include "initializeModeling.h"
+#include "ParticleSystem/initializeParticleSystem.h"
+#include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
+void declare_modeling_init_static_plugin(py::module& m,std::string typestr) {
+	using Class = dyno::ModelingInitializer;
+	using Parent = dyno::PluginEntry;
+	std::string pyclass_name = std::string("ModelingInitializer" + typestr);
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("modeling_init_static_plugin", &Modeling::initStaticPlugin);
+}
+
+void declare_paticleSystem_init_static_plugin(py::module& m, std::string typestr) {
+	using Class = dyno::ParticleSystemInitializer;
+	using Parent = dyno::PluginEntry;
+	std::string pyclass_name = std::string("ParticleSystemInitializer" + typestr);
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("paticleSystem_init_static_plugin", &PaticleSystem::initStaticPlugin);
+}
+/*
+void declare_semiAnalyticalScheme_init_static_plugin(py::module& m, std::string typestr) {
+	using Class = dyno::SemiAnalyticalSchemeInitializer;
+	using Parent = dyno::PluginEntry;
+	std::string pyclass_name = std::string("SemiAnalyticalSchemeInitializer" + typestr);
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("semiAnalyticalScheme_init_static_plugin", &SemiAnalyticalScheme::initStaticPlugin);
+}*/
+
+//------------------------- NEW END ------------------------------
+
+
 void pybind_framework(py::module& m)
 {
 	pybind_log(m);
@@ -217,6 +322,19 @@ void pybind_framework(py::module& m)
 	declare_instance<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
 	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
 	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
+
+
+    // New
+	declare_parametric_model<dyno::DataType3f>(m, "3f");
+	declare_plane_model<dyno::DataType3f>(m, "3f");
+	declare_sphere_model<dyno::DataType3f>(m, "3f");
+	declare_merge_triangle_set<dyno::DataType3f>(m, "3f");
+
+	declare_semiAnalyticalSFI_node<dyno::DataType3f>(m, "3f");
+
+	declare_modeling_init_static_plugin(m,"");
+	declare_paticleSystem_init_static_plugin(m,"");
+	//declare_semiAnalyticalScheme_init_static_plugin(m, "");
 
 
 }

@@ -9,7 +9,7 @@ namespace dyno
 
 	template<typename TDataType>
 	CollistionDetectionBoundingBox<TDataType>::CollistionDetectionBoundingBox()
-		: CollisionModel()
+		: ComputeModule()
 	{
 	}
 
@@ -436,7 +436,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CollistionDetectionBoundingBox<TDataType>::doCollision()
+	void CollistionDetectionBoundingBox<TDataType>::compute()
 	{
 		int sum = 0;
 

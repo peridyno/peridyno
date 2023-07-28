@@ -16,7 +16,7 @@ scn.add_node(boundary)
 
 
 pointRender = dyno.GLPointVisualModule3f()
-pointRender.set_color(dyno.Vector3f([1, 0.2, 1]))
+pointRender.set_color(dyno.Color(1, 0.2, 1))
 pointRender.set_colorMapMode(pointRender.ColorMapMode.PER_OBJECT_SHADER)
 cloth.current_topology().connect(pointRender.in_pointSet())
 cloth.state_velocity().connect(pointRender.in_color())
@@ -31,5 +31,5 @@ cloth.graphics_pipeline().push_module(surfaceRenderer)
 
 app = dyno.GLApp()
 app.set_scenegraph(scn)
-app.create_window(1024, 768)
+app.initialize(1280, 768, True)
 app.main_loop()

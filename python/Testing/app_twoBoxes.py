@@ -22,12 +22,12 @@ rigid.current_topology().connect(mapper.in_discreteElements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule3f()
-sRender.set_color(dyno.Vector3f([1, 1, 0]))
+sRender.set_color(dyno.Color(1, 1, 0))
 mapper.out_triangleSet().connect(sRender.in_triangleSet())
 rigid.graphics_pipeline().push_module(sRender)
 
 
 app = dyno.GLApp()
 app.set_scenegraph(scn)
-app.create_window(1280, 768)
+app.initialize(1280, 768, True)
 app.main_loop()

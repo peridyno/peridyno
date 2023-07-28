@@ -365,7 +365,7 @@ namespace dyno
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
@@ -374,7 +374,7 @@ namespace dyno
 
 		// between OpenGL and property widget
 		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
-			m_propertyWidget->showProperty(node);
+			m_propertyWidget->showNodeProperty(node);
 			// TODO: high light selected node in node editor
 			auto qNodes = mNodeFlowView->flowScene()->allNodes();
 			for (auto qNode : qNodes)

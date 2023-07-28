@@ -61,8 +61,8 @@ namespace dyno
 
 		ts->copyFrom(*input);
 
-		//auto& nbr = nbrQuery->outNeighborIds()->getData();
-		auto& nbr = ts->getPointNeighbors();
+		DArrayList<int> nbr;
+		ts->requestPointNeighbors(nbr);
 		auto& pts = ts->getPoints();
 
 		this->statePosition()->resize(pts.size());
@@ -82,6 +82,8 @@ namespace dyno
 		this->stateRestPosition()->assign(this->statePosition()->getData());
 
 		constructRestShapeWithSelf(*nbrPtr, nbr, this->statePosition()->getData());
+
+		nbr.clear();
 	}
 
 	template<typename TDataType>

@@ -24,8 +24,8 @@ namespace dyno
 	{
 		std::vector<Triangle> triangles;
 
-		m_tethedrons.resize(tetrahedrons.size());
-		m_tethedrons.assign(tetrahedrons);
+		mTethedrons.resize(tetrahedrons.size());
+		mTethedrons.assign(tetrahedrons);
 
 		this->updateTriangles();
 	}
@@ -33,12 +33,12 @@ namespace dyno
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::setTetrahedrons(DArray<Tetrahedron>& tetrahedrons)
 	{
-		if (tetrahedrons.size() != m_tethedrons.size())
+		if (tetrahedrons.size() != mTethedrons.size())
 		{
-			m_tethedrons.resize(tetrahedrons.size());
+			mTethedrons.resize(tetrahedrons.size());
 		}
 
-		m_tethedrons.assign(tetrahedrons);
+		mTethedrons.assign(tetrahedrons);
 
 		this->updateTriangles();
 	}
@@ -145,22 +145,22 @@ namespace dyno
 		counter.resize(this->mCoords.size());
 		counter.reset();
 
-		cuExecute(m_tethedrons.size(),
+		cuExecute(mTethedrons.size(),
 			TetSet_CountTets,
 			counter,
-			m_tethedrons);
+			mTethedrons);
 
-		m_ver2Tet.resize(counter);
+		mVer2Tet.resize(counter);
 
 		counter.reset();
-		cuExecute(m_tethedrons.size(),
+		cuExecute(mTethedrons.size(),
 			TetSet_SetupTetIds,
-			m_ver2Tet,
-			m_tethedrons);
+			mVer2Tet,
+			mTethedrons);
 
 		counter.clear();
 
-		return m_ver2Tet;
+		return mVer2Tet;
 	}
 
 	template<typename TDataType>
@@ -280,7 +280,7 @@ namespace dyno
 	void TetrahedronSet<TDataType>::updateTriangles()
 	{
 
-		uint tetSize = m_tethedrons.size();
+		uint tetSize = mTethedrons.size();
 
 		DArray<TKey> keys;
 		DArray<Info> tetIds;
@@ -292,7 +292,7 @@ namespace dyno
 			TetSet_SetupKeys,
 			keys,
 			tetIds,
-			m_tethedrons);
+			mTethedrons);
 
 		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), tetIds.begin());
 
@@ -307,14 +307,14 @@ namespace dyno
 		int triNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
-		tri2Tet.resize(triNum);
+		mTri2Tet.resize(triNum);
 
 		auto& pTri = this->getTriangles();
 		pTri.resize(triNum);
 		cuExecute(keys.size(),
 			TetSet_SetupTriangles,
 			pTri,
-			tri2Tet,
+			mTri2Tet,
 			keys,
 			counter,
 			tetIds);
@@ -330,13 +330,13 @@ namespace dyno
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::copyFrom(TetrahedronSet<TDataType>& tetSet)
 	{
-		m_tethedrons.resize(tetSet.m_tethedrons.size());
-		m_tethedrons.assign(tetSet.m_tethedrons);
+		mTethedrons.resize(tetSet.mTethedrons.size());
+		mTethedrons.assign(tetSet.mTethedrons);
 
-		tri2Tet.resize(tetSet.tri2Tet.size());
-		tri2Tet.assign(tetSet.tri2Tet);
+		mTri2Tet.resize(tetSet.mTri2Tet.size());
+		mTri2Tet.assign(tetSet.mTri2Tet);
 
-		m_ver2Tet.assign(tetSet.m_ver2Tet);
+		mVer2Tet.assign(tetSet.mVer2Tet);
 
 		TriangleSet<TDataType>::copyFrom(tetSet);
 	}
@@ -344,7 +344,7 @@ namespace dyno
 	template<typename TDataType>
 	bool TetrahedronSet<TDataType>::isEmpty()
 	{
-		return m_tethedrons.size() && TriangleSet<TDataType>::isEmpty();
+		return mTethedrons.size() && TriangleSet<TDataType>::isEmpty();
 	}
 
 	DEFINE_CLASS(TetrahedronSet);

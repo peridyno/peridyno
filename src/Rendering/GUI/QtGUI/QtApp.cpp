@@ -24,6 +24,11 @@ namespace dyno {
 #endif // CUDA_BACKEND
 
         mMainWindow = nullptr;
+
+        //To fix the displace scaling issue
+        QApplication::setAttribute(Qt::AA_Use96Dpi);
+        qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
+
         mQApp = std::make_shared<QApplication>(argc, argv);
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications

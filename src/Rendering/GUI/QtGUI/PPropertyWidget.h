@@ -53,10 +53,10 @@ namespace dyno
 		void stateFieldUpdated(FBase* field, int status);
 
 	public slots:
-		void showProperty(std::shared_ptr<Module> module);
-		void showProperty(std::shared_ptr<Node> node);
+		void showModuleProperty(std::shared_ptr<Module> module);
+		void showNodeProperty(std::shared_ptr<Node> node);
 
-		void showNodeProperty(Qt::QtNode& block);
+		void showProperty(Qt::QtNode& block);
 
 		//A slot to receive a message when any field widget is updated
 		void contentUpdated();

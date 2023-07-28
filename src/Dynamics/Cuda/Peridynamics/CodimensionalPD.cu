@@ -454,7 +454,8 @@ namespace dyno
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTriangleSet()->getDataPtr());
 		if (triSet == nullptr) return;
 
-		auto& neighbors = triSet->getPointNeighbors();
+		DArrayList<int> neighbors;
+		triSet->requestPointNeighbors(neighbors);
 
 		auto& restPos = this->stateRestPosition()->getData();
 
@@ -479,7 +480,9 @@ namespace dyno
 			stateRestShape()->getData(),
 			neighbors);
 
+		neighbors.clear();
 	}
+
 	template<typename Real, typename Coord, typename Triangle>
 	__global__ void HB_UpdateUnit(
 		DArray<Coord> restPos,
