@@ -86,7 +86,11 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QDebug>
-#include <QtWidgets/QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#else
+	#include <QtWidgets/QOpenGLWidget>
+#endif
 #include <QtSvg/QSvgRenderer>
 #include <QHBoxLayout>
 #include <QDialog>
@@ -96,6 +100,7 @@
 #include "NodeEditor/QtNodeWidget.h"
 
 #include "nodes/QDataModelRegistry"
+#include "nodes/QNode"
 #include "ToolBar/TabToolbar.h"
 #include "ToolBar/Page.h"
 #include "ToolBar/Group.h"
@@ -124,8 +129,6 @@ namespace dyno
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physical simulation platform"));
 		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo5.png")));
 
-
-		mOpenGLWidget = new POpenGLWidget();
 		setCentralView();
 
 
@@ -176,47 +179,19 @@ namespace dyno
 		centralWidget->setLayout(mainLayout);
 
 		//Setup views
-		
 		QTabWidget* tabWidget = new QTabWidget();
 		tabWidget->setObjectName(QStringLiteral("tabWidget"));
 		tabWidget->setGeometry(QRect(140, 60, 361, 241));
 		
-// 		//VTK-based visualization widget
-// 		m_vtkOpenglWidget = new PVTKOpenGLWidget();
-// 		m_vtkOpenglWidget->setObjectName(QStringLiteral("tabView"));
-// 		m_vtkOpenglWidget->layout()->setMargin(0);
-// 		tabWidget->addTab(m_vtkOpenglWidget, QString());
-// 		tabWidget->setTabText(tabWidget->indexOf(m_vtkOpenglWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
-// 
-// 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), m_vtkOpenglWidget, SLOT(prepareRenderingContex()));
-// 		mainLayout->addWidget(tabWidget, 0, 0);
-
-
-// 		m_moduleFlowView = new PModuleFlowWidget();
-// 		m_moduleFlowView->setObjectName(QStringLiteral("tabEditor"));
-// 		tabWidget->addTab(m_moduleFlowView, QString());
-// 		tabWidget->setTabText(tabWidget->indexOf(m_moduleFlowView), QApplication::translate("MainWindow", "Module Editor", Q_NULLPTR));
-
-		//OpenGL-based visualization widget
-// 		mOpenGLWidget->setObjectName(QStringLiteral("tabView"));
-// 		mOpenGLWidget->layout()->setMargin(0);
-// 		tabWidget->addTab(mOpenGLWidget, QString());
-// 		tabWidget->setTabText(tabWidget->indexOf(mOpenGLWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
-		
+		mOpenGLWidget = new POpenGLWidget(this);
+		mOpenGLWidget->setContentsMargins(0, 0, 0, 0);
 		mainLayout->addWidget(mOpenGLWidget, 1);
 		
 		//Setup animation widget
 		m_animationWidget = new PAnimationWidget(this);
-		m_animationWidget->layout()->setMargin(0);
-
- 	//	QWidget* viewWidget = new QWidget();
- 	//	QHBoxLayout* hLayout = new QHBoxLayout();
-	//	viewWidget->setLayout(hLayout);
- 	//	hLayout->addWidget(m_vtkOpenglWidget, 1);
- 	//	hLayout->addWidget(m_flowView, 1);
+		m_animationWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
  		mainLayout->addWidget(m_animationWidget, 0);
-		
 	}
 
 	void PMainWindow::showAboutMsg()
@@ -253,38 +228,6 @@ namespace dyno
 		m_statusBar = new PStatusBar(this);
 		setStatusBar(m_statusBar);
 	}
-
-/*	void PMainWindow::setupMenuBar()
-	{
-		QMenu *menu = menuBar()->addMenu(tr("&File"));
-
-		menu->addAction(tr("New ..."), this, &PMainWindow::newScene);
-		menu->addAction(tr("Load ..."), this, &PMainWindow::loadScene);
-		menu->addAction(tr("Save ..."), this, &PMainWindow::saveScene);
-
-		menu->addSeparator();
-		menu->addAction(tr("&Quit"), this, &QWidget::close);
-
-		mainWindowMenu = menuBar()->addMenu(tr("&View"));
-		mainWindowMenu->addAction(tr("FullScreen"), this, &PMainWindow::fullScreen);
-
-#ifdef Q_OS_OSX
-		toolBarMenu->addSeparator();
-
-		action = toolBarMenu->addAction(tr("Unified"));
-		action->setCheckable(true);
-		action->setChecked(unifiedTitleAndToolBarOnMac());
-		connect(action, &QAction::toggled, this, &QMainWindow::setUnifiedTitleAndToolBarOnMac);
-#endif
-
-		windowMenu = menuBar()->addMenu(tr("&Window"));
-		for (int i = 0; i < toolBars.count(); ++i)
-			windowMenu->addMenu(toolBars.at(i)->toolbarMenu());
-
-		aboutMenu = menuBar()->addMenu(tr("&Help"));
-		aboutMenu->addAction(tr("Show Help ..."), this, &PMainWindow::showHelp);
-		aboutMenu->addAction(tr("About ..."), this, &PMainWindow::showAbout);
-	}*/
 
 	void PMainWindow::saveScene()
 	{
@@ -422,7 +365,7 @@ namespace dyno
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
@@ -431,9 +374,9 @@ namespace dyno
 
 		// between OpenGL and property widget
 		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
-			m_propertyWidget->showProperty(node);
+			m_propertyWidget->showNodeProperty(node);
 			// TODO: high light selected node in node editor
-			auto& qNodes = mNodeFlowView->flowScene()->allNodes();
+			auto qNodes = mNodeFlowView->flowScene()->allNodes();
 			for (auto qNode : qNodes)
 			{
 				if (dynamic_cast<Qt::QtNodeWidget*>(qNode->nodeDataModel())->getNode() == node)
@@ -459,10 +402,6 @@ namespace dyno
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)
 	{
-		// 	QLichtThread* m_thread = new QLichtThread(openGLWidget->winId());
-		// 	m_thread->start();
-
-		
 	}
 
 }

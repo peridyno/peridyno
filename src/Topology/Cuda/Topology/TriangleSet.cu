@@ -20,8 +20,8 @@ namespace dyno
 	{
 		mTriangleIndex.clear();
 		mVer2Tri.clear();
-		edg2Tri.clear();
-		tri2Edg.clear();
+		mEdg2Tri.clear();
+		mTri2Edg.clear();
 	}
 
 	template<typename Triangle>
@@ -57,7 +57,7 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& TriangleSet<TDataType>::getVertex2Triangles()
 	{
-		DArray<uint> counter(this->m_coords.size());
+		DArray<uint> counter(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(mTriangleIndex.size(),
@@ -150,10 +150,10 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateTriangle2Edge()
 	{
-		if (edg2Tri.size() == 0)
+		if (mEdg2Tri.size() == 0)
 			this->updateEdges();
 
-		uint edgSize = edg2Tri.size();
+		uint edgSize = mEdg2Tri.size();
 
 		DArray<int> triIds, edgIds;
 		triIds.resize(2 * edgSize);
@@ -163,16 +163,16 @@ namespace dyno
 			TS_setupIds,
 			edgIds,
 			triIds,
-			edg2Tri);
+			mEdg2Tri);
 
 		thrust::sort_by_key(thrust::device, triIds.begin(), triIds.begin() + triIds.size(), edgIds.begin());
 
 		auto& pEdges = this->getEdges();
 
-		tri2Edg.resize(mTriangleIndex.size());
+		mTri2Edg.resize(mTriangleIndex.size());
 		cuExecute(triIds.size(),
 			TS_SetupTri2Edg,
-			tri2Edg,
+			mTri2Edg,
 			triIds,
 			edgIds,
 			pEdges,
@@ -272,14 +272,14 @@ namespace dyno
 		int edgeNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
-		edg2Tri.resize(edgeNum);
+		mEdg2Tri.resize(edgeNum);
 
 		auto& pEdges = this->getEdges();
 		pEdges.resize(edgeNum);
 		cuExecute(keys.size(),
 			TS_SetupEdges,
 			pEdges,
-			edg2Tri,
+			mEdg2Tri,
 			keys,
 			counter,
 			triIds);
@@ -304,7 +304,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TriangleSet<TDataType>::loadObjFile(std::string filename)
+	bool TriangleSet<TDataType>::loadObjFile(std::string filename)
 	{
 		std::vector<Coord> vertList;
 		std::vector<Triangle> faceList;
@@ -319,7 +319,7 @@ namespace dyno
 
 		bool succeed = tinyobj::LoadObj(&myattrib, &myshape, &mymat, &mywarn, &myerr, fname, nullptr ,true, true);
 		if (!succeed)
-			return;
+			return false;
 
 		for (int i = 0; i < myattrib.GetVertices().size() / 3; i++)
 		{
@@ -341,6 +341,8 @@ namespace dyno
 		faceList.clear();
 		myshape.clear();
 		mymat.clear();
+
+		return true;
 	}
 
 	template<typename TDataType>
@@ -351,8 +353,8 @@ namespace dyno
 		mTriangleIndex.resize(triangleSet.mTriangleIndex.size());
 		mTriangleIndex.assign(triangleSet.mTriangleIndex);
 
-		edg2Tri.resize(triangleSet.edg2Tri.size());
-		edg2Tri.assign(triangleSet.edg2Tri);
+		mEdg2Tri.resize(triangleSet.mEdg2Tri.size());
+		mEdg2Tri.assign(triangleSet.mEdg2Tri);
 
 		EdgeSet<TDataType>::copyFrom(triangleSet);
 	}
@@ -382,7 +384,7 @@ namespace dyno
 		auto& vertices = ret->getPoints();
 		auto& indices = ret->getTriangles();
 
-		uint vNum0 = m_coords.size();
+		uint vNum0 = mCoords.size();
 		uint vNum1 = ts.getPoints().size();
 
 		uint tNum0 = mTriangleIndex.size();
@@ -391,7 +393,7 @@ namespace dyno
 		vertices.resize(vNum0 + vNum1);
 		indices.resize(tNum0 + tNum1);
 
-		vertices.assign(m_coords, vNum0, 0, 0);
+		vertices.assign(mCoords, vNum0, 0, 0);
 		vertices.assign(ts.getPoints(), vNum1, vNum0, 0);
 
 		indices.assign(mTriangleIndex, tNum0, 0, 0);
@@ -446,7 +448,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateVertexNormal()
 	{
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		if (vertSize <= 0)
 			return;
@@ -459,7 +461,7 @@ namespace dyno
 		cuExecute(vertSize,
 			TS_SetupVertexNormals,
 			mVertexNormal,
-			this->m_coords,
+			this->mCoords,
 			mTriangleIndex,
 			vert2Tri);
 	}
@@ -516,7 +518,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal)
 	{
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		vertexNormal.resize(vertSize);
 
@@ -525,7 +527,7 @@ namespace dyno
 		cuExecute(vertSize,
 			TS_SetupAngleWeightedVertexNormals,
 			vertexNormal,
-			this->m_coords,
+			this->mCoords,
 			mTriangleIndex,
 			vert2Tri);
 	}
@@ -565,17 +567,17 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateEdgeNormal(DArray<Coord>& edgeNormal)
 	{
-		if (edg2Tri.size() == 0)
+		if (mEdg2Tri.size() == 0)
 			updateEdges();
 
-		edgeNormal.resize(edg2Tri.size());
+		edgeNormal.resize(mEdg2Tri.size());
 
-		cuExecute(edg2Tri.size(),
+		cuExecute(mEdg2Tri.size(),
 			TS_SetupEdgeNormals,
 			edgeNormal,
-			this->m_coords,
+			this->mCoords,
 			mTriangleIndex,
-			edg2Tri);
+			mEdg2Tri);
 	}
 
 	template<typename TDataType>

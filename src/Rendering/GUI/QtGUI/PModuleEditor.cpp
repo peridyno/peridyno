@@ -23,7 +23,7 @@
 namespace dyno
 {
 	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* widget)
-		: QMainWindow(nullptr, 0)
+		: QMainWindow(nullptr)
 	{
 		mToolBar = new PModuleEditorToolBar();
 
@@ -52,7 +52,7 @@ namespace dyno
 		propertyDockWidget->setWidget(propertyWidget);
 		propertyDockWidget->setFixedWidth(360);
 
-		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showNodeProperty);
+		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showProperty);
 
 		connect(mToolBar, &PModuleEditorToolBar::showAnimationPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showAnimationPipeline);
 		connect(mToolBar, &PModuleEditorToolBar::showGraphicsPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showGraphicsPipeline);

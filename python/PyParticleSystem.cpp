@@ -6,7 +6,7 @@
 #include "ParticleSystem/GhostParticles.h"
 
 #include "Peridynamics/ElasticBody.h"
-#include "Peridynamics/Module/ElasticityModule.h"
+#include "Peridynamics/Module/LinearElasticitySolver.h"
 
 #include "ParticleSystem/CircularEmitter.h"
 

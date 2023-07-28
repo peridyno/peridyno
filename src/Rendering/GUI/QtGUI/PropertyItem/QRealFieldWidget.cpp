@@ -2,6 +2,8 @@
 
 #include <QHBoxLayout>
 
+#include "Field.h"
+
 namespace dyno
 {
 	QRealFieldWidget::QRealFieldWidget(FBase* field)

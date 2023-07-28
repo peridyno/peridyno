@@ -1,3 +1,18 @@
+/**
+ * Copyright 2017-2023 Xiaowei He
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
 #include "EdgeSet.h"
 
@@ -97,8 +112,9 @@ namespace dyno
 		 */
 		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 		DArrayList<int>& getVertex2Triangles();
-		DArray<Tri2Edg>& getTriangle2Edge() { return tri2Edg; }
-		DArray<Edg2Tri>& getEdge2Triangle() { return edg2Tri; }
+
+		DArray<TopologyModule::Tri2Edg>& getTriangle2Edge() { return mTri2Edg; }
+		DArray<TopologyModule::Edg2Tri>& getEdge2Triangle() { return mEdg2Tri; }
 
 		DArray<Coord>& getVertexNormals() { return mVertexNormal; }
 
@@ -111,7 +127,7 @@ namespace dyno
 		void updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal);
 
 
-		void loadObjFile(std::string filename);
+		bool loadObjFile(std::string filename);
 
 		void copyFrom(TriangleSet<TDataType>& triangleSet);
 
@@ -132,8 +148,8 @@ namespace dyno
 		DArray<Triangle> mTriangleIndex;
 		DArrayList<int> mVer2Tri;
 
-		DArray<::dyno::TopologyModule::Edg2Tri> edg2Tri;
-		DArray<::dyno::TopologyModule::Tri2Edg> tri2Edg;
+		DArray<::dyno::TopologyModule::Edg2Tri> mEdg2Tri;
+		DArray<::dyno::TopologyModule::Tri2Edg> mTri2Edg;
 
 		DArray<Coord> mVertexNormal;
 	};

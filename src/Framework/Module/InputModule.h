@@ -181,9 +181,9 @@ namespace dyno
 		bool capsLockEnabled() { return (mods & PModifierBits::MB_CAPS_LOCK) != 0; }
 		bool numLockEnabled() { return (mods & PModifierBits::MB_NUM_LOCK) != 0; }
 
-		PKeyboardType key;
-		PActionType action;
-		PModifierBits mods;
+		PKeyboardType key =  PKEY_UNKNOWN;
+		PActionType action = AT_UNKOWN;
+		PModifierBits mods = MB_NO_MODIFIER;
 	};
 
 	struct PMouseEvent

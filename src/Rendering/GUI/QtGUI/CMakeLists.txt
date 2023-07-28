@@ -1,43 +1,77 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Macro definition for ToolBar
 add_definitions(-DTT_BUILDING_DLL)
 
 set(LIB_NAME QtGUI)
 set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(CMAKE_AUTOMOC ON)                                                                   # 弢�启自动moc功能
-set(CMAKE_AUTOUIC ON) 
+#set(CMAKE_AUTOMOC ON)                                                                   # 弢�启自动moc功能
+#set(CMAKE_AUTOUIC ON) 
 
-find_package(Qt5 COMPONENTS
-             Core
-             Widgets
-             Gui
-             OpenGL
-			 Svg)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 
-qt5_add_resources(RESOURCES 
-    ./Resources/DefaultStyle.qrc
-    ./Resources/StyleTemplate.qrc
-    ./Resources/img/icons.qrc)
+if (${QT_VERSION_MAJOR} EQUAL 6)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS 
+        Core
+        Core5Compat
+        Widgets
+        Gui
+        OpenGL
+        OpenGLWidgets
+        Svg)
 
+    qt_add_resources(RESOURCES 
+        ./Resources/DefaultStyle.qrc
+        ./Resources/StyleTemplate.qrc
+        ./Resources/img/icons.qrc)
+else()
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS 
+        Core
+        Widgets
+        Gui
+        OpenGL
+        Svg)
+
+    qt5_add_resources(RESOURCES 
+        ./Resources/DefaultStyle.qrc
+        ./Resources/StyleTemplate.qrc
+        ./Resources/img/icons.qrc)
+endif()
 
 file(                                                                           
-    GLOB_RECURSE LIB_SRC                                                        #利用glob命令读取扢�有源文件list
+    GLOB_RECURSE ALL_FILES                                                        #利用glob命令读取扢�有源文件list
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
     "${LIB_SRC_DIR}/*.c*"
     "${LIB_SRC_DIR}/*.h*"
-	"${LIB_SRC_DIR}/Nodes/*.h*"
-    "${LIB_SRC_DIR}/Nodes/*.c*"
-    "${LIB_SRC_DIR}/ToolBar/*.h*"
-	"${LIB_SRC_DIR}/ToolBar/*.c*"
 )
 
+file(                                                                           
+    GLOB_RECURSE MOC_FILES                                                        #利用glob命令读取扢�有源文件list
+    LIST_DIRECTORIES false
+    CONFIGURE_DEPENDS
+    "${LIB_SRC_DIR}/*.h*"
+)
+
+if (${QT_VERSION_MAJOR} EQUAL 6)
+  qt_wrap_cpp(
+    ALL_FILES
+      ${MOC_FILES}
+  )
+else()
+  qt5_wrap_cpp(
+    ALL_FILES
+      ${MOC_FILES}
+  )
+endif()
+
+
 add_library(${LIB_NAME} SHARED 
-	${LIB_SRC} 
+	${ALL_FILES}
 	${RESOURCES})
 
-foreach(SRC IN ITEMS ${LIB_SRC})
+foreach(SRC IN ITEMS ${ALL_FILES})
     get_filename_component(SRC_PATH "${SRC}" PATH)
     file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
     string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
@@ -56,8 +90,10 @@ if(WIN32)
 endif()
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/GUI")
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-                                                                             
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+endif()                                                                      
 
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
@@ -78,7 +114,15 @@ endif()
 # target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
 target_link_libraries(${LIB_NAME} PUBLIC
 	Core Framework RenderCore GLRenderEngine ImWidgets imgui
-	Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL Qt5::Svg)  
+	Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Core 
+    Qt${QT_VERSION_MAJOR}::Gui 
+    Qt${QT_VERSION_MAJOR}::OpenGL 
+    Qt${QT_VERSION_MAJOR}::Svg)
+
+if (${QT_VERSION_MAJOR} EQUAL 6)
+    target_link_libraries(${LIB_NAME} PUBLIC Qt6::Core5Compat Qt6::OpenGLWidgets)  
+endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE $<BUILD_INTERFACE:nodes>)  
 
@@ -87,6 +131,11 @@ target_include_directories(${LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/QtGUI>	
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
+
+if(WIN32)
+    # fix error for linking
+    target_link_options(${LIB_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/FORCE:MULTIPLE>)
+endif()
 
 install(TARGETS ${LIB_NAME}
     EXPORT ${LIB_NAME}Targets

@@ -4,6 +4,8 @@
 #include <QGridLayout>
 #include <QPainter>
 
+#include "Field.h"
+
 namespace dyno
 {
 	QRampWidget::QRampWidget(FBase* field)

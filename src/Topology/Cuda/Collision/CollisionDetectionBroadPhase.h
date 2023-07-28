@@ -1,5 +1,5 @@
 #pragma once
-#include "Module/CollisionModel.h"
+#include "Module/ComputeModule.h"
 
 #include "Algorithm/Reduction.h"
 #include "Primitive/Primitive3D.h"
@@ -11,7 +11,7 @@ namespace dyno
 	typedef unsigned long long int PKey;
 
 	template<typename TDataType>
-	class CollisionDetectionBroadPhase : public CollisionModel
+	class CollisionDetectionBroadPhase : public ComputeModule
 	{
 		DECLARE_TCLASS(CollisionDetectionBroadPhase, TDataType)
 	public:
@@ -22,9 +22,6 @@ namespace dyno
 		CollisionDetectionBroadPhase();
 		virtual ~CollisionDetectionBroadPhase();
 
-		void doCollision() override;
-
-		bool isSupport(std::shared_ptr<CollidableObject> obj) override { return true; }
 		void setSelfCollision(bool s)
 		{
 			self_collision = s;
@@ -44,6 +41,9 @@ namespace dyno
 		DEF_ARRAY_IN(AABB, Target, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_OUT(int, ContactList, DeviceType::GPU, "Contact pairs");
+
+	protected:
+		void compute() override;
 
 	private:
 		void doCollisionWithSparseOctree();

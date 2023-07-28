@@ -4,7 +4,7 @@
 
 #include <math_constants.h>
 
-namespace dyno 
+namespace dyno
 {
     template<typename Real>
     __device__  Complex<Real> complex_exp(Real arg)
@@ -124,30 +124,30 @@ namespace dyno
     template<typename TDataType>
     void OceanPatch<TDataType>::resetStates()
     {
-		resetWindType();
+        resetWindType();
 
         uint res = this->varResolution()->getData();
 
-		cufftPlan2d(&fftPlan, res, res, CUFFT_C2C);
+        cufftPlan2d(&fftPlan, res, res, CUFFT_C2C);
 
-		int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Complex);
-		mH0.resize(mSpectrumWidth, mSpectrumHeight);
+        int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Complex);
+        mH0.resize(mSpectrumWidth, mSpectrumHeight);
 
         Complex* host_h0 = (Complex*)malloc(spectrumSize);
-		generateH0(host_h0);
+        generateH0(host_h0);
 
-		cuSafeCall(cudaMemcpy(mH0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
+        cuSafeCall(cudaMemcpy(mH0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
-		mHt.resize(res, res);
-		mDxt.resize(res, res);
-		mDzt.resize(res, res);
-		this->stateDisplacement()->resize(res, res);
+        mHt.resize(res, res);
+        mDxt.resize(res, res);
+        mDzt.resize(res, res);
+        this->stateDisplacement()->resize(res, res);
 
-		auto topo = this->stateHeightField()->getDataPtr();
-		Real h = this->varPatchSize()->getData() / res;
-		topo->setExtents(res, res);
-		topo->setGridSpacing(h);
-		topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
+        auto topo = this->stateHeightField()->getDataPtr();
+        Real h = this->varPatchSize()->getData() / res;
+        topo->setExtents(res, res);
+        topo->setGridSpacing(h);
+        topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
 
         this->update();
     }
@@ -157,56 +157,56 @@ namespace dyno
     {
         Real timeScaled = this->varTimeScale()->getData() * this->stateElapsedTime()->getData();
 
-		uint res = this->varResolution()->getData();
+        uint res = this->varResolution()->getData();
 
-		cuExecute2D(make_uint2(res, res),
-			OP_GenerateSpectrumKernel,
-			mH0,
-			mHt,
-			mSpectrumWidth,
-			res,
-			res,
+        cuExecute2D(make_uint2(res, res),
+            OP_GenerateSpectrumKernel,
+            mH0,
+            mHt,
+            mSpectrumWidth,
+            res,
+            res,
             timeScaled,
-			this->varPatchSize()->getData());
+            this->varPatchSize()->getData());
 
-		cuExecute2D(make_uint2(res, res),
-			OP_GenerateDispalcementKernel,
-			mHt,
-			mDxt,
-			mDzt,
-			res,
-			res,
-			this->varPatchSize()->getData());
+        cuExecute2D(make_uint2(res, res),
+            OP_GenerateDispalcementKernel,
+            mHt,
+            mDxt,
+            mDzt,
+            res,
+            res,
+            this->varPatchSize()->getData());
 
-		cufftExecC2C(fftPlan, (float2*)mHt.begin(), (float2*)mHt.begin(), CUFFT_INVERSE);
-		cufftExecC2C(fftPlan, (float2*)mDxt.begin(), (float2*)mDxt.begin(), CUFFT_INVERSE);
-		cufftExecC2C(fftPlan, (float2*)mDzt.begin(), (float2*)mDzt.begin(), CUFFT_INVERSE);
+        cufftExecC2C(fftPlan, (float2*)mHt.begin(), (float2*)mHt.begin(), CUFFT_INVERSE);
+        cufftExecC2C(fftPlan, (float2*)mDxt.begin(), (float2*)mDxt.begin(), CUFFT_INVERSE);
+        cufftExecC2C(fftPlan, (float2*)mDzt.begin(), (float2*)mDzt.begin(), CUFFT_INVERSE);
 
-		cuExecute2D(make_uint2(res, res),
-			O_UpdateDisplacement,
-			this->stateDisplacement()->getData(),
-			mHt,
-			mDxt,
-			mDzt,
-			res);
+        cuExecute2D(make_uint2(res, res),
+            O_UpdateDisplacement,
+            this->stateDisplacement()->getData(),
+            mHt,
+            mDxt,
+            mDzt,
+            res);
     }
 
-	template<typename TDataType>
-	void OceanPatch<TDataType>::postUpdateStates()
-	{
-		auto topo = this->stateHeightField()->getDataPtr();
+    template<typename TDataType>
+    void OceanPatch<TDataType>::postUpdateStates()
+    {
+        auto topo = this->stateHeightField()->getDataPtr();
 
-		auto& shifts = topo->getDisplacement();
+        auto& shifts = topo->getDisplacement();
 
-		uint2 extent;
-		extent.x = shifts.nx();
-		extent.y = shifts.ny();
-		cuExecute2D(extent,
-			O_UpdateTopology,
-			shifts,
-			this->stateDisplacement()->getData(),
-			mChoppiness);
-	}
+        uint2 extent;
+        extent.x = shifts.nx();
+        extent.y = shifts.ny();
+        cuExecute2D(extent,
+            O_UpdateTopology,
+            shifts,
+            this->stateDisplacement()->getData(),
+            mChoppiness);
+    }
 
     template<typename Coord, typename Complex>
     __global__ void O_UpdateDisplacement(
@@ -317,7 +317,7 @@ namespace dyno
                 Real h0_im = Ei * P * CUDART_SQRT_HALF_F;
 
                 int i = y * mSpectrumWidth + x;
-				h0[i] = Complex(h0_re, h0_im);
+                h0[i] = Complex(h0_re, h0_im);
             }
         }
     }

@@ -23,7 +23,6 @@ namespace dyno {
 	class Node;
 	class FCallBackFunc;
 
-
 	enum NodePortType
 	{
 		Single,
@@ -83,6 +82,7 @@ namespace dyno {
 		friend class Node;
 	};
 
+	void disconnect(Node* node, NodePort* port);
 
 	template<typename T>
 	class SingleNodePort : public NodePort
@@ -98,7 +98,8 @@ namespace dyno {
 		~SingleNodePort() override {
 			//Disconnect nodes from node ports here instead of inside the destructor of Node to avoid memory leak
 			if (m_nodes[0] != nullptr) {
-				m_nodes[0]->disconnect(this);
+				disconnect(m_nodes[0], this);
+				//m_nodes[0]->disconnect(this);
 			}
 			m_nodes[0] = nullptr; 
 		}
@@ -192,7 +193,8 @@ namespace dyno {
 			//Disconnect nodes from node ports here instead of inside the destructor of Node to avoid memory leak
 			for(auto node : m_nodes)
 			{
-				node->disconnect(this);
+				disconnect(node, this);
+				//node->disconnect(this);
 			}
 
 			m_derived_nodes.clear(); 

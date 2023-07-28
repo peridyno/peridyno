@@ -16,6 +16,8 @@
 #include <QScrollArea>
 #include <QGridLayout>
 
+#include "Color.h"
+
 #include "PropertyItem/QVector3iFieldWidget.h"
 #include "PropertyItem/QVector3FieldWidget.h"
 #include "PropertyItem/QBoolFieldWidget.h"
@@ -39,7 +41,6 @@ namespace dyno
 
 		mMainLayout->setContentsMargins(0, 0, 0, 0);
 		mMainLayout->setSpacing(0);
-		mMainLayout->setMargin(0);
 		mMainLayout->addWidget(mScrollArea);
 
 		mScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -48,7 +49,7 @@ namespace dyno
 
 		mScrollLayout = new QGridLayout;
 		mScrollLayout->setAlignment(Qt::AlignTop);
-		mScrollLayout->setMargin(0);
+		mScrollLayout->setContentsMargins(0, 0, 0, 0);
 		
 		QWidget * m_scroll_widget = new QWidget;
 		m_scroll_widget->setLayout(mScrollLayout);
@@ -87,7 +88,7 @@ namespace dyno
 		mPropertyItems.clear();
 	}
 
-	void PPropertyWidget::showProperty(std::shared_ptr<Module> module)
+	void PPropertyWidget::showModuleProperty(std::shared_ptr<Module> module)
 	{
 		if (module == nullptr)
 			return;
@@ -167,7 +168,7 @@ namespace dyno
 				mFlag[i] = !mFlag[i];
 				});
 		}
-		vlayout->setMargin(0);
+		vlayout->setContentsMargins(0, 0, 0, 0);
 		vlayout->setSpacing(0);
 		mWidget->setLayout(vlayout);
 
@@ -176,7 +177,7 @@ namespace dyno
 		mSeleted = module;
 	}
 
-	void PPropertyWidget::showProperty(std::shared_ptr<Node> node)
+	void PPropertyWidget::showNodeProperty(std::shared_ptr<Node> node)
 	{
 		if (node == nullptr)
 			return;
@@ -278,7 +279,7 @@ namespace dyno
 				mFlag[i] = !mFlag[i];
 				});
 		}
-		vlayout->setMargin(0);
+		vlayout->setContentsMargins(0, 0, 0, 0);
 		vlayout->setSpacing(0);
 		mWidget->setLayout(vlayout);
 
@@ -287,21 +288,21 @@ namespace dyno
 		mSeleted = node;
 	}
 
-	void PPropertyWidget::showNodeProperty(Qt::QtNode& block)
+	void PPropertyWidget::showProperty(Qt::QtNode& block)
 	{
 		auto dataModel = block.nodeDataModel();
 
 		auto node = dynamic_cast<Qt::QtNodeWidget*>(dataModel);
 		if (node != nullptr)
 		{
-			this->showProperty(node->getNode());
+			this->showNodeProperty(node->getNode());
 		}
 		else
 		{
 			auto module = dynamic_cast<Qt::QtModuleWidget*>(dataModel);
 			if (module != nullptr)
 			{
-				this->showProperty(module->getModule());
+				this->showModuleProperty(module->getModule());
 			}
 		}
 	}

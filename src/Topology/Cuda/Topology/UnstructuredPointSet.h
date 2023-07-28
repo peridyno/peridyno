@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Xiaowei He
+ * Copyright 2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,34 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module.h"
-#include "Module/CollidableObject.h"
+#include "PointSet.h"
 
 namespace dyno
 {
-	class CollisionModel : public Module
+	template<typename TDataType>
+	class UnstructuredPointSet : public PointSet<TDataType>
 	{
 	public:
-		CollisionModel();
-		virtual ~CollisionModel();
+		UnstructuredPointSet();
+		~UnstructuredPointSet();
 
-		virtual bool isSupport(std::shared_ptr<CollidableObject> obj) { return false; }
+		void copyFrom(UnstructuredPointSet<TDataType>& pts);
 
-		virtual void doCollision() = 0;
-	
-		std::string getModuleType() override { return "CollisionModel"; }
+		/**
+		 * @brief Return the neighbor lists of points
+		 */
+		DArrayList<int>& getPointNeighbors();
 
-		virtual void addCollidableObject(std::shared_ptr<CollidableObject> obj) {};
+
+		void clear();
 
 	protected:
-		void updateImpl() override;
+		/**
+		 * @brief Neighbor list storing neighborings ids.
+		 *
+		 * Note the lists is empty in default, each derived class should implement its own way to construct the neighbor lists
+		 */
+		DArrayList<int> mNeighborLists;
 	};
-
 }
+

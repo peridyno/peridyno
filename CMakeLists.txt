@@ -23,23 +23,24 @@ endif()
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
 
-    find_package(CUDA REQUIRED)
-    if(CUDA_FOUND)
-        include_directories(${CUDA_INCLUDE_DIRS})
-        link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
-        link_libraries(${CUDA_LIBRARIES})
-    else()
-        message("Cuda not found")
-    endif()      
+    #find_package(CUDA REQUIRED)
+    # if(CUDA_FOUND)
+    #     include_directories(${CUDA_INCLUDE_DIRS})
+    #     link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+    #     link_libraries(${CUDA_LIBRARIES})
+    # else()
+    #     message("Cuda not found")
+    # endif()      
 
 	# define library version (update: apparently you can also do it in project()!)
 	set(PERIDYNO_LIBRARY_VERSION_MAJOR 0 CACHE STRING "peridyno major version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_MINOR 8 CACHE STRING "peridyno minor version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_PATCH 2 CACHE STRING "patch version of peridyno" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_MINOR 9 CACHE STRING "peridyno minor version" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 	set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    #为sln内部projects设置管理folder
-	set(CMAKE_CXX_STANDARD 11 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
+	set(CMAKE_CXX_STANDARD 17 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         #默认为本项目下各编译目标指定C++11语言特性
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	#set(CMAKE_C_CREATE_STATIC_LIBRARY "")
 	#set(CMAKE_C_COMPILE_OBJECT  "")
 
@@ -148,19 +149,24 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 
 	if(PERIDYNO_LIBRARY_PLUGIN)
 		option(PERIDYNO_PLUGIN_ALEMBIC "Enable binding the abc exporter library" OFF)
+		option(PERIDYNO_PLUGIN_GMSH "Enable binding the Gmsh library" OFF)
 		
-		if(PERIDYNO_LIBRARY_ALEMBIC)
+		if(PERIDYNO_PLUGIN_ALEMBIC)
 			add_subdirectory(external/Imath)
 			add_subdirectory(external/alembic/)
+		endif()
+
+		if(PERIDYNO_PLUGIN_GMSH)
+			add_subdirectory(external/gmsh-fork)
 		endif()
 	endif()
 
 	# VTK rendering support, off by default
 	option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
 	# Qt GUI support, off by default
-	option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
+	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" OFF)
 
-	if(PERIDYNO_Qt5_GUI)
+	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
 	endif()
 
@@ -312,7 +318,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	    add_subdirectory(tests)
 	endif()
 
-	if(PERIDYNO_Qt5_GUI)
+	if(PERIDYNO_QT_GUI)
 		add_subdirectory(external/nodeeditor)
 	endif()
 
@@ -340,9 +346,9 @@ else()
 	add_subdirectory(external/imgui)
 
 	# Qt GUI support, off by default
-	option(PERIDYNO_Qt5_GUI "Enable building Qt-based applications" OFF)
+	option(PERIDYNO_QT_GUI "Enable building Qt-based applications" OFF)
 
-	if(PERIDYNO_Qt5_GUI)
+	if(PERIDYNO_QT_GUI)
 		add_subdirectory(external/nodeeditor)
 	endif()
 

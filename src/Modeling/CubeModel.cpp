@@ -96,9 +96,7 @@ namespace dyno
 		length[1] *= scale[1];
 		length[2] *= scale[2];
 
-		Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
+		Quat<Real> q = computeQuaternion();
 
 		q.normalize();
 

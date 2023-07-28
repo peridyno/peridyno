@@ -79,9 +79,7 @@ namespace dyno
 			for(int i = 0;i < CopyNumber; i++)
 			{
 				//建立四元数以进行递归变换
-				Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180 * (i + 1), Coord(1, 0, 0))
-					* Quat<Real>(M_PI * rot[1] / 180 * (i + 1), Coord(0, 1, 0))
-					* Quat<Real>(M_PI * rot[2] / 180 * (i + 1), Coord(0, 0, 1));
+				Quat<Real> q = computeQuaternion();
 				q.normalize();
 
 				auto RV = [&](const Coord& v)->Coord {
@@ -129,9 +127,7 @@ namespace dyno
 		auto rott = this->varRotation()->getData();
 		auto scalet= this->varScale()->getData();
 
-		Quat<Real> qt = Quat<Real>(M_PI * rott[0] / 180, Coord(1, 0, 0))
-			* Quat<Real>(M_PI * rott[1] / 180, Coord(0, 1, 0))
-			* Quat<Real>(M_PI * rott[2] / 180, Coord(0, 0, 1));
+		Quat<Real> qt = computeQuaternion();
 
 		qt.normalize();
 

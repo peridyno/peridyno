@@ -50,7 +50,7 @@ namespace dyno
 		case Log::Error:
 		{
 			TextColor = Qt::red;
-			setTextColor(TextColor);
+			//setTextColor(TextColor);
 			break;
 		}
 		}

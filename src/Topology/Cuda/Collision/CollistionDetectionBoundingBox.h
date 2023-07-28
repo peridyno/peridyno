@@ -1,13 +1,13 @@
 #pragma once
 #include "CollisionData.h"
 
-#include "Module/CollisionModel.h"
+#include "Module/ComputeModule.h"
 
 #include "Topology/DiscreteElements.h"
 
 namespace dyno {
 	template<typename TDataType>
-	class CollistionDetectionBoundingBox : public CollisionModel
+	class CollistionDetectionBoundingBox : public ComputeModule
 	{
 		DECLARE_TCLASS(CollistionDetectionBoundingBox, TDataType)
 
@@ -18,8 +18,6 @@ namespace dyno {
 
 		CollistionDetectionBoundingBox();
 		~CollistionDetectionBoundingBox() override;
-		
-		void doCollision() override;
 
 	public:
 		DEF_VAR(Coord, UpperBound, Coord(100), "An upper bound for the bounding box");
@@ -30,6 +28,10 @@ namespace dyno {
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
+
+	protected:
+		void compute() override;
+
 	private:
 		DArray<int> mBoundaryContactCounter;
 
