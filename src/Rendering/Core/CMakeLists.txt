@@ -20,6 +20,8 @@ set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
 
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering")
+set_target_properties(${LIB_NAME} PROPERTIES
+    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
 if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES
