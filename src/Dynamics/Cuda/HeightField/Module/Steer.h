@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2022 Xiaowei He
+ * Copyright 2017-2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,27 @@
  * limitations under the License.
  */
 #pragma once
+#include "Module/KeyboardInputModule.h"
 
-#include "Ocean.h"
-#include "Vessel.h"
-
-#include "Algorithm/Reduction.h"
-
-namespace dyno
+namespace dyno 
 {
 	template<typename TDataType>
-	class Coupling : public Node
+	class Steer : public KeyboardInputModule
 	{
-		DECLARE_TCLASS(Coupling, TDataType)
+		DECLARE_TCLASS(Steer, TDataType);
 	public:
+		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		Coupling();
-		~Coupling() override;
+		Steer();
+		~Steer() override {};
 
-	public:
-		DEF_VAR(Real, Damping, Real(0.98), "Translational damping");
-		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");
+		DEF_VAR_IN(Coord, Velocity, "Velocity");
 
-		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
-		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
+		DEF_VAR_IN(Quat<Real>, Quaternion, "Rotation");
 
 	protected:
-		void resetStates() override;
-		void updateStates() override;
-
-	private:
-		DArray<Coord> mForce;
-		DArray<Coord> mTorque;
-
-		Reduction<Coord> mReduce;
+		void onEvent(PKeyboardEvent event) override;
 	};
-
-	IMPLEMENT_TCLASS(Coupling, TDataType)
 }
