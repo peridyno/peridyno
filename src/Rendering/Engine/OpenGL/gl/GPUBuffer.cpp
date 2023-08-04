@@ -39,10 +39,12 @@ namespace gl
 #endif
 
 #ifdef CUDA_BACKEND
-		if (buffer)
-			cudaFree(buffer);
-		if (resource)
-			cudaGraphicsUnregisterResource(resource);
+		if (buffer) {
+			cuSafeCall(cudaFree(buffer));
+		}
+		if (resource) {
+			cuSafeCall(cudaGraphicsUnregisterResource(resource));
+		}
 #endif // CUDA_BACKEND
 
 		// finally call buffer release
@@ -55,10 +57,11 @@ namespace gl
 		this->resized = true;
 
 #ifdef CUDA_BACKEND
-		if (buffer)
-			cudaFree(buffer);
-		cudaMalloc(&buffer, size); 
-		cudaStreamSynchronize(0);
+		if (buffer) {
+			cuSafeCall(cudaFree(buffer));
+		}
+		cuSafeCall(cudaMalloc(&buffer, size)); 
+		cuSafeCall(cudaStreamSynchronize(0));
 		this->size = size;
 #endif // CUDA_BACKEND
 
@@ -180,8 +183,8 @@ namespace gl
 			this->allocate(size * 2);
 		}
 
-		cudaMemcpy(buffer, src, size, cudaMemcpyDeviceToDevice);
-		//cudaStreamSynchronize(0);
+		cuSafeCall(cudaMemcpy(buffer, src, size, cudaMemcpyDeviceToDevice));
+		//cuSafeCall(cudaStreamSynchronize(0));
 	}
 #endif
 
@@ -201,18 +204,18 @@ namespace gl
 
 			// register the cuda resource after resize...
 			if (resource != 0) {
-				cudaGraphicsUnregisterResource(resource);
+				cuSafeCall(cudaGraphicsUnregisterResource(resource));
 			}
-			cudaGraphicsGLRegisterBuffer(&resource, id, cudaGraphicsRegisterFlagsWriteDiscard);
+			cuSafeCall(cudaGraphicsGLRegisterBuffer(&resource, id, cudaGraphicsRegisterFlagsWriteDiscard));
 		}
 
 		size_t size0;
 		void* devicePtr = 0;
-		cudaGraphicsMapResources(1, &resource);
-		cudaGraphicsResourceGetMappedPointer(&devicePtr, &size0, resource);
-		cudaMemcpy(devicePtr, buffer, size, cudaMemcpyDeviceToDevice);
-		cudaGraphicsUnmapResources(1, &resource);
-		//(cudaStreamSynchronize(0);
+		cuSafeCall(cudaGraphicsMapResources(1, &resource));
+		cuSafeCall(cudaGraphicsResourceGetMappedPointer(&devicePtr, &size0, resource));
+		cuSafeCall(cudaMemcpy(devicePtr, buffer, size, cudaMemcpyDeviceToDevice));
+		cuSafeCall(cudaGraphicsUnmapResources(1, &resource));
+		//cuSafeCall(cudaStreamSynchronize(0));
 
 #endif // CUDA_BACKEND
 
