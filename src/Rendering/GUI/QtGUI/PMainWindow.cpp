@@ -398,10 +398,14 @@ namespace dyno
 					mOpenGLWidget->update();
 				}
 			});
+
+		connect(m_animationWidget->m_startSim, &QPushButton::released, [=]()
+			{
+				mOpenGLWidget->setFocus();
+			});
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)
 	{
 	}
-
 }

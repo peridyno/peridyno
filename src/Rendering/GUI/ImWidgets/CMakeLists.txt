@@ -33,6 +33,9 @@ elseif(UNIX)
     endif()
 endif()
 
+set_target_properties(${LIB_NAME} PROPERTIES
+    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
+
 target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 
 install(TARGETS ${LIB_NAME}

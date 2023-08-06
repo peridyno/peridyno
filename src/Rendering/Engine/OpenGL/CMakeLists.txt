@@ -66,6 +66,8 @@ target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-rel
 #Tell the required compilers to enable device linking on the library target.
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/Engine")
+set_target_properties(${LIB_NAME} PROPERTIES
+    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
