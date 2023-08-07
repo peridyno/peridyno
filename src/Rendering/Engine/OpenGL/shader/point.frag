@@ -1,7 +1,7 @@
 #version 440
 
 
-#extension GL_ARB_shading_language_include : require
+
 #include "common.glsl"
 #include "pbr.glsl"
 #include "shadow.glsl"

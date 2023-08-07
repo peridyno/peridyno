@@ -1,10 +1,8 @@
 #version 440
 
-#extension GL_ARB_shading_language_include : require
-
-#include "common.glsl"
-#include "shadow.glsl"
-#include "transparent.glsl"
+#include "../common.glsl"
+#include "../shadow.glsl"
+#include "../transparent.glsl"
 
 in vec2 vTexCoord;
 in vec3 vPosition;
