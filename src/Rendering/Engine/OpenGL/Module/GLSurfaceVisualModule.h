@@ -55,12 +55,12 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	protected:
-		virtual void updateGraphicsContext() override;
+		virtual void updateImpl() override;
 
-		virtual void paintGL(GLRenderPass mode) override;
+		virtual void paintGL(const RenderParams& rparams) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-		virtual void destroyGL() override;
+		virtual void releaseGL() override;
 
 	protected:
 
@@ -78,5 +78,6 @@ namespace dyno
 		gl::XBuffer		mInstanceBuffer;
 		unsigned int	mInstanceCount = 0;
 
+		gl::Buffer		mUniformBlock;
 	};
 };

@@ -182,22 +182,24 @@ namespace dyno
 		//QtImGui
 		QtImGui::newFrame();
 
-		// Draw scene		
-		auto engine = this->getRenderEngine();
-		auto camera = this->getCamera();
-		auto& rparams = this->getRenderParams();
-		auto scene = SceneGraphFactory::instance()->active();
+		// update rendering params
+		mRenderParams.width = mCamera->viewportWidth();
+		mRenderParams.height = mCamera->viewportHeight();
+		mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
+		mRenderParams.transforms.view = mCamera->getViewMat();
+		mRenderParams.transforms.proj = mCamera->getProjMat();
 
 		// Jian SHI: hack for unit scaling...
-		float planeScale = rparams.planeScale;
-		float rulerScale = rparams.rulerScale;
-		rparams.planeScale *= this->getCamera()->unitScale();
-		rparams.rulerScale *= this->getCamera()->unitScale();
+		float planeScale = mRenderEngine->planeScale;
+		float rulerScale = mRenderEngine->rulerScale;
+		mRenderEngine->planeScale *= mCamera->unitScale();
+		mRenderEngine->rulerScale *= mCamera->unitScale();
 
-		engine->draw(scene.get(), camera.get(), rparams);
+		// Draw scene		
+		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
 
-		rparams.planeScale = planeScale;
-		rparams.rulerScale = rulerScale;
+		mRenderEngine->planeScale = planeScale;
+		mRenderEngine->rulerScale = rulerScale;
 
 		// Draw ImGui
 		mImWindow.draw(this);

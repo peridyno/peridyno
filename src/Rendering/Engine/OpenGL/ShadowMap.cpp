@@ -56,8 +56,7 @@ namespace dyno
 		mFramebuffer.unbind();
 
 		// uniform buffers
-		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-		mShadowMatrixUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		mShadowUniform.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
 		// for blur depth textures
 		mQuad = gl::Mesh::ScreenQuad();
@@ -71,8 +70,7 @@ namespace dyno
 		mShadowDepth.release();
 		mShadowBlur.release();
 
-		mTransformUBO.release();
-		mShadowMatrixUBO.release();
+		mShadowUniform.release();
 
 		mQuad->release();
 		delete mQuad;
@@ -126,7 +124,8 @@ namespace dyno
 	glm::mat4 getLightProjMatrix(glm::mat4 lightView,
 		Vec3f lowerBound,
 		Vec3f upperBound,
-		Camera* camera)
+		glm::mat4 cameraView,
+		glm::mat4 cameraProj)
 	{
 		glm::vec4 p[8] = {
 			lightView * glm::vec4{lowerBound[0], lowerBound[1], lowerBound[2], 1},
@@ -148,25 +147,22 @@ namespace dyno
 		}
 
 		// frustrum clamp
-		if (camera != 0)
+		std::array<glm::vec4, 8> corners = getFrustumCorners(cameraProj);
+		glm::mat4 tm = lightView * glm::inverse(cameraView);
+
+		glm::vec4 fbmin = tm * corners[0];
+		glm::vec4 fbmax = tm * corners[0];
+		for (int i = 1; i < 8; i++)
 		{
-			std::array<glm::vec4, 8> corners = getFrustumCorners(camera->getProjMat());
-			glm::mat4 tm = lightView * glm::inverse(camera->getViewMat());
-
-			glm::vec4 fbmin = tm * corners[0];
-			glm::vec4 fbmax = tm * corners[0];
-			for (int i = 1; i < 8; i++)
-			{
-				glm::vec4 c = tm * corners[i];
-				fbmin = glm::min(fbmin, c);
-				fbmax = glm::max(fbmax, c);
-			}
-
-			bmin.x = glm::max(bmin.x, fbmin.x);
-			bmin.y = glm::max(bmin.y, fbmin.y);
-			bmax.x = glm::min(bmax.x, fbmax.x);
-			bmax.y = glm::min(bmax.y, fbmax.y);
+			glm::vec4 c = tm * corners[i];
+			fbmin = glm::min(fbmin, c);
+			fbmax = glm::max(fbmax, c);
 		}
+
+		bmin.x = glm::max(bmin.x, fbmin.x);
+		bmin.y = glm::max(bmin.y, fbmin.y);
+		bmax.x = glm::min(bmax.x, fbmax.x);
+		bmax.y = glm::min(bmax.y, fbmax.y);
 
 		float cx = (bmin.x + bmax.x) * 0.5;
 		float cy = (bmin.y + bmax.y) * 0.5;
@@ -176,7 +172,7 @@ namespace dyno
 		return lightProj;
 	}
 
-	void ShadowMap::update(dyno::SceneGraph* scene, Camera* camera, const dyno::RenderParams & rparams)
+	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams)
 	{
 		// initialization
 		mFramebuffer.bind();
@@ -190,43 +186,16 @@ namespace dyno
 			glViewport(0, 0, width, height);
 
 			glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
-			glm::mat4 lightProj = getLightProjMatrix(lightView, scene->getLowerBound(), scene->getUpperBound(), camera);
-
-			// update light transform infomation
-			struct {
-				glm::mat4 model;
-				glm::mat4 view;
-				glm::mat4 proj;
-				int width;
-				int height;
-			} lightMVP;
-
-			lightMVP.width = width;
-			lightMVP.height = height;
-			lightMVP.model = glm::mat4(1);
-			lightMVP.view = lightView;
-			lightMVP.proj = lightProj;
-
-			mTransformUBO.load(&lightMVP, sizeof(lightMVP));
-
-			// shadow map uniform
-			struct {
-				glm::mat4 transform;
-				float minValue;
-			} shadow;
-
-			shadow.transform = lightProj * lightView * glm::inverse(camera->getViewMat());
-			shadow.minValue = minValue;
-
-			mShadowMatrixUBO.load(&shadow, sizeof(shadow));
-
-			mTransformUBO.bindBufferBase(0);
-			mShadowMatrixUBO.bindBufferBase(3);
+			glm::mat4 lightProj = getLightProjMatrix(lightView, 
+				scene->getLowerBound(), 
+				scene->getUpperBound(), 
+				rparams.transforms.view, 
+				rparams.transforms.proj);
 
 			// draw objects to shadow texture
-			static class DrawShadow : public Action
+			class DrawShadow : public Action
 			{
-			private:
+			public:
 				void process(Node* node) override
 				{
 					if (!node->isVisible())	return;
@@ -234,16 +203,23 @@ namespace dyno
 					for (auto iter : node->graphicsPipeline()->activeModules()) {
 						auto m = dynamic_cast<GLVisualModule*>(iter.get());
 						if (m && m->isVisible()) {
-							m->draw(GLRenderPass::SHADOW);
+							m->draw(params);
 						}
 					}
 				}
+				RenderParams params;
 			} action;
+
+			action.params.transforms.model = glm::mat4(1);
+			action.params.transforms.view = lightView;
+			action.params.transforms.proj = lightProj;
+			action.params.mode = GLRenderMode::SHADOW;
+			action.params.width = this->width;
+			action.params.height = this->height;
+
 			scene->traverseForward(&action);
 
 			// blur shadow map		
-			const int blurIters = 1;
-
 			glDisable(GL_DEPTH_TEST);
 			mBlurProgram->use();
 			for (int i = 0; i < blurIters; i++)
@@ -259,10 +235,29 @@ namespace dyno
 				mQuad->draw();
 			}
 			glEnable(GL_DEPTH_TEST);
+
+			// update shadow map uniform
+			struct {
+				glm::mat4	transform;
+				float		minValue;
+			} shadow;
+
+			shadow.transform = lightProj * lightView * glm::inverse(rparams.transforms.view);
+			shadow.minValue = minValue;
+			mShadowUniform.load(&shadow, sizeof(shadow));
 		}
 
+	}
+
+	void ShadowMap::bind(int shadowUniformLoc, int shadowTexSlot)
+	{		
 		// bind the shadow texture to the slot
-		mShadowTex.bind(GL_TEXTURE5);
+		mShadowUniform.bindBufferBase(shadowUniformLoc);
+
+		if (shadowTexSlot >= GL_TEXTURE0) 
+			mShadowTex.bind(shadowTexSlot);
+		else
+			mShadowTex.bind(GL_TEXTURE0 + shadowTexSlot);
 
 	}
 

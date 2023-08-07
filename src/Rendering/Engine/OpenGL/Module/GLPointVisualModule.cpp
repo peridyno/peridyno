@@ -59,30 +59,28 @@ namespace dyno
 
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("point.vert", "point.frag");
 
+		// create shader uniform buffer
+		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
 		gl::glCheckError();
 
 		return true;
 	}
 
-	void GLPointVisualModule::destroyGL()
+	void GLPointVisualModule::releaseGL()
 	{
-		if (isGLInitialized)
-		{
-			mShaderProgram->release();
-			delete mShaderProgram;
+		mShaderProgram->release();
+		delete mShaderProgram;
 
-			mPosition.release();
-			mColor.release();
-			mVertexArray.release();
+		mPosition.release();
+		mColor.release();
+		mVertexArray.release();
 
-			isGLInitialized = false;
-		}
+		mUniformBlock.release();
 	}
 
 	void GLPointVisualModule::updateGL()
 	{
-		updateMutex.lock();
-
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
 		mPosition.mapGL();
@@ -100,13 +98,10 @@ namespace dyno
 			glDisableVertexAttribArray(1);
 			mVertexArray.unbind();
 		}
-
-		updateMutex.unlock();
 	}
 
-	void GLPointVisualModule::updateGraphicsContext()
+	void GLPointVisualModule::updateImpl()
 	{
-		updateMutex.lock();
 		// update data
 		auto pPointSet = this->inPointSet()->getDataPtr();
 		auto points = pPointSet->getPoints();
@@ -123,23 +118,24 @@ namespace dyno
 				auto colors = this->inColor()->getData();
 				mColor.load(colors);
 			}
-
-			GLVisualModule::updateGraphicsContext();
+			
 		}
-
-		updateMutex.unlock();
 	}
 
-	void GLPointVisualModule::paintGL(GLRenderPass pass)
+	void GLPointVisualModule::paintGL(const RenderParams& rparams)
 	{
 		if (mNumPoints == 0)
 			return;
+
+		// setup uniform buffer
+		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+		mUniformBlock.bindBufferBase(0);
 
 		mShaderProgram->use();
 		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getData());
 
 		unsigned int subroutine;
-		if (pass == GLRenderPass::COLOR)
+		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
 			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
@@ -148,12 +144,12 @@ namespace dyno
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == GLRenderPass::SHADOW)
+		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == GLRenderPass::TRANSPARENCY)
+		else if (rparams.mode == GLRenderMode::TRANSPARENCY)
 		{
 			printf("WARNING: GLPointVisualModule does not support transparency!\n");
 			return;

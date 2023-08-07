@@ -89,7 +89,7 @@ namespace dyno
 		return true;
 	}
 
-	void GLElementVisualModule::destroyGL()
+	void GLElementVisualModule::releaseGL()
 	{
 	}
 
@@ -236,7 +236,6 @@ namespace dyno
 
 	void GLElementVisualModule::updateGL()
 	{
-		updateMutex.lock();
 		mDrawCount = triangles.size() * 3;
 
 		if (mDrawCount > 0)
@@ -244,17 +243,14 @@ namespace dyno
 			mVertexBuffer.load(vertices);
 			mIndexBuffer.load(triangles);
 		}
-
-		updateMutex.unlock();
 	}
 
 	GLElementVisualModule::~GLElementVisualModule()
 	{
 	}
 
-	void GLElementVisualModule::updateGraphicsContext()
+	void GLElementVisualModule::updateImpl()
 	{
-		updateMutex.lock();
 
 		// update data
 				/*auto triSet = this->inTriangleSet()->getDataPtr();
@@ -369,17 +365,14 @@ namespace dyno
 			m_triangleRender->setNormalArray(normals);
 			have_triangles = true;*/
 		}
-
-		GLVisualModule::updateGraphicsContext();
-		updateMutex.unlock();
 	}
 
-	void GLElementVisualModule::paintGL(GLRenderPass pass)
+	void GLElementVisualModule::paintGL(const RenderParams& rparams)
 	{
 		mShaderProgram->use();
 
 		unsigned int subroutine;
-		if (pass == GLRenderPass::COLOR)
+		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			Color c = this->varBaseColor()->getData();
 			mShaderProgram->setVec3("uBaseColor", Vec3f(c.r, c.g, c.b));
@@ -390,7 +383,7 @@ namespace dyno
 			subroutine = 0;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == GLRenderPass::SHADOW)
+		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
 			subroutine = 1;
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);

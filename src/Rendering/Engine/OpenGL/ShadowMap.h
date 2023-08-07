@@ -36,7 +36,10 @@ namespace dyno
 		ShadowMap(int w = 1024, int h = 1024);
 		~ShadowMap();
 
-		void update(dyno::SceneGraph* scene, Camera* camera, const dyno::RenderParams& rparams);
+		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+
+		// bind uniform block and texture
+		void bind(int shadowUniformLoc = 3, int shadowTexSlot = 5);
 
 	private:
 		// framebuffers
@@ -49,8 +52,7 @@ namespace dyno
 		gl::Mesh*			mQuad;
 
 
-		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices
-		gl::Buffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices
+		gl::Buffer			mShadowUniform;	// uniform buffer for shadow lookup matrices
 
 	public:
 		int				width;
@@ -58,5 +60,7 @@ namespace dyno
 
 		// patch to color bleeding, min p_max
 		float			minValue = 0.1f;
+		// num of blur interations for VSM
+		const int		blurIters = 1;
 	};
 }

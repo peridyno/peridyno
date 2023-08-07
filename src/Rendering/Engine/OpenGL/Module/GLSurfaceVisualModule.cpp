@@ -35,6 +35,7 @@ namespace dyno
 	{
 		// create vertex buffer and vertex array object
 		mVAO.create();
+
 		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mColorBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
@@ -56,36 +57,32 @@ namespace dyno
 		// create shader program
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
 
+		// create shader uniform buffer
+		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
 		return true;
 	}
 
-	void GLSurfaceVisualModule::destroyGL()
+	void GLSurfaceVisualModule::releaseGL()
 	{
-		if (isGLInitialized)
-		{
-			mShaderProgram->release();
-			delete mShaderProgram;
-			mShaderProgram = 0;
+		mShaderProgram->release();
+		delete mShaderProgram;
+		mShaderProgram = 0;
 
-			mVAO.release();
-			mIndexBuffer.release();
-			mVertexBuffer.release();
-			mNormalBuffer.release();
-			mColorBuffer.release();
-			
+		mVAO.release();
+		mIndexBuffer.release();
+		mVertexBuffer.release();
+		mNormalBuffer.release();
+		mColorBuffer.release();
+
 #ifdef CUDA_BACKEND
-			mInstanceBuffer.release();
+		mInstanceBuffer.release();
 #endif
-
-			isGLInitialized = false;
-		}
+		mUniformBlock.release();
 	}
 
 	void GLSurfaceVisualModule::updateGL()
 	{
-		// acquire data update lock
-		updateMutex.lock();
-
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
 		mVertexBuffer.mapGL();
@@ -116,15 +113,10 @@ namespace dyno
 			mVAO.bindVertexBuffer(&mNormalBuffer, 2, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		gl::glCheckError();
-
-		// release data update lock
-		updateMutex.unlock();
 	}
 
-	void GLSurfaceVisualModule::updateGraphicsContext()
+	void GLSurfaceVisualModule::updateImpl()
 	{
-		updateMutex.lock();
-
 		// update data
 
 		auto triSet = this->inTriangleSet()->getDataPtr();
@@ -164,31 +156,32 @@ namespace dyno
 #endif
 			}
 
-			GLVisualModule::updateGraphicsContext();
 		}
-		
-		updateMutex.unlock();
 	}
 
-	void GLSurfaceVisualModule::paintGL(GLRenderPass mode)
+	void GLSurfaceVisualModule::paintGL(const RenderParams& rparams)
 	{
 		if (mDrawCount == 0)
 			return;
 
 		unsigned int subroutine;
-		if (mode == GLRenderPass::COLOR) {
+		if (rparams.mode == GLRenderMode::COLOR) {
 			subroutine = 0;
 		}
-		else if (mode == GLRenderPass::SHADOW) {
+		else if (rparams.mode == GLRenderMode::SHADOW) {
 			subroutine = 1;
 		}
-		else if (mode == GLRenderPass::TRANSPARENCY) {
+		else if (rparams.mode == GLRenderMode::TRANSPARENCY) {
 			subroutine = 2;
 		}
 		else {
 			printf("GLSurfaceVisualModule: Unknown render mode!\n");
 			return;
 		}
+
+		// setup uniform buffer
+		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+		mUniformBlock.bindBufferBase(0);
 
 		mShaderProgram->use();
 

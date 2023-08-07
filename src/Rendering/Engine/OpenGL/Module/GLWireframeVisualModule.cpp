@@ -43,44 +43,38 @@ namespace dyno
 
 		// create shader program
 		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
-		
+
+		// create shader uniform buffer
+		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
 		return true;
 	}
 
-	void GLWireframeVisualModule::destroyGL()
+	void GLWireframeVisualModule::releaseGL()
 	{
-		if (isGLInitialized)
-		{
-			mShaderProgram->release();
-			delete mShaderProgram;
+		mShaderProgram->release();
+		delete mShaderProgram;
 
-			mVAO.release();
-			mVertexBuffer.release();
-			mIndexBuffer.release();
+		mVAO.release();
+		mVertexBuffer.release();
+		mIndexBuffer.release();
 
-			isGLInitialized = false;
-		}
+		mUniformBlock.release();
 	}
 
 
 	void GLWireframeVisualModule::updateGL()
 	{
-		updateMutex.lock();
-
 		mVertexBuffer.mapGL();
 		mIndexBuffer.mapGL();
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 		mVAO.bindIndexBuffer(&mIndexBuffer);
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
-
-		updateMutex.unlock();
 	}
 
-	void GLWireframeVisualModule::updateGraphicsContext()
+	void GLWireframeVisualModule::updateImpl()
 	{
-		updateMutex.lock();
-
 		// copy data
 		auto edgeSet = this->inEdgeSet()->getDataPtr();
 		auto edges = edgeSet->getEdges();
@@ -92,26 +86,26 @@ namespace dyno
 		{
 			mVertexBuffer.load(vertices);
 			mIndexBuffer.load(edges);
-
-			GLVisualModule::updateGraphicsContext();
 		}
-
-		updateMutex.unlock();
 	}
 
 
-	void GLWireframeVisualModule::paintGL(GLRenderPass pass)
+	void GLWireframeVisualModule::paintGL(const RenderParams& rparams)
 	{
 		if (mNumEdges == 0)
 			return;
 
+		// setup uniform buffer
+		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+		mUniformBlock.bindBufferBase(0);
+
 		mShaderProgram->use();
 
-		unsigned int subroutine = (unsigned int)pass;
+		unsigned int subroutine = rparams.mode;
 
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 
-		if (pass == GLRenderPass::COLOR)
+		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			Color c = this->varBaseColor()->getData();
 			mShaderProgram->setVec3("uBaseColor", Vec3f(c.r, c.g, c.b));
@@ -119,7 +113,7 @@ namespace dyno
 			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
 			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
 		}
-		else if (pass == GLRenderPass::SHADOW)
+		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
 			// cast shadow?
 		}

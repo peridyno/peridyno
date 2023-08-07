@@ -2,33 +2,22 @@
 
 #extension GL_ARB_shading_language_include : require
 
-/*
-* Common uniform blocks
-*/
-
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
-	// TODO: move to other place...
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
+} uRenderParams;
 
 
 /*
@@ -240,7 +229,7 @@ layout(location = 0) subroutine uniform RenderPass renderPass;
 vec3 GetViewDir()
 {
 	// orthogonal projection
-	if(uTransform.proj[3][3] == 1.0)
+	if(uRenderParams.proj[3][3] == 1.0)
 		return vec3(0, 0, 1);
 	// perspective projection
 	return normalize(-fs_in.position);
@@ -258,17 +247,17 @@ vec3 Shade()
 
 	// for main directional light
 	{
-		vec3 L = normalize(uLight.direction.xyz);
+		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
 		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, L);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.intensity.rgb * uLight.intensity.a;
+		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
 
 		// shadow
 		vec3 shadowFactor = vec3(1);
-		if (uLight.direction.w != 0)
+		if (uRenderParams.direction.w != 0)
 			shadowFactor = GetShadowFactor(fs_in.position);
 
 		Lo += shadowFactor * radiance * brdf;
@@ -280,14 +269,14 @@ vec3 Shade()
 		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, V);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.camera.rgb * uLight.camera.a;
+		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
 
 		// no shadow...
 		Lo += radiance * brdf;
 	}
 
 	// ambient light
-	vec3 ambient = uLight.ambient.rgb * uLight.ambient.a * fs_in.color;
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * fs_in.color;
 
 	// final color
 	vec3 color = ambient + Lo;
@@ -310,13 +299,13 @@ vec3 ShadeTransparency()
 
 	// for main directional light
 	{
-		vec3 L = normalize(uLight.direction.xyz);
+		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
 		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, L);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.intensity.rgb * uLight.intensity.a;
+		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
 
 		// shadow
 		vec3 shadowFactor = vec3(1);
@@ -332,14 +321,14 @@ vec3 ShadeTransparency()
 		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, V);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.camera.rgb * uLight.camera.a;
+		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
 
 		// no shadow...
 		Lo += radiance * brdf;
 	}
 
 	// ambient light
-	vec3 ambient = uLight.ambient.rgb * uLight.ambient.a * fs_in.color;
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * fs_in.color;
 
 	// final color
 	vec3 color = ambient + Lo;
@@ -355,7 +344,7 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fragColor.a = 1.0;
 	
 	// store index
-	fragIndices.r = uVars.index;
+	fragIndices.r = uRenderParams.index;
 	fragIndices.g = fs_in.instanceID;
 }
 
@@ -380,7 +369,7 @@ layout(index = 2) subroutine(RenderPass) void TransparencyLinkedList(void)
 		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), uAlpha);
 		nodes[freeNodeIndex].depth = gl_FragCoord.z;
 		nodes[freeNodeIndex].nextIndex = nextIndex;
-		nodes[freeNodeIndex].geometryID = uVars.index;
+		nodes[freeNodeIndex].geometryID = uRenderParams.index;
 		nodes[freeNodeIndex].instanceID = fs_in.instanceID;
 	}
 	// No output to the framebuffer.

@@ -36,14 +36,13 @@ bool GLObjMeshVisualModule::initializeGL()
 	vshader.release();
 	fshader.release();
 
+	mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
 	return true;
 }
 
 void GLObjMeshVisualModule::updateGL()
 {
-	//printf("%s\n", __FUNCTION__);
-	updateMutex.lock();
-
 	// need remap
 	mPositions.mapGL();
 	mNormals.mapGL();
@@ -51,30 +50,22 @@ void GLObjMeshVisualModule::updateGL()
 	mInices.mapGL();
 
 	mTexColor.load(mTexData.nx(), mTexData.ny(), (void*)mTexData.begin());
-
-	this->updated = clock::now();
-	updateMutex.unlock();
 }
 
-void GLObjMeshVisualModule::destroyGL()
+void GLObjMeshVisualModule::releaseGL()
 {
-	if (isGLInitialized)
-	{
-		mPositions.release();
-		mNormals.release();
-		mTexCoords.release();
-		mInices.release();
-		mTexColor.release();
+	mPositions.release();
+	mNormals.release();
+	mTexCoords.release();
+	mInices.release();
+	mTexColor.release();
+	mProgram.release();
 
-		mProgram.release();
-
-		isGLInitialized = false;
-	}
+	mUniformBlock.release();
 }
 
-void GLObjMeshVisualModule::paintGL(GLRenderPass mode)
+void GLObjMeshVisualModule::paintGL(const RenderParams& rparams)
 {
-	//
 	mProgram.use();
 
 	// bind SSBO
@@ -94,19 +85,22 @@ void GLObjMeshVisualModule::paintGL(GLRenderPass mode)
 	gl::glCheckError();
 
 	// handle subroutine
-	unsigned int subroutine ;
-	if (mode == GLRenderPass::COLOR) {
+	unsigned int subroutine;
+	if (rparams.mode == GLRenderMode::COLOR) {
 		subroutine = 0;
 		// also load texture
 		mTexColor.bind(GL_TEXTURE1);
 	}
-	else if (mode == GLRenderPass::SHADOW) {
+	else if (rparams.mode == GLRenderMode::SHADOW) {
 		subroutine = 1;
 	}
 	else
 	{
 		return;
 	}
+
+	mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+	mUniformBlock.bindBufferBase(0);
 
 	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 	
@@ -125,10 +119,8 @@ void GLObjMeshVisualModule::setColorTexture(const std::string& file)
 	}
 }
 
-void GLObjMeshVisualModule::updateGraphicsContext()
+void GLObjMeshVisualModule::updateImpl()
 {
-	updateMutex.lock();
-
 	// copy to rendering buffer
 	mPositions.load(in_Position.getData());
 	mNormals.load(in_Normal.getData());
@@ -139,10 +131,6 @@ void GLObjMeshVisualModule::updateGraphicsContext()
 	mTexData.assign(in_TexColor.getData());
 
 	mDrawCount = in_Index.size();
-
-	GLVisualModule::updateGraphicsContext();
-	updateMutex.unlock();
-
 }
 
 

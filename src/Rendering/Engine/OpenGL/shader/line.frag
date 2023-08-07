@@ -6,21 +6,22 @@ in VertexData
 	vec3 normal;
 };
 
-layout(std140, binding = 0) uniform TransformUniformBlock
+layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-} transform;
-
-layout(std140, binding = 1) uniform LightUniformBlock
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} light;
-
+	// parameters
+	int width;
+	int height;
+	int index;
+} uRenderParams;
 
 uniform vec3  uBaseColor;
 uniform float uMetallic;
@@ -39,7 +40,7 @@ void main(void) {
 vec3 GetViewDir()
 {
 	// orthogonal projection
-	if (transform.proj[3][3] == 1.0)
+	if (uRenderParams.proj[3][3] == 1.0)
 		return vec3(0, 0, 1);
 
 	// perspective projection
@@ -92,7 +93,7 @@ layout(binding = 5) uniform sampler2D uTexShadow;
 
 vec3 GetShadowFactor(vec3 pos)
 {
-	if (light.direction.w == 0) return vec3(1);
+	if (uRenderParams.direction.w == 0) return vec3(1);
 
 	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;	// NDC
@@ -184,12 +185,12 @@ vec3 pbr()
 	{
 		// calculate per-light radiance
 		//vec3 L = normalize(lightPositions[i] - WorldPos);
-		vec3 L = normalize(light.direction.xyz);
+		vec3 L = normalize(uRenderParams.direction.xyz);
 		vec3 H = normalize(V + L);
 		//float distance = length(lightPositions[i] - WorldPos);
 		//float attenuation = 1.0 / (distance * distance);
 		//vec3 radiance = lightColors[i] * attenuation;
-		vec3 radiance = light.intensity.rgb * light.intensity.a;
+		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
 
 		// Cook-Torrance BRDF
 		float NDF = DistributionGGX(N, H, uRoughness);
@@ -220,7 +221,7 @@ vec3 pbr()
 		Lo += GetShadowFactor(position) * (kD * uBaseColor / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = light.ambient.rgb * light.ambient.a * uBaseColor;
-	vec3 cameraLight = light.camera.rgb * light.camera.a * uBaseColor * abs(dotNV);
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * uBaseColor;
+	vec3 cameraLight = uRenderParams.camera.rgb * uRenderParams.camera.a * uBaseColor * abs(dotNV);
 	return ambient + cameraLight + Lo;
 }

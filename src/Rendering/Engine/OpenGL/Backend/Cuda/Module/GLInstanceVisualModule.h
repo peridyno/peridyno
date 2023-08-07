@@ -36,7 +36,7 @@ namespace dyno
 
 	protected:
 
-		virtual void updateGraphicsContext() override;
+		virtual void updateImpl() override;
 		virtual void updateGL() override;
 
 	};

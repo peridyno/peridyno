@@ -6,27 +6,20 @@
 
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
-	// TODO: move to other place...
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
+} uRenderParams;
 
 /*
 *  ShadowMap
@@ -94,7 +87,7 @@ layout(binding = 1) uniform sampler2D uRulerTex;
 
 void main(void) {
 	vec3 shadow = GetShadowFactor(vPosition);
-	vec3 shading = shadow * uLight.intensity.rgb + uLight.ambient.rgb;
+	vec3 shading = shadow * uRenderParams.intensity.rgb + uRenderParams.ambient.rgb;
 	shading = clamp(shading, 0, 1);
 	float f = texture(uRulerTex, vTexCoord).r;
 	f = clamp(0.5 - f, 0.0, 1.0);

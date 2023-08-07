@@ -1,32 +1,21 @@
 #version 430
 
-/*
-* Common uniform blocks
-*/
-
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
-	// TODO: move to other place...
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
+} uRenderParams;
 
 
 layout(binding = 1) uniform sampler2D uTexColor;
@@ -209,7 +198,7 @@ layout(location = 0) subroutine uniform RenderPass renderPass;
 vec3 GetViewDir()
 {
 	// orthogonal projection
-	if(uTransform.proj[3][3] == 1.0)
+	if(uRenderParams.proj[3][3] == 1.0)
 		return vec3(0, 0, 1);
 	// perspective projection
 	return normalize(-vPosition);
@@ -228,17 +217,17 @@ vec3 Shade()
 
 	// for main directional light
 	{
-		vec3 L = normalize(uLight.direction.xyz);
+		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
 		vec3 brdf = EvalPBR(baseColor, uMetallic, uRoughness, N, V, L);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.intensity.rgb * uLight.intensity.a;
+		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
 
 		// shadow
 		vec3 shadowFactor = vec3(1);
-		if (uLight.direction.w != 0)
+		if (uRenderParams.direction.w != 0)
 			shadowFactor = GetShadowFactor(vPosition);
 
 		Lo += shadowFactor * radiance * brdf;
@@ -250,14 +239,14 @@ vec3 Shade()
 		vec3 brdf = EvalPBR(baseColor, uMetallic, uRoughness, N, V, V);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.camera.rgb * uLight.camera.a;
+		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
 
 		// no shadow...
 		Lo += radiance * brdf;
 	}
 
 	// ambient light
-	vec3 ambient = uLight.ambient.rgb * uLight.ambient.a * baseColor;
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * baseColor;
 
 	// final color
 	vec3 color = ambient + Lo;
@@ -274,7 +263,7 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fColor.a = 1.0;
 	
 	// store index
-	fIndex.r = uVars.index;
+	fIndex.r = uRenderParams.index;
 }
 
 layout(index = 1) subroutine(RenderPass) void ShadowPass(void)

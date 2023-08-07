@@ -2,25 +2,20 @@
 
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
+} uRenderParams;
 
 // shader storage buffer
 layout(std430, binding = 0) buffer _Position { float positions[]; };
@@ -49,7 +44,7 @@ void main(void) {
         positions[pIndex * 3 + 1], 
         positions[pIndex * 3 + 2],
         1.0);
-    position = uTransform.view * uTransform.model * position;
+    position = uRenderParams.view * uRenderParams.model * position;
 	vPosition= position.xyz;
     
     vNormal   = vec3(0);
@@ -62,7 +57,7 @@ void main(void) {
             normals[nIndex * 3 + 2],
             0.0);
 
-        mat4 MV = uTransform.view * uTransform.model;
+        mat4 MV = uRenderParams.view * uRenderParams.model;
         mat4 N = transpose(inverse(MV));
         vNormal = (N * normal).xyz;
     }        
@@ -79,5 +74,5 @@ void main(void) {
     vColor = vec3(1);
         
 
-	gl_Position = uTransform.proj * position;
+	gl_Position = uRenderParams.proj * position;
 }

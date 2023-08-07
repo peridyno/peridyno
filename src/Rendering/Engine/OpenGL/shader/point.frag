@@ -1,34 +1,21 @@
 #version 440
 
-
-/*
-* Common uniform blocks
-*/
-
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
-	// TODO: move to other place...
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
-
+} uRenderParams;
 
 /*
 * PBR shading
@@ -217,7 +204,7 @@ void main(void)
 	fPosition = vPosition + fNormal * uPointSize;
 
 	// update depth
-	vec4 clipPos = uTransform.proj * vec4(fPosition, 1);
+	vec4 clipPos = uRenderParams.proj * vec4(fPosition, 1);
 	float ndcZ = clipPos.z / clipPos.w;
 
 	gl_FragDepth = (gl_DepthRange.diff * ndcZ + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
@@ -228,7 +215,7 @@ void main(void)
 vec3 GetViewDir()
 {
 	// orthogonal projection
-	if (uTransform.proj[3][3] == 1.0)
+	if (uRenderParams.proj[3][3] == 1.0)
 		return vec3(0, 0, 1);
 	// perspective projection
 	return normalize(-fPosition);
@@ -246,17 +233,17 @@ vec3 Shade()
 
 	// for main directional light
 	{
-		vec3 L = normalize(uLight.direction.xyz);
+		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
 		vec3 brdf = EvalPBR(vColor, uMetallic, uRoughness, N, V, L);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.intensity.rgb * uLight.intensity.a;
+		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
 
 		// shadow
 		vec3 shadowFactor = vec3(1);
-		if (uLight.direction.w != 0)
+		if (uRenderParams.direction.w != 0)
 			shadowFactor = GetShadowFactor(vPosition);
 
 		Lo += shadowFactor * radiance * brdf;
@@ -268,14 +255,14 @@ vec3 Shade()
 		vec3 brdf = EvalPBR(vColor, uMetallic, uRoughness, N, V, V);
 
 		// do not consider attenuation
-		vec3 radiance = uLight.camera.rgb * uLight.camera.a;
+		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
 
 		// no shadow...
 		Lo += radiance * brdf;
 	}
 
 	// ambient light
-	vec3 ambient = uLight.ambient.rgb * uLight.ambient.a * vColor;
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * vColor;
 
 	// final color
 	vec3 color = ambient + Lo;
@@ -291,7 +278,7 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fragColor.a = 1.0;
 	
 	// store index
-	fragIndices.r = uVars.index;
+	fragIndices.r = uRenderParams.index;
 	fragIndices.g = 0;
 }
 

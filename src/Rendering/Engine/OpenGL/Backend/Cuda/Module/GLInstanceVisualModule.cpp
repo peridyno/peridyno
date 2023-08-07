@@ -22,45 +22,36 @@ namespace dyno {
 		return "Instance Visual Module";
 	}
 
-	void GLInstanceVisualModule::updateGraphicsContext()
+	void GLInstanceVisualModule::updateImpl()
 	{
-		GLSurfaceVisualModule::updateGraphicsContext();
+		GLSurfaceVisualModule::updateImpl();
 
-		{
-			updateMutex.lock();
-			// update instance data
-			mInstanceBuffer.load(this->inInstanceTransform()->getData());
-			// instance colors if available
-			if (this->inInstanceColor()->getDataPtr())
-				mColorBuffer.load(this->inInstanceColor()->getData());
-			mInstanceCount = this->inInstanceTransform()->size();
-			updateMutex.unlock();
-		}
+		// update instance data
+		mInstanceBuffer.load(this->inInstanceTransform()->getData());
+		// instance colors if available
+		if (this->inInstanceColor()->getDataPtr())
+			mColorBuffer.load(this->inInstanceColor()->getData());
+		mInstanceCount = this->inInstanceTransform()->size();
 	}
 
 	void GLInstanceVisualModule::updateGL()
 	{
 		GLSurfaceVisualModule::updateGL();
 
-		{		
-			updateMutex.lock();
-
-			mInstanceBuffer.mapGL();
-			if (this->inInstanceColor()->getDataPtr()) {
-				mColorBuffer.mapGL();
-				mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, sizeof(Vec3f), 0, 1);
-			}
-
-			// bind the translation vector
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), 0, 1);
-			// bind the scale vector
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), sizeof(Vec3f), 1);
-			// bind the rotation matrix
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), 2 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), 3 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mInstanceBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
-
-			updateMutex.unlock();
+		mInstanceBuffer.mapGL();
+		if (this->inInstanceColor()->getDataPtr()) {
+			mColorBuffer.mapGL();
+			mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, sizeof(Vec3f), 0, 1);
 		}
+
+		// bind the translation vector
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), 0, 1);
+		// bind the scale vector
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), sizeof(Vec3f), 1);
+		// bind the rotation matrix
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), 2 * sizeof(Vec3f), 1);
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), 3 * sizeof(Vec3f), 1);
+		mVAO.bindVertexBuffer(&mInstanceBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
+
 	}
 }

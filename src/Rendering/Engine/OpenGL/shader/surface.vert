@@ -1,33 +1,21 @@
 #version 440
 
-/*
-* Common uniform blocks
-*/
-
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
-	// TODO: move to other place...
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
-
+} uRenderParams;
 
 layout(location = 0) in vec3 in_vert;
 layout(location = 1) in vec3 in_color;
@@ -67,17 +55,17 @@ void main(void) {
 		vs_out.instanceID = gl_InstanceID;
 	}
 
-	vec4 worldPos = uTransform.model * vec4(position, 1.0);
-	vec4 cameraPos = uTransform.view * worldPos;
+	vec4 worldPos = uRenderParams.model * vec4(position, 1.0);
+	vec4 cameraPos = uRenderParams.view * worldPos;
 
 	vs_out.position = cameraPos.xyz;
 
 	if(uVertexNormal)
 	{
-		mat4 MV = uTransform.view * uTransform.model;
+		mat4 MV = uRenderParams.view * uRenderParams.model;
 		mat4 N = transpose(inverse(MV));
 		vs_out.normal = (N * vec4(in_norm, 0)).xyz;
 	}
 
-	gl_Position = uTransform.proj * cameraPos;
+	gl_Position = uRenderParams.proj * cameraPos;
 }

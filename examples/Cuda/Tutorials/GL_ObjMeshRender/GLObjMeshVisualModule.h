@@ -14,13 +14,13 @@ public:
 	void setColorTexture(const std::string& file);
 
 protected:
-	virtual void updateGraphicsContext() override;
+	virtual void updateImpl() override;
 
 protected:
-	virtual void paintGL(GLRenderPass mode) override;
+	virtual void paintGL(const RenderParams& rparams) override;
 	virtual void updateGL() override;
 	virtual bool initializeGL() override;
-	virtual void destroyGL() override;
+	virtual void releaseGL() override;
 
 
 public:
@@ -45,4 +45,6 @@ private:
 
 	CArray2D<Vec4f> mTexData;
 	gl::Texture2D	mTexColor;
+
+	gl::Buffer		mUniformBlock;
 };

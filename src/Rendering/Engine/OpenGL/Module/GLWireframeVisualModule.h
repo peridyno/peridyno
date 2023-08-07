@@ -56,12 +56,12 @@ namespace dyno
 		DEF_ENUM(EEdgeMode, RenderMode, EEdgeMode::LINE, "");
 
 	protected:
-		virtual void updateGraphicsContext() override;
+		virtual void updateImpl() override;
 
-		virtual void paintGL(GLRenderPass mode) override;
+		virtual void paintGL(const RenderParams& rparams) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-		virtual void destroyGL() override;
+		virtual void releaseGL() override;
 				
 	private:
 
@@ -72,5 +72,6 @@ namespace dyno
 		gl::XBuffer		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 
+		gl::Buffer		mUniformBlock;
 	};
 };

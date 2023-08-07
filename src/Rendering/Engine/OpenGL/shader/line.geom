@@ -1,32 +1,21 @@
 #version 440
 
-/*
-* Common uniform blocks
-*/
-
 layout(std140, binding = 0) uniform Transforms
 {
+	// transform
 	mat4 model;
 	mat4 view;
 	mat4 proj;
-
-	// TODO: move to other place...
-	int width;
-	int height;
-} uTransform;
-
-layout(std140, binding = 1) uniform Lights
-{
+	// illumination
 	vec4 ambient;
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-} uLight;
-
-layout(std140, binding = 2) uniform Variables
-{
+	// parameters
+	int width;
+	int height;
 	int index;
-} uVars;
+} uRenderParams;
 
 
 layout (lines) in;
@@ -130,10 +119,10 @@ void cylinder() {
 		vec3 p10 = p0 + R * (vec3(x1, y1, 0.f) * scale);
 		vec3 p11 = p0 + R * (vec3(x1, y1, 1.f) * scale);
 
-		vec4 p00p = uTransform.proj * vec4(p00, 1);
-		vec4 p01p = uTransform.proj * vec4(p01, 1);
-		vec4 p10p = uTransform.proj * vec4(p10, 1);
-		vec4 p11p = uTransform.proj * vec4(p11, 1);
+		vec4 p00p = uRenderParams.proj * vec4(p00, 1);
+		vec4 p01p = uRenderParams.proj * vec4(p01, 1);
+		vec4 p10p = uRenderParams.proj * vec4(p10, 1);
+		vec4 p11p = uRenderParams.proj * vec4(p11, 1);
 		
 		color = gs_in[0].color;
 

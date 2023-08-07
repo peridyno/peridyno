@@ -46,7 +46,7 @@ namespace dyno
 		virtual void initialize() override;
 		virtual void terminate() override;
 
-		virtual void draw(dyno::SceneGraph* scene, Camera* camera, const RenderParams& rparams) override;
+		virtual void draw(dyno::SceneGraph* scene, const RenderParams& rparams) override;
 
 		virtual std::string name() const override;
 
@@ -54,12 +54,10 @@ namespace dyno
 		Selection select(int x, int y, int w, int h) override;
 
 	private:
-		void setupInternalFramebuffer();
-		void resizeFramebuffer(int w, int h);
-		
+		void createFramebuffer();
+		void resizeFramebuffer(int w, int h);		
 		void setupTransparencyPass();
-
-		void updateRenderModules(dyno::SceneGraph* scene);
+		void updateRenderItems(dyno::SceneGraph* scene);
 
 	private:
 
@@ -89,18 +87,12 @@ namespace dyno
 		gl::Texture2D	mHeadIndexTex;
 		gl::Program*	mBlendProgram;
 
-		gl::Mesh*		mScreenQuad = 0;
-
-		// uniform buffers
-		gl::Buffer		mTransformUBO;
-		gl::Buffer		mLightUBO;
-		gl::Buffer		mVariableUBO;
-
 		GLRenderHelper* mRenderHelper;
 		ShadowMap*		mShadowMap;
 		// anti-aliasing
 		bool			bEnableFXAA = true;
 		FXAA*			mFXAAFilter;
 
+		gl::Mesh* mScreenQuad = 0;
 	};
 };
