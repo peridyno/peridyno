@@ -40,14 +40,25 @@ foreach(SHADER_FILE ${_IN_FILES})
 	# get variable name from file name
 	get_filename_component(name_ ${SHADER_FILE} NAME)
 	file(APPEND ${SHADER_HEADER_FILE} "//// ${name_} ////\n")
-	file(APPEND ${SHADER_HEADER_FILE} "{ \"${name_}\",R\"(\n")
+	file(APPEND ${SHADER_HEADER_FILE} "{ \"${name_}\",\n")
 
 	load_shader(${SHADER_FILE})
 
 	get_property(content_ DIRECTORY PROPERTY content_${name_})
-	file(APPEND ${SHADER_HEADER_FILE} "${content_}\n")
+	string(LENGTH "${content_}" len_)
+	set(pos_ 0)
+	while(${pos_} LESS ${len_})
+		math(EXPR next_len_ "${len_} - ${pos_}")
+		# fix msvc C2026
+		if(${next_len_} GREATER 16380)
+			set(next_len_ 16380)
+		endif()
 
-	file(APPEND ${SHADER_HEADER_FILE} ")\"},\n\n")	
+		string(SUBSTRING "${content_}" ${pos_} ${next_len_} sub_content_)
+		file(APPEND ${SHADER_HEADER_FILE} "R\"(${sub_content_})\" ")
+		math(EXPR pos_ "${pos_} + ${next_len_}")
+	endwhile()
+	file(APPEND ${SHADER_HEADER_FILE} "\n},\n\n")
 endforeach()	
 # close variable
 file(APPEND ${SHADER_HEADER_FILE} "};\n\n")
