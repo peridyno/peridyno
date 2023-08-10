@@ -1,15 +1,17 @@
-/*
-
-    We use a geometry shader to handle normals
-
-*/
-
+// We use a geometry shader to handle normals
 #version 460
+
+#extension GL_GOOGLE_include_directive: enable
+
+#include "common.glsl"
 
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-in VertexData
+// whether to use vertex normal
+layout(location = 1) uniform bool uVertexNormal = false;
+
+layout(location=0) in VertexData
 {
 	vec3 position;
 	vec3 normal;
@@ -17,7 +19,7 @@ in VertexData
     int  instanceID;
 } gs_in[];
 
-out VertexData
+layout(location=0) out VertexData
 {
 	vec3 position;
 	vec3 normal;
@@ -25,9 +27,6 @@ out VertexData
     int  instanceID;
 } gs_out;
 
-
-// whether to use vertex normal
-uniform bool uVertexNormal = false;
 
 void main() {   
     

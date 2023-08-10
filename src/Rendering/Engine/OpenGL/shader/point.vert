@@ -1,35 +1,19 @@
 #version 440
 
-#extension GL_ARB_shading_language_include : require
-
-layout(std140, binding = 0) uniform Transforms
-{
-	// transform
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	// illumination
-	vec4 ambient;
-	vec4 intensity;
-	vec4 direction;
-	vec4 camera;
-	// parameters
-	int width;
-	int height;
-	int index;
-} uRenderParams;
+#extension GL_GOOGLE_include_directive: enable
+#include "common.glsl"
 
 // input
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aColor;
 
 // output
-out vec3 vPosition;
-out vec3 vColor;
+layout(location = 0) out vec3 vPosition;
+layout(location = 1) out vec3 vColor;
 
-uniform float uPointSize;
 
-vec3 ColorMapping();
+layout(location = 0) uniform float uPointSize;
+
 void main(void) 
 {
 	vColor = aColor;

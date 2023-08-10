@@ -10,6 +10,9 @@
 
 #include <array>
 
+#include "screen.vert.h"
+#include "blur.frag.h"
+
 namespace dyno 
 {
 
@@ -60,7 +63,9 @@ namespace dyno
 
 		// for blur depth textures
 		mQuad = gl::Mesh::ScreenQuad();
-		mBlurProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blur.frag");
+		mBlurProgram = gl::Program::createProgramSPIRV(
+			SCREEN_VERT, sizeof(SCREEN_VERT),
+			BLUR_FRAG, sizeof(BLUR_FRAG));
 	}
 
 	ShadowMap::~ShadowMap()

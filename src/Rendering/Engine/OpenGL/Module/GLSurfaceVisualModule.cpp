@@ -3,6 +3,10 @@
 
 #include <glad/glad.h>
 
+#include "surface.vert.h"
+#include "surface.frag.h"
+#include "surface.geom.h"
+
 namespace dyno
 {
 	IMPLEMENT_CLASS(GLSurfaceVisualModule)
@@ -55,7 +59,10 @@ namespace dyno
 #endif
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			SURFACE_VERT, sizeof(SURFACE_VERT),
+			SURFACE_FRAG, sizeof(SURFACE_FRAG),
+			SURFACE_GEOM, sizeof(SURFACE_GEOM));
 
 		// create shader uniform buffer
 		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
@@ -83,6 +90,8 @@ namespace dyno
 
 	void GLSurfaceVisualModule::updateGL()
 	{
+		if (mDrawCount == 0) return;
+
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
 		mVertexBuffer.mapGL();
@@ -164,45 +173,37 @@ namespace dyno
 		if (mDrawCount == 0)
 			return;
 
-		unsigned int subroutine;
+		mShaderProgram->use();
+
 		if (rparams.mode == GLRenderMode::COLOR) {
-			subroutine = 0;
 		}
 		else if (rparams.mode == GLRenderMode::SHADOW) {
-			subroutine = 1;
 		}
 		else if (rparams.mode == GLRenderMode::TRANSPARENCY) {
-			subroutine = 2;
 		}
 		else {
 			printf("GLSurfaceVisualModule: Unknown render mode!\n");
 			return;
 		}
 
-		// setup uniform buffer
-		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
-		mUniformBlock.bindBufferBase(0);
-
-		mShaderProgram->use();
-
 		// setup uniforms
 		mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
 		mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
 		mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
 		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getData());
-
-		// instanced rendering?
 		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
+
+		// setup uniform buffer
+		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+		mUniformBlock.bindBufferBase(0);
+		gl::glCheckError();
+
+		mVAO.bind();
 
 		// color
 		auto color = this->varBaseColor()->getData();
 		glVertexAttrib3f(1, color.r, color.g, color.b);
 
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-
-		mVAO.bind();
-
-		gl::glCheckError();
 		if(mInstanceCount > 0)
 			glDrawElementsInstanced(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0, mInstanceCount);
 		else

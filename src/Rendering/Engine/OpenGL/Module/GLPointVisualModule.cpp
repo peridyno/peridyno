@@ -6,6 +6,9 @@
 // opengl
 #include <glad/glad.h>
 
+#include "point.vert.h"
+#include "point.frag.h"
+
 #ifdef CUDA_BACKEND
 // cuda
 #include <cuda_gl_interop.h>
@@ -57,7 +60,9 @@ namespace dyno
 		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
 		mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
 
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("point.vert", "point.frag");
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			POINT_VERT, sizeof(POINT_VERT),
+			POINT_FRAG, sizeof(POINT_FRAG));
 
 		// create shader uniform buffer
 		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
@@ -81,6 +86,8 @@ namespace dyno
 
 	void GLPointVisualModule::updateGL()
 	{
+		if (mNumPoints == 0) return;
+
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
 		mPosition.mapGL();
@@ -134,20 +141,15 @@ namespace dyno
 		mShaderProgram->use();
 		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getData());
 
-		unsigned int subroutine;
 		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
 			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
 			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
-
-			subroutine = 0;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
 		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
-			subroutine = 1;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
+
 		}
 		else if (rparams.mode == GLRenderMode::TRANSPARENCY)
 		{

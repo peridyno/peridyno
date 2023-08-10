@@ -7,6 +7,13 @@
 #include <glad/glad.h>
 #include <vector>
 
+#include "plane.vert.h"
+#include "plane.frag.h"
+#include "bbox.vert.h"
+#include "bbox.frag.h"
+#include "screen.vert.h"
+#include "background.frag.h"
+
 namespace dyno
 {
 	class GroundRenderer
@@ -14,7 +21,9 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mProgram = gl::ShaderFactory::createShaderProgram("plane.vert", "plane.frag");
+			mProgram = gl::Program::createProgramSPIRV(
+				PLANE_VERT, sizeof(PLANE_VERT),
+				PLANE_FRAG, sizeof(PLANE_FRAG));
 			mPlane = gl::Mesh::Plane(1.f);
 
 			// create ruler texture
@@ -96,7 +105,10 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mProgram = gl::ShaderFactory::createShaderProgram("bbox.vert", "bbox.frag");
+			mProgram = gl::Program::createProgramSPIRV(
+				BBOX_VERT, sizeof(BBOX_VERT), 
+				BBOX_FRAG, sizeof(BBOX_FRAG));
+
 			mCubeVBO.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 			mCubeVBO.load(0, 8 * 3 * sizeof(float));
 			mCubeVAO.create();
@@ -187,7 +199,9 @@ namespace dyno
 		{
 			// create a quad object
 			mScreenQuad = gl::Mesh::ScreenQuad();
-			mBackgroundProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "background.frag");
+			mBackgroundProgram = gl::Program::createProgramSPIRV(
+				SCREEN_VERT, sizeof(SCREEN_VERT),
+				BACKGROUND_FRAG, sizeof(BACKGROUND_FRAG));
 		}
 
 		~BackgroundRenderer() {

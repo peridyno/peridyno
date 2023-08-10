@@ -5,6 +5,10 @@
 #include "GLRenderEngine.h"
 #include "Utility.h"
 
+#include "line.vert.h"
+#include "surface.frag.h"
+#include "line.geom.h"
+
 namespace dyno
 {
 	IMPLEMENT_CLASS(GLWireframeVisualModule)
@@ -42,7 +46,10 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			LINE_VERT, sizeof(LINE_VERT),
+			SURFACE_FRAG, sizeof(SURFACE_FRAG),
+			LINE_GEOM, sizeof(LINE_GEOM));
 
 		// create shader uniform buffer
 		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
@@ -65,6 +72,8 @@ namespace dyno
 
 	void GLWireframeVisualModule::updateGL()
 	{
+		if (mNumEdges == 0) return;
+
 		mVertexBuffer.mapGL();
 		mIndexBuffer.mapGL();
 
@@ -101,10 +110,6 @@ namespace dyno
 
 		mShaderProgram->use();
 
-		unsigned int subroutine = rparams.mode;
-
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-
 		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			Color c = this->varBaseColor()->getData();
@@ -123,18 +128,16 @@ namespace dyno
 			return;
 		}
 
-
 		// preserve previous polygon mode
 		int mode;
 		glGetIntegerv(GL_POLYGON_MODE, &mode);
 
 		if (this->varRenderMode()->getDataPtr()->currentKey() == EEdgeMode::LINE)
 		{
+			mShaderProgram->setInt("uEdgeMode", 0);
 			// draw as lines
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glLineWidth(this->varLineWidth()->getData());
-
-			mShaderProgram->setInt("uEdgeMode", 0);
 		}
 		else
 		{

@@ -1,25 +1,11 @@
 #version 440
 
-layout(std140, binding = 0) uniform Transforms
-{
-	// transform
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	// illumination
-	vec4 ambient;
-	vec4 intensity;
-	vec4 direction;
-	vec4 camera;
-	// parameters
-	int width;
-	int height;
-	int index;
-} uRenderParams;
+#extension GL_GOOGLE_include_directive: enable
+#include "common.glsl"
 
 layout(location = 0) in vec3 in_vert;
 
-out VertexData
+layout(location = 0) out VertexData
 {
 	vec3 position;
 	vec3 normal;
@@ -28,7 +14,7 @@ out VertexData
 } vs_out;
 
 // we treat color as per-vertex
-uniform vec3 uBaseColor;
+layout(location = 2) uniform vec3 uBaseColor;
 
 void main(void) {
 

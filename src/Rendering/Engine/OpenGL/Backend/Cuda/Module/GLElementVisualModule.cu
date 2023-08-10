@@ -8,6 +8,9 @@
 #include "Primitive/Primitive3D.h"
 #include "Array/Array.h"
 
+#include "surface.vert.h"
+#include "surface.frag.h"
+#include "surface.geom.h"
 
 namespace dyno
 {
@@ -83,9 +86,11 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("surface.vert", "surface.frag", "surface.geom");
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			SURFACE_VERT, sizeof(SURFACE_VERT), 
+			SURFACE_FRAG, sizeof(SURFACE_FRAG),
+			SURFACE_GEOM, sizeof(SURFACE_GEOM));
 
-		printf("aaaaaGL\n");
 		return true;
 	}
 

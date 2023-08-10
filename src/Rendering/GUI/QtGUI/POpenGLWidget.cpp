@@ -124,7 +124,7 @@ namespace dyno
 		QSurfaceFormat format;
 		format.setDepthBufferSize(24);
 		format.setMajorVersion(4);
-		format.setMinorVersion(4);
+		format.setMinorVersion(6);
 		format.setSamples(4);
 		format.setSwapInterval(1);
 		format.setProfile(QSurfaceFormat::CoreProfile);

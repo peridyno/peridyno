@@ -24,6 +24,9 @@
 #include <unordered_set>
 #include <memory>
 
+#include "screen.vert.h"
+#include "blend.frag.h"
+
 namespace dyno
 {
 	GLRenderEngine::GLRenderEngine()
@@ -118,7 +121,9 @@ namespace dyno
 		mHeadIndexTex.create();
 		mHeadIndexTex.resize(1, 1);
 
-		mBlendProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blend.frag");
+		mBlendProgram = gl::Program::createProgramSPIRV(
+			SCREEN_VERT, sizeof(SCREEN_VERT),
+			BLEND_FRAG, sizeof(BLEND_FRAG));
 	}
 
 

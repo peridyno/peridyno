@@ -1,29 +1,15 @@
 #version 440
 
+#extension GL_GOOGLE_include_directive: enable
+#include "../common.glsl"
+
 layout(location=0) in vec3 aPos;
 
-uniform float uPlaneScale;
-uniform float uRulerScale;
+layout(location=2) uniform float uPlaneScale;
+layout(location=3) uniform float uRulerScale;
 
-layout(std140, binding = 0) uniform Transforms
-{
-	// transform
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	// illumination
-	vec4 ambient;
-	vec4 intensity;
-	vec4 direction;
-	vec4 camera;
-	// parameters
-	int width;
-	int height;
-	int index;
-} uRenderParams;
-
-out vec2 vTexCoord;
-out vec3 vPosition;
+layout(location=0) out vec2 vTexCoord;
+layout(location=1) out vec3 vPosition;
    
 void main(void) 
 {

@@ -1,39 +1,22 @@
 #version 440
 
-layout(std140, binding = 0) uniform Transforms
-{
-	// transform
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	// illumination
-	vec4 ambient;
-	vec4 intensity;
-	vec4 direction;
-	vec4 camera;
-	// parameters
-	int width;
-	int height;
-	int index;
-} uRenderParams;
+#extension GL_GOOGLE_include_directive: enable
+#include "common.glsl"
 
-
-layout (lines) in;
-
+layout(lines) in;
 layout(triangle_strip, max_vertices = 72) out;
 
-uniform int		uEdgeMode = 1;
-// radius for cylinder
-uniform float	uRadius = 0.003;
+layout(location = 0) uniform int	uEdgeMode = 1;
+layout(location = 1) uniform float	uRadius = 0.003;
 
-in VertexData {
+layout(location = 0) in VertexData {
 	vec3 position;
 	vec3 normal;
 	vec3 color;
 	int  instanceID; 	// not used for this type
 } gs_in[];
 
-out VertexData {
+layout(location = 0) out VertexData {
 	vec3 position;
 	vec3 normal;
 	vec3 color;
