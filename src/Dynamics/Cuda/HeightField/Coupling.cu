@@ -94,7 +94,7 @@ namespace dyno
 		Real pressure = rho * gravity.norm() * h;
 
 		Coord force_i = pressure * triangle.area() * normal_i;
-		Coord torque_i = force_i.cross(triangle_center - center);
+		Coord torque_i = -force_i.cross(triangle_center - center);
 
 		force[tId] = force_i;
 		torque[tId] = torque_i;
@@ -154,10 +154,11 @@ namespace dyno
 			velocity += dt * F_total / mass;
 			angular_velocity += dt * inertia.inverse() * T_total;
 
-			velocity *= this->varDragging()->getData();
-			angular_velocity *= this->varDragging()->getData();
+			velocity *= this->varDamping()->getValue();
+			angular_velocity *= this->varRotationalDamping()->getValue();
 
 			mesh->stateVelocity()->setValue(velocity);
+			mesh->stateAngularVelocity()->setValue(angular_velocity);
 		}
 	}
 

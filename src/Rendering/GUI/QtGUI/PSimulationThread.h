@@ -4,6 +4,10 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <atomic>
+#include <chrono>
+#include <mutex>
+#include <condition_variable>
 
 #include <nodes/QNode>
 
@@ -55,21 +59,22 @@ namespace dyno
 	private:
 		PSimulationThread();
 
-		int mTotalFrame;
+		void notify();
 
-		bool mReset = false;
-		bool mPaused = true;
-		
-		bool mRunning = true;
-		bool mFinished = false;
+		std::atomic<int> mTotalFrame;
 
-		bool mUpdatingGraphicsContext = false;
+		bool mReset;
+	 	std::atomic<bool> mPaused;
+		std::atomic<bool> mRunning;
+		bool mFinished;
 
-		std::shared_ptr<Node> mActiveNode = nullptr;
+		std::atomic<bool> mUpdatingGraphicsContext;
 
-		int mTimeOut = 10000;
+		std::shared_ptr<Node> mActiveNode;
 
-		QMutex mMutex;
+		std::chrono::milliseconds mTimeOut;
+		std::timed_mutex mMutex;
+		std::condition_variable_any mCond;
 	};
 }
 
