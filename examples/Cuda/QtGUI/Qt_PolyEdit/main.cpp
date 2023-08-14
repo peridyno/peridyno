@@ -3,14 +3,17 @@
 //#include "TrianglePickerNode.h"
 #include "initializeModeling.h"
 #include "PointFromCurve.h"
-#include "../Plugin/ObjIO/OBJexporter.h"
-#include "../Plugin/ObjIO/ObjLoader.h"
+
 #include "Sweep.h"
 #include "SphereModel.h"
 #include "PolyExtrude.h"
 #include "Group.h"
 #include "CopyToPoint.h"
-#include "../Plugin/ObjIO/ObjPointLoader.h"
+
+//ObjIO
+#include "ObjIO/OBJexporter.h"
+#include "ObjIO/ObjLoader.h"
+#include "ObjIO/ObjPointLoader.h"
 
 
 using namespace dyno;

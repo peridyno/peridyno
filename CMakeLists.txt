@@ -166,6 +166,11 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	# Qt GUI support, off by default
 	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" OFF)
 
+	# Add Plugin folder
+	if(PERIDYNO_LIBRARY_PLUGIN)
+		add_subdirectory(plugins)
+	endif()
+
 	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
 	endif()

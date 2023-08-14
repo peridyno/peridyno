@@ -9,7 +9,7 @@
 #include "Sweep.h"
 #include "PointFromCurve.h"
 
-#include "Plugin/ObjIO/ObjPointLoader.h"
+#include "ObjIO/ObjPointLoader.h"
 
 
 using namespace dyno;

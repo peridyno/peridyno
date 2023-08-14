@@ -2,7 +2,7 @@
 
 #include "initializeModeling.h"
 #include "PointFromCurve.h"
-#include "../Plugin/ObjIO/OBJexporter.h"
+#include "ObjIO/OBJexporter.h"
 #include "Sweep.h"
 #include "Extrude.h"
 

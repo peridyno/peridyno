@@ -22,14 +22,6 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     add_subdirectory(Modeling)
 endif()
 
-#if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_GRAPHICS)
-#    add_subdirectory(Graphics)
-#endif()
-
-if(PERIDYNO_LIBRARY_PLUGIN)
-    add_subdirectory(Plugin)
-endif()
-
 add_subdirectory(Dynamics)
 
 # Write/install version file
