@@ -179,8 +179,6 @@ namespace dyno
 
 	void PSimulationThread::reset(int num)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
-
 		this->pause();
 
 		mFinished = true;
