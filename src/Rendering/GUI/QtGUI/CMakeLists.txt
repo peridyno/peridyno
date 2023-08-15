@@ -120,6 +120,8 @@ target_link_libraries(${LIB_NAME} PUBLIC
     Qt${QT_VERSION_MAJOR}::OpenGL 
     Qt${QT_VERSION_MAJOR}::Svg)
 
+target_compile_definitions(${LIB_NAME} PRIVATE PERIDYNO_QTGUI_EXPORTS)
+
 if (${QT_VERSION_MAJOR} EQUAL 6)
     target_link_libraries(${LIB_NAME} PUBLIC Qt6::Core5Compat Qt6::OpenGLWidgets)  
 endif()

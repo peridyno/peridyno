@@ -9,6 +9,8 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(Color, QColorWidget)
+
 	QColorButton::QColorButton(QWidget* pParent) :
 		QPushButton(pParent),
 		mMargin(5),

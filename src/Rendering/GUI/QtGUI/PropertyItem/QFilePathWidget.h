@@ -18,6 +18,7 @@
  */
 #pragma once
 #include "QFieldWidget.h"
+#include "QtGUI/PPropertyWidget.h"
 
 namespace dyno
 {
@@ -25,6 +26,8 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
+		DECLARE_FIELD_WIDGET
+
 		QStringFieldWidget(FBase* field);
 		~QStringFieldWidget() override {};
 
@@ -39,6 +42,8 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
+		DECLARE_FIELD_WIDGET
+
 		QFilePathWidget(FBase* field);
 		~QFilePathWidget() override {};
 

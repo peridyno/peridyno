@@ -9,6 +9,8 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(bool, QBoolFieldWidget)
+
 	QBoolFieldWidget::QBoolFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{

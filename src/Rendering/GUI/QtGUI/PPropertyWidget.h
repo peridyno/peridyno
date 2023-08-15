@@ -17,12 +17,19 @@
  * limitations under the License.
  */
 #pragma once
-#include "nodes/QNode"
+#include <map>
+#include <QWidget>
+#include <typeinfo>
+
 
 class QVBoxLayout;
 class QScrollArea;
 class QGridLayout;
 class LockerButton;
+
+namespace Qt {
+	class QtNode;
+}
 
 namespace dyno
 {
@@ -61,7 +68,20 @@ namespace dyno
 		//A slot to receive a message when any field widget is updated
 		void contentUpdated();
 
+	public:
+		struct FieldWidgetMeta {
+			using constructor_t = QWidget* (*)(FBase*);
+			const std::type_info* type;
+			constructor_t constructor;
+		};
+		static int registerWidget(const FieldWidgetMeta&);
+		static FieldWidgetMeta* getRegistedWidget(const std::string&);
+
+		static QWidget* createFieldWidget(FBase* field);
+
 	private:
+		static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
+
 		void addScalarFieldWidget(FBase* field, QGridLayout* layout,int j);
 		void addArrayFieldWidget(FBase* field);
 
@@ -81,3 +101,12 @@ namespace dyno
 		std::shared_ptr<OBase> mSeleted = nullptr;
 	};
 }
+
+#define DECLARE_FIELD_WIDGET \
+	static int reg_field_widget; \
+	static QWidget* createWidget(dyno::FBase*);
+
+#define IMPL_FIELD_WIDGET(_data_type_, _type_) \
+	int _type_::reg_field_widget = \
+		dyno::PPropertyWidget::registerWidget(dyno::PPropertyWidget::FieldWidgetMeta {&typeid(_data_type_), &_type_::createWidget}); \
+	QWidget* _type_::createWidget(dyno::FBase* f) { return new _type_(f); }
