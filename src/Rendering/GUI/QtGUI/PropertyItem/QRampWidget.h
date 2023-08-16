@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <QPainterPath>
 #include "qlayout.h"
+#include "Field.h"
 
 namespace dyno
 {
