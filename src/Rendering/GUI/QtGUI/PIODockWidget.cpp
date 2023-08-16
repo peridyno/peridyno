@@ -131,7 +131,7 @@ namespace dyno
 		m_ioTabWidget->tabBar()->setObjectName("ControlPanelTabBar");
 
 		//Create log widget
-		mLogWidget = new PLogWidget();
+		mLogWidget = PLogWidget::instance();
 		m_ioTabWidget->addTab(mLogWidget, QString("Log"));
 		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mLogWidget), QApplication::translate("MainWindow", "Log", Q_NULLPTR));
 

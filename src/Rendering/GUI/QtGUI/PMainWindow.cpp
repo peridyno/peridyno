@@ -54,11 +54,8 @@
 #include "PAnimationWidget.h"
 
 #include "PIODockWidget.h"
-#include "PLogWidget.h"
 #include "PConsoleWidget.h"
-//#include "PSceneGraphWidget.h"
 #include "PPropertyWidget.h"
-//#include "PModuleListWidget.h"
 #include "PSimulationThread.h"
 #include "PModuleEditor.h"
 
