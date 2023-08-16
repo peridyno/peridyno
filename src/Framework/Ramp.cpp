@@ -1,26 +1,8 @@
 #include "Ramp.h"
-#include "Field.h"
+#include "Vector/Vector3D.h"
+#include "Vector/Vector2D.h"
 
 namespace dyno {
-	
-	template<>
-	std::string FVar<Ramp>::serialize()
-	{
-		if (isEmpty())
-			return "";
-
-		Ramp val = this->getValue();
-
-		return "";
-	}
-
-	template<>
-	bool FVar<Ramp>::deserialize(const std::string& str)
-	{
-		if (str.empty())
-			return false;
-		return true;
-	}
 
 	Ramp::Ramp() 
 	{
@@ -30,6 +12,63 @@ namespace dyno {
 	Ramp::Ramp(BorderMode border) 
 	{ 
 		Bordermode = border;
+	}
+
+	Ramp::Ramp(const Ramp& ramp)
+	{
+		this->Dirmode = ramp.Dirmode;
+		this->Bordermode = ramp.Bordermode;
+		this->MyCoord = ramp.MyCoord;
+		this->FE_MyCoord = ramp.FE_MyCoord;
+		this->FE_HandleCoord = ramp.FE_HandleCoord;
+		this->FinalCoord = ramp.FinalCoord;
+		this->Originalcoord = ramp.Originalcoord;
+		this->OriginalHandlePoint = ramp.OriginalHandlePoint;
+
+		this->myBezierPoint = ramp.myBezierPoint;
+		this->myBezierPoint_H = ramp.myBezierPoint_H;
+		this->resamplePoint = ramp.resamplePoint;
+		this->myHandlePoint = ramp.myHandlePoint;
+
+		this->lengthArray = ramp.lengthArray;
+		this->length_EndPoint_Map = ramp.length_EndPoint_Map;
+
+		this->InterpMode = ramp.InterpMode;
+
+		this->remapRange[8] = ramp.InterpMode;// "MinX","MinY","MaxX","MaxY"
+
+		this->lockSize = ramp.lockSize;
+		this->useCurve = ramp.useCurve;
+		this->displayUseRamp = ramp.displayUseRamp;
+		this->useRamp = ramp.useRamp;
+		this->useSquard = ramp.useSquard;
+		this->curveClose = ramp.curveClose;
+		this->resample = ramp.resample;
+
+		this->useColseButton = ramp.useColseButton;
+		this->useSquardButton = ramp.useSquardButton;
+
+		this->Spacing = ramp.Spacing;
+
+		this->NminX = ramp.NminX;
+		this->NmaxX = ramp.NmaxX;
+		this->NminY = ramp.NminY;
+		this->NmaxY = ramp.NmaxY;
+
+		this->handleDefaultLength = ramp.handleDefaultLength;
+		this->segment = ramp.segment;
+		this->resampleResolution = ramp.resampleResolution;
+
+		this->xLess = ramp.xLess;
+		this->xGreater = ramp.xGreater;
+		this->yLess = ramp.yLess;
+		this->yGreater = ramp.yGreater;
+
+		this->generatorMin = ramp.generatorMin;
+		this->generatorMax = ramp.generatorMax;
+
+		this->customHandle = ramp.customHandle;
+
 	}
 
 	float Ramp::getCurveValueByX(float inputX)
