@@ -73,7 +73,7 @@ With a scene moded by PeriDyno, it can either be run as a GFLW application, Qt a
 
 - Qt application
 
-[<img src="data/screenshots/qtapp.png" style="zoom:80%;" />](https://github.com/peridyno/peridyno/assets/66506655/deea03ee-bf0f-4d29-ae12-9ff5d7d080a8.mp4)
+[<img src="data/screenshots/qtapp.png" style="zoom:80%;" />](https://github.com/peridyno/peridyno/assets/66506655/466ba7ee-851b-489c-aa7a-4493b3552476.mp4)
 
 # License
 
