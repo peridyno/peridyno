@@ -448,8 +448,10 @@ namespace dyno
 			
 		}
 
-		this->getValue().updateBezierCurve();
-		this->getValue().UpdateFieldFinalCoord();
+
+
+		ramp->updateBezierCurve();
+		ramp->UpdateFieldFinalCoord();
 
 		this->setValue(*ramp);
 
