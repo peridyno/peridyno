@@ -207,7 +207,6 @@ namespace dyno
 
 	void PSimulationThread::resetQtNode(Qt::QtNode& node)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
 		auto model = node.nodeDataModel();
 		auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
 
