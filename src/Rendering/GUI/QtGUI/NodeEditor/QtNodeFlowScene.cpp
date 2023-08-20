@@ -14,6 +14,7 @@
 #include "SceneGraphFactory.h"
 
 #include <QtWidgets/QMessageBox>
+#include <QMenu>
 #include "iostream"
 
 namespace Qt
@@ -65,6 +66,8 @@ namespace Qt
 		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
 		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
 		//connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
+
+		connect(this, &QtFlowScene::nodeContextMenu, this, &QtNodeFlowScene::showContextMenu);
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
@@ -95,6 +98,8 @@ namespace Qt
 			QPointF posView(m->bx(), m->by());
 
 			node.nodeGraphicsObject().setPos(posView);
+			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
+			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
 
 			this->nodePlaced(node);
 		};
@@ -388,11 +393,89 @@ namespace Qt
 		}
 	}
 
-	void QtNodeFlowScene::Key2_Signal(QtNode& n, bool checked)
+	void QtNodeFlowScene::showContextMenu(QtNode& n, const QPointF& pos)
 	{
-		printf("Key2_Signal\n");
+		auto menu = new QMenu;
+		menu->setStyleSheet("QMenu{color:white;border: 1px solid black;} "); //QMenu::item:selected {background-color : #4b586a;}
+
+		auto openAct = new QAction("Open", this);
+
+		auto showAllNodesAct = new QAction("Show All Nodes", this);
+		auto showThisNodeOnlyAct = new QAction("Show This Only", this);
+
+		auto delAct = new QAction("Delete", this);
+		auto helpAct = new QAction("Help", this);
+
+		menu->addAction(openAct);
+
+		menu->addSeparator();
+		menu->addAction(showThisNodeOnlyAct);
+		menu->addAction(showAllNodesAct);
+		
+		menu->addSeparator();
+		menu->addAction(delAct);
+
+		menu->addSeparator();
+		menu->addAction(helpAct);
+
+		connect(openAct, &QAction::triggered, this, [&]() { nodeDoubleClicked(n); });
+
+
+		connect(showAllNodesAct, &QAction::triggered, this, [&]() {
+			showAllNodes();
+		});
+
+		connect(showThisNodeOnlyAct, &QAction::triggered, this, [&]() {
+			showThisNodeOnly(n);
+		});
+
+		connect(delAct, &QAction::triggered, this, [&](){ this->removeNode(n); });
+		connect(helpAct, &QAction::triggered, this, [&]() { this->showHelper(n); });
+
+		menu->move(QCursor().pos().x() + 4, QCursor().pos().y() + 4);
+		menu->show();
 	}
-	
+
+	void QtNodeFlowScene::showThisNodeOnly(QtNode& n)
+	{
+		auto nodes = this->allNodes();
+		for (auto node : nodes)
+		{
+			if (node->id() == n.id())
+			{
+				node->nodeGraphicsObject().setHotKey1Hovered(true);
+				this->enableRendering(*node, true);
+			}
+			else
+			{
+				node->nodeGraphicsObject().setHotKey1Hovered(false);
+				this->enableRendering(*node, false);
+			}
+		}
+
+		this->updateNodeGraphView();
+
+		nodes.clear();
+	}
+
+	void QtNodeFlowScene::showAllNodes()
+	{
+		auto nodes = this->allNodes();
+		for (auto node : nodes)
+		{
+			this->enableRendering(*node, true);
+		}
+
+		this->updateNodeGraphView();
+
+		nodes.clear();
+	}
+
+	//TODO: show a message on how to use this node
+	void QtNodeFlowScene::showHelper(QtNode& n)
+	{
+		QMessageBox::information(nullptr, "Node Info", "Show something about this node");
+	}
 
 	void QtNodeFlowScene::reorderAllNodes()
 	{
