@@ -7,6 +7,8 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(PEnum, QEnumFieldWidget)
+
 	QEnumFieldWidget::QEnumFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{

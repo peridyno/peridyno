@@ -6,6 +6,9 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(int, QIntegerFieldWidget)
+	IMPL_FIELD_WIDGET(uint, QUIntegerFieldWidget)
+
 	QIntegerFieldWidget::QIntegerFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{

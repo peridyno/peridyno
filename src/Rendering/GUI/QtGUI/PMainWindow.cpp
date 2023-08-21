@@ -251,30 +251,7 @@ namespace dyno
 		return;
 	}
 
-	void PMainWindow::showModuleEditor()
-	{
-		auto nodes = mNodeFlowView->flowScene()->selectedNodes();
-		Qt::QtNodeWidget* clickedNode = nullptr;
-		if (nodes.size() > 0) {
-			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
-		}
-
-
-		if (clickedNode == nullptr)
-			return;
-
-		QString caption = nodes[0]->nodeDataModel()->caption();
-
-		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
-		moduelEditor->setWindowTitle("Module Flow Editor -- " +caption);
-		ModifyModuleEditor(moduelEditor);
-		moduelEditor->show();
-
-		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
-		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
-	}
-
-	void PMainWindow::openModuleEditor(Qt::QtNode& s)
+	void PMainWindow::showModuleEditor(Qt::QtNode& s)
 	{
 		Qt::QtNodeWidget* clickedNode = nullptr;
 
@@ -287,15 +264,6 @@ namespace dyno
 
 		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
 		moduelEditor->setWindowTitle("Module Flow Editor -- " + caption);
-		ModifyModuleEditor(moduelEditor);
-		moduelEditor->show();
-
-		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
-		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
-	}
-
-	void PMainWindow::ModifyModuleEditor(PModuleEditor* moduelEditor)
-	{
 		moduelEditor->resize(1024, 600);
 		moduelEditor->setMinimumSize(512, 360);
 

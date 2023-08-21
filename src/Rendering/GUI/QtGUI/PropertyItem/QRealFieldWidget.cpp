@@ -6,6 +6,8 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(float, QRealFieldWidget)
+
 	QRealFieldWidget::QRealFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{

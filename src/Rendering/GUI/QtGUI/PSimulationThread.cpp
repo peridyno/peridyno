@@ -67,6 +67,7 @@ namespace dyno
 		}
 	}
 
+
 	void PSimulationThread::createNewScene(std::shared_ptr<SceneGraph> scn)
 	{
 		if (mMutex.try_lock_for(mTimeOut))
@@ -179,8 +180,6 @@ namespace dyno
 
 	void PSimulationThread::reset(int num)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
-
 		this->pause();
 
 		mFinished = true;
@@ -199,8 +198,8 @@ namespace dyno
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
 		mActiveNode = node;
+
 		//Note: should set mReset at the end
 		mReset = true;
 		notify();
@@ -208,7 +207,6 @@ namespace dyno
 
 	void PSimulationThread::resetQtNode(Qt::QtNode& node)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
 		auto model = node.nodeDataModel();
 		auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
 

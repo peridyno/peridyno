@@ -112,9 +112,7 @@ namespace dyno
 		void showHelp();
 		void showAbout();
 
-		void showModuleEditor();
-		void openModuleEditor(Qt::QtNode& n);
-		void ModifyModuleEditor(PModuleEditor* moduelEditor);
+		void showModuleEditor(Qt::QtNode& n);
 
 		void showMessage();
 

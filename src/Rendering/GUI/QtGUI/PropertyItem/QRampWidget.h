@@ -18,8 +18,11 @@
  */
 #pragma once
 #include "QFieldWidget.h"
+#include "QtGUI/PPropertyWidget.h"
+
 #include <QKeyEvent>
 #include <QEvent>
+
 #include "Ramp.h"
 #include "PCustomWidgets.h"
 #include "QBoolFieldWidget.h"
@@ -37,6 +40,8 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
+		DECLARE_FIELD_WIDGET
+
 		QRampWidget(FBase* field);
 		~QRampWidget() override {};
 	
