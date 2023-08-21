@@ -4,13 +4,36 @@
 
 #include <QHeaderView>
 
+#include <QMenu>
+#include <QContextMenuEvent>
 #include <QString>
 #include <QTime>
 #include <QApplication>
 
 namespace dyno
 {
-	PLogSignal PLogWidget::logSignal;
+	std::atomic<PLogWidget*> PLogWidget::gInstance;
+	std::mutex PLogWidget::gMutex;
+
+	class QTimeTableWidgetItem : public QTableWidgetItem
+	{
+	public:
+		QTimeTableWidgetItem(void);
+
+		virtual QSize sizeHint() const;
+	};
+
+	class PTableItemMessage : public QTableWidgetItem
+	{
+	public:
+		PTableItemMessage(const Log::Message& m);
+	};
+
+	class PTableItemProgress : public QTableWidgetItem
+	{
+	public:
+		PTableItemProgress(const QString& Event, const float& Progress);
+	};
 
 	QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
 		QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))
@@ -24,7 +47,7 @@ namespace dyno
 
 	QSize QTimeTableWidgetItem::sizeHint(void) const
 	{
-		return QSize(70, 10);
+		return QTableWidgetItem::sizeHint();
 	}
 
 	PTableItemMessage::PTableItemMessage(const Log::Message& m) :
@@ -75,6 +98,21 @@ namespace dyno
 		//	setTextColor(Qt::blue);
 	}
 
+	PLogWidget* PLogWidget::instance()
+	{
+		PLogWidget* ins = gInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(gMutex);
+			ins = gInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new PLogWidget();
+				gInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
+	}
+
 	PLogWidget::PLogWidget(QWidget* pParent /*= NULL*/) :
 		QTableWidget(pParent)
 	{
@@ -101,8 +139,6 @@ namespace dyno
 
 		setAlternatingRowColors(true);
 
-		QObject::connect(&PLogWidget::logSignal, SIGNAL(sendMessage(const Log::Message&)), this, SLOT(OnLog(const Log::Message&)));
-
 		Log::sendMessage(Log::Info, "Finished");
 	}
 
@@ -116,7 +152,7 @@ namespace dyno
 		mEnableLogging = mEnableLogging ? false : true;
 	}
 
-	void PLogWidget::OnLog(const Log::Message& m)
+	void PLogWidget::onPrintMessage(const Log::Message& m)
 	{
 		if (!mEnableLogging)
 			return;
@@ -153,43 +189,8 @@ namespace dyno
 		setItem(0, 2, new PTableItemMessage(m));
 		setRowHeight(0, 18);
 	}
-// 
-// 	void PLogWidget::OnLog(const QString& Message, const QString& Icon)
-// 	{
-// 		insertRow(0);
-// 
-// 		QIcon ItemIcon = GetIcon(Icon);
-// 
-// 		setItem(0, 0, new QTimeTableWidgetItem());
-// 		setItem(0, 1, new QTableWidgetItem(ItemIcon, ""));
-// 		setItem(0, 2, new QTableItemMessage(Message, QLogger::Normal));
-// 		setRowHeight(0, 18);
-// 	}
-// 
-// 	void PLogWidget::OnLogProgress(const QString& Event, const float& Progress)
-// 	{
-// 		// Find nearest row with matching event
-// 		QList<QTableWidgetItem*> Items = findItems(Event, Qt::MatchStartsWith);
-// 
-// 		int RowIndex = 0;
-// 
-// 		if (Items.empty())
-// 		{
-// 			insertRow(0);
-// 			RowIndex = 0;
-// 		}
-// 		else
-// 		{
-// 			RowIndex = Items[0]->row();
-// 		}
-// 
-// 		setItem(RowIndex, 0, new QTimeTableWidgetItem());
-// 		setItem(RowIndex, 1, new QTableWidgetItem(""));
-// 		setItem(RowIndex, 2, new QTableItemProgress(Event, Progress));
-// 		setRowHeight(0, 18);
-// 	}
 
-	void PLogWidget::OnClear(void)
+	void PLogWidget::onClear(void)
 	{
 		if (currentRow() < 0)
 			return;
@@ -197,7 +198,7 @@ namespace dyno
 		removeRow(currentRow());
 	}
 
-	void PLogWidget::OnClearAll(void)
+	void PLogWidget::onClearAll(void)
 	{
 		clear();
 		setRowCount(0);
@@ -205,19 +206,16 @@ namespace dyno
 
 	void PLogWidget::RecieveLogMessage(const Log::Message& m)
 	{
-		PLogWidget::logSignal.setMessage(m);
+		PLogWidget::instance()->onPrintMessage(m);
 	}
 
 	void PLogWidget::contextMenuEvent(QContextMenuEvent* pContextMenuEvent)
 	{
-// 		QMenu ContextMenu(this);
-// 		ContextMenu.setTitle("Log");
-// 
-// 		if (currentRow() > 0)
-// 			ContextMenu.addAction(GetIcon("cross-small"), "Clear", this, SLOT(OnClear()));
-// 
-// 		ContextMenu.addAction(GetIcon("cross"), "Clear All", this, SLOT(OnClearAll()));
-// 		ContextMenu.exec(pContextMenuEvent->globalPos());
+		QMenu menu;
+		menu.setTitle("Log");
+
+		menu.addAction(getIcon("cross"), "Clear All", this, SLOT(onClearAll()));
+		menu.exec(pContextMenuEvent->globalPos());
 	}
 
 	QIcon PLogWidget::getIcon(const QString& name)
@@ -230,9 +228,18 @@ namespace dyno
 		return QSize(100, 100);
 	}
 
-	void PLogSignal::setMessage(const Log::Message& message)
-	{
-		emit sendMessage(message);
-	}
+	int PLogWidget::sizeHintForColumn(int column) const {
+		ensurePolished();
 
+		//TODO: viewOptions cannot not be recognized for Qt 6 
+// 		int row_count = rowCount();
+// 		if (row_count > 0 && column == 0) {
+// 			auto idx = model()->index(0, 0);
+// 			auto vo = viewOptions();
+// 			auto hint = itemDelegate(idx)->sizeHint(vo, idx).width();
+// 			return hint + 1;
+// 		}
+
+		return QTableWidget::sizeHintForColumn(column);
+	}
 }

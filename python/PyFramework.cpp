@@ -50,12 +50,11 @@ std::shared_ptr<TNode> create_root(SceneGraph& scene, Args&& ... args) {
 
 void pybind_log(py::module& m)
 {
-	py::class_<Log>(m, "Log")
-		.def(py::init<>())
-		.def_static("set_output", &Log::setOutput)
-		.def_static("get_output", &Log::getOutput)
-		.def_static("send_message", &Log::sendMessage)
-		.def_static("set_level", &Log::setLevel);
+	//TODO: Log is updated, update the python binding as well
+// 	py::class_<Log>(m, "Log")
+// 		.def_static("set_output", &Log::setOutput)
+// 		.def_static("get_output", &Log::getOutput)
+// 		.def_static("set_level", &Log::setLevel);
 }
 
 
