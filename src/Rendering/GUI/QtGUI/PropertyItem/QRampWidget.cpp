@@ -14,6 +14,8 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(Ramp, QRampWidget)
+
 	QRampWidget::QRampWidget(FBase* field)
 		: QFieldWidget(field)
 	{

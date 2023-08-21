@@ -6,6 +6,8 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(Vec3i, QVector3iFieldWidget)
+
 	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
