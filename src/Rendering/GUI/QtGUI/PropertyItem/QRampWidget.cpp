@@ -147,12 +147,15 @@ namespace dyno
 			nameReal[i] = new QLabel(QString::fromStdString(nameString[i]));
 
 			sliderReal[i] = new mQDoubleSlider;
-			sliderReal[i]->setRange(0,10);
 			sliderReal[i]->id = i;
 
 			spinnerReal[i] = new mQDoubleSpinner;
-			spinnerReal[i]->setRange(0, 10);
 			spinnerReal[i]->id = i;
+
+			auto rangeArray = f->getValue().remapRange;
+
+			sliderReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
+			spinnerReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
 
 			QObject::connect(sliderReal[i], SIGNAL(valueChanged(double)), spinnerReal[i], SLOT(setValue(double)));
 			QObject::connect(spinnerReal[i], SIGNAL(valueChanged(double)), sliderReal[i], SLOT(setValue(double)));
@@ -181,10 +184,7 @@ namespace dyno
 					break;
 			}
 
-			auto rangeArray = f->getValue().remapRange;
 
-			sliderReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
-			spinnerReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
 
 			if (i < 2) 
 			{

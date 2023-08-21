@@ -203,7 +203,7 @@ namespace dyno {
 
 		void setVarByStr(std::string Str, double& value)
 		{
-			if (std::isdigit(Str[0]))
+			if (std::isdigit(Str[0]) | (Str[0]=='-'))
 			{
 				value = std::stod(Str);
 			}
@@ -211,7 +211,7 @@ namespace dyno {
 		}
 		void setVarByStr(std::string Str, float& value)
 		{
-			if (std::isdigit(Str[0]))
+			if (std::isdigit(Str[0]) | (Str[0] == '-'))
 			{
 				value = float(std::stod(Str));
 			}
@@ -219,7 +219,7 @@ namespace dyno {
 		}
 		void setVarByStr(std::string Str, int& value)
 		{
-			if (std::isdigit(Str[0]))
+			if (std::isdigit(Str[0]) | (Str[0] == '-'))
 			{
 				value = std::stoi(Str);
 			}

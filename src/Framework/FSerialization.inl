@@ -346,7 +346,6 @@ namespace dyno
 		if (str.empty())
 			return false;
 
-		//在这写反序列化
 
 		std::stringstream ss(str);
 		std::string substr;
@@ -388,7 +387,7 @@ namespace dyno
 				}
 				else if (countHandle > 0 && countHandle % 2 == 0)
 				{
-					ramp->MyCoord.push_back(Ramp::Coord2D(tempCoord, std::stod(substr)));
+					ramp->myHandlePoint.push_back(Ramp::Coord2D(tempCoord, std::stod(substr)));
 				}
 			}
 			else if (currentVarName == "useCurve")
