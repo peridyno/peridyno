@@ -635,7 +635,7 @@ namespace Qt
 		for (it = otherVertices.begin(); it != otherVertices.end(); it++)
 		{
 			dyno::ObjectId id = *it;
-			printf("¿Î…¢≈≈–Ú%d\n", id);
+			//printf("¿Î…¢≈≈–Ú%d\n", id);
 			if (qtNodeMapper.find(id) != qtNodeMapper.end())
 			{
 				QtNode* qtNode = qtNodeMapper[id];
