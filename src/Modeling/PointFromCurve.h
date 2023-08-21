@@ -44,7 +44,7 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "Points");
 
-		DEF_INSTANCE_OUT(EdgeSet<TDataType>, EdgeSet, "Curve");
+		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "Curve");
 
 
 

@@ -298,7 +298,7 @@ namespace dyno {
 	{
 		std::vector<Coord2D> temp;
 		temp.assign(MyCoord.begin(),MyCoord.end());
-		if (curveClose) 
+		if (curveClose&&temp.size()>= 3) 
 		{
 			temp.push_back(MyCoord[0]);
 		}
