@@ -21,7 +21,6 @@
 #include "NodePort.h"
 
 #include "Module/TopologyModule.h"
-//#include "Module/DeviceContext.h"
 #include "Module/CustomModule.h"
 #include "Module/TopologyMapping.h"
 #include "Module/AnimationPipeline.h"
@@ -111,35 +110,11 @@ namespace dyno
 
 		void setDt(Real dt);
 
-		// 	Iterator begin();
-		// 	Iterator end();
-
 		void setSceneGraph(SceneGraph* scn);
 		SceneGraph* getSceneGraph();
 
-// 		/**
-// 		 * @brief Add a ancestor
-// 		 *
-// 		 * @param Ancestor
-// 		 * @return std::shared_ptr<Node>
-// 		 */
-// 		Node* addAncestor(Node* anc);
-// 
-// 		bool hasAncestor(Node* anc);
-
 		std::vector<NodePort*>& getImportNodes() { return mImportNodes; }
 		std::vector<NodePort*>& getExportNodes() { return mExportNodes; }
-
-// 		/**
-// 		 * @brief Return all descendants
-// 		 *
-// 		 * @return std::list<Node*> descendant list
-// 		 */
-// 		std::list<Node*>& getDescendants() {return mDescendants; }
-
-// 		std::shared_ptr<DeviceContext> getContext();
-// 		void setContext(std::shared_ptr<DeviceContext> context);
-//		virtual void setAsCurrentContext();
 
 		/**
 		 * @brief Add a module to m_module_list and other special module lists
@@ -216,29 +191,6 @@ namespace dyno
 			return TypeInfo::cast<TModule>(base);
 		}
 
-#define NODE_SET_SPECIAL_MODULE_BY_TEMPLATE( CLASSNAME )														\
-	template<class TModule>																						\
-	std::shared_ptr<TModule> set##CLASSNAME(std::string name) {													\
-		if (hasModule(name))																					\
-		{																										\
-			Log::sendMessage(Log::Error, std::string("Module ") + name + std::string(" already exists!"));		\
-			return nullptr;																						\
-		}																										\
-																												\
-		std::shared_ptr<TModule> module = std::make_shared<TModule>();											\
-		module->setName(name);																					\
-		this->set##CLASSNAME(module);																			\
-																												\
-		return module;																							\
-	}
-
-#define NODE_SET_SPECIAL_MODULE( CLASSNAME, MODULENAME )						\
-	virtual void set##CLASSNAME( std::shared_ptr<CLASSNAME> module) {			\
-		if(MODULENAME != nullptr)	deleteFromModuleList(MODULENAME);					\
-		MODULENAME = module;													\
-		addToModuleList(module);														\
-	}
-
 		std::shared_ptr<AnimationPipeline>		animationPipeline();
 		std::shared_ptr<GraphicsPipeline>		graphicsPipeline();
 
@@ -256,35 +208,7 @@ namespace dyno
 
 			return module;
 		}
-
-#define NODE_CREATE_SPECIAL_MODULE(CLASSNAME) \
-	template<class TModule>									\
-		std::shared_ptr<TModule> add##CLASSNAME(std::string name)	\
-		{																	\
-			if (hasModule(name))											\
-			{																\
-				Log::sendMessage(Log::Error, std::string("Module ") + name + std::string(" already exists!"));	\
-				return nullptr;																					\
-			}																									\
-			std::shared_ptr<TModule> module = std::make_shared<TModule>();										\
-			module->setName(name);																				\
-			this->add##CLASSNAME(module);																		\
-																												\
-			return module;																						\
-		}																										
-
-#define NODE_ADD_SPECIAL_MODULE( CLASSNAME, SEQUENCENAME ) \
-	virtual void add##CLASSNAME( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.push_back(module); addToModuleList(module);} \
-	virtual void delete##CLASSNAME( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.remove(module); deleteFromModuleList(module); } \
-	std::list<std::shared_ptr<CLASSNAME>>& get##CLASSNAME##List(){ return SEQUENCENAME;}
-
-			NODE_ADD_SPECIAL_MODULE(TopologyMapping, m_topology_mapping_list)
-			NODE_ADD_SPECIAL_MODULE(CustomModule, m_custom_list)
-
-			NODE_CREATE_SPECIAL_MODULE(TopologyMapping)
-			NODE_CREATE_SPECIAL_MODULE(CustomModule)
-
-			
+	
 		/**
 		 * @brief Initialize all states, called before the node is first updated.
 		 */
@@ -345,9 +269,7 @@ namespace dyno
 
 		uint sizeOfImportNodes() const;
 		uint sizeOfExportNodes() const { return (uint)mExportNodes.size(); }
-// 		uint sizeOfAncestors() const { return (uint)mAncestors.size(); }
-// 		uint sizeofDescendants() const { return (uint)mDescendants.size(); }
-	
+
 	protected:
 // 		virtual void doTraverseBottomUp(Action* act);
 // 		virtual void doTraverseTopDown(Action* act);
@@ -371,30 +293,10 @@ namespace dyno
 		void tick();
 
 	private:
-// 		/**
-// 		 * @brief Add a descendant
-// 		 *
-// 		 * @param descendant
-// 		 * @return std::shared_ptr<Node>
-// 		 */
-// 		Node* addDescendant(Node* descent);
-// 
-// 		bool hasDescendant(Node* descent);
-// 
-// 		void removeDescendant(Node* descent);
-
 		bool addNodePort(NodePort* port);
 
 		bool addToModuleList(std::shared_ptr<Module> module);
 		bool deleteFromModuleList(std::shared_ptr<Module> module);
-
-#define NODE_ADD_SPECIAL_MODULE_LIST( CLASSNAME, SEQUENCENAME ) \
-	virtual void addTo##CLASSNAME##List( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.push_back(module); } \
-	virtual void deleteFrom##CLASSNAME##List( std::shared_ptr<CLASSNAME> module) { SEQUENCENAME.remove(module); } \
-
-			NODE_ADD_SPECIAL_MODULE_LIST(TopologyMapping, m_topology_mapping_list)
-			NODE_ADD_SPECIAL_MODULE_LIST(CustomModule, m_custom_list)
-
 
 	public:
 		std::string m_node_name;
@@ -428,31 +330,15 @@ namespace dyno
 		 */
 		std::list<std::shared_ptr<Module>> m_module_list;
 
-		//m_topology will be deprecated in the next version
-		std::shared_ptr<TopologyModule> m_topology;
 		/**
-		 * @brief Pointer of a specific module
+		 * @brief Pointer of the pipeline
 		 *
 		 */
 		std::shared_ptr<AnimationPipeline> m_animation_pipeline;
 		std::shared_ptr<GraphicsPipeline> m_render_pipeline;
 
-		/**
-		 * @brief A module list containg specific modules
-		 *
-		 */
-		std::list<std::shared_ptr<TopologyMapping>> m_topology_mapping_list;
-		std::list<std::shared_ptr<CustomModule>> m_custom_list;
-
 // 		//std::shared_ptr<DeviceContext> m_context;
 // 
-// 		std::list<Node*> mAncestors;
-// 
-// 		/**
-// 		 * @brief Storing pointers to descendants
-// 		 */
-// 		std::list<Node*> mDescendants;
-
 		std::vector<NodePort*> mImportNodes;
 
 		std::vector<NodePort*> mExportNodes;

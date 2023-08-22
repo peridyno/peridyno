@@ -146,12 +146,6 @@ namespace dyno
 
 				if (node->isActive())
 				{
-					auto customModules = node->getCustomModuleList();
-					for (std::list<std::shared_ptr<CustomModule>>::iterator iter = customModules.begin(); iter != customModules.end(); iter++)
-					{
-						(*iter)->update();
-					}
-
 					node->update();
 				}
 

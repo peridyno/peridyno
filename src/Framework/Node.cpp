@@ -308,17 +308,6 @@ bool Node::addModule(std::shared_ptr<Module> module)
 	bool ret = true;
 	ret &= addToModuleList(module);
 
-	std::string mType = module->getModuleType();
-	if (std::string("TopologyModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<TopologyModule>(module);
-		m_topology = downModule;
-	}
-	else if (std::string("TopologyMapping").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<TopologyMapping>(module);
-		this->addToTopologyMappingList(downModule);
-	}
 	return ret;
 }
 
@@ -333,18 +322,6 @@ void Node::initialize()
 bool Node::deleteModule(std::shared_ptr<Module> module)
 {
 	bool ret = true;
-
-	std::string mType = module->getModuleType();
-
-	if (std::string("TopologyModule").compare(mType) == 0)
-	{
-		m_topology = nullptr;
-	}
-	else if (std::string("TopologyMapping").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<TopologyMapping>(module);
-		this->deleteFromTopologyMappingList(downModule);
-	}
 
 	ret &= deleteFromModuleList(module);
 		
