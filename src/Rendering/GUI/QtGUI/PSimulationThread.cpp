@@ -8,6 +8,8 @@
 #include "SceneGraph.h"
 #include "SceneGraphFactory.h"
 
+#include "Action.h"
+
 #include "NodeEditor/QtNodeWidget.h"
 
 using namespace std::chrono_literals;
@@ -198,10 +200,9 @@ namespace dyno
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
-		mActiveNode = node;
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->reset(node);
 
-		//Note: should set mReset at the end
-		mReset = true;
 		notify();
 	}
 
@@ -215,6 +216,24 @@ namespace dyno
 			mActiveNode = widget->getNode();
 			mReset = true;
 		}
+	}
+
+	void PSimulationThread::syncNode(std::shared_ptr<Node> node)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+
+		class SyncNodeAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->reset();
+				node->updateGraphicsContext();
+			}
+		};
+
+		scn->traverseForwardWithAutoSync<SyncNodeAct>(node);
+
+		notify();
 	}
 
 	void PSimulationThread::startUpdatingGraphicsContext()

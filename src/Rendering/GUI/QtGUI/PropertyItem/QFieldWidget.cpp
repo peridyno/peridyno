@@ -73,7 +73,6 @@ namespace dyno
 		connect(ValueModify, SIGNAL(DiaValueChange(double)), this, SLOT(ModifyValue(double)));
 	}
 	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event)
-
 	{
 		QDoubleSpinBox::mousePressEvent(event);
 		if (event->button() == Qt::RightButton) {

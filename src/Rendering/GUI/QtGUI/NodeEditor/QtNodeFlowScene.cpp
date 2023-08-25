@@ -14,6 +14,8 @@
 #include "SceneGraphFactory.h"
 
 #include <QtWidgets/QMessageBox>
+#include <QKeySequence>
+#include <QShortcut>
 #include <QMenu>
 #include "iostream"
 
@@ -22,7 +24,6 @@ namespace Qt
 	QtNodeFlowScene::QtNodeFlowScene(std::shared_ptr<QtDataModelRegistry> registry, QObject* parent)
 		: QtFlowScene(registry, parent)
 	{
-
 	}
 
 	QtNodeFlowScene::QtNodeFlowScene(QObject* parent)
@@ -395,6 +396,12 @@ namespace Qt
 
 	void QtNodeFlowScene::showContextMenu(QtNode& n, const QPointF& pos)
 	{
+		auto qDataModel = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+		auto node = qDataModel->getNode();
+		if (node == nullptr) {
+			return;
+		}
+
 		auto menu = new QMenu;
 		menu->setStyleSheet("QMenu{color:white;border: 1px solid black;} "); //QMenu::item:selected {background-color : #4b586a;}
 
@@ -402,6 +409,9 @@ namespace Qt
 
 		auto showAllNodesAct = new QAction("Show All Nodes", this);
 		auto showThisNodeOnlyAct = new QAction("Show This Only", this);
+
+		showAllNodesAct->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_V));
+		showThisNodeOnlyAct->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_H));
 
 		auto delAct = new QAction("Delete", this);
 		auto helpAct = new QAction("Help", this);
@@ -411,6 +421,23 @@ namespace Qt
 		menu->addSeparator();
 		menu->addAction(showThisNodeOnlyAct);
 		menu->addAction(showAllNodesAct);
+
+
+		auto resetNodeAct = new QAction("Reset This Node", this);
+		auto activateAllNodesAct = new QAction("Activate All Nodes", this);
+		auto activateThisNodeOnlyAct = new QAction("Activate This Only", this);
+		auto autoSyncAct = new QAction("Auto-Sync", this);
+		autoSyncAct->setCheckable(true);
+		autoSyncAct->setChecked(node->isAutoSync());
+		menu->addSeparator();
+		menu->addAction(resetNodeAct);
+
+		menu->addSeparator();
+		menu->addAction(activateThisNodeOnlyAct);
+		menu->addAction(activateAllNodesAct);
+
+		menu->addSeparator();
+		menu->addAction(autoSyncAct);
 		
 		menu->addSeparator();
 		menu->addAction(delAct);
@@ -428,6 +455,22 @@ namespace Qt
 		connect(showThisNodeOnlyAct, &QAction::triggered, this, [&]() {
 			showThisNodeOnly(n);
 		});
+
+		connect(resetNodeAct, &QAction::triggered, this, [=]() {
+			node->reset();
+		});
+
+		connect(activateAllNodesAct, &QAction::triggered, this, [&]() {
+			activateAllNodes();
+			});
+
+		connect(activateThisNodeOnlyAct, &QAction::triggered, this, [&]() {
+			activateThisNodeOnly(n);
+			});
+
+		connect(autoSyncAct, &QAction::triggered, this, [=](bool checked) {
+			node->setAutoSync(checked);
+			});
 
 		connect(delAct, &QAction::triggered, this, [&](){ this->removeNode(n); });
 		connect(helpAct, &QAction::triggered, this, [&]() { this->showHelper(n); });
@@ -464,6 +507,41 @@ namespace Qt
 		for (auto node : nodes)
 		{
 			this->enableRendering(*node, true);
+		}
+
+		this->updateNodeGraphView();
+
+		nodes.clear();
+	}
+
+	void QtNodeFlowScene::activateThisNodeOnly(QtNode& n)
+	{
+		auto nodes = this->allNodes();
+		for (auto node : nodes)
+		{
+			if (node->id() == n.id())
+			{
+				node->nodeGraphicsObject().setHotKey0Hovered(true);
+				this->enablePhysics(*node, true);
+			}
+			else
+			{
+				node->nodeGraphicsObject().setHotKey0Hovered(false);
+				this->enablePhysics(*node, false);
+			}
+		}
+
+		this->updateNodeGraphView();
+
+		nodes.clear();
+	}
+
+	void QtNodeFlowScene::activateAllNodes()
+	{
+		auto nodes = this->allNodes();
+		for (auto node : nodes)
+		{
+			this->enablePhysics(*node, true);
 		}
 
 		this->updateNodeGraphView();
@@ -549,15 +627,10 @@ namespace Qt
 					}
 				}
 			}
-
-			
-
 		};
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
-
 			constructDAG(it.get());
-
 		}
 
 
@@ -635,7 +708,6 @@ namespace Qt
 		for (it = otherVertices.begin(); it != otherVertices.end(); it++)
 		{
 			dyno::ObjectId id = *it;
-			printf("¿Î…¢≈≈–Ú%d\n", id);
 			if (qtNodeMapper.find(id) != qtNodeMapper.end())
 			{
 				QtNode* qtNode = qtNodeMapper[id];

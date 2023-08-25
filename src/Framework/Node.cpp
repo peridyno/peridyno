@@ -51,14 +51,14 @@ std::string Node::getNodeType()
 	return "Default";
 }
 
-bool Node::isControllable()
+bool Node::isAutoSync()
 {
-	return m_controllable;
+	return mAutoSync;
 }
 
-void Node::setControllable(bool con)
+void Node::setAutoSync(bool con)
 {
-	m_controllable = con;
+	mAutoSync = con;
 }
 
 bool Node::canExported()

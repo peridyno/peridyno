@@ -73,6 +73,9 @@ private:
 	void showThisNodeOnly(QtNode& n);
 	void showAllNodes();
 
+	void activateThisNodeOnly(QtNode& n);
+	void activateAllNodes();
+
 	SceneGraph* m_scene = nullptr;
 
 	bool mEditingEnabled = true;

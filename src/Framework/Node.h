@@ -80,9 +80,14 @@ namespace dyno
 
 		virtual std::string getNodeType();
 
-		bool isControllable();
+		bool isAutoSync();
 
-		void setControllable(bool con);
+		/**
+		 * @brief Whether the node can be automatically synchronized when its ancestor is updated
+		 *
+		 * @param if true, the node can be synchronized automatically, otherwise not
+		 */
+		void setAutoSync(bool con);
 
 		bool canExported();
 
@@ -307,7 +312,10 @@ namespace dyno
 		DEF_VAR_STATE(uint, FrameNumber, 0, "Frame number");
 
 	private:
-		bool m_controllable = true;
+		/**
+		 * @brief A parameter to control whether the node can be updated automatically by its ancestor
+		 */
+		bool mAutoSync = false;
 
 		bool mPhysicsEnabled = true;
 

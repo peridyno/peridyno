@@ -493,28 +493,37 @@ namespace dyno
 	};
 
 	//Used to traverse the scene graph from a specific node
-	void BFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
+	void BFS(Node* node, NodeList& list, std::map<ObjectId, bool>& visited) {
 
 		visited[node->objectId()] = true;
 
-		nodeQueue.push_back(node);
+		std::queue<Node*> queue;
+		queue.push(node);
 
-		auto exports = node->getExportNodes();
-		for (auto port : exports) {
-			auto exNode = port->getParent();
-			if (exNode != nullptr && !visited[node->objectId()]) {
-				BFS(exNode, nodeQueue, visited);
+		while (!queue.empty())
+		{
+			auto fn = queue.front();
+			queue.pop();
+
+			list.push_back(fn);
+
+			auto exports = fn->getExportNodes();
+			for (auto port : exports) {
+				auto next = port->getParent();
+				if (next != nullptr && !visited[next->objectId()]) {
+					queue.push(next);
+				}
 			}
-		}
 
-		auto outFields = node->getOutputFields();
-		for(auto f : outFields) {
-			auto& sinks = f->getSinks();
-			for(auto sink : sinks) {
-				if (sink != nullptr) {
-					auto exNode = dynamic_cast<Node*>(sink->parent());
-					if (exNode != nullptr && !visited[exNode->objectId()]) {
-						BFS(exNode, nodeQueue, visited);
+			auto outFields = fn->getOutputFields();
+			for (auto f : outFields) {
+				auto& sinks = f->getSinks();
+				for (auto sink : sinks) {
+					if (sink != nullptr) {
+						auto next = dynamic_cast<Node*>(sink->parent());
+						if (next != nullptr && !visited[next->objectId()]) {
+							queue.push(next);
+						}
 					}
 				}
 			}
@@ -619,6 +628,67 @@ namespace dyno
 		visited.clear();
 	}
 
+	//Used to traverse the scene graph from a specific node
+	void BFSWithAutoSync(Node* node, NodeList& list, std::map<ObjectId, bool>& visited) {
+
+		visited[node->objectId()] = true;
+
+		std::queue<Node*> queue;
+		queue.push(node);
+
+		while (!queue.empty())
+		{
+			auto fn = queue.front();
+			queue.pop();
+
+			list.push_back(fn);
+
+			auto exports = fn->getExportNodes();
+			for (auto port : exports) {
+				auto next = port->getParent();
+				if (next != nullptr && next->isAutoSync() && !visited[next->objectId()]) {
+					queue.push(next);
+				}
+			}
+
+			auto outFields = fn->getOutputFields();
+			for (auto f : outFields) {
+				auto& sinks = f->getSinks();
+				for (auto sink : sinks) {
+					if (sink != nullptr) {
+						auto next = dynamic_cast<Node*>(sink->parent());
+						if (next != nullptr && next->isAutoSync() && !visited[next->objectId()]) {
+							queue.push(next);
+						}
+					}
+				}
+			}
+		}
+	};
+
+	void SceneGraph::traverseForwardWithAutoSync(std::shared_ptr<Node> node, Action* act)
+	{
+		std::map<ObjectId, bool> visited;
+		for (auto& nm : mNodeMap) {
+			visited[nm.first] = false;
+		}
+
+		NodeList list;
+		BFSWithAutoSync(node.get(), list, visited);
+
+		for (auto it = list.begin(); it != list.end(); ++it)
+		{
+			Node* node = *it;
+
+			act->start(node);
+			act->process(node);
+			act->end(node);
+		}
+
+		list.clear();
+		visited.clear();
+	}
+
 	void SceneGraph::deleteNode(std::shared_ptr<Node> node)
 	{
 		if (node == nullptr ||
@@ -629,20 +699,6 @@ namespace dyno
 		mQueueUpdateRequired = true;
 	}
 
-	void DownwardDFS(Node* node, std::map<ObjectId, bool>& visited) {
-
-		visited[node->objectId()] = true;
-		node->update();
-
-		auto exports = node->getExportNodes();
-		for (auto port : exports) {
-			auto exNode = port->getParent();
-			if (exNode != nullptr && !visited[node->objectId()]) {
-				DownwardDFS(exNode, visited);
-			}
-		}
-	};
-
 	void SceneGraph::propagateNode(std::shared_ptr<Node> node)
 	{
 		std::map<ObjectId, bool> visited;
@@ -651,7 +707,7 @@ namespace dyno
 			visited[(*it)->objectId()] = false;
 		}
 
-		DownwardDFS(node.get(), visited);
+		//DownwardDFS(node.get(), visited);
 
 		visited.clear();
 	}
