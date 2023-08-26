@@ -424,11 +424,8 @@ namespace Qt
 
 
 		auto resetNodeAct = new QAction("Reset This Node", this);
-		auto activateAllNodesAct = new QAction("Activate All Nodes", this);
 		auto activateThisNodeOnlyAct = new QAction("Activate This Only", this);
-		auto autoSyncAct = new QAction("Auto-Sync", this);
-		autoSyncAct->setCheckable(true);
-		autoSyncAct->setChecked(node->isAutoSync());
+		auto activateAllNodesAct = new QAction("Activate All Nodes", this);
 		menu->addSeparator();
 		menu->addAction(resetNodeAct);
 
@@ -437,7 +434,19 @@ namespace Qt
 		menu->addAction(activateAllNodesAct);
 
 		menu->addSeparator();
+		auto autoSyncAct = new QAction("Auto-Sync", this);
+		autoSyncAct->setCheckable(true);
+		autoSyncAct->setChecked(node->isAutoSync());
+
+		auto enableDiscendants = new QAction("Enable Descendants' Auto-Sync(s)", this);
+		auto disableDiscendants = new QAction("Disable Descendants' Auto-Sync(s)", this);
+		auto enableAutoSync = new QAction("Enable All Auto-Sync(s)", this);
+		auto disableAutoSync = new QAction("Disable All Auto-Sync(s)", this);
 		menu->addAction(autoSyncAct);
+		menu->addAction(enableDiscendants);
+		menu->addAction(disableDiscendants);
+		menu->addAction(enableAutoSync);
+		menu->addAction(disableAutoSync);
 		
 		menu->addSeparator();
 		menu->addAction(delAct);
@@ -462,15 +471,31 @@ namespace Qt
 
 		connect(activateAllNodesAct, &QAction::triggered, this, [&]() {
 			activateAllNodes();
-			});
+		});
 
 		connect(activateThisNodeOnlyAct, &QAction::triggered, this, [&]() {
 			activateThisNodeOnly(n);
-			});
+		});
 
 		connect(autoSyncAct, &QAction::triggered, this, [=](bool checked) {
 			node->setAutoSync(checked);
+		});
+
+		connect(enableDiscendants, &QAction::triggered, this, [&]() {
+			autoSyncAllDescendants(n, true);
 			});
+
+		connect(disableDiscendants, &QAction::triggered, this, [&]() {
+			autoSyncAllDescendants(n, false);
+			});
+
+		connect(enableAutoSync, &QAction::triggered, this, [=]() {
+			autoSyncAllNodes(true);
+		});
+
+		connect(disableAutoSync, &QAction::triggered, this, [=]() {
+			autoSyncAllNodes(false);
+		});
 
 		connect(delAct, &QAction::triggered, this, [&](){ this->removeNode(n); });
 		connect(helpAct, &QAction::triggered, this, [&]() { this->showHelper(n); });
@@ -541,12 +566,57 @@ namespace Qt
 		auto nodes = this->allNodes();
 		for (auto node : nodes)
 		{
-			this->enablePhysics(*node, true);
+			auto a = node->nodeDataModel();
 		}
 
 		this->updateNodeGraphView();
 
 		nodes.clear();
+	}
+
+	void QtNodeFlowScene::autoSyncAllNodes(bool autoSync)
+	{
+		auto nodes = this->allNodes();
+		for (auto node : nodes)
+		{
+			auto dataModel = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
+			if (dataModel != nullptr)
+			{
+				auto dNode = dataModel->getNode();
+				dNode->setAutoSync(autoSync);
+			}
+		}
+
+		nodes.clear();
+	}
+
+	void QtNodeFlowScene::autoSyncAllDescendants(QtNode& n, bool autoSync)
+	{
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+
+		class ToggleAutoSyncAct : public dyno::Action
+		{
+		public:
+			ToggleAutoSyncAct(bool autoSync) { mAutoSync = autoSync; }
+
+			void process(Node* node) override {
+				node->setAutoSync(mAutoSync);
+			}
+
+		private:
+			bool mAutoSync = true;
+		};
+
+		ToggleAutoSyncAct act(autoSync);
+
+		auto dataModel = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+		if (dataModel != nullptr)
+		{
+			auto dNode = dataModel->getNode();
+			if (dNode == nullptr) return;
+
+			scn->traverseForward(dNode, &act);
+		}
 	}
 
 	//TODO: show a message on how to use this node
