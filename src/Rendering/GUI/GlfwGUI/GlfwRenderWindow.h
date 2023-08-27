@@ -113,6 +113,8 @@ namespace dyno {
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
 
+		double mCursorTempX = -1.0;
+
 		int mSaveScreenInterval = 1;
 
 		//current screen capture file index
@@ -125,6 +127,7 @@ namespace dyno {
 		bool mShowImWindow = true;
 
 		ImWindow mImWindow;
+		
 
     };
 

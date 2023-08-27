@@ -387,6 +387,7 @@ namespace dyno
 		glfwSetCursorPosCallback(mWindow, mCursorPosFunc);
 		glfwSetCursorEnterCallback(mWindow, mCursorEnterFunc);
 		glfwSetScrollCallback(mWindow, mScrollFunc);
+
 	}
 
 	void GlfwRenderWindow::drawScene(void)
@@ -455,12 +456,19 @@ namespace dyno
 			activeWindow->imWindow()->mouseReleaseEvent(mouseEvent);
 		}
 
-
 		// update cursor position record
-		if (action == GLFW_PRESS)
+		
+		if (action == GLFW_PRESS) 
+		{
 			activeWindow->setCursorPos(xpos, ypos);
-		else
+			activeWindow->mCursorTempX = xpos;
+		}
+		else 
+		{
 			activeWindow->setCursorPos(-1, -1);
+			activeWindow->mCursorTempX = -1;
+		}
+
 	}
 
 	void GlfwRenderWindow::cursorPosCallback(GLFWwindow* window, double x, double y)
@@ -488,15 +496,26 @@ namespace dyno
 			camera->rotateToPoint(x, y);
 		}
 		else if (
-			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && 
+			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_MIDDLE &&
 			activeWindow->getButtonState() == GLFW_DOWN && 
 			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
 			!activeWindow->mImWindow.cameraLocked()) 
 		{
 			camera->translateToPoint(x, y);
 		}
-
-		activeWindow->imWindow()->mouseMoveEvent(mouseEvent);
+		else if (
+			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT &&
+			activeWindow->getButtonState() == GLFW_DOWN &&
+			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
+			!activeWindow->mImWindow.cameraLocked())////
+		{
+			if (activeWindow->mCursorTempX != -1) 
+			{
+				camera->zoom(-0.005 * (x - activeWindow->mCursorTempX));
+				activeWindow->mCursorTempX = x;
+			}
+		}
+		activeWindow->imWindow()->mouseMoveEvent(mouseEvent); 
 	}
 
 	void GlfwRenderWindow::cursorEnterCallback(GLFWwindow* window, int entered)

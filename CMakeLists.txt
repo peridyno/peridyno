@@ -131,7 +131,7 @@ option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
+	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" ON)
 	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
 	if(PERIDYNO_PYTHON_BINDING)
 	    add_subdirectory(python)
@@ -165,6 +165,11 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
 	# Qt GUI support, off by default
 	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" OFF)
+
+	# Add Plugin folder
+	if(PERIDYNO_LIBRARY_PLUGIN)
+		add_subdirectory(plugins)
+	endif()
 
 	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)

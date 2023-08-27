@@ -18,6 +18,7 @@
  */
 #pragma once
 #include "QFieldWidget.h"
+#include "QtGUI/PPropertyWidget.h"
 
 namespace dyno
 {
@@ -56,6 +57,8 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
+		DECLARE_FIELD_WIDGET
+
 		QColorWidget(FBase* field);
 		~QColorWidget() override;
 

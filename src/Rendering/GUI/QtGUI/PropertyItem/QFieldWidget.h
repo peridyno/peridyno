@@ -30,6 +30,7 @@
 //PeriDyno
 #include "Format.h"
 #include "FCallBackFunc.h"
+#include "QtGUI/Common.h"
 
 //C++
 #include <memory>
@@ -43,7 +44,7 @@ namespace dyno
 	class QDoubleSpinner;
 	class QDoubleSlider;
 
-	class QFieldWidget : public QGroupBox
+	class PERIDYNO_QTGUI_API QFieldWidget : public QGroupBox
 	{
 		Q_OBJECT
 	public:

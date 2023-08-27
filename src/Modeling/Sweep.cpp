@@ -3,6 +3,7 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
+#include "EarClipper.h"
 
 
 
@@ -12,16 +13,15 @@ namespace dyno
 	SweepModel<TDataType>::SweepModel()
 		: ParametricModel<TDataType>()
 	{
-
 		this->varRadius()->setRange(0.001f, 10.0f);
+
 		this->varRadius()->setValue(1);
 
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 
-
-		glModule = std::make_shared<GLSurfaceVisualModule>();
+		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
@@ -37,36 +37,76 @@ namespace dyno
 		auto pointGlModule = std::make_shared<GLPointVisualModule>();
 		this->stateTriangleSet()->connect(pointGlModule->inPointSet());
 		this->graphicsPipeline()->pushModule(pointGlModule);
-		pointGlModule->varPointSize()->setValue(0.02);
+		pointGlModule->varPointSize()->setValue(0.005);
 
 		this->stateTriangleSet()->promoteOuput();
+
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SweepModel<TDataType>::varChanged, this));
+
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+		this->varRadius()->attach(callback);
+		this->varCurveRamp()->attach(callback);
+		this->varReverseNormal()->attach(callback);
+
+		auto displayCallback = std::make_shared<FCallBackFunc>(std::bind(&SweepModel<TDataType>::displayChanged, this));
+
+		this->varDisplayPoints()->attach(displayCallback);
+		this->varDisplaySurface()->attach(displayCallback);
+		this->varDisplayWireframe()->attach(displayCallback);
+
 	}
 
 	template<typename TDataType>
 	void SweepModel<TDataType>::resetStates()
 	{
+		varChanged();
+		displayChanged();
+		printf("resetStates  sweep \n");
+	}
 
+	template<typename TDataType>
+	void SweepModel<TDataType>::varChanged()
+	{
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
 
 		auto radius = this->varRadius()->getData();
 		
-		auto VertexIn = this->inSpline()->getData().getPoints();
+		if (this->inSpline()->isEmpty())
+		{ 
+			printf("inSpline  empty \n");
+			return; 
+		}
+		if (this->inCurve()->isEmpty()) 
+		{ 
+			printf("inCurve  empty \n");
+			return; 
+		}
+
+		auto SplineIn = this->inSpline()->getData().getPoints();
 
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
+
+		auto VertexIn2 = this->inCurve()->getData().getPoints();
+
+		if (SplineIn.size() == 0) { return; }
+		if (VertexIn2.size() == 0) { return; }
 
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
-		//Curve1路径曲线 曲线点
+		//Spline路径曲线 曲线点
 		CArray<Coord> c_point1;
-		c_point1.assign(VertexIn);
 
-		int lengthV = VertexIn.size();
+		c_point1.assign(SplineIn);
+
+		int lengthV = SplineIn.size();
 		totalIndex = lengthV;
 		//Curve2环形曲线 曲线点
-		auto VertexIn2 = this->inCurve()->getData().getPoints();
 
 		CArray<Coord> c_point2;
 		c_point2.assign(VertexIn2);
@@ -78,59 +118,49 @@ namespace dyno
 		Real PI = 3.1415926535;
 
 		uint counter = 0;
-		Coord Location1;
-		Coord Location2;
-		Coord LocationTemp1 = {0,1,0};
+
+		Coord LocationCurrent;
+		Coord LocationNext = {0,1,0};
 		Coord LocationTemp2 = {0,1,0};
 
-		Vec3f Dir;
+
 		//建立四元数以进行递归变换
 
 
 		for (size_t i = 0; i < lengthV; i++) 
 		{
 			currentIndex = i;
-			Location2 = { c_point1[i][0], c_point1[i][1], c_point1[i][2] };
-			
+
+			int current = i;
 			int next = i + 1;
-			if (i == lengthV - 1) { next = i - 1; }
 
-			LocationTemp1 = { c_point1[next][0], c_point1[next][1], c_point1[next][2] };
+			if (i == lengthV - int(1))
+			{ 
+				next = i ; 
+				current = i - 1;
+			}
 
-			Vec3f vb = Vec3f(0,1,0);
-			Vec3f va = LocationTemp1 - Location2;
-			if (i == lengthV - 1) { va = Location2 - LocationTemp1; }
+			LocationCurrent = { c_point1[current][0], c_point1[current][1], c_point1[current][2] };
+			LocationNext = { c_point1[next][0], c_point1[next][1], c_point1[next][2] };
 
+			Vec3f vb = Vec3f(0, 1, 0);
+			Vec3f va =LocationNext - LocationCurrent;
 			va.normalize();
 			vb.normalize();
 
-			Vec3f v =va.cross(vb);
-			Vec3f vs = va.cross(vb);
-			v.normalize();
+			Vec3f Axis = va.cross(vb);
+			if (Axis == Vec3f(0, 0, 0)) 
+			{
+				Axis = Vec3f(0,1,0);
+				printf("in a line\n");
+			}
+			Axis.normalize();
 
-			float ca = vb.dot(va);
+			Real angle =-1 * acos(va.dot(vb));
 
-			float scale = 1 - ca;
-			
-			Vec3f vt = Vec3f(v[0]*scale ,v[1]*scale ,v[2]*scale);
+			//DYN_FUNC Quat(Real rot, const Vector<Real, 3> &axis);  //init from the rotation axis and angle(in radian)
 
-			SquareMatrix<Real, 3> rotationMatrix;
-			rotationMatrix(0,0) = vt[0] * v[0] + ca;
-			rotationMatrix(1,1) = vt[1] * v[1] + ca;
-			rotationMatrix(2,2) = vt[2] * v[2] + ca;
-			vt[0] *= v[1];
-			vt[2] *= v[0];
-			vt[1] *= v[2];
-
-			rotationMatrix(0,1) = vt[0] - vs[2];
-			rotationMatrix(0,2) = vt[2] + vs[1];
-			rotationMatrix(1,0) = vt[0] + vs[2];
-			rotationMatrix(1,2) = vt[1] - vs[0];
-			rotationMatrix(2,0) = vt[2] - vs[1];
-			rotationMatrix(2,1) = vt[1] + vs[0];
-
-
-			Quat<Real> q = Quat<Real>(rotationMatrix);
+			Quat<Real> q = Quat<Real>(angle ,Axis);
 
 
 			auto RV = [&](const Coord& v)->Coord
@@ -138,26 +168,17 @@ namespace dyno
 				return q.rotate(v);//
 			};
 
-
+			Coord LocationCurvePoint;
+			Coord Offest;
 			for (size_t k = 0; k < lengthV2; k++ ) 
 			{
-
-				Location1 = { c_point2[k][0], c_point2[k][1], c_point2[k][2] };
-				
-				
-
-
-				Location1 = RV(Location1 * RealScale()) + Location2;//
-
-				vertices.push_back(Location1);
-
+				LocationCurvePoint = { c_point2[k][0], c_point2[k][1], c_point2[k][2] };
+				Offest = c_point1[i];
+				LocationCurvePoint = RV(LocationCurvePoint * RealScale()) + Offest;//
+				vertices.push_back(LocationCurvePoint);
 			}
 
 		}
-
-
-		vertices.push_back(Coord(c_point1[0][0], c_point1[0][1], c_point1[0][2] ));
-		vertices.push_back(Coord(c_point1[lengthV-1][0], c_point1[lengthV - 1][1], c_point1[lengthV - 1][2]));
 
 		unsigned ptnum = vertices.size();
 	
@@ -180,24 +201,36 @@ namespace dyno
 
 		}
 
+		//fill cap
+		// get triangleCap by EarClipper
+		EarClipper<DataType3f> sab;
+		std::vector<TopologyModule::Triangle> triangleCap;
 
-		for (int i = 0; i < lengthV2; i++) 
+		sab.polyClip(VertexIn2, triangleCap);
+		int addnum2 = vertices.size() - VertexIn2.size();
+
+
+
+		for (int i = 0; i < triangleCap.size(); i++)
 		{
-			if (i < lengthV2 - 1) 
+			triangle.push_back(TopologyModule::Triangle(triangleCap[i][2], triangleCap[i][1], triangleCap[i][0]));
+			triangle.push_back(TopologyModule::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
+		}
+
+		//ReverseNormal
+		if (this->varReverseNormal()->getData() == true)
+		{
+			int trinum = triangle.size();
+			for (int i = 0; i < trinum; i++)
 			{
-				triangle.push_back(TopologyModule::Triangle(i, i + 1, ptnum - 2));
-				triangle.push_back(TopologyModule::Triangle(ptnum - 3 - lengthV2 + i +1, ptnum - 3 - lengthV2 + i + 2, ptnum - 1));
-			}
-			else 
-			{
-				triangle.push_back(TopologyModule::Triangle(i, i - lengthV2 + 1, ptnum - 2));
-				triangle.push_back(TopologyModule::Triangle(ptnum - 3 - lengthV2 + i + 1, ptnum - 3 - lengthV2 + i + 2 - lengthV2, ptnum - 1));
+				int temp;
+				temp = triangle[i][0];
+				triangle[i][0] = triangle[i][2];
+				triangle[i][2] = temp;
 			}
 		}
 
-
-
-		//变换
+		//Transform
 
 		Quat<Real> q2 = computeQuaternion();
 
@@ -222,36 +255,38 @@ namespace dyno
 
 		triangleSet->update();
 
-
-
 		vertices.clear();
 		triangle.clear();
 		
-
 	}
 
 
-	template<typename TDataType>
-	void SweepModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
-	};
 
 	template<typename TDataType>
 	Vec3f SweepModel<TDataType>::RealScale() 
 	{
 		auto radius = this->varRadius()->getData();
-		//后续可以修改这个变换以起到使sweep细节更丰富的目的
 		Vec3f s = Vec3f(1*radius ,1* radius ,1 *radius);
-		if (this->varuseRamp()->getData() == true) 
-		{
-			float pr = this->varCurveRamp()->getValue().getCurveValueByX(currentIndex / totalIndex);
-			std::cout << "采样值为" << pr << std::endl;
-			if (pr != -1) { s = s * pr;}
-		}
+
+		float pr = this->varCurveRamp()->getValue().getCurveValueByX(currentIndex / (totalIndex - 1));
+		//std::cout << "current : "<< currentIndex <<"  totalIndex : " << totalIndex << "sampler" << pr << std::endl;
+		if (pr != -1) { s = s * pr;}
+
 		return s;
 	}
 
+	template<typename TDataType>
+	void SweepModel<TDataType>::displayChanged()
+	{
+		auto SurfaceModule = this->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+		SurfaceModule->setVisible(this->varDisplaySurface()->getValue());
 
+		auto wireModule = this->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
+		wireModule->setVisible(this->varDisplayWireframe()->getValue());
+	
+		auto pointModule = this->graphicsPipeline()->findFirstModule<GLPointVisualModule>();
+		pointModule->setVisible(this->varDisplayPoints()->getValue());
+	}
 
 	DEFINE_CLASS(SweepModel);
 }

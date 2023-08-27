@@ -42,7 +42,7 @@ public Q_SLOTS:
 	void createNodeGraphView();
 
 	/**
-	 * @brief Update the view only for the active scene graph, the data model will be changed.
+	 * @brief Update the view only for the active scene graph, the data model will not be changed.
 	 */
 	void updateNodeGraphView();
 
@@ -60,7 +60,9 @@ public Q_SLOTS:
 
 	void enablePhysics(QtNode& n, bool checked);
 
-	void Key2_Signal(QtNode& n, bool checked);
+	void showContextMenu(QtNode& n, const QPointF& pos);
+
+	void showHelper(QtNode& n);
 
 	/**
 	 * Auto layout for the node graph
@@ -68,6 +70,12 @@ public Q_SLOTS:
 	void reorderAllNodes();
 
 private:
+	void showThisNodeOnly(QtNode& n);
+	void showAllNodes();
+
+	void activateThisNodeOnly(QtNode& n);
+	void activateAllNodes();
+
 	SceneGraph* m_scene = nullptr;
 
 	bool mEditingEnabled = true;

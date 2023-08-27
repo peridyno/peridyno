@@ -4,6 +4,8 @@
 
 #include <math_constants.h>
 
+#include <fstream>
+
 namespace dyno
 {
     template<typename Real>

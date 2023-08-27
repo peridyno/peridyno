@@ -40,24 +40,34 @@ namespace dyno
 
 		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
 
+		DEF_VAR(Ramp, CurveRamp, Ramp::BorderMode::Close, "");
+
+		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
+
+		DEF_VAR(bool, DisplayPoints, false, "DisplayPoints");
+
+		DEF_VAR(bool, DisplayWireframe, false, "DisplayWireframe");
+
+		DEF_VAR(bool, DisplaySurface, true, "DisplaySurface");
+		
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_IN(PointSet<TDataType>, Spline, "")
+		DEF_INSTANCE_IN(PointSet<TDataType>, Spline, "");
 
-		DEF_INSTANCE_IN(PointSet<TDataType>, Curve, "")
+		DEF_INSTANCE_IN(PointSet<TDataType>, Curve, "");
 
-		DEF_VAR(Ramp,CurveRamp,Ramp::BorderMode::Close,"");
 
-		DEF_VAR(bool,useRamp,false,"");
-
-		void disableRender();
 
 		Vec3f RealScale();
 
 	protected:
 		void resetStates() override;
 
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
+		void varChanged();
+
+		void displayChanged();
+
+
 		float currentIndex = 0;
 		float totalIndex = 0;
 	};

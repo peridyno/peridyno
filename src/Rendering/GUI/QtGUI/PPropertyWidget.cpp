@@ -3,34 +3,24 @@
 //Framework
 #include "Module.h"
 #include "Node.h"
-#include "FilePath.h"
-#include "Ramp.h"
 #include "SceneGraph.h"
 
 //Node editor
 #include "NodeEditor/QtNodeWidget.h"
 #include "NodeEditor/QtModuleWidget.h"
+#include "nodes/QNode"
 
 #include "LockerButton.h"
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QGridLayout>
 
-#include "Color.h"
-
-#include "PropertyItem/QVector3iFieldWidget.h"
-#include "PropertyItem/QVector3FieldWidget.h"
-#include "PropertyItem/QBoolFieldWidget.h"
-#include "PropertyItem/QIntegerFieldWidget.h"
-#include "PropertyItem/QFilePathWidget.h"
-#include "PropertyItem/QRealFieldWidget.h"
-#include "PropertyItem/QEnumFieldWidget.h"
-#include "PropertyItem/QRampWidget.h"
 #include "PropertyItem/QStateFieldWidget.h"
-#include "PropertyItem/QColorWidget.h"
 
 namespace dyno
 {
+	std::map<std::string, PPropertyWidget::FieldWidgetMeta> PPropertyWidget::sFieldWidgetMeta {};
+
 	//QWidget-->QVBoxLayout-->QScrollArea-->QWidget-->QGridLayout
 	PPropertyWidget::PPropertyWidget(QWidget *parent)
 		: QWidget(parent)
@@ -62,6 +52,16 @@ namespace dyno
 	PPropertyWidget::~PPropertyWidget()
 	{
 		mPropertyItems.clear();
+	}
+
+	int PPropertyWidget::registerWidget(const FieldWidgetMeta& meta) {
+		sFieldWidgetMeta[meta.type->name()] = meta;
+		return 0;
+	}
+	PPropertyWidget::FieldWidgetMeta* PPropertyWidget::getRegistedWidget(const std::string& name) {
+		if(sFieldWidgetMeta.count(name))
+			return &sFieldWidgetMeta.at(name);
+		return nullptr;
 	}
 
 	QSize PPropertyWidget::sizeHint() const
@@ -320,87 +320,23 @@ namespace dyno
 			emit moduleUpdated(module);
 	}
 
-	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)
-	{
+	QWidget* PPropertyWidget::createFieldWidget(FBase* field) {
+		QWidget* fw {nullptr};
 		std::string template_name = field->getTemplateName();
 
-		if (template_name == std::string(typeid(bool).name()))
-		{
-			auto fw = new QBoolFieldWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-			
-			layout->addWidget(fw,j,0);
+		auto reg = getRegistedWidget(template_name);
+		if(reg) {
+			fw = reg->constructor(field);
 		}
-		else if (template_name == std::string(typeid(int).name()))
-		{
-			auto fw = new QIntegerFieldWidget(field);
 
+		return fw;
+	}
+
+	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)
+	{
+		QWidget* fw = createFieldWidget(field);
+		if(fw != nullptr) {
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(uint).name()))
-		{
-			auto fw = new QUIntegerFieldWidget(field);
-
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(float).name()))
-		{
-			auto fw = new QRealFieldWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw ,j, 0);
-		}
-		else if (template_name == std::string(typeid(Vec3f).name()))
-		{
-			auto fw = new QVector3FieldWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(Vec3i).name()))
-		{
-			auto fw = new QVector3iFieldWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(FilePath).name()))
-		{
-			auto fw = new QFilePathWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(Ramp).name()))
-		{
-			auto fw = new QRampWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(PEnum).name()))
-		{
-			auto fw = new QEnumFieldWidget(field);
-			//this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(std::string).name()))
-		{
-			auto fw = new QStringFieldWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
-			layout->addWidget(fw, j, 0);
-		}
-		else if (template_name == std::string(typeid(Color).name()))
-		{
-			auto fw = new QColorWidget(field);
-			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-
 			layout->addWidget(fw, j, 0);
 		}
 	}

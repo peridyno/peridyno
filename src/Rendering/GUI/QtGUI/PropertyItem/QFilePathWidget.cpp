@@ -9,6 +9,9 @@
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(std::string, QStringFieldWidget)
+	IMPL_FIELD_WIDGET(FilePath, QFilePathWidget)
+
 	QStringFieldWidget::QStringFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{

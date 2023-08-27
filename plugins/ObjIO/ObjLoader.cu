@@ -16,9 +16,7 @@ namespace dyno
 		: Node()
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
-		
-		//triSet->getTriangles().clear();
-		//triSet->getVertex2Triangles().clear();
+
 		std::vector<Coord> vertList;
 		std::vector<TopologyModule::Triangle> faceList;
 
@@ -42,13 +40,14 @@ namespace dyno
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
-		if (this->varFileName()->constDataPtr()->string() == "")
+		if (this->varFileName()->getValue().string() == "")
 			return;
-		std::string filename = this->varFileName()->constDataPtr()->string();
-		loadObj(*triSet,filename);
+		std::string filename = this->varFileName()->getValue().string();
+		loadObj(*triSet, filename);
 		triSet->scale(this->varScale()->getData());
 		triSet->translate(this->varLocation()->getData());
 		triSet->rotate(this->varRotation()->getData() * PI / 180);
+		triSet->update();
 
 		Node::resetStates();
 
@@ -77,29 +76,31 @@ namespace dyno
 
 	}
 
-	
+
 	template<typename TDataType>
 	void ObjMesh<TDataType>::updateStates()
 	{
-		
+
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
 		if (this->varSequence()->getData() == true)
 		{
-			std::string filename = this->varFileName()->constDataPtr()->string();
+			std::string filename = this->varFileName()->getValue().string();
 			int num_ = filename.rfind("_");
 
 			filename.replace(num_ + 1, filename.length() - 4 - (num_ + 1), std::to_string(this->stateFrameNumber()->getData()));
 
-				loadObj(*triSet,filename);
-				triSet->scale(this->varScale()->getData());
-				triSet->translate(this->varLocation()->getData());
-				triSet->rotate(this->varRotation()->getData() * PI / 180);
+			loadObj(*triSet, filename);
+			triSet->scale(this->varScale()->getData());
+			triSet->translate(this->varLocation()->getData());
+			triSet->rotate(this->varRotation()->getData() * PI / 180);
+			triSet->update();
 
-				initPos.resize(triSet->getPoints().size());
-				initPos.assign(triSet->getPoints());
-				center = this->varCenter()->getData();
-				centerInit = center;
+
+			initPos.resize(triSet->getPoints().size());
+			initPos.assign(triSet->getPoints());
+			center = this->varCenter()->getData();
+			centerInit = center;
 		}
 
 		Coord velocity = this->varVelocity()->getData();
@@ -124,7 +125,7 @@ namespace dyno
 				center,
 				centerInit,
 				rotMat
-		);
+			);
 		}
 
 	}
@@ -175,6 +176,9 @@ namespace dyno
 
 		Triangleset.setPoints(vertList);
 		Triangleset.setTriangles(faceList);
+		//Triangleset.updateVertexNormal();
+		Triangleset.update();
+
 	}
 
 

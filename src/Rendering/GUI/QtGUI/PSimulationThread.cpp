@@ -8,6 +8,8 @@
 #include "SceneGraph.h"
 #include "SceneGraphFactory.h"
 
+#include "Action.h"
+
 #include "NodeEditor/QtNodeWidget.h"
 
 using namespace std::chrono_literals;
@@ -66,6 +68,7 @@ namespace dyno
 			Log::sendMessage(Log::Info, "Time out");
 		}
 	}
+
 
 	void PSimulationThread::createNewScene(std::shared_ptr<SceneGraph> scn)
 	{
@@ -179,8 +182,6 @@ namespace dyno
 
 	void PSimulationThread::reset(int num)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
-
 		this->pause();
 
 		mFinished = true;
@@ -199,16 +200,14 @@ namespace dyno
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
-		mActiveNode = node;
-		//Note: should set mReset at the end
-		mReset = true;
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->reset(node);
+
 		notify();
 	}
 
 	void PSimulationThread::resetQtNode(Qt::QtNode& node)
 	{
-		std::unique_lock<decltype(mMutex)> lock(mMutex);
 		auto model = node.nodeDataModel();
 		auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
 
@@ -217,6 +216,24 @@ namespace dyno
 			mActiveNode = widget->getNode();
 			mReset = true;
 		}
+	}
+
+	void PSimulationThread::syncNode(std::shared_ptr<Node> node)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+
+		class SyncNodeAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->reset();
+				node->updateGraphicsContext();
+			}
+		};
+
+		scn->traverseForwardWithAutoSync<SyncNodeAct>(node);
+
+		notify();
 	}
 
 	void PSimulationThread::startUpdatingGraphicsContext()

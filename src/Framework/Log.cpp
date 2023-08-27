@@ -1,96 +1,159 @@
+//#define _CRT_SECURE_NO_WARNINGS
+
 #include "Log.h"
-#include <iostream>
+#include "FilePath.h"
+
 
 namespace dyno
 {
-	std::string Log::outputFile;
-	std::ofstream Log::outputStream;
-	std::list<Log::Message> Log::messages;
-	void(*Log::receiver)(const Message&) = NULL;
-	Log::MessageType Log::logLevel = Log::DebugInfo;
+	std::string Log::sOutputFile;
+	std::ofstream Log::sOutputStream;
+    void(*Log::receiver)(const Message&) = nullptr;
+    Log::MessageType Log::sLogLevel = Log::DebugInfo;
 
-	void Log::sendMessage(MessageType type, const std::string& text)
-	{
-		// Skip logging to file if minimum level is higher
-		if ((int)type < (int)logLevel)
-			return;
+    std::atomic<Log*> Log::sLogInstance = nullptr;
+    std::queue<Log::Message> Log::sMessageQueue;
 
+#define LOG_DEBUG(format, ...) Log::instance()->writeMessage(Log::DebugInfo, format, ##__VA_ARGS__)
+#define LOG_INFO(format, ...)  Log::instance()->writeMessage(Log::Info, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...) Log::instance()->writeMessage(Log::Error, format, ##__VA_ARGS__)
+#define LOG_WARN(format, ...) Log::instance()->writeMessage(Log::Warning, format, ##__VA_ARGS__)
+#define LOG_USER(format, ...) Log::instance()->writeMessage(Log::User, format, ##__VA_ARGS__)
+#define LOG_DISPLAY(format, ...) Log::instance()->writeMessage(Log::Display, format, ##__VA_ARGS__)
+
+    void Log::writeMessage(MessageType level, const char* format, ...)
+    {
 		// log message
 		Log::Message m;
-		m.type = type;
-		m.text = text;
+		m.type = level;
+		m.text = std::string(format);
 		time_t t = time(NULL);
 		m.when = localtime(&t);
-		messages.push_back(m);
 
-		// if user wants to catch messages, send it to him
-		if (receiver)
-			receiver(m);
+        //Finish create Message and push into queue
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            sMessageQueue.push(m);  //push message into queue
+            mCondition.notify_one();
+        }
+    }
 
-		// if enabled logging to file
-		if (outputStream.is_open())
-		{
-			// print time
-			char buffer[9];
-			strftime(buffer, 9, "%X", m.when);
-			outputStream << buffer;
+    void Log::sendMessage(MessageType type, const std::string& text)
+    {
+		// Skip logging to file if minimum level is higher
+		if ((int)type < (int)sLogLevel)
+			return;
 
-			// print type
-			switch (type)
-			{
-			case DebugInfo: outputStream << " | debug   | "; break;
-			case Info:		outputStream << " | info    | "; break;
-			case Warning:	outputStream << " | warning | "; break;
-			case Error:		outputStream << " | ERROR   | "; break;
-			default:		outputStream << " | user    | ";
-			}
+        switch (type)
+        {
+        case DebugInfo: LOG_DEBUG(text.c_str()); break;
+        case Info:		LOG_INFO(text.c_str()); break;
+        case Warning:	LOG_WARN(text.c_str()); break;
+        case Error:		LOG_ERROR(text.c_str()); break;
+        default:		LOG_USER(text.c_str());
+        }
+    }
 
-			// print description
-			outputStream << text << std::endl;
-		}
+    void Log::setUserReceiver(void (*userFunc)(const Message&))
+    {
+        receiver = userFunc;
+    }
+
+	void Log::setLevel(MessageType level)
+	{
+        sLogLevel = level;
 	}
 
 	void Log::setOutput(const std::string& filename)
 	{
-		LogDebug("Setting output log file: " + filename);
-		outputFile = filename;
+		sOutputFile = filename;
 
 		// close old one
-		if (outputStream.is_open())
-			outputStream.close();
+		if (sOutputStream.is_open())
+			sOutputStream.close();
 
 		// create file
-		outputStream.open(filename.c_str());
-		if (!outputStream.is_open())
+		sOutputStream.open(filename.c_str());
+		if (!sOutputStream.is_open())
 			sendMessage(Error, "Cannot create/open '" + filename + "' for logging");
 	}
 
 	const std::string& Log::getOutput()
 	{
-		return outputFile;
-
+        return sOutputFile;
 	}
 
-	std::list<Log::Message>& Log::getMessages()
-	{ 
-		return messages; 
-	}
+	Log* Log::instance()
+    {
+        static std::mutex mutex;
+        Log* ins = sLogInstance.load(std::memory_order_acquire);
 
-	void Log::setLevel(MessageType level)
-	{
-		logLevel = level;
-	}
+        if (!ins) {
+            std::lock_guard<std::mutex> tLock(mutex);
+            ins = sLogInstance.load(std::memory_order_relaxed);
+            if (!ins) {
+                ins = new Log();
+                sLogInstance.store(ins, std::memory_order_release);
+            }
+        }
 
-	void Log::setUserReceiver(void (*userFunc)(const Message&))
-	{
-		receiver = userFunc;
-	}
+        return ins;
+    }
 
+    Log::Log()
+        : mRunning(true)
+    {
+        mThread = std::thread(&Log::outputThread, this);
+    }
 
-	Log::~Log()
-	{
-		if (outputStream.is_open())
-			outputStream.close();
-	}
+    Log::~Log()
+    {
 
+        mCondition.notify_one();
+        if (mThread.joinable()) {
+            mThread.join();
+        }
+
+        mRunning = false;
+    }
+
+    void Log::outputThread()
+    {
+        while (mRunning) {
+            std::unique_lock<std::mutex> lock(mtx);
+            mCondition.wait(lock, [&]() { return !sMessageQueue.empty() || !mRunning; });
+
+            while (!sMessageQueue.empty()) {
+                auto m = sMessageQueue.front();
+                sMessageQueue.pop();
+
+				if (receiver) {
+					receiver(m);
+				}
+
+				// if enabled logging to file
+				if (sOutputStream.is_open())
+				{
+					// print time
+					char buffer[9];
+					strftime(buffer, 9, "%X", m.when);
+					sOutputStream << buffer;
+
+					// print type
+					switch (m.type)
+					{
+					case DebugInfo: sOutputStream << " | Debug   | "; break;
+					case Info:		sOutputStream << " | Info    | "; break;
+					case Warning:	sOutputStream << " | warning | "; break;
+					case Error:		sOutputStream << " | ERROR   | "; break;
+					default:		sOutputStream << " | user    | ";
+					}
+
+					// print description
+					sOutputStream << m.text << std::endl;
+				}
+            }
+
+        }
+    }
 }
