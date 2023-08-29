@@ -32,6 +32,12 @@ void gl::XTexture2D<T>::create()
 }
 
 template<typename T>
+bool gl::XTexture2D<T>::isValid() const
+{
+	return width > 0 && height > 0;
+}
+
+template<typename T>
 void gl::XTexture2D<T>::load(dyno::DArray2D<T> data)
 {
 #ifdef VK_BACKEND
@@ -47,6 +53,9 @@ template<typename T>
 void XTexture2D<T>::updateGL()
 {
 	int size = buffer.nx() * buffer.ny() * sizeof(T);
+	if (size <= 0) {
+		return;
+	}
 
 #ifdef CUDA_BACKEND
 

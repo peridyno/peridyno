@@ -61,7 +61,10 @@ bool ObjMeshNode::load(const std::string& path) {
     std::vector<dyno::Vec3f> vertices;
     std::vector<dyno::Vec3f> normals;
     std::vector<dyno::Vec2f> texCoords;
-    std::vector<dyno::Vec3i> triangles;
+
+    std::vector<dyno::Vec3i> pIndex;
+    std::vector<dyno::Vec3i> nIndex;
+    std::vector<dyno::Vec3i> tIndex;
 
     for (int i = 0; i < attrib.vertices.size(); i += 3) {
         vertices.push_back({ attrib.vertices[i], attrib.vertices[i+1], attrib.vertices[i+2] });
@@ -78,14 +81,21 @@ bool ObjMeshNode::load(const std::string& path) {
     for (const tinyobj::shape_t& shape: shapes) {
         // only load triangle mesh...
         const auto& mesh = shape.mesh;
-        for (const auto& idx : mesh.indices) {
-            triangles.push_back({ idx.vertex_index, idx.normal_index, idx.texcoord_index });
+
+        for (int i = 0; i < mesh.indices.size(); i += 3) {
+            auto idx0 = mesh.indices[i];
+            auto idx1 = mesh.indices[i + 1];
+            auto idx2 = mesh.indices[i + 2];
+
+            pIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
+            nIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
+            tIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
         }
     }
 
     // load texture...
     dyno::CArray2D<dyno::Vec4f> texture(1, 1);
-    texture[0, 0] = dyno::Vec4f(1, 0, 0, 1);
+    texture[0, 0] = dyno::Vec4f(1);
 
     for (const auto& mtl : materials) {
         if (!mtl.diffuse_texname.empty())
@@ -99,11 +109,17 @@ bool ObjMeshNode::load(const std::string& path) {
         }
     }
 
-    this->out_Position.assign(vertices);
+    auto triSet = this->out_TriangleSet.allocate();
+
+    triSet->setPoints(vertices);
+    triSet->setTriangles(pIndex);
+
     this->out_Normal.assign(normals);
+    this->out_NormalIndex.assign(nIndex);
     this->out_TexCoord.assign(texCoords);
-    this->out_Index.assign(triangles);
-    this->out_TexColor.assign(texture);
+    this->out_TexCoordIndex.assign(tIndex);
+    this->out_ColorTexture.assign(texture);
+
     this->update();
 
     return result;

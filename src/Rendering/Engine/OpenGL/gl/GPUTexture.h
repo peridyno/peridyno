@@ -37,6 +37,8 @@ namespace gl {
 
 		virtual void create() override;
 
+		bool isValid() const;
+
 	public:
 		// load data to into an intermediate buffer
 		void load(dyno::DArray2D<T> data);

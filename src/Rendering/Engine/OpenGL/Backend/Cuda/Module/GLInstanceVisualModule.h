@@ -35,9 +35,16 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, InstanceColor, DeviceType::GPU, "");
 
 	protected:
-
 		virtual void updateImpl() override;
+
+		virtual bool initializeGL() override;
+		virtual void releaseGL() override;
 		virtual void updateGL() override;
+
+	private:
+
+		gl::XBuffer<Transform3f> mInstanceTransforms;
+		gl::XBuffer<Vec3f>		 mInstanceColors;
 
 	};
 };

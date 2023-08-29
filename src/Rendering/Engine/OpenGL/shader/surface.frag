@@ -12,16 +12,14 @@ layout(location=0) in VertexData
 	vec3 position;
 	vec3 normal;
 	vec3 color;
+	vec3 texCoord;
     flat int instanceID;
 } fs_in;
 
 layout(location = 0) out vec4  fragColor;
 layout(location = 1) out ivec4 fragIndices;
 
-// material properties
-layout(location = 3) uniform float uMetallic;
-layout(location = 4) uniform float uRoughness;
-layout(location = 5) uniform float uAlpha;
+layout(binding = 10) uniform sampler2D uTexColor;
 
 vec3 GetViewDir()
 {
@@ -32,22 +30,40 @@ vec3 GetViewDir()
 	return normalize(-fs_in.position);
 }
 
+vec3 GetNormal()
+{
+	if(length(fs_in.normal) > 0)
+		return normalize(fs_in.normal);
+	// 
+	vec3 X = dFdx(fs_in.position);
+	vec3 Y = dFdy(fs_in.position);
+	return normalize(cross(X,Y));
+}
+
+vec3 GetColor()
+{
+	if(fs_in.texCoord.z > 0)
+		return texture(uTexColor, fs_in.texCoord.xy).rgb;
+	return fs_in.color;
+}
+
 vec3 Shade()
 {
-	vec3 N = normalize(fs_in.normal);
+	vec3 N = GetNormal();
 	vec3 V = GetViewDir();
 
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;
 	
 	vec3 Lo = vec3(0);
+	vec3 baseColor = GetColor();
 
 	// for main directional light
 	{
 		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, L);
+		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, L);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
@@ -63,7 +79,7 @@ vec3 Shade()
 	// for a simple camera light
 	{
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, V);
+		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, V);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
@@ -73,7 +89,7 @@ vec3 Shade()
 	}
 
 	// ambient light
-	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * fs_in.color;
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * baseColor;
 
 	// final color
 	vec3 color = ambient + Lo;
@@ -86,20 +102,21 @@ vec3 Shade()
 
 vec3 ShadeTransparency()
 {
-	vec3 N = normalize(fs_in.normal);
+	vec3 N = GetNormal();
 	vec3 V = GetViewDir();
 
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;
 	
-	vec3 Lo = vec3(0);
+	vec3 Lo = vec3(0);	
+	vec3 baseColor = GetColor();
 
 	// for main directional light
 	{
 		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, L);
+		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, L);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
@@ -115,7 +132,7 @@ vec3 ShadeTransparency()
 	// for a simple camera light
 	{
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(fs_in.color, uMetallic, uRoughness, N, V, V);
+		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, V);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
@@ -125,7 +142,7 @@ vec3 ShadeTransparency()
 	}
 
 	// ambient light
-	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * fs_in.color;
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * baseColor;
 
 	// final color
 	vec3 color = ambient + Lo;
@@ -163,7 +180,7 @@ void TransparencyLinkedList(void)
 		uint nextIndex = imageAtomicExchange(u_headIndex, ivec2(gl_FragCoord.xy), freeNodeIndex);
 
 		// Store the color, depth and the next index for later resolving.
-		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), uAlpha);
+		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), 0.6);//uMtl.alpha);
 		nodes[freeNodeIndex].depth = gl_FragCoord.z;
 		nodes[freeNodeIndex].nextIndex = nextIndex;
 		nodes[freeNodeIndex].geometryID = uRenderParams.index;

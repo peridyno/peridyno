@@ -20,6 +20,7 @@ layout(location = 0) out VertexData {
 	vec3 position;
 	vec3 normal;
 	vec3 color;
+	vec3 texCoord;
 	int  instanceID; 	// not used for this type
 };
 

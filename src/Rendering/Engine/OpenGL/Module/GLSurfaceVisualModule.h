@@ -15,14 +15,15 @@
  */
 
 #pragma once
-#include "Topology/TriangleSet.h"
+
+#include <DeclarePort.h>
+#include <Topology/TriangleSet.h>
 
 #include "GLVisualModule.h"
 #include "gl/GPUBuffer.h"
+#include "gl/GPUTexture.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
-
-#include <DeclarePort.h>
 
 namespace dyno
 {
@@ -38,7 +39,8 @@ namespace dyno
 
 		DECLARE_ENUM(EColorMode,
 			CM_Object = 0,
-			CM_Vertex = 1);
+			CM_Vertex = 1,
+			CM_Texture = 2);
 
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 
@@ -54,6 +56,14 @@ namespace dyno
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
+		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");
+		DEF_ARRAY_IN(TopologyModule::Triangle, NormalIndex, DeviceType::GPU, "");
+
+		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
+		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
+
+		DEF_ARRAY2D_IN(Vec4f, ColorTexture, DeviceType::GPU, "");
+
 	protected:
 		virtual void updateImpl() override;
 
@@ -65,19 +75,29 @@ namespace dyno
 	protected:
 
 		gl::Program*	mShaderProgram;
+
+		// uniform blocks
+		gl::Buffer		mRenderParamsUBlock;
+		gl::Buffer		mPBRMaterialUBlock;
+
 		gl::VertexArray	mVAO;
+		unsigned int	mNumTriangles = 0;
 
-		gl::XBuffer<Vec3f> mVertexBuffer;
-		gl::XBuffer<Vec3f> mNormalBuffer;
-		gl::XBuffer<Vec3f> mColorBuffer;
-		gl::XBuffer<TopologyModule::Triangle> mIndexBuffer;
+		gl::XBuffer<Vec3f> mVertexPosition;
+		gl::XBuffer<Vec3f> mVertexColor;			// per-vertex color
+		gl::XBuffer<TopologyModule::Triangle> mVertexIndex;
 
-		unsigned int	mDrawCount = 0;
+		gl::XBuffer<Vec3f> mNormal;
+		gl::XBuffer<TopologyModule::Triangle> mNormalIndex;
+
+		gl::XBuffer<Vec2f> mTexCoord;
+		gl::XBuffer<TopologyModule::Triangle> mTexCoordIndex;
+
+		// color texture
+		gl::XTexture2D<Vec4f> mColorTexture;
 
 		// for instanced rendering
-		gl::XBuffer<Transform3f> mInstanceBuffer;
 		unsigned int			 mInstanceCount = 0;
 
-		gl::Buffer		mUniformBlock;
 	};
 };

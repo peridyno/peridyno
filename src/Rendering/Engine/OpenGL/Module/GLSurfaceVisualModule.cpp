@@ -14,7 +14,14 @@ namespace dyno
 	GLSurfaceVisualModule::GLSurfaceVisualModule()
 	{
 		this->setName("surface_renderer");
+
 		this->inColor()->tagOptional(true);
+		this->inColorTexture()->tagOptional(true);
+
+		this->inNormal()->tagOptional(true);
+		this->inNormalIndex()->tagOptional(true);
+		this->inTexCoord()->tagOptional(true);
+		this->inTexCoordIndex()->tagOptional(true);
 	}
 
 	GLSurfaceVisualModule::~GLSurfaceVisualModule()
@@ -40,23 +47,22 @@ namespace dyno
 		// create vertex buffer and vertex array object
 		mVAO.create();
 
-		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-		mColorBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-		mNormalBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mVertexIndex.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mNormalIndex.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mTexCoordIndex.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
-		mVAO.bindIndexBuffer(&mIndexBuffer);
+		mVertexPosition.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+		mVertexColor.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+		mNormal.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+		mTexCoord.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+
+		mVAO.bindIndexBuffer(&mVertexIndex);
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
-		mVAO.bindVertexBuffer(&mColorBuffer, 1, vecSize, GL_FLOAT, 0, 0, 0);
-		mVAO.bindVertexBuffer(&mNormalBuffer, 2, vecSize, GL_FLOAT, 0, 0, 0);
-
-#ifdef CUDA_BACKEND
-		// create transform buffer for instances, we should bind it to VAO later if necessary
-		mInstanceBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-#endif
+		mVAO.bindVertexBuffer(&mVertexPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mVertexColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mNormal, 2, vecSize, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
 		mShaderProgram = gl::Program::createProgramSPIRV(
@@ -65,7 +71,8 @@ namespace dyno
 			SURFACE_GEOM, sizeof(SURFACE_GEOM));
 
 		// create shader uniform buffer
-		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		mRenderParamsUBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+		mPBRMaterialUBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
 		return true;
 	}
@@ -76,59 +83,108 @@ namespace dyno
 		delete mShaderProgram;
 		mShaderProgram = 0;
 
+		// vertex array object
 		mVAO.release();
-		mIndexBuffer.release();
-		mVertexBuffer.release();
-		mNormalBuffer.release();
-		mColorBuffer.release();
 
-#ifdef CUDA_BACKEND
-		mInstanceBuffer.release();
-#endif
-		mUniformBlock.release();
+		// vertex array buffer
+		mVertexIndex.release();
+		mNormalIndex.release();
+		mTexCoordIndex.release();
+
+		// shader storage buffer
+		mVertexColor.release();
+		mVertexPosition.release();
+		mNormal.release();
+		mTexCoord.release();
+
+		// release uniform block
+		mRenderParamsUBlock.release();
+		mPBRMaterialUBlock.release();
 	}
 
 	void GLSurfaceVisualModule::updateGL()
 	{
-		mDrawCount = mIndexBuffer.count() * 3;
-		if (mDrawCount == 0) return;
+		mNumTriangles = mVertexIndex.count();
+		if (mNumTriangles == 0) return;
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
+		mVertexIndex.updateGL();
 
-		mVertexBuffer.updateGL();
-		mIndexBuffer.updateGL();
-		// need to rebind
-		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
-
+		// setup VAO binding...
 		mVAO.bind();
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(2);
-		// unbind instance buffer
+
+		// vertex index
+		{
+			mVertexIndex.bind();
+			glEnableVertexAttribArray(0);
+			glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0);
+		}
+
+		// normal
+		{
+			if (mNormalIndex.count() == mNumTriangles) {
+				mNormalIndex.updateGL();
+				mNormalIndex.bind();
+				glEnableVertexAttribArray(1);
+				glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), (void*)0);
+			}
+			else
+			{
+				glDisableVertexAttribArray(1);
+				glVertexAttribI4i(1, -1, -1, -1, -1);
+			}
+		}
+
+		// texcoord
+		{
+			if (mTexCoordIndex.count() == mNumTriangles) {
+				mTexCoordIndex.updateGL();
+				mTexCoordIndex.bind();
+				glEnableVertexAttribArray(2);
+				glVertexAttribIPointer(2, 1, GL_INT, sizeof(int), (void*)0);
+			}
+			else
+			{
+				glDisableVertexAttribArray(2);
+				glVertexAttribI4i(2, -1, -1, -1, -1);
+			}
+		}
+
+		// instance transforms
 		glDisableVertexAttribArray(3);
 		glDisableVertexAttribArray(4);
 		glDisableVertexAttribArray(5);
 		glDisableVertexAttribArray(6);
 		glDisableVertexAttribArray(7);
+		glDisableVertexAttribArray(8);
+
 		mVAO.unbind();
+
+		// update shader storage buffer
+		mVertexPosition.updateGL();
 
 		// vertex color
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex) {
-			mColorBuffer.updateGL();
-			mVAO.bindVertexBuffer(&mColorBuffer, 1, vecSize, GL_FLOAT, 0, 0, 0);
+			mVertexColor.updateGL();
 		}
 		// vertex normal
 		if(this->varUseVertexNormal()->getValue()) {
-			mNormalBuffer.updateGL();
-			mVAO.bindVertexBuffer(&mNormalBuffer, 2, vecSize, GL_FLOAT, 0, 0, 0);
+			mNormal.updateGL();
 		}
+
+		// texture coordinates
+		if (mTexCoord.count() > 0) {
+			mTexCoord.updateGL();
+		}
+
+		// update texture content
+		mColorTexture.updateGL();
+
 		gl::glCheckError();
 	}
 
 	void GLSurfaceVisualModule::updateImpl()
 	{
 		// update data
-
 		auto triSet = this->inTriangleSet()->getDataPtr();
 
 #ifdef  CUDA_BACKEND
@@ -139,34 +195,59 @@ namespace dyno
 		auto indices = triSet->getVulkanIndex();
 #endif // VK_BACKEND
 
-		mIndexBuffer.load(indices);
+		mVertexIndex.load(indices);
 
 		auto vertices = triSet->getPoints();
-		mVertexBuffer.load(vertices);
+		mVertexPosition.load(vertices);
 
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
 			!this->inColor()->isEmpty() &&
 			this->inColor()->getDataPtr()->size() == vertices.size())
 		{
 			auto colors = this->inColor()->getData();
-			mColorBuffer.load(colors);
+			mVertexColor.load(colors);
 		}
 
-		if (this->varUseVertexNormal()->getData())
+		// generate per-vertex normal
+		if (this->varUseVertexNormal()->getValue())
 		{
-			//TODO: optimize the performance
 #ifdef CUDA_BACKEND
-			triSet->update();
-			auto normals = triSet->getVertexNormals();
-			mNormalBuffer.load(normals);
+			//TODO: optimize the performance
+			if (this->inNormal()->isEmpty()) {
+				triSet->update();
+				auto normals = triSet->getVertexNormals();
+				mNormal.load(normals);
+			}
+			else
+			{
+				mNormal.load(this->inNormal()->getData());
+				// has separate normal index?
+				if (!this->inNormalIndex()->isEmpty())
+					mNormalIndex.load(this->inNormalIndex()->getData());
+			}
 #endif
 		}
 
+		// texture coordinates
+		{
+			if (!this->inTexCoord()->isEmpty()) {
+				mTexCoord.load(this->inTexCoord()->getData());
+			}
+
+			if (!this->inTexCoordIndex()->isEmpty()) {
+				mTexCoordIndex.load(this->inTexCoordIndex()->getData());
+			}
+		}
+
+		// texture
+		if (!inColorTexture()->isEmpty()) {
+			mColorTexture.load(inColorTexture()->getData());
+		}
 	}
 
 	void GLSurfaceVisualModule::paintGL(const RenderParams& rparams)
 	{
-		if (mDrawCount == 0)
+		if (mNumTriangles == 0)
 			return;
 
 		mShaderProgram->use();
@@ -182,32 +263,55 @@ namespace dyno
 			return;
 		}
 
+		// bind vertex data
+		mVertexPosition.bindBufferBase(8);
+		mNormal.bindBufferBase(9);
+		mTexCoord.bindBufferBase(10);
+		mVertexColor.bindBufferBase(11);
+
 		// setup uniforms
-		mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
-		mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
-		mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
+		struct {
+			glm::vec3 color;
+			float metallic;
+			float roughness;
+			float alpha;
+		} pbr;
+
+		auto color = this->varBaseColor()->getData();
+		pbr.color = { color.r, color.g, color.b };
+		pbr.metallic = this->varMetallic()->getData();
+		pbr.roughness = this->varRoughness()->getData();
+		pbr.alpha = this->varAlpha()->getData();
+
 		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getData());
+		mShaderProgram->setInt("uColorMode", this->varColorMode()->getValue().currentKey());
 		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
 
 		// setup uniform buffer
-		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
-		mUniformBlock.bindBufferBase(0);
-		gl::glCheckError();
+		mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
+		mRenderParamsUBlock.bindBufferBase(0);
+
+		mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+		mPBRMaterialUBlock.bindBufferBase(1);
+
+		// bind texture
+		if (mColorTexture.isValid()) {
+			mColorTexture.bind(GL_TEXTURE10);
+		}
+		else
+		{
+			glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		mVAO.bind();
 
-		// color
-		auto color = this->varBaseColor()->getData();
-		glVertexAttrib3f(1, color.r, color.g, color.b);
-
 		if(mInstanceCount > 0)
-			glDrawElementsInstanced(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0, mInstanceCount);
+			glDrawArraysInstanced(GL_TRIANGLES, 0, mNumTriangles * 3, mInstanceCount);
 		else
-			glDrawElements(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0);
+			glDrawArrays(GL_TRIANGLES, 0, mNumTriangles * 3);
 
 		gl::glCheckError();
 		mVAO.unbind();
-
-		gl::glCheckError();
 	}
 }

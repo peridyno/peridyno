@@ -1,5 +1,5 @@
-mtllib sphere.mtl
-usemtl sphere
+mtllib material.mtl
+usemtl Material
 o Sphere
 v 0.000000 0.831470 -0.555570
 v 0.000000 0.555570 -0.831470

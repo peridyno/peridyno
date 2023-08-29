@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Node.h>
+#include <Topology/TriangleSet.h>
 
 using namespace dyno;
 
@@ -13,10 +14,15 @@ public:
 
 public:
 	// use TriangleSet data structure?
-	DEF_ARRAY_OUT(Vec3f, Position,	DeviceType::GPU, "");
-	DEF_ARRAY_OUT(Vec3f, Normal,	DeviceType::GPU, "");
-	DEF_ARRAY_OUT(Vec2f, TexCoord,	DeviceType::GPU, "");
-	DEF_ARRAY_OUT(Vec3i, Index,		DeviceType::GPU, "");
 
-	DEF_ARRAY2D_OUT(Vec4f, TexColor, DeviceType::GPU, "");
+	DEF_INSTANCE_OUT(TriangleSet<DataType3f>, TriangleSet, "");
+
+	// additional data
+	DEF_ARRAY_OUT(Vec3f, Normal, DeviceType::GPU, "");
+	DEF_ARRAY_OUT(Vec3i, NormalIndex, DeviceType::GPU, "");
+
+	DEF_ARRAY_OUT(Vec2f, TexCoord, DeviceType::GPU, "");
+	DEF_ARRAY_OUT(Vec3i, TexCoordIndex, DeviceType::GPU, "");
+
+	DEF_ARRAY2D_OUT(Vec4f, ColorTexture, DeviceType::GPU, "");
 };
