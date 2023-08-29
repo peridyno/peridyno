@@ -53,6 +53,7 @@ namespace dyno
 
 		//ColorDialog.setWindowIcon(GetIcon("color--pencil"));
 		colorDialog.setCurrentColor(mColor);
+		colorDialog.adjustSize();
 		colorDialog.exec();
 
 		disconnect(&colorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));

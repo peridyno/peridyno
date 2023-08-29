@@ -59,11 +59,11 @@ QWidget:disabled {
 QWidget::item:selected {
   background-color: #346792;
 }
-
+/*
 QWidget::item:hover:!selected {
   background-color: #1A72BB;
 }
-
+*/
 /* QMainWindow ------------------------------------------------------------
 
 This adjusts the splitter in the dock widget, not qsplitter
