@@ -1,5 +1,5 @@
 #pragma once
-#include "Module/CollisionModel.h"
+#include "Module/ComputeModule.h"
 #include "Primitive/Primitive3D.h"
 
 #include "Catalyzer/VkReduce.h"
@@ -13,7 +13,7 @@ namespace dyno
 // 		dyno::Vec3f v1;
 // 	};
 
-	class CollisionDetectionBroadPhase : public CollisionModel
+	class CollisionDetectionBroadPhase : public ComputeModule
 	{
 	public:
 		CollisionDetectionBroadPhase();
@@ -21,7 +21,8 @@ namespace dyno
 
 		bool initializeImpl() override;
 
-		void doCollision() override;
+	protected:
+		void compute() override;
 
 	public:
 		float mGridSizeLimit;	// "Limit the smallest grid size";
