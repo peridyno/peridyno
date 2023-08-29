@@ -72,10 +72,11 @@ namespace dyno
 
 	void GLWireframeVisualModule::updateGL()
 	{
+		mNumEdges = mIndexBuffer.count();
 		if (mNumEdges == 0) return;
 
-		mVertexBuffer.mapGL();
-		mIndexBuffer.mapGL();
+		mVertexBuffer.updateGL();
+		mIndexBuffer.updateGL();
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 		mVAO.bindIndexBuffer(&mIndexBuffer);
@@ -89,13 +90,8 @@ namespace dyno
 		auto edges = edgeSet->getEdges();
 		auto vertices = edgeSet->getPoints();
 
-		mNumEdges = edges.size();
-
-		if (mNumEdges > 0)
-		{
-			mVertexBuffer.load(vertices);
-			mIndexBuffer.load(edges);
-		}
+		mVertexBuffer.load(vertices);
+		mIndexBuffer.load(edges);
 	}
 
 

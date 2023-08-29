@@ -67,16 +67,16 @@ namespace dyno
 		gl::Program*	mShaderProgram;
 		gl::VertexArray	mVAO;
 
-		gl::XBuffer		mIndexBuffer;
-		gl::XBuffer		mVertexBuffer;
-		gl::XBuffer		mNormalBuffer;
-		gl::XBuffer		mColorBuffer;
+		gl::XBuffer<Vec3f> mVertexBuffer;
+		gl::XBuffer<Vec3f> mNormalBuffer;
+		gl::XBuffer<Vec3f> mColorBuffer;
+		gl::XBuffer<TopologyModule::Triangle> mIndexBuffer;
 
 		unsigned int	mDrawCount = 0;
 
 		// for instanced rendering
-		gl::XBuffer		mInstanceBuffer;
-		unsigned int	mInstanceCount = 0;
+		gl::XBuffer<Transform3f> mInstanceBuffer;
+		unsigned int			 mInstanceCount = 0;
 
 		gl::Buffer		mUniformBlock;
 	};

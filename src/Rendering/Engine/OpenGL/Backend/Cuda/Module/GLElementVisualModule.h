@@ -45,8 +45,8 @@ namespace dyno
 		gl::Program* mShaderProgram;
 		gl::VertexArray	mVAO;
 
-		gl::XBuffer		mVertexBuffer;
-		gl::XBuffer 	mIndexBuffer;
+		gl::XBuffer<Vec3f>	mVertexBuffer;
+		gl::XBuffer<Vec3i> 	mIndexBuffer;
 
 		unsigned int	mDrawCount = 0;
 

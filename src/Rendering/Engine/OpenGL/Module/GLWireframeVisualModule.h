@@ -67,9 +67,9 @@ namespace dyno
 
 		gl::Program*	mShaderProgram;
 
-		gl::VertexArray	mVAO;
-		gl::XBuffer		mVertexBuffer;
-		gl::XBuffer		mIndexBuffer;
+		gl::VertexArray				mVAO;
+		gl::XBuffer<Vec3f>						mVertexBuffer;
+		gl::XBuffer<TopologyModule::Edge>		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 
 		gl::Buffer		mUniformBlock;

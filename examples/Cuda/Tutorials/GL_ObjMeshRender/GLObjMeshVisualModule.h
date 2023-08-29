@@ -33,10 +33,10 @@ public:
 
 
 private:
-	gl::XBuffer mPositions;
-	gl::XBuffer mNormals;
-	gl::XBuffer mTexCoords;
-	gl::XBuffer mInices;
+	gl::XBuffer<dyno::Vec3f> mPositions;
+	gl::XBuffer<dyno::Vec3f> mNormals;
+	gl::XBuffer<dyno::Vec2f> mTexCoords;
+	gl::XBuffer<dyno::Vec3i> mInices;
 	int			mDrawCount = 0;
 
 	gl::Program		mProgram;

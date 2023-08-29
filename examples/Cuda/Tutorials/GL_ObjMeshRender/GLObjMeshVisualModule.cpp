@@ -39,10 +39,10 @@ bool GLObjMeshVisualModule::initializeGL()
 void GLObjMeshVisualModule::updateGL()
 {
 	// need remap
-	mPositions.mapGL();
-	mNormals.mapGL();
-	mTexCoords.mapGL();
-	mInices.mapGL();
+	mPositions.updateGL();
+	mNormals.updateGL();
+	mTexCoords.updateGL();
+	mInices.updateGL();
 
 	mTexColor.updateGL();
 }

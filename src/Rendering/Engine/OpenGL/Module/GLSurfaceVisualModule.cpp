@@ -90,12 +90,13 @@ namespace dyno
 
 	void GLSurfaceVisualModule::updateGL()
 	{
+		mDrawCount = mIndexBuffer.count() * 3;
 		if (mDrawCount == 0) return;
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
-		mVertexBuffer.mapGL();
-		mIndexBuffer.mapGL();
+		mVertexBuffer.updateGL();
+		mIndexBuffer.updateGL();
 		// need to rebind
 		mVAO.bindIndexBuffer(&mIndexBuffer);
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
@@ -113,12 +114,12 @@ namespace dyno
 
 		// vertex color
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex) {
-			mColorBuffer.mapGL();
+			mColorBuffer.updateGL();
 			mVAO.bindVertexBuffer(&mColorBuffer, 1, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		// vertex normal
 		if(this->varUseVertexNormal()->getValue()) {
-			mNormalBuffer.mapGL();
+			mNormalBuffer.updateGL();
 			mVAO.bindVertexBuffer(&mNormalBuffer, 2, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		gl::glCheckError();
@@ -132,40 +133,35 @@ namespace dyno
 
 #ifdef  CUDA_BACKEND
 		auto indices = triSet->getTriangles();
-		mDrawCount = indices.size() * 3;
 #endif // CUDA_BACKEND
 
 #ifdef VK_BACKEND
 		auto indices = triSet->getVulkanIndex();
-		mDrawCount = indices.size();
 #endif // VK_BACKEND
 
-		if (mDrawCount > 0)
+		mIndexBuffer.load(indices);
+
+		auto vertices = triSet->getPoints();
+		mVertexBuffer.load(vertices);
+
+		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
+			!this->inColor()->isEmpty() &&
+			this->inColor()->getDataPtr()->size() == vertices.size())
 		{
-			mIndexBuffer.load(indices);
-
-			auto vertices = triSet->getPoints();
-			mVertexBuffer.load(vertices);
-
-			if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
-				!this->inColor()->isEmpty() &&
-				this->inColor()->getDataPtr()->size() == vertices.size())
-			{
-				auto colors = this->inColor()->getData();
-				mColorBuffer.load(colors);
-			}
-
-			if (this->varUseVertexNormal()->getData())
-			{
-				//TODO: optimize the performance
-#ifdef CUDA_BACKEND
-				triSet->update();
-				auto normals = triSet->getVertexNormals();
-				mNormalBuffer.load(normals);
-#endif
-			}
-
+			auto colors = this->inColor()->getData();
+			mColorBuffer.load(colors);
 		}
+
+		if (this->varUseVertexNormal()->getData())
+		{
+			//TODO: optimize the performance
+#ifdef CUDA_BACKEND
+			triSet->update();
+			auto normals = triSet->getVertexNormals();
+			mNormalBuffer.load(normals);
+#endif
+		}
+
 	}
 
 	void GLSurfaceVisualModule::paintGL(const RenderParams& rparams)

@@ -45,7 +45,7 @@ namespace gl {
 		void genMipmap();
 
 	public:
-		unsigned int target = -1;
+		unsigned int target = 0xFFFFFFFF;
 
 		unsigned int internalFormat;
 		unsigned int format;

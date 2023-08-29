@@ -28,10 +28,7 @@ namespace dyno
 		mNumPoints = 0;
 		this->setName("point_renderer");
 		this->inColor()->tagOptional(true);
-
 		this->varPointSize()->setRange(0.001f, 1.0f);
-
-
 		this->varForceUpdate()->setValue(true);
 	}
 
@@ -86,17 +83,18 @@ namespace dyno
 
 	void GLPointVisualModule::updateGL()
 	{
+		mNumPoints = mPosition.count();
 		if (mNumPoints == 0) return;
 
 		uint vecSize = sizeof(Vec3f) / sizeof(float);
 
-		mPosition.mapGL();
+		mPosition.updateGL();
 		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
 
 		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
-			mColor.mapGL();
+			mColor.updateGL();
 			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
 		}
 		else
@@ -113,19 +111,13 @@ namespace dyno
 		auto pPointSet = this->inPointSet()->getDataPtr();
 		auto points = pPointSet->getPoints();
 
-		mNumPoints = points.size();
+		mPosition.load(points);
 
-		if (mNumPoints > 0)
+		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
+			&& !this->inColor()->isEmpty())
 		{
-			mPosition.load(points);
-
-			if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
-				&& !this->inColor()->isEmpty())
-			{
-				auto colors = this->inColor()->getData();
-				mColor.load(colors);
-			}
-			
+			auto colors = this->inColor()->getData();
+			mColor.load(colors);
 		}
 	}
 

@@ -70,8 +70,8 @@ namespace dyno
 
 		gl::VertexArray	mVertexArray;
 
-		gl::XBuffer		mPosition;
-		gl::XBuffer		mColor;
+		gl::XBuffer<Vec3f>		mPosition;
+		gl::XBuffer<Vec3f>		mColor;
 
 		unsigned int	mNumPoints;
 		gl::Program*	mShaderProgram = 0;

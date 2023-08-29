@@ -19,126 +19,19 @@
 
 #endif // VK_BACKEND
 
+
 namespace gl
 {
-	void gl::XBuffer::release()
+	template<typename T>
+	void XBuffer<T>::load(dyno::DArray<T> data)
 	{
 #ifdef VK_BACKEND
-#ifdef WIN32
-		CloseHandle(handle);
-#else
-		if (fd != -1)
-		{
-			close(fd);
-			fd = -1;
-		}
-#endif
-		if(memoryObject)
-			glDeleteMemoryObjectsEXT(1, &memoryObject);
-		// TODO: release command buffer?
-#endif
+		this->loadVulkan(data.buffer(), data.bufferSize());
+#endif // VK_BACKEND
 
 #ifdef CUDA_BACKEND
-		if (buffer) {
-			cuSafeCall(cudaFree(buffer));
-		}
-		if (resource) {
-			cuSafeCall(cudaGraphicsUnregisterResource(resource));
-		}
+		buffer.assign(data);
 #endif // CUDA_BACKEND
-
-		// finally call buffer release
-		Buffer::release();
-	}
-
-	void XBuffer::allocate(int size) 
-	{
-		std::cout << "allocate buffer: " << this->size << " -> " << size << " bytes" << std::endl;
-		this->resized = true;
-
-#ifdef CUDA_BACKEND
-		if (buffer) {
-			cuSafeCall(cudaFree(buffer));
-		}
-		cuSafeCall(cudaMalloc(&buffer, size)); 
-		cuSafeCall(cudaStreamSynchronize(0));
-		this->size = size;
-#endif // CUDA_BACKEND
-
-#ifdef VK_BACKEND
-		dyno::VkContext* ctx = dyno::VkSystem::instance()->currentContext();
-		VkDevice device = ctx->deviceHandle();
-
-		// create new vulkan buffer
-		{
-			// free current buffer
-			vkDestroyBuffer(device, buffer, 0);
-			vkFreeMemory(device, memory, 0);
-
-			// OS platforms
-#ifdef WIN32
-			VkExternalMemoryHandleTypeFlags type = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-#else
-			VkExternalMemoryHandleTypeFlags type = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-#endif
-
-			VkBufferCreateInfo bufferInfo{};
-			bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			bufferInfo.size = size;
-			bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-			bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-			VkExternalMemoryBufferCreateInfo externalInfo{};
-			externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
-			externalInfo.handleTypes = type;
-			bufferInfo.pNext = &externalInfo;
-
-			if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-				throw std::runtime_error("failed to create buffer!");
-			}
-
-			VkMemoryRequirements memRequirements;
-			vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
-
-			VkMemoryAllocateInfo allocInfo{};
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = ctx->getMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-			// enable export memory
-			VkExportMemoryAllocateInfo memoryHandleEx{};
-			memoryHandleEx.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
-			memoryHandleEx.handleTypes = type;
-			allocInfo.pNext = &memoryHandleEx;  // <-- Enabling Export
-
-			if (vkAllocateMemory(device, &allocInfo, nullptr, &memory) != VK_SUCCESS) {
-				throw std::runtime_error("failed to allocate buffer memory!");
-			}
-
-			vkBindBufferMemory(device, buffer, memory, 0);
-		}
-
-		// get the real allocated size of the buffer
-		VkMemoryRequirements req;
-		vkGetBufferMemoryRequirements(device, buffer, &req);
-		this->size = req.size;
-
-		// get memory handle for import
-#ifdef WIN32
-		VkMemoryGetWin32HandleInfoKHR info{};
-		info.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
-		info.memory = memory;
-		info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-
-		auto vkGetMemoryWin32HandleKHR =
-			PFN_vkGetMemoryWin32HandleKHR(vkGetDeviceProcAddr(device, "vkGetMemoryWin32HandleKHR"));
-
-		vkGetMemoryWin32HandleKHR(device, &info, &handle);
-#else
-		// TODO: for linux and other OS
-#endif  
-
-#endif
 	}
 
 #ifdef VK_BACKEND
@@ -174,38 +67,31 @@ namespace gl
 #endif // VK_BACKEND
 
 
-#ifdef CUDA_BACKEND
-	void XBuffer::loadCuda(void* src, int size)
+	template<typename T>
+	void XBuffer<T>::updateGL()
 	{
-		if (src == nullptr || size <= 0) return;
-		// simple strategy to reduce frequently memory allocation
-		if (size > this->size || size < (this->size / 4)) {
-			this->allocate(size * 2);
-		}
-
-		cuSafeCall(cudaMemcpy(buffer, src, size, cudaMemcpyDeviceToDevice));
-		//cuSafeCall(cudaStreamSynchronize(0));
-	}
-#endif
-
-
-	void XBuffer::mapGL()
-	{
+		int size = buffer.size() * sizeof(T);
+		if (size == 0)
+			return;
 
 #ifdef CUDA_BACKEND
-		
-		if (resized)
-		{
-			resized = false;
-			// resize buffer...		
-			glBindBuffer(target, id);
-			glBufferData(target, size, 0, usage);
-			glBindBuffer(target, 0);
 
-			// register the cuda resource after resize...
-			if (resource != 0) {
+		int newSize = this->size;
+
+		// shrink
+		if (size < (this->size / 2))
+			newSize = size;
+		// expand
+		if (size > this->size)
+			newSize = size * 1.5;
+
+		// resized
+		if(newSize != this->size) {
+			printf("allocate XBuffer: %d -> %d\n", this->size, newSize);
+			allocate(newSize);
+			// need re-register resource
+			if(resource != 0)
 				cuSafeCall(cudaGraphicsUnregisterResource(resource));
-			}
 			cuSafeCall(cudaGraphicsGLRegisterBuffer(&resource, id, cudaGraphicsRegisterFlagsWriteDiscard));
 		}
 
@@ -213,9 +99,8 @@ namespace gl
 		void* devicePtr = 0;
 		cuSafeCall(cudaGraphicsMapResources(1, &resource));
 		cuSafeCall(cudaGraphicsResourceGetMappedPointer(&devicePtr, &size0, resource));
-		cuSafeCall(cudaMemcpy(devicePtr, buffer, size, cudaMemcpyDeviceToDevice));
+		cuSafeCall(cudaMemcpy(devicePtr, buffer.begin(), size, cudaMemcpyDeviceToDevice));
 		cuSafeCall(cudaGraphicsUnmapResources(1, &resource));
-		//cuSafeCall(cudaStreamSynchronize(0));
 
 #endif // CUDA_BACKEND
 
@@ -246,6 +131,12 @@ namespace gl
 		glCheckError();
 
 #endif // VK_BACKEND
+	}
+
+	template<typename T>
+	int XBuffer<T>::count() const
+	{
+		return buffer.size();
 	}
 
 }

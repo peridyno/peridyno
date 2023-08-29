@@ -19,6 +19,12 @@
 #include <Array/Array2D.h>
 #include "Texture.h"
 
+#include <Vector.h>
+
+#ifdef CUDA_BACKEND
+struct cudaGraphicsResource;
+#endif
+
 namespace gl {
 
 	// texture for loading data from cuda/vulkan api
@@ -29,24 +35,25 @@ namespace gl {
 		XTexture2D() {}
 		~XTexture2D() {}
 
+		virtual void create() override;
+
 	public:
-		template<DeviceType device>
-		void load(dyno::Array2D<T, device> data) {
-#ifdef VK_BACKEND
-
-#endif // VK_BACKEND
-
-#ifdef CUDA_BACKEND
-			buffer.assign(data);
-#endif // CUDA_BACKEND
-		}
-
+		// load data to into an intermediate buffer
+		void load(dyno::DArray2D<T> data);
+		// update OpenGL texture within GL context
 		void updateGL();
 
 	private:
+		int width  = -1;
+		int height = -1;
 
 #ifdef CUDA_BACKEND
-		dyno::Array2D<T, DeviceType::GPU> buffer;
+		dyno::DArray2D<T>		buffer;
+		cudaGraphicsResource*	resource = 0;
 #endif
 	};
+
+	template class XTexture2D<dyno::Vec4f>;
+	template class XTexture2D<dyno::Vec3f>;
+	template class XTexture2D<dyno::Vec3u>;
 }

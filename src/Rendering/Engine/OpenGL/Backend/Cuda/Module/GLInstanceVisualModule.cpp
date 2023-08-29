@@ -38,9 +38,9 @@ namespace dyno {
 	{
 		GLSurfaceVisualModule::updateGL();
 
-		mInstanceBuffer.mapGL();
+		mInstanceBuffer.updateGL();
 		if (this->inInstanceColor()->getDataPtr()) {
-			mColorBuffer.mapGL();
+			mColorBuffer.updateGL();
 			mVAO.bindVertexBuffer(&mColorBuffer, 1, 3, GL_FLOAT, sizeof(Vec3f), 0, 1);
 		}
 
