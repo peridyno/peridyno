@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLSurfaceVisualModule.h>
-#include <gl/Texture.h>
+#include <gl/GPUTexture.h>
 
 using namespace dyno;
 
@@ -31,7 +31,6 @@ public:
 
 	DEF_ARRAY2D_IN(Vec4f, TexColor, DeviceType::GPU, "");
 
-private:
 
 private:
 	gl::XBuffer mPositions;
@@ -43,8 +42,7 @@ private:
 	gl::Program		mProgram;
 	gl::VertexArray	mVAO;
 
-	CArray2D<Vec4f> mTexData;
-	gl::Texture2D	mTexColor;
+	gl::XTexture2D<dyno::Vec4f> mTexColor;
 
 	gl::Buffer		mUniformBlock;
 };

@@ -18,11 +18,6 @@ bool GLObjMeshVisualModule::initializeGL()
 	mTexCoords.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 	mInices.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
-	mTexColor.format = GL_RGBA;
-	mTexColor.internalFormat = GL_RGBA32F;
-	mTexColor.type = GL_FLOAT;
-	mTexColor.create();
-
 	mProgram.create();
 
 	gl::Shader vshader, fshader;
@@ -49,7 +44,7 @@ void GLObjMeshVisualModule::updateGL()
 	mTexCoords.mapGL();
 	mInices.mapGL();
 
-	mTexColor.load(mTexData.nx(), mTexData.ny(), (void*)mTexData.begin());
+	mTexColor.updateGL();
 }
 
 void GLObjMeshVisualModule::releaseGL()
@@ -128,7 +123,7 @@ void GLObjMeshVisualModule::updateImpl()
 	mInices.load(in_Index.getData());
 
 	// copy texture data...
-	mTexData.assign(in_TexColor.getData());
+	mTexColor.load(in_TexColor.getData());
 
 	mDrawCount = in_Index.size();
 }
