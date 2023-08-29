@@ -366,7 +366,7 @@ namespace dyno
 				}
 			});
 
-		connect(mAnimationWidget->m_startSim, &QPushButton::released, [=]()
+		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()
 			{
 				mOpenGLWidget->setFocus();
 			});
