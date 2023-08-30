@@ -1,5 +1,7 @@
 #include "PAnimationWidget.h"
 
+#include "SceneGraph.h"
+#include "SceneGraphFactory.h"
 #include "PSimulationThread.h"
 #include "Platform.h"
 
@@ -14,14 +16,14 @@ namespace dyno
 {
 	PAnimationWidget::PAnimationWidget(QWidget *parent) : 
 		QWidget(parent),
-		m_startSim(nullptr),
-		m_resetSim(nullptr),
-		StartLabel(nullptr),
-		ResetLabel(nullptr),
-		Starticon(nullptr),
-		Pauseicon(nullptr),
-		Reseticon(nullptr),
-		Finishicon(nullptr)
+		mStartSim(nullptr),
+		mResetSim(nullptr),
+		mStartLabel(nullptr),
+		mResetLabel(nullptr),
+		mStartIcon(nullptr),
+		mPauseIcon(nullptr),
+		mResetIcon(nullptr),
+		mFinishIcon(nullptr)
 	{
 		mTotalFrame = 800;
 
@@ -37,8 +39,6 @@ namespace dyno
 		mTotalFrameSpinbox->setMaximum(1000000);
 		mTotalFrameSpinbox->setValue(mTotalFrame);
 
-		QGridLayout* GLayout = new QGridLayout;
-		
 		mFrameSlider = new PAnimationQSlider(0, mTotalFrame, this);
 		mFrameSlider->setObjectName("AnimationSlider");
 		mFrameSlider->setStyleSheet("border-top-right-radius: 0px; border-bottom-right-radius: 0px;");
@@ -48,45 +48,61 @@ namespace dyno
 
 		QHBoxLayout* operationLayout = new QHBoxLayout();
 
-		m_startSim = new QPushButton();								//创建按钮
-		m_resetSim = new QPushButton();
-		m_startSim->setStyleSheet("padding: 6px;");	
-		m_resetSim->setStyleSheet("padding: 6px;");
+		mStartSim = new QPushButton();								//创建按钮
+		mResetSim = new QPushButton();
+		mStartSim->setStyleSheet("padding: 6px;");	
+		mResetSim->setStyleSheet("padding: 6px;");
 
-		m_startSim->setShortcut(QKeySequence(Qt::Key_Space));		//设置播放快捷键
+		mStartSim->setShortcut(QKeySequence(Qt::Key_Space));		//设置播放快捷键
 
-		Starticon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));//设置按钮icon
-		Pauseicon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
-		Reseticon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
-		Finishicon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Finish.png"));
+		mStartIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));//设置按钮icon
+		mPauseIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
+		mResetIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
+		mFinishIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Finish.png"));
 
-		StartLabel = new QLabel;													//创建QLabel以承载icon
-		PAnimationWidget::buildIconLabel(StartLabel,Starticon, m_startSim, 30);		//构建PushButton上的Label样式
-		ResetLabel = new QLabel;
-		PAnimationWidget::buildIconLabel(ResetLabel, Reseticon, m_resetSim, 30);
+		mStartLabel = new QLabel;													//创建QLabel以承载icon
+		PAnimationWidget::buildIconLabel(mStartLabel,mStartIcon, mStartSim, 30);		//构建PushButton上的Label样式
+		mResetLabel = new QLabel;
+		PAnimationWidget::buildIconLabel(mResetLabel, mResetIcon, mResetSim, 30);
 
-		m_resetSim->setCheckable(false);
+		mResetSim->setCheckable(false);
 
+		mPersistent = new QCheckBox();
+		mPersistent->setObjectName("SimulationCheckBox");
+		mPersistent->setChecked(false);
+		mPersistent->setFixedSize(29, 29);
+		mPersistent->setContentsMargins(0, 0, 0, 0);
+		mPersistent->setToolTip("Run the simulation permanently");
+		
 		operationLayout->addWidget(mTotalFrameSpinbox, 0);
-		operationLayout->addWidget(m_startSim, 0);
-		operationLayout->addWidget(m_resetSim, 0);
+		operationLayout->addWidget(mStartSim, 0);
+		operationLayout->addWidget(mResetSim, 0);
+		operationLayout->addWidget(mPersistent, 0);
 		operationLayout->setSpacing(0);
 
-		m_startSim->setCheckable(true);
+		mStartSim->setCheckable(true);
 
 		layout->addLayout(frameLayout, 10);
 		layout->addStretch();
 		layout->addLayout(operationLayout, 1);
 		layout->setSpacing(0);
 		
-		connect(m_startSim, SIGNAL(released()), this, SLOT(toggleSimulation()));
-		connect(m_resetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
+		connect(mStartSim, SIGNAL(released()), this, SLOT(toggleSimulation()));
+		connect(mResetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
 
 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
 
 		// 动态改变 Slider
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), mFrameSlider, SLOT(maximumChanged(int)));
+		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), this, SLOT(totalFrameChanged(int)));
+
+		connect(mPersistent, SIGNAL(stateChanged(int)), this, SLOT(runForever(int)));
+
+		connect(mStartSim, &QPushButton::released, [=]()
+			{
+				emit simulationStarted();
+			});
 
 		PSimulationThread::instance()->start();
 	}
@@ -100,23 +116,23 @@ namespace dyno
 	
 	void PAnimationWidget::toggleSimulation()
 	{
-		if (m_startSim->isChecked())
+		if (mStartSim->isChecked())
 		{
 			PSimulationThread::instance()->resume();
-			m_startSim->setText("");
+			mStartSim->setText("");
 			//m_startSim->setIcon(*PauseIcon);//更新icon状态
-			StartLabel->setPixmap(*Pauseicon);//更新Label上的icon为Pauseicon
+			mStartLabel->setPixmap(*mPauseIcon);//更新Label上的icon为Pauseicon
 
-			m_resetSim->setDisabled(true);
+			mResetSim->setDisabled(true);
 			mTotalFrameSpinbox->setEnabled(false);
 			mFrameSlider->setEnabled(false);
 		}
 		else
 		{
 			PSimulationThread::instance()->pause();
-			m_startSim->setText("");
-			m_resetSim->setDisabled(false);
-			StartLabel->setPixmap(*Starticon);		//更新Label上的icon为Starticon
+			mStartSim->setText("");
+			mResetSim->setDisabled(false);
+			mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
 
 
 			mTotalFrameSpinbox->setEnabled(true);
@@ -128,10 +144,10 @@ namespace dyno
 	{
 		PSimulationThread::instance()->reset(mTotalFrameSpinbox->value());
 
-		m_startSim->setText("");
-		m_startSim->setEnabled(true);
-		m_startSim->setChecked(false);
-		StartLabel->setPixmap(*Starticon);		//更新Label上的icon为Starticon
+		mStartSim->setText("");
+		mStartSim->setEnabled(true);
+		mStartSim->setChecked(false);
+		mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
 
 		mTotalFrameSpinbox->setEnabled(true);
 		mFrameSlider->setEnabled(true);
@@ -140,13 +156,13 @@ namespace dyno
 
 	void PAnimationWidget::simulationFinished()
 	{
-		StartLabel->setPixmap(*Finishicon);		//更新Label上的icon为Finishicon
+		mStartLabel->setPixmap(*mFinishIcon);		//更新Label上的icon为Finishicon
 
-		m_startSim->setText("");
-		m_startSim->setDisabled(true);
-		m_startSim->setChecked(false);
+		mStartSim->setText("");
+		mStartSim->setDisabled(true);
+		mStartSim->setChecked(false);
 
-		m_resetSim->setDisabled(false);
+		mResetSim->setDisabled(false);
 
 		mTotalFrameSpinbox->setEnabled(true);
 	}
@@ -169,4 +185,54 @@ namespace dyno
 		iconLayout->setContentsMargins(0, 0, 0, 0);
 		btn->setLayout(iconLayout);								//将Layout指定给目标Button
 	}
+
+	void PAnimationWidget::totalFrameChanged(int num)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+
+		if (scn->getFrameNumber() < num)
+		{
+			mResetSim->setEnabled(true);
+			mStartSim->setEnabled(true);
+			
+			mStartLabel->setPixmap(*mStartIcon);
+
+			PSimulationThread::instance()->proceed(num);
+		}
+	}
+
+	void PAnimationWidget::runForever(int state)
+	{
+		switch (state)
+		{
+		case Qt::CheckState::Checked:
+			mStartSim->setDisabled(true);
+			mResetSim->setDisabled(true);
+			mFrameSlider->setDisabled(true);
+			mTotalFrameSpinbox->setDisabled(true);
+
+			disconnect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
+
+			PSimulationThread::instance()->setTotalFrames(std::numeric_limits<int>::max());
+			PSimulationThread::instance()->resume();
+			break;
+
+		case Qt::CheckState::Unchecked:
+			mStartSim->setDisabled(false);
+			mResetSim->setDisabled(false);
+			mStartLabel->setPixmap(*mStartIcon);
+			mFrameSlider->setDisabled(false);
+			mTotalFrameSpinbox->setDisabled(false);
+
+			connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
+
+			PSimulationThread::instance()->setTotalFrames(mTotalFrameSpinbox->value());
+			PSimulationThread::instance()->pause();
+			break;
+
+		default:
+			break;
+		}
+	}
+
 }

@@ -198,6 +198,17 @@ namespace dyno
 		notify();
 	}
 
+	void PSimulationThread::proceed(int num)
+	{
+		this->pause();
+
+		mFinished = false;
+
+		mTotalFrame = num;
+
+		notify();
+	}
+
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
 		auto scn = SceneGraphFactory::instance()->active();
