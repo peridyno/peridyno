@@ -1,20 +1,46 @@
-#include "DensityPBD.h"
+#include "IterativeDensitySolver.h"
 
-#include "Node.h"
 #include "SummationDensity.h"
 
 namespace dyno
 {
 //	IMPLEMENT_TCLASS(DensityPBD, TDataType)
 
-	template <typename Real, typename Coord>
+	template<typename TDataType>
+	IterativeDensitySolver<TDataType>::IterativeDensitySolver()
+		: ParticleApproximation<TDataType>()
+	{
+		this->varIterationNumber()->setValue(3);
+		this->varRestDensity()->setValue(Real(1000));
+
+		mSummation = std::make_shared<SummationDensity<TDataType>>();
+
+		this->inSmoothingLength()->connect(mSummation->inSmoothingLength());
+		this->inSamplingDistance()->connect(mSummation->inSamplingDistance());
+		this->inPosition()->connect(mSummation->inPosition());
+		this->inNeighborIds()->connect(mSummation->inNeighborIds());
+
+		mSummation->outDensity()->connect(this->outDensity());
+	}
+
+	template<typename TDataType>
+	IterativeDensitySolver<TDataType>::~IterativeDensitySolver()
+	{
+		mLamda.clear();
+		mDeltaPos.clear();
+		mPositionOld.clear();
+	}
+
+
+	template <typename Real, typename Coord, typename Kernel>
 	__global__ void K_ComputeLambdas(
 		DArray<Real> lambdaArr,
 		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
-		SpikyKernel<Real> kern,
-		Real smoothingLength)
+		Real smoothingLength,
+		Kernel gradient,
+		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= posArr.size()) return;
@@ -33,7 +59,7 @@ namespace dyno
 
 			if (r > EPSILON)
 			{
-				Coord g = kern.Gradient(r, smoothingLength)*(pos_i - posArr[j]) * (1.0f / r);
+				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
 				grad_ci += g;
 				lamda_i += g.dot(g);
 			}
@@ -48,15 +74,16 @@ namespace dyno
 		lambdaArr[pId] = lamda_i > 0.0f ? 0.0f : lamda_i;
 	}
 
-	template <typename Real, typename Coord>
+	template <typename Real, typename Coord, typename Kernel>
 	__global__ void K_ComputeDisplacement(
-		DArray<Coord> dPos, 
-		DArray<Real> lambdas, 
-		DArray<Coord> posArr, 
-		DArrayList<int> neighbors, 
-		SpikyKernel<Real> kern,
+		DArray<Coord> dPos,
+		DArray<Real> lambdas,
+		DArray<Coord> posArr,
+		DArrayList<int> neighbors,
 		Real smoothingLength,
-		Real dt)
+		Real dt,
+		Kernel gradient,
+		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= posArr.size()) return;
@@ -73,9 +100,9 @@ namespace dyno
 			Real r = (pos_i - posArr[j]).norm();
 			if (r > EPSILON)
 			{
-				Coord dp_ij = 10.0f*(pos_i - posArr[j])*(lamda_i + lambdas[j])*kern.Gradient(r, smoothingLength)* (1.0 / r);
+				Coord dp_ij = 10.0f * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
 				dP_i += dp_ij;
-				
+
 				atomicAdd(&dPos[pId][0], dp_ij[0]);
 				atomicAdd(&dPos[j][0], -dp_ij[0]);
 
@@ -84,7 +111,7 @@ namespace dyno
 					atomicAdd(&dPos[pId][1], dp_ij[1]);
 					atomicAdd(&dPos[j][1], -dp_ij[1]);
 				}
-				
+
 				if (Coord::dims() >= 3)
 				{
 					atomicAdd(&dPos[pId][2], dp_ij[2]);
@@ -92,15 +119,13 @@ namespace dyno
 				}
 			}
 		}
-
-//		dPos[pId] = dP_i;
 	}
 
 	template <typename Real, typename Coord>
 	__global__ void K_UpdatePosition(
-		DArray<Coord> posArr, 
-		DArray<Coord> velArr, 
-		DArray<Coord> dPos, 
+		DArray<Coord> posArr,
+		DArray<Coord> velArr,
+		DArray<Coord> dPos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -109,55 +134,24 @@ namespace dyno
 		posArr[pId] += dPos[pId];
 	}
 
-
 	template<typename TDataType>
-	DensityPBD<TDataType>::DensityPBD()
-		: ConstraintModule()
-	{
-		this->varIterationNumber()->setValue(3);
-
-		this->varSamplingDistance()->setValue(Real(0.005));
-		this->varSmoothingLength()->setValue(Real(0.011));
-		this->varRestDensity()->setValue(Real(1000));
-
-		m_summation = std::make_shared<SummationDensity<TDataType>>();
-
-		this->varRestDensity()->connect(m_summation->varRestDensity());
-		this->varSmoothingLength()->connect(m_summation->inSmoothingLength());
-		this->varSamplingDistance()->connect(m_summation->inSamplingDistance());
-
-		this->inPosition()->connect(m_summation->inPosition());
-		this->inNeighborIds()->connect(m_summation->inNeighborIds());
-
-		m_summation->outDensity()->connect(this->outDensity());
-	}
-
-	template<typename TDataType>
-	DensityPBD<TDataType>::~DensityPBD()
-	{
-		m_lamda.clear();
-		m_deltaPos.clear();
-		m_position_old.clear();
-	}
-
-	template<typename TDataType>
-	void DensityPBD<TDataType>::constrain()
+	void IterativeDensitySolver<TDataType>::compute()
 	{
 		int num = this->inPosition()->size();
 
-		if (m_position_old.size() != this->inPosition()->size())
-			m_position_old.resize(this->inPosition()->size());
+		if (mPositionOld.size() != this->inPosition()->size())
+			mPositionOld.resize(this->inPosition()->size());
 
-		m_position_old.assign(this->inPosition()->getData());
+		mPositionOld.assign(this->inPosition()->getData());
 
 		if (this->outDensity()->size() != this->inPosition()->size())
 			this->outDensity()->resize(this->inPosition()->size());
 
-		if (m_deltaPos.size() != this->inPosition()->size())
-			m_deltaPos.resize(this->inPosition()->size());
+		if (mDeltaPos.size() != this->inPosition()->size())
+			mDeltaPos.resize(this->inPosition()->size());
 
-		if (m_lamda.size() != this->inPosition()->size())
-			m_lamda.resize(this->inPosition()->size());
+		if (mLamda.size() != this->inPosition()->size())
+			mLamda.resize(this->inPosition()->size());
 
 		int it = 0;
 
@@ -174,58 +168,55 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void DensityPBD<TDataType>::takeOneIteration()
+	void IterativeDensitySolver<TDataType>::takeOneIteration()
 	{
 		Real dt = this->inTimeStep()->getData();
-
 		int num = this->inPosition()->size();
-		uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
-		
-		m_deltaPos.reset();
+		mDeltaPos.reset();
+		mSummation->varRestDensity()->setValue(this->varRestDensity()->getValue());
+		mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
+		mSummation->update();
 
-		m_summation->update();
-
-		cuExecute(num, K_ComputeLambdas,
-			m_lamda,
-			m_summation->outDensity()->getData(),
+		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+			K_ComputeLambdas,
+			mLamda,
+			mSummation->outDensity()->getData(),
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
-			m_kernel,
-			this->varSmoothingLength()->getData());
+			this->inSmoothingLength()->getValue());
 
-		cuExecute(num, K_ComputeDisplacement,
-			m_deltaPos,
-			m_lamda,
+		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+			K_ComputeDisplacement,
+			mDeltaPos,
+			mLamda,
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
-			m_kernel,
-			this->varSmoothingLength()->getData(),
+			this->inSmoothingLength()->getData(),
 			dt);
 
 		cuExecute(num, K_UpdatePosition,
 			this->inPosition()->getData(),
 			this->inVelocity()->getData(),
-			m_deltaPos,
+			mDeltaPos,
 			dt);
 	}
 
 	template <typename Real, typename Coord>
 	__global__ void DP_UpdateVelocity(
 		DArray<Coord> velArr,
-		DArray<Coord> prePos,
 		DArray<Coord> curPos,
+		DArray<Coord> prePos,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velArr.size()) return;
 
 		velArr[pId] += (curPos[pId] - prePos[pId]) / dt;
-
 	}
 
 	template<typename TDataType>
-	void DensityPBD<TDataType>::updateVelocity()
+	void IterativeDensitySolver<TDataType>::updateVelocity()
 	{
 		int num = this->inPosition()->size();
 
@@ -233,10 +224,10 @@ namespace dyno
 
 		cuExecute(num, DP_UpdateVelocity,
 			this->inVelocity()->getData(),
-			m_position_old,
 			this->inPosition()->getData(),
+			mPositionOld,
 			dt);
 	}
 
-	DEFINE_CLASS(DensityPBD);
+	DEFINE_CLASS(IterativeDensitySolver);
 }

@@ -1,6 +1,5 @@
 #pragma once
-#include "Module/ConstraintModule.h"
-#include "Kernel.h"
+#include "ParticleApproximation.h"
 
 namespace dyno {
 
@@ -11,21 +10,15 @@ namespace dyno {
 	*	\brief	This class implements a position-based solver for incompressibility.
 	*/
 	template<typename TDataType>
-	class DensityPBD : public ConstraintModule
+	class IterativeDensitySolver : public ParticleApproximation<TDataType>
 	{
-		DECLARE_TCLASS(DensityPBD, TDataType)
+		DECLARE_TCLASS(IterativeDensitySolver, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DensityPBD();
-		~DensityPBD() override;
-
-		void constrain() override;
-
-		void takeOneIteration();
-
-		void updateVelocity();
+		IterativeDensitySolver();
+		~IterativeDensitySolver() override;
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time Step");
@@ -56,20 +49,22 @@ namespace dyno {
 
 		DEF_VAR(Real, RestDensity, 1000, "Reference density");
 
-		DEF_VAR(Real, SamplingDistance, 0.005, "");
+	protected:
+		void compute() override;
 
-		DEF_VAR(Real, SmoothingLength, 0.01, "");
+	public:
+		void takeOneIteration();
 
-	private:
-		SpikyKernel<Real> m_kernel;
-
-		DArray<Real> m_lamda;
-		DArray<Coord> m_deltaPos;
-		DArray<Coord> m_position_old;
+		void updateVelocity();
 
 	private:
-		std::shared_ptr<SummationDensity<TDataType>> m_summation;
+		DArray<Real> mLamda;
+		DArray<Coord> mDeltaPos;
+		DArray<Coord> mPositionOld;
+
+	private:
+		std::shared_ptr<SummationDensity<TDataType>> mSummation;
 	};
 
-	IMPLEMENT_TCLASS(DensityPBD, TDataType)
+	IMPLEMENT_TCLASS(IterativeDensitySolver, TDataType)
 }

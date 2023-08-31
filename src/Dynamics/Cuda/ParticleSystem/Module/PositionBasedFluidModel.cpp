@@ -2,7 +2,7 @@
 
 #include "ParticleIntegrator.h"
 #include "SummationDensity.h"
-#include "DensityPBD.h"
+#include "IterativeDensitySolver.h"
 #include "ImplicitViscosity.h"
 
 #include "Collision/NeighborPointQuery.h"
@@ -29,8 +29,8 @@ namespace dyno
 		this->inPosition()->connect(nbrQuery->inPosition());
 		this->pushModule(nbrQuery);
 
-		auto density = std::make_shared<DensityPBD<TDataType>>();
-		m_smoothingLength.connect(density->varSmoothingLength());
+		auto density = std::make_shared<IterativeDensitySolver<TDataType>>();
+		m_smoothingLength.connect(density->inSmoothingLength());
 		this->inTimeStep()->connect(density->inTimeStep());
 		this->inPosition()->connect(density->inPosition());
 		this->inVelocity()->connect(density->inVelocity());

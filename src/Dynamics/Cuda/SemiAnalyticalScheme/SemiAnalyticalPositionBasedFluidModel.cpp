@@ -9,7 +9,7 @@
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/Module/DensityPBD.h"
+#include "ParticleSystem/Module/IterativeDensitySolver.h"
 
 #include "Collision/NeighborPointQuery.h"
 #include "Collision/NeighborTriangleQuery.h"

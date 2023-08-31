@@ -2,7 +2,7 @@
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/SummationDensity.h"
-#include "ParticleSystem/Module/DensityPBD.h"
+#include "ParticleSystem/Module/IterativeDensitySolver.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
 #include "Collision/NeighborPointQuery.h"

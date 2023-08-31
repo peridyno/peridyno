@@ -4,7 +4,7 @@
 #include "Module/ParticleIntegrator.h"
 #include "Module/ImplicitViscosity.h"
 #include "Module/SummationDensity.h"
-#include "Module/DensityPBD.h"
+#include "Module/IterativeDensitySolver.h"
 #include "Module/BoundaryConstraint.h"
 #include "Module/VariationalApproximateProjection.h"
 

@@ -42,7 +42,7 @@ namespace dyno
 	template <typename TDataType>
 	class NeighborPointQuery;
 	template <typename TDataType>
-	class DensityPBD;
+	class IterativeDensitySolver;
 	template<typename TDataType>
 	class NeighborTriangleQuery;
 	template <typename TDataType>

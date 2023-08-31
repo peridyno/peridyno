@@ -13,7 +13,7 @@
 
 #include "ParticleSystem/Module/PositionBasedFluidModel.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/DensityPBD.h"
+#include "ParticleSystem/Module/IterativeDensitySolver.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
 #include "SharedFunc.h"
