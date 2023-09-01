@@ -16,12 +16,15 @@ namespace dyno
 		this->setName("surface_renderer");
 
 		this->inColor()->tagOptional(true);
-		this->inColorTexture()->tagOptional(true);
 
 		this->inNormal()->tagOptional(true);
 		this->inNormalIndex()->tagOptional(true);
 		this->inTexCoord()->tagOptional(true);
 		this->inTexCoordIndex()->tagOptional(true);
+
+#ifdef CUDA_BACKEND
+		this->inColorTexture()->tagOptional(true); 
+#endif
 	}
 
 	GLSurfaceVisualModule::~GLSurfaceVisualModule()
@@ -55,14 +58,6 @@ namespace dyno
 		mVertexColor.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 		mNormal.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 		mTexCoord.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
-
-		mVAO.bindIndexBuffer(&mVertexIndex);
-
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
-
-		mVAO.bindVertexBuffer(&mVertexPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
-		mVAO.bindVertexBuffer(&mVertexColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
-		mVAO.bindVertexBuffer(&mNormal, 2, vecSize, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
 		mShaderProgram = gl::Program::createProgramSPIRV(
@@ -176,8 +171,10 @@ namespace dyno
 			mTexCoord.updateGL();
 		}
 
+#ifdef CUDA_BACKEND
 		// update texture content
 		mColorTexture.updateGL();
+#endif
 
 		gl::glCheckError();
 	}
@@ -186,18 +183,10 @@ namespace dyno
 	{
 		// update data
 		auto triSet = this->inTriangleSet()->getDataPtr();
-
-#ifdef  CUDA_BACKEND
 		auto indices = triSet->getTriangles();
-#endif // CUDA_BACKEND
-
-#ifdef VK_BACKEND
-		auto indices = triSet->getVulkanIndex();
-#endif // VK_BACKEND
+		auto vertices = triSet->getPoints();
 
 		mVertexIndex.load(indices);
-
-		auto vertices = triSet->getPoints();
 		mVertexPosition.load(vertices);
 
 		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex &&
@@ -239,10 +228,13 @@ namespace dyno
 			}
 		}
 
+#ifdef CUDA_BACKEND
 		// texture
 		if (!inColorTexture()->isEmpty()) {
 			mColorTexture.load(inColorTexture()->getData());
 		}
+#endif
+
 	}
 
 	void GLSurfaceVisualModule::paintGL(const RenderParams& rparams)
@@ -294,16 +286,18 @@ namespace dyno
 		mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 		mPBRMaterialUBlock.bindBufferBase(1);
 
+
+#ifdef CUDA_BACKEND
 		// bind texture
 		if (mColorTexture.isValid()) {
 			mColorTexture.bind(GL_TEXTURE10);
 		}
 		else
+#endif
 		{
 			glActiveTexture(GL_TEXTURE10);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-
 		mVAO.bind();
 
 		if(mInstanceCount > 0)

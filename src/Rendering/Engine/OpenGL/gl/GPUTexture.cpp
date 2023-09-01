@@ -37,27 +37,23 @@ bool gl::XTexture2D<T>::isValid() const
 	return width > 0 && height > 0;
 }
 
+
+#ifdef CUDA_BACKEND
 template<typename T>
 void gl::XTexture2D<T>::load(dyno::DArray2D<T> data)
 {
-#ifdef VK_BACKEND
-
-#endif // VK_BACKEND
-
-#ifdef CUDA_BACKEND
 	buffer.assign(data);
-#endif // CUDA_BACKEND
 }
+#endif // CUDA_BACKEND
 
 template<typename T>
 void XTexture2D<T>::updateGL()
 {
+#ifdef CUDA_BACKEND
 	int size = buffer.nx() * buffer.ny() * sizeof(T);
 	if (size <= 0) {
 		return;
 	}
-
-#ifdef CUDA_BACKEND
 
 	// prepare dst texture
 	if (this->id == GL_INVALID_INDEX)

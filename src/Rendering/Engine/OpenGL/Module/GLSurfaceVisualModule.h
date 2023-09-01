@@ -62,7 +62,9 @@ namespace dyno
 		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
 		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
 
+#ifdef CUDA_BACKEND
 		DEF_ARRAY2D_IN(Vec4f, ColorTexture, DeviceType::GPU, "");
+#endif
 
 	protected:
 		virtual void updateImpl() override;
@@ -93,8 +95,10 @@ namespace dyno
 		gl::XBuffer<Vec2f> mTexCoord;
 		gl::XBuffer<TopologyModule::Triangle> mTexCoordIndex;
 
+#ifdef CUDA_BACKEND
 		// color texture
 		gl::XTexture2D<Vec4f> mColorTexture;
+#endif
 
 		// for instanced rendering
 		unsigned int			 mInstanceCount = 0;

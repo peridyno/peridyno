@@ -48,14 +48,12 @@ namespace dyno
 
 	bool GLPointVisualModule::initializeGL()
 	{
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
-
 		mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mColor.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		mVertexArray.create();
-		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
-		mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 
 		mShaderProgram = gl::Program::createProgramSPIRV(
 			POINT_VERT, sizeof(POINT_VERT),
@@ -86,16 +84,14 @@ namespace dyno
 		mNumPoints = mPosition.count();
 		if (mNumPoints == 0) return;
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
-
 		mPosition.updateGL();
-		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
 			mColor.updateGL();
-			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
+			mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{

@@ -16,12 +16,11 @@
 
 #pragma once
 
-#include <Array/Array2D.h>
 #include "Texture.h"
-
 #include <Vector.h>
 
 #ifdef CUDA_BACKEND
+#include <Array/Array2D.h>
 struct cudaGraphicsResource;
 #endif
 
@@ -36,14 +35,15 @@ namespace gl {
 		~XTexture2D() {}
 
 		virtual void create() override;
-
 		bool isValid() const;
 
-	public:
-		// load data to into an intermediate buffer
-		void load(dyno::DArray2D<T> data);
 		// update OpenGL texture within GL context
 		void updateGL();
+
+#ifdef CUDA_BACKEND
+		// load data to into an intermediate buffer
+		void load(dyno::DArray2D<T> data);
+#endif
 
 	private:
 		int width  = -1;

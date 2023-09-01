@@ -41,9 +41,8 @@ namespace dyno
 		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
 		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
 		mShaderProgram = gl::Program::createProgramSPIRV(
@@ -78,9 +77,8 @@ namespace dyno
 		mVertexBuffer.updateGL();
 		mIndexBuffer.updateGL();
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
 		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 	}
 
 	void GLWireframeVisualModule::updateImpl()
