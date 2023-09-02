@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <QtApp.h>
 #include <SceneGraph.h>
 
 #include "ObjMesh.h"
@@ -12,46 +12,43 @@ std::shared_ptr<SceneGraph> createScene()
 
 	{
 		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
-		mesh->load("data/cube.obj");
-		auto triSet = mesh->outTriangleSet()->getDataPtr();
-		triSet->scale(0.3f);
-		triSet->translate({ -0.5, 0, 0.5 });
-		mesh->update();
+		mesh->varFileName()->setValue(getAssetPath() + "obj/standard/cube.obj");
+		mesh->varLocation()->setValue(Vec3f(-0.5f, 0.0f, 0.0f));
+		mesh->varScale()->setValue(Vec3f(0.3f));
 
 		auto render = std::make_shared<GLSurfaceVisualModule>();
-		mesh->outTriangleSet()->connect(render->inTriangleSet());
+		mesh->stateTriangleSet()->connect(render->inTriangleSet());
 
 		render->varUseVertexNormal()->setValue(true);
-		mesh->outNormal()->connect(render->inNormal());
-		mesh->outNormalIndex()->connect(render->inNormalIndex());
+		mesh->stateNormal()->connect(render->inNormal());
+		mesh->stateNormalIndex()->connect(render->inNormalIndex());
 
 		render->varColorMode()->getDataPtr()->setCurrentKey(GLSurfaceVisualModule::CM_Texture);
-		mesh->outTexCoord()->connect(render->inTexCoord());
-		mesh->outTexCoordIndex()->connect(render->inTexCoordIndex());
-		mesh->outColorTexture()->connect(render->inColorTexture());
+		mesh->stateTexCoord()->connect(render->inTexCoord());
+		mesh->stateTexCoordIndex()->connect(render->inTexCoordIndex());
+		mesh->stateColorTexture()->connect(render->inColorTexture());
 
 		mesh->graphicsPipeline()->pushModule(render);
 	}
 
 	{
 		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
-		mesh->load("data/sphere.obj");
-		auto triSet = mesh->outTriangleSet()->getDataPtr();
-		triSet->scale(0.3f);
-		triSet->translate({ 0.2, 0.2, -0.2 });
-		mesh->update();
+		//mesh->varFileName()->setValue(getAssetPath() + "obj/standard/sphere.obj");
+		mesh->varFileName()->setValue(getAssetPath() + "obj/eyeball/eyeball.obj");
+		mesh->varLocation()->setValue(Vec3f(0.5f, 0.0f, 0.0f));
+		mesh->varScale()->setValue(Vec3f(0.3f));
 
 		auto render = std::make_shared<GLSurfaceVisualModule>();
-		mesh->outTriangleSet()->connect(render->inTriangleSet());
+		mesh->stateTriangleSet()->connect(render->inTriangleSet());
 
 		render->varUseVertexNormal()->setValue(true);
-		mesh->outNormal()->connect(render->inNormal());
-		mesh->outNormalIndex()->connect(render->inNormalIndex());
+		mesh->stateNormal()->connect(render->inNormal());
+		mesh->stateNormalIndex()->connect(render->inNormalIndex());
 
 		render->varColorMode()->getDataPtr()->setCurrentKey(GLSurfaceVisualModule::CM_Texture);
-		mesh->outTexCoord()->connect(render->inTexCoord());
-		mesh->outTexCoordIndex()->connect(render->inTexCoordIndex());
-		mesh->outColorTexture()->connect(render->inColorTexture());
+		mesh->stateTexCoord()->connect(render->inTexCoord());
+		mesh->stateTexCoordIndex()->connect(render->inTexCoordIndex());
+		mesh->stateColorTexture()->connect(render->inColorTexture());
 
 		mesh->graphicsPipeline()->pushModule(render);
 	}
@@ -62,7 +59,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp app;
+	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1280, 768);
 	app.mainLoop();

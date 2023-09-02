@@ -1,28 +1,34 @@
 #pragma once
 
-#include <Node.h>
-#include <Topology/TriangleSet.h>
+#include "Node/ParametricModel.h"
+
+#include "FilePath.h"
+
+#include "Topology/TriangleSet.h"
 
 using namespace dyno;
 
-class ObjMeshNode : public Node
+class ObjMeshNode : public ParametricModel<DataType3f>
 {
 public:
 	ObjMeshNode();
 
-	bool load(const std::string& path);
-
 public:
 	// use TriangleSet data structure?
 
-	DEF_INSTANCE_OUT(TriangleSet<DataType3f>, TriangleSet, "");
+	DEF_VAR(FilePath, FileName, "", "The full obj file name");
+
+	DEF_INSTANCE_STATE(TriangleSet<DataType3f>, TriangleSet, "");
 
 	// additional data
-	DEF_ARRAY_OUT(Vec3f, Normal, DeviceType::GPU, "");
-	DEF_ARRAY_OUT(Vec3i, NormalIndex, DeviceType::GPU, "");
+	DEF_ARRAY_STATE(Vec3f, Normal, DeviceType::GPU, "");
+	DEF_ARRAY_STATE(Vec3i, NormalIndex, DeviceType::GPU, "");
 
-	DEF_ARRAY_OUT(Vec2f, TexCoord, DeviceType::GPU, "");
-	DEF_ARRAY_OUT(Vec3i, TexCoordIndex, DeviceType::GPU, "");
+	DEF_ARRAY_STATE(Vec2f, TexCoord, DeviceType::GPU, "");
+	DEF_ARRAY_STATE(Vec3i, TexCoordIndex, DeviceType::GPU, "");
 
-	DEF_ARRAY2D_OUT(Vec4f, ColorTexture, DeviceType::GPU, "");
+	DEF_ARRAY2D_STATE(Vec4f, ColorTexture, DeviceType::GPU, "");
+
+protected:
+	void resetStates() override;
 };

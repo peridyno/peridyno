@@ -1,0 +1,54 @@
+# Blender MTL File: 'eyeball.blend'
+# Material Count: 4
+
+newmtl EyeBlack
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd textures\Eye_D.jpg
+
+newmtl Eye_Iris
+Ns 17.647059
+Ka 1.000000 1.000000 1.000000
+Kd 0.035281 0.125983 0.299100
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures\Eye_D.jpg
+map_Bump textures\\Eye_N.jpg
+map_Ke textures\\Eye_D.jpg
+map_Ks textures\\Eye_D.jpg
+
+newmtl Eye_Tranz.001
+Ns 705.413990
+Ka 1.000000 1.000000 1.000000
+Kd 0.607568 0.607568 0.607568
+Ks 0.439189 0.439189 0.439189
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.170064
+illum 2
+map_Kd textures\Eye_D.jpg
+map_Bump textures\\Eye_N.jpg
+refl textures\\REF 1.jpg
+
+newmtl Eye_white
+Ns 550.955445
+Ka 1.000000 1.000000 1.000000
+Kd 0.412973 0.412973 0.412973
+Ks 0.627027 0.627027 0.627027
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures\Eye_D.jpg
+map_Bump textures\\Eye_N.jpg
+map_Ks textures\\Eye_D.jpg
+refl textures\\REF 1.jpg
