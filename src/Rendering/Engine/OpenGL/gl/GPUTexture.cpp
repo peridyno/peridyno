@@ -55,15 +55,12 @@ void XTexture2D<T>::updateGL()
 		return;
 	}
 
-	// prepare dst texture
-	if (this->id == GL_INVALID_INDEX)
-	{
-		this->create();
-	}
-
 	if (width != buffer.nx() || height != buffer.ny()) {
 		// resize texture
+		this->release();
+		this->create();
 		this->resize(buffer.nx(), buffer.ny());
+
 		width = buffer.nx();
 		height = buffer.ny();
 
