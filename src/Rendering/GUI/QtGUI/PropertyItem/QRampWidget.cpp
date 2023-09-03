@@ -147,12 +147,15 @@ namespace dyno
 			nameReal[i] = new QLabel(QString::fromStdString(nameString[i]));
 
 			sliderReal[i] = new mQDoubleSlider;
-			sliderReal[i]->setRange(0,10);
 			sliderReal[i]->id = i;
 
 			spinnerReal[i] = new mQDoubleSpinner;
-			spinnerReal[i]->setRange(0, 10);
 			spinnerReal[i]->id = i;
+
+			auto rangeArray = f->getValue().remapRange;
+
+			sliderReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
+			spinnerReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
 
 			QObject::connect(sliderReal[i], SIGNAL(valueChanged(double)), spinnerReal[i], SLOT(setValue(double)));
 			QObject::connect(spinnerReal[i], SIGNAL(valueChanged(double)), sliderReal[i], SLOT(setValue(double)));
@@ -181,10 +184,7 @@ namespace dyno
 					break;
 			}
 
-			auto rangeArray = f->getValue().remapRange;
 
-			sliderReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
-			spinnerReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
 
 			if (i < 2) 
 			{
@@ -268,7 +268,7 @@ namespace dyno
 		mQCheckBox* CheckboxUseRamp = new mQCheckBox();
 
 		{
-			/*if (f->getValue().displayUseRamp == true)
+			if (f->getValue().displayUseRamp == true)
 			{
 				NameUseRamp->setFixedHeight(24);
 				if (f->getValue().Bordermode == Ramp::BorderMode::Open) 
@@ -288,7 +288,7 @@ namespace dyno
 
 				connect(CheckboxUseRamp, SIGNAL(mValueChanged(int)), DrawLabel, SLOT(setUseRamp(bool)));
 
-			}*/
+			}
 		}
 
 		QHBoxLayout* HlayoutUseRamp = new QHBoxLayout;
@@ -300,13 +300,13 @@ namespace dyno
 		QVBoxLayout* TotalLayout = new QVBoxLayout();
 		TotalLayout->setContentsMargins(0, 0, 0, 0);
 		TotalLayout->setSpacing(5);
-		//if (f->getValue().displayUseRamp == true) { TotalLayout->addLayout(HlayoutUseRamp); }
+		if (f->getValue().displayUseRamp == true) { TotalLayout->addLayout(HlayoutUseRamp); }
 		TotalLayout->addLayout(Gridlayout);
 		TotalLayout->addLayout(Hlayout1);
 		TotalLayout->addLayout(Hlayout2);
 		TotalLayout->addLayout(boolLayout);
 		TotalLayout->addLayout(SpacingHlayout);
-		//printf("widget  :  %d \n", int(f->getValue().displayUseRamp));
+		printf("widget  :  %d \n", int(f->getValue().displayUseRamp));
 
 		this->setLayout(TotalLayout);
 		
@@ -1668,8 +1668,8 @@ namespace dyno
 		s.resample = LineResample;
 		s.useSquard = isSquard;
 		s.Spacing = spacing;
-		/*s.displayUseRamp = field->getValue().displayUseRamp;
-		s.useRamp = useRamp;*/
+		s.displayUseRamp = field->getValue().displayUseRamp;
+		s.useRamp = useRamp;
 
 		s.NminX = NminX;
 		s.NmaxX = NmaxX;
@@ -1677,7 +1677,6 @@ namespace dyno
 		s.NmaxY = NmaxY;
 
 		s.curveClose = curveClose;
-		//s.useRamp = useRamp;
 
 		if (useBezier) { s.InterpMode = Ramp::Interpolation::Bezier; }
 		else { s.InterpMode = Ramp::Interpolation::Linear; }

@@ -16,7 +16,7 @@ namespace dyno
 		this->varScale()->setRange(0.001f, 10.0f);
 
 		this->statePointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->outEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+		this->stateEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 
 		this->statePointSet()->promoteOuput();
 
@@ -26,7 +26,7 @@ namespace dyno
 		pointGlModule->varPointSize()->setValue(0.01);
 
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->outEdgeSet()->connect(wireframe->inEdgeSet());
+		this->stateEdgeSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
 		wireframe->setColor(Color(1, 1, 0));
 		wireframe->varLineWidth()->setValue(0.1);
@@ -79,7 +79,7 @@ namespace dyno
 			}
 		}
 
-		if (curve.curveClose && curve.resample == true)
+		if (curve.curveClose && curve.resample == true && vertices.size()>=3)
 		{
 
 			vertices.erase(vertices.end() - 1);
@@ -117,7 +117,7 @@ namespace dyno
 			std::vector<TopologyModule::Edge> edges;
 
 
-			auto edgeSet = this->outEdgeSet()->getDataPtr();
+			auto edgeSet = this->stateEdgeSet()->getDataPtr();
 
 			int ptnum = vertices.size();
 
@@ -133,7 +133,7 @@ namespace dyno
 			}
 			//printf(" set \n");
 
-			if (curve.curveClose == true) 
+			if (curve.curveClose == true && vertices.size()>=3) 
 			{
 				edges.push_back(TopologyModule::Edge(vertices.size()-1,0));
 			}
@@ -143,7 +143,6 @@ namespace dyno
 			edgeSet->setPoints(vertices);
 			edgeSet->setEdges(edges);
 
-			//printf(" edge num : %d\n" , this->outEdgeSet()->getDataPtr()->getEdges().size());
 
 			vertices.clear();
 			edges.clear();
