@@ -152,7 +152,7 @@ namespace dyno
 			if (Axis == Vec3f(0, 0, 0)) 
 			{
 				Axis = Vec3f(0,1,0);
-				printf("in a line\n");
+
 			}
 			Axis.normalize();
 

@@ -28,6 +28,9 @@ namespace dyno
 
 namespace Qt
 {
+	QPointF SimStatePos = QPointF(0.0f, 0.0f);
+	QPointF RenStatePos = QPointF(0.0f, 0.0f);
+
 	QtModuleFlowScene::QtModuleFlowScene(std::shared_ptr<QtDataModelRegistry> registry,
 		QObject* parent)
 		: QtFlowScene(registry, parent)
@@ -75,7 +78,7 @@ namespace Qt
 
 		connect(this, &QtFlowScene::nodeMoved, this, &QtModuleFlowScene::moveModule);
 		connect(this, &QtFlowScene::nodePlaced, this, &QtModuleFlowScene::addModule);
-//		connect(this, &QtFlowScene::nodeDeleted, this, &QtModuleFlowScene::deleteModule);
+		connect(this, &QtFlowScene::nodeDeleted, this, &QtModuleFlowScene::deleteModule);
 
 		connect(this, &QtFlowScene::outPortConextMenu, this, &QtModuleFlowScene::promoteOutput);
 	}
@@ -135,7 +138,6 @@ namespace Qt
 
 		auto& modules = mActivePipeline->allModules();
 
-
 		auto addModuleWidget = [&](std::shared_ptr<Module> m) -> void
 		{
 			auto mId = m->objectId();
@@ -155,15 +157,20 @@ namespace Qt
 
 		//Create a dummy module to store all state variables
 		mStates = std::make_shared<dyno::States>();
+
 		auto& fields = node->getAllFields();
 		for (auto field : fields)
 		{
-			if (field->getFieldType() == dyno::FieldTypeEnum::State 
-					|| field->getFieldType() == dyno::FieldTypeEnum::In)
+			if (field->getFieldType() == dyno::FieldTypeEnum::State
+				|| field->getFieldType() == dyno::FieldTypeEnum::In)
 			{
 				mStates->addOutputField(field);
 			}
 		}
+
+
+		QPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;
+		mStates->setBlockCoord(pos.x(), pos.y());
 
 		addModuleWidget(mStates);
 
@@ -379,7 +386,6 @@ namespace Qt
 			}
 		}
 
-		//DOTO: optimize the position for the dummy module
 		float offsetX = 0.0f;
 		for (size_t l = 0; l < layout.layerNumber(); l++)
 		{
@@ -410,6 +416,14 @@ namespace Qt
 
 			offsetX += (xMax + mDx);
 		}
+
+		if (mActivePipeline == mNode->animationPipeline()) {
+			SimStatePos = QPointF(mStates->bx(), mStates->by());
+		}
+		else {
+			RenStatePos = QPointF(mStates->bx(), mStates->by());
+		}
+			
 
 		qtNodeMapper.clear();
 		moduleMapper.clear();

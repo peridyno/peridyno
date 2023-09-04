@@ -29,15 +29,29 @@ namespace dyno
 		{
 			return;
 		}
+
 		TriangleSet<TDataType>trilist;
-		trilist.copyFrom(this->inTriangleSet()->getData());
 
-		DArray<TopologyModule::Triangle> d_triangle = trilist.getTriangles();
+		auto inTriSet = TypeInfo::cast<TriangleSet<DataType3f>>(this->inTopology()->getDataPtr());
+		if (inTriSet != nullptr) 
+		{
+			trilist.copyFrom(*inTriSet);
+		}
+		else 
+		{
+			auto ptSet = TypeInfo::cast<PointSet<DataType3f>>(this->inTopology()->getDataPtr());
+			if (ptSet == nullptr) return;
+
+			trilist.setPoints(ptSet->getPoints());
+		}
+
+
+		auto d_triangle = trilist.getTriangles();
 		CArray<TopologyModule::Triangle> c_triangle;
-		c_triangle.assign(d_triangle);
-		trilist.getVer2Edge();
-		trilist.getVertex2Triangles();
-
+		if (d_triangle.size()) 
+		{
+			c_triangle.assign(d_triangle);
+		}
 
 		DArray<Coord> d_point = trilist.getPoints();
 		CArray<Coord> c_point;
@@ -66,8 +80,8 @@ namespace dyno
 			c_stress.assign(d_stress);
 		}
 
-		int n_point = this->inTriangleSet()->getData().getVertex2Triangles().size();
-		int n_triangle = this->inTriangleSet()->getData().getTriangles().size();
+		int n_point = trilist.getVertex2Triangles().size();
+		int n_triangle = trilist.getTriangles().size();
 		int stw = 3;
 		int num = 6;
 

@@ -60,7 +60,7 @@ namespace Qt
 		std::shared_ptr<dyno::Pipeline> mActivePipeline;
 
 		//A virtual module to store all state variables
-		std::shared_ptr<dyno::Module> mStates;
+		std::shared_ptr<dyno::Module> mStates = nullptr;
 
 		float mDx = 100.0f;
 		float mDy = 50.0f;

@@ -3,12 +3,16 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include "Field.h"
+#include "Vector/Vector2D.h"
+#include "Vector/Vector3D.h"
 
 namespace dyno {
-	class Ramp
+	class Ramp 
 	{
 	public:
+		//typedef Ramp				VarType;
+		//typedef Ramp				DataType;
+
 		enum Direction
 		{
 			 x = 0,
@@ -106,61 +110,8 @@ namespace dyno {
 	public:
 		Ramp();
 		Ramp(BorderMode border) ;
-		Ramp(const Ramp & ramp) 
-		{
-			this->Dirmode = ramp.Dirmode;
-			this->Bordermode = ramp.Bordermode;
-			this->MyCoord = ramp.MyCoord;
-			this->FE_MyCoord = ramp.FE_MyCoord;
-			this->FE_HandleCoord = ramp.FE_HandleCoord;
-			this->FinalCoord = ramp.FinalCoord;
-			this->Originalcoord = ramp.Originalcoord;
-			this->OriginalHandlePoint = ramp.OriginalHandlePoint;
+		Ramp(const Ramp& ramp);
 
-			this->myBezierPoint = ramp.myBezierPoint;
-			this->myBezierPoint_H = ramp.myBezierPoint_H;
-			this->resamplePoint = ramp.resamplePoint;
-			this->myHandlePoint = ramp.myHandlePoint;
-
-			this->lengthArray = ramp.lengthArray;
-			this->length_EndPoint_Map = ramp.length_EndPoint_Map;
-
-			this->InterpMode = ramp.InterpMode;
-
-			this->remapRange[8] = ramp.InterpMode;// "MinX","MinY","MaxX","MaxY"
-
-			this->lockSize = ramp.lockSize;
-			this->useCurve = ramp.useCurve;
-
-			this->useSquard = ramp.useSquard;
-			this->curveClose = ramp.curveClose;
-			this->resample = ramp.resample;
-
-			this->useColseButton = ramp.useColseButton;
-			this->useSquardButton = ramp.useSquardButton;
-
-			this->Spacing = ramp.Spacing;
-
-			this->NminX = ramp.NminX;
-			this->NmaxX = ramp.NmaxX;
-			this->NminY = ramp.NminY;
-			this->NmaxY = ramp.NmaxY;
-
-			this->handleDefaultLength = ramp.handleDefaultLength;
-			this->segment = ramp.segment;
-			this->resampleResolution = ramp.resampleResolution;
-
-			this->xLess = ramp.xLess;
-			this->xGreater = ramp.xGreater;
-			this->yLess = ramp.yLess;
-			this->yGreater = ramp.yGreater;
-
-			this->generatorMin = ramp.generatorMin;
-			this->generatorMax = ramp.generatorMax;
-
-			this->customHandle = ramp.customHandle;
-
-		}
 
 		~Ramp() { ; };
 
@@ -205,28 +156,138 @@ namespace dyno {
 		void setDisplayUseRamp(bool v);
 		void setUseRamp(bool v);
 
+		void convertCoordToStr(std::string VarName,std::vector<Ramp::Coord2D> Array, std::string& Str)
+		{
+			Str.append(VarName+" ");
+			for (int i = 0; i < Array.size(); i++)
+			{
+				std::string tempTextX = std::to_string(Array[i].x);
+				std::string tempTextY = std::to_string(Array[i].y);
+				Str.append(tempTextX + " " + tempTextY );
+				if (i != Array.size() - 1) 
+				{
+					Str.append(" ");
+				}
+			}
+			Str.append(" ");
+		}
 
+		template <typename T>
+		void convertVarToStr(std::string VarName, T value, std::string& Str)
+		{
+			int temp = int(value);
+			Str.append(VarName + " ");
+			Str.append(std::to_string(temp));
+			Str.append(" ");
+			std::cout << std::endl << Str;
+		}
+
+		template<>
+		void convertVarToStr(std::string VarName, float value, std::string& Str)
+		{
+			Str.append(VarName + " ");
+			Str.append(std::to_string(value));
+			Str.append(" ");
+			std::cout << std::endl << Str;
+		}
+
+		template<>
+		void convertVarToStr(std::string VarName, double value, std::string& Str)
+		{
+			Str.append(VarName + " ");
+			Str.append(std::to_string(value));
+			Str.append(" ");
+			std::cout << std::endl << Str;
+		}
+
+
+		void setVarByStr(std::string Str, double& value)
+		{
+			if (std::isdigit(Str[0]) | (Str[0]=='-'))
+			{
+				value = std::stod(Str);
+			}
+			return;
+		}
+		void setVarByStr(std::string Str, float& value)
+		{
+			if (std::isdigit(Str[0]) | (Str[0] == '-'))
+			{
+				value = float(std::stod(Str));
+			}
+			return;
+		}
+		void setVarByStr(std::string Str, int& value)
+		{
+			if (std::isdigit(Str[0]) | (Str[0] == '-'))
+			{
+				value = std::stoi(Str);
+			}
+			return;
+		}
+
+		void setVarByStr(std::string Str, bool& value)
+		{
+			if (std::isdigit(Str[0]))
+			{
+				value = bool(std::stoi(Str));
+			}
+			return;
+		}
+
+		void setVarByStr(std::string Str, Direction& value)
+		{
+			if (std::isdigit(Str[0]))
+			{
+				value = Direction(std::stoi(Str));
+			}
+			return;
+		}
+
+		void setVarByStr(std::string Str, BorderMode& value)
+		{
+			if (std::isdigit(Str[0]))
+			{
+				value = BorderMode(std::stoi(Str));
+			}
+			return;
+		}
+		void setVarByStr(std::string Str, Interpolation& value)
+		{
+			if (std::isdigit(Str[0]))
+			{
+				value = Interpolation(std::stoi(Str));
+			}
+			return;
+		}
+
+		//must save
 		Direction Dirmode = x;
-		std::string DirectionStrings[int(Direction::count)] = { "x","y" };
 		BorderMode Bordermode = Close;
+		Interpolation InterpMode = Linear;
+
 		std::vector<Coord2D> MyCoord;
-		std::vector<Coord2D> FE_MyCoord;
-		std::vector<Coord2D> FE_HandleCoord;
-		std::vector<Coord2D> FinalCoord;
-		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
-		std::vector<OriginalCoord> OriginalHandlePoint;//qt HandlePoint Coord
+		std::vector<Coord2D> myHandlePoint;
+	
+		//
+		std::string InterpStrings[int(Direction::count)] = { "Linear","Bezier" };
+		std::string DirectionStrings[int(Direction::count)] = { "x","y" };
 
 		std::vector<Coord2D> myBezierPoint;
 		std::vector<Coord2D> myBezierPoint_H;
 		std::vector<Coord2D> resamplePoint;
-		std::vector<Coord2D> myHandlePoint;
+
+		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
+		std::vector<OriginalCoord> OriginalHandlePoint;//qt HandlePoint Coord
+
+		std::vector<Coord2D> FE_MyCoord;
+		std::vector<Coord2D> FE_HandleCoord;
+		std::vector<Coord2D> FinalCoord;
 
 		std::vector<double> lengthArray;
 		std::map<float, EndPoint> length_EndPoint_Map;
 
-		std::string InterpStrings[int(Direction::count)] = { "Linear","Bezier" };
-		Interpolation InterpMode = Linear;
-
+		//must save
 		float remapRange[8] = {-3,3,-3,3,-3,3,-3,3};// "MinX","MinY","MaxX","MaxY"
 
 		bool lockSize = false;
@@ -241,7 +302,7 @@ namespace dyno {
 		bool useSquard = false;
 		bool useSquardButton = true;
 
-		Real Spacing = 5;
+		float Spacing = 5;
 
 		double NminX = 0;
 		double NmaxX = 1;
@@ -252,6 +313,9 @@ namespace dyno {
 		float segment = 10;
 		float resampleResolution = 20;
 
+
+		bool displayUseRamp = false;   // Display UseRamp checkbox for RampWidget;
+		bool useRamp = false;    // Enable curve data ,enabled when displayEnable is true
 
 	private:
 		float xLess = 1;
@@ -265,8 +329,6 @@ namespace dyno {
 		bool customHandle = false;
 
 	};
-
-	
 
 
 }
