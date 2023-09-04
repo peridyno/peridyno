@@ -10,7 +10,6 @@
 
 namespace dyno
 {
-	template <typename TDataType> class TriangleSet;
 
 	template<typename TDataType>
 	class OBJExporter : public Node
@@ -46,18 +45,16 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-		//void updateStates() override;
+		void updateStates() override;
 
-		void preUpdateStates() override;
-		void setFrameStep();
-
+		void outputSurfaceMesh(std::shared_ptr<TriangleSet<TDataType>> triangleset);
+		void outputPointCloud(std::shared_ptr<PointSet<TDataType>> pointset);
 
 	private:
 
 
-		std::shared_ptr<TriangleMeshWriter<TDataType>> ExportModule = nullptr;
-		std::shared_ptr<TriangleSet<TDataType>> ptr_TriangleSet = nullptr;
 
+		std::string file_postfix = ".obj";
 
 	};
 }
