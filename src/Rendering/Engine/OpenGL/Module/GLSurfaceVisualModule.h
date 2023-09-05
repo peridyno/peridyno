@@ -57,9 +57,11 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");
+		
+		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
+
 		DEF_ARRAY_IN(TopologyModule::Triangle, NormalIndex, DeviceType::GPU, "");
 
-		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
 		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
 
 #ifdef CUDA_BACKEND

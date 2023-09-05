@@ -12,7 +12,7 @@
 #pragma once
 #include "LinearElasticitySolver.h"
 
-#include "ParticleSystem/Module/DensityPBD.h"
+#include "ParticleSystem/Module/IterativeDensitySolver.h"
 
 namespace dyno {
 
@@ -79,6 +79,6 @@ namespace dyno {
 		DArray<Real> m_yield_J2;
 		DArray<Real> m_I1;
 
-		std::shared_ptr<DensityPBD<TDataType>> mDensityPBD;
+		std::shared_ptr<IterativeDensitySolver<TDataType>> mDensityPBD;
 	};
 }

@@ -35,7 +35,7 @@ namespace dyno
 
 		DEF_VAR(bool, ReCount, false, "ReCount");
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet")
+		DEF_INSTANCE_IN(TopologyModule, Topology, "TopologyModule");
 
 		DEF_ARRAY_IN(Vec3f, Vec3f, DeviceType::GPU, "");
 

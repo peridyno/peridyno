@@ -3,7 +3,7 @@
 //ParticleSystem
 #include "Module/ParticleIntegrator.h"
 #include "Module/ImplicitViscosity.h"
-#include "Module/DensityPBD.h"
+#include "Module/IterativeDensitySolver.h"
 
 //Framework
 #include "Auxiliary/DataSource.h"
@@ -23,9 +23,11 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid()
 		: ParticleSystem<TDataType>()
 	{
-		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
+		auto smoothingLength = this->animationPipeline()->createModule<FloatingNumber<TDataType>>();
 		smoothingLength->varValue()->setValue(Real(0.006));
-		this->animationPipeline()->pushModule(smoothingLength);
+
+		auto samplingDistance = this->animationPipeline()->createModule<FloatingNumber<TDataType>>();
+		samplingDistance->varValue()->setValue(Real(0.005));
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());
@@ -39,8 +41,9 @@ namespace dyno
 		this->statePosition()->connect(nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(nbrQuery);
 
-		auto density = std::make_shared<DensityPBD<TDataType>>();
-		smoothingLength->outFloating()->connect(density->varSmoothingLength());
+		auto density = std::make_shared<IterativeDensitySolver<TDataType>>();
+		smoothingLength->outFloating()->connect(density->inSmoothingLength());
+		samplingDistance->outFloating()->connect(density->inSamplingDistance());
 		this->stateTimeStep()->connect(density->inTimeStep());
 		this->statePosition()->connect(density->inPosition());
 		this->stateVelocity()->connect(density->inVelocity());

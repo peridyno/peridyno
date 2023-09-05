@@ -20,6 +20,7 @@
 #include <map>
 #include <QWidget>
 #include <typeinfo>
+#include <memory>
 
 
 class QVBoxLayout;
