@@ -25,10 +25,10 @@ namespace dyno
 		m_reconstuct_all_neighborhood.setValue(false);
 		m_incompressible.setValue(true);
 
-		mDensityPBD = std::make_shared<DensityPBD<TDataType>>();
+		mDensityPBD = std::make_shared<IterativeDensitySolver<TDataType>>();
 		mDensityPBD->varIterationNumber()->setValue(1);
 		this->inTimeStep()->connect(mDensityPBD->inTimeStep());
-		this->inHorizon()->connect(mDensityPBD->varSmoothingLength());
+		this->inHorizon()->connect(mDensityPBD->inSmoothingLength());
 		this->inY()->connect(mDensityPBD->inPosition());
 		this->inVelocity()->connect(mDensityPBD->inVelocity());
 		this->inNeighborIds()->connect(mDensityPBD->inNeighborIds());

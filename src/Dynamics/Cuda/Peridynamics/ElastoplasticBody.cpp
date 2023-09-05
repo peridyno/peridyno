@@ -13,7 +13,7 @@
 
 #include "ParticleSystem/Module/PositionBasedFluidModel.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/DensityPBD.h"
+#include "ParticleSystem/Module/IterativeDensitySolver.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
 #include "SharedFunc.h"
@@ -117,11 +117,12 @@ namespace dyno
 		auto& pts = ptSet->getPoints();
 		pts.assign(this->statePosition()->getData());
 
-		auto tMappings = this->getTopologyMappingList();
-		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
-		{
-			(*iter)->apply();
-		}
+		//TODO: fix the following issue
+// 		auto tMappings = this->getTopologyMappingList();
+// 		for (auto iter = tMappings.begin(); iter != tMappings.end(); iter++)
+// 		{
+// 			(*iter)->apply();
+// 		}
 	}
 
 	DEFINE_CLASS(ElastoplasticBody);

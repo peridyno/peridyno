@@ -118,6 +118,8 @@ namespace dyno
 
 		void addNodeByName(std::string name);
 
+		void showAboutMsg();
+
 	private:
 		void setCentralView();
 		void setupToolBar();
@@ -128,6 +130,7 @@ namespace dyno
 	protected:
 		void mousePressEvent(QMouseEvent *event) override;
 
+	private:
 		QApplication* application;
 
 		QList<PToolBar*> toolBars;
@@ -136,18 +139,15 @@ namespace dyno
 
 		Qt::QtNodeFlowWidget*		mNodeFlowView;
 		
-		PStatusBar*				m_statusBar;
+		PStatusBar*				mStatusBar;
 		POpenGLWidget*			mOpenGLWidget;
 
-		PPropertyWidget*		m_propertyWidget;
-		PAnimationWidget*		m_animationWidget;
+		PPropertyWidget*		mPropertyWidget;
+		PAnimationWidget*		mAnimationWidget;
 
 		PMainToolBar*			mToolBar = nullptr;
 
 		PIODockWidget* mIoDockerWidget = nullptr;
-
-	public slots:
-		void showAboutMsg();
 	};
 
 }

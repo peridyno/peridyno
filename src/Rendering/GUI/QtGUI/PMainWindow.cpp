@@ -54,11 +54,8 @@
 #include "PAnimationWidget.h"
 
 #include "PIODockWidget.h"
-#include "PLogWidget.h"
 #include "PConsoleWidget.h"
-//#include "PSceneGraphWidget.h"
 #include "PPropertyWidget.h"
-//#include "PModuleListWidget.h"
 #include "PSimulationThread.h"
 #include "PModuleEditor.h"
 
@@ -121,9 +118,9 @@ namespace dyno
 		QtApp* app,
 		QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
-		m_statusBar(nullptr),
-		m_propertyWidget(nullptr),
-		m_animationWidget(nullptr)
+		mStatusBar(nullptr),
+		mPropertyWidget(nullptr),
+		mAnimationWidget(nullptr)
 	{
 		setObjectName("MainWindow");
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physical simulation platform"));
@@ -144,6 +141,8 @@ namespace dyno
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
+
+		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
 
 		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
 
@@ -188,10 +187,10 @@ namespace dyno
 		mainLayout->addWidget(mOpenGLWidget, 1);
 		
 		//Setup animation widget
-		m_animationWidget = new PAnimationWidget(this);
-		m_animationWidget->layout()->setContentsMargins(0, 0, 0, 0);
+		mAnimationWidget = new PAnimationWidget(this);
+		mAnimationWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
- 		mainLayout->addWidget(m_animationWidget, 0);
+ 		mainLayout->addWidget(mAnimationWidget, 0);
 	}
 
 	void PMainWindow::showAboutMsg()
@@ -225,8 +224,8 @@ namespace dyno
 
 	void PMainWindow::setupStatusBar()
 	{
-		m_statusBar = new PStatusBar(this);
-		setStatusBar(m_statusBar);
+		mStatusBar = new PStatusBar(this);
+		setStatusBar(mStatusBar);
 	}
 
 	void PMainWindow::saveScene()
@@ -322,8 +321,8 @@ namespace dyno
 		propertyDockWidget->setWindowIcon(qtIcon);
 		propertyDockWidget->setMinimumWidth(580);
 		addDockWidget(sets[2].area, propertyDockWidget);
-		m_propertyWidget = new PPropertyWidget();
-		propertyDockWidget->setWidget(m_propertyWidget);
+		mPropertyWidget = new PPropertyWidget();
+		propertyDockWidget->setWidget(mPropertyWidget);
 		
 		mIoDockerWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
 		mIoDockerWidget->setWindowIcon(qtIcon);
@@ -333,16 +332,16 @@ namespace dyno
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showProperty);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, mPropertyWidget, &PPropertyWidget::showProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
-		connect(m_propertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::fieldUpdated);
+		connect(mPropertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::fieldUpdated);
 
 		// between OpenGL and property widget
 		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
-			m_propertyWidget->showNodeProperty(node);
+			mPropertyWidget->showNodeProperty(node);
 			// TODO: high light selected node in node editor
 			auto qNodes = mNodeFlowView->flowScene()->allNodes();
 			for (auto qNode : qNodes)
@@ -367,7 +366,7 @@ namespace dyno
 				}
 			});
 
-		connect(m_animationWidget->m_startSim, &QPushButton::released, [=]()
+		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()
 			{
 				mOpenGLWidget->setFocus();
 			});

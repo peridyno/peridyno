@@ -16,7 +16,7 @@ namespace dyno
 
 		for (auto it = nList.begin(); it != nList.end(); ++it)
 		{
-			if ((*it)->isControllable() && nMap.find((*it)->objectId()) != nMap.end()) {
+			if (nMap.find((*it)->objectId()) != nMap.end()) {
 				mNodeList.push_back(nMap[(*it)->objectId()]);
 			}
 		}

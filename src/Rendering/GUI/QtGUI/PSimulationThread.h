@@ -36,7 +36,15 @@ namespace dyno
 
 		void run() override;
 
+		/**
+		 * @brief Reset the simulation
+		 */
 		void reset(int num);
+
+		/**
+		 * @brief Continue the simulation from the current frame
+		 */
+		void proceed(int num);
 
 		void startUpdatingGraphicsContext();
 		void stopUpdatingGraphicsContext();
@@ -55,6 +63,8 @@ namespace dyno
 	public slots:
 		void resetNode(std::shared_ptr<Node> node);
 		void resetQtNode(Qt::QtNode& node);
+
+		void syncNode(std::shared_ptr<Node> node);
 
 	private:
 		PSimulationThread();

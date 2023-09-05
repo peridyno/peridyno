@@ -33,6 +33,15 @@ namespace dyno
 
 		void popModule(std::shared_ptr<Module> m);
 
+		template<class TModule>
+		std::shared_ptr<TModule> createModule()
+		{
+			std::shared_ptr<TModule> m = std::make_shared<TModule>();
+			this->pushModule(m);
+
+			return m;
+		}
+
 		/**
 		 * Return the first module with TModule type
 		 */

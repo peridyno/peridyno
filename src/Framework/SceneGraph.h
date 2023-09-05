@@ -190,6 +190,20 @@ namespace dyno
 			traverseForward(node, &action);
 		}
 
+		/**
+		 * @brief Breadth-first tree traversal starting from a specific node, only those whose mAutoSync turned-on will be visited.
+		 *
+		 * @param node  Root node
+		 * @param act 	Operation on the node
+		 */
+		void traverseForwardWithAutoSync(std::shared_ptr<Node> node, Action* act);
+
+		template<class Act, class ... Args>
+		void traverseForwardWithAutoSync(std::shared_ptr<Node> node, Args&& ... args) {
+			Act action(std::forward<Args>(args)...);
+			traverseForwardWithAutoSync(node, &action);
+		}
+
 	protected:
 		//void retriveExecutionQueue(std::list<Node*>& nQueue);
 

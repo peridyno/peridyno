@@ -73,6 +73,13 @@ private:
 	void showThisNodeOnly(QtNode& n);
 	void showAllNodes();
 
+	void activateThisNodeOnly(QtNode& n);
+	void activateAllNodes();
+
+	void autoSyncAllNodes(bool autoSync);
+
+	void autoSyncAllDescendants(QtNode& n, bool autoSync);
+
 	SceneGraph* m_scene = nullptr;
 
 	bool mEditingEnabled = true;

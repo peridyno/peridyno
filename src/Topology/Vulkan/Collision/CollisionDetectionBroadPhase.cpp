@@ -8,7 +8,7 @@
 namespace dyno
 {
 	CollisionDetectionBroadPhase::CollisionDetectionBroadPhase()
-		: dyno::CollisionModel()
+		: ComputeModule()
 	{
 		vkr = std::make_shared<VkReduce<int>>();
 		vks = std::make_shared<VkScan<int>>();
@@ -46,7 +46,7 @@ namespace dyno
 		return true;
 	}
 
-	void CollisionDetectionBroadPhase::doCollision()
+	void CollisionDetectionBroadPhase::compute()
 	{
 		uint num = this->inBoundingBox()->size();
 
