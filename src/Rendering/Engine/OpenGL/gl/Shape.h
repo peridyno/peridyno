@@ -21,6 +21,8 @@
 
 #include "GPUBuffer.h"
 
+#include "Material.h"
+
 #include "Topology/TriangleSet.h"
 
 namespace gl
@@ -45,6 +47,8 @@ namespace gl
 		gl::XBuffer<dyno::TopologyModule::Triangle>		glVertexIndex;
 		gl::XBuffer<dyno::TopologyModule::Triangle>		glNormalIndex;
 		gl::XBuffer<dyno::TopologyModule::Triangle>		glTexCoordIndex;
+
+		std::shared_ptr<Material> material = nullptr;
 
 	private:
 		bool mInitialized = false;

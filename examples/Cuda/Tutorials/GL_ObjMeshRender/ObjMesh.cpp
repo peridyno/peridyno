@@ -85,38 +85,6 @@ void ObjMeshNode::resetStates()
 	this->stateShapes()->resize(shapes.size());
 	auto& statShapes = this->stateShapes()->getData();
 
-	uint sId = 0;
-	for (const tinyobj::shape_t& shape : shapes) {
-		// only load triangle mesh...
-		const auto& mesh = shape.mesh;
-		statShapes[sId] = std::make_shared<gl::Shape>();
-		std::vector<dyno::TopologyModule::Triangle> vertexIndex;
-		std::vector<dyno::TopologyModule::Triangle> normalIndex;
-		std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
-		for (int i = 0; i < mesh.indices.size(); i += 3) {
-			auto idx0 = mesh.indices[i];
-			auto idx1 = mesh.indices[i + 1];
-			auto idx2 = mesh.indices[i + 2];
-
-			pIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
-			nIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
-			tIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
-
-			vertexIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
-			normalIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
-			texCoordIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
-		}
-		statShapes[sId]->vertexIndex.assign(vertexIndex);
-		statShapes[sId]->normalIndex.assign(normalIndex);
-		statShapes[sId]->texCoordIndex.assign(texCoordIndex);
-
-		vertexIndex.clear();
-		normalIndex.clear();
-		texCoordIndex.clear();
-
-		sId++;
-	}
-
 	// load texture...
 	dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 	texture[0, 0] = dyno::Vec4f(1);
@@ -151,6 +119,44 @@ void ObjMeshNode::resetStates()
 		mId++;
 	}
 
+	uint sId = 0;
+	for (const tinyobj::shape_t& shape : shapes) {
+		// only load triangle mesh...
+		const auto& mesh = shape.mesh;
+		statShapes[sId] = std::make_shared<gl::Shape>();
+		std::vector<dyno::TopologyModule::Triangle> vertexIndex;
+		std::vector<dyno::TopologyModule::Triangle> normalIndex;
+		std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
+
+		if (mesh.material_ids.size() > 0)
+		{
+			statShapes[sId]->material = sMats[mesh.material_ids[0]];
+		}
+
+		for (int i = 0; i < mesh.indices.size(); i += 3) {
+			auto idx0 = mesh.indices[i];
+			auto idx1 = mesh.indices[i + 1];
+			auto idx2 = mesh.indices[i + 2];
+
+			pIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
+			nIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
+			tIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
+
+			vertexIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
+			normalIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
+			texCoordIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
+		}
+		statShapes[sId]->vertexIndex.assign(vertexIndex);
+		statShapes[sId]->normalIndex.assign(normalIndex);
+		statShapes[sId]->texCoordIndex.assign(texCoordIndex);
+
+		vertexIndex.clear();
+		normalIndex.clear();
+		texCoordIndex.clear();
+
+		sId++;
+	}
+
 	if (this->stateTriangleSet()->isEmpty())
 	{
 		this->stateTriangleSet()->allocate();
@@ -176,6 +182,4 @@ void ObjMeshNode::resetStates()
 	this->stateNormalIndex()->assign(nIndex);
 	this->stateTexCoordIndex()->assign(tIndex);
 	this->stateColorTexture()->assign(texture);
-
-	this->update();
 }

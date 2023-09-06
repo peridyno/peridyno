@@ -206,12 +206,12 @@ namespace dyno
 		mPBRMaterialUBlock.bindBufferBase(1);
 
 
-		for (int i = 0; i < shapes.size(); i++)
+		for (int i = 0; i < 1; i++)
 		{
 #ifdef CUDA_BACKEND
 			// bind texture
-			if (materials[2]->mColorTexture.isValid()) {
-				materials[2]->mColorTexture.bind(GL_TEXTURE10);
+			if (shapes[i]->material != nullptr && shapes[i]->material->mColorTexture.isValid()) {
+				shapes[i]->material->mColorTexture.bind(GL_TEXTURE10);
 			}
 			else
 #endif
@@ -219,6 +219,8 @@ namespace dyno
 				glActiveTexture(GL_TEXTURE10);
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
+
+			mVAO.bind();
 
 			// vertex index
 			uint num = shapes[i]->vertexIndex.size();
@@ -263,6 +265,8 @@ namespace dyno
 			glDisableVertexAttribArray(6);
 			glDisableVertexAttribArray(7);
 			glDisableVertexAttribArray(8);
+
+			mVAO.unbind();
 
 			mVAO.bind();
 
