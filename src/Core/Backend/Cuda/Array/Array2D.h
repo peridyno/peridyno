@@ -75,6 +75,7 @@ namespace dyno {
 		inline uint size() const { return (uint)m_data.size(); }
 		inline bool isCPU() const { return false; }
 		inline bool isGPU() const { return true; }
+		inline bool isEmpty() const { return m_nx == 0 || m_ny == 0 || m_data.size() == 0; }
 
 		void assign(const Array2D<T, DeviceType::GPU>& src);
 		void assign(const Array2D<T, DeviceType::CPU>& src);
@@ -151,6 +152,7 @@ namespace dyno {
 		DYN_FUNC inline uint size() const { return m_nx * m_ny; }
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
+		inline bool isEmpty() const { return m_nx == 0 || m_ny == 0 || m_data == nullptr; }
 
 		void assign(const Array2D<T, DeviceType::GPU>& src);
 		void assign(const Array2D<T, DeviceType::CPU>& src);

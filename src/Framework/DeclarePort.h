@@ -49,7 +49,6 @@ public:									\
 
  /**
   * @brief Macro definitions for instance
-  *
   */
 #define DEF_INSTANCE_STATE(T, name, desc)		\
 private:									\

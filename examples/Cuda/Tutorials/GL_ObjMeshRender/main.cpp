@@ -3,6 +3,7 @@
 
 #include "ObjMesh.h"
 #include <GLSurfaceVisualModule.h>
+#include <GLPhotorealisticRender.h>
 
 using namespace std;
 
@@ -51,6 +52,13 @@ std::shared_ptr<SceneGraph> createScene()
 		mesh->stateColorTexture()->connect(render->inColorTexture());
 
 		mesh->graphicsPipeline()->pushModule(render);
+
+		auto realisticRender = mesh->graphicsPipeline()->createModule<GLPhotorealisticRender>();
+		mesh->stateVertex()->connect(realisticRender->inVertex());
+		mesh->stateNormal()->connect(realisticRender->inNormal());
+		mesh->stateTexCoord()->connect(realisticRender->inTexCoord());
+		mesh->stateShapes()->connect(realisticRender->inShapes());
+		mesh->stateMaterials()->connect(realisticRender->inMaterials());
 	}
 
 

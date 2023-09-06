@@ -82,10 +82,17 @@ void ObjMeshNode::resetStates()
 		texCoords.push_back({ attrib.texcoords[i], attrib.texcoords[i + 1] });
 	}
 
+	this->stateShapes()->resize(shapes.size());
+	auto& statShapes = this->stateShapes()->getData();
+
+	uint sId = 0;
 	for (const tinyobj::shape_t& shape : shapes) {
 		// only load triangle mesh...
 		const auto& mesh = shape.mesh;
-
+		statShapes[sId] = std::make_shared<gl::Shape>();
+		std::vector<dyno::TopologyModule::Triangle> vertexIndex;
+		std::vector<dyno::TopologyModule::Triangle> normalIndex;
+		std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
 		for (int i = 0; i < mesh.indices.size(); i += 3) {
 			auto idx0 = mesh.indices[i];
 			auto idx1 = mesh.indices[i + 1];
@@ -94,23 +101,54 @@ void ObjMeshNode::resetStates()
 			pIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
 			nIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
 			tIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
+
+			vertexIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
+			normalIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
+			texCoordIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
 		}
+		statShapes[sId]->vertexIndex.assign(vertexIndex);
+		statShapes[sId]->normalIndex.assign(normalIndex);
+		statShapes[sId]->texCoordIndex.assign(texCoordIndex);
+
+		vertexIndex.clear();
+		normalIndex.clear();
+		texCoordIndex.clear();
+
+		sId++;
 	}
 
 	// load texture...
 	dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 	texture[0, 0] = dyno::Vec4f(1);
 
+	this->stateMaterials()->resize(materials.size());
+	auto& sMats = this->stateMaterials()->getData();
+
+	uint mId = 0;
 	for (const auto& mtl : materials) {
+		sMats[mId] = std::make_shared<gl::Material>();
+		sMats[mId]->ambient = { mtl.ambient[0], mtl.ambient[1], mtl.ambient[2] };
+		sMats[mId]->diffuse = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
+		sMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
+		sMats[mId]->roughness = 1.0f - mtl.shininess;
 		if (!mtl.diffuse_texname.empty())
 		{
 			auto tex_path = (root / mtl.diffuse_texname).string();
-			std::cout << tex_path << std::endl;
 
 			// load textures
 			loadImage(tex_path.c_str(), texture);
-			break;
+			sMats[mId]->texColor.assign(texture);
 		}
+		if (!mtl.bump_texname.empty())
+		{
+			auto tex_path = (root / mtl.bump_texname).string();
+
+			// load textures
+			loadImage(tex_path.c_str(), texture);
+			sMats[mId]->texBump.assign(texture);
+		}
+
+		mId++;
 	}
 
 	if (this->stateTriangleSet()->isEmpty())
@@ -132,9 +170,10 @@ void ObjMeshNode::resetStates()
 	ts->rotate(q);
 	ts->translate(t);
 
+	this->stateVertex()->assign(vertices);
 	this->stateNormal()->assign(normals);
-	this->stateNormalIndex()->assign(nIndex);
 	this->stateTexCoord()->assign(texCoords);
+	this->stateNormalIndex()->assign(nIndex);
 	this->stateTexCoordIndex()->assign(tIndex);
 	this->stateColorTexture()->assign(texture);
 
