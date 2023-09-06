@@ -98,8 +98,8 @@ namespace dyno
 
 	void GLPhotorealisticRender::updateGL()
 	{
-		auto& shapes = this->inShapes()->getData();
-		auto& materials = this->inMaterials()->getData();
+		auto& shapes = this->inShapes()->constData();
+		auto& materials = this->inMaterials()->constData();
 
 		for (int i = 0; i < shapes.size(); i++)
 		{
@@ -134,16 +134,16 @@ namespace dyno
 	void GLPhotorealisticRender::updateImpl()
 	{
 		// update data
-		auto& vertices = this->inVertex()->getData();
-		auto& normals = this->inNormal()->getData();
-		auto& texCoord = this->inTexCoord()->getData();
+		auto& vertices = this->inVertex()->constData();
+		auto& normals = this->inNormal()->constData();
+		auto& texCoord = this->inTexCoord()->constData();
 
 		mVertexPosition.load(vertices);
 		mNormal.load(normals);
 		mTexCoord.load(texCoord);
 
-		auto& shapes = this->inShapes()->getData();
-		auto& materials = this->inMaterials()->getData();
+		auto& shapes = this->inShapes()->constData();
+		auto& materials = this->inMaterials()->constData();
 
 		for (int i = 0; i < shapes.size(); i++)
 		{
@@ -158,8 +158,8 @@ namespace dyno
 
 	void GLPhotorealisticRender::paintGL(const RenderParams& rparams)
 	{
-		auto& shapes = this->inShapes()->getData();
-		auto& materials = this->inMaterials()->getData();
+		auto& shapes = this->inShapes()->constData();
+		auto& materials = this->inMaterials()->constData();
 
 		mShaderProgram->use();
 
@@ -195,7 +195,7 @@ namespace dyno
 		pbr.alpha = this->varAlpha()->getValue();
 
 		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getValue());
-		mShaderProgram->setInt("uColorMode", this->varColorMode()->getValue().currentKey());
+		mShaderProgram->setInt("uColorMode", this->varColorMode()->currentKey());
 		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
 
 		// setup uniform buffer
@@ -206,7 +206,7 @@ namespace dyno
 		mPBRMaterialUBlock.bindBufferBase(1);
 
 
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < shapes.size(); i++)
 		{
 #ifdef CUDA_BACKEND
 			// bind texture

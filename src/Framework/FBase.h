@@ -215,6 +215,11 @@ Data& getData() {													\
 	assert(dataPtr != nullptr);										\
 	return *dataPtr;												\
 }																	\
+const Data& constData() {											\
+	auto dataPtr = this->constDataPtr();							\
+	assert(dataPtr != nullptr);										\
+	return *dataPtr;												\
+}																	\
 private:															\
 	std::shared_ptr<Data> m_data = nullptr;							\
 public:

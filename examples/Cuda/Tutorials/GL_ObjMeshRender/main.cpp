@@ -24,7 +24,7 @@ std::shared_ptr<SceneGraph> createScene()
 		mesh->stateNormal()->connect(render->inNormal());
 		mesh->stateNormalIndex()->connect(render->inNormalIndex());
 
-		render->varColorMode()->getDataPtr()->setCurrentKey(GLSurfaceVisualModule::CM_Texture);
+		render->varColorMode()->setCurrentKey(GLSurfaceVisualModule::CM_Texture);
 		mesh->stateTexCoord()->connect(render->inTexCoord());
 		mesh->stateTexCoordIndex()->connect(render->inTexCoordIndex());
 		mesh->stateColorTexture()->connect(render->inColorTexture());
@@ -46,7 +46,7 @@ std::shared_ptr<SceneGraph> createScene()
 		mesh->stateNormal()->connect(render->inNormal());
 		mesh->stateNormalIndex()->connect(render->inNormalIndex());
 
-		render->varColorMode()->getDataPtr()->setCurrentKey(GLSurfaceVisualModule::CM_Texture);
+		render->varColorMode()->setCurrentKey(GLSurfaceVisualModule::CM_Texture);
 		mesh->stateTexCoord()->connect(render->inTexCoord());
 		mesh->stateTexCoordIndex()->connect(render->inTexCoordIndex());
 		mesh->stateColorTexture()->connect(render->inColorTexture());

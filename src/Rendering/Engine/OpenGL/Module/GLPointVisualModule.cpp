@@ -43,7 +43,7 @@ namespace dyno
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
-		this->varColorMode()->getDataPtr()->setCurrentKey(mode);
+		this->varColorMode()->setCurrentKey(mode);
 	}
 
 	bool GLPointVisualModule::initializeGL()
@@ -87,7 +87,7 @@ namespace dyno
 		mPosition.updateGL();
 		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
 
-		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
 			mColor.updateGL();
@@ -109,7 +109,7 @@ namespace dyno
 
 		mPosition.load(points);
 
-		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
 			auto colors = this->inColor()->getData();
@@ -127,13 +127,13 @@ namespace dyno
 		mUniformBlock.bindBufferBase(0);
 
 		mShaderProgram->use();
-		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getData());
+		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getValue());
 
 		if (rparams.mode == GLRenderMode::COLOR)
 		{
-			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getValue());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getValue());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getValue());
 		}
 		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
@@ -151,7 +151,7 @@ namespace dyno
 		}
 
 		// per-object color color
-		auto color = this->varBaseColor()->getData();
+		auto color = this->varBaseColor()->getValue();
 		glVertexAttrib3f(1, color.r, color.g, color.b);
 
 		mVertexArray.bind();

@@ -158,7 +158,7 @@ namespace dyno
 		mVertexPosition.updateGL();
 
 		// vertex color
-		if (this->varColorMode()->getValue() == EColorMode::CM_Vertex) {
+		if (this->varColorMode()->currentKey() == EColorMode::CM_Vertex) {
 			mVertexColor.updateGL();
 		}
 		// vertex normal
@@ -182,7 +182,7 @@ namespace dyno
 	void GLSurfaceVisualModule::updateImpl()
 	{
 		// update data
-		auto triSet = this->inTriangleSet()->getDataPtr();
+		auto triSet = this->inTriangleSet()->constDataPtr();
 		auto indices = triSet->getTriangles();
 		auto vertices = triSet->getPoints();
 
@@ -209,10 +209,10 @@ namespace dyno
 			}
 			else
 			{
-				mNormal.load(this->inNormal()->getData());
+				mNormal.load(this->inNormal()->constData());
 				// has separate normal index?
 				if (!this->inNormalIndex()->isEmpty())
-					mNormalIndex.load(this->inNormalIndex()->getData());
+					mNormalIndex.load(this->inNormalIndex()->constData());
 			}
 #endif
 		}
@@ -220,18 +220,18 @@ namespace dyno
 		// texture coordinates
 		{
 			if (!this->inTexCoord()->isEmpty()) {
-				mTexCoord.load(this->inTexCoord()->getData());
+				mTexCoord.load(this->inTexCoord()->constData());
 			}
 
 			if (!this->inTexCoordIndex()->isEmpty()) {
-				mTexCoordIndex.load(this->inTexCoordIndex()->getData());
+				mTexCoordIndex.load(this->inTexCoordIndex()->constData());
 			}
 		}
 
 #ifdef CUDA_BACKEND
 		// texture
 		if (!inColorTexture()->isEmpty()) {
-			mColorTexture.load(inColorTexture()->getData());
+			mColorTexture.load(inColorTexture()->constData());
 		}
 #endif
 
@@ -269,14 +269,14 @@ namespace dyno
 			float alpha;
 		} pbr;
 
-		auto color = this->varBaseColor()->getData();
+		auto color = this->varBaseColor()->getValue();
 		pbr.color = { color.r, color.g, color.b };
-		pbr.metallic = this->varMetallic()->getData();
-		pbr.roughness = this->varRoughness()->getData();
-		pbr.alpha = this->varAlpha()->getData();
+		pbr.metallic = this->varMetallic()->getValue();
+		pbr.roughness = this->varRoughness()->getValue();
+		pbr.alpha = this->varAlpha()->getValue();
 
-		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getData());
-		mShaderProgram->setInt("uColorMode", this->varColorMode()->getValue().currentKey());
+		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getValue());
+		mShaderProgram->setInt("uColorMode", this->varColorMode()->currentKey());
 		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
 
 		// setup uniform buffer
