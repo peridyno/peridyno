@@ -23,29 +23,28 @@
 #include <QKeyEvent>
 #include <QEvent>
 
-#include "Ramp.h"
-#include "PCustomWidgets.h"
-#include "QBoolFieldWidget.h"
 #include "qcheckbox.h"
 #include <algorithm>
 #include <QPainterPath>
 #include "qlayout.h"
 #include "Field.h"
+
+#include "Curve.h"
 #include "QComponent.h"
 
 namespace dyno
 {
 
 
-	class QRampWidget : public QFieldWidget
+	class QCurveWidget : public QFieldWidget
 	{
 		Q_OBJECT
 	public:
 		DECLARE_FIELD_WIDGET
 
-		QRampWidget(FBase* field);
-		~QRampWidget() override {};
-	
+		QCurveWidget(FBase* field);
+		~QCurveWidget() override {};
+
 
 
 	public slots:
@@ -53,12 +52,10 @@ namespace dyno
 
 	};
 
-
-	class QDrawLabel : public mDrawLabel
+	class QCurveLabel : public mDrawLabel
 	{
 		Q_OBJECT
-
-
+	
 	public slots:
 		void changeValue(int s);
 		void changeInterpValue(int s);
@@ -68,22 +65,31 @@ namespace dyno
 		void setSpacingToDrawLabel(double value, int id);
 		void SetValueToDrawLabel(double value, int id);
 		void setLinearResample(int s);
-		void setUseRamp(int v);
 
 	public:
 
-		QDrawLabel(QWidget* parent = nullptr);
-		QDrawLabel(FVar<Ramp>* f,QWidget* parent = nullptr);
-		~QDrawLabel();
+		QCurveLabel(QWidget* parent = nullptr);
+		QCurveLabel(FVar<Curve>* f, QWidget* parent = nullptr) 
+		{
+			this->setField(f);
+			this->copySettingFromField();
+			if (isSquard) 
+				this->setLabelSize(w, w, w, w);
+			else
+				this->setLabelSize(w, h, w, w);
+			this->setStyleSheet("background:rgba(110,115,100,1)");
+			this->setMouseTracking(true);
+		};
+		~QCurveLabel();
 		void updateDataToField();
 		Dir setMode(int s) { return Dir(s); }
-		//void setBorderMode(int border) { if (border == 0) {borderMode = Open;}else{borderMode = Close;}}
-		void setField(FVar<Ramp>* f) 
+		//void setBorderMode(int border) { if (border == 0) { borderMode = Open; } else { borderMode = Close; } }
+		void setField(FVar<Curve>* f)
 		{
-			field = TypeInfo::cast<FVar<Ramp>>(f);
+			field = TypeInfo::cast<FVar<Curve>>(f);
 		}
-		void copyFromField(std::vector<Ramp::Coord2D> coord01, std::vector<MyCoord>& thisArray);
-		void copyFromField(std::vector<Ramp::OriginalCoord> coord01, std::vector<MyCoord>& thisArray);
+		void copyFromField(std::vector<Curve::Coord2D> coord01, std::vector<MyCoord>& thisArray);
+		void copyFromField(std::vector<Curve::OriginalCoord> coord01, std::vector<MyCoord>& thisArray);
 		void updateLabelShape();
 		void copySettingFromField();
 
@@ -93,19 +99,19 @@ namespace dyno
 		void mousePressEvent(QMouseEvent* event)override;
 		void mouseReleaseEvent(QMouseEvent* event)override;
 		void reSort(std::vector<MyCoord>& vector1);
-		void initializeLine(Dir mode );
+		void initializeLine(Dir mode);
 		void deletePoint();
-		void setLabelSize(int minX , int minY, int maxX, int maxY);
+		void setLabelSize(int minX, int minY, int maxX, int maxY);
 		void buildBezierPoint();
 		void keyPressEvent(QKeyEvent* event);
 		int addPointtoEnd();
 		int insertCurvePoint(MyCoord pCoord);
-		void insertHandlePoint(int fp, MyCoord pCoord);	
+		void insertHandlePoint(int fp, MyCoord pCoord);
 		void keyReleaseEvent(QKeyEvent* event);
 		void leaveEvent(QEvent* event);
-		void remapArrayToHeight(std::vector<MyCoord>& Array,int h);
+		void remapArrayToHeight(std::vector<MyCoord>& Array, int h);
 		void updateFloatCoordArray(std::vector<MyCoord> CoordArray, std::vector<Coord0_1>& myfloatCoord);
-		void CoordtoField(Ramp& s);
+		void CoordtoField(Curve& s);
 		Coord0_1 CoordTo0_1Value(MyCoord& coord);
 		MyCoord ZeroOneToCoord(Coord0_1& value, int x0, int x1, int y0, int y1);
 		void buildCoordToResortMap();
@@ -128,14 +134,13 @@ namespace dyno
 	public:
 		//Setting
 		bool useBezier = false;
-		bool isSquard = false;
+		bool isSquard = true;
 		bool useSort = true;
 		bool lockSize = false;
 		bool curveClose = false;
 		bool LineResample = false;
 		bool useRamp = false;
 		double spacing = 10;				//Resampling Spacing
-		//BorderMode borderMode = Close;		//Ramp Or Canvas
 
 	private:
 
@@ -144,13 +149,13 @@ namespace dyno
 		int h = 100;						//Default Height
 
 		int selectDistance = 10;			//SelectDistanceThreshold
-		int HandleAngleThreshold = 20;  
+		int HandleAngleThreshold = 20;
 		int radius = 4;						//Point Radius
 		float iniHandleLength = 15;			//DefaultHandleLength
 
 		Dir Mode = x;						//Direction for CloseMode
-		Interpolation InterpMode= Linear;   //Interpolation
-		FVar<Ramp>* field;					//field
+		Interpolation InterpMode = Linear;   //Interpolation
+		FVar<Curve>* field;					//field
 
 		//reSize
 		int maxX = 0;
@@ -196,7 +201,7 @@ namespace dyno
 		MyCoord dtPos;					//delta position of th SelectedPoint
 		MyCoord iniHandlePos;			//initial position of the SelectedHandlePoint
 		MyCoord pressCoord;				//Current PressCoord
-		MyCoord hoverCoord;				
+		MyCoord hoverCoord;
 		MyCoord selectCoord;
 
 		//CurveCoord
@@ -207,7 +212,7 @@ namespace dyno
 		std::vector<Coord0_1> bezierFloatCoord;		// updateFloatCoordArray(CurvePoint, bezierFloatCoord); 
 		std::vector<Coord0_1> handleFloatCoord;
 		std::vector<MyCoord> CurvePoint;			//	resample Path
-		std::vector<int> multiSelectID;				
+		std::vector<int> multiSelectID;
 
 		//Map
 		std::map<int, float> curvePointMapLength;		//find Length by curvePoint

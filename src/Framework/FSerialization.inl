@@ -309,7 +309,7 @@ namespace dyno
 
 		this->getValue().convertVarToStr("curveClose", this->getValue().curveClose, finalText);
 		this->getValue().convertVarToStr("InterpMode", this->getValue().InterpMode, finalText);
-		this->getValue().convertVarToStr("Bordermode", this->getValue().Bordermode, finalText);
+		//this->getValue().convertVarToStr("Bordermode", this->getValue().Bordermode, finalText);
 
 		//
 		this->getValue().convertVarToStr("Dirmode", this->getValue().Dirmode, finalText);
@@ -414,8 +414,8 @@ namespace dyno
 				ramp->setVarByStr(substr, ramp->curveClose);
 			else if (currentVarName == "InterpMode")
 				ramp->setVarByStr(substr, ramp->InterpMode);
-			else if (currentVarName == "Bordermode")
-				ramp->setVarByStr(substr, ramp->Bordermode);
+			//else if (currentVarName == "Bordermode")
+			//	ramp->setVarByStr(substr, ramp->Bordermode);
 			else if (currentVarName == "Dirmode")
 				ramp->setVarByStr(substr, ramp->Dirmode);
 			else if (currentVarName == "lockSize")

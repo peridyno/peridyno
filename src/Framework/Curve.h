@@ -6,33 +6,36 @@
 #include "Vector/Vector2D.h"
 #include "Vector/Vector3D.h"
 #include "Canvas.h"
+#include "Module/TopologyModule.h"
 
 namespace dyno {
 
-
-	class Ramp : public Canvas
+	class Curve :public Canvas
 	{
 	public:
-		Ramp();
-		Ramp(Direction dir);
-		Ramp(const Ramp& ramp);
+
+		Curve();
+		Curve(CurveMode mode) 
+		{
+			curveClose = int(mode);
+		}
+		Curve(const Curve& ramp);
 
 
-		~Ramp() { ; };
+		~Curve() { };
 
-		void varChanged();
-		float getCurveValueByX(float inputX);
-		void addItemMyCoord(float x, float y);
-		void addItemBezierCoord(float x, float y);
-		void addFloatItemToCoord(float x, float y, std::vector<Coord2D>& coordArray);
+		//void varChanged();
+		void addItemMyCoord(float x ,float y);
+		//void addItemBezierCoord(float x, float y);
+		void addFloatItemToCoord(float x, float y,std::vector<Coord2D>& coordArray);
 		void addItemOriginalCoord(int x, int y);
 		void addPoint(float x, float y);
 		void setCurveClose(bool s);
-		void addPointAndHandlePoint(Coord2D point, Coord2D handle_1, Coord2D handle_2);
+		void addPointAndHandlePoint(Coord2D point,Coord2D handle_1, Coord2D handle_2 );
 		void clearMyCoord();
 		void addItemHandlePoint(int x, int y);
 		void UpdateFieldFinalCoord();
-		void updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3, std::vector<Coord2D>& bezierSet);
+		void updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3 ,std::vector<Coord2D>& bezierSet);
 		void updateBezierCurve();
 		void rebuildHandlePoint(std::vector<Coord2D> s);
 		double calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet);
@@ -41,35 +44,51 @@ namespace dyno {
 		void useBezier();
 		void useLinear();
 		void setResample(bool s);
-		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord(); }
-		void remapY(double minY, double maxY) { NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
-		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
+		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord();}
+		void remapY(double minY, double maxY) { NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord();}
+		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord();}
 
 		void buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet);
 		void updateResampleLinearLine();
-		void updateResampleBezierCurve();
+		void updateResampleBezierCurve(std::vector<Coord2D>& myBezierPoint_H);
 		void resamplePointFromLine(std::vector<Coord2D> pointSet);
 
+		//Remapping Coord
 		void setRange_MinX(float min, float max) { remapRange[0] = min; remapRange[1] = max; }// "MinX", "MinY", "MaxX", "MaxY"
 		void setRange_MaxX(float min, float max) { remapRange[4] = min; remapRange[5] = max; }
 		void setRange_MinY(float min, float max) { remapRange[2] = min; remapRange[3] = max; }
 		void setRange_MaxY(float min, float max) { remapRange[6] = min; remapRange[7] = max; }
 		void setRange(float min, float max) { setRange_MinX(min, max); setRange_MaxX(min, max); setRange_MinY(min, max); setRange_MaxY(min, max); };
 		//void setBorderMode(BorderMode border) { this->Bordermode = border; UpdateFieldFinalCoord();}
-		void setSpacing(double s);
-		void borderCloseResort();
-		void setDisplayUseRamp(bool v);
-		void setUseRamp(bool v);
-
-		void convertCoordToStr(std::string VarName, std::vector<Ramp::Coord2D> Array, std::string& Str)
+		
+		//interface
+		unsigned getPointSize() 
 		{
-			Str.append(VarName + " ");
+			if (FinalCoord.empty())
+				return 0;
+			return this->FinalCoord.size(); 
+		}
+
+
+		std::vector<Coord2D> getPoints() { return FinalCoord; }
+
+
+		//ReSample
+		void setSpacing(double s);
+
+		//
+		void borderCloseResort();
+
+		//Seri
+		void convertCoordToStr(std::string VarName,std::vector<Curve::Coord2D> Array, std::string& Str)
+		{
+			Str.append(VarName+" ");
 			for (int i = 0; i < Array.size(); i++)
 			{
 				std::string tempTextX = std::to_string(Array[i].x);
 				std::string tempTextY = std::to_string(Array[i].y);
-				Str.append(tempTextX + " " + tempTextY);
-				if (i != Array.size() - 1)
+				Str.append(tempTextX + " " + tempTextY );
+				if (i != Array.size() - 1) 
 				{
 					Str.append(" ");
 				}
@@ -108,7 +127,7 @@ namespace dyno {
 
 		void setVarByStr(std::string Str, double& value)
 		{
-			if (std::isdigit(Str[0]) | (Str[0] == '-'))
+			if (std::isdigit(Str[0]) | (Str[0]=='-'))
 			{
 				value = std::stod(Str);
 			}
@@ -140,46 +159,26 @@ namespace dyno {
 			return;
 		}
 
-		void setVarByStr(std::string Str, Direction& value)
+		void setVarByStr(std::string Str, Canvas::Interpolation& value)
 		{
 			if (std::isdigit(Str[0]))
 			{
-				value = Direction(std::stoi(Str));
-			}
-			return;
-		}
-
-		//void setVarByStr(std::string Str, BorderMode& value)
-		//{
-		//	if (std::isdigit(Str[0]))
-		//	{
-		//		value = BorderMode(std::stoi(Str));
-		//	}
-		//	return;
-		//}
-		void setVarByStr(std::string Str, Interpolation& value)
-		{
-			if (std::isdigit(Str[0]))
-			{
-				value = Interpolation(std::stoi(Str));
+				value = Canvas::Interpolation(std::stoi(Str));
 			}
 			return;
 		}
 
 		//must save
-		Direction Dirmode = x;
-		//BorderMode Bordermode = Close;
-		Interpolation InterpMode = Linear;
+
+		Canvas::Interpolation InterpMode = Linear;
 
 		std::vector<Coord2D> MyCoord;
 		std::vector<Coord2D> myHandlePoint;
-
+	
 		//
-		std::string InterpStrings[int(Direction::count)] = { "Linear","Bezier" };
-		std::string DirectionStrings[int(Direction::count)] = { "x","y" };
+		std::string InterpStrings[2] = { "Linear","Bezier" };
 
 		std::vector<Coord2D> myBezierPoint;
-		std::vector<Coord2D> myBezierPoint_H;
 		std::vector<Coord2D> resamplePoint;
 
 		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
@@ -193,7 +192,7 @@ namespace dyno {
 		std::map<float, EndPoint> length_EndPoint_Map;
 
 		//must save
-		float remapRange[8] = { -3,3,-3,3,-3,3,-3,3 };// "MinX","MinY","MaxX","MaxY"
+		float remapRange[8] = {-3,3,-3,3,-3,3,-3,3};// "MinX","MinY","MaxX","MaxY"
 
 		bool lockSize = false;
 		bool useCurve = false;
@@ -204,8 +203,8 @@ namespace dyno {
 		bool curveClose = false;
 		bool useColseButton = true;
 
-		bool useSquard = false;
-		bool useSquardButton = false;
+		bool useSquard = true;
+		bool useSquardButton = true;
 
 		float Spacing = 5;
 
@@ -234,8 +233,6 @@ namespace dyno {
 		bool customHandle = false;
 
 	};
-
-
 
 }
 

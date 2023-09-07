@@ -18,6 +18,7 @@
 #include "Node/ParametricModel.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "Curve.h"
 
 namespace dyno
 {
@@ -42,11 +43,14 @@ namespace dyno
 
 		DEF_VAR(Real, Height, 1, "Height");
 
+		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
+
+		DEF_VAR(Curve, Curve, Curve::CurveMode::Open, "");
+
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_IN(PointSet<TDataType>,PointSet,"")
+		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
 
-		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
 
 
 	protected:

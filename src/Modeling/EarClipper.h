@@ -69,6 +69,18 @@ namespace dyno
 
 			this->polyClip(vtsvector, outTriangles);
 		}
+		void polyClip(CArray<Coord> vts, std::vector<TopologyModule::Triangle>& outTriangles)
+		{
+			if (vts.isEmpty()) { return; }
+
+			std::vector<DataType3f::Coord> vtsvector;
+			for (size_t i = 0; i < vts.size(); i++)
+			{
+				vtsvector.push_back(vts[i]);
+			}
+
+			this->polyClip(vtsvector, outTriangles);
+		}
 
 	};
 

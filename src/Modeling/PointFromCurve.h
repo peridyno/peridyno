@@ -19,7 +19,7 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
-#include "Ramp.h"
+#include "Curve.h"
 
 namespace dyno
 {
@@ -40,7 +40,7 @@ namespace dyno
 
 		DEF_VAR(Real, UniformScale, 1, "Uniform Scale");
 
-		DEF_VAR(Ramp,Curve,Ramp::BorderMode::Open,"");
+		DEF_VAR(Curve,Curve, Curve::CurveMode::Open,"");
 
 		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "Points");
 

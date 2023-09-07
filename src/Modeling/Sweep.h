@@ -40,7 +40,7 @@ namespace dyno
 
 		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
 
-		DEF_VAR(Ramp, CurveRamp, Ramp::BorderMode::Close, "");
+		DEF_VAR(Ramp, CurveRamp,Ramp::Direction::x, "");
 
 		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
 

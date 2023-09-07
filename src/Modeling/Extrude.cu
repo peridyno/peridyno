@@ -41,6 +41,7 @@ namespace dyno
 		this->varRow()->attach(callback);
 		this->varHeight()->attach(callback);
 		this->varReverseNormal()->attach(callback);
+		this->varCurve()->attach(callback);
 
 
 	}
@@ -56,49 +57,83 @@ namespace dyno
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
-		if (this->inPointSet()->isEmpty()) {return;}
 
-		auto columns = this->inPointSet()->getData().getPointSize();
-
-
-		int pointsize = this->inPointSet()->getData().getPointSize();
-
-		if (pointsize >= 3) 
+		enum PointMode
 		{
-			std::vector<Coord> vertices;
-			std::vector<TopologyModule::Triangle> triangle;
+			UseInput = 0,
+			UseCurve = 1,
+		};
 
+		PointMode mPointMode = PointMode::UseCurve;
 
-			int columns_i = int(columns);
-			int ptn = pointsize;
-
-			uint counter = 0;
-			Vec3f Location;
-
-			PointSet<TDataType> s;
-			s.copyFrom(this->inPointSet()->getData());
-
-			DArray<Coord> sa = s.getPoints();
-			CArray<Coord> c_sa;
-			c_sa.assign(sa);
-
-			//以下是侧面点的构建
+		int columns_i = 0;
+		if (!this->inPointSet()->isEmpty()) 
+		{
+			columns_i = this->inPointSet()->getData().getPointSize();
+			mPointMode = PointMode::UseInput;
+		}
+		else if (this->varCurve()->getValue().getPointSize()) 
+		{
+			columns_i = this->varCurve()->getValue().getPointSize();
+			mPointMode = PointMode::UseCurve;
+		}
+		else
+		{
+			columns_i = 0;
+		}
+		
+		if (columns_i >= 3)
+		{
+		//以下是侧面点的构建
 
 			Real HeightValue = this->varHeight()->getData();
 			Real RowValue = this->varRow()->getData();
 			Real tempRow = 0;
-			for (int i = 0; i <= RowValue; i++) {
 
+			std::vector<Coord> vertices;
+			CArray<Coord> capPoint;
+
+			for (int i = 0; i <= RowValue; i++) 
+			{
 				Real tempy = HeightValue * i / RowValue;
+				Vec3f position;
 
-				for (int k = 0; k < ptn; k++)
+				if (mPointMode == PointMode::UseInput)
 				{
-					Location = { c_sa[k][0] , c_sa[k][1] + tempy ,c_sa[k][2] };
+					DArray<Coord> sa = this->inPointSet()->getData().getPoints();
+					CArray<Coord> capPoint;
+					capPoint.assign(capPoint);
 
-					vertices.push_back(Location);
+					for (int k = 0; k < columns_i; k++)
+					{
+						position = { capPoint[k][0] , capPoint[k][1] + tempy ,capPoint[k][2] };
+
+						vertices.push_back(position);
+					}
+				}
+				else if (mPointMode == PointMode::UseCurve)
+				{
+					for (int k = 0; k < columns_i; k++)
+					{
+						auto curvePoint = this->varCurve()->getValue().getPoints();
+
+						position = { float(curvePoint[k].x) , float(tempy) ,float(curvePoint[k].y) };
+						vertices.push_back(position);
+
+						if (i == 0 )
+						{
+							capPoint.pushBack(position);
+						}
+					}
+
 				}
 			}
+
+
+
+
 			//以下是底部及上部点的构建
+			std::vector<TopologyModule::Triangle> triangle;
 
 			int pt_side_len = vertices.size();
 
@@ -165,8 +200,8 @@ namespace dyno
 			EarClipper<DataType3f> sab;
 			std::vector<TopologyModule::Triangle> triangleCap;
 
-			sab.polyClip(sa, triangleCap);
-			int addnum2 = vertices.size() - sa.size();
+			sab.polyClip(capPoint, triangleCap);
+			int addnum2 = vertices.size() - capPoint.size();
 
 			
 			for (int i = 0; i < triangleCap.size(); i++)
