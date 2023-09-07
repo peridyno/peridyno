@@ -45,7 +45,7 @@ namespace dyno
 
 		DEF_VAR(bool, ReverseNormal, false, "ReverseNormal");
 
-		DEF_VAR(Curve, Curve, Curve::CurveMode::Open, "");
+		DEF_VAR(Curve, Curve, Curve::CurveMode::Close, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 

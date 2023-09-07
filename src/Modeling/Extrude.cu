@@ -100,15 +100,18 @@ namespace dyno
 
 				if (mPointMode == PointMode::UseInput)
 				{
-					DArray<Coord> sa = this->inPointSet()->getData().getPoints();
-					CArray<Coord> capPoint;
-					capPoint.assign(capPoint);
+					if (i == 0)
+					{
+						DArray<Coord> sa = this->inPointSet()->getData().getPoints();
+						capPoint.assign(sa);
+					}
 
 					for (int k = 0; k < columns_i; k++)
 					{
 						position = { capPoint[k][0] , capPoint[k][1] + tempy ,capPoint[k][2] };
 
 						vertices.push_back(position);
+
 					}
 				}
 				else if (mPointMode == PointMode::UseCurve)
@@ -121,9 +124,8 @@ namespace dyno
 						vertices.push_back(position);
 
 						if (i == 0 )
-						{
 							capPoint.pushBack(position);
-						}
+
 					}
 
 				}
