@@ -12,7 +12,9 @@ layout(location=0) in VertexData
 	vec3 position;
 	vec3 normal;
 	vec3 color;
-	vec3 texCoord;
+	vec3 texCoord;    
+	vec3 tangent;
+    vec3 bitangent;
     flat int instanceID;
 } fs_in;
 
@@ -20,6 +22,7 @@ layout(location = 0) out vec4  fragColor;
 layout(location = 1) out ivec4 fragIndices;
 
 layout(binding = 10) uniform sampler2D uTexColor;
+layout(binding = 11) uniform sampler2D uTexBump;
 
 vec3 GetViewDir()
 {
@@ -32,8 +35,24 @@ vec3 GetViewDir()
 
 vec3 GetNormal()
 {
+	if(textureSize(uTexBump, 0).x > 1 && fs_in.texCoord.z > 0)
+	{
+		mat3 tbn = mat3(
+			normalize(fs_in.tangent), 
+			normalize(fs_in.bitangent), 
+			normalize(fs_in.normal));
+		// transform normal
+		vec3 bump = texture(uTexBump, fs_in.texCoord.xy).rgb * 2.0 - 1.0;
+
+		// TODO: pass bump scale as parameter
+		float bumpScale = 0.2;
+		bump = mix(vec3(0, 0, 1), bump, bumpScale);
+		return normalize(tbn * bump); 
+	}
+
 	if(length(fs_in.normal) > 0)
 		return normalize(fs_in.normal);
+
 	// 
 	vec3 X = dFdx(fs_in.position);
 	vec3 Y = dFdy(fs_in.position);
@@ -50,6 +69,7 @@ vec3 GetColor()
 vec3 Shade()
 {
 	vec3 N = GetNormal();
+	//return N;
 	vec3 V = GetViewDir();
 
 	float dotNV = dot(N, V);
@@ -180,7 +200,7 @@ void TransparencyLinkedList(void)
 		uint nextIndex = imageAtomicExchange(u_headIndex, ivec2(gl_FragCoord.xy), freeNodeIndex);
 
 		// Store the color, depth and the next index for later resolving.
-		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), 0.6);//uMtl.alpha);
+		nodes[freeNodeIndex].color = vec4(ShadeTransparency(), uMtl.alpha);
 		nodes[freeNodeIndex].depth = gl_FragCoord.z;
 		nodes[freeNodeIndex].nextIndex = nextIndex;
 		nodes[freeNodeIndex].geometryID = uRenderParams.index;

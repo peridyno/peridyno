@@ -37,7 +37,7 @@ bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
 }
 
 ObjMeshNode::ObjMeshNode() {
-	this->stateTriangleSet()->promoteOuput();
+
 }
 
 void ObjMeshNode::resetStates()
@@ -157,29 +157,20 @@ void ObjMeshNode::resetStates()
 		sId++;
 	}
 
-	if (this->stateTriangleSet()->isEmpty())
+	PointSet<DataType3f> ps;
+	ps.setPoints(vertices);
+
+	// apply transform to vertices
 	{
-		this->stateTriangleSet()->allocate();
+		auto t = this->varLocation()->getValue();
+		auto q = this->computeQuaternion();
+		auto s = this->varScale()->getValue();
+		ps.scale(s);
+		ps.rotate(q);
+		ps.translate(t);
 	}
 
-	auto ts = this->stateTriangleSet()->getDataPtr();
-
-	ts->setPoints(vertices);
-	ts->setTriangles(pIndex);
-	ts->update();
-
-	auto t = this->varLocation()->getValue();
-	auto q = this->computeQuaternion();
-	auto s = this->varScale()->getValue();
-
-	ts->scale(s);
-	ts->rotate(q);
-	ts->translate(t);
-
-	this->stateVertex()->assign(vertices);
-	this->stateNormal()->assign(normals);
+	this->stateVertex()->assign(ps.getPoints());
+	this->stateNormal()->assign(normals);	// TODO: apply transform to normal
 	this->stateTexCoord()->assign(texCoords);
-	this->stateNormalIndex()->assign(nIndex);
-	this->stateTexCoordIndex()->assign(tIndex);
-	this->stateColorTexture()->assign(texture);
 }

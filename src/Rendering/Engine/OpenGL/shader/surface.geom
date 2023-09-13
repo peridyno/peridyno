@@ -26,11 +26,35 @@ layout(location=0) out VertexData
 	vec3 normal;
 	vec3 color;    
 	vec3 texCoord;
+    vec3 tangent;
+    vec3 bitangent;
     int  instanceID;
 } gs_out;
 
 
 void main() {   
+
+    {
+        vec3 v0 = gs_in[0].position;
+        vec3 v1 = gs_in[1].position;
+        vec3 v2 = gs_in[2].position;
+
+        vec2 uv0 = gs_in[0].texCoord.st;
+        vec2 uv1 = gs_in[1].texCoord.st;
+        vec2 uv2 = gs_in[2].texCoord.st;
+
+        // Edges of the triangle : position delta
+        vec3 deltaPos1 = v1-v0;
+        vec3 deltaPos2 = v2-v0;
+
+        // UV delta
+        vec2 deltaUV1 = uv1-uv0;
+        vec2 deltaUV2 = uv2-uv0;
+
+        float r = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+        gs_out.tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*r;
+        gs_out.bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*r;
+    }
     
     if(uVertexNormal)
     {

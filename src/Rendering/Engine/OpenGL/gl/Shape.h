@@ -18,11 +18,8 @@
 
 #include "Object.h"
 #include "Platform.h"
-
 #include "GPUBuffer.h"
-
 #include "Material.h"
-
 #include "Topology/TriangleSet.h"
 
 namespace gl
@@ -35,9 +32,7 @@ namespace gl
 
 		virtual void create();
 		virtual void release();
-
 		void update();
-
 		void updateGL();
 
 		dyno::DArray<dyno::TopologyModule::Triangle> vertexIndex;
@@ -47,7 +42,6 @@ namespace gl
 		gl::XBuffer<dyno::TopologyModule::Triangle>		glVertexIndex;
 		gl::XBuffer<dyno::TopologyModule::Triangle>		glNormalIndex;
 		gl::XBuffer<dyno::TopologyModule::Triangle>		glTexCoordIndex;
-
 		std::shared_ptr<Material> material = nullptr;
 
 	private:

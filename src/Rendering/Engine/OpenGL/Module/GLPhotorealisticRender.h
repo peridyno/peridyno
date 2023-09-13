@@ -16,14 +16,8 @@
 
 #pragma once
 
-#include <DeclarePort.h>
-#include <Topology/TriangleSet.h>
+#include "GLSurfaceVisualModule.h"
 
-#include "GLVisualModule.h"
-#include "gl/GPUBuffer.h"
-#include "gl/GPUTexture.h"
-#include "gl/VertexArray.h"
-#include "gl/Shader.h"
 #include "gl/Shape.h"
 #include "gl/Material.h"
 
@@ -39,27 +33,12 @@ namespace dyno
 	public:
 		virtual std::string caption() override;
 
-		DECLARE_ENUM(EColorMode,
-			CM_Object = 0,
-			CM_Vertex = 1,
-			CM_Texture = 2);
-
-		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
-
-		DEF_VAR(bool, UseVertexNormal, false, "");
-
-		DEF_ARRAY_IN(Vec3f, Vertex, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");
-		
+		DEF_ARRAY_IN(Vec3f, Vertex,		DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
 		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
 
-
-		DEF_INSTANCES_IN(gl::Shape, Shape, "");
-
-		DEF_INSTANCES_IN(gl::Material, Material, "");
+		DEF_INSTANCES_IN(gl::Shape,		Shape, "");
+		DEF_INSTANCES_IN(gl::Material,	Material, "");
 
 	protected:
 		virtual void updateImpl() override;
@@ -70,24 +49,14 @@ namespace dyno
 		virtual void releaseGL() override;
 
 	protected:
-
-		gl::Program*	mShaderProgram;
-
-		// uniform blocks
-		gl::Buffer		mRenderParamsUBlock;
-		gl::Buffer		mPBRMaterialUBlock;
-
-		gl::VertexArray	mVAO;
-
-		gl::XBuffer<Vec3f> mVertexPosition;
-		gl::XBuffer<Vec3f> mVertexColor;			// per-vertex color
-
+		gl::XBuffer<Vec3f> mPosition;
 		gl::XBuffer<Vec3f> mNormal;
-
 		gl::XBuffer<Vec2f> mTexCoord;
 
-		// for instanced rendering
-		unsigned int			 mInstanceCount = 0;
-
+	private:
+		gl::Program*	mShaderProgram;
+		gl::Buffer		mRenderParamsUBlock;
+		gl::Buffer		mPBRMaterialUBlock;
+		gl::VertexArray	mVAO;
 	};
 };

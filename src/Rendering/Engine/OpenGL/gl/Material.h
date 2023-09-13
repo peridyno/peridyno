@@ -28,26 +28,20 @@ namespace gl
 	class Material : public Object
 	{
 	public:
+
 		Material();
 		~Material() override;
-
 		void create() override;
 		void release() override;
-
 		void update();
-
 		void updateGL();
 
+	public:
 		dyno::Vec3f ambient = { 0.0f, 0.0f, 0.0f };
-
 		dyno::Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
-
 		dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
-
-
 		float roughness = 0.0f;
 		float alpha = 1.0f;
-
 		dyno::DArray2D<dyno::Vec4f> texColor;
 		dyno::DArray2D<dyno::Vec4f> texBump;
 

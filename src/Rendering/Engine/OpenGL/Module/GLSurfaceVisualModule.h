@@ -43,7 +43,6 @@ namespace dyno
 			CM_Texture = 2);
 
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
-
 		DEF_VAR(bool, UseVertexNormal, false, "");
 
 #ifdef CUDA_BACKEND
@@ -54,18 +53,16 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet, TriangleSet, "");
 #endif
 
-		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");
-		
+		DEF_ARRAY_IN(Vec3f, Color,		DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
 		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
 
 		DEF_ARRAY_IN(TopologyModule::Triangle, NormalIndex, DeviceType::GPU, "");
-
 		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
 
 #ifdef CUDA_BACKEND
 		DEF_ARRAY2D_IN(Vec4f, ColorTexture, DeviceType::GPU, "");
+		DEF_ARRAY2D_IN(Vec4f, BumpMap, DeviceType::GPU, "");
 #endif
 
 	protected:
@@ -100,6 +97,7 @@ namespace dyno
 #ifdef CUDA_BACKEND
 		// color texture
 		gl::XTexture2D<Vec4f> mColorTexture;
+		gl::XTexture2D<Vec4f> mBumpMap;
 #endif
 
 		// for instanced rendering

@@ -23,7 +23,8 @@ namespace dyno
 		this->inTexCoordIndex()->tagOptional(true);
 
 #ifdef CUDA_BACKEND
-		this->inColorTexture()->tagOptional(true); 
+		this->inColorTexture()->tagOptional(true);
+		this->inBumpMap()->tagOptional(true);
 #endif
 	}
 
@@ -103,56 +104,14 @@ namespace dyno
 		if (mNumTriangles == 0) return;
 
 		mVertexIndex.updateGL();
-
-		// setup VAO binding...
-		mVAO.bind();
-
-		// vertex index
-		{
-			mVertexIndex.bind();
-			glEnableVertexAttribArray(0);
-			glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0);
-		}
-
 		// normal
-		{
-			if (mNormalIndex.count() == mNumTriangles) {
-				mNormalIndex.updateGL();
-				mNormalIndex.bind();
-				glEnableVertexAttribArray(1);
-				glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), (void*)0);
-			}
-			else
-			{
-				glDisableVertexAttribArray(1);
-				glVertexAttribI4i(1, -1, -1, -1, -1);
-			}
+		if (mNormalIndex.count() == mNumTriangles) {
+			mNormalIndex.updateGL();
 		}
-
 		// texcoord
-		{
-			if (mTexCoordIndex.count() == mNumTriangles) {
-				mTexCoordIndex.updateGL();
-				mTexCoordIndex.bind();
-				glEnableVertexAttribArray(2);
-				glVertexAttribIPointer(2, 1, GL_INT, sizeof(int), (void*)0);
-			}
-			else
-			{
-				glDisableVertexAttribArray(2);
-				glVertexAttribI4i(2, -1, -1, -1, -1);
-			}
+		if (mTexCoordIndex.count() == mNumTriangles) {
+			mTexCoordIndex.updateGL();
 		}
-
-		// instance transforms
-		glDisableVertexAttribArray(3);
-		glDisableVertexAttribArray(4);
-		glDisableVertexAttribArray(5);
-		glDisableVertexAttribArray(6);
-		glDisableVertexAttribArray(7);
-		glDisableVertexAttribArray(8);
-
-		mVAO.unbind();
 
 		// update shader storage buffer
 		mVertexPosition.updateGL();
@@ -233,6 +192,10 @@ namespace dyno
 		if (!inColorTexture()->isEmpty()) {
 			mColorTexture.load(inColorTexture()->constData());
 		}
+
+		if (!inBumpMap()->isEmpty()) {
+			mBumpMap.load(inBumpMap()->constData());
+		}
 #endif
 
 	}
@@ -255,50 +218,102 @@ namespace dyno
 			return;
 		}
 
-		// bind vertex data
-		mVertexPosition.bindBufferBase(8);
-		mNormal.bindBufferBase(9);
-		mTexCoord.bindBufferBase(10);
-		mVertexColor.bindBufferBase(11);
+		// material 
+		{
+			struct {
+				glm::vec3 color;
+				float metallic;
+				float roughness;
+				float alpha;
+			} pbr;
+			auto color = this->varBaseColor()->getValue();
+			pbr.color = { color.r, color.g, color.b };
+			pbr.metallic = this->varMetallic()->getValue();
+			pbr.roughness = this->varRoughness()->getValue();
+			pbr.alpha = this->varAlpha()->getValue();
+			mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+		}
 
 		// setup uniforms
-		struct {
-			glm::vec3 color;
-			float metallic;
-			float roughness;
-			float alpha;
-		} pbr;
-
-		auto color = this->varBaseColor()->getValue();
-		pbr.color = { color.r, color.g, color.b };
-		pbr.metallic = this->varMetallic()->getValue();
-		pbr.roughness = this->varRoughness()->getValue();
-		pbr.alpha = this->varAlpha()->getValue();
-
 		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getValue());
 		mShaderProgram->setInt("uColorMode", this->varColorMode()->currentKey());
 		mShaderProgram->setInt("uInstanced", mInstanceCount > 0);
 
 		// setup uniform buffer
 		mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
-		mRenderParamsUBlock.bindBufferBase(0);
 
-		mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+		// uniform block binding
+		mRenderParamsUBlock.bindBufferBase(0);
 		mPBRMaterialUBlock.bindBufferBase(1);
 
+		// bind vertex data
+		{
+			mVertexPosition.bindBufferBase(8);
+			mNormal.bindBufferBase(9);
+			mTexCoord.bindBufferBase(10);
+			mVertexColor.bindBufferBase(11);
+		}
+
+		// bind textures 
+		{
+			// reset 
+			glActiveTexture(GL_TEXTURE10);		// color
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE11);		// bump map
+			glBindTexture(GL_TEXTURE_2D, 0);
 
 #ifdef CUDA_BACKEND
-		// bind texture
-		if (mColorTexture.isValid()) {
-			mColorTexture.bind(GL_TEXTURE10);
-		}
-		else
+			if (mColorTexture.isValid()) mColorTexture.bind(GL_TEXTURE10);
+			if (mBumpMap.isValid())		 mBumpMap.bind(GL_TEXTURE11);
 #endif
-		{
-			glActiveTexture(GL_TEXTURE10);
-			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+
 		mVAO.bind();
+
+		// setup VAO binding...
+		{
+			// vertex index
+			mVertexIndex.bind();
+			glEnableVertexAttribArray(0);
+			glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0);
+
+			if (mNormalIndex.count() == mNumTriangles) {
+				mNormalIndex.bind();
+				glEnableVertexAttribArray(1);
+				glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), (void*)0);
+			}
+			else
+			{
+				glDisableVertexAttribArray(1);
+				glVertexAttribI4i(1, -1, -1, -1, -1);
+			}
+
+			if (mTexCoordIndex.count() == mNumTriangles) {
+				mTexCoordIndex.bind();
+				glEnableVertexAttribArray(2);
+				glVertexAttribIPointer(2, 1, GL_INT, sizeof(int), (void*)0);
+			}
+			else
+			{
+				glDisableVertexAttribArray(2);
+				glVertexAttribI4i(2, -1, -1, -1, -1);
+			}
+
+			//if (mInstanceCount > 0)
+			//{
+
+			//}
+			//else
+			//{
+			//	// instance transforms
+			//	glDisableVertexAttribArray(3);
+			//	glDisableVertexAttribArray(4);
+			//	glDisableVertexAttribArray(5);
+			//	glDisableVertexAttribArray(6);
+			//	glDisableVertexAttribArray(7);
+			//	glDisableVertexAttribArray(8);
+			//}
+		}
 
 		if(mInstanceCount > 0)
 			glDrawArraysInstanced(GL_TRIANGLES, 0, mNumTriangles * 3, mInstanceCount);
