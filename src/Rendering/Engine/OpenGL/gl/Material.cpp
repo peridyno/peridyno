@@ -21,12 +21,12 @@ namespace gl
 
 	void Material::update()
 	{
-		if (!texColor.isEmpty())
+		if (texColor.size())
 		{
 			mColorTexture.load(texColor);
 		}
 
-		if (!texBump.isEmpty())
+		if (texBump.size())
 		{
 			mBumpTexture.load(texBump);
 		}

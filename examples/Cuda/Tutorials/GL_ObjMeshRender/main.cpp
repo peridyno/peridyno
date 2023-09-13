@@ -10,11 +10,11 @@ std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	if(false) {
+	if(true) {
 		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
 		mesh->varFileName()->setValue(getAssetPath() + "obj/standard/cube.obj");
-		mesh->varLocation()->setValue(Vec3f(-0.5f, 0.0f, 0.0f));
 		mesh->varScale()->setValue(Vec3f(0.3f));
+		mesh->varLocation()->setValue(Vec3f(-0.0f, 0.3f, 0.0f));
 
 		auto render = mesh->graphicsPipeline()->createModule<GLPhotorealisticRender>();
 
@@ -31,8 +31,8 @@ std::shared_ptr<SceneGraph> createScene()
 		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
 		//mesh->varFileName()->setValue(getAssetPath() + "obj/standard/sphere.obj");
 		mesh->varFileName()->setValue(getAssetPath() + "obj/eyeball/eyeball.obj");
-		mesh->varLocation()->setValue(Vec3f(0.5f, 0.0f, 0.0f));
-		mesh->varScale()->setValue(Vec3f(0.3f));
+		mesh->varScale()->setValue(Vec3f(0.2f));
+		mesh->varLocation()->setValue(Vec3f(0.5f, 0.3f, 0.5f));
 
 		auto realisticRender = mesh->graphicsPipeline()->createModule<GLPhotorealisticRender>();
 		mesh->stateVertex()->connect(realisticRender->inVertex());
