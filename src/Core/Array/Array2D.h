@@ -75,9 +75,11 @@ namespace dyno {
 		inline uint size() const { return (uint)m_data.size(); }
 		inline bool isCPU() const { return false; }
 		inline bool isGPU() const { return true; }
-		inline bool isEmpty() const { return m_nx == 0 || m_ny == 0 || m_data.size() == 0; }
 
+#ifndef NO_BACKEND
 		void assign(const Array2D<T, DeviceType::GPU>& src);
+#endif
+
 		void assign(const Array2D<T, DeviceType::CPU>& src);
 
 	private:
@@ -88,87 +90,48 @@ namespace dyno {
 	};
 
 	template<typename T>
-	class Array2D<T, DeviceType::GPU>
+	void Array2D<T, DeviceType::CPU>::resize(uint nx, uint ny)
 	{
-	public:
-		Array2D() {};
+		if (m_data.size() != 0) clear();
 
-		Array2D(uint nx, uint ny)
-		{
-			this->resize(nx, ny);
-		};
+		m_data.resize(nx * ny);
+		m_nx = nx;
+		m_ny = ny;
+	}
 
-		/*!
-		*	\brief	Should not release data here, call Release() explicitly.
-		*/
-		~Array2D() {};
+	template<typename T>
+	void Array2D<T, DeviceType::CPU>::reset()
+	{
+		std::fill(m_data.begin(), m_data.end(), 0);
+	}
 
-		void resize(uint nx, uint ny);
+	template<typename T>
+	void dyno::Array2D<T, DeviceType::CPU>::clear()
+	{
+		m_data.clear();
 
-		void reset();
+		m_nx = 0;
+		m_ny = 0;
+	}
 
-		void clear();
-
-		inline T* begin() const { return m_data; }
-
-		DYN_FUNC inline uint nx() const { return m_nx; }
-		DYN_FUNC inline uint ny() const { return m_ny; }
-		DYN_FUNC inline uint pitch() const { return m_pitch; }
-
-		DYN_FUNC inline T operator () (const uint i, const uint j) const
-		{
-			char* addr = (char*)m_data;
-			addr += j * m_pitch;
-
-			return ((T*)addr)[i];
-			//return m_data[i + j* m_pitch];
+	template<typename T>
+	void Array2D<T, DeviceType::CPU>::assign(const Array2D<T, DeviceType::CPU>& src)
+	{
+		if (m_nx != src.size() || m_ny != src.size()) {
+			this->resize(src.nx(), src.ny());
 		}
 
-		DYN_FUNC inline T& operator () (const uint i, const uint j)
-		{
-			char* addr = (char*)m_data;
-			addr += j * m_pitch;
-
-			return ((T*)addr)[i];
-
-			//return m_data[i + j* m_pitch];
-		}
-
-		DYN_FUNC inline int index(const uint i, const uint j) const
-		{
-			return i + j * m_nx;
-		}
-
-		DYN_FUNC inline T operator [] (const uint id) const
-		{
-			return m_data[id];
-		}
-
-		DYN_FUNC inline T& operator [] (const uint id)
-		{
-			return m_data[id];
-		}
-
-		DYN_FUNC inline uint size() const { return m_nx * m_ny; }
-		DYN_FUNC inline bool isCPU() const { return false; }
-		DYN_FUNC inline bool isGPU() const { return true; }
-		inline bool isEmpty() const { return m_nx == 0 || m_ny == 0 || m_data == nullptr; }
-
-		void assign(const Array2D<T, DeviceType::GPU>& src);
-		void assign(const Array2D<T, DeviceType::CPU>& src);
-
-	private:
-		uint m_nx = 0;
-		uint m_ny = 0;
-		uint m_pitch = 0;
-		T* m_data = nullptr;
-	};
+		m_data.assign(src.m_data);
+	}
 
 	template<typename T>
 	using CArray2D = Array2D<T, DeviceType::CPU>;
-
-	template<typename T>
-	using DArray2D = Array2D<T, DeviceType::GPU>;
 }
 
-#include "Array2D.inl"
+#ifdef CUDA_BACKEND
+#include "Backend/Cuda/Array/Array2D.inl"
+#endif
+
+#ifdef VK_BACKEND
+//#include "Backend/Vulkan/Array/Array2D.inl"
+#endif
