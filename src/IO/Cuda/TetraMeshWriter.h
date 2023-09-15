@@ -40,20 +40,18 @@ namespace dyno
 		bool updatePtr();
 
 		bool outputSurfaceMesh();
+		void output()override;
 
 	protected:
-		void updateImpl() override;
+		//void updateImpl() override;
 
 	public:
 
 
 	protected:
-		int m_output_index = 0;
 		int max_output_files = 150;
 		int idle_frame_num = 0;		//output one file of [num]+1 frames
 		int current_idle_frame = 0;
-		std::string output_path = "G:/TEMP";
-		std::string name_prefix = "cup";
 		std::string file_postfix = ".obj";
 
 		DArray<Triangle>* ptr_triangles;

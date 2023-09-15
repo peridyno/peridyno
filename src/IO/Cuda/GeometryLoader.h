@@ -2,6 +2,7 @@
 #include "Node.h"
 
 #include "FilePath.h"
+#include "Node/ParametricModel.h"
 
 namespace dyno
 {
@@ -9,16 +10,16 @@ namespace dyno
 	*	\class	Geometry Loader
 	*	\brief	Base class for other geometry loaders
 	*/
-	class GeometryLoader : public Node
+	template<typename TDataType>
+	class GeometryLoader : public ParametricModel<TDataType>
 	{
 	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
 		GeometryLoader();
-		virtual ~GeometryLoader();
 
-		DEF_VAR(Vec3f, Location, 0, "Node location");
-		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-		DEF_VAR(Vec3f, Scale, 0, "Node scale");
-
+	public:
 		DEF_VAR(FilePath, FileName, "", "");
 	};
 }

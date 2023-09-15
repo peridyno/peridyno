@@ -6,7 +6,7 @@ namespace dyno
 
 	template<typename TDataType>
 	PointsLoader<TDataType>::PointsLoader()
-		: GeometryLoader()
+		: GeometryLoader<TDataType>()
 	{
 	}
 

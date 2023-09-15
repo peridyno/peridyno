@@ -66,18 +66,14 @@ namespace dyno
 		DArray<int>* OringalID;
 
 	protected:
-		void updateImpl() override;
 
 	public:
 
 
 	protected:
-		int m_output_index = 0;
 		int max_output_files = 10000;
 		int idle_frame_num = 9;		//output one file of [num]+1 frames
 		int current_idle_frame = 0;
-		std::string output_path = "D:/ChangYue/SubFrac/";
-		std::string name_prefix = "Ice_Board_";
 		std::string file_postfix = ".obj";
 
 		DArray<Triangle>* ptr_triangles;
