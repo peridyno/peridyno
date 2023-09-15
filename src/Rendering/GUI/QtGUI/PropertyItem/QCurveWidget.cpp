@@ -196,6 +196,8 @@ namespace dyno
 		connect(Checkbox, SIGNAL(mValueChanged(int)), spacingSlider, SLOT(setNewVisable(int)));
 		connect(Checkbox, SIGNAL(mValueChanged(int)), spacingSpinner, SLOT(setNewVisable(int)));
 
+		connect(combox2, SIGNAL(currentIndexChanged(int)), Checkbox, SLOT(updateChecked(int)));
+
 		if (f->getValue().resample == false)
 		{
 			spacingSlider->setVisible(false);
@@ -546,6 +548,8 @@ namespace dyno
 
 		if (shiftKey)	//多选
 		{
+			printf("多选\n");
+
 			for (size_t i = 0; i < CoordArray.size(); i++)
 			{
 				int temp = sqrt(std::pow((pressCoord.x - CoordArray[i].x), 2) + std::pow((pressCoord.y - CoordArray[i].y), 2));
@@ -585,6 +589,7 @@ namespace dyno
 		}
 		else if (!shiftKey && !altKey)		//单选
 		{
+			printf("单选\n");
 			for (size_t i = 0; i < CoordArray.size(); i++)
 			{
 				int temp = sqrt(std::pow((pressCoord.x - CoordArray[i].x), 2) + std::pow((pressCoord.y - CoordArray[i].y), 2));
@@ -623,6 +628,7 @@ namespace dyno
 		//判断是否点击贝塞尔控制柄
 		if (useBezier)
 		{
+			printf("控制柄\n");
 			int displayHandle[2] = { handleParent * 2 ,handleParent * 2 + 1};
 			for (size_t k = 0; k < 2; k++)
 			{

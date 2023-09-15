@@ -127,6 +127,23 @@ namespace dyno
 			}
 		}
 
+		void updateChecked(int s) 
+		{
+			if (s ==1 && this->checkState()== Qt::CheckState::Unchecked)
+			{
+				setCheckState(Qt::CheckState::Checked);
+				emit stateChanged(1);
+			}
+		}
+		void updateUnchecked(int s)
+		{
+			if (s == 0 && this->checkState() == Qt::CheckState::Checked)
+			{
+				setCheckState(Qt::CheckState::Unchecked);
+				emit stateChanged(0);
+			}
+		}
+
 
 	public:
 		QLabel* nameLabel = nullptr;
