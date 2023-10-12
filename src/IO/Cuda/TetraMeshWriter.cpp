@@ -20,17 +20,6 @@ namespace dyno
 	{
 	}
 
-	template<typename TDataType>
-	void TetraMeshWriter<TDataType>::setNamePrefix(std::string prefix)
-	{
-		this->name_prefix = prefix;
-	}
-
-	template<typename TDataType>
-	void TetraMeshWriter<TDataType>::setOutputPath(std::string path)
-	{
-		this->output_path = path;
-	}
 
 	template<typename TDataType>
 	bool TetraMeshWriter<TDataType>::updatePtr() 
@@ -49,7 +38,7 @@ namespace dyno
 	{
 		if (this->ptr_tri2tet == nullptr || this->ptr_triangles == nullptr || this->ptr_vertices == nullptr) {
 			printf("------Tetra Mesh Writer: array nullptr \n");
-			return false;
+			return;
 		}
 
 		auto output_path = this->varOutputPath()->getValue();
@@ -60,7 +49,7 @@ namespace dyno
 
 		if (!output.is_open()) {
 			printf("------Tetra Mesh Writer: open file failed \n");
-			return false;
+			return;
 		}
 
 		printf("Output Surface!!!!!!!!\n");
@@ -121,8 +110,7 @@ namespace dyno
 		host_triangles.clear();
 		host_tri2tet.clear();
 
-		this->m_output_index ++;
-		return true;
+		return;
 	}
 
 

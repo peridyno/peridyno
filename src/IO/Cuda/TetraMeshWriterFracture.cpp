@@ -382,25 +382,9 @@ namespace dyno
 		host_tri2tet.clear();
 		host_VerId.clear();
 
-		this->m_output_index ++;
 		return true;
 	}
 
-	/*template<typename TDataType>
-	void TetraMeshWriterFracture<TDataType>::updateImpl() 
-	{
-		printf("===========Tetra Mesh Writer============\n");
-
-		if (this->m_output_index >= this->max_output_files) { return; }
-
-		if (this->current_idle_frame <= 0) {
-			this->current_idle_frame = this->idle_frame_num;
-			this->outputSurfaceMesh();
-		}
-		else {
-			this->current_idle_frame--;
-		}
-	}*/
 
 	DEFINE_CLASS(TetraMeshWriterFracture);
 }
