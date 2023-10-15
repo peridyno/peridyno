@@ -62,23 +62,23 @@ public:
 	DEF_VAR_OUT(TPoint3D<Real>, Point, "");
 
 protected:
-	void resetStates() override {
+	//void resetStates() override {
 
-		Coord initPos = Coord(2.0, 0.0, 0.0);
+	//	Coord initPos = Coord(2.0, 0.0, 0.0);
 
-		this->varLocation()->setValue(initPos);
+	//	this->varLocation()->setValue(initPos);
 
-		auto points = this->statePointSet()->getDataPtr();
+	//	auto points = this->statePointSet()->getDataPtr();
 
-		std::vector<Coord> hPos;
-		hPos.push_back(initPos);
+	//	std::vector<Coord> hPos;
+	//	hPos.push_back(initPos);
 
-		points->setPoints(hPos);
+	//	points->setPoints(hPos);
 
-		this->outPoint()->setValue(TPoint3D<Real>(initPos));
+	//	this->outPoint()->setValue(TPoint3D<Real>(initPos));
 
-		hPos.clear();
-	}
+	//	hPos.clear();
+	//}
 
 	void locationChanged() {
 		auto loc = this->varLocation()->getData();
