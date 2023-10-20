@@ -10,8 +10,7 @@ namespace dyno
 
 	ImChart::ImChart()
 	{
-		this->setName("im_colorbar");
-
+		this->setName("im_chart");
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ImChart::varChange, this));
 
@@ -21,7 +20,7 @@ namespace dyno
 		this->varMax()->attach(callback);
 		this->varMin()->attach(callback);
 		this->inFrameNumber()->attach(callback);
-
+		this->varOutputFile()->attach(callback);
 		this->varChange();
 		this->varCount()->setRange(-50000,50000);
 		this->inFrameNumber()->tagOptional(false);
@@ -99,7 +98,8 @@ namespace dyno
 			drawValue();
 		}	
 
-		
+		out = this->varOutputFile()->getValue();
+
 		if (out)
 			this->outputTxt();
 		//
@@ -141,6 +141,7 @@ namespace dyno
 		ImGui::PlotLines(this->varTitle()->getValue().c_str(), valuePtr, count, 0, overlay, min, max, ImVec2(0, 80.0f));
 		ImGui::End();
 
+		printf("c_array %d, d_array %d\n",c_Value.size(),d_Value.size());
 	}
 
 	void ImChart::drawArray()
@@ -260,7 +261,7 @@ namespace dyno
 		for (uint i = 0; i < count; i++) {
 			output << i+1 << "," << c_Value[i] << std::endl;
 		}
-
+		
 		output.close();
 
 

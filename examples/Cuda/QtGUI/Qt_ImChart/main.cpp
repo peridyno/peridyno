@@ -165,66 +165,66 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
-	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-
-	auto fluid = scn->addNode(std::make_shared<ParticleSystem<DataType3f>>());
-	fluid->loadParticles(Vec3f(-0.1, 0.0, -0.1), Vec3f(0.105, 0.1, 0.105), 0.005);
-
-	auto ghost = scn->addNode(createGhostParticles());
-
-	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
-	fluid->connect(incompressibleFluid->importFluidParticles());
-	ghost->connect(incompressibleFluid->importBoundaryParticles());
-// 	incompressibleFluid->setFluidParticles(fluid);
-// 	incompressibleFluid->setBoundaryParticles(ghost);
-
-// 	root->addAncestor(incompressibleFluid.get());
-// 	root->addParticleSystem(fluid);
-	incompressibleFluid->connect(boundary->importParticleSystems());
-
-	{
-		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-		colorMapper->varMax()->setValue(5.0f);
-
-		fluid->stateVelocity()->connect(calculateNorm->inVec());
-		calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-		fluid->graphicsPipeline()->pushModule(calculateNorm);
-		fluid->graphicsPipeline()->pushModule(colorMapper);
-
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-		fluid->statePointSet()->connect(ptRender->inPointSet());
-		colorMapper->outColor()->connect(ptRender->inColor());
-
-		fluid->graphicsPipeline()->pushModule(ptRender);
-
-		{
-			auto ghostRender = std::make_shared<GLPointVisualModule>();
-			ghostRender->setColor(Color(1, 0.5, 0));
-			ghostRender->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-
-			ghost->statePointSet()->connect(ghostRender->inPointSet());
-
-			ghost->graphicsPipeline()->pushModule(ghostRender);
-
-		}
-		// A simple chart bar widget for node
-		auto chart = std::make_shared<ImChart>();
-		chart->varMax()->setValue(5.0f);
-		calculateNorm->outNorm()->connect(chart->inArray());
-		chart->varInputMode()->setCurrentKey(ImChart::InputMode::Array);
-		fluid->graphicsPipeline()->pushModule(chart);
-		chart->varTitle()->setValue("Fluid");
-		incompressibleFluid->stateFrameNumber()->connect(chart->inFrameNumber());
-		chart->varCount()->setValue(50);
-	}
-	
+//	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+//	boundary->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
+//	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
+//
+//	auto fluid = scn->addNode(std::make_shared<ParticleSystem<DataType3f>>());
+//	fluid->loadParticles(Vec3f(-0.1, 0.0, -0.1), Vec3f(0.105, 0.1, 0.105), 0.005);
+//
+//	auto ghost = scn->addNode(createGhostParticles());
+//
+//	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
+//	fluid->connect(incompressibleFluid->importFluidParticles());
+//	ghost->connect(incompressibleFluid->importBoundaryParticles());
+//// 	incompressibleFluid->setFluidParticles(fluid);
+//// 	incompressibleFluid->setBoundaryParticles(ghost);
+//
+//// 	root->addAncestor(incompressibleFluid.get());
+//// 	root->addParticleSystem(fluid);
+//	incompressibleFluid->connect(boundary->importParticleSystems());
+//
+//	{
+//		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+//		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+//		colorMapper->varMax()->setValue(5.0f);
+//
+//		fluid->stateVelocity()->connect(calculateNorm->inVec());
+//		calculateNorm->outNorm()->connect(colorMapper->inScalar());
+//
+//		fluid->graphicsPipeline()->pushModule(calculateNorm);
+//		fluid->graphicsPipeline()->pushModule(colorMapper);
+//
+//		auto ptRender = std::make_shared<GLPointVisualModule>();
+//		ptRender->setColor(Color(1, 0, 0));
+//		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+//
+//		fluid->statePointSet()->connect(ptRender->inPointSet());
+//		colorMapper->outColor()->connect(ptRender->inColor());
+//
+//		fluid->graphicsPipeline()->pushModule(ptRender);
+//
+//		{
+//			auto ghostRender = std::make_shared<GLPointVisualModule>();
+//			ghostRender->setColor(Color(1, 0.5, 0));
+//			ghostRender->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
+//
+//			ghost->statePointSet()->connect(ghostRender->inPointSet());
+//
+//			ghost->graphicsPipeline()->pushModule(ghostRender);
+//
+//		}
+//		// A simple chart bar widget for node
+//		auto chart = std::make_shared<ImChart>();
+//		chart->varMax()->setValue(5.0f);
+//		calculateNorm->outNorm()->connect(chart->inArray());
+//		chart->varInputMode()->setCurrentKey(ImChart::InputMode::Array);
+//		fluid->graphicsPipeline()->pushModule(chart);
+//		chart->varTitle()->setValue("Fluid");
+//		incompressibleFluid->stateFrameNumber()->connect(chart->inFrameNumber());
+//		chart->varCount()->setValue(50);
+//	}
+//	
 	{
 		auto sinPt = scn->addNode(std::make_shared<PointFromVector>());
 
@@ -249,6 +249,9 @@ std::shared_ptr<SceneGraph> createScene()
 		timeChart->varInputMode()->setCurrentKey(ImChart::InputMode::Var);
 		timeChart->varCount()->setValue(200);
 		timeChart->varTitle()->setValue("Time");
+
+		//OutputFile;
+		//timeChart->varOutputFile()->setValue(true);
 	}
 
 
