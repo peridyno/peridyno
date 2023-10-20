@@ -54,6 +54,8 @@ public:
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&Point<TDataType>::locationChanged, this));
 		this->varLocation()->attach(callback);
+
+		this->varLocation()->setValue(Coord(2.0, 0.0, 0.0));
 	}
 
 public:
@@ -61,27 +63,9 @@ public:
 
 	DEF_VAR_OUT(TPoint3D<Real>, Point, "");
 
-protected:
-	//void resetStates() override {
-
-	//	Coord initPos = Coord(2.0, 0.0, 0.0);
-
-	//	this->varLocation()->setValue(initPos);
-
-	//	auto points = this->statePointSet()->getDataPtr();
-
-	//	std::vector<Coord> hPos;
-	//	hPos.push_back(initPos);
-
-	//	points->setPoints(hPos);
-
-	//	this->outPoint()->setValue(TPoint3D<Real>(initPos));
-
-	//	hPos.clear();
-	//}
-
+private:
 	void locationChanged() {
-		auto loc = this->varLocation()->getData();
+		auto loc = this->varLocation()->getValue();
 		
 		auto points = this->statePointSet()->getDataPtr();
 
