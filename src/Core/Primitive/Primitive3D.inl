@@ -3728,6 +3728,26 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC bool TTet3D<Real>::contain(Coord3D p)
+	{
+		return TPoint3D<Real>(p).inside(*this);
+	}
+
+	template<typename Real>
+	DYN_FUNC Vector<Real, 4> TTet3D<Real>::computeBarycentricCoordinates(const Coord3D& p)
+	{
+		SquareMatrix<Real, 3> T(v[0].x - v[3].x, v[1].x - v[3].x, v[2].x - v[3].x,
+								v[0].y - v[3].y, v[1].y - v[3].y, v[2].y - v[3].y,
+								v[0].z - v[3].z, v[1].z - v[3].z, v[2].z - v[3].z);
+
+		Vector<Real, 3> b(p.x - v[3].x, p.y - v[3].y, p.z - v[3].z);
+
+		Vector<Real, 3> lambda = T.inverse() * b;
+
+		return Vector<Real, 4>(lambda.x, lambda.y, lambda.z, Real(1) - lambda.x - lambda.y - lambda.z);
+	}
+
+	template<typename Real>
 	DYN_FUNC TAlignedBox3D<Real>::TAlignedBox3D()
 	{
 		v0 = Coord3D(Real(-1));

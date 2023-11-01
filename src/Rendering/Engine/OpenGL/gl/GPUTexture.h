@@ -18,9 +18,9 @@
 
 #include "Texture.h"
 #include <Vector.h>
+#include <Array/Array2D.h>
 
 #ifdef CUDA_BACKEND
-#include <Array/Array2D.h>
 struct cudaGraphicsResource;
 #endif
 
@@ -43,6 +43,11 @@ namespace gl {
 #ifdef CUDA_BACKEND
 		// load data to into an intermediate buffer
 		void load(dyno::DArray2D<T> data);
+#endif
+
+#ifdef VK_BACKEND
+		//TODO: implementation
+		void load(dyno::DArray2D<T>& data) {};
 #endif
 
 	private:

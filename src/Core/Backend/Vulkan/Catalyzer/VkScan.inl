@@ -18,6 +18,8 @@ namespace dyno {
 		scan(output, input, ScanType);
 
 		vkTransfer(inputData, output);
+
+		output.clear();
 	}
 
 	template<typename T>
@@ -63,7 +65,6 @@ namespace dyno {
 		uniformParam.setValue(sp);
 		mScan->flush(groupSize, &buffers[0], &buffers[0], &buffers[1], &uniformParam);
 
-		mScan->begin();
 		for (std::size_t i = 1; i < buffers.size() - 1; i++)
 		{
 			sp.n = buffers[i].size();
@@ -71,15 +72,28 @@ namespace dyno {
 			sp.ScanType = INCLUSIVESCAN;
 
 			uniformParam.setValue(sp);
-			mScan->enqueue(groupSizeScan, &buffers[i], &buffers[i], &buffers[i + 1], &uniformParam);
+			mScan->flush(groupSizeScan, &buffers[i], &buffers[i], &buffers[i + 1], &uniformParam);
 		}
-		mScan->end();
-		mScan->update(true);
-		mScan->wait();
+		
+		//TODO: check why the following code does not work properly
+// 		mScan->begin();
+// 		for (std::size_t i = 1; i < buffers.size() - 1; i++)
+// 		{
+// 			sp.n = buffers[i].size();
+// 			dim3 groupSizeScan = vkDispatchSize(sp.n, localSize);
+// 			sp.ScanType = INCLUSIVESCAN;
+// 
+// 			uniformParam.setValue(sp);
+// 			mScan->enqueue(groupSizeScan, &buffers[i], &buffers[i], &buffers[i + 1], &uniformParam);
+// 		}
+// 		mScan->end();
+// 		mScan->update(true);
+// 		mScan->wait();
 
 		VkConstant<int> num;
 		mAdd->begin();
-		for (std::size_t i = 1; i < buffers.size() - 1; i++)
+		//for (std::size_t i = 1; i < buffers.size(); i++)
+		for (std::size_t i = buffers.size() - 1; i > 0; i--)
 		{
 			num.setValue(buffers[i - 1].size());
 			dim3 groupSizeAdd = vkDispatchSize(num.getValue(), localSize);
@@ -90,6 +104,13 @@ namespace dyno {
 		mAdd->wait();
 
 		vkTransfer(output, buffers[0]);
+		
+		if (_ScanType == EXCLUSIVESCAN) {
+			vkTransfer(buffers[0], input);
+			num.setValue(input.size());
+			mSub->flush(groupSize, &buffers[0], &output, &num);
+		}
+
 		for (std::size_t i = 0; i < buffers.size(); i++)
 		{
 			buffers[i].clear();
@@ -109,9 +130,15 @@ namespace dyno {
 			BUFFER(T),
 			BUFFER(T),
 			CONSTANT(int));
+
+		mSub = std::make_shared<VkProgram>(
+			BUFFER(T),
+			BUFFER(T),
+			CONSTANT(int));
 		
 		mAdd->load(getDynamicSpvFile<T>("shaders/glsl/core/Add.comp.spv"));
 		mScan->load(getDynamicSpvFile<T>("shaders/glsl/core/Scan.comp.spv"));
+		mSub->load(getDynamicSpvFile<T>("shaders/glsl/core/Sub.comp.spv"));
 	}
 
 	template<typename T>

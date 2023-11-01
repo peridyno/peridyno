@@ -14,6 +14,8 @@ namespace dyno
 
 		DArray<Edge>& getEdges() { return mEdgeIndex; }
 
+		void copyFrom(EdgeSet& es);
+
 	protected:
 		/**
 		 * Override updateEdges to update edges in a special way

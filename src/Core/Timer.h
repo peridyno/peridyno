@@ -21,7 +21,12 @@ namespace dyno
 		~CTimer();
 		void start();
 		void stop();
+
+		/**
+		 * @brief return the elapsed time in (ms)
+		 */
 		double getElapsedTime();
+		void outputString(char* str);
 	protected:
 #if (defined __unix__) || (defined __APPLE__)
 		long start_sec_, stop_sec_, start_micro_sec_, stop_micro_sec_;

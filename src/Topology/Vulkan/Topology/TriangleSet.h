@@ -9,6 +9,9 @@ namespace dyno
 		TriangleSet();
 		~TriangleSet() override;
 
+		void setTriangles(std::vector<Triangle>& indices);
+		void setTriangles(const DArray<Triangle>& indices);
+
 		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
 
 		//TODO: fix the hack

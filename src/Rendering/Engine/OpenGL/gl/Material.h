@@ -45,11 +45,9 @@ namespace gl
 		dyno::DArray2D<dyno::Vec4f> texColor;
 		dyno::DArray2D<dyno::Vec4f> texBump;
 
-#ifdef CUDA_BACKEND
 		// color texture
 		gl::XTexture2D<dyno::Vec4f> mColorTexture;
 		gl::XTexture2D<dyno::Vec4f> mBumpTexture;
-#endif
 
 		bool mInitialized = false;
 	};

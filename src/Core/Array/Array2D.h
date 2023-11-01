@@ -42,6 +42,9 @@ namespace dyno {
 
 		void clear();
 
+		inline const std::vector<T>* handle() const { return &m_data; }
+		inline std::vector<T>* handle() { return &m_data; }
+
 		inline const T* begin() const { return m_data.data(); }
 
 		inline uint nx() const { return m_nx; }
@@ -133,5 +136,5 @@ namespace dyno {
 #endif
 
 #ifdef VK_BACKEND
-//#include "Backend/Vulkan/Array/Array2D.inl"
+#include "Backend/Vulkan/Array/Array2D.inl"
 #endif

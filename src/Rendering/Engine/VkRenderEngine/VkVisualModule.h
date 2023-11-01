@@ -26,9 +26,14 @@ namespace dyno
 
 		std::string getModuleType() override { return "VkVisualModule"; }
 
+		virtual void updateGraphicsContext() {};
+
 		virtual void buildCommandBuffers(VkCommandBuffer drawCmdBuffer) = 0;
 		virtual void prepare(VkRenderPass renderPass) = 0;
 		virtual void viewChanged(const glm::mat4& perspective, const glm::mat4& view) = 0;
+
+	protected:
+		void updateImpl() override;
 	};
 }
 

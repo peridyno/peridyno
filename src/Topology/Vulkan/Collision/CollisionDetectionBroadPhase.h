@@ -19,11 +19,6 @@ namespace dyno
 		CollisionDetectionBroadPhase();
 		virtual ~CollisionDetectionBroadPhase();
 
-		bool initializeImpl() override;
-
-	protected:
-		void compute() override;
-
 	public:
 		float mGridSizeLimit;	// "Limit the smallest grid size";
 
@@ -40,6 +35,9 @@ namespace dyno
 
 		DEF_ARRAY_OUT(Vec2u, Contacts, DeviceType::GPU, "");
 		//VkDeviceArray<Vec2u> mContactList;
+
+	protected:
+		void compute() override;
 
 	private:
 		std::shared_ptr<VkReduce<int>> vkr;

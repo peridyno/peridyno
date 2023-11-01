@@ -20,16 +20,9 @@
 #include "FBase.h"
 
 #include "Array/Array.h"
-
-#ifdef CUDA_BACKEND
-	#include "Array/Array2D.h"
-	#include "Array/Array3D.h"
-	#include "Array/ArrayList.h"
-#endif
-
-#ifdef VK_BACKEND
-	#include "Array/ArrayList.h"
-#endif
+#include "Array/Array2D.h"
+#include "Array/Array3D.h"
+#include "Array/ArrayList.h"
 
 namespace dyno {
 	/*!
@@ -299,7 +292,6 @@ namespace dyno {
 	template<typename T>
 	using DeviceArrayField = FArray<T, DeviceType::GPU>;
 
-#ifdef CUDA_BACKEND
 	/**
 	 * Define field for Array2D
 	 */
@@ -338,7 +330,7 @@ namespace dyno {
 		{
 			data = std::make_shared<Array2D<T, deviceType>>();
 		}
-	
+
 		data->assign(vals);
 
 		//this->tick();
@@ -380,7 +372,7 @@ namespace dyno {
 		if (data == nullptr) {
 			data = std::make_shared<Array2D<T, deviceType>>();
 		}
-		
+
 		data->resize(ny, ny);
 
 		//this->tick();
@@ -462,12 +454,13 @@ namespace dyno {
 
 		if (data == nullptr)
 			data = std::make_shared<Array3D<T, deviceType>>();
-		
+
 		data->resize(nx, ny, nz);
 
 		//this->tick();
 	}
 
+#ifdef CUDA_BACKEND
 	/**
 	 * Define field for Array
 	 */

@@ -45,8 +45,13 @@ namespace dyno
 		return elapsed_time;
 #elif (defined _WIN32)
 		double elapsed_time = static_cast<double>(stop_count_.QuadPart - start_count_.QuadPart) / static_cast<double>(timer_frequency_.QuadPart);
-		return elapsed_time;
+		return 1000.0 * elapsed_time;
 #endif
+	}
+
+	void CTimer::outputString(char* str)
+	{
+		std::cout << str << ": " << getElapsedTime() << "ms" << std::endl;
 	}
 
 #ifdef CUDA_BACKEND
@@ -80,7 +85,7 @@ namespace dyno
 
 	void GTimer::outputString(char* str)
 	{
-		std::cout << str << ": " << getElapsedTime() << std::endl;
+		std::cout << str << ": " << getElapsedTime() << "ms" << std::endl;
 	}
 #endif
 } // end of namespace dyno
