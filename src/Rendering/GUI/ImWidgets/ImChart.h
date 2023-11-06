@@ -82,6 +82,8 @@ namespace dyno
 		int count=20;
 
 		std::string file_postfix = ".txt";
-		bool out = false;
+
+		bool isOut = false;
+
 	};
 };

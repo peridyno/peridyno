@@ -25,6 +25,8 @@ namespace dyno
 		this->varCount()->setRange(-50000,50000);
 		this->inFrameNumber()->tagOptional(false);
 
+		isOut = this->varOutputFile()->getValue();
+
 	
 	}
 
@@ -98,9 +100,9 @@ namespace dyno
 			drawValue();
 		}	
 
-		out = this->varOutputFile()->getValue();
+		
 
-		if (out)
+		if (isOut)
 			this->outputTxt();
 		//
 
@@ -135,13 +137,16 @@ namespace dyno
 		ImGui::PopStyleColor();
 
 		std::string checklabel = "Output_" + this->varTitle()->getValue();
-		ImGui::Checkbox(checklabel.data(), &out);
+		
+		ImGui::Checkbox(checklabel.data(), &isOut);
+
+		printf("isout : %d \n",int(isOut));
 
 		char overlay[2] = " ";
 		ImGui::PlotLines(this->varTitle()->getValue().c_str(), valuePtr, count, 0, overlay, min, max, ImVec2(0, 80.0f));
 		ImGui::End();
 
-		printf("c_array %d, d_array %d\n",c_Value.size(),d_Value.size());
+		//printf("c_array %d, d_array %d\n",c_Value.size(),d_Value.size());
 	}
 
 	void ImChart::drawArray()
