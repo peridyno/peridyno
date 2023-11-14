@@ -4,6 +4,9 @@
 #include "ObjMesh.h"
 #include <GLPhotorealisticRender.h>
 
+#ifdef VK_BACKEND
+#endif
+
 using namespace std;
 
 std::shared_ptr<SceneGraph> createScene()
@@ -47,6 +50,10 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
+#ifdef VK_BACKEND
+	VkSystem::instance()->initialize();
+#endif
+
 	GlfwApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1280, 768);

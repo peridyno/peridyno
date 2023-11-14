@@ -22,18 +22,15 @@ bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
             for (int y0 = 0; y0 < y; y0++)
             {
                 int idx = (y0 * x + x0) * comp;
-
                 for (int c0 = 0; c0 < comp; c0++) {
                     img(x0, y0)[c0] = data[idx + c0];
                 }
             }
         }
-        return true;
     }
 
     STBI_FREE(data);
-
-    return false;
+    return data == 0;
 }
 
 ObjMeshNode::ObjMeshNode() {
@@ -157,7 +154,13 @@ void ObjMeshNode::resetStates()
 		sId++;
 	}
 
+#ifdef CUDA_BACKEND
 	PointSet<DataType3f> ps;
+#endif
+
+#ifdef VK_BACKEND
+	PointSet ps;
+#endif
 	ps.setPoints(vertices);
 
 	// apply transform to vertices
@@ -165,9 +168,12 @@ void ObjMeshNode::resetStates()
 		auto t = this->varLocation()->getValue();
 		auto q = this->computeQuaternion();
 		auto s = this->varScale()->getValue();
+
+#ifdef CUDA_BACKEND
 		ps.scale(s);
 		ps.rotate(q);
 		ps.translate(t);
+#endif
 	}
 
 	this->stateVertex()->assign(ps.getPoints());

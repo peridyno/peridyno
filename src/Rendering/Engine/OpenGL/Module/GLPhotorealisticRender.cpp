@@ -155,12 +155,10 @@ namespace dyno
 				glActiveTexture(GL_TEXTURE11);		// bump map
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-#ifdef CUDA_BACKEND
 				if (mtl->mColorTexture.isValid()) 
 					mtl->mColorTexture.bind(GL_TEXTURE10);
 				if (mtl->mBumpTexture.isValid())  
 					mtl->mBumpTexture.bind(GL_TEXTURE11);
-#endif
 			}
 
 			int numTriangles = shape->glVertexIndex.count();

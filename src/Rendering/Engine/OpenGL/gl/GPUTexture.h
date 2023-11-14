@@ -24,6 +24,10 @@
 struct cudaGraphicsResource;
 #endif
 
+#ifdef VK_BACKEND
+#include <VkDeviceArray.h>
+#endif
+
 namespace gl {
 
 	// texture for loading data from cuda/vulkan api
@@ -40,15 +44,8 @@ namespace gl {
 		// update OpenGL texture within GL context
 		void updateGL();
 
-#ifdef CUDA_BACKEND
 		// load data to into an intermediate buffer
 		void load(dyno::DArray2D<T> data);
-#endif
-
-#ifdef VK_BACKEND
-		//TODO: implementation
-		void load(dyno::DArray2D<T>& data) {};
-#endif
 
 	private:
 		int width  = -1;
@@ -57,6 +54,23 @@ namespace gl {
 #ifdef CUDA_BACKEND
 		dyno::DArray2D<T>		buffer;
 		cudaGraphicsResource*	resource = 0;
+#endif
+
+#ifdef VK_BACKEND
+		dyno::CArray2D<T> temp;
+
+		VkBuffer		buffer = VK_NULL_HANDLE;
+		VkDeviceMemory	memory = VK_NULL_HANDLE;
+		bool resized		= false;
+#ifdef WIN32
+		HANDLE handle = nullptr;  // The Win32 handle
+#else
+		int fd = -1;
+#endif
+		// command for copy buffer
+		VkCommandBuffer copyCmd = VK_NULL_HANDLE;
+		// OpenGL memory object
+		unsigned int	memoryObject = 0;
 #endif
 	};
 

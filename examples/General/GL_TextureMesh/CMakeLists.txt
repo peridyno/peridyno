@@ -6,5 +6,5 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM AND PERIDYNO_QT_GUI)
         GlfwGUI
         GLRenderEngine)
 
-    add_example(GL_ObjMeshRender Tutorials LIB_DEPENDENCY)
+    add_example(GL_TextureMesh Tutorials LIB_DEPENDENCY)
 endif()
