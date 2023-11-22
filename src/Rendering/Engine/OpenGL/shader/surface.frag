@@ -24,6 +24,8 @@ layout(location = 1) out ivec4 fragIndices;
 layout(binding = 10) uniform sampler2D uTexColor;
 layout(binding = 11) uniform sampler2D uTexBump;
 
+layout(location = 4) uniform float uBumpScale = 1.0;
+
 vec3 GetViewDir()
 {
 	// orthogonal projection
@@ -41,12 +43,14 @@ vec3 GetNormal()
 			normalize(fs_in.tangent), 
 			normalize(fs_in.bitangent), 
 			normalize(fs_in.normal));
-		// transform normal
-		vec3 bump = texture(uTexBump, fs_in.texCoord.xy).rgb * 2.0 - 1.0;
 
-		// TODO: pass bump scale as parameter
-		float bumpScale = 0.2;
-		bump = mix(vec3(0, 0, 1), bump, bumpScale);
+		// transform normal
+		vec3 bump = texture(uTexBump, fs_in.texCoord.xy).rgb;
+		bump = pow(bump, vec3(1.0/2.2));
+		bump = bump * 2.0 - 1.0;
+
+		//return vec3(bump.y);
+		bump = mix(vec3(0, 0, 1), bump, uBumpScale);
 		return normalize(tbn * bump); 
 	}
 

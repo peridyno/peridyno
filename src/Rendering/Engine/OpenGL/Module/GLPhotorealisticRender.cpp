@@ -157,8 +157,10 @@ namespace dyno
 
 				if (mtl->mColorTexture.isValid()) 
 					mtl->mColorTexture.bind(GL_TEXTURE10);
-				if (mtl->mBumpTexture.isValid())  
+				if (mtl->mBumpTexture.isValid()) {
 					mtl->mBumpTexture.bind(GL_TEXTURE11);
+					mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
+				}
 			}
 
 			int numTriangles = shape->glVertexIndex.count();

@@ -42,8 +42,11 @@ namespace gl
 		dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
 		float roughness = 0.0f;
 		float alpha = 1.0f;
+
 		dyno::DArray2D<dyno::Vec4f> texColor;
+
 		dyno::DArray2D<dyno::Vec4f> texBump;
+		float bumpScale = 1.f;
 
 		// color texture
 		gl::XTexture2D<dyno::Vec4f> mColorTexture;

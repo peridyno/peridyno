@@ -226,8 +226,19 @@ void XTexture2D<T>::updateGL()
 	cudaArray* texture_ptr;
 	cuSafeCall(cudaGraphicsMapResources(1, &resource));
 	cuSafeCall(cudaGraphicsSubResourceGetMappedArray(&texture_ptr, resource, 0, 0));
-	cuSafeCall(cudaMemcpyToArray(texture_ptr, 0, 0, buffer.begin(), size, cudaMemcpyDeviceToDevice));
+
+	// for pitch...
+	dyno::DArray2D<T> temp(width*height, 1);
+	cuSafeCall(cudaMemcpy2D(temp.begin(), sizeof(T) * buffer.nx(), 
+		buffer.begin(), buffer.pitch(), 
+		sizeof(T) * buffer.nx(), buffer.ny(), cudaMemcpyDeviceToDevice));
+
+	cuSafeCall(cudaMemcpyToArray(texture_ptr, 0, 0, temp.begin(), size, cudaMemcpyDeviceToDevice));
+	temp.clear();
+	
 	cuSafeCall(cudaGraphicsUnmapResources(1, &resource));
+
+	
 
 #endif // CUDA_BACKEND
 

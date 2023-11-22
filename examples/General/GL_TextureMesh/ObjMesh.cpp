@@ -111,6 +111,9 @@ void ObjMeshNode::resetStates()
 			// load textures
 			loadImage(tex_path.c_str(), texture);
 			sMats[mId]->texBump.assign(texture);
+
+			auto texOpt = mtl.bump_texopt;
+			sMats[mId]->bumpScale = texOpt.bump_multiplier;
 		}
 
 		mId++;
