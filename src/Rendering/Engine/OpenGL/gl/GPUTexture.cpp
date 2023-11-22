@@ -202,8 +202,8 @@ template<typename T>
 void XTexture2D<T>::updateGL()
 {
 #ifdef CUDA_BACKEND
-	int size = buffer.nx() * buffer.ny() * sizeof(T);
-	if (size <= 0) {
+		
+	if (buffer.size() <= 0) {
 		return;
 	}
 
@@ -227,18 +227,12 @@ void XTexture2D<T>::updateGL()
 	cuSafeCall(cudaGraphicsMapResources(1, &resource));
 	cuSafeCall(cudaGraphicsSubResourceGetMappedArray(&texture_ptr, resource, 0, 0));
 
-	// for pitch...
-	dyno::DArray2D<T> temp(width*height, 1);
-	cuSafeCall(cudaMemcpy2D(temp.begin(), sizeof(T) * buffer.nx(), 
-		buffer.begin(), buffer.pitch(), 
-		sizeof(T) * buffer.nx(), buffer.ny(), cudaMemcpyDeviceToDevice));
-
-	cuSafeCall(cudaMemcpyToArray(texture_ptr, 0, 0, temp.begin(), size, cudaMemcpyDeviceToDevice));
-	temp.clear();
+	// copy data with pitch
+	cuSafeCall(cudaMemcpy2DToArray(texture_ptr, 0, 0, 
+		buffer.begin(), buffer.pitch(), buffer.nx() * sizeof(T), buffer.ny(), 
+		cudaMemcpyDeviceToDevice));
 	
-	cuSafeCall(cudaGraphicsUnmapResources(1, &resource));
-
-	
+	cuSafeCall(cudaGraphicsUnmapResources(1, &resource));	
 
 #endif // CUDA_BACKEND
 

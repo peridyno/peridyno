@@ -13,6 +13,7 @@ bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
 {
     int x, y, comp;
     stbi_set_flip_vertically_on_load(true);
+
     float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
 
     if (data) {
@@ -27,10 +28,10 @@ bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
                 }
             }
         }
+		STBI_FREE(data);
     }
 
-    STBI_FREE(data);
-    return data == 0;
+    return data != 0;
 }
 
 ObjMeshNode::ObjMeshNode() {
@@ -100,20 +101,21 @@ void ObjMeshNode::resetStates()
 		{
 			auto tex_path = (root / mtl.diffuse_texname).string();
 
-			// load textures
-			loadImage(tex_path.c_str(), texture);
-			sMats[mId]->texColor.assign(texture);
+			if (loadImage(tex_path.c_str(), texture))
+			{
+				sMats[mId]->texColor.assign(texture);
+			}
 		}
 		if (!mtl.bump_texname.empty())
 		{
 			auto tex_path = (root / mtl.bump_texname).string();
 
-			// load textures
-			loadImage(tex_path.c_str(), texture);
-			sMats[mId]->texBump.assign(texture);
-
-			auto texOpt = mtl.bump_texopt;
-			sMats[mId]->bumpScale = texOpt.bump_multiplier;
+			if (loadImage(tex_path.c_str(), texture))
+			{
+				sMats[mId]->texBump.assign(texture);
+				auto texOpt = mtl.bump_texopt;
+				sMats[mId]->bumpScale = texOpt.bump_multiplier;
+			}
 		}
 
 		mId++;
