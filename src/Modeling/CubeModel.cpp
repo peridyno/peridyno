@@ -274,8 +274,8 @@ namespace dyno
 
 				quads.push_back(TopologyModule::Quad(v3, v2, v1, v0));
 
-				triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
-				triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
+				triangles.push_back(TopologyModule::Triangle(v2, v1, v0));
+				triangles.push_back(TopologyModule::Triangle(v3, v2, v0));
 			}
 		}
 
