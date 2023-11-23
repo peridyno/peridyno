@@ -130,7 +130,7 @@ namespace dyno
 		mNormal.bindBufferBase(9);
 		mTexCoord.bindBufferBase(10);
 
-		auto shapes = this->inShapes()->constData();
+		auto& shapes = this->inShapes()->constData();
 		for (int i = 0; i < shapes.size(); i++)
 		{
 			auto shape = shapes[i];
