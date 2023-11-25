@@ -13,6 +13,8 @@ layout(std430, binding = 8) buffer _Position { float positions[]; };
 layout(std430, binding = 9) buffer _Normal   { float normals[];   };
 layout(std430, binding = 10) buffer _TexCoord { float texCoords[]; };
 layout(std430, binding = 11) buffer _Color    { float colors[]; };
+layout(std430, binding = 12) buffer _Tangent    { float tangent[]; };
+layout(std430, binding = 13) buffer _Bitangent    { float bitangent[]; };
 
 // instance transform
 layout(location = 3) in vec3 instance_translation;
@@ -34,6 +36,8 @@ layout(location = 0) out VertexData {
 	vec3 normal;
 	vec3 color;
 	vec3 texCoord;
+	vec3 tangent;
+    vec3 bitangent;
 	int  instanceID;
 } vs;
 
@@ -82,17 +86,22 @@ void main(void) {
 	{
 		// use separate normal index
 		if(nIndex != -1) 
-			offset = nIndex * 3;		
+			offset = nIndex * 3;
 
 		mat4 MV = uRenderParams.view * uRenderParams.model;
 		mat4 N = transpose(inverse(MV));
 
 		vec4 n = vec4(normals[offset], normals[offset + 1], normals[offset + 2], 0.0);
+		vec4 tn = vec4(tangent[offset], tangent[offset + 1], tangent[offset + 2], 0.0);
+		vec4 tb = vec4(bitangent[offset], bitangent[offset + 1], bitangent[offset + 2], 0.0);
 		vs.normal = (N * n).xyz;
-
+		vs.tangent = (N * tn).xyz;
+		vs.bitangent = (N * tb).xyz;
 	}
 	else{
 		vs.normal = vec3(0);
+		vs.tangent = vec3(0);
+		vs.bitangent = vec3(0);
 	}
 
 	// texture coordinates

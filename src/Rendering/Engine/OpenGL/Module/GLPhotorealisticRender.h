@@ -21,6 +21,10 @@
 #include "gl/Shape.h"
 #include "gl/Material.h"
 
+#ifdef CUDA_BACKEND
+#include "ConstructTangentSpace.h"
+#endif
+
 namespace dyno
 {
 	class GLPhotorealisticRender : public GLVisualModule
@@ -51,6 +55,8 @@ namespace dyno
 	protected:
 		gl::XBuffer<Vec3f> mPosition;
 		gl::XBuffer<Vec3f> mNormal;
+		gl::XBuffer<Vec3f> mTangent;
+		gl::XBuffer<Vec3f> mBitangent;
 		gl::XBuffer<Vec2f> mTexCoord;
 
 	private:
@@ -58,5 +64,9 @@ namespace dyno
 		gl::Buffer		mRenderParamsUBlock;
 		gl::Buffer		mPBRMaterialUBlock;
 		gl::VertexArray	mVAO;
+
+#ifdef CUDA_BACKEND
+		std::shared_ptr<ConstructTangentSpace> mTangentSpaceConstructor;
+#endif
 	};
 };

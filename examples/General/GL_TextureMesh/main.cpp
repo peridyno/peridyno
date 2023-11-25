@@ -33,7 +33,8 @@ std::shared_ptr<SceneGraph> createScene()
 	if(true) {
 		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
 		mesh->varFileName()->setValue(getAssetPath() + "obj/moon/Moon_Normal.obj");
-	
+		//mesh->varFileName()->setValue("C:/Users/M/Desktop/land/Landscape.obj");
+
 		mesh->varScale()->setValue(Vec3f(0.005f));
 		mesh->varLocation()->setValue(Vec3f(0.5f, 0.3f, 0.5f));
 

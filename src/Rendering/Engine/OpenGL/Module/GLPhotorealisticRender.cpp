@@ -18,6 +18,14 @@ namespace dyno
 		this->inNormal()->tagOptional(true);
 		this->inTexCoord()->tagOptional(true);
 		this->inMaterials()->tagOptional(true);
+
+#ifdef CUDA_BACKEND
+		mTangentSpaceConstructor = std::make_shared<ConstructTangentSpace>();
+		this->inVertex()->connect(mTangentSpaceConstructor->inVertex());
+		this->inNormal()->connect(mTangentSpaceConstructor->inNormal());
+		this->inTexCoord()->connect(mTangentSpaceConstructor->inTexCoord());
+		this->inShapes()->connect(mTangentSpaceConstructor->inShapes());
+#endif
 	}
 
 	GLPhotorealisticRender::~GLPhotorealisticRender()
@@ -45,6 +53,8 @@ namespace dyno
 
 		mPosition.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 		mNormal.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+		mTangent.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+		mBitangent.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 		mTexCoord.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 
 		return true;
@@ -77,6 +87,8 @@ namespace dyno
 		// update shader storage buffer
 		mPosition.updateGL();
 		mNormal.updateGL();
+		mTangent.updateGL();
+		mBitangent.updateGL();
 
 		// texture coordinates
 		if (mTexCoord.count() > 0) {
@@ -97,14 +109,24 @@ namespace dyno
 		mNormal.load(normals);
 		mTexCoord.load(texCoord);
 
-		auto shapes = this->inShapes()->constData();
-		auto materials = this->inMaterials()->constData();
+		auto& shapes = this->inShapes()->constData();
+		auto& materials = this->inMaterials()->constData();
 
 		for (int i = 0; i < shapes.size(); i++)
 			shapes[i]->update();
 
 		for (int i = 0; i < materials.size(); i++)
 			materials[i]->update();
+
+#ifdef CUDA_BACKEND
+		mTangentSpaceConstructor->update();
+
+		if (!mTangentSpaceConstructor->outTangent()->isEmpty())
+		{
+			mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
+			mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
+#endif
+		}
 	}
 
 	void GLPhotorealisticRender::paintGL(const RenderParams& rparams)
@@ -119,7 +141,20 @@ namespace dyno
 		mShaderProgram->use();
 
 		// setup uniforms
-		mShaderProgram->setInt("uVertexNormal", 1);
+		if (mNormal.count() > 0 
+			&& mTangent.count() > 0 
+			&& mBitangent.count() > 0
+			&& mNormal.count() == mTangent.count()
+			&& mNormal.count() == mBitangent.count())
+		{
+			mShaderProgram->setInt("uVertexNormal", 1);
+			mNormal.bindBufferBase(9);
+			mTangent.bindBufferBase(12);
+			mBitangent.bindBufferBase(13);
+		}
+		else
+			mShaderProgram->setInt("uVertexNormal", 0);
+		
 		mShaderProgram->setInt("uColorMode", 2);
 		mShaderProgram->setInt("uInstanced", 0);
 
@@ -127,8 +162,9 @@ namespace dyno
 		mRenderParamsUBlock.bindBufferBase(0);
 
 		mPosition.bindBufferBase(8);
-		mNormal.bindBufferBase(9);
 		mTexCoord.bindBufferBase(10);
+
+
 
 		auto& shapes = this->inShapes()->constData();
 		for (int i = 0; i < shapes.size(); i++)
