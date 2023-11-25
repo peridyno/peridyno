@@ -53,9 +53,14 @@ namespace dyno
 
 		mPosition.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 		mNormal.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+
+#ifdef CUDA_BACKEND
 		mTangent.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 		mBitangent.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+#endif
+
 		mTexCoord.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
+
 
 		return true;
 	}
