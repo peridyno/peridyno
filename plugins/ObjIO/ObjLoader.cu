@@ -44,9 +44,9 @@ namespace dyno
 			return;
 		std::string filename = this->varFileName()->getValue().string();
 		loadObj(*triSet, filename);
-		triSet->scale(this->varScale()->getData());
-		triSet->translate(this->varLocation()->getData());
-		triSet->rotate(this->varRotation()->getData() * PI / 180);
+		triSet->scale(this->varScale()->getValue());
+		triSet->translate(this->varLocation()->getValue());
+		triSet->rotate(this->varRotation()->getValue() * PI / 180);
 		triSet->update();
 
 		Node::resetStates();
@@ -83,7 +83,7 @@ namespace dyno
 
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
-		if (this->varSequence()->getData() == true)
+		if (this->varSequence()->getValue() == true)
 		{
 			std::string filename = this->varFileName()->getValue().string();
 			int num_ = filename.rfind("_");
@@ -91,9 +91,9 @@ namespace dyno
 			filename.replace(num_ + 1, filename.length() - 4 - (num_ + 1), std::to_string(this->stateFrameNumber()->getData()));
 
 			loadObj(*triSet, filename);
-			triSet->scale(this->varScale()->getData());
-			triSet->translate(this->varLocation()->getData());
-			triSet->rotate(this->varRotation()->getData() * PI / 180);
+			triSet->scale(this->varScale()->getValue());
+			triSet->translate(this->varLocation()->getValue());
+			triSet->rotate(this->varRotation()->getValue() * PI / 180);
 			triSet->update();
 
 

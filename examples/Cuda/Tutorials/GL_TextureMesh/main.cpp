@@ -1,11 +1,8 @@
-#include <GlfwApp.h>
+#include <QtApp.h>
 #include <SceneGraph.h>
 
-#include "ObjMesh.h"
+#include "TexturedMesh.h"
 #include <GLPhotorealisticRender.h>
-
-#ifdef VK_BACKEND
-#endif
 
 using namespace std;
 
@@ -14,7 +11,7 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	if(true) {
-		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
+		auto mesh = scn->addNode(std::make_shared<TexturedMesh>());
 		mesh->varFileName()->setValue(getAssetPath() + "obj/standard/cube.obj");
 		mesh->varScale()->setValue(Vec3f(0.3f));
 		mesh->varLocation()->setValue(Vec3f(-1.5f, 0.3f, 0.0f));
@@ -31,7 +28,7 @@ std::shared_ptr<SceneGraph> createScene()
 	}
 
 	if(true) {
-		auto mesh = scn->addNode(std::make_shared<ObjMeshNode>());
+		auto mesh = scn->addNode(std::make_shared<TexturedMesh>());
 		mesh->varFileName()->setValue(getAssetPath() + "obj/moon/Moon_Normal.obj");
 		//mesh->varFileName()->setValue("C:/Users/M/Desktop/land/Landscape.obj");
 
@@ -55,7 +52,7 @@ int main()
 	VkSystem::instance()->initialize();
 #endif
 
-	GlfwApp app;
+	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1280, 768);
 	app.mainLoop();

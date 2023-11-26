@@ -51,12 +51,12 @@ namespace dyno
 		void requestBoundingBox(Coord& lo, Coord& hi);
 		
 		//Transform
-		void scale(Real s);
-		void scale(Coord s);
-		void translate(Coord t);
+		void scale(const Real s);
+		void scale(const Coord s);
+		void translate(const Coord t);
 
-		void rotate(Coord angle);
-		void rotate(Quat<Real> q);
+		virtual void rotate(const Coord angle);
+		virtual void rotate(const Quat<Real> q);
 
 		void loadObjFile(std::string filename);
 

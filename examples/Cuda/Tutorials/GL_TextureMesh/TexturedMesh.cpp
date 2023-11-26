@@ -1,4 +1,4 @@
-#include "ObjMesh.h"
+#include "TexturedMesh.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tinyobjloader/tiny_obj_loader.h>
@@ -34,11 +34,57 @@ bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
     return data != 0;
 }
 
-ObjMeshNode::ObjMeshNode() {
+TexturedMesh::TexturedMesh()
+{
+	this->stateVertex()->promoteOuput();
+	this->stateNormal()->promoteOuput();
+	this->stateTexCoord()->promoteOuput();
+	this->stateShapes()->promoteOuput();
+	this->stateMaterials()->promoteOuput();
 
+	auto callbackLoadFile = std::make_shared<FCallBackFunc>(std::bind(&TexturedMesh::callbackLoadFile, this));
+
+	this->varFileName()->attach(callbackLoadFile);
 }
 
-void ObjMeshNode::resetStates()
+TexturedMesh::~TexturedMesh()
+{
+	mInitialVertex.clear();
+	mInitialNormal.clear();
+	mInitialTexCoord.clear();
+}
+
+void TexturedMesh::resetStates()
+{
+#ifdef CUDA_BACKEND
+	TriangleSet<DataType3f> ts;
+#endif
+
+#ifdef VK_BACKEND
+	TriangleSet ps;
+#endif
+	ts.setPoints(mInitialVertex);
+	ts.setNormals(mInitialNormal);
+
+	// apply transform to vertices
+	{
+		auto t = this->varLocation()->getValue();
+		auto q = this->computeQuaternion();
+		auto s = this->varScale()->getValue();
+
+#ifdef CUDA_BACKEND
+		ts.scale(s);
+		ts.rotate(q);
+		ts.translate(t);
+#endif
+	}
+
+	this->stateVertex()->assign(ts.getPoints());
+	this->stateNormal()->assign(ts.getVertexNormals());
+	this->stateTexCoord()->assign(mInitialTexCoord);
+}
+
+void TexturedMesh::callbackLoadFile()
 {
 	auto fullname = this->varFileName()->getValue();
 	auto root = fullname.parent_path();
@@ -90,6 +136,7 @@ void ObjMeshNode::resetStates()
 	this->stateMaterials()->resize(materials.size());
 	auto& sMats = this->stateMaterials()->getData();
 
+	// Load materials
 	uint mId = 0;
 	for (const auto& mtl : materials) {
 		sMats[mId] = std::make_shared<gl::Material>();
@@ -159,29 +206,11 @@ void ObjMeshNode::resetStates()
 		sId++;
 	}
 
-#ifdef CUDA_BACKEND
-	PointSet<DataType3f> ps;
-#endif
+	mInitialVertex.assign(vertices);
+	mInitialNormal.assign(normals);
+	mInitialTexCoord.assign(texCoords);
 
-#ifdef VK_BACKEND
-	PointSet ps;
-#endif
-	ps.setPoints(vertices);
-
-	// apply transform to vertices
-	{
-		auto t = this->varLocation()->getValue();
-		auto q = this->computeQuaternion();
-		auto s = this->varScale()->getValue();
-
-#ifdef CUDA_BACKEND
-		ps.scale(s);
-		ps.rotate(q);
-		ps.translate(t);
-#endif
-	}
-
-	this->stateVertex()->assign(ps.getPoints());
-	this->stateNormal()->assign(normals);	// TODO: apply transform to normal
-	this->stateTexCoord()->assign(texCoords);
+	vertices.clear();
+	normals.clear();
+	texCoords.clear();
 }

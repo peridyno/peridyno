@@ -11,10 +11,11 @@
 
 using namespace dyno;
 
-class ObjMeshNode : public ParametricModel<DataType3f>
+class TexturedMesh : public ParametricModel<DataType3f>
 {
 public:
-	ObjMeshNode();
+	TexturedMesh();
+	~TexturedMesh() override;
 
 public:
 
@@ -30,4 +31,11 @@ public:
 
 protected:
 	void resetStates() override;
+
+private: 
+	void callbackLoadFile();
+
+	DArray<Vec3f> mInitialVertex;
+	DArray<Vec3f> mInitialNormal;
+	DArray<Vec2f> mInitialTexCoord;
 };

@@ -19,6 +19,7 @@ namespace dyno
 	TriangleSet<TDataType>::~TriangleSet()
 	{
 		mTriangleIndex.clear();
+		mVertexNormal.clear();
 		mVer2Tri.clear();
 		mEdg2Tri.clear();
 		mTri2Edg.clear();
@@ -446,6 +447,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void TriangleSet<TDataType>::setNormals(DArray<Coord>& normals)
+	{
+		mVertexNormal.assign(normals);
+	}
+
+	template<typename TDataType>
 	void TriangleSet<TDataType>::updateVertexNormal()
 	{
 		uint vertSize = this->mCoords.size();
@@ -585,9 +592,36 @@ namespace dyno
 	{
 		this->updateTriangles();
 
-		this->updateVertexNormal();
+		if(bAutoUpdateNormal)
+			this->updateVertexNormal();
 
 		this->EdgeSet<TDataType>::updateTopology();
+	}
+
+	template <typename Real, typename Coord>
+	__global__ void PS_RotateNormal(
+		DArray<Coord> normals,
+		Quat<Real> q)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= normals.size()) return;
+		SquareMatrix<Real, 3> rot = q.toMatrix3x3();
+
+		normals[pId] = rot * normals[pId];
+	}
+
+	template<typename TDataType>
+	void TriangleSet<TDataType>::rotate(const Coord angle)
+	{
+		EdgeSet<TDataType>::rotate(angle);
+	}
+
+	template<typename TDataType>
+	void TriangleSet<TDataType>::rotate(const Quat<Real> q)
+	{
+		EdgeSet<TDataType>::rotate(q);
+
+		cuExecute(mVertexNormal.size(), PS_RotateNormal, mVertexNormal, q);
 	}
 
 	DEFINE_CLASS(TriangleSet);

@@ -116,6 +116,7 @@ namespace dyno
 		DArray<TopologyModule::Tri2Edg>& getTriangle2Edge() { return mTri2Edg; }
 		DArray<TopologyModule::Edg2Tri>& getEdge2Triangle() { return mEdg2Tri; }
 
+		void setNormals(DArray<Coord>& normals);
 		DArray<Coord>& getVertexNormals() { return mVertexNormal; }
 
 		/**
@@ -136,6 +137,12 @@ namespace dyno
 
 		bool isEmpty() override;
 
+		//If true, normals will be updated automatically as calling update();
+		void setAutoUpdateNormals(bool b) { bAutoUpdateNormal = b; }
+
+		void rotate(const Coord angle) override;
+		void rotate(const Quat<Real> q) override;
+
 	protected:
 		void updateTopology() override;
 
@@ -145,6 +152,9 @@ namespace dyno
 		virtual void updateVertexNormal();
 
 	private:
+		//A tag used to identify when the normals should be updated automatically
+		bool bAutoUpdateNormal = true;
+
 		DArray<Triangle> mTriangleIndex;
 		DArrayList<int> mVer2Tri;
 
