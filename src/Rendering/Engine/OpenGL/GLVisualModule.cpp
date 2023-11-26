@@ -68,6 +68,9 @@ namespace dyno
 
 	void GLVisualModule::draw(const RenderParams& rparams)
 	{
+		if (!this->validateInputs())
+			return;
+
 		if (!this->isVisible())
 			return;
 
