@@ -43,13 +43,17 @@ namespace dyno
 
 	public:
 		DEF_VAR(Real, Length, 0.4, "LinLength");
-		DEF_VAR(bool, ShowPoints, true, "ShowPoints");
+		DEF_VAR(bool, Normalize, true, "Normalize");
+
+		DEF_VAR(bool, ShowPoints, false, "ShowPoints");
 		DEF_VAR(bool, ShowEdges, true, "ShowEdges");
 		DEF_ENUM(LineMode, LineMode, LineMode::Line, "");
 		DEF_VAR(Real, LineWidth, 0.04, " LineWidth");
 		DEF_VAR(bool, ShowWireframe, true, "ShowWireframe");
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSetIn, "");
+
+		DEF_INSTANCE_IN(TopologyModule, Topology, "");
+		DEF_ARRAY_IN(Coord, InNormal, DeviceType::GPU, "");
 
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, NormalSet, "");
 		DEF_ARRAY_STATE(Coord, Normal, DeviceType::GPU, "");
@@ -58,6 +62,7 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+		void updateStates() override;
 
 	private:
 		void varChanged();
@@ -66,7 +71,7 @@ namespace dyno
 
 		std::shared_ptr<GLPointVisualModule> glpoint;
 		std::shared_ptr<GLWireframeVisualModule> gledge;
-		std::shared_ptr<GLWireframeVisualModule> glsource;
+
 	};
 
 
