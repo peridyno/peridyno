@@ -4,6 +4,11 @@
 #include <iostream>
 #include <sys/stat.h>
 
+#include "GLWireframeVisualModule.h"
+#include "GLSurfaceVisualModule.h"
+#include "GLPointVisualModule.h"
+
+
 #include "tinyobjloader/tiny_obj_loader.h"
 
 
@@ -26,7 +31,7 @@ namespace dyno
 		this->stateTopology()->setDataPtr(triSet);
 		this->outTriangleSet()->setDataPtr(triSet);
 
-		surfacerender = std::make_shared<GLSurfaceVisualModule>();
+		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
 		surfacerender->setVisible(true);
 		surfacerender->setColor(Color(0.8, 0.52, 0.25));
 

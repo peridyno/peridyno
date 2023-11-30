@@ -43,6 +43,24 @@ macro(add_plugin LIB_NAME LIB_DEPENDENCY)
     target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr;--expt-extended-lambda>)
 
     target_link_libraries(${LIB_NAME} PUBLIC ${${LIB_DEPENDENCY}})
+
+    install(TARGETS ${LIB_NAME}
+    EXPORT ${LIB_NAME}Targets
+    RUNTIME  DESTINATION  ${PERIDYNO_RUNTIME_INSTALL_DIR}
+    LIBRARY  DESTINATION  ${PERIDYNO_LIBRARY_INSTALL_DIR}
+    ARCHIVE  DESTINATION  ${PERIDYNO_ARCHIVE_INSTALL_DIR}
+    )
+
+    install(EXPORT ${LIB_NAME}Targets DESTINATION ${PERIDYNO_CMAKE_CONFIG_INSTALL_DIR}
+        FILE ${LIB_NAME}Targets.cmake)
+
+    #Append ${LIB_NAME}Targets.cmake to the global list, which will be include in PeridynoConfig.cmake
+    get_property(LOCAL_CMAKES_NAMES GLOBAL PROPERTY "GLOBAL_CMAKES_NAMES")
+    list(APPEND LOCAL_CMAKES_NAMES "${LIB_NAME}Targets.cmake")    
+    set_property(GLOBAL PROPERTY GLOBAL_CMAKES_NAMES ${LOCAL_CMAKES_NAMES})
+
+    file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.cuh" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
+    install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/plugins/${LIB_NAME})
 endmacro()
 
 macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
