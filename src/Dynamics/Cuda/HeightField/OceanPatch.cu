@@ -204,7 +204,7 @@ namespace dyno
         extent.x = shifts.nx();
         extent.y = shifts.ny();
         cuExecute2D(extent,
-            O_UpdateTopology,
+            CW_UpdateHeightDisp,
             shifts,
             this->stateDisplacement()->getData(),
             mChoppiness);
@@ -232,7 +232,7 @@ namespace dyno
     }
 
     template <typename Coord>
-    __global__ void O_UpdateTopology(
+    __global__ void CW_UpdateHeightDisp(
         DArray2D<Coord> displacement,
         DArray2D<Coord> dis,
         float choppiness)

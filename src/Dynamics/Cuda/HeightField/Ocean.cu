@@ -124,7 +124,7 @@ namespace dyno
 		//Add capillary waves
 		auto& waves = this->getCapillaryWaves();
 		for (int i = 0; i < waves.size(); i++) {
-			auto wave = TypeInfo::cast<HeightField<TDataType>>(waves[i]->stateTopology()->getDataPtr());
+			auto wave = this->stateHeightField()->getDataPtr();
 
 			auto& waveDisp = wave->getDisplacement();
 

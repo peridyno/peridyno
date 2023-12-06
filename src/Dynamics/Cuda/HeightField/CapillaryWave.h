@@ -16,92 +16,69 @@
 #pragma once
 #include "Node.h"
 #include "Topology/HeightField.h"
+
 namespace dyno
 {
+	/**
+	 * Simulation of a square capillary wave using the shallow water equation (SWE)
+	 */
 	template<typename TDataType>
 	class CapillaryWave : public Node
 	{
 		DECLARE_TCLASS(CapillaryWave, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
-		typedef typename dyno::Vector<float, 4> Coord4;
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename Vector<Real, 4> Coord4D;
 
-		CapillaryWave(int size, float patchLength, std::string name = "capillaryWave");
-		CapillaryWave(std::string name = "capillaryWave");
+		CapillaryWave();
+		~CapillaryWave() override;
 
-		virtual ~CapillaryWave();
+	public:
+		DEF_VAR(Real, WaterLevel, 2, "");
 
-		DArray2D<Coord4> GetHeight() { return mHeight; }
+		DEF_VAR(uint, Resolution, 512, "");
 
-		float getHorizon() { return horizon; }
+		DEF_VAR(Real, Length, 512.0f, "The simulated region size in meters");
 
-		void setOriginX(int x) { simulatedOriginX = x; }
-		void setOriginY(int y) { simulatedOriginY = y; }
+	public:
+		DEF_ARRAY2D_STATE(Coord4D, Height, DeviceType::GPU, "");
 
-		int simulatedOriginX = 0;			
-		int simulatedOriginY = 0;			
+		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Height field");
 
-		int getOriginX() { return simulatedOriginX; }
-		int getOriginZ() { return simulatedOriginY; }
+	public:
+		void setOriginX(int x) { mOriginX = x; }
+		void setOriginY(int y) { mOriginY = y; }
 
-		int getGridSize() { return simulatedRegionWidth; }
-		float getRealGridSize() { return realGridSize; }
+		int getOriginX() { return mOriginX; }
+		int getOriginZ() { return mOriginY; }
 
-		DArray2D<Coord4> getHeightField() { return mHeight; }
-		Vec2f getOrigin() { return Vec2f(simulatedOriginX * realGridSize, simulatedOriginY * realGridSize); }
+		Real getRealGridSize() { return mRealGridSize; }
 
+		Coord2D getOrigin() { return Coord2D(mOriginX * mRealGridSize, mOriginY * mRealGridSize); }
+
+		//TODO: make improvements
 		void addSource();
-		void moveDynamicRegion(int nx, int ny);		
-
-		DArray2D<Vec2f> getmSource() { return mSource; }
-		DArray2D<float> getWeight() { return mWeight; }
-
-		void compute();
-		void updateStates() override;
-
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		void moveDynamicRegion(int nx, int ny);
 
 	protected:
 		void resetStates() override;
 
-		void updateTopology() override;
+		void updateStates() override;
 
-		void initialize();
-		void initDynamicRegion();
-		void initSource();
-		void resetSource();
-		void swapDeviceGrid();
-		void initHeightPosition();
+	private:
+		Real mRealGridSize;
 
-	public:
-		int mResolution;
+		int mOriginX = 0;
+		int mOriginY = 0;
 
-		float mChoppiness;  
+		DArray2D<Coord4D> mDeviceGrid;		    
+		DArray2D<Coord4D> mDeviceGridNext;
 
-	protected:
-		float patchLength;
-		float realGridSize;
 
-		int simulatedRegionWidth;
-		int simulatedRegionHeight;
-
-		size_t gridPitch;
-
-		float horizon = 2.0f;			        
-
-		DArray2D<Coord4> mHeight;				
-		DArray2D<Coord4> mDeviceGrid;		    
-		DArray2D<Coord4> mDeviceGridNext;
-		DArray2D<Coord4> mDisplacement;         
 		DArray2D<Vec2f> mSource;				
 		DArray2D<float> mWeight;
-
-	public:
-		DEF_VAR(int, Size, 512, "");
-		DEF_VAR(float, PatchLength, 512.0f, "");
-
-		//std::shared_ptr<HeightField<TDataType>> heights;	
 	};
 
 	IMPLEMENT_TCLASS(CapillaryWave, TDataType)
