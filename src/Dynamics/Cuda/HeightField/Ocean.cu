@@ -32,12 +32,23 @@ namespace dyno
 		oceanHeights->setExtents(Nx * patchHeights->width(), Nz * patchHeights->height());
 		oceanHeights->setGridSpacing(h);
 		oceanHeights->setOrigin(Vec3f(-0.5 * h * oceanHeights->width(), 0, -0.5 * h * oceanHeights->height()));
+
+		Real level = this->varWaterLevel()->getValue();
+
+		//Initialize the height field for the ocean
+		DArray2D<Coord>& patchDisp = patchHeights->getDisplacement();
+		cuExecute2D(make_uint2(patchDisp.nx(), patchDisp.ny()),
+			O_InitOceanWave,
+			oceanHeights->getDisplacement(),
+			patchDisp,
+			level);
 	}
 
-	template<typename Coord>
+	template<typename Real, typename Coord>
 	__global__ void O_InitOceanWave(
 		DArray2D<Coord> oceanVertex,
-		DArray2D<Coord> displacement)
+		DArray2D<Coord> displacement,
+		Real level)	//Water level
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -58,7 +69,8 @@ namespace dyno
 					int nx = i + t * width;
 					int ny = j + s * height;
 
-					oceanVertex(nx, ny) = D_ij;// [ny * oceanWidth + nx] = v;
+					oceanVertex(nx, ny) = D_ij;
+					oceanVertex(nx, ny).y += level;
 				}
 			}
 		}
@@ -93,18 +105,23 @@ namespace dyno
 	template<typename TDataType>
 	void Ocean<TDataType>::updateStates()
 	{
-		auto patch = this->getOceanPatch();
+		Real level = this->varWaterLevel()->getValue();
 
-		auto topo = this->stateHeightField()->getDataPtr();
+		auto patch = this->getOceanPatch();
 
 		auto patchHeights = patch->stateHeightField()->getDataPtr();
 
+		auto oceanHeights = this->stateHeightField()->getDataPtr();
+
+		//Initialize the height field for the ocean
 		DArray2D<Coord>& patchDisp = patchHeights->getDisplacement();
 		cuExecute2D(make_uint2(patchDisp.nx(), patchDisp.ny()),
 			O_InitOceanWave,
-			topo->getDisplacement(),
-			patchDisp);
+			oceanHeights->getDisplacement(),
+			patchDisp,
+			level);
 
+		//Add capillary waves
 		auto& waves = this->getCapillaryWaves();
 		for (int i = 0; i < waves.size(); i++) {
 			auto wave = TypeInfo::cast<HeightField<TDataType>>(waves[i]->stateTopology()->getDataPtr());
@@ -113,7 +130,7 @@ namespace dyno
 
 			cuExecute2D(make_uint2(waveDisp.nx(), waveDisp.ny()),
 				O_AddOceanTrails,
-				topo->getDisplacement(),
+				oceanHeights->getDisplacement(),
 				waveDisp);
 		}
 	}

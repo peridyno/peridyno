@@ -34,6 +34,8 @@ namespace dyno
 		DEF_VAR(uint, ExtentX, 1, "");
 		DEF_VAR(uint, ExtentZ, 1, "");
 
+		DEF_VAR(Real, WaterLevel, 0, "");
+
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 		DEF_NODE_PORTS(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
 
