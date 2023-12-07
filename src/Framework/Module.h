@@ -29,6 +29,7 @@
 
 namespace dyno
 {
+	class SceneGraph;
 	class Node;
 
 	class Module : public OBase
@@ -43,17 +44,27 @@ namespace dyno
 		void update();
 
 		void setName(std::string name);
-		void setParent(Node* node);
 
 		std::string getName() override;
 
-		Node* getParent() {
-			if (m_node == NULL) {
-				Log::sendMessage(Log::Error, "Parent node is not set!");
-			}
+		/**
+		 * @brief Set the parent node
+		 */
+		virtual void setParentNode(Node* node);
 
-			return m_node;
-		}
+		/**
+		 * @breif Return the Node that contains this Module
+		 * 
+		 * @return return nullptr if the Module is not contained in any Node
+		 */
+		Node* getParentNode();
+
+		/**
+		 * @breif Return the SceneGraph that contains this Module
+		 *
+		 * @return return nullptr if the module is not contained in any node
+		 */
+		SceneGraph* getSceneGraph();
 
 		bool isInitialized();
 

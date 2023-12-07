@@ -180,7 +180,7 @@ namespace dyno
 		m_module_name = name;
 	}
 
-	void Module::setParent(Node* node)
+	void Module::setParentNode(Node* node)
 	{
 		m_node = node;
 	}
@@ -188,6 +188,24 @@ namespace dyno
 	std::string Module::getName()
 	{
 		return m_module_name;
+	}
+
+	Node* Module::getParentNode()
+	{
+		if (m_node == NULL) {
+			Log::sendMessage(Log::Error, "Parent node is not set!");
+		}
+
+		return m_node;
+	}
+
+	dyno::SceneGraph* Module::getSceneGraph()
+	{
+		auto node = this->getParentNode();
+
+		if (node == NULL) return NULL;
+
+		return node->getSceneGraph();
 	}
 
 	void Module::setUpdateAlways(bool b)

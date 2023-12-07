@@ -27,6 +27,8 @@ namespace dyno {
 
 		const std::list<Module*>& moduleList() const { return mModuleList; }
 
+		void setParentNode(Node* node) override;
+
 	protected:
 		void preprocess() final;
 		void updateImpl() override;

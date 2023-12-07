@@ -350,7 +350,7 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	//scene.setGravity(Vec3f(0, -7.0, 0));
 	scn->setUpperBound(Vec3f(2.5, 2.5, 2.5));
-	scn->setLowerBound(Vec3f(-2.5, 0, -2.5));
+	scn->setLowerBound(Vec3f(-2.5, -2.5, -2.5));
 
 	auto loader = scn->addNode(std::make_shared<LoadParticles<DataType3f>>());
 	loader->loadParticles(

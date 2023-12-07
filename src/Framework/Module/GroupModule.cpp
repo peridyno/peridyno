@@ -26,6 +26,20 @@ namespace dyno
 		mModuleUpdated = true;
 	}
 
+	void GroupModule::setParentNode(Node* node)
+	{
+		for (auto m = mModuleMap.begin(); m != mModuleMap.end(); m++) {
+			m->second->setParentNode(node);
+		}
+
+		for (auto m : mPersistentModule)
+		{
+			m->setParentNode(node);
+		}
+
+		Module::setParentNode(node);
+	}
+
 	void GroupModule::preprocess()
 	{
 		if (mModuleUpdated) {

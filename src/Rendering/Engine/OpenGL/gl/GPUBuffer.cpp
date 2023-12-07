@@ -212,7 +212,6 @@ void main() { vDst[uDstPitch * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y
 
 		// resized
 		if(newSize != this->size) {
-			printf("allocate XBuffer: %d -> %d\n", this->size, newSize);
 			allocate(newSize);
 			// need re-register resource
 			if(resource != 0)

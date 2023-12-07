@@ -1,6 +1,8 @@
 #include "NeighborPointQuery.h"
 #include "Topology/GridHash.h"
 
+#include "SceneGraph.h"
+
 namespace dyno
 {
 	__constant__ int offset_nq[27][3] = { 
@@ -148,6 +150,17 @@ namespace dyno
 		Reduction<Coord> reduce;
 		Coord hiBound = reduce.maximum(points.begin(), points.size());
 		Coord loBound = reduce.minimum(points.begin(), points.size());
+
+		// To avoid particles running out of the simulation domain
+		auto scn = this->getSceneGraph();
+		if (scn != NULL)
+		{
+			auto loLimit = scn->getLowerBound();
+			auto hiLimit = scn->getUpperBound();
+
+			hiBound = hiBound.minimum(hiLimit);
+			loBound = loBound.maximum(loLimit);
+		}
 
 		GridHash<TDataType> hashGrid;
 		hashGrid.setSpace(h, loBound - Coord(h), hiBound + Coord(h));
@@ -325,6 +338,18 @@ namespace dyno
 		Reduction<Coord> reduce;
 		Coord hiBound = reduce.maximum(points.begin(), points.size());
 		Coord loBound = reduce.minimum(points.begin(), points.size());
+
+		// To avoid particles running out of the simulation domain
+		auto scn = this->getSceneGraph();
+		if (scn != NULL)
+		{
+			auto loLimit = scn->getLowerBound();
+			auto hiLimit = scn->getUpperBound();
+
+			hiBound = hiBound.minimum(hiLimit);
+			loBound = loBound.maximum(loLimit);
+		}
+
 
 		GridHash<TDataType> hashGrid;
 		hashGrid.setSpace(h, loBound - Coord(h), hiBound + Coord(h));
