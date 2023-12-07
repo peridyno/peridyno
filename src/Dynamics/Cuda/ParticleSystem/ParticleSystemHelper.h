@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Xiaowei He
+ * Copyright 2017-2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,31 @@
  * limitations under the License.
  */
 #pragma once
-#include "ParticleSystem.h"
-#include "ParticleEmitter.h"
 
-#include "Topology/PointSet.h"
+#include "Vector.h"
+#include "DataTypes.h"
+#include "Array/Array.h"
 
-namespace dyno
+#include "Topology/SparseOctree.h"
+
+namespace dyno 
 {
 	template<typename TDataType>
-	class ParticleFluid : public ParticleSystem<TDataType>
+	class ParticleSystemHelper
 	{
-		DECLARE_TCLASS(ParticleFluid, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ParticleFluid();
-		~ParticleFluid() override;
+		static void calculateMortonCode(
+			DArray<OcKey>& morton,
+			DArray<Coord>& pos,
+			Real d);
 
-		DEF_VAR(bool, ReshuffleParticles, false, "");
-
-		DEF_NODE_PORTS(ParticleEmitter<TDataType>, ParticleEmitter, "Particle Emitters");
-
-		DEF_NODE_PORTS(ParticleSystem<TDataType>, InitialState, "Initial Fluid Particles");
-
-	protected:
-		void resetStates() override;
-
-		void preUpdateStates();
-
-	private:
-		void loadInitialStates();
-
-		void reshuffleParticles();
+		static void reorderParticles(
+			DArray<Coord>& pos,
+			DArray<Coord>& vel,
+			DArray<Coord>& force,
+			DArray<OcKey>& morton);
 	};
 }

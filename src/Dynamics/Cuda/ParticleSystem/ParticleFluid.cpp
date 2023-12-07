@@ -5,6 +5,8 @@
 #include "Module/ImplicitViscosity.h"
 #include "Module/IterativeDensitySolver.h"
 
+#include "ParticleSystemHelper.h"
+
 //Framework
 #include "Auxiliary/DataSource.h"
 
@@ -132,6 +134,20 @@ namespace dyno
 				}
 			}
 		}
+
+		if (this->varReshuffleParticles()->getValue())
+		{
+			auto& pos = this->statePosition()->getData();
+			auto& vel = this->stateVelocity()->getData();
+			auto& force = this->stateForce()->getData();
+
+			DArray<OcKey> morton(pos.size());
+
+			ParticleSystemHelper<TDataType>::calculateMortonCode(morton, pos, Real(0.005));
+			ParticleSystemHelper<TDataType>::reorderParticles(pos, vel, force, morton);
+
+			morton.clear();
+		}
 	}
 
 	template<typename TDataType>
@@ -198,6 +214,12 @@ namespace dyno
 			auto points = this->statePointSet()->getDataPtr();
 			points->clear();
 		}
+	}
+
+	template<typename TDataType>
+	void ParticleFluid<TDataType>::reshuffleParticles()
+	{
+
 	}
 
 	DEFINE_CLASS(ParticleFluid);
