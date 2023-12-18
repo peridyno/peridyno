@@ -23,24 +23,19 @@ namespace dyno
 		}
 	}
 
-	void GLVisualModule::updateGraphicsContext()
+	void GLVisualModule::updateImpl()
 	{
-		//printf("UpdateGraphicsContext\n");
-		//if (!this->isGLInitialized)
-		//{
-		//	if (!gladLoadGL()) {
-		//		printf("Failed to load OpenGL context!\n");
-		//		exit(-1);
-		//	}
+		printf("Warning: %s::updateImpl is not implemented!\n", getName().c_str());
+	}
 
-		//	isGLInitialized = initializeGL();
+	void GLVisualModule::preprocess()
+	{
+		updateMutex.lock();
+	}
 
-		//	if (!this->isGLInitialized)
-		//		return;
-		//}
-
-		//this->updateGL();
-
+	void GLVisualModule::postprocess()
+	{
+		updateMutex.unlock();
 		this->changed = clock::now();
 	}
 
@@ -71,10 +66,39 @@ namespace dyno
 		return alpha.getValue() < 1.f;
 	}
 
-	void GLVisualModule::draw(GLRenderPass pass)
+	void GLVisualModule::draw(const RenderParams& rparams)
 	{
-		if (this->validateInputs() && this->isVisible() && this->isGLInitialized) {
-			this->paintGL(pass);
+		if (!this->validateInputs())
+			return;
+
+		if (!this->isVisible())
+			return;
+
+		if (!isGLInitialized)
+			isGLInitialized = initializeGL();
+
+		// if failed to initialize...
+		if (!isGLInitialized)
+			throw std::runtime_error("Cannot initialize " + getName());
+
+		// check update
+		if (changed > updated) {
+			updateMutex.lock();
+			updateGL();
+			updated = clock::now();
+			updateMutex.unlock();
+		}
+
+		// draw
+		this->paintGL(rparams);
+	}
+
+	void GLVisualModule::release()
+	{
+		if (isGLInitialized)
+		{
+			this->releaseGL();
+			isGLInitialized = false;
 		}
 	}
 

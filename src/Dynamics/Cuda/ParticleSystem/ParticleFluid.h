@@ -30,8 +30,9 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		ParticleFluid();
-		virtual ~ParticleFluid();
+		~ParticleFluid() override;
 
+		DEF_VAR(bool, ReshuffleParticles, false, "");
 
 		DEF_NODE_PORTS(ParticleEmitter<TDataType>, ParticleEmitter, "Particle Emitters");
 
@@ -44,5 +45,7 @@ namespace dyno
 
 	private:
 		void loadInitialStates();
+
+		void reshuffleParticles();
 	};
 }

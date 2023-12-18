@@ -59,22 +59,23 @@ namespace dyno
 		DEF_ENUM(ColorMapMode, ColorMode, ColorMapMode::PER_OBJECT_SHADER, "Color Mode");
 
 	protected:
-		virtual void updateGraphicsContext() override;
+		virtual void updateImpl() override;
 
-		virtual void paintGL(GLRenderPass pass) override;
+		virtual void paintGL(const RenderParams& rparams) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-		virtual void destroyGL() override;
+		virtual void releaseGL() override;
 
 	private:
 
 		gl::VertexArray	mVertexArray;
 
-		gl::XBuffer		mPosition;
-		gl::XBuffer		mColor;
+		gl::XBuffer<Vec3f>		mPosition;
+		gl::XBuffer<Vec3f>		mColor;
 
 		unsigned int	mNumPoints;
 		gl::Program*	mShaderProgram = 0;
 
+		gl::Buffer		mUniformBlock;
 	};
 };

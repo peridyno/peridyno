@@ -35,9 +35,9 @@ namespace dyno
 					initTopo->loadObjFile(fileName);
 					curTopo->copyFrom(*initTopo);
 
-					curTopo->scale(this->varScale()->getData());
-					curTopo->rotate(this->varRotation()->getData() * M_PI / 180);
-					curTopo->translate(this->varLocation()->getData());
+					curTopo->scale(this->varScale()->getValue());
+					curTopo->rotate(this->varRotation()->getValue() * M_PI / 180);
+					curTopo->translate(this->varLocation()->getValue());
 				}
 			}
 		);
@@ -49,9 +49,9 @@ namespace dyno
 				auto curTopo = this->stateTriangleSet()->getDataPtr();
 
 				curTopo->copyFrom(*initTopo);
-				curTopo->scale(this->varScale()->getData());
-				curTopo->rotate(this->varRotation()->getData() * M_PI / 180);
-				curTopo->translate(this->varLocation()->getData());
+				curTopo->scale(this->varScale()->getValue());
+				curTopo->rotate(this->varRotation()->getValue() * M_PI / 180);
+				curTopo->translate(this->varLocation()->getValue());
 			}
 		);
 		this->varLocation()->attach(transform);

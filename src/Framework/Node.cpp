@@ -612,7 +612,7 @@ bool Node::addToModuleList(std::shared_ptr<Module> module)
 	if (found == m_module_list.end())
 	{
 		m_module_list.push_back(module);
-		module->setParent(this);
+		module->setParentNode(this);
 		return true;
 	}
 

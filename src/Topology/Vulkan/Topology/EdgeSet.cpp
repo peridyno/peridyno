@@ -21,6 +21,12 @@ namespace dyno
 		mEdgeIndex.assign(edges);
 	}
 
+	void EdgeSet::copyFrom(EdgeSet& es)
+	{
+		mEdgeIndex.assign(es.mEdgeIndex);
+		mPoints.assign(es.mPoints);
+	}
+
 	void EdgeSet::updateTopology()
 	{
 		this->updateEdges();

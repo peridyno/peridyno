@@ -2,6 +2,9 @@
 #include <glad/glad.h>
 #include "Utility.h"
 
+#include "screen.vert.h"
+#include "fxaa.frag.h"
+
 namespace dyno
 {
 	FXAA::FXAA()
@@ -13,7 +16,9 @@ namespace dyno
 		, UseHighQualityEndpoints(true)
 	{
 		mScreenQuad = gl::Mesh::ScreenQuad();
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "fxaa.frag");
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			SCREEN_VERT, sizeof(SCREEN_VERT),
+			FXAA_FRAG, sizeof(FXAA_FRAG));
 	}
 
 	FXAA::~FXAA()

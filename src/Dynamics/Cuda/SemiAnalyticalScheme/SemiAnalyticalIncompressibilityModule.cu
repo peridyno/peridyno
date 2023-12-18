@@ -1375,7 +1375,7 @@ void SemiAnalyticalIncompressibilityModule<TDataType>::constrain()
 {
     //return true;
 
-    Real dt = getParent()->getDt();
+    Real dt = getParentNode()->getDt();
 
     //		int start_f = Start.getValue();
     //		cudaMemcpy(m_velocityAll.getValue().getDataPtr() + start_f, m_particle_velocity.getValue().getDataPtr(), num_f * sizeof(Coord), cudaMemcpyDeviceToDevice);

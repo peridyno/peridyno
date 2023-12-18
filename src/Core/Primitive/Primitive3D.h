@@ -700,6 +700,10 @@ namespace dyno
 		DYN_FUNC TPoint3D<Real> circumcenter() const;
 		DYN_FUNC TPoint3D<Real> barycenter() const;
 
+		DYN_FUNC bool contain(Coord3D p);
+
+		DYN_FUNC Vector<Real, 4> computeBarycentricCoordinates(const Coord3D& p);
+
 		Coord3D v[4];
 	};
 

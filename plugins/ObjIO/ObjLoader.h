@@ -3,10 +3,6 @@
 #include "Topology/TriangleSet.h"
 #include "Field.h"
 #include "FilePath.h"
-#include "GLWireframeVisualModule.h"
-#include "GLSurfaceVisualModule.h"
-#include "GLPointVisualModule.h"
-
 
 namespace dyno
 {
@@ -49,8 +45,6 @@ namespace dyno
 		DEF_VAR(Coord, AngularVelocity, Coord(0), "");
 
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
-		//DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
-		std::shared_ptr <GLSurfaceVisualModule> surfacerender;
 
 	protected:
 		void resetStates() override;

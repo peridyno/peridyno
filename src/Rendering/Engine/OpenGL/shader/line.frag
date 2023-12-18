@@ -1,45 +1,21 @@
 #version 440
 
-in VertexData
+#extension GL_GOOGLE_include_directive: enable
+#include "common.glsl"
+#include "shadow.glsl"
+
+layout(location = 0) in VertexData
 {
 	vec3 position;
 	vec3 normal;
 };
 
-layout(std140, binding = 0) uniform TransformUniformBlock
-{
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-} transform;
-
-layout(std140, binding = 1) uniform LightUniformBlock
-{
-	vec4 ambient;
-	vec4 intensity;
-	vec4 direction;
-	vec4 camera;
-} light;
-
-
-uniform vec3  uBaseColor;
-uniform float uMetallic;
-uniform float uRoughness;
-uniform float uAlpha;
-
 layout(location = 0) out vec4 fragColor;
-
-subroutine void RenderPass(void);
-layout(location = 0) subroutine uniform RenderPass renderPass;
-
-void main(void) { 
-	renderPass();
-} 
 
 vec3 GetViewDir()
 {
 	// orthogonal projection
-	if (transform.proj[3][3] == 1.0)
+	if (uRenderParams.proj[3][3] == 1.0)
 		return vec3(0, 0, 1);
 
 	// perspective projection
@@ -58,7 +34,7 @@ vec3 gamma_correct(vec3 v)
 }
 
 vec3 pbr();
-layout(index = 0) subroutine(RenderPass) void ColorPass(void)
+void ColorPass(void)
 {
 	vec3 color = pbr();
 	color = reinhard_tonemap(color);
@@ -67,7 +43,7 @@ layout(index = 0) subroutine(RenderPass) void ColorPass(void)
 	fragColor.a = 1.0;
 }
 
-layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
+void ShadowPass(void)
 {
 	float depth = gl_FragCoord.z;
 	//depth = depth * 0.5 + 0.5;
@@ -83,44 +59,15 @@ layout(index = 1) subroutine(RenderPass) void ShadowPass(void)
 	fragColor = vec4(moment1, moment2, 0.0, 0.0);
 }
 
-/***************** ShadowMap *********************/
-layout(std140, binding = 2) uniform ShadowUniform{
-	mat4	transform;
-	float	minValue;		// patch to color bleeding
-} uShadowBlock;
-layout(binding = 5) uniform sampler2D uTexShadow;
-
-vec3 GetShadowFactor(vec3 pos)
-{
-	if (light.direction.w == 0) return vec3(1);
-
-	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
-	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;	// NDC
-	projCoords = projCoords * 0.5 + 0.5;
-
-	// From http://fabiensanglard.net/shadowmappingVSM/index.php
-	float distance = min(1.0, projCoords.z);
-	vec2  moments = texture(uTexShadow, projCoords.xy).rg;
-
-	// Surface is fully lit. as the current fragment is before the light occluder
-	if (distance <= moments.x)
-		return vec3(1.0);
-
-	// The fragment is either in shadow or penumbra. We now use chebyshev's upperBound to check
-	// How likely this pixel is to be lit (p_max)
-	float variance = moments.y - (moments.x * moments.x);
-	variance = max(variance, 0.00001);
-
-	float d = distance - moments.x;
-	float p_max = variance / (variance + d * d);
-
-	// simple patch to color bleeding 
-	p_max = (p_max - uShadowBlock.minValue) / (1.0 - uShadowBlock.minValue);
-	p_max = clamp(p_max, 0.0, 1.0);
-
-	return vec3(p_max);
-}
-
+void main(void) { 
+	if(uRenderParams.mode == 0){
+		ColorPass();
+	}else if(uRenderParams.mode == 1){
+		ShadowPass();
+	}else if(uRenderParams.mode == 2){
+		discard;
+	}
+} 
 
 // refer to https://learnopengl.com
 const float PI = 3.14159265359;
@@ -176,7 +123,7 @@ vec3 pbr()
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
 	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, uBaseColor, uMetallic);
+	F0 = mix(F0, uMtl.color, uMtl.metallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -184,16 +131,16 @@ vec3 pbr()
 	{
 		// calculate per-light radiance
 		//vec3 L = normalize(lightPositions[i] - WorldPos);
-		vec3 L = normalize(light.direction.xyz);
+		vec3 L = normalize(uRenderParams.direction.xyz);
 		vec3 H = normalize(V + L);
 		//float distance = length(lightPositions[i] - WorldPos);
 		//float attenuation = 1.0 / (distance * distance);
 		//vec3 radiance = lightColors[i] * attenuation;
-		vec3 radiance = light.intensity.rgb * light.intensity.a;
+		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
 
 		// Cook-Torrance BRDF
-		float NDF = DistributionGGX(N, H, uRoughness);
-		float G = GeometrySmith(N, V, L, uRoughness);
+		float NDF = DistributionGGX(N, H, uMtl.roughness);
+		float G = GeometrySmith(N, V, L, uMtl.roughness);
 		vec3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
 		vec3 nominator = NDF * G * F;
@@ -209,7 +156,7 @@ vec3 pbr()
 		// multiply kD by the inverse metalness such that only non-metals 
 		// have diffuse lighting, or a linear blend if partly metal (pure metals
 		// have no diffuse light).
-		kD *= 1.0 - uMetallic;
+		kD *= 1.0 - uMtl.metallic;
 
 		// scale light by NdotL
 		float NdotL = max(dot(N, L), 0.0);
@@ -217,10 +164,10 @@ vec3 pbr()
 		// add to outgoing radiance Lo
 		//Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-		Lo += GetShadowFactor(position) * (kD * uBaseColor / PI + specular) * radiance * NdotL;
+		Lo += GetShadowFactor(position) * (kD * uMtl.color / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = light.ambient.rgb * light.ambient.a * uBaseColor;
-	vec3 cameraLight = light.camera.rgb * light.camera.a * uBaseColor * abs(dotNV);
+	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * uMtl.color;
+	vec3 cameraLight = uRenderParams.camera.rgb * uRenderParams.camera.a * uMtl.color * abs(dotNV);
 	return ambient + cameraLight + Lo;
 }

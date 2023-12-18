@@ -5,6 +5,10 @@
 #include "GLRenderEngine.h"
 #include "Utility.h"
 
+#include "line.vert.h"
+#include "surface.frag.h"
+#include "line.geom.h"
+
 namespace dyno
 {
 	IMPLEMENT_CLASS(GLWireframeVisualModule)
@@ -37,81 +41,70 @@ namespace dyno
 		mIndexBuffer.create(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 		mVertexBuffer.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
 		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("line.vert", "surface.frag", "line.geom");
-		
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			LINE_VERT, sizeof(LINE_VERT),
+			SURFACE_FRAG, sizeof(SURFACE_FRAG),
+			LINE_GEOM, sizeof(LINE_GEOM));
+
+		// create shader uniform buffer
+		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+
 		return true;
 	}
 
-	void GLWireframeVisualModule::destroyGL()
+	void GLWireframeVisualModule::releaseGL()
 	{
-		if (isGLInitialized)
-		{
-			mShaderProgram->release();
-			delete mShaderProgram;
+		mShaderProgram->release();
+		delete mShaderProgram;
 
-			mVAO.release();
-			mVertexBuffer.release();
-			mIndexBuffer.release();
+		mVAO.release();
+		mVertexBuffer.release();
+		mIndexBuffer.release();
 
-			isGLInitialized = false;
-		}
+		mUniformBlock.release();
 	}
 
 
 	void GLWireframeVisualModule::updateGL()
 	{
-		updateMutex.lock();
+		mNumEdges = mIndexBuffer.count();
+		if (mNumEdges == 0) return;
 
-		mVertexBuffer.mapGL();
-		mIndexBuffer.mapGL();
+		mVertexBuffer.updateGL();
+		mIndexBuffer.updateGL();
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
 		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, vecSize, GL_FLOAT, 0, 0, 0);
-
-		updateMutex.unlock();
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 	}
 
-	void GLWireframeVisualModule::updateGraphicsContext()
+	void GLWireframeVisualModule::updateImpl()
 	{
-		updateMutex.lock();
-
 		// copy data
 		auto edgeSet = this->inEdgeSet()->getDataPtr();
 		auto edges = edgeSet->getEdges();
 		auto vertices = edgeSet->getPoints();
 
-		mNumEdges = edges.size();
-
-		if (mNumEdges > 0)
-		{
-			mVertexBuffer.load(vertices);
-			mIndexBuffer.load(edges);
-
-			GLVisualModule::updateGraphicsContext();
-		}
-
-		updateMutex.unlock();
+		mVertexBuffer.load(vertices);
+		mIndexBuffer.load(edges);
 	}
 
 
-	void GLWireframeVisualModule::paintGL(GLRenderPass pass)
+	void GLWireframeVisualModule::paintGL(const RenderParams& rparams)
 	{
 		if (mNumEdges == 0)
 			return;
 
+		// setup uniform buffer
+		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+		mUniformBlock.bindBufferBase(0);
+
 		mShaderProgram->use();
 
-		unsigned int subroutine = (unsigned int)pass;
-
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-
-		if (pass == GLRenderPass::COLOR)
+		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			Color c = this->varBaseColor()->getData();
 			mShaderProgram->setVec3("uBaseColor", Vec3f(c.r, c.g, c.b));
@@ -119,7 +112,7 @@ namespace dyno
 			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
 			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
 		}
-		else if (pass == GLRenderPass::SHADOW)
+		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
 			// cast shadow?
 		}
@@ -129,18 +122,16 @@ namespace dyno
 			return;
 		}
 
-
 		// preserve previous polygon mode
 		int mode;
 		glGetIntegerv(GL_POLYGON_MODE, &mode);
 
 		if (this->varRenderMode()->getDataPtr()->currentKey() == EEdgeMode::LINE)
 		{
+			mShaderProgram->setInt("uEdgeMode", 0);
 			// draw as lines
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glLineWidth(this->varLineWidth()->getData());
-
-			mShaderProgram->setInt("uEdgeMode", 0);
 		}
 		else
 		{

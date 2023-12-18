@@ -69,7 +69,7 @@ set(SPVREMAP_HEADERS
     doc.h)
 
 add_library(SPIRV ${LIB_TYPE} ${SOURCES} ${HEADERS})
-set_property(TARGET SPIRV PROPERTY FOLDER glslang)
+set_property(TARGET SPIRV PROPERTY FOLDER ThirdParty/glslang)
 set_property(TARGET SPIRV PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(SPIRV PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>

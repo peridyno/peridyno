@@ -158,12 +158,12 @@ void ImWindow::draw(RenderWindow* app)
 
 			if (ImGui::BeginMenu("Lighting", "")) {
 
-				float iBgGray[2] = { rparams.bgColor0[0], rparams.bgColor1[0] };
+				float iBgGray[2] = { engine->bgColor0[0], engine->bgColor1[0] };
 				RenderParams::Light iLight = rparams.light;
 
 				ImGui::DragFloat2("BG color", iBgGray, 0.01f, 0.0f, 1.0f, "%.2f", 0);
-				rparams.bgColor0 = glm::vec3(iBgGray[0]);
-				rparams.bgColor1 = glm::vec3(iBgGray[1]);
+				engine->bgColor0 = glm::vec3(iBgGray[0]);
+				engine->bgColor1 = glm::vec3(iBgGray[1]);
 
 				ImGui::Text("Ambient Light");
 
@@ -225,7 +225,7 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Checkbox("Show View Manipulator", &mViewManipulator);
 				ImGui::Spacing();
 
-				ImGui::Checkbox("Show Background", &(rparams.showGround));
+				ImGui::Checkbox("Show Background", &(engine->showGround));
 				ImGui::Spacing();
 
 				ImGui::Separator();
@@ -241,7 +241,7 @@ void ImWindow::draw(RenderWindow* app)
 
 					ImGui::Separator();
 
-					ImGui::Checkbox("Show Bounding Box", &(rparams.showSceneBounds));
+					ImGui::Checkbox("Show Bounding Box", &(engine->showSceneBounds));
 					ImGui::Spacing();
 
 					Vec3f lowerBound = scene->getLowerBound();

@@ -15,14 +15,15 @@
  */
 
 #pragma once
-#include "Topology/TriangleSet.h"
+
+#include <DeclarePort.h>
+#include <Topology/TriangleSet.h>
 
 #include "GLVisualModule.h"
 #include "gl/GPUBuffer.h"
+#include "gl/GPUTexture.h"
 #include "gl/VertexArray.h"
 #include "gl/Shader.h"
-
-#include <DeclarePort.h>
 
 namespace dyno
 {
@@ -38,10 +39,10 @@ namespace dyno
 
 		DECLARE_ENUM(EColorMode,
 			CM_Object = 0,
-			CM_Vertex = 1);
+			CM_Vertex = 1,
+			CM_Texture = 2);
 
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
-
 		DEF_VAR(bool, UseVertexNormal, false, "");
 
 #ifdef CUDA_BACKEND
@@ -52,31 +53,55 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet, TriangleSet, "");
 #endif
 
-		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, Color,		DeviceType::GPU, "");
+		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
+		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
+
+		DEF_ARRAY_IN(TopologyModule::Triangle, NormalIndex, DeviceType::GPU, "");
+		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
+
+#ifdef CUDA_BACKEND
+		DEF_ARRAY2D_IN(Vec4f, ColorTexture, DeviceType::GPU, "");
+		DEF_ARRAY2D_IN(Vec4f, BumpMap, DeviceType::GPU, "");
+#endif
 
 	protected:
-		virtual void updateGraphicsContext() override;
+		virtual void updateImpl() override;
 
-		virtual void paintGL(GLRenderPass mode) override;
+		virtual void paintGL(const RenderParams& rparams) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-		virtual void destroyGL() override;
+		virtual void releaseGL() override;
 
 	protected:
 
 		gl::Program*	mShaderProgram;
+
+		// uniform blocks
+		gl::Buffer		mRenderParamsUBlock;
+		gl::Buffer		mPBRMaterialUBlock;
+
 		gl::VertexArray	mVAO;
+		unsigned int	mNumTriangles = 0;
 
-		gl::XBuffer		mIndexBuffer;
-		gl::XBuffer		mVertexBuffer;
-		gl::XBuffer		mNormalBuffer;
-		gl::XBuffer		mColorBuffer;
+		gl::XBuffer<Vec3f> mVertexPosition;
+		gl::XBuffer<Vec3f> mVertexColor;			// per-vertex color
+		gl::XBuffer<TopologyModule::Triangle> mVertexIndex;
 
-		unsigned int	mDrawCount = 0;
+		gl::XBuffer<Vec3f> mNormal;
+		gl::XBuffer<TopologyModule::Triangle> mNormalIndex;
+
+		gl::XBuffer<Vec2f> mTexCoord;
+		gl::XBuffer<TopologyModule::Triangle> mTexCoordIndex;
+
+#ifdef CUDA_BACKEND
+		// color texture
+		gl::XTexture2D<Vec4f> mColorTexture;
+		gl::XTexture2D<Vec4f> mBumpMap;
+#endif
 
 		// for instanced rendering
-		gl::XBuffer		mInstanceBuffer;
-		unsigned int	mInstanceCount = 0;
+		unsigned int			 mInstanceCount = 0;
 
 	};
 };

@@ -13,6 +13,20 @@ namespace dyno
 
 	}
 
+	void TetrahedronSet::setTetrahedrons(std::vector<TopologyModule::Tetrahedron>& indices)
+	{
+		mTetrahedronIndex.assign(indices);
+	}
+
+	void TetrahedronSet::copyFrom(TetrahedronSet& es)
+	{
+		mTetrahedronIndex.assign(es.mTetrahedronIndex);
+		mTriangleIndex.assign(es.mTriangleIndex);
+		mIndex.assign(es.mIndex);
+		mEdgeIndex.assign(es.mEdgeIndex);
+		mPoints.assign(es.mPoints);
+	}
+
 	void TetrahedronSet::updateTopology()
 	{
 		std::vector<dyno::TopologyModule::Tetrahedron> tets(mTetrahedronIndex.size());

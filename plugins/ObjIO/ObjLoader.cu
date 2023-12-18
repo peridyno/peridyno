@@ -4,6 +4,11 @@
 #include <iostream>
 #include <sys/stat.h>
 
+#include "GLWireframeVisualModule.h"
+#include "GLSurfaceVisualModule.h"
+#include "GLPointVisualModule.h"
+
+
 #include "tinyobjloader/tiny_obj_loader.h"
 
 
@@ -26,7 +31,7 @@ namespace dyno
 		this->stateTopology()->setDataPtr(triSet);
 		this->outTriangleSet()->setDataPtr(triSet);
 
-		surfacerender = std::make_shared<GLSurfaceVisualModule>();
+		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
 		surfacerender->setVisible(true);
 		surfacerender->setColor(Color(0.8, 0.52, 0.25));
 
@@ -44,9 +49,9 @@ namespace dyno
 			return;
 		std::string filename = this->varFileName()->getValue().string();
 		loadObj(*triSet, filename);
-		triSet->scale(this->varScale()->getData());
-		triSet->translate(this->varLocation()->getData());
-		triSet->rotate(this->varRotation()->getData() * PI / 180);
+		triSet->scale(this->varScale()->getValue());
+		triSet->translate(this->varLocation()->getValue());
+		triSet->rotate(this->varRotation()->getValue() * PI / 180);
 		triSet->update();
 
 		Node::resetStates();
@@ -83,7 +88,7 @@ namespace dyno
 
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
-		if (this->varSequence()->getData() == true)
+		if (this->varSequence()->getValue() == true)
 		{
 			std::string filename = this->varFileName()->getValue().string();
 			int num_ = filename.rfind("_");
@@ -91,9 +96,9 @@ namespace dyno
 			filename.replace(num_ + 1, filename.length() - 4 - (num_ + 1), std::to_string(this->stateFrameNumber()->getData()));
 
 			loadObj(*triSet, filename);
-			triSet->scale(this->varScale()->getData());
-			triSet->translate(this->varLocation()->getData());
-			triSet->rotate(this->varRotation()->getData() * PI / 180);
+			triSet->scale(this->varScale()->getValue());
+			triSet->translate(this->varLocation()->getValue());
+			triSet->rotate(this->varRotation()->getValue() * PI / 180);
 			triSet->update();
 
 

@@ -1,9 +1,9 @@
 #version 440
 
-in vec2 texCoord;
+layout(location = 0) in vec2 texCoord;
 
-uniform vec3 uColor0;
-uniform vec3 uColor1;
+layout(location = 0) uniform vec3 uColor0;
+layout(location = 1) uniform vec3 uColor1;
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out ivec4 fragIndices;

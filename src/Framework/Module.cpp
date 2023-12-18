@@ -60,12 +60,6 @@ namespace dyno
 
 		if (this->requireUpdate()) {
 
-			//reset input fields
-			for (auto f_in : fields_input)
-			{
-				f_in->tack();
-			}
-
 			//pre processing
 			this->preprocess();
 
@@ -81,14 +75,10 @@ namespace dyno
 				param->tack();
 			}
 
-			//TODO: a hack, if the input to be modified, use FieldTypeEnum::IO instead 
+			//reset input fields
 			for (auto f_in : fields_input)
 			{
-				auto f_src = f_in->getTopField();
-				if (f_src->getFieldType() == FieldTypeEnum::State && f_in->getFieldType() == FieldTypeEnum::In)
-				{
-					f_src->tick();
-				}
+				f_in->tack();
 			}
 
 			//tag all output fields as modifed
@@ -163,7 +153,7 @@ namespace dyno
 
 	bool Module::requireUpdate()
 	{
-		if (this->varForceUpdate()->getData())
+		if (this->varForceUpdate()->getValue())
 		{
 			return true;
 		}
@@ -190,7 +180,7 @@ namespace dyno
 		m_module_name = name;
 	}
 
-	void Module::setParent(Node* node)
+	void Module::setParentNode(Node* node)
 	{
 		m_node = node;
 	}
@@ -198,6 +188,24 @@ namespace dyno
 	std::string Module::getName()
 	{
 		return m_module_name;
+	}
+
+	Node* Module::getParentNode()
+	{
+		if (m_node == NULL) {
+			Log::sendMessage(Log::Error, "Parent node is not set!");
+		}
+
+		return m_node;
+	}
+
+	dyno::SceneGraph* Module::getSceneGraph()
+	{
+		auto node = this->getParentNode();
+
+		if (node == NULL) return NULL;
+
+		return node->getSceneGraph();
 	}
 
 	void Module::setUpdateAlways(bool b)

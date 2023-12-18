@@ -76,7 +76,7 @@ namespace dyno
 			*m_cSDF,
 			this->varNormalFriction()->getData(),
 			this->varTangentialFriction()->getData(),
-			getParent()->getDt());
+			this->getParentNode()->getDt());
 	}
 
 	template<typename TDataType>

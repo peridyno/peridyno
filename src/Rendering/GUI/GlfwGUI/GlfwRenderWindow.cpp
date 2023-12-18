@@ -213,17 +213,24 @@ namespace dyno
 			}
 			
 			activeScene->updateGraphicsContext();
-				
+
+			// update rendering params
+			mRenderParams.width = mCamera->viewportWidth();
+			mRenderParams.height = mCamera->viewportHeight();
+			mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
+			mRenderParams.transforms.view = mCamera->getViewMat();
+			mRenderParams.transforms.proj = mCamera->getProjMat();
+
 			// Jian SHI: hack for unit scaling...
-			float planeScale = mRenderParams.planeScale;
-			float rulerScale = mRenderParams.rulerScale;
-			mRenderParams.planeScale *= mCamera->unitScale();
-			mRenderParams.rulerScale *= mCamera->unitScale();
+			float planeScale = mRenderEngine->planeScale;
+			float rulerScale = mRenderEngine->rulerScale;
+			mRenderEngine->planeScale *= mCamera->unitScale();
+			mRenderEngine->rulerScale *= mCamera->unitScale();
 
-			mRenderEngine->draw(activeScene.get(), mCamera.get(), mRenderParams);
+			mRenderEngine->draw(activeScene.get(), mRenderParams);
 
-			mRenderParams.planeScale = planeScale;
-			mRenderParams.rulerScale = rulerScale;
+			mRenderEngine->planeScale = planeScale;
+			mRenderEngine->rulerScale = rulerScale;
 
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();

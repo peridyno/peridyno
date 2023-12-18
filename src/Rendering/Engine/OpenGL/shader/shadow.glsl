@@ -1,4 +1,8 @@
-/***************** ShadowMap *********************/
+
+/*
+*  ShadowMap
+*/
+
 layout(std140, binding = 3) uniform ShadowUniform{
 	mat4	transform;
 	float	minValue;		// patch to color bleeding

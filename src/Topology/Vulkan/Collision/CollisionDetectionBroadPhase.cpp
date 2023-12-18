@@ -41,11 +41,6 @@ namespace dyno
 	{
 	}
 
-	bool CollisionDetectionBroadPhase::initializeImpl()
-	{
-		return true;
-	}
-
 	void CollisionDetectionBroadPhase::compute()
 	{
 		uint num = this->inBoundingBox()->size();

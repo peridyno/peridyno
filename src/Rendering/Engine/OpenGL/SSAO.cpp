@@ -3,6 +3,9 @@
 #include <random>
 #include <glad/glad.h>
 
+#include "screen.vert.h"
+#include "ssao.frag.h"
+
 namespace dyno
 {
 	SSAO::SSAO()
@@ -10,7 +13,9 @@ namespace dyno
 		mWidth = mHeight = 0;
 
 		// shader programs
-		mSSAOProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "ssao.frag");
+		mSSAOProgram = gl::Program::createProgramSPIRV(
+			SCREEN_VERT, sizeof(SCREEN_VERT),
+			SSAO_FRAG, sizeof(SSAO_FRAG));
 
 		// SSAO kernel
 		mSSAOKernelUBO.create(GL_UNIFORM_BUFFER, GL_STATIC_DRAW);

@@ -1,5 +1,9 @@
 
-// refer to https://learnopengl.com
+/*
+* PBR shading
+* refer to https://learnopengl.com
+*/
+
 const float PI = 3.14159265359;
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {

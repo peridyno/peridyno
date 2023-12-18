@@ -4,112 +4,64 @@
 
 namespace dyno
 {
-#define GRAVITY 9.83219 * 0.5
-#define BLOCKSIZE_X 16
-#define BLOCKSIZE_Y 16
-
+#define GRAVITY 9.83219
 
 	template<typename TDataType>
-	CapillaryWave<TDataType>::CapillaryWave(int size, float patchLength, std::string name)
-		: Node(name)
+	CapillaryWave<TDataType>::CapillaryWave()
+		: Node()
 	{
-		//heights = std::make_shared<HeightField<TDataType>>();
-		//int size = this->varSize()->getData();
-		//float patchLength = this->varPatchLength()->getData();
-
 		auto heights = std::make_shared<HeightField<TDataType>>();
-		heights->setExtents(size, size);
-		this->stateTopology()->setDataPtr(heights);
-
-		mResolution = size;
-		mChoppiness = 1.0f;
-
-		patchLength = patchLength;
-		realGridSize = patchLength / size;
-
-		simulatedRegionWidth = size;
-		simulatedRegionHeight = size;
-
-		initialize();
-
-	}
-
-	template<typename TDataType>
-	CapillaryWave<TDataType>::CapillaryWave(std::string name)
-		: Node(name)
-	{
-		int size = this->varSize()->getData();
-		float patchLength = this->varPatchLength()->getData();
-
-		auto heights = std::make_shared<HeightField<TDataType>>();
-		heights->setExtents(size, size);
-		this->stateTopology()->setDataPtr(heights);
-
-		mResolution = size;
-		mChoppiness = 1.0f;
-
-		patchLength = patchLength;
-		realGridSize = patchLength / size;
-
-		simulatedRegionWidth = size;
-		simulatedRegionHeight = size;
-
-		initialize();
-
+		this->stateHeightField()->setDataPtr(heights);
 	}
 
 	template<typename TDataType>
 	CapillaryWave<TDataType>::~CapillaryWave()
 	{
-		mDisplacement.clear();
 		mDeviceGrid.clear();
 		mDeviceGridNext.clear();
-		mHeight.clear();
+
 		mSource.clear();
 		mWeight.clear();
 	}
 
-	template <typename Coord>
-	__global__ void O_UpdateTopology(
-		DArray2D<Coord> displacement,
-		DArray2D<Vec4f> dis,
-		float choppiness)
+	template <typename Coord3D, typename Coord4D>
+	__global__ void CW_UpdateHeightDisp(
+		DArray2D<Coord3D> displacement,
+		DArray2D<Coord4D> dis)
 	{
 		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
 		if (i < displacement.nx() && j < displacement.ny())
 		{
-			int id = displacement.index(i, j);
-			displacement(i, j).y = dis[id].x;
+			displacement(i, j).y = dis(i, j).x;
 		}
 	}
 
 	template <typename Coord>
 	__device__ float C_GetU(Coord gp)
 	{
-		float h = max(gp.x, 0.0f);
-		float uh = gp.y;
+		Real h = max(gp.x, 0.0f);
+		Real uh = gp.y;
 
-		float h4 = h * h * h * h;
+		Real h4 = h * h * h * h;
 		return sqrtf(2.0f) * h * uh / (sqrtf(h4 + max(h4, EPSILON)));
 	}
 
 	template <typename Coord>
-	__device__ float C_GetV(Coord gp)
+	__device__ Real C_GetV(Coord gp)
 	{
-		float h = max(gp.x, 0.0f);
-		float vh = gp.z;
+		Real h = max(gp.x, 0.0f);
+		Real vh = gp.z;
 
-		float h4 = h * h * h * h;
+		Real h4 = h * h * h * h;
 		return sqrtf(2.0f) * h * vh / (sqrtf(h4 + max(h4, EPSILON)));
 	}
 
-	template <typename Coord>
+	template <typename Coord2D, typename Coord4D>
 	__global__ void AddSource(
-		DArray2D<Coord> grid,
-		DArray2D<Vec2f> mSource,
-		int patchSize,
-		int pitchSize)
+		DArray2D<Coord4D> grid,
+		DArray2D<Coord2D> mSource,
+		int patchSize)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -118,13 +70,13 @@ namespace dyno
 			int gx = i + 1;
 			int gy = j + 1;
 
-			Coord gp = grid[gx + gy * pitchSize];
-			Vec2f s_ij = mSource[i + j * patchSize];
+			Coord4D gp = grid(gx, gy);
+			Coord2D s_ij = mSource(i, j);
 
-			float h = gp.x;
-			float u = C_GetU(gp);
-			float v = C_GetV(gp);
-			float length = sqrt(s_ij.x * s_ij.x + s_ij.y * s_ij.y);
+			Real h = gp.x;
+			Real u = C_GetU(gp);
+			Real v = C_GetV(gp);
+			Real length = sqrt(s_ij.x * s_ij.x + s_ij.y * s_ij.y);
 			if (length > 0.001f)
 			{
 				u += s_ij.x;
@@ -141,39 +93,31 @@ namespace dyno
 			gp.y = u * h;
 			gp.z = v * h;
 
-			grid[gx + gy * pitchSize] = gp;
+			grid(gx, gy) = gp;
 		}
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::addSource()
 	{
-		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
+		uint res = this->varResolution()->getValue();
 
-		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
+		cuExecute2D(make_uint2(res, res),
 			AddSource,
-			mDeviceGridNext,
+			mDeviceGrid,
 			mSource,
-			simulatedRegionWidth,
-			gridPitch);
-
-		//swapDeviceGrid();
-
+			res);
 	}
 
 	template <typename Coord>
-	__global__ void MoveSimulatedRegion(
+	__global__ void CW_MoveSimulatedRegion(
 		DArray2D<Coord> grid_next,
 		DArray2D<Coord> grid,
 		int width,
 		int height,
 		int dx,
 		int dy,
-		int pitch,
-		float horizon)
+		Real level)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -182,8 +126,8 @@ namespace dyno
 			int gx = i + 1;
 			int gy = j + 1;
 
-			Coord gp = grid[gx + gy * pitch];
-			Coord gp_init = Coord(horizon, 0.0f, 0.0f, gp.w);
+			Coord gp = grid(gx, gy);
+			Coord gp_init = Coord(level, 0.0f, 0.0f, gp.w);
 
 			int new_i = i - dx;
 			int new_j = j - dy;
@@ -198,95 +142,171 @@ namespace dyno
 			new_j = new_j % height;
 			if (new_j < 0) new_j = height + new_j;
 
-			grid[(new_j + 1) * pitch + new_i + 1] = gp;
+			grid(new_i + 1, new_j + 1) = gp;
 		}
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::moveDynamicRegion(int nx, int ny)
 	{
+		auto res = this->varResolution()->getValue();
 
-		int extNx = simulatedRegionWidth + 2;
-		int extNy = simulatedRegionHeight + 2;
+		auto level = this->varWaterLevel()->getValue();
 
-		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
+		int extNx = res + 2;
+		int extNy = res + 2;
 
-		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionHeight),
-			MoveSimulatedRegion,
+		cuExecute2D(make_uint2(extNx, extNy),
+			CW_MoveSimulatedRegion,
 			mDeviceGridNext,
 			mDeviceGrid,
-			simulatedRegionWidth,
-			simulatedRegionHeight,
+			res,
+			res,
 			nx,
 			ny,
-			gridPitch,
-			horizon);
+			level);
 
-		swapDeviceGrid();
+		//TODO: validation
+		//swapDeviceGrid();
 
 		addSource();
 
-		simulatedOriginX += nx;
-		simulatedOriginY += ny;
-
-		//	std::cout << "Origin X: " << m_simulatedOriginX << " Origin Y: " << m_simulatedOriginY << std::endl;
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::updateTopology()
-	{
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
-
-		auto& shifts = topo->getDisplacement();
-
-		uint2 extent;
-		extent.x = shifts.nx();
-		extent.y = shifts.ny();
-
-		cuExecute2D(extent,
-			O_UpdateTopology,
-			shifts,
-			mHeight,
-			mChoppiness);
+		mOriginX += nx;
+		mOriginY += ny;
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::resetStates()
 	{
-		
+		int res = this->varResolution()->getValue();
+		Real length = this->varLength()->getValue();
+
+		Real level = this->varWaterLevel()->getValue();
+
+		mRealGridSize = length / res;
+
+		int extNx = res + 2;
+		int extNy = res + 2;
+
+		mDeviceGrid.resize(extNx, extNy);
+		mDeviceGridNext.resize(extNx, extNy);
+		this->stateHeight()->resize(res, res);
+
+		//init grid with initial values
+		cuExecute2D(make_uint2(extNx, extNy),
+			InitDynamicRegion,
+			mDeviceGrid,
+			extNx,
+			extNy,
+			level);
+
+		//init grid_next with initial values
+		cuExecute2D(make_uint2(extNx, extNy),
+			InitDynamicRegion,
+			mDeviceGridNext,
+			extNx,
+			extNy,
+			level);
+
+//		initSource();
+
+		auto topo = this->stateHeightField()->getDataPtr();
+		topo->setExtents(res, res);
+
+		auto& disp = topo->getDisplacement();
+
+		uint2 extent;
+		extent.x = disp.nx();
+		extent.y = disp.ny();
+
+		cuExecute2D(extent,
+			CW_InitHeightDisp,
+			this->stateHeight()->getData(),
+			disp,
+			level);
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateStates()
 	{
-		compute();
-		this->animationPipeline()->update();
+		Real dt = this->stateTimeStep()->getValue();
+
+		Real level = this->varWaterLevel()->getValue();
+
+		uint res = this->varResolution()->getValue();
+
+		int extNx = res + 2;
+		int extNy = res + 2;
+
+		int nStep = 1;
+		float timestep = dt / nStep;
+
+		for (int iter = 0; iter < nStep; iter++)
+		{
+			cuExecute2D(make_uint2(extNx, extNy),
+				CW_ImposeBC,
+				mDeviceGridNext,
+				mDeviceGrid,
+				extNx,
+				extNy);
+
+			cuExecute2D(make_uint2(res, res),
+				CW_OneWaveStep,
+				mDeviceGrid,
+				mDeviceGridNext,
+				res,
+				res,
+				timestep);
+		}
+
+		cuExecute2D(make_uint2(res, res),
+			CW_InitHeights,
+			this->stateHeight()->getData(),
+			mDeviceGrid,
+			res,
+			mRealGridSize);
+
+		cuExecute2D(make_uint2(res, res),
+			CW_InitHeightGrad,
+			this->stateHeight()->getData(),
+			res);
+
+		//Update topology
+		auto topo = this->stateHeightField()->getDataPtr();
+
+		auto& disp = topo->getDisplacement();
+
+		uint2 extent;
+		extent.x = disp.nx();
+		extent.y = disp.ny();
+
+		cuExecute2D(extent,
+			CW_UpdateHeightDisp,
+			disp,
+			this->stateHeight()->getData());
 	}
 
-	template <typename Coord>
-	__global__ void InitDynamicRegion(DArray2D<Coord> grid, int gridwidth, int gridheight, int pitch, float level)
+	template <typename Coord4D>
+	__global__ void InitDynamicRegion(DArray2D<Coord4D> grid, int gridwidth, int gridheight, float level)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
 		if (x < gridwidth && y < gridheight)
 		{
-			Coord gp;
+			Coord4D gp;
 			gp.x = level;
 			gp.y = 0.0f;
 			gp.z = 0.0f;
 			gp.w = 0.0f;
 
-			grid[y * pitch + x] = gp;
-			//grid2Dwrite(grid, x, y, pitch, gp);
-			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid[y * pitch + x].x = 5.0f;
+			grid(x, y) = gp;
+			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid(x, y).x = 5.0f;
 		}
 	}
 
+	template<typename Coord2D>
 	__global__ void InitSource(
-		DArray2D<Vec2f> source,
+		DArray2D<Coord2D> source,
 		int patchSize)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -295,14 +315,14 @@ namespace dyno
 		{
 			if (i < patchSize / 2 + 3 && i > patchSize / 2 - 3 && j < patchSize / 2 + 3 && j > patchSize / 2 - 3)
 			{
-				Vec2f uv(1.0f, 1.0f);
+				Coord2D uv(1.0f, 1.0f);
 				source[i + j * patchSize] = uv;
 			}
 		}
 	}
 
-	template <typename Coord>
-	__global__ void ImposeBC(DArray2D<Coord> grid_next, DArray2D<Coord> grid, int width, int height, int pitch)
+	template <typename Coord4D>
+	__global__ void CW_ImposeBC(DArray2D<Coord4D> grid_next, DArray2D<Coord4D> grid, int width, int height)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -310,34 +330,34 @@ namespace dyno
 		{
 			if (x == 0)
 			{
-				Coord a = grid[(y)*pitch + 1];
-				grid_next[(y)*pitch + x] = a;
+				Coord4D a = grid(1, y);
+				grid_next(x, y) = a;
 			}
 			else if (x == width - 1)
 			{
-				Coord a = grid[(y)*pitch + width - 2];
-				grid_next[(y)*pitch + x] = a;
+				Coord4D a = grid(width - 2, y);
+				grid_next(x, y) = a;
 			}
 			else if (y == 0)
 			{
-				Coord a = grid[(1) * pitch + x];
-				grid_next[(y)*pitch + x] = a;
+				Coord4D a = grid(x, 1);
+				grid_next(x, y) = a;
 			}
 			else if (y == height - 1)
 			{
-				Coord a = grid[(height - 2) * pitch + x];
-				grid_next[(y)*pitch + x] = a;
+				Coord4D a = grid(x, height - 2);
+				grid_next(x, y) = a;
 			}
 			else
 			{
-				Coord a = grid[(y)*pitch + x];
-				grid_next[(y)*pitch + x] = a;
+				Coord4D a = grid(x, y);
+				grid_next(x, y) = a;
 			}
 		}
 	}
 
 	template <typename Coord>
-	__host__ __device__ void C_FixShore(Coord& l, Coord& c, Coord& r)
+	__host__ __device__ void CW_FixShore(Coord& l, Coord& c, Coord& r)
 	{
 
 		if (r.x < 0.0f || l.x < 0.0f || c.x < 0.0f)
@@ -357,7 +377,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__host__ __device__ Coord C_VerticalPotential(Coord gp)
+	__host__ __device__ Coord CW_VerticalPotential(Coord gp)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -375,7 +395,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__device__ Coord C_HorizontalPotential(Coord gp)
+	__device__ Coord CW_HorizontalPotential(Coord gp)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -405,8 +425,8 @@ namespace dyno
 		return H;
 	}
 
-	template <typename Coord>
-	__global__ void OneWaveStep(DArray2D<Coord> grid_next, DArray2D<Coord> grid, int width, int height, float timestep, int pitch)
+	template <typename Coord4D>
+	__global__ void CW_OneWaveStep(DArray2D<Coord4D> grid_next, DArray2D<Coord4D> grid, int width, int height, float timestep)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -416,37 +436,36 @@ namespace dyno
 			int gridx = x + 1;
 			int gridy = y + 1;
 
-			Coord center = grid[gridx + pitch * gridy];
+			Coord4D center = grid(gridx, gridy);
 
-			Coord north = grid[gridx + pitch * (gridy - 1)];
+			Coord4D north = grid(gridx, gridy - 1);
 
-			Coord west = grid[gridx - 1 + pitch * gridy];
+			Coord4D west = grid(gridx - 1, gridy);
 
-			Coord south = grid[gridx + pitch * (gridy + 1)];
+			Coord4D south = grid(gridx, gridy + 1);
 
-			Coord east = grid[gridx + 1 + pitch * gridy];
+			Coord4D east = grid(gridx + 1, gridy);
 
-			C_FixShore(west, center, east);
-			C_FixShore(north, center, south);
+			CW_FixShore(west, center, east);
+			CW_FixShore(north, center, south);
 
-			Coord u_south = 0.5f * (south + center) - timestep * (C_VerticalPotential(south) - C_VerticalPotential(center));
-			Coord u_north = 0.5f * (north + center) - timestep * (C_VerticalPotential(center) - C_VerticalPotential(north));
-			Coord u_west = 0.5f * (west + center) - timestep * (C_HorizontalPotential(center) - C_HorizontalPotential(west));
-			Coord u_east = 0.5f * (east + center) - timestep * (C_HorizontalPotential(east) - C_HorizontalPotential(center));
+			Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south) - CW_VerticalPotential(center));
+			Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center) - CW_VerticalPotential(north));
+			Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center) - CW_HorizontalPotential(west));
+			Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east) - CW_HorizontalPotential(center));
 
-			Coord u_center = center + timestep * C_SlopeForce(center, north, east, south, west) - timestep * (C_HorizontalPotential(u_east) - C_HorizontalPotential(u_west)) - timestep * (C_VerticalPotential(u_south) - C_VerticalPotential(u_north));
+			Coord4D u_center = center + timestep * C_SlopeForce(center, north, east, south, west) - timestep * (CW_HorizontalPotential(u_east) - CW_HorizontalPotential(u_west)) - timestep * (CW_VerticalPotential(u_south) - CW_VerticalPotential(u_north));
 			u_center.x = max(0.0f, u_center.x);
 
-			grid_next[gridx + gridy * pitch] = u_center;
+			grid_next(gridx, gridy) = u_center;
 		}
 	}
 
 	template <typename Coord>
-	__global__ void InitHeightField(
+	__global__ void CW_InitHeights(
 		DArray2D<Coord> height,
 		DArray2D<Coord> grid,
 		int patchSize,
-		float horizon,
 		float realSize)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -456,20 +475,20 @@ namespace dyno
 			int gridx = i + 1;
 			int gridy = j + 1;
 
-			Coord gp = grid[gridx + patchSize * gridy];
-			height[i + j * patchSize].x = gp.x - horizon;
+			Coord gp = grid(gridx, gridy);
+			height(i, j).x = gp.x;
 
 			float d = sqrtf((i - patchSize / 2) * (i - patchSize / 2) + (j - patchSize / 2) * (j - patchSize / 2));
 			float q = d / (0.49f * patchSize);
 
 			float weight = q < 1.0f ? 1.0f - q * q : 0.0f;
-			height[i + j * patchSize].y = 1.3f * realSize * sinf(3.0f * weight * height[i + j * patchSize].x * 0.5f * M_PI);
+			height(i, j).y = 1.3f * realSize * sinf(3.0f * weight * height(i, j).x * 0.5f * M_PI);
 		}
 	}
 
-	template <typename Coord>
-	__global__ void InitHeightGrad(
-		DArray2D<Coord> height,
+	template <typename Coord4D>
+	__global__ void CW_InitHeightGrad(
+		DArray2D<Coord4D> height,
 		int patchSize)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -481,189 +500,38 @@ namespace dyno
 			int j_minus_one = (j - 1 + patchSize) % patchSize;
 			int j_plus_one = (j + 1) % patchSize;
 
-			Coord Dx = (height[i_plus_one + j * patchSize] - height[i_minus_one + j * patchSize]) / 2;
-			Coord Dz = (height[i + j_plus_one * patchSize] - height[i + j_minus_one * patchSize]) / 2;
+			Coord4D Dx = (height(i_plus_one, j) - height(i_minus_one, j)) / 2;
+			Coord4D Dz = (height(i, j_plus_one) - height(i, j_minus_one)) / 2;
 
-			height[i + patchSize * j].z = Dx.y;
-			height[i + patchSize * j].w = Dz.y;
+			height(i, j).z = Dx.y;
+			height(i, j).w = Dz.y;
 		}
 	}
 
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::compute()
-	{
-		float dt = 0.016f;
-
-		int extNx = simulatedRegionWidth + 2;
-		int extNy = simulatedRegionHeight + 2;
-
-		cudaError_t error;
-		// make dimension
-		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
-
-		int x1 = (extNx + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y1 = (extNy + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock1(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid1(x1, y1);
-
-		int nStep = 1;
-		float timestep = dt / nStep;
-
-		for (int iter = 0; iter < nStep; iter++)
-		{
-			cuExecute2D(make_uint2(extNx, extNy),
-				ImposeBC,
-				mDeviceGridNext,
-				mDeviceGrid,
-				extNx,
-				extNy,
-				gridPitch);
-
-			swapDeviceGrid();
-
-			cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionHeight),
-				OneWaveStep,
-				mDeviceGridNext,
-				mDeviceGrid,
-				simulatedRegionWidth,
-				simulatedRegionHeight,
-				1.0f * timestep,
-				gridPitch);
-
-			swapDeviceGrid();
-		}
-
-		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
-			InitHeightField,
-			mHeight,
-			mDeviceGrid,
-			simulatedRegionWidth,
-			horizon,
-			realGridSize);
-
-		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
-			InitHeightGrad,
-			mHeight,
-			simulatedRegionWidth);
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::initialize() {
-		initDynamicRegion();
-
-		initSource();
-
-		initHeightPosition();
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::initDynamicRegion() {
-		int extNx = simulatedRegionWidth + 2;
-		int extNy = simulatedRegionHeight + 2;
-
-		mDeviceGrid.resize(extNx, extNy);
-		mDeviceGridNext.resize(extNx, extNy);
-		mHeight.resize(simulatedRegionWidth, simulatedRegionHeight);
-
-		gridPitch = mResolution;
-
-		int x = (extNx + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (extNy + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
-
-		//init grid with initial values
-		cuExecute2D(make_uint2(extNx, extNy),
-			InitDynamicRegion,
-			mDeviceGrid,
-			extNx,
-			extNy,
-			gridPitch,
-			horizon);
-
-		//init grid_next with initial values
-		cuExecute2D(make_uint2(extNx, extNy),
-			InitDynamicRegion,
-			mDeviceGridNext,
-			extNx,
-			extNy,
-			gridPitch,
-			horizon);
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::initSource() {
-		//int sizeInBytes = simulatedRegionWidth * simulatedRegionHeight * sizeof(float2);
-
-		mSource.resize(simulatedRegionWidth, simulatedRegionHeight);
-		mWeight.resize(simulatedRegionWidth, simulatedRegionHeight);
-
-		//cuSafeCall(cudaMalloc(&mWeight, simulatedRegionWidth * simulatedRegionHeight * sizeof(float)));
-
-		int x = (simulatedRegionWidth + BLOCKSIZE_X - 1) / BLOCKSIZE_X;
-		int y = (simulatedRegionHeight + BLOCKSIZE_Y - 1) / BLOCKSIZE_Y;
-		dim3 threadsPerBlock(BLOCKSIZE_X, BLOCKSIZE_Y);
-		dim3 blocksPerGrid(x, y);
-
-		cuExecute2D(make_uint2(simulatedRegionWidth, simulatedRegionWidth),
-			InitSource,
-			mSource,
-			simulatedRegionWidth);
-
-		resetSource();
-	}
-
-	template <typename Coord>
-	__global__ void InitHeightPosition(
-		DArray2D<Coord> displacement,
-		float horizon)
+	template <typename Real, typename Coord3D, typename Coord4D>
+	__global__ void CW_InitHeightDisp(
+		DArray2D<Coord4D> heights,
+		DArray2D<Coord3D> displacement,
+		Real horizon)
 	{
 		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
 		if (i < displacement.nx() && j < displacement.ny())
 		{
-			int id = displacement.index(i, j);
 			displacement(i, j).x = 0;
 			displacement(i, j).y = horizon;
 			displacement(i, j).z = 0;
 
-			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500)  displacement(i, j).y = 5.0f;
+			heights(i, j).x = horizon;
+			heights(i, j).y = 0;
+			heights(i, j).z = 0;
+			heights(i, j).w = 0;
+
+			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500) {
+				displacement(i, j).y = 5.0f;
+				heights(i, j).x = 5.0f;
+			}
 		}
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::initHeightPosition() {
-		auto topo = TypeInfo::cast<HeightField<TDataType>>(this->stateTopology()->getDataPtr());
-
-		auto& shifts = topo->getDisplacement();
-
-		uint2 extent;
-		extent.x = shifts.nx();
-		extent.y = shifts.ny();
-
-		cuExecute2D(extent,
-			InitHeightPosition,
-			shifts,
-			horizon);
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::resetSource()
-	{
-		//cudaMemset(mWeight, 0, simulatedRegionWidth * simulatedRegionHeight * sizeof(float));
-		mWeight.reset();
-		mSource.reset();
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::swapDeviceGrid()
-	{
-		DArray2D<Vec4f> grid_helper = mDeviceGrid;
-		mDeviceGrid = mDeviceGridNext;
-		mDeviceGridNext = grid_helper;
 	}
 
 	DEFINE_CLASS(CapillaryWave);

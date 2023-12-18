@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include "Vector.h"
+#include <Vector.h>
+#include <RenderParams.h>
 
 namespace dyno
 {
@@ -29,8 +30,8 @@ namespace dyno
 		GLRenderHelper();
 		~GLRenderHelper();
 
-		void drawGround(float planeScale, float rulerScale = 1.f);
-		void drawBBox(Vec3f pmin, Vec3f pmax, int type = 0);
+		void drawGround(const RenderParams& rparams, float planeScale, float rulerScale = 1.f);
+		void drawBBox(const RenderParams& rparams, Vec3f pmin, Vec3f pmax, int type = 0);
 		void drawBackground(Vec3f color0, Vec3f color1);
 
 	private:

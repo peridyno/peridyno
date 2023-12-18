@@ -1,8 +1,8 @@
+// shader for Order-Independent-Transparency blending
 #version 440
 
-
-
-#include "transparent.glsl"
+#extension GL_GOOGLE_include_directive: enable
+#include "transparency.glsl"
 
 layout(location = 0) out vec4  fragColor;
 layout(location = 1) out ivec4 fragIndices;

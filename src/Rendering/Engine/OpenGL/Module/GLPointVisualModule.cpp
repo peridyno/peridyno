@@ -6,6 +6,9 @@
 // opengl
 #include <glad/glad.h>
 
+#include "point.vert.h"
+#include "point.frag.h"
+
 #ifdef CUDA_BACKEND
 // cuda
 #include <cuda_gl_interop.h>
@@ -25,10 +28,7 @@ namespace dyno
 		mNumPoints = 0;
 		this->setName("point_renderer");
 		this->inColor()->tagOptional(true);
-
 		this->varPointSize()->setRange(0.001f, 1.0f);
-
-
 		this->varForceUpdate()->setValue(true);
 	}
 
@@ -43,56 +43,55 @@ namespace dyno
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
-		this->varColorMode()->getDataPtr()->setCurrentKey(mode);
+		this->varColorMode()->setCurrentKey(mode);
 	}
 
 	bool GLPointVisualModule::initializeGL()
 	{
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
-
 		mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 		mColor.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		mVertexArray.create();
-		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
-		mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
+		mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 
-		mShaderProgram = gl::ShaderFactory::createShaderProgram("point.vert", "point.frag");
+		mShaderProgram = gl::Program::createProgramSPIRV(
+			POINT_VERT, sizeof(POINT_VERT),
+			POINT_FRAG, sizeof(POINT_FRAG));
+
+		// create shader uniform buffer
+		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
 		gl::glCheckError();
 
 		return true;
 	}
 
-	void GLPointVisualModule::destroyGL()
+	void GLPointVisualModule::releaseGL()
 	{
-		if (isGLInitialized)
-		{
-			mShaderProgram->release();
-			delete mShaderProgram;
+		mShaderProgram->release();
+		delete mShaderProgram;
 
-			mPosition.release();
-			mColor.release();
-			mVertexArray.release();
+		mPosition.release();
+		mColor.release();
+		mVertexArray.release();
 
-			isGLInitialized = false;
-		}
+		mUniformBlock.release();
 	}
 
 	void GLPointVisualModule::updateGL()
 	{
-		updateMutex.lock();
+		mNumPoints = mPosition.count();
+		if (mNumPoints == 0) return;
 
-		uint vecSize = sizeof(Vec3f) / sizeof(float);
+		mPosition.updateGL();
+		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
 
-		mPosition.mapGL();
-		mVertexArray.bindVertexBuffer(&mPosition, 0, vecSize, GL_FLOAT, 0, 0, 0);
-
-		if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
+		if (this->varColorMode()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
 			&& !this->inColor()->isEmpty())
 		{
-			mColor.mapGL();
-			mVertexArray.bindVertexBuffer(&mColor, 1, vecSize, GL_FLOAT, 0, 0, 0);
+			mColor.updateGL();
+			mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 		}
 		else
 		{
@@ -100,60 +99,47 @@ namespace dyno
 			glDisableVertexAttribArray(1);
 			mVertexArray.unbind();
 		}
-
-		updateMutex.unlock();
 	}
 
-	void GLPointVisualModule::updateGraphicsContext()
+	void GLPointVisualModule::updateImpl()
 	{
-		updateMutex.lock();
 		// update data
 		auto pPointSet = this->inPointSet()->getDataPtr();
 		auto points = pPointSet->getPoints();
 
-		mNumPoints = points.size();
+		mPosition.load(points);
 
-		if (mNumPoints > 0)
+		if (this->varColorMode()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
+			&& !this->inColor()->isEmpty())
 		{
-			mPosition.load(points);
-
-			if (this->varColorMode()->getDataPtr()->currentKey() == ColorMapMode::PER_VERTEX_SHADER
-				&& !this->inColor()->isEmpty())
-			{
-				auto colors = this->inColor()->getData();
-				mColor.load(colors);
-			}
-
-			GLVisualModule::updateGraphicsContext();
+			auto colors = this->inColor()->getData();
+			mColor.load(colors);
 		}
-
-		updateMutex.unlock();
 	}
 
-	void GLPointVisualModule::paintGL(GLRenderPass pass)
+	void GLPointVisualModule::paintGL(const RenderParams& rparams)
 	{
 		if (mNumPoints == 0)
 			return;
 
+		// setup uniform buffer
+		mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+		mUniformBlock.bindBufferBase(0);
+
 		mShaderProgram->use();
-		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getData());
+		mShaderProgram->setFloat("uPointSize", this->varPointSize()->getValue());
 
-		unsigned int subroutine;
-		if (pass == GLRenderPass::COLOR)
+		if (rparams.mode == GLRenderMode::COLOR)
 		{
-			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getValue());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getValue());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getValue());
+		}
+		else if (rparams.mode == GLRenderMode::SHADOW)
+		{
 
-			subroutine = 0;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
 		}
-		else if (pass == GLRenderPass::SHADOW)
-		{
-			subroutine = 1;
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &subroutine);
-		}
-		else if (pass == GLRenderPass::TRANSPARENCY)
+		else if (rparams.mode == GLRenderMode::TRANSPARENCY)
 		{
 			printf("WARNING: GLPointVisualModule does not support transparency!\n");
 			return;
@@ -165,7 +151,7 @@ namespace dyno
 		}
 
 		// per-object color color
-		auto color = this->varBaseColor()->getData();
+		auto color = this->varBaseColor()->getValue();
 		glVertexAttrib3f(1, color.r, color.g, color.b);
 
 		mVertexArray.bind();

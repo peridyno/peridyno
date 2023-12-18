@@ -21,6 +21,7 @@
 #include "Vector.h"
 #include <glm/glm.hpp>
 
+
 namespace gl {
 
 	// OpenGL shader
@@ -30,6 +31,7 @@ namespace gl {
 	public:
 		bool createFromFile(unsigned int type, const std::string& path);
 		bool createFromSource(unsigned int type, const std::string& src);
+		bool createFromSPIRV(unsigned int type, const void* spirv, const size_t len);
 		void release();
 
 	protected:
@@ -56,13 +58,14 @@ namespace gl {
 		void setVec4(const char* name, dyno::Vec4f v);
 		void setVec3(const char* name, dyno::Vec3f v);
 		void setVec2(const char* name, dyno::Vec2f v);
-	};
 
-	// Shader factory for creating shader programs
-	class ShaderFactory {
 	public:
-		static bool initialize();
-		static Program* createShaderProgram(const char* vs, const char* fs, const char* gs = 0);
+		static Program* createProgram(const char* vs, const char* fs, const char* gs = 0);
+
+		static Program* createProgramSPIRV(
+			const void* vs, size_t vs_len,
+			const void* fs, size_t fs_len,
+			const void* gs = 0, size_t gs_len = 0);
 	};
 
 }

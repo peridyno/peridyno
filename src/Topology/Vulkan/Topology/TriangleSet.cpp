@@ -22,6 +22,16 @@ namespace dyno
 
 	}
 
+	void TriangleSet::setTriangles(std::vector<Triangle>& indices)
+	{
+		mTriangleIndex.assign(indices);
+	}
+
+	void TriangleSet::setTriangles(const DArray<Triangle>& indices)
+	{
+		mTriangleIndex.assign(indices);
+	}
+
 	void TriangleSet::updateTopology()
 	{
 		this->updateTriangles();

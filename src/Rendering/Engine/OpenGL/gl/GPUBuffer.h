@@ -16,9 +16,12 @@
 
 #pragma once
 
-#include "Platform.h"
 #include "Buffer.h"
 #include <Array/Array.h>
+
+#include <Vector.h>
+#include <Matrix/Transform3x3.h>
+#include <Module/TopologyModule.h>
 
 #ifdef CUDA_BACKEND
 struct cudaGraphicsResource;
@@ -33,54 +36,62 @@ namespace gl
 
 	// buffer for exchange data from simulation to rendering
 	// please note that we use additional buffer for r/w consistency between simulation and rendering loop
+	template<typename T>
 	class XBuffer : public gl::Buffer
 	{
 	public:
-		void release() override;
-		void allocate(int size) override;
+		// update OpenGL buffer within GL context
+		void updateGL();
+		// return number of elements
+		int  count() const;
 
-		template<typename T>
-		void load(dyno::Array<T, DeviceType::GPU> data)
-		{		
-
+		// load data to into an intermediate buffer
+		template<typename T1>
+		void load(dyno::DArray<T1> data)
+		{
 #ifdef VK_BACKEND
-			this->loadVulkan(data.buffer(), data.bufferSize());
+			this->loadVkBuffer(data.buffer(), data.bufferSize());
 #endif // VK_BACKEND
 
 #ifdef CUDA_BACKEND
-			this->loadCuda(data.begin(), data.size() * sizeof(T));
+			buffer.assign(data);
 #endif // CUDA_BACKEND
 		}
-
-		void mapGL();
 
 	private:
 
 #ifdef VK_BACKEND
 		VkBuffer		buffer = VK_NULL_HANDLE;
 		VkDeviceMemory	memory = VK_NULL_HANDLE;
-
-		VkCommandBuffer copyCmd = VK_NULL_HANDLE;
-
+		int srcBufferSize		= -1;	// real size of the data
+		int allocatedSize	= -1;	// allocated buffer size
 #ifdef WIN32
 		HANDLE handle = nullptr;  // The Win32 handle
 #else
 		int fd = -1;
 #endif
-		unsigned int memoryObject = 0;  // OpenGL memory object
+		// command for copy buffer
+		VkCommandBuffer copyCmd = VK_NULL_HANDLE;
 
-		void loadVulkan(VkBuffer src, int size);
+		unsigned int	memoryObject = 0;			// OpenGL memory object
+		unsigned int	tempBuffer = 0xffffffff;	// temp buffer
+		bool resized = true;
+
+		void loadVkBuffer(VkBuffer src, int size);
+		void allocateVkBuffer(int size);
+
 #endif	//VK_BACKEND
 
 
 #ifdef CUDA_BACKEND
-		cudaGraphicsResource*	resource = 0;
-		void*					buffer = 0;		// local cuda buffer
-
-		void loadCuda(void* src, int size);
+		dyno::DArray<T>	buffer;
+		cudaGraphicsResource* resource = 0;
 #endif
-
-		// resize flag
-		bool resized = false;
 	};
+
+	template class XBuffer<dyno::Vec2f>;
+	template class XBuffer<dyno::Vec3f>;
+	template class XBuffer<dyno::Transform3f>;
+	template class XBuffer<dyno::TopologyModule::Edge>;
+	template class XBuffer<dyno::TopologyModule::Triangle>;
 }

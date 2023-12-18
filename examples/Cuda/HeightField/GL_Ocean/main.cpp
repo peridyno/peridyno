@@ -6,8 +6,7 @@
 #include <HeightField/OceanPatch.h>
 #include <HeightField/CapillaryWave.h>
 
-#include "Mapping/HeightFieldToTriangleSet.h"
-
+#include <Mapping/HeightFieldToTriangleSet.h>
 
 #include <GLSurfaceVisualModule.h>
 
@@ -19,15 +18,15 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
+	oceanPatch->varWindType()->setValue(2);
 
 	auto root = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 	root->varExtentX()->setValue(2);
 	root->varExtentZ()->setValue(2);
 	oceanPatch->connect(root->importOceanPatch());
 
-	auto capillaryWave = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>(512, 512.0f));
-	capillaryWave->connect(root->importCapillaryWaves());
-	
+	auto waves = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>());
+	waves->connect(root->importCapillaryWaves());
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 // 	mapper->varScale()->setValue(0.01);

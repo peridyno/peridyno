@@ -112,7 +112,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointSet<TDataType>::scale(Real s)
+	void PointSet<TDataType>::scale(const Real s)
 	{
 		cuExecute(mCoords.size(), PS_Scale, mCoords, s);
 	}
@@ -130,7 +130,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointSet<TDataType>::scale(Coord s)
+	void PointSet<TDataType>::scale(const Coord s)
 	{
 		cuExecute(mCoords.size(), PS_Scale, mCoords, s);
 	}
@@ -148,7 +148,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void PointSet<TDataType>::translate(Coord t)
+	void PointSet<TDataType>::translate(const Coord t)
 	{
 		cuExecute(mCoords.size(), PS_Translate, mCoords, t);
 	}
@@ -191,7 +191,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void PointSet<TDataType>::rotate(Coord angle)
+	void PointSet<TDataType>::rotate(const Coord angle)
 	{
 		cuExecute(mCoords.size(), PS_Rotate, mCoords, angle, Coord(0.0f));
 	}
@@ -209,7 +209,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointSet<TDataType>::rotate(Quat<Real> q)
+	void PointSet<TDataType>::rotate(const Quat<Real> q)
 	{
 		cuExecute(mCoords.size(), PS_Rotate, mCoords, q);
 	}

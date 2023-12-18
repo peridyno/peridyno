@@ -17,7 +17,5 @@ namespace dyno
 		virtual void update() = 0;
 		virtual void paint() = 0;
 
-	protected:
-		void updateGraphicsContext() override;
 	};
 }

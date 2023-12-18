@@ -7,6 +7,13 @@
 #include <glad/glad.h>
 #include <vector>
 
+#include "plane.vert.h"
+#include "plane.frag.h"
+#include "bbox.vert.h"
+#include "bbox.frag.h"
+#include "screen.vert.h"
+#include "background.frag.h"
+
 namespace dyno
 {
 	class GroundRenderer
@@ -14,7 +21,9 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mProgram = gl::ShaderFactory::createShaderProgram("plane.vert", "plane.frag");
+			mProgram = gl::Program::createProgramSPIRV(
+				PLANE_VERT, sizeof(PLANE_VERT),
+				PLANE_FRAG, sizeof(PLANE_FRAG));
 			mPlane = gl::Mesh::Plane(1.f);
 
 			// create ruler texture
@@ -44,6 +53,8 @@ namespace dyno
 			mRulerTex.genMipmap();
 			// set anisotropy
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
+
+			mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		}
 
 		~GroundRenderer()
@@ -55,11 +66,16 @@ namespace dyno
 
 			mProgram->release();
 			delete mProgram;
+
+			mUniformBlock.release();
 		}
 
 
-		void draw(float planeScale, float rulerScale)
+		void draw(const RenderParams& rparams, float planeScale, float rulerScale)
 		{
+			mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+			mUniformBlock.bindBufferBase(0);
+
 			mRulerTex.bind(GL_TEXTURE1);
 
 			glEnable(GL_BLEND); 
@@ -80,6 +96,8 @@ namespace dyno
 		gl::Mesh*			mPlane;
 		gl::Texture2D 		mRulerTex;
 		gl::Program*		mProgram;
+
+		gl::Buffer			mUniformBlock;
 	};
 
 	class BBoxRenderer
@@ -87,11 +105,16 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mProgram = gl::ShaderFactory::createShaderProgram("bbox.vert", "bbox.frag");
+			mProgram = gl::Program::createProgramSPIRV(
+				BBOX_VERT, sizeof(BBOX_VERT), 
+				BBOX_FRAG, sizeof(BBOX_FRAG));
+
 			mCubeVBO.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 			mCubeVBO.load(0, 8 * 3 * sizeof(float));
 			mCubeVAO.create();
 			mCubeVAO.bindVertexBuffer(&mCubeVBO, 0, 3, GL_FLOAT, 0, 0, 0);
+
+			mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		}
 
 		~BBoxRenderer()
@@ -101,9 +124,11 @@ namespace dyno
 
 			mProgram->release();
 			delete mProgram;
+
+			mUniformBlock.release();
 		}
 
-		void draw(Vec3f p0, Vec3f p1, int type)
+		void draw(const RenderParams& rparams, Vec3f p0, Vec3f p1, int type)
 		{
 			float vertices[]{
 				p0[0], p0[1], p0[2],
@@ -116,6 +141,9 @@ namespace dyno
 				p1[0], p1[1], p1[2],
 				p1[0], p1[1], p0[2],
 			};
+
+			mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+			mUniformBlock.bindBufferBase(0);
 
 			mCubeVBO.load(vertices, sizeof(vertices));
 			mCubeVAO.bind();
@@ -160,6 +188,8 @@ namespace dyno
 		gl::VertexArray	mCubeVAO;
 		gl::Buffer		mCubeVBO;
 		gl::Program*	mProgram;
+
+		gl::Buffer		mUniformBlock;
 	};
 
 	class BackgroundRenderer
@@ -169,7 +199,9 @@ namespace dyno
 		{
 			// create a quad object
 			mScreenQuad = gl::Mesh::ScreenQuad();
-			mBackgroundProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "background.frag");
+			mBackgroundProgram = gl::Program::createProgramSPIRV(
+				SCREEN_VERT, sizeof(SCREEN_VERT),
+				BACKGROUND_FRAG, sizeof(BACKGROUND_FRAG));
 		}
 
 		~BackgroundRenderer() {
@@ -212,16 +244,16 @@ namespace dyno
 		if (mBackgroundRenderer) delete mBackgroundRenderer;
 	}
 
-	void GLRenderHelper::drawGround(float planeScale, float rulerScale)
+	void GLRenderHelper::drawGround(const RenderParams& rparams, float planeScale, float rulerScale)
 	{
 		if (mGroundRenderer != NULL)
-			mGroundRenderer->draw(planeScale, rulerScale);
+			mGroundRenderer->draw(rparams, planeScale, rulerScale);
 	}
 
-	void GLRenderHelper::drawBBox(Vec3f p0, Vec3f p1, int type)
+	void GLRenderHelper::drawBBox(const RenderParams& rparams, Vec3f p0, Vec3f p1, int type)
 	{
 		if (mBBoxRenderer != NULL)
-			mBBoxRenderer->draw(p0, p1, type);
+			mBBoxRenderer->draw(rparams, p0, p1, type);
 	}
 
 	void GLRenderHelper::drawBackground(Vec3f color0, Vec3f color1)

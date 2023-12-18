@@ -1,27 +1,28 @@
 #version 440
 
-
+#extension GL_GOOGLE_include_directive: enable
 #include "common.glsl"
 
-layout (lines) in;
-
+layout(lines) in;
 layout(triangle_strip, max_vertices = 72) out;
 
-uniform int		uEdgeMode = 1;
-// radius for cylinder
-uniform float	uRadius = 0.003;
+layout(location = 0) uniform int	uEdgeMode = 1;
+layout(location = 1) uniform float	uRadius = 0.003;
 
-in VertexData {
+layout(location = 0) in VertexData {
 	vec3 position;
 	vec3 normal;
 	vec3 color;
 	int  instanceID; 	// not used for this type
 } gs_in[];
 
-out VertexData {
+layout(location = 0) out VertexData {
 	vec3 position;
 	vec3 normal;
 	vec3 color;
+	vec3 texCoord;	
+	vec3 tangent;
+    vec3 bitangent;
 	int  instanceID; 	// not used for this type
 };
 
@@ -104,10 +105,10 @@ void cylinder() {
 		vec3 p10 = p0 + R * (vec3(x1, y1, 0.f) * scale);
 		vec3 p11 = p0 + R * (vec3(x1, y1, 1.f) * scale);
 
-		vec4 p00p = uTransform.proj * vec4(p00, 1);
-		vec4 p01p = uTransform.proj * vec4(p01, 1);
-		vec4 p10p = uTransform.proj * vec4(p10, 1);
-		vec4 p11p = uTransform.proj * vec4(p11, 1);
+		vec4 p00p = uRenderParams.proj * vec4(p00, 1);
+		vec4 p01p = uRenderParams.proj * vec4(p01, 1);
+		vec4 p10p = uRenderParams.proj * vec4(p10, 1);
+		vec4 p11p = uRenderParams.proj * vec4(p11, 1);
 		
 		color = gs_in[0].color;
 

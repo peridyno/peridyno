@@ -31,8 +31,8 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Create a cube
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0.6, 0.85, 0.5));
-	cube->varLength()->setValue(Vec3f(0.1, 0.65, 0.1));
+	cube->varLocation()->setValue(Vec3f(0.6, 0.5, 0.5));
+	cube->varLength()->setValue(Vec3f(0.2, 0.2, 0.2));
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
@@ -47,6 +47,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->varReshuffleParticles()->setValue(true);
 	//fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 	initialParticles->connect(fluid->importInitialStates());
 

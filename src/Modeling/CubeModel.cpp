@@ -86,11 +86,11 @@ namespace dyno
 	template<typename TDataType>
 	void CubeModel<TDataType>::varChanged() 
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto length = this->varLength()->getData();
+		auto length = this->varLength()->getValue();
 
 		length[0] *= scale[0];
 		length[1] *= scale[1];
@@ -109,7 +109,7 @@ namespace dyno
 
 		this->outCube()->setValue(box);
 
-		auto segments = this->varSegments()->getData();
+		auto segments = this->varSegments()->getValue();
 
 		uint nyz = 2 * (segments[1] + segments[2]);
 

@@ -24,6 +24,9 @@
 #include <unordered_set>
 #include <memory>
 
+#include "screen.vert.h"
+#include "blend.frag.h"
+
 namespace dyno
 {
 	GLRenderEngine::GLRenderEngine()
@@ -49,17 +52,11 @@ namespace dyno
 		glDepthFunc(GL_LEQUAL);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		setupInternalFramebuffer();
+		createFramebuffer();
 
 		// OIT
 		setupTransparencyPass();
 
-		// create uniform block for transform
-		mTransformUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-		// create uniform block for light
-		mLightUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
-		// create uniform bnlock for global variables
-		mVariableUBO.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		gl::glCheckError();
 
 		// create a screen quad
@@ -75,7 +72,7 @@ namespace dyno
 	{
 		// release render modules
 		for (auto item : mRenderItems) {
-			item.visualModule->destroyGL();
+			item.visualModule->release();
 		}
 
 		// release framebuffer
@@ -90,11 +87,6 @@ namespace dyno
 		mHeadIndexTex.release();
 		mBlendProgram->release();
 		delete mBlendProgram;
-
-		// release uniform buffers
-		mTransformUBO.release();
-		mLightUBO.release();
-		mVariableUBO.release();
 
 		// release other objects
 		mScreenQuad->release();
@@ -129,11 +121,13 @@ namespace dyno
 		mHeadIndexTex.create();
 		mHeadIndexTex.resize(1, 1);
 
-		mBlendProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "blend.frag");
+		mBlendProgram = gl::Program::createProgramSPIRV(
+			SCREEN_VERT, sizeof(SCREEN_VERT),
+			BLEND_FRAG, sizeof(BLEND_FRAG));
 	}
 
 
-	void GLRenderEngine::setupInternalFramebuffer()
+	void GLRenderEngine::createFramebuffer()
 	{
 		// create render textures
 		mColorTex.maxFilter = GL_LINEAR;
@@ -178,142 +172,98 @@ namespace dyno
 		gl::glCheckError();
 	}
 
-	void GLRenderEngine::updateRenderModules(dyno::SceneGraph* scene)
+	void GLRenderEngine::updateRenderItems(dyno::SceneGraph* scene)
 	{
-
 		std::vector<RenderItem> items;
-
 		for (auto iter = scene->begin(); iter != scene->end(); iter++) {
-			auto node = iter.get();
-
-			for (auto m : node->graphicsPipeline()->activeModules()) {
-				auto vm = std::dynamic_pointer_cast<GLVisualModule>(m);
-				if (vm) {
-					items.push_back({ node, vm });
-				}
+			for (auto m : iter->graphicsPipeline()->activeModules()) {
+				if (auto vm = std::dynamic_pointer_cast<GLVisualModule>(m))
+					items.push_back({ iter.get(), vm });
 			}
 		}
 
-		
-		for (auto item : mRenderItems) {
-			// release GL resource for unreferenced visual module
+		// release GL resource for unreferenced visual module
+		for (auto item : mRenderItems) {			
 			if (std::find(items.begin(), items.end(), item) == items.end())
-			{
-				item.visualModule->destroyGL();
-			}
+				item.visualModule->release();
 		}
-
 		mRenderItems = items;
-
-
-		// initialize modules
-		for (auto item : mRenderItems) {
-			if (!item.visualModule->isGLInitialized)
-				item.visualModule->isGLInitialized = item.visualModule->initializeGL();
-
-			if (!item.visualModule->isGLInitialized)
-				printf("Warning: failed to initialize %s\n", item.visualModule->getName().c_str());
-		}
-
-		// update if necessary
-		for (auto item : mRenderItems) {
-			if (item.visualModule->isGLInitialized)
-			{
-				// check update
-				if (item.visualModule->changed > item.visualModule->updated) {
-					item.visualModule->updateGL();
-					item.visualModule->updated = GLVisualModule::clock::now();
-				}
-			}
-		}
-
 	}
 
-	void GLRenderEngine::draw(dyno::SceneGraph* scene, Camera* camera, const RenderParams& rparams)
+	void GLRenderEngine::draw(dyno::SceneGraph* scene, const RenderParams& rparams)
 	{
-		updateRenderModules(scene);
+		updateRenderItems(scene);
 
 		// preserve current framebuffer
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
 		// update framebuffer size
-		resizeFramebuffer(camera->viewportWidth(), camera->viewportHeight());
+		resizeFramebuffer(rparams.width, rparams.height);
 
 		// update shadow map
-		mShadowMap->update(scene, camera, rparams);
+		mShadowMap->update(scene, rparams);
 
-		// setup scene transform matrices
-		struct
-		{
-			glm::mat4 model;
-			glm::mat4 view;
-			glm::mat4 projection;
-			int width;
-			int height;
-		} sceneUniformBuffer;
-		sceneUniformBuffer.model = glm::mat4(1);
-		sceneUniformBuffer.view = camera->getViewMat();
-		sceneUniformBuffer.projection = camera->getProjMat();
-		sceneUniformBuffer.width = camera->viewportWidth();
-		sceneUniformBuffer.height = camera->viewportHeight();
+		// copy
+		RenderParams params = rparams;
+		// TODO: we might use world space
+		params.light.mainLightDirection = glm::normalize(glm::vec3(
+				params.transforms.view * glm::vec4(params.light.mainLightDirection, 0)));
 
-		mTransformUBO.load(&sceneUniformBuffer, sizeof(sceneUniformBuffer));
-		mTransformUBO.bindBufferBase(0);
-
-		// setup light block
-		RenderParams::Light light = rparams.light;
-		light.mainLightDirection = glm::vec3(camera->getViewMat() * glm::vec4(light.mainLightDirection, 0));
-		mLightUBO.load(&light, sizeof(light));
-		mLightUBO.bindBufferBase(1);
-		// transform uniform block
-		mVariableUBO.bindBufferBase(2);
-
-		const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
+		// bind internal framebuffer for rendering
 		mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
+
+		// attachement 0: color, attachment 1: index
+		const unsigned int attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		mFramebuffer.drawBuffers(2, attachments);
 
 		// clear color and depth
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// clear index buffer
-		//GLint clearIndex[]{11, -1, -1, -1};
-		//glClearBufferiv(GL_COLOR, 1, clearIndex);
-		glViewport(0, 0, camera->viewportWidth(), camera->viewportHeight());
+		glViewport(0, 0, rparams.width, rparams.height);
 
-		// draw background color
-		// it would also clear index buffer...
-		Vec3f c0 = Vec3f(rparams.bgColor0.x, rparams.bgColor0.y, rparams.bgColor0.z);
-		Vec3f c1 = Vec3f(rparams.bgColor1.x, rparams.bgColor1.y, rparams.bgColor1.z);
-		mRenderHelper->drawBackground(c0, c1);
-				
-		// first we render opacity objects
-		for (int i = 0; i < mRenderItems.size(); i++) {
+		// Step 1: draw background color, it also clears index buffer...
+		{
+			Vec3f c0 = Vec3f(this->bgColor0.x, this->bgColor0.y, this->bgColor0.z);
+			Vec3f c1 = Vec3f(this->bgColor1.x, this->bgColor1.y, this->bgColor1.z);
+			mRenderHelper->drawBackground(c0, c1);
+		}
 
-			if (mRenderItems[i].node->isVisible() && !mRenderItems[i].visualModule->isTransparent())
+		mShadowMap->bind();
+
+		// Step 2: render opacity objects
+		{
+			params.mode = GLRenderMode::COLOR;
+
+			for (int i = 0; i < mRenderItems.size(); i++) 
 			{
-				mVariableUBO.load(&i, sizeof(i));
-				mRenderItems[i].visualModule->draw(GLRenderPass::COLOR);
+				if (mRenderItems[i].node->isVisible() && !mRenderItems[i].visualModule->isTransparent())
+				{
+					params.index = i;
+					mRenderItems[i].visualModule->draw(params);
+				}
 			}
 		}
 
-		// draw a ground grid (xy-plane)
-		// since the grid is transparent, we should handle it before drawing transparent nodes
-		if (rparams.showGround)
+		// Step 3: draw a ground grid (xy-plane)
+		// since the grid is transparent, we handle it between opacity and transparent objects
+		if (this->showGround)
 		{
+			// only draw to color buffer, so we can pick through
 			mFramebuffer.drawBuffers(1, attachments);
-			mRenderHelper->drawGround(rparams.planeScale, rparams.rulerScale);
+			mRenderHelper->drawGround(params, this->planeScale, this->rulerScale);
 		}
 
-		// render transparency objects
+		// Step 4: transparency objects
 		{
 			// reset free node index
 			const int zero = 0;
 			mFreeNodeIdx.load((void*)&zero, sizeof(int));
+
 			// reset head index
 			const int clear = 0xFFFFFFFF;
 			mHeadIndexTex.clear((void*)&clear);
 
+			// binding...
 			glBindImageTexture(0, mHeadIndexTex.id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 			mFreeNodeIdx.bindBufferBase(0);
 			mLinkedListBuffer.bindBufferBase(0);
@@ -321,65 +271,64 @@ namespace dyno
 			// draw to no attachments
 			mFramebuffer.drawBuffers(0, 0);
 
+			// OIT: first pass
 			glDepthMask(false);
-			for (int i = 0; i < mRenderItems.size(); i++) {
-
+			params.mode = GLRenderMode::TRANSPARENCY;
+			for (int i = 0; i < mRenderItems.size(); i++) 
+			{
 				if (mRenderItems[i].node->isVisible() && mRenderItems[i].visualModule->isTransparent())
 				{
-					mVariableUBO.load(&i, sizeof(i));
-					mRenderItems[i].visualModule->draw(GLRenderPass::TRANSPARENCY);
+					params.index = i;
+					mRenderItems[i].visualModule->draw(params);
 				}
 			}
-
 			glDepthMask(true);
 
-			// blend alpha
+			// OIT: blend alpha
 			mFramebuffer.drawBuffers(2, attachments);
-
 			mBlendProgram->use();
-
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
-
 			mScreenQuad->draw();
-
 			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 			glDisable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
-		}
-		
+		}		
 
-		// draw scene bounding box
-		if (rparams.showSceneBounds && scene != 0)
+		// Step 5: scene bounding box
+		if (this->showSceneBounds && scene != 0)
 		{
 			mFramebuffer.drawBuffers(1, attachments);
 			// get bounding box of the scene
 			auto p0 = scene->getLowerBound();
 			auto p1 = scene->getUpperBound();
-			mRenderHelper->drawBBox(p0, p1);
+			mRenderHelper->drawBBox(params, p0, p1);
 		}
 
-		// draw to final framebuffer with fxaa filter
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-			
-		if (bEnableFXAA)
+		// Step 6: draw to final framebuffer with fxaa filter
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glViewport(0, 0, camera->viewportWidth(), camera->viewportHeight());
+			// restore previous framebuffer
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
-			mColorTex.bind(GL_TEXTURE1);
-			mDepthTex.bind(GL_TEXTURE2);
-			mFXAAFilter->apply(camera->viewportWidth(), camera->viewportHeight());
-		}
-		else
-		{
-			mFramebuffer.bind(GL_READ_FRAMEBUFFER);
-			glReadBuffer(GL_COLOR_ATTACHMENT0);
-			glBlitFramebuffer(
-				0, 0, camera->viewportWidth(), camera->viewportHeight(),
-				0, 0, camera->viewportWidth(), camera->viewportHeight(),
-				GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			if (bEnableFXAA)
+			{
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glViewport(0, 0, rparams.width, rparams.height);
+
+				mColorTex.bind(GL_TEXTURE1);
+				mDepthTex.bind(GL_TEXTURE2);
+				mFXAAFilter->apply(rparams.width, rparams.height);
+			}
+			else
+			{
+				mFramebuffer.bind(GL_READ_FRAMEBUFFER);
+				glReadBuffer(GL_COLOR_ATTACHMENT0);
+				glBlitFramebuffer(
+					0, 0, rparams.width, rparams.height,
+					0, 0, rparams.width, rparams.height,
+					GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			}
 		}
 
 		gl::glCheckError();
@@ -392,10 +341,7 @@ namespace dyno
 		mColorTex.resize(w, h);
 		mDepthTex.resize(w, h);
 		mIndexTex.resize(w, h);
-
-		// transparency
 		mHeadIndexTex.resize(w, h);
-
 		gl::glCheckError();
 	}
 
