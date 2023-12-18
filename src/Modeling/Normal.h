@@ -16,6 +16,8 @@
 
 #pragma once
 #include "Node/ParametricModel.h"
+#include "Topology/TriangleSet.h"
+
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
 #include "GLSurfaceVisualModule.h"
@@ -23,38 +25,40 @@
 
 namespace dyno
 {
-
-
 	template<typename TDataType>
-	class Normal : public ParametricModel<TDataType>
+	class Normal :public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(Normal, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
-
-		DECLARE_ENUM(LineMode,
-			Line = 0,
-			Cylnder = 1);
 
 		Normal();
 
+		DECLARE_ENUM(LineMode,
+		Line = 0,
+			Cylnder = 1,
+			Arrow = 2
+			);
 	public:
 		DEF_VAR(Real, Length, 0.4, "LinLength");
 		DEF_VAR(bool, Normalize, true, "Normalize");
 
 		DEF_VAR(bool, ShowPoints, false, "ShowPoints");
 		DEF_VAR(bool, ShowEdges, true, "ShowEdges");
+
 		DEF_ENUM(LineMode, LineMode, LineMode::Line, "");
 		DEF_VAR(Real, LineWidth, 0.04, " LineWidth");
 		DEF_VAR(bool, ShowWireframe, true, "ShowWireframe");
-
-
+		DEF_VAR(int, ArrowResolution, 8 , "");
+		DEF_VAR(int,Debug,0,"debug");
+		
 		DEF_INSTANCE_IN(TopologyModule, Topology, "");
 		DEF_ARRAY_IN(Coord, InNormal, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Real, Color, DeviceType::GPU, "");
 
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>,Arrow,"");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, NormalSet, "");
 		DEF_ARRAY_STATE(Coord, Normal, DeviceType::GPU, "");
 	
@@ -71,7 +75,10 @@ namespace dyno
 
 		std::shared_ptr<GLPointVisualModule> glpoint;
 		std::shared_ptr<GLWireframeVisualModule> gledge;
-
+		std::shared_ptr<GLSurfaceVisualModule> glArrow;
+		DArray<Coord> d_points;
+		DArray<TopologyModule::Edge> d_edges;
+		DArray<Coord> d_normalPt;
 	};
 
 

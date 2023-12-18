@@ -4,6 +4,9 @@
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
 #include "Topology.h"
+#include "CylinderModel.h"
+#include "ConeModel.h"
+#include "ColorMapping.h"
 
 namespace dyno
 {
@@ -18,6 +21,10 @@ namespace dyno
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&Normal<TDataType>::varChanged, this));
 
 		this->varLength()->attach(callback);
+		this->varDebug()->attach(callback);
+		this->varLineWidth()->attach(callback);
+		this->varArrowResolution()->attach(callback);
+		this->varLineMode()->attach(callback);
 
 		auto render_callback = std::make_shared<FCallBackFunc>(std::bind(&Normal<TDataType>::renderChanged, this));
 		this->varLineMode()->attach(render_callback);
@@ -35,8 +42,32 @@ namespace dyno
 		this->stateNormalSet()->connect(gledge->inEdgeSet());
 		this->graphicsPipeline()->pushModule(gledge);
 
+		this->stateArrow()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		glArrow = std::make_shared<GLSurfaceVisualModule>();
+		//glArrow->varColorMode()->setCurrentKey(GLSurfaceVisualModule::CM_Vertex);
+		this->stateArrow()->connect(glArrow->inTriangleSet());
+		this->graphicsPipeline()->pushModule(glArrow);
+
+		this->varArrowResolution()->setRange(4,15);
+		this->varLength()->setRange(0.1,10);
 		this->inTopology()->tagOptional(true);
 		this->inInNormal()->tagOptional(true);
+		this->inColor()->tagOptional(true);
+
+
+		//auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+		//colorMapper->varMin()->setValue(-0.5);
+		//colorMapper->varMax()->setValue(0.5);
+		//this->inColor()->connect(colorMapper->inScalar());
+		//this->graphicsPipeline()->pushModule(colorMapper);
+		//// 
+		//// 
+		//auto surfaceVisualizer = std::make_shared<GLSurfaceVisualModule>();
+		//surfaceVisualizer->varColorMode()->getDataPtr()->setCurrentKey(1);
+		//colorMapper->outColor()->connect(surfaceVisualizer->inColor());
+		//this->stateArrow()->connect(surfaceVisualizer->inTriangleSet());
+		//this->graphicsPipeline()->pushModule(surfaceVisualizer);
+
 	}
 
 	template<typename TDataType>
@@ -47,13 +78,13 @@ namespace dyno
 
 		gledge->varRenderMode()->setCurrentKey(this->varLineMode()->getDataPtr()->currentKey());
 		gledge->varRadius()->setValue(this->varLineWidth()->getValue());
-		
 	}
 
 
 	template<typename TDataType>
 	void Normal<TDataType>::resetStates()
 	{
+		printf("reset\n");
 		this->varChanged();
 		this->renderChanged();
 	}
@@ -61,52 +92,16 @@ namespace dyno
 	template<typename TDataType>
 	void Normal<TDataType>::updateStates()
 	{
+		printf("update\n");
 		this->varChanged();
-		this->renderChanged();
+		//this->renderChanged();
 	}
 
 	template<typename TDataType>
 	void Normal<TDataType>::varChanged()
-	{
-			
+	{		
+		printf("varChanged\n");
 		auto normalSet = this->stateNormalSet()->getDataPtr();
-
-		////**********************************  build Normal by CPU **********************************////
-		//CArray<Triangle> c_triangles;
-		//c_triangles.assign(d_triangles);
-		//CArray<Coord> c_points;
-		//c_points.assign(d_points);
-		//std::vector<Coord> normalPt;
-		//std::vector<TopologyModule::Edge> edges;
-
-		//for (size_t i = 0; i < c_triangles.size(); i++)
-		//{
-		//	int a = c_triangles[i][0];
-		//	int b = c_triangles[i][1];
-		//	int c = c_triangles[i][2];
-		//	Real x = (c_points[a][0] + c_points[b][0] + c_points[c][0]) / 3;
-		//	Real y = (c_points[a][1] + c_points[b][1] + c_points[c][1]) / 3;
-		//	Real z = (c_points[a][2] + c_points[b][2] + c_points[c][2]) / 3;
-		//	
-		//	Coord ca = c_points[b] - c_points[a];
-		//	Coord cb = c_points[b] - c_points[c];
-		//	Coord dirNormal = ca.cross(cb).normalize() * -1 * this->varLength()->getValue();
-
-
-		//	normalPt.push_back(Coord(x, y, z));
-		//	normalPt.push_back(Coord(x, y, z)+ dirNormal);
-		//	
-		//	edges.push_back(TopologyModule::Edge(i * 2, i * 2 + 1));
-		//	
-		//}
-		// 
-		//normalSet->setPoints(normalPt);
-		//normalSet->setEdges(edges);
-		//normalSet->update();
-
-		DArray<TopologyModule::Edge> d_edges;
-		DArray<Coord> d_normalPt;
-
 
 		auto inTriSet = TypeInfo::cast<TriangleSet<DataType3f>>(this->inTopology()->getDataPtr());
 		if (inTriSet != nullptr) 
@@ -119,7 +114,7 @@ namespace dyno
 			////**********************************  build Normal by Cuda **********************************////
 			{
 				DArray<TopologyModule::Triangle>& d_triangles = inTriSet->getTriangles();
-				DArray<Coord>& d_points = inTriSet->getPoints();
+				d_points = inTriSet->getPoints();
 
 				d_edges.resize(d_triangles.size());
 				d_normalPt.resize(d_triangles.size() * 2);
@@ -147,7 +142,7 @@ namespace dyno
 					printf("Normal Node: Need input!\n");
 					return;
 				}
-				DArray<Coord>& d_points = ptSet->getPoints();
+				d_points = ptSet->getPoints();
 				d_edges.resize(d_points.size());
 				d_normalPt.resize(d_points.size() * 2);
 				cuExecute(d_points.size(),
@@ -164,6 +159,145 @@ namespace dyno
 			normalSet->setEdges(d_edges);
 			normalSet->update();
 		}
+
+		if (this->varLineMode()->getValue() != this->Arrow) 
+		{
+			auto arrowTriSet = this->stateArrow()->getDataPtr();
+			arrowTriSet->getPoints().clear();
+			arrowTriSet->getTriangles().clear();
+			arrowTriSet->update();
+			return;
+		}
+			
+
+		auto cylinder = std::make_shared<CylinderModel<DataType3f>>();
+		cylinder->varColumns()->setValue(this->varArrowResolution()->getValue());
+		cylinder->varEndSegment()->setValue(1);
+		cylinder->varRow()->setValue(1);
+		cylinder->varRadius()->setValue(this->varLineWidth()->getValue());
+		cylinder->varHeight()->setValue(1.0f);
+		cylinder->varLocation()->setValue(Coord(0.0f, 0.5f, 0.0f));
+
+		auto cylinderTriangles = cylinder->stateTriangleSet()->getDataPtr()->getTriangles();
+		auto cylinderPoints = cylinder->stateTriangleSet()->getDataPtr()->getPoints();
+
+
+
+
+		
+		DArray<Coord> CylinderPoint;
+		DArray<TopologyModule::Triangle> CylinderTriangle;
+		DArray<Coord> singleCylinderPoint;
+		DArray<TopologyModule::Triangle> singleCylinderTriangle;
+
+		singleCylinderPoint.assign(cylinder->stateTriangleSet()->getDataPtr()->getPoints());
+		singleCylinderTriangle.assign(cylinder->stateTriangleSet()->getDataPtr()->getTriangles());
+
+		//CylinderPoint.assign(merge->getPoints());
+		//CylinderTriangle.assign(merge->getTriangles());
+
+		int normalNum = d_normalPt.size()/2;
+		int singleCylinderPtNum = singleCylinderPoint.size();
+		CylinderPoint.resize(singleCylinderPtNum * normalNum);
+
+		//printf("normalNum : %d \nsingleArrowPtNum : %d\n", normalNum, singleArrowPtNum);
+		//printf("arrowPoint : %d\n", arrowPoint.size());
+		//printf("arrowTriangle : %d\n", arrowTriangle.size());
+
+		cuExecute(CylinderPoint.size(),
+			UpdateArrowPoint,
+			CylinderPoint,
+			d_normalPt,
+			singleCylinderPoint,
+			singleCylinderPtNum,
+			0,
+			this->varDebug()->getValue(),
+			false,
+			0
+		);
+
+
+		CylinderTriangle.resize(singleCylinderTriangle.size()* normalNum);
+		printf("Num : %d \n ResizeNum : %d\n", singleCylinderTriangle.size(), CylinderTriangle.size());
+
+		cuExecute(CylinderTriangle.size(),
+			UpdateArrowTriangles,
+			CylinderTriangle,
+			singleCylinderTriangle,
+			singleCylinderTriangle.size(),
+			singleCylinderPoint.size(),
+			this->varDebug()->getValue()
+		);
+
+		printf("pt : %d \n", CylinderPoint.size());
+		printf("tri : %d\n", CylinderTriangle.size());
+
+
+		auto cone = std::make_shared<ConeModel<DataType3f>>();
+		cone->varColumns()->setValue(this->varArrowResolution()->getValue());
+		cone->varRadius()->setValue(this->varLineWidth()->getValue() * 2); 
+		cone->varHeight()->setValue(this->varLineWidth()->getValue() * 2 * 2);
+		cone->varLocation()->setValue(Vec3f(0,this->varLineWidth()->getValue(),0));
+		cone->varRow()->setValue(1);
+
+		auto coneTriangles = cone->stateTriangleSet()->getDataPtr()->getTriangles();
+		auto conePoints = cone->stateTriangleSet()->getDataPtr()->getPoints();
+
+		DArray<Coord> conePoint;
+		DArray<TopologyModule::Triangle> coneTriangle;
+		DArray<Coord> singleConePoint;
+		DArray<TopologyModule::Triangle> singleConeTriangle;
+
+		singleConePoint.assign(conePoints);
+		singleConeTriangle.assign(coneTriangles);
+
+		int singleConePtNum = singleConePoint.size();
+		conePoint.resize(singleConePtNum* normalNum);
+
+		cuExecute(conePoint.size(),
+			UpdateArrowPoint,
+			conePoint,
+			d_normalPt,
+			singleConePoint,
+			singleConePtNum,
+			0,
+			this->varDebug()->getValue(),
+			true,
+			1
+		);
+
+
+
+
+		coneTriangle.resize(singleConeTriangle.size()* normalNum);
+		printf("Num : %d \n ResizeNum : %d\n", singleConeTriangle.size(), coneTriangle.size());
+
+		cuExecute(coneTriangle.size(),
+			UpdateArrowTriangles,
+			coneTriangle,
+			singleConeTriangle,
+			singleConeTriangle.size(),
+			singleConePoint.size(),
+			this->varDebug()->getValue()
+		);
+
+		auto triset1 = std::make_shared<TriangleSet<DataType3f>>();
+		triset1->setPoints(CylinderPoint);
+		triset1->setTriangles(CylinderTriangle);
+
+		auto triset2 = std::make_shared<TriangleSet<DataType3f>>();
+		triset2->setPoints(conePoint);
+		triset2->setTriangles(coneTriangle);
+
+		auto merge = std::make_shared<TriangleSet<DataType3f>>();
+		merge->copyFrom(*triset1->merge(*triset2));
+
+
+		auto arrowTriSet = this->stateArrow()->getDataPtr();
+		arrowTriSet->setPoints(merge->getPoints());
+		arrowTriSet->setTriangles(merge->getTriangles());
+		arrowTriSet->update();
+
 	}
 
 	template< typename Coord>
@@ -173,7 +307,8 @@ namespace dyno
 		DArray<Coord> normal,
 		DArray<TopologyModule::Edge> edges,
 		float length,
-		bool normallization)
+		bool normallization
+		)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= d_point.size()) return;
@@ -184,7 +319,7 @@ namespace dyno
 		else
 			dirNormal = dirNormal * length;
 
-		normal_points[2 * pId] = d_point[pId];
+		normal_points[2 * pId] = d_point[pId] ;
 		normal_points[2 * pId + 1] = d_point[pId] + dirNormal;
 
 		edges[pId] = TopologyModule::Edge(2 * pId, 2 * pId + 1);
@@ -225,6 +360,99 @@ namespace dyno
 
 		edges[pId] = TopologyModule::Edge(2 * pId, 2 * pId + 1);
 	}
+
+	template< typename Coord>
+	__global__ void UpdateArrowPoint(
+		DArray<Coord> arrowPoints,
+		DArray<Coord> NormalPt,
+		DArray<Coord> singleArrowPoints,
+		int arrowPtNum,
+		int offest,
+		int debug,
+		bool moveToTop,
+		float lengthOverride
+		)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= arrowPoints.size()) return;
+
+		int i = int(pId / arrowPtNum);
+		/*if (i != debug)
+			return;*/
+
+		Coord root = NormalPt[i * 2];
+		Coord head = NormalPt[i * 2 + 1];
+		Vec3f defaultDirection = Vec3f(0, 1, 0);
+		Vec3f direction = head - root;
+		float length = direction.norm();
+		float distance = direction.norm();
+
+		direction.normalize();
+		defaultDirection.normalize();
+		Real angle;
+		Vec3f Axis = direction.cross(defaultDirection);
+		if (Axis == Vec3f(0, 0, 0) && direction[1] < 0)
+		{
+			Axis = Vec3f(1, 0, 0);
+			angle = M_PI;
+		}
+		Axis.normalize();
+
+		angle = -1 * acos(direction.dot(defaultDirection));
+
+		Quat<Real> q = Quat<Real>(angle, Axis);
+
+		Real x, y, z, w;
+		x = q.x;
+		y = q.y;
+		z = q.z;
+		w = q.w;
+
+		Coord u(x, y, z);
+		Real s = w;
+		Coord tempPt;
+
+		if (lengthOverride != 0)
+			length = lengthOverride;
+		
+		if (moveToTop)
+		{
+			tempPt = Coord(singleArrowPoints[pId - i * arrowPtNum][0],
+				singleArrowPoints[pId - i * arrowPtNum][1] * length + offest + distance,
+				singleArrowPoints[pId - i * arrowPtNum][2]);
+		}
+		else 
+		{
+			tempPt = Coord(singleArrowPoints[pId - i * arrowPtNum][0],
+				singleArrowPoints[pId - i * arrowPtNum][1] * length + offest,
+				singleArrowPoints[pId - i * arrowPtNum][2]);
+		}
+	
+		arrowPoints[pId] = 2.0f * u.dot(tempPt) * u+ (s * s - u.dot(u)) * tempPt + 2.0f * s * u.cross(tempPt) + root;
+	
+	}
+
+
+	__global__ void UpdateArrowTriangles(
+		DArray<TopologyModule::Triangle> arrowTriangles,
+		DArray<TopologyModule::Triangle> singleArrowTriangles,
+		int arrowTriNum,
+		int singlePointNum,
+		int debug
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= arrowTriangles.size()) return;
+
+		int i = pId % arrowTriNum;
+		int k = (pId / arrowTriNum);
+		int z = (pId / arrowTriNum) * singlePointNum;
+		TopologyModule::Triangle temp = singleArrowTriangles[i];
+
+		arrowTriangles[pId] = TopologyModule::Triangle(temp[0] + z, temp[1] + z, temp[2] + z);
+	}
+
+
 
 
 	DEFINE_CLASS(Normal);
