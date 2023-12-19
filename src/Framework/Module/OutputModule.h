@@ -11,16 +11,35 @@ namespace dyno
 
 		std::string getModuleType() override { return "OutputModule"; }
 
-		virtual void flush() {};
+		virtual void output() {};	
+
+		int getFrameNumber();
+
+		void setFilePostfix(std::string postfix);
+
 
 	protected:
-		void updateImpl() override;
+		void updateImpl() final;
 
-		DEF_VAR(std::string, OutputPath, "", "");
-		DEF_VAR(std::string, Prefix, "", "");
+		DEF_VAR_IN(unsigned, FrameNumber, "Input FrameNumber");
 
-		DEF_VAR(unsigned, Start, 1, "FramStep");
-		DEF_VAR(unsigned, End, 1000, "FramStep");
+		DEF_VAR(std::string, OutputPath, "", "OutputPath");
+		DEF_VAR(bool,ReCount,true,"ReCount");
+
+		DEF_VAR(unsigned, Start, 1, "Start");
+		DEF_VAR(unsigned, End, 1000, "End");
 		DEF_VAR(unsigned, FrameStep, 1, "FramStep");
+
+
+
+	private:
+
+		int updateFrameNumber();
+		void updateSkipFrame();
+
+		int mFileIndex = 0;
+		int mCount = -1;
+		bool mSkipFrame = false;
+
 	};
 }

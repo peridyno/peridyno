@@ -21,22 +21,15 @@ namespace dyno
 		EigenValueWriter();
 		virtual ~EigenValueWriter();
 
-		void setNamePrefix(std::string prefix);
-		void setOutputPath(std::string path);
-
+		void output()override;
 
 	protected:
-		void updateImpl() override;
 
 	public:
 		
 		DEF_ARRAY_IN(Transform, Transform, DeviceType::GPU, "transform");
+
 	private:
-		int mFileIndex = 0;
-		
-
-		std::string mOutpuPath;
-		std::string mOutputPrefix;
-
+		int mFileIndex = -1;
 	};
 }

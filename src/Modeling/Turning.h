@@ -18,7 +18,7 @@
 #include "Node/ParametricModel.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
-#include "Ramp.h"
+#include "Curve.h"
 
 
 namespace dyno
@@ -51,7 +51,7 @@ namespace dyno
 
 		DEF_VAR(bool, UseRamp, false, "");
 
-		DEF_VAR(Ramp, Curve, Ramp::BorderMode::Open, "");
+		DEF_VAR(Curve, Curve, Curve::CurveMode::Open, "");
 
 		void disableRender();
 

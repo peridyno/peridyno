@@ -1,4 +1,4 @@
-#include "QRampWidget.h"
+#include "QCurveWidget.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -14,16 +14,16 @@
 
 namespace dyno
 {
-	IMPL_FIELD_WIDGET(Ramp, QRampWidget)
+	IMPL_FIELD_WIDGET(Curve, QCurveWidget)
 
-	QRampWidget::QRampWidget(FBase* field)
+	QCurveWidget::QCurveWidget(FBase* field)
 		: QFieldWidget(field)
 	{
-		printf("QRampWidget\n");
-		FVar<Ramp>* f = TypeInfo::cast<FVar<Ramp>>(field);
+		printf("QCurveWidget\n");
+		FVar<Curve>* f = TypeInfo::cast<FVar<Curve>>(field);
 		if (f == nullptr)
 		{
-			printf("QRamp Nullptr\n");
+			printf("QCurve Nullptr\n");
 			return;
 
 		}
@@ -33,24 +33,13 @@ namespace dyno
 		
 
 		//Enum List    Direction Mode
-		int curIndex = int(f->getValue().Dirmode);
-		int enumNum = f->getValue().count;
-		QComboBox* combox = new QComboBox;
-		combox->setMaximumWidth(256);
-			for (size_t i = 0; i < enumNum; i++)
-			{
-				auto enumName = f->getValue().DirectionStrings[i];
-				combox->addItem(QString::fromStdString(enumName));
-			}
-		combox->setCurrentIndex(curIndex);
-
 
 		//Enum List    InterpMode
 		int curIndex2 = int(f->getValue().InterpMode);
 		int enumNum2 = f->getValue().InterpolationCount;
 		QComboBox* combox2 = new QComboBox;
 		combox2->setMaximumWidth(256);
-			for (size_t i = 0; i < enumNum; i++)
+			for (size_t i = 0; i < 2; i++)
 			{
 				auto enumName2 = f->getValue().InterpStrings[i];
 				combox2->addItem(QString::fromStdString(enumName2));
@@ -70,21 +59,11 @@ namespace dyno
 
 
 		//build DrawLabel
-		QDrawLabel* DrawLabel = new QDrawLabel();
-
-		DrawLabel->setMode(combox->currentIndex());
-
-		//DrawLabel->setBorderMode(int(f->getValue().Bordermode));
-
-		DrawLabel->setField(f);
-
-		DrawLabel->copySettingFromField();
-
-		DrawLabel->updateLabelShape();
-		//printf("drawlabel  %d : \n", int(DrawLabel->borderMode));
+		QCurveLabel* DrawLabel = new QCurveLabel(f);
 
 
-		connect(combox, SIGNAL(currentIndexChanged(int)), DrawLabel, SLOT(changeValue(int)));
+
+
 		connect(combox2, SIGNAL(currentIndexChanged(int)), DrawLabel, SLOT(changeInterpValue(int)));
 
 		//VLayout : combox2 / SquardButton / CloseButton
@@ -217,6 +196,8 @@ namespace dyno
 		connect(Checkbox, SIGNAL(mValueChanged(int)), spacingSlider, SLOT(setNewVisable(int)));
 		connect(Checkbox, SIGNAL(mValueChanged(int)), spacingSpinner, SLOT(setNewVisable(int)));
 
+		connect(combox2, SIGNAL(currentIndexChanged(int)), Checkbox, SLOT(updateChecked(int)));
+
 		if (f->getValue().resample == false)
 		{
 			spacingSlider->setVisible(false);
@@ -242,33 +223,42 @@ namespace dyno
 			unfold->setStyleSheet(
 				"QPushButton{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(100, 100, 100, 255), stop : 1 rgba(35, 35, 35, 255));}QPushButton:hover{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(120,120,120, 255), stop : 1 rgba(90, 90, 90, 255));} "
 			);
-			connect(unfold, &QToggleButton::clicked, DrawLabel, &QDrawLabel::changeLabelSize);
+			connect(unfold, &QToggleButton::clicked, DrawLabel, &QCurveLabel::changeLabelSize);
 			unfold->setValue(f->getValue().useSquard);
 			VLayout->addWidget(unfold);
 		}
 
-
-		QHBoxLayout* HlayoutUseRamp = new QHBoxLayout;
-		HlayoutUseRamp->setContentsMargins(0, 0, 0, 0);
-		HlayoutUseRamp->setSpacing(0);
+		
+		{	
+			if(f->getValue().useColseButton)
+			{
+				QToggleButton* curveCloseButton = new QToggleButton(f->getValue().curveClose);
+				curveCloseButton->setText("Close", "Open");
+				curveCloseButton->setStyleSheet
+				(
+					"QPushButton{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(100, 100, 100, 255), stop : 1 rgba(35, 35, 35, 255));}QPushButton:hover{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(120,120,120, 255), stop : 1 rgba(90, 90, 90, 255));} "
+				);
+				VLayout->addWidget(curveCloseButton); 
+				connect(curveCloseButton, &QToggleButton::clicked, DrawLabel, &QCurveLabel::setCurveClose);
+				curveCloseButton->setValue(f->getValue().curveClose);
+			}
+		}
 
 
 		QVBoxLayout* TotalLayout = new QVBoxLayout();
 		TotalLayout->setContentsMargins(0, 0, 0, 0);
 		TotalLayout->setSpacing(5);
-		if (f->getValue().displayUseRamp == true) { TotalLayout->addLayout(HlayoutUseRamp); }
 		TotalLayout->addLayout(Gridlayout);
 		TotalLayout->addLayout(Hlayout1);
 		TotalLayout->addLayout(Hlayout2);
 		TotalLayout->addLayout(boolLayout);
 		TotalLayout->addLayout(SpacingHlayout);
-		printf("widget  :  %d \n", int(f->getValue().displayUseRamp));
 
 		this->setLayout(TotalLayout);
 		
 	}
 
-	void QRampWidget::updateField()
+	void QCurveWidget::updateField()
 	{
 		FVar<Ramp>* f = TypeInfo::cast<FVar<Ramp>>(field());
 		if (f == nullptr)
@@ -278,7 +268,7 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::paintEvent(QPaintEvent* event)
+	void QCurveLabel::paintEvent(QPaintEvent* event)
 	{
 
 		//设置半径
@@ -286,7 +276,7 @@ namespace dyno
 		int w = this->width();
 		int h = this->height();
 		
-		//设置最大最小坐标
+		//设置边界框
 		minX = 0 + 1.5 * radius;
 		maxX = w - 2 * radius;
 		minY = 0 + 2 * radius;
@@ -297,11 +287,11 @@ namespace dyno
 		{
 			if (field->getValue().Originalcoord.empty())		//如果field中没有Widget传回的数据，则从field本身的Coord进行初始化
 			{
-				this->copyFromField(field->getValue().FE_MyCoord, CoordArray);
-				reSortCoordArray.assign(CoordArray.begin(), CoordArray.end());
-				reSort(reSortCoordArray);
+
+				this->copyFromField(field->getValue().MyCoord, reSortCoordArray);
+				CoordArray.assign(reSortCoordArray.begin(), reSortCoordArray.end());
 				buildCoordToResortMap();
-				this->copyFromField(field->getValue().FE_HandleCoord, HandlePoints);
+				this->copyFromField(field->getValue().myHandlePoint, HandlePoints);
 			}
 			else		//否则直接取field存的qt坐标
 			{
@@ -312,34 +302,7 @@ namespace dyno
 
 		}
 
-
-		if (CoordArray.empty())			//如果是close模式，且没有初始化数据，则在空画布创建两个点，作为边界点
-		{
-			if (Mode == x)		//direction为x创建点的逻辑
-			{
-				if (generatorXmin)
-				{
-					MyCoord FirstCoord;
-					CoordArray.push_back(FirstCoord);
-
-					CoordArray[CoordArray.size() - 1].x = minX;
-					CoordArray[CoordArray.size() - 1].y = (maxY + minY) / 2;
-					std::swap(CoordArray[0], CoordArray[CoordArray.size() - 1]);
-					generatorXmin = 0;
-				}
-				if (generatorXmax)
-				{
-					MyCoord LastCoord;
-					CoordArray.push_back(LastCoord);
-
-					CoordArray[CoordArray.size() - 1].x = maxX;
-					CoordArray[CoordArray.size() - 1].y = (maxY + minY) / 2;
-					std::swap(CoordArray[1], CoordArray[CoordArray.size() - 1]);
-					generatorXmax = 0;
-				}
-			}
-		}
-
+		//Close模式要在这里创建左右两个封闭点
 		reSortCoordArray.assign(CoordArray.begin(), CoordArray.end());		//用CoordArray为reSortCoordArray赋值
 		reSort(reSortCoordArray);		//对reSortCoordArray重排序
 
@@ -399,7 +362,15 @@ namespace dyno
 				path.cubicTo(QPointF(HandlePoints[f].x, HandlePoints[f].y), QPointF(HandlePoints[s].x, HandlePoints[s].y), QPointF(reSortCoordArray[ptnum + 1].x, reSortCoordArray[ptnum + 1].y));
 				painter.drawPath(path);
 			}
-
+			//根据curveClose判断是否绘制首尾连接线以闭合曲线
+			if (curveClose && reSortCoordArray.size()>=3)
+			{
+				int end = reSortCoordArray.size() - 1;
+				int handleEnd = HandlePoints.size() - 1;
+				path.moveTo(reSortCoordArray[end].x, reSortCoordArray[end].y);
+				path.cubicTo(QPointF(HandlePoints[handleEnd].x, HandlePoints[handleEnd].y), QPointF(HandlePoints[0].x, HandlePoints[0].y), QPointF(reSortCoordArray[0].x, reSortCoordArray[0].y));
+				painter.drawPath(path);
+			}
 		}		
 		else 
 		{
@@ -415,6 +386,13 @@ namespace dyno
 					painter.drawPath(path);
 				}
 
+				if (curveClose && reSortCoordArray.size() >= 3)
+				{
+					int end = reSortCoordArray.size()-1;
+					path.moveTo(reSortCoordArray[end].x, reSortCoordArray[end].y);
+					path.lineTo(QPointF(reSortCoordArray[0].x, reSortCoordArray[0].y));
+					painter.drawPath(path);
+				}
 			}
 		}
 
@@ -518,182 +496,31 @@ namespace dyno
 		painter.setBrush(QBrush(QColor(255, 0, 0), Qt::SolidPattern));
 		painter.setPen(QPen(QPen(QBrush(QColor(255, 0, 0)), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
 		
-		////测试
-		//std::vector<MyCoord> Marray;
-		//if (1) //测试
-		//{
-		//	auto coord01 = field->getDataPtr()->myBezierPoint;
-
-		//	for (auto it : coord01)
-		//	{
-		//		Coord0_1 s;
-		//		s.set(it.x, it.y);
-		//		Marray.push_back(ZeroOneToCoord(s, minX, maxX, minY, maxY));
-		//	}
-		//}		
-
-		//QPainterPath temppath;
-		//for (size_t i = 1; i < Marray.size(); i++)
-		//{
-		//	painter.drawLine(QCoordArray[i], QCoordArray[i + 1]);
-
-		//	int ptnum = i - 1;
-		//	temppath.moveTo(Marray[ptnum].x, Marray[ptnum].y);
-		//	temppath.lineTo(QPointF(Marray[ptnum + 1].x, Marray[ptnum + 1].y));
-		//	painter.drawPath(temppath);
-		//}
-		//for (auto it : Marray)
-		//{
-		//	painter.drawEllipse(it.x - radius , it.y - radius ,2 * radius, 2 * radius);
-		//}
-
-		////测试
-		//std::vector<MyCoord> Marray2;
-		//if (1) //测试
-		//{
-		//	auto coord01 = field->getDataPtr()->resamplePoint;
-
-		//	for (auto it : coord01)
-		//	{
-		//		Coord0_1 s;
-		//		s.set(it.x, it.y);
-		//		Marray2.push_back(ZeroOneToCoord(s, minX, maxX, minY, maxY));
-		//	}
-		//}
-		//painter.setBrush(QBrush(QColor(255, 255, 0), Qt::SolidPattern));
-		//painter.setPen(QPen(QPen(QBrush(QColor(255, 255, 0)), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
-
-		//for (auto it : Marray2)
-		//{
-		//	painter.drawEllipse(it.x - radius/2, it.y - radius/2,  radius,  radius);
-		//}
-
-
-		//std::vector<MyCoord> Marray3;
-		//if (1) //测试
-		//{
-		//	auto coord01 = field->getDataPtr()->myHandlePoint;
-
-		//	for (auto it : coord01)
-		//	{
-		//		Coord0_1 s;
-		//		s.set(it.x, it.y);
-		//		Marray3.push_back(ZeroOneToCoord(s, minX, maxX, minY, maxY));
-		//	}
-		//}
-		//painter.setBrush(QBrush(QColor(0, 255, 0), Qt::SolidPattern));
-		//painter.setPen(QPen(QPen(QBrush(QColor(0, 255, 0)), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
-
-		//for (int i = 0; i < Marray3.size() ; i ++ )
-		//{
-		//	if (i % 2 == 0) 
-		//	{
-		//		painter.setBrush(QBrush(QColor(255, 255, 0), Qt::SolidPattern));
-		//		painter.setPen(QPen(QPen(QBrush(QColor(255, 255, 0)), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
-		//	}
-		//	else 
-		//	{
-		//		painter.setBrush(QBrush(QColor(0, 255, 0), Qt::SolidPattern));
-		//		painter.setPen(QPen(QPen(QBrush(QColor(0, 255, 0)), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
-		//	}
-		//	painter.drawEllipse(Marray3[i].x - radius, Marray3[i].y - radius, radius * 2, radius * 2);
-		//}
-
-		////测试
-		//std::vector<MyCoord> Marray4;
-		//if (1) //测试
-		//{
-		//	auto coord01 = field->getDataPtr()->MyCoord;
-
-		//	for (auto it : coord01)
-		//	{
-		//		Coord0_1 s;
-		//		s.set(it.x, it.y);
-		//		Marray4.push_back(ZeroOneToCoord(s, minX, maxX, minY, maxY));
-		//	}
-		//}
-		//painter.setBrush(QBrush(QColor(0, 255, 255), Qt::SolidPattern));
-		//painter.setPen(QPen(QPen(QBrush(QColor(0, 255, 255)), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
-
-		//for (auto it : Marray4)
-		//{
-		//	painter.drawEllipse(it.x - radius , it.y - radius , radius * 2, radius * 2);
-		//}
-
 
 
 	}
 
-	QDrawLabel::~QDrawLabel() 
+	QCurveLabel::~QCurveLabel()
 	{
 
 	}
 
 
-	QDrawLabel::QDrawLabel(QWidget* parent)
+	QCurveLabel::QCurveLabel(QWidget* parent)
 	{
-		this->setLabelSize(w, h, w, w);
+		this->setLabelSize(w, w, w, w);
 		this->setStyleSheet("background:rgba(110,115,100,1)");
 		this->setMouseTracking(true);
 
-
-		if (Mode == x)
-		{
-			for (auto it : CoordArray)
-			{
-				if (it.x == minX)
-				{
-					generatorXmin = 0;
-				}
-				else
-				{
-					if (!generatorXmin) { minIndex++; }
-				}
-				if (it.x == maxX)
-				{
-					generatorXmax = 0;
-				}
-				else
-				{
-					if (!generatorXmax) { maxIndex++; }
-				}
-			}
-
-			if (!generatorXmin) 
-			{
-				std::swap(CoordArray[0], CoordArray[minIndex++]);
-			}
-			if (!generatorXmax)
-			{
-				std::swap(CoordArray[1], CoordArray[maxIndex++]);
-			}
-		}
-		if (Mode == y)
-		{
-			for (auto it : CoordArray)
-			{
-				if (it.y == minY) { generatorYmin = 0; }
-				if (it.y == maxY) { generatorYmax = 0; }
-			}
-
-			if (!generatorYmin)
-			{
-				std::swap(CoordArray[0], CoordArray[minIndex++]);
-			}
-			if (!generatorYmax)
-			{
-				std::swap(CoordArray[1], CoordArray[maxIndex++]);
-			}
-		}
 	}
 
-	void QDrawLabel::setLabelSize(int minX, int minY, int maxX, int maxY)
+	void QCurveLabel::setLabelSize(int minX, int minY, int maxX, int maxY)
 	{
 		this->setMinimumSize(minX, minY);
 		this->setMaximumSize(maxX, maxY);
 	}
 
-	void QDrawLabel::reSort(std::vector<MyCoord>& vector1)
+	void QCurveLabel::reSort(std::vector<MyCoord>& vector1)
 	{
 
 		if (useSort) 
@@ -711,7 +538,7 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::mousePressEvent(QMouseEvent* event) 
+	void QCurveLabel::mousePressEvent(QMouseEvent* event)
 	{
 
 		//鼠标左键
@@ -721,6 +548,8 @@ namespace dyno
 
 		if (shiftKey)	//多选
 		{
+			printf("多选\n");
+
 			for (size_t i = 0; i < CoordArray.size(); i++)
 			{
 				int temp = sqrt(std::pow((pressCoord.x - CoordArray[i].x), 2) + std::pow((pressCoord.y - CoordArray[i].y), 2));
@@ -760,6 +589,7 @@ namespace dyno
 		}
 		else if (!shiftKey && !altKey)		//单选
 		{
+			printf("单选\n");
 			for (size_t i = 0; i < CoordArray.size(); i++)
 			{
 				int temp = sqrt(std::pow((pressCoord.x - CoordArray[i].x), 2) + std::pow((pressCoord.y - CoordArray[i].y), 2));
@@ -798,6 +628,7 @@ namespace dyno
 		//判断是否点击贝塞尔控制柄
 		if (useBezier)
 		{
+			printf("控制柄\n");
 			int displayHandle[2] = { handleParent * 2 ,handleParent * 2 + 1};
 			for (size_t k = 0; k < 2; k++)
 			{
@@ -848,27 +679,73 @@ namespace dyno
 		if (!isSelect && !isHandleSelect)
 		{
 			//close模式下插入点并自动排序
-			addPointtoEnd();
+
+			//尾插
+			if (!ctrlKey)
+			{
+				addPointtoEnd();
+			}
+			//线段中间插入点
+			else if (ctrlKey)
+			{
+				if (reSortCoordArray.size() >= 2)
+				{
+					int id = insertCurvePoint(pressCoord);
+
+					if (InterpMode == Interpolation::Bezier)
+					{
+						selectPoint = -1;
+						isSelect = false;
+						InsertBezierOpenPoint = true;
+						handleParent = id;
+						selectHandlePoint = id * 2 + 1;
+						connectHandlePoint = selectHandlePoint - 1;
+						isHandleSelect = true;
+					}
+					if (InterpMode == Interpolation::Linear)
+					{
+						selectPoint = id;
+						isSelect = true;
+						InsertBezierOpenPoint = false;
+						handleParent = id;
+						selectHandlePoint = -1;
+						connectHandlePoint = -1;
+						isHandleSelect = false;
+					}
+
+					multiSelectID.clear();
+					multiSelectID.push_back(id);
+				}
+				else
+				{ 
+					addPointtoEnd(); 
+				}
+				
+			}
+
 		}
 		//鼠标右键
 		else if(event->button() == Qt::RightButton)
 		{
-			if (selectPoint > 1) 
+
+			if(selectPoint >=0)
 			{
 				deletePoint();
 			}
+
 		}
+
 
 		this->update();
 	}
-
 	//尾插
-	int QDrawLabel::addPointtoEnd() 
-	{
-
+	int QCurveLabel::addPointtoEnd()
+	{	
+		if (!InsertAtBegin)
+		{
 			CoordArray.push_back(pressCoord);
 			buildCoordToResortMap();
-			insertElementToHandlePointSet(CoordArray.size() - 1);
+			insertHandlePoint(CoordArray.size() - 1,pressCoord);
 
 			if (InterpMode == Interpolation::Bezier)
 			{
@@ -894,14 +771,43 @@ namespace dyno
 
 			multiSelectID.clear();
 			multiSelectID.push_back(CoordArray.size() - 1);
+		}
+		else if(InsertAtBegin)
+		{
+			CoordArray.insert(CoordArray.begin(), pressCoord);
+			buildCoordToResortMap();
+			insertHandlePoint(0, pressCoord);
 
 
+			if (InterpMode == Interpolation::Bezier)
+			{
+				InsertBezierOpenPoint = true;
+				selectPoint = -1;
+				isSelect = false;
+				handleParent = 0;
+				selectHandlePoint = 1;
+				connectHandlePoint = selectHandlePoint - 1;
+				isHandleSelect = true;
+			}
+			if (InterpMode == Interpolation::Linear)
+			{
+				InsertBezierOpenPoint = false;
+				selectPoint = 0;
+				isSelect = true;
+				handleParent = selectPoint;
+				selectHandlePoint = -1;
+				connectHandlePoint = -1;
+				isHandleSelect = false;
+				iniPos.set(CoordArray[selectPoint]);
+			}
+		}
 
+		
 		return handleParent;
 
 	}
 
-	void QDrawLabel::deletePoint()
+	void QCurveLabel::deletePoint()
 	{
 		if (multiSelectID.size() <= 1) 
 		{
@@ -945,7 +851,7 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::mouseMoveEvent(QMouseEvent* event)
+	void QCurveLabel::mouseMoveEvent(QMouseEvent* event)
 	{
 		this->grabKeyboard();
 		//移动约束 
@@ -953,23 +859,10 @@ namespace dyno
 		{
 			//首位移动约束 ——单选
 
-			if (selectPoint <= 1)
-			{
-				if (Mode == Dir::x)
-				{
-					CoordArray[selectPoint].y = dyno::clamp(event->pos().y(), minY, maxY);
-				}
-				else if (Mode == Dir::y)
-				{
-					CoordArray[selectPoint].x = dyno::clamp(event->pos().x(), minX, maxX);
-				}
-			}
-			else
-			{
-				CoordArray[selectPoint].x = dyno::clamp(event->pos().x(), minX, maxX);
-				CoordArray[selectPoint].y = dyno::clamp(event->pos().y(), minY, maxY);
-			}
+			CoordArray[selectPoint].x = dyno::clamp(event->pos().x(), minX, maxX);
+			CoordArray[selectPoint].y = dyno::clamp(event->pos().y(), minY, maxY);
 
+			//
 			dtPos.set(CoordArray[selectPoint].x-iniPos.x , CoordArray[selectPoint].y - iniPos.y);
 
 			HandlePoints[selectPoint * 2].x = dyno::clamp(HandlePoints[selectPoint * 2].x + dtPos.x, minX, maxX);
@@ -988,23 +881,12 @@ namespace dyno
 					int tempSelect = multiSelectID[i];
 					if (tempSelect != selectPoint) 
 					{
-						if (tempSelect <= 1)
-						{
-							if (Mode == Dir::x)
-							{
-								CoordArray[tempSelect].y = dyno::clamp(CoordArray[tempSelect].y + dtPos.y, minY, maxY);
-							}
-							else if (Mode == Dir::y)
-							{
-								CoordArray[tempSelect].x = dyno::clamp(CoordArray[tempSelect].x + dtPos.x, minX, maxX);
-							}
-						}
-						else
-						{
-							CoordArray[tempSelect].x = dyno::clamp(CoordArray[tempSelect].x + dtPos.x, minX, maxX);
-							CoordArray[tempSelect].y = dyno::clamp(CoordArray[tempSelect].y + dtPos.y, minY, maxY);
-						}
+			
 
+						CoordArray[tempSelect].x = dyno::clamp(CoordArray[tempSelect].x + dtPos.x, minX, maxX);
+						CoordArray[tempSelect].y = dyno::clamp(CoordArray[tempSelect].y + dtPos.y, minY, maxY);
+
+						//
 						HandlePoints[tempSelect * 2].x = dyno::clamp(HandlePoints[tempSelect * 2].x + dtPos.x, minX, maxX);
 						HandlePoints[tempSelect * 2].y = dyno::clamp(HandlePoints[tempSelect * 2].y + dtPos.y, minY, maxY);
 
@@ -1081,7 +963,7 @@ namespace dyno
 		}
 
 	}
-	void QDrawLabel::mouseReleaseEvent(QMouseEvent* event)
+	void QCurveLabel::mouseReleaseEvent(QMouseEvent* event)
 	{
 		selectPoint = -1;
 		isSelect = false;
@@ -1096,9 +978,9 @@ namespace dyno
 		updateDataToField();
 		update();
 	}
-	void QDrawLabel::updateDataToField() 
+	void QCurveLabel::updateDataToField()
 	{
-		Ramp s;
+		Curve s;
 
 		//更新数据到field 
 		if (field == nullptr) { return; }
@@ -1116,10 +998,10 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::changeValue(int s) 
+	void QCurveLabel::changeValue(int s)
 	{
 		this->Mode = (Dir)s;
-		Ramp ras;
+		Curve ras;
 
 		initializeLine(Mode);
 
@@ -1135,7 +1017,7 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::changeInterpValue(int s)
+	void QCurveLabel::changeInterpValue(int s)
 	{
 		this->InterpMode = (Interpolation)s;
 		if (InterpMode == Interpolation::Linear) { useBezier = 0; }
@@ -1144,7 +1026,7 @@ namespace dyno
 		update();
 	}
 
-	void QDrawLabel::initializeLine(Dir mode) 
+	void QCurveLabel::initializeLine(Dir mode)
 	{
 		if (mode == x)
 		{
@@ -1162,7 +1044,7 @@ namespace dyno
 		}
 	}
 
-	void QDrawLabel::changeLabelSize() 
+	void QCurveLabel::changeLabelSize()
 	{
 		if (!lockSize) 
 		{
@@ -1171,7 +1053,7 @@ namespace dyno
 			updateLabelShape();
 		}	
 	}
-	void QDrawLabel::updateLabelShape()
+	void QCurveLabel::updateLabelShape()
 	{
 		if (isSquard)
 		{
@@ -1192,7 +1074,7 @@ namespace dyno
 		this->update();
 	}
 
-	void QDrawLabel::remapArrayToHeight(std::vector<MyCoord>& Array, int h) 
+	void QCurveLabel::remapArrayToHeight(std::vector<MyCoord>& Array, int h)
 	{
 		double fmaxX = double(maxX);
 		double fminX = double(minX);
@@ -1205,7 +1087,7 @@ namespace dyno
 			Array[i].y = k * (newMaxY - fminY) + fminY;
 		}
 	}
-	void QDrawLabel::buildBezierPoint() 
+	void QCurveLabel::buildBezierPoint()
 	{
 		int totalLength = path.length();
 		CurvePoint.clear();
@@ -1235,21 +1117,15 @@ namespace dyno
 		
 	}
 
-	void QDrawLabel::setCurveClose() 
+	void QCurveLabel::setCurveClose()
 	{
 		curveClose = !curveClose;
 		this->ForceUpdate = true;
 		update();
 	}
 
-	void QDrawLabel::setUseRamp(int v)
-	{
-		this->useRamp = v;
-		printf("useramp : %d\n",v);
-		update();
-	}
 
-	void  QDrawLabel::keyReleaseEvent(QKeyEvent* event)
+	void  QCurveLabel::keyReleaseEvent(QKeyEvent* event)
 	{
 		QWidget::keyPressEvent(event);
 		parent()->event((QEvent*)event);
@@ -1270,7 +1146,7 @@ namespace dyno
 		}
 	}
 
-	void  QDrawLabel::leaveEvent(QEvent* event)
+	void  QCurveLabel::leaveEvent(QEvent* event)
 	{
 		shiftKey = false;
 		altKey = false;
@@ -1278,7 +1154,7 @@ namespace dyno
 	}
 
 
-	void QDrawLabel::insertHandlePoint(int fp, MyCoord pCoord)
+	void QCurveLabel::insertHandlePoint(int fp, MyCoord pCoord)
 	{
 		dyno::Vec2f P(pCoord.x, pCoord.y);
 		int size = reSortCoordArray.size();
@@ -1310,7 +1186,7 @@ namespace dyno
 		HandlePoints.insert(HandlePoints.begin() + num, MyCoord(p2));
 	}
 
-	int QDrawLabel::insertCurvePoint(MyCoord pCoord)
+	int QCurveLabel::insertCurvePoint(MyCoord pCoord)
 	{
 		lengthMapEndPoint.clear();
 		QPainterPath tempPath;
@@ -1400,7 +1276,7 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::keyPressEvent(QKeyEvent* event)
+	void QCurveLabel::keyPressEvent(QKeyEvent* event)
 	{
 		QWidget::keyPressEvent(event);
 		parent()->event((QEvent*)event);
@@ -1422,7 +1298,7 @@ namespace dyno
 		}
 	}
 
-	void  QDrawLabel::updateFloatCoordArray(std::vector<MyCoord> CoordArray, std::vector<Coord0_1>& myfloatCoord)
+	void  QCurveLabel::updateFloatCoordArray(std::vector<MyCoord> CoordArray, std::vector<Coord0_1>& myfloatCoord)
 	{
 		myfloatCoord.clear();
 		for (auto it : CoordArray)
@@ -1431,7 +1307,7 @@ namespace dyno
 		}
 	}
 
-	void QDrawLabel::CoordtoField(Ramp& s)
+	void QCurveLabel::CoordtoField(Curve& s)
 	{
 		s.clearMyCoord();
 		for (auto it : floatCoord)
@@ -1439,15 +1315,9 @@ namespace dyno
 			s.addFloatItemToCoord(it.x, it.y, s.MyCoord);
 		}
 
-		for (size_t i = 0; i < reSortCoordArray.size(); i++)
+		for (auto it : handleFloatCoord)
 		{
-			int sa = mapResortIDtoOriginalID.find(i)->second;
-
-			int f = 2 * sa;
-			int e = 2 * sa + 1;
-
-			s.addFloatItemToCoord(handleFloatCoord[f].x, handleFloatCoord[f].y, s.myHandlePoint);
-			s.addFloatItemToCoord(handleFloatCoord[e].x, handleFloatCoord[e].y, s.myHandlePoint);
+			s.addFloatItemToCoord(it.x, it.y, s.myHandlePoint);
 		}
 
 		for (auto it : CoordArray)
@@ -1474,17 +1344,15 @@ namespace dyno
 
 		s.curveClose = curveClose;
 
-		if (useBezier) { s.InterpMode = Ramp::Interpolation::Bezier; }
-		else { s.InterpMode = Ramp::Interpolation::Linear; }
-
-
+		if (useBezier) { s.InterpMode = Curve::Interpolation::Bezier; }
+		else { s.InterpMode = Curve::Interpolation::Linear; }
 
 		s.updateBezierCurve();
 		s.UpdateFieldFinalCoord();
 	}
 
 
-	QDrawLabel::Coord0_1 QDrawLabel::CoordTo0_1Value(MyCoord& coord)
+	QCurveLabel::Coord0_1 QCurveLabel::CoordTo0_1Value(MyCoord& coord)
 	{//曲线坐标转换到0-1浮点值，并反转Y轴
 		Coord0_1 s;
 
@@ -1504,7 +1372,7 @@ namespace dyno
 		return s;
 	}
 
-	QDrawLabel::MyCoord QDrawLabel::ZeroOneToCoord(Coord0_1& value, int x0, int x1, int y0, int y1)
+	QCurveLabel::MyCoord QCurveLabel::ZeroOneToCoord(Coord0_1& value, int x0, int x1, int y0, int y1)
 	{//0-1浮点值到曲线坐标
 
 		MyCoord s;
@@ -1514,7 +1382,7 @@ namespace dyno
 		return s;
 	}
 
-	void QDrawLabel::buildCoordToResortMap()
+	void QCurveLabel::buildCoordToResortMap()
 	{
 		reSortCoordArray.assign(CoordArray.begin(), CoordArray.end());
 		reSort(reSortCoordArray);
@@ -1534,7 +1402,7 @@ namespace dyno
 
 	};
 
-	void QDrawLabel::insertElementToHandlePointSet(int i)
+	void QCurveLabel::insertElementToHandlePointSet(int i)
 	{
 		dyno::Vec2f P(CoordArray[i].x, CoordArray[i].y);
 
@@ -1581,14 +1449,14 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::setSpacingToDrawLabel(double value, int id)
+	void QCurveLabel::setSpacingToDrawLabel(double value, int id)
 	{
 		spacing = value;
 		ForceUpdate = true;
 		update();
 	}
 
-	void QDrawLabel::SetValueToDrawLabel(double value, int id)
+	void QCurveLabel::SetValueToDrawLabel(double value, int id)
 	{
 		switch (id)
 		{
@@ -1605,7 +1473,7 @@ namespace dyno
 		update();
 	}
 
-	void QDrawLabel::copyFromField(std::vector<Ramp::Coord2D> coord01, std::vector<MyCoord>& thisArray)
+	void QCurveLabel::copyFromField(std::vector<Curve::Coord2D> coord01, std::vector<MyCoord>& thisArray)
 	{	
 		if (coord01.size())
 		{
@@ -1619,7 +1487,7 @@ namespace dyno
 
 	}
 
-	void QDrawLabel::copyFromField(std::vector<Ramp::OriginalCoord> coord01, std::vector<MyCoord>& thisArray)
+	void QCurveLabel::copyFromField(std::vector<Curve::OriginalCoord> coord01, std::vector<MyCoord>& thisArray)
 	{
 		if (coord01.size())
 		{
@@ -1633,7 +1501,7 @@ namespace dyno
 		}
 	}
 
-	void QDrawLabel::buildHandlePointSet()
+	void QCurveLabel::buildHandlePointSet()
 	{
 		for (size_t i = 0; i < CoordArray.size(); i++)
 		{
@@ -1642,14 +1510,14 @@ namespace dyno
 	}
 
 
-	void QDrawLabel::setLinearResample(int s) 
+	void QCurveLabel::setLinearResample(int s)
 	{
 		LineResample = s;
 		this->ForceUpdate = true;
 		update();
 	}
 
-	void QDrawLabel::copySettingFromField()
+	void QCurveLabel::copySettingFromField()
 	{
 		useBezier = field->getValue().useCurve;
 		LineResample = field->getValue().resample;
@@ -1662,9 +1530,7 @@ namespace dyno
 		else { InterpMode = Linear; }
 
 
-		if (field->getValue().Dirmode == Ramp::Direction::x) { Mode = Dir::x; }
-		else { Mode = Dir::y; }
-		useSort = true; 
+		useSort = false;
 
 	}
 

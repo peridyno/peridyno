@@ -23,11 +23,6 @@ namespace dyno
 	{
 	}
 
-	template<typename TDataType>
-	void TetraMeshWriterFracture<TDataType>::setNamePrefix(std::string prefix)
-	{
-		this->name_prefix = prefix;
-	}
 
 	
 	bool cmp(OriginalFaceId a, OriginalFaceId b)
@@ -198,12 +193,6 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TetraMeshWriterFracture<TDataType>::setOutputPath(std::string path)
-	{
-		this->output_path = path;
-	}
-
-	template<typename TDataType>
 	bool TetraMeshWriterFracture<TDataType>::updatePtr() 
 	{
 		if (this->ptr_TetrahedronSet == nullptr) {
@@ -247,11 +236,11 @@ namespace dyno
 			return false;
 		}
 
-		
-
-		std::stringstream ss; ss << m_output_index;
-		std::string filename = output_path + "/" + this->name_prefix + ss.str() + this->file_postfix;
-		std::string filenameF = output_path + "/" + this->name_prefix + "Frac_" + ss.str() + this->file_postfix;
+		auto output_path = this->varOutputPath()->getValue();
+		int frame_number = this->getFrameNumber();
+		std::stringstream ss; ss <<frame_number;
+		std::string filename = output_path + ss.str() + this->file_postfix;
+		std::string filenameF = output_path + "Frac_" + ss.str() + this->file_postfix;
 		std::ofstream output(filename.c_str(), std::ios::out);
 		std::ofstream outputF(filenameF.c_str(), std::ios::out);
 
@@ -393,25 +382,9 @@ namespace dyno
 		host_tri2tet.clear();
 		host_VerId.clear();
 
-		this->m_output_index ++;
 		return true;
 	}
 
-	template<typename TDataType>
-	void TetraMeshWriterFracture<TDataType>::updateImpl() 
-	{
-		printf("===========Tetra Mesh Writer============\n");
-
-		if (this->m_output_index >= this->max_output_files) { return; }
-
-		if (this->current_idle_frame <= 0) {
-			this->current_idle_frame = this->idle_frame_num;
-			this->outputSurfaceMesh();
-		}
-		else {
-			this->current_idle_frame--;
-		}
-	}
 
 	DEFINE_CLASS(TetraMeshWriterFracture);
 }

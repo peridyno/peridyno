@@ -15,24 +15,25 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
+
+		DECLARE_ENUM(OpenType,
+			ASCII = 0,
+			binary = 1);
+
 		ParticleWriter();
 		virtual ~ParticleWriter();
 
-		void setNamePrefix(std::string prefix);
-		void setOutputPath(std::string path);
+		void OutputASCII(std::string filename);
+		void OutputBinary(std::string filename);
 
-
+		void output()override;
 	protected:
-		void updateImpl() override;
 
 	public:
-		//DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
-		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
-	private:
-		int mFileIndex = 0;
-		int time_idx = 0;
-		std::string mOutpuPath;
-		std::string mOutputPrefix;
 
+		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "Input PointSet");
+		DEF_ENUM(OpenType, FileType, ASCII, "FileType");
+
+	private:
 	};
 }

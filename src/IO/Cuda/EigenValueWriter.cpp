@@ -19,35 +19,17 @@ namespace dyno
 	EigenValueWriter<TDataType>::~EigenValueWriter()
 	{
 	}
-
-	template<typename TDataType>
-	void EigenValueWriter<TDataType>::setNamePrefix(std::string prefix)
-	{
-		mOutputPrefix = prefix;
-	}
-
-	template<typename TDataType>
-	void EigenValueWriter<TDataType>::setOutputPath(std::string path)
-	{
-		mOutpuPath = path;
-	}
 	
 
 	template<typename TDataType>
-	void EigenValueWriter<TDataType>::updateImpl()
+	void EigenValueWriter<TDataType>::output()
 	{
+		auto path = this->varOutputPath()->getValue();
 
-		std::stringstream ss;
-
-		//**********渲染数据需要自动补零
-		if (mFileIndex < 10) ss<<"000";
-		else if (mFileIndex < 100) ss << "00";
-		else if (mFileIndex < 1000) ss << "0";
-		//**********
-		ss << mFileIndex;
-		
-		std::string filename = mOutpuPath + ss.str() + mOutputPrefix + std::string(".txt");
+		std::stringstream ss; ss << getFrameNumber();
+		std::string filename = path + ss.str()  + std::string(".txt");
 		std::fstream output(filename.c_str(), std::ios::out);
+
 
 		int pNum = this->inTransform()->size();
 		output << pNum << ' ';
@@ -106,7 +88,6 @@ namespace dyno
 
 		output.close();
 
-		mFileIndex++;
 	}
 
 	DEFINE_CLASS(EigenValueWriter);
