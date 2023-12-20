@@ -27,41 +27,38 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class Normal :public Node
+	class VectorVisualNode :public Node
 	{
-		DECLARE_TCLASS(Normal, TDataType);
+		DECLARE_TCLASS(VectorVisualNode, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Normal();
-		~Normal() 
-		{
-			d_points.clear();
-			d_edges.clear();
-			d_normalPt.clear();
-			d_normal.clear();
-			triangleCenter.clear();
-		}
+		VectorVisualNode();
 
+		DECLARE_ENUM(LineMode,
+			Line = 0,
+			Cylnder = 1,
+			Arrow = 2
+			);
 	public:
-		DEF_VAR(Real, Length, 0.2, "LinLength");
+		DEF_VAR(Real, Length, 0.4, "LinLength");
 		DEF_VAR(bool, Normalize, true, "Normalize");
 
-		DEF_VAR(Real, LineWidth, 0.01, " LineWidth");
-		DEF_VAR(bool, ShowWireframe, true, "ShowWireframe");
+		DEF_ENUM(LineMode, LineMode, LineMode::Line, "");
+		DEF_VAR(Real, LineWidth, 0.04, " LineWidth");
 		DEF_VAR(int, ArrowResolution, 8 , "");
+		DEF_VAR(int,Debug,0,"debug");
 
 		//In
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
-		DEF_ARRAY_IN(Coord, InNormal, DeviceType::GPU, "");
+		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
+		DEF_ARRAY_IN(Coord, InVector, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Real, Scalar, DeviceType::GPU, "");
 
 		//Normal
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, NormalSet, "");
 		DEF_ARRAY_STATE(Coord, Normal, DeviceType::GPU, "");
-		DEF_INSTANCE_STATE(PointSet<TDataType>, TriangleCenter, "");
 
 		//Arrow
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, ArrowCylinder, "");
@@ -78,14 +75,17 @@ namespace dyno
 		void varChanged();
 		void renderChanged();
 
+
+		std::shared_ptr<GLWireframeVisualModule> gledge;
 		std::shared_ptr<GLInstanceVisualModule> glInstanceCylinder;
 		std::shared_ptr<GLInstanceVisualModule> glInstanceCone;
 		DArray<Coord> d_points;
 		DArray<TopologyModule::Edge> d_edges;
 		DArray<Coord> d_normalPt;
-		DArray<Coord> d_normal;
-		DArray<Coord> triangleCenter;
+		DArray<Real> d_ConvertColor;
 	};
 
-	IMPLEMENT_TCLASS(Normal, TDataType);
+
+
+	IMPLEMENT_TCLASS(VectorVisualNode, TDataType);
 }
