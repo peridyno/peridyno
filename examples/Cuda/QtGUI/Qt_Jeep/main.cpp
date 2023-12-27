@@ -1,5 +1,5 @@
 #include <QtApp.h>
-#include "Plugin/ObjIO/ObjLoader.h"
+#include "ObjIO/ObjLoader.h"
 #include <QtApp.h>
 
 #include <SceneGraph.h>
@@ -8,7 +8,7 @@
 #include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/SquareEmitter.h>
 
-#include <Multiphysics/SolidFluidCoupling.h>
+//#include <Multiphysics/SolidFluidCoupling.h>
 
 #include <Module/CalculateNorm.h>
 #include <Peridynamics/HyperelasticBody.h>
@@ -77,7 +77,6 @@
 #include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
 
 #include "StaticTriangularMesh.h"
-#include "Plugin/ObjIO/ObjLoader.h"
 
 #include "CubeModel.h"
 #include "ParticleSystem/CubeSampler.h"
@@ -101,8 +100,8 @@ std::shared_ptr<SceneGraph> creatScene()
 	// Scene Setting
 	scn->setTotalTime(3.0f);
 	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
-	scn->setLowerBound(Vec3f(-1.0f, 0.0f, 0.0f));
-	scn->setUpperBound(Vec3f(1.0f, 1.0f, 1.0f));
+	scn->setLowerBound(Vec3f(-0.5f, 0.0f, -4.0f));
+	scn->setUpperBound(Vec3f(0.5f, 1.0f, 4.0f));
 
 
 	// Create Var
@@ -123,7 +122,8 @@ std::shared_ptr<SceneGraph> creatScene()
 	ObjJeep->varScale()->setValue(scale);
 	ObjJeep->varLocation()->setValue(LocationBody);
 	ObjJeep->varVelocity()->setValue(velocity);
-	ObjJeep->surfacerender->setColor(color);
+	auto glJeep = ObjJeep->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glJeep->setColor(color);
 
 	// Import Wheel
 	std::vector<std::string> wheelPath = { "Jeep/Wheel_R.obj","Jeep/Wheel_R.obj","Jeep/Wheel_L.obj","Jeep/Wheel_R.obj" };
@@ -156,7 +156,8 @@ std::shared_ptr<SceneGraph> creatScene()
 	ObjRoad->varFileName()->setValue(getAssetPath() + "Jeep/Road/Road.obj");
 	ObjRoad->varScale()->setValue(Vec3f(0.04));
 	ObjRoad->varLocation()->setValue(Vec3f(0, 0, 0.5));
-	ObjRoad->surfacerender->setColor(Color(1, 1, 1));
+	auto glRoad = ObjRoad->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glRoad->setColor(color);
 
 	//*************************************** Merge Model ***************************************//
 	//MergeWheel
@@ -172,17 +173,19 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto mergeRoad = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeRoad->varUpdateMode()->setCurrentKey(1);
 	mergeWheel->stateTriangleSet()->promoteOuput()->connect(mergeRoad->inTriangleSet01());
-	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSet02());
+	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSet03());
 
 	//Obj boundary
 	auto ObjBoundary = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
 	ObjBoundary->varFileName()->setValue(getAssetPath() + "Jeep/Road/boundary.obj");
 	ObjBoundary->varScale()->setValue(Vec3f(0.04));
 	ObjBoundary->varLocation()->setValue(Vec3f(0, 0, 0.5));
-	ObjBoundary->surfacerender->setColor(Color(1, 1, 1));
+	auto glBoundary = ObjBoundary->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glBoundary->setColor(color);
 
 	ObjBoundary->outTriangleSet()->connect(mergeRoad->inTriangleSet02());
 	ObjBoundary->graphicsPipeline()->disable();
+	ObjJeep->outTriangleSet()->connect(mergeRoad->inTriangleSet04());
 
 	//SetVisible
 	mergeRoad->graphicsPipeline()->disable();
@@ -249,34 +252,39 @@ void importOtherModel(std::shared_ptr<SceneGraph> scn)
 	ObjRoad_1->varFileName()->setValue(getAssetPath() + "Jeep/Road/obj_1.obj");
 	ObjRoad_1->varScale()->setValue(ScaleRoad);
 	ObjRoad_1->varLocation()->setValue(LocationRoad);
-	ObjRoad_1->surfacerender->setColor(Color(1, 1, 1));
+	auto glRoad_1 = ObjRoad_1->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glRoad_1->setColor(Color(1, 1, 1));
 
 	auto ObjRoadWall = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
 	ObjRoadWall->varFileName()->setValue(getAssetPath() + "Jeep/Road/obj_wall.obj");
 	ObjRoadWall->varScale()->setValue(ScaleRoad);
 	ObjRoadWall->varLocation()->setValue(LocationRoad);
-	ObjRoadWall->surfacerender->setColor(Color(1, 1, 1));
+	auto glRoadWall = ObjRoadWall->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glRoadWall->setColor(Color(1, 1, 1));
 
 	auto ObjRoadDoor = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
 	ObjRoadDoor->varFileName()->setValue(getAssetPath() + "Jeep/Road/obj_door.obj");
 	ObjRoadDoor->varScale()->setValue(ScaleRoad);
 	ObjRoadDoor->varLocation()->setValue(LocationRoad);
-	ObjRoadDoor->surfacerender->setColor(Color(0.5));
-	ObjRoadDoor->surfacerender->setRoughness(0.5);
-	ObjRoadDoor->surfacerender->setMetallic(1);
+	auto glRoadDoor = ObjRoadDoor->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glRoadDoor->setColor(Color(0.5));
+	glRoadDoor->setRoughness(0.5);
+	glRoadDoor->setMetallic(1);
 
 	auto ObjRoadLogo = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
 	ObjRoadLogo->varFileName()->setValue(getAssetPath() + "Jeep/Road/obj_logo.obj");
 	ObjRoadLogo->varScale()->setValue(ScaleRoad);
 	ObjRoadLogo->varLocation()->setValue(LocationRoad);
-	ObjRoadLogo->surfacerender->setColor(Color(0, 0.2, 1));
+	auto glRoadLogo = ObjRoadLogo->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glRoadLogo->setColor(Color(0, 0.2, 1));
 
 	auto ObjRoadText = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
 	ObjRoadText->varFileName()->setValue(getAssetPath() + "Jeep/Road/obj_peridyno.obj");
 	ObjRoadText->varScale()->setValue(ScaleRoad);
 	ObjRoadText->varLocation()->setValue(LocationRoad);
-	ObjRoadText->surfacerender->setColor(Color(4, 4, 4));
-
+	auto glRoadText = ObjRoadText->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glRoadText->setColor(Color(4, 4, 4));
+	
 }
 
 int main()

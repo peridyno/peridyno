@@ -41,23 +41,25 @@ namespace dyno
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet01, "")
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "")
+			DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "")
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "")
+			DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "")
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "")
-		
-		DECLARE_ENUM(UpdateMode,
-			Reset = 0,
+			DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "")
+
+			DECLARE_ENUM(UpdateMode,
+		Reset = 0,
 			Tick = 1);
 
-		DEF_ENUM(UpdateMode ,UpdateMode,UpdateMode::Reset,"");
+		DEF_ENUM(UpdateMode, UpdateMode, UpdateMode::Reset, "");
 
 		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
 		void disableRender();
 		void preUpdateStates()override;
 		void MergeCPU();
+		void MergeGPU();
+
 	protected:
 		void resetStates() override;
 
