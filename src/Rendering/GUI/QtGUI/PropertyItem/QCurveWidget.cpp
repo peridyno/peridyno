@@ -271,21 +271,21 @@ namespace dyno
 	void QCurveLabel::paintEvent(QPaintEvent* event)
 	{
 
-		//设置半径
+		//set Point Radius
 		radius = 4;
 		int w = this->width();
 		int h = this->height();
 		
-		//设置边界框
+		//set border
 		minX = 0 + 1.5 * radius;
 		maxX = w - 2 * radius;
 		minY = 0 + 2 * radius;
 		maxY = h - 1.5 * radius;
 
-		//如果CoordArray为空，则从field中取数据
+		//get data
 		if (CoordArray.empty()) 
 		{
-			if (field->getValue().Originalcoord.empty())		//如果field中没有Widget传回的数据，则从field本身的Coord进行初始化
+			if (field->getValue().Originalcoord.empty())		//If there is no data from the Widget in the field, it is initialized from the field
 			{
 
 				this->copyFromField(field->getValue().MyCoord, reSortCoordArray);
@@ -293,7 +293,7 @@ namespace dyno
 				buildCoordToResortMap();
 				this->copyFromField(field->getValue().myHandlePoint, HandlePoints);
 			}
-			else		//否则直接取field存的qt坐标
+			else		//use data from the Widget
 			{
 				this->copyFromField(field->getValue().Originalcoord,CoordArray);
 				//this->copyFromField(field->getDataPtr()->OriginalHandlePoint, HandlePoints);
@@ -302,9 +302,9 @@ namespace dyno
 
 		}
 
-		//Close模式要在这里创建左右两个封闭点
-		reSortCoordArray.assign(CoordArray.begin(), CoordArray.end());		//用CoordArray为reSortCoordArray赋值
-		reSort(reSortCoordArray);		//对reSortCoordArray重排序
+		//if useClose,add end & start Point.
+		reSortCoordArray.assign(CoordArray.begin(), CoordArray.end());		
+		reSort(reSortCoordArray);		
 
 
 		QPainter painter(this);
@@ -324,28 +324,28 @@ namespace dyno
 		//Draw Ellipse
 		size_t ptNum = CoordArray.size();
 
-		QVector<QPointF> QCoordArray;//创建QPointF以绘制点
+		QVector<QPointF> QCoordArray;
 		for (size_t i = 0; i < reSortCoordArray.size(); i++) 
 		{
 			QCoordArray.push_back(QPointF(reSortCoordArray[i].x, reSortCoordArray[i].y));
 		}
 
 
-		buildCoordToResortMap();	//构建map用以通过CoordArray查找排序后reSortCoordArray的元素id
+		buildCoordToResortMap();	//Build map. find element id of sorted reSortCoordArray by CoordArray
 
-		if (HandlePoints.empty())	//通过CoordArray构建贝塞尔控制柄的点HandlePoints
+		if (HandlePoints.empty())	//Build HandlePoints for Bezier handles from CoordArray.
 		{
 			buildHandlePointSet();
 		}
 
-		//绘制曲线
+		
 		QPen LinePen = QPen(QPen(QBrush(QColor(200,200,200)), 2, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
 		painter.setPen(LinePen);
 
 		path.clear();
-		if (useBezier)		//画贝塞尔曲线或折线
+		if (useBezier)		//Draw Bezier or Line
 		{
-			//绘制贝塞尔曲线
+			//draw Bezier
 			for (size_t i = 1; i < reSortCoordArray.size(); i++)
 			{
 				int ptnum = i - 1;
@@ -362,7 +362,7 @@ namespace dyno
 				path.cubicTo(QPointF(HandlePoints[f].x, HandlePoints[f].y), QPointF(HandlePoints[s].x, HandlePoints[s].y), QPointF(reSortCoordArray[ptnum + 1].x, reSortCoordArray[ptnum + 1].y));
 				painter.drawPath(path);
 			}
-			//根据curveClose判断是否绘制首尾连接线以闭合曲线
+			// use CurveClose?
 			if (curveClose && reSortCoordArray.size()>=3)
 			{
 				int end = reSortCoordArray.size() - 1;
@@ -399,7 +399,7 @@ namespace dyno
 		QPen LinePenWhite = QPen(QPen(QBrush(Qt::white), 2, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
 		painter.setPen(LinePenWhite);
 
-		//绘制点
+		//draw Point
 		for (size_t i = 0; i < ptNum; i++)
 		{
 			painter.setBrush(QBrush(Qt::gray, Qt::SolidPattern));
@@ -425,35 +425,22 @@ namespace dyno
 			painter.drawEllipse(CoordArray[hoverPoint].x - radius, CoordArray[hoverPoint].y - radius, 2 * radius, 2 * radius);
 		}
 
-		//绘制控制柄
+		//drawHandle
 		if (useBezier) 
 		{
-			////绘制全部控制柄
-			//{
-			//	for (size_t i = 0; i < CoordArray.size(); i++)
-			//	{
-			//		int f = i * 2;
-			//		int s = i * 2 + 1;
-			//		painter.drawLine(QPointF(CoordArray[i].x, CoordArray[i].y), QPointF(HandlePoints[f].x, HandlePoints[f].y));
-			//		painter.drawLine(QPointF(CoordArray[i].x, CoordArray[i].y), QPointF(HandlePoints[s].x, HandlePoints[s].y));
-			//	}
-			//	for (size_t i = 0; i < HandlePoints.size(); i++)
-			//	{
-			//		painter.drawEllipse(HandlePoints[i].x - radius, HandlePoints[i].y - radius, 2 * radius, 2 * radius);
-			//	}
-			//}
+	
 
 			if (handleParent != -1)
 			{
 				int f = handleParent * 2;
 				int s = handleParent * 2 + 1;
-				//绘制控制柄
+				//draw Handle
 				painter.drawLine(QPointF(CoordArray[handleParent].x, CoordArray[handleParent].y), QPointF(HandlePoints[f].x, HandlePoints[f].y));
 				painter.drawLine(QPointF(CoordArray[handleParent].x, CoordArray[handleParent].y), QPointF(HandlePoints[s].x, HandlePoints[s].y));
-				//绘制控制点
+				//draw ControlPoint
 				painter.drawEllipse(HandlePoints[f].x - radius, HandlePoints[f].y - radius, 2 * radius, 2 * radius);
 				painter.drawEllipse(HandlePoints[s].x - radius, HandlePoints[s].y - radius, 2 * radius, 2 * radius);
-				// 绘制父点
+				//draw ParentPoint
 				painter.setBrush(QBrush(QColor(80, 179, 255), Qt::SolidPattern));
 				painter.drawEllipse(CoordArray[handleParent].x - radius, CoordArray[handleParent].y - radius, 2 * radius, 2 * radius);
 
@@ -471,7 +458,7 @@ namespace dyno
 			}
 		}
 
-		if (ForceUpdate)//强制更新数据
+		if (ForceUpdate)
 		{ 
 
 			buildBezierPoint();			
@@ -483,7 +470,7 @@ namespace dyno
 		painter.setBrush(QBrush(QColor(80, 179, 255), Qt::SolidPattern));
 		painter.setPen(QPen(QPen(QBrush(QColor(255, 255, 255)), 2, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin)));
 
-		//绘制选中点
+		//draw selected point
 		if (multiSelectID.size()) 
 		{
 			for (auto it : multiSelectID)
@@ -540,16 +527,12 @@ namespace dyno
 
 	void QCurveLabel::mousePressEvent(QMouseEvent* event)
 	{
-
-		//鼠标左键
-
+		//MouseLeft
 		pressCoord.x = event->pos().x();
 		pressCoord.y = event->pos().y();
 
-		if (shiftKey)	//多选
+		if (shiftKey)	
 		{
-			printf("多选\n");
-
 			for (size_t i = 0; i < CoordArray.size(); i++)
 			{
 				int temp = sqrt(std::pow((pressCoord.x - CoordArray[i].x), 2) + std::pow((pressCoord.y - CoordArray[i].y), 2));
@@ -587,9 +570,8 @@ namespace dyno
 				}
 			}
 		}
-		else if (!shiftKey && !altKey)		//单选
+		else if (!shiftKey && !altKey)		//
 		{
-			printf("单选\n");
 			for (size_t i = 0; i < CoordArray.size(); i++)
 			{
 				int temp = sqrt(std::pow((pressCoord.x - CoordArray[i].x), 2) + std::pow((pressCoord.y - CoordArray[i].y), 2));
@@ -625,10 +607,10 @@ namespace dyno
 			}
 		}
 		
-		//判断是否点击贝塞尔控制柄
+		//if select Handle
 		if (useBezier)
 		{
-			printf("控制柄\n");
+			//printf("handle\n");
 			int displayHandle[2] = { handleParent * 2 ,handleParent * 2 + 1};
 			for (size_t k = 0; k < 2; k++)
 			{
@@ -661,7 +643,7 @@ namespace dyno
 
 					connectLength = V2.norm();
 				
-					{//判断Handle是否联动
+					{//handle Connect?
 						Vec2f V3 = Vec2f(HandlePoints[selectHandlePoint].x - CoordArray[handleParent].x, HandlePoints[selectHandlePoint].y - CoordArray[handleParent].y);
 						Vec2f V4 = Vec2f(HandlePoints[connectHandlePoint].x - CoordArray[handleParent].x, HandlePoints[connectHandlePoint].y - CoordArray[handleParent].y);
 						V4.normalize();
@@ -675,17 +657,15 @@ namespace dyno
 				}
 			}
 		}
-		//未点击任何点则插入点
 		if (!isSelect && !isHandleSelect)
 		{
-			//close模式下插入点并自动排序
 
-			//尾插
+			//pushback Point
 			if (!ctrlKey)
 			{
 				addPointtoEnd();
 			}
-			//线段中间插入点
+			//insert Point in Edge
 			else if (ctrlKey)
 			{
 				if (reSortCoordArray.size() >= 2)
@@ -724,7 +704,7 @@ namespace dyno
 			}
 
 		}
-		//鼠标右键
+		
 		else if(event->button() == Qt::RightButton)
 		{
 
@@ -738,7 +718,7 @@ namespace dyno
 
 		this->update();
 	}
-	//尾插
+	
 	int QCurveLabel::addPointtoEnd()
 	{	
 		if (!InsertAtBegin)
@@ -854,15 +834,12 @@ namespace dyno
 	void QCurveLabel::mouseMoveEvent(QMouseEvent* event)
 	{
 		this->grabKeyboard();
-		//移动约束 
+		//constrained
 		if (isSelect) 
 		{
-			//首位移动约束 ——单选
-
 			CoordArray[selectPoint].x = dyno::clamp(event->pos().x(), minX, maxX);
 			CoordArray[selectPoint].y = dyno::clamp(event->pos().y(), minY, maxY);
 
-			//
 			dtPos.set(CoordArray[selectPoint].x-iniPos.x , CoordArray[selectPoint].y - iniPos.y);
 
 			HandlePoints[selectPoint * 2].x = dyno::clamp(HandlePoints[selectPoint * 2].x + dtPos.x, minX, maxX);
@@ -873,7 +850,6 @@ namespace dyno
 
 			iniPos = CoordArray[selectPoint];
 
-			//多选
 			if (multiSelectID.size() > 1)
 			{
 				for (size_t i = 0; i < multiSelectID.size(); i++)
@@ -903,10 +879,10 @@ namespace dyno
 
 			update();
 		}
-		//控制柄移动
+		//constrained Handle
 		if (isHandleSelect)
 		{
-			//首位移动约束 
+
 			HandlePoints[selectHandlePoint].x = dyno::clamp(event->pos().x(), minX, maxX); 
 			HandlePoints[selectHandlePoint].y = dyno::clamp(event->pos().y(), minY, maxY);
 			
@@ -973,7 +949,7 @@ namespace dyno
 		connectHandlePoint = -1;
 		HandleConnection = true;
 
-		//按照百分比划Bezier分点
+		//build Bezier Point
 		buildBezierPoint();
 		updateDataToField();
 		update();
@@ -982,7 +958,6 @@ namespace dyno
 	{
 		Curve s;
 
-		//更新数据到field 
 		if (field == nullptr) { return; }
 		else
 		{
@@ -1353,7 +1328,7 @@ namespace dyno
 
 
 	QCurveLabel::Coord0_1 QCurveLabel::CoordTo0_1Value(MyCoord& coord)
-	{//曲线坐标转换到0-1浮点值，并反转Y轴
+	{
 		Coord0_1 s;
 
 		double x = double(coord.x);
@@ -1373,7 +1348,7 @@ namespace dyno
 	}
 
 	QCurveLabel::MyCoord QCurveLabel::ZeroOneToCoord(Coord0_1& value, int x0, int x1, int y0, int y1)
-	{//0-1浮点值到曲线坐标
+	{
 
 		MyCoord s;
 		s.x = int(value.x * float(x1 - x0)) + x0;
