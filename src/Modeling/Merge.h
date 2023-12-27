@@ -39,15 +39,15 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet01, "")
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet01, "");
 
-			DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "")
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "");
 
-			DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "")
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "");
 
-			DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "")
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "");
 
-			DECLARE_ENUM(UpdateMode,
+		DECLARE_ENUM(UpdateMode,
 		Reset = 0,
 			Tick = 1);
 
