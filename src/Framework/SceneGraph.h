@@ -37,6 +37,10 @@ namespace dyno
 
 // 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
 // 		std::shared_ptr<Node> getRootNode() { return mRoot; }
+		
+		DEF_VAR(Vec3f, Gravity, Vec3f(0,-9.8,0), "");
+		DEF_VAR(Vec3f, LowerBound, Vec3f(0, 0, 0), "");
+		DEF_VAR(Vec3f, UpperBound, Vec3f(0, 0, 0), "");
 
 		virtual bool initialize();
 		bool isInitialized() { return mInitialized; }
@@ -108,16 +112,16 @@ namespace dyno
 	public:
 		static SceneGraph& getInstance();
 
-		inline void setTotalTime(float t) { mMaxTime = t; }
+		inline void setTotalTime(float t) { mMaxTime = t; tempUpdateVar(); }
 		inline float getTotalTime() { return mMaxTime; }
 
-		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; }
+		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; tempUpdateVar();}
 		inline float getFrameRate() { return mFrameRate; }
 		inline float getTimeCostPerFrame() { return mFrameCost; }
 		inline float getFrameInterval() { return 1.0f / mFrameRate; }
 
 		inline int getFrameNumber() { return mFrameNumber; }
-		inline void setFrameNumber(int n) { mFrameNumber = n; }
+		inline void setFrameNumber(int n) { mFrameNumber = n;  tempUpdateVar();}
 		
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
@@ -222,7 +226,48 @@ namespace dyno
 		{
 			//mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
+
+			tempUpdateVar();
+			
+			auto callback = std::make_shared<FCallBackFunc>(std::bind(&SceneGraph::tempUpdateData, this));
+			this->varGravity()->attach(callback);
+			this->varLowerBound()->attach(callback);
+			this->varUpperBound()->attach(callback);	
 		};
+
+
+		void tempUpdateVar() 
+		{
+			printf("tempUpdataVar\n");
+
+			this->varGravity()->setValue(mGravity);
+			this->varLowerBound()->setValue(mLowerBound);
+			this->varUpperBound()->setValue(mUpperBound);
+			
+
+			auto g = this->varGravity()->getValue();
+			auto LB = this->varLowerBound()->getValue();
+			auto UB = this->varUpperBound()->getValue();
+
+			printf("var* mGravity: %f, %f, %f\n", g[0], g[1], g[2]);
+			printf("var* mLowerBound: %f, %f, %f\n", LB[0], LB[1], LB[2]);
+			printf("var* mUpperBound: %f, %f, %f\n", UB[0], UB[1], UB[2]);
+
+		}
+
+		void tempUpdateData()
+		{
+			printf("tempUpdataData\n");
+
+			mGravity = this->varGravity()->getValue();
+			mLowerBound = this->varLowerBound()->getValue();
+			mUpperBound = this->varUpperBound()->getValue();
+
+			printf("mGravity: %f, %f, %f\n", mGravity[0], mGravity[1], mGravity[2]);
+			printf("mLowerBound: %f, %f, %f\n", mLowerBound[0], mLowerBound[1], mLowerBound[2]);
+			printf("mUpperBound: %f, %f, %f\n", mUpperBound[0], mUpperBound[1], mUpperBound[2]);
+
+		}
 
 		/**
 		* To avoid erroneous operations

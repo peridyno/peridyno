@@ -19,6 +19,7 @@ namespace dyno
 		void nodeCreated(std::shared_ptr<Node> node);
 
 		void logActTriggered();
+		void settingTriggered();
 
 	public slots:
 		void newFile();
@@ -52,8 +53,10 @@ namespace dyno
 		//Edit menu
 		QAction* mLogAct;
 
-		QAction* mEditAct;
+		QAction* mSettingAct;
 
 		QString mFileName;
+
+
 	};
 }

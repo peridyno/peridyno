@@ -109,6 +109,9 @@
 
 #include "PMainToolBar.h"
 #include "PModuleEditorToolBar.h"
+#include "PSettingEditor.h"
+#include "SceneGraphFactory.h"
+
 
 namespace dyno
 {
@@ -135,6 +138,8 @@ namespace dyno
 
 		setupToolBar();
 
+		setupSettingEditor();
+
 		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
@@ -145,6 +150,10 @@ namespace dyno
 		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
 
 		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
+		
+		connect(mToolBar, &PMainToolBar::settingTriggered, this, &PMainWindow::showSettingEditor);
+
+		connect(this, &PMainWindow::updateSetting, mSettingEditor->getSettingWidget(), &PSettingWidget::updateData);
 
 		statusBar()->showMessage(tr("Status Bar"));
 	}
@@ -381,4 +390,32 @@ namespace dyno
 	void PMainWindow::mousePressEvent(QMouseEvent *event)
 	{
 	}
+
+	void PMainWindow::setupSettingEditor()
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+
+		mSettingEditor = new PSettingEditor(scn,nullptr);
+
+	}
+
+	void PMainWindow::showSettingEditor() 
+	{	
+		if (mSettingEditor == nullptr)
+			return;
+
+		updateSettingData();
+		mSettingEditor->show();
+	}
+
+	void PMainWindow::updateSettingData() 
+	{
+		if (mSceneGraph == nullptr)
+			return;
+
+		emit updateSetting();
+	}
+
+
+
 }

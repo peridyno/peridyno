@@ -59,6 +59,7 @@
 #include "NodeEditor/QtModuleFlowWidget.h"
 #include "../../external/nodeeditor/include/nodes/internal/QtNode.hpp"
 
+
 QT_FORWARD_DECLARE_CLASS(QMenu)
 
 // class Qt::PNodeFlowWidget;
@@ -80,6 +81,7 @@ namespace dyno
 
 	class QtApp;
 	class ImWidget;
+	class PSettingEditor;
 
 //	QT_FORWARD_DECLARE_CLASS(QLichtWidget)
 
@@ -119,6 +121,15 @@ namespace dyno
 		void addNodeByName(std::string name);
 
 		void showAboutMsg();
+		
+		//Setting Editor
+
+		void showSettingEditor();
+
+		void setSceneGraph(std::shared_ptr<SceneGraph> scn) { this->mSceneGraph = scn; }
+
+	signals:
+		void updateSetting ();
 
 	private:
 		void setCentralView();
@@ -126,6 +137,8 @@ namespace dyno
 		void setupStatusBar();
 //		void setupMenuBar();
 		void setupAllWidgets();
+		void setupSettingEditor();
+		void updateSettingData();
 
 	protected:
 		void mousePressEvent(QMouseEvent *event) override;
@@ -148,6 +161,11 @@ namespace dyno
 		PMainToolBar*			mToolBar = nullptr;
 
 		PIODockWidget* mIoDockerWidget = nullptr;
+
+		PSettingEditor* mSettingEditor = nullptr;
+
+		std::shared_ptr<SceneGraph> mSceneGraph = nullptr; 
+
 	};
 
 }

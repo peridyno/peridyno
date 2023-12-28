@@ -149,7 +149,7 @@ namespace dyno
 				vlayout->addWidget(mPropertyLabel[i]);
 				mPropertyWidget[i]->setLayout(mPropertyLayout[i]);
 				vlayout->addWidget(mPropertyWidget[i]);
-				//以下为是否再属性栏显示 StateVariables
+				
 				mPropertyWidget[i]->setVisible(false);
 				mPropertyLabel[i]->setVisible(false);
 			}
@@ -309,10 +309,14 @@ namespace dyno
 
 	void PPropertyWidget::contentUpdated()
 	{
+
 		auto node = std::dynamic_pointer_cast<Node>(mSeleted);
 
-		if (node != nullptr)
+		if (node != nullptr) 
+		{
 			emit nodeUpdated(node);
+			printf("updatecontent\n");
+		}
 
 		auto module = std::dynamic_pointer_cast<Module>(mSeleted);
 

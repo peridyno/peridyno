@@ -53,7 +53,13 @@ namespace dyno
 
 	void SceneGraph::setGravity(Vec3f g)
 	{
-		mGravity = g;
+		mGravity = g; 
+		printf("gravity : %f, %f, %f ***************************\n", mGravity[0], mGravity[1], mGravity[2]);
+		this->varGravity()->setValue(mGravity);
+		auto s = this->varGravity()->getValue();
+		printf("gravity : %f, %f, %f ***************************\n", s[0], s[1], s[2]);
+
+
 	}
 
 	Vec3f SceneGraph::getGravity()
@@ -302,6 +308,7 @@ namespace dyno
 		mFrameNumber = 0;
 
 		mSync.unlock();
+		tempUpdateVar();//≤‚ ‘
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
@@ -311,6 +318,7 @@ namespace dyno
 		this->traverseForward<ResetAct>(node);
 
 		mSync.unlock();
+		tempUpdateVar();//≤‚ ‘
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
@@ -347,12 +355,21 @@ namespace dyno
 
 	void SceneGraph::setLowerBound(Vec3f lowerBound)
 	{
-		mLowerBound = lowerBound;
+		mLowerBound = lowerBound; 
+		printf("lowerBound : %f,%f,%f ***************************\n",mLowerBound[0], mLowerBound[1], mLowerBound[2]);
+		this->varLowerBound()->setValue(mLowerBound);
+		auto s = this->varLowerBound()->getValue();
+		printf("lowerBound var: %f,%f,%f ***************************\n", s[0], s[1], s[2]);
+
 	}
 
 	void SceneGraph::setUpperBound(Vec3f upperBound)
 	{
 		mUpperBound = upperBound;
+		this->varUpperBound()->setValue(mUpperBound);
+		printf("UpperBound : %f,%f,%f ***************************\n", mUpperBound[0], mUpperBound[1], mUpperBound[2]);
+		auto s = this->varUpperBound()->getValue();
+		printf("UpperBound var: %f,%f,%f ***************************\n", s[0], s[1], s[2]);
 	}
 
 	void SceneGraph::markQueueUpdateRequired()
