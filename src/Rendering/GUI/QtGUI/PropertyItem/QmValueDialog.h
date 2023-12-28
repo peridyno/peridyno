@@ -71,12 +71,8 @@ namespace dyno
 		QSpinBox* mISpinBox;
 
 	Q_SIGNALS:
-		void DiaValueChange(double);
-
-		void DiaValueChange(QString);
 
 	public slots:
-		//void ModifyValue(double);
 
 		void initData(double);
 

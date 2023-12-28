@@ -3,7 +3,7 @@
 #include <QHBoxLayout>
 
 #include "Field.h"
-#include "QFieldWidget.h"
+#include "QmDoubleSpinBox.h"
 
 namespace dyno
 {
@@ -28,7 +28,7 @@ namespace dyno
 		slider->setMinimumWidth(60);
 
 
-		mDoubleSpinBox* spinner = new mDoubleSpinBox;;
+		spinner = new mDoubleSpinBox;;
 		spinner->setRange(field->getMin(), field->getMax());
 		spinner->setFixedWidth(100);
 
@@ -69,17 +69,17 @@ namespace dyno
 	{
 		std::string template_name = field()->getTemplateName();
 
-
+		double v = spinner->getRealValue();
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)value);
+			f->setValue((float)v);
 			f->update();
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(value);
+			f->setValue(v);
 			f->update();
 		}
 

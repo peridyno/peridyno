@@ -35,6 +35,7 @@
 
 //C++
 #include <memory>
+#include <sstream>
 
 namespace dyno
 {
@@ -91,19 +92,34 @@ namespace dyno
 	protected:
 		
 
-		virtual QString textFromValue(double val) const override 
+		virtual QString textFromValue(double val) const override
 		{
-			return QString::number(realValue, 10, displayDecimals);
+			auto qstr = QString::number(realValue, 10, displayDecimals);
+
+			return qstr;
 		}
-			
+		
+		virtual double valueFromText(const QString& text) const override 
+		{
+			if (istoggle)
+			{
+				return realValue;
+			}
+			else 
+			{
+				return text.toDouble();
+			}
+		}
+
 	public:
 
-
-
 	signals:
+		void updateByDialog(double);
+
+
 	public slots:
 		void ModifyValue(double);
-
+		void ModifyValueAndUpdate(double);
 		void LineEditFinished(double);
 		void LineEditStart();
 		
@@ -114,7 +130,12 @@ namespace dyno
 			else
 				displayDecimals = decimalsMin;
 
-			this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
+			istoggle = true;
+
+			auto t = QString::number(realValue, 10, displayDecimals);
+			this->lineEdit()->setText(t);
+
+			istoggle = false;
 		}
 		
 	private:
@@ -122,6 +143,7 @@ namespace dyno
 		int decimalsMax = 8;
 		int displayDecimals = 3;
 		double realValue = 0;
+		bool istoggle = false;
 	};
 
 

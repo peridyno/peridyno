@@ -23,17 +23,22 @@ namespace dyno
 		connect(this, SIGNAL(valueChanged(double)), this, SLOT(LineEditFinished(double)));
 
 		this->setDecimals(decimalsMax);
-		this->setKeyboardTracking(1);
+		this->setKeyboardTracking(false);
 
 	}
 
 	void mDoubleSpinBox::LineEditStart()
 	{
+		//printf("*************************************\n");
+		//printf("textChanged\n");
+
 		return;
 	}
 
 	void mDoubleSpinBox::LineEditFinished(double v) 
 	{
+		//printf("valueChanged\n");
+		//printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		realValue = v;
 		this->setValue(realValue);
 
@@ -46,7 +51,7 @@ namespace dyno
 	}
 	void mDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) 
 	{
-		printf("contextMenum");
+
 		if(ValueModify== nullptr)
 			ValueModify = new ValueDialog(this);
 		ValueModify->updateDialogPosition();
@@ -77,7 +82,16 @@ namespace dyno
 	void mDoubleSpinBox::ModifyValue(double v)
 	{
 		this->setRealValue(v);
+
+	}
+
+	void mDoubleSpinBox::ModifyValueAndUpdate(double v)
+	{
+		this->setKeyboardTracking(true);
+		this->setRealValue(v);
+		printf("setModifyValue++++++++++++++++++++++++++ %f\n", v);
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
+		this->setKeyboardTracking(false);
 	}
 
 

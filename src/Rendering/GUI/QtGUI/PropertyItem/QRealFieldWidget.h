@@ -41,6 +41,6 @@ namespace dyno
 
 	private:
 		QDoubleSlider* slider = nullptr;
-
+		mDoubleSpinBox* spinner = nullptr;
 	};
 }

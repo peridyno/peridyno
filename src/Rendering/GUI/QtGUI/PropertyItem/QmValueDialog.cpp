@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 
 #include <memory>
-#include "QFieldWidget.h"
+#include "QmDoubleSpinBox.h"
 
 namespace dyno
 {
@@ -49,7 +49,7 @@ namespace dyno
 
 				VLayout->addWidget(button[i]);
 
-				connect(button[i], SIGNAL(ValueChange(double)), doubleSpinBox, SLOT(ModifyValue(double)));
+				connect(button[i], SIGNAL(ValueChange(double)), doubleSpinBox, SLOT(ModifyValueAndUpdate(double)));
 				connect(button[i], SIGNAL(Release(double)), this, SLOT(initData(double)));
 			}
 		}

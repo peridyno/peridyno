@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 
 #include "Field.h"
+#include "QmDoubleSpinBox.h"
 
 namespace dyno
 {
@@ -84,7 +85,7 @@ namespace dyno
 		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
-
+		
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner3, SLOT(toggleDecimals(bool)));
@@ -121,6 +122,7 @@ namespace dyno
 
 	void QVector3FieldWidget::updateWidget()
 	{
+		printf("updateWidget");
 		std::string template_name = field()->getTemplateName();
 
 		double v1 = 0;
@@ -149,9 +151,9 @@ namespace dyno
 		spinner2->blockSignals(true);
 		spinner3->blockSignals(true);
 
-		spinner1->setValue(v1);
-		spinner2->setValue(v2);
-		spinner3->setValue(v3);
+		spinner1->setRealValue(v1);
+		spinner2->setRealValue(v2);
+		spinner3->setRealValue(v3);
 
 		spinner1->blockSignals(false);
 		spinner2->blockSignals(false);
