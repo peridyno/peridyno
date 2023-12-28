@@ -41,10 +41,12 @@ namespace dyno
 
 
 		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+
 	}
 
 	void QIntegerFieldWidget::changeValue(int value)
 	{
+
 		FVar<int>* f = TypeInfo::cast<FVar<int>>(field());
 		if (f == nullptr)
 			return;

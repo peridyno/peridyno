@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 
 #include "Field.h"
+#include "QFieldWidget.h"
 
 namespace dyno
 {
@@ -18,7 +19,7 @@ namespace dyno
 
 		this->setLayout(layout);
 
-		QLabel* name = new QLabel();
+		toggleLabel* name = new toggleLabel();
 		name->setFixedHeight(24);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
@@ -26,10 +27,10 @@ namespace dyno
 		slider->setRange(field->getMin(), field->getMax());
 		slider->setMinimumWidth(60);
 
-		QDoubleSpinner* spinner = new QDoubleSpinner;
+
+		mDoubleSpinBox* spinner = new mDoubleSpinBox;;
 		spinner->setRange(field->getMin(), field->getMax());
 		spinner->setFixedWidth(100);
-		spinner->setDecimals(3);
 
 		layout->addWidget(name, 0);
 		layout->addWidget(slider, 1);
@@ -42,22 +43,22 @@ namespace dyno
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field);
 			slider->setValue((double)f->getValue());
-			spinner->setValue((double)f->getValue());
+			spinner->setRealValue((double)f->getValue());
 		}
 		else if(template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 			slider->setValue(f->getValue());
-			spinner->setValue(f->getValue());
+			spinner->setRealValue(f->getValue());
 		}
 
 		FormatFieldWidgetName(field->getObjectName());
 
-		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(setValue(double)));
+		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(ModifyValue(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 
-		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
+		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -67,6 +68,7 @@ namespace dyno
 	void QRealFieldWidget::updateField(double value)
 	{
 		std::string template_name = field()->getTemplateName();
+
 
 		if (template_name == std::string(typeid(float).name()))
 		{

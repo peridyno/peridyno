@@ -39,6 +39,9 @@ namespace dyno
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(field->getMin(), field->getMax());
 
+
+
+
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner1, 0, 1);
 		layout->addWidget(spinner2, 0, 2);

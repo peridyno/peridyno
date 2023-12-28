@@ -48,29 +48,6 @@ namespace dyno
 	class ValueDialog;
 
 
-	class PERIDYNO_QTGUI_API QFieldWidget : public QGroupBox
-	{
-		Q_OBJECT
-	public:
-		QFieldWidget(FBase* field);
-		virtual ~QFieldWidget();
-
-		inline FBase* field() { return mField; }
-
-	signals:
-		void fieldChanged();
-
-	public slots:
-
-	private:
-		FBase* mField = nullptr;
-
-	private:
-		void syncValueFromField();
-
-		std::shared_ptr<FCallBackFunc> callback = nullptr;
-	};
-
 
 	class mDoubleSpinBox : public QDoubleSpinBox
 	{

@@ -41,5 +41,6 @@ namespace dyno
 
 	private:
 		QDoubleSlider* slider = nullptr;
+
 	};
 }

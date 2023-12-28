@@ -17,7 +17,7 @@ namespace dyno
 
 		this->setLayout(layout);
 
-		QLabel* name = new QLabel();
+		toggleLabel* name = new toggleLabel();
 		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
 		QFontMetrics fontMetrics(name->font());
@@ -38,15 +38,15 @@ namespace dyno
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(field->getMin(), field->getMax());
 
-		spinner1->DSB1 = spinner1;
-		spinner1->DSB2 = spinner2;
-		spinner1->DSB3 = spinner3;
-		spinner2->DSB1 = spinner1;
-		spinner2->DSB2 = spinner2;
-		spinner2->DSB3 = spinner3;
-		spinner3->DSB1 = spinner1;
-		spinner3->DSB2 = spinner2;
-		spinner3->DSB3 = spinner3;
+		//spinner1->DSB1 = spinner1;
+		//spinner1->DSB2 = spinner2;
+		//spinner1->DSB3 = spinner3;
+		//spinner2->DSB1 = spinner1;
+		//spinner2->DSB2 = spinner2;
+		//spinner2->DSB3 = spinner3;
+		//spinner3->DSB1 = spinner1;
+		//spinner3->DSB2 = spinner2;
+		//spinner3->DSB3 = spinner3;
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner1, 0, 1);
@@ -77,14 +77,19 @@ namespace dyno
 			v2 = v[1];
 			v3 = v[2];
 		}
-
-		spinner1->setValue(v1);
-		spinner2->setValue(v2);
-		spinner3->setValue(v3);
+		spinner1->setRealValue(v1);
+		spinner2->setRealValue(v2);
+		spinner3->setRealValue(v3);
 
 		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+
+		QObject::connect(name, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
+		QObject::connect(name, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
+		QObject::connect(name, SIGNAL(toggle(bool)), spinner3, SLOT(toggleDecimals(bool)));
+
+
 
 		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
@@ -95,9 +100,9 @@ namespace dyno
 
 	void QVector3FieldWidget::updateField(double value)
 	{
-		double v1 = spinner1->value();
-		double v2 = spinner2->value();
-		double v3 = spinner3->value();
+		double v1 = spinner1->getRealValue();
+		double v2 = spinner2->getRealValue();
+		double v3 = spinner3->getRealValue();
 
 		std::string template_name = field()->getTemplateName();
 
@@ -105,6 +110,7 @@ namespace dyno
 		{
 			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(field());
 			f->setValue(Vec3f((float)v1, (float)v2, (float)v3));
+			Vec3f s = f->getValue();
 		}
 		else if (template_name == std::string(typeid(Vec3d).name()))
 		{

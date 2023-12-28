@@ -44,4 +44,6 @@ namespace dyno
 		mDoubleSpinBox* spinner3;
 	};
 
+
+
 }
