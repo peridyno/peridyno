@@ -73,7 +73,6 @@ namespace dyno
 		
 		ValueDialog* ValueModify = nullptr;
 
-		bool ModifyByDialog;
 
 	private:
 		//Prohibited to use
@@ -84,8 +83,6 @@ namespace dyno
 		void mouseReleaseEvent(QMouseEvent* event) override;
 
 		void mouseMoveEvent(QMouseEvent* event) override;
-		
-		void buildDialog();
 
 		void contextMenuEvent(QContextMenuEvent* event) override;
 
@@ -114,7 +111,6 @@ namespace dyno
 	public:
 
 	signals:
-		void updateByDialog(double);
 
 
 	public slots:

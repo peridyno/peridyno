@@ -38,6 +38,7 @@ namespace dyno
 		//Called when the field is updated
 		void updateWidget();
 
+
 	private:
 		mDoubleSpinBox* spinner1;
 		mDoubleSpinBox* spinner2;

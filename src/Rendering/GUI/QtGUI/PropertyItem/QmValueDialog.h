@@ -66,15 +66,16 @@ namespace dyno
 
 		ValueButton* button[5];
 
-		QAbstractSpinBox* SBox1;
-		mDoubleSpinBox* mDSpinBox;
-		QSpinBox* mISpinBox;
+		QAbstractSpinBox* SBox1 = nullptr;
+		mDoubleSpinBox* mDSpinBox = nullptr;
+		QSpinBox* mISpinBox = nullptr;
 
 	Q_SIGNALS:
 
 	public slots:
 
 		void initData(double);
+		void initData(int);
 
 	private:
 
@@ -97,31 +98,41 @@ namespace dyno
 		void setRealText(QString t) { text = t; }
 
 		double SpinBoxData = 0;
-
 		double Data1 = 0;
-
 
 		double defaultValue = 0;
 		double finalValue = 0;
 		int StartX = 0;
 		int EndX = 0;
+
+		int intBoxData = 0;
+		int intDefaultValue = 0;
+		int intFinalValue = 0;
+		int intData1 = 0;
+
 		QDialog* parentDialog;
-		QAbstractSpinBox* DSB1;
+
+		mDoubleSpinBox* buttonDSpinBox = nullptr;
+		QSpinBox* buttonISpinBox = nullptr;
 
 		bool shiftPress = 0;
 		
 	Q_SIGNALS:
 		void ValueChange(double);
-	Q_SIGNALS:
+		void ValueChange(int);
+
 		void Release(double);
+		void Release(int);
 
 	private:
+		//double
 		double sub = 0;
 		int temp = 0;
 		std::string str;
 		QString text;
 		bool displayRealValue = true;
+		//int
+		int intSub = 0;
 	};
-
 
 }

@@ -3,6 +3,7 @@
 #include <QGridLayout>
 
 #include "Field.h"
+#include "QmSpinBox.h"
 
 namespace dyno
 {
@@ -27,15 +28,15 @@ namespace dyno
 		//Set label tips
 		name->setToolTip(str);
 
-		spinner1 = new QSpinBox;
+		spinner1 = new mSpinBox;
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(field->getMin(), field->getMax());
 
-		spinner2 = new QSpinBox;
+		spinner2 = new mSpinBox;
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(field->getMin(), field->getMax());
 
-		spinner3 = new QSpinBox;
+		spinner3 = new mSpinBox;
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(field->getMin(), field->getMax());
 

@@ -29,16 +29,13 @@ namespace dyno
 
 	void mDoubleSpinBox::LineEditStart()
 	{
-		//printf("*************************************\n");
-		//printf("textChanged\n");
 
 		return;
 	}
 
 	void mDoubleSpinBox::LineEditFinished(double v) 
 	{
-		//printf("valueChanged\n");
-		//printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+
 		realValue = v;
 		this->setValue(realValue);
 
@@ -57,10 +54,7 @@ namespace dyno
 		ValueModify->updateDialogPosition();
 		ValueModify->show();
 	}
-	void mDoubleSpinBox::buildDialog() 
-	{
 
-	}
 
 	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event)
 	{
@@ -89,7 +83,6 @@ namespace dyno
 	{
 		this->setKeyboardTracking(true);
 		this->setRealValue(v);
-		printf("setModifyValue++++++++++++++++++++++++++ %f\n", v);
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
 		this->setKeyboardTracking(false);
 	}

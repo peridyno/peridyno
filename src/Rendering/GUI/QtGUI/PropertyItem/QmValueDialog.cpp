@@ -17,15 +17,17 @@ namespace dyno
 	{
 
 		SBox1 = parent;
-		//
-		QVBoxLayout* VLayout = new QVBoxLayout;
-		float power = 0.1;
 
+		QVBoxLayout* VLayout = new QVBoxLayout;
+
+
+		// double
 		auto doubleSpinBox = TypeInfo::cast<mDoubleSpinBox>(parent);
 		if (doubleSpinBox != nullptr)
 		{
 			printf("castto mDoubleSpinBox\n");
 			mDSpinBox = doubleSpinBox;
+			float power = 0.1;
 			for (int i = 0; i < 5; i++)
 			{
 				button[i] = new ValueButton;
@@ -46,19 +48,47 @@ namespace dyno
 				button[i]->defaultValue = power * 1000;
 				button[i]->SpinBoxData = doubleSpinBox->getRealValue();
 				button[i]->parentDialog = this;
-
+				button[i]->buttonDSpinBox = doubleSpinBox;
 				VLayout->addWidget(button[i]);
 
 				connect(button[i], SIGNAL(ValueChange(double)), doubleSpinBox, SLOT(ModifyValueAndUpdate(double)));
 				connect(button[i], SIGNAL(Release(double)), this, SLOT(initData(double)));
 			}
 		}
-
+		// int
 		auto mIntSpinBox = TypeInfo::cast<QSpinBox>(parent);
 		if (mIntSpinBox != nullptr)
 		{
 			mISpinBox = mIntSpinBox;
-			printf("castto QSpinBox\n");
+			printf("castto mDoubleSpinBox\n");
+
+			int step[5] = {1,5,10,20,50};
+
+			for (int i = 0; i < 5; i++)
+			{
+				button[i] = new ValueButton;
+
+				std::string s = std::to_string(step[i]);
+				QString text = QString::fromStdString(s);
+
+				button[i]->setText(text);//initial
+				button[i]->setRealText(text);
+				button[i]->setFixedWidth(200);
+				button[i]->setFixedHeight(40);
+				button[i]->adjustSize();
+				//button[i]->setAlignment(Qt::AlignHCenter| Qt::AlignVCenter);
+				button[i]->setStyleSheet("QLabel{color:white;background-color:#346792;border: 1px solid #000000;border-radius:3px; padding: 0px;}");
+				button[i]->StartX = QCursor().pos().x();
+				button[i]->intDefaultValue = step[i];
+				button[i]->intBoxData = mISpinBox->value();
+				button[i]->parentDialog = this;
+				button[i]->buttonISpinBox = mIntSpinBox;
+
+				VLayout->addWidget(button[i]);
+
+				connect(button[i], SIGNAL(ValueChange(int)), mIntSpinBox, SLOT(setValue(int)));
+				connect(button[i], SIGNAL(Release(int)), this, SLOT(initData(int)));
+			}
 		}
 
 		VLayout->setSpacing(0);
@@ -72,8 +102,9 @@ namespace dyno
 
 		this->setWindowTitle("Property Editor");
 
-
 	}
+
+
 	void ValueDialog::updateDialogPosition() 
 	{
 		this->move(QCursor().pos().x() - button[1]->rect().width() / 2, QCursor().pos().y() - button[1]->rect().height() * 5 / 2 - 5);
@@ -115,11 +146,24 @@ namespace dyno
 	{	
 		if (mDSpinBox != nullptr) 
 		{
-			printf("castto doubleSpineBox\n");
+			printf("doubleSpineBox\n");
 			for (int i = 0; i < 5; i++)
 			{
 				button[i]->SpinBoxData = v;
 				button[i]->Data1 = mDSpinBox->getRealValue();
+			}
+		}
+	}
+
+	void ValueDialog::initData(int v)
+	{
+		if (mISpinBox != nullptr)
+		{
+			printf("SpineBox\n");
+			for (int i = 0; i < 5; i++)
+			{
+				button[i]->SpinBoxData = v;
+				button[i]->intData1 = mISpinBox->value();
 			}
 		}
 	}
@@ -133,16 +177,37 @@ namespace dyno
 	{
 		EndX = QCursor().pos().x();
 		temp = (EndX - StartX) / 10;
-		sub = defaultValue * temp;
+		if(buttonDSpinBox !=nullptr)
+		{
+			sub = defaultValue * temp;
 
-		//str = std::to_string(sub);
-		if (displayRealValue) 
-			str = std::to_string(defaultValue) + "\n" + std::to_string(SpinBoxData + sub);
-		else 
-			str = std::to_string(sub);
+			if (displayRealValue)
+				str = std::to_string(defaultValue) + "\n" + std::to_string(SpinBoxData + sub);
+			else
+				str = std::to_string(sub);
+
+			text = QString::fromStdString(str);
+			this->setText(text);
+
+			emit ValueChange(SpinBoxData + sub);
+		}
+		else if (buttonISpinBox != nullptr) 
+		{
+			intSub = intDefaultValue * temp;
+
+			if (displayRealValue)
+				str = std::to_string(intDefaultValue) + "\n" + std::to_string(intBoxData + intSub);
+			else
+				str = std::to_string(intSub);
+
+			text = QString::fromStdString(str);
+			this->setText(text);
+
+			emit ValueChange(int(intBoxData + intSub));
 		
-		text = QString::fromStdString(str);
-		this->setText(text);
+		}
+
+
 
 		//if (shiftPress)
 		//{
@@ -157,7 +222,7 @@ namespace dyno
 		//	DSB3->setValue(Data3 * p);
 		//}
 
-		emit ValueChange(SpinBoxData + sub);
+
 
 
 	}
@@ -171,15 +236,36 @@ namespace dyno
 	void ValueButton::mousePressEvent(QMouseEvent* event)
 	{
 		StartX = QCursor().pos().x();
+
+		if (buttonDSpinBox != nullptr)
+		{
+			SpinBoxData = buttonDSpinBox->getRealValue();
+		}
+		else if (buttonISpinBox != nullptr)
+		{
+			intBoxData = buttonISpinBox->value();
+		}
 	}
 	void ValueButton::mouseReleaseEvent(QMouseEvent* event)
 	{
-		str = std::to_string(defaultValue);
-		text = QString::fromStdString(str);
-		this->setText(text);
-		SpinBoxData = SpinBoxData + sub;
+		if (buttonDSpinBox != nullptr)
+		{
+			str = std::to_string(defaultValue);
+			text = QString::fromStdString(str);
+			this->setText(text);
+			SpinBoxData = SpinBoxData + sub;
 
-		emit Release(SpinBoxData);
+			emit Release(SpinBoxData);
+		}
+		else if (buttonISpinBox != nullptr)
+		{
+			str = std::to_string(intDefaultValue);
+			text = QString::fromStdString(str);
+			this->setText(text);
+			intBoxData = intBoxData + intSub;
+
+			emit Release(intBoxData);
+		}
 
 	}
 }
