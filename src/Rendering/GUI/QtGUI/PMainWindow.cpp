@@ -395,7 +395,7 @@ namespace dyno
 	{
 		auto scn = SceneGraphFactory::instance()->active();
 
-		mSettingEditor = new PSettingEditor(scn,nullptr);
+		mSettingEditor = new PSettingEditor(nullptr);
 
 	}
 

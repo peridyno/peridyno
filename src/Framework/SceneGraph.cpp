@@ -53,13 +53,7 @@ namespace dyno
 
 	void SceneGraph::setGravity(Vec3f g)
 	{
-		mGravity = g; 
-		printf("gravity : %f, %f, %f ***************************\n", mGravity[0], mGravity[1], mGravity[2]);
-		this->varGravity()->setValue(mGravity);
-		auto s = this->varGravity()->getValue();
-		printf("gravity : %f, %f, %f ***************************\n", s[0], s[1], s[2]);
-
-
+		mGravity = g;
 	}
 
 	Vec3f SceneGraph::getGravity()
@@ -79,7 +73,7 @@ namespace dyno
 		{
 			return true;
 		}
- 		//TODO: check initialization
+		//TODO: check initialization
 // 		if (mRoot == nullptr)
 // 		{
 // 			return false;
@@ -97,7 +91,7 @@ namespace dyno
 				{
 					(*iter)->initialize();
 				}
-				
+
 				node->graphicsPipeline()->update();
 			}
 		};
@@ -119,7 +113,7 @@ namespace dyno
 		{
 		public:
 			AdvanceAct(float dt, float t, bool bTiming = false) {
-				mDt = dt; 
+				mDt = dt;
 				mElapsedTime = t;
 				mTiming = bTiming;
 			};
@@ -145,7 +139,7 @@ namespace dyno
 				CTimer timer;
 #endif // CUDA_BACKEND
 
-				
+
 				if (mTiming) {
 					timer.start();
 				}
@@ -162,7 +156,7 @@ namespace dyno
 					std::stringstream ss;
 					name << std::setw(40) << node->getClassInfo()->getClassName();
 					ss << std::setprecision(10) << timer.getElapsedTime();
-					
+
 					std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
 					Log::sendMessage(Log::Info, info);
 				}
@@ -172,7 +166,7 @@ namespace dyno
 			float mElapsedTime;
 
 			bool mTiming = false;
-		};	
+		};
 
 		this->traverseForward<AdvanceAct>(dt, mElapsedTime, mNodeTiming);
 
@@ -185,10 +179,10 @@ namespace dyno
 
 		std::cout << "****************    Frame " << mFrameNumber << " Started    ****************" << std::endl;
 
-// 		if (mRoot == nullptr)
-// 		{
-// 			return;
-// 		}
+		// 		if (mRoot == nullptr)
+		// 		{
+		// 			return;
+		// 		}
 
 		float t = 0.0f;
 		float dt = 0.0f;
@@ -228,15 +222,15 @@ namespace dyno
 			this->advance(interval - t);
 		}
 
-// 		class UpdateGrpahicsContextAct : public Action
-// 		{
-// 		public:
-// 			void process(Node* node) override {
-// 				node->graphicsPipeline()->update();
-// 			}
-// 		};
-// 
-// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
+		// 		class UpdateGrpahicsContextAct : public Action
+		// 		{
+		// 		public:
+		// 			void process(Node* node) override {
+		// 				node->graphicsPipeline()->update();
+		// 			}
+		// 		};
+		// 
+		// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
 
 		this->traverseForward<PostProcessing>();
 
@@ -308,7 +302,6 @@ namespace dyno
 		mFrameNumber = 0;
 
 		mSync.unlock();
-		
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
@@ -318,7 +311,6 @@ namespace dyno
 		this->traverseForward<ResetAct>(node);
 
 		mSync.unlock();
-
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
@@ -355,21 +347,12 @@ namespace dyno
 
 	void SceneGraph::setLowerBound(Vec3f lowerBound)
 	{
-		mLowerBound = lowerBound; 
-		printf("lowerBound : %f,%f,%f ***************************\n",mLowerBound[0], mLowerBound[1], mLowerBound[2]);
-		this->varLowerBound()->setValue(mLowerBound);
-		auto s = this->varLowerBound()->getValue();
-		printf("lowerBound var: %f,%f,%f ***************************\n", s[0], s[1], s[2]);
-
+		mLowerBound = lowerBound;
 	}
 
 	void SceneGraph::setUpperBound(Vec3f upperBound)
 	{
 		mUpperBound = upperBound;
-		this->varUpperBound()->setValue(mUpperBound);
-		printf("UpperBound : %f,%f,%f ***************************\n", mUpperBound[0], mUpperBound[1], mUpperBound[2]);
-		auto s = this->varUpperBound()->getValue();
-		printf("UpperBound var: %f,%f,%f ***************************\n", s[0], s[1], s[2]);
 	}
 
 	void SceneGraph::markQueueUpdateRequired()
@@ -467,7 +450,7 @@ namespace dyno
 		auto imports = node->getImportNodes();
 		for (auto port : imports) {
 			auto& inNodes = port->getNodes();
-			for (auto inNode :  inNodes) {
+			for (auto inNode : inNodes) {
 				if (inNode != nullptr && !visited[inNode->objectId()]) {
 					DFS(inNode, nodeQueue, visited);
 				}
@@ -475,9 +458,9 @@ namespace dyno
 		}
 
 		auto inFields = node->getInputFields();
-		for(auto f : inFields) {
+		for (auto f : inFields) {
 			auto* src = f->getSource();
-			if (src != nullptr)	{
+			if (src != nullptr) {
 				auto* inNode = dynamic_cast<Node*>(src->parent());
 				if (inNode != nullptr && !visited[inNode->objectId()]) {
 					DFS(inNode, nodeQueue, visited);
@@ -496,9 +479,9 @@ namespace dyno
 		}
 
 		auto outFields = node->getOutputFields();
-		for(auto f : outFields) {
+		for (auto f : outFields) {
 			auto& sinks = f->getSinks();
-			for(auto sink : sinks) {
+			for (auto sink : sinks) {
 				if (sink != nullptr) {
 					auto exNode = dynamic_cast<Node*>(sink->parent());
 					if (exNode != nullptr && !visited[exNode->objectId()]) {
@@ -547,26 +530,26 @@ namespace dyno
 		}
 	};
 
-// 	void SceneGraph::retriveExecutionQueue(std::list<Node*>& nQueue)
-// 	{
-// 		nQueue.clear();
-// 
-// 		std::map<ObjectId, bool> visited;
-// 		for (auto& nm : mNodeMap) {
-// 			visited[nm.first] = false;
-// 		}
-// 
-// 		for (auto& n : mNodeMap) {
-// 			if (!visited[n.first]) {
-// 
-// 				Node* node = n.second.get();
-// 
-// 				DFS(node, nQueue, visited);
-// 			}
-// 		}
-// 
-// 		visited.clear();
-// 	}
+	// 	void SceneGraph::retriveExecutionQueue(std::list<Node*>& nQueue)
+	// 	{
+	// 		nQueue.clear();
+	// 
+	// 		std::map<ObjectId, bool> visited;
+	// 		for (auto& nm : mNodeMap) {
+	// 			visited[nm.first] = false;
+	// 		}
+	// 
+	// 		for (auto& n : mNodeMap) {
+	// 			if (!visited[n.first]) {
+	// 
+	// 				Node* node = n.second.get();
+	// 
+	// 				DFS(node, nQueue, visited);
+	// 			}
+	// 		}
+	// 
+	// 		visited.clear();
+	// 	}
 
 	void SceneGraph::updateExecutionQueue()
 	{
@@ -581,7 +564,7 @@ namespace dyno
 		}
 
 		for (auto& n : mNodeMap) {
-			if (!visited[n.first])	{
+			if (!visited[n.first]) {
 
 				Node* node = n.second.get();
 

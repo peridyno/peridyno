@@ -5,6 +5,7 @@
 #include "Field.h"
 #include "QmDoubleSpinBox.h"
 
+
 namespace dyno
 {
 	IMPL_FIELD_WIDGET(Vec3f, QVector3FieldWidget)
@@ -39,16 +40,6 @@ namespace dyno
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(field->getMin(), field->getMax());
 
-		//spinner1->DSB1 = spinner1;
-		//spinner1->DSB2 = spinner2;
-		//spinner1->DSB3 = spinner3;
-		//spinner2->DSB1 = spinner1;
-		//spinner2->DSB2 = spinner2;
-		//spinner2->DSB3 = spinner3;
-		//spinner3->DSB1 = spinner1;
-		//spinner3->DSB2 = spinner2;
-		//spinner3->DSB3 = spinner3;
-
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner1, 0, 1);
 		layout->addWidget(spinner2, 0, 2);
@@ -82,9 +73,9 @@ namespace dyno
 		spinner2->setRealValue(v2);
 		spinner3->setRealValue(v3);
 
-		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
-		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
-		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
+		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
+		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
 		
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
@@ -94,6 +85,65 @@ namespace dyno
 
 		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
+
+
+	QVector3FieldWidget::QVector3FieldWidget(QString name, Vec3f v)
+	{
+		value = v;
+
+		QGridLayout* layout = new QGridLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		this->setLayout(layout);
+
+		toggleLabel* nameLabel = new toggleLabel();
+		
+		nameLabel->setFixedSize(100, 18);
+		QFontMetrics fontMetrics(nameLabel->font());
+		QString elide = fontMetrics.elidedText(name, Qt::ElideRight, 100);
+		nameLabel->setText(elide);
+		//Set label tips
+		nameLabel->setToolTip(name);
+
+		spinner1 = new mDoubleSpinBox;
+		spinner1->setMinimumWidth(30);
+		spinner1->setRange(-100000, 100000);
+
+		spinner2 = new mDoubleSpinBox;
+		spinner2->setMinimumWidth(30);
+		spinner2->setRange(-100000, 100000);
+
+		spinner3 = new mDoubleSpinBox;
+		spinner3->setMinimumWidth(30);
+		spinner3->setRange(-100000, 100000);
+
+
+		layout->addWidget(nameLabel, 0, 0);
+		layout->addWidget(spinner1, 0, 1);
+		layout->addWidget(spinner2, 0, 2);
+		layout->addWidget(spinner3, 0, 3);
+		layout->setSpacing(3);
+
+		double v1 = value[0];
+		double v2 = value[1];
+		double v3 = value[2];
+
+		spinner1->setRealValue(v1);
+		spinner2->setRealValue(v2);
+		spinner3->setRealValue(v3);
+
+		QObject::connect(nameLabel, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
+		QObject::connect(nameLabel, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
+		QObject::connect(nameLabel, SIGNAL(toggle(bool)), spinner3, SLOT(toggleDecimals(bool)));
+
+		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
+		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
+		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
+
+		//QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
+	}
+
 
 	QVector3FieldWidget::~QVector3FieldWidget()
 	{
@@ -111,7 +161,6 @@ namespace dyno
 		{
 			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(field());
 			f->setValue(Vec3f((float)v1, (float)v2, (float)v3));
-			Vec3f s = f->getValue();
 		}
 		else if (template_name == std::string(typeid(Vec3d).name()))
 		{
@@ -120,9 +169,9 @@ namespace dyno
 		}
 	}
 
+
 	void QVector3FieldWidget::updateWidget()
 	{
-		printf("updateWidget");
 		std::string template_name = field()->getTemplateName();
 
 		double v1 = 0;
@@ -159,5 +208,12 @@ namespace dyno
 		spinner2->blockSignals(false);
 		spinner3->blockSignals(false);
 	}
+
+	void QVector3FieldWidget::vec3fValueChange(double)
+	{
+		value = Vec3f(spinner1->getRealValue(), spinner2->getRealValue(), spinner3->getRealValue());
+		emit vec3fChange(double(value[0]), double(value[1]), double(value[2]));
+	}
+
 }
 

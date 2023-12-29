@@ -22,7 +22,7 @@
 
 #include <mutex>
 
-namespace dyno 
+namespace dyno
 {
 	typedef std::list<Node*> NodeList;
 
@@ -35,12 +35,8 @@ namespace dyno
 
 		~SceneGraph();
 
-// 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
-// 		std::shared_ptr<Node> getRootNode() { return mRoot; }
-		
-		DEF_VAR(Vec3f, Gravity, Vec3f(0,-9.8,0), "");
-		DEF_VAR(Vec3f, LowerBound, Vec3f(0, 0, 0), "");
-		DEF_VAR(Vec3f, UpperBound, Vec3f(0, 0, 0), "");
+		// 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
+		// 		std::shared_ptr<Node> getRootNode() { return mRoot; }
 
 		virtual bool initialize();
 		bool isInitialized() { return mInitialized; }
@@ -96,7 +92,7 @@ namespace dyno
 			if (tNode == nullptr ||
 				mNodeMap.find(tNode->objectId()) != mNodeMap.end())
 				return nullptr;
-				
+
 			mNodeMap[tNode->objectId()] = tNode;
 			mQueueUpdateRequired = true;
 
@@ -112,17 +108,17 @@ namespace dyno
 	public:
 		static SceneGraph& getInstance();
 
-		inline void setTotalTime(float t) { mMaxTime = t; UpdateVar(); }
+		inline void setTotalTime(float t) { mMaxTime = t; }
 		inline float getTotalTime() { return mMaxTime; }
 
-		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; UpdateVar();}
+		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; }
 		inline float getFrameRate() { return mFrameRate; }
 		inline float getTimeCostPerFrame() { return mFrameCost; }
 		inline float getFrameInterval() { return 1.0f / mFrameRate; }
 
 		inline int getFrameNumber() { return mFrameNumber; }
-		inline void setFrameNumber(int n) { mFrameNumber = n;  UpdateVar();}
-		
+		inline void setFrameNumber(int n) { mFrameNumber = n; }
+
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
 
@@ -135,7 +131,7 @@ namespace dyno
 		void setLowerBound(Vec3f lowerBound);
 		void setUpperBound(Vec3f upperBound);
 
-		inline Iterator begin() { 
+		inline Iterator begin() {
 
 			updateExecutionQueue();
 
@@ -226,29 +222,7 @@ namespace dyno
 		{
 			//mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
-
-			UpdateVar();
-			
-			auto callback = std::make_shared<FCallBackFunc>(std::bind(&SceneGraph::UpdateField, this));
-			this->varGravity()->attach(callback);
-			this->varLowerBound()->attach(callback);
-			this->varUpperBound()->attach(callback);	
 		};
-
-
-		void UpdateVar()
-		{
-			this->varGravity()->setValue(mGravity);
-			this->varLowerBound()->setValue(mLowerBound);
-			this->varUpperBound()->setValue(mUpperBound);
-		}
-
-		void UpdateField()
-		{
-			mGravity = this->varGravity()->getValue();
-			mLowerBound = this->varLowerBound()->getValue();
-			mUpperBound = this->varUpperBound()->getValue();
-		}
 
 		/**
 		* To avoid erroneous operations

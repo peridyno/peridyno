@@ -54,6 +54,8 @@ namespace dyno
 		Q_OBJECT
 	public:
 		QFieldWidget(FBase* field);
+		QFieldWidget() { ; }
+
 		virtual ~QFieldWidget();
 
 		inline FBase* field() { return mField; }

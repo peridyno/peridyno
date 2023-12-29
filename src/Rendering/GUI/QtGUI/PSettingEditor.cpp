@@ -18,19 +18,21 @@
 #include "ToolBar/ToolButtonStyle.h"
 #include "ToolBar/CompactToolButton.h"
 
-#include "PPropertyWidget.h"
 #include "qscrollarea.h"
+#include "PropertyItem/QVector3FieldWidget.h"
+#include "SceneGraphFactory.h"
+#include "SceneGraph.h"
+
 
 namespace dyno
 {
-	PSettingEditor::PSettingEditor(std::shared_ptr<SceneGraph> scn, QWidget* widget)
+	PSettingEditor::PSettingEditor(QWidget* widget)
 		: QMainWindow(nullptr)
 		
 	{
-		//this->setFixedSize(800,600);
+
 		this->setWindowTitle(QString("Setting"));
-		this->setSceneGraph(scn); 
-		//Set up property dock widget
+
 
 		QDockWidget* Docker = new QDockWidget();
 		this->addDockWidget(Qt::LeftDockWidgetArea, Docker);
@@ -85,6 +87,8 @@ namespace dyno
 		DockerRight->setWidget(settingWidget);	
 	}
 
+	
+
 	void PSettingEditor::buildOtherSettingWidget()
 	{
 		if (settingWidget != nullptr) 
@@ -138,12 +142,44 @@ namespace dyno
 		setLayout(mMainLayout);
 	};
 
-	void PSettingWidget::updateData()
-	{	
+
+	void PSceneSetting::updateData()
+	{
+
+		auto scn = SceneGraphFactory::instance()->active();
+		Vec3f gValue = scn->getGravity();
+		Vec3f lowerBValue = scn->getLowerBound();
+		Vec3f upperBValue = scn->getUpperBound();
+
+		gravityWidget = new QVector3FieldWidget(QString("Gravity"), gValue);
+		lowerBoundWidget= new QVector3FieldWidget(QString("Lower Bound"), lowerBValue);
+		upperBoundWidget = new QVector3FieldWidget(QString("Upper Bound"), upperBValue);
+
+		QObject::connect(gravityWidget, SIGNAL(vec3fChange(double, double, double)), this, SLOT(setGravity(double, double, double)));
+		QObject::connect(lowerBoundWidget, SIGNAL(vec3fChange(double, double, double)), this, SLOT(setLowerBound(double, double, double)));
+		QObject::connect(upperBoundWidget, SIGNAL(vec3fChange(double, double, double)), this, SLOT(setUpperBound(double, double, double)));
+
+		getScrollLayout()->addWidget(gravityWidget, 0, 0);
+		getScrollLayout()->addWidget(lowerBoundWidget, 1, 0);
+		getScrollLayout()->addWidget(upperBoundWidget, 2, 0);
 
 	}
 
-
+	void PSceneSetting::setGravity(double v0, double v1, double v2)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->setGravity(Vec3f(float(v0), float(v1), float(v2)));
+	}
+	void PSceneSetting::setLowerBound(double v0, double v1, double v2)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->setLowerBound(Vec3f(float(v0), float(v1), float(v2)));
+	}
+	void PSceneSetting::setUpperBound(double v0, double v1, double v2)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->setUpperBound(Vec3f(float(v0), float(v1), float(v2)));
+	}
 
 
 }

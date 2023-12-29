@@ -4,15 +4,19 @@
 
 #include "NodeEditor/QtNodeWidget.h"
 #include "NodeEditor/QtModuleFlowScene.h"
-#include "SceneGraph.h"
+
 #include "PPropertyWidget.h"
 #include <QMouseEvent>
 #include "qpushbutton.h"
 #include "qgridlayout.h"
 
+
+
 namespace dyno
 {
 	class PSettingWidget;
+	class QVector3FieldWidget;
+	class SceneGraph;
 
 
 	class PSettingEditor :
@@ -20,15 +24,11 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		PSettingEditor(std::shared_ptr<SceneGraph> scn,QWidget* widget = nullptr);
+		PSettingEditor(QWidget* widget = nullptr);
 
 		~PSettingEditor() {}
-
-		void setSceneGraph(std::shared_ptr<SceneGraph> scn){ mSceneGraph = scn;}
 		
 		PSettingWidget* getSettingWidget() { return settingWidget; }
-
-		std::shared_ptr<SceneGraph> getSceneGraph() { return mSceneGraph; }
 
 	signals:
 		void changed(SceneGraph* scn);
@@ -42,7 +42,6 @@ namespace dyno
 
 
 	private:
-		std::shared_ptr<SceneGraph> mSceneGraph = nullptr;
 
 		PSettingWidget* settingWidget = nullptr;
 		QDockWidget* DockerRight = nullptr;
@@ -66,8 +65,7 @@ namespace dyno
 
 	public slots:
 		
-		virtual void updateData();
-
+		virtual void updateData() { ; }
 
 	private:
 
@@ -89,46 +87,25 @@ namespace dyno
 		PSceneSetting(PSettingEditor* editor,std::string title) 
 			:PSettingWidget(editor,title)
 		{
-			mPPropertyWidget = new PPropertyWidget();
-		};
+			;
+		}
 
 
 		~PSceneSetting() {}
 	public slots:
 
-		void updateData() override
-		{
+		void updateData() override;
 
-			std::vector<FBase*>& fields = getEditor()->getSceneGraph()->getAllFields();
+		void setGravity(double v0, double v1, double v2);
+		void setLowerBound(double v0, double v1, double v2);
+		void setUpperBound(double v0, double v1, double v2);
 
-			int i = 0;
-			int k = 0;
-
-			for (FBase* var : fields)
-			{
-				if (var != nullptr) {
-					if (var->getFieldType() == FieldTypeEnum::Param)
-					{
-						if (var->getClassName() == std::string("FVar"))
-						{
-
-							//this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
-							QWidget* fw = mPPropertyWidget->createFieldWidget(var);
-							if (fw != nullptr) {
-								//this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-								getScrollLayout()->addWidget(fw, i, 0);
-								i++;
-
-							}
-						}
-					}
-				}
-			}
-
-		}
 
 	private:
-		PPropertyWidget* mPPropertyWidget = nullptr;
+
+		QVector3FieldWidget* gravityWidget = nullptr;
+		QVector3FieldWidget* lowerBoundWidget = nullptr;
+		QVector3FieldWidget* upperBoundWidget = nullptr;
 
 
 	};
