@@ -73,9 +73,9 @@ namespace dyno
 		spinner2->setRealValue(v2);
 		spinner3->setRealValue(v3);
 
-		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
-		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
-		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(vec3fValueChange(double)));
+		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 		
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
