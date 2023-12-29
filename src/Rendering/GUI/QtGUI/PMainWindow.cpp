@@ -410,9 +410,6 @@ namespace dyno
 
 	void PMainWindow::updateSettingData() 
 	{
-		if (mSceneGraph == nullptr)
-			return;
-
 		emit updateSetting();
 	}
 

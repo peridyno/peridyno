@@ -126,7 +126,6 @@ namespace dyno
 
 		void showSettingEditor();
 
-		void setSceneGraph(std::shared_ptr<SceneGraph> scn) { this->mSceneGraph = scn; }
 
 	signals:
 		void updateSetting ();
@@ -164,7 +163,6 @@ namespace dyno
 
 		PSettingEditor* mSettingEditor = nullptr;
 
-		std::shared_ptr<SceneGraph> mSceneGraph = nullptr; 
 
 	};
 
