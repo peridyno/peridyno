@@ -397,8 +397,8 @@ namespace dyno
 		b.y *= signy;
 		b.z *= signz;
 
-		aOut = rot * trans + a;
-		bOut = rot * trans + b;
+		aOut = rot * a + trans;
+		bOut = rot * b + trans;
 	}
 
 	template<typename Real>

@@ -382,8 +382,10 @@ namespace dyno
 		{
 		case EStructure::BVH:
 			doCollisionWithLinearBVH();
+			break;
 		case EStructure::Octree:
 			doCollisionWithSparseOctree();
+			break;
 		default:
 			break;
 		}
