@@ -1,6 +1,6 @@
 #pragma once
 #include <Module/CustomModule.h>
-#include <ParticleSystem/Attribute.h>
+#include <Collision/Attribute.h>
 
 #include <map>
 

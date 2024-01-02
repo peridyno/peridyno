@@ -26,7 +26,7 @@ namespace dyno
 	/*
 	 * Base OpenGL object with ID and create/release interface
 	 */
-	class GraphicsObject : Object
+	class GraphicsObject : public Object
 	{
 	protected:
 		virtual void create() = 0;

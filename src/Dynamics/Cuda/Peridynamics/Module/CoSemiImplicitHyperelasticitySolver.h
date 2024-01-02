@@ -2,7 +2,7 @@
 #include "Peridynamics/Bond.h"
 #include "Peridynamics/EnergyDensityFunction.h"
 #include "Topology/TriangleSet.h"
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 
 #include "Peridynamics/Module/LinearElasticitySolver.h"
 #include "Peridynamics/Module/ContactRule.h"

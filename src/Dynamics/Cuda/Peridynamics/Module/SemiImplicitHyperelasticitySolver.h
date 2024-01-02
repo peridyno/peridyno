@@ -2,7 +2,7 @@
 #include "../Bond.h"
 #include "../EnergyDensityFunction.h"
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 
 #include "LinearElasticitySolver.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "Module/GroupModule.h"
 
-#include "../Attribute.h"
+#include "Collision/Attribute.h"
 
 namespace dyno
 {

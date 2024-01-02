@@ -11,7 +11,7 @@
 #include "ParticleSystem/Module/SummationDensity.h"
 #include "ParticleSystem/Module/Kernel.h"
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 #include "IntersectionArea.h"
 #include "Algorithm/Function2Pt.h"
 

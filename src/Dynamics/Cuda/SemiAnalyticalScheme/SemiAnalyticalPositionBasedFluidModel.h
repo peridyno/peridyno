@@ -12,7 +12,7 @@
 #include "Module/GroupModule.h"
 #include "TriangularMeshConstraint.h"
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 
 /**
  * PositionBasedFluidModelMesh

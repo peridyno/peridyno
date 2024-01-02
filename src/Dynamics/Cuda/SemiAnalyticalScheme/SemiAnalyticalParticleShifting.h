@@ -22,7 +22,7 @@
 #pragma once
 #include "Module/TopologyModule.h"
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 #include "ParticleSystem/Module/ParticleApproximation.h"
 
 namespace dyno

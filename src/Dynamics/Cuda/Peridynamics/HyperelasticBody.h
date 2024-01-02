@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 #include "ParticleSystem/ParticleSystem.h"
 
 #include "Peridynamics/TetrahedralSystem.h"

@@ -3,7 +3,7 @@
 
 #include "Topology/TriangleSet.h"
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 
 namespace  dyno
 {

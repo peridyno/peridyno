@@ -1,6 +1,6 @@
 #pragma once
 #include "Module/CoSemiImplicitHyperelasticitySolver.h"
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 #include "ParticleSystem/ParticleSystem.h"
 #include "Peridynamics/TriangularSystem.h"
 #include "Peridynamics/Bond.h"

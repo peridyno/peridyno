@@ -2,7 +2,8 @@
 #include "Module/MouseInputModule.h"
 #include "Module/TopologyModule.h"
 #include "Topology/TriangleSet.h"
-#include "ParticleSystem/Attribute.h"
+
+#include "Collision/Attribute.h"
 
 /**
  * @brief This is an implementation of drag interaction calculated by triangles.
