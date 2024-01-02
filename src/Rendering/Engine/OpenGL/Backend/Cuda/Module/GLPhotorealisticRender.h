@@ -18,8 +18,8 @@
 
 #include "GLSurfaceVisualModule.h"
 
-#include "gl/Shape.h"
-#include "gl/Material.h"
+#include "GraphicsObject/Shape.h"
+#include "GraphicsObject/Material.h"
 
 #ifdef CUDA_BACKEND
 #include "ConstructTangentSpace.h"
@@ -41,8 +41,8 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
 		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
 
-		DEF_INSTANCES_IN(gl::Shape,		Shape, "");
-		DEF_INSTANCES_IN(gl::Material,	Material, "");
+		DEF_INSTANCES_IN(Shape,		Shape, "");
+		DEF_INSTANCES_IN(Material,	Material, "");
 
 	protected:
 		virtual void updateImpl() override;
@@ -53,17 +53,17 @@ namespace dyno
 		virtual void releaseGL() override;
 
 	protected:
-		gl::XBuffer<Vec3f> mPosition;
-		gl::XBuffer<Vec3f> mNormal;
-		gl::XBuffer<Vec3f> mTangent;
-		gl::XBuffer<Vec3f> mBitangent;
-		gl::XBuffer<Vec2f> mTexCoord;
+		XBuffer<Vec3f> mPosition;
+		XBuffer<Vec3f> mNormal;
+		XBuffer<Vec3f> mTangent;
+		XBuffer<Vec3f> mBitangent;
+		XBuffer<Vec2f> mTexCoord;
 
 	private:
-		gl::Program*	mShaderProgram;
-		gl::Buffer		mRenderParamsUBlock;
-		gl::Buffer		mPBRMaterialUBlock;
-		gl::VertexArray	mVAO;
+		Program*	mShaderProgram;
+		Buffer		mRenderParamsUBlock;
+		Buffer		mPBRMaterialUBlock;
+		VertexArray	mVAO;
 
 #ifdef CUDA_BACKEND
 		std::shared_ptr<ConstructTangentSpace> mTangentSpaceConstructor;

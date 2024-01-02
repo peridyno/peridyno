@@ -43,7 +43,7 @@ namespace dyno
 		// create vertex buffer and vertex array object
 		mVAO.create();		
 		// create shader program
-		mShaderProgram = gl::Program::createProgramSPIRV(
+		mShaderProgram = Program::createProgramSPIRV(
 			SURFACE_VERT, sizeof(SURFACE_VERT),
 			SURFACE_FRAG, sizeof(SURFACE_FRAG),
 			SURFACE_GEOM, sizeof(SURFACE_GEOM));
@@ -100,7 +100,7 @@ namespace dyno
 			mTexCoord.updateGL();
 		}
 
-		gl::glCheckError();
+		glCheckError();
 	}
 
 	void GLPhotorealisticRender::updateImpl()
@@ -240,7 +240,7 @@ namespace dyno
 
 			glDrawArrays(GL_TRIANGLES, 0, numTriangles * 3);
 
-			gl::glCheckError();
+			glCheckError();
 			mVAO.unbind();
 		}
 	}

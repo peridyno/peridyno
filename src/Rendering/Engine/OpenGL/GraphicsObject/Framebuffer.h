@@ -16,28 +16,31 @@
 
 #pragma once
 
-#include "VertexArray.h"
+#include "GraphicsObject.h"
 
-namespace gl
+namespace dyno
 {
-	// basic triangle mesh object
-	class Mesh : public VertexArray
+	class Framebuffer : public GraphicsObject
 	{
-		GL_OBJECT(Mesh)
+		GL_OBJECT(Framebuffer)
 	public:
-		virtual void create() override;
-		virtual void release() override;
-		virtual void draw(int instance = 0);
+		void create() override;
+		void release() override;
+
+		void bind(unsigned int target = 0x8CA9);	// default bind to GL_DRAW_FRAMEBUFFER
+		void unbind();
+
+		void clearColor(float r = 0.f, float g = 0.f, float b = 0.f, float a = 1.f);
+		void clearDepth(float depth = 1.f);
+
+		void setTexture2D(unsigned int attachment, unsigned int tex, int level = 0);
+
+		void drawBuffers(int count, const unsigned int* buffers);
+		
+		int checkStatus();
 
 	public:
-		// static methods to create common mesh object
-		static Mesh* Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
-		static Mesh* ScreenQuad();
-		static Mesh* Plane(float scale);
-
-	private:
-		Buffer	vbo;
-		Buffer	ibo;
-		int		count;
+		// current framebuffer binding
+		static unsigned int current();
 	};
 }

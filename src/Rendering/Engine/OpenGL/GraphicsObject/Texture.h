@@ -16,23 +16,44 @@
 
 #pragma once
 
-#include "Buffer.h"
+#include "GraphicsObject.h"
 
-namespace gl
-{
-	class VertexArray : public Object
+namespace dyno {
+
+	class Texture2D : public GraphicsObject
 	{
-		GL_OBJECT(VertexArray)
+		GL_OBJECT(Texture2D)
 	public:
+		Texture2D();
+
 		virtual void create() override;
 		virtual void release() override;
 
 		virtual void bind();
 		virtual void unbind();
 
-		virtual void bindIndexBuffer(Buffer* buffer);
-		virtual void bindVertexBuffer(Buffer* buffer,
-			int index, int size, int type, int stride, int offset, int divisor);
+		virtual void bind(int slot);
+
+		virtual void dump(void* pixels);
+
+		virtual void resize(int w, int h);
+		virtual void load(int w, int h, void* data);
+
+		// OpenGL 4.4+, clear texture
+		virtual void clear(void* value);
+
+		void genMipmap();
+
+	public:
+		unsigned int target = 0xFFFFFFFF;
+
+		unsigned int internalFormat;
+		unsigned int format;
+		unsigned int type;
+
+		unsigned int minFilter;
+		unsigned int maxFilter;
+
 	};
 
 }

@@ -15,8 +15,8 @@ namespace dyno
 		, EndpointSearchIterations(12)
 		, UseHighQualityEndpoints(true)
 	{
-		mScreenQuad = gl::Mesh::ScreenQuad();
-		mShaderProgram = gl::Program::createProgramSPIRV(
+		mScreenQuad = Mesh::ScreenQuad();
+		mShaderProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
 			FXAA_FRAG, sizeof(FXAA_FRAG));
 	}

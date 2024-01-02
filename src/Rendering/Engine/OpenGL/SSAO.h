@@ -17,10 +17,10 @@
 
 #pragma once
 
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "gl/Buffer.h"
-#include "gl/Shader.h"
+#include "GraphicsObject/Framebuffer.h"
+#include "GraphicsObject/Texture.h"
+#include "GraphicsObject/Buffer.h"
+#include "GraphicsObject/Shader.h"
 
 namespace dyno 
 {
@@ -34,19 +34,19 @@ namespace dyno
 
 	private:
 
-		gl::Program*		mSSAOProgram;
+		Program*		mSSAOProgram;
 
-		gl::Buffer			mSSAOKernelUBO;
-		gl::Texture2D		mSSAONoiseTex;
+		Buffer			mSSAOKernelUBO;
+		Texture2D		mSSAONoiseTex;
 
-		gl::Framebuffer		mDepthFramebuffer;
-		gl::Texture2D		mDepthTex;
+		Framebuffer		mDepthFramebuffer;
+		Texture2D		mDepthTex;
 
-		gl::Framebuffer		mSSAOFramebuffer;
-		gl::Texture2D		mSSAOTex;
+		Framebuffer		mSSAOFramebuffer;
+		Texture2D		mSSAOTex;
 
-		gl::Framebuffer		mSSAOFilterFramebuffer;
-		gl::Texture2D		mSSAOFilterTex;
+		Framebuffer		mSSAOFilterFramebuffer;
+		Texture2D		mSSAOFilterTex;
 
 		unsigned int	mWidth;
 		unsigned int	mHeight;

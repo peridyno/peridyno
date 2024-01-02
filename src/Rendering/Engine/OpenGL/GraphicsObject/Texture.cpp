@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace gl 
+namespace dyno
 {
 
 	Texture2D::Texture2D()

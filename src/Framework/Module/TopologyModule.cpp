@@ -6,7 +6,7 @@ namespace dyno
 IMPLEMENT_CLASS(TopologyModule)
 
 TopologyModule::TopologyModule()
-	: Module()
+	: OBase()
 	, m_topologyChanged(true)
 {
 
@@ -16,7 +16,7 @@ TopologyModule::~TopologyModule()
 {
 }
 
-void TopologyModule::updateImpl()
+void TopologyModule::update()
 {
 	this->updateTopology();
 }

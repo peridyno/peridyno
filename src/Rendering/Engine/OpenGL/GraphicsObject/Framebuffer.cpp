@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <iostream>
 
-namespace gl
+namespace dyno
 {
 	void Framebuffer::create()
 	{

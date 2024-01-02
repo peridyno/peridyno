@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 
-namespace gl
+namespace dyno
 {
 	Shape::Shape()
 	{

@@ -62,8 +62,8 @@ namespace dyno
 		mShadowUniform.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
 		// for blur depth textures
-		mQuad = gl::Mesh::ScreenQuad();
-		mBlurProgram = gl::Program::createProgramSPIRV(
+		mQuad = Mesh::ScreenQuad();
+		mBlurProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
 			BLUR_FRAG, sizeof(BLUR_FRAG));
 	}

@@ -31,13 +31,13 @@ struct cudaGraphicsResource;
 #include <VkDeviceArray.h>
 #endif
 
-namespace gl
+namespace dyno
 {
 
 	// buffer for exchange data from simulation to rendering
 	// please note that we use additional buffer for r/w consistency between simulation and rendering loop
 	template<typename T>
-	class XBuffer : public gl::Buffer
+	class XBuffer : public Buffer
 	{
 	public:
 		// update OpenGL buffer within GL context

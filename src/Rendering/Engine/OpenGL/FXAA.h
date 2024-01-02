@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
 
 namespace dyno
 {
@@ -39,7 +39,7 @@ namespace dyno
 
 	private:
 
-		gl::Program*	mShaderProgram;
-		gl::Mesh*		mScreenQuad = 0;
+		Program*	mShaderProgram;
+		Mesh*		mScreenQuad = 0;
 	};
 }

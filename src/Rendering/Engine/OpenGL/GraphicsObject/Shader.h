@@ -16,16 +16,16 @@
 
 #pragma once
 
-#include "Object.h"
+#include "GraphicsObject.h"
 #include <string>
 #include "Vector.h"
 #include <glm/glm.hpp>
 
 
-namespace gl {
+namespace dyno {
 
 	// OpenGL shader
-	class Shader : public Object
+	class Shader : public GraphicsObject
 	{
 		GL_OBJECT(Shader)
 	public:
@@ -39,7 +39,7 @@ namespace gl {
 	};
 
 	// OpenGL shader program
-	class Program : public Object
+	class Program : public GraphicsObject
 	{
 		GL_OBJECT(Program)
 	public:

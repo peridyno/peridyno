@@ -43,8 +43,8 @@ namespace dyno
 
 	private:
 
-		gl::XBuffer<Transform3f> mInstanceTransforms;
-		gl::XBuffer<Vec3f>		 mInstanceColors;
+		XBuffer<Transform3f> mInstanceTransforms;
+		XBuffer<Vec3f>		 mInstanceColors;
 
 	};
 };

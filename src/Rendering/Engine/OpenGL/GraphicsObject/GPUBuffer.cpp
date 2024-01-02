@@ -20,7 +20,7 @@
 
 #endif // VK_BACKEND
 
-namespace gl
+namespace dyno
 {
 	class BufferCopy {
 	public:
@@ -58,7 +58,7 @@ uniform int uDstPitch = 1;
 void main() { vDst[uDstPitch * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y] 
 			= vSrc[uSrcPitch * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y]; }
 )===";
-			gl::Shader shader;
+			Shader shader;
 			shader.createFromSource(GL_COMPUTE_SHADER, src);
 			program.create();
 			program.attachShader(shader);
@@ -66,7 +66,7 @@ void main() { vDst[uDstPitch * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y
 			shader.release();
 		}
 
-		gl::Program program;
+		Program program;
 	};
 
 #ifdef VK_BACKEND

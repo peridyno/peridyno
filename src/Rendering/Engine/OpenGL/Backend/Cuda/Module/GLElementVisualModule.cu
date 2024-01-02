@@ -86,7 +86,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::Program::createProgramSPIRV(
+		mShaderProgram = Program::createProgramSPIRV(
 			SURFACE_VERT, sizeof(SURFACE_VERT), 
 			SURFACE_FRAG, sizeof(SURFACE_FRAG),
 			SURFACE_GEOM, sizeof(SURFACE_GEOM));
@@ -403,6 +403,6 @@ namespace dyno
 		glDrawElements(GL_TRIANGLES, mDrawCount, GL_UNSIGNED_INT, 0);
 		mVAO.unbind();
 
-		gl::glCheckError();
+		glCheckError();
 	}
 }

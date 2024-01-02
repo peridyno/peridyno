@@ -3,7 +3,6 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
-#include "Topology.h"
 #include "CylinderModel.h"
 #include "ConeModel.h"
 #include "ColorMapping.h"

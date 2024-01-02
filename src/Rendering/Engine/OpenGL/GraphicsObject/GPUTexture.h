@@ -28,7 +28,7 @@ struct cudaGraphicsResource;
 #include <VkDeviceArray.h>
 #endif
 
-namespace gl {
+namespace dyno {
 
 	// texture for loading data from cuda/vulkan api
 	template<typename T>

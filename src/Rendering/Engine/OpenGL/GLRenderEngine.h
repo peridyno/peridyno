@@ -21,11 +21,11 @@
 
 #include <RenderEngine.h>
 
-#include "gl/Buffer.h"
-#include "gl/Texture.h"
-#include "gl/Framebuffer.h"
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
+#include "GraphicsObject/Buffer.h"
+#include "GraphicsObject/Texture.h"
+#include "GraphicsObject/Framebuffer.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
 
 
 namespace dyno
@@ -75,17 +75,17 @@ namespace dyno
 
 	private:
 		// internal framebuffer
-		gl::Framebuffer	mFramebuffer;
-		gl::Texture2D	mColorTex;
-		gl::Texture2D	mDepthTex;
-		gl::Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
+		Framebuffer	mFramebuffer;
+		Texture2D	mColorTex;
+		Texture2D	mDepthTex;
+		Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
 
 		// for linked-list OIT
 		const int		MAX_OIT_NODES = 1024 * 1024 * 8;
-		gl::Buffer		mFreeNodeIdx;
-		gl::Buffer		mLinkedListBuffer;
-		gl::Texture2D	mHeadIndexTex;
-		gl::Program*	mBlendProgram;
+		Buffer		mFreeNodeIdx;
+		Buffer		mLinkedListBuffer;
+		Texture2D	mHeadIndexTex;
+		Program*	mBlendProgram;
 
 		GLRenderHelper* mRenderHelper;
 		ShadowMap*		mShadowMap;
@@ -93,6 +93,6 @@ namespace dyno
 		bool			bEnableFXAA = true;
 		FXAA*			mFXAAFilter;
 
-		gl::Mesh* mScreenQuad = 0;
+		Mesh* mScreenQuad = 0;
 	};
 };

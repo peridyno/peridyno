@@ -1,6 +1,6 @@
 #include "Material.h"
 
-namespace gl
+namespace dyno
 {
 	Material::Material()
 	{

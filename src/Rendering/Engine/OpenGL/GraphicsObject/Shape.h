@@ -18,40 +18,33 @@
 
 #include "Object.h"
 #include "Platform.h"
+#include "GPUBuffer.h"
+#include "Material.h"
+#include "Topology/TriangleSet.h"
 
-#include "Array/Array2D.h"
-
-#include "gl/GPUTexture.h"
-
-namespace gl
+namespace dyno
 {
-	class Material : public Object
+	class Shape : public GraphicsObject
 	{
 	public:
+		Shape();
+		~Shape() override;
 
-		Material();
-		~Material() override;
-		void create() override;
-		void release() override;
+		virtual void create();
+		virtual void release();
 		void update();
 		void updateGL();
 
-	public:
-		dyno::Vec3f ambient = { 0.0f, 0.0f, 0.0f };
-		dyno::Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
-		dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
-		float roughness = 0.0f;
-		float alpha = 1.0f;
+		DArray<dyno::TopologyModule::Triangle> vertexIndex;
+		DArray<dyno::TopologyModule::Triangle> normalIndex;
+		DArray<dyno::TopologyModule::Triangle> texCoordIndex;
 
-		dyno::DArray2D<dyno::Vec4f> texColor;
+		XBuffer<dyno::TopologyModule::Triangle>		glVertexIndex;
+		XBuffer<dyno::TopologyModule::Triangle>		glNormalIndex;
+		XBuffer<dyno::TopologyModule::Triangle>		glTexCoordIndex;
+		std::shared_ptr<Material> material = nullptr;
 
-		dyno::DArray2D<dyno::Vec4f> texBump;
-		float bumpScale = 1.f;
-
-		// color texture
-		gl::XTexture2D<dyno::Vec4f> mColorTexture;
-		gl::XTexture2D<dyno::Vec4f> mBumpTexture;
-
+	private:
 		bool mInitialized = false;
 	};
 };

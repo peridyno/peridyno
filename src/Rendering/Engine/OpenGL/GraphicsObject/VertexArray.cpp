@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <vector>
 
-namespace gl
+namespace dyno
 {
 	void VertexArray::create()
 	{

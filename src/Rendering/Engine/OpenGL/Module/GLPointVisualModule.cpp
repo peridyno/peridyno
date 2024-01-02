@@ -55,14 +55,14 @@ namespace dyno
 		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);
 		mVertexArray.bindVertexBuffer(&mColor, 1, 3, GL_FLOAT, 0, 0, 0);
 
-		mShaderProgram = gl::Program::createProgramSPIRV(
+		mShaderProgram = Program::createProgramSPIRV(
 			POINT_VERT, sizeof(POINT_VERT),
 			POINT_FRAG, sizeof(POINT_FRAG));
 
 		// create shader uniform buffer
 		mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 
-		gl::glCheckError();
+		glCheckError();
 
 		return true;
 	}
@@ -156,6 +156,6 @@ namespace dyno
 
 		mVertexArray.bind();
 		glDrawArrays(GL_POINTS, 0, mNumPoints);
-		gl::glCheckError();
+		glCheckError();
 	}
 }

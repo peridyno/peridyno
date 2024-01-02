@@ -5,7 +5,7 @@
 
 #include <math.h>
 
-namespace gl
+namespace dyno
 {
 
 	void Mesh::create()

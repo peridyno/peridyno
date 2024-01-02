@@ -5,9 +5,9 @@
 #include "Topology/DiscreteElements.h"
 
 #include "GLVisualModule.h"
-#include "gl/GPUBuffer.h"
-#include "gl/VertexArray.h"
-#include "gl/Shader.h"
+#include "GraphicsObject/GPUBuffer.h"
+#include "GraphicsObject/VertexArray.h"
+#include "GraphicsObject/Shader.h"
 
 
 namespace dyno
@@ -42,11 +42,11 @@ namespace dyno
 
 	private:
 
-		gl::Program* mShaderProgram;
-		gl::VertexArray	mVAO;
+		Program* mShaderProgram;
+		VertexArray	mVAO;
 
-		gl::XBuffer<Vec3f>	mVertexBuffer;
-		gl::XBuffer<Vec3i> 	mIndexBuffer;
+		XBuffer<Vec3f>	mVertexBuffer;
+		XBuffer<Vec3i> 	mIndexBuffer;
 
 		unsigned int	mDrawCount = 0;
 

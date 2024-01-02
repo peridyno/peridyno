@@ -20,10 +20,10 @@
 #include <Topology/TriangleSet.h>
 
 #include "GLVisualModule.h"
-#include "gl/GPUBuffer.h"
-#include "gl/GPUTexture.h"
-#include "gl/VertexArray.h"
-#include "gl/Shader.h"
+#include "GraphicsObject/GPUBuffer.h"
+#include "GraphicsObject/GPUTexture.h"
+#include "GraphicsObject/VertexArray.h"
+#include "GraphicsObject/Shader.h"
 
 namespace dyno
 {
@@ -75,29 +75,29 @@ namespace dyno
 
 	protected:
 
-		gl::Program*	mShaderProgram;
+		Program*	mShaderProgram;
 
 		// uniform blocks
-		gl::Buffer		mRenderParamsUBlock;
-		gl::Buffer		mPBRMaterialUBlock;
+		Buffer		mRenderParamsUBlock;
+		Buffer		mPBRMaterialUBlock;
 
-		gl::VertexArray	mVAO;
+		VertexArray	mVAO;
 		unsigned int	mNumTriangles = 0;
 
-		gl::XBuffer<Vec3f> mVertexPosition;
-		gl::XBuffer<Vec3f> mVertexColor;			// per-vertex color
-		gl::XBuffer<TopologyModule::Triangle> mVertexIndex;
+		XBuffer<Vec3f> mVertexPosition;
+		XBuffer<Vec3f> mVertexColor;			// per-vertex color
+		XBuffer<TopologyModule::Triangle> mVertexIndex;
 
-		gl::XBuffer<Vec3f> mNormal;
-		gl::XBuffer<TopologyModule::Triangle> mNormalIndex;
+		XBuffer<Vec3f> mNormal;
+		XBuffer<TopologyModule::Triangle> mNormalIndex;
 
-		gl::XBuffer<Vec2f> mTexCoord;
-		gl::XBuffer<TopologyModule::Triangle> mTexCoordIndex;
+		XBuffer<Vec2f> mTexCoord;
+		XBuffer<TopologyModule::Triangle> mTexCoordIndex;
 
 #ifdef CUDA_BACKEND
 		// color texture
-		gl::XTexture2D<Vec4f> mColorTexture;
-		gl::XTexture2D<Vec4f> mBumpMap;
+		XTexture2D<Vec4f> mColorTexture;
+		XTexture2D<Vec4f> mBumpMap;
 #endif
 
 		// for instanced rendering

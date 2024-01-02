@@ -45,7 +45,7 @@ namespace dyno
 		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 
 		// create shader program
-		mShaderProgram = gl::Program::createProgramSPIRV(
+		mShaderProgram = Program::createProgramSPIRV(
 			LINE_VERT, sizeof(LINE_VERT),
 			SURFACE_FRAG, sizeof(SURFACE_FRAG),
 			LINE_GEOM, sizeof(LINE_GEOM));
@@ -146,6 +146,6 @@ namespace dyno
 		// restore polygon mode
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
-		gl::glCheckError();
+		glCheckError();
 	}
 }

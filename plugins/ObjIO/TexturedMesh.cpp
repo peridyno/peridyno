@@ -156,7 +156,7 @@ namespace dyno
 		// Load materials
 		uint mId = 0;
 		for (const auto& mtl : materials) {
-			sMats[mId] = std::make_shared<gl::Material>();
+			sMats[mId] = std::make_shared<Material>();
 			sMats[mId]->ambient = { mtl.ambient[0], mtl.ambient[1], mtl.ambient[2] };
 			sMats[mId]->diffuse = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
 			sMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
@@ -189,7 +189,7 @@ namespace dyno
 		for (const tinyobj::shape_t& shape : shapes) {
 			// only load triangle mesh...
 			const auto& mesh = shape.mesh;
-			statShapes[sId] = std::make_shared<gl::Shape>();
+			statShapes[sId] = std::make_shared<Shape>();
 			std::vector<dyno::TopologyModule::Triangle> vertexIndex;
 			std::vector<dyno::TopologyModule::Triangle> normalIndex;
 			std::vector<dyno::TopologyModule::Triangle> texCoordIndex;

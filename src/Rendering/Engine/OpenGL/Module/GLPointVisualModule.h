@@ -18,9 +18,9 @@
 #include "Topology/PointSet.h"
 
 #include "GLVisualModule.h"
-#include "gl/GPUBuffer.h"
-#include "gl/VertexArray.h"
-#include "gl/Shader.h"
+#include "GraphicsObject/GPUBuffer.h"
+#include "GraphicsObject/VertexArray.h"
+#include "GraphicsObject/Shader.h"
 
 
 namespace dyno
@@ -68,14 +68,14 @@ namespace dyno
 
 	private:
 
-		gl::VertexArray	mVertexArray;
+		VertexArray	mVertexArray;
 
-		gl::XBuffer<Vec3f>		mPosition;
-		gl::XBuffer<Vec3f>		mColor;
+		XBuffer<Vec3f>		mPosition;
+		XBuffer<Vec3f>		mColor;
 
 		unsigned int	mNumPoints;
-		gl::Program*	mShaderProgram = 0;
+		Program*	mShaderProgram = 0;
 
-		gl::Buffer		mUniformBlock;
+		Buffer		mUniformBlock;
 	};
 };

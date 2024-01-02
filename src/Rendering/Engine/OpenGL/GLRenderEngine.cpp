@@ -57,10 +57,10 @@ namespace dyno
 		// OIT
 		setupTransparencyPass();
 
-		gl::glCheckError();
+		glCheckError();
 
 		// create a screen quad
-		mScreenQuad = gl::Mesh::ScreenQuad();
+		mScreenQuad = Mesh::ScreenQuad();
 
 		mRenderHelper = new GLRenderHelper();
 		mShadowMap = new ShadowMap(2048, 2048);
@@ -121,7 +121,7 @@ namespace dyno
 		mHeadIndexTex.create();
 		mHeadIndexTex.resize(1, 1);
 
-		mBlendProgram = gl::Program::createProgramSPIRV(
+		mBlendProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
 			BLEND_FRAG, sizeof(BLEND_FRAG));
 	}
@@ -169,7 +169,7 @@ namespace dyno
 
 		mFramebuffer.checkStatus();
 		mFramebuffer.unbind();
-		gl::glCheckError();
+		glCheckError();
 	}
 
 	void GLRenderEngine::updateRenderItems(dyno::SceneGraph* scene)
@@ -331,7 +331,7 @@ namespace dyno
 			}
 		}
 
-		gl::glCheckError();
+		glCheckError();
 	}
 
 
@@ -342,7 +342,7 @@ namespace dyno
 		mDepthTex.resize(w, h);
 		mIndexTex.resize(w, h);
 		mHeadIndexTex.resize(w, h);
-		gl::glCheckError();
+		glCheckError();
 	}
 
 	std::string GLRenderEngine::name() const
@@ -363,7 +363,7 @@ namespace dyno
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
 		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(x, y, w, h, GL_RGBA_INTEGER, GL_INT, indices.data());
-		gl::glCheckError();
+		glCheckError();
 
 		// use unordered set to get unique id
 		std::unordered_set<glm::ivec4> uniqueIdx(indices.begin(), indices.end());

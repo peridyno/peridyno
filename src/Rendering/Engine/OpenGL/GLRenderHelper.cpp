@@ -1,8 +1,8 @@
 #include "GLRenderHelper.h"
 
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
-#include "gl/Texture.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
+#include "GraphicsObject/Texture.h"
 
 #include <glad/glad.h>
 #include <vector>
@@ -21,10 +21,10 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mProgram = gl::Program::createProgramSPIRV(
+			mProgram = Program::createProgramSPIRV(
 				PLANE_VERT, sizeof(PLANE_VERT),
 				PLANE_FRAG, sizeof(PLANE_FRAG));
-			mPlane = gl::Mesh::Plane(1.f);
+			mPlane = Mesh::Plane(1.f);
 
 			// create ruler texture
 			const int k = 50;
@@ -89,15 +89,15 @@ namespace dyno
 
 			glDisable(GL_BLEND);
 
-			gl::glCheckError();
+			glCheckError();
 		}
 
 	private:
-		gl::Mesh*			mPlane;
-		gl::Texture2D 		mRulerTex;
-		gl::Program*		mProgram;
+		Mesh*			mPlane;
+		Texture2D 		mRulerTex;
+		Program*		mProgram;
 
-		gl::Buffer			mUniformBlock;
+		Buffer			mUniformBlock;
 	};
 
 	class BBoxRenderer
@@ -105,7 +105,7 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mProgram = gl::Program::createProgramSPIRV(
+			mProgram = Program::createProgramSPIRV(
 				BBOX_VERT, sizeof(BBOX_VERT), 
 				BBOX_FRAG, sizeof(BBOX_FRAG));
 
@@ -181,15 +181,15 @@ namespace dyno
 			}
 
 			mCubeVAO.unbind();
-			gl::glCheckError();
+			glCheckError();
 		}
 
 	private:
-		gl::VertexArray	mCubeVAO;
-		gl::Buffer		mCubeVBO;
-		gl::Program*	mProgram;
+		VertexArray	mCubeVAO;
+		Buffer		mCubeVBO;
+		Program*	mProgram;
 
-		gl::Buffer		mUniformBlock;
+		Buffer		mUniformBlock;
 	};
 
 	class BackgroundRenderer
@@ -198,8 +198,8 @@ namespace dyno
 		BackgroundRenderer()
 		{
 			// create a quad object
-			mScreenQuad = gl::Mesh::ScreenQuad();
-			mBackgroundProgram = gl::Program::createProgramSPIRV(
+			mScreenQuad = Mesh::ScreenQuad();
+			mBackgroundProgram = Program::createProgramSPIRV(
 				SCREEN_VERT, sizeof(SCREEN_VERT),
 				BACKGROUND_FRAG, sizeof(BACKGROUND_FRAG));
 		}
@@ -224,8 +224,8 @@ namespace dyno
 
 	private:
 		// background
-		gl::Program*	mBackgroundProgram;
-		gl::Mesh*		mScreenQuad;
+		Program*	mBackgroundProgram;
+		Mesh*		mScreenQuad;
 	};
 
 

@@ -61,7 +61,7 @@ namespace dyno
 		mTexCoord.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 
 		// create shader program
-		mShaderProgram = gl::Program::createProgramSPIRV(
+		mShaderProgram = Program::createProgramSPIRV(
 			SURFACE_VERT, sizeof(SURFACE_VERT),
 			SURFACE_FRAG, sizeof(SURFACE_FRAG),
 			SURFACE_GEOM, sizeof(SURFACE_GEOM));
@@ -135,7 +135,7 @@ namespace dyno
 		mColorTexture.updateGL();
 #endif
 
-		gl::glCheckError();
+		glCheckError();
 	}
 
 	void GLSurfaceVisualModule::updateImpl()
@@ -320,7 +320,7 @@ namespace dyno
 		else
 			glDrawArrays(GL_TRIANGLES, 0, mNumTriangles * 3);
 
-		gl::glCheckError();
+		glCheckError();
 		mVAO.unbind();
 	}
 }

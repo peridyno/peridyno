@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <fstream>
 
-namespace gl {
+namespace dyno {
 
 	bool Shader::createFromSource(unsigned int type, const std::string& src)
 	{

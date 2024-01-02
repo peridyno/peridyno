@@ -19,12 +19,14 @@
 #include <typeinfo>
 #include <iostream>
 
-namespace gl
+#include "Object.h"
+
+namespace dyno
 {
 	/*
 	 * Base OpenGL object with ID and create/release interface
 	 */
-	class Object
+	class GraphicsObject : Object
 	{
 	protected:
 		virtual void create() = 0;
@@ -33,12 +35,12 @@ namespace gl
 		virtual bool isValid() const { return id != 0xFFFFFFFF; }
 
 	protected:
-		Object() = default;
-		virtual ~Object() = default; 
+		GraphicsObject() = default;
+		virtual ~GraphicsObject() = default; 
 		
 		// should be non-copyable
-		Object(const Object&) = delete;
-		Object& operator = (const Object&) = delete;
+		GraphicsObject(const GraphicsObject&) = delete;
+		GraphicsObject& operator = (const GraphicsObject&) = delete;
 
 	public:
 		unsigned int id = 0xFFFFFFFF;	// GL_INVALID_INDEX

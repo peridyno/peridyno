@@ -19,7 +19,9 @@
 #include "Module/ComputeModule.h"
 
 #include "Topology/TriangleSet.h"
-#include "gl/Shape.h"
+
+//Graphics object
+#include "GraphicsObject/Shape.h"
 
 namespace dyno
 {
@@ -37,7 +39,7 @@ namespace dyno
 
 		DEF_ARRAY_IN(Vec2f, TexCoord, DeviceType::GPU, "");
 
-		DEF_INSTANCES_IN(gl::Shape, Shape, "");
+		DEF_INSTANCES_IN(Shape, Shape, "");
 
 		DEF_ARRAY_OUT(Vec3f, Normal, DeviceType::GPU, "");
 

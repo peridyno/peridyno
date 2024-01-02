@@ -19,9 +19,9 @@
 #include "Topology/EdgeSet.h"
 
 #include "GLVisualModule.h"
-#include "gl/GPUBuffer.h"
-#include "gl/VertexArray.h"
-#include "gl/Shader.h"
+#include "GraphicsObject/GPUBuffer.h"
+#include "GraphicsObject/VertexArray.h"
+#include "GraphicsObject/Shader.h"
 
 namespace dyno
 {
@@ -65,13 +65,13 @@ namespace dyno
 				
 	private:
 
-		gl::Program*	mShaderProgram;
+		Program*	mShaderProgram;
 
-		gl::VertexArray				mVAO;
-		gl::XBuffer<Vec3f>						mVertexBuffer;
-		gl::XBuffer<TopologyModule::Edge>		mIndexBuffer;
+		VertexArray				mVAO;
+		XBuffer<Vec3f>						mVertexBuffer;
+		XBuffer<TopologyModule::Edge>		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 
-		gl::Buffer		mUniformBlock;
+		Buffer		mUniformBlock;
 	};
 };

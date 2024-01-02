@@ -13,7 +13,7 @@ namespace dyno
 		mWidth = mHeight = 0;
 
 		// shader programs
-		mSSAOProgram = gl::Program::createProgramSPIRV(
+		mSSAOProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
 			SSAO_FRAG, sizeof(SSAO_FRAG));
 

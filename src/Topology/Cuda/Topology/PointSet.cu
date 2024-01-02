@@ -11,7 +11,7 @@ namespace dyno
 	PointSet<TDataType>::PointSet()
 		: TopologyModule()
 	{
-		this->setUpdateAlways(true);
+		//this->setUpdateAlways(true);
 	}
 
 	template<typename TDataType>

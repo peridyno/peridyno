@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "gl/Buffer.h"
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
+#include "GraphicsObject/Buffer.h"
+#include "GraphicsObject/Framebuffer.h"
+#include "GraphicsObject/Texture.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
 
 #include <vector>
 #include <RenderEngine.h>
@@ -43,16 +43,16 @@ namespace dyno
 
 	private:
 		// framebuffers
-		gl::Framebuffer		mFramebuffer;
-		gl::Texture2D		mShadowTex;
-		gl::Texture2D		mShadowDepth;
-		gl::Texture2D		mShadowBlur;
+		Framebuffer		mFramebuffer;
+		Texture2D		mShadowTex;
+		Texture2D		mShadowDepth;
+		Texture2D		mShadowBlur;
 
-		gl::Program*		mBlurProgram;
-		gl::Mesh*			mQuad;
+		Program*		mBlurProgram;
+		Mesh*			mQuad;
 
 
-		gl::Buffer			mShadowUniform;	// uniform buffer for shadow lookup matrices
+		Buffer			mShadowUniform;	// uniform buffer for shadow lookup matrices
 
 	public:
 		int				width;

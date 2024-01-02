@@ -10,7 +10,7 @@ std::string base_name(const std::string& path)
 	return path.substr(path.find_last_of("/\\") + 1);
 }
 
-namespace gl
+namespace dyno
 {
 
 	GLenum glCheckError_(const char* file, int line)

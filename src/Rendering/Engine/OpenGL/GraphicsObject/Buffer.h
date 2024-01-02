@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "Object.h"
+#include "GraphicsObject.h"
 
-namespace gl
+namespace dyno
 {
-	class Buffer : public Object
+	class Buffer : public GraphicsObject
 	{
 		GL_OBJECT(Buffer)
 	public:
