@@ -64,8 +64,8 @@ namespace dyno
 		DEF_VAR(Real, EdgeSelectedSize, 0.002f, "");
 		DEF_VAR(Real, EdgeOtherSize, 0.0015, "");
 
-		TrianglePickerNode(std::string name = "default");
-		~TrianglePickerNode();
+		TrianglePickerNode();
+		~TrianglePickerNode() override;
 
 		std::string getNodeType();
 

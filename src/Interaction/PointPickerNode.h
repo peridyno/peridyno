@@ -41,8 +41,8 @@ namespace dyno
 		DEF_VAR(Real, PointOtherSize, 0.01f, "");
 		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
-		PointPickerNode(std::string name = "default");
-		~PointPickerNode();
+		PointPickerNode();
+		~PointPickerNode() override;
 
 		std::string getNodeType();
 

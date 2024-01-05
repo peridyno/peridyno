@@ -17,8 +17,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ThreadSystem(std::string name = "default");
-		virtual ~ThreadSystem();
+		ThreadSystem();
+		~ThreadSystem() override;
 
 		
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "");

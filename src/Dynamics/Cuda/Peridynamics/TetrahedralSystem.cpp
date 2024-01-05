@@ -13,8 +13,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(TetrahedralSystem, TDataType)
 
 	template<typename TDataType>
-	TetrahedralSystem<TDataType>::TetrahedralSystem(std::string name)
-		: Node(name)
+	TetrahedralSystem<TDataType>::TetrahedralSystem()
+		: Node()
 	{
 		auto topo = std::make_shared<TetrahedronSet<TDataType>>();
 		this->stateTetrahedronSet()->setDataPtr(topo);

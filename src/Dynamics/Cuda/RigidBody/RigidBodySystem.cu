@@ -17,8 +17,8 @@ namespace dyno
 	typedef typename dyno::TOrientedBox3D<Real> Box3D;
 
 	template<typename TDataType>
-	RigidBodySystem<TDataType>::RigidBodySystem(std::string name)
-		: Node(name)
+	RigidBodySystem<TDataType>::RigidBodySystem()
+		: Node()
 	{
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
 		this->stateTopology()->setDataPtr(std::make_shared<DiscreteElements<TDataType>>());

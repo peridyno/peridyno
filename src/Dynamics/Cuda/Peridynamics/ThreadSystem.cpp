@@ -12,8 +12,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(ThreadSystem, TDataType)
 
 	template<typename TDataType>
-	ThreadSystem<TDataType>::ThreadSystem(std::string name)
-		: Node(name)
+	ThreadSystem<TDataType>::ThreadSystem()
+		: Node()
 	{
 		auto topo = std::make_shared<EdgeSet<TDataType>>();
 		this->stateEdgeSet()->setDataPtr(topo);

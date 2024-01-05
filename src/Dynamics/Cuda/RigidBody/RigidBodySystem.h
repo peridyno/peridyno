@@ -41,8 +41,8 @@ namespace dyno
 		typedef typename dyno::TContactPair<Real> ContactPair;
 
 
-		RigidBodySystem(std::string name = "RigidBodySystem");
-		virtual ~RigidBodySystem();
+		RigidBodySystem();
+		~RigidBodySystem() override;
 
 		void addBox(
 			const BoxInfo& box, 

@@ -5,9 +5,9 @@
 
 namespace dyno
 {
-Node::Node(std::string name)
+Node::Node()
 	: OBase()
-	, m_node_name(name)
+	, m_node_name("default")
 	, m_dt(0.016f)
 	, m_mass(1.0f)
 {

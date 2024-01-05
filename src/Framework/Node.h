@@ -72,7 +72,7 @@ namespace dyno
 		template<class T>
 		using SPtr = std::shared_ptr<T>;
 
-		Node(std::string name = "default");
+		Node();
 		~Node() override;
 
 		void setName(std::string name);

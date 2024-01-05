@@ -13,8 +13,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(TriangularSystem, TDataType)
 	
 	template<typename TDataType>
-	TriangularSystem<TDataType>::TriangularSystem(std::string name)
-		: Node(name)
+	TriangularSystem<TDataType>::TriangularSystem()
+		: Node()
 	{
 		//Create a node for surface mesh rendering
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();

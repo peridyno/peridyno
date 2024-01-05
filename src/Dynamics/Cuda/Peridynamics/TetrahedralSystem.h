@@ -17,8 +17,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		TetrahedralSystem(std::string name = "default");
-		virtual ~TetrahedralSystem();
+		TetrahedralSystem();
+		~TetrahedralSystem() override;
 
 		DEF_ARRAY_STATE(Coord, NormalSDF, DeviceType::GPU, "");
 		DEF_VAR(Bool, SDF, false, "has SDF");

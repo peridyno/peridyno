@@ -17,8 +17,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		TriangularSystem(std::string name = "default");
-		virtual ~TriangularSystem();
+		TriangularSystem();
+		~TriangularSystem() override;
 
 		void addFixedParticle(int id, Coord pos);
 

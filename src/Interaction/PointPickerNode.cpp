@@ -8,8 +8,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(PointPickerNode, TDataType)
 
 	template<typename TDataType>
-	PointPickerNode<TDataType>::PointPickerNode(std::string name)
-		:Node(name)
+	PointPickerNode<TDataType>::PointPickerNode()
+		:Node()
 	{
 		auto pointInteractor = std::make_shared<PointInteraction<TDataType>>();
 

@@ -24,7 +24,7 @@ namespace dyno
 		typedef typename TDataType::Matrix Matrix;
 		typedef typename TBond<TDataType> Bond;
 
-		CodimensionalPD(std::string name = "default");
+		CodimensionalPD();
 		CodimensionalPD( Real xi, Real E , Real kb, Real timeSetp=1e-3, std::string name = "default");
 		virtual ~CodimensionalPD();
 

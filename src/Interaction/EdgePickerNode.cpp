@@ -8,8 +8,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(EdgePickerNode, TDataType)
 
 	template<typename TDataType>
-	EdgePickerNode<TDataType>::EdgePickerNode(std::string name)
-		:Node(name)
+	EdgePickerNode<TDataType>::EdgePickerNode()
+		:Node()
 	{
 		auto edgeInteractor = std::make_shared<EdgeInteraction<TDataType>>();
 		auto pointInteractor = std::make_shared<PointInteraction<TDataType>>();

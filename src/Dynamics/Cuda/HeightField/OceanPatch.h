@@ -46,6 +46,15 @@ namespace dyno {
     public:
         DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
 
+        DEF_VAR(Real, Amplitude, 0, "");
+
+        DEF_VAR(Real, WindSpeed, 0, "");
+
+        DEF_VAR(Real, Choppiness, 0, "");
+
+        DEF_VAR(Real, GlobalShift, 0, "");
+
+
         DEF_VAR(Real, WindDirection, Real(60), "Wind direction");
 
         DEF_VAR(uint, Resolution, 512, "");
@@ -80,11 +89,6 @@ namespace dyno {
         const Real g = 9.81f;          //重力
 
         Real mDirDepend = 0.07f;  //风长方向相关性
-
-        Real mAmplitude = 1e-7f;          //波的缩放系数
-        Real mWindSpeed = 1.0f;
-        Real mChoppiness;  //设置浪尖的尖锐性，范围0~1
-        Real mGlobalShift;    //大尺度偏移幅度
 
         cufftHandle fftPlan;
 

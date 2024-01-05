@@ -8,8 +8,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(QuadPickerNode, TDataType)
 
 	template<typename TDataType>
-	QuadPickerNode<TDataType>::QuadPickerNode(std::string name)
-		:Node(name)
+	QuadPickerNode<TDataType>::QuadPickerNode()
+		:Node()
 	{
 		auto surfaceInteractor = std::make_shared<SurfaceInteraction<TDataType>>();
 		auto edgeInteractor = std::make_shared<EdgeInteraction<TDataType>>();

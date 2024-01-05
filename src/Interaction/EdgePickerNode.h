@@ -55,8 +55,8 @@ namespace dyno
 
 		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
-		EdgePickerNode(std::string name = "default");
-		~EdgePickerNode();
+		EdgePickerNode();
+		~EdgePickerNode() override;
 
 		std::string getNodeType();
 

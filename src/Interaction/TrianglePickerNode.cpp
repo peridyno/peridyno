@@ -8,8 +8,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(TrianglePickerNode, TDataType)
 
 	template<typename TDataType>
-	TrianglePickerNode<TDataType>::TrianglePickerNode(std::string name)
-		:Node(name)
+	TrianglePickerNode<TDataType>::TrianglePickerNode()
+		:Node()
 	{
 		auto surfaceInteractor = std::make_shared<SurfaceInteraction<TDataType>>();
 		auto edgeInteractor = std::make_shared<EdgeInteraction<TDataType>>();
