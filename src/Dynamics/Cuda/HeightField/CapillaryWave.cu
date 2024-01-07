@@ -1,11 +1,11 @@
 ﻿#include "CapillaryWave.h"
 
+#include "SceneGraph.h"
+
 #include <Mapping/HeightFieldToTriangleSet.h>
 
 namespace dyno
 {
-#define GRAVITY 9.83219
-
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave()
 		: Node()
@@ -19,9 +19,6 @@ namespace dyno
 	{
 		mDeviceGrid.clear();
 		mDeviceGridNext.clear();
-
-		mSource.clear();
-		mWeight.clear();
 	}
 
 	template <typename Coord3D, typename Coord4D>
@@ -151,8 +148,6 @@ namespace dyno
 			extNy,
 			level);
 
-//		initSource();
-
 		auto topo = this->stateHeightField()->getDataPtr();
 		topo->setExtents(res, res);
 		topo->setGridSpacing(mRealGridSize);
@@ -187,6 +182,9 @@ namespace dyno
 		int nStep = 1;
 		float timestep = dt / nStep;
 
+		auto scn = this->getSceneGraph();
+		auto GRAVITY = scn->getGravity().norm();
+
 		for (int iter = 0; iter < nStep; iter++)
 		{
 			cuExecute2D(make_uint2(extNx, extNy),
@@ -202,6 +200,7 @@ namespace dyno
 				mDeviceGridNext,
 				res,
 				res,
+				GRAVITY,
 				timestep);
 		}
 
@@ -250,25 +249,12 @@ namespace dyno
 		}
 	}
 
-	template<typename Coord2D>
-	__global__ void InitSource(
-		DArray2D<Coord2D> source,
-		int patchSize)
-	{
-		int i = threadIdx.x + blockIdx.x * blockDim.x;
-		int j = threadIdx.y + blockIdx.y * blockDim.y;
-		if (i < patchSize && j < patchSize)
-		{
-			if (i < patchSize / 2 + 3 && i > patchSize / 2 - 3 && j < patchSize / 2 + 3 && j > patchSize / 2 - 3)
-			{
-				Coord2D uv(1.0f, 1.0f);
-				source[i + j * patchSize] = uv;
-			}
-		}
-	}
-
 	template <typename Coord4D>
-	__global__ void CW_ImposeBC(DArray2D<Coord4D> grid_next, DArray2D<Coord4D> grid, int width, int height)
+	__global__ void CW_ImposeBC(
+		DArray2D<Coord4D> grid_next, 
+		DArray2D<Coord4D> grid, 
+		int width, 
+		int height)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -323,7 +309,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__host__ __device__ Coord CW_VerticalPotential(Coord gp)
+	__host__ __device__ Coord CW_VerticalPotential(Coord gp, float GRAVITY)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -341,7 +327,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__device__ Coord CW_HorizontalPotential(Coord gp)
+	__device__ Coord CW_HorizontalPotential(Coord gp, float GRAVITY)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -359,7 +345,7 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__device__ Coord C_SlopeForce(Coord c, Coord n, Coord e, Coord s, Coord w)
+	__device__ Coord CW_SlopeForce(Coord c, Coord n, Coord e, Coord s, Coord w, float GRAVITY)
 	{
 		float h = max(c.x, 0.0f);
 
@@ -372,7 +358,13 @@ namespace dyno
 	}
 
 	template <typename Coord4D>
-	__global__ void CW_OneWaveStep(DArray2D<Coord4D> grid_next, DArray2D<Coord4D> grid, int width, int height, float timestep)
+	__global__ void CW_OneWaveStep(
+		DArray2D<Coord4D> grid_next, 
+		DArray2D<Coord4D> grid, 
+		int width, 
+		int height, 
+		float GRAVITY, 
+		float timestep)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -395,12 +387,12 @@ namespace dyno
 			CW_FixShore(west, center, east);
 			CW_FixShore(north, center, south);
 
-			Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south) - CW_VerticalPotential(center));
-			Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center) - CW_VerticalPotential(north));
-			Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center) - CW_HorizontalPotential(west));
-			Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east) - CW_HorizontalPotential(center));
+			Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south, GRAVITY) - CW_VerticalPotential(center, GRAVITY));
+			Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center, GRAVITY) - CW_VerticalPotential(north, GRAVITY));
+			Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center, GRAVITY) - CW_HorizontalPotential(west, GRAVITY));
+			Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east, GRAVITY) - CW_HorizontalPotential(center, GRAVITY));
 
-			Coord4D u_center = center + timestep * C_SlopeForce(center, north, east, south, west) - timestep * (CW_HorizontalPotential(u_east) - CW_HorizontalPotential(u_west)) - timestep * (CW_VerticalPotential(u_south) - CW_VerticalPotential(u_north));
+			Coord4D u_center = center + timestep * CW_SlopeForce(center, north, east, south, west, GRAVITY) - timestep * (CW_HorizontalPotential(u_east, GRAVITY) - CW_HorizontalPotential(u_west, GRAVITY)) - timestep * (CW_VerticalPotential(u_south, GRAVITY) - CW_VerticalPotential(u_north, GRAVITY));
 			u_center.x = max(0.0f, u_center.x);
 
 			grid_next(gridx, gridy) = u_center;

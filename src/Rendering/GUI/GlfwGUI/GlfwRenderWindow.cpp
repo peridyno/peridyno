@@ -355,6 +355,8 @@ namespace dyno
 	void GlfwRenderWindow::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
+
+		this->setSelection(!mAnimationToggle);
 	}
 
 	void GlfwRenderWindow::toggleImGUI()

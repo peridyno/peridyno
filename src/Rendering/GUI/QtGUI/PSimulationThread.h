@@ -52,6 +52,15 @@ namespace dyno
 		void setTotalFrames(int num);
 
 		int getCurrentFrameNum();
+
+		bool isPaused() {
+			return mPaused;
+		}
+
+		bool isRunning() {
+			return mRunning;
+		}
+
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
 

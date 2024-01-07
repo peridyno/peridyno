@@ -39,6 +39,8 @@ namespace dyno
 
 		virtual void setWindowSize(int w, int h);
 
+		void setSelection(bool b);
+
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
 		RenderParams					mRenderParams;
@@ -62,5 +64,6 @@ namespace dyno
 
 		Selection selectedObject;
 
+		bool mSelectionEnabled = true;
 	};
 };

@@ -26,6 +26,7 @@ namespace dyno
 
 	signals:
 		void simulationStarted();
+		void simulationStopped();
 
 	public slots:
 		void toggleSimulation();

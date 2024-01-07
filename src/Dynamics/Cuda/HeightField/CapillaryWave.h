@@ -75,9 +75,6 @@ namespace dyno
 
 		int mOriginX = 0;
 		int mOriginY = 0;
-
-		DArray2D<Vec2f> mSource;				
-		DArray2D<float> mWeight;
 	};
 
 	IMPLEMENT_TCLASS(CapillaryWave, TDataType)

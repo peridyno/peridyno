@@ -99,11 +99,6 @@ namespace dyno
 
 		connect(mPersistent, SIGNAL(stateChanged(int)), this, SLOT(runForever(int)));
 
-		connect(mStartSim, &QPushButton::released, [=]()
-			{
-				emit simulationStarted();
-			});
-
 		PSimulationThread::instance()->start();
 	}
 
@@ -126,6 +121,8 @@ namespace dyno
 			mResetSim->setDisabled(true);
 			mTotalFrameSpinbox->setEnabled(false);
 			mFrameSlider->setEnabled(false);
+
+			emit simulationStarted();
 		}
 		else
 		{
@@ -137,6 +134,8 @@ namespace dyno
 
 			mTotalFrameSpinbox->setEnabled(true);
 			mFrameSlider->setEnabled(true);
+
+			emit simulationStopped();
 		}
 	}
 
@@ -215,6 +214,9 @@ namespace dyno
 
 			PSimulationThread::instance()->setTotalFrames(std::numeric_limits<int>::max());
 			PSimulationThread::instance()->resume();
+
+			emit simulationStarted();
+
 			break;
 
 		case Qt::CheckState::Unchecked:
@@ -228,6 +230,9 @@ namespace dyno
 
 			PSimulationThread::instance()->setTotalFrames(mTotalFrameSpinbox->value());
 			PSimulationThread::instance()->pause();
+
+			emit simulationStopped();
+
 			break;
 
 		default:

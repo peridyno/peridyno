@@ -19,12 +19,23 @@ void dyno::RenderWindow::setWindowSize(int w, int h)
 	mCamera->setHeight(h);
 }
 
+void dyno::RenderWindow::setSelection(bool b)
+{
+	mSelectionEnabled = b;
+
+	if (b == false) {
+		selectedObject.items.clear();
+	}
+}
+
 const dyno::Selection& dyno::RenderWindow::select(int x, int y, int w, int h)
 {
-	selectedObject = mRenderEngine->select(x, y, w, h);
-	
-	if (selectedObject.items.size() > 0)
-		onSelected(selectedObject);
+	if (mSelectionEnabled) {
+		selectedObject = mRenderEngine->select(x, y, w, h);
+
+		if (selectedObject.items.size() > 0)
+			onSelected(selectedObject);
+	}
 
 	return selectedObject;
 }
