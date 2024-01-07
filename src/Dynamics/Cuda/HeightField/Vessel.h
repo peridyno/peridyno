@@ -37,13 +37,15 @@ namespace dyno
 		NBoundingBox boundingBox() override;
 
 	public:
-		DEF_VAR(Coord, Barycenter, Coord(0), "");
+		DEF_VAR(Coord, BarycenterOffset, Coord(0), "The center offset defined in vessel's local frame");
 
 		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
 
 		DEF_VAR(FilePath, MeshName, getAssetPath() + "obj/boat_mesh.obj", "");
 
 		DEF_VAR(Real, Density, Real(1000), "Density");
+
+		DEF_VAR_STATE(Coord, Barycenter, Coord(0), "A vessel's barycenter, note it can be different from the Center");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Envelope, "Envelope for the vessel");
 
@@ -60,6 +62,8 @@ namespace dyno
 		TriangleSet<TDataType> mInitialEnvelope;
 
 		TriangleSet<TDataType> mInitialMesh;
+
+		Coord mShapeCenter = Coord(0);
 	};
 
 	IMPLEMENT_TCLASS(Vessel, TDataType)

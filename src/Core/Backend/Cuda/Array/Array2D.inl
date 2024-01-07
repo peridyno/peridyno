@@ -38,7 +38,7 @@ namespace dyno {
 		DYN_FUNC inline uint ny() const { return m_ny; }
 		DYN_FUNC inline uint pitch() const { return m_pitch; }
 
-		DYN_FUNC inline T operator () (const uint i, const uint j) const
+		GPU_FUNC inline T operator () (const uint i, const uint j) const
 		{
 			char* addr = (char*)m_data;
 			addr += j * m_pitch;
@@ -47,7 +47,7 @@ namespace dyno {
 			//return m_data[i + j* m_pitch];
 		}
 
-		DYN_FUNC inline T& operator () (const uint i, const uint j)
+		GPU_FUNC inline T& operator () (const uint i, const uint j)
 		{
 			char* addr = (char*)m_data;
 			addr += j * m_pitch;
@@ -62,12 +62,12 @@ namespace dyno {
 			return i + j * m_nx;
 		}
 
-		DYN_FUNC inline T operator [] (const uint id) const
+		GPU_FUNC inline T operator [] (const uint id) const
 		{
 			return m_data[id];
 		}
 
-		DYN_FUNC inline T& operator [] (const uint id)
+		GPU_FUNC inline T& operator [] (const uint id)
 		{
 			return m_data[id];
 		}

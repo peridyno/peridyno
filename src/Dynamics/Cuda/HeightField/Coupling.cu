@@ -1,5 +1,7 @@
 #include "Coupling.h"
 
+#include "Math/Lerp.h"
+
 #include "Primitive/Primitive3D.h"
 
 namespace dyno
@@ -22,39 +24,6 @@ namespace dyno
 	{
 	}
 
-	template<typename Coord>
-	__device__ Coord GetDisplacement(Coord pos, DArray2D<Coord>& displacement, Coord origin, Real h)
-	{
-		Real x = (pos.x - origin.x) / h;
-		Real z = (pos.z - origin.z) / h;
-
-		int i = floor(x);
-		int j = floor(z);
-
-		float fx = x - i;
-		float fz = z - j;
-
-		i = clamp((int)i, (int)0, (int)displacement.nx() - 1);
-		j = clamp((int)j, (int)0, (int)displacement.ny() - 1);
-
-		if (i == displacement.nx() - 1){
-			i = displacement.nx() - 2;
-			fx = 1.0f;
-		}
-
-		if (j == displacement.ny() - 1){
-			j = displacement.ny() - 2;
-			fz = 1.0f;
-		}
-
-		Coord d00 = displacement(i, j);
-		Coord d10 = displacement(i + 1, j);
-		Coord d01 = displacement(i, j + 1);
-		Coord d11 = displacement(i + 1, j + 1);
-
-		return d00 * (1 - fx) * (1 - fz) + d10 * fx * (1 - fz) + d01 * (1 - fx) * fz + d11 * fx * fz;
-	}
-
 	template<typename Coord, typename Triangle>
 	__global__ void C_ComputeForceAndTorque(
 		DArray<Coord> force,
@@ -62,7 +31,7 @@ namespace dyno
 		DArray<Coord> vertices,
 		DArray<Triangle> indices,
 		DArray2D<Coord> heights,
-		Coord center,
+		Coord barycenter,
 		Coord gravity,
 		Coord origin,
 		Real spacing,
@@ -85,7 +54,7 @@ namespace dyno
 
 		Coord triangle_center = (v0 + v1 + v2) / Real(3);
 
-		Coord d_i = GetDisplacement(triangle_center, heights, origin, spacing);
+		Coord d_i = bilinear(heights, (triangle_center.x - origin.x) / spacing, (triangle_center.z - origin.z) / spacing);
 
 		//Calculate buoyancy
 		Real sea_level = d_i.y;
@@ -94,7 +63,7 @@ namespace dyno
 		Real pressure = rho * gravity.norm() * h;
 
 		Coord force_i = pressure * triangle.area() * normal_i;
-		Coord torque_i = -force_i.cross(triangle_center - center);
+		Coord torque_i = -force_i.cross(triangle_center - barycenter);
 
 		force[tId] = force_i;
 		torque[tId] = torque_i;
@@ -113,7 +82,7 @@ namespace dyno
 			auto& triangles = mesh->stateEnvelope()->getData();
 
 			Real mass = mesh->stateMass()->getData();
-			Coord center = mesh->stateCenter()->getData();
+			Coord barycenter = mesh->stateBarycenter()->getData();
 			Coord velocity = mesh->stateVelocity()->getData();
 			Coord angular_velocity = mesh->stateAngularVelocity()->getData();
 			Matrix inertia = mesh->stateInertia()->getData();
@@ -142,7 +111,7 @@ namespace dyno
 				vertices,
 				indices,
 				displacements,
-				center,
+				barycenter,
 				gravity,
 				origin,
 				h,

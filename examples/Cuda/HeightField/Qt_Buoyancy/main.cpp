@@ -20,6 +20,9 @@
 #include <HeightField/Ocean.h>
 #include <HeightField/OceanPatch.h>
 #include <HeightField/Coupling.h>
+#include <HeightField/Wake.h>
+
+#include <HeightField/Module/Steer.h>
 
 #include <HeightField/Vessel.h>
 
@@ -36,7 +39,7 @@ using namespace std;
 using namespace dyno;
 
 /**
- * @brief An example to demonstrate the coupling between a boat and the ocean
+ * @brief An example to demonstrate the coupling between a boat and the ocean, use W, S, A and D to control the movement of the vessel
  */
 
 std::shared_ptr<SceneGraph> createScene()
@@ -46,14 +49,20 @@ std::shared_ptr<SceneGraph> createScene()
 	auto ocean = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 
 	auto patch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
-	patch->varWindType()->setValue(3);
+	patch->varWindType()->setValue(4);
+	patch->varPatchSize()->setValue(128.0f);
 	patch->connect(ocean->importOceanPatch());
+
+	auto wake = scn->addNode(std::make_shared<Wake<DataType3f>>());
+	wake->varWaterLevel()->setValue(4);
+	wake->varLength()->setValue(128.0f);
+	wake->varMagnitude()->setValue(0.2f);
+	wake->connect(ocean->importCapillaryWaves());
 
 	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 
 	ocean->stateHeightField()->connect(mapper->inHeightField());
 	ocean->graphicsPipeline()->pushModule(mapper);
-
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Color(0.0f, 0.2f, 1.0f));
@@ -64,11 +73,17 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto boat = scn->addNode(std::make_shared<Vessel<DataType3f>>());
 	boat->varDensity()->setValue(150.0f);
+	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
-// 	boat->varEnvelopeName()->setValue(getAssetPath() + "obj/boat_boundary.obj");
-// 	boat->varMeshName()->setValue(getAssetPath() + "obj/boat_mesh.obj");
+
+	auto steer = std::make_shared<Steer<DataType3f>>();
+	boat->stateVelocity()->connect(steer->inVelocity());
+	boat->stateAngularVelocity()->connect(steer->inAngularVelocity());
+	boat->stateQuaternion()->connect(steer->inQuaternion());
+	boat->animationPipeline()->pushModule(steer);
 
 	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
+	boat->connect(wake->importVessel());
 	boat->connect(coupling->importVessels());
 	ocean->connect(coupling->importOcean());
 	

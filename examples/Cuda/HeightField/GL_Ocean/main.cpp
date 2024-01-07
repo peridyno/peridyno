@@ -18,7 +18,7 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto oceanPatch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
-	oceanPatch->varWindType()->setValue(4);
+	oceanPatch->varWindType()->setValue(8);
 
 	auto root = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 	root->varExtentX()->setValue(2);

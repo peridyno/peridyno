@@ -59,7 +59,6 @@ namespace dyno
 		Coord2D getOrigin() { return Coord2D(mOriginX * mRealGridSize, mOriginY * mRealGridSize); }
 
 		//TODO: make improvements
-		void addSource();
 		void moveDynamicRegion(int nx, int ny);
 
 	protected:
@@ -67,15 +66,15 @@ namespace dyno
 
 		void updateStates() override;
 
+	protected:
+		DArray2D<Coord4D> mDeviceGrid;
+		DArray2D<Coord4D> mDeviceGridNext;
+
 	private:
 		Real mRealGridSize;
 
 		int mOriginX = 0;
 		int mOriginY = 0;
-
-		DArray2D<Coord4D> mDeviceGrid;		    
-		DArray2D<Coord4D> mDeviceGridNext;
-
 
 		DArray2D<Vec2f> mSource;				
 		DArray2D<float> mWeight;

@@ -32,6 +32,8 @@ namespace dyno
 
 		DEF_VAR_IN(Coord, Velocity, "Velocity");
 
+		DEF_VAR_IN(Coord, AngularVelocity, "Angular velocity");
+
 		DEF_VAR_IN(Quat<Real>, Quaternion, "Rotation");
 
 	protected:

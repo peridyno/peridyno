@@ -61,7 +61,7 @@ namespace dyno
 
 					envelope->scale(this->varScale()->getValue());
 					envelope->rotate(this->varRotation()->getValue() * M_PI / 180);
-					envelope->translate(this->varLocation()->getValue() + this->varBarycenter()->getValue());
+					envelope->translate(this->varLocation()->getValue());
 				}
 			}
 		);
@@ -93,9 +93,8 @@ namespace dyno
 		Coord rot = this->varRotation()->getValue();
 		Coord scale = this->varScale()->getValue();
 
-		Coord barycenter = this->varBarycenter()->getValue();
-
 		auto quat = this->computeQuaternion();
+		auto offset = this->varBarycenterOffset()->getValue();
 
 		//Initialize states for the rigid body
 		{
@@ -104,13 +103,13 @@ namespace dyno
 
 			mInitialMesh.requestBoundingBox(lo, hi);
 
-			Coord center = 0.5f * (hi + lo);
+			mShapeCenter = 0.5f * (hi + lo);
 
 			auto envelope = this->stateEnvelope()->getDataPtr();
 			envelope->copyFrom(mInitialEnvelope);
 			envelope->scale(scale);
 			envelope->rotate(quat);
-			envelope->translate(location + barycenter - center);
+			envelope->translate(location);
 
 			Real lx = hi.x - lo.x;
 			Real ly = hi.y - lo.y;
@@ -126,7 +125,8 @@ namespace dyno
 					0, 0, lx * lx + ly * ly);
 
 			this->stateMass()->setValue(mass);
-			this->stateCenter()->setValue(location);
+			this->stateCenter()->setValue(location + mShapeCenter);
+			this->stateBarycenter()->setValue(location + mShapeCenter + quat.rotate(offset));
 			this->stateVelocity()->setValue(Vec3f(0));
 			this->stateAngularVelocity()->setValue(Vec3f(0));
 			this->stateInertia()->setValue(inertia);
@@ -152,19 +152,21 @@ namespace dyno
 		auto quat = this->stateQuaternion()->getValue();
 		auto scale = this->varScale()->getValue();
 
-		auto barycenter = this->varBarycenter()->getValue();
+		auto offset = this->varBarycenterOffset()->getValue();
+
+		this->stateBarycenter()->setValue(center + quat.rotate(offset));
  
 		auto buoy = this->stateEnvelope()->getDataPtr();
 		buoy->copyFrom(mInitialEnvelope);
 		buoy->rotate(quat);
 		buoy->scale(scale);
-		buoy->translate(center + barycenter);
+		buoy->translate(center - mShapeCenter);
 
 		auto mesh = this->stateMesh()->getDataPtr();
 		mesh->copyFrom(mInitialMesh);
 		mesh->rotate(quat);
 		mesh->scale(scale);
-		mesh->translate(center);
+		mesh->translate(center - mShapeCenter);
 	}
 
 	template<typename TDataType>
@@ -173,8 +175,6 @@ namespace dyno
 		Coord location = this->varLocation()->getValue();
 		Coord rot = this->varRotation()->getValue();
 		Coord scale = this->varScale()->getValue();
-
-		Coord barycenter = this->varBarycenter()->getValue();
 
 		auto quat = this->computeQuaternion();
 
@@ -189,7 +189,7 @@ namespace dyno
 		envelope->copyFrom(mInitialEnvelope);
 		envelope->scale(scale);
 		envelope->rotate(quat);
-		envelope->translate(location + barycenter - center);
+		envelope->translate(location);
 
 		auto mesh = this->stateMesh()->getDataPtr();
 		mesh->copyFrom(mInitialMesh);

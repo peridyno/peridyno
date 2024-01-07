@@ -57,58 +57,6 @@ namespace dyno
 		return sqrtf(2.0f) * h * vh / (sqrtf(h4 + max(h4, EPSILON)));
 	}
 
-	template <typename Coord2D, typename Coord4D>
-	__global__ void AddSource(
-		DArray2D<Coord4D> grid,
-		DArray2D<Coord2D> mSource,
-		int patchSize)
-	{
-		int i = threadIdx.x + blockIdx.x * blockDim.x;
-		int j = threadIdx.y + blockIdx.y * blockDim.y;
-		if (i < patchSize && j < patchSize)
-		{
-			int gx = i + 1;
-			int gy = j + 1;
-
-			Coord4D gp = grid(gx, gy);
-			Coord2D s_ij = mSource(i, j);
-
-			Real h = gp.x;
-			Real u = C_GetU(gp);
-			Real v = C_GetV(gp);
-			Real length = sqrt(s_ij.x * s_ij.x + s_ij.y * s_ij.y);
-			if (length > 0.001f)
-			{
-				u += s_ij.x;
-				v += s_ij.y;
-
-				u *= 0.98f;
-				v *= 0.98f;
-
-				u = min(0.4f, max(-0.4f, u));
-				v = min(0.4f, max(-0.4f, v));
-			}
-
-			gp.x = h;
-			gp.y = u * h;
-			gp.z = v * h;
-
-			grid(gx, gy) = gp;
-		}
-	}
-
-	template<typename TDataType>
-	void CapillaryWave<TDataType>::addSource()
-	{
-		uint res = this->varResolution()->getValue();
-
-		cuExecute2D(make_uint2(res, res),
-			AddSource,
-			mDeviceGrid,
-			mSource,
-			res);
-	}
-
 	template <typename Coord>
 	__global__ void CW_MoveSimulatedRegion(
 		DArray2D<Coord> grid_next,
@@ -166,11 +114,6 @@ namespace dyno
 			ny,
 			level);
 
-		//TODO: validation
-		//swapDeviceGrid();
-
-		addSource();
-
 		mOriginX += nx;
 		mOriginY += ny;
 	}
@@ -212,6 +155,8 @@ namespace dyno
 
 		auto topo = this->stateHeightField()->getDataPtr();
 		topo->setExtents(res, res);
+		topo->setGridSpacing(mRealGridSize);
+		topo->setOrigin(Coord3D(-0.5 * mRealGridSize * topo->width(), 0, -0.5 * mRealGridSize * topo->height()));
 
 		auto& disp = topo->getDisplacement();
 
@@ -223,6 +168,7 @@ namespace dyno
 			CW_InitHeightDisp,
 			this->stateHeight()->getData(),
 			disp,
+			mDeviceGrid,
 			level);
 	}
 
@@ -300,7 +246,7 @@ namespace dyno
 			gp.w = 0.0f;
 
 			grid(x, y) = gp;
-			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid(x, y).x = 5.0f;
+//			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid(x, y).x = level;
 		}
 	}
 
@@ -476,13 +422,7 @@ namespace dyno
 			int gridy = j + 1;
 
 			Coord gp = grid(gridx, gridy);
-			height(i, j).x = gp.x;
-
-			float d = sqrtf((i - patchSize / 2) * (i - patchSize / 2) + (j - patchSize / 2) * (j - patchSize / 2));
-			float q = d / (0.49f * patchSize);
-
-			float weight = q < 1.0f ? 1.0f - q * q : 0.0f;
-			height(i, j).y = 1.3f * realSize * sinf(3.0f * weight * height(i, j).x * 0.5f * M_PI);
+			height(i, j) = gp;
 		}
 	}
 
@@ -512,25 +452,23 @@ namespace dyno
 	__global__ void CW_InitHeightDisp(
 		DArray2D<Coord4D> heights,
 		DArray2D<Coord3D> displacement,
+		DArray2D<Coord4D> grid,
 		Real horizon)
 	{
 		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
 		if (i < displacement.nx() && j < displacement.ny())
 		{
+			int gridx = i + 1;
+			int gridy = j + 1;
+
+			Coord4D gij = grid(gridx, gridy);
+
 			displacement(i, j).x = 0;
-			displacement(i, j).y = horizon;
+			displacement(i, j).y = gij.x + gij.w;
 			displacement(i, j).z = 0;
 
-			heights(i, j).x = horizon;
-			heights(i, j).y = 0;
-			heights(i, j).z = 0;
-			heights(i, j).w = 0;
-
-			if ((i - 256) * (i - 256) + (j - 256) * (j - 256) <= 2500) {
-				displacement(i, j).y = 5.0f;
-				heights(i, j).x = 5.0f;
-			}
+			heights(i, j) = gij;
 		}
 	}
 

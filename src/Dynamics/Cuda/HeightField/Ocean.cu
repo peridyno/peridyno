@@ -76,29 +76,32 @@ namespace dyno
 		}
 	}
 
-	template<typename Coord>
+	template<typename Real, typename Coord>
 	__global__ void O_AddOceanTrails(
 		DArray2D<Coord> oceanVertex,
-		DArray2D<Coord> CapillaryWave)
+		DArray2D<Coord> waveDisp,
+		Real h)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
 
-		int width = CapillaryWave.nx();
-		int height = CapillaryWave.ny();
+		int width = waveDisp.nx();
+		int height = waveDisp.ny();
 
 		if (i < width && j < height)
 		{
-			Coord C_ij = CapillaryWave(i, j);
+			Coord D_ij = waveDisp(i, j);
 
-			int tiledX = oceanVertex.nx() / CapillaryWave.nx();
-			int tiledY = oceanVertex.ny() / CapillaryWave.ny();
+			D_ij.y -= h;
+
+			int tiledX = oceanVertex.nx() / waveDisp.nx();
+			int tiledY = oceanVertex.ny() / waveDisp.ny();
 
 			//TODO: correct the position
 			int nx = i;
 			int ny = j;
 
-			oceanVertex(nx, ny) += C_ij;
+			oceanVertex(nx, ny) += D_ij;
 		}
 	}
 
@@ -124,14 +127,16 @@ namespace dyno
 		//Add capillary waves
 		auto& waves = this->getCapillaryWaves();
 		for (int i = 0; i < waves.size(); i++) {
-			auto wave = this->stateHeightField()->getDataPtr();
+			auto wave = waves[i]->stateHeightField()->getDataPtr();
+			auto h = waves[i]->varWaterLevel()->getValue();
 
 			auto& waveDisp = wave->getDisplacement();
 
 			cuExecute2D(make_uint2(waveDisp.nx(), waveDisp.ny()),
 				O_AddOceanTrails,
 				oceanHeights->getDisplacement(),
-				waveDisp);
+				waveDisp,
+				h);
 		}
 	}
 

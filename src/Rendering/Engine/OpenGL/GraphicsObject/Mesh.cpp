@@ -156,10 +156,10 @@ namespace dyno
 	Mesh* Mesh::Plane(float scale)
 	{
 		std::vector<float> vertices = {
-			-scale, 0, -scale,
-			-scale, 0,  scale,
-			 scale, 0, -scale,
-			 scale, 0,  scale,
+			-scale, -0.0001f, -scale,
+			-scale, -0.0001f,  scale,
+			 scale, -0.0001f, -scale,
+			 scale, -0.0001f,  scale,
 		};
 
 		std::vector<unsigned int> indices = {
