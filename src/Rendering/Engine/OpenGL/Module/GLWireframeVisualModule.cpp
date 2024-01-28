@@ -103,11 +103,11 @@ namespace dyno
 
 		if (rparams.mode == GLRenderMode::COLOR)
 		{
-			Color c = this->varBaseColor()->getData();
+			Color c = this->varBaseColor()->getValue();
 			mShaderProgram->setVec3("uBaseColor", Vec3f(c.r, c.g, c.b));
-			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getData());
-			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getData());
-			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getData());
+			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getValue());
+			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getValue());
+			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getValue());
 		}
 		else if (rparams.mode == GLRenderMode::SHADOW)
 		{
@@ -134,7 +134,7 @@ namespace dyno
 		{
 			// draw as cylinders
 			mShaderProgram->setInt("uEdgeMode", 1);
-			mShaderProgram->setFloat("uRadius", this->varRadius()->getData());
+			mShaderProgram->setFloat("uRadius", this->varRadius()->getValue());
 		}
 
 		mVAO.bindIndexBuffer(&mIndexBuffer);
