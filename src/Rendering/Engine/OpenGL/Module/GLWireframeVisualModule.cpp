@@ -76,9 +76,6 @@ namespace dyno
 
 		mVertexBuffer.updateGL();
 		mIndexBuffer.updateGL();
-
-		mVAO.bindIndexBuffer(&mIndexBuffer);
-		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
 	}
 
 	void GLWireframeVisualModule::updateImpl()
@@ -140,7 +137,10 @@ namespace dyno
 			mShaderProgram->setFloat("uRadius", this->varRadius()->getData());
 		}
 
-		mVAO.bind();		
+		mVAO.bindIndexBuffer(&mIndexBuffer);
+		mVAO.bindVertexBuffer(&mVertexBuffer, 0, 3, GL_FLOAT, 0, 0, 0);
+		mVAO.bind();
+
 		glDrawElements(GL_LINES, mNumEdges * 2, GL_UNSIGNED_INT, 0);
 
 		// restore polygon mode
