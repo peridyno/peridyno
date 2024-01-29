@@ -55,9 +55,18 @@ namespace dyno
 
 		Coord nSeg = (_hi - _lo) / ds;
 
-		nx = (int)ceil(nSeg[0]) + 1 + 2 * padding;
-		ny = (int)ceil(nSeg[1]) + 1 + 2 * padding;
-		nz = (int)ceil(nSeg[2]) + 1 + 2 * padding;
+		nx = (int)ceil(nSeg[0]);
+		ny = (int)ceil(nSeg[1]);
+		nz = (int)ceil(nSeg[2]);
+
+		//To avoid values less or equal to zero
+		nx = nx < 1 ? 1 : nx;
+		ny = ny < 1 ? 1 : ny;
+		nz = nz < 1 ? 1 : nz;
+
+		nx += 2 * padding;
+		ny += 2 * padding;
+		nz += 2 * padding;
 		hi = lo + Coord((Real)nx, (Real)ny, (Real)nz) * ds;
 
 		num = nx * ny * nz;
