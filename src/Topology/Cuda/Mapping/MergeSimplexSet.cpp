@@ -37,9 +37,9 @@ namespace dyno
 		points.assign(p2, p2.size(), 0, p0.size() + p1.size());
 
 		simplices->setPoints(points);
-		simplices->setSegments(edge_set->getEdges());
-		simplices->setTriangles(tri_set->getTriangles());
-		simplices->setTetrahedrons(tet_set->getTetrahedrons());
+		simplices->setEdgeIndex(edge_set->getEdges());
+		simplices->setTriangleIndex(tri_set->getTriangles());
+		simplices->setTetrahedronIndex(tet_set->getTetrahedrons());
 
 		simplices->update();
 	}

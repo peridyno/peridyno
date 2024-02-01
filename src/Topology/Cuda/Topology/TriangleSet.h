@@ -137,6 +137,8 @@ namespace dyno
 
 		bool isEmpty() override;
 
+		void clear() override;
+
 		//If true, normals will be updated automatically as calling update();
 		void setAutoUpdateNormals(bool b) { bAutoUpdateNormal = b; }
 

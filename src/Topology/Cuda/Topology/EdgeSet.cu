@@ -172,5 +172,14 @@ namespace dyno
 		return mEdges.size() == 0 && PointSet<TDataType>::isEmpty();
 	}
 
+	template<typename TDataType>
+	void EdgeSet<TDataType>::clear()
+	{
+		mEdges.clear();
+		mVer2Edge.clear();
+
+		PointSet<TDataType>::clear();
+	}
+
 	DEFINE_CLASS(EdgeSet);
 }

@@ -62,7 +62,7 @@ namespace dyno
 
 		virtual bool isEmpty();
 
-		void clear();
+		virtual void clear();
 
 		/**
 		 * @brief Return the array of points

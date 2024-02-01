@@ -131,6 +131,8 @@ namespace dyno
 
 		bool isEmpty() override;
 
+		void clear() override;
+
 	protected:
 		/**
 		 * Override updateEdges to update edges in a customized way, e.g., only the four edges will be created for a quadrangle

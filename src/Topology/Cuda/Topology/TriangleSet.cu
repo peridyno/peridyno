@@ -415,6 +415,19 @@ namespace dyno
 		return mTriangleIndex.size() == 0 && EdgeSet<TDataType>::isEmpty();
 	}
 
+	template<typename TDataType>
+	void TriangleSet<TDataType>::clear()
+	{
+		mTriangleIndex.clear();
+		mVer2Tri.clear();
+		mEdg2Tri.clear();
+		mTri2Edg.clear();
+
+		mVertexNormal.clear();
+
+		EdgeSet<TDataType>::clear();
+	}
+
 	template<typename Coord, typename Triangle>
 	__global__ void TS_SetupVertexNormals(
 		DArray<Coord> normals,

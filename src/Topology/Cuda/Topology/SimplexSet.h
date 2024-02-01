@@ -15,6 +15,9 @@
  */
 #pragma once
 #include "PointSet.h"
+#include "EdgeSet.h"
+#include "TriangleSet.h"
+#include "TetrahedronSet.h"
 
 namespace dyno
 {
@@ -36,17 +39,49 @@ namespace dyno
 
 		bool isEmpty() override;
 
-		void setSegments(const DArray<Edge>& segments) { mSegmentIndex.assign(segments); }
-		void setTriangles(const DArray<Triangle>& triangles) { mTriangleIndex.assign(triangles); }
-		void setTetrahedrons(const DArray<Tetrahedron>& tetrahedrons) { mTetrahedronSet.assign(tetrahedrons); }
+		void setEdgeIndex(const DArray<Edge>& segments) { mEdgeIndex.assign(segments); }
+		void setEdgeIndex(const CArray<Edge>& segments) { mEdgeIndex.assign(segments); }
+
+		void setTriangleIndex(const DArray<Triangle>& triangles) { mTriangleIndex.assign(triangles); }
+		void setTriangleIndex(const CArray<Triangle>& triangles) { mTriangleIndex.assign(triangles); }
+
+		void setTetrahedronIndex(const DArray<Tetrahedron>& tetrahedrons) { mTetrahedronIndex.assign(tetrahedrons); }
+		void setTetrahedronIndex(const CArray<Tetrahedron>& tetrahedrons) { mTetrahedronIndex.assign(tetrahedrons); }
+
+		/**
+		 * @brief return the 1-dimensional simplex to EdgeSet
+		 */
+		void extractSimplex1D(EdgeSet<TDataType>& es);
+
+		/**
+		 * @brief return the 2-dimensional simplex to TriangleSet
+		 */
+		void extractSimplex2D(TriangleSet<TDataType>& ts);
+
+		/**
+		 * @brief return the 3-dimensional simplex to TetrahedronSet
+		 */
+		void extractSimplex3D(TetrahedronSet<TDataType>& ts);
+
+		void extractPointSet(PointSet<TDataType>& ps);
+
+		/**
+		 * @brief extract and merge edges from 1, 2, 3-dimensional simplexes into one EdgeSet
+		 */
+		void extractEdgeSet(EdgeSet<TDataType>& es);
+
+		/**
+		 * @brief extract and merge triangles from 2, 3-dimensional simplexes into one TriangleSet
+		 */
+		void extractTriangleSet(TriangleSet<TDataType>& ts);
 
 	protected:
 		void updateTopology() override;
 
 	private:
-		DArray<Edge> mSegmentIndex;
+		DArray<Edge> mEdgeIndex;
 		DArray<Triangle> mTriangleIndex;
-		DArray<Tetrahedron> mTetrahedronSet;
+		DArray<Tetrahedron> mTetrahedronIndex;
 	};
 }
 
