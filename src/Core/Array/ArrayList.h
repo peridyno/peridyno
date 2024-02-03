@@ -34,6 +34,16 @@ namespace dyno {
 
 		bool resize(uint num);
 
+		/**
+		 * @brief Pre-allocate CPU space
+		 *
+		 * @param counts
+		 * @return true
+		 * @return false
+		 */
+		bool resize(const CArray<uint>& counts);
+		bool resize(const uint arraySize, const uint eleSize);
+
 		inline uint size() const { return mLists.size(); }
 		uint elementSize();
 
@@ -113,6 +123,69 @@ namespace dyno {
 	uint ArrayList<ElementType, DeviceType::CPU>::elementSize()
 	{
 		return mElements.size();
+	}
+
+	template<class ElementType>
+	bool ArrayList<ElementType, DeviceType::CPU>::resize(const CArray<uint>& counts)
+	{
+		assert(counts.size() > 0);
+
+		if (mIndex.size() != counts.size())
+		{
+			mIndex.resize(counts.size());
+			mLists.resize(counts.size());
+		}
+
+		mIndex.assign(counts);
+
+		uint total_num = 0;
+		for (uint i = 0; i < mIndex.size(); i++)
+		{
+			uint num = mIndex[i];
+			
+			//exclusive scan
+			mIndex[i] = total_num;	
+
+			//summation
+			total_num += num;
+		}
+
+		mElements.resize(total_num);
+
+		//initialize all lists.
+		for (uint i = 0; i < mLists.size(); i++)
+		{
+			mLists[i].reserve(mElements.begin() + mIndex[i], counts[i]);
+		}
+
+		return true;
+	}
+
+	template<class ElementType>
+	bool ArrayList<ElementType, DeviceType::CPU>::resize(const uint arraySize, const uint eleSize)
+	{
+		assert(arraySize > 0);
+
+		if (mIndex.size() != arraySize)
+		{
+			mIndex.resize(arraySize);
+			mLists.resize(arraySize);
+			mElements.resize(arraySize * eleSize);
+		}
+
+		uint total_num = 0;
+		for (uint i = 0; i < mIndex.size(); i++)
+		{
+			mIndex[i] = i * eleSize;
+		}
+
+		//initialize all lists.
+		for (uint i = 0; i < mLists.size(); i++)
+		{
+			mLists[i].reserve(mElements.begin() + mIndex[i], eleSize);
+		}
+
+		return true;
 	}
 
 	template<class ElementType>

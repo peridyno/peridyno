@@ -73,9 +73,10 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		QSpinBox* spinner = new QSpinBox;
-		spinner->setMaximum(1000000);
+		spinner->setMinimum(field->getMin());
+		spinner->setMaximum(field->getMax());
 		spinner->setFixedWidth(100);
-		spinner->setValue(f->getData());
+		spinner->setValue(f->getValue());
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);

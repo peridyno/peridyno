@@ -33,6 +33,12 @@ namespace dyno
 		PolygonSet();
 		~PolygonSet() override;
 
+		/**
+		 * @brief initialize polygon indices
+		 */
+		void setPolygons(const CArrayList<uint>& indices);
+		void setPolygons(const DArrayList<uint>& indices);
+
 		void copyFrom(PolygonSet<TDataType>& polygons);
 
 		bool isEmpty() override;
@@ -43,9 +49,9 @@ namespace dyno
 		void extractEdgeSet(EdgeSet<TDataType>& es);
 
 		/**
-		 * @brief convert all polygons to triangles and store into one TriangleSet
+		 * @brief turn all polygons into triangles and store into one TriangleSet
 		 */
-		void extractTriangleSet(TriangleSet<TDataType>& ts);
+		void turnIntoTriangleSet(TriangleSet<TDataType>& ts);
 
 	protected:
 		void updateTopology() override;

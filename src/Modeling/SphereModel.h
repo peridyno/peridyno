@@ -12,12 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Revision history:
+ * 
+ * 2024-02-03: replace TriangleSet with PolygonSet as the major state;
  */
 
 #pragma once
 #include "Node/ParametricModel.h"
 
 #include "Topology/TriangleSet.h"
+#include "Topology/PolygonSet.h"
 
 namespace dyno
 {
@@ -41,21 +46,21 @@ namespace dyno
 
 		DEF_VAR(Real, Radius, 1, "Sphere radius");
 
-		DECLARE_ENUM(SphereMode,
-			Theta = 0,
-			RowAndColumns = 1);
+		DECLARE_ENUM(SphereType,
+			Standard = 0,
+			Icosahedron = 1);
 
-		DEF_ENUM(SphereMode, SphereMode, SphereMode::Theta, "ScaleMode");
+		DEF_ENUM(SphereType, Type, SphereType::Standard, "Sphere type");
 
-		DEF_VAR(Real, Theta, 0.15, "Angle");
+		DEF_VAR(unsigned, Latitude, 32, "Latitude");
+
+		DEF_VAR(unsigned, Longitude, 32, "Longitude");
+
+		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
-
-		DEF_VAR(unsigned, Columns, 50, "Sphere Columns");
-
-		DEF_VAR(unsigned, Row, 50, "Sphere Row");
 
 	protected:
 		void resetStates() override;

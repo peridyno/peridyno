@@ -17,6 +17,18 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void PolygonSet<TDataType>::setPolygons(const CArrayList<uint>& indices)
+	{
+		mPolygonIndex.assign(indices);
+	}
+
+	template<typename TDataType>
+	void PolygonSet<TDataType>::setPolygons(const DArrayList<uint>& indices)
+	{
+		mPolygonIndex.assign(indices);
+	}
+
+	template<typename TDataType>
 	void PolygonSet<TDataType>::copyFrom(PolygonSet<TDataType>& polygons)
 	{
 		PointSet<TDataType>::copyFrom(polygons);
@@ -139,7 +151,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PolygonSet<TDataType>::extractTriangleSet(TriangleSet<TDataType>& ts)
+	void PolygonSet<TDataType>::turnIntoTriangleSet(TriangleSet<TDataType>& ts)
 	{
 		ts.clear();
 

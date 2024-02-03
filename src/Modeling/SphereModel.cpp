@@ -6,6 +6,8 @@
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
 
+#include "Mapping/Extract.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -14,12 +16,12 @@ namespace dyno
 	{
 		this->varRadius()->setRange(0.001f, 100.0f);
 
-		this->varTheta()->setRange(0.001f, 1.5f);
-
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+
+		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
 		
-		this->varRow()->setRange(8, 10000);
-		this->varColumns()->setRange(8, 10000);
+		this->varLatitude()->setRange(2, 10000);
+		this->varLongitude()->setRange(3, 10000);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
@@ -28,23 +30,26 @@ namespace dyno
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
 		this->varRadius()->attach(callback);
-		this->varTheta()->attach(callback);
-		this->varRow()->attach(callback);
-		this->varSphereMode()->attach(callback);
+		this->varLatitude()->attach(callback);
+		this->varLongitude()->attach(callback);
+		this->varType()->attach(callback);
 
-		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
-		this->stateTriangleSet()->connect(glModule->inTriangleSet());
-		this->graphicsPipeline()->pushModule(glModule);
+		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
+		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
+		tsRender->setVisible(true);
+		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(tsRender);
 
+		auto exES = std::make_shared<ExtractEdgeSetFromPolygonSet<TDataType>>();
+		this->statePolygonSet()->connect(exES->inPolygonSet());
+		this->graphicsPipeline()->pushModule(exES);
 
-		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireframe);
+		auto esRender = std::make_shared<GLWireframeVisualModule>();
+		esRender->varBaseColor()->setValue(Color(0, 0, 0));
+		exES->outEdgeSet()->connect(esRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(esRender);
 
 		this->stateTriangleSet()->promoteOuput();
-
 	}
 
 	template<typename TDataType>
@@ -94,354 +99,150 @@ namespace dyno
 	template<typename TDataType>
 	void SphereModel<TDataType>::varChanged()
 	{
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto radius = this->varRadius()->getValue();
 
-		auto radius = this->varRadius()->getData();
-		auto theta = this->varTheta()->getData();
+		auto latitude = this->varLatitude()->getValue();
+		auto longitude = this->varLongitude()->getValue();
 
-		auto row = this->varRow()->getData();
-		auto columns = this->varColumns()->getData();
+		auto type = this->varType()->getValue();
 
-		auto mode = this->varSphereMode()->getData();
-
-		if (row <= 5) { printf("Invalid Row Values!\n"); return; }
-		if (columns <= 5) { printf("Invalid Column Values!\n");  return; }
-
-		//radius *= (sqrt(scale[0] * scale[0] + scale[1] * scale[1] + scale[2] * scale[2]));
-
+		//Setup a sphere primitive
 		TSphere3D<Real> ball;
 		ball.center = center;
 		ball.radius = radius;
 		this->outSphere()->setValue(ball);
 
-
-		auto triangleSet = this->stateTriangleSet()->getDataPtr();
+		auto polySet = this->statePolygonSet()->getDataPtr();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
 
-		if (mode == SphereMode::Theta) 
+		if (type == SphereType::Standard)
 		{
+			Real deltaTheta = M_PI / latitude;
+			Real deltaPhi = 2 * M_PI / longitude;
 
+			//Setup vertices
+			vertices.push_back(Coord(0, radius, 0));
 
-			Real PI = Real(M_PI);
-
-
-
-			Coord point(0.0f);
-
-			for (float d_alpha = -PI/2 + theta/2; d_alpha < PI/2; d_alpha += theta )
+			Real theta = 0;
+			for (uint i = 0; i < latitude - 1; i++)
 			{
-				point[1] = radius * sin(d_alpha);
+				theta += deltaTheta;
 
-				for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta )
+				Real phi = 0;
+				for (uint j = 0; j < longitude; j++)
 				{
-					point[0] = (cos(d_alpha) * radius) * sin(d_beta);
-					point[2] = (cos(d_alpha) * radius) * cos(d_beta);
-					vertices.push_back(point);
+					phi += deltaPhi;
 
-				}
+					Real y = radius * std::cos(theta);
+					Real x = (std::sin(theta) * radius) * std::sin(phi);
+					Real z = (std::sin(theta) * radius) * std::cos(phi);
 
-			}
-
-			vertices.push_back(Coord(0, -radius , 0));
-			vertices.push_back(Coord(0, radius , 0));
-
-
-			int face_id = 0;
-			for (float d_alpha = -PI / 2 + theta/2; d_alpha < PI / 2; d_alpha += theta)
-			{
-
-
-				for (float d_beta = 0.0f; d_beta < 2 * PI; d_beta += theta)
-				{
-					if ((d_beta + theta - 2 * PI < EPSILON)&&(d_alpha + theta < PI / 2))
-					{
-						int cd = 2 * PI / theta;
-						triangle.push_back(TopologyModule::Triangle(face_id, face_id+1, face_id + cd + 1));
-					}
-					else if((d_beta + theta - 2 * PI >= EPSILON) && (d_alpha + theta < PI / 2))
-					{
-						int cd = 2 * PI / theta;
-						triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd , face_id + cd + 1));
-					}
-					else if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha + theta >= PI / 2))
-					{
-						triangle.push_back(TopologyModule::Triangle(face_id, face_id + 1, vertices.size() - 1));
-					}
-					else if ((d_beta + theta - 2 * PI >= EPSILON) && (d_alpha + theta >= PI / 2))
-					{
-						int cd = 2 * PI / theta;
-						triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, vertices.size() - 1));
-					}
-
-
-
-					if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha - theta + PI / 2 > EPSILON ))
-					{
-						int cd = 2 * PI / theta;
-						triangle.push_back(TopologyModule::Triangle(face_id, face_id - cd, face_id + 1));
-					}
-					else if ((d_beta + theta - 2 * PI > EPSILON) && (d_alpha - theta + PI / 2 > EPSILON))
-					{
-						int cd = 2 * PI / theta;
-						triangle.push_back(TopologyModule::Triangle(face_id, face_id - 2 * cd - 1, face_id - cd));
-					}
-					else if ((d_beta + theta - 2 * PI < EPSILON) && (d_alpha - theta + PI / 2 < EPSILON))
-					{
-						triangle.push_back(TopologyModule::Triangle(face_id, vertices.size() - 2, face_id + 1));
-					}
-					else if ((d_beta + theta - 2 * PI >= EPSILON) && (d_alpha - theta + PI / 2 < EPSILON))
-					{
-						int cd = 2 * PI / theta;
-						triangle.push_back(TopologyModule::Triangle(face_id, vertices.size() - 2, face_id - cd));
-					}
-
-					face_id++;
-				}
-			}
-		}
-
-
-//RowAndColumns
-		else if (mode == SphereMode::RowAndColumns)
-		{
-			vertices.clear();
-			Real PI = 3.1415926535;
-
-			//std::cout.setf(std::ios::fixed);
-			//std::cout.precision(2);
-			uint counter = 0;
-			Coord Location;
-			float angle = PI / 180 * 360 / columns;
-			float temp_angle = angle;
-			float x, y, z;
-			float Theta_y = PI / 180 * 360 / (2 * (row - 1));
-			float temp_Theta = Theta_y;
-
-			float ThetaValue = 360 / (2 * (row - 1));
-			float temp_ThetaValue;
-			float test = PI / 180 * 30;
-
-			int forNum;
-			if (row % 2 == 0) { forNum = (row - 2) / 2; }
-			else { forNum = (row - 1) / 2; }
-
-			for (int i = 0; i < forNum; i++)
-			{
-				temp_Theta = i * Theta_y;
-				temp_ThetaValue = i * ThetaValue;
-
-				if (row % 2 == 0) 
-				{
-					temp_Theta = i * Theta_y + Theta_y / 2;
-					temp_ThetaValue = i * ThetaValue + ThetaValue / 2;
-					if (temp_ThetaValue >= 0 && temp_ThetaValue <= 90)
-					{
-						y = sin(temp_Theta) * radius;
-					}
-					else if (temp_ThetaValue >= 90 && temp_ThetaValue <= 180)
-					{
-
-					}
-					else
-					{
-						break;
-					}
-
-
-				}
-				else
-				{
-					temp_Theta = i * Theta_y;
-					temp_ThetaValue = i * ThetaValue;
-					if (temp_ThetaValue >= 0 && temp_ThetaValue <= 90)
-					{
-						y = sin(temp_Theta) * radius;
-					}
-					else if (temp_ThetaValue >= 90 && temp_ThetaValue <= 180)
-					{
-					}
-					else
-					{
-						break;
-					}
-				}
-
-
-				for (int k = 0; k < columns; k++)
-				{
-					temp_angle = k * angle;
-					x = sin(temp_angle) * abs(radius * cos(temp_Theta));
-
-					z = cos(temp_angle) * abs(radius * cos(temp_Theta));
 					vertices.push_back(Coord(x, y, z));
 				}
-
 			}
 
-			int DownPtNum = vertices.size();
-			for (int i = 0; i < DownPtNum; i++)
-			{
-				if (vertices[i][1] != 0) { vertices.push_back(Coord(vertices[i][0], -vertices[i][1], vertices[i][2])); }
-			}
-
-
-			vertices.push_back(Coord(0, radius, 0));
 			vertices.push_back(Coord(0, -radius, 0));
-			
-			int pt_side_len = vertices.size();
 
+			//Setup polygon indices
+			uint numOfPolygon = latitude * longitude;
 
+			CArray<uint> counter(numOfPolygon);
 
-
-			//1.上半部分   （总点数/2）-1    
-			//   i,i + 1,i + columns
-			int fortriNum;
-			if (row % 2 == 0) { fortriNum = (row - 4) / 2; }
-			else { fortriNum = (row - 3) / 2; }
-			printf("fortrinum:%d\n", fortriNum);
-			for (int x = 0; x < fortriNum; x++)//(row - 2)
+			uint incre = 0;
+			for (uint j = 0; j < longitude; j++)
 			{
-				for (int i = 0; i < columns; i++)
-				{
-					int temp = x * columns;
-
-					if ((i+1) % columns == 0)
-					{
-						triangle.push_back(TopologyModule::Triangle(i + temp, i - (columns-1)+temp, i - (columns - 1) +  columns +temp ));
-						triangle.push_back(TopologyModule::Triangle(i - (columns - 1) + columns + temp,  i + columns + temp , i + temp));
-
-					}
-					else
-					{
-						triangle.push_back(TopologyModule::Triangle(i + temp, i + 1 + temp, i + columns + temp));
-						triangle.push_back(TopologyModule::Triangle(i + 1 + temp, i + columns + 1 + temp, i + columns + temp));
-					}
-					//端面
-					if (x == fortriNum - 1)
-					{
-						if ((i + 1) % columns != 0) 
-						{
-							triangle.push_back(TopologyModule::Triangle(i + temp + columns, i + temp + columns + 1, vertices.size() - 2));
-						}
-						else 
-						{
-							triangle.push_back(TopologyModule::Triangle(i + temp + columns, temp + columns, vertices.size() - 2));
-						}
-					}
-				}
-
-				//下半部分
-				
-				if (row % 2 == 0 | (row % 2 != 0 && x != fortriNum - 1))
-				{
-					for (int i = 0; i < columns; i++)
-					{
-						int temp = (x + fortriNum + 1) * columns;
-
-
-						if ((i + 1) % columns == 0)
-						{
-							triangle.push_back(TopologyModule::Triangle(i - (columns - 1) + columns + temp, i - (columns - 1) + temp, i + temp));
-							triangle.push_back(TopologyModule::Triangle(i + temp, i + columns + temp, i + 1  + temp));
-							//std::cout << i + temp << "," << x * columns + temp << "," << (x + 1) * columns + temp << std::endl;
-
-						}
-						else
-						{
-							triangle.push_back(TopologyModule::Triangle(i + columns + temp, i + 1 + temp, i + temp));
-							triangle.push_back(TopologyModule::Triangle(i + columns + temp, i + columns + 1 + temp, i + 1 + temp));
-						}
-						//端面
-						if (x == fortriNum - 1)
-						{
-							if ((i + 1) % columns != 0)
-							{
-								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, i + temp + columns + 1, i + temp + columns));
-							}
-							else
-							{
-								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, temp + columns,i + temp + columns));
-							}
-						}
-					}
-				
-				}
-				else if (row % 2 != 0 && x == fortriNum - 1)
-				{
-					for (int i = 0; i < columns; i++)
-					{
-						int temp = (x + fortriNum) * columns;
-						if (x == fortriNum - 1)
-						{
-							if ((i + 1) % columns != 0)
-							{
-								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, i + temp + columns + 1, i + temp + columns));
-							}
-							else
-							{
-								triangle.push_back(TopologyModule::Triangle(vertices.size() - 1, temp + columns, i + temp + columns));
-							}
-						}
-					}
-				}
-				
-
+				counter[incre] = 3;
+				incre++;
 			}
-			//中段连接处
-			printf("columns:%d\n", columns);
 
-			for (int i = 0; i < columns; i++)
+			for (uint i = 0; i < latitude - 2; i++)
 			{
-				int temp = (fortriNum + 1) * columns;
-				if ((i + 1) % columns == 0)
+				for (uint j = 0; j < longitude; j++)
 				{
-					triangle.push_back(TopologyModule::Triangle(temp + i, i - columns + 1, i));
-					triangle.push_back(TopologyModule::Triangle(temp + i - columns + 1, i - columns + 1, temp + i));
-				}
-				else
-				{
-					triangle.push_back(TopologyModule::Triangle(temp + i, i + 1, i));
-					triangle.push_back(TopologyModule::Triangle(temp + 1 + i, i + 1, temp + i));
-
+					counter[incre] = 4;
+					incre++;
 				}
 			}
+
+			for (uint j = 0; j < longitude; j++)
+			{
+				counter[incre] = 3;
+				incre++;
+			}
+
+			CArrayList<uint> polygonIndices;
+			polygonIndices.resize(counter);
+
+			incre = 0;
+			uint offset = 1;
+			for (uint j = 0; j < longitude; j++)
+			{
+				auto& index = polygonIndices[incre];
+				index.insert(0);
+				index.insert(offset + j);
+				index.insert(offset + (j + 1) % longitude);
+
+				incre++;
+			}
+
+			for (uint i = 0; i < latitude - 2; i++)
+			{
+				for (uint j = 0; j < longitude; j++)
+				{
+					auto& index = polygonIndices[incre];
+					index.insert(offset + j);
+					index.insert(offset + j + longitude);
+					index.insert(offset + (j + 1) % longitude + longitude);
+					index.insert(offset + (j + 1) % longitude);
+
+					incre++;
+				}
+				offset += longitude;
+			}
+
+			for (uint j = 0; j < longitude; j++)
+			{
+				auto& index = polygonIndices[incre];
+				index.insert(offset + j);
+				index.insert(vertices.size() - 1);
+				index.insert(offset + (j + 1) % longitude);
+
+				incre++;
+			}
+
+			//Apply transformation
+			Quat<Real> q = computeQuaternion();
+
+			auto RV = [&](const Coord& v)->Coord {
+				return center + q.rotate(v - center);
+			};
+
+			int numpt = vertices.size();
+
+			for (int i = 0; i < numpt; i++) {
+				vertices[i] = RV(vertices[i] * scale + RV(center));
+			}
+
+			polySet->setPoints(vertices);
+			polySet->setPolygons(polygonIndices);
+			polySet->update();
+
+			polygonIndices.clear();
 		}
-
-		//变换
-
-		//Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180, Coord(1, 0, 0))
-		//	* Quat<Real>(M_PI * rot[1] / 180, Coord(0, 1, 0))
-		//	* Quat<Real>(M_PI * rot[2] / 180, Coord(0, 0, 1));
-		// q.normalize();
-
-		Quat<Real> q = computeQuaternion();
-
-
-		auto RV = [&](const Coord& v)->Coord {
-			return center + q.rotate(v - center);
-		};
-
-		int numpt = vertices.size();
-
-		for (int i = 0; i < numpt; i++)
+		else if(type == SphereType::Icosahedron)
 		{
-
-			vertices[i] = RV(vertices[i] * scale + RV(center));
+			//TODO: implementation
 		}
-		triangleSet->setPoints(vertices);
-		
-		triangleSet->setTriangles(triangle);
 
-		triangleSet->update();
+		auto& ts = this->stateTriangleSet()->getData();
+		polySet->turnIntoTriangleSet(ts);
 
 		vertices.clear();
-		triangle.clear();
-
 	}
 
 
