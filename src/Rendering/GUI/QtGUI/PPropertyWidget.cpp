@@ -315,7 +315,7 @@ namespace dyno
 		if (node != nullptr) 
 		{
 			emit nodeUpdated(node);
-			printf("updatecontent\n");
+
 		}
 
 		auto module = std::dynamic_pointer_cast<Module>(mSeleted);

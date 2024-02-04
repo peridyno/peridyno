@@ -112,16 +112,16 @@ namespace dyno
 	public:
 		static SceneGraph& getInstance();
 
-		inline void setTotalTime(float t) { mMaxTime = t; tempUpdateVar(); }
+		inline void setTotalTime(float t) { mMaxTime = t; UpdateVar(); }
 		inline float getTotalTime() { return mMaxTime; }
 
-		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; tempUpdateVar();}
+		inline void setFrameRate(float frameRate) { mFrameRate = frameRate; UpdateVar();}
 		inline float getFrameRate() { return mFrameRate; }
 		inline float getTimeCostPerFrame() { return mFrameCost; }
 		inline float getFrameInterval() { return 1.0f / mFrameRate; }
 
 		inline int getFrameNumber() { return mFrameNumber; }
-		inline void setFrameNumber(int n) { mFrameNumber = n;  tempUpdateVar();}
+		inline void setFrameNumber(int n) { mFrameNumber = n;  UpdateVar();}
 		
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
@@ -227,46 +227,27 @@ namespace dyno
 			//mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
 
-			tempUpdateVar();
+			UpdateVar();
 			
-			auto callback = std::make_shared<FCallBackFunc>(std::bind(&SceneGraph::tempUpdateData, this));
+			auto callback = std::make_shared<FCallBackFunc>(std::bind(&SceneGraph::UpdateField, this));
 			this->varGravity()->attach(callback);
 			this->varLowerBound()->attach(callback);
 			this->varUpperBound()->attach(callback);	
 		};
 
 
-		void tempUpdateVar() 
+		void UpdateVar()
 		{
-			printf("tempUpdataVar\n");
-
 			this->varGravity()->setValue(mGravity);
 			this->varLowerBound()->setValue(mLowerBound);
 			this->varUpperBound()->setValue(mUpperBound);
-			
-
-			auto g = this->varGravity()->getValue();
-			auto LB = this->varLowerBound()->getValue();
-			auto UB = this->varUpperBound()->getValue();
-
-			printf("var* mGravity: %f, %f, %f\n", g[0], g[1], g[2]);
-			printf("var* mLowerBound: %f, %f, %f\n", LB[0], LB[1], LB[2]);
-			printf("var* mUpperBound: %f, %f, %f\n", UB[0], UB[1], UB[2]);
-
 		}
 
-		void tempUpdateData()
+		void UpdateField()
 		{
-			printf("tempUpdataData\n");
-
 			mGravity = this->varGravity()->getValue();
 			mLowerBound = this->varLowerBound()->getValue();
 			mUpperBound = this->varUpperBound()->getValue();
-
-			printf("mGravity: %f, %f, %f\n", mGravity[0], mGravity[1], mGravity[2]);
-			printf("mLowerBound: %f, %f, %f\n", mLowerBound[0], mLowerBound[1], mLowerBound[2]);
-			printf("mUpperBound: %f, %f, %f\n", mUpperBound[0], mUpperBound[1], mUpperBound[2]);
-
 		}
 
 		/**

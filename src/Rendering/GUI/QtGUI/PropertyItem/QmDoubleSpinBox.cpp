@@ -29,14 +29,11 @@ namespace dyno
 
 	void mDoubleSpinBox::LineEditStart()
 	{
-		printf("Start\n");
 		return;
 	}
 
 	void mDoubleSpinBox::LineEditFinished(double v) 
 	{
-		printf("finished\n");
-
 		realValue = v;
 		this->setValue(realValue);
 
@@ -81,7 +78,6 @@ namespace dyno
 	{
 		this->setRealValue(v);
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
-		printf("setRealValue++++++++++++++++++++++++++ %f\n", v);
 	}
 
 
