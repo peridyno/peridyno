@@ -100,7 +100,6 @@ namespace dyno
 		{
 
 			std::vector<FBase*>& fields = getEditor()->getSceneGraph()->getAllFields();
-			printf("updateData : %d\n", fields.size());
 
 			int i = 0;
 			int k = 0;
@@ -112,7 +111,6 @@ namespace dyno
 					{
 						if (var->getClassName() == std::string("FVar"))
 						{
-							printf("isFVar\n");
 
 							//this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
 							QWidget* fw = mPPropertyWidget->createFieldWidget(var);
@@ -120,7 +118,7 @@ namespace dyno
 								//this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 								getScrollLayout()->addWidget(fw, i, 0);
 								i++;
-								printf("addWidget\n");
+
 							}
 						}
 					}

@@ -308,7 +308,7 @@ namespace dyno
 		mFrameNumber = 0;
 
 		mSync.unlock();
-		tempUpdateVar();//≤‚ ‘
+		
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
@@ -318,7 +318,7 @@ namespace dyno
 		this->traverseForward<ResetAct>(node);
 
 		mSync.unlock();
-		tempUpdateVar();//≤‚ ‘
+
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
