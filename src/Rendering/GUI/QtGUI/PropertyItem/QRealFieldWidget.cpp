@@ -54,7 +54,7 @@ namespace dyno
 
 		FormatFieldWidgetName(field->getObjectName());
 
-		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(ModifyValue(double)));
+		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(ModifyValueAndUpdate(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 
