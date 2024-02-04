@@ -24,8 +24,8 @@ void main(void) {
 
 	vs_out.color = uBaseColor;
 
-	// add a small offset to z so lines are drawn overlay on surface
-	if (uEdgeMode==0) cameraPos.z += 0.003;
-
 	gl_Position = uRenderParams.proj * cameraPos;  
+	
+	// add a small offset to z so lines are drawn overlay on surface
+	if (uEdgeMode==0) gl_Position.z -= 0.00003;
 }
