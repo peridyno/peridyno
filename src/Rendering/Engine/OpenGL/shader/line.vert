@@ -13,7 +13,7 @@ layout(location = 0) out VertexData
 	int  instanceID;	// not used for this type
 } vs_out;
 
-// we treat color as per-vertex
+layout(location = 0) uniform int  uEdgeMode;
 layout(location = 2) uniform vec3 uBaseColor;
 
 void main(void) {
@@ -23,6 +23,9 @@ void main(void) {
 	vs_out.position = cameraPos.xyz;
 
 	vs_out.color = uBaseColor;
+
+	// add a small offset to z so lines are drawn overlay on surface
+	if (uEdgeMode==0) cameraPos.z += 0.003;
 
 	gl_Position = uRenderParams.proj * cameraPos;  
 }
