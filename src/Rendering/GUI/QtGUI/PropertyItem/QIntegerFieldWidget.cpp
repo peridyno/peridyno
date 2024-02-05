@@ -36,6 +36,7 @@ namespace dyno
 
 		mSpinBox* spinner = new mSpinBox;
 		spinner->setRange(field->getMin(), field->getMax());
+		printf(field->getObjectName().c_str());
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
@@ -79,6 +80,7 @@ namespace dyno
 		spinner->setMaximum(1000000);
 		spinner->setFixedWidth(100);
 		spinner->setValue(f->getValue());
+		spinner->setRange(field->getMin(), field->getMax());
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
