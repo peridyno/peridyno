@@ -45,9 +45,9 @@ namespace dyno
 
 		DEF_VAR(unsigned, EndSegment, 3, "Cylinder EndSegment");
 
-		DEF_VAR(Real, Radius, 0.6, "Cylinder radius");
+		DEF_VAR(Real, Radius, 0.5, "Cylinder radius");
 
-		DEF_VAR(Real, Height, 0.9, "Cylinder Height");
+		DEF_VAR(Real, Height, 1.0, "Cylinder Height");
 
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 

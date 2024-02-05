@@ -13,11 +13,11 @@ namespace dyno
 		: ParametricModel<TDataType>()
 	{
 
-		this->varRow()->setRange(1, 50);
-		this->varColumns()->setRange(3, 50);
+		this->varRow()->setRange(1, 500);
+		this->varColumns()->setRange(3, 500);
 		this->varRadius()->setRange(0.001f, 20.0f);
 		this->varHeight()->setRange(0.001f, 20.0f);
-		this->varEndSegment()->setRange(2, 39);
+		this->varEndSegment()->setRange(0, 500);
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
