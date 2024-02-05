@@ -19,6 +19,7 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "Topology/PolygonSet.h"
 
 namespace dyno
 {
@@ -48,9 +49,14 @@ namespace dyno
 
 		DEF_VAR(Real, Height, 0.9, "Cylinder Height");
 
+		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
+
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
+
+
+
 
 	protected:
 		void resetStates() override;
