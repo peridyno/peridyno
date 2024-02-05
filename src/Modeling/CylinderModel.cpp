@@ -13,10 +13,10 @@ namespace dyno
 		: ParametricModel<TDataType>()
 	{
 
-		this->varRow()->setRange(2, 50);
+		this->varRow()->setRange(1, 50);
 		this->varColumns()->setRange(3, 50);
-		this->varRadius()->setRange(0.001f, 100.0f);
-		this->varHeight()->setRange(0.001f, 100.0f);
+		this->varRadius()->setRange(0.001f, 20.0f);
+		this->varHeight()->setRange(0.001f, 20.0f);
 		this->varEndSegment()->setRange(2, 39);
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
@@ -146,15 +146,16 @@ namespace dyno
 		CArray<uint> counter(numOfPolygon);
 
 		uint incre = 0;
+		uint endQuadNum = ((int(end_segment) - 1) * int(columns) < 0 ? 0 : (int(end_segment) - 1) * int(columns));
 
-		uint QuadNum = columns * row + 2 * ((end_segment - 1) * columns);
+		uint QuadNum = columns * row + 2 * endQuadNum;
 		for (uint j = 0; j < QuadNum; j++)
 		{
 			counter[incre] = 4;
 			incre++;
 		}
 
-		uint TriangleNum = columns * 2;
+		uint TriangleNum = (int(end_segment) - 1) < 0 ? 0 : columns * 2;
 		for (uint j = 0; j < TriangleNum; j++)
 		{
 			counter[incre] = 3;
@@ -191,89 +192,93 @@ namespace dyno
 		}
 
 		//Top
-		uint sidePtNum = columns * row;
-		for (uint i = 0; i < columns; i++)
+		if (end_segment > 0) 
 		{
-			for (uint j = 0; j < end_segment - 1; j++)
+			uint sidePtNum = columns * row;
+			for (uint i = 0; i < columns; i++)
 			{
-				auto& index = polygonIndices[incre];
-
-				uint p1 = i + j * columns + (sidePtNum);
-				uint p2 = (i + 1) % columns + j * columns + (sidePtNum);
-				uint p3 = (i + 1) % columns + j * columns + columns + (sidePtNum);
-				uint p4 = i + j * columns + columns + (sidePtNum);
-
-				//printf("add Quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
-
-				index.insert(p1);
-				index.insert(p2);
-				index.insert(p3);
-				index.insert(p4);
-
-				incre++;
-			}
-		}
-
-		//Buttom
-		uint sideTopPtNum = incre;
-		for (uint i = 0; i < columns; i++)
-		{
-			for (uint j = 0; j < end_segment - 1; j++)
-			{
-				auto& index = polygonIndices[incre];
-
-				uint temp = sideTopPtNum;
-				if (j == 0) 
+				for (uint j = 0; j < end_segment - 1; j++)
 				{
-					temp = 0;
+					auto& index = polygonIndices[incre];
+
+					uint p1 = i + j * columns + (sidePtNum);
+					uint p2 = (i + 1) % columns + j * columns + (sidePtNum);
+					uint p3 = (i + 1) % columns + j * columns + columns + (sidePtNum);
+					uint p4 = i + j * columns + columns + (sidePtNum);
+
+					//printf("add Quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
+
+					index.insert(p1);
+					index.insert(p2);
+					index.insert(p3);
+					index.insert(p4);
+
+					incre++;
 				}
+			}
 
-				uint p1 = i + j * columns + (temp);
-				uint p2 = (i + 1) % columns + j * columns + (temp);
-				uint p3 = (i + 1) % columns + j * columns + columns + (sideTopPtNum);
-				uint p4 = i + j * columns + columns + (sideTopPtNum);
+			//Buttom
+			uint sideTopPtNum = incre;
+			for (uint i = 0; i < columns; i++)
+			{
+				for (uint j = 0; j < end_segment - 1; j++)
+				{
+					auto& index = polygonIndices[incre];
 
-				//printf("add quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
+					uint temp = sideTopPtNum;
+					if (j == 0)
+					{
+						temp = 0;
+					}
 
+					uint p1 = i + j * columns + (temp);
+					uint p2 = (i + 1) % columns + j * columns + (temp);
+					uint p3 = (i + 1) % columns + j * columns + columns + (sideTopPtNum);
+					uint p4 = i + j * columns + columns + (sideTopPtNum);
+
+					//printf("add quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
+
+					index.insert(p1);
+					index.insert(p2);
+					index.insert(p3);
+					index.insert(p4);
+
+					incre++;
+				}
+			}
+			uint buttomPtNum = incre;
+
+			//TriangleTop
+			for (uint i = 0; i < columns; i++)
+			{
+				auto& index = polygonIndices[incre];
+				uint p1 = sideTopPtNum + i;
+				uint p2 = sideTopPtNum + (i + 1) % columns;
+				uint p3 = topCenter;
+				//printf("add Triangle: %d - %d  %d  %d \n", incre, p1, p2, p3);
 				index.insert(p1);
 				index.insert(p2);
 				index.insert(p3);
-				index.insert(p4);
+
+				incre++;
+			}
+
+			//TriangleButtom
+			for (uint i = 0; i < columns; i++)
+			{
+				auto& index = polygonIndices[incre];
+				uint p1 = buttomPtNum + i;
+				uint p2 = buttomPtNum + (i + 1) % columns;
+				uint p3 = buttomCenter;
+				//printf("add Triangle: %d - %d  %d  %d \n", incre, p1, p2, p3);
+				index.insert(p1);
+				index.insert(p2);
+				index.insert(p3);
 
 				incre++;
 			}
 		}
-		uint buttomPtNum = incre;
-
-		//TriangleTop
-		for (uint i = 0; i < columns; i++)
-		{
-			auto& index = polygonIndices[incre];
-			uint p1 = sideTopPtNum + i;
-			uint p2 = sideTopPtNum + (i + 1) % columns;
-			uint p3 = topCenter;
-			//printf("add Triangle: %d - %d  %d  %d \n", incre, p1, p2, p3);
-			index.insert(p1);
-			index.insert(p2);
-			index.insert(p3);
-
-			incre++;
-		}
-
-		//TriangleButtom
-		for (uint i = 0; i < columns; i++)
-		{
-			auto& index = polygonIndices[incre];
-			uint p1 = buttomPtNum + i;
-			uint p2 = buttomPtNum + (i + 1) % columns;
-			uint p3 = buttomCenter;
-			//printf("add Triangle: %d - %d  %d  %d \n", incre, p1, p2, p3);
-			index.insert(p1);
-			index.insert(p2);
-			index.insert(p3);
-
-			incre++;
-		}
+		
 
 
 		//TransformModel
