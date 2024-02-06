@@ -9,8 +9,10 @@ namespace dyno
 		template<typename TDataType>
 	OBJExporter<TDataType>::OBJExporter()
 	{
-
-
+		
+		this->varEndFrame()->setRange(0,999999999);
+		this->varFrameStep()->setRange(0, 999999999);
+		this->varStartFrame()->setRange(0, 999999999);
 
 	}
 
