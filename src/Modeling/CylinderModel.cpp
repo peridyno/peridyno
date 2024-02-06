@@ -50,11 +50,7 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(esRender);
  
 		this->stateTriangleSet()->promoteOuput();
-
-
-
-
-		this->stateTriangleSet()->promoteOuput();
+		this->statePolygonSet()->promoteOuput();
 	}
 
 	template<typename TDataType>

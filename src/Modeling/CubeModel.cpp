@@ -4,6 +4,8 @@
 #include "GLWireframeVisualModule.h"
 
 #include "Mapping/QuadSetToTriangleSet.h"
+#include "Mapping/Extract.h"
+
 
 namespace dyno
 {
@@ -14,23 +16,9 @@ namespace dyno
 		this->varLength()->setRange(0.01, 100.0f);
 		this->varSegments()->setRange(1, 100);
 
-		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
+		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-
-		auto q2t = std::make_shared<QuadSetToTriangleSet<TDataType>>();
-		this->stateQuadSet()->connect(q2t->inQuadSet());
-		this->graphicsPipeline()->pushModule(q2t);
-
-		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
-		q2t->outTriangleSet()->connect(glModule->inTriangleSet());
-		this->graphicsPipeline()->pushModule(glModule);
-
-		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateQuadSet()->connect(wireframe->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireframe);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CubeModel<TDataType>::varChanged, this));
 
@@ -41,8 +29,23 @@ namespace dyno
 		this->varSegments()->attach(callback);
 		this->varLength()->attach(callback);
 
-	 	this->stateQuadSet()->promoteOuput();
+		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
+		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
+		tsRender->setVisible(true);
+		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(tsRender);
+
+		auto exES = std::make_shared<ExtractEdgeSetFromPolygonSet<TDataType>>();
+		this->statePolygonSet()->connect(exES->inPolygonSet());
+		this->graphicsPipeline()->pushModule(exES);
+
+		auto esRender = std::make_shared<GLWireframeVisualModule>();
+		esRender->varBaseColor()->setValue(Color(0, 0, 0));
+		exES->outEdgeSet()->connect(esRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(esRender);
+
 		this->stateTriangleSet()->promoteOuput();
+		this->statePolygonSet()->promoteOuput();
 
 		//Do not export the node
 		this->allowExported(false);
@@ -92,6 +95,7 @@ namespace dyno
 
 		auto length = this->varLength()->getValue();
 
+
 		length[0] *= scale[0];
 		length[1] *= scale[1];
 		length[2] *= scale[2];
@@ -114,8 +118,7 @@ namespace dyno
 		uint nyz = 2 * (segments[1] + segments[2]);
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Quad> quads;
-		std::vector<TopologyModule::Triangle> triangles;
+		//std::vector<TopologyModule::Quad> quads;
 
 		Real dx = length[0] / segments[0];
 		Real dy = length[1] / segments[1];
@@ -128,6 +131,25 @@ namespace dyno
 		auto RV = [&](const Coord& v)->Coord {
 			return center + q.rotate(v - center);
 		};
+
+		uint numOfPolygon = 2 * (segments[0] * segments[1] + segments[0] * segments[2] + segments[1] * segments[2]);
+
+		CArray<uint> counter2(numOfPolygon);
+
+		uint incre = 0;
+
+		for (uint j = 0; j < numOfPolygon; j++)
+		{
+			counter2[incre] = 4;
+			incre++;
+		}
+		
+		CArrayList<uint> polygonIndices;
+		polygonIndices.resize(counter2);
+
+		incre = 0;
+		printf("QuadNum: %d",numOfPolygon);
+
 
 		int v0, v1, v2, v3;
 
@@ -199,10 +221,14 @@ namespace dyno
 					v2 = counter + t + nyz + 1;
 					v3 = counter + t + nyz;
 
-					quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+					auto& quads = polygonIndices[incre];
 
-					triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
-					triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
+					quads.insert(v0);
+					quads.insert(v1);
+					quads.insert(v2);
+					quads.insert(v3);
+
+					incre++;
 				}
 
 				v0 = counter + nyz - 1;
@@ -210,10 +236,15 @@ namespace dyno
 				v2 = counter + nyz;
 				v3 = counter + 2 * nyz - 1;
 
-				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+				auto& quads = polygonIndices[incre];
 
-				triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
-				triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
+				quads.insert(v0);
+				quads.insert(v1);
+				quads.insert(v2);
+				quads.insert(v3);
+
+				incre++;
+
 			}
 
 			counter += nyz;
@@ -242,10 +273,16 @@ namespace dyno
 				v2 = indexTop[Index2D(ny + 1, nz + 1)];
 				v3 = indexTop[Index2D(ny, nz + 1)];
 
-				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+				auto& quads = polygonIndices[incre];
 
-				triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
-				triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
+				quads.insert(v0);
+				quads.insert(v1);
+				quads.insert(v2);
+				quads.insert(v3);
+
+				incre++;
+
+
 			}
 		}
 
@@ -272,28 +309,36 @@ namespace dyno
 				v2 = indexBottom[Index2D(ny + 1, nz + 1)];
 				v3 = indexBottom[Index2D(ny, nz + 1)];
 
-				quads.push_back(TopologyModule::Quad(v3, v2, v1, v0));
+				auto& quads = polygonIndices[incre];
 
-				triangles.push_back(TopologyModule::Triangle(v2, v1, v0));
-				triangles.push_back(TopologyModule::Triangle(v3, v2, v0));
+				quads.insert(v0);
+				quads.insert(v1);
+				quads.insert(v2);
+				quads.insert(v3);
+
+				incre++;
+
+
 			}
 		}
 
-		auto qs = this->stateQuadSet()->getDataPtr();
-		qs->setPoints(vertices);
-		qs->setQuads(quads);
-		qs->update();
+		auto polySet = this->statePolygonSet()->getDataPtr();
 
-		auto ts = this->stateTriangleSet()->getDataPtr();
-		ts->setPoints(vertices);
-		ts->setTriangles(triangles);
-		ts->update();
+		polySet->setPoints(vertices);
+		polySet->setPolygons(polygonIndices);
+		polySet->update();
+
+		polygonIndices.clear();
+
+		auto& ts = this->stateTriangleSet()->getData();
+		polySet->turnIntoTriangleSet(ts);
+
+		vertices.clear();
 
 		indexTop.clear();
 		indexBottom.clear();
 		vertices.clear();
-		quads.clear();
-		triangles.clear();
+
 	}
 
 

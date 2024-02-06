@@ -18,7 +18,7 @@
 #include "Node/ParametricModel.h"
 
 #include "Topology/TriangleSet.h"
-#include "Topology/QuadSet.h"
+#include "Topology/PolygonSet.h"
 
 namespace dyno
 {
@@ -44,7 +44,7 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
+		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 
