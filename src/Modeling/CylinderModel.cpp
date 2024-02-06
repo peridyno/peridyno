@@ -48,9 +48,10 @@ namespace dyno
 		esRender->varBaseColor()->setValue(Color(0, 0, 0));
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
- 
-		this->stateTriangleSet()->promoteOuput();
+
 		this->statePolygonSet()->promoteOuput();
+		this->stateTriangleSet()->promoteOuput();
+
 	}
 
 	template<typename TDataType>

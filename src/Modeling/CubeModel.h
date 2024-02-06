@@ -42,9 +42,9 @@ namespace dyno
 
 		DEF_VAR(Vec3i, Segments, Vec3i(1, 1, 1), "");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
-
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
+
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 

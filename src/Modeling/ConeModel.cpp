@@ -2,6 +2,8 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
+#include "GLPointVisualModule.h"
+#include "Mapping/Extract.h"
 
 
 namespace dyno
@@ -14,20 +16,10 @@ namespace dyno
 		this->varColumns()->setRange(3, 50);
 		this->varRadius()->setRange(0.001f, 10.0f);
 		this->varHeight()->setRange(0.001f, 10.0f);
+		this->varEndSegment()->setRange(0,500);
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-
-		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
-		this->stateTriangleSet()->connect(glModule->inTriangleSet());
-		this->graphicsPipeline()->pushModule(glModule);
-
-		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireframe);
-		this->stateTriangleSet()->promoteOuput();
-
+		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ConeModel<TDataType>::varChanged, this));
 
@@ -40,6 +32,22 @@ namespace dyno
 		this->varRadius()->attach(callback);
 		this->varHeight()->attach(callback);
 
+		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
+		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
+		tsRender->setVisible(true);
+		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(tsRender);
+
+		auto exES = std::make_shared<ExtractEdgeSetFromPolygonSet<TDataType>>();
+		this->statePolygonSet()->connect(exES->inPolygonSet());
+		this->graphicsPipeline()->pushModule(exES);
+
+		auto esRender = std::make_shared<GLWireframeVisualModule>();
+		esRender->varBaseColor()->setValue(Color(0, 0, 0));
+		exES->outEdgeSet()->connect(esRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(esRender);
+
+		this->statePolygonSet()->promoteOuput();
 		this->stateTriangleSet()->promoteOuput();
 	}
 
@@ -60,79 +68,131 @@ namespace dyno
 		auto row = this->varRow()->getData();
 		auto columns = this->varColumns()->getData();
 		auto height = this->varHeight()->getData();
+		auto end_segment = this->varEndSegment()->getData();
 
-		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
-		Real PI = 3.1415926535;
 
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
-		int columns_i = int(columns);
-		int row_i = int(row);
-
-
-		uint counter = 0;
 		Coord Location;
-		Real angle = PI / 180 * 360 / columns_i;
+		Real angle = M_PI / 180 * 360 / columns;
 		Real temp_angle = angle;
 		Real x, y, z;
 
 
-		//以下是侧面点的构建
+		//Side
+		for (int k = row - 1; k >= 0; k--)
+		{
+			Real ratio = float(k) / float(row);
+			Real tempy = height * ratio;
+			Real tempRadius = radius * (1 - ratio);
 
+			for (int j = 0; j < columns; j++) {
 
-		for (int j = 0; j < columns; j++) {
+				temp_angle = j * angle;
 
-			temp_angle = j * angle;
+				Location = { sin(temp_angle) * tempRadius , tempy ,cos(temp_angle) * tempRadius };
 
-			x = sin(temp_angle) * radius;
-			y = 0;
-			z = cos(temp_angle) * radius;
-
-			vertices.push_back(Coord(x, y, z));
+				vertices.push_back(Location);
+			}
 		}
 
-
-		int pt_side_len = vertices.size();
-
-
-		//以下是底部及上部点的构建
-
-		for (int i = 1; i < row_i; i++)
+		for (int i = 1; i < end_segment; i++)
 		{
-			float offset = i / (float(row_i) - i);
+			Real ratio = float(i) / float(end_segment);
+			Real tempy = 0;
+			Real tempRadius = radius * (1 - ratio);
 
 			for (int p = 0; p < columns; p++)
 			{
-				Coord buttompt = { (vertices[p][0] + offset * 0) / (1 + offset), (vertices[p][1] + offset * 0) / (1 + offset), (vertices[p][2] + offset * 0) / (1 + offset) };
+				temp_angle = p * angle;
+
+				Coord buttompt = { sin(temp_angle) * tempRadius , tempy ,cos(temp_angle) * tempRadius };
 
 				vertices.push_back(buttompt);
 			}
-
 		}
 
-		for (int i = 1; i < row_i; i++)
-		{
-			float offset = i / (float(row_i) - i);
-
-			for (int p = 0; p < columns; p++)
-			{
-				int top_start = pt_side_len - columns + p;
-
-				Coord toppt = { (vertices[top_start][0] + offset * 0) / (1 + offset), (vertices[top_start][1] + offset * height) / (1 + offset), (vertices[top_start][2] + offset * 0) / (1 + offset) };
-
-				vertices.push_back(toppt);
-			}
-
-		}
-
-		//以下是底部圆心及上部圆心点的构建
 		vertices.push_back(Coord(0, 0, 0));
+		uint buttomCenter = vertices.size() - 1;
+		uint topCenter = vertices.size();
 		vertices.push_back(Coord(0, height, 0));
+		
+		uint numOfPolygon = columns * (row + end_segment);
+		CArray<uint> counter(numOfPolygon);
+		uint incre = 0;
+		uint QuadNum = columns * uint(int(row) - 1)+ columns * uint(int(end_segment) - 1);
+		for (uint j = 0; j < QuadNum; j++)
+		{
+			counter[incre] = 4;
+			incre++;
+		}
 
-		//变换
+		uint TriangleNum = uint( columns * 2);
 
+		for (uint j = 0; j < TriangleNum; j++)
+		{
+			counter[incre] = 3;
+			incre++;
+		}
+		CArrayList<uint> polygonIndices;
+		polygonIndices.resize(counter);
+
+		//Quad
+		incre = 0;
+		for (uint i = 0; i < columns; i++)
+		{
+			for (uint j = 0; j < (row + end_segment -2); j++)
+			{
+				auto& index = polygonIndices[incre];
+
+				uint p1 = i + j * columns;
+				uint p2 = (i + 1) % columns + j * columns;
+				uint p3 = (i + 1) % columns + j * columns + columns;
+				uint p4 = i + j * columns + columns;
+
+				index.insert(p1);
+				index.insert(p2);
+				index.insert(p3);
+				index.insert(p4);
+
+				incre++;
+			}
+		}
+
+		uint sidePtNum = incre;
+
+		//TriangleTop
+		for (uint i = 0; i < columns; i++)
+		{
+			auto& index = polygonIndices[incre];
+			uint p1 = sidePtNum + i;
+			uint p2 = sidePtNum + (i + 1) % columns;
+			uint p3 = buttomCenter;
+
+			index.insert(p1);
+			index.insert(p2);
+			index.insert(p3);
+
+			incre++;
+		}
+
+		//TriangleButtom
+		for (uint i = 0; i < columns; i++)
+		{
+			auto& index = polygonIndices[incre];
+			uint p1 = i;
+			uint p2 = (i + 1) % columns;
+			uint p3 = topCenter;
+			index.insert(p1);
+			index.insert(p2);
+			index.insert(p3);
+
+			incre++;
+		}
+
+		//Transform
 		Quat<Real> q = computeQuaternion();
 
 		q.normalize();
@@ -149,150 +209,22 @@ namespace dyno
 			vertices[i] = RV(vertices[i] * scale + RV(center));
 		}
 
+		auto polySet = this->statePolygonSet()->getDataPtr();
 
-		//以下是底面和顶面的构建
+		polySet->setPoints(vertices);
+		polySet->setPolygons(polygonIndices);
+		polySet->update();
 
-		//以下是底面和顶面的构建
-		//侧面原有的点数，pt_side_len,
+		auto& ts = this->stateTriangleSet()->getData();
+		polySet->turnIntoTriangleSet(ts);
+		
+		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
-		int pt_len = vertices.size() - 2;
-		int top_pt_len = vertices.size() - 2 - pt_side_len;
-		int addnum = 0;
+		std::cout<< triangleSet->getTriangles().size()<<std::endl;
+		//std::cout << polySet-> << std::endl;
 
-		for (int s = 0; s < row; s++)  //内部循环遍历每一圈每一列
-		{
-			int temp = 0;
-			//****************是否是外圈，是外圈使用四个点围成两个三角形*****************//
-			if (s != row_i - 1)
-			{
-				for (int i = 0; i < columns; i++)
-				{
-					//****************先判断是否是最外一圈，是的话与侧面序号相接*****************//
-					if (s == 0)
-					{
-						temp = i;  //i为0-columns的序号，“+ x * (pt_side_len - columns)”作为侧面序号的变化量，最终得出侧面 上、下一圈的序号
-						addnum = pt_side_len;
-					}
-					else
-					{
-						temp = pt_side_len + i + unsigned(s - 1) * columns;
-						addnum = columns;
-					}
-
-
-					//****************是否是最后一列，是的话首尾序号相接，防止连接点换行*****************//
-					if (i != columns - 1)
-					{
-						triangle.push_back(TopologyModule::Triangle(addnum + temp, temp + 1, temp));	//生成底面
-						triangle.push_back(TopologyModule::Triangle(addnum + temp, addnum + temp + 1, temp + 1));
-					}
-					else
-					{
-						triangle.push_back(TopologyModule::Triangle(addnum + temp, temp - columns + 1, temp));	//生成底面最后一列
-
-						if (s == 0)		triangle.push_back(TopologyModule::Triangle(addnum + temp, temp - columns + addnum + 1, temp - columns + 1));
-						else			triangle.push_back(TopologyModule::Triangle(addnum + temp, temp + 1, temp - columns + 1));
-
-					}
-
-				}
-			}
-			//****************是否是最内圈，是最内圈使用周长连接圆心*****************//
-			else
-			{
-
-				for (int z = 0; z < columns; z++)
-				{
-					temp = pt_side_len + z + unsigned(s - 1) * columns;
-					if (z != columns - 1)
-					{
-						triangle.push_back(TopologyModule::Triangle(temp + 1, temp, pt_len));	//生成底面最内圈
-
-					}
-					else
-					{
-						triangle.push_back(TopologyModule::Triangle(temp - columns + 1, temp, pt_len));	//生成底面最内圈最后一个面
-
-					}
-
-				}
-			}
-
-		}
-		//*************************上部************************//
-
-		for (int s = 0; s < row_i; s++)  //内部循环遍历每一圈每一列
-		{
-			int temp = 0;
-			//****************是否是外圈，是外圈使用四个点围成两个三角形*****************//
-			if (s != row_i - 1)
-			{
-				for (int i = 0; i < columns; i++)
-				{
-					//****************先判断是否是最外一圈，是的话与侧面序号相接*****************//
-					if (s == 0)
-					{
-						temp = i + pt_side_len - columns;  //i为0-columns的序号，“+ x * (pt_side_len - columns)”作为侧面序号的变化量，最终得出侧面 上、下一圈的序号
-						addnum = row_i * columns;
-					}
-					else
-					{
-						temp = pt_side_len + i + unsigned(s - 1) * columns + columns * (row_i - 1);
-						addnum = columns;
-					}
-					//****************是否是最后一列，是的话首尾序号相接，防止连接点换行*****************//
-					if (i != columns - 1)
-					{
-						triangle.push_back(TopologyModule::Triangle(temp, temp + 1, addnum + temp));	//生成底面
-						triangle.push_back(TopologyModule::Triangle(temp + 1, addnum + temp + 1, addnum + temp));
-					}
-					else
-					{
-						triangle.push_back(TopologyModule::Triangle(temp, temp - columns + 1, addnum + temp));	//生成底面最后一列
-
-						if (s == 0)		triangle.push_back(TopologyModule::Triangle(temp - columns + 1, temp - columns + addnum + 1, addnum + temp));
-						else			triangle.push_back(TopologyModule::Triangle(temp - columns + 1, temp + 1, addnum + temp));
-
-					}
-
-				}
-			}
-			//****************是否是最内圈，是最内圈使用周长连接圆心*****************//
-			else
-			{
-
-				for (int z = 0; z < columns; z++)
-				{
-					temp = pt_side_len + z + unsigned(s - 1) * columns + columns * (row_i - 1);
-					if (z != columns - 1)
-					{
-						triangle.push_back(TopologyModule::Triangle(pt_len + 1, temp, temp + 1));	//生成底面最内圈
-
-					}
-					else
-					{
-						triangle.push_back(TopologyModule::Triangle(pt_len + 1, temp, temp - columns + 1));	//生成底面最内圈最后一个面
-
-					}
-
-				}
-			}
-
-		}
-
-
-
-		triangleSet->setPoints(vertices);
-		triangleSet->setTriangles(triangle);
-
-		//		triangleSet->updateEdges();
-		//		triangleSet->updateVertexNormal();
-
-
-		triangleSet->update();
-
+		polygonIndices.clear();
 		vertices.clear();
-		triangle.clear();
 
 		//Setup the geometric primitive
 		TCone3D<Real> cone;

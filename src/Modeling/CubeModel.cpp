@@ -44,9 +44,9 @@ namespace dyno
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
-		this->stateTriangleSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();
-
+		this->stateTriangleSet()->promoteOuput();
+		
 		//Do not export the node
 		this->allowExported(false);
 	}

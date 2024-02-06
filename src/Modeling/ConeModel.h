@@ -18,6 +18,7 @@
 #include "Node/ParametricModel.h"
 
 #include "Topology/TriangleSet.h"
+#include "Topology/PolygonSet.h"
 
 namespace dyno
 {
@@ -39,9 +40,13 @@ namespace dyno
 
 		DEF_VAR(unsigned, Row, 4, "Cone Row");
 
+		DEF_VAR(unsigned, EndSegment, 3, "Cone EndSegment");
+
 		DEF_VAR(Real, Radius, 0.6, "Cone radius");
 
 		DEF_VAR(Real, Height, 0.9, "Cone Height");
+
+		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
