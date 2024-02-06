@@ -25,7 +25,7 @@ namespace dyno
 		auto doubleSpinBox = TypeInfo::cast<mDoubleSpinBox>(parent);
 		if (doubleSpinBox != nullptr)
 		{
-			printf("castto mDoubleSpinBox\n");
+
 			mDSpinBox = doubleSpinBox;
 			float power = 0.1;
 			for (int i = 0; i < 5; i++)
@@ -60,8 +60,7 @@ namespace dyno
 		if (mIntSpinBox != nullptr)
 		{
 			mISpinBox = mIntSpinBox;
-			printf("castto mDoubleSpinBox\n");
-
+			
 			int step[5] = {1,5,10,20,50};
 
 			for (int i = 0; i < 5; i++)
