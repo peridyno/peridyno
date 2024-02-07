@@ -321,6 +321,43 @@ namespace dyno
 
 	}
 
+	template<typename TDataType>
+	NBoundingBox CylinderModel<TDataType>::boundingBox()
+	{
+		auto center = this->varLocation()->getData();
+		auto rot = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto radius = this->varRadius()->getData();
+		auto height = this->varHeight()->getData();
+
+		Coord length(Coord(radius, height, radius));
+		length[0] *= scale[0];
+		length[1] *= scale[1];
+		length[2] *= scale[2];
+
+		Quat<Real> q = computeQuaternion();
+
+		q.normalize();
+
+		TOrientedBox3D<Real> box;
+		box.center = center;
+		box.u = q.rotate(Coord(1, 0, 0));
+		box.v = q.rotate(Coord(0, 1, 0));
+		box.w = q.rotate(Coord(0, 0, 1));
+		box.extent = length;
+
+		auto AABB = box.aabb();
+		auto& v0 = AABB.v0;
+		auto& v1 = AABB.v1;
+
+
+		NBoundingBox ret;
+		ret.lower = Vec3f(v0.x, v0.y, v0.z);
+		ret.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return ret;
+	}
 
 	DEFINE_CLASS(CylinderModel);
 }

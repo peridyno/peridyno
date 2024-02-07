@@ -56,7 +56,9 @@ namespace dyno
 		DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
 
+	public:
 
+		NBoundingBox boundingBox()override;
 
 	protected:
 		void resetStates() override;

@@ -52,8 +52,12 @@ namespace dyno
 
 		DEF_VAR_OUT(TCone3D<Real>, Cone, "");
 
+	public:
+		NBoundingBox boundingBox() override;
+
 	protected:
 		void resetStates() override;
+
 
 	private:
 		void varChanged();

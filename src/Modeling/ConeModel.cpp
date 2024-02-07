@@ -71,7 +71,6 @@ namespace dyno
 		auto end_segment = this->varEndSegment()->getData();
 
 
-
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
@@ -114,22 +113,36 @@ namespace dyno
 			}
 		}
 
-		vertices.push_back(Coord(0, 0, 0));
-		uint buttomCenter = vertices.size() - 1;
-		uint topCenter = vertices.size();
+
 		vertices.push_back(Coord(0, height, 0));
+		uint topCenter = vertices.size() - 1;
+		uint buttomCenter = vertices.size();
+
+		//if (end_segment > 0) 
+			vertices.push_back(Coord(0, 0, 0));
 		
+		uint realRow = (int(row) - 1 > 0) ? int(row) - 1 : 0;
+		uint realEndsegment = (int(end_segment) - 1 > 0) ? int(end_segment) - 1 : 0;
+
 		uint numOfPolygon = columns * (row + end_segment);
 		CArray<uint> counter(numOfPolygon);
 		uint incre = 0;
-		uint QuadNum = columns * uint(int(row) - 1)+ columns * uint(int(end_segment) - 1);
+
+		uint QuadNum = columns * realRow + columns * realEndsegment;
+		uint TriangleNum;
+		if(end_segment>0)
+			TriangleNum= uint(columns * 2);
+		else
+			TriangleNum = uint(columns);
+
+		printf("FaceNum: %d   QuadNum: %d  TriangleNum: %d \n", numOfPolygon, QuadNum, TriangleNum);
+
+
 		for (uint j = 0; j < QuadNum; j++)
 		{
 			counter[incre] = 4;
 			incre++;
 		}
-
-		uint TriangleNum = uint( columns * 2);
 
 		for (uint j = 0; j < TriangleNum; j++)
 		{
@@ -139,11 +152,16 @@ namespace dyno
 		CArrayList<uint> polygonIndices;
 		polygonIndices.resize(counter);
 
+		printf("FaceNum: %d   QuadNum: %d  TriangleNum: %d \n", numOfPolygon, QuadNum, TriangleNum);
+
 		//Quad
 		incre = 0;
+
+		printf("for: %d, %d, %d\n", realRow + realEndsegment, realRow, realEndsegment);
+
 		for (uint i = 0; i < columns; i++)
 		{
-			for (uint j = 0; j < (row + end_segment -2); j++)
+			for (uint j = 0; j < realRow + realEndsegment; j++)
 			{
 				auto& index = polygonIndices[incre];
 
@@ -157,28 +175,34 @@ namespace dyno
 				index.insert(p3);
 				index.insert(p4);
 
+				printf("add Quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
+
 				incre++;
 			}
 		}
 
 		uint sidePtNum = incre;
 
-		//TriangleTop
-		for (uint i = 0; i < columns; i++)
+		if (end_segment > 0)
 		{
-			auto& index = polygonIndices[incre];
-			uint p1 = sidePtNum + i;
-			uint p2 = sidePtNum + (i + 1) % columns;
-			uint p3 = buttomCenter;
+			//TriangleButtom
+			for (uint i = 0; i < columns; i++)
+			{
+				auto& index = polygonIndices[incre];
+				uint p1 = sidePtNum + i;
+				uint p2 = sidePtNum + (i + 1) % columns;
+				uint p3 = buttomCenter;
 
-			index.insert(p1);
-			index.insert(p2);
-			index.insert(p3);
+				index.insert(p1);
+				index.insert(p2);
+				index.insert(p3);
 
-			incre++;
+				printf("add tri: %d - %d  %d  %d \n", incre, p1, p2, p3);
+
+				incre++;
+			}
 		}
-
-		//TriangleButtom
+		//TriangleTop
 		for (uint i = 0; i < columns; i++)
 		{
 			auto& index = polygonIndices[incre];
@@ -205,7 +229,7 @@ namespace dyno
 
 		for (int i = 0; i < numpt; i++)
 		{
-			vertices[i][1] -= 1 * height / 3;
+			vertices[i][1] -= 1 * height / 2;
 			vertices[i] = RV(vertices[i] * scale + RV(center));
 		}
 
@@ -235,6 +259,46 @@ namespace dyno
 		cone.rotation = q;
 		this->outCone()->setValue(cone);
 	}
+
+	template<typename TDataType>
+	NBoundingBox ConeModel<TDataType>:: boundingBox() 
+	{
+		auto center = this->varLocation()->getData();
+		auto rot = this->varRotation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto radius = this->varRadius()->getData();
+		auto height = this->varHeight()->getData();
+
+		Coord length(Coord(radius, height, radius));
+		length[0] *= scale[0];
+		length[1] *= scale[1];
+		length[2] *= scale[2];
+
+		Quat<Real> q = computeQuaternion();
+
+		q.normalize();
+
+		TOrientedBox3D<Real> box;
+		box.center = center;
+		box.u = q.rotate(Coord(1, 0, 0));
+		box.v = q.rotate(Coord(0, 1, 0));
+		box.w = q.rotate(Coord(0, 0, 1));
+		box.extent = length;
+
+		auto AABB = box.aabb();
+		auto& v0 = AABB.v0;
+		auto& v1 = AABB.v1;
+
+
+		NBoundingBox ret;
+		ret.lower = Vec3f(v0.x, v0.y, v0.z);
+		ret.upper = Vec3f(v1.x, v1.y, v1.z);
+
+		return ret;
+	}
+
+
 
 	DEFINE_CLASS(ConeModel);
 }
