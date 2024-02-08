@@ -175,7 +175,6 @@ namespace dyno
 				index.insert(p3);
 				index.insert(p4);
 
-				printf("add Quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
 
 				incre++;
 			}
@@ -197,7 +196,6 @@ namespace dyno
 				index.insert(p2);
 				index.insert(p3);
 
-				printf("add tri: %d - %d  %d  %d \n", incre, p1, p2, p3);
 
 				incre++;
 			}
