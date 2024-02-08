@@ -203,7 +203,7 @@ namespace dyno
 					uint p3 = (i + 1) % columns + j * columns + columns + (sidePtNum);
 					uint p4 = i + j * columns + columns + (sidePtNum);
 
-					//printf("add Quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
+					printf("add Quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
 
 					index.insert(p1);
 					index.insert(p2);
@@ -233,7 +233,7 @@ namespace dyno
 					uint p3 = (i + 1) % columns + j * columns + columns + (sideTopPtNum);
 					uint p4 = i + j * columns + columns + (sideTopPtNum);
 
-					//printf("add quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
+					printf("add quad: %d - %d  %d  %d  %d \n", incre, p1, p2, p3, p4);
 
 					index.insert(p1);
 					index.insert(p2);
@@ -252,7 +252,7 @@ namespace dyno
 				uint p1 = sideTopPtNum + i;
 				uint p2 = sideTopPtNum + (i + 1) % columns;
 				uint p3 = topCenter;
-				//printf("add Triangle: %d - %d  %d  %d \n", incre, p1, p2, p3);
+				printf("add Triangle: %d - %d  %d  %d \n", incre, p1, p2, p3);
 				index.insert(p1);
 				index.insert(p2);
 				index.insert(p3);
@@ -261,6 +261,10 @@ namespace dyno
 			}
 
 			//TriangleButtom
+			if (end_segment == 1) 
+			{
+				buttomPtNum = 0;
+			}
 			for (uint i = 0; i < columns; i++)
 			{
 				auto& index = polygonIndices[incre];
