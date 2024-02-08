@@ -200,9 +200,9 @@ namespace dyno
 		spinner2->blockSignals(true);
 		spinner3->blockSignals(true);
 
-		spinner1->setRealValue(v1);
-		spinner2->setRealValue(v2);
-		spinner3->setRealValue(v3);
+		spinner1->ModifyValueAndUpdate(v1);
+		spinner2->ModifyValueAndUpdate(v2);
+		spinner3->ModifyValueAndUpdate(v3);
 
 		spinner1->blockSignals(false);
 		spinner2->blockSignals(false);
