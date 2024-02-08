@@ -135,7 +135,7 @@ namespace dyno
 		else
 			TriangleNum = uint(columns);
 
-		printf("FaceNum: %d   QuadNum: %d  TriangleNum: %d \n", numOfPolygon, QuadNum, TriangleNum);
+
 
 
 		for (uint j = 0; j < QuadNum; j++)
@@ -152,12 +152,12 @@ namespace dyno
 		CArrayList<uint> polygonIndices;
 		polygonIndices.resize(counter);
 
-		printf("FaceNum: %d   QuadNum: %d  TriangleNum: %d \n", numOfPolygon, QuadNum, TriangleNum);
+
 
 		//Quad
 		incre = 0;
 
-		printf("for: %d, %d, %d\n", realRow + realEndsegment, realRow, realEndsegment);
+		
 
 		for (uint i = 0; i < columns; i++)
 		{
@@ -244,8 +244,6 @@ namespace dyno
 		
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 
-		std::cout<< triangleSet->getTriangles().size()<<std::endl;
-		//std::cout << polySet-> << std::endl;
 
 		polygonIndices.clear();
 		vertices.clear();
