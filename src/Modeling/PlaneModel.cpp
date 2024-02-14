@@ -59,9 +59,9 @@ namespace dyno
 	template<typename TDataType>
 	NBoundingBox PlaneModel<TDataType>::boundingBox()
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
 		Coord length;
 		length[0] *= scale[0];

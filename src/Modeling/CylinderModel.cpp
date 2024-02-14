@@ -63,15 +63,15 @@ namespace dyno
 	template<typename TDataType>
 	void CylinderModel<TDataType>::varChanged() 
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getData();
-		auto row = this->varRow()->getData();
-		auto columns = this->varColumns()->getData();
-		auto height = this->varHeight()->getData();
-		auto end_segment = this->varEndSegment()->getData();
+		auto radius = this->varRadius()->getValue();
+		auto row = this->varRow()->getValue();
+		auto columns = this->varColumns()->getValue();
+		auto height = this->varHeight()->getValue();
+		auto end_segment = this->varEndSegment()->getValue();
 
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 		auto polySet = this->statePolygonSet()->getDataPtr();
