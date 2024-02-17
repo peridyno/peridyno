@@ -35,7 +35,7 @@ namespace dyno
 		name->setToolTip(str);
 
 		mSpinBox* spinner = new mSpinBox;
-		spinner->setRange(field->getMin(), field->getMax());
+		spinner->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
@@ -76,10 +76,9 @@ namespace dyno
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
 		mSpinBox* spinner = new mSpinBox;
-		spinner->setMaximum(1000000);
 		spinner->setFixedWidth(100);
 		spinner->setValue(f->getValue());
-		spinner->setRange(field->getMin(), field->getMax());
+		spinner->setRange(castMinimum<uint>(field->getMin()), castMaximum<uint>(field->getMax()));
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
