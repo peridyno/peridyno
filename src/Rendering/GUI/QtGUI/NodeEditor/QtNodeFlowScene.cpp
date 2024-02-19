@@ -166,29 +166,41 @@ namespace Qt
 						auto parSrc = fieldSrc->parent();
 						if (parSrc != nullptr)
 						{
-							Node* nodeSrc = dynamic_cast<Node*>(parSrc);
+							//To handle fields from node states or outputs
+							dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
 
-							auto outId = nodeSrc->objectId();
-							auto fieldsOut = nodeSrc->getOutputFields();
-
-							uint outFieldIndex = 0;
-							bool fieldFound = false;
-							for (auto f : fieldsOut)
+							//To handle fields that are exported from module outputs
+							if (nodeSrc == nullptr)
 							{
-								if (f == fieldSrc)
-								{
-									fieldFound = true;
-									break;
-								}
-								outFieldIndex++;
+								dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+								if (moduleSrc != nullptr)
+									nodeSrc = moduleSrc->getParentNode();
 							}
 
-							if (nodeSrc->canExported()) outFieldIndex++;
-
-							if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+							if (nodeSrc != nullptr)
 							{
-								auto outBlock = nodeMap[outId];
-								createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+								auto outId = nodeSrc->objectId();
+								auto fieldsOut = nodeSrc->getOutputFields();
+
+								uint outFieldIndex = 0;
+								bool fieldFound = false;
+								for (auto f : fieldsOut)
+								{
+									if (f == fieldSrc)
+									{
+										fieldFound = true;
+										break;
+									}
+									outFieldIndex++;
+								}
+
+								if (nodeSrc->canExported()) outFieldIndex++;
+
+								if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+								{
+									auto outBlock = nodeMap[outId];
+									createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+								}
 							}
 						}
 					}
