@@ -17,6 +17,7 @@
 #include "PointSet.h"
 #include "EdgeSet.h"
 #include "TriangleSet.h"
+#include "QuadSet.h"
 
 namespace dyno
 {
@@ -28,6 +29,7 @@ namespace dyno
 
 		typedef typename TopologyModule::Edge Edge;
 		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename TopologyModule::Quad Quad;
 
 	public:
 		PolygonSet();
@@ -47,6 +49,16 @@ namespace dyno
 		 * @brief extract and merge edges from all polygons into one EdgeSet
 		 */
 		void extractEdgeSet(EdgeSet<TDataType>& es);
+
+		/**
+		 * @brief extract all triangles
+		 */
+		void extractTriangleSet(TriangleSet<TDataType>& ts);
+
+		/**
+		 * @brief extract all quads
+		 */
+		void extractQuadSet(QuadSet<TDataType>& qs);
 
 		/**
 		 * @brief turn all polygons into triangles and store into one TriangleSet

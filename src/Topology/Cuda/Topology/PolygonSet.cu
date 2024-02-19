@@ -102,7 +102,7 @@ namespace dyno
 
 		DArray<Edge> edges(eNum);
 
-		//TODO: remove duplicates
+		//TODO: remove duplicative edges
 		cuExecute(polyNum,
 			PolygonSet_SetupEdgeIndices,
 			edges,
@@ -115,6 +115,139 @@ namespace dyno
 
 		radix.clear();
 		edges.clear();
+	}
+
+	__global__ void PolygonSet_ExtractTriangleNumber(
+		DArray<uint> counter,
+		DArrayList<uint> polygonIndices)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= counter.size()) return;
+
+		counter[tId] = polygonIndices[tId].size() == 3 ? 1 : 0;
+	}
+
+	template<typename Triangle>
+	__global__ void PolygonSet_ExtractTriangleIndices(
+		DArray<Triangle> triangles,
+		DArrayList<uint> polygonIndices,
+		DArray<uint> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= radix.size()) return;
+
+		uint offset = radix[tId];
+
+		auto& index = polygonIndices[tId];
+
+		if (index.size() == 3)
+		{
+			uint v0 = index[0];
+			uint v1 = index[1];
+			uint v2 = index[2];
+			triangles[offset] = Triangle(v0, v1, v2);
+		}
+	}
+
+	template<typename TDataType>
+	void PolygonSet<TDataType>::extractTriangleSet(TriangleSet<TDataType>& ts)
+	{
+		ts.clear();
+
+		uint polyNum = mPolygonIndex.size();
+
+		DArray<uint> radix(polyNum);
+
+		cuExecute(polyNum,
+			PolygonSet_ExtractTriangleNumber,
+			radix,
+			mPolygonIndex);
+
+		int tNum = thrust::reduce(thrust::device, radix.begin(), radix.begin() + radix.size());
+		thrust::exclusive_scan(thrust::device, radix.begin(), radix.begin() + radix.size(), radix.begin());
+
+		DArray<Triangle> triangleIndices(tNum);
+
+		//TODO: remove duplicative vertices
+		cuExecute(polyNum,
+			PolygonSet_ExtractTriangleIndices,
+			triangleIndices,
+			mPolygonIndex,
+			radix);
+
+		ts.setPoints(mCoords);
+		ts.setTriangles(triangleIndices);
+		ts.update();
+
+		radix.clear();
+		triangleIndices.clear();
+	}
+
+	__global__ void PolygonSet_ExtractQuadNumber(
+		DArray<uint> counter,
+		DArrayList<uint> polygonIndices)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= counter.size()) return;
+
+		counter[tId] = polygonIndices[tId].size() == 4 ? 1 : 0;
+	}
+
+	template<typename Quad>
+	__global__ void PolygonSet_ExtractQuadIndices(
+		DArray<Quad> quads,
+		DArrayList<uint> polygonIndices,
+		DArray<uint> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= radix.size()) return;
+
+		uint offset = radix[tId];
+
+		auto& index = polygonIndices[tId];
+
+		if (index.size() == 4)
+		{
+			uint v0 = index[0];
+			uint v1 = index[1];
+			uint v2 = index[2];
+			uint v3 = index[3];
+			quads[offset] = Quad(v0, v1, v2, v3);
+		}
+	}
+
+	template<typename TDataType>
+	void PolygonSet<TDataType>::extractQuadSet(QuadSet<TDataType>& qs)
+	{
+		qs.clear();
+
+		uint polyNum = mPolygonIndex.size();
+
+		DArray<uint> radix(polyNum);
+
+		cuExecute(polyNum,
+			PolygonSet_ExtractQuadNumber,
+			radix,
+			mPolygonIndex);
+
+		int tNum = thrust::reduce(thrust::device, radix.begin(), radix.begin() + radix.size());
+		thrust::exclusive_scan(thrust::device, radix.begin(), radix.begin() + radix.size(), radix.begin());
+
+		DArray<Quad> quadIndices(tNum);
+
+		//TODO: remove duplicative vertices
+		cuExecute(polyNum,
+			PolygonSet_ExtractQuadIndices,
+			quadIndices,
+			mPolygonIndex,
+			radix);
+
+		qs.setPoints(mCoords);
+		qs.setQuads(quadIndices);
+		qs.update();
+
+		radix.clear();
+		quadIndices.clear();
 	}
 
 	__global__ void PolygonSet_CountTriangleNumber(

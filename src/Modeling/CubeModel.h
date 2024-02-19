@@ -46,6 +46,8 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
+		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
+
 		DEF_VAR_OUT(TOrientedBox3D<Real>, Cube,  "");
 
 	protected:
