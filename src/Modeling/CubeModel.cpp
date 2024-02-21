@@ -151,8 +151,6 @@ namespace dyno
 		polygonIndices.resize(counter2);
 
 		incre = 0;
-		printf("QuadNum: %d",numOfPolygon);
-
 
 		int v0, v1, v2, v3;
 

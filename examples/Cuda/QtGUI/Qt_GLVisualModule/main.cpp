@@ -166,6 +166,11 @@ int main()
 	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
+
+	//Configure GLRenderEngine
+	auto renderEngine = app.renderWindow()->getRenderEngine();
+	renderEngine->showGround = false;
+
 	app.mainLoop();
 
 	return 0;
