@@ -15,8 +15,6 @@ namespace dyno
 	PositionBasedFluidModel<TDataType>::PositionBasedFluidModel()
 		: GroupModule()
 	{
-		m_smoothingLength.setValue(Real(0.006));
-
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
@@ -25,12 +23,13 @@ namespace dyno
 		this->pushModule(integrator);
 
 		auto nbrQuery =std::make_shared<NeighborPointQuery<TDataType>>();
-		m_smoothingLength.connect(nbrQuery->inRadius());
+		this->varSmoothingLength()->connect(nbrQuery->inRadius());
 		this->inPosition()->connect(nbrQuery->inPosition());
 		this->pushModule(nbrQuery);
 
 		auto density = std::make_shared<IterativeDensitySolver<TDataType>>();
-		m_smoothingLength.connect(density->inSmoothingLength());
+		this->varSamplingDistance()->connect(density->inSamplingDistance());
+		this->varSmoothingLength()->connect(density->inSmoothingLength());
 		this->inTimeStep()->connect(density->inTimeStep());
 		this->inPosition()->connect(density->inPosition());
 		this->inVelocity()->connect(density->inVelocity());
@@ -40,7 +39,7 @@ namespace dyno
 		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
 		viscosity->varViscosity()->setValue(Real(1.0));
 		this->inTimeStep()->connect(viscosity->inTimeStep());
-		m_smoothingLength.connect(viscosity->inSmoothingLength());
+		this->varSmoothingLength()->connect(viscosity->inSmoothingLength());
 		this->inPosition()->connect(viscosity->inPosition());
 		this->inVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());

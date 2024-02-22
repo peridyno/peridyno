@@ -129,7 +129,7 @@ namespace dyno {
 			this->resize(src.nx(), src.ny(), src.nz());
 		}
 
-		m_data.assign(src.m_data);
+		m_data.assign(src.m_data.begin(), src.m_data.end());
 	}
 
 	template<typename T>

@@ -31,7 +31,7 @@ namespace dyno
 		ParticleWriterABC();
 		virtual ~ParticleWriterABC();
 
-		void flush() override;
+		void output() override;
 
 	public:
 		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
