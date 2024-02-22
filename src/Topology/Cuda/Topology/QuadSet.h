@@ -108,7 +108,9 @@ namespace dyno
 		~QuadSet();
 
 		DArray<Quad>& getQuads() { return mQuads; }
+
 		void setQuads(std::vector<Quad>& quads);
+		void setQuads(DArray<Quad>& quads);
 
 		DArrayList<int>& getVertex2Quads();
 

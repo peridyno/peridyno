@@ -55,6 +55,7 @@ namespace dyno {
 
         mMainWindow = std::make_shared<PMainWindow>(this);
         mMainWindow->resize(width, height);
+        mMainWindow->show();
     }
 
     void QtApp::mainLoop()
@@ -65,8 +66,7 @@ namespace dyno {
 
         QString style = file.readAll();
         mQApp->setStyleSheet(style);
-
-        mMainWindow->show();
+       
         mQApp->exec();
     }
 

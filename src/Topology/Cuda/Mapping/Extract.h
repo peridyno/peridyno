@@ -17,6 +17,7 @@
 #include "Module/TopologyMapping.h"
 
 #include "Topology/TriangleSet.h"
+#include "Topology/QuadSet.h"
 #include "Topology/PolygonSet.h"
 
 namespace dyno
@@ -60,6 +61,28 @@ namespace dyno
 		DEF_INSTANCE_IN(PolygonSet<TDataType>, PolygonSet, "The input polygon set");
 
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "The output TriangleSet");
+
+	protected:
+		bool apply() override;
+	};
+
+	template<typename TDataType>
+	class ExtractQaudSetFromPolygonSet : public TopologyMapping
+	{
+		DECLARE_TCLASS(ExtractQaudSetFromPolygonSet, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		ExtractQaudSetFromPolygonSet();
+		~ExtractQaudSetFromPolygonSet() override;
+
+		inline std::string caption() override { return "Extract"; }
+
+	public:
+		DEF_INSTANCE_IN(PolygonSet<TDataType>, PolygonSet, "The input polygon set");
+
+		DEF_INSTANCE_OUT(QuadSet<TDataType>, QuadSet, "The output QuadSet");
 
 	protected:
 		bool apply() override;

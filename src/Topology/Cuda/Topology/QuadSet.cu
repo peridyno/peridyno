@@ -194,12 +194,14 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::setQuads(std::vector<Quad>& quads)
 	{
-		mQuads.resize(quads.size());
 		mQuads.assign(quads);
-
-		//this->updateTriangles();
 	}
 
+	template<typename TDataType>
+	void QuadSet<TDataType>::setQuads(DArray<Quad>& quads)
+	{
+		mQuads.assign(quads);
+	}
 
 	template<typename TDataType>
 	void QuadSet<TDataType>::copyFrom(QuadSet<TDataType>& quadSet)

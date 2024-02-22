@@ -48,6 +48,19 @@ namespace dyno
 	class ValueDialog;
 	class toggleLabel;
 
+	template<typename T>
+	T castMaximum(float v) {
+		T tMax = std::numeric_limits<T>::max();
+		tMax = tMax < v ? tMax : (T)v;
+		return tMax;
+	}
+
+	template<typename T>
+	T castMinimum(float v) {
+		T tMin = std::numeric_limits<T>::min();
+		tMin = tMin > v ? tMin : (T)v;
+		return tMin;
+	}
 
 	class PERIDYNO_QTGUI_API QFieldWidget : public QGroupBox
 	{

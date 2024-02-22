@@ -17,6 +17,8 @@
 #include "initializeModeling.h"
 #include "initializeInteraction.h"
 
+#include "Mapping/Extract.h"
+
 using namespace dyno;
 
 int main()
@@ -35,13 +37,14 @@ int main()
 	//cylinder->setVisible(false);
 	//cylinder->stateTriangleSet()->connect(pickerNode->inTopology());
 
-	auto quadPickerNode = scn->addNode(std::make_shared<QuadPickerNode<DataType3f>>());
 	auto cube1 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cube1->varLocation()->setValue(Vec3f(-0.75f, 2.5f, 0.75f));
 	cube1->setVisible(false);
 	cube1->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
+
+	auto quadPickerNode = scn->addNode(std::make_shared<QuadPickerNode<DataType3f>>());
 	cube1->stateQuadSet()->connect(quadPickerNode->inTopology());
-	cube1->stateQuadSet()->promoteOuput();
+	//cube1->stateQuadSet()->promoteOuput();
 
 	auto pickerNode = scn->addNode(std::make_shared<TrianglePickerNode<DataType3f>>());
 	auto cube2 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
@@ -49,7 +52,7 @@ int main()
 	cube2->setVisible(false);
 	cube2->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
 	cube2->stateTriangleSet()->connect(pickerNode->inTopology());
-	cube2->stateTriangleSet()->promoteOuput();
+	//cube2->stateTriangleSet()->promoteOuput();
 
 	auto pointPickerNode = scn->addNode(std::make_shared<PointPickerNode<DataType3f>>());
 	auto cube3 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
@@ -59,7 +62,7 @@ int main()
 	auto cubeSampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
 	cube3->outCube()->connect(cubeSampler->inCube());
 	cubeSampler->statePointSet()->connect(pointPickerNode->inTopology());
-	cubeSampler->statePointSet()->promoteOuput();
+	//cubeSampler->statePointSet()->promoteOuput();
 
 	auto edgePickerNode = scn->addNode(std::make_shared<EdgePickerNode<DataType3f>>());
 	auto cube4 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
@@ -67,13 +70,13 @@ int main()
 	cube4->setVisible(false);
 	cube4->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
 	cube4->stateQuadSet()->connect(edgePickerNode->inTopology());
-	cube4->stateQuadSet()->promoteOuput();
+	//cube4->stateQuadSet()->promoteOuput();
 
 	//auto mesh2 = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());
 	//mesh2->varFileName()->setValue(getAssetPath() + "submarine/submarine.obj");
 	//mesh2->outTriangleSet()->connect(pickerNode->inTopology()); 
 
-	pickerNode->varInteractionRadius()->setValue(0.02f);
+//	pickerNode->varInteractionRadius()->setValue(0.02f);
 	scn->setUpperBound({ 4, 4, 4 });
 
 	QtApp app;

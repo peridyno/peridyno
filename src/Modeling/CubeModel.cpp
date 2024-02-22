@@ -20,6 +20,8 @@ namespace dyno
 
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
+		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
+
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CubeModel<TDataType>::varChanged, this));
 
 		this->varLocation()->attach(callback);
@@ -44,8 +46,9 @@ namespace dyno
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
-		this->statePolygonSet()->promoteOuput();
+		//this->statePolygonSet()->promoteOuput();
 		this->stateTriangleSet()->promoteOuput();
+		this->stateQuadSet()->promoteOuput();
 		
 		//Do not export the node
 		this->allowExported(false);
@@ -148,8 +151,6 @@ namespace dyno
 		polygonIndices.resize(counter2);
 
 		incre = 0;
-		printf("QuadNum: %d",numOfPolygon);
-
 
 		int v0, v1, v2, v3;
 
@@ -332,6 +333,9 @@ namespace dyno
 
 		auto& ts = this->stateTriangleSet()->getData();
 		polySet->turnIntoTriangleSet(ts);
+
+		auto& qs = this->stateQuadSet()->getData();
+		polySet->extractQuadSet(qs);
 
 		vertices.clear();
 

@@ -30,15 +30,15 @@ namespace dyno
 
 		spinner1 = new mSpinBox;
 		spinner1->setMinimumWidth(30);
-		spinner1->setRange(field->getMin(), field->getMax());
+		spinner1->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
 
 		spinner2 = new mSpinBox;
 		spinner2->setMinimumWidth(30);
-		spinner2->setRange(field->getMin(), field->getMax());
+		spinner2->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
 
 		spinner3 = new mSpinBox;
 		spinner3->setMinimumWidth(30);
-		spinner3->setRange(field->getMin(), field->getMax());
+		spinner3->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
 
 
 
