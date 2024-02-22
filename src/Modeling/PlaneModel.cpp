@@ -63,6 +63,7 @@ namespace dyno
 
 		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
+		this->statePolygonSet()->promoteOuput();
 	}
 
 	struct Index2DPlane
@@ -154,9 +155,6 @@ namespace dyno
 		};
 
 		uint numOfPolygon = segments[0] * segments[2];
-		
-		std::cout << "scale: " << scale[0] << " , " << scale[1] << " , " << scale[2] << std::endl;
-		std::cout << "length: " << lengthX << " , " << lengthZ << std::endl;
 
 		CArray<uint> counter2(numOfPolygon);
 

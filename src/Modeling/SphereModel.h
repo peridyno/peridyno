@@ -44,7 +44,7 @@ namespace dyno
 	public:
 		DEF_VAR(Coord, Center, 0, "Sphere center");
 
-		DEF_VAR(Real, Radius, 1, "Sphere radius");
+		DEF_VAR(Real, Radius, 0.5, "Sphere radius");
 
 		DECLARE_ENUM(SphereType,
 			Standard = 0,
