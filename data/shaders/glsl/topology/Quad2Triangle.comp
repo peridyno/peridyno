@@ -1,0 +1,31 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout(std430, binding = 0) buffer Input
+{
+   Quad quads[];
+};
+
+layout(std430, binding = 1) buffer Output
+{
+   Triangle triangles[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   uint idx = gl_GlobalInvocationID.x;
+	if (idx >= pushConsts.num) 
+		return;
+
+   Quad quad = quads[idx];
+   triangles[2 * idx] = ivec3(quad[0], quad[1], quad[2]);
+   triangles[2 * idx + 1] = ivec3(quad[0], quad[2], quad[3]);
+}

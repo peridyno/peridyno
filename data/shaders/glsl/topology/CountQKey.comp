@@ -1,0 +1,33 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout(std430, binding = 0) buffer Counter
+{
+   int counter[];
+};
+
+layout(std430, binding = 1) buffer Key
+{
+   QKey keys[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   if (tId == 0 || !compare_eq(keys[tId], keys[tId - 1]))
+      counter[tId] = 1;
+   else
+      counter[tId] = 0;
+}

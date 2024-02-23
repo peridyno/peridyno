@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Platform.h"
 #include "vulkan/vulkan.h"
 
@@ -36,6 +36,8 @@ namespace dyno {
 
 		VkBuffer bufferHandle() const { return buffer->buffer; }
 
+		VkDeviceAddress bufferAddress() const;
+
 		virtual VariableType type() = 0;
 
 		static VkDescriptorType descriptorType(const VariableType varType);
@@ -43,6 +45,8 @@ namespace dyno {
 		virtual uint32_t bufferSize() = 0;
 
 		virtual void* data() const { return nullptr; }
+
+		std::shared_ptr<vks::Buffer> bufferSp() { return buffer; }
 
 	protected:
 		VkContext* ctx = nullptr;

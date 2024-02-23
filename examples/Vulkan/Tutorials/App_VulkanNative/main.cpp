@@ -23,6 +23,7 @@
 #include "VkContext.h"
 #include "VkProgram.h"
 #include "Array/Array.h"
+#include "PlatformConfig.h"
 
 using namespace dyno;
 
@@ -231,7 +232,7 @@ int main(int, char**)
 
 	// Create pipeline
 	VkComputePipelineCreateInfo computePipelineCreateInfo = vks::initializers::computePipelineCreateInfo(pipelineLayout, 0);
-	std::string fileName = getAssetPath() + "shaders/glsl/tutorials/VecAdd.comp.spv";
+	std::string fileName = getAssetPath()  / "shaders/glsl/tutorials/VecAdd.comp.spv";
 	VkPipelineShaderStageCreateInfo shaderStage = {};
 	shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;

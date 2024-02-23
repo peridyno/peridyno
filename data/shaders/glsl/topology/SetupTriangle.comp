@@ -1,0 +1,75 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+struct Info {
+   int id;
+   int orderId;
+   Triangle triangle;
+};
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Triangles
+{
+   Triangle triangles[];
+};
+
+layout(std430, binding = 1) buffer Tri2Tets
+{
+   Tri2Tet tri2Tet[];
+};
+
+layout(std430, binding = 2) buffer Tri2TetsOrder
+{
+   Tri2Tet tri2Tetorder[];
+};
+
+layout(std430, binding = 3) buffer Keys
+{
+   TKey keys[];
+};
+
+layout(std430, binding = 4) buffer Counts
+{
+   int counter[];
+};
+
+layout(std430, binding = 5) buffer TetIds
+{
+   Info tetIds[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   int shift = counter[tId];
+   if (tId == 0 || !compare_eq(keys[tId], keys[tId - 1]))
+   {
+      TKey key = keys[tId];
+      triangles[shift] = tetIds[tId].triangle;
+
+      Tri2Tet t2T = Tri2Tet(EMPTY, EMPTY);
+      Tri2Tet t2To = Tri2Tet(EMPTY, EMPTY);
+
+      t2T[0] = tetIds[tId].id;
+      t2To[0] = tetIds[tId].orderId;
+      if (tId + 1 < regs.num && compare_eq(keys[tId + 1], key))
+      {
+         t2T[1] = tetIds[tId + 1].id;
+         t2To[1] = tetIds[tId + 1].orderId;
+      }
+
+      tri2Tet[shift] = t2T;
+      tri2Tetorder[shift] = t2To;
+   }
+}

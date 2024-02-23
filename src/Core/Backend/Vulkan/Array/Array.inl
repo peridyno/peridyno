@@ -1,4 +1,4 @@
-#include "VkDeviceArray.h"
+﻿#include "VkDeviceArray.h"
 #include "VkTransfer.h"
 
 namespace dyno 
@@ -30,6 +30,9 @@ namespace dyno
 			this->resize(num);
 		}
 
+		Array(VkDeviceArray<T> arr):mData(arr) {
+		}
+
 		/*!
 		*	\brief	Do not release memory here, call clear() explicitly.
 		*/
@@ -47,8 +50,7 @@ namespace dyno
 		*/
 		void clear();
 
-// 		inline const T* begin() const { return mData; }
-// 		inline T* begin() { return mData; }
+ 		inline VkDeviceArray<T> begin() const { return mData; }
 
 		inline const VkDeviceArray<T>* handle() const { return &mData; }
 		inline VkDeviceArray<T>* handle() { return &mData; }
@@ -119,8 +121,7 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::reset()
 	{
-		//TODO: 
-		//cuSafeCall(cudaMemset((void*)mData, 0, mTotalNum * sizeof(T)));
+		vkFill(mData, 0);
 	}
 
 	template<typename T>
@@ -142,34 +143,40 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const Array<T, DeviceType::CPU>& src)
 	{
+		if(src.size() == 0) {
+			mData.clear();
+			return;
+		}
 		if (mData.size() != src.size())
 			this->resize(src.size());
 
 		vkTransfer(mData, *src.handle());
-		//cuSafeCall(cudaMemcpy(mData, src.begin(), src.size() * sizeof(T), cudaMemcpyHostToDevice));
 	}
 
 
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const std::vector<T>& src)
 	{
+		if(src.size() == 0) {
+			mData.clear();
+			return;
+		}
 		if (mData.size() != src.size())
 			this->resize((uint)src.size());
 
 		vkTransfer(mData, src);
-		//cuSafeCall(cudaMemcpy(mData, src.data(), src.size() * sizeof(T), cudaMemcpyHostToDevice));
 	}
 
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const std::vector<T>& src, const uint count, const uint dstOffset, const uint srcOffset)
 	{
-		//cuSafeCall(cudaMemcpy(mData + dstOffset, src.begin() + srcOffset, count * sizeof(T), cudaMemcpyHostToDevice));
+		vkTransfer(mData, (uint64_t)dstOffset, src, (uint64_t)srcOffset, (uint64_t)count);
 	}
 
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const Array<T, DeviceType::CPU>& src, const uint count, const uint dstOffset, const uint srcOffset)
 	{
-		//cuSafeCall(cudaMemcpy(mData + dstOffset, src.begin() + srcOffset, count * sizeof(T), cudaMemcpyHostToDevice));
+		vkTransfer(mData, (uint64_t)dstOffset, *src.handle(), (uint64_t)srcOffset, (uint64_t)count);
 	}
 
 	template<typename T>

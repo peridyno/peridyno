@@ -11,6 +11,7 @@ using namespace dyno;
 
 int main(int, char**)
 {
+	VkSystem::instance()->setAssetPath(getAssetPath());
 	VkSystem::instance()->initialize(false);
 
 	//Initialize all buffers

@@ -1,0 +1,58 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout(std430, binding = 0) buffer Quads
+{
+   Quad quads[];
+};
+
+layout(std430, binding = 1) buffer Quad2Hexs
+{
+   Quad2Hex quad2Hex[];
+};
+
+layout(std430, binding = 2) buffer Keys
+{
+   QKey keys[];
+};
+
+layout(std430, binding = 3) buffer Counts
+{
+   int counter[];
+};
+
+layout(std430, binding = 4) buffer HexIds
+{
+   int hexIds[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   int shift = counter[tId];
+   if (tId == 0 || !compare_eq(keys[tId], keys[tId - 1]))
+   {
+      QKey key = keys[tId];
+      quads[shift] = Quad(key[0], key[1], key[2], key[3]);
+
+      Quad2Hex q2H = Quad2Hex(EMPTY, EMPTY);
+      q2H[0] = hexIds[tId];
+
+      if (tId + 1 < regs.num && compare_eq(keys[tId + 1],key))
+         q2H[1] = hexIds[tId + 1];
+
+      quad2Hex[shift] = q2H;
+   }
+}

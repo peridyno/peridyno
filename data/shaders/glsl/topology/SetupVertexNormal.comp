@@ -1,0 +1,64 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#define USE_BUFFER_REFERENCE
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer ElementRef
+{
+   int id;
+};
+
+#define ELEMENT ElementRef
+#define LIST_NAME List
+#define LIST_REF_NAME ListRef
+#include "../adt/List.glsl"
+
+layout(std430, binding = 0) buffer NormalBuf
+{
+   Coord normals[];
+};
+
+layout(std430, binding = 1) buffer VerticeBuf
+{
+   Coord vertices[];
+};
+
+layout(std430, binding = 2) buffer QuadBuf
+{
+   Quad quads[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+   ListRef quadIds;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   ListRef list_i = regs.quadIds[tId];
+   uint quadSize = List_size(list_i);
+
+   Coord N = Coord(0);
+   for (uint ne = 0; ne < quadSize; ne++)
+   {
+      int j = List_get(list_i, ne).id;
+      Quad t = quads[j];
+
+      Coord v0 = vertices[t[0]];
+      Coord v1 = vertices[t[1]];
+      Coord v2 = vertices[t[2]];
+      Coord v3 = vertices[t[3]];
+
+      N += cross(v1 - v0, v2 - v0);
+   }
+   N = normalize(N);
+   normals[tId] = N;
+}

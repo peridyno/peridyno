@@ -41,14 +41,7 @@ namespace dyno
 
 		std::string caption() override;
 
-#ifdef CUDA_BACKEND
 		DEF_INSTANCE_IN(EdgeSet<DataType3f>, EdgeSet, "");
-#endif
-
-#ifdef  VK_BACKEND
-		DEF_INSTANCE_IN(EdgeSet, EdgeSet, "");
-#endif // DEBUG
-
 		
 		DEF_VAR(float, Radius, 0.003f, "Cylinder radius");
 		DEF_VAR(float, LineWidth, 1.f, "Line width");

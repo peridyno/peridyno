@@ -31,7 +31,7 @@ namespace dyno
 		DEF_VAR(float, Width, 0.1, "Emitter width");
 		DEF_VAR(float, Height, 0.1, "Emitter height");
 
-		DEF_INSTANCE_STATE(EdgeSet, Outline, "Outline of the emitter");
+		DEF_INSTANCE_STATE(EdgeSet3f, Outline, "Outline of the emitter");
 
 	protected:
 		void resetStates() override;

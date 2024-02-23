@@ -2,28 +2,42 @@
 
 namespace dyno
 {
-	PointSet::PointSet()
+	template<typename TDataType>
+	PointSet<TDataType>::PointSet()
 		: TopologyModule()
 	{
 	}
 
-	PointSet::~PointSet()
+	template<typename TDataType>
+	PointSet<TDataType>::~PointSet()
 	{
 	}
 
-	void PointSet::setPoints(std::vector<Vec3f>& points)
+	template<typename TDataType>
+	void PointSet<TDataType>::setPoints(std::vector<Vec3f>& points)
 	{
-		mPoints.assign(points);
+		mCoords.assign(points);
 	}
 
-	void PointSet::setPoints(const DArray<Vec3f>& points)
+	template<typename TDataType>
+	void PointSet<TDataType>::setPoints(const DArray<Vec3f>& points)
 	{
-		mPoints.assign(points);
+		mCoords.assign(points);
+
+
 	}
 
-	void PointSet::clear()
+	template<typename TDataType>
+	bool PointSet<TDataType>::isEmpty()
 	{
-		mPoints.clear();
+		return mCoords.size() == 0;
 	}
 
+	template<typename TDataType>
+	void PointSet<TDataType>::clear()
+	{
+		mCoords.clear();
+	}
+
+	DEFINE_CLASS(PointSet)
 }

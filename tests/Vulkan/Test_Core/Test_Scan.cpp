@@ -1,7 +1,6 @@
 
 #include "gtest/gtest.h"
 #include <numeric>
-#include "VkSystem.h"
 #include "VkTransfer.h"
 #include "Catalyzer/VkScan.h"
 
@@ -9,9 +8,6 @@ using namespace dyno;
 
 TEST(VkScan, scan)
 {
-	//Support int float and uint32_t
-	VkSystem::instance()->initialize();
-	
 	//Test int type Data
 	VkScan<int> scanInt;
 	std::vector<int> inputData(1000, 1);

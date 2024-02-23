@@ -1,0 +1,43 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Keys
+{
+   EKey keys[];
+};
+
+layout(std430, binding = 1) buffer Ids
+{
+   int ids[];
+};
+
+layout(std430, binding = 2) buffer Shapes
+{
+   Quad quads[];
+};
+
+layout(push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   Quad quad = quads[tId];
+   keys[4 * tId] = EKey(quad[0], quad[1]);
+   keys[4 * tId + 1] = EKey(quad[1], quad[2]);
+   keys[4 * tId + 2] = EKey(quad[2], quad[3]);
+   keys[4 * tId + 3] = EKey(quad[3], quad[0]);
+
+   ids[4 * tId] = tId;
+   ids[4 * tId + 1] = tId;
+   ids[4 * tId + 2] = tId;
+   ids[4 * tId + 3] = tId; 
+}

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,33 +25,35 @@
 
 namespace dyno
 {
-	class Material : public GraphicsObject
-	{
-	public:
+	namespace render {
+		class Material : public GraphicsObject
+		{
+		public:
 
-		Material();
-		~Material() override;
-		void create() override;
-		void release() override;
-		void update();
-		void updateGL();
+			Material();
+			~Material() override;
+			void create() override;
+			void release() override;
+			void update();
+			void updateGL();
 
-	public:
-		dyno::Vec3f ambient = { 0.0f, 0.0f, 0.0f };
-		dyno::Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
-		dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
-		float roughness = 0.0f;
-		float alpha = 1.0f;
+		public:
+			dyno::Vec3f ambient = { 0.0f, 0.0f, 0.0f };
+			dyno::Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
+			dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
+			float roughness = 0.0f;
+			float alpha = 1.0f;
 
-		dyno::DArray2D<dyno::Vec4f> texColor;
+			dyno::DArray2D<dyno::Vec4f> texColor;
 
-		dyno::DArray2D<dyno::Vec4f> texBump;
-		float bumpScale = 1.f;
+			dyno::DArray2D<dyno::Vec4f> texBump;
+			float bumpScale = 1.f;
 
-		// color texture
-		XTexture2D<dyno::Vec4f> mColorTexture;
-		XTexture2D<dyno::Vec4f> mBumpTexture;
+			// color texture
+			XTexture2D<dyno::Vec4f> mColorTexture;
+			XTexture2D<dyno::Vec4f> mBumpTexture;
 
-		bool mInitialized = false;
-	};
+			bool mInitialized = false;
+		};
+	}
 };

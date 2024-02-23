@@ -165,16 +165,16 @@ namespace vks
 	{
         unmap();
         if (usePool) {
-            if (buffer) {
+            if (buffer != VK_NULL_HANDLE) {
                 vmaDestroyBuffer(allocator, buffer, allocation);
                 buffer = VK_NULL_HANDLE;
             }
         } else {
-            if (buffer) {
+            if (buffer != VK_NULL_HANDLE) {
                 vkDestroyBuffer(device, buffer, nullptr);
                 buffer = VK_NULL_HANDLE;
             }
-            if (memory) {
+            if (memory != VK_NULL_HANDLE) {
                 vkFreeMemory(device, memory, nullptr);
                 memory = VK_NULL_HANDLE;
             }

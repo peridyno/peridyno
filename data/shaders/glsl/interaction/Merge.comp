@@ -1,0 +1,81 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+
+#define eMergeOR 0
+#define eMergeXOR 1
+#define eMergeC 2
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Intersect
+{
+   int intersected1[];
+};
+
+layout(std430, binding = 1) buffer Intersect2
+{
+   int intersected2[];
+};
+
+layout(std430, binding = 2) buffer OutIntersect
+{
+   int outIntersected[];
+};
+
+layout(std430, binding = 3) buffer OutUnintersect
+{
+   int outUnintersected[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+	int type;
+} regs;
+
+void MergeIntersectedIndexOR(int pId)
+{
+	if (intersected1[pId] == 0 && intersected2[pId] == 0)
+		outIntersected[pId] = 0;
+	else
+		outIntersected[pId] = 1;
+
+	outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+}
+
+void MergeIntersectedIndexXOR(int pId)
+{
+	if (intersected1[pId] == intersected2[pId])
+		outIntersected[pId] = 0;
+	else
+		outIntersected[pId] = 1;
+
+	outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+}
+
+void MergeIntersectedIndexC(int pId)
+{
+	if (intersected2[pId] == 1)
+		outIntersected[pId] = 0;
+	else
+		outIntersected[pId] = intersected1[pId];
+
+	outUnintersected[pId] = outIntersected[pId] == 1 ? 0 : 1;
+}
+
+void main() {
+    int pId = int(gl_GlobalInvocationID.x);
+    if (pId >= regs.num) return;
+
+	switch(regs.type) {
+		case eMergeOR:
+			MergeIntersectedIndexOR(pId);
+			break;
+		case eMergeXOR:
+			MergeIntersectedIndexXOR(pId);
+			break;
+		case eMergeC:
+			MergeIntersectedIndexC(pId);
+			break;
+	}
+}
