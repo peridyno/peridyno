@@ -6,9 +6,10 @@
 
 namespace dyno
 {
+	template<typename TDataType>
 	class DiscreteElementsToTriangleSet : public TopologyMapping
 	{
-		DECLARE_CLASS(DiscreteElementsToTriangleSet);
+		DECLARE_TCLASS(DiscreteElementsToTriangleSet, TDataType);
 	public:
 		DiscreteElementsToTriangleSet();
 
@@ -17,10 +18,10 @@ namespace dyno
 
 	public:
 		DEF_INSTANCE_IN(DiscreteElements, DiscreteElements, "");
-		DEF_INSTANCE_OUT(TriangleSet, TriangleSet, "");
+		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 
 	private:
-		TriangleSet mStandardSphere;
-		TriangleSet mStandardCapsule;
+		TriangleSet<TDataType> mStandardSphere;
+		TriangleSet<TDataType> mStandardCapsule;
 	};
 }

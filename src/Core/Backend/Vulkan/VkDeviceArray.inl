@@ -28,18 +28,19 @@ namespace dyno {
 				if (ctx->useMemoryPool) {
 					buffer->size = newSize;
 					buffer->usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-						VK_BUFFER_USAGE_TRANSFER_SRC_BIT | usageFlags;
+						VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | usageFlags;
 					buffer->memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 					ctx->createBuffer(VkContext::DevicePool, buffer);
 				}
 				else {
 					ctx->createBuffer(
 						usageFlags | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-						VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+						VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
 						VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 						buffer,
 						newSize);
 				}
+				vkFill(*this, 0);
 			}
 
 			return VK_BUFFER_REALLOCATED;

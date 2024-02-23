@@ -3,12 +3,6 @@
 #include "VkConstant.h"
 
 namespace dyno {
-
-	inline int SizeOfNextLevel(int size, int localSize)
-	{
-		return (size + localSize) / localSize;
-	}
-
 	template<typename T>
 	T VkReduce<T>::reduce(const std::vector<T>& input)
 	{
@@ -36,12 +30,15 @@ namespace dyno {
 
 		std::vector<VkDeviceArray<T>> buffers;
 		buffers.push_back(input);
+		auto nextLevelSize = [](int input, int local) -> int {
+			return (input + local) / local;
+		};
 
-		int n = SizeOfNextLevel(globalSize, localSize);
+		int n = nextLevelSize(globalSize, localSize);
 		while (n > 1)
 		{
 			buffers.push_back(VkDeviceArray<T>(n));
-			n = SizeOfNextLevel(n, localSize);
+			n = nextLevelSize(n, localSize);
 		}
 
 		buffers.push_back(VkDeviceArray<T>(1));

@@ -8,10 +8,12 @@ using namespace dyno;
 TEST(VkSort, sort)
 {
 	VkSystem::instance()->initialize();
-	VkSort<float> sortInt;
+	VkSortByKey<float, float> sortInt;
 	uint32_t dSize = 10;
-	std::vector<float> keys(dSize, 1.0f);
-	std::vector<float> values(dSize, 1.0f);
+	CArray<float> keys;
+	keys.assign(std::vector<float>(dSize, 1.0f));
+	CArray<float> values;
+	values.assign(std::vector<float>(dSize, 1.0f));
 
 	for (std::size_t i = 0; i < dSize; i++)
 	{
@@ -20,8 +22,9 @@ TEST(VkSort, sort)
 		//printf("keys[%d]=%d  values[%d]=%d \n", i, keys[i], i, values[i]);
 	}
 	//test sort by key
-	sortInt.sort_by_key(keys, values, UP);
-	int SortType = UP;
+	//sortInt.sort_by_key(keys, values, UP);
+	sortInt.sortByKey(keys, values, SortParam::eUp);
+	int SortType = SortParam::eUp;
 
 	//test sort
 	//sortInt.sort(keys,DOWN);

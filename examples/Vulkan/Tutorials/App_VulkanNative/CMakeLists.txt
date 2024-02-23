@@ -1,3 +1,5 @@
 set(LIB_DEPENDENCY 
-    Core)
+    Core
+    Framework
+    )
 add_example(App_VulkanNative Tutorials LIB_DEPENDENCY)

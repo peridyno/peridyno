@@ -11,8 +11,6 @@ namespace dyno {
 
 	VkVariable::~VkVariable()
 	{
-		// TODO: sovle other issue while destroy buffer here.
-		// buffer.destroy();
 	}
 
 	VkDescriptorType VkVariable::descriptorType(const VariableType varType)
@@ -30,4 +28,11 @@ namespace dyno {
 		return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 	}
 
+
+	VkDeviceAddress VkVariable::bufferAddress() const {
+		static_assert(sizeof(VkDeviceAddress) == sizeof(uint64_t));
+		VkBufferDeviceAddressInfo info {VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO};
+		info.buffer = bufferHandle();
+		return vkGetBufferDeviceAddress(currentContext()->deviceHandle(), &info);
+	}
 }

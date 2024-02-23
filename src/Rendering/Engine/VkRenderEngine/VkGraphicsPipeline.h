@@ -1,6 +1,7 @@
 #pragma once 
 #include <array>
 
+#include "FilePath.h"
 #include "VkSystem.h"
 #include "VulkanTools.h"
 #include "VkContext.h"
@@ -62,7 +63,7 @@ namespace dyno {
 		}
 
 	protected:
-		std::string getShadersPath() const;
+		FilePath getShadersPath() const;
 
 		VkPipelineShaderStageCreateInfo loadShader(std::string fileName, VkShaderStageFlagBits stage);
 

@@ -1,4 +1,4 @@
-#include "Buffer.h"
+﻿#include "Buffer.h"
 
 #include <glad/glad.h>
 
@@ -21,7 +21,9 @@ namespace dyno
 
 	void Buffer::release()
 	{
-		glDeleteBuffers(1, &id);
+		if (id != GL_INVALID_INDEX) {
+			glDeleteBuffers(1, &id);
+		}
 		glCheckError();
 
 		// reset object id

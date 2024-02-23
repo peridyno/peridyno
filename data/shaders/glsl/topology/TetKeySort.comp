@@ -1,0 +1,60 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "../core/BitonicSort.glsl"
+
+#include "Topology.glsl"
+
+struct Info {
+   int id;
+   int orderId;
+   Triangle triangle;
+};
+
+layout(std430, binding = 0) buffer Keys
+{
+	TKey key[];
+};
+layout(std430, binding = 1) buffer Values
+{
+	Info value[];
+};
+shared TKey local_key[SORT_LOCAL_SIZE];
+shared Info local_value[SORT_LOCAL_SIZE];
+
+void prepare_local(in int local_idx, in int global_idx) {
+    local_key[local_idx] = key[global_idx];
+    local_value[local_idx] = value[global_idx];
+}
+void output_global(in int global_idx, in int local_idx) {
+    key[global_idx] = local_key[local_idx];
+    value[global_idx] = local_value[local_idx];
+}
+void compare_swap_global(in int idx1, in int idx2) {
+	bool cmp = SORT_DIRECTION == SORT_UP ? compare_large(key[idx1], key[idx2]) : compare_less(key[idx1], key[idx2]);
+    if(cmp) {
+		TKey t = key[idx1];
+		key[idx1] = key[idx2];
+		key[idx2] = t;
+
+        Info t2 = value[idx1];
+        value[idx1] = value[idx2];
+        value[idx2] = t2;
+    }
+}
+void compare_swap_local(in int idx1, in int idx2) {
+	bool cmp = SORT_DIRECTION == SORT_UP ? compare_large(local_key[idx1], local_key[idx2]) : compare_less(local_key[idx1], local_key[idx2]);
+    if(cmp) {
+		TKey t = local_key[idx1];
+		local_key[idx1] = local_key[idx2];
+		local_key[idx2] = t;
+
+        Info t2 = local_value[idx1];
+        local_value[idx1] = local_value[idx2];
+        local_value[idx2] = t2;
+    }
+}
+
+void main() {
+    sort();
+}

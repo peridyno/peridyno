@@ -1,4 +1,4 @@
-#include "Shape.h"
+﻿#include "Shape.h"
 
 #include "glad/glad.h"
 
@@ -10,6 +10,9 @@ namespace dyno
 
 	Shape::~Shape()
 	{
+		vertexIndex.clear();
+		normalIndex.clear();
+		texCoordIndex.clear();
 	}
 
 	void Shape::create()

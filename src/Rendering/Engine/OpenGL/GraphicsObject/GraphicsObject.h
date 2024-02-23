@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2017-2021 Jian SHI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 
 #include <typeinfo>
 #include <iostream>
+#include <cassert>
 
 #include "Object.h"
 
@@ -29,14 +30,17 @@ namespace dyno
 	class GraphicsObject : public Object
 	{
 	protected:
+		
 		virtual void create() = 0;
 		virtual void release() = 0;
 
 		virtual bool isValid() const { return id != 0xFFFFFFFF; }
 
 	protected:
-		GraphicsObject() = default;
-		virtual ~GraphicsObject() = default; 
+		GraphicsObject() {}
+		virtual ~GraphicsObject() override {
+			assert(!isValid());
+		}
 		
 		// should be non-copyable
 		GraphicsObject(const GraphicsObject&) = delete;
@@ -50,6 +54,11 @@ namespace dyno
 	unsigned int glCheckError_(const char* file, int line);
 	#define glCheckError() glCheckError_(__FILE__, __LINE__) 
 
-#define GL_OBJECT(T) \
-	public:	~T() { if(isValid()) printf("Unreleased resource: %s(%d)\n", #T, id);}
+#define GL_OBJECT(T)            \
+	public:                     \
+		~T() {                  \
+			if(isValid()) {     \
+				printf("Unreleased resource: %s(%d)\n", #T, id); \
+			}                   \
+		}
 }

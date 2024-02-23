@@ -74,7 +74,7 @@ namespace dyno {
 		VkQueue computeQueue;
 		VkQueue transferQueue;
 		/** @brief Set to true when the debug marker extension is detected */
-		bool enableDebugMarkers = false;
+		bool enableDebugMarkers;
 		/** @brief Contains queue family indices */
 
 		// Pipeline cache object
@@ -107,6 +107,6 @@ namespace dyno {
 
 		std::map<VkFlags, MemoryPoolInfo> poolMap;
 		VmaAllocator g_Allocator;
-		bool useMemoryPool = false;
+		bool useMemoryPool;
 	};
 }

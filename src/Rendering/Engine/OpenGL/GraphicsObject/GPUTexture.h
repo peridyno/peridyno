@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2023-2023 Jian SHI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,8 +35,8 @@ namespace dyno {
 	class XTexture2D : public Texture2D
 	{
 	public:
-		XTexture2D() {}
-		~XTexture2D() {}
+		XTexture2D();
+		~XTexture2D();
 
 		virtual void create() override;
 		bool isValid() const;

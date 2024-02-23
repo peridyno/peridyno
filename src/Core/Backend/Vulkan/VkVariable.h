@@ -36,6 +36,8 @@ namespace dyno {
 
 		VkBuffer bufferHandle() const { return buffer->buffer; }
 
+		VkDeviceAddress bufferAddress() const;
+
 		virtual VariableType type() = 0;
 
 		static VkDescriptorType descriptorType(const VariableType varType);

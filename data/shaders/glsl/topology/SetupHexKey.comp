@@ -1,0 +1,46 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Keys
+{
+   QKey keys[];
+};
+
+layout(std430, binding = 1) buffer Ids
+{
+   int ids[];
+};
+
+layout(std430, binding = 2) buffer Shapes
+{
+   Hexahedron hexs[];
+};
+
+layout(push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+   Hexahedron hex = hexs[tId];
+   keys[6 * tId] =     QKey(hex.id[0], hex.id[1], hex.id[2], hex.id[3]);
+   keys[6 * tId + 1] = QKey(hex.id[4], hex.id[5], hex.id[6], hex.id[7]);
+   keys[6 * tId + 2] = QKey(hex.id[0], hex.id[1], hex.id[5], hex.id[4]);
+   keys[6 * tId + 3] = QKey(hex.id[1], hex.id[2], hex.id[6], hex.id[5]);
+   keys[6 * tId + 4] = QKey(hex.id[3], hex.id[2], hex.id[6], hex.id[7]);
+   keys[6 * tId + 5] = QKey(hex.id[0], hex.id[3], hex.id[7], hex.id[4]);
+
+   ids[6 * tId] = tId;
+   ids[6 * tId + 1] = tId;
+   ids[6 * tId + 2] = tId;
+   ids[6 * tId + 3] = tId;
+   ids[6 * tId + 4] = tId;
+   ids[6 * tId + 5] = tId;
+}

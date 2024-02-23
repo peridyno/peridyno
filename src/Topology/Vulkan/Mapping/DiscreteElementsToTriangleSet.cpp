@@ -1,14 +1,16 @@
-#include "DiscreteElementsToTriangleSet.h"
+﻿#include "DiscreteElementsToTriangleSet.h"
 
 #include "VkTransfer.h"
 
 namespace dyno
 {
-	IMPLEMENT_CLASS(DiscreteElementsToTriangleSet);
+	IMPLEMENT_TCLASS(DiscreteElementsToTriangleSet, TDataType);
 
-	DiscreteElementsToTriangleSet::DiscreteElementsToTriangleSet()
+	template<typename TDataType>
+	DiscreteElementsToTriangleSet<TDataType>::DiscreteElementsToTriangleSet()
 		: dyno::TopologyMapping()
 	{
+		return;
 		this->addKernel(
 			"SetupFacets",
 			std::make_shared<VkProgram>(
@@ -20,11 +22,13 @@ namespace dyno
 				UNIFORM(ElementOffset),	//in: offset
 				CONSTANT(uint32_t))			//in: number of boxes
 		);
-		kernel("SetupFacets")->load(getAssetPath() + "shaders/glsl/topology/SetupFacets.comp.spv");
+		kernel("SetupFacets")->load(getSpvFile("shaders/glsl/topology/SetupFacets.comp.spv"));
 	}
 
-	bool DiscreteElementsToTriangleSet::apply()
+	template<typename TDataType>
+	bool DiscreteElementsToTriangleSet<TDataType>::apply()
 	{
+		return true;
 		auto elements = this->inDiscreteElements()->getDataPtr();
 
 		if (this->outTriangleSet()->isEmpty()) {
@@ -39,7 +43,7 @@ namespace dyno
 		
 		uint32_t totalSize = boxes.size() * 36 + capsules.size() * 48 + spheres.size() * 24;
 
-		auto& vertices = outTopo->mPoints;
+		auto& vertices = outTopo->mCoords;
 		auto& indices = outTopo->mTriangleIndex;
 
 		vertices.resize(totalSize);
@@ -67,4 +71,6 @@ namespace dyno
 
 		return true;
 	}
+
+	DEFINE_CLASS(DiscreteElementsToTriangleSet)
 }

@@ -1,0 +1,43 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#define USE_BUFFER_REFERENCE
+#include "../base/Common.glsl"
+
+layout(std430, binding = 0) buffer Shapes
+{
+   int shape[];
+};
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer ElementRef
+{
+   int id;
+};
+
+#define ELEMENT ElementRef
+#define LIST_NAME List
+#define LIST_REF_NAME ListRef
+#include "../adt/List.glsl"
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+   uint shape_size;
+   ListRef lists;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   uint t = int(gl_GlobalInvocationID.x);
+	if (t >= regs.num) 
+		return;
+
+   uint idx = t * regs.shape_size;
+
+   for(uint i = 0;i < regs.shape_size;i++) {
+      uint list_idx = shape[idx + i];
+      ElementRef el = List_atomicAdd(regs.lists[list_idx]);
+      el.id = int(idx);
+   }
+}

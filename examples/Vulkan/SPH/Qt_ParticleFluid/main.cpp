@@ -52,6 +52,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
+	VkSystem::instance()->setAssetPath(getAssetPath());
 	VkSystem::instance()->initialize(true);
 
 	PaticleSystem::initStaticPlugin();

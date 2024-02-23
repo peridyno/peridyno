@@ -25,14 +25,16 @@ namespace dyno {
 	template<typename T>
 	void VkScan<T>::scan(VkDeviceArray<T>& output, const VkDeviceArray<T>& input, uint _ScanType)
 	{
-		assert(input.size() > 0);
-		if (input.size() == 1) {
-			if(_ScanType == EXCLUSIVESCAN){
+		if(input.size() == 0) {
+			return;
+		}
+		else if (input.size() == 1) {
+			if(_ScanType == Type::Exclusive){
 				std::vector<T> tmp{ 0 };
 				vkTransfer(output, tmp);
 				return;
 			}
-			else if (_ScanType == INCLUSIVESCAN) {
+			else if (_ScanType == Type::Inclusive) {
 				vkTransfer(output, input);
 				return;
 			}
@@ -54,50 +56,39 @@ namespace dyno {
 
 		vkTransfer(buffers[0], input);
 
-		VkUniform<ScanParameters> uniformParam;
-		ScanParameters sp;
-		sp.n = buffers[0].size();
-		sp.ScanType = _ScanType;
+		VkConstant<ScanParameters> push;
+		push->n = buffers[0].size();
+		push->ScanType = _ScanType;
 
-		dim3 groupSize = vkDispatchSize(sp.n, localSize);
+		dim3 groupSize = vkDispatchSize(push->n, localSize);
 	
-
-		uniformParam.setValue(sp);
-		mScan->flush(groupSize, &buffers[0], &buffers[0], &buffers[1], &uniformParam);
-
-		for (std::size_t i = 1; i < buffers.size() - 1; i++)
-		{
-			sp.n = buffers[i].size();
-			dim3 groupSizeScan = vkDispatchSize(sp.n, localSize);
-			sp.ScanType = INCLUSIVESCAN;
-
-			uniformParam.setValue(sp);
-			mScan->flush(groupSizeScan, &buffers[i], &buffers[i], &buffers[i + 1], &uniformParam);
-		}
+		//mScan->flush(groupSize, &buffers[0], &buffers[0], &buffers[1], &push);
+		//for (std::size_t i = 1; i < buffers.size() - 1; i++)
+		//{
+		//	push->n = buffers[i].size();
+		//	dim3 groupSizeScan = vkDispatchSize(push->n, localSize);
+		//	push->ScanType = INCLUSIVESCAN;
+		//	mScan->flush(groupSizeScan, &buffers[i], &buffers[i], &buffers[i + 1], &push);
+		//}
 		
-		//TODO: check why the following code does not work properly
-// 		mScan->begin();
-// 		for (std::size_t i = 1; i < buffers.size() - 1; i++)
-// 		{
-// 			sp.n = buffers[i].size();
-// 			dim3 groupSizeScan = vkDispatchSize(sp.n, localSize);
-// 			sp.ScanType = INCLUSIVESCAN;
-// 
-// 			uniformParam.setValue(sp);
-// 			mScan->enqueue(groupSizeScan, &buffers[i], &buffers[i], &buffers[i + 1], &uniformParam);
-// 		}
-// 		mScan->end();
-// 		mScan->update(true);
-// 		mScan->wait();
+ 		mScan->begin();
+ 		mScan->enqueue(groupSize, &buffers[0], &buffers[0], &buffers[1], &push);
+ 		for (std::size_t i = 1; i < buffers.size() - 1; i++)
+ 		{
+ 			push->n = buffers[i].size();
+ 			push->ScanType = Type::Inclusive;
+ 			mScan->enqueue(vkDispatchSize(push->n, localSize), &buffers[i], &buffers[i], &buffers[i + 1], &push);
+ 		}
+ 		mScan->end();
+ 		mScan->update(true);
+ 		mScan->wait();
 
 		VkConstant<int> num;
 		mAdd->begin();
-		//for (std::size_t i = 1; i < buffers.size(); i++)
 		for (std::size_t i = buffers.size() - 1; i > 0; i--)
 		{
 			num.setValue(buffers[i - 1].size());
-			dim3 groupSizeAdd = vkDispatchSize(num.getValue(), localSize);
-			mAdd->enqueue(groupSizeAdd, &buffers[i], &buffers[i - 1], &num);
+			mAdd->enqueue(vkDispatchSize(num.getValue(), localSize), &buffers[i], &buffers[i - 1], &num);
 		}
 		mAdd->end();
 		mAdd->update(true);
@@ -105,11 +96,11 @@ namespace dyno {
 
 		vkTransfer(output, buffers[0]);
 		
-		if (_ScanType == EXCLUSIVESCAN) {
-			vkTransfer(buffers[0], input);
-			num.setValue(input.size());
-			mSub->flush(groupSize, &buffers[0], &output, &num);
-		}
+		//if (_ScanType == EXCLUSIVESCAN) {
+		//	vkTransfer(buffers[0], input);
+		//	num.setValue(input.size());
+		//	mSub->flush(groupSize, &buffers[0], &output, &num);
+		//}
 
 		for (std::size_t i = 0; i < buffers.size(); i++)
 		{
@@ -123,7 +114,7 @@ namespace dyno {
 			BUFFER(T),
 			BUFFER(T),
 			BUFFER(T),
-			UNIFORM(ScanParameters));
+			CONSTANT(ScanParameters));
 		
 
 		mAdd = std::make_shared<VkProgram>(
@@ -131,14 +122,8 @@ namespace dyno {
 			BUFFER(T),
 			CONSTANT(int));
 
-		mSub = std::make_shared<VkProgram>(
-			BUFFER(T),
-			BUFFER(T),
-			CONSTANT(int));
-		
 		mAdd->load(getDynamicSpvFile<T>("shaders/glsl/core/Add.comp.spv"));
 		mScan->load(getDynamicSpvFile<T>("shaders/glsl/core/Scan.comp.spv"));
-		mSub->load(getDynamicSpvFile<T>("shaders/glsl/core/Sub.comp.spv"));
 	}
 
 	template<typename T>

@@ -9,7 +9,10 @@ namespace dyno {
 *
 * @param physicalDevice Physical device that is to be used
 */
-	VkContext::VkContext(VkPhysicalDevice physicalDevice)
+	VkContext::VkContext(VkPhysicalDevice physicalDevice):
+		enableDebugMarkers(false),
+		g_Allocator(VK_NULL_HANDLE),
+		useMemoryPool(false)
 	{
 		assert(physicalDevice);
 		this->physicalDevice = physicalDevice;
@@ -51,18 +54,21 @@ namespace dyno {
 	*/
 	VkContext::~VkContext()
 	{
-	    for (const auto &pool : poolMap)
-        {
-	        vmaDestroyPool(g_Allocator, pool.second.pool);
-        }
-	    vmaDestroyAllocator(g_Allocator);
+		if(g_Allocator) {
+			for (const auto &pool : poolMap)
+			{
+				vmaDestroyPool(g_Allocator, pool.second.pool);
+			}
+			vmaDestroyAllocator(g_Allocator);
+		}
 
-		if (commandPool)
-		{
+		if (commandPool) {
 			vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
 		}
-		if (logicalDevice)
-		{
+		if (pipelineCache) {
+			vkDestroyPipelineCache(logicalDevice, pipelineCache, NULL);
+		}
+		if (logicalDevice) {
 			vkDestroyDevice(logicalDevice, nullptr);
 		}
 	}
@@ -270,6 +276,8 @@ namespace dyno {
 			physicalDeviceFeatures2.pNext = pNextChain;
 			deviceCreateInfo.pEnabledFeatures = nullptr;
 			deviceCreateInfo.pNext = &physicalDeviceFeatures2;
+
+			vkGetPhysicalDeviceFeatures2(physicalDevice, &physicalDeviceFeatures2);
 		}
 
 		// Enable the debug marker extension if it is present (likely meaning a debugging tool is present)
@@ -503,12 +511,14 @@ namespace dyno {
     */
     VkResult VkContext::createMemoryPool(VkInstance instance, uint32_t apiVerion)
     {
-        useMemoryPool = false;
+		useMemoryPool = true;
+
         VmaAllocatorCreateInfo allocatorInfo = {};
         allocatorInfo.vulkanApiVersion = apiVerion;
         allocatorInfo.physicalDevice = physicalDeviceHandle();
         allocatorInfo.device = deviceHandle();
         allocatorInfo.instance = instance;
+		allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
         vmaCreateAllocator(&allocatorInfo, &g_Allocator);
 
         VmaPoolCreateInfo poolCreateInfo = {};

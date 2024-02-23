@@ -1,4 +1,4 @@
-#include "VkProgram.h"
+﻿#include "VkProgram.h"
 #include "VulkanTools.h"
 
 #include <assert.h>
@@ -12,14 +12,20 @@ namespace dyno
 		mUniformArgs.clear();
 		mConstArgs.clear();
 
-		for (auto& shderModule : shaderModules) {
+		for (auto shderModule : shaderModules) {
 			vkDestroyShaderModule(ctx->deviceHandle(), shderModule, nullptr);
 		}
 
 		vkDestroyPipeline(ctx->deviceHandle(), pipeline, nullptr);
 		vkDestroyPipelineLayout(ctx->deviceHandle(), pipelineLayout, nullptr);
 		vkDestroyDescriptorSetLayout(ctx->deviceHandle(), descriptorSetLayout, nullptr);
-		vkDestroyDescriptorPool(ctx->deviceHandle(), descriptorPool, nullptr);
+		if(descriptorPool != VK_NULL_HANDLE)
+			vkDestroyDescriptorPool(ctx->deviceHandle(), descriptorPool, nullptr);
+
+		if(mCommandBuffers != VK_NULL_HANDLE)
+			vkFreeCommandBuffers(ctx->deviceHandle(), mCommandPool, 1, &mCommandBuffers); 
+		if(mCmdBufferCopy != VK_NULL_HANDLE)
+			vkFreeCommandBuffers(ctx->deviceHandle(), mCommandPool, 1, &mCmdBufferCopy); 
 
 		vkDestroyCommandPool(ctx->deviceHandle(), mCommandPool, nullptr);
 		vkDestroyFence(ctx->deviceHandle(), mFence, nullptr);
@@ -29,6 +35,9 @@ namespace dyno
 
 	void VkProgram::begin()
 	{
+		if(descriptorPool != VK_NULL_HANDLE) {
+			vkResetDescriptorPool(ctx->deviceHandle(), descriptorPool, 0);
+		}
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 		cmdBufInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
@@ -38,16 +47,9 @@ namespace dyno
 
 	void VkProgram::dispatch(dim3 groupSize)
 	{
-		vkCmdBindDescriptorSets(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, 0);
-		uint32_t offset = 0;
-		for (size_t i = 0; i < mAllArgs.size(); i++)
-		{
-			auto variable = mAllArgs[i];
-			if (variable->type() == VariableType::Constant) {
-				vkCmdPushConstants(mCommandBuffers, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, variable->bufferSize(), variable->data());
-				offset += variable->bufferSize();
-			}
-		}
+		//vkCmdBindDescriptorSets(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, descriptorSet ? 1 : 0, &descriptorSet, 0, 0);
+		auto pushBuf = buildPushBuf(mConstArgs);
+		vkCmdPushConstants(mCommandBuffers, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, pushBuf.size(), pushBuf.data());
 
 		vkCmdBindPipeline(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 		vkCmdDispatch(mCommandBuffers, groupSize.x, groupSize.y, groupSize.z);
@@ -136,8 +138,12 @@ namespace dyno
 		std::vector<VkBufferMemoryBarrier> bufferBarriers;
 		for (size_t i = 0; i < mBufferArgs.size(); i++)
 		{
-			bufferBarrier.buffer = mBufferArgs[i]->bufferHandle();
-			bufferBarriers.push_back(bufferBarrier);
+			auto handle = mBufferArgs[i]->bufferHandle();
+			// bypass null handle
+			if(handle != VK_NULL_HANDLE) {
+				bufferBarrier.buffer = handle;
+				bufferBarriers.push_back(bufferBarrier);
+			}
 		}
 
 		vkCmdPipelineBarrier(
@@ -198,13 +204,14 @@ namespace dyno
 		mCommandBuffers = mCmdBufferCopy;
 	}
 
-	bool VkProgram::load(std::string fileName)
+	bool VkProgram::load(std::filesystem::path fileName_) 
 	{
+		auto fileName = fileName_.string();
 		//Create pipeline layout
 		std::vector<VkPushConstantRange> pushConstantRanges;
-		for (size_t i = 0; i < mFormalConstants.size(); i++)
 		{
-			pushConstantRanges.push_back(vks::initializers::pushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, mFormalConstants[i]->bufferSize(), i));
+			auto range = buildPushRange(VK_SHADER_STAGE_COMPUTE_BIT, mFormalConstants);
+			if(range.size > 0) pushConstantRanges.push_back(range);
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo =
@@ -234,12 +241,12 @@ namespace dyno
 		return shaderStage;
 	}
 
-	void VkProgram::pushFormalParameter(VkVariable* arg)
+	void VkProgram::pushFormalParameter(const VkArgInfo& arg)
 	{
 		mFormalParamters.push_back(arg);
 	}
 
-	void VkProgram::pushFormalConstant(VkVariable* arg)
+	void VkProgram::pushFormalConstant(const VkArgInfo& arg)
 	{
 		mFormalConstants.push_back(arg);
 		
@@ -273,6 +280,48 @@ namespace dyno
 
 		mUniformArgs.push_back(arg);
 		this->pushArgument(arg);
+	}
+
+	VkPushConstantRange VkProgram::buildPushRange(VkShaderStageFlags stage, const std::vector<VkArgInfo>& vars) {
+		VkPushConstantRange range {};
+		range.stageFlags = stage;
+		range.offset = 0;
+		for (size_t i = 0, offset = 0; i < vars.size(); i++)
+		{
+			auto size = vars[i].var_size;
+			if(i > 0) {
+				auto pre_size = vars[i-1].var_size;
+				offset = vks::tools::alignedSize(std::max(offset + pre_size, (std::size_t)size), 4);
+			}
+			range.size = offset + vks::tools::alignedSize(size, 4); 
+		}
+		assert(range.size % 4 == 0);
+		return range;
+	}
+
+	std::vector<std::byte> VkProgram::buildPushBuf(const std::vector<VkVariable*>& vars) {
+		std::vector<std::byte> buf;
+		for (size_t i = 0, offset = 0; i < vars.size(); i++)
+		{
+			auto data = (std::byte*)vars[i]->data();
+			auto size = vars[i]->bufferSize();
+			if(i > 0) {
+				auto pre_size = vars[i-1]->bufferSize();
+				offset = vks::tools::alignedSize(std::max<std::size_t>(offset + pre_size,std::min<std::size_t>(16, size)), 4);
+			}
+			buf.resize(offset + vks::tools::alignedSize(size, 4));
+			std::copy(data, data + size, buf.begin() + offset);
+		}
+		assert(buf.size() % 4 == 0);
+		return buf;
+	}
+
+	VkDescriptorSet VkProgram::allocateDescriptorSet() {
+		VkDescriptorSet set;
+		VkDescriptorSetAllocateInfo allocInfo =
+			vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(ctx->deviceHandle(), &allocInfo, &set));
+		return set;
 	}
 
 	VkMultiProgram::VkMultiProgram()

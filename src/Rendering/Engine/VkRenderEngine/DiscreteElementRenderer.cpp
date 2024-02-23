@@ -17,7 +17,7 @@ namespace dyno
 
 	bool DiscreteElementRenderer::initializeImpl()
 	{
-		Node* pNode = getParent();
+		Node* pNode = getParentNode();
 		assert(pNode != nullptr);
 
 		auto eleSet = std::dynamic_pointer_cast<DiscreteElements>(this->inTopology()->getDataPtr());

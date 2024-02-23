@@ -1,4 +1,4 @@
-#include "GPUTexture.h"
+﻿#include "GPUTexture.h"
 
 #include <Vector.h>
 
@@ -21,42 +21,66 @@
 #endif // VK_BACKEND
 
 
+
 namespace dyno
 {
-	template<typename T>
-	void XTexture2D<T>::create()
-	{
-		if (typeid(T) == typeid(dyno::Vec4f)) {
-			this->format = GL_RGBA;
-			this->internalFormat = GL_RGBA32F;
-			this->type = GL_FLOAT;
-		}
-		else if (typeid(T) == typeid(dyno::Vec3f)) {
-			this->format = GL_RGB;
-			this->internalFormat = GL_RGB32F;
-			this->type = GL_FLOAT;
-		}
-		else if (typeid(T) == typeid(dyno::Vec3u)) {
-			this->format = GL_RGB;
-			this->internalFormat = GL_RGB8;
-			this->type = GL_UNSIGNED_BYTE;
-		}
+template<typename T>
+XTexture2D<T>::XTexture2D() {}
+template<typename T>
+XTexture2D<T>::~XTexture2D() {
 
-		Texture2D::create();
-	}
-
-	template<typename T>
-	bool XTexture2D<T>::isValid() const
-	{
-		return width > 0 && height > 0;
-	}
-
-
-	template<typename T>
-	void XTexture2D<T>::load(dyno::DArray2D<T> data)
-	{
 #ifdef CUDA_BACKEND
-		buffer.assign(data);
+#ifdef _WIN32
+	if (resource) {
+		cuSafeCall(cudaGraphicsUnregisterResource(resource));
+	}
+#endif
+	buffer.clear();
+#elif defined(VK_BACKEND)
+		dyno::VkContext* vkCtx = dyno::VkSystem::instance()->currentContext();
+		if(copyCmd)
+			vkFreeCommandBuffers(vkCtx->deviceHandle(), vkCtx->commandPool, 1, &copyCmd);
+		if(buffer != VK_NULL_HANDLE)
+			vkDestroyBuffer(vkCtx->deviceHandle(), buffer, nullptr);
+		if(memory != VK_NULL_HANDLE)
+			vkFreeMemory(vkCtx->deviceHandle(), memory, nullptr);
+#endif
+}
+
+template<typename T>
+	void XTexture2D<T>::create()
+{
+	if (typeid(T) == typeid(dyno::Vec4f)) {
+		this->format = GL_RGBA;
+		this->internalFormat = GL_RGBA32F;
+		this->type = GL_FLOAT;
+	}
+	else if (typeid(T) == typeid(dyno::Vec3f)) {
+		this->format = GL_RGB;
+		this->internalFormat = GL_RGB32F;
+		this->type = GL_FLOAT;
+	}
+	else if (typeid(T) == typeid(dyno::Vec3u)) {
+		this->format = GL_RGB;
+		this->internalFormat = GL_RGB8;
+		this->type = GL_UNSIGNED_BYTE;
+	}
+
+	Texture2D::create();
+}
+
+template<typename T>
+	bool XTexture2D<T>::isValid() const
+{
+	return width > 0 && height > 0;
+}
+
+
+template<typename T>
+	void XTexture2D<T>::load(dyno::DArray2D<T> data)
+{
+#ifdef CUDA_BACKEND
+	buffer.assign(data);
 #endif // CUDA_BACKEND
 
 #ifdef VK_BACKEND
@@ -79,6 +103,8 @@ namespace dyno
 			// free current buffer
 			vkDestroyBuffer(device, buffer, nullptr);
 			vkFreeMemory(device, memory, nullptr);
+			buffer = VK_NULL_HANDLE;
+			memory = VK_NULL_HANDLE;
 
 			VkExternalMemoryHandleTypeFlags type;
 			// OS platforms
@@ -198,8 +224,8 @@ namespace dyno
 #endif
 	}
 
-	template<typename T>
-	void XTexture2D<T>::updateGL()
+template<typename T>
+void XTexture2D<T>::updateGL()
 	{
 #ifdef CUDA_BACKEND
 
@@ -217,20 +243,22 @@ namespace dyno
 			height = buffer.ny();
 
 			// re-register resource when size changed...
-			if (resource)
+			if (resource) {
 				cuSafeCall(cudaGraphicsUnregisterResource(resource));
+			}
 			cuSafeCall(cudaGraphicsGLRegisterImage(&resource, this->id, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard));
 		}
-
+		if (resource == nullptr) return;
+		
 		// Map buffer objects to get CUDA device pointers
 		cudaArray* texture_ptr;
 		cuSafeCall(cudaGraphicsMapResources(1, &resource));
 		cuSafeCall(cudaGraphicsSubResourceGetMappedArray(&texture_ptr, resource, 0, 0));
 
-		// copy data with pitch
-		cuSafeCall(cudaMemcpy2DToArray(texture_ptr, 0, 0,
-			buffer.begin(), buffer.pitch(), buffer.nx() * sizeof(T), buffer.ny(),
-			cudaMemcpyDeviceToDevice));
+			// copy data with pitch
+			cuSafeCall(cudaMemcpy2DToArray(texture_ptr, 0, 0,
+				buffer.begin(), buffer.pitch(), buffer.nx() * sizeof(T), buffer.ny(),
+				cudaMemcpyDeviceToDevice));
 
 		cuSafeCall(cudaGraphicsUnmapResources(1, &resource));
 
@@ -256,9 +284,10 @@ namespace dyno
 				width * height * sizeof(T) * 2,
 				GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
 #else
-			//glImportMemoryFdEXT(bufGl.memoryObject, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, bufGl.fd);
+			glImportMemoryFdEXT(memoryObject, width*height*sizeof(T)*2, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
 			// fd got consumed
-			//bufGl.fd = -1;
+			fd = -1;
+			glCheckError();
 #endif
 			// named buffer
 			if (this->id != GL_INVALID_INDEX)
