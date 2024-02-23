@@ -97,8 +97,8 @@ namespace dyno
 		// Rendering pipeline
 		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-		shaderStages[0] = loadShader(getShadersPath() + "graphics/cloth.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShadersPath() + "graphics/cloth.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader((getShadersPath()  / "graphics/cloth.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader((getShadersPath()  / "graphics/cloth.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(pipelineLayout, renderPass);
 
@@ -206,9 +206,9 @@ namespace dyno
 		addGraphicsToComputeBarriers(drawCmdBuffer);
 	}
 
-	std::string TriangleSetRenderer::getShadersPath() const
+	FilePath TriangleSetRenderer::getShadersPath() const
 	{
-		return getAssetPath() + "shaders/" + shaderDir + "/";
+		return FilePath(getAssetPath()) / "shaders" / shaderDir;
 	}
 
 	VkPipelineShaderStageCreateInfo TriangleSetRenderer::loadShader(std::string fileName, VkShaderStageFlagBits stage)
@@ -224,7 +224,7 @@ namespace dyno
 
 	bool TriangleSetRenderer::initializeImpl()
 	{
-		auto triSet = std::dynamic_pointer_cast<TriangleSet>(this->inTopology()->getDataPtr());
+		auto triSet = std::dynamic_pointer_cast<TriangleSet3f>(this->inTopology()->getDataPtr());
 		if (triSet == nullptr)
 			return false;
 
@@ -235,12 +235,12 @@ namespace dyno
 		this->mIndex.resize(3 * triSet->mTriangleIndex.size());
 
 		program = std::make_shared<VkProgram>(BUFFER(Vertex), BUFFER(uint32_t), BUFFER(Vec3f), BUFFER(uint32_t), CONSTANT(uint32_t));
-		program->load(getAssetPath() + "shaders/glsl/graphics/SetupVertexFromPoints.comp.spv");
+		program->load(getSpvFile("shaders/glsl/graphics/SetupVertexFromPoints.comp.spv"));
 
 		particleNumber.setValue(triSet->mTriangleIndex.size());
 		dim3 groupSize = vkDispatchSize(triSet->mTriangleIndex.size(), 32);
 		program->begin();
-		program->enqueue(groupSize, &this->mVertex, &this->mIndex, triSet->mPoints.handle(), triSet->mIndex.handle(), &this->particleNumber);
+		program->enqueue(groupSize, &this->mVertex, &this->mIndex, triSet->mCoords.handle(), triSet->mIndex.handle(), &this->particleNumber);
 		program->end();
 
 		program->update();
@@ -250,7 +250,7 @@ namespace dyno
 
 	void TriangleSetRenderer::updateGraphicsContext()
 	{
-		auto triSet = std::dynamic_pointer_cast<TriangleSet>(this->inTopology()->getDataPtr());
+		auto triSet = std::dynamic_pointer_cast<TriangleSet3f>(this->inTopology()->getDataPtr());
 		assert(triSet != nullptr);
 
 		program->update();

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "ImWidget.h"
+#include "Algorithm/Reduction.h"
 
 namespace dyno
 {

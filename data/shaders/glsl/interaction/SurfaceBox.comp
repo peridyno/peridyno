@@ -1,0 +1,121 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Points
+{
+   Coord3D points[];
+};
+
+layout(std430, binding = 1) buffer Triangles
+{
+   Triangle triangles[];
+};
+
+layout(std430, binding = 2) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 3) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+
+    Plane3D plane13;
+    Plane3D plane42;
+    Plane3D plane14;
+    Plane3D plane32;
+
+	Ray3D mouseray;
+} regs;
+
+void main() {
+    int pId = int(gl_GlobalInvocationID.x);
+    if (pId >= regs.num) return;
+
+
+    Triangle3D t = new_triangle3D(points[triangles[pId][0]], points[triangles[pId][1]], points[triangles[pId][2]]); 
+    Segment3D s1 = Segment3D(points[triangles[pId][0]], points[triangles[pId][1]]); 
+    Segment3D s2 = Segment3D(points[triangles[pId][1]], points[triangles[pId][2]]); 
+    Segment3D s3 = Segment3D(points[triangles[pId][2]], points[triangles[pId][0]]);
+
+    bool flag = false;
+    Point3D p;
+    bool temp11 = segment_intersect(s1, regs.plane13, p);
+    temp11 = temp11 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot(p.origin - regs.plane32.origin, regs.plane32.normal)) > 0; 
+    if (temp11) flag = true; 
+
+    bool temp12 = segment_intersect(s1, regs.plane42, p);
+    temp12 = temp12 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot(p.origin - regs.plane32.origin, regs.plane32.normal)) > 0; 
+    if (temp12) flag = true; 
+
+    bool temp13 = segment_intersect(s1, regs.plane14, p);
+    temp13 = temp13 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot(p.origin - regs.plane42.origin, regs.plane42.normal)) > 0;
+    if (temp13) flag = true;
+
+    bool temp14 = segment_intersect(s1, regs.plane32, p);
+    temp14 = temp14 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot(p.origin - regs.plane42.origin, regs.plane42.normal)) > 0; 
+    if (temp14) flag = true; 
+
+    bool temp21 = segment_intersect(s2, regs.plane13, p);
+    temp21 = temp21 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot(p.origin - regs.plane32.origin, regs.plane32.normal)) > 0; 
+    if (temp21) flag = true;
+
+    bool temp22 = segment_intersect(s2, regs.plane42, p);
+    temp22 = temp22 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot(p.origin - regs.plane32.origin, regs.plane32.normal)) > 0; 
+    if (temp22) flag = true; 
+
+    bool temp23 = segment_intersect(s2, regs.plane14, p);
+    temp23 = temp23 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot(p.origin - regs.plane42.origin, regs.plane42.normal)) > 0; 
+    if (temp23) flag = true;
+
+    bool temp24 = segment_intersect(s2, regs.plane32, p);
+    temp24 = temp24 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot(p.origin - regs.plane42.origin, regs.plane42.normal)) > 0; 
+    if (temp24) flag = true; 
+
+    bool temp31 = segment_intersect(s3, regs.plane13, p);
+    temp31 = temp31 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot(p.origin - regs.plane32.origin, regs.plane32.normal)) > 0; 
+    if (temp31) flag = true; 
+
+    bool temp32 = segment_intersect(s3, regs.plane42, p);
+    temp32 = temp32 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot(p.origin - regs.plane32.origin, regs.plane32.normal)) > 0; 
+    if (temp32) flag = true; 
+
+    bool temp33 = segment_intersect(s3, regs.plane14, p);
+    temp33 = temp33 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot(p.origin - regs.plane42.origin, regs.plane42.normal)) > 0; 
+    if (temp33) flag = true; 
+
+    bool temp34 = segment_intersect(s3, regs.plane32, p);
+    temp34 = temp34 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot(p.origin - regs.plane42.origin, regs.plane42.normal)) > 0; 
+    if (temp34) flag = true;
+
+    for (int i = 0; i < 3; i++)
+    {
+        float temp1 = (dot(points[triangles[pId][i]] - regs.plane13.origin, regs.plane13.normal)) * (dot(points[triangles[pId][i]] - regs.plane42.origin, regs.plane42.normal)); 
+        float temp2 = (dot(points[triangles[pId][i]] - regs.plane14.origin, regs.plane14.normal)) * (dot(points[triangles[pId][i]] - regs.plane32.origin, regs.plane32.normal)); 
+        if (temp1 >= 0 && temp2 >= 0)
+        {
+            flag = flag || true;
+            break;
+        }
+    }
+
+    int temp = ray_intersect(regs.mouseray, t, p);
+    if (temp == 1)
+    {
+        flag = flag || true;
+    }
+
+    if (flag || intersected[pId] == 1)
+        intersected[pId] = 1;
+    else
+        intersected[pId] = 0;
+    unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+}

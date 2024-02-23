@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Assorted Vulkan helper functions
 *
 * Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
@@ -10,6 +10,7 @@
 
 #include "vulkan/vulkan.h"
 #include "VulkanInitializers.hpp"
+#include "VkSystem.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -30,7 +31,6 @@
 #elif defined(__ANDROID__)
 #include "VulkanAndroid.h"
 #include <android/asset_manager.h>
-#include "Platform.h"
 #elif defined(__GNUC__) || defined(__clang__)
 #include "Platform.h"
 #endif
@@ -57,11 +57,16 @@
 	VkResult res = (f);																					\
 	if (res != VK_SUCCESS)																				\
 	{																									\
-		std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << "\n"; \
+		logVkError(res, __FILE__, __LINE__);                                                          \
 		assert(res == VK_SUCCESS);																		\
 	}																									\
 }
 #endif
+
+void logVkError(VkResult res, const char* file, int line);
+
+
+std::string getSpvFile(const std::string& fileName);
 
 template<typename T>
 std::string getDynamicSpvFile(const std::string &fileName)
@@ -85,7 +90,7 @@ std::string getDynamicSpvFile(const std::string &fileName)
 
     // test.comp.spv --> test.int.comp.spv
     outFileName.insert(suffixPos, "." + typeName);
-    return getAssetPath() + outFileName;
+	return getSpvFile(outFileName);
 }
 
 namespace vks

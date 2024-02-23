@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2017-2021 Jian SHI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,8 @@ namespace dyno
 	class XBuffer : public Buffer
 	{
 	public:
+		XBuffer();
+		~XBuffer();
 		// update OpenGL buffer within GL context
 		void updateGL();
 		// return number of elements
@@ -50,7 +52,7 @@ namespace dyno
 		void load(dyno::DArray<T1> data)
 		{
 #ifdef VK_BACKEND
-			this->loadVkBuffer(data.buffer(), data.bufferSize());
+			this->loadVkBuffer(data.buffer(), data.size() * sizeof(T1));
 #endif // VK_BACKEND
 
 #ifdef CUDA_BACKEND
@@ -58,13 +60,17 @@ namespace dyno
 #endif // CUDA_BACKEND
 		}
 
+		auto native_buffer() { return buffer; };
+
+		void release() override;
+
 	private:
 
 #ifdef VK_BACKEND
 		VkBuffer		buffer = VK_NULL_HANDLE;
 		VkDeviceMemory	memory = VK_NULL_HANDLE;
-		int srcBufferSize		= -1;	// real size of the data
-		int allocatedSize	= -1;	// allocated buffer size
+		std::size_t srcBufferSize = 0;	// real size of the data
+		std::size_t allocatedSize = 0;	// allocated buffer size
 #ifdef WIN32
 		HANDLE handle = nullptr;  // The Win32 handle
 #else
@@ -73,13 +79,13 @@ namespace dyno
 		// command for copy buffer
 		VkCommandBuffer copyCmd = VK_NULL_HANDLE;
 
-		unsigned int	memoryObject = 0;			// OpenGL memory object
-		unsigned int	tempBuffer = 0xffffffff;	// temp buffer
-		bool resized = true;
+		unsigned int memoryObject = 0;			// OpenGL memory object
+		unsigned int tempBuffer = 0xffffffff;	// temp buffer
+		bool resized = false;
 
 		void loadVkBuffer(VkBuffer src, int size);
 		void allocateVkBuffer(int size);
-
+		void closeHandle();
 #endif	//VK_BACKEND
 
 
@@ -89,9 +95,12 @@ namespace dyno
 #endif
 	};
 
+	template class XBuffer<unsigned char>;
 	template class XBuffer<dyno::Vec2f>;
 	template class XBuffer<dyno::Vec3f>;
 	template class XBuffer<dyno::Transform3f>;
 	template class XBuffer<dyno::TopologyModule::Edge>;
 	template class XBuffer<dyno::TopologyModule::Triangle>;
+
+	using XBufferBasic = XBuffer<unsigned char>;
 }

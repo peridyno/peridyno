@@ -42,14 +42,7 @@ namespace dyno
 		void setColorMapMode(ColorMapMode mode);
 
 	public:
-#ifdef CUDA_BACKEND
 		DEF_INSTANCE_IN(PointSet<DataType3f>, PointSet, "");
-#endif
-
-#ifdef VK_BACKEND
-		DEF_INSTANCE_IN(PointSet, PointSet, "");
-#endif // VK_BACKEND
-
 
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 

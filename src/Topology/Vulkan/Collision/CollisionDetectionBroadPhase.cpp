@@ -22,7 +22,7 @@ namespace dyno
 				BUFFER(uint32_t),			//shape type
 				CONSTANT(uint32_t))				//number of AABBs
 		);
-		kernel("CollisionCounterInBroadPhase")->load(getAssetPath() + "shaders/glsl/collision/CollisionCounterInBroadPhase.comp.spv");
+		kernel("CollisionCounterInBroadPhase")->load(getSpvFile("shaders/glsl/collision/CollisionCounterInBroadPhase.comp.spv"));
 
 		this->addKernel(
 			"CollisionDetectionInBroadPhase",
@@ -34,7 +34,7 @@ namespace dyno
 				BUFFER(uint32_t),			//shape type
 				CONSTANT(uint32_t))				//number of AABBs
 		);
-		kernel("CollisionDetectionInBroadPhase")->load(getAssetPath() + "shaders/glsl/collision/CollisionDetectionInBroadPhase.comp.spv");
+		kernel("CollisionDetectionInBroadPhase")->load(getSpvFile("shaders/glsl/collision/CollisionDetectionInBroadPhase.comp.spv"));
 	}
 
 	CollisionDetectionBroadPhase::~CollisionDetectionBroadPhase()

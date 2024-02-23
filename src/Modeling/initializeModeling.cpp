@@ -8,7 +8,6 @@
 #include "CylinderModel.h"
 #include "ConeModel.h"
 #include "Turning.h"
-#include "Merge.h"
 
 #include "StaticTriangularMesh.h"
 #include "GLWireframeVisualModule.h"

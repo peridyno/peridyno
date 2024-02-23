@@ -28,7 +28,7 @@ namespace dyno
 				BUFFER(uint),				//array
 				CONSTANT(uint))				//num
 		);
-		kernel("ResetUInt")->load(getAssetPath() + "shaders/glsl/math/ResetUInt.comp.spv");
+		kernel("ResetUInt")->load(getSpvFile("shaders/glsl/math/ResetUInt.comp.spv"));
 
 		this->addKernel(
 			"CountParticles",
@@ -38,7 +38,7 @@ namespace dyno
 				UNIFORM(HashGrid),			//hash grid structure
 				UNIFORM(uint))				//num
 		);
-		kernel("CountParticles")->load(getAssetPath() + "shaders/glsl/particlesystem/CountParticles.comp.spv");
+		kernel("CountParticles")->load(getSpvFile("shaders/glsl/particlesystem/CountParticles.comp.spv"));
 
 		this->addKernel(
 			"SetupParticles",
@@ -51,7 +51,7 @@ namespace dyno
 				UNIFORM(ArrayListInfo),		//
 				UNIFORM(uint))				//particle num
 		);
-		kernel("SetupParticles")->load(getAssetPath() + "shaders/glsl/particlesystem/SetupParticles.comp.spv");
+		kernel("SetupParticles")->load(getSpvFile("shaders/glsl/particlesystem/SetupParticles.comp.spv"));
 
 		this->addKernel(
 			"CountNeighbors",
@@ -64,7 +64,7 @@ namespace dyno
 				UNIFORM(ArrayListInfo),		//hash grid array list
 				UNIFORM(uint))				//particle num
 		);
-		kernel("CountNeighbors")->load(getAssetPath() + "shaders/glsl/particlesystem/CountNeighbors.comp.spv");
+		kernel("CountNeighbors")->load(getSpvFile("shaders/glsl/particlesystem/CountNeighbors.comp.spv"));
 
 		this->addKernel(
 			"SetupNeighbors",
@@ -80,7 +80,7 @@ namespace dyno
 				UNIFORM(ArrayListInfo),		//hash grid array list
 				UNIFORM(uint))				//particle num
 		);
-		kernel("SetupNeighbors")->load(getAssetPath() + "shaders/glsl/particlesystem/SetupNeighbors.comp.spv");
+		kernel("SetupNeighbors")->load(getSpvFile("shaders/glsl/particlesystem/SetupNeighbors.comp.spv"));
 	}
 
 	NeighborPointQuery::~NeighborPointQuery()
@@ -121,11 +121,11 @@ namespace dyno
 		uint gNum = nx * ny * nz;
 
 		DArray<uint> counter(gNum);
-
+		auto vk_gNum = VkConstant<uint>(gNum);
 		kernel("ResetUInt")->flush(
 			vkDispatchSize(gNum, 64),
 			counter.handle(),
-			&VkConstant<uint>(gNum));
+			&vk_gNum);
 
 		HashGrid grid;
 		grid.lo = lo;
@@ -152,10 +152,11 @@ namespace dyno
 
 		cellIds.resize(*counter.handle());
 
+		vk_gNum = VkConstant<uint>(gNum);
 		kernel("ResetUInt")->flush(
 			vkDispatchSize(gNum, 64),
 			counter.handle(),
-			&VkConstant<uint>(gNum));
+			&vk_gNum);
 
 		kernel("SetupParticles")->flush(
 			vkDispatchSize(pNum, 64),

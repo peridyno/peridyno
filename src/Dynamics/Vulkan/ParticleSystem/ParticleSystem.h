@@ -39,7 +39,7 @@ namespace dyno
 		/**
 		 * @brief A topology
 		 */
-		DEF_INSTANCE_STATE(PointSet, PointSet, "Topology");
+		DEF_INSTANCE_STATE(PointSet3f, PointSet, "Topology");
 
 	protected:
 		void resetStates() override;

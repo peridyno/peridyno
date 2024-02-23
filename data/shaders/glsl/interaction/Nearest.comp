@@ -1,0 +1,34 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 1) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+	int min_index;
+} regs;
+
+void main() { 
+    uint pId = gl_GlobalInvocationID.x;
+    if (pId >= regs.num) return;
+
+    if (intersected[pId] == 1)
+    {
+        if (pId != regs.min_index)
+        {
+            intersected[pId] = 0;
+            unintersected[pId] = 1;
+        }
+    }
+}

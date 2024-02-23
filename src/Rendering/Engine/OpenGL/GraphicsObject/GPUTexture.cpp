@@ -1,4 +1,4 @@
-#include "GPUTexture.h"
+﻿#include "GPUTexture.h"
 
 #include <Vector.h>
 
@@ -21,42 +21,67 @@
 #endif // VK_BACKEND
 
 
+
 namespace dyno
 {
-	template<typename T>
-	void XTexture2D<T>::create()
-	{
-		if (typeid(T) == typeid(dyno::Vec4f)) {
-			this->format = GL_RGBA;
-			this->internalFormat = GL_RGBA32F;
-			this->type = GL_FLOAT;
-		}
-		else if (typeid(T) == typeid(dyno::Vec3f)) {
-			this->format = GL_RGB;
-			this->internalFormat = GL_RGB32F;
-			this->type = GL_FLOAT;
-		}
-		else if (typeid(T) == typeid(dyno::Vec3u)) {
-			this->format = GL_RGB;
-			this->internalFormat = GL_RGB8;
-			this->type = GL_UNSIGNED_BYTE;
-		}
+template<typename T>
+XTexture2D<T>::XTexture2D() {}
+template<typename T>
+XTexture2D<T>::~XTexture2D() {
 
-		Texture2D::create();
-	}
-
-	template<typename T>
-	bool XTexture2D<T>::isValid() const
-	{
-		return width > 0 && height > 0;
-	}
-
-
-	template<typename T>
-	void XTexture2D<T>::load(dyno::DArray2D<T> data)
-	{
 #ifdef CUDA_BACKEND
-		buffer.assign(data);
+#ifdef _WIN32
+	if (resource) {
+		cuSafeCall(cudaGraphicsUnregisterResource(resource));
+	}
+#endif
+	buffer.clear();
+#elif defined(VK_BACKEND)
+		dyno::VkContext* vkCtx = dyno::VkSystem::instance()->currentContext();
+		if(copyCmd)
+			vkFreeCommandBuffers(vkCtx->deviceHandle(), vkCtx->commandPool(), 1, &copyCmd);
+		if(buffer != VK_NULL_HANDLE)
+			vkDestroyBuffer(vkCtx->deviceHandle(), buffer, nullptr);
+		if(memory != VK_NULL_HANDLE)
+			vkFreeMemory(vkCtx->deviceHandle(), memory, nullptr);
+		this->closeHandle();
+#endif
+}
+
+template<typename T>
+	void XTexture2D<T>::create()
+{
+	if (typeid(T) == typeid(dyno::Vec4f)) {
+		this->format = GL_RGBA;
+		this->internalFormat = GL_RGBA32F;
+		this->type = GL_FLOAT;
+	}
+	else if (typeid(T) == typeid(dyno::Vec3f)) {
+		this->format = GL_RGB;
+		this->internalFormat = GL_RGB32F;
+		this->type = GL_FLOAT;
+	}
+	else if (typeid(T) == typeid(dyno::Vec3u)) {
+		this->format = GL_RGB;
+		this->internalFormat = GL_RGB8;
+		this->type = GL_UNSIGNED_BYTE;
+	}
+
+	Texture2D::create();
+}
+
+template<typename T>
+	bool XTexture2D<T>::isValid() const
+{
+	return width > 0 && height > 0;
+}
+
+
+template<typename T>
+	void XTexture2D<T>::load(dyno::DArray2D<T> data)
+{
+#ifdef CUDA_BACKEND
+	buffer.assign(data);
 #endif // CUDA_BACKEND
 
 #ifdef VK_BACKEND
@@ -79,6 +104,10 @@ namespace dyno
 			// free current buffer
 			vkDestroyBuffer(device, buffer, nullptr);
 			vkFreeMemory(device, memory, nullptr);
+			buffer = VK_NULL_HANDLE;
+			memory = VK_NULL_HANDLE;
+
+			this->closeHandle();
 
 			VkExternalMemoryHandleTypeFlags type;
 			// OS platforms
@@ -87,7 +116,6 @@ namespace dyno
 #else
 			type = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 #endif
-
 			// create vulkan buffer
 			{
 				VkBufferCreateInfo bufferInfo{};
@@ -128,7 +156,7 @@ namespace dyno
 				}
 			}
 
-			vkBindBufferMemory(device, buffer, memory, 0);
+		 	VK_CHECK_RESULT(vkBindBufferMemory(device, buffer, memory, 0));
 
 		}
 
@@ -155,7 +183,7 @@ namespace dyno
 			vkCmdCopyBuffer(copyCmd, src, buffer, 1, &copyRegion);
 
 			// end and flush
-			ctx->flushCommandBuffer(copyCmd, ctx->transferQueue, false);
+			ctx->flushCommandBuffer(copyCmd, ctx->transferQueueHandle(), false);
 		}
 
 		{
@@ -176,7 +204,7 @@ namespace dyno
 			vkCmdCopyBuffer(copyCmd, buffer, wtf.buffer(), 1, &copyRegion);
 
 			// end and flush
-			ctx->flushCommandBuffer(copyCmd, ctx->transferQueue, false);
+			ctx->flushCommandBuffer(copyCmd, ctx->transferQueueHandle(), false);
 
 			temp.assign(wtf);
 		}
@@ -190,16 +218,23 @@ namespace dyno
 
 		auto vkGetMemoryWin32HandleKHR =
 			PFN_vkGetMemoryWin32HandleKHR(vkGetDeviceProcAddr(device, "vkGetMemoryWin32HandleKHR"));
-		vkGetMemoryWin32HandleKHR(device, &info, &handle);
+		VK_CHECK_RESULT(vkGetMemoryWin32HandleKHR(device, &info, &handle));
 #else
-	// TODO: for linux and other OS
+		VkMemoryGetFdInfoKHR info{};
+		info.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
+		info.memory = memory;
+		info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+		auto vkGetMemoryFdKHR =
+			PFN_vkGetMemoryFdKHR(vkGetDeviceProcAddr(device, "vkGetMemoryFdKHR"));
+		VK_CHECK_RESULT(vkGetMemoryFdKHR(device, &info, &fd));
 #endif  
 
 #endif
 	}
 
-	template<typename T>
-	void XTexture2D<T>::updateGL()
+template<typename T>
+void XTexture2D<T>::updateGL()
 	{
 #ifdef CUDA_BACKEND
 
@@ -217,20 +252,22 @@ namespace dyno
 			height = buffer.ny();
 
 			// re-register resource when size changed...
-			if (resource)
+			if (resource) {
 				cuSafeCall(cudaGraphicsUnregisterResource(resource));
+			}
 			cuSafeCall(cudaGraphicsGLRegisterImage(&resource, this->id, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard));
 		}
-
+		if (resource == nullptr) return;
+		
 		// Map buffer objects to get CUDA device pointers
 		cudaArray* texture_ptr;
 		cuSafeCall(cudaGraphicsMapResources(1, &resource));
 		cuSafeCall(cudaGraphicsSubResourceGetMappedArray(&texture_ptr, resource, 0, 0));
 
-		// copy data with pitch
-		cuSafeCall(cudaMemcpy2DToArray(texture_ptr, 0, 0,
-			buffer.begin(), buffer.pitch(), buffer.nx() * sizeof(T), buffer.ny(),
-			cudaMemcpyDeviceToDevice));
+			// copy data with pitch
+			cuSafeCall(cudaMemcpy2DToArray(texture_ptr, 0, 0,
+				buffer.begin(), buffer.pitch(), buffer.nx() * sizeof(T), buffer.ny(),
+				cudaMemcpyDeviceToDevice));
 
 		cuSafeCall(cudaGraphicsUnmapResources(1, &resource));
 
@@ -256,15 +293,13 @@ namespace dyno
 				width * height * sizeof(T) * 2,
 				GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
 #else
-			//glImportMemoryFdEXT(bufGl.memoryObject, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, bufGl.fd);
-			// fd got consumed
-			//bufGl.fd = -1;
+			glImportMemoryFdEXT(memoryObject, width*height*sizeof(T)*2, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
 #endif
+			glCheckError();
 			// named buffer
 			if (this->id != GL_INVALID_INDEX)
 				glDeleteTextures(1, &this->id);
 
-			//glGenTextures(1, &this->id);
 			glCreateTextures(GL_TEXTURE_2D, 1, &this->id);
 			glBindTexture(GL_TEXTURE_2D, this->id);
 			//this->create();
@@ -289,9 +324,24 @@ namespace dyno
 
 #endif // VK_BACKEND
 	}
+
+#ifdef VK_BACKEND
+template<typename T>
+void XTexture2D<T>::closeHandle() {
+#ifdef WIN32
+	if (handle) {
+		CloseHandle(handle);
+		handle = nullptr;
+	}
+#else
+	if (fd >= 0) {
+		close(fd);
+		fd = -1;
+	}
+#endif
 }
+#endif
 
-
-
+}
 
 

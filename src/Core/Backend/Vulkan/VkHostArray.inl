@@ -1,4 +1,4 @@
-namespace dyno {
+﻿namespace dyno {
 
 	template<typename T>
 	VkHostArray<T>::~VkHostArray()
@@ -18,7 +18,7 @@ namespace dyno {
 			buffer->destroy();
 
 			if (num > 0) {
-				if (ctx->useMemoryPool) {
+				if (ctx->useMemPool()) {
 					buffer->size = newSize;
 					buffer->usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 					buffer->memoryPropertyFlags =

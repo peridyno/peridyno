@@ -99,8 +99,8 @@ namespace dyno
 		// Rendering pipeline
 		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-		shaderStages[0] = loadShader(getShadersPath() + "graphics/render.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShadersPath() + "graphics/render.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader((getShadersPath()  / "graphics/render.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader((getShadersPath()  / "graphics/render.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(pipelineLayout, renderPass);
 
@@ -145,7 +145,7 @@ namespace dyno
 		VK_CHECK_RESULT(vkCreateGraphicsPipelines(ctx->deviceHandle(), ctx->pipelineCacheHandle(), 1, &pipelineCreateInfo, nullptr, &pipeline));
 	
 		// create sphere pipeline
-		shaderStages[0] = loadShader(getShadersPath() + "graphics/renderSphere.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[0] = loadShader((getShadersPath()  / "graphics/renderSphere.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT);
 
 		inputBindings = {
 			vks::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
@@ -170,7 +170,7 @@ namespace dyno
 		VK_CHECK_RESULT(vkCreateGraphicsPipelines(ctx->deviceHandle(), ctx->pipelineCacheHandle(), 1, &pipelineCreateInfo, nullptr, &spherePipeline));
 
 		// create capsule pipeline
-		shaderStages[0] = loadShader(getShadersPath() + "graphics/renderCapsule.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[0] = loadShader((getShadersPath()  / "graphics/renderCapsule.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT);
 
 		inputBindings = {
 			vks::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX),
@@ -287,9 +287,9 @@ namespace dyno
 		}
 	}
 
-	std::string VkGraphicsPipeline::getShadersPath() const
+	FilePath VkGraphicsPipeline::getShadersPath() const
 	{
-		return getAssetPath() + "shaders/" + shaderDir + "/";
+		return FilePath(getAssetPath())  / "shaders" / shaderDir;
 	}
 
 	VkPipelineShaderStageCreateInfo VkGraphicsPipeline::loadShader(std::string fileName, VkShaderStageFlagBits stage)

@@ -7,11 +7,12 @@ using namespace dyno;
 
 TEST(VkSort, sort)
 {
-	VkSystem::instance()->initialize();
-	VkSort<float> sortInt;
+	VkSortByKey<int, int> sortInt;
 	uint32_t dSize = 10;
-	std::vector<float> keys(dSize, 1.0f);
-	std::vector<float> values(dSize, 1.0f);
+	CArray<int> keys;
+	keys.assign(std::vector<int>(dSize, 1.0f));
+	CArray<int> values;
+	values.assign(std::vector<int>(dSize, 1.0f));
 
 	for (std::size_t i = 0; i < dSize; i++)
 	{
@@ -19,20 +20,17 @@ TEST(VkSort, sort)
 		values[i] = rand() % 2048;
 		//printf("keys[%d]=%d  values[%d]=%d \n", i, keys[i], i, values[i]);
 	}
-	//test sort by key
-	sortInt.sort_by_key(keys, values, UP);
-	int SortType = UP;
 
-	//test sort
-	//sortInt.sort(keys,DOWN);
-	//int SortType = DOWN;
+	sortInt.sortByKey(keys, values, SortParam::eUp);
 
 	for (std::size_t i = 0; i < dSize - 1; i++)
 	{
-		if (SortType == 0)
-			EXPECT_EQ(keys[i] <= keys[i + 1], true);
-		else
-			EXPECT_EQ(keys[i] >= keys[i + 1], true);
-		//printf("key[%d]=%d  values[%d]=%d\n", i, keys[i], i, values[i]);
+		EXPECT_EQ(keys[i] <= keys[i + 1], true);
+	}
+
+	sortInt.sortByKey(keys, values, SortParam::eDown);
+	for (std::size_t i = 0; i < dSize - 1; i++)
+	{
+		EXPECT_EQ(keys[i] >= keys[i + 1], true);
 	}
 }

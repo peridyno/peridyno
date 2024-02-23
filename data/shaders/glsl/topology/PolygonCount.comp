@@ -1,0 +1,42 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+
+#define USE_BUFFER_REFERENCE
+#include "../base/Common.glsl"
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer IndexRef
+{
+   uint idx;
+};
+
+#define ELEMENT IndexRef
+#define LIST_NAME List
+#define LIST_REF_NAME ListRef
+#include "../adt/List.glsl"
+
+layout(std430, binding = 0) buffer B1
+{
+   uint counter[];
+};
+
+layout (push_constant) uniform PushConsts {
+   uint num;
+   ListRef polygonIndice;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   uint idx = gl_GlobalInvocationID.x;
+	if (idx >= regs.num)
+		return;
+
+   List list = regs.polygonIndice[idx].data;
+
+   uint N = List_size(list);
+   for (uint i = 0; i < N; i++) {
+      uint v0 = List_get(list, i).idx;
+      atomicAdd(counter[v0], 1);
+   }
+}

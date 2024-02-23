@@ -1,4 +1,13 @@
-#pragma once
+﻿#pragma once
+
+#include <memory>
+#include <map>
+#include <filesystem>
+#include <array>
+#include <cstddef>
+#include <typeinfo>
+#include <optional>
+
 #include "VkSystem.h"
 #include "VkContext.h"
 #include "VkDeviceArray.h"
@@ -6,8 +15,8 @@
 #include "VkDeviceArray3D.h"
 #include "VkUniform.h"
 #include "VkConstant.h"
-#include <memory>
-#include <map>
+#include "VkCompContext.h"
+
 
 namespace dyno {
 
@@ -38,6 +47,23 @@ namespace dyno {
 		return blockDim;
 	}
 
+	static dim3 vkDispatchSize(const VkConstant<uint>& totalSize, uint blockSize)
+	{
+		dim3 blockDim;
+		blockDim.x = iDivUp(totalSize.getValue(), blockSize);
+		return blockDim;
+	}
+
+	static dim3 vkDispatchSize2D(const VkConstant<uint>& size_x, const VkConstant<uint>& size_y, uint blockSize)
+	{
+		dim3 blockDims;
+		blockDims.x = iDivUp(size_x.getValue(), blockSize);
+		blockDims.y = iDivUp(size_y.getValue(), blockSize);
+		blockDims.z = 1;
+
+		return blockDims;
+	}
+
 	static dim3 vkDispatchSize2D(uint size_x, uint size_y, uint blockSize)
 	{
 		dim3 blockDims;
@@ -58,50 +84,29 @@ namespace dyno {
 		return blockDims;
 	}
 
-	template<typename T>
-	inline VkDeviceArray<T>* bufferPtr()
-	{
-		static VkDeviceArray<T> var;
-		return &var;
-	}
+	struct VkArgInfo {
+		template<typename T, typename VT>
+		static VkArgInfo info(VariableType type) {
+			return VkArgInfo {type, &typeid(T), sizeof(VT)};
+		}
 
-	template<typename T>
-	inline VkDeviceArray2D<T>* buffer2DPtr()
-	{
-		static VkDeviceArray2D<T> var;
-		return &var;
-	}
+		VariableType var_type;
+		const std::type_info* type; // maybe template func addr?
+		std::size_t var_size;
+	};
 
-	template<typename T>
-	inline VkDeviceArray3D<T>* buffer3DPtr()
-	{
-		static VkDeviceArray3D<T> var;
-		return &var;
-	}
-
-	template<typename T>
-	inline VkUniform<T>* uniformPtr()
-	{
-		static VkUniform<T> var;
-		return &var;
-	}
-
-	template<typename T>
-	inline VkConstant<T>* constantPtr()
-	{
-		static VkConstant<T> var;
-		return &var;
-	}
-
-#define BUFFER(T) bufferPtr<T>()
-#define BUFFER2D(T) buffer2DPtr<T>()
-#define BUFFER3D(T) buffer3DPtr<T>()
-#define UNIFORM(T) uniformPtr<T>()
-#define CONSTANT(T) constantPtr<T>()
+#define VKARGINFO(T, VT, VART) dyno::VkArgInfo::info<T, VT>(dyno::VariableType::VART)
+#define BUFFER(T) VKARGINFO(VkDeviceArray<T>, T, DeviceBuffer)
+#define BUFFER2D(T) VKARGINFO(VkDeviceArray2D<T>, T, DeviceBuffer)
+#define BUFFER3D(T) VKARGINFO(VkDeviceArray3D<T>, T, DeviceBuffer)
+#define UNIFORM(T) VKARGINFO(VkUniform<T>, T, Uniform)
+#define CONSTANT(T) VKARGINFO(VkConstant<T>, T, Constant)
 
 	class VkProgram {
 
 	public:
+		static constexpr int MaxDiscriptorSetNum {128};
+
 		template<typename... Args>
 		VkProgram(Args... args);
 
@@ -130,16 +135,33 @@ namespace dyno {
 		void wait();
 
 		template<typename... Args>
-		void flush(dim3 groupSize, Args... args) {
-			this->begin();
-			this->enqueue(groupSize, args...);
-			this->end();
+		void submit(dim3 groupSize, Args... args) {
+			auto& comp = VkCompContext::current();
+			{
+				this->begin();
+				this->enqueue(groupSize, args...);
+				this->end();
 
-			this->update(true);
-			this->wait();
+				this->update(false);
+			}
 		}
 
-		bool load(std::string fileName);
+		template<typename... Args>
+		void flush(dim3 groupSize, Args... args) {
+			auto& comp = VkCompContext::current();
+			comp.push();
+			{
+				this->begin();
+				this->enqueue(groupSize, args...);
+				this->end();
+
+				this->update(true);
+				this->wait();
+			}
+			comp.pop();
+		}
+
+		bool load(std::filesystem::path fileName);
         void addMacro(std::string key, std::string value);
 
 		void addGraphicsToComputeBarriers(VkCommandBuffer commandBuffer);
@@ -154,15 +176,15 @@ namespace dyno {
 			} semaphores;
 		} compute;
 
-		void setVkCommandBuffer(VkCommandBuffer cmdBuffer) { mCommandBuffers = cmdBuffer; }
 		void bindPipeline();
 
+		void setVkCommandBuffer(VkCommandBuffer cmdBuffer);
 		void suspendInherentCmdBuffer(VkCommandBuffer cmdBuffer);
 		void restoreInherentCmdBuffer();
 
 	protected:
-		void pushFormalParameter(VkVariable* arg);
-		void pushFormalConstant(VkVariable* arg);
+		void pushFormalParameter(const VkArgInfo& arg);
+		void pushFormalConstant(const VkArgInfo& arg);
 
 		void pushArgument(VkVariable* arg);
 		void pushConstant(VkVariable* arg);
@@ -171,11 +193,14 @@ namespace dyno {
 
 	private:
 		VkPipelineShaderStageCreateInfo createComputeStage(std::string fileName);
+		VkPushConstantRange buildPushRange(VkShaderStageFlags, const std::vector<VkArgInfo>&);
+		std::vector<std::byte> buildPushBuf(const std::vector<VkVariable*>&);
+		VkCommandBuffer commandBuffer() const;
 
 		VkContext* ctx = nullptr;
 
-		std::vector<VkVariable*> mFormalParamters;
-		std::vector<VkVariable*> mFormalConstants;
+		std::vector<VkArgInfo> mFormalParamters;
+		std::vector<VkArgInfo> mFormalConstants;
 
 		std::vector<VkVariable*> mAllArgs;
 		std::vector<VkVariable*> mBufferArgs;
@@ -183,18 +208,19 @@ namespace dyno {
 		std::vector<VkVariable*> mConstArgs;
 
 		// Descriptor set pool
-		VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-		VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-		VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+		// VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+		VkDescriptorSetLayout descriptorSetLayout {VK_NULL_HANDLE};
+		VkDescriptorCache::LayoutHandle mLayoutHandle;
+
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline pipeline = VK_NULL_HANDLE;
 		
 		VkFence mFence;
-		VkQueue queue = VK_NULL_HANDLE;
-		VkCommandPool mCommandPool = VK_NULL_HANDLE;
-		VkCommandBuffer mCommandBuffers = VK_NULL_HANDLE;
+		VkQueue queue;
 
-		VkCommandBuffer mCmdBufferCopy = VK_NULL_HANDLE;
+		std::optional<VkCommandBuffer> mCommandBuffer;
+		std::optional<VkCommandBuffer> mOldCommandBuffer;
+
 		std::vector<VkShaderModule> shaderModules;
 	};
 
@@ -203,19 +229,6 @@ namespace dyno {
 	{
 		ctx = VkSystem::instance()->currentContext();
 
-		// Create the command pool
-		VkCommandPoolCreateInfo cmdPoolInfo = {};
-		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		cmdPoolInfo.queueFamilyIndex = ctx->queueFamilyIndices.compute;
-		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		VK_CHECK_RESULT(vkCreateCommandPool(ctx->deviceHandle(), &cmdPoolInfo, nullptr, &mCommandPool));
-
-		// Create a command buffer for compute operations
-		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
-			vks::initializers::commandBufferAllocateInfo(mCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(ctx->deviceHandle(), &cmdBufAllocateInfo, &mCommandBuffers));
-
 		// Semaphores for graphics / compute synchronization
 		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
 		VK_CHECK_RESULT(vkCreateSemaphore(ctx->deviceHandle(), &semaphoreCreateInfo, nullptr, &compute.semaphores.ready));
@@ -223,21 +236,21 @@ namespace dyno {
 
 		uint32_t nBuffer = 0;
 		uint32_t nUniform = 0;
-		std::initializer_list<VkVariable*> variables{args...};
-		for (auto variable : variables)
+		std::initializer_list<VkArgInfo> argInfos{args...};
+		for (auto arg : argInfos)
 		{
-			switch (variable->type())
+			switch (arg.var_type)
 			{
 			case VariableType::DeviceBuffer:
-				this->pushFormalParameter(variable);
+				this->pushFormalParameter(arg);
 				nBuffer++;
 				break;
 			case VariableType::Uniform:
-				this->pushFormalParameter(variable);
+				this->pushFormalParameter(arg);
 				nUniform++;
 				break;
 			case VariableType::Constant:
-				this->pushFormalConstant(variable);
+				this->pushFormalConstant(arg);
 				break;
 			default:
 				break;
@@ -248,39 +261,36 @@ namespace dyno {
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
 		for (size_t i = 0; i < mFormalParamters.size(); i++)
 		{
-			if (mFormalParamters[i]->type() == VariableType::DeviceBuffer || mFormalParamters[i]->type() == VariableType::Uniform)
+			if (mFormalParamters[i].var_type == VariableType::DeviceBuffer || mFormalParamters[i].var_type == VariableType::Uniform)
 			{
-				setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VkVariable::descriptorType(mFormalParamters[i]->type()), VK_SHADER_STAGE_COMPUTE_BIT, i));
+				setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VkVariable::descriptorType(mFormalParamters[i].var_type), VK_SHADER_STAGE_COMPUTE_BIT, i));
 			}
 		}
 
 		VkDescriptorSetLayoutCreateInfo descriptorLayout =
 			vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
+		mLayoutHandle = ctx->descriptorCache().queryLayoutHandle(descriptorLayout);
+		descriptorSetLayout = ctx->descriptorCache().layout(mLayoutHandle).value();
 
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(ctx->deviceHandle(), &descriptorLayout, nullptr, &descriptorSetLayout));
+		// VK_CHECK_RESULT(vkCreateDescriptorSetLayout(ctx->deviceHandle(), &descriptorLayout, nullptr, &descriptorSetLayout));
 
 
-		std::vector<VkDescriptorPoolSize> poolSizes;
+		// std::vector<VkDescriptorPoolSize> poolSizes;
 		
-		if (nBuffer > 0)
-			poolSizes.push_back(vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nBuffer));
+		// if (nBuffer > 0)
+		// 	poolSizes.push_back(vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nBuffer));
 
-		if (nUniform > 0)
-			poolSizes.push_back(vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nUniform));
+		// if (nUniform > 0)
+		// 	poolSizes.push_back(vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nUniform));
 
-		// Create the descriptor pool
-		VkDescriptorPoolCreateInfo descriptorPoolInfo =
-			vks::initializers::descriptorPoolCreateInfo(poolSizes, poolSizes.size());
-		VK_CHECK_RESULT(vkCreateDescriptorPool(ctx->deviceHandle(), &descriptorPoolInfo, nullptr, &descriptorPool));
-
-		VkDescriptorSetAllocateInfo allocInfo =
-			vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
-
-		// Create two descriptor sets with input and output buffers switched
-		VK_CHECK_RESULT(vkAllocateDescriptorSets(ctx->deviceHandle(), &allocInfo, &descriptorSet));
+		// if(poolSizes.size()) {
+		// 	VkDescriptorPoolCreateInfo descriptorPoolInfo =
+		// 		vks::initializers::descriptorPoolCreateInfo(poolSizes, std::max(poolSizes.size(), (std::size_t)1) * MaxDiscriptorSetNum);
+		// 	VK_CHECK_RESULT(vkCreateDescriptorPool(ctx->deviceHandle(), &descriptorPoolInfo, nullptr, &descriptorPool));
+		// }
 
 		// Create a compute capable device queue
-		vkGetDeviceQueue(ctx->deviceHandle(), ctx->queueFamilyIndices.compute, 0, &queue);
+		vkGetDeviceQueue(ctx->deviceHandle(), ctx->computeQueueFamilyIndex(), 0, &queue);
 
 		VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo(VK_FLAGS_NONE);
 		VK_CHECK_RESULT(vkCreateFence(ctx->deviceHandle(), &fenceInfo, nullptr, &mFence));
@@ -289,16 +299,23 @@ namespace dyno {
 	template<typename... Args>
 	void VkProgram::enqueue(dim3 groupSize, Args... args)
 	{
-		std::initializer_list<VkVariable*> variables{args...};
+		std::initializer_list<VkVariable*> variables{const_cast<VkVariable*>((const VkVariable*)args)...};
 
 #ifndef NDEBUG
 		assert(mFormalParamters.size() == variables.size());
+		constexpr std::array types { &typeid(std::decay_t<std::remove_pointer_t<decltype(args)>>)... };
 		for (std::size_t i = 0; i < variables.size(); i++)
 		{
 			auto variable = *(variables.begin() + i);
-			assert(mFormalParamters[i]->type() == variable->type());
+			auto& p = mFormalParamters[i];
+			assert(p.var_type == variable->type());
+			if(p.var_type == VariableType::Constant && p.var_type == VariableType::Uniform) {
+				assert(*p.type == *types[i]);
+			}
 		}
 #endif // !NDEBUG
+
+		auto cmd = commandBuffer();
 
 
 		mAllArgs.clear();
@@ -311,6 +328,7 @@ namespace dyno {
 			{
 			case VariableType::DeviceBuffer:
 				this->pushDeviceBuffer(variable);
+
 				break;
 			case VariableType::Uniform:
 				this->pushUniform(variable);
@@ -323,36 +341,38 @@ namespace dyno {
 			}
 		}
 
-		//Create descriptor set layout
-		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-		for (size_t i = 0; i < variables.size(); i++)
 		{
-			auto variable = *(variables.begin() + i);
-			if ((mAllArgs[i]->type() == VariableType::DeviceBuffer && mAllArgs[i]->bufferSize() > 0) || mAllArgs[i]->type() == VariableType::Uniform) {
-				writeDescriptorSets.push_back(
-					vks::initializers::writeDescriptorSet(descriptorSet, VkVariable::descriptorType(variable->type()), i, &variable->getDescriptor()));
+			auto& compCtx = VkCompContext::current();
+			auto descriptorSet = compCtx.allocDescriptorSet(mLayoutHandle);
+			//Create descriptor set layout
+			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+			for (size_t i = 0; i < variables.size(); i++)
+			{
+				auto variable = *(variables.begin() + i);
+				if ((variable->type() == VariableType::DeviceBuffer && variable->bufferSize() > 0) || variable->type() == VariableType::Uniform) {
+					writeDescriptorSets.push_back(
+						vks::initializers::writeDescriptorSet(descriptorSet, VkVariable::descriptorType(variable->type()), i, &variable->getDescriptor()));
+				}
+				if (variable->type() == VariableType::DeviceBuffer) {
+					VkCompContext::current().registerBuffer(variable->bufferSp());
+				}
 			}
-		}
 
-		vkUpdateDescriptorSets(ctx->deviceHandle(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
-		vkCmdBindDescriptorSets(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, 0);
-		writeDescriptorSets.clear();
+			vkUpdateDescriptorSets(ctx->deviceHandle(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, 0);
+			writeDescriptorSets.clear();
+		}
 		
-		vkCmdBindPipeline(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 
-		uint32_t offset = 0;
-		for (size_t i = 0; i < variables.size(); i++)
 		{
-			auto variable = *(variables.begin() + i);
-			if (variable->type() == VariableType::Constant) {
-				vkCmdPushConstants(mCommandBuffers, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, variable->bufferSize(), variable->data());
-				offset += variable->bufferSize();
-			}
+			auto pushBuf = buildPushBuf(mConstArgs);
+			vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, pushBuf.size(), pushBuf.data());
 		}
 
-		vkCmdDispatch(mCommandBuffers, groupSize.x, groupSize.y, groupSize.z);
+		vkCmdDispatch(cmd, groupSize.x, groupSize.y, groupSize.z);
 
-		addComputeToComputeBarriers(mCommandBuffers);
+		addComputeToComputeBarriers(cmd);
 	}
 
 	template<typename... Args>
@@ -362,10 +382,15 @@ namespace dyno {
 
 #ifndef NDEBUG
 		assert(mFormalParamters.size() == variables.size());
+		constexpr std::array types { &typeid(std::decay_t<std::remove_pointer_t<decltype(args)>>)... };
 		for (std::size_t i = 0; i < variables.size(); i++)
 		{
 			auto variable = *(variables.begin() + i);
-			assert(mFormalParamters[i]->type() == variable->type());
+			auto& p = mFormalParamters[i];
+			assert(p.var_type == variable->type());
+			if(p.var_type == VariableType::Constant && p.var_type == VariableType::Uniform) {
+				assert(*p.type == *types[i]);
+			}
 		}
 #endif // !NDEBUG
 
@@ -391,20 +416,24 @@ namespace dyno {
 			}
 		}
 
-		//Create descriptor set layout
-		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-		for (size_t i = 0; i < variables.size(); i++)
 		{
-			auto variable = *(variables.begin() + i);
-			if ((mAllArgs[i]->type() == VariableType::DeviceBuffer && mAllArgs[i]->bufferSize() > 0) || mAllArgs[i]->type() == VariableType::Uniform) {
-				writeDescriptorSets.push_back(
-					vks::initializers::writeDescriptorSet(descriptorSet, VkVariable::descriptorType(variable->type()), i, &variable->getDescriptor()));
+			auto descriptorSet = ctx->descriptorCache().querySet(mLayoutHandle).value();
+			//Create descriptor set layout
+			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+			for (size_t i = 0; i < variables.size(); i++)
+			{
+				auto variable = *(variables.begin() + i);
+				if ((mAllArgs[i]->type() == VariableType::DeviceBuffer && mAllArgs[i]->bufferSize() > 0) || mAllArgs[i]->type() == VariableType::Uniform) {
+					writeDescriptorSets.push_back(
+						vks::initializers::writeDescriptorSet(descriptorSet, VkVariable::descriptorType(variable->type()), i, &variable->getDescriptor()));
+				}
 			}
-		}
 
-		vkUpdateDescriptorSets(ctx->deviceHandle(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
-		writeDescriptorSets.clear();
+			vkUpdateDescriptorSets(ctx->deviceHandle(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+			writeDescriptorSets.clear();
+		}
 	}
+
 
 	class VkMultiProgram
 	{

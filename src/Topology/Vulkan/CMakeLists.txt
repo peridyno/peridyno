@@ -27,10 +27,14 @@ set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
 set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON) 
 
 set_target_properties(${LIB_NAME} PROPERTIES
-    OUTPUT_NAME "px${LIB_NAME}-${PHOENIX_PHYSICS_VERSION}")
+    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
 target_include_directories(${LIB_NAME} PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Topology/Vulkan>)
+	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Topology/Vulkan>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Topology/Vulkan>
+    )
 
 target_link_libraries(${LIB_NAME} Core Framework)
 

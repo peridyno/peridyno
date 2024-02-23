@@ -1,0 +1,60 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Triangles
+{
+   Triangle triangles[];
+};
+
+layout(std430, binding = 1) buffer IntersectTris
+{
+   Triangle intersected_triangles[];
+};
+
+layout(std430, binding = 2) buffer UnintersectTris
+{
+   Triangle unintersected_triangles[];
+};
+
+layout(std430, binding = 3) buffer OutTriIndexs
+{
+   int outTriangleIndex[];
+};
+
+layout(std430, binding = 4) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 5) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout(std430, binding = 6) buffer Intersect_O
+{
+   int intersected_o[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+void main() {
+   int pId = int(gl_GlobalInvocationID.x);
+   if (pId >= regs.num) return;
+
+	if (intersected_o[pId] == 1)
+	{
+		intersected_triangles[intersected[pId]] = triangles[pId];
+		outTriangleIndex[intersected[pId]] = pId;
+	}
+	else
+	{
+		unintersected_triangles[unintersected[pId]] = triangles[pId];
+	}
+}

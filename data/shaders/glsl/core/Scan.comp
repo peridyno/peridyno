@@ -3,6 +3,8 @@
 
 #define T int
 #define DataType T
+#define SCAN_TYPE_EXCLUSIVE 0
+#define SCAN_TYPE_INCLUSIVE 1
 
 layout(std430, binding = 0) buffer Input
 {
@@ -14,33 +16,23 @@ layout(std430, binding = 1) buffer Output
    DataType outputs[];
 };
 
-layout(std430, binding = 2) buffer PartialSums
+layout(std430, binding = 2) buffer NextLevel
 {
-   DataType partial_sums[];
+   DataType next_level[];
 };
 
-layout(std140, binding = 3) uniform PushConsts
+layout(push_constant) uniform PushConsts
 {
   int n;
   int ScanType;
 } consts;
+
 
 layout (local_size_x = 256) in;
 layout (constant_id = 2) const int sumSubGroupSize = 64;
 
 
 shared DataType sdata[sumSubGroupSize];
-shared DataType sdata2[sumSubGroupSize];
-
-DataType subgroupInclusive(){
-	DataType value = 0;
-	
-	for(int i = int(gl_GlobalInvocationID.x-gl_SubgroupInvocationID) ; i <= int(gl_GlobalInvocationID.x) ; i++){
-		value+=inputs[i];
-	}
-	
-	return value;
-}
 
 void main()
 {
@@ -52,44 +44,23 @@ void main()
 		inputValue = sum;
     }
 
-   if (gl_GlobalInvocationID.x < consts.n)
-    {
-		sum = subgroupInclusive();
-	}
-	
+	sum = subgroupInclusiveAdd(sum);
+
     if (gl_SubgroupInvocationID == gl_SubgroupSize - 1)
     {
         sdata[gl_SubgroupID] = sum;
-		sdata2[gl_SubgroupID] = sum;
     }
-
+	
     memoryBarrierShared();
     barrier();
 
-	if(gl_SubgroupSize > gl_NumSubgroups){
-		if (gl_SubgroupID == 0){
+    if (gl_SubgroupID == 0)
+    {
+        DataType warpSum = gl_SubgroupInvocationID < gl_NumSubgroups ? sdata[gl_SubgroupInvocationID] : 0;
+        warpSum = subgroupInclusiveAdd(warpSum);
+        sdata[gl_SubgroupInvocationID] = warpSum;
+    }
 
-			DataType warpSum = gl_SubgroupInvocationID < gl_NumSubgroups ? sdata[gl_SubgroupInvocationID] : 0;
-			warpSum = subgroupInclusiveAdd(warpSum);
-			sdata[gl_SubgroupInvocationID] = warpSum;
-		}
-	}else{
-		if (gl_GlobalInvocationID.x < consts.n)
-		{
-			uint thid = gl_GlobalInvocationID.x - gl_WorkGroupSize.x * gl_WorkGroupID.x;
-			if(thid  >= 0 && thid  < gl_NumSubgroups){
-			
-				DataType value2 = 0;
-					
-				for(int i = 0 ; i <= int(thid) ; i++){
-					value2+=sdata2[i];
-				}
-				
-				sdata[thid] = value2;
-				
-			}
-		}
-	}
     memoryBarrierShared();
     barrier();
 
@@ -103,14 +74,13 @@ void main()
 
     if (gl_GlobalInvocationID.x < consts.n)
     {
-        if(consts.ScanType != 0)
-			outputs[gl_GlobalInvocationID.x] = sum;
-		else
-			outputs[gl_GlobalInvocationID.x] = sum - inputValue;
+        if(consts.ScanType == SCAN_TYPE_EXCLUSIVE)
+		    outputs[gl_GlobalInvocationID.x] = sum - inputValue;
+        else
+		    outputs[gl_GlobalInvocationID.x] = sum;
     }
-
     if (gl_LocalInvocationID.x == gl_WorkGroupSize.x - 1)
     {
-        partial_sums[gl_WorkGroupID.x] = sum;
+        next_level[gl_WorkGroupID.x] = sum;
     }
 }

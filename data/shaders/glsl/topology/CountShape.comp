@@ -1,0 +1,36 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout(std430, binding = 0) buffer Counter
+{
+   uint counter[];
+};
+
+layout(std430, binding = 1) buffer Hexs
+{
+   int shape[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+	uint shape_size;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+    uint t = gl_GlobalInvocationID.x;
+	if (t >= regs.num) 
+		return;
+
+	uint idx = t * regs.shape_size;
+
+	for(uint i = 0; i < regs.shape_size; i++) {
+		uint cnt_idx = shape[idx + i];
+		atomicAdd(counter[cnt_idx], 1);
+	}
+}

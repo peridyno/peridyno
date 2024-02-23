@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Assorted commonly used Vulkan helper functions
 *
 * Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
@@ -7,6 +7,7 @@
 */
 
 #include "VulkanTools.h"
+#include "VkSystem.h"
 
 namespace vks
 {
@@ -385,4 +386,12 @@ namespace vks
 		}
 
 	}
+}
+
+void logVkError(VkResult res, const char* file, int line) {
+	std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << file << " at line " << line << "\n"; \
+}
+
+std::string getSpvFile(const std::string& fileName) {
+	return (dyno::VkSystem::instance()->getAssetPath() / fileName).string();
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +42,7 @@ namespace dyno
 		XBuffer<dyno::TopologyModule::Triangle>		glVertexIndex;
 		XBuffer<dyno::TopologyModule::Triangle>		glNormalIndex;
 		XBuffer<dyno::TopologyModule::Triangle>		glTexCoordIndex;
-		std::shared_ptr<Material> material = nullptr;
+		std::shared_ptr<render::Material> material = nullptr;
 
 	private:
 		bool mInitialized = false;

@@ -1,3 +1,5 @@
+#!/bin/python3
+
 import argparse
 import fileinput
 import os
@@ -20,6 +22,18 @@ json_config_str = {
             "folder": "core"
         },
         {
+            "name": "Max.comp",
+            "folder": "core"
+        },
+        {
+            "name": "Min.comp",
+            "folder": "core"
+        },
+        {
+            "name": "MinElement.comp",
+            "folder": "core"
+        },
+        {
             "name": "Reduce.comp",
             "folder": "core"
         },
@@ -34,6 +48,10 @@ json_config_str = {
         {
             "name": "SortByKey.comp",
             "folder": "core"
+        },
+        {
+            "name": "ArrayComponent.comp",
+            "folder": "array"
         }
     ]
 }
@@ -155,7 +173,7 @@ def findGlslang():
     if args.glslang != None and isExe(args.glslang):
         return args.glslang
 
-    exe_name = "glslangvalidator"
+    exe_name = "glslangValidator"
     if os.name == "nt":
         exe_name += ".exe"
 

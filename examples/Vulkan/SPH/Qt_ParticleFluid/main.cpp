@@ -52,15 +52,20 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
+	VkSystem::instance()->setAssetPath(getAssetPath());
 	VkSystem::instance()->initialize(true);
 
 	PaticleSystem::initStaticPlugin();
 
-	QtApp app;
+	{
 
-	app.setSceneGraph(createScene());
-	app.initialize(1024, 768);
-	app.mainLoop();
+		QtApp app;
+
+		app.setSceneGraph(createScene());
+		app.initialize(1024, 768);
+		app.mainLoop();
+	}
+	VkSystem::instance()->destroy();
 
 	return 0;
 }

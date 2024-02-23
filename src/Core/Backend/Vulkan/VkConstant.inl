@@ -27,7 +27,7 @@ namespace dyno {
 	}
 
 	template<typename T>
-	T VkConstant<T>::getValue()
+	T VkConstant<T>::getValue() const
 	{
 		return mVal;
 	}

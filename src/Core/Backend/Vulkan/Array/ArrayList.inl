@@ -1,130 +1,196 @@
 #include "VkDeviceArray.h"
 #include "VkUniform.h"
+#include "Array/ArrayTools.h"
 
 #include "Catalyzer/VkScan.h"
 #include "Catalyzer/VkReduce.h"
 
-namespace dyno 
+namespace dyno
 {
-	struct ArrayListInfo
-	{
-		uint32_t arraySize = 0;
-		uint32_t totalSize = 0;
-	};
+    struct ArrayListInfo {
+        uint32_t arraySize = 0;
+        uint32_t totalSize = 0;
+    };
 
-	template<typename T>
-	class ArrayList<T, DeviceType::GPU>
-	{
-	public:
-		ArrayList();
+    template <typename T>
+    class ArrayList<T, DeviceType::GPU> {
+    public:
+        using value_t = T;
 
-		/*!
-		*	\brief	Should not release data here, call Release() explicitly.
-		*/
-		~ArrayList() {};
+        ArrayList();
 
-		void resize(const std::vector<uint32_t>& num);
-		void resize(const VkDeviceArray<uint32_t>& num);
+        /*!
+         *	\brief	Should not release data here, call Release() explicitly.
+         */
+        ~ArrayList() {};
 
-		void assign(const ArrayList<T, DeviceType::GPU>& src);
-		void assign(const ArrayList<T, DeviceType::CPU>& src);
+        void resize(const std::vector<uint32_t>& num);
+        void resize(const DArray<uint32_t>& num);
+        void resize(const VkDeviceArray<uint32_t>& num);
 
-		uint32_t size() { return mIndex.size(); }
-		inline uint elementSize() const { return mElements.size(); }
+        void assign(const ArrayList<T, DeviceType::GPU>& src);
+        void assign(const ArrayList<T, DeviceType::CPU>& src);
+        void assign(const std::vector<std::vector<T>>& src);
 
-		const DArray<uint32_t>& index() const { return mIndex; }
-		const DArray<T>& elements() const { return mElements; }
+        uint32_t size() {
+            return mIndex.size();
+        }
+        inline uint elementSize() const {
+            return mElements.size();
+        }
 
-		inline bool isCPU() const { return false; }
-		inline bool isGPU() const { return true; }
-		inline bool isEmpty() const { return mIndex.size() == 0; }
+        const DArray<uint32_t>& index() const {
+            return mIndex;
+        }
+        const DArray<T>& elements() const {
+            return mElements;
+        }
+        const DArray<List<T>>& lists() const {
+            return mLists;
+        }
 
-		void clear();
+        inline bool isCPU() const {
+            return false;
+        }
+        inline bool isGPU() const {
+            return true;
+        }
+        inline bool isEmpty() const {
+            return mIndex.size() == 0;
+        }
 
-	public:
-		DArray<uint> mIndex;
-		DArray<T> mElements;
+        void clear();
 
-		VkUniform<ArrayListInfo> mInfo;
-	};
+    public:
+        DArray<uint> mIndex;
+        DArray<T> mElements;
 
-	template<typename T>
-	using DArrayList = ArrayList<T, DeviceType::GPU>;
+        DArray<List<T>> mLists;
 
-	template<typename T>
-	void ArrayList<T, DeviceType::CPU>::assign(const ArrayList<T, DeviceType::GPU>& src)
-	{
-		mIndex.assign(src.index());
-		mElements.assign(src.elements());
+        VkUniform<ArrayListInfo> mInfo;
 
-		mLists.resize(mIndex.size());
+        VkListAllocator mAllocator;
+    };
 
-		//redirect the element address
-		for (int i = 0; i < mIndex.size(); i++)
-		{
-			//mLists[i].reserve(mElements.begin() + mIndex[i], this->size(i));
-			uint num = size(i);
-			mLists[i].assign(mElements.begin() + mIndex[i], num, num);
-		}
-	}
+    template <typename T>
+    using DArrayList = ArrayList<T, DeviceType::GPU>;
 
-	template<typename T>
-	ArrayList<T, DeviceType::GPU>::ArrayList()
-	{
+    template <typename T>
+    void ArrayList<T, DeviceType::CPU>::assign(const ArrayList<T, DeviceType::GPU>& src) {
+        mIndex.assign(src.index());
+        mElements.assign(src.elements());
 
-	}
+        mLists.resize(mIndex.size());
 
-	template<typename T>
-	void ArrayList<T, DeviceType::GPU>::resize(const std::vector<uint32_t>& num)
-	{
-		VkDeviceArray<uint32_t> deviceNum;
-		deviceNum.resize(num.size());
+        // redirect the element address
+        for (int i = 0; i < mIndex.size(); i++) {
+            // mLists[i].reserve(mElements.begin() + mIndex[i], this->size(i));
+            uint num = size(i);
+            mLists[i].assign(mElements.begin() + mIndex[i], num, num);
+        }
+    }
 
-		vkTransfer(deviceNum, num);
+    template <typename T>
+    ArrayList<T, DeviceType::GPU>::ArrayList() {
+    }
 
-		this->resize(deviceNum);
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::resize(const std::vector<uint32_t>& num) {
+        DArray<uint32_t> deviceNum;
+        deviceNum.resize(num.size());
 
-		deviceNum.clear();
-	}
+        vkTransfer(*deviceNum.handle(), num);
 
-	template<typename T>
-	void ArrayList<T, DeviceType::GPU>::resize(const VkDeviceArray<uint32_t>& num)
-	{
-		mIndex.resize(num.size());
+        this->resize(deviceNum);
 
-		VkScan<uint32_t> mScan;
-		VkReduce<uint32_t> mReduce;
+        deviceNum.clear();
+    }
 
-		mScan.scan(*mIndex.handle(), num, EXCLUSIVESCAN);
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::resize(const DArray<uint32_t>& num) {
+        this->resize(*num.handle());
+    }
 
-		uint32_t totalNum = mReduce.reduce(num);
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::resize(const VkDeviceArray<uint32_t>& num) {
+        mIndex.resize(num.size());
+        mLists.resize(num.size());
 
-		mElements.resize(totalNum);
+        VkScan<uint32_t> mScan;
+        VkReduce<uint32_t> mReduce;
 
-		ArrayListInfo info;
-		info.arraySize = num.size();
-		info.totalSize = totalNum;
+        mScan.scan(*mIndex.handle(), num, EXCLUSIVESCAN);
 
-		mInfo.setValue(info);
-	}
+        uint32_t totalNum = mReduce.reduce(num);
 
-	template<typename T>
-	void ArrayList<T, DeviceType::GPU>::assign(const ArrayList<T, DeviceType::CPU>& src)
-	{
+        mElements.resize(totalNum);
 
-	}
+        ArrayListInfo info;
+        info.arraySize = num.size();
+        info.totalSize = totalNum;
 
-	template<typename T>
-	void ArrayList<T, DeviceType::GPU>::assign(const ArrayList<T, DeviceType::GPU>& src)
-	{
+        mInfo.setValue(info);
 
-	}
+        mAllocator.allocate(mLists, mElements, mIndex);
+    }
 
-	template<typename T>
-	void ArrayList<T, DeviceType::GPU>::clear()
-	{
-		mIndex.clear();
-		mElements.clear();
-	}
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::assign(const ArrayList<T, DeviceType::CPU>& src) {
+        mIndex.assign(src.index());
+        mElements.assign(src.elements());
+        mLists.assign(src.lists());
+        mAllocator.allocate(mLists, mElements, mIndex);
+    }
 
-}
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::assign(const ArrayList<T, DeviceType::GPU>& src) {
+        mIndex.assign(src.index());
+        mElements.assign(src.elements());
+        mLists.assign(src.lists());
+        mAllocator.allocate(mLists, mElements, mIndex);
+    }
+
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::assign(const std::vector<std::vector<T>>& src) {
+        size_t indNum = src.size();
+        CArray<uint> hIndex(indNum);
+        CArray<T> hElements;
+
+        size_t eleNum = 0;
+        for (int i = 0; i < src.size(); i++) {
+            hIndex[i] = (uint)eleNum;
+            eleNum += src[i].size();
+
+            for (int j = 0; j < src[i].size(); j++) {
+                hElements.pushBack(src[i][j]);
+            }
+        }
+
+        CArray<List<T>> lists;
+        lists.resize(indNum);
+
+        mIndex.assign(hIndex);
+        mElements.assign(hElements);
+        T* stAdr = mElements.begin();
+
+        eleNum = 0;
+        for (int i = 0; i < src.size(); i++) {
+            size_t num_i = src[i].size();
+            List<T> lst;
+            lst.assign(stAdr + eleNum, num_i, num_i);
+            lists[i] = lst;
+
+            eleNum += src[i].size();
+        }
+
+        mLists.assign(lists);
+    }
+
+    template <typename T>
+    void ArrayList<T, DeviceType::GPU>::clear() {
+        mIndex.clear();
+        mElements.clear();
+		mLists.clear();
+    }
+
+} // namespace dyno

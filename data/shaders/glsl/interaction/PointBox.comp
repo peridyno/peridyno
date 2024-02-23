@@ -1,0 +1,55 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Points
+{
+   Coord3D points[];
+};
+
+layout(std430, binding = 1) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 2) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+
+    Plane3D plane13;
+    Plane3D plane42;
+    Plane3D plane14;
+    Plane3D plane32;
+
+	Ray3D mouseray;
+	Real radius;
+} regs;
+
+void main() {
+    int pId = int(gl_GlobalInvocationID.x);
+    if (pId >= regs.num) return;
+
+    bool flag = false;
+    float temp1 = (dot((points[pId] - regs.plane13.origin), regs.plane13.normal)) * (dot((points[pId] - regs.plane42.origin), regs.plane42.normal));
+    float temp2 = (dot((points[pId] - regs.plane14.origin), regs.plane14.normal)) * (dot((points[pId] - regs.plane32.origin), regs.plane32.normal));
+    if (temp1 >= 0 && temp2 >= 0)
+        flag = true;
+
+    Sphere3D sphere = new_sphere3D(points[pId], regs.radius);
+    Segment3D seg;
+    int temp =  ray_intersect(regs.mouseray, sphere, seg);
+    if (temp > 0)
+        flag = flag || true;
+    if (flag || intersected[pId] == 1)
+        intersected[pId] = 1;
+    else
+        intersected[pId] = 0;
+    unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+}

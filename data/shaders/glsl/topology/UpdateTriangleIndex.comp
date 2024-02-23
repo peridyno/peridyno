@@ -1,0 +1,34 @@
+#version 450
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+
+layout(std430, binding = 0) buffer B0 {
+	Triangle indices[ ];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+	uint vertexOffset;
+	uint indexOffset;
+} pushConsts;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+	uint tId = gl_GlobalInvocationID.x + pushConsts.indexOffset;
+	if (tId >= pushConsts.num)
+		return;
+
+	Triangle t = indices[tId];
+	int vertexOffset = int(pushConsts.vertexOffset);
+	t[0] += vertexOffset;
+	t[1] += vertexOffset;
+	t[2] += vertexOffset;
+
+	indices[tId] = t;
+}

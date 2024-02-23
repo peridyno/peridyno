@@ -1,0 +1,58 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+layout(std430, binding = 0) buffer EdgeBuf
+{
+   Edge edges[];
+};
+
+layout(std430, binding = 1) buffer Edg2QuadBuf
+{
+   Edg2Quad edg2Quad[];
+};
+
+layout(std430, binding = 2) buffer KeyBuf
+{
+   EKey keys[];
+};
+
+layout(std430, binding = 3) buffer CounterBuf
+{
+   int counter[];
+};
+
+layout(std430, binding = 4) buffer QuadIds
+{
+   int quadIds[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   int shift = counter[tId];
+   if (tId == 0 || !compare_eq(keys[tId], keys[tId - 1]))
+   {
+      EKey key = keys[tId];
+      edges[shift] = Edge(key[0], key[1]);
+
+      Edg2Quad e2Q = Edg2Quad(EMPTY, EMPTY);
+      e2Q[0] = quadIds[tId];
+
+      if (tId + 1 < regs.num && compare_eq(keys[tId + 1], key))
+         e2Q[1] = quadIds[tId + 1];
+
+      edg2Quad[shift] = e2Q;
+   }
+}

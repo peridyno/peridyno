@@ -35,8 +35,6 @@ namespace dyno
 		~GLSurfaceVisualModule();
 
 	public:
-		virtual std::string caption() override;
-
 		DECLARE_ENUM(EColorMode,
 			CM_Object = 0,
 			CM_Vertex = 1,
@@ -45,13 +43,7 @@ namespace dyno
 		DEF_ENUM(EColorMode, ColorMode, EColorMode::CM_Object, "Color Mode");
 		DEF_VAR(bool, UseVertexNormal, false, "");
 
-#ifdef CUDA_BACKEND
-		DEF_INSTANCE_IN(TriangleSet<DataType3f>, TriangleSet, "");
-#endif
-
-#ifdef  VK_BACKEND
-		DEF_INSTANCE_IN(TriangleSet, TriangleSet, "");
-#endif
+		DEF_INSTANCE_IN(GLTriangleSet, TriangleSet, "");
 
 		DEF_ARRAY_IN(Vec3f, Color,		DeviceType::GPU, "");
 		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
@@ -60,10 +52,8 @@ namespace dyno
 		DEF_ARRAY_IN(TopologyModule::Triangle, NormalIndex, DeviceType::GPU, "");
 		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
 
-#ifdef CUDA_BACKEND
 		DEF_ARRAY2D_IN(Vec4f, ColorTexture, DeviceType::GPU, "");
 		DEF_ARRAY2D_IN(Vec4f, BumpMap, DeviceType::GPU, "");
-#endif
 
 	protected:
 		virtual void updateImpl() override;
@@ -94,11 +84,9 @@ namespace dyno
 		XBuffer<Vec2f> mTexCoord;
 		XBuffer<TopologyModule::Triangle> mTexCoordIndex;
 
-#ifdef CUDA_BACKEND
 		// color texture
 		XTexture2D<Vec4f> mColorTexture;
 		XTexture2D<Vec4f> mBumpMap;
-#endif
 
 		// for instanced rendering
 		unsigned int			 mInstanceCount = 0;

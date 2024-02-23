@@ -8,8 +8,6 @@ using namespace dyno;
 
 TEST(VkReduce, reduce)
 {
-	VkSystem::instance()->initialize();
-
 	//Test float type Data
 	VkReduce<float> sortFloat;
 	std::vector<float> inputFloatData(100, 1.0f);

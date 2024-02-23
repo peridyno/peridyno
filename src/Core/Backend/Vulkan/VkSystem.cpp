@@ -1,4 +1,4 @@
-#include "VkSystem.h"
+﻿#include "VkSystem.h"
 #include "VulkanTools.h"
 #include "VulkanDebug.h"
 #include "VkContext.h"
@@ -6,19 +6,41 @@
 #include <iostream>
 
 namespace dyno {
+	namespace 
+	{
+		std::unique_ptr<VkSystem>& vksystem_instance() {
+			static std::unique_ptr<VkSystem> gInstance {std::make_unique<VkSystem>()};
+			return gInstance;
+		}
+	}
 
 	VkSystem* VkSystem::instance()
 	{
-		static VkSystem gInstance;
-		return &gInstance;
+		return vksystem_instance().get();
 	}
 
-	VkSystem::VkSystem()
+	void VkSystem::destroy()
+	{
+		vksystem_instance().reset();
+	}
+
+	VkSystem::VkSystem():
+		ctx(nullptr),
+		validation(false),
+		useMemoryPool(true),
+		name("Vulkan"),
+		apiVersion(VK_API_VERSION_1_2),
+		deviceCreatepNextChain(nullptr),
+		debugUtilsMessenger(nullptr)
 	{
 	}
 
 	VkSystem::~VkSystem()
 	{
+		if (ctx != nullptr) {
+			delete ctx;
+		}
+
 		if (validation && debugUtilsMessenger != nullptr)
 		{
 			auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vkInstance, "vkDestroyDebugUtilsMessengerEXT");
@@ -27,11 +49,21 @@ namespace dyno {
 			}
 		}
 
-		if (ctx != nullptr) {
-			delete ctx;
-		}
-
 		vkDestroyInstance(vkInstance, nullptr);
+	}
+
+	VkContext* VkSystem::currentContext() const { return ctx; }
+	VkInstance VkSystem::instanceHandle() const { return vkInstance; }
+	VkPhysicalDeviceProperties VkSystem::getDeviceProperties() const {
+		return deviceProperties;
+	}
+
+	VkPhysicalDevice VkSystem::getPhysicalDevice() const {
+		return physicalDevice;
+	}
+
+	void VkSystem::enableMemoryPool(bool enableMemPool) {
+		useMemoryPool = enableMemPool;
 	}
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -44,6 +76,9 @@ namespace dyno {
 	bool VkSystem::initialize(bool enableValidation)
 	{
 		validation = enableValidation;
+#if defined(DYNO_VK_VALIDATION)
+		validation = true;
+#endif
 
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 		// To enable Vulkan/OpenGL interop
@@ -67,7 +102,7 @@ namespace dyno {
 	assert(libLoaded);
 #endif
 
-		VkResult err;
+		VkResult err {};
 
 		// Vulkan instance
 		err = createVulkanInstance();
@@ -104,17 +139,15 @@ namespace dyno {
 		}
 
 		// GPU selection
-
-		// Select physical device to be used for the Vulkan example
-		// Defaults to the first device unless specified by command line
 		uint32_t selectedDevice = 0;
 
 		physicalDevice = physicalDevices[selectedDevice];
-
 		// Store properties (including limits), features and memory properties of the physical device (so that examples can check against them)
 		vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 		vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
+
+		std::printf("Load vulkan: %s(%d.%d)\n", deviceProperties.deviceName, VK_VERSION_MAJOR(deviceProperties.apiVersion), VK_VERSION_MINOR(deviceProperties.apiVersion));
 
 		// Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
 		//getEnabledFeatures();
@@ -122,12 +155,17 @@ namespace dyno {
 		// Vulkan device creation
 		// This is handled by a separate class that gets a logical device representation
 		// and encapsulates functions related to a device
+
+		VkPhysicalDeviceBufferDeviceAddressFeatures bdaFeature {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES};
+		deviceCreatepNextChain = &bdaFeature;
+
 		ctx = new VkContext(physicalDevice);
-		VkResult res = ctx->createLogicalDevice(enabledFeatures, enabledDeviceExtensions, deviceCreatepNextChain);
+		VkResult res = ctx->createLogicalDevice(deviceFeatures, enabledDeviceExtensions, deviceCreatepNextChain);
 		if (res != VK_SUCCESS) {
 			vks::tools::exitFatal("Could not create Vulkan device: \n" + vks::tools::errorString(res), res);
 			return false;
 		}
+		assert(bdaFeature.bufferDeviceAddress);
 
 		if (useMemoryPool) {
 			res = ctx->createMemoryPool(vkInstance, apiVersion);
@@ -182,11 +220,6 @@ namespace dyno {
 
 	VkResult VkSystem::createVulkanInstance()
 	{
-		// Validation can also be forced via a define
-#if defined(_VALIDATION)
-		this->validation = true;
-#endif
-
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = name.c_str();
@@ -283,7 +316,7 @@ namespace dyno {
 		validationFeatures.disabledValidationFeatureCount = 0;
 		validationFeatures.pDisabledValidationFeatures = nullptr;
 
-		debugCreateInfo.pNext = &validationFeatures;
+		validationFeatures.pNext = &debugCreateInfo;
 
 		if (validation)
 		{
@@ -305,7 +338,7 @@ namespace dyno {
 			if (validationLayerPresent) {
 				instanceCreateInfo.ppEnabledLayerNames = &validationLayerName;
 				instanceCreateInfo.enabledLayerCount = 1;
-				instanceCreateInfo.pNext = &debugCreateInfo;
+				instanceCreateInfo.pNext = &validationFeatures;
 			}
 			else {
 				std::cerr << "Validation layer VK_LAYER_KHRONOS_validation not present, validation is disabled";
@@ -329,5 +362,12 @@ namespace dyno {
 		}
 		return result;
 	}
+
+		std::filesystem::path VkSystem::getAssetPath() const {
+			return assertPath;
+		}
+		void VkSystem::setAssetPath(const std::filesystem::path& p) {
+			assertPath = p;
+		}
 
 }

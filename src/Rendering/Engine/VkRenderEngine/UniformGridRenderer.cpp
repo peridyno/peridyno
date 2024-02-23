@@ -56,7 +56,7 @@ namespace dyno
 				UNIFORM(GridInfo),		//grid info
 				CONSTANT(uint32_t))			//number of total grid cells
 		);
-		kernel("SetupBox")->load(getAssetPath() + "shaders/glsl/phasefield/SetupBox.comp.spv");
+		kernel("SetupBox")->load(getSpvFile("shaders/glsl/phasefield/SetupBox.comp.spv"));
 
 		return true;
 	}

@@ -1,0 +1,31 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer B1
+{
+   int intersected_o[];
+};
+
+layout(std430, binding = 1) buffer B2
+{
+   int intersected_q[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+void main() { 
+   uint pId = gl_GlobalInvocationID.x;
+   if (pId >= regs.num) return;
+
+   intersected_q[pId] = 0;
+   if (intersected_o[pId*2] == 1||intersected_o[pId*2+1]==1)
+   {
+      intersected_q[pId] = 1;
+   }
+}

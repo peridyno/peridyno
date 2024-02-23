@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "VkVariable.h"
 #include "VulkanBuffer.h"
 
@@ -10,6 +10,8 @@ namespace dyno {
 	public:
 		VkUniform();
 		~VkUniform();
+
+		T getValue() const;
 
 		void setValue(T val);
 

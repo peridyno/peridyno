@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "Platform.h"
 #include "vulkan/vulkan.h"
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #include <android_native_app_glue.h>
@@ -17,62 +18,46 @@ namespace dyno
 
 	public:
 		static VkSystem* instance();
+		static void destroy();
 
-		VkContext* currentContext() { return ctx; }
+		VkSystem();
+		~VkSystem();
+
+		VkContext* currentContext() const;
 
 		bool initialize(bool enableValidation = false);
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 		bool initialize(android_app* state);
 #endif
-		VkInstance instanceHandle() { return vkInstance; }
+		VkInstance instanceHandle() const;
+		VkPhysicalDeviceProperties getDeviceProperties() const;
+		VkPhysicalDevice getPhysicalDevice() const;
+		std::filesystem::path getAssetPath() const;
 
-		void enableMemoryPool(bool enableMemPool = false) {
-			useMemoryPool = enableMemPool;
-		}
-
-		VkPhysicalDeviceProperties getDeviceProperties() {
-			return deviceProperties;
-		}
-
-		VkPhysicalDevice getPhysicalDevice() {
-			return physicalDevice;
-		}
-
+		void enableMemoryPool(bool enableMemPool = false);
+		void setAssetPath(const std::filesystem::path&);
 	private:
-		VkSystem();
-		~VkSystem();
-
-		/*!
-		 *	\brief	Creates the application wide Vulkan instance.
-		 */
 		VkResult createVulkanInstance();
 
-		/*!
-		 *	\brief	Current Vulkan context.
-		 */
-		VkContext* ctx = nullptr;
+		VkContext* ctx;
 
 		bool validation;
-		bool useMemoryPool = true;
-		std::string name = "Vulkan";
-		uint32_t apiVersion = VK_API_VERSION_1_2;
+		bool useMemoryPool;
+		std::string name;
+		uint32_t apiVersion;
 
-		/*!
-		 *	\brief	Vulkan instance, stores all per-application states.
-		 */
 		VkInstance vkInstance;
 		VkPhysicalDevice physicalDevice;
 		VkPhysicalDeviceProperties deviceProperties;
 		VkPhysicalDeviceFeatures deviceFeatures;
 		VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
-		VkPhysicalDeviceFeatures enabledFeatures{};
-		void* deviceCreatepNextChain = nullptr;
+		void* deviceCreatepNextChain;
 
-		VkDebugUtilsMessengerEXT debugUtilsMessenger = nullptr;
+		VkDebugUtilsMessengerEXT debugUtilsMessenger;
+
+		std::filesystem::path assertPath;
 				
-	public:
 		std::vector<const char*> enabledDeviceExtensions;
 		std::vector<const char*> enabledInstanceExtensions;
-
 	};
 }

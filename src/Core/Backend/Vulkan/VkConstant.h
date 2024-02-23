@@ -12,13 +12,21 @@ namespace dyno {
 		~VkConstant();
 
 		void setValue(const T val);
-		T getValue();
+		T getValue() const;
 
 		VariableType type() override;
 
 		uint32_t bufferSize() override { return sizeof(T); }
 
 		void* data() const override { return (void*)&mVal; }
+
+		const T* operator->() const {
+			return &mVal;
+		}
+
+		T* operator->() {
+			return &mVal;
+		}
 
 	protected:
 		T mVal;

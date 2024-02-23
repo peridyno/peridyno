@@ -1,0 +1,59 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Points
+{
+   Coord3D points[];
+};
+
+layout(std430, binding = 1) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 2) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout(std430, binding = 3) buffer Disatance
+{
+   Real triDistance[];
+};
+
+layout(std430, binding = 4) buffer Triangles
+{
+   Triangle triangles[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+	Ray3D mouseray;
+} regs;
+
+void main() { 
+   uint pId = gl_GlobalInvocationID.x;
+   if (pId >= regs.num) return;
+
+   Triangle3D t = new_triangle3D(points[triangles[pId][0]], points[triangles[pId][1]], points[triangles[pId][2]]);
+   int temp = 0;
+
+   Point3D p;
+   temp = ray_intersect(regs.mouseray, t, p);
+
+   if (temp == 1)
+   {
+      intersected[pId] = 1;
+      triDistance[pId] = length(regs.mouseray.origin - p.origin);
+   }
+   else
+   {
+      intersected[pId] = 0;
+      triDistance[pId] = 3.4E38;
+   }
+   unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+}

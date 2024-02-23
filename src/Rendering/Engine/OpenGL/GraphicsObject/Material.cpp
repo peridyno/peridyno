@@ -1,13 +1,15 @@
-#include "Material.h"
+﻿#include "Material.h"
 
-namespace dyno
+namespace dyno::render
 {
-	Material::Material()
+	Material::Material() : texColor()
 	{
 	}
 
 	Material::~Material()
 	{
+		texColor.clear();
+		texBump.clear();
 	}
 
 	void Material::create()
@@ -16,7 +18,8 @@ namespace dyno
 
 	void Material::release()
 	{
-
+		mColorTexture.release();
+		mBumpTexture.release();
 	}
 
 	void Material::update()

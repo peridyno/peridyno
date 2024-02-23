@@ -15,7 +15,7 @@ namespace dyno
 		this->varWidth()->setRange(0.01, 10.0f);
 		this->varHeight()->setRange(0.01, 10.0f);
 
-		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet>());
+		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet3f>());
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SquareEmitter::tranformChanged, this));
 
