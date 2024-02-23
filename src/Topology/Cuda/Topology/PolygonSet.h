@@ -41,6 +41,8 @@ namespace dyno
 		void setPolygons(const CArrayList<uint>& indices);
 		void setPolygons(const DArrayList<uint>& indices);
 
+		DArrayList<uint>& getPolygons();
+
 		void copyFrom(PolygonSet<TDataType>& polygons);
 
 		bool isEmpty() override;

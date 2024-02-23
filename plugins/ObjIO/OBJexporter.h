@@ -4,6 +4,7 @@
 #include "node.h"
 #include "Topology/TriangleSet.h"
 #include "TriangleMeshWriter.h"
+#include "Topology/PolygonSet.h"
 
 #include <string>
 #include <memory>
@@ -24,7 +25,7 @@ namespace dyno
 		typedef typename Quat<Real> TQuat;
 
 		DECLARE_ENUM(OutputType,
-			TriangleMesh = 0,
+			Mesh = 0,
 			PointCloud = 1);
 
 		OBJExporter();
@@ -38,17 +39,19 @@ namespace dyno
 		DEF_VAR(unsigned, StartFrame, 1, "StartFrame");
 		DEF_VAR(unsigned, EndFrame, 500000, "EndFrame");
 		DEF_VAR(unsigned, FrameStep, 1, "FrameStep");
-		DEF_ENUM(OutputType, OutputType, TriangleMesh, "OutputType");
+		DEF_ENUM(OutputType, OutputType, Mesh, "OutputType");
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet")
-
+		DEF_INSTANCE_IN(PolygonSet<TDataType>, PolygonSet, "PolygonSet");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet");
 
 	protected:
 		void resetStates() override;
 		void updateStates() override;
 
-		void outputSurfaceMesh(std::shared_ptr<TriangleSet<TDataType>> triangleset);
-		void outputPointCloud(std::shared_ptr<PointSet<TDataType>> pointset);
+		void outputTriangleMesh(std::shared_ptr<TriangleSet<TDataType>> triangleset);
+
+		void outputPolygonSet(std::shared_ptr<PolygonSet<TDataType>> polygonSet);
+
 
 	private:
 

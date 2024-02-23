@@ -23,6 +23,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	DArrayList<uint>& PolygonSet<TDataType>::getPolygons()
+	{
+		return mPolygonIndex;
+	}
+
+	template<typename TDataType>
 	void PolygonSet<TDataType>::setPolygons(const DArrayList<uint>& indices)
 	{
 		mPolygonIndex.assign(indices);
