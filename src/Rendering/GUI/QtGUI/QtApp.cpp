@@ -31,6 +31,13 @@ namespace dyno {
 
         mQApp = std::make_shared<QApplication>(argc, argv);
 
+        //Set default GUI style
+		QFile file(":/dyno/DarkStyle.qss");
+		file.open(QIODevice::ReadOnly);
+
+		QString style = file.readAll();
+		mQApp->setStyleSheet(style);
+
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
     }
@@ -59,14 +66,7 @@ namespace dyno {
     }
 
     void QtApp::mainLoop()
-    {
-        QFile file(":/dyno/DarkStyle.qss");
-        //QFile file(":/dyno/DarkStyle.qss");
-        file.open(QIODevice::ReadOnly);
-
-        QString style = file.readAll();
-        mQApp->setStyleSheet(style);
-       
+    {       
         mQApp->exec();
     }
 

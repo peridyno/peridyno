@@ -6,7 +6,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	PolygonSet<TDataType>::PolygonSet()
-		: PointSet<TDataType>()
+		: EdgeSet<TDataType>()
 	{
 	}
 
@@ -45,10 +45,64 @@ namespace dyno
 		return empty;
 	}
 
+	__global__ void PolygonSet_CountPolygonNumber(
+		DArray<uint> counter,
+		DArrayList<uint> polygonIndices)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= polygonIndices.size()) return;
+
+		auto& index = polygonIndices[tId];
+
+		int N = index.size();
+		for (int i = 0; i < N; i++)
+		{
+			uint v0 = index[i];
+			atomicAdd(&counter[v0], 1);
+		}
+	}
+
+	__global__ void PolygonSet_SetupVertex2Polygon(
+		DArrayList<uint> vert2Poly,
+		DArrayList<uint> polygonIndices)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= polygonIndices.size()) return;
+
+		auto& index = polygonIndices[tId];
+
+		int N = index.size();
+		for (int i = 0; i < N; i++)
+		{
+			uint v0 = index[i];
+			index.atomicInsert(v0);
+		}
+	}
+
 	template<typename TDataType>
 	void PolygonSet<TDataType>::updateTopology()
 	{
+		uint vNum = mCoords.size();
 
+		//Update the vertex to polygon mapping
+		DArray<uint> counter(vNum);
+		counter.reset();
+
+		cuExecute(vNum,
+			PolygonSet_CountPolygonNumber,
+			counter,
+			mPolygonIndex);
+
+		mVer2Poly.resize(counter);
+
+		cuExecute(vNum,
+			PolygonSet_SetupVertex2Polygon,
+			mVer2Poly,
+			mPolygonIndex);
+
+		counter.clear();
+
+		EdgeSet<TDataType>::updateTopology();
 	}
 
 	__global__ void PolygonSet_CountEdgeNumber(
@@ -61,9 +115,9 @@ namespace dyno
 		counter[tId] = polygonIndices[tId].size();
 	}
 
-	template<typename Edge>
-	__global__ void PolygonSet_SetupEdgeIndices(
-		DArray<Edge> edges,
+	__global__ void PolygonSet_SetupEdgeKeys(
+		DArray<EKey> keys,
+		DArray<uint> polyIds,
 		DArrayList<uint> polygonIndices,
 		DArray<uint> radix)
 	{
@@ -79,15 +133,57 @@ namespace dyno
 		{
 			uint v0 = index[i];
 			uint v1 = index[(i + 1) % N];
-			edges[offset + i] = Edge(v0, v1);
+			keys[offset + i] = EKey(v0, v1);
+			polyIds[offset + i] = tId;
+		}
+	}
+
+	__global__ void PolygonSet_CountUniqueEdge(
+		DArray<uint> counter,
+		DArray<EKey> keys)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= keys.size()) return;
+
+		if (tId == 0 || keys[tId] != keys[tId - 1])
+			counter[tId] = 1;
+		else
+			counter[tId] = 0;
+	}
+
+	template<typename Edge, typename Edg2Poly>
+	__global__ void PolygonSet_SetupEdgeIndices(
+		DArray<Edge> edges,
+		DArrayList<uint> poly2Edge,
+		DArray<Edg2Poly> edg2Poly,
+		DArray<EKey> edgeKeys,
+		DArray<uint> polyIds,
+		DArray<uint> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= edgeKeys.size()) return;
+
+		uint edgeId = radix[tId];
+		uint polyId = polyIds[tId];
+		poly2Edge[polyId].atomicInsert(edgeId);
+		if (tId == 0 || edgeKeys[tId] != edgeKeys[tId - 1])
+		{
+			EKey key = edgeKeys[tId];
+			edges[edgeId] = Edge(key[0], key[1]);
+
+			Edg2Poly e2p(EMPTY, EMPTY);
+			e2p[0] = polyIds[tId];
+
+			if (tId + 1 < edgeKeys.size() && edgeKeys[tId + 1] == key)
+				e2p[1] = polyIds[tId + 1];
+
+			edg2Poly[edgeId] = e2p;
 		}
 	}
 
 	template<typename TDataType>
-	void PolygonSet<TDataType>::extractEdgeSet(EdgeSet<TDataType>& es)
+	void PolygonSet<TDataType>::updateEdges()
 	{
-		es.clear();
-
 		uint polyNum = mPolygonIndex.size();
 
 		DArray<uint> radix(polyNum);
@@ -97,24 +193,58 @@ namespace dyno
 			radix,
 			mPolygonIndex);
 
+		mPoly2Edg.resize(radix);
+
 		int eNum = thrust::reduce(thrust::device, radix.begin(), radix.begin() + radix.size());
 		thrust::exclusive_scan(thrust::device, radix.begin(), radix.begin() + radix.size(), radix.begin());
 
-		DArray<Edge> edges(eNum);
+		DArray<EKey> edgeKeys(eNum);
+		DArray<uint> polyIds(eNum);
 
-		//TODO: remove duplicative edges
 		cuExecute(polyNum,
-			PolygonSet_SetupEdgeIndices,
-			edges,
+			PolygonSet_SetupEdgeKeys,
+			edgeKeys,
+			polyIds,
 			mPolygonIndex,
 			radix);
 
-		es.setPoints(mCoords);
-		es.setEdges(edges);
-		es.update();
+		DArray<uint> uniqueEdgeCounter(eNum);
+
+		thrust::sort_by_key(thrust::device, edgeKeys.begin(), edgeKeys.begin() + edgeKeys.size(), polyIds.begin());
+
+		cuExecute(edgeKeys.size(),
+			PolygonSet_CountUniqueEdge,
+			uniqueEdgeCounter,
+			edgeKeys);
+
+		int uniqueNum = thrust::reduce(thrust::device, uniqueEdgeCounter.begin(), uniqueEdgeCounter.begin() + uniqueEdgeCounter.size());
+		thrust::exclusive_scan(thrust::device, uniqueEdgeCounter.begin(), uniqueEdgeCounter.begin() + uniqueEdgeCounter.size(), uniqueEdgeCounter.begin());
+
+		mEdges.resize(uniqueNum);
+		mEdg2Poly.resize(uniqueNum);
+
+		cuExecute(edgeKeys.size(),
+			PolygonSet_SetupEdgeIndices,
+			mEdges,
+			mPoly2Edg,
+			mEdg2Poly,
+			edgeKeys,
+			polyIds,
+			uniqueEdgeCounter);
 
 		radix.clear();
-		edges.clear();
+		polyIds.clear();
+		edgeKeys.clear();
+		uniqueEdgeCounter.clear();
+	}
+
+	template<typename TDataType>
+	void PolygonSet<TDataType>::extractEdgeSet(EdgeSet<TDataType>& es)
+	{
+		es.setPoints(mCoords);
+		es.setEdges(mEdges);
+
+		es.update();
 	}
 
 	__global__ void PolygonSet_ExtractTriangleNumber(

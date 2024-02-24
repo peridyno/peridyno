@@ -100,6 +100,9 @@ namespace dyno
 		EdgeSet();
 		~EdgeSet() override;
 
+		void setEdges(std::vector<Edge>& edges);
+		void setEdges(DArray<Edge>& edges);
+
 		/**
 		 * @brief Request the neighboring ids of each point according to the mesh topology
 		 * 			Be sure update() is called as long as the topology is changed  
@@ -107,8 +110,6 @@ namespace dyno
 		 * @param lists A neighbor list storing the ids
 		 */
 		void requestPointNeighbors(DArrayList<int>& lists);
-
-		void loadSmeshFile(std::string filename);
 
 		/**
 		 * @brief Get all edges with each one containing the indices of two edge ends
@@ -122,16 +123,16 @@ namespace dyno
 		 * 
 		 * @return DArrayList<int>& 
 		 */
-		DArrayList<int>& getVer2Edge();
-
-		void setEdges(std::vector<Edge>& edges);
-		void setEdges(DArray<Edge>& edges);
+		DArrayList<int>& vertex2Edge() { return mVer2Edge; }
 
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
 
 		bool isEmpty() override;
 
 		void clear() override;
+
+		//TODO:
+		void loadSmeshFile(std::string filename) {};
 
 	protected:
 		/**
@@ -143,6 +144,10 @@ namespace dyno
 
 	protected:
 		DArray<Edge> mEdges;
+
+		/**
+		 * Map vertex id to edge id
+		 */
 		DArrayList<int> mVer2Edge;
 	};
 }

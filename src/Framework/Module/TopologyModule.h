@@ -49,7 +49,7 @@ public:
 	typedef VectorND<PointType, 2>	Quad2Hex;
 	typedef VectorND<PointType, 2>	Edg2Hex;
 	
-
+	typedef VectorND<PointType, 2>	Edg2Poly;
 	
 public:
 	TopologyModule();

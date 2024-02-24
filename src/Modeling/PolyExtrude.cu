@@ -103,7 +103,7 @@ namespace dyno
 		}
 		else { return; }
 
-		auto sa = trilist.getVer2Edge();
+		auto& sa = trilist.vertex2Edge();
 
 		auto ss = trilist.getVertex2Triangles();
 

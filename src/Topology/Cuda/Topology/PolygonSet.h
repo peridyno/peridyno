@@ -21,8 +21,11 @@
 
 namespace dyno
 {
+	/**
+	 * @brief a class to store polygon whose vertex number is greater or equal than 3
+	 */
 	template<typename TDataType>
-	class PolygonSet : public PointSet<TDataType>
+	class PolygonSet : public EdgeSet<TDataType>
 	{
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -40,6 +43,17 @@ namespace dyno
 		 */
 		void setPolygons(const CArrayList<uint>& indices);
 		void setPolygons(const DArrayList<uint>& indices);
+
+		DArrayList<uint>& polygonIndices() { return mPolygonIndex; }
+
+		DArrayList<uint>& vertex2Polygon() { return mVer2Poly; }
+
+		DArrayList<uint>& polygon2Edge() { return mPoly2Edg; };
+
+		DArray<::dyno::TopologyModule::Edg2Poly>& edge2Polygon() {
+			return mEdg2Poly;
+		}
+
 
 		void copyFrom(PolygonSet<TDataType>& polygons);
 
@@ -68,8 +82,19 @@ namespace dyno
 	protected:
 		void updateTopology() override;
 
+		void updateEdges() override;
+
 	private:
 		DArrayList<uint> mPolygonIndex;
+
+		//Map vertex id to polygon id
+		DArrayList<uint> mVer2Poly;
+
+		//Map polygon id to edge id
+		DArrayList<uint> mPoly2Edg;
+
+		//Map edge id to triangle id
+		DArray<::dyno::TopologyModule::Edg2Poly> mEdg2Poly;
 	};
 }
 
