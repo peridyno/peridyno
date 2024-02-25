@@ -47,59 +47,6 @@ namespace dyno
 		ids[v1].atomicInsert(v0);
 	}
 	
-	template<typename Edge>
-	__global__ void ES_CountEdges(
-		DArray<uint> counter,
-		DArray<Edge> edges)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= edges.size()) return;
-
-		Edge t = edges[tId];
-
-		atomicAdd(&counter[t[0]], 1);
-		atomicAdd(&counter[t[1]], 1);
-	}
-
-	template<typename Edge>
-	__global__ void ES_SetupEdgeIds(
-		DArrayList<int> edgeIds,
-		DArray<Edge> edges)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= edges.size()) return;
-
-		Edge t = edges[tId];
-
-		edgeIds[t[0]].atomicInsert(tId);
-		edgeIds[t[1]].atomicInsert(tId);
-	}
-
-	template<typename TDataType>
-	DArrayList<int>& EdgeSet<TDataType>::getVer2Edge()
-	{
-		DArray<uint> counter;
-		counter.resize(this->mCoords.size());
-		counter.reset();
-
-		cuExecute(mEdges.size(),
-			ES_CountEdges,
-			counter,
-			mEdges);
-
-		mVer2Edge.resize(counter);
-
-		counter.reset();
-		cuExecute(mEdges.size(),
-			ES_SetupEdgeIds,
-			mVer2Edge,
-			mEdges);
-
-		counter.clear();
-
-		return mVer2Edge;
-	}
-
 	template<typename TDataType>
 	void EdgeSet<TDataType>::requestPointNeighbors(DArrayList<int>& lists)
 	{
@@ -123,11 +70,6 @@ namespace dyno
 			mEdges);
 
 		counts.clear();
-	}
-
-	template<typename TDataType>
-	void EdgeSet<TDataType>::loadSmeshFile(std::string filename)
-	{
 	}
 
 	template<typename TDataType>
@@ -158,10 +100,58 @@ namespace dyno
 		this->tagAsChanged();
 	}
 
+	template<typename Edge>
+	__global__ void ES_CountEdges(
+		DArray<uint> counter,
+		DArray<Edge> edges)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= edges.size()) return;
+
+		Edge t = edges[tId];
+
+		atomicAdd(&counter[t[0]], 1);
+		atomicAdd(&counter[t[1]], 1);
+	}
+
+	template<typename Edge>
+	__global__ void ES_SetupEdgeIds(
+		DArrayList<int> edgeIds,
+		DArray<Edge> edges)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= edges.size()) return;
+
+		Edge t = edges[tId];
+
+		edgeIds[t[0]].atomicInsert(tId);
+		edgeIds[t[1]].atomicInsert(tId);
+	}
+
 	template<typename TDataType>
 	void EdgeSet<TDataType>::updateTopology()
 	{
 		this->updateEdges();
+
+		//Update the vertex to edge mapping
+		DArray<uint> counter;
+		counter.resize(this->mCoords.size());
+		counter.reset();
+
+		cuExecute(mEdges.size(),
+			ES_CountEdges,
+			counter,
+			mEdges);
+
+		mVer2Edge.resize(counter);
+
+		counter.reset();
+		cuExecute(mEdges.size(),
+			ES_SetupEdgeIds,
+			mVer2Edge,
+			mEdges);
+
+		counter.clear();
 
 		PointSet<TDataType>::updateTopology();
 	}

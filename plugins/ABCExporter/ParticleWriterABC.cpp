@@ -27,7 +27,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ParticleWriterABC<TDataType>::flush()
+	void ParticleWriterABC<TDataType>::output()
 	{
 		if (time_idx % 8 != 0)
 		{

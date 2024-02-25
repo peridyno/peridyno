@@ -154,7 +154,7 @@ namespace dyno
 		else
 			return;
 
-		auto d_polygons = polySet->getPolygons();
+		auto d_polygons = polySet->polygonIndices();
 
 		CArrayList<uint> c_polygons;
 		if(d_polygons.size())

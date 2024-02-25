@@ -158,9 +158,14 @@ namespace dyno
 		bool bAutoUpdateNormal = true;
 
 		DArray<Triangle> mTriangleIndex;
+
+		//Map vertex id to triangle id
 		DArrayList<int> mVer2Tri;
 
+		//Map edge id to triangle id
 		DArray<::dyno::TopologyModule::Edg2Tri> mEdg2Tri;
+
+		//Map triangle id to edge id
 		DArray<::dyno::TopologyModule::Tri2Edg> mTri2Edg;
 
 		DArray<Coord> mVertexNormal;

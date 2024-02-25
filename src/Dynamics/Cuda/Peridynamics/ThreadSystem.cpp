@@ -74,8 +74,6 @@ namespace dyno
 		dEdge.resize(edges.size());
 		dEdge.assign(edges);
 
-		edgeSet->getVer2Edge();
-
 		auto& pts = edgeSet->getPoints();
 
 		if (pts.size() > 0)
