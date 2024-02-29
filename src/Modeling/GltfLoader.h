@@ -19,7 +19,10 @@
 #include "Topology/TriangleSet.h"
 
 #include "FilePath.h"
-
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "tinygltf/tiny_gltf.h"
 
 namespace dyno
 {
@@ -46,8 +49,9 @@ namespace dyno
 		//DefaultChannel
 		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "Position");
 		DEF_ARRAY_STATE(Coord, Normal, DeviceType::GPU, "Normal");
-		DEF_ARRAY_STATE(Coord, UV, DeviceType::GPU, "UV");
-		
+		DEF_ARRAY_STATE(Coord, TexCoord_0, DeviceType::GPU, "UVSet 0");
+		DEF_ARRAY_STATE(Coord, TexCoord_1, DeviceType::GPU, "UVSet 1");
+
 		//CustomChannel
 		DEF_VAR(std::string, RealName_1, "", "RealName_1");
 		DEF_VAR(std::string, RealName_2, "", "RealName_2");
@@ -71,7 +75,19 @@ namespace dyno
 	private:
 		void varChanged();
 
+		void getTrianglesFromMesh(
+			tinygltf::Model& model,
+			const tinygltf::Primitive& primitive,
+			std::vector<TopologyModule::Triangle>& triangles
+		);
 	
+		void getCoordByAttributeName(
+			tinygltf::Model& model,
+			const tinygltf::Primitive& primitive,
+			std::string& attributeName,
+			std::vector<Coord>& vertices
+		);
+
 	};
 
 

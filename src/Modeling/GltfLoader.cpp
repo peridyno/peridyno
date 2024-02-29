@@ -1,8 +1,5 @@
 #include "GltfLoader.h"
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "tinygltf/tiny_gltf.h"
+
 
 
 #include <bitset>
@@ -84,122 +81,171 @@ namespace dyno
 		//model.meshes[0].primitives[0].attributes;
 
 		int meshNum = model.meshes.size();
-		for (size_t i = 0; i < meshNum; i++)
-		{
-			printf("model size = %d \n", meshNum);
+		printf("**** mesh number = %d \n", meshNum);
 
-			int primInfoNum = model.meshes[i].primitives.size();
-			for (size_t j = 0; j < primInfoNum; j++)
+		for (size_t i = 0; i < meshNum; i++)
+		{	
+			
+			int primNum = model.meshes[i].primitives.size();
+			printf("**** Primtive Number : %d\n", primNum);
+
+			for (size_t j = 0; j < primNum; j++)
 			{
-				printf("model: %d, primtive: %d\n",i,j);
-				//====================================
+				printf("get Data from mesh: %d, primtive: %d\n",i,j);
+
 				//current primitive
 				const tinygltf::Primitive& primitive = model.meshes[i].primitives[j];
-				printf("triangle Mode %d\n", primitive.mode);
+
 				std::map<std::string, int> a = primitive.attributes;
-
-				//triangle accessor
-				{
-					const tinygltf::Accessor& accessorTriangles = model.accessors[primitive.indices];
-					const tinygltf::BufferView& bufferView = model.bufferViews[accessorTriangles.bufferView];
-					const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
-
-					std::vector<TopologyModule::Triangle> triangles;
-					//get Triangle vertex id
-					if (accessorTriangles.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
-					{
-						printf("\n----------   UNSIGNED_BYTE   ---------\n");
-						const byte* elementBYTE = reinterpret_cast<const byte*>(&buffer.data[accessorTriangles.byteOffset + model.accessors[0].byteOffset]);
-
-						//for (size_t k = 0; k < accessorTriangles.count / 3; k++)
-						//{
-						//	std::cout << int(elementBYTE[k * 3]) <<", " << int(elementBYTE[k * 3 + 1]) << ", " << int(elementBYTE[k * 3 + 2]) << ",";
-						//	printf("\n");
-						//	triangles.push_back(TopologyModule::Triangle(int(elementBYTE[k * 3]), int(elementBYTE[k * 3 + 1]), int(elementBYTE[k * 3 + 2])));
-						//}
-						//triangleSet->setTriangles(triangles);
-
-						for (size_t k = 0; k < accessorTriangles.count; k++)
-						{
-							auto num = this->varTest()->getValue();
-							std::cout << int(elementBYTE[k]) % num << ","; //
-							if ((k + 1) % 3 == 0) 
-							{
-								std::cout << " -- " << int(elementBYTE[k]) / num;
-								printf("\n");
-							}
-								
-						}
-
-
-					}
-					else if (accessorTriangles.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
-					{
-						printf("\n----------   UNSIGNED_SHORT   ---------\n");
-						const unsigned short* elements = reinterpret_cast<const unsigned short*>(&buffer.data[accessorTriangles.byteOffset + model.accessors[0].byteOffset]);
-
-						for (size_t k = 0; k < accessorTriangles.count / 3; k++)
-						{
-							std::cout << elements[k] << ",";
-							if ((k + 1) % 3 == 0)
-								printf("\n");
-						}
-					}
-					else if (accessorTriangles.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
-					{
-						printf("\n----------   UNSIGNED_INT   ---------\n");
-						const unsigned int* elements = reinterpret_cast<const unsigned int*>(&buffer.data[accessorTriangles.byteOffset + model.accessors[0].byteOffset]);
-
-						for (size_t k = 0; k < accessorTriangles.count / 3; k++)
-						{
-							std::cout << elements[k] << ",";
-							if ((k + 1) % 3 == 0)
-								printf("\n");
-						}
-					}
-				}
-
-				//assign Attributes for Points
+				
+				//Print Attributes;
 				for (std::map<std::string, int>::iterator it = a.begin(); it != a.end(); ++it)
 				{
 					std::cout << "***find Parm !!! " << it->first << std::endl;
-					std::string parm= it->first;
+					std::string parm = it->first;
+				} 
+
+				//Set Vertices
+				std::vector<Coord> vertices;
+				this->getCoordByAttributeName(model, primitive, std::string("POSITION"), vertices);
+				triangleSet->setPoints(vertices);
+				vertices.clear();
+
+				//Set Normal
+				std::vector<Coord> normals;
+				this->getCoordByAttributeName(model, primitive, std::string("NORMAL"), normals);
+				this->stateNormal()->assign(normals);
+				normals.clear();
+
+				//Set TexCoord
+				std::vector<Coord> texCoord0;
+				this->getCoordByAttributeName(model, primitive, std::string("TEXCOORD_0"), normals);
+				this->stateTexCoord_0()->assign(texCoord0);
+				texCoord0.clear();
+
+				std::vector<Coord> texCoord1;
+				this->getCoordByAttributeName(model, primitive, std::string("TEXCOORD_0"), normals);
+				this->stateTexCoord_0()->assign(texCoord1);
+				texCoord1.clear();
 
 
+				//Set Triangles
+				if (primitive.mode == TINYGLTF_MODE_TRIANGLES)
+				{
+					printf("*********** getTriangles ,Mode ==  TINYGLTF_MODE_TRIANGLES  ************");
 
-					//Check AttributeName
-					if(it->first == "POSITION")
-					{
-						printf("\n--------------------  POSITION  --------------------\n");
-						const tinygltf::Accessor& accessorPosition = model.accessors[primitive.attributes.find("POSITION")->second];
-						const tinygltf::BufferView& bufferView = model.bufferViews[accessorPosition.bufferView];
-						const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
-						CArray<Coord> c_P;
-						DArray<Coord> d_P;
-						const float* positions = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessorPosition.byteOffset]);
-						for (size_t i = 0; i < accessorPosition.count; ++i) 
-						{
-							c_P.pushBack(Coord(positions[i * 3 + 0],positions[i * 3 + 1], positions[i * 3 + 2]));
-						}
+					std::vector<TopologyModule::Triangle> trianglesVector;
+					getTrianglesFromMesh(model, primitive,trianglesVector);
+					triangleSet->setTriangles(trianglesVector);
+					trianglesVector.clear();
+				}
 
-						//d_P.assign(c_P);
-						//this->statePosition()->getDataPtr()->assign(d_P);;
-						//triangleSet->setPoints(d_P);
+				
+			}
+		}
 
-						printf("Position.size : %d",this->statePosition()->size());
-					}
+		printf("*********\n*********\n*********\n*********\n*********\n");
+	}
+
+	// ***************************** function *************************** //
+	template<typename TDataType>
+	void GltfLoader<TDataType>::getTrianglesFromMesh(
+		tinygltf::Model& model, 
+		const tinygltf::Primitive& primitive,
+		std::vector<TopologyModule::Triangle>& triangles
+	)
+	{	
+			const tinygltf::Accessor& accessorTriangles = model.accessors[primitive.indices];
+			const tinygltf::BufferView& bufferView = model.bufferViews[accessorTriangles.bufferView];
+			const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+			
+			//get Triangle Vertex id
+			if (accessorTriangles.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
+			{
+				printf("\n----------   UNSIGNED_BYTE   ---------\n");
+				const byte* elements = reinterpret_cast<const byte*>(&buffer.data[accessorTriangles.byteOffset + model.accessors[0].byteOffset]);
+
+				for (size_t k = 0; k < accessorTriangles.count / 3; k++)
+				{
+					std::cout << int(elements[k * 3]) << ", " << int(elements[k * 3 + 1]) << ", " << int(elements[k * 3 + 2]) << ",";
+					printf("\n");
+					triangles.push_back(TopologyModule::Triangle(int(elements[k * 3]), int(elements[k * 3 + 1]), int(elements[k * 3 + 2])));
+				}
+
+			}
+			else if (accessorTriangles.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+			{
+				printf("\n----------   UNSIGNED_SHORT   ---------\n");
+				const unsigned short* elements = reinterpret_cast<const unsigned short*>(&buffer.data[accessorTriangles.byteOffset + model.accessors[0].byteOffset]);
+
+				for (size_t k = 0; k < accessorTriangles.count / 3; k++)
+				{
+					std::cout << int(elements[k * 3]) << ", " << int(elements[k * 3 + 1]) << ", " << int(elements[k * 3 + 2]) << ",";
+					printf("\n");
+					triangles.push_back(TopologyModule::Triangle(int(elements[k * 3]), int(elements[k * 3 + 1]), int(elements[k * 3 + 2])));
 				}
 				
+			}
+			else if (accessorTriangles.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
+			{
+				printf("\n----------   UNSIGNED_INT   ---------\n");
+				const unsigned int* elements = reinterpret_cast<const unsigned int*>(&buffer.data[accessorTriangles.byteOffset + model.accessors[0].byteOffset]);
 
+				for (size_t k = 0; k < accessorTriangles.count / 3; k++)
+				{
+					std::cout << int(elements[k * 3]) << ", " << int(elements[k * 3 + 1]) << ", " << int(elements[k * 3 + 2]) << ",";
+					printf("\n");
+					triangles.push_back(TopologyModule::Triangle(int(elements[k * 3]), int(elements[k * 3 + 1]), int(elements[k * 3 + 2])));
+				}
 				
+			}
+	}
 
+	// ********************************** getVec3f By Attribute Name *************************//
+	template<typename TDataType>
+	void GltfLoader<TDataType>::getCoordByAttributeName(
+		tinygltf::Model& model,
+		const tinygltf::Primitive& primitive,
+		std::string& attributeName,
+		std::vector<Coord>& vertices
+		)
+	{
+		//assign Attributes for Points
+		std::map<std::string, int>::const_iterator iter;
+		iter = primitive.attributes.find(attributeName);
 
+		if (iter == primitive.attributes.end())
+		{	
+			std::cout << attributeName << " : not found !!! \n";
+		}
 
-
+		const tinygltf::Accessor& accessorAttribute = model.accessors[iter->second];
+		const tinygltf::BufferView& bufferView = model.bufferViews[accessorAttribute.bufferView];
+		const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+		std::cout << attributeName <<"Type == " << accessorAttribute.type << "\n";
+		
+		if (accessorAttribute.type == TINYGLTF_TYPE_VEC3) 
+		{
+			const float* positions = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessorAttribute.byteOffset]);
+			for (size_t i = 0; i < accessorAttribute.count; ++i)
+			{
+				vertices.push_back(Coord(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]));
+				std::cout << i << "-------" << positions[i * 3 + 0] << ", " << positions[i * 3 + 1] << ", " << positions[i * 3 + 2] << "\n";
+			}
+		}
+		else if (accessorAttribute.type == TINYGLTF_TYPE_VEC2)
+		{
+			const float* positions = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessorAttribute.byteOffset]);
+			for (size_t i = 0; i < accessorAttribute.count; ++i)
+			{
+				vertices.push_back(Coord(positions[i * 2 + 0], positions[i * 2 + 1], 0));
+				std::cout << i << "-------" << positions[i * 2 + 0] << ", " << positions[i * 2 + 1] << ", " << 0 << "\n";
 			}
 		}
 
 	}
+
+
 
 
 	DEFINE_CLASS(GltfLoader);
