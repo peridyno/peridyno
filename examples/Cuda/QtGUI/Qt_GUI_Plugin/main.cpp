@@ -9,6 +9,7 @@ using namespace dyno;
 #include "Multiphysics/initializeMultiphysics.h"
 
 #include "initializeModeling.h"
+#include "initializeIO.h"
 
 /**
  * @brief This example demonstrate how to load plugin libraries in a static way
@@ -23,6 +24,7 @@ int main()
 	SemiAnalyticalScheme::initStaticPlugin();
 	Volume::initStaticPlugin();
 	Multiphysics::initStaticPlugin();
+	dynoIO::initStaticPlugin();
 
 	QtApp app;
 	app.initialize(1366, 800);

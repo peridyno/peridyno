@@ -19,3 +19,6 @@
 [submodule "external/tinyobjloader"]
 	path = external/tinyobjloader
 	url = https://gitee.com/bigshark151/tinyobjloader.git
+[submodule "external/stb"]
+	path = external/stb
+	url = https://gitee.com/peridyno/stb.git
