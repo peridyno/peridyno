@@ -19,7 +19,7 @@ namespace dyno
 	};
 }
 
-namespace IO
+namespace dynoIO
 {
 	dyno::PluginEntry* initStaticPlugin();
 }
