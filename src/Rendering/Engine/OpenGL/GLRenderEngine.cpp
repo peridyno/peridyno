@@ -119,7 +119,7 @@ namespace dyno
 		mHeadIndexTex.format = GL_RED_INTEGER;
 		mHeadIndexTex.type = GL_UNSIGNED_INT;
 		mHeadIndexTex.create();
-		mHeadIndexTex.resize(1, 1);
+		mHeadIndexTex.resize(1, 1, 1);
 
 		mBlendProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
@@ -136,12 +136,12 @@ namespace dyno
 		mColorTex.internalFormat = GL_RGBA;
 		mColorTex.type = GL_BYTE;
 		mColorTex.create();
-		mColorTex.resize(1, 1);
+		mColorTex.resize(1, 1, 1);
 
 		mDepthTex.internalFormat = GL_DEPTH_COMPONENT32;
 		mDepthTex.format = GL_DEPTH_COMPONENT;
 		mDepthTex.create();
-		mDepthTex.resize(1, 1);
+		mDepthTex.resize(1, 1, 1);
 
 		// index
 		mIndexTex.internalFormat = GL_RGBA32I;
@@ -150,16 +150,16 @@ namespace dyno
 		//mIndexTex.wrapS = GL_CLAMP_TO_EDGE;
 		//mIndexTex.wrapT = GL_CLAMP_TO_EDGE;
 		mIndexTex.create();
-		mIndexTex.resize(1, 1);
+		mIndexTex.resize(1, 1, 1);
 
 		// create framebuffer
 		mFramebuffer.create();
 
 		// bind framebuffer texture
 		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mDepthTex.id);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mColorTex.id);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT1, mIndexTex.id);
+		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, &mDepthTex);
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mColorTex);
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT1, &mIndexTex);
 
 		const GLenum buffers[] = {
 			GL_COLOR_ATTACHMENT0,
@@ -198,8 +198,13 @@ namespace dyno
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
+		GLint samples;
+		glGetFramebufferParameteriv(GL_FRAMEBUFFER, GL_SAMPLES, &samples);
+		if (bEnableFXAA)
+			samples = 1;
+
 		// update framebuffer size
-		resizeFramebuffer(rparams.width, rparams.height);
+		resizeFramebuffer(rparams.width, rparams.height, samples);
 
 		// update shadow map
 		mShadowMap->update(scene, rparams);
@@ -335,13 +340,13 @@ namespace dyno
 	}
 
 
-	void GLRenderEngine::resizeFramebuffer(int w, int h)
+	void GLRenderEngine::resizeFramebuffer(int w, int h, int samples)
 	{
 		// resize internal framebuffer
-		mColorTex.resize(w, h);
-		mDepthTex.resize(w, h);
-		mIndexTex.resize(w, h);
-		mHeadIndexTex.resize(w, h);
+		mColorTex.resize(w, h, samples);
+		mDepthTex.resize(w, h, samples);
+		mIndexTex.resize(w, h, samples);
+		mHeadIndexTex.resize(w, h, samples);
 		glCheckError();
 	}
 

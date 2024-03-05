@@ -53,9 +53,13 @@ namespace dyno
 		// get the selected nodes on given rect area
 		Selection select(int x, int y, int w, int h) override;
 
+		// use MSAA, 
+		void setMSAA(int  samples);
+		void setFXAA(bool on);
+
 	private:
 		void createFramebuffer();
-		void resizeFramebuffer(int w, int h);		
+		void resizeFramebuffer(int w, int h, int samples);
 		void setupTransparencyPass();
 		void updateRenderItems(dyno::SceneGraph* scene);
 
@@ -75,23 +79,24 @@ namespace dyno
 
 	private:
 		// internal framebuffer
-		Framebuffer	mFramebuffer;
-		Texture2D	mColorTex;
-		Texture2D	mDepthTex;
-		Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
+		Framebuffer				mFramebuffer;
+		Texture2DMultiSample	mColorTex;
+		Texture2DMultiSample	mDepthTex;
+		Texture2DMultiSample	mIndexTex;			// indices for object/mesh/primitive etc.
 
 		// for linked-list OIT
-		const int		MAX_OIT_NODES = 1024 * 1024 * 8;
-		Buffer		mFreeNodeIdx;
-		Buffer		mLinkedListBuffer;
-		Texture2D	mHeadIndexTex;
-		Program*	mBlendProgram;
+		const int				MAX_OIT_NODES = 1024 * 1024 * 8;
+		Buffer					mFreeNodeIdx;
+		Buffer					mLinkedListBuffer;
+		Texture2DMultiSample	mHeadIndexTex;
+		Program*				mBlendProgram;
 
-		GLRenderHelper* mRenderHelper;
-		ShadowMap*		mShadowMap;
+		GLRenderHelper*			mRenderHelper;
+		ShadowMap*				mShadowMap;
+
 		// anti-aliasing
-		bool			bEnableFXAA = true;
-		FXAA*			mFXAAFilter;
+		bool					bEnableFXAA = false;
+		FXAA*					mFXAAFilter;
 
 		Mesh* mScreenQuad = 0;
 	};
