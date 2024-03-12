@@ -41,10 +41,7 @@ namespace dyno
 			return;
 		}
 
-		auto output_path = this->varOutputPath()->getValue();
-		int frame_number = this->getFrameNumber();
-		std::stringstream ss; ss << frame_number;
-		std::string filename = output_path + ss.str() + this->file_postfix;
+		std::string filename = this->constructFileName() + this->file_postfix;
 		std::ofstream output(filename.c_str(), std::ios::out);
 
 		if (!output.is_open()) {

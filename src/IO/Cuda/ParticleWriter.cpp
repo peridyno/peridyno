@@ -24,19 +24,7 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleWriter<TDataType>::output()
 	{
-		std::stringstream ss;
-		int frameNum = this->getFrameNumber();
-		//**********渲染数据需要自动补零
-		if (frameNum < 10) ss<<"000";
-		else if (frameNum < 100) ss << "00";
-		else if (frameNum < 1000) ss << "0";
-		//**********
-		ss << frameNum;
-		
-
-		auto path = this->varOutputPath()->getValue();
-
-		std::string filename = path + ss.str() + std::string(".txt");
+		std::string filename = this->constructFileName() + std::string(".txt");
 		
 		auto fileType = this->varFileType()->getValue();
 		if (fileType == OpenType::ASCII) 

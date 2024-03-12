@@ -12,9 +12,6 @@ namespace dyno
 	template<typename TDataType>
 	TriangleMeshWriter<TDataType>::TriangleMeshWriter() : OutputModule()
 	{
-		this->varEnd()->setRange(1, 100000);
-		
-		this->inFrameNumber()->tagOptional(true);
 	}
 
 	template<typename TDataType>
@@ -45,10 +42,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleMeshWriter<TDataType>::outputSurfaceMesh(std::shared_ptr<TriangleSet<TDataType>> triangleset)
 	{
-		int out_number = getFrameNumber();
-
-		std::stringstream ss; ss << out_number;
-		std::string filename = this->varOutputPath()->getData() + ss.str() + this->file_postfix;// 
+		std::string filename = this->constructFileName() + this->file_postfix;;
 		std::ofstream output(filename.c_str(), std::ios::out);
 
 		std::cout << filename << std::endl;
@@ -94,10 +88,7 @@ namespace dyno
 	template<typename TDataType>
 	void TriangleMeshWriter<TDataType>::outputPointCloud(std::shared_ptr<PointSet<TDataType>> pointset)
 	{
-		int out_number = getFrameNumber();
-
-		std::stringstream ss; ss << out_number;
-		std::string filename = this->varOutputPath()->getData() + ss.str() + this->file_postfix;// 
+		std::string filename = this->constructFileName() + this->file_postfix;// 
 		std::ofstream output(filename.c_str(), std::ios::out);
 
 		std::cout << filename << std::endl;

@@ -104,7 +104,7 @@ namespace dyno
 	void TexturedMesh::callbackLoadFile()
 	{
 		auto fullname = this->varFileName()->getValue();
-		auto root = fullname.parent_path();
+		auto root = fullname.path().parent_path();
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
