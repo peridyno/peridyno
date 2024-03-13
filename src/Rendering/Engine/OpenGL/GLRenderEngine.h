@@ -84,6 +84,10 @@ namespace dyno
 		Texture2DMultiSample	mDepthTex;
 		Texture2DMultiSample	mIndexTex;			// indices for object/mesh/primitive etc.
 
+		// non-multisample framebuffer for select
+		Framebuffer				mSelectFramebuffer;
+		Texture2D				mSelectIndexTex;
+
 		// for linked-list OIT
 		const int				MAX_OIT_NODES = 1024 * 1024 * 8;
 		Buffer					mFreeNodeIdx;
