@@ -81,6 +81,9 @@ namespace dyno
 		mDepthTex.release();
 		mIndexTex.release();
 
+		mSelectIndexTex.release();
+		mSelectFramebuffer.release();
+
 		// release linked-list OIT objects
 		mFreeNodeIdx.release();
 		mLinkedListBuffer.release();
@@ -169,6 +172,21 @@ namespace dyno
 
 		mFramebuffer.checkStatus();
 		mFramebuffer.unbind();
+
+		// select framebuffer
+		mSelectIndexTex.internalFormat = GL_RGBA32I;
+		mSelectIndexTex.format = GL_RGBA_INTEGER;
+		mSelectIndexTex.type = GL_INT;
+		mSelectIndexTex.create();
+		mSelectIndexTex.resize(1, 1);
+
+		mSelectFramebuffer.create();
+		mSelectFramebuffer.bind();
+		mSelectFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mSelectIndexTex);
+		mSelectFramebuffer.drawBuffers(1, buffers);
+		mSelectFramebuffer.checkStatus();
+		mSelectFramebuffer.unbind();
+
 		glCheckError();
 	}
 
@@ -347,6 +365,9 @@ namespace dyno
 		mDepthTex.resize(w, h, samples);
 		mIndexTex.resize(w, h, samples);
 		mHeadIndexTex.resize(w, h, samples);
+
+		mSelectIndexTex.resize(w, h);
+
 		glCheckError();
 	}
 
@@ -361,11 +382,18 @@ namespace dyno
 		w = std::max(1, w);
 		h = std::max(1, h);
 
+		// blit multisample framebuffer to regular framebuffer
+		mFramebuffer.bind(GL_READ_FRAMEBUFFER);
+		mSelectFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glBlitFramebuffer(x, y, w, h, x, y, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
 		// read pixels
 		std::vector<glm::ivec4> indices(w * h);
 
-		mFramebuffer.bind(GL_READ_FRAMEBUFFER);
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		mSelectFramebuffer.bind(GL_READ_FRAMEBUFFER);
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(x, y, w, h, GL_RGBA_INTEGER, GL_INT, indices.data());
 		glCheckError();
