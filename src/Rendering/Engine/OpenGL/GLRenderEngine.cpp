@@ -387,7 +387,7 @@ namespace dyno
 		mSelectFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glBlitFramebuffer(x, y, w, h, x, y, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(x, y, x+w, y+h, x, y, x+w, y+h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 		// read pixels
 		std::vector<glm::ivec4> indices(w * h);
