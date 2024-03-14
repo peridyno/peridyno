@@ -382,6 +382,10 @@ namespace dyno
 		w = std::max(1, w);
 		h = std::max(1, h);
 
+		// save current framebuffer binding
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+
 		// blit multisample framebuffer to regular framebuffer
 		mFramebuffer.bind(GL_READ_FRAMEBUFFER);
 		mSelectFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
@@ -396,6 +400,10 @@ namespace dyno
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(x, y, w, h, GL_RGBA_INTEGER, GL_INT, indices.data());
+
+		// restore current framebuffer binding
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
 		glCheckError();
 
 		// use unordered set to get unique id
