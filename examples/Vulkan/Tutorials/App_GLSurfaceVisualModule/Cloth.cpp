@@ -21,7 +21,7 @@ namespace dyno
 	Cloth::Cloth(std::string name)
 		: dyno::Node()
 	{
-		auto triSet = std::make_shared<TriangleSet>();
+		auto triSet = std::make_shared<TriangleSet3f>();
 		this->stateTopology()->setDataPtr(triSet);
 	}
 
@@ -78,13 +78,13 @@ namespace dyno
 		}
 		infile.close();
 
-		auto topo = std::dynamic_pointer_cast<TriangleSet>(this->stateTopology()->getDataPtr());
+		auto topo = std::dynamic_pointer_cast<TriangleSet3f>(this->stateTopology()->getDataPtr());
 
-		topo->mPoints.resize(vertList.size());
+		topo->mCoords.resize(vertList.size());
 		topo->mTriangleIndex.resize(faceList.size());
 
 		//vkTransfer(topo->mPoints, vertList);
-		topo->mPoints.assign(vertList);
+		topo->mCoords.assign(vertList);
 		//vkTransfer(topo->mTriangleIndex, faceList);
 		topo->mTriangleIndex.assign(faceList);
 

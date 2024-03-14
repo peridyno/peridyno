@@ -102,6 +102,10 @@ set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLA
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
+target_compile_definitions(${LIB_NAME} PRIVATE
+    "$<$<BOOL:${PERIDYNO_VK_VALIDATION}>:DYNO_VK_VALIDATION>"
+)
+
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
     #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files

@@ -9,12 +9,12 @@ class Spring : public Node
 {
 public:
 	Spring() {
-		auto triSet = std::make_shared<EdgeSet>();
+		auto triSet = std::make_shared<EdgeSet3f>();
 		this->stateTopology()->setDataPtr(triSet);
 	}
 	virtual ~Spring() {};
 
-	DEF_INSTANCE_STATE(EdgeSet, Topology, "");
+	DEF_INSTANCE_STATE(EdgeSet3f, Topology, "");
 
 protected:
 	void resetStates() override {
@@ -26,7 +26,7 @@ protected:
 		edges.push_back(TopologyModule::Edge(0, 1));
 
 		auto topo = this->stateTopology()->getDataPtr();
-		topo->mPoints.assign(vertices);
+		topo->mCoords.assign(vertices);
 		topo->mEdgeIndex.assign(edges);
 
 		vertices.clear();
@@ -49,6 +49,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main(int, char**)
 {
+	VkSystem::instance()->setAssetPath(getAssetPath());
 	VkSystem::instance()->initialize();
 
 	GlfwApp window;

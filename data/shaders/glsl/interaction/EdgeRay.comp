@@ -1,0 +1,62 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Points
+{
+   Coord3D points[];
+};
+
+layout(std430, binding = 1) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 2) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout(std430, binding = 3) buffer Disatance
+{
+   Real lineDistance[];
+};
+
+layout(std430, binding = 4) buffer Edges 
+{
+   Edge edges[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+	Ray3D mouseray;
+	Real radius;
+} regs;
+
+void main() { 
+   uint pId = gl_GlobalInvocationID.x;
+   if (pId >= regs.num) return;
+
+   Segment3D seg = Segment3D(points[edges[pId].x], points[edges[pId].y]);
+
+   bool flag = false;
+   if (ray_distance(regs.mouseray, seg) <= regs.radius)
+   {
+      flag = true;
+      lineDistance[pId] = point_distance(Point3D(regs.mouseray.origin), seg);
+   }
+   else 
+   {
+      flag = false;
+      lineDistance[pId] = 3.4E38;
+   }
+
+   if (flag || intersected[pId] == 1)
+      intersected[pId] = 1;
+   else
+      intersected[pId] = 0;
+   unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+}

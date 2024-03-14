@@ -1,54 +1,142 @@
 #include "TriangleSet.h"
 #include "VkTransfer.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tinyobjloader/tiny_obj_loader.h"
+
 namespace dyno
 {
+    template <typename TDataType>
+    TriangleSet<TDataType>::TriangleSet()
+        : EdgeSet<TDataType>(),
+          mSort(getSpvFile("shaders/glsl/topology/QuadKeySort.comp.spv")) {
+        this->addKernel("SetupTriangleIndices",
+                        std::make_shared<VkProgram>(BUFFER(uint32_t), // int: height
+                                                    BUFFER(Triangle), // in:  CapillaryTexture
+                                                    CONSTANT(uint)    // in:  horizon & realSize
+                                                    ));
+        this->kernel("SetupTriangleIndices")
+            ->load(getSpvFile("shaders/glsl/topology/SetupTriangleIndices.comp.spv"));
 
-	TriangleSet::TriangleSet()
-	{
-		this->addKernel(
-			"SetupTriangleIndices",
-			std::make_shared<VkProgram>(
-				BUFFER(uint32_t),			//int: height
-				BUFFER(Triangle),       //in:  CapillaryTexture
-				CONSTANT(uint)			//in:  horizon & realSize
-				)
-		);
-		kernel("SetupTriangleIndices")->load(getAssetPath() + "shaders/glsl/topology/SetupTriangleIndices.comp.spv");
-	}
+        this->addKernel("SetupTriKey",
+                        std::make_shared<VkProgram>(BUFFER(EKey), BUFFER(int), BUFFER(Triangle), CONSTANT(uint)));
+        this->addKernel("CountEKey", std::make_shared<VkProgram>(BUFFER(int), BUFFER(EKey), CONSTANT(uint)));
+        this->addKernel("SetupEdge2Tri", std::make_shared<VkProgram>(BUFFER(Edge), BUFFER(Edg2Tri), BUFFER(EKey),
+                                                                     BUFFER(int), BUFFER(int), CONSTANT(uint)));
+        this->kernel("SetupTriKey")->load(getSpvFile("shaders/glsl/topology/SetupTriKey.comp.spv"));
+        this->kernel("CountEKey")->load(getSpvFile("shaders/glsl/topology/CountEKey.comp.spv"));
+        this->kernel("SetupEdge2Tri")->load(getSpvFile("shaders/glsl/topology/SetupEdge2Tri.comp.spv"));
+    }
 
-	TriangleSet::~TriangleSet()
-	{
+    template <typename TDataType>
+    TriangleSet<TDataType>::~TriangleSet() {
+    }
 
-	}
+    template <typename TDataType>
+    void TriangleSet<TDataType>::setTriangles(std::vector<Triangle>& indices) {
+        mTriangleIndex.assign(indices);
+    }
 
-	void TriangleSet::setTriangles(std::vector<Triangle>& indices)
-	{
-		mTriangleIndex.assign(indices);
-	}
+    template <typename TDataType>
+    void TriangleSet<TDataType>::setTriangles(const DArray<Triangle>& indices) {
+        mTriangleIndex.assign(indices);
+    }
 
-	void TriangleSet::setTriangles(const DArray<Triangle>& indices)
-	{
-		mTriangleIndex.assign(indices);
-	}
+    template <typename TDataType>
+    void TriangleSet<TDataType>::updateTopology() {
+        this->updateTriangles();
 
-	void TriangleSet::updateTopology()
-	{
-		this->updateTriangles();
+        EdgeSet<TDataType>::updateTopology();
+    }
 
-		EdgeSet::updateTopology();
-	}
+    template <typename TDataType>
+    void TriangleSet<TDataType>::updateTriangles() {
+        uint num = mTriangleIndex.size();
 
-	void TriangleSet::updateTriangles()
-	{
-		uint num = mTriangleIndex.size();
+        mIndex.resize(3 * num);
 
-		mIndex.resize(3 * num);
+        auto vk_num = VkConstant<uint>(num);
+        this->kernel("SetupTriangleIndices")
+            ->flush(vkDispatchSize(num, 64), mIndex.handle(), mTriangleIndex.handle(), &vk_num);
+    }
 
-		kernel("SetupTriangleIndices")->flush(
-			vkDispatchSize(num, 64),
-			mIndex.handle(),
-			mTriangleIndex.handle(),
-			&VkConstant<uint>(num));
-	}
-}
+    template <typename TDataType>
+    void TriangleSet<TDataType>::updateEdges() {
+        VkConstant<uint> n;
+        uint triSize = mTriangleIndex.size();
+        DArray<EKey> keys;
+        DArray<int> triIds;
+
+        n.setValue(triSize);
+        keys.resize(3 * triSize);
+        triIds.resize(3 * triSize);
+        this->kernel("SetupTriKey")
+            ->flush(vkDispatchSize(triSize, 64), keys.handle(), triIds.handle(), mTriangleIndex.handle(), &n);
+        mSort.sortByKey(keys, triIds, SortParam::eUp);
+        DArray<int> counter;
+        counter.resize(3 * triSize);
+
+        n.setValue(keys.size());
+        this->kernel("CountEKey")->flush(vkDispatchSize(keys.size(), 64), counter.handle(), keys.handle(), &n);
+
+        int edgeNum = this->reduce().reduce(*counter.handle());
+        this->scan().scan(*counter.handle(), *counter.handle(), VkScan<int>::Type::Exclusive);
+
+        mEdg2Tri.resize(edgeNum);
+
+        auto& pEdges = this->getEdges();
+        pEdges.resize(edgeNum);
+
+        n.setValue(keys.size());
+        this->kernel("SetupEdge2Tri")
+            ->flush(vkDispatchSize(keys.size(), 64), pEdges.handle(), mEdg2Tri.handle(), keys.handle(),
+                    counter.handle(), triIds.handle(), &n);
+        counter.clear();
+        triIds.clear();
+        keys.clear();
+    }
+
+    template<typename TDataType>
+    bool TriangleSet<TDataType>::loadObjFile(std::string filename)
+    {
+        std::vector<Coord> vertList;
+        std::vector<Triangle> faceList;
+
+        tinyobj::attrib_t myattrib;
+        std::vector <tinyobj::shape_t> myshape;
+        std::vector <tinyobj::material_t> mymat;
+        std::string mywarn;
+        std::string myerr;
+
+        char* fname = (char*)filename.c_str();
+
+        bool succeed = tinyobj::LoadObj(&myattrib, &myshape, &mymat, &mywarn, &myerr, fname, nullptr, true, true);
+        if (!succeed)
+            return false;
+
+        for (int i = 0; i < myattrib.GetVertices().size() / 3; i++)
+        {
+            vertList.push_back(Coord(myattrib.GetVertices()[3 * i], myattrib.GetVertices()[3 * i + 1], myattrib.GetVertices()[3 * i + 2]));
+        }
+
+        for (int i = 0; i < myshape.size(); i++)
+        {
+            for (int s = 0; s < myshape[i].mesh.indices.size() / 3; s++)
+            {
+                faceList.push_back(Triangle(myshape[i].mesh.indices[3 * s].vertex_index, myshape[i].mesh.indices[3 * s + 1].vertex_index, myshape[i].mesh.indices[3 * s + 2].vertex_index));
+            }
+        }
+        this->setPoints(vertList);
+        this->setTriangles(faceList);
+        this->update();
+
+        vertList.clear();
+        faceList.clear();
+        myshape.clear();
+        mymat.clear();
+
+        return true;
+    }
+
+    DEFINE_CLASS(TriangleSet)
+} // namespace dyno

@@ -1,4 +1,4 @@
-#include "VkUniform.h"
+﻿#include "VkUniform.h"
 
 namespace dyno {
 
@@ -6,7 +6,7 @@ namespace dyno {
 	VkUniform<T>::VkUniform()
 		: VkVariable()
 	{
-		if (ctx->useMemoryPool) {
+		if (ctx->useMemPool()) {
 			buffer->size = sizeof(T);
 			buffer->usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 			buffer->memoryPropertyFlags =
@@ -26,6 +26,13 @@ namespace dyno {
 	VkUniform<T>::~VkUniform()
 	{
 		buffer->destroy();
+	}
+
+	template<typename T>
+	T VkUniform<T>::getValue() const {
+		T val {};
+		memcpy(&val, buffer->mapped, sizeof(T));
+		return val;
 	}
 
 	template<typename T>

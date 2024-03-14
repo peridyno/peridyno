@@ -7,7 +7,7 @@ namespace dyno
 	ParticleSystem::ParticleSystem()
 		: Node()
 	{
-		auto ptSet = std::make_shared<PointSet>();
+		auto ptSet = std::make_shared<PointSet3f>();
 		this->statePointSet()->setDataPtr(ptSet);
 	}
 

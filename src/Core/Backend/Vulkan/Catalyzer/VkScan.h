@@ -23,6 +23,11 @@ namespace dyno {
 		VkScan();
 		~VkScan();
 
+		enum Type {
+			Exclusive = 0,
+			Inclusive,
+		};
+
 		void scan(std::vector<T>& input, uint ScanType);
 
 		void scan(VkDeviceArray<T>& output, const VkDeviceArray<T>& input, uint ScanType);
@@ -30,8 +35,6 @@ namespace dyno {
 		std::shared_ptr<VkProgram> mScan;
 
 		std::shared_ptr<VkProgram> mAdd;
-
-		std::shared_ptr<VkProgram> mSub;
 	};
 }
 #include "VkScan.inl"

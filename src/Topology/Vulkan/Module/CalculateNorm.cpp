@@ -13,7 +13,7 @@ namespace dyno
 				BUFFER(Vec3f),				//vector
 				CONSTANT(uint))				//num
 		);
-		kernel("CalculateNorm")->load(getAssetPath() + "shaders/glsl/topology/CalculateNorm.comp.spv");
+		kernel("CalculateNorm")->load(getSpvFile("shaders/glsl/topology/CalculateNorm.comp.spv"));
 	}
 
 	void CalculateNorm::compute()

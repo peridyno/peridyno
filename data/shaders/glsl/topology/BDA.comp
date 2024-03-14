@@ -1,0 +1,39 @@
+#version 450
+#extension GL_EXT_buffer_reference : enable
+#extension GL_EXT_buffer_reference2 : enable
+#extension GL_ARB_gpu_shader_int64 : enable
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer ListElement
+{
+   vec3 positions;
+};
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer List
+{
+   uint max_size;
+   ListElement data;
+};
+
+layout(std430, binding = 0) buffer Out {
+	uint64_t out_buf[];
+};
+
+layout (push_constant) uniform PushConsts {
+	int num;
+   List list;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   uint idx = gl_GlobalInvocationID.x;
+	if (idx >= regs.num) 
+		return;
+   if(idx == 0) {
+      regs.list.max_size = 100;
+      (regs.list+1).max_size = 200;
+      out_buf[0] = uint64_t(regs.list);
+      out_buf[1] = regs.list.max_size;
+   }
+}

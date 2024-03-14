@@ -1,112 +1,92 @@
-#pragma once
-#include "Platform.h"
-#include "VulkanBuffer.h"
-#include "VulkanTools.h"
-#include "vulkan/vulkan.h"
+﻿#pragma once
+
 #include <algorithm>
 #include <assert.h>
 #include <exception>
 #include <map>
+#include <mutex>
+
+#include "Platform.h"
+#include "VulkanTools.h"
+#include "VulkanBuffer.h"
+#include "VkDescriptorCache.h"
 
 VK_DEFINE_HANDLE(VmaAllocator)
 VK_DEFINE_HANDLE(VmaPool)
 
-namespace dyno {
+namespace dyno
+{
+    class VkSystem;
 
-	class VkContext
-	{
-	public:
-		explicit VkContext(VkPhysicalDevice physicalDevice);
-		~VkContext();
+    class VkContext {
+        friend class VkSystem;
 
-		VkResult createLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, std::vector<const char *> enabledExtensions, void *pNextChain, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
-
-		void createPipelineCache();
-
-		inline	VkDevice		deviceHandle() { return logicalDevice; }
-		inline	VkQueue			graphicsQueueHandle() { return graphicsQueue; }
-		inline	VkQueue			computeQueueHandle() { return computeQueue; }
-		inline	VkQueue			transferQueueHandle() { return transferQueue; }
-
-		inline	VkPhysicalDevice	physicalDeviceHandle() { return physicalDevice; }
-
-		inline  VkPipelineCache	pipelineCacheHandle() { return pipelineCache; }
-
-		// Check whether the compute queue family is distinct from the graphics queue family
-		bool isComputeQueueSpecial();
-
-		uint32_t        getMemoryType(uint32_t  typeBits, VkMemoryPropertyFlags properties, VkBool32 *memTypeFound = nullptr) const;
-		uint32_t        getQueueFamilyIndex(VkQueueFlagBits queueFlags) const;
-		VkResult        createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer *buffer, VkDeviceMemory *memory, void *data = nullptr);
-		VkResult        createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, std::shared_ptr<vks::Buffer> &buffer, VkDeviceSize size, const void *data = nullptr);
-        VkResult        createBuffer(uint32_t poolType, std::shared_ptr<vks::Buffer> &buffer, const void *data = nullptr);
-        VkResult        createMemoryPool(VkInstance instance, uint32_t apiVerion);
-		void            copyBuffer(vks::Buffer *src, vks::Buffer *dst, VkQueue queue, VkBufferCopy *copyRegion = nullptr);
-		VkCommandPool   createCommandPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-		VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, VkCommandPool pool, bool begin = false);
-		VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false);
-		void            flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, VkCommandPool pool, bool free = true);
-		void            flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true);
-		bool            extensionSupported(std::string extension);
-		VkFormat        getSupportedDepthFormat(bool checkSamplingSupport);
-
-	public:
-		/** @brief Physical device representation */
-		VkPhysicalDevice physicalDevice;
-		/** @brief Logical device representation (application's view of the device) */
-		VkDevice logicalDevice;
-		/** @brief Properties of the physical device including limits that the application can check against */
-		VkPhysicalDeviceProperties properties;
-		/** @brief Features of the physical device that an application can use to check if a feature is supported */
-		VkPhysicalDeviceFeatures features;
-		/** @brief Features that have been enabled for use on the physical device */
-		VkPhysicalDeviceFeatures enabledFeatures;
-		/** @brief Memory types and heaps of the physical device */
-		VkPhysicalDeviceMemoryProperties memoryProperties;
-		/** @brief Queue family properties of the physical device */
-		std::vector<VkQueueFamilyProperties> queueFamilyProperties;
-		/** @brief List of extensions supported by the device */
-		std::vector<std::string> supportedExtensions;
-		/** @brief Default command pool for the graphics queue family index */
-		VkCommandPool commandPool = VK_NULL_HANDLE;
-
-		VkQueue graphicsQueue;
-		VkQueue computeQueue;
-		VkQueue transferQueue;
-		/** @brief Set to true when the debug marker extension is detected */
-		bool enableDebugMarkers = false;
-		/** @brief Contains queue family indices */
-
-		// Pipeline cache object
-		VkPipelineCache pipelineCache;
-
-		struct
-		{
-			uint32_t graphics;
-			uint32_t compute;
-			uint32_t transfer;
-		} queueFamilyIndices;
-		operator VkDevice() const
-		{
-			return logicalDevice;
-		};
-
-		enum MemPoolType
+    public:
+        enum MemPoolType
         {
-		    DevicePool,
-		    HostPool,
-		    UniformPool,
-		    EndType
+            DevicePool,
+            HostPool,
+            UniformPool,
+            EndType
         };
 
-		struct MemoryPoolInfo
-        {
-		    VmaPool pool;
-		    int32_t usage;
-        };
+        explicit VkContext(VkPhysicalDevice physicalDevice);
+        ~VkContext();
 
-		std::map<VkFlags, MemoryPoolInfo> poolMap;
-		VmaAllocator g_Allocator;
-		bool useMemoryPool = false;
-	};
-}
+        void createPipelineCache();
+        VkResult createLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures,
+                                     std::vector<const char*> enabledExtensions, void* pNextChain,
+                                     bool useSwapChain = true,
+                                     VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
+
+        bool useMemPool() const;
+        bool enableDebugMarkers() const;
+        VkDevice deviceHandle() const;
+        VkCommandPool commandPool() const;
+        VkQueue graphicsQueueHandle() const;
+        VkQueue computeQueueHandle() const;
+        VkQueue transferQueueHandle() const;
+
+        uint32_t graphicsQueueFamilyIndex() const;
+        uint32_t computeQueueFamilyIndex() const;
+        uint32_t transferQueueFamilyIndex() const;
+
+        const VkPhysicalDeviceProperties& properties() const;
+        const VkPhysicalDeviceFeatures& enabledFeatures() const;
+
+        VkPhysicalDevice physicalDeviceHandle() const;
+        VkPipelineCache pipelineCacheHandle() const;
+
+        // Check whether the compute queue family is distinct from the graphics queue family
+        bool isComputeQueueSpecial();
+
+        VkDescriptorCache& descriptorCache();
+
+        uint32_t getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties,
+                               VkBool32* memTypeFound = nullptr) const;
+        VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags,
+                              VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = nullptr);
+        VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags,
+                              std::shared_ptr<vks::Buffer>& buffer, VkDeviceSize size, const void* data = nullptr);
+        VkResult createBuffer(MemPoolType poolType, std::shared_ptr<vks::Buffer>& buffer, const void* data = nullptr);
+        void copyBuffer(vks::Buffer* src, vks::Buffer* dst, VkQueue queue, VkBufferCopy* copyRegion = nullptr);
+        VkCommandPool createCommandPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags createFlags =
+                                                                       VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+        VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, VkCommandPool pool, bool begin = false);
+        VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false);
+        void flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, VkCommandPool pool, bool free = true);
+        void flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true);
+        bool extensionSupported(std::string extension);
+        VkFormat getSupportedDepthFormat(bool checkSamplingSupport);
+        void vkQueueSubmitSync(VkQueue queue, uint32_t submitCount, const VkSubmitInfo* pSubmits, VkFence fence);
+        void destroy(VkCommandPool, VkCommandBuffer);
+
+    private:
+        uint32_t getQueueFamilyIndex(VkQueueFlagBits queueFlags) const;
+        VkResult createMemoryPool(VkInstance instance, uint32_t apiVerion);
+
+        class Private;
+        DYNO_DECLARE_PRIVATE(Private);
+        std::unique_ptr<Private> d_ptr;
+    };
+} // namespace dyno

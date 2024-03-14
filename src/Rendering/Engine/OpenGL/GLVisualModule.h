@@ -22,6 +22,7 @@
 
 #include <Color.h>
 #include <RenderParams.h>
+#include "Topology/TriangleSet.h"
 
 namespace dyno
 {
@@ -38,6 +39,9 @@ namespace dyno
 	public:
 		GLVisualModule();
 		~GLVisualModule() override;
+
+		using GLTriangleSet = TriangleSet<DataType3f>;
+		using GLPointSet = PointSet<DataType3f>;
 
 		// basic Disney PBR material properties
 		void setColor(const Color& color);
