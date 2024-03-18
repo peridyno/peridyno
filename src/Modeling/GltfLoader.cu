@@ -236,8 +236,10 @@ namespace dyno
 				}
 			}
 			this->stateJointSet()->getDataPtr()->setEdges(edges);
+			//this->initialJointPosition.assign(jointVertices);
+			jointVertices.clear();
 		}
-
+		
 
 
 
@@ -364,7 +366,7 @@ namespace dyno
 
 						if (!colorUri.empty())
 						{
-							auto root = this->varFileName()->getValue().parent_path();
+							auto root = this->varFileName()->getValue().path().parent_path();
 							colorUri = (root / colorUri).string();
 
 							if (loadImage(colorUri.c_str(), texture))
@@ -379,7 +381,7 @@ namespace dyno
 
 						if (!bumpUri.empty())
 						{
-							auto root = this->varFileName()->getValue().parent_path();
+							auto root = this->varFileName()->getValue().path().parent_path();
 							bumpUri = (root / bumpUri).string();
 
 							if (loadImage(bumpUri.c_str(), texture))
@@ -1325,6 +1327,7 @@ namespace dyno
 		meshVertex_joint_weight_0.clear();
 		meshVertex_joint_weight_1.clear();
 
+		initialPosition.clear();
 
 
 		this->stateBindJoints_0()->clear();

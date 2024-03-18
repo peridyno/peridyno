@@ -122,6 +122,10 @@ namespace dyno
 
 
 	private:
+
+		DArray<Coord> initialPosition;
+		//DArray<Coord> initialJointPosition;
+
 		tinygltf::Model model;
 		std::map<joint, Quat<float>> joint_rotation;
 		std::map<joint, Vec3f> joint_scale;
@@ -144,14 +148,17 @@ namespace dyno
 
 		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,//动画变换数据
 		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,//动画时间戳
+
 		std::vector<joint> all_Joints;
-		DArray<Coord> initialPosition;
+
 
 		std::vector<Vec4f> meshVertex_joint_weight_0;
 		std::vector<Vec4f> meshVertex_bind_joint_0;
 
 		std::vector<Vec4f> meshVertex_joint_weight_1;
 		std::vector<Vec4f> meshVertex_bind_joint_1;
+
+
 
 	private:
 
