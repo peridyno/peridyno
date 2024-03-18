@@ -124,7 +124,6 @@ namespace dyno
 	private:
 
 		DArray<Coord> initialPosition;
-		//DArray<Coord> initialJointPosition;
 
 		tinygltf::Model model;
 		std::map<joint, Quat<float>> joint_rotation;

@@ -236,7 +236,7 @@ namespace dyno
 				}
 			}
 			this->stateJointSet()->getDataPtr()->setEdges(edges);
-			//this->initialJointPosition.assign(jointVertices);
+
 			jointVertices.clear();
 		}
 		
@@ -940,24 +940,43 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateStates()
 	{
-		// 更新骨骼点位置
-		std::vector<Coord> jointVertices;
-		for (size_t j = 0; j < all_Joints.size(); j++)
-		{
-			joint jId = all_Joints[j];
+		//// 更新骨骼点位置
+		//std::vector<Coord> jointVertices;
+		//for (size_t j = 0; j < all_Joints.size(); j++)
+		//{
+		//	joint jId = all_Joints[j];
 
-			if (this->varImportAnimation()->getValue())
-			{
-				this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
-				jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_AnimaMatrix));
-			}
-			else
-			{
-				jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_matrix));
-			}
+		//	if (this->varImportAnimation()->getValue())
+		//	{
+		//		this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
+		//		jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_AnimaMatrix));
+		//	}
+		//	else
+		//	{
+		//		jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_matrix));
+		//	}
+		//}
+
+		//this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
+
+		if (model.animations.size() && this->varImportAnimation()->getValue())
+		{
+			this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
+			this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
+
+			DArray<int> d_joints;
+			d_joints.assign(all_Joints);
+
+			cuExecute(all_Joints.size(),
+				jointAnimation,
+				this->stateJointSet()->getDataPtr()->getPoints(),
+				this->stateJointWorldMatrix()->getData(),
+				d_joints
+			);
+
 		}
 
-		this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
+
 
 		if (model.animations.size() && this->varImportAnimation()->getValue())
 		{
@@ -1298,7 +1317,26 @@ namespace dyno
 
 	}
 
+	template< typename Coord, typename Mat4f>
+	__global__ void jointAnimation(
+		DArray<Coord> worldPosition,
+		DArray<Mat4f> WorldMatrix,
+		DArray<int> joints
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= joints.size()) return;
 
+		Vec4f result = Vec4f(0, 0, 0, 1);
+		Coord offest;
+		int jointId = joints[pId];
+		result = WorldMatrix[jointId] * result;
+		
+		worldPosition[pId][0] = result[0];
+		worldPosition[pId][1] = result[1];
+		worldPosition[pId][2] = result[2];
+
+	}
 
 
 	template<typename TDataType>
