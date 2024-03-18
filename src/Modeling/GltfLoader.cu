@@ -1,8 +1,6 @@
 #include "GltfLoader.h"
 
-#include "GLPointVisualModule.h"
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
+
 
 #include <GLPhotorealisticRender.h>
 
@@ -40,11 +38,16 @@ namespace dyno
 	{
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varChanged, this));
 
-
 		this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
 
 		this->varImportAnimation()->attach(callback);
 		this->varFileName()->attach(callback);
+
+		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::updateTransform, this));
+
+		this->varLocation()->attach(callbackTransform);
+		this->varScale()->attach(callbackTransform);
+		this->varRotation()->attach(callbackTransform);
 
 		auto render = std::make_shared<GLPhotorealisticRender>();
 
@@ -56,16 +59,18 @@ namespace dyno
 		this->stateMaterials()->connect(render->inMaterials());
 		this->graphicsPipeline()->pushModule(render);
 
-
 		//Joint Render
-		auto jointRender = std::make_shared<GLPointVisualModule>();
-		jointRender->setColor(Color(1.0f, 0.0f, 0.0f));
-		jointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
-		jointRender->setVisible(true);
-		this->stateJointSet()->connect(jointRender->inPointSet());
-		this->graphicsPipeline()->pushModule(jointRender);
+		auto callbackRender = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varRenderChanged, this));
+		this->varJointRadius()->attach(callbackRender);
 
-		auto jointLineRender = std::make_shared<GLWireframeVisualModule>();
+		jointPointRender = std::make_shared<GLPointVisualModule>();
+		jointPointRender->setColor(Color(1.0f, 0.0f, 0.0f));
+		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
+		jointPointRender->setVisible(true);
+		this->stateJointSet()->connect(jointPointRender->inPointSet());
+		this->graphicsPipeline()->pushModule(jointPointRender);
+
+		jointLineRender = std::make_shared<GLWireframeVisualModule>();
 		jointLineRender->varBaseColor()->setValue(Color(0, 1, 0));
 		jointLineRender->setVisible(true);
 		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 2);
@@ -73,17 +78,20 @@ namespace dyno
 		this->stateJointSet()->connect(jointLineRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(jointLineRender);
 
-
 		this->stateVertex()->promoteOuput();
 		this->stateNormal()->promoteOuput();
-
 		this->stateShapes()->promoteOuput();
 		this->stateMaterials()->promoteOuput();
-
-
-
 		this->stateShapes()->promoteOuput();
+
+
+
+
 	}
+
+
+
+
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::varChanged()
@@ -94,7 +102,7 @@ namespace dyno
 		printf("!!!!!!!!!!!!!!!!!    Import GLTF   !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n");
 
 		this->InitializationData();
-
+		this->updateTransform();
 
 		using namespace tinygltf;
 
@@ -183,12 +191,11 @@ namespace dyno
 		}
 
 
-
 		this->getJointAndHierarchy(Scene_JointsNodesId, all_Joints);		//update private: std::map<joint, std::vector<int>> jointId_joint_Dir;
-
+		
 		int jointNum = all_Joints.size();
 
-
+		d_joints.assign(all_Joints);
 
 		// Joint import from root
 		//joint
@@ -202,7 +209,7 @@ namespace dyno
 		//get InverseBindMatrix (Global)
 		this->buildInverseBindMatrices(all_Joints);	//依赖层级
 
-		// get joint World Location		这计算点位置和动画变换写在一起了
+		// get joint World Location	
 		printf("************  Set Joint  ************\n");
 		{
 			std::vector<Coord> jointVertices;
@@ -210,18 +217,8 @@ namespace dyno
 			{
 				joint jId = all_Joints[j];
 
-				if (this->varImportAnimation()->getValue())
-				{
-
-					this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
-
-					jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_AnimaMatrix));
-
-				}
-				else
-				{
-					jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_matrix));
-				}
+				jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_matrix));
+				
 			}
 
 			//
@@ -239,18 +236,14 @@ namespace dyno
 
 			jointVertices.clear();
 		}
+
+
+
 		
-
-
-
-
-
 		std::vector<Coord> vertices;
 		std::vector<Coord> normals;
 		std::vector<Coord> texCoord0;
 		std::vector<Coord> texCoord1;
-
-
 
 		std::vector<TopologyModule::Triangle> trianglesVector;
 		int shapeNum = 0;
@@ -259,7 +252,6 @@ namespace dyno
 		{
 			shapeNum += meshId.primitives.size();
 		}
-
 
 		//shape
 		this->stateShapes()->resize(shapeNum);
@@ -271,13 +263,9 @@ namespace dyno
 		this->stateMaterials()->resize(model.materials.size());
 		auto& sMats = this->stateMaterials()->getData();
 
-
-
 		std::vector<tinygltf::Material>& materials = model.materials;
 		std::vector<Texture>& textures = model.textures;
 		std::vector<Image>& images = model.images;
-
-
 
 		int primitive_PointOffest;
 		int currentShape = 0;
@@ -285,7 +273,6 @@ namespace dyno
 		for (int mId = 0; mId < model.meshes.size(); mId++)
 		{
 			// import Mesh
-
 			std::vector<dyno::TopologyModule::Triangle> vertexIndex;
 			std::vector<dyno::TopologyModule::Triangle> normalIndex;
 			std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
@@ -463,35 +450,12 @@ namespace dyno
 		//std::vector<Coord> aniVertices = vertices;
 
 		this->stateVertex()->assign(vertices);
-
-		initialPosition.assign(this->stateVertex()->getData());
-
-
-		if (model.animations.size() && this->varImportAnimation()->getValue())
-		{
-
-			this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
-			this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
-
-			cuExecute(this->stateVertex()->getData().size(),
-				PointsAnimation,
-				initialPosition,
-				this->stateVertex()->getData(),
-				this->stateJointInverseBindMatrix()->getData(),
-				this->stateJointWorldMatrix()->getData(),
-
-				this->stateBindJoints_0()->getData(),
-				this->stateBindJoints_1()->getData(),
-				this->stateWeights_0()->getData(),
-				this->stateWeights_1()->getData()
-			);
-
-		}
-
-
-		// assign Vertices Normal texCoord
-
 		this->stateNormal()->assign(normals);
+
+
+		initialPosition.assign(vertices);
+		initialNormal.assign(normals);
+
 
 		std::vector<Vec2f> tempTexCoord;
 		for (auto uv0 : texCoord0)
@@ -509,6 +473,9 @@ namespace dyno
 		tempTexCoord.clear();
 
 
+		
+
+		updateAnimation();
 
 	}
 
@@ -940,52 +907,29 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateStates()
 	{
-		//// 更新骨骼点位置
-		//std::vector<Coord> jointVertices;
-		//for (size_t j = 0; j < all_Joints.size(); j++)
-		//{
-		//	joint jId = all_Joints[j];
 
-		//	if (this->varImportAnimation()->getValue())
-		//	{
-		//		this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
-		//		jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_AnimaMatrix));
-		//	}
-		//	else
-		//	{
-		//		jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_matrix));
-		//	}
-		//}
+		updateAnimation();
+	};
 
-		//this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
 
+	template<typename TDataType>
+	void GltfLoader<TDataType>::updateAnimation()
+	{
 		if (model.animations.size() && this->varImportAnimation()->getValue())
 		{
 			this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
 			this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
 
-			DArray<int> d_joints;
-			d_joints.assign(all_Joints);
-
+			//update Joints
 			cuExecute(all_Joints.size(),
 				jointAnimation,
 				this->stateJointSet()->getDataPtr()->getPoints(),
 				this->stateJointWorldMatrix()->getData(),
-				d_joints
+				d_joints,
+				this->stateTransform()->getValue()
 			);
 
-		}
-
-
-
-		if (model.animations.size() && this->varImportAnimation()->getValue())
-		{
-			this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
-
-			this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
-
-
-
+			//update Points
 			cuExecute(this->stateVertex()->getData().size(),
 				PointsAnimation,
 				initialPosition,
@@ -996,11 +940,28 @@ namespace dyno
 				this->stateBindJoints_0()->getData(),
 				this->stateBindJoints_1()->getData(),
 				this->stateWeights_0()->getData(),
-				this->stateWeights_1()->getData()
+				this->stateWeights_1()->getData(),
+				this->stateTransform()->getValue()
+			);
 
+			//update Normals
+			cuExecute(this->stateVertex()->getData().size(),
+				PointsAnimation,
+				initialNormal,
+				this->stateNormal()->getData(),
+				this->stateJointInverseBindMatrix()->getData(),
+				this->stateJointWorldMatrix()->getData(),
+
+				this->stateBindJoints_0()->getData(),
+				this->stateBindJoints_1()->getData(),
+				this->stateWeights_0()->getData(),
+				this->stateWeights_1()->getData(),
+				this->stateTransform()->getValue()
 			);
 		}
+
 	};
+
 
 	template<typename TDataType>
 	std::vector<int> GltfLoader<TDataType>::getJointDirByJointIndex(std::map<int, std::vector<int>> jointId_joint_Dir, int Index)
@@ -1018,6 +979,23 @@ namespace dyno
 
 		jointDir = iter->second;		// std::vector<int> jD 按顺序为    
 		return jointDir;				//当前骨骼->Root  如 4-2-1-0表示当前骨骼为4，向上依次为 4-2-1-0
+	}
+
+
+	template<typename TDataType>
+	std::string GltfLoader<TDataType>::getTexUri(const std::vector<tinygltf::Texture>& textures, const std::vector<tinygltf::Image>& images, int index)
+	{
+		std::string uri;
+
+		if (index == -1)
+			return uri;
+
+		auto& TexSource = textures[index].source;
+		auto& TexSampler = textures[index].sampler;
+
+		uri = images[TexSource].uri;
+
+		return uri;
 	}
 
 
@@ -1158,6 +1136,8 @@ namespace dyno
 			c_joint_Mat4f[jointId] = tempMatrix;
 		}
 
+
+
 		this->stateJointWorldMatrix()->assign(c_joint_Mat4f);
 
 	};
@@ -1255,6 +1235,36 @@ namespace dyno
 		return v_world_space;
 	}
 
+	template<typename TDataType>
+	void GltfLoader<TDataType>::updateTransform()
+	{
+		Vec3f location = this->varLocation()->getValue();
+		Vec3f scale = this->varScale()->getValue();
+		Mat4f mT = Mat4f(1, 0, 0, location[0], 0, 1, 0, location[1], 0, 0, 1, location[2], 0, 0, 0, 1);
+		Mat4f mS = Mat4f(scale[0], 0, 0, 0, 0, scale[1], 0, 0, 0, 0, scale[2], 0, 0, 0, 0, 1);
+		Mat4f mR = computeQuaternion().toMatrix4x4();
+		Mat4f transform = mT * mS * mR;
+		this->stateTransform()->setValue(transform);
+
+
+	}
+
+
+	/*template< typename Coord, typename Mat4f>
+	__global__ void TransformVertex(
+		DArray<Coord> worldPosition,
+		Mat4f transformMatrix
+	) 
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= worldPosition.size()) return;
+
+		Vec4f result = transformMatrix * Vec4f(worldPosition[pId][0], worldPosition[pId][1], worldPosition[pId][2], 1);
+		worldPosition[pId][0] = result[0];
+		worldPosition[pId][1] = result[1];
+		worldPosition[pId][2] = result[2];
+
+	}*/
 
 	template< typename Coord, typename Vec4f, typename Mat4f>
 	__global__ void PointsAnimation(
@@ -1266,8 +1276,9 @@ namespace dyno
 		DArray<Vec4f> bind_joints_0,
 		DArray<Vec4f> bind_joints_1,
 		DArray<Vec4f> weights_0,
-		DArray<Vec4f> weights_1
+		DArray<Vec4f> weights_1,
 
+		Mat4f transform
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1307,6 +1318,8 @@ namespace dyno
 			}
 		}
 
+		result = transform * result;
+
 		if (j0 | j1)
 		{
 			worldPosition[pId][0] = result[0];
@@ -1321,7 +1334,8 @@ namespace dyno
 	__global__ void jointAnimation(
 		DArray<Coord> worldPosition,
 		DArray<Mat4f> WorldMatrix,
-		DArray<int> joints
+		DArray<int> joints,
+		Mat4f transform
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1331,7 +1345,9 @@ namespace dyno
 		Coord offest;
 		int jointId = joints[pId];
 		result = WorldMatrix[jointId] * result;
-		
+
+		result = transform * result;
+
 		worldPosition[pId][0] = result[0];
 		worldPosition[pId][1] = result[1];
 		worldPosition[pId][2] = result[2];
@@ -1366,6 +1382,8 @@ namespace dyno
 		meshVertex_joint_weight_1.clear();
 
 		initialPosition.clear();
+		d_joints.clear();
+		initialNormal.clear();
 
 
 		this->stateBindJoints_0()->clear();
@@ -1492,6 +1510,15 @@ namespace dyno
 		InitializationData();
 		initialPosition.clear();
 	}
+
+	template<typename TDataType>
+	void GltfLoader<TDataType>::varRenderChanged()
+	{
+		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 2);
+		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
+	}
+
+
 
 
 	DEFINE_CLASS(GltfLoader);
