@@ -72,13 +72,13 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
-		name->setFixedSize(100, 18);
+		name->setFixedHeight(18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		mSpinBox* spinner = new mSpinBox;
+		QSpinBox* spinner = new QSpinBox;
 		spinner->setFixedWidth(100);
+		spinner->setRange(castMinimum<uint>(field->getMin()), castMaximum<int>(field->getMax()));
 		spinner->setValue(f->getValue());
-		spinner->setRange(castMinimum<uint>(field->getMin()), castMaximum<uint>(field->getMax()));
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);

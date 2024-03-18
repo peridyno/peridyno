@@ -56,5 +56,18 @@ namespace dyno {
 
 	};
 
+	class Texture2DMultiSample : public Texture2D
+	{
+		GL_OBJECT(Texture2DMultiSample)
+	public:
+		Texture2DMultiSample();
+
+		virtual void create();
+		virtual void resize(int w, int h, unsigned int nSamples);
+
+	public:
+		unsigned int samples;
+	};
+
 }
 

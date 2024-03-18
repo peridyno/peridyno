@@ -76,11 +76,17 @@ namespace dyno
 		
 		if (!this->inArray()->isEmpty() && this->varInputMode()->getValue() == InputMode::Array)
 		{
-			auto pArray = this->inArray()->getData();
+			auto& pArray = this->inArray()->getData();
 			if (pFixed)
 			{
+#ifdef CUDA_BACKEND
 				lowLimit = m_reduce_real.minimum(pArray.begin(), pArray.size());
 				upLimit = m_reduce_real.maximum(pArray.begin(), pArray.size());
+#endif // CUDA_BACKEND
+
+#ifdef VK_BACKEND
+				//TODO: VkReduce does not support yet
+#endif // VK_BACKEND
 			}
 
 		}

@@ -66,7 +66,15 @@ namespace dyno
 	private:
 
         ImVec2              		mCoord = ImVec2(0,0);
+#ifdef CUDA_BACKEND
 		Reduction<Real> 			m_reduce_real;
+#endif // CUDA_BACKEND
+
+#ifdef VK_BACKEND
+		VkReduce<Real>				m_reduce_real;
+#endif // VK_BACKEND
+
+		
 		float min = -1;
 		float max = 1;
 

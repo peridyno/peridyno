@@ -42,7 +42,7 @@ namespace dyno
 		assert(inPos.size() == inColor.size());
 
 		std::stringstream ss; ss << m_output_index;
-		std::string filename = this->varOutputPath()->getData() + std::string("fluid_pos_") + ss.str() + std::string(".abc");
+		std::string filename = this->varOutputPath()->getValue().string() + std::string("fluid_pos_") + ss.str() + std::string(".abc");
 
 		Alembic::AbcGeom::OArchive archive(Alembic::AbcCoreOgawa::WriteArchive(),
 			filename);

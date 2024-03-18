@@ -53,7 +53,7 @@ namespace dyno
 	}
 }
 
-dyno::PluginEntry* IO::initStaticPlugin()
+dyno::PluginEntry* dynoIO::initStaticPlugin()
 {
 	if (dyno::IOInitializer::instance()->initialize())
 		return dyno::IOInitializer::instance();

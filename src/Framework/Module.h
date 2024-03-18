@@ -68,7 +68,7 @@ namespace dyno
 
 		bool isInitialized();
 
-		virtual std::string getModuleType() { return "Module"; }
+		virtual std::string getModuleType() { return "Default"; }
 
 		bool attachField(FBase* field, std::string name, std::string desc, bool autoDestroy = true) override;
 

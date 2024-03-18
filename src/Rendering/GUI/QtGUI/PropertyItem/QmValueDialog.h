@@ -115,8 +115,6 @@ namespace dyno
 		mDoubleSpinBox* buttonDSpinBox = nullptr;
 		QSpinBox* buttonISpinBox = nullptr;
 
-		bool shiftPress = 0;
-		
 	Q_SIGNALS:
 		void ValueChange(double);
 		void ValueChange(int);
@@ -133,6 +131,8 @@ namespace dyno
 		bool displayRealValue = true;
 		//int
 		int intSub = 0;
+
+		bool mMousePressed = false;
 	};
 
 }

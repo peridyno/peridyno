@@ -9,9 +9,6 @@
 #include "Module/MouseInputModule.h"
 #include "Log.h"
 
-#ifdef CUDA_BACKEND
-	#include "Image_IO/image_io.h"
-#endif
 #include <RenderEngine.h>
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
@@ -30,6 +27,9 @@
 #include "ImGuizmo.h"
 
 #include <ImWidget.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
 
 namespace dyno 
 {
@@ -198,7 +198,6 @@ namespace dyno
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
-			
 			glfwPollEvents();
 
 			if (mAnimationToggle){
@@ -319,16 +318,11 @@ namespace dyno
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
-		//TODO:
-#ifdef CUDA_BACKEND
-		Image image(width, height, Image::RGB, data);
-		image.flipVertically();
-		bool status = ImageIO::save(file_name, &image);
-		delete[] data;
-		return status;
-#else
-		return false;
-#endif
+
+		stbi_flip_vertically_on_write(true);
+		int status = stbi_write_bmp(file_name.c_str(), width, height, 3, data);
+
+		return status == 0;
 	}
 
 	bool GlfwRenderWindow::saveScreen()
@@ -337,7 +331,7 @@ namespace dyno
 		adaptor << mSaveScreenIndex++;
 		std::string index_str;
 		adaptor >> index_str;
-		std::string file_name = mOutputPath + std::string("screen_capture_") + index_str + std::string(".ppm");
+		std::string file_name = mOutputPath + std::string("screen_capture_") + index_str + std::string(".bmp");
 		return saveScreen(file_name);
 	}
 

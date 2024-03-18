@@ -1,7 +1,8 @@
 #include "picture.h"
 // 图形加载
 #define STB_IMAGE_IMPLEMENTATION
-#include "image/stb_image.h"
+#include "stb/stb_image.h"
+
 namespace dyno {
 	// Simple helper function to load an image into a OpenGL texture with common
 	// settings

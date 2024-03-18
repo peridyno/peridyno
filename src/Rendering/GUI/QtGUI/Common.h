@@ -10,7 +10,7 @@
 #endif
 
 namespace dyno {
-	inline QString qstr(const FilePath& p) {
-		return QString::fromStdString(p.string());
-	}
+// 	inline QString qstr(const FilePath& p) {
+// 		return QString::fromStdString(p.string());
+// 	}
 }
