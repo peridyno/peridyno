@@ -2,9 +2,9 @@
 #include "Node.h"
 #include "Topology/QuadSet.h"
 #include "Module/TopologyModule.h"
-#include "SurfaceInteraction.h"
-#include "EdgeInteraction.h"
-#include "PointInteraction.h"
+#include "Module/SurfaceInteraction.h"
+#include "Module/EdgeInteraction.h"
+#include "Module/PointInteraction.h"
 #include "Mapping/QuadSetToTriangleSet.h"
 
 namespace dyno

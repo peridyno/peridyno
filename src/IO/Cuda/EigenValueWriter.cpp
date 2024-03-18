@@ -26,8 +26,7 @@ namespace dyno
 	{
 		auto path = this->varOutputPath()->getValue();
 
-		std::stringstream ss; ss << getFrameNumber();
-		std::string filename = path + ss.str()  + std::string(".txt");
+		std::string filename = this->constructFileName() + std::string(".txt");
 		std::fstream output(filename.c_str(), std::ios::out);
 
 

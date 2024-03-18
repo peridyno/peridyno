@@ -121,31 +121,17 @@ namespace dyno
 	void  ValueDialog::keyPressEvent(QKeyEvent* event)
 	{
 		QDialog::keyPressEvent(event);
-		if (event->key() == Qt::Key_Shift)
-		{
-			for (size_t i = 0; i < 5; i++)
-			{
-				this->button[i]->shiftPress = true;
-			}
-		}
 	}
+
 	void  ValueDialog::keyReleaseEvent(QKeyEvent* event)
 	{
 		QDialog::keyReleaseEvent(event);
-		if (event->key() == Qt::Key_Shift)
-		{
-			for (size_t i = 0; i < 5; i++)
-			{
-				this->button[i]->shiftPress = false;
-			}
-		}
 	}
 
 	void ValueDialog::initData(double v)
 	{	
 		if (mDSpinBox != nullptr) 
 		{
-			printf("doubleSpineBox\n");
 			for (int i = 0; i < 5; i++)
 			{
 				button[i]->SpinBoxData = v;
@@ -158,7 +144,6 @@ namespace dyno
 	{
 		if (mISpinBox != nullptr)
 		{
-			printf("SpineBox\n");
 			for (int i = 0; i < 5; i++)
 			{
 				button[i]->SpinBoxData = v;
@@ -174,8 +159,12 @@ namespace dyno
 
 	void ValueButton::mouseMoveEvent(QMouseEvent* event)
 	{
+		if (!mMousePressed)
+			return;
+
 		EndX = QCursor().pos().x();
 		temp = (EndX - StartX) / 10;
+
 		if(buttonDSpinBox !=nullptr)
 		{
 			sub = defaultValue * temp;
@@ -205,25 +194,6 @@ namespace dyno
 			emit ValueChange(int(intBoxData + intSub));
 		
 		}
-
-
-
-		//if (shiftPress)
-		//{
-		//	double p = (SpinBoxData+sub)/SpinBoxData;
-		//	
-		//	double d1 = DSB1->value();
-		//	double d2 = DSB2->value();
-		//	double d3 = DSB3->value();
-
-		//	DSB1->setValue(Data1 * p);
-		//	DSB2->setValue(Data2 * p);
-		//	DSB3->setValue(Data3 * p);
-		//}
-
-
-
-
 	}
 
 	ValueButton::ValueButton(QWidget* parent) :
@@ -244,7 +214,10 @@ namespace dyno
 		{
 			intBoxData = buttonISpinBox->value();
 		}
+
+		mMousePressed = true;
 	}
+
 	void ValueButton::mouseReleaseEvent(QMouseEvent* event)
 	{
 		if (buttonDSpinBox != nullptr)
@@ -266,6 +239,7 @@ namespace dyno
 			emit Release(intBoxData);
 		}
 
+		mMousePressed = false;
 	}
 }
 

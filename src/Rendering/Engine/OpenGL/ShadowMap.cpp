@@ -53,7 +53,7 @@ namespace dyno
 		mFramebuffer.create();
 
 		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, mShadowDepth.id);
+		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, &mShadowDepth);
 		mFramebuffer.checkStatus();
 
 		mFramebuffer.unbind();
@@ -181,7 +181,7 @@ namespace dyno
 	{
 		// initialization
 		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mShadowTex);
 		mFramebuffer.clearDepth(1.0);
 		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -231,12 +231,12 @@ namespace dyno
 			{
 				mBlurProgram->setVec2("uScale", { 1.f / width, 0.f / height });
 				mShadowTex.bind(GL_TEXTURE5);
-				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowBlur.id);
+				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mShadowBlur);
 				mQuad->draw();
 
 				mBlurProgram->setVec2("uScale", { 0.f / width, 1.f / height });
 				mShadowBlur.bind(GL_TEXTURE5);
-				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, mShadowTex.id);
+				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mShadowTex);
 				mQuad->draw();
 			}
 			glEnable(GL_DEPTH_TEST);

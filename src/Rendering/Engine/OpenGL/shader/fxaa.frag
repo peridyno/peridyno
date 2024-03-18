@@ -82,7 +82,7 @@ layout(location = 0) out vec4 fragColor;
 layout(location = 0) in vec2 texCoord;
 
 // Aliased color buffer (should be sRGB, ideally)
-layout(binding = 1) uniform sampler2D Input;
+layout(binding = 1) uniform sampler2DMS Input;
 
 // 1.f/Input.width, 1.f/Input.height:
 layout(location = 2) uniform vec2 InvTexSize;
@@ -116,6 +116,10 @@ float luminosity(vec3 rgb)
   return dot(rgb, LUMINOSITY_VEC);
 }
 
+vec4 texture(sampler2DMS tex, vec2 uv)
+{
+    return texelFetch(tex, ivec2(uv * textureSize(tex)), 0);
+}
 //======================= Endpoint Search Routines =============================
 // Identify the endpoints of a detected edge and compute a sampling offset to
 // correct for aliasing. The computed offset accounts for distance from edge

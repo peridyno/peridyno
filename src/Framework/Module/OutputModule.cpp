@@ -5,6 +5,12 @@ namespace dyno
 	OutputModule::OutputModule()
 		: Module()
 	{
+		this->varStride()->setRange(1, 1024);
+
+		auto path = this->varOutputPath()->getValue();
+		path.set_as_path(true);
+		this->varOutputPath()->setValue(path);
+
 		this->inFrameNumber()->tagOptional(true);
 	}
 
@@ -14,73 +20,43 @@ namespace dyno
 
 	void OutputModule::updateImpl()
 	{
-		this->updateFrameNumber();
-		this->updateSkipFrame();
-		
-		if (mSkipFrame)
-			return;
+		uint startFrame = this->varStartFrame()->getValue();
+		uint endFrame = this->varEndFrame()->getValue();
 
-		//OutputFile
-		this->output();
+		uint frame = this->inFrameNumber()->getValue();
 
-	}
+		uint stride = this->varStride()->getValue();
 
-
-	int OutputModule::getFrameNumber()
-	{
-		return mFileIndex;
-	}
-
-
-	int OutputModule::updateFrameNumber()
-	{
-
-		auto frame_step = this->varFrameStep()->getData();
-		mCount++;
-		//If the input is not empty,  use InFrameNumber
-		if (!this->inFrameNumber()->isEmpty())
+		if (frame >= startFrame && frame <= endFrame)
 		{
-			mFileIndex = inFrameNumber()->getValue();
-
-			if (frame_step > 1)
+			if ((frame - startFrame) % stride == 0)
 			{
-				if (this->varReCount()->getValue())				
-					mFileIndex = mFileIndex / frame_step;
-				//else
-				//use inFrameNumber
-
+				//OutputFile
+				this->output();
 			}
-			//else
-			//use inFrameNumber
-
-			return mFileIndex;
 		}
-		//no input
-		//use count;
-		else
-		{
-			mFileIndex = mCount;
-			return mFileIndex;
-		}
-
 	}
 
-	void OutputModule::updateSkipFrame()
+	std::string OutputModule::constructFileName()
 	{
-		mSkipFrame = false;
+		uint num = this->inFrameNumber()->getValue();
+		uint stride = this->varStride()->getValue();
 
-		auto frameStep = this->varFrameStep()->getValue();
+		uint index = num;
 
-		if (!this->inFrameNumber()->isEmpty())
-		{
-			if (frameStep > 1 && this->inFrameNumber()->getValue() % frameStep != 0)
-				mSkipFrame = true;
-		}	
+		if (this->varReordering()->getValue()){
+			index = num / stride;
+		}
+
+		std::string prefix = this->varPrefix()->getValue();
+
+		auto path = this->varOutputPath()->getValue().path();
+
+		std::stringstream ss; ss << index;
+
+		//TODO: check whether the path already contains "\\" or "/" at the end
+		std::string filename = path.string() + "\\" + prefix + ss.str();
+		
+		return filename;
 	}
-
-
-
-
-
-
 }

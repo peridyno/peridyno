@@ -94,19 +94,37 @@ namespace dyno
 		connect(location, &QLineEdit::textChanged, this, &QFilePathWidget::updateField);
 
 		connect(open, &QPushButton::clicked, this, [=]() {
-			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getAssetPath()), tr("Text Files(*.*)"));
-			if (!path.isEmpty()) {
-				QFile file(path);
-				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-					QMessageBox::warning(this, tr("Read File"),
-						tr("Cannot open file:\n%1").arg(path));
-					return;
+
+			bool bPath = f->constDataPtr()->is_path();
+			if (bPath)
+			{
+				QString path = QFileDialog::getExistingDirectory(this, tr("Open File"), QString::fromStdString(getAssetPath()), QFileDialog::ReadOnly);
+				if (!path.isEmpty()) {
+					//Windows: "\\"; Linux: "/"
+					path = QDir::toNativeSeparators(path);
+					location->setText(path);
 				}
-				location->setText(path);
-				file.close();
+				else
+					QMessageBox::warning(this, tr("Path"), tr("You do not select any path."));
 			}
-			else {
-				QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
+			else
+			{
+				QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getAssetPath()), tr("Text Files(*.*)"));
+				if (!path.isEmpty()) {
+					//Windows: "\\"; Linux: "/"
+					path = QDir::toNativeSeparators(path);
+					QFile file(path);
+					if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+						QMessageBox::warning(this, tr("Read File"),
+							tr("Cannot open file:\n%1").arg(path));
+						return;
+					}
+					location->setText(path);
+					file.close();
+				}
+				else {
+					QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
+				}
 			}
 		});
 	}
@@ -118,7 +136,12 @@ namespace dyno
 		{
 			return;
 		}
-		f->setValue(str.toStdString());
+
+		auto path = f->getValue();
+
+		path.set_path(str.toStdString());
+
+		f->setValue(path);
 		f->update();
 
 		emit fieldChanged();

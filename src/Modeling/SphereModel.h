@@ -52,9 +52,9 @@ namespace dyno
 
 		DEF_ENUM(SphereType, Type, SphereType::Standard, "Sphere type");
 
-		DEF_VAR(unsigned, Latitude, 32, "Latitude");
+		DEF_VAR(uint, Latitude, 32, "Latitude");
 
-		DEF_VAR(unsigned, Longitude, 32, "Longitude");
+		DEF_VAR(uint, Longitude, 32, "Longitude");
 
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 

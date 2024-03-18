@@ -1,6 +1,7 @@
 #include "Framebuffer.h"
 #include <glad/glad.h>
 #include <iostream>
+#include "Texture.h"
 
 namespace dyno
 {
@@ -60,9 +61,9 @@ namespace dyno
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Framebuffer::setTexture2D(unsigned int attachment, unsigned int tex, int level)
+	void Framebuffer::setTexture2D(unsigned int attachment, const Texture2D* tex, int level)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, tex, level);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, tex->target, tex->id, level);
 		glCheckError();
 	}
 

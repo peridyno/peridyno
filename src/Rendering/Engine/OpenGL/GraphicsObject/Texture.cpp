@@ -96,5 +96,31 @@ namespace dyno
 		glCheckError();
 	}
 
+	Texture2DMultiSample::Texture2DMultiSample()
+	{
+		this->target = GL_TEXTURE_2D_MULTISAMPLE;
+	}
+
+
+	void Texture2DMultiSample::create()
+	{
+		if (target == -1) {
+			std::cerr << "Failed to create texture, wrong target id: " << target << std::endl;
+			return;
+		}
+
+		glGenTextures(1, &id);
+		glCheckError();
+	}
+
+	void Texture2DMultiSample::resize(int w, int h, unsigned int nSamples)
+	{
+		this->samples = nSamples;
+
+		glBindTexture(target, id);
+		glTexImage2DMultisample(target, samples, internalFormat, w, h, GL_TRUE);
+		glCheckError();
+	}
+
 }
 

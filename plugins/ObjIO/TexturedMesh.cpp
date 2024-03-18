@@ -4,7 +4,7 @@
 #include <tinyobjloader/tiny_obj_loader.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <image/stb_image.h>
+#include <stb/stb_image.h>
 
 #include <iostream>
 #include <filesystem>
@@ -104,7 +104,7 @@ namespace dyno
 	void TexturedMesh::callbackLoadFile()
 	{
 		auto fullname = this->varFileName()->getValue();
-		auto root = fullname.parent_path();
+		auto root = fullname.path().parent_path();
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;

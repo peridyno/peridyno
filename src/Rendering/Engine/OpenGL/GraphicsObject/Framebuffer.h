@@ -20,6 +20,7 @@
 
 namespace dyno
 {
+	class Texture2D;
 	class Framebuffer : public GraphicsObject
 	{
 		GL_OBJECT(Framebuffer)
@@ -33,7 +34,7 @@ namespace dyno
 		void clearColor(float r = 0.f, float g = 0.f, float b = 0.f, float a = 1.f);
 		void clearDepth(float depth = 1.f);
 
-		void setTexture2D(unsigned int attachment, unsigned int tex, int level = 0);
+		void setTexture2D(unsigned int attachment, const Texture2D* tex, int level = 0);
 
 		void drawBuffers(int count, const unsigned int* buffers);
 		
