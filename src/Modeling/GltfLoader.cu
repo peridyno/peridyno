@@ -364,7 +364,7 @@ namespace dyno
 
 						if (!colorUri.empty())
 						{
-							auto root = this->varFileName()->getValue().parent_path();
+							auto root = this->varFileName()->getValue().path().parent_path();
 							colorUri = (root / colorUri).string();
 
 							if (loadImage(colorUri.c_str(), texture))
@@ -379,7 +379,7 @@ namespace dyno
 
 						if (!bumpUri.empty())
 						{
-							auto root = this->varFileName()->getValue().parent_path();
+							auto root = this->varFileName()->getValue().path().parent_path();
 							bumpUri = (root / bumpUri).string();
 
 							if (loadImage(bumpUri.c_str(), texture))
