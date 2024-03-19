@@ -199,10 +199,10 @@ namespace dyno
 
 				auto& quads = polygonIndices[incre];
 
-				quads.insert(v0);
-				quads.insert(v1);
-				quads.insert(v2);
 				quads.insert(v3);
+				quads.insert(v2);
+				quads.insert(v1);
+				quads.insert(v0);
 
 				incre++;
 			}

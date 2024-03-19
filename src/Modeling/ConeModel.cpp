@@ -12,7 +12,7 @@ namespace dyno
 	ConeModel<TDataType>::ConeModel()
 		: ParametricModel<TDataType>()
 	{
-		this->varRow()->setRange(2, 50);
+		this->varRow()->setRange(1, 50);
 		this->varColumns()->setRange(3, 50);
 		this->varRadius()->setRange(0.001f, 10.0f);
 		this->varHeight()->setRange(0.001f, 10.0f);
@@ -170,10 +170,10 @@ namespace dyno
 				uint p3 = (i + 1) % columns + j * columns + columns;
 				uint p4 = i + j * columns + columns;
 
-				index.insert(p1);
-				index.insert(p2);
-				index.insert(p3);
 				index.insert(p4);
+				index.insert(p3);
+				index.insert(p2);
+				index.insert(p1);
 
 
 				incre++;
@@ -192,9 +192,9 @@ namespace dyno
 				uint p2 = sidePtNum + (i + 1) % columns;
 				uint p3 = buttomCenter;
 
-				index.insert(p1);
-				index.insert(p2);
 				index.insert(p3);
+				index.insert(p2);
+				index.insert(p1);
 
 
 				incre++;
