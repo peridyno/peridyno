@@ -49,6 +49,11 @@ namespace dyno
 		this->varScale()->attach(callbackTransform);
 		this->varRotation()->attach(callbackTransform);
 
+		this->varLocation()->attach(callback);
+		this->varScale()->attach(callback);
+		this->varRotation()->attach(callback);
+
+
 		auto render = std::make_shared<GLPhotorealisticRender>();
 
 		this->stateVertex()->connect(render->inVertex());
@@ -137,12 +142,9 @@ namespace dyno
 
 
 		////import Animation ：
-		if (this->varImportAnimation()->getValue()) 
-		{
-			this->importAnimation();
-		}
-		
 
+		
+		this->importAnimation();
 
 
 		//Animation done;
@@ -260,7 +262,10 @@ namespace dyno
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
 
-		this->stateMaterials()->resize(model.materials.size());
+		if(model.materials.size())
+			this->stateMaterials()->resize(model.materials.size());
+		else
+			this->stateMaterials()->resize(shapeNum);
 		auto& sMats = this->stateMaterials()->getData();
 
 		std::vector<tinygltf::Material>& materials = model.materials;
@@ -327,7 +332,7 @@ namespace dyno
 
 
 					int matId = primitive.material;
-					if (matId != -1)
+					if (matId != -1)// == -1 会出问题
 					{
 
 						auto material = materials[matId];
@@ -380,6 +385,16 @@ namespace dyno
 
 						statShapes[currentShape]->material = sMats[matId];
 
+					}
+					else 
+					{
+						sMats[currentShape] = std::make_shared<Material>();
+						sMats[currentShape]->ambient = { 0,0,0 };
+						sMats[currentShape]->diffuse = Vec3f(0.5, 0.5, 0.5);
+						sMats[currentShape]->alpha = 1;
+						sMats[currentShape]->specular = Vec3f(1,1,1);
+						sMats[currentShape]->roughness = 0.5;
+						statShapes[currentShape]->material = sMats[currentShape];
 					}
 
 
@@ -475,7 +490,7 @@ namespace dyno
 
 		
 
-		updateAnimation();
+		updateAnimation(0);
 
 	}
 
@@ -907,59 +922,59 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateStates()
 	{
+		if (!(model.animations.size() && this->varImportAnimation()->getValue()))
+			return;
 
-		updateAnimation();
+		updateAnimation(this->stateFrameNumber()->getValue());
 	};
 
 
 	template<typename TDataType>
-	void GltfLoader<TDataType>::updateAnimation()
+	void GltfLoader<TDataType>::updateAnimation(int frameNumber)
 	{
-		if (model.animations.size() && this->varImportAnimation()->getValue())
-		{
-			this->updateAnimationMatrix(all_Joints, this->stateFrameNumber()->getValue());
-			this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
 
-			//update Joints
-			cuExecute(all_Joints.size(),
-				jointAnimation,
-				this->stateJointSet()->getDataPtr()->getPoints(),
-				this->stateJointWorldMatrix()->getData(),
-				d_joints,
-				this->stateTransform()->getValue()
-			);
+		this->updateAnimationMatrix(all_Joints, frameNumber); 
+		this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
 
-			//update Points
-			cuExecute(this->stateVertex()->getData().size(),
-				PointsAnimation,
-				initialPosition,
-				this->stateVertex()->getData(),
-				this->stateJointInverseBindMatrix()->getData(),
-				this->stateJointWorldMatrix()->getData(),
+		//update Joints
+		cuExecute(all_Joints.size(),
+			jointAnimation,
+			this->stateJointSet()->getDataPtr()->getPoints(),
+			this->stateJointWorldMatrix()->getData(),
+			d_joints,
+			this->stateTransform()->getValue()
+		);
 
-				this->stateBindJoints_0()->getData(),
-				this->stateBindJoints_1()->getData(),
-				this->stateWeights_0()->getData(),
-				this->stateWeights_1()->getData(),
-				this->stateTransform()->getValue()
-			);
+		//update Points
+		cuExecute(this->stateVertex()->getData().size(),
+			PointsAnimation,
+			initialPosition,
+			this->stateVertex()->getData(),
+			this->stateJointInverseBindMatrix()->getData(),
+			this->stateJointWorldMatrix()->getData(),
 
-			//update Normals
-			cuExecute(this->stateVertex()->getData().size(),
-				PointsAnimation,
-				initialNormal,
-				this->stateNormal()->getData(),
-				this->stateJointInverseBindMatrix()->getData(),
-				this->stateJointWorldMatrix()->getData(),
+			this->stateBindJoints_0()->getData(),
+			this->stateBindJoints_1()->getData(),
+			this->stateWeights_0()->getData(),
+			this->stateWeights_1()->getData(),
+			this->stateTransform()->getValue()
+		);
 
-				this->stateBindJoints_0()->getData(),
-				this->stateBindJoints_1()->getData(),
-				this->stateWeights_0()->getData(),
-				this->stateWeights_1()->getData(),
-				this->stateTransform()->getValue()
-			);
-		}
+		//update Normals
+		cuExecute(this->stateVertex()->getData().size(),
+			PointsAnimation,
+			initialNormal,
+			this->stateNormal()->getData(),
+			this->stateJointInverseBindMatrix()->getData(),
+			this->stateJointWorldMatrix()->getData(),
 
+			this->stateBindJoints_0()->getData(),
+			this->stateBindJoints_1()->getData(),
+			this->stateWeights_0()->getData(),
+			this->stateWeights_1()->getData(),
+			this->stateTransform()->getValue()
+		);
+	
 	};
 
 
@@ -1031,17 +1046,17 @@ namespace dyno
 					//是否有动画，如果有动画就用动画的变换
 
 					int tempFrame = 0;
-					//防止越界
-					if (currentframe > iterR->second.size() - 1)
-						tempFrame = iterR->second.size() - 1;
-					else if (currentframe < 0)
-						tempFrame = 0;
-					else
-						tempFrame = currentframe;
-
-
+					
 					if (iterR != joint_R_f_anim.end())
-					{
+					{	
+						//防止越界   必要时替换成input
+						if (currentframe > iterR->second.size() - 1)
+							tempFrame = iterR->second.size() - 1;
+						else if (currentframe < 0)
+							tempFrame = 0;
+						else
+							tempFrame = currentframe;
+
 						//使用当前帧
 						qR = iterR->second[tempFrame];
 
@@ -1057,6 +1072,14 @@ namespace dyno
 					iterT = joint_T_f_anim.find(select);
 					if (iterT != joint_T_f_anim.end())
 					{
+						//防止越界  必要时替换成input
+						if (currentframe > iterT->second.size() - 1)
+							tempFrame = iterT->second.size() - 1;
+						else if (currentframe < 0)
+							tempFrame = 0;
+						else
+							tempFrame = currentframe;
+
 						vT = iterT->second[tempFrame];
 					}
 					else
@@ -1068,6 +1091,14 @@ namespace dyno
 					iterS = joint_S_f_anim.find(select);
 					if (iterS != joint_S_f_anim.end())
 					{
+						//防止越界  必要时替换成input
+						if (currentframe > iterS->second.size() - 1)
+							tempFrame = iterS->second.size() - 1;
+						else if (currentframe < 0)
+							tempFrame = 0;
+						else
+							tempFrame = currentframe;
+
 						vS = iterS->second[tempFrame];
 					}
 					else
@@ -1508,7 +1539,10 @@ namespace dyno
 	GltfLoader<TDataType>::~GltfLoader()
 	{
 		InitializationData();
+
 		initialPosition.clear();
+		initialNormal.clear();
+		d_joints.clear();
 	}
 
 	template<typename TDataType>
