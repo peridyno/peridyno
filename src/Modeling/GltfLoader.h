@@ -58,7 +58,7 @@ namespace dyno
 		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, false, "");
 		DEF_VAR(Real, JointRadius, 0.004, "");
-		DEF_VAR(bool, ReloadTextures, 0.004, "");
+		//DEF_VAR(bool, ReloadTextures, 0.004, "");
 
 		//DefaultChannel
 

@@ -488,7 +488,27 @@ namespace dyno
 		tempTexCoord.clear();
 
 
-		
+		if (all_Joints.empty()) 
+		{
+			auto vL = this->varLocation()->getValue();
+			auto vS = this->varScale()->getValue();
+
+			Quat<float> q = computeQuaternion();
+
+			auto RV = [&](const Coord& v)->Coord {
+				return vL + q.rotate(v - vL);
+			};
+
+			int numpt = vertices.size();
+
+			for (int i = 0; i < numpt; i++)
+			{
+				vertices[i] = RV(vertices[i] * vS + RV(vL));
+			}
+
+			this->stateVertex()->assign(vertices);
+			initialPosition.assign(vertices);
+		}
 
 		updateAnimation(0);
 
