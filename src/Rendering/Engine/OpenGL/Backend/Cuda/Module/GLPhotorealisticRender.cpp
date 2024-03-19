@@ -160,7 +160,6 @@ namespace dyno
 		else
 			mShaderProgram->setInt("uVertexNormal", 0);
 		
-		mShaderProgram->setInt("uColorMode", 2);
 		mShaderProgram->setInt("uInstanced", 0);
 
 		mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
@@ -179,8 +178,7 @@ namespace dyno
 
 			// material 
 			{
-				auto color = this->varBaseColor()->getValue();
-				pbr.color = { color.r, color.g, color.b };
+				pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
 				pbr.metallic = this->varMetallic()->getValue();
 				pbr.roughness = this->varRoughness()->getValue();
 				pbr.alpha = this->varAlpha()->getValue();
@@ -196,8 +194,14 @@ namespace dyno
 				glActiveTexture(GL_TEXTURE11);		// bump map
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				if (mtl->mColorTexture.isValid()) 
+				if (mtl->mColorTexture.isValid()) {
+					mShaderProgram->setInt("uColorMode", 2);
 					mtl->mColorTexture.bind(GL_TEXTURE10);
+				}
+				else {
+					mShaderProgram->setInt("uColorMode", 0);
+				}
+
 				if (mtl->mBumpTexture.isValid()) {
 					mtl->mBumpTexture.bind(GL_TEXTURE11);
 					mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
