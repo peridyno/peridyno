@@ -6,7 +6,6 @@
 #include "Vector/Vector2D.h"
 #include "Vector/Vector3D.h"
 #include "Canvas.h"
-#include "Module/TopologyModule.h"
 
 namespace dyno {
 
@@ -24,31 +23,76 @@ namespace dyno {
 
 		~Curve() { };
 
-		//void varChanged();
-		void addItemMyCoord(float x ,float y);
-		//void addItemBezierCoord(float x, float y);
-		void addFloatItemToCoord(float x, float y,std::vector<Coord2D>& coordArray);
-		void addItemOriginalCoord(int x, int y);
+	public:
+
+		//save
+		Canvas::Interpolation InterpMode = Linear;
+		std::vector<Coord2D> MyCoord;
+		std::vector<Coord2D> myHandlePoint;
+		std::string InterpStrings[2] = { "Linear","Bezier" };
+		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
+		std::vector<OriginalCoord> OriginalHandlePoint;//qt HandlePoint Coord
+
+		//save
+		float remapRange[8] = { -3,3,-3,3,-3,3,-3,3 };// "MinX","MinY","MaxX","MaxY"
+		bool lockSize = false;
+		bool useCurve = false;
+		bool resample = true;
+		bool curveClose = false;
+		bool useColseButton = true;
+		bool useSquard = true;
+		bool useSquardButton = true;
+		float Spacing = 5;
+		double NminX = 0;
+		double NmaxX = 1;
+		double NminY = 0;
+		double NmaxY = 1;
+
+	private:
+		std::vector<Coord2D> myBezierPoint;
+		std::vector<Coord2D> resamplePoint;
+		std::vector<Coord2D> FinalCoord;
+		std::vector<double> lengthArray;
+		std::map<float, EndPoint> length_EndPoint_Map;
+
+		float segment = 10;
+		float resampleResolution = 20;
+		float xLess = 1;
+		float xGreater = 0;
+		float yLess = 1;
+		float yGreater = 0;
+		bool generatorMin = true;
+		bool generatorMax = true;
+		bool customHandle = false;
+
+	public:
+	
+		//interface:
 		void addPoint(float x, float y);
+		void addPointAndHandlePoint(Coord2D point, Coord2D handle_1, Coord2D handle_2);
 		void setCurveClose(bool s);
-		void addPointAndHandlePoint(Coord2D point,Coord2D handle_1, Coord2D handle_2 );
-		void clearMyCoord();
-		void addItemHandlePoint(int x, int y);
-		void UpdateFieldFinalCoord();
-		void updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3 ,std::vector<Coord2D>& bezierSet);
-		void updateBezierCurve();
-		void rebuildHandlePoint(std::vector<Coord2D> s);
-		double calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet);
-		void setInterpMode(bool useBezier);
-		void setUseSquard(bool s);
+		std::vector<Coord2D> getPoints() { return FinalCoord; }
 		void useBezier();
 		void useLinear();
 		void setResample(bool s);
-		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord();}
-		void remapY(double minY, double maxY) { NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord();}
-		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord();}
+		void setInterpMode(bool useBezier);
+		void setUseSquard(bool s);
+		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord(); }
+		void remapY(double minY, double maxY) { NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
+		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
+		unsigned getPointSize() { return this->FinalCoord.size(); }
+		void setSpacing(double s);
 
-		void buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet);
+		//Field:
+		void UpdateFieldFinalCoord();
+
+		//Qt:
+		void addFloatItemToCoord(float x, float y,std::vector<Coord2D>& coordArray);
+		void addItemOriginalCoord(int x, int y);
+		void clearMyCoord();
+		void addItemHandlePoint(int x, int y);
+		void updateBezierCurve();
+
 		void updateResampleLinearLine();
 		void updateResampleBezierCurve(std::vector<Coord2D>& myBezierPoint_H);
 		void resamplePointFromLine(std::vector<Coord2D> pointSet);
@@ -59,27 +103,8 @@ namespace dyno {
 		void setRange_MinY(float min, float max) { remapRange[2] = min; remapRange[3] = max; }
 		void setRange_MaxY(float min, float max) { remapRange[6] = min; remapRange[7] = max; }
 		void setRange(float min, float max) { setRange_MinX(min, max); setRange_MaxX(min, max); setRange_MinY(min, max); setRange_MaxY(min, max); };
-		//void setBorderMode(BorderMode border) { this->Bordermode = border; UpdateFieldFinalCoord();}
 		
-		//interface
-		unsigned getPointSize() 
-		{
-			if (FinalCoord.empty())
-				return 0;
-			return this->FinalCoord.size(); 
-		}
-
-
-		std::vector<Coord2D> getPoints() { return FinalCoord; }
-
-
-		//ReSample
-		void setSpacing(double s);
-
-		//
-		void borderCloseResort();
-
-		//Seri
+		//IO
 		void convertCoordToStr(std::string VarName,std::vector<Curve::Coord2D> Array, std::string& Str)
 		{
 			Str.append(VarName+" ");
@@ -168,69 +193,14 @@ namespace dyno {
 			return;
 		}
 
-		//must save
-
-		Canvas::Interpolation InterpMode = Linear;
-
-		std::vector<Coord2D> MyCoord;
-		std::vector<Coord2D> myHandlePoint;
-	
-		//
-		std::string InterpStrings[2] = { "Linear","Bezier" };
-
-		std::vector<Coord2D> myBezierPoint;
-		std::vector<Coord2D> resamplePoint;
-
-		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
-		std::vector<OriginalCoord> OriginalHandlePoint;//qt HandlePoint Coord
-
-		std::vector<Coord2D> FE_MyCoord;
-		std::vector<Coord2D> FE_HandleCoord;
-		std::vector<Coord2D> FinalCoord;
-
-		std::vector<double> lengthArray;
-		std::map<float, EndPoint> length_EndPoint_Map;
-
-		//must save
-		float remapRange[8] = {-3,3,-3,3,-3,3,-3,3};// "MinX","MinY","MaxX","MaxY"
-
-		bool lockSize = false;
-		bool useCurve = false;
-
-
-		bool resample = true;
-
-		bool curveClose = false;
-		bool useColseButton = true;
-
-		bool useSquard = true;
-		bool useSquardButton = true;
-
-		float Spacing = 5;
-
-		double NminX = 0;
-		double NmaxX = 1;
-		double NminY = 0;
-		double NmaxY = 1;
-
-		int handleDefaultLength = 18;
-		float segment = 10;
-		float resampleResolution = 20;
-
-
-		bool displayUseRamp = false;   // Display UseRamp checkbox for RampWidget;
-		bool useRamp = false;    // Enable curve data ,enabled when displayEnable is true
 
 	private:
-		float xLess = 1;
-		float xGreater = 0;
-		float yLess = 1;
-		float yGreater = 0;
 
-		bool generatorMin = true;
-		bool generatorMax = true;
+		void updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3, std::vector<Coord2D>& bezierSet);
+		void rebuildHandlePoint(std::vector<Coord2D> s);
+		void buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet);
 
-		bool customHandle = false;
+
 
 	};
 

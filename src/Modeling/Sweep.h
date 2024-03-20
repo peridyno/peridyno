@@ -57,9 +57,6 @@ namespace dyno
 		DEF_INSTANCE_IN(PointSet<TDataType>, Curve, "");
 
 
-
-		Vec3f RealScale();
-
 	protected:
 		void resetStates() override;
 
@@ -67,6 +64,7 @@ namespace dyno
 
 		void displayChanged();
 
+		Vec3f RealScale();
 
 		float currentIndex = 0;
 		float totalIndex = 0;

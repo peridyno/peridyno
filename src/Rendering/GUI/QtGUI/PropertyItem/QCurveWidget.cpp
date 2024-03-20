@@ -1309,8 +1309,6 @@ namespace dyno
 		s.resample = LineResample;
 		s.useSquard = isSquard;
 		s.Spacing = spacing;
-		s.displayUseRamp = field->getValue().displayUseRamp;
-		s.useRamp = useRamp;
 
 		s.NminX = NminX;
 		s.NmaxX = NmaxX;

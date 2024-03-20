@@ -141,13 +141,12 @@ namespace dyno
 				P1 = i;
 				P2 = i + 1;
 				P3 = i + 2;
-				disP = dis/ab.norm();//dis / ab.norm()
+				disP = dis/ab.norm();
 
 				auto l = ab.normalize();
 
 				offestLocation = Coord(c_point1[i][0]+dis*l[0], c_point1[i][1] + dis * l[1], c_point1[i][2] + dis * l[2]) ;//+ Coord(dis * l[0], dis * l[1], dis * l[2])
 				
-				//matrix
 
 				Location2 = Vec3f(c_point1[P1][0], c_point1[P1][1], c_point1[P1][2]);
 

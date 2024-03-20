@@ -149,14 +149,7 @@ namespace dyno {
 			return;
 		}
 
-		//void setVarByStr(std::string Str, BorderMode& value)
-		//{
-		//	if (std::isdigit(Str[0]))
-		//	{
-		//		value = BorderMode(std::stoi(Str));
-		//	}
-		//	return;
-		//}
+
 		void setVarByStr(std::string Str, Interpolation& value)
 		{
 			if (std::isdigit(Str[0]))
