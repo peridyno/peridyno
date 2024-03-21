@@ -21,7 +21,8 @@ namespace dyno
 
 		connect(this->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(LineEditStart()));
 		connect(this, SIGNAL(valueChanged(double)), this, SLOT(LineEditFinished(double)));
-
+		connect(this, SIGNAL(valueChanged(double)), this, SLOT(ModifyValueAndUpdate(double)));
+		
 		this->setDecimals(decimalsMax);
 		this->setKeyboardTracking(false);
 
@@ -29,13 +30,11 @@ namespace dyno
 
 	void mDoubleSpinBox::LineEditStart()
 	{
-
 		return;
 	}
 
 	void mDoubleSpinBox::LineEditFinished(double v) 
 	{
-
 		realValue = v;
 		this->setValue(realValue);
 
@@ -81,6 +80,7 @@ namespace dyno
 
 	void mDoubleSpinBox::ModifyValueAndUpdate(double v)
 	{
+
 		this->setKeyboardTracking(true);
 		this->setRealValue(v);
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));

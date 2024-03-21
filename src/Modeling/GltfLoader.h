@@ -17,6 +17,8 @@
 #pragma once
 #include "Node/ParametricModel.h"
 #include "Topology/TriangleSet.h"
+#include "GLPointVisualModule.h"
+#include "GLWireframeVisualModule.h"
 
 #include "FilePath.h"
 #define TINYGLTF_IMPLEMENTATION
@@ -56,7 +58,7 @@ namespace dyno
 		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, false, "");
 		DEF_VAR(Real, JointRadius, 0.004, "");
-
+		//DEF_VAR(bool, ReloadTextures, 0.004, "");
 
 		//DefaultChannel
 
@@ -73,11 +75,7 @@ namespace dyno
 		DEF_VAR(std::string, CoordName_1, "", "CoordName_1");
 		DEF_VAR(std::string, CoordName_2, "", "CoordName_2");
 
-		DEF_ARRAY_STATE(Real, RealChannel_1, DeviceType::GPU, "RealChannel_1");
-		DEF_ARRAY_STATE(int, IntChannel_1, DeviceType::GPU, "IntChannel_1");
-		DEF_ARRAY_STATE(Coord, CoordChannel_1, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Coord, CoordChannel_2, DeviceType::GPU, "CoordChannel_1");
-
+		DEF_VAR_STATE(Mat4f, Transform, Mat4f::identityMatrix(), "RealChannel_1");
 
 		DEF_ARRAY_STATE(Vec4f, BindJoints_0, DeviceType::GPU, "CoordChannel_1");
 		DEF_ARRAY_STATE(Vec4f, BindJoints_1, DeviceType::GPU, "CoordChannel_1");
@@ -87,6 +85,11 @@ namespace dyno
 		DEF_ARRAY_STATE(Mat4f, JointInverseBindMatrix, DeviceType::GPU, "CoordChannel_1");
 		DEF_ARRAY_STATE(Mat4f, JointLocalMatrix, DeviceType::GPU, "CoordChannel_1");
 		DEF_ARRAY_STATE(Mat4f, JointWorldMatrix, DeviceType::GPU, "CoordChannel_1");
+		
+		DEF_ARRAY_STATE(Real, RealChannel_1, DeviceType::GPU, "RealChannel_1");
+		DEF_ARRAY_STATE(int, IntChannel_1, DeviceType::GPU, "IntChannel_1");
+		DEF_ARRAY_STATE(Coord, CoordChannel_1, DeviceType::GPU, "CoordChannel_1");
+		DEF_ARRAY_STATE(Coord, CoordChannel_2, DeviceType::GPU, "CoordChannel_1");
 		//
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
@@ -100,22 +103,7 @@ namespace dyno
 	protected:
 		void resetStates() override
 		{
-			//varChanged();
-		}
-
-		std::string getTexUri(const std::vector<tinygltf::Texture>& textures, const std::vector<tinygltf::Image>& images, int index)
-		{
-			std::string uri;
-
-			if (index == -1)
-				return uri;
-
-			auto& TexSource = textures[index].source;
-			auto& TexSampler = textures[index].sampler;
-
-			uri = images[TexSource].uri;
-
-			return uri;
+			updateTransform();
 		}
 
 		void updateStates() override;
@@ -124,6 +112,8 @@ namespace dyno
 	private:
 
 		DArray<Coord> initialPosition;
+		DArray<Coord> initialNormal;
+		DArray<int> d_joints;
 
 		tinygltf::Model model;
 		std::map<joint, Quat<float>> joint_rotation;
@@ -158,14 +148,22 @@ namespace dyno
 		std::vector<Vec4f> meshVertex_bind_joint_1;
 
 
+		std::shared_ptr<GLWireframeVisualModule> jointLineRender;
+		std::shared_ptr<GLPointVisualModule> jointPointRender;
 
 	private:
 
 		void varChanged();
 
+		void varRenderChanged();
+
+		void updateTransform();
+
 		void traverseNode(joint id, std::vector<joint>& joint_nodes, std::map<joint, std::vector<int>>& dir, std::vector<joint> currentDir);
 
 		void importAnimation();		
+
+		void updateAnimation(int frameNumber);
 
 		void InitializationData();
 
@@ -201,6 +199,7 @@ namespace dyno
 
 		Vec3f getmeshPointDeformByJoint(joint jointId, Coord worldPosition, std::map<joint, Mat4f> jMatrix);
 
+		std::string getTexUri(const std::vector<tinygltf::Texture>& textures, const std::vector<tinygltf::Image>& images, int index);
 
 	};
 
