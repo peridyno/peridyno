@@ -45,18 +45,17 @@ namespace dyno
 
 	class QDoubleSpinner;
 	class QDoubleSlider;
-	class mDoubleSpinBox;
-	class ValueDialog;
+	class QPiecewiseDoubleSpinBox;
+	class QValueDialog;
 
-
-
-	class mSpinBox : public QSpinBox
+	/**
+	 * A piecewise spin box
+	 */
+	class QPiecewiseSpinBox : public QSpinBox
 	{
 		Q_OBJECT
 	public:
-		explicit mSpinBox(QWidget* parent = nullptr);
-		
-		ValueDialog* ValueModify = nullptr;
+		explicit QPiecewiseSpinBox(QWidget* parent = nullptr);
 
 	private:
 		
@@ -64,10 +63,7 @@ namespace dyno
 
 		void contextMenuEvent(QContextMenuEvent* event) override;
 
-
-
+	private:
+		QValueDialog* mValueModify = nullptr;
 	};
-
-
-
 }

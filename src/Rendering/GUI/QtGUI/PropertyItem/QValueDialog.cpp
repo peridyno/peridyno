@@ -1,4 +1,4 @@
-#include "QmValueDialog.h"
+#include "QValueDialog.h"
 
 #include "Module.h"
 #include "Node.h"
@@ -8,12 +8,12 @@
 #include <QVBoxLayout>
 
 #include <memory>
-#include "QmDoubleSpinBox.h"
+#include "QPiecewiseDoubleSpinBox.h"
 
 namespace dyno
 {
 
-	ValueDialog::ValueDialog(QAbstractSpinBox* parent)
+	QValueDialog::QValueDialog(QAbstractSpinBox* parent)
 	{
 
 		SBox1 = parent;
@@ -22,7 +22,7 @@ namespace dyno
 
 
 		// double
-		auto doubleSpinBox = TypeInfo::cast<mDoubleSpinBox>(parent);
+		auto doubleSpinBox = TypeInfo::cast<QPiecewiseDoubleSpinBox>(parent);
 		if (doubleSpinBox != nullptr)
 		{
 
@@ -30,7 +30,7 @@ namespace dyno
 			float power = 0.1;
 			for (int i = 0; i < 5; i++)
 			{
-				button[i] = new ValueButton;
+				button[i] = new QValueButton;
 
 				power *= 0.1;
 
@@ -51,8 +51,8 @@ namespace dyno
 				button[i]->buttonDSpinBox = doubleSpinBox;
 				VLayout->addWidget(button[i]);
 
-				connect(button[i], SIGNAL(ValueChange(double)), doubleSpinBox, SLOT(ModifyValueAndUpdate(double)));
-				connect(button[i], SIGNAL(Release(double)), this, SLOT(initData(double)));
+				connect(button[i], SIGNAL(valueChange(double)), doubleSpinBox, SLOT(ModifyValueAndUpdate(double)));
+				connect(button[i], SIGNAL(mouseReleased(double)), this, SLOT(initData(double)));
 			}
 		}
 		// int
@@ -65,7 +65,7 @@ namespace dyno
 
 			for (int i = 0; i < 5; i++)
 			{
-				button[i] = new ValueButton;
+				button[i] = new QValueButton;
 
 				std::string s = std::to_string(step[i]);
 				QString text = QString::fromStdString(s);
@@ -85,8 +85,8 @@ namespace dyno
 
 				VLayout->addWidget(button[i]);
 
-				connect(button[i], SIGNAL(ValueChange(int)), mIntSpinBox, SLOT(setValue(int)));
-				connect(button[i], SIGNAL(Release(int)), this, SLOT(initData(int)));
+				connect(button[i], SIGNAL(valueChange(int)), mIntSpinBox, SLOT(setValue(int)));
+				connect(button[i], SIGNAL(mouseReleased(int)), this, SLOT(initData(int)));
 			}
 		}
 
@@ -104,31 +104,31 @@ namespace dyno
 	}
 
 
-	void ValueDialog::updateDialogPosition() 
+	void QValueDialog::updateDialogPosition() 
 	{
 		this->move(QCursor().pos().x() - button[1]->rect().width() / 2, QCursor().pos().y() - button[1]->rect().height() * 5 / 2 - 5);
 
 	}
 
 	
-	void ValueDialog::mouseReleaseEvent(QMouseEvent* event)
+	void QValueDialog::mouseReleaseEvent(QMouseEvent* event)
 	{
 
 	}
 
 
 
-	void  ValueDialog::keyPressEvent(QKeyEvent* event)
+	void  QValueDialog::keyPressEvent(QKeyEvent* event)
 	{
 		QDialog::keyPressEvent(event);
 	}
 
-	void  ValueDialog::keyReleaseEvent(QKeyEvent* event)
+	void  QValueDialog::keyReleaseEvent(QKeyEvent* event)
 	{
 		QDialog::keyReleaseEvent(event);
 	}
 
-	void ValueDialog::initData(double v)
+	void QValueDialog::initData(double v)
 	{	
 		if (mDSpinBox != nullptr) 
 		{
@@ -140,7 +140,7 @@ namespace dyno
 		}
 	}
 
-	void ValueDialog::initData(int v)
+	void QValueDialog::initData(int v)
 	{
 		if (mISpinBox != nullptr)
 		{
@@ -152,12 +152,12 @@ namespace dyno
 		}
 	}
 
-	void ValueDialog::mouseMoveEvent(QMouseEvent* event)
+	void QValueDialog::mouseMoveEvent(QMouseEvent* event)
 	{
 
 	}
 
-	void ValueButton::mouseMoveEvent(QMouseEvent* event)
+	void QValueButton::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (!mMousePressed)
 			return;
@@ -177,7 +177,7 @@ namespace dyno
 			text = QString::fromStdString(str);
 			this->setText(text);
 
-			emit ValueChange(SpinBoxData + sub);
+			emit valueChange(SpinBoxData + sub);
 		}
 		else if (buttonISpinBox != nullptr) 
 		{
@@ -191,18 +191,18 @@ namespace dyno
 			text = QString::fromStdString(str);
 			this->setText(text);
 
-			emit ValueChange(int(intBoxData + intSub));
+			emit valueChange(int(intBoxData + intSub));
 		
 		}
 	}
 
-	ValueButton::ValueButton(QWidget* parent) :
+	QValueButton::QValueButton(QWidget* parent) :
 		QPushButton(parent)
 	{
 
 	}
 
-	void ValueButton::mousePressEvent(QMouseEvent* event)
+	void QValueButton::mousePressEvent(QMouseEvent* event)
 	{
 		StartX = QCursor().pos().x();
 
@@ -218,7 +218,7 @@ namespace dyno
 		mMousePressed = true;
 	}
 
-	void ValueButton::mouseReleaseEvent(QMouseEvent* event)
+	void QValueButton::mouseReleaseEvent(QMouseEvent* event)
 	{
 		if (buttonDSpinBox != nullptr)
 		{
@@ -227,7 +227,7 @@ namespace dyno
 			this->setText(text);
 			SpinBoxData = SpinBoxData + sub;
 
-			emit Release(SpinBoxData);
+			emit mouseReleased(SpinBoxData);
 		}
 		else if (buttonISpinBox != nullptr)
 		{
@@ -236,7 +236,7 @@ namespace dyno
 			this->setText(text);
 			intBoxData = intBoxData + intSub;
 
-			emit Release(intBoxData);
+			emit mouseReleased(intBoxData);
 		}
 
 		mMousePressed = false;
