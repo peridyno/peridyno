@@ -22,6 +22,8 @@
 #include "GraphicsObject/Material.h"
 #include "GraphicsObject/VertexArray.h"
 #include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Instance.h"
+#include "GLPhotorealisticRender.h"
 
 #ifdef CUDA_BACKEND
 #include "ConstructTangentSpace.h"
@@ -29,22 +31,17 @@
 
 namespace dyno
 {
-	class GLPhotorealisticRender : public GLVisualModule
+	class GLInstancePhotorealisticRender : public GLPhotorealisticRender
 	{
-		DECLARE_CLASS(GLPhotorealisticRender)
+		DECLARE_CLASS(GLInstancePhotorealisticRender)
 	public:
-		GLPhotorealisticRender();
-		~GLPhotorealisticRender();
+		GLInstancePhotorealisticRender();
+		~GLInstancePhotorealisticRender();
 
 	public:
 		virtual std::string caption() override;
 
-		DEF_ARRAY_IN(Vec3f, Vertex,		DeviceType::GPU, "");
-		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
-		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
-
-		DEF_INSTANCES_IN(Shape,		Shape, "");
-		DEF_INSTANCES_IN(Material,	Material, "");
+		DEF_INSTANCES_IN(ShapeInstance, Instance, "");
 
 	protected:
 		virtual void updateImpl() override;
@@ -54,25 +51,14 @@ namespace dyno
 		virtual bool initializeGL() override;
 		virtual void releaseGL() override;
 
+	
 
 	protected:
-		XBuffer<Vec3f> mPosition;
-		XBuffer<Vec3f> mNormal;
-		XBuffer<Vec3f> mTangent;
-		XBuffer<Vec3f> mBitangent;
-		XBuffer<Vec2f> mTexCoord;
-		VertexArray	mVAO;
 
-		Program* mShaderProgram;
-		Buffer		mRenderParamsUBlock;
-		Buffer		mPBRMaterialUBlock;
 
 	private:
 
-		
 
-#ifdef CUDA_BACKEND
-		std::shared_ptr<ConstructTangentSpace> mTangentSpaceConstructor;
-#endif
 	};
+
 };

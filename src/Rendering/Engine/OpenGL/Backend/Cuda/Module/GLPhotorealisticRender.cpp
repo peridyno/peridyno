@@ -242,10 +242,13 @@ namespace dyno
 				}
 			}
 
+
 			glDrawArrays(GL_TRIANGLES, 0, numTriangles * 3);
 
 			glCheckError();
 			mVAO.unbind();
 		}
 	}
+
+
 }
