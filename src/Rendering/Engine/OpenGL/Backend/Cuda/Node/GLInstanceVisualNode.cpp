@@ -17,6 +17,7 @@ namespace dyno
 		this->inVertex()->connect(sRender->inVertex());
 
 		this->graphicsPipeline()->pushModule(sRender);
+		this->setAutoSync(true);
 	}
 
 	template<typename TDataType>

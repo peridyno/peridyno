@@ -57,16 +57,17 @@ public:
 		this->stateShapeInstances()->resize(shapeNum);
 		auto& stateInstances = this->stateShapeInstances()->getData();
 
+		auto offest = this->varOffest()->getValue();
+
 		std::vector<std::vector<Transform3f>> transform;
 		transform.resize(shapeNum);
 		for (size_t i = 0; i < shapeNum; i++)
 		{
 			for (size_t j = 0; j < copyNum; j++)
 			{
-				transform[i].push_back(Transform3f(Vec3f(j, 0, 0), Mat3f::identityMatrix(), Vec3f(1, 1, 1)));
+				transform[i].push_back(Transform3f(Vec3f(offest[0]*j, 0, 0), Mat3f::identityMatrix(), Vec3f(1, 1, 1)));
 				std::cout << transform[i][transform[i].size() - 1].translation().x << ", " << transform[i][transform[i].size() - 1].translation().y << ", " << transform[i][transform[i].size() - 1].translation().z << std::endl;
-			
-				
+					
 			}
 			copyNum++;
 
@@ -111,14 +112,14 @@ public:
 
 	}
 
+	DEF_VAR(Vec3f, Offest,Vec3f(0.4,0,0) ,"");
+	DEF_ARRAY_IN(Mat4f, WorldMatrix, DeviceType::GPU, "");
 
-	DEF_ARRAY_IN(Mat4f, WorldMatrix, DeviceType::GPU, "CoordChannel_1");
+	DEF_ARRAY_STATE(Mat4f, Matrix, DeviceType::GPU, "");
+	DEF_ARRAY_STATE(Transform3f, Transform, DeviceType::GPU, "");
 
-	DEF_ARRAY_STATE(Mat4f, Matrix, DeviceType::GPU, "CoordChannel_1");
-	DEF_ARRAY_STATE(Transform3f, Transform, DeviceType::GPU, "CoordChannel_1");
-
-	DEF_ARRAYLIST_STATE(Mat4f, MatrixList, DeviceType::GPU, "CoordChannel_1");
-	DEF_ARRAYLIST_STATE(Transform3f, TransformList, DeviceType::GPU, "CoordChannel_1");
+	DEF_ARRAYLIST_STATE(Mat4f, MatrixList, DeviceType::GPU, "");
+	DEF_ARRAYLIST_STATE(Transform3f, TransformList, DeviceType::GPU, "");
 
 	DEF_INSTANCES_STATE(ShapeInstance, ShapeInstance, "");
 };
