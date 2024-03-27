@@ -48,7 +48,7 @@ macro(add_plugin LIB_NAME LIB_DEPENDENCY)
     add_compile_definitions(PERIDYNO_API_EXPORTS)
 
     target_include_directories(${LIB_NAME} PUBLIC 
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/plugins>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/plugins>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>/plugins)
 
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
