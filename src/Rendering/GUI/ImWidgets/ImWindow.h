@@ -33,7 +33,9 @@ namespace dyno
 		bool mViewManipulator = true;
 
 
-		int  mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
+		int mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
+
+		int	mSelectMode = 0; // 0 - point, 1 - edge, 2 - polygon
 
 		// cursor status
 		int mRegX = -1;

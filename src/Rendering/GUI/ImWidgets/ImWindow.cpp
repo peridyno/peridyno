@@ -285,7 +285,7 @@ void ImWindow::draw(RenderWindow* app)
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 5.f));
 			ImGui::Begin("Right Sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 			
-			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ARROWS_ALT, "Translate", mEditMode == 0))
+			if (ImGui::radioWithIconButton(ICON_FA_ARROWS_ALT, "Translate", mEditMode == 0))
 				mEditMode = 0;
 			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ALT, "Scale", mEditMode == 1))
 				mEditMode = 1;
@@ -293,7 +293,7 @@ void ImWindow::draw(RenderWindow* app)
 				mEditMode = 2;
 			ImGui::Separator(); // --------
 
-			if (ImGui::Button("A", ImVec2(27, 27)))
+			if (ImGui::Button(ICON_FA_EXPAND, ImVec2(30, 30)))
 			{
 				if (scene) {
 					auto node = app->getCurrentSelectedNode();
@@ -317,6 +317,17 @@ void ImWindow::draw(RenderWindow* app)
 					camera->setUnitScale(unit);
 				}
 			}
+
+			ImGui::Separator(); // --------
+
+			if (ImGui::radioWithIconButton(ICON_FA_LOCATION_ARROW, "Object", mSelectMode == 0))
+				mSelectMode = 0;
+			if (ImGui::radioWithIconButton(ICON_FA_DRAW_POLYGON, "Primitives", mSelectMode == 1))
+				mSelectMode = 1;
+
+// 			if (ImGui::ImageButton())
+// 			{
+// 			}
 
 			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
 			ImGui::End();	
