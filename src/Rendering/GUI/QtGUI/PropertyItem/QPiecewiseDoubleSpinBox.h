@@ -45,16 +45,14 @@ namespace dyno
 
 	class QDoubleSpinner;
 	class QDoubleSlider;
-	class mDoubleSpinBox;
-	class ValueDialog;
+	class QPiecewiseDoubleSpinBox;
+	class QValueDialog;
 
-
-
-	class mDoubleSpinBox : public QDoubleSpinBox
+	class QPiecewiseDoubleSpinBox : public QDoubleSpinBox
 	{
 		Q_OBJECT
 	public:
-		explicit mDoubleSpinBox(QWidget* parent = nullptr);
+		explicit QPiecewiseDoubleSpinBox(QWidget* parent = nullptr);
 
 		double getRealValue() 
 		{
@@ -71,7 +69,7 @@ namespace dyno
 			return this->lineEdit();
 		}
 		
-		ValueDialog* ValueModify = nullptr;
+		QValueDialog* ValueModify = nullptr;
 
 
 	private:
@@ -143,12 +141,12 @@ namespace dyno
 	};
 
 
-	class toggleLabel : public QLabel
+	class QToggleLabel : public QLabel
 	{
 		Q_OBJECT
 	public:
 
-		explicit toggleLabel(QWidget* parent = nullptr)
+		explicit QToggleLabel(QWidget* parent = nullptr)
 			: QLabel(parent)
 		{
 

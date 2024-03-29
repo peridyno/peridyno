@@ -44,17 +44,17 @@ namespace dyno
 
 	class QDoubleSpinner;
 	class QDoubleSlider;
-	class mDoubleSpinBox;
-	class ValueDialog;
-	class ValueButton;
+	class QPiecewiseDoubleSpinBox;
+	class QValueDialog;
+	class QValueButton;
 
-	class ValueDialog : public QDialog
+	class QValueDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
 
-		ValueDialog(QAbstractSpinBox* parent = nullptr);
+		QValueDialog(QAbstractSpinBox* parent = nullptr);
 
 		void mouseMoveEvent(QMouseEvent* event) override;
 		void mouseReleaseEvent(QMouseEvent* event) override;
@@ -64,10 +64,10 @@ namespace dyno
 
 		void updateDialogPosition();
 
-		ValueButton* button[5];
+		QValueButton* button[5];
 
 		QAbstractSpinBox* SBox1 = nullptr;
-		mDoubleSpinBox* mDSpinBox = nullptr;
+		QPiecewiseDoubleSpinBox* mDSpinBox = nullptr;
 		QSpinBox* mISpinBox = nullptr;
 
 	Q_SIGNALS:
@@ -82,12 +82,12 @@ namespace dyno
 	};
 
 
-	class ValueButton : public QPushButton
+	class QValueButton : public QPushButton
 	{
 		Q_OBJECT
 
 	public:
-		explicit ValueButton(QWidget* parent = nullptr);
+		explicit QValueButton(QWidget* parent = nullptr);
 
 		void mouseMoveEvent(QMouseEvent* event) override;
 
@@ -112,15 +112,15 @@ namespace dyno
 
 		QDialog* parentDialog;
 
-		mDoubleSpinBox* buttonDSpinBox = nullptr;
+		QPiecewiseDoubleSpinBox* buttonDSpinBox = nullptr;
 		QSpinBox* buttonISpinBox = nullptr;
 
 	Q_SIGNALS:
-		void ValueChange(double);
-		void ValueChange(int);
+		void valueChange(double);
+		void valueChange(int);
 
-		void Release(double);
-		void Release(int);
+		void mouseReleased(double);
+		void mouseReleased(int);
 
 	private:
 		//double

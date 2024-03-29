@@ -48,9 +48,9 @@ namespace dyno
 
 
 	private:
-		mDoubleSpinBox* spinner1;
-		mDoubleSpinBox* spinner2;
-		mDoubleSpinBox* spinner3;
+		QPiecewiseDoubleSpinBox* spinner1;
+		QPiecewiseDoubleSpinBox* spinner2;
+		QPiecewiseDoubleSpinBox* spinner3;
 
 		Vec3f value;// active in "QVector3FieldWidget(QString name, Vec3f* v);"
 	};

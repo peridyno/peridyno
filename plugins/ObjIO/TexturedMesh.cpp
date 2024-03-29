@@ -53,6 +53,11 @@ namespace dyno
 
 		this->varFileName()->attach(callbackLoadFile);
 
+		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&TexturedMesh::callbackTransform, this));
+		this->varLocation()->attach(callbackTransform);
+		this->varRotation()->attach(callbackTransform);
+		this->varScale()->attach(callbackTransform);
+
 		auto render = this->graphicsPipeline()->createModule<GLPhotorealisticRender>();
 
 		this->stateVertex()->connect(render->inVertex());
@@ -73,32 +78,7 @@ namespace dyno
 
 	void TexturedMesh::resetStates()
 	{
-#ifdef CUDA_BACKEND
-		TriangleSet<DataType3f> ts;
-#endif
 
-#ifdef VK_BACKEND
-		TriangleSet ps;
-#endif
-		ts.setPoints(mInitialVertex);
-		ts.setNormals(mInitialNormal);
-
-		// apply transform to vertices
-		{
-			auto t = this->varLocation()->getValue();
-			auto q = this->computeQuaternion();
-			auto s = this->varScale()->getValue();
-
-#ifdef CUDA_BACKEND
-			ts.scale(s);
-			ts.rotate(q);
-			ts.translate(t);
-#endif
-		}
-
-		this->stateVertex()->assign(ts.getPoints());
-		this->stateNormal()->assign(ts.getVertexNormals());
-		this->stateTexCoord()->assign(mInitialTexCoord);
 	}
 
 	void TexturedMesh::callbackLoadFile()
@@ -230,6 +210,43 @@ namespace dyno
 		vertices.clear();
 		normals.clear();
 		texCoords.clear();
+
+		//reset the transform
+		this->varLocation()->setValue(Vec3f(0));
+		this->varRotation()->setValue(Vec3f(0));
+		this->varScale()->setValue(Vec3f(1));
+	}
+
+	void TexturedMesh::callbackTransform()
+	{
+#ifdef CUDA_BACKEND
+		TriangleSet<DataType3f> ts;
+#endif
+
+#ifdef VK_BACKEND
+		TriangleSet ps;
+#endif
+		ts.setPoints(mInitialVertex);
+		ts.setNormals(mInitialNormal);
+
+		// apply transform to vertices
+		{
+			auto t = this->varLocation()->getValue();
+			auto q = this->computeQuaternion();
+			auto s = this->varScale()->getValue();
+
+#ifdef CUDA_BACKEND
+			ts.scale(s);
+			ts.rotate(q);
+			ts.translate(t);
+#endif
+		}
+
+		this->stateVertex()->assign(ts.getPoints());
+		this->stateNormal()->assign(ts.getVertexNormals());
+		this->stateTexCoord()->assign(mInitialTexCoord);
+
+		ts.clear();
 	}
 
 }

@@ -25,18 +25,30 @@ macro(add_plugin LIB_NAME LIB_DEPENDENCY)
     set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Plugins")
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
     set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCH_FLAGS})
-    set_target_properties(${LIB_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugin)
+
+    if(WIN32)
+        set_target_properties(${LIB_NAME} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    elseif(UNIX)
+        if (CMAKE_BUILD_TYPE MATCHES Debug)
+            set_target_properties(${LIB_NAME} PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
+        else()
+            set_target_properties(${LIB_NAME} PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
+        endif()
+    endif()
     
 
     set_target_properties(${LIB_NAME} PROPERTIES
-        OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
+        OUTPUT_NAME "plugin-${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
     set_target_properties(${LIB_NAME} PROPERTIES
         CUDA_SEPARABLE_COMPILATION OFF)
 
     add_compile_definitions(PERIDYNO_API_EXPORTS)
 
     target_include_directories(${LIB_NAME} PUBLIC 
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/plugins>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/plugins>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>/plugins)
 
     #To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
@@ -96,5 +108,5 @@ macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
             set_target_properties(${PROJECT_NAME} PROPERTIES
                 RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
         endif()
-    endif()   
+    endif()
 endmacro()

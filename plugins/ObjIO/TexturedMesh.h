@@ -36,6 +36,7 @@ namespace dyno
 
 	private:
 		void callbackLoadFile();
+		void callbackTransform();
 
 		DArray<Vec3f> mInitialVertex;
 		DArray<Vec3f> mInitialNormal;

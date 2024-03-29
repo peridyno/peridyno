@@ -3,7 +3,7 @@
 #include <QGridLayout>
 
 #include "Field.h"
-#include "QmSpinBox.h"
+#include "QPiecewiseSpinBox.h"
 
 namespace dyno
 {
@@ -34,7 +34,7 @@ namespace dyno
 		//Set label tips
 		name->setToolTip(str);
 
-		mSpinBox* spinner = new mSpinBox;
+		QPiecewiseSpinBox* spinner = new QPiecewiseSpinBox;
 		spinner->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
 
 		layout->addWidget(name, 0, 0);
@@ -75,7 +75,7 @@ namespace dyno
 		name->setFixedHeight(18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		QSpinBox* spinner = new QSpinBox;
+		QPiecewiseSpinBox* spinner = new QPiecewiseSpinBox;
 		spinner->setFixedWidth(100);
 		spinner->setRange(castMinimum<uint>(field->getMin()), castMaximum<int>(field->getMax()));
 		spinner->setValue(f->getValue());

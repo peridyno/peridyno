@@ -1,4 +1,4 @@
-#include "QmDoubleSpinBox.h"
+#include "QPiecewiseDoubleSpinBox.h"
 
 #include "Module.h"
 #include "Node.h"
@@ -8,13 +8,13 @@
 #include <QVBoxLayout>
 
 #include <memory>
-#include "QmValueDialog.h"
+#include "QValueDialog.h"
 
 namespace dyno
 {
 
 
-	mDoubleSpinBox::mDoubleSpinBox(QWidget* parent)
+	QPiecewiseDoubleSpinBox::QPiecewiseDoubleSpinBox(QWidget* parent)
 		: QDoubleSpinBox(parent)
 	{
 		//this->lineEdit()->setMouseTracking(true);
@@ -28,12 +28,12 @@ namespace dyno
 
 	}
 
-	void mDoubleSpinBox::LineEditStart()
+	void QPiecewiseDoubleSpinBox::LineEditStart()
 	{
 		return;
 	}
 
-	void mDoubleSpinBox::LineEditFinished(double v) 
+	void QPiecewiseDoubleSpinBox::LineEditFinished(double v) 
 	{
 		realValue = v;
 		this->setValue(realValue);
@@ -41,44 +41,44 @@ namespace dyno
 		return;
 	}
 
-	void mDoubleSpinBox::wheelEvent(QWheelEvent* event)
+	void QPiecewiseDoubleSpinBox::wheelEvent(QWheelEvent* event)
 	{
 
 	}
-	void mDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) 
+	void QPiecewiseDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) 
 	{
 
 		if(ValueModify== nullptr)
-			ValueModify = new ValueDialog(this);
+			ValueModify = new QValueDialog(this);
 		ValueModify->updateDialogPosition();
 		ValueModify->show();
 	}
 
 
-	void mDoubleSpinBox::mousePressEvent(QMouseEvent* event)
+	void QPiecewiseDoubleSpinBox::mousePressEvent(QMouseEvent* event)
 	{
 		QDoubleSpinBox::mousePressEvent(event);
 
 	}
 
-	void mDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
+	void QPiecewiseDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
 	{
 		QDoubleSpinBox::mouseReleaseEvent(event);
 	}
 
-	void mDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)
+	void QPiecewiseDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)
 	{
 		QDoubleSpinBox::mouseMoveEvent(event);
 
 	}
 
-	void mDoubleSpinBox::ModifyValue(double v)
+	void QPiecewiseDoubleSpinBox::ModifyValue(double v)
 	{
 		this->setRealValue(v);
 
 	}
 
-	void mDoubleSpinBox::ModifyValueAndUpdate(double v)
+	void QPiecewiseDoubleSpinBox::ModifyValueAndUpdate(double v)
 	{
 
 		this->setKeyboardTracking(true);

@@ -3,7 +3,7 @@
 #include <QHBoxLayout>
 
 #include "Field.h"
-#include "QmDoubleSpinBox.h"
+#include "QPiecewiseDoubleSpinBox.h"
 
 namespace dyno
 {
@@ -19,7 +19,7 @@ namespace dyno
 
 		this->setLayout(layout);
 
-		toggleLabel* name = new toggleLabel();
+		QToggleLabel* name = new QToggleLabel();
 		name->setFixedHeight(24);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
@@ -28,7 +28,7 @@ namespace dyno
 		slider->setMinimumWidth(60);
 
 
-		spinner = new mDoubleSpinBox;;
+		spinner = new QPiecewiseDoubleSpinBox;;
 		spinner->setRange(field->getMin(), field->getMax());
 		spinner->setFixedWidth(100);
 

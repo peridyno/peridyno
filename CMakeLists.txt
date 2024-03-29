@@ -49,7 +49,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	set(CUDA_ARCH_FLAGS 60 CACHE STRING "cuda architectures" FORCE)                                 #默认为所有cuda代码生成computability7.0下二进制代码
 
 	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
-	set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/plugin"  CACHE PATH "" FORCE)
+	set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/bin"  CACHE PATH "" FORCE)
 	#file(COPY "data/" DESTINATION "data")
 else()
 	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})
