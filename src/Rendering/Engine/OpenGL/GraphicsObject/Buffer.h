@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2017-2021 Jian SHI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ namespace dyno
 	{
 		GL_OBJECT(Buffer)
 	public:
+
 		virtual void create(int target, int usage);
 		virtual void release() override;
 

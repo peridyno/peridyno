@@ -1,0 +1,53 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+
+#define USE_BUFFER_REFERENCE
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+#define ELEMENT uint64_t
+#define LIST_NAME List
+#define LIST_REF_NAME ListRef
+#include "../adt/List.glsl"
+
+layout(std430, binding = 0) buffer B1
+{
+   Triangle triangles[];
+};
+
+layout(std430, binding = 1) buffer B2
+{
+   uint radix[];
+};
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer IndexRef
+{
+   uint idx;
+};
+
+layout (push_constant) uniform PushConsts {
+   uint num;
+   ListRef lists;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   uint idx = gl_GlobalInvocationID.x;
+	if (idx >= regs.num)
+		return;
+
+   uint offset = radix[idx];
+
+   List index_list = regs.lists[idx].data;
+   IndexRef index = IndexRef(index_list.buf);
+
+   if(List_size(index_list) == 3)
+   {
+      uint v0 = index[0].idx;
+      uint v1 = index[1].idx;
+      uint v2 = index[2].idx;
+      triangles[offset] = Triangle(v0, v1, v2);
+   }
+}

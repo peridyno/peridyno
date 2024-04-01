@@ -21,7 +21,10 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     add_subdirectory(Interaction)
     add_subdirectory(Modeling)
 endif()
-
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+    add_subdirectory(Interaction)
+    add_subdirectory(Modeling)
+endif()
 add_subdirectory(Dynamics)
 
 # Write/install version file

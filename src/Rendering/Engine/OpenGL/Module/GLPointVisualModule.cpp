@@ -1,4 +1,4 @@
-#include "GLPointVisualModule.h"
+﻿#include "GLPointVisualModule.h"
 #include "GLRenderEngine.h"
 
 #include <Utility.h>
@@ -34,11 +34,6 @@ namespace dyno
 
 	GLPointVisualModule::~GLPointVisualModule()
 	{
-// 		points.clear();
-// 		colors.clear();
-// 
-// 		mPosition.release();
-// 		mColor.release();
 	}
 
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)

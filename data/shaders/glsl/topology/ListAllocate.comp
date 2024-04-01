@@ -1,0 +1,41 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+
+#define USE_BUFFER_REFERENCE
+#include "../base/Common.glsl"
+
+#define ELEMENT uint64_t
+#define LIST_NAME List
+#define LIST_REF_NAME ListRef
+#include "../adt/List.glsl"
+
+layout(std430, buffer_reference, buffer_reference_align = 4) buffer IndexRef
+{
+   uint idx;
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num_list;
+	uint num_element;
+   uint element_size;
+   ListRef lists;
+   IndexRef indexs;
+   uint64_t elements;
+} regs;
+
+layout (local_size_x = 64) in;
+
+void main() 
+{
+   uint idx = gl_GlobalInvocationID.x;
+   if (idx >= regs.num_list)
+		return;
+
+   List list = regs.lists[idx].data;
+   uint count = idx == regs.num_list - 1 ? regs.num_element - regs.indexs[regs.num_list - 1].idx : regs.indexs[idx + 1].idx - regs.indexs[idx].idx;
+   //list.size = 0;
+   list.max_size = count;
+   list.buf = regs.elements + regs.indexs[idx].idx * regs.element_size;
+
+   regs.lists[idx].data = list;
+}

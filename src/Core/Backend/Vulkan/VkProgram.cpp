@@ -1,4 +1,4 @@
-#include "VkProgram.h"
+﻿#include "VkProgram.h"
 #include "VulkanTools.h"
 
 #include <assert.h>
@@ -7,62 +7,62 @@ namespace dyno
 {
 	VkProgram::~VkProgram()
 	{
-		mAllArgs.clear();
-		mBufferArgs.clear();
-		mUniformArgs.clear();
-		mConstArgs.clear();
+		ctx->descriptorCache().releaseLayoutHandle(mLayoutHandle);
 
-		for (auto& shderModule : shaderModules) {
+		for (auto shderModule : shaderModules) {
 			vkDestroyShaderModule(ctx->deviceHandle(), shderModule, nullptr);
 		}
 
 		vkDestroyPipeline(ctx->deviceHandle(), pipeline, nullptr);
 		vkDestroyPipelineLayout(ctx->deviceHandle(), pipelineLayout, nullptr);
-		vkDestroyDescriptorSetLayout(ctx->deviceHandle(), descriptorSetLayout, nullptr);
-		vkDestroyDescriptorPool(ctx->deviceHandle(), descriptorPool, nullptr);
 
-		vkDestroyCommandPool(ctx->deviceHandle(), mCommandPool, nullptr);
-		vkDestroyFence(ctx->deviceHandle(), mFence, nullptr);
 		vkDestroySemaphore(ctx->deviceHandle(), compute.semaphores.ready, nullptr);
 		vkDestroySemaphore(ctx->deviceHandle(), compute.semaphores.complete, nullptr);
 	}
 
+	VkCommandBuffer VkProgram::commandBuffer() const {
+		if (mCommandBuffer) {
+			return mCommandBuffer.value();
+		}
+		return  VkCompContext::current().commandBuffer();
+	}
+
 	void VkProgram::begin()
 	{
+		//if(descriptorPool != VK_NULL_HANDLE) {
+		//	vkResetDescriptorPool(ctx->deviceHandle(), descriptorPool, 0);
+		//}
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 		cmdBufInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-		VK_CHECK_RESULT(vkBeginCommandBuffer(mCommandBuffers, &cmdBufInfo));
+		VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffer(), &cmdBufInfo));
 		//vkCmdBindPipeline(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 	}
 
+	/*
 	void VkProgram::dispatch(dim3 groupSize)
 	{
-		vkCmdBindDescriptorSets(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, 0);
-		uint32_t offset = 0;
-		for (size_t i = 0; i < mAllArgs.size(); i++)
-		{
-			auto variable = mAllArgs[i];
-			if (variable->type() == VariableType::Constant) {
-				vkCmdPushConstants(mCommandBuffers, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, variable->bufferSize(), variable->data());
-				offset += variable->bufferSize();
-			}
-		}
+		//vkCmdBindDescriptorSets(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, descriptorSet ? 1 : 0, &descriptorSet, 0, 0);
+		auto cmd = commandBuffer();
+		auto pushBuf = buildPushBuf(mConstArgs);
+		vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, pushBuf.size(), pushBuf.data());
 
-		vkCmdBindPipeline(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-		vkCmdDispatch(mCommandBuffers, groupSize.x, groupSize.y, groupSize.z);
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+		vkCmdDispatch(cmd, groupSize.x, groupSize.y, groupSize.z);
 
-		addComputeToComputeBarriers(mCommandBuffers);
+		addComputeToComputeBarriers(cmd);
 	}
+	*/
 
 	void VkProgram::end()
 	{
-		vkEndCommandBuffer(mCommandBuffers);
+		auto cmd = commandBuffer();
+		vkEndCommandBuffer(cmd);
 	}
 
-	void VkProgram::update(bool sync)
+	auto VkProgram::update(bool sync) -> std::optional<VkFence>
 	{
-		vkResetFences(ctx->deviceHandle(), 1, &mFence);
+		auto cmd = commandBuffer();
 
 		static bool firstDraw = true;
 		VkSubmitInfo computeSubmitInfo = vks::initializers::submitInfo();
@@ -80,35 +80,41 @@ namespace dyno
 		//computeSubmitInfo.signalSemaphoreCount = 1;
 		//computeSubmitInfo.pSignalSemaphores = &compute.semaphores.complete;
 		computeSubmitInfo.commandBufferCount = 1;
-		computeSubmitInfo.pCommandBuffers = &mCommandBuffers;
+		computeSubmitInfo.pCommandBuffers = &cmd;
 
 		if (sync) {
-			VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &computeSubmitInfo, mFence));
+			VkFence fence {VK_NULL_HANDLE};
+			VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo(VK_FLAGS_NONE);
+			VK_CHECK_RESULT(vkCreateFence(ctx->deviceHandle(), &fenceInfo, nullptr, &fence));
+			VkCompContext::current().submit(queue, 1, &computeSubmitInfo, fence);
+			return fence;
 		}
 		else {
-			VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &computeSubmitInfo, VK_NULL_HANDLE));
+			VkCompContext::current().submit(queue, 1, &computeSubmitInfo, VK_NULL_HANDLE);
 		}
+		return std::nullopt;
 	}
 
-	void VkProgram::wait()
+	void VkProgram::wait(VkFence fence)
 	{
-		VK_CHECK_RESULT(vkWaitForFences(ctx->deviceHandle(), 1, &mFence, VK_TRUE, UINT64_MAX));
+		VK_CHECK_RESULT(vkWaitForFences(ctx->deviceHandle(), 1, &fence, VK_TRUE, UINT64_MAX));
+		vkDestroyFence(ctx->deviceHandle(), fence, nullptr);
 	}
 
-	void VkProgram::addGraphicsToComputeBarriers(VkCommandBuffer commandBuffer)
+	void VkProgram::addGraphicsToComputeBarriers(VkCommandBuffer commandBuffer, std::vector<VkVariable*> bufferArgs)
 	{
 		if (ctx->isComputeQueueSpecial()) {
 			VkBufferMemoryBarrier bufferBarrier = vks::initializers::bufferMemoryBarrier();
 			bufferBarrier.srcAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
 			bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-			bufferBarrier.srcQueueFamilyIndex = ctx->queueFamilyIndices.graphics;
-			bufferBarrier.dstQueueFamilyIndex = ctx->queueFamilyIndices.compute;
+			bufferBarrier.srcQueueFamilyIndex = ctx->graphicsQueueFamilyIndex();
+			bufferBarrier.dstQueueFamilyIndex = ctx->computeQueueFamilyIndex();
 			bufferBarrier.size = VK_WHOLE_SIZE;
 
 			std::vector<VkBufferMemoryBarrier> bufferBarriers;
-			for (size_t i = 0; i < mBufferArgs.size(); i++)
+			for (size_t i = 0; i < bufferArgs.size(); i++)
 			{
-				bufferBarrier.buffer = mBufferArgs[i]->bufferHandle();
+				bufferBarrier.buffer = bufferArgs[i]->bufferHandle();
 				bufferBarriers.push_back(bufferBarrier);
 			}
 			// 			bufferBarrier.buffer = input->bufferHandle();
@@ -125,19 +131,23 @@ namespace dyno
 		}
 	}
 
-	void VkProgram::addComputeToComputeBarriers(VkCommandBuffer commandBuffer)
+	void VkProgram::addComputeToComputeBarriers(VkCommandBuffer commandBuffer, std::vector<VkVariable*> bufferArgs)
 	{
 		VkBufferMemoryBarrier bufferBarrier = vks::initializers::bufferMemoryBarrier();
 		bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
 		bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		bufferBarrier.srcQueueFamilyIndex = ctx->queueFamilyIndices.compute;
-		bufferBarrier.dstQueueFamilyIndex = ctx->queueFamilyIndices.compute;
+		bufferBarrier.srcQueueFamilyIndex = ctx->computeQueueFamilyIndex();
+		bufferBarrier.dstQueueFamilyIndex = ctx->computeQueueFamilyIndex();
 		bufferBarrier.size = VK_WHOLE_SIZE;
 		std::vector<VkBufferMemoryBarrier> bufferBarriers;
-		for (size_t i = 0; i < mBufferArgs.size(); i++)
+		for (size_t i = 0; i < bufferArgs.size(); i++)
 		{
-			bufferBarrier.buffer = mBufferArgs[i]->bufferHandle();
-			bufferBarriers.push_back(bufferBarrier);
+			auto handle = bufferArgs[i]->bufferHandle();
+			// bypass null handle
+			if(handle != VK_NULL_HANDLE) {
+				bufferBarrier.buffer = handle;
+				bufferBarriers.push_back(bufferBarrier);
+			}
 		}
 
 		vkCmdPipelineBarrier(
@@ -150,19 +160,19 @@ namespace dyno
 			0, nullptr);
 	}
 
-	void VkProgram::addComputeToGraphicsBarriers(VkCommandBuffer commandBuffer)
+	void VkProgram::addComputeToGraphicsBarriers(VkCommandBuffer commandBuffer, std::vector<VkVariable*> bufferArgs)
 	{
 		if (ctx->isComputeQueueSpecial()) {
 			VkBufferMemoryBarrier bufferBarrier = vks::initializers::bufferMemoryBarrier();
 			bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
 			bufferBarrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
-			bufferBarrier.srcQueueFamilyIndex = ctx->queueFamilyIndices.compute;
-			bufferBarrier.dstQueueFamilyIndex = ctx->queueFamilyIndices.graphics;
+			bufferBarrier.srcQueueFamilyIndex = ctx->computeQueueFamilyIndex();
+			bufferBarrier.dstQueueFamilyIndex = ctx->graphicsQueueFamilyIndex();
 			bufferBarrier.size = VK_WHOLE_SIZE;
 			std::vector<VkBufferMemoryBarrier> bufferBarriers;
-			for (size_t i = 0; i < mBufferArgs.size(); i++)
+			for (size_t i = 0; i < bufferArgs.size(); i++)
 			{
-				bufferBarrier.buffer = mBufferArgs[i]->bufferHandle();
+				bufferBarrier.buffer = bufferArgs[i]->bufferHandle();
 				bufferBarriers.push_back(bufferBarrier);
 			}
 			// 			std::vector<VkBufferMemoryBarrier> bufferBarriers;
@@ -184,27 +194,34 @@ namespace dyno
 
 	void VkProgram::bindPipeline()
 	{
-		vkCmdBindPipeline(mCommandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+		auto cmd = VkCompContext::current().commandBuffer();
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+	}
+
+
+	void VkProgram::setVkCommandBuffer(VkCommandBuffer cmdBuffer) {
+		mCommandBuffer = cmdBuffer;
 	}
 
 	void VkProgram::suspendInherentCmdBuffer(VkCommandBuffer cmdBuffer)
 	{
-		mCmdBufferCopy = mCommandBuffers;
-		mCommandBuffers = cmdBuffer;
+		mOldCommandBuffer = mCommandBuffer;
+		mCommandBuffer = cmdBuffer;
 	}
 
 	void VkProgram::restoreInherentCmdBuffer()
 	{
-		mCommandBuffers = mCmdBufferCopy;
+		mCommandBuffer = mOldCommandBuffer;
 	}
 
-	bool VkProgram::load(std::string fileName)
+	bool VkProgram::load(std::filesystem::path fileName_) 
 	{
+		auto fileName = fileName_.string();
 		//Create pipeline layout
 		std::vector<VkPushConstantRange> pushConstantRanges;
-		for (size_t i = 0; i < mFormalConstants.size(); i++)
 		{
-			pushConstantRanges.push_back(vks::initializers::pushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, mFormalConstants[i]->bufferSize(), i));
+			auto range = buildPushRange(VK_SHADER_STAGE_COMPUTE_BIT, mFormalConstants);
+			if(range.size > 0) pushConstantRanges.push_back(range);
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo =
@@ -234,18 +251,19 @@ namespace dyno
 		return shaderStage;
 	}
 
-	void VkProgram::pushFormalParameter(VkVariable* arg)
+	void VkProgram::pushFormalParameter(const VkArgInfo& arg)
 	{
 		mFormalParamters.push_back(arg);
 	}
 
-	void VkProgram::pushFormalConstant(VkVariable* arg)
+	void VkProgram::pushFormalConstant(const VkArgInfo& arg)
 	{
 		mFormalConstants.push_back(arg);
 		
 		this->pushFormalParameter(arg);
 	}
 
+	/*
 	void VkProgram::pushArgument(VkVariable* arg)
 	{
 		mAllArgs.push_back(arg);
@@ -274,104 +292,44 @@ namespace dyno
 		mUniformArgs.push_back(arg);
 		this->pushArgument(arg);
 	}
+	*/
 
-	VkMultiProgram::VkMultiProgram()
-	{
-		auto inst = VkSystem::instance();
-		ctx = VkSystem::instance()->currentContext();
-
-		// Create the command pool
-		VkCommandPoolCreateInfo cmdPoolInfo = {};
-		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		cmdPoolInfo.queueFamilyIndex = ctx->queueFamilyIndices.compute;
-		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		VK_CHECK_RESULT(vkCreateCommandPool(ctx->deviceHandle(), &cmdPoolInfo, nullptr, &commandPool));
-
-		// Create a command buffer for compute operations
-		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
-			vks::initializers::commandBufferAllocateInfo(commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(ctx->deviceHandle(), &cmdBufAllocateInfo, &commandBuffers));
-
-		VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo(VK_FLAGS_NONE);
-		VK_CHECK_RESULT(vkCreateFence(ctx->deviceHandle(), &fenceInfo, nullptr, &mFence));
-
-		// Semaphores for graphics / compute synchronization
-		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-		VK_CHECK_RESULT(vkCreateSemaphore(ctx->deviceHandle(), &semaphoreCreateInfo, nullptr, &compute.semaphores.ready));
-		VK_CHECK_RESULT(vkCreateSemaphore(ctx->deviceHandle(), &semaphoreCreateInfo, nullptr, &compute.semaphores.complete));
-
-		// Create a compute capable device queue
-		vkGetDeviceQueue(ctx->deviceHandle(), ctx->queueFamilyIndices.compute, 0, &queue);
-	}
-
-	VkMultiProgram::~VkMultiProgram()
-	{
-
-	}
-
-	void VkMultiProgram::add(std::string name, std::shared_ptr<VkProgram> program)
-	{
-		assert(program != nullptr);
-		mPrograms[name] = program;
-		program->setVkCommandBuffer(commandBuffers);
-	}
-
-	void VkMultiProgram::begin()
-	{
-		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-		cmdBufInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-
-		VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffers, &cmdBufInfo));
-
-		for (auto &pgm : mPrograms) {
-			pgm.second->suspendInherentCmdBuffer(commandBuffers);
+	VkPushConstantRange VkProgram::buildPushRange(VkShaderStageFlags stage, const std::vector<VkArgInfo>& vars) {
+		VkPushConstantRange range {};
+		range.stageFlags = stage;
+		range.offset = 0;
+		for (size_t i = 0, offset = 0; i < vars.size(); i++)
+		{
+			auto size = vars[i].var_size;
+			if(i > 0) {
+				auto pre_size = vars[i-1].var_size;
+				offset = vks::tools::alignedSize(std::max(offset + pre_size, (std::size_t)size), 4);
+			}
+			range.size = offset + vks::tools::alignedSize(size, 4); 
 		}
-		//vkCmdBindPipeline(commandBuffers, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+		assert(range.size % 4 == 0);
+		return range;
 	}
 
-	void VkMultiProgram::update(bool sync)
-	{
-		vkResetFences(ctx->deviceHandle(), 1, &mFence);
-
-		//		static bool firstDraw = true;
-		VkSubmitInfo computeSubmitInfo = vks::initializers::submitInfo();
-		// FIXME find a better way to do this (without using fences, which is much slower)
-		VkPipelineStageFlags computeWaitDstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-		// 		if (!firstDraw) {
-		// 			computeSubmitInfo.waitSemaphoreCount = 1;
-		// 			computeSubmitInfo.pWaitSemaphores = &compute.semaphores.ready;
-		// 			computeSubmitInfo.pWaitDstStageMask = &computeWaitDstStageMask;
-		// 		}
-		// 		else {
-		// 			firstDraw = false;
-		// 		}
-		// 		computeSubmitInfo.signalSemaphoreCount = 1;
-		// 		computeSubmitInfo.pSignalSemaphores = &compute.semaphores.complete;
-		computeSubmitInfo.commandBufferCount = 1;
-		computeSubmitInfo.pCommandBuffers = &commandBuffers;
-
-		if (sync) {
-			VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &computeSubmitInfo, mFence));
-			VK_CHECK_RESULT(vkWaitForFences(ctx->deviceHandle(), 1, &mFence, VK_TRUE, UINT64_MAX));
+	std::vector<std::byte> VkProgram::buildPushBuf(const std::vector<VkVariable*>& vars) {
+		std::vector<std::byte> buf;
+		for (size_t i = 0, offset = 0; i < vars.size(); i++)
+		{
+			const auto& varInfo = mFormalConstants.at(i);
+			auto data = (std::byte*)vars[i]->data();
+			auto size = vars[i]->bufferSize();
+			assert(size == varInfo.var_size);
+			auto align = varInfo.var_align;
+			auto alignSize = vks::tools::alignedSize(size, align);
+			if(i > 0) {
+				auto pre_size = vars[i-1]->bufferSize();
+				//vks::tools::alignedSize(std::max<std::size_t>(offset + pre_size, std::min<std::size_t>(16, size)), 4);
+				offset = vks::tools::alignedSize(offset + pre_size, align);
+			}
+			buf.resize(offset + alignSize);
+			std::copy(data, data + size, buf.begin() + offset);
 		}
-		else {
-			VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &computeSubmitInfo, VK_NULL_HANDLE));
-		}
-	}
-
-	void VkMultiProgram::end()
-	{
-		for (auto &pgm : mPrograms) {
-			pgm.second->restoreInherentCmdBuffer();
-		}
-
-		// release the storage buffers back to the graphics queue
-		vkEndCommandBuffer(commandBuffers);
-	}
-
-	void VkMultiProgram::wait()
-	{
-		VK_CHECK_RESULT(vkWaitForFences(ctx->deviceHandle(), 1, &mFence, VK_TRUE, UINT64_MAX));
+		assert(buf.size() % 4 == 0);
+		return buf;
 	}
 }

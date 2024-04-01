@@ -1,0 +1,89 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Points
+{
+   Coord3D points[];
+};
+
+layout(std430, binding = 1) buffer Edges
+{
+   Edge edges[];
+};
+
+layout(std430, binding = 2) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 3) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+
+    Plane3D plane13;
+    Plane3D plane42;
+    Plane3D plane14;
+    Plane3D plane32;
+
+	Ray3D mouseray;
+	Real radius;
+} regs;
+
+void main() {
+    int pId = int(gl_GlobalInvocationID.x);
+    if (pId >= regs.num) return;
+
+    bool flag = false;
+
+    Point3D p;
+
+    Segment3D s = Segment3D(points[edges[pId][0]], points[edges[pId][1]]);
+    bool temp1 = segment_intersect(s, regs.plane13, p);
+    temp1 = temp1 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot((p.origin - regs.plane32.origin), regs.plane32.normal)) > 0;
+    if (temp1)
+        flag = true;
+    bool temp2 = segment_intersect(s, regs.plane42, p);
+    temp2 = temp2 && (dot((p.origin - regs.plane14.origin), regs.plane14.normal)) * (dot((p.origin - regs.plane32.origin), regs.plane32.normal)) > 0;
+    if (temp2)
+        flag = true;
+    bool temp3 = segment_intersect(s, regs.plane14, p);
+    temp3 = temp3 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot((p.origin - regs.plane42.origin), regs.plane42.normal)) > 0;
+    if (temp3)
+        flag = true;
+    bool temp4 = segment_intersect(s, regs.plane32, p);
+    temp4 = temp4 && (dot((p.origin - regs.plane13.origin), regs.plane13.normal)) * (dot((p.origin - regs.plane42.origin), regs.plane42.normal)) > 0;
+    if (temp4)
+        flag = true;
+
+    for (int i = 0; i < 2; i++)
+    {
+        float temp1 = dot((points[edges[pId][i]] - regs.plane13.origin), regs.plane13.normal) * dot((points[edges[pId][i]] - regs.plane42.origin), regs.plane42.normal);
+        float temp2 = dot((points[edges[pId][i]] - regs.plane14.origin), regs.plane14.normal) * dot((points[edges[pId][i]] - regs.plane32.origin), regs.plane32.normal);
+        if (temp1 >= 0 && temp2 >= 0)
+        {
+            flag = flag||true;
+            break;
+        }
+    }
+
+    Segment3D seg = Segment3D(points[edges[pId][0]], points[edges[pId][1]]);
+
+    if (ray_distance(regs.mouseray, seg) <= regs.radius)
+    {
+        flag = flag || true;
+    }
+
+    if (flag || intersected[pId] == 1)
+        intersected[pId] = 1;
+    else
+        intersected[pId] = 0;
+    unintersected[pId] = (intersected[pId] == 1 ? 0 : 1);
+}

@@ -1,0 +1,62 @@
+#version 450
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+
+#define T int
+#define DataType T
+
+layout(std430, binding = 0) buffer Input
+{
+   DataType inputs[];
+};
+
+layout(std430, binding = 1) buffer Output
+{
+   DataType outputs[];
+};
+
+layout (local_size_x = 256) in;
+layout (constant_id = 2) const int sumSubGroupSize = 64;
+
+layout(push_constant) uniform PushConsts
+{
+  int n;
+  DataType init_val;
+} consts;
+
+shared DataType sdata[sumSubGroupSize];
+
+void main()
+{
+    DataType min_val = consts.init_val;
+    if (gl_GlobalInvocationID.x < consts.n)
+    {
+        min_val = inputs[gl_GlobalInvocationID.x];
+    }
+
+	min_val = subgroupMin(min_val);
+	
+    if (gl_SubgroupInvocationID == 0)
+    {
+        sdata[gl_SubgroupID] = min_val;
+    }
+
+    memoryBarrierShared();
+    barrier();
+	
+	if (gl_SubgroupID == 0)
+	{
+		min_val = gl_SubgroupInvocationID < gl_NumSubgroups ? sdata[gl_SubgroupInvocationID] : consts.init_val;
+		min_val = subgroupMin(min_val);
+	}
+
+	if (gl_LocalInvocationID.x == 0)
+    {
+		if(gl_SubgroupSize < gl_NumSubgroups) {
+			for (int i = int(gl_SubgroupSize); i < int(gl_NumSubgroups) ; i++) {
+				min_val = min(min_val, sdata[i]);
+			}
+		}
+        outputs[gl_WorkGroupID.x] = min_val;
+    }
+	
+}

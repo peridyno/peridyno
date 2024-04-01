@@ -1,4 +1,4 @@
-#include "GLWireframeVisualModule.h"
+﻿#include "GLWireframeVisualModule.h"
 
 // opengl
 #include <glad/glad.h>
@@ -13,7 +13,7 @@ namespace dyno
 {
 	IMPLEMENT_CLASS(GLWireframeVisualModule)
 
-	GLWireframeVisualModule::GLWireframeVisualModule()
+		GLWireframeVisualModule::GLWireframeVisualModule()
 	{
 		this->setName("wireframe_renderer");
 		this->varRadius()->setRange(0.001, 0.01);
@@ -21,11 +21,6 @@ namespace dyno
 
 	GLWireframeVisualModule::~GLWireframeVisualModule()
 	{
-// 		edges.clear();
-// 		vertices.clear();
-
-// 		mVertexBuffer.release();
-// 		mIndexBuffer.release();
 	}
 
 
@@ -85,8 +80,16 @@ namespace dyno
 		auto edges = edgeSet->getEdges();
 		auto vertices = edgeSet->getPoints();
 
+		mNumEdges = edges.size();
+
 		mVertexBuffer.load(vertices);
 		mIndexBuffer.load(edges);
+
+		//if (mNumEdges > 0)
+		//{
+		//	mVertexBuffer.load(vertices);
+		//	mIndexBuffer.load(edges);
+		//}
 	}
 
 
@@ -142,6 +145,7 @@ namespace dyno
 		mVAO.bind();
 
 		glDrawElements(GL_LINES, mNumEdges * 2, GL_UNSIGNED_INT, 0);
+		mVAO.unbind();
 
 		// restore polygon mode
 		glPolygonMode(GL_FRONT_AND_BACK, mode);

@@ -6,12 +6,16 @@ namespace dyno {
 	template<typename T>
 	void Array2D<T, DeviceType::CPU>::assign(const Array2D<T, DeviceType::GPU>& src)
 	{
+		if (src.size() == 0) {
+			clear();
+			return;
+		}
+
 		if (m_nx != src.size() || m_ny != src.size()) {
 			this->resize(src.nx(), src.ny());
 		}
 
 		vkTransfer(m_data, *src.handle());
-		//cuSafeCall(cudaMemcpy2D(m_data.data(), sizeof(T) * m_nx, src.begin(), src.pitch(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyDeviceToHost));
 	}
 
 	template<typename T>

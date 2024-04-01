@@ -55,7 +55,12 @@ namespace dyno
 		{
 			buffer->bind();
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, size, type, GL_FALSE, stride, (void*)offset);
+			if (type == GL_INT || type == GL_UNSIGNED_INT) {
+				glVertexAttribIPointer(index, size, type, stride, (void*)offset);
+			}
+			else {
+				glVertexAttribPointer(index, size, type, GL_FALSE, stride, (void*)offset);
+			}
 			glVertexAttribDivisor(index, divisor);
 		}
 		this->unbind();

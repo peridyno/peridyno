@@ -1,6 +1,7 @@
 #pragma once 
 #include <array>
 
+#include "FilePath.h"
 #include "VkSystem.h"
 #include "VulkanTools.h"
 #include "VkContext.h"
@@ -30,7 +31,7 @@ namespace dyno {
 
 		~TriangleSetRenderer();
 
-		DEF_INSTANCE_IN(TriangleSet, Topology, "");
+		DEF_INSTANCE_IN(TriangleSet3f, Topology, "");
 
 		void prepare(VkRenderPass renderPass) override
 		{
@@ -75,7 +76,7 @@ namespace dyno {
 		bool initializeImpl() override;
 		void updateGraphicsContext() override;
 
-		std::string getShadersPath() const;
+		FilePath getShadersPath() const;
 
 		VkPipelineShaderStageCreateInfo loadShader(std::string fileName, VkShaderStageFlagBits stage);
 

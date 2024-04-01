@@ -1,0 +1,46 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../base/Common.glsl"
+#include "Interaction.glsl"
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Triangles
+{
+   Triangle triangles[];
+};
+
+layout(std430, binding = 1) buffer Points
+{
+   Coord3D points[];
+};
+
+layout(std430, binding = 2) buffer Intersect
+{
+   int intersected[];
+};
+
+layout(std430, binding = 3) buffer Unintersect
+{
+   int unintersected[];
+};
+
+layout (push_constant) uniform PushConsts {
+	uint num;
+   Ray3D mouseray;
+} regs;
+
+void main() { 
+  uint pId = gl_GlobalInvocationID.x;
+   if (pId >= regs.num) return;
+
+   if (intersected[pId] == 1)
+   {
+      Triangle3D t = new_triangle3D(points[triangles[pId][0]], points[triangles[pId][1]], points[triangles[pId][2]]);
+      if (dot(regs.mouseray.direction, triangle_normal(t)) >= 0)
+      {
+         intersected[pId] = 0;
+         unintersected[pId] = 1;
+      }
+   }
+}

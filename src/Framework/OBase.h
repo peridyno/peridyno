@@ -43,7 +43,6 @@ namespace dyno {
 
 #ifdef VK_BACKEND
 		typedef std::map<ProgramID, std::shared_ptr<VkProgram>> ProgramMap;
-		typedef std::map<ProgramID, std::shared_ptr<VkMultiProgram>> MultiProgramMap;
 #endif // VK_BACKEND
 
 		OBase() : Object() {};
@@ -189,13 +188,8 @@ namespace dyno {
 
 		std::shared_ptr<VkProgram> kernel(ProgramID programId);
 
-		VkMultiProgram& createKernelGroup(ProgramID programId);
-
-		VkMultiProgram& kernelGroup(ProgramID programId);
-
 	protected:
 		ProgramMap Kernels;
-		MultiProgramMap MultiKernels;
 #endif
 
 	private:

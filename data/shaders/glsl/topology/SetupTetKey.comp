@@ -1,0 +1,52 @@
+#version 450
+#extension GL_GOOGLE_include_directive : enable
+#define USE_BUFFER_REFERENCE
+#include "../base/Common.glsl"
+#include "Topology.glsl"
+
+
+struct Info {
+   int id;
+   int orderId;
+   Triangle triangle;
+};
+
+layout (local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Keys
+{
+   TKey keys[];
+};
+
+layout(std430, binding = 1) buffer Ids
+{
+   Info ids[];
+};
+
+layout(std430, binding = 2) buffer Shapes
+{
+   Tetrahedron tets[];
+};
+
+layout(push_constant) uniform PushConsts {
+	uint num;
+} regs;
+
+
+void main() 
+{
+   int tId = int(gl_GlobalInvocationID.x);
+	if (tId >= regs.num) 
+		return;
+
+   Tetrahedron tet = tets[tId];
+   keys[4 * tId] = TKey(tet[0], tet[1], tet[2]);
+   keys[4 * tId + 1] = TKey(tet[1], tet[2], tet[3]);
+   keys[4 * tId + 2] = TKey(tet[2], tet[3], tet[0]);
+   keys[4 * tId + 3] = TKey(tet[3], tet[0], tet[1]);
+
+   ids[4 * tId] = Info(tId, 1, Triangle(tet[0], tet[1], tet[2]));
+   ids[4 * tId + 1] = Info(tId, 3, Triangle(tet[1], tet[2], tet[3]));
+   ids[4 * tId + 2] = Info(tId, 4, Triangle(tet[2], tet[3], tet[0]));
+   ids[4 * tId + 3] = Info(tId, 2, Triangle(tet[3], tet[0], tet[1]));
+}

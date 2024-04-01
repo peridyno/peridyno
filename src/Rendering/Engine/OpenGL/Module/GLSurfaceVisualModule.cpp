@@ -1,4 +1,4 @@
-#include "GLSurfaceVisualModule.h"
+﻿#include "GLSurfaceVisualModule.h"
 #include "Utility.h"
 
 #include <glad/glad.h>
@@ -22,28 +22,12 @@ namespace dyno
 		this->inTexCoord()->tagOptional(true);
 		this->inTexCoordIndex()->tagOptional(true);
 
-#ifdef CUDA_BACKEND
 		this->inColorTexture()->tagOptional(true);
 		this->inBumpMap()->tagOptional(true);
-#endif
 	}
 
 	GLSurfaceVisualModule::~GLSurfaceVisualModule()
 	{
-// 		mIndexBuffer.release();
-// 		mVertexBuffer.release();
-// 		mNormalBuffer.release();
-// 		mColorBuffer.release();
-// 
-// 		triangles.clear();
-// 		vertices.clear();
-// 		normals.clear();
-// 		colors.clear();
-	}
-
-	std::string GLSurfaceVisualModule::caption()
-	{
-		return "Surface Visual Module";
 	}
 
 	bool GLSurfaceVisualModule::initializeGL()
@@ -96,6 +80,9 @@ namespace dyno
 		// release uniform block
 		mRenderParamsUBlock.release();
 		mPBRMaterialUBlock.release();
+
+		mColorTexture.release();
+		mBumpMap.release();
 	}
 
 	void GLSurfaceVisualModule::updateGL()
@@ -130,10 +117,8 @@ namespace dyno
 			mTexCoord.updateGL();
 		}
 
-#ifdef CUDA_BACKEND
 		// update texture content
 		mColorTexture.updateGL();
-#endif
 
 		glCheckError();
 	}
@@ -187,7 +172,6 @@ namespace dyno
 			}
 		}
 
-#ifdef CUDA_BACKEND
 		// texture
 		if (!inColorTexture()->isEmpty()) {
 			mColorTexture.load(inColorTexture()->constData());
@@ -196,7 +180,6 @@ namespace dyno
 		if (!inBumpMap()->isEmpty()) {
 			mBumpMap.load(inBumpMap()->constData());
 		}
-#endif
 
 	}
 
@@ -221,18 +204,19 @@ namespace dyno
 		// material 
 		{
 			struct {
-				glm::vec3 color;
+				glm::vec4 color;
 				float metallic;
 				float roughness;
 				float alpha;
 			} pbr;
 			auto color = this->varBaseColor()->getValue();
-			pbr.color = { color.r, color.g, color.b };
+			pbr.color = { color.r, color.g, color.b, 0.0 };
 			pbr.metallic = this->varMetallic()->getValue();
 			pbr.roughness = this->varRoughness()->getValue();
 			pbr.alpha = this->varAlpha()->getValue();
 			mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 		}
+		
 
 		// setup uniforms
 		mShaderProgram->setInt("uVertexNormal", this->varUseVertexNormal()->getValue());
@@ -262,10 +246,8 @@ namespace dyno
 			glActiveTexture(GL_TEXTURE11);		// bump map
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-#ifdef CUDA_BACKEND
 			if (mColorTexture.isValid()) mColorTexture.bind(GL_TEXTURE10);
 			if (mBumpMap.isValid())		 mBumpMap.bind(GL_TEXTURE11);
-#endif
 		}
 
 		mVAO.bind();

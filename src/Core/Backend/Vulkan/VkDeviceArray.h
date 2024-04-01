@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 #include "VkVariable.h"
 #include "VulkanBuffer.h"
+#include "VkCompContext.h"
 
 namespace dyno
 {

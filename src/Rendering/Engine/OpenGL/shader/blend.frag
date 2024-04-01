@@ -13,9 +13,11 @@ uint fragmentIndices[MAX_FRAGMENTS];
 void main(void)
 {
 	uint walkerIndex = imageLoad(u_headIndex, ivec2(gl_FragCoord.xy)).r;
+	ivec2 size = imageSize(u_headIndex);
+	bool has_fragment = walkerIndex != 0xffffffff && gl_FragCoord.x < size.x && gl_FragCoord.y < size.y;
 
 	// Check, if a fragment was written.
-	if (walkerIndex != 0xffffffff)
+	if (has_fragment)
 	{
 		uint numberFragments = 0;
 		uint tempIndex;

@@ -30,7 +30,7 @@ namespace dyno
 		// Setup and fill the compute shader storage buffers containing the particles
 		void loadObjFile(std::string filename);
 
-		DEF_INSTANCE_STATE(TriangleSet, Topology, "");
+		DEF_INSTANCE_STATE(TriangleSet3f, Topology, "");
 
 	protected:
 		void updateStates() override;

@@ -1,0 +1,88 @@
+#version 450
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+
+#define T int
+#define DataType T
+
+layout(std430, binding = 0) buffer Input
+{
+   uint inputs[];
+};
+
+layout(std430, binding = 1) buffer Output
+{
+   uint outputs[];
+};
+
+layout(std430, binding = 2) buffer Data
+{
+   DataType values[];
+};
+
+layout (local_size_x = 256) in;
+layout (constant_id = 2) const int sumSubGroupSize = 64;
+
+layout(push_constant) uniform Pushregs
+{
+  uint n;
+  uint value_n;
+  int first_run;
+  DataType init_val;
+} regs;
+
+shared uint sdata[sumSubGroupSize];
+shared DataType global_min_val;
+
+DataType get_val(uint idx) {
+    return idx < regs.value_n ? values[idx] : regs.init_val;
+}
+
+void main()
+{
+    uint idx = gl_GlobalInvocationID.x;
+    DataType min_val = regs.init_val;
+    if (idx < regs.n)
+    {
+        if(regs.first_run != 0) {
+            min_val = values[idx];
+        }
+        else {
+            idx = inputs[idx];
+            min_val = values[idx];
+        }
+    }
+
+    DataType val = min_val;
+
+	min_val = subgroupMin(min_val);
+	
+    if (min_val == val)
+    {
+        sdata[gl_SubgroupID] = idx;
+        inputs[gl_SubgroupID] = idx;
+    }
+
+    memoryBarrierShared();
+    barrier();
+	
+	if (gl_SubgroupID == 0)
+	{
+		uint min_idx = gl_SubgroupInvocationID < gl_NumSubgroups ? sdata[gl_SubgroupInvocationID] : 0;
+        min_val = get_val(min_idx);
+		min_val = subgroupMin(min_val);
+
+        if(gl_SubgroupSize < gl_NumSubgroups) {
+            for (int i = int(gl_SubgroupSize); i < int(gl_NumSubgroups) ; i++) {
+                min_val = min(min_val, get_val(sdata[i]));
+            }
+        }
+        global_min_val = min_val;
+    }
+
+    memoryBarrierShared();
+    barrier();
+
+    if(global_min_val == val) {
+        outputs[gl_WorkGroupID.x] = idx;
+    }
+}

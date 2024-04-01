@@ -62,4 +62,34 @@ const inline std::string getPluginPath() {
 	return "${PERIDYNO_PLUGIN_PATH}/";
 }
 
+template <typename T>
+inline T* dynoGetPtrHelper(T* ptr) {
+    return ptr;
+}
+template <typename Ptr>
+inline auto dynoGetPtrHelper(Ptr& ptr) -> decltype(ptr.operator->()) {
+    return ptr.operator->();
+}
+
+// The body must be a statement:
+#define DYNO_DECLARE_PRIVATE(Class)                                                                                    \
+    inline Class* d_func() {                                                                                           \
+        return reinterpret_cast<Class*>(dynoGetPtrHelper(d_ptr));                                                      \
+    }                                                                                                                  \
+    inline const Class* d_func() const {                                                                               \
+        return reinterpret_cast<const Class*>(dynoGetPtrHelper(d_ptr));                                                \
+    }
+
+#define DYNO_DECLARE_PUBLIC(Class)                                                                                     \
+    inline Class* q_func() {                                                                                           \
+        return static_cast<Class*>(q_ptr);                                                                             \
+    }                                                                                                                  \
+    inline const Class* q_func() const {                                                                               \
+        return static_cast<const Class*>(q_ptr);                                                                       \
+    }                                                                                                                  \
+    friend class Class;
+
+#define DYNO_D(Class) Class::Private* const d = d_func()
+#define DYNO_Q(Class) Class* const q = q_func()
+
 //#define SIMULATION2D
