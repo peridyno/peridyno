@@ -148,6 +148,8 @@ namespace dyno
 	public:
 		void onMouseEvent(PMouseEvent event);
 
+		void onMouseEvent(PMouseEvent event, std::shared_ptr<Node> node);
+
 		void onKeyboardEvent(PKeyboardEvent event);
 
 		/**
