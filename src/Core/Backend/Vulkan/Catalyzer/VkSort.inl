@@ -9,6 +9,7 @@ namespace dyno
         uint algorithm;
         uint direction;
     };
+    static_assert(sizeof(VkSortPush) == 16);
 
     inline int ComputeAddZeroSize(int OriginalSize) {
         int AddZeroSize = 2;
@@ -47,6 +48,7 @@ namespace dyno
         mSortKernel->begin();
 
         VkConstant<VkSortPush> push;
+        constexpr std::size_t x = sizeof(VkSortPush);
         push->n = data.size();
         push->h = h;
         push->algorithm = SortParam::eLocalBms;
@@ -76,8 +78,8 @@ namespace dyno
             }
         }
         mSortKernel->end();
-        mSortKernel->update(true);
-        mSortKernel->wait();
+        auto fence = mSortKernel->update(true);
+        mSortKernel->wait(fence.value());
 
         VkCompContext::current().pop();
     }
@@ -174,7 +176,7 @@ namespace dyno
             }
         }
         mSortKernel->end();
-        mSortKernel->update(true);
-        mSortKernel->wait();
+        auto fence = mSortKernel->update(true);
+        mSortKernel->wait(fence.value());
     }
 } // namespace dyno

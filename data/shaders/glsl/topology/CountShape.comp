@@ -17,6 +17,7 @@ layout(std430, binding = 1) buffer Hexs
 layout (push_constant) uniform PushConsts {
 	uint num;
 	uint shape_size;
+	uint shape_stride;
 } regs;
 
 layout (local_size_x = 64) in;
@@ -27,7 +28,7 @@ void main()
 	if (t >= regs.num) 
 		return;
 
-	uint idx = t * regs.shape_size;
+	uint idx = t * regs.shape_stride;
 
 	for(uint i = 0; i < regs.shape_size; i++) {
 		uint cnt_idx = shape[idx + i];

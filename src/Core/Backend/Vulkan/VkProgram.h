@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <typeinfo>
 #include <optional>
+#include <type_traits>
 
 #include "VkSystem.h"
 #include "VkContext.h"
@@ -87,12 +88,14 @@ namespace dyno {
 	struct VkArgInfo {
 		template<typename T, typename VT>
 		static VkArgInfo info(VariableType type) {
-			return VkArgInfo {type, &typeid(T), sizeof(VT)};
+			return VkArgInfo {type, &typeid(T), sizeof(VT), alignof(VT), std::is_scalar_v<VT>};
 		}
 
 		VariableType var_type;
 		const std::type_info* type; // maybe template func addr?
 		std::size_t var_size;
+		std::size_t var_align;
+		bool is_scalar;
 	};
 
 #define VKARGINFO(T, VT, VART) dyno::VkArgInfo::info<T, VT>(dyno::VariableType::VART)
@@ -126,13 +129,13 @@ namespace dyno {
 		template<typename... Args>
 		void write(Args... args);
 
-		void dispatch(dim3 groupSize);
+		// void dispatch(dim3 groupSize);
 
 		void end();
 
-		void update(bool sync = false);
+		auto update(bool sync = false) -> std::optional<VkFence>;
 
-		void wait();
+		void wait(VkFence);
 
 		template<typename... Args>
 		void submit(dim3 groupSize, Args... args) {
@@ -155,8 +158,8 @@ namespace dyno {
 				this->enqueue(groupSize, args...);
 				this->end();
 
-				this->update(true);
-				this->wait();
+				auto fence = this->update(true);
+				this->wait(fence.value());
 			}
 			comp.pop();
 		}
@@ -164,9 +167,9 @@ namespace dyno {
 		bool load(std::filesystem::path fileName);
         void addMacro(std::string key, std::string value);
 
-		void addGraphicsToComputeBarriers(VkCommandBuffer commandBuffer);
-		void addComputeToComputeBarriers(VkCommandBuffer commandBuffer);
-		void addComputeToGraphicsBarriers(VkCommandBuffer commandBuffer);
+		void addGraphicsToComputeBarriers(VkCommandBuffer commandBuffer, std::vector<VkVariable*>);
+		void addComputeToComputeBarriers(VkCommandBuffer commandBuffer, std::vector<VkVariable*>);
+		void addComputeToGraphicsBarriers(VkCommandBuffer commandBuffer, std::vector<VkVariable*>);
 
 		// Resources for the compute part of the example
 		struct {
@@ -186,11 +189,6 @@ namespace dyno {
 		void pushFormalParameter(const VkArgInfo& arg);
 		void pushFormalConstant(const VkArgInfo& arg);
 
-		void pushArgument(VkVariable* arg);
-		void pushConstant(VkVariable* arg);
-		void pushDeviceBuffer(VkVariable* arg);
-		void pushUniform(VkVariable* arg);
-
 	private:
 		VkPipelineShaderStageCreateInfo createComputeStage(std::string fileName);
 		VkPushConstantRange buildPushRange(VkShaderStageFlags, const std::vector<VkArgInfo>&);
@@ -202,11 +200,6 @@ namespace dyno {
 		std::vector<VkArgInfo> mFormalParamters;
 		std::vector<VkArgInfo> mFormalConstants;
 
-		std::vector<VkVariable*> mAllArgs;
-		std::vector<VkVariable*> mBufferArgs;
-		std::vector<VkVariable*> mUniformArgs;
-		std::vector<VkVariable*> mConstArgs;
-
 		// Descriptor set pool
 		// VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 		VkDescriptorSetLayout descriptorSetLayout {VK_NULL_HANDLE};
@@ -215,7 +208,6 @@ namespace dyno {
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline pipeline = VK_NULL_HANDLE;
 		
-		VkFence mFence;
 		VkQueue queue;
 
 		std::optional<VkCommandBuffer> mCommandBuffer;
@@ -292,8 +284,8 @@ namespace dyno {
 		// Create a compute capable device queue
 		vkGetDeviceQueue(ctx->deviceHandle(), ctx->computeQueueFamilyIndex(), 0, &queue);
 
-		VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo(VK_FLAGS_NONE);
-		VK_CHECK_RESULT(vkCreateFence(ctx->deviceHandle(), &fenceInfo, nullptr, &mFence));
+		//VkFenceCreateInfo fenceInfo = vks::initializers::fenceCreateInfo(VK_FLAGS_NONE);
+		//VK_CHECK_RESULT(vkCreateFence(ctx->deviceHandle(), &fenceInfo, nullptr, &mFence));
 	}
 
 	template<typename... Args>
@@ -317,24 +309,22 @@ namespace dyno {
 
 		auto cmd = commandBuffer();
 
+		std::vector<VkVariable*> constArgs;
+		std::vector<VkVariable*> bufferArgs;
 
-		mAllArgs.clear();
-		mBufferArgs.clear();
-		mUniformArgs.clear();
-		mConstArgs.clear();
 		for (auto variable : variables)
 		{
 			switch (variable->type())
 			{
 			case VariableType::DeviceBuffer:
-				this->pushDeviceBuffer(variable);
-
+				bufferArgs.push_back(variable);
+				// this->pushDeviceBuffer(variable);
 				break;
 			case VariableType::Uniform:
-				this->pushUniform(variable);
+				//this->pushUniform(variable);
 				break;
 			case VariableType::Constant:
-				this->pushConstant(variable);
+				constArgs.push_back(variable);
 				break;
 			default:
 				break;
@@ -366,13 +356,13 @@ namespace dyno {
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 
 		{
-			auto pushBuf = buildPushBuf(mConstArgs);
+			auto pushBuf = buildPushBuf(constArgs);
 			vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, pushBuf.size(), pushBuf.data());
 		}
 
 		vkCmdDispatch(cmd, groupSize.x, groupSize.y, groupSize.z);
 
-		addComputeToComputeBarriers(cmd);
+		addComputeToComputeBarriers(cmd, bufferArgs);
 	}
 
 	template<typename... Args>
@@ -394,22 +384,18 @@ namespace dyno {
 		}
 #endif // !NDEBUG
 
-		mAllArgs.clear();
-		mBufferArgs.clear();
-		mUniformArgs.clear();
-		mConstArgs.clear();
 		for (auto variable : variables)
 		{
 			switch (variable->type())
 			{
 			case VariableType::DeviceBuffer:
-				this->pushDeviceBuffer(variable);
+		//		this->pushDeviceBuffer(variable);
 				break;
 			case VariableType::Uniform:
-				this->pushUniform(variable);
+		//		this->pushUniform(variable);
 				break;
 			case VariableType::Constant:
-				this->pushConstant(variable);
+		//		this->pushConstant(variable);
 				break;
 			default:
 				break;
@@ -423,7 +409,7 @@ namespace dyno {
 			for (size_t i = 0; i < variables.size(); i++)
 			{
 				auto variable = *(variables.begin() + i);
-				if ((mAllArgs[i]->type() == VariableType::DeviceBuffer && mAllArgs[i]->bufferSize() > 0) || mAllArgs[i]->type() == VariableType::Uniform) {
+				if ((variable->type() == VariableType::DeviceBuffer && variable->bufferSize() > 0) || variable->type() == VariableType::Uniform) {
 					writeDescriptorSets.push_back(
 						vks::initializers::writeDescriptorSet(descriptorSet, VkVariable::descriptorType(variable->type()), i, &variable->getDescriptor()));
 				}
@@ -433,43 +419,4 @@ namespace dyno {
 			writeDescriptorSets.clear();
 		}
 	}
-
-
-	class VkMultiProgram
-	{
-	public:
-		VkMultiProgram();
-		~VkMultiProgram();
-
-		void add(std::string name, std::shared_ptr<VkProgram> program);
-
-		inline std::shared_ptr<VkProgram> operator [] (std::string name)
-		{
-			return mPrograms[name];
-		}
-
-		void begin();
-		void update(bool sync = false);
-		void end();
-
-		void wait();
-
-		// Resources for the compute part of the example
-		struct {
-			struct Semaphores {
-				VkSemaphore ready{ 0L };
-				VkSemaphore complete{ 0L };
-			} semaphores;
-		} compute;
-
-	private:
-		std::map<std::string, std::shared_ptr<VkProgram>> mPrograms;
-
-		VkContext* ctx = nullptr;
-
-		VkFence mFence;
-		VkQueue queue = VK_NULL_HANDLE;
-		VkCommandPool commandPool = VK_NULL_HANDLE;
-		VkCommandBuffer commandBuffers = VK_NULL_HANDLE;
-	};
 }

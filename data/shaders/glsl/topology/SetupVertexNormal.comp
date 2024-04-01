@@ -31,7 +31,8 @@ layout(std430, binding = 2) buffer QuadBuf
 };
 
 layout (push_constant) uniform PushConsts {
-	uint num;
+   uint num;
+   uint num2;
    ListRef quadIds;
 } regs;
 
@@ -55,7 +56,7 @@ void main()
       Coord v0 = vertices[t[0]];
       Coord v1 = vertices[t[1]];
       Coord v2 = vertices[t[2]];
-      Coord v3 = vertices[t[3]];
+      //Coord v3 = vertices[t[3]];
 
       N += cross(v1 - v0, v2 - v0);
    }

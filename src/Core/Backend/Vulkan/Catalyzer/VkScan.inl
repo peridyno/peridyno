@@ -74,8 +74,8 @@ namespace dyno {
  			mScan->enqueue(vkDispatchSize(push->n, localSize), &buffers[i], &buffers[i], &buffers[i + 1], &push);
  		}
  		mScan->end();
- 		mScan->update(true);
- 		mScan->wait();
+ 		auto fence = mScan->update(true);
+ 		mScan->wait(fence.value());
 
 		VkConstant<int> num;
 		mAdd->begin();
@@ -85,8 +85,8 @@ namespace dyno {
 			mAdd->enqueue(vkDispatchSize(num.getValue(), localSize), &buffers[i], &buffers[i - 1], &num);
 		}
 		mAdd->end();
-		mAdd->update(true);
-		mAdd->wait();
+		fence = mAdd->update(true);
+		mAdd->wait(fence.value());
 
 		vkTransfer(output, buffers[0]);
 

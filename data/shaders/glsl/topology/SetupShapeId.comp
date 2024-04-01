@@ -20,8 +20,9 @@ layout(std430, buffer_reference, buffer_reference_align = 4) buffer ElementRef
 #include "../adt/List.glsl"
 
 layout (push_constant) uniform PushConsts {
-	uint num;
+   uint num;
    uint shape_size;
+   uint shape_stride;
    ListRef lists;
 } regs;
 
@@ -33,7 +34,7 @@ void main()
 	if (t >= regs.num) 
 		return;
 
-   uint idx = t * regs.shape_size;
+   uint idx = t * regs.shape_stride;
 
    for(uint i = 0;i < regs.shape_size;i++) {
       uint list_idx = shape[idx + i];

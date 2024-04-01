@@ -58,8 +58,8 @@ namespace dyno {
 
 		mReduceKernel->end();
 
-		mReduceKernel->update(true);
-		mReduceKernel->wait();
+		auto fence = mReduceKernel->update(true);
+		mReduceKernel->wait(fence.value());
 
 		std::vector<T> ret(1);
 		vkTransfer(ret, buffers.back());

@@ -430,27 +430,6 @@ namespace dyno {
 		return prog;
 	}
 
-	VkMultiProgram& OBase::createKernelGroup(ProgramID programId)
-	{
-		auto inst = VkSystem::instance();
-		MultiProgramMap::iterator result = MultiKernels.find(programId);
-		if (result != MultiKernels.end())
-		{
-			std::cout << "Warning: Kernel " << programId << " already exists, be sure you want to replace the original with a new one" << std::endl;
-		}
-
-		inst = VkSystem::instance();
-		std::shared_ptr<VkMultiProgram> prog = std::make_shared<VkMultiProgram>();
-		MultiKernels[programId] = prog;
-
-		return *MultiKernels[programId];
-	}
-
-	VkMultiProgram& OBase::kernelGroup(ProgramID programId)
-	{
-		return *MultiKernels[programId];
-	}
-
 	std::shared_ptr<VkProgram> OBase::kernel(ProgramID programId)
 	{
 		return Kernels[programId];

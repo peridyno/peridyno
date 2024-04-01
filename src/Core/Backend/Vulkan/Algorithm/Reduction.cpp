@@ -76,8 +76,8 @@ namespace dyno
 
         mReduceKernel->end();
 
-        mReduceKernel->update(true);
-        mReduceKernel->wait();
+        auto fence = mReduceKernel->update(true);
+        mReduceKernel->wait(fence.value());
 
         VkCompContext::current().pop();
 
@@ -112,8 +112,8 @@ namespace dyno
 
         mMaxKernel->end();
 
-        mMaxKernel->update(true);
-        mMaxKernel->wait();
+        auto fence = mMaxKernel->update(true);
+        mMaxKernel->wait(fence.value());
         VkCompContext::current().pop();
 
         auto& out_buf = mBuffer[i % mBuffer.size()];
@@ -147,8 +147,8 @@ namespace dyno
 
         mMinKernel->end();
 
-        mMinKernel->update(true);
-        mMinKernel->wait();
+        auto fence = mMinKernel->update(true);
+        mMinKernel->wait(fence.value());
         VkCompContext::current().pop();
 
         auto& out_buf = mBuffer[i % mBuffer.size()];
