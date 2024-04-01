@@ -30,6 +30,7 @@
 #include "Log.h"
 
 using FBase = dyno::FBase;
+using OBase = dyno::OBase;
 using InstanceBase = dyno::InstanceBase;
 using Node = dyno::Node;
 using NodePort = dyno::NodePort;
@@ -276,7 +277,7 @@ void pybind_framework(py::module& m)
 	py::class_<VisualModule, Module, std::shared_ptr<VisualModule>>(m, "VisualModule")
 		.def(py::init<>());
 
-	py::class_<TopologyModule, Module, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
+	py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
 		.def(py::init<>());
 
 	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule");
