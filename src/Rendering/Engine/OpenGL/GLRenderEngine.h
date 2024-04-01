@@ -83,6 +83,8 @@ namespace dyno
 		Texture2DMultiSample	mColorTex;
 		Texture2DMultiSample	mDepthTex;
 		Texture2DMultiSample	mIndexTex;			// indices for object/mesh/primitive etc.
+		// MSAA samples
+		unsigned int			mInternalMSAASamples = 4;
 
 		// non-multisample framebuffer for select
 		Framebuffer				mSelectFramebuffer;
