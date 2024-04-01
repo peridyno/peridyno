@@ -398,21 +398,25 @@ namespace dyno
 
 		GlfwRenderWindow* activeWindow = (GlfwRenderWindow*)glfwGetWindowUserPointer(window);
 
-		// handle picking
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
-			activeWindow->getButtonAction() == GLFW_PRESS &&
-			activeWindow->getButtonMode() == 0 &&
-			action == GLFW_RELEASE) {
+		// Object selection
+		if (activeWindow->getSelectionMode() == RenderWindow::OBJECT_MODE)
+		{
+			// handle picking
+			if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
+				activeWindow->getButtonAction() == GLFW_PRESS &&
+				activeWindow->getButtonMode() == 0 &&
+				action == GLFW_RELEASE) {
 
-			// in picking
-			int x = fmin(xpos, activeWindow->getCursorPosX());
-			int y = fmax(ypos, activeWindow->getCursorPosY());
-			int w = fabs(xpos - activeWindow->getCursorPosX());
-			int h = fabs(ypos - activeWindow->getCursorPosY());
-			// flip y to texture space...
-			y = activeWindow->getHeight() - y - 1;
+				// in picking
+				int x = fmin(xpos, activeWindow->getCursorPosX());
+				int y = fmax(ypos, activeWindow->getCursorPosY());
+				int w = fabs(xpos - activeWindow->getCursorPosX());
+				int h = fabs(ypos - activeWindow->getCursorPosY());
+				// flip y to texture space...
+				y = activeWindow->getHeight() - y - 1;
 
-			const auto& selection = activeWindow->select(x, y, w, h);
+				const auto& selection = activeWindow->select(x, y, w, h);
+			}
 		}
 
 		auto camera = activeWindow->getCamera();
@@ -421,26 +425,38 @@ namespace dyno
 		activeWindow->setButtonAction(action);
 		activeWindow->setButtonMode(mods);
 
-		PMouseEvent mouseEvent;
-		mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
-		mouseEvent.buttonType = (PButtonType)button;
-		mouseEvent.actionType = (PActionType)action;
-		mouseEvent.mods = (PModifierBits)activeWindow->getButtonMode();
-		mouseEvent.camera = camera;
-		mouseEvent.x = (float)xpos;
-		mouseEvent.y = (float)ypos;
+		// Primitive selection
+		if (activeWindow->getSelectionMode() == RenderWindow::PRIMITIVE_MODE)
+		{
+			PMouseEvent mouseEvent;
+			mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
+			mouseEvent.buttonType = (PButtonType)button;
+			mouseEvent.actionType = (PActionType)action;
+			mouseEvent.mods = (PModifierBits)activeWindow->getButtonMode();
+			mouseEvent.camera = camera;
+			mouseEvent.x = (float)xpos;
+			mouseEvent.y = (float)ypos;
 
-		auto activeScene = SceneGraphFactory::instance()->active();
+			auto activeScene = SceneGraphFactory::instance()->active();
 
-		activeScene->onMouseEvent(mouseEvent);
+			activeScene->onMouseEvent(mouseEvent, activeWindow->getCurrentSelectedNode());
+
+			if (action == GLFW_PRESS)
+			{
+				activeWindow->imWindow()->mousePressEvent(mouseEvent);
+			}
+
+			if (action == GLFW_RELEASE)
+			{
+				activeWindow->imWindow()->mouseReleaseEvent(mouseEvent);
+			}
+		}
 
 		if (action == GLFW_PRESS)
 		{
 			// if(mOpenCameraRotate)
 			camera->registerPoint((float)xpos, (float)ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
-
-			activeWindow->imWindow()->mousePressEvent(mouseEvent);
 		}
 		else
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -448,8 +464,6 @@ namespace dyno
 		if (action == GLFW_RELEASE)
 		{
 			activeWindow->setButtonState(GLFW_UP);
-
-			activeWindow->imWindow()->mouseReleaseEvent(mouseEvent);
 		}
 
 		// update cursor position record

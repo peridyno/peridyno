@@ -320,14 +320,10 @@ void ImWindow::draw(RenderWindow* app)
 
 			ImGui::Separator(); // --------
 
-			if (ImGui::radioWithIconButton(ICON_FA_LOCATION_ARROW, "Object", mSelectMode == 0))
-				mSelectMode = 0;
-			if (ImGui::radioWithIconButton(ICON_FA_DRAW_POLYGON, "Primitives", mSelectMode == 1))
-				mSelectMode = 1;
-
-// 			if (ImGui::ImageButton())
-// 			{
-// 			}
+			if (ImGui::radioWithIconButton(ICON_FA_LOCATION_ARROW, "Object", app->getSelectionMode() == RenderWindow::OBJECT_MODE))
+				app->setSelectionMode(RenderWindow::OBJECT_MODE);
+			if (ImGui::radioWithIconButton(ICON_FA_DRAW_POLYGON, "Primitives", app->getSelectionMode() == RenderWindow::PRIMITIVE_MODE))
+				app->setSelectionMode(RenderWindow::PRIMITIVE_MODE);
 
 			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
 			ImGui::End();	

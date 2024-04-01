@@ -401,6 +401,30 @@ namespace dyno
 		this->traverseForward(&eventAct);
 	}
 
+	void SceneGraph::onMouseEvent(PMouseEvent event, std::shared_ptr<Node> node)
+	{
+		if (node == nullptr || !node->isVisible())
+			return;
+
+		for (auto iter : node->animationPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<MouseInputModule*>(iter.get());
+			if (m)
+			{
+				m->enqueueEvent(event);
+			}
+		}
+
+		for (auto iter : node->graphicsPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<MouseInputModule*>(iter.get());
+			if (m)
+			{
+				m->enqueueEvent(event);
+			}
+		}
+	}
+
 	void SceneGraph::onKeyboardEvent(PKeyboardEvent event)
 	{
 		class KeyboardEventAct : public Action
