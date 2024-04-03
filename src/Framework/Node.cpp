@@ -8,15 +8,14 @@ namespace dyno
 Node::Node()
 	: OBase()
 	, m_node_name("default")
-	, m_dt(0.016f)
-	, m_mass(1.0f)
+	, mDt(0.016f)
 {
 }
 
 
 Node::~Node()
 {
-	m_module_list.clear();
+	mModuleList.clear();
 
 // 	for (auto port : mImportNodes)
 // 	{
@@ -98,12 +97,12 @@ void Node::setVisible(bool visible)
 
 float Node::getDt()
 {
-	return m_dt;
+	return mDt;
 }
 
 void Node::setDt(Real dt)
 {
-	m_dt = dt;
+	mDt = dt;
 }
 
 void Node::setSceneGraph(SceneGraph* scn)
@@ -167,6 +166,9 @@ void Node::update()
 void Node::reset()
 {
 	if (this->validateInputs()) {
+		this->stateElapsedTime()->setValue(0.0f);
+		this->stateFrameNumber()->setValue(0);
+
 		this->resetStates();
 
 		//When the node is reset, call tick() to force updating all modules
@@ -191,8 +193,7 @@ void Node::updateGraphicsContext()
 
 void Node::resetStates()
 {
-	this->stateElapsedTime()->setValue(0.0f);
-	this->stateFrameNumber()->setValue(0);
+	this->resetPipeline()->update();
 }
 
 bool Node::validateInputs()
@@ -249,22 +250,31 @@ void Node::tick()
 // 	addModule(m_context);
 // }
 
+std::shared_ptr<Pipeline> Node::resetPipeline()
+{
+	if (mResetPipeline == nullptr)
+	{
+		mResetPipeline = std::make_shared<AnimationPipeline>(this);
+	}
+	return mResetPipeline;
+}
+
 std::shared_ptr<AnimationPipeline> Node::animationPipeline()
 {
-	if (m_animation_pipeline == nullptr)
+	if (mAnimationPipeline == nullptr)
 	{
-		m_animation_pipeline = std::make_shared<AnimationPipeline>(this);
+		mAnimationPipeline = std::make_shared<AnimationPipeline>(this);
 	}
-	return m_animation_pipeline;
+	return mAnimationPipeline;
 }
 
 std::shared_ptr<GraphicsPipeline> Node::graphicsPipeline()
 {
-	if (m_render_pipeline == nullptr)
+	if (mGraphicsPipeline == nullptr)
 	{
-		m_render_pipeline = std::make_shared<GraphicsPipeline>(this);
+		mGraphicsPipeline = std::make_shared<GraphicsPipeline>(this);
 	}
-	return m_render_pipeline;
+	return mGraphicsPipeline;
 }
 
 /*
@@ -309,14 +319,6 @@ bool Node::addModule(std::shared_ptr<Module> module)
 	ret &= addToModuleList(module);
 
 	return ret;
-}
-
-void Node::initialize()
-{
-	this->resetStates();
-
-	this->animationPipeline()->updateExecutionQueue();
-	this->graphicsPipeline()->updateExecutionQueue();
 }
 
 bool Node::deleteModule(std::shared_ptr<Module> module)
@@ -575,7 +577,7 @@ std::shared_ptr<Module> Node::getModule(std::string name)
 {
 	std::shared_ptr<Module> base = nullptr;
 	std::list<std::shared_ptr<Module>>::iterator iter;
-	for (iter = m_module_list.begin(); iter != m_module_list.end(); iter++)
+	for (iter = mModuleList.begin(); iter != mModuleList.end(); iter++)
 	{
 		if ((*iter)->getName() == name)
 		{
@@ -608,10 +610,10 @@ bool Node::hasModule(std::string name)
 
 bool Node::addToModuleList(std::shared_ptr<Module> module)
 {
-	auto found = std::find(m_module_list.begin(), m_module_list.end(), module);
-	if (found == m_module_list.end())
+	auto found = std::find(mModuleList.begin(), mModuleList.end(), module);
+	if (found == mModuleList.end())
 	{
-		m_module_list.push_back(module);
+		mModuleList.push_back(module);
 		module->setParentNode(this);
 		return true;
 	}
@@ -621,10 +623,10 @@ bool Node::addToModuleList(std::shared_ptr<Module> module)
 
 bool Node::deleteFromModuleList(std::shared_ptr<Module> module)
 {
-	auto found = std::find(m_module_list.begin(), m_module_list.end(), module);
-	if (found != m_module_list.end())
+	auto found = std::find(mModuleList.begin(), mModuleList.end(), module);
+	if (found != mModuleList.end())
 	{
-		m_module_list.erase(found);
+		mModuleList.erase(found);
 		return true;
 	}
 

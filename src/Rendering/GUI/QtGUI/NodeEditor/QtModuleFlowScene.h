@@ -46,6 +46,8 @@ namespace Qt
 
 		void moveModule(QtNode& n, const QPointF& newLocation);
 
+		void showResetPipeline();
+
 		void showAnimationPipeline();
 
 		void showGraphicsPipeline();

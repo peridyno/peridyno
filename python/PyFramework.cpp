@@ -284,8 +284,6 @@ void pybind_framework(py::module& m)
 
 	py::class_<SceneGraph, std::shared_ptr<SceneGraph>>(m, "SceneGraph")
 		.def(py::init<>())
-		.def("is_initialized", &SceneGraph::isInitialized)
-		.def("initialize", &SceneGraph::initialize)
 		.def("set_total_time", &SceneGraph::setTotalTime)
 		.def("get_total_time", &SceneGraph::getTotalTime)
 		.def("set_frame_rate", &SceneGraph::setFrameRate)

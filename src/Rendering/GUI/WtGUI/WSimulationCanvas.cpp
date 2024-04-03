@@ -256,7 +256,7 @@ void WSimulationCanvas::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 	if (this->mScene)
 	{
 		makeCurrent();
-		this->mScene->initialize();
+		this->mScene->reset();
 		doneCurrent();
 
 		scheduleRender();
