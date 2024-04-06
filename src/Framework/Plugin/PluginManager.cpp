@@ -146,7 +146,8 @@ namespace dyno
 
 		for (const auto& entry : fs::directory_iterator(pathName))
 		{
-			if (entry.path().extension() == getExtension())
+			std::string name = entry.path().filename().string();
+			if (entry.path().extension() == getExtension() && name.find("plugin-") != std::string::npos)
 			{
 				loadPlugin(entry.path().string());
 			}

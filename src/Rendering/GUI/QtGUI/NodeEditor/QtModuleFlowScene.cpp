@@ -245,6 +245,18 @@ namespace Qt
 		}
 	}
 
+	void QtModuleFlowScene::showResetPipeline()
+	{
+		auto pipeline = mNode->resetPipeline();
+
+		if (mNode == nullptr || mActivePipeline == pipeline)
+			return;
+
+		mActivePipeline = pipeline;
+
+		updateModuleGraphView();
+	}
+
 	void QtModuleFlowScene::showAnimationPipeline()
 	{
 		auto pipeline = mNode->animationPipeline();

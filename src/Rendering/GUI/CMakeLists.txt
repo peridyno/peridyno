@@ -12,3 +12,7 @@ add_subdirectory(GlfwGUI)
 if(PERIDYNO_QT_GUI)
     add_subdirectory(QtGUI)
 endif()
+
+if(PERIDYNO_WT_GUI)
+    add_subdirectory(WtGUI)
+endif()

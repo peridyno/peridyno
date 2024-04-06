@@ -19,7 +19,7 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "Curve.h"
-
+#include "Topology/PolygonSet.h"
 
 namespace dyno
 {
@@ -39,9 +39,11 @@ namespace dyno
 	public:
 		DEF_VAR(unsigned, Columns, 24, "Turning Columns");
 
-		DEF_VAR(unsigned, EndSegment, 2, "Turning EndSegment");
+		DEF_VAR(unsigned, EndSegment, 1, "Turning EndSegment");
 
 		DEF_VAR(Real, Radius, 0, "Turning radius");
+
+		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
@@ -52,8 +54,6 @@ namespace dyno
 		DEF_VAR(bool, UseRamp, false, "");
 
 		DEF_VAR(Curve, Curve, Curve::CurveMode::Open, "");
-
-		void disableRender();
 
 	protected:
 		void resetStates() override;

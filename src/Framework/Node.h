@@ -152,7 +152,7 @@ namespace dyno
 			return deleteModule(module);
 		}
 
-		std::list<std::shared_ptr<Module>>& getModuleList() { return m_module_list; }
+		std::list<std::shared_ptr<Module>>& getModuleList() { return mModuleList; }
 
 		bool hasModule(std::string name);
 
@@ -176,7 +176,7 @@ namespace dyno
 			TModule* tmp = new TModule;
 			std::shared_ptr<Module> base;
 			std::list<std::shared_ptr<Module>>::iterator iter;
-			for (iter = m_module_list.begin(); iter != m_module_list.end(); iter++)
+			for (iter = mModuleList.begin(); iter != mModuleList.end(); iter++)
 			{
 				if ((*iter)->getClassInfo() == tmp->getClassInfo())
 				{
@@ -196,6 +196,7 @@ namespace dyno
 			return TypeInfo::cast<TModule>(base);
 		}
 
+		std::shared_ptr<Pipeline>				resetPipeline();
 		std::shared_ptr<AnimationPipeline>		animationPipeline();
 		std::shared_ptr<GraphicsPipeline>		graphicsPipeline();
 
@@ -213,11 +214,6 @@ namespace dyno
 
 			return module;
 		}
-	
-		/**
-		 * @brief Initialize all states, called before the node is first updated.
-		 */
-		void initialize();
 		
 		/**
 		 * @brief Called every time interval.
@@ -327,23 +323,21 @@ namespace dyno
 		 * @brief Time step size
 		 *
 		 */
-		Real m_dt;
-		bool m_initalized;
-
-		Real m_mass;
+		Real mDt;
 
 		/**
 		 * @brief A module list containing all modules
 		 *
 		 */
-		std::list<std::shared_ptr<Module>> m_module_list;
+		std::list<std::shared_ptr<Module>> mModuleList;
 
 		/**
 		 * @brief Pointer of the pipeline
 		 *
 		 */
-		std::shared_ptr<AnimationPipeline> m_animation_pipeline;
-		std::shared_ptr<GraphicsPipeline> m_render_pipeline;
+		std::shared_ptr<Pipeline>	mResetPipeline;
+		std::shared_ptr<AnimationPipeline> mAnimationPipeline;
+		std::shared_ptr<GraphicsPipeline> mGraphicsPipeline;
 
 // 		//std::shared_ptr<DeviceContext> m_context;
 // 

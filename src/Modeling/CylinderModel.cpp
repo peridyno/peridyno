@@ -231,10 +231,10 @@ namespace dyno
 					uint p4 = i + j * columns + columns + (sideTopPtNum);
 
 
-					index.insert(p1);
-					index.insert(p2);
-					index.insert(p3);
 					index.insert(p4);
+					index.insert(p3);
+					index.insert(p2);
+					index.insert(p1);
 
 					incre++;
 				}
@@ -268,9 +268,9 @@ namespace dyno
 				uint p2 = buttomPtNum + (i + 1) % columns;
 				uint p3 = buttomCenter;
 
-				index.insert(p1);
-				index.insert(p2);
 				index.insert(p3);
+				index.insert(p2);
+				index.insert(p1);
 
 				incre++;
 			}

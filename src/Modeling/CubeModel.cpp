@@ -49,6 +49,7 @@ namespace dyno
 		//this->statePolygonSet()->promoteOuput();
 		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
+		this->statePolygonSet()->promoteOuput();
 		
 		//Do not export the node
 		this->allowExported(false);
@@ -287,7 +288,7 @@ namespace dyno
 			}
 		}
 
-		//Bottom
+
 		x = center[0] - length[0] / 2;
 		for (int ny = 1; ny < segments[1]; ny++)
 		{
@@ -312,10 +313,10 @@ namespace dyno
 
 				auto& quads = polygonIndices[incre];
 
-				quads.insert(v0);
-				quads.insert(v1);
-				quads.insert(v2);
 				quads.insert(v3);
+				quads.insert(v2);
+				quads.insert(v1);
+				quads.insert(v0);
 
 				incre++;
 

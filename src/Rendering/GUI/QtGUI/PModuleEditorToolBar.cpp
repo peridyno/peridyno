@@ -21,14 +21,21 @@ namespace dyno
 
 		mLayout->addStretch();
 
+		mResetButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_blue.png")), "Reset");
 		mAnimationButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/animation.png")), "Animation");
 		mRenderingButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/Display.png")), "Rendering");
 
+		mResetButton->setObjectName("mResetButton");
 		mAnimationButton->setObjectName("mAnimationButton");
 		mRenderingButton->setObjectName("mRenderingButton");
 
+		mResetButton->setChecked(false);
+		mAnimationButton->setChecked(true);
+		mRenderingButton->setChecked(false);
+
 		this->setLayout(mLayout);
 
+		connect(mResetButton, &QPushButton::released, this, &PModuleEditorToolBar::resetButtonClicked);
 		connect(mAnimationButton, &QPushButton::released, this, &PModuleEditorToolBar::animationButtonClicked);
 		connect(mRenderingButton, &QPushButton::released, this, &PModuleEditorToolBar::renderingButtonClicked);
 	}
@@ -106,8 +113,18 @@ namespace dyno
 		return button;
 	}
 
+	void PModuleEditorToolBar::resetButtonClicked()
+	{
+		mResetButton->setChecked(true);
+		mAnimationButton->setChecked(false);
+		mRenderingButton->setChecked(false);
+
+		emit showResetPipeline();
+	}
+
 	void PModuleEditorToolBar::animationButtonClicked()
 	{
+		mResetButton->setChecked(false);
 		mAnimationButton->setChecked(true);
 		mRenderingButton->setChecked(false);
 
@@ -116,6 +133,7 @@ namespace dyno
 
 	void PModuleEditorToolBar::renderingButtonClicked()
 	{
+		mResetButton->setChecked(false);
 		mAnimationButton->setChecked(false);
 		mRenderingButton->setChecked(true);
 

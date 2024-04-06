@@ -44,9 +44,9 @@ namespace dyno
 
 	class QDoubleSpinner;
 	class QDoubleSlider;
-	class mDoubleSpinBox;
-	class ValueDialog;
-	class toggleLabel;
+	class QPiecewiseDoubleSpinBox;
+	class QValueDialog;
+	class QToggleLabel;
 
 	template<typename T>
 	T castMaximum(float v) {

@@ -25,6 +25,12 @@ namespace dyno
 	public:
 		RenderWindow();
 
+		enum SelectionMode
+		{
+			OBJECT_MODE,
+			PRIMITIVE_MODE
+		};
+
 		virtual void initialize(int width, int height) {}
 		virtual void mainLoop() {}
 
@@ -40,6 +46,9 @@ namespace dyno
 		virtual void setWindowSize(int w, int h);
 
 		void setSelection(bool b);
+
+		inline SelectionMode getSelectionMode() { return mSlectionMode; }
+		inline void setSelectionMode(SelectionMode mode) { mSlectionMode = mode; }
 
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
@@ -63,6 +72,8 @@ namespace dyno
 		virtual void onSelected(const Selection& s);
 
 		Selection selectedObject;
+
+		SelectionMode mSlectionMode = SelectionMode::OBJECT_MODE;
 
 		bool mSelectionEnabled = true;
 	};

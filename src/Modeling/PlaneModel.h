@@ -19,6 +19,7 @@
 
 #include "Topology/TriangleSet.h"
 #include "Topology/QuadSet.h"
+#include "Topology/PolygonSet.h"
 
 namespace dyno
 {
@@ -43,6 +44,8 @@ namespace dyno
 
 		DEF_VAR(unsigned, SegmentX, unsigned(1), "Segment X");
 		DEF_VAR(unsigned, SegmentZ, unsigned(1), "Segment Z");
+
+		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 

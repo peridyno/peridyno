@@ -3,30 +3,28 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
+#include "Mapping/QuadSetToTriangleSet.h"
+#include "Mapping/Extract.h"
+
 namespace dyno
 {
 	template<typename TDataType>
 	PlaneModel<TDataType>::PlaneModel()
 		: ParametricModel<TDataType>()
 	{
-		this->varLengthX()->setRange(0.01, 50.0f);
-		this->varLengthZ()->setRange(0.01, 50.0f);
+		this->varLengthX()->setRange(0.01, 100.0f);
+		this->varLengthZ()->setRange(1, 100.0f);
 
 		this->varSegmentX()->setRange(1, 100);
 		this->varSegmentZ()->setRange(1, 100);
 
+
+		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
+
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+
 		this->stateQuadSet()->setDataPtr(std::make_shared<QuadSet<TDataType>>());
 
-		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
-		this->stateTriangleSet()->connect(glModule->inTriangleSet());
-		this->graphicsPipeline()->pushModule(glModule);
-
-		auto wireframe = std::make_shared<GLWireframeVisualModule>();
-		this->stateTriangleSet()->connect(wireframe->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireframe);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PlaneModel<TDataType>::varChanged, this));
 
@@ -40,8 +38,32 @@ namespace dyno
 		this->varLengthX()->attach(callback);
 		this->varLengthZ()->attach(callback);
 
+
+		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
+		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
+		tsRender->setVisible(true);
+		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(tsRender);
+
+		auto exES = std::make_shared<ExtractEdgeSetFromPolygonSet<TDataType>>();
+		this->statePolygonSet()->connect(exES->inPolygonSet());
+		this->graphicsPipeline()->pushModule(exES);
+
+		auto esRender = std::make_shared<GLWireframeVisualModule>();
+		esRender->varBaseColor()->setValue(Color(0, 0, 0));
+		exES->outEdgeSet()->connect(esRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(esRender);
+
+		//this->statePolygonSet()->promoteOuput();
 		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
+
+		//Do not export the node
+		this->allowExported(false);
+
+		this->stateTriangleSet()->promoteOuput();
+		this->stateQuadSet()->promoteOuput();
+		this->statePolygonSet()->promoteOuput();
 	}
 
 	struct Index2DPlane
@@ -132,6 +154,22 @@ namespace dyno
 			return center + q.rotate(v);
 		};
 
+		uint numOfPolygon = segments[0] * segments[2];
+
+		CArray<uint> counter2(numOfPolygon);
+
+		uint incre = 0;
+
+		for (uint j = 0; j < numOfPolygon; j++)
+		{
+			counter2[incre] = 4;
+			incre++;
+		}
+
+		CArrayList<uint> polygonIndices;
+		polygonIndices.resize(counter2);
+
+		incre = 0;
 
 		Real x, y, z;
 		//Bottom
@@ -159,32 +197,33 @@ namespace dyno
 				v2 = nx + 1 + (nz + 1) * (segmentX + 1);;
 				v3 = nx + (nz + 1) * (segmentX + 1);;
 
-				quads.push_back(TopologyModule::Quad(v0, v1, v2, v3));
+				auto& quads = polygonIndices[incre];
 
-				if ((nx + nz) % 2 == 0){
-					triangles.push_back(TopologyModule::Triangle(v0, v1, v2));
-					triangles.push_back(TopologyModule::Triangle(v0, v2, v3));
-				}
-				else{
-					triangles.push_back(TopologyModule::Triangle(v0, v1, v3));
-					triangles.push_back(TopologyModule::Triangle(v1, v2, v3));
-				}
+				quads.insert(v3);
+				quads.insert(v2);
+				quads.insert(v1);
+				quads.insert(v0);
+
+				incre++;
 			}
 		}
 
-		auto qs = this->stateQuadSet()->getDataPtr();
-		qs->setPoints(vertices);
-		qs->setQuads(quads);
-		qs->update();
+		auto polySet = this->statePolygonSet()->getDataPtr();
 
-		auto ts = this->stateTriangleSet()->getDataPtr();
-		ts->setPoints(vertices);
-		ts->setTriangles(triangles);
-		ts->update();
+		polySet->setPoints(vertices);
+		polySet->setPolygons(polygonIndices);
+		polySet->update();
+
+		polygonIndices.clear();
+
+		auto& ts = this->stateTriangleSet()->getData();
+		polySet->turnIntoTriangleSet(ts);
+
+		auto& qs = this->stateQuadSet()->getData();
+		polySet->extractQuadSet(qs);
 
 		vertices.clear();
-		quads.clear();
-		triangles.clear();
+
 	}
 
 	DEFINE_CLASS(PlaneModel);
