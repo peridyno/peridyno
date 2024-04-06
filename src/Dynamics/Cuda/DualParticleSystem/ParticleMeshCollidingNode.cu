@@ -13,7 +13,7 @@ namespace dyno
 		//triangle neighbor
 		auto nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		smoothingLength->outFloating()->connect(nbrQueryTri->inRadius());
-//		this->inPosition()->connect(nbrQueryTri->inPosition());
+		this->inPosition()->connect(nbrQueryTri->inPosition());
  		this->stateTriangleVertex()->connect(nbrQueryTri->inTriPosition());
  		this->stateTriangleIndex()->connect(nbrQueryTri->inTriangles());
 		this->inTriangleSet()->connect(nbrQueryTri->inTriangles());

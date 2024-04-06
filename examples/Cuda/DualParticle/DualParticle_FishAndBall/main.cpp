@@ -16,7 +16,6 @@
 #include "DualParticleSystem/ParticleMeshCollidingNode.h"
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
-#include <ParticleSystem/ParticleLoader.h>
 #include "PointsLoader.h"
 using namespace std;
 using namespace dyno;

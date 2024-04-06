@@ -15,7 +15,6 @@
 #include "DualParticleSystem/ParticleMeshCollidingNode.h"
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
-#include <ParticleSystem/ParticleLoader.h>
 #include "Collision/Attribute.h"
 #include "DualParticleSystem/VirtualSpatiallyAdaptiveStrategy.h"
 #include "DualParticleSystem/VirtualColocationStrategy.h"
@@ -23,7 +22,6 @@
 #include "DualParticleSystem/DualParticleIsphModule.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "RotatingSquarePatchModule.h"
-//#include "ABCExporter/ParticleWriterABC.h"
 
 using namespace std;
 using namespace dyno;
