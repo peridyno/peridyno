@@ -40,6 +40,10 @@ namespace dyno
 		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
+		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
+		this->varGravityValue()->connect(iterSolver->varGravityValue());
+		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
+		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
@@ -48,6 +52,11 @@ namespace dyno
 		this->stateInertia()->connect(iterSolver->inInertia());
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
+
+		this->stateBallAndSocketJoints()->connect(iterSolver->inBallAndSocketJoints());
+		this->stateSliderJoints()->connect(iterSolver->inSliderJoints());
+		this->stateHingeJoints()->connect(iterSolver->inHingeJoints());
+		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
 
 		merge->outContacts()->connect(iterSolver->inContacts());
 
@@ -99,7 +108,7 @@ namespace dyno
 
 		float r = b.radius;
 		if (bd.mass <= 0.0f) {
-			bd.mass = 3 / 4.0f*M_PI*r*r*r*density;
+			bd.mass = 4 / 3.0f*M_PI*r*r*r*density;
 		}
 		float I11 = r * r;
 		bd.inertia = 0.4f * bd.mass
@@ -115,6 +124,17 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	Mat3f RigidBodySystem<TDataType>::pointInertia(Coord r1)
+	{
+		Real x = r1.x;
+		Real y = r1.y;
+		Real z = r1.z;
+		return Mat3f(y * y + z * z, -x * y, -x * z, -y * x, x * x + z * z, -y * z, -z * x, -z * y, x * x + y * y);
+	}
+
+
+
+	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addTet(
 		const TetInfo& tet,
 		const RigidBodyInfo& bodyDef, 
@@ -125,21 +145,50 @@ namespace dyno
 
 		bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
 
-		float r = 0.025;
-		if (bd.mass <= 0.0f) {
-			bd.mass = 3 / 4.0f*M_PI*r*r*r*density;
-		}
-		float I11 = r * r;
-		bd.inertia = 0.4f * bd.mass
-			* Mat3f(I11, 0, 0,
-				0, I11, 0,
-				0, 0, I11);
+		auto centroid = bd.position;
 
+		auto tmpMat = Mat3f(tet.v[1] - tet.v[0], tet.v[2] - tet.v[0], tet.v[3] - tet.v[0]);
+		Real volume = (1.0 / 6.0) * abs(tmpMat.determinant());
+		Real mass = volume * density;
+		bd.mass = mass;
+
+
+		Mat3f inertiaMatrix(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+		for (int i = 0; i < 4; i++)
+		{
+			Coord r = tet.v[i] - centroid;
+			inertiaMatrix += (mass / 4.0) * pointInertia(r);
+		}
+
+		bd.inertia = inertiaMatrix;
 		bd.shapeType = ET_TET;
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
 		mHostTets.push_back(b);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addBallAndSocketJoint(const BallAndSocketJoint& joint)
+	{
+		mHostJointsBallAndSocket.push_back(joint);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addSliderJoint(const SliderJoint& joint)
+	{
+		mHostJointsSlider.push_back(joint);
+	}
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addHingeJoint(const HingeJoint& joint)
+	{
+		mHostJointsHinge.push_back(joint);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addFixedJoint(const FixedJoint& joint)
+	{
+		mHostJointsFixed.push_back(joint);
 	}
 
 	template <typename Real, typename Coord, typename Matrix, typename Quat>
@@ -219,6 +268,12 @@ namespace dyno
 		mDeviceBoxes.assign(mHostBoxes);
 		mDeviceSpheres.assign(mHostSpheres);
 		mDeviceTets.assign(mHostTets);
+
+
+		this->stateBallAndSocketJoints()->assign(mHostJointsBallAndSocket);
+		this->stateSliderJoints()->assign(mHostJointsSlider);
+		this->stateHingeJoints()->assign(mHostJointsHinge);
+		this->stateFixedJoints()->assign(mHostJointsFixed);
 
 		auto& boxes = topo->getBoxes();
 		auto& spheres = topo->getSpheres();

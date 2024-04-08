@@ -25,37 +25,38 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
-	BoxInfo box;
-	for (int i = 8; i > 1; i--)
-		for (int j = 0; j < i + 1; j++)
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	BoxInfo box1, box2;
+	box1.center = Vec3f(0, 0.2, 0);
+	box1.halfLength = Vec3f(0.1);
+
+	box2.center = Vec3f(0, 0.6, 0);
+	box2.halfLength = Vec3f(0.1);
+
+	HingeJoint<Real> joint(0, 1);
+	joint.setAnchorPoint(box1.center + Vec3f(0.0, 0.2f, 0.0), box1.center, box2.center, box1.rot, box2.rot);
+	joint.setAxis(Vec3f(1, 0, 0), box1.rot, box2.rot);
+	rigid->addHingeJoint(joint);
+	rigid->addBox(box1, rigidBody);
+	rigidBody.angularVelocity = Vec3f(0.0, 0, 10.0);
+	rigid->addBox(box2, rigidBody);
+
+	/*for (int i = 0; i < 20; i++)
+	{
+		box.center = Vec3f(0.5f, 0.1f + i * 0.2f, 0.5f);
+		box.halfLength = Vec3f(0.1f);
+		if (i != 20)
 		{
-			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
-			box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
-			rigid->addBox(box, rigidBody);
+			HingeJoint<Real> joint(i, i + 1);
+			joint.setAnchorPoint(box.center + Vec3f(0.0, 0.1f, 0.0), box.center, box.center + Vec3f(0, 0.2, 0), box.rot, box.rot);
+			joint.setAxis(Vec3f(0, 0, 1), box.rot, box.rot);
+			rigid->addHingeJoint(joint);
 		}
+		rigid->addBox(box, rigidBody);
+	}*/
 
-	SphereInfo sphere;
-	sphere.center = Vec3f(0.5f, 0.75f, 0.5f);
-	sphere.radius = 0.025f;
 
-	RigidBodyInfo rigidSphere;
-	rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.5f, 0.95f, 0.5f);
-	sphere.radius = 0.025f;
-	rigid->addSphere(sphere, rigidSphere);
-
-	sphere.center = Vec3f(0.5f, 0.65f, 0.5f);
-	sphere.radius = 0.05f;
-	rigid->addSphere(sphere, rigidSphere);
-
-	TetInfo tet;
-	tet.v[0] = Vec3f(0.5f, 1.1f, 0.5f);
-	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
-	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
-	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
-	rigid->addTet(tet, rigidSphere);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());

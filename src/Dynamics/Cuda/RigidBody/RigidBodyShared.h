@@ -22,7 +22,7 @@ namespace dyno
 		{
 			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
 			halfLength = Vector<Real, 3>(1.0f, 1.0f, 1.0f);
-			rot = Quat<Real>(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		Vector<Real, 3> center;
@@ -37,7 +37,7 @@ namespace dyno
 		{
 			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
 			radius = 1.0;
-			rot = Quat<Real>(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 		Quat<Real> rot;
 		Vector<Real, 3> center;
@@ -79,7 +79,7 @@ namespace dyno
 		CapsuleInfo()
 		{
 			center = Vec3f(0.0f, 0.0f, 0.0f);
-			rot = Quat1f(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 			radius = 1.0f;
 			halfLength = 1.0f;
 		}

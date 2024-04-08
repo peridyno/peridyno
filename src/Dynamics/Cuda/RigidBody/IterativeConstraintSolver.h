@@ -16,6 +16,7 @@
 #pragma once
 #include "Module/ConstraintModule.h"
 #include "RigidBodyShared.h"
+#include "Topology/Joint.h"
 
 namespace dyno
 {
@@ -35,6 +36,11 @@ namespace dyno
 		typedef typename ::dyno::Quat<Real> TQuat;
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
 		typedef typename ::dyno::TConstraintPair<Real> Constraint;
+
+		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename SliderJoint<Real> SliderJoint;
+		typedef typename HingeJoint<Real> HingeJoint;
+		typedef typename FixedJoint<Real> FixedJoint;
 	
 		IterativeConstraintSolver();
 		~IterativeConstraintSolver();
@@ -44,7 +50,15 @@ namespace dyno
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
 
-		DEF_VAR(uint, IterationNumber, 30, "");
+		DEF_VAR(bool, GravityEnabled, true, "");
+
+		DEF_VAR(Real, GravityValue, 9.8, "");
+
+		DEF_VAR(Real, FrictionCoefficient, 0.1, "");
+
+		DEF_VAR(Real, Slop, 0.0001, "");
+
+		DEF_VAR(uint, IterationNumber, 50, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -67,22 +81,33 @@ namespace dyno
 
 		DEF_ARRAY_IN(ContactPair, Contacts, DeviceType::GPU, "");
 
+		DEF_ARRAY_IN(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
+
+		DEF_ARRAY_IN(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
+
+		DEF_ARRAY_IN(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
+
+		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
+
 	private:
 		void initializeJacobian(Real dt);
 
 	private:
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
-		DArray<Coord> mAccel;
+
+		DArray<Coord> mImpulseC;
+		DArray<Coord> mImpulseExt;
 
 		DArray<Real> mEta;		//eta
 		DArray<Real> mD;		//diagonal elements of JB
 		DArray<Real> mLambda;	//contact impulse
 
-		DArray<Real> mContactNumber;
-
-		DArray<Matrix> mInitialInertia;
 
 		DArray<Constraint> mAllConstraints;
+
+		DArray<int> mContactNumber;
+		DArray<int> mJointNumber;
+
 	};
 }

@@ -35,17 +35,6 @@ namespace dyno
 
 		~SceneGraph();
 
-		// 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
-		// 		std::shared_ptr<Node> getRootNode() { return mRoot; }
-
-		virtual bool initialize();
-		bool isInitialized() { return mInitialized; }
-		bool isEmpty() {
-			return mNodeMap.size() == 0;
-		}
-
-		void invalid();
-
 		virtual void advance(float dt);
 		virtual void takeOneFrame();
 		virtual void updateGraphicsContext();
@@ -105,6 +94,10 @@ namespace dyno
 
 		void propagateNode(std::shared_ptr<Node> node);
 
+		bool isEmpty() {
+			return mNodeMap.size() == 0;
+		}
+
 	public:
 		static SceneGraph& getInstance();
 
@@ -147,6 +140,8 @@ namespace dyno
 
 	public:
 		void onMouseEvent(PMouseEvent event);
+
+		void onMouseEvent(PMouseEvent event, std::shared_ptr<Node> node);
 
 		void onKeyboardEvent(PKeyboardEvent event);
 
@@ -216,7 +211,6 @@ namespace dyno
 			, mFrameRate(25)
 			, mFrameNumber(0)
 			, mFrameCost(0)
-			, mInitialized(false)
 			, mLowerBound(-1, -1, -1)
 			, mUpperBound(1, 1, 1)
 		{
@@ -231,7 +225,6 @@ namespace dyno
 		SceneGraph& operator=(const SceneGraph&) = delete;
 
 	private:
-		bool mInitialized;
 		bool mAdvativeInterval = true;
 
 		float mElapsedTime;

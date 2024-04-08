@@ -39,6 +39,22 @@ namespace dyno
 		CN_FLUID_NONPENETRATION,
 		CN_GLOBAL_NONPENETRATION,
 		CN_LOACL_NONPENETRATION,
+		CN_ANCHOR_EQUAL_1,
+		CN_ANCHOR_EQUAL_2,
+		CN_ANCHOR_EQUAL_3,
+		CN_ANCHOR_TRANS_1,
+		CN_ANCHOR_TRANS_2,
+		CN_BAN_ROT_1,
+		CN_BAN_ROT_2,
+		CN_BAN_ROT_3,
+		CN_ALLOW_ROT1D_1,
+		CN_ALLOW_ROT1D_2,
+		CN_JOINT_SLIDER_MIN,
+		CN_JOINT_SLIDER_MAX,
+		CN_JOINT_SLIDER_MOTER,
+		CN_JOINT_HINGE_MIN,
+		CN_JOINT_HINGE_MAX,
+		CN_JOINT_HINGE_MOTER,
 		CN_UNKNOWN
 	};
 
@@ -145,6 +161,8 @@ namespace dyno
 		int localTag2;
 
 		Real interpenetration = 0.0f;//inter_dist
+		Real d_min;
+		Real d_max;
 
 		Vector<Real, 3> pos1;
 		Vector<Real, 3> pos2;
@@ -152,6 +170,10 @@ namespace dyno
 		Vector<Real, 3> normal1;
 		Vector<Real, 3> normal2;
 
+		Vector<Real, 3> axis;
+
 		ConstraintType type;
+
+		bool isValid;
 	};
 }
