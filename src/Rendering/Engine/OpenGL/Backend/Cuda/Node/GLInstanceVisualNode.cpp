@@ -10,11 +10,7 @@ namespace dyno
 	{
 		auto sRender = std::make_shared<GLInstancePhotorealisticRender>();
 		this->inInstances()->connect(sRender->inInstances());
-		this->inMaterials()->connect(sRender->inMaterials());
-		this->inNormal()->connect(sRender->inNormal());
-		this->inShapes()->connect(sRender->inShapes());
-		this->inTexCoord()->connect(sRender->inTexCoord());
-		this->inVertex()->connect(sRender->inVertex());
+		this->inTextureMesh()->connect(sRender->inTextureMesh());
 
 		this->graphicsPipeline()->pushModule(sRender);
 		this->setAutoSync(true);

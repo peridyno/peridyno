@@ -19,7 +19,7 @@
 #include "Object.h"
 #include "Platform.h"
 #include "GPUBuffer.h"
-#include "Material.h"
+
 #include "Topology/TriangleSet.h"
 #include "Matrix/SquareMatrix.h"
 

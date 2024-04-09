@@ -71,17 +71,21 @@ namespace dyno
 			float alpha;
 		} pbr;
 
+		auto& vertices = mTextureMesh.vertices();
+		auto& normals = mTextureMesh.normals();
+		auto& texCoords = mTextureMesh.texCoords();
+
 		mShaderProgram->use();
 
 		// setup uniforms
-		if (mNormal.count() > 0
+		if (normals.count() > 0
 			&& mTangent.count() > 0
 			&& mBitangent.count() > 0
-			&& mNormal.count() == mTangent.count()
-			&& mNormal.count() == mBitangent.count())
+			&& normals.count() == mTangent.count()
+			&& normals.count() == mBitangent.count())
 		{
 			mShaderProgram->setInt("uVertexNormal", 1);
-			mNormal.bindBufferBase(9);
+			normals.bindBufferBase(9);
 			mTangent.bindBufferBase(12);
 			mBitangent.bindBufferBase(13);
 		}
@@ -93,12 +97,12 @@ namespace dyno
 		mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
 		mRenderParamsUBlock.bindBufferBase(0);
 
-		mPosition.bindBufferBase(8);
-		mTexCoord.bindBufferBase(10);
+		vertices.bindBufferBase(8);
+		texCoords.bindBufferBase(10);
 
 
 		auto& instances = this->inInstances()->constData();
-		auto& shapes = this->inShapes()->constData();
+		auto& shapes = mTextureMesh.shapes();
 		for (int i = 0; i < shapes.size(); i++)
 		{
 			auto shape = shapes[i];
@@ -122,16 +126,16 @@ namespace dyno
 				glActiveTexture(GL_TEXTURE11);		// bump map
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				if (mtl->mColorTexture.isValid()) {
+				if (mtl->texColor.isValid()) {
 					mShaderProgram->setInt("uColorMode", 2);
-					mtl->mColorTexture.bind(GL_TEXTURE10);
+					mtl->texColor.bind(GL_TEXTURE10);
 				}
 				else {
 					mShaderProgram->setInt("uColorMode", 0);
 				}
 
-				if (mtl->mBumpTexture.isValid()) {
-					mtl->mBumpTexture.bind(GL_TEXTURE11);
+				if (mtl->texBump.isValid()) {
+					mtl->texBump.bind(GL_TEXTURE11);
 					mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
 				}
 			}

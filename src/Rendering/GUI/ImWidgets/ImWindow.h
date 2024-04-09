@@ -33,7 +33,7 @@ namespace dyno
 		bool mViewManipulator = true;
 
 
-		int  mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
+		int mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
 
 		// cursor status
 		int mRegX = -1;

@@ -18,8 +18,7 @@
 
 #include "GLVisualModule.h"
 
-#include "GraphicsObject/Shape.h"
-#include "GraphicsObject/Material.h"
+#include "GraphicsObject/GLTextureMesh.h"
 #include "GraphicsObject/VertexArray.h"
 #include "GraphicsObject/Shader.h"
 #include "GraphicsObject/Instance.h"

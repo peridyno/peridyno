@@ -18,10 +18,11 @@
 
 #include "GLVisualModule.h"
 
-#include "GraphicsObject/Shape.h"
-#include "GraphicsObject/Material.h"
 #include "GraphicsObject/VertexArray.h"
 #include "GraphicsObject/Shader.h"
+#include "GraphicsObject/GLTextureMesh.h"
+
+#include "Topology/TextureMesh.h"
 
 #ifdef CUDA_BACKEND
 #include "ConstructTangentSpace.h"
@@ -34,17 +35,12 @@ namespace dyno
 		DECLARE_CLASS(GLPhotorealisticRender)
 	public:
 		GLPhotorealisticRender();
-		~GLPhotorealisticRender();
+		~GLPhotorealisticRender() override;
 
 	public:
 		virtual std::string caption() override;
 
-		DEF_ARRAY_IN(Vec3f, Vertex,		DeviceType::GPU, "");
-		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
-		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
-
-		DEF_INSTANCES_IN(Shape,		Shape, "");
-		DEF_INSTANCES_IN(Material,	Material, "");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 
 	protected:
 		virtual void updateImpl() override;
@@ -56,20 +52,16 @@ namespace dyno
 
 
 	protected:
-		XBuffer<Vec3f> mPosition;
-		XBuffer<Vec3f> mNormal;
 		XBuffer<Vec3f> mTangent;
 		XBuffer<Vec3f> mBitangent;
-		XBuffer<Vec2f> mTexCoord;
-		VertexArray	mVAO;
 
 		Program* mShaderProgram;
 		Buffer		mRenderParamsUBlock;
 		Buffer		mPBRMaterialUBlock;
 
-	private:
+		VertexArray	mVAO;
 
-		
+		GLTextureMesh mTextureMesh;
 
 #ifdef CUDA_BACKEND
 		std::shared_ptr<ConstructTangentSpace> mTangentSpaceConstructor;

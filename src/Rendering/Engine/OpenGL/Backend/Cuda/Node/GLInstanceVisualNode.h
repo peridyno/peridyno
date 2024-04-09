@@ -18,8 +18,7 @@
 #include <Node.h>
 
 #include <Topology/TriangleSet.h>
-#include "GraphicsObject/Shape.h"
-#include "GraphicsObject/Material.h"
+#include "GraphicsObject/GLTextureMesh.h"
 #include "GraphicsObject/Instance.h"
 
 
@@ -41,13 +40,8 @@ namespace dyno
 		std::string getNodeType() override;
 
 	public:
-
-		DEF_ARRAY_IN(Vec3f, Vertex, DeviceType::GPU, "");
-		DEF_ARRAY_IN(Vec3f, Normal, DeviceType::GPU, "");
-		DEF_ARRAY_IN(Vec2f, TexCoord, DeviceType::GPU, "");
-
-		DEF_INSTANCES_IN(Shape, Shape, "");
-		DEF_INSTANCES_IN(Material, Material, "");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+		
 		DEF_INSTANCES_IN(ShapeInstance, Instance, "");
 
 	protected:
