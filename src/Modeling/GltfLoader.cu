@@ -1,7 +1,5 @@
 #include "GltfLoader.h"
 
-
-
 #include <GLPhotorealisticRender.h>
 
 namespace dyno
@@ -53,15 +51,10 @@ namespace dyno
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
 
+		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto render = std::make_shared<GLPhotorealisticRender>();
-
-		this->stateVertex()->connect(render->inVertex());
-		this->stateNormal()->connect(render->inNormal());
-		this->stateTexCoord_0()->connect(render->inTexCoord());
-
-		this->stateShapes()->connect(render->inShapes());
-		this->stateMaterials()->connect(render->inMaterials());
+		this->stateTextureMesh()->connect(render->inTextureMesh());
 		this->graphicsPipeline()->pushModule(render);
 
 		//Joint Render
@@ -83,15 +76,7 @@ namespace dyno
 		this->stateJointSet()->connect(jointLineRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(jointLineRender);
 
-		this->stateVertex()->promoteOuput();
-		this->stateNormal()->promoteOuput();
-		this->stateShapes()->promoteOuput();
-		this->stateMaterials()->promoteOuput();
-		this->stateShapes()->promoteOuput();
-
-
-
-
+		this->stateTextureMesh()->promoteOuput();
 	}
 
 
@@ -255,18 +240,24 @@ namespace dyno
 			shapeNum += meshId.primitives.size();
 		}
 
-		//shape
-		this->stateShapes()->resize(shapeNum);
-		auto& statShapes = this->stateShapes()->getData();
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
 
+		auto& reMats = texMesh->materials();
+		auto& reShapes = texMesh->shapes();
+
+		reShapes.resize(shapeNum);
+
+
+		//shape
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
 
-		if(model.materials.size())
-			this->stateMaterials()->resize(model.materials.size());
-		else
-			this->stateMaterials()->resize(shapeNum);
-		auto& sMats = this->stateMaterials()->getData();
+		if (model.materials.size()) {
+			reMats.resize(model.materials.size());
+		}
+		else {
+			reMats.resize(shapeNum);
+		}
 
 		std::vector<tinygltf::Material>& materials = model.materials;
 		std::vector<Texture>& textures = model.textures;
@@ -323,12 +314,11 @@ namespace dyno
 					normalIndex = (tempTriangles);
 					texCoordIndex = (tempTriangles);
 
-					statShapes[currentShape] = std::make_shared<Shape>();
+					reShapes[currentShape] = std::make_shared<Shape>();
 
-
-					statShapes[currentShape]->vertexIndex.assign(vertexIndex);
-					statShapes[currentShape]->normalIndex.assign(normalIndex);
-					statShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
+					reShapes[currentShape]->vertexIndex.assign(vertexIndex);
+					reShapes[currentShape]->normalIndex.assign(normalIndex);
+					reShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
 
 
 					int matId = primitive.material;
@@ -344,14 +334,12 @@ namespace dyno
 						auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
 						auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
 
-
-
-						sMats[matId] = std::make_shared<Material>();
-						sMats[matId]->ambient = { 0,0,0 };
-						sMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
-						sMats[matId]->alpha = color[3];
-						sMats[matId]->specular = Vec3f(1 - roughness);
-						sMats[matId]->roughness = roughness;
+						reMats[matId] = std::make_shared<Material>();
+						reMats[matId]->ambient = { 0,0,0 };
+						reMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
+						reMats[matId]->alpha = color[3];
+						reMats[matId]->specular = Vec3f(1 - roughness);
+						reMats[matId]->roughness = roughness;
 
 
 						std::string colorUri = getTexUri(textures, images, colorTexId);
@@ -363,7 +351,7 @@ namespace dyno
 
 							if (loadImage(colorUri.c_str(), texture))
 							{
-								sMats[matId]->texColor.assign(texture);
+								reMats[matId]->texColor.assign(texture);
 							}
 						}
 
@@ -378,23 +366,24 @@ namespace dyno
 
 							if (loadImage(bumpUri.c_str(), texture))
 							{
-								sMats[matId]->texBump.assign(texture);
-								sMats[matId]->bumpScale = scale;
+								reMats[matId]->texBump.assign(texture);
+								reMats[matId]->bumpScale = scale;
 							}
 						}
 
-						statShapes[currentShape]->material = sMats[matId];
+						reShapes[currentShape]->material = reMats[matId];
 
 					}
 					else 
 					{
-						sMats[currentShape] = std::make_shared<Material>();
-						sMats[currentShape]->ambient = { 0,0,0 };
-						sMats[currentShape]->diffuse = Vec3f(0.5, 0.5, 0.5);
-						sMats[currentShape]->alpha = 1;
-						sMats[currentShape]->specular = Vec3f(1,1,1);
-						sMats[currentShape]->roughness = 0.5;
-						statShapes[currentShape]->material = sMats[currentShape];
+						reMats[currentShape] = std::make_shared<Material>();
+						reMats[currentShape]->ambient = { 0,0,0 };
+						reMats[currentShape]->diffuse = Vec3f(0.5, 0.5, 0.5);
+						reMats[currentShape]->alpha = 1;
+						reMats[currentShape]->specular = Vec3f(1, 1, 1);
+						reMats[currentShape]->roughness = 0.5;
+
+						reShapes[currentShape]->material = reMats[currentShape];
 					}
 
 
@@ -464,9 +453,8 @@ namespace dyno
 		//±ä»»¶¥µã
 		//std::vector<Coord> aniVertices = vertices;
 
-		this->stateVertex()->assign(vertices);
-		this->stateNormal()->assign(normals);
-
+		texMesh->vertices().assign(vertices);
+		texMesh->normals().assign(normals);
 
 		initialPosition.assign(vertices);
 		initialNormal.assign(normals);
@@ -478,6 +466,9 @@ namespace dyno
 			tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));// uv.v need flip
 		}
 		this->stateTexCoord_0()->assign(tempTexCoord);
+		texMesh->texCoords().assign(tempTexCoord);
+
+
 		tempTexCoord.clear();
 		for (auto uv1 : texCoord1)
 		{
@@ -506,7 +497,8 @@ namespace dyno
 				vertices[i] = RV(vertices[i] * vS + RV(vL));
 			}
 
-			this->stateVertex()->assign(vertices);
+			texMesh->vertices().assign(vertices);
+
 			initialPosition.assign(vertices);
 		}
 
@@ -952,6 +944,7 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateAnimation(int frameNumber)
 	{
+		auto mesh = this->stateTextureMesh()->getDataPtr();
 
 		this->updateAnimationMatrix(all_Joints, frameNumber); 
 		this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
@@ -966,10 +959,10 @@ namespace dyno
 		);
 
 		//update Points
-		cuExecute(this->stateVertex()->getData().size(),
+		cuExecute(mesh->vertices().size(),
 			PointsAnimation,
 			initialPosition,
-			this->stateVertex()->getData(),
+			mesh->vertices(),
 			this->stateJointInverseBindMatrix()->getData(),
 			this->stateJointWorldMatrix()->getData(),
 
@@ -981,10 +974,10 @@ namespace dyno
 		);
 
 		//update Normals
-		cuExecute(this->stateVertex()->getData().size(),
+		cuExecute(mesh->vertices().size(),
 			PointsAnimation,
 			initialNormal,
-			this->stateNormal()->getData(),
+			mesh->normals(),
 			this->stateJointInverseBindMatrix()->getData(),
 			this->stateJointWorldMatrix()->getData(),
 
@@ -1449,14 +1442,9 @@ namespace dyno
 		this->stateJointLocalMatrix()->clear();
 
 		this->stateJointWorldMatrix()->clear();
-		this->stateMaterials()->clear();
-		this->stateNormal()->clear();
 		this->stateRealChannel_1()->clear();
-		this->stateShapes()->clear();
 		this->stateTexCoord_0()->clear();
 		this->stateTexCoord_1()->clear();
-
-		this->stateVertex()->clear();
 		this->stateWeights_0()->clear();
 		this->stateWeights_1()->clear();
 	}

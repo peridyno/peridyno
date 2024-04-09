@@ -6,6 +6,9 @@ namespace dyno {
 
 	ConstructTangentSpace::ConstructTangentSpace()
 	{
+		this->outNormal()->allocate();
+		this->outTangent()->allocate();
+		this->outBitangent()->allocate();
 	}
 
 	ConstructTangentSpace::~ConstructTangentSpace()
@@ -98,13 +101,15 @@ namespace dyno {
 
 	void ConstructTangentSpace::compute()
 	{
-		auto& inVertex = this->inVertex()->constData();
-		auto& inNormal = this->inNormal()->constData();
-		auto& inTexCoord = this->inTexCoord()->constData();
-		auto& inShapes = this->inShapes()->constData();
+		auto mesh = this->inTextureMesh()->constDataPtr();
+
+		auto& inVertex = mesh->vertices();
+		auto& inNormal = mesh->normals();
+		auto& inTexCoord = mesh->texCoords();
+		auto& inShapes =  mesh->shapes();
 
 		if (this->outNormal()->size() != inNormal.size()) {
-			auto totalNum = this->inNormal()->size();
+			auto totalNum = inNormal.size();
 			this->outNormal()->resize(totalNum);
 			this->outTangent()->resize(totalNum);
 			this->outBitangent()->resize(totalNum);

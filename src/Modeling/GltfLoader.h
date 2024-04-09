@@ -17,6 +17,8 @@
 #pragma once
 #include "Node/ParametricModel.h"
 #include "Topology/TriangleSet.h"
+#include "Topology/TextureMesh.h"
+
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
@@ -25,10 +27,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tinygltf/tiny_gltf.h"
-
-#include "GraphicsObject/Shape.h"
-#include "GraphicsObject/Material.h"
-
 
 #define NULL_TIME (-9599.99)
 
@@ -61,10 +59,6 @@ namespace dyno
 		//DEF_VAR(bool, ReloadTextures, 0.004, "");
 
 		//DefaultChannel
-
-		DEF_ARRAY_STATE(Vec3f, Vertex, DeviceType::GPU, "");
-		DEF_ARRAY_STATE(Vec3f, Normal, DeviceType::GPU, "");
-
 		DEF_ARRAY_STATE(Vec2f, TexCoord_0, DeviceType::GPU, "UVSet 0");
 		DEF_ARRAY_STATE(Vec2f, TexCoord_1, DeviceType::GPU, "UVSet 1");
 		DEF_ARRAY_STATE(Mat4f, InitialMatrix, DeviceType::GPU, "");
@@ -94,10 +88,7 @@ namespace dyno
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
-
-
-		DEF_INSTANCES_STATE(Shape, Shape, "");
-		DEF_INSTANCES_STATE(Material, Material, "");
+		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
 
 	protected:

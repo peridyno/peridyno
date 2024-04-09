@@ -21,7 +21,7 @@
 #include "Topology/TriangleSet.h"
 
 //Graphics object
-#include "GraphicsObject/Shape.h"
+#include "Topology/TextureMesh.h"
 
 namespace dyno
 {
@@ -33,13 +33,7 @@ namespace dyno
 		~ConstructTangentSpace() override;
 
 	public:
-		DEF_ARRAY_IN(Vec3f, Vertex, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Vec3f, Normal, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Vec2f, TexCoord, DeviceType::GPU, "");
-
-		DEF_INSTANCES_IN(Shape, Shape, "");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 
 		DEF_ARRAY_OUT(Vec3f, Normal, DeviceType::GPU, "");
 
