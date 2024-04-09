@@ -83,7 +83,7 @@ namespace dyno
 
 		Mat3f pointInertia(Coord v1);
 
-		Real getDt() override { return 0.001/3; }
+		Real getDt() override { return 0.001; }
 
 	protected:
 		void resetStates() override;
