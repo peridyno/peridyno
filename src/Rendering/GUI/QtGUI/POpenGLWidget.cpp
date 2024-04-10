@@ -267,75 +267,82 @@ namespace dyno
 		auto camera = this->getCamera();
 		camera->registerPoint(event->x(), event->y());
 
-		PMouseEvent mouseEvent;
-		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
-		mouseEvent.buttonType = mappingMouseButton(event);
-		mouseEvent.actionType = PActionType::AT_PRESS;
-		mouseEvent.mods = mappingModifierBits(event->modifiers());
-		mouseEvent.camera = camera;
-		mouseEvent.x = (float)event->x();
-		mouseEvent.y = (float)event->y();
+		//Primitive selection
+		if (this->getSelectionMode() == RenderWindow::PRIMITIVE_MODE)
+		{
+			PMouseEvent mouseEvent;
+			mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
+			mouseEvent.buttonType = mappingMouseButton(event);
+			mouseEvent.actionType = PActionType::AT_PRESS;
+			mouseEvent.mods = mappingModifierBits(event->modifiers());
+			mouseEvent.camera = camera;
+			mouseEvent.x = (float)event->x();
+			mouseEvent.y = (float)event->y();
+
+			auto activeScene = SceneGraphFactory::instance()->active();
+
+			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+
+			mImWindow.mousePressEvent(mouseEvent);
+		}
 
 		if (event->button() == Qt::RightButton)
 		{
 			mtempCursorX = event->x();
 		}
 
-		auto activeScene = SceneGraphFactory::instance()->active();
-
-		activeScene->onMouseEvent(mouseEvent);
-
-		mImWindow.mousePressEvent(mouseEvent);
-
 		updateGrpahicsContext();
 	}
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
-		// do picking
-
-
-		if( (event->modifiers() == 0 || event->modifiers() == Qt::ShiftModifier)
-			&& event->button() == Qt::LeftButton 
-			&& !ImGuizmo::IsUsing()
-			&& !ImGui::GetIO().WantCaptureMouse)
+		// Object selection
+		if (this->getSelectionMode() == RenderWindow::OBJECT_MODE)
 		{
-			int x = event->x();
-			int y = event->y();
+			if ((event->modifiers() == 0 || event->modifiers() == Qt::ShiftModifier)
+				&& event->button() == Qt::LeftButton
+				&& !ImGuizmo::IsUsing()
+				&& !ImGui::GetIO().WantCaptureMouse)
+			{
+				int x = event->x();
+				int y = event->y();
 
-			int w = std::abs(mCursorX - x);
-			int h = std::abs(mCursorY - y);
-			x = std::min(mCursorX, x);
-			y = std::min(mCursorY, y);
-			// flip y
-			y = this->height() - y - 1;
+				int w = std::abs(mCursorX - x);
+				int h = std::abs(mCursorY - y);
+				x = std::min(mCursorX, x);
+				y = std::min(mCursorY, y);
+				// flip y
+				y = this->height() - y - 1;
 
-			makeCurrent();
-			const auto& selection = this->select(x, y, w, h);
-			doneCurrent();
+				makeCurrent();
+				const auto& selection = this->select(x, y, w, h);
+				doneCurrent();
+			}
 		}
 
+		//Primitive selection
+		if (this->getSelectionMode() == RenderWindow::PRIMITIVE_MODE)
+		{
+			auto camera = this->getCamera();
 
-		auto camera = this->getCamera();
+			mButtonState = QButtonState::QBUTTON_UP;
 
-		mButtonState = QButtonState::QBUTTON_UP;
-
-		PMouseEvent mouseEvent;
-		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
-		mouseEvent.buttonType = mappingMouseButton(event);
-		mouseEvent.actionType = PActionType::AT_RELEASE;
-		mouseEvent.mods = mappingModifierBits(event->modifiers());
-		mouseEvent.camera = camera;
-		mouseEvent.x = (float)event->x();
-		mouseEvent.y = (float)event->y();
+			PMouseEvent mouseEvent;
+			mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
+			mouseEvent.buttonType = mappingMouseButton(event);
+			mouseEvent.actionType = PActionType::AT_RELEASE;
+			mouseEvent.mods = mappingModifierBits(event->modifiers());
+			mouseEvent.camera = camera;
+			mouseEvent.x = (float)event->x();
+			mouseEvent.y = (float)event->y();
 
 
+			auto activeScene = SceneGraphFactory::instance()->active();
 
-		auto activeScene = SceneGraphFactory::instance()->active();
+			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
 
-		activeScene->onMouseEvent(mouseEvent);
-
-		mImWindow.mouseReleaseEvent(mouseEvent);
+			mImWindow.mouseReleaseEvent(mouseEvent);
+		}
 
 		updateGrpahicsContext();
 	}
@@ -367,20 +374,24 @@ namespace dyno
 			camera->translateToPoint(event->x(), event->y());
 		}
 
-		PMouseEvent mouseEvent;
-		mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
-		mouseEvent.buttonType = mappingMouseButton(event);
-		mouseEvent.actionType = PActionType::AT_REPEAT;
-		mouseEvent.mods = mappingModifierBits(event->modifiers());
-		mouseEvent.camera = camera;
-		mouseEvent.x = (float)event->x();
-		mouseEvent.y = (float)event->y();
+		if (this->getSelectionMode() == RenderWindow::PRIMITIVE_MODE)
+		{
+			PMouseEvent mouseEvent;
+			mouseEvent.ray = camera->castRayInWorldSpace((float)event->x(), (float)event->y());
+			mouseEvent.buttonType = mappingMouseButton(event);
+			mouseEvent.actionType = PActionType::AT_REPEAT;
+			mouseEvent.mods = mappingModifierBits(event->modifiers());
+			mouseEvent.camera = camera;
+			mouseEvent.x = (float)event->x();
+			mouseEvent.y = (float)event->y();
 
-		auto activeScene = SceneGraphFactory::instance()->active();
+			auto activeScene = SceneGraphFactory::instance()->active();
 
-		activeScene->onMouseEvent(mouseEvent);
+			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
 
-		mImWindow.mouseMoveEvent(mouseEvent);
+			//To draw a selected region
+			mImWindow.mouseMoveEvent(mouseEvent);
+		}
 
 		updateGrpahicsContext();
 	}

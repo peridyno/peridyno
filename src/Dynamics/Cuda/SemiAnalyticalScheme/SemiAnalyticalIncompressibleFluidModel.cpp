@@ -43,8 +43,9 @@ namespace dyno {
 		m_nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		m_smoothing_length.connect(m_nbrQueryTri->inRadius());
 		this->m_particle_position.connect(m_nbrQueryTri->inPosition());
-		this->m_triangle_vertex.connect(m_nbrQueryTri->inTriPosition());
-		this->m_triangle_index.connect(m_nbrQueryTri->inTriangles());
+// 		this->m_triangle_vertex.connect(m_nbrQueryTri->inTriPosition());
+// 		this->m_triangle_index.connect(m_nbrQueryTri->inTriangles());
+		this->inTriangleSet()->connect(m_nbrQueryTri->inTriangleSet());
 
 		//m_nbrQueryTri->initialize();
 
@@ -64,8 +65,9 @@ namespace dyno {
 		m_meshCollision = std::make_shared<TriangularMeshConstraint<TDataType>>();
 		this->m_particle_position.connect(m_meshCollision->inPosition());
 		this->m_particle_velocity.connect(m_meshCollision->inVelocity());
-		this->m_triangle_vertex.connect(m_meshCollision->inTriangleVertex());
-		this->m_triangle_index.connect(m_meshCollision->inTriangleIndex());
+// 		this->m_triangle_vertex.connect(m_meshCollision->inTriangleVertex());
+// 		this->m_triangle_index.connect(m_meshCollision->inTriangleIndex());
+		this->inTriangleSet()->connect(m_meshCollision->inTriangleSet());
 		m_nbrQueryTri->outNeighborIds()->connect(m_meshCollision->inTriangleNeighborIds());
 		//pReduce = Reduction<Real>::Create(m_velocity_mod.size());
 
@@ -123,15 +125,15 @@ namespace dyno {
 
 		m_integrator->integrate();
 
-		m_nbrQueryPoint->compute();
+		m_nbrQueryPoint->update();
 
-		m_nbrQueryTri->compute();
+		m_nbrQueryTri->update();
 
 		m_meshCollision->update();
 
-		m_visModule->constrain();
+		m_visModule->update();
 
-		m_pbdModule->constrain();
+		m_pbdModule->update();
 
 		m_integrator->end();
 	}

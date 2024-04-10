@@ -67,46 +67,6 @@ namespace dyno
 		mNodeQueue.clear();
 	}
 
-	bool SceneGraph::initialize()
-	{
-		if (mInitialized)
-		{
-			return true;
-		}
-		//TODO: check initialization
-// 		if (mRoot == nullptr)
-// 		{
-// 			return false;
-// 		}
-
-		class InitAct : public Action
-		{
-		public:
-			void process(Node* node) override {
-				node->initialize();
-
-				auto& list = node->getModuleList();
-				std::list<std::shared_ptr<Module>>::iterator iter = list.begin();
-				for (; iter != list.end(); iter++)
-				{
-					(*iter)->initialize();
-				}
-
-				node->graphicsPipeline()->update();
-			}
-		};
-
-		this->traverseForward<InitAct>();
-		mInitialized = true;
-
-		return mInitialized;
-	}
-
-	void SceneGraph::invalid()
-	{
-		mInitialized = false;
-	}
-
 	void SceneGraph::advance(float dt)
 	{
 		class AdvanceAct : public Action
@@ -289,9 +249,6 @@ namespace dyno
 					return;
 				}
 
-				node->stateFrameNumber()->setValue(0);
-				node->stateElapsedTime()->setValue(0.0f);
-
 				node->reset();
 			}
 		};
@@ -399,6 +356,30 @@ namespace dyno
 		MouseEventAct eventAct(event);
 
 		this->traverseForward(&eventAct);
+	}
+
+	void SceneGraph::onMouseEvent(PMouseEvent event, std::shared_ptr<Node> node)
+	{
+		if (node == nullptr || !node->isVisible())
+			return;
+
+		for (auto iter : node->animationPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<MouseInputModule*>(iter.get());
+			if (m)
+			{
+				m->enqueueEvent(event);
+			}
+		}
+
+		for (auto iter : node->graphicsPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<MouseInputModule*>(iter.get());
+			if (m)
+			{
+				m->enqueueEvent(event);
+			}
+		}
 	}
 
 	void SceneGraph::onKeyboardEvent(PKeyboardEvent event)

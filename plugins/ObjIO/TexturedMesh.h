@@ -5,9 +5,7 @@
 #include "FilePath.h"
 
 #include "Topology/TriangleSet.h"
-
-#include "GraphicsObject/Shape.h"
-#include "GraphicsObject/Material.h"
+#include "Topology/TextureMesh.h"
 
 namespace dyno
 {
@@ -23,19 +21,14 @@ namespace dyno
 
 		DEF_VAR(FilePath, FileName, "", "The full obj file name");
 
-		// additional data
-		DEF_ARRAY_STATE(Vec3f, Vertex, DeviceType::GPU, "");
-		DEF_ARRAY_STATE(Vec3f, Normal, DeviceType::GPU, "");
-		DEF_ARRAY_STATE(Vec2f, TexCoord, DeviceType::GPU, "");
-
-		DEF_INSTANCES_STATE(Shape, Shape, "");
-		DEF_INSTANCES_STATE(Material, Material, "");
+		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
 	protected:
 		void resetStates() override;
 
 	private:
 		void callbackLoadFile();
+		void callbackTransform();
 
 		DArray<Vec3f> mInitialVertex;
 		DArray<Vec3f> mInitialNormal;

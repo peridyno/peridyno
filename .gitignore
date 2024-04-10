@@ -28,7 +28,6 @@ build/*
 buildDebug/*
 .vscode/*
 
-*.bin
 *.ipch
 /docs
 /console_log.txt

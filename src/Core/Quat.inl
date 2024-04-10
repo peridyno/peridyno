@@ -203,7 +203,9 @@ namespace dyno
 		// pitch (y-axis rotation)
 		Real sinp = 2 * (w * y - z * x);
 		if (glm::abs(sinp) >= 1)
+		{
 			pitch = sinp > 0 ? Real(M_PI / 2) : -Real(M_PI / 2); // use 90 degrees if out of range
+		}
 		else
 			pitch = glm::asin(sinp);
 
@@ -212,6 +214,7 @@ namespace dyno
 		Real cosy_cosp = 1 - 2 * (y * y + z * z);
 		yaw = atan2(siny_cosp, cosy_cosp);
 	}
+
 
 	template <typename Real>
 	DYN_FUNC Real Quat<Real>::angle() const
@@ -222,7 +225,10 @@ namespace dyno
 	template <typename Real>
 	DYN_FUNC Real Quat<Real>::angle(const Quat<Real>& quat) const
 	{
-		return glm::acos(dot(quat)) * (Real)(2);
+		Real dot_product = dot(quat);
+
+		dot_product = glm::clamp(dot_product, (Real)-1, (Real)1);
+		return glm::acos(dot_product) * (Real)(2);
 	}
 
 	template <typename Real>

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Xiaowei He
+ * Copyright 2024 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include "Object.h"
 #include "Platform.h"
 #include "GPUBuffer.h"
-#include "Material.h"
+
 #include "Topology/TriangleSet.h"
 #include "Matrix/SquareMatrix.h"
 

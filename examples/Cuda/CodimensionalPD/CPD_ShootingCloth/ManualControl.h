@@ -1,5 +1,5 @@
 #pragma once
-#include <Module/CustomModule.h>
+#include <Module/ComputeModule.h>
 #include <Collision/Attribute.h>
 
 #include <map>
@@ -7,7 +7,7 @@
 namespace dyno {
 	
 	template<typename TDataType>
-	class ManualControl : public CustomModule
+	class ManualControl : public ComputeModule
 	{
 		DECLARE_TCLASS(ManualControl, TDataType)
 	public:
@@ -32,7 +32,7 @@ namespace dyno {
 		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "");
 	
 	protected:
-		void updateImpl() override { this->begin(); this->applyCustomBehavior(); };
+		void compute() override { this->begin(); this->applyCustomBehavior(); };
 	};
 
 }

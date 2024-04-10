@@ -71,6 +71,9 @@ namespace dyno
 
 		SemiAnalyticalIncompressibleFluidModel();
 
+	public:
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+
 		/**
 		 * advance the scene node in time
 		 *

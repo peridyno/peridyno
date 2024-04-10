@@ -41,27 +41,24 @@ namespace dyno
 
 	IMPLEMENT_CLASS(TexturedMesh)
 
-		TexturedMesh::TexturedMesh()
+	TexturedMesh::TexturedMesh()
 	{
-		this->stateVertex()->promoteOuput();
-		this->stateNormal()->promoteOuput();
-		this->stateTexCoord()->promoteOuput();
-		this->stateShapes()->promoteOuput();
-		this->stateMaterials()->promoteOuput();
+		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto callbackLoadFile = std::make_shared<FCallBackFunc>(std::bind(&TexturedMesh::callbackLoadFile, this));
 
 		this->varFileName()->attach(callbackLoadFile);
 
+		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&TexturedMesh::callbackTransform, this));
+		this->varLocation()->attach(callbackTransform);
+		this->varRotation()->attach(callbackTransform);
+		this->varScale()->attach(callbackTransform);
+
 		auto render = this->graphicsPipeline()->createModule<GLPhotorealisticRender>();
-
-		this->stateVertex()->connect(render->inVertex());
-		this->stateNormal()->connect(render->inNormal());
-		this->stateTexCoord()->connect(render->inTexCoord());
-
-		this->stateShapes()->connect(render->inShapes());
-		this->stateMaterials()->connect(render->inMaterials());
+		this->stateTextureMesh()->connect(render->inTextureMesh());
 		this->graphicsPipeline()->pushModule(render);
+
+		this->stateTextureMesh()->promoteOuput();
 	}
 
 	TexturedMesh::~TexturedMesh()
@@ -73,32 +70,7 @@ namespace dyno
 
 	void TexturedMesh::resetStates()
 	{
-#ifdef CUDA_BACKEND
-		TriangleSet<DataType3f> ts;
-#endif
 
-#ifdef VK_BACKEND
-		TriangleSet ps;
-#endif
-		ts.setPoints(mInitialVertex);
-		ts.setNormals(mInitialNormal);
-
-		// apply transform to vertices
-		{
-			auto t = this->varLocation()->getValue();
-			auto q = this->computeQuaternion();
-			auto s = this->varScale()->getValue();
-
-#ifdef CUDA_BACKEND
-			ts.scale(s);
-			ts.rotate(q);
-			ts.translate(t);
-#endif
-		}
-
-		this->stateVertex()->assign(ts.getPoints());
-		this->stateNormal()->assign(ts.getVertexNormals());
-		this->stateTexCoord()->assign(mInitialTexCoord);
 	}
 
 	void TexturedMesh::callbackLoadFile()
@@ -143,31 +115,39 @@ namespace dyno
 			texCoords.push_back({ attrib.texcoords[i], attrib.texcoords[i + 1] });
 		}
 
-		this->stateShapes()->resize(shapes.size());
-		auto& statShapes = this->stateShapes()->getData();
+		mInitialVertex.assign(vertices);
+		mInitialNormal.assign(normals);
+		mInitialTexCoord.assign(texCoords);
+
+		vertices.clear();
+		normals.clear();
+		texCoords.clear();
+
 
 		// load texture...
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
 
-		this->stateMaterials()->resize(materials.size());
-		auto& sMats = this->stateMaterials()->getData();
-
 		// Load materials
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
+
+		auto& tMats = texMesh->materials();
+		tMats.resize(materials.size());
+
 		uint mId = 0;
 		for (const auto& mtl : materials) {
-			sMats[mId] = std::make_shared<Material>();
-			sMats[mId]->ambient = { mtl.ambient[0], mtl.ambient[1], mtl.ambient[2] };
-			sMats[mId]->diffuse = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
-			sMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
-			sMats[mId]->roughness = 1.0f - mtl.shininess;
+			tMats[mId] = std::make_shared<Material>();
+			tMats[mId]->ambient = { mtl.ambient[0], mtl.ambient[1], mtl.ambient[2] };
+			tMats[mId]->diffuse = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
+			tMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
+			tMats[mId]->roughness = 1.0f - mtl.shininess;
 			if (!mtl.diffuse_texname.empty())
 			{
 				auto tex_path = (root / mtl.diffuse_texname).string();
 
 				if (loadImage(tex_path.c_str(), texture))
 				{
-					sMats[mId]->texColor.assign(texture);
+					tMats[mId]->texColor.assign(texture);
 				}
 			}
 			if (!mtl.bump_texname.empty())
@@ -176,27 +156,31 @@ namespace dyno
 
 				if (loadImage(tex_path.c_str(), texture))
 				{
-					sMats[mId]->texBump.assign(texture);
+					tMats[mId]->texBump.assign(texture);
 					auto texOpt = mtl.bump_texopt;
-					sMats[mId]->bumpScale = texOpt.bump_multiplier;
+					tMats[mId]->bumpScale = texOpt.bump_multiplier;
 				}
 			}
 
 			mId++;
 		}
 
+
+		auto& tShapes = texMesh->shapes();
+		tShapes.resize(shapes.size());
+
 		uint sId = 0;
 		for (const tinyobj::shape_t& shape : shapes) {
 			// only load triangle mesh...
 			const auto& mesh = shape.mesh;
-			statShapes[sId] = std::make_shared<Shape>();
-			std::vector<dyno::TopologyModule::Triangle> vertexIndex;
-			std::vector<dyno::TopologyModule::Triangle> normalIndex;
-			std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
+			tShapes[sId] = std::make_shared<Shape>();
+			std::vector<TopologyModule::Triangle> vertexIndex;
+			std::vector<TopologyModule::Triangle> normalIndex;
+			std::vector<TopologyModule::Triangle> texCoordIndex;
 
 			if (mesh.material_ids.size() > 0)
 			{
-				statShapes[sId]->material = sMats[mesh.material_ids[0]];
+				tShapes[sId]->material = tMats[mesh.material_ids[0]];
 			}
 
 			for (int i = 0; i < mesh.indices.size(); i += 3) {
@@ -204,17 +188,13 @@ namespace dyno
 				auto idx1 = mesh.indices[i + 1];
 				auto idx2 = mesh.indices[i + 2];
 
-				pIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
-				nIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
-				tIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
-
 				vertexIndex.push_back({ idx0.vertex_index, idx1.vertex_index, idx2.vertex_index });
 				normalIndex.push_back({ idx0.normal_index, idx1.normal_index, idx2.normal_index });
 				texCoordIndex.push_back({ idx0.texcoord_index, idx1.texcoord_index, idx2.texcoord_index });
 			}
-			statShapes[sId]->vertexIndex.assign(vertexIndex);
-			statShapes[sId]->normalIndex.assign(normalIndex);
-			statShapes[sId]->texCoordIndex.assign(texCoordIndex);
+			tShapes[sId]->vertexIndex.assign(vertexIndex);
+			tShapes[sId]->normalIndex.assign(normalIndex);
+			tShapes[sId]->texCoordIndex.assign(texCoordIndex);
 
 			vertexIndex.clear();
 			normalIndex.clear();
@@ -223,13 +203,45 @@ namespace dyno
 			sId++;
 		}
 
-		mInitialVertex.assign(vertices);
-		mInitialNormal.assign(normals);
-		mInitialTexCoord.assign(texCoords);
 
-		vertices.clear();
-		normals.clear();
-		texCoords.clear();
+		//reset the transform
+		this->varLocation()->setValue(Vec3f(0));
+		this->varRotation()->setValue(Vec3f(0));
+		this->varScale()->setValue(Vec3f(1));
+	}
+
+	void TexturedMesh::callbackTransform()
+	{
+#ifdef CUDA_BACKEND
+		TriangleSet<DataType3f> ts;
+#endif
+
+#ifdef VK_BACKEND
+		TriangleSet ps;
+#endif
+		ts.setPoints(mInitialVertex);
+		ts.setNormals(mInitialNormal);
+
+		// apply transform to vertices
+		{
+			auto t = this->varLocation()->getValue();
+			auto q = this->computeQuaternion();
+			auto s = this->varScale()->getValue();
+
+#ifdef CUDA_BACKEND
+			ts.scale(s);
+			ts.rotate(q);
+			ts.translate(t);
+#endif
+		}
+
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
+
+		texMesh->vertices().assign(ts.getPoints());
+		texMesh->normals().assign(ts.getVertexNormals());
+		texMesh->texCoords().assign(mInitialTexCoord);
+
+		ts.clear();
 	}
 
 }

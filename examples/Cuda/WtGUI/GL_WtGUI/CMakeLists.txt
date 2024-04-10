@@ -1,0 +1,3 @@
+set(LIB_DEPENDENCY
+    WtGUI)
+add_example(GL_WtGUI WtGUI LIB_DEPENDENCY)

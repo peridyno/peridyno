@@ -216,13 +216,21 @@ namespace dyno
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
+		// resize internal framebuffer
 		GLint samples;
 		glGetFramebufferParameteriv(GL_FRAMEBUFFER, GL_SAMPLES, &samples);
-		if (bEnableFXAA)
-			samples = 1;
-
-		// update framebuffer size
-		resizeFramebuffer(rparams.width, rparams.height, samples);
+		if (bEnableFXAA) {
+			// if FXAA is enabled, we use 1 spp internal framebuffer
+			resizeFramebuffer(rparams.width, rparams.height, 1);
+		}
+		else if (samples > 0) {
+			// external framebuffer MSAA is enabled,
+			resizeFramebuffer(rparams.width, rparams.height, samples);
+		}
+		else {
+			// target framebuffer is non-multisample, and FXAA is disabled...
+			resizeFramebuffer(rparams.width, rparams.height, mInternalMSAASamples);
+		}
 
 		// update shadow map
 		mShadowMap->update(scene, rparams);
@@ -350,7 +358,7 @@ namespace dyno
 				glBlitFramebuffer(
 					0, 0, rparams.width, rparams.height,
 					0, 0, rparams.width, rparams.height,
-					GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+					GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			}
 		}
 

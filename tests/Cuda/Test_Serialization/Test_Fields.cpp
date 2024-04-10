@@ -7,7 +7,7 @@ using namespace dyno;
 TEST(Fields, serialize)
 {
 	FVar<FilePath> varPath;
-	varPath.setValue("Test");
+	varPath.setValue(FilePath("Test"));
 	EXPECT_EQ(varPath.serialize(), std::string("Test"));
 
 	FVar<bool> varBool;

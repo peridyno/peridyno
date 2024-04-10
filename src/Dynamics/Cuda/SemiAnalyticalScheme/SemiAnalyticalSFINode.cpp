@@ -14,6 +14,8 @@
 
 #include "SemiAnalyticalParticleShifting.h"
 
+#include "TriangularMeshConstraint.h"
+
 #include "Auxiliary/DataSource.h"
 
 namespace dyno
@@ -25,8 +27,14 @@ namespace dyno
 		: Node()
 	{
 		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
+		smoothingLength->setName("Smoothing Length");
 		smoothingLength->varValue()->setValue(Real(0.012));
 		this->animationPipeline()->pushModule(smoothingLength);
+
+		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
+		samplingDistance->setName("Sampling Distance");
+		samplingDistance->varValue()->setValue(Real(0.005));
+		this->animationPipeline()->pushModule(samplingDistance);
 
 		//integrator
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
@@ -46,8 +54,7 @@ namespace dyno
 		auto nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		smoothingLength->outFloating()->connect(nbrQueryTri->inRadius());
 		this->statePosition()->connect(nbrQueryTri->inPosition());
-		this->stateTriangleVertex()->connect(nbrQueryTri->inTriPosition());
-		this->stateTriangleIndex()->connect(nbrQueryTri->inTriangles());
+		this->inTriangleSet()->connect(nbrQueryTri->inTriangleSet());
 		this->animationPipeline()->pushModule(nbrQueryTri);
 
 		//mesh collision
@@ -55,8 +62,9 @@ namespace dyno
 		this->stateTimeStep()->connect(meshCollision->inTimeStep());
 		this->statePosition()->connect(meshCollision->inPosition());
 		this->stateVelocity()->connect(meshCollision->inVelocity());
-		this->stateTriangleVertex()->connect(meshCollision->inTriangleVertex());
-		this->stateTriangleIndex()->connect(meshCollision->inTriangleIndex());
+// 		this->stateTriangleVertex()->connect(meshCollision->inTriangleVertex());
+// 		this->stateTriangleIndex()->connect(meshCollision->inTriangleIndex());
+		this->inTriangleSet()->connect(meshCollision->inTriangleSet());
 		nbrQueryTri->outNeighborIds()->connect(meshCollision->inTriangleNeighborIds());
 		this->animationPipeline()->pushModule(meshCollision);
 
@@ -72,12 +80,15 @@ namespace dyno
 
 		//particle shifting
 		auto pshiftModule = std::make_shared<SemiAnalyticalParticleShifting<TDataType>>();
+		samplingDistance->outFloating()->connect(pshiftModule->inSamplingDistance());
+		smoothingLength->outFloating()->connect(pshiftModule->inSmoothingLength());
 		this->stateTimeStep()->connect(pshiftModule->inTimeStep());
 		this->statePosition()->connect(pshiftModule->inPosition());
 		this->stateVelocity()->connect(pshiftModule->inVelocity());
 		nbrQuery->outNeighborIds()->connect(pshiftModule->inNeighborIds());
-		this->stateTriangleVertex()->connect(pshiftModule->inTriangleVer());
-		this->stateTriangleIndex()->connect(pshiftModule->inTriangleInd());
+		this->inTriangleSet()->connect(pshiftModule->inTriangleSet());
+// 		this->stateTriangleVertex()->connect(pshiftModule->inTriangleVer());
+// 		this->stateTriangleIndex()->connect(pshiftModule->inTriangleInd());
 		this->stateAttribute()->connect(pshiftModule->inAttribute());
 		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
 		this->animationPipeline()->pushModule(pshiftModule);
@@ -115,8 +126,9 @@ namespace dyno
 			this->statePosition()->connect(pbd->inPosition());
 			this->stateVelocity()->connect(pbd->inVelocity());
 			this->stateForceDensity()->connect(pbd->inForce());
-			this->stateTriangleVertex()->connect(pbd->inTriangleVertex());
-			this->stateTriangleIndex()->connect(pbd->inTriangleIndex());
+// 			this->stateTriangleVertex()->connect(pbd->inTriangleVertex());
+// 			this->stateTriangleIndex()->connect(pbd->inTriangleIndex());
+			this->inTriangleSet()->connect(pbd->inTriangleSet());
 			this->animationPipeline()->pushModule(pbd);
 		}
 
@@ -155,9 +167,9 @@ namespace dyno
 		
 		SetupAttributesForSFI(allattrs);
 
-		auto triSet = this->inTriangleSet()->getDataPtr();
-		this->stateTriangleVertex()->assign(triSet->getPoints());
-		this->stateTriangleIndex()->assign(triSet->getTriangles());
+// 		auto triSet = this->inTriangleSet()->getDataPtr();
+// 		this->stateTriangleVertex()->assign(triSet->getPoints());
+// 		this->stateTriangleIndex()->assign(triSet->getTriangles());
 	}
 
 	template<typename TDataType>
@@ -209,9 +221,9 @@ namespace dyno
 		this->stateForceDensity()->reset();
 		SetupAttributesForSFI(new_atti);
 		
-		auto triSet = this->inTriangleSet()->getDataPtr();
-		this->stateTriangleVertex()->assign(triSet->getPoints());
-		this->stateTriangleIndex()->assign(triSet->getTriangles());
+// 		auto triSet = this->inTriangleSet()->getDataPtr();
+// 		this->stateTriangleVertex()->assign(triSet->getPoints());
+// 		this->stateTriangleIndex()->assign(triSet->getTriangles());
 	}
 
 	template<typename TDataType>

@@ -3,7 +3,7 @@
 #include <QVBoxLayout>
 
 #include "Field.h"
-#include "QmDoubleSpinBox.h"
+#include "QPiecewiseDoubleSpinBox.h"
 
 
 namespace dyno
@@ -19,7 +19,7 @@ namespace dyno
 
 		this->setLayout(layout);
 
-		toggleLabel* name = new toggleLabel();
+		QToggleLabel* name = new QToggleLabel();
 		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
 		QFontMetrics fontMetrics(name->font());
@@ -28,15 +28,15 @@ namespace dyno
 		//Set label tips
 		name->setToolTip(str);
 
-		spinner1 = new mDoubleSpinBox;
+		spinner1 = new QPiecewiseDoubleSpinBox;
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(field->getMin(), field->getMax());
 
-		spinner2 = new mDoubleSpinBox;
+		spinner2 = new QPiecewiseDoubleSpinBox;
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(field->getMin(), field->getMax());
 
-		spinner3 = new mDoubleSpinBox;
+		spinner3 = new QPiecewiseDoubleSpinBox;
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(field->getMin(), field->getMax());
 
@@ -97,7 +97,7 @@ namespace dyno
 
 		this->setLayout(layout);
 
-		toggleLabel* nameLabel = new toggleLabel();
+		QToggleLabel* nameLabel = new QToggleLabel();
 		
 		nameLabel->setFixedSize(100, 18);
 		QFontMetrics fontMetrics(nameLabel->font());
@@ -106,15 +106,15 @@ namespace dyno
 		//Set label tips
 		nameLabel->setToolTip(name);
 
-		spinner1 = new mDoubleSpinBox;
+		spinner1 = new QPiecewiseDoubleSpinBox;
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(-100000, 100000);
 
-		spinner2 = new mDoubleSpinBox;
+		spinner2 = new QPiecewiseDoubleSpinBox;
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(-100000, 100000);
 
-		spinner3 = new mDoubleSpinBox;
+		spinner3 = new QPiecewiseDoubleSpinBox;
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(-100000, 100000);
 

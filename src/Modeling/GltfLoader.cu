@@ -1,7 +1,5 @@
 #include "GltfLoader.h"
 
-
-
 #include <GLPhotorealisticRender.h>
 
 namespace dyno
@@ -39,6 +37,7 @@ namespace dyno
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varChanged, this));
 
 		this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
+		this->stateShapeCenter()->setDataPtr(std::make_shared<PointSet<DataType3f>>());
 
 		this->varImportAnimation()->attach(callback);
 		this->varFileName()->attach(callback);
@@ -49,19 +48,14 @@ namespace dyno
 		this->varScale()->attach(callbackTransform);
 		this->varRotation()->attach(callbackTransform);
 
-		this->varLocation()->attach(callback);
-		this->varScale()->attach(callback);
-		this->varRotation()->attach(callback);
+		//this->varLocation()->attach(callback);
+		//this->varScale()->attach(callback);
+		//this->varRotation()->attach(callback);
 
+		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto render = std::make_shared<GLPhotorealisticRender>();
-
-		this->stateVertex()->connect(render->inVertex());
-		this->stateNormal()->connect(render->inNormal());
-		this->stateTexCoord_0()->connect(render->inTexCoord());
-
-		this->stateShapes()->connect(render->inShapes());
-		this->stateMaterials()->connect(render->inMaterials());
+		this->stateTextureMesh()->connect(render->inTextureMesh());
 		this->graphicsPipeline()->pushModule(render);
 
 		//Joint Render
@@ -78,19 +72,25 @@ namespace dyno
 		jointLineRender = std::make_shared<GLWireframeVisualModule>();
 		jointLineRender->varBaseColor()->setValue(Color(0, 1, 0));
 		jointLineRender->setVisible(true);
-		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 2);
+		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 3);
 		jointLineRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::EEdgeMode::CYLINDER);
 		this->stateJointSet()->connect(jointLineRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(jointLineRender);
 
-		this->stateVertex()->promoteOuput();
-		this->stateNormal()->promoteOuput();
-		this->stateShapes()->promoteOuput();
-		this->stateMaterials()->promoteOuput();
-		this->stateShapes()->promoteOuput();
+		auto glShapeCenter = std::make_shared<GLPointVisualModule>();
+		glShapeCenter->setColor(Color(1.0f, 1.0f, 0.0f));
+		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue()*8);
+		glShapeCenter->setVisible(true);
+		this->stateShapeCenter()->connect(glShapeCenter->inPointSet());
+		this->graphicsPipeline()->pushModule(glShapeCenter);
 
 
 
+		this->stateTextureMesh()->promoteOuput();
+
+
+
+		this->allowExported(true);
 
 	}
 
@@ -107,7 +107,7 @@ namespace dyno
 		printf("!!!!!!!!!!!!!!!!!    Import GLTF   !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n");
 
 		this->InitializationData();
-		this->updateTransform();
+
 
 		using namespace tinygltf;
 
@@ -202,14 +202,24 @@ namespace dyno
 		// Joint import from root
 		//joint
 
-		std::vector<std::string> joint_name;
 		std::vector<std::vector<int>> joint_child;
 
 		//get Local Transform T S R M
-		this->getJointsTransformData(all_Joints, joint_name, joint_child);
+		this->getJointsTransformData(all_Joints, joint_Name, joint_child);
 
 		//get InverseBindMatrix (Global)
 		this->buildInverseBindMatrices(all_Joints);	//依赖层级
+
+		std::vector<Mat4f> localMatrix;
+		localMatrix.resize(all_Joints.size());
+		for (size_t k = 0; k < all_Joints.size(); k++)
+		{
+			localMatrix[k] = joint_matrix[k];
+		}
+		this->stateJointLocalMatrix()->assign(localMatrix);
+
+
+
 
 		// get joint World Location	
 		printf("************  Set Joint  ************\n");
@@ -255,22 +265,31 @@ namespace dyno
 			shapeNum += meshId.primitives.size();
 		}
 
-		//shape
-		this->stateShapes()->resize(shapeNum);
-		auto& statShapes = this->stateShapes()->getData();
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
 
+		auto& reMats = texMesh->materials();
+		auto& reShapes = texMesh->shapes();
+
+		reShapes.resize(shapeNum);
+
+
+
+		//shape
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
 
-		if(model.materials.size())
-			this->stateMaterials()->resize(model.materials.size());
-		else
-			this->stateMaterials()->resize(shapeNum);
-		auto& sMats = this->stateMaterials()->getData();
+		if (model.materials.size()) {
+			reMats.resize(model.materials.size());
+		}
+		else {
+			reMats.resize(shapeNum);
+		}
 
 		std::vector<tinygltf::Material>& materials = model.materials;
 		std::vector<Texture>& textures = model.textures;
 		std::vector<Image>& images = model.images;
+
+		std::vector<Coord> shapeCenter;
 
 		int primitive_PointOffest;
 		int currentShape = 0;
@@ -296,17 +315,18 @@ namespace dyno
 
 
 				//Set Vertices
-				this->getCoordByAttributeName(model, primitive, std::string("POSITION"), vertices);
+				this->getVec3fByAttributeName(model, primitive, std::string("POSITION"), vertices);
+				
 
 				//Set Normal
-				this->getCoordByAttributeName(model, primitive, std::string("NORMAL"), normals);
+				this->getVec3fByAttributeName(model, primitive, std::string("NORMAL"), normals);
 
 				//Set TexCoord
 
 
-				this->getCoordByAttributeName(model, primitive, std::string("TEXCOORD_0"), texCoord0);
+				this->getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_0"), texCoord0);
 
-				this->getCoordByAttributeName(model, primitive, std::string("TEXCOORD_1"), texCoord1);
+				this->getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_1"), texCoord1);
 
 
 				//Set Triangles
@@ -323,13 +343,15 @@ namespace dyno
 					normalIndex = (tempTriangles);
 					texCoordIndex = (tempTriangles);
 
-					statShapes[currentShape] = std::make_shared<Shape>();
+					reShapes[currentShape] = std::make_shared<Shape>();
 
+					reShapes[currentShape]->vertexIndex.assign(vertexIndex);
+					reShapes[currentShape]->normalIndex.assign(normalIndex);
+					reShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
 
-					statShapes[currentShape]->vertexIndex.assign(vertexIndex);
-					statShapes[currentShape]->normalIndex.assign(normalIndex);
-					statShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
+					getBoundingBoxByName(primitive, std::string("POSITION"), reShapes[currentShape]->boundingBox, reShapes[currentShape]->boundingTransform);//,Transform3f& transform
 
+					shapeCenter.push_back(reShapes[currentShape]->boundingTransform.translation());
 
 					int matId = primitive.material;
 					if (matId != -1)// == -1 会出问题
@@ -344,14 +366,12 @@ namespace dyno
 						auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
 						auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
 
-
-
-						sMats[matId] = std::make_shared<Material>();
-						sMats[matId]->ambient = { 0,0,0 };
-						sMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
-						sMats[matId]->alpha = color[3];
-						sMats[matId]->specular = Vec3f(1 - roughness);
-						sMats[matId]->roughness = roughness;
+						reMats[matId] = std::make_shared<Material>();
+						reMats[matId]->ambient = { 0,0,0 };
+						reMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
+						reMats[matId]->alpha = color[3];
+						reMats[matId]->specular = Vec3f(1 - roughness);
+						reMats[matId]->roughness = roughness;
 
 
 						std::string colorUri = getTexUri(textures, images, colorTexId);
@@ -363,7 +383,7 @@ namespace dyno
 
 							if (loadImage(colorUri.c_str(), texture))
 							{
-								sMats[matId]->texColor.assign(texture);
+								reMats[matId]->texColor.assign(texture);
 							}
 						}
 
@@ -378,23 +398,24 @@ namespace dyno
 
 							if (loadImage(bumpUri.c_str(), texture))
 							{
-								sMats[matId]->texBump.assign(texture);
-								sMats[matId]->bumpScale = scale;
+								reMats[matId]->texBump.assign(texture);
+								reMats[matId]->bumpScale = scale;
 							}
 						}
 
-						statShapes[currentShape]->material = sMats[matId];
+						reShapes[currentShape]->material = reMats[matId];
 
 					}
 					else 
 					{
-						sMats[currentShape] = std::make_shared<Material>();
-						sMats[currentShape]->ambient = { 0,0,0 };
-						sMats[currentShape]->diffuse = Vec3f(0.5, 0.5, 0.5);
-						sMats[currentShape]->alpha = 1;
-						sMats[currentShape]->specular = Vec3f(1,1,1);
-						sMats[currentShape]->roughness = 0.5;
-						statShapes[currentShape]->material = sMats[currentShape];
+						reMats[currentShape] = std::make_shared<Material>();
+						reMats[currentShape]->ambient = { 0,0,0 };
+						reMats[currentShape]->diffuse = Vec3f(0.5, 0.5, 0.5);
+						reMats[currentShape]->alpha = 1;
+						reMats[currentShape]->specular = Vec3f(1, 1, 1);
+						reMats[currentShape]->roughness = 0.5;
+
+						reShapes[currentShape]->material = reMats[currentShape];
 					}
 
 
@@ -405,6 +426,7 @@ namespace dyno
 				currentShape++;
 
 			}
+			this->stateShapeCenter()->getDataPtr()->setPoints(shapeCenter);
 		}
 
 
@@ -462,11 +484,9 @@ namespace dyno
 		clock_t start_time = clock();
 
 		//变换顶点
-		//std::vector<Coord> aniVertices = vertices;
 
-		this->stateVertex()->assign(vertices);
-		this->stateNormal()->assign(normals);
-
+		texMesh->vertices().assign(vertices);
+		texMesh->normals().assign(normals);
 
 		initialPosition.assign(vertices);
 		initialNormal.assign(normals);
@@ -478,6 +498,9 @@ namespace dyno
 			tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));// uv.v need flip
 		}
 		this->stateTexCoord_0()->assign(tempTexCoord);
+		texMesh->texCoords().assign(tempTexCoord);
+
+
 		tempTexCoord.clear();
 		for (auto uv1 : texCoord1)
 		{
@@ -505,12 +528,12 @@ namespace dyno
 			{
 				vertices[i] = RV(vertices[i] * vS + RV(vL));
 			}
-
-			this->stateVertex()->assign(vertices);
+			texMesh->vertices().assign(vertices);
 			initialPosition.assign(vertices);
 		}
 
-		updateAnimation(0);
+
+		this->updateTransform();
 
 	}
 
@@ -706,7 +729,7 @@ namespace dyno
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::getJointsTransformData(const std::vector<joint>& all_Joints,
-		std::vector<std::string>& joint_name,
+		std::map<joint,std::string>& joint_name,
 		std::vector<std::vector<int>>& joint_child
 	)
 	{
@@ -721,7 +744,7 @@ namespace dyno
 			std::vector<double>& matrix = model.nodes[jId].matrix;				//length must be 0 or 16
 			std::vector<double>& MorphTargetWeights = model.nodes[jId].weights;	//The weights of the instantiated Morph Target
 
-			joint_name.push_back(model.nodes[jId].name);
+			joint_name[jId] = model.nodes[jId].name;
 			joint_child.push_back(children);
 
 
@@ -786,7 +809,7 @@ namespace dyno
 
 	// ********************************** getVec3f By Attribute Name *************************//
 	template<typename TDataType>
-	void GltfLoader<TDataType>::getCoordByAttributeName(
+	void GltfLoader<TDataType>::getVec3fByAttributeName(
 		tinygltf::Model& model,
 		const tinygltf::Primitive& primitive,
 		const std::string& attributeName,
@@ -826,23 +849,59 @@ namespace dyno
 	}
 
 
+	template<typename TDataType>
+	void GltfLoader<TDataType>::getBoundingBoxByName(
+		const tinygltf::Primitive& primitive,
+		const std::string& attributeName,
+		TAlignedBox3D<Real>& bound,
+		Transform3f& transform
+	)
+	{
+		//assign Attributes for Points
+		std::map<std::string, int>::const_iterator iter;
+		iter = primitive.attributes.find(attributeName);
+
+		if (iter == primitive.attributes.end())
+		{
+			std::cout << attributeName << " : not found !!! \n";
+			return;
+		}
+
+		auto min = model.accessors[iter->second].maxValues;
+		auto max = model.accessors[iter->second].minValues;
+		if (min.size() != 3) 
+		{
+			std::cout << attributeName << " : not Vec3f !!! \n";
+			return;
+		}
+
+		Coord v0 = Coord(min[0], min[1], min[2]);
+		Coord v1 = Coord(max[0], max[1], max[2]);
+		bound = TAlignedBox3D<Real>(v0,v1);
+
+		Coord center = (v0 + v1) / 2;
+		transform = Transform3f(Vec3f(center),Mat3f::identityMatrix(),Vec3f(1));
+		printf("\nboundingMin: %f, %f, %f\n", v0[0], v0[1], v0[2]);
+		printf("\nboundingMax: %f, %f, %f\n", v1[0], v1[1], v1[2]);
+		printf("\nTransform: %f, %f, %f\n", center[0], center[1], center[2]);
+
+
+	}
+
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::getRealByIndex(tinygltf::Model& model, int index, std::vector<Real>& result)
 	{
 
-		// 获取指定索引处的实数值
 		const tinygltf::Accessor& accessor = model.accessors[index];
 		const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
 		const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
 
 
-		// 假设实数值是浮点数类型
 		if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
 		{
 			const float* dataPtr = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 
-			// 将实数值存储在vector中
 			for (size_t i = 0; i < accessor.count; ++i) {
 				result.push_back(static_cast<Real>(dataPtr[i]));
 			}
@@ -851,7 +910,6 @@ namespace dyno
 		{
 			const double* dataPtr = reinterpret_cast<const double*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 
-			// 将实数值存储在vector中
 			for (size_t i = 0; i < accessor.count; ++i) {
 				result.push_back(static_cast<Real>(dataPtr[i]));
 			}
@@ -867,7 +925,6 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::getVec3fByIndex(tinygltf::Model& model, int index, std::vector<Vec3f>& result)
 	{
-		// 获取指定索引处的实数值
 		const tinygltf::Accessor& accessor = model.accessors[index];
 		const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
 		const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
@@ -888,18 +945,14 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::getQuatByIndex(tinygltf::Model& model, int index, std::vector<Quat<float>>& result)
 	{
-
-		// 获取指定索引处的实数值
 		const tinygltf::Accessor& accessor = model.accessors[index];
 		const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
 		const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
-
 
 		if (accessor.type == TINYGLTF_TYPE_VEC4)
 		{
 			const float* dataPtr = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 
-			// 存储在vector中
 			for (size_t i = 0; i < accessor.count; ++i) {
 				result.push_back(Quat<float>(dataPtr[i * 4 + 0], dataPtr[i * 4 + 1], dataPtr[i * 4 + 2], dataPtr[i * 4 + 3]));
 			}
@@ -952,9 +1005,12 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateAnimation(int frameNumber)
 	{
+		auto mesh = this->stateTextureMesh()->getDataPtr();
 
 		this->updateAnimationMatrix(all_Joints, frameNumber); 
 		this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
+
+
 
 		//update Joints
 		cuExecute(all_Joints.size(),
@@ -966,10 +1022,10 @@ namespace dyno
 		);
 
 		//update Points
-		cuExecute(this->stateVertex()->getData().size(),
+		cuExecute(mesh->vertices().size(),
 			PointsAnimation,
 			initialPosition,
-			this->stateVertex()->getData(),
+			mesh->vertices(),
 			this->stateJointInverseBindMatrix()->getData(),
 			this->stateJointWorldMatrix()->getData(),
 
@@ -977,14 +1033,15 @@ namespace dyno
 			this->stateBindJoints_1()->getData(),
 			this->stateWeights_0()->getData(),
 			this->stateWeights_1()->getData(),
-			this->stateTransform()->getValue()
+			this->stateTransform()->getValue(),
+			false
 		);
 
 		//update Normals
-		cuExecute(this->stateVertex()->getData().size(),
+		cuExecute(mesh->vertices().size(),
 			PointsAnimation,
 			initialNormal,
-			this->stateNormal()->getData(),
+			mesh->normals(),
 			this->stateJointInverseBindMatrix()->getData(),
 			this->stateJointWorldMatrix()->getData(),
 
@@ -992,14 +1049,15 @@ namespace dyno
 			this->stateBindJoints_1()->getData(),
 			this->stateWeights_0()->getData(),
 			this->stateWeights_1()->getData(),
-			this->stateTransform()->getValue()
+			this->stateTransform()->getValue(),
+			true
 		);
 	
 	};
 
 
 	template<typename TDataType>
-	std::vector<int> GltfLoader<TDataType>::getJointDirByJointIndex(std::map<int, std::vector<int>> jointId_joint_Dir, int Index)
+	std::vector<int> GltfLoader<TDataType>::getJointDirByJointIndex(int Index)
 	{
 		std::vector<int> jointDir;
 		std::map<int, std::vector<int>>::const_iterator iter;
@@ -1012,8 +1070,8 @@ namespace dyno
 			return jointDir;
 		}
 
-		jointDir = iter->second;		// std::vector<int> jD 按顺序为    
-		return jointDir;				//当前骨骼->Root  如 4-2-1-0表示当前骨骼为4，向上依次为 4-2-1-0
+		jointDir = iter->second;
+		return jointDir;
 	}
 
 
@@ -1041,7 +1099,7 @@ namespace dyno
 
 		for (auto jId : all_Joints)
 		{
-			const std::vector<int>& jD = getJointDirByJointIndex(jointId_joint_Dir, jId);	//get joint 骨骼链
+			const std::vector<int>& jD = getJointDirByJointIndex(jId);	
 
 			Mat4f tempMatrix = Mat4f::identityMatrix();
 
@@ -1143,7 +1201,7 @@ namespace dyno
 
 		Vec3f result = Vec3f(0);
 
-		const std::vector<int>& jD = getJointDirByJointIndex(jointId_joint_Dir, jointId);	//get joint 骨骼链
+		const std::vector<int>& jD = getJointDirByJointIndex(jointId);	
 
 		Mat4f tempMatrix = Mat4f::identityMatrix();
 
@@ -1172,7 +1230,7 @@ namespace dyno
 		for (size_t i = 0; i < allJoints.size(); i++)
 		{
 			joint jointId = allJoints[i];
-			const std::vector<int>& jD = getJointDirByJointIndex(jointId_joint_Dir, jointId);	//get joint 骨骼链
+			const std::vector<int>& jD = getJointDirByJointIndex(jointId);	
 
 
 
@@ -1185,9 +1243,10 @@ namespace dyno
 				tempMatrix *= jMatrix[select];		//jD[k] 从root(id为0)向当前骨骼逐个应用变换
 			}
 			c_joint_Mat4f[jointId] = tempMatrix;
+
 		}
 
-
+		
 
 		this->stateJointWorldMatrix()->assign(c_joint_Mat4f);
 
@@ -1206,7 +1265,7 @@ namespace dyno
 		{
 			joint jointId = all_Joints[i];
 
-			const std::vector<int>& jD = getJointDirByJointIndex(jointId_joint_Dir, jointId);
+			const std::vector<int>& jD = getJointDirByJointIndex(jointId);
 
 			Mat4f tempMatrix = Mat4f::identityMatrix();
 
@@ -1219,10 +1278,8 @@ namespace dyno
 				Vec3f vS = Vec3f(1, 1, 1);
 				Quat<float> qR = Quat<float>(Mat3f::identityMatrix());
 
-
-				if (model.nodes[select].matrix.empty())//int k = jD.size() - 1; k >= 0; k--
+				if (model.nodes[select].matrix.empty())
 				{
-
 					qR = joint_rotation[select];
 
 					vT = joint_translation[select];
@@ -1237,7 +1294,7 @@ namespace dyno
 					tempJointMatrix[select] = mT * mS * mR;
 				}
 
-				tempMatrix *= tempJointMatrix[select].inverse();		//jD[k] 从root(id为0)向当前骨骼逐个应用变换
+				tempMatrix *= tempJointMatrix[select].inverse();
 
 			}
 
@@ -1297,27 +1354,44 @@ namespace dyno
 		Mat4f transform = mT * mS * mR;
 		this->stateTransform()->setValue(transform);
 
+		if (all_Joints.size())
+			updateAnimation(this->stateFrameNumber()->getValue());
+		else
+		{
+			if (this->stateTextureMesh()->getDataPtr()->vertices().size())
+			{
+				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+					StaticMeshTransform,
+					initialPosition,
+					this->stateTextureMesh()->getDataPtr()->vertices(),
+					transform
+				);
+
+
+			}
+
+		}
 
 	}
 
 
-	/*template< typename Coord, typename Mat4f>
-	__global__ void TransformVertex(
-		DArray<Coord> worldPosition,
-		Mat4f transformMatrix
-	) 
+	template< typename Coord, typename Mat4f>
+	__global__ void StaticMeshTransform(
+		DArray<Coord> initialPosition,
+		DArray<Coord> Position,
+		Mat4f transform
+	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= worldPosition.size()) return;
+		if (pId >= Position.size()) return;
 
-		Vec4f result = transformMatrix * Vec4f(worldPosition[pId][0], worldPosition[pId][1], worldPosition[pId][2], 1);
-		worldPosition[pId][0] = result[0];
-		worldPosition[pId][1] = result[1];
-		worldPosition[pId][2] = result[2];
+		Vec4f temp = transform * Vec4f(initialPosition[pId][0], initialPosition[pId][1], initialPosition[pId][2], 1);
+		Position[pId] = Vec3f(temp[0], temp[1], temp[2]);
 
-	}*/
+	}
 
-	template< typename Coord, typename Vec4f, typename Mat4f>
+
+	template< typename Coord, typename Vec4f, typename Mat4f >
 	__global__ void PointsAnimation(
 		DArray<Coord> intialPosition,
 		DArray<Coord> worldPosition,
@@ -1329,14 +1403,17 @@ namespace dyno
 		DArray<Vec4f> weights_0,
 		DArray<Vec4f> weights_1,
 
-		Mat4f transform
+		Mat4f transform,
+		bool isNormal
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= worldPosition.size()) return;
 
 
-		Vec4f result = Vec4f(0, 0, 0, 1);
+		Vec4f result = Vec4f(0, 0, 0, float(!isNormal));
+
+
 		Coord offest;
 
 		bool j0 = bind_joints_0.size();
@@ -1350,9 +1427,9 @@ namespace dyno
 				Real weight = weights_0[pId][i];
 
 				offest = intialPosition[pId];
-				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], 1);//
+				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
 
-				result += (WorldMatrix[jointId] * v_bone_space) * weight;
+				result += (transform * WorldMatrix[jointId] * v_bone_space) * weight;
 			}
 		}
 		if (j1)
@@ -1363,13 +1440,13 @@ namespace dyno
 				Real weight = weights_1[pId][i];
 
 				offest = intialPosition[pId];
-				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], 1);//
+				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
 
 				result += (WorldMatrix[jointId] * v_bone_space) * weight;
 			}
 		}
 
-		result = transform * result;
+		//result = transform * result;
 
 		if (j0 | j1)
 		{
@@ -1378,6 +1455,8 @@ namespace dyno
 			worldPosition[pId][2] = result[2];
 		}
 
+		if (isNormal)
+			worldPosition[pId] = worldPosition[pId].normalize();
 
 	}
 
@@ -1395,15 +1474,16 @@ namespace dyno
 		Vec4f result = Vec4f(0, 0, 0, 1);
 		Coord offest;
 		int jointId = joints[pId];
-		result = WorldMatrix[jointId] * result;
+		result = transform * WorldMatrix[jointId] * result;
 
-		result = transform * result;
+		//result = transform * result;
 
 		worldPosition[pId][0] = result[0];
 		worldPosition[pId][1] = result[1];
 		worldPosition[pId][2] = result[2];
 
 	}
+
 
 
 	template<typename TDataType>
@@ -1449,14 +1529,9 @@ namespace dyno
 		this->stateJointLocalMatrix()->clear();
 
 		this->stateJointWorldMatrix()->clear();
-		this->stateMaterials()->clear();
-		this->stateNormal()->clear();
 		this->stateRealChannel_1()->clear();
-		this->stateShapes()->clear();
 		this->stateTexCoord_0()->clear();
 		this->stateTexCoord_1()->clear();
-
-		this->stateVertex()->clear();
 		this->stateWeights_0()->clear();
 		this->stateWeights_1()->clear();
 	}
@@ -1472,14 +1547,14 @@ namespace dyno
 			joint_input[i] = Vec3f(NULL_TIME, NULL_TIME, NULL_TIME);
 		}
 
-		//Reset loading animation  ;     在reset时候载入所有动画数据
+		//Reset loading animation  ;   
 		for (size_t i = 0; i < model.animations.size(); i++)
 		{
 			std::string& name = model.animations[i].name;
 			std::vector<AnimationChannel>& channels = model.animations[i].channels;
 			std::vector<AnimationSampler>& samplers = model.animations[i].samplers;
 
-			for (size_t j = 0; j < channels.size(); j++)	//channels 每个动画通道导入
+			for (size_t j = 0; j < channels.size(); j++)	//channels 
 			{
 				//get sampler info
 				int& samplerId = channels[j].sampler;              // required
@@ -1516,7 +1591,7 @@ namespace dyno
 					}
 				}
 
-				//Reset时导入所有动画
+				//Reset
 				{
 					//out animation data
 					std::vector<Vec3f> frame_T_anim;
