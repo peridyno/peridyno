@@ -17,6 +17,8 @@
 #pragma once
 
 #include "Module/TopologyModule.h"
+#include "Primitive/Primitive3D.h"
+
 
 namespace dyno
 {
@@ -56,6 +58,9 @@ namespace dyno
 		DArray<TopologyModule::Triangle> vertexIndex;
 		DArray<TopologyModule::Triangle> normalIndex;
 		DArray<TopologyModule::Triangle> texCoordIndex;
+
+		TAlignedBox3D<Real> boundingBox;
+		Transform3f boundingTransform;
 
 		std::shared_ptr<Material> material = nullptr;
 	};
