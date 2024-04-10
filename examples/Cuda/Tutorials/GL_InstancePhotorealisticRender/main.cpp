@@ -119,7 +119,7 @@ int main()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->varFileName()->setValue(std::string("E:/Peridyno/models/car/race.gltf"));
+	gltf->varFileName()->setValue(getAssetPath() + "gltf/FlightHelmet/FlightHelmet.gltf");
 	
 	auto module = gltf->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
 	//gltf->deleteModule(module);
