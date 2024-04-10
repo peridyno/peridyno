@@ -1,5 +1,8 @@
 #include "NeighborPointQuery.h"
+
 #include "Topology/GridHash.h"
+#include "Topology/LinearBVH.h"
+#include "Topology/SparseOctree.h"
 
 #include "SceneGraph.h"
 
@@ -54,11 +57,24 @@ namespace dyno
 	template<typename TDataType>
 	void NeighborPointQuery<TDataType>::compute()
 	{
-		if (this->varSizeLimit()->getData() <= 0) {
-			requestDynamicNeighborIds();
+		auto sType = this->varSpatial()->currentKey();
+
+		if (sType == Spatial::UNIFORM)
+		{
+			if (this->varSizeLimit()->getValue() <= 0) {
+				requestDynamicNeighborIds();
+			}
+			else {
+				requestFixedSizeNeighborIds();
+			}
 		}
-		else {
-			requestFixedSizeNeighborIds();
+		else if (sType == Spatial::BVH)
+		{
+			requestNeighborIdsWithBVH();
+		}
+		else if (sType == Spatial::OCTREE)
+		{
+			requestNeighborIdsWithOctree();
 		}
 	}
 
@@ -136,9 +152,9 @@ namespace dyno
 	void NeighborPointQuery<TDataType>::requestDynamicNeighborIds()
 	{
 		// Prepare inputs
-		auto& points	= this->inPosition()->getData();
-		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->getData() : this->inOther()->getData();
-		auto h			= this->inRadius()->getData();
+		auto& points	= this->inPosition()->constData();
+		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->constData() : this->inOther()->constData();
+		auto h			= this->inRadius()->getValue();
 
 		// Prepare outputs
 		if (this->outNeighborIds()->isEmpty())
@@ -319,9 +335,9 @@ namespace dyno
 	void NeighborPointQuery<TDataType>::requestFixedSizeNeighborIds()
 	{
 		// Prepare inputs
-		auto& points	= this->inPosition()->getData();
-		auto& other		= this->inOther()->isEmpty() ? this->inPosition()->getData() : this->inOther()->getData();
-		auto h			= this->inRadius()->getData();
+		auto& points = this->inPosition()->constData();
+		auto& other = this->inOther()->isEmpty() ? this->inPosition()->constData() : this->inOther()->constData();
+		auto h			= this->inRadius()->getValue();
 
 		// Prepare outputs
 		if (this->outNeighborIds()->isEmpty())
@@ -373,6 +389,298 @@ namespace dyno
 		distance.clear();
 		//hashGrid.clear();
 		hashGrid.release();
+	}
+
+	template<typename Real, typename Coord>
+	__global__ void NPQ_SetupAABB(
+		DArray<AABB> boundingBox,
+		DArray<Coord> position,
+		Real radius)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= position.size()) return;
+
+		AABB box;
+		Coord p = position[pId];
+		box.v0 = p - radius;
+		box.v1 = p + radius;
+
+		boundingBox[pId] = box;
+	}
+
+	template<typename Coord, typename TDataType>
+	__global__ void NPQ_RequestNeighborNumberBVH(
+		DArray<uint> counter,
+		DArray<Coord> position,
+		LinearBVH<TDataType> bvh)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= position.size()) return;
+
+		Coord p = position[tId];
+
+		typename LinearBVH<TDataType>::AABB aabb;
+		aabb.v0 = p - EPSILON;
+		aabb.v1 = p + EPSILON;
+
+		counter[tId] = bvh.requestIntersectionNumber(aabb);
+	}
+
+	//TODO: sort ids according to their distance to the center
+	template<typename Coord, typename TDataType>
+	__global__ void NPQ_RequestNeighborIdsBVH(
+		DArrayList<int> idLists,
+		DArray<Coord> position,
+		LinearBVH<TDataType> bvh)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= position.size()) return;
+
+		Coord p = position[tId];
+
+		typename LinearBVH<TDataType>::AABB aabb;
+		aabb.v0 = p - EPSILON;
+		aabb.v1 = p + EPSILON;
+
+		bvh.requestIntersectionIds(idLists[tId], aabb);
+	}
+
+	template<typename TDataType>
+	void NeighborPointQuery<TDataType>::requestNeighborIdsWithBVH()
+	{
+		// Prepare inputs
+		auto& points = this->inPosition()->constData();
+		auto& other = this->inOther()->isEmpty() ? this->inPosition()->constData() : this->inOther()->constData();
+		auto h = this->inRadius()->getValue();
+
+		uint numSrc = points.size();
+		uint numTar = other.size();
+
+		if (this->outNeighborIds()->isEmpty()) {
+			this->outNeighborIds()->allocate();
+		}
+
+		auto& neighborLists = this->outNeighborIds()->getData();
+
+		DArray<AABB> aabbs(numTar);
+
+		cuExecute(numTar,
+			NPQ_SetupAABB,
+			aabbs,
+			other,
+			h);
+
+		LinearBVH<TDataType> bvh;
+		bvh.construct(aabbs);
+
+		DArray<uint> counter(numSrc);
+
+		cuExecute(numSrc,
+			NPQ_RequestNeighborNumberBVH,
+			counter,
+			points,
+			bvh);
+
+		neighborLists.resize(counter);
+
+		cuExecute(numSrc,
+			NPQ_RequestNeighborIdsBVH,
+			neighborLists,
+			points,
+			bvh);
+
+		counter.clear();
+		aabbs.clear();
+
+		bvh.release();
+	}
+
+	template<typename Coord, typename TDataType>
+	__global__ void CDBP_RequestIntersectionNumber(
+		DArray<uint> count,
+		DArray<Coord> points,
+		Real radius,
+		SparseOctree<TDataType> octree)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= count.size()) return;
+
+		Coord p = points[tId];
+
+		AABB aabb;
+		aabb.v0 = p - radius;
+		aabb.v1 = p + radius;
+
+		count[tId] = octree.requestIntersectionNumberFromBottom(aabb);
+	}
+
+	template<typename Coord, typename TDataType>
+	__global__ void CDBP_RequestIntersectionIds(
+		DArrayList<int> lists,
+		DArray<int> ids,
+		DArray<uint> count,
+		DArray<Coord> points,
+		Real radius,
+		SparseOctree<TDataType> octree)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= count.size()) return;
+
+		Coord p = points[tId];
+		int total_num = count.size();
+
+		AABB aabb;
+		aabb.v0 = p - radius;
+		aabb.v1 = p + radius;
+
+		octree.reqeustIntersectionIdsFromBottom(ids.begin() + count[tId], aabb);
+
+		int n = tId == total_num - 1 ? ids.size() - count[total_num - 1] : count[tId + 1] - count[tId];
+
+		List<int>& list_i = lists[tId];
+
+		for (int t = 0; t < n; t++)
+		{
+			list_i.insert(ids[count[tId] + t]);
+		}
+	}
+
+	template<typename Real, typename Coord>
+	__global__ void CDBP_RequestNeighborSize(
+		DArray<uint> counter,
+		DArray<Coord> srcPoints,
+		DArray<Coord> tarPoints,
+		DArrayList<int> lists,
+		Real radius)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= counter.size()) return;
+
+		Coord p_i = srcPoints[tId];
+
+		List<int>& list_i = lists[tId];
+		int nbSize = list_i.size();
+		int num = 0;
+		for (int ne = 0; ne < nbSize; ne++)
+		{
+			int j = list_i[ne];
+			Real r = (p_i - tarPoints[j]).norm();
+
+			if (r < radius)
+				num++;
+		}
+
+		counter[tId] = num;
+	}
+
+	//TODO: sort ids according to their distance to the center
+	template<typename Real, typename Coord>
+	__global__ void CDBP_RequestNeighborIds(
+		DArrayList<int> neighbors,
+		DArray<Coord> srcPoints,
+		DArray<Coord> tarPoints,
+		DArrayList<int> lists,
+		Real radius)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= neighbors.size()) return;
+
+		Coord p_i = srcPoints[tId];
+
+		List<int>& list_i = lists[tId];
+		int nbSize = list_i.size();
+
+		List<int>& neList_i = neighbors[tId];
+		int num = 0;
+		for (int ne = 0; ne < nbSize; ne++)
+		{
+			int j = list_i[ne];
+			Real r = (p_i - tarPoints[j]).norm();
+
+			if (r < radius)
+			{
+				neList_i.insert(j);
+			}
+		}
+	}
+
+	template<typename TDataType>
+	void NeighborPointQuery<TDataType>::requestNeighborIdsWithOctree()
+	{
+		// Prepare inputs
+		auto& points = this->inPosition()->constData();
+		auto& other = this->inOther()->isEmpty() ? this->inPosition()->constData() : this->inOther()->constData();
+		auto h = this->inRadius()->getValue();
+
+		uint numSrc = points.size();
+		uint numTar = other.size();
+
+		if (this->outNeighborIds()->isEmpty()) {
+			this->outNeighborIds()->allocate();
+		}
+
+		auto& neighborLists = this->outNeighborIds()->getData();
+
+		Reduction<Coord> m_reduce_coord;
+		auto min_v0 = m_reduce_coord.minimum(other.begin(), other.size());
+		auto max_v1 = m_reduce_coord.maximum(other.begin(), other.size());
+
+		SparseOctree<TDataType> octree;
+		octree.setSpace(min_v0, h, maximum(max_v1[0] - min_v0[0], maximum(max_v1[1] - min_v0[1], max_v1[2] - min_v0[2])));
+		octree.construct(other, 0);
+
+		DArray<uint> counter(numSrc);
+
+		cuExecute(numSrc,
+			CDBP_RequestIntersectionNumber,
+			counter,
+			points,
+			h,
+			octree);
+
+		DArrayList<int> lists;
+		lists.resize(counter);
+
+		Reduction<uint> reduce;
+		uint total_num = reduce.accumulate(counter.begin(), counter.size());
+
+		Scan<uint> scan;
+		scan.exclusive(counter.begin(), counter.size());
+
+		DArray<int> ids(total_num);
+		cuExecute(numSrc,
+			CDBP_RequestIntersectionIds,
+			lists,
+			ids,
+			counter,
+			points,
+			h,
+			octree);
+
+		DArray<uint> neighbor_counter(numSrc);
+		cuExecute(numSrc,
+			CDBP_RequestNeighborSize,
+			neighbor_counter,
+			points,
+			other,
+			lists,
+			h);
+
+		neighborLists.resize(neighbor_counter);
+
+		cuExecute(numSrc,
+			CDBP_RequestNeighborIds,
+			neighborLists,
+			points,
+			other,
+			lists,
+			h);
+
+		counter.clear();
+		lists.clear();
+		ids.clear();
+		neighbor_counter.clear();
+		octree.release();
 	}
 
 	DEFINE_CLASS(NeighborPointQuery);

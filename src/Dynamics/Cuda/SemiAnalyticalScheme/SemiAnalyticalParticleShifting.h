@@ -20,7 +20,7 @@
 
 
 #pragma once
-#include "Module/TopologyModule.h"
+#include "Topology/TriangleSet.h"
 
 #include "Collision/Attribute.h"
 #include "ParticleSystem/Module/ParticleApproximation.h"
@@ -40,8 +40,6 @@ namespace dyno
 
 		SemiAnalyticalParticleShifting();
 		~SemiAnalyticalParticleShifting() override;
-
-		void compute()override;
 
 	public:
 		DEF_VAR(uint, InterationNumber, 10, "");
@@ -69,8 +67,10 @@ namespace dyno
 
 		DEF_ARRAYLIST_IN(int, NeighborTriIds, DeviceType::GPU, "triangle neighbors");
 
-		DEF_ARRAY_IN(Triangle, TriangleInd, DeviceType::GPU, "triangle_index");
-		DEF_ARRAY_IN(Coord, TriangleVer, DeviceType::GPU, "triangle_vertex");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+
+	protected:
+		void compute()override;
 
 	private:
 		DArray<Real> mLambda;

@@ -6,13 +6,11 @@
  * @version    : 1.1
  */
 #pragma once
-#include "SemiAnalyticalPBD.h"
-
-#include "Module/TopologyModule.h"
 #include "Module/GroupModule.h"
-#include "TriangularMeshConstraint.h"
 
 #include "Collision/Attribute.h"
+
+#include "Topology/TriangleSet.h"
 
 /**
  * PositionBasedFluidModelMesh
@@ -43,14 +41,11 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real  Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
 		SemiAnalyticalPositionBasedFluidModel();
-		virtual ~SemiAnalyticalPositionBasedFluidModel() {};
+		~SemiAnalyticalPositionBasedFluidModel() override {};
 
 	public:
-		FVar<int> Start;
-
 		DEF_VAR(Real, SmoothingLength, 0.01, "Smoothing length");
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -59,8 +54,6 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");  //current particle velocity
 		DEF_ARRAY_IN(Coord, Force, DeviceType::GPU, "");
 
-
-		DEF_ARRAY_IN(Coord, TriangleVertex, DeviceType::GPU, "");     //triangle vertex point position
-		DEF_ARRAY_IN(Triangle, TriangleIndex, DeviceType::GPU, "");          //triangle index
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 	};
-}  // namespace PhysIKA
+}  // namespace dyno

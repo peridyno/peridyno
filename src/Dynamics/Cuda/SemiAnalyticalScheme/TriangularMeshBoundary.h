@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Yue Chang
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,48 +14,49 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module/ConstraintModule.h"
+#include "Node.h"
+
+#include "ParticleSystem/ParticleSystem.h"
 
 #include "Topology/TriangleSet.h"
 
 namespace dyno
 {
+	/**
+	 * @brief A triangular mesh boundary to prevent interpenetration for particles
+	 */
 	template<typename TDataType>
-	class TriangularMeshConstraint : public ConstraintModule
+	class TriangularMeshBoundary : public Node
 	{
-		DECLARE_TCLASS(TriangularMeshConstraint, TDataType)
+		DECLARE_TCLASS(TriangularMeshBoundary, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
-		TriangularMeshConstraint();
-		~TriangularMeshConstraint() override;
+		TriangularMeshBoundary();
+		~TriangularMeshBoundary() override;
 
 
 	public:
-		DEF_VAR(Real, Thickness, 0.0065, "Threshold for collision detection");
+		DEF_VAR(Real, Thickness, 0.0065, "Mesh thickness used for collision detection");
 
 		DEF_VAR(Real, TangentialFriction, 0, "Tangential friction");
 		DEF_VAR(Real, NormalFriction, 0, "Normal friction");
 
 	public:
-		DEF_VAR_IN(Real, TimeStep, "Time Step");
-
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
+		DEF_NODE_PORTS(ParticleSystem<TDataType>, ParticleSystem, "Particle Systems");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_ARRAYLIST_IN(int, TriangleNeighborIds, DeviceType::GPU, "triangle neighbors");
+	public:
+		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "Particle position");
+		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
 	protected:
-		void constrain() override;
+		void preUpdateStates() override;
+		void updateStates() override;
+		void postUpdateStates() override;
 
 	private:
-		DArray<Coord> mPosBuffer;
-
-		DArray<Coord> mPreviousPosition;
-		DArray<Coord> mPrivousVertex;
 	};
 }

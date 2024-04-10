@@ -16,6 +16,8 @@
 #pragma once
 #include "Module/ComputeModule.h"
 
+#include "Primitive/Primitive3D.h"
+
 namespace dyno 
 {
 	template<typename TDataType>
@@ -25,18 +27,19 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TAlignedBox3D<Real> AABB;
 
 		NeighborPointQuery();
 		~NeighborPointQuery() override;
-		
-		void compute() override;
-
-	private:
-		void requestDynamicNeighborIds();
-
-		void requestFixedSizeNeighborIds();
 
 	public:
+		DECLARE_ENUM(Spatial,
+			UNIFORM = 0,
+			BVH = 1,
+			OCTREE = 2);
+
+		DEF_ENUM(Spatial, Spatial, Spatial::UNIFORM, "");
+
 		DEF_VAR(uint, SizeLimit, 0, "Maximum number of neighbors");
 
 		/**
@@ -46,9 +49,9 @@ namespace dyno
 		DEF_VAR_IN(Real, Radius, "Search radius");
 
 		/**
-		 * @brief A set of points to be required from.
+		 * @brief A set of points whose neighbors will be required for.
 		 */
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "A set of points to be required from");
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "A set of points whose neighbors will be required for");
 
 		/**
 		 * @brief Another set of points the algorithm will require neighbor ids for.
@@ -61,5 +64,17 @@ namespace dyno
 		 * @brief Ids of neighboring particles
 		 */
 		DEF_ARRAYLIST_OUT(int, NeighborIds, DeviceType::GPU, "Return neighbor ids");
+
+	protected:
+		void compute() override;
+
+	private:
+		void requestDynamicNeighborIds();
+
+		void requestFixedSizeNeighborIds();
+
+		void requestNeighborIdsWithBVH();
+
+		void requestNeighborIdsWithOctree();
 	};
 }
