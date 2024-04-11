@@ -19,7 +19,6 @@
 
 #include <Topology/TriangleSet.h>
 #include "GraphicsObject/GLTextureMesh.h"
-#include "GraphicsObject/Instance.h"
 
 
 namespace dyno
@@ -42,7 +41,7 @@ namespace dyno
 	public:
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 		
-		DEF_INSTANCES_IN(ShapeInstance, Instance, "");
+		DEF_ARRAYLIST_IN(Transform3f, InstanceTransform, DeviceType::GPU, "");
 
 	protected:
 		void resetStates() override;

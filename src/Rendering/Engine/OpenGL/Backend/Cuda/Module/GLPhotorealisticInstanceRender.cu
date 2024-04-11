@@ -1,4 +1,4 @@
-#include "GLInstancePhotorealisticRender.h"
+#include "GLPhotorealisticInstanceRender.h"
 #include "Utility.h"
 
 #include <glad/glad.h>
@@ -9,60 +9,61 @@
 
 namespace dyno
 {
-	IMPLEMENT_CLASS(GLInstancePhotorealisticRender)
+	IMPLEMENT_CLASS(GLPhotorealisticInstanceRender)
 
-	GLInstancePhotorealisticRender::GLInstancePhotorealisticRender()
+	GLPhotorealisticInstanceRender::GLPhotorealisticInstanceRender()
 		: GLPhotorealisticRender()
 	{
-		
 	}
 
-	GLInstancePhotorealisticRender::~GLInstancePhotorealisticRender()
+	GLPhotorealisticInstanceRender::~GLPhotorealisticInstanceRender()
 	{
 	
 	}
 
-	std::string GLInstancePhotorealisticRender::caption()
+	std::string GLPhotorealisticInstanceRender::caption()
 	{
 		return "Photorealistic Instance Render";
 	}
 
-	bool GLInstancePhotorealisticRender::initializeGL()
+	bool GLPhotorealisticInstanceRender::initializeGL()
 	{
+		mGLTransform.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+
 		return GLPhotorealisticRender::initializeGL();
 	}
 
-	void GLInstancePhotorealisticRender::releaseGL()
+	void GLPhotorealisticInstanceRender::releaseGL()
 	{
+		mGLTransform.release();
+		mLists.clear();
+		mOffset.clear();
 		GLPhotorealisticRender::releaseGL();
-
 	}
 
-	void GLInstancePhotorealisticRender::updateGL()
+	void GLPhotorealisticInstanceRender::updateGL()
 	{
+		mGLTransform.updateGL();
+
 		GLPhotorealisticRender::updateGL();
-
-		auto& instances = this->inInstances()->constData();
-
-		for (int i = 0; i < instances.size(); i++)
-		{
-			instances[i]->create();
-			instances[i]->updateGL();
-		}	
 	}
 
 
-	void GLInstancePhotorealisticRender::updateImpl()
+	void GLPhotorealisticInstanceRender::updateImpl()
 	{
+		auto inst = this->inTransform()->constDataPtr();
+
+		if (this->inTransform()->isModified())
+		{
+			mOffset.assign(inst->index());
+			mLists.assign(inst->lists());
+			mGLTransform.load(inst->elements());
+		}
+
 		GLPhotorealisticRender::updateImpl();
-
-		auto& instances = this->inInstances()->constData();
-
-		for (int i = 0; i < instances.size(); i++)
-			instances[i]->update();
 	}
 
-	void GLInstancePhotorealisticRender::paintGL(const RenderParams& rparams)
+	void GLPhotorealisticInstanceRender::paintGL(const RenderParams& rparams)
 	{	
 		struct {
 			glm::vec3 color;
@@ -100,8 +101,6 @@ namespace dyno
 		vertices.bindBufferBase(8);
 		texCoords.bindBufferBase(10);
 
-
-		auto& instances = this->inInstances()->constData();
 		auto& shapes = mTextureMesh.shapes();
 		for (int i = 0; i < shapes.size(); i++)
 		{
@@ -175,29 +174,19 @@ namespace dyno
 
 			}
 
-			if (!this->inInstances()->isEmpty())
-			{
-				instances[i]->gltransform.updateGL();
-				// bind the translation vector
-				mVAO.bindVertexBuffer(&instances[i]->gltransform, 3, 3, GL_FLOAT, sizeof(Transform3f), 0, 1);
-				// bind the scale vector
-				mVAO.bindVertexBuffer(&instances[i]->gltransform, 4, 3, GL_FLOAT, sizeof(Transform3f), sizeof(Vec3f), 1);
-				// bind the rotation matrix
-				mVAO.bindVertexBuffer(&instances[i]->gltransform, 5, 3, GL_FLOAT, sizeof(Transform3f), 2 * sizeof(Vec3f), 1);
-				mVAO.bindVertexBuffer(&instances[i]->gltransform, 6, 3, GL_FLOAT, sizeof(Transform3f), 3 * sizeof(Vec3f), 1);
-				mVAO.bindVertexBuffer(&instances[i]->gltransform, 7, 3, GL_FLOAT, sizeof(Transform3f), 4 * sizeof(Vec3f), 1);
-				mVAO.bind();
-				glDrawArraysInstanced(GL_TRIANGLES, 0, numTriangles * 3, instances[i]->instanceCount);
-			}
-			else
-				glDrawArrays(GL_TRIANGLES, 0, numTriangles * 3);
+			uint offset_i = sizeof(Transform3f) * mOffset[i];
+			mVAO.bindVertexBuffer(&mGLTransform, 3, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 0, 1);
+			// bind the scale vector
+			mVAO.bindVertexBuffer(&mGLTransform, 4, 3, GL_FLOAT, sizeof(Transform3f), offset_i + sizeof(Vec3f), 1);
+			// bind the rotation matrix
+			mVAO.bindVertexBuffer(&mGLTransform, 5, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 2 * sizeof(Vec3f), 1);
+			mVAO.bindVertexBuffer(&mGLTransform, 6, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 3 * sizeof(Vec3f), 1);
+			mVAO.bindVertexBuffer(&mGLTransform, 7, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 4 * sizeof(Vec3f), 1);
+			mVAO.bind();
+			glDrawArraysInstanced(GL_TRIANGLES, 0, numTriangles * 3, mLists[i].size());
 
 			mVAO.unbind();
 
 		}
 	}
-
-
-	
-	
 }

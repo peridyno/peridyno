@@ -15,48 +15,35 @@
  */
 
 #pragma once
-
-#include "GLVisualModule.h"
-
-#include "GraphicsObject/GLTextureMesh.h"
-#include "GraphicsObject/VertexArray.h"
-#include "GraphicsObject/Shader.h"
-#include "GraphicsObject/Instance.h"
 #include "GLPhotorealisticRender.h"
-
-#ifdef CUDA_BACKEND
-#include "ConstructTangentSpace.h"
-#endif
 
 namespace dyno
 {
-	class GLInstancePhotorealisticRender : public GLPhotorealisticRender
+	class GLPhotorealisticInstanceRender : public GLPhotorealisticRender
 	{
-		DECLARE_CLASS(GLInstancePhotorealisticRender)
+		DECLARE_CLASS(GLPhotorealisticInstanceRender)
 	public:
-		GLInstancePhotorealisticRender();
-		~GLInstancePhotorealisticRender();
+		GLPhotorealisticInstanceRender();
+		~GLPhotorealisticInstanceRender() override;
 
 	public:
 		virtual std::string caption() override;
 
-		DEF_INSTANCES_IN(ShapeInstance, Instance, "");
+		DEF_ARRAYLIST_IN(Transform3f, Transform, DeviceType::GPU, "");
 
 	protected:
-		virtual void updateImpl() override;
+		void updateImpl() override;
 
-		virtual void paintGL(const RenderParams& rparams) override;
-		virtual void updateGL() override;
-		virtual bool initializeGL() override;
-		virtual void releaseGL() override;
-
-	
-
-	protected:
-
+		void paintGL(const RenderParams& rparams) override;
+		void updateGL() override;
+		bool initializeGL() override;
+		void releaseGL() override;
 
 	private:
+		CArray<uint> mOffset;
+		CArray<List<Transform3f>> mLists;
 
+		XBuffer<Transform3f> mGLTransform;
 
 	};
 

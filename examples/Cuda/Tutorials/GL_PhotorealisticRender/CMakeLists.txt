@@ -6,5 +6,5 @@ if(PERIDYNO_PLUGIN_OBJ)
 		GlfwGUI
 		GLRenderEngine)
 
-	add_example(GL_TextureMesh Tutorials LIB_DEPENDENCY)
+	add_example(GL_PhotorealisticRender Tutorials LIB_DEPENDENCY)
 endif()

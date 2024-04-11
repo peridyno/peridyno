@@ -1,6 +1,6 @@
 #include "GLInstanceVisualNode.h"
 
-#include <GLInstancePhotorealisticRender.h>
+#include <GLPhotorealisticInstanceRender.h>
 
 namespace dyno
 {
@@ -8,8 +8,8 @@ namespace dyno
 	GLInstanceVisualNode<TDataType>::GLInstanceVisualNode()
 		: Node()
 	{
-		auto sRender = std::make_shared<GLInstancePhotorealisticRender>();
-		this->inInstances()->connect(sRender->inInstances());
+		auto sRender = std::make_shared<GLPhotorealisticInstanceRender>();
+		this->inInstanceTransform()->connect(sRender->inTransform());
 		this->inTextureMesh()->connect(sRender->inTextureMesh());
 
 		this->graphicsPipeline()->pushModule(sRender);
