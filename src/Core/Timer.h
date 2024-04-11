@@ -53,7 +53,7 @@ namespace dyno
 
 		float getElapsedTime();
 
-		void outputString(char* str);
+		void outputString(const char* str);
 	};
 #endif
 } //end of namespace dyno

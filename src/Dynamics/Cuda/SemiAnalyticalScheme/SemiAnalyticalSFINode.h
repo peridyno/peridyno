@@ -42,9 +42,6 @@ namespace  dyno
 		DEF_ARRAY_STATE(Coord, ForceDensity, DeviceType::GPU, "Force density");
 
 		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
-
-		DEF_ARRAY_STATE(Triangle, TriangleIndex, DeviceType::GPU, "triangle_index");
-		DEF_ARRAY_STATE(Coord, TriangleVertex, DeviceType::GPU, "triangle_vertex");
 		
 	protected:
 		void resetStates() override;

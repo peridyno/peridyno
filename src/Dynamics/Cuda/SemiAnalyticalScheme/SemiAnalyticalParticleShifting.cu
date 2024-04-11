@@ -14,19 +14,15 @@ namespace dyno {
 	{
 		this->varInertia()->setValue(Real(0.1));
 		this->varBulk()->setValue(Real(0.5));
-		this->inSmoothingLength()->setValue(Real(0.0125));//0.0125
-		this->inSamplingDistance()->setValue(Real(0.005));
 
 		mCalculateDensity = std::make_shared<SemiAnalyticalSummationDensity<TDataType>>();
+		this->inSamplingDistance()->connect(mCalculateDensity->inSamplingDistance());
 		this->inSmoothingLength()->connect(mCalculateDensity->inSmoothingLength());
 		this->inPosition()->connect(mCalculateDensity->inPosition());
 		this->inNeighborIds()->connect(mCalculateDensity->inNeighborIds());
 		this->inNeighborTriIds()->connect(mCalculateDensity->inNeighborTriIds());
-		this->inTriangleInd()->connect(mCalculateDensity->inTriangleInd());
-		this->inTriangleVer()->connect(mCalculateDensity->inTriangleVer());
+		this->inTriangleSet()->connect(mCalculateDensity->inTriangleSet());
 		this->varRestDensity()->connect(mCalculateDensity->varRestDensity());
-
-		mCalculateDensity->inSamplingDistance()->setValue(Real(0.005));
 	};
 
 	template<typename TDataType>
@@ -419,9 +415,13 @@ namespace dyno {
 		mBoundaryDir.reset();
 		mBoundaryDis.reset();
 
-		Real d = mCalculateDensity->inSamplingDistance()->getData();
-		Real rho_0 = mCalculateDensity->varRestDensity()->getData();
+		Real d = mCalculateDensity->inSamplingDistance()->getValue();
+		Real rho_0 = mCalculateDensity->varRestDensity()->getValue();
 		Real mass = d * d*d*rho_0;
+
+		auto ts = this->inTriangleSet()->constDataPtr();
+		auto& triVertex = ts->getPoints();
+		auto& triIndex = ts->getTriangles();
 
 		mCalculateDensity->update();
 
@@ -444,8 +444,8 @@ namespace dyno {
 					this->inPosition()->getData(),
 					this->inNeighborIds()->getData(),
 					this->inNeighborTriIds()->getData(),
-					this->inTriangleInd()->getData(),
-					this->inTriangleVer()->getData(),
+					triIndex,
+					triVertex,
 					this->inSmoothingLength()->getData());
 			}
 

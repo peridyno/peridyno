@@ -23,9 +23,13 @@ namespace dyno
 	template<typename TDataType>
 	void SemiAnalyticalSummationDensity<TDataType>::compute()
 	{
+		auto ts = this->inTriangleSet()->constDataPtr();
+		auto& triVertex = ts->getPoints();
+		auto& triIndex = ts->getTriangles();
+
 		int p_num = this->inPosition()->getDataPtr()->size();
 		int n_num = this->inNeighborIds()->getDataPtr()->size();
-		int t_num = this->inTriangleInd()->getDataPtr()->size();
+		int t_num = triIndex.size();
 		int tn_num = this->inNeighborTriIds()->getDataPtr()->size();
 
 		//printf("tn_num:  %d\n", tn_num);
@@ -42,8 +46,8 @@ namespace dyno
 		compute(
 			this->outDensity()->getData(),
 			this->inPosition()->getData(),
-			this->inTriangleInd()->getData(),
-			this->inTriangleVer()->getData(),
+			triIndex,
+			triVertex,
 			this->inNeighborIds()->getData(),
 			this->inNeighborTriIds()->getData(),
 			this->inSmoothingLength()->getData(),
@@ -55,11 +59,15 @@ namespace dyno
 	template<typename TDataType>
 	void SemiAnalyticalSummationDensity<TDataType>::compute(DArray<Real>& rho)
 	{
+		auto ts = this->inTriangleSet()->constDataPtr();
+		auto& triVertex = ts->getPoints();
+		auto& triIndex = ts->getTriangles();
+
 		compute(
 			rho,
 			this->inPosition()->getData(),
-			this->inTriangleInd()->getData(),
-			this->inTriangleVer()->getData(),
+			triIndex,
+			triVertex,
 			this->inNeighborIds()->getData(),
 			this->inNeighborTriIds()->getData(),
 			this->inSmoothingLength()->getData(),

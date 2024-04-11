@@ -16,8 +16,7 @@ namespace dyno {
 		//this->Dirmode = ramp.Dirmode;
 		//this->Bordermode = ramp.Bordermode;
 		this->MyCoord = ramp.MyCoord;
-		this->FE_MyCoord = ramp.FE_MyCoord;
-		this->FE_HandleCoord = ramp.FE_HandleCoord;
+
 		this->FinalCoord = ramp.FinalCoord;
 		this->Originalcoord = ramp.Originalcoord;
 		this->OriginalHandlePoint = ramp.OriginalHandlePoint;
@@ -35,8 +34,7 @@ namespace dyno {
 
 		this->lockSize = ramp.lockSize;
 		this->useCurve = ramp.useCurve;
-		this->displayUseRamp = ramp.displayUseRamp;
-		this->useRamp = ramp.useRamp;
+
 		this->useSquard = ramp.useSquard;
 		this->curveClose = ramp.curveClose;
 		this->resample = ramp.resample;
@@ -51,7 +49,6 @@ namespace dyno {
 		this->NminY = ramp.NminY;
 		this->NmaxY = ramp.NmaxY;
 
-		this->handleDefaultLength = ramp.handleDefaultLength;
 		this->segment = ramp.segment;
 		this->resampleResolution = ramp.resampleResolution;
 
@@ -404,18 +401,7 @@ namespace dyno {
 		}
 	}
 
-	double Curve::calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet)
-	{
-		double length = 0;
-		int n = BezierPtSet.size();
-		for (size_t k = 0; k < n - 1; k++)
-		{	
-			int e = k ;
-			int f = k + 1;
-			length += sqrt(std::pow((BezierPtSet[f].x - BezierPtSet[e].x), 2) + std::pow((BezierPtSet[f].y - BezierPtSet[e].y), 2));
-		}
-		return length;
-	}
+
 
 	void Curve::buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet)
 	{
@@ -443,12 +429,12 @@ namespace dyno {
 
 
 	//widget to field;
-	void Curve::addItemMyCoord(float x, float y)
-	{
-		Coord2D s;
-		s.set(x, y);
-		MyCoord.push_back(s);
-	}
+	//void Curve::addItemMyCoord(float x, float y)
+	//{
+	//	Coord2D s;
+	//	s.set(x, y);
+	//	MyCoord.push_back(s);
+	//}
 
 	void Curve::addFloatItemToCoord(float x, float y, std::vector<Coord2D>& coordArray)
 	{

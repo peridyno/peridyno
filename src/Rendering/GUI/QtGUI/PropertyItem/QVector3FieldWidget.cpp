@@ -69,9 +69,9 @@ namespace dyno
 			v2 = v[1];
 			v3 = v[2];
 		}
-		spinner1->setRealValue(v1);
-		spinner2->setRealValue(v2);
-		spinner3->setRealValue(v3);
+		spinner1->ModifyValueAndUpdate(v1);
+		spinner2->ModifyValueAndUpdate(v2);
+		spinner3->ModifyValueAndUpdate(v3);
 
 		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));

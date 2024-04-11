@@ -11,16 +11,13 @@ namespace dyno
 	SemiAnalyticalPBD<TDataType>::SemiAnalyticalPBD()
 		: ConstraintModule()
 	{
-		this->inSamplingDistance()->setValue(0.005);
-
 		mCalculateDensity = std::make_shared<SemiAnalyticalSummationDensity<TDataType>>();
 		this->inSmoothingLength()->connect(mCalculateDensity->inSmoothingLength());
 		this->inSamplingDistance()->connect(mCalculateDensity->inSamplingDistance());
 		this->inPosition()->connect(mCalculateDensity->inPosition());
 		this->inNeighborParticleIds()->connect(mCalculateDensity->inNeighborIds());
 		this->inNeighborTriangleIds()->connect(mCalculateDensity->inNeighborTriIds());
-		this->inTriangleIndex()->connect(mCalculateDensity->inTriangleInd());
-		this->inTriangleVertex()->connect(mCalculateDensity->inTriangleVer());
+		this->inTriangleSet()->connect(mCalculateDensity->inTriangleSet());
 	}
 
 	template <typename TDataType>
@@ -357,6 +354,10 @@ namespace dyno
 	{
 		auto& inPos = this->inPosition()->getData();
 
+		auto ts = this->inTriangleSet()->constDataPtr();
+		auto& triVertex = ts->getPoints();
+		auto& triIndex = ts->getTriangles();
+
 		mDeltaPos.reset();
 		mCalculateDensity->update();
 
@@ -367,8 +368,8 @@ namespace dyno
 			mLamda,
 			mCalculateDensity->outDensity()->getData(),
 			inPos,
-			this->inTriangleIndex()->getData(),
-			this->inTriangleVertex()->getData(),
+			triIndex,
+			triVertex,
 			this->inNeighborParticleIds()->getData(),
 			this->inNeighborTriangleIds()->getData(),
 			m_kernel,
@@ -380,8 +381,8 @@ namespace dyno
 			mDeltaPos,
 			mLamda,
 			inPos,
-			this->inTriangleIndex()->getData(),
-			this->inTriangleVertex()->getData(),
+			triIndex,
+			triVertex,
 			this->inNeighborParticleIds()->getData(),
 			this->inNeighborTriangleIds()->getData(),
 			m_kernel,

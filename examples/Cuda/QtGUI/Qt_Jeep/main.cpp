@@ -43,6 +43,7 @@
 #include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
+#include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
 
 
 #include "RigidBody/RigidBody.h"
@@ -85,7 +86,17 @@
 #include "Merge.h"
 #include "ColorMapping.h"
 
+#include "ParticleSystem/Module/ParticleIntegrator.h"
+#include "ParticleSystem/Module/ImplicitViscosity.h"
+#include "ParticleSystem/Module/IterativeDensitySolver.h"
 
+#include "Collision/NeighborPointQuery.h"
+#include "Collision/NeighborTriangleQuery.h"
+
+#include "SemiAnalyticalScheme/SemiAnalyticalPBD.h"
+#include "SemiAnalyticalScheme/TriangularMeshConstraint.h"
+
+#include "Auxiliary/DataSource.h"
 
 using namespace dyno;
 
@@ -219,10 +230,11 @@ std::shared_ptr<SceneGraph> creatScene()
 	fluid->stateVelocity()->promoteOuput()->connect(visualizer->inVector());
 
 	//SemiAnalyticalSFINode
-	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
-	sfi->varFast()->setValue(true);
-	fluid->connect(sfi->importParticleSystems());
-	mergeRoad->stateTriangleSet()->promoteOuput()->connect(sfi->inTriangleSet());
+	auto meshBoundary = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
+	//sfi->varFast()->setValue(true);
+	fluid->connect(meshBoundary->importParticleSystems());
+
+	mergeRoad->stateTriangleSet()->promoteOuput()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
 	auto staticBoundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;

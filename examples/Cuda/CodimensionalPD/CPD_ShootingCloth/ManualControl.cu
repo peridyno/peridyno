@@ -9,7 +9,7 @@ namespace dyno
 
 	template<typename TDataType>
 	ManualControl<TDataType>::ManualControl()
-		: CustomModule()
+		: ComputeModule()
 	{
 
 	}

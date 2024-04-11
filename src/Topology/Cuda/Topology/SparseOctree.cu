@@ -762,7 +762,7 @@ namespace dyno {
 	}
 	template<typename TDataType>
 	void SparseOctree<TDataType>::construct(
-		DArray<Coord>& points,
+		const DArray<Coord>& points,
 		Real radius)
 	{
 		DArray<AABB> aabb;
@@ -1116,7 +1116,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	void SparseOctree<TDataType>::construct(DArray<AABB>& aabb)
+	void SparseOctree<TDataType>::construct(const DArray<AABB>& aabb)
 	{
 		
 		data_count.resize(aabb.size());
@@ -1164,7 +1164,7 @@ namespace dyno {
 	}
 
 	template<typename TDataType>
-	void SparseOctree<TDataType>::construct(DArray<OctreeNode>& nodes)
+	void SparseOctree<TDataType>::construct(const DArray<OctreeNode>& nodes)
 	{
 		/*************** step 2: remove duplicative nodes ****************/
 		int total_node_num = nodes.size();

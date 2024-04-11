@@ -24,6 +24,7 @@
 
 #include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
+#include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
 
 #include "StaticTriangularMesh.h"
@@ -65,7 +66,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
-	fluid->animationPipeline()->disable();
+//	fluid->animationPipeline()->disable();
 
 	//Barricade
 	auto barricade = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
@@ -85,25 +86,15 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->graphicsPipeline()->disable();
 
 	//SFI node
-	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
+	auto sfi = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
 	auto pbd = std::make_shared<SemiAnalyticalPositionBasedFluidModel<DataType3f>>();
 	pbd->varSmoothingLength()->setValue(0.0085);
-
-	sfi->animationPipeline()->clear();
-	sfi->stateTimeStep()->connect(pbd->inTimeStep());
-	sfi->statePosition()->connect(pbd->inPosition());
-	sfi->stateVelocity()->connect(pbd->inVelocity());
-	sfi->stateForceDensity()->connect(pbd->inForce());
-	sfi->stateTriangleVertex()->connect(pbd->inTriangleVertex());
-	sfi->stateTriangleIndex()->connect(pbd->inTriangleIndex());
-	sfi->animationPipeline()->pushModule(pbd);
 
 	auto merge = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	boundary->stateTriangleSet()->connect(merge->inFirst());
 	barricade->stateTriangleSet()->connect(merge->inSecond());
 
 	fluid->connect(sfi->importParticleSystems());
-	//barricade->connect(sfi->importBoundaryMeshs());
 	merge->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	return scn;

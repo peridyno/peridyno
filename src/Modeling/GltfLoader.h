@@ -17,6 +17,8 @@
 #pragma once
 #include "Node/ParametricModel.h"
 #include "Topology/TriangleSet.h"
+#include "Topology/TextureMesh.h"
+
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
@@ -25,10 +27,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tinygltf/tiny_gltf.h"
-
-#include "GraphicsObject/Shape.h"
-#include "GraphicsObject/Material.h"
-
 
 #define NULL_TIME (-9599.99)
 
@@ -57,14 +55,10 @@ namespace dyno
 
 		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, false, "");
-		DEF_VAR(Real, JointRadius, 0.004, "");
+		DEF_VAR(Real, JointRadius, 0.01, "");
 		//DEF_VAR(bool, ReloadTextures, 0.004, "");
 
 		//DefaultChannel
-
-		DEF_ARRAY_STATE(Vec3f, Vertex, DeviceType::GPU, "");
-		DEF_ARRAY_STATE(Vec3f, Normal, DeviceType::GPU, "");
-
 		DEF_ARRAY_STATE(Vec2f, TexCoord_0, DeviceType::GPU, "UVSet 0");
 		DEF_ARRAY_STATE(Vec2f, TexCoord_1, DeviceType::GPU, "UVSet 1");
 		DEF_ARRAY_STATE(Mat4f, InitialMatrix, DeviceType::GPU, "");
@@ -90,14 +84,13 @@ namespace dyno
 		DEF_ARRAY_STATE(int, IntChannel_1, DeviceType::GPU, "IntChannel_1");
 		DEF_ARRAY_STATE(Coord, CoordChannel_1, DeviceType::GPU, "CoordChannel_1");
 		DEF_ARRAY_STATE(Coord, CoordChannel_2, DeviceType::GPU, "CoordChannel_1");
-		//
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
+	
+		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
+
+		DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
-
-
-		DEF_INSTANCES_STATE(Shape, Shape, "");
-		DEF_INSTANCES_STATE(Material, Material, "");
+		
 
 
 	protected:
@@ -167,11 +160,11 @@ namespace dyno
 
 		void InitializationData();
 
-		void getJointsTransformData(const std::vector<joint>& all_Joints,std::vector<std::string>& joint_name,std::vector<std::vector<int>>& joint_child);
+		void getJointsTransformData(const std::vector<joint>& all_Joints, std::map<joint, std::string>& joint_name,std::vector<std::vector<int>>& joint_child);
 
 		void getTriangles(tinygltf::Model& model,const tinygltf::Primitive& primitive,std::vector<TopologyModule::Triangle>& triangles,int pointOffest);
 
-		void getCoordByAttributeName(tinygltf::Model& model,const tinygltf::Primitive& primitive,const std::string& attributeName,std::vector<Coord>& vertices);
+		void getVec3fByAttributeName(tinygltf::Model& model,const tinygltf::Primitive& primitive,const std::string& attributeName,std::vector<Coord>& vertices);
 
 		void getVec4ByAttributeName(tinygltf::Model& model, const tinygltf::Primitive& primitive, const std::string& attributeName, std::vector<Vec4f>& vec4Data);
 
@@ -185,7 +178,7 @@ namespace dyno
 
 		void getMatrix(tinygltf::Model& model,std::vector<Mat4f>& mat);
 
-		std::vector<int> getJointDirByJointIndex(std::map<int, std::vector<int>> jointId_joint_Dir, int Index);
+		std::vector<int> getJointDirByJointIndex(int Index);
 
 		void updateAnimationMatrix(const std::vector<joint>& all_Joints, int currentframe);
 
@@ -200,6 +193,8 @@ namespace dyno
 		Vec3f getmeshPointDeformByJoint(joint jointId, Coord worldPosition, std::map<joint, Mat4f> jMatrix);
 
 		std::string getTexUri(const std::vector<tinygltf::Texture>& textures, const std::vector<tinygltf::Image>& images, int index);
+
+		void getBoundingBoxByName(const tinygltf::Primitive& primitive, const std::string& attributeName, TAlignedBox3D<Real>& vertices, Transform3f& transform);
 
 	};
 

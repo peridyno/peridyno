@@ -31,20 +31,27 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		struct Prim_point_Point 
+
+
+		PolyExtrude();
+
+	protected:
+
+
+		struct Prim_point_Point
 		{
 			int oriP[10];
 
 			int newP[10];
 
 			int primID = -1;
-	
-			Prim_point_Point() 
+
+			Prim_point_Point()
 			{
 				iniArray();
 			};
 
-			Prim_point_Point(bool useOri , int prim,int p0,int p1, int p2)
+			Prim_point_Point(bool useOri, int prim, int p0, int p1, int p2)
 			{
 				iniArray();
 
@@ -54,7 +61,7 @@ namespace dyno
 					this->oriP[1] = p1;
 					this->oriP[2] = p2;
 				}
-				else 
+				else
 				{
 					this->newP[0] = p0;
 					this->newP[1] = p1;
@@ -62,7 +69,7 @@ namespace dyno
 				}
 				this->primID = prim;
 			};
-			Prim_point_Point(bool useOri,int prim ,int p)
+			Prim_point_Point(bool useOri, int prim, int p)
 			{
 				iniArray();
 
@@ -82,19 +89,19 @@ namespace dyno
 				}
 				this->primID = prim;
 			};
-			void setNewID_byOriID(int np,int op) 
+			void setNewID_byOriID(int np, int op)
 			{
 				for (int i = 0; i < sizeof(oriP) / sizeof(oriP[0]); i++)
 				{
-					if (oriP[i] == op) 
-					{ 
-						this->newP[i] = np; 
+					if (oriP[i] == op)
+					{
+						this->newP[i] = np;
 						break;
 					}
 
 				}
 			}
-			void iniArray() 
+			void iniArray()
 			{
 				for (int i = 0; i < sizeof(oriP) / sizeof(oriP[0]); i++)
 				{
@@ -123,7 +130,7 @@ namespace dyno
 
 			bool operator<(const point_layer& other) const
 			{
-				if (this->layer < other.layer) 
+				if (this->layer < other.layer)
 				{
 					return true;
 				}
@@ -134,21 +141,15 @@ namespace dyno
 					else
 						return false;
 				}
-				else 
+				else
 				{
 					return false;
 				}
-
-
 			}
-
 
 			int getpoint() { return this->oriPoint; }
 			int getlayer() { return this->layer; }
 		};
-
-
-		PolyExtrude();
 
 
 	public:

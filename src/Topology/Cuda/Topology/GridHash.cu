@@ -85,7 +85,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, DArray<typename TDataType::Coord> pos)
+	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, const DArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -111,7 +111,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GridHash<TDataType>::construct(DArray<Coord>& pos)
+	void GridHash<TDataType>::construct(const DArray<Coord>& pos)
 	{
 		clear();
 

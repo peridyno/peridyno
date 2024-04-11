@@ -46,6 +46,7 @@ namespace dyno
 		this->varUniformScale()->attach(callback);
 		this->varCurve()->attach(callback);
 
+
 	}
 
 	template<typename TDataType>
@@ -63,7 +64,7 @@ namespace dyno
 		auto uniformScale = this->varUniformScale()->getData();
 		auto pointSet = this->statePointSet()->getDataPtr();
 		auto curve = this->varCurve()->getValue();
-		auto floatCoord = curve.FinalCoord;
+		auto floatCoord = curve.getPoints();
 		int length = floatCoord.size();
 		std::vector<Coord> vertices;
 

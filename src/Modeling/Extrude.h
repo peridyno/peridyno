@@ -33,10 +33,6 @@ namespace dyno
 
 		ExtrudeModel();
 
-		void varChanged();
-
-		void displayChanged();
-
 	public:
 
 		DEF_VAR(unsigned, Row, 4, "Row");
@@ -56,7 +52,7 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-
+		void varChanged();
 	};
 
 	IMPLEMENT_TCLASS(ExtrudeModel, TDataType);

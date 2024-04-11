@@ -16,8 +16,7 @@
 
 #pragma once
 #include "Node/ParametricModel.h"
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
+#include "Topology/TriangleSet.h"
 
 
 namespace dyno
@@ -48,22 +47,19 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "");
 
 		DECLARE_ENUM(UpdateMode,
-		Reset = 0,
+			Reset = 0,
 			Tick = 1);
 
 		DEF_ENUM(UpdateMode, UpdateMode, UpdateMode::Reset, "");
 
-		//DEF_VAR_OUT(TCylinder3D<Real>, Cylinder, "");
 
-		void disableRender();
 		void preUpdateStates()override;
-		void MergeCPU();
+
 		void MergeGPU();
 
 	protected:
 		void resetStates() override;
 
-		std::shared_ptr <GLSurfaceVisualModule> glModule;
 	};
 
 
