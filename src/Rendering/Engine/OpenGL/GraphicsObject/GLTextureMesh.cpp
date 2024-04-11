@@ -131,7 +131,7 @@ namespace dyno
 			}
 		}
 
-		uint matNum = mesh->shapes().size();
+		uint matNum = mesh->materials().size();
 		if (mMaterials.size() != matNum)
 		{
 			mMaterials.resize(matNum);
