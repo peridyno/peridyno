@@ -12,8 +12,6 @@
 
 #include "RigidBody/RigidBody.h"
 
-
-
 using Node = dyno::Node;
 using NodePort = dyno::NodePort;
 
@@ -26,7 +24,7 @@ void declare_multi_node_port(py::module& m, std::string typestr) {
 }
 
 template <typename TDataType>
-void declare_static_boundary(py::module &m, std::string typestr) {
+void declare_static_boundary(py::module& m, std::string typestr) {
 	using Class = dyno::StaticBoundary<TDataType>;
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("StaticBoundary") + typestr;
@@ -72,7 +70,7 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 }
 
 template <typename TDataType>
-void declare_particle_system(py::module &m, std::string typestr) {
+void declare_particle_system(py::module& m, std::string typestr) {
 	using Class = dyno::ParticleSystem<TDataType>;
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("ParticleSystem") + typestr;
@@ -83,10 +81,9 @@ void declare_particle_system(py::module &m, std::string typestr) {
 		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
 		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference)
-        //没找到对应的topology？我暂时用的是statePointSet替代跑通一下。。
+		//没找到对应的topology？我暂时用的是statePointSet替代跑通一下。。
 		.def("current_topology", &Class::statePointSet, py::return_value_policy::reference);
 }
-
 
 template <typename TDataType>
 void declare_ghost_particlesm(py::module& m, std::string typestr) {
@@ -100,8 +97,6 @@ void declare_ghost_particlesm(py::module& m, std::string typestr) {
 		;
 }
 
-
-
 void declare_attribute(py::module& m, std::string typestr) {
 	using Class = dyno::Attribute;
 
@@ -113,14 +108,14 @@ void declare_attribute(py::module& m, std::string typestr) {
 }
 
 template <typename TDataType>
-void declare_particle_elastic_body(py::module &m, std::string typestr) {
+void declare_particle_elastic_body(py::module& m, std::string typestr) {
 	using Class = dyno::ElasticBody<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
 	std::string pyclass_name = std::string("ParticleElasticBody") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-//		.def("load_particles", (void (Class::*)(Class::Coord lo, Class::Coord hi, Class::Real distance)) &Class::loadParticles)
-		.def("load_particles", (void (Class::*)(std::string)) &Class::loadParticles)
+		//		.def("load_particles", (void (Class::*)(Class::Coord lo, Class::Coord hi, Class::Real distance)) &Class::loadParticles)
+		.def("load_particles", (void (Class::*)(std::string)) & Class::loadParticles)
 		.def("translate", &Class::translate);
 }
 
@@ -139,8 +134,6 @@ void declare_circular_emitter(py::module& m, std::string typestr) {
 		.def("var_location", &Class::varLocation, py::return_value_policy::reference);
 }
 
-
-
 void pybind_particle_system(py::module& m)
 {
 	declare_func(m, "");
@@ -158,9 +151,7 @@ void pybind_particle_system(py::module& m)
 	declare_particle_fluid<dyno::DataType3f>(m, "3f");
 	declare_particle_elastic_body<dyno::DataType3f>(m, "3f");
 
-
-	
 	declare_ghost_particlesm<dyno::DataType3f>(m, "3f");
-    
+
 	declare_circular_emitter<dyno::DataType3f>(m, "3f");
 }

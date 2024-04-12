@@ -20,14 +20,14 @@
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 
-
 #include "ParticleSystem/ParticleSystem.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 
-
 #include "SceneGraph.h"
 #include "Log.h"
+
+#include "Color.h"
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -43,6 +43,7 @@ using AnimationPipeline = dyno::AnimationPipeline;
 using SceneGraph = dyno::SceneGraph;
 using VisualModule = dyno::VisualModule;
 using Log = dyno::Log;
+using Color = dyno::Color;
 
 template<class TNode, class ...Args>
 std::shared_ptr<TNode> create_root(SceneGraph& scene, Args&& ... args) {
@@ -57,7 +58,6 @@ void pybind_log(py::module& m)
 // 		.def_static("get_output", &Log::getOutput)
 // 		.def_static("set_level", &Log::setLevel);
 }
-
 
 template<typename T>
 void declare_var(py::module& m, std::string typestr) {
@@ -146,7 +146,6 @@ void declare_discrete_topology_mapping(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 }
 
-
 //------------------------- New ------------------------------
 
 #include "SphereModel.h"
@@ -160,7 +159,6 @@ void declare_sphere_model(py::module& m, std::string typestr) {
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
 		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
 		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
-
 }
 
 template <typename TDataType>
@@ -172,7 +170,6 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 		.def(py::init<>());
 }
 
-
 #include "PlaneModel.h"
 template <typename TDataType>
 void declare_plane_model(py::module& m, std::string typestr) {
@@ -183,7 +180,6 @@ void declare_plane_model(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
 		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
-		
 }
 
 #include "Mapping/MergeTriangleSet.h"
@@ -197,7 +193,6 @@ void declare_merge_triangle_set(py::module& m, std::string typestr) {
 		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
 		.def("in_first", &Class::inFirst, py::return_value_policy::reference)
 		.def("in_second", &Class::inSecond, py::return_value_policy::reference);
-
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
@@ -216,7 +211,7 @@ void declare_semiAnalyticalSFI_node(py::module& m, std::string typestr) {
 #include "initializeModeling.h"
 #include "ParticleSystem/initializeParticleSystem.h"
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
-void declare_modeling_init_static_plugin(py::module& m,std::string typestr) {
+void declare_modeling_init_static_plugin(py::module& m, std::string typestr) {
 	using Class = dyno::ModelingInitializer;
 	using Parent = dyno::PluginEntry;
 	std::string pyclass_name = std::string("ModelingInitializer" + typestr);
@@ -242,7 +237,6 @@ void declare_semiAnalyticalScheme_init_static_plugin(py::module& m, std::string 
 
 //------------------------- NEW END ------------------------------
 
-
 void pybind_framework(py::module& m)
 {
 	pybind_log(m);
@@ -261,6 +255,11 @@ void pybind_framework(py::module& m)
 
 	py::class_<FBase, std::shared_ptr<FBase>>(m, "FBase")
 		.def("connect", &FBase::connect);
+
+	py::class_<OBase, std::shared_ptr<OBase>>(m, "OBase");
+
+	py::class_<Color>(m, "Color")
+		.def(py::init<float, float, float>());
 
 	py::class_<InstanceBase, FBase, std::shared_ptr<InstanceBase>>(m, "FInstance");
 
@@ -301,7 +300,6 @@ void pybind_framework(py::module& m)
 
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 
-
 	declare_pointset<dyno::DataType3f>(m, "3f");
 	declare_edgeSet<dyno::DataType3f>(m, "3f");
 	declare_triangleSet<dyno::DataType3f>(m, "3f");
@@ -321,8 +319,7 @@ void pybind_framework(py::module& m)
 	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
 	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
 
-
-    // New
+	// New
 	declare_parametric_model<dyno::DataType3f>(m, "3f");
 	declare_plane_model<dyno::DataType3f>(m, "3f");
 	declare_sphere_model<dyno::DataType3f>(m, "3f");
@@ -330,9 +327,7 @@ void pybind_framework(py::module& m)
 
 	declare_semiAnalyticalSFI_node<dyno::DataType3f>(m, "3f");
 
-	declare_modeling_init_static_plugin(m,"");
-	declare_paticleSystem_init_static_plugin(m,"");
+	declare_modeling_init_static_plugin(m, "");
+	declare_paticleSystem_init_static_plugin(m, "");
 	//declare_semiAnalyticalScheme_init_static_plugin(m, "");
-
-
 }

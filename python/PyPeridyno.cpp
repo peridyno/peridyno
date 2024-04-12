@@ -8,14 +8,12 @@
 #include "PyCloth.h"
 #include "PyQtGUI.h"
 #include "PyRigidBodySystem.h"
-
-
+#include "PyModeling.h"
 
 // void init_GlutGUI(py::module &);
 // void init_Core(py::module &);
 
 PYBIND11_MODULE(PyPeridyno, m) {
-
 	m.doc() = "Python binding of Peridyno";
 
 	pybind_glfw_gui(m);
@@ -26,5 +24,5 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_qt_gui(m);
 	pybind_cloth(m);
 	pybind_rigid_body_system(m);
-	
+	pybind_modeling(m);
 }
