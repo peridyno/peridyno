@@ -136,40 +136,48 @@ namespace dyno
 		for (int i = 0; i < shapes.size(); i++)
 		{
 			auto shape = shapes[i];
-			auto mtl   = shape->material;
-
-			// material 
+			if (shape->material != nullptr) 
 			{
-				pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
-				pbr.metallic = this->varMetallic()->getValue();
-				pbr.roughness = this->varRoughness()->getValue();
-				pbr.alpha = this->varAlpha()->getValue();
-				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
-				mPBRMaterialUBlock.bindBufferBase(1);
-			}
+				auto mtl = shape->material;
 
-			// bind textures 
+				// material 
+				{
+					pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
+					pbr.metallic = this->varMetallic()->getValue();
+					pbr.roughness = this->varRoughness()->getValue();
+					pbr.alpha = this->varAlpha()->getValue();
+					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+					mPBRMaterialUBlock.bindBufferBase(1);
+				}
+
+				// bind textures 
+				{
+					// reset 
+					glActiveTexture(GL_TEXTURE10);		// color
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE11);		// bump map
+					glBindTexture(GL_TEXTURE_2D, 0);
+
+					if (mtl->texColor.isValid()) {
+						mShaderProgram->setInt("uColorMode", 2);
+						mtl->texColor.bind(GL_TEXTURE10);
+					}
+					else {
+						mtl->texColor.unbind();
+						mShaderProgram->setInt("uColorMode", 0);
+					}
+
+					if (mtl->texBump.isValid()) {
+						mtl->texBump.bind(GL_TEXTURE11);
+						mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
+					}
+				}
+			}
+			else 
 			{
-				// reset 
-				glActiveTexture(GL_TEXTURE10);		// color
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE11);		// bump map
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-				if (mtl->texColor.isValid()) {
-					mShaderProgram->setInt("uColorMode", 2);
-					mtl->texColor.bind(GL_TEXTURE10);
-				}
-				else {
-					mShaderProgram->setInt("uColorMode", 0);
-				}
-
-				if (mtl->texBump.isValid()) {
-					mtl->texBump.bind(GL_TEXTURE11);
-					mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
-				}
+				mShaderProgram->setInt("uColorMode", 0);
 			}
-
+			
 			int numTriangles = shape->glVertexIndex.count();
 
 			mVAO.bind();
