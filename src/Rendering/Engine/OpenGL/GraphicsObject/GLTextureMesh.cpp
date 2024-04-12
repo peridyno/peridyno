@@ -113,7 +113,6 @@ namespace dyno
 
 	void GLTextureMesh::load(const std::shared_ptr<TextureMesh> mesh)
 	{
-		printf("load:\n");
 		if (mesh == nullptr)
 			return;
 
