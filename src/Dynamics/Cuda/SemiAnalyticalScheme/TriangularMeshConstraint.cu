@@ -22,201 +22,8 @@ namespace dyno
 		mPrivousVertex.clear();
 	}
 
-	//Implement the triangle clustering algorithm, refer to Section 4 in "Semi-analytical Solid Boundary Conditions for Free Surface Flows" by Chang et al., Pacific Graphics 2020.
-// 	template <typename Coord>
-// 	__global__ void VC_Sort_Neighbors_Collide(	
-// 		DArray<Coord> position,
-// 		DArray<TopologyModule::Triangle> m_triangle_index,
-// 		DArray<Coord> positionTri,
-// 		DArrayList<int> neighborsTri)
-// 	{
-// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (pId >= position.size()) return;
-// 
-// 		List<int>& nbrTriIds_i = neighborsTri[pId];
-// 		int nbSizeTri = nbrTriIds_i.size();
-// 		
-// 		Coord pos_i = position[pId];
-// 
-// 
-// 		for (int ne = nbSizeTri / 2 - 1; ne >= 0; ne--)
-// 		{
-// 			int start = ne;
-// 			int end = nbSizeTri - 1;
-// 			int c = start;
-// 			int l = 2 * c + 1;
-// 			int tmp = nbrTriIds_i[c];
-// 			for (; l <= end; c = l, l = 2 * l + 1)
-// 			{
-// 
-// 				if (l < end)
-// 				{
-// 					bool judge = false;
-// 					{
-// 						int idx1, idx2;
-// 						idx1 = nbrTriIds_i[l];
-// 						idx2 = nbrTriIds_i[l + 1];
-// 						
-// 						Triangle3D t3d1(positionTri[m_triangle_index[idx1][0]], positionTri[m_triangle_index[idx1][1]], positionTri[m_triangle_index[idx1][2]]);
-// 						Triangle3D t3d2(positionTri[m_triangle_index[idx2][0]], positionTri[m_triangle_index[idx2][1]], positionTri[m_triangle_index[idx2][2]]);
-// 
-// 						Coord normal1 = t3d1.normal().normalize();
-// 						Coord normal2 = t3d2.normal().normalize();
-// 
-// 						Point3D p3d(pos_i);
-// 
-// 						Plane3D PL1(positionTri[m_triangle_index[idx1][0]], t3d1.normal());
-// 						Plane3D PL2(positionTri[m_triangle_index[idx2][0]], t3d2.normal());
-// 
-// 						Real dis1 = p3d.distance(PL1);
-// 						Real dis2 = p3d.distance(PL2);
-// 
-// 						if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON && abs(normal1[1] - normal2[1]) < EPSILON)
-// 							judge = normal1[2] < normal2[2] ? true : false;
-// 						else if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON)
-// 							judge = normal1[1] < normal2[1] ? true : false;
-// 						else if (abs(dis1 - dis2) < EPSILON)
-// 							judge = normal1[0] < normal2[0] ? true : false;
-// 						else
-// 							judge = dis1 <= dis2 ? true : false;
-// 
-// 					}
-// 					if (judge)
-// 						l++;
-// 				}
-// 				bool judge = false;
-// 				{
-// 					int idx1, idx2;
-// 					idx1 = nbrTriIds_i[l];
-// 					idx2 = tmp;
-// 					
-// 					Triangle3D t3d1(positionTri[m_triangle_index[idx1][0]], positionTri[m_triangle_index[idx1][1]], positionTri[m_triangle_index[idx1][2]]);
-// 					Triangle3D t3d2(positionTri[m_triangle_index[idx2][0]], positionTri[m_triangle_index[idx2][1]], positionTri[m_triangle_index[idx2][2]]);
-// 
-// 					Coord normal1 = t3d1.normal().normalize();
-// 					Coord normal2 = t3d2.normal().normalize();
-// 
-// 					Point3D p3d(pos_i);
-// 
-// 					Plane3D PL1(positionTri[m_triangle_index[idx1][0]], t3d1.normal());
-// 					Plane3D PL2(positionTri[m_triangle_index[idx2][0]], t3d2.normal());
-// 
-// 					Real dis1 = p3d.distance(PL1);
-// 					Real dis2 = p3d.distance(PL2);
-// 
-// 					if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON && abs(normal1[1] - normal2[1]) < EPSILON)
-// 						judge = normal1[2] <= normal2[2] ? true : false;
-// 					else if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON)
-// 						judge = normal1[1] <= normal2[1] ? true : false;
-// 					else if (abs(dis1 - dis2) < EPSILON)
-// 						judge = normal1[0] <= normal2[0] ? true : false;
-// 					else
-// 						judge = dis1 <= dis2 ? true : false;
-// 
-// 				}
-// 				if (judge)
-// 					break;
-// 				else
-// 				{
-// 					
-// 					nbrTriIds_i[c] = nbrTriIds_i[l];
-// 					nbrTriIds_i[l] = tmp;
-// 				}
-// 			}
-// 		}
-// 		for (int ne = nbSizeTri - 1; ne > 0; ne--)
-// 		{
-// 			int swap_tmp = nbrTriIds_i[0];
-// 	
-// 			nbrTriIds_i[0] = nbrTriIds_i[ne];
-// 			nbrTriIds_i[ne] = swap_tmp;
-// 
-// 			int start = 0;
-// 			int end = ne - 1;
-// 			int c = start;
-// 			int l = 2 * c + 1;
-// 			int tmp = nbrTriIds_i[c];
-// 			for (; l <= end; c = l, l = 2 * l + 1)
-// 			{
-// 
-// 				if (l < end)
-// 				{
-// 					bool judge = false;
-// 					{
-// 						int idx1, idx2;
-// 						idx1 = nbrTriIds_i[l];
-// 						idx2 = nbrTriIds_i[l + 1];
-// 						
-// 						Triangle3D t3d1(positionTri[m_triangle_index[idx1][0]], positionTri[m_triangle_index[idx1][1]], positionTri[m_triangle_index[idx1][2]]);
-// 						Triangle3D t3d2(positionTri[m_triangle_index[idx2][0]], positionTri[m_triangle_index[idx2][1]], positionTri[m_triangle_index[idx2][2]]);
-// 
-// 						Coord normal1 = t3d1.normal().normalize();
-// 						Coord normal2 = t3d2.normal().normalize();
-// 
-// 						Point3D p3d(pos_i);
-// 
-// 						Plane3D PL1(positionTri[m_triangle_index[idx1][0]], t3d1.normal());
-// 						Plane3D PL2(positionTri[m_triangle_index[idx2][0]], t3d2.normal());
-// 
-// 						Real dis1 = p3d.distance(PL1);
-// 						Real dis2 = p3d.distance(PL2);
-// 
-// 						if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON && abs(normal1[1] - normal2[1]) < EPSILON)
-// 							judge = normal1[2] < normal2[2] ? true : false;
-// 						else if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON)
-// 							judge = normal1[1] < normal2[1] ? true : false;
-// 						else if (abs(dis1 - dis2) < EPSILON)
-// 							judge = normal1[0] < normal2[0] ? true : false;
-// 						else
-// 							judge = dis1 < dis2 ? true : false;
-// 					}
-// 					if (judge)
-// 						l++;
-// 				}
-// 				bool judge = false;
-// 				{
-// 					int idx1, idx2;
-// 					idx1 = nbrTriIds_i[l];
-// 					idx2 = tmp;
-// 					
-// 					Triangle3D t3d1(positionTri[m_triangle_index[idx1][0]], positionTri[m_triangle_index[idx1][1]], positionTri[m_triangle_index[idx1][2]]);
-// 					Triangle3D t3d2(positionTri[m_triangle_index[idx2][0]], positionTri[m_triangle_index[idx2][1]], positionTri[m_triangle_index[idx2][2]]);
-// 
-// 					Plane3D PL1(positionTri[m_triangle_index[idx1][0]], t3d1.normal());
-// 					Plane3D PL2(positionTri[m_triangle_index[idx2][0]], t3d2.normal());
-// 
-// 					Coord normal1 = t3d1.normal().normalize();
-// 					Coord normal2 = t3d2.normal().normalize();
-// 
-// 					Point3D p3d(pos_i);
-// 
-// 					Real dis1 = p3d.distance(PL1);
-// 					Real dis2 = p3d.distance(PL2);
-// 
-// 					if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON && abs(normal1[1] - normal2[1]) < EPSILON)
-// 						judge = normal1[2] <= normal2[2] ? true : false;
-// 					else if (abs(dis1 - dis2) < EPSILON && abs(normal1[0] - normal2[0]) < EPSILON)
-// 						judge = normal1[1] <= normal2[1] ? true : false;
-// 					else if (abs(dis1 - dis2) < EPSILON)
-// 						judge = normal1[0] <= normal2[0] ? true : false;
-// 					else
-// 						judge = dis1 <= dis2 ? true : false;
-// 				}
-// 				if (judge)
-// 					break;
-// 				else
-// 				{
-// 					
-// 					nbrTriIds_i[c] = nbrTriIds_i[l];
-// 					nbrTriIds_i[l] = tmp;
-// 				}
-// 			}
-// 		}
-// 		return;
-// 	}
-
 	template<typename Real, typename Coord>
-	__global__ void K_CCD_MESH (
+	__global__ void TMC_MeshConstrain(
 		DArray<Coord> particle_position,
 		DArray<Coord> particle_velocity,
 		DArray<Coord> particle_position_previous,
@@ -224,7 +31,9 @@ namespace dyno
 		DArray<Coord> triangle_vertex_previous,
 		DArray<TopologyModule::Triangle> triangle_index,
 		DArrayList<int> triangle_neighbors,
-		Real threshold,
+		Real friction_normal,
+		Real friction_tangent,
+		Real thickness,	//thickness of the boundary
 		Real dt)
 	{
 		typedef typename TPoint3D<Real> Point3D;
@@ -241,109 +50,90 @@ namespace dyno
 		Coord pos_i_old = particle_position_previous[pId];
 		Coord vel_i = particle_velocity[pId];
 
-		Point3D start_point(particle_position[pId]);
-		Point3D end_point(particle_position[pId]);
-		PointSweep3D ptSweep(start_point, end_point);
+		Point3D point_start(pos_i_old);
+		Point3D point_end(pos_i);
+		PointSweep3D ptSweep(point_start, point_end);
 
-		Real t = 100.0f;
-		Real min_t = 10.0f;
-		bool bIntersected = false;
-		int min_j = -1;
+		//Intersection number
+		int num = 0;
 
-		int interNum = 0;
-		Coord total_pos(0);
-		Coord delta_pos(0);
+		Coord weighted_pos(0);
+		Coord weighted_normal(0);
+
 
 		for (int ne = 0; ne < nbrSize; ne++)
 		{
 			int j = nbrTriIds_i[ne];
+	
+			Triangle3D triangle_start(triangle_vertex_previous[triangle_index[j][0]], triangle_vertex_previous[triangle_index[j][1]], triangle_vertex_previous[triangle_index[j][2]]);
+			Triangle3D triangle_end(triangle_vertex[triangle_index[j][0]], triangle_vertex[triangle_index[j][1]], triangle_vertex[triangle_index[j][2]]);
 
-			Point3D p3d(pos_i);
-			Point3D p3dp(pos_i);
+			TriangleSweep3D triSweep(triangle_start, triangle_end);
 
-			Triangle3D t3d(triangle_vertex[triangle_index[j][0]], triangle_vertex[triangle_index[j][1]], triangle_vertex[triangle_index[j][2]]);
-			Real min_distance = abs(p3d.distance(t3d));
-			if (ne < nbrSize - 1)
+			//TODO: implement CCD
+// 			Real t;
+// 			typename Triangle3D::Param baryc;
+// 			bool intersected = ptSweep.intersect(triSweep, baryc, t);
+// 			if (intersected) {
+// 				//If the particle intersects a triangle according to CCD, move its position back to the middle point
+// 				point_end = ptSweep.interpolate(t / 2);
+// 			}
+
+			TPoint3D<Real> proj_end = point_end.project(triangle_end);
+
+			Real dist_end = (proj_end.origin - point_end.origin).norm();
+
+			if (dist_end <= thickness)
 			{
-				int jn;
-				do
-				{
-					jn = nbrTriIds_i[ne + 1];
-					Triangle3D t3d_n(triangle_vertex[triangle_index[jn][0]], triangle_vertex[triangle_index[jn][1]], triangle_vertex[triangle_index[jn][2]]);
-					if ((t3d.normal().cross(t3d_n.normal())).norm() > EPSILON * t3d_n.normal().norm() * t3d.normal().norm()) break;
+				Coord dir_j = point_end.origin - proj_end.origin;
 
-					if (abs(p3d.distance(t3d_n)) < abs(min_distance))
-					{
-						j = jn;
-						min_distance = abs(p3d.distance(t3d_n));
-					}
-
-					ne++;
-				} while (ne < nbrSize - 1);
-			}
-		
-
-			Triangle3D start_triangle(triangle_vertex_previous[triangle_index[j][0]], triangle_vertex_previous[triangle_index[j][1]], triangle_vertex_previous[triangle_index[j][2]]);
-			Triangle3D end_triangle(triangle_vertex[triangle_index[j][0]], triangle_vertex[triangle_index[j][1]], triangle_vertex[triangle_index[j][2]]);
-
-			TriangleSweep3D triSweep(start_triangle, end_triangle);
-
-			typename Triangle3D::Param baryc;
-			int num = ptSweep.intersect(triSweep, baryc, t, threshold);
-
-			if (num > 0)
-			{
-				interNum++;
-				bool tmp = false;
-				Coord proj_j = end_triangle.computeLocation(baryc);
-
-				Coord dir_j = start_point.origin - proj_j;
-				if (dir_j.norm() > REAL_EPSILON)
-				{
+				if (dir_j.norm() > REAL_EPSILON) {
 					dir_j.normalize();
 				}
 
+				Coord newpos = proj_end.origin + dir_j * thickness;
 
-				Coord newpos = proj_j + dir_j * threshold;
+				weighted_normal += dir_j;
+				weighted_pos += newpos;
 
-				total_pos += newpos;// end_triangle.computeLocation(tParam) + threshold * end_triangle.normal();
-				auto d_pos_i = newpos - pos_i;
-				if (d_pos_i.norm() > threshold)
-				{
-					d_pos_i *= 0.0;// threshold / d_pos_i.norm();
-				}
-				delta_pos += d_pos_i;
+				num++;
 			}
 		}
 
-		if (interNum > 0)
+		if (num > 0)
 		{
-			total_pos /= interNum;
-			delta_pos /= interNum;
+			//Calculate a weighted displacement
+			weighted_pos /= num;
+			weighted_normal /= num;
 
-			particle_position[pId] = total_pos;
+			particle_position[pId] = weighted_pos;
 
-			Real norm_v = vel_i.norm();
-			Coord old_vel = vel_i;
+			vel_i += (weighted_pos - pos_i) / dt;
 
-			vel_i += delta_pos / dt;
+			Real vel_mag_i = vel_i.dot(weighted_normal);
+			Coord vel_norm_i = vel_mag_i * weighted_normal;
+			Coord vel_tan_i = vel_i - vel_norm_i;
+			vel_norm_i *= (1.0f - friction_normal);
+			vel_tan_i *= (1.0f - friction_tangent);
 
-			particle_velocity[pId] = vel_i;
+			particle_velocity[pId] = vel_norm_i + vel_tan_i;
 		}
 	}
 
 	template<typename TDataType>
 	void TriangularMeshConstraint<TDataType>::constrain()
 	{
-		Real threshold = this->varThreshold()->getData();
+		Real thickness = this->varThickness()->getValue();
 
-		Real dt = this->inTimeStep()->getData();
+		Real dt = this->inTimeStep()->getValue();
 
 		auto& positions = this->inPosition()->getData();
 		auto& velocities = this->inVelocity()->getData();
 
-		auto& vertices = this->inTriangleVertex()->getData();
-		auto& triangles = this->inTriangleIndex()->getData();
+		auto ts = this->inTriangleSet()->constDataPtr();
+
+		auto& vertices = ts->getPoints();
+		auto& triangles = ts->getTriangles();
 		
 		auto& neighborIds = this->inTriangleNeighborIds()->getData();
 
@@ -358,13 +148,8 @@ namespace dyno
 		mPrivousVertex.assign(vertices);
 
 		if (neighborIds.size() > 0) {
-// 			cuExecute(p_num, VC_Sort_Neighbors_Collide,
-// 				positions,
-// 				triangles,
-// 				vertices,
-// 				this->inTriangleNeighborIds()->getData()
-// 			);
-			cuExecute(p_num, K_CCD_MESH,
+			cuExecute(p_num, 
+				TMC_MeshConstrain,
 				positions,
 				velocities,
 				mPreviousPosition,
@@ -372,7 +157,9 @@ namespace dyno
 				mPrivousVertex,
 				triangles,
 				neighborIds,
-				threshold,
+				this->varNormalFriction()->getValue(),
+				this->varTangentialFriction()->getValue(),
+				thickness,
 				dt);
 		}
 

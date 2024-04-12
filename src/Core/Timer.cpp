@@ -83,7 +83,7 @@ namespace dyno
 		return milliseconds;
 	}
 
-	void GTimer::outputString(char* str)
+	void GTimer::outputString(const char* str)
 	{
 		std::cout << str << ": " << getElapsedTime() << "ms" << std::endl;
 	}

@@ -56,8 +56,9 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-	private:
 		void varChanged();
+
+	private:
 
 		void substrFromTwoString(std::string& first, std::string& Second, std::string& line, std::string& MyStr, int& index);
 

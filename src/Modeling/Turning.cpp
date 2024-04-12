@@ -79,7 +79,7 @@ namespace dyno
 
 		auto useRamp = this->varUseRamp()->getValue();
 		auto Ramp = this->varCurve()->getValue();
-		auto floatCoordArray = Ramp.FinalCoord;
+		auto floatCoordArray = Ramp.getPoints();
 
 
 		PointSet<TDataType> s;

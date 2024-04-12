@@ -139,7 +139,7 @@ namespace dyno
 		bool lockSize = false;
 		bool curveClose = false;
 		bool LineResample = false;
-		bool useRamp = false;
+
 		double spacing = 10;				//Resampling Spacing
 
 	private:

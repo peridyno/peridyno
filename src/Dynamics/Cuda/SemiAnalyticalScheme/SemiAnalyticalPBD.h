@@ -8,7 +8,8 @@
 
 #pragma once
 #include "Module/ConstraintModule.h"
-#include "Module/TopologyModule.h"
+
+#include "Topology/TriangleSet.h"
 
 #include "ParticleSystem/Module/ParticleApproximation.h"
 
@@ -44,8 +45,6 @@ namespace dyno
 
         DEF_VAR_IN(Real, TimeStep, "");
 
-        FVar<Real> m_restDensity;
-
         /**
         * @brief smoothing length
         * A positive number represents the radius of neighborhood for each point
@@ -64,23 +63,17 @@ namespace dyno
         */
         DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 
-        /**
-             * @brief neighbor list of particles, only neighbor pairs of particle-particle are counted
-             */
-        DEF_ARRAYLIST_IN(int, NeighborParticleIds, DeviceType::GPU, "");
-        /**
-             * @brief neighbor list of particles and mesh triangles, only neighbor pairs of particle-triangle are counted
-             */
-        DEF_ARRAYLIST_IN(int, NeighborTriangleIds, DeviceType::GPU, "");
-        /**
-             * @brief positions of Triangle vertexes
-             */
-        DEF_ARRAY_IN(Coord, TriangleVertex, DeviceType::GPU, "");
+        DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
         /**
-             * @brief Triangle indexes, represented by three integers, indicating the three indexes of triangle vertex
-             */
-        DEF_ARRAY_IN(Triangle, TriangleIndex, DeviceType::GPU, "");
+		* @brief neighbor list of particles, only neighbor pairs of particle-particle are counted
+		*/
+        DEF_ARRAYLIST_IN(int, NeighborParticleIds, DeviceType::GPU, "");
+
+        /**
+		* @brief neighbor list of particles and mesh triangles, only neighbor pairs of particle-triangle are counted
+		*/
+        DEF_ARRAYLIST_IN(int, NeighborTriangleIds, DeviceType::GPU, "");
 
     private:
         void takeOneIteration();

@@ -1,5 +1,6 @@
 #include "NeighborTriangleQuery.h"
-#include "Primitive/Primitive3D.h"
+
+#include "Topology/SparseOctree.h"
 
 #include "Collision/CollisionDetectionBroadPhase.h"
 
@@ -129,7 +130,11 @@ namespace dyno
 			mQueryAABB.resize(pNum);
 		}
 
-		int tNum = this->inTriangles()->size();
+		auto ts = this->inTriangleSet()->constDataPtr();
+		auto& triVertex = ts->getPoints();
+		auto& triIndex = ts->getTriangles();
+
+		int tNum = triIndex.size();
 		if (tNum == 0) return;
 		if (mQueriedAABB.size() != tNum) {
 			mQueriedAABB.resize(tNum);
@@ -138,16 +143,16 @@ namespace dyno
 		cuExecute(pNum,
 			NTQ_SetupAABB,
 			mQueryAABB,
-			this->inPosition()->getData(),
-			this->inRadius()->getData() * 0.9);
+			this->inPosition()->constData(),
+			this->inRadius()->getValue() * 0.9);
 
 		cuExecute(tNum,
 			NTQ_SetupAABB,
 			mQueriedAABB,
-			this->inTriPosition()->getData(),
-			this->inTriangles()->getData());
+			triVertex,
+			triIndex);
 
-		Real radius = this->inRadius()->getData();
+		Real radius = this->inRadius()->getValue();
 
 		mBroadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 		mBroadPhaseCD->inSource()->assign(mQueryAABB);
@@ -158,9 +163,11 @@ namespace dyno
 		switch (type)
 		{
 		case Spatial::BVH:
-			mBroadPhaseCD->varAccelerationStructure()->getDataPtr()->setCurrentKey(CollisionDetectionBroadPhase<TDataType>::BVH);
+			mBroadPhaseCD->varAccelerationStructure()->setCurrentKey(CollisionDetectionBroadPhase<TDataType>::BVH);
+			break;
 		case Spatial::OCTREE:
-			mBroadPhaseCD->varAccelerationStructure()->getDataPtr()->setCurrentKey(CollisionDetectionBroadPhase<TDataType>::Octree);
+			mBroadPhaseCD->varAccelerationStructure()->setCurrentKey(CollisionDetectionBroadPhase<TDataType>::Octree);
+			break;
 		default:
 			break;
 		}
@@ -195,8 +202,8 @@ namespace dyno
 				NTQ_Narrow_Count,
 				nbr,
 				this->inPosition()->getData(),
-				this->inTriPosition()->getData(),
-				this->inTriangles()->getData(),
+				triVertex,
+				triIndex,
 				nbrNum,
 				this->inRadius()->getData() * 0.9);
 
@@ -210,8 +217,8 @@ namespace dyno
 					nbr,
 					nbrIds,
 					this->inPosition()->getData(),
-					this->inTriPosition()->getData(),
-					this->inTriangles()->getData(),
+					triVertex,
+					triIndex,
 					this->inRadius()->getData() * 0.9);
 
 				nbrNum.clear();

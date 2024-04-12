@@ -14,6 +14,11 @@
 #include "Collision/NeighborPointQuery.h"
 #include "Collision/NeighborTriangleQuery.h"
 
+#include "SemiAnalyticalPBD.h"
+#include "TriangularMeshConstraint.h"
+
+#include "Auxiliary/DataSource.h"
+
 namespace dyno {
 	IMPLEMENT_TCLASS(SemiAnalyticalPositionBasedFluidModel, TDataType)
 
@@ -21,31 +26,38 @@ namespace dyno {
 	SemiAnalyticalPositionBasedFluidModel<TDataType>::SemiAnalyticalPositionBasedFluidModel()
 		: GroupModule()
 	{
-		this->varSmoothingLength()->setValue(Real(0.0125));
+		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
+		smoothingLength->setName("Smoothing Length");
+		smoothingLength->varValue()->setValue(Real(0.012));
+		this->pushModule(smoothingLength);
+
+		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
+		samplingDistance->setName("Sampling Distance");
+		samplingDistance->varValue()->setValue(Real(0.005));
+		this->pushModule(samplingDistance);
 
 		auto m_nbrQueryPoint = std::make_shared<NeighborPointQuery<TDataType>>();
-		this->varSmoothingLength()->connect(m_nbrQueryPoint->inRadius());
+		smoothingLength->outFloating()->connect(m_nbrQueryPoint->inRadius());
 		this->inPosition()->connect(m_nbrQueryPoint->inPosition());
 		this->pushModule(m_nbrQueryPoint);
 		//m_nbrQueryPoint->initialize();
 
 		auto m_nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
-		this->varSmoothingLength()->connect(m_nbrQueryTri->inRadius());
+		smoothingLength->outFloating()->connect(m_nbrQueryTri->inRadius());
 		this->inPosition()->connect(m_nbrQueryTri->inPosition());
-		this->inTriangleVertex()->connect(m_nbrQueryTri->inTriPosition());
-		this->inTriangleIndex()->connect(m_nbrQueryTri->inTriangles());
+		this->inTriangleSet()->connect(m_nbrQueryTri->inTriangleSet());
 		this->pushModule(m_nbrQueryTri);
 		
-		auto m_pbdModule2 = std::make_shared<SemiAnalyticalPBD<TDataType>>();
-		this->inTimeStep()->connect(m_pbdModule2->inTimeStep());
-		this->inPosition()->connect(m_pbdModule2->inPosition());
-		this->inVelocity()->connect(m_pbdModule2->inVelocity());
-		this->varSmoothingLength()->connect(m_pbdModule2->inSmoothingLength());
-		m_nbrQueryPoint->outNeighborIds()->connect(m_pbdModule2->inNeighborParticleIds());
-		m_nbrQueryTri->outNeighborIds()->connect(m_pbdModule2->inNeighborTriangleIds());
-		this->inTriangleIndex()->connect(m_pbdModule2->inTriangleIndex());
-		this->inTriangleVertex()->connect(m_pbdModule2->inTriangleVertex());
-		this->pushModule(m_pbdModule2);
+// 		auto m_pbdModule2 = std::make_shared<SemiAnalyticalPBD<TDataType>>();
+// 		this->inTimeStep()->connect(m_pbdModule2->inTimeStep());
+// 		this->inPosition()->connect(m_pbdModule2->inPosition());
+// 		this->inVelocity()->connect(m_pbdModule2->inVelocity());
+// 		smoothingLength->outFloating()->connect(m_pbdModule2->inSmoothingLength());
+// 		samplingDistance->outFloating()->connect(m_pbdModule2->inSamplingDistance());
+// 		m_nbrQueryPoint->outNeighborIds()->connect(m_pbdModule2->inNeighborParticleIds());
+// 		m_nbrQueryTri->outNeighborIds()->connect(m_pbdModule2->inNeighborTriangleIds());
+// 		this->inTriangleSet()->connect(m_pbdModule2->inTriangleSet());
+// 		this->pushModule(m_pbdModule2);
 
 		auto m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->inTimeStep()->connect(m_integrator->inTimeStep());
@@ -59,7 +71,7 @@ namespace dyno {
 		this->inPosition()->connect(m_visModule->inPosition());
 		this->inVelocity()->connect(m_visModule->inVelocity());
 		m_visModule->varViscosity()->setValue(Real(1));
-		this->varSmoothingLength()->connect(m_visModule->inSmoothingLength());
+		smoothingLength->outFloating()->connect(m_visModule->inSmoothingLength());
 		m_nbrQueryPoint->outNeighborIds()->connect(m_visModule->inNeighborIds());
 		this->pushModule(m_visModule);
 
@@ -68,10 +80,16 @@ namespace dyno {
 		this->inTimeStep()->connect(m_meshCollision->inTimeStep());
 		this->inPosition()->connect(m_meshCollision->inPosition());
 		this->inVelocity()->connect(m_meshCollision->inVelocity());
-		this->inTriangleVertex()->connect(m_meshCollision->inTriangleVertex());
-		this->inTriangleIndex()->connect(m_meshCollision->inTriangleIndex());
+		this->inTriangleSet()->connect(m_meshCollision->inTriangleSet());
 		m_nbrQueryTri->outNeighborIds()->connect(m_meshCollision->inTriangleNeighborIds());
 		this->pushModule(m_meshCollision);
+
+		this->varSmoothingLength()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					smoothingLength->varValue()->setValue(this->varSmoothingLength()->getValue());
+				})
+		);
 	}
 
 	DEFINE_CLASS(SemiAnalyticalPositionBasedFluidModel);

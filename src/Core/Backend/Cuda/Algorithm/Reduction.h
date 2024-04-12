@@ -10,23 +10,23 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(uint n);
+		static Reduction* Create(const uint n);
 		~Reduction();
 
-		T accumulate(T * val, uint num);
+		T accumulate(const T * val, const uint num);
 
-		T maximum(T* val, uint num);
+		T maximum(const T* val, const uint num);
 
-		T minimum(T* val, uint num);
+		T minimum(const T* val, const uint num);
 
-		T average(T* val, uint num);
+		T average(const T* val, const uint num);
 
 	private:
-		Reduction(uint num);
+		Reduction(const uint num);
 
-		void allocAuxiliaryArray(uint num);
+		void allocAuxiliaryArray(const uint num);
 
-		uint getAuxiliaryArraySize(uint n);
+		uint getAuxiliaryArraySize(const uint n);
 		
 		uint m_num;
 		
@@ -40,19 +40,19 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(uint n);
+		static Reduction* Create(const uint n);
 		~Reduction();
 
-		Vec3f accumulate(Vec3f * val, uint num);
+		Vec3f accumulate(const Vec3f * val, const uint num);
 
-		Vec3f maximum(Vec3f* val, uint num);
+		Vec3f maximum(const Vec3f* val, const uint num);
 
-		Vec3f minimum(Vec3f* val, uint num);
+		Vec3f minimum(const Vec3f* val, const uint num);
 
-		Vec3f average(Vec3f* val, uint num);
+		Vec3f average(const Vec3f* val, const uint num);
 
 	private:
-		void allocAuxiliaryArray(uint num);
+		void allocAuxiliaryArray(const uint num);
 
 
 		uint m_num;
@@ -67,19 +67,19 @@ namespace dyno {
 	public:
 		Reduction();
 
-		static Reduction* Create(uint n);
+		static Reduction* Create(const uint n);
 		~Reduction();
 
-		Vec3d accumulate(Vec3d * val, uint num);
+		Vec3d accumulate(const Vec3d * val, const uint num);
 
-		Vec3d maximum(Vec3d* val, uint num);
+		Vec3d maximum(const Vec3d* val, const uint num);
 
-		Vec3d minimum(Vec3d* val, uint num);
+		Vec3d minimum(const Vec3d* val, const uint num);
 
-		Vec3d average(Vec3d* val, uint num);
+		Vec3d average(const Vec3d* val, const uint num);
 
 	private:
-		void allocAuxiliaryArray(uint num);
+		void allocAuxiliaryArray(const uint num);
 
 
 		uint m_num;

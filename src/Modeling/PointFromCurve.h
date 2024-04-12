@@ -51,9 +51,6 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-		float currentIndex = 0;
-		float totalIndex = 0;
-
 
 	private:
 		void varChanged();
