@@ -136,6 +136,8 @@ namespace dyno
 		this->varIterationNumber()->setValue(5);
 		maxDensity = this->varRestDensity()->getValue();
 
+		this->outVirtualParticles()->allocate();
+
 		this->varSamplingDistance()->setValue(Real(0.005));
 		this->varSmoothingLength()->setValue(Real(0.011));
 		this->varRestDensity()->setValue(Real(1000));

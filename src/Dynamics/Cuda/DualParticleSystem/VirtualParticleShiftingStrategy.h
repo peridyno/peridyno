@@ -24,7 +24,7 @@
 namespace dyno {
 
 	template<typename TDataType> class SummationDensity;
-
+	template<typename TDataType> class NeighborPointQuery;
 	/*
 	*@Brief: Particle shifting strategy in Dual-particle SPH method. (Virtual paritlce genorator).
 	*@Note : Implementation is based on  PBF method (Position Base Fluid.)

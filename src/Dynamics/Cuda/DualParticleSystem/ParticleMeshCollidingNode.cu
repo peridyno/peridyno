@@ -14,9 +14,9 @@ namespace dyno
 		auto nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
 		smoothingLength->outFloating()->connect(nbrQueryTri->inRadius());
 		this->inPosition()->connect(nbrQueryTri->inPosition());
- 		this->stateTriangleVertex()->connect(nbrQueryTri->inTriPosition());
- 		this->stateTriangleIndex()->connect(nbrQueryTri->inTriangles());
-		this->inTriangleSet()->connect(nbrQueryTri->inTriangles());
+// 		this->stateTriangleVertex()->connect(nbrQueryTri->inTriPosition());
+// 		this->stateTriangleIndex()->connect(nbrQueryTri->inTriangles());
+		this->inTriangleSet()->connect(nbrQueryTri->inTriangleSet());
 		this->animationPipeline()->pushModule(nbrQueryTri);
 
 		//mesh collision
@@ -24,9 +24,9 @@ namespace dyno
 		this->stateTimeStep()->connect(meshCollision->inTimeStep());
 		this->inPosition()->connect(meshCollision->inPosition());
 		this->inVelocity()->connect(meshCollision->inVelocity());
- 		this->stateTriangleVertex()->connect(meshCollision->inTriangleVertex());
- 		this->stateTriangleIndex()->connect(meshCollision->inTriangleIndex());
-//		this->inTriangleSet()->connect(meshCollision->inTriangleSet());
+//		this->stateTriangleVertex()->connect(meshCollision->inTriangleVertex());
+//		this->stateTriangleIndex()->connect(meshCollision->inTriangleIndex());
+		this->inTriangleSet()->connect(meshCollision->inTriangleSet());
 		nbrQueryTri->outNeighborIds()->connect(meshCollision->inTriangleNeighborIds());
 		this->animationPipeline()->pushModule(meshCollision);
 
