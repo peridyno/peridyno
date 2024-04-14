@@ -28,8 +28,8 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	BoxInfo box, box1, box2, box3, box4;
-	box.center = Vec3f(0, 0.1, 0);
-	box.halfLength = Vec3f(0.2, 0.02, 0.1);
+	box.center = Vec3f(0, 0.15, 0);
+	box.halfLength = Vec3f(0.2, 0.04, 0.1);
 	SphereInfo sphere1, sphere2, sphere3, sphere4;
 	sphere1.center = Vec3f(-0.18, 0.03, 0.09);
 	sphere1.radius = 0.03;
@@ -43,6 +43,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	RigidBodyInfo rigidbody;
 
 	rigid->addBox(box, rigidbody);
+	rigidbody.angularVelocity = Vec3f(0, 0, -50);
 	rigid->addSphere(sphere1, rigidbody);
 	rigid->addSphere(sphere2, rigidbody);
 	rigid->addSphere(sphere3, rigidbody);
@@ -50,22 +51,22 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	HingeJoint<Real> joint1(0, 4);
 	joint1.setAnchorPoint(sphere1.center, sphere1.center, box.center, sphere1.rot, box.rot);
-	joint1.setMoter(-10.0);
+	joint1.setMoter(-20.0);
 	joint1.setAxis(Vec3f(0, 0, 1), sphere1.rot, box.rot);
 	rigid->addHingeJoint(joint1);
 	HingeJoint<Real> joint2(1, 4);
 	joint2.setAnchorPoint(sphere2.center, sphere2.center, box.center, sphere2.rot, box.rot);
-	joint2.setMoter(-10.0);
+	joint2.setMoter(-20.0);
 	joint2.setAxis(Vec3f(0, 0, 1), sphere2.rot, box.rot);
 	rigid->addHingeJoint(joint2);
 	HingeJoint<Real> joint3(2, 4);
 	joint3.setAnchorPoint(sphere3.center, sphere3.center, box.center, sphere3.rot, box.rot);
-	joint3.setMoter(-10.0);
+	joint3.setMoter(-20.0);
 	joint3.setAxis(Vec3f(0, 0, 1), sphere3.rot, box.rot);
 	rigid->addHingeJoint(joint3);
 	HingeJoint<Real> joint4(3, 4);
 	joint4.setAnchorPoint(sphere4.center, sphere4.center, box.center, sphere4.rot, box.rot);
-	joint4.setMoter(-10.0);
+	joint4.setMoter(-20.0);
 	joint4.setAxis(Vec3f(0, 0, 1), sphere4.rot, box.rot);
 	rigid->addHingeJoint(joint4);
 	

@@ -53,17 +53,17 @@ namespace dyno
 		void addBox(
 			const BoxInfo& box, 
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(100));
+			const Real density = Real(0.1));
 
 		void addSphere(
 			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
-			const Real density = Real(100));
+			const Real density = Real(0.1));
 
 		void addTet(
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(100));
+			const Real density = Real(0.1));
 
 		void addBallAndSocketJoint(
 			const BallAndSocketJoint& joint
@@ -83,7 +83,7 @@ namespace dyno
 
 		Mat3f pointInertia(Coord v1);
 
-		Real getDt() override { return 0.001; }
+		Real getDt() override { return double(0.001); }
 
 	protected:
 		void resetStates() override;
@@ -97,7 +97,7 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 0.2, "");
+		DEF_VAR(Real, FrictionCoefficient, 0.002, "");
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 

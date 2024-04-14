@@ -33,13 +33,11 @@ std::shared_ptr<SceneGraph> creatBricks()
 	box2.center = Vec3f(0, 0.6, 0);
 	box2.halfLength = Vec3f(0.1);
 
-	HingeJoint<Real> joint(0, 1);
-	joint.setAnchorPoint(box1.center + Vec3f(0.0, 0.2f, 0.0), box1.center, box2.center, box1.rot, box2.rot);
-	joint.setAxis(Vec3f(1, 0, 0), box1.rot, box2.rot);
-	rigid->addHingeJoint(joint);
 	rigid->addBox(box1, rigidBody);
 	rigidBody.angularVelocity = Vec3f(0.0, 0, 10.0);
 	rigid->addBox(box2, rigidBody);
+
+	//rigid->setStaticBody(0);
 
 	/*for (int i = 0; i < 20; i++)
 	{

@@ -58,7 +58,7 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(uint, IterationNumber, 50, "");
+		DEF_VAR(uint, IterationNumber, 20, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -93,8 +93,10 @@ namespace dyno
 		void initializeJacobian(Real dt);
 
 	private:
+		int cnt = 0;
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
+		DArray<Real> mJB;		//JB
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
@@ -103,11 +105,18 @@ namespace dyno
 		DArray<Real> mD;		//diagonal elements of JB
 		DArray<Real> mLambda;	//contact impulse
 
+		DArray<Real> mLambda_old;
+
+		DArray<Real> mDiff;
+		CArray<Real> mDiffHost;
+
 
 		DArray<Constraint> mAllConstraints;
 
 		DArray<int> mContactNumber;
 		DArray<int> mJointNumber;
+
+		DArray<Real> mError;
 
 	};
 }

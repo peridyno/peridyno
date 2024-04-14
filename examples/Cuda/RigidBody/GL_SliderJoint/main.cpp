@@ -41,7 +41,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	box2.halfLength = Vec3f(1, 0.05, 0.3);
 	rigid->addBox(box2, rigidBody);
 
-	rigidBody.linearVelocity = Vec3f(-30, 0, 0);
+	rigidBody.linearVelocity = Vec3f(-10, 0, 0);
 
 	box3.center = Vec3f(0.5, 0.2, 0);
 	box3.halfLength = Vec3f(0.1, 0.1, 0.1);
@@ -51,7 +51,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	SliderJoint<Real> joint1(0, 1);
 	Vec3f point = Vec3f(0, 0.1, 0);
-	joint1.setAnchorPoint(point, box1.center, box2.center);
+	joint1.setAnchorPoint(point, box1.center, box2.center, box1.rot, box2.rot);
 	joint1.setAxis(Vec3f(1, 0, 0));
 	joint1.setRange(-0.9, 0.9);
 	rigid->addSliderJoint(joint1);
@@ -68,11 +68,11 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	FixedJoint<Real> joint2(1, 3);
 	point = Vec3f(0, 0.1, -0.2);
-	joint2.setAnchorPoint(point, box2.center, box4.center);
+	joint2.setAnchorPoint(point, box2.center, box4.center, box2.rot, box5.rot);
 	rigid->addFixedJoint(joint2);
 	FixedJoint<Real> joint3(1, 4);
 	point = Vec3f(0, 0.1, 0.2);
-	joint3.setAnchorPoint(point, box2.center, box5.center);
+	joint3.setAnchorPoint(point, box2.center, box5.center, box2.rot, box5.rot);
     rigid->addFixedJoint(joint3);
 
 
