@@ -92,12 +92,13 @@ void declare_matrix(py::module& m, std::string typestr) {
 }
 
 #include "Primitive/Primitive3D.h"
+template <typename Real>
+void declare_TOrientedBox3D(py::module& m, std::string typestr)
+{
+}
 
 void pybind_core(py::module& m)
 {
-	py::class_<dyno::TOrientedBox3D<float>>(m, "TOrienteBox3D")
-		.def(py::init());
-
 	py::class_<dyno::CTimer>(m, "CTimer")
 		.def(py::init())
 		.def("start", &dyno::CTimer::start)
@@ -119,4 +120,22 @@ void pybind_core(py::module& m)
 	// 	declare_matrix<double, 2>(m, "2d");
 	// 	declare_matrix<double, 3>(m, "3d");
 	// 	declare_matrix<double, 4>(m, "4d");
+
+	typedef  dyno::Vector<Real, 2> Coord2D;
+	typedef  dyno::Vector<Real, 3> Coord3D;
+	typedef  dyno::SquareMatrix<Real, 3> Matrix3D;
+
+	py::class_<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D")
+		.def(py::init<const Coord3D&, const Coord3D&, const Coord3D&, const Coord3D&, const Coord3D&>())
+		.def(py::init<const Coord3D&, const dyno::Quat<Real>&, const Coord3D&>())
+		.def(py::init<const dyno::TOrientedBox3D<Real>&>())
+		.def("volume", &dyno::TOrientedBox3D<Real>::volume)
+		.def("isValid", &dyno::TOrientedBox3D<Real>::isValid)
+		.def("rotate", &dyno::TOrientedBox3D<Real>::rotate)
+		.def("aabb", &dyno::TOrientedBox3D<Real>::aabb)
+		.def_readwrite("center", &dyno::TOrientedBox3D<Real>::center)
+		.def_readwrite("u", &dyno::TOrientedBox3D<Real>::u)
+		.def_readwrite("v", &dyno::TOrientedBox3D<Real>::v)
+		.def_readwrite("w", &dyno::TOrientedBox3D<Real>::w)
+		.def_readwrite("extent", &dyno::TOrientedBox3D<Real>::extent);
 }
