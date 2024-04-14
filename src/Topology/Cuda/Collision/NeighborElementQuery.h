@@ -24,8 +24,6 @@ namespace dyno {
 
 		NeighborElementQuery();
 		~NeighborElementQuery() override;
-		
-		void compute() override;
 
 	public:
 		/**
@@ -39,6 +37,10 @@ namespace dyno {
 		DEF_ARRAY_IN(CollisionMask, CollisionMask, DeviceType::GPU, "");
 
 		DEF_ARRAY_OUT(TContactPair<Real>, Contacts, DeviceType::GPU, "");
+
+	protected:
+		void compute() override;
+
 	private:
 		DArray<AABB> mQueryAABB;
 		DArray<AABB> mQueriedAABB;

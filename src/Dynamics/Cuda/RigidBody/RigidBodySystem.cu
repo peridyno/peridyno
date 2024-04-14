@@ -169,6 +169,33 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addCapsule(
+		const CapsuleInfo& capsule,
+		const RigidBodyInfo& bodyDef, 
+		const Real density /*= Real(100)*/)
+	{
+		auto b = capsule;
+		auto bd = bodyDef;
+
+		float lx = 2.0f * b.halfLength;
+		float ly = 2.0f * b.radius;
+		float lz = 2.0f * b.radius;
+		bd.position = b.center;
+
+		bd.mass = density * lx * ly * lz;
+		bd.inertia = 1.0f / 12.0f * bd.mass
+			* Mat3f(ly * ly + lz * lz, 0, 0,
+				0, lx * lx + lz * lz, 0,
+				0, 0, lx * lx + ly * ly);
+
+		bd.shapeType = ET_CAPSULE;
+		bd.angle = b.rot;
+
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), bd);
+		mHostCapsules.push_back(b);
+	}
+
+	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addBallAndSocketJoint(const BallAndSocketJoint& joint)
 	{
 		mHostJointsBallAndSocket.push_back(joint);
@@ -260,6 +287,21 @@ namespace dyno
 		tet3d[tId].v[3] = tetInfo[tId].v[3];
 	}
 
+	__global__ void SetupCaps(
+		DArray<Capsule3D> cap3d,
+		DArray<CapsuleInfo> capInfo)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= capInfo.size()) return;
+
+		float halfLenght = capInfo[tId].halfLength;
+		Mat3f rot = capInfo[tId].rot.toMatrix3x3();
+
+		cap3d[tId].segment.v0 = capInfo[tId].center - rot * Vec3f(0, 0, halfLenght);
+		cap3d[tId].segment.v1 = capInfo[tId].center + rot * Vec3f(0, 0, halfLenght);
+		cap3d[tId].radius = capInfo[tId].radius;
+	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::resetStates()
 	{
@@ -268,7 +310,7 @@ namespace dyno
 		mDeviceBoxes.assign(mHostBoxes);
 		mDeviceSpheres.assign(mHostSpheres);
 		mDeviceTets.assign(mHostTets);
-
+		mDeviceCapsules.assign(mHostCapsules);
 
 		this->stateBallAndSocketJoints()->assign(mHostJointsBallAndSocket);
 		this->stateSliderJoints()->assign(mHostJointsSlider);
@@ -278,10 +320,12 @@ namespace dyno
 		auto& boxes = topo->getBoxes();
 		auto& spheres = topo->getSpheres();
 		auto& tets = topo->getTets();
+		auto& caps = topo->getCaps();
 
 		boxes.resize(mDeviceBoxes.size());
 		spheres.resize(mDeviceSpheres.size());
 		tets.resize(mDeviceTets.size());
+		caps.resize(mDeviceCapsules.size());
 
 		//Setup the topology
 		cuExecute(mDeviceBoxes.size(),
@@ -298,6 +342,11 @@ namespace dyno
 			SetupTets,
 			tets,
 			mDeviceTets);
+
+		cuExecute(mDeviceCapsules.size(),
+			SetupCaps,
+			caps,
+			mDeviceCapsules);
 
 		mDeviceRigidBodyStates.assign(mHostRigidBodyStates);
 
@@ -330,7 +379,7 @@ namespace dyno
 		this->stateInitialInertia()->resize(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
-
+		updateTopology();
 
 		m_yaw = 0.0f;
 		m_pitch = 0.0f;
@@ -390,12 +439,34 @@ namespace dyno
 		tet[pId].v[3] = rotation[pId + start_tet] * (tet_init[pId].v[3] - center_init) + pos[pId + start_tet];
 	}
 
+	template <typename Real, typename Coord>
+	__global__ void UpdateCapsules(
+		DArray<Capsule3D> caps,
+		DArray<CapsuleInfo> cap_init,
+		DArray<Coord> pos,
+		DArray<Quat<Real>> quat,
+		int start_cap)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= caps.size()) return;
+
+		Capsule3D cap;
+		cap.radius = cap_init[pId].radius;
+		cap.segment.v0 = pos[pId + start_cap] - quat[pId + start_cap].rotate(Coord(0, 0, cap_init[pId].halfLength));
+		cap.segment.v1 = pos[pId + start_cap] + quat[pId + start_cap].rotate(Coord(0, 0, cap_init[pId].halfLength));
+
+		caps[pId] = cap;
+	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::updateTopology()
 	{
 		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
+
+		CArray<Coord> hPos;
+		hPos.assign(this->stateCenter()->constData());
 
 		cuExecute(mDeviceBoxes.size(),
 			UpdateBoxes,
@@ -405,7 +476,7 @@ namespace dyno
 			this->stateRotationMatrix()->getData(),
 			offset.boxIndex());
 
-		cuExecute(mDeviceBoxes.size(),
+		cuExecute(mDeviceSpheres.size(),
 			UpdateSpheres,
 			discreteSet->getSpheres(),
 			mDeviceSpheres,
@@ -420,6 +491,14 @@ namespace dyno
 			this->stateCenter()->getData(),
 			this->stateRotationMatrix()->getData(),
 			offset.tetIndex());
+
+		cuExecute(mDeviceCapsules.size(),
+			UpdateCapsules,
+			discreteSet->getCaps(),
+			mDeviceCapsules,
+			this->stateCenter()->getData(),
+			this->stateQuaternion()->getData(),
+			offset.capsuleIndex());
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

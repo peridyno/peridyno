@@ -161,11 +161,7 @@ namespace dyno
 		float sin1 = sqrtf((1 - cos2) / 2.0);
 		Vec3f axis = Vec3f(-dir[1], dir[0], 0).normalize();
 		Quat<float> q(axis.x * sin1, axis.y * sin1, axis.z * sin1, cos1);
-		if (tId == -1)//DEBUG
-		{
-			printf("cos (%f %f %f)\n", cos2, cos1, sin1);
-			printf("dir (%f %f %f)\n", dir[0], dir[1], dir[2]);
-		}
+
 		rot[tId] = q.toMatrix3x3();
 	}
 
@@ -185,12 +181,13 @@ namespace dyno
 
 		Capsule3D capsule = capsuleInstances[instanceId];
 		float r = capsule.radius;
-		float h = (capsule.segment.length() / 2.0f) - r;
+		float h = (capsule.segment.length() / 2.0f);
 		Vec3f center = (capsule.segment.v0 +  capsule.segment.v1 ) / 2.0f; 
 
 		Vec3f v = capsuleVertices[vertexId];
 		Vec3f orignZ = Vec3f(0, 0, 1);
 		Vec3f newZ = Vec3f(0, 0, h);
+
 		if (v.z >= 1) // 上半球
 		{
 			vertices[pointOffset + tId] = rot[instanceId] * ((v - orignZ) * r + newZ) + center;
@@ -202,14 +199,7 @@ namespace dyno
 		else // 圆柱
 		{
 			vertices[pointOffset + tId] = rot[instanceId] * (v * Vec3f(r, r, h)) + center;
-		}
-		if (tId == -1) //DEBUG
-		{
-			printf("[%f %f]\n", r, h);
-			printf("v: (%f,%f,%f) \n", v.x, v.y, v.z);
-			printf("center: (%f,%f,%f) \n", center.x, center.y, center.z);
-			printf("ver: (%f,%f,%f) \n", vertices[pointOffset + tId].x, vertices[pointOffset + tId].y, vertices[pointOffset + tId].z);
-		}		
+		}	
 	}
 
 	template<typename Triangle>
@@ -218,6 +208,7 @@ namespace dyno
 		DArray<Triangle> capsuleIndices,
 		DArray<Capsule3D> capsuleInstances,
 		uint vertexSize,						//vertex size of the instance sphere 
+		uint vertexOffset,
 		uint indexOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -226,17 +217,10 @@ namespace dyno
 		uint instanceId = tId / capsuleIndices.size();
 		uint indexId = tId % capsuleIndices.size();
 
-		int vertexOffset = indexOffset + instanceId * vertexSize;
+		vertexOffset += instanceId * vertexSize;
 		
 		Triangle tIndex = capsuleIndices[indexId];
 		indices[indexOffset + tId] = Triangle(tIndex[0] + vertexOffset, tIndex[1] + vertexOffset, tIndex[2] + vertexOffset);
-
-		if (tId == -1) //DEBUG
-		{
-			printf("tIndex [%d %d %d]\n", tIndex[0], tIndex[1], tIndex[2]);
-			printf("%d\n", vertexOffset);
-		}
-
 	}
 
 	template<typename TDataType>
@@ -247,7 +231,7 @@ namespace dyno
 			this->outTriangleSet()->allocate();
 		}
 
-		auto inTopo = this->inDiscreteElements()->getDataPtr();
+		auto inTopo = this->inDiscreteElements()->constDataPtr();
 
 		DArray<Mat3f> capsuleRotates;
 		//printf("====================================================== inside box update\n");
@@ -287,6 +271,7 @@ namespace dyno
 		uint vertexOffset = 0;
 		uint indexOffset = 0;
 
+		//Setup spheres
 		cuExecute(numOfSpheres * sphereVertices.size(),
 			SetupVerticesForSphereInstances,
 			vertices,
@@ -304,13 +289,37 @@ namespace dyno
 
 		vertexOffset += numOfSpheres * sphereVertices.size();
 		indexOffset += numOfSpheres * sphereIndices.size();
-		
-		// Capsule
+
+		//Setup boxes
+		cuExecute(numOfBoxes,
+			SetupCubeInstances,
+			vertices,
+			indices,
+			boxes,
+			vertexOffset,
+			indexOffset);
+
+		vertexOffset += boxes.size() * 8;
+		indexOffset += boxes.size() * 12;
+
+		//Setup tets
+		cuExecute(numOfTets,
+			SetupTetInstances,
+			vertices,
+			indices,
+			tets,
+			vertexOffset,
+			indexOffset);
+
+		vertexOffset += numOfTets * 4;
+		indexOffset += numOfTets * 4;
+
+		//Setup capsules
 		cuExecute(numofCaps,
 			SetupRotateForCapsuleInstances,
 			capsuleInstances,
 			capsuleRotates);
-		
+
 		cuExecute(numofCaps * capsuleVertices.size(),
 			SetupVerticesForCapsuleInstances,
 			vertices,
@@ -325,31 +334,16 @@ namespace dyno
 			capsuleIndices,
 			capsuleInstances,
 			capsuleVertices.size(),
+			vertexOffset,
 			indexOffset);
 
 		vertexOffset += numofCaps * capsuleVertices.size();
 		indexOffset += numofCaps * capsuleIndices.size();
 
-		cuExecute(numOfBoxes,
-			SetupCubeInstances,
-			vertices,
-			indices,
-			boxes,
-			vertexOffset,
-			indexOffset);
-
-		vertexOffset += boxes.size() * 8;
-		indexOffset += boxes.size() * 12;
-
-		cuExecute(numOfTets,
-			SetupTetInstances,
-			vertices,
-			indices,
-			tets,
-			vertexOffset,
-			indexOffset);
 
 		this->outTriangleSet()->getDataPtr()->update();
+
+		capsuleRotates.clear();
 
 		return true;
 	}

@@ -63,7 +63,7 @@ namespace dyno
 	{
 	public:
 		Vector<Real, 3> position;			// World coordinate of contact
-		Real penetration;			// Depth of penetration from collision
+		Real penetration;			// Depth of penetration from collision whose value is assumed to be negative when interpenetration occurs
 	};
 
 	template<typename Real>

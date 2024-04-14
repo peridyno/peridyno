@@ -79,6 +79,9 @@ namespace dyno
 		uint triEnd;
 	};
 
+	/**
+	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle
+	 */
 	template<typename TDataType>
 	class DiscreteElements : public TopologyModule
 	{

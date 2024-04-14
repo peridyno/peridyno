@@ -65,6 +65,11 @@ namespace dyno
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
+		void addCapsule(
+			const CapsuleInfo& capsule,
+			const RigidBodyInfo& bodyDef,
+			const Real density = Real(100));
+
 		void addBallAndSocketJoint(
 			const BallAndSocketJoint& joint
 		);
@@ -150,12 +155,14 @@ namespace dyno
 		std::vector<SphereInfo> mHostSpheres;
 		std::vector<BoxInfo> mHostBoxes;
 		std::vector<TetInfo> mHostTets;
+		std::vector<CapsuleInfo> mHostCapsules;
 
 		DArray<RigidBodyInfo> mDeviceRigidBodyStates;
 
 		DArray<SphereInfo> mDeviceSpheres;
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
+		DArray<CapsuleInfo> mDeviceCapsules;
 
 		std::vector<BallAndSocketJoint> mHostJointsBallAndSocket;
 		std::vector<SliderJoint> mHostJointsSlider;

@@ -70,6 +70,123 @@ void createTetBox(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
 	rigid->addTet(tet0, rigidBody);
 }
 
+void createTwoCapsules(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	CapsuleInfo capsule;
+	capsule.center = Vec3f(-1.25, 0.1, -0.5f);
+	capsule.halfLength = 0.1f;
+	capsule.radius = 0.1f;
+	rigid->addCapsule(capsule, rigidBody);
+
+	capsule.center = Vec3f(-1.3, 0.33, -0.5f);
+	capsule.halfLength = 0.1f;
+	capsule.rot = Quat1f(0, 1, 0, 0.5);
+	capsule.radius = 0.1f;
+	rigid->addCapsule(capsule, rigidBody);
+}
+
+void createCapsuleBox(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	BoxInfo box;
+	box.center = Vec3f(-1.3, 0.1, 0.5);
+	box.halfLength = Vec3f(0.1, 0.1, 0.1);
+	rigid->addBox(box, rigidBody);
+
+	CapsuleInfo capsule;
+	capsule.center = Vec3f(-1.3, 0.3, 0.35);
+	capsule.halfLength = 0.1f;
+	capsule.radius = 0.1f;
+	rigid->addCapsule(capsule, rigidBody);
+}
+
+void createCapsuleTet(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
+{
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+
+	TetInfo tet0;
+	tet0.v[0] = Vec3f(0.45f, 0.0f, -0.45f);
+	tet0.v[1] = Vec3f(0.45f, 0.25f, -0.45f);
+	tet0.v[2] = Vec3f(0.7f, 0.0f, -0.45f);
+	tet0.v[3] = Vec3f(0.45f, 0.0f, -0.2f);
+	rigid->addTet(tet0, rigidBody);
+
+	CapsuleInfo capsule;
+	capsule.center = Vec3f(0.45, 0.4, -0.35);
+	capsule.halfLength = 0.1f;
+	capsule.radius = 0.1f;
+	rigid->addCapsule(capsule, rigidBody);
+}
+
+//create tests for sphere
+void createTwoSpheres(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
+{
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	SphereInfo sphere;
+	sphere.center = Vec3f(-1.3, 0.1, 1.5);
+	sphere.radius = 0.1f;
+	rigid->addSphere(sphere, rigidBody);
+
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	sphere.center = Vec3f(-1.3, 0.3, 1.59);
+	sphere.radius = 0.1f;
+	rigid->addSphere(sphere, rigidBody);
+}
+
+void createSphereBox(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
+{
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	BoxInfo box;
+	box.center = Vec3f(-0.3, 0.3, 1.5);
+	box.halfLength = Vec3f(0.1f);
+	rigid->addBox(box, rigidBody);
+
+	SphereInfo sphere;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	sphere.center = Vec3f(-0.3, 0.1, 1.59);
+	sphere.radius = 0.1f;
+	rigid->addSphere(sphere, rigidBody);
+}
+
+void createSphereTet(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
+{
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	TetInfo tet;
+	tet.v[0] = Vec3f(0.45f, 0.3f, 1.59);
+	tet.v[1] = Vec3f(0.45f, 0.55f, 1.59);
+	tet.v[2] = Vec3f(0.7f, 0.3f, 1.59);
+	tet.v[3] = Vec3f(0.45f, 0.3f, 1.89);
+	rigid->addTet(tet, rigidBody);
+
+	SphereInfo sphere;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	sphere.center = Vec3f(0.7, 0.1, 1.59);
+	sphere.radius = 0.1f;
+	rigid->addSphere(sphere, rigidBody);
+}
+
+void createSphereCapsule(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
+{
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	CapsuleInfo cap;
+	cap.center = Vec3f(1.3, 0.3, 1.6);
+	cap.halfLength = 0.1f;
+	cap.radius = 0.1f;
+	rigid->addCapsule(cap, rigidBody);
+
+	SphereInfo sphere;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	sphere.center = Vec3f(1.3, 0.1, 1.59);
+	sphere.radius = 0.1f;
+	rigid->addSphere(sphere, rigidBody);
+}
+
 std::shared_ptr<SceneGraph> creatScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
@@ -117,6 +234,15 @@ std::shared_ptr<SceneGraph> creatScene()
 	createTwoBoxes(rigid);
 	createTwoTets(rigid);
 	createTetBox(rigid);
+	createCapsuleBox(rigid);
+	createTwoCapsules(rigid);
+	createCapsuleTet(rigid);
+
+	//sphere
+	createTwoSpheres(rigid);
+	createSphereBox(rigid);
+	createSphereTet(rigid);
+	createSphereCapsule(rigid);
 
 	return scn;
 }
