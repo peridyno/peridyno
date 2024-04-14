@@ -1,4 +1,5 @@
 #include "IterativeConstraintSolver.h"
+#include <fstream>
 
 namespace dyno
 {
@@ -417,6 +418,7 @@ namespace dyno
 
 		D[tId] = d;
 	}
+
 	
 
 	template<typename Coord, typename Constraint, typename Quat>
@@ -643,6 +645,105 @@ namespace dyno
 			eta[tId] -= b_rot;
 		}
 	}
+
+	template<typename Constraint, typename Coord>
+	__global__ void calculateJB(
+		DArray<Coord> J,
+		DArray<Coord> B,
+		DArray<Constraint> constraints,
+		DArray<Real> D
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		int size = constraints.size() * constraints.size();
+		if (tId >= size)
+			return;
+
+		Real tmp = 0;
+		int row = tId / constraints.size();
+		int col = tId % constraints.size();
+
+		int idx1_row = constraints[row].bodyId1;
+		int idx2_row = constraints[row].bodyId2;
+
+		int idx1_col = constraints[col].bodyId1;
+		int idx2_col = constraints[col].bodyId2;
+
+		if (idx1_row == idx1_col && idx2_row == idx2_col)
+		{
+			tmp += J[4 * row].dot(B[4 * col]) + J[4 * row + 1].dot(B[4 * col + 1]) + J[4 * row + 2].dot(B[4 * col + 2]) + J[4 * row + 3].dot(B[4 * col + 3]);
+		}
+		else
+		{
+			if (idx1_row == idx1_col)
+			{
+				tmp += J[4 * row].dot(B[4 * col]) + J[4 * row + 1].dot(B[4 * col + 1]);
+			}
+			else if (idx2_row == idx2_col)
+			{
+				tmp += J[4 * row + 2].dot(B[4 * col + 2]) + J[4 * row + 3].dot(B[4 * col + 3]);
+			}
+			else if (idx1_row == idx2_col)
+			{
+				tmp += J[4 * row].dot(B[4 * col + 2]) + J[4 * row + 1].dot(B[4 * col + 3]);
+			}
+			else
+			{
+				tmp += J[4 * row + 2].dot(B[4 * col]) + J[4 * row + 3].dot(B[4 * col + 1]);
+			}
+		}
+		int index = constraints.size() * row + col;
+		D[index] = tmp;
+	}
+
+	template<typename Real>
+	__global__ void calculateError(
+		DArray<Real> JB,
+		DArray<Real> lambda,
+		DArray<Real> eta,
+		DArray<Real> error
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= lambda.size())
+			return;
+		double tmp = 0;
+		for (int i = 0; i < lambda.size(); i++)
+		{
+			tmp += JB[tId * lambda.size() + i] * lambda[i];
+		}
+
+		error[tId] = eta[tId] - tmp;
+
+	}
+
+	template<typename Real>
+	__global__ void calculateDiff(
+		DArray<Real> lambda,
+		DArray<Real> lambda_old,
+		DArray<Real> diff
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= lambda.size())
+			return;
+		diff[tId] = lambda[tId] - lambda_old[tId];
+	}
+
+	template<typename Real>
+	Real calculateNorm(
+		CArray<Real> diff
+	)
+	{
+		Real norm = 0.0;
+		for (int i = 0; i < diff.size(); i++)
+		{
+			if (abs(diff[i]) > norm)
+				norm = abs(diff[i]);
+		}
+		return norm;
+	}
+
 
 
 	template<typename Contact, typename Constraint>
@@ -993,6 +1094,36 @@ namespace dyno
 		constraints[baseIndex + 5].type = ConstraintType::CN_BAN_ROT_3;
 	}
 
+	__global__ void jacobiKernel(
+		DArray<double> JB,
+		DArray<double> lambda,
+		DArray<double> newlambda,
+		DArray<double> eta
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId < lambda.size())
+		{
+			double sum = 0.0;
+			for (int j = 0; j < lambda.size(); j++)
+			{
+				if (j != tId)
+				{
+					sum += JB[tId * lambda.size() + j] * lambda[j];
+				}
+			}
+			if (abs(JB[tId * lambda.size() + tId]) > 1e-10)
+			{
+				newlambda[tId] = 0.1 * (eta[tId] - sum) / JB[tId * lambda.size() + tId];
+			}
+			else
+			{
+				newlambda[tId] = lambda[tId];
+			}
+			printf("%d : %g %g %g %g\n", tId, newlambda[tId], eta[tId], sum, JB[tId * lambda.size() + tId]);
+		}
+	}
+
 	template<typename Coord, typename Constraint>
 	__global__ void takeOneJacobiIteration(
 		DArray<Real> lambda,
@@ -1017,7 +1148,7 @@ namespace dyno
 		int idx1 = constraints[tId].bodyId1;
 		int idx2 = constraints[tId].bodyId2;
 
-		Real tmp = eta[tId];
+		double tmp = eta[tId];
 
 		tmp -= J[4 * tId].dot(impulse[idx1 * 2]);
 		tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]);
@@ -1031,10 +1162,9 @@ namespace dyno
 
 		if (d[tId] > EPSILON)
 		{
-			Real omega = 1;
+			int stepInverse = 0;
 			if (constraints[tId].type == ConstraintType::CN_FRICTION || constraints[tId].type == ConstraintType::CN_NONPENETRATION)
 			{
-				int stepInverse = 0;
 				if (idx2 != INVALID)
 				{
 					stepInverse = nbq[idx1] > nbq[idx2] ? nbq[idx1] : nbq[idx2];
@@ -1042,22 +1172,20 @@ namespace dyno
 				else
 				{
 					stepInverse = nbq[idx1];
-				}
-				omega /= stepInverse;
+				}	
 			}
 
 			else
 			{
-				int stepInverse = 2 * (jointNumber[idx1] + jointNumber[idx2]);
-				omega /= stepInverse;
+				stepInverse += 4 * (jointNumber[idx1] + jointNumber[idx2]);
+	
 			}
 
-			
 
-			Real delta_lambda = (tmp / d[tId]) * omega;
+			double delta_lambda = (tmp / (d[tId] * stepInverse));
 
 
-			Real lambda_new = lambda[tId] + delta_lambda;
+			double lambda_new = lambda[tId] + delta_lambda;
 
 			// Projection to Bound
 			if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
@@ -1071,8 +1199,8 @@ namespace dyno
 
 			if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
-				//lambda_new = (abs(lambda_new) > mu * g * dt) ? (lambda_new < 0 ? -mu * g * dt: mu * g * dt) : lambda_new;
-				//delta_lambda = lambda_new - lambda[tId];
+				lambda_new = (abs(lambda_new) > mu * g * dt) ? (lambda_new < 0 ? -mu * g * dt: mu * g * dt) : lambda_new;
+				delta_lambda = lambda_new - lambda[tId];
 			}
 			
 			lambda[tId] += delta_lambda;
@@ -1258,12 +1386,14 @@ namespace dyno
 		mD.resize(constraint_size);
 		mEta.resize(constraint_size);
 		mLambda.resize(constraint_size);
+		mLambda_old.resize(constraint_size);
 
 		mJ.reset();
 		mB.reset();
 		mD.reset();
 		mEta.reset();
 		mLambda.reset();
+		mLambda_old.reset();
 		mContactNumber.reset();
 		mJointNumber.reset();
 
@@ -1353,6 +1483,7 @@ namespace dyno
 		impulse_ext[2 * tId + 1] = Coord(0);
 	}
 
+
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::constrain()
 	{
@@ -1380,8 +1511,72 @@ namespace dyno
 
 			int constraint_size = mAllConstraints.size();
 
+			mJB.resize(constraint_size * constraint_size);
+			mJB.reset();
+
+			cuExecute(constraint_size * constraint_size,
+				calculateJB,
+				mJ,
+				mB,
+				mAllConstraints,
+				mJB);
+
+
+			if (cnt == 0)
+			{
+				CArray<Real> JB;
+				JB.assign(mJB);
+				FILE* file = fopen("C:\\Users\\92388\\Desktop\\matrix.txt", "w");
+				if (file == NULL) {
+					perror("Failed to open file");
+					return;
+				}
+				else
+				{
+					std::cout << "Yes" << std::endl;
+				}
+
+				for (int i = 0; i < JB.size(); i++)
+				{
+					if (i % constraint_size == constraint_size - 1)
+					{
+						fprintf(file, "%lf\n", JB[i]);
+					}
+					else
+					{
+						fprintf(file, "%lf ", JB[i]);
+					}
+				}
+
+				fclose(file);
+
+				CArray<Constraint> constraints;
+				constraints.assign(mAllConstraints);
+				file = fopen("C:\\Users\\92388\\Desktop\\constraint.txt", "w");
+				if (file == NULL) {
+					perror("Failed to open file");
+					return;
+				}
+				else
+				{
+					std::cout << "Yes" << std::endl;
+				}
+
+				for (int i = 0; i < constraints.size(); i++)
+				{
+					fprintf(file, "%d ", constraints[i].type);
+				}
+
+				fclose(file);
+			}
+
+
 			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
 			{
+				mDiff.resize(constraint_size);
+				mDiff.reset();
+				mError.resize(constraint_size);
+				mError.reset();
 				cuExecute(constraint_size,
 					takeOneJacobiIteration,
 					mLambda,
@@ -1397,8 +1592,78 @@ namespace dyno
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt);
+
+				cuExecute(constraint_size,
+					calculateError,
+					mJB,
+					mLambda,
+					mEta,
+					mError);
+				
+				Real error = 0.0;
+				CArray<Real> mHostError;
+				mHostError.assign(mError);
+				for (int j = 0; j < mHostError.size(); j++)
+				{
+					error += mHostError[j] * mHostError[j];
+				}
+				printf("Error : %lf\n", sqrt(error));
+				
+				
+				cuExecute(constraint_size,
+					calculateDiff,
+					mLambda,
+					mLambda_old,
+					mDiff);
+				mDiffHost.assign(mDiff);
+				Real change = calculateNorm(mDiffHost);
+				printf("lambda_change : %lf\n", change);
+				mLambda_old.assign(mLambda);
+				if (change < EPSILON)
+					break;
+			}
+			if (cnt == 0)
+			{
+				CArray<Real> lambda;
+				lambda.assign(mLambda);
+				FILE* file = fopen("C:\\Users\\92388\\Desktop\\lambda.txt", "w");
+				if (file == NULL) {
+					perror("Failed to open file");
+					return;
+				}
+				else
+				{
+					std::cout << "Yes" << std::endl;
+				}
+
+				for (int i = 0; i < lambda.size(); i++)
+				{
+					fprintf(file, "%lf ", lambda[i]);
+				}
+
+				fclose(file);
+
+				CArray<Real> eta;
+				eta.assign(mEta);
+				file = fopen("C:\\Users\\92388\\Desktop\\eta.txt", "w");
+				if (file == NULL) {
+					perror("Failed to open file");
+					return;
+				}
+				else
+				{
+					std::cout << "Yes" << std::endl;
+				}
+
+				for (int i = 0; i < eta.size(); i++)
+				{
+					fprintf(file, "%lf ", eta[i]);
+				}
+
+				fclose(file);
 			}
 		}
+		cnt += 1;
 
 		cuExecute(bodyNum,
 			RB_updateVelocity,

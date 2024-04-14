@@ -26,6 +26,7 @@ namespace dyno
 		int bodyId2;
 	};
 
+
 	template<typename Real>
 	class BallAndSocketJoint : public Joint<Real>
 	{
@@ -41,11 +42,14 @@ namespace dyno
 			this->bodyId2 = bodyId2;
 		}
 		
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos)
+		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
 		{
-			this->r1 = anchor_point - body1_pos;
-			this->r2 = anchor_point - body2_pos;
+			Mat3f rotMat1 = body1_quat.toMatrix3x3();
+			Mat3f rotMat2 = body2_quat.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
+			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
 		}
+
 	public:
 		// anchor point in body1 local space
 		Vector<Real, 3> r1;
@@ -69,10 +73,12 @@ namespace dyno
 			this->bodyId2 = bodyId2;
 		}
 
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos)
+		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
 		{
-			this->r1 = anchor_point - body1_pos;
-			this->r2 = anchor_point - body2_pos;
+			Mat3f rotMat1 = body1_quat.toMatrix3x3();
+			Mat3f rotMat2 = body2_quat.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
+			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
 		}
 
 		void setAxis(Vector<Real, 3> axis)
@@ -186,10 +192,12 @@ namespace dyno
 			this->bodyId2 = bodyId2;
 		}
 
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos)
+		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
 		{
-			this->r1 = anchor_point - body1_pos;
-			this->r2 = anchor_point - body2_pos;
+			Mat3f rotMat1 = body1_quat.toMatrix3x3();
+			Mat3f rotMat2 = body2_quat.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
+			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
 		}
 	public:
 		// anchor point position in body1 and body2 local space

@@ -40,7 +40,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		newBox.halfLength = oldBox.halfLength;
 		rigid->addBox(newBox, rigidBody);
 		FixedJoint<Real> joint(i, i + 1);
-		joint.setAnchorPoint(oldBox.center + Vec3f(0.0, 0.025f, 0.0), oldBox.center, newBox.center);
+		joint.setAnchorPoint(oldBox.center + Vec3f(0.0, 0.025f, 0.0), oldBox.center, newBox.center, oldBox.rot, newBox.rot);
 		rigid->addFixedJoint(joint);
 		oldBox = newBox;
 	}
