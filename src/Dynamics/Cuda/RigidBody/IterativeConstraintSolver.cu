@@ -13,6 +13,7 @@ namespace dyno
 		this->inSliderJoints()->tagOptional(true);
 		this->inHingeJoints()->tagOptional(true);
 		this->inFixedJoints()->tagOptional(true);
+		this->inPointJoints()->tagOptional(true);
 	}
 
 	template<typename TDataType>
@@ -399,6 +400,45 @@ namespace dyno
 			}
 		}
 
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
+		{
+			J[4 * tId] = Coord(1.0, 0, 0);
+			J[4 * tId + 1] = Coord(0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0);
+
+			B[4 * tId] = Coord(1 / mass[idx1], 0, 0);
+			B[4 * tId + 1] = Coord(0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = Coord(0);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
+		{
+			J[4 * tId] = Coord(0, 1.0, 0);
+			J[4 * tId + 1] = Coord(0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0);
+
+			B[4 * tId] = Coord(0, 1.0/mass[idx1], 0);
+			B[4 * tId + 1] = Coord(0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = Coord(0);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
+		{
+			J[4 * tId] = Coord(0, 0, 1.0);
+			J[4 * tId + 1] = Coord(0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0);
+
+			B[4 * tId] = Coord(0, 0, 1.0/mass[idx1]);
+			B[4 * tId + 1] = Coord(0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = Coord(0);
+		}
+
 		
 	}
 
@@ -461,7 +501,7 @@ namespace dyno
 		{
 			if (constraints[tId].interpenetration < -slop)
 			{
-				Real beta = Real(0.2);
+				Real beta = Real(0.3);
 				Real alpha = 0;
 
 				Real b_error = beta * invDt * (constraints[tId].interpenetration + slop);
@@ -486,7 +526,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
 		{
-			Real beta = 0.3;
+			Real beta = 0.1;
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
@@ -495,7 +535,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
 		{
-			Real beta = 0.3;
+			Real beta = 0.1;
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
@@ -504,7 +544,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
 		{
-			Real beta = 0.3;
+			Real beta = 0.1;
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
@@ -628,7 +668,7 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
 		{
-			Real beta = Real(1)/Real(3);
+			Real beta = Real(0);
 			Coord a1 = constraints[tId].axis;
 			Coord b2 = constraints[tId].pos1;
 			Real b_rot = invDt * beta * a1.dot(b2);
@@ -637,11 +677,34 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
 		{
-			Real beta = Real(1) / Real(3);
+			Real beta = Real(0);
 			Coord a1 = constraints[tId].axis;
 			Coord c2 = constraints[tId].pos2;
 			Real b_rot = invDt * beta * a1.dot(c2);
 			eta[tId] -= b_rot;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
+		{
+			Real beta = Real(1) / Real(3);
+			Coord error = constraints[tId].normal1;
+			Real b_error = invDt * beta * error[0];
+			eta[tId] -= b_error;
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
+		{
+			Real beta = Real(1) / Real(3);
+			Coord error = constraints[tId].normal1;
+			Real b_error = invDt * beta * error[1];
+			eta[tId] -= b_error;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
+		{
+			Real beta = Real(1) / Real(3);
+			Coord error = constraints[tId].normal1;
+			Real b_error = invDt * beta * error[2];
+			eta[tId] -= b_error;
 		}
 	}
 
@@ -1058,6 +1121,36 @@ namespace dyno
 
 	}
 
+	template<typename Joint, typename Constraint, typename Coord>
+	__global__ void setUpPointJoint(
+		DArray<Joint> joints,
+		DArray<Constraint> constraints,
+		DArray<Coord> pos,
+		int begin_index
+	)
+	{
+		int tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= joints.size())
+			return;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+
+		int baseIndex = 3 * tId + begin_index;
+
+		for (int i = 0; i < 3; i++)
+		{
+			constraints[baseIndex + i].bodyId1 = idx1;
+			constraints[baseIndex + i].bodyId2 = idx2;
+			constraints[baseIndex + i].normal1 = pos[idx1] - joints[tId].anchorPoint;
+		}
+
+		constraints[baseIndex].type = ConstraintType::CN_JOINT_NO_MOVE_1;
+		constraints[baseIndex + 1].type = ConstraintType::CN_JOINT_NO_MOVE_2;
+		constraints[baseIndex + 2].type = ConstraintType::CN_JOINT_NO_MOVE_3;
+
+	}
+
 	template<typename Joint, typename Constraint, typename Matrix>
 	__global__ void setUpFixedJoint(
 		DArray<Joint> joints,
@@ -1176,8 +1269,12 @@ namespace dyno
 
 			else
 			{
-				stepInverse += 4 * (jointNumber[idx1] + jointNumber[idx2]);
-	
+				if (idx2 != INVALID)
+				{
+					stepInverse += 4 * jointNumber[idx2];
+				}
+
+				stepInverse += 4 * jointNumber[idx1];
 			}
 
 
@@ -1246,6 +1343,7 @@ namespace dyno
 		int sliderJoint_size = this->inSliderJoints()->size();
 		int hingeJoint_size = this->inHingeJoints()->size();
 		int fixedJoint_size = this->inFixedJoints()->size();
+		int pointJoint_size = this->inPointJoints()->size();
 
 		if (this->varFrictionEnabled()->getData())
 		{
@@ -1274,6 +1372,11 @@ namespace dyno
 		if (fixedJoint_size != 0)
 		{
 			constraint_size += 6 * fixedJoint_size;
+		}
+
+		if (pointJoint_size != 0)
+		{
+			constraint_size += 3 * pointJoint_size;
 		}
 
 
@@ -1368,6 +1471,22 @@ namespace dyno
 				joints,
 				mAllConstraints,
 				this->inRotationMatrix()->getData(),
+				begin_index);
+		}
+		printf("%d\n", pointJoint_size);
+		if (pointJoint_size != 0)
+		{
+			auto& joints = this->inPointJoints()->getData();
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size + 6 * fixedJoint_size;
+			if (this->varFrictionEnabled()->getData())
+			{
+				begin_index += 2 * contact_size;
+			}
+			cuExecute(pointJoint_size,
+				setUpPointJoint,
+				joints,
+				mAllConstraints,
+				this->inCenter()->getData(),
 				begin_index);
 		}
 
@@ -1505,7 +1624,7 @@ namespace dyno
 				dt);
 		}
 
-		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty())
+		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
 		{
 			initializeJacobian(dt);
 
@@ -1520,10 +1639,6 @@ namespace dyno
 				mB,
 				mAllConstraints,
 				mJB);
-
-
-
-
 
 			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
 			{

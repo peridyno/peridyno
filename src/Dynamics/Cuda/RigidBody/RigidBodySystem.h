@@ -45,6 +45,7 @@ namespace dyno
 		typedef typename SliderJoint<Real> SliderJoint;
 		typedef typename HingeJoint<Real> HingeJoint;
 		typedef typename FixedJoint<Real> FixedJoint;
+		typedef typename PointJoint<Real> PointJoint;
 
 
 		RigidBodySystem();
@@ -53,22 +54,22 @@ namespace dyno
 		void addBox(
 			const BoxInfo& box, 
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(0.1));
+			const Real density = Real(1000));
 
 		void addSphere(
 			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
-			const Real density = Real(0.1));
+			const Real density = Real(1000));
 
 		void addTet(
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(0.1));
+			const Real density = Real(1000));
 
 		void addCapsule(
 			const CapsuleInfo& capsule,
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(100));
+			const Real density = Real(1000));
 
 		void addBallAndSocketJoint(
 			const BallAndSocketJoint& joint
@@ -84,6 +85,10 @@ namespace dyno
 
 		void addFixedJoint(
 			const FixedJoint& joint
+		);
+
+		void addPointJoint(
+			const PointJoint& joint
 		);
 
 		Mat3f pointInertia(Coord v1);
@@ -149,6 +154,8 @@ namespace dyno
 
 		DEF_ARRAY_STATE(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
 
+		DEF_ARRAY_STATE(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
+
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
@@ -168,6 +175,7 @@ namespace dyno
 		std::vector<SliderJoint> mHostJointsSlider;
 		std::vector<HingeJoint> mHostJointsHinge;
 		std::vector<FixedJoint> mHostJointsFixed;
+		std::vector<PointJoint> mHostJointsPoint;
 
 	public:
 		int m_numOfSamples;

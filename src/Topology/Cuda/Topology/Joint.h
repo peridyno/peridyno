@@ -204,4 +204,29 @@ namespace dyno
 		Vector<Real, 3> r1;
 		Vector<Real, 3> r2;
 	};
+
+
+	template<typename Real>
+	class PointJoint : public Joint<Real>
+	{
+	public:
+		PointJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+		}
+		PointJoint(int bodyId)
+		{
+			this->bodyId1 = bodyId;
+			this->bodyId2 = INVALID;
+		}
+		void setAnchorPoint(Vector<Real, 3> point)
+		{
+			this->anchorPoint = point;
+		}
+
+	public:
+		Vector<Real, 3> anchorPoint;
+
+	};
 }

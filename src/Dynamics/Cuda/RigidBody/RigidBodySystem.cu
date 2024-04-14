@@ -57,6 +57,7 @@ namespace dyno
 		this->stateSliderJoints()->connect(iterSolver->inSliderJoints());
 		this->stateHingeJoints()->connect(iterSolver->inHingeJoints());
 		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
+		this->statePointJoints()->connect(iterSolver->inPointJoints());
 
 		merge->outContacts()->connect(iterSolver->inContacts());
 
@@ -218,6 +219,12 @@ namespace dyno
 		mHostJointsFixed.push_back(joint);
 	}
 
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addPointJoint(const PointJoint& joint)
+	{
+		mHostJointsPoint.push_back(joint);
+	}
+
 	template <typename Real, typename Coord, typename Matrix, typename Quat>
 	__global__ void RB_SetupInitialStates(
 		DArray<Real> mass,
@@ -316,6 +323,7 @@ namespace dyno
 		this->stateSliderJoints()->assign(mHostJointsSlider);
 		this->stateHingeJoints()->assign(mHostJointsHinge);
 		this->stateFixedJoints()->assign(mHostJointsFixed);
+		this->statePointJoints()->assign(mHostJointsPoint);
 
 		auto& boxes = topo->getBoxes();
 		auto& spheres = topo->getSpheres();

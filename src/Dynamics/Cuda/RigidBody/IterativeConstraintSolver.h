@@ -41,6 +41,7 @@ namespace dyno
 		typedef typename SliderJoint<Real> SliderJoint;
 		typedef typename HingeJoint<Real> HingeJoint;
 		typedef typename FixedJoint<Real> FixedJoint;
+		typedef typename PointJoint<Real> PointJoint;
 	
 		IterativeConstraintSolver();
 		~IterativeConstraintSolver();
@@ -88,6 +89,8 @@ namespace dyno
 		DEF_ARRAY_IN(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
 
 		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
+
+		DEF_ARRAY_IN(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
 
 	private:
 		void initializeJacobian(Real dt);
