@@ -88,7 +88,7 @@ namespace dyno
 
 		Mat3f pointInertia(Coord v1);
 
-		Real getDt() override { return double(0.001); }
+		Real getDt() override { return 0.001; }
 
 	protected:
 		void resetStates() override;
@@ -102,7 +102,7 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 0.002, "");
+		DEF_VAR(Real, FrictionCoefficient, 100, "");
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 

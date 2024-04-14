@@ -1,5 +1,4 @@
 #include "IterativeConstraintSolver.h"
-#include <fstream>
 
 namespace dyno
 {
@@ -1199,7 +1198,8 @@ namespace dyno
 
 			if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
-				lambda_new = (abs(lambda_new) > mu * g * dt) ? (lambda_new < 0 ? -mu * g * dt: mu * g * dt) : lambda_new;
+				Real mass_avl = mass[idx1];
+				lambda_new = (abs(lambda_new) > mu *mass_avl * g * dt) ? (lambda_new < 0 ? -mu * mass_avl * g * dt: mu *mass_avl* g * dt) : lambda_new;
 				delta_lambda = lambda_new - lambda[tId];
 			}
 			
@@ -1522,53 +1522,7 @@ namespace dyno
 				mJB);
 
 
-			if (cnt == 0)
-			{
-				CArray<Real> JB;
-				JB.assign(mJB);
-				FILE* file = fopen("C:\\Users\\92388\\Desktop\\matrix.txt", "w");
-				if (file == NULL) {
-					perror("Failed to open file");
-					return;
-				}
-				else
-				{
-					std::cout << "Yes" << std::endl;
-				}
 
-				for (int i = 0; i < JB.size(); i++)
-				{
-					if (i % constraint_size == constraint_size - 1)
-					{
-						fprintf(file, "%lf\n", JB[i]);
-					}
-					else
-					{
-						fprintf(file, "%lf ", JB[i]);
-					}
-				}
-
-				fclose(file);
-
-				CArray<Constraint> constraints;
-				constraints.assign(mAllConstraints);
-				file = fopen("C:\\Users\\92388\\Desktop\\constraint.txt", "w");
-				if (file == NULL) {
-					perror("Failed to open file");
-					return;
-				}
-				else
-				{
-					std::cout << "Yes" << std::endl;
-				}
-
-				for (int i = 0; i < constraints.size(); i++)
-				{
-					fprintf(file, "%d ", constraints[i].type);
-				}
-
-				fclose(file);
-			}
 
 
 			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
@@ -1599,7 +1553,7 @@ namespace dyno
 					mLambda,
 					mEta,
 					mError);
-				
+
 				Real error = 0.0;
 				CArray<Real> mHostError;
 				mHostError.assign(mError);
@@ -1607,9 +1561,9 @@ namespace dyno
 				{
 					error += mHostError[j] * mHostError[j];
 				}
-				printf("Error : %lf\n", sqrt(error));
-				
-				
+				//printf("Error : %lf\n", sqrt(error));
+
+
 				cuExecute(constraint_size,
 					calculateDiff,
 					mLambda,
@@ -1617,71 +1571,30 @@ namespace dyno
 					mDiff);
 				mDiffHost.assign(mDiff);
 				Real change = calculateNorm(mDiffHost);
-				printf("lambda_change : %lf\n", change);
+				//printf("lambda_change : %lf\n", change);
 				mLambda_old.assign(mLambda);
 				if (change < EPSILON)
 					break;
 			}
-			if (cnt == 0)
-			{
-				CArray<Real> lambda;
-				lambda.assign(mLambda);
-				FILE* file = fopen("C:\\Users\\92388\\Desktop\\lambda.txt", "w");
-				if (file == NULL) {
-					perror("Failed to open file");
-					return;
-				}
-				else
-				{
-					std::cout << "Yes" << std::endl;
-				}
 
-				for (int i = 0; i < lambda.size(); i++)
-				{
-					fprintf(file, "%lf ", lambda[i]);
-				}
+			cuExecute(bodyNum,
+				RB_updateVelocity,
+				this->inVelocity()->getData(),
+				this->inAngularVelocity()->getData(),
+				mImpulseExt,
+				mImpulseC);
 
-				fclose(file);
-
-				CArray<Real> eta;
-				eta.assign(mEta);
-				file = fopen("C:\\Users\\92388\\Desktop\\eta.txt", "w");
-				if (file == NULL) {
-					perror("Failed to open file");
-					return;
-				}
-				else
-				{
-					std::cout << "Yes" << std::endl;
-				}
-
-				for (int i = 0; i < eta.size(); i++)
-				{
-					fprintf(file, "%lf ", eta[i]);
-				}
-
-				fclose(file);
-			}
+			cuExecute(bodyNum,
+				RB_updateGesture,
+				this->inCenter()->getData(),
+				this->inQuaternion()->getData(),
+				this->inRotationMatrix()->getData(),
+				this->inInertia()->getData(),
+				this->inVelocity()->getData(),
+				this->inAngularVelocity()->getData(),
+				this->inInitialInertia()->getData(),
+				dt)
 		}
-		cnt += 1;
-
-		cuExecute(bodyNum,
-			RB_updateVelocity,
-			this->inVelocity()->getData(),
-			this->inAngularVelocity()->getData(),
-			mImpulseExt,
-			mImpulseC);
-
-		cuExecute(bodyNum,
-			RB_updateGesture,
-			this->inCenter()->getData(),
-			this->inQuaternion()->getData(),
-			this->inRotationMatrix()->getData(),
-			this->inInertia()->getData(),
-			this->inVelocity()->getData(),
-			this->inAngularVelocity()->getData(),
-			this->inInitialInertia()->getData(),
-			dt)
 	}
 
 

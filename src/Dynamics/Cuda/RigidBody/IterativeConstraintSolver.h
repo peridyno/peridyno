@@ -93,7 +93,6 @@ namespace dyno
 		void initializeJacobian(Real dt);
 
 	private:
-		int cnt = 0;
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
 		DArray<Real> mJB;		//JB
