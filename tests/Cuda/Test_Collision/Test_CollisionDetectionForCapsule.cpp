@@ -39,10 +39,10 @@ TEST(Capsule, obb)
 	using Capsule = TCapsule3D<float>;
 
 	Box b0 = Box(Coord3D(0, 0, 0), Quat<float>(0, 0, 0, 1), Coord3D(1, 1, 1));
-	Capsule cap = Capsule(Coord3D(1.0f, 1.0f, 0), Coord3D(-1.0f, 1.0f, 0), 1);
+	Capsule cap = Capsule(Coord3D(1.0f, 1.9f, 0), Coord3D(-1.0f, 1.9f, 0), 1);
 
 	TManifold<Real> manifold;
-	CollisionDetection<float>::request(manifold, b0, cap);
+	CollisionDetection<float>::request(manifold, cap, b0);
 
 	EXPECT_EQ(manifold.contactCount > 0, true);
 }

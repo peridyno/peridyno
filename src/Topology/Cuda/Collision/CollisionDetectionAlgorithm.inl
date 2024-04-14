@@ -1432,8 +1432,6 @@ namespace dyno
 
 		Real boundary1, boundary2, b1, b2;
 
-
-
 		//u
 		axisTmp = box.u / box.u.norm();
 		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
@@ -1543,6 +1541,11 @@ namespace dyno
 		}
 
 		setupContactTets(boundary1, boundary2, axis, cap, box, -sMax, m);
+
+		for (uint i = 0; i < m.contactCount; i++)
+		{
+			m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+		}
 	}
 
 	template<typename Real>
@@ -1712,7 +1715,7 @@ namespace dyno
 
 	//Separating Axis Theorem for tets
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const Tet3D& tet)
 	{
 		m.contactCount = 0;
 
@@ -1848,12 +1851,17 @@ namespace dyno
 		}
 		
 		setupContactTets(boundary1, boundary2, axis, tet, cap, -sMax, m);
+
+		for (uint i = 0; i < m.contactCount; i++)
+		{
+			m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+		}
 	}
 
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const Tet3D& tet)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
 	{
-		request(m, tet, cap);
+		request(m, cap, tet);
 		
 		swapContactPair(m);
 	}
