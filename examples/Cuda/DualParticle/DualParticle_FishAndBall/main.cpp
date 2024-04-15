@@ -10,10 +10,8 @@
 #include <ImColorbar.h>
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
-#include <CubeModel.h>
-#include <ParticleSystem/CubeSampler.h>
-#include <ParticleSystem/SquareEmitter.h>
-#include "DualParticleSystem/ParticleMeshCollidingNode.h"
+#include <SphereModel.h>
+#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
 #include "PointsLoader.h"
@@ -45,9 +43,8 @@ std::shared_ptr<SceneGraph> createScene()
 	//boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 	fluid->connect(boundary->importParticleSystems());
 
-	auto ball = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
-	ball->varFileName()->setValue(getAssetPath() + "fish/ball.obj");
-	ball->varScale()->setValue(Vec3f(1 / 2.5));
+	auto ball = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	ball->varScale()->setValue(Vec3f(0.38));
 	ball->varLocation()->setValue(Vec3f(0.0, 0.0, 0.3));
 	auto sRenderf = std::make_shared<GLSurfaceVisualModule>();
 	sRenderf->setColor(Color(0.8f, 0.52f, 0.25f));
@@ -56,11 +53,10 @@ std::shared_ptr<SceneGraph> createScene()
 	ball->stateTriangleSet()->connect(sRenderf->inTriangleSet());
 	ball->graphicsPipeline()->pushModule(sRenderf);
 
-
-	auto pm_collide = scn->addNode(std::make_shared <ParticleMeshCollidingNode<DataType3f >>());
+	auto pm_collide = scn->addNode(std::make_shared <TriangularMeshBoundary<DataType3f >>());
 	ball->stateTriangleSet()->connect(pm_collide->inTriangleSet());
-	fluid->statePosition()->connect(pm_collide->inPosition());
-	fluid->stateVelocity()->connect(pm_collide->inVelocity());
+	fluid->connect(pm_collide->importParticleSystems());
+	//fluid->stateVelocity()->connect(pm_collide->inVelocity());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());

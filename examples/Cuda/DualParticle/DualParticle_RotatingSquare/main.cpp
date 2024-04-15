@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include <GlfwApp.h>
 #include "SceneGraph.h"
 #include <Log.h>
 #include "ParticleSystem/StaticBoundary.h"
@@ -205,7 +205,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	QtApp window;
+	GlfwApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);
 	window.mainLoop();

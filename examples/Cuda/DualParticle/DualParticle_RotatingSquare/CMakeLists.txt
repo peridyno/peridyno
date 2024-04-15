@@ -5,7 +5,6 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
         IO 
         DualParticleSystem 
         GlfwGUI
-        QtGUI
         GLRenderEngine)
     add_example(DualParticle_RotatingSquare DualParticle LIB_DEPENDENCY)
 endif()

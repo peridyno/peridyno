@@ -1,7 +1,6 @@
 #include "initializeDualParticleSystem.h"
 #include "DualParticleFluidSystem.h"
 #include "DualParticleIsphModule.h"
-#include "ParticleMeshCollidingNode.h"
 #include "VirtualColocationStrategy.h"
 #include "VirtualParticleShiftingStrategy.h"
 #include "VirtualSpatiallyAdaptiveStrategy.h"

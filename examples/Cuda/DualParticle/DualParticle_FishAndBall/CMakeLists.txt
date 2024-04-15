@@ -5,6 +5,8 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
         IO          
         QtGUI
         DualParticleSystem 
+        SemiAnalyticalScheme
+        ParticleSystem
         GlfwGUI
         GLRenderEngine)
     add_example(DualParticle_FishAndBall DualParticle LIB_DEPENDENCY)
