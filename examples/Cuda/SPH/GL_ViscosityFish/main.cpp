@@ -1,5 +1,4 @@
 #include <GlfwApp.h>
-
 #include <SceneGraph.h>
 #include <Log.h>
 #include <ParticleSystem/ParticleFluid.h>
@@ -14,7 +13,6 @@
 #include "Collision/NeighborPointQuery.h"
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-
 #include "Auxiliary/DataSource.h"
 #include <ParticleSystem/CubeSampler.h>
 #include "PointsLoader.h"
@@ -59,7 +57,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 		auto simple = std::make_shared <SimpleVelocityConstraint<DataType3f>>();
 		simple->varViscosity()->setValue(500);
-		simple->varSimpleIterationEnable()->setValue(true);
+		simple->varSimpleIterationEnable()->setValue(false);
 		fluid->stateTimeStep()->connect(simple->inTimeStep());
 		smoothingLength->outFloating()->connect(simple->inSmoothingLength());
 		fluid->statePosition()->connect(simple->inPosition());

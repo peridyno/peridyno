@@ -14,6 +14,7 @@
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
+#include "Auxiliary/DataSource.h"
 #include "PointsLoader.h"
 using namespace std;
 using namespace dyno;

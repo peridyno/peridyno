@@ -37,7 +37,7 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
 
 	auto fluid = scn->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
-	fluid->varReshuffleParticles()->setValue(true);
+	//fluid->varReshuffleParticles()->setValue(true);
 	emitter->connect(fluid->importParticleEmitters());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();

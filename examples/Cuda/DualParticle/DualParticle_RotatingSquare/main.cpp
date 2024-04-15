@@ -12,7 +12,6 @@
 #include <CubeModel.h>
 #include <ParticleSystem/CubeSampler.h>
 #include <ParticleSystem/SquareEmitter.h>
-#include "DualParticleSystem/ParticleMeshCollidingNode.h"
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
 #include "Collision/Attribute.h"
@@ -22,7 +21,7 @@
 #include "DualParticleSystem/DualParticleIsphModule.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "RotatingSquarePatchModule.h"
-
+#include "Auxiliary/DataSource.h"
 using namespace std;
 using namespace dyno;
 
