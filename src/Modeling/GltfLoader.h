@@ -196,6 +196,9 @@ namespace dyno
 
 		void getBoundingBoxByName(const tinygltf::Primitive& primitive, const std::string& attributeName, TAlignedBox3D<Real>& vertices, Transform3f& transform);
 
+
+		void loadMaterial();
+		
 	};
 
 

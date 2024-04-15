@@ -204,6 +204,8 @@ namespace dyno
 #ifdef CUDA_BACKEND
 
 		if (buffer.size() <= 0) {
+			width = buffer.nx();
+			height = buffer.ny();
 			return;
 		}
 

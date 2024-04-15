@@ -150,21 +150,31 @@ namespace dyno
 			mMaterials[i]->specular = mesh->materials()[i]->specular;
 			mMaterials[i]->roughness = mesh->materials()[i]->roughness;
 			mMaterials[i]->bumpScale = mesh->materials()[i]->bumpScale;
-
 			mMaterials[i]->texColor.load(mesh->materials()[i]->texColor);
 			mMaterials[i]->texBump.load(mesh->materials()[i]->texBump);
 
 			mapper[mesh->materials()[i]] = i;
-		}
+		}	
 
 		for (uint i = 0; i < shapeNum; i++)
 		{
 			mShapes[i]->glVertexIndex.load(mesh->shapes()[i]->vertexIndex);
 			mShapes[i]->glNormalIndex.load(mesh->shapes()[i]->normalIndex);
 			mShapes[i]->glTexCoordIndex.load(mesh->shapes()[i]->texCoordIndex);
-
+	
 			//Setup the material for each shape
-			mShapes[i]->material = mMaterials[mapper[mesh->shapes()[i]->material]];
+			auto test = mapper[mesh->shapes()[i]->material];
+			auto testsm = mesh->shapes()[i]->material;
+
+			if (mesh->shapes()[i]->material != NULL) 
+			{
+				mShapes[i]->material = mMaterials[mapper[mesh->shapes()[i]->material]];
+			}
+			else 
+			{
+				mShapes[i]->material = NULL;
+			}
+				
 		}
 
 		mapper.clear();

@@ -63,6 +63,7 @@ namespace dyno
 		Transform3f boundingTransform;
 
 		std::shared_ptr<Material> material = nullptr;
+
 	};
 
 	class TextureMesh : public TopologyModule
@@ -77,6 +78,17 @@ namespace dyno
 
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
 		std::vector<std::shared_ptr<Material>>& materials() { return mMaterials; }
+
+
+		virtual void clear() 
+		{
+			mVertices.clear(); 
+			mNormals.clear();
+			mTexCoords.clear();
+			mMaterials.clear();
+			mMaterials.clear();
+			mShapes.clear();
+		}
 
 	private:
 		DArray<Vec3f> mVertices;
