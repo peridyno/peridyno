@@ -65,7 +65,7 @@ namespace dyno
 		 */
 		DEF_ARRAYLIST_OUT(int, NeighborIds, DeviceType::GPU, "Return neighbor ids");
 
-	//protected:
+	protected:
 		void compute() override;
 
 	private:

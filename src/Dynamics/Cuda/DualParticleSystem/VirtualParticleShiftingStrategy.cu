@@ -207,7 +207,7 @@ namespace dyno
 			this->inTimeStep()->getData()
 		);
 
-		m_vv_nbrQuery->compute();
+		m_vv_nbrQuery->update();
 
 		if (this->inFrameNumber()->getValue() == 0)
 		{

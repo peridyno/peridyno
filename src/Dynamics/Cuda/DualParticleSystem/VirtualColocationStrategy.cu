@@ -53,12 +53,6 @@ namespace dyno
 			this->inRPosition()->getData(),
 			this->outVirtualParticles()->getData()
 		);
-
-
-
-		std::cout << "*VIRTUAL PARTICLE:: Real Particles: " << this->inRPosition()->size() << std::endl;
-		std::cout << "*VIRTUAL PARTICLE:: Virtual Particles: " << this->outVirtualParticles()->size() << std::endl;
-
 		//this->inVPosition()->connect(this->outVirtualParticles());
 	}
 
