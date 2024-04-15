@@ -16,6 +16,7 @@
 #include "Turning.h"
 
 #include "Mapping/MergeTriangleSet.h"
+#include "CapsuleModel.h"
 
 namespace dyno 
 {
@@ -99,6 +100,13 @@ namespace dyno
 			"ToolBarIco/Modeling/CubeCombo.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<MergeTriangleSet<DataType3f>>();
+			});
+
+		group->addAction(
+			"Capsule",
+			"ToolBarIco/Modeling/Capsule.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<CapsuleModel<DataType3f>>();
 			});
 	}
 }
