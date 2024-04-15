@@ -81,7 +81,7 @@ void createTwoCapsules(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
 
 	capsule.center = Vec3f(-1.3, 0.33, -0.5f);
 	capsule.halfLength = 0.1f;
-	capsule.rot = Quat1f(0, 1, 0, 0.5);
+	capsule.rot = Quat1f(M_PI/8, Vec3f(0, 1, 0));
 	capsule.radius = 0.1f;
 	rigid->addCapsule(capsule, rigidBody);
 }
@@ -231,18 +231,18 @@ std::shared_ptr<SceneGraph> creatScene()
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
-	createTwoBoxes(rigid);
+	//createTwoBoxes(rigid);
 	createTwoTets(rigid);
-	createTetBox(rigid);
-	createCapsuleBox(rigid);
-	createTwoCapsules(rigid);
-	createCapsuleTet(rigid);
+	//createTetBox(rigid);
+	//createCapsuleBox(rigid);
+	//createTwoCapsules(rigid);
+	//createCapsuleTet(rigid);
 
 	//sphere
-	createTwoSpheres(rigid);
-	createSphereBox(rigid);
-	createSphereTet(rigid);
-	createSphereCapsule(rigid);
+	//createTwoSpheres(rigid);
+	//createSphereBox(rigid);
+	//createSphereTet(rigid);
+	//createSphereCapsule(rigid);
 
 	return scn;
 }

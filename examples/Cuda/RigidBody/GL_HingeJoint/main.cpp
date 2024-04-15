@@ -42,16 +42,16 @@ std::shared_ptr<SceneGraph> creatBricks()
 	sphere4.radius = 0.03;
 
 	capsule1.center = Vec3f(-0.18, 0.03, 0.09);
-	capsule1.halfLength = 0.02;
+	capsule1.halfLength = 0.01;
 	capsule1.radius = 0.03;
 	capsule2.center = Vec3f(-0.18, 0.03, -0.09);
-	capsule2.halfLength = 0.02;
+	capsule2.halfLength = 0.01;
 	capsule2.radius = 0.03;
 	capsule3.center = Vec3f(0.18, 0.03, 0.09);
-	capsule3.halfLength = 0.02;
+	capsule3.halfLength = 0.01;
 	capsule3.radius = 0.03;
 	capsule4.center = Vec3f(0.18, 0.03, -0.09);
-	capsule4.halfLength = 0.02;
+	capsule4.halfLength = 0.01;
 	capsule4.radius = 0.03;
 
 	RigidBodyInfo rigidbody;

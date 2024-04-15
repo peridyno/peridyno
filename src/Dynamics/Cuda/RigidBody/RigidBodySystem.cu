@@ -135,38 +135,80 @@ namespace dyno
 
 
 
+	//template<typename TDataType>
+	//void RigidBodySystem<TDataType>::addTet(
+	//	const TetInfo& tet,
+	//	const RigidBodyInfo& bodyDef, 
+	//	const Real density /*= Real(1)*/)
+	//{
+	//	auto b = tet;
+	//	auto bd = bodyDef;
+
+	//	bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+
+	//	auto centroid = bd.position;
+
+	//	auto tmpMat = Mat3f(tet.v[1] - tet.v[0], tet.v[2] - tet.v[0], tet.v[3] - tet.v[0]);
+	//	Real volume = (1.0 / 6.0) * abs(tmpMat.determinant());
+	//	Real mass = volume * density;
+	//	bd.mass = mass;
+
+
+	//	Mat3f inertiaMatrix(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	//	for (int i = 0; i < 4; i++)
+	//	{
+	//		Coord r = tet.v[i] - centroid;
+	//		inertiaMatrix += (mass / 4.0) * pointInertia(r);
+	//	}
+
+
+
+	//	bd.inertia = inertiaMatrix;
+	//	bd.shapeType = ET_TET;
+	//	bd.angle = Quat<Real>();
+
+	//	mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
+	//	mHostTets.push_back(b);
+	//}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addTet(
-		const TetInfo& tet,
-		const RigidBodyInfo& bodyDef, 
+		const TetInfo& tetInfo,
+		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
 	{
-		auto b = tet;
+		TetInfo tet = tetInfo;
 		auto bd = bodyDef;
 
 		bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
 
 		auto centroid = bd.position;
+		tet.v[0] = tet.v[0] - centroid;
+		tet.v[1] = tet.v[1] - centroid;
+		tet.v[2] = tet.v[2] - centroid;
+		tet.v[3] = tet.v[3] - centroid;
 
 		auto tmpMat = Mat3f(tet.v[1] - tet.v[0], tet.v[2] - tet.v[0], tet.v[3] - tet.v[0]);
-		Real volume = (1.0 / 6.0) * abs(tmpMat.determinant());
+
+		Real detJ = abs(tmpMat.determinant());
+		Real volume = (1.0 / 6.0) * detJ;
 		Real mass = volume * density;
 		bd.mass = mass;
 
-
-		Mat3f inertiaMatrix(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-		for (int i = 0; i < 4; i++)
-		{
-			Coord r = tet.v[i] - centroid;
-			inertiaMatrix += (mass / 4.0) * pointInertia(r);
-		}
+		Real a = density * detJ * (tet.v[0].y * tet.v[0].y + tet.v[0].y * tet.v[1].y + tet.v[1].y * tet.v[1].y + tet.v[0].y * tet.v[2].y + tet.v[1].y * tet.v[2].y + tet.v[2].y * tet.v[2].y + tet.v[0].y * tet.v[3].y + tet.v[1].y * tet.v[3].y + tet.v[2].y * tet.v[3].y + tet.v[3].y * tet.v[3].y + tet.v[0].z * tet.v[0].z + tet.v[0].z * tet.v[1].z + tet.v[1].z * tet.v[1].z + tet.v[0].z * tet.v[2].z + tet.v[1].z * tet.v[2].z + tet.v[2].z * tet.v[2].z + tet.v[0].z * tet.v[3].z + tet.v[1].z * tet.v[3].z + tet.v[2].z * tet.v[3].z + tet.v[3].z * tet.v[3].z) / 60;
+		Real b = density * detJ * (tet.v[0].x * tet.v[0].x + tet.v[0].x * tet.v[1].x + tet.v[1].x * tet.v[1].x + tet.v[0].x * tet.v[2].x + tet.v[1].x * tet.v[2].x + tet.v[2].x * tet.v[2].x + tet.v[0].x * tet.v[3].x + tet.v[1].x * tet.v[3].x + tet.v[2].x * tet.v[3].x + tet.v[3].x * tet.v[3].x + tet.v[0].z * tet.v[0].z + tet.v[0].z * tet.v[1].z + tet.v[1].z * tet.v[1].z + tet.v[0].z * tet.v[2].z + tet.v[1].z * tet.v[2].z + tet.v[2].z * tet.v[2].z + tet.v[0].z * tet.v[3].z + tet.v[1].z * tet.v[3].z + tet.v[2].z * tet.v[3].z + tet.v[3].z * tet.v[3].z) / 60;
+		Real c = density * detJ * (tet.v[0].x * tet.v[0].x + tet.v[0].x * tet.v[1].x + tet.v[1].x * tet.v[1].x + tet.v[0].x * tet.v[2].x + tet.v[1].x * tet.v[2].x + tet.v[2].x * tet.v[2].x + tet.v[0].x * tet.v[3].x + tet.v[1].x * tet.v[3].x + tet.v[2].x * tet.v[3].x + tet.v[3].x * tet.v[3].x + tet.v[0].y * tet.v[0].y + tet.v[0].y * tet.v[1].y + tet.v[1].y * tet.v[1].y + tet.v[0].y * tet.v[2].y + tet.v[1].y * tet.v[2].y + tet.v[2].y * tet.v[2].y + tet.v[0].y * tet.v[3].y + tet.v[1].y * tet.v[3].y + tet.v[2].y * tet.v[3].y + tet.v[3].y * tet.v[3].y) / 60;
+		Real a_ = density * detJ * (2 * tet.v[0].y * tet.v[0].z + tet.v[1].y * tet.v[0].z + tet.v[2].y * tet.v[0].z + tet.v[3].y * tet.v[0].z + tet.v[0].y * tet.v[1].z + 2 * tet.v[1].y * tet.v[1].z + tet.v[2].y * tet.v[1].z + tet.v[3].y * tet.v[1].z + tet.v[0].y * tet.v[2].z + tet.v[1].y * tet.v[2].z + 2 * tet.v[2].y * tet.v[2].z + tet.v[3].y * tet.v[2].z + tet.v[0].y * tet.v[3].z + tet.v[1].y * tet.v[3].z + tet.v[2].y * tet.v[3].z + 2 * tet.v[3].y * tet.v[3].z) / 120;
+		Real b_ = density * detJ * (2 * tet.v[0].x * tet.v[0].z + tet.v[1].x * tet.v[0].z + tet.v[2].x * tet.v[0].z + tet.v[3].x * tet.v[0].z + tet.v[0].x * tet.v[1].z + 2 * tet.v[1].x * tet.v[1].z + tet.v[2].x * tet.v[1].z + tet.v[3].x * tet.v[1].z + tet.v[0].x * tet.v[2].z + tet.v[1].x * tet.v[2].z + 2 * tet.v[2].x * tet.v[2].z + tet.v[3].x * tet.v[2].z + tet.v[0].x * tet.v[3].z + tet.v[1].x * tet.v[3].z + tet.v[2].x * tet.v[3].z + 2 * tet.v[3].x * tet.v[3].z) / 120;
+		Real c_ = density * detJ * (2 * tet.v[0].x * tet.v[0].y + tet.v[1].x * tet.v[0].y + tet.v[2].x * tet.v[0].y + tet.v[3].x * tet.v[0].y + tet.v[0].x * tet.v[1].y + 2 * tet.v[1].x * tet.v[1].y + tet.v[2].x * tet.v[1].y + tet.v[3].x * tet.v[1].y + tet.v[0].x * tet.v[2].y + tet.v[1].x * tet.v[2].y + 2 * tet.v[2].x * tet.v[2].y + tet.v[3].x * tet.v[2].y + tet.v[0].x * tet.v[3].y + tet.v[1].x * tet.v[3].y + tet.v[2].x * tet.v[3].y + 2 * tet.v[3].x * tet.v[3].y) / 120;
+		Mat3f inertiaMatrix(a, -b_, -c_, -b_, b, -a_, -c_, -a_, c);
 
 		bd.inertia = inertiaMatrix;
 		bd.shapeType = ET_TET;
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
-		mHostTets.push_back(b);
+		mHostTets.push_back(tetInfo);
 	}
 
 	template<typename TDataType>
@@ -178,16 +220,27 @@ namespace dyno
 		auto b = capsule;
 		auto bd = bodyDef;
 
-		float lx = 2.0f * b.halfLength;
-		float ly = 2.0f * b.radius;
-		float lz = 2.0f * b.radius;
+		Real r = b.radius;
+		Real h = b.halfLength * 2;
+
+
+		Real mass_hemisphere = 2.0 / 3.0 * M_PI * r * r * r;
+		Real mass_cylinder = M_PI * r * r * h;
+
+		Real I_1_cylinder = 1.0 / 12.0 * mass_cylinder * (3 * r * r + h * h);
+		Real I_2_cylinder = 1.0 / 2.0 * mass_cylinder * r * r;
+
+
+		Real tmp = h / 2 + 3.0 / 8.0 * r;
+		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
+		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
+
 		bd.position = b.center;
 
-		bd.mass = density * lx * ly * lz;
-		bd.inertia = 1.0f / 12.0f * bd.mass
-			* Mat3f(ly * ly + lz * lz, 0, 0,
-				0, lx * lx + lz * lz, 0,
-				0, 0, lx * lx + ly * ly);
+		bd.mass = mass_hemisphere * 2 + mass_cylinder;
+		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
+				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
+				0, 0, I_2_cylinder + 2 *I_2_hemisphere);
 
 		bd.shapeType = ET_CAPSULE;
 		bd.angle = b.rot;

@@ -1473,7 +1473,6 @@ namespace dyno
 				this->inRotationMatrix()->getData(),
 				begin_index);
 		}
-		printf("%d\n", pointJoint_size);
 		if (pointJoint_size != 0)
 		{
 			auto& joints = this->inPointJoints()->getData();
