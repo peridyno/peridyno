@@ -649,7 +649,7 @@
 						"POSITION":1
 					},
 					"indices":0,
-					"material":0
+					"material":4
 				},
 				{
 					"attributes":{
@@ -660,7 +660,7 @@
 						"POSITION":7
 					},
 					"indices":6,
-					"material":1
+					"material":4
 				},
 				{
 					"attributes":{
@@ -671,7 +671,7 @@
 						"POSITION":13
 					},
 					"indices":12,
-					"material":2
+					"material":4
 				},
 				{
 					"attributes":{
@@ -682,7 +682,7 @@
 						"POSITION":19
 					},
 					"indices":18,
-					"material":3
+					"material":4
 				},
 				{
 					"attributes":{
@@ -722,10 +722,11 @@
 		{
 			"name":"principledshader1",
 			"pbrMetallicRoughness":{
-				"baseColorFactor":[1,0,0,1
-				],
 				"metallicFactor":0,
-				"roughnessFactor":0.300000012
+				"roughnessFactor":0.300000012,			
+				"baseColorTexture":{
+					"index":0
+				}
 			}
 		},
 		{
@@ -763,6 +764,9 @@
 				"baseColorTexture":{
 					"index":0
 				}
+			},
+			"normalTexture":{
+				"index":2
 			}
 		},
 		{
@@ -788,6 +792,9 @@
 		},
 		{
 			"source":1
+		},
+		{
+			"source":2
 		}
 	],
 	"images":[
@@ -797,6 +804,10 @@
 		},
 		{
 			"uri":"Body_Base_color.png",
+			"mimeType":"image/png"
+		},
+		{
+			"uri":"Wheel_Normal_OpenGL.png",
 			"mimeType":"image/png"
 		}
 	],

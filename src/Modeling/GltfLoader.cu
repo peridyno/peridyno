@@ -265,29 +265,20 @@ namespace dyno
 			shapeNum += meshId.primitives.size();
 		}
 
+		//materials
+		loadMaterial();
+		
+		
+		//shapes
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
-
-		auto& reMats = texMesh->materials();
+		
 		auto& reShapes = texMesh->shapes();
-
+		reShapes.clear();
 		reShapes.resize(shapeNum);
 
+		auto& reMats = texMesh->materials();
+		
 
-
-		//shape
-		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
-		texture[0, 0] = dyno::Vec4f(1);
-
-		if (model.materials.size()) {
-			reMats.resize(model.materials.size());
-		}
-		else {
-			reMats.resize(shapeNum);
-		}
-
-		std::vector<tinygltf::Material>& materials = model.materials;
-		std::vector<Texture>& textures = model.textures;
-		std::vector<Image>& images = model.images;
 
 		std::vector<Coord> shapeCenter;
 
@@ -354,69 +345,33 @@ namespace dyno
 					shapeCenter.push_back(reShapes[currentShape]->boundingTransform.translation());
 
 					int matId = primitive.material;
-					if (matId != -1)// == -1 会出问题
+					if (matId != -1 && matId < reMats.size())// 有材质
 					{
-
-						auto material = materials[matId];
-						auto color = material.pbrMetallicRoughness.baseColorFactor;
-						auto roughness = material.pbrMetallicRoughness.roughnessFactor;
-
-						auto metallic = material.pbrMetallicRoughness.metallicFactor;
-
-						auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
-						auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
-
-						reMats[matId] = std::make_shared<Material>();
-						reMats[matId]->ambient = { 0,0,0 };
-						reMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
-						reMats[matId]->alpha = color[3];
-						reMats[matId]->specular = Vec3f(1 - roughness);
-						reMats[matId]->roughness = roughness;
-
-
-						std::string colorUri = getTexUri(textures, images, colorTexId);
-
-						if (!colorUri.empty())
-						{
-							auto root = this->varFileName()->getValue().path().parent_path();
-							colorUri = (root / colorUri).string();
-
-							if (loadImage(colorUri.c_str(), texture))
-							{
-								reMats[matId]->texColor.assign(texture);
-							}
-						}
-
-						auto bumpTexId = material.normalTexture.index;
-						auto scale = material.normalTexture.scale;
-						std::string bumpUri = getTexUri(textures, images, bumpTexId);
-
-						if (!bumpUri.empty())
-						{
-							auto root = this->varFileName()->getValue().path().parent_path();
-							bumpUri = (root / bumpUri).string();
-
-							if (loadImage(bumpUri.c_str(), texture))
-							{
-								reMats[matId]->texBump.assign(texture);
-								reMats[matId]->bumpScale = scale;
-							}
-						}
-
 						reShapes[currentShape]->material = reMats[matId];
+						//printf("shape_materialID : %d - %d\n",currentShape,matId);
 
+						//printf("texture size %d - %d:\n", reMats[matId]->texColor.nx(), reMats[matId]->texColor.ny());
 					}
 					else 
 					{
-						reMats[currentShape] = std::make_shared<Material>();
-						reMats[currentShape]->ambient = { 0,0,0 };
-						reMats[currentShape]->diffuse = Vec3f(0.5, 0.5, 0.5);
-						reMats[currentShape]->alpha = 1;
-						reMats[currentShape]->specular = Vec3f(1, 1, 1);
-						reMats[currentShape]->roughness = 0.5;
-
-						reShapes[currentShape]->material = reMats[currentShape];
+						reShapes[currentShape]->material = NULL;
 					}
+
+					//else //无材质，创建新材质
+					//{
+					//	auto newMat = std::make_shared<Material>();
+
+					//	newMat->ambient = { 0,0,0 };
+					//	newMat->diffuse = Vec3f(0.5, 0.5, 0.5);
+					//	newMat->alpha = 1;
+					//	newMat->specular = Vec3f(1, 1, 1);
+					//	newMat->roughness = 0.5;
+	
+					//	reMats.push_back(newMat);
+
+					//	reShapes[currentShape]->material = reMats[reMats.size() - 1];
+					//	printf("shape_materialID : %d - %d\n", currentShape, currentShape);
+					//}
 
 
 
@@ -881,9 +836,7 @@ namespace dyno
 
 		Coord center = (v0 + v1) / 2;
 		transform = Transform3f(Vec3f(center),Mat3f::identityMatrix(),Vec3f(1));
-		printf("\nboundingMin: %f, %f, %f\n", v0[0], v0[1], v0[2]);
-		printf("\nboundingMax: %f, %f, %f\n", v1[0], v1[1], v1[2]);
-		printf("\nTransform: %f, %f, %f\n", center[0], center[1], center[2]);
+
 
 
 	}
@@ -1534,6 +1487,8 @@ namespace dyno
 		this->stateTexCoord_1()->clear();
 		this->stateWeights_0()->clear();
 		this->stateWeights_1()->clear();
+		this->stateTextureMesh()->getDataPtr()->clear();
+		
 	}
 
 	template<typename TDataType>
@@ -1647,6 +1602,87 @@ namespace dyno
 		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
 	}
 
+	template<typename TDataType>
+	void GltfLoader<TDataType>::loadMaterial()
+	{
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
+		const std::vector<tinygltf::Material>& sourceMaterials = model.materials;
+		
+		auto& reMats = texMesh->materials();
+		reMats.clear();
+		if (sourceMaterials.size()) //use materials.size()
+		{
+			reMats.resize(sourceMaterials.size());
+		}
+
+
+		std::vector<tinygltf::Texture>& textures = model.textures;
+		std::vector<tinygltf::Image>& images = model.images;
+		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
+		texture[0, 0] = dyno::Vec4f(1);
+
+
+		for (int matId = 0; matId < sourceMaterials.size(); matId++)
+		{
+			auto material = sourceMaterials[matId];
+			auto color = material.pbrMetallicRoughness.baseColorFactor;
+			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
+
+			auto metallic = material.pbrMetallicRoughness.metallicFactor;
+
+			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
+			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
+
+			reMats[matId] = std::make_shared<Material>();
+			reMats[matId]->ambient = { 0,0,0 };
+			reMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
+			reMats[matId]->alpha = color[3];
+			reMats[matId]->specular = Vec3f(1 - roughness);
+			reMats[matId]->roughness = roughness;
+
+			std::string colorUri = getTexUri(textures, images, colorTexId);
+
+			if (!colorUri.empty())
+			{
+				auto root = this->varFileName()->getValue().path().parent_path();
+				colorUri = (root / colorUri).string();
+
+				if (loadImage(colorUri.c_str(), texture))
+				{
+					reMats[matId]->texColor.assign(texture);
+				}
+			}
+			else 
+			{
+				if (reMats[matId]->texColor.size()) 
+					reMats[matId]->texColor.clear();
+			}
+
+			auto bumpTexId = material.normalTexture.index;
+			auto scale = material.normalTexture.scale;
+			std::string bumpUri = getTexUri(textures, images, bumpTexId);
+
+			if (!bumpUri.empty())
+			{
+				auto root = this->varFileName()->getValue().path().parent_path();
+				bumpUri = (root / bumpUri).string();
+
+				if (loadImage(bumpUri.c_str(), texture))
+				{
+					reMats[matId]->texBump.assign(texture);
+					reMats[matId]->bumpScale = scale;
+				}
+			}
+			else
+			{
+				if (reMats[matId]->texBump.size())
+					reMats[matId]->texBump.clear();
+			}
+
+		}
+
+
+	}
 
 
 

@@ -86,6 +86,7 @@ option(PERIDYNO_LIBRARY_RIGIDBODY "Enable binding the rigid body library" ON)
 option(PERIDYNO_LIBRARY_VOLUME "Enable binding the volume library" ON)
 option(PERIDYNO_LIBRARY_HEIGHTFIELD "Enable binding the Height Field library" ON)
 option(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME "Enable binding the semi-analycial scheme library" ON)
+option(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM "Enable binding the dual-particle scheme library" ON)
 
 option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
 
@@ -123,4 +124,9 @@ endif()
 if(PERIDYNO_LIBRARY_MULTIPHYSICS)
 	set(LIB_DEPENDENCY ParticleSystem Peridynamics RigidBody Volume)
     build_library(Multiphysics LIB_DEPENDENCY)
+endif()
+
+if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
+    set(LIB_DEPENDENCY ParticleSystem Modeling SemiAnalyticalScheme)
+    build_library(DualParticleSystem LIB_DEPENDENCY)
 endif()

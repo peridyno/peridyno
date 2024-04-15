@@ -51,6 +51,7 @@ namespace dyno
 	{
 		glActiveTexture(slot);
 		glBindTexture(target, id);
+		glCheckError();
 	}
 
 	void Texture2D::unbind()

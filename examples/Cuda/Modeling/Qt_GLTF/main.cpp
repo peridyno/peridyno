@@ -23,8 +23,7 @@ int main()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->varFileName()->setValue(std::string("D:/Render/Model/Jeep_PeriDyno/JeepGltf/jeep.gltf"));//"C:/Users/dell/Desktop/jeep.gltf"
-
+	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
 
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();
