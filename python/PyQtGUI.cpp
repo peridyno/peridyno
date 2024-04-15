@@ -1,6 +1,5 @@
 #include "PyCommon.h"
 
-#include "QtGUI/QtApp.h"
 #include "ImColorbar.h"
 #include "ImWidget.h"
 

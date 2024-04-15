@@ -1,4 +1,5 @@
 #include "PyCore.h"
+#include <pybind11/stl.h>
 
 #include "Timer.h"
 #include "Vector.h"
@@ -138,4 +139,8 @@ void pybind_core(py::module& m)
 		.def_readwrite("v", &dyno::TOrientedBox3D<Real>::v)
 		.def_readwrite("w", &dyno::TOrientedBox3D<Real>::w)
 		.def_readwrite("extent", &dyno::TOrientedBox3D<Real>::extent);
+
+	py::class_<std::vector<dyno::Vec3f>>(m, "VectorVec3f")
+		.def(py::init<>())
+		.def("push_back", &std::vector<dyno::Vec3f>::push_back);
 }
