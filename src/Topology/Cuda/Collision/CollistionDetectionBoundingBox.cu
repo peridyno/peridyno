@@ -176,8 +176,8 @@ namespace dyno
 
 			Capsule3D cap_i = cap[pId - elementOffset.capsuleIndex()];
 
-			Coord v0 = cap_i.segment.v0;
-			Coord v1 = cap_i.segment.v1;
+			Coord v0 = cap_i.startPoint();
+			Coord v1 = cap_i.endPoint();
 
 			Real radius = cap_i.radius;
 
@@ -505,8 +505,8 @@ namespace dyno
 
 			Capsule3D cap_i = cap[pId - elementOffset.capsuleIndex()];
 
-			Coord v0 = cap_i.segment.v0;
-			Coord v1 = cap_i.segment.v1;
+			Coord v0 = cap_i.startPoint();
+			Coord v1 = cap_i.endPoint();
 
 			Real radius = cap_i.radius;
 

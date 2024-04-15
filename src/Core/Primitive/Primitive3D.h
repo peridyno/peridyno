@@ -14,6 +14,7 @@
 #include "Matrix.h"
 #include "Quat.h"
 
+// Temporary code, to be removed in the  
 namespace px
 {
 	struct Plane3D
@@ -654,16 +655,24 @@ namespace dyno
 
 	public:
 		DYN_FUNC TCapsule3D();
-		DYN_FUNC TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r);
+		DYN_FUNC TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl);
 		DYN_FUNC TCapsule3D(const TCapsule3D<Real>& capsule);
 
-		DYN_FUNC Real volume();
+		DYN_FUNC Real volume() const;
 
-		DYN_FUNC bool isValid();
-		DYN_FUNC TAlignedBox3D<Real> aabb();
+		DYN_FUNC bool isValid() const;
+		DYN_FUNC TAlignedBox3D<Real> aabb() const;
 
+		// return the two ends
+		DYN_FUNC inline Coord3D startPoint() const { return center - rotation.rotate(halfLength * Coord3D(0, 0, 1)); }
+		DYN_FUNC inline Coord3D endPoint() const { return center + rotation.rotate(halfLength * Coord3D(0, 0, 1)); }
+
+		DYN_FUNC inline TSegment3D<Real> centerline() const { return TSegment3D<Real>(startPoint(), endPoint()); }
+
+		Coord3D center;
+		Quat<Real> rotation;
 		Real radius;
-		TSegment3D<Real> segment;
+		Real halfLength;
 	};
 
 	/**
@@ -687,7 +696,7 @@ namespace dyno
 
 		DYN_FUNC Real volume() const;
 
-		DYN_FUNC bool isValid();
+		DYN_FUNC bool isValid() const;
 
 		//DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 		DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;

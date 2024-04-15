@@ -259,7 +259,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TCapsule3D<Real>& capsule) const
 	{
-		Coord3D coordQ = project(capsule.segment).origin;
+		Coord3D coordQ = project(capsule.centerline()).origin;
 		Coord3D dir = origin - coordQ;
 
 		return TPoint3D<Real>(coordQ + capsule.radius * dir.normalize());
@@ -367,7 +367,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TPoint3D<Real> TPoint3D<Real>::project(const TCapsule3D<Real>& capsule, Bool& bInside /*= Bool(false)*/) const
 	{
-		Coord3D coordQ = project(capsule.segment).origin;
+		Coord3D coordQ = project(capsule.centerline()).origin;
 		Coord3D dir = origin - coordQ;
 
 		bInside = dir.normSquared() < capsule.radius * capsule.radius ? true : false;
@@ -792,7 +792,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC bool TPoint3D<Real>::inside(const TCapsule3D<Real>& capsule) const
 	{
-		return distanceSquared(capsule.segment) < capsule.radius * capsule.radius;
+		return distanceSquared(capsule.centerline()) < capsule.radius * capsule.radius;
 	}
 
 	template<typename Real>
@@ -3245,44 +3245,51 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TCapsule3D<Real>::TCapsule3D()
 	{
-		segment = TSegment3D<Real>(Coord3D(0), Coord3D(1, 0, 0));
+		center = Coord3D(0, 0, 0);
+		rotation = Quat<Real>();
 		radius = Real(1);
+		halfLength = Real(1);
 	}
 
 	template<typename Real>
-	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r)
-		: segment(v0, v1)
+	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl)
+		: center(c)
+		, rotation(q)
 		, radius(r)
+		, halfLength(hl)
 	{
-
 	}
 
 	template<typename Real>
 	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const TCapsule3D& capsule)
 	{
-		segment = capsule.segment;
+		center = capsule.center;
+		rotation = capsule.rotation;
 		radius = capsule.radius;
+		halfLength = capsule.halfLength;
 	}
 
 	template<typename Real>
-	DYN_FUNC Real TCapsule3D<Real>::volume()
+	DYN_FUNC Real TCapsule3D<Real>::volume() const
 	{
 		Real r2 = radius * radius;
-		return Real(M_PI) * r2 * segment.length() + Real(4.0 * M_PI / 3.0) * r2 * radius;
+		return 2 * Real(M_PI) * r2 * halfLength + Real(4.0 * M_PI / 3.0) * r2 * radius;
 	}
 
 	template<typename Real>
-	DYN_FUNC bool TCapsule3D<Real>::isValid()
+	DYN_FUNC bool TCapsule3D<Real>::isValid() const
 	{
-		return radius >= REAL_EPSILON;
+		return radius >= REAL_EPSILON && halfLength >= REAL_EPSILON;
 	}
 
 	template<typename Real>
-	DYN_FUNC TAlignedBox3D<Real> TCapsule3D<Real>::aabb()
+	DYN_FUNC TAlignedBox3D<Real> TCapsule3D<Real>::aabb() const
 	{
 		TAlignedBox3D<Real> abox;
-		abox.v0 = minimum(segment.v0, segment.v1) - radius;
-		abox.v1 = maximum(segment.v0, segment.v1) + radius;
+		Coord3D v0 = startPoint();
+		Coord3D v1 = endPoint();
+		abox.v0 = minimum(v0, v1) - radius;
+		abox.v1 = maximum(v0, v1) + radius;
 		return abox;
 	}
 
@@ -3350,7 +3357,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC bool TTet3D<Real>::isValid()
+	DYN_FUNC bool TTet3D<Real>::isValid() const
 	{
 		return volume() >= REAL_EPSILON;
 	}

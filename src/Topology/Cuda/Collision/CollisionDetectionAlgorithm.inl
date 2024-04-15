@@ -726,8 +726,8 @@ namespace dyno
 	{
 		m.contactCount = 0;
 
-		Segment3D s0(cap0.segment);
-		Segment3D s1(cap1.segment);
+		Segment3D s0(cap0.centerline());
+		Segment3D s1(cap1.centerline());
 		Real r0 = cap0.radius + cap1.radius;
 
 		// From cap0 to cap1
@@ -752,7 +752,7 @@ namespace dyno
 		m.contactCount = 0;
 
 		Point3D s(sphere.center);
-		Segment3D c(cap.segment);
+		Segment3D c(cap.centerline());
 		Real r0 = cap.radius + sphere.radius;
 
 		Point3D pos = s.project(c);//pos: capsule
@@ -794,7 +794,7 @@ namespace dyno
 	{
 
 		//projection to axis
-		Segment3D seg = cap.segment;
+		Segment3D seg = cap.centerline();
 
 		lowerBoundary1 = seg.v0.dot(axisNormal) - cap.radius;
 		upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
@@ -925,7 +925,7 @@ namespace dyno
 		Capsule3D cap)
 	{
 
-		Segment3D seg = cap.segment;
+		Segment3D seg = cap.centerline();
 		//projection to axis
 
 		lowerBoundary1 = seg.v0.dot(axisNormal) - cap.radius;
@@ -967,14 +967,14 @@ namespace dyno
 		Vector<Real, 3> boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
-		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+		if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v0.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-			boundaryPoints2[cnt1++] = cap.segment.v0;
-		if (abs(cap.segment.v1.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+			abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt1++] = cap.startPoint();
+		if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v1.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-			boundaryPoints2[cnt1++] = cap.segment.v1;
+			abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt1++] = cap.endPoint();
 
 		
 
@@ -1027,7 +1027,7 @@ namespace dyno
 		}
 		else if (cnt1 == 2)
 		{
-			Segment3D s1 = cap.segment;
+			Segment3D s1 = cap.centerline();
 
 			if (cnt2 == 2)
 			{
@@ -1158,14 +1158,14 @@ namespace dyno
 				boundaryPoints1[cnt1 ++] = i;
 		}
 
-		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+		if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v0.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
 			boundaryPoints2[cnt2 ++] = 0;
 		
-		if (abs(cap.segment.v1.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+		if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v1.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
 			boundaryPoints2[cnt2++] = 1;
 
 		if (cnt1 == 1)
@@ -1180,7 +1180,7 @@ namespace dyno
 		{
 			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = boundaryPoints2[0] ? cap.segment.v1 : cap.segment.v0;
+			m.contacts[0].position = boundaryPoints2[0] ? cap.endPoint() : cap.startPoint();
 			m.contactCount = 1;
 			return;
 		}
@@ -1190,7 +1190,7 @@ namespace dyno
 
 			//if (cnt2 == 2)
 			{
-				Segment3D s2 = cap.segment;
+				Segment3D s2 = cap.centerline();
 				Segment3D dir = s1.proximity(s2);//v0: self v1: other
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				m.contacts[0].penetration = sMax;
@@ -1205,7 +1205,7 @@ namespace dyno
 			//if (cnt2 == 2)
 			{
 
-				Segment3D s2 = cap.segment;
+				Segment3D s2 = cap.centerline();
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
@@ -1418,7 +1418,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const OBox3D& box)
 	{
-		Segment3D c(cap.segment);
+		Segment3D c(cap.centerline());
 		Real r0 = cap.radius;
 
 		m.contactCount = 0;
@@ -1784,7 +1784,7 @@ namespace dyno
 		2, 3
 		};
 
-		axisTmp = cap.segment.direction();
+		axisTmp = cap.centerline().direction();
 		if (axisTmp.norm() > EPSILON)
 		{
 			axisTmp /= axisTmp.norm();
@@ -1812,7 +1812,7 @@ namespace dyno
 		for (int i = 0; i < 6; i++)
 		{
 			Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
-			Vector<Real, 3> dirCap = cap.segment.direction();
+			Vector<Real, 3> dirCap = cap.centerline().direction();
 
 			
 

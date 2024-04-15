@@ -14,7 +14,7 @@ TEST(Capsule, sphere)
 	using Capsule = TCapsule3D<float>;
 
 	Sphere sphere = Sphere(Coord3D(0, 0, 0), 1.0f);
-	Capsule cap = Capsule(Coord3D(1.0f, 1.99f, 0), Coord3D(-1.0f, 1.99f, 0), 1);
+	Capsule cap = Capsule(Coord3D(0, 1.99, 0), Quat1f(), 1, 1);
 
 	TManifold<Real> manifold;
 	CollisionDetection<float>::request(manifold, sphere, cap);
@@ -39,7 +39,7 @@ TEST(Capsule, obb)
 	using Capsule = TCapsule3D<float>;
 
 	Box b0 = Box(Coord3D(0, 0, 0), Quat<float>(0, 0, 0, 1), Coord3D(1, 1, 1));
-	Capsule cap = Capsule(Coord3D(1.0f, 1.9f, 0), Coord3D(-1.0f, 1.9f, 0), 1);
+	Capsule cap = Capsule(Coord3D(0, 1.9, 0), Quat1f(), 1, 1);
 
 	TManifold<Real> manifold;
 	CollisionDetection<float>::request(manifold, cap, b0);

@@ -304,9 +304,10 @@ namespace dyno
 		float halfLenght = capInfo[tId].halfLength;
 		Mat3f rot = capInfo[tId].rot.toMatrix3x3();
 
-		cap3d[tId].segment.v0 = capInfo[tId].center - rot * Vec3f(0, 0, halfLenght);
-		cap3d[tId].segment.v1 = capInfo[tId].center + rot * Vec3f(0, 0, halfLenght);
+		cap3d[tId].center = capInfo[tId].center;
+		cap3d[tId].rotation = capInfo[tId].rot;
 		cap3d[tId].radius = capInfo[tId].radius;
+		cap3d[tId].halfLength = capInfo[tId].halfLength;
 	}
 
 	template<typename TDataType>
@@ -460,8 +461,9 @@ namespace dyno
 
 		Capsule3D cap;
 		cap.radius = cap_init[pId].radius;
-		cap.segment.v0 = pos[pId + start_cap] - quat[pId + start_cap].rotate(Coord(0, 0, cap_init[pId].halfLength));
-		cap.segment.v1 = pos[pId + start_cap] + quat[pId + start_cap].rotate(Coord(0, 0, cap_init[pId].halfLength));
+		cap.halfLength = cap_init[pId].halfLength;
+		cap.rotation = quat[pId + start_cap];
+		cap.center = pos[pId + start_cap];
 
 		caps[pId] = cap;
 	}
