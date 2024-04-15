@@ -201,10 +201,46 @@ void pybind_framework(py::module& m)
 
 	py::class_<NodePort>(m, "NodePort");
 
-	py::class_<FBase, std::shared_ptr<FBase>>(m, "FBase")
-		.def("connect", &FBase::connect);
-
 	py::class_<OBase, std::shared_ptr<OBase>>(m, "OBase");
+
+	py::class_<FBase, std::shared_ptr<FBase>>(m, "FBase")
+		.def("get_template_name", &FBase::getTemplateName)
+		.def("get_class_name", &FBase::getClassName)
+		.def("get_object_name", &FBase::getObjectName)
+		.def("get_description", &FBase::getDescription)
+		.def("get_device_type", &FBase::getDeviceType)
+		.def("set_object_name", &FBase::setObjectName)
+		.def("set_parent", &FBase::setParent)
+		.def("is_derived", &FBase::isDerived)
+		.def("is_auto_destroyable", &FBase::isAutoDestroyable)
+		.def("set_auto_destroy", &FBase::setAutoDestroy)
+		.def("set_derived", &FBase::setDerived)
+		.def("is_modified", &FBase::isModified)
+		.def("tick", &FBase::tick)
+		.def("tack", &FBase::tack)
+		.def("is_optional", &FBase::isOptional)
+		.def("tag_optional", &FBase::tagOptional)
+		.def("get_min", &FBase::getMin)
+		.def("set_min", &FBase::setMin)
+		.def("get_max", &FBase::getMax)
+		.def("set_max", &FBase::setMax)
+		.def("set_range", &FBase::setRange)
+		.def("connect", &FBase::connect)
+		.def("disconnect", &FBase::disconnect)
+		.def("serialize", &FBase::serialize)
+		.def("deserialize", &FBase::deserialize)
+
+		.def("get_top_field", &FBase::getTopField)
+		.def("get_source", &FBase::getSource)
+		.def("promote_ouput", &FBase::promoteOuput)
+		.def("promote_input", &FBase::promoteInput)
+		.def("demote_ouput", &FBase::demoteOuput)
+		.def("demote_input", &FBase::demoteInput)
+
+		.def("is_empty", &FBase::isEmpty)
+		.def("update", &FBase::update)
+		.def("attach", &FBase::attach)
+		.def("detach", &FBase::detach);
 
 	py::class_<Color>(m, "Color")
 		.def(py::init<float, float, float>());
@@ -224,7 +260,10 @@ void pybind_framework(py::module& m)
 	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr());
 
 	py::class_<VisualModule, Module, std::shared_ptr<VisualModule>>(m, "VisualModule")
-		.def(py::init<>());
+		.def(py::init<>())
+		.def("set_visible", &VisualModule::setVisible)
+		.def("is_visible", &VisualModule::isVisible)
+		.def("get_module_type", &VisualModule::getModuleType);
 
 	py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
 		.def(py::init<>());
@@ -258,7 +297,10 @@ void pybind_framework(py::module& m)
 	declare_discrete_elements_to_triangle_set<dyno::DataType3f>(m, "3f");
 
 	declare_var<float>(m, "f");
+	declare_var<bool>(m, "b");
+	declare_var<std::string>(m, "s");
 	declare_var<dyno::Vec3f>(m, "3f");
+	declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
 
 	declare_array<float, DeviceType::GPU>(m, "1fD");
 	declare_array<dyno::Vec3f, DeviceType::GPU>(m, "3fD");

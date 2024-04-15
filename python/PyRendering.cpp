@@ -8,7 +8,6 @@
 #include "Topology/TriangleSet.h"
 using namespace dyno;
 
-
 /**
 	Wrap the visual module to make sure the GLAD is initialzied.
 */
@@ -46,15 +45,17 @@ void declare_point_visual_module(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>> GLPV(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	GLPV.def(py::init<>())
 		.def("in_pointSet", &Class::inPointSet, py::return_value_policy::reference)
-		.def("set_colorMapMode", &GLPointVisualModule::setColorMapMode)
-		.def("in_color", &Class::inColor, py::return_value_policy::reference);
+		.def("set_colorMapMode", &Class::setColorMapMode)
+		.def("in_color", &Class::inColor, py::return_value_policy::reference)
+		//DEF_VAR
+		.def("var_point_size", &Class::varPointSize, py::return_value_policy::reference)
+		//DEF_ENUM
+		.def("var_color_mode", &Class::varColorMode, py::return_value_policy::reference);
 
-
-
-	py::enum_<GLPointVisualModule::ColorMapMode>(GLPV, "ColorMapMode")
-		.value("PER_OBJECT_SHADER", GLPointVisualModule::ColorMapMode::PER_OBJECT_SHADER)
-		.value("PER_VERTEX_SHADER", GLPointVisualModule::ColorMapMode::PER_VERTEX_SHADER);
-	
+	//DECLARE_ENUM
+	py::enum_<Class::ColorMapMode>(GLPV, "ColorMapMode")
+		.value("PER_OBJECT_SHADER", Class::ColorMapMode::PER_OBJECT_SHADER)
+		.value("PER_VERTEX_SHADER", Class::ColorMapMode::PER_VERTEX_SHADER);
 }
 
 void declare_surface_visual_module(py::module& m, std::string typestr) {
@@ -65,9 +66,6 @@ void declare_surface_visual_module(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
-
-
-
 }
 
 void pybind_rendering(py::module& m)
@@ -79,14 +77,13 @@ void pybind_rendering(py::module& m)
 		.def("set_alpha", &GLVisualModule::setAlpha)
 		.def("is_transparent", &GLVisualModule::isTransparent);
 
-// 	py::class_<GLPointVisualModuleWrap, GLVisualModule, std::shared_ptr<GLPointVisualModuleWrap>>
-// 		(m, "GLPointVisualModule", py::buffer_protocol(), py::dynamic_attr())
-// 		.def(py::init<>())
-// 		.def("set_point_size", &GLPointVisualModuleWrap::setPointSize)
-// 		.def("get_point_size", &GLPointVisualModuleWrap::getPointSize)
-// 		.def("in_pointset", &GLPointVisualModuleWrap::inPointSet, py::return_value_policy::reference)
-// 		.def("in_color", &GLPointVisualModuleWrap::inColor);
-
+	// 	py::class_<GLPointVisualModuleWrap, GLVisualModule, std::shared_ptr<GLPointVisualModuleWrap>>
+	// 		(m, "GLPointVisualModule", py::buffer_protocol(), py::dynamic_attr())
+	// 		.def(py::init<>())
+	// 		.def("set_point_size", &GLPointVisualModuleWrap::setPointSize)
+	// 		.def("get_point_size", &GLPointVisualModuleWrap::getPointSize)
+	// 		.def("in_pointset", &GLPointVisualModuleWrap::inPointSet, py::return_value_policy::reference)
+	// 		.def("in_color", &GLPointVisualModuleWrap::inColor);
 
 	py::class_<GLSurfaceVisualModuleWrap, GLVisualModule, std::shared_ptr<GLSurfaceVisualModuleWrap>>
 		(m, "GLSurfaceVisualModule", py::buffer_protocol(), py::dynamic_attr())

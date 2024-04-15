@@ -25,6 +25,6 @@ void declare_cube_model(py::module& m, std::string typestr) {
 }
 
 void pybind_modeling(py::module& m) {
-	declare_var<dyno::TOrientedBox3D<float>>(m, "TOrientedBox3D");
+	//declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
 	declare_cube_model <dyno::DataType3f>(m, "3f");
 }
