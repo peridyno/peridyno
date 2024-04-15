@@ -36,7 +36,7 @@ scn.add_node(emitter)
 scn.add_node(fluid)
 scn.add_node(container)
 
-app = dyno.GLApp()
+app = dyno.GLfwApp()
 app.set_scenegraph(scn)
 app.initialize(800, 600, True)
 app.main_loop()

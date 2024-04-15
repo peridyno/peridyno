@@ -1,5 +1,6 @@
 #include "PyCommon.h"
 
+#include "QtGUI/QtApp.h"
 #include "ImColorbar.h"
 #include "ImWidget.h"
 
@@ -51,6 +52,13 @@ void declare_im_widget(py::module& m, std::string typestr) {
 
 void pybind_qt_gui(py::module& m)
 {
+	//py::class_<dyno::QtApp>(m, "QtApp")
+	//	.def(py::init())
+	//	.def("set_scenegraph", &dyno::QtApp::setSceneGraph)
+	//	.def("initialize", &dyno::QtApp::initialize)
+	//	.def("main_loop", &dyno::QtApp::mainLoop)
+	//	.def("set_window_title", &dyno::QtApp::setWindowTitle);
+
 	declare_im_widget(m, "3f");
 	declare_im_colorbar(m, "3f");
 
