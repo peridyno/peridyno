@@ -708,76 +708,6 @@ namespace dyno
 		}
 	}
 
-	template<typename Constraint, typename Coord>
-	__global__ void calculateJB(
-		DArray<Coord> J,
-		DArray<Coord> B,
-		DArray<Constraint> constraints,
-		DArray<Real> D
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		int size = constraints.size() * constraints.size();
-		if (tId >= size)
-			return;
-
-		Real tmp = 0;
-		int row = tId / constraints.size();
-		int col = tId % constraints.size();
-
-		int idx1_row = constraints[row].bodyId1;
-		int idx2_row = constraints[row].bodyId2;
-
-		int idx1_col = constraints[col].bodyId1;
-		int idx2_col = constraints[col].bodyId2;
-
-		if (idx1_row == idx1_col && idx2_row == idx2_col)
-		{
-			tmp += J[4 * row].dot(B[4 * col]) + J[4 * row + 1].dot(B[4 * col + 1]) + J[4 * row + 2].dot(B[4 * col + 2]) + J[4 * row + 3].dot(B[4 * col + 3]);
-		}
-		else
-		{
-			if (idx1_row == idx1_col)
-			{
-				tmp += J[4 * row].dot(B[4 * col]) + J[4 * row + 1].dot(B[4 * col + 1]);
-			}
-			else if (idx2_row == idx2_col)
-			{
-				tmp += J[4 * row + 2].dot(B[4 * col + 2]) + J[4 * row + 3].dot(B[4 * col + 3]);
-			}
-			else if (idx1_row == idx2_col)
-			{
-				tmp += J[4 * row].dot(B[4 * col + 2]) + J[4 * row + 1].dot(B[4 * col + 3]);
-			}
-			else
-			{
-				tmp += J[4 * row + 2].dot(B[4 * col]) + J[4 * row + 3].dot(B[4 * col + 1]);
-			}
-		}
-		int index = constraints.size() * row + col;
-		D[index] = tmp;
-	}
-
-	template<typename Real>
-	__global__ void calculateError(
-		DArray<Real> JB,
-		DArray<Real> lambda,
-		DArray<Real> eta,
-		DArray<Real> error
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		if (tId >= lambda.size())
-			return;
-		double tmp = 0;
-		for (int i = 0; i < lambda.size(); i++)
-		{
-			tmp += JB[tId * lambda.size() + i] * lambda[i];
-		}
-
-		error[tId] = eta[tId] - tmp;
-
-	}
 
 	template<typename Real>
 	__global__ void calculateDiff(
@@ -1186,36 +1116,6 @@ namespace dyno
 		constraints[baseIndex + 5].type = ConstraintType::CN_BAN_ROT_3;
 	}
 
-	__global__ void jacobiKernel(
-		DArray<double> JB,
-		DArray<double> lambda,
-		DArray<double> newlambda,
-		DArray<double> eta
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		if (tId < lambda.size())
-		{
-			double sum = 0.0;
-			for (int j = 0; j < lambda.size(); j++)
-			{
-				if (j != tId)
-				{
-					sum += JB[tId * lambda.size() + j] * lambda[j];
-				}
-			}
-			if (abs(JB[tId * lambda.size() + tId]) > 1e-10)
-			{
-				newlambda[tId] = 0.1 * (eta[tId] - sum) / JB[tId * lambda.size() + tId];
-			}
-			else
-			{
-				newlambda[tId] = lambda[tId];
-			}
-			printf("%d : %g %g %g %g\n", tId, newlambda[tId], eta[tId], sum, JB[tId * lambda.size() + tId]);
-		}
-	}
-
 	template<typename Coord, typename Constraint>
 	__global__ void takeOneJacobiIteration(
 		DArray<Real> lambda,
@@ -1323,16 +1223,6 @@ namespace dyno
 		}
 	}
 
-	template<typename Constraint>
-	__global__ void printConstraintType(
-		DArray<Constraint> constraints
-	)
-	{
-		int tId = threadIdx.x + blockDim.x * blockIdx.x;
-		if (tId >= constraints.size())
-			return;
-		printf("%d : %d\n", tId, constraints[tId].type);
-	}
 
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::initializeJacobian(Real dt)
@@ -1629,22 +1519,11 @@ namespace dyno
 
 			int constraint_size = mAllConstraints.size();
 
-			mJB.resize(constraint_size * constraint_size);
-			mJB.reset();
-
-			cuExecute(constraint_size * constraint_size,
-				calculateJB,
-				mJ,
-				mB,
-				mAllConstraints,
-				mJB);
 
 			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
 			{
 				mDiff.resize(constraint_size);
 				mDiff.reset();
-				mError.resize(constraint_size);
-				mError.reset();
 				cuExecute(constraint_size,
 					takeOneJacobiIteration,
 					mLambda,
@@ -1660,24 +1539,7 @@ namespace dyno
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt);
-
-				cuExecute(constraint_size,
-					calculateError,
-					mJB,
-					mLambda,
-					mEta,
-					mError);
-
-				Real error = 0.0;
-				CArray<Real> mHostError;
-				mHostError.assign(mError);
-				for (int j = 0; j < mHostError.size(); j++)
-				{
-					error += mHostError[j] * mHostError[j];
-				}
-				//printf("Error : %lf\n", sqrt(error));
-
-
+		
 				cuExecute(constraint_size,
 					calculateDiff,
 					mLambda,

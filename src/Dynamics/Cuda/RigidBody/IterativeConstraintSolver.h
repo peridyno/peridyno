@@ -98,7 +98,6 @@ namespace dyno
 	private:
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
-		DArray<Real> mJB;		//JB
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
@@ -118,7 +117,6 @@ namespace dyno
 		DArray<int> mContactNumber;
 		DArray<int> mJointNumber;
 
-		DArray<Real> mError;
 
 	};
 }
