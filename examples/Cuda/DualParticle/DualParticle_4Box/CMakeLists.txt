@@ -2,8 +2,7 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
     set(LIB_DEPENDENCY     
         Core 
         Framework 
-        IO          
-        QtGUI
+        IO
         DualParticleSystem 
         GlfwGUI
         GLRenderEngine)
