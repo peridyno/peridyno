@@ -26,15 +26,31 @@ void declare_surface_visual_module(py::module& m, std::string typestr) {
 	using Parent = dyno::GLVisualModule;
 
 	std::string pyclass_name = std::string("GLSurfaceVisualModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
+	py::class_<Class, Parent, std::shared_ptr<Class>>GLSVM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	GLSVM.def(py::init<>())
+		.def("caption", &Class::caption)
+		.def("var_color_mode", &Class::varColorMode, py::return_value_policy::reference)
+		.def("var_use_vertex_normal", &Class::varUseVertexNormal, py::return_value_policy::reference)
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		//DEF_ARRAY_IN
+		.def("in_color", &Class::inColor, py::return_value_policy::reference)
+		.def("in_normal", &Class::inNormal, py::return_value_policy::reference)
+		.def("in_tex_coord", &Class::inTexCoord, py::return_value_policy::reference)
+		.def("in_normal_index", &Class::inNormalIndex, py::return_value_policy::reference)
+		.def("in_tex_coord_index", &Class::inTexCoordIndex, py::return_value_policy::reference)
+		.def("in_color_texture", &Class::inColorTexture, py::return_value_policy::reference)
+		.def("in_bump_map", &Class::inBumpMap, py::return_value_policy::reference);
+
+	py::enum_<Class::EColorMode>(GLSVM, "EColorMode")
+		.value("CM_Object", Class::CM_Object)
+		.value("CM_Vertex", Class::CM_Vertex)
+		.value("CM_Texture", Class::CM_Texture);
 }
 
 void pybind_rendering(py::module& m)
 {
-	py::class_<GLVisualModule, VisualModule, std::shared_ptr<GLVisualModule>>(m, "GLVisualModule")
-		.def("set_color", &GLVisualModule::setColor)
+	py::class_<GLVisualModule, VisualModule, std::shared_ptr<GLVisualModule>>GLVM(m, "GLVisualModule");
+	GLVM.def("set_color", &GLVisualModule::setColor)
 		.def("set_metallic", &GLVisualModule::setMetallic)
 		.def("set_roughness", &GLVisualModule::setRoughness)
 		.def("set_alpha", &GLVisualModule::setAlpha)

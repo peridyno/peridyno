@@ -10,3 +10,4 @@
 #include "Dynamics/PyParticleSystem.h"
 #include "Dynamics/PyMultiphysics.h"
 #include "Dynamics/PyCloth.h"
+#include "Dynamics/PyPeridynamics.h"

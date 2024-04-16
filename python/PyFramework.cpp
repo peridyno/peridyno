@@ -24,7 +24,6 @@ void declare_discrete_topology_mapping(py::module& m, std::string typestr)
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 }
 
-
 void pybind_log(py::module& m)
 {
 	//TODO: Log is updated, update the python binding as well
@@ -33,8 +32,6 @@ void pybind_log(py::module& m)
 // 		.def_static("get_output", &Log::getOutput)
 // 		.def_static("set_level", &Log::setLevel);
 }
-
-
 
 void pybind_framework(py::module& m)
 {
@@ -51,6 +48,12 @@ void pybind_framework(py::module& m)
 		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference);
 
 	py::class_<NodePort>(m, "NodePort");
+	/*		.def(py::init<>())
+			.def("get_port_name", &NodePort::getPortName)
+			.def("get_port_type", &NodePort::getPortType)
+			.def("set_port_type", &NodePort::setPortType)
+			.def("get_parent", &NodePort::getParent, py::return_value_policy::reference)
+			.def("attach", &NodePort::attach)*/
 
 	py::class_<OBase, std::shared_ptr<OBase>>(m, "OBase");
 
@@ -121,8 +124,18 @@ void pybind_framework(py::module& m)
 
 	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule");
 
-	py::class_<SceneGraph, std::shared_ptr<SceneGraph>>(m, "SceneGraph")
+	py::class_<SceneGraph, OBase, std::shared_ptr<SceneGraph>>(m, "SceneGraph")
 		.def(py::init<>())
+		.def("bounding_box", &SceneGraph::boundingBox)
+		.def("print_node_info", &SceneGraph::printNodeInfo)
+		.def("print_module_info", &SceneGraph::printModuleInfo)
+		.def("is_node_info_printable", &SceneGraph::isNodeInfoPrintable)
+		.def("is_module_info_printable", &SceneGraph::isModuleInfoPrintable)
+		.def("load", &SceneGraph::load)
+		.def("invoke", &SceneGraph::invoke)
+		.def("delete_node", &SceneGraph::deleteNode)
+		.def("propagate_node", &SceneGraph::propagateNode)
+		.def("is_empty", &SceneGraph::isEmpty)
 		.def("set_total_time", &SceneGraph::setTotalTime)
 		.def("get_total_time", &SceneGraph::getTotalTime)
 		.def("set_frame_rate", &SceneGraph::setFrameRate)
@@ -138,7 +151,6 @@ void pybind_framework(py::module& m)
 		.def("get_lower_bound", &SceneGraph::getLowerBound)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
 
-
 	//------------------------- New ------------------------------2024
 	py::class_<dyno::FilePath>(m, "FilePath")
 		.def(py::init<const std::string&>())
@@ -151,7 +163,6 @@ void pybind_framework(py::module& m)
 		.def("add_extension", &dyno::FilePath::add_extension)
 		.def("set_as_path", &dyno::FilePath::set_as_path)
 		.def("set_path", &dyno::FilePath::set_path);
-
 
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 

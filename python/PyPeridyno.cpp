@@ -1,6 +1,5 @@
 #include "PyPeridyno.h"
 
-
 // void init_GlutGUI(py::module &);
 // void init_Core(py::module &);
 
@@ -17,4 +16,5 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_rigid_body_system(m);
 	pybind_modeling(m);
 	pybind_multiphysics(m);
+	pybind_peridynamics(m);
 }
