@@ -526,7 +526,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
 		{
-			Real beta = 0.1;
+			Real beta = 0.3;
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
@@ -535,7 +535,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
 		{
-			Real beta = 0.1;
+			Real beta = 0.3;
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
@@ -544,7 +544,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
 		{
-			Real beta = 0.1;
+			Real beta = 0.3;
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
@@ -643,7 +643,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN)
 		{
-			Real beta = 0.1;
+			Real beta = 0.3;
 			Real b_min = invDt * beta * constraints[tId].d_min;
 			eta[tId] -= b_min;
 		}
@@ -655,7 +655,7 @@ namespace dyno
 		}
 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MAX)
 		{
-			Real beta = 0.1;
+			Real beta = 0.3;
 			Real b_max = invDt * beta * constraints[tId].d_max;
 			eta[tId] -= b_max;
 		}
@@ -668,7 +668,7 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
 		{
-			Real beta = Real(0);
+			Real beta = Real(0.3);
 			Coord a1 = constraints[tId].axis;
 			Coord b2 = constraints[tId].pos1;
 			Real b_rot = invDt * beta * a1.dot(b2);
@@ -677,7 +677,7 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
 		{
-			Real beta = Real(0);
+			Real beta = Real(0.3);
 			Coord a1 = constraints[tId].axis;
 			Coord c2 = constraints[tId].pos2;
 			Real b_rot = invDt * beta * a1.dot(c2);

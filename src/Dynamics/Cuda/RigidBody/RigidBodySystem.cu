@@ -45,6 +45,7 @@ namespace dyno
 		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
+		this->stateMass()->connect(merge->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
 		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
@@ -58,6 +59,12 @@ namespace dyno
 		this->stateHingeJoints()->connect(iterSolver->inHingeJoints());
 		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
 		this->statePointJoints()->connect(iterSolver->inPointJoints());
+
+		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
+		this->stateSliderJoints()->connect(merge->inSliderJoints());
+		this->stateHingeJoints()->connect(merge->inHingeJoints());
+		this->stateFixedJoints()->connect(merge->inFixedJoints());
+
 
 		merge->outContacts()->connect(iterSolver->inContacts());
 
@@ -134,43 +141,6 @@ namespace dyno
 	}
 
 
-
-	//template<typename TDataType>
-	//void RigidBodySystem<TDataType>::addTet(
-	//	const TetInfo& tet,
-	//	const RigidBodyInfo& bodyDef, 
-	//	const Real density /*= Real(1)*/)
-	//{
-	//	auto b = tet;
-	//	auto bd = bodyDef;
-
-	//	bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
-
-	//	auto centroid = bd.position;
-
-	//	auto tmpMat = Mat3f(tet.v[1] - tet.v[0], tet.v[2] - tet.v[0], tet.v[3] - tet.v[0]);
-	//	Real volume = (1.0 / 6.0) * abs(tmpMat.determinant());
-	//	Real mass = volume * density;
-	//	bd.mass = mass;
-
-
-	//	Mat3f inertiaMatrix(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	//	for (int i = 0; i < 4; i++)
-	//	{
-	//		Coord r = tet.v[i] - centroid;
-	//		inertiaMatrix += (mass / 4.0) * pointInertia(r);
-	//	}
-
-
-
-	//	bd.inertia = inertiaMatrix;
-	//	bd.shapeType = ET_TET;
-	//	bd.angle = Quat<Real>();
-
-	//	mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
-	//	mHostTets.push_back(b);
-	//}
-
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addTet(
 		const TetInfo& tetInfo,
@@ -224,8 +194,8 @@ namespace dyno
 		Real h = b.halfLength * 2;
 
 
-		Real mass_hemisphere = 2.0 / 3.0 * M_PI * r * r * r;
-		Real mass_cylinder = M_PI * r * r * h;
+		Real mass_hemisphere = 2.0 / 3.0 * M_PI * r * r * r * density;
+		Real mass_cylinder = M_PI * r * r * h * density;
 
 		Real I_1_cylinder = 1.0 / 12.0 * mass_cylinder * (3 * r * r + h * h);
 		Real I_2_cylinder = 1.0 / 2.0 * mass_cylinder * r * r;
@@ -241,6 +211,9 @@ namespace dyno
 		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
 				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
 				0, 0, I_2_cylinder + 2 *I_2_hemisphere);
+		
+
+
 
 		bd.shapeType = ET_CAPSULE;
 		bd.angle = b.rot;

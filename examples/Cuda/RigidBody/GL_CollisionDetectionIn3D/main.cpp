@@ -231,18 +231,18 @@ std::shared_ptr<SceneGraph> creatScene()
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
-	//createTwoBoxes(rigid);
+	createTwoBoxes(rigid);
 	createTwoTets(rigid);
-	//createTetBox(rigid);
-	//createCapsuleBox(rigid);
-	//createTwoCapsules(rigid);
-	//createCapsuleTet(rigid);
+	createTetBox(rigid);
+	createCapsuleBox(rigid);
+	createTwoCapsules(rigid);
+	createCapsuleTet(rigid);
 
-	//sphere
-	//createTwoSpheres(rigid);
-	//createSphereBox(rigid);
-	//createSphereTet(rigid);
-	//createSphereCapsule(rigid);
+
+	createTwoSpheres(rigid);
+	createSphereBox(rigid);
+	createSphereTet(rigid);
+	createSphereCapsule(rigid);
 
 	return scn;
 }

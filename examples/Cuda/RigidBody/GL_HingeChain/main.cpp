@@ -28,10 +28,9 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 	
 	RigidBodyInfo rigidBody;
-	rigidBody.collisionMask = CT_BoxExcluded;
 	BoxInfo newbox, oldbox;
-	oldbox.center = Vec3f(0, 3.0, 0);
-	oldbox.halfLength = Vec3f(0.02, 0.07, 0.02);
+	oldbox.center = Vec3f(-1.0, 2.2, 0.5);
+	oldbox.halfLength = Vec3f(0.02, 0.09, 0.02);
 	oldbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	rigid->addBox(oldbox, rigidBody);
@@ -45,7 +44,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		HingeJoint<Real> joint(i, i + 1);
 		joint.setAnchorPoint(oldbox.center + Vec3f(0.1, 0, 0), oldbox.center, newbox.center, oldbox.rot, newbox.rot);
 		joint.setAxis(Vec3f(0, 0, 1), oldbox.rot, newbox.rot);
-		joint.setRange(-M_PI, M_PI);
+		joint.setRange(-M_PI/2, M_PI/2);
 		rigid->addHingeJoint(joint);
 		oldbox = newbox;
 
@@ -56,6 +55,15 @@ std::shared_ptr<SceneGraph> creatBricks()
 			rigid->addPointJoint(joint);
 		}
 	}
+
+	BoxInfo box;
+	for (int i = 8; i > 1; i--)
+		for (int j = 0; j < i + 1; j++)
+		{
+			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
+			box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
+			rigid->addBox(box, rigidBody);
+		}
 	
 
 

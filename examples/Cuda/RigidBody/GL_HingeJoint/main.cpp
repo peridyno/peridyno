@@ -29,7 +29,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	BoxInfo box, box1, box2, box3, box4;
 	box.center = Vec3f(0, 0.15, 0);
-	box.halfLength = Vec3f(0.2, 0.04, 0.1);
+	box.halfLength = Vec3f(0.2, 0.01, 0.1);
 	CapsuleInfo capsule1, capsule2, capsule3, capsule4;
 	SphereInfo sphere1, sphere2, sphere3, sphere4;
 	sphere1.center = Vec3f(-0.18, 0.03, 0.09);
