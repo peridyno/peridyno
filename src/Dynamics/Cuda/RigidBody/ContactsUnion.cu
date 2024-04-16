@@ -126,10 +126,14 @@ namespace dyno
 		CArray<ContactPair> contactsC;
 
 		if (inDataA != nullptr)
+		{
 			contactsA.assign(*inDataA);
+		}
 
 		if (inDataB != nullptr)
+		{
 			contactsB.assign(*inDataB);
+		}
 
 		
 		filterArray(mapMatrixCPU, contactsA, contactsB, contactsC, bodyNum);
@@ -138,11 +142,11 @@ namespace dyno
 
 		int total_size = contactsC.size();
 
+		if (this->outContacts()->size() != total_size)
+			this->outContacts()->resize(total_size);
 		if (total_size == 0)
 			return;
 
-		if (this->outContacts()->size() != total_size)
-			this->outContacts()->resize(total_size);
 
 		auto& outData = this->outContacts()->getData();
 		outData.assign(contactsC);
@@ -154,7 +158,10 @@ namespace dyno
 	bool ContactsUnion<TDataType>::validateInputs()
 	{
 		bool ret = this->inContactsA()->isEmpty() && this->inContactsB()->isEmpty();
-
+		if (ret)
+		{
+			this->outContacts()->resize(0);
+		}
 		return !ret;
 	}
 

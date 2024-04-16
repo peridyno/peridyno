@@ -20,74 +20,32 @@
 using namespace std;
 using namespace dyno;
 
-std::shared_ptr<SceneGraph> creatBricks()
+std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
-	BoxInfo box, box1, box2, box3, box4;
-	box.center = Vec3f(0, 0.15, 0);
-	box.halfLength = Vec3f(0.2, 0.01, 0.1);
-	CapsuleInfo capsule1, capsule2, capsule3, capsule4;
-	SphereInfo sphere1, sphere2, sphere3, sphere4;
-	sphere1.center = Vec3f(-0.18, 0.03, 0.09);
-	sphere1.radius = 0.03;
-	sphere2.center = Vec3f(-0.18, 0.03, -0.09);
-	sphere2.radius = 0.03;
-	sphere3.center = Vec3f(0.18, 0.03, 0.09);
-	sphere3.radius = 0.03;
-	sphere4.center = Vec3f(0.18, 0.03, -0.09);
-	sphere4.radius = 0.03;
-
-	capsule1.center = Vec3f(-0.18, 0.03, 0.09);
-	capsule1.halfLength = 0.01;
-	capsule1.radius = 0.03;
-	capsule2.center = Vec3f(-0.18, 0.03, -0.09);
-	capsule2.halfLength = 0.01;
-	capsule2.radius = 0.03;
-	capsule3.center = Vec3f(0.18, 0.03, 0.09);
-	capsule3.halfLength = 0.01;
-	capsule3.radius = 0.03;
-	capsule4.center = Vec3f(0.18, 0.03, -0.09);
-	capsule4.halfLength = 0.01;
-	capsule4.radius = 0.03;
-
-	RigidBodyInfo rigidbody;
-
-	rigid->addBox(box, rigidbody);
-	rigidbody.angularVelocity = Vec3f(0, 0, 0);
-	/*rigid->addSphere(sphere1, rigidbody);
-	rigid->addSphere(sphere2, rigidbody);
-	rigid->addSphere(sphere3, rigidbody);
-	rigid->addSphere(sphere4, rigidbody);*/
-
-	rigid->addCapsule(capsule1, rigidbody);
-	rigid->addCapsule(capsule2, rigidbody);
-	rigid->addCapsule(capsule3, rigidbody);
-	rigid->addCapsule(capsule4, rigidbody);
-
-	HingeJoint<Real> joint1(1, 0);
-	joint1.setAnchorPoint(capsule1.center, capsule1.center, box.center, capsule1.rot, box.rot);
-	joint1.setMoter(-20.0);
-	joint1.setAxis(Vec3f(0, 0, 1), capsule1.rot, box.rot);
-	rigid->addHingeJoint(joint1);
-	HingeJoint<Real> joint2(2, 0);
-	joint2.setAnchorPoint(capsule2.center, capsule2.center, box.center, capsule2.rot, box.rot);
-	joint2.setMoter(-20.0);
-	joint2.setAxis(Vec3f(0, 0, 1), capsule2.rot, box.rot);
-	rigid->addHingeJoint(joint2);
-	HingeJoint<Real> joint3(3, 0);
-	joint3.setAnchorPoint(capsule3.center, capsule3.center, box.center, capsule3.rot, box.rot);
-	joint3.setMoter(-20.0);
-	joint3.setAxis(Vec3f(0, 0, 1), capsule3.rot, box.rot);
-	rigid->addHingeJoint(joint3);
-	HingeJoint<Real> joint4(4, 0);
-	joint4.setAnchorPoint(capsule4.center, capsule4.center, box.center, capsule4.rot, box.rot);
-	joint4.setMoter(-20.0);
-	joint4.setAxis(Vec3f(0, 0, 1), capsule4.rot, box.rot);
-	rigid->addHingeJoint(joint4);
+	RigidBodyInfo rigidBody;
+	BoxInfo newbox, oldbox;
+	oldbox.center = Vec3f(-1.0, 0.2, 0.5);
+	oldbox.halfLength = Vec3f(0.02, 0.08, 0.02);
+	rigidBody.linearVelocity = Vec3f(1, 0, 0);
+	rigid->addBox(oldbox, rigidBody);
+	rigidBody.linearVelocity = Vec3f(0, 0, 0);
+	for (int i = 0; i < 4; i++)
+	{
+		newbox.center = oldbox.center + Vec3f(0.0, 0.2, 0);
+		newbox.halfLength = oldbox.halfLength;
+		rigid->addBox(newbox, rigidBody);
+		HingeJoint<Real> joint(i, i + 1);
+		joint.setAnchorPoint(oldbox.center + Vec3f(0.0, 0.1, 0), oldbox.center, newbox.center, oldbox.rot, newbox.rot);
+		joint.setAxis(Vec3f(0, 0, 1), oldbox.rot, newbox.rot);
+		joint.setRange(-M_PI / 2, M_PI / 2);
+		rigid->addHingeJoint(joint);
+		oldbox = newbox;
+	}
 	
 
 
@@ -162,7 +120,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 int main()
 {
 	GlfwApp app;
-	app.setSceneGraph(creatBricks());
+	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 	app.mainLoop();
 

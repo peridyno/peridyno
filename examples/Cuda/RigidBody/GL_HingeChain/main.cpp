@@ -29,13 +29,13 @@ std::shared_ptr<SceneGraph> creatBricks()
 	
 	RigidBodyInfo rigidBody;
 	BoxInfo newbox, oldbox;
-	oldbox.center = Vec3f(-1.0, 2.2, 0.5);
+	oldbox.center = Vec3f(-2.0, 4, 0.5);
 	oldbox.halfLength = Vec3f(0.02, 0.09, 0.02);
 	oldbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	rigid->addBox(oldbox, rigidBody);
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 30; i++)
 	{
 		newbox.center = oldbox.center + Vec3f(0.2, 0, 0);
 		newbox.halfLength = oldbox.halfLength;
@@ -44,11 +44,11 @@ std::shared_ptr<SceneGraph> creatBricks()
 		HingeJoint<Real> joint(i, i + 1);
 		joint.setAnchorPoint(oldbox.center + Vec3f(0.1, 0, 0), oldbox.center, newbox.center, oldbox.rot, newbox.rot);
 		joint.setAxis(Vec3f(0, 0, 1), oldbox.rot, newbox.rot);
-		joint.setRange(-M_PI/2, M_PI/2);
+		joint.setRange(-M_PI*2/3, M_PI*2/3);
 		rigid->addHingeJoint(joint);
 		oldbox = newbox;
 
-		if (i == 9)
+		if (i == 29)
 		{
 			PointJoint<Real> joint(i + 1);
 			joint.setAnchorPoint(newbox.center);

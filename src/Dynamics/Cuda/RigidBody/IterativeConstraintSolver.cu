@@ -1229,6 +1229,7 @@ namespace dyno
 	{
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
+
 		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
 		int sliderJoint_size = this->inSliderJoints()->size();
 		int hingeJoint_size = this->inHingeJoints()->size();
@@ -1379,9 +1380,6 @@ namespace dyno
 				begin_index);
 		}
 
-		/*cuExecute(constraint_size,
-			printConstraintType,
-			mAllConstraints);*/
 
 
 		auto sizeOfRigids = this->inCenter()->size();
@@ -1501,6 +1499,7 @@ namespace dyno
 		mImpulseExt.resize(bodyNum * 2);
 		mImpulseC.reset();
 		mImpulseExt.reset();
+	
 
 		Real dt = this->inTimeStep()->getData();
 
@@ -1539,7 +1538,7 @@ namespace dyno
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt);
-		
+
 				cuExecute(constraint_size,
 					calculateDiff,
 					mLambda,
@@ -1547,11 +1546,12 @@ namespace dyno
 					mDiff);
 				mDiffHost.assign(mDiff);
 				Real change = calculateNorm(mDiffHost);
-				//printf("lambda_change : %lf\n", change);
 				mLambda_old.assign(mLambda);
 				if (change < EPSILON)
 					break;
 			}
+		}
+
 
 			cuExecute(bodyNum,
 				RB_updateVelocity,
@@ -1559,6 +1559,8 @@ namespace dyno
 				this->inAngularVelocity()->getData(),
 				mImpulseExt,
 				mImpulseC);
+
+			//std::cout << mImpulseC << std::endl;
 
 			cuExecute(bodyNum,
 				RB_updateGesture,
@@ -1570,10 +1572,6 @@ namespace dyno
 				this->inAngularVelocity()->getData(),
 				this->inInitialInertia()->getData(),
 				dt)
-		}
 	}
-
-
-
 	DEFINE_CLASS(IterativeConstraintSolver);
 }

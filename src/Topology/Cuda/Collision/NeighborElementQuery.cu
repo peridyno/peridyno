@@ -629,7 +629,6 @@ namespace dyno
 		mBroadPhaseCD->update();
 
 		auto& contactList = mBroadPhaseCD->outContactList()->getData();
-
 		if (contactList.size() == 0) return;
 
 		DArray<int> count(contactList.size());
@@ -639,9 +638,13 @@ namespace dyno
 			contactList);
 
 		int totalSize = mReduce.accumulate(count.begin(), count.size());
-
 		if (totalSize <= 0)
+		{
+			auto& contacts = this->outContacts()->getData();
+
+			contacts.resize(0);
 			return;
+		}
 
 		mScan.exclusive(count);
 
