@@ -5,7 +5,7 @@
 #include "Peridynamics/TriangularSystem.h"
 #include "Peridynamics/TetrahedralSystem.h"
 
-namespace dyno 
+namespace dyno
 {
 	template <typename TDataType> class BoundaryConstraint;
 

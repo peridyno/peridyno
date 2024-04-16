@@ -3,11 +3,6 @@ import PyPeridyno as dyno
 
 def create_ghost_particles():
     ghost = dyno.GhostParticles3f()
-    num = 0
-    host_pos = dyno.VectorVec3f()
-    host_pos.push_back(dyno.Vector3f([1, 1, 1]))
-
-    ghost.set_position().resize(num)
     return ghost
 
 

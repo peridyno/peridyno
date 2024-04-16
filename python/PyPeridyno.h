@@ -1,2 +1,12 @@
 #pragma once
 #include "PyCommon.h"
+#include "PyCore.h"
+#include "PyFramework.h"
+#include "PyRigidBodySystem.h"
+#include "PyModeling.h"
+#include "Rendering/PyGlfwGUI.h"
+#include "Rendering/PyRendering.h"
+#include "Rendering/PyQtGUI.h"
+#include "Dynamics/PyParticleSystem.h"
+#include "Dynamics/PyMultiphysics.h"
+#include "Dynamics/PyCloth.h"

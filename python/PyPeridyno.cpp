@@ -1,14 +1,5 @@
 #include "PyPeridyno.h"
 
-#include "PyGlfwGUI.h"
-#include "PyCore.h"
-#include "PyFramework.h"
-#include "PyParticleSystem.h"
-#include "PyRendering.h"
-#include "PyCloth.h"
-#include "PyQtGUI.h"
-#include "PyRigidBodySystem.h"
-#include "PyModeling.h"
 
 // void init_GlutGUI(py::module &);
 // void init_Core(py::module &);
@@ -25,4 +16,5 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_cloth(m);
 	pybind_rigid_body_system(m);
 	pybind_modeling(m);
+	pybind_multiphysics(m);
 }

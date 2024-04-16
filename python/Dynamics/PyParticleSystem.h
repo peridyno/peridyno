@@ -1,4 +1,5 @@
-#include "PyParticleSystem.h"
+#pragma once
+#include "../PyCommon.h"
 
 #include "ParticleSystem/SquareEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
@@ -139,8 +140,8 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//public
-		.def("load_sdf", &Class::loadSDF)
-		.def("load_cube", &Class::loadCube)
+		//.def("load_sdf", &Class::loadSDF)
+		//.def("load_cube", &Class::loadCube)
 		.def("load_sphere", &Class::loadShpere)
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
@@ -163,16 +164,6 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 		.def("import_rigid_bodys", &Class::importRigidBodys, py::return_value_policy::reference);
 }
 
-void declare_attribute(py::module& m, std::string typestr) {
-	using Class = dyno::Attribute;
-
-	std::string pyclass_name = std::string("Attribute") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("set_fluid", &Class::setFluid)
-		.def("set_dynamic", &Class::setDynamic);
-}
-
 template <typename TDataType>
 void declare_multi_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::MultipleNodePort<TDataType>;
@@ -193,31 +184,8 @@ void declare_particle_elastic_body(py::module& m, std::string typestr) {
 		.def("translate", &Class::translate);
 }
 
-void declare_func(py::module& m, std::string typestr) {
-	using Class = dyno::Attribute;
-}
+void declare_func(py::module& m, std::string typestr);
 
-void pybind_particle_system(py::module& m)
-{
-	declare_func(m, "");
+void declare_attribute(py::module& m, std::string typestr);
 
-	declare_attribute(m, "");
-
-	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
-	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
-
-	declare_static_boundary<dyno::DataType3f>(m, "3f");
-	declare_sampler<dyno::DataType3f>(m, "3f");
-	declare_cube_sampler<dyno::DataType3f>(m, "3f");
-
-	declare_particle_system<dyno::DataType3f>(m, "3f");
-	declare_particle_emitter<dyno::DataType3f>(m, "3f");
-	declare_particle_emitter_square<dyno::DataType3f>(m, "3f");
-	declare_particle_fluid<dyno::DataType3f>(m, "3f");
-	declare_particle_elastic_body<dyno::DataType3f>(m, "3f");
-	declare_make_particle_system<dyno::DataType3f>(m, "3f");
-
-	declare_ghost_particlesm<dyno::DataType3f>(m, "3f");
-
-	declare_circular_emitter<dyno::DataType3f>(m, "3f");
-}
+void pybind_particle_system(py::module& m);
