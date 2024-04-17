@@ -14,12 +14,12 @@ calculateNorm = dyno.CalculateNorm3f()
 colorMapper = dyno.ColorMapping3f()
 colorMapper.var_max().set_value(0.5)
 
-ptRender = dyno.GLPointVisualModule3f()
+ptRender = dyno.GLPointVisualModule()
 ptRender.set_color(dyno.Color(1, 0, 0))
-ptRender.set_colorMapMode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
+ptRender.set_color_map_mode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
 
 fluid.state_velocity().connect(calculateNorm.in_vec())
-fluid.state_point_set().connect(ptRender.in_pointSet())
+fluid.state_point_set().connect(ptRender.in_point_set())
 calculateNorm.out_norm().connect(colorMapper.in_scalar())
 colorMapper.out_color().connect(ptRender.in_color())
 

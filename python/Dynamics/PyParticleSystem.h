@@ -142,8 +142,8 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//public
-		//.def("load_sdf", &Class::loadSDF)
-		//.def("load_cube", &Class::loadCube)
+		.def("load_sdf", &Class::loadSDF)
+		.def("load_cube", &Class::loadCube)
 		.def("load_sphere", &Class::loadShpere)
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)

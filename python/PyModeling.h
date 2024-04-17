@@ -46,9 +46,11 @@ void declare_sphere_model(py::module& m, std::string typestr) {
 		//DEF_ENUM
 		.def("var_type", &Class::varType, py::return_value_policy::reference);
 
-	py::enum_<Class::SphereType>(SM, "SphereType")
+	py::enum_<typename Class::SphereType>(SM, "SphereType")
 		.value("Standard", Class::SphereType::Standard)
-		.value("Icosahedron", Class::SphereType::Icosahedron);
+		.value("Icosahedron", Class::SphereType::Icosahedron)
+		.export_values();
+
 }
 
 #include "StaticTriangularMesh.h"

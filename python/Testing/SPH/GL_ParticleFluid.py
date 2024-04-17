@@ -51,11 +51,11 @@ colorMapper.var_max().set_value(5.0)
 calculateNorm.out_norm().connect(colorMapper.in_scalar())
 fluid.graphics_pipeline().push_module(colorMapper)
 
-ptRender = dyno.GLPointVisualModule3f()
+ptRender = dyno.GLPointVisualModule()
 ptRender.set_color(dyno.Color(1, 0, 0))
-ptRender.set_colorMapMode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
+ptRender.set_color_map_mode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
 
-fluid.state_point_set().connect(ptRender.in_pointSet())
+fluid.state_point_set().connect(ptRender.in_point_set())
 colorMapper.out_color().connect(ptRender.in_color())
 
 fluid.graphics_pipeline().push_module(ptRender)

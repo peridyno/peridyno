@@ -1,4 +1,4 @@
-#include "PyRigidBodySystem.h"
+#include "PyRigidBody.h"
 
 void declare_rigid_body_info(py::module& m, std::string typestr) {
 	using Class = dyno::RigidBodyInfo;

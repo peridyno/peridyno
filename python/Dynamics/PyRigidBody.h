@@ -1,5 +1,5 @@
 #pragma once
-#include "PyCommon.h"
+#include "../PyCommon.h"
 
 #include "RigidBody/RigidBody.h"
 #include "RigidBody/RigidBodySystem.h"
