@@ -18,4 +18,5 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_multiphysics(m);
 	pybind_peridynamics(m);
 	pybind_dual_particle_system(m);
+	pybind_height_field(m);
 }

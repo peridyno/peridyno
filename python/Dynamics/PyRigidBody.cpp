@@ -18,7 +18,6 @@ void declare_rigid_body_info(py::module& m, std::string typestr) {
 		.def_readwrite("collisionMask", &Class::collisionMask);
 }
 
-
 void declare_box_info(py::module& m, std::string typestr) {
 	using Class = dyno::BoxInfo;
 
@@ -27,9 +26,7 @@ void declare_box_info(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def_readwrite("center", &Class::center)
 		.def_readwrite("halfLength", &Class::halfLength);
-
 }
-
 
 void declare_sphere_info(py::module& m, std::string typestr) {
 	using Class = dyno::SphereInfo;
@@ -39,10 +36,7 @@ void declare_sphere_info(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def_readwrite("center", &Class::center)
 		.def_readwrite("radius", &Class::radius);
-
 }
-
-
 
 // class: TetInfo      - For Examples_1: QT_Bricks
 void declare_tet_info(py::module& m, std::string typestr) {
@@ -56,6 +50,7 @@ void declare_tet_info(py::module& m, std::string typestr) {
 }
 
 void pybind_rigid_body_system(py::module& m) {
+	declare_rigid_body<dyno::DataType3f>(m, "3f");
 	declare_rigid_body_system<dyno::DataType3f>(m, "3f");
 
 	declare_rigid_body_info(m, "");
@@ -67,5 +62,4 @@ void pybind_rigid_body_system(py::module& m) {
 	declare_neighbor_element_query<dyno::DataType3f>(m, "3f");
 	declare_contacts_to_edge_set<dyno::DataType3f>(m, "3f");
 	declare_contacts_to_point_set<dyno::DataType3f>(m, "3f");
-
 }

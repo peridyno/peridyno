@@ -164,6 +164,16 @@ void pybind_framework(py::module& m)
 		.def("set_as_path", &dyno::FilePath::set_as_path)
 		.def("set_path", &dyno::FilePath::set_path);
 
+	py::class_<dyno::PluginEntry>(m, "PluginEntry")
+		.def(py::init<>())
+		.def("name", &dyno::PluginEntry::name)
+		.def("version", &dyno::PluginEntry::version)
+		.def("description", &dyno::PluginEntry::description)
+		.def("setName", &dyno::PluginEntry::setName, py::arg("pluginName"))
+		.def("setVersion", &dyno::PluginEntry::setVersion, py::arg("pluginVersion"))
+		.def("setDescription", &dyno::PluginEntry::setDescription, py::arg("desc"))
+		.def("initialize", &dyno::PluginEntry::initialize);
+
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 
 	declare_pointset<dyno::DataType3f>(m, "3f");
