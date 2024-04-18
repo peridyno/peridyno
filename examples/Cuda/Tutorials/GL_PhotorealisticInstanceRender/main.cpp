@@ -18,7 +18,7 @@ public:
 	{
 		auto mesh = this->inTextureMesh()->constDataPtr();
 
-		int copyNum = 5;
+		int copyNum = 0;
 		int shapeNum = mesh->shapes().size();
 
 		auto offest = this->varOffest()->getValue();

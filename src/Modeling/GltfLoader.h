@@ -108,6 +108,9 @@ namespace dyno
 		DArray<Coord> initialNormal;
 		DArray<int> d_joints;
 
+		DArray<Coord> d_ShapeCenter;
+		bool ToCenter = false;
+
 		tinygltf::Model model;
 		std::map<joint, Quat<float>> joint_rotation;
 		std::map<joint, Vec3f> joint_scale;
@@ -196,6 +199,7 @@ namespace dyno
 
 		void getBoundingBoxByName(const tinygltf::Primitive& primitive, const std::string& attributeName, TAlignedBox3D<Real>& vertices, Transform3f& transform);
 
+		void updateTransformState();
 
 		void loadMaterial();
 		

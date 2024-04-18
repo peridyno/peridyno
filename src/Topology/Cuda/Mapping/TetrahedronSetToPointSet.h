@@ -23,11 +23,11 @@ namespace dyno
 		void setFrom(std::shared_ptr<TetrahedronSet<TDataType>> from) { m_from = from; }
 		void setTo(std::shared_ptr<PointSet<TDataType>> to) { m_to = to; }
 
-		bool apply() override;
-
 		void match(std::shared_ptr<TetrahedronSet<TDataType>> from, std::shared_ptr<PointSet<TDataType>> to);
 
 	protected:
+		bool apply() override;
+
 		bool initializeImpl() override;
 
 	private:
