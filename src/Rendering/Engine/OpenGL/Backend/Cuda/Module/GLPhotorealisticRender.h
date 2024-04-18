@@ -55,6 +55,8 @@ namespace dyno
 		XBuffer<Vec3f> mTangent;
 		XBuffer<Vec3f> mBitangent;
 
+		XBuffer<Transform3f> mShapeTransform;
+
 		Program* mShaderProgram;
 		Buffer		mRenderParamsUBlock;
 		Buffer		mPBRMaterialUBlock;

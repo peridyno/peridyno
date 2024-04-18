@@ -48,6 +48,8 @@ namespace dyno
 		mBitangent.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 #endif
 
+		mShapeTransform.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+
 		return true;
 	}
 
@@ -64,6 +66,8 @@ namespace dyno
 
 		mVAO.release();
 
+		mShapeTransform.release();
+
 		mTextureMesh.release();
 	}
 
@@ -71,6 +75,8 @@ namespace dyno
 	{
 		mTangent.updateGL();
 		mBitangent.updateGL();
+
+		mShapeTransform.updateGL();
 
 		mTextureMesh.updateGL();
 
@@ -211,7 +217,6 @@ namespace dyno
 					glVertexAttribI4i(2, -1, -1, -1, -1);
 				}
 			}
-
 
 			glDrawArrays(GL_TRIANGLES, 0, numTriangles * 3);
 

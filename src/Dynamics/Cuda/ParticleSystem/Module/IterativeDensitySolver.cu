@@ -81,6 +81,7 @@ namespace dyno
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
 		Real smoothingLength,
+		Real kappa,
 		Real dt,
 		Kernel gradient,
 		Real scale)
@@ -100,7 +101,7 @@ namespace dyno
 			Real r = (pos_i - posArr[j]).norm();
 			if (r > EPSILON)
 			{
-				Coord dp_ij = 10.0f * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
+				Coord dp_ij = kappa * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
 				dP_i += dp_ij;
 
 				atomicAdd(&dPos[pId][0], dp_ij[0]);
@@ -192,7 +193,8 @@ namespace dyno
 			mLamda,
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
-			this->inSmoothingLength()->getData(),
+			this->inSmoothingLength()->getValue(),
+			this->varKappa()->getValue(),
 			dt);
 
 		cuExecute(num, K_UpdatePosition,

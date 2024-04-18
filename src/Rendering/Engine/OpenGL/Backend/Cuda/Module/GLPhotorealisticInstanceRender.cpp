@@ -28,22 +28,20 @@ namespace dyno
 
 	bool GLPhotorealisticInstanceRender::initializeGL()
 	{
-		mGLTransform.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+		mXTransformBuffer.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 		return GLPhotorealisticRender::initializeGL();
 	}
 
 	void GLPhotorealisticInstanceRender::releaseGL()
 	{
-		mGLTransform.release();
-		mLists.clear();
-		mOffset.clear();
+		mXTransformBuffer.release();
 		GLPhotorealisticRender::releaseGL();
 	}
 
 	void GLPhotorealisticInstanceRender::updateGL()
 	{
-		mGLTransform.updateGL();
+		mXTransformBuffer.updateGL();
 
 		GLPhotorealisticRender::updateGL();
 	}
@@ -55,9 +53,36 @@ namespace dyno
 
 		if (this->inTransform()->isModified())
 		{
-			mOffset.assign(inst->index());
-			mLists.assign(inst->lists());
-			mGLTransform.load(inst->elements());
+			auto texMesh = this->inTextureMesh()->constDataPtr();
+
+			mInstanceTransform.assign(*inst);
+
+			auto& elements = mInstanceTransform.elements();
+
+			for (uint i = 0; i < texMesh->shapes().size(); i++)
+			{
+				Transform3f ti = texMesh->shapes()[i]->boundingTransform;
+
+				List<Transform3f>& list = mInstanceTransform[i];
+
+				for (uint j = 0; j < list.size(); j++)
+				{
+					Transform3f tj = list[j];
+
+					tj.rotation() = tj.rotation() * ti.rotation().transpose();
+					tj.translation() = tj.translation() - ti.translation();
+					tj.scale() = Vec3f(tj.scale().x / ti.scale().x, tj.scale().y / ti.scale().y, tj.scale().z / ti.scale().z);
+
+					list[j] = tj;
+				}
+			}
+
+			DArray<Transform3f> dArr;
+			dArr.assign(mInstanceTransform.elements());
+
+			mXTransformBuffer.load(dArr);
+
+			dArr.clear();
 		}
 
 		GLPhotorealisticRender::updateImpl();
@@ -75,6 +100,9 @@ namespace dyno
 		auto& vertices = mTextureMesh.vertices();
 		auto& normals = mTextureMesh.normals();
 		auto& texCoords = mTextureMesh.texCoords();
+
+		auto& offset = mInstanceTransform.index();
+		auto& lists = mInstanceTransform.lists();
 
 		mShaderProgram->use();
 
@@ -174,16 +202,16 @@ namespace dyno
 
 			}
 
-			uint offset_i = sizeof(Transform3f) * mOffset[i];
-			mVAO.bindVertexBuffer(&mGLTransform, 3, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 0, 1);
+			uint offset_i = sizeof(Transform3f) * offset[i];
+			mVAO.bindVertexBuffer(&mXTransformBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 0, 1);
 			// bind the scale vector
-			mVAO.bindVertexBuffer(&mGLTransform, 4, 3, GL_FLOAT, sizeof(Transform3f), offset_i + sizeof(Vec3f), 1);
+			mVAO.bindVertexBuffer(&mXTransformBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), offset_i + sizeof(Vec3f), 1);
 			// bind the rotation matrix
-			mVAO.bindVertexBuffer(&mGLTransform, 5, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 2 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mGLTransform, 6, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 3 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mGLTransform, 7, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 4 * sizeof(Vec3f), 1);
+			mVAO.bindVertexBuffer(&mXTransformBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 2 * sizeof(Vec3f), 1);
+			mVAO.bindVertexBuffer(&mXTransformBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 3 * sizeof(Vec3f), 1);
+			mVAO.bindVertexBuffer(&mXTransformBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 4 * sizeof(Vec3f), 1);
 			mVAO.bind();
-			glDrawArraysInstanced(GL_TRIANGLES, 0, numTriangles * 3, mLists[i].size());
+			glDrawArraysInstanced(GL_TRIANGLES, 0, numTriangles * 3, mInstanceTransform[i].size());
 
 			mVAO.unbind();
 

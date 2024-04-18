@@ -104,6 +104,8 @@ namespace dyno
 		if (this->varFileName()->isEmpty())
 			return;
 
+		this->updateTransformState();
+
 		printf("!!!!!!!!!!!!!!!!!    Import GLTF   !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n");
 
 		this->InitializationData();
@@ -384,12 +386,6 @@ namespace dyno
 			this->stateShapeCenter()->getDataPtr()->setPoints(shapeCenter);
 		}
 
-
-
-
-
-
-
 		//Scene_SkinNodesId;
 		////导入蒙皮
 
@@ -445,6 +441,44 @@ namespace dyno
 
 		initialPosition.assign(vertices);
 		initialNormal.assign(normals);
+
+
+	
+		texMesh->shapeIds().resize(texMesh->vertices().size());
+
+
+
+		//记录每Vertex的ShapeID
+		if (ToCenter)
+		{
+			for (int i = 0; i < texMesh->shapes().size(); i++)
+			{
+				auto it = texMesh->shapes()[i];
+
+				cuExecute(texMesh->shapes()[i]->vertexIndex.size(),
+					updateVertexId_Shape,
+					texMesh->shapes()[i]->vertexIndex,
+					texMesh->shapeIds(),
+					i
+				);
+			}
+
+
+			d_ShapeCenter.assign(shapeCenter);
+
+			cuExecute(texMesh->vertices().size(),
+				ShapeToCenter,
+				initialPosition,
+				texMesh->vertices(),
+				texMesh->shapeIds(),
+				d_ShapeCenter,
+				this->stateTransform()->getValue()
+			);
+
+		}
+
+
+
 
 
 		std::vector<Vec2f> tempTexCoord;
@@ -832,9 +866,14 @@ namespace dyno
 
 		Coord v0 = Coord(min[0], min[1], min[2]);
 		Coord v1 = Coord(max[0], max[1], max[2]);
-		bound = TAlignedBox3D<Real>(v0,v1);
+		
 
 		Coord center = (v0 + v1) / 2;
+		if(ToCenter)
+			bound = TAlignedBox3D<Real>(v0 - center, v1 - center);
+		else
+			bound = TAlignedBox3D<Real>(v0 , v1 );
+
 		transform = Transform3f(Vec3f(center),Mat3f::identityMatrix(),Vec3f(1));
 
 
@@ -1297,7 +1336,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GltfLoader<TDataType>::updateTransform()
+	void GltfLoader<TDataType>::updateTransformState() 
 	{
 		Vec3f location = this->varLocation()->getValue();
 		Vec3f scale = this->varScale()->getValue();
@@ -1306,9 +1345,29 @@ namespace dyno
 		Mat4f mR = computeQuaternion().toMatrix4x4();
 		Mat4f transform = mT * mS * mR;
 		this->stateTransform()->setValue(transform);
+	}
 
-		if (all_Joints.size())
-			updateAnimation(this->stateFrameNumber()->getValue());
+	template<typename TDataType>
+	void GltfLoader<TDataType>::updateTransform()
+	{
+		this->updateTransformState();
+
+		if (all_Joints.size()) 
+		{
+			if (ToCenter) 
+			{		
+				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+					ShapeToCenter,
+					initialPosition,
+					this->stateTextureMesh()->getDataPtr()->vertices(),
+					this->stateTextureMesh()->getDataPtr()->shapeIds(),
+					d_ShapeCenter,
+					this->stateTransform()->getValue()
+				);
+			}	
+			else 
+				updateAnimation(this->stateFrameNumber()->getValue());
+		}
 		else
 		{
 			if (this->stateTextureMesh()->getDataPtr()->vertices().size())
@@ -1317,7 +1376,7 @@ namespace dyno
 					StaticMeshTransform,
 					initialPosition,
 					this->stateTextureMesh()->getDataPtr()->vertices(),
-					transform
+					this->stateTransform()->getValue()
 				);
 
 
@@ -1681,6 +1740,44 @@ namespace dyno
 
 		}
 
+
+	}
+
+
+	template< typename Coord ,typename uint,typename Mat4f >
+	__global__ void ShapeToCenter(
+		DArray<Coord> iniPos,
+		DArray<Coord> finalPos,
+		DArray<uint> shapeId,
+		DArray<Coord> t,
+		Mat4f m
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= iniPos.size()) return;
+	
+		finalPos[pId] = iniPos[pId] - t[shapeId[pId]];
+		Vec4f P = Vec4f(finalPos[pId][0], finalPos[pId][1], finalPos[pId][2], 1);
+
+		P = m * P;		
+		finalPos[pId] = Coord(P[0], P[1], P[2]);
+
+	}
+
+
+	template<typename Triangle,typename uint>
+	__global__ void updateVertexId_Shape(
+		DArray<Triangle> triangle,
+		DArray<uint> ID_shapeId,
+		int shapeId
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= triangle.size()) return;
+
+		ID_shapeId[triangle[pId][0]] = shapeId;
+		ID_shapeId[triangle[pId][1]] = shapeId;
+		ID_shapeId[triangle[pId][2]] = shapeId;
 
 	}
 

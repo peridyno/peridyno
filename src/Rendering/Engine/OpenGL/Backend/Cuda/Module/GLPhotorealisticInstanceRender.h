@@ -40,10 +40,9 @@ namespace dyno
 		void releaseGL() override;
 
 	private:
-		CArray<uint> mOffset;
-		CArray<List<Transform3f>> mLists;
+		CArrayList<Transform3f> mInstanceTransform;
 
-		XBuffer<Transform3f> mGLTransform;
+		XBuffer<Transform3f> mXTransformBuffer;
 
 	};
 
