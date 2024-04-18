@@ -24,6 +24,41 @@ void declare_discrete_topology_mapping(py::module& m, std::string typestr)
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 }
 
+#include "Camera.h"
+void declare_camera(py::module& m)
+{
+	using Class = dyno::Camera;
+	std::string pyclass_name = std::string("TopologyMapping");
+	py::class_<Class, std::shared_ptr<Class>>camera(m, pyclass_name.c_str());
+	camera.def("get_view_mat", &Class::getViewMat) // 绑定 getViewMat 方法
+		.def("get_proj_mat", &Class::getProjMat) // 绑定 getProjMat 方法
+		.def("rotate_to_point", &Class::rotateToPoint) // 绑定 rotateToPoint 方法
+		.def("translate_to_point", &Class::translateToPoint) // 绑定 translateToPoint 方法
+		.def("zoom", &Class::zoom) // 绑定 zoom 方法
+		.def("register_point", &Class::registerPoint) // 绑定 registerPoint 方法
+		.def("set_width", &Class::setWidth) // 绑定 setWidth 方法
+		.def("set_height", &Class::setHeight) // 绑定 setHeight 方法
+		.def("set_clip_near", &Class::setClipNear) // 绑定 setClipNear 方法
+		.def("set_clip_far", &Class::setClipFar) // 绑定 setClipFar 方法
+		.def("viewport_width", &Class::viewportWidth) // 绑定 viewportWidth 方法
+		.def("viewport_height", &Class::viewportHeight) // 绑定 viewportHeight 方法
+		.def("clip_near", &Class::clipNear) // 绑定 clipNear 方法
+		.def("clip_far", &Class::clipFar) // 绑定 clipFar 方法
+		.def("set_eye_pos", &Class::setEyePos) // 绑定 setEyePos 方法
+		.def("set_target_pos", &Class::setTargetPos) // 绑定 setTargetPos 方法
+		.def("get_eye_pos", &Class::getEyePos) // 绑定 getEyePos 方法
+		.def("get_target_pos", &Class::getTargetPos) // 绑定 getTargetPos 方法
+		.def("cast_ray_in_world_space", &Class::castRayInWorldSpace) // 绑定 castRayInWorldSpace 方法
+		.def("set_unit_scale", &Class::setUnitScale) // 绑定 setUnitScale 方法
+		.def("unit_scale", &Class::unitScale) // 绑定 unitScale 方法
+		.def("set_projection_type", &Class::setProjectionType) // 绑定 setProjectionType 方法
+		.def("projection_type", &Class::projectionType); // 绑定 projectionType 方法;
+
+	py::enum_<Class::ProjectionType>(camera, "ProjectionType")
+		.value("Perspective", Class::ProjectionType::Perspective)
+		.value("Orthogonal", Class::ProjectionType::Orthogonal);
+}
+
 void pybind_log(py::module& m)
 {
 	//TODO: Log is updated, update the python binding as well
@@ -185,6 +220,7 @@ void pybind_framework(py::module& m)
 
 	declare_var<float>(m, "f");
 	declare_var<bool>(m, "b");
+	declare_var<uint>(m, "uint");
 	declare_var<std::string>(m, "s");
 	declare_var<dyno::Vec3f>(m, "3f");
 	declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
@@ -198,6 +234,7 @@ void pybind_framework(py::module& m)
 	declare_instance<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
 	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
 	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
+	declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
 
 	// New
 	declare_parametric_model<dyno::DataType3f>(m, "3f");
@@ -208,5 +245,17 @@ void pybind_framework(py::module& m)
 
 	declare_modeling_init_static_plugin(m, "");
 	declare_paticleSystem_init_static_plugin(m, "");
+
+	//import
+	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
+	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
+	declare_multi_node_port<dyno::TriangularSystem<dyno::DataType3f>>(m, "TriangularSystem3f");
+	declare_multi_node_port<dyno::CapillaryWave<dyno::DataType3f>>(m, "CapillaryWave3f");
+
+	declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
+	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
+
+	declare_camera(m);
+
 	//declare_semiAnalyticalScheme_init_static_plugin(m, "");
 }

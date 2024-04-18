@@ -172,6 +172,6 @@ void declare_wake(py::module& m, std::string typestr) {
 		.def("import_vessel", &Class::importVessel, py::return_value_policy::reference);
 }
 
-void declare_height_field_initializer(py::module& m, std::string typestr);
+//void declare_height_field_initializer(py::module& m, std::string typestr);
 
 void pybind_height_field(py::module& m);

@@ -24,6 +24,13 @@
 #include "ParticleSystem/ParticleSystem.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
+#include "ParticleSystem/ParticleEmitter.h"
+
+#include "Peridynamics/TriangularSystem.h"
+
+#include "HeightField/CapillaryWave.h"
+#include "HeightField/Ocean.h"
+#include "HeightField/OceanPatch.h"
 
 #include "SceneGraph.h"
 #include "Log.h"
@@ -46,6 +53,11 @@ using SceneGraph = dyno::SceneGraph;
 using VisualModule = dyno::VisualModule;
 using Log = dyno::Log;
 using Color = dyno::Color;
+
+using uint = unsigned int;
+using uchar = unsigned char;
+using uint64 = unsigned long long;
+using int64 = signed long long;
 
 template<class TNode, class ...Args>
 std::shared_ptr<TNode> create_root(SceneGraph& scene, Args&& ... args) {
@@ -132,8 +144,35 @@ void declare_discrete_elements_to_triangle_set(py::module& m, std::string typest
 		.def("out_triangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
-
 //------------------------- New ------------------------------
+
+template <typename TDataType>
+void declare_multi_node_port(py::module& m, std::string typestr) {
+	using Class = dyno::MultipleNodePort<TDataType>;
+	using Parent = dyno::NodePort;
+	std::string pyclass_name = std::string("MultipleNodePort_") + typestr;
+	py::class_<Class, Parent>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("clear", &Class::clear)
+		.def("add_derive_node", &Class::addDerivedNode)
+		.def("remove_derive_node", &Class::removeDerivedNode)
+		.def("is_kind_of", &Class::isKindOf)
+		.def("has_node", &Class::hasNode)
+		.def("get_nodes", &Class::getNodes, py::return_value_policy::reference)
+		.def("get_derived_node", &Class::getDerivedNodes, py::return_value_policy::reference);
+}
+
+template <typename TDataType>
+void declare_single_node_port(py::module& m, std::string typestr) {
+	using Class = dyno::SingleNodePort<TDataType>;
+	using Parent = dyno::NodePort;
+	std::string pyclass_name = std::string("SingleNodePort_") + typestr;
+	py::class_<Class, Parent>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("is_kind_of", &Class::isKindOf)
+		.def("has_node", &Class::hasNode)
+		.def("get_nodes", &Class::getNodes, py::return_value_policy::reference)
+		.def("get_derived_node", &Class::getDerivedNode, py::return_value_policy::reference)
+		.def("set_derived_node", &Class::setDerivedNode);
+}
 
 template <typename TDataType>
 void declare_parametric_model(py::module& m, std::string typestr) {
@@ -194,6 +233,7 @@ void declare_paticleSystem_init_static_plugin(py::module& m, std::string typestr
 
 void declare_discrete_topology_mapping(py::module& m, std::string typestr);
 
+void declare_camera(py::module& m);
 
 void pybind_log(py::module& m);
 

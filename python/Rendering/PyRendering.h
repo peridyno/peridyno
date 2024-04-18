@@ -42,4 +42,6 @@ void declare_point_visual_module(py::module& m, std::string typestr);
 
 void declare_surface_visual_module(py::module& m, std::string typestr);
 
+void declare_rednder_window(py::module& m);
+
 void pybind_rendering(py::module& m);

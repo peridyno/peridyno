@@ -47,6 +47,31 @@ void declare_surface_visual_module(py::module& m, std::string typestr) {
 		.value("CM_Texture", Class::CM_Texture);
 }
 
+#include "RenderWindow.h"
+#include "Camera.h"
+void declare_rednder_window(py::module& m) {
+	using Class = dyno::RenderWindow;
+	std::string pyclass_name = std::string("RenderWindow");
+	py::class_<Class, std::shared_ptr<Class>>RW(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	RW.def(py::init<>())
+		.def("initialize", &RenderWindow::initialize) // 绑定 initialize 方法
+		.def("mainLoop", &RenderWindow::mainLoop) // 绑定 mainLoop 方法
+		.def("get_render_engine", &RenderWindow::getRenderEngine) // 绑定 getRenderEngine 方法
+		.def("set_render_engine", &RenderWindow::setRenderEngine) // 绑定 setRenderEngine 方法
+		.def("get_camera", &RenderWindow::getCamera) // 绑定 getCamera 方法
+		.def("set_camera", &RenderWindow::setCamera) // 绑定 setCamera 方法
+		.def("get_render_params", &RenderWindow::getRenderParams) // 绑定 getRenderParams 方法
+		.def("set_render_params", &RenderWindow::setRenderParams) // 绑定 setRenderParams 方法
+		.def("set_window_size", &RenderWindow::setWindowSize) // 绑定 setWindowSize 方法
+		.def("set_selection", &RenderWindow::setSelection) // 绑定 setSelection 方法
+		.def("get_selection_mode", &RenderWindow::getSelectionMode) // 绑定 getSelectionMode 方法
+		.def("set_selection_mode", &RenderWindow::setSelectionMode);// 绑定 setSelectionMode 方法
+
+	py::enum_<Class::SelectionMode>(RW, "SelectionMode")
+		.value("OBJECT_MODE", Class::SelectionMode::OBJECT_MODE)
+		.value("PRIMITIVE_MODE", Class::SelectionMode::PRIMITIVE_MODE);
+}
+
 void pybind_rendering(py::module& m)
 {
 	py::class_<GLVisualModule, VisualModule, std::shared_ptr<GLVisualModule>>GLVM(m, "GLVisualModule");
@@ -64,13 +89,17 @@ void pybind_rendering(py::module& m)
 	// 		.def("in_pointset", &GLPointVisualModuleWrap::inPointSet, py::return_value_policy::reference)
 	// 		.def("in_color", &GLPointVisualModuleWrap::inColor);
 
-	py::class_<GLSurfaceVisualModuleWrap, GLVisualModule, std::shared_ptr<GLSurfaceVisualModuleWrap>>
-		(m, "GLSurfaceVisualModule", py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
+	//py::class_<GLSurfaceVisualModuleWrap, GLVisualModule, std::shared_ptr<GLSurfaceVisualModuleWrap>>
+	//	(m, "GLSurfaceVisualModule", py::buffer_protocol(), py::dynamic_attr())
+	//	.def(py::init<>());
 
 	declare_color_mapping<dyno::DataType3f>(m, "3f");
 
 	declare_point_visual_module(m, "");
 
-	declare_surface_visual_module(m, "3f");
+	declare_surface_visual_module(m, "");
+
+	declare_rednder_window(m);
+
+	//declare_surface_visual_module(m, "3f");
 }

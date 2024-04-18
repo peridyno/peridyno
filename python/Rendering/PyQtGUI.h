@@ -1,11 +1,8 @@
 #pragma once
-#ifndef __PYQTGUI__
-#define __PYQTGUI__
 #include "../PyCommon.h"
 
 #include "ImColorbar.h"
 #include "ImWidget.h"
-
 
 //template<typename T>
 //void declare_instance(py::module& m, std::string typestr) {
@@ -23,5 +20,3 @@ void declare_im_colorbar(py::module& m, std::string typestr);
 void declare_im_widget(py::module& m, std::string typestr);
 
 void pybind_qt_gui(py::module& m);
-
-#endif

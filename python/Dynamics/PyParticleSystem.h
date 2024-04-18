@@ -167,20 +167,6 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 }
 
 template <typename TDataType>
-void declare_multi_node_port(py::module& m, std::string typestr) {
-	using Class = dyno::MultipleNodePort<TDataType>;
-	using Parent = dyno::NodePort;
-	std::string pyclass_name = std::string("MultipleNodePort_") + typestr;
-	py::class_<Class, Parent>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("clear", &Class::clear)
-		.def("add_derive_node", &Class::addDerivedNode)
-		.def("remove_derive_node", &Class::removeDerivedNode)
-		.def("is_kind_of", &Class::isKindOf)
-		.def("has_node", &Class::hasNode)
-		.def("get_nodes", &Class::getNodes, py::return_value_policy::reference);
-}
-
-template <typename TDataType>
 void declare_particle_elastic_body(py::module& m, std::string typestr) {
 	using Class = dyno::ElasticBody<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;

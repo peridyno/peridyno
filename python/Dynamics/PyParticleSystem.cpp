@@ -20,10 +20,6 @@ void pybind_particle_system(py::module& m)
 
 	declare_attribute(m, "");
 
-	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
-	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
-	declare_multi_node_port<dyno::TriangularSystem<dyno::DataType3f>>(m, "TriangularSystem3f");
-
 	declare_static_boundary<dyno::DataType3f>(m, "3f");
 	declare_sampler<dyno::DataType3f>(m, "3f");
 	declare_cube_sampler<dyno::DataType3f>(m, "3f");
