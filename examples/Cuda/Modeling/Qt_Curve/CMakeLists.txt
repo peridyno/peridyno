@@ -8,5 +8,5 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Multiphysics
         QtGUI
         ObjIO)
-    add_example(Qt_GUI_Curve Qt LIB_DEPENDENCY)
+    add_example(Qt_GUI_Curve Modeling LIB_DEPENDENCY)
 endif()
