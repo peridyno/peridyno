@@ -7,6 +7,7 @@
 #include "Module/VisualModule.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
+#include "Module/MouseInputModule.h"
 
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"
@@ -52,7 +53,12 @@ using AnimationPipeline = dyno::AnimationPipeline;
 using SceneGraph = dyno::SceneGraph;
 using VisualModule = dyno::VisualModule;
 using Log = dyno::Log;
+//new
 using Color = dyno::Color;
+using ConstraintModule = dyno::ConstraintModule;
+using NumericalIntegrator = dyno::NumericalIntegrator;
+using InputModule = dyno::InputModule;
+using MouseInputModule = dyno::MouseInputModule;
 
 using uint = unsigned int;
 using uchar = unsigned char;

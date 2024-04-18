@@ -72,6 +72,8 @@ void pybind_framework(py::module& m)
 {
 	pybind_log(m);
 
+	//basic
+
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
 		.def("set_name", &Node::setName)
@@ -82,15 +84,13 @@ void pybind_framework(py::module& m)
 		.def("graphics_pipeline", &Node::graphicsPipeline, py::return_value_policy::reference)
 		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference);
 
-	py::class_<NodePort>(m, "NodePort");
-	/*		.def(py::init<>())
-			.def("get_port_name", &NodePort::getPortName)
-			.def("get_port_type", &NodePort::getPortType)
-			.def("set_port_type", &NodePort::setPortType)
-			.def("get_parent", &NodePort::getParent, py::return_value_policy::reference)
-			.def("attach", &NodePort::attach)*/
-
-	py::class_<OBase, std::shared_ptr<OBase>>(m, "OBase");
+	py::class_<NodePort>(m, "NodePort")
+		//.def(py::init<>())
+		.def("get_port_name", &NodePort::getPortName)
+		.def("get_port_type", &NodePort::getPortType)
+		.def("set_port_type", &NodePort::setPortType)
+		.def("get_parent", &NodePort::getParent, py::return_value_policy::reference)
+		.def("attach", &NodePort::attach);
 
 	py::class_<FBase, std::shared_ptr<FBase>>(m, "FBase")
 		.def("get_template_name", &FBase::getTemplateName)
@@ -134,19 +134,35 @@ void pybind_framework(py::module& m)
 	py::class_<Color>(m, "Color")
 		.def(py::init<float, float, float>());
 
+	py::class_<dyno::FilePath>(m, "FilePath")
+		.def(py::init<const std::string&>())
+		.def("string", &dyno::FilePath::string)
+		.def("path", &dyno::FilePath::path)
+		.def("__eq__", &dyno::FilePath::operator==)
+		.def("__ne__", &dyno::FilePath::operator!=)
+		.def("is_path", &dyno::FilePath::is_path)
+		.def("extensions", &dyno::FilePath::extensions)
+		.def("add_extension", &dyno::FilePath::add_extension)
+		.def("set_as_path", &dyno::FilePath::set_as_path)
+		.def("set_path", &dyno::FilePath::set_path);
+
+	py::class_<dyno::PluginEntry>(m, "PluginEntry")
+		.def(py::init<>())
+		.def("name", &dyno::PluginEntry::name)
+		.def("version", &dyno::PluginEntry::version)
+		.def("description", &dyno::PluginEntry::description)
+		.def("setName", &dyno::PluginEntry::setName, py::arg("pluginName"))
+		.def("setVersion", &dyno::PluginEntry::setVersion, py::arg("pluginVersion"))
+		.def("setDescription", &dyno::PluginEntry::setDescription, py::arg("desc"))
+		.def("initialize", &dyno::PluginEntry::initialize);
+
+	//FBase
 	py::class_<InstanceBase, FBase, std::shared_ptr<InstanceBase>>(m, "FInstance");
+
+	//module
 
 	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>());
-
-	py::class_<Pipeline, Module, std::shared_ptr<Pipeline>>(m, "Pipeline")
-		.def("push_module", &Pipeline::pushModule)
-		.def("disable", &Pipeline::disable)
-		.def("enable", &Pipeline::enable);
-
-	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr());
-
-	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr());
 
 	py::class_<VisualModule, Module, std::shared_ptr<VisualModule>>(m, "VisualModule")
 		.def(py::init<>())
@@ -154,10 +170,51 @@ void pybind_framework(py::module& m)
 		.def("is_visible", &VisualModule::isVisible)
 		.def("get_module_type", &VisualModule::getModuleType);
 
+	py::class_<Pipeline, Module, std::shared_ptr<Pipeline>>(m, "Pipeline")
+		.def("push_module", &Pipeline::pushModule)
+		.def("disable", &Pipeline::disable)
+		.def("enable", &Pipeline::enable);
+
+	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
+		.def("get_module_type", &dyno::ComputeModule::getModuleType);
+
+	py::class_<ConstraintModule, Module, std::shared_ptr<ConstraintModule>>(m, "ConstraintModule")
+		.def("constrain", &dyno::ConstraintModule::constrain)
+		.def("get_module_type", &dyno::ConstraintModule::getModuleType);
+
+	py::class_<NumericalIntegrator, Module, std::shared_ptr<NumericalIntegrator>>(m, "NumericalIntegrator")
+		.def(py::init<>()) // 绑定默认构造函数
+		.def("begin", &NumericalIntegrator::begin) // 绑定 begin 方法
+		.def("end", &NumericalIntegrator::end) // 绑定 end 方法
+		.def("integrate", &NumericalIntegrator::integrate) // 绑定 integrate 方法
+		.def("set_mass_id", &NumericalIntegrator::setMassID) // 绑定 setMassID 方法
+		.def("set_force_id", &NumericalIntegrator::setForceID) // 绑定 setForceID 方法
+		.def("set_torque_id", &NumericalIntegrator::setTorqueID) // 绑定 setTorqueID 方法
+		.def("set_position_id", &NumericalIntegrator::setPositionID) // 绑定 setPositionID 方法
+		.def("set_velocity_id", &NumericalIntegrator::setVelocityID) // 绑定 setVelocityID 方法
+		.def("set_position_pre_id", &NumericalIntegrator::setPositionPreID) // 绑定 setPositionPreID 方法
+		.def("set_velocity_pre_id", &NumericalIntegrator::setVelocityPreID) // 绑定 setVelocityPreID 方法
+		.def("get_module_type", &NumericalIntegrator::getModuleType); // 绑定 getModuleType 方法
+
+	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
+		.def("get_module_type", &InputModule::getModuleType);
+
+	py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
+		.def("enqueue_event", &MouseInputModule::enqueueEvent)
+		.def("var_cache_event", &MouseInputModule::varCacheEvent);
+
+	//pipeline
+
+	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr());
+
+	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr());
+
+	//OBase
+
+	py::class_<OBase, std::shared_ptr<OBase>>(m, "OBase");
+
 	py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
 		.def(py::init<>());
-
-	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule");
 
 	py::class_<SceneGraph, OBase, std::shared_ptr<SceneGraph>>(m, "SceneGraph")
 		.def(py::init<>())
@@ -187,27 +244,6 @@ void pybind_framework(py::module& m)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
 
 	//------------------------- New ------------------------------2024
-	py::class_<dyno::FilePath>(m, "FilePath")
-		.def(py::init<const std::string&>())
-		.def("string", &dyno::FilePath::string)
-		.def("path", &dyno::FilePath::path)
-		.def("__eq__", &dyno::FilePath::operator==)
-		.def("__ne__", &dyno::FilePath::operator!=)
-		.def("is_path", &dyno::FilePath::is_path)
-		.def("extensions", &dyno::FilePath::extensions)
-		.def("add_extension", &dyno::FilePath::add_extension)
-		.def("set_as_path", &dyno::FilePath::set_as_path)
-		.def("set_path", &dyno::FilePath::set_path);
-
-	py::class_<dyno::PluginEntry>(m, "PluginEntry")
-		.def(py::init<>())
-		.def("name", &dyno::PluginEntry::name)
-		.def("version", &dyno::PluginEntry::version)
-		.def("description", &dyno::PluginEntry::description)
-		.def("setName", &dyno::PluginEntry::setName, py::arg("pluginName"))
-		.def("setVersion", &dyno::PluginEntry::setVersion, py::arg("pluginVersion"))
-		.def("setDescription", &dyno::PluginEntry::setDescription, py::arg("desc"))
-		.def("initialize", &dyno::PluginEntry::initialize);
 
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 
