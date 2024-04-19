@@ -22,6 +22,18 @@ namespace dyno
 	template<typename TDataType>
 	void MergeTriangleSet<TDataType>::resetStates()
 	{
+		merge();
+	}
+
+	template<typename TDataType>
+	void MergeTriangleSet<TDataType>::updateStates()
+	{
+		merge();
+	}
+
+	template<typename TDataType>
+	void MergeTriangleSet<TDataType>::merge()
+	{
 		auto first = this->inFirst()->getDataPtr();
 		auto second = this->inSecond()->getDataPtr();
 

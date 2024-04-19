@@ -29,11 +29,14 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename Transform<Real, 3> Transform;
 
 		TextureMeshToTriangleSet();
 		~TextureMeshToTriangleSet() override;
 
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+
+		DEF_ARRAYLIST_IN(Transform, Transform, DeviceType::GPU, "");
  
  		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 
