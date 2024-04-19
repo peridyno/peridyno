@@ -19,6 +19,7 @@
 #include "Module/TopologyMapping.h"
 #include "PlaneModel.h"
 #include "SphereModel.h"
+#include "Module/GroupModule.h"
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 
@@ -59,6 +60,7 @@ using ConstraintModule = dyno::ConstraintModule;
 using NumericalIntegrator = dyno::NumericalIntegrator;
 using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
+using GroupModule = dyno::GroupModule;
 
 using uint = unsigned int;
 using uchar = unsigned char;

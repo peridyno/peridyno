@@ -182,6 +182,11 @@ void pybind_framework(py::module& m)
 		.def("constrain", &dyno::ConstraintModule::constrain)
 		.def("get_module_type", &dyno::ConstraintModule::getModuleType);
 
+	py::class_<GroupModule, Module, std::shared_ptr<GroupModule>>(m, "GroupModule")
+		.def("push_module", &GroupModule::pushModule)
+		.def("module_list", &GroupModule::moduleList)
+		.def("set_parent_node", &GroupModule::setParentNode);
+
 	py::class_<NumericalIntegrator, Module, std::shared_ptr<NumericalIntegrator>>(m, "NumericalIntegrator")
 		.def(py::init<>()) // 绑定默认构造函数
 		.def("begin", &NumericalIntegrator::begin) // 绑定 begin 方法
@@ -202,6 +207,7 @@ void pybind_framework(py::module& m)
 	py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent);
+
 
 	//pipeline
 

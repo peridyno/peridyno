@@ -222,4 +222,183 @@ void declare_drag_surface_interaction(py::module& m, std::string typestr) {
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference);
 }
 
+#include "Peridynamics/Module/DragVertexInteraction.h"
+template <typename TDataType>
+void declare_drag_vertex_interaction(py::module& m, std::string typestr) {
+	using Class = dyno::DragVertexInteraction<TDataType>;
+	using Parent = dyno::MouseInputModule;
+	std::string pyclass_name = std::string("DragVertexInteraction") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>()) // 绑定默认构造函数
+		.def("interaction_click", &Class::InteractionClick)
+		.def("interaction_drag", &Class::InteractionDrag)
+		.def("calc_vertex_interact_click", &Class::calcVertexInteractClick)
+		.def("calc_vertex_interact_drag", &Class::calcVertexInteractDrag)
+		.def("set_vertex_fixed", &Class::setVertexFixed)
+		.def("cancel_velocity", &Class::cancelVelocity)
+		.def("in_initial_triangle_set", &Class::inInitialTriangleSet, py::return_value_policy::reference)
+		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("var_interation_radius", &Class::varInterationRadius, py::return_value_policy::reference)
+		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/Module/ElastoplasticityModule.h"
+#include "cmath"
+template <typename TDataType>
+void declare_elastoplasticity_module(py::module& m, std::string typestr) {
+	using Class = dyno::ElastoplasticityModule<TDataType>;
+	using Parent = dyno::LinearElasticitySolver<TDataType>;
+	std::string pyclass_name = std::string("ElastoplasticityModule") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("constrain", &Class::constrain)
+		.def("solve_elasticity", &Class::solveElasticity)
+		.def("apply_plasticity", &Class::applyPlasticity)
+		.def("apply_yielding", &Class::applyYielding)
+		.def("rotate_rest_shape", &Class::rotateRestShape)
+		.def("reconstruct_rest_shape", &Class::reconstructRestShape)
+		.def("set_cohesion", &Class::setCohesion)
+		.def("set_friction_angle", &Class::setFrictionAngle)
+		.def("enable_fully_reconstruction", &Class::enableFullyReconstruction)
+		.def("disable_fully_reconstruction", &Class::disableFullyReconstruction)
+		.def("enable_incompressibility", &Class::enableIncompressibility)
+		.def("disable_incompressibility", &Class::disableIncompressibility)
+		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/Module/FixedPoints.h"
+template <typename TDataType>
+void declare_fixed_points(py::module& m, std::string typestr) {
+	using Class = dyno::FixedPoints<TDataType>;
+	using Parent = dyno::ConstraintModule;
+	std::string pyclass_name = std::string("FixedPoints") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("add_fixed_point", &Class::addFixedPoint)
+		.def("remove_fixed_point", &Class::removeFixedPoint)
+		.def("clear", &Class::clear)
+		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/Module/FractureModule.h"
+template <typename TDataType>
+void declare_fracture_module(py::module& m, std::string typestr) {
+	using Class = dyno::FractureModule<TDataType>;
+	using Parent = dyno::ElastoplasticityModule<TDataType>;
+	std::string pyclass_name = std::string("FractureModule") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("apply_plasticity", &Class::applyPlasticity);
+}
+
+#include "Peridynamics/Module/GranularModule.h"
+template <typename TDataType>
+void declare_granular_module(py::module& m, std::string typestr) {
+	using Class = dyno::GranularModule<TDataType>;
+	using Parent = dyno::ElastoplasticityModule<TDataType>;
+	std::string pyclass_name = std::string("GranularModule") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+}
+
+#include "Peridynamics/Module/OneDimElasticityModule.h"
+template <typename TDataType>
+void declare_one_dim_elasticity_module(py::module& m, std::string typestr) {
+	using Class = dyno::OneDimElasticityModule<TDataType>;
+	using Parent = dyno::ConstraintModule;
+	std::string pyclass_name = std::string("OneDimElasticityModule") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("constrain", &Class::constrain)
+		.def("solve_elasticity", &Class::solveElasticity)
+		.def("set_iteration_number", &Class::setIterationNumber)
+		.def("get_iteration_number", &Class::getIterationNumber)
+		.def("set_material_stiffness", &Class::setMaterialStiffness);
+}
+
+#include "Peridynamics/Module/Peridynamics.h"
+template <typename TDataType>
+void declare_peridynamics(py::module& m, std::string typestr) {
+	using Class = dyno::Peridynamics<TDataType>;
+	using Parent = dyno::GroupModule;
+	std::string pyclass_name = std::string("Peridynamics") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("in_x", &Class::inX, py::return_value_policy::reference)
+		.def("in_y", &Class::inY, py::return_value_policy::reference)
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("in_force", &Class::inForce, py::return_value_policy::reference)
+		.def("in_bonds", &Class::inBonds, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/Module/SemiImplicitHyperelasticitySolver.h"
+template <typename TDataType>
+void declare_semi_implicit_hyperelasticity_solver(py::module& m, std::string typestr) {
+	using Class = dyno::SemiImplicitHyperelasticitySolver<TDataType>;
+	using Parent = dyno::LinearElasticitySolver<TDataType>;
+	std::string pyclass_name = std::string("SemiImplicitHyperelasticitySolver") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("solve_elasticity", &Class::solveElasticity)
+		.def("var_strain_limiting", &Class::varStrainLimiting, py::return_value_policy::reference)
+		.def("in_energy_type", &Class::inEnergyType, py::return_value_policy::reference)
+		.def("in_energy_models", &Class::inEnergyModels, py::return_value_policy::reference)
+		.def("var_is_alpha_computed", &Class::varIsAlphaComputed, py::return_value_policy::reference)
+		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("in_volume", &Class::inVolume, py::return_value_policy::reference)
+		.def("in_volume_pair", &Class::inVolumePair, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/Bond.h"
+template <typename TDataType>
+void declare_bond(py::module& m, std::string typestr) {
+	using Class = dyno::TBond<TDataType>;
+	std::string pyclass_name = std::string("TBond") + typestr;
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def_readwrite("idx", &Class::idx)
+		.def_readwrite("xi", &Class::xi);
+}
+
+#include "Peridynamics/Cloth.h"
+template <typename TDataType>
+void declare_cloth(py::module& m, std::string typestr) {
+	using Class = dyno::Cloth<TDataType>;
+	using Parent = dyno::TriangularSystem<TDataType>;
+	std::string pyclass_name = std::string("Cloth") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("state_rest_rotation", &Class::stateRestPosition, py::return_value_policy::reference)
+		.def("state_old_position", &Class::stateOldPosition, py::return_value_policy::reference)
+		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/ElasticBody.h"
+template <typename TDataType>
+void declare_elastic_body(py::module& m, std::string typestr) {
+	using Class = dyno::ElasticBody<TDataType>;
+	using Parent = dyno::ParticleSystem<TDataType>;
+	std::string pyclass_name = std::string("ElasticBody") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		//.def("load_particles", &Class::loadParticles, py::arg("filename"))
+		//.def("load_particles", &Class::loadParticles)
+		.def("translate", &Class::translate)
+		.def("scale", &Class::scale)
+		.def("rotate", &Class::rotate)
+		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("state_reference_position", &Class::stateReferencePosition, py::return_value_policy::reference)
+		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference);
+}
+
+
+
+
+
 void pybind_peridynamics(py::module& m);
