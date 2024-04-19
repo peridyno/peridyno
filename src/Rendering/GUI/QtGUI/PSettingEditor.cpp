@@ -9,7 +9,11 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QSvgRenderer>
-#include "qgridlayout.h"
+#include <QGridLayout>
+#include <QFormLayout>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QSlider>
 
 #include "PDockWidget.h"
 #include "PModuleEditorToolBar.h"
@@ -23,6 +27,7 @@
 #include "SceneGraphFactory.h"
 #include "SceneGraph.h"
 
+#include <GLRenderEngine.h>
 
 namespace dyno
 {
@@ -32,7 +37,6 @@ namespace dyno
 	{
 
 		this->setWindowTitle(QString("Setting"));
-
 
 		QDockWidget* Docker = new QDockWidget();
 		this->addDockWidget(Qt::LeftDockWidgetArea, Docker);
@@ -45,6 +49,7 @@ namespace dyno
 		QLabel* SelectLabel = new QLabel("Cateory");
 		SelectLabel->setAlignment(Qt::AlignCenter);
 		PPushButton* SceneSettingbtr = new PPushButton("SceneSetting");
+		PPushButton* RenderSettingbtr = new PPushButton("RenderSetting");
 		PPushButton* OtherSettingbtr = new PPushButton("Other");
 		QWidget* selectWidget = new QWidget();
 		QVBoxLayout* selectVLayout = new QVBoxLayout();
@@ -52,11 +57,15 @@ namespace dyno
 		settingWidget = new PSceneSetting(this, "Scene Setting");
 		settingWidget->updateData();
 
+		renderSettingWidget = new PRenderSetting(this, "Render Setting");
+
 		this->connect(SceneSettingbtr, SIGNAL(active(QString)), this, SLOT(buildSceneSettingWidget()));
 		this->connect(OtherSettingbtr, SIGNAL(active(QString)), this, SLOT(buildOtherSettingWidget()));
+		this->connect(RenderSettingbtr, SIGNAL(active(QString)), this, SLOT(showRenderSettingWidget()));
 
 		selectVLayout->addWidget(SelectLabel);
 		selectVLayout->addWidget(SceneSettingbtr);
+		selectVLayout->addWidget(RenderSettingbtr);
 		selectVLayout->addWidget(OtherSettingbtr);
 		selectVLayout->addStretch();
 
@@ -69,9 +78,13 @@ namespace dyno
 		DockerRight->setMinimumSize(QSize(500,600));
 		DockerRight->setTitleBarWidget(new QWidget());
 		delete titleBar2;
-		DockerRight->setWidget(settingWidget);
-		
+		DockerRight->setWidget(settingWidget);		
 
+	}
+
+	void PSettingEditor::setRenderEngine(std::shared_ptr<RenderEngine> engine)
+	{
+		((PRenderSetting*)this->renderSettingWidget)->setRenderEngine(engine);
 	}
 
 	void PSettingEditor::buildSceneSettingWidget()
@@ -102,6 +115,13 @@ namespace dyno
 		DockerRight->setWidget(settingWidget);
 	}
 
+	void PSettingEditor::showRenderSettingWidget()
+	{
+
+		renderSettingWidget->updateData();
+		DockerRight->setWidget(renderSettingWidget);
+	}
+
 
 	PSettingWidget::PSettingWidget(PSettingEditor* editor,std::string title)
 	{
@@ -123,8 +143,6 @@ namespace dyno
 		mMainLayout->addWidget(mTitle);
 
 		mMainLayout->addWidget(mScrollArea);
-
-
 
 		mScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 		mScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -181,5 +199,69 @@ namespace dyno
 		scn->setUpperBound(Vec3f(float(v0), float(v1), float(v2)));
 	}
 
+	PRenderSetting::PRenderSetting(PSettingEditor* editor, std::string title)
+		: PSettingWidget(editor, title)
+	{
+		QFormLayout* layout = new QFormLayout(this);
+		this->getScrollLayout()->addLayout(layout, 0, 0);
+
+		fxaaEnabled = new QCheckBox(this);
+		
+		msaaSamples = new QComboBox(this);
+		msaaSamples->addItems({"Disable", "2", "4", "8"});
+
+		shadowMapSize = new QComboBox(this);
+		shadowMapSize->addItems({ "256", "512", "1024", "2048" });
+
+		shadowBlurIters = new QSpinBox(this);
+		shadowBlurIters->setRange(0, 10);
+
+		layout->addRow(tr("Enable FXAA"), fxaaEnabled);
+		layout->addRow(tr("MSAA Samples"), msaaSamples);
+		layout->addRow(tr("ShadowMap Size"), shadowMapSize);
+		layout->addRow(tr("ShadowMap Blur"), shadowBlurIters);
+	}
+
+	PRenderSetting::~PRenderSetting()
+	{
+
+	}
+
+	void PRenderSetting::setRenderEngine(std::shared_ptr<RenderEngine> engine) {
+		mRenderEngine = std::dynamic_pointer_cast<GLRenderEngine>(engine);
+		if (mRenderEngine)
+		{
+			// update values
+			fxaaEnabled->setChecked(mRenderEngine->getFXAA());
+			msaaSamples->setCurrentText(QString::number(mRenderEngine->getMSAA()));
+			shadowMapSize->setCurrentText(QString::number(mRenderEngine->getShadowMapSize()));
+			shadowBlurIters->setValue(mRenderEngine->getShadowBlurIters());
+
+			// connection
+			connect(fxaaEnabled, &QCheckBox::toggled, [=]() {
+				mRenderEngine->setFXAA(fxaaEnabled->isChecked());
+				});
+
+			connect(msaaSamples, &QComboBox::currentIndexChanged, [=](int idx) {
+				mRenderEngine->setMSAA((1 << idx));
+				});
+
+			connect(shadowMapSize, &QComboBox::currentIndexChanged, [=](int idx) {
+				mRenderEngine->setShadowMapSize((256 << idx));
+				});
+
+			connect(shadowBlurIters, &QSpinBox::valueChanged, [=](int iters) {
+				mRenderEngine->setShadowBlurIters(iters);
+				});
+		}
+	}
+
+	void PRenderSetting::updateData()
+	{
+		if (mRenderEngine)
+		{
+			// ??
+		}
+	}
 
 }

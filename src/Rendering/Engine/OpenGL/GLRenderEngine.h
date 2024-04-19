@@ -53,9 +53,18 @@ namespace dyno
 		// get the selected nodes on given rect area
 		Selection select(int x, int y, int w, int h) override;
 
-		// use MSAA, 
-		void setMSAA(int  samples);
-		void setFXAA(bool on);
+		// use MSAA samples
+		void setMSAA(int samples);
+		int  getMSAA() const;
+
+		void setFXAA(bool flag);
+		int getFXAA() const;
+
+		void setShadowMapSize(int size);
+		int  getShadowMapSize() const;
+
+		void setShadowBlurIters(int iters);
+		int  getShadowBlurIters() const;
 
 	private:
 		void createFramebuffer();
@@ -83,8 +92,6 @@ namespace dyno
 		Texture2DMultiSample	mColorTex;
 		Texture2DMultiSample	mDepthTex;
 		Texture2DMultiSample	mIndexTex;			// indices for object/mesh/primitive etc.
-		// MSAA samples
-		unsigned int			mInternalMSAASamples = 4;
 
 		// non-multisample framebuffer for select
 		Framebuffer				mSelectFramebuffer;
@@ -101,8 +108,14 @@ namespace dyno
 		ShadowMap*				mShadowMap;
 
 		// anti-aliasing
+		
+		// MSAA samples
+		int						mMSAASamples = 4;
+
+		// FXAA
 		bool					bEnableFXAA = false;
 		FXAA*					mFXAAFilter;
+
 
 		Mesh* mScreenQuad = 0;
 	};
