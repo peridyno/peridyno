@@ -50,6 +50,8 @@
 #ifndef TINY_GLTF_H_
 #define TINY_GLTF_H_
 
+#pragma once
+
 #include <array>
 #include <cassert>
 #include <cstdint>
