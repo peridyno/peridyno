@@ -34,14 +34,9 @@ namespace dyno
 		//TODO: This is a temporary code
 		Transform globalT = globalTransform[shapeId][0];
 
-// 		if (tId < localTransform.size())
-// 		{
-// 			printf("Local: %f %f %f \n", locT.translation().x, locT.translation().y, locT.translation().z);
-// 			printf("Global: %f %f %f \n", globalT.translation().x, globalT.translation().y, globalT.translation().z);
-// 		}
-// 
+		Coord s = globalT.scale();
 
-		vertices[tId] = globalT.rotation() * locT.rotation().transpose() * (v - locT.translation())+globalT.translation();
+		vertices[tId] = globalT.rotation() * Coord(v.x * s.x, v.y * s.y, v.z * s.z)+globalT.translation();
 	}
 
 	template<typename TDataType>

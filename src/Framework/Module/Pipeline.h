@@ -88,7 +88,7 @@ namespace dyno
 		/**
 		 * Turn a module output field to a node output node
 		 */
-		void promoteOutputToNode(FBase* base);
+		FBase* promoteOutputToNode(FBase* base);
 
 		/**
 		 * Withdraw a module output field from the node

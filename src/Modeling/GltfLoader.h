@@ -107,7 +107,7 @@ namespace dyno
 		DArray<int> d_joints;
 
 		DArray<Coord> d_ShapeCenter;
-		bool ToCenter = false;
+		bool ToCenter = true;
 
 		std::map<joint, Quat<float>> joint_rotation;
 		std::map<joint, Vec3f> joint_scale;

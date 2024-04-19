@@ -138,6 +138,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	Vec3f scale = Vec3f(0.4,0.4,0.4);
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+	gltf->setVisible(false);
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 
@@ -165,6 +166,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
+	vechicle->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
 	road->outTriangleSet()->connect(tsMerger->inSecond());
 
 	//*************************************** Cube Sample ***************************************//
@@ -255,7 +257,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	particleSystem->connect(fluid->importInitialStates());
 
-	//SemiAnalyticalSFINode
+	//TriangularMeshBoundary
 	auto meshBoundary = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
 	meshBoundary->varThickness()->setValue(0.005f * total_scale);
 
@@ -267,13 +269,6 @@ std::shared_ptr<SceneGraph> creatScene()
 	staticBoundary->loadCube(Vec3f(-4.6, 0, -7.2), Vec3f(4.6, 2, 12), 0.1, true);
 	fluid->connect(staticBoundary->importParticleSystems());
 
-// 	auto sVisual = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
-// 	texMeshConverter->outTriangleSet()->connect(sVisual->inTriangleSet());
-
-	//*************************************** Import Other Models ***************************************//
-
-	//Other Models
-//	importOtherModel(scn);
 
 	return scn;
 }
