@@ -16,7 +16,17 @@
 namespace dyno 
 {
 
-	ShadowMap::ShadowMap(int w, int h): width(w), height(h)
+	ShadowMap::ShadowMap(int size)
+	{
+		this->setSize(size);
+	}
+
+	ShadowMap::~ShadowMap()
+	{
+
+	}
+
+	void ShadowMap::initialize()
 	{
 		const glm::vec4 border = glm::vec4(1);
 
@@ -46,9 +56,10 @@ namespace dyno
 		mShadowDepth.format = GL_DEPTH_COMPONENT;
 		mShadowDepth.create();
 
-		mShadowTex.resize(width, height);
-		mShadowBlur.resize(width, height);
-		mShadowDepth.resize(width, height);
+		mShadowTex.resize(size, size);
+		mShadowBlur.resize(size, size);
+		mShadowDepth.resize(size, size);
+		sizeUpdated = false;
 
 		mFramebuffer.create();
 
@@ -68,7 +79,7 @@ namespace dyno
 			BLUR_FRAG, sizeof(BLUR_FRAG));
 	}
 
-	ShadowMap::~ShadowMap()
+	void ShadowMap::release()
 	{
 		mFramebuffer.release();
 		mShadowTex.release();
@@ -179,6 +190,14 @@ namespace dyno
 
 	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams)
 	{
+		if (sizeUpdated)
+		{
+			mShadowTex.resize(size, size);
+			mShadowBlur.resize(size, size);
+			mShadowDepth.resize(size, size);
+			sizeUpdated = false;
+		}
+
 		// initialization
 		mFramebuffer.bind();
 		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mShadowTex);
@@ -188,7 +207,7 @@ namespace dyno
 		if (rparams.light.mainLightShadow > 0.f	&& 
 			scene != nullptr && !scene->isEmpty())
 		{
-			glViewport(0, 0, width, height);
+			glViewport(0, 0, size, size);
 
 			glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
 			glm::mat4 lightProj = getLightProjMatrix(lightView, 
@@ -219,8 +238,8 @@ namespace dyno
 			action.params.transforms.view = lightView;
 			action.params.transforms.proj = lightProj;
 			action.params.mode = GLRenderMode::SHADOW;
-			action.params.width = this->width;
-			action.params.height = this->height;
+			action.params.width = this->size;
+			action.params.height = this->size;
 
 			scene->traverseForward(&action);
 
@@ -229,12 +248,12 @@ namespace dyno
 			mBlurProgram->use();
 			for (int i = 0; i < blurIters; i++)
 			{
-				mBlurProgram->setVec2("uScale", { 1.f / width, 0.f / height });
+				mBlurProgram->setVec2("uScale", { 1.f / size, 0.f / size });
 				mShadowTex.bind(GL_TEXTURE5);
 				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mShadowBlur);
 				mQuad->draw();
 
-				mBlurProgram->setVec2("uScale", { 0.f / width, 1.f / height });
+				mBlurProgram->setVec2("uScale", { 0.f / size, 1.f / size });
 				mShadowBlur.bind(GL_TEXTURE5);
 				mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mShadowTex);
 				mQuad->draw();
@@ -264,6 +283,30 @@ namespace dyno
 		else
 			mShadowTex.bind(GL_TEXTURE0 + shadowTexSlot);
 
+	}
+
+	int ShadowMap::getSize() const
+	{
+		return this->size;
+	}
+
+	void ShadowMap::setSize(int size)
+	{
+		if (this->size == size)
+			return;
+
+		this->size = size;
+		this->sizeUpdated = true;
+	}
+
+	int ShadowMap::getNumBlurIterations() const
+	{
+		return this->blurIters;
+	}
+
+	void ShadowMap::setNumBlurIterations(int iter)
+	{
+		this->blurIters = iter;
 	}
 
 }

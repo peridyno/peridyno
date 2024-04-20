@@ -48,6 +48,8 @@ namespace dyno
 		mBitangent.create(GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_DRAW);
 #endif
 
+		mShapeTransform.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+
 		return true;
 	}
 
@@ -64,6 +66,8 @@ namespace dyno
 
 		mVAO.release();
 
+		mShapeTransform.release();
+
 		mTextureMesh.release();
 	}
 
@@ -71,6 +75,8 @@ namespace dyno
 	{
 		mTangent.updateGL();
 		mBitangent.updateGL();
+
+		mShapeTransform.updateGL();
 
 		mTextureMesh.updateGL();
 
@@ -124,9 +130,6 @@ namespace dyno
 		
 		mShaderProgram->setInt("uInstanced", 0);
 
-		mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
-		mRenderParamsUBlock.bindBufferBase(0);
-
 		vertices.bindBufferBase(8);
 		texCoords.bindBufferBase(10);
 
@@ -136,40 +139,58 @@ namespace dyno
 		for (int i = 0; i < shapes.size(); i++)
 		{
 			auto shape = shapes[i];
-			auto mtl   = shape->material;
-
-			// material 
+			if (shape->material != nullptr) 
 			{
-				pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
-				pbr.metallic = this->varMetallic()->getValue();
-				pbr.roughness = this->varRoughness()->getValue();
-				pbr.alpha = this->varAlpha()->getValue();
-				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
-				mPBRMaterialUBlock.bindBufferBase(1);
-			}
+				auto mtl = shape->material;
 
-			// bind textures 
+				// 
+				{
+					RenderParams pm_i = rparams;
+
+					pm_i.transforms.model = shape->transform;
+
+					mRenderParamsUBlock.load((void*)&pm_i, sizeof(RenderParams));
+					mRenderParamsUBlock.bindBufferBase(0);
+				}
+
+				// material 
+				{
+					pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
+					pbr.metallic = this->varMetallic()->getValue();
+					pbr.roughness = this->varRoughness()->getValue();
+					pbr.alpha = this->varAlpha()->getValue();
+					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+					mPBRMaterialUBlock.bindBufferBase(1);
+				}
+
+				// bind textures 
+				{
+					// reset 
+					glActiveTexture(GL_TEXTURE10);		// color
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE11);		// bump map
+					glBindTexture(GL_TEXTURE_2D, 0);
+
+					if (mtl->texColor.isValid()) {
+						mShaderProgram->setInt("uColorMode", 2);
+						mtl->texColor.bind(GL_TEXTURE10);
+					}
+					else {
+						mtl->texColor.unbind();
+						mShaderProgram->setInt("uColorMode", 0);
+					}
+
+					if (mtl->texBump.isValid()) {
+						mtl->texBump.bind(GL_TEXTURE11);
+						mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
+					}
+				}
+			}
+			else 
 			{
-				// reset 
-				glActiveTexture(GL_TEXTURE10);		// color
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE11);		// bump map
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-				if (mtl->texColor.isValid()) {
-					mShaderProgram->setInt("uColorMode", 2);
-					mtl->texColor.bind(GL_TEXTURE10);
-				}
-				else {
-					mShaderProgram->setInt("uColorMode", 0);
-				}
-
-				if (mtl->texBump.isValid()) {
-					mtl->texBump.bind(GL_TEXTURE11);
-					mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
-				}
+				mShaderProgram->setInt("uColorMode", 0);
 			}
-
+			
 			int numTriangles = shape->glVertexIndex.count();
 
 			mVAO.bind();
@@ -203,7 +224,6 @@ namespace dyno
 					glVertexAttribI4i(2, -1, -1, -1, -1);
 				}
 			}
-
 
 			glDrawArrays(GL_TRIANGLES, 0, numTriangles * 3);
 

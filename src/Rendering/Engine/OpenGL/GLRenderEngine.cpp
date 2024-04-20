@@ -31,12 +31,12 @@ namespace dyno
 {
 	GLRenderEngine::GLRenderEngine()
 	{
-
+		mShadowMap = new ShadowMap();
 	}
 
 	GLRenderEngine::~GLRenderEngine()
 	{
-
+		delete mShadowMap;
 	}
 
 	void GLRenderEngine::initialize()
@@ -63,13 +63,15 @@ namespace dyno
 		mScreenQuad = Mesh::ScreenQuad();
 
 		mRenderHelper = new GLRenderHelper();
-		mShadowMap = new ShadowMap(2048, 2048);
 		mFXAAFilter = new FXAA;
 
+		mShadowMap->initialize();
 	}
 
 	void GLRenderEngine::terminate()
 	{
+		mShadowMap->release();
+
 		// release render modules
 		for (auto item : mRenderItems) {
 			item.visualModule->release();
@@ -96,7 +98,6 @@ namespace dyno
 		delete mScreenQuad;
 
 		delete mRenderHelper;
-		delete mShadowMap;
 		delete mFXAAFilter;
 
 	}
@@ -129,6 +130,26 @@ namespace dyno
 			BLEND_FRAG, sizeof(BLEND_FRAG));
 	}
 
+
+	void GLRenderEngine::setShadowMapSize(int size)
+	{
+		mShadowMap->setSize(size);
+	}
+
+	int GLRenderEngine::getShadowMapSize() const
+	{
+		return mShadowMap->getSize();
+	}
+
+	void GLRenderEngine::setShadowBlurIters(int iters)
+	{
+		mShadowMap->setNumBlurIterations(iters);
+	}
+
+	int GLRenderEngine::getShadowBlurIters() const
+	{
+		return mShadowMap->getNumBlurIterations();
+	}
 
 	void GLRenderEngine::createFramebuffer()
 	{
@@ -229,7 +250,7 @@ namespace dyno
 		}
 		else {
 			// target framebuffer is non-multisample, and FXAA is disabled...
-			resizeFramebuffer(rparams.width, rparams.height, mInternalMSAASamples);
+			resizeFramebuffer(rparams.width, rparams.height, mMSAASamples);
 		}
 
 		// update shadow map
@@ -434,6 +455,29 @@ namespace dyno
 		}
 
 		return result;
+	}
+
+	void GLRenderEngine::setMSAA(int samples)
+	{
+		// [0, 8]
+		if (samples < 0) samples = 0;
+		if (samples > 8) samples = 8;
+		mMSAASamples = samples;
+	}
+
+	int GLRenderEngine::getMSAA() const
+	{
+		return mMSAASamples;
+	}
+
+	void GLRenderEngine::setFXAA(bool flag)
+	{
+		bEnableFXAA = flag;
+	}
+
+	int GLRenderEngine::getFXAA() const
+	{
+		return bEnableFXAA;
 	}
 
 }

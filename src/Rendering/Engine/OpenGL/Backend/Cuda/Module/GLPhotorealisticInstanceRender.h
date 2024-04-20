@@ -43,7 +43,7 @@ namespace dyno
 		CArray<uint> mOffset;
 		CArray<List<Transform3f>> mLists;
 
-		XBuffer<Transform3f> mGLTransform;
+		XBuffer<Transform3f> mXTransformBuffer;
 
 	};
 

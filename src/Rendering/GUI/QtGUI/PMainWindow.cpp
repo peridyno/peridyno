@@ -396,6 +396,7 @@ namespace dyno
 		auto scn = SceneGraphFactory::instance()->active();
 
 		mSettingEditor = new PSettingEditor(nullptr);
+		mSettingEditor->setRenderEngine(mOpenGLWidget->getRenderEngine());
 
 	}
 

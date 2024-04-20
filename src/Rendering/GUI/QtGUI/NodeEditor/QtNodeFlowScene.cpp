@@ -700,12 +700,22 @@ namespace Qt
 					{
 						Node* nodeSrc = dynamic_cast<Node*>(parSrc);
 
-						auto outId = nodeSrc->objectId();
-						
-						graph.addEdge(outId, inId);
+						// Otherwise parSrc is a field of Module
+						if (nodeSrc == nullptr)
+						{
+							dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+							if (moduleSrc != nullptr)
+								nodeSrc = moduleSrc->getParentNode();
+						}
 
-						graph.removeID(outId, inId);
+						if (nodeSrc != nullptr)
+						{
+							auto outId = nodeSrc->objectId();
 
+							graph.addEdge(outId, inId);
+
+							graph.removeID(outId, inId);
+						}
 					}
 				}
 			}

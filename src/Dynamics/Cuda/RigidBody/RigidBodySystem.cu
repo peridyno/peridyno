@@ -501,8 +501,10 @@ namespace dyno
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
-		CArray<Coord> hPos;
-		hPos.assign(this->stateCenter()->constData());
+		if (this->stateCenter()->size() <= 0)
+		{
+			return;
+		}
 
 		cuExecute(mDeviceBoxes.size(),
 			UpdateBoxes,

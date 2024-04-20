@@ -34,7 +34,7 @@ namespace dyno
 		auto topo = this->outPointSet()->getDataPtr();
 
 		topo->loadObjFile(filename.string());
-
+		topo->rotate(this->varRotation()->getData());
 		topo->scale(this->varScale()->getData());
 		topo->translate(this->varLocation()->getData());
 	}

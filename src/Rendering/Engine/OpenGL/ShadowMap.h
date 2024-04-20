@@ -33,13 +33,22 @@ namespace dyno
 	class ShadowMap
 	{
 	public:
-		ShadowMap(int w = 1024, int h = 1024);
+		ShadowMap(int size = 1024);
 		~ShadowMap();
+
+		void initialize();
+		void release();
 
 		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
 
 		// bind uniform block and texture
 		void bind(int shadowUniformLoc = 3, int shadowTexSlot = 5);
+
+		int  getSize() const;
+		void setSize(int size);
+
+		int  getNumBlurIterations() const;
+		void setNumBlurIterations(int iter);
 
 	private:
 		// framebuffers
@@ -54,13 +63,15 @@ namespace dyno
 
 		Buffer			mShadowUniform;	// uniform buffer for shadow lookup matrices
 
+		bool			sizeUpdated = false;
+		int				size = -1;
+
+		// num of blur interations for VSM
+		int				blurIters = 1;
+
 	public:
-		int				width;
-		int				height;
 
 		// patch to color bleeding, min p_max
 		float			minValue = 0.1f;
-		// num of blur interations for VSM
-		const int		blurIters = 1;
 	};
 }

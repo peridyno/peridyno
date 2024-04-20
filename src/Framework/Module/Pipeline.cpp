@@ -154,12 +154,14 @@ namespace dyno
 		return true;
 	}
 
-	void Pipeline::promoteOutputToNode(FBase* base)
+	FBase* Pipeline::promoteOutputToNode(FBase* base)
 	{
 		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
-			return;
+			return nullptr;
 
 		mNode->addOutputField(base);
+
+		return base;
 	}
 
 	void Pipeline::demoteOutputFromNode(FBase* base)

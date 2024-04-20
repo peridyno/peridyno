@@ -49,6 +49,8 @@ namespace dyno {
 
 		DEF_VAR(Real, RestDensity, 1000, "Reference density");
 
+		DEF_VAR(Real, Kappa, Real(10), "A value to adjust the magnitide of constraints");
+
 	protected:
 		void compute() override;
 

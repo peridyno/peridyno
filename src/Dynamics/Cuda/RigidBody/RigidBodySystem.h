@@ -111,7 +111,7 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
 		/**
 		 * @brief Particle position
