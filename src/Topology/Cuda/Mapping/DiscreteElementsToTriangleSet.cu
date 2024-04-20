@@ -166,20 +166,20 @@ namespace dyno
 		Vec3f center = capsule.center; 
 
 		Vec3f v = capsuleVertices[vertexId];
-		Vec3f orignZ = Vec3f(0, 0, 1);
-		Vec3f newZ = Vec3f(0, 0, h);
+		Vec3f orignZ = Vec3f(0, 1, 0);
+		Vec3f newZ = Vec3f(0, h, 0);
 
-		if (v.z >= 1) // 上半球
+		if (v.y >= 1) // 上半球
 		{
 			vertices[pointOffset + tId] = rot * ((v - orignZ) * r + newZ) + center;
 		}
-		else if (v.z <= -1) // 下半球
+		else if (v.y <= -1) // 下半球
 		{
 			vertices[pointOffset + tId] = rot * ((v + orignZ) * r - newZ) + center;
 		}
 		else // 圆柱
 		{
-			vertices[pointOffset + tId] = rot * (v * Vec3f(r, r, h)) + center;
+			vertices[pointOffset + tId] = rot * (v * Vec3f(r, h, r)) + center;
 		}	
 	}
 

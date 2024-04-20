@@ -646,6 +646,7 @@ namespace dyno
 		Quat<Real> rotation;
 	};
 
+	// The centerline is set to align with the Y-axis in default 
 	template<typename Real>
 	class TCapsule3D
 	{
@@ -664,8 +665,8 @@ namespace dyno
 		DYN_FUNC TAlignedBox3D<Real> aabb() const;
 
 		// return the two ends
-		DYN_FUNC inline Coord3D startPoint() const { return center - rotation.rotate(halfLength * Coord3D(0, 0, 1)); }
-		DYN_FUNC inline Coord3D endPoint() const { return center + rotation.rotate(halfLength * Coord3D(0, 0, 1)); }
+		DYN_FUNC inline Coord3D startPoint() const { return center - rotation.rotate(halfLength * Coord3D(0, 1, 0)); }
+		DYN_FUNC inline Coord3D endPoint() const { return center + rotation.rotate(halfLength * Coord3D(0, 1, 0)); }
 
 		DYN_FUNC inline TSegment3D<Real> centerline() const { return TSegment3D<Real>(startPoint(), endPoint()); }
 

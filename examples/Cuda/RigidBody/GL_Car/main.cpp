@@ -33,15 +33,19 @@ std::shared_ptr<SceneGraph> creatCar()
 	CapsuleInfo capsule1, capsule2, capsule3, capsule4;
 
 	capsule1.center = Vec3f(-0.18, 0.03, 0.09);
+	capsule1.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule1.halfLength = 0.01;
 	capsule1.radius = 0.03;
 	capsule2.center = Vec3f(-0.18, 0.03, -0.09);
+	capsule2.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule2.halfLength = 0.01;
 	capsule2.radius = 0.03;
 	capsule3.center = Vec3f(0.18, 0.03, 0.09);
+	capsule3.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule3.halfLength = 0.01;
 	capsule3.radius = 0.03;
 	capsule4.center = Vec3f(0.18, 0.03, -0.09);
+	capsule4.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule4.halfLength = 0.01;
 	capsule4.radius = 0.03;
 

@@ -75,13 +75,14 @@ void createTwoCapsules(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
 	CapsuleInfo capsule;
 	capsule.center = Vec3f(-1.25, 0.1, -0.5f);
+	capsule.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule.halfLength = 0.1f;
 	capsule.radius = 0.1f;
 	rigid->addCapsule(capsule, rigidBody);
 
 	capsule.center = Vec3f(-1.3, 0.33, -0.5f);
 	capsule.halfLength = 0.1f;
-	capsule.rot = Quat1f(M_PI/8, Vec3f(0, 1, 0));
+	capsule.rot = Quat1f(M_PI/2, Vec3f(1, 0, 0));
 	capsule.radius = 0.1f;
 	rigid->addCapsule(capsule, rigidBody);
 }
@@ -96,6 +97,7 @@ void createCapsuleBox(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
 
 	CapsuleInfo capsule;
 	capsule.center = Vec3f(-1.3, 0.3, 0.35);
+	capsule.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule.halfLength = 0.1f;
 	capsule.radius = 0.1f;
 	rigid->addCapsule(capsule, rigidBody);
@@ -115,6 +117,7 @@ void createCapsuleTet(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 
 	CapsuleInfo capsule;
 	capsule.center = Vec3f(0.45, 0.4, -0.35);
+	capsule.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule.halfLength = 0.1f;
 	capsule.radius = 0.1f;
 	rigid->addCapsule(capsule, rigidBody);
@@ -176,6 +179,7 @@ void createSphereCapsule(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
 	CapsuleInfo cap;
 	cap.center = Vec3f(1.3, 0.3, 1.6);
+	cap.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	cap.halfLength = 0.1f;
 	cap.radius = 0.1f;
 	rigid->addCapsule(cap, rigidBody);
