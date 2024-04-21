@@ -117,6 +117,14 @@ namespace dyno
 
 	public slots:
 		void updateData() override;
+
+		void setMSAA(int idx);
+
+		void setShadowMapSize(int idx);
+
+		void setShadowBlurIters(int iters);
+
+
 	private:
 		std::shared_ptr<GLRenderEngine> mRenderEngine;
 

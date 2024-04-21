@@ -49,7 +49,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto ocean = scn->addNode(std::make_shared<Ocean<DataType3f>>());
 
 	auto patch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
-	patch->varWindType()->setValue(4);
+	patch->varWindType()->setValue(5);
 	patch->varPatchSize()->setValue(128.0f);
 	patch->connect(ocean->importOceanPatch());
 
@@ -75,6 +75,8 @@ std::shared_ptr<SceneGraph> createScene()
 	boat->varDensity()->setValue(150.0f);
 	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
+	boat->varMeshName()->setValue(getAssetPath()+std::string("obj/SailBoat_mesh.obj"));
+	boat->varEnvelopeName()->setValue(getAssetPath() + std::string("obj/SailBoat_boundary.obj"));
 
 	auto steer = std::make_shared<Steer<DataType3f>>();
 	boat->stateVelocity()->connect(steer->inVelocity());
@@ -102,7 +104,7 @@ int main()
 	
 	//Set the distance unit for the camera, the fault unit is meter
 	app.renderWindow()->getCamera()->setUnitScale(10.0);
-
+	app.renderWindow()->getRenderEngine()->showGround = false;
 	app.mainLoop();
 
 	return 0;

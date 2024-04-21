@@ -29,6 +29,8 @@
 
 #include <GLRenderEngine.h>
 
+
+
 namespace dyno
 {
 	PSettingEditor::PSettingEditor(QWidget* widget)
@@ -242,17 +244,14 @@ namespace dyno
 				mRenderEngine->setFXAA(fxaaEnabled->isChecked());
 				});
 
-			connect(msaaSamples, &QComboBox::currentIndexChanged, [=](int idx) {
-				mRenderEngine->setMSAA((1 << idx));
-				});
 
-			connect(shadowMapSize, &QComboBox::currentIndexChanged, [=](int idx) {
-				mRenderEngine->setShadowMapSize((256 << idx));
-				});
+			connect(msaaSamples, SIGNAL(currentIndexChanged(int)), this, SLOT(setMSAA(int)));
 
-			connect(shadowBlurIters, &QSpinBox::valueChanged, [=](int iters) {
-				mRenderEngine->setShadowBlurIters(iters);
-				});
+
+			connect(shadowMapSize, SIGNAL(currentIndexChanged(int)), this, SLOT(setShadowMapSize(int)));
+
+
+			connect(shadowBlurIters, SIGNAL(valueChanged(int)), this, SLOT(setShadowBlurIters(int)));
 		}
 	}
 
@@ -264,4 +263,18 @@ namespace dyno
 		}
 	}
 
+	void PRenderSetting::setMSAA(int idx)
+	{
+		mRenderEngine->setFXAA(fxaaEnabled->isChecked());
+	}
+
+	void PRenderSetting::setShadowMapSize(int idx)
+	{
+		mRenderEngine->setShadowMapSize((256 << idx));
+	}
+
+	void PRenderSetting::setShadowBlurIters(int iters)
+	{
+		mRenderEngine->setShadowBlurIters(iters);
+	}
 }
