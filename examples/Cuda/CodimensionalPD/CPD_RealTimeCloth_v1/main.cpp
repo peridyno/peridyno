@@ -80,6 +80,9 @@ int main()
 	window.setSceneGraph(createScene());
 
 	window.initialize(1024, 768);
+
+	window.renderWindow()->setSelectionMode(RenderWindow::PRIMITIVE_MODE);
+
 	window.mainLoop();
 
 	return 0;

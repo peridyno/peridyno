@@ -35,6 +35,12 @@ namespace dyno
 
 		~SceneGraph();
 
+		enum EWorkMode
+		{
+			EDIT_MODE,
+			RUNNING_MODE
+		};
+
 		virtual void advance(float dt);
 		virtual void takeOneFrame();
 		virtual void updateGraphicsContext();
@@ -97,6 +103,8 @@ namespace dyno
 		bool isEmpty() {
 			return mNodeMap.size() == 0;
 		}
+
+		EWorkMode getWorkMode() { return mWorkMode; }
 
 	public:
 		static SceneGraph& getInstance();
@@ -250,6 +258,8 @@ namespace dyno
 
 		bool mNodeTiming = false;
 		bool mModuleTiming = false;
+
+		EWorkMode mWorkMode = EDIT_MODE;
 
 		/**
 		 * A  lock to guarantee consistency across threads

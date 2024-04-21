@@ -349,8 +349,6 @@ namespace dyno
 	void GlfwRenderWindow::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
-
-		this->setSelection(!mAnimationToggle);
 	}
 
 	void GlfwRenderWindow::toggleImGUI()
@@ -439,7 +437,13 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, activeWindow->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
+			{
+				activeScene->onMouseEvent(mouseEvent, activeWindow->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
+			
 
 			if (action == GLFW_PRESS)
 			{

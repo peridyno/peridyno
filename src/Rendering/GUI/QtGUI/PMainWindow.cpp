@@ -378,12 +378,10 @@ namespace dyno
 		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()
 			{
 				mOpenGLWidget->setFocus();
-				mOpenGLWidget->setSelection(false);
 			});
 
 		connect(mAnimationWidget, &PAnimationWidget::simulationStopped, [=]()
 			{
-				mOpenGLWidget->setSelection(true);
 			});
 	}
 

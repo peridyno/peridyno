@@ -283,7 +283,12 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
+			{
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			mImWindow.mousePressEvent(mouseEvent);
 		}
