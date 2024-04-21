@@ -19,6 +19,8 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 
+#include "Module/ComputeModule.h"
+
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
@@ -28,6 +30,34 @@
 
 namespace dyno
 {
+	/**
+	 * @brief A class to facilitate showing the shape information
+	 */
+	class BoundingBoxOfTextureMesh : public ComputeModule
+	{
+		DECLARE_CLASS(BoundingBoxOfTextureMesh);
+	public:
+		BoundingBoxOfTextureMesh();
+
+		DEF_VAR(uint, ShapeId, 0, "");
+
+		DEF_VAR(Vec3f, Center, Vec3f(0), "");
+
+		DEF_VAR(Vec3f, LowerBound, Vec3f(0), "");
+
+		DEF_VAR(Vec3f, UpperBound, Vec3f(0), "");
+
+	public:
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+
+		DEF_INSTANCE_OUT(EdgeSet<DataType3f>, BoundingBox, "");
+
+	private:
+		void compute() override;
+
+		void shapeIdChanged();
+	};
+
 
 	template<typename TDataType>
 	class GltfLoader : public ParametricModel<TDataType>

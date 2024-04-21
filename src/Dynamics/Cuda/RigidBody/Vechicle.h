@@ -3,6 +3,8 @@
 
 #include "Topology/TextureMesh.h"
 
+#include "STL/Pair.h"
+
 namespace dyno 
 {
 	template<typename TDataType>
@@ -13,13 +15,18 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
+		typedef typename Pair<uint, uint> BindingPair;
 
 		Vechicle();
 		~Vechicle() override;
 
+		void bind(uint bodyId, Pair<uint, uint> shapeId);
+
 	public:
 
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
+
+		DEF_ARRAY_STATE(BindingPair, Binding, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 
@@ -27,6 +34,12 @@ namespace dyno
 		void resetStates() override;
 
 		void updateStates() override;
+
+	private:
+
+		std::vector<Pair<uint, uint>> mBindingPair;
+
+		DArray<Matrix> mInitialRot;
 	};
 
 	IMPLEMENT_TCLASS(Vechicle, TDataType)

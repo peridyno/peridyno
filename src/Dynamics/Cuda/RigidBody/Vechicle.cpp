@@ -1,6 +1,7 @@
 #include "Vechicle.h"
 
 #include "Module/SimpleVechicleDriver.h"
+#include "Module/SharedFuncsForRigidBody.h"
 
 namespace dyno
 {
@@ -25,6 +26,15 @@ namespace dyno
 	template<typename TDataType>
 	void Vechicle<TDataType>::resetStates()
 	{
+		RigidBodySystem<TDataType>::resetStates();
+
+		auto topo = this->stateTopology()->constDataPtr();
+
+		int sizeOfRigids = topo->totalSize();
+
+		this->stateBinding()->resize(sizeOfRigids);
+
+
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		uint N = texMesh->shapes().size();
@@ -46,12 +56,30 @@ namespace dyno
 		instantanceTransform->assign(tms);
 
 		tms.clear();
+
+		auto binding = this->stateBinding()->getDataPtr();
+		binding->assign(mBindingPair);
+
+		mInitialRot.assign(this->stateRotationMatrix()->constData());
 	}
 
 	template<typename TDataType>
 	void Vechicle<TDataType>::updateStates()
 	{
 		RigidBodySystem<TDataType>::updateStates();
+
+		ApplyTransform(
+			this->stateInstanceTransform()->getData(),
+			this->stateCenter()->getData(),
+			this->stateRotationMatrix()->getData(),
+			mInitialRot,
+			this->stateBinding()->getData());
+	}
+
+	template<typename TDataType>
+	void Vechicle<TDataType>::bind(uint bodyId, Pair<uint, uint> shapeId)
+	{
+		mBindingPair.insert(mBindingPair.begin() + bodyId, shapeId);
 	}
 
 	DEFINE_CLASS(Vechicle);

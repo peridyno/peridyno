@@ -1,6 +1,7 @@
-if(PERIDYNO_LIBRARY_RIGIDBODY)
+if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
     set(LIB_DEPENDENCY 
         RigidBody
-        GlfwGUI)
+        Modeling
+        QtGUI)
     add_example(GL_Car RigidBody LIB_DEPENDENCY)
 endif()

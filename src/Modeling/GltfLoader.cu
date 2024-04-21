@@ -12,8 +12,91 @@
 
 namespace dyno
 {
+	IMPLEMENT_CLASS(BoundingBoxOfTextureMesh);
 
+	BoundingBoxOfTextureMesh::BoundingBoxOfTextureMesh()
+		: ComputeModule()
+	{
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&BoundingBoxOfTextureMesh::shapeIdChanged, this));
 
+		this->varShapeId()->attach(callback);
+	}
+
+	void BoundingBoxOfTextureMesh::compute()
+	{
+		shapeIdChanged();
+	}
+
+	void BoundingBoxOfTextureMesh::shapeIdChanged()
+	{
+		uint shapeId = this->varShapeId()->getValue();
+		auto mesh = this->inTextureMesh()->constDataPtr();
+
+		if (mesh == nullptr)
+		{
+			return;
+		}
+
+		if (this->outBoundingBox()->isEmpty())
+		{
+			this->outBoundingBox()->allocate();
+		}
+
+		auto& es = this->outBoundingBox()->getData();
+
+		if (shapeId < mesh->shapes().size())
+		{
+			auto bb = mesh->shapes()[shapeId]->boundingBox;
+
+			this->varCenter()->setValue((bb.v0 + bb.v1) / 2);
+			this->varLowerBound()->setValue(bb.v0);
+			this->varUpperBound()->setValue(bb.v1);
+
+			std::vector<Vec3f> vertices;
+
+			Vec3f v0 = bb.v0;
+			Vec3f v1 = Vec3f(bb.v0.x, bb.v0.y, bb.v1.z);
+			Vec3f v2 = Vec3f(bb.v1.x, bb.v0.y, bb.v1.z);
+			Vec3f v3 = Vec3f(bb.v1.x, bb.v0.y, bb.v0.z);
+
+			Vec3f v4 = Vec3f(bb.v0.x, bb.v1.y, bb.v0.z);
+			Vec3f v5 = Vec3f(bb.v0.x, bb.v1.y, bb.v1.z);
+			Vec3f v6 = bb.v1;
+			Vec3f v7 = Vec3f(bb.v1.x, bb.v1.y, bb.v0.z);
+
+			vertices.push_back(v0);
+			vertices.push_back(v1);
+			vertices.push_back(v2);
+			vertices.push_back(v3);
+			vertices.push_back(v4);
+			vertices.push_back(v5);
+			vertices.push_back(v6);
+			vertices.push_back(v7);
+
+			std::vector<TopologyModule::Edge> edges;
+			edges.push_back(TopologyModule::Edge(0, 1));
+			edges.push_back(TopologyModule::Edge(1, 2));
+			edges.push_back(TopologyModule::Edge(2, 3));
+			edges.push_back(TopologyModule::Edge(3, 0));
+
+			edges.push_back(TopologyModule::Edge(4, 5));
+			edges.push_back(TopologyModule::Edge(5, 6));
+			edges.push_back(TopologyModule::Edge(6, 7));
+			edges.push_back(TopologyModule::Edge(7, 4));
+
+			edges.push_back(TopologyModule::Edge(0, 4));
+			edges.push_back(TopologyModule::Edge(1, 5));
+			edges.push_back(TopologyModule::Edge(2, 6));
+			edges.push_back(TopologyModule::Edge(3, 7));
+
+			es.setPoints(vertices);
+			es.setEdges(edges);
+
+			es.update();
+		}
+		else
+			es.clear();
+	}
 
 	template<typename TDataType>
 	GltfLoader<TDataType>::GltfLoader()
@@ -68,7 +151,13 @@ namespace dyno
 		this->stateShapeCenter()->connect(glShapeCenter->inPointSet());
 		this->graphicsPipeline()->pushModule(glShapeCenter);
 
+		auto showBoundingBox = std::make_shared<BoundingBoxOfTextureMesh>();
+		this->stateTextureMesh()->connect(showBoundingBox->inTextureMesh());
+		this->graphicsPipeline()->pushModule(showBoundingBox);
 
+		auto bbRender = std::make_shared<GLWireframeVisualModule>();
+		showBoundingBox->outBoundingBox()->connect(bbRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(bbRender);
 
 		this->stateTextureMesh()->promoteOuput();
 
@@ -1265,10 +1354,6 @@ namespace dyno
 		finalPos[pId] = Coord(P[0], P[1], P[2]);
 
 	}
-
-
-
-
 
 	DEFINE_CLASS(GltfLoader);
 }
