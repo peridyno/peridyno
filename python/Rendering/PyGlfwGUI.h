@@ -1,4 +1,4 @@
 #pragma once
-#include "PyCommon.h"
+#include "../PyCommon.h"
 
 void pybind_glfw_gui(py::module& m);

@@ -33,7 +33,7 @@ namespace dyno
 	public:
 		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
 
-		DEF_VAR_IN(TOrientedBox3D<Real>, Cube,  "");
+		DEF_VAR_IN(TOrientedBox3D<Real>, Cube, "");
 
 	protected:
 		void resetStates() override;

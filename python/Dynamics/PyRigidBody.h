@@ -1,10 +1,30 @@
-#include "PyRigidBodySystem.h"
+#pragma once
+#include "../PyCommon.h"
+
 #include "RigidBody/RigidBody.h"
 #include "RigidBody/RigidBodySystem.h"
 #include "RigidBody/RigidBodyShared.h"
 
 using InstanceBase = dyno::InstanceBase;
 using namespace dyno;
+
+template <typename TDataType>
+void declare_rigid_body(py::module& m, std::string typestr) {
+	using Class = dyno::RigidBody<TDataType>;
+	using Parent = dyno::ParametricModel<TDataType>;
+	std::string pyclass_name = std::string("RigidBody") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_gravity", &Class::varGravity, py::return_value_policy::reference)
+		.def("state_mass", &Class::stateMass, py::return_value_policy::reference)
+		.def("state_center", &Class::stateCenter, py::return_value_policy::reference)
+		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("state_angular_velocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
+		.def("state_rotation_matrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
+		.def("state_inertia", &Class::stateInertia, py::return_value_policy::reference)
+		.def("state_quaternion", &Class::stateQuaternion, py::return_value_policy::reference)
+		.def("state_initial_inertia", &Class::stateInitialInertia, py::return_value_policy::reference);
+}
 
 template <typename TDataType>
 void declare_rigid_body_system(py::module& m, std::string typestr) {
@@ -20,66 +40,6 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 		.def("current_topology", &Class::stateTopology, py::return_value_policy::reference)
 		.def("state_collisionMask", &Class::stateCollisionMask, py::return_value_policy::reference);
 }
-
-
-
-void declare_rigid_body_info(py::module& m, std::string typestr) {
-	using Class = dyno::RigidBodyInfo;
-
-	std::string pyclass_name = std::string("RigidBodyInfo") + typestr;
-	py::class_<Class, std::shared_ptr<Class>> (m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def_readwrite("linear_velocity", &Class::linearVelocity)
-		.def_readwrite("angular_velocity", &Class::angularVelocity)
-		.def_readwrite("position", &Class::position)
-		.def_readwrite("inertia", &Class::inertia)
-		.def_readwrite("mass", &Class::mass)
-		.def_readwrite("friction", &Class::friction)
-		.def_readwrite("restitution", &Class::restitution)
-		.def_readwrite("motionType", &Class::motionType)
-		.def_readwrite("shapeType", &Class::shapeType)
-		.def_readwrite("collisionMask", &Class::collisionMask);
-}
-
-
-void declare_box_info(py::module& m, std::string typestr) {
-	using Class = dyno::BoxInfo;
-
-	std::string pyclass_name = std::string("BoxInfo") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def_readwrite("center", &Class::center)
-		.def_readwrite("halfLength", &Class::halfLength);
-
-}
-
-
-void declare_sphere_info(py::module& m, std::string typestr) {
-	using Class = dyno::SphereInfo;
-
-	std::string pyclass_name = std::string("SphereInfo") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def_readwrite("center", &Class::center)
-		.def_readwrite("radius", &Class::radius);
-
-}
-
-
-
-// class: TetInfo      - For Examples_1: QT_Bricks
-void declare_tet_info(py::module& m, std::string typestr) {
-	using Class = dyno::TetInfo;
-
-	std::string pyclass_name = std::string("TetInfo") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-//		.def_readwrite("v", &Class::v); // "def_readwrite" is not applicable to fixed arrays,so replace it with the get-set method.
-		.def_property("v", &get_v, &set_v);
-}
-
-
-
 
 // class: TContactPair      - For Examples_1: QT_Bricks
 template<typename Real>
@@ -100,8 +60,7 @@ void declare_collisionData_TContactPair(py::module& m, std::string typestr) {
 		.def_readwrite("contactType", &Class::contactType);
 }
 
-
-// class: NeighborElementQuery      - For Examples_1: QT_Bricks  
+// class: NeighborElementQuery      - For Examples_1: QT_Bricks
 #include "Collision/NeighborElementQuery.h"
 template<typename TDataType>
 void declare_neighbor_element_query(py::module& m, std::string typestr) {
@@ -109,12 +68,10 @@ void declare_neighbor_element_query(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("NeighborElementQuery") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_discreteElements", &Class::inDiscreteElements,py::return_value_policy::reference)
+		.def("in_discreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
 		.def("in_collisionMask", &Class::inCollisionMask, py::return_value_policy::reference)
-		.def("out_contacts", &Class::outContacts , py::return_value_policy::reference);
+		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
 }
-
-
 
 // class: ContactsToEdgeSet      - For Examples_1: QT_Bricks
 #include "Mapping/ContactsToEdgeSet.h"
@@ -133,8 +90,6 @@ void declare_contacts_to_edge_set(py::module& m, std::string typestr) {
 		.def("out_edgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
 }
 
-
-
 // class: ContactsToPointSet3f      - For Examples_1: QT_Bricks
 #include "Mapping/ContactsToPointSet.h"
 template<typename TDataType>
@@ -148,20 +103,13 @@ void declare_contacts_to_point_set(py::module& m, std::string typestr) {
 		.def("out_pointSet", &Class::outPointSet, py::return_value_policy::reference);
 }
 
+void declare_rigid_body_info(py::module& m, std::string typestr);
 
+void declare_box_info(py::module& m, std::string typestr);
 
+void declare_sphere_info(py::module& m, std::string typestr);
 
-void pybind_rigid_body_system(py::module& m) {
-	declare_rigid_body_system<dyno::DataType3f>(m, "3f");
+// class: TetInfo      - For Examples_1: QT_Bricks
+void declare_tet_info(py::module& m, std::string typestr);
 
-	declare_rigid_body_info(m, "");
-	declare_box_info(m,"");
-	
-	declare_sphere_info(m, "");
-	declare_tet_info(m, "");
-
-	declare_neighbor_element_query<dyno::DataType3f>(m, "3f");
-	declare_contacts_to_edge_set<dyno::DataType3f>(m, "3f");
-	declare_contacts_to_point_set<dyno::DataType3f>(m, "3f");
-
-}
+void pybind_rigid_body_system(py::module& m);
