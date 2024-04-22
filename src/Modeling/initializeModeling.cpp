@@ -50,44 +50,52 @@ namespace dyno
 			"Modeling", 
 			"ToolBarIco/Modeling/Modeling.png");
 
-		auto group = page->addGroup("Modeling");
+		auto basic = page->addGroup("Basic");
 
-		group->addAction(
+		basic->addAction(
 			"Plane",
 			"ToolBarIco/Modeling/Plane.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<PlaneModel<DataType3f>>();
 			});
 
-		group->addAction(
+		basic->addAction(
 			"Cube",
 			"ToolBarIco/Modeling/Cube.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<CubeModel<DataType3f>>();
 			});
 
-		group->addAction(
+		basic->addAction(
 			"Sphere",
 			"ToolBarIco/Modeling/Sphere.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<SphereModel<DataType3f>>();
 			});
 
-		group->addAction(
+		basic->addAction(
 			"Cylinder",
 			"ToolBarIco/Modeling/Cylinder.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<CylinderModel<DataType3f>>();
 			});
-		group->addAction(
+		basic->addAction(
 			"Cone",
 			"ToolBarIco/Modeling/Cone.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<ConeModel<DataType3f>>();
 			});
 
+		basic->addAction(
+			"Capsule",
+			"ToolBarIco/Modeling/Capsule.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<CapsuleModel<DataType3f>>();
+			});
 
-		group->addAction(
+		auto op = page->addGroup("Operation");
+
+		op->addAction(
 			"Turning Model",
 			"ToolBarIco/Modeling/Turn.png",
 			[=]()->std::shared_ptr<Node> {
@@ -95,18 +103,11 @@ namespace dyno
 			});
 
 
-		group->addAction(
+		op->addAction(
 			"Merge",
 			"ToolBarIco/Modeling/CubeCombo.png",
 			[=]()->std::shared_ptr<Node> {
 				return std::make_shared<MergeTriangleSet<DataType3f>>();
-			});
-
-		group->addAction(
-			"Capsule",
-			"ToolBarIco/Modeling/Capsule.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<CapsuleModel<DataType3f>>();
 			});
 	}
 }

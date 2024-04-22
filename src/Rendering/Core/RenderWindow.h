@@ -45,10 +45,8 @@ namespace dyno
 
 		virtual void setWindowSize(int w, int h);
 
-		void setSelection(bool b);
-
-		inline SelectionMode getSelectionMode() { return mSlectionMode; }
-		inline void setSelectionMode(SelectionMode mode) { mSlectionMode = mode; }
+		inline SelectionMode getSelectionMode() { return mSelectionMode; }
+		inline void setSelectionMode(SelectionMode mode) { mSelectionMode = mode; }
 
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
@@ -73,8 +71,6 @@ namespace dyno
 
 		Selection selectedObject;
 
-		SelectionMode mSlectionMode = SelectionMode::OBJECT_MODE;
-
-		bool mSelectionEnabled = true;
+		SelectionMode mSelectionMode = SelectionMode::OBJECT_MODE;
 	};
 };

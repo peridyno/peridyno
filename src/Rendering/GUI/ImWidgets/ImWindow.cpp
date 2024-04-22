@@ -363,8 +363,11 @@ void ImWindow::draw(RenderWindow* app)
 	// draw a rect for selection area 
 	drawSelectedRegion();
 
-	// current active node
-	drawNodeManipulator(app->getCurrentSelectedNode(), camera->getViewMat(), camera->getProjMat());
+	if (scene->getWorkMode() == SceneGraph::EDIT_MODE)
+	{
+		// current active node
+		drawNodeManipulator(app->getCurrentSelectedNode(), camera->getViewMat(), camera->getProjMat());
+	}
 
 	// view manipulator
 	if(mViewManipulator)
