@@ -3,7 +3,7 @@
 
 #include "Mapping/HeightFieldToTriangleSet.h"
 template <typename TDataType>
-void declare__height_field_to_triangle_set(py::module& m, std::string typestr) {
+void declare_height_field_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::HeightFieldToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
 	std::string pyclass_name = std::string("HeightFieldToTriangleSet") + typestr;
@@ -14,5 +14,7 @@ void declare__height_field_to_triangle_set(py::module& m, std::string typestr) {
 		.def("in_height_field", &Class::inHeightField, py::return_value_policy::reference)
 		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
 }
+
+
 
 void pybind_topology(py::module& m);

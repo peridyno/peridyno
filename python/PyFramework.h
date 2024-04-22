@@ -189,6 +189,7 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParametricModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("compute_quaternion", &Class::computeQuaternion)
 		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
 		.def("var_rotation", &Class::varRotation, py::return_value_policy::reference)
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference);
@@ -237,7 +238,7 @@ void declare_semiAnalyticalScheme_init_static_plugin(py::module& m, std::string 
 
 void declare_modeling_init_static_plugin(py::module& m, std::string typestr);
 
-void declare_paticleSystem_init_static_plugin(py::module& m, std::string typestr);
+//void declare_paticle_system_init_static_plugin(py::module& m, std::string typestr);
 
 void declare_discrete_topology_mapping(py::module& m, std::string typestr);
 

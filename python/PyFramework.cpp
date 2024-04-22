@@ -8,13 +8,7 @@ void declare_modeling_init_static_plugin(py::module& m, std::string typestr) {
 		.def("modeling_init_static_plugin", &Modeling::initStaticPlugin);
 }
 
-void declare_paticleSystem_init_static_plugin(py::module& m, std::string typestr) {
-	using Class = dyno::ParticleSystemInitializer;
-	using Parent = dyno::PluginEntry;
-	std::string pyclass_name = std::string("ParticleSystemInitializer" + typestr);
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("paticleSystem_init_static_plugin", &PaticleSystem::initStaticPlugin);
-}
+
 
 void declare_discrete_topology_mapping(py::module& m, std::string typestr)
 {
@@ -286,7 +280,7 @@ void pybind_framework(py::module& m)
 	declare_semiAnalyticalSFI_node<dyno::DataType3f>(m, "3f");
 
 	declare_modeling_init_static_plugin(m, "");
-	declare_paticleSystem_init_static_plugin(m, "");
+	//declare_paticle_system_init_static_plugin(m, "");
 
 	//import
 	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
