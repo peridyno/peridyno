@@ -54,22 +54,22 @@ namespace dyno
 		void addBox(
 			const BoxInfo& box, 
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(1000));
+			const Real density = Real(100));
 
 		void addSphere(
 			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
-			const Real density = Real(1000));
+			const Real density = Real(100));
 
 		void addTet(
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(1000));
+			const Real density = Real(100));
 
 		void addCapsule(
 			const CapsuleInfo& capsule,
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(1000));
+			const Real density = Real(100));
 
 		void addBallAndSocketJoint(
 			const BallAndSocketJoint& joint
@@ -109,7 +109,7 @@ namespace dyno
 
 		DEF_VAR(Real, FrictionCoefficient, 100, "");
 
-		DEF_VAR(Real, Slop, 0.0001, "");
+		DEF_VAR(Real, Slop, 0.001, "");
 
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 

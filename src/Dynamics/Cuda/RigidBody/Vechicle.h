@@ -22,6 +22,8 @@ namespace dyno
 
 		void bind(uint bodyId, Pair<uint, uint> shapeId);
 
+		void setInitialCenterDiff(std::vector<Vec3f> diff);
+
 	public:
 
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
@@ -35,11 +37,16 @@ namespace dyno
 
 		void updateStates() override;
 
+
 	private:
 
 		std::vector<Pair<uint, uint>> mBindingPair;
 
 		DArray<Matrix> mInitialRot;
+
+		DArray<Vec3f> mDiff;
+
+
 	};
 
 	IMPLEMENT_TCLASS(Vechicle, TDataType)

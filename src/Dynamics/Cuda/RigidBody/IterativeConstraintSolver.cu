@@ -1130,6 +1130,7 @@ namespace dyno
 		DArray<int> jointNumber,
 		Real mu,
 		Real g,
+		Real maxMoter,
 		Real dt
 	)
 	{
@@ -1199,6 +1200,14 @@ namespace dyno
 				lambda_new = (abs(lambda_new) > mu *mass_avl * g * dt) ? (lambda_new < 0 ? -mu * mass_avl * g * dt: mu *mass_avl* g * dt) : lambda_new;
 				delta_lambda = lambda_new - lambda[tId];
 			}
+
+			if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
+			{
+				lambda_new = (abs(lambda_new) > maxMoter * dt) ? (lambda_new < 0 ? -maxMoter * dt : maxMoter * dt) : lambda_new;
+				delta_lambda = lambda_new - lambda[tId];
+			}
+
+
 			
 			lambda[tId] += delta_lambda;
 
@@ -1537,6 +1546,7 @@ namespace dyno
 					mJointNumber,
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
+					this->varMaxMoter()->getData(),
 					dt);
 
 				cuExecute(constraint_size,

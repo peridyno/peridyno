@@ -59,7 +59,9 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(uint, IterationNumber, 20, "");
+		DEF_VAR(uint, IterationNumber, 30, "");
+
+		DEF_VAR(Real, MaxMoter, 3000, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
