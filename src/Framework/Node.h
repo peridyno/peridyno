@@ -88,15 +88,6 @@ namespace dyno
 		 */
 		void setAutoSync(bool con);
 
-		bool canExported();
-
-		/**
-		 * @brief To allow exporting the node
-		 *
-		 * @param if true, the node can be exported, otherwise not
-		 */
-		void allowExported(bool ex);
-
 		/// Check the state of dynamics
 		virtual bool isActive();
 

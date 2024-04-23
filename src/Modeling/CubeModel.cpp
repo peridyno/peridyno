@@ -50,9 +50,6 @@ namespace dyno
 		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();
-		
-		//Do not export the node
-		this->allowExported(false);
 	}
 
 	struct Index2D
