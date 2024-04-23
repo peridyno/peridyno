@@ -58,9 +58,6 @@ namespace dyno
 		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
 
-		//Do not export the node
-		this->allowExported(false);
-
 		this->stateTriangleSet()->promoteOuput();
 		this->stateQuadSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();

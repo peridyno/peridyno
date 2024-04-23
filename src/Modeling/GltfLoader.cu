@@ -68,14 +68,7 @@ namespace dyno
 		this->stateShapeCenter()->connect(glShapeCenter->inPointSet());
 		this->graphicsPipeline()->pushModule(glShapeCenter);
 
-
-
 		this->stateTextureMesh()->promoteOuput();
-
-
-
-		this->allowExported(true);
-
 	}
 
 

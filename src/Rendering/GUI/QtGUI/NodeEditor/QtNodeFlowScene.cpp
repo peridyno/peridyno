@@ -194,7 +194,7 @@ namespace Qt
 									outFieldIndex++;
 								}
 
-								if (nodeSrc->canExported()) outFieldIndex++;
+								if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
 
 								if (fieldFound && nodeMap.find(outId) != nodeMap.end())
 								{
