@@ -75,8 +75,8 @@ std::shared_ptr<SceneGraph> createScene()
 	boat->varDensity()->setValue(150.0f);
 	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
-	boat->varMeshName()->setValue(getAssetPath()+std::string("obj/SailBoat_mesh.obj"));
-	boat->varEnvelopeName()->setValue(getAssetPath() + std::string("obj/SailBoat_boundary.obj"));
+	boat->varMeshName()->setValue(getAssetPath()+std::string("SailBoat/SailBoat_mesh.obj"));
+	boat->varEnvelopeName()->setValue(getAssetPath() + std::string("SailBoat/SailBoat_boundary.obj"));
 
 	auto steer = std::make_shared<Steer<DataType3f>>();
 	boat->stateVelocity()->connect(steer->inVelocity());
