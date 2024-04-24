@@ -7,8 +7,6 @@ namespace dyno
 		: Node()
 	{
 		this->varScale()->setRange(Real(0.0001), Real(1000));
-
-		this->allowExported(false);
 	}
 
 	DEFINE_CLASS(ParametricModel);

@@ -6,8 +6,6 @@ namespace dyno
 	MergeTriangleSet<TDataType>::MergeTriangleSet()
 		: Node()
 	{
-		this->allowExported(false);
-
 		auto ts = std::make_shared<TriangleSet<TDataType>>();
 		this->stateTriangleSet()->setDataPtr(ts);
 
