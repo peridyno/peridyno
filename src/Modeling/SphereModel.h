@@ -12,9 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Revision history:
- * 
+ *
  * 2024-02-03: replace TriangleSet with PolygonSet as the major state;
  */
 

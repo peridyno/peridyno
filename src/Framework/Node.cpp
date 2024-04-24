@@ -60,16 +60,6 @@ void Node::setAutoSync(bool con)
 	mAutoSync = con;
 }
 
-bool Node::canExported()
-{
-	return mExported;
-}
-
-void Node::allowExported(bool ex)
-{
-	mExported = ex;
-}
-
 bool Node::isActive()
 {
 	return mPhysicsEnabled;
@@ -421,24 +411,8 @@ void Node::updateTopology()
 
 }
 
-// void Node::traverseBottomUp(Action* act)
-// {
-// 	doTraverseBottomUp(act);
-// }
-// 
-// void Node::traverseTopDown(Action* act)
-// {
-// 	doTraverseTopDown(act);
-// }
-
 bool Node::connect(NodePort* nPort)
 {
-	if (!canExported())
-	{
-		Log::sendMessage(Log::Error, this->getClassInfo()->getClassName() + "can not be exported");
-		return false;
-	}
-
 	nPort->notify();
 
 	return this->appendExportNode(nPort);

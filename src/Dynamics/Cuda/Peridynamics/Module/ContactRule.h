@@ -39,8 +39,8 @@ namespace dyno
 		void constrain() override;
 
 		void initCCDBroadPhase(); // One should call it AT LEAST ONCE to initial data 'mBroadPhaseCD' before update the model to get inState or outState updated.
-		void setContactMaxIte(int ite) {	
-			this->ContactMaxIte = ite;	
+		void setContactMaxIte(int ite) {
+			this->ContactMaxIte = ite;
 		}
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangularMesh, "");
@@ -58,7 +58,7 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
 		DEF_VAR_IN(Real, TimeStep, "");
-		
+
 	public:
 		DEF_ARRAY_OUT(Coord, ContactForce, DeviceType::GPU, "Contact Force");
 		DEF_ARRAY_OUT(Real, Weight, DeviceType::GPU, "Weight");

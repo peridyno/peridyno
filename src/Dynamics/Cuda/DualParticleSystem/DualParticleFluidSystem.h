@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#pragma once
+ //#pragma once
 #include "ParticleSystem/ParticleFluid.h"
 #include "ParticleSystem/ParticleEmitter.h"
 #include "Topology/PointSet.h"
@@ -48,12 +48,12 @@ namespace dyno
 		DEF_INSTANCE_STATE(PointSet<TDataType>, VirtualPointSet, "Topology");
 
 		DECLARE_ENUM(EVirtualParticleSamplingStrategy,
-		ColocationStrategy = 0,
-		ParticleShiftingStrategy = 1,
-		SpatiallyAdaptiveStrategy = 2);
+			ColocationStrategy = 0,
+			ParticleShiftingStrategy = 1,
+			SpatiallyAdaptiveStrategy = 2);
 
-		DEF_ENUM(EVirtualParticleSamplingStrategy, 
-			VirtualParticleSamplingStrategy, 
+		DEF_ENUM(EVirtualParticleSamplingStrategy,
+			VirtualParticleSamplingStrategy,
 			EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy,
 			"Virtual Particle Sampling Strategy");
 

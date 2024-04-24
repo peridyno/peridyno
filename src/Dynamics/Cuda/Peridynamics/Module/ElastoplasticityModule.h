@@ -5,9 +5,9 @@
  * 		  For more details, please refer to [He et al. 2017] "Projective Peridynamics for Modeling Versatile Elastoplastic Materials"
  * @version 0.1
  * @date 2019-06-18
- * 
+ *
  * @copyright Copyright (c) 2019
- * 
+ *
  */
 #pragma once
 #include "LinearElasticitySolver.h"
@@ -28,7 +28,7 @@ namespace dyno {
 
 		ElastoplasticityModule();
 		~ElastoplasticityModule() override {};
-		
+
 		void constrain() override;
 
 		void solveElasticity() override;
@@ -55,14 +55,14 @@ namespace dyno {
 		inline Real computeA()
 		{
 			Real phi = m_phi.getData();
-			return (Real)6.0*m_c.getData()*cos(phi) / (3.0f + sin(phi)) / sqrt(3.0f);
+			return (Real)6.0 * m_c.getData() * cos(phi) / (3.0f + sin(phi)) / std::sqrt(3.0f);
 		}
 
 
 		inline Real computeB()
 		{
 			Real phi = m_phi.getData();
-			return (Real)2.0f*sin(phi) / (3.0f + sin(phi)) / sqrt(3.0f);
+			return (Real)2.0f * sin(phi) / (3.0f + sin(phi)) / std::sqrt(3.0f);
 		}
 
 	private:

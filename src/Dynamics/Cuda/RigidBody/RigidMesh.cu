@@ -25,8 +25,6 @@ namespace dyno
 		rigidMeshRender->setColor(Color(0.8f, 0.8f, 0.8f));
 		this->stateMesh()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(rigidMeshRender);
-
-		this->allowExported(true);
 	}
 
 	template<typename TDataType>

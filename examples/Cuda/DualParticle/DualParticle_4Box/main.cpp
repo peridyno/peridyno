@@ -79,7 +79,7 @@ std::shared_ptr<SceneGraph> createScene()
 	initialParticles4->connect(fluid->importInitialStates());
 
 	//Create a boundary
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); 
+	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
 	boundary->loadCube(Vec3f(-0.25, 0, -0.25), Vec3f(0.25, 2, 0.25), 0.02, true);
 	fluid->connect(boundary->importParticleSystems());
 

@@ -160,11 +160,6 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(bbRender);
 
 		this->stateTextureMesh()->promoteOuput();
-
-
-
-		this->allowExported(true);
-
 	}
 
 
