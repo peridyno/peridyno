@@ -29,6 +29,8 @@
 #include "ParticleSystem/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 
+#include "RigidBody/Vechicle.h"
+
 #include "Topology/TriangleSet.h"
 #include "Collision/NeighborPointQuery.h"
 
@@ -70,6 +72,7 @@
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
+#include <Module/GLPhotorealisticInstanceRender.h>
 
 #include <GLRenderEngine.h>
 
@@ -135,8 +138,17 @@ std::shared_ptr<SceneGraph> creatScene()
 	Vec3f scale = Vec3f(0.4,0.4,0.4);
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+	gltf->setVisible(false);
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
+
+	auto vechicle = scn->addNode(std::make_shared<Vechicle<DataType3f>>());
+	gltf->stateTextureMesh()->connect(vechicle->inTextureMesh());
+
+	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
+	vechicle->inTextureMesh()->connect(prRender->inTextureMesh());
+	vechicle->stateInstanceTransform()->connect(prRender->inTransform());
+	vechicle->graphicsPipeline()->pushModule(prRender);
 
 	// Import Road
 	auto road = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
@@ -147,11 +159,14 @@ std::shared_ptr<SceneGraph> creatScene()
 	glRoad->setColor(color);
 
 
-	auto texMeshConverter = scn->addNode(std::make_shared<TextureMeshToTriangleSetNode<DataType3f>>());
-	gltf->stateTextureMesh()->connect(texMeshConverter->inTextureMesh());
+	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
+	vechicle->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
+	vechicle->stateInstanceTransform()->connect(texMeshConverter->inTransform());
+	vechicle->animationPipeline()->pushModule(texMeshConverter);
 
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
+	vechicle->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
 	road->outTriangleSet()->connect(tsMerger->inSecond());
 
 	//*************************************** Cube Sample ***************************************//
@@ -242,7 +257,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	particleSystem->connect(fluid->importInitialStates());
 
-	//SemiAnalyticalSFINode
+	//TriangularMeshBoundary
 	auto meshBoundary = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
 	meshBoundary->varThickness()->setValue(0.005f * total_scale);
 
@@ -254,13 +269,6 @@ std::shared_ptr<SceneGraph> creatScene()
 	staticBoundary->loadCube(Vec3f(-4.6, 0, -7.2), Vec3f(4.6, 2, 12), 0.1, true);
 	fluid->connect(staticBoundary->importParticleSystems());
 
-	auto sVisual = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
-	texMeshConverter->outTriangleSet()->connect(sVisual->inTriangleSet());
-
-	//*************************************** Import Other Models ***************************************//
-
-	//Other Models
-//	importOtherModel(scn);
 
 	return scn;
 }

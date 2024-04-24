@@ -130,9 +130,6 @@ namespace dyno
 		
 		mShaderProgram->setInt("uInstanced", 0);
 
-		mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
-		mRenderParamsUBlock.bindBufferBase(0);
-
 		vertices.bindBufferBase(8);
 		texCoords.bindBufferBase(10);
 
@@ -145,6 +142,16 @@ namespace dyno
 			if (shape->material != nullptr) 
 			{
 				auto mtl = shape->material;
+
+				// 
+				{
+					RenderParams pm_i = rparams;
+
+					pm_i.transforms.model = shape->transform;
+
+					mRenderParamsUBlock.load((void*)&pm_i, sizeof(RenderParams));
+					mRenderParamsUBlock.bindBufferBase(0);
+				}
 
 				// material 
 				{

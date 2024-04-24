@@ -162,6 +162,23 @@ namespace dyno
 			mShapes[i]->glNormalIndex.load(mesh->shapes()[i]->normalIndex);
 			mShapes[i]->glTexCoordIndex.load(mesh->shapes()[i]->texCoordIndex);
 	
+			Vec3f S =  mesh->shapes()[i]->boundingTransform.scale();
+			Mat3f R = mesh->shapes()[i]->boundingTransform.rotation();
+			Vec3f T = mesh->shapes()[i]->boundingTransform.translation();
+
+			Mat3f RS = R * Mat3f(
+				S[0], 0, 0,
+				0, S[1], 0,
+				0, 0, S[2]);
+
+			glm::mat4 tm = glm::mat4{
+				RS(0, 0), RS(1, 0), RS(2, 0), 0,
+				RS(0, 1), RS(1, 1), RS(2, 1), 0,
+				RS(0, 2), RS(1, 2), RS(2, 2), 0,
+				T[0],	  T[1],	    T[2],	  1 };
+
+			mShapes[i]->transform = tm;
+
 			//Setup the material for each shape
 			auto test = mapper[mesh->shapes()[i]->material];
 			auto testsm = mesh->shapes()[i]->material;

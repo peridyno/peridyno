@@ -2,22 +2,25 @@
 
 #include <QMainWindow>
 
+#include <QMouseEvent>
+#include <QCheckBox>
+#include <QSlider>
+#include <QPushButton>
+#include <QGridLayout>
+#include <QComboBox>
+#include <QSpinBox>
+
 #include "NodeEditor/QtNodeWidget.h"
 #include "NodeEditor/QtModuleFlowScene.h"
-
 #include "PPropertyWidget.h"
-#include <QMouseEvent>
-#include "qpushbutton.h"
-#include "qgridlayout.h"
-
-
 
 namespace dyno
 {
 	class PSettingWidget;
 	class QVector3FieldWidget;
 	class SceneGraph;
-
+	class RenderEngine;
+	class GLRenderEngine;
 
 	class PSettingEditor :
 		public QMainWindow
@@ -30,20 +33,22 @@ namespace dyno
 		
 		PSettingWidget* getSettingWidget() { return settingWidget; }
 
+		void setRenderEngine(std::shared_ptr<RenderEngine> engine);
+
 	signals:
 		void changed(SceneGraph* scn);
 
 	public slots:
 
 		void buildSceneSettingWidget();
-
-
 		void buildOtherSettingWidget();
 
+		void showRenderSettingWidget();
 
 	private:
 
 		PSettingWidget* settingWidget = nullptr;
+		PSettingWidget* renderSettingWidget = nullptr;
 		QDockWidget* DockerRight = nullptr;
 	};
 
@@ -78,7 +83,6 @@ namespace dyno
 	};
 
 
-
 	class PSceneSetting :
 		public PSettingWidget
 	{
@@ -86,27 +90,48 @@ namespace dyno
 	public:
 		PSceneSetting(PSettingEditor* editor,std::string title) 
 			:PSettingWidget(editor,title)
-		{
-			;
-		}
-
-
+		{	}
 		~PSceneSetting() {}
 	public slots:
-
 		void updateData() override;
-
 		void setGravity(double v0, double v1, double v2);
 		void setLowerBound(double v0, double v1, double v2);
 		void setUpperBound(double v0, double v1, double v2);
-
-
 	private:
 
 		QVector3FieldWidget* gravityWidget = nullptr;
 		QVector3FieldWidget* lowerBoundWidget = nullptr;
 		QVector3FieldWidget* upperBoundWidget = nullptr;
+	};
 
+
+	class PRenderSetting :
+		public PSettingWidget
+	{
+		Q_OBJECT
+	public:
+		PRenderSetting(PSettingEditor* editor, std::string title);
+		~PRenderSetting();
+
+		void setRenderEngine(std::shared_ptr<RenderEngine> engine);
+
+	public slots:
+		void updateData() override;
+
+		void setMSAA(int idx);
+
+		void setShadowMapSize(int idx);
+
+		void setShadowBlurIters(int iters);
+
+
+	private:
+		std::shared_ptr<GLRenderEngine> mRenderEngine;
+
+		QCheckBox* fxaaEnabled;
+		QComboBox* msaaSamples;
+		QComboBox* shadowMapSize;
+		QSpinBox*  shadowBlurIters;
 
 	};
 

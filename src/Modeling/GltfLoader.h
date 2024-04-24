@@ -23,16 +23,11 @@
 #include "GLWireframeVisualModule.h"
 
 #include "FilePath.h"
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "tinygltf/tiny_gltf.h"
 
-#define NULL_TIME (-9599.99)
+
 
 namespace dyno
 {
-
 
 	template<typename TDataType>
 	class GltfLoader : public ParametricModel<TDataType>
@@ -43,6 +38,9 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
+
+		typedef typename TopologyModule::Triangle Triangle;
+		
 
 		typedef unsigned char byte;
 		typedef int joint;
@@ -109,14 +107,14 @@ namespace dyno
 		DArray<int> d_joints;
 
 		DArray<Coord> d_ShapeCenter;
-		bool ToCenter = false;
+		bool ToCenter = true;
 
-		tinygltf::Model model;
 		std::map<joint, Quat<float>> joint_rotation;
 		std::map<joint, Vec3f> joint_scale;
 		std::map<joint, Vec3f> joint_translation;
 		std::map<joint, Mat4f> joint_matrix;
 		std::map<joint, std::vector<int>> jointId_joint_Dir;
+
 
 		std::map<joint, std::vector<Vec3f>> joint_T_f_anim;
 		std::map<joint, std::vector<Quat<float>>> joint_R_f_anim;
@@ -131,11 +129,18 @@ namespace dyno
 		std::vector<std::string> Scene_Name;
 		std::map<joint, std::string> joint_Name;
 
-		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,//¶¯»­±ä»»Êý¾Ý
-		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,//¶¯»­Ê±¼ä´Á
-
+		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,//ï¿½ï¿½ï¿½ï¿½ï¿½ä»»ï¿½ï¿½ï¿½ï¿½
+		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½
+		
+		std::vector<int> all_Nodes;
 		std::vector<joint> all_Joints;
+		std::vector<int> all_Meshs;
 
+		std::map<joint, std::vector<int>> nodeId_Dir;
+		std::map<int, std::vector<int>> meshId_Dir;
+
+		std::map<int, std::string> mesh_Name;
+		std::map<int, Mat4f> node_matrix;
 
 		std::vector<Vec4f> meshVertex_joint_weight_0;
 		std::vector<Vec4f> meshVertex_bind_joint_0;
@@ -143,11 +148,22 @@ namespace dyno
 		std::vector<Vec4f> meshVertex_joint_weight_1;
 		std::vector<Vec4f> meshVertex_bind_joint_1;
 
+		CArray<Mat4f> mesh_Matrix;
 
 		std::shared_ptr<GLWireframeVisualModule> jointLineRender;
 		std::shared_ptr<GLPointVisualModule> jointPointRender;
 
+		int maxMeshId = -1;
+		int maxJointId = -1;
+		int jointNum = -1;
+		int meshNum = -1;
+
+
+
+
+
 	private:
+
 
 		void varChanged();
 
@@ -155,31 +171,9 @@ namespace dyno
 
 		void updateTransform();
 
-		void traverseNode(joint id, std::vector<joint>& joint_nodes, std::map<joint, std::vector<int>>& dir, std::vector<joint> currentDir);
-
-		void importAnimation();		
-
 		void updateAnimation(int frameNumber);
 
 		void InitializationData();
-
-		void getJointsTransformData(const std::vector<joint>& all_Joints, std::map<joint, std::string>& joint_name,std::vector<std::vector<int>>& joint_child);
-
-		void getTriangles(tinygltf::Model& model,const tinygltf::Primitive& primitive,std::vector<TopologyModule::Triangle>& triangles,int pointOffest);
-
-		void getVec3fByAttributeName(tinygltf::Model& model,const tinygltf::Primitive& primitive,const std::string& attributeName,std::vector<Coord>& vertices);
-
-		void getVec4ByAttributeName(tinygltf::Model& model, const tinygltf::Primitive& primitive, const std::string& attributeName, std::vector<Vec4f>& vec4Data);
-
-		void getVertexBindJoint(tinygltf::Model& model, const tinygltf::Primitive& primitive, const std::string& attributeName, std::vector<Vec4f>& vec4Data, const std::vector<int>& skinJoints);
-		
-		void getRealByIndex(tinygltf::Model& model, int index, std::vector<Real>& result);
-
-		void getVec3fByIndex(tinygltf::Model& model, int index, std::vector<Vec3f>& result);
-
-		void getQuatByIndex(tinygltf::Model& model, int index, std::vector<Quat<float>>& result);
-
-		void getMatrix(tinygltf::Model& model,std::vector<Mat4f>& mat);
 
 		std::vector<int> getJointDirByJointIndex(int Index);
 
@@ -190,19 +184,10 @@ namespace dyno
 		void updateJointWorldMatrix(const std::vector<joint>& allJoints, std::map<joint, Mat4f> jMatrix);
 
 		void buildInverseBindMatrices(const std::vector<joint>& all_Joints);
-
-		void getJointAndHierarchy(std::map<scene, std::vector<int>> Scene_JointsNodesId, std::vector<joint>& all_Joints);
-
+		
 		Vec3f getmeshPointDeformByJoint(joint jointId, Coord worldPosition, std::map<joint, Mat4f> jMatrix);
 
-		std::string getTexUri(const std::vector<tinygltf::Texture>& textures, const std::vector<tinygltf::Image>& images, int index);
-
-		void getBoundingBoxByName(const tinygltf::Primitive& primitive, const std::string& attributeName, TAlignedBox3D<Real>& vertices, Transform3f& transform);
-
 		void updateTransformState();
-
-		void loadMaterial();
-		
 	};
 
 

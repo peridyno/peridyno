@@ -63,7 +63,6 @@ void declare_rednder_window(py::module& m) {
 		.def("get_render_params", &RenderWindow::getRenderParams) // 绑定 getRenderParams 方法
 		.def("set_render_params", &RenderWindow::setRenderParams) // 绑定 setRenderParams 方法
 		.def("set_window_size", &RenderWindow::setWindowSize) // 绑定 setWindowSize 方法
-		.def("set_selection", &RenderWindow::setSelection) // 绑定 setSelection 方法
 		.def("get_selection_mode", &RenderWindow::getSelectionMode) // 绑定 getSelectionMode 方法
 		.def("set_selection_mode", &RenderWindow::setSelectionMode);// 绑定 setSelectionMode 方法
 

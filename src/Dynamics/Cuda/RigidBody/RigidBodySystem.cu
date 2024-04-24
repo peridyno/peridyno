@@ -342,6 +342,11 @@ namespace dyno
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
+		if (this->stateCenter()->size() <= 0)
+		{
+			return;
+		}
+
 		cuExecute(mDeviceBoxes.size(),
 			UpdateBoxes,
 			discreteSet->getBoxes(),

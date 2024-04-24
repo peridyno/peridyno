@@ -135,6 +135,8 @@ namespace dyno
 		timer.start(16);
 
 		setFocusPolicy(Qt::StrongFocus);
+
+		this->setRenderEngine(std::make_shared<GLRenderEngine>());
 	}
 
 	POpenGLWidget::~POpenGLWidget()
@@ -159,10 +161,10 @@ namespace dyno
 
 		// initialize render engine
 		if (this->getRenderEngine() == 0) {
-			auto engine = std::make_shared<GLRenderEngine>();
-			this->setRenderEngine(engine);
-			engine->initialize();
+			this->setRenderEngine(std::make_shared<GLRenderEngine>());
 		}
+
+		this->getRenderEngine()->initialize();
 
 		// Get Context scale
 		float scale = QGuiApplication::primaryScreen()->logicalDotsPerInchX() / 96.0;
@@ -281,7 +283,12 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
+			{
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			mImWindow.mousePressEvent(mouseEvent);
 		}

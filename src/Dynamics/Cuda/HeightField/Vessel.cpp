@@ -25,8 +25,6 @@ namespace dyno
 		this->stateMesh()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(rigidMeshRender);
 
-		this->allowExported(true);
-
 		auto meshLoader = std::make_shared<FCallBackFunc>(
 			[=]() {
 				std::string name = this->varMeshName()->getValue().string();

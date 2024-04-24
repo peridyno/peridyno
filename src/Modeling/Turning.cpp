@@ -53,10 +53,6 @@ namespace dyno
 		this->stateTriangleSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();
 
-		//Do not export the node
-		this->allowExported(false);
-
-
 		this->statePolygonSet()->promoteOuput();
 		this->stateTriangleSet()->promoteOuput();
 	}

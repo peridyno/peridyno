@@ -378,12 +378,10 @@ namespace dyno
 		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()
 			{
 				mOpenGLWidget->setFocus();
-				mOpenGLWidget->setSelection(false);
 			});
 
 		connect(mAnimationWidget, &PAnimationWidget::simulationStopped, [=]()
 			{
-				mOpenGLWidget->setSelection(true);
 			});
 	}
 
@@ -396,6 +394,7 @@ namespace dyno
 		auto scn = SceneGraphFactory::instance()->active();
 
 		mSettingEditor = new PSettingEditor(nullptr);
+		mSettingEditor->setRenderEngine(mOpenGLWidget->getRenderEngine());
 
 	}
 

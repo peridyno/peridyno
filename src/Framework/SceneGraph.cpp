@@ -200,6 +200,8 @@ namespace dyno
 
 		mFrameNumber++;
 
+		mWorkMode = RUNNING_MODE;
+
 		mSync.unlock();
 	}
 
@@ -257,6 +259,8 @@ namespace dyno
 
 		mElapsedTime = 0.0f;
 		mFrameNumber = 0;
+
+		mWorkMode = EDIT_MODE;
 
 		mSync.unlock();
 	}

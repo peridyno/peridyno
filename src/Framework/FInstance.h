@@ -138,7 +138,7 @@ namespace dyno {
 		}
 
 		bool canBeConnectedBy(InstanceBase* ins) final {
-			std::shared_ptr<Object> dataPtr = ins->isEmpty() ? ins->standardObjectPointer() : ins->objectPointer();
+			std::shared_ptr<Object> dataPtr = ins->standardObjectPointer();
 			auto dPtr = std::dynamic_pointer_cast<T>(dataPtr);
 
 			return dPtr == nullptr ? false : true;

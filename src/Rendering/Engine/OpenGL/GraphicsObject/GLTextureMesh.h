@@ -23,6 +23,8 @@
 
 #include "Topology/TextureMesh.h"
 
+#include <glm/glm.hpp>
+
 namespace dyno
 {
 	class GLMaterial : public GraphicsObject
@@ -66,6 +68,8 @@ namespace dyno
 		XBuffer<dyno::TopologyModule::Triangle>		glVertexIndex;
 		XBuffer<dyno::TopologyModule::Triangle>		glNormalIndex;
 		XBuffer<dyno::TopologyModule::Triangle>		glTexCoordIndex;
+
+		glm::mat4 transform;
 
 		std::shared_ptr<GLMaterial> material = nullptr;
 

@@ -42,6 +42,11 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+
+		void updateStates() override;
+
+	private:
+		void merge();
 	};
 
 	IMPLEMENT_TCLASS(MergeTriangleSet, TDataType)
