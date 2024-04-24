@@ -34,10 +34,6 @@ namespace dyno
 
 		this->stateBinding()->resize(sizeOfRigids);
 
-		this->mDiff.resize(sizeOfRigids);
-
-
-
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		uint N = texMesh->shapes().size();
@@ -75,17 +71,11 @@ namespace dyno
 
 		ApplyTransform(
 			this->stateInstanceTransform()->getData(),
-			this->mDiff,
+			this->stateOffset()->getData(),
 			this->stateCenter()->getData(),
 			this->stateRotationMatrix()->getData(),
 			mInitialRot,
 			this->stateBinding()->getData());
-	}
-
-	template<typename TDataType>
-	void Vechicle<TDataType>::setInitialCenterDiff(std::vector<Vec3f> diff)
-	{
-		this->mDiff.assign(diff);
 	}
 
 	template<typename TDataType>

@@ -76,6 +76,26 @@ namespace dyno
 	{
 	}
 
+	template<typename Real>
+	SquareMatrix<Real, 3> ParallelAxisTheorem(Vector<Real, 3> offset, Real m)
+	{
+		SquareMatrix<Real, 3> mat;
+		mat(0, 0) = m * (offset.y * offset.y + offset.z * offset.z);
+		mat(1, 1) = m * (offset.x * offset.x + offset.z * offset.z);
+		mat(2, 2) = m * (offset.x * offset.x + offset.y * offset.y);
+
+		mat(0, 1) = m * offset.x * offset.y;
+		mat(1, 0) = m * offset.x * offset.y;
+
+		mat(0, 2) = m * offset.x * offset.z;
+		mat(2, 0) = m * offset.z * offset.x;
+
+		mat(1, 2) = m * offset.y * offset.z;
+		mat(2, 1) = m * offset.z * offset.y;
+
+		return mat;
+	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addBox(
 		const BoxInfo& box,
@@ -88,15 +108,14 @@ namespace dyno
 		float lx = 2.0f * b.halfLength[0];
 		float ly = 2.0f * b.halfLength[1];
 		float lz = 2.0f * b.halfLength[2];
-		bd.position = b.center;
+		bd.position = b.center + bd.offset;
 
 		bd.mass = density * lx * ly * lz;
 
-		printf("box : %lf\n", bd.mass);
 		bd.inertia = 1.0f / 12.0f * bd.mass
-			* Mat3f(ly*ly + lz * lz, 0, 0,
-				0, lx*lx + lz * lz, 0,
-				0, 0, lx*lx + ly * ly);
+			* Mat3f(ly * ly + lz * lz, 0, 0,
+				0, lx * lx + lz * lz, 0,
+				0, 0, lx * lx + ly * ly) + ParallelAxisTheorem(-bd.offset, bd.mass);
 
 		bd.shapeType = ET_BOX;
 		bd.angle = b.rot;
@@ -114,7 +133,7 @@ namespace dyno
 		auto b = sphere;
 		auto bd = bodyDef;
 
-		bd.position = b.center;
+		bd.position = b.center + bd.offset;
 
 		float r = b.radius;
 		if (bd.mass <= 0.0f) {
@@ -124,7 +143,7 @@ namespace dyno
 		bd.inertia = 0.4f * bd.mass
 			* Mat3f(I11, 0, 0,
 				0, I11, 0,
-				0, 0, I11);
+				0, 0, I11) + ParallelAxisTheorem(-bd.offset, bd.mass);
 
 		bd.shapeType = ET_SPHERE;
 		bd.angle = b.rot;
@@ -207,17 +226,14 @@ namespace dyno
 		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
 		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
 
-		bd.position = b.center;
+		bd.position = b.center + bd.offset;
 
 		bd.mass = mass_hemisphere * 2 + mass_cylinder;
 
-		printf("capsule : %lf\n", bd.mass);
 		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
 				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
-				0, 0, I_2_cylinder + 2 *I_2_hemisphere);
+				0, 0, I_2_cylinder + 2 *I_2_hemisphere) + ParallelAxisTheorem(-bd.offset, bd.mass);
 		
-
-
 
 		bd.shapeType = ET_CAPSULE;
 		bd.angle = b.rot;
@@ -259,6 +275,7 @@ namespace dyno
 	__global__ void RB_SetupInitialStates(
 		DArray<Real> mass,
 		DArray<Coord> pos,
+		DArray<Coord> barycenterOffset,
 		DArray<Matrix> rotation,
 		DArray<Coord> velocity,
 		DArray<Coord> angularVelocity,
@@ -278,6 +295,7 @@ namespace dyno
 		angularVelocity[tId] = states[tId].angularVelocity;
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
+		barycenterOffset[tId] = states[tId].offset;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
 	}
@@ -396,6 +414,7 @@ namespace dyno
 		this->stateRotationMatrix()->resize(sizeOfRigids);
 		this->stateAngularVelocity()->resize(sizeOfRigids);
 		this->stateCenter()->resize(sizeOfRigids);
+		this->stateOffset()->resize(sizeOfRigids);
 		this->stateVelocity()->resize(sizeOfRigids);
 		this->stateMass()->resize(sizeOfRigids);
 		this->stateInertia()->resize(sizeOfRigids);
@@ -406,6 +425,7 @@ namespace dyno
 			RB_SetupInitialStates,
 			this->stateMass()->getData(),
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateRotationMatrix()->getData(),
 			this->stateVelocity()->getData(),
 			this->stateAngularVelocity()->getData(),
@@ -431,13 +451,14 @@ namespace dyno
 		DArray<Sphere3D> sphere,
 		DArray<SphereInfo> sphere_init,
 		DArray<Coord> pos,
+		DArray<Coord> bcOffset,
 		DArray<Quat<Real>> quat,
 		int start_sphere)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= sphere.size()) return;
 
-		sphere[pId].center = pos[pId + start_sphere];
+		sphere[pId].center = pos[pId + start_sphere] - quat[pId + start_sphere].rotate(bcOffset[pId + start_sphere]);
 		sphere[pId].rotation = quat[pId + start_sphere];
 	}
 
@@ -446,12 +467,13 @@ namespace dyno
 		DArray<Box3D> box,
 		DArray<BoxInfo> box_init,
 		DArray<Coord> pos,
+		DArray<Coord> bcOffset,
 		DArray<Matrix> rotation,
 		int start_box)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= box.size()) return;
-		box[pId].center = pos[pId + start_box];
+		box[pId].center = pos[pId + start_box] - rotation[pId + start_box] * bcOffset[pId + start_box];
 
 		box[pId].extent = box_init[pId].halfLength;
 
@@ -483,6 +505,7 @@ namespace dyno
 		DArray<Capsule3D> caps,
 		DArray<CapsuleInfo> cap_init,
 		DArray<Coord> pos,
+		DArray<Coord> bcOffset,
 		DArray<Quat<Real>> quat,
 		int start_cap)
 	{
@@ -493,7 +516,7 @@ namespace dyno
 		cap.radius = cap_init[pId].radius;
 		cap.halfLength = cap_init[pId].halfLength;
 		cap.rotation = quat[pId + start_cap];
-		cap.center = pos[pId + start_cap];
+		cap.center = pos[pId + start_cap] - quat[pId + start_cap].rotate(bcOffset[pId + start_cap]);
 
 		caps[pId] = cap;
 	}
@@ -515,6 +538,7 @@ namespace dyno
 			discreteSet->getBoxes(),
 			mDeviceBoxes,
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateRotationMatrix()->getData(),
 			offset.boxIndex());
 
@@ -523,6 +547,7 @@ namespace dyno
 			discreteSet->getSpheres(),
 			mDeviceSpheres,
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateQuaternion()->getData(),
 			offset.sphereIndex());
 
@@ -539,6 +564,7 @@ namespace dyno
 			discreteSet->getCaps(),
 			mDeviceCapsules,
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateQuaternion()->getData(),
 			offset.capsuleIndex());
 	}

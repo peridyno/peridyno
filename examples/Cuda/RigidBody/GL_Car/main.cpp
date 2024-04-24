@@ -28,7 +28,6 @@ std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-
 	auto jeep = scn->addNode(std::make_shared<Vechicle<DataType3f>>());
 
 	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
@@ -37,8 +36,10 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->graphicsPipeline()->pushModule(prRender);
 
 	BoxInfo box, box2;
-	box.center = Vec3f(0, 0.450, 0.148);
-	box.halfLength = Vec3f(1.011, 0.3, 2);
+	//box.center = Vec3f(0, 0.450, 0.148);
+	//box.center = Vec3f(0, 1.171, 0.148);
+	box.center = Vec3f(0, 1.171, -0.011);
+	box.halfLength = Vec3f(1.011, 0.2, 1.8);
 	box2.center = Vec3f(0, 1.044, -2.254);
 	box2.halfLength = Vec3f(0.450, 0.450, 0.250);
 	CapsuleInfo capsule1, capsule2, capsule3, capsule4;
@@ -62,7 +63,11 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	RigidBodyInfo rigidbody;
 
-	jeep->addBox(box, rigidbody);
+	Vec3f offset = Vec3f(0.0f, -0.721f, 0.0f);
+	rigidbody.offset = offset;
+	jeep->addBox(box, rigidbody, 1000);
+
+	rigidbody.offset = Vec3f(0.0f);
 	jeep->addBox(box2, rigidbody);
 	Real wheel_velocity = 50;
 
@@ -71,44 +76,31 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->addCapsule(capsule3, rigidbody, 100);
 	jeep->addCapsule(capsule4, rigidbody, 100);
 
-
-
 	HingeJoint<Real> joint1(2, 0);
-	joint1.setAnchorPoint(capsule1.center, capsule1.center, box.center, capsule1.rot, box.rot);
+	joint1.setAnchorPoint(capsule1.center, capsule1.center, box.center + offset, capsule1.rot, box.rot);
 	joint1.setMoter(wheel_velocity, true);
 	joint1.setAxis(Vec3f(1, 0, 0), capsule1.rot, box.rot);
 	jeep->addHingeJoint(joint1);
 	HingeJoint<Real> joint2(3, 0);
-	joint2.setAnchorPoint(capsule2.center, capsule2.center, box.center, capsule2.rot, box.rot);
+	joint2.setAnchorPoint(capsule2.center, capsule2.center, box.center + offset, capsule2.rot, box.rot);
 	joint2.setMoter(wheel_velocity, true);
 	joint2.setAxis(Vec3f(1, 0, 0), capsule2.rot, box.rot);
 	jeep->addHingeJoint(joint2);
 	HingeJoint<Real> joint3(4, 0);
-	joint3.setAnchorPoint(capsule3.center, capsule3.center, box.center, capsule3.rot, box.rot);
+	joint3.setAnchorPoint(capsule3.center, capsule3.center, box.center + offset, capsule3.rot, box.rot);
 	joint3.setMoter(wheel_velocity, true);
 	joint3.setAxis(Vec3f(1, 0, 0), capsule3.rot, box.rot);
 	jeep->addHingeJoint(joint3);
 	HingeJoint<Real> joint4(5, 0);
-	joint4.setAnchorPoint(capsule4.center, capsule4.center, box.center, capsule4.rot, box.rot);
+	joint4.setAnchorPoint(capsule4.center, capsule4.center, box.center + offset, capsule4.rot, box.rot);
 	joint4.setMoter(wheel_velocity, true);
 	joint4.setAxis(Vec3f(1, 0, 0), capsule4.rot, box.rot);
 	jeep->addHingeJoint(joint4);
 
 
 	FixedJoint<Real> joint5(0, 1);
-	joint5.setAnchorPoint((box.center + box2.center) / 2, box.center, box2.center, box.rot, box2.rot);
+	joint5.setAnchorPoint((box.center + box2.center) / 2, box.center + offset, box2.center, box.rot, box2.rot);
 	jeep->addFixedJoint(joint5);
-
-	std::vector<Vec3f> diff = {
-		{0,0.721,-0.159},
-		{0,0,0},
-		{0,0,0},
-		{0,0,0},
-		{0,0,0},
-		{0,0,0}
-	};
-
-	jeep->setInitialCenterDiff(diff);
 
 	jeep->bind(0, Pair<uint, uint>(5, 0));
 	jeep->bind(1, Pair<uint, uint>(4, 0));
@@ -117,24 +109,23 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->bind(4, Pair<uint, uint>(2, 0));
 	jeep->bind(5, Pair<uint, uint>(3, 0));
 
-
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->setVisible(false);
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
-	/*auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	jeep->stateTopology()->connect(mapper->inDiscreteElements());
-	jeep->graphicsPipeline()->pushModule(mapper);*/
+	jeep->graphicsPipeline()->pushModule(mapper);
 
-	/*auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
 	sRender->setAlpha(0.8f);
 	sRender->setRoughness(0.7f);
 	sRender->setMetallic(3.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	jeep->graphicsPipeline()->pushModule(sRender);*/
+	jeep->graphicsPipeline()->pushModule(sRender);
 
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals

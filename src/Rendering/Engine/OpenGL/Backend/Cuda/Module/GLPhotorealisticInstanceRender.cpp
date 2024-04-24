@@ -61,7 +61,8 @@ namespace dyno
 			mXTransformBuffer.load(inst->elements());
 		}
 
-		GLPhotorealisticRender::updateImpl();
+		if (this->inTextureMesh()->isModified())
+			GLPhotorealisticRender::updateImpl();
 	}
 
 	void GLPhotorealisticInstanceRender::paintGL(const RenderParams& rparams)
