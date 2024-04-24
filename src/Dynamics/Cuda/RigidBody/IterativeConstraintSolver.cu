@@ -387,16 +387,32 @@ namespace dyno
 		{
 			if (constraints[tId].isValid)
 			{
-				Coord a = constraints[tId].axis;
-				J[4 * tId] = Coord(0);
-				J[4 * tId + 1] = -a;
-				J[4 * tId + 2] = Coord(0);
-				J[4 * tId + 3] = a;
+				if (constraints[tId].isWheel)
+				{
+					Coord a = constraints[tId].axis;
+					J[4 * tId] = Coord(0);
+					J[4 * tId + 1] = -a;
+					J[4 * tId + 2] = Coord(0);
+					J[4 * tId + 3] = Coord(0);
 
-				B[4 * tId] = Coord(0);
-				B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
-				B[4 * tId + 2] = Coord(0);
-				B[4 * tId + 3] = inertia[idx2].inverse() * a;
+					B[4 * tId] = Coord(0);
+					B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
+					B[4 * tId + 2] = Coord(0);
+					B[4 * tId + 3] = Coord(0);
+				}
+				else
+				{
+					Coord a = constraints[tId].axis;
+					J[4 * tId] = Coord(0);
+					J[4 * tId + 1] = -a;
+					J[4 * tId + 2] = Coord(0);
+					J[4 * tId + 3] = a;
+
+					B[4 * tId] = Coord(0);
+					B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
+					B[4 * tId + 2] = Coord(0);
+					B[4 * tId + 3] = inertia[idx2].inverse() * a;
+				}
 			}
 		}
 
@@ -1038,6 +1054,7 @@ namespace dyno
 			constraints[baseIndex + i].d_min = C_min > 0 ? 0 : C_min;
 			constraints[baseIndex + i].d_max = C_max > 0 ? 0 : C_max;
 			constraints[baseIndex + i].interpenetration = v_moter;
+			constraints[baseIndex + i].isWheel = joints[tId].is_wheel;
 		}
 		
 		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_EQUAL_1;
@@ -1130,7 +1147,6 @@ namespace dyno
 		DArray<int> jointNumber,
 		Real mu,
 		Real g,
-		Real maxMoter,
 		Real dt
 	)
 	{
@@ -1201,13 +1217,6 @@ namespace dyno
 				delta_lambda = lambda_new - lambda[tId];
 			}
 
-			if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
-			{
-				lambda_new = (abs(lambda_new) > maxMoter * dt) ? (lambda_new < 0 ? -maxMoter * dt : maxMoter * dt) : lambda_new;
-				delta_lambda = lambda_new - lambda[tId];
-			}
-
-
 			
 			lambda[tId] += delta_lambda;
 
@@ -1238,6 +1247,7 @@ namespace dyno
 	{
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
+
 
 		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
 		int sliderJoint_size = this->inSliderJoints()->size();
@@ -1546,7 +1556,6 @@ namespace dyno
 					mJointNumber,
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
-					this->varMaxMoter()->getData(),
 					dt);
 
 				cuExecute(constraint_size,
@@ -1562,26 +1571,24 @@ namespace dyno
 			}
 		}
 
+		cuExecute(bodyNum,
+			RB_updateVelocity,
+			this->inVelocity()->getData(),
+			this->inAngularVelocity()->getData(),
+			mImpulseExt,
+			mImpulseC);
 
-			cuExecute(bodyNum,
-				RB_updateVelocity,
-				this->inVelocity()->getData(),
-				this->inAngularVelocity()->getData(),
-				mImpulseExt,
-				mImpulseC);
 
-			//std::cout << mImpulseC << std::endl;
-
-			cuExecute(bodyNum,
-				RB_updateGesture,
-				this->inCenter()->getData(),
-				this->inQuaternion()->getData(),
-				this->inRotationMatrix()->getData(),
-				this->inInertia()->getData(),
-				this->inVelocity()->getData(),
-				this->inAngularVelocity()->getData(),
-				this->inInitialInertia()->getData(),
-				dt)
+		cuExecute(bodyNum,
+			RB_updateGesture,
+			this->inCenter()->getData(),
+			this->inQuaternion()->getData(),
+			this->inRotationMatrix()->getData(),
+			this->inInertia()->getData(),
+			this->inVelocity()->getData(),
+			this->inAngularVelocity()->getData(),
+			this->inInitialInertia()->getData(),
+			dt);
 	}
 	DEFINE_CLASS(IterativeConstraintSolver);
 }

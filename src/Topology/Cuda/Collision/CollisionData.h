@@ -178,5 +178,7 @@ namespace dyno
 		ConstraintType type;
 
 		bool isValid;
+
+		bool isWheel;
 	};
 }

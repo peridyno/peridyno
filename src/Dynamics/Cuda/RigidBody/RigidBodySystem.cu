@@ -91,6 +91,8 @@ namespace dyno
 		bd.position = b.center;
 
 		bd.mass = density * lx * ly * lz;
+
+		printf("box : %lf\n", bd.mass);
 		bd.inertia = 1.0f / 12.0f * bd.mass
 			* Mat3f(ly*ly + lz * lz, 0, 0,
 				0, lx*lx + lz * lz, 0,
@@ -208,6 +210,8 @@ namespace dyno
 		bd.position = b.center;
 
 		bd.mass = mass_hemisphere * 2 + mass_cylinder;
+
+		printf("capsule : %lf\n", bd.mass);
 		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
 				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
 				0, 0, I_2_cylinder + 2 *I_2_hemisphere);
