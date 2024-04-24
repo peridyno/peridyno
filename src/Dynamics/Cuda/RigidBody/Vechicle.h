@@ -28,6 +28,8 @@ namespace dyno
 
 		DEF_ARRAY_STATE(BindingPair, Binding, DeviceType::GPU, "");
 
+		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");
+
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 
 	protected:
@@ -38,7 +40,10 @@ namespace dyno
 
 	private:
 
+
 		std::vector<Pair<uint, uint>> mBindingPair;
+
+		std::vector<int> mBodyId;
 
 		DArray<Matrix> mInitialRot;
 	};

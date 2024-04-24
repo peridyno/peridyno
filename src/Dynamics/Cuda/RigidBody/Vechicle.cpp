@@ -33,6 +33,7 @@ namespace dyno
 		int sizeOfRigids = topo->totalSize();
 
 		this->stateBinding()->resize(sizeOfRigids);
+		this->stateBindingTag()->resize(sizeOfRigids);
 
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
@@ -57,7 +58,20 @@ namespace dyno
 		tms.clear();
 
 		auto binding = this->stateBinding()->getDataPtr();
-		binding->assign(mBindingPair);
+		auto bindingtag = this->stateBindingTag()->getDataPtr();
+
+
+		std::vector<Pair<uint, uint>> bindingPair(sizeOfRigids);
+		std::vector<int> tags(sizeOfRigids, 0);
+
+		for (int i = 0; i < mBindingPair.size(); i++)
+		{
+			bindingPair[mBodyId[i]] = mBindingPair[i];
+			tags[mBodyId[i]] = 1;
+		}
+
+		binding->assign(bindingPair);
+		bindingtag->assign(tags);
 
 		mInitialRot.assign(this->stateRotationMatrix()->constData());
 
@@ -75,13 +89,15 @@ namespace dyno
 			this->stateCenter()->getData(),
 			this->stateRotationMatrix()->getData(),
 			mInitialRot,
-			this->stateBinding()->getData());
+			this->stateBinding()->getData(),
+			this->stateBindingTag()->getData());
 	}
 
 	template<typename TDataType>
 	void Vechicle<TDataType>::bind(uint bodyId, Pair<uint, uint> shapeId)
 	{
-		mBindingPair.insert(mBindingPair.begin() + bodyId, shapeId);
+		mBindingPair.push_back(shapeId);
+		mBodyId.push_back(bodyId);
 	}
 
 	DEFINE_CLASS(Vechicle);

@@ -387,32 +387,16 @@ namespace dyno
 		{
 			if (constraints[tId].isValid)
 			{
-				if (constraints[tId].isWheel)
-				{
-					Coord a = constraints[tId].axis;
-					J[4 * tId] = Coord(0);
-					J[4 * tId + 1] = -a;
-					J[4 * tId + 2] = Coord(0);
-					J[4 * tId + 3] = Coord(0);
+				Coord a = constraints[tId].axis;
+				J[4 * tId] = Coord(0);
+				J[4 * tId + 1] = -a;
+				J[4 * tId + 2] = Coord(0);
+				J[4 * tId + 3] = a;
 
-					B[4 * tId] = Coord(0);
-					B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
-					B[4 * tId + 2] = Coord(0);
-					B[4 * tId + 3] = Coord(0);
-				}
-				else
-				{
-					Coord a = constraints[tId].axis;
-					J[4 * tId] = Coord(0);
-					J[4 * tId + 1] = -a;
-					J[4 * tId + 2] = Coord(0);
-					J[4 * tId + 3] = a;
-
-					B[4 * tId] = Coord(0);
-					B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
-					B[4 * tId + 2] = Coord(0);
-					B[4 * tId + 3] = inertia[idx2].inverse() * a;
-				}
+				B[4 * tId] = Coord(0);
+				B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
+				B[4 * tId + 2] = Coord(0);
+				B[4 * tId + 3] = inertia[idx2].inverse() * a;
 			}
 		}
 
@@ -1054,7 +1038,6 @@ namespace dyno
 			constraints[baseIndex + i].d_min = C_min > 0 ? 0 : C_min;
 			constraints[baseIndex + i].d_max = C_max > 0 ? 0 : C_max;
 			constraints[baseIndex + i].interpenetration = v_moter;
-			constraints[baseIndex + i].isWheel = joints[tId].is_wheel;
 		}
 		
 		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_EQUAL_1;

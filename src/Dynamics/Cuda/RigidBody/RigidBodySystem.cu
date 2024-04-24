@@ -112,6 +112,8 @@ namespace dyno
 
 		bd.mass = density * lx * ly * lz;
 
+		std::cout << "Box : " << bd.mass << std::endl;
+
 		bd.inertia = 1.0f / 12.0f * bd.mass
 			* Mat3f(ly * ly + lz * lz, 0, 0,
 				0, lx * lx + lz * lz, 0,
@@ -229,6 +231,8 @@ namespace dyno
 		bd.position = b.center + bd.offset;
 
 		bd.mass = mass_hemisphere * 2 + mass_cylinder;
+
+		std::cout << "Capsule : " << bd.mass << std::endl;
 
 		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
 				0, I_1_cylinder + 2 * I_1_hemisphere, 0,

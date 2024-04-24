@@ -179,6 +179,5 @@ namespace dyno
 
 		bool isValid;
 
-		bool isWheel;
 	};
 }

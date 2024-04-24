@@ -13,5 +13,6 @@ namespace dyno
 		const DArray<Vec3f>& translate,
 		const DArray<Mat3f>& rotation,
 		const DArray<Mat3f>& rotationInit,
-		const DArray<Pair<uint, uint>>& binding);
+		const DArray<Pair<uint, uint>>& binding,
+		const DArray<int>& bindingtag);
 }

@@ -8,10 +8,13 @@ namespace dyno
 		const DArray<Vec3f> translate,
 		const DArray<Mat3f> rotation,
 		const DArray<Mat3f> rotationInit,
-		const DArray<Pair<uint, uint>> binding)
+		const DArray<Pair<uint, uint>> binding,
+		const DArray<int> bindingtag)
 	{
 		int tId = threadIdx.x + blockIdx.x * blockDim.x;
 		if (tId >= rotation.size())
+			return;
+		if (bindingtag[tId] == 0)
 			return;
 
 		Pair<uint, uint> pair = binding[tId];
@@ -29,7 +32,8 @@ namespace dyno
 		const DArray<Vec3f>& translate,
 		const DArray<Mat3f>& rotation,
 		const DArray<Mat3f>& rotationInit,
-		const DArray<Pair<uint, uint>>& binding)
+		const DArray<Pair<uint, uint>>& binding,
+		const DArray<int>& bindingtag)
 	{
 		cuExecute(rotation.size(),
 			SF_ApplyTransform,
@@ -38,7 +42,8 @@ namespace dyno
 			translate,
 			rotation,
 			rotationInit,
-			binding);
+			binding,
+			bindingtag);
 
 	}
 }

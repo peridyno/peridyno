@@ -153,11 +153,10 @@ namespace dyno
 			this->useRange = true;
 		}
 
-		void setMoter(Real v_moter, bool is_wheel=false)
+		void setMoter(Real v_moter)
 		{
 			this->v_moter = v_moter;
 			this->useMoter = true;
-			this->is_wheel = is_wheel;
 		}
 
 	public:
@@ -175,7 +174,6 @@ namespace dyno
 
 		bool useMoter = false;
 		bool useRange = false;
-		bool is_wheel;
 	};
 
 	template<typename Real>
