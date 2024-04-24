@@ -37,8 +37,8 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->graphicsPipeline()->pushModule(prRender);
 
 	BoxInfo box, box2;
-	box.center = Vec3f(0, 1.171, 0.148);
-	box.halfLength = Vec3f(1.011, 0.793, 2);
+	box.center = Vec3f(0, 0.450, 0.148);
+	box.halfLength = Vec3f(1.011, 0.3, 2);
 	box2.center = Vec3f(0, 1.044, -2.254);
 	box2.halfLength = Vec3f(0.450, 0.450, 0.250);
 	CapsuleInfo capsule1, capsule2, capsule3, capsule4;
@@ -65,41 +65,42 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->addBox(box, rigidbody);
 	jeep->addBox(box2, rigidbody);
 	Real wheel_velocity = 50;
-	//rigidbody.angularVelocity = Vec3f(-wheel_velocity, 0, 0);
 
-	jeep->addCapsule(capsule1, rigidbody);
-	jeep->addCapsule(capsule2, rigidbody);
-	jeep->addCapsule(capsule3, rigidbody);
-	jeep->addCapsule(capsule4, rigidbody);
+	jeep->addCapsule(capsule1, rigidbody, 100);
+	jeep->addCapsule(capsule2, rigidbody, 100);
+	jeep->addCapsule(capsule3, rigidbody, 100);
+	jeep->addCapsule(capsule4, rigidbody, 100);
+
 
 
 	HingeJoint<Real> joint1(2, 0);
 	joint1.setAnchorPoint(capsule1.center, capsule1.center, box.center, capsule1.rot, box.rot);
-	joint1.setMoter(wheel_velocity);
+	joint1.setMoter(wheel_velocity, true);
 	joint1.setAxis(Vec3f(1, 0, 0), capsule1.rot, box.rot);
 	jeep->addHingeJoint(joint1);
 	HingeJoint<Real> joint2(3, 0);
 	joint2.setAnchorPoint(capsule2.center, capsule2.center, box.center, capsule2.rot, box.rot);
-	joint2.setMoter(wheel_velocity);
+	joint2.setMoter(wheel_velocity, true);
 	joint2.setAxis(Vec3f(1, 0, 0), capsule2.rot, box.rot);
 	jeep->addHingeJoint(joint2);
 	HingeJoint<Real> joint3(4, 0);
 	joint3.setAnchorPoint(capsule3.center, capsule3.center, box.center, capsule3.rot, box.rot);
-	joint3.setMoter(wheel_velocity);
+	joint3.setMoter(wheel_velocity, true);
 	joint3.setAxis(Vec3f(1, 0, 0), capsule3.rot, box.rot);
 	jeep->addHingeJoint(joint3);
 	HingeJoint<Real> joint4(5, 0);
 	joint4.setAnchorPoint(capsule4.center, capsule4.center, box.center, capsule4.rot, box.rot);
-	joint4.setMoter(wheel_velocity);
+	joint4.setMoter(wheel_velocity, true);
 	joint4.setAxis(Vec3f(1, 0, 0), capsule4.rot, box.rot);
 	jeep->addHingeJoint(joint4);
+
 
 	FixedJoint<Real> joint5(0, 1);
 	joint5.setAnchorPoint((box.center + box2.center) / 2, box.center, box2.center, box.rot, box2.rot);
 	jeep->addFixedJoint(joint5);
 
 	std::vector<Vec3f> diff = {
-		{0,0,-0.159},
+		{0,0.721,-0.159},
 		{0,0,0},
 		{0,0,0},
 		{0,0,0},
