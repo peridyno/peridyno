@@ -19,7 +19,7 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
+#include "BasicShape.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
@@ -27,7 +27,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class CapsuleModel : public ParametricModel<TDataType>
+	class CapsuleModel : public BasicShape<TDataType>
 	{
 		DECLARE_TCLASS(CapsuleModel, TDataType);
 
@@ -38,6 +38,8 @@ namespace dyno
 		CapsuleModel();
 
 		std::string caption() override { return "Capsule"; }
+		
+		BasicShapeType getShapeType() override { return BasicShapeType::CAPSULE; }
 
 		NBoundingBox boundingBox() override;
 

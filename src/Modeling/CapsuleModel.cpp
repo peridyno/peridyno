@@ -24,7 +24,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	CapsuleModel<TDataType>::CapsuleModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 		this->varRadius()->setRange(0.001f, 100.0f);
 

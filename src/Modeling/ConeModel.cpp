@@ -10,7 +10,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	ConeModel<TDataType>::ConeModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 		this->varRow()->setRange(1, 50);
 		this->varColumns()->setRange(3, 50);

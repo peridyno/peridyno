@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
+#include "BasicShape.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
@@ -23,7 +23,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class ConeModel : public ParametricModel<TDataType>
+	class ConeModel : public BasicShape<TDataType>
 	{
 		DECLARE_TCLASS(ConeModel, TDataType);
 
@@ -34,6 +34,8 @@ namespace dyno
 		ConeModel();
 
 		std::string caption() override { return "Cone"; }
+
+		BasicShapeType getShapeType() override { return BasicShapeType::CONE; }
 
 	public:
 		DEF_VAR(unsigned, Columns, 24, "Cone Columns");

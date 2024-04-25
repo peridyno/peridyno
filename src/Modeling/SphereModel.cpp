@@ -12,7 +12,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	SphereModel<TDataType>::SphereModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 		this->varRadius()->setRange(0.001f, 100.0f);
 

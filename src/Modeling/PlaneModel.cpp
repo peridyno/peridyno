@@ -10,7 +10,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	PlaneModel<TDataType>::PlaneModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 		this->varLengthX()->setRange(0.01, 100.0f);
 		this->varLengthZ()->setRange(1, 100.0f);
