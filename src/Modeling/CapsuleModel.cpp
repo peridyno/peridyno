@@ -126,10 +126,10 @@ namespace dyno
 		Real halfHeight = this->varHeight()->getValue() / 2;
 		auto row = this->varHeightSegment()->getValue();
 
-		//Setup a Cylinder primitive
-		Coord v0 = Coord(0, halfHeight, 0);
-		Coord v1 = Coord(0, -halfHeight, 0);
-		TCapsule3D<Real> capsulePrim = TCapsule3D(v0, v1, radius);
+		Quat<Real> q = computeQuaternion();
+
+		//Setup a capsule primitive
+		TCapsule3D<Real> capsulePrim = TCapsule3D<Real>(center, q, radius, halfHeight);
 
 		this->outCapsule()->setValue(capsulePrim);
 

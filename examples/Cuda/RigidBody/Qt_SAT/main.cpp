@@ -50,6 +50,8 @@ public:
 
 	DEF_VAR_IN(TOrientedBox3D<Real>, CubeB, "");
 
+	DEF_INSTANCE_OUT(PointSet<TDataType>, PointSet, "");
+
 	DEF_INSTANCE_OUT(EdgeSet<TDataType>, EdgeSet, "");
 	
 protected:
@@ -61,9 +63,15 @@ protected:
 
 		CollisionDetection<Real>::request(manifold, cubeA, cubeB);
 
+		if (this->outPointSet()->isEmpty()) {
+			this->outPointSet()->allocate();
+		}
+
 		if (this->outEdgeSet()->isEmpty()){
 			this->outEdgeSet()->allocate();
 		}
+
+		std::vector<Coord> points;
 
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Edge> edges;
@@ -72,14 +80,20 @@ protected:
 		uint num = manifold.contactCount;
 		for (uint i = 0; i < num; i++)
 		{
+			points.push_back(manifold.contacts[i].position);
 			vertices.push_back(manifold.contacts[i].position);
-			edges.push_back(TopologyModule::Edge(i, (i + 1) % num));
+			vertices.push_back(manifold.contacts[i].position + manifold.normal * 0.05);
+			edges.push_back(TopologyModule::Edge(2 * i, 2 * i + 1));
 		}
+
+		auto ptSet = this->outPointSet()->getDataPtr();
+		ptSet->setPoints(points);
 
 		auto edgeSet = this->outEdgeSet()->getDataPtr();
 		edgeSet->setPoints(vertices);
 		edgeSet->setEdges(edges);
 
+		points.clear();
 		vertices.clear();
 		edges.clear();
 	};
@@ -107,7 +121,7 @@ public:
 		auto pointRender = std::make_shared<GLPointVisualModule>();
 		pointRender->varPointSize()->setValue(0.02);
 		pointRender->varBaseColor()->setValue(Color(1.0f, 0.0f, 0.0f));
-		computeContacts->outEdgeSet()->connect(pointRender->inPointSet());
+		computeContacts->outPointSet()->connect(pointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender);
 
 		auto wireRender = std::make_shared<GLWireframeVisualModule>();

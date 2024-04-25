@@ -1,6 +1,7 @@
 #include "Vechicle.h"
 
 #include "Module/SimpleVechicleDriver.h"
+#include "Module/SharedFuncsForRigidBody.h"
 
 namespace dyno
 {
@@ -25,6 +26,15 @@ namespace dyno
 	template<typename TDataType>
 	void Vechicle<TDataType>::resetStates()
 	{
+		RigidBodySystem<TDataType>::resetStates();
+
+		auto topo = this->stateTopology()->constDataPtr();
+
+		int sizeOfRigids = topo->totalSize();
+
+		this->stateBinding()->resize(sizeOfRigids);
+		this->stateBindingTag()->resize(sizeOfRigids);
+
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		uint N = texMesh->shapes().size();
@@ -46,12 +56,48 @@ namespace dyno
 		instantanceTransform->assign(tms);
 
 		tms.clear();
+
+		auto binding = this->stateBinding()->getDataPtr();
+		auto bindingtag = this->stateBindingTag()->getDataPtr();
+
+
+		std::vector<Pair<uint, uint>> bindingPair(sizeOfRigids);
+		std::vector<int> tags(sizeOfRigids, 0);
+
+		for (int i = 0; i < mBindingPair.size(); i++)
+		{
+			bindingPair[mBodyId[i]] = mBindingPair[i];
+			tags[mBodyId[i]] = 1;
+		}
+
+		binding->assign(bindingPair);
+		bindingtag->assign(tags);
+
+		mInitialRot.assign(this->stateRotationMatrix()->constData());
+
 	}
 
 	template<typename TDataType>
 	void Vechicle<TDataType>::updateStates()
 	{
 		RigidBodySystem<TDataType>::updateStates();
+
+
+		ApplyTransform(
+			this->stateInstanceTransform()->getData(),
+			this->stateOffset()->getData(),
+			this->stateCenter()->getData(),
+			this->stateRotationMatrix()->getData(),
+			mInitialRot,
+			this->stateBinding()->getData(),
+			this->stateBindingTag()->getData());
+	}
+
+	template<typename TDataType>
+	void Vechicle<TDataType>::bind(uint bodyId, Pair<uint, uint> shapeId)
+	{
+		mBindingPair.push_back(shapeId);
+		mBodyId.push_back(bodyId);
 	}
 
 	DEFINE_CLASS(Vechicle);

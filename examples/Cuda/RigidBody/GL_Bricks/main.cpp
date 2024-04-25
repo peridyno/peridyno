@@ -57,6 +57,9 @@ std::shared_ptr<SceneGraph> creatBricks()
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
 	rigid->addTet(tet, rigidSphere);
 
+
+
+
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);

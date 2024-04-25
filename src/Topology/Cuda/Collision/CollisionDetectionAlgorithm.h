@@ -25,7 +25,6 @@ namespace dyno
 		DYN_FUNC static void request(Manifold& m, const OBox3D box0, const OBox3D box1);
 
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const OBox3D& box);
-
 		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Sphere3D& sphere);
 
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere0, const Sphere3D& sphere1);
@@ -33,17 +32,16 @@ namespace dyno
 		DYN_FUNC static void request(Manifold& m, const Tet3D& tet0, const Tet3D& tet1);
 
 		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const OBox3D& box);
-
 		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Tet3D& tet);
 
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Tet3D& tet);
-
 		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Sphere3D& sphere);
+
+		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Capsule3D& cap);
+		DYN_FUNC static void request(Manifold& m, const Capsule3D& cap, const Sphere3D& sphere);
 		
 		//=========================================
 		DYN_FUNC static void request(Manifold& m, const Capsule3D& cap0, const Capsule3D& cap1);//untested
-
-		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Capsule3D& cap);//untested
 
 		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Triangle3D& tri);//untested
 		DYN_FUNC static void request(Manifold& m, const Triangle3D& tri, const Sphere3D& sphere);//untested
@@ -51,10 +49,10 @@ namespace dyno
 
 		DYN_FUNC static void request(Manifold& m, const Triangle3D& tri, const Capsule3D cap); //untested
 
-		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Capsule3D& cap);//untested
 		DYN_FUNC static void request(Manifold& m, const Capsule3D& cap, const Tet3D& tet);//untested
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Capsule3D& cap);//untested
 
-
+		DYN_FUNC static void request(Manifold& m, const Capsule3D& cap, const OBox3D& box);//untested
 		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Capsule3D& cap);//untested
 
 		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Triangle3D& tri);

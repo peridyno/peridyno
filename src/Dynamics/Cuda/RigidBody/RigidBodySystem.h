@@ -16,6 +16,7 @@
 #pragma once
 #include "Node.h"
 #include "RigidBodyShared.h"
+#include "Topology/Joint.h"
 #include <vector>
 #include <iostream>
 namespace dyno
@@ -39,6 +40,12 @@ namespace dyno
 		typedef typename dyno::Quat<Real> TQuat;
 
 		typedef typename dyno::TContactPair<Real> ContactPair;
+		
+		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename SliderJoint<Real> SliderJoint;
+		typedef typename HingeJoint<Real> HingeJoint;
+		typedef typename FixedJoint<Real> FixedJoint;
+		typedef typename PointJoint<Real> PointJoint;
 
 
 		RigidBodySystem();
@@ -47,17 +54,44 @@ namespace dyno
 		void addBox(
 			const BoxInfo& box, 
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(1));
+			const Real density = Real(100));
 
 		void addSphere(
 			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
-			const Real density = Real(1));
+			const Real density = Real(100));
 
 		void addTet(
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
-			const Real density = Real(1));
+			const Real density = Real(100));
+
+		void addCapsule(
+			const CapsuleInfo& capsule,
+			const RigidBodyInfo& bodyDef,
+			const Real density = Real(100));
+
+		void addBallAndSocketJoint(
+			const BallAndSocketJoint& joint
+		);
+
+		void addSliderJoint(
+			const SliderJoint& joint
+		);
+
+		void addHingeJoint(
+			const HingeJoint& joint
+		);
+
+		void addFixedJoint(
+			const FixedJoint& joint
+		);
+
+		void addPointJoint(
+			const PointJoint& joint
+		);
+
+		Mat3f pointInertia(Coord v1);
 
 		Real getDt() override { return 0.001; }
 
@@ -68,6 +102,14 @@ namespace dyno
 
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
+
+		DEF_VAR(bool, GravityEnabled, true, "A toggle to control the gravity");
+
+		DEF_VAR(Real, GravityValue, 9.8, "");
+
+		DEF_VAR(Real, FrictionCoefficient, 300, "");
+
+		DEF_VAR(Real, Slop, 0.001, "");
 
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
@@ -80,6 +122,11 @@ namespace dyno
 		 * @brief Particle position
 		 */
 		DEF_ARRAY_STATE(Coord, Center, DeviceType::GPU, "Center of rigid bodies");
+
+		/**
+		 * @brief The initial offset of barycenters
+		 */
+		DEF_ARRAY_STATE(Coord, Offset, DeviceType::GPU, "Offset of barycenters");
 
 		/**
 		 * @brief Particle position
@@ -104,18 +151,36 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Matrix, InitialInertia, DeviceType::GPU, "Initial inertia matrix");
 
+		DEF_ARRAY_STATE(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
+
+		DEF_ARRAY_STATE(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
+
+		DEF_ARRAY_STATE(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
+
+		DEF_ARRAY_STATE(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
+
+		DEF_ARRAY_STATE(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
+
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
 		std::vector<SphereInfo> mHostSpheres;
 		std::vector<BoxInfo> mHostBoxes;
 		std::vector<TetInfo> mHostTets;
+		std::vector<CapsuleInfo> mHostCapsules;
 
 		DArray<RigidBodyInfo> mDeviceRigidBodyStates;
 
 		DArray<SphereInfo> mDeviceSpheres;
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
+		DArray<CapsuleInfo> mDeviceCapsules;
+
+		std::vector<BallAndSocketJoint> mHostJointsBallAndSocket;
+		std::vector<SliderJoint> mHostJointsSlider;
+		std::vector<HingeJoint> mHostJointsHinge;
+		std::vector<FixedJoint> mHostJointsFixed;
+		std::vector<PointJoint> mHostJointsPoint;
 
 	public:
 		int m_numOfSamples;
@@ -130,14 +195,11 @@ namespace dyno
 		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
 
-		void updateVelocityAngule(Vec3f force, Vec3f torque, float dt);
-		void advect(float dt);
 		//float m_damping = 0.9f;
 
 		float m_yaw;
 		float m_pitch;
 		float m_roll;
 		float m_recoverSpeed;
-		void getEulerAngle(float& yaw, float& pitch, float& roll);
 	};
 }
