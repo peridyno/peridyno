@@ -1,23 +1,5 @@
 #include "PyFramework.h"
 
-void declare_modeling_init_static_plugin(py::module& m, std::string typestr) {
-	using Class = dyno::ModelingInitializer;
-	using Parent = dyno::PluginEntry;
-	std::string pyclass_name = std::string("ModelingInitializer" + typestr);
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("modeling_init_static_plugin", &Modeling::initStaticPlugin);
-}
-
-
-
-void declare_discrete_topology_mapping(py::module& m, std::string typestr)
-{
-	using Class = dyno::TopologyMapping;
-	using Parent = dyno::Module;
-	std::string pyclass_name = std::string("TopologyMapping") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str());
-}
-
 #include "Camera.h"
 void declare_camera(py::module& m)
 {
@@ -71,12 +53,29 @@ void pybind_framework(py::module& m)
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
 		.def("set_name", &Node::setName)
+		.def("get_name", &Node::getName)
+		.def("get_node_type", &Node::getNodeType)
+		.def("is_auto_sync", &Node::isAutoSync)
+		.def("set_auto_sync", &Node::setAutoSync)
 		.def("is_active", &Node::isActive)
-		.def("connect", &Node::connect)
+		.def("set_active", &Node::setActive)
+		.def("is_visible", &Node::isVisible)
 		.def("set_visible", &Node::setVisible)
+		.def("connect", &Node::connect)
+
 		.def("disconnect", &Node::disconnect)
 		.def("graphics_pipeline", &Node::graphicsPipeline, py::return_value_policy::reference)
 		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference);
+
+	py::class_<dyno::PluginEntry, std::shared_ptr<dyno::PluginEntry>>(m, "PluginEntry")
+		.def(py::init<>())
+		.def("name", &dyno::PluginEntry::name)
+		.def("version", &dyno::PluginEntry::version)
+		.def("description", &dyno::PluginEntry::description)
+		.def("setName", &dyno::PluginEntry::setName, py::arg("pluginName"))
+		.def("setVersion", &dyno::PluginEntry::setVersion, py::arg("pluginVersion"))
+		.def("setDescription", &dyno::PluginEntry::setDescription, py::arg("desc"))
+		.def("initialize", &dyno::PluginEntry::initialize);
 
 	py::class_<NodePort>(m, "NodePort")
 		//.def(py::init<>())
@@ -140,21 +139,12 @@ void pybind_framework(py::module& m)
 		.def("set_as_path", &dyno::FilePath::set_as_path)
 		.def("set_path", &dyno::FilePath::set_path);
 
-	py::class_<dyno::PluginEntry>(m, "PluginEntry")
-		.def(py::init<>())
-		.def("name", &dyno::PluginEntry::name)
-		.def("version", &dyno::PluginEntry::version)
-		.def("description", &dyno::PluginEntry::description)
-		.def("setName", &dyno::PluginEntry::setName, py::arg("pluginName"))
-		.def("setVersion", &dyno::PluginEntry::setVersion, py::arg("pluginVersion"))
-		.def("setDescription", &dyno::PluginEntry::setDescription, py::arg("desc"))
-		.def("initialize", &dyno::PluginEntry::initialize);
+
 
 	//FBase
 	py::class_<InstanceBase, FBase, std::shared_ptr<InstanceBase>>(m, "FInstance");
 
 	//module
-
 	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>());
 
@@ -195,12 +185,16 @@ void pybind_framework(py::module& m)
 		.def("set_velocity_pre_id", &NumericalIntegrator::setVelocityPreID) // 绑定 setVelocityPreID 方法
 		.def("get_module_type", &NumericalIntegrator::getModuleType); // 绑定 getModuleType 方法
 
+	py::class_<TopologyMappingdyno, Module, std::shared_ptr< TopologyMappingdyno>>(m, "TopologyMappingdyno");
+
 	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
 		.def("get_module_type", &InputModule::getModuleType);
 
 	py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent);
+
+
 
 
 	//pipeline
@@ -244,16 +238,6 @@ void pybind_framework(py::module& m)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
 
 	//------------------------- New ------------------------------2024
-
-	declare_calculate_norm<dyno::DataType3f>(m, "3f");
-
-	declare_pointset<dyno::DataType3f>(m, "3f");
-	declare_edgeSet<dyno::DataType3f>(m, "3f");
-	declare_triangleSet<dyno::DataType3f>(m, "3f");
-
-	declare_discrete_topology_mapping(m, "3f");
-	declare_discrete_elements_to_triangle_set<dyno::DataType3f>(m, "3f");
-
 	declare_var<float>(m, "f");
 	declare_var<bool>(m, "b");
 	declare_var<uint>(m, "uint");
@@ -274,14 +258,6 @@ void pybind_framework(py::module& m)
 
 	// New
 	declare_parametric_model<dyno::DataType3f>(m, "3f");
-
-	declare_merge_triangle_set<dyno::DataType3f>(m, "3f");
-
-	declare_semiAnalyticalSFI_node<dyno::DataType3f>(m, "3f");
-
-	declare_modeling_init_static_plugin(m, "");
-	//declare_paticle_system_init_static_plugin(m, "");
-
 	//import
 	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
 	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
@@ -292,6 +268,4 @@ void pybind_framework(py::module& m)
 	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
 
 	declare_camera(m);
-
-	//declare_semiAnalyticalScheme_init_static_plugin(m, "");
 }

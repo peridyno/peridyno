@@ -61,6 +61,7 @@ using NumericalIntegrator = dyno::NumericalIntegrator;
 using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
 using GroupModule = dyno::GroupModule;
+using TopologyMappingdyno = dyno::TopologyMapping;
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -101,55 +102,6 @@ void declare_instance(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("connect", &Class::connect)
 		.def("disconnect", &Class::disconnect);
-}
-
-template <typename TDataType>
-void declare_calculate_norm(py::module& m, std::string typestr) {
-	using Class = dyno::CalculateNorm<TDataType>;
-	using Parent = dyno::ComputeModule;
-	std::string pyclass_name = std::string("CalculateNorm") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("in_vec", &Class::inVec, py::return_value_policy::reference)
-		.def("out_norm", &Class::outNorm, py::return_value_policy::reference);
-}
-
-template <typename TDataType>
-void declare_pointset(py::module& m, std::string typestr) {
-	using Class = dyno::PointSet<TDataType>;
-	using Parent = dyno::TopologyModule;
-	std::string pyclass_name = std::string("PointSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
-}
-
-template <typename TDataType>
-void declare_triangleSet(py::module& m, std::string typestr) {
-	using Class = dyno::TriangleSet<TDataType>;
-	using Parent = dyno::EdgeSet<TDataType>;
-	std::string pyclass_name = std::string("TriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
-}
-
-template <typename TDataType>
-void declare_edgeSet(py::module& m, std::string typestr) {
-	using Class = dyno::EdgeSet<TDataType>;
-	using Parent = dyno::PointSet<TDataType>;
-	std::string pyclass_name = std::string("EdgeSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
-}
-
-template <typename TDataType>
-void declare_discrete_elements_to_triangle_set(py::module& m, std::string typestr) {
-	using Class = dyno::DiscreteElementsToTriangleSet<TDataType>;
-	using Parent = dyno::TopologyMapping;
-	std::string pyclass_name = std::string("DiscreteElementsToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("in_discreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("out_triangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 //------------------------- New ------------------------------
@@ -195,19 +147,6 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference);
 }
 
-#include "Mapping/MergeTriangleSet.h"
-template <typename TDataType>
-void declare_merge_triangle_set(py::module& m, std::string typestr) {
-	using Class = dyno::MergeTriangleSet<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("MergeTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_first", &Class::inFirst, py::return_value_policy::reference)
-		.def("in_second", &Class::inSecond, py::return_value_policy::reference);
-}
-
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
 template <typename TDataType>
 void declare_semiAnalyticalSFI_node(py::module& m, std::string typestr) {
@@ -225,22 +164,7 @@ void declare_semiAnalyticalSFI_node(py::module& m, std::string typestr) {
 #include "ParticleSystem/initializeParticleSystem.h"
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 
-/*
-void declare_semiAnalyticalScheme_init_static_plugin(py::module& m, std::string typestr) {
-	using Class = dyno::SemiAnalyticalSchemeInitializer;
-	using Parent = dyno::PluginEntry;
-	std::string pyclass_name = std::string("SemiAnalyticalSchemeInitializer" + typestr);
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("semiAnalyticalScheme_init_static_plugin", &SemiAnalyticalScheme::initStaticPlugin);
-}*/
-
 //------------------------- NEW END ------------------------------
-
-void declare_modeling_init_static_plugin(py::module& m, std::string typestr);
-
-//void declare_paticle_system_init_static_plugin(py::module& m, std::string typestr);
-
-void declare_discrete_topology_mapping(py::module& m, std::string typestr);
 
 void declare_camera(py::module& m);
 

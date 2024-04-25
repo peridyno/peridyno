@@ -14,17 +14,33 @@ void declare_attribute(py::module& m, std::string typestr) {
 		.def("set_dynamic", &Class::setDynamic);
 }
 
+
 #include "ParticleSystem/initializeParticleSystem.h"
-void declare_paticle_system_init_static_plugin(py::module& m) {
+void declare_particle_system_initializer(py::module& m) {
 	using Class = dyno::ParticleSystemInitializer;
 	using Parent = dyno::PluginEntry;
 	std::string pyclass_name = std::string("ParticleSystemInitializer");
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("instance", &Class::instance);
 }
 
+#include "ParticleSystem/ParticleType.h"
+void declare_particle_type(py::module& m) {
+	using Class = dyno::ParticleType;
+	std::string pyclass_name = std::string("ParticleType");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("set_particle_type", &Class::SetParticleType)
+		.def("get_particle_type", &Class::GetParticleType)
+		.def("is_virtual", &Class::IsVirtual)
+		.def("is_real", &Class::IsReal);
+}
+
+
 void pybind_particle_system(py::module& m)
 {
+	declare_func(m, "");
+	declare_attribute(m, "");
 	declare_approximate_implicit_viscosity<dyno::DataType3f>(m, "3f");
 	declare_boundary_constraint<dyno::DataType3f>(m, "3f");
 	declare_implicit_viscosity<dyno::DataType3f>(m, "3f");
@@ -40,30 +56,21 @@ void pybind_particle_system(py::module& m)
 	declare_surface_tension<dyno::DataType3f>(m, "3f");
 	declare_variational_approximate_projection<dyno::DataType3f>(m, "3f");
 	declare_particle_emitter<dyno::DataType3f>(m, "3f");
-	declare_particle_emitter_square<dyno::DataType3f>(m, "3f");
 	declare_particle_system<dyno::DataType3f>(m, "3f");
 	declare_circular_emitter<dyno::DataType3f>(m, "3f");
 	declare_sampler<dyno::DataType3f>(m, "3f");
 	declare_cube_sampler<dyno::DataType3f>(m, "3f");
 	declare_ghost_fluid<dyno::DataType3f>(m, "3f");
 	declare_ghost_particlesm<dyno::DataType3f>(m, "3f");
-
-	declare_func(m, "");
-
-	declare_attribute(m, "");
-
-	declare_static_boundary<dyno::DataType3f>(m, "3f");
-
-
-
-
-
-
-	declare_particle_fluid<dyno::DataType3f>(m, "3f");
-	declare_particle_elastic_body<dyno::DataType3f>(m, "3f");
+	declare_particle_system_initializer(m);
 	declare_make_particle_system<dyno::DataType3f>(m, "3f");
-
-
-
-
+	declare_particle_fluid<dyno::DataType3f>(m, "3f");
+	declare_particle_system_helper<dyno::DataType3f>(m, "3f");
+	declare_particle_type(m);
+	declare_poisson_disk_sampling<dyno::DataType3f>(m, "3f");
+	declare_poisson_emitter<dyno::DataType3f>(m, "3f");
+	declare_sampling_points<dyno::DataType3f>(m, "3f");
+	declare_sphere_sampler<dyno::DataType3f>(m, "3f");
+	declare_square_emitter<dyno::DataType3f>(m, "3f");
+	declare_static_boundary<dyno::DataType3f>(m, "3f");
 }

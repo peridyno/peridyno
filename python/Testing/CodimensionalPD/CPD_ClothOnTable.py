@@ -33,10 +33,10 @@ cloth = dyno.CodimensionalPD3f(0.3, 8000, 0.003, float('7e-4'), "default")
 cloth.load_surface(filePath("cloth_shell/mesh40k_1_h90.obj"))
 cloth.connect(boundary.import_triangular_system())
 
-surfaceRendererCloth = dyno.GLSurfaceVisualModule3f()
+surfaceRendererCloth = dyno.GLSurfaceVisualModule()
 surfaceRendererCloth.set_color(dyno.Color(0.4, 0.4, 1.0))
 
-surfaceRenderer = dyno.GLSurfaceVisualModule3f()
+surfaceRenderer = dyno.GLSurfaceVisualModule()
 surfaceRenderer.set_color(dyno.Color(0.8,0.8,0.8))
 surfaceRenderer.var_use_vertex_normal().set_value(True)
 

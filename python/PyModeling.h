@@ -82,4 +82,6 @@ void declare_plane_model(py::module& m, std::string typestr) {
 		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
 }
 
+void declare_modeling_initializer(py::module& m);
+
 void pybind_modeling(py::module& m);

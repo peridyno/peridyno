@@ -11,11 +11,13 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_topology(m);
 
 	pybind_particle_system(m);
-	pybind_rigid_body_system(m);
+	pybind_rigid_body(m);
 	pybind_multiphysics(m);
 	pybind_peridynamics(m);
 	pybind_dual_particle_system(m);
 	pybind_height_field(m);
+	pybind_semi_analytical_scheme(m);
+	pybind_volume(m);
 
 	pybind_glfw_gui(m);
 	pybind_qt_gui(m);

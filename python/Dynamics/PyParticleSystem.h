@@ -283,7 +283,7 @@ void declare_particle_emitter(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("size_of_particles", &Class::sizeOfParticles)
-		.def("get_position", &Class::getPosition)
+		.def("get_positions", &Class::getPositions)
 		.def("get_velocities", &Class::getVelocities)
 		.def("get_node_type", &Class::getNodeType)
 		.def("var_velocity_magnitude", &Class::varVelocityMagnitude, py::return_value_policy::reference)
@@ -350,7 +350,7 @@ template <typename TDataType>
 void declare_ghost_fluid(py::module& m, std::string typestr) {
 	using Class = dyno::GhostFluid<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
-	std::string pyclass_name = std::string("GhostParticles") + typestr;
+	std::string pyclass_name = std::string("GhostFluid") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference)
@@ -372,13 +372,6 @@ void declare_ghost_particlesm(py::module& m, std::string typestr) {
 		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference);
 }
 
-
-
-
-
-
-
-
 #include "ParticleSystem/MakeParticleSystem.h"
 template <typename TDataType>
 void declare_make_particle_system(py::module& m, std::string typestr) {
@@ -392,8 +385,6 @@ void declare_make_particle_system(py::module& m, std::string typestr) {
 		//DEF_INSTANCE_IN
 		.def("in_points", &Class::inPoints, py::return_value_policy::reference);
 }
-
-
 
 template <typename TDataType>
 void declare_particle_fluid(py::module& m, std::string typestr) {
@@ -415,17 +406,95 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 		.def("remove_initial_state", &Class::removeInitialState);
 }
 
+#include "ParticleSystem/ParticleSystemHelper.h"
+template <typename TDataType>
+void declare_particle_system_helper(py::module& m, std::string typestr) {
+	using Class = dyno::ParticleSystemHelper<TDataType>;
+	std::string pyclass_name = std::string("ParticleSystemHelper") + typestr;
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("calculate_morton_code", &Class::calculateMortonCode)
+		.def("reorder_particles", &Class::reorderParticles);
+}
+
+#include "ParticleSystem/PoissonDiskSampling.h"
+template <typename TDataType>
+void declare_poisson_disk_sampling(py::module& m, std::string typestr) {
+	using Class = dyno::PoissonDiskSampling<TDataType>;
+	using Parent = dyno::Sampler<TDataType>;
+	std::string pyclass_name = std::string("PoissonDiskSampling") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("construct_grid", &Class::ConstructGrid)
+		.def("collision_judge_2d", &Class::collisionJudge2D)
+		.def("collision_judge", &Class::collisionJudge)
+		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("var_dimension", &Class::varDimension, py::return_value_policy::reference)
+		.def("var_box_a", &Class::varBox_a, py::return_value_policy::reference)
+		.def("var_box_b", &Class::varBox_b, py::return_value_policy::reference)
+		.def("var_sdf_file_name", &Class::varSdfFileName, py::return_value_policy::reference)
+		.def("lerp", &Class::lerp)
+		.def("get_distance_from_sdf", &Class::getDistanceFromSDF)
+		.def("get_sdf", &Class::getSDF)
+		.def("get_one_point_inside_sdf", &Class::getOnePointInsideSDF);
+}
+
+#include "ParticleSystem/PoissonEmitter.h"
+template <typename TDataType>
+void declare_poisson_emitter(py::module& m, std::string typestr) {
+	using Class = dyno::PoissonEmitter<TDataType>;
+	using Parent = dyno::ParticleEmitter<TDataType>;
+	std::string pyclass_name = std::string("PoissonEmitter") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>PE(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	PE.def(py::init<>())
+		.def("var_width", &Class::varWidth, py::return_value_policy::reference)
+		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
+		.def("var_delay_start", &Class::varDelayStart, py::return_value_policy::reference)
+		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference)
+		.def("var_emitter_shape", &Class::varEmitterShape, py::return_value_policy::reference);
+
+	py::enum_<typename Class::EmitterShape>(PE, "EmitterShape")
+		.value("Square", Class::EmitterShape::Square)
+		.value("Round", Class::EmitterShape::Round)
+		.export_values();
+}
+
+#include "ParticleSystem/SamplingPoints.h"
+template <typename TDataType>
+void declare_sampling_points(py::module& m, std::string typestr) {
+	using Class = dyno::SamplingPoints<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("SamplingPoints") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("disable_render", &Class::disableRender)
+		.def("point_size", &Class::pointSize)
+		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+}
 
 
-
+#include "ParticleSystem/SphereSampler.h"
+template <typename TDataType>
+void declare_sphere_sampler(py::module& m, std::string typestr) {
+	using Class = dyno::SphereSampler<TDataType>;
+	using Parent = dyno::Sampler<TDataType>;
+	std::string pyclass_name = std::string("SphereSampler") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("in_sphere", &Class::inSphere, py::return_value_policy::reference);
+}
 
 template <typename TDataType>
-void declare_particle_emitter_square(py::module& m, std::string typestr) {
+void declare_square_emitter(py::module& m, std::string typestr) {
 	using Class = dyno::SquareEmitter<TDataType>;
 	using Parent = dyno::ParticleEmitter<TDataType>;
 	std::string pyclass_name = std::string("SquareEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
+		.def(py::init<>())
+		.def("var_width", &Class::varWidth, py::return_value_policy::reference)
+		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
+		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/StaticBoundary.h"
@@ -461,22 +530,15 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 		.def("import_rigid_bodys", &Class::importRigidBodys, py::return_value_policy::reference);
 }
 
-template <typename TDataType>
-void declare_particle_elastic_body(py::module& m, std::string typestr) {
-	using Class = dyno::ElasticBody<TDataType>;
-	using Parent = dyno::ParticleSystem<TDataType>;
-	std::string pyclass_name = std::string("ParticleElasticBody") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		//		.def("load_particles", (void (Class::*)(Class::Coord lo, Class::Coord hi, Class::Real distance)) &Class::loadParticles)
-		.def("load_particles", (void (Class::*)(std::string)) & Class::loadParticles)
-		.def("translate", &Class::translate);
-}
 
 void declare_func(py::module& m, std::string typestr);
 
 void declare_attribute(py::module& m, std::string typestr);
 
-void declare_paticle_system_init_static_plugin(py::module& m);
+void declare_particle_system_initializer(py::module& m);
+
+void declare_particle_type(py::module& m);
+
 
 void pybind_particle_system(py::module& m);
+
