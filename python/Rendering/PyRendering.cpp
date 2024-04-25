@@ -47,6 +47,24 @@ void declare_surface_visual_module(py::module& m, std::string typestr) {
 		.value("CM_Texture", Class::CM_Texture);
 }
 
+#include "GLWireframeVisualModule.h"
+void declare_gl_wireframe_visual_module(py::module& m) {
+	using Class = dyno::GLWireframeVisualModule;
+	using Parent = dyno::GLVisualModule;
+	std::string pyclass_name = std::string("GLWireframeVisualModule");
+	py::class_<Class, Parent, std::shared_ptr<Class>>GLWVM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	GLWVM.def(py::init<>())
+		.def("caption", &Class::caption)
+		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
+		.def("var_line_width", &Class::varLineWidth, py::return_value_policy::reference)
+		.def("var_render_mode", &Class::varRenderMode, py::return_value_policy::reference)
+		.def("in_edge_set", &Class::inEdgeSet, py::return_value_policy::reference);
+
+	py::enum_<typename Class::EEdgeMode>(GLWVM, "EEdgeMode")
+		.value("LINE", Class::EEdgeMode::LINE)
+		.value("CYLINDER", Class::EEdgeMode::CYLINDER);
+}
+
 #include "RenderWindow.h"
 #include "Camera.h"
 void declare_rednder_window(py::module& m) {
@@ -78,7 +96,13 @@ void pybind_rendering(py::module& m)
 		.def("set_metallic", &GLVisualModule::setMetallic)
 		.def("set_roughness", &GLVisualModule::setRoughness)
 		.def("set_alpha", &GLVisualModule::setAlpha)
-		.def("is_transparent", &GLVisualModule::isTransparent);
+		.def("is_transparent", &GLVisualModule::isTransparent)
+		.def("draw", &GLVisualModule::draw)
+		.def("release", &GLVisualModule::release)
+		.def("var_base_color", &GLVisualModule::varBaseColor, py::return_value_policy::reference)
+		.def("var_metallic", &GLVisualModule::varMetallic, py::return_value_policy::reference)
+		.def("var_roughness", &GLVisualModule::varRoughness, py::return_value_policy::reference)
+		.def("var_alpha", &GLVisualModule::varAlpha, py::return_value_policy::reference);
 
 	// 	py::class_<GLPointVisualModuleWrap, GLVisualModule, std::shared_ptr<GLPointVisualModuleWrap>>
 	// 		(m, "GLPointVisualModule", py::buffer_protocol(), py::dynamic_attr())
@@ -97,6 +121,8 @@ void pybind_rendering(py::module& m)
 	declare_point_visual_module(m, "");
 
 	declare_surface_visual_module(m, "");
+
+	declare_gl_wireframe_visual_module(m);
 
 	declare_rednder_window(m);
 

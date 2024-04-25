@@ -79,8 +79,17 @@ void declare_var(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FVar") + typestr;
 	py::class_<Class, FBase, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("get_template_name", &Class::getTemplateName)
+		.def("get_class_name", &Class::getClassName)
+		.def("size", &Class::size)
 		.def("set_value", &Class::setValue)
-		.def("get_value", &Class::getValue);
+		.def("get_value", &Class::getValue)
+		.def("serialize", &Class::serialize)
+		.def("deserialize", &Class::deserialize)
+		.def("is_empty", &Class::isEmpty)
+		//.def("connect", &Class::connect)
+		.def("get_data", &Class::getData);
+	//.def("const_data_ptr", &Class::constDataPtr, py::return_value_policy::reference);
 }
 
 template<typename T, DeviceType deviceType>

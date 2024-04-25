@@ -24,6 +24,7 @@ void pybind_peridynamics(py::module& m)
 	declare_bond<dyno::DataType3f>(m, "3f");
 	declare_cloth<dyno::DataType3f>(m, "3f");
 	declare_elastic_body<dyno::DataType3f>(m, "3f");
+	declare_elastoplastic_body<dyno::DataType3f>(m, "3f");
 	declare_tetrahedral_system<dyno::DataType3f>(m, "3f");
 	declare_hyperelastic_body<dyno::DataType3f>(m, "3f");
 	//declare_peridynamics_initializer<dyno::DataType3f>(m, "3f");

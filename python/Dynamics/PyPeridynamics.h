@@ -385,8 +385,11 @@ void declare_elastic_body(py::module& m, std::string typestr) {
 	using Class = dyno::ElasticBody<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
 	std::string pyclass_name = std::string("ElasticBody") + typestr;
+	typedef typename TDataType::Coord Coord;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("load_particles", py::overload_cast<std::string>(&Class::loadParticles)
+		/*, py::overload_cast<Coord, Coord, Real>(&Class::loadParticles)*/)
 		//.def("load_particles", &Class::loadParticles, py::arg("filename"))
 		//.def("load_particles", &Class::loadParticles)
 		.def("translate", &Class::translate)
@@ -395,6 +398,22 @@ void declare_elastic_body(py::module& m, std::string typestr) {
 		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
 		.def("state_reference_position", &Class::stateReferencePosition, py::return_value_policy::reference)
 		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference);
+}
+
+#include "Peridynamics/ElastoplasticBody.h"
+template <typename TDataType>
+void declare_elastoplastic_body(py::module& m, std::string typestr) {
+	using Class = dyno::ElastoplasticBody<TDataType>;
+	using Parent = dyno::ParticleSystem<TDataType>;
+	std::string pyclass_name = std::string("ElastoplasticBody") + typestr;
+	typedef typename TDataType::Coord Coord;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("load_particles", &Class::loadParticles)
+		.def("translate", &Class::translate)
+		.def("scale", &Class::scale)
+		.def("rotate", &Class::rotate)
+		.def("state_rest_shape", &Class::stateRestShape, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/TetrahedralSystem.h"
@@ -494,7 +513,5 @@ void declare_thread(py::module& m, std::string typestr) {
 		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
 		.def("state_rest_shape", &Class::stateRestShape, py::return_value_policy::reference);
 }
-
-
 
 void pybind_peridynamics(py::module& m);

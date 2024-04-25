@@ -12,6 +12,7 @@ root.graphics_pipeline().push_module(mapper)
 sRender = dyno.GLSurfaceVisualModule()
 sRender.set_color(dyno.Color(0,0.2,1.0))
 sRender.var_use_vertex_normal().connect(sRender.in_triangle_set())
+mapper.out_triangle_set().connect(sRender.in_triangle_set())
 root.graphics_pipeline().push_module(sRender)
 
 scn.add_node(root)

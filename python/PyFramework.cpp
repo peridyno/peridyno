@@ -35,6 +35,22 @@ void declare_camera(py::module& m)
 		.value("Orthogonal", Class::ProjectionType::Orthogonal);
 }
 
+#include "DeclareEnum.h"
+void declare_p_enum(py::module& m)
+{
+	using Class = dyno::PEnum;
+	std::string pyclass_name = std::string("PEnum");
+	py::class_<Class, std::shared_ptr<Class>>camera(m, pyclass_name.c_str());
+	camera.def(py::init<>())
+		.def(py::init<std::string, int, const std::string>())
+		.def("operator==", &Class::operator==)
+		.def("operator!=", &Class::operator!=)
+		.def("current_key", &Class::currentKey)
+		.def("current_string", &Class::currentString)
+		.def("set_current_key", &Class::setCurrentKey)
+		.def("enum_map", &Class::enumMap);
+}
+
 void pybind_log(py::module& m)
 {
 	//TODO: Log is updated, update the python binding as well
@@ -61,11 +77,34 @@ void pybind_framework(py::module& m)
 		.def("set_active", &Node::setActive)
 		.def("is_visible", &Node::isVisible)
 		.def("set_visible", &Node::setVisible)
-		.def("connect", &Node::connect)
-
-		.def("disconnect", &Node::disconnect)
+		.def("get_dt", &Node::getDt)
+		.def("set_dt", &Node::setDt)
+		.def("set_scnen_graph", &Node::setSceneGraph)
+		.def("get_scene_graph", &Node::getSceneGraph)
+		.def("get_import_nodes", &Node::getImportNodes)
+		.def("get_export_nodes", &Node::getExportNodes)
+		//.def("add_module", &Node::addModule)
+		//.def("delete_module", &Node::deleteModule)
+		.def("get_module_list", &Node::getModuleList)
+		.def("has_module", &Node::hasModule)
+		//.def("get_module", &Node::getModule)
+		.def("reset_pipeline", &Node::resetPipeline, py::return_value_policy::reference)
 		.def("graphics_pipeline", &Node::graphicsPipeline, py::return_value_policy::reference)
-		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference);
+		.def("animation_pipeline", &Node::animationPipeline, py::return_value_policy::reference)
+		.def("update", &Node::update)
+		.def("update_graphics_context", &Node::updateGraphicsContext)
+		.def("reset", &Node::reset)
+		.def("bounding_box", &Node::boundingBox)
+		.def("connect", &Node::connect)
+		.def("disconnect", &Node::disconnect)
+		.def("attach_field", &Node::attachField)
+		.def("get_all_node_ports", &Node::getAllNodePorts)
+		.def("size_of_node_ports", &Node::sizeOfNodePorts)
+		.def("size_of_import_nodes", &Node::sizeOfImportNodes)
+		.def("size_of_export_nodes", &Node::sizeOfExportNodes)
+		.def("state_elapsed_time", &Node::stateElapsedTime, py::return_value_policy::reference)
+		.def("state_time_step", &Node::stateTimeStep, py::return_value_policy::reference)
+		.def("state_frame_number", &Node::stateFrameNumber, py::return_value_policy::reference);
 
 	py::class_<dyno::PluginEntry, std::shared_ptr<dyno::PluginEntry>>(m, "PluginEntry")
 		.def(py::init<>())
@@ -139,8 +178,6 @@ void pybind_framework(py::module& m)
 		.def("set_as_path", &dyno::FilePath::set_as_path)
 		.def("set_path", &dyno::FilePath::set_path);
 
-
-
 	//FBase
 	py::class_<InstanceBase, FBase, std::shared_ptr<InstanceBase>>(m, "FInstance");
 
@@ -194,9 +231,6 @@ void pybind_framework(py::module& m)
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent);
 
-
-
-
 	//pipeline
 
 	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr());
@@ -238,6 +272,9 @@ void pybind_framework(py::module& m)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
 
 	//------------------------- New ------------------------------2024
+
+	declare_p_enum(m);
+
 	declare_var<float>(m, "f");
 	declare_var<bool>(m, "b");
 	declare_var<uint>(m, "uint");
@@ -245,6 +282,17 @@ void pybind_framework(py::module& m)
 	declare_var<dyno::Vec3f>(m, "3f");
 	declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
 	declare_var<dyno::FilePath>(m, "FilePath");
+	declare_var<dyno::Color>(m, "Color");
+	py::class_<dyno::FVar<dyno::PEnum>, FBase, std::shared_ptr<dyno::FVar<dyno::PEnum>>>(m, "FVarPEnum")
+		.def(py::init<>())
+		.def("size", &dyno::FVar<dyno::PEnum>::size)
+		.def("set_value", &dyno::FVar<dyno::PEnum>::setValue)
+		.def("get_value", &dyno::FVar<dyno::PEnum>::getValue)
+		.def("current_key", &dyno::FVar<dyno::PEnum>::currentKey)
+		.def("set_current_key", &dyno::FVar<dyno::PEnum>::setCurrentKey)
+		.def("serialize", &dyno::FVar<dyno::PEnum>::serialize)
+		.def("deserialize", &dyno::FVar<dyno::PEnum>::deserialize)
+		.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty);
 
 	declare_array<float, DeviceType::GPU>(m, "1fD");
 	declare_array<dyno::Vec3f, DeviceType::GPU>(m, "3fD");
