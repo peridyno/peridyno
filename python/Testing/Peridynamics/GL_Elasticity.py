@@ -23,7 +23,7 @@ root.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1, 1, 1]), 0.005, True)
 bunny = dyno.ElasticBody3f()
 bunny.connect(root.import_particle_systems())
 
-bunny.load_particles("H:/program/Simulation/unibeam/python/peridyno/data/bunny/bunny_points.obj")
+bunny.load_particles(filePath("bunny/bunny_points.obj"))
 bunny.scale(1.0)
 bunny.translate(dyno.Vector3f([0.5,0.1,0.5]))
 bunny.set_visible(True)

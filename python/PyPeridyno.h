@@ -4,6 +4,7 @@
 #include "PyFramework.h"
 #include "PyModeling.h"
 #include "PyTopology.h"
+#include "PyIO.h"
 
 #include "Rendering/PyGlfwGUI.h"
 #include "Rendering/PyRendering.h"

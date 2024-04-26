@@ -41,7 +41,7 @@ namespace dyno
 	public:
 
 		DEF_INSTANCE_IN(TopologyModule, Topology, "Input TriangleSet");
-		DEF_ENUM(OutputType,OutputType,OutputType::TriangleMesh,"OutputType")
+		DEF_ENUM(OutputType, OutputType, OutputType::TriangleMesh, "OutputType")
 
 
 

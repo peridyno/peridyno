@@ -7,6 +7,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	m.doc() = "Python binding of Peridyno";
 	pybind_core(m);
 	pybind_framework(m);
+	pybind_io(m);
 	pybind_modeling(m);
 	pybind_topology(m);
 

@@ -8,6 +8,7 @@
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
 #include "Module/MouseInputModule.h"
+#include "Module/OutputModule.h"
 
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"
@@ -62,6 +63,9 @@ using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
 using GroupModule = dyno::GroupModule;
 using TopologyMappingdyno = dyno::TopologyMapping;
+using OutputModule = dyno::OutputModule;
+using Object = dyno::Object;
+
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -109,8 +113,21 @@ void declare_instance(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Instance") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("get_template_name", &Class::getTemplateName)
+		.def("get_class_name", &Class::getClassName)
+		.def("get_data_ptr", &Class::getDataPtr)
+		.def("const_data_ptr", &Class::constDataPtr)
+		.def("set_data_ptr", &Class::setDataPtr)
+		.def("allocate", &Class::allocate)
+		.def("is_empty", &Class::isEmpty)
 		.def("connect", &Class::connect)
-		.def("disconnect", &Class::disconnect);
+		.def("get_data", &Class::getData, py::return_value_policy::reference)
+		.def("size", &Class::size)
+		.def("object_pointer", &Class::objectPointer)
+		.def("standard_object_pointer", &Class::standardObjectPointer)
+		.def("set_object_pointer", &Class::setObjectPointer)
+		.def("can_be_connected_by", &Class::canBeConnectedBy)
+		.def("get_template_name", &Class::getTemplateName);
 }
 
 //------------------------- New ------------------------------

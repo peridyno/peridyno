@@ -65,6 +65,13 @@ void pybind_framework(py::module& m)
 	pybind_log(m);
 
 	//basic
+	py::class_<Object, std::shared_ptr<Object>>(m, "Object")
+		.def(py::init<>())
+		.def("register_class", &Object::registerClass)
+		//.def("create_object", &Object::createObject, py::return_value_policy::reference)
+		.def("get_class_map", &Object::getClassMap, py::return_value_policy::reference)
+		.def("base_id", &Object::baseId)
+		.def("object_id", &Object::objectId);
 
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
@@ -106,7 +113,7 @@ void pybind_framework(py::module& m)
 		.def("state_time_step", &Node::stateTimeStep, py::return_value_policy::reference)
 		.def("state_frame_number", &Node::stateFrameNumber, py::return_value_policy::reference);
 
-	py::class_<dyno::PluginEntry, std::shared_ptr<dyno::PluginEntry>>(m, "PluginEntry")
+	py::class_<dyno::PluginEntry, std::shared_ptr<dyno::PluginEntry >>(m, "PluginEntry")
 		.def(py::init<>())
 		.def("name", &dyno::PluginEntry::name)
 		.def("version", &dyno::PluginEntry::version)
@@ -116,11 +123,14 @@ void pybind_framework(py::module& m)
 		.def("setDescription", &dyno::PluginEntry::setDescription, py::arg("desc"))
 		.def("initialize", &dyno::PluginEntry::initialize);
 
-	py::class_<NodePort>(m, "NodePort")
+	py::class_<NodePort, std::shared_ptr<dyno::NodePort>>(m, "NodePort")
 		//.def(py::init<>())
 		.def("get_port_name", &NodePort::getPortName)
 		.def("get_port_type", &NodePort::getPortType)
 		.def("set_port_type", &NodePort::setPortType)
+		.def("get_nodes", &NodePort::getNodes)
+		.def("is_kind_of", &NodePort::isKindOf)
+		.def("had_node", &NodePort::hasNode)
 		.def("get_parent", &NodePort::getParent, py::return_value_policy::reference)
 		.def("attach", &NodePort::attach);
 
@@ -179,11 +189,30 @@ void pybind_framework(py::module& m)
 		.def("set_path", &dyno::FilePath::set_path);
 
 	//FBase
-	py::class_<InstanceBase, FBase, std::shared_ptr<InstanceBase>>(m, "FInstance");
+	py::class_<InstanceBase, FBase, std::shared_ptr<InstanceBase>>(m, "InstanceBase")
+		.def("can_be_connected_by", &InstanceBase::canBeConnectedBy)
+		.def("set_object_pointer", &InstanceBase::setObjectPointer)
+		.def("object_pointer", &InstanceBase::objectPointer)
+		.def("standard_object_pointer", &InstanceBase::standardObjectPointer)
+		.def("class_name", &InstanceBase::className);
 
 	//module
 	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
-		.def(py::init<>());
+		.def(py::init<>())
+		.def("initialize", &Module::initialize)
+		.def("update", &Module::update)
+		.def("set_name", &Module::initialize)
+		.def("get_name", &Module::initialize)
+		.def("set_parent_node", &Module::initialize)
+		.def("get_parent_node", &Module::initialize)
+		.def("get_scene_graph", &Module::initialize)
+		.def("is_initialized", &Module::isInitialized)
+		.def("get_module_type", &Module::getModuleType)
+		.def("attach_field", &Module::attachField)
+		.def("is_input_complete", &Module::isInputComplete)
+		.def("is_output_complete", &Module::isOutputCompete)
+		.def("var_force_update", &Module::varForceUpdate, py::return_value_policy::reference)
+		.def("set_update_always", &Module::setUpdateAlways);
 
 	py::class_<VisualModule, Module, std::shared_ptr<VisualModule>>(m, "VisualModule")
 		.def(py::init<>())
@@ -192,9 +221,24 @@ void pybind_framework(py::module& m)
 		.def("get_module_type", &VisualModule::getModuleType);
 
 	py::class_<Pipeline, Module, std::shared_ptr<Pipeline>>(m, "Pipeline")
+		.def("size_of_dynamic_modules", &Pipeline::sizeOfDynamicModules)
+		.def("size_of_persistent_modules", &Pipeline::sizeOfPersistentModules)
 		.def("push_module", &Pipeline::pushModule)
+		.def("pop_module", &Pipeline::popModule)
+		//.def("create_modules", &Pipeline::createModule)
+		//.def("find_first_module", &Pipeline::findFirstModule)
+		.def("clear", &Pipeline::clear)
+		.def("push_persiistent_module", &Pipeline::pushPersistentModule)
+		.def("active_moduiles", &Pipeline::activeModules, py::return_value_policy::reference)
+		.def("all_modules", &Pipeline::allModules, py::return_value_policy::reference)
+		.def("enable", &Pipeline::enable)
 		.def("disable", &Pipeline::disable)
-		.def("enable", &Pipeline::enable);
+		.def("update_execution_queue", &Pipeline::updateExecutionQueue)
+		.def("print_module_info", &Pipeline::printModuleInfo)
+		.def("force_update", &Pipeline::forceUpdate)
+		.def("promote_putput_to_node", &Pipeline::promoteOutputToNode, py::return_value_policy::reference)
+		.def("demote_output_from_node", &Pipeline::demoteOutputFromNode);
+
 
 	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
 		.def("get_module_type", &dyno::ComputeModule::getModuleType);
@@ -227,6 +271,16 @@ void pybind_framework(py::module& m)
 	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
 		.def("get_module_type", &InputModule::getModuleType);
 
+	py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
+		.def("var_output_path", &OutputModule::varOutputPath, py::return_value_policy::reference)
+		.def("var_prefix", &OutputModule::varPrefix, py::return_value_policy::reference)
+		.def("var_start_frame", &OutputModule::varStartFrame, py::return_value_policy::reference)
+		.def("var_end_frame", &OutputModule::varEndFrame, py::return_value_policy::reference)
+		.def("var_stride", &OutputModule::varStride, py::return_value_policy::reference)
+		.def("var_reordering", &OutputModule::varReordering, py::return_value_policy::reference)
+		.def("in_frame_number", &OutputModule::inFrameNumber, py::return_value_policy::reference)
+		.def("get_module_type", &OutputModule::getModuleType);
+
 	py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent);
@@ -239,23 +293,73 @@ void pybind_framework(py::module& m)
 
 	//OBase
 
-	py::class_<OBase, std::shared_ptr<OBase>>(m, "OBase");
+	py::class_<OBase, Object, std::shared_ptr<OBase>>(m, "OBase")
+		.def("caption", &OBase::caption)
+		.def("caption_visible", &OBase::captionVisible)
+		.def("description", &OBase::description)
+		.def("get_name", &OBase::getName)
+		/*.def("add_field", &OBase::addField)
+		.def("add_field", &OBase::addField)
+		.def("add_field_alias", &OBase::addFieldAlias)
+		.def("add_field_alias", &OBase::addFieldAlias)*/
+		.def("find_field", &OBase::findField)
+		//.def("find_field_alias", &OBase::findFieldAlias)
+		//.def("find_field_alias", &OBase::findFieldAlias)
+		.def("remove_field", &OBase::removeField)
+		//.def("remove_field_alias", &OBase::removeFieldAlias)
+		//.def("remove_field_alias", &OBase::removeFieldAlias)
+		//.def("get_field", &OBase::getField, py::return_value_policy::reference)
+		.def("get_all_fields", &OBase::getAllFields, py::return_value_policy::reference)
+		.def("attach_field", &OBase::attachField)
+		.def("is_all_fields_ready", &OBase::isAllFieldsReady)
+		.def("get_field_alias", &OBase::getFieldAlias)
+		.def("get_field_alias_count", &OBase::getFieldAliasCount)
+		.def("set_block_coord", &OBase::setBlockCoord)
+		.def("bx", &OBase::bx)
+		.def("by", &OBase::by)
+		.def("find_input_field", &OBase::findInputField)
+		.def("add_input_field", &OBase::addInputField)
+		.def("remove_input_field", &OBase::removeInputField)
+		.def("get_input_fields", &OBase::getInputFields, py::return_value_policy::reference)
+		.def("find_output_field", &OBase::findOutputField)
+		.def("add_output_field", &OBase::addOutputField)
+		.def("add_to_output", &OBase::addToOutput)
+		.def("remove_output_field", &OBase::removeOutputField)
+		.def("remove_from_output", &OBase::removeFromOutput)
+		.def("get_output_fields", &OBase::getOutputFields, py::return_value_policy::reference)
+		.def("find_parameter", &OBase::findParameter)
+		.def("add_parameter", &OBase::addParameter)
+		.def("remove_parameter", &OBase::removeParameter)
+		.def("get_parameters", &OBase::getParameters, py::return_value_policy::reference);
 
 	py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
-		.def(py::init<>());
-
-	py::class_<SceneGraph, OBase, std::shared_ptr<SceneGraph>>(m, "SceneGraph")
 		.def(py::init<>())
+		.def("get_dof", &TopologyModule::getDOF)
+		.def("tag_as_changed", &TopologyModule::tagAsChanged)
+		.def("tag_as_unchanged", &TopologyModule::tagAsUnchanged)
+		.def("is_topology_changed", &TopologyModule::isTopologyChanged)
+		.def("update", &TopologyModule::update);
+
+	py::class_<SceneGraph, OBase, std::shared_ptr<SceneGraph>>SG(m, "SceneGraph");
+	SG.def(py::init<>())
+		.def("advance", &SceneGraph::advance)
+		.def("take_one_frame", &SceneGraph::takeOneFrame)
+		.def("update_graphics_context", &SceneGraph::updateGraphicsContext)
+		.def("run", &SceneGraph::run)
 		.def("bounding_box", &SceneGraph::boundingBox)
+		//.def("reset", &SceneGraph::reset)
 		.def("print_node_info", &SceneGraph::printNodeInfo)
 		.def("print_module_info", &SceneGraph::printModuleInfo)
 		.def("is_node_info_printable", &SceneGraph::isNodeInfoPrintable)
 		.def("is_module_info_printable", &SceneGraph::isModuleInfoPrintable)
 		.def("load", &SceneGraph::load)
 		.def("invoke", &SceneGraph::invoke)
+		//.def("create_new_scene", &SceneGraph::createNewScene)
 		.def("delete_node", &SceneGraph::deleteNode)
 		.def("propagate_node", &SceneGraph::propagateNode)
 		.def("is_empty", &SceneGraph::isEmpty)
+		.def("get_work_mode", &SceneGraph::getWorkMode)
+		.def("get_instance", &SceneGraph::getInstance)
 		.def("set_total_time", &SceneGraph::setTotalTime)
 		.def("get_total_time", &SceneGraph::getTotalTime)
 		.def("set_frame_rate", &SceneGraph::setFrameRate)
@@ -263,13 +367,26 @@ void pybind_framework(py::module& m)
 		.def("get_timecost_perframe", &SceneGraph::getTimeCostPerFrame)
 		.def("get_frame_interval", &SceneGraph::getFrameInterval)
 		.def("get_frame_number", &SceneGraph::getFrameNumber)
+		.def("is_interval_adaptive", &SceneGraph::isIntervalAdaptive)
+		.def("set_adaptive_interval", &SceneGraph::setAdaptiveInterval)
 		.def("set_gravity", &SceneGraph::setGravity)
 		.def("get_gravity", &SceneGraph::getGravity)
 		.def("set_upper_bound", &SceneGraph::setUpperBound)
 		.def("get_upper_bound", &SceneGraph::getUpperBound)
 		.def("set_lower_bound", &SceneGraph::setLowerBound)
 		.def("get_lower_bound", &SceneGraph::getLowerBound)
+		.def("begin", &SceneGraph::begin)
+		.def("end", &SceneGraph::end)
+		.def("mark_queue_update_required", &SceneGraph::markQueueUpdateRequired)
+		//.def("on_mouse_event", &SceneGraph::onMouseEvent)
+		//.def("traverse_backward", &SceneGraph::traverseBackward)
+		//.def("traverse_forward", &SceneGraph::traverseForward)
+		//.def("traverse_forward_with_auth_sync", &SceneGraph::traverseForwardWithAutoSync)
 		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
+
+	py::enum_<typename SceneGraph::EWorkMode>(m, "EWorkMode")
+		.value("EDIT_MODE", SceneGraph::EWorkMode::EDIT_MODE)
+		.value("RUNNING_MODE", SceneGraph::EWorkMode::RUNNING_MODE);
 
 	//------------------------- New ------------------------------2024
 
