@@ -22,17 +22,17 @@ namespace dyno
 		this->varRotation()->attach(callback);
 
 
-		auto rigidMeshRender = std::make_shared<GLSurfaceVisualModule>();
-		rigidMeshRender->setColor(Color(0.8f, 0.8f, 0.8f));
-		this->stateEnvelope()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
-		this->graphicsPipeline()->pushModule(rigidMeshRender);
-		rigidMeshRender->setVisible(true);
+		auto EnvelopeRender = std::make_shared<GLSurfaceVisualModule>();
+		EnvelopeRender->setColor(Color(0.8f, 0.8f, 0.8f));
+		this->stateEnvelope()->promoteOuput()->connect(EnvelopeRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(EnvelopeRender);
+		EnvelopeRender->setVisible(false);
 
 
-		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-		this->inTextureMesh()->connect(prRender->inTextureMesh());
-		this->stateInstanceTransform()->connect(prRender->inTransform());
-		this->graphicsPipeline()->pushModule(prRender);
+		auto texMeshRender = std::make_shared<GLPhotorealisticInstanceRender>();
+		this->inTextureMesh()->connect(texMeshRender->inTextureMesh());
+		this->stateInstanceTransform()->connect(texMeshRender->inTransform());
+		this->graphicsPipeline()->pushModule(texMeshRender);
 
 
 		auto evenlopeLoader = std::make_shared<FCallBackFunc>(
@@ -161,7 +161,7 @@ namespace dyno
 				for (uint j = 0; j < list.size(); j++)
 				{
 					
-					list[j].translation() = center ;
+					list[j].translation() = center + quat.rotate(mShapeCenter) - mShapeCenter;
 					list[j].rotation() = quat.toMatrix3x3();
 					list[j].scale() = scale;
 
@@ -169,13 +169,10 @@ namespace dyno
 
 			}
 
-
 			auto instantanceTransform = this->stateInstanceTransform()->getDataPtr();
 			instantanceTransform->assign(tms);
 
 			tms.clear();
-			tms.assign(this->stateInstanceTransform()->getData());
-
 
 		}
 	}
