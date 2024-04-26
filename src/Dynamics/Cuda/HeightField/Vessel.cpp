@@ -3,6 +3,7 @@
 #include "Quat.h"
 
 #include <GLSurfaceVisualModule.h>
+#include "GLPhotorealisticInstanceRender.h"
 
 namespace dyno
 {
@@ -20,31 +21,19 @@ namespace dyno
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
 
+
 		auto rigidMeshRender = std::make_shared<GLSurfaceVisualModule>();
 		rigidMeshRender->setColor(Color(0.8f, 0.8f, 0.8f));
-		this->stateMesh()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
+		this->stateEnvelope()->promoteOuput()->connect(rigidMeshRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(rigidMeshRender);
+		rigidMeshRender->setVisible(true);
 
-		auto meshLoader = std::make_shared<FCallBackFunc>(
-			[=]() {
-				std::string name = this->varMeshName()->getValue().string();
-				bool succeed = mInitialMesh.loadObjFile(name);
 
-				if (succeed)
-				{
-					auto curTopo = this->stateMesh()->getDataPtr();
+		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
+		this->inTextureMesh()->connect(prRender->inTextureMesh());
+		this->stateInstanceTransform()->connect(prRender->inTransform());
+		this->graphicsPipeline()->pushModule(prRender);
 
-					curTopo->copyFrom(mInitialMesh);
-
-					curTopo->scale(this->varScale()->getValue());
-					curTopo->rotate(this->varRotation()->getValue() * M_PI / 180);
-					curTopo->translate(this->varLocation()->getValue());
-				}
-			}
-		);
-		meshLoader->update();
-
-		this->varMeshName()->attach(meshLoader);
 
 		auto evenlopeLoader = std::make_shared<FCallBackFunc>(
 			[=]() {
@@ -87,27 +76,21 @@ namespace dyno
 	template<typename TDataType>
 	void Vessel<TDataType>::resetStates()
 	{
-		Coord location = this->varLocation()->getValue();
-		Coord rot = this->varRotation()->getValue();
-		Coord scale = this->varScale()->getValue();
 
-		auto quat = this->computeQuaternion();
-		auto offset = this->varBarycenterOffset()->getValue();
+		this->transform();
+
+		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		//Initialize states for the rigid body
-		{
-			Coord lo;
-			Coord hi;
+		{ 
 
-			mInitialMesh.requestBoundingBox(lo, hi);
+			Coord lo = texMesh->shapes()[0]->boundingBox.v0;
+			Coord hi = texMesh->shapes()[0]->boundingBox.v1;
 
-			mShapeCenter = 0.5f * (hi + lo);
+			Coord scale = this->varScale()->getValue();
 
-			auto envelope = this->stateEnvelope()->getDataPtr();
-			envelope->copyFrom(mInitialEnvelope);
-			envelope->scale(scale);
-			envelope->rotate(quat);
-			envelope->translate(location);
+			mShapeCenter = texMesh->shapes()[0]->boundingTransform.translation() * scale;
+			printf("%f,%f,%f\n",mShapeCenter[0], mShapeCenter[1], mShapeCenter[2]);
 
 			Real lx = hi.x - lo.x;
 			Real ly = hi.y - lo.y;
@@ -122,6 +105,13 @@ namespace dyno
 					0, lx * lx + lz * lz, 0,
 					0, 0, lx * lx + ly * ly);
 
+
+			Coord location = this->varLocation()->getValue();
+			Coord rot = this->varRotation()->getValue();
+
+			auto quat = this->computeQuaternion();
+			auto offset = this->varBarycenterOffset()->getValue();
+
 			this->stateMass()->setValue(mass);
 			this->stateCenter()->setValue(location + mShapeCenter);
 			this->stateBarycenter()->setValue(location + mShapeCenter + quat.rotate(offset));
@@ -132,11 +122,8 @@ namespace dyno
 			this->stateInitialInertia()->setValue(inertia);
 		}
 
-		auto mesh = this->stateMesh()->getDataPtr();
-		mesh->copyFrom(mInitialMesh);
-		mesh->scale(scale);
-		mesh->rotate(quat);
-		mesh->translate(location);
+
+		
 
 		RigidBody<TDataType>::resetStates();
 	}
@@ -160,28 +147,48 @@ namespace dyno
 		buoy->scale(scale);
 		buoy->translate(center - mShapeCenter);
 
-		auto mesh = this->stateMesh()->getDataPtr();
-		mesh->copyFrom(mInitialMesh);
-		mesh->rotate(quat);
-		mesh->scale(scale);
-		mesh->translate(center - mShapeCenter);
+		auto texMesh = this->inTextureMesh()->getDataPtr();
+		{
+
+			uint N = texMesh->shapes().size();
+
+			CArrayList<Transform3f> tms;
+			tms.assign(this->stateInstanceTransform()->constData());
+
+			for (uint i = 0; i < tms.size(); i++)
+			{
+				auto& list = tms[i];
+				for (uint j = 0; j < list.size(); j++)
+				{
+					
+					list[j].translation() = center ;
+					list[j].rotation() = quat.toMatrix3x3();
+					list[j].scale() = scale;
+
+				}
+
+			}
+
+
+			auto instantanceTransform = this->stateInstanceTransform()->getDataPtr();
+			instantanceTransform->assign(tms);
+
+			tms.clear();
+			tms.assign(this->stateInstanceTransform()->getData());
+
+
+		}
 	}
 
 	template<typename TDataType>
 	void Vessel<TDataType>::transform()
 	{
+
 		Coord location = this->varLocation()->getValue();
 		Coord rot = this->varRotation()->getValue();
 		Coord scale = this->varScale()->getValue();
 
 		auto quat = this->computeQuaternion();
-
-		Coord lo;
-		Coord hi;
-
-		mInitialMesh.requestBoundingBox(lo, hi);
-
-		Coord center = 0.5f * (hi + lo);
 
 		auto envelope = this->stateEnvelope()->getDataPtr();
 		envelope->copyFrom(mInitialEnvelope);
@@ -189,11 +196,33 @@ namespace dyno
 		envelope->rotate(quat);
 		envelope->translate(location);
 
-		auto mesh = this->stateMesh()->getDataPtr();
-		mesh->copyFrom(mInitialMesh);
-		mesh->scale(scale);
-		mesh->rotate(quat);
-		mesh->translate(location);
+		auto texMesh = this->inTextureMesh()->constDataPtr();
+		{
+			uint N = texMesh->shapes().size();
+
+			CArrayList<Transform3f> tms;
+			tms.resize(N, 1);
+
+			for (uint i = 0; i < N; i++)
+			{
+				Transform3f t = texMesh->shapes()[i]->boundingTransform;
+
+				tms[i].insert(Transform3f(t.translation() * scale + location, quat.toMatrix3x3(), t.scale() * scale));
+
+
+			}
+
+			if (this->stateInstanceTransform()->isEmpty())
+			{
+				this->stateInstanceTransform()->allocate();
+			}
+
+			auto instantanceTransform = this->stateInstanceTransform()->getDataPtr();
+			instantanceTransform->assign(tms);
+
+			tms.clear();
+
+		}
 	}
 
 	DEFINE_CLASS(Vessel);
