@@ -166,10 +166,13 @@
 			"name":"principledshader1",
 			"pbrMetallicRoughness":{
 				"metallicFactor":0,
-				"roughnessFactor":0.300000012,
+				"roughnessFactor":0.500000012,
 				"baseColorTexture":{
 					"index":0
 				}
+			},
+			"normalTexture":{
+				"index":1
 			}
 		}
 	],
@@ -182,11 +185,18 @@
 	"textures":[
 		{
 			"source":0
+		},
+		{
+			"source":1
 		}
 	],
 	"images":[
 		{
 			"uri":"SailBoatTex_Base_color.png",
+			"mimeType":"image/png"
+		},
+		{
+			"uri":"SailBoatTex_Normal_OpenGL.png",
 			"mimeType":"image/png"
 		}
 	],
