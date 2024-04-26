@@ -24,6 +24,7 @@ namespace dyno
 		DArray<Sphere3D> sphere,
 		DArray<Box3D> box,
 		DArray<Tet3D> tet,
+		DArray<Capsule3D> cap,
 		DArray<int> count,
 		Coord hi,
 		Coord lo,
@@ -169,8 +170,74 @@ namespace dyno
 
 			count[pId] = cnt;
 		}
-		else//segments
+		else if (eleType == ET_CAPSULE)//segments
 		{
+			int cnt = 0;
+
+			Capsule3D cap_i = cap[pId - elementOffset.capsuleIndex()];
+
+			Coord v0 = cap_i.startPoint();
+			Coord v1 = cap_i.endPoint();
+
+			Real radius = cap_i.radius;
+
+			if (v0.x + radius >= hi.x)
+			{
+				cnt++;
+			}
+			if (v0.x - radius <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v0.y + radius >= hi.y)
+			{
+				cnt++;
+			}
+			if (v0.y - radius <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v0.z + radius >= hi.z)
+			{
+				cnt++;
+			}
+			if (v0.z - radius <= lo.z)
+			{
+				cnt++;
+			}
+
+
+			//v1
+			if (v1.x + radius >= hi.x)
+			{
+				cnt++;
+			}
+			if (v1.x - radius <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v1.y + radius >= hi.y)
+			{
+				cnt++;
+			}
+			if (v1.y - radius <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v1.z + radius >= hi.z)
+			{
+				cnt++;
+			}
+			if (v1.z - radius <= lo.z)
+			{
+				cnt++;
+			}
+
+			count[pId] = cnt;
 		}
 	}
 
@@ -179,6 +246,7 @@ namespace dyno
 		DArray<Sphere3D> sphere,
 		DArray<Box3D> box,
 		DArray<Tet3D> tet,
+		DArray<Capsule3D> cap,
 		DArray<int> count,
 		DArray<ContactPair> nbq,
 		Coord hi,
@@ -430,8 +498,145 @@ namespace dyno
 				}
 			}
 		}
-		else//segments 
+		else if (eleType == ET_CAPSULE)
 		{
+			int cnt = 0;
+			int start_i = count[pId];
+
+			Capsule3D cap_i = cap[pId - elementOffset.capsuleIndex()];
+
+			Coord v0 = cap_i.startPoint();
+			Coord v1 = cap_i.endPoint();
+
+			Real radius = cap_i.radius;
+
+			//v0
+			if (v0.x + radius >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v0 + Coord(radius, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.x + radius - hi.x;
+				cnt++;
+			}
+			if (v0.x - radius <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v0 - Coord(radius, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v0.x - radius);
+				cnt++;
+			}
+
+			if (v0.y + radius >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v0 + Coord(0, radius, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.y + radius - hi.y;
+				cnt++;
+			}
+			if (v0.y - radius <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v0 - Coord(0, radius, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v0.y - radius);
+				cnt++;
+			}
+
+			if (v0.z + radius >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v0 + Coord(0, 0, radius);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.z + radius - hi.z;
+				cnt++;
+			}
+			if (v0.z - radius <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v0 - Coord(0, 0, radius);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v0.z - radius);
+				cnt++;
+			}
+
+			//v1
+			if (v1.x + radius >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v1 + Coord(radius, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.x + radius - hi.x;
+				cnt++;
+			}
+			if (v1.x - radius <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v1 - Coord(radius, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v1.x - radius);
+				cnt++;
+			}
+
+			if (v1.y + radius >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v1 + Coord(0, radius, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.y + radius - hi.y;
+				cnt++;
+			}
+			if (v1.y - radius <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v1 - Coord(0, radius, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v1.y - radius);
+				cnt++;
+			}
+
+			if (v1.z + radius >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v1 + Coord(0, 0, radius);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.z + radius - hi.z;
+				cnt++;
+			}
+			if (v1.z - radius <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v1 - Coord(0, 0, radius);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v1.z - radius);
+				cnt++;
+			}
 		}
 	}
 
@@ -457,6 +662,7 @@ namespace dyno
 				discreteSet->getSpheres(),
 				discreteSet->getBoxes(),
 				discreteSet->getTets(),
+				discreteSet->getCaps(),
 				mBoundaryContactCounter,
 				upperBound,
 				lowerBound,
@@ -473,6 +679,7 @@ namespace dyno
 					discreteSet->getSpheres(),
 					discreteSet->getBoxes(),
 					discreteSet->getTets(),
+					discreteSet->getCaps(),
 					mBoundaryContactCounter,
 					this->outContacts()->getData(),
 					upperBound,

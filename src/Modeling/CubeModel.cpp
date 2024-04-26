@@ -11,7 +11,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	CubeModel<TDataType>::CubeModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 		this->varLength()->setRange(0.01, 100.0f);
 		this->varSegments()->setRange(1, 100);

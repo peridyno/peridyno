@@ -40,7 +40,12 @@ namespace dyno
 		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
+		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
+		this->varGravityValue()->connect(iterSolver->varGravityValue());
+		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
+		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
+		this->stateMass()->connect(merge->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
 		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
@@ -48,6 +53,18 @@ namespace dyno
 		this->stateInertia()->connect(iterSolver->inInertia());
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
+
+		this->stateBallAndSocketJoints()->connect(iterSolver->inBallAndSocketJoints());
+		this->stateSliderJoints()->connect(iterSolver->inSliderJoints());
+		this->stateHingeJoints()->connect(iterSolver->inHingeJoints());
+		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
+		this->statePointJoints()->connect(iterSolver->inPointJoints());
+
+		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
+		this->stateSliderJoints()->connect(merge->inSliderJoints());
+		this->stateHingeJoints()->connect(merge->inHingeJoints());
+		this->stateFixedJoints()->connect(merge->inFixedJoints());
+
 
 		merge->outContacts()->connect(iterSolver->inContacts());
 
@@ -57,6 +74,26 @@ namespace dyno
 	template<typename TDataType>
 	RigidBodySystem<TDataType>::~RigidBodySystem()
 	{
+	}
+
+	template<typename Real>
+	SquareMatrix<Real, 3> ParallelAxisTheorem(Vector<Real, 3> offset, Real m)
+	{
+		SquareMatrix<Real, 3> mat;
+		mat(0, 0) = m * (offset.y * offset.y + offset.z * offset.z);
+		mat(1, 1) = m * (offset.x * offset.x + offset.z * offset.z);
+		mat(2, 2) = m * (offset.x * offset.x + offset.y * offset.y);
+
+		mat(0, 1) = m * offset.x * offset.y;
+		mat(1, 0) = m * offset.x * offset.y;
+
+		mat(0, 2) = m * offset.x * offset.z;
+		mat(2, 0) = m * offset.z * offset.x;
+
+		mat(1, 2) = m * offset.y * offset.z;
+		mat(2, 1) = m * offset.z * offset.y;
+
+		return mat;
 	}
 
 	template<typename TDataType>
@@ -71,13 +108,16 @@ namespace dyno
 		float lx = 2.0f * b.halfLength[0];
 		float ly = 2.0f * b.halfLength[1];
 		float lz = 2.0f * b.halfLength[2];
-		bd.position = b.center;
+		bd.position = b.center + bd.offset;
 
 		bd.mass = density * lx * ly * lz;
+
+		std::cout << "Box : " << bd.mass << std::endl;
+
 		bd.inertia = 1.0f / 12.0f * bd.mass
-			* Mat3f(ly*ly + lz * lz, 0, 0,
-				0, lx*lx + lz * lz, 0,
-				0, 0, lx*lx + ly * ly);
+			* Mat3f(ly * ly + lz * lz, 0, 0,
+				0, lx * lx + lz * lz, 0,
+				0, 0, lx * lx + ly * ly) + ParallelAxisTheorem(-bd.offset, bd.mass);
 
 		bd.shapeType = ET_BOX;
 		bd.angle = b.rot;
@@ -95,17 +135,17 @@ namespace dyno
 		auto b = sphere;
 		auto bd = bodyDef;
 
-		bd.position = b.center;
+		bd.position = b.center + bd.offset;
 
 		float r = b.radius;
 		if (bd.mass <= 0.0f) {
-			bd.mass = 3 / 4.0f*M_PI*r*r*r*density;
+			bd.mass = 4 / 3.0f*M_PI*r*r*r*density;
 		}
 		float I11 = r * r;
 		bd.inertia = 0.4f * bd.mass
 			* Mat3f(I11, 0, 0,
 				0, I11, 0,
-				0, 0, I11);
+				0, 0, I11) + ParallelAxisTheorem(-bd.offset, bd.mass);
 
 		bd.shapeType = ET_SPHERE;
 		bd.angle = b.rot;
@@ -115,37 +155,131 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	Mat3f RigidBodySystem<TDataType>::pointInertia(Coord r1)
+	{
+		Real x = r1.x;
+		Real y = r1.y;
+		Real z = r1.z;
+		return Mat3f(y * y + z * z, -x * y, -x * z, -y * x, x * x + z * z, -y * z, -z * x, -z * y, x * x + y * y);
+	}
+
+
+	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addTet(
-		const TetInfo& tet,
-		const RigidBodyInfo& bodyDef, 
+		const TetInfo& tetInfo,
+		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
 	{
-		auto b = tet;
+		TetInfo tet = tetInfo;
 		auto bd = bodyDef;
 
 		bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
 
-		float r = 0.025;
-		if (bd.mass <= 0.0f) {
-			bd.mass = 3 / 4.0f*M_PI*r*r*r*density;
-		}
-		float I11 = r * r;
-		bd.inertia = 0.4f * bd.mass
-			* Mat3f(I11, 0, 0,
-				0, I11, 0,
-				0, 0, I11);
+		auto centroid = bd.position;
+		tet.v[0] = tet.v[0] - centroid;
+		tet.v[1] = tet.v[1] - centroid;
+		tet.v[2] = tet.v[2] - centroid;
+		tet.v[3] = tet.v[3] - centroid;
 
+		auto tmpMat = Mat3f(tet.v[1] - tet.v[0], tet.v[2] - tet.v[0], tet.v[3] - tet.v[0]);
+
+		Real detJ = abs(tmpMat.determinant());
+		Real volume = (1.0 / 6.0) * detJ;
+		Real mass = volume * density;
+		bd.mass = mass;
+
+		Real a = density * detJ * (tet.v[0].y * tet.v[0].y + tet.v[0].y * tet.v[1].y + tet.v[1].y * tet.v[1].y + tet.v[0].y * tet.v[2].y + tet.v[1].y * tet.v[2].y + tet.v[2].y * tet.v[2].y + tet.v[0].y * tet.v[3].y + tet.v[1].y * tet.v[3].y + tet.v[2].y * tet.v[3].y + tet.v[3].y * tet.v[3].y + tet.v[0].z * tet.v[0].z + tet.v[0].z * tet.v[1].z + tet.v[1].z * tet.v[1].z + tet.v[0].z * tet.v[2].z + tet.v[1].z * tet.v[2].z + tet.v[2].z * tet.v[2].z + tet.v[0].z * tet.v[3].z + tet.v[1].z * tet.v[3].z + tet.v[2].z * tet.v[3].z + tet.v[3].z * tet.v[3].z) / 60;
+		Real b = density * detJ * (tet.v[0].x * tet.v[0].x + tet.v[0].x * tet.v[1].x + tet.v[1].x * tet.v[1].x + tet.v[0].x * tet.v[2].x + tet.v[1].x * tet.v[2].x + tet.v[2].x * tet.v[2].x + tet.v[0].x * tet.v[3].x + tet.v[1].x * tet.v[3].x + tet.v[2].x * tet.v[3].x + tet.v[3].x * tet.v[3].x + tet.v[0].z * tet.v[0].z + tet.v[0].z * tet.v[1].z + tet.v[1].z * tet.v[1].z + tet.v[0].z * tet.v[2].z + tet.v[1].z * tet.v[2].z + tet.v[2].z * tet.v[2].z + tet.v[0].z * tet.v[3].z + tet.v[1].z * tet.v[3].z + tet.v[2].z * tet.v[3].z + tet.v[3].z * tet.v[3].z) / 60;
+		Real c = density * detJ * (tet.v[0].x * tet.v[0].x + tet.v[0].x * tet.v[1].x + tet.v[1].x * tet.v[1].x + tet.v[0].x * tet.v[2].x + tet.v[1].x * tet.v[2].x + tet.v[2].x * tet.v[2].x + tet.v[0].x * tet.v[3].x + tet.v[1].x * tet.v[3].x + tet.v[2].x * tet.v[3].x + tet.v[3].x * tet.v[3].x + tet.v[0].y * tet.v[0].y + tet.v[0].y * tet.v[1].y + tet.v[1].y * tet.v[1].y + tet.v[0].y * tet.v[2].y + tet.v[1].y * tet.v[2].y + tet.v[2].y * tet.v[2].y + tet.v[0].y * tet.v[3].y + tet.v[1].y * tet.v[3].y + tet.v[2].y * tet.v[3].y + tet.v[3].y * tet.v[3].y) / 60;
+		Real a_ = density * detJ * (2 * tet.v[0].y * tet.v[0].z + tet.v[1].y * tet.v[0].z + tet.v[2].y * tet.v[0].z + tet.v[3].y * tet.v[0].z + tet.v[0].y * tet.v[1].z + 2 * tet.v[1].y * tet.v[1].z + tet.v[2].y * tet.v[1].z + tet.v[3].y * tet.v[1].z + tet.v[0].y * tet.v[2].z + tet.v[1].y * tet.v[2].z + 2 * tet.v[2].y * tet.v[2].z + tet.v[3].y * tet.v[2].z + tet.v[0].y * tet.v[3].z + tet.v[1].y * tet.v[3].z + tet.v[2].y * tet.v[3].z + 2 * tet.v[3].y * tet.v[3].z) / 120;
+		Real b_ = density * detJ * (2 * tet.v[0].x * tet.v[0].z + tet.v[1].x * tet.v[0].z + tet.v[2].x * tet.v[0].z + tet.v[3].x * tet.v[0].z + tet.v[0].x * tet.v[1].z + 2 * tet.v[1].x * tet.v[1].z + tet.v[2].x * tet.v[1].z + tet.v[3].x * tet.v[1].z + tet.v[0].x * tet.v[2].z + tet.v[1].x * tet.v[2].z + 2 * tet.v[2].x * tet.v[2].z + tet.v[3].x * tet.v[2].z + tet.v[0].x * tet.v[3].z + tet.v[1].x * tet.v[3].z + tet.v[2].x * tet.v[3].z + 2 * tet.v[3].x * tet.v[3].z) / 120;
+		Real c_ = density * detJ * (2 * tet.v[0].x * tet.v[0].y + tet.v[1].x * tet.v[0].y + tet.v[2].x * tet.v[0].y + tet.v[3].x * tet.v[0].y + tet.v[0].x * tet.v[1].y + 2 * tet.v[1].x * tet.v[1].y + tet.v[2].x * tet.v[1].y + tet.v[3].x * tet.v[1].y + tet.v[0].x * tet.v[2].y + tet.v[1].x * tet.v[2].y + 2 * tet.v[2].x * tet.v[2].y + tet.v[3].x * tet.v[2].y + tet.v[0].x * tet.v[3].y + tet.v[1].x * tet.v[3].y + tet.v[2].x * tet.v[3].y + 2 * tet.v[3].x * tet.v[3].y) / 120;
+		Mat3f inertiaMatrix(a, -b_, -c_, -b_, b, -a_, -c_, -a_, c);
+
+		bd.inertia = inertiaMatrix;
 		bd.shapeType = ET_TET;
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
-		mHostTets.push_back(b);
+		mHostTets.push_back(tetInfo);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addCapsule(
+		const CapsuleInfo& capsule,
+		const RigidBodyInfo& bodyDef, 
+		const Real density /*= Real(100)*/)
+	{
+		auto b = capsule;
+		auto bd = bodyDef;
+
+		Real r = b.radius;
+		Real h = b.halfLength * 2;
+
+
+		Real mass_hemisphere = 2.0 / 3.0 * M_PI * r * r * r * density;
+		Real mass_cylinder = M_PI * r * r * h * density;
+
+		Real I_1_cylinder = 1.0 / 12.0 * mass_cylinder * (3 * r * r + h * h);
+		Real I_2_cylinder = 1.0 / 2.0 * mass_cylinder * r * r;
+
+
+		Real tmp = h / 2 + 3.0 / 8.0 * r;
+		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
+		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
+
+		bd.position = b.center + bd.offset;
+
+		bd.mass = mass_hemisphere * 2 + mass_cylinder;
+
+		std::cout << "Capsule : " << bd.mass << std::endl;
+
+		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
+				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
+				0, 0, I_2_cylinder + 2 *I_2_hemisphere) + ParallelAxisTheorem(-bd.offset, bd.mass);
+		
+
+		bd.shapeType = ET_CAPSULE;
+		bd.angle = b.rot;
+
+		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), bd);
+		mHostCapsules.push_back(b);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addBallAndSocketJoint(const BallAndSocketJoint& joint)
+	{
+		mHostJointsBallAndSocket.push_back(joint);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addSliderJoint(const SliderJoint& joint)
+	{
+		mHostJointsSlider.push_back(joint);
+	}
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addHingeJoint(const HingeJoint& joint)
+	{
+		mHostJointsHinge.push_back(joint);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addFixedJoint(const FixedJoint& joint)
+	{
+		mHostJointsFixed.push_back(joint);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::addPointJoint(const PointJoint& joint)
+	{
+		mHostJointsPoint.push_back(joint);
 	}
 
 	template <typename Real, typename Coord, typename Matrix, typename Quat>
 	__global__ void RB_SetupInitialStates(
 		DArray<Real> mass,
 		DArray<Coord> pos,
+		DArray<Coord> barycenterOffset,
 		DArray<Matrix> rotation,
 		DArray<Coord> velocity,
 		DArray<Coord> angularVelocity,
@@ -165,6 +299,7 @@ namespace dyno
 		angularVelocity[tId] = states[tId].angularVelocity;
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
+		barycenterOffset[tId] = states[tId].offset;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
 	}
@@ -211,6 +346,22 @@ namespace dyno
 		tet3d[tId].v[3] = tetInfo[tId].v[3];
 	}
 
+	__global__ void SetupCaps(
+		DArray<Capsule3D> cap3d,
+		DArray<CapsuleInfo> capInfo)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= capInfo.size()) return;
+
+		float halfLenght = capInfo[tId].halfLength;
+		Mat3f rot = capInfo[tId].rot.toMatrix3x3();
+
+		cap3d[tId].center = capInfo[tId].center;
+		cap3d[tId].rotation = capInfo[tId].rot;
+		cap3d[tId].radius = capInfo[tId].radius;
+		cap3d[tId].halfLength = capInfo[tId].halfLength;
+	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::resetStates()
 	{
@@ -219,14 +370,23 @@ namespace dyno
 		mDeviceBoxes.assign(mHostBoxes);
 		mDeviceSpheres.assign(mHostSpheres);
 		mDeviceTets.assign(mHostTets);
+		mDeviceCapsules.assign(mHostCapsules);
+
+		this->stateBallAndSocketJoints()->assign(mHostJointsBallAndSocket);
+		this->stateSliderJoints()->assign(mHostJointsSlider);
+		this->stateHingeJoints()->assign(mHostJointsHinge);
+		this->stateFixedJoints()->assign(mHostJointsFixed);
+		this->statePointJoints()->assign(mHostJointsPoint);
 
 		auto& boxes = topo->getBoxes();
 		auto& spheres = topo->getSpheres();
 		auto& tets = topo->getTets();
+		auto& caps = topo->getCaps();
 
 		boxes.resize(mDeviceBoxes.size());
 		spheres.resize(mDeviceSpheres.size());
 		tets.resize(mDeviceTets.size());
+		caps.resize(mDeviceCapsules.size());
 
 		//Setup the topology
 		cuExecute(mDeviceBoxes.size(),
@@ -244,6 +404,11 @@ namespace dyno
 			tets,
 			mDeviceTets);
 
+		cuExecute(mDeviceCapsules.size(),
+			SetupCaps,
+			caps,
+			mDeviceCapsules);
+
 		mDeviceRigidBodyStates.assign(mHostRigidBodyStates);
 
 		int sizeOfRigids = topo->totalSize();
@@ -253,6 +418,7 @@ namespace dyno
 		this->stateRotationMatrix()->resize(sizeOfRigids);
 		this->stateAngularVelocity()->resize(sizeOfRigids);
 		this->stateCenter()->resize(sizeOfRigids);
+		this->stateOffset()->resize(sizeOfRigids);
 		this->stateVelocity()->resize(sizeOfRigids);
 		this->stateMass()->resize(sizeOfRigids);
 		this->stateInertia()->resize(sizeOfRigids);
@@ -263,6 +429,7 @@ namespace dyno
 			RB_SetupInitialStates,
 			this->stateMass()->getData(),
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateRotationMatrix()->getData(),
 			this->stateVelocity()->getData(),
 			this->stateAngularVelocity()->getData(),
@@ -275,7 +442,7 @@ namespace dyno
 		this->stateInitialInertia()->resize(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
-
+		updateTopology();
 
 		m_yaw = 0.0f;
 		m_pitch = 0.0f;
@@ -288,13 +455,14 @@ namespace dyno
 		DArray<Sphere3D> sphere,
 		DArray<SphereInfo> sphere_init,
 		DArray<Coord> pos,
+		DArray<Coord> bcOffset,
 		DArray<Quat<Real>> quat,
 		int start_sphere)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= sphere.size()) return;
 
-		sphere[pId].center = pos[pId + start_sphere];
+		sphere[pId].center = pos[pId + start_sphere] - quat[pId + start_sphere].rotate(bcOffset[pId + start_sphere]);
 		sphere[pId].rotation = quat[pId + start_sphere];
 	}
 
@@ -303,12 +471,13 @@ namespace dyno
 		DArray<Box3D> box,
 		DArray<BoxInfo> box_init,
 		DArray<Coord> pos,
+		DArray<Coord> bcOffset,
 		DArray<Matrix> rotation,
 		int start_box)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= box.size()) return;
-		box[pId].center = pos[pId + start_box];
+		box[pId].center = pos[pId + start_box] - rotation[pId + start_box] * bcOffset[pId + start_box];
 
 		box[pId].extent = box_init[pId].halfLength;
 
@@ -335,6 +504,27 @@ namespace dyno
 		tet[pId].v[3] = rotation[pId + start_tet] * (tet_init[pId].v[3] - center_init) + pos[pId + start_tet];
 	}
 
+	template <typename Real, typename Coord>
+	__global__ void UpdateCapsules(
+		DArray<Capsule3D> caps,
+		DArray<CapsuleInfo> cap_init,
+		DArray<Coord> pos,
+		DArray<Coord> bcOffset,
+		DArray<Quat<Real>> quat,
+		int start_cap)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= caps.size()) return;
+
+		Capsule3D cap;
+		cap.radius = cap_init[pId].radius;
+		cap.halfLength = cap_init[pId].halfLength;
+		cap.rotation = quat[pId + start_cap];
+		cap.center = pos[pId + start_cap] - quat[pId + start_cap].rotate(bcOffset[pId + start_cap]);
+
+		caps[pId] = cap;
+	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::updateTopology()
 	{
@@ -352,14 +542,16 @@ namespace dyno
 			discreteSet->getBoxes(),
 			mDeviceBoxes,
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateRotationMatrix()->getData(),
 			offset.boxIndex());
 
-		cuExecute(mDeviceBoxes.size(),
+		cuExecute(mDeviceSpheres.size(),
 			UpdateSpheres,
 			discreteSet->getSpheres(),
 			mDeviceSpheres,
 			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
 			this->stateQuaternion()->getData(),
 			offset.sphereIndex());
 
@@ -370,6 +562,15 @@ namespace dyno
 			this->stateCenter()->getData(),
 			this->stateRotationMatrix()->getData(),
 			offset.tetIndex());
+
+		cuExecute(mDeviceCapsules.size(),
+			UpdateCapsules,
+			discreteSet->getCaps(),
+			mDeviceCapsules,
+			this->stateCenter()->getData(),
+			this->stateOffset()->getData(),
+			this->stateQuaternion()->getData(),
+			offset.capsuleIndex());
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

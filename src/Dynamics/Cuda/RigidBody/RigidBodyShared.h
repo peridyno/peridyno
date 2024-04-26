@@ -22,7 +22,7 @@ namespace dyno
 		{
 			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
 			halfLength = Vector<Real, 3>(1.0f, 1.0f, 1.0f);
-			rot = Quat<Real>(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		Vector<Real, 3> center;
@@ -37,7 +37,7 @@ namespace dyno
 		{
 			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
 			radius = 1.0;
-			rot = Quat<Real>(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 		Quat<Real> rot;
 		Vector<Real, 3> center;
@@ -79,7 +79,7 @@ namespace dyno
 		CapsuleInfo()
 		{
 			center = Vec3f(0.0f, 0.0f, 0.0f);
-			rot = Quat1f(1.0f, 0.0f, 0.0f, 0.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 			radius = 1.0f;
 			halfLength = 1.0f;
 		}
@@ -93,17 +93,19 @@ namespace dyno
 	{
 		RigidBodyInfo()
 		{
-			linearVelocity = Vec3f(0.0f);
-			angularVelocity = Vec3f(0.0f);
-			position = Vec3f(0.0f);
+			linearVelocity = Vector<Real, 3>(0.0f);
+			angularVelocity = Vector<Real, 3>(0.0f);
+			position = Vector<Real, 3>(0.0f);
+			offset = Vector<Real, 3>(0.0f);
+			bodyId = 0;
 			mass = -1.0f;
-			inertia = Mat3f(0.0f);
+			inertia = SquareMatrix<Real, 3>(0.0f);
 			friction = 0.0f;
 			restitution = 0.0f;
 			motionType = MT_Static;
 			collisionMask = CT_AllObjects;
 			shapeType = ET_Other;
-			angle = Quat1f(0.0f, 0.0f, 0.0f, 1.0f);
+			angle = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		Quat<Real> angle;
@@ -114,11 +116,16 @@ namespace dyno
 		/// The angular velocity of the body.
 		Vector<Real, 3> angularVelocity;
 
-		/// The world position of the body.
+		/// The barycenter of the body.
 		Vector<Real, 3> position;
+
+		/// An offset from the barycenter to the geometric center
+		Vector<Real, 3> offset;
 
 		/// The inertia of the body
 		SquareMatrix<Real, 3> inertia;
+
+		uint bodyId;
 
  		Real mass;
 

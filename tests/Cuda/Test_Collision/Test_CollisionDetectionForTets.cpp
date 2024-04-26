@@ -212,5 +212,4 @@ TEST(TET, collision)
 	printf("contact penetration: %.3lf\n",
 		manifold.contacts[0].penetration
 		);*/
- 	
 }

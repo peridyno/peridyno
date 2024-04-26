@@ -24,7 +24,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	CapsuleModel<TDataType>::CapsuleModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 		this->varRadius()->setRange(0.001f, 100.0f);
 
@@ -126,10 +126,10 @@ namespace dyno
 		Real halfHeight = this->varHeight()->getValue() / 2;
 		auto row = this->varHeightSegment()->getValue();
 
-		//Setup a Cylinder primitive
-		Coord v0 = Coord(0, halfHeight, 0);
-		Coord v1 = Coord(0, -halfHeight, 0);
-		TCapsule3D<Real> capsulePrim = TCapsule3D(v0, v1, radius);
+		Quat<Real> q = computeQuaternion();
+
+		//Setup a capsule primitive
+		TCapsule3D<Real> capsulePrim = TCapsule3D<Real>(center, q, radius, halfHeight);
 
 		this->outCapsule()->setValue(capsulePrim);
 
@@ -310,8 +310,12 @@ namespace dyno
 				auto& source = polygonIndices[i];
 				auto& index = polygonIndices[i + incre];
 
-				for (size_t j = 0; j < source.size(); j++)
-					index.insert(source[j] + halfVtNum);
+				for (size_t j = 0; j < source.size(); j++) 
+				{	
+					uint N = source.size() - 1;
+					index.insert(source[N - j] + halfVtNum);
+
+				}
 
 			}
 
@@ -322,10 +326,11 @@ namespace dyno
 				for (size_t j = 0; j < longitude; j++)
 				{
 					auto& index = polygonIndices[incre];
-					index.insert(index_ID.find(Index2D(i, j))->second);
-					index.insert(index_ID.find(Index2D(i + 1, j))->second);
-					index.insert(index_ID.find(Index2D(i + 1, (j + 1) % longitude))->second);
 					index.insert(index_ID.find(Index2D(i, (j + 1) % longitude))->second);
+					index.insert(index_ID.find(Index2D(i + 1, (j + 1) % longitude))->second);
+					index.insert(index_ID.find(Index2D(i + 1, j))->second);
+					index.insert(index_ID.find(Index2D(i, j))->second);
+
 					incre++;
 				}
 			}

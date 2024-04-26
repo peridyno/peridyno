@@ -16,6 +16,16 @@ namespace dyno
 		return v < 0 ? -Real(1) : Real(1);
 	}
 
+	template<typename Real>
+	DYN_FUNC void swapContactPair(TManifold<Real>& m)
+	{
+		m.normal = -m.normal;
+
+		for (uint i = 0; i < m.contactCount; i++) {
+			m.contacts[i].position += m.contacts[i].penetration * m.normal;
+		}
+	}
+
 	//--------------------------------------------------------------------------------------------------
 	// qBoxtoBox
 	//--------------------------------------------------------------------------------------------------
@@ -56,7 +66,23 @@ namespace dyno
 	}
 	
 	
-
+	/**
+	 *		Ordering of the edges
+	 *					   ---2  --- 
+	 *				   /			 /
+	 *				  3			    1
+	 *				 /			   /
+	 *				  ---   0  --- 
+	 *					|			 |
+	 *					10			 9	
+	 *					|			 |
+	 *	 				 ---- 4  --- ----->x
+	 *				|   /       |   /
+	 *			   11  5		8  7
+	 *				| /			| /
+	 *				 / --- 6 --- 
+	 *             z
+	 */
 	template<typename Real>
 	//--------------------------------------------------------------------------------------------------
 	DYN_FUNC void computeReferenceEdgesAndBasis(unsigned char* out, SquareMatrix<Real, 3>* basis, Vector<Real, 3>* e, const Vector<Real, 3>& eR, const Transform<Real, 3>& rtx, Vector<Real, 3> n, int axis)
@@ -643,7 +669,7 @@ namespace dyno
 
 				for (int i = 0; i < outNum; ++i)
 				{
-					m.contacts[i].position = out[i].v;
+					m.contacts[i].position = flip ? (out[i].v + depths[i] * m.normal) : out[i].v;
 					m.contacts[i].penetration = depths[i];
 				}
 			}
@@ -667,7 +693,7 @@ namespace dyno
 			m.contactCount = 1;
 
 			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = (CA + CB) * float(0.5);
+			m.contacts[0].position = CB;
 		}
 	}
 
@@ -700,10 +726,11 @@ namespace dyno
 	{
 		m.contactCount = 0;
 
-		Segment3D s0(cap0.segment);
-		Segment3D s1(cap1.segment);
+		Segment3D s0(cap0.centerline());
+		Segment3D s1(cap1.centerline());
 		Real r0 = cap0.radius + cap1.radius;
 
+		// From cap0 to cap1
 		Segment3D dir = s0.proximity(s1);
 
 		dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
@@ -714,7 +741,7 @@ namespace dyno
 
 		m.normal = dir.direction().normalize();
 		m.contacts[0].penetration = sMax;
-		m.contacts[0].position = dir.v0;
+		m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
 		m.contactCount = 1;
 	}
 
@@ -725,11 +752,12 @@ namespace dyno
 		m.contactCount = 0;
 
 		Point3D s(sphere.center);
-		Segment3D c(cap.segment);
+		Segment3D c(cap.centerline());
 		Real r0 = cap.radius + sphere.radius;
 
 		Point3D pos = s.project(c);//pos: capsule
 
+		// From sphere to capsule
 		Segment3D dir = pos - s;
 
 		Real sMax = dir.direction().norm() - r0;
@@ -738,8 +766,16 @@ namespace dyno
 
 		m.normal = dir.direction().normalize();
 		m.contacts[0].penetration = sMax;
-		m.contacts[0].position = dir.v0;
+		m.contacts[0].position = dir.v0 + (sphere.radius + sMax) * m.normal;
 		m.contactCount = 1;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const Sphere3D& sphere)
+	{
+		request(m, sphere, cap);
+
+		swapContactPair(m);
 	}
 
 	template<typename Real>
@@ -758,7 +794,7 @@ namespace dyno
 	{
 
 		//projection to axis
-		Segment3D seg = cap.segment;
+		Segment3D seg = cap.centerline();
 
 		lowerBoundary1 = seg.v0.dot(axisNormal) - cap.radius;
 		upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
@@ -889,7 +925,7 @@ namespace dyno
 		Capsule3D cap)
 	{
 
-		Segment3D seg = cap.segment;
+		Segment3D seg = cap.centerline();
 		//projection to axis
 
 		lowerBoundary1 = seg.v0.dot(axisNormal) - cap.radius;
@@ -931,14 +967,14 @@ namespace dyno
 		Vector<Real, 3> boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
-		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+		if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v0.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-			boundaryPoints2[cnt1++] = cap.segment.v0;
-		if (abs(cap.segment.v1.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+			abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt1++] = cap.startPoint();
+		if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v1.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-			boundaryPoints2[cnt1++] = cap.segment.v1;
+			abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			boundaryPoints2[cnt1++] = cap.endPoint();
 
 		
 
@@ -991,7 +1027,7 @@ namespace dyno
 		}
 		else if (cnt1 == 2)
 		{
-			Segment3D s1 = cap.segment;
+			Segment3D s1 = cap.centerline();
 
 			if (cnt2 == 2)
 			{
@@ -1122,14 +1158,14 @@ namespace dyno
 				boundaryPoints1[cnt1 ++] = i;
 		}
 
-		if (abs(cap.segment.v0.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+		if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v0.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
 			boundaryPoints2[cnt2 ++] = 0;
 		
-		if (abs(cap.segment.v1.dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
+		if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
-			abs(cap.segment.v1.dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+			abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
 			boundaryPoints2[cnt2++] = 1;
 
 		if (cnt1 == 1)
@@ -1144,7 +1180,7 @@ namespace dyno
 		{
 			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = boundaryPoints2[0] ? cap.segment.v1 : cap.segment.v0;
+			m.contacts[0].position = boundaryPoints2[0] ? cap.endPoint() : cap.startPoint();
 			m.contactCount = 1;
 			return;
 		}
@@ -1154,7 +1190,7 @@ namespace dyno
 
 			//if (cnt2 == 2)
 			{
-				Segment3D s2 = cap.segment;
+				Segment3D s2 = cap.centerline();
 				Segment3D dir = s1.proximity(s2);//v0: self v1: other
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 				m.contacts[0].penetration = sMax;
@@ -1169,7 +1205,7 @@ namespace dyno
 			//if (cnt2 == 2)
 			{
 
-				Segment3D s2 = cap.segment;
+				Segment3D s2 = cap.centerline();
 				m.contactCount = 0;
 				m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
@@ -1380,9 +1416,9 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Capsule3D& cap)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const OBox3D& box)
 	{
-		Segment3D c(cap.segment);
+		Segment3D c(cap.centerline());
 		Real r0 = cap.radius;
 
 		m.contactCount = 0;
@@ -1395,8 +1431,6 @@ namespace dyno
 		Vector<Real, 3> axisTmp = axis;
 
 		Real boundary1, boundary2, b1, b2;
-
-		
 
 		//u
 		axisTmp = box.u / box.u.norm();
@@ -1465,9 +1499,9 @@ namespace dyno
 			}
 		}
 
-		
+
 		//dir generated by cross product from capsule and box
-		
+
 		Vector<Real, 3> dirCap = c.direction();
 		for (int j = 0; j < 3; j++)
 		{
@@ -1505,9 +1539,21 @@ namespace dyno
 				}
 			}
 		}
-		
+
 		setupContactTets(boundary1, boundary2, axis, cap, box, -sMax, m);
 
+		for (uint i = 0; i < m.contactCount; i++)
+		{
+			m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Capsule3D& cap)
+	{
+		request(m, cap, box);
+		
+		swapContactPair(m);
 	}
 
 	template<typename Real>
@@ -1667,16 +1713,9 @@ namespace dyno
 		m.normal = -m.normal;
 	}
 
-	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const Tet3D& tet)
-	{
-		request(m, tet, cap);
-		m.normal = -m.normal;
-	}
-
 	//Separating Axis Theorem for tets
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const Tet3D& tet)
 	{
 		m.contactCount = 0;
 
@@ -1745,7 +1784,7 @@ namespace dyno
 		2, 3
 		};
 
-		axisTmp = cap.segment.direction();
+		axisTmp = cap.centerline().direction();
 		if (axisTmp.norm() > EPSILON)
 		{
 			axisTmp /= axisTmp.norm();
@@ -1773,7 +1812,7 @@ namespace dyno
 		for (int i = 0; i < 6; i++)
 		{
 			Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
-			Vector<Real, 3> dirCap = cap.segment.direction();
+			Vector<Real, 3> dirCap = cap.centerline().direction();
 
 			
 
@@ -1812,14 +1851,27 @@ namespace dyno
 		}
 		
 		setupContactTets(boundary1, boundary2, axis, tet, cap, -sMax, m);
-		m.normal *= -1;
+
+		for (uint i = 0; i < m.contactCount; i++)
+		{
+			m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
+	{
+		request(m, cap, tet);
+		
+		swapContactPair(m);
 	}
 
 	template<typename Real>
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Sphere3D& sphere)
 	{
 		request(m, sphere, box);
-		m.normal = -m.normal;
+
+		swapContactPair(m);
 	}
 
 	template<typename Real>
@@ -1840,7 +1892,7 @@ namespace dyno
 
 		m.normal = dir.normalize();
 		m.contacts[0].penetration = sMax;
-		m.contacts[0].position = c0 + (r0 - 0.5 * sMax) * m.normal;
+		m.contacts[0].position = c0 + (r0 + sMax) * m.normal;
 		m.contactCount = 1;
 	}
 
@@ -2866,7 +2918,8 @@ namespace dyno
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Tet3D& tet)
 	{
 		request(m, tet, box);
-		m.normal *= -1;
+
+		swapContactPair(m);
 	}
 
 	template<typename Real>
@@ -2890,6 +2943,14 @@ namespace dyno
 		m.contacts[0].penetration = sMax;
 		m.contacts[0].position = vproj.origin;
 		m.contactCount = 1;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Sphere3D& sphere)
+	{
+		request(m, sphere, tet);
+
+		swapContactPair(m);
 	}
 
 	template<typename Real>
@@ -2921,12 +2982,6 @@ namespace dyno
 		m.contactCount = 1;
 	}
 
-	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Sphere3D& sphere)
-	{
-		request(m, sphere, tet);
-		m.normal *= -1;
-	}
 	template<typename Real>
 	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Triangle3D& tri, const Sphere3D& sphere)
 	{

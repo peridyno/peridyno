@@ -10,7 +10,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	CylinderModel<TDataType>::CylinderModel()
-		: ParametricModel<TDataType>()
+		: BasicShape<TDataType>()
 	{
 
 		this->varRow()->setRange(1, 500);

@@ -20,7 +20,7 @@ namespace dyno {
 		~CollistionDetectionBoundingBox() override;
 
 	public:
-		DEF_VAR(Coord, UpperBound, Coord(100), "An upper bound for the bounding box");
+		DEF_VAR(Coord, UpperBound, Coord(1000), "An upper bound for the bounding box");
 
 		DEF_VAR(Coord, LowerBound, Coord(-100, 0, -100), "A lower bound for the bounding box");
 

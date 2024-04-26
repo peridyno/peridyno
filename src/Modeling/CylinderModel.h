@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
+#include "BasicShape.h"
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -26,7 +26,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class CylinderModel : public ParametricModel<TDataType>
+	class CylinderModel : public BasicShape<TDataType>
 	{
 		DECLARE_TCLASS(CylinderModel, TDataType);
 
@@ -37,6 +37,8 @@ namespace dyno
 		CylinderModel();
 
 		std::string caption() override { return "Cylinder"; }
+
+		BasicShapeType getShapeType() override { return BasicShapeType::CYLINDER; }
 
 	public:
 		DEF_VAR(unsigned, Columns, 24, "Cylinder Columns");
