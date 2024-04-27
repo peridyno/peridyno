@@ -4,6 +4,7 @@
 #include "Algorithm/Reduction.h"
 #include "Primitive/Primitive3D.h"
 
+#include "Topology/LinearBVH.h"
 
 namespace dyno
 {
@@ -65,6 +66,8 @@ namespace dyno
 
 		DArray<int> mIds;
 		DArray<PKey> mKeys;
+
+		LinearBVH<TDataType> bvh;
 	};
 
 	IMPLEMENT_TCLASS(CollisionDetectionBroadPhase, TDataType)

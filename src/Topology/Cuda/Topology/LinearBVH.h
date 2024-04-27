@@ -60,7 +60,7 @@ namespace dyno
 		LinearBVH();
 		~LinearBVH();
 
-		void construct(DArray<AABB>& aabb);
+		void construct(const DArray<AABB>& aabb);
 
 		GPU_FUNC uint requestIntersectionNumber(const AABB& queryAABB, const int queryId = EMPTY) const;
 		GPU_FUNC void requestIntersectionIds(List<int>& ids, const AABB& queryAABB, const int queryId = EMPTY) const;

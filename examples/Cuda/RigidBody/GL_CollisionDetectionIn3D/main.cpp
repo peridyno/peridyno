@@ -14,6 +14,7 @@
 #include <Mapping/ContactsToPointSet.h>
 
 #include "Collision/NeighborElementQuery.h"
+#include "Collision/CollistionDetectionBoundingBox.h"
 
 using namespace std;
 using namespace dyno;
@@ -232,8 +233,26 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
 	pointRender->setColor(Color(1, 0, 0));
+	pointRender->varPointSize()->setValue(0.01f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
+
+	//Visualize boundary contacts
+		//Visualize contact points
+	auto cdBV = std::make_shared<CollistionDetectionBoundingBox<DataType3f>>();
+	rigid->stateTopology()->connect(cdBV->inDiscreteElements());
+	//jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
+	rigid->graphicsPipeline()->pushModule(cdBV);
+
+	auto boundaryContactsMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	cdBV->outContacts()->connect(boundaryContactsMapper->inContacts());
+	rigid->graphicsPipeline()->pushModule(boundaryContactsMapper);
+
+	auto boundaryContactsRender = std::make_shared<GLPointVisualModule>();
+	boundaryContactsRender->setColor(Color(0, 1, 0));
+	boundaryContactsRender->varPointSize()->setValue(0.01f);
+	boundaryContactsMapper->outPointSet()->connect(boundaryContactsRender->inPointSet());
+	rigid->graphicsPipeline()->pushModule(boundaryContactsRender);
 
 	createTwoBoxes(rigid);
 	createTwoTets(rigid);

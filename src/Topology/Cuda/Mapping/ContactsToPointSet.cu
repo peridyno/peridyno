@@ -2,6 +2,8 @@
 
 namespace dyno
 {
+	IMPLEMENT_TCLASS(ContactsToPointSet, TDataType);
+
 	template<typename TDataType>
 	ContactsToPointSet<TDataType>::ContactsToPointSet()
 		: TopologyMapping()

@@ -3,7 +3,6 @@
 #include "Primitive/Primitive3D.h"
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
-#include <cuda_runtime.h>
 #include "IterativeConstraintSolver.h"
 
 //Module headers
