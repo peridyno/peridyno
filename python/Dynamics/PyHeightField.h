@@ -150,7 +150,7 @@ void declare_vessel(py::module& m, std::string typestr) {
 		//DEV_VAR
 		.def("var_barycenter_offset", &Class::varBarycenterOffset, py::return_value_policy::reference)
 		.def("var_envelope_name", &Class::varEnvelopeName, py::return_value_policy::reference)
-		.def("var_mesh_name", &Class::varMeshName, py::return_value_policy::reference)
+		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
 		.def("var_density", &Class::varDensity, py::return_value_policy::reference)
 		.def("state_barycenter", &Class::stateBarycenter, py::return_value_policy::reference)
 		.def("state_envelope", &Class::stateEnvelope, py::return_value_policy::reference)

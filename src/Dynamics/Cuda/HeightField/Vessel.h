@@ -19,6 +19,7 @@
 #include "Topology/TriangleSet.h"
 
 #include "FilePath.h"
+#include "Topology/TextureMesh.h"
 
 namespace dyno 
 {
@@ -41,7 +42,10 @@ namespace dyno
 
 		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
 
-		DEF_VAR(FilePath, MeshName, getAssetPath() + "obj/boat_mesh.obj", "");
+		DEF_VAR(bool, Test, true, "");
+
+
+	//	DEF_VAR(FilePath, MeshName, getAssetPath() + "obj/boat_mesh.obj", "");
 
 		DEF_VAR(Real, Density, Real(1000), "Density");
 
@@ -50,6 +54,10 @@ namespace dyno
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Envelope, "Envelope for the vessel");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Mesh, "Surface mesh");
+
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
+
+		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 
 	protected:
 		void resetStates() override;

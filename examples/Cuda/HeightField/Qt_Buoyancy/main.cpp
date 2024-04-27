@@ -35,6 +35,9 @@
 #include <GLRenderEngine.h>
 #include <GLSurfaceVisualModule.h>
 
+#include "GltfLoader.h"
+
+
 using namespace std;
 using namespace dyno;
 
@@ -71,12 +74,18 @@ std::shared_ptr<SceneGraph> createScene()
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	ocean->graphicsPipeline()->pushModule(sRender);
 
+	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+	gltf->varFileName()->setValue(getAssetPath()+std::string("SailBoat/SailBoat.gltf"));
+
+
 	auto boat = scn->addNode(std::make_shared<Vessel<DataType3f>>());
 	boat->varDensity()->setValue(150.0f);
 	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
-	boat->varMeshName()->setValue(getAssetPath()+std::string("SailBoat/SailBoat_mesh.obj"));
 	boat->varEnvelopeName()->setValue(getAssetPath() + std::string("SailBoat/SailBoat_boundary.obj"));
+
+	gltf->stateTextureMesh()->connect(boat->inTextureMesh());
+	gltf->setVisible(false);
 
 	auto steer = std::make_shared<Steer<DataType3f>>();
 	boat->stateVelocity()->connect(steer->inVelocity());
