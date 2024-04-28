@@ -47,10 +47,10 @@ void declare_codimensionalPD(py::module& m, std::string typestr) {
 		//	"Set energy model to XuModel")
 		//.def("set_energy_model", py::overload_cast<dyno::FiberModel<Real>&>(&Class::setEnergyModel),
 		//	"Set energy model to FiberModel")
-		.def("setMaxIteNumber", &Class::setMaxIteNumber) // 设置最大迭代次数
-		.def("setGrad_ite_eps", &Class::setGrad_ite_eps) // 设置梯度迭代容差
-		.def("setContactMaxIte", &Class::setContactMaxIte) // 设置接触最大迭代次数
-		.def("setAccelerated", &Class::setAccelerated)
+		.def("set_max_ite_number", &Class::setMaxIteNumber) // 设置最大迭代次数
+		.def("set_grad_ite_eps", &Class::setGrad_ite_eps) // 设置梯度迭代容差
+		.def("set_contact_max_ite", &Class::setContactMaxIte) // 设置接触最大迭代次数
+		.def("set_accelerated", &Class::setAccelerated)
 		//DEF_VAR
 		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
 		.def("var_energy_type", &Class::varEnergyType, py::return_value_policy::reference)

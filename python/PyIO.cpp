@@ -34,5 +34,12 @@ void pybind_io(py::module& m)
 	declare_gmsh(m);
 	declare_smesh(m);
 	declare_io_initializer(m);
-
+	declare_eigen_value_writer<dyno::DataType3f>(m, "3f");
+	declare_geometry_loader<dyno::DataType3f>(m, "3f");
+	declare_particle_writer<dyno::DataType3f>(m, "3f");
+	declare_points_loader<dyno::DataType3f>(m, "3f");
+	declare_surface_mesh_loader<dyno::DataType3f>(m, "3f");
+	//declare_tetra_mesh_writer<dyno::DataType3f>(m, "3f");
+	declare_tetra_mesh_writer_fracture<dyno::DataType3f>(m, "3f");
+	declare_triangle_mesh_writer<dyno::DataType3f>(m, "3f");
 }

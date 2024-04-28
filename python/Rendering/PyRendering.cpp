@@ -104,18 +104,6 @@ void pybind_rendering(py::module& m)
 		.def("var_roughness", &GLVisualModule::varRoughness, py::return_value_policy::reference)
 		.def("var_alpha", &GLVisualModule::varAlpha, py::return_value_policy::reference);
 
-	// 	py::class_<GLPointVisualModuleWrap, GLVisualModule, std::shared_ptr<GLPointVisualModuleWrap>>
-	// 		(m, "GLPointVisualModule", py::buffer_protocol(), py::dynamic_attr())
-	// 		.def(py::init<>())
-	// 		.def("set_point_size", &GLPointVisualModuleWrap::setPointSize)
-	// 		.def("get_point_size", &GLPointVisualModuleWrap::getPointSize)
-	// 		.def("in_pointset", &GLPointVisualModuleWrap::inPointSet, py::return_value_policy::reference)
-	// 		.def("in_color", &GLPointVisualModuleWrap::inColor);
-
-	//py::class_<GLSurfaceVisualModuleWrap, GLVisualModule, std::shared_ptr<GLSurfaceVisualModuleWrap>>
-	//	(m, "GLSurfaceVisualModule", py::buffer_protocol(), py::dynamic_attr())
-	//	.def(py::init<>());
-
 	declare_color_mapping<dyno::DataType3f>(m, "3f");
 
 	declare_point_visual_module(m, "");
@@ -125,6 +113,4 @@ void pybind_rendering(py::module& m)
 	declare_gl_wireframe_visual_module(m);
 
 	declare_rednder_window(m);
-
-	//declare_surface_visual_module(m, "3f");
 }

@@ -307,7 +307,6 @@ void declare_particle_system(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
-
 template <typename TDataType>
 void declare_circular_emitter(py::module& m, std::string typestr) {
 	using Class = dyno::CircularEmitter<TDataType>;
@@ -396,7 +395,7 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 		//DEF_VAR
 		.def("var_reshuffle_particles", &Class::varReshuffleParticles, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
-		.def("import_particles_emitters", &Class::importParticleEmitters, py::return_value_policy::reference)
+		.def("import_particle_emitters", &Class::importParticleEmitters, py::return_value_policy::reference)
 		.def("get_particle_emitters", &Class::getParticleEmitters)
 		.def("add_particle_emitter", &Class::addParticleEmitter)
 		.def("remove_particle_emitter", &Class::removeParticleEmitter)
@@ -472,7 +471,6 @@ void declare_sampling_points(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
-
 #include "ParticleSystem/SphereSampler.h"
 template <typename TDataType>
 void declare_sphere_sampler(py::module& m, std::string typestr) {
@@ -530,7 +528,6 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 		.def("import_rigid_bodys", &Class::importRigidBodys, py::return_value_policy::reference);
 }
 
-
 void declare_func(py::module& m, std::string typestr);
 
 void declare_attribute(py::module& m, std::string typestr);
@@ -539,6 +536,4 @@ void declare_particle_system_initializer(py::module& m);
 
 void declare_particle_type(py::module& m);
 
-
 void pybind_particle_system(py::module& m);
-

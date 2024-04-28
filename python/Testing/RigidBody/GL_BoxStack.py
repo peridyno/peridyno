@@ -1,6 +1,7 @@
 import os
 
 import PyPeridyno as dyno
+import numpy as np
 
 
 def filePath(str):
@@ -16,6 +17,7 @@ def filePath(str):
 
 
 scn = dyno.SceneGraph()
+
 
 
 app = dyno.GLfwApp()

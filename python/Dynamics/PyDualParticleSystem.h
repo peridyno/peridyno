@@ -16,11 +16,10 @@ void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
 		.def("state_virtual_pointSet", &Class::stateVirtualPointSet, py::return_value_policy::reference)
 		.def("var_virtual_particle_sampling_strategy", &Class::varVirtualParticleSamplingStrategy, py::return_value_policy::reference);
 
-	py::enum_<typename Class::EVirtualParticleSamplingStrategy>(m, "EVirtualParticleSamplingStrategy")
+	py::enum_<typename Class::EVirtualParticleSamplingStrategy>(DPFS, "EVirtualParticleSamplingStrategy")
 		.value("ColocationStrategy", Class::EVirtualParticleSamplingStrategy::ColocationStrategy)
 		.value("ParticleShiftingStrategy", Class::EVirtualParticleSamplingStrategy::ParticleShiftingStrategy)
-		.value("SpatiallyAdaptiveStrategy", Class::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy)
-		.export_values();
+		.value("SpatiallyAdaptiveStrategy", Class::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy);
 }
 
 #include "DualParticleSystem/DualParticleIsphModule.h"

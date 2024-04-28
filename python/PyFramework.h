@@ -34,6 +34,7 @@
 #include "HeightField/CapillaryWave.h"
 #include "HeightField/Ocean.h"
 #include "HeightField/OceanPatch.h"
+#include "HeightField/GranularMedia.h"
 
 #include "SceneGraph.h"
 #include "Log.h"
@@ -65,7 +66,6 @@ using GroupModule = dyno::GroupModule;
 using TopologyMappingdyno = dyno::TopologyMapping;
 using OutputModule = dyno::OutputModule;
 using Object = dyno::Object;
-
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -137,7 +137,7 @@ void declare_multi_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::MultipleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
 	std::string pyclass_name = std::string("MultipleNodePort_") + typestr;
-	py::class_<Class, Parent>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("clear", &Class::clear)
 		.def("add_derive_node", &Class::addDerivedNode)
 		.def("remove_derive_node", &Class::removeDerivedNode)
@@ -152,7 +152,7 @@ void declare_single_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::SingleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
 	std::string pyclass_name = std::string("SingleNodePort_") + typestr;
-	py::class_<Class, Parent>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("is_kind_of", &Class::isKindOf)
 		.def("has_node", &Class::hasNode)
 		.def("get_nodes", &Class::getNodes, py::return_value_policy::reference)

@@ -163,7 +163,7 @@ void pybind_framework(py::module& m)
 
 		.def("get_top_field", &FBase::getTopField)
 		.def("get_source", &FBase::getSource)
-		.def("promote_ouput", &FBase::promoteOuput)
+		.def("promote_output", &FBase::promoteOuput)
 		.def("promote_input", &FBase::promoteInput)
 		.def("demote_ouput", &FBase::demoteOuput)
 		.def("demote_input", &FBase::demoteInput)
@@ -238,7 +238,6 @@ void pybind_framework(py::module& m)
 		.def("force_update", &Pipeline::forceUpdate)
 		.def("promote_putput_to_node", &Pipeline::promoteOutputToNode, py::return_value_policy::reference)
 		.def("demote_output_from_node", &Pipeline::demoteOutputFromNode);
-
 
 	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
 		.def("get_module_type", &dyno::ComputeModule::getModuleType);
@@ -409,7 +408,8 @@ void pybind_framework(py::module& m)
 		.def("set_current_key", &dyno::FVar<dyno::PEnum>::setCurrentKey)
 		.def("serialize", &dyno::FVar<dyno::PEnum>::serialize)
 		.def("deserialize", &dyno::FVar<dyno::PEnum>::deserialize)
-		.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty);
+		.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty)
+		.def("get_data_ptr", &dyno::FVar<dyno::PEnum>::getDataPtr);
 
 	declare_array<float, DeviceType::GPU>(m, "1fD");
 	declare_array<dyno::Vec3f, DeviceType::GPU>(m, "3fD");
@@ -431,6 +431,7 @@ void pybind_framework(py::module& m)
 
 	declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
 	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
+	declare_single_node_port<dyno::GranularMedia<dyno::DataType3f>>(m, "GranularMedia3f");
 
 	declare_camera(m);
 }
