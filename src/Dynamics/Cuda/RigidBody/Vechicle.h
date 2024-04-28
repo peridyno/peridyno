@@ -2,6 +2,7 @@
 #include "RigidBodySystem.h"
 
 #include "Topology/TextureMesh.h"
+#include "Topology/TriangleSet.h"
 
 #include "STL/Pair.h"
 
@@ -23,9 +24,11 @@ namespace dyno
 		void bind(uint bodyId, Pair<uint, uint> shapeId);
 
 	public:
-
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
 
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet of the boundary");
+
+	public:
 		DEF_ARRAY_STATE(BindingPair, Binding, DeviceType::GPU, "");
 
 		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");

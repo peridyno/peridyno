@@ -24,8 +24,8 @@ namespace dyno
 			return;
 		}
 
-		auto min = model.accessors[iter->second].maxValues;
-		auto max = model.accessors[iter->second].minValues;
+		auto min = model.accessors[iter->second].minValues;
+		auto max = model.accessors[iter->second].maxValues;
 		if (min.size() != 3)
 		{
 			std::cout << attributeName << " : not Vec3f !!! \n";
@@ -34,6 +34,7 @@ namespace dyno
 
 		Vec3f v0 = Vec3f(min[0], min[1], min[2]);
 		Vec3f v1 = Vec3f(max[0], max[1], max[2]);
+
 		bound = TAlignedBox3D<Real>(v0, v1);
 
 		Vec3f center = (v0 + v1) / 2;

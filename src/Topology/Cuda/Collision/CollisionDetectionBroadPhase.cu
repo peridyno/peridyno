@@ -59,6 +59,8 @@ namespace dyno
 
 		mIds.clear();
 		mKeys.clear();
+
+		bvh.release();
 	}
 
 	template<typename Real, typename Coord>
@@ -535,17 +537,17 @@ namespace dyno
 	template<typename TDataType>
 	void CollisionDetectionBroadPhase<TDataType>::doCollisionWithLinearBVH()
 	{
-		auto& aabb_src = this->inSource()->getData();
-		auto& aabb_tar = this->inTarget()->getData();
+		auto& aabb_src = this->inSource()->constData();
+
+		if (this->inTarget()->isModified()) {
+			bvh.construct(this->inTarget()->constData());
+		}
 
 		if (this->outContactList()->isEmpty()) {
 			this->outContactList()->allocate();
 		}
 
 		auto& contacts = this->outContactList()->getData();
-
-		LinearBVH<TDataType> bvh;
-		bvh.construct(aabb_tar);
 
 		mCounter.resize(aabb_src.size());
 		cuExecute(aabb_src.size(),
@@ -555,12 +557,6 @@ namespace dyno
 			bvh,
 			self_collision);
 
-// 		CArray<uint> hCounter;
-// 		hCounter.assign(mCounter);
-// 		for (int i = 0; i < hCounter.size(); i++)
-// 			std::cout << "Num: " << hCounter[i] << std::endl;
-// 		hCounter.clear();
-
 		contacts.resize(mCounter);
 
 		cuExecute(aabb_src.size(),
@@ -569,11 +565,6 @@ namespace dyno
 			aabb_src,
 			bvh,
 			self_collision);
-
-// 		CArrayList<int> hContacts;
-// 		hContacts.assign(contacts);
-
-		bvh.release();
 	}
 
 	DEFINE_CLASS(CollisionDetectionBroadPhase);
