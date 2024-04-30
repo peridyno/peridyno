@@ -75,14 +75,14 @@ std::shared_ptr<SceneGraph> createScene()
 	ocean->graphicsPipeline()->pushModule(sRender);
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->varFileName()->setValue(getAssetPath()+std::string("SailBoat/SailBoat.gltf"));
+	gltf->varFileName()->setValue(getAssetPath()+std::string("gltf/SailBoat/SailBoat.gltf"));
 
 
 	auto boat = scn->addNode(std::make_shared<Vessel<DataType3f>>());
 	boat->varDensity()->setValue(150.0f);
 	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
-	boat->varEnvelopeName()->setValue(getAssetPath() + std::string("SailBoat/SailBoat_boundary.obj"));
+	boat->varEnvelopeName()->setValue(getAssetPath() + std::string("gltf/SailBoat/SailBoat_boundary.obj"));
 
 	gltf->stateTextureMesh()->connect(boat->inTextureMesh());
 	gltf->setVisible(false);
