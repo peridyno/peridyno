@@ -346,7 +346,7 @@ void declare_sphere_model(py::module& m, std::string typestr) {
 		.def("var_longitude", &Class::varLongitude, py::return_value_policy::reference)
 		//DEF_INSTANCE_STATE
 		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
 		//DEF_VAR_OUT
 		.def("out_Sphere", &Class::outSphere, py::return_value_policy::reference)
 		//DEF_ENUM

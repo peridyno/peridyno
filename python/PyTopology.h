@@ -87,7 +87,7 @@ void declare_merge_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MergeTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_triangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
 		.def("in_first", &Class::inFirst, py::return_value_policy::reference)
 		.def("in_second", &Class::inSecond, py::return_value_policy::reference);
 }
