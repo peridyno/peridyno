@@ -19,8 +19,10 @@ namespace dyno
 		this->animationPipeline()->clear();
 
 		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
+		elementQuery->varSelfCollision()->setValue(false);
 		this->stateTopology()->connect(elementQuery->inDiscreteElements());
 		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
 
 // 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();

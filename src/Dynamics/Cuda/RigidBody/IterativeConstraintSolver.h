@@ -46,8 +46,6 @@ namespace dyno
 		IterativeConstraintSolver();
 		~IterativeConstraintSolver();
 
-		void constrain() override;
-
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
 
@@ -92,6 +90,9 @@ namespace dyno
 		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
 
 		DEF_ARRAY_IN(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
+
+	protected:
+		void constrain() override;
 
 	private:
 		void initializeJacobian(Real dt);
