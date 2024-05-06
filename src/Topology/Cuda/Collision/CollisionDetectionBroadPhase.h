@@ -21,12 +21,7 @@ namespace dyno
 		typedef typename TDataType::Matrix Matrix;
 
 		CollisionDetectionBroadPhase();
-		virtual ~CollisionDetectionBroadPhase();
-
-		void setSelfCollision(bool s)
-		{
-			self_collision = s;
-		}
+		~CollisionDetectionBroadPhase() override;
 
 	public:
 		DECLARE_ENUM(EStructure,
@@ -36,6 +31,8 @@ namespace dyno
 		DEF_ENUM(EStructure, AccelerationStructure, EStructure::BVH, "Acceleration structure");
 
 		DEF_VAR(Real, GridSizeLimit, 0.005, "Limit the smallest grid size");
+
+		DEF_VAR(bool, SelfCollision, false, "");
 
 		DEF_ARRAY_IN(AABB, Source, DeviceType::GPU, "");
 
@@ -53,8 +50,6 @@ namespace dyno
 	private:
 		Reduction<Real> m_reduce_real;
 		Reduction<Coord> m_reduce_coord;
-
-		bool self_collision = false;
 
 		DArray<Real> mH;
 

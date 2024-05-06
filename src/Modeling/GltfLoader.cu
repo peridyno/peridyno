@@ -231,7 +231,7 @@ namespace dyno
 		getJointsTransformData(all_Nodes, joint_Name, joint_child, joint_rotation, joint_scale, joint_translation, joint_matrix, model);
 
 		//get InverseBindMatrix (Global)
-		this->buildInverseBindMatrices(all_Nodes);
+		this->buildInverseBindMatrices(all_Joints);
 
 
 		std::vector<Mat4f> localMatrix;
@@ -247,9 +247,12 @@ namespace dyno
 		printf("************  Set Joint  ************\n");
 		{
 			std::vector<Coord> jointVertices;
+			std::map<int, int> jointId_VId;
+
 			for (size_t j = 0; j < jointNum; j++)
 			{
 				joint jId = all_Joints[j];
+				jointId_VId[jId] = jointVertices.size();
 
 				jointVertices.push_back(getVertexLocationWithJointTransform(jId, Vec3f(0, 0, 0), joint_matrix));
 
@@ -259,11 +262,11 @@ namespace dyno
 			this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
 			std::vector<TopologyModule::Edge> edges;
 
-			for (size_t jId = 0; jId < joint_child.size(); jId++)
+			for (size_t i = 0; i < jointNum; i++)
 			{
-				for (auto childId : joint_child[jId])
+				for (auto childId : joint_child[all_Joints[i]])
 				{
-					edges.push_back(TopologyModule::Edge(jId, childId));
+					edges.push_back(TopologyModule::Edge(i, jointId_VId[childId]));
 				}
 			}
 			this->stateJointSet()->getDataPtr()->setEdges(edges);
@@ -859,7 +862,9 @@ namespace dyno
 
 		for (size_t i = 0; i < maxJointId + 1; i++)
 		{
-			temp.push_back(Mat4f::identityMatrix());
+			//temp.push_back(Mat4f::identityMatrix());
+			temp[i] = Mat4f::identityMatrix();
+
 		}
 
 

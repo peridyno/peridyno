@@ -217,7 +217,7 @@ namespace dyno
 				contact.normal1 = normal_min;
 				contact.pos1 = proj_min + normal_min * d_min;
 				contact.contactType = ContactType::CT_BOUDNARY;
-				contact.interpenetration = d_min;
+				contact.interpenetration = -d_min;
 
 				nbr_cons[8 * tId + cnt] = contact;
 
