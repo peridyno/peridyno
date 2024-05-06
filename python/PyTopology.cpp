@@ -13,5 +13,6 @@ void pybind_topology(py::module& m)
 	declare_neighbor_element_query<dyno::DataType3f>(m, "3f");
 	declare_contacts_to_edge_set<dyno::DataType3f>(m, "3f");
 	declare_contacts_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_neighbor_point_query<dyno::DataType3f>(m, "3f");
 
 }

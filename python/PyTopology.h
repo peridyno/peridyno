@@ -157,6 +157,27 @@ void declare_contacts_to_point_set(py::module& m, std::string typestr) {
 		.def("out_pointSet", &Class::outPointSet, py::return_value_policy::reference);
 }
 
+#include "Collision/NeighborPointQuery.h"
+template<typename TDataType>
+void declare_neighbor_point_query(py::module& m, std::string typestr) {
+	using Class = dyno::NeighborPointQuery<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("NeighborPointQuery") + typestr;
+	py::class_<Class, std::shared_ptr<Class>>NPQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	NPQ.def(py::init<>())
+		.def("var_spatial", &Class::varSpatial, py::return_value_policy::reference)
+		.def("var_size_limit", &Class::varSizeLimit, py::return_value_policy::reference)
+		.def("in_radius", &Class::inRadius, py::return_value_policy::reference)
+		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
+		.def("in_other", &Class::inOther, py::return_value_policy::reference)
+		.def("out_neighbor_ids", &Class::outNeighborIds, py::return_value_policy::reference);
+
+	py::enum_<typename Class::Spatial>(NPQ, "Spatial")
+		.value("UNIFORM", Class::Spatial::UNIFORM)
+		.value("BVH", Class::Spatial::BVH)
+		.value("OCTREE", Class::Spatial::OCTREE);
+}
+
 
 
 

@@ -39,8 +39,10 @@
 #include "SceneGraph.h"
 #include "Log.h"
 
-#include "Color.h"
+#include "Color.h"  
 #include "FilePath.h"
+
+#include "Auxiliary/DataSource.h"
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -66,6 +68,7 @@ using GroupModule = dyno::GroupModule;
 using TopologyMappingdyno = dyno::TopologyMapping;
 using OutputModule = dyno::OutputModule;
 using Object = dyno::Object;
+using DataSource = dyno::DataSource;
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -173,17 +176,41 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference);
 }
 
-#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
+//#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
+//template <typename TDataType>
+//void declare_semi_analytical_sfi_node(py::module& m, std::string typestr) {
+//	using Class = dyno::SemiAnalyticalSFINode<TDataType>;
+//	using Parent = dyno::Node;
+//	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
+//	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+//		.def(py::init<>())
+//		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
+//		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
+//}
+
 template <typename TDataType>
-void declare_semiAnalyticalSFI_node(py::module& m, std::string typestr) {
-	using Class = dyno::SemiAnalyticalSFINode<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
+void declare_floating_number(py::module& m, std::string typestr) {
+	using Class = dyno::FloatingNumber<TDataType>;
+	using Parent = dyno::DataSource;
+	std::string pyclass_name = std::string("FloatingNumber") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
-		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
+		.def("var_value", &Class::varValue, py::return_value_policy::reference)
+		.def("out_floating", &Class::outFloating, py::return_value_policy::reference);
 }
+
+template <typename TDataType>
+void declare_vector_3_source(py::module& m, std::string typestr) {
+	using Class = dyno::Vector3Source<TDataType>;
+	using Parent = dyno::DataSource;
+	std::string pyclass_name = std::string("Vector3Source") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_value", &Class::varValue, py::return_value_policy::reference)
+		.def("out_coord", &Class::outCoord, py::return_value_policy::reference);
+}
+
+
 
 //Init_static_plugin  - for example_3 WaterPouring
 #include "initializeModeling.h"

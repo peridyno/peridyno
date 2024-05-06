@@ -280,6 +280,11 @@ void pybind_framework(py::module& m)
 		.def("in_frame_number", &OutputModule::inFrameNumber, py::return_value_policy::reference)
 		.def("get_module_type", &OutputModule::getModuleType);
 
+	py::class_<DataSource, Module, std::shared_ptr<DataSource>>(m, "DataSource")
+		.def(py::init<>())
+		.def("captionVisible", &DataSource::captionVisible)
+		.def("get_module_type", &DataSource::getModuleType);
+
 	py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent);
@@ -432,6 +437,9 @@ void pybind_framework(py::module& m)
 	declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
 	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
 	declare_single_node_port<dyno::GranularMedia<dyno::DataType3f>>(m, "GranularMedia3f");
+	//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
+
+	declare_floating_number<dyno::DataType3f>(m, "3f");
 
 	declare_camera(m);
 }
