@@ -579,9 +579,10 @@ namespace dyno
 
 		d_joints.assign(all_Joints);
 
-		maxJointId = *std::max_element(all_Joints.begin(), all_Joints.end());
-
-
+		if (all_Joints.size())
+			maxJointId = *std::max_element(all_Joints.begin(), all_Joints.end());
+		else
+			maxJointId = -1;
 	}
 
 
