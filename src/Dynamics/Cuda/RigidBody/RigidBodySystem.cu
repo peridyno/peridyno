@@ -3,7 +3,7 @@
 #include "Primitive/Primitive3D.h"
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
-#include "IterativeConstraintSolver.h"
+#include "NgsConstraintSolver.h"
 
 //Module headers
 #include "ContactsUnion.h"
@@ -36,13 +36,13 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<NgsConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
 		this->varGravityValue()->connect(iterSolver->varGravityValue());
 		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
-		this->varSlop()->connect(iterSolver->varSlop());
+		//this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		this->stateMass()->connect(merge->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());

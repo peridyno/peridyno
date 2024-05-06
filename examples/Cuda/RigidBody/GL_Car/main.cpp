@@ -76,22 +76,22 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	Vec3f offset = Vec3f(0.0f, -0.721f, 0.148f);
 	rigidbody.offset = offset;
-	jeep->addBox(box1, rigidbody, 10000);
+	jeep->addBox(box1, rigidbody, 100);
 
 	rigidbody.offset = Vec3f(0.0f);
 
-	jeep->addBox(box2, rigidbody, 10000);
-	jeep->addBox(box3, rigidbody, 10000);
-	jeep->addBox(box4, rigidbody, 10000);
-	jeep->addBox(box5, rigidbody, 10000);
-	jeep->addBox(box6, rigidbody, 10000);
+	jeep->addBox(box2, rigidbody, 100);
+	jeep->addBox(box3, rigidbody, 100);
+	jeep->addBox(box4, rigidbody, 100);
+	jeep->addBox(box5, rigidbody, 100);
+	jeep->addBox(box6, rigidbody, 100);
 
 	Real wheel_velocity = 50;
 
-	jeep->addCapsule(capsule1, rigidbody, 100);
-	jeep->addCapsule(capsule2, rigidbody, 100);
-	jeep->addCapsule(capsule3, rigidbody, 100);
-	jeep->addCapsule(capsule4, rigidbody, 100);
+	jeep->addCapsule(capsule1, rigidbody, 1);
+	jeep->addCapsule(capsule2, rigidbody, 1);
+	jeep->addCapsule(capsule3, rigidbody, 1);
+	jeep->addCapsule(capsule4, rigidbody, 1);
 
 	HingeJoint<Real> joint1(6, 2);
 	joint1.setAnchorPoint(capsule1.center, capsule1.center, box3.center, capsule1.rot, box3.rot);
