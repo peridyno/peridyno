@@ -26,15 +26,16 @@ namespace dyno
 	__global__ void IntegrationVelocity(
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
-		DArray<Coord> impulse
+		DArray<Coord> impulse,
+		Real dt
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= velocity.size())
 			return;
 
-		velocity[tId] += impulse[2 * tId];
-		angular_velocity[tId] += impulse[2 * tId + 1];
+		velocity[tId] += impulse[2 * tId] * dt;
+		angular_velocity[tId] += impulse[2 * tId + 1] * dt;
 	}
 
 	template<typename Coord, typename Matrix, typename Quat>
@@ -63,8 +64,35 @@ namespace dyno
 		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
 	}
 
+	template<typename Coord, typename Matrix, typename Quat>
+	__global__ void CorrectPosition(
+		DArray<Coord> impulse,
+		DArray<Coord> pos,
+		DArray<Quat> rotQuat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> inertia,
+		DArray<Coord> velocity,
+		DArray<Coord> angular_velocity,
+		DArray<Matrix> inertia_init,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= pos.size())
+			return;
+
+		pos[tId] += impulse[2 * tId] * dt * dt;
+		rotQuat[tId] += dt * dt * 0.5 * Quat(impulse[2 * tId + 1][0], impulse[2 * tId + 1][1], impulse[tId][2], 0.0) * (rotQuat[tId]);
+
+		rotQuat[tId] = rotQuat[tId].normalize();
+
+		rotMat[tId] = rotQuat[tId].toMatrix3x3();
+
+		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+	}
+
 	template<typename Coord, typename Matrix, typename Constraint>
-	__global__ void calculateJacobianAndB(
+	__global__ void NGScalculateJacobianAndB(
 		DArray<Coord> J,
 		DArray<Coord> B,
 		DArray<Coord> pos,
@@ -84,7 +112,7 @@ namespace dyno
 		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION || constraints[tId].type == ConstraintType::CN_FRICTION)
 		{
 			Coord n = constraints[tId].normal1;
-			Coord r1 = constraints[tId].pos1 - pos[idx1];
+			Coord r1 = constraints[tId].pos1;
 			Coord rcn_1 = r1.cross(n);
 
 			J[4 * tId] = -n;
@@ -94,7 +122,7 @@ namespace dyno
 
 			if (idx2 != INVALID)
 			{
-				Coord r2 = constraints[tId].pos2 - pos[idx2];
+				Coord r2 = constraints[tId].pos2;
 				Coord rcn_2 = r2.cross(n);
 				J[4 * tId + 2] = n;
 				J[4 * tId + 3] = rcn_2;
@@ -406,7 +434,7 @@ namespace dyno
 	}
 
 	template<typename Coord, typename Real>
-	__global__ void calculateDiagonals(
+	__global__ void NGScalculateDiagonals(
 		DArray<Real> D,
 		DArray<Coord> J,
 		DArray<Coord> B
@@ -422,12 +450,13 @@ namespace dyno
 
 
 	template<typename Coord, typename Constraint, typename Real>
-	__global__ void calculateEta(
+	__global__ void NGScalculateEta(
 		DArray<Real> eta,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
 		DArray<Constraint> constraints,
-		DArray<Coord> J
+		DArray<Coord> J,
+		Real dt
 	)
 	{
 		int tId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -439,45 +468,141 @@ namespace dyno
 		int idx2 = constraints[tId].bodyId2;
 
 		Real eta_i = Real(0);
+		Real invDt = 1.0 / dt;
 
-		eta_i -= J[4 * tId].dot(velocity[idx1]);
-		eta_i -= J[4 * tId + 1].dot(angular_velocity[idx1]);
+		eta_i -= J[4 * tId].dot(velocity[idx1] * invDt);
+		eta_i -= J[4 * tId + 1].dot(angular_velocity[idx1] * invDt);
 
 		if (idx2 != INVALID)
 		{
-			eta_i -= J[4 * tId + 2].dot(velocity[idx2]);
-			eta_i -= J[4 * tId + 3].dot(angular_velocity[idx2]);
+			eta_i -= J[4 * tId + 2].dot(velocity[idx2] * invDt);
+			eta_i -= J[4 * tId + 3].dot(angular_velocity[idx2] * invDt);
 		}
 
 		eta[tId] = eta_i;
+
+		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+		{
+			Real beta = Real(0.2);
+			Real alpha = 0;
+
+			Real b_error = beta * invDt * constraints[tId].interpenetration;
+
+			printf("%lf\n", b_error);
+
+			Real b_res = 0;
+
+			Coord n = constraints[tId].normal1;
+			Coord r1 = constraints[tId].pos1;
+
+			Coord gamma = -velocity[idx1] - angular_velocity[idx1].cross(r1);
+
+			if (idx2 != INVALID)
+			{
+				Coord r2 = constraints[tId].pos2;
+				gamma = gamma + velocity[idx2] + angular_velocity[idx2].cross(r2);
+			}
+
+			b_res += alpha * gamma.dot(n);
+
+			eta[tId] -= (b_error + b_res) * invDt;
+		}
 	}
 
-	template<typename Contact, typename Constraint>
-	__global__ void setUpContactAndFrictionConstraints(
+
+	template<typename Coord, typename Constraint, typename Real>
+	__global__ void NGScalculateError(
+		DArray<Real> positionError,
+		DArray<Coord> pos,
+		DArray<Constraint> constraints,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= constraints.size())
+			return;
+
+		Real beta = 1.0;
+		Real invDt = 1 / dt;
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+		{
+			Real error = 0;
+			error -= (pos[idx1] + constraints[tId].pos1).dot(constraints[tId].normal1);
+			if (idx2 != INVALID)
+			{
+				error += (pos[idx2] + constraints[tId].pos2).dot(constraints[tId].normal1);
+			}
+			positionError[tId] = -beta * error * invDt * invDt;
+
+			//printf("%d : %lf\n", tId, error);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
+		{
+			Coord error = pos[idx2] + constraints[tId].normal2 - pos[idx1] - constraints[tId].normal1;
+			positionError[tId] = -beta * error[0] * invDt * invDt;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
+		{
+			Coord error = pos[idx2] + constraints[tId].normal2 - pos[idx1] - constraints[tId].normal1;
+			positionError[tId] = -beta * error[1] * invDt * invDt;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
+		{
+			Coord error = pos[idx2] + constraints[tId].normal2 - pos[idx1] - constraints[tId].normal1;
+			positionError[tId] = -beta * error[2] * invDt * invDt;
+		}
+
+
+	}
+
+	template<typename Contact, typename Constraint, typename Coord, typename Matrix>
+	__global__ void NGSsetUpContactAndFrictionConstraints(
 		DArray<Constraint> constraints,
 		DArray<Contact> contacts,
-		int contact_size,
+		DArray<Coord> pos,
+		DArray<Coord> localPoint,
+		DArray<Coord> localNormal,
+		DArray<Matrix> rotMat,
 		bool hasFriction
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= contact_size)
+		if (tId >= contacts.size())
 			return;
 
 
+		int idx1 = contacts[tId].bodyId1;
+		int idx2 = contacts[tId].bodyId2;
+		int contact_size = contacts.size();
 		constraints[tId].bodyId1 = contacts[tId].bodyId1;
 		constraints[tId].bodyId2 = contacts[tId].bodyId2;
-		constraints[tId].pos1 = contacts[tId].pos1;
-		constraints[tId].pos2 = contacts[tId].pos2;
-		constraints[tId].normal1 = contacts[tId].normal1;
-		constraints[tId].normal2 = contacts[tId].normal2;
+
+		if (idx2 != INVALID)
+		{
+			constraints[tId].pos1 = contacts[tId].pos2 - contacts[tId].interpenetration * contacts[tId].normal1 - pos[idx1];
+			constraints[tId].pos2 = contacts[tId].pos2 - pos[idx2];
+		}
+		else
+		{
+			constraints[tId].pos1 = contacts[tId].pos1 - pos[idx1];
+		}
+		localPoint[2 * tId] = constraints[tId].pos1;
+		localPoint[2 * tId + 1] = constraints[tId].pos2;
+
+
+		
+		constraints[tId].normal1 = -contacts[tId].normal1;
+		constraints[tId].normal2 = -contacts[tId].normal2;
 		constraints[tId].interpenetration = -contacts[tId].interpenetration;
 		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
+		localNormal[tId] = rotMat[idx1].inverse() * constraints[tId].normal1;
 
-		printf("%d pos1: (%lf, %lf, %lf)\n", tId, contacts[tId].pos1[0], constraints[tId].pos1[1], constraints[tId].pos1[2]);
-		printf("%d pos2: (%lf, %lf, %lf)\n", tId, contacts[tId].pos2[0], constraints[tId].pos2[1], constraints[tId].pos2[2]);
-		printf("%d normal1: (%lf, %lf, %lf)\n", tId, contacts[tId].normal1[0], constraints[tId].normal1[1], constraints[tId].normal1[2]);
-		printf("%d normal2: (%lf, %lf, %lf)\n", tId, contacts[tId].normal2[0], constraints[tId].normal2[1], constraints[tId].normal2[2]);
 		
 		if (hasFriction)
 		{
@@ -502,24 +627,53 @@ namespace dyno
 
 			constraints[tId * 2 + contact_size].bodyId1 = contacts[tId].bodyId1;
 			constraints[tId * 2 + contact_size].bodyId2 = contacts[tId].bodyId2;
-			constraints[tId * 2 + contact_size].pos1 = contacts[tId].pos1;
-			constraints[tId * 2 + contact_size].pos2 = contacts[tId].pos2;
+			constraints[tId * 2 + contact_size].pos1 = constraints[tId].pos1;
+			constraints[tId * 2 + contact_size].pos2 = constraints[tId].pos2;
 			constraints[tId * 2 + contact_size].normal1 = u1;
 			constraints[tId * 2 + contact_size].normal2 = -u1;
 			constraints[tId * 2 + contact_size].type = ConstraintType::CN_FRICTION;
 
 			constraints[tId * 2 + 1 + contact_size].bodyId1 = contacts[tId].bodyId1;
 			constraints[tId * 2 + 1 + contact_size].bodyId2 = contacts[tId].bodyId2;
-			constraints[tId * 2 + 1 + contact_size].pos1 = contacts[tId].pos1;
-			constraints[tId * 2 + 1 + contact_size].pos2 = contacts[tId].pos2;
+			constraints[tId * 2 + 1 + contact_size].pos1 = constraints[tId].pos1;
+			constraints[tId * 2 + 1 + contact_size].pos2 = constraints[tId].pos2;
 			constraints[tId * 2 + 1 + contact_size].normal1 = u2;
 			constraints[tId * 2 + 1 + contact_size].normal2 = -u2;
 			constraints[tId * 2 + 1 + contact_size].type = ConstraintType::CN_FRICTION;
 		}
 	}
 
+	template<typename Contact, typename Constraint, typename Coord, typename Matrix>
+	__global__ void NGSsetUpContactConstraints(
+		DArray<Constraint> constraints,
+		DArray<Contact> contacts,
+		DArray<Coord> localPoint,
+		DArray<Coord> localNormal,
+		DArray<Matrix> rotMat
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contacts.size())
+			return;
+
+
+		int idx1 = contacts[tId].bodyId1;
+		int idx2 = contacts[tId].bodyId2;
+		constraints[tId].bodyId1 = contacts[tId].bodyId1;
+		constraints[tId].bodyId2 = contacts[tId].bodyId2;
+		constraints[tId].pos1 = localPoint[2 * tId];
+		constraints[tId].pos2 = localPoint[2 * tId + 1];
+		constraints[tId].normal1 = rotMat[idx1] * localNormal[tId];
+		constraints[tId].normal2 = -rotMat[idx1] *localNormal[tId];
+		constraints[tId].interpenetration = -contacts[tId].interpenetration;
+		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
+		
+	}
+
+	
+
 	template<typename Joint, typename Constraint, typename Coord, typename Matrix>
-	__global__ void setUpBallAndSocketJointConstraints(
+	__global__ void NGSsetUpBallAndSocketJointConstraints(
 		DArray<Constraint> constraints,
 		DArray<Joint> joints,
 		DArray<Coord> pos,
@@ -560,7 +714,7 @@ namespace dyno
 
 
 	template<typename Coord, typename Constraint>
-	__global__ void takeOneJacobiIteration(
+	__global__ void NGStakeOneJacobiIteration(
 		DArray<Real> lambda,
 		DArray<Coord> impulse,
 		DArray<Real> d,
@@ -571,8 +725,7 @@ namespace dyno
 		DArray<Constraint> constraints,
 		Real mu,
 		Real g,
-		Real dt,
-		int isPositionIteration
+		Real dt
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -582,8 +735,6 @@ namespace dyno
 		int idx1 = constraints[tId].bodyId1;
 		int idx2 = constraints[tId].bodyId2;
 
-		if (constraints[tId].type == ConstraintType::CN_FRICTION && isPositionIteration)
-			return;
 
 		Real tmp = eta[tId];
 
@@ -598,7 +749,7 @@ namespace dyno
 
 		if (d[tId] > EPSILON)
 		{
-			int stepInverse = 10;
+			int stepInverse = 5;
 			Real delta_lambda = tmp / (d[tId] * stepInverse);
 			Real lambda_new = lambda[tId] + delta_lambda;
 
@@ -625,7 +776,7 @@ namespace dyno
 					mass_avl = mass[idx1];
 				}
 
-				lambda_new = (abs(lambda_new) > mu * mass_avl * g * dt) ? (lambda_new < 0 ? -mu * mass_avl * g * dt : mu * mass_avl * g * dt) : lambda_new;
+				lambda_new = (abs(lambda_new) > mu * mass_avl * g) ? (lambda_new < 0 ? -mu * mass_avl * g : mu * mass_avl * g) : lambda_new;
 				delta_lambda = lambda_new - lambda[tId];
 			}
 
@@ -653,10 +804,14 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void NgsConstraintSolver<TDataType>::initializeJacobian(Real dt, int isPosition)
+	void NgsConstraintSolver<TDataType>::initializeJacobian(Real dt)
 	{
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
+		mLocalPoint.resize(2 * contact_size);
+		mLocalPoint.reset();
+		mLocalNormal.resize(contact_size);
+		mLocalNormal.reset();
 
 		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
 		
@@ -685,16 +840,15 @@ namespace dyno
 		if (contact_size != 0)
 		{
 			auto& contacts = this->inContacts()->getData();
-			std::cout << "begin" << std::endl;
-			std::cout << contacts.size() << std::endl;
-			std::cout << constraint_size << std::endl;
 			cuExecute(contact_size,
-				setUpContactAndFrictionConstraints,
+				NGSsetUpContactAndFrictionConstraints,
 				mAllConstraints,
 				contacts,
-				contact_size,
+				this->inCenter()->getData(),
+				mLocalPoint,
+				mLocalNormal,
+				this->inRotationMatrix()->getData(),
 				this->varFrictionEnabled()->getData());
-			std::cout << "end" << std::endl;
 		}
 
 		if (ballAndSocketJoint_size != 0)
@@ -706,7 +860,7 @@ namespace dyno
 				begin_index += 2 * contact_size;
 			}
 			cuExecute(ballAndSocketJoint_size,
-				setUpBallAndSocketJointConstraints,
+				NGSsetUpBallAndSocketJointConstraints,
 				mAllConstraints,
 				joints,
 				this->inCenter()->getData(),
@@ -727,7 +881,7 @@ namespace dyno
 		mLambda.reset();
 
 		cuExecute(constraint_size,
-			calculateJacobianAndB,
+			NGScalculateJacobianAndB,
 			mJ,
 			mB,
 			this->inCenter()->getData(),
@@ -737,34 +891,114 @@ namespace dyno
 			this->inRotationMatrix()->getData());
 
 		cuExecute(constraint_size,
-			calculateDiagonals,
+			NGScalculateDiagonals,
 			mD,
 			mJ,
 			mB);
 
 		cuExecute(constraint_size,
-			calculateEta,
+			NGScalculateEta,
 			mEta,
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mAllConstraints,
-			mJ
-		);
+			mJ,
+			dt);
+	}
+
+	template<typename TDataType>
+	void NgsConstraintSolver<TDataType>::initializeJacobianForPosition(Real dt)
+	{
+		int constraint_size = 0;
+		//int contact_size = this->inContacts()->size();
+
+
+		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
+
+		constraint_size += 3 * ballAndSocketJoint_size;
+	
+
+		std::cout << constraint_size << std::endl;
+		if (constraint_size == 0)
+		{
+			return;
+		}
+
+		mAllConstraints.resize(constraint_size);
+
+		/*if (contact_size != 0)
+		{
+			auto& contacts = this->inContacts()->getData();
+			cuExecute(contact_size,
+				NGSsetUpContactConstraints,
+				mAllConstraints,
+				contacts,
+				mLocalPoint,
+				mLocalNormal,
+				this->inRotationMatrix()->getData());
+		}*/
+
+		if (ballAndSocketJoint_size != 0)
+		{
+			auto& joints = this->inBallAndSocketJoints()->getData();
+			int begin_index = 0;
+			cuExecute(ballAndSocketJoint_size,
+				NGSsetUpBallAndSocketJointConstraints,
+				mAllConstraints,
+				joints,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData(),
+				begin_index);
+		}
+
+		mJ.resize(4 * constraint_size);
+		mB.resize(4 * constraint_size);
+		mD.resize(constraint_size);
+		mPositionError.resize(constraint_size);
+		mLambda.resize(constraint_size);
+
+		mJ.reset();
+		mB.reset();
+		mD.reset();
+		mPositionError.reset();
+		mLambda.reset();
+
+		cuExecute(constraint_size,
+			NGScalculateJacobianAndB,
+			mJ,
+			mB,
+			this->inCenter()->getData(),
+			this->inInertia()->getData(),
+			this->inMass()->getData(),
+			mAllConstraints,
+			this->inRotationMatrix()->getData());
+
+		cuExecute(constraint_size,
+			NGScalculateDiagonals,
+			mD,
+			mJ,
+			mB);
+
+		cuExecute(constraint_size,
+			NGScalculateError,
+			mPositionError,
+			this->inCenter()->getData(),
+			mAllConstraints,
+			dt);
 	}
 
 
 	template<typename Coord>
-	__global__ void setUpGravity(
+	__global__ void NGSsetUpGravity(
 		DArray<Coord> impulse_ext,
-		Real g,
-		Real dt
+		Real g
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= impulse_ext.size() / 2)
 			return;
 
-		impulse_ext[2 * tId] = Coord(0, -g, 0) * dt;
+		impulse_ext[2 * tId] = Coord(0, -g, 0);
 		impulse_ext[2 * tId + 1] = Coord(0);
 	}
 
@@ -783,21 +1017,21 @@ namespace dyno
 		if (this->varGravityEnabled()->getData())
 		{
 			cuExecute(bodyNum,
-				setUpGravity,
+				NGSsetUpGravity,
 				mImpulseExt,
-				this->varGravityValue()->getData(),
-				dt);
+				this->varGravityValue()->getData());
 		}
 
 		cuExecute(bodyNum,
 			IntegrationVelocity,
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
-			mImpulseExt);
+			mImpulseExt,
+			dt);
 
 		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty())
 		{
-			initializeJacobian(dt, 0);
+			initializeJacobian(dt);
 
 
 			int constraint_size = mAllConstraints.size();
@@ -805,7 +1039,7 @@ namespace dyno
 			for (int i = 0; i < this->varVelocityIterationNumber()->getData(); i++)
 			{
 				cuExecute(constraint_size,
-					takeOneJacobiIteration,
+					NGStakeOneJacobiIteration,
 					mLambda,
 					mImpulseC,
 					mD,
@@ -816,8 +1050,7 @@ namespace dyno
 					mAllConstraints,
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
-					dt,
-					0);
+					dt);
 			}
 		}
 
@@ -825,7 +1058,8 @@ namespace dyno
 			IntegrationVelocity,
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
-			mImpulseC);
+			mImpulseC,
+			dt);
 
 		cuExecute(bodyNum,
 			IntegrationGesture,
@@ -837,6 +1071,43 @@ namespace dyno
 			this->inAngularVelocity()->getData(),
 			this->inInitialInertia()->getData(),
 			dt);
+
+		/*if (!this->inBallAndSocketJoints()->isEmpty())
+		{
+			for (int i = 0; i < this->varPositionIterationNumber()->getData(); i++)
+			{
+				initializeJacobianForPosition(dt);
+
+				mImpulseC.reset();
+				int constraint_size = mAllConstraints.size();
+
+				cuExecute(constraint_size,
+					NGStakeOneJacobiIteration,
+					mLambda,
+					mImpulseC,
+					mD,
+					mJ,
+					mB,
+					mPositionError,
+					this->inMass()->getData(),
+					mAllConstraints,
+					this->varFrictionCoefficient()->getData(),
+					this->varGravityValue()->getData(),
+					dt);
+				cuExecute(bodyNum,
+					CorrectPosition,
+					mImpulseC,
+					this->inCenter()->getData(),
+					this->inQuaternion()->getData(),
+					this->inRotationMatrix()->getData(),
+					this->inInertia()->getData(),
+					this->inVelocity()->getData(),
+					this->inAngularVelocity()->getData(),
+					this->inInitialInertia()->getData(),
+					dt);
+			}
+			
+		}*/
 
 	}
 	DEFINE_CLASS(NgsConstraintSolver);
