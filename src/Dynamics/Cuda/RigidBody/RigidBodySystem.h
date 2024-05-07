@@ -16,7 +16,10 @@
 #pragma once
 #include "Node.h"
 #include "RigidBodyShared.h"
+
 #include "Topology/Joint.h"
+#include "Collision/Attribute.h"
+
 #include <vector>
 #include <iostream>
 namespace dyno
@@ -148,6 +151,8 @@ namespace dyno
 		DEF_ARRAY_STATE(TQuat, Quaternion, DeviceType::GPU, "Quaternion");
 
 		DEF_ARRAY_STATE(CollisionMask, CollisionMask, DeviceType::GPU, "Collision mask for each rigid body");
+
+		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "Rigid body attributes");
 
 		DEF_ARRAY_STATE(Matrix, InitialInertia, DeviceType::GPU, "Initial inertia matrix");
 

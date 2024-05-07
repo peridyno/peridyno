@@ -2,6 +2,8 @@
 
 namespace dyno
 {
+	IMPLEMENT_TCLASS(ContactsToEdgeSet, TDataType);
+
 	template<typename TDataType>
 	ContactsToEdgeSet<TDataType>::ContactsToEdgeSet()
 		: TopologyMapping()

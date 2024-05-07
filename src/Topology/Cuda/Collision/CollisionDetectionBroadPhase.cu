@@ -59,6 +59,8 @@ namespace dyno
 
 		mIds.clear();
 		mKeys.clear();
+
+		bvh.release();
 	}
 
 	template<typename Real, typename Coord>
@@ -433,7 +435,7 @@ namespace dyno
 			aabb_src,
 			aabb_tar,
 			octree,
-			self_collision
+			this->varSelfCollision()->getValue()
 		);
 
 		int total_node_num = thrust::reduce(thrust::device, mCounter.begin(), mCounter.begin() + mCounter.size(), (int)0, thrust::plus<int>());
@@ -456,7 +458,7 @@ namespace dyno
 			aabb_src,
 			aabb_tar,
 			octree,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		// 		print(counter);
 		// 		print(ids);
@@ -480,7 +482,7 @@ namespace dyno
 			mCounter,
 			aabb_src,
 			octree,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		contacts.resize(mNewCounter);
 
@@ -491,7 +493,7 @@ namespace dyno
 			mCounter,
 			aabb_src,
 			octree,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		CArrayList<int> hContacts;
 		hContacts.assign(contacts);
@@ -535,8 +537,11 @@ namespace dyno
 	template<typename TDataType>
 	void CollisionDetectionBroadPhase<TDataType>::doCollisionWithLinearBVH()
 	{
-		auto& aabb_src = this->inSource()->getData();
-		auto& aabb_tar = this->inTarget()->getData();
+		auto& aabb_src = this->inSource()->constData();
+
+		if (this->inTarget()->isModified()) {
+			bvh.construct(this->inTarget()->constData());
+		}
 
 		if (this->outContactList()->isEmpty()) {
 			this->outContactList()->allocate();
@@ -544,22 +549,13 @@ namespace dyno
 
 		auto& contacts = this->outContactList()->getData();
 
-		LinearBVH<TDataType> bvh;
-		bvh.construct(aabb_tar);
-
 		mCounter.resize(aabb_src.size());
 		cuExecute(aabb_src.size(),
 			CDBP_RequestIntersectionNumberBVH,
 			mCounter,
 			aabb_src,
 			bvh,
-			self_collision);
-
-// 		CArray<uint> hCounter;
-// 		hCounter.assign(mCounter);
-// 		for (int i = 0; i < hCounter.size(); i++)
-// 			std::cout << "Num: " << hCounter[i] << std::endl;
-// 		hCounter.clear();
+			this->varSelfCollision()->getValue());
 
 		contacts.resize(mCounter);
 
@@ -568,12 +564,7 @@ namespace dyno
 			contacts,
 			aabb_src,
 			bvh,
-			self_collision);
-
-// 		CArrayList<int> hContacts;
-// 		hContacts.assign(contacts);
-
-		bvh.release();
+			this->varSelfCollision()->getValue());
 	}
 
 	DEFINE_CLASS(CollisionDetectionBroadPhase);

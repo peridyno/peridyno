@@ -3,7 +3,6 @@
 #include "Primitive/Primitive3D.h"
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
-#include <cuda_runtime.h>
 #include "IterativeConstraintSolver.h"
 
 //Module headers
@@ -26,6 +25,7 @@ namespace dyno
 		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
 		this->stateTopology()->connect(elementQuery->inDiscreteElements());
 		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
 
 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
@@ -286,11 +286,12 @@ namespace dyno
 		DArray<Quat> rotation_q,
 		DArray<Matrix> inertia,
 		DArray<CollisionMask> mask,
+		DArray<Attribute> atts,
 		DArray<RigidBodyInfo> states,
 		ElementOffset offset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= rotation_q.size())
+		if (tId >= states.size())
 			return;
 		
 		mass[tId] = states[tId].mass;
@@ -302,6 +303,10 @@ namespace dyno
 		barycenterOffset[tId] = states[tId].offset;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
+
+		Attribute att_i;
+		att_i.setObjectId(states[tId].bodyId);
+		atts[tId] = att_i;
 	}
 
 	__global__ void SetupBoxes(
@@ -424,6 +429,7 @@ namespace dyno
 		this->stateInertia()->resize(sizeOfRigids);
 		this->stateQuaternion()->resize(sizeOfRigids);
 		this->stateCollisionMask()->resize(sizeOfRigids);
+		this->stateAttribute()->resize(sizeOfRigids);
 
 		cuExecute(sizeOfRigids,
 			RB_SetupInitialStates,
@@ -436,6 +442,7 @@ namespace dyno
 			this->stateQuaternion()->getData(),
 			this->stateInertia()->getData(),
 			this->stateCollisionMask()->getData(),
+			this->stateAttribute()->getData(),
 			mDeviceRigidBodyStates,
 			eleOffset);
 

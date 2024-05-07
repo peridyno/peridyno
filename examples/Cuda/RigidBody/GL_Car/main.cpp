@@ -15,8 +15,12 @@
 #include <Mapping/AnchorPointToPointSet.h>
 
 #include "Collision/NeighborElementQuery.h"
+#include "Collision/CollistionDetectionTriangleSet.h"
+#include "Collision/CollistionDetectionBoundingBox.h"
 
 #include <Module/GLPhotorealisticInstanceRender.h>
+
+#include <PlaneModel.h>
 
 #include "GltfLoader.h"
 
@@ -37,7 +41,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	BoxInfo box1, box2, box3, box4, box5, box6;
 	box1.center = Vec3f(0, 1.171, -0.011);
-	box1.halfLength = Vec3f(1.011, 0.2, 1.8);
+	box1.halfLength = Vec3f(1.011, 0.5, 2.4);
 	box2.center = Vec3f(0, 1.044, -2.254);
 	box2.halfLength = Vec3f(0.250, 0.250, 0.250);
 
@@ -139,18 +143,22 @@ std::shared_ptr<SceneGraph> creatCar()
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
-	/*
-	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	jeep->stateTopology()->connect(mapper->inDiscreteElements());
-	jeep->graphicsPipeline()->pushModule(mapper);
 
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-	sRender->setAlpha(0.8f);
-	sRender->setRoughness(0.7f);
-	sRender->setMetallic(3.0f);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	jeep->graphicsPipeline()->pushModule(sRender);*/
+	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
+	plane->varScale()->setValue(Vec3f(10.0f));
+	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
+
+// 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+// 	jeep->stateTopology()->connect(mapper->inDiscreteElements());
+// 	jeep->graphicsPipeline()->pushModule(mapper);
+// 
+// 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+// 	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+// 	sRender->setAlpha(0.8f);
+// 	sRender->setRoughness(0.7f);
+// 	sRender->setMetallic(3.0f);
+// 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+// 	jeep->graphicsPipeline()->pushModule(sRender);
 
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals
@@ -169,16 +177,16 @@ std::shared_ptr<SceneGraph> creatCar()
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	jeep->graphicsPipeline()->pushModule(wireRender);
 
-	//Visualize contact points
-	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
-	jeep->graphicsPipeline()->pushModule(contactPointMapper);
-
-	auto pointRender = std::make_shared<GLPointVisualModule>();
-	pointRender->setColor(Color(1, 0, 0));
-	pointRender->varPointSize()->setValue(0.00003f);
-	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-	jeep->graphicsPipeline()->pushModule(pointRender);
+// 	//Visualize contact points
+// 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+// 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
+// 	jeep->graphicsPipeline()->pushModule(contactPointMapper);
+// 
+// 	auto pointRender = std::make_shared<GLPointVisualModule>();
+// 	pointRender->setColor(Color(1, 0, 0));
+// 	pointRender->varPointSize()->setValue(0.00003f);
+// 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
+// 	jeep->graphicsPipeline()->pushModule(pointRender);
 
 	//Visualize Anchor point for joint
 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
@@ -195,6 +203,24 @@ std::shared_ptr<SceneGraph> creatCar()
 	pointRender2->varPointSize()->setValue(0.03f);
 	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
 	jeep->graphicsPipeline()->pushModule(pointRender2);
+
+
+// 	//Visualize contact points
+// 	auto cdBV = std::make_shared<CollistionDetectionTriangleSet<DataType3f>>();
+// 	jeep->stateTopology()->connect(cdBV->inDiscreteElements());
+// 	jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
+// 	jeep->graphicsPipeline()->pushModule(cdBV);
+// 
+// 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+// 	cdBV->outContacts()->connect(contactPointMapper->inContacts());
+// 	jeep->graphicsPipeline()->pushModule(contactPointMapper);
+// 
+// 	auto contactsRender = std::make_shared<GLPointVisualModule>();
+// 	contactsRender->setColor(Color(1, 0, 0));
+// 	contactsRender->varPointSize()->setValue(0.1f);
+// 	contactPointMapper->outPointSet()->connect(contactsRender->inPointSet());
+// 	jeep->graphicsPipeline()->pushModule(contactsRender);
+
 	return scn;
 }
 
