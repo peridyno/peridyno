@@ -220,6 +220,9 @@ void pybind_framework(py::module& m)
 		.def("is_visible", &VisualModule::isVisible)
 		.def("get_module_type", &VisualModule::getModuleType);
 
+	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
+		.def("get_module_type", &dyno::ComputeModule::getModuleType);
+
 	py::class_<Pipeline, Module, std::shared_ptr<Pipeline>>(m, "Pipeline")
 		.def("size_of_dynamic_modules", &Pipeline::sizeOfDynamicModules)
 		.def("size_of_persistent_modules", &Pipeline::sizeOfPersistentModules)
@@ -238,9 +241,6 @@ void pybind_framework(py::module& m)
 		.def("force_update", &Pipeline::forceUpdate)
 		.def("promote_putput_to_node", &Pipeline::promoteOutputToNode, py::return_value_policy::reference)
 		.def("demote_output_from_node", &Pipeline::demoteOutputFromNode);
-
-	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
-		.def("get_module_type", &dyno::ComputeModule::getModuleType);
 
 	py::class_<ConstraintModule, Module, std::shared_ptr<ConstraintModule>>(m, "ConstraintModule")
 		.def("constrain", &dyno::ConstraintModule::constrain)
@@ -416,8 +416,13 @@ void pybind_framework(py::module& m)
 		.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty)
 		.def("get_data_ptr", &dyno::FVar<dyno::PEnum>::getDataPtr);
 
+	declare_array<int, DeviceType::GPU>(m, "1D");
 	declare_array<float, DeviceType::GPU>(m, "1fD");
 	declare_array<dyno::Vec3f, DeviceType::GPU>(m, "3fD");
+
+	declare_array_list<int, DeviceType::GPU>(m, "1D");
+	declare_array_list<float, DeviceType::GPU>(m, "1fD");
+	declare_array_list<dyno::Vec3f, DeviceType::GPU>(m, "3fD");
 
 	declare_instance<TopologyModule>(m, "");
 	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");

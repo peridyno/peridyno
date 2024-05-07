@@ -126,9 +126,12 @@ void declare_neighbor_element_query(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("NeighborElementQuery") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_radius", &Class::inRadius, py::return_value_policy::reference)
+		.def("var_self_collision", &Class::varSelfCollision, py::return_value_policy::reference)
+		.def("var_d_head", &Class::varDHead, py::return_value_policy::reference)
+		.def("var_grid_size_limit", &Class::varGridSizeLimit, py::return_value_policy::reference)
 		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
 		.def("in_collision_mask", &Class::inCollisionMask, py::return_value_policy::reference)
+		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
 		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
@@ -138,7 +141,7 @@ void declare_contacts_to_edge_set(py::module& m, std::string typestr) {
 	using Class = dyno::ContactsToEdgeSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
 	std::string pyclass_name = std::string("ContactsToEdgeSet") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
@@ -151,7 +154,7 @@ void declare_contacts_to_point_set(py::module& m, std::string typestr) {
 	using Class = dyno::ContactsToPointSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
 	std::string pyclass_name = std::string("ContactsToPointSet") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
 		.def("out_pointSet", &Class::outPointSet, py::return_value_policy::reference);
@@ -163,7 +166,7 @@ void declare_neighbor_point_query(py::module& m, std::string typestr) {
 	using Class = dyno::NeighborPointQuery<TDataType>;
 	using Parent = dyno::ComputeModule;
 	std::string pyclass_name = std::string("NeighborPointQuery") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>NPQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, std::shared_ptr<Class>>NPQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	NPQ.def(py::init<>())
 		.def("var_spatial", &Class::varSpatial, py::return_value_policy::reference)
 		.def("var_size_limit", &Class::varSizeLimit, py::return_value_policy::reference)

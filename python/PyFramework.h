@@ -103,10 +103,30 @@ template<typename T, DeviceType deviceType>
 void declare_array(py::module& m, std::string typestr) {
 	using Class = dyno::FArray<T, deviceType>;
 	using Parent = FBase;
-	std::string pyclass_name = std::string("Array") + typestr;
+	std::string pyclass_name = std::string("FArray") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("resize", &Class::resize);
+}
+
+template<typename T, DeviceType deviceType>
+void declare_array_list(py::module& m, std::string typestr) {
+	using Class = dyno::FArrayList<T, deviceType>;
+	using Parent = FBase;
+	std::string pyclass_name = std::string("FArrayList") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("get_template_name", &Class::getTemplateName)
+		.def("get_class_name", &Class::getClassName)
+		.def("get_data_ptr", &Class::getDataPtr, py::return_value_policy::reference)
+		.def("const_data_ptr", &Class::constDataPtr, py::return_value_policy::reference)
+		.def("allocate", &Class::allocate)
+		//.def("connect", &Class::connect)
+		.def("get_data", &Class::getData, py::return_value_policy::reference)
+		.def("const_data", &Class::constData, py::return_value_policy::reference)
+		.def("size", &Class::size)
+		.def("is_empty", &Class::isEmpty);
+	//²»È«
 }
 
 template<typename T>
