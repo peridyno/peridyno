@@ -55,7 +55,7 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(uint, VelocityIterationNumber, 50, "");
+		DEF_VAR(uint, VelocityIterationNumber, 30, "");
 
 		DEF_VAR(uint, PositionIterationNumber, 5, "");
 
@@ -91,13 +91,17 @@ namespace dyno
 		DEF_ARRAY_IN(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
 
 	private:
-		void initializeJacobian(Real dt, int isPosition);
+		void initializeJacobian(Real dt);
+		void initializeJacobianForPosition(Real dt);
 	private:
 		DArray<Coord> mJ;
 		DArray<Coord> mB;
 		DArray<Real> mEta;
 		DArray<Real> mD;
 		DArray<Real> mLambda;
+		DArray<Real> mPositionError;
+		DArray<Coord> mLocalPoint;
+		DArray<Coord> mLocalNormal;
 		
 
 		DArray<Coord> mImpulseC;
