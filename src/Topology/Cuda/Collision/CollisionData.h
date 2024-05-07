@@ -163,7 +163,10 @@ namespace dyno
 		int localTag1;
 		int localTag2;
 
-		Real interpenetration = 0.0f;//inter_dist
+		/**
+		 * A positive value representing the interpenetration distance
+		 */
+		Real interpenetration = 0.0f;
 		Real d_min;
 		Real d_max;
 

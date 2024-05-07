@@ -41,7 +41,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	BoxInfo box1, box2, box3, box4, box5, box6;
 	box1.center = Vec3f(0, 1.171, -0.011);
-	box1.halfLength = Vec3f(1.011, 0.2, 1.8);
+	box1.halfLength = Vec3f(1.011, 0.5, 2.4);
 	box2.center = Vec3f(0, 1.044, -2.254);
 	box2.halfLength = Vec3f(0.250, 0.250, 0.250);
 

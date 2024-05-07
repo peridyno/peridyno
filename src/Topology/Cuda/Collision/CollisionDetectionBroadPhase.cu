@@ -435,7 +435,7 @@ namespace dyno
 			aabb_src,
 			aabb_tar,
 			octree,
-			self_collision
+			this->varSelfCollision()->getValue()
 		);
 
 		int total_node_num = thrust::reduce(thrust::device, mCounter.begin(), mCounter.begin() + mCounter.size(), (int)0, thrust::plus<int>());
@@ -458,7 +458,7 @@ namespace dyno
 			aabb_src,
 			aabb_tar,
 			octree,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		// 		print(counter);
 		// 		print(ids);
@@ -482,7 +482,7 @@ namespace dyno
 			mCounter,
 			aabb_src,
 			octree,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		contacts.resize(mNewCounter);
 
@@ -493,7 +493,7 @@ namespace dyno
 			mCounter,
 			aabb_src,
 			octree,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		CArrayList<int> hContacts;
 		hContacts.assign(contacts);
@@ -555,7 +555,7 @@ namespace dyno
 			mCounter,
 			aabb_src,
 			bvh,
-			self_collision);
+			this->varSelfCollision()->getValue());
 
 		contacts.resize(mCounter);
 
@@ -564,7 +564,7 @@ namespace dyno
 			contacts,
 			aabb_src,
 			bvh,
-			self_collision);
+			this->varSelfCollision()->getValue());
 	}
 
 	DEFINE_CLASS(CollisionDetectionBroadPhase);
