@@ -20,15 +20,19 @@
 
 namespace dyno
 {
+	/**
+	 * @brief Implementation of an iterative constraint solver for rigid body dynamics with contact.
+	 * 			Refer to "Iterative Dynamics with Temporal Coherence" by Erin Catto, 2005.
+	 */
 	template<typename TDataType>
 	class NgsConstraintSolver : public ConstraintModule
 	{
-		DECLARE_TCLASS(NgsConstraintSolver, TDataType)
+		DECLARE_TCLASS(IterativeConstraintSolver, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-
+		
 		typedef typename ::dyno::Quat<Real> TQuat;
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
 		typedef typename ::dyno::TConstraintPair<Real> Constraint;
@@ -38,11 +42,9 @@ namespace dyno
 		typedef typename HingeJoint<Real> HingeJoint;
 		typedef typename FixedJoint<Real> FixedJoint;
 		typedef typename PointJoint<Real> PointJoint;
-
+	
 		NgsConstraintSolver();
-		~NgsConstraintSolver();
-
-		void constrain() override;
+		~NgsConstraintSolver() override;
 
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
@@ -55,9 +57,10 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(uint, VelocityIterationNumber, 30, "");
+		DEF_VAR(uint, IterationNumber, 10, "");
 
 		DEF_VAR(uint, PositionIterationNumber, 5, "");
+
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -90,23 +93,35 @@ namespace dyno
 
 		DEF_ARRAY_IN(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
 
+	protected:
+		void constrain() override;
+
 	private:
 		void initializeJacobian(Real dt);
-		void initializeJacobianForPosition(Real dt);
+
 	private:
-		DArray<Coord> mJ;
-		DArray<Coord> mB;
-		DArray<Real> mEta;
-		DArray<Real> mD;
-		DArray<Real> mLambda;
-		DArray<Real> mPositionError;
-		DArray<Coord> mLocalPoint;
-		DArray<Coord> mLocalNormal;
-		
+		DArray<Coord> mJ;		//Jacobian
+		DArray<Coord> mB;		//B = M^{-1}J^T
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
 
+		DArray<Real> mEta;		//eta
+		DArray<Real> mD;		//diagonal elements of JB
+		DArray<Real> mLambda;	//contact impulse
+
+		DArray<Real> mLambda_old;
+
+		DArray<Real> mDiff;
+		CArray<Real> mDiffHost;
+
+		DArray<ContactPair> mContactsInLocalFrame;
+
 		DArray<Constraint> mAllConstraints;
+
+		DArray<int> mContactNumber;
+		DArray<int> mJointNumber;
+
+
 	};
 }

@@ -4,6 +4,7 @@
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
 #include "NgsConstraintSolver.h"
+#include "IterativeConstraintSolver.h"
 
 //Module headers
 #include "ContactsUnion.h"
@@ -37,7 +38,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<NgsConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -69,6 +70,8 @@ namespace dyno
 		merge->outContacts()->connect(iterSolver->inContacts());
 
 		this->animationPipeline()->pushModule(iterSolver);
+
+		this->setDt(0.001f);
 	}
 
 	template<typename TDataType>

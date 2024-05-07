@@ -21,6 +21,33 @@ namespace dyno
 	{
 	}
 
+	template<typename Real, typename Coord, typename Quat, typename Matrix>
+	__global__ void RB_updatePositionAndRotation(
+		DArray<Coord> center,
+		DArray<Quat> rotQuat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> inertia,
+		DArray<Matrix> inertia_init,
+		DArray<Coord> impulse_constrain,
+		Real dt)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= center.size())
+			return;
+
+		Coord dv = impulse_constrain[2 * tId];
+		Coord dw = impulse_constrain[2 * tId + 1];
+
+		center[tId] += dv * dt;
+		rotQuat[tId] += dt * 0.5 * Quat(dw.x, dw.y, dw.z, 0) * rotQuat[tId];
+
+		rotQuat[tId] = rotQuat[tId].normalize();
+
+		rotMat[tId] = rotQuat[tId].toMatrix3x3();
+
+		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+	}
+
 	template<typename Coord>
 	__global__ void RB_updateVelocity(
 		DArray<Coord> velocity,
@@ -521,7 +548,7 @@ namespace dyno
 
 				b_res += alpha * gamma.dot(n);
 
-				eta[tId] -= b_error + b_res;
+				eta[tId] -= b_error;// +b_res;
 			}
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
@@ -738,30 +765,46 @@ namespace dyno
 
 
 
-	template<typename Contact, typename Constraint>
+	template<typename Coord, typename Matrix, typename Contact, typename Constraint>
 	__global__ void setUpContactAndFrictionConstraints(
 		DArray<Constraint> constraints,
-		DArray<Contact> contacts,
-		int contact_size,
+		DArray<Contact> contactsInLocalFrame,
+		DArray<Coord> center,
+		DArray<Matrix> rot,
 		bool hasFriction
 	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= contact_size)
+		if (tId >= contactsInLocalFrame.size())
 			return;
 
-		constraints[tId].bodyId1 = contacts[tId].bodyId1;
-		constraints[tId].bodyId2 = contacts[tId].bodyId2;
-		constraints[tId].pos1 = contacts[tId].pos1;
-		constraints[tId].pos2 = contacts[tId].pos2;
-		constraints[tId].normal1 = -contacts[tId].normal1;
-		constraints[tId].normal2 = -contacts[tId].normal2;
-		constraints[tId].interpenetration = -contacts[tId].interpenetration;
+		int contact_size = contactsInLocalFrame.size();
+
+		int idx1 = contactsInLocalFrame[tId].bodyId1;
+		int idx2 = contactsInLocalFrame[tId].bodyId2;
+
+		Coord c1 = center[idx1];
+		Matrix rot1 = rot[idx1];
+
+		constraints[tId].bodyId1 = idx1;
+		constraints[tId].bodyId2 = idx2;
+		constraints[tId].pos1 = rot1 * contactsInLocalFrame[tId].pos1 + c1;
+		constraints[tId].normal1 = -rot1 * contactsInLocalFrame[tId].normal1;
+		if (idx2 != INVALID)
+		{
+			Coord c2 = center[idx2];
+			Matrix rot2 = rot[idx2];
+
+			constraints[tId].pos2 = rot2 * contactsInLocalFrame[tId].pos2 + c2;
+			constraints[tId].normal2 = -rot2 * contactsInLocalFrame[tId].normal2;
+		}
+		
+		constraints[tId].interpenetration = -contactsInLocalFrame[tId].interpenetration;
 		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
 
 		if (hasFriction)
 		{
-			Vector<Real, 3> n = contacts[tId].normal1;
+			Vector<Real, 3> n = constraints[tId].normal1;
 			n = n.normalize();
 
 			Vector<Real, 3> u1, u2;
@@ -780,18 +823,18 @@ namespace dyno
 			u2 = u1.cross(n);
 			u2 = u2.normalize();
 
-			constraints[tId * 2 + contact_size].bodyId1 = contacts[tId].bodyId1;
-			constraints[tId * 2 + contact_size].bodyId2 = contacts[tId].bodyId2;
-			constraints[tId * 2 + contact_size].pos1 = contacts[tId].pos1;
-			constraints[tId * 2 + contact_size].pos2 = contacts[tId].pos2;
+			constraints[tId * 2 + contact_size].bodyId1 = idx1;
+			constraints[tId * 2 + contact_size].bodyId2 = idx2;
+			constraints[tId * 2 + contact_size].pos1 = constraints[tId].pos1;
+			constraints[tId * 2 + contact_size].pos2 = constraints[tId].pos2;
 			constraints[tId * 2 + contact_size].normal1 = u1;
 			constraints[tId * 2 + contact_size].normal2 = -u1;
 			constraints[tId * 2 + contact_size].type = ConstraintType::CN_FRICTION;
 
-			constraints[tId * 2 + 1 + contact_size].bodyId1 = contacts[tId].bodyId1;
-			constraints[tId * 2 + 1 + contact_size].bodyId2 = contacts[tId].bodyId2;
-			constraints[tId * 2 + 1 + contact_size].pos1 = contacts[tId].pos1;
-			constraints[tId * 2 + 1 + contact_size].pos2 = contacts[tId].pos2;
+			constraints[tId * 2 + 1 + contact_size].bodyId1 = idx1;
+			constraints[tId * 2 + 1 + contact_size].bodyId2 = idx2;
+			constraints[tId * 2 + 1 + contact_size].pos1 = constraints[tId].pos1;
+			constraints[tId * 2 + 1 + contact_size].pos2 = constraints[tId].pos2;
 			constraints[tId * 2 + 1 + contact_size].normal1 = u2;
 			constraints[tId * 2 + 1 + contact_size].normal2 = -u2;
 			constraints[tId * 2 + 1 + contact_size].type = ConstraintType::CN_FRICTION;
@@ -1151,7 +1194,6 @@ namespace dyno
 			tmp -= J[4 * tId + 3].dot(impulse[idx2 * 2 + 1]);
 		}
 
-
 		if (d[tId] > EPSILON)
 		{
 			int stepInverse = 0;
@@ -1186,6 +1228,7 @@ namespace dyno
 			// Projection to Bound
 			if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
 			{
+				//printf("%d: %f %f %f \n", tId, impulse_constrain[tId].x, impulse_constrain[tId].y, impulse_constrain[tId].z);
 				if (lambda_new < 0)
 				{
 					lambda_new = 0;
@@ -1289,8 +1332,9 @@ namespace dyno
 			cuExecute(contact_size,
 				setUpContactAndFrictionConstraints,
 				mAllConstraints,
-				contacts,
-				contact_size,
+				mContactsInLocalFrame,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData(),
 				this->varFrictionEnabled()->getData());
 		}
 
@@ -1492,9 +1536,51 @@ namespace dyno
 	}
 
 
+	template<typename Contact, typename Coord, typename Matrix>
+	__global__ void setUpContactsInLocalFrame(
+		DArray<Contact> contactsInLocalFrame,
+		DArray<Contact> contactsInGlobalFrame,
+		DArray<Coord> center,
+		DArray<Matrix> rot)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contactsInGlobalFrame.size())
+			return;
+
+		Contact globalC = contactsInGlobalFrame[tId];
+
+		int idx1 = globalC.bodyId1;
+		int idx2 = globalC.bodyId2;
+
+		Contact localC;
+		localC.bodyId1 = globalC.bodyId1;
+		localC.bodyId2 = globalC.bodyId2;
+
+		localC.interpenetration = globalC.interpenetration;
+		localC.contactType = globalC.contactType;
+
+		Coord c1 = center[idx1];
+		Matrix rot1 = rot[idx1];
+
+		localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
+		localC.normal1 = rot1.transpose() * globalC.normal1;
+
+		if (idx2 != INVALID) {
+			Coord c2 = center[idx2];
+			Matrix rot2 = rot[idx2];
+
+			localC.pos2 = rot2.transpose() * (globalC.pos2 - c2);
+			localC.normal2 = rot2.transpose() * globalC.normal2;
+		}
+
+		contactsInLocalFrame[tId] = localC;
+	}
+
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::constrain()
 	{
+		this->varFrictionEnabled()->setValue(false);
+
 		uint bodyNum = this->inCenter()->size();
 
 		mImpulseC.resize(bodyNum * 2);
@@ -1505,61 +1591,86 @@ namespace dyno
 
 		Real dt = this->inTimeStep()->getData();
 
-		if (this->varGravityEnabled()->getData())
-		{
-			cuExecute(bodyNum,
-				setUpGravity,
-				mImpulseExt,
-				this->varGravityValue()->getData(),
-				dt);
-		}
+// 		if (this->varGravityEnabled()->getData())
+// 		{
+// 			cuExecute(bodyNum,
+// 				setUpGravity,
+// 				mImpulseExt,
+// 				this->varGravityValue()->getData(),
+// 				dt);
+// 		}
 
 		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
 		{
-			initializeJacobian(dt);
-
-			int constraint_size = mAllConstraints.size();
-
-
-			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
+			if (mContactsInLocalFrame.size() != this->inContacts()->size())
 			{
-				mDiff.resize(constraint_size);
-				mDiff.reset();
-				cuExecute(constraint_size,
-					takeOneJacobiIteration,
-					mLambda,
-					mImpulseC,
-					mD,
-					mJ,
-					mB,
-					mEta,
-					this->inMass()->getData(),
-					mAllConstraints,
-					mContactNumber,
-					mJointNumber,
-					this->varFrictionCoefficient()->getData(),
-					this->varGravityValue()->getData(),
-					dt);
+				mContactsInLocalFrame.resize(this->inContacts()->size());
+			}
 
-				cuExecute(constraint_size,
-					calculateDiff,
-					mLambda,
-					mLambda_old,
-					mDiff);
-				mDiffHost.assign(mDiff);
-				Real change = calculateNorm(mDiffHost);
-				mLambda_old.assign(mLambda);
-				if (change < EPSILON)
-					break;
+			cuExecute(this->inContacts()->size(),
+				setUpContactsInLocalFrame,
+				mContactsInLocalFrame,
+				this->inContacts()->getData(),
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData());
+
+			for (size_t ngs = 0; ngs < 5; ngs++)
+			{
+				initializeJacobian(dt);
+
+				int constraint_size = mAllConstraints.size();
+
+
+				for (int i = 0; i < 1; i++)
+				{
+					mDiff.resize(constraint_size);
+					mDiff.reset();
+					cuExecute(constraint_size,
+						takeOneJacobiIteration,
+						mLambda,
+						mImpulseC,
+						mD,
+						mJ,
+						mB,
+						mEta,
+						this->inMass()->getData(),
+						mAllConstraints,
+						mContactNumber,
+						mJointNumber,
+						this->varFrictionCoefficient()->getData(),
+						this->varGravityValue()->getData(),
+						dt);
+
+					cuExecute(constraint_size,
+						calculateDiff,
+						mLambda,
+						mLambda_old,
+						mDiff);
+					mDiffHost.assign(mDiff);
+					Real change = calculateNorm(mDiffHost);
+					mLambda_old.assign(mLambda);
+					if (change < EPSILON)
+						break;
+				}
+
+				// 		cuExecute(bodyNum,
+				// 			RB_updateVelocity,
+				// 			this->inVelocity()->getData(),
+				// 			this->inAngularVelocity()->getData(),
+				// 			mImpulseExt,
+				// 			mImpulseC);
+
+				cuExecute(bodyNum,
+					RB_updatePositionAndRotation,
+					this->inCenter()->getData(),
+					this->inQuaternion()->getData(),
+					this->inRotationMatrix()->getData(),
+					this->inInertia()->getData(),
+					this->inInitialInertia()->getData(),
+					mImpulseC,
+					dt);
 			}
 		}
-
-		cuExecute(bodyNum,
-			RB_updateVelocity,
-			this->inVelocity()->getData(),
-			this->inAngularVelocity()->getData(),
-			mImpulseExt,
-			mImpulseC);
 
 
 		cuExecute(bodyNum,
