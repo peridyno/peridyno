@@ -51,7 +51,7 @@ namespace dyno
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
 		this->varGravityValue()->connect(iterSolver->varGravityValue());
 		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
-		//this->varSlop()->connect(iterSolver->varSlop());
+		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		
 		this->stateCenter()->connect(iterSolver->inCenter());

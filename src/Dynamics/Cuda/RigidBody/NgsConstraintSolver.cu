@@ -36,9 +36,11 @@ namespace dyno
 			return;
 
 		Coord dv = impulse_constrain[2 * tId];
+
+
 		Coord dw = impulse_constrain[2 * tId + 1];
 
-		center[tId] += dv * dt;
+		center[tId] += dt * dv;
 		rotQuat[tId] += dt * 0.5 * Quat(dw.x, dw.y, dw.z, 0) * rotQuat[tId];
 
 		rotQuat[tId] = rotQuat[tId].normalize();
@@ -505,21 +507,13 @@ namespace dyno
 		if (tId >= constraints.size())
 			return;
 
+
 		Real invDt = Real(1) / dt;
 
 		int idx1 = constraints[tId].bodyId1;
 		int idx2 = constraints[tId].bodyId2;
 
 		Real eta_i = Real(0);
-
-// 		eta_i -= J[4 * tId].dot(velocity[idx1] + impulse_ext[idx1 * 2]);
-// 		eta_i -= J[4 * tId + 1].dot(angular_velocity[idx1] + impulse_ext[idx1 * 2 + 1]);
-// 
-// 		if (idx2 != INVALID)
-// 		{
-// 			eta_i -= J[4 * tId + 2].dot(velocity[idx2] + impulse_ext[idx2 * 2]);
-// 			eta_i -= J[4 * tId + 3].dot(angular_velocity[idx2] + impulse_ext[idx2 * 2 + 1]);
-// 		}
 
 		eta[tId] = eta_i;
 
@@ -529,9 +523,12 @@ namespace dyno
 			{
 				Real beta = Real(0.3);
 				Real alpha = 0;
-
-				Real b_error = beta * invDt * (constraints[tId].interpenetration + slop);
-
+				Real b_error;
+				if (constraints[tId].interpenetration + slop < 0)
+					b_error = beta * invDt * (constraints[tId].interpenetration + slop);
+				else
+					b_error = 0;
+				//printf("error : %lf\n", b_error);
 				eta[tId] -= b_error;// +b_res;
 			}
 		}
@@ -541,7 +538,7 @@ namespace dyno
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-			Real b_trans = invDt * beta * error[0];
+			Real b_trans = beta * error[0];
 			eta[tId] -= b_trans;
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
@@ -550,7 +547,7 @@ namespace dyno
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-			Real b_trans = invDt * beta * error[1];
+			Real b_trans = beta * invDt * error[1];
 			eta[tId] -= b_trans;
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
@@ -559,7 +556,7 @@ namespace dyno
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-			Real b_trans = invDt * beta * error[2];
+			Real b_trans = beta * invDt * error[2];
 			eta[tId] -= b_trans;
 		}
 
@@ -750,9 +747,14 @@ namespace dyno
 
 			constraints[tId].pos2 = rot2 * contactsInLocalFrame[tId].pos2 + c2;
 			constraints[tId].normal2 = -rot2 * contactsInLocalFrame[tId].normal2;
+			constraints[tId].interpenetration = (constraints[tId].pos2 - constraints[tId].pos1).dot(constraints[tId].normal1) < 0 ? (constraints[tId].pos2 - constraints[tId].pos1).dot(constraints[tId].normal1) : 0.0f;
 		}
-		
-		constraints[tId].interpenetration = -contactsInLocalFrame[tId].interpenetration;
+		else
+		{
+			constraints[tId].interpenetration = (-constraints[tId].pos1).dot(constraints[tId].normal1) < 0 ? (-constraints[tId].pos1).dot(constraints[tId].normal1) : 0.0f;
+			printf("%lf\n", constraints[tId].interpenetration);
+		}
+
 		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
 	}
 
@@ -1097,6 +1099,7 @@ namespace dyno
 		int idx2 = constraints[tId].bodyId2;
 
 		double tmp = eta[tId];
+		//printf("%lf, %lf\n", tmp, eta[tId]);
 
 		tmp -= J[4 * tId].dot(impulse[idx1 * 2]);
 		tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]);
@@ -1110,7 +1113,7 @@ namespace dyno
 		if (d[tId] > EPSILON)
 		{
 			int stepInverse = 0;
-			if (constraints[tId].type == ConstraintType::CN_FRICTION || constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+			if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
 			{
 				if (idx2 != INVALID)
 				{
@@ -1135,8 +1138,7 @@ namespace dyno
 			stepInverse = stepInverse < 1 ? 1 : stepInverse;
 
 			double delta_lambda = (tmp / (d[tId] * stepInverse));
-
-
+			//printf("tmp : %lf delta_lambda : %lf\n", tmp, delta_lambda);
 			double lambda_new = lambda[tId] + delta_lambda;
 
 			// Projection to Bound
@@ -1474,15 +1476,30 @@ namespace dyno
 		Coord c1 = center[idx1];
 		Matrix rot1 = rot[idx1];
 
-		localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
+		/*localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
 		localC.normal1 = rot1.transpose() * globalC.normal1;
 
 		if (idx2 != INVALID) {
 			Coord c2 = center[idx2];
 			Matrix rot2 = rot[idx2];
 
-			localC.pos2 = rot2.transpose() * (globalC.pos2 - c2);
-			localC.normal2 = rot2.transpose() * globalC.normal2;
+			localC.pos2 = rot2.transpose() * (globalC.pos1 - c2);
+			localC.normal2 = -rot2.transpose() * globalC.normal1;
+		}*/
+
+		if (idx2 != INVALID)
+		{
+			Coord c2 = center[idx2];
+			Matrix rot2 = rot[idx2];
+			localC.pos1 = rot1.transpose() * (globalC.pos1 - globalC.normal1 * globalC.interpenetration- c1);
+			localC.normal1 = rot1.transpose() * globalC.normal1;
+			localC.pos2 = rot2.transpose() * (globalC.pos1 - c2);
+			localC.normal2 = -rot2.transpose() * globalC.normal1;
+		}
+		else
+		{
+			localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
+			localC.normal1 = rot1.transpose() * globalC.normal1;
 		}
 
 		contactsInLocalFrame[tId] = localC;

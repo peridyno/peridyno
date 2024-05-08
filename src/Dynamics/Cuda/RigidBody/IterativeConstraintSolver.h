@@ -55,11 +55,11 @@ namespace dyno
 
 		DEF_VAR(Real, FrictionCoefficient, 100, "");
 
-		DEF_VAR(Real, Slop, 0.0001, "");
+		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 10, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 20, "");
 
-		DEF_VAR(uint, IterationNumberForPositionSolver, 5, "");
+		DEF_VAR(uint, IterationNumberForPositionSolver, 3, "");
 
 
 	public:
