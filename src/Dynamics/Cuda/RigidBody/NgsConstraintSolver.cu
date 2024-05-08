@@ -538,7 +538,7 @@ namespace dyno
 			Coord r1 = constraints[tId].normal1;
 			Coord r2 = constraints[tId].normal2;
 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-			Real b_trans = beta * error[0];
+			Real b_trans = beta * invDt * error[0];
 			eta[tId] -= b_trans;
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
