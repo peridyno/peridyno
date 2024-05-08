@@ -418,11 +418,13 @@ void pybind_framework(py::module& m)
 
 	declare_array<int, DeviceType::GPU>(m, "1D");
 	declare_array<float, DeviceType::GPU>(m, "1fD");
-	declare_array<dyno::Vec3f, DeviceType::GPU>(m, "3fD");
+	declare_array<Vec3f, DeviceType::GPU>(m, "3fD");
+	declare_array<CollisionMask, DeviceType::GPU>(m, "CollisionMask");
+	declare_array<dyno::TContactPair<float>, DeviceType::GPU>(m, "TContactPair");
 
 	declare_array_list<int, DeviceType::GPU>(m, "1D");
 	declare_array_list<float, DeviceType::GPU>(m, "1fD");
-	declare_array_list<dyno::Vec3f, DeviceType::GPU>(m, "3fD");
+	declare_array_list<Vec3f, DeviceType::GPU>(m, "3fD");
 
 	declare_instance<TopologyModule>(m, "");
 	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");

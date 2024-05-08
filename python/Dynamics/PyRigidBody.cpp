@@ -36,7 +36,7 @@ void declare_box_info(py::module& m, std::string typestr) {
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def_readwrite("center", &Class::center)
-		.def_readwrite("halfLength", &Class::halfLength)
+		.def_readwrite("half_length", &Class::halfLength)
 		.def_readwrite("rot", &Class::rot);
 }
 
@@ -58,8 +58,7 @@ void declare_tet_info(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetInfo") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//		.def_readwrite("v", &Class::v); // "def_readwrite" is not applicable to fixed arrays,so replace it with the get-set method.
-		.def_property("v", &dyno::get_v, &dyno::set_v);
+		.def_property("v", );
 }
 
 void declare_capsule_info(py::module& m, std::string typestr) {

@@ -75,8 +75,8 @@ void declare_discrete_elements_to_triangle_set(py::module& m, std::string typest
 	std::string pyclass_name = std::string("DiscreteElementsToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_discreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("out_triangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/MergeTriangleSet.h"
@@ -145,7 +145,7 @@ void declare_contacts_to_edge_set(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
-		.def("out_edgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("out_edge_set", &Class::outEdgeSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/ContactsToPointSet.h"
@@ -157,7 +157,7 @@ void declare_contacts_to_point_set(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("out_pointSet", &Class::outPointSet, py::return_value_policy::reference);
+		.def("out_point_set", &Class::outPointSet, py::return_value_policy::reference);
 }
 
 #include "Collision/NeighborPointQuery.h"

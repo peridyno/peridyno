@@ -43,6 +43,7 @@
 #include "FilePath.h"
 
 #include "Auxiliary/DataSource.h"
+#include "Collision/CollisionData.h"
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -69,6 +70,8 @@ using TopologyMappingdyno = dyno::TopologyMapping;
 using OutputModule = dyno::OutputModule;
 using Object = dyno::Object;
 using DataSource = dyno::DataSource;
+using CollisionMask = dyno::CollisionMask;
+using Vec3f = dyno::Vec3f;
 
 using uint = unsigned int;
 using uchar = unsigned char;
