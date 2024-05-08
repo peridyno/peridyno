@@ -1810,6 +1810,8 @@ namespace dyno
 				dt);
 		}
 
+		//this->varIterationNumberForVelocitySolver()->setValue(0);
+
 		//Velocity solver
 		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
 		{
@@ -1882,13 +1884,13 @@ namespace dyno
 				this->inContacts()->getData(),
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData());
-			for (size_t ngs = 0; ngs < this->varIterationNumberForPositionSolver()->getValue(); ngs++)
+			for (size_t ngs = 0; ngs < 5; ngs++)
 			{
 				mImpulseC.reset();
 				mLambda.reset();
 				initializeJacobianForNGS(dt);
 				int constraint_size = mPositionConstraints.size();
-				for (int j = 0; j < 5; j++)
+				for (int j = 0; j < 1; j++)
 				{
 					cuExecute(constraint_size,
 						NGS_takeOneJacobiIteration,

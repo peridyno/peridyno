@@ -751,8 +751,11 @@ namespace dyno
 		}
 		else
 		{
-			constraints[tId].interpenetration = (-constraints[tId].pos1).dot(constraints[tId].normal1) < 0 ? (-constraints[tId].pos1).dot(constraints[tId].normal1) : 0.0f;
-			printf("%lf\n", constraints[tId].interpenetration);
+			//constraints[tId].interpenetration = (-constraints[tId].pos1).dot(constraints[tId].normal1) < 0 ? (-constraints[tId].pos1).dot(constraints[tId].normal1) : 0.0f;
+			//printf("%lf\n", constraints[tId].interpenetration);
+			//constraints[tId].interpenetration = -contactsInLocalFrame[tId].interpenetration;
+			Real dist = (contactsInLocalFrame[tId].pos2 - constraints[tId].pos1).dot(contactsInLocalFrame[tId].normal2);
+			constraints[tId].interpenetration = dist < 0 ? dist : 0.0f;
 		}
 
 		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
@@ -1500,6 +1503,9 @@ namespace dyno
 		{
 			localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
 			localC.normal1 = rot1.transpose() * globalC.normal1;
+
+			localC.pos2 = globalC.pos1 + globalC.normal1 * globalC.interpenetration;
+			localC.normal2 = - globalC.normal1;
 		}
 
 		contactsInLocalFrame[tId] = localC;
