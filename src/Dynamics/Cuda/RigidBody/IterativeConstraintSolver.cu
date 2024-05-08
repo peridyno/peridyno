@@ -1,5 +1,7 @@
 #include "IterativeConstraintSolver.h"
 
+#include "NgsConstraintSolver.cu"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(IterativeConstraintSolver, TDataType)
@@ -521,7 +523,8 @@ namespace dyno
 
 				b_res += alpha * gamma.dot(n);
 
-				eta[tId] -= b_error + b_res;
+				//eta[tId] -= b_error + b_res;
+				eta[tId] -= b_res;
 			}
 		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
@@ -792,6 +795,84 @@ namespace dyno
 			constraints[tId * 2 + 1 + contact_size].bodyId2 = contacts[tId].bodyId2;
 			constraints[tId * 2 + 1 + contact_size].pos1 = contacts[tId].pos1;
 			constraints[tId * 2 + 1 + contact_size].pos2 = contacts[tId].pos2;
+			constraints[tId * 2 + 1 + contact_size].normal1 = u2;
+			constraints[tId * 2 + 1 + contact_size].normal2 = -u2;
+			constraints[tId * 2 + 1 + contact_size].type = ConstraintType::CN_FRICTION;
+
+		}
+
+	}
+
+	template<typename Coord, typename Matrix, typename Contact, typename Constraint>
+	__global__ void ICS_setUpContactAndFrictionConstraints(
+		DArray<Constraint> constraints,
+		DArray<Contact> contactsInLocalFrame,
+		DArray<Coord> center,
+		DArray<Matrix> rot,
+		bool hasFriction
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contactsInLocalFrame.size())
+			return;
+
+		int contact_size = contactsInLocalFrame.size();
+
+		int idx1 = contactsInLocalFrame[tId].bodyId1;
+		int idx2 = contactsInLocalFrame[tId].bodyId2;
+
+		Coord c1 = center[idx1];
+		Matrix rot1 = rot[idx1];
+
+		constraints[tId].bodyId1 = idx1;
+		constraints[tId].bodyId2 = idx2;
+		constraints[tId].pos1 = rot1 * contactsInLocalFrame[tId].pos1 + c1;
+		constraints[tId].normal1 = -rot1 * contactsInLocalFrame[tId].normal1;
+		if (idx2 != INVALID)
+		{
+			Coord c2 = center[idx2];
+			Matrix rot2 = rot[idx2];
+
+			constraints[tId].pos2 = rot2 * contactsInLocalFrame[tId].pos2 + c2;
+			constraints[tId].normal2 = -rot2 * contactsInLocalFrame[tId].normal2;
+		}
+
+		constraints[tId].interpenetration = -contactsInLocalFrame[tId].interpenetration;
+		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
+
+		if (hasFriction)
+		{
+			Vector<Real, 3> n = constraints[tId].normal1;
+			n = n.normalize();
+
+			Vector<Real, 3> u1, u2;
+
+			if (abs(n[1]) > EPSILON || abs(n[2]) > EPSILON)
+			{
+				u1 = Vector<Real, 3>(0, n[2], -n[1]);
+				u1 = u1.normalize();
+			}
+			else if (abs(n[0]) > EPSILON)
+			{
+				u1 = Vector<Real, 3>(n[2], 0, -n[0]);
+				u1 = u1.normalize();
+			}
+
+			u2 = u1.cross(n);
+			u2 = u2.normalize();
+
+			constraints[tId * 2 + contact_size].bodyId1 = idx1;
+			constraints[tId * 2 + contact_size].bodyId2 = idx2;
+			constraints[tId * 2 + contact_size].pos1 = constraints[tId].pos1;
+			constraints[tId * 2 + contact_size].pos2 = constraints[tId].pos2;
+			constraints[tId * 2 + contact_size].normal1 = u1;
+			constraints[tId * 2 + contact_size].normal2 = -u1;
+			constraints[tId * 2 + contact_size].type = ConstraintType::CN_FRICTION;
+
+			constraints[tId * 2 + 1 + contact_size].bodyId1 = idx1;
+			constraints[tId * 2 + 1 + contact_size].bodyId2 = idx2;
+			constraints[tId * 2 + 1 + contact_size].pos1 = constraints[tId].pos1;
+			constraints[tId * 2 + 1 + contact_size].pos2 = constraints[tId].pos2;
 			constraints[tId * 2 + 1 + contact_size].normal1 = u2;
 			constraints[tId * 2 + 1 + contact_size].normal2 = -u2;
 			constraints[tId * 2 + 1 + contact_size].type = ConstraintType::CN_FRICTION;
@@ -1177,6 +1258,7 @@ namespace dyno
 				stepInverse += 4 * jointNumber[idx1];
 			}
 
+			stepInverse = stepInverse < 1 ? 1 : stepInverse;
 
 			double delta_lambda = (tmp / (d[tId] * stepInverse));
 
@@ -1280,7 +1362,7 @@ namespace dyno
 			return;
 		}
 
-		mAllConstraints.resize(constraint_size);
+		mVelocityConstraints.resize(constraint_size);
 
 
 		if (contact_size != 0)
@@ -1288,7 +1370,7 @@ namespace dyno
 			auto& contacts = this->inContacts()->getData();
 			cuExecute(contact_size,
 				setUpContactAndFrictionConstraints,
-				mAllConstraints,
+				mVelocityConstraints,
 				contacts,
 				contact_size,
 				this->varFrictionEnabled()->getData());
@@ -1306,7 +1388,7 @@ namespace dyno
 
 			cuExecute(ballAndSocketJoint_size,
 				setUpBallAndSocketJointConstraints,
-				mAllConstraints,
+				mVelocityConstraints,
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
@@ -1327,7 +1409,7 @@ namespace dyno
 			cuExecute(sliderJoint_size,
 				setUpSliderJoint,
 				joints,
-				mAllConstraints,
+				mVelocityConstraints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
 				begin_index);
@@ -1344,7 +1426,7 @@ namespace dyno
 			cuExecute(hingeJoint_size,
 				setUpHingeJoint,
 				joints,
-				mAllConstraints,
+				mVelocityConstraints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
 				this->inQuaternion()->getData(),
@@ -1362,7 +1444,7 @@ namespace dyno
 			cuExecute(fixedJoint_size,
 				setUpFixedJoint,
 				joints,
-				mAllConstraints,
+				mVelocityConstraints,
 				this->inRotationMatrix()->getData(),
 				begin_index);
 		}
@@ -1377,7 +1459,7 @@ namespace dyno
 			cuExecute(pointJoint_size,
 				setUpPointJoint,
 				joints,
-				mAllConstraints,
+				mVelocityConstraints,
 				this->inCenter()->getData(),
 				begin_index);
 		}
@@ -1452,7 +1534,7 @@ namespace dyno
 			this->inCenter()->getData(),
 			this->inInertia()->getData(),
 			this->inMass()->getData(),
-			mAllConstraints,
+			mVelocityConstraints,
 			this->inRotationMatrix()->getData());
 
 		cuExecute(constraint_size,
@@ -1470,7 +1552,223 @@ namespace dyno
 			mJ,
 			this->inMass()->getData(),
 			this->inCenter()->getData(),
-			mAllConstraints,
+			mVelocityConstraints,
+			this->inQuaternion()->getData(),
+			this->varSlop()->getData(),
+			dt);
+	}
+
+	template<typename TDataType>
+	void IterativeConstraintSolver<TDataType>::initializeJacobianForNGS(Real dt)
+	{
+		int constraint_size = 0;
+		int contact_size = this->inContacts()->size();
+
+
+		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
+		int sliderJoint_size = this->inSliderJoints()->size();
+		int hingeJoint_size = this->inHingeJoints()->size();
+		int fixedJoint_size = this->inFixedJoints()->size();
+		int pointJoint_size = this->inPointJoints()->size();
+
+		constraint_size = contact_size;
+
+		if (ballAndSocketJoint_size != 0)
+		{
+			constraint_size += 3 * ballAndSocketJoint_size;
+		}
+
+		if (sliderJoint_size != 0)
+		{
+			constraint_size += 8 * sliderJoint_size;
+		}
+
+		if (hingeJoint_size != 0)
+		{
+			constraint_size += 8 * hingeJoint_size;
+		}
+
+		if (fixedJoint_size != 0)
+		{
+			constraint_size += 6 * fixedJoint_size;
+		}
+
+		if (pointJoint_size != 0)
+		{
+			constraint_size += 3 * pointJoint_size;
+		}
+
+		if (constraint_size == 0)
+		{
+			return;
+		}
+
+		mPositionConstraints.resize(constraint_size);
+
+		if (contact_size != 0)
+		{
+			auto& contacts = this->inContacts()->getData();
+			cuExecute(contact_size,
+				NGS_setUpContactAndFrictionConstraints,
+				mPositionConstraints,
+				mContactsInLocalFrame,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData());
+		}
+
+		if (ballAndSocketJoint_size != 0)
+		{
+			auto& joints = this->inBallAndSocketJoints()->getData();
+			int begin_index = contact_size;
+
+			cuExecute(ballAndSocketJoint_size,
+				NGS_setUpBallAndSocketJointConstraints,
+				mPositionConstraints,
+				joints,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData(),
+				begin_index);
+		}
+
+		if (sliderJoint_size != 0)
+		{
+			auto& joints = this->inSliderJoints()->getData();
+			int begin_index = contact_size;
+
+			begin_index += 3 * ballAndSocketJoint_size;
+
+			cuExecute(sliderJoint_size,
+				NGS_setUpSliderJoint,
+				joints,
+				mPositionConstraints,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData(),
+				begin_index);
+		}
+
+		if (hingeJoint_size != 0)
+		{
+			auto& joints = this->inHingeJoints()->getData();
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size;
+
+			cuExecute(hingeJoint_size,
+				NGS_setUpHingeJoint,
+				joints,
+				mPositionConstraints,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
+				begin_index);
+		}
+
+		if (fixedJoint_size != 0)
+		{
+			auto& joints = this->inFixedJoints()->getData();
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size;
+
+			cuExecute(fixedJoint_size,
+				NGS_setUpFixedJoint,
+				joints,
+				mPositionConstraints,
+				this->inRotationMatrix()->getData(),
+				begin_index);
+		}
+		if (pointJoint_size != 0)
+		{
+			auto& joints = this->inPointJoints()->getData();
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size + 6 * fixedJoint_size;
+
+			cuExecute(pointJoint_size,
+				NGS_setUpPointJoint,
+				joints,
+				mPositionConstraints,
+				this->inCenter()->getData(),
+				begin_index);
+		}
+
+		auto sizeOfRigids = this->inCenter()->size();
+		mContactNumber.resize(sizeOfRigids);
+		mJointNumber.resize(sizeOfRigids);
+
+		mJ_p.resize(4 * constraint_size);
+		mB_p.resize(4 * constraint_size);
+
+		mD_p.resize(constraint_size);
+		mEta_p.resize(constraint_size);
+
+		mJ_p.reset();
+		mB_p.reset();
+		mD_p.reset();
+		mEta_p.reset();
+
+		mContactNumber.reset();
+		mJointNumber.reset();
+
+		if (contact_size != 0)
+		{
+			cuExecute(contact_size,
+				NGS_calculateNbrCons,
+				this->inContacts()->getData(),
+				mContactNumber);
+		}
+
+		if (ballAndSocketJoint_size != 0)
+		{
+			cuExecute(ballAndSocketJoint_size,
+				NGS_calculateJoints,
+				this->inBallAndSocketJoints()->getData(),
+				mJointNumber);
+		}
+
+		if (sliderJoint_size != 0)
+		{
+			cuExecute(sliderJoint_size,
+				NGS_calculateJoints,
+				this->inSliderJoints()->getData(),
+				mJointNumber);
+		}
+
+		if (hingeJoint_size != 0)
+		{
+			cuExecute(hingeJoint_size,
+				NGS_calculateJoints,
+				this->inHingeJoints()->getData(),
+				mJointNumber);
+		}
+
+		if (fixedJoint_size != 0)
+		{
+			cuExecute(fixedJoint_size,
+				NGS_calculateJoints,
+				this->inFixedJoints()->getData(),
+				mJointNumber);
+		}
+
+		cuExecute(constraint_size,
+			NGS_calculateJacobianAndB,
+			mJ_p,
+			mB_p,
+			this->inCenter()->getData(),
+			this->inInertia()->getData(),
+			this->inMass()->getData(),
+			mPositionConstraints,
+			this->inRotationMatrix()->getData());
+
+		cuExecute(constraint_size,
+			NGS_calculateDiagonals,
+			mD_p,
+			mJ_p,
+			mB_p);
+
+		cuExecute(constraint_size,
+			NGS_calculateEta,
+			mEta_p,
+			this->inVelocity()->getData(),
+			this->inAngularVelocity()->getData(),
+			mJ_p,
+			this->inMass()->getData(),
+			this->inCenter()->getData(),
+			mPositionConstraints,
 			this->inQuaternion()->getData(),
 			this->varSlop()->getData(),
 			dt);
@@ -1490,7 +1788,6 @@ namespace dyno
 		impulse_ext[2 * tId] = Coord(0, -g, 0) * dt;
 		impulse_ext[2 * tId + 1] = Coord(0);
 	}
-
 
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::constrain()
@@ -1514,14 +1811,14 @@ namespace dyno
 				dt);
 		}
 
+		//Velocity solver
 		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
 		{
 			initializeJacobian(dt);
 
-			int constraint_size = mAllConstraints.size();
+			int constraint_size = mVelocityConstraints.size();
 
-
-			for (int i = 0; i < this->varIterationNumber()->getData(); i++)
+			for (int i = 0; i < this->varIterationNumberForVelocitySolver()->getValue(); i++)
 			{
 				mDiff.resize(constraint_size);
 				mDiff.reset();
@@ -1534,23 +1831,23 @@ namespace dyno
 					mB,
 					mEta,
 					this->inMass()->getData(),
-					mAllConstraints,
+					mVelocityConstraints,
 					mContactNumber,
 					mJointNumber,
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt);
 
-				cuExecute(constraint_size,
-					calculateDiff,
-					mLambda,
-					mLambda_old,
-					mDiff);
-				mDiffHost.assign(mDiff);
-				Real change = calculateNorm(mDiffHost);
-				mLambda_old.assign(mLambda);
-				if (change < EPSILON)
-					break;
+// 				cuExecute(constraint_size,
+// 					calculateDiff,
+// 					mLambda,
+// 					mLambda_old,
+// 					mDiff);
+// 				mDiffHost.assign(mDiff);
+// 				Real change = calculateNorm(mDiffHost);
+// 				mLambda_old.assign(mLambda);
+// 				if (change < EPSILON)
+// 					break;
 			}
 		}
 
@@ -1572,6 +1869,58 @@ namespace dyno
 			this->inAngularVelocity()->getData(),
 			this->inInitialInertia()->getData(),
 			dt);
+
+		//Position solver
+		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
+		{
+			mImpulseC.reset();
+			mLambda.reset();
+
+			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
+				mContactsInLocalFrame.resize(this->inContacts()->size());
+			}
+
+			cuExecute(this->inContacts()->size(),
+				NGS_setUpContactsInLocalFrame,
+				mContactsInLocalFrame,
+				this->inContacts()->getData(),
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData());
+
+			for (size_t ngs = 0; ngs < this->varIterationNumberForPositionSolver()->getValue(); ngs++)
+			{
+				initializeJacobianForNGS(dt);
+
+				int constraint_size = mPositionConstraints.size();
+
+				cuExecute(constraint_size,
+					NGS_takeOneJacobiIteration,
+					mLambda,
+					mImpulseC,
+					mD_p,
+					mJ_p,
+					mB_p,
+					mEta_p,
+					this->inMass()->getData(),
+					mPositionConstraints,
+					mContactNumber,
+					mJointNumber,
+					this->varFrictionCoefficient()->getData(),
+					this->varGravityValue()->getData(),
+					dt);
+
+				cuExecute(bodyNum,
+					NGS_updatePositionAndRotation,
+					this->inCenter()->getData(),
+					this->inQuaternion()->getData(),
+					this->inRotationMatrix()->getData(),
+					this->inInertia()->getData(),
+					this->inInitialInertia()->getData(),
+					mImpulseC,
+					dt);
+			}
+		}
 	}
+
 	DEFINE_CLASS(IterativeConstraintSolver);
 }

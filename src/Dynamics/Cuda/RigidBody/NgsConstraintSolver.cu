@@ -492,7 +492,6 @@ namespace dyno
 		DArray<Real> eta,
 		DArray<Coord> velocity,
 		DArray<Coord> angular_velocity,
-		DArray<Coord> impulse_ext,
 		DArray<Coord> J,
 		DArray<Real> mass,
 		DArray<Coord> pos,
@@ -513,14 +512,14 @@ namespace dyno
 
 		Real eta_i = Real(0);
 
-		eta_i -= J[4 * tId].dot(velocity[idx1] + impulse_ext[idx1 * 2]);
-		eta_i -= J[4 * tId + 1].dot(angular_velocity[idx1] + impulse_ext[idx1 * 2 + 1]);
-
-		if (idx2 != INVALID)
-		{
-			eta_i -= J[4 * tId + 2].dot(velocity[idx2] + impulse_ext[idx2 * 2]);
-			eta_i -= J[4 * tId + 3].dot(angular_velocity[idx2] + impulse_ext[idx2 * 2 + 1]);
-		}
+// 		eta_i -= J[4 * tId].dot(velocity[idx1] + impulse_ext[idx1 * 2]);
+// 		eta_i -= J[4 * tId + 1].dot(angular_velocity[idx1] + impulse_ext[idx1 * 2 + 1]);
+// 
+// 		if (idx2 != INVALID)
+// 		{
+// 			eta_i -= J[4 * tId + 2].dot(velocity[idx2] + impulse_ext[idx2 * 2]);
+// 			eta_i -= J[4 * tId + 3].dot(angular_velocity[idx2] + impulse_ext[idx2 * 2 + 1]);
+// 		}
 
 		eta[tId] = eta_i;
 
@@ -532,21 +531,6 @@ namespace dyno
 				Real alpha = 0;
 
 				Real b_error = beta * invDt * (constraints[tId].interpenetration + slop);
-
-				Real b_res = 0;
-
-				Coord n = constraints[tId].normal1;
-				Coord r1 = constraints[tId].pos1 - pos[idx1];
-
-				Coord gamma = -velocity[idx1] - angular_velocity[idx1].cross(r1);
-
-				if (idx2 != INVALID)
-				{
-					Coord r2 = constraints[tId].pos2 - pos[idx2];
-					gamma = gamma + velocity[idx2] + angular_velocity[idx2].cross(r2);
-				}
-
-				b_res += alpha * gamma.dot(n);
 
 				eta[tId] -= b_error;// +b_res;
 			}
@@ -736,43 +720,12 @@ namespace dyno
 	}
 
 
-	template<typename Real>
-	__global__ void NGS_calculateDiff(
-		DArray<Real> lambda,
-		DArray<Real> lambda_old,
-		DArray<Real> diff
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		if (tId >= lambda.size())
-			return;
-		diff[tId] = lambda[tId] - lambda_old[tId];
-	}
-
-	template<typename Real>
-	Real calculateNorm(
-		CArray<Real> diff
-	)
-	{
-		Real norm = 0.0;
-		for (int i = 0; i < diff.size(); i++)
-		{
-			if (abs(diff[i]) > norm)
-				norm = abs(diff[i]);
-		}
-		return norm;
-	}
-
-
-
 	template<typename Coord, typename Matrix, typename Contact, typename Constraint>
 	__global__ void NGS_setUpContactAndFrictionConstraints(
 		DArray<Constraint> constraints,
 		DArray<Contact> contactsInLocalFrame,
 		DArray<Coord> center,
-		DArray<Matrix> rot,
-		bool hasFriction
-	)
+		DArray<Matrix> rot)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= contactsInLocalFrame.size())
@@ -801,46 +754,6 @@ namespace dyno
 		
 		constraints[tId].interpenetration = -contactsInLocalFrame[tId].interpenetration;
 		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
-
-		if (hasFriction)
-		{
-			Vector<Real, 3> n = constraints[tId].normal1;
-			n = n.normalize();
-
-			Vector<Real, 3> u1, u2;
-
-			if (abs(n[1]) > EPSILON || abs(n[2]) > EPSILON)
-			{
-				u1 = Vector<Real, 3>(0, n[2], -n[1]);
-				u1 = u1.normalize();
-			}
-			else if (abs(n[0]) > EPSILON)
-			{
-				u1 = Vector<Real, 3>(n[2], 0, -n[0]);
-				u1 = u1.normalize();
-			}
-
-			u2 = u1.cross(n);
-			u2 = u2.normalize();
-
-			constraints[tId * 2 + contact_size].bodyId1 = idx1;
-			constraints[tId * 2 + contact_size].bodyId2 = idx2;
-			constraints[tId * 2 + contact_size].pos1 = constraints[tId].pos1;
-			constraints[tId * 2 + contact_size].pos2 = constraints[tId].pos2;
-			constraints[tId * 2 + contact_size].normal1 = u1;
-			constraints[tId * 2 + contact_size].normal2 = -u1;
-			constraints[tId * 2 + contact_size].type = ConstraintType::CN_FRICTION;
-
-			constraints[tId * 2 + 1 + contact_size].bodyId1 = idx1;
-			constraints[tId * 2 + 1 + contact_size].bodyId2 = idx2;
-			constraints[tId * 2 + 1 + contact_size].pos1 = constraints[tId].pos1;
-			constraints[tId * 2 + 1 + contact_size].pos2 = constraints[tId].pos2;
-			constraints[tId * 2 + 1 + contact_size].normal1 = u2;
-			constraints[tId * 2 + 1 + contact_size].normal2 = -u2;
-			constraints[tId * 2 + 1 + contact_size].type = ConstraintType::CN_FRICTION;
-
-		}
-
 	}
 
 	template<typename Joint, typename Constraint, typename Coord, typename Matrix>
@@ -1219,6 +1132,7 @@ namespace dyno
 				stepInverse += 4 * jointNumber[idx1];
 			}
 
+			stepInverse = stepInverse < 1 ? 1 : stepInverse;
 
 			double delta_lambda = (tmp / (d[tId] * stepInverse));
 
@@ -1334,8 +1248,7 @@ namespace dyno
 				mAllConstraints,
 				mContactsInLocalFrame,
 				this->inCenter()->getData(),
-				this->inRotationMatrix()->getData(),
-				this->varFrictionEnabled()->getData());
+				this->inRotationMatrix()->getData());
 		}
 
 		if (ballAndSocketJoint_size != 0)
@@ -1510,7 +1423,6 @@ namespace dyno
 			mEta,
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
-			mImpulseExt,
 			mJ,
 			this->inMass()->getData(),
 			this->inCenter()->getData(),
@@ -1623,8 +1535,6 @@ namespace dyno
 
 				for (int i = 0; i < 1; i++)
 				{
-					mDiff.resize(constraint_size);
-					mDiff.reset();
 					cuExecute(constraint_size,
 						NGS_takeOneJacobiIteration,
 						mLambda,
@@ -1640,17 +1550,6 @@ namespace dyno
 						this->varFrictionCoefficient()->getData(),
 						this->varGravityValue()->getData(),
 						dt);
-
-					cuExecute(constraint_size,
-						NGS_calculateDiff,
-						mLambda,
-						mLambda_old,
-						mDiff);
-					mDiffHost.assign(mDiff);
-					Real change = calculateNorm(mDiffHost);
-					mLambda_old.assign(mLambda);
-					if (change < EPSILON)
-						break;
 				}
 
 				// 		cuExecute(bodyNum,

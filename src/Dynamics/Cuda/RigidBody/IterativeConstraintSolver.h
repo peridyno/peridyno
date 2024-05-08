@@ -57,7 +57,9 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(uint, IterationNumber, 10, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 10, "");
+
+		DEF_VAR(uint, IterationNumberForPositionSolver, 5, "");
 
 
 	public:
@@ -96,10 +98,14 @@ namespace dyno
 
 	private:
 		void initializeJacobian(Real dt);
+		void initializeJacobianForNGS(Real dt);
 
 	private:
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
+
+		DArray<Coord> mJ_p;		//Jacobian
+		DArray<Coord> mB_p;		//B = M^{-1}J^T
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
@@ -108,13 +114,18 @@ namespace dyno
 		DArray<Real> mD;		//diagonal elements of JB
 		DArray<Real> mLambda;	//contact impulse
 
+		DArray<Real> mEta_p;		//eta
+		DArray<Real> mD_p;			//diagonal elements of JB
+
 		DArray<Real> mLambda_old;
+
+		DArray<ContactPair> mContactsInLocalFrame;
 
 		DArray<Real> mDiff;
 		CArray<Real> mDiffHost;
 
-
-		DArray<Constraint> mAllConstraints;
+		DArray<Constraint> mPositionConstraints;
+		DArray<Constraint> mVelocityConstraints;
 
 		DArray<int> mContactNumber;
 		DArray<int> mJointNumber;
