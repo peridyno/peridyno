@@ -36,6 +36,12 @@ namespace dyno
 		auto merge = std::make_shared<ContactsUnion<TDataType>>();
 		elementQuery->outContacts()->connect(merge->inContactsA());
 		cdBV->outContacts()->connect(merge->inContactsB());
+
+		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
+		this->stateSliderJoints()->connect(merge->inSliderJoints());
+		this->stateHingeJoints()->connect(merge->inHingeJoints());
+		this->stateFixedJoints()->connect(merge->inFixedJoints());
+
 		this->animationPipeline()->pushModule(merge);
 
 		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
@@ -61,15 +67,36 @@ namespace dyno
 		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
 		this->statePointJoints()->connect(iterSolver->inPointJoints());
 
-		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
-		this->stateSliderJoints()->connect(merge->inSliderJoints());
-		this->stateHingeJoints()->connect(merge->inHingeJoints());
-		this->stateFixedJoints()->connect(merge->inFixedJoints());
-
-
 		merge->outContacts()->connect(iterSolver->inContacts());
 
 		this->animationPipeline()->pushModule(iterSolver);
+
+
+		auto ngsSolver = std::make_shared<NgsConstraintSolver<TDataType>>();
+		this->stateTimeStep()->connect(ngsSolver->inTimeStep());
+		this->varFrictionEnabled()->connect(ngsSolver->varFrictionEnabled());
+		this->varGravityEnabled()->connect(ngsSolver->varGravityEnabled());
+		this->varGravityValue()->connect(ngsSolver->varGravityValue());
+		this->varFrictionCoefficient()->connect(ngsSolver->varFrictionCoefficient());
+		//this->varSlop()->connect(iterSolver->varSlop());
+		this->stateMass()->connect(ngsSolver->inMass());
+		this->stateCenter()->connect(ngsSolver->inCenter());
+		this->stateVelocity()->connect(ngsSolver->inVelocity());
+		this->stateAngularVelocity()->connect(ngsSolver->inAngularVelocity());
+		this->stateRotationMatrix()->connect(ngsSolver->inRotationMatrix());
+		this->stateInertia()->connect(ngsSolver->inInertia());
+		this->stateQuaternion()->connect(ngsSolver->inQuaternion());
+		this->stateInitialInertia()->connect(ngsSolver->inInitialInertia());
+
+		this->stateBallAndSocketJoints()->connect(ngsSolver->inBallAndSocketJoints());
+		this->stateSliderJoints()->connect(ngsSolver->inSliderJoints());
+		this->stateHingeJoints()->connect(ngsSolver->inHingeJoints());
+		this->stateFixedJoints()->connect(ngsSolver->inFixedJoints());
+		this->statePointJoints()->connect(ngsSolver->inPointJoints());
+
+		merge->outContacts()->connect(ngsSolver->inContacts());
+
+		this->animationPipeline()->pushModule(ngsSolver);
 
 		this->setDt(0.001f);
 	}

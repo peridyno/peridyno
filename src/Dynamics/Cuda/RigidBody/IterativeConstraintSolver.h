@@ -113,7 +113,6 @@ namespace dyno
 		DArray<Real> mDiff;
 		CArray<Real> mDiffHost;
 
-		DArray<ContactPair> mContactsInLocalFrame;
 
 		DArray<Constraint> mAllConstraints;
 
