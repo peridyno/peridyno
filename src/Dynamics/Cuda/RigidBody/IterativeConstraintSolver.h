@@ -127,6 +127,9 @@ namespace dyno
 		DArray<Constraint> mPositionConstraints;
 		DArray<Constraint> mVelocityConstraints;
 
+		DArray<Coord> mCenterPre;
+		DArray<TQuat> mQuatPre;
+
 		DArray<int> mContactNumber;
 		DArray<int> mJointNumber;
 

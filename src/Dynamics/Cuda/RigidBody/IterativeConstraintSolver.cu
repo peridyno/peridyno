@@ -499,216 +499,216 @@ namespace dyno
 
 		eta[tId] = eta_i;
 
-		//if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
-		//{
-		//	if (constraints[tId].interpenetration < -slop)
-		//	{
-		//		Real beta = Real(0.3);
-		//		Real alpha = 0;
-
-		//		Real b_error = beta * invDt * (constraints[tId].interpenetration + slop);
-
-		//		Real b_res = 0;
-
-		//		Coord n = constraints[tId].normal1;
-		//		Coord r1 = constraints[tId].pos1 - pos[idx1];
-
-		//		Coord gamma = -velocity[idx1] - angular_velocity[idx1].cross(r1);
-
-		//		if (idx2 != INVALID)
-		//		{
-		//			Coord r2 = constraints[tId].pos2 - pos[idx2];
-		//			gamma = gamma + velocity[idx2] + angular_velocity[idx2].cross(r2);
-		//		}
-
-		//		b_res += alpha * gamma.dot(n);
-
-		//		//eta[tId] -= b_error + b_res;
-		//		eta[tId] -= b_res;
-		//	}
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
-		//{
-		//	Real beta = 0.3;
-		//	Coord r1 = constraints[tId].normal1;
-		//	Coord r2 = constraints[tId].normal2;
-		//	Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-		//	Real b_trans = invDt * beta * error[0];
-		//	eta[tId] -= b_trans;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
-		//{
-		//	Real beta = 0.3;
-		//	Coord r1 = constraints[tId].normal1;
-		//	Coord r2 = constraints[tId].normal2;
-		//	Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-		//	Real b_trans = invDt * beta * error[1];
-		//	eta[tId] -= b_trans;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
-		//{
-		//	Real beta = 0.3;
-		//	Coord r1 = constraints[tId].normal1;
-		//	Coord r2 = constraints[tId].normal2;
-		//	Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-		//	Real b_trans = invDt * beta * error[2];
-		//	eta[tId] -= b_trans;
-		//}
-
-		//if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_1)
-		//{
-		//	Real beta = Real(1) / Real(4);
-		//	Coord r1 = constraints[tId].pos1;
-		//	Coord r2 = constraints[tId].pos2;
-		//	Coord n1 = constraints[tId].normal1;
-
-		//	Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n1);
-		//	eta[tId] -= b_trans;
-		//}
-
-		//if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_2)
-		//{
-		//	Real beta = Real(1) / Real(3);
-		//	Coord r1 = constraints[tId].pos1;
-		//	Coord r2 = constraints[tId].pos2;
-		//	Coord n2 = constraints[tId].normal2;
-		//	Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n2);
-		//	eta[tId] -= b_trans;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
-		//{
-		//	Real beta = 0.15;
-		//	Real yaw, pitch, roll_1, roll_2;
-		//	Quat q2 = rotation_q[idx2]; 
-		//	q2 = q2.normalize();
-		//	Quat q1 = rotation_q[idx1]; 
-		//	q1 = q1.normalize();
-
-		//	q2.toEulerAngle(yaw, pitch, roll_2);
-		//	q1.toEulerAngle(yaw, pitch, roll_1);
-
-
-
-		//	Real roll_diff = roll_2 - roll_1;
-		//	if (roll_diff > M_PI)
-		//		roll_diff -= 2 * M_PI;
-		//	else if (roll_diff < -M_PI)
-		//		roll_diff += 2 * M_PI;
-		//	Real b_rot = invDt * beta * roll_diff;
-		//	eta[tId] -= b_rot;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
-		//{
-		//	Real beta = 0.15;
-		//	Real yaw, pitch_1, pitch_2, roll;
-		//	Quat q2 = rotation_q[idx2];
-		//	q2 = q2.normalize();
-		//	Quat q1 = rotation_q[idx1]; 
-		//	q1 = q1.normalize();
-
-		//	q2.toEulerAngle(yaw, pitch_2, roll);
-		//	q1.toEulerAngle(yaw, pitch_1, roll);
-
-		//	Real pitch_diff = pitch_2 - pitch_1;
-		//	if (pitch_diff > M_PI)
-		//		pitch_diff -= 2 * M_PI;
-		//	else if (pitch_diff < -M_PI)
-		//		pitch_diff += 2 * M_PI;
-
-		//	Real b_rot = invDt * beta * pitch_diff;
-		//	eta[tId] -= b_rot;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
-		//{
-		//	Real beta = 0.15;
-		//	Real yaw_1, yaw_2, pitch, roll;
-		//	Quat q2 = rotation_q[idx2]; 
-		//	q2 = q2.normalize();
-		//	Quat q1 = rotation_q[idx1];
-		//	q1 = q1.normalize();
-
-		//	q2.toEulerAngle(yaw_2, pitch, roll);
-		//	q1.toEulerAngle(yaw_1, pitch, roll);
-		//	Real yaw_diff = yaw_2 - yaw_1;
-		//	if (yaw_diff > M_PI)
-		//		yaw_diff -= 2 * M_PI;
-		//	else if (yaw_diff < -M_PI)
-		//		yaw_diff += 2 * M_PI;
-
-		//	Real b_rot = invDt * beta * yaw_diff;
-
-		//	eta[tId] -= b_rot;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MOTER || constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
-		//{
-		//	Real v_moter = constraints[tId].interpenetration;
-		//	eta[tId] -= v_moter;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN)
-		//{
-		//	Real beta = 0.3;
-		//	Real b_min = invDt * beta * constraints[tId].d_min;
-		//	eta[tId] -= b_min;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MIN)
-		//{
-		//	Real beta = Real(1)/Real(3);
-		//	Real b_min = invDt * beta * constraints[tId].d_min;
-		//	eta[tId] -= b_min;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MAX)
-		//{
-		//	Real beta = 0.3;
-		//	Real b_max = invDt * beta * constraints[tId].d_max;
-		//	eta[tId] -= b_max;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MAX)
-		//{
-		//	Real beta = Real(1)/Real(3);
-		//	Real b_max = invDt * beta * constraints[tId].d_max;
-		//	eta[tId] -= b_max;
-		//}
-
-		//if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
-		//{
-		//	Real beta = Real(0.3);
-		//	Coord a1 = constraints[tId].axis;
-		//	Coord b2 = constraints[tId].pos1;
-		//	Real b_rot = invDt * beta * a1.dot(b2);
-		//	eta[tId] -= b_rot;
-		//}
-
-		//if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
-		//{
-		//	Real beta = Real(0.3);
-		//	Coord a1 = constraints[tId].axis;
-		//	Coord c2 = constraints[tId].pos2;
-		//	Real b_rot = invDt * beta * a1.dot(c2);
-		//	eta[tId] -= b_rot;
-		//}
-
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
-		//{
-		//	Real beta = Real(1) / Real(3);
-		//	Coord error = constraints[tId].normal1;
-		//	Real b_error = invDt * beta * error[0];
-		//	eta[tId] -= b_error;
-		//}
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
-		//{
-		//	Real beta = Real(1) / Real(3);
-		//	Coord error = constraints[tId].normal1;
-		//	Real b_error = invDt * beta * error[1];
-		//	eta[tId] -= b_error;
-		//}
-
-		//if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
-		//{
-		//	Real beta = Real(1) / Real(3);
-		//	Coord error = constraints[tId].normal1;
-		//	Real b_error = invDt * beta * error[2];
-		//	eta[tId] -= b_error;
-		//}
+// 		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+// 		{
+// 			if (constraints[tId].interpenetration < -slop)
+// 			{
+// 				Real beta = Real(0.3);
+// 				Real alpha = 0;
+// 
+// 				Real b_error = beta * invDt * (constraints[tId].interpenetration + slop);
+// 
+// 				Real b_res = 0;
+// 
+// 				Coord n = constraints[tId].normal1;
+// 				Coord r1 = constraints[tId].pos1 - pos[idx1];
+// 
+// 				Coord gamma = -velocity[idx1] - angular_velocity[idx1].cross(r1);
+// 
+// 				if (idx2 != INVALID)
+// 				{
+// 					Coord r2 = constraints[tId].pos2 - pos[idx2];
+// 					gamma = gamma + velocity[idx2] + angular_velocity[idx2].cross(r2);
+// 				}
+// 
+// 				b_res += alpha * gamma.dot(n);
+// 
+// 				//eta[tId] -= b_error + b_res;
+// 				eta[tId] -= b_res;
+// 			}
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
+// 		{
+// 			Real beta = 0.3;
+// 			Coord r1 = constraints[tId].normal1;
+// 			Coord r2 = constraints[tId].normal2;
+// 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
+// 			Real b_trans = invDt * beta * error[0];
+// 			eta[tId] -= b_trans;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
+// 		{
+// 			Real beta = 0.3;
+// 			Coord r1 = constraints[tId].normal1;
+// 			Coord r2 = constraints[tId].normal2;
+// 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
+// 			Real b_trans = invDt * beta * error[1];
+// 			eta[tId] -= b_trans;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
+// 		{
+// 			Real beta = 0.3;
+// 			Coord r1 = constraints[tId].normal1;
+// 			Coord r2 = constraints[tId].normal2;
+// 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
+// 			Real b_trans = invDt * beta * error[2];
+// 			eta[tId] -= b_trans;
+// 		}
+// 
+// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_1)
+// 		{
+// 			Real beta = Real(1) / Real(4);
+// 			Coord r1 = constraints[tId].pos1;
+// 			Coord r2 = constraints[tId].pos2;
+// 			Coord n1 = constraints[tId].normal1;
+// 
+// 			Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n1);
+// 			eta[tId] -= b_trans;
+// 		}
+// 
+// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_2)
+// 		{
+// 			Real beta = Real(1) / Real(3);
+// 			Coord r1 = constraints[tId].pos1;
+// 			Coord r2 = constraints[tId].pos2;
+// 			Coord n2 = constraints[tId].normal2;
+// 			Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n2);
+// 			eta[tId] -= b_trans;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
+// 		{
+// 			Real beta = 0.15;
+// 			Real yaw, pitch, roll_1, roll_2;
+// 			Quat q2 = rotation_q[idx2]; 
+// 			q2 = q2.normalize();
+// 			Quat q1 = rotation_q[idx1]; 
+// 			q1 = q1.normalize();
+// 
+// 			q2.toEulerAngle(yaw, pitch, roll_2);
+// 			q1.toEulerAngle(yaw, pitch, roll_1);
+// 
+// 
+// 
+// 			Real roll_diff = roll_2 - roll_1;
+// 			if (roll_diff > M_PI)
+// 				roll_diff -= 2 * M_PI;
+// 			else if (roll_diff < -M_PI)
+// 				roll_diff += 2 * M_PI;
+// 			Real b_rot = invDt * beta * roll_diff;
+// 			eta[tId] -= b_rot;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
+// 		{
+// 			Real beta = 0.15;
+// 			Real yaw, pitch_1, pitch_2, roll;
+// 			Quat q2 = rotation_q[idx2];
+// 			q2 = q2.normalize();
+// 			Quat q1 = rotation_q[idx1]; 
+// 			q1 = q1.normalize();
+// 
+// 			q2.toEulerAngle(yaw, pitch_2, roll);
+// 			q1.toEulerAngle(yaw, pitch_1, roll);
+// 
+// 			Real pitch_diff = pitch_2 - pitch_1;
+// 			if (pitch_diff > M_PI)
+// 				pitch_diff -= 2 * M_PI;
+// 			else if (pitch_diff < -M_PI)
+// 				pitch_diff += 2 * M_PI;
+// 
+// 			Real b_rot = invDt * beta * pitch_diff;
+// 			eta[tId] -= b_rot;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
+// 		{
+// 			Real beta = 0.15;
+// 			Real yaw_1, yaw_2, pitch, roll;
+// 			Quat q2 = rotation_q[idx2]; 
+// 			q2 = q2.normalize();
+// 			Quat q1 = rotation_q[idx1];
+// 			q1 = q1.normalize();
+// 
+// 			q2.toEulerAngle(yaw_2, pitch, roll);
+// 			q1.toEulerAngle(yaw_1, pitch, roll);
+// 			Real yaw_diff = yaw_2 - yaw_1;
+// 			if (yaw_diff > M_PI)
+// 				yaw_diff -= 2 * M_PI;
+// 			else if (yaw_diff < -M_PI)
+// 				yaw_diff += 2 * M_PI;
+// 
+// 			Real b_rot = invDt * beta * yaw_diff;
+// 
+// 			eta[tId] -= b_rot;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MOTER || constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
+// 		{
+// 			Real v_moter = constraints[tId].interpenetration;
+// 			eta[tId] -= v_moter;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN)
+// 		{
+// 			Real beta = 0.3;
+// 			Real b_min = invDt * beta * constraints[tId].d_min;
+// 			eta[tId] -= b_min;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MIN)
+// 		{
+// 			Real beta = Real(1)/Real(3);
+// 			Real b_min = invDt * beta * constraints[tId].d_min;
+// 			eta[tId] -= b_min;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MAX)
+// 		{
+// 			Real beta = 0.3;
+// 			Real b_max = invDt * beta * constraints[tId].d_max;
+// 			eta[tId] -= b_max;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MAX)
+// 		{
+// 			Real beta = Real(1)/Real(3);
+// 			Real b_max = invDt * beta * constraints[tId].d_max;
+// 			eta[tId] -= b_max;
+// 		}
+// 
+// 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
+// 		{
+// 			Real beta = Real(0.3);
+// 			Coord a1 = constraints[tId].axis;
+// 			Coord b2 = constraints[tId].pos1;
+// 			Real b_rot = invDt * beta * a1.dot(b2);
+// 			eta[tId] -= b_rot;
+// 		}
+// 
+// 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
+// 		{
+// 			Real beta = Real(0.3);
+// 			Coord a1 = constraints[tId].axis;
+// 			Coord c2 = constraints[tId].pos2;
+// 			Real b_rot = invDt * beta * a1.dot(c2);
+// 			eta[tId] -= b_rot;
+// 		}
+// 
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
+// 		{
+// 			Real beta = Real(1) / Real(3);
+// 			Coord error = constraints[tId].normal1;
+// 			Real b_error = invDt * beta * error[0];
+// 			eta[tId] -= b_error;
+// 		}
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
+// 		{
+// 			Real beta = Real(1) / Real(3);
+// 			Coord error = constraints[tId].normal1;
+// 			Real b_error = invDt * beta * error[1];
+// 			eta[tId] -= b_error;
+// 		}
+// 
+// 		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
+// 		{
+// 			Real beta = Real(1) / Real(3);
+// 			Coord error = constraints[tId].normal1;
+// 			Real b_error = invDt * beta * error[2];
+// 			eta[tId] -= b_error;
+// 		}
 	}
 
 
@@ -1788,6 +1788,36 @@ namespace dyno
 		impulse_ext[2 * tId + 1] = Coord(0);
 	}
 
+	template <typename Real, typename Coord, typename Quat>
+	__global__ void ICS_UpdateVelocityForPositionSolver(
+		DArray<Coord> velocity,
+		DArray<Coord> angularVelocity,
+		DArray<Coord> center,
+		DArray<Coord> p_prev,
+		DArray<Quat> quaternion,
+		DArray<Quat> q_prev,
+		Real damping,
+		Real angularDamping,
+		Real dt)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= velocity.size())
+			return;
+
+		velocity[pId] += (center[pId] - p_prev[pId]) / dt;
+		velocity[pId] *= damping;
+
+		Quat q = quaternion[pId];
+		q = q.normalize();
+		Quat dq = q * (q_prev[pId].inverse());
+
+		Coord dw = 2 * Coord(dq.x, dq.y, dq.z) / dt;
+		dw *= dq.w >= 0 ? 1.0f : -1.0f;
+
+		angularVelocity[pId] += dw;
+		angularVelocity[pId] *= 1.0 * angularDamping;
+	}
+
 	template<typename TDataType>
 	void IterativeConstraintSolver<TDataType>::constrain()
 	{
@@ -1797,7 +1827,6 @@ namespace dyno
 		mImpulseExt.resize(bodyNum * 2);
 		mImpulseC.reset();
 		mImpulseExt.reset();
-	
 
 		Real dt = this->inTimeStep()->getData();
 
@@ -1874,6 +1903,9 @@ namespace dyno
 		//Position solver
 		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
 		{
+			mCenterPre.assign(this->inCenter()->constData());
+			mQuatPre.assign(this->inQuaternion()->constData());
+
 			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
 				mContactsInLocalFrame.resize(this->inContacts()->size());
 			}
@@ -1918,6 +1950,18 @@ namespace dyno
 					mImpulseC,
 					dt);
 			}
+
+			cuExecute(bodyNum,
+				ICS_UpdateVelocityForPositionSolver,
+				this->inVelocity()->getData(),
+				this->inAngularVelocity()->getData(),
+				this->inCenter()->getData(),
+				mCenterPre,
+				this->inQuaternion()->getData(),
+				mQuatPre,
+				Real(0.99),
+				Real(0.99),
+				dt);
 		}
 	}
 

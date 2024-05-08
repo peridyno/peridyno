@@ -81,6 +81,8 @@ namespace dyno
 		if (tId >= pos.size())
 			return;
 
+		velocity[tId] += Coord(0.0f, -9.8f, 0.0f) * dt;
+
 		pos[tId] += velocity[tId] * dt;
 
 		rotQuat[tId] = rotQuat[tId].normalize();
@@ -532,6 +534,7 @@ namespace dyno
 				eta[tId] -= b_error;// +b_res;
 			}
 		}
+
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
 		{
 			Real beta = 0.3;
