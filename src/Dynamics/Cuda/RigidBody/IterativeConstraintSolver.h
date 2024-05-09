@@ -59,7 +59,7 @@ namespace dyno
 
 		DEF_VAR(uint, IterationNumberForVelocitySolver, 20, "");
 
-		DEF_VAR(uint, IterationNumberForPositionSolver, 3, "");
+		DEF_VAR(uint, IterationNumberForPositionSolver, 30, "");
 
 
 	public:

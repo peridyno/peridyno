@@ -1,6 +1,5 @@
 #include "IterativeConstraintSolver.h"
 
-#include "NgsConstraintSolver.cu"
 
 namespace dyno
 {
@@ -499,216 +498,11 @@ namespace dyno
 
 		eta[tId] = eta_i;
 
-// 		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
-// 		{
-// 			if (constraints[tId].interpenetration < -slop)
-// 			{
-// 				Real beta = Real(0.3);
-// 				Real alpha = 0;
-// 
-// 				Real b_error = beta * invDt * (constraints[tId].interpenetration + slop);
-// 
-// 				Real b_res = 0;
-// 
-// 				Coord n = constraints[tId].normal1;
-// 				Coord r1 = constraints[tId].pos1 - pos[idx1];
-// 
-// 				Coord gamma = -velocity[idx1] - angular_velocity[idx1].cross(r1);
-// 
-// 				if (idx2 != INVALID)
-// 				{
-// 					Coord r2 = constraints[tId].pos2 - pos[idx2];
-// 					gamma = gamma + velocity[idx2] + angular_velocity[idx2].cross(r2);
-// 				}
-// 
-// 				b_res += alpha * gamma.dot(n);
-// 
-// 				//eta[tId] -= b_error + b_res;
-// 				eta[tId] -= b_res;
-// 			}
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
-// 		{
-// 			Real beta = 0.3;
-// 			Coord r1 = constraints[tId].normal1;
-// 			Coord r2 = constraints[tId].normal2;
-// 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-// 			Real b_trans = invDt * beta * error[0];
-// 			eta[tId] -= b_trans;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
-// 		{
-// 			Real beta = 0.3;
-// 			Coord r1 = constraints[tId].normal1;
-// 			Coord r2 = constraints[tId].normal2;
-// 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-// 			Real b_trans = invDt * beta * error[1];
-// 			eta[tId] -= b_trans;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
-// 		{
-// 			Real beta = 0.3;
-// 			Coord r1 = constraints[tId].normal1;
-// 			Coord r2 = constraints[tId].normal2;
-// 			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
-// 			Real b_trans = invDt * beta * error[2];
-// 			eta[tId] -= b_trans;
-// 		}
-// 
-// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_1)
-// 		{
-// 			Real beta = Real(1) / Real(4);
-// 			Coord r1 = constraints[tId].pos1;
-// 			Coord r2 = constraints[tId].pos2;
-// 			Coord n1 = constraints[tId].normal1;
-// 
-// 			Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n1);
-// 			eta[tId] -= b_trans;
-// 		}
-// 
-// 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_2)
-// 		{
-// 			Real beta = Real(1) / Real(3);
-// 			Coord r1 = constraints[tId].pos1;
-// 			Coord r2 = constraints[tId].pos2;
-// 			Coord n2 = constraints[tId].normal2;
-// 			Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n2);
-// 			eta[tId] -= b_trans;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
-// 		{
-// 			Real beta = 0.15;
-// 			Real yaw, pitch, roll_1, roll_2;
-// 			Quat q2 = rotation_q[idx2]; 
-// 			q2 = q2.normalize();
-// 			Quat q1 = rotation_q[idx1]; 
-// 			q1 = q1.normalize();
-// 
-// 			q2.toEulerAngle(yaw, pitch, roll_2);
-// 			q1.toEulerAngle(yaw, pitch, roll_1);
-// 
-// 
-// 
-// 			Real roll_diff = roll_2 - roll_1;
-// 			if (roll_diff > M_PI)
-// 				roll_diff -= 2 * M_PI;
-// 			else if (roll_diff < -M_PI)
-// 				roll_diff += 2 * M_PI;
-// 			Real b_rot = invDt * beta * roll_diff;
-// 			eta[tId] -= b_rot;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
-// 		{
-// 			Real beta = 0.15;
-// 			Real yaw, pitch_1, pitch_2, roll;
-// 			Quat q2 = rotation_q[idx2];
-// 			q2 = q2.normalize();
-// 			Quat q1 = rotation_q[idx1]; 
-// 			q1 = q1.normalize();
-// 
-// 			q2.toEulerAngle(yaw, pitch_2, roll);
-// 			q1.toEulerAngle(yaw, pitch_1, roll);
-// 
-// 			Real pitch_diff = pitch_2 - pitch_1;
-// 			if (pitch_diff > M_PI)
-// 				pitch_diff -= 2 * M_PI;
-// 			else if (pitch_diff < -M_PI)
-// 				pitch_diff += 2 * M_PI;
-// 
-// 			Real b_rot = invDt * beta * pitch_diff;
-// 			eta[tId] -= b_rot;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
-// 		{
-// 			Real beta = 0.15;
-// 			Real yaw_1, yaw_2, pitch, roll;
-// 			Quat q2 = rotation_q[idx2]; 
-// 			q2 = q2.normalize();
-// 			Quat q1 = rotation_q[idx1];
-// 			q1 = q1.normalize();
-// 
-// 			q2.toEulerAngle(yaw_2, pitch, roll);
-// 			q1.toEulerAngle(yaw_1, pitch, roll);
-// 			Real yaw_diff = yaw_2 - yaw_1;
-// 			if (yaw_diff > M_PI)
-// 				yaw_diff -= 2 * M_PI;
-// 			else if (yaw_diff < -M_PI)
-// 				yaw_diff += 2 * M_PI;
-// 
-// 			Real b_rot = invDt * beta * yaw_diff;
-// 
-// 			eta[tId] -= b_rot;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MOTER || constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
-// 		{
-// 			Real v_moter = constraints[tId].interpenetration;
-// 			eta[tId] -= v_moter;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN)
-// 		{
-// 			Real beta = 0.3;
-// 			Real b_min = invDt * beta * constraints[tId].d_min;
-// 			eta[tId] -= b_min;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MIN)
-// 		{
-// 			Real beta = Real(1)/Real(3);
-// 			Real b_min = invDt * beta * constraints[tId].d_min;
-// 			eta[tId] -= b_min;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MAX)
-// 		{
-// 			Real beta = 0.3;
-// 			Real b_max = invDt * beta * constraints[tId].d_max;
-// 			eta[tId] -= b_max;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MAX)
-// 		{
-// 			Real beta = Real(1)/Real(3);
-// 			Real b_max = invDt * beta * constraints[tId].d_max;
-// 			eta[tId] -= b_max;
-// 		}
-// 
-// 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
-// 		{
-// 			Real beta = Real(0.3);
-// 			Coord a1 = constraints[tId].axis;
-// 			Coord b2 = constraints[tId].pos1;
-// 			Real b_rot = invDt * beta * a1.dot(b2);
-// 			eta[tId] -= b_rot;
-// 		}
-// 
-// 		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
-// 		{
-// 			Real beta = Real(0.3);
-// 			Coord a1 = constraints[tId].axis;
-// 			Coord c2 = constraints[tId].pos2;
-// 			Real b_rot = invDt * beta * a1.dot(c2);
-// 			eta[tId] -= b_rot;
-// 		}
-// 
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
-// 		{
-// 			Real beta = Real(1) / Real(3);
-// 			Coord error = constraints[tId].normal1;
-// 			Real b_error = invDt * beta * error[0];
-// 			eta[tId] -= b_error;
-// 		}
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
-// 		{
-// 			Real beta = Real(1) / Real(3);
-// 			Coord error = constraints[tId].normal1;
-// 			Real b_error = invDt * beta * error[1];
-// 			eta[tId] -= b_error;
-// 		}
-// 
-// 		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
-// 		{
-// 			Real beta = Real(1) / Real(3);
-// 			Coord error = constraints[tId].normal1;
-// 			Real b_error = invDt * beta * error[2];
-// 			eta[tId] -= b_error;
-// 		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MOTER || constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
+		{
+			Real v_moter = constraints[tId].interpenetration;
+			eta[tId] -= v_moter;
+		}
 	}
 
 
@@ -1274,12 +1068,12 @@ namespace dyno
 				}
 			}
 
-			if (constraints[tId].type == ConstraintType::CN_FRICTION)
+			/*if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
 				Real mass_avl = mass[idx1];
 				lambda_new = (abs(lambda_new) > mu *mass_avl * g * dt) ? (lambda_new < 0 ? -mu * mass_avl * g * dt: mu *mass_avl* g * dt) : lambda_new;
 				delta_lambda = lambda_new - lambda[tId];
-			}
+			}*/
 
 			
 			lambda[tId] += delta_lambda;
@@ -1368,10 +1162,11 @@ namespace dyno
 		{
 			auto& contacts = this->inContacts()->getData();
 			cuExecute(contact_size,
-				setUpContactAndFrictionConstraints,
+				ICS_setUpContactAndFrictionConstraints,
 				mVelocityConstraints,
-				contacts,
-				contact_size,
+				mContactsInLocalFrame,
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData(),
 				this->varFrictionEnabled()->getData());
 		}
 
@@ -1579,12 +1374,12 @@ namespace dyno
 
 		if (sliderJoint_size != 0)
 		{
-			constraint_size += 8 * sliderJoint_size;
+			constraint_size += 7 * sliderJoint_size;
 		}
 
 		if (hingeJoint_size != 0)
 		{
-			constraint_size += 8 * hingeJoint_size;
+			constraint_size += 7 * hingeJoint_size;
 		}
 
 		if (fixedJoint_size != 0)
@@ -1608,7 +1403,7 @@ namespace dyno
 		{
 			auto& contacts = this->inContacts()->getData();
 			cuExecute(contact_size,
-				NGS_setUpContactAndFrictionConstraints,
+				NGS_setUpContactConstraints,
 				mPositionConstraints,
 				mContactsInLocalFrame,
 				this->inCenter()->getData(),
@@ -1648,7 +1443,7 @@ namespace dyno
 		if (hingeJoint_size != 0)
 		{
 			auto& joints = this->inHingeJoints()->getData();
-			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size;
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 7 * sliderJoint_size;
 
 			cuExecute(hingeJoint_size,
 				NGS_setUpHingeJoint,
@@ -1663,7 +1458,7 @@ namespace dyno
 		if (fixedJoint_size != 0)
 		{
 			auto& joints = this->inFixedJoints()->getData();
-			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size;
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 7 * sliderJoint_size + 7 * hingeJoint_size;
 
 			cuExecute(fixedJoint_size,
 				NGS_setUpFixedJoint,
@@ -1675,7 +1470,7 @@ namespace dyno
 		if (pointJoint_size != 0)
 		{
 			auto& joints = this->inPointJoints()->getData();
-			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size + 6 * fixedJoint_size;
+			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 7 * sliderJoint_size + 7 * hingeJoint_size + 6 * fixedJoint_size;
 
 			cuExecute(pointJoint_size,
 				NGS_setUpPointJoint,
@@ -1788,6 +1583,1180 @@ namespace dyno
 		impulse_ext[2 * tId + 1] = Coord(0);
 	}
 
+	template<typename Real, typename Coord, typename Quat, typename Matrix>
+	__global__ void NGS_updatePositionAndRotation(
+		DArray<Coord> center,
+		DArray<Quat> rotQuat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> inertia,
+		DArray<Matrix> inertia_init,
+		DArray<Coord> impulse_constrain,
+		Real dt)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= center.size())
+			return;
+
+		Coord dv = impulse_constrain[2 * tId];
+
+
+		Coord dw = impulse_constrain[2 * tId + 1];
+
+		center[tId] += dt * dv;
+		rotQuat[tId] += dt * 0.5 * Quat(dw.x, dw.y, dw.z, 0) * rotQuat[tId];
+
+		rotQuat[tId] = rotQuat[tId].normalize();
+
+		rotMat[tId] = rotQuat[tId].toMatrix3x3();
+
+		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+	}
+
+	template<typename Coord>
+	__global__ void NGS_updateVelocity(
+		DArray<Coord> velocity,
+		DArray<Coord> angular_velocity,
+		DArray<Coord> impulse_ext,
+		DArray<Coord> impulse_constrain
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= velocity.size())
+			return;
+		velocity[tId] += impulse_ext[2 * tId] + impulse_constrain[2 * tId];
+		angular_velocity[tId] += impulse_ext[2 * tId + 1] + impulse_constrain[2 * tId + 1];
+	}
+
+	template<typename Coord, typename Matrix, typename Quat>
+	__global__ void NGS_updateGesture(
+		DArray<Coord> pos,
+		DArray<Quat> rotQuat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> inertia,
+		DArray<Coord> velocity,
+		DArray<Coord> angular_velocity,
+		DArray<Matrix> inertia_init,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= pos.size())
+			return;
+
+		velocity[tId] += Coord(0.0f, -9.8f, 0.0f) * dt;
+
+		pos[tId] += velocity[tId] * dt;
+
+		rotQuat[tId] = rotQuat[tId].normalize();
+
+		rotQuat[tId] += dt * 0.5f *
+			Quat(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+			* (rotQuat[tId]);
+
+		rotQuat[tId] = rotQuat[tId].normalize();
+
+		rotMat[tId] = rotQuat[tId].toMatrix3x3();
+
+		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+	}
+
+	template<typename ContactPair>
+	__global__ void NGS_calculateNbrCons(
+		DArray<ContactPair> nbc,
+		DArray<int> nbrCnt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= nbc.size())
+			return;
+
+		int idx1 = nbc[tId].bodyId1;
+		int idx2 = nbc[tId].bodyId2;
+
+		atomicAdd(&nbrCnt[idx1], 1);
+
+		if (idx2 != INVALID)
+			atomicAdd(&nbrCnt[idx2], 1);
+	}
+
+	template<typename Joint>
+	__global__ void NGS_calculateJoints(
+		DArray<Joint> joints,
+		DArray<int> jointCnt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= joints.size())
+			return;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+
+		atomicAdd(&jointCnt[idx1], 1);
+		atomicAdd(&jointCnt[idx2], 1);
+	}
+
+	template<typename Coord, typename Matrix, typename Constraint>
+	__global__ void NGS_calculateJacobianAndB(
+		DArray<Coord> J,
+		DArray<Coord> B,
+		DArray<Coord> pos,
+		DArray<Matrix> inertia,
+		DArray<Real> mass,
+		DArray<Constraint> constraints,
+		DArray<Matrix> rotMat
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= constraints.size())
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION || constraints[tId].type == ConstraintType::CN_FRICTION)
+		{
+			Coord n = constraints[tId].normal1;
+			Coord r1 = constraints[tId].pos1 - pos[idx1];
+			Coord rcn_1 = r1.cross(n);
+
+			J[4 * tId] = -n;
+			J[4 * tId + 1] = -rcn_1;
+			B[4 * tId] = -n / mass[idx1];
+			B[4 * tId + 1] = -inertia[idx1].inverse() * rcn_1;
+
+			if (idx2 != INVALID)
+			{
+				Coord r2 = constraints[tId].pos2 - pos[idx2];
+				Coord rcn_2 = r2.cross(n);
+				J[4 * tId + 2] = n;
+				J[4 * tId + 3] = rcn_2;
+				B[4 * tId + 2] = n / mass[idx2];
+				B[4 * tId + 3] = inertia[idx2].inverse() * rcn_2;
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
+		{
+			Coord r1 = constraints[tId].normal1;
+			Coord r2 = constraints[tId].normal2;
+
+			J[4 * tId] = Coord(-1, 0, 0);
+			J[4 * tId + 1] = Coord(0, -r1[2], r1[1]);
+			J[4 * tId + 2] = Coord(1, 0, 0);
+			J[4 * tId + 3] = Coord(0, r2[2], -r2[1]);
+
+			B[4 * tId] = Coord(-1, 0, 0) / mass[idx1];
+			B[4 * tId + 1] = inertia[idx1].inverse() * Coord(0, -r1[2], r1[1]);
+			B[4 * tId + 2] = Coord(1, 0, 0) / mass[idx2];
+			B[4 * tId + 3] = inertia[idx2].inverse() * Coord(0, r2[2], -r2[1]);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
+		{
+			Coord r1 = constraints[tId].normal1;
+			Coord r2 = constraints[tId].normal2;
+
+			J[4 * tId] = Coord(0, -1, 0);
+			J[4 * tId + 1] = Coord(r1[2], 0, -r1[0]);
+			J[4 * tId + 2] = Coord(0, 1, 0);
+			J[4 * tId + 3] = Coord(-r2[2], 0, r2[0]);
+
+			B[4 * tId] = Coord(0, -1, 0) / mass[idx1];
+			B[4 * tId + 1] = inertia[idx1].inverse() * Coord(r1[2], 0, -r1[0]);
+			B[4 * tId + 2] = Coord(0, 1, 0) / mass[idx2];
+			B[4 * tId + 3] = inertia[idx2].inverse() * Coord(-r2[2], 0, r2[0]);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
+		{
+			Coord r1 = constraints[tId].normal1;
+			Coord r2 = constraints[tId].normal2;
+
+			J[4 * tId] = Coord(0, 0, -1);
+			J[4 * tId + 1] = Coord(-r1[1], r1[0], 0);
+			J[4 * tId + 2] = Coord(0, 0, 1);
+			J[4 * tId + 3] = Coord(r2[1], -r2[0], 0);
+
+			B[4 * tId] = Coord(0, 0, -1) / mass[idx1];
+			B[4 * tId + 1] = inertia[idx1].inverse() * Coord(-r1[1], r1[0], 0);
+			B[4 * tId + 2] = Coord(0, 0, 1) / mass[idx2];
+			B[4 * tId + 3] = inertia[idx2].inverse() * Coord(r2[1], -r2[0], 0);
+		}
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_1)
+		{
+			Coord r1 = constraints[tId].pos1;
+			Coord r2 = constraints[tId].pos2;
+
+			Coord n1 = constraints[tId].normal1;
+
+			J[4 * tId] = -n1;
+			J[4 * tId + 1] = -(pos[idx2] + r2 - pos[idx1]).cross(n1);
+			J[4 * tId + 2] = n1;
+			J[4 * tId + 3] = r2.cross(n1);
+
+			B[4 * tId] = -n1 / mass[idx1];
+			B[4 * tId + 1] = inertia[idx1].inverse() * J[4 * tId + 1];
+			B[4 * tId + 2] = n1 / mass[idx2];
+			B[4 * tId + 3] = inertia[idx2].inverse() * J[4 * tId + 3];
+		}
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_2)
+		{
+			Coord r1 = constraints[tId].pos1;
+			Coord r2 = constraints[tId].pos2;
+
+			Coord n2 = constraints[tId].normal2;
+
+			J[4 * tId] = -n2;
+			J[4 * tId + 1] = -(pos[idx2] + r2 - pos[idx1]).cross(n2);
+			J[4 * tId + 2] = n2;
+			J[4 * tId + 3] = r2.cross(n2);
+
+			B[4 * tId] = -n2 / mass[idx1];
+			B[4 * tId + 1] = inertia[idx1].inverse() * J[4 * tId + 1];
+			B[4 * tId + 2] = n2 / mass[idx2];
+			B[4 * tId + 3] = inertia[idx2].inverse() * J[4 * tId + 3];
+		}
+		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
+		{
+			J[4 * tId] = Coord(0);
+			J[4 * tId + 1] = Coord(-1, 0, 0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(1, 0, 0);
+
+			B[4 * tId] = Coord(0);
+			B[4 * tId + 1] = inertia[idx1].inverse() * Coord(-1, 0, 0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = inertia[idx2].inverse() * Coord(1, 0, 0);
+		}
+		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
+		{
+			J[4 * tId] = Coord(0);
+			J[4 * tId + 1] = Coord(0, -1, 0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0, 1, 0);
+
+			B[4 * tId] = Coord(0);
+			B[4 * tId + 1] = inertia[idx1].inverse() * Coord(0, -1, 0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = inertia[idx2].inverse() * Coord(0, 1, 0);
+		}
+		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
+		{
+			J[4 * tId] = Coord(0);
+			J[4 * tId + 1] = Coord(0, 0, -1);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0, 0, 1);
+
+			B[4 * tId] = Coord(0);
+			B[4 * tId + 1] = inertia[idx1].inverse() * Coord(0, 0, -1);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = inertia[idx2].inverse() * Coord(0, 0, 1);
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MOTER)
+		{
+			if (constraints[tId].isValid)
+			{
+				Coord n = constraints[tId].axis;
+
+				J[4 * tId] = n;
+				J[4 * tId + 1] = Coord(0);
+				J[4 * tId + 2] = -n;
+				J[4 * tId + 3] = Coord(0);
+
+				B[4 * tId] = n / mass[idx1];
+				B[4 * tId + 1] = Coord(0);
+				B[4 * tId + 2] = -n / mass[idx2];
+				B[4 * tId + 3] = Coord(0);
+			}
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MIN)
+		{
+			if (constraints[tId].isValid)
+			{
+				Coord a = constraints[tId].axis;
+				Coord r1 = constraints[tId].pos1;
+				Coord r2 = constraints[tId].pos2;
+
+				J[4 * tId] = -a;
+				J[4 * tId + 1] = -(pos[idx2] + r2 - pos[idx1]).cross(a);
+				J[4 * tId + 2] = a;
+				J[4 * tId + 3] = r2.cross(a);
+
+				B[4 * tId] = -a / mass[idx1];
+				B[4 * tId + 1] = inertia[idx1].inverse() * J[4 * tId + 1];
+				B[4 * tId + 2] = a / mass[idx2];
+				B[4 * tId + 3] = inertia[idx2].inverse() * J[4 * tId + 3];
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MAX)
+		{
+			if (constraints[tId].isValid)
+			{
+				Coord a = constraints[tId].axis;
+				Coord r1 = constraints[tId].pos1;
+				Coord r2 = constraints[tId].pos2;
+
+				J[4 * tId] = a;
+				J[4 * tId + 1] = (pos[idx2] + r2 - pos[idx1]).cross(a);
+				J[4 * tId + 2] = -a;
+				J[4 * tId + 3] = -r2.cross(a);
+
+				B[4 * tId] = a / mass[idx1];
+				B[4 * tId + 1] = inertia[idx1].inverse() * J[4 * tId + 1];
+				B[4 * tId + 2] = -a / mass[idx2];
+				B[4 * tId + 3] = inertia[idx2].inverse() * J[4 * tId + 3];
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
+		{
+			Coord b2 = constraints[tId].pos1;
+			Coord a1 = constraints[tId].axis;
+
+			J[4 * tId] = Coord(0);
+			J[4 * tId + 1] = -b2.cross(a1);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = b2.cross(a1);
+
+			B[4 * tId] = Coord(0);
+			B[4 * tId + 1] = inertia[idx1].inverse() * J[4 * tId + 1];
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = inertia[idx2].inverse() * J[4 * tId + 3];
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
+		{
+			Coord c2 = constraints[tId].pos2;
+			Coord a1 = constraints[tId].axis;
+
+			J[4 * tId] = Coord(0);
+			J[4 * tId + 1] = -c2.cross(a1);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = c2.cross(a1);
+
+			B[4 * tId] = Coord(0);
+			B[4 * tId + 1] = inertia[idx1].inverse() * J[4 * tId + 1];
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = inertia[idx2].inverse() * J[4 * tId + 3];
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN)
+		{
+			if (constraints[tId].isValid == 1)
+			{
+				Coord a = constraints[tId].axis;
+				J[4 * tId] = Coord(0);
+				J[4 * tId + 1] = -a;
+				J[4 * tId + 2] = Coord(0);
+				J[4 * tId + 3] = a;
+
+				B[4 * tId] = Coord(0);
+				B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
+				B[4 * tId + 2] = Coord(0);
+				B[4 * tId + 3] = inertia[idx2].inverse() * (a);
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MAX)
+		{
+			if (constraints[tId].isValid == 1)
+			{
+				Coord a = constraints[tId].axis;
+				J[4 * tId] = Coord(0);
+				J[4 * tId + 1] = a;
+				J[4 * tId + 2] = Coord(0);
+				J[4 * tId + 3] = -a;
+
+				B[4 * tId] = Coord(0);
+				B[4 * tId + 1] = inertia[idx1].inverse() * (a);
+				B[4 * tId + 2] = Coord(0);
+				B[4 * tId + 3] = inertia[idx2].inverse() * (-a);
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MOTER)
+		{
+			if (constraints[tId].isValid)
+			{
+				Coord a = constraints[tId].axis;
+				J[4 * tId] = Coord(0);
+				J[4 * tId + 1] = -a;
+				J[4 * tId + 2] = Coord(0);
+				J[4 * tId + 3] = a;
+
+				B[4 * tId] = Coord(0);
+				B[4 * tId + 1] = inertia[idx1].inverse() * (-a);
+				B[4 * tId + 2] = Coord(0);
+				B[4 * tId + 3] = inertia[idx2].inverse() * a;
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
+		{
+			J[4 * tId] = Coord(1.0, 0, 0);
+			J[4 * tId + 1] = Coord(0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0);
+
+			B[4 * tId] = Coord(1 / mass[idx1], 0, 0);
+			B[4 * tId + 1] = Coord(0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = Coord(0);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
+		{
+			J[4 * tId] = Coord(0, 1.0, 0);
+			J[4 * tId + 1] = Coord(0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0);
+
+			B[4 * tId] = Coord(0, 1.0 / mass[idx1], 0);
+			B[4 * tId + 1] = Coord(0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = Coord(0);
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
+		{
+			J[4 * tId] = Coord(0, 0, 1.0);
+			J[4 * tId + 1] = Coord(0);
+			J[4 * tId + 2] = Coord(0);
+			J[4 * tId + 3] = Coord(0);
+
+			B[4 * tId] = Coord(0, 0, 1.0 / mass[idx1]);
+			B[4 * tId + 1] = Coord(0);
+			B[4 * tId + 2] = Coord(0);
+			B[4 * tId + 3] = Coord(0);
+		}
+
+
+	}
+
+	template<typename Coord>
+	__global__ void NGS_calculateDiagonals(
+		DArray<Real> D,
+		DArray<Coord> J,
+		DArray<Coord> B
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= D.size())
+			return;
+
+		Real d = J[4 * tId].dot(B[4 * tId]) + J[4 * tId + 1].dot(B[4 * tId + 1]) + J[4 * tId + 2].dot(B[4 * tId + 2]) + J[4 * tId + 3].dot(B[4 * tId + 3]);
+
+		D[tId] = d;
+	}
+
+
+
+	template<typename Coord, typename Constraint, typename Quat>
+	__global__ void NGS_calculateEta(
+		DArray<Real> eta,
+		DArray<Coord> velocity,
+		DArray<Coord> angular_velocity,
+		DArray<Coord> J,
+		DArray<Real> mass,
+		DArray<Coord> pos,
+		DArray<Constraint> constraints,
+		DArray<Quat> rotation_q,
+		Real slop,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= constraints.size())
+			return;
+
+
+		Real invDt = Real(1) / dt;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		Real eta_i = Real(0);
+
+		eta[tId] = eta_i;
+
+		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+		{
+			if (constraints[tId].interpenetration < -slop)
+			{
+				Real beta = Real(1.0);
+				Real alpha = 0;
+				Real b_error;
+				if (constraints[tId].interpenetration + slop < 0)
+					b_error = beta * invDt * (constraints[tId].interpenetration + slop);
+				else
+					b_error = 0;
+				eta[tId] -= b_error;// +b_res;
+			}
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
+		{
+			Real beta = 1.0;
+			Coord r1 = constraints[tId].normal1;
+			Coord r2 = constraints[tId].normal2;
+			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
+			Real b_trans = beta * invDt * error[0];
+			eta[tId] -= b_trans;
+		}
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_2)
+		{
+			Real beta = 1.0;
+			Coord r1 = constraints[tId].normal1;
+			Coord r2 = constraints[tId].normal2;
+			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
+			Real b_trans = beta * invDt * error[1];
+			eta[tId] -= b_trans;
+		}
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_3)
+		{
+			Real beta = 1.0;
+			Coord r1 = constraints[tId].normal1;
+			Coord r2 = constraints[tId].normal2;
+			Coord error = pos[idx2] + r2 - pos[idx1] - r1;
+			Real b_trans = beta * invDt * error[2];
+			eta[tId] -= b_trans;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_1)
+		{
+			Real beta = Real(1.0);
+			Coord r1 = constraints[tId].pos1;
+			Coord r2 = constraints[tId].pos2;
+			Coord n1 = constraints[tId].normal1;
+
+			Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n1);
+			eta[tId] -= b_trans;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_2)
+		{
+			Real beta = Real(1.0);
+			Coord r1 = constraints[tId].pos1;
+			Coord r2 = constraints[tId].pos2;
+			Coord n2 = constraints[tId].normal2;
+			Real b_trans = invDt * beta * (pos[idx2] + r2 - pos[idx1] - r1).dot(n2);
+			eta[tId] -= b_trans;
+		}
+		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
+		{
+			Real beta = 1.0;
+			Real yaw, pitch, roll_1, roll_2;
+			Quat q2 = rotation_q[idx2];
+			q2 = q2.normalize();
+			Quat q1 = rotation_q[idx1];
+			q1 = q1.normalize();
+
+			q2.toEulerAngle(yaw, pitch, roll_2);
+			q1.toEulerAngle(yaw, pitch, roll_1);
+
+
+
+			Real roll_diff = roll_2 - roll_1;
+			if (roll_diff > M_PI)
+				roll_diff -= 2 * M_PI;
+			else if (roll_diff < -M_PI)
+				roll_diff += 2 * M_PI;
+			Real b_rot = invDt * beta * roll_diff;
+			eta[tId] -= b_rot;
+		}
+		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
+		{
+			Real beta = 1.0;
+			Real yaw, pitch_1, pitch_2, roll;
+			Quat q2 = rotation_q[idx2];
+			q2 = q2.normalize();
+			Quat q1 = rotation_q[idx1];
+			q1 = q1.normalize();
+
+			q2.toEulerAngle(yaw, pitch_2, roll);
+			q1.toEulerAngle(yaw, pitch_1, roll);
+
+			Real pitch_diff = pitch_2 - pitch_1;
+			if (pitch_diff > M_PI)
+				pitch_diff -= 2 * M_PI;
+			else if (pitch_diff < -M_PI)
+				pitch_diff += 2 * M_PI;
+
+			Real b_rot = invDt * beta * pitch_diff;
+			eta[tId] -= b_rot;
+		}
+		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
+		{
+			Real beta = 1.0;
+			Real yaw_1, yaw_2, pitch, roll;
+			Quat q2 = rotation_q[idx2];
+			q2 = q2.normalize();
+			Quat q1 = rotation_q[idx1];
+			q1 = q1.normalize();
+
+			q2.toEulerAngle(yaw_2, pitch, roll);
+			q1.toEulerAngle(yaw_1, pitch, roll);
+			Real yaw_diff = yaw_2 - yaw_1;
+			if (yaw_diff > M_PI)
+				yaw_diff -= 2 * M_PI;
+			else if (yaw_diff < -M_PI)
+				yaw_diff += 2 * M_PI;
+
+			Real b_rot = invDt * beta * yaw_diff;
+
+			eta[tId] -= b_rot;
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN)
+		{
+			Real beta = 0.3;
+			Real b_min = invDt * beta * constraints[tId].d_min;
+			eta[tId] -= b_min;
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MIN)
+		{
+			Real beta = Real(1) / Real(3);
+			Real b_min = invDt * beta * constraints[tId].d_min;
+			eta[tId] -= b_min;
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MAX)
+		{
+			Real beta = 0.3;
+			Real b_max = invDt * beta * constraints[tId].d_max;
+			eta[tId] -= b_max;
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MAX)
+		{
+			Real beta = Real(1) / Real(3);
+			Real b_max = invDt * beta * constraints[tId].d_max;
+			eta[tId] -= b_max;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_1)
+		{
+			Real beta = Real(1.0);
+			Coord a1 = constraints[tId].axis;
+			Coord b2 = constraints[tId].pos1;
+			Real b_rot = invDt * beta * a1.dot(b2);
+			eta[tId] -= b_rot;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_ALLOW_ROT1D_2)
+		{
+			Real beta = Real(1.0);
+			Coord a1 = constraints[tId].axis;
+			Coord c2 = constraints[tId].pos2;
+			Real b_rot = invDt * beta * a1.dot(c2);
+			eta[tId] -= b_rot;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
+		{
+			Real beta = Real(1.0);
+			Coord error = constraints[tId].normal1;
+			Real b_error = invDt * beta * error[0];
+			eta[tId] -= b_error;
+		}
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_2)
+		{
+			Real beta = Real(1.0);
+			Coord error = constraints[tId].normal1;
+			Real b_error = invDt * beta * error[1];
+			eta[tId] -= b_error;
+		}
+
+		if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_3)
+		{
+			Real beta = Real(1.0);
+			Coord error = constraints[tId].normal1;
+			Real b_error = invDt * beta * error[2];
+			eta[tId] -= b_error;
+		}
+	}
+
+
+	template<typename Coord, typename Matrix, typename Contact, typename Constraint>
+	__global__ void NGS_setUpContactConstraints(
+		DArray<Constraint> constraints,
+		DArray<Contact> contactsInLocalFrame,
+		DArray<Coord> center,
+		DArray<Matrix> rot)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contactsInLocalFrame.size())
+			return;
+
+		int contact_size = contactsInLocalFrame.size();
+
+		int idx1 = contactsInLocalFrame[tId].bodyId1;
+		int idx2 = contactsInLocalFrame[tId].bodyId2;
+
+		Coord c1 = center[idx1];
+		Matrix rot1 = rot[idx1];
+
+		constraints[tId].bodyId1 = idx1;
+		constraints[tId].bodyId2 = idx2;
+		constraints[tId].pos1 = rot1 * contactsInLocalFrame[tId].pos1 + c1;
+		constraints[tId].normal1 = -rot1 * contactsInLocalFrame[tId].normal1;
+		if (idx2 != INVALID)
+		{
+			Coord c2 = center[idx2];
+			Matrix rot2 = rot[idx2];
+
+			constraints[tId].pos2 = rot2 * contactsInLocalFrame[tId].pos2 + c2;
+			constraints[tId].normal2 = -rot2 * contactsInLocalFrame[tId].normal2;
+			constraints[tId].interpenetration = (constraints[tId].pos2 - constraints[tId].pos1).dot(constraints[tId].normal1) < 0 ? (constraints[tId].pos2 - constraints[tId].pos1).dot(constraints[tId].normal1) : 0.0f;
+		}
+		else
+		{
+			Real dist = (contactsInLocalFrame[tId].pos2 - constraints[tId].pos1).dot(contactsInLocalFrame[tId].normal2);
+			constraints[tId].interpenetration = dist < 0 ? dist : 0.0f;
+		}
+
+		constraints[tId].type = ConstraintType::CN_NONPENETRATION;
+	}
+
+	template<typename Joint, typename Constraint, typename Coord, typename Matrix>
+	__global__ void NGS_setUpBallAndSocketJointConstraints(
+		DArray<Constraint> constraints,
+		DArray<Joint> joints,
+		DArray<Coord> pos,
+		DArray<Matrix> rotMat,
+		int begin_index
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+
+		if (tId >= joints.size())
+			return;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+
+		Coord r1 = rotMat[idx1] * joints[tId].r1;
+		Coord r2 = rotMat[idx2] * joints[tId].r2;
+
+		int baseIndex = 3 * tId + begin_index;
+
+		constraints[baseIndex].bodyId1 = idx1;
+		constraints[baseIndex].bodyId2 = idx2;
+		constraints[baseIndex].normal1 = r1;
+		constraints[baseIndex].normal2 = r2;
+		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_EQUAL_1;
+
+		constraints[baseIndex + 1].bodyId1 = idx1;
+		constraints[baseIndex + 1].bodyId2 = idx2;
+		constraints[baseIndex + 1].normal1 = r1;
+		constraints[baseIndex + 1].normal2 = r2;
+		constraints[baseIndex + 1].type = ConstraintType::CN_ANCHOR_EQUAL_2;
+
+		constraints[baseIndex + 2].bodyId1 = idx1;
+		constraints[baseIndex + 2].bodyId2 = idx2;
+		constraints[baseIndex + 2].normal1 = r1;
+		constraints[baseIndex + 2].normal2 = r2;
+		constraints[baseIndex + 2].type = ConstraintType::CN_ANCHOR_EQUAL_3;
+
+	}
+
+	template<typename Joint, typename Constraint, typename Coord, typename Matrix>
+	__global__ void NGS_setUpSliderJoint(
+		DArray<Joint> joints,
+		DArray<Constraint> constraints,
+		DArray<Coord> pos,
+		DArray<Matrix> rotMat,
+		int begin_index
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+
+		if (tId >= joints.size())
+			return;
+
+		int constraint_size = 7;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+
+		Coord r1 = rotMat[idx1] * joints[tId].r1;
+		Coord r2 = rotMat[idx2] * joints[tId].r2;
+
+		Coord n = rotMat[idx1] * joints[tId].sliderAxis;
+		n = n.normalize();
+		Coord n1, n2;
+		if (abs(n[1]) > EPSILON || abs(n[2]) > EPSILON)
+		{
+			n1 = Vector<Real, 3>(0, n[2], -n[1]);
+			n1 = n1.normalize();
+		}
+		else if (abs(n[0]) > EPSILON)
+		{
+			n1 = Vector<Real, 3>(n[2], 0, -n[0]);
+			n1 = n1.normalize();
+		}
+		n2 = n1.cross(n);
+		n2 = n2.normalize();
+
+		int baseIndex = constraint_size * tId + begin_index;
+
+		bool useRange = joints[tId].useRange;
+		Real C_min = 0.0;
+		Real C_max = 0.0;
+		if (joints[tId].useRange)
+		{
+			Coord u = pos[idx2] + r2 - pos[idx1] - r1;
+			C_min = u.dot(n) - joints[tId].d_min;
+			C_max = joints[tId].d_max - u.dot(n);
+			if (C_min < 0)
+				constraints[baseIndex + 5].isValid = true;
+			else
+				constraints[baseIndex + 5].isValid = false;
+			if (C_max < 0)
+				constraints[baseIndex + 6].isValid = true;
+			else
+				constraints[baseIndex + 6].isValid = false;
+		}
+
+
+		for (int i = 0; i < constraint_size; i++)
+		{
+			auto& constraint = constraints[baseIndex + i];
+			constraint.bodyId1 = idx1;
+			constraint.bodyId2 = idx2;
+			constraint.pos1 = r1;
+			constraint.pos2 = r2;
+			constraint.normal1 = n1;
+			constraint.normal2 = n2;
+			constraint.axis = n;
+			constraint.d_min = C_min;
+			constraint.d_max = C_max;
+		}
+
+		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_TRANS_1;
+		constraints[baseIndex + 1].type = ConstraintType::CN_ANCHOR_TRANS_2;
+		constraints[baseIndex + 2].type = ConstraintType::CN_BAN_ROT_1;
+		constraints[baseIndex + 3].type = ConstraintType::CN_BAN_ROT_2;
+		constraints[baseIndex + 4].type = ConstraintType::CN_BAN_ROT_3;
+		constraints[baseIndex + 5].type = ConstraintType::CN_JOINT_SLIDER_MIN;
+		constraints[baseIndex + 6].type = ConstraintType::CN_JOINT_SLIDER_MAX;
+	}
+
+	template<typename Joint, typename Constraint, typename Coord, typename Matrix, typename Quat>
+	__global__ void NGS_setUpHingeJoint(
+		DArray<Joint> joints,
+		DArray<Constraint> constraints,
+		DArray<Coord> pos,
+		DArray<Matrix> rotMat,
+		DArray<Quat> rotation_q,
+		int begin_index
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= joints.size())
+			return;
+
+		int constraint_size = 7;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+
+		Matrix rotMat1 = rotMat[idx1];
+		Matrix rotMat2 = rotMat[idx2];
+
+
+		Coord r1 = rotMat1 * joints[tId].r1;
+		Coord r2 = rotMat2 * joints[tId].r2;
+
+		Coord a1 = rotMat1 * joints[tId].hingeAxisBody1;
+		Coord a2 = rotMat2 * joints[tId].hingeAxisBody2;
+
+
+
+		// two vector orthogonal to the a2
+		Coord b2, c2;
+		if (abs(a2[1]) > EPSILON || abs(a2[2]) > EPSILON)
+		{
+			b2 = Coord(0, a2[2], -a2[1]);
+			b2 = b2.normalize();
+		}
+		else if (abs(a2[0]) > EPSILON)
+		{
+			b2 = Coord(a2[2], 0, -a2[0]);
+			b2 = b2.normalize();
+		}
+		c2 = b2.cross(a2);
+		c2 = c2.normalize();
+
+		Real C_min = 0.0;
+		Real C_max = 0.0;
+		int baseIndex = tId * constraint_size + begin_index;
+
+		if (joints[tId].useRange)
+		{
+			Real theta = rotation_q[idx2].angle(rotation_q[idx1]);
+
+			Quat q_rot = rotation_q[idx2] * rotation_q[idx1].inverse();
+
+			if (a1.dot(Coord(q_rot.x, q_rot.y, q_rot.z)) < 0)
+			{
+				theta = -theta;
+			}
+
+
+			C_min = theta - joints[tId].d_min;
+			C_max = joints[tId].d_max - theta;
+
+			if (C_min < 0)
+			{
+				constraints[baseIndex + 5].isValid = true;
+			}
+			else
+				constraints[baseIndex + 5].isValid = false;
+
+			if (C_max < 0)
+			{
+				constraints[baseIndex + 6].isValid = true;
+			}
+			else
+				constraints[baseIndex + 6].isValid = false;
+		}
+
+
+		for (int i = 0; i < constraint_size; i++)
+		{
+			constraints[baseIndex + i].bodyId1 = idx1;
+			constraints[baseIndex + i].bodyId2 = idx2;
+			constraints[baseIndex + i].axis = a1;
+			constraints[baseIndex + i].normal1 = r1;
+			constraints[baseIndex + i].normal2 = r2;
+			constraints[baseIndex + i].pos1 = b2;
+			constraints[baseIndex + i].pos2 = c2;
+			constraints[baseIndex + i].d_min = C_min > 0 ? 0 : C_min;
+			constraints[baseIndex + i].d_max = C_max > 0 ? 0 : C_max;
+		}
+
+		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_EQUAL_1;
+		constraints[baseIndex + 1].type = ConstraintType::CN_ANCHOR_EQUAL_2;
+		constraints[baseIndex + 2].type = ConstraintType::CN_ANCHOR_EQUAL_3;
+		constraints[baseIndex + 3].type = ConstraintType::CN_ALLOW_ROT1D_1;
+		constraints[baseIndex + 4].type = ConstraintType::CN_ALLOW_ROT1D_2;
+		constraints[baseIndex + 5].type = ConstraintType::CN_JOINT_HINGE_MIN;
+		constraints[baseIndex + 6].type = ConstraintType::CN_JOINT_HINGE_MAX;
+
+	}
+
+	template<typename Joint, typename Constraint, typename Coord>
+	__global__ void NGS_setUpPointJoint(
+		DArray<Joint> joints,
+		DArray<Constraint> constraints,
+		DArray<Coord> pos,
+		int begin_index
+	)
+	{
+		int tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= joints.size())
+			return;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+
+		int baseIndex = 3 * tId + begin_index;
+
+		for (int i = 0; i < 3; i++)
+		{
+			constraints[baseIndex + i].bodyId1 = idx1;
+			constraints[baseIndex + i].bodyId2 = idx2;
+			constraints[baseIndex + i].normal1 = pos[idx1] - joints[tId].anchorPoint;
+		}
+
+		constraints[baseIndex].type = ConstraintType::CN_JOINT_NO_MOVE_1;
+		constraints[baseIndex + 1].type = ConstraintType::CN_JOINT_NO_MOVE_2;
+		constraints[baseIndex + 2].type = ConstraintType::CN_JOINT_NO_MOVE_3;
+
+	}
+
+	template<typename Joint, typename Constraint, typename Matrix>
+	__global__ void NGS_setUpFixedJoint(
+		DArray<Joint> joints,
+		DArray<Constraint> constraints,
+		DArray<Matrix> rotMat,
+		int begin_index
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+
+		if (tId >= joints.size())
+			return;
+
+		int idx1 = joints[tId].bodyId1;
+		int idx2 = joints[tId].bodyId2;
+		Vector<Real, 3> r1 = rotMat[idx1] * joints[tId].r1;
+		Vector<Real, 3> r2 = rotMat[idx2] * joints[tId].r2;
+
+		int baseIndex = 6 * tId + begin_index;
+		for (int i = 0; i < 6; i++)
+		{
+			constraints[baseIndex + i].bodyId1 = idx1;
+			constraints[baseIndex + i].bodyId2 = idx2;
+			constraints[baseIndex + i].normal1 = r1;
+			constraints[baseIndex + i].normal2 = r2;
+		}
+
+		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_EQUAL_1;
+		constraints[baseIndex + 1].type = ConstraintType::CN_ANCHOR_EQUAL_2;
+		constraints[baseIndex + 2].type = ConstraintType::CN_ANCHOR_EQUAL_3;
+		constraints[baseIndex + 3].type = ConstraintType::CN_BAN_ROT_1;
+		constraints[baseIndex + 4].type = ConstraintType::CN_BAN_ROT_2;
+		constraints[baseIndex + 5].type = ConstraintType::CN_BAN_ROT_3;
+	}
+
+	template<typename Coord, typename Constraint>
+	__global__ void NGS_takeOneJacobiIteration(
+		DArray<Real> lambda,
+		DArray<Coord> impulse,
+		DArray<Real> d,
+		DArray<Coord> J,
+		DArray<Coord> B,
+		DArray<Real> eta,
+		DArray<Real> mass,
+		DArray<Constraint> constraints,
+		DArray<int> nbq,
+		DArray<int> jointNumber,
+		Real mu,
+		Real g,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= constraints.size())
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		double tmp = eta[tId];
+
+		tmp -= J[4 * tId].dot(impulse[idx1 * 2]);
+		tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]);
+
+		if (idx2 != INVALID)
+		{
+			tmp -= J[4 * tId + 2].dot(impulse[idx2 * 2]);
+			tmp -= J[4 * tId + 3].dot(impulse[idx2 * 2 + 1]);
+		}
+
+		if (d[tId] > EPSILON)
+		{
+			int stepInverse = 0;
+			if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+			{
+				if (idx2 != INVALID)
+				{
+					stepInverse = nbq[idx1] > nbq[idx2] ? nbq[idx1] : nbq[idx2];
+				}
+				else
+				{
+					stepInverse = nbq[idx1];
+				}
+			}
+
+			else
+			{
+				if (idx2 != INVALID)
+				{
+					stepInverse += 4 * jointNumber[idx2];
+				}
+
+				stepInverse += 4 * jointNumber[idx1];
+			}
+
+			stepInverse = stepInverse < 1 ? 1 : stepInverse;
+
+			double delta_lambda = (tmp / (d[tId] * stepInverse));
+			double lambda_new = lambda[tId] + delta_lambda;
+
+			// Projection to Bound
+			if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+			{
+				if (lambda_new < 0)
+				{
+					lambda_new = 0;
+					delta_lambda = lambda_new - lambda[tId];
+				}
+			}
+
+
+
+			lambda[tId] += delta_lambda;
+
+			atomicAdd(&impulse[idx1 * 2][0], B[4 * tId][0] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2][1], B[4 * tId][1] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2][2], B[4 * tId][2] * delta_lambda);
+
+			atomicAdd(&impulse[idx1 * 2 + 1][0], B[4 * tId + 1][0] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2 + 1][1], B[4 * tId + 1][1] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2 + 1][2], B[4 * tId + 1][2] * delta_lambda);
+
+			if (idx2 != INVALID)
+			{
+				atomicAdd(&impulse[idx2 * 2][0], B[4 * tId + 2][0] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2][1], B[4 * tId + 2][1] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2][2], B[4 * tId + 2][2] * delta_lambda);
+
+				atomicAdd(&impulse[idx2 * 2 + 1][0], B[4 * tId + 3][0] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2 + 1][1], B[4 * tId + 3][1] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2 + 1][2], B[4 * tId + 3][2] * delta_lambda);
+			}
+		}
+	}
+
+		template<typename Contact, typename Coord, typename Matrix>
+		__global__ void NGS_setUpContactsInLocalFrame(
+			DArray<Contact> contactsInLocalFrame,
+			DArray<Contact> contactsInGlobalFrame,
+			DArray<Coord> center,
+			DArray<Matrix> rot)
+		{
+			int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+			if (tId >= contactsInGlobalFrame.size())
+				return;
+
+			Contact globalC = contactsInGlobalFrame[tId];
+
+			int idx1 = globalC.bodyId1;
+			int idx2 = globalC.bodyId2;
+
+			Contact localC;
+			localC.bodyId1 = globalC.bodyId1;
+			localC.bodyId2 = globalC.bodyId2;
+
+			localC.interpenetration = globalC.interpenetration;
+			localC.contactType = globalC.contactType;
+
+			Coord c1 = center[idx1];
+			Matrix rot1 = rot[idx1];
+
+			if (idx2 != INVALID)
+			{
+				Coord c2 = center[idx2];
+				Matrix rot2 = rot[idx2];
+				localC.pos1 = rot1.transpose() * (globalC.pos1 - globalC.normal1 * globalC.interpenetration - c1);
+				localC.normal1 = rot1.transpose() * globalC.normal1;
+				localC.pos2 = rot2.transpose() * (globalC.pos1 - c2);
+				localC.normal2 = -rot2.transpose() * globalC.normal1;
+			}
+			else
+			{
+				localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
+				localC.normal1 = rot1.transpose() * globalC.normal1;
+
+				localC.pos2 = globalC.pos1 + globalC.normal1 * globalC.interpenetration;
+				localC.normal2 = -globalC.normal1;
+			}
+
+			contactsInLocalFrame[tId] = localC;
+		}
+
 	template <typename Real, typename Coord, typename Quat>
 	__global__ void ICS_UpdateVelocityForPositionSolver(
 		DArray<Coord> velocity,
@@ -1839,7 +2808,16 @@ namespace dyno
 				dt);
 		}
 
-		//this->varIterationNumberForVelocitySolver()->setValue(0);
+		if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
+			mContactsInLocalFrame.resize(this->inContacts()->size());
+		}
+
+		cuExecute(this->inContacts()->size(),
+			NGS_setUpContactsInLocalFrame,
+			mContactsInLocalFrame,
+			this->inContacts()->getData(),
+			this->inCenter()->getData(),
+			this->inRotationMatrix()->getData());
 
 		//Velocity solver
 		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
@@ -1867,17 +2845,6 @@ namespace dyno
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt);
-
-// 				cuExecute(constraint_size,
-// 					calculateDiff,
-// 					mLambda,
-// 					mLambda_old,
-// 					mDiff);
-// 				mDiffHost.assign(mDiff);
-// 				Real change = calculateNorm(mDiffHost);
-// 				mLambda_old.assign(mLambda);
-// 				if (change < EPSILON)
-// 					break;
 			}
 		}
 
@@ -1916,7 +2883,7 @@ namespace dyno
 				this->inContacts()->getData(),
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData());
-			for (size_t ngs = 0; ngs < 5; ngs++)
+			for (size_t ngs = 0; ngs < this->varIterationNumberForPositionSolver()->getData(); ngs++)
 			{
 				mImpulseC.reset();
 				mLambda.reset();

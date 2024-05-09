@@ -86,7 +86,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->addBox(box5, rigidbody, 100);
 	jeep->addBox(box6, rigidbody, 100);
 
-	Real wheel_velocity = 50;
+	Real wheel_velocity = 100;
 
 	jeep->addCapsule(capsule1, rigidbody, 1);
 	jeep->addCapsule(capsule2, rigidbody, 1);
