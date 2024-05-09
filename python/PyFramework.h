@@ -5,6 +5,7 @@
 #include "FInstance.h"
 #include "Field.h"
 #include "Module/VisualModule.h"
+#include "Module/VisualModule.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
 #include "Module/MouseInputModule.h"
@@ -39,7 +40,7 @@
 #include "SceneGraph.h"
 #include "Log.h"
 
-#include "Color.h"  
+#include "Color.h"
 #include "FilePath.h"
 
 #include "Auxiliary/DataSource.h"
@@ -232,8 +233,6 @@ void declare_vector_3_source(py::module& m, std::string typestr) {
 		.def("var_value", &Class::varValue, py::return_value_policy::reference)
 		.def("out_coord", &Class::outCoord, py::return_value_policy::reference);
 }
-
-
 
 //Init_static_plugin  - for example_3 WaterPouring
 #include "initializeModeling.h"

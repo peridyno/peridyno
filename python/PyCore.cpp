@@ -1,6 +1,5 @@
 #include "PyCore.h"
 
-
 void pybind_core(py::module& m)
 {
 	py::class_<dyno::CTimer>(m, "CTimer")
@@ -24,6 +23,8 @@ void pybind_core(py::module& m)
 	// 	declare_matrix<double, 2>(m, "2d");
 	// 	declare_matrix<double, 3>(m, "3d");
 	// 	declare_matrix<double, 4>(m, "4d");
+
+	declare_quat<float>(m, "1f");
 
 	typedef  dyno::Vector<Real, 2> Coord2D;
 	typedef  dyno::Vector<Real, 3> Coord3D;

@@ -21,6 +21,37 @@ void declare_contacts_union(py::module& m, std::string typestr) {
 		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
+#include "RigidBody/IterativeConstraintSolver.h"
+template <typename TDataType>
+void declare_iterative_constraint_solver(py::module& m, std::string typestr) {
+	using Class = dyno::IterativeConstraintSolver<TDataType>;
+	using Parent = dyno::ConstraintModule;
+	std::string pyclass_name = std::string("IterativeConstraintSolver") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
+		.def("var_iteration_number", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
+		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("in_ball_and_socket_joints", &Class::inBallAndSocketJoints, py::return_value_policy::reference)
+		.def("in_slider_joints", &Class::inSliderJoints, py::return_value_policy::reference)
+		.def("in_hinge_joints", &Class::inHingeJoints, py::return_value_policy::reference)
+		.def("in_fixed_joints", &Class::inFixedJoints, py::return_value_policy::reference)
+		.def("in_point_joints", &Class::inPointJoints, py::return_value_policy::reference);
+	;
+}
 
 template <typename TDataType>
 void declare_rigid_body(py::module& m, std::string typestr) {
@@ -98,9 +129,25 @@ void declare_rigid_mesh(py::module& m, std::string typestr) {
 		.def("state_mesh", &Class::stateMesh, py::return_value_policy::reference);
 }
 
+#include "RigidBody/Vechicle.h"
+template <typename TDataType>
+void declare_vechicle(py::module& m, std::string typestr) {
+	using Class = dyno::Vechicle<TDataType>;
+	using Parent = dyno::RigidBodySystem<TDataType>;
+	std::string pyclass_name = std::string("Vechicle") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("bind", &Class::bind)
+		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
+		.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference)
+		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
+}
+
 // class: TContactPair      - For Examples_1: QT_Bricks
 template<typename Real>
-void declare_collisionData_TContactPair(py::module& m, std::string typestr) {
+void declare_collision_data_t_contact_pair(py::module& m, std::string typestr) {
 	using Class = dyno::TContactPair<Real>;
 
 	std::string pyclass_name = std::string("TContactPair") + typestr;
@@ -116,6 +163,8 @@ void declare_collisionData_TContactPair(py::module& m, std::string typestr) {
 		.def_readwrite("normal2", &Class::normal2)
 		.def_readwrite("contactType", &Class::contactType);
 }
+
+void declare_simple_vechicle_driver(py::module& m);
 
 void declare_rigid_body_info(py::module& m, std::string typestr);
 

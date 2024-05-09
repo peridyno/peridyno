@@ -21,6 +21,8 @@ rigid = dyno.RigidBodySystem3f()
 
 rigidBody = dyno.RigidBodyInfo()
 rigidBody.linear_velocity = dyno.Vector3f([0.5, 0, 0])
+
+rigidBody.collisionMask = dyno.CollisionMask.CT_BoxOnly
 box = dyno.BoxInfo()
 for i in range(8, 1, -1):
     for j in range(i + 1):
@@ -34,6 +36,7 @@ sphere.center = dyno.Vector3f([0.5, 0.75, 0.5])
 sphere.radius = 0.025
 
 rigidSphere = dyno.RigidBodyInfo()
+rigidSphere.collisionMask = dyno.CollisionMask.CT_SphereOnly
 rigid.add_sphere(sphere, rigidSphere)
 
 sphere.center = dyno.Vector3f([0.5, 0.95, 0.5])
@@ -63,30 +66,6 @@ sRender.set_alpha(0.5)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 
-elementQuery = dyno.NeighborElementQuery3f()
-rigid.state_topology().connect(elementQuery.in_discrete_elements())
-rigid.state_collision_mask().connect(elementQuery.in_collision_mask())
-rigid.graphics_pipeline().push_module(elementQuery)
-
-contactMapper = dyno.ContactsToEdgeSet3f()
-elementQuery.out_contacts().connect(contactMapper.in_contacts())
-contactMapper.var_scale().set_value(0.02)
-rigid.graphics_pipeline().push_module(contactMapper)
-
-wireRender = dyno.GLWireframeVisualModule()
-wireRender.set_color(dyno.Color(0, 0, 1))
-contactMapper.out_edge_set().connect(wireRender.in_edge_set())
-rigid.graphics_pipeline().push_module(wireRender)
-
-contactPointMapper = dyno.ContactsToPointSet3f()
-elementQuery.out_contacts().connect(contactPointMapper.in_contacts())
-rigid.graphics_pipeline().push_module(contactPointMapper)
-
-pointRender = dyno.GLPointVisualModule()
-pointRender.set_color(dyno.Color(1, 0, 0))
-pointRender.var_point_size().set_value(0.003)
-contactPointMapper.out_point_set().connect(pointRender.in_point_set())
-rigid.graphics_pipeline().push_module(pointRender)
 
 scn.add_node(rigid)
 

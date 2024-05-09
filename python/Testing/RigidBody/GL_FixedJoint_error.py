@@ -18,40 +18,25 @@ def filePath(str):
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
-
+newBox = oldBox = dyno.BoxInfo()
 rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([0.5, 0, 0])
-box = dyno.BoxInfo()
-for i in range(8, 1, -1):
-    for j in range(i + 1):
-        box.center = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [0.5, 1.1 - 0.13 * i, 0.12 + 0.21 * j + 0.1 * (8 - i)])
-        box.half_length = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f([0.065, 0.065, 0.1])
-        rigid.add_box(box, rigidBody)
+rigidBody.linear_velocity = dyno.Vector3f([1, 0.0, 1.0])
 
-sphere = dyno.SphereInfo()
-sphere.center = dyno.Vector3f([0.5, 0.75, 0.5])
-sphere.radius = 0.025
+oldBox.center = dyno.Vector3f([0, 0.1, 0])
+oldBox.half_length = dyno.Vector3f([0.02, 0.02, 0.02])
+rigid.add_box(oldBox, rigidBody)
 
-rigidSphere = dyno.RigidBodyInfo()
-rigid.add_sphere(sphere, rigidSphere)
+rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
 
-sphere.center = dyno.Vector3f([0.5, 0.95, 0.5])
-sphere.radius = 0.025
-rigid.add_sphere(sphere, rigidSphere)
-
-sphere.center = dyno.Vector3f([0.5, 0.65, 0.5])
-sphere.radius = 0.05
-rigid.add_sphere(sphere, rigidSphere)
-
-tet = dyno.TetInfo()
-tet.v = [
-    dyno.Vector3f([0.5, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.2, 0.5]),
-    dyno.Vector3f([0.6, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.1, 0.6]),
-]
-rigid.add_tet(tet, rigidSphere)
+for i in range(10):
+    newBox.center = oldBox.center + dyno.Vector3f([0.0, 0.05, 0.0])
+    newBox.half_length = oldBox.half_length
+    rigid.add_box(newBox, rigidBody)
+    joint = dyno.FixedJointf(i, i + 1)
+    joint.set_anchor_point(oldBox.center + dyno.Vector3f([0, 0.025, 0]), oldBox.center, newBox.center, oldBox.rot,
+                           newBox.rot)
+    rigid.add_fixed_joint(joint)
+    oldBox = newBox
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
@@ -59,7 +44,7 @@ rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
 sRender.set_color(dyno.Color(1, 1, 0))
-sRender.set_alpha(0.5)
+sRender.set_alpha(1.0)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 

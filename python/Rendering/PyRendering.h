@@ -7,6 +7,7 @@
 #include <GLSurfaceVisualModule.h>
 #include "glad/glad.h"
 #include "Topology/TriangleSet.h"
+#include "Backend/Cuda/Module/RenderTools.h"
 using namespace dyno;
 
 /**
@@ -45,5 +46,17 @@ void declare_surface_visual_module(py::module& m, std::string typestr);
 void declare_gl_wireframe_visual_module(py::module& m);
 
 void declare_rednder_window(py::module& m);
+
+void declare_construct_tangent_space(py::module& m);
+
+void declare_gl_element_visual_module(py::module& m);
+
+void declare_gl_instance_visual_module(py::module& m);
+
+void declare_gl_element_visual_module(py::module& m);
+
+void declare_gl_photorealistic_render(py::module& m);
+
+void declare_gl_photorealistic_instance_render(py::module& m);
 
 void pybind_rendering(py::module& m);

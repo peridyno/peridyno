@@ -89,6 +89,64 @@ void declare_rednder_window(py::module& m) {
 		.value("PRIMITIVE_MODE", Class::SelectionMode::PRIMITIVE_MODE);
 }
 
+//backend-module
+#include "Backend/Cuda/Module/ConstructTangentSpace.h"
+void declare_construct_tangent_space(py::module& m) {
+	using Class = dyno::ConstructTangentSpace;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("ConstructTangentSpace");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("out_normal", &Class::outNormal, py::return_value_policy::reference)
+		.def("out_tangent", &Class::outTangent, py::return_value_policy::reference)
+		.def("out_bitangent", &Class::outBitangent, py::return_value_policy::reference);
+}
+
+#include "Backend/Cuda/Module/GLElementVisualModule.h"
+void declare_gl_element_visual_module(py::module& m) {
+	using Class = dyno::GLElementVisualModule;
+	using Parent = dyno::GLVisualModule;
+	std::string pyclass_name = std::string("GLElementVisualModule");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference);
+}
+
+#include "Backend/Cuda/Module/GLInstanceVisualModule.h"
+void declare_gl_instance_visual_module(py::module& m) {
+	using Class = dyno::GLInstanceVisualModule;
+	using Parent = dyno::GLSurfaceVisualModule;
+	std::string pyclass_name = std::string("GLInstanceVisualModule");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("caption", &Class::caption)
+		.def("in_instance_transform", &Class::inInstanceTransform, py::return_value_policy::reference)
+		.def("in_instance_color", &Class::inInstanceColor, py::return_value_policy::reference);
+}
+
+#include "Backend/Cuda/Module/GLPhotorealisticRender.h"
+void declare_gl_photorealistic_render(py::module& m) {
+	using Class = dyno::GLPhotorealisticRender;
+	using Parent = dyno::GLVisualModule;
+	std::string pyclass_name = std::string("GLPhotorealisticRender");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("caption", &Class::caption)
+		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference);
+}
+
+#include "Backend/Cuda/Module/GLPhotorealisticInstanceRender.h"
+void declare_gl_photorealistic_instance_render(py::module& m) {
+	using Class = dyno::GLPhotorealisticInstanceRender;
+	using Parent = dyno::GLPhotorealisticRender;
+	std::string pyclass_name = std::string("GLPhotorealisticInstanceRender");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("caption", &Class::caption)
+		.def("in_transform", &Class::inTransform, py::return_value_policy::reference);
+}
+
 void pybind_rendering(py::module& m)
 {
 	py::class_<GLVisualModule, VisualModule, std::shared_ptr<GLVisualModule>>GLVM(m, "GLVisualModule");
@@ -113,4 +171,18 @@ void pybind_rendering(py::module& m)
 	declare_gl_wireframe_visual_module(m);
 
 	declare_rednder_window(m);
+
+	declare_construct_tangent_space(m);
+
+	declare_gl_element_visual_module(m);
+
+	declare_gl_instance_visual_module(m);
+
+	declare_gl_photorealistic_render(m);
+
+	declare_gl_photorealistic_instance_render(m);
+
+	py::class_<RenderTools, std::shared_ptr<RenderTools>>(m, "RenderTools")
+		.def(py::init<>())
+		.def("setup_color", &RenderTools::setupColor);
 }

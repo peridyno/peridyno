@@ -39,7 +39,6 @@ void declare_edgeSet(py::module& m, std::string typestr) {
 		.def("is_empty", &Class::isEmpty)
 		.def("clear", &Class::clear)
 		.def("load_smesh_file", &Class::loadSmeshFile);
-
 }
 
 #include "Topology/TriangleSet.h"
@@ -181,7 +180,154 @@ void declare_neighbor_point_query(py::module& m, std::string typestr) {
 		.value("OCTREE", Class::Spatial::OCTREE);
 }
 
+#include "Collision/NeighborTriangleQuery.h"
+template<typename TDataType>
+void declare_neighbor_triangle_query(py::module& m, std::string typestr) {
+	using Class = dyno::NeighborTriangleQuery<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("NeighborTriangleQuery") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>NTQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	NTQ.def(py::init<>())
+		.def("var_spatial", &Class::varSpatial, py::return_value_policy::reference)
+		.def("in_radius", &Class::inRadius, py::return_value_policy::reference)
+		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("out_neighbor_ids", &Class::outNeighborIds, py::return_value_policy::reference);
 
+	py::enum_<typename Class::Spatial>(NTQ, "Spatial")
+		.value("BVH", Class::Spatial::BVH)
+		.value("OCTREE", Class::Spatial::OCTREE);
+}
 
+#include "Collision/CalculateBoundingBox.h"
+template<typename TDataType>
+void declare_calculate_bounding_box(py::module& m, std::string typestr) {
+	using Class = dyno::CalculateBoundingBox<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("CalculateBoundingBox") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("compute", &Class::compute)
+		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("out_aabb", &Class::outAABB, py::return_value_policy::reference);
+}
+
+#include "Collision/CollisionDetectionBroadPhase.h"
+template<typename TDataType>
+void declare_collision_detection_broad_phase(py::module& m, std::string typestr) {
+	using Class = dyno::CollisionDetectionBroadPhase<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("CollisionDetectionBroadPhase") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>CDBP(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	CDBP.def(py::init<>())
+		.def("var_acceleration_structure", &Class::varAccelerationStructure, py::return_value_policy::reference)
+		.def("var_grid_size_limit", &Class::varGridSizeLimit, py::return_value_policy::reference)
+		.def("var_self_collision", &Class::varSelfCollision, py::return_value_policy::reference)
+		.def("in_source", &Class::inSource, py::return_value_policy::reference)
+		.def("in_target", &Class::inTarget, py::return_value_policy::reference)
+		.def("out_contact_list", &Class::outContactList, py::return_value_policy::reference);
+
+	py::enum_<typename Class::EStructure>(CDBP, "EStructure")
+		.value("BVH", Class::EStructure::BVH)
+		.value("Octree", Class::EStructure::Octree);
+}
+
+#include "Collision/CollistionDetectionBoundingBox.h"
+template<typename TDataType>
+void declare_collistion_detection_bounding_box(py::module& m, std::string typestr) {
+	using Class = dyno::CollistionDetectionBoundingBox<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("CollistionDetectionBoundingBox") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_upper_bound", &Class::varUpperBound, py::return_value_policy::reference)
+		.def("var_lower_bound", &Class::varLowerBound, py::return_value_policy::reference)
+		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
+}
+
+#include "Collision/CollistionDetectionTriangleSet.h"
+template<typename TDataType>
+void declare_collistion_detection_triangle_set(py::module& m, std::string typestr) {
+	using Class = dyno::CollistionDetectionTriangleSet<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("CollistionDetectionTriangleSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
+}
+
+#include "Topology/Joint.h"
+template<typename Real>
+void declare_joint(py::module& m, std::string typestr) {
+	using Class = dyno::Joint<Real>;
+	std::string pyclass_name = std::string("Joint") + typestr;
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int, int>());
+}
+
+template<typename Real>
+void declare_ball_and_socket_joint(py::module& m, std::string typestr) {
+	using Class = dyno::BallAndSocketJoint<Real>;
+	using Parent = dyno::Joint<Real>;
+	std::string pyclass_name = std::string("BallAndSocketJoint") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int, int>())
+		.def("set_anchor_point", &Class::setAnchorPoint);
+}
+
+template<typename Real>
+void declare_slider_joint(py::module& m, std::string typestr) {
+	using Class = dyno::SliderJoint<Real>;
+	using Parent = dyno::Joint<Real>;
+	std::string pyclass_name = std::string("SliderJoint") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int, int>())
+		.def("set_anchor_point", &Class::setAnchorPoint)
+		.def("set_axis", &Class::setAxis)
+		.def("set_moter", &Class::setMoter)
+		.def("set_range", &Class::setRange);
+}
+
+template<typename Real>
+void declare_hinge_joint(py::module& m, std::string typestr) {
+	using Class = dyno::HingeJoint<Real>;
+	using Parent = dyno::Joint<Real>;
+	std::string pyclass_name = std::string("HingeJoint") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int, int>())
+		.def("set_anchor_point", &Class::setAnchorPoint)
+		.def("set_axis", &Class::setAxis)
+		.def("set_moter", &Class::setMoter)
+		.def("set_range", &Class::setRange);
+}
+
+template<typename Real>
+void declare_fixed_joint(py::module& m, std::string typestr) {
+	using Class = dyno::FixedJoint<Real>;
+	using Parent = dyno::Joint<Real>;
+	std::string pyclass_name = std::string("FixedJoint") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int, int>())
+		.def("set_anchor_point", &Class::setAnchorPoint);
+}
+
+template<typename Real>
+void declare_point_joint(py::module& m, std::string typestr) {
+	using Class = dyno::PointJoint<Real>;
+	using Parent = dyno::Joint<Real>;
+	std::string pyclass_name = std::string("PointJoint") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int>())
+		.def("set_anchor_point", &Class::setAnchorPoint);
+}
 
 void pybind_topology(py::module& m);
