@@ -59,6 +59,8 @@ namespace dyno
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
 
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
+
+		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()

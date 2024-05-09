@@ -40,6 +40,9 @@ namespace dyno
 	public:
 		virtual std::string caption() override;
 
+	public:
+		DEF_VAR(uint, MaterialIndex, 0, "");
+
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 
 	protected:

@@ -1284,10 +1284,9 @@ namespace dyno
 			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
 
 			reMats[matId] = std::make_shared<Material>();
-			reMats[matId]->ambient = { 0,0,0 };
-			reMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
+			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
 			reMats[matId]->alpha = color[3];
-			reMats[matId]->specular = Vec3f(1 - roughness);
+			reMats[matId]->metallic = metallic;
 			reMats[matId]->roughness = roughness;
 
 			std::string colorUri = getTexUri(textures, images, colorTexId);
