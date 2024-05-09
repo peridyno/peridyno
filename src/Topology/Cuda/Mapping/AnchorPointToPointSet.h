@@ -3,7 +3,7 @@
 
 #include "Collision/CollisionData.h"
 #include "Topology/PointSet.h"
-#include "Topology/Joint.h"
+#include "Topology/DiscreteElements.h"
 
 
 namespace dyno

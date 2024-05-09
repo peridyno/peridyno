@@ -1,6 +1,5 @@
 #include "IterativeConstraintSolver.h"
 
-
 namespace dyno
 {
 	IMPLEMENT_TCLASS(IterativeConstraintSolver, TDataType)

@@ -18,7 +18,8 @@
  */
 #pragma once
 #include "Module/ConstraintModule.h"
-#include "RigidBodyShared.h"
+#include "RigidBody/RigidBodyShared.h"
+
 #include "Topology/Joint.h"
 
 namespace dyno

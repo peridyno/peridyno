@@ -18,7 +18,7 @@
 #include "Collision/CollisionData.h"
 
 #include "Module/ComputeModule.h"
-#include "Topology/Joint.h"
+#include "Topology/DiscreteElements.h"
 
 namespace dyno 
 {

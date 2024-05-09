@@ -2,13 +2,12 @@
 
 #include "Module/SimpleVechicleDriver.h"
 #include "Module/SharedFuncsForRigidBody.h"
+#include "Module/ContactsUnion.h"
+#include "Module/IterativeConstraintSolver.h"
 
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
 #include "Collision/CollistionDetectionTriangleSet.h"
-
-#include "ContactsUnion.h"
-#include "IterativeConstraintSolver.h"
 
 namespace dyno
 {
@@ -97,56 +96,51 @@ namespace dyno
 
 		int sizeOfRigids = topo->totalSize();
 
-		this->stateBinding()->resize(sizeOfRigids);
-		this->stateBindingTag()->resize(sizeOfRigids);
-
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		uint N = texMesh->shapes().size();
 
 		CArrayList<Transform3f> tms;
-		tms.resize(N, 1);
+		CArray<uint> instanceNum(N);
+		instanceNum.reset();
 
+		//Calculate instance number
+		for (uint i = 0; i < mBindingPair.size(); i++)
+		{
+			instanceNum[mBindingPair[i].first]++;
+		}
+		tms.resize(instanceNum);
+
+		//Initialize CArrayList
 		for (uint i = 0; i < N; i++)
 		{
-			tms[i].insert(texMesh->shapes()[i]->boundingTransform);
+			for (uint j = 0; j < instanceNum[i]; j++)
+			{
+				tms[i].insert(Transform3f());
+			}
 		}
 
-		if (this->stateInstanceTransform()->isEmpty())
-		{
-			this->stateInstanceTransform()->allocate();
-		}
+		this->stateInstanceTransform()->assign(tms);
 
-		auto instantanceTransform = this->stateInstanceTransform()->getDataPtr();
-		instantanceTransform->assign(tms);
-
-		tms.clear();
-
-		auto binding = this->stateBinding()->getDataPtr();
-		auto bindingtag = this->stateBindingTag()->getDataPtr();
-
+		auto deTopo = this->stateTopology()->constDataPtr();
+		auto offset = deTopo->calculateElementOffset();
 
 		std::vector<Pair<uint, uint>> bindingPair(sizeOfRigids);
 		std::vector<int> tags(sizeOfRigids, 0);
 
 		for (int i = 0; i < mBindingPair.size(); i++)
 		{
-			bindingPair[mBodyId[i]] = mBindingPair[i];
-			tags[mBodyId[i]] = 1;
+			auto actor = mActors[i];
+			int idx = actor->idx + offset.checkElementOffset(actor->shapeType);
+
+			bindingPair[idx] = mBindingPair[i];
+			tags[idx] = 1;
 		}
 
-		binding->assign(bindingPair);
-		bindingtag->assign(tags);
+		mBindingPairDevice.assign(bindingPair);
+		mBindingTagDevice.assign(tags);
 
 		mInitialRot.assign(this->stateRotationMatrix()->constData());
-
-	}
-
-	template<typename TDataType>
-	void Vechicle<TDataType>::updateStates()
-	{
-		RigidBodySystem<TDataType>::updateStates();
-
 
 		ApplyTransform(
 			this->stateInstanceTransform()->getData(),
@@ -154,15 +148,30 @@ namespace dyno
 			this->stateCenter()->getData(),
 			this->stateRotationMatrix()->getData(),
 			mInitialRot,
-			this->stateBinding()->getData(),
-			this->stateBindingTag()->getData());
+			mBindingPairDevice,
+			mBindingTagDevice);
 	}
 
 	template<typename TDataType>
-	void Vechicle<TDataType>::bind(uint bodyId, Pair<uint, uint> shapeId)
+	void Vechicle<TDataType>::updateStates()
 	{
+		RigidBodySystem<TDataType>::updateStates();
+
+		ApplyTransform(
+			this->stateInstanceTransform()->getData(),
+			this->stateOffset()->getData(),
+			this->stateCenter()->getData(),
+			this->stateRotationMatrix()->getData(),
+			mInitialRot,
+			mBindingPairDevice,
+			mBindingTagDevice);
+	}
+
+	template<typename TDataType>
+	void Vechicle<TDataType>::bind(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId)
+	{
+		mActors.push_back(actor);
 		mBindingPair.push_back(shapeId);
-		mBodyId.push_back(bodyId);
 	}
 
 	DEFINE_CLASS(Vechicle);

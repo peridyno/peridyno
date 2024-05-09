@@ -3,11 +3,11 @@
 #include "Primitive/Primitive3D.h"
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
-#include "IterativeConstraintSolver.h"
+
+#include "RigidBody/Module/IterativeConstraintSolver.h"
 
 //Module headers
-#include "ContactsUnion.h"
-
+#include "RigidBody/Module/ContactsUnion.h"
 
 namespace dyno
 {
@@ -100,7 +100,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addBox(
+	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addBox(
 		const BoxInfo& box,
 		const RigidBodyInfo& bodyDef, 
 		const Real density)
@@ -127,10 +127,18 @@ namespace dyno
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
 		mHostBoxes.push_back(b);
+
+		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
+		actor->idx = mHostBoxes.size() - 1;
+		actor->shapeType = ET_BOX;
+		actor->center = bd.position;
+		actor->rot = b.rot;
+		
+		return actor;
 	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addSphere(
+	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addSphere(
 		const SphereInfo& sphere, 
 		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
@@ -155,6 +163,14 @@ namespace dyno
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
 		mHostSpheres.push_back(b);
+
+		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
+		actor->idx = mHostSpheres.size() - 1;
+		actor->shapeType = ET_SPHERE;
+		actor->center = bd.position;
+		actor->rot = b.rot;
+
+		return actor;
 	}
 
 	template<typename TDataType>
@@ -168,7 +184,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addTet(
+	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addTet(
 		const TetInfo& tetInfo,
 		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
@@ -205,10 +221,18 @@ namespace dyno
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
 		mHostTets.push_back(tetInfo);
+
+		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
+		actor->idx = mHostTets.size() - 1;
+		actor->shapeType = ET_TET;
+		actor->center = bd.position;
+		actor->rot = Quat<Real>();
+
+		return actor;
 	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addCapsule(
+	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addCapsule(
 		const CapsuleInfo& capsule,
 		const RigidBodyInfo& bodyDef, 
 		const Real density /*= Real(100)*/)
@@ -247,6 +271,14 @@ namespace dyno
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), bd);
 		mHostCapsules.push_back(b);
+
+		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
+		actor->idx = mHostCapsules.size() - 1;
+		actor->shapeType = ET_CAPSULE;
+		actor->center = bd.position;
+		actor->rot = b.rot;
+
+		return actor;
 	}
 
 	template<typename TDataType>
@@ -260,6 +292,7 @@ namespace dyno
 	{
 		mHostJointsSlider.push_back(joint);
 	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::addHingeJoint(const HingeJoint& joint)
 	{
@@ -370,6 +403,22 @@ namespace dyno
 		cap3d[tId].halfLength = capInfo[tId].halfLength;
 	}
 
+	template<typename Joint>
+	__global__ void UpdateJointIndices(
+		DArray<Joint> joints,
+		ElementOffset offset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= joints.size()) return;
+
+		Joint joint = joints[tId];
+
+		joint.bodyId1 += offset.checkElementOffset(joint.bodyType1);
+		joint.bodyId2 += offset.checkElementOffset(joint.bodyType2);
+
+		joints[tId] = joint;
+	}
+
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::resetStates()
 	{
@@ -379,12 +428,6 @@ namespace dyno
 		mDeviceSpheres.assign(mHostSpheres);
 		mDeviceTets.assign(mHostTets);
 		mDeviceCapsules.assign(mHostCapsules);
-
-		this->stateBallAndSocketJoints()->assign(mHostJointsBallAndSocket);
-		this->stateSliderJoints()->assign(mHostJointsSlider);
-		this->stateHingeJoints()->assign(mHostJointsHinge);
-		this->stateFixedJoints()->assign(mHostJointsFixed);
-		this->statePointJoints()->assign(mHostJointsPoint);
 
 		auto& boxes = topo->getBoxes();
 		auto& spheres = topo->getSpheres();
@@ -452,12 +495,40 @@ namespace dyno
 		this->stateInitialInertia()->resize(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
-		updateTopology();
+		this->stateBallAndSocketJoints()->assign(mHostJointsBallAndSocket);
+		this->stateSliderJoints()->assign(mHostJointsSlider);
+		this->stateHingeJoints()->assign(mHostJointsHinge);
+		this->stateFixedJoints()->assign(mHostJointsFixed);
+		this->statePointJoints()->assign(mHostJointsPoint);
 
-		m_yaw = 0.0f;
-		m_pitch = 0.0f;
-		m_roll = 0.0f;
-		m_recoverSpeed = 0.3f;
+		uint os = eleOffset.checkElementOffset(ET_CAPSULE);
+
+		cuExecute(this->stateBallAndSocketJoints()->size(),
+			UpdateJointIndices,
+			this->stateBallAndSocketJoints()->getData(),
+			eleOffset);
+
+		cuExecute(this->stateSliderJoints()->size(),
+			UpdateJointIndices,
+			this->stateSliderJoints()->getData(),
+			eleOffset);
+
+		cuExecute(this->stateHingeJoints()->size(),
+			UpdateJointIndices,
+			this->stateHingeJoints()->getData(),
+			eleOffset);
+
+		cuExecute(this->stateFixedJoints()->size(),
+			UpdateJointIndices,
+			this->stateFixedJoints()->getData(),
+			eleOffset);
+
+		cuExecute(this->statePointJoints()->size(),
+			UpdateJointIndices,
+			this->statePointJoints()->getData(),
+			eleOffset);
+
+		updateTopology();
 	}
 	
 	template <typename Real, typename Coord>

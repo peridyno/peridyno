@@ -24,6 +24,18 @@
 #include <iostream>
 namespace dyno
 {
+	class PdActor
+	{
+	public:
+		int idx = -1;
+
+		ElementType shapeType = ET_Other;
+
+		Vec3f center;
+
+		Quat1f rot;
+	};
+
 	/*!
 	*	\class	RigidBodySystem
 	*	\brief	Implementation of a rigid body system containing a variety of rigid bodies with different shapes.
@@ -54,22 +66,22 @@ namespace dyno
 		RigidBodySystem();
 		~RigidBodySystem() override;
 
-		void addBox(
+		std::shared_ptr<PdActor> addBox(
 			const BoxInfo& box, 
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
-		void addSphere(
+		std::shared_ptr<PdActor> addSphere(
 			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
 			const Real density = Real(100));
 
-		void addTet(
+		std::shared_ptr<PdActor> addTet(
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
-		void addCapsule(
+		std::shared_ptr<PdActor> addCapsule(
 			const CapsuleInfo& capsule,
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
@@ -93,6 +105,71 @@ namespace dyno
 		void addPointJoint(
 			const PointJoint& joint
 		);
+
+
+		BallAndSocketJoint& createBallAndSocketJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			BallAndSocketJoint joint(actor1->idx, actor2->idx);
+			joint.bodyType1 = actor1->shapeType;
+			joint.bodyType2 = actor2->shapeType;
+
+			mHostJointsBallAndSocket.push_back(joint);
+
+			return mHostJointsBallAndSocket[mHostJointsBallAndSocket.size() - 1];
+		}
+
+		SliderJoint& createSliderJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			SliderJoint joint(actor1->idx, actor2->idx);
+
+			joint.bodyType1 = actor1->shapeType;
+			joint.bodyType2 = actor2->shapeType;
+
+			mHostJointsSlider.push_back(joint);
+
+			return mHostJointsSlider[mHostJointsSlider.size() - 1];
+		}
+
+		HingeJoint& createHingeJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			HingeJoint joint(actor1->idx, actor2->idx);
+			joint.bodyType1 = actor1->shapeType;
+			joint.bodyType2 = actor2->shapeType;
+
+			mHostJointsHinge.push_back(joint);
+
+			return mHostJointsHinge[mHostJointsHinge.size() - 1];
+		}
+
+		FixedJoint& createFixedJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			FixedJoint joint(actor1->idx, actor2->idx);
+			joint.bodyType1 = actor1->shapeType;
+			joint.bodyType2 = actor2->shapeType;
+
+			mHostJointsFixed.push_back(joint);
+
+			return mHostJointsFixed[mHostJointsFixed.size() - 1];
+		}
+
+		PointJoint& createPointJoint(
+			std::shared_ptr<PdActor> actor1)
+		{
+			PointJoint joint(actor1->idx);
+			joint.bodyType1 = actor1->shapeType;
+
+			mHostJointsPoint.push_back(joint);
+
+			return mHostJointsPoint[mHostJointsPoint.size() - 1];
+		}
 
 		Mat3f pointInertia(Coord v1);
 
@@ -197,12 +274,5 @@ namespace dyno
 
 		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
-
-		//float m_damping = 0.9f;
-
-		float m_yaw;
-		float m_pitch;
-		float m_roll;
-		float m_recoverSpeed;
 	};
 }

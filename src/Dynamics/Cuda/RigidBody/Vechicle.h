@@ -21,7 +21,7 @@ namespace dyno
 		Vechicle();
 		~Vechicle() override;
 
-		void bind(uint bodyId, Pair<uint, uint> shapeId);
+		void bind(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
 
 	public:
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
@@ -29,10 +29,6 @@ namespace dyno
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet of the boundary");
 
 	public:
-		DEF_ARRAY_STATE(BindingPair, Binding, DeviceType::GPU, "");
-
-		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");
-
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 
 	protected:
@@ -42,13 +38,14 @@ namespace dyno
 
 
 	private:
-
-
 		std::vector<Pair<uint, uint>> mBindingPair;
 
-		std::vector<int> mBodyId;
+		std::vector<std::shared_ptr<PdActor>> mActors;
 
 		DArray<Matrix> mInitialRot;
+
+		DArray<BindingPair> mBindingPairDevice;
+		DArray<int> mBindingTagDevice;
 	};
 
 	IMPLEMENT_TCLASS(Vechicle, TDataType)
