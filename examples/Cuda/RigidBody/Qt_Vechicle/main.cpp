@@ -39,20 +39,23 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->stateInstanceTransform()->connect(prRender->inTransform());
 	jeep->graphicsPipeline()->pushModule(prRender);
 
-	BoxInfo box1, box2, box3, box4, box5, box6;
+	BoxInfo box1, box2, box3, box4;
+	//car body
 	box1.center = Vec3f(0, 1.171, -0.011);
-	box1.halfLength = Vec3f(1.011, 0.5, 2.4);
-	box2.center = Vec3f(0, 1.044, -2.254);
-	box2.halfLength = Vec3f(0.250, 0.250, 0.250);
+	box1.halfLength = Vec3f(1.011, 0.793, 2.4);
 
-	box3.center = Vec3f(0.812, 1.171, 1.722);
-	box3.halfLength = Vec3f(0.450, 0.2, 0.450);
-	box4.center = Vec3f(-0.812, 1.171, 1.722);
-	box4.halfLength = Vec3f(0.450, 0.2, 0.450);
-	box5.center = Vec3f(-0.812, 1.171, -1.426);
-	box5.halfLength = Vec3f(0.450, 0.2, 0.450);
-	box6.center = Vec3f(0.812, 1.171, -1.426);
-	box6.halfLength = Vec3f(0.450, 0.2, 0.450);
+
+	box2.center = Vec3f(0, 1.044, -2.254);
+	box2.halfLength = Vec3f(0.447, 0.447, 0.15);
+
+	box3.center = Vec3f(0.812, 0.450, 1.722);
+	box3.halfLength = Vec3f(0.2f);
+	box4.center = Vec3f(-0.812, 0.450, 1.722);
+	box4.halfLength = Vec3f(0.2f);
+// 	box5.center = Vec3f(-0.812, 1.171, -1.426);
+// 	box5.halfLength = Vec3f(0.450, 0.2, 0.450);
+// 	box6.center = Vec3f(0.812, 1.171, -1.426);
+// 	box6.halfLength = Vec3f(0.450, 0.2, 0.450);
 	CapsuleInfo capsule1, capsule2, capsule3, capsule4;
 
 	capsule1.center = Vec3f(0.812, 0.450, 1.722);
@@ -76,42 +79,46 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	Vec3f offset = Vec3f(0.0f, -0.721f, 0.148f);
 	rigidbody.offset = offset;
-	jeep->addBox(box1, rigidbody, 100);
+	jeep->addBox(box1, rigidbody, 10);
 
 	rigidbody.offset = Vec3f(0.0f);
 
 	jeep->addBox(box2, rigidbody, 100);
-	jeep->addBox(box3, rigidbody, 100);
-	jeep->addBox(box4, rigidbody, 100);
-	jeep->addBox(box5, rigidbody, 100);
-	jeep->addBox(box6, rigidbody, 100);
+	jeep->addBox(box3, rigidbody, 1000);
+	jeep->addBox(box4, rigidbody, 1000);
+// 	jeep->addBox(box5, rigidbody, 100);
+// 	jeep->addBox(box6, rigidbody, 100);
 
-	Real wheel_velocity = 100;
+	Real wheel_velocity = 10;
 
-	jeep->addCapsule(capsule1, rigidbody, 1);
-	jeep->addCapsule(capsule2, rigidbody, 1);
-	jeep->addCapsule(capsule3, rigidbody, 1);
-	jeep->addCapsule(capsule4, rigidbody, 1);
+	//rigidbody.angularVelocity = Vec3f(0.0f, 0.0f, 50.0f);
+	jeep->addCapsule(capsule1, rigidbody, 100);
+	jeep->addCapsule(capsule2, rigidbody, 100);
+	jeep->addCapsule(capsule3, rigidbody, 100);
+	jeep->addCapsule(capsule4, rigidbody, 100);
 
-	HingeJoint<Real> joint1(6, 2);
+	//front rear
+	HingeJoint<Real> joint1(4, 2);
 	joint1.setAnchorPoint(capsule1.center, capsule1.center, box3.center, capsule1.rot, box3.rot);
 	joint1.setMoter(wheel_velocity);
 	joint1.setAxis(Vec3f(1, 0, 0), capsule1.rot, box3.rot);
 	jeep->addHingeJoint(joint1);
-	HingeJoint<Real> joint2(7, 3);
+	HingeJoint<Real> joint2(5, 3);
 	joint2.setAnchorPoint(capsule2.center, capsule2.center, box4.center, capsule2.rot, box4.rot);
 	joint2.setMoter(wheel_velocity);
 	joint2.setAxis(Vec3f(1, 0, 0), capsule2.rot, box4.rot);
 	jeep->addHingeJoint(joint2);
-	HingeJoint<Real> joint3(8, 4);
-	joint3.setAnchorPoint(capsule3.center, capsule3.center, box5.center, capsule3.rot, box5.rot);
+
+	//back rear
+	HingeJoint<Real> joint3(6, 0);
+	joint3.setAnchorPoint(capsule3.center, capsule3.center, box1.center + offset, capsule3.rot, box1.rot);
 	joint3.setMoter(wheel_velocity);
-	joint3.setAxis(Vec3f(1, 0, 0), capsule3.rot, box5.rot);
+	joint3.setAxis(Vec3f(1, 0, 0), capsule3.rot, box1.rot);
 	jeep->addHingeJoint(joint3);
-	HingeJoint<Real> joint4(9, 5);
-	joint4.setAnchorPoint(capsule4.center, capsule4.center, box6.center, capsule4.rot, box6.rot);
+	HingeJoint<Real> joint4(7, 0);
+	joint4.setAnchorPoint(capsule4.center, capsule4.center, box1.center + offset, capsule4.rot, box1.rot);
 	joint4.setMoter(wheel_velocity);
-	joint4.setAxis(Vec3f(1, 0, 0), capsule4.rot, box6.rot);
+	joint4.setAxis(Vec3f(1, 0, 0), capsule4.rot, box1.rot);
 	jeep->addHingeJoint(joint4);
 
 
@@ -124,19 +131,13 @@ std::shared_ptr<SceneGraph> creatCar()
 	FixedJoint<Real> joint7(0, 3);
 	joint7.setAnchorPoint((box1.center + offset + box4.center) / 2, box1.center + offset, box4.center, box1.rot, box4.rot);
 	jeep->addFixedJoint(joint7);
-	FixedJoint<Real> joint8(0, 4);
-	joint8.setAnchorPoint((box1.center + offset + box5.center) / 2, box1.center + offset, box5.center, box1.rot, box5.rot);
-	jeep->addFixedJoint(joint8);
-	FixedJoint<Real> joint9(0, 5);
-	joint9.setAnchorPoint((box1.center + offset + box6.center) / 2, box1.center + offset, box6.center, box1.rot, box6.rot);
-	jeep->addFixedJoint(joint9);
 
 	jeep->bind(0, Pair<uint, uint>(5, 0));
 	jeep->bind(1, Pair<uint, uint>(4, 0));
-	jeep->bind(6, Pair<uint, uint>(0, 0));
-	jeep->bind(7, Pair<uint, uint>(1, 0));
-	jeep->bind(8, Pair<uint, uint>(2, 0));
-	jeep->bind(9, Pair<uint, uint>(3, 0));
+	jeep->bind(4, Pair<uint, uint>(0, 0));
+	jeep->bind(5, Pair<uint, uint>(1, 0));
+	jeep->bind(6, Pair<uint, uint>(2, 0));
+	jeep->bind(7, Pair<uint, uint>(3, 0));
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->setVisible(false);
@@ -148,6 +149,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	plane->varScale()->setValue(Vec3f(10.0f));
 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
 
+	//Visualize rigid bodies
 // 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 // 	jeep->stateTopology()->connect(mapper->inDiscreteElements());
 // 	jeep->graphicsPipeline()->pushModule(mapper);
@@ -177,25 +179,12 @@ std::shared_ptr<SceneGraph> creatCar()
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	jeep->graphicsPipeline()->pushModule(wireRender);
 
-// 	//Visualize contact points
-// 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-// 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
-// 	jeep->graphicsPipeline()->pushModule(contactPointMapper);
-// 
-// 	auto pointRender = std::make_shared<GLPointVisualModule>();
-// 	pointRender->setColor(Color(1, 0, 0));
-// 	pointRender->varPointSize()->setValue(0.00003f);
-// 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-// 	jeep->graphicsPipeline()->pushModule(pointRender);
-
 	//Visualize Anchor point for joint
 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
 	jeep->stateCenter()->connect(anchorPointMapper->inCenter());
 	jeep->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
 	jeep->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
 	jeep->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
-	//rigid->stateHingeJoints()->connect(anchorPointMapper->inHingeJoints());
-	//rigid->stateFixedJoints()->connect(anchorPointMapper->inFixedJoints());
 	jeep->graphicsPipeline()->pushModule(anchorPointMapper);
 
 	auto pointRender2 = std::make_shared<GLPointVisualModule>();

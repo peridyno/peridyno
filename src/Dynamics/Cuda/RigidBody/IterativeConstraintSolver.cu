@@ -33,6 +33,7 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= velocity.size())
 			return;
+
 		velocity[tId] += impulse_ext[2 * tId] + impulse_constrain[2 * tId];
 		angular_velocity[tId] += impulse_ext[2 * tId + 1] + impulse_constrain[2 * tId + 1];
 	}

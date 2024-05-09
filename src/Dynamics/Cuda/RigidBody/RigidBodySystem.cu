@@ -71,7 +71,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		this->setDt(0.005f);
+		this->setDt(0.004f);
 	}
 
 	template<typename TDataType>
@@ -300,7 +300,7 @@ namespace dyno
 		mass[tId] = states[tId].mass;
 		rotation[tId] = states[tId].angle.toMatrix3x3();
 		velocity[tId] = states[tId].linearVelocity;
-		angularVelocity[tId] = states[tId].angularVelocity;
+		angularVelocity[tId] = rotation[tId] * states[tId].angularVelocity;
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
 		barycenterOffset[tId] = states[tId].offset;

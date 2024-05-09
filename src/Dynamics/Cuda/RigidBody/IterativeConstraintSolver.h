@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Updates: 
+ *  - 2024-4-9:  Add position-based solver by Liang Riukai
  */
 #pragma once
 #include "Module/ConstraintModule.h"

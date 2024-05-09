@@ -171,8 +171,6 @@ namespace dyno
 			Attribute att_i = attribute[ids.bodyId1];
 			Attribute att_j = attribute[ids.bodyId2];
 
-			printf("Collision excluded \n");
-
 			if (att_i.objectId() == att_j.objectId())
 				return;
 		}
