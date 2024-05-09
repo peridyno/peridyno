@@ -42,7 +42,9 @@ namespace dyno
 		dyno::Vec3f ambient = { 0.0f, 0.0f, 0.0f };
 		dyno::Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
 		dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
+
 		float roughness = 0.0f;
+		float metallic = 0.0f;
 		float alpha = 1.0f;
 
 		float bumpScale = 1.f;

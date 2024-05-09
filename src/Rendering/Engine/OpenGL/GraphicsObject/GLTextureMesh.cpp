@@ -149,6 +149,7 @@ namespace dyno
 			mMaterials[i]->diffuse = mesh->materials()[i]->diffuse;
 			mMaterials[i]->specular = mesh->materials()[i]->specular;
 			mMaterials[i]->roughness = mesh->materials()[i]->roughness;
+			mMaterials[i]->metallic = mesh->materials()[i]->metallic;
 			mMaterials[i]->bumpScale = mesh->materials()[i]->bumpScale;
 			mMaterials[i]->texColor.load(mesh->materials()[i]->texColor);
 			mMaterials[i]->texBump.load(mesh->materials()[i]->texBump);

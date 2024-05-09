@@ -61,8 +61,7 @@ namespace dyno
 			mXTransformBuffer.load(inst->elements());
 		}
 
-		if (this->inTextureMesh()->isModified())
-			GLPhotorealisticRender::updateImpl();
+		GLPhotorealisticRender::updateImpl();
 	}
 
 	void GLPhotorealisticInstanceRender::paintGL(const RenderParams& rparams)
@@ -115,9 +114,9 @@ namespace dyno
 			// material 
 			{
 				pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
-				pbr.metallic = this->varMetallic()->getValue();
-				pbr.roughness = this->varRoughness()->getValue();
-				pbr.alpha = this->varAlpha()->getValue();
+				pbr.metallic = mtl->metallic;
+				pbr.roughness = mtl->roughness;
+				pbr.alpha = mtl->alpha;
 				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 				mPBRMaterialUBlock.bindBufferBase(1);
 			}

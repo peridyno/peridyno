@@ -33,6 +33,7 @@ namespace dyno
 
 	public:
 		float roughness = 0.0f;
+		float metallic = 0.0f;
 		float alpha = 1.0f;
 
 		float bumpScale = 1.f;
