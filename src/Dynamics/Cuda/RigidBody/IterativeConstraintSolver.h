@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  * Updates: 
- *  - 2024-4-9:  Add position-based solver by Liang Riukai
+ *  - 2024-4-9:  Add position-based solver by Liang Ruikai
  */
 #pragma once
 #include "Module/ConstraintModule.h"

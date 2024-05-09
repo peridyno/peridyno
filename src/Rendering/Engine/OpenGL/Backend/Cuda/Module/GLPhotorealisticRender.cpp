@@ -15,6 +15,60 @@ namespace dyno
 	{
 		this->setName("ObjMeshRenderer");
 
+		this->varMaterialIndex()->attach(std::make_shared<FCallBackFunc>(
+			[=]() {
+				uint idx = this->varMaterialIndex()->getValue();
+
+				if (mTextureMesh.materials().size() > idx)
+				{
+					auto material = mTextureMesh.materials()[idx];
+
+					this->varAlpha()->setValue(material->alpha);
+					this->varMetallic()->setValue(material->metallic);
+					this->varRoughness()->setValue(material->roughness);
+					this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+				}
+			}));
+
+		this->varMetallic()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					uint idx = this->varMaterialIndex()->getValue();
+
+					if (mTextureMesh.materials().size() > idx)
+					{
+						auto material = mTextureMesh.materials()[idx];
+
+						material->metallic = this->varMetallic()->getValue();
+					}
+				}));
+
+		this->varRoughness()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					uint idx = this->varMaterialIndex()->getValue();
+
+					if (mTextureMesh.materials().size() > idx)
+					{
+						auto material = mTextureMesh.materials()[idx];
+
+						material->roughness = this->varRoughness()->getValue();
+					}
+				}));
+
+		this->varAlpha()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					uint idx = this->varMaterialIndex()->getValue();
+
+					if (mTextureMesh.materials().size() > idx)
+					{
+						auto material = mTextureMesh.materials()[idx];
+
+						material->roughness = this->varAlpha()->getValue();
+					}
+				}));
+
 #ifdef CUDA_BACKEND
 		mTangentSpaceConstructor = std::make_shared<ConstructTangentSpace>();
 		this->inTextureMesh()->connect(mTangentSpaceConstructor->inTextureMesh());
@@ -85,7 +139,10 @@ namespace dyno
 
 	void GLPhotorealisticRender::updateImpl()
 	{
-		mTextureMesh.load(this->inTextureMesh()->constDataPtr());
+		if (this->inTextureMesh()->isModified()) {
+			mTextureMesh.load(this->inTextureMesh()->constDataPtr());
+			this->varMaterialIndex()->setRange(0, mTextureMesh.materials().size() - 1);
+		}
 
 #ifdef CUDA_BACKEND
 		mTangentSpaceConstructor->update();
@@ -155,10 +212,10 @@ namespace dyno
 
 				// material 
 				{
-					pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
-					pbr.metallic = this->varMetallic()->getValue();
-					pbr.roughness = this->varRoughness()->getValue();
-					pbr.alpha = this->varAlpha()->getValue();
+					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
+					pbr.metallic = mtl->metallic;
+					pbr.roughness = mtl->roughness;
+					pbr.alpha = mtl->alpha;
 					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 					mPBRMaterialUBlock.bindBufferBase(1);
 				}
