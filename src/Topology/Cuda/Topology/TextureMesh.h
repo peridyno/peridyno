@@ -22,6 +22,7 @@
 
 namespace dyno
 {
+	// simple PBR material model
 	class Material : public Object
 	{
 	public:
@@ -32,18 +33,17 @@ namespace dyno
 		};
 
 	public:
-		float roughness = 0.0f;
-		float metallic = 0.0f;
+
+		Vec3f baseColor = { 0.8f, 0.8f, 0.8f };
+		
+		float metallic  = 0.0f;
+		float roughness = 1.0f;
 		float alpha = 1.0f;
 
-		float bumpScale = 1.f;
-
-		Vec3f ambient = { 0.0f, 0.0f, 0.0f };
-		Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
-		Vec3f specular = { 0.0f, 0.0f, 0.0f };
-
 		DArray2D<Vec4f> texColor;
+
 		DArray2D<Vec4f> texBump;
+		float bumpScale = 1.f;
 	};
 
 	class Shape : public Object

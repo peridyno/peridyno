@@ -113,7 +113,7 @@ namespace dyno
 
 			// material 
 			{
-				pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
+				pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 				pbr.metallic = mtl->metallic;
 				pbr.roughness = mtl->roughness;
 				pbr.alpha = mtl->alpha;

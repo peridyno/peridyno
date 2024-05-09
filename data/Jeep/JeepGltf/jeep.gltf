@@ -760,7 +760,7 @@
 			"name":"principledshader1",
 			"pbrMetallicRoughness":{
 				"metallicFactor":0,
-				"roughnessFactor":0.300000012,
+				"roughnessFactor":1.000000,
 				"baseColorTexture":{
 					"index":0
 				}

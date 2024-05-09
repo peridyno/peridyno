@@ -26,7 +26,7 @@ namespace dyno
 					this->varAlpha()->setValue(material->alpha);
 					this->varMetallic()->setValue(material->metallic);
 					this->varRoughness()->setValue(material->roughness);
-					this->varBaseColor()->setValue(Color(material->diffuse.x, material->diffuse.y, material->diffuse.z));
+					this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
 				}
 			}));
 
@@ -53,6 +53,19 @@ namespace dyno
 						auto material = mTextureMesh.materials()[idx];
 
 						material->roughness = this->varRoughness()->getValue();
+					}
+				}));
+
+		this->varAlpha()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					uint idx = this->varMaterialIndex()->getValue();
+
+					if (mTextureMesh.materials().size() > idx)
+					{
+						auto material = mTextureMesh.materials()[idx];
+
+						material->roughness = this->varAlpha()->getValue();
 					}
 				}));
 
@@ -199,7 +212,7 @@ namespace dyno
 
 				// material 
 				{
-					pbr.color = { mtl->diffuse.x, mtl->diffuse.y, mtl->diffuse.z };
+					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
 					pbr.alpha = mtl->alpha;
