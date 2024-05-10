@@ -133,14 +133,7 @@ namespace dyno
 
 		mInitialRot.assign(this->stateRotationMatrix()->constData());
 
-		ApplyTransform(
-			this->stateInstanceTransform()->getData(),
-			this->stateOffset()->getData(),
-			this->stateCenter()->getData(),
-			this->stateRotationMatrix()->getData(),
-			mInitialRot,
-			mBindingPairDevice,
-			mBindingTagDevice);
+		this->updateInstanceTransform();
 
 		tms.clear();
 		bindingPair.clear();
@@ -152,6 +145,12 @@ namespace dyno
 	{
 		RigidBodySystem<TDataType>::updateStates();
 
+		this->updateInstanceTransform();
+	}
+
+	template<typename TDataType>
+	void Vechicle<TDataType>::updateInstanceTransform()
+	{
 		ApplyTransform(
 			this->stateInstanceTransform()->getData(),
 			this->stateOffset()->getData(),
@@ -176,7 +175,8 @@ namespace dyno
 
 	template<typename TDataType>
 	Jeep<TDataType>::Jeep()
-		: Vechicle<TDataType>()
+		: ParametricModel<TDataType>()
+		, Vechicle<TDataType>()
 	{
 		BoxInfo box1, box2, box3, box4;
 		//car body
@@ -272,6 +272,32 @@ namespace dyno
 	Jeep<TDataType>::~Jeep()
 	{
 
+	}
+
+	template<typename TDataType>
+	void Jeep<TDataType>::resetStates()
+	{
+		Vechicle<TDataType>::resetStates();
+
+		auto loc = this->varLocation()->getValue();
+		
+		Coord tr = Coord(loc.x, loc.y, loc.z);
+		
+		CArray<Coord> hostCenter;
+		hostCenter.assign(this->stateCenter()->constData());
+
+		for (uint i = 0; i < hostCenter.size(); i++)
+		{
+			hostCenter[i] += tr;
+		}
+
+		this->stateCenter()->assign(hostCenter);
+
+		this->updateTopology();
+
+		this->updateInstanceTransform();
+
+		hostCenter.clear();
 	}
 
 	DEFINE_CLASS(Jeep);

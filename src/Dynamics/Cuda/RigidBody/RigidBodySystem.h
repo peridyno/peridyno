@@ -29,7 +29,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class RigidBodySystem : public Node
+	class RigidBodySystem : virtual public Node
 	{
 		DECLARE_TCLASS(RigidBodySystem, TDataType)
 	public:

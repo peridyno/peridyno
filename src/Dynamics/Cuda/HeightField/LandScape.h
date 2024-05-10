@@ -21,7 +21,7 @@
 namespace dyno {
 
     template<typename TDataType>
-    class LandScape : public ParametricModel<TDataType>
+    class LandScape : virtual public ParametricModel<TDataType>
     {
         DECLARE_TCLASS(LandScape, TDataType)
     public:

@@ -23,7 +23,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class ExtrudeModel : public ParametricModel<TDataType>
+	class ExtrudeModel : virtual public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(ExtrudeModel, TDataType);
 

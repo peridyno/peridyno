@@ -60,7 +60,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class GltfLoader : public ParametricModel<TDataType>
+	class GltfLoader : virtual public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(GltfLoader, TDataType);
 
