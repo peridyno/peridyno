@@ -233,7 +233,8 @@ namespace dyno
 
 		void setAxis(Vector<Real, 3> axis)
 		{
-			this->sliderAxis = axis;
+			Mat3f rotMat1 = this->actor1->rot.rot.toMatrix3x3();
+			this->sliderAxis = rotMat1.transpose() * axis;
 		}
 
 		void setMoter(Real v_moter)
