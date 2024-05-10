@@ -32,48 +32,43 @@ std::shared_ptr<SceneGraph> creatBricks()
 	
 	box1.center = Vec3f(0, 0.3, 0);
 	box1.halfLength = Vec3f(0.1, 0.2, 0.1);
-	rigid->addBox(box1, rigidBody);
+	auto boxActor1 = rigid->addBox(box1, rigidBody);
 
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 
 
 	box2.center = Vec3f(0, 0.05, 0);
 	box2.halfLength = Vec3f(1, 0.05, 0.3);
-	rigid->addBox(box2, rigidBody);
+	auto boxActor2 = rigid->addBox(box2, rigidBody);
 
 	rigidBody.linearVelocity = Vec3f(-10, 0, 0);
 
 	box3.center = Vec3f(0.5, 0.2, 0);
 	box3.halfLength = Vec3f(0.1, 0.1, 0.1);
 
-	rigid->addBox(box3, rigidBody);
+	auto boxActor3 = rigid->addBox(box3, rigidBody);
 
 
-	SliderJoint<Real> joint1(0, 1);
-	Vec3f point = Vec3f(0, 0.1, 0);
-	joint1.setAnchorPoint(point, box1.center, box2.center, box1.rot, box2.rot);
-	joint1.setAxis(Vec3f(1, 0, 0));
-	joint1.setRange(-0.9, 0.9);
-	rigid->addSliderJoint(joint1);
+	auto& sliderJoint = rigid->createSliderJoint(boxActor1, boxActor2);
+	sliderJoint.setAnchorPoint(Vec3f(0, 0.1, 0), box1.center, box2.center, box1.rot, box2.rot);
+	sliderJoint.setAxis(Vec3f(1, 0, 0));
+	sliderJoint.setRange(-0.9, 0.9);
 
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 
 	box4.center = Vec3f(0, 0.15, -0.2);
 	box4.halfLength = Vec3f(1, 0.05, 0.1);
-	rigid->addBox(box4, rigidBody);
+	auto boxActor4 = rigid->addBox(box4, rigidBody);
 	
 	box5.center = Vec3f(0, 0.15, 0.2);
 	box5.halfLength = Vec3f(1, 0.05, 0.1);
-	rigid->addBox(box5, rigidBody);
+	auto boxActor5 = rigid->addBox(box5, rigidBody);
 
-	FixedJoint<Real> joint2(1, 3);
-	point = Vec3f(0, 0.1, -0.2);
-	joint2.setAnchorPoint(point, box2.center, box4.center, box2.rot, box5.rot);
-	rigid->addFixedJoint(joint2);
-	FixedJoint<Real> joint3(1, 4);
-	point = Vec3f(0, 0.1, 0.2);
-	joint3.setAnchorPoint(point, box2.center, box5.center, box2.rot, box5.rot);
-    rigid->addFixedJoint(joint3);
+
+	auto& fixedJoint1 = rigid->createFixedJoint(boxActor2, boxActor4);
+	fixedJoint1.setAnchorPoint(Vec3f(0, 0.1, -0.2), box2.center, box4.center, box2.rot, box4.rot);
+	auto& fixedJoint2 = rigid->createFixedJoint(boxActor2, boxActor5);
+	fixedJoint2.setAnchorPoint(Vec3f(0, 0.1, 0.2), box2.center, box5.center, box2.rot, box5.rot);
 
 
 

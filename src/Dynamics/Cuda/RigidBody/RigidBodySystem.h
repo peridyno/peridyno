@@ -86,25 +86,6 @@ namespace dyno
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
-		void addBallAndSocketJoint(
-			const BallAndSocketJoint& joint
-		);
-
-		void addSliderJoint(
-			const SliderJoint& joint
-		);
-
-		void addHingeJoint(
-			const HingeJoint& joint
-		);
-
-		void addFixedJoint(
-			const FixedJoint& joint
-		);
-
-		void addPointJoint(
-			const PointJoint& joint
-		);
 
 
 		BallAndSocketJoint& createBallAndSocketJoint(

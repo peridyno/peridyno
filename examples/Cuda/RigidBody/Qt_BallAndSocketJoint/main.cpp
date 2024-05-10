@@ -27,23 +27,24 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	BoxInfo newBox, oldBox;
 	RigidBodyInfo rigidBody;
+	rigidBody.bodyId = 1;
 	rigidBody.linearVelocity = Vec3f(1, 0.0, 0.0);
 	oldBox.center = Vec3f(0, 0.1, 0);
 	oldBox.halfLength = Vec3f(0.05, 0.05, 0.05);
-	rigid->addBox(oldBox, rigidBody);
+	auto oldBoxActor = rigid->addBox(oldBox, rigidBody);
 
 	
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		rigidBody.linearVelocity = Vec3f(0, 0, 0);
 		newBox.center = oldBox.center + Vec3f(0.0, 0.12f, 0.0);
 		newBox.halfLength = oldBox.halfLength;
-		rigid->addBox(newBox, rigidBody);
-		BallAndSocketJoint<Real> joint(i, i + 1);
-		joint.setAnchorPoint(oldBox.center + Vec3f(0.0, 0.06f, 0.0), oldBox.center, newBox.center, oldBox.rot, newBox.rot);
-		rigid->addBallAndSocketJoint(joint);
+		auto newBoxActor = rigid->addBox(newBox, rigidBody);
+		auto& ballAndSocketJoint = rigid->createBallAndSocketJoint(oldBoxActor, newBoxActor);
+		ballAndSocketJoint.setAnchorPoint((oldBox.center + newBox.center) / 2, oldBox.center, newBox.center, oldBox.rot, newBox.rot);
 		oldBox = newBox;
+		oldBoxActor = newBoxActor;
 	}
 
 

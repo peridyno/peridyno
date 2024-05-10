@@ -36,12 +36,6 @@ namespace dyno
 		elementQuery->outContacts()->connect(merge->inContactsA());
 		cdBV->outContacts()->connect(merge->inContactsB());
 
-		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
-		this->stateSliderJoints()->connect(merge->inSliderJoints());
-		this->stateHingeJoints()->connect(merge->inHingeJoints());
-		this->stateFixedJoints()->connect(merge->inFixedJoints());
-		this->stateMass()->connect(merge->inMass());
-
 		this->animationPipeline()->pushModule(merge);
 
 		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
@@ -71,7 +65,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		this->setDt(0.004f);
+		this->setDt(0.005f);
 	}
 
 	template<typename TDataType>
@@ -114,8 +108,6 @@ namespace dyno
 		bd.position = b.center + bd.offset;
 
 		bd.mass = density * lx * ly * lz;
-
-		std::cout << "Box : " << bd.mass << std::endl;
 
 		bd.inertia = 1.0f / 12.0f * bd.mass
 			* Mat3f(ly * ly + lz * lz, 0, 0,
@@ -259,7 +251,6 @@ namespace dyno
 
 		bd.mass = mass_hemisphere * 2 + mass_cylinder;
 
-		std::cout << "Capsule : " << bd.mass << std::endl;
 
 		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
 				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
@@ -281,35 +272,7 @@ namespace dyno
 		return actor;
 	}
 
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addBallAndSocketJoint(const BallAndSocketJoint& joint)
-	{
-		mHostJointsBallAndSocket.push_back(joint);
-	}
 
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addSliderJoint(const SliderJoint& joint)
-	{
-		mHostJointsSlider.push_back(joint);
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addHingeJoint(const HingeJoint& joint)
-	{
-		mHostJointsHinge.push_back(joint);
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addFixedJoint(const FixedJoint& joint)
-	{
-		mHostJointsFixed.push_back(joint);
-	}
-
-	template<typename TDataType>
-	void RigidBodySystem<TDataType>::addPointJoint(const PointJoint& joint)
-	{
-		mHostJointsPoint.push_back(joint);
-	}
 
 	template <typename Real, typename Coord, typename Matrix, typename Quat>
 	__global__ void RB_SetupInitialStates(
