@@ -50,7 +50,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 
 	auto& sliderJoint = rigid->createSliderJoint(boxActor1, boxActor2);
-	sliderJoint.setAnchorPoint(Vec3f(0, 0.1, 0), box1.center, box2.center, box1.rot, box2.rot);
+	sliderJoint.setAnchorPoint(Vec3f(0, 0.1, 0));
 	sliderJoint.setAxis(Vec3f(1, 0, 0));
 	sliderJoint.setRange(-0.9, 0.9);
 
@@ -66,9 +66,9 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 
 	auto& fixedJoint1 = rigid->createFixedJoint(boxActor2, boxActor4);
-	fixedJoint1.setAnchorPoint(Vec3f(0, 0.1, -0.2), box2.center, box4.center, box2.rot, box4.rot);
+	fixedJoint1.setAnchorPoint(Vec3f(0, 0.1, -0.2));
 	auto& fixedJoint2 = rigid->createFixedJoint(boxActor2, boxActor5);
-	fixedJoint2.setAnchorPoint(Vec3f(0, 0.1, 0.2), box2.center, box5.center, box2.rot, box5.rot);
+	fixedJoint2.setAnchorPoint(Vec3f(0, 0.1, 0.2));
 
 
 

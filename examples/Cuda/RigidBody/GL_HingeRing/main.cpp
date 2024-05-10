@@ -53,20 +53,20 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 
 	auto& hingeJoint1 = rigid->createHingeJoint(boxActor1, boxActor3);
-	hingeJoint1.setAnchorPoint(Vec3f(-0.26, 0.8, 0), box1.center, box3.center, box1.rot, box3.rot);
-	hingeJoint1.setAxis(Vec3f(0, 0, 1), box1.rot, box3.rot);
+	hingeJoint1.setAnchorPoint(Vec3f(-0.26, 0.8, 0));
+	hingeJoint1.setAxis(Vec3f(0, 0, 1));
 	hingeJoint1.setRange(-M_PI * 2 / 3, M_PI * 2 / 3);
 	auto& hingeJoint2 = rigid->createHingeJoint(boxActor1, boxActor4);
-	hingeJoint2.setAnchorPoint(Vec3f(0.26, 0.8, 0), box1.center, box4.center, box1.rot, box4.rot);
-	hingeJoint2.setAxis(Vec3f(0, 0, 1), box1.rot, box4.rot);
+	hingeJoint2.setAnchorPoint(Vec3f(0.26, 0.8, 0));
+	hingeJoint2.setAxis(Vec3f(0, 0, 1));
 	hingeJoint2.setRange(-M_PI * 2 / 3, M_PI * 2 / 3);
 	auto& hingeJoint3 = rigid->createHingeJoint(boxActor2, boxActor3);
-	hingeJoint3.setAnchorPoint(Vec3f(-0.26, 0.3, 0), box2.center, box3.center, box2.rot, box3.rot);
-	hingeJoint3.setAxis(Vec3f(0, 0, 1), box2.rot, box3.rot);
+	hingeJoint3.setAnchorPoint(Vec3f(-0.26, 0.3, 0));
+	hingeJoint3.setAxis(Vec3f(0, 0, 1));
 	hingeJoint3.setRange(-M_PI * 2 / 3, M_PI * 2 / 3);
 	auto& hingeJoint4 = rigid->createHingeJoint(boxActor2, boxActor4);
-	hingeJoint4.setAnchorPoint(Vec3f(0.26, 0.3, 0), box2.center, box4.center, box2.rot, box4.rot);
-	hingeJoint4.setAxis(Vec3f(0, 0, 1), box2.rot, box4.rot);
+	hingeJoint4.setAnchorPoint(Vec3f(0.26, 0.3, 0));
+	hingeJoint4.setAxis(Vec3f(0, 0, 1));
 	hingeJoint4.setRange(-M_PI * 2 / 3, M_PI * 2 / 3);
 	
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();

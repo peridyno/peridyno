@@ -99,6 +99,18 @@ namespace dyno
 		uint triEnd;
 	};
 
+	class PdActor
+	{
+	public:
+		int idx = INVALID;
+
+		ElementType shapeType = ET_Other;
+
+		Vec3f center;
+
+		Quat1f rot;
+	};
+
 	template<typename Real>
 	class Joint
 	{
@@ -110,22 +122,33 @@ namespace dyno
 
 			this->bodyType1 = ET_Other;
 			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
 		}
 
-		DYN_FUNC Joint(int bodyId1, int bodyId2)
+		CPU_FUNC Joint(PdActor* a1, PdActor* a2)
 		{
-			this->bodyId1 = bodyId1;
-			this->bodyId2 = bodyId2;
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
 
-			this->bodyType1 = ET_Other;
-			this->bodyType2 = ET_Other;
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
 		}
+
 	public:
 		int bodyId1;
 		int bodyId2;
 
 		ElementType bodyType1;
 		ElementType bodyType2;
+
+		//The following two pointers should only be visited from host codes.
+		PdActor* actor1 = nullptr;
+		PdActor* actor2 = nullptr;
 	};
 
 
@@ -137,19 +160,32 @@ namespace dyno
 		{
 			this->bodyId1 = INVALID;
 			this->bodyId2 = INVALID;
-		}
-		DYN_FUNC BallAndSocketJoint(int bodyId1, int bodyId2)
-		{
-			this->bodyId1 = bodyId1;
-			this->bodyId2 = bodyId2;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
 		}
 
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
+		CPU_FUNC BallAndSocketJoint(PdActor* a1, PdActor* a2)
 		{
-			Mat3f rotMat1 = body1_quat.toMatrix3x3();
-			Mat3f rotMat2 = body2_quat.toMatrix3x3();
-			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
-			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
 		}
 
 	public:
@@ -167,20 +203,32 @@ namespace dyno
 		{
 			this->bodyId1 = INVALID;
 			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
 		}
 
-		DYN_FUNC SliderJoint(int bodyId1, int bodyId2)
+		CPU_FUNC SliderJoint(PdActor* a1, PdActor* a2)
 		{
-			this->bodyId1 = bodyId1;
-			this->bodyId2 = bodyId2;
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
 		}
 
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
 		{
-			Mat3f rotMat1 = body1_quat.toMatrix3x3();
-			Mat3f rotMat2 = body2_quat.toMatrix3x3();
-			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
-			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
 		}
 
 		void setAxis(Vector<Real, 3> axis)
@@ -225,25 +273,38 @@ namespace dyno
 		{
 			this->bodyId1 = INVALID;
 			this->bodyId2 = INVALID;
-		}
-		DYN_FUNC HingeJoint(int bodyId1, int bodyId2)
-		{
-			this->bodyId1 = bodyId1;
-			this->bodyId2 = bodyId2;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
 		}
 
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
+		CPU_FUNC HingeJoint(PdActor* a1, PdActor* a2)
 		{
-			Mat3f rotMat1 = body1_quat.toMatrix3x3();
-			Mat3f rotMat2 = body2_quat.toMatrix3x3();
-			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
-			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
 		}
 
-		void setAxis(Vector<Real, 3> axis, Quat<Real> quat_1, Quat<Real> quat_2)
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
 		{
-			Mat3f rotMat1 = quat_1.toMatrix3x3();
-			Mat3f rotMat2 = quat_2.toMatrix3x3();
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+		}
+
+		void setAxis(Vector<Real, 3> axis)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
 			this->hingeAxisBody1 = rotMat1.inverse() * axis;
 			this->hingeAxisBody2 = rotMat2.inverse() * axis;
 		}
@@ -286,21 +347,34 @@ namespace dyno
 		{
 			this->bodyId1 = INVALID;
 			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
 		}
 
-		DYN_FUNC FixedJoint(int bodyId1, int bodyId2)
+		CPU_FUNC FixedJoint(PdActor* a1, PdActor* a2)
 		{
-			this->bodyId1 = bodyId1;
-			this->bodyId2 = bodyId2;
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
 		}
 
-		void setAnchorPoint(Vector<Real, 3>anchor_point, Vector<Real, 3> body1_pos, Vector<Real, 3>body2_pos, Quat<Real> body1_quat, Quat<Real> body2_quat)
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
 		{
-			Mat3f rotMat1 = body1_quat.toMatrix3x3();
-			Mat3f rotMat2 = body2_quat.toMatrix3x3();
-			this->r1 = rotMat1.inverse() * (anchor_point - body1_pos);
-			this->r2 = rotMat2.inverse() * (anchor_point - body2_pos);
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
 		}
+
 	public:
 		// anchor point position in body1 and body2 local space
 		Vector<Real, 3> r1;
@@ -316,11 +390,23 @@ namespace dyno
 		{
 			this->bodyId1 = INVALID;
 			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
 		}
-		PointJoint(int bodyId)
+		PointJoint(PdActor* a1)
 		{
-			this->bodyId1 = bodyId;
+			this->bodyId1 = a1->idx;
 			this->bodyId2 = INVALID;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = a1;
+			this->actor2 = nullptr;
 		}
 		void setAnchorPoint(Vector<Real, 3> point)
 		{

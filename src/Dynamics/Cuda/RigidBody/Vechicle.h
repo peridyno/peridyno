@@ -48,5 +48,13 @@ namespace dyno
 		DArray<int> mBindingTagDevice;
 	};
 
-	IMPLEMENT_TCLASS(Vechicle, TDataType)
+
+	template<typename TDataType>
+	class Jeep : virtual public Vechicle<TDataType>
+	{
+		DECLARE_TCLASS(Jeep, TDataType)
+	public:
+		Jeep();
+		~Jeep() override;
+	};
 }

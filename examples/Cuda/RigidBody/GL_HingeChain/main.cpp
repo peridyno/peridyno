@@ -42,8 +42,8 @@ std::shared_ptr<SceneGraph> creatBricks()
 		newbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 		auto newBoxActor = rigid->addBox(newbox, rigidBody);
 		auto& hingeJoint = rigid->createHingeJoint(oldBoxActor, newBoxActor);
-		hingeJoint.setAnchorPoint((oldbox.center + newbox.center) / 2, oldbox.center, newbox.center, oldbox.rot, newbox.rot);
-		hingeJoint.setAxis(Vec3f(0, 0, 1), oldbox.rot, newbox.rot);
+		hingeJoint.setAnchorPoint((oldbox.center + newbox.center) / 2);
+		hingeJoint.setAxis(Vec3f(0, 0, 1));
 		hingeJoint.setRange(-M_PI / 2, M_PI / 2);
 		oldbox = newbox;
 		oldBoxActor = newBoxActor;

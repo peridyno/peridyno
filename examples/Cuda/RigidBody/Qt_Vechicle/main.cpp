@@ -100,34 +100,34 @@ std::shared_ptr<SceneGraph> creatCar()
 
 		//front rear
 		auto& joint1 = jeep->createHingeJoint(frontLeftTireActor, frontLeftSteerActor);
-		joint1.setAnchorPoint(frontLeftTireActor->center, frontLeftTireActor->center, frontLeftSteerActor->center, frontLeftTireActor->rot, frontLeftSteerActor->rot);
+		joint1.setAnchorPoint(frontLeftTireActor->center);
 		joint1.setMoter(wheel_velocity);
-		joint1.setAxis(Vec3f(1, 0, 0), frontLeftTireActor->rot, frontLeftSteerActor->rot);
+		joint1.setAxis(Vec3f(1, 0, 0));
 
 		auto& joint2 = jeep->createHingeJoint(frontRightTireActor, frontRightSteerActor);
-		joint2.setAnchorPoint(frontRightTireActor->center, frontRightTireActor->center, frontRightSteerActor->center, frontRightTireActor->rot, frontRightSteerActor->rot);
+		joint2.setAnchorPoint(frontRightTireActor->center);
 		joint2.setMoter(wheel_velocity);
-		joint2.setAxis(Vec3f(1, 0, 0), frontRightTireActor->rot, frontRightSteerActor->rot);
+		joint2.setAxis(Vec3f(1, 0, 0));
 
 		//back rear
 		auto& joint3 = jeep->createHingeJoint(rearLeftTireActor, bodyActor);
-		joint3.setAnchorPoint(rearLeftTireActor->center, rearLeftTireActor->center, bodyActor->center, rearLeftTireActor->rot, bodyActor->rot);
+		joint3.setAnchorPoint(rearLeftTireActor->center);
 		joint3.setMoter(wheel_velocity);
-		joint3.setAxis(Vec3f(1, 0, 0), rearLeftTireActor->rot, bodyActor->rot);
+		joint3.setAxis(Vec3f(1, 0, 0));
 
 		auto& joint4 = jeep->createHingeJoint(rearRightTireActor, bodyActor);
-		joint4.setAnchorPoint(rearRightTireActor->center, rearRightTireActor->center, bodyActor->center, rearRightTireActor->rot, bodyActor->rot);
+		joint4.setAnchorPoint(rearRightTireActor->center);
 		joint4.setMoter(wheel_velocity);
-		joint4.setAxis(Vec3f(1, 0, 0), rearRightTireActor->rot, bodyActor->rot);
+		joint4.setAxis(Vec3f(1, 0, 0));
 
 
 		//FixedJoint<Real> joint5(0, 1);
 		auto& joint5 = jeep->createFixedJoint(bodyActor, spareTireActor);
-		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2, bodyActor->center, spareTireActor->center, bodyActor->rot, spareTireActor->rot);
+		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
 		auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
-		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2, bodyActor->center, frontLeftSteerActor->center, bodyActor->rot, frontLeftSteerActor->rot);
+		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
 		auto& joint7 = jeep->createFixedJoint(bodyActor, frontRightSteerActor);
-		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2, bodyActor->center, frontRightSteerActor->center, bodyActor->rot, frontRightSteerActor->rot);
+		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
 
 		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
 		jeep->bind(spareTireActor, Pair<uint, uint>(4, i));

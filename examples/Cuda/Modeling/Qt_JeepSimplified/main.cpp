@@ -142,13 +142,13 @@ std::shared_ptr<SceneGraph> creatScene()
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 
-	auto vechicle = scn->addNode(std::make_shared<Vechicle<DataType3f>>());
-	gltf->stateTextureMesh()->connect(vechicle->inTextureMesh());
+	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
+	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
 	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	vechicle->inTextureMesh()->connect(prRender->inTextureMesh());
-	vechicle->stateInstanceTransform()->connect(prRender->inTransform());
-	vechicle->graphicsPipeline()->pushModule(prRender);
+	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
+	jeep->stateInstanceTransform()->connect(prRender->inTransform());
+	jeep->graphicsPipeline()->pushModule(prRender);
 
 	// Import Road
 	auto road = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
@@ -158,15 +158,16 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto glRoad = road->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	glRoad->setColor(color);
 
+	road->outTriangleSet()->connect(jeep->inTriangleSet());
 
 	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
-	vechicle->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
-	vechicle->stateInstanceTransform()->connect(texMeshConverter->inTransform());
-	vechicle->animationPipeline()->pushModule(texMeshConverter);
+	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
+	jeep->stateInstanceTransform()->connect(texMeshConverter->inTransform());
+	jeep->animationPipeline()->pushModule(texMeshConverter);
 
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
-	vechicle->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
+	jeep->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
 	road->outTriangleSet()->connect(tsMerger->inSecond());
 
 	//*************************************** Cube Sample ***************************************//

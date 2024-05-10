@@ -42,7 +42,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		newBox.halfLength = oldBox.halfLength;
 		auto newBoxActor = rigid->addBox(newBox, rigidBody);
 		auto& ballAndSocketJoint = rigid->createBallAndSocketJoint(oldBoxActor, newBoxActor);
-		ballAndSocketJoint.setAnchorPoint((oldBox.center + newBox.center) / 2, oldBox.center, newBox.center, oldBox.rot, newBox.rot);
+		ballAndSocketJoint.setAnchorPoint((oldBox.center + newBox.center) / 2);
 		oldBox = newBox;
 		oldBoxActor = newBoxActor;
 	}

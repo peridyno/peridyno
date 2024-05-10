@@ -23,18 +23,6 @@
 #include <iostream>
 namespace dyno
 {
-	class PdActor
-	{
-	public:
-		int idx = -1;
-
-		ElementType shapeType = ET_Other;
-
-		Vec3f center;
-
-		Quat1f rot;
-	};
-
 	/*!
 	*	\class	RigidBodySystem
 	*	\brief	Implementation of a rigid body system containing a variety of rigid bodies with different shapes.
@@ -91,10 +79,7 @@ namespace dyno
 			std::shared_ptr<PdActor> actor1,
 			std::shared_ptr<PdActor> actor2)
 		{
-			BallAndSocketJoint joint(actor1->idx, actor2->idx);
-			joint.bodyType1 = actor1->shapeType;
-			joint.bodyType2 = actor2->shapeType;
-
+			BallAndSocketJoint joint(actor1.get(), actor2.get());
 			mHostJointsBallAndSocket.push_back(joint);
 
 			return mHostJointsBallAndSocket[mHostJointsBallAndSocket.size() - 1];
@@ -104,11 +89,7 @@ namespace dyno
 			std::shared_ptr<PdActor> actor1,
 			std::shared_ptr<PdActor> actor2)
 		{
-			SliderJoint joint(actor1->idx, actor2->idx);
-
-			joint.bodyType1 = actor1->shapeType;
-			joint.bodyType2 = actor2->shapeType;
-
+			SliderJoint joint(actor1.get(), actor2.get());
 			mHostJointsSlider.push_back(joint);
 
 			return mHostJointsSlider[mHostJointsSlider.size() - 1];
@@ -118,10 +99,7 @@ namespace dyno
 			std::shared_ptr<PdActor> actor1,
 			std::shared_ptr<PdActor> actor2)
 		{
-			HingeJoint joint(actor1->idx, actor2->idx);
-			joint.bodyType1 = actor1->shapeType;
-			joint.bodyType2 = actor2->shapeType;
-
+			HingeJoint joint(actor1.get(), actor2.get());
 			mHostJointsHinge.push_back(joint);
 
 			return mHostJointsHinge[mHostJointsHinge.size() - 1];
@@ -131,10 +109,7 @@ namespace dyno
 			std::shared_ptr<PdActor> actor1,
 			std::shared_ptr<PdActor> actor2)
 		{
-			FixedJoint joint(actor1->idx, actor2->idx);
-			joint.bodyType1 = actor1->shapeType;
-			joint.bodyType2 = actor2->shapeType;
-
+			FixedJoint joint(actor1.get(), actor2.get());
 			mHostJointsFixed.push_back(joint);
 
 			return mHostJointsFixed[mHostJointsFixed.size() - 1];
@@ -143,9 +118,7 @@ namespace dyno
 		PointJoint& createPointJoint(
 			std::shared_ptr<PdActor> actor1)
 		{
-			PointJoint joint(actor1->idx);
-			joint.bodyType1 = actor1->shapeType;
-
+			PointJoint joint(actor1.get());
 			mHostJointsPoint.push_back(joint);
 
 			return mHostJointsPoint[mHostJointsPoint.size() - 1];
