@@ -25,7 +25,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
 	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
+	rigidBody.linearVelocity = Vec3f(1.0, 0, 0);
 	BoxInfo box;
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)

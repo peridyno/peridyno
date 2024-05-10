@@ -28,10 +28,6 @@ namespace dyno
 		DECLARE_TCLASS(ContactsUnion, TDataType)
 	public:
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
-		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
-		typedef typename SliderJoint<Real> SliderJoint;
-		typedef typename HingeJoint<Real> HingeJoint;
-		typedef typename FixedJoint<Real> FixedJoint;
 
 		ContactsUnion() {};
 		~ContactsUnion() override {};
