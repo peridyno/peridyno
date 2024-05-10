@@ -1,5 +1,65 @@
 #include "PyTopology.h"
 
+#include "Topology/TextureMesh.h"
+void declare_texture_mesh(py::module& m) {
+	using Class = dyno::TextureMesh;
+	using Parent = dyno::TopologyModule;
+	std::string pyclass_name = std::string("TextureMesh");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+}
+
+void declare_attribute(py::module& m) {
+	using Class = dyno::Attribute;
+
+	std::string pyclass_name = std::string("Attribute");
+	py::class_<Class, std::shared_ptr<Class>>Attribute(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	Attribute.def(py::init<>())
+		.def("set_material_type", &Class::setMaterialType)
+		.def("set_kinematic_type", &Class::setKinematicType)
+		.def("set_object_id", &Class::setObjectId)
+
+		.def("material_type", &Class::materialType)
+		.def("kinematic_type", &Class::kinematicType)
+
+		.def("is_fluid", &Class::isFluid)
+		.def("is_rigid", &Class::isRigid)
+		.def("is_elastic", &Class::isElastic)
+		.def("is_plastic", &Class::isPlastic)
+
+		.def("set_fluid", &Class::setFluid)
+		.def("set_rigid", &Class::setRigid)
+		.def("set_elastic", &Class::setElastic)
+		.def("set_plastic", &Class::setPlastic)
+
+		.def("is_fixed", &Class::isFixed)
+		.def("is_passive", &Class::isPassive)
+		.def("is_dynamic", &Class::isDynamic)
+
+		.def("set_fixed", &Class::setFixed)
+		.def("set_passive", &Class::setPassive)
+		.def("set_dynamic", &Class::setDynamic)
+
+		.def("object_id", &Class::objectId);
+
+	py::enum_<typename Class::KinematicType>(Attribute, "KinematicType")
+		.value("KINEMATIC_MASK", Class::KinematicType::KINEMATIC_MASK)
+		.value("KINEMATIC_FIXED", Class::KinematicType::KINEMATIC_FIXED)
+		.value("KINEMATIC_PASSIVE", Class::KinematicType::KINEMATIC_PASSIVE)
+		.value("KINEMATIC_POSITIVE", Class::KinematicType::KINEMATIC_POSITIVE);
+
+	py::enum_<typename Class::MaterialType>(Attribute, "MaterialType")
+		.value("MATERIAL_MASK", Class::MaterialType::MATERIAL_MASK)
+		.value("MATERIAL_FLUID", Class::MaterialType::MATERIAL_FLUID)
+		.value("MATERIAL_RIGID", Class::MaterialType::MATERIAL_RIGID)
+		.value("MATERIAL_ELASTIC", Class::MaterialType::MATERIAL_ELASTIC)
+		.value("MATERIAL_PLASTIC", Class::MaterialType::MATERIAL_PLASTIC);
+
+	py::enum_<typename Class::ObjectID>(Attribute, "ObjectID")
+		.value("OBJECTID_MASK", Class::ObjectID::OBJECTID_MASK)
+		.value("OBJECTID_INVALID", Class::ObjectID::OBJECTID_INVALID);
+}
+
 void pybind_topology(py::module& m)
 {
 	declare_pointset<dyno::DataType3f>(m, "3f");
@@ -74,4 +134,7 @@ void pybind_topology(py::module& m)
 		.value("CN_JOINT_NO_MOVE_2", dyno::ConstraintType::CN_JOINT_NO_MOVE_2)
 		.value("CN_JOINT_NO_MOVE_3", dyno::ConstraintType::CN_JOINT_NO_MOVE_3)
 		.value("CN_UNKNOWN", dyno::ConstraintType::CN_UNKNOWN);
+
+	declare_texture_mesh(m);
+	declare_attribute(m);
 }

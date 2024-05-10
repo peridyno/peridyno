@@ -528,10 +528,6 @@ void declare_static_boundary(py::module& m, std::string typestr) {
 		.def("import_rigid_bodys", &Class::importRigidBodys, py::return_value_policy::reference);
 }
 
-void declare_func(py::module& m, std::string typestr);
-
-void declare_attribute(py::module& m, std::string typestr);
-
 void declare_particle_system_initializer(py::module& m);
 
 void declare_particle_type(py::module& m);

@@ -10,6 +10,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_io(m);
 	pybind_modeling(m);
 	pybind_topology(m);
+	pybind_expand(m);
 
 	pybind_particle_system(m);
 	pybind_rigid_body(m);

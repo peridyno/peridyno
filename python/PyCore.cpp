@@ -43,4 +43,9 @@ void pybind_core(py::module& m)
 		.def_readwrite("v", &dyno::TOrientedBox3D<Real>::v)
 		.def_readwrite("w", &dyno::TOrientedBox3D<Real>::w)
 		.def_readwrite("extent", &dyno::TOrientedBox3D<Real>::extent);
+
+	//for GL_GhostSPH sample
+	py::bind_vector<std::vector<dyno::Vec3f>>(m, "VectorVec3f", py::module_local(false))
+		.def(py::init());
+	py::bind_vector<std::vector<dyno::Attribute>>(m, "VectorAttribute", py::module_local(false));
 }

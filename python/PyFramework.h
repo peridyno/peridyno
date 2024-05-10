@@ -13,10 +13,12 @@
 
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"
+#include "Module/KeyboardInputModule.h"
 
 #include "Topology/PointSet.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/EdgeSet.h"
+#include "Topology/TextureMesh.h"
 
 #include "Module/TopologyMapping.h"
 #include "PlaneModel.h"
@@ -36,6 +38,8 @@
 #include "HeightField/Ocean.h"
 #include "HeightField/OceanPatch.h"
 #include "HeightField/GranularMedia.h"
+
+#include "RigidBody/RigidBody.h"
 
 #include "SceneGraph.h"
 #include "Log.h"
@@ -73,6 +77,7 @@ using Object = dyno::Object;
 using DataSource = dyno::DataSource;
 using CollisionMask = dyno::CollisionMask;
 using Vec3f = dyno::Vec3f;
+using KeyboardInputModule = dyno::KeyboardInputModule;
 
 using uint = unsigned int;
 using uchar = unsigned char;

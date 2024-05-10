@@ -270,6 +270,10 @@ void pybind_framework(py::module& m)
 	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
 		.def("get_module_type", &InputModule::getModuleType);
 
+	py::class_<KeyboardInputModule, InputModule, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
+		.def("enqueue_event", &KeyboardInputModule::enqueueEvent)
+		.def("var_cache_event", &KeyboardInputModule::varCacheEvent);
+
 	py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
 		.def("var_output_path", &OutputModule::varOutputPath, py::return_value_policy::reference)
 		.def("var_prefix", &OutputModule::varPrefix, py::return_value_policy::reference)
@@ -404,6 +408,7 @@ void pybind_framework(py::module& m)
 	declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
 	declare_var<dyno::FilePath>(m, "FilePath");
 	declare_var<dyno::Color>(m, "Color");
+	declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
 	py::class_<dyno::FVar<dyno::PEnum>, FBase, std::shared_ptr<dyno::FVar<dyno::PEnum>>>(m, "FVarPEnum")
 		.def(py::init<>())
 		.def("size", &dyno::FVar<dyno::PEnum>::size)
@@ -421,6 +426,7 @@ void pybind_framework(py::module& m)
 	declare_array<Vec3f, DeviceType::GPU>(m, "3fD");
 	declare_array<CollisionMask, DeviceType::GPU>(m, "CollisionMask");
 	declare_array<dyno::TContactPair<float>, DeviceType::GPU>(m, "TContactPair");
+	declare_array<dyno::Attribute, DeviceType::GPU>(m, "Attribute");
 
 	declare_array_list<int, DeviceType::GPU>(m, "1D");
 	declare_array_list<float, DeviceType::GPU>(m, "1fD");
@@ -432,6 +438,7 @@ void pybind_framework(py::module& m)
 	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
 	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
 	declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
+	declare_instance<dyno::TextureMesh>(m, "TextureMesh");
 
 	// New
 	declare_parametric_model<dyno::DataType3f>(m, "3f");

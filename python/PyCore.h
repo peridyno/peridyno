@@ -3,6 +3,8 @@
 
 #include <pybind11/stl.h>
 
+#include "Collision/Attribute.h"
+
 #include "Timer.h"
 #include "Vector.h"
 #include "Matrix.h"

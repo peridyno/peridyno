@@ -1,20 +1,5 @@
 #include "PyParticleSystem.h"
 
-void declare_func(py::module& m, std::string typestr) {
-	using Class = dyno::Attribute;
-}
-
-void declare_attribute(py::module& m, std::string typestr) {
-	using Class = dyno::Attribute;
-
-	std::string pyclass_name = std::string("Attribute") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("set_fluid", &Class::setFluid)
-		.def("set_dynamic", &Class::setDynamic);
-}
-
-
 #include "ParticleSystem/initializeParticleSystem.h"
 void declare_particle_system_initializer(py::module& m) {
 	using Class = dyno::ParticleSystemInitializer;
@@ -36,11 +21,8 @@ void declare_particle_type(py::module& m) {
 		.def("is_real", &Class::IsReal);
 }
 
-
 void pybind_particle_system(py::module& m)
 {
-	declare_func(m, "");
-	declare_attribute(m, "");
 	declare_approximate_implicit_viscosity<dyno::DataType3f>(m, "3f");
 	declare_boundary_constraint<dyno::DataType3f>(m, "3f");
 	declare_implicit_viscosity<dyno::DataType3f>(m, "3f");
