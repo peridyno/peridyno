@@ -27,23 +27,24 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	BoxInfo newBox, oldBox;
 	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(1, 0.0, 1.0);
+	rigidBody.bodyId = 1;
+	rigidBody.linearVelocity = Vec3f(1, 0.0, 0.0);
 	oldBox.center = Vec3f(0, 0.1, 0);
 	oldBox.halfLength = Vec3f(0.05, 0.05, 0.05);
-	rigid->addBox(oldBox, rigidBody);
+	auto oldBoxActor = rigid->addBox(oldBox, rigidBody);
 
 	
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		rigidBody.linearVelocity = Vec3f(0, 0, 0);
 		newBox.center = oldBox.center + Vec3f(0.0, 0.12f, 0.0);
 		newBox.halfLength = oldBox.halfLength;
-		rigid->addBox(newBox, rigidBody);
-		BallAndSocketJoint<Real> joint(i, i + 1);
-		joint.setAnchorPoint(oldBox.center + Vec3f(0.0, 0.06f, 0.0), oldBox.center, newBox.center, oldBox.rot, newBox.rot);
-		rigid->addBallAndSocketJoint(joint);
+		auto newBoxActor = rigid->addBox(newBox, rigidBody);
+		auto& ballAndSocketJoint = rigid->createBallAndSocketJoint(oldBoxActor, newBoxActor);
+		ballAndSocketJoint.setAnchorPoint((oldBox.center + newBox.center) / 2);
 		oldBox = newBox;
+		oldBoxActor = newBoxActor;
 	}
 
 
@@ -89,20 +90,20 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
 	//Visualize Anchor point for joint
-	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
-	rigid->stateCenter()->connect(anchorPointMapper->inCenter());
-	rigid->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
-	rigid->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
-	//rigid->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
-	//rigid->stateHingeJoints()->connect(anchorPointMapper->inHingeJoints());
-	//rigid->stateFixedJoints()->connect(anchorPointMapper->inFixedJoints());
-	rigid->graphicsPipeline()->pushModule(anchorPointMapper);
-
-	auto pointRender2 = std::make_shared<GLPointVisualModule>();
-	pointRender2->setColor(Color(1, 0, 0));
-	pointRender2->varPointSize()->setValue(0.002f);
-	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
-	rigid->graphicsPipeline()->pushModule(pointRender2);
+// 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
+// 	rigid->stateCenter()->connect(anchorPointMapper->inCenter());
+// 	rigid->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
+// 	rigid->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
+// 	//rigid->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
+// 	//rigid->stateHingeJoints()->connect(anchorPointMapper->inHingeJoints());
+// 	//rigid->stateFixedJoints()->connect(anchorPointMapper->inFixedJoints());
+// 	rigid->graphicsPipeline()->pushModule(anchorPointMapper);
+// 
+// 	auto pointRender2 = std::make_shared<GLPointVisualModule>();
+// 	pointRender2->setColor(Color(1, 0, 0));
+// 	pointRender2->varPointSize()->setValue(0.002f);
+// 	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
+// 	rigid->graphicsPipeline()->pushModule(pointRender2);
 
 	return scn;
 }

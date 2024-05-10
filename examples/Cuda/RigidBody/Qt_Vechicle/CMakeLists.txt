@@ -3,5 +3,5 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
         RigidBody
         Modeling
         QtGUI)
-    add_example(GL_Car RigidBody LIB_DEPENDENCY)
+    add_example(Qt_Vechicle RigidBody LIB_DEPENDENCY)
 endif()

@@ -17,7 +17,6 @@
 #include "Node.h"
 #include "RigidBodyShared.h"
 
-#include "Topology/Joint.h"
 #include "Collision/Attribute.h"
 
 #include <vector>
@@ -30,7 +29,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class RigidBodySystem : public Node
+	class RigidBodySystem : virtual public Node
 	{
 		DECLARE_TCLASS(RigidBodySystem, TDataType)
 	public:
@@ -54,49 +53,78 @@ namespace dyno
 		RigidBodySystem();
 		~RigidBodySystem() override;
 
-		void addBox(
+		std::shared_ptr<PdActor> addBox(
 			const BoxInfo& box, 
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
-		void addSphere(
+		std::shared_ptr<PdActor> addSphere(
 			const SphereInfo& sphere,
 			const RigidBodyInfo& bodyDef, 
 			const Real density = Real(100));
 
-		void addTet(
+		std::shared_ptr<PdActor> addTet(
 			const TetInfo& tet,
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
-		void addCapsule(
+		std::shared_ptr<PdActor> addCapsule(
 			const CapsuleInfo& capsule,
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
-		void addBallAndSocketJoint(
-			const BallAndSocketJoint& joint
-		);
 
-		void addSliderJoint(
-			const SliderJoint& joint
-		);
 
-		void addHingeJoint(
-			const HingeJoint& joint
-		);
+		BallAndSocketJoint& createBallAndSocketJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			BallAndSocketJoint joint(actor1.get(), actor2.get());
+			mHostJointsBallAndSocket.push_back(joint);
 
-		void addFixedJoint(
-			const FixedJoint& joint
-		);
+			return mHostJointsBallAndSocket[mHostJointsBallAndSocket.size() - 1];
+		}
 
-		void addPointJoint(
-			const PointJoint& joint
-		);
+		SliderJoint& createSliderJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			SliderJoint joint(actor1.get(), actor2.get());
+			mHostJointsSlider.push_back(joint);
+
+			return mHostJointsSlider[mHostJointsSlider.size() - 1];
+		}
+
+		HingeJoint& createHingeJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			HingeJoint joint(actor1.get(), actor2.get());
+			mHostJointsHinge.push_back(joint);
+
+			return mHostJointsHinge[mHostJointsHinge.size() - 1];
+		}
+
+		FixedJoint& createFixedJoint(
+			std::shared_ptr<PdActor> actor1,
+			std::shared_ptr<PdActor> actor2)
+		{
+			FixedJoint joint(actor1.get(), actor2.get());
+			mHostJointsFixed.push_back(joint);
+
+			return mHostJointsFixed[mHostJointsFixed.size() - 1];
+		}
+
+		PointJoint& createPointJoint(
+			std::shared_ptr<PdActor> actor1)
+		{
+			PointJoint joint(actor1.get());
+			mHostJointsPoint.push_back(joint);
+
+			return mHostJointsPoint[mHostJointsPoint.size() - 1];
+		}
 
 		Mat3f pointInertia(Coord v1);
-
-		Real getDt() override { return 0.001; }
 
 	protected:
 		void resetStates() override;
@@ -110,7 +138,7 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 300, "");
+		DEF_VAR(Real, FrictionCoefficient, 1000, "");
 
 		DEF_VAR(Real, Slop, 0.001, "");
 
@@ -156,16 +184,6 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Matrix, InitialInertia, DeviceType::GPU, "Initial inertia matrix");
 
-		DEF_ARRAY_STATE(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
-
-		DEF_ARRAY_STATE(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
-
-		DEF_ARRAY_STATE(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
-
-		DEF_ARRAY_STATE(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
-
-		DEF_ARRAY_STATE(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
-
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
@@ -199,12 +217,5 @@ namespace dyno
 
 		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
-
-		//float m_damping = 0.9f;
-
-		float m_yaw;
-		float m_pitch;
-		float m_roll;
-		float m_recoverSpeed;
 	};
 }

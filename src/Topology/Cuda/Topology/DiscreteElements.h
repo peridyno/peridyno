@@ -48,6 +48,26 @@ namespace dyno
 			triEnd = endIndex;
 		}
 
+		DYN_FUNC inline uint checkElementOffset(ElementType eleType)
+		{
+			if (eleType == ET_SPHERE)
+				return sphereStart;
+
+			if (eleType == ET_BOX)
+				return boxStart;
+
+			if (eleType == ET_TET)
+				return tetStart;
+
+			if (eleType == ET_CAPSULE)
+				return capStart;
+
+			if (eleType == ET_TRI)
+				return triStart;
+
+			return 0;
+		}
+
 		DYN_FUNC inline ElementType checkElementType(uint id)
 		{
 			if (id >= sphereStart && id < sphereEnd)
@@ -79,6 +99,326 @@ namespace dyno
 		uint triEnd;
 	};
 
+	class PdActor
+	{
+	public:
+		int idx = INVALID;
+
+		ElementType shapeType = ET_Other;
+
+		Vec3f center;
+
+		Quat1f rot;
+	};
+
+	template<typename Real>
+	class Joint
+	{
+	public:
+		DYN_FUNC Joint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+
+		CPU_FUNC Joint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+
+	public:
+		int bodyId1;
+		int bodyId2;
+
+		ElementType bodyType1;
+		ElementType bodyType2;
+
+		//The following two pointers should only be visited from host codes.
+		PdActor* actor1 = nullptr;
+		PdActor* actor2 = nullptr;
+	};
+
+
+	template<typename Real>
+	class BallAndSocketJoint : public Joint<Real>
+	{
+	public:
+		DYN_FUNC BallAndSocketJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+
+		CPU_FUNC BallAndSocketJoint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+		}
+
+	public:
+		// anchor point in body1 local space
+		Vector<Real, 3> r1;
+		// anchor point in body2 local space
+		Vector<Real, 3> r2;
+	};
+
+	template<typename Real>
+	class SliderJoint : public Joint<Real>
+	{
+	public:
+		DYN_FUNC SliderJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+
+		CPU_FUNC SliderJoint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+		}
+
+		void setAxis(Vector<Real, 3> axis)
+		{
+			this->sliderAxis = axis;
+		}
+
+		void setMoter(Real v_moter)
+		{
+			this->useMoter = true;
+			this->v_moter = v_moter;
+		}
+
+		void setRange(Real d_min, Real d_max)
+		{
+			this->d_min = d_min;
+			this->d_max = d_max;
+			this->useRange = true;
+		}
+
+
+	public:
+		bool useRange = false;
+		bool useMoter = false;
+		// motion range
+		Real d_min;
+		Real d_max;
+		Real v_moter;
+		// anchor point position in body1 and body2 local space
+		Vector<Real, 3> r1;
+		Vector<Real, 3> r2;
+		// slider axis in body1 local space
+		Vector<Real, 3> sliderAxis;
+	};
+
+
+	template<typename Real>
+	class HingeJoint : public Joint<Real>
+	{
+	public:
+		DYN_FUNC HingeJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+
+		CPU_FUNC HingeJoint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+		}
+
+		void setAxis(Vector<Real, 3> axis)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->hingeAxisBody1 = rotMat1.inverse() * axis;
+			this->hingeAxisBody2 = rotMat2.inverse() * axis;
+		}
+
+		void setRange(Real theta_min, Real theta_max)
+		{
+			this->d_min = theta_min;
+			this->d_max = theta_max;
+			this->useRange = true;
+		}
+
+		void setMoter(Real v_moter)
+		{
+			this->v_moter = v_moter;
+			this->useMoter = true;
+		}
+
+	public:
+		// motion range
+		Real d_min;
+		Real d_max;
+		Real v_moter;
+		// anchor point position in body1 and body2 local space
+		Vector<Real, 3> r1;
+		Vector<Real, 3> r2;
+
+		// axis a in body local space
+		Vector<Real, 3> hingeAxisBody1;
+		Vector<Real, 3> hingeAxisBody2;
+
+		bool useMoter = false;
+		bool useRange = false;
+	};
+
+	template<typename Real>
+	class FixedJoint : public Joint<Real>
+	{
+	public:
+		DYN_FUNC FixedJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+
+		CPU_FUNC FixedJoint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+
+		void setAnchorPoint(Vector<Real, 3>anchor_point)
+		{
+			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
+			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
+			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+		}
+
+	public:
+		// anchor point position in body1 and body2 local space
+		Vector<Real, 3> r1;
+		Vector<Real, 3> r2;
+	};
+
+
+	template<typename Real>
+	class PointJoint : public Joint<Real>
+	{
+	public:
+		PointJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+		PointJoint(PdActor* a1)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = a1;
+			this->actor2 = nullptr;
+		}
+		void setAnchorPoint(Vector<Real, 3> point)
+		{
+			this->anchorPoint = point;
+		}
+
+	public:
+		Vector<Real, 3> anchorPoint;
+
+	};
+
+
 	/**
 	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle
 	 */
@@ -95,12 +435,20 @@ namespace dyno
 		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 		typedef typename ::dyno::TTet3D<Real> Tet3D;
 
+		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename SliderJoint<Real> SliderJoint;
+		typedef typename HingeJoint<Real> HingeJoint;
+		typedef typename FixedJoint<Real> FixedJoint;
+		typedef typename PointJoint<Real> PointJoint;
+
 		DiscreteElements();
 		~DiscreteElements() override;
 
 		void scale(Real s);
 
 		uint totalSize();
+
+		uint totalJointSize();
 
 		uint sphereIndex();
 		uint boxIndex();
@@ -123,6 +471,12 @@ namespace dyno
 		DArray<Capsule3D>&	getCaps() { return m_caps; }
 		DArray<Triangle3D>& getTris() { return m_tris; }
 
+		DArray<BallAndSocketJoint>& ballAndSocketJoints() { return mBallAndSocketJoints; };
+		DArray<SliderJoint>& sliderJoints() { return mSliderJoints; };
+		DArray<HingeJoint>& hingeJoints() { return mHingeJoints; };
+		DArray<FixedJoint>& fixedJoints() { return mFixedJoints; };
+		DArray<PointJoint>& pointJoints() { return mPointJoints; };
+
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
 
@@ -136,6 +490,12 @@ namespace dyno
 		DArray<Tet3D> m_tets;
 		DArray<Capsule3D> m_caps;
 		DArray<Triangle3D> m_tris;
+
+		DArray<BallAndSocketJoint> mBallAndSocketJoints;
+		DArray<SliderJoint> mSliderJoints;
+		DArray<HingeJoint> mHingeJoints;
+		DArray<FixedJoint> mFixedJoints;
+		DArray<PointJoint> mPointJoints;
 		
 		DArray<Real> m_tet_sdf;
 		DArray<int> m_tet_body_mapping;

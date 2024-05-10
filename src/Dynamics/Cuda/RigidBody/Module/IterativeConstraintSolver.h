@@ -12,11 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Updates: 
+ *  - 2024-4-9:  Add position-based solver by Liang Ruikai
  */
 #pragma once
 #include "Module/ConstraintModule.h"
-#include "RigidBodyShared.h"
-#include "Topology/Joint.h"
+#include "RigidBody/RigidBodyShared.h"
+
+#include "Topology/DiscreteElements.h"
 
 namespace dyno
 {
@@ -53,11 +57,13 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 0.1, "");
+		DEF_VAR(Real, FrictionCoefficient, 100, "");
 
-		DEF_VAR(Real, Slop, 0.0001, "");
+		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(uint, IterationNumber, 30, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 20, "");
+
+		DEF_VAR(uint, IterationNumberForPositionSolver, 50, "");
 
 
 	public:
@@ -81,25 +87,21 @@ namespace dyno
 
 		DEF_ARRAY_IN(ContactPair, Contacts, DeviceType::GPU, "");
 
-		DEF_ARRAY_IN(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
-
-		DEF_ARRAY_IN(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
-
-		DEF_ARRAY_IN(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
-
-		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
-
-		DEF_ARRAY_IN(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
+		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
 	protected:
 		void constrain() override;
 
 	private:
 		void initializeJacobian(Real dt);
+		void initializeJacobianForNGS(Real dt);
 
 	private:
 		DArray<Coord> mJ;		//Jacobian
 		DArray<Coord> mB;		//B = M^{-1}J^T
+
+		DArray<Coord> mJ_p;		//Jacobian
+		DArray<Coord> mB_p;		//B = M^{-1}J^T
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
@@ -108,13 +110,21 @@ namespace dyno
 		DArray<Real> mD;		//diagonal elements of JB
 		DArray<Real> mLambda;	//contact impulse
 
+		DArray<Real> mEta_p;		//eta
+		DArray<Real> mD_p;			//diagonal elements of JB
+
 		DArray<Real> mLambda_old;
+
+		DArray<ContactPair> mContactsInLocalFrame;
 
 		DArray<Real> mDiff;
 		CArray<Real> mDiffHost;
 
+		DArray<Constraint> mPositionConstraints;
+		DArray<Constraint> mVelocityConstraints;
 
-		DArray<Constraint> mAllConstraints;
+		DArray<Coord> mCenterPre;
+		DArray<TQuat> mQuatPre;
 
 		DArray<int> mContactNumber;
 		DArray<int> mJointNumber;

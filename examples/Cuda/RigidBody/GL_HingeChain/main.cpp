@@ -33,26 +33,25 @@ std::shared_ptr<SceneGraph> creatBricks()
 	oldbox.halfLength = Vec3f(0.02, 0.09, 0.02);
 	oldbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	rigid->addBox(oldbox, rigidBody);
+	auto oldBoxActor = rigid->addBox(oldbox, rigidBody);
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	for (int i = 0; i < 30; i++)
 	{
 		newbox.center = oldbox.center + Vec3f(0.2, 0, 0);
 		newbox.halfLength = oldbox.halfLength;
 		newbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		rigid->addBox(newbox, rigidBody);
-		HingeJoint<Real> joint(i, i + 1);
-		joint.setAnchorPoint(oldbox.center + Vec3f(0.1, 0, 0), oldbox.center, newbox.center, oldbox.rot, newbox.rot);
-		joint.setAxis(Vec3f(0, 0, 1), oldbox.rot, newbox.rot);
-		joint.setRange(-M_PI*2/3, M_PI*2/3);
-		rigid->addHingeJoint(joint);
+		auto newBoxActor = rigid->addBox(newbox, rigidBody);
+		auto& hingeJoint = rigid->createHingeJoint(oldBoxActor, newBoxActor);
+		hingeJoint.setAnchorPoint((oldbox.center + newbox.center) / 2);
+		hingeJoint.setAxis(Vec3f(0, 0, 1));
+		hingeJoint.setRange(-M_PI / 2, M_PI / 2);
 		oldbox = newbox;
+		oldBoxActor = newBoxActor;
 
 		if (i == 29)
 		{
-			PointJoint<Real> joint(i + 1);
-			joint.setAnchorPoint(newbox.center);
-			rigid->addPointJoint(joint);
+			auto& pointJoint = rigid->createPointJoint(newBoxActor);
+			pointJoint.setAnchorPoint(newbox.center);
 		}
 	}
 
@@ -65,27 +64,13 @@ std::shared_ptr<SceneGraph> creatBricks()
 			rigid->addBox(box, rigidBody);
 		}
 	
-
-
-
-
-
-
-	
-
-	
-
-
-
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-	sRender->setAlpha(0.8f);
-	sRender->setRoughness(0.7f);
-	sRender->setMetallic(3.0f);
+	sRender->setColor(Color(1, 1, 0));
+	sRender->setAlpha(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -98,7 +83,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactMapper->inContacts());
-	contactMapper->varScale()->setValue(0.00002);
+	contactMapper->varScale()->setValue(0.02);
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
@@ -113,7 +98,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
 	pointRender->setColor(Color(1, 0, 0));
-	pointRender->varPointSize()->setValue(0.00003f);
+	pointRender->varPointSize()->setValue(0.003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
@@ -121,10 +106,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
 	rigid->stateCenter()->connect(anchorPointMapper->inCenter());
 	rigid->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
-	rigid->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
-	rigid->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
-	//rigid->stateHingeJoints()->connect(anchorPointMapper->inHingeJoints());
-	//rigid->stateFixedJoints()->connect(anchorPointMapper->inFixedJoints());
+	rigid->stateTopology()->connect(anchorPointMapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(anchorPointMapper);
 
 	auto pointRender2 = std::make_shared<GLPointVisualModule>();

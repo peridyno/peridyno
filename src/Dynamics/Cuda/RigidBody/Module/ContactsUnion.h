@@ -18,7 +18,7 @@
 #include "Collision/CollisionData.h"
 
 #include "Module/ComputeModule.h"
-#include "Topology/Joint.h"
+#include "Topology/DiscreteElements.h"
 
 namespace dyno 
 {
@@ -28,35 +28,19 @@ namespace dyno
 		DECLARE_TCLASS(ContactsUnion, TDataType)
 	public:
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
-		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
-		typedef typename SliderJoint<Real> SliderJoint;
-		typedef typename HingeJoint<Real> HingeJoint;
-		typedef typename FixedJoint<Real> FixedJoint;
 
 		ContactsUnion() {};
 		~ContactsUnion() override {};
 
-		void compute() override;
-
-		void filterArray(CArray<int>& mapMatrix, CArray<ContactPair>& contactsA, CArray<ContactPair>& contactsB, CArray<ContactPair>&contactsC, int bodynum);
-
 	public:
-		DEF_ARRAY_IN(Real, Mass, DeviceType::GPU, "Mass of rigid bodies");
-
-		DEF_ARRAY_IN(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
-
-		DEF_ARRAY_IN(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
-
-		DEF_ARRAY_IN(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
-
-		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
-
 		DEF_ARRAY_IN(ContactPair, ContactsA, DeviceType::GPU, "");
 		DEF_ARRAY_IN(ContactPair, ContactsB, DeviceType::GPU, "");
 
 		DEF_ARRAY_OUT(ContactPair, Contacts, DeviceType::GPU, "");
 
 	protected:
+		void compute() override;
+
 		bool validateInputs() override;
 	};
 }
