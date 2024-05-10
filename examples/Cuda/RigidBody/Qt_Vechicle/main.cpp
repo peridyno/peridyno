@@ -178,18 +178,18 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->graphicsPipeline()->pushModule(wireRender);
 
 	//Visualize Anchor point for joint
-	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
-	jeep->stateCenter()->connect(anchorPointMapper->inCenter());
-	jeep->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
-	jeep->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
-	jeep->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
-	jeep->graphicsPipeline()->pushModule(anchorPointMapper);
-
-	auto pointRender2 = std::make_shared<GLPointVisualModule>();
-	pointRender2->setColor(Color(1, 0, 0));
-	pointRender2->varPointSize()->setValue(0.03f);
-	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
-	jeep->graphicsPipeline()->pushModule(pointRender2);
+// 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
+// 	jeep->stateCenter()->connect(anchorPointMapper->inCenter());
+// 	jeep->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
+// 	jeep->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
+// 	jeep->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
+// 	jeep->graphicsPipeline()->pushModule(anchorPointMapper);
+// 
+// 	auto pointRender2 = std::make_shared<GLPointVisualModule>();
+// 	pointRender2->setColor(Color(1, 0, 0));
+// 	pointRender2->varPointSize()->setValue(0.03f);
+// 	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
+// 	jeep->graphicsPipeline()->pushModule(pointRender2);
 
 
 // 	//Visualize contact points
@@ -216,6 +216,10 @@ int main()
 	QtApp app;
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
+
+	//Set the distance unit for the camera, the fault unit is meter
+	app.renderWindow()->getCamera()->setUnitScale(3.0f);
+
 	app.mainLoop();
 
 	return 0;

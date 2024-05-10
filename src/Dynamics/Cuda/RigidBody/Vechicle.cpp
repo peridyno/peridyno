@@ -46,7 +46,6 @@ namespace dyno
 		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
-		this->stateMass()->connect(merge->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
 		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
@@ -55,17 +54,7 @@ namespace dyno
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
 
-		this->stateBallAndSocketJoints()->connect(iterSolver->inBallAndSocketJoints());
-		this->stateSliderJoints()->connect(iterSolver->inSliderJoints());
-		this->stateHingeJoints()->connect(iterSolver->inHingeJoints());
-		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
-		this->statePointJoints()->connect(iterSolver->inPointJoints());
-
-		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
-		this->stateSliderJoints()->connect(merge->inSliderJoints());
-		this->stateHingeJoints()->connect(merge->inHingeJoints());
-		this->stateFixedJoints()->connect(merge->inFixedJoints());
-
+		this->stateTopology()->connect(iterSolver->inDiscreteElements());
 
 		merge->outContacts()->connect(iterSolver->inContacts());
 

@@ -349,12 +349,20 @@ namespace dyno
 		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 		typedef typename ::dyno::TTet3D<Real> Tet3D;
 
+		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename SliderJoint<Real> SliderJoint;
+		typedef typename HingeJoint<Real> HingeJoint;
+		typedef typename FixedJoint<Real> FixedJoint;
+		typedef typename PointJoint<Real> PointJoint;
+
 		DiscreteElements();
 		~DiscreteElements() override;
 
 		void scale(Real s);
 
 		uint totalSize();
+
+		uint totalJointSize();
 
 		uint sphereIndex();
 		uint boxIndex();
@@ -377,6 +385,12 @@ namespace dyno
 		DArray<Capsule3D>&	getCaps() { return m_caps; }
 		DArray<Triangle3D>& getTris() { return m_tris; }
 
+		DArray<BallAndSocketJoint>& ballAndSocketJoints() { return mBallAndSocketJoints; };
+		DArray<SliderJoint>& sliderJoints() { return mSliderJoints; };
+		DArray<HingeJoint>& hingeJoints() { return mHingeJoints; };
+		DArray<FixedJoint>& fixedJoints() { return mFixedJoints; };
+		DArray<PointJoint>& pointJoints() { return mPointJoints; };
+
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
 
@@ -390,6 +404,12 @@ namespace dyno
 		DArray<Tet3D> m_tets;
 		DArray<Capsule3D> m_caps;
 		DArray<Triangle3D> m_tris;
+
+		DArray<BallAndSocketJoint> mBallAndSocketJoints;
+		DArray<SliderJoint> mSliderJoints;
+		DArray<HingeJoint> mHingeJoints;
+		DArray<FixedJoint> mFixedJoints;
+		DArray<PointJoint> mPointJoints;
 		
 		DArray<Real> m_tet_sdf;
 		DArray<int> m_tet_body_mapping;

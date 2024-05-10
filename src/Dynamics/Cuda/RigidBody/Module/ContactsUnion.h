@@ -36,27 +36,15 @@ namespace dyno
 		ContactsUnion() {};
 		~ContactsUnion() override {};
 
-		void compute() override;
-
-		void filterArray(CArray<int>& mapMatrix, CArray<ContactPair>& contactsA, CArray<ContactPair>& contactsB, CArray<ContactPair>&contactsC, int bodynum);
-
 	public:
-		DEF_ARRAY_IN(Real, Mass, DeviceType::GPU, "Mass of rigid bodies");
-
-		DEF_ARRAY_IN(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
-
-		DEF_ARRAY_IN(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
-
-		DEF_ARRAY_IN(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
-
-		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
-
 		DEF_ARRAY_IN(ContactPair, ContactsA, DeviceType::GPU, "");
 		DEF_ARRAY_IN(ContactPair, ContactsB, DeviceType::GPU, "");
 
 		DEF_ARRAY_OUT(ContactPair, Contacts, DeviceType::GPU, "");
 
 	protected:
+		void compute() override;
+
 		bool validateInputs() override;
 	};
 }

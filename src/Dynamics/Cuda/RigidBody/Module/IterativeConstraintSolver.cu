@@ -9,11 +9,6 @@ namespace dyno
 		: ConstraintModule()
 	{
 		this->inContacts()->tagOptional(true);
-		this->inBallAndSocketJoints()->tagOptional(true);
-		this->inSliderJoints()->tagOptional(true);
-		this->inHingeJoints()->tagOptional(true);
-		this->inFixedJoints()->tagOptional(true);
-		this->inPointJoints()->tagOptional(true);
 	}
 
 	template<typename TDataType>
@@ -1106,12 +1101,13 @@ namespace dyno
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
 
+		auto topo = this->inDiscreteElements()->constDataPtr();
 
-		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
-		int sliderJoint_size = this->inSliderJoints()->size();
-		int hingeJoint_size = this->inHingeJoints()->size();
-		int fixedJoint_size = this->inFixedJoints()->size();
-		int pointJoint_size = this->inPointJoints()->size();
+		int ballAndSocketJoint_size = topo->ballAndSocketJoints().size();
+		int sliderJoint_size = topo->sliderJoints().size();
+		int hingeJoint_size = topo->hingeJoints().size();
+		int fixedJoint_size = topo->fixedJoints().size();
+		int pointJoint_size = topo->pointJoints().size();
 
 		if (this->varFrictionEnabled()->getData())
 		{
@@ -1172,7 +1168,7 @@ namespace dyno
 
 		if (ballAndSocketJoint_size != 0)
 		{
-			auto& joints = this->inBallAndSocketJoints()->getData();
+			auto& joints = topo->ballAndSocketJoints();
 			int begin_index = contact_size;
 
 			if (this->varFrictionEnabled()->getData())
@@ -1191,7 +1187,7 @@ namespace dyno
 
 		if (sliderJoint_size != 0)
 		{
-			auto& joints = this->inSliderJoints()->getData();
+			auto& joints = topo->sliderJoints();
 			int begin_index = contact_size;
 
 			if (this->varFrictionEnabled()->getData())
@@ -1211,7 +1207,7 @@ namespace dyno
 
 		if (hingeJoint_size != 0)
 		{
-			auto& joints = this->inHingeJoints()->getData();
+			auto& joints = topo->hingeJoints();
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size;
 			if (this->varFrictionEnabled()->getData())
 			{
@@ -1229,7 +1225,7 @@ namespace dyno
 
 		if (fixedJoint_size != 0)
 		{
-			auto& joints = this->inFixedJoints()->getData();
+			auto& joints = topo->fixedJoints();
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size;
 			if (this->varFrictionEnabled()->getData())
 			{
@@ -1244,7 +1240,7 @@ namespace dyno
 		}
 		if (pointJoint_size != 0)
 		{
-			auto& joints = this->inPointJoints()->getData();
+			auto& joints = topo->pointJoints();
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size + 6 * fixedJoint_size;
 			if (this->varFrictionEnabled()->getData())
 			{
@@ -1293,7 +1289,7 @@ namespace dyno
 		{
 			cuExecute(ballAndSocketJoint_size,
 				calculateJoints,
-				this->inBallAndSocketJoints()->getData(),
+				topo->ballAndSocketJoints(),
 				mJointNumber);
 		}
 
@@ -1301,7 +1297,7 @@ namespace dyno
 		{
 			cuExecute(sliderJoint_size,
 				calculateJoints,
-				this->inSliderJoints()->getData(),
+				topo->sliderJoints(),
 				mJointNumber);
 		}
 
@@ -1309,7 +1305,7 @@ namespace dyno
 		{
 			cuExecute(hingeJoint_size,
 				calculateJoints,
-				this->inHingeJoints()->getData(),
+				topo->hingeJoints(),
 				mJointNumber);
 		}
 
@@ -1317,7 +1313,7 @@ namespace dyno
 		{
 			cuExecute(fixedJoint_size,
 				calculateJoints,
-				this->inFixedJoints()->getData(),
+				topo->fixedJoints(),
 				mJointNumber);
 		}
 
@@ -1358,12 +1354,13 @@ namespace dyno
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
 
+		auto topo = this->inDiscreteElements()->constDataPtr();
 
-		int ballAndSocketJoint_size = this->inBallAndSocketJoints()->size();
-		int sliderJoint_size = this->inSliderJoints()->size();
-		int hingeJoint_size = this->inHingeJoints()->size();
-		int fixedJoint_size = this->inFixedJoints()->size();
-		int pointJoint_size = this->inPointJoints()->size();
+		int ballAndSocketJoint_size = topo->ballAndSocketJoints().size();
+		int sliderJoint_size = topo->sliderJoints().size();
+		int hingeJoint_size = topo->hingeJoints().size();
+		int fixedJoint_size = topo->fixedJoints().size();
+		int pointJoint_size = topo->pointJoints().size();
 
 		constraint_size = contact_size;
 
@@ -1412,7 +1409,7 @@ namespace dyno
 
 		if (ballAndSocketJoint_size != 0)
 		{
-			auto& joints = this->inBallAndSocketJoints()->getData();
+			auto& joints = topo->ballAndSocketJoints();
 			int begin_index = contact_size;
 
 			cuExecute(ballAndSocketJoint_size,
@@ -1426,7 +1423,7 @@ namespace dyno
 
 		if (sliderJoint_size != 0)
 		{
-			auto& joints = this->inSliderJoints()->getData();
+			auto& joints = topo->sliderJoints();
 			int begin_index = contact_size;
 
 			begin_index += 3 * ballAndSocketJoint_size;
@@ -1442,7 +1439,7 @@ namespace dyno
 
 		if (hingeJoint_size != 0)
 		{
-			auto& joints = this->inHingeJoints()->getData();
+			auto& joints = topo->hingeJoints();
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 7 * sliderJoint_size;
 
 			cuExecute(hingeJoint_size,
@@ -1457,7 +1454,7 @@ namespace dyno
 
 		if (fixedJoint_size != 0)
 		{
-			auto& joints = this->inFixedJoints()->getData();
+			auto& joints = topo->fixedJoints();
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 7 * sliderJoint_size + 7 * hingeJoint_size;
 
 			cuExecute(fixedJoint_size,
@@ -1469,7 +1466,7 @@ namespace dyno
 		}
 		if (pointJoint_size != 0)
 		{
-			auto& joints = this->inPointJoints()->getData();
+			auto& joints = topo->pointJoints();
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 7 * sliderJoint_size + 7 * hingeJoint_size + 6 * fixedJoint_size;
 
 			cuExecute(pointJoint_size,
@@ -1510,7 +1507,7 @@ namespace dyno
 		{
 			cuExecute(ballAndSocketJoint_size,
 				NGS_calculateJoints,
-				this->inBallAndSocketJoints()->getData(),
+				topo->ballAndSocketJoints(),
 				mJointNumber);
 		}
 
@@ -1518,7 +1515,7 @@ namespace dyno
 		{
 			cuExecute(sliderJoint_size,
 				NGS_calculateJoints,
-				this->inSliderJoints()->getData(),
+				topo->sliderJoints(),
 				mJointNumber);
 		}
 
@@ -1526,7 +1523,7 @@ namespace dyno
 		{
 			cuExecute(hingeJoint_size,
 				NGS_calculateJoints,
-				this->inHingeJoints()->getData(),
+				topo->hingeJoints(),
 				mJointNumber);
 		}
 
@@ -1534,7 +1531,7 @@ namespace dyno
 		{
 			cuExecute(fixedJoint_size,
 				NGS_calculateJoints,
-				this->inFixedJoints()->getData(),
+				topo->fixedJoints(),
 				mJointNumber);
 		}
 
@@ -2792,6 +2789,8 @@ namespace dyno
 	{
 		uint bodyNum = this->inCenter()->size();
 
+		auto topo = this->inDiscreteElements()->constDataPtr();
+
 		mImpulseC.resize(bodyNum * 2);
 		mImpulseExt.resize(bodyNum * 2);
 		mImpulseC.reset();
@@ -2820,7 +2819,7 @@ namespace dyno
 			this->inRotationMatrix()->getData());
 
 		//Velocity solver
-		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
+		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0)
 		{
 			initializeJacobian(dt);
 
@@ -2868,7 +2867,7 @@ namespace dyno
 			dt);
 
 		//Position solver
-		if (!this->inContacts()->isEmpty() || !this->inBallAndSocketJoints()->isEmpty() || !this->inSliderJoints()->isEmpty() || !this->inHingeJoints()->isEmpty() || !this->inFixedJoints()->isEmpty() || !this->inPointJoints()->isEmpty())
+		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0)
 		{
 			mCenterPre.assign(this->inCenter()->constData());
 			mQuatPre.assign(this->inQuaternion()->constData());

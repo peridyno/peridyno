@@ -17,7 +17,6 @@
 #include "Node.h"
 #include "RigidBodyShared.h"
 
-#include "Topology/Joint.h"
 #include "Collision/Attribute.h"
 
 #include <vector>
@@ -230,16 +229,6 @@ namespace dyno
 		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "Rigid body attributes");
 
 		DEF_ARRAY_STATE(Matrix, InitialInertia, DeviceType::GPU, "Initial inertia matrix");
-
-		DEF_ARRAY_STATE(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
-
-		DEF_ARRAY_STATE(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
-
-		DEF_ARRAY_STATE(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
-
-		DEF_ARRAY_STATE(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
-
-		DEF_ARRAY_STATE(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
 
 	private:
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;

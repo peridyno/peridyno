@@ -20,7 +20,7 @@
 #include "Module/ConstraintModule.h"
 #include "RigidBody/RigidBodyShared.h"
 
-#include "Topology/Joint.h"
+#include "Topology/DiscreteElements.h"
 
 namespace dyno
 {
@@ -87,15 +87,7 @@ namespace dyno
 
 		DEF_ARRAY_IN(ContactPair, Contacts, DeviceType::GPU, "");
 
-		DEF_ARRAY_IN(BallAndSocketJoint, BallAndSocketJoints, DeviceType::GPU, "Ball And Socket Joints");
-
-		DEF_ARRAY_IN(SliderJoint, SliderJoints, DeviceType::GPU, "Slider Joints");
-
-		DEF_ARRAY_IN(HingeJoint, HingeJoints, DeviceType::GPU, "Hinge Joints");
-
-		DEF_ARRAY_IN(FixedJoint, FixedJoints, DeviceType::GPU, "Fixed Joints");
-
-		DEF_ARRAY_IN(PointJoint, PointJoints, DeviceType::GPU, "Point Joints");
+		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
 	protected:
 		void constrain() override;

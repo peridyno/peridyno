@@ -121,10 +121,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
 	rigid->stateCenter()->connect(anchorPointMapper->inCenter());
 	rigid->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
-	rigid->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
-	rigid->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
-	//rigid->stateHingeJoints()->connect(anchorPointMapper->inHingeJoints());
-	//rigid->stateFixedJoints()->connect(anchorPointMapper->inFixedJoints());
+	rigid->stateTopology()->connect(anchorPointMapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(anchorPointMapper);
 
 	auto pointRender2 = std::make_shared<GLPointVisualModule>();

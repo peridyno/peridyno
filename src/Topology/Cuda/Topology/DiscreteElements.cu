@@ -29,6 +29,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	uint DiscreteElements<TDataType>::totalJointSize()
+	{
+		return mBallAndSocketJoints.size() + mSliderJoints.size() + mHingeJoints.size() + mFixedJoints.size() + mPointJoints.size();
+	}
+
+	template<typename TDataType>
 	uint DiscreteElements<TDataType>::sphereIndex()
 	{
 		return 0;

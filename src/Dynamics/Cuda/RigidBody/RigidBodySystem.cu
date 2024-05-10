@@ -36,12 +36,6 @@ namespace dyno
 		elementQuery->outContacts()->connect(merge->inContactsA());
 		cdBV->outContacts()->connect(merge->inContactsB());
 
-		this->stateBallAndSocketJoints()->connect(merge->inBallAndSocketJoints());
-		this->stateSliderJoints()->connect(merge->inSliderJoints());
-		this->stateHingeJoints()->connect(merge->inHingeJoints());
-		this->stateFixedJoints()->connect(merge->inFixedJoints());
-		this->stateMass()->connect(merge->inMass());
-
 		this->animationPipeline()->pushModule(merge);
 
 		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
@@ -60,13 +54,7 @@ namespace dyno
 		this->stateInertia()->connect(iterSolver->inInertia());
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
-
-		this->stateBallAndSocketJoints()->connect(iterSolver->inBallAndSocketJoints());
-		this->stateSliderJoints()->connect(iterSolver->inSliderJoints());
-		this->stateHingeJoints()->connect(iterSolver->inHingeJoints());
-		this->stateFixedJoints()->connect(iterSolver->inFixedJoints());
-		this->statePointJoints()->connect(iterSolver->inPointJoints());
-
+		this->stateTopology()->connect(iterSolver->inDiscreteElements());
 		merge->outContacts()->connect(iterSolver->inContacts());
 
 		this->animationPipeline()->pushModule(iterSolver);
@@ -495,37 +483,37 @@ namespace dyno
 		this->stateInitialInertia()->resize(sizeOfRigids);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
-		this->stateBallAndSocketJoints()->assign(mHostJointsBallAndSocket);
-		this->stateSliderJoints()->assign(mHostJointsSlider);
-		this->stateHingeJoints()->assign(mHostJointsHinge);
-		this->stateFixedJoints()->assign(mHostJointsFixed);
-		this->statePointJoints()->assign(mHostJointsPoint);
+		topo->ballAndSocketJoints().assign(mHostJointsBallAndSocket);
+		topo->sliderJoints().assign(mHostJointsSlider);
+		topo->hingeJoints().assign(mHostJointsHinge);
+		topo->fixedJoints().assign(mHostJointsFixed);
+		topo->pointJoints().assign(mHostJointsPoint);
 
 		uint os = eleOffset.checkElementOffset(ET_CAPSULE);
 
-		cuExecute(this->stateBallAndSocketJoints()->size(),
+		cuExecute(topo->ballAndSocketJoints().size(),
 			UpdateJointIndices,
-			this->stateBallAndSocketJoints()->getData(),
+			topo->ballAndSocketJoints(),
 			eleOffset);
 
-		cuExecute(this->stateSliderJoints()->size(),
+		cuExecute(topo->sliderJoints().size(),
 			UpdateJointIndices,
-			this->stateSliderJoints()->getData(),
+			topo->sliderJoints(),
 			eleOffset);
 
-		cuExecute(this->stateHingeJoints()->size(),
+		cuExecute(topo->hingeJoints().size(),
 			UpdateJointIndices,
-			this->stateHingeJoints()->getData(),
+			topo->hingeJoints(),
 			eleOffset);
 
-		cuExecute(this->stateFixedJoints()->size(),
+		cuExecute(topo->fixedJoints().size(),
 			UpdateJointIndices,
-			this->stateFixedJoints()->getData(),
+			topo->fixedJoints(),
 			eleOffset);
 
-		cuExecute(this->statePointJoints()->size(),
+		cuExecute(topo->pointJoints().size(),
 			UpdateJointIndices,
-			this->statePointJoints()->getData(),
+			topo->pointJoints(),
 			eleOffset);
 
 		updateTopology();
