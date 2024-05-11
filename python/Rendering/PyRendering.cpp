@@ -185,4 +185,6 @@ void pybind_rendering(py::module& m)
 	py::class_<RenderTools, std::shared_ptr<RenderTools>>(m, "RenderTools")
 		.def(py::init<>())
 		.def("setup_color", &RenderTools::setupColor);
+
+	declare_gl_surface_visual_node<dyno::DataType3f>(m, "3f");
 }

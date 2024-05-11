@@ -140,4 +140,6 @@ void pybind_topology(py::module& m)
 
 	declare_texture_mesh(m);
 	declare_attribute(m);
+
+	declare_point_set_to_triangle_set<dyno::DataType3f>(m, "3f");
 }

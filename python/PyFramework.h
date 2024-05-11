@@ -183,7 +183,7 @@ template <typename TDataType>
 void declare_single_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::SingleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
-	std::string pyclass_name = std::string("SingleNodePort_") + typestr;
+	std::string pyclass_name = std::string("SingleNodePorParametricModelt_") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("is_kind_of", &Class::isKindOf)
 		.def("has_node", &Class::hasNode)

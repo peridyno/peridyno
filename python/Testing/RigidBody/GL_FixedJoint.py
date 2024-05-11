@@ -18,25 +18,25 @@ def filePath(str):
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
+
 newBox = oldBox = dyno.BoxInfo()
 rigidBody = dyno.RigidBodyInfo()
 rigidBody.linear_velocity = dyno.Vector3f([1, 0.0, 1.0])
 
 oldBox.center = dyno.Vector3f([0, 0.1, 0])
 oldBox.half_length = dyno.Vector3f([0.02, 0.02, 0.02])
-rigid.add_box(oldBox, rigidBody)
+oldBoxActor = rigid.add_box(oldBox, rigidBody)
 
 rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
 
 for i in range(10):
     newBox.center = oldBox.center + dyno.Vector3f([0.0, 0.05, 0.0])
     newBox.half_length = oldBox.half_length
-    rigid.add_box(newBox, rigidBody)
-    joint = dyno.FixedJointf(i, i + 1)
-    joint.set_anchor_point(oldBox.center + dyno.Vector3f([0, 0.025, 0]), oldBox.center, newBox.center, oldBox.rot,
-                           newBox.rot)
-    rigid.add_fixed_joint(joint)
+    newBoxActor = rigid.add_box(newBox, rigidBody)
+    fixedJoint = rigid.create_fixed_joint(oldBoxActor, newBoxActor)
+    fixedJoint.set_anchor_point((oldBox.center + newBox.center)/2)
     oldBox = newBox
+    oldBoxActor = newBoxActor
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())

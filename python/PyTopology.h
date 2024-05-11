@@ -330,4 +330,18 @@ void declare_point_joint(py::module& m, std::string typestr) {
 		.def("set_anchor_point", &Class::setAnchorPoint);
 }
 
+
+#include "Mapping/PointSetToTriangleSet.h"
+template <typename TDataType>
+void declare_point_set_to_triangle_set(py::module& m, std::string typestr) {
+	using Class = dyno::PointSetToTriangleSet<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("PointSetToTriangleSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
+		.def("in_initial_shape", &Class::inInitialShape, py::return_value_policy::reference)
+		.def("out_shape", &Class::outShape, py::return_value_policy::reference);
+}
+
 void pybind_topology(py::module& m);

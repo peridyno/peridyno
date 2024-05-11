@@ -31,7 +31,7 @@ boundary.load_sdf(filePath("cloth_shell/table/table.sdf"), False)
 
 cloth = dyno.CodimensionalPD3f(0.3, 8000, 0.003, float('7e-4'), "default")
 cloth.load_surface(filePath("cloth_shell/mesh40k_1_h90.obj"))
-cloth.connect(boundary.import_triangular_system())
+cloth.connect(boundary.import_triangular_systems())
 
 surfaceRendererCloth = dyno.GLSurfaceVisualModule()
 surfaceRendererCloth.set_color(dyno.Color(0.4, 0.4, 1.0))

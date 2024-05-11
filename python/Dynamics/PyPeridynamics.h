@@ -386,12 +386,13 @@ void declare_elastic_body(py::module& m, std::string typestr) {
 	using Parent = dyno::ParticleSystem<TDataType>;
 	std::string pyclass_name = std::string("ElasticBody") + typestr;
 	typedef typename TDataType::Coord Coord;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	typedef typename TDataType::Real Real;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol())
 		.def(py::init<>())
-		.def("load_particles", py::overload_cast<std::string>(&Class::loadParticles)
-		/*, py::overload_cast<Coord, Coord, Real>(&Class::loadParticles)*/)
-		//.def("load_particles", &Class::loadParticles, py::arg("filename"))
-		//.def("load_particles", &Class::loadParticles)
+		.def("load_particles", /*py::overload_cast<std::string>(&Class::loadParticles)
+			, */py::overload_cast<Coord, Coord, Real>(&Class::loadParticles))
+			//.def("load_particles", &Class::loadParticles, py::arg("filename"))
+			//.def("load_particles", &Class::loadParticles)
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
 		.def("rotate", &Class::rotate)
