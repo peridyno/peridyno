@@ -80,7 +80,7 @@ fluid.graphics_pipeline().push_module(vpRender)
 
 scn.add_node(ptsLoader)
 scn.add_node(initialParticles)
-# scn.add_node(ptsLoader2)
+scn.add_node(ptsLoader2)
 scn.add_node(initialParticles2)
 scn.add_node(fluid)
 scn.add_node(boundary)

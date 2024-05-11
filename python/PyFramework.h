@@ -50,6 +50,13 @@
 #include "Auxiliary/DataSource.h"
 #include "Collision/CollisionData.h"
 
+#include "PointsLoader.h"
+#include "GltfLoader.h"
+#include "GeometryLoader.h"
+#include "ParticleSystem/MakeParticleSystem.h"
+#include "ParticleSystem/StaticBoundary.h"
+#include "ParticleSystem/ParticleFluid.h"
+
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
 using InstanceBase = dyno::InstanceBase;
@@ -154,12 +161,12 @@ void declare_instance(py::module& m, std::string typestr) {
 		.def("is_empty", &Class::isEmpty)
 		.def("connect", &Class::connect)
 		.def("get_data", &Class::getData, py::return_value_policy::reference)
-		.def("size", &Class::size)
-		.def("object_pointer", &Class::objectPointer)
-		.def("standard_object_pointer", &Class::standardObjectPointer)
-		.def("set_object_pointer", &Class::setObjectPointer)
-		.def("can_be_connected_by", &Class::canBeConnectedBy)
-		.def("get_template_name", &Class::getTemplateName);
+		.def("size", &Class::size);
+	//.def("object_pointer", &Class::objectPointer)
+	//.def("standard_object_pointer", &Class::standardObjectPointer)
+	//.def("set_object_pointer", &Class::setObjectPointer)
+	//.def("can_be_connected_by", &Class::canBeConnectedBy)
+	//.def("get_template_name", &Class::getTemplateName);
 }
 
 //------------------------- New ------------------------------

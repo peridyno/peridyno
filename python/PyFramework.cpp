@@ -394,8 +394,14 @@ void pybind_framework(py::module& m)
 		//.def("traverse_backward", py::overload_cast<dyno::Action*>(&SceneGraph::traverseBackward))
 		//.def("traverse_forward", &SceneGraph::traverseForward)
 		//.def("traverse_forward_with_auth_sync", &SceneGraph::traverseForwardWithAutoSync)
-		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
-	//.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(py::args&&)>(&SceneGraph::addNode));
+		//.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode));
+		.def("add_node", static_cast<std::shared_ptr<dyno::StaticBoundary<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::StaticBoundary<dyno::DataType3f>>)>(&SceneGraph::addNode))
+		.def("add_node", static_cast<std::shared_ptr<dyno::ParticleFluid<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParticleFluid<dyno::DataType3f>>)>(&SceneGraph::addNode))
+		.def("add_node", static_cast<std::shared_ptr<dyno::PointsLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::PointsLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
+		.def("add_node", static_cast<std::shared_ptr<dyno::MakeParticleSystem<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::MakeParticleSystem<dyno::DataType3f>>)>(&SceneGraph::addNode))
+		.def("add_node", static_cast<std::shared_ptr<dyno::GltfLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GltfLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
+		.def("add_node", static_cast<std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>)>(&SceneGraph::addNode))
+		.def("add_node", static_cast<std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>)>(&SceneGraph::addNode));
 
 	py::enum_<typename SceneGraph::EWorkMode>(m, "EWorkMode")
 		.value("EDIT_MODE", SceneGraph::EWorkMode::EDIT_MODE)

@@ -19,7 +19,6 @@ scn = dyno.SceneGraph()
 gltf = dyno.GltfLoader3f()
 gltf.var_file_name().set_value(dyno.FilePath(filePath("Jeep/JeepGltf/jeep.gltf")))
 
-
 scn.add_node(gltf)
 
 app = dyno.GLfwApp()
