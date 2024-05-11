@@ -99,4 +99,6 @@ void pybind_rigid_body(py::module& m) {
 	declare_sphere_info(m, "");
 	declare_tet_info(m, "");
 	declare_capsule_info(m, "");
+
+
 }

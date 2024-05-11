@@ -259,14 +259,14 @@ void declare_collistion_detection_triangle_set(py::module& m, std::string typest
 		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
-#include "Topology/Joint.h"
+#include "Topology/DiscreteElements.h"
 template<typename Real>
 void declare_joint(py::module& m, std::string typestr) {
 	using Class = dyno::Joint<Real>;
 	std::string pyclass_name = std::string("Joint") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<int, int>());
+		.def(py::init<dyno::PdActor*, dyno::PdActor*>());
 }
 
 template<typename Real>
@@ -276,7 +276,7 @@ void declare_ball_and_socket_joint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("BallAndSocketJoint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<int, int>())
+		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
 		.def("set_anchor_point", &Class::setAnchorPoint);
 }
 
@@ -287,7 +287,7 @@ void declare_slider_joint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SliderJoint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<int, int>())
+		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
 		.def("set_anchor_point", &Class::setAnchorPoint)
 		.def("set_axis", &Class::setAxis)
 		.def("set_moter", &Class::setMoter)
@@ -301,7 +301,7 @@ void declare_hinge_joint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("HingeJoint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<int, int>())
+		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
 		.def("set_anchor_point", &Class::setAnchorPoint)
 		.def("set_axis", &Class::setAxis)
 		.def("set_moter", &Class::setMoter)
@@ -315,7 +315,7 @@ void declare_fixed_joint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FixedJoint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<int, int>())
+		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
 		.def("set_anchor_point", &Class::setAnchorPoint);
 }
 
@@ -326,7 +326,7 @@ void declare_point_joint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointJoint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<int>())
+		.def(py::init<dyno::PdActor*>())
 		.def("set_anchor_point", &Class::setAnchorPoint);
 }
 

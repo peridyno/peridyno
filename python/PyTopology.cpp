@@ -62,6 +62,7 @@ void declare_attribute(py::module& m) {
 
 void pybind_topology(py::module& m)
 {
+
 	declare_pointset<dyno::DataType3f>(m, "3f");
 	declare_edgeSet<dyno::DataType3f>(m, "3f");
 	declare_triangleSet<dyno::DataType3f>(m, "3f");
@@ -80,6 +81,8 @@ void pybind_topology(py::module& m)
 	declare_collision_detection_broad_phase<dyno::DataType3f>(m, "3f");
 	declare_collistion_detection_bounding_box<dyno::DataType3f>(m, "3f");
 	declare_collistion_detection_triangle_set<dyno::DataType3f>(m, "3f");
+
+	py::class_<dyno::PdActor, std::shared_ptr<dyno::PdActor>>(m, "PdActor");
 
 	declare_joint<float>(m, "f");
 	declare_ball_and_socket_joint<float>(m, "f");

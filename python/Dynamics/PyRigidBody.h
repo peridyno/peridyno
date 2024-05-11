@@ -7,7 +7,7 @@
 
 using InstanceBase = dyno::InstanceBase;
 
-#include "RigidBody/ContactsUnion.h"
+#include "RigidBody/Module/ContactsUnion.h"
 template <typename TDataType>
 void declare_contacts_union(py::module& m, std::string typestr) {
 	using Class = dyno::ContactsUnion<TDataType>;
@@ -15,13 +15,12 @@ void declare_contacts_union(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ContactsUnion") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("compute", &Class::compute)
 		.def("in_contacts_a", &Class::inContactsA, py::return_value_policy::reference)
 		.def("in_contacts_b", &Class::inContactsB, py::return_value_policy::reference)
 		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
-#include "RigidBody/IterativeConstraintSolver.h"
+#include "RigidBody/Module/IterativeConstraintSolver.h"
 template <typename TDataType>
 void declare_iterative_constraint_solver(py::module& m, std::string typestr) {
 	using Class = dyno::IterativeConstraintSolver<TDataType>;
@@ -34,7 +33,8 @@ void declare_iterative_constraint_solver(py::module& m, std::string typestr) {
 		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
 		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
 		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
-		.def("var_iteration_number", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("var_iteration_number_for_velocity_solver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
+		.def("var_iteration_number_for_position_solver", &Class::varIterationNumberForPositionSolver, py::return_value_policy::reference)
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
 		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
@@ -45,11 +45,12 @@ void declare_iterative_constraint_solver(py::module& m, std::string typestr) {
 		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
 		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
 		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_ball_and_socket_joints", &Class::inBallAndSocketJoints, py::return_value_policy::reference)
-		.def("in_slider_joints", &Class::inSliderJoints, py::return_value_policy::reference)
-		.def("in_hinge_joints", &Class::inHingeJoints, py::return_value_policy::reference)
-		.def("in_fixed_joints", &Class::inFixedJoints, py::return_value_policy::reference)
-		.def("in_point_joints", &Class::inPointJoints, py::return_value_policy::reference);
+		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference);
+	//.def("in_ball_and_socket_joints", &Class::inBallAndSocketJoints, py::return_value_policy::reference)
+	//.def("in_slider_joints", &Class::inSliderJoints, py::return_value_policy::reference)
+	//.def("in_hinge_joints", &Class::inHingeJoints, py::return_value_policy::reference)
+	//.def("in_fixed_joints", &Class::inFixedJoints, py::return_value_policy::reference)
+	//.def("in_point_joints", &Class::inPointJoints, py::return_value_policy::reference);
 	;
 }
 
@@ -82,11 +83,11 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 		.def("add_sphere", &Class::addSphere, py::arg("sphere"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
 		.def("add_tet", &Class::addTet, py::arg("tet"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
 		.def("add_capsule", &Class::addCapsule, py::arg("capsule"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("add_ball_and_socket_joint", &Class::addBallAndSocketJoint)
-		.def("add_slider_joint", &Class::addSliderJoint)
-		.def("add_hinge_joint", &Class::addHingeJoint)
-		.def("add_fixed_joint", &Class::addFixedJoint)
-		.def("add_point_joint", &Class::addPointJoint)
+		.def("create_ball_and_socket_joint", &Class::createBallAndSocketJoint, py::return_value_policy::reference)
+		.def("create_slider_joint", &Class::createSliderJoint, py::return_value_policy::reference)
+		.def("create_hinge_joint", &Class::createHingeJoint, py::return_value_policy::reference)
+		.def("create_fixed_joint", &Class::createFixedJoint, py::return_value_policy::reference)
+		.def("create_point_joint", &Class::createPointJoint, py::return_value_policy::reference)
 		.def("point_inertia", &Class::pointInertia)
 		.def("get_dt", &Class::getDt)
 		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
@@ -104,12 +105,12 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 		.def("state_inertia", &Class::stateInertia, py::return_value_policy::reference)
 		.def("state_quaternion", &Class::stateQuaternion, py::return_value_policy::reference)
 		.def("state_collision_mask", &Class::stateCollisionMask, py::return_value_policy::reference)
-		.def("state_initial_inertia", &Class::stateInitialInertia, py::return_value_policy::reference)
-		.def("state_ball_and_socket_joints", &Class::stateBallAndSocketJoints, py::return_value_policy::reference)
-		.def("state_slider_joints", &Class::stateSliderJoints, py::return_value_policy::reference)
-		.def("state_hinge_joints", &Class::stateHingeJoints, py::return_value_policy::reference)
-		.def("state_fixed_joints", &Class::stateFixedJoints, py::return_value_policy::reference)
-		.def("state_point_joints", &Class::statePointJoints, py::return_value_policy::reference);
+		.def("state_initial_inertia", &Class::stateInitialInertia, py::return_value_policy::reference);
+	/*.def("state_ball_and_socket_joints", &Class::stateBallAndSocketJoints, py::return_value_policy::reference)
+	.def("state_slider_joints", &Class::stateSliderJoints, py::return_value_policy::reference)
+	.def("state_hinge_joints", &Class::stateHingeJoints, py::return_value_policy::reference)
+	.def("state_fixed_joints", &Class::stateFixedJoints, py::return_value_policy::reference)
+	.def("state_point_joints", &Class::statePointJoints, py::return_value_policy::reference)*/
 }
 
 #include "RigidBody/RigidMesh.h"
@@ -140,8 +141,8 @@ void declare_vechicle(py::module& m, std::string typestr) {
 		.def("bind", &Class::bind)
 		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
 		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
-		.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference)
+		/*		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
+				.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference)*/
 		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
 }
 
