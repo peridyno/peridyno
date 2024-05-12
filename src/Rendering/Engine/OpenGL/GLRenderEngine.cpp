@@ -169,6 +169,11 @@ namespace dyno
 		}
 	}
 
+	void GLRenderEngine::setUseEnvmapBackground(bool flag)
+	{
+		bDrawEnvmap = flag;
+	}
+
 	void GLRenderEngine::createFramebuffer()
 	{
 		// create render textures

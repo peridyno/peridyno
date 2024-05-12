@@ -159,11 +159,19 @@ void Envmap::draw(const RenderParams& rparams)
 
 void dyno::Envmap::bindIBL()
 {
-	//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	irradianceCube.bind(GL_TEXTURE7);
-	prefilteredCube.bind(GL_TEXTURE8);
-	brdfLut.bind(GL_TEXTURE9);
-	glCheckError();
+	if (this->path) {
+		if (requireUpdate) {
+			// update envmap
+			this->update();
+			this->requireUpdate = false;
+		}
+
+		//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		irradianceCube.bind(GL_TEXTURE7);
+		prefilteredCube.bind(GL_TEXTURE8);
+		brdfLut.bind(GL_TEXTURE9);
+		glCheckError();
+	}
 }
 
 void Envmap::update()

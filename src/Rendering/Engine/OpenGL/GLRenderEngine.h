@@ -68,6 +68,7 @@ namespace dyno
 		int  getShadowBlurIters() const;
 
 		void setEnvmap(const std::string& path);
+		void setUseEnvmapBackground(bool flag);
 
 	private:
 		void createFramebuffer();
