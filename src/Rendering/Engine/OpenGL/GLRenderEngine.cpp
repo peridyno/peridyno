@@ -6,6 +6,7 @@
 #include "ShadowMap.h"
 #include "SSAO.h"
 #include "FXAA.h"
+#include "Envmap.h"
 
 // dyno
 #include "SceneGraph.h"
@@ -32,11 +33,13 @@ namespace dyno
 	GLRenderEngine::GLRenderEngine()
 	{
 		mShadowMap = new ShadowMap();
+		mEnvmap = new Envmap();
 	}
 
 	GLRenderEngine::~GLRenderEngine()
 	{
 		delete mShadowMap;
+		delete mEnvmap;
 	}
 
 	void GLRenderEngine::initialize()
@@ -66,11 +69,13 @@ namespace dyno
 		mFXAAFilter = new FXAA;
 
 		mShadowMap->initialize();
+		mEnvmap->initialize();
 	}
 
 	void GLRenderEngine::terminate()
 	{
 		mShadowMap->release();
+		mEnvmap->release();
 
 		// release render modules
 		for (auto item : mRenderItems) {
@@ -151,11 +156,22 @@ namespace dyno
 		return mShadowMap->getNumBlurIterations();
 	}
 
+	void GLRenderEngine::setEnvmap(const std::string& file)
+	{
+		if (file.empty()) {
+			bDrawEnvmap = false;
+			return;
+		}
+		else
+		{
+			bDrawEnvmap = true;
+			mEnvmap->load(file.c_str());
+		}
+	}
+
 	void GLRenderEngine::createFramebuffer()
 	{
 		// create render textures
-		mColorTex.maxFilter = GL_LINEAR;
-		mColorTex.minFilter = GL_LINEAR;
 		mColorTex.format = GL_RGBA;
 		mColorTex.internalFormat = GL_RGBA;
 		mColorTex.type = GL_BYTE;
@@ -181,9 +197,9 @@ namespace dyno
 
 		// bind framebuffer texture
 		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, &mDepthTex);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mColorTex);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT1, &mIndexTex);
+		mFramebuffer.setTexture(GL_DEPTH_ATTACHMENT, &mDepthTex);
+		mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mColorTex);
+		mFramebuffer.setTexture(GL_COLOR_ATTACHMENT1, &mIndexTex);
 
 		const GLenum buffers[] = {
 			GL_COLOR_ATTACHMENT0,
@@ -203,7 +219,7 @@ namespace dyno
 
 		mSelectFramebuffer.create();
 		mSelectFramebuffer.bind();
-		mSelectFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mSelectIndexTex);
+		mSelectFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mSelectIndexTex);
 		mSelectFramebuffer.drawBuffers(1, buffers);
 		mSelectFramebuffer.checkStatus();
 		mSelectFramebuffer.unbind();
@@ -280,7 +296,18 @@ namespace dyno
 			mRenderHelper->drawBackground(c0, c1);
 		}
 
+		//
+		if(bDrawEnvmap) {
+			mEnvmap->draw(params);
+		}
+
+		// clear index buffer
+		GLint clearIndex[] = { -1, -1, -1, -1 };
+		glClearBufferiv(GL_COLOR, 1, clearIndex);
+		glCheckError();
+
 		mShadowMap->bind();
+		mEnvmap->bindIBL();
 
 		// Step 2: render opacity objects
 		{

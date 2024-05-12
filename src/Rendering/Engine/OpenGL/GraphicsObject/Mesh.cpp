@@ -174,4 +174,37 @@ namespace dyno
 		mesh->count = indices.size();
 		return mesh;
 	}
+	Mesh* Mesh::Cube()
+	{
+		float p0[3] = {-1, -1, -1};
+		float p1[3] = { 1, 1, 1 };
+		float vertices[]{
+			p0[0], p0[1], p0[2],
+			p0[0], p0[1], p1[2],
+			p1[0], p0[1], p1[2],
+			p1[0], p0[1], p0[2],
+
+			p0[0], p1[1], p0[2],
+			p0[0], p1[1], p1[2],
+			p1[0], p1[1], p1[2],
+			p1[0], p1[1], p0[2],
+		};
+
+		unsigned int indices[]
+		{
+			0, 1, 2, 2, 3, 0, // bottom
+			7, 6, 5, 5, 4, 7, // top
+			4, 5, 1, 1, 0, 4, // left
+			3, 2, 6, 6, 7, 3, // right
+			0, 3, 7, 7, 4, 0, // front
+			5, 6, 2, 2, 1, 5, // back
+		};
+
+		Mesh* mesh = new Mesh;
+		mesh->create();
+		mesh->vbo.load(vertices, 8 * 3 * sizeof(float));
+		mesh->ibo.load(indices, 36 * sizeof(unsigned int));
+		mesh->count = 36;
+		return mesh;
+	}
 }

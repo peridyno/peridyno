@@ -91,3 +91,38 @@ vec3 EvalPBR(vec3 color, float metallic, float roughness, vec3 N, vec3 V, vec3 L
 	}
     return vec3(0);
 }
+
+layout(binding = 7) uniform samplerCube irradianceCube;
+layout(binding = 8) uniform samplerCube prefilteredCube;
+layout(binding = 9) uniform sampler2D   brdfLut;
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}   
+
+// in world space...
+vec3 EvalPBR_IBL(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V)
+{
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	
+
+    vec3 irradiance = texture(irradianceCube, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+    
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 R = reflect(-V, N); 
+    vec3 prefilteredColor = textureLod(prefilteredCube, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(brdfLut, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = kD * diffuse + specular;
+   
+    return ambient;
+}

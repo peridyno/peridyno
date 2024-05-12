@@ -79,7 +79,8 @@ vec3 Shade()
 	float dotNV = dot(N, V);
 	if (dotNV < 0.0)	N = -N;
 	
-	vec3 Lo = vec3(0);
+	vec3 color = vec3(0);
+
 	vec3 baseColor = GetColor();
 
 	// for main directional light
@@ -97,7 +98,7 @@ vec3 Shade()
 		if (uRenderParams.direction.w != 0)
 			shadowFactor = GetShadowFactor(fs_in.position);
 
-		Lo += shadowFactor * radiance * brdf;
+		color += shadowFactor * radiance * brdf;
 	}
 	
 	// for a simple camera light
@@ -109,14 +110,26 @@ vec3 Shade()
 		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
 
 		// no shadow...
-		Lo += radiance * brdf;
+		color += radiance * brdf; 
 	}
 
-	// ambient light
-	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * baseColor;
+	// IBL
+	{
+		// convert to world space...
+	    mat4 invView = inverse(uRenderParams.view);
+		N = normalize(vec3(invView * vec4(N, 0))); 
+		V = normalize(vec3(invView * vec4(V, 0))); 
 
+		float envScale = 1.0; // TODO: pass argument in RenderParams
+		color += EvalPBR_IBL(baseColor, uMtl.metallic, uMtl.roughness, N, V) * envScale;
+	}
+	
+	// ambient light
+	{
+		color += uRenderParams.ambient.rgb * uRenderParams.ambient.a * baseColor;
+	}
+	 
 	// final color
-	vec3 color = ambient + Lo;
 	color = ReinhardTonemap(color);
 	color = GammaCorrect(color);
 
