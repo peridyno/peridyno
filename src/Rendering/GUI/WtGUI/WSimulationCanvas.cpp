@@ -126,7 +126,7 @@ void WSimulationCanvas::initializeGL()
 	mFramebuffer.create();
 	mFramebuffer.bind();
 	const unsigned int GL_COLOR_ATTACHMENT0 = 0x8CE0;
-	mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mFrameColor);	// 
+	mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mFrameColor);	// 
 	unsigned int buffers[]{ GL_COLOR_ATTACHMENT0 };
 	mFramebuffer.drawBuffers(1, buffers);
 	mFramebuffer.unbind();

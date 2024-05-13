@@ -6,7 +6,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS AND PERIDYNO_QT_GUI)
         Modeling
         Peridynamics
         Multiphysics
-        GlfwGUI
+        QtGUI
         GLRenderEngine
         Interaction)
     add_example(GL_ClothWithCollision CodimensionalPD LIB_DEPENDENCY)
