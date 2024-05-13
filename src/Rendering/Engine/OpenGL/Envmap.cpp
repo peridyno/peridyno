@@ -246,12 +246,20 @@ void Envmap::genLUT()
 	auto quad = Mesh::ScreenQuad();
 	brdfProgram->use();
 
+
+	// preserve current framebuffer
+	GLint fbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+
 	fb.bind();
 	fb.setTexture(GL_COLOR_ATTACHMENT0, &brdfLut);
 
 	glViewport(0, 0, brdfLutSize, brdfLutSize);
 	quad->draw();
 	glCheckError();
+
+	//fb.unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
 	quad->release();
 	delete quad;
