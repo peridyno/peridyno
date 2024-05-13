@@ -11,13 +11,15 @@ layout(location=0) out vec4 fragColor;
 
 layout(binding = 1) uniform sampler2D uRulerTex;
 
+layout(location = 0) uniform vec4 uPlaneColor;
+layout(location = 1) uniform vec4 uRulerColor;
+
 void main(void) {
 	vec3 shadow = GetShadowFactor(vPosition);
 	vec3 shading = shadow * uRenderParams.intensity.rgb + uRenderParams.ambient.rgb;
-	shading = clamp(shading, 0, 1);
 	float f = texture(uRulerTex, vTexCoord).r;
-	f = clamp(0.5 - f, 0.0, 1.0);
 
-	fragColor = vec4(shading * f, 0.5);	
+	vec4 color = mix(uPlaneColor, uRulerColor, f);
+	fragColor = vec4(shading * color.rgb, color.a);	
 }
 

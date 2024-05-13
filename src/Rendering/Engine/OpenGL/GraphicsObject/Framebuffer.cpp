@@ -61,7 +61,7 @@ namespace dyno
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Framebuffer::setTexture2D(unsigned int attachment, const Texture2D* tex, int level)
+	void Framebuffer::setTexture(unsigned int attachment, const Texture* tex, int level)
 	{
 		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, tex->target, tex->id, level);
 		glCheckError();

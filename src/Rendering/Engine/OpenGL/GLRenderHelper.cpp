@@ -71,7 +71,11 @@ namespace dyno
 		}
 
 
-		void draw(const RenderParams& rparams, float planeScale, float rulerScale)
+		void draw(const RenderParams& rparams,
+			float planeScale,
+			float rulerScale,
+			dyno::Vec4f planeColor,
+			dyno::Vec4f rulerColor)
 		{
 			mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
 			mUniformBlock.bindBufferBase(0);
@@ -84,6 +88,8 @@ namespace dyno
 			mProgram->use();
 			mProgram->setFloat("uPlaneScale", planeScale);
 			mProgram->setFloat("uRulerScale", rulerScale);
+			mProgram->setVec4("uPlaneColor", planeColor);
+			mProgram->setVec4("uRulerColor", rulerColor);
 
 			mPlane->draw();
 
@@ -244,10 +250,13 @@ namespace dyno
 		if (mBackgroundRenderer) delete mBackgroundRenderer;
 	}
 
-	void GLRenderHelper::drawGround(const RenderParams& rparams, float planeScale, float rulerScale)
+	void GLRenderHelper::drawGround(const RenderParams& rparams, 
+		float planeScale, float rulerScale,
+		dyno::Vec4f planeColor, dyno::Vec4f rulerColor)
 	{
+		
 		if (mGroundRenderer != NULL)
-			mGroundRenderer->draw(rparams, planeScale, rulerScale);
+			mGroundRenderer->draw(rparams, planeScale, rulerScale, planeColor, rulerColor);
 	}
 
 	void GLRenderHelper::drawBBox(const RenderParams& rparams, Vec3f p0, Vec3f p1, int type)

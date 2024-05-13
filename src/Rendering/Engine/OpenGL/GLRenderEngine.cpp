@@ -6,6 +6,7 @@
 #include "ShadowMap.h"
 #include "SSAO.h"
 #include "FXAA.h"
+#include "Envmap.h"
 
 // dyno
 #include "SceneGraph.h"
@@ -32,11 +33,13 @@ namespace dyno
 	GLRenderEngine::GLRenderEngine()
 	{
 		mShadowMap = new ShadowMap();
+		mEnvmap = new Envmap();
 	}
 
 	GLRenderEngine::~GLRenderEngine()
 	{
 		delete mShadowMap;
+		delete mEnvmap;
 	}
 
 	void GLRenderEngine::initialize()
@@ -66,11 +69,13 @@ namespace dyno
 		mFXAAFilter = new FXAA;
 
 		mShadowMap->initialize();
+		mEnvmap->initialize();
 	}
 
 	void GLRenderEngine::terminate()
 	{
 		mShadowMap->release();
+		mEnvmap->release();
 
 		// release render modules
 		for (auto item : mRenderItems) {
@@ -151,11 +156,32 @@ namespace dyno
 		return mShadowMap->getNumBlurIterations();
 	}
 
+	void GLRenderEngine::setEnvmap(const std::string& file)
+	{
+		if (file.empty()) {
+			bDrawEnvmap = false;
+			return;
+		}
+		else
+		{
+			bDrawEnvmap = true;
+			mEnvmap->load(file.c_str());
+		}
+	}
+
+	void GLRenderEngine::setUseEnvmapBackground(bool flag)
+	{
+		bDrawEnvmap = flag;
+	}
+
+	void GLRenderEngine::setEnvmapScale(float scale)
+	{
+		mEnvmap->setScale(scale);
+	}
+
 	void GLRenderEngine::createFramebuffer()
 	{
 		// create render textures
-		mColorTex.maxFilter = GL_LINEAR;
-		mColorTex.minFilter = GL_LINEAR;
 		mColorTex.format = GL_RGBA;
 		mColorTex.internalFormat = GL_RGBA;
 		mColorTex.type = GL_BYTE;
@@ -181,9 +207,9 @@ namespace dyno
 
 		// bind framebuffer texture
 		mFramebuffer.bind();
-		mFramebuffer.setTexture2D(GL_DEPTH_ATTACHMENT, &mDepthTex);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mColorTex);
-		mFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT1, &mIndexTex);
+		mFramebuffer.setTexture(GL_DEPTH_ATTACHMENT, &mDepthTex);
+		mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mColorTex);
+		mFramebuffer.setTexture(GL_COLOR_ATTACHMENT1, &mIndexTex);
 
 		const GLenum buffers[] = {
 			GL_COLOR_ATTACHMENT0,
@@ -203,7 +229,7 @@ namespace dyno
 
 		mSelectFramebuffer.create();
 		mSelectFramebuffer.bind();
-		mSelectFramebuffer.setTexture2D(GL_COLOR_ATTACHMENT0, &mSelectIndexTex);
+		mSelectFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mSelectIndexTex);
 		mSelectFramebuffer.drawBuffers(1, buffers);
 		mSelectFramebuffer.checkStatus();
 		mSelectFramebuffer.unbind();
@@ -275,12 +301,23 @@ namespace dyno
 
 		// Step 1: draw background color, it also clears index buffer...
 		{
-			Vec3f c0 = Vec3f(this->bgColor0.x, this->bgColor0.y, this->bgColor0.z);
-			Vec3f c1 = Vec3f(this->bgColor1.x, this->bgColor1.y, this->bgColor1.z);
-			mRenderHelper->drawBackground(c0, c1);
+			mRenderHelper->drawBackground(
+				Vec3f(this->bgColor0.x, this->bgColor0.y, this->bgColor0.z), 
+				Vec3f(this->bgColor1.x, this->bgColor1.y, this->bgColor1.z));
 		}
 
+		//
+		if(bDrawEnvmap) {
+			mEnvmap->draw(params);
+		}
+
+		// clear index buffer
+		GLint clearIndex[] = { -1, -1, -1, -1 };
+		glClearBufferiv(GL_COLOR, 1, clearIndex);
+		glCheckError();
+
 		mShadowMap->bind();
+		mEnvmap->bindIBL();
 
 		// Step 2: render opacity objects
 		{
@@ -302,7 +339,10 @@ namespace dyno
 		{
 			// only draw to color buffer, so we can pick through
 			mFramebuffer.drawBuffers(1, attachments);
-			mRenderHelper->drawGround(params, this->planeScale, this->rulerScale);
+			mRenderHelper->drawGround(params, 
+				this->planeScale, this->rulerScale,
+				Vec4f(this->planeColor.r, this->planeColor.g, this->planeColor.b, this->planeColor.a),
+				Vec4f(this->rulerColor.r, this->rulerColor.g, this->rulerColor.b, this->rulerColor.a));
 		}
 
 		// Step 4: transparency objects
