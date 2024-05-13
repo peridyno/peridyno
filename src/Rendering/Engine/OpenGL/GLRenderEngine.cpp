@@ -296,9 +296,9 @@ namespace dyno
 
 		// Step 1: draw background color, it also clears index buffer...
 		{
-			Vec3f c0 = Vec3f(this->bgColor0.x, this->bgColor0.y, this->bgColor0.z);
-			Vec3f c1 = Vec3f(this->bgColor1.x, this->bgColor1.y, this->bgColor1.z);
-			mRenderHelper->drawBackground(c0, c1);
+			mRenderHelper->drawBackground(
+				Vec3f(this->bgColor0.x, this->bgColor0.y, this->bgColor0.z), 
+				Vec3f(this->bgColor1.x, this->bgColor1.y, this->bgColor1.z));
 		}
 
 		//
@@ -334,7 +334,10 @@ namespace dyno
 		{
 			// only draw to color buffer, so we can pick through
 			mFramebuffer.drawBuffers(1, attachments);
-			mRenderHelper->drawGround(params, this->planeScale, this->rulerScale);
+			mRenderHelper->drawGround(params, 
+				this->planeScale, this->rulerScale,
+				Vec4f(this->planeColor.r, this->planeColor.g, this->planeColor.b, this->planeColor.a),
+				Vec4f(this->rulerColor.r, this->rulerColor.g, this->rulerColor.b, this->rulerColor.a));
 		}
 
 		// Step 4: transparency objects
