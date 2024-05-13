@@ -60,12 +60,13 @@ void declare_attribute(py::module& m) {
 		.value("OBJECTID_INVALID", Class::ObjectID::OBJECTID_INVALID);
 }
 
+
 void pybind_topology(py::module& m)
 {
 
-	declare_pointset<dyno::DataType3f>(m, "3f");
-	declare_edgeSet<dyno::DataType3f>(m, "3f");
-	declare_triangleSet<dyno::DataType3f>(m, "3f");
+	declare_point_set<dyno::DataType3f>(m, "3f");
+	declare_edge_set<dyno::DataType3f>(m, "3f");
+	declare_triangle_set<dyno::DataType3f>(m, "3f");
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 	declare_height_field_to_triangle_set<dyno::DataType3f>(m, "3f");
 	declare_discrete_elements_to_triangle_set<dyno::DataType3f>(m, "3f");
@@ -138,8 +139,104 @@ void pybind_topology(py::module& m)
 		.value("CN_JOINT_NO_MOVE_3", dyno::ConstraintType::CN_JOINT_NO_MOVE_3)
 		.value("CN_UNKNOWN", dyno::ConstraintType::CN_UNKNOWN);
 
+	py::enum_<typename dyno::ElementType>(m, "ElementType")
+		.value("ET_BOX", dyno::ElementType::ET_BOX)
+		.value("ET_TET", dyno::ElementType::ET_TET)
+		.value("ET_CAPSULE", dyno::ElementType::ET_CAPSULE)
+		.value("ET_SPHERE", dyno::ElementType::ET_SPHERE)
+		.value("ET_TRI", dyno::ElementType::ET_TRI)
+		.value("ET_Other", dyno::ElementType::ET_Other);
+
+	py::class_<dyno::EKey, std::shared_ptr<dyno::EKey>>(m, "EKey")
+		.def(py::init<>())
+		.def("is_valid", &dyno::EKey::isValid);
+
+	py::class_<dyno::BVHNode, std::shared_ptr<dyno::BVHNode>>(m, "BVHNode")
+		.def(py::init<>())
+		.def("is_leaf", &dyno::BVHNode::isLeaf);
+
+	py::class_<dyno::QKey, std::shared_ptr<dyno::QKey>>(m, "QKey")
+		.def(py::init<>());
+
+	py::class_<dyno::OctreeNode, std::shared_ptr<dyno::OctreeNode>>(m, "OctreeNode")
+		.def(py::init<>())
+		//.def("is_contained_in", &dyno::OctreeNode::isContainedIn)
+		.def("is_contained_strictly_in", &dyno::OctreeNode::isContainedStrictlyIn)
+		.def("least_common_ancestor", &dyno::OctreeNode::leastCommonAncestor)
+		.def("key", &dyno::OctreeNode::key)
+		.def("level", &dyno::OctreeNode::level)
+		.def("set_data_index", &dyno::OctreeNode::setDataIndex)
+		.def("get_data_index", &dyno::OctreeNode::getDataIndex)
+		.def("set_first_child_index", &dyno::OctreeNode::setFirstChildIndex)
+		.def("get_first_child_index", &dyno::OctreeNode::getFirstChildIndex)
+		.def("set_data_size", &dyno::OctreeNode::setDataSize)
+		.def("get_data_size", &dyno::OctreeNode::getDataSize)
+		.def("is_valid", &dyno::OctreeNode::isValid)
+		.def("is_empty", &dyno::OctreeNode::isEmpty);
+
+	py::class_<dyno::Material, dyno::Object, std::shared_ptr<dyno::Material>>(m, "Material")
+		.def(py::init<>())
+		.def_readwrite("base_color", &dyno::Material::baseColor)
+		.def_readwrite("metallic", &dyno::Material::metallic)
+		.def_readwrite("roughness", &dyno::Material::roughness)
+		.def_readwrite("alpha", &dyno::Material::alpha)
+		.def_readwrite("tex_color", &dyno::Material::texColor)
+		.def_readwrite("tex_bump", &dyno::Material::texBump)
+		.def_readwrite("bump_scale", &dyno::Material::bumpScale);
+
+	py::class_<dyno::Shape, dyno::Object, std::shared_ptr<dyno::Shape>>(m, "Shape")
+		.def(py::init<>())
+		.def_readwrite("vertex_index", &dyno::Shape::vertexIndex)
+		.def_readwrite("normal_index", &dyno::Shape::normalIndex)
+		.def_readwrite("texCoord_index", &dyno::Shape::texCoordIndex)
+		.def_readwrite("bounding_box", &dyno::Shape::boundingBox)
+		.def_readwrite("bounding_transform", &dyno::Shape::boundingTransform)
+		.def_readwrite("material", &dyno::Shape::material);
+
+	py::class_<dyno::TKey, std::shared_ptr<dyno::TKey>>(m, "TKey")
+		.def(py::init<>());
+
+
 	declare_texture_mesh(m);
 	declare_attribute(m);
-
+	declare_quad_set<dyno::DataType3f>(m, "3f");
 	declare_point_set_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_anchor_point_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_bounding_box_to_edge_set<dyno::DataType3f>(m, "3f");
+	declare_extract_edge_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_extract_triangle_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_extract_qaud_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_frame_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_marching_cubes<dyno::DataType3f>(m, "3f");
+	declare_marching_cubes_helper<dyno::DataType3f>(m, "3f");
+	declare_merge_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_point_set_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_quad_set_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_split_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_tetrahedron_set_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_texture_mesh_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_volume_clipper<dyno::DataType3f>(m, "3f");
+	declare_calculate_maximum<dyno::DataType3f>(m, "3f");
+	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
+	declare_animation_curve<dyno::DataType3f>(m, "3f");
+	declare_discrete_elements<dyno::DataType3f>(m, "3f");
+	declare_distance_field3D<dyno::DataType3f>(m, "3f");
+	declare_frame<dyno::DataType3f>(m, "3f");
+	declare_grid_hash<dyno::DataType3f>(m, "3f");
+	declare_grid_set<dyno::DataType3f>(m, "3f");
+	declare_height_field<dyno::DataType3f>(m, "3f");
+	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
+	declare_joint_tree<dyno::DataType3f>(m, "3f");
+	declare_linear_bvh<dyno::DataType3f>(m, "3f");
+	declare_polygon_set<dyno::DataType3f>(m, "3f");
+
+
+	declare_signed_distance_fieldt<dyno::DataType3f>(m, "3f");
+	declare_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_sparse_grid_hash<dyno::DataType3f>(m, "3f");
+	declare_sparse_octree<dyno::DataType3f>(m, "3f");
+	declare_structured_point_set<dyno::DataType3f>(m, "3f");
+	declare_tetrahedron_set<dyno::DataType3f>(m, "3f");
+	declare_uniform_grid3D<dyno::DataType3f>(m, "3f");
+	declare_unstructured_point_set<dyno::DataType3f>(m, "3f");
 }

@@ -1,10 +1,6 @@
 import os
 
 import PyPeridyno as dyno
-
-scn = dyno.SceneGraph()
-
-
 def filePath(str):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     relative_path = "../../../data/" + str
@@ -16,6 +12,7 @@ def filePath(str):
         print(f"File not found: {file_path}")
         return -1
 
+scn = dyno.SceneGraph()
 
 elastoplasticBody = dyno.ElastoplasticBody3f()
 elastoplasticBody.set_visible(False)
@@ -77,3 +74,4 @@ app = dyno.GLfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()
+

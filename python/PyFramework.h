@@ -50,12 +50,29 @@
 #include "Auxiliary/DataSource.h"
 #include "Collision/CollisionData.h"
 
+//ScemeGraph->add_node
 #include "PointsLoader.h"
 #include "GltfLoader.h"
 #include "GeometryLoader.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/ParticleFluid.h"
+#include "StaticTriangularMesh.h"
+#include "Multiphysics/VolumeBoundary.h"
+
+#include "Action/ActNodeInfo.h"
+#include "Auxiliary/Add.h"
+#include "Auxiliary/DebugInfo.h"
+#include "Auxiliary/Divide.h"
+#include "Auxiliary/Multiply.h"
+#include "Auxiliary/Subtract.h"
+
+#include "Plugin/PluginManager.h"
+#include "DirectedAcyclicGraph.h"
+#include "NodeFactory.h"
+#include "SceneGraphFactory.h"
+#include "SceneLoaderFactory.h"
+#include "SceneLoaderXML.h"
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -85,6 +102,16 @@ using DataSource = dyno::DataSource;
 using CollisionMask = dyno::CollisionMask;
 using Vec3f = dyno::Vec3f;
 using KeyboardInputModule = dyno::KeyboardInputModule;
+using Add = dyno::Add;
+using DebugInfo = dyno::DebugInfo;
+using PrintInt = dyno::PrintInt;
+using PrintVector = dyno::PrintVector;
+using PrintFloat = dyno::PrintFloat;
+using PrintUnsigned = dyno::PrintUnsigned;
+using Divide = dyno::Divide;
+using Multiply = dyno::Multiply;
+using Subtract = dyno::Subtract;
+
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -112,7 +139,8 @@ void declare_var(py::module& m, std::string typestr) {
 		.def("is_empty", &Class::isEmpty)
 		//.def("connect", &Class::connect)
 		.def("get_data", &Class::getData);
-	//.def("const_data_ptr", &Class::constDataPtr, py::return_value_policy::reference);
+	//.def("const_data_ptr", &Class::constDataPtr, py::return_value_policy::reference)
+	//.def("get_data_ptr", &Class::getDataPtr, py::return_value_policy::reference);
 }
 
 template<typename T, DeviceType deviceType>
@@ -204,7 +232,7 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 	using Class = dyno::ParametricModel<TDataType>;
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("ParametricModel") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr(), py::multiple_inheritance())
 		.def(py::init<>())
 		.def("compute_quaternion", &Class::computeQuaternion)
 		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
@@ -244,6 +272,55 @@ void declare_vector_3_source(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("var_value", &Class::varValue, py::return_value_policy::reference)
 		.def("out_coord", &Class::outCoord, py::return_value_policy::reference);
+}
+
+
+template <typename TDataType>
+void declare_add_real_and_real(py::module& m, std::string typestr) {
+	using Class = dyno::AddRealAndReal<TDataType>;
+	using Parent = dyno::Add;
+	std::string pyclass_name = std::string("AddRealAndReal") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_a", &Class::inA, py::return_value_policy::reference)
+		.def("in_b", &Class::inB, py::return_value_policy::reference)
+		.def("out_o", &Class::outO, py::return_value_policy::reference);
+}
+
+template <typename TDataType>
+void declare_divide_real_and_real(py::module& m, std::string typestr) {
+	using Class = dyno::DivideRealAndReal<TDataType>;
+	using Parent = dyno::Divide;
+	std::string pyclass_name = std::string("DivideRealAndReal") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_a", &Class::inA, py::return_value_policy::reference)
+		.def("in_b", &Class::inB, py::return_value_policy::reference)
+		.def("out_o", &Class::outO, py::return_value_policy::reference);
+}
+
+template <typename TDataType>
+void declare_multiply_real_and_real(py::module& m, std::string typestr) {
+	using Class = dyno::MultiplyRealAndReal<TDataType>;
+	using Parent = dyno::Multiply;
+	std::string pyclass_name = std::string("MultiplyRealAndReal") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_a", &Class::inA, py::return_value_policy::reference)
+		.def("in_b", &Class::inB, py::return_value_policy::reference)
+		.def("out_o", &Class::outO, py::return_value_policy::reference);
+}
+
+template <typename TDataType>
+void declare_subtract_real_and_real(py::module& m, std::string typestr) {
+	using Class = dyno::SubtractRealAndReal<TDataType>;
+	using Parent = dyno::Subtract;
+	std::string pyclass_name = std::string("SubtractRealAndReal") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_a", &Class::inA, py::return_value_policy::reference)
+		.def("in_b", &Class::inB, py::return_value_policy::reference)
+		.def("out_o", &Class::outO, py::return_value_policy::reference);
 }
 
 //Init_static_plugin  - for example_3 WaterPouring

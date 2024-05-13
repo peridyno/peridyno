@@ -388,6 +388,7 @@ void declare_static_triangular_mesh(py::module& m, std::string typestr) {
 		//DEF_INSTANCE_STATE
 		.def("state_initial_triangle_set", &Class::stateInitialTriangleSet, py::return_value_policy::reference)
 		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
+	//.def("set_visible", &Class::setVisible);
 }
 
 #include "Sweep.h"
