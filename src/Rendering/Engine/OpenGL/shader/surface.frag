@@ -119,9 +119,7 @@ vec3 Shade()
 	    mat4 invView = inverse(uRenderParams.view);
 		N = normalize(vec3(invView * vec4(N, 0))); 
 		V = normalize(vec3(invView * vec4(V, 0))); 
-
-		float envScale = 1.0; // TODO: pass argument in RenderParams
-		color += EvalPBR_IBL(baseColor, uMtl.metallic, uMtl.roughness, N, V) * envScale;
+		color += EvalPBR_IBL(baseColor, uMtl.metallic, uMtl.roughness, N, V);
 	}
 	
 	// ambient light

@@ -23,6 +23,8 @@ public:
 
 	void bindIBL();
 
+	void setScale(float scale);
+
 private:
 	void update();
 	void genLUT();
@@ -56,6 +58,11 @@ private:
 	Mesh*	cube = 0;
 
 	Framebuffer fb;
+
+	struct {
+		float scale = 1.f;
+	} params;
+	Buffer	uboParams;
 };
 
 };

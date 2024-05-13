@@ -79,6 +79,8 @@ void Envmap::initialize()
 
 	cube = Mesh::Cube();
 
+	uboParams.create(GL_UNIFORM_BUFFER, GL_STATIC_DRAW);
+
 	// create programs
 	prog = Program::createProgramSPIRV(
 		ENVMAP_VERT, sizeof(ENVMAP_VERT),
@@ -105,6 +107,7 @@ void Envmap::release()
 	prog->release();
 	delete prog;
 
+	uboParams.release();
 }
 
 void Envmap::load(const char* path)
@@ -170,8 +173,16 @@ void dyno::Envmap::bindIBL()
 		irradianceCube.bind(GL_TEXTURE7);
 		prefilteredCube.bind(GL_TEXTURE8);
 		brdfLut.bind(GL_TEXTURE9);
+
+		uboParams.load(&params, sizeof(params));
+		uboParams.bindBufferBase(6);
 		glCheckError();
 	}
+}
+
+void dyno::Envmap::setScale(float scale)
+{
+	params.scale = scale;
 }
 
 void Envmap::update()

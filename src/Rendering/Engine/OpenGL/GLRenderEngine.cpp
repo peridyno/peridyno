@@ -174,6 +174,11 @@ namespace dyno
 		bDrawEnvmap = flag;
 	}
 
+	void GLRenderEngine::setEnvmapScale(float scale)
+	{
+		mEnvmap->setScale(scale);
+	}
+
 	void GLRenderEngine::createFramebuffer()
 	{
 		// create render textures

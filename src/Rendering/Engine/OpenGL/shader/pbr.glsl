@@ -92,6 +92,9 @@ vec3 EvalPBR(vec3 color, float metallic, float roughness, vec3 N, vec3 V, vec3 L
     return vec3(0);
 }
 
+layout(std140, binding = 6) uniform IBLParams {
+    float scale;
+} iblParams;
 layout(binding = 7) uniform samplerCube irradianceCube;
 layout(binding = 8) uniform samplerCube prefilteredCube;
 layout(binding = 9) uniform sampler2D   brdfLut;
@@ -124,5 +127,5 @@ vec3 EvalPBR_IBL(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V)
 
     vec3 ambient = kD * diffuse + specular;
    
-    return ambient;
+    return ambient * iblParams.scale;
 }

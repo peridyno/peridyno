@@ -56,6 +56,11 @@ int main()
 
 		renderer->bgColor0 = { 1, 1, 1 };
 		renderer->bgColor1 = { 1, 1, 1 };
+
+		renderer->planeColor = { 1,1,1,1 };
+		renderer->rulerColor = { 1,1,1,1 };
+
+		renderer->setEnvmapScale(5.f);
 	}
 
 	app.mainLoop();

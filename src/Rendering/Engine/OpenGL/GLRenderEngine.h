@@ -69,6 +69,7 @@ namespace dyno
 
 		void setEnvmap(const std::string& path);
 		void setUseEnvmapBackground(bool flag);
+		void setEnvmapScale(float scale);
 
 	private:
 		void createFramebuffer();
