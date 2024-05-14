@@ -8,7 +8,7 @@ emitter.var_location().set_value(dyno.Vector3f([0.5, 0.5, 0.5]))
 fluid = dyno.ParticleFluid3f()
 fluid.load_particles(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([0.2, 0.2, 0.2]), 0.05)
 
-emitter.connect(fluid.import_particles_emitters())
+emitter.connect(fluid.import_particle_emitters())
 
 calculateNorm = dyno.CalculateNorm3f()
 colorMapper = dyno.ColorMapping3f()

@@ -3,6 +3,8 @@
 
 #include <pybind11/stl.h>
 
+#include "Collision/Attribute.h"
+
 #include "Timer.h"
 #include "Vector.h"
 #include "Matrix.h"
@@ -92,6 +94,16 @@ void declare_matrix(py::module& m, std::string typestr) {
 		.def_static("rows", &Matrix::rows)
 		.def_static("cols", &Matrix::cols)
 		.def_static("identity_matrix", &Matrix::identityMatrix);
+}
+
+#include "Quat.h"
+template <typename Real>
+void declare_quat(py::module& m, std::string typestr) {
+	using Quat = dyno::Quat<Real>;
+	std::string pyclass_name = std::string("Quat") + typestr;
+	py::class_<Quat>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<Real, Real, Real, Real>())
+		.def(py::init<Real, const dyno::Vector<Real, 3>&>());
 }
 
 #include "Primitive/Primitive3D.h"

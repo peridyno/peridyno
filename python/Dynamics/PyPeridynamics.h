@@ -47,10 +47,10 @@ void declare_codimensionalPD(py::module& m, std::string typestr) {
 		//	"Set energy model to XuModel")
 		//.def("set_energy_model", py::overload_cast<dyno::FiberModel<Real>&>(&Class::setEnergyModel),
 		//	"Set energy model to FiberModel")
-		.def("setMaxIteNumber", &Class::setMaxIteNumber) // 设置最大迭代次数
-		.def("setGrad_ite_eps", &Class::setGrad_ite_eps) // 设置梯度迭代容差
-		.def("setContactMaxIte", &Class::setContactMaxIte) // 设置接触最大迭代次数
-		.def("setAccelerated", &Class::setAccelerated)
+		.def("set_max_ite_number", &Class::setMaxIteNumber) // 设置最大迭代次数
+		.def("set_grad_ite_eps", &Class::setGrad_ite_eps) // 设置梯度迭代容差
+		.def("set_contact_max_ite", &Class::setContactMaxIte) // 设置接触最大迭代次数
+		.def("set_accelerated", &Class::setAccelerated)
 		//DEF_VAR
 		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
 		.def("var_energy_type", &Class::varEnergyType, py::return_value_policy::reference)
@@ -385,8 +385,12 @@ void declare_elastic_body(py::module& m, std::string typestr) {
 	using Class = dyno::ElasticBody<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
 	std::string pyclass_name = std::string("ElasticBody") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	typedef typename TDataType::Coord Coord;
+	typedef typename TDataType::Real Real;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol())
 		.def(py::init<>())
+		.def("load_particles", py::overload_cast<std::string>(&Class::loadParticles))
+		.def("load_particles", py::overload_cast<Coord, Coord, Real>(&Class::loadParticles))
 		//.def("load_particles", &Class::loadParticles, py::arg("filename"))
 		//.def("load_particles", &Class::loadParticles)
 		.def("translate", &Class::translate)
@@ -397,8 +401,118 @@ void declare_elastic_body(py::module& m, std::string typestr) {
 		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference);
 }
 
+#include "Peridynamics/ElastoplasticBody.h"
+template <typename TDataType>
+void declare_elastoplastic_body(py::module& m, std::string typestr) {
+	using Class = dyno::ElastoplasticBody<TDataType>;
+	using Parent = dyno::ParticleSystem<TDataType>;
+	std::string pyclass_name = std::string("ElastoplasticBody") + typestr;
+	typedef typename TDataType::Coord Coord;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("load_particles", &Class::loadParticles)
+		.def("translate", &Class::translate)
+		.def("scale", &Class::scale)
+		.def("rotate", &Class::rotate)
+		.def("state_rest_shape", &Class::stateRestShape, py::return_value_policy::reference);
+}
 
+#include "Peridynamics/TetrahedralSystem.h"
+template <typename TDataType>
+void declare_tetrahedral_system(py::module& m, std::string typestr) {
+	using Class = dyno::TetrahedralSystem<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("TetrahedralSystem") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("state_normal_sdf", &Class::stateNormalSDF, py::return_value_policy::reference)
+		.def("var_sdf", &Class::varSDF, py::return_value_policy::reference)
+		.def("state_tetrahedron_set", &Class::stateTetrahedronSet, py::return_value_policy::reference)
+		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
+		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
+		.def("load_vertex_from_file", &Class::loadVertexFromFile)
+		.def("load_vertex_from_gmsh_file", &Class::loadVertexFromGmshFile)
+		.def("translate", &Class::translate)
+		.def("scale", &Class::scale)
+		.def("rotate", &Class::rotate);
+}
 
+#include "Peridynamics/HyperelasticBody.h"
+template <typename TDataType>
+void declare_hyperelastic_body(py::module& m, std::string typestr) {
+	using Class = dyno::HyperelasticBody<TDataType>;
+	using Parent = dyno::TetrahedralSystem<TDataType>;
+	std::string pyclass_name = std::string("HyperelasticBody") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("translate", &Class::translate)
+		//.def("scale", py::overload_cast<Real>(&Class::scale),
+		//	py::overload_cast<Coord>(&Class::scale))
+		//.def("rotate", py::overload_cast<Quat<Real>>(&Class::rotate),
+		//	py::overload_cast<Coord>(&Class::rotate))
+		//.def("set_energy_model", py::overload_cast<StVKModel<Real>>(&Class::setEnergyModel),
+		//	py::overload_cast<LinearModel<Real>>(&Class::setEnergyModel),
+		//	py::overload_cast<NeoHookeanModel<Real>>(&Class::setEnergyModel),
+		//	py::overload_cast<XuModel<Real>>(&Class::setEnergyModel))
+		.def("load_sdf", &Class::loadSDF)
+		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
+		.def("var_rotation", &Class::varRotation, py::return_value_policy::reference)
+		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
+		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("var_alpha_computed", &Class::varAlphaComputed, py::return_value_policy::reference)
+		.def("var_energy_type", &Class::varEnergyType, py::return_value_policy::reference)
+		.def("var_energy_model", &Class::varEnergyModel, py::return_value_policy::reference)
+		.def("state_rest_position", &Class::stateRestPosition, py::return_value_policy::reference)
+		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference)
+		.def("state_volume_pair", &Class::stateVolumePair, py::return_value_policy::reference)
+		.def("state_vertex_rotation", &Class::stateVertexRotation, py::return_value_policy::reference)
+		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference)
+		.def("state_volume", &Class::stateVolume, py::return_value_policy::reference)
+		.def("var_neighbor_searching_adjacent", &Class::varNeighborSearchingAdjacent, py::return_value_policy::reference)
+		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
+		.def("state_tets", &Class::stateTets, py::return_value_policy::reference)
+		.def("state_disrance_sdf", &Class::stateDisranceSDF, py::return_value_policy::reference);
+}
 
+//#include "Peridynamics/initializePeridynamics.h"
+//template <typename TDataType>
+//void declare_peridynamics_initializer(py::module& m, std::string typestr) {
+//	using Class = dyno::PeridynamicsInitializer<TDataType>;
+//	using Parent = dyno::PluginEntry;
+//	std::string pyclass_name = std::string("PeridynamicsInitializer") + typestr;
+//	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+//		.def(py::init<>())
+//		.def("instance", &Class::instance);
+//}
+
+#include "Peridynamics/ThreadSystem.h"
+template <typename TDataType>
+void declare_thread_system(py::module& m, std::string typestr) {
+	using Class = dyno::ThreadSystem<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("ThreadSystem") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str())
+		.def(py::init<>())
+		.def("state_edge_set", &Class::stateEdgeSet, py::return_value_policy::reference)
+		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
+		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
+		.def("add_thread", &Class::addThread);
+}
+
+#include "Peridynamics/Thread.h"
+template <typename TDataType>
+void declare_thread(py::module& m, std::string typestr) {
+	using Class = dyno::Thread<TDataType>;
+	using Parent = dyno::ThreadSystem<TDataType>;
+	std::string pyclass_name = std::string("Thread") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("translate", &Class::translate)
+		.def("scale", &Class::scale)
+		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("state_rest_shape", &Class::stateRestShape, py::return_value_policy::reference);
+}
 
 void pybind_peridynamics(py::module& m);
