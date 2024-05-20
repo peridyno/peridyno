@@ -7,16 +7,15 @@
 #include <Wt/WLabel.h>
 #include <Wt/WCssDecorationStyle.h>
 
-
 #define DECLARE_PHYSIKA_SAMPLE(NAME) \
 	class NAME : public Sample { \
 	public:\
 		std::string name() const {return #NAME;};\
 		std::string thumbnail() const {return std::string("samples/") + #NAME + ".jpg";};\
-		std::string source() const {return std::string("/") + #NAME + ".py";};\
+		std::string source() const {return std::string("../../../../data/python_web_sample/") + #NAME + ".py";};\
 	};
 
-DECLARE_PHYSIKA_SAMPLE(Collision)
+DECLARE_PHYSIKA_SAMPLE(CPD_ClothDrop)
 DECLARE_PHYSIKA_SAMPLE(DrySand)
 DECLARE_PHYSIKA_SAMPLE(Elasticity)
 DECLARE_PHYSIKA_SAMPLE(Fracture)
@@ -35,7 +34,7 @@ class SampleStore
 private:
 	SampleStore()
 	{
-		samples.push_back(new Collision);
+		samples.push_back(new CPD_ClothDrop);
 		samples.push_back(new DrySand);
 		samples.push_back(new Elasticity);
 		samples.push_back(new Fracture);
@@ -74,7 +73,6 @@ public:
 
 private:
 	std::vector<Sample*> samples;
-
 };
 
 Wt::WContainerWidget* _createItem(Sample* sample)
@@ -100,7 +98,6 @@ Wt::WContainerWidget* _createItem(Sample* sample)
 
 	container->mouseWentOver().connect([=]() {
 		container->setDecorationStyle(style0);
-
 		});
 
 	container->mouseWentOut().connect([=]() {
@@ -126,7 +123,6 @@ WSampleWidget::WSampleWidget()
 			});
 	}
 }
-
 
 Wt::Signal<Sample*>& WSampleWidget::clicked()
 {

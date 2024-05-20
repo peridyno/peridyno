@@ -26,7 +26,6 @@
 
 #include <filesystem>
 
-
 WMainWindow::WMainWindow()
 	: WContainerWidget(), bRunFlag(false)
 {
@@ -57,7 +56,6 @@ WMainWindow::WMainWindow()
 
 WMainWindow::~WMainWindow()
 {
-
 }
 
 void WMainWindow::initMenu(Wt::WMenu* menu)
@@ -88,8 +86,8 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 				std::string path = sample->source();
 				Wt::log("warning") << Wt::WApplication::appRoot();
-				Wt::log("warning") << std::filesystem::current_path().string() + path;
-				std::ifstream ifs("data\\docroot\\samples\\Collision.py");
+				Wt::log("warning") << std::filesystem::current_path().string();
+				std::ifstream ifs(path);
 				if (ifs.is_open())
 				{
 					std::string content((std::istreambuf_iterator<char>(ifs)),
@@ -111,7 +109,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 		menu->contentsStack()->setCurrentWidget(0);
 		});
 }
-
 
 void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 {
