@@ -13,7 +13,7 @@
 	public:\
 		std::string name() const {return #NAME;};\
 		std::string thumbnail() const {return std::string("samples/") + #NAME + ".jpg";};\
-		std::string source() const {return std::string("data/samples/") + #NAME + ".py";};\
+		std::string source() const {return std::string("/") + #NAME + ".py";};\
 	};
 
 DECLARE_PHYSIKA_SAMPLE(Collision)
@@ -81,7 +81,7 @@ Wt::WContainerWidget* _createItem(Sample* sample)
 {
 	Wt::WContainerWidget* container = new Wt::WContainerWidget;
 	auto layout = container->setLayout(std::make_unique<Wt::WVBoxLayout>());
-	
+
 	// image
 	auto image = layout->addWidget(std::make_unique<Wt::WImage>(sample->thumbnail()), 0, Wt::AlignmentFlag::Center);
 	image->resize(120, 120);
@@ -97,7 +97,7 @@ Wt::WContainerWidget* _createItem(Sample* sample)
 
 	container->setStyleClass("sample-item");
 	image->setStyleClass("sample-item");
-	
+
 	container->mouseWentOver().connect([=]() {
 		container->setDecorationStyle(style0);
 
@@ -114,12 +114,12 @@ WSampleWidget::WSampleWidget()
 {
 	this->setHeight(Wt::WLength("100%"));
 	this->setOverflow(Wt::Overflow::Auto);
-	
+
 	for (auto sample : SampleStore::getInstance()->getSamples())
 	{
 		auto item = _createItem(sample);
 		this->addWidget(std::unique_ptr<Wt::WContainerWidget>(item));
-		
+
 		item->clicked().connect([=]()
 			{
 				m_signal.emit(sample);

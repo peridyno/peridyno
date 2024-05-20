@@ -18,10 +18,13 @@
 #include <Wt/WTableView.h>
 #include <Wt/WStackedWidget.h>
 #include <Wt/WText.h>
+#include <Wt/WLogger.h>
 
 #include <fstream>
 
 #include <SceneGraph.h>
+
+#include <filesystem>
 
 
 WMainWindow::WMainWindow()
@@ -49,7 +52,7 @@ WMainWindow::WMainWindow()
 	// menu
 	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::East);
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
-	initMenu(menu);	
+	initMenu(menu);
 }
 
 WMainWindow::~WMainWindow()
@@ -74,7 +77,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 		});
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
-			if(scene) setScene(scene);
+		if (scene) setScene(scene);
 		});
 
 	sampleWidget->clicked().connect([=](Sample* sample)
@@ -84,13 +87,20 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 				pythonItem->select();
 
 				std::string path = sample->source();
-				std::ifstream ifs(path);
+				Wt::log("warning") << Wt::WApplication::appRoot();
+				Wt::log("warning") << std::filesystem::current_path().string() + path;
+				std::ifstream ifs("data\\docroot\\samples\\Collision.py");
 				if (ifs.is_open())
 				{
 					std::string content((std::istreambuf_iterator<char>(ifs)),
 						(std::istreambuf_iterator<char>()));
 					pythonWidget->setText(content);
-					pythonWidget->execute(content);
+					//pythonWidget->execute(content);
+				}
+				else
+				{
+					std::string content = "Error: Not Find The Python File";
+					pythonWidget->setText(content);
 				}
 			}
 		});
@@ -99,7 +109,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	hide->select();
 	hide->clicked().connect([=]() {
 		menu->contentsStack()->setCurrentWidget(0);
-	});
+		});
 }
 
 
@@ -117,7 +127,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	// node tree
 	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
 	panel0->setTitle("Node Tree");
-	panel0->setCollapsible(true);	
+	panel0->setCollapsible(true);
 	auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
 	treeView->setSortingEnabled(false);
 	treeView->setSelectionMode(Wt::SelectionMode::Single);
@@ -130,8 +140,8 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
 	panel1->setTitle("Module List");
 	panel1->setCollapsible(true);
-	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());	treeView->setSortingEnabled(false);	
-	tableView->setSortingEnabled(false); 
+	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());	treeView->setSortingEnabled(false);
+	tableView->setSortingEnabled(false);
 	tableView->setSelectionMode(Wt::SelectionMode::Single);
 	tableView->setEditTriggers(Wt::EditTrigger::None);
 	tableView->setModel(mModuleDataModel);
