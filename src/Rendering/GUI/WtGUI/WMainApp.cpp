@@ -201,3 +201,9 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 
 	window->setScene(scene);
 }
+
+WMainApp::~WMainApp()
+{
+	WApplication::quit();
+	Wt::log("warning") << "stop WApplication";
+}

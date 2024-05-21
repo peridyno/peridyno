@@ -11,7 +11,7 @@
 namespace dyno
 {
 	class Camera;
-	class SceneGraph; 
+	class SceneGraph;
 	class GLRenderEngine;
 
 	struct RenderParams;
@@ -29,7 +29,7 @@ public:
 	void setScene(std::shared_ptr<dyno::SceneGraph> scene);
 
 	dyno::RenderParams* getRenderParams();
-	
+
 	void update();
 
 protected:
@@ -46,20 +46,23 @@ private:
 	void onMouseReleased(const Wt::WMouseEvent& evt);
 	void onMouseWheeled(const Wt::WMouseEvent& evt);
 
-private:
-	Wt::WImage*				mImage;
-	Wt::WApplication*		mApp;
+	int width = 800;
+	int height = 600;
 
-	GLFWwindow*				mContext;
-	dyno::GLRenderEngine*	mRenderEngine;
-	dyno::RenderParams*		mRenderParams;
-	
+private:
+	Wt::WImage* mImage;
+	Wt::WApplication* mApp;
+
+	GLFWwindow* mContext;
+	dyno::GLRenderEngine* mRenderEngine;
+	dyno::RenderParams* mRenderParams;
+
 	std::vector<unsigned char> mImageData;					// raw image	
 	std::vector<unsigned char> mJpegBuffer;					// jpeg data	
 	std::unique_ptr<ImageEncoder> mJpegEncoder;				// jpeg encoder	
 	std::unique_ptr<Wt::WMemoryResource> mJpegResource;		// Wt resource for jpeg image
 
-	std::shared_ptr<dyno::SceneGraph> mScene;	
+	std::shared_ptr<dyno::SceneGraph> mScene;
 	std::shared_ptr<dyno::Camera>	  mCamera;
 
 	// internal framebuffer

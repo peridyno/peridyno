@@ -35,7 +35,7 @@ WSimulationCanvas::WSimulationCanvas()
 	this->setAttributeValue("oncontextmenu", "return false;");
 
 	mApp = Wt::WApplication::instance();
-	
+
 	mImage = this->addNew<Wt::WImage>();
 	mImage->resize("100%", "100%");
 
@@ -67,17 +67,16 @@ WSimulationCanvas::WSimulationCanvas()
 		"}"
 		"}.bind(" + mImage->jsRef() + ")");
 
-	
-	mImageData.resize(640 * 480 * 3);	// initialize image buffer
+	mImageData.resize(width * height * 3);	// initialize image buffer
 	mJpegEncoder = std::make_unique<ImageEncoderNV>();
-	mJpegEncoder->SetQuality(90);
+	mJpegEncoder->SetQuality(100);
 	mJpegResource = std::make_unique<Wt::WMemoryResource>("image/jpeg");
 
 	mRenderEngine = new dyno::GLRenderEngine;
 	mRenderParams = new dyno::RenderParams;
 	mCamera = std::make_shared<dyno::OrbitCamera>();
-	mCamera->setWidth(640);
-	mCamera->setHeight(480);
+	mCamera->setWidth(width);
+	mCamera->setHeight(height);
 	mCamera->registerPoint(0, 0);
 	mCamera->rotateToPoint(-32, 12);
 
@@ -105,7 +104,7 @@ void WSimulationCanvas::initializeGL()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-	mContext = glfwCreateWindow(640, 480, "", NULL, NULL);
+	mContext = glfwCreateWindow(width, height, "", NULL, NULL);
 	if (!mContext)
 	{
 		Wt::log("error") << "Failed to create OpenGL context!";
@@ -121,7 +120,7 @@ void WSimulationCanvas::initializeGL()
 	mFrameColor.internalFormat = GL_RGB;
 	mFrameColor.type = GL_BYTE;
 	mFrameColor.create();
-	mFrameColor.resize(640, 480);
+	mFrameColor.resize(width, height);
 
 	mFramebuffer.create();
 	mFramebuffer.bind();
@@ -136,7 +135,7 @@ void WSimulationCanvas::initializeGL()
 
 void WSimulationCanvas::makeCurrent()
 {
-	if(glfwGetCurrentContext() != mContext)
+	if (glfwGetCurrentContext() != mContext)
 		glfwMakeContextCurrent(mContext);
 }
 
@@ -156,7 +155,7 @@ void WSimulationCanvas::layoutSizeChanged(int width, int height)
 	mFrameColor.resize(width, height);
 	this->doneCurrent();
 
-	WContainerWidget::layoutSizeChanged(width, height); 
+	WContainerWidget::layoutSizeChanged(width, height);
 	scheduleRender();
 }
 
@@ -164,7 +163,7 @@ void WSimulationCanvas::onMousePressed(const Wt::WMouseEvent& evt)
 {
 	Wt::Coordinates coord = evt.widget();
 	mCamera->registerPoint(coord.x, coord.y);
-	
+
 }
 
 void WSimulationCanvas::onMouseDrag(const Wt::WMouseEvent& evt)
@@ -232,6 +231,8 @@ void WSimulationCanvas::update()
 
 	// encode image
 	{
+		mJpegBuffer.clear();
+
 		mJpegEncoder->Encode(mImageData.data(),
 			mCamera->viewportWidth(), mCamera->viewportHeight(), 0,
 			mJpegBuffer);
@@ -242,7 +243,7 @@ void WSimulationCanvas::update()
 
 	// update UI
 	{
-		mJpegResource->setData(mJpegBuffer);
+		mJpegResource->setData(std::move(mJpegBuffer));
 		const std::string url = mJpegResource->generateUrl();
 		mImage->callJavaScriptMember("update", WWebWidget::jsStringLiteral(url));
 	}

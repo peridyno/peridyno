@@ -4,8 +4,8 @@ import PyPeridyno as dyno
 
 
 def filePath(str):
-    script_dir = "H:/program/Simulation/unibeam/python/build"
-    relative_path = "data/" + str
+    script_dir = os.getcwd()
+    relative_path = "../../../../data/" + str
     file_path = os.path.join(script_dir, relative_path)
     if os.path.isfile(file_path):
         print(file_path)

@@ -56,6 +56,8 @@ WMainWindow::WMainWindow()
 
 WMainWindow::~WMainWindow()
 {
+	WContainerWidget::clear();
+	Wt::log("warning") << "stop WMainWindows";
 }
 
 void WMainWindow::initMenu(Wt::WMenu* menu)
@@ -93,7 +95,8 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 					std::string content((std::istreambuf_iterator<char>(ifs)),
 						(std::istreambuf_iterator<char>()));
 					pythonWidget->setText(content);
-					//pythonWidget->execute(content);
+					pythonWidget->execute(content);
+					//menu->contentsStack()->setCurrentWidget(0);
 				}
 				else
 				{

@@ -4,8 +4,8 @@ import PyPeridyno as dyno
 
 
 def filePath(str):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    relative_path = "../../../data/" + str
+    script_dir = os.getcwd()
+    relative_path = "../../../../data/" + str
     file_path = os.path.join(script_dir, relative_path)
     if os.path.isfile(file_path):
         print(file_path)
@@ -15,10 +15,10 @@ def filePath(str):
         return -1
 
 
-scn = dyno.SceneGraph()
-scn.set_lower_bound(dyno.Vector3f([-1.5, 0, -1.5]))
-scn.set_upper_bound(dyno.Vector3f([1.5, 3, 1.5]))
-scn.set_gravity(dyno.Vector3f([0, -0.98, 0]))
+scene = dyno.SceneGraph()
+scene.set_lower_bound(dyno.Vector3f([-1.5, 0, -1.5]))
+scene.set_upper_bound(dyno.Vector3f([1.5, 3, 1.5]))
+scene.set_gravity(dyno.Vector3f([0, -0.98, 0]))
 
 staticTriangularMesh = dyno.StaticTriangularMesh3f()
 staticTriangularMesh.var_file_name().set_value(dyno.FilePath(filePath("cloth_shell/v1/woman_model.obj")))
@@ -49,14 +49,9 @@ staticTriangularMesh.graphics_pipeline().push_module(surfaceRenderer)
 cloth.set_visible(True)
 staticTriangularMesh.set_visible(True)
 
-scn.print_node_info(True)
-scn.print_module_info(True)
+scene.print_node_info(True)
+scene.print_module_info(True)
 
-scn.add_node(staticTriangularMesh)
-scn.add_node(boundary)
-scn.add_node(cloth)
-
-app = dyno.GLfwApp()
-app.set_scenegraph(scn)
-app.initialize(1920, 1080, True)
-app.main_loop()
+scene.add_node(staticTriangularMesh)
+scene.add_node(boundary)
+scene.add_node(cloth)
