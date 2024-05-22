@@ -56,7 +56,6 @@ WMainWindow::WMainWindow()
 
 WMainWindow::~WMainWindow()
 {
-	WContainerWidget::clear();
 	Wt::log("warning") << "stop WMainWindows";
 }
 
@@ -87,8 +86,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 				pythonItem->select();
 
 				std::string path = sample->source();
-				Wt::log("warning") << Wt::WApplication::appRoot();
-				Wt::log("warning") << std::filesystem::current_path().string();
 				std::ifstream ifs(path);
 				if (ifs.is_open())
 				{

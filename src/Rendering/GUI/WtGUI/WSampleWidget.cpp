@@ -7,12 +7,14 @@
 #include <Wt/WLabel.h>
 #include <Wt/WCssDecorationStyle.h>
 
+#include <Platform.h>
+
 #define DECLARE_PHYSIKA_SAMPLE(NAME) \
 	class NAME : public Sample { \
 	public:\
 		std::string name() const {return #NAME;};\
 		std::string thumbnail() const {return std::string("samples/") + #NAME + ".jpg";};\
-		std::string source() const {return std::string("../../../../data/python_web_sample/") + #NAME + ".py";};\
+		std::string source() const {return getAssetPath() + std::string("python_web_sample/") + #NAME + ".py";};\
 	};
 
 DECLARE_PHYSIKA_SAMPLE(CPD_ClothDrop)

@@ -1,4 +1,3 @@
 set(LIB_DEPENDENCY
     WtGUI)
 add_example(GL_WtGUI WtGUI LIB_DEPENDENCY)
-file(COPY "../../../../data" DESTINATION ${CMAKE_BINARY_DIR})

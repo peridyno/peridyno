@@ -95,6 +95,7 @@ scene.add_node(container)
 
 WPythonWidget::~WPythonWidget()
 {
+	Wt::log("warning") << "WPythonWidget destory";
 }
 
 void WPythonWidget::setText(const std::string& text)

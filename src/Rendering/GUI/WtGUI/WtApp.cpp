@@ -7,7 +7,6 @@
 std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
 {
 	auto app = std::make_unique<WMainApp>(env);
-
 	return app;
 }
 
@@ -37,6 +36,9 @@ namespace dyno {
 				args.push_back("0.0.0.0:5000");
 				args.push_back("--docroot");
 				args.push_back(doc_root);
+				args.push_back("--config");
+				args.push_back(doc_root + "\\wt_config.xml");
+				Wt::log("warning") << doc_root + "\\wt_config.xml";
 				Wt::WRun("", args, &createApplication);
 			}
 			else

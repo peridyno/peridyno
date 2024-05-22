@@ -142,6 +142,7 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 
 	this->setTitle("PeriDyno: An AI-targeted physics simulation platform");
 
+
 	// style sheet for the canvas
 	this->styleSheet().addRule(
 		".remote-framebuffer",
@@ -200,10 +201,10 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 	}
 
 	window->setScene(scene);
+
 }
 
 WMainApp::~WMainApp()
 {
-	WApplication::quit();
 	Wt::log("warning") << "stop WApplication";
 }

@@ -91,7 +91,18 @@ WSimulationCanvas::~WSimulationCanvas()
 	mRenderEngine->terminate();
 	delete mRenderEngine;
 
+	delete mRenderParams;
+
+	mFramebuffer.release();
+	mFrameColor.release();
+
+	mImageData.resize(0);
+	mJpegBuffer.resize(0);
+
 	glfwDestroyWindow(mContext);
+	//glfwTerminate();
+	Wt::log("warning") << "WSimulationCanvas destory";
+
 }
 
 void WSimulationCanvas::initializeGL()
