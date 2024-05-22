@@ -23,8 +23,6 @@ std::shared_ptr<SceneGraph> creatBricks()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-	rigid->setDt(0.005f);
-
 	uint dim = 5;
 	float h = 0.1f;
 

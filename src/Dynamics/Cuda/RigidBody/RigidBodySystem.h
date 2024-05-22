@@ -138,7 +138,7 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 1000, "");
+		DEF_VAR(Real, FrictionCoefficient, 2.0, "");
 
 		DEF_VAR(Real, Slop, 0.001, "");
 

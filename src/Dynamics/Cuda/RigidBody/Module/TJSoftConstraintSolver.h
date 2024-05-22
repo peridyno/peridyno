@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Yue Chang
+ * Copyright 2024 Liang Ruikai
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * Updates: 
- *  - 2024-4-9:  Add position-based solver by Liang Ruikai
+ *
  */
+
 #pragma once
 #include "Module/ConstraintModule.h"
 #include "RigidBody/RigidBodyShared.h"
@@ -24,19 +23,15 @@
 
 namespace dyno
 {
-	/**
-	 * @brief Implementation of an iterative constraint solver for rigid body dynamics with contact.
-	 * 			Refer to "Iterative Dynamics with Temporal Coherence" by Erin Catto, 2005.
-	 */
 	template<typename TDataType>
-	class IterativeConstraintSolver : public ConstraintModule
+	class TJSoftConstraintSolver : public ConstraintModule
 	{
-		DECLARE_TCLASS(IterativeConstraintSolver, TDataType)
+		DECLARE_TCLASS(TJSoftConstraintSolver, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		
+
 		typedef typename ::dyno::Quat<Real> TQuat;
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
 		typedef typename ::dyno::TConstraintPair<Real> Constraint;
@@ -46,9 +41,9 @@ namespace dyno
 		typedef typename HingeJoint<Real> HingeJoint;
 		typedef typename FixedJoint<Real> FixedJoint;
 		typedef typename PointJoint<Real> PointJoint;
-	
-		IterativeConstraintSolver();
-		~IterativeConstraintSolver();
+
+		TJSoftConstraintSolver();
+		~TJSoftConstraintSolver();
 
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
@@ -61,10 +56,15 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 20, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 5, "");
 
-		DEF_VAR(uint, IterationNumberForPositionSolver, 50, "");
+		DEF_VAR(Real, LinearDamping, 0.1, "");
 
+		DEF_VAR(Real, AngularDamping, 0.1, "");
+
+		DEF_VAR(Real, DampingRatio, 1.0, "");
+
+		DEF_VAR(Real, Hertz, 100, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -94,41 +94,25 @@ namespace dyno
 
 	private:
 		void initializeJacobian(Real dt);
-		void initializeJacobianForNGS(Real dt);
 
 	private:
-		DArray<Coord> mJ;		//Jacobian
-		DArray<Coord> mB;		//B = M^{-1}J^T
-
-		DArray<Coord> mJ_p;		//Jacobian
-		DArray<Coord> mB_p;		//B = M^{-1}J^T
+		DArray<Coord> mJ;
+		DArray<Coord> mB;
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
 
-		DArray<Real> mEta;		//eta
-		DArray<Real> mD;		//diagonal elements of JB
-		DArray<Real> mLambda;	//contact impulse
-
-		DArray<Real> mEta_p;		//eta
-		DArray<Real> mD_p;			//diagonal elements of JB
-
-		DArray<Real> mLambda_old;
+		DArray<Real> mEta;
+		DArray<Real> mLambda;
 
 		DArray<ContactPair> mContactsInLocalFrame;
 
-		DArray<Real> mDiff;
-		CArray<Real> mDiffHost;
-
-		DArray<Constraint> mPositionConstraints;
 		DArray<Constraint> mVelocityConstraints;
 
-		DArray<Coord> mCenterPre;
-		DArray<TQuat> mQuatPre;
-
 		DArray<int> mContactNumber;
-		DArray<int> mJointNumber;
 
-
+		DArray<Real> mK_1;
+		DArray<Mat2f> mK_2;
+		DArray<Matrix> mK_3;
 	};
 }

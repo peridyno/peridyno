@@ -39,7 +39,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	jeep->stateInstanceTransform()->connect(prRender->inTransform());
 	jeep->graphicsPipeline()->pushModule(prRender);
 
-	uint N = 2;
+	uint N = 1;
 
 	for (uint i = 0; i < N; i++)
 	{
@@ -77,34 +77,36 @@ std::shared_ptr<SceneGraph> creatCar()
 		capsule4.halfLength = 0.1495;
 		capsule4.radius = 0.450;
 
+
 		RigidBodyInfo rigidbody;
 
 		rigidbody.bodyId = i;
 
 		Vec3f offset = Vec3f(0.0f, -0.721f, 0.148f);
 		rigidbody.offset = offset;
-		auto bodyActor = jeep->addBox(box1, rigidbody, 10);
+		auto bodyActor = jeep->addBox(box1, rigidbody, 1000);
 
 		rigidbody.offset = Vec3f(0.0f);
 
 		auto spareTireActor = jeep->addBox(box2, rigidbody, 100);
-		auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
-		auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);
+		//auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
+		//auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);
 
-		Real wheel_velocity = 10;
+		Real wheel_velocity = 30;
 
 		auto frontLeftTireActor = jeep->addCapsule(capsule1, rigidbody, 100);
 		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
 		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
 		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);
 
+
 		//front rear
-		auto& joint1 = jeep->createHingeJoint(frontLeftTireActor, frontLeftSteerActor);
+		auto& joint1 = jeep->createHingeJoint(frontLeftTireActor, bodyActor);
 		joint1.setAnchorPoint(frontLeftTireActor->center);
 		joint1.setMoter(wheel_velocity);
 		joint1.setAxis(Vec3f(1, 0, 0));
 
-		auto& joint2 = jeep->createHingeJoint(frontRightTireActor, frontRightSteerActor);
+		auto& joint2 = jeep->createHingeJoint(frontRightTireActor, bodyActor);
 		joint2.setAnchorPoint(frontRightTireActor->center);
 		joint2.setMoter(wheel_velocity);
 		joint2.setAxis(Vec3f(1, 0, 0));
@@ -124,10 +126,10 @@ std::shared_ptr<SceneGraph> creatCar()
 		//FixedJoint<Real> joint5(0, 1);
 		auto& joint5 = jeep->createFixedJoint(bodyActor, spareTireActor);
 		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
-		auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
+		/*auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
 		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
 		auto& joint7 = jeep->createFixedJoint(bodyActor, frontRightSteerActor);
-		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
+		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);*/
 
 		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
 		jeep->bind(spareTireActor, Pair<uint, uint>(4, i));
@@ -148,17 +150,17 @@ std::shared_ptr<SceneGraph> creatCar()
 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
 
 	//Visualize rigid bodies
-// 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-// 	jeep->stateTopology()->connect(mapper->inDiscreteElements());
-// 	jeep->graphicsPipeline()->pushModule(mapper);
-// 
-// 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-// 	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-// 	sRender->setAlpha(0.8f);
-// 	sRender->setRoughness(0.7f);
-// 	sRender->setMetallic(3.0f);
-// 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-// 	jeep->graphicsPipeline()->pushModule(sRender);
+ 	/*auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+ 	jeep->stateTopology()->connect(mapper->inDiscreteElements());
+ 	jeep->graphicsPipeline()->pushModule(mapper);
+ 
+ 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+ 	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+ 	sRender->setAlpha(0.8f);
+ 	sRender->setRoughness(0.7f);
+ 	sRender->setMetallic(3.0f);
+ 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+ 	jeep->graphicsPipeline()->pushModule(sRender);*/
 
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals

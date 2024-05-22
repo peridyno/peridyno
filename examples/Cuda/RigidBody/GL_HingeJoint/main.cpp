@@ -42,7 +42,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		auto& hingeJoint = rigid->createHingeJoint(oldBoxActor, newBoxActor);
 		hingeJoint.setAnchorPoint((oldbox.center + newbox.center) / 2);
 		hingeJoint.setAxis(Vec3f(0, 0, 1));
-		hingeJoint.setRange(-M_PI/2, M_PI/2);
+		hingeJoint.setRange(-M_PI/3, M_PI/3);
 		oldbox = newbox;
 		oldBoxActor = newBoxActor;
 	}

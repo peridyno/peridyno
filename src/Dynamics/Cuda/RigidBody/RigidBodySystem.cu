@@ -4,7 +4,11 @@
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
 
-#include "RigidBody/Module/IterativeConstraintSolver.h"
+#include "RigidBody/Module/TJConstraintSolver.h"
+#include "RigidBody/Module/TJSoftConstraintSolver.h"
+#include "RigidBody/Module/PJSNJSConstraintSolver.h"
+#include "RigidBody/Module/PJSConstraintSolver.h"
+#include "RigidBody/Module/PJSoftConstraintSolver.h"
 
 //Module headers
 #include "RigidBody/Module/ContactsUnion.h"
@@ -38,7 +42,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<IterativeConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -59,7 +63,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		this->setDt(0.005f);
+		this->setDt(0.016f);
 	}
 
 	template<typename TDataType>
