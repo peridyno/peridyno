@@ -1,19 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    relative_path = "../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scn = dyno.SceneGraph()
 scn.set_lower_bound(dyno.Vector3f([-0.5, 0, -0.5]))

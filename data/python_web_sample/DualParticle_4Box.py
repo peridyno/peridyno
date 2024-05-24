@@ -1,4 +1,3 @@
-import os
 import PyPeridyno as dyno
 
 scene = dyno.SceneGraph()
@@ -87,7 +86,7 @@ calculateNorm.out_norm().connect(colorBar.in_scalar())
 fluid.graphics_pipeline().push_module(colorBar)
 
 vpRender = dyno.GLPointVisualModule()
-vpRender.set_color(dyno.Color(1,1,0))
+vpRender.set_color(dyno.Color(1, 1, 0))
 vpRender.set_color_map_mode(vpRender.ColorMapMode.PER_VERTEX_SHADER)
 fluid.state_virtual_pointSet().connect(vpRender.in_point_set())
 vpRender.var_point_size().set_value(0.0005)

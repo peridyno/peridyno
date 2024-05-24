@@ -1,19 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.getcwd()
-    relative_path = "../../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scene = dyno.SceneGraph()
 scene.set_total_time(3)
@@ -46,18 +31,18 @@ fluid.graphics_pipeline().push_module(colorMapper)
 fluid.graphics_pipeline().push_module(ptRender)
 
 barricade = dyno.StaticTriangularMesh3f()
-barricade.var_file_name().set_value(dyno.FilePath(filePath("bowl/barricade.obj")))
+barricade.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "bowl/barricade.obj"))
 barricade.var_location().set_value(dyno.Vector3f([0.1, 0.022, 0.5]))
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(0.8,0.52, 0.25))
+sRender.set_color(dyno.Color(0.8, 0.52, 0.25))
 sRender.set_visible(True)
 sRender.var_use_vertex_normal().set_value(True)
 barricade.state_triangle_set().connect(sRender.in_triangle_set())
 barricade.graphics_pipeline().push_module(sRender)
 
 boundary = dyno.StaticTriangularMesh3f()
-boundary.var_file_name().set_value(dyno.FilePath(filePath("standard/standard_cube2.obj")))
+boundary.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "standard/standard_cube2.obj"))
 boundary.graphics_pipeline().disable()
 
 sfi = dyno.TriangularMeshBoundary3f()

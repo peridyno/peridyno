@@ -1,19 +1,5 @@
-import os
-
 import PyPeridyno as dyno
 import numpy as np
-
-
-def filePath(str):
-    script_dir = os.getcwd()
-    relative_path = "../../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
 
 
 def createGhostParticles():
@@ -45,7 +31,7 @@ def createGhostParticles():
     for x in np.arange(lowx - m_iExt * s, highx + m_iExt * s + s, s):
         for y in np.arange(lowy - m_iExt * s, highy + m_iExt * s, s):
             for z in np.arange(lowz - m_iExt * s, highz + m_iExt * s, s):
-                print(x,y,z)
+                print(x, y, z)
                 attri = dyno.Attribute()
                 attri.set_fluid()
                 attri.set_dynamic()

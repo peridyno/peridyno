@@ -1,19 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    relative_path = "../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scn = dyno.SceneGraph()
 
@@ -34,7 +19,7 @@ for i in range(10):
     newBox.half_length = oldBox.half_length
     newBoxActor = rigid.add_box(newBox, rigidBody)
     fixedJoint = rigid.create_fixed_joint(oldBoxActor, newBoxActor)
-    fixedJoint.set_anchor_point((oldBox.center + newBox.center)/2)
+    fixedJoint.set_anchor_point((oldBox.center + newBox.center) / 2)
     oldBox = newBox
     oldBoxActor = newBoxActor
 

@@ -26,7 +26,6 @@ sRender.set_color(dyno.Color(1, 1, 0))
 mapper.out_triangleSet().connect(sRender.in_triangleSet())
 rigid.graphics_pipeline().push_module(sRender)
 
-
 app = dyno.GLApp()
 app.set_scenegraph(scn)
 app.initialize(1280, 768, True)

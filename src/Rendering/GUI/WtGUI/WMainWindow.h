@@ -9,6 +9,7 @@ namespace dyno
 
 class WNodeDataModel;
 class WModuleDataModel;
+class WParameterDataNode;
 class WSimulationCanvas;
 class WMainWindow : public Wt::WContainerWidget
 {
@@ -33,6 +34,7 @@ private:
 	// data models
 	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
 	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
+	std::shared_ptr< WParameterDataNode> mParameterDataNode;
 
 	bool				bRunFlag;
 

@@ -1,16 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-def filePath(str):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    relative_path = "../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
 
 scn = dyno.SceneGraph()
 
@@ -21,7 +9,7 @@ elastoplasticBody.scale(0.05)
 elastoplasticBody.translate(dyno.Vector3f([0.3, 0.2, 0.5]))
 
 surfaceMeshLoader = dyno.SurfaceMeshLoader3f()
-surfaceMeshLoader.var_file_name().set_value(dyno.FilePath(filePath("standard/standard_cube20.obj")))
+surfaceMeshLoader.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "standard/standard_cube20.obj"))
 surfaceMeshLoader.var_scale().set_value(dyno.Vector3f([0.05, 0.05, 0.05]))
 surfaceMeshLoader.var_location().set_value(dyno.Vector3f([0.3, 0.2, 0.5]))
 
@@ -41,7 +29,7 @@ elasticBody.scale(0.05)
 elasticBody.translate(dyno.Vector3f([0.5, 0.2, 0.5]))
 
 surfaceMeshLoader2 = dyno.SurfaceMeshLoader3f()
-surfaceMeshLoader2.var_file_name().set_value(dyno.FilePath(filePath("standard/standard_cube20.obj")))
+surfaceMeshLoader2.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "standard/standard_cube20.obj"))
 surfaceMeshLoader2.var_scale().set_value(dyno.Vector3f([0.05, 0.05, 0.05]))
 surfaceMeshLoader2.var_location().set_value(dyno.Vector3f([0.3, 0.2, 0.5]))
 
@@ -55,10 +43,9 @@ surfaceVisualizer2 = dyno.GLSurfaceVisualNode3f()
 topoMapper2.out_shape().connect(surfaceVisualizer2.in_triangle_set())
 
 boundary = dyno.StaticBoundary3f()
-boundary.load_cube(dyno.Vector3f([0,0,0]), dyno.Vector3f([1,1,1]), 0.005, True)
+boundary.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1, 1, 1]), 0.005, True)
 elastoplasticBody.connect(boundary.import_particle_systems())
 elasticBody.connect(boundary.import_particle_systems())
-
 
 scn.add_node(elastoplasticBody)
 scn.add_node(surfaceMeshLoader)
@@ -74,4 +61,3 @@ app = dyno.GLfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()
-

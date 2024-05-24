@@ -1,6 +1,3 @@
-import os
-import sys
-
 import PyPeridyno as dyno
 
 scene = dyno.SceneGraph()
@@ -29,14 +26,7 @@ initialParticles.connect(fluid.import_initial_states())
 
 boundary = dyno.StaticBoundary3f()
 boundary.load_cube(dyno.Vector3f([-0.5, 0, -0.5]), dyno.Vector3f([1.5, 2, 1.5]), 0.02, True)
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-relative_path = "../../../data/bowl/bowl.sdf"
-file_path = os.path.join(script_dir, relative_path)
-if os.path.isfile(file_path):
-    boundary.load_sdf(file_path, False)
-else:
-    print(f"File not found: {file_path}")
+boundary.load_sdf(dyno.get_asset_path() + "bowl/bowl.sdf", False)
 
 fluid.connect(boundary.import_particle_systems())
 

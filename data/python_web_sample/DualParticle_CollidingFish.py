@@ -1,20 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.getcwd()
-    relative_path = "../../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
-
 
 scene = dyno.SceneGraph()
 scene.set_upper_bound(dyno.Vector3f([3, 3, 3]))
@@ -22,7 +6,7 @@ scene.set_lower_bound(dyno.Vector3f([-3, -3, -3]))
 scene.set_gravity(dyno.Vector3f([0, 0, 0]))
 
 ptsLoader = dyno.PointsLoader3f()
-ptsLoader.var_file_name().set_value(dyno.FilePath(filePath("fish/FishPoints.obj")))
+ptsLoader.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "fish/FishPoints.obj"))
 ptsLoader.var_rotation().set_value(dyno.Vector3f([0, 0, 3.1415926]))
 ptsLoader.var_location().set_value(dyno.Vector3f([0, 0, 0.23]))
 initialParticles = dyno.MakeParticleSystem3f()
@@ -30,7 +14,7 @@ initialParticles.var_initial_velocity().set_value(dyno.Vector3f([0, 0, -1.5]))
 ptsLoader.out_point_set().promote_output().connect(initialParticles.in_points())
 
 ptsLoader2 = dyno.PointsLoader3f()
-ptsLoader2.var_file_name().set_value(dyno.FilePath(filePath("fish/FishPoints.obj")))
+ptsLoader2.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "fish/FishPoints.obj"))
 ptsLoader2.var_rotation().set_value(dyno.Vector3f([0, 0, 0]))
 ptsLoader2.var_location().set_value(dyno.Vector3f([0, 0, -0.23]))
 initialParticles2 = dyno.MakeParticleSystem3f()
@@ -73,7 +57,7 @@ calculateNorm.out_norm().connect(colorBar.in_scalar())
 fluid.graphics_pipeline().push_module(colorBar)
 
 vpRender = dyno.GLPointVisualModule()
-vpRender.set_color(dyno.Color(1,1,0))
+vpRender.set_color(dyno.Color(1, 1, 0))
 vpRender.set_color_map_mode(vpRender.ColorMapMode.PER_VERTEX_SHADER)
 fluid.state_virtual_pointSet().connect(vpRender.in_point_set())
 vpRender.var_point_size().set_value(0.0005)

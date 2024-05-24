@@ -1,26 +1,11 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.getcwd()
-    relative_path = "../../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scene = dyno.SceneGraph()
 scene.set_upper_bound(dyno.Vector3f([1.5, 1, 1.5]))
 scene.set_lower_bound(dyno.Vector3f([-0.5, 0, -0.5]))
 
 ptsLoader = dyno.PointsLoader3f()
-ptsLoader.var_file_name().set_value(dyno.FilePath(filePath("fish/FishPoints.obj")))
+ptsLoader.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "fish/FishPoints.obj"))
 ptsLoader.var_rotation().set_value(dyno.Vector3f([0, 0, 3.1415926]))
 ptsLoader.var_location().set_value(dyno.Vector3f([0, 0.15, 0.23]))
 initialParticles = dyno.MakeParticleSystem3f()
@@ -62,7 +47,7 @@ fluid.animation_pipeline().push_module(simple)
 
 boundary = dyno.StaticBoundary3f()
 boundary.load_cube(dyno.Vector3f([-0.5, 0, -0.5]), dyno.Vector3f([1.5, 2, 1.5]), 0.02, True)
-boundary.load_sdf(filePath("bowl/bowl.sdf"), False)
+boundary.load_sdf(dyno.get_asset_path() + "bowl/bowl.sdf", False)
 fluid.connect(boundary.import_particle_systems())
 
 calculateNorm = dyno.CalculateNorm3f()

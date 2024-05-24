@@ -4,6 +4,7 @@
 #include <pybind11/stl.h>
 
 #include "Collision/Attribute.h"
+#include "Platform.h"
 
 #include "Timer.h"
 #include "Vector.h"

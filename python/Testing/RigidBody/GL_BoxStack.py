@@ -1,19 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    relative_path = "../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scn = dyno.SceneGraph()
 
@@ -53,7 +38,7 @@ contactMapper.var_scale().set_value(0.02)
 rigid.graphics_pipeline().push_module(contactMapper)
 
 wireRender = dyno.GLWireframeVisualModule()
-wireRender.set_color(dyno.Color(0,0,1))
+wireRender.set_color(dyno.Color(0, 0, 1))
 contactMapper.out_edge_set().connect(wireRender.in_edge_set())
 rigid.graphics_pipeline().push_module(wireRender)
 
@@ -62,11 +47,10 @@ elementQuery.out_contacts().connect(contactPointMapper.in_contacts())
 rigid.graphics_pipeline().push_module(contactPointMapper)
 
 pointRender = dyno.GLPointVisualModule()
-pointRender.set_color(dyno.Color(1,0,0))
+pointRender.set_color(dyno.Color(1, 0, 0))
 pointRender.var_point_size().set_value(0.003)
 contactPointMapper.out_point_set().connect(pointRender.in_point_set())
 rigid.graphics_pipeline().push_module(pointRender)
-
 
 scn.add_node(rigid)
 

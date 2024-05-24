@@ -4,6 +4,7 @@
 #include "WSampleWidget.h"
 #include "WRenderParamsWidget.h"
 #include "WPythonWidget.h"
+#include "WParameterDataNode.h"
 
 #include <Wt/WVBoxLayout.h>
 #include <Wt/WHBoxLayout.h>
@@ -18,6 +19,8 @@
 #include <Wt/WTableView.h>
 #include <Wt/WStackedWidget.h>
 #include <Wt/WText.h>
+#include <Wt/WTable.h>
+#include <Wt/WColorPicker.h>
 #include <Wt/WLogger.h>
 
 #include <fstream>
@@ -115,6 +118,8 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	// create data model
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
+	mParameterDataNode = std::make_shared< WParameterDataNode>();
+
 
 	// vertical layout
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -137,17 +142,32 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
 	panel1->setTitle("Module List");
 	panel1->setCollapsible(true);
-	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());	treeView->setSortingEnabled(false);
+	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
+	treeView->setSortingEnabled(false);
 	tableView->setSortingEnabled(false);
 	tableView->setSelectionMode(Wt::SelectionMode::Single);
 	tableView->setEditTriggers(Wt::EditTrigger::None);
 	tableView->setModel(mModuleDataModel);
+
+	// Parameter list
+	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>(), 3);
+	panel3->setTitle("Control Variable");
+	panel3->setCollapsible(true);
+
 
 	// action for selection change
 	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
 		{
 			auto node = mNodeDataModel->getNode(idx);
 			mModuleDataModel->setNode(node);
+			mParameterDataNode->setNode(node);
+			mParameterDataNode->createParameterPanel(panel3);
+		});
+
+	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto module = mModuleDataModel->getModule(idx);
+			mParameterDataNode->setModule(module);
 		});
 
 	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)

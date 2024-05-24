@@ -2,6 +2,13 @@
 
 #include <Wt/WAbstractItemModel.h>
 #include <Wt/WAbstractTableModel.h>
+#include <Wt/WText.h>
+#include <Wt/WPanel.h>
+#include <Wt/WTable.h>
+#include <Wt/WDoubleSpinBox.h>
+#include <Wt/WLogger.h>
+
+#include <FBase.h>
 
 namespace dyno
 {
@@ -24,7 +31,7 @@ public:
 	virtual int columnCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
 	virtual int rowCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
 
-	virtual Wt::cpp17::any data(const Wt::WModelIndex& index, 
+	virtual Wt::cpp17::any data(const Wt::WModelIndex& index,
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
 
 	virtual Wt::cpp17::any headerData(int section,
@@ -41,7 +48,7 @@ private:
 		int id = -1;
 		int offset = 0;
 
-		NodeItem*				parent;
+		NodeItem* parent;
 		std::vector<NodeItem*>	children;
 
 		std::shared_ptr<dyno::Node> ref;
@@ -71,3 +78,4 @@ public:
 private:
 	std::shared_ptr<dyno::Node> mNode;
 };
+

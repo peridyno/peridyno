@@ -1,19 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.getcwd()
-    relative_path = "../../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scene = dyno.SceneGraph()
 scene.set_lower_bound(dyno.Vector3f([-1.5, 0, -1.5]))
@@ -21,15 +6,15 @@ scene.set_upper_bound(dyno.Vector3f([1.5, 3, 1.5]))
 scene.set_gravity(dyno.Vector3f([0, -0.98, 0]))
 
 staticTriangularMesh = dyno.StaticTriangularMesh3f()
-staticTriangularMesh.var_file_name().set_value(dyno.FilePath(filePath("cloth_shell/v1/woman_model.obj")))
+staticTriangularMesh.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "cloth_shell/v1/woman_model.obj"))
 
 boundary = dyno.VolumeBoundary3f()
 boundary.load_cube(dyno.Vector3f([-1.5, 0, -1.5]), dyno.Vector3f([1.5, 3, 1.5]), 0.005, True)
-boundary.load_sdf(filePath("cloth_shell/v1/woman_v1.sdf"), False)
+boundary.load_sdf(dyno.get_asset_path() + "cloth_shell/v1/woman_v1.sdf", False)
 
 cloth = dyno.CodimensionalPD3f(0.02, 1000, 0.1, 0.0005, "default")
 # cloth.set_dt(0.001)
-cloth.load_surface(filePath("cloth_shell/v1/cloth_highMesh.obj"))
+cloth.load_surface(dyno.get_asset_path() + "cloth_shell/v1/cloth_highMesh.obj")
 cloth.connect(boundary.import_triangular_systems())
 cloth.set_max_ite_number(10)
 cloth.set_contact_max_ite(20)

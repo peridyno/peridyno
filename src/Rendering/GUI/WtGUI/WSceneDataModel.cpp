@@ -4,7 +4,7 @@
 
 WNodeDataModel::WNodeDataModel()
 {
-	
+
 }
 
 void WNodeDataModel::setScene(std::shared_ptr<dyno::SceneGraph> scene)
@@ -32,35 +32,35 @@ void WNodeDataModel::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 }
 
 
-Wt::WModelIndex WNodeDataModel::parent(const Wt::WModelIndex & index) const
+Wt::WModelIndex WNodeDataModel::parent(const Wt::WModelIndex& index) const
 {
 	return Wt::WModelIndex();
 }
 
-Wt::WModelIndex WNodeDataModel::index(int row, int column, const Wt::WModelIndex & parent) const
+Wt::WModelIndex WNodeDataModel::index(int row, int column, const Wt::WModelIndex& parent) const
 {
 	if (parent.isValid())
 	{
 		return Wt::WModelIndex();
-	}	
+	}
 	return createIndex(row, column, row);
 }
 
-int WNodeDataModel::columnCount(const Wt::WModelIndex & parent) const
+int WNodeDataModel::columnCount(const Wt::WModelIndex& parent) const
 {
 	return 2;
 }
 
-int WNodeDataModel::rowCount(const Wt::WModelIndex & parent) const
+int WNodeDataModel::rowCount(const Wt::WModelIndex& parent) const
 {
 	if (parent.isValid())
 		return 0;
 	return mNodeList.size();
 }
 
-Wt::cpp17::any WNodeDataModel::data(const Wt::WModelIndex & index, Wt::ItemDataRole role) const
+Wt::cpp17::any WNodeDataModel::data(const Wt::WModelIndex& index, Wt::ItemDataRole role) const
 {
-	if (index.isValid()) 
+	if (index.isValid())
 	{
 		auto node = mNodeList[index.internalId()]->ref;
 
@@ -153,7 +153,7 @@ Wt::cpp17::any WModuleDataModel::data(const Wt::WModelIndex& index, Wt::ItemData
 			if (index.column() == 1)
 			{
 				return (*iter)->getModuleType();
-			}			
+			}
 		}
 		else if (role == Wt::ItemDataRole::Decoration)
 		{
@@ -194,3 +194,5 @@ std::shared_ptr<dyno::Module> WModuleDataModel::getModule(const Wt::WModelIndex&
 	}
 	return std::shared_ptr<dyno::Module>();
 }
+
+

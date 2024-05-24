@@ -1,19 +1,4 @@
-import os
-
 import PyPeridyno as dyno
-
-
-def filePath(str):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    relative_path = "../../../data/" + str
-    file_path = os.path.join(script_dir, relative_path)
-    if os.path.isfile(file_path):
-        print(file_path)
-        return file_path
-    else:
-        print(f"File not found: {file_path}")
-        return -1
-
 
 scn = dyno.SceneGraph()
 
@@ -65,7 +50,6 @@ sRender.set_color(dyno.Color(1, 1, 0))
 sRender.set_alpha(0.5)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
-
 
 scn.add_node(rigid)
 
