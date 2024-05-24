@@ -23,4 +23,5 @@ void pybind_height_field(py::module& m)
 	declare_surface_particle_tracking<dyno::DataType3f>(m, "3f");
 	declare_vessel<dyno::DataType3f>(m, "3f");
 	declare_wake<dyno::DataType3f>(m, "3f");
+	declare_steer<dyno::DataType3f>(m, "3f");
 }

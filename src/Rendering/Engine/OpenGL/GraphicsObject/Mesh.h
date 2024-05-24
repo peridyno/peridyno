@@ -34,6 +34,7 @@ namespace dyno
 		static Mesh* Sphere(float radius = 1.f, int sectors = 16, int stacks = 8);
 		static Mesh* ScreenQuad();
 		static Mesh* Plane(float scale);
+		static Mesh* Cube();
 
 	private:
 		Buffer	vbo;

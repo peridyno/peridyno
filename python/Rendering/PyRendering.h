@@ -7,6 +7,7 @@
 #include <GLSurfaceVisualModule.h>
 #include "glad/glad.h"
 #include "Topology/TriangleSet.h"
+#include "Backend/Cuda/Module/RenderTools.h"
 using namespace dyno;
 
 /**
@@ -38,10 +39,39 @@ void declare_color_mapping(py::module& m, std::string typestr) {
 		.def("var_max", &Class::varMax, py::return_value_policy::reference);
 }
 
+
+#include "Backend/Cuda/Node/GLSurfaceVisualNode.h"
+template <typename TDataType>
+void declare_gl_surface_visual_node(py::module& m, std::string typestr) {
+	using Class = dyno::GLSurfaceVisualNode<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("GLSurfaceVisualNode") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("caption", &Class::caption)
+		.def("get_node_type", &Class::getNodeType)
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("var_color", &Class::varColor, py::return_value_policy::reference);
+}
+
 void declare_point_visual_module(py::module& m, std::string typestr);
 
 void declare_surface_visual_module(py::module& m, std::string typestr);
 
+void declare_gl_wireframe_visual_module(py::module& m);
+
 void declare_rednder_window(py::module& m);
+
+void declare_construct_tangent_space(py::module& m);
+
+void declare_gl_element_visual_module(py::module& m);
+
+void declare_gl_instance_visual_module(py::module& m);
+
+void declare_gl_element_visual_module(py::module& m);
+
+void declare_gl_photorealistic_render(py::module& m);
+
+void declare_gl_photorealistic_instance_render(py::module& m);
 
 void pybind_rendering(py::module& m);

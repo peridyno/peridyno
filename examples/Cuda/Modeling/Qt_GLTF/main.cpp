@@ -12,6 +12,8 @@ using namespace dyno;
 #include "initializeIO.h"
 #include "GltfLoader.h"
 
+#include <GLRenderEngine.h>
+
 /**
  * @brief This example demonstrate how to load plugin libraries in a static way
  */
@@ -25,6 +27,14 @@ int main()
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
 
+	// hard code
+	// car body material
+	gltf->stateTextureMesh()->getData().materials()[5]->metallic = 1.f;
+	gltf->stateTextureMesh()->getData().materials()[5]->roughness = 0.15f;
+	// wheel
+	gltf->stateTextureMesh()->getData().materials()[4]->metallic = 0.f;
+	gltf->stateTextureMesh()->getData().materials()[4]->roughness = 1.f;
+
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();
 	PaticleSystem::initStaticPlugin();
@@ -36,8 +46,23 @@ int main()
 
 	QtApp app;
 	app.setSceneGraph(scn);
+	app.initialize(1920, 1080);
 
-	app.initialize(1366, 800);
+	// setup envmap
+	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(app.renderWindow()->getRenderEngine());
+	if (renderer) {
+		renderer->setEnvmap(getAssetPath() + "textures/hdr/venice_sunset_1k.hdr");
+		renderer->setUseEnvmapBackground(false);
+
+		renderer->bgColor0 = { 1, 1, 1 };
+		renderer->bgColor1 = { 1, 1, 1 };
+
+		renderer->planeColor = { 1,1,1,1 };
+		renderer->rulerColor = { 1,1,1,1 };
+
+		renderer->setEnvmapScale(0.0f);
+	}
+
 	app.mainLoop();
 
 	return 0;

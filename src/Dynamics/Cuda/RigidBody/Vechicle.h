@@ -1,4 +1,5 @@
 #pragma once
+#include "Node/ParametricModel.h"
 #include "RigidBodySystem.h"
 
 #include "Topology/TextureMesh.h"
@@ -36,6 +37,7 @@ namespace dyno
 
 		void updateStates() override;
 
+		void updateInstanceTransform();
 
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
@@ -48,13 +50,18 @@ namespace dyno
 		DArray<int> mBindingTagDevice;
 	};
 
-
 	template<typename TDataType>
-	class Jeep : virtual public Vechicle<TDataType>
+	class Jeep : virtual public ParametricModel<TDataType>, virtual public Vechicle<TDataType>
 	{
 		DECLARE_TCLASS(Jeep, TDataType)
 	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
 		Jeep();
 		~Jeep() override;
+
+	protected:
+		void resetStates() override;
 	};
 }

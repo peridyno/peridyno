@@ -24,7 +24,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class ParametricModel : public Node
+	class ParametricModel : virtual public Node
 	{
 	public:
 		typedef typename TDataType::Real Real;

@@ -32,6 +32,7 @@ namespace dyno
 {
 	class SSAO;
 	class FXAA;
+	class Envmap;
 	class ShadowMap;
 	class GLRenderHelper;
 	class GLVisualModule;
@@ -65,6 +66,10 @@ namespace dyno
 
 		void setShadowBlurIters(int iters);
 		int  getShadowBlurIters() const;
+
+		void setEnvmap(const std::string& path);
+		void setUseEnvmapBackground(bool flag);
+		void setEnvmapScale(float scale);
 
 	private:
 		void createFramebuffer();
@@ -115,6 +120,10 @@ namespace dyno
 		// FXAA
 		bool					bEnableFXAA = false;
 		FXAA*					mFXAAFilter;
+
+		// Envmap
+		Envmap*					mEnvmap = 0;
+		bool					bDrawEnvmap = false;
 
 
 		Mesh* mScreenQuad = 0;

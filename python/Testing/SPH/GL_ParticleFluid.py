@@ -23,7 +23,7 @@ cube.out_cube().connect(sampler.in_cube())
 
 initialParticles = dyno.MakeParticleSystem3f()
 
-sampler.state_point_set().promote_ouput().connect(initialParticles.in_points())
+sampler.state_point_set().promote_output().connect(initialParticles.in_points())
 
 fluid = dyno.ParticleFluid3f()
 fluid.var_reshuffle_particles().set_value(True)

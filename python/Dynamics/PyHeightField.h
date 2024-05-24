@@ -147,14 +147,17 @@ void declare_vessel(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Vessel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("bounding_box", &Class::boundingBox)
 		//DEV_VAR
 		.def("var_barycenter_offset", &Class::varBarycenterOffset, py::return_value_policy::reference)
 		.def("var_envelope_name", &Class::varEnvelopeName, py::return_value_policy::reference)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("var_test", &Class::varTest, py::return_value_policy::reference)
 		.def("var_density", &Class::varDensity, py::return_value_policy::reference)
 		.def("state_barycenter", &Class::stateBarycenter, py::return_value_policy::reference)
 		.def("state_envelope", &Class::stateEnvelope, py::return_value_policy::reference)
-		.def("state_mesh", &Class::stateMesh, py::return_value_policy::reference);
+		.def("state_mesh", &Class::stateMesh, py::return_value_policy::reference)
+		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
 }
 
 #include "HeightField/Wake.h"
@@ -170,6 +173,20 @@ void declare_wake(py::module& m, std::string typestr) {
 		//DEF_NODE_PORT
 		.def("get_vessel", &Class::getVessel)
 		.def("import_vessel", &Class::importVessel, py::return_value_policy::reference);
+}
+
+#include "HeightField/Module/Steer.h"
+template <typename TDataType>
+void declare_steer(py::module& m, std::string typestr) {
+	using Class = dyno::Steer<TDataType>;
+	using Parent = dyno::KeyboardInputModule;
+	std::string pyclass_name = std::string("Steer") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		//DEV_VAR
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference);
 }
 
 //void declare_height_field_initializer(py::module& m, std::string typestr);
