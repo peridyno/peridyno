@@ -265,9 +265,9 @@ namespace dyno
 				this->inRotationMatrix()->getData()
 			);
 
-			Real dh = dt / this->varIterationNumberForVelocitySolver()->getValue();
+			Real dh = dt / this->varSubStepping()->getValue();
 
-			for (int i = 0; i < this->varIterationNumberForVelocitySolver()->getValue(); i++)
+			for (int i = 0; i < this->varSubStepping()->getValue(); i++)
 			{
 				if (this->varGravityEnabled()->getValue())
 				{
@@ -290,7 +290,7 @@ namespace dyno
 
 				mImpulseC.reset();
 				initializeJacobian(dh);
-				for (int j = 0; j < 30; j++)
+				for (int j = 0; j < this->varIterationNumberForVelocitySolver()->getValue(); j++)
 				{
 					JacobiIterationForSoft(
 						mLambda,
