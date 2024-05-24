@@ -69,8 +69,8 @@ namespace dyno
 		{
 			return;
 		}
-
-		mVelocityConstraints.resize(constraint_size);
+		if(mVelocityConstraints.size() != constraint_size)
+			mVelocityConstraints.resize(constraint_size);
 
 		if (contact_size != 0)
 		{

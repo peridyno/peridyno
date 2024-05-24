@@ -1743,7 +1743,7 @@ namespace dyno
 		else
 		{
 			localC.pos1 = rot1.transpose() * (globalC.pos1 - c1);
-			localC.normal1 = -globalC.normal1;
+			localC.normal1 = - globalC.normal1;
 			localC.pos2 = globalC.pos1;
 			localC.normal2 = globalC.normal1;
 		}
@@ -2552,7 +2552,7 @@ namespace dyno
 		{
 			if (idx2 != INVALID)
 			{
-				stepInverse = nbq[idx1] > nbq[idx2] ? nbq[idx1] : nbq[idx2];
+				stepInverse = nbq[idx1] + nbq[idx2];
 			}
 			else
 			{

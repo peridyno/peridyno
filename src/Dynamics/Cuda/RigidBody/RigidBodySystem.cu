@@ -42,7 +42,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -63,7 +63,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		this->setDt(0.016f);
+		this->setDt(0.005f);
 	}
 
 	template<typename TDataType>
