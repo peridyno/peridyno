@@ -20,12 +20,12 @@ void declare_contacts_union(py::module& m, std::string typestr) {
 		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
-#include "RigidBody/Module/IterativeConstraintSolver.h"
+#include "RigidBody/Module/PJSNJSConstraintSolver.h"
 template <typename TDataType>
 void declare_iterative_constraint_solver(py::module& m, std::string typestr) {
-	using Class = dyno::IterativeConstraintSolver<TDataType>;
+	using Class = dyno::PJSNJSConstraintSolver<TDataType>;
 	using Parent = dyno::ConstraintModule;
-	std::string pyclass_name = std::string("IterativeConstraintSolver") + typestr;
+	std::string pyclass_name = std::string("PJSNJSConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)

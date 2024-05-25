@@ -88,7 +88,7 @@ namespace dyno
 		if (hingeJoints_size > 0)
 		{
 			int begin_index = 2 * (ballAndSocketJoints_size + sliderJoints_size);
-			cuExecute(sliderJoints_size,
+			cuExecute(hingeJoints_size,
 				setUpAnchorPoints,
 				hingeJoints,
 				this->inRotationMatrix()->getData(),
@@ -100,7 +100,7 @@ namespace dyno
 		if (fixedJoint_size > 0)
 		{
 			int begin_index = 2 * (ballAndSocketJoints_size + sliderJoints_size + hingeJoints_size);
-			cuExecute(sliderJoints_size,
+			cuExecute(fixedJoint_size,
 				setUpAnchorPoints,
 				fixedJoints,
 				this->inRotationMatrix()->getData(),
