@@ -271,7 +271,7 @@ namespace dyno
 		QString caption = s.nodeDataModel()->caption();
 
 		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode);
-		moduleEditor->setWindowTitle("Module Flow Editor -- " + caption);
+		moduleEditor->setWindowTitle("Module Editor -- " + caption);
 		moduleEditor->resize(1024, 600);
 		moduleEditor->setMinimumSize(512, 360);
 

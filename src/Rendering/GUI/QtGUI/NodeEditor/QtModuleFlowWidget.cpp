@@ -15,10 +15,15 @@ namespace Qt
 		QWidget(parent)
 	{
 		auto menuBar = new QMenuBar();
-		auto newAction = menuBar->addAction("New..");
-		auto saveAction = menuBar->addAction("Save..");
-		auto loadAction = menuBar->addAction("Load..");
-		auto clearAction = menuBar->addAction("Clear..");
+
+		QMenu* fileMenu = new QMenu("File");
+
+		auto newAction = fileMenu->addAction("New..");
+		auto saveAction = fileMenu->addAction("Save..");
+		auto loadAction = fileMenu->addAction("Load..");
+		auto clearAction = fileMenu->addAction("Clear..");
+
+		menuBar->addMenu(fileMenu);
 
 		QVBoxLayout *l = new QVBoxLayout(this);
 
