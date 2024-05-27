@@ -146,7 +146,7 @@ namespace dyno
 
 		auto glShapeCenter = std::make_shared<GLPointVisualModule>();
 		glShapeCenter->setColor(Color(1.0f, 1.0f, 0.0f));
-		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue() * 8);
+		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue() * 2);
 		glShapeCenter->setVisible(true);
 		this->stateShapeCenter()->connect(glShapeCenter->inPointSet());
 		this->graphicsPipeline()->pushModule(glShapeCenter);
@@ -1017,6 +1017,8 @@ namespace dyno
 				this->stateTransform()->getValue()
 			);
 		}
+
+		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
 
 	}
 
