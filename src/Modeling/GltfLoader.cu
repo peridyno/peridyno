@@ -1451,9 +1451,15 @@ namespace dyno
 		if (tId >= pos.size()) return;
 
 		if (tId < pos.size() - 1 && radix[tId] != radix[tId + 1])
-		{	
+		{
 			newPos[radix[tId]] = pos[tId];
 		}
+		else if (tId == pos.size() - 1 && pos.size() > 2)
+		{
+			if(radix[tId] != radix[tId - 1])
+				newPos[radix[tId]] = pos[tId];
+		}
+		
 	}
 
 
