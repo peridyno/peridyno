@@ -5,6 +5,8 @@
 namespace dyno
 {
 	class SceneGraph;
+	class SceneGraphFactory;
+	class Node;
 };
 
 class WNodeDataModel;
@@ -26,6 +28,7 @@ private:
 	void start();
 	void stop();
 	void step();
+	void reset();
 
 private:
 
@@ -36,9 +39,9 @@ private:
 	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
 	std::shared_ptr< WParameterDataNode> mParameterDataNode;
 
-	bool				bRunFlag;
+	bool	bRunFlag;
+	bool	mReset;
 
 	std::shared_ptr<dyno::SceneGraph>	mScene;
+	std::shared_ptr<dyno::Node> mActiveNode;
 };
-
-

@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include <SceneGraph.h>
+#include <SceneGraphFactory.h>
 
 #include <filesystem>
 
@@ -120,7 +121,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared< WParameterDataNode>();
 
-
 	// vertical layout
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -136,7 +136,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	treeView->setEditTriggers(Wt::EditTrigger::None);
 	treeView->setColumnResizeEnabled(true);
 	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 150);
+	treeView->setColumnWidth(0, 250);
 
 	// module list
 	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
@@ -153,7 +153,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>(), 3);
 	panel3->setTitle("Control Variable");
 	panel3->setCollapsible(true);
-
 
 	// action for selection change
 	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
@@ -188,17 +187,24 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
 	auto stopButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Stop"));
 	auto stepButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Step"));
+	auto resetButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
 
 	// actions
 	stepButton->clicked().connect(this, &WMainWindow::step);
 	startButton->clicked().connect(this, &WMainWindow::start);
 	stopButton->clicked().connect(this, &WMainWindow::stop);
+	resetButton->clicked().connect(this, &WMainWindow::reset);
 }
 
 void WMainWindow::start()
 {
 	if (mScene)
 	{
+		if (mReset)
+		{
+			mScene->reset();
+			mReset = false;
+		}
 		this->bRunFlag = true;
 		Wt::WApplication* app = Wt::WApplication::instance();
 		while (this->bRunFlag)
@@ -222,7 +228,23 @@ void WMainWindow::step()
 		mSceneCanvas->update();
 	}
 
-	std::cout << "Step!!!" << std::endl;
+	Wt::log("info") << "Step!!!";
+	Wt::log("info") << mScene->getFrameNumber();
+}
+
+void WMainWindow::reset()
+{
+	if (mScene)
+	{
+		this->bRunFlag = false;
+
+		mScene->setFrameNumber(0);
+		mScene->reset();
+
+		mReset = true;
+	}
+
+	Wt::log("info") << mScene->getFrameNumber();
 }
 
 void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)

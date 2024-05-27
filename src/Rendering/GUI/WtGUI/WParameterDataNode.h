@@ -17,10 +17,12 @@ namespace dyno
 	class SceneGraph;
 };
 
-
 class WParameterDataNode : public Wt::WAbstractTableModel
 {
 public:
+
+	WParameterDataNode();
+	~WParameterDataNode();
 
 	void setNode(std::shared_ptr<dyno::Node> node);
 	void setModule(std::shared_ptr<dyno::Module> module);
@@ -37,7 +39,8 @@ public:
 
 	void createParameterPanel(Wt::WPanel* panel);
 
-	void updateParameter();
+	void updateNode();
+	void updateModule();
 
 	static int registerWidget(const Wt::WContainerWidget);
 
@@ -54,5 +57,4 @@ private:
 	void addScalarFieldWidget(dyno::FBase* field);
 
 	static std::map < std::string, Wt::WContainerWidget> sWContainerWidget;
-
 };

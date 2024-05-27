@@ -20,6 +20,10 @@ T* addTableRow(Wt::WTable* table, std::string label, int labelWidth = 200, int w
 	return widget;
 }
 
+WParameterDataNode::WParameterDataNode()
+{
+	//sWContainerWidget.insert(std::pair< std::string, Wt::WContainerWidget>("float", WRealWidget));
+}
 
 void WParameterDataNode::setNode(std::shared_ptr<dyno::Node> node)
 {
@@ -34,7 +38,6 @@ void WParameterDataNode::setModule(std::shared_ptr<dyno::Module> module)
 	layoutAboutToBeChanged().emit();
 	layoutChanged().emit();
 }
-
 
 int WParameterDataNode::columnCount(const Wt::WModelIndex& parent) const
 {
@@ -98,7 +101,6 @@ Wt::cpp17::any WParameterDataNode::data(const Wt::WModelIndex& index, Wt::ItemDa
 	}
 	return Wt::cpp17::any();
 }
-
 
 Wt::cpp17::any WParameterDataNode::headerData(int section, Wt::Orientation orientation, Wt::ItemDataRole role) const
 {
