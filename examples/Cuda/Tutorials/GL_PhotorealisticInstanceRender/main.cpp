@@ -11,40 +11,34 @@ class GenerateInstances : public Node
 public:
 	GenerateInstances() {
 		this->stateTransform()->allocate();
-		
 	};
 
-	void resetStates() override 
+	void resetStates() override
 	{
 		auto mesh = this->inTextureMesh()->constDataPtr();
+		const int instanceCount = 8;
+		const int shapeNum = mesh->shapes().size();
 
-		int copyNum = 5;
-		int shapeNum = mesh->shapes().size();
+		std::vector<std::vector<Transform3f>> transform(shapeNum);
 
-		auto offest = this->varOffest()->getValue();
-
-		std::vector<std::vector<Transform3f>> transform;
-		transform.resize(shapeNum);
-		for (size_t i = 0; i < shapeNum; i++)
+		for (size_t j = 0; j < instanceCount; j++)
 		{
-			for (size_t j = 0; j < copyNum; j++)
-			{
-				transform[i].push_back(Transform3f(Vec3f(offest[0]*j, 0, 0), Mat3f::identityMatrix(), Vec3f(1, 1, 1)));
-				std::cout << transform[i][transform[i].size() - 1].translation().x << ", " << transform[i][transform[i].size() - 1].translation().y << ", " << transform[i][transform[i].size() - 1].translation().z << std::endl;
-					
-			}
-			copyNum++;
+			auto rotate = Quat1f(j * 2.f * M_PI / instanceCount, Vec3f(0, 1, 0)).toMatrix3x3();
+			auto scale = Vec3f(0.8 + float(j) / instanceCount);
+			auto translate = rotate * Vec3f(0, 0, 1) + scale * Vec3f(0, 0.32, 0);
 
+			for (size_t i = 0; i < shapeNum; i++) {
+				transform[i].push_back(Transform3f(translate, rotate, scale));
+			}
 		}
 
 		auto tl = this->stateTransform()->getDataPtr();
 		tl->assign(transform);
 	}
 
-	DEF_VAR(Vec3f, Offest,Vec3f(0.4,0,0) ,"");
+	//DEF_VAR(Vec3f, Offest, Vec3f(0.4, 0, 0), "");
 
 	DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
-
 	DEF_ARRAYLIST_STATE(Transform3f, Transform, DeviceType::GPU, "");
 };
 
@@ -52,10 +46,12 @@ int main()
 {
 	//Create SceneGraph
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setLowerBound(Vec3f(-3, 0, -3));
+	scn->setUpperBound(Vec3f( 3, 3,  3));
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(getAssetPath() + "gltf/FlightHelmet/FlightHelmet.gltf");
-	
+
 	auto module = gltf->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
 	//gltf->deleteModule(module);
 	gltf->graphicsPipeline()->clear();
