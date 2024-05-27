@@ -28,7 +28,10 @@ public:
 			auto translate = rotate * Vec3f(0, 0, 1) + scale * Vec3f(0, 0.32, 0);
 
 			for (size_t i = 0; i < shapeNum; i++) {
-				transform[i].push_back(Transform3f(translate, rotate, scale));
+
+				auto shapeTransform = this->inTextureMesh()->constDataPtr()->shapes()[i]->boundingTransform;
+
+				transform[i].push_back(Transform3f(translate + rotate * shapeTransform.translation() * scale, rotate, scale));
 			}
 		}
 
