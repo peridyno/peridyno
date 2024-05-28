@@ -60,7 +60,7 @@ namespace dyno
 	template<typename TDataType>
 	Vessel<TDataType>::~Vessel()
 	{
-		
+
 	}
 
 	template<typename TDataType>
@@ -82,15 +82,16 @@ namespace dyno
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		//Initialize states for the rigid body
-		{ 
+		{
+			auto bodyIndex = this->varBodyId()->getValue();
 
-			Coord lo = texMesh->shapes()[0]->boundingBox.v0;
-			Coord hi = texMesh->shapes()[0]->boundingBox.v1;
+			Coord lo = texMesh->shapes()[bodyIndex]->boundingBox.v0;
+			Coord hi = texMesh->shapes()[bodyIndex]->boundingBox.v1;
 
 			Coord scale = this->varScale()->getValue();
 
-			mShapeCenter = texMesh->shapes()[0]->boundingTransform.translation() * scale;
-			printf("%f,%f,%f\n",mShapeCenter[0], mShapeCenter[1], mShapeCenter[2]);
+			mShapeCenter = texMesh->shapes()[bodyIndex]->boundingTransform.translation() * scale;
+
 
 			Real lx = hi.x - lo.x;
 			Real ly = hi.y - lo.y;
@@ -123,7 +124,7 @@ namespace dyno
 		}
 
 
-		
+
 
 		RigidBody<TDataType>::resetStates();
 	}
@@ -140,7 +141,7 @@ namespace dyno
 		auto offset = this->varBarycenterOffset()->getValue();
 
 		this->stateBarycenter()->setValue(center + quat.rotate(offset));
- 
+
 		auto buoy = this->stateEnvelope()->getDataPtr();
 		buoy->copyFrom(mInitialEnvelope);
 		buoy->rotate(quat);
@@ -160,11 +161,9 @@ namespace dyno
 				auto& list = tms[i];
 				for (uint j = 0; j < list.size(); j++)
 				{
-					
-					list[j].translation() = center + quat.rotate(mShapeCenter) - mShapeCenter;
+					list[j].translation() = center + quat.rotate(texMesh->shapes()[i]->boundingTransform.translation() * scale) - mShapeCenter; //
 					list[j].rotation() = quat.toMatrix3x3();
 					list[j].scale() = scale;
-
 				}
 
 			}
@@ -192,6 +191,9 @@ namespace dyno
 		envelope->scale(scale);
 		envelope->rotate(quat);
 		envelope->translate(location);
+
+		if (this->inTextureMesh()->isEmpty())
+			return;
 
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 		{
