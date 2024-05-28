@@ -10,12 +10,34 @@
 
 #include <FBase.h>
 
+#include "WtGUI/PropertyItem/WRealFieldWidget.h"
+
 namespace dyno
 {
 	class Node;
 	class Module;
 	class SceneGraph;
+	class FBase;
 };
+
+template<class T>
+T* addTableRow(Wt::WTable* table, std::string label, int labelWidth = 200, int widgetWidth = 150)
+{
+	int row = table->rowCount();
+	auto cell0 = table->elementAt(row, 0);
+	auto cell1 = table->elementAt(row, 1);
+
+	cell0->addNew<Wt::WText>(label);
+	cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
+	cell0->setWidth(labelWidth);
+
+	cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
+	cell1->setWidth(widgetWidth);
+
+	T* widget = cell1->addNew<T>();
+	widget->setWidth(widgetWidth);
+	return widget;
+}
 
 class WParameterDataNode : public Wt::WAbstractTableModel
 {
@@ -48,7 +70,14 @@ public:
 
 	//std::shared_ptr<dyno::Module> getModuleField(const Wt::WModelIndex& index);
 	//std::shared_ptr<dyno::Node> getNodeField(const Wt::WModelIndex& index);
+
+	struct FieldWidgetMeta {
+		using constructor_t = Wt::WContainerWidget* (*)(dyno::FBase*);
+		const std::type_info* type;
+		constructor_t constructor;
+	};
 private:
+
 	std::shared_ptr<dyno::Node> mNode;
 	std::shared_ptr<dyno::Module> mModule;
 
@@ -56,5 +85,5 @@ private:
 
 	void addScalarFieldWidget(dyno::FBase* field);
 
-	static std::map < std::string, Wt::WContainerWidget> sWContainerWidget;
+	//static std::map < std::string, Wt::WContainerWidget> sWContainerWidget;
 };

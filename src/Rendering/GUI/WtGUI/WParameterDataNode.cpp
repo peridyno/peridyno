@@ -1,28 +1,13 @@
 #include "WParameterDataNode.h"
 #include <SceneGraph.h>
 
-template<class T>
-T* addTableRow(Wt::WTable* table, std::string label, int labelWidth = 200, int widgetWidth = 150)
-{
-	int row = table->rowCount();
-	auto cell0 = table->elementAt(row, 0);
-	auto cell1 = table->elementAt(row, 1);
-
-	cell0->addNew<Wt::WText>(label);
-	cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
-	cell0->setWidth(labelWidth);
-
-	cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
-	cell1->setWidth(widgetWidth);
-
-	T* widget = cell1->addNew<T>();
-	widget->setWidth(widgetWidth);
-	return widget;
-}
-
 WParameterDataNode::WParameterDataNode()
 {
 	//sWContainerWidget.insert(std::pair< std::string, Wt::WContainerWidget>("float", WRealWidget));
+}
+
+WParameterDataNode::~WParameterDataNode()
+{
 }
 
 void WParameterDataNode::setNode(std::shared_ptr<dyno::Node> node)
@@ -131,8 +116,11 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 			{
 				if (var->getClassName() == std::string("FVar"))
 				{
-					Wt::WDoubleSpinBox* test;
-					test = addTableRow<Wt::WDoubleSpinBox>(table, var->getTemplateName());
+					//auto test = addTableRow<WRealFieldWidget>(table, var->getTemplateName());
+					int row = table->rowCount();
+					auto cell0 = table->elementAt(row, 0);
+					WRealFieldWidget* widget = cell0->addNew<WRealFieldWidget>(var);
+
 					Wt::log("info") << var->getDescription();
 				}
 			}

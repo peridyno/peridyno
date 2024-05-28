@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Wt/WContainerWidget.h>
+#include "WParameterDataNode.h"
 
 namespace dyno
 {
@@ -37,7 +38,7 @@ private:
 	// data models
 	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
 	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
-	std::shared_ptr< WParameterDataNode> mParameterDataNode;
+	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 
 	bool	bRunFlag;
 	bool	mReset;

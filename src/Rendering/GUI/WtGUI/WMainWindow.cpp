@@ -119,7 +119,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	// create data model
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
-	mParameterDataNode = std::make_shared< WParameterDataNode>();
+	mParameterDataNode = std::make_shared<WParameterDataNode>();
 
 	// vertical layout
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -160,6 +160,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 			auto node = mNodeDataModel->getNode(idx);
 			mModuleDataModel->setNode(node);
 			mParameterDataNode->setNode(node);
+
 			mParameterDataNode->createParameterPanel(panel3);
 		});
 
