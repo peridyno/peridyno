@@ -21,7 +21,7 @@ namespace dyno
 };
 
 template<class T>
-T* addTableRow(Wt::WTable* table, std::string label, int labelWidth = 200, int widgetWidth = 150)
+T* addTableNodeRow(Wt::WTable* table, std::string label, dyno::FBase* var, int labelWidth = 200, int widgetWidth = 200)
 {
 	int row = table->rowCount();
 	auto cell0 = table->elementAt(row, 0);
@@ -34,7 +34,7 @@ T* addTableRow(Wt::WTable* table, std::string label, int labelWidth = 200, int w
 	cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
 	cell1->setWidth(widgetWidth);
 
-	T* widget = cell1->addNew<T>();
+	T* widget = cell1->addNew<T>(var);
 	widget->setWidth(widgetWidth);
 	return widget;
 }
@@ -64,26 +64,37 @@ public:
 	void updateNode();
 	void updateModule();
 
-	static int registerWidget(const Wt::WContainerWidget);
-
-	static Wt::WContainerWidget* getRegistedWidget(const std::string&);
-
-	//std::shared_ptr<dyno::Module> getModuleField(const Wt::WModelIndex& index);
-	//std::shared_ptr<dyno::Node> getNodeField(const Wt::WModelIndex& index);
-
+public:
 	struct FieldWidgetMeta {
 		using constructor_t = Wt::WContainerWidget* (*)(dyno::FBase*);
 		const std::type_info* type;
 		constructor_t constructor;
 	};
+
+	static int registerWidget(const FieldWidgetMeta& meta);
+
+	static FieldWidgetMeta* getRegistedWidget(const std::string&);
+
+	Wt::WContainerWidget* createFieldWidget(dyno::FBase* field);
+
 private:
 
 	std::shared_ptr<dyno::Node> mNode;
 	std::shared_ptr<dyno::Module> mModule;
-
 	Wt::WTable* table;
 
-	void addScalarFieldWidget(dyno::FBase* field);
+	//std::unique_ptr<Wt::WContainerWidget> mWidget;
 
-	//static std::map < std::string, Wt::WContainerWidget> sWContainerWidget;
+	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 150);
+
+	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };
+
+#define DECLARE_FIELD_WIDGET \
+	static int reg_field_widget; \
+	static Wt::WContainerWidget* createWidget(dyno::FBase*);
+
+#define IMPL_FIELD_WIDGET(_data_type_, _type_) \
+	int _type_::reg_field_widget = \
+		dyno::WParameterDataNode::registerWidget(dyno::WParameterDataNode::FieldWidgetMeta {&typeid(_data_type_), &_type_::createWidget}); \
+	Wt::WContainerWidget* _type_::createWidget(dyno::FBase* f) { return new _type_(f); }
