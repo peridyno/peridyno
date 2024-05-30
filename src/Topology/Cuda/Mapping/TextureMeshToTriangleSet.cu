@@ -120,12 +120,44 @@ namespace dyno
 	template<typename TDataType>
 	void TextureMeshToTriangleSetNode<TDataType>::resetStates()
 	{
+		auto mesh = this->inTextureMesh()->constDataPtr();
+
+		uint N = mesh->shapes().size();
+
+		CArrayList<Transform3f> hostT;
+		hostT.resize(N, 1);
+
+		for (uint i = 0; i < N; i++)
+		{
+			hostT[i].insert(mesh->shapes()[i]->boundingTransform);
+		}
+
+		mTM2TS->inTransform()->assign(hostT);
+
+		hostT.clear();
+
 		mTM2TS->update();
 	}
 
 	template<typename TDataType>
 	void TextureMeshToTriangleSetNode<TDataType>::updateStates()
 	{
+		auto mesh = this->inTextureMesh()->constDataPtr();
+
+		uint N = mesh->shapes().size();
+
+		CArrayList<Transform3f> hostT;
+		hostT.resize(N, 1);
+
+		for (uint i = 0; i < N; i++)
+		{
+			hostT[i].insert(mesh->shapes()[i]->boundingTransform);
+		}
+
+		mTM2TS->inTransform()->assign(hostT);
+
+		hostT.clear();
+
 		mTM2TS->update();
 	}
 

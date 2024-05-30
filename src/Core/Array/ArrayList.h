@@ -30,7 +30,7 @@ namespace dyno {
 	{
 	public:
 		ArrayList() {};
-		~ArrayList() {}
+		~ArrayList() {};
 
 		bool resize(uint num);
 
