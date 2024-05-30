@@ -11,7 +11,14 @@ WParameterDataNode::WParameterDataNode() :table(nullptr)
 		WRealFieldWidget::WRealFieldWidgetConstructor
 	};
 
+	FieldWidgetMeta WVector3FieldWidgetMeta
+	{
+		&typeid(dyno::Vec3f),
+		WVector3FieldWidget::WVector3FieldWidgetConstructor
+	};
+
 	registerWidget(WRealWidgetMeta);
+	registerWidget(WVector3FieldWidgetMeta);
 }
 
 WParameterDataNode::~WParameterDataNode()
@@ -105,19 +112,12 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 			{
 				if (var->getClassName() == std::string("FVar"))
 				{
-
 					std::string template_name = var->getTemplateName();
-					if (template_name == "float")
+					if (template_name == "class dyno::Vector<float,3>"|| template_name == "float")
 					{
-						//auto test = addTableNodeRow<WRealFieldWidget>(table, var->getObjectName(), var);
-						//test->setValue();
 						addScalarFieldWidget(table, var->getObjectName(), var);
 					}
-					//int row = table->rowCount();
-					//auto cell0 = table->elementAt(row, 0);
-					//cell0->addNew<Wt::WText>(var->getTemplateName());
-
-					//Wt::log("info") << std::string(typeid(float).name());
+					Wt::log("info") << var->getTemplateName();
 				}
 			}
 			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
@@ -136,7 +136,6 @@ int WParameterDataNode::registerWidget(const FieldWidgetMeta& meta) {
 
 WParameterDataNode::FieldWidgetMeta* WParameterDataNode::getRegistedWidget(const std::string& name)
 {
-
 	if (sFieldWidgetMeta.count(name))
 		return &sFieldWidgetMeta.at(name);
 	return nullptr;
@@ -162,21 +161,18 @@ void WParameterDataNode::addScalarFieldWidget(Wt::WTable* table, std::string lab
 	{
 		std::unique_ptr<Wt::WContainerWidget> mWidget(fw);
 		if (fw != nullptr) {
-			//this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-			//layout->addWidget(fw, j, 0);
 			int row = table->rowCount();
 			auto cell0 = table->elementAt(row, 0);
 			auto cell1 = table->elementAt(row, 1);
 
 			cell0->addNew<Wt::WText>(label);
-			//cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
-			//cell0->setWidth(labelWidth);
+			cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
+			cell0->setWidth(labelWidth);
 
-			//cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
-			//cell1->setWidth(widgetWidth);
+			cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
+			cell1->setWidth(widgetWidth);
 
-			cell0->addWidget(std::unique_ptr<Wt::WContainerWidget>(std::move(mWidget)));
+			cell1->addWidget(std::unique_ptr<Wt::WContainerWidget>(std::move(mWidget)));
 		}
 	}
-
 }

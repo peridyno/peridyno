@@ -11,6 +11,7 @@
 #include <FBase.h>
 
 #include "WtGUI/PropertyItem/WRealFieldWidget.h"
+#include "WtGUI/PropertyItem/WVector3FieldWidget.h"
 
 namespace dyno
 {
@@ -19,25 +20,6 @@ namespace dyno
 	class SceneGraph;
 	class FBase;
 };
-
-template<class T>
-T* addTableNodeRow(Wt::WTable* table, std::string label, dyno::FBase* var, int labelWidth = 200, int widgetWidth = 200)
-{
-	int row = table->rowCount();
-	auto cell0 = table->elementAt(row, 0);
-	auto cell1 = table->elementAt(row, 1);
-
-	cell0->addNew<Wt::WText>(label);
-	cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
-	cell0->setWidth(labelWidth);
-
-	cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
-	cell1->setWidth(widgetWidth);
-
-	T* widget = cell1->addNew<T>(var);
-	widget->setWidth(widgetWidth);
-	return widget;
-}
 
 class WParameterDataNode : public Wt::WAbstractTableModel
 {
@@ -85,7 +67,7 @@ private:
 
 	//std::unique_ptr<Wt::WContainerWidget> mWidget;
 
-	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 150);
+	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
 
 	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };

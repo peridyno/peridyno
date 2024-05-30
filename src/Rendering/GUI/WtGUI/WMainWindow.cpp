@@ -136,7 +136,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	treeView->setEditTriggers(Wt::EditTrigger::None);
 	treeView->setColumnResizeEnabled(true);
 	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 250);
+	treeView->setColumnWidth(0, 300);
 
 	// module list
 	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);

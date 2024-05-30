@@ -1,7 +1,5 @@
 #include "WRealFieldWidget.h"
 
-
-
 WRealFieldWidget::WRealFieldWidget()
 	: Wt::WContainerWidget(), mData(nullptr), mFloatField(nullptr), mDoubleField(nullptr), layout(nullptr)
 {
@@ -19,14 +17,23 @@ WRealFieldWidget::WRealFieldWidget(dyno::FBase* field)
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(0);
 
-	//mName = layout->addWidget(std::make_unique<Wt::WText>());
-	//mName->setText(field->getObjectName());
+	setValue(field);
 
+	mfield = field;
+	mData->valueChanged().connect(this, &WRealFieldWidget::updateField);
+}
+
+WRealFieldWidget::~WRealFieldWidget()
+{
+}
+
+void WRealFieldWidget::setValue(dyno::FBase* field)
+{
 	std::string template_name = field->getTemplateName();
 	if (template_name == std::string(typeid(float).name()))
 	{
 		dyno::FVar<float>* f = TypeInfo::cast<dyno::FVar<float>>(field);
-		//mFloatField = (double)f;
+		mFloatField = f;
 		mData = layout->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
 		mData->setValue((double)f->getValue());
 	}
@@ -39,19 +46,20 @@ WRealFieldWidget::WRealFieldWidget(dyno::FBase* field)
 	}
 }
 
-WRealFieldWidget::~WRealFieldWidget()
+void WRealFieldWidget::updateField()
 {
-}
-
-void WRealFieldWidget::setValue()
-{
-	if (mFloatField != nullptr || mDoubleField != nullptr)
+	std::string template_name = mfield->getTemplateName();
+	double v = mData->value();
+	if (template_name == std::string(typeid(float).name()))
 	{
-		mData->setValue(mFloatField != nullptr ? mFloatField->getValue()
-			: mDoubleField->getValue());
+		dyno::FVar<float>* f = TypeInfo::cast<dyno::FVar<float>>(mfield);
+		f->setValue((float)v);
+		f->update();
 	}
-	else
+	else if (template_name == std::string(typeid(double).name()))
 	{
-		Wt::log("warning") << "No Real Field";
-	}
+		dyno::FVar<double>* f = TypeInfo::cast<dyno::FVar<double>>(mfield);
+		f->setValue(v);
+		f->update();
+	};
 }
