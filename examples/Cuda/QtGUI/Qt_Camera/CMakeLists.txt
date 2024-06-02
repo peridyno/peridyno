@@ -1,4 +1,5 @@
 set(LIB_DEPENDENCY 
+    Modeling
     QtGUI)
 
 if(MSVC)

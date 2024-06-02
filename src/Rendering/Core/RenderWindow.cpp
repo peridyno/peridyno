@@ -41,6 +41,11 @@ void dyno::RenderWindow::saveScreen(unsigned int frame)
 	}
 }
 
+void dyno::RenderWindow::setMainLightDirection(glm::vec3 dir)
+{
+	mRenderParams.light.mainLightDirection = -dir;
+}
+
 const dyno::Selection& dyno::RenderWindow::select(int x, int y, int w, int h)
 {
 	selectedObject = mRenderEngine->select(x, y, w, h);

@@ -182,10 +182,7 @@ void ImWindow::draw(RenderWindow* app)
 
 				// Light Direction
 				ImGui::Text("Main Light Direction");
-
-				glm::mat4 view = camera->getViewMat();
-				glm::mat4 inverse_view = glm::transpose(view);// view R^-1 = R^T
-				glm::vec3 tmpLightDir = glm::vec3(view * glm::vec4(iLight.mainLightDirection, 0));
+				glm::vec3 tmpLightDir = iLight.mainLightDirection;
 				vec3 vL(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
 
 				ImGui::beginTitle("Light dir");
@@ -204,8 +201,10 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::PopItemWidth();
 				ImGui::EndGroup();
 
-				tmpLightDir = glm::vec3(inverse_view * glm::vec4(vL[0], vL[1], vL[2], 0));
-				iLight.mainLightDirection = glm::vec3(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
+				tmpLightDir = glm::vec3(-vL[0], -vL[1], -vL[2]);
+				float len = length(tmpLightDir);
+
+				iLight.mainLightDirection = len < EPSILON ? tmpLightDir : tmpLightDir / len;
 
 				// Light Shadow
 				bool shadow = iLight.mainLightShadow != 0;

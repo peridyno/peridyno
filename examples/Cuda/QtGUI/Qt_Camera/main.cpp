@@ -1,4 +1,6 @@
 #include <QtApp.h>
+#include <CubeModel.h>
+
 using namespace dyno;
 
 /**
@@ -6,7 +8,13 @@ using namespace dyno;
  */
 int main(int, char**)
 {
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+
+	scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+
 	QtApp app;
+
+	app.setSceneGraph(scn);
 	app.initialize(1024, 768);
 
 	//Set the eye position for the camera
@@ -17,6 +25,8 @@ int main(int, char**)
 
 	//Set the distance unit for the camera, the fault unit is meter
 	app.renderWindow()->getCamera()->setUnitScale(3.0f);
+
+	app.renderWindow()->setMainLightDirection(glm::vec3(0.48f, -0.62f, -0.62f));
 
 	app.mainLoop();
 

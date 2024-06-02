@@ -62,6 +62,9 @@ namespace dyno
 
 		void saveScreen(unsigned int frame);
 
+		//Set light direction
+		void setMainLightDirection(glm::vec3 dir);
+
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
 		RenderParams					mRenderParams;
