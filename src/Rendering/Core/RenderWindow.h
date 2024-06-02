@@ -48,12 +48,27 @@ namespace dyno
 		inline SelectionMode getSelectionMode() { return mSelectionMode; }
 		inline void setSelectionMode(SelectionMode mode) { mSelectionMode = mode; }
 
+		void toggleImGUI();
+		inline bool showImGUI() { return mShowImWindow; }
+
+		//Screen recording
+		inline bool& isScreenRecordingOn() {
+			return mSaveScreenToggle;
+		}
+
+		inline int& screenRecordingInterval() { return mSaveScreenInterval; }
+
+		void setScreenRecordingPath(std::string path) { mScreenRecordingPath = path; }
+
+		void saveScreen(unsigned int frame);
+
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
 		RenderParams					mRenderParams;
 
 		std::shared_ptr<Camera>			mCamera;
 
+		virtual void onSaveScreen(const std::string& filename) {};
 	
 	// interface for node picking
 	public:
@@ -72,5 +87,12 @@ namespace dyno
 		Selection selectedObject;
 
 		SelectionMode mSelectionMode = SelectionMode::OBJECT_MODE;
+
+		bool mShowImWindow = true;
+
+		bool mSaveScreenToggle = false;
+		int mSaveScreenInterval = 1;
+
+		std::string mScreenRecordingPath;
 	};
 };

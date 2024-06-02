@@ -22,6 +22,10 @@
 
 #include <map>
 
+//stb
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
+
 namespace dyno
 {
 	std::map<int, PKeyboardType> KeyMap =
@@ -204,7 +208,8 @@ namespace dyno
 		mRenderEngine->rulerScale = rulerScale;
 
 		// Draw ImGui
-		mImWindow.draw(this);
+		if (showImGUI())
+			mImWindow.draw(this);
 		// Draw widgets
 // 		// TODO: maybe move into mImWindow...
 // 		for (auto widget : mWidgets)
@@ -421,6 +426,15 @@ namespace dyno
 		keyEvent.mods = mappingModifierBits(event->modifiers());
 
 		activeScene->onKeyboardEvent(keyEvent);
+
+		switch (event->key())
+		{
+		case Qt::Key_F1:
+			this->toggleImGUI();
+			break;
+		default:
+			break;
+		}
 	}
 
 	void POpenGLWidget::keyReleaseEvent(QKeyEvent* event)
@@ -472,6 +486,21 @@ namespace dyno
 		update();
 
 		doneCurrent();
+	}
+
+	void POpenGLWidget::updateOneFrame(int frame)
+	{
+		if (!this->isScreenRecordingOn())
+			return;
+
+		saveScreen(frame);
+	}
+
+	void POpenGLWidget::onSaveScreen(const std::string& filename)
+	{
+		QImage image = QOpenGLWidget::grabFramebuffer();
+
+		image.save(filename.c_str());
 	}
 
 }

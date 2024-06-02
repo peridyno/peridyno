@@ -25,6 +25,9 @@
 #else
 	#include <QOpenGLWidget>
 #endif
+
+#include <QOpenGLFramebufferObject>
+
 #include <QTimer>
 
 //#include <GL/glu.h>
@@ -76,9 +79,13 @@ namespace dyno
 
 		void onSelected(const Selection& s) override;
 
+		void onSaveScreen(const std::string& filename) override;
+
 	public slots:
 		void updateGrpahicsContext();
 		void updateGraphicsContext(Node* node);
+
+		void updateOneFrame(int frame);
 
 	signals:
 		void nodeSelected(std::shared_ptr<Node> node);
@@ -92,6 +99,8 @@ namespace dyno
 		int          mtempCursorX = -1;
 		// Qt
 		QTimer timer;
+
+		QOpenGLFramebufferObject* mFBO = nullptr;
 
 		// 
 		ImWindow mImWindow;

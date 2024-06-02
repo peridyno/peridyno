@@ -217,8 +217,49 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Auxiliary", "")) {
+			if (ImGui::BeginMenu("Environment")) {
+				ImGui::Separator();
 
+				if (ImGui::RadioButton("Standard", &engine->envStyle, 0))
+				{
+					engine->setEnvStyle(EEnvStyle::Standard);
+				}
+				
+				if (ImGui::RadioButton("Studio", &engine->envStyle, 1))
+				{
+					engine->setEnvStyle(EEnvStyle::Studio);
+				}
+
+				if (engine->envStyle == EEnvStyle::Studio)
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Draw Environment Map", &engine->bDrawEnvmap);
+					ImGui::DragFloat("Environment Scale", &engine->enmapScale, 0.01f, 0.0f, 1.0f);
+				}
+
+				ImGui::Separator();
+
+				if (scene)
+				{
+					ImGui::Checkbox("Show Bounding Box", &(engine->showSceneBounds));
+					ImGui::Spacing();
+
+					Vec3f lowerBound = scene->getLowerBound();
+					float lo[3] = { lowerBound[0], lowerBound[1], lowerBound[2] };
+					ImGui::InputFloat3("Lower Bound", lo);
+					scene->setLowerBound(Vec3f(lo[0], lo[1], lo[2]));
+
+					Vec3f upperBound = scene->getUpperBound();
+					float up[3] = { upperBound[0], upperBound[1], upperBound[2] };
+					ImGui::InputFloat3("Upper Bound", up);
+					scene->setUpperBound(Vec3f(up[0], up[1], up[2]));
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Auxiliary", "")) {
 				ImGui::Checkbox("Lock Camera", &mDisenableCamera);
 				ImGui::Spacing();
 
@@ -238,23 +279,12 @@ void ImWindow::draw(RenderWindow* app)
 					bool canPrintModuleInfo = scene->isModuleInfoPrintable();
 					if (ImGui::Checkbox("Print Module Info", &canPrintModuleInfo))
 						scene->printModuleInfo(canPrintModuleInfo);
-
-					ImGui::Separator();
-
-					ImGui::Checkbox("Show Bounding Box", &(engine->showSceneBounds));
-					ImGui::Spacing();
-
-					Vec3f lowerBound = scene->getLowerBound();
-					float lo[3] = { lowerBound[0], lowerBound[1], lowerBound[2] };
-					ImGui::InputFloat3("Lower Bound", lo);
-					scene->setLowerBound(Vec3f(lo[0], lo[1], lo[2]));
-
-					Vec3f upperBound = scene->getUpperBound();
-					float up[3] = { upperBound[0], upperBound[1], upperBound[2] };
-					ImGui::InputFloat3("Upper Bound", up);
-					scene->setUpperBound(Vec3f(up[0], up[1], up[2]));
 				}
 
+				ImGui::Separator();
+
+				ImGui::Checkbox("Screen Recording", &app->isScreenRecordingOn());
+				ImGui::DragInt("Interval", &app->screenRecordingInterval(), 1.0f, 1, 100);
 
 				ImGui::EndMenu();
 			}
@@ -331,13 +361,17 @@ void ImWindow::draw(RenderWindow* app)
 			ImGui::PopStyleVar(2);
 		}
 
-		// Bottom Right widget
+		// Bottom Right Widget
 		{
 			std::string rEngineName = engine->name();
-			ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-			ImGui::Text("Rendered by %s: %.1f FPS", rEngineName.c_str(), ImGui::GetIO().Framerate);
+			ImGui::Begin("Top Left Widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+
+			Vec3f eyePos = camera->getEyePos();
+			Vec3f tarPos = camera->getTargetPos();
+			ImGui::Text("Eye: (%.2f, %.2f, %.2f) | Target: (%.2f, %.2f, %.2f) | Rendered by %s: %.1f FPS", eyePos.x, eyePos.y, eyePos.z, tarPos.x, tarPos.y, tarPos.z, rEngineName.c_str(), ImGui::GetIO().Framerate);
 
 			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, io.DisplaySize.y - ImGui::GetWindowSize().y));
+
 			ImGui::End();
 		}
 

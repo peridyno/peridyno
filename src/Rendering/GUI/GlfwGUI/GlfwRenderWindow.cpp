@@ -202,10 +202,9 @@ namespace dyno
 
 			if (mAnimationToggle){
 
-				if (mSaveScreenToggle)
+				if (this->isScreenRecordingOn())
 				{
-					if (activeScene->getFrameNumber() % mSaveScreenInterval == 0)
-						saveScreen();
+					saveScreen(activeScene->getFrameNumber());
 				}
 
 				activeScene->takeOneFrame();
@@ -236,7 +235,7 @@ namespace dyno
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			if(mShowImWindow)
+			if(showImGUI())
 				mImWindow.draw(this);
 
 // 			// Draw widgets
@@ -305,9 +304,7 @@ namespace dyno
 		return mCursorPosY;
 	}
 
-
-
-	bool GlfwRenderWindow::saveScreen(const std::string &file_name) const
+	void GlfwRenderWindow::onSaveScreen(const std::string &filename)
 	{
 		int width;
 		int height;
@@ -320,21 +317,10 @@ namespace dyno
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
 
 		stbi_flip_vertically_on_write(true);
-		int status = stbi_write_bmp(file_name.c_str(), width, height, 3, data);
+		int status = stbi_write_bmp(filename.c_str(), width, height, 3, data);
 
-		return status == 0;
+		delete data;
 	}
-
-	bool GlfwRenderWindow::saveScreen()
-	{
-		std::stringstream adaptor;
-		adaptor << mSaveScreenIndex++;
-		std::string index_str;
-		adaptor >> index_str;
-		std::string file_name = mOutputPath + std::string("screen_capture_") + index_str + std::string(".bmp");
-		return saveScreen(file_name);
-	}
-
 
 	void GlfwRenderWindow::turnOnVSync()
 	{
@@ -349,11 +335,6 @@ namespace dyno
 	void GlfwRenderWindow::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
-	}
-
-	void GlfwRenderWindow::toggleImGUI()
-	{
-		mShowImWindow = !mShowImWindow;
 	}
 
 	int GlfwRenderWindow::getWidth()
