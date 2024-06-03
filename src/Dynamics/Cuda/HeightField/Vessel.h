@@ -21,7 +21,7 @@
 #include "FilePath.h"
 #include "Topology/TextureMesh.h"
 
-namespace dyno 
+namespace dyno
 {
 	template<typename TDataType>
 	class Vessel : virtual public RigidBody<TDataType>
@@ -42,20 +42,13 @@ namespace dyno
 
 		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
 
-		DEF_VAR(bool, Test, true, "");
-
-
-	//	DEF_VAR(FilePath, MeshName, getAssetPath() + "obj/boat_mesh.obj", "");
-
 		DEF_VAR(Real, Density, Real(1000), "Density");
 
 		DEF_VAR_STATE(Coord, Barycenter, Coord(0), "A vessel's barycenter, note it can be different from the Center");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Envelope, "Envelope for the vessel");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Mesh, "Surface mesh");
-
-		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the Vessel");
 
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 
@@ -68,8 +61,6 @@ namespace dyno
 		void transform();
 
 		TriangleSet<TDataType> mInitialEnvelope;
-
-		TriangleSet<TDataType> mInitialMesh;
 
 		Coord mShapeCenter = Coord(0);
 	};

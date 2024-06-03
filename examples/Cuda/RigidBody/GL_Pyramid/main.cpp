@@ -45,7 +45,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Color(1, 1, 0));
-	sRender->setAlpha(0.5f);
+	sRender->setAlpha(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 

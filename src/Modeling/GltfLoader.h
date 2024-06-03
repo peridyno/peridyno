@@ -84,34 +84,26 @@ namespace dyno
 		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, false, "");
 		DEF_VAR(Real, JointRadius, 0.01, "");
-		//DEF_VAR(bool, ReloadTextures, 0.004, "");
 
+		DEF_VAR(bool, UseInstanceTransform, true, "");
 		//DefaultChannel
 		DEF_ARRAY_STATE(Vec2f, TexCoord_0, DeviceType::GPU, "UVSet 0");
 		DEF_ARRAY_STATE(Vec2f, TexCoord_1, DeviceType::GPU, "UVSet 1");
 		DEF_ARRAY_STATE(Mat4f, InitialMatrix, DeviceType::GPU, "");
 
 		//CustomChannel
-		DEF_VAR(std::string, RealName_1, "", "RealName_1");
-		DEF_VAR(std::string, IntName_1, "", "IntName_1");
-		DEF_VAR(std::string, CoordName_1, "", "CoordName_1");
-		DEF_VAR(std::string, CoordName_2, "", "CoordName_2");
 
-		DEF_VAR_STATE(Mat4f, Transform, Mat4f::identityMatrix(), "RealChannel_1");
+		DEF_VAR_STATE(Mat4f, Transform, Mat4f::identityMatrix(), "Transform");
 
-		DEF_ARRAY_STATE(Vec4f, BindJoints_0, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Vec4f, BindJoints_1, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Vec4f, Weights_0, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Vec4f, Weights_1, DeviceType::GPU, "CoordChannel_1");
+		DEF_ARRAY_STATE(Vec4f, BindJoints_0, DeviceType::GPU, "BindJoints_0");
+		DEF_ARRAY_STATE(Vec4f, BindJoints_1, DeviceType::GPU, "BindJoints_1");
+		DEF_ARRAY_STATE(Vec4f, Weights_0, DeviceType::GPU, "Weights_0");
+		DEF_ARRAY_STATE(Vec4f, Weights_1, DeviceType::GPU, "Weights_1");
 
-		DEF_ARRAY_STATE(Mat4f, JointInverseBindMatrix, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Mat4f, JointLocalMatrix, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Mat4f, JointWorldMatrix, DeviceType::GPU, "CoordChannel_1");
+		DEF_ARRAY_STATE(Mat4f, JointInverseBindMatrix, DeviceType::GPU, "JointInverseBindMatrix");
+		DEF_ARRAY_STATE(Mat4f, JointLocalMatrix, DeviceType::GPU, "JointLocalMatrix");
+		DEF_ARRAY_STATE(Mat4f, JointWorldMatrix, DeviceType::GPU, "JointWorldMatrix");
 		
-		DEF_ARRAY_STATE(Real, RealChannel_1, DeviceType::GPU, "RealChannel_1");
-		DEF_ARRAY_STATE(int, IntChannel_1, DeviceType::GPU, "IntChannel_1");
-		DEF_ARRAY_STATE(Coord, CoordChannel_1, DeviceType::GPU, "CoordChannel_1");
-		DEF_ARRAY_STATE(Coord, CoordChannel_2, DeviceType::GPU, "CoordChannel_1");
 	
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
@@ -133,11 +125,12 @@ namespace dyno
 	private:
 
 		DArray<Coord> initialPosition;
+		DArray<Coord> unCenterPosition;
 		DArray<Coord> initialNormal;
 		DArray<int> d_joints;
 
 		DArray<Coord> d_ShapeCenter;
-		bool ToCenter = true;
+		bool ToCenter = false;
 
 		std::map<joint, Quat<float>> joint_rotation;
 		std::map<joint, Vec3f> joint_scale;
@@ -188,8 +181,8 @@ namespace dyno
 		int jointNum = -1;
 		int meshNum = -1;
 
-
-
+		DArray<Mat4f> d_mesh_Matrix;
+		DArray<int> d_shape_meshId;
 
 
 	private:

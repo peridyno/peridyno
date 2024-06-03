@@ -34,7 +34,7 @@ namespace dyno
 
 		void simulationFinished();
 
-		void updateSlider();
+		void updateSlider(int frame);
 
 		void buildIconLabel(QLabel* Label, QPixmap* Icon,  QPushButton*btn, int size);
 

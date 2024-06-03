@@ -67,9 +67,10 @@ namespace dyno
 		void setShadowBlurIters(int iters);
 		int  getShadowBlurIters() const;
 
+		void setDefaultEnvmap() override;
 		void setEnvmap(const std::string& path);
-		void setUseEnvmapBackground(bool flag);
-		void setEnvmapScale(float scale);
+
+		void setEnvStyle(EEnvStyle style) override;
 
 	private:
 		void createFramebuffer();
@@ -123,9 +124,7 @@ namespace dyno
 
 		// Envmap
 		Envmap*					mEnvmap = 0;
-		bool					bDrawEnvmap = false;
-
-
+		
 		Mesh* mScreenQuad = 0;
 	};
 };
