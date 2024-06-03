@@ -17,8 +17,39 @@ WParameterDataNode::WParameterDataNode() :table(nullptr)
 		WVector3FieldWidget::WVector3FieldWidgetConstructor
 	};
 
+	FieldWidgetMeta WVector3dFieldWidgetMeta
+	{
+		&typeid(dyno::Vec3d),
+		WVector3FieldWidget::WVector3FieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WVector3iFieldWidgetMeta
+	{
+		&typeid(dyno::Vec3i),
+		WVector3iFieldWidget::WVector3iFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WVector3uFieldWidgetMeta
+	{
+		&typeid(dyno::Vec3u),
+		WVector3iFieldWidget::WVector3iFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WBoolFieldWidgetMeta
+	{
+		&typeid(bool),
+		WBoolFieldWidget::WBoolFieldWidgetConstructor
+	};
+
+
+
+
 	registerWidget(WRealWidgetMeta);
 	registerWidget(WVector3FieldWidgetMeta);
+	registerWidget(WVector3dFieldWidgetMeta);
+	registerWidget(WVector3iFieldWidgetMeta);
+	registerWidget(WVector3uFieldWidgetMeta);
+	//registerWidget(WBoolFieldWidgetMeta);
 }
 
 WParameterDataNode::~WParameterDataNode()
@@ -113,10 +144,11 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 				if (var->getClassName() == std::string("FVar"))
 				{
 					std::string template_name = var->getTemplateName();
-					if (template_name == "class dyno::Vector<float,3>"|| template_name == "float")
+					if (template_name == "class dyno::Vector<float,3>" || template_name == "float")
 					{
-						addScalarFieldWidget(table, var->getObjectName(), var);
+
 					}
+					addScalarFieldWidget(table, var->getObjectName(), var);
 					Wt::log("info") << var->getTemplateName();
 				}
 			}

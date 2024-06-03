@@ -12,6 +12,8 @@
 
 #include "WtGUI/PropertyItem/WRealFieldWidget.h"
 #include "WtGUI/PropertyItem/WVector3FieldWidget.h"
+#include "WtGUI/PropertyItem/WVector3iFieldWidget.h"
+#include "WtGUI/PropertyItem/WBoolFieldWidget.h"
 
 namespace dyno
 {
