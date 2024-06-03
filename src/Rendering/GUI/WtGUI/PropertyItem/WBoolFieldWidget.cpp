@@ -14,7 +14,6 @@ WBoolFieldWidget::WBoolFieldWidget(dyno::FBase* field)
 
 WBoolFieldWidget::~WBoolFieldWidget()
 {
-
 }
 
 void WBoolFieldWidget::setValue(dyno::FBase* field)
@@ -23,7 +22,11 @@ void WBoolFieldWidget::setValue(dyno::FBase* field)
 	if (f == nullptr) {
 		return;
 	}
+
+	checkbox = layout->addWidget(std::make_unique<Wt::WCheckBox>());
+
 	checkbox->setChecked(f->getData());
+	Wt::log("info") << f->getData();
 }
 
 void WBoolFieldWidget::updateField()

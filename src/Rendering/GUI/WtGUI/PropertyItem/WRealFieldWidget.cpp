@@ -1,15 +1,5 @@
 #include "WRealFieldWidget.h"
 
-WRealFieldWidget::WRealFieldWidget()
-	: Wt::WContainerWidget(), mData(nullptr), mFloatField(nullptr), mDoubleField(nullptr), layout(nullptr)
-{
-	auto layout = this->setLayout(std::make_unique<Wt::WHBoxLayout>());
-	layout->setContentsMargins(0, 0, 0, 0);
-	layout->setSpacing(0);
-	auto text = layout->addWidget(std::make_unique<Wt::WText>());
-	text->setText("field->getObjectName()");
-}
-
 WRealFieldWidget::WRealFieldWidget(dyno::FBase* field)
 	: Wt::WContainerWidget(), mData(nullptr), mFloatField(nullptr), mDoubleField(nullptr)
 {
@@ -35,6 +25,9 @@ void WRealFieldWidget::setValue(dyno::FBase* field)
 		dyno::FVar<float>* f = TypeInfo::cast<dyno::FVar<float>>(field);
 		mFloatField = f;
 		mData = layout->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
+		mData->setRange(field->getMin(), field->getMax());
+		mData->setSingleStep(0.0001);
+		mData->setDecimals(4);
 		mData->setValue((double)f->getValue());
 	}
 	else if (template_name == std::string(typeid(double).name()))
@@ -42,6 +35,9 @@ void WRealFieldWidget::setValue(dyno::FBase* field)
 		dyno::FVar<double>* f = TypeInfo::cast<dyno::FVar<double>>(field);
 		mDoubleField = f;
 		mData = layout->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
+		mData->setRange(field->getMin(), field->getMax());
+		mData->setSingleStep(0.0001);
+		mData->setDecimals(4);
 		mData->setValue(mDoubleField->getValue());
 	}
 }

@@ -9,7 +9,7 @@ namespace dyno
 {
 	IMPL_FIELD_WIDGET(PEnum, QEnumFieldWidget)
 
-	QEnumFieldWidget::QEnumFieldWidget(FBase* field)
+		QEnumFieldWidget::QEnumFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
 		auto f = TypeInfo::cast<FVar<PEnum>>(field);
@@ -68,4 +68,3 @@ namespace dyno
 		f->update();
 	}
 }
-

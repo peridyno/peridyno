@@ -48,6 +48,14 @@ void WVector3iFieldWidget::setValue(dyno::FBase* field)
 	mData2 = layout->addWidget(std::make_unique<Wt::WSpinBox>());
 	mData3 = layout->addWidget(std::make_unique<Wt::WSpinBox>());
 
+	mData1->setRange(field->getMin(), field->getMax());
+	mData2->setRange(field->getMin(), field->getMax());
+	mData3->setRange(field->getMin(), field->getMax());
+
+	mData1->setSingleStep(1);
+	mData2->setSingleStep(1);
+	mData3->setSingleStep(1);
+
 	mData1->setValue(v1);
 	mData2->setValue(v2);
 	mData3->setValue(v3);

@@ -13,8 +13,6 @@
 class WRealFieldWidget : public Wt::WContainerWidget
 {
 public:
-
-	WRealFieldWidget();
 	WRealFieldWidget(dyno::FBase*);
 	~WRealFieldWidget();
 

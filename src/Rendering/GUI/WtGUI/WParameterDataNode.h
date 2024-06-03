@@ -14,6 +14,10 @@
 #include "WtGUI/PropertyItem/WVector3FieldWidget.h"
 #include "WtGUI/PropertyItem/WVector3iFieldWidget.h"
 #include "WtGUI/PropertyItem/WBoolFieldWidget.h"
+#include "WtGUI/PropertyItem/WIntegerFieldWidget.h"
+#include "WtGUI/PropertyItem/WColorWidget.h"
+#include "WtGUI/PropertyItem/WCurveWidget.h"
+#include "WtGUI/PropertyItem/WEnumFieldWidget.h"
 
 namespace dyno
 {

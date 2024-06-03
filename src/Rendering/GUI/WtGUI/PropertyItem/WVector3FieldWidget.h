@@ -7,7 +7,7 @@ class WVector3FieldWidget : public Wt::WContainerWidget
 {
 public:
 	WVector3FieldWidget(dyno::FBase*);
-	WVector3FieldWidget(std::string, dyno::Vec3f);
+	//WVector3FieldWidget(std::string, dyno::Vec3f);
 	~WVector3FieldWidget();
 
 	static Wt::WContainerWidget* WVector3FieldWidgetConstructor(dyno::FBase* field)
