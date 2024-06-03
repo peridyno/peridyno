@@ -168,10 +168,6 @@ void declare_gltf_loader(py::module& m, std::string typestr) {
 		.def("state_tex_coord_0", &Class::stateTexCoord_0, py::return_value_policy::reference)
 		.def("state_tex_coord_1", &Class::stateTexCoord_1, py::return_value_policy::reference)
 		.def("state_initial_matrix", &Class::stateInitialMatrix, py::return_value_policy::reference)
-		.def("var_real_name_1", &Class::varRealName_1, py::return_value_policy::reference)
-		.def("vat_int_name_1", &Class::varIntName_1, py::return_value_policy::reference)
-		.def("var_coord_name_1", &Class::varCoordName_1, py::return_value_policy::reference)
-		.def("var_coord_name_2", &Class::varCoordName_2, py::return_value_policy::reference)
 
 		.def("state_transform", &Class::stateTransform, py::return_value_policy::reference)
 
@@ -183,11 +179,6 @@ void declare_gltf_loader(py::module& m, std::string typestr) {
 		.def("state_joint_inverse_bind_matrix", &Class::stateJointInverseBindMatrix, py::return_value_policy::reference)
 		.def("state_joint_local_matrix", &Class::stateJointLocalMatrix, py::return_value_policy::reference)
 		.def("state_jont_world_matrix", &Class::stateJointWorldMatrix, py::return_value_policy::reference)
-
-		.def("state_real_channel_1", &Class::stateRealChannel_1, py::return_value_policy::reference)
-		.def("state_int_channel_1", &Class::stateIntChannel_1, py::return_value_policy::reference)
-		.def("state_coord_channel_1", &Class::stateCoordChannel_1, py::return_value_policy::reference)
-		.def("state_coord_channel_2", &Class::stateCoordChannel_2, py::return_value_policy::reference)
 
 		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 

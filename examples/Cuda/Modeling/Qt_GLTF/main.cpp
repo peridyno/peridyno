@@ -51,16 +51,7 @@ int main()
 	// setup envmap
 	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(app.renderWindow()->getRenderEngine());
 	if (renderer) {
-		renderer->setEnvmap(getAssetPath() + "textures/hdr/venice_sunset_1k.hdr");
-		renderer->setUseEnvmapBackground(false);
-
-		renderer->bgColor0 = { 1, 1, 1 };
-		renderer->bgColor1 = { 1, 1, 1 };
-
-		renderer->planeColor = { 1,1,1,1 };
-		renderer->rulerColor = { 1,1,1,1 };
-
-		renderer->setEnvmapScale(0.0f);
+		renderer->setEnvStyle(EEnvStyle::Studio);
 	}
 
 	app.mainLoop();

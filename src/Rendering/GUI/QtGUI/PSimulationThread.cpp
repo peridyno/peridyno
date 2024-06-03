@@ -156,7 +156,7 @@ namespace dyno
 
 				mReset = false;
 
-				emit oneFrameFinished();
+				emit oneFrameFinished(scn->getFrameNumber());
 			}
 
 			if(!mPaused) {
@@ -166,7 +166,7 @@ namespace dyno
 
 					this->startUpdatingGraphicsContext();
 
-					emit oneFrameFinished();
+					emit oneFrameFinished(scn->getFrameNumber());
 				}
 
 				if (scn->getFrameNumber() >= mTotalFrame)

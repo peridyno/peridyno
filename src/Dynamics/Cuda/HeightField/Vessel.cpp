@@ -12,7 +12,6 @@ namespace dyno
 		: RigidBody<TDataType>()
 	{
 		this->stateEnvelope()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->stateMesh()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		this->varDensity()->setRange(1.0f, 10000.0f);
 
@@ -50,9 +49,12 @@ namespace dyno
 					envelope->rotate(this->varRotation()->getValue() * M_PI / 180);
 					envelope->translate(this->varLocation()->getValue());
 				}
+
+
 			}
 		);
 		evenlopeLoader->update();
+
 
 		this->varEnvelopeName()->attach(evenlopeLoader);
 	}
@@ -60,7 +62,7 @@ namespace dyno
 	template<typename TDataType>
 	Vessel<TDataType>::~Vessel()
 	{
-		
+
 	}
 
 	template<typename TDataType>
@@ -68,7 +70,7 @@ namespace dyno
 	{
 		NBoundingBox box;
 
-		this->stateMesh()->constDataPtr()->requestBoundingBox(box.lower, box.upper);
+		mInitialEnvelope.requestBoundingBox(box.lower, box.upper);
 
 		return box;
 	}
@@ -82,15 +84,19 @@ namespace dyno
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
 		//Initialize states for the rigid body
-		{ 
+		{
+			Coord lo;
+			Coord hi;
 
-			Coord lo = texMesh->shapes()[0]->boundingBox.v0;
-			Coord hi = texMesh->shapes()[0]->boundingBox.v1;
+			if (mInitialEnvelope.isEmpty())
+				return;
+
+			mInitialEnvelope.requestBoundingBox(lo, hi);
 
 			Coord scale = this->varScale()->getValue();
 
-			mShapeCenter = texMesh->shapes()[0]->boundingTransform.translation() * scale;
-			printf("%f,%f,%f\n",mShapeCenter[0], mShapeCenter[1], mShapeCenter[2]);
+			mShapeCenter = 0.5f * (hi + lo);
+
 
 			Real lx = hi.x - lo.x;
 			Real ly = hi.y - lo.y;
@@ -123,7 +129,7 @@ namespace dyno
 		}
 
 
-		
+
 
 		RigidBody<TDataType>::resetStates();
 	}
@@ -140,7 +146,7 @@ namespace dyno
 		auto offset = this->varBarycenterOffset()->getValue();
 
 		this->stateBarycenter()->setValue(center + quat.rotate(offset));
- 
+
 		auto buoy = this->stateEnvelope()->getDataPtr();
 		buoy->copyFrom(mInitialEnvelope);
 		buoy->rotate(quat);
@@ -160,11 +166,9 @@ namespace dyno
 				auto& list = tms[i];
 				for (uint j = 0; j < list.size(); j++)
 				{
-					
-					list[j].translation() = center + quat.rotate(mShapeCenter) - mShapeCenter;
+					list[j].translation() = center + quat.rotate(texMesh->shapes()[i]->boundingTransform.translation() * scale) - mShapeCenter; //
 					list[j].rotation() = quat.toMatrix3x3();
 					list[j].scale() = scale;
-
 				}
 
 			}
@@ -192,6 +196,9 @@ namespace dyno
 		envelope->scale(scale);
 		envelope->rotate(quat);
 		envelope->translate(location);
+
+		if (this->inTextureMesh()->isEmpty())
+			return;
 
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 		{
