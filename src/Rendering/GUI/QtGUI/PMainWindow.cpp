@@ -145,6 +145,7 @@ namespace dyno
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
+		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
 		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);

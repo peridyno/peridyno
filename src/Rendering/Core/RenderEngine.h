@@ -30,6 +30,12 @@ namespace dyno
 	class Camera;
 	struct RenderParams;
 
+	enum EEnvStyle
+	{
+		Standard = 0,
+		Studio = 1
+	};
+
 	// data structure for mouse selection
 	struct Selection {
 
@@ -60,6 +66,13 @@ namespace dyno
 
 		virtual std::string name() const = 0;
 
+		virtual void setDefaultEnvmap() {};
+
+		void setUseEnvmapBackground(bool flag) { bDrawEnvmap = flag; }
+		void setEnvmapScale(float scale) { enmapScale = scale; }
+
+		virtual void setEnvStyle(EEnvStyle style) { envStyle = style; }
+
 	public:
 
 		// Backcolor gray scale
@@ -73,7 +86,12 @@ namespace dyno
 		glm::vec4 planeColor = { 0.3, 0.3, 0.3, 0.5 };
 		glm::vec4 rulerColor = { 0.0, 0.0, 0.0, 0.5 };
 
+		bool  bDrawEnvmap = false;
+		float enmapScale = 0.0f;
+
 		bool  showSceneBounds = false;
+
+		int envStyle = 0;
 	};
 };
 

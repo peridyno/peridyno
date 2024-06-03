@@ -46,22 +46,10 @@ namespace dyno {
 		uint getButtonAction() const { return mButtonAction; }
 		ButtonState getButtonState() const { return mButtonState; }
 
-
-		//save screenshot to file
-		bool saveScreen(const std::string &file_name) const;  //save to file with given name
-		bool saveScreen();                                    //save to file with default name "screen_capture_XXX.png"
-
-		void enableSaveScreen() { mSaveScreenToggle = true; }
-		void disableSaveScreen() { mSaveScreenToggle = false; };
-		void setOutputPath(std::string path) { mOutputPath = path; }
-		void setSaveScreenInterval(int n) { mSaveScreenInterval = n < 1 ? 1 : n; }
-		int getSaveScreenInternal() { return mSaveScreenInterval; }
-
 		void turnOnVSync();
 		void turnOffVSync();
 
 		void toggleAnimation();
-		void toggleImGUI();
 
 		int getWidth();
 		int getHeight();
@@ -84,7 +72,8 @@ namespace dyno {
 		static void cursorEnterCallback(GLFWwindow* window, int entered);
 		static void scrollCallback(GLFWwindow* window, double offsetX, double OffsetY);
 
-
+		//save screenshot to file
+		void onSaveScreen(const std::string& filename) override;  //save to file with given name
 		
     private:
 		//pointers to callback methods
@@ -109,26 +98,16 @@ namespace dyno {
 		double mCursorPosY;
 
 		bool mAnimationToggle = false;
-		bool mSaveScreenToggle = false;
+
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
 
 		double mCursorTempX = -1.0;
 
-		int mSaveScreenInterval = 1;
-
-		//current screen capture file index
-		uint mSaveScreenIndex;
-
-		std::string mOutputPath;
 		std::string mWindowTitle;
 
 	private:
-		bool mShowImWindow = true;
-
 		ImWindow mImWindow;
-		
-
     };
 
 }

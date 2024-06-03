@@ -66,7 +66,7 @@ namespace dyno
 
 		void sceneGraphChanged();
 
-		void oneFrameFinished();
+		void oneFrameFinished(int frame);
 		void simulationFinished();
 
 	public slots:

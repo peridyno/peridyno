@@ -156,27 +156,50 @@ namespace dyno
 		return mShadowMap->getNumBlurIterations();
 	}
 
+	void GLRenderEngine::setDefaultEnvmap()
+	{
+		setEnvmap(getAssetPath() + "textures/hdr/venice_sunset_1k.hdr");
+	}
+
 	void GLRenderEngine::setEnvmap(const std::string& file)
 	{
 		if (file.empty()) {
-			bDrawEnvmap = false;
+			//bDrawEnvmap = false;
 			return;
 		}
 		else
 		{
-			bDrawEnvmap = true;
+			//bDrawEnvmap = true;
 			mEnvmap->load(file.c_str());
 		}
 	}
 
-	void GLRenderEngine::setUseEnvmapBackground(bool flag)
+	void GLRenderEngine::setEnvStyle(EEnvStyle style)
 	{
-		bDrawEnvmap = flag;
-	}
+		envStyle = style;
 
-	void GLRenderEngine::setEnvmapScale(float scale)
-	{
-		mEnvmap->setScale(scale);
+		if (style == EEnvStyle::Standard)
+		{
+			this->bgColor0 = glm::vec3(0.2f);
+			this->bgColor1 = glm::vec3(0.8f);
+
+			this->planeColor = { 0.3, 0.3, 0.3, 0.5 };
+			this->rulerColor = { 0.0, 0.0, 0.0, 0.5 };
+
+			this->setUseEnvmapBackground(false);
+			this->setEnvmapScale(0.0f);
+		}
+		else if (style == EEnvStyle::Studio)
+		{
+			this->bgColor0 = { 1, 1, 1 };
+			this->bgColor1 = { 1, 1, 1 };
+
+			this->planeColor = { 1,1,1,1 };
+			this->rulerColor = { 1,1,1,1 };
+
+			this->setUseEnvmapBackground(true);
+			this->setEnvmapScale(1.0f);
+		}
 	}
 
 	void GLRenderEngine::createFramebuffer()
@@ -317,6 +340,8 @@ namespace dyno
 		glCheckError();
 
 		mShadowMap->bind();
+
+		mEnvmap->setScale(enmapScale);
 		mEnvmap->bindIBL();
 
 		// Step 2: render opacity objects
