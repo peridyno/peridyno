@@ -42,15 +42,11 @@ namespace dyno
 
 		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
 
-		DEF_VAR(int, BodyId, 0, "");
-
 		DEF_VAR(Real, Density, Real(1000), "Density");
 
 		DEF_VAR_STATE(Coord, Barycenter, Coord(0), "A vessel's barycenter, note it can be different from the Center");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Envelope, "Envelope for the vessel");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Mesh, "Surface mesh");
 
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the Vessel");
 
@@ -65,8 +61,6 @@ namespace dyno
 		void transform();
 
 		TriangleSet<TDataType> mInitialEnvelope;
-
-		TriangleSet<TDataType> mInitialMesh;
 
 		Coord mShapeCenter = Coord(0);
 	};

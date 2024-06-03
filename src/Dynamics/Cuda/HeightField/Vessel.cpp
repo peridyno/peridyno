@@ -12,7 +12,6 @@ namespace dyno
 		: RigidBody<TDataType>()
 	{
 		this->stateEnvelope()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->stateMesh()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		this->varDensity()->setRange(1.0f, 10000.0f);
 
@@ -50,9 +49,12 @@ namespace dyno
 					envelope->rotate(this->varRotation()->getValue() * M_PI / 180);
 					envelope->translate(this->varLocation()->getValue());
 				}
+
+
 			}
 		);
 		evenlopeLoader->update();
+
 
 		this->varEnvelopeName()->attach(evenlopeLoader);
 	}
@@ -68,7 +70,7 @@ namespace dyno
 	{
 		NBoundingBox box;
 
-		this->stateMesh()->constDataPtr()->requestBoundingBox(box.lower, box.upper);
+		mInitialEnvelope.requestBoundingBox(box.lower, box.upper);
 
 		return box;
 	}
@@ -83,14 +85,17 @@ namespace dyno
 
 		//Initialize states for the rigid body
 		{
-			auto bodyIndex = this->varBodyId()->getValue();
+			Coord lo;
+			Coord hi;
 
-			Coord lo = texMesh->shapes()[bodyIndex]->boundingBox.v0;
-			Coord hi = texMesh->shapes()[bodyIndex]->boundingBox.v1;
+			if (mInitialEnvelope.isEmpty())
+				return;
+
+			mInitialEnvelope.requestBoundingBox(lo, hi);
 
 			Coord scale = this->varScale()->getValue();
 
-			mShapeCenter = texMesh->shapes()[bodyIndex]->boundingTransform.translation() * scale;
+			mShapeCenter = 0.5f * (hi + lo);
 
 
 			Real lx = hi.x - lo.x;
