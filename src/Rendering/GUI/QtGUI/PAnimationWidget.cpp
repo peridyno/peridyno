@@ -91,7 +91,7 @@ namespace dyno
 		connect(mResetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
 
-		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
+		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
 
 		// ¶¯Ì¬¸Ä±ä Slider
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), mFrameSlider, SLOT(maximumChanged(int)));
@@ -166,9 +166,9 @@ namespace dyno
 		mTotalFrameSpinbox->setEnabled(true);
 	}
 	
-	void PAnimationWidget::updateSlider()
+	void PAnimationWidget::updateSlider(int frame)
 	{
-		mFrameSlider->setValue(PSimulationThread::instance()->getCurrentFrameNum());
+		mFrameSlider->setValue(frame);
 	}
 
 	void PAnimationWidget::buildIconLabel(QLabel* Label, QPixmap* Icon, QPushButton* btn, int size) {

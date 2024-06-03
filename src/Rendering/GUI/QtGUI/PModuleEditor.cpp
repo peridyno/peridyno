@@ -50,7 +50,7 @@ namespace dyno
 		
 		PPropertyWidget* propertyWidget = new PPropertyWidget();
 		propertyDockWidget->setWidget(propertyWidget);
-		propertyDockWidget->setFixedWidth(360);
+		propertyDockWidget->setMinimumWidth(480);
 
 		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showProperty);
 

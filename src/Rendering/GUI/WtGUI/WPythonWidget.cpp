@@ -31,14 +31,18 @@ WPythonWidget::WPythonWidget()
 
 	std::string command =
 		ref + ".editor = ace.edit(" + ref + ");" +
-		ref + ".editor.setTheme(\"ace/theme/github\");" +
-		ref + ".editor.getSession().setMode(\"ace/mode/python\");";
+		ref + ".editor.setTheme(\"ace/theme/monokai\");" +
+		ref + ".editor.getSession().setMode(\"ace/mode/python\");" +
+		ref + ".editor.setFontSize(14);" +
+		"ace.require(\"ace/ext/language_tools\");" +
+		ref + ".editor.setOptions({enableBasicAutocompletion: true,enableSnippets : true,enableLiveAutocompletion : true});" +
+		ref + ".editor.setOption(\"wrap\",\"free\")";
 	mCodeEditor->doJavaScript(command);
 
 	// create signal
 	auto jsignal = new Wt::JSignal<std::string>(mCodeEditor, "update");
 	jsignal->connect(this, &WPythonWidget::execute);
-	
+
 	auto str = jsignal->createCall({ ref + ".editor.getValue()" });
 	command = "function(object, event) {" + str + ";}";
 	auto btn = layout->addWidget(std::make_unique<Wt::WPushButton>("Update"), 0);
@@ -52,37 +56,37 @@ scene = dyno.SceneGraph()
 
 emitter = dyno.SquareEmitter3f()
 emitter.var_location().set_value(dyno.Vector3f([0.5, 0.5, 0.5]))
-scene.add_node(emitter)
 
 fluid = dyno.ParticleFluid3f()
-fluid.load_particles(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([0.2, 0.2, 0.2]), 0.005)
-scene.add_node(fluid)
+fluid.load_particles(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([0.2, 0.2, 0.2]), 0.05)
 
-boundary = dyno.StaticBoundary3f()
-boundary.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1.0, 1.0, 1.0]), 0.02, True)
-scene.add_node(boundary)
+emitter.connect(fluid.import_particle_emitters())
 
-calcNorm = dyno.CalculateNorm3f()
+calculateNorm = dyno.CalculateNorm3f()
 colorMapper = dyno.ColorMapping3f()
-colorMapper.var_max().set_value(5.0);
-pointRender = dyno.GLPointVisualModule3f()
-pointRender.set_colorMapRange(0, 5)
-pointRender.set_colorMapMode(dyno.GLPointVisualModule3f.ColorMapMode.PER_VERTEX_SHADER)
+colorMapper.var_max().set_value(0.5)
 
-fluid.state_velocity().connect(calcNorm.in_vec())
+ptRender = dyno.GLPointVisualModule()
+ptRender.set_color(dyno.Color(1, 0, 0))
+ptRender.set_color_map_mode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
 
-calcNorm.out_norm().connect(colorMapper.in_scalar())
+fluid.state_velocity().connect(calculateNorm.in_vec())
+fluid.state_point_set().connect(ptRender.in_point_set())
+calculateNorm.out_norm().connect(colorMapper.in_scalar())
+colorMapper.out_color().connect(ptRender.in_color())
 
-fluid.state_point_set().connect(pointRender.in_pointSet())
-colorMapper.out_color().connect(pointRender.in_color())
-
-fluid.graphics_pipeline().push_module(calcNorm)
+fluid.graphics_pipeline().push_module(calculateNorm)
 fluid.graphics_pipeline().push_module(colorMapper)
-fluid.graphics_pipeline().push_module(pointRender)
+fluid.graphics_pipeline().push_module(ptRender)
 
-emitter.connect(fluid.import_particles_emitters())
-fluid.connect(boundary.import_particle_systems())
+container = dyno.StaticBoundary3f()
+container.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1.0, 1.0, 1.0]), 0.02, True)
 
+fluid.connect(container.import_particle_systems())
+
+scene.add_node(emitter)
+scene.add_node(fluid)
+scene.add_node(container)
 )====";
 
 	setText(source);
@@ -91,10 +95,11 @@ fluid.connect(boundary.import_particle_systems())
 
 WPythonWidget::~WPythonWidget()
 {
+	Wt::log("warning") << "WPythonWidget destory";
 }
 
 void WPythonWidget::setText(const std::string& text)
-{	
+{
 	// update code editor content
 	std::string ref = mCodeEditor->jsRef();
 	std::string command = ref + ".editor.setValue(`" + text + "`, 1);";

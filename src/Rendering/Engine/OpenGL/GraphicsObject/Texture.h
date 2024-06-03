@@ -20,29 +20,19 @@
 
 namespace dyno {
 
-	class Texture2D : public GraphicsObject
-	{
-		GL_OBJECT(Texture2D)
+	class Texture : public GraphicsObject {
+		GL_OBJECT(Texture)
 	public:
-		Texture2D();
-
+		Texture();
 		virtual void create() override;
 		virtual void release() override;
 
 		virtual void bind();
-		virtual void unbind();
-
 		virtual void bind(int slot);
-
-		virtual void dump(void* pixels);
-
-		virtual void resize(int w, int h);
-		virtual void load(int w, int h, void* data);
+		virtual void unbind();
 
 		// OpenGL 4.4+, clear texture
 		virtual void clear(void* value);
-
-		void genMipmap();
 
 	public:
 		unsigned int target = 0xFFFFFFFF;
@@ -51,22 +41,43 @@ namespace dyno {
 		unsigned int format;
 		unsigned int type;
 
-		unsigned int minFilter;
-		unsigned int maxFilter;
-
 	};
 
-	class Texture2DMultiSample : public Texture2D
+	class Texture2D : public Texture
+	{
+		GL_OBJECT(Texture2D)
+	public:
+		Texture2D();
+
+		virtual void create() override;
+
+		virtual void load(int w, int h, void* data);
+		virtual void dump(void* pixels);
+
+		virtual void resize(int w, int h);
+		void genMipmap();
+
+	public:
+		unsigned int minFilter;
+		unsigned int maxFilter;
+	};
+
+	class Texture2DMultiSample : public Texture
 	{
 		GL_OBJECT(Texture2DMultiSample)
 	public:
 		Texture2DMultiSample();
-
-		virtual void create();
 		virtual void resize(int w, int h, unsigned int nSamples);
 
 	public:
 		unsigned int samples;
+	};
+
+	class TextureCube : public Texture
+	{
+		GL_OBJECT(TextureCube)
+	public:
+		TextureCube();
 	};
 
 }

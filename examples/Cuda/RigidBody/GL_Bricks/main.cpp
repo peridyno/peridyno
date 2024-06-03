@@ -23,39 +23,40 @@ std::shared_ptr<SceneGraph> creatBricks()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-
 	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
+	rigidBody.linearVelocity = Vec3f(1.0, 0, 0);
 	BoxInfo box;
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)
 		{
-			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
+			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.2 * j + 0.1 * (8 - i));
 			box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
-			rigid->addBox(box, rigidBody);
+			auto boxAt = rigid->addBox(box, rigidBody);
 		}
+
+
 
 	SphereInfo sphere;
 	sphere.center = Vec3f(0.5f, 0.75f, 0.5f);
 	sphere.radius = 0.025f;
 
 	RigidBodyInfo rigidSphere;
-	rigid->addSphere(sphere, rigidSphere);
+	auto sphereAt1 = rigid->addSphere(sphere, rigidSphere);
 
 	sphere.center = Vec3f(0.5f, 0.95f, 0.5f);
 	sphere.radius = 0.025f;
-	rigid->addSphere(sphere, rigidSphere);
+	auto sphereAt2 = rigid->addSphere(sphere, rigidSphere);
 
 	sphere.center = Vec3f(0.5f, 0.65f, 0.5f);
 	sphere.radius = 0.05f;
-	rigid->addSphere(sphere, rigidSphere);
+	auto sphereAt3 = rigid->addSphere(sphere, rigidSphere);
 
 	TetInfo tet;
 	tet.v[0] = Vec3f(0.5f, 1.1f, 0.5f);
 	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
 	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
-	rigid->addTet(tet, rigidSphere);
+	auto TetAt = rigid->addTet(tet, rigidSphere);
 
 
 

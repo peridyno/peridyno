@@ -1,6 +1,5 @@
 #include "PyCore.h"
 
-
 void pybind_core(py::module& m)
 {
 	py::class_<dyno::CTimer>(m, "CTimer")
@@ -25,6 +24,8 @@ void pybind_core(py::module& m)
 	// 	declare_matrix<double, 3>(m, "3d");
 	// 	declare_matrix<double, 4>(m, "4d");
 
+	declare_quat<float>(m, "1f");
+
 	typedef  dyno::Vector<Real, 2> Coord2D;
 	typedef  dyno::Vector<Real, 3> Coord3D;
 	typedef  dyno::SquareMatrix<Real, 3> Matrix3D;
@@ -42,4 +43,9 @@ void pybind_core(py::module& m)
 		.def_readwrite("v", &dyno::TOrientedBox3D<Real>::v)
 		.def_readwrite("w", &dyno::TOrientedBox3D<Real>::w)
 		.def_readwrite("extent", &dyno::TOrientedBox3D<Real>::extent);
+
+	//for GL_GhostSPH sample
+	py::bind_vector<std::vector<dyno::Vec3f>>(m, "VectorVec3f", py::module_local(false))
+		.def(py::init());
+	py::bind_vector<std::vector<dyno::Attribute>>(m, "VectorAttribute", py::module_local(false));
 }

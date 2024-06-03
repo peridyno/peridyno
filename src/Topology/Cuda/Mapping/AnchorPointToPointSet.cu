@@ -6,10 +6,6 @@ namespace dyno
 	AnchorPointToPointSet<TDataType>::AnchorPointToPointSet()
 		: TopologyMapping()
 	{
-		this->inBallAndSocketJoints()->tagOptional(true);
-		this->inSliderJoints()->tagOptional(true);
-		//this->inHingeJoints()->tagOptional(true);
-		//this->inFixedJoints()->tagOptional(true);
 	}
 
 	template<typename Coord, typename Matrix, typename Joint>
@@ -40,16 +36,23 @@ namespace dyno
 	template<typename TDataType>
 	bool AnchorPointToPointSet<TDataType>::apply()
 	{
-		if (this->outPointSet()->isEmpty())
-		{
+		auto topo = this->inDiscreteElements()->constDataPtr();
+
+		if (this->outPointSet()->isEmpty()) {
 			this->outPointSet()->allocate();
 		}
+
+		auto& ballAndSocketJoints = topo->ballAndSocketJoints();
+		auto& sliderJoints = topo->sliderJoints();
+		auto& hingeJoints = topo->hingeJoints();
+		auto& fixedJoints = topo->fixedJoints();
+
 		uint anchorPointSize = 0;
-		uint ballAndSocketJoints_size = this->inBallAndSocketJoints()->size();
-		uint sliderJoints_size = this->inSliderJoints()->size();
-		//uint hingeJoints_size = this->inHingeJoints()->size();
-		//uint fixedJoint_size = this->inFixedJoints()->size();
-		anchorPointSize += ballAndSocketJoints_size + sliderJoints_size;// +hingeJoints_size + fixedJoint_size;
+		uint ballAndSocketJoints_size = ballAndSocketJoints.size();
+		uint sliderJoints_size = sliderJoints.size();
+		uint hingeJoints_size = hingeJoints.size();
+		uint fixedJoint_size = fixedJoints.size();
+		anchorPointSize += ballAndSocketJoints_size + sliderJoints_size + hingeJoints_size + fixedJoint_size;
 
 		if (anchorPointSize == 0)
 			return false;
@@ -59,58 +62,55 @@ namespace dyno
 		auto& vertices = outset->getPoints();
 		vertices.resize(anchorPointSize * 2);
 
-		if (!this->inBallAndSocketJoints()->isEmpty())
+		if (ballAndSocketJoints_size > 0)
 		{
-			auto& joints = this->inBallAndSocketJoints()->getData();
 			cuExecute(ballAndSocketJoints_size,
 				setUpAnchorPoints,
-				joints,
+				ballAndSocketJoints,
 				this->inRotationMatrix()->getData(),
 				this->inCenter()->getData(),
 				vertices,
 				0);
 		}
 
-		if (!this->inSliderJoints()->isEmpty())
+		if (sliderJoints_size > 0)
 		{
-			auto& joints = this->inSliderJoints()->getData();
 			int begin_index = 2 * ballAndSocketJoints_size;
 			cuExecute(sliderJoints_size,
 				setUpAnchorPoints,
-				joints,
+				sliderJoints,
 				this->inRotationMatrix()->getData(),
 				this->inCenter()->getData(),
 				vertices,
 				begin_index);
 		}
-		/*
-		if (!this->inHingeJoints()->isEmpty())
+		
+		if (hingeJoints_size > 0)
 		{
-			auto& joints = this->inHingeJoints()->getData();
 			int begin_index = 2 * (ballAndSocketJoints_size + sliderJoints_size);
-			cuExecute(sliderJoints_size,
+			cuExecute(hingeJoints_size,
 				setUpAnchorPoints,
-				joints,
+				hingeJoints,
 				this->inRotationMatrix()->getData(),
 				this->inCenter()->getData(),
 				vertices,
 				begin_index);
 		}
 
-		if (!this->inFixedJoints()->isEmpty())
+		if (fixedJoint_size > 0)
 		{
-			auto& joints = this->inFixedJoints()->getData();
 			int begin_index = 2 * (ballAndSocketJoints_size + sliderJoints_size + hingeJoints_size);
-			cuExecute(sliderJoints_size,
+			cuExecute(fixedJoint_size,
 				setUpAnchorPoints,
-				joints,
+				fixedJoints,
 				this->inRotationMatrix()->getData(),
 				this->inCenter()->getData(),
 				vertices,
 				begin_index);
-		}*/
+		}
 
 		return true;
 	}
+
 	DEFINE_CLASS(AnchorPointToPointSet);
 }

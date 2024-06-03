@@ -63,33 +63,42 @@ void main(void) {
 
 	vs.instanceID = -1;
 
+	mat4 modelMat = uRenderParams.model;
 	if(uInstanced) {
-		// apply instance transform
-		vec3 scaled = instance_scaling * position;
-		vec3 rotated = instance_rotation * scaled;
-		position = rotated + instance_translation;		
-		
+
+		mat4 instanceTransform = mat4(1.0);
+		// scale
+		instanceTransform[0][0] = instance_scaling.x;
+		instanceTransform[1][1] = instance_scaling.y;
+		instanceTransform[2][2] = instance_scaling.z;
+		// rotation
+		instanceTransform = mat4(instance_rotation) * instanceTransform;
+		// translate
+		instanceTransform[3] = vec4(instance_translation, 1);
+		// apply to model transform matrix
+		modelMat = modelMat * instanceTransform;
+
 		vs.instanceID = gl_InstanceID;
 
 		if(uColorMode == 0) {	
 			vs.color = instance_color;
 		}
 	}
+	mat4 MV = uRenderParams.view * modelMat;
 
-	vec4 worldPos = uRenderParams.model * vec4(position, 1.0);
-	vec4 cameraPos = uRenderParams.view * worldPos;
+	//vec4 worldPos = modelMat * vec4(position, 1.0);
+	//vec4 cameraPos = uRenderParams.view * worldPos;
+	vec4 cameraPos = MV * vec4(position, 1.0);
 
 	vs.position = cameraPos.xyz;
 
 	// if use vertex normal, than Normal data should be valid
 	if(uVertexNormal)
 	{
+		mat4 N = transpose(inverse(MV));
 		// use separate normal index
 		if(nIndex != -1) 
 			offset = nIndex * 3;
-
-		mat4 MV = uRenderParams.view * uRenderParams.model;
-		mat4 N = transpose(inverse(MV));
 
 		vec4 n = vec4(normals[offset], normals[offset + 1], normals[offset + 2], 0.0);
 		vec4 tn = vec4(tangent[offset], tangent[offset + 1], tangent[offset + 2], 0.0);

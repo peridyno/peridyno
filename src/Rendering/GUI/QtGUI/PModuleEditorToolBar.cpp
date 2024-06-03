@@ -11,7 +11,7 @@
 namespace dyno
 {
 	PModuleEditorToolBar::PModuleEditorToolBar(QWidget* parent) :
-		QWidget(parent)
+		QFrame(parent)
 	{
 		mLayout = new QHBoxLayout;
 
@@ -38,6 +38,13 @@ namespace dyno
 		connect(mResetButton, &QPushButton::released, this, &PModuleEditorToolBar::resetButtonClicked);
 		connect(mAnimationButton, &QPushButton::released, this, &PModuleEditorToolBar::animationButtonClicked);
 		connect(mRenderingButton, &QPushButton::released, this, &PModuleEditorToolBar::renderingButtonClicked);
+
+		this->setStyleSheet("border-radius: 4px; border: 1px solid rgb(120,120,120);");
+
+		mResetButton->setStyleSheet("border: none;");
+		mRenderingButton->setStyleSheet("border: none;");
+		mAnimationButton->setStyleSheet("border: none;");
+
 	}
 
 	QAction* PModuleEditorToolBar::addAction(QToolButton::ToolButtonPopupMode type, QAction* action, QMenu* menu /*= nullptr*/)

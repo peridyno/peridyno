@@ -2,6 +2,7 @@
 #include <GLPhotorealisticRender.h>
 
 #define NULL_TIME (-9599.99)
+#define NULL_POSITION (-959959.9956)
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -109,15 +110,14 @@ namespace dyno
 		this->varImportAnimation()->attach(callback);
 		this->varFileName()->attach(callback);
 
+
 		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::updateTransform, this));
 
 		this->varLocation()->attach(callbackTransform);
 		this->varScale()->attach(callbackTransform);
 		this->varRotation()->attach(callbackTransform);
+		this->varUseInstanceTransform()->attach(callbackTransform);
 
-		//this->varLocation()->attach(callback);
-		//this->varScale()->attach(callback);
-		//this->varRotation()->attach(callback);
 
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
@@ -146,7 +146,7 @@ namespace dyno
 
 		auto glShapeCenter = std::make_shared<GLPointVisualModule>();
 		glShapeCenter->setColor(Color(1.0f, 1.0f, 0.0f));
-		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue() * 8);
+		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue() * 2);
 		glShapeCenter->setVisible(true);
 		this->stateShapeCenter()->connect(glShapeCenter->inPointSet());
 		this->graphicsPipeline()->pushModule(glShapeCenter);
@@ -160,6 +160,9 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(bbRender);
 
 		this->stateTextureMesh()->promoteOuput();
+
+
+
 	}
 
 
@@ -476,8 +479,10 @@ namespace dyno
 		}
 
 		CArray<int> c_shape_meshId;
-		DArray<int> d_shape_meshId;
+
 		c_shape_meshId.resize(shape_meshId.size());
+
+		//getMeshMatrix
 
 		std::vector<int> MeshNodeIDs;
 
@@ -495,14 +500,11 @@ namespace dyno
 
 		getMeshMatrix(model, MeshNodeIDs, maxMeshId, mesh_Matrix);
 
-
 		for (auto it : shape_meshId)
 		{
 			c_shape_meshId[it.first] = MeshNodeIDs[it.second];
 		}
 		d_shape_meshId.assign(c_shape_meshId);
-
-
 
 
 		initialPosition.assign(vertices);
@@ -511,90 +513,58 @@ namespace dyno
 		texMesh->vertices().assign(vertices);
 		texMesh->normals().assign(normals);
 
-
-
-		DArray<Mat4f> d_mesh_Matrix;
+		
 		d_mesh_Matrix.assign(mesh_Matrix);
-
-		cuExecute(texMesh->vertices().size(),
-			ShapeTransform,
-			initialPosition,
-			texMesh->vertices(),
-			initialNormal,
-			texMesh->normals(),
-			d_mesh_Matrix,
-			texMesh->shapeIds(),
-			d_shape_meshId
-		);
-
-
 
 
 		texMesh->shapeIds().resize(texMesh->vertices().size());
 
 
 
-		// update VertexId_ShapeId
-		if (ToCenter)
+		// flip UV
 		{
-
-
-			d_ShapeCenter.assign(shapeCenter);
-
-			cuExecute(texMesh->vertices().size(),
-				ShapeToCenter,
-				initialPosition,
-				texMesh->vertices(),
-				texMesh->shapeIds(),
-				d_ShapeCenter,
-				this->stateTransform()->getValue()
-			);
-
-		}
-
-
-
-
-
-		std::vector<Vec2f> tempTexCoord;
-		for (auto uv0 : texCoord0)
-		{
-			tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));	// uv.v need flip
-		}
-		this->stateTexCoord_0()->assign(tempTexCoord);
-		texMesh->texCoords().assign(tempTexCoord);
-
-
-		tempTexCoord.clear();
-		for (auto uv1 : texCoord1)
-		{
-			tempTexCoord.push_back(Vec2f(uv1[0], 1 - uv1[1]));
-		}
-		this->stateTexCoord_1()->assign(tempTexCoord);
-		texCoord1.clear();
-		tempTexCoord.clear();
-
-
-		if (all_Joints.empty())
-		{
-			auto vL = this->varLocation()->getValue();
-			auto vS = this->varScale()->getValue();
-
-			Quat<float> q = computeQuaternion();
-
-			auto RV = [&](const Coord& v)->Coord {
-				return vL + q.rotate(v - vL);
-			};
-
-			int numpt = vertices.size();
-
-			for (int i = 0; i < numpt; i++)
+			std::vector<Vec2f> tempTexCoord;
+			for (auto uv0 : texCoord0)
 			{
-				vertices[i] = RV(vertices[i] * vS + RV(vL));
+				tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));	// uv.v need flip
 			}
-			texMesh->vertices().assign(vertices);
-			initialPosition.assign(vertices);
+			this->stateTexCoord_0()->assign(tempTexCoord);
+			texMesh->texCoords().assign(tempTexCoord);
+
+
+			tempTexCoord.clear();
+			for (auto uv1 : texCoord1)
+			{
+				tempTexCoord.push_back(Vec2f(uv1[0], 1 - uv1[1]));
+			}
+			this->stateTexCoord_1()->assign(tempTexCoord);
+			texCoord1.clear();
+			tempTexCoord.clear();
 		}
+
+
+
+
+		//if (all_Joints.empty())
+		//{
+		//	auto vL = this->varLocation()->getValue();
+		//	auto vS = this->varScale()->getValue();
+
+		//	Quat<float> q = computeQuaternion();
+
+		//	auto RV = [&](const Coord& v)->Coord {
+		//		return vL + q.rotate(v - vL);
+		//	};
+
+		//	int numpt = vertices.size();
+
+		//	for (int i = 0; i < numpt; i++)
+		//	{
+		//		vertices[i] = RV(vertices[i] * vS + RV(vL));
+		//	}
+		//	texMesh->vertices().assign(vertices);
+		//	initialPosition.assign(vertices);
+		//}
 
 
 		this->updateTransform();
@@ -947,41 +917,108 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateTransform()
 	{
+		//updateModelTransformMatrix
 		this->updateTransformState();
 
-		if (all_Joints.size())
+		if (all_Joints.size())	//Animation
 		{
-			if (ToCenter)
-			{
-				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
-					ShapeToCenter,
-					initialPosition,
-					this->stateTextureMesh()->getDataPtr()->vertices(),
-					this->stateTextureMesh()->getDataPtr()->shapeIds(),
-					d_ShapeCenter,
-					this->stateTransform()->getValue()
-				);
-			}
-			else
+			if(varImportAnimation()->getValue())
 				updateAnimation(this->stateFrameNumber()->getValue());
 		}
-		else
-		{
-			if (this->stateTextureMesh()->getDataPtr()->vertices().size())
-			{
-				//setStaticMeshTransform(initialPosition, this->stateTextureMesh()->getDataPtr()->vertices(), transform);
 
+		if (this->stateTextureMesh()->getDataPtr()->vertices().size())
+		{
+			//Move by Dir
+			if (true)
+			{
 				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
-					StaticMeshTransform,
+					ShapeTransform,
 					initialPosition,
 					this->stateTextureMesh()->getDataPtr()->vertices(),
-					this->stateTransform()->getValue()
+					initialNormal,
+					this->stateTextureMesh()->getDataPtr()->normals(),
+					d_mesh_Matrix,
+					this->stateTextureMesh()->getDataPtr()->shapeIds(),
+					d_shape_meshId
 				);
-
-
 			}
 
+			//Move by VarTransform
 		}
+
+		
+
+		//update BoundingBox 
+		
+		auto shapeNum = this->stateTextureMesh()->getDataPtr()->shapes().size();
+
+		CArray<Coord> c_shapeCenter;
+		c_shapeCenter.resize(shapeNum);
+		//counter
+		for (uint i = 0; i < shapeNum; i++)
+		{
+			DArray<int> counter;
+			counter.resize(this->stateTextureMesh()->getDataPtr()->vertices().size());
+
+
+			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				C_Shape_PointCounter,
+				counter,
+				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				i
+			);
+
+			Reduction<int> reduce;
+			int num = reduce.accumulate(counter.begin(), counter.size());
+
+			DArray<Coord> targetPoints;
+			targetPoints.resize(num);
+
+			Scan<int> scan;
+			scan.exclusive(counter.begin(), counter.size());
+
+			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				C_SetupPoints,
+				targetPoints,
+				this->stateTextureMesh()->getDataPtr()->vertices(),
+				counter
+			);
+
+
+			Reduction<Coord> reduceBounding;
+
+			auto& bounding = this->stateTextureMesh()->getDataPtr()->shapes()[i]->boundingBox;
+			Coord lo = reduceBounding.minimum(targetPoints.begin(), targetPoints.size());
+			Coord hi = reduceBounding.maximum(targetPoints.begin(), targetPoints.size());
+
+			bounding.v0 = lo;
+			bounding.v1 = hi;
+			this->stateTextureMesh()->getDataPtr()->shapes()[i]->boundingTransform.translation() = (lo + hi) / 2;
+
+			c_shapeCenter[i] = (lo + hi) / 2;
+
+			targetPoints.clear();
+			
+			counter.clear();
+		}
+
+		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
+		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+
+		//ToCenter
+		if (varUseInstanceTransform()->getValue())
+		{
+			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				ShapeToCenter,
+				unCenterPosition,
+				this->stateTextureMesh()->getDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				d_ShapeCenter,
+				this->stateTransform()->getValue()
+			);
+		}
+
+		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
 
 	}
 
@@ -1022,13 +1059,21 @@ namespace dyno
 
 		Vec4f tempV = Vec4f(intialPosition[pId][0], intialPosition[pId][1], intialPosition[pId][2], 1);
 		Vec4f tempN = Vec4f(intialNormal[pId][0], intialNormal[pId][1], intialNormal[pId][2], 0);
+		if (pId == 1) 
+		{
+			auto iP = intialPosition[pId];
+		}
 
 		tempV = WorldMatrix[MeshId] * tempV;
 		tempN = WorldMatrix[MeshId] * tempN;
 
 		worldPosition[pId] = Coord(tempV[0], tempV[1], tempV[2]);
 		Normal[pId] = Coord(tempN[0], tempN[1], tempN[2]);
-
+		if (pId == 1)
+		{
+			auto iP = worldPosition[pId];
+		}
+		
 	}
 
 
@@ -1182,6 +1227,10 @@ namespace dyno
 		meshId_Dir.clear();
 		node_matrix.clear();
 
+		d_mesh_Matrix.clear();
+		d_shape_meshId.clear();
+		unCenterPosition.clear();
+
 		maxJointId = -1;
 		jointNum = -1;
 		meshNum = -1;
@@ -1190,15 +1239,12 @@ namespace dyno
 		this->stateBindJoints_1()->clear();
 		this->stateWeights_0()->clear();
 		this->stateWeights_1()->clear();
-		this->stateCoordChannel_1()->clear();
-		this->stateCoordChannel_2()->clear();
+
 		this->stateInitialMatrix()->clear();
-		this->stateIntChannel_1()->clear();
 		this->stateJointInverseBindMatrix()->clear();
 		this->stateJointLocalMatrix()->clear();
 
 		this->stateJointWorldMatrix()->clear();
-		this->stateRealChannel_1()->clear();
 		this->stateTexCoord_0()->clear();
 		this->stateTexCoord_1()->clear();
 		this->stateWeights_0()->clear();
@@ -1284,10 +1330,9 @@ namespace dyno
 			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
 
 			reMats[matId] = std::make_shared<Material>();
-			reMats[matId]->ambient = { 0,0,0 };
-			reMats[matId]->diffuse = Vec3f(color[0], color[1], color[2]);
+			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
 			reMats[matId]->alpha = color[3];
-			reMats[matId]->specular = Vec3f(1 - roughness);
+			reMats[matId]->metallic = metallic;
 			reMats[matId]->roughness = roughness;
 
 			std::string colorUri = getTexUri(textures, images, colorTexId);
@@ -1354,6 +1399,69 @@ namespace dyno
 		finalPos[pId] = Coord(P[0], P[1], P[2]);
 
 	}
+
+
+
+	template< typename Coord, typename uint>
+	__global__ void initialCenterCoord(
+		DArray<Coord> Pos,
+		DArray<uint> shapeId,
+		DArray<int> pointId,
+		DArray<Coord> iniPoint,
+		int shapeNum
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= Pos.size()) return;
+	
+		for (int i = 0; i < shapeNum; i++)
+		{
+			if (shapeId[pId] == i && pointId[i] == -1)
+			{
+				pointId[i] = i;
+				iniPoint[i] = Pos[pId];
+				break;
+			}
+		}
+	}
+
+
+	template<typename uint>
+	__global__ void  C_Shape_PointCounter(
+		DArray<int> counter,
+		DArray<uint> point_ShapeIds,
+		uint target
+		)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= point_ShapeIds.size()) return;
+
+		counter[tId] = (point_ShapeIds[tId]== target) ? 1 : 0;
+	}
+
+
+	template<typename Coord>
+	__global__ void  C_SetupPoints(
+		DArray<Coord> newPos,
+		DArray<Coord> pos,
+		DArray<int> radix
+	)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= pos.size()) return;
+
+		if (tId < pos.size() - 1 && radix[tId] != radix[tId + 1])
+		{
+			newPos[radix[tId]] = pos[tId];
+		}
+		else if (tId == pos.size() - 1 && pos.size() > 2)
+		{
+			if(radix[tId] != radix[tId - 1])
+				newPos[radix[tId]] = pos[tId];
+		}
+		
+	}
+
 
 	DEFINE_CLASS(GltfLoader);
 }

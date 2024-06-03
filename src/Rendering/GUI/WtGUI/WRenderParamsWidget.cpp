@@ -94,8 +94,8 @@ void WRenderParamsWidget::createLightPanel()
 		// ambient light
 		mAmbientColor = addTableRow<Wt::WColorPicker>(table, "Ambient Color");
 		mAmbientScale = addTableRow<Wt::WDoubleSpinBox>(table, "Ambient Scale");
-		mAmbientScale->setRange(1, 100);		
-	}	
+		mAmbientScale->setRange(1, 100);
+	}
 
 	// main directional light
 	{
@@ -170,7 +170,7 @@ void WRenderParamsWidget::createRenderPanel()
 	//mAxisHelper = addTableRow<Wt::WCheckBox>(table, "Axis Helper");
 	mGroundPlane = addTableRow<Wt::WCheckBox>(table, "Ground Plane");
 	mGroundScale = addTableRow<Wt::WSlider>(table, "Ground Scale");
-	mGroundScale->setRange(1, 10);
+	mGroundScale->setRange(1, 52);
 	mBackgroudColor0 = addTableRow<Wt::WColorPicker>(table, "Background");
 	mBackgroudColor0->setStyleClass("color-picker");
 	mBackgroudColor1 = addTableRow<Wt::WColorPicker>(table, "Background");
@@ -234,7 +234,7 @@ void WRenderParamsWidget::update()
 // 	mCameraClipNear->setValue(mRenderParams->camera.z_min);
 // 	mCameraClipFar->setValue(mRenderParams->camera.z_max);
 
- 	// render
+	// render
 //  	mSceneBounds->setChecked(mRenderParams->showSceneBounds);
 //  	//mAxisHelper->setChecked(mRenderParams->showAxisHelper);
 //  	mGroundPlane->setChecked(mRenderParams->showGround);
@@ -254,29 +254,29 @@ void WRenderParamsWidget::updateRenderParams()
 	glm::vec2 polar = glm::radians(glm::vec2(mLightTheta->value(), mLightPhi->value()));
 	mRenderParams->light.mainLightDirection = sphere2xyz(glm::vec3(polar, 1));
 
-// 	mRenderParams->camera.eye.x = mCameraEyeX->value();
-// 	mRenderParams->camera.eye.y = mCameraEyeY->value();
-// 	mRenderParams->camera.eye.z = mCameraEyeZ->value();
-// 
-// 	mRenderParams->camera.target.x = mCameraTargetX->value();
-// 	mRenderParams->camera.target.y = mCameraTargetY->value();
-// 	mRenderParams->camera.target.z = mCameraTargetZ->value();
-// 
-// 	mRenderParams->camera.up.x = mCameraUpX->value();
-// 	mRenderParams->camera.up.y = mCameraUpY->value();
-// 	mRenderParams->camera.up.z = mCameraUpZ->value();
-// 
-// 	mRenderParams->camera.y_fov = mCameraFov->value();
-// 	//mRenderParams->camera.aspect = mCameraAspect->value();
-// 	mRenderParams->camera.z_min = mCameraClipNear->value();
-// 	mRenderParams->camera.z_max = mCameraClipFar->value();
-// 
-//  	mRenderParams->showSceneBounds = mSceneBounds->isChecked();
-//  	//mRenderParams->showAxisHelper = mAxisHelper->isChecked();
-//  	mRenderParams->showGround = mGroundPlane->isChecked();
-//  	mRenderParams->planeScale = mGroundScale->value();
-//  	mRenderParams->bgColor0 = WColor2Glm(mBackgroudColor0->color());
-// 	mRenderParams->bgColor1 = WColor2Glm(mBackgroudColor1->color());
+	// mRenderParams->camera.eye.x = mCameraEyeX->value();
+	// 	mRenderParams->camera.eye.y = mCameraEyeY->value();
+	// 	mRenderParams->camera.eye.z = mCameraEyeZ->value();
+	// 
+	// 	mRenderParams->camera.target.x = mCameraTargetX->value();
+	// 	mRenderParams->camera.target.y = mCameraTargetY->value();
+	// 	mRenderParams->camera.target.z = mCameraTargetZ->value();
+	// 
+	// 	mRenderParams->camera.up.x = mCameraUpX->value();
+	// 	mRenderParams->camera.up.y = mCameraUpY->value();
+	// 	mRenderParams->camera.up.z = mCameraUpZ->value();
+	// 
+	// 	mRenderParams->camera.y_fov = mCameraFov->value();
+	// 	//mRenderParams->camera.aspect = mCameraAspect->value();
+	// 	mRenderParams->camera.z_min = mCameraClipNear->value();
+	// 	mRenderParams->camera.z_max = mCameraClipFar->value();
+	// 
+	//  	mRenderParams->showSceneBounds = mSceneBounds->isChecked();
+	//  	//mRenderParams->showAxisHelper = mAxisHelper->isChecked();
+	//  	mRenderParams->showGround = mGroundPlane->isChecked();
+	//  	mRenderParams->planeScale = mGroundScale->value();
+	//  	mRenderParams->bgColor0 = WColor2Glm(mBackgroudColor0->color());
+	// 	mRenderParams->bgColor1 = WColor2Glm(mBackgroudColor1->color());
 
 	mSignal.emit();
 }

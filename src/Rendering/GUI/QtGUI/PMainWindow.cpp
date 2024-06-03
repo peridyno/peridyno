@@ -145,6 +145,7 @@ namespace dyno
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
+		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
 		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
@@ -270,18 +271,18 @@ namespace dyno
 
 		QString caption = s.nodeDataModel()->caption();
 
-		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
-		moduelEditor->setWindowTitle("Module Flow Editor -- " + caption);
-		moduelEditor->resize(1024, 600);
-		moduelEditor->setMinimumSize(512, 360);
+		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode);
+		moduleEditor->setWindowTitle("Module Editor -- " + caption);
+		moduleEditor->resize(1024, 600);
+		moduleEditor->setMinimumSize(512, 360);
 
-		moduelEditor->setWindowModality(Qt::ApplicationModal);
-		moduelEditor->setAttribute(Qt::WA_ShowModal, true);
-		moduelEditor->setAttribute(Qt::WA_DeleteOnClose, true);
-		moduelEditor->show();
+		moduleEditor->setWindowModality(Qt::WindowModal);
+		moduleEditor->setAttribute(Qt::WA_ShowModal, true);
+		moduleEditor->setAttribute(Qt::WA_DeleteOnClose, true);
+		moduleEditor->show();
 
-		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
-		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
+		connect(moduleEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduleEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 	}
 
 	void PMainWindow::showMessage()

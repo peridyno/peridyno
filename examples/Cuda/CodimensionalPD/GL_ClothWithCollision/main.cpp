@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <QtApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
 #include <Log.h>
@@ -54,7 +54,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp app;
+	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
 	app.mainLoop();

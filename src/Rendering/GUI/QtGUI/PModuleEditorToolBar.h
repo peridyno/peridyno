@@ -20,10 +20,11 @@
 #include <QToolButton>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QFrame>
 
 namespace dyno
 {
-	class PModuleEditorToolBar : public QWidget
+	class PModuleEditorToolBar : public QFrame
 	{
 		Q_OBJECT
 	public:

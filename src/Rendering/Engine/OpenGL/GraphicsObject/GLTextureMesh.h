@@ -27,6 +27,7 @@
 
 namespace dyno
 {
+	// simple PBR material model
 	class GLMaterial : public GraphicsObject
 	{
 	public:
@@ -39,10 +40,10 @@ namespace dyno
 		void updateGL();
 
 	public:
-		dyno::Vec3f ambient = { 0.0f, 0.0f, 0.0f };
-		dyno::Vec3f diffuse = { 0.8f, 0.8f, 0.8f };
-		dyno::Vec3f specular = { 0.0f, 0.0f, 0.0f };
-		float roughness = 0.0f;
+		Vec3f baseColor = { 0.8f, 0.8f, 0.8f };
+		
+		float metallic = 0.0f;
+		float roughness = 1.0f;
 		float alpha = 1.0f;
 
 		float bumpScale = 1.f;

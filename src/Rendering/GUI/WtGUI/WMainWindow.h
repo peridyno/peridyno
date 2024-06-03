@@ -9,15 +9,16 @@ namespace dyno
 
 class WNodeDataModel;
 class WModuleDataModel;
+class WParameterDataNode;
 class WSimulationCanvas;
 class WMainWindow : public Wt::WContainerWidget
 {
 public:
 	WMainWindow();
-	~WMainWindow();		
+	~WMainWindow();
 
 	void setScene(std::shared_ptr<dyno::SceneGraph> scene);
-	
+
 private:
 	void initMenu(Wt::WMenu*);
 	void initLeftPanel(Wt::WContainerWidget*);
@@ -28,11 +29,12 @@ private:
 
 private:
 
-	WSimulationCanvas*	mSceneCanvas;
+	WSimulationCanvas* mSceneCanvas;
 
 	// data models
 	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
 	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
+	std::shared_ptr< WParameterDataNode> mParameterDataNode;
 
 	bool				bRunFlag;
 

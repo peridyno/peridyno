@@ -3,6 +3,9 @@
 #include "OrbitCamera.h"
 #include "TrackballCamera.h"
 
+#include <iostream>
+#include <sstream>
+
 dyno::RenderWindow::RenderWindow()
 {
 	// create a default camera
@@ -17,6 +20,30 @@ void dyno::RenderWindow::setWindowSize(int w, int h)
 {
 	mCamera->setWidth(w);
 	mCamera->setHeight(h);
+}
+
+void dyno::RenderWindow::toggleImGUI()
+{
+	mShowImWindow = !mShowImWindow;
+}
+
+void dyno::RenderWindow::saveScreen(unsigned int frame)
+{
+	if (frame % mSaveScreenInterval == 0)
+	{
+		std::stringstream adaptor;
+		adaptor << frame / mSaveScreenInterval;
+		std::string index_str;
+		adaptor >> index_str;
+		std::string file_name = mScreenRecordingPath + std::string("screen_capture_") + index_str + std::string(".bmp");
+
+		this->onSaveScreen(file_name);
+	}
+}
+
+void dyno::RenderWindow::setMainLightDirection(glm::vec3 dir)
+{
+	mRenderParams.light.mainLightDirection = -dir;
 }
 
 const dyno::Selection& dyno::RenderWindow::select(int x, int y, int w, int h)

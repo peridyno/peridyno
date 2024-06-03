@@ -137,10 +137,11 @@ namespace dyno
 		uint mId = 0;
 		for (const auto& mtl : materials) {
 			tMats[mId] = std::make_shared<Material>();
-			tMats[mId]->ambient = { mtl.ambient[0], mtl.ambient[1], mtl.ambient[2] };
-			tMats[mId]->diffuse = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
-			tMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
-			tMats[mId]->roughness = 1.0f - mtl.shininess;
+			//tMats[mId]->ambient = { mtl.ambient[0], mtl.ambient[1], mtl.ambient[2] };
+			//tMats[mId]->diffuse = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
+			//tMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
+			//tMats[mId]->roughness = 1.0f - mtl.shininess;
+			tMats[mId]->baseColor = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
 			if (!mtl.diffuse_texname.empty())
 			{
 				auto tex_path = (root / mtl.diffuse_texname).string();
