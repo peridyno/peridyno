@@ -1141,7 +1141,7 @@ namespace dyno
 			Quat q1 = rotation_q[idx1];
 			q1 = q1.normalize();
 
-			q2.toEulerAngle(yaw, pitch, roll_2);
+			/*q2.toEulerAngle(yaw, pitch, roll_2);
 			q1.toEulerAngle(yaw, pitch, roll_1);
 
 			Real roll_diff = roll_2 - roll_1;
@@ -1149,7 +1149,22 @@ namespace dyno
 				roll_diff -= 2 * M_PI;
 			else if (roll_diff < -M_PI)
 				roll_diff += 2 * M_PI;
-			error = roll_diff;
+			error = roll_diff;*/
+			Quat q_error = q2 * q1.inverse();
+			q_error = q_error.normalize();
+			Real theta = 2.0 * acos(q_error.w);
+			Real s = sqrt(1.0 - q_error.w * q_error.w);
+			Vec3f u = Vec3f(q_error.x, q_error.y, q_error.z);
+			if (s < 1e-6)
+			{
+				u = Vec3f(1.0, 0, 0);
+			}
+			else
+			{
+				u = u / s;
+			}
+			
+			error = theta * u.x;
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
@@ -1160,7 +1175,7 @@ namespace dyno
 			Quat q1 = rotation_q[idx1];
 			q1 = q1.normalize();
 
-			q2.toEulerAngle(yaw, pitch_2, roll);
+			/*q2.toEulerAngle(yaw, pitch_2, roll);
 			q1.toEulerAngle(yaw, pitch_1, roll);
 
 			Real pitch_diff = pitch_2 - pitch_1;
@@ -1169,7 +1184,21 @@ namespace dyno
 			else if (pitch_diff < -M_PI)
 				pitch_diff += 2 * M_PI;
 
-			error = pitch_diff;
+			error = pitch_diff;*/
+			Quat q_error = q2 * q1.inverse();
+			q_error = q_error.normalize();
+			Real theta = 2.0 * acos(q_error.w);
+			Real s = sqrt(1.0 - q_error.w * q_error.w);
+			Vec3f u = Vec3f(q_error.x, q_error.y, q_error.z);
+			if (s < 1e-6)
+			{
+				u = Vec3f(1.0, 0, 0);
+			}
+			else
+			{
+				u = u / s;
+			}
+			error = theta * u.y;
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
@@ -1180,7 +1209,7 @@ namespace dyno
 			Quat q1 = rotation_q[idx1];
 			q1 = q1.normalize();
 
-			q2.toEulerAngle(yaw_2, pitch, roll);
+			/*q2.toEulerAngle(yaw_2, pitch, roll);
 			q1.toEulerAngle(yaw_1, pitch, roll);
 			Real yaw_diff = yaw_2 - yaw_1;
 			if (yaw_diff > M_PI)
@@ -1188,7 +1217,21 @@ namespace dyno
 			else if (yaw_diff < -M_PI)
 				yaw_diff += 2 * M_PI;
 
-			error = yaw_diff;
+			error = yaw_diff;*/
+			Quat q_error = q2 * q1.inverse();
+			q_error = q_error.normalize();
+			Real theta = 2.0 * acos(q_error.w);
+			Real s = sqrt(1.0 - q_error.w * q_error.w);
+			Vec3f u = Vec3f(q_error.x, q_error.y, q_error.z);
+			if (s < 1e-6)
+			{
+				u = Vec3f(1.0, 0, 0);
+			}
+			else
+			{
+				u = u / s;
+			}
+			error = theta * u.z;
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_JOINT_HINGE_MIN || constraints[tId].type == ConstraintType::CN_JOINT_SLIDER_MIN)

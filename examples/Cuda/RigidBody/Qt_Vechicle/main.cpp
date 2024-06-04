@@ -89,8 +89,8 @@ std::shared_ptr<SceneGraph> creatCar()
 		rigidbody.offset = Vec3f(0.0f);
 
 		auto spareTireActor = jeep->addBox(box2, rigidbody, 100);
-		//auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
-		//auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);
+		auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
+		auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);
 
 		Real wheel_velocity = 30;
 
@@ -126,10 +126,10 @@ std::shared_ptr<SceneGraph> creatCar()
 		//FixedJoint<Real> joint5(0, 1);
 		auto& joint5 = jeep->createFixedJoint(bodyActor, spareTireActor);
 		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
-		/*auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
+		auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
 		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
 		auto& joint7 = jeep->createFixedJoint(bodyActor, frontRightSteerActor);
-		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);*/
+		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
 
 		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
 		jeep->bind(spareTireActor, Pair<uint, uint>(4, i));
@@ -146,7 +146,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varScale()->setValue(Vec3f(100.0f));
+	plane->varScale()->setValue(Vec3f(1000.0f));
 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
 
 	//Visualize rigid bodies
