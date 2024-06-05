@@ -135,7 +135,7 @@ void declare_var(py::module& m, std::string typestr) {
 		.def("set_value", &Class::setValue)
 		.def("get_value", &Class::getValue)
 		.def("serialize", &Class::serialize)
-		.def("deserialize", &Class::deserialize)
+		//.def("deserialize", &Class::deserialize)
 		.def("is_empty", &Class::isEmpty)
 		//.def("connect", &Class::connect)
 		.def("get_data", &Class::getData);
