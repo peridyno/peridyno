@@ -58,7 +58,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		box3.halfLength = Vec3f(0.2f);
 		box4.center = Vec3f(-0.812, 0.450, 1.722) + tr;
 		box4.halfLength = Vec3f(0.2f);
-		CapsuleInfo capsule1, capsule2, capsule3, capsule4;
+		/*CapsuleInfo capsule1, capsule2, capsule3, capsule4;
 
 		capsule1.center = Vec3f(0.812, 0.450, 1.722) + tr;
 		capsule1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
@@ -75,29 +75,42 @@ std::shared_ptr<SceneGraph> creatCar()
 		capsule4.center = Vec3f(0.812, 0.450, -1.426) + tr;
 		capsule4.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 		capsule4.halfLength = 0.1495;
-		capsule4.radius = 0.450;
+		capsule4.radius = 0.450;*/
+		SphereInfo sphere1, sphere2, sphere3, sphere4;
+		sphere1.center = Vec3f(0.812, 0.450, 1.722) + tr;
+		sphere1.radius = 0.450;
+		sphere2.center = Vec3f(-0.812, 0.450, 1.722) + tr;
+		sphere2.radius = 0.450;
+		sphere3.center = Vec3f(-0.812, 0.450, -1.426) + tr;
+		sphere3.radius = 0.450;
+		sphere4.center = Vec3f(0.812, 0.450, -1.426) + tr;
+		sphere4.radius = 0.450;
 
 
 		RigidBodyInfo rigidbody;
 
 		rigidbody.bodyId = i;
 
-		Vec3f offset = Vec3f(0.0f, -0.721f, 0.148f);
+		Vec3f offset = Vec3f(0.0f, 0, 0.159);
 		rigidbody.offset = offset;
 		auto bodyActor = jeep->addBox(box1, rigidbody, 1000);
 
 		rigidbody.offset = Vec3f(0.0f);
 
 		auto spareTireActor = jeep->addBox(box2, rigidbody, 100);
-		auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
-		auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);
+		/*auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
+		auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);*/
 
 		Real wheel_velocity = 30;
 
-		auto frontLeftTireActor = jeep->addCapsule(capsule1, rigidbody, 100);
+		/*auto frontLeftTireActor = jeep->addCapsule(capsule1, rigidbody, 100);
 		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
 		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
-		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);
+		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);*/
+		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody, 100);
+		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody, 100);
+		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody, 100);
+		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody, 100);
 
 
 		//front rear
@@ -126,10 +139,10 @@ std::shared_ptr<SceneGraph> creatCar()
 		//FixedJoint<Real> joint5(0, 1);
 		auto& joint5 = jeep->createFixedJoint(bodyActor, spareTireActor);
 		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
-		auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
+		/*auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
 		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
 		auto& joint7 = jeep->createFixedJoint(bodyActor, frontRightSteerActor);
-		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
+		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);*/
 
 		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
 		jeep->bind(spareTireActor, Pair<uint, uint>(4, i));
@@ -146,11 +159,11 @@ std::shared_ptr<SceneGraph> creatCar()
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varScale()->setValue(Vec3f(1000.0f));
+	plane->varScale()->setValue(Vec3f(100.0f));
 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
 
 	//Visualize rigid bodies
- 	/*auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+ 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
  	jeep->stateTopology()->connect(mapper->inDiscreteElements());
  	jeep->graphicsPipeline()->pushModule(mapper);
  
@@ -160,7 +173,7 @@ std::shared_ptr<SceneGraph> creatCar()
  	sRender->setRoughness(0.7f);
  	sRender->setMetallic(3.0f);
  	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
- 	jeep->graphicsPipeline()->pushModule(sRender);*/
+ 	jeep->graphicsPipeline()->pushModule(sRender);
 
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals

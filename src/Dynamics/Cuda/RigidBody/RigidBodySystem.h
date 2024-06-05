@@ -115,6 +115,15 @@ namespace dyno
 			return mHostJointsFixed[mHostJointsFixed.size() - 1];
 		}
 
+		FixedJoint& createFixedJoint(
+			std::shared_ptr<PdActor> actor1)
+		{
+			FixedJoint joint(actor1.get());
+			mHostJointsFixed.push_back(joint);
+
+			return mHostJointsFixed[mHostJointsFixed.size() - 1];
+		}
+
 		PointJoint& createPointJoint(
 			std::shared_ptr<PdActor> actor1)
 		{
