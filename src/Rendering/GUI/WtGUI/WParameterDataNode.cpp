@@ -59,6 +59,18 @@ WParameterDataNode::WParameterDataNode() :table(nullptr)
 		WEnumFieldWidget::WEnumFieldWidgetConstructor
 	};
 
+	FieldWidgetMeta WColorWidgetMeta
+	{
+		&typeid(dyno::Color),
+		WColorWidget::WColorWidgetConstructor
+	};
+
+	FieldWidgetMeta WFileWidgetMeta
+	{
+		&typeid(dyno::FilePath),
+		WFileWidget::WFileWidgetConstructor
+	};
+
 	registerWidget(WRealWidgetMeta);
 	registerWidget(WVector3FieldWidgetMeta);
 	registerWidget(WVector3dFieldWidgetMeta);
@@ -68,6 +80,8 @@ WParameterDataNode::WParameterDataNode() :table(nullptr)
 	registerWidget(WIntegerFieldWidgetMeta);
 	registerWidget(WUIntegerFieldWidgetMeta);
 	registerWidget(WEnumFieldWidgetMeta);
+	registerWidget(WColorWidgetMeta);
+	registerWidget(WFileWidgetMeta);
 }
 
 WParameterDataNode::~WParameterDataNode()
@@ -162,11 +176,34 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 				if (var->getClassName() == std::string("FVar"))
 				{
 					std::string template_name = var->getTemplateName();
-					if (template_name == "class dyno::PEnum")
-					{
-						addScalarFieldWidget(table, var->getObjectName(), var);
-					}
+					addScalarFieldWidget(table, var->getObjectName(), var);
+					Wt::log("info") << var->getTemplateName();
+				}
+			}
+			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
+			{
+				//Wt::log("info") << var->getDescription();
+			}
+		}
+	}
+	table->setMargin(10);
+}
 
+void WParameterDataNode::createParameterPanelModule(Wt::WPanel* panel)
+{
+	table = panel->setCentralWidget(std::make_unique<Wt::WTable>());
+	std::vector<dyno::FBase*>& fields = mModule->getAllFields();
+	int a = 0;
+	for (dyno::FBase* var : fields)
+	{
+		if (var != nullptr)
+		{
+			if (var->getFieldType() == dyno::FieldTypeEnum::Param)
+			{
+				if (var->getClassName() == std::string("FVar"))
+				{
+					std::string template_name = var->getTemplateName();
+					addScalarFieldWidget(table, var->getObjectName(), var);
 					Wt::log("info") << var->getTemplateName();
 				}
 			}

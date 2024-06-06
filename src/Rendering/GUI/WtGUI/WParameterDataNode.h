@@ -9,6 +9,7 @@
 #include <Wt/WLogger.h>
 
 #include <FBase.h>
+#include "FilePath.h"
 
 #include "WtGUI/PropertyItem/WRealFieldWidget.h"
 #include "WtGUI/PropertyItem/WVector3FieldWidget.h"
@@ -16,8 +17,9 @@
 #include "WtGUI/PropertyItem/WBoolFieldWidget.h"
 #include "WtGUI/PropertyItem/WIntegerFieldWidget.h"
 #include "WtGUI/PropertyItem/WColorWidget.h"
-#include "WtGUI/PropertyItem/WCurveWidget.h"
+#include "WtGUI/PropertyItem/WFileWidget.h"
 #include "WtGUI/PropertyItem/WEnumFieldWidget.h"
+#include "WtGUI/PropertyItem/WColorWidget.h"
 
 namespace dyno
 {
@@ -39,6 +41,7 @@ public:
 
 	virtual int columnCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
 	virtual int rowCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
+	//virtual int rowCountModule(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
 
 	virtual Wt::cpp17::any data(const Wt::WModelIndex& index,
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
@@ -48,6 +51,7 @@ public:
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
 
 	void createParameterPanel(Wt::WPanel* panel);
+	void createParameterPanelModule(Wt::WPanel* panel);
 
 	void updateNode();
 	void updateModule();

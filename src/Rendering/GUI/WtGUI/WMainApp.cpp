@@ -113,7 +113,6 @@ std::shared_ptr<SceneGraph> createScene()
 		colorMapper->outColor()->connect(ptRender->inColor());
 
 		fluid->graphicsPipeline()->pushModule(ptRender);
-
 	}
 
 	{
@@ -141,7 +140,6 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 	this->setTheme(theme);
 
 	this->setTitle("PeriDyno: An AI-targeted physics simulation platform");
-
 
 	// style sheet for the canvas
 	this->styleSheet().addRule(
@@ -186,6 +184,16 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 		"padding: 0!important;"
 	);
 
+	// scrollable style
+	this->styleSheet().addRule(
+		".scrollable-content",
+		"overflow: auto;"
+		"max-height: 200px;"
+		"border: 1px solid #ccc;"
+		"padding: 10px;"
+		"box-sizing: border-box;"
+	);
+
 	// set layout and add main window
 	auto layout = this->root()->setLayout(std::make_unique<Wt::WHBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -201,7 +209,6 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 	}
 
 	window->setScene(scene);
-
 }
 
 WMainApp::~WMainApp()
