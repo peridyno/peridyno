@@ -4,8 +4,13 @@
 #include <Wt/WFileUpload.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WString.h>
+#include <Wt/WVBoxLayout.h>
+#include <Wt/WMessageBox.h>
 
 #include <WParameterDataNode.h>
+
+#include <fstream>
+#include <filesystem>
 
 class WFileWidget : public Wt::WContainerWidget
 {
@@ -23,14 +28,15 @@ public:
 	//Called when the widget is updated
 	void updateField();
 
-	bool hasFile(std::string);
-
-	std::string shortFilePath(std::string str);
-
 private:
 	dyno::FBase* mfield;
-	Wt::WHBoxLayout* layout;
+	Wt::WVBoxLayout* layout;
 	Wt::WLineEdit* mfilename;
-	//Wt::WFileUpload* fileUpload;
-	Wt::WPushButton* button;
+	//Wt::WPushButton* uploadButton;
+	Wt::WFileUpload* upload;
+
+	void uploadFile();
+	void fileTooLarge();
+	bool hasFile(std::string);
+	std::string shortFilePath(std::string str);
 };
