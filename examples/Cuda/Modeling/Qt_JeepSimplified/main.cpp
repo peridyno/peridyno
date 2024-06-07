@@ -199,7 +199,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
-
+	gltfRoad->varLocation()->setValue(Vec3f(0, 0, 3.488));
 
 	auto roadInstance = scn->addNode(std::make_shared<GenerateInstances>());
 	gltfRoad->stateTextureMesh()->connect(roadInstance->inTextureMesh());
@@ -214,7 +214,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
 	jeep->stateInstanceTransform()->connect(texMeshConverter->inTransform());
 	jeep->animationPipeline()->pushModule(texMeshConverter);
-
+	jeep->varLocation()->setValue(Vec3f(0,0,-2.9));
 
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
@@ -225,9 +225,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Cube Sample ***************************************//
 	// Cube 
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0.0, 0.025, 0.4) * total_scale);
-	cube->varLength()->setValue(Vec3f(0.35, 0.02, 3) * total_scale);
-	cube->varScale()->setValue(Vec3f(2, 1, 1));
+	cube->varLocation()->setValue(Vec3f(0,0.15,3.436) );
+	cube->varLength()->setValue(Vec3f(2.1,0.12,18));
+	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
 	cube->graphicsPipeline()->disable();
 
 	auto cubeSmapler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
@@ -334,6 +334,14 @@ int main()
 
 	//Set the distance unit for the camera, the fault unit is meter
 	window.renderWindow()->getCamera()->setUnitScale(3.0f);
+
+	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(window.renderWindow()->getRenderEngine());
+	if (renderer) {
+		renderer->setEnvStyle(EEnvStyle::Studio);
+		renderer->showGround = false;
+		renderer->setUseEnvmapBackground(false);
+
+	}
 
 	window.mainLoop();
 
