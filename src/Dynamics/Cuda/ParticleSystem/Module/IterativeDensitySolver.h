@@ -1,13 +1,15 @@
 #pragma once
 #include "ParticleApproximation.h"
-
+#include "Algorithm/Arithmetic.h"
 namespace dyno {
 
 	template<typename TDataType> class SummationDensity;
 
-	/*!
-	*	\class	DensityPBD
-	*	\brief	This class implements a position-based solver for incompressibility.
+	/**
+	 * @brief This is an implementation of the iterative density solver integrated into the Position Based Dynamics framework.
+	 *
+	 * For details, refer to "Position Based Fluids" by Macklin and M¡§uller, ACM TOG, 2013
+	 *
 	*/
 	template<typename TDataType>
 	class IterativeDensitySolver : public ParticleApproximation<TDataType>
@@ -49,7 +51,7 @@ namespace dyno {
 
 		DEF_VAR(Real, RestDensity, 1000, "Reference density");
 
-		DEF_VAR(Real, Kappa, Real(10), "A value to adjust the magnitide of constraints");
+		DEF_VAR(Real, Kappa, Real(1), "");
 
 	protected:
 		void compute() override;
@@ -63,6 +65,10 @@ namespace dyno {
 		DArray<Real> mLamda;
 		DArray<Coord> mDeltaPos;
 		DArray<Coord> mPositionOld;
+
+
+		Arithmetic<Real>* m_arithmetic;
+
 
 	private:
 		std::shared_ptr<SummationDensity<TDataType>> mSummation;

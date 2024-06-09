@@ -204,7 +204,7 @@ namespace dyno
 	PRenderSetting::PRenderSetting(PSettingEditor* editor, std::string title)
 		: PSettingWidget(editor, title)
 	{
-		QFormLayout* layout = new QFormLayout(this);
+		QFormLayout* layout = new QFormLayout();
 		this->getScrollLayout()->addLayout(layout, 0, 0);
 
 		fxaaEnabled = new QCheckBox(this);

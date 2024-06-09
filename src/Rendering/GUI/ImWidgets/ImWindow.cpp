@@ -150,7 +150,7 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Separator();
 
 				float distanceUnit = camera->unitScale();
-				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
+				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
 					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
@@ -161,21 +161,21 @@ void ImWindow::draw(RenderWindow* app)
 				float iBgGray[2] = { engine->bgColor0[0], engine->bgColor1[0] };
 				RenderParams::Light iLight = rparams.light;
 
-				ImGui::DragFloat2("BG color", iBgGray, 0.01f, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.2f", 0);
 				engine->bgColor0 = glm::vec3(iBgGray[0]);
 				engine->bgColor1 = glm::vec3(iBgGray[1]);
 
 				ImGui::Text("Ambient Light");
 
 				ImGui::beginTitle("Ambient Light Scale");
-				ImGui::DragFloat("", &iLight.ambientScale, 0.01f, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 1.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 
 				ImGui::Text("Main Light");
 				ImGui::beginTitle("Main Light Scale");
-				ImGui::DragFloat("", &iLight.mainLightScale, 0.01f, 0.0f, 5.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 5.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
@@ -193,11 +193,11 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::BeginGroup();
 				ImGui::PushItemWidth(120 * .5 - 2);
 				ImGui::beginTitle("Light dir editor x");
-				ImGui::DragFloat("", (float*)(&vL[0]), 0.01f, -1.0f, 1.0f, "x:%.2f", 0); ImGui::endTitle();
+				ImGui::SliderFloat("", (float*)(&vL[0]), -1.0f, 1.0f, "x:%.2f", 0); ImGui::endTitle();
 				ImGui::beginTitle("Light dir editor y");
-				ImGui::DragFloat("", (float*)(&vL[1]), 0.01f, -1.0f, 1.0f, "y:%.2f", 0); ImGui::endTitle();
+				ImGui::SliderFloat("", (float*)(&vL[1]), -1.0f, 1.0f, "y:%.2f", 0); ImGui::endTitle();
 				ImGui::beginTitle("Light dir editor z");
-				ImGui::DragFloat("", (float*)(&vL[2]), 0.01f, -1.0f, 1.0f, "z:%.2f", 0); ImGui::endTitle();
+				ImGui::SliderFloat("", (float*)(&vL[2]), -1.0f, 1.0f, "z:%.2f", 0); ImGui::endTitle();
 				ImGui::PopItemWidth();
 				ImGui::EndGroup();
 
@@ -217,8 +217,6 @@ void ImWindow::draw(RenderWindow* app)
 			}
 
 			if (ImGui::BeginMenu("Environment")) {
-				ImGui::Separator();
-
 				if (ImGui::RadioButton("Standard", &engine->envStyle, 0))
 				{
 					engine->setEnvStyle(EEnvStyle::Standard);
@@ -246,12 +244,12 @@ void ImWindow::draw(RenderWindow* app)
 
 					Vec3f lowerBound = scene->getLowerBound();
 					float lo[3] = { lowerBound[0], lowerBound[1], lowerBound[2] };
-					ImGui::InputFloat3("Lower Bound", lo);
+					ImGui::SliderFloat3("Lower Bound", lo, -10.0f, 10.0f);
 					scene->setLowerBound(Vec3f(lo[0], lo[1], lo[2]));
 
 					Vec3f upperBound = scene->getUpperBound();
 					float up[3] = { upperBound[0], upperBound[1], upperBound[2] };
-					ImGui::InputFloat3("Upper Bound", up);
+					ImGui::SliderFloat3("Upper Bound", up, -10.0f, 10.0f);
 					scene->setUpperBound(Vec3f(up[0], up[1], up[2]));
 				}
 
@@ -283,7 +281,7 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Separator();
 
 				ImGui::Checkbox("Screen Recording", &app->isScreenRecordingOn());
-				ImGui::DragInt("Interval", &app->screenRecordingInterval(), 1.0f, 1, 100);
+				ImGui::SliderInt("Interval", &app->screenRecordingInterval(), 1, 100);
 
 				ImGui::EndMenu();
 			}

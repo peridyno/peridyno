@@ -140,7 +140,11 @@ void Node::updateStates()
 
 void Node::update()
 {
-	if (this->validateInputs())
+	if (!this->validateInputs()) {
+		return;
+	}
+
+	if (this->requireUpdate())
 	{
 		this->preUpdateStates();
 
@@ -150,6 +154,24 @@ void Node::update()
 		this->postUpdateStates();
 
 		this->updateTopology();
+
+		//reset parameters
+		for (auto param : fields_param)
+		{
+			param->tack();
+		}
+
+		//reset input fields
+		for (auto f_in : fields_input)
+		{
+			f_in->tack();
+		}
+
+		//tag all output fields as modifed
+		for (auto f_out : fields_output)
+		{
+			f_out->tick();
+		}
 	}
 }
 
@@ -202,6 +224,35 @@ bool Node::validateInputs()
 	}
 
 	return true;
+}
+
+bool Node::requireUpdate()
+{
+	//TODO: improve the following rules
+	if (mForceUpdate)
+		return true;
+
+	//check input fields
+	bool modified = false;
+
+	if (mImportNodes.size() > 0)
+	{
+		return true;
+	}
+	 
+
+	for (auto f_in : fields_input)
+	{
+		modified |= f_in->isModified();
+	}
+
+	//check control fields
+	for (auto var : fields_param)
+	{
+		modified |= var->isModified();
+	}
+
+	return modified;
 }
 
 void Node::tick()
@@ -472,6 +523,11 @@ uint Node::sizeOfImportNodes() const
 	}
 
 	return n;
+}
+
+void Node::setForceUpdate(bool b)
+{
+	mForceUpdate = b;
 }
 
 // Node* Node::addDescendant(Node* descent)
