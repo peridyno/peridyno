@@ -1,25 +1,92 @@
 #include "WParameterDataNode.h"
 #include <SceneGraph.h>
 
-template<class T>
-T* addTableRow(Wt::WTable* table, std::string label, int labelWidth = 200, int widgetWidth = 150)
+std::map<std::string, WParameterDataNode::FieldWidgetMeta> WParameterDataNode::sFieldWidgetMeta{};
+
+WParameterDataNode::WParameterDataNode() :table(nullptr)
 {
-	int row = table->rowCount();
-	auto cell0 = table->elementAt(row, 0);
-	auto cell1 = table->elementAt(row, 1);
+	FieldWidgetMeta WRealWidgetMeta
+	{
+		&typeid(float),
+		WRealFieldWidget::WRealFieldWidgetConstructor
+	};
 
-	cell0->addNew<Wt::WText>(label);
-	cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
-	cell0->setWidth(labelWidth);
+	FieldWidgetMeta WVector3FieldWidgetMeta
+	{
+		&typeid(dyno::Vec3f),
+		WVector3FieldWidget::WVector3FieldWidgetConstructor
+	};
 
-	cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
-	cell1->setWidth(widgetWidth);
+	FieldWidgetMeta WVector3dFieldWidgetMeta
+	{
+		&typeid(dyno::Vec3d),
+		WVector3FieldWidget::WVector3FieldWidgetConstructor
+	};
 
-	T* widget = cell1->addNew<T>();
-	widget->setWidth(widgetWidth);
-	return widget;
+	FieldWidgetMeta WVector3iFieldWidgetMeta
+	{
+		&typeid(dyno::Vec3i),
+		WVector3iFieldWidget::WVector3iFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WVector3uFieldWidgetMeta
+	{
+		&typeid(dyno::Vec3u),
+		WVector3iFieldWidget::WVector3iFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WBoolFieldWidgetMeta
+	{
+		&typeid(bool),
+		WBoolFieldWidget::WBoolFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WIntegerFieldWidgetMeta
+	{
+		&typeid(int),
+		WIntegerFieldWidget::WIntegerFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WUIntegerFieldWidgetMeta
+	{
+		&typeid(dyno::uint),
+		WUIntegerFieldWidget::WUIntegerFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WEnumFieldWidgetMeta
+	{
+		&typeid(dyno::PEnum),
+		WEnumFieldWidget::WEnumFieldWidgetConstructor
+	};
+
+	FieldWidgetMeta WColorWidgetMeta
+	{
+		&typeid(dyno::Color),
+		WColorWidget::WColorWidgetConstructor
+	};
+
+	FieldWidgetMeta WFileWidgetMeta
+	{
+		&typeid(dyno::FilePath),
+		WFileWidget::WFileWidgetConstructor
+	};
+
+	registerWidget(WRealWidgetMeta);
+	registerWidget(WVector3FieldWidgetMeta);
+	registerWidget(WVector3dFieldWidgetMeta);
+	registerWidget(WVector3iFieldWidgetMeta);
+	registerWidget(WVector3uFieldWidgetMeta);
+	registerWidget(WBoolFieldWidgetMeta);
+	registerWidget(WIntegerFieldWidgetMeta);
+	registerWidget(WUIntegerFieldWidgetMeta);
+	registerWidget(WEnumFieldWidgetMeta);
+	registerWidget(WColorWidgetMeta);
+	registerWidget(WFileWidgetMeta);
 }
 
+WParameterDataNode::~WParameterDataNode()
+{
+}
 
 void WParameterDataNode::setNode(std::shared_ptr<dyno::Node> node)
 {
@@ -34,7 +101,6 @@ void WParameterDataNode::setModule(std::shared_ptr<dyno::Module> module)
 	layoutAboutToBeChanged().emit();
 	layoutChanged().emit();
 }
-
 
 int WParameterDataNode::columnCount(const Wt::WModelIndex& parent) const
 {
@@ -58,25 +124,6 @@ Wt::cpp17::any WParameterDataNode::data(const Wt::WModelIndex& index, Wt::ItemDa
 		auto iter = mod.begin();
 		std::advance(iter, index.row());
 
-		std::vector<dyno::FBase*>& fields = mNode->getAllFields();
-		for (dyno::FBase* var : fields)
-		{
-			if (var != nullptr)
-			{
-				if (var->getFieldType() == dyno::FieldTypeEnum::Param)
-				{
-					if (var->getClassName() == std::string("FVar"))
-					{
-						Wt::log("info") << var->getDescription();
-					}
-				}
-				else if (var->getFieldType() == dyno::FieldTypeEnum::State)
-				{
-					Wt::log("info") << var->getDescription();
-				}
-			}
-		}
-
 		if (role == Wt::ItemDataRole::Display || role == Wt::ItemDataRole::ToolTip)
 		{
 			if (index.column() == 0)
@@ -98,7 +145,6 @@ Wt::cpp17::any WParameterDataNode::data(const Wt::WModelIndex& index, Wt::ItemDa
 	}
 	return Wt::cpp17::any();
 }
-
 
 Wt::cpp17::any WParameterDataNode::headerData(int section, Wt::Orientation orientation, Wt::ItemDataRole role) const
 {
@@ -129,9 +175,9 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 			{
 				if (var->getClassName() == std::string("FVar"))
 				{
-					Wt::WDoubleSpinBox* test;
-					test = addTableRow<Wt::WDoubleSpinBox>(table, var->getTemplateName());
-					Wt::log("info") << var->getDescription();
+					std::string template_name = var->getTemplateName();
+					addScalarFieldWidget(table, var->getObjectName(), var);
+					Wt::log("info") << var->getTemplateName();
 				}
 			}
 			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
@@ -140,6 +186,80 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 			}
 		}
 	}
-	//table->elementAt(a, 0)->addWidget(std::make_unique<Wt::WText>("Item @ row 0, column 0"));
 	table->setMargin(10);
+}
+
+void WParameterDataNode::createParameterPanelModule(Wt::WPanel* panel)
+{
+	table = panel->setCentralWidget(std::make_unique<Wt::WTable>());
+	std::vector<dyno::FBase*>& fields = mModule->getAllFields();
+	int a = 0;
+	for (dyno::FBase* var : fields)
+	{
+		if (var != nullptr)
+		{
+			if (var->getFieldType() == dyno::FieldTypeEnum::Param)
+			{
+				if (var->getClassName() == std::string("FVar"))
+				{
+					std::string template_name = var->getTemplateName();
+					addScalarFieldWidget(table, var->getObjectName(), var);
+					Wt::log("info") << var->getTemplateName();
+				}
+			}
+			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
+			{
+				//Wt::log("info") << var->getDescription();
+			}
+		}
+	}
+	table->setMargin(10);
+}
+
+int WParameterDataNode::registerWidget(const FieldWidgetMeta& meta) {
+	sFieldWidgetMeta[meta.type->name()] = meta;
+	return 0;
+}
+
+WParameterDataNode::FieldWidgetMeta* WParameterDataNode::getRegistedWidget(const std::string& name)
+{
+	if (sFieldWidgetMeta.count(name))
+		return &sFieldWidgetMeta.at(name);
+	return nullptr;
+}
+
+Wt::WContainerWidget* WParameterDataNode::createFieldWidget(dyno::FBase* field)
+{
+	Wt::WContainerWidget* fw = nullptr;
+	std::string template_name = field->getTemplateName();
+	auto reg = getRegistedWidget(template_name);
+
+	if (reg) {
+		fw = reg->constructor(field);
+	}
+
+	return fw;
+}
+
+void WParameterDataNode::addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth, int widgetWidth)
+{
+	Wt::WContainerWidget* fw = createFieldWidget(field);
+	if (fw)
+	{
+		std::unique_ptr<Wt::WContainerWidget> mWidget(fw);
+		if (fw != nullptr) {
+			int row = table->rowCount();
+			auto cell0 = table->elementAt(row, 0);
+			auto cell1 = table->elementAt(row, 1);
+
+			cell0->addNew<Wt::WText>(label);
+			cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
+			cell0->setWidth(labelWidth);
+
+			cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
+			cell1->setWidth(widgetWidth);
+
+			cell1->addWidget(std::unique_ptr<Wt::WContainerWidget>(std::move(mWidget)));
+		}
+	}
 }

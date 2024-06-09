@@ -40,7 +40,8 @@ buildDebug/*
 *.comp.spv
 *.spv
 
-
 .idea/
 cmake-build-*
 build-*
+
+imgui.ini

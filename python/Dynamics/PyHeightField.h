@@ -187,6 +187,4 @@ void declare_steer(py::module& m, std::string typestr) {
 		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference);
 }
 
-//void declare_height_field_initializer(py::module& m, std::string typestr);
-
 void pybind_height_field(py::module& m);
