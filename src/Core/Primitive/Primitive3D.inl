@@ -1500,7 +1500,7 @@ namespace dyno
 	{
 		//transform to the local coordinate system of obb
 		Coord3D diff = origin - obb.center;
-		Coord3D originPrime = Coord3D(diff.dot(obb.u), diff.dot(obb.v), diff.dot(obb.w));
+		Coord3D originPrime = Coord3D(diff.dot(obb.u), diff.dot(obb.v), diff.dot(obb.w)) + Coord3D(obb.center);
 		Coord3D dirPrime = Coord3D(direction.dot(obb.u), direction.dot(obb.v), direction.dot(obb.w));
 
 		TSegment3D<Real> pqPrime = TLine3D<Real>(originPrime, dirPrime).proximity(TAlignedBox3D<Real>(obb.center - obb.extent, obb.center + obb.extent));
