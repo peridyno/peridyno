@@ -62,7 +62,7 @@ private:
 	std::unique_ptr<ImageEncoder> mJpegEncoder;				// jpeg encoder	
 	std::unique_ptr<Wt::WMemoryResource> mJpegResource;		// Wt resource for jpeg image
 
-	std::shared_ptr<dyno::SceneGraph> mScene;
+	std::shared_ptr<dyno::SceneGraph> mScene = nullptr;
 	std::shared_ptr<dyno::Camera>	  mCamera;
 
 	// internal framebuffer
