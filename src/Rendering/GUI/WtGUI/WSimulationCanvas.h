@@ -4,9 +4,11 @@
 
 #include <memory>
 
-#include <Rendering/Engine/OpenGL/GraphicsObject/Framebuffer.h>
-#include <Rendering/Engine/OpenGL/GraphicsObject/Texture.h>
+#include <GraphicsObject/Framebuffer.h>
+#include <GraphicsObject/Texture.h>
 
+#include <ImWidgets/ImWindow.h>
+#include <RenderWindow.h>
 
 namespace dyno
 {
@@ -20,15 +22,15 @@ namespace dyno
 struct GLFWwindow;
 class ImageEncoder;
 
-class WSimulationCanvas : public Wt::WContainerWidget
+class WSimulationCanvas 
+	: public Wt::WContainerWidget
+	, public dyno::RenderWindow
 {
 public:
 	WSimulationCanvas();
 	~WSimulationCanvas();
 
 	void setScene(std::shared_ptr<dyno::SceneGraph> scene);
-
-	dyno::RenderParams* getRenderParams();
 
 	void update();
 
@@ -54,8 +56,8 @@ private:
 	Wt::WApplication* mApp;
 
 	GLFWwindow* mContext;
-	dyno::GLRenderEngine* mRenderEngine;
-	dyno::RenderParams* mRenderParams;
+
+	dyno::ImWindow mImWindow;
 
 	std::vector<unsigned char> mImageData;					// raw image	
 	std::vector<unsigned char> mJpegBuffer;					// jpeg data	
@@ -63,7 +65,7 @@ private:
 	std::unique_ptr<Wt::WMemoryResource> mJpegResource;		// Wt resource for jpeg image
 
 	std::shared_ptr<dyno::SceneGraph> mScene = nullptr;
-	std::shared_ptr<dyno::Camera>	  mCamera;
+	//std::shared_ptr<dyno::Camera>	  mCamera;
 
 	// internal framebuffer
 	dyno::Framebuffer mFramebuffer;

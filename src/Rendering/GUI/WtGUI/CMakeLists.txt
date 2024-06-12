@@ -35,7 +35,7 @@ set_target_properties(Wt::HTTP PROPERTIES MAP_IMPORTED_CONFIG_RELEASE RelWithDeb
 target_link_libraries(${LIB_NAME} PRIVATE Wt::Wt Wt::HTTP)
 
 # link dyno
-target_link_libraries(${LIB_NAME} PUBLIC Core Framework Topology ParticleSystem Peridynamics GLRenderEngine)
+target_link_libraries(${LIB_NAME} PUBLIC Core Framework Topology ImWidgets GLRenderEngine)
 
 # for python scripting
 # Jian: put pybind11 at end since there could be header conflict for node.h

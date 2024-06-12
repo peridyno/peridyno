@@ -69,7 +69,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	menu->setMargin(5, Wt::Side::Right);
 
 	auto sampleWidget = new WSampleWidget();
-	auto paramsWidget = new WRenderParamsWidget(mSceneCanvas->getRenderParams());
+	auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	auto pythonWidget = new WPythonWidget;
 
 	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));

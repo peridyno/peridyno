@@ -12,6 +12,10 @@
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 using namespace dyno;
 
 WSimulationCanvas::WSimulationCanvas()
@@ -72,13 +76,9 @@ WSimulationCanvas::WSimulationCanvas()
 	mJpegEncoder->SetQuality(100);
 	mJpegResource = std::make_unique<Wt::WMemoryResource>("image/jpeg");
 
-	mRenderEngine = new dyno::GLRenderEngine;
-	mRenderParams = new dyno::RenderParams;
-	mCamera = std::make_shared<dyno::OrbitCamera>();
-	mCamera->setWidth(width);
-	mCamera->setHeight(height);
-	mCamera->registerPoint(0, 0);
-	mCamera->rotateToPoint(-32, 12);
+	mRenderEngine = std::make_shared<dyno::GLRenderEngine>();
+
+	this->setWindowSize(width, height);
 
 	// initialize OpenGL context and RenderEngine
 	this->initializeGL();
@@ -89,15 +89,17 @@ WSimulationCanvas::~WSimulationCanvas()
 	makeCurrent();
 
 	mRenderEngine->terminate();
-	delete mRenderEngine;
-
-	delete mRenderParams;
 
 	mFramebuffer.release();
 	mFrameColor.release();
 
 	mImageData.resize(0);
 	mJpegBuffer.resize(0);
+
+	// Cleanup
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwDestroyWindow(mContext);
 	//glfwTerminate();
@@ -125,6 +127,28 @@ void WSimulationCanvas::initializeGL()
 	makeCurrent();
 
 	mRenderEngine->initialize();
+
+
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+
+	const char* glsl_version = "#version 130";
+	// Setup Platform/Renderer backends
+	ImGui_ImplGlfw_InitForOpenGL(mContext, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
+
+	// Get Context scale
+	float xscale, yscale;
+	glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
+
+	// Initialize ImWindow
+	mImWindow.initialize(xscale);
 
 	// create framebuffer here...
 	mFrameColor.format = GL_RGB;
@@ -218,11 +242,11 @@ void WSimulationCanvas::update()
 		}
 
 		// update rendering params
-		mRenderParams->width = mCamera->viewportWidth();
-		mRenderParams->height = mCamera->viewportHeight();
-		mRenderParams->transforms.model = glm::mat4(1);	 // TODO: world transform?
-		mRenderParams->transforms.view = mCamera->getViewMat();
-		mRenderParams->transforms.proj = mCamera->getProjMat();
+		mRenderParams.width = mCamera->viewportWidth();
+		mRenderParams.height = mCamera->viewportHeight();
+		mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
+		mRenderParams.transforms.view = mCamera->getViewMat();
+		mRenderParams.transforms.proj = mCamera->getProjMat();
 
 		// Jian SHI: hack for unit scaling...
 		float planeScale = mRenderEngine->planeScale;
@@ -231,7 +255,18 @@ void WSimulationCanvas::update()
 		mRenderEngine->rulerScale *= mCamera->unitScale();
 
 		mFramebuffer.bind();
-		mRenderEngine->draw(mScene.get(), *mRenderParams);
+		mRenderEngine->draw(mScene.get(), mRenderParams);
+
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		if (showImGUI())
+			mImWindow.draw(this);
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// dump framebuffer
 		mFrameColor.dump(mImageData.data());
@@ -275,8 +310,3 @@ void WSimulationCanvas::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 	}
 
 }
-
-dyno::RenderParams* WSimulationCanvas::getRenderParams()
-{
-	return mRenderParams;
-};
