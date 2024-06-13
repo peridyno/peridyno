@@ -15,6 +15,4 @@ public:
 
 private:
 	WMainWindow* window;
-
-	std::shared_ptr<dyno::SceneGraph> scene;
 };

@@ -20,6 +20,8 @@ namespace dyno
 		this->stateNormal()->connect(model->inNormal());
 		this->stateAttribute()->connect(model->inAttribute());
 		this->animationPipeline()->pushModule(model);
+
+		this->setDt(0.001f);
 	}
 
 	__global__ void SetupFluidAttributes(

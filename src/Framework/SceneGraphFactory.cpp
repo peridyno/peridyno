@@ -37,6 +37,19 @@ namespace dyno
 		return mSceneGraphs.top();
 	}
 
+	std::shared_ptr<SceneGraph> SceneGraphFactory::createDefaultScene()
+	{
+		if (mDefaultCreator != nullptr)
+			return mDefaultCreator();
+
+		return nullptr;
+	}
+
+	void SceneGraphFactory::setDefaultCreator(SceneGraphCreator creator)
+	{
+		mDefaultCreator = creator;
+	}
+
 	void SceneGraphFactory::pushScene(std::shared_ptr<SceneGraph> scn)
 	{
 		mSceneGraphs.push(scn);

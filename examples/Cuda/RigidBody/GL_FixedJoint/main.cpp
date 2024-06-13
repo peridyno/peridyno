@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include <GlfwApp.h>
 
 #include <SceneGraph.h>
 
@@ -91,7 +91,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 int main()
 {
-	QtApp app;
+	GlfwApp app;
 	app.setSceneGraph(creatBricks());
 	app.initialize(1280, 768);
 	app.mainLoop();

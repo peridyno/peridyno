@@ -43,6 +43,6 @@ private:
 	bool	bRunFlag;
 	bool	mReset;
 
-	std::shared_ptr<dyno::SceneGraph>	mScene;
+	std::shared_ptr<dyno::SceneGraph>	mScene = nullptr;
 	std::shared_ptr<dyno::Node> mActiveNode;
 };
