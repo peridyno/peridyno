@@ -7,6 +7,8 @@
 #include "GLPointVisualModule.h"
 
 #include "Mapping/Extract.h"
+#include "Topology/EdgeSet.h"
+#include <memory>
 
 struct Index2D
 {
@@ -31,7 +33,9 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
-		
+
+		this->stateCenterLine()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+
 		this->varLatitude()->setRange(2, 10000);
 		this->varLongitude()->setRange(3, 10000);
 		this->varHeight()->setRange(0, 100);
@@ -58,6 +62,14 @@ namespace dyno
 		this->statePolygonSet()->connect(exES->inPolygonSet());
 		this->graphicsPipeline()->pushModule(exES);
 
+		auto clRender = std::make_shared<GLWireframeVisualModule>();
+		clRender->varBaseColor()->setValue(Color(46.f / 255.f , 107.f / 255.f, 202.f / 255.f));
+		clRender->varLineWidth()->setValue(1.f);
+		clRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::CYLINDER);
+
+		this->stateCenterLine()->connect(clRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(clRender);
+		
 		auto esRender = std::make_shared<GLWireframeVisualModule>();
 		esRender->varBaseColor()->setValue(Color(0, 0, 0));
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
@@ -361,7 +373,19 @@ namespace dyno
 		auto& ts = this->stateTriangleSet()->getData();
 		polySet->turnIntoTriangleSet(ts);
 
+		// Center Line
+		std::vector<TopologyModule::Edge> edges;
+		vertices.clear();
+		vertices.push_back(center + q.rotate(Coord(0, + halfHeight, 0)));
+		vertices.push_back(center + q.rotate(Coord(0, - halfHeight, 0)));
+		edges.push_back(TopologyModule::Edge(0, 1));
 
+		auto edgeSet = this->stateCenterLine()->getDataPtr();
+		edgeSet->setPoints(vertices);
+		edgeSet->setEdges(edges);
+		edgeSet->update();
+		
+		edges.clear();
 		vertices.clear();
 	}
 

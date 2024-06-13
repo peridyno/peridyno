@@ -1141,8 +1141,14 @@ namespace dyno
 
 		auto case00 = [](Coord3D& pt, Real& t, const Coord3D dir, const Coord3D extent, const int axis) {
 			t = (extent[axis] - pt[axis]) / dir[axis];
-			pt[axis] = extent[axis];
-
+			if (t < Real(0) || t > Real(1))
+			{
+				t = (-extent[axis] - pt[axis]) / dir[axis];
+				pt[axis] = -extent[axis];
+			}
+			else
+				pt[axis] = extent[axis];
+			
 			pt = clamp(pt, -extent, extent);
 		};
 
