@@ -156,7 +156,7 @@ namespace dyno
 
 		auto PROJECT_INSIDE = [](const TPoint3D<Real> p, const TTriangle3D<Real> triangle) -> bool
 		{
-			Real epsilon = Real(0.01);
+			Real epsilon = Real(0.00001);
 			TPlane3D<Real> plane(triangle.v[0], triangle.normal());
 			
 			TPoint3D<Real> proj = p.project(plane);

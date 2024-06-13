@@ -59,6 +59,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		box4.center = Vec3f(-0.812, 0.450, 1.722) + tr;
 		box4.halfLength = Vec3f(0.2f);
 		CapsuleInfo capsule1, capsule2, capsule3, capsule4;
+		SphereInfo sphere1, sphere2, sphere3, sphere4;
 
 		capsule1.center = Vec3f(0.812, 0.450, 1.722) + tr;
 		capsule1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
@@ -77,6 +78,19 @@ std::shared_ptr<SceneGraph> creatCar()
 		capsule4.halfLength = 0.1495;
 		capsule4.radius = 0.450;
 
+		sphere1.center = Vec3f(0.812, 0.450, 1.722) + tr;
+		sphere1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+		sphere1.radius = 0.450;
+		sphere2.center = Vec3f(-0.812, 0.450, 1.722) + tr;
+		sphere2.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+		sphere2.radius = 0.450;
+		sphere3.center = Vec3f(-0.812, 0.450, -1.426) + tr;
+		sphere3.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+		sphere3.radius = 0.450;
+		sphere4.center = Vec3f(0.812, 0.450, -1.426) + tr;
+		sphere4.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+		sphere4.radius = 0.450;
+
 
 		RigidBodyInfo rigidbody;
 
@@ -94,10 +108,15 @@ std::shared_ptr<SceneGraph> creatCar()
 
 		Real wheel_velocity = 30;
 
-		auto frontLeftTireActor = jeep->addCapsule(capsule1, rigidbody, 100);
-		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
-		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
-		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);
+// 		auto frontLeftTireActor = jeep->addCapsule(capsule1, rigidbody, 100);
+// 		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
+// 		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
+// 		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);
+
+		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody, 100);
+		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody, 100);
+		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody, 100);
+		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody, 100);
 
 
 		//front rear
@@ -194,21 +213,21 @@ std::shared_ptr<SceneGraph> creatCar()
 // 	jeep->graphicsPipeline()->pushModule(pointRender2);
 
 
-// 	//Visualize contact points
-// 	auto cdBV = std::make_shared<CollistionDetectionTriangleSet<DataType3f>>();
-// 	jeep->stateTopology()->connect(cdBV->inDiscreteElements());
-// 	jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
-// 	jeep->graphicsPipeline()->pushModule(cdBV);
-// 
-// 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-// 	cdBV->outContacts()->connect(contactPointMapper->inContacts());
-// 	jeep->graphicsPipeline()->pushModule(contactPointMapper);
-// 
-// 	auto contactsRender = std::make_shared<GLPointVisualModule>();
-// 	contactsRender->setColor(Color(1, 0, 0));
-// 	contactsRender->varPointSize()->setValue(0.1f);
-// 	contactPointMapper->outPointSet()->connect(contactsRender->inPointSet());
-// 	jeep->graphicsPipeline()->pushModule(contactsRender);
+	//Visualize contact points
+	auto cdBV = std::make_shared<CollistionDetectionTriangleSet<DataType3f>>();
+	jeep->stateTopology()->connect(cdBV->inDiscreteElements());
+	jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
+	jeep->graphicsPipeline()->pushModule(cdBV);
+
+	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	cdBV->outContacts()->connect(contactPointMapper->inContacts());
+	jeep->graphicsPipeline()->pushModule(contactPointMapper);
+
+	auto contactsRender = std::make_shared<GLPointVisualModule>();
+	contactsRender->setColor(Color(1, 0, 0));
+	contactsRender->varPointSize()->setValue(0.1f);
+	contactPointMapper->outPointSet()->connect(contactsRender->inPointSet());
+	jeep->graphicsPipeline()->pushModule(contactsRender);
 
 	return scn;
 }
