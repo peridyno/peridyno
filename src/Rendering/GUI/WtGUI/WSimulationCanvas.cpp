@@ -13,8 +13,8 @@
 #include <TrackballCamera.h>
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui_impl_wt.h"
 
 using namespace dyno;
 
@@ -88,6 +88,8 @@ WSimulationCanvas::~WSimulationCanvas()
 {
 	makeCurrent();
 
+	delete mImGuiCtx;
+
 	mRenderEngine->terminate();
 
 	mFramebuffer.release();
@@ -96,11 +98,7 @@ WSimulationCanvas::~WSimulationCanvas()
 	mImageData.resize(0);
 	mJpegBuffer.resize(0);
 
-	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
 	glfwDestroyWindow(mContext);
 	//glfwTerminate();
 	Wt::log("warning") << "WSimulationCanvas destory";
@@ -128,19 +126,10 @@ void WSimulationCanvas::initializeGL()
 
 	mRenderEngine->initialize();
 
-
-
+	mImGuiCtx = new ImGuiBackendWt(this);
 	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
-
 	const char* glsl_version = "#version 130";
-	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForOpenGL(mContext, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// Get Context scale
@@ -259,7 +248,8 @@ void WSimulationCanvas::update()
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
+		mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
+
 		ImGui::NewFrame();
 
 		if (showImGUI())

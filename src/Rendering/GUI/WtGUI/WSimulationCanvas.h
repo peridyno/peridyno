@@ -21,6 +21,7 @@ namespace dyno
 
 struct GLFWwindow;
 class ImageEncoder;
+class ImGuiBackendWt;
 
 class WSimulationCanvas 
 	: public Wt::WContainerWidget
@@ -56,6 +57,7 @@ private:
 	Wt::WApplication* mApp;
 
 	GLFWwindow* mContext;
+	ImGuiBackendWt* mImGuiCtx;
 
 	dyno::ImWindow mImWindow;
 
