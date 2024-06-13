@@ -320,7 +320,7 @@ void ImWindow::draw(RenderWindow* app)
 				mEditMode = 2;
 			ImGui::Separator(); // --------
 
-			if (ImGui::Button(ICON_FA_EXPAND, ImVec2(30, 30)))
+			if (ImGui::clickButton(ICON_FA_EXPAND, "Focus"))
 			{
 				if (scene) {
 					auto node = app->getCurrentSelectedNode();
