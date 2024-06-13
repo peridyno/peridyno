@@ -4,14 +4,8 @@
 #include <Wt/WServer.h>
 #include <Wt/WLogger.h>
 
-std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
-{
-	auto app = std::make_unique<WMainApp>(env);
-	return app;
-}
-
 namespace dyno {
-	dyno::WtApp::WtApp(int argc /*= 0*/, char** argv /*= NULL*/)
+	WtApp::WtApp(int argc /*= 0*/, char** argv /*= NULL*/)
 	{
 		argc_ = argc;
 		argv_ = argv;
@@ -24,6 +18,11 @@ namespace dyno {
 
 	void WtApp::mainLoop()
 	{
+		auto createApp = [&](const Wt::WEnvironment& env)->std::unique_ptr<Wt::WApplication> {
+			auto app = std::make_unique<WMainApp>(env);
+			return app;
+		};
+
 		try {
 			if (argc_ == 1)
 			{
@@ -39,12 +38,12 @@ namespace dyno {
 				args.push_back("--config");
 				args.push_back(doc_root + "\\wt_config.xml");
 				Wt::log("warning") << doc_root + "\\wt_config.xml";
-				Wt::WRun("", args, &createApplication);
+				Wt::WRun("", args, createApp);
 			}
 			else
 			{
 				Wt::WServer server(argc_, argv_);
-				server.addEntryPoint(Wt::EntryPointType::Application, &createApplication);
+				server.addEntryPoint(Wt::EntryPointType::Application, createApp);
 				server.run();
 			}
 

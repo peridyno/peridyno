@@ -19,5 +19,7 @@ namespace dyno
 
 		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return SceneGraphFactory::instance()->active(); }
 		virtual void setSceneGraph(std::shared_ptr<SceneGraph> scene) { SceneGraphFactory::instance()->pushScene(scene); }
+
+		virtual void setSceneGraphCreator(std::function<std::shared_ptr<SceneGraph>()> creator) { SceneGraphFactory::instance()->setDefaultCreator(creator); }
 	};
 }

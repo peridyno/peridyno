@@ -82,6 +82,8 @@ WSimulationCanvas::WSimulationCanvas()
 
 	// initialize OpenGL context and RenderEngine
 	this->initializeGL();
+
+	this->toggleImGUI();
 }
 
 WSimulationCanvas::~WSimulationCanvas()
@@ -126,18 +128,21 @@ void WSimulationCanvas::initializeGL()
 
 	mRenderEngine->initialize();
 
-	mImGuiCtx = new ImGuiBackendWt(this);
-	// Setup Dear ImGui context
-	ImGui::StyleColorsDark();
-	const char* glsl_version = "#version 130";
-	ImGui_ImplOpenGL3_Init(glsl_version);
+	if (showImGUI())
+	{
+		mImGuiCtx = new ImGuiBackendWt(this);
+		// Setup Dear ImGui context
+		ImGui::StyleColorsDark();
+		const char* glsl_version = "#version 130";
+		ImGui_ImplOpenGL3_Init(glsl_version);
 
-	// Get Context scale
-	float xscale, yscale;
-	glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
+		// Get Context scale
+		float xscale, yscale;
+		glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
 
-	// Initialize ImWindow
-	mImWindow.initialize(xscale);
+		// Initialize ImWindow
+		mImWindow.initialize(xscale);
+	}
 
 	// create framebuffer here...
 	mFrameColor.format = GL_RGB;
@@ -246,17 +251,19 @@ void WSimulationCanvas::update()
 		mFramebuffer.bind();
 		mRenderEngine->draw(mScene.get(), mRenderParams);
 
-		// Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
-
-		ImGui::NewFrame();
-
 		if (showImGUI())
+		{
+			// Start the Dear ImGui frame
+			ImGui_ImplOpenGL3_NewFrame();
+			mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
+
+			ImGui::NewFrame();
+
 			mImWindow.draw(this);
 
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
 
 		// dump framebuffer
 		mFrameColor.dump(mImageData.data());
