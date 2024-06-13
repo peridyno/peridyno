@@ -150,7 +150,7 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Separator();
 
 				float distanceUnit = camera->unitScale();
-				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
+				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
 					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
