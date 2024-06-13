@@ -150,7 +150,7 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Separator();
 
 				float distanceUnit = camera->unitScale();
-				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
+				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
 					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
@@ -320,7 +320,7 @@ void ImWindow::draw(RenderWindow* app)
 				mEditMode = 2;
 			ImGui::Separator(); // --------
 
-			if (ImGui::Button(ICON_FA_EXPAND, ImVec2(30, 30)))
+			if (ImGui::Button(ICON_FA_EXPAND))
 			{
 				if (scene) {
 					auto node = app->getCurrentSelectedNode();
