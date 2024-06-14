@@ -16,7 +16,17 @@ class Source : public Node
 	DECLARE_CLASS(Source);
 public:
 
-	
+
+	void varChanged() 
+	{
+		auto v = this->varTestVectorInt()->getValue();
+		printf("field Value: ");
+		for (size_t i = 0; i < v.size(); i++)
+		{
+			std::cout << v[i] << ", ";
+		}
+		std::cout << std::endl;
+	}
 
 	DEF_VAR(std::vector<int>, TestVectorInt, std::vector<int> {0}, "");
 
@@ -102,6 +112,7 @@ public:
 	void resetStates()override
 	{
 		initialData();
+		varChanged();
 	}
 
 	void initialData()
@@ -210,6 +221,10 @@ public:
 
 		this->statePointSet()->setDataPtr(std::make_shared<PointSet<DataType3f>>());
 		this->statePointSetS()->setDataPtr(std::make_shared<PointSet<DataType3f>>());
+
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&Source::varChanged, this));
+
+		this->varTestVectorInt()->attach(callback);
 
 	};
 

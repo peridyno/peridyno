@@ -1,4 +1,4 @@
-#include "QVectorWidget.h"
+#include "QVectorIntFieldWidget.h"
 
 #include <QGridLayout>
 
@@ -9,9 +9,9 @@
 
 namespace dyno
 {
-	IMPL_FIELD_WIDGET(std::vector<int>, QVectorWidget)
+	IMPL_FIELD_WIDGET(std::vector<int>, QVectorIntFieldWidget)
 
-	QVectorWidget::QVectorWidget(FBase* field)
+		QVectorIntFieldWidget::QVectorIntFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
 		mainLayout = new QVBoxLayout;
@@ -33,27 +33,28 @@ namespace dyno
 
 		mainLayout->addLayout(nameLayout);
 
-		////Set default GUI style
-		//QFile file(":/dyno/DarkStyle.qss");
-		//file.open(QIODevice::ReadOnly);
 
-		//QString style = file.readAll();
-		//this->setStyleSheet(style);
+		QObject::connect(addItembutton, SIGNAL(pressed()), this, SLOT(addItemWidget()));
+		QObject::connect(this, SIGNAL(vectorChange()), this, SLOT(updateField()));
 
 		FVar<std::vector<int>>* f = TypeInfo::cast<FVar<std::vector<int>>>(field);
-		if (f != nullptr) 
+		if (f != nullptr)
 		{
-			printf("vector int\n");
 			mVec = f->getValue();
 		}
 
-		
-		QObject::connect(addItembutton, SIGNAL(pressed()), this, SLOT(addItemWidget()));
-
+		updateWidget();
 
 	};
 
+	void QVectorIntFieldWidget::updateWidget()
+	{
+		for (size_t i = 0; i < mVec.size(); i++)
+		{
+			createItemWidget(mVec[i]);
+		}
 
+	}
 
 }
 
