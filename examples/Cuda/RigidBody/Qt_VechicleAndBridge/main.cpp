@@ -57,16 +57,16 @@ std::shared_ptr<SceneGraph> creatCar()
 		{
 			auto up = texMesh->shapes()[it]->boundingBox.v1;
 			auto down = texMesh->shapes()[it]->boundingBox.v0;
-			SphereInfo sphere;
+			/*SphereInfo sphere;
 			sphere.center = texMesh->shapes()[it]->boundingTransform.translation();
 			sphere.radius = std::abs(up.y - down.y) / 2;
-			Actors[it] = jeep->addSphere(sphere, rigidbody, 100);
-			/*CapsuleInfo capsule;
+			Actors[it] = jeep->addSphere(sphere, rigidbody, 100);*/
+			CapsuleInfo capsule;
 			capsule.center = texMesh->shapes()[it]->boundingTransform.translation();
 			capsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 			capsule.radius = std::abs(up.y - down.y) / 2;
 			capsule.halfLength = 0.1495;
-			Actors[it] = jeep->addCapsule(capsule, rigidbody, 100);*/
+			Actors[it] = jeep->addCapsule(capsule, rigidbody, 100);
 			jeep->bind(Actors[it], Pair<uint, uint>(it, 0));
 		}
 		else
@@ -117,7 +117,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		}
 		else if(it != 51)
 		{
-			box.halfLength = Vec3f(abs(tmp.x), abs(tmp.y) * 0.88, abs(tmp.z));
+			box.halfLength = Vec3f(abs(tmp.x), abs(tmp.y) * 0.86, abs(tmp.z));
 			Actors[it] = jeep->addBox(box, rigidbody, 10000000);
 		}
 		else
@@ -189,7 +189,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 
 	//Visualize rigid bodies
-	/*
+	
  	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
  	jeep->stateTopology()->connect(mapper->inDiscreteElements());
  	jeep->graphicsPipeline()->pushModule(mapper);
@@ -201,24 +201,9 @@ std::shared_ptr<SceneGraph> creatCar()
  	sRender->setMetallic(3.0f);
  	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
  	jeep->graphicsPipeline()->pushModule(sRender);
-	*/
+
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals
-	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
-	jeep->stateTopology()->connect(elementQuery->inDiscreteElements());
-	jeep->stateCollisionMask()->connect(elementQuery->inCollisionMask());
-	jeep->graphicsPipeline()->pushModule(elementQuery);
-
-	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
-	elementQuery->outContacts()->connect(contactMapper->inContacts());
-	contactMapper->varScale()->setValue(0.00002);
-	jeep->graphicsPipeline()->pushModule(contactMapper);
-
-	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
-	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
-	jeep->graphicsPipeline()->pushModule(wireRender);
-
 
 	return scn;
 }

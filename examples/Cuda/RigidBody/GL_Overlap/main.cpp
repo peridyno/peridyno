@@ -23,15 +23,14 @@ std::shared_ptr<SceneGraph> creatBricks()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-	rigid->setDt(0.001);
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	BoxInfo box;
 	int N = 10;
 	for (int i = N; i > 0; i--) {
 
-		box.center = 0.5f * Vec3f(0.5f, 0.065, 0.12f + 0.15f * (N - i));
-		box.halfLength = 0.5f * Vec3f(0.065f, 0.065f, 0.1f);
+		box.center = 5.0f * Vec3f(0.5f, 0.065, 0.12f + 0.15f * (N - i));
+		box.halfLength = 5.0f * Vec3f(0.065f, 0.065f, 0.1f);
 		auto boxAt = rigid->addBox(box, rigidBody);
 	}
 
@@ -44,8 +43,8 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(1, 1, 0));
-	sRender->setAlpha(0.5f);
+	sRender->setColor(Color(0.204, 0.424, 0.612));
+	sRender->setAlpha(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -62,12 +61,12 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
-	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
+	wireRender->setColor(Color(0, 0, 0));
+	mapper->outTriangleSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
 	//Visualize contact points
-	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	/*auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
@@ -75,7 +74,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	pointRender->setColor(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-	rigid->graphicsPipeline()->pushModule(pointRender);
+	rigid->graphicsPipeline()->pushModule(pointRender);*/
 
 	return scn;
 }

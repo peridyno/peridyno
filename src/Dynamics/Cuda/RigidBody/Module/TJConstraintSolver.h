@@ -56,7 +56,7 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(Real, BaumgarteBias, 0.2, "");
+		DEF_VAR(Real, BaumgarteBias, 0.3, "");
 
 		DEF_VAR(uint, SubStepping, 10, "");
 

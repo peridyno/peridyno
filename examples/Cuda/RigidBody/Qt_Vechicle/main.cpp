@@ -91,15 +91,13 @@ std::shared_ptr<SceneGraph> creatCar()
 
 		rigidbody.bodyId = i;
 
-		Vec3f offset = Vec3f(0.0f, 0, 0.159);
+		Vec3f offset = Vec3f(0.0f, -0.721, 0.159);
 		rigidbody.offset = offset;
 		auto bodyActor = jeep->addBox(box1, rigidbody, 1000);
 
 		rigidbody.offset = Vec3f(0.0f);
 
-		auto spareTireActor = jeep->addBox(box2, rigidbody, 100);
-		/*auto frontLeftSteerActor = jeep->addBox(box3, rigidbody, 1000);
-		auto frontRightSteerActor = jeep->addBox(box4, rigidbody, 1000);*/
+		auto spareTireActor = jeep->addBox(box2, rigidbody, 1000);
 
 		Real wheel_velocity = 30;
 
@@ -136,13 +134,8 @@ std::shared_ptr<SceneGraph> creatCar()
 		joint4.setAxis(Vec3f(1, 0, 0));
 
 
-		//FixedJoint<Real> joint5(0, 1);
 		auto& joint5 = jeep->createFixedJoint(bodyActor, spareTireActor);
 		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
-		/*auto& joint6 = jeep->createFixedJoint(bodyActor, frontLeftSteerActor);
-		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
-		auto& joint7 = jeep->createFixedJoint(bodyActor, frontRightSteerActor);
-		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);*/
 
 		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
 		jeep->bind(spareTireActor, Pair<uint, uint>(4, i));
@@ -159,69 +152,38 @@ std::shared_ptr<SceneGraph> creatCar()
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varScale()->setValue(Vec3f(100.0f));
+	plane->varLocation()->setValue(Vec3f(0, 0, 0));
+	plane->varScale()->setValue(Vec3f(300.0f));
 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
 
-// 	//Visualize rigid bodies
-//  	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-//  	jeep->stateTopology()->connect(mapper->inDiscreteElements());
-//  	jeep->graphicsPipeline()->pushModule(mapper);
-//  
-//  	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-//  	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-//  	sRender->setAlpha(0.8f);
-//  	sRender->setRoughness(0.7f);
-//  	sRender->setMetallic(3.0f);
-//  	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-//  	jeep->graphicsPipeline()->pushModule(sRender);
 
-	//TODO: to enable using internal modules inside a node
-	//Visualize contact normals
-	auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
-	jeep->stateTopology()->connect(elementQuery->inDiscreteElements());
-	jeep->stateCollisionMask()->connect(elementQuery->inCollisionMask());
-	jeep->graphicsPipeline()->pushModule(elementQuery);
+
+ 	//Visualize contact points
+ 	auto cdBV = std::make_shared<CollistionDetectionTriangleSet<DataType3f>>();
+ 	jeep->stateTopology()->connect(cdBV->inDiscreteElements());
+ 	jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
+ 	jeep->graphicsPipeline()->pushModule(cdBV);
+ 
+ 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+ 	cdBV->outContacts()->connect(contactPointMapper->inContacts());
+ 	jeep->graphicsPipeline()->pushModule(contactPointMapper);
+ 
+ 	auto contactsRender = std::make_shared<GLPointVisualModule>();
+ 	contactsRender->setColor(Color(1, 0, 0));
+ 	contactsRender->varPointSize()->setValue(0.1f);
+ 	contactPointMapper->outPointSet()->connect(contactsRender->inPointSet());
+ 	jeep->graphicsPipeline()->pushModule(contactsRender);
 
 	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
-	elementQuery->outContacts()->connect(contactMapper->inContacts());
-	contactMapper->varScale()->setValue(0.00002);
+	cdBV->outContacts()->connect(contactMapper->inContacts());
+	contactMapper->varScale()->setValue(2);
 	jeep->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
+	wireRender->setColor(Color(1, 0, 0));
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	jeep->graphicsPipeline()->pushModule(wireRender);
 
-	//Visualize Anchor point for joint
-// 	auto anchorPointMapper = std::make_shared<AnchorPointToPointSet<DataType3f>>();
-// 	jeep->stateCenter()->connect(anchorPointMapper->inCenter());
-// 	jeep->stateRotationMatrix()->connect(anchorPointMapper->inRotationMatrix());
-// 	jeep->stateBallAndSocketJoints()->connect(anchorPointMapper->inBallAndSocketJoints());
-// 	jeep->stateSliderJoints()->connect(anchorPointMapper->inSliderJoints());
-// 	jeep->graphicsPipeline()->pushModule(anchorPointMapper);
-// 
-// 	auto pointRender2 = std::make_shared<GLPointVisualModule>();
-// 	pointRender2->setColor(Color(1, 0, 0));
-// 	pointRender2->varPointSize()->setValue(0.03f);
-// 	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
-// 	jeep->graphicsPipeline()->pushModule(pointRender2);
-
-
-// 	//Visualize contact points
-// 	auto cdBV = std::make_shared<CollistionDetectionTriangleSet<DataType3f>>();
-// 	jeep->stateTopology()->connect(cdBV->inDiscreteElements());
-// 	jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
-// 	jeep->graphicsPipeline()->pushModule(cdBV);
-// 
-// 	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-// 	cdBV->outContacts()->connect(contactPointMapper->inContacts());
-// 	jeep->graphicsPipeline()->pushModule(contactPointMapper);
-// 
-// 	auto contactsRender = std::make_shared<GLPointVisualModule>();
-// 	contactsRender->setColor(Color(1, 0, 0));
-// 	contactsRender->varPointSize()->setValue(0.1f);
-// 	contactPointMapper->outPointSet()->connect(contactsRender->inPointSet());
-// 	jeep->graphicsPipeline()->pushModule(contactsRender);
 
 	return scn;
 }
