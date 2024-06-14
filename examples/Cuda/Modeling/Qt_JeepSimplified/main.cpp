@@ -111,6 +111,42 @@
 
 using namespace dyno;
 
+class GenerateInstances : public Node
+{
+public:
+	GenerateInstances() {
+		this->stateTransform()->allocate();
+	};
+
+	void resetStates() override
+	{
+		auto mesh = this->inTextureMesh()->constDataPtr();
+		const int instanceCount = 1;
+		const int shapeNum = mesh->shapes().size();
+
+		std::vector<std::vector<Transform3f>> transform(shapeNum);
+
+		for (size_t j = 0; j < instanceCount; j++)
+		{
+			for (size_t i = 0; i < shapeNum; i++) {
+
+				auto shapeTransform = this->inTextureMesh()->constDataPtr()->shapes()[i]->boundingTransform;
+
+				transform[i].push_back(Transform3f(shapeTransform.translation(), shapeTransform.rotation(), shapeTransform.scale()));
+			}
+		}
+
+		auto tl = this->stateTransform()->getDataPtr();
+		tl->assign(transform);
+	}
+
+	//DEF_VAR(Vec3f, Offest, Vec3f(0.4, 0, 0), "");
+
+	DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+	DEF_ARRAYLIST_STATE(Transform3f, Transform, DeviceType::GPU, "");
+};
+
+
 std::shared_ptr<SceneGraph> creatScene();
 void importOtherModel(std::shared_ptr<SceneGraph> scn);
 
@@ -151,35 +187,51 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->graphicsPipeline()->pushModule(prRender);
 
 	// Import Road
-	auto road = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
-	road->varFileName()->setValue(getAssetPath() + "Jeep/Road/Road.obj");
-	road->varScale()->setValue(Vec3f(0.04) * total_scale);
-	road->varLocation()->setValue(Vec3f(0, 0, 3.5));
-	auto glRoad = road->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
-	glRoad->setColor(color);
+	//auto road = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	//road->varFileName()->setValue(getAssetPath() + "Jeep/Road/Road.obj");
+	//road->varScale()->setValue(Vec3f(0.04) * total_scale);
+	//road->varLocation()->setValue(Vec3f(0, 0, 3.5));
+	//auto glRoad = road->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	//glRoad->setColor(color);
 
-	road->outTriangleSet()->connect(jeep->inTriangleSet());
+	//road->outTriangleSet()->connect(jeep->inTriangleSet());
+
+
+	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
+	gltfRoad->varLocation()->setValue(Vec3f(0, 0, 3.488));
+
+	auto roadInstance = scn->addNode(std::make_shared<GenerateInstances>());
+	gltfRoad->stateTextureMesh()->connect(roadInstance->inTextureMesh());
+	
+	auto texMeshConverterRoad = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
+	roadInstance->inTextureMesh()->connect(texMeshConverterRoad->inTextureMesh());
+	//gltfRoad->stateInstanceTransform()->connect(texMeshConverterRoad->inTransform());
+	roadInstance->animationPipeline()->pushModule(texMeshConverterRoad);
+	roadInstance->stateTransform()->connect(texMeshConverterRoad->inTransform());
 
 	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
 	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
 	jeep->stateInstanceTransform()->connect(texMeshConverter->inTransform());
 	jeep->animationPipeline()->pushModule(texMeshConverter);
+	jeep->varLocation()->setValue(Vec3f(0,0,-2.9));
 
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
 	jeep->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
-	road->outTriangleSet()->connect(tsMerger->inSecond());
+	texMeshConverterRoad->outTriangleSet()->connect(tsMerger->inSecond());
+	texMeshConverterRoad->outTriangleSet()->connect(jeep->inTriangleSet());
 
 	//*************************************** Cube Sample ***************************************//
 	// Cube 
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0.0, 0.025, 0.4) * total_scale);
-	cube->varLength()->setValue(Vec3f(0.35, 0.02, 3) * total_scale);
-	cube->varScale()->setValue(Vec3f(2, 1, 1));
+	cube->varLocation()->setValue(Vec3f(0,0.15,3.436) );
+	cube->varLength()->setValue(Vec3f(2.1,0.12,18));
+	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
 	cube->graphicsPipeline()->disable();
 
 	auto cubeSmapler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
-	cubeSmapler->varSamplingDistance()->setValue(0.005f * total_scale);
+	cubeSmapler->varSamplingDistance()->setValue(0.004f * total_scale);
 	cube->outCube()->connect(cubeSmapler->inCube());
 	cubeSmapler->graphicsPipeline()->disable();
 
@@ -198,7 +250,7 @@ std::shared_ptr<SceneGraph> creatScene()
 		smoothingLength->varValue()->setValue(0.006f * total_scale);
 
 		auto samplingDistance = fluid->animationPipeline()->createModule<FloatingNumber<DataType3f>>();
-		samplingDistance->varValue()->setValue(Real(0.005) * total_scale);
+		samplingDistance->varValue()->setValue(Real(0.004) * total_scale);
 
 		auto integrator = std::make_shared<ParticleIntegrator<DataType3f>>();
 		fluid->stateTimeStep()->connect(integrator->inTimeStep());
@@ -282,6 +334,14 @@ int main()
 
 	//Set the distance unit for the camera, the fault unit is meter
 	window.renderWindow()->getCamera()->setUnitScale(3.0f);
+
+	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(window.renderWindow()->getRenderEngine());
+	if (renderer) {
+		renderer->setEnvStyle(EEnvStyle::Studio);
+		renderer->showGround = false;
+		renderer->setUseEnvmapBackground(false);
+
+	}
 
 	window.mainLoop();
 

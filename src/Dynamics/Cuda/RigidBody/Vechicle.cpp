@@ -15,6 +15,8 @@
 #include <GLWireframeVisualModule.h>
 #include <Mapping/ContactsToEdgeSet.h>
 
+#include "Module/CarDriver.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(Vechicle, TDataType)
@@ -286,6 +288,12 @@ namespace dyno
 		this->bind(frontRightTireActor, Pair<uint, uint>(1, 0));
 		this->bind(rearLeftTireActor, Pair<uint, uint>(2, 0));
 		this->bind(rearRightTireActor, Pair<uint, uint>(3, 0));
+
+
+		auto driver = std::make_shared<CarDriver<DataType3f>>();
+		this->animationPipeline()->pushModule(driver);
+		this->stateQuaternion()->connect(driver->inQuaternion());
+		this->stateTopology()->connect(driver->inTopology());
 	}
 
 	template<typename TDataType>
