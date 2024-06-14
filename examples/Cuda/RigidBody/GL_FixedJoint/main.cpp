@@ -36,14 +36,22 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	for (int i = 0; i < 10; i++)
 	{
-		newBox.center = oldBox.center + Vec3f(0.0, 0.05f, 0.0);
+		newBox.center = oldBox.center + Vec3f(0.01, 0.05f, 0.0);
 		newBox.halfLength = oldBox.halfLength;
 		auto newBoxActor = rigid->addBox(newBox, rigidBody);
-		auto& fixedJoint = rigid->createFixedJoint(oldBoxActor, newBoxActor);
-		fixedJoint.setAnchorPoint((oldBox.center + newBox.center) / 2);
+
+		/*auto& fixedJoint = rigid->createFixedJoint(oldBoxActor, newBoxActor);
+		fixedJoint.setAnchorPoint((oldBox.center + newBox.center) / 2);*/
+
+		auto& fixedJoint = rigid->createUnilateralFixedJoint(newBoxActor);
+		fixedJoint.setAnchorPoint(newBox.center);
+
 		oldBox = newBox;
 		oldBoxActor = newBoxActor;
 	}
+	newBox.center = oldBox.center + Vec3f(0.01, 0.05f, 0.0);
+	newBox.halfLength = oldBox.halfLength;
+	auto newBoxActor = rigid->addBox(newBox, rigidBody, 1);
 	
 
 
