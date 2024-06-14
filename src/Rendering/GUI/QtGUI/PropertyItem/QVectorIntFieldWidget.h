@@ -36,14 +36,14 @@ namespace dyno
 			mId = id;
 
 			index = new QLabel(std::to_string(id).c_str());
-			this->addWidget(index, 0, 0);
+			this->addWidget(index, 0);
 
 			inputSpin = new QSpinBox;
 			inputSpin->setValue(0);
-			this->addWidget(inputSpin, 0, 0);
+			this->addWidget(inputSpin, 0);
 
 			removeButton = new QPushButton("Delete");
-			this->addWidget(removeButton, 0, 0);
+			this->addWidget(removeButton, 0);
 
 			//this->layout()->addWidget(index);
 			QObject::connect(removeButton, SIGNAL(pressed()), this, SLOT(emitSignal()));

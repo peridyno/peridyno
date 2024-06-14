@@ -99,8 +99,6 @@ namespace dyno {
 
 		bool mAnimationToggle = false;
 
-		bool mSaveScreenToggle = true;
-
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
 

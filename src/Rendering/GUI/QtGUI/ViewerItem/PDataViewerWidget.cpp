@@ -159,9 +159,9 @@ namespace dyno
 	void PDataViewerWidget::wheelEvent(QWheelEvent* wheelEvent)
 	{
 		if (AltPressed) 
-			this->horizontalScrollBar()->setValue(horizontalScrollBar()->value() - (wheelEvent->delta()/abs(wheelEvent->delta())));
+			this->horizontalScrollBar()->setValue(horizontalScrollBar()->value() - (wheelEvent->angleDelta().x()/abs(wheelEvent->angleDelta().x())));
 		else
-			emit wheelDeltaAngleChange(wheelEvent->delta());
+			emit wheelDeltaAngleChange(wheelEvent->angleDelta().x());
 
 	}
 
