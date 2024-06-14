@@ -28,12 +28,13 @@ public:
 		std::cout << std::endl;
 	}
 
-	DEF_VAR(std::vector<int>, TestVectorInt, std::vector<int> {0}, "");
+	DEF_VAR(std::vector<int>, TestVectorInt, std::vector<int>(3,0), "");
 
 	DEF_ARRAY_STATE(Vec3f, Float, DeviceType::GPU, "");
 	DEF_ARRAY_STATE(Vec3d, Double, DeviceType::GPU, "");
 	DEF_ARRAY_STATE(int, Int, DeviceType::GPU, "");
 	DEF_ARRAY_STATE(uint, Uint, DeviceType::GPU, "");
+	DEF_ARRAY_STATE(Vec3f, Vec2Float, DeviceType::GPU, "");
 
 	DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 	DEF_ARRAYLIST_STATE(Transform3f, InstanceTransformCPU, DeviceType::CPU, "Instance transforms");

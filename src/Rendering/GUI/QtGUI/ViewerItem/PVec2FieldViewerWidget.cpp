@@ -1,4 +1,4 @@
-#include "PVec2iFieldViewerWidget.h"
+#include "PVec2FieldViewerWidget.h"
 #include <QHeaderView>
 #include "Vector/Vector3D.h"
 #include "Vector/Vector2D.h"
