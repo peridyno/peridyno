@@ -1238,7 +1238,7 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.z;
+					error = theta * v.x;
 				}
 				else
 				{
@@ -1251,7 +1251,7 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
+					error = theta * v.x;
 				}
 				else
 				{
@@ -1278,7 +1278,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 			else
@@ -1287,11 +1287,11 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
+					error = theta * v.y;
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 		}
@@ -1314,7 +1314,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 			else
@@ -1327,7 +1327,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 		}
@@ -1527,7 +1527,7 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.z;
+					error = theta * v.x;
 				}
 				else
 				{
@@ -1540,7 +1540,7 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
+					error = theta * v.x;
 				}
 				else
 				{
@@ -1567,7 +1567,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 			else
@@ -1576,11 +1576,11 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
+					error = theta * v.y;
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 		}
@@ -1603,7 +1603,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 			else
@@ -1616,7 +1616,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 		}
@@ -1814,7 +1814,7 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.z;
+					error = theta * v.x;
 				}
 				else
 				{
@@ -1827,7 +1827,7 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
+					error = theta * v.x;
 				}
 				else
 				{
@@ -1854,7 +1854,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 			else
@@ -1863,11 +1863,11 @@ namespace dyno
 				if (theta > 1e-6)
 				{
 					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
+					error = theta * v.y;
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 		}
@@ -1890,7 +1890,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 			else
@@ -1903,7 +1903,7 @@ namespace dyno
 				}
 				else
 				{
-					error = 0;
+					error = theta;
 				}
 			}
 		}
