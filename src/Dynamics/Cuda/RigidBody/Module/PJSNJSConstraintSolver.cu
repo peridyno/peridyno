@@ -509,7 +509,7 @@ namespace dyno
 				mLambda.reset();
 				initializeJacobianForNJS();
 				int constraint_size = mPositionConstraints.size();
-				for (int j = 0; j < 5; j++)
+				for (int j = 0; j < 1; j++)
 				{
 					JacobiIterationForNJS(
 						mLambda,

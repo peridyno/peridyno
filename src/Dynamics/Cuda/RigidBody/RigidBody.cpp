@@ -9,6 +9,7 @@ namespace dyno
 	RigidBody<TDataType>::RigidBody()
 		: ParametricModel<TDataType>()
 	{
+		this->setForceUpdate(true);
 	}
 
 	template<typename TDataType>

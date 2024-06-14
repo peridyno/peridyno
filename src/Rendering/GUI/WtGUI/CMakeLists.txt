@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 set(LIB_NAME WtGUI)
+set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
@@ -11,8 +12,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 include_directories(${PROJECT_SOURCE_DIR}/external)
 
 # add sources
-file(GLOB_RECURSE SOURCES "*.cpp" "*.h")
+file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h")
 add_library(${LIB_NAME} SHARED ${SOURCES})
+
+foreach(SRC IN ITEMS ${SOURCES})
+    get_filename_component(SRC_PATH "${SRC}" PATH)
+    file(RELATIVE_PATH SRC_PATH_REL "${LIB_SRC_DIR}" "${SRC_PATH}")
+    string(REPLACE "/" "\\" GROUP_PATH "${SRC_PATH_REL}")
+    source_group("${GROUP_PATH}" FILES "${SRC}")
+endforeach()
 
 target_link_libraries(${LIB_NAME} PRIVATE glfw)
 
@@ -27,7 +35,7 @@ set_target_properties(Wt::HTTP PROPERTIES MAP_IMPORTED_CONFIG_RELEASE RelWithDeb
 target_link_libraries(${LIB_NAME} PRIVATE Wt::Wt Wt::HTTP)
 
 # link dyno
-target_link_libraries(${LIB_NAME} PUBLIC Core Framework Topology ParticleSystem Peridynamics GLRenderEngine)
+target_link_libraries(${LIB_NAME} PUBLIC Core Framework Topology ImWidgets GLRenderEngine)
 
 # for python scripting
 # Jian: put pybind11 at end since there could be header conflict for node.h

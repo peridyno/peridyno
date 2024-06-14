@@ -4,13 +4,12 @@
 
 namespace dyno
 {
-//	IMPLEMENT_TCLASS(DensityPBD, TDataType)
-
 	template<typename TDataType>
 	IterativeDensitySolver<TDataType>::IterativeDensitySolver()
 		: ParticleApproximation<TDataType>()
 	{
 		this->varIterationNumber()->setValue(3);
+		this->varKappa()->setValue(200);
 		this->varRestDensity()->setValue(Real(1000));
 
 		mSummation = std::make_shared<SummationDensity<TDataType>>();
@@ -38,6 +37,7 @@ namespace dyno
 		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
+		Real rho_0,
 		Real smoothingLength,
 		Kernel gradient,
 		Real scale)
@@ -69,7 +69,7 @@ namespace dyno
 
 		Real rho_i = rhoArr[pId];
 
-		lamda_i = -(rho_i - 1000.0f) / (lamda_i + 0.1f);
+		lamda_i = -(rho_i - rho_0) / (lamda_i + 0.001f);
 
 		lambdaArr[pId] = lamda_i > 0.0f ? 0.0f : lamda_i;
 	}
@@ -91,6 +91,8 @@ namespace dyno
 
 		Coord pos_i = posArr[pId];
 		Real lamda_i = lambdas[pId];
+
+		Real rho_0 = Real(1000);
 
 		Coord dP_i(0);
 		List<int>& list_i = neighbors[pId];
@@ -135,6 +137,20 @@ namespace dyno
 		posArr[pId] += dPos[pId];
 	}
 
+
+	template <typename Real>
+	__global__ void K_DensityErrorCompute(
+		DArray<Real> error,
+		DArray<Real> density,
+		Real density0
+	) {
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= density.size()) return;
+
+		error[pId] = abs(density[pId] - density0) / density0;
+
+	}
+
 	template<typename TDataType>
 	void IterativeDensitySolver<TDataType>::compute()
 	{
@@ -156,12 +172,49 @@ namespace dyno
 
 		int it = 0;
 
-		int itNum = this->varIterationNumber()->getData();
-		while (it < itNum)
-		{
-			takeOneIteration();
 
-			it++;
+		DArray<Real> error;
+		error.resize(num);
+		error.reset();
+
+		mSummation->varRestDensity()->setValue(this->varRestDensity()->getValue());
+		mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
+		mSummation->update();
+
+		cuExecute(num,
+			K_DensityErrorCompute,
+			error,
+			mSummation->outDensity()->getData(),
+			Real(1000));
+
+		m_arithmetic = Arithmetic<float>::Create(num);
+
+		Real rr = m_arithmetic->Dot(error, error);
+		Real MaxError = sqrt(rr / error.size());
+		Reduction<Real> reduce;
+
+
+		int itNum = this->varIterationNumber()->getValue();
+		while (it++ < itNum)
+		{
+			mSummation->varRestDensity()->setValue(this->varRestDensity()->getValue());
+			mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
+			mSummation->update();
+
+// 			cuExecute(num,
+// 				K_DensityErrorCompute,
+// 				error,
+// 				mSummation->outDensity()->getData(),
+// 				Real(1000));
+// 
+// 			auto& mm_density = mSummation->outDensity()->getData();
+// 			Real total_error = m_arithmetic->Dot(error, error) / error.size();
+// 
+// 			Real everage_value = reduce.average(mm_density.begin(), mm_density.size());
+// 			Real max_value = reduce.maximum(mm_density.begin(), mm_density.size());
+// 			std::cout << it << "::" << total_error / MaxError << " ::" << max_value << " ::" << everage_value << std::endl;
+	
+			takeOneIteration();
 		}
 
 		updateVelocity();
@@ -173,9 +226,10 @@ namespace dyno
 	{
 		Real dt = this->inTimeStep()->getData();
 		int num = this->inPosition()->size();
+		Real rho_0 = this->varRestDensity()->getValue();
 
 		mDeltaPos.reset();
-		mSummation->varRestDensity()->setValue(this->varRestDensity()->getValue());
+		mSummation->varRestDensity()->setValue(rho_0);
 		mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
 		mSummation->update();
 
@@ -185,6 +239,7 @@ namespace dyno
 			mSummation->outDensity()->getData(),
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
+			rho_0,
 			this->inSmoothingLength()->getValue());
 
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,

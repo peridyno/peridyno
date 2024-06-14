@@ -23,6 +23,7 @@ namespace dyno {
 		void load(std::string filename, bool inverted = false);
 		void setCube(Coord lo, Coord hi, Real distance, bool inverted = false);
 		void setSphere(Coord center, Real r, Real distance, bool inverted = false);
+		void setCylinder(Coord center, Real r, Real height, Real distance, int axis, bool inverted = false);
 
 	public:
 		DeviceArrayField<Coord> m_position;

@@ -111,6 +111,8 @@ namespace dyno
 	TextureMeshToTriangleSetNode<TDataType>::TextureMeshToTriangleSetNode()
 		: Node()
 	{
+		this->setForceUpdate(false);
+
 		mTM2TS = std::make_shared<TextureMeshToTriangleSet<TDataType>>();
 
 		this->inTextureMesh()->connect(mTM2TS->inTextureMesh());

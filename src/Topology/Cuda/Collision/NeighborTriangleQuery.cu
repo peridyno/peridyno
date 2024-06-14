@@ -156,7 +156,11 @@ namespace dyno
 
 		mBroadPhaseCD->varGridSizeLimit()->setValue(2 * radius);
 		mBroadPhaseCD->inSource()->assign(mQueryAABB);
-		mBroadPhaseCD->inTarget()->assign(mQueriedAABB);
+
+		if (this->inTriangleSet()->isModified()) {
+			mBroadPhaseCD->inTarget()->assign(mQueriedAABB);
+		}
+		
 
 		auto type = this->varSpatial()->getDataPtr()->currentKey();
 

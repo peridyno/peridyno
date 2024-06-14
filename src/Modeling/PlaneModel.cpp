@@ -40,7 +40,7 @@ namespace dyno
 
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
+		tsRender->setColor(Color(1.0f, 1.0f, 1.0f));
 		tsRender->setVisible(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
@@ -51,7 +51,8 @@ namespace dyno
 
 		auto esRender = std::make_shared<GLWireframeVisualModule>();
 		esRender->varBaseColor()->setValue(Color(0, 0, 0));
-		exES->outEdgeSet()->connect(esRender->inEdgeSet());
+		//exES->outEdgeSet()->connect(esRender->inEdgeSet());
+		this->stateTriangleSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
 		//this->statePolygonSet()->promoteOuput();

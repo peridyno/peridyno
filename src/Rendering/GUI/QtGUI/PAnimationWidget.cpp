@@ -210,7 +210,7 @@ namespace dyno
 			mFrameSlider->setDisabled(true);
 			mTotalFrameSpinbox->setDisabled(true);
 
-			disconnect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
+			disconnect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
 
 			PSimulationThread::instance()->setTotalFrames(std::numeric_limits<int>::max());
 			PSimulationThread::instance()->resume();
@@ -226,7 +226,7 @@ namespace dyno
 			mFrameSlider->setDisabled(false);
 			mTotalFrameSpinbox->setDisabled(false);
 
-			connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), this, SLOT(updateSlider()));
+			connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
 
 			PSimulationThread::instance()->setTotalFrames(mTotalFrameSpinbox->value());
 			PSimulationThread::instance()->pause();

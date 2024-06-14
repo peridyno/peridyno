@@ -24,8 +24,6 @@ namespace dyno
 
 		std::string getNodeType() override;
 
-		Real getDt() override { return 0.001; }
-		
 	public:
 		/**
 		 * @brief Particle position

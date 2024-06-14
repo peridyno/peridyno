@@ -1141,8 +1141,14 @@ namespace dyno
 
 		auto case00 = [](Coord3D& pt, Real& t, const Coord3D dir, const Coord3D extent, const int axis) {
 			t = (extent[axis] - pt[axis]) / dir[axis];
-			pt[axis] = extent[axis];
-
+			if (t < Real(0) || t > Real(1))
+			{
+				t = (-extent[axis] - pt[axis]) / dir[axis];
+				pt[axis] = -extent[axis];
+			}
+			else
+				pt[axis] = extent[axis];
+			
 			pt = clamp(pt, -extent, extent);
 		};
 
@@ -1500,7 +1506,7 @@ namespace dyno
 	{
 		//transform to the local coordinate system of obb
 		Coord3D diff = origin - obb.center;
-		Coord3D originPrime = Coord3D(diff.dot(obb.u), diff.dot(obb.v), diff.dot(obb.w));
+		Coord3D originPrime = Coord3D(diff.dot(obb.u), diff.dot(obb.v), diff.dot(obb.w)) + Coord3D(obb.center);
 		Coord3D dirPrime = Coord3D(direction.dot(obb.u), direction.dot(obb.v), direction.dot(obb.w));
 
 		TSegment3D<Real> pqPrime = TLine3D<Real>(originPrime, dirPrime).proximity(TAlignedBox3D<Real>(obb.center - obb.extent, obb.center + obb.extent));

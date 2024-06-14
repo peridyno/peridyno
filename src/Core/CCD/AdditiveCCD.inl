@@ -489,9 +489,9 @@ namespace dyno
 		T dsqr = SquareDistanceVF(x[0], x[1], x[2], x[3]);
 		//printf("dsqrVF:%f\n", sqrt(dsqr));
 
-		T g = this->s * (dsqr - pow(this->xi * invL, 2)) / (sqrt(dsqr) + this->xi * invL);
+		T g = this->s * (dsqr - glm::pow(this->xi * invL, 2)) / (glm::sqrt(dsqr) + this->xi * invL);
 		time = 0.0;
-		T tL = (1 - this->s) * (dsqr - pow(this->xi * invL, 2)) / ((sqrt(dsqr) + this->xi* invL) * lp);
+		T tL = (1 - this->s) * (dsqr - glm::pow(this->xi * invL, 2)) / ((glm::sqrt(dsqr) + this->xi* invL) * lp);
 		
 		if (tL<0.0){
 			time = 0.0;
@@ -501,12 +501,12 @@ namespace dyno
 			
 		int ite = 0;
 		while (ite<MAX_ITE) {
-			tL = (1 - this->s) * (dsqr - pow(this->xi * invL, 2)) / ((sqrt(dsqr) + this->xi * invL) * lp);
+			tL = (1 - this->s) * (dsqr - glm::pow(this->xi * invL, 2)) / ((glm::sqrt(dsqr) + this->xi * invL) * lp);
 			for (int i = 0; i < 4; ++i)
 				x[i] += tL * p[i];
 			
 			dsqr = SquareDistanceVF(x[0], x[1], x[2], x[3]);
-			if (time > 0.0 && ((dsqr - pow(this->xi * invL, 2)) / (sqrt(dsqr) + this->xi * invL) <= g))
+			if (time > 0.0 && ((dsqr - glm::pow(this->xi * invL, 2)) / (glm::sqrt(dsqr) + this->xi * invL) <= g))
 				break;
 			time += tL;
 			if (REAL_GREAT(time, this->tc))

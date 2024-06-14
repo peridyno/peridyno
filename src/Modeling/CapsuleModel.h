@@ -60,6 +60,8 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
+		DEF_INSTANCE_STATE(EdgeSet<TDataType>, CenterLine, "");
+
 		DEF_VAR_OUT(TCapsule3D<Real>, Capsule, "");
 
 	protected:

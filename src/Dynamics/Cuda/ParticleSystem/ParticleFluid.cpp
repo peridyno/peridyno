@@ -60,6 +60,8 @@ namespace dyno
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
 		this->animationPipeline()->pushModule(viscosity);
+
+		this->setDt(Real(0.001));
 	}
 
 	template<typename TDataType>

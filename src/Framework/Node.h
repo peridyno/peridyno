@@ -261,6 +261,8 @@ namespace dyno
 		uint sizeOfImportNodes() const;
 		uint sizeOfExportNodes() const { return (uint)mExportNodes.size(); }
 
+		void setForceUpdate(bool b);
+
 	protected:
 // 		virtual void doTraverseBottomUp(Action* act);
 // 		virtual void doTraverseTopDown(Action* act);
@@ -277,6 +279,8 @@ namespace dyno
 		virtual void resetStates();
 
 		virtual bool validateInputs();
+
+		virtual bool requireUpdate();
 
 		/**
 		 * @brief notify all state and output fields are updated
@@ -308,6 +312,8 @@ namespace dyno
 		bool mRenderingEnabled = true;
 
 		bool mExported = true;
+
+		bool mForceUpdate = true;
 
 		/**
 		 * @brief Time step size

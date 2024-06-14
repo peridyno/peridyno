@@ -368,18 +368,35 @@ namespace dyno
 			this->actor2 = a2;
 		}
 
+		CPU_FUNC FixedJoint(PdActor* a1)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = a1;
+			this->actor2 = nullptr;
+		}
+
 		void setAnchorPoint(Vector<Real, 3>anchor_point)
 		{
 			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
-			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
 			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
-			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+			this->w = anchor_point;
+			if (this->bodyId2 != INVALID)
+			{
+				Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+				this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+			}
 		}
 
 	public:
 		// anchor point position in body1 and body2 local space
 		Vector<Real, 3> r1;
 		Vector<Real, 3> r2;
+		Vector<Real, 3> w;
 	};
 
 

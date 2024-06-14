@@ -9,7 +9,7 @@ namespace dyno
 {
 	IMPL_FIELD_WIDGET(float, QRealFieldWidget)
 
-	QRealFieldWidget::QRealFieldWidget(FBase* field)
+		QRealFieldWidget::QRealFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
 		//this->setStyleSheet("border:none");
@@ -45,7 +45,7 @@ namespace dyno
 			slider->setValue((double)f->getValue());
 			spinner->setRealValue((double)f->getValue());
 		}
-		else if(template_name == std::string(typeid(double).name()))
+		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 			slider->setValue(f->getValue());

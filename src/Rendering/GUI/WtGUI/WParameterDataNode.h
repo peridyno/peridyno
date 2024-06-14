@@ -9,24 +9,39 @@
 #include <Wt/WLogger.h>
 
 #include <FBase.h>
+#include "FilePath.h"
+
+#include "WtGUI/PropertyItem/WRealFieldWidget.h"
+#include "WtGUI/PropertyItem/WVector3FieldWidget.h"
+#include "WtGUI/PropertyItem/WVector3iFieldWidget.h"
+#include "WtGUI/PropertyItem/WBoolFieldWidget.h"
+#include "WtGUI/PropertyItem/WIntegerFieldWidget.h"
+#include "WtGUI/PropertyItem/WColorWidget.h"
+#include "WtGUI/PropertyItem/WFileWidget.h"
+#include "WtGUI/PropertyItem/WEnumFieldWidget.h"
+#include "WtGUI/PropertyItem/WColorWidget.h"
 
 namespace dyno
 {
 	class Node;
 	class Module;
 	class SceneGraph;
+	class FBase;
 };
-
 
 class WParameterDataNode : public Wt::WAbstractTableModel
 {
 public:
+
+	WParameterDataNode();
+	~WParameterDataNode();
 
 	void setNode(std::shared_ptr<dyno::Node> node);
 	void setModule(std::shared_ptr<dyno::Module> module);
 
 	virtual int columnCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
 	virtual int rowCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
+	//virtual int rowCountModule(const Wt::WModelIndex& parent = Wt::WModelIndex()) const;
 
 	virtual Wt::cpp17::any data(const Wt::WModelIndex& index,
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
@@ -36,23 +51,42 @@ public:
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
 
 	void createParameterPanel(Wt::WPanel* panel);
+	void createParameterPanelModule(Wt::WPanel* panel);
 
-	void updateParameter();
+	void updateNode();
+	void updateModule();
 
-	static int registerWidget(const Wt::WContainerWidget);
+public:
+	struct FieldWidgetMeta {
+		using constructor_t = Wt::WContainerWidget* (*)(dyno::FBase*);
+		const std::type_info* type;
+		constructor_t constructor;
+	};
 
-	static Wt::WContainerWidget* getRegistedWidget(const std::string&);
+	static int registerWidget(const FieldWidgetMeta& meta);
 
-	//std::shared_ptr<dyno::Module> getModuleField(const Wt::WModelIndex& index);
-	//std::shared_ptr<dyno::Node> getNodeField(const Wt::WModelIndex& index);
+	static FieldWidgetMeta* getRegistedWidget(const std::string&);
+
+	Wt::WContainerWidget* createFieldWidget(dyno::FBase* field);
+
 private:
+
 	std::shared_ptr<dyno::Node> mNode;
 	std::shared_ptr<dyno::Module> mModule;
-
 	Wt::WTable* table;
 
-	void addScalarFieldWidget(dyno::FBase* field);
+	//std::unique_ptr<Wt::WContainerWidget> mWidget;
 
-	static std::map < std::string, Wt::WContainerWidget> sWContainerWidget;
+	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
 
+	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };
+
+#define DECLARE_FIELD_WIDGET \
+	static int reg_field_widget; \
+	static Wt::WContainerWidget* createWidget(dyno::FBase*);
+
+#define IMPL_FIELD_WIDGET(_data_type_, _type_) \
+	int _type_::reg_field_widget = \
+		dyno::WParameterDataNode::registerWidget(dyno::WParameterDataNode::FieldWidgetMeta {&typeid(_data_type_), &_type_::createWidget}); \
+	Wt::WContainerWidget* _type_::createWidget(dyno::FBase* f) { return new _type_(f); }

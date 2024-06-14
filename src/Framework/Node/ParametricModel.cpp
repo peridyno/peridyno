@@ -6,6 +6,8 @@ namespace dyno
 	ParametricModel<TDataType>::ParametricModel()
 		: Node()
 	{
+		this->setForceUpdate(false);
+
 		this->varScale()->setRange(Real(0.0001), Real(1000));
 	}
 

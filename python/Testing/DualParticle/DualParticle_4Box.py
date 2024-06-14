@@ -1,3 +1,9 @@
+import sys
+
+# 打印 Python 的系统路径
+print(sys.path)
+import os
+os.environ['PATH'] = os.pathsep.join(['E:\\Program\\Simulation\\unibeam\\python\\build\\bin\\Debug', os.environ['PATH']])
 import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()

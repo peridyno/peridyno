@@ -800,7 +800,6 @@ namespace dyno
 		upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
 		lowerBoundary1 = glm::min(lowerBoundary1, seg.v1.dot(axisNormal) - cap.radius);
 		upperBoundary1 = glm::max(upperBoundary1, seg.v1.dot(axisNormal) + cap.radius);
-			
 		
 
 		Vector<Real, 3> center = box.center;
@@ -953,7 +952,7 @@ namespace dyno
 
 
 	template<typename Real>
-	DYN_FUNC inline void setupContactTets(
+	DYN_FUNC inline void setupContactCaps(
 		Real boundary1,
 		Real boundary2,
 		const Vector<Real, 3> axisNormal,
@@ -962,20 +961,26 @@ namespace dyno
 		Real sMax,
 		TManifold<Real>& m)
 	{
+		// Gen contact point on box
+		// On box vertex
+
+		// On box edge
+		
+		// On box face
+
 		int cnt1, cnt2;
-		Vector<Real, 3> boundaryPoints1[4];
+		Vector<Real, 3> boundaryPoints1[4]; 
 		Vector<Real, 3> boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
 		if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
 			abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-			boundaryPoints2[cnt1++] = cap.startPoint();
+			boundaryPoints1[cnt1++] = cap.startPoint();
 		if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
 			||
 			abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-			boundaryPoints2[cnt1++] = cap.endPoint();
-
+			boundaryPoints1[cnt1++] = cap.endPoint();
 		
 
 		Vector<Real, 3> center = box.center;
@@ -1016,10 +1021,10 @@ namespace dyno
 		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
-		//printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
+		printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
 		if (cnt1 == 1 || cnt2 == 1)
 		{
-			m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
+			m.normal = (boundary1 < boundary2) ? -axisNormal : axisNormal;
 			m.contacts[0].penetration = sMax;
 			m.contacts[0].position = (cnt1 == 1) ? boundaryPoints1[0] : boundaryPoints2[0];
 			m.contactCount = 1;
@@ -1072,9 +1077,9 @@ namespace dyno
 				Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
 				Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
 
-				/*printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
-				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2], dirTmp1.cross(axisNormal)[0], dirTmp1.cross(axisNormal)[1], dirTmp1.cross(axisNormal)[2]);
-				printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2], dirTmp2.cross(axisNormal)[0], dirTmp2.cross(axisNormal)[1], dirTmp2.cross(axisNormal)[2]);*/
+				//printf("%.3lf %.3lf %.3lf\n", axisNormal[0], axisNormal[1], axisNormal[2]);
+				//printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2], dirTmp1.cross(axisNormal)[0], dirTmp1.cross(axisNormal)[1], dirTmp1.cross(axisNormal)[2]);
+				//printf("%.3lf %.3lf %.3lf %.5lf %.5lf %.5lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2], dirTmp2.cross(axisNormal)[0], dirTmp2.cross(axisNormal)[1], dirTmp2.cross(axisNormal)[2]);
 
 
 				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
@@ -1093,8 +1098,8 @@ namespace dyno
 				dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
 				dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
 
-				/*printf("%.3lf %.3lf %.3lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2]);
-				printf("%.3lf %.3lf %.3lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2]);*/
+				//printf("%.3lf %.3lf %.3lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2]);
+				//printf("%.3lf %.3lf %.3lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2]);
 
 				if (dirTmp1.cross(axisNormal).norm() < 1e-4)
 				{
@@ -1116,10 +1121,10 @@ namespace dyno
 					else
 						s2 = Segment3D(boundaryPoints2[3], boundaryPoints2[i - 2]);
 					Segment3D dir = s1.proximity(s2);
-					/*printf("dir: %.3lf %.3lf %.3lf\naxisnormal %.3lf %.3lf %.3lf\n%.6lf\n",
-						dir.direction()[0], dir.direction()[1], dir.direction()[2],
-						axisNormal[0], axisNormal[1], axisNormal[2],
-						dir.direction().normalize().cross(axisNormal).norm());*/
+					//printf("dir: %.3lf %.3lf %.3lf\naxisnormal %.3lf %.3lf %.3lf\n%.6lf\n",
+					//	dir.direction()[0], dir.direction()[1], dir.direction()[2],
+					//	axisNormal[0], axisNormal[1], axisNormal[2],
+					//	dir.direction().normalize().cross(axisNormal).norm());
 					if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-4)
 					{
 						//printf("Yes\n");
@@ -1423,102 +1428,42 @@ namespace dyno
 
 		m.contactCount = 0;
 
-		Real sMax = (Real)INT_MAX;
-		Real sIntersect;
-		Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
-		Real l1, u1, l2, u2;
-		Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
-		Vector<Real, 3> axisTmp = axis;
 
-		Real boundary1, boundary2, b1, b2;
+		Segment3D s0(cap.centerline());
+		Segment3D ints = s0;
+		
+		int segInter = s0.intersect(box, ints);
+		
+		bool bInter = false;
 
-		//u
-		axisTmp = box.u / box.u.norm();
-		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+		// Check if intersection
+		if (segInter == 0)
 		{
-			m.contactCount = 0;
-			return;
+			Segment3D dir = s0.proximity(box);
+			Real sMax = dir.direction().norm() - r0;
+			//printf("Capsule 2 Box Broad: %.4f\n", sMax);
+			if (sMax < 0) bInter = true;
 		}
 		else
 		{
-			if (sIntersect < sMax)
-			{
-				sMax = sIntersect;
-				lowerBoundary1 = l1;
-				lowerBoundary2 = l2;
-				upperBoundary1 = u1;
-				upperBoundary2 = u2;
-				boundary1 = b1;
-				boundary2 = b2;
-				axis = axisTmp;
-			}
+			bInter = true;
 		}
 
+		if (!bInter) return;
 
-		//v
-		axisTmp = box.v / box.v.norm();
-		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
-		{
-			m.contactCount = 0;
-			return;
-		}
-		else
-		{
-			if (sIntersect < sMax)
-			{
-				sMax = sIntersect;
-				lowerBoundary1 = l1;
-				lowerBoundary2 = l2;
-				upperBoundary1 = u1;
-				upperBoundary2 = u2;
-				boundary1 = b1;
-				boundary2 = b2;
-				axis = axisTmp;
-			}
-		}
+		// like SAT (Select collision direction)
+		{ 
+			Real sMax = (Real)INT_MAX;
+			Real sIntersect;
+			Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
+			Real l1, u1, l2, u2;
+			Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
+			Vector<Real, 3> axisTmp = axis;
 
-		//w
-		axisTmp = box.w / box.w.norm();
-		if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
-		{
-			m.contactCount = 0;
-			return;
-		}
-		else
-		{
-			if (sIntersect < sMax)
-			{
-				sMax = sIntersect;
-				lowerBoundary1 = l1;
-				lowerBoundary2 = l2;
-				upperBoundary1 = u1;
-				upperBoundary2 = u2;
-				boundary1 = b1;
-				boundary2 = b2;
-				axis = axisTmp;
-			}
-		}
+			Real boundary1, boundary2, b1, b2;
 
-
-		//dir generated by cross product from capsule and box
-
-		Vector<Real, 3> dirCap = c.direction();
-		for (int j = 0; j < 3; j++)
-		{
-			Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
-			axisTmp = dirCap.cross(boxDir);
-			if (axisTmp.norm() > EPSILON)
-			{
-				axisTmp /= axisTmp.norm();
-			}
-			else //parallel, choose an arbitary direction
-			{
-				if (abs(dirCap[0]) > EPSILON)
-					axisTmp = Vector<Real, 3>(dirCap[1], -dirCap[0], 0);
-				else
-					axisTmp = Vector<Real, 3>(0, dirCap[2], -dirCap[1]);
-				axisTmp /= axisTmp.norm();
-			}
+			//u
+			axisTmp = box.u / box.u.norm();
 			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
 			{
 				m.contactCount = 0;
@@ -1538,13 +1483,98 @@ namespace dyno
 					axis = axisTmp;
 				}
 			}
-		}
 
-		setupContactTets(boundary1, boundary2, axis, cap, box, -sMax, m);
 
-		for (uint i = 0; i < m.contactCount; i++)
-		{
-			m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+			//v
+			axisTmp = box.v / box.v.norm();
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+			{
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+
+			//w
+			axisTmp = box.w / box.w.norm();
+			if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+			{
+				m.contactCount = 0;
+				return;
+			}
+			else
+			{
+				if (sIntersect < sMax)
+				{
+					sMax = sIntersect;
+					lowerBoundary1 = l1;
+					lowerBoundary2 = l2;
+					upperBoundary1 = u1;
+					upperBoundary2 = u2;
+					boundary1 = b1;
+					boundary2 = b2;
+					axis = axisTmp;
+				}
+			}
+			
+			//dir generated by cross product from capsule and box
+			Vector<Real, 3> dirCap = c.direction();
+			for (int j = 0; j < 3; j++)
+			{
+				Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
+				axisTmp = dirCap.cross(boxDir);
+				if (axisTmp.norm() > EPSILON)
+				{
+					axisTmp /= axisTmp.norm();
+				}
+				else //parallel, choose an arbitary direction
+				{
+					if (abs(dirCap[0]) > EPSILON)
+						axisTmp = Vector<Real, 3>(dirCap[1], -dirCap[0], 0);
+					else
+						axisTmp = Vector<Real, 3>(0, dirCap[2], -dirCap[1]);
+					axisTmp /= axisTmp.norm();
+				}
+				if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
+				{
+					m.contactCount = 0;
+					return;
+				}
+				else
+				{
+					if (sIntersect < sMax)
+					{
+						sMax = sIntersect;
+						lowerBoundary1 = l1;
+						lowerBoundary2 = l2;
+						upperBoundary1 = u1;
+						upperBoundary2 = u2;
+						boundary1 = b1;
+						boundary2 = b2;
+						axis = axisTmp;
+					}
+				}
+			}
+
+
+			setupContactCaps(boundary1, boundary2, axis, cap, box, -sMax, m);
+
+			for (uint i = 0; i < m.contactCount; i++)
+			{
+				m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+			}
 		}
 	}
 
@@ -1898,10 +1928,10 @@ namespace dyno
 
 	template<typename Real>
 	DYN_FUNC inline bool checkOverlap(
-		Real lowerBoundary1,
-		Real upperBoundary1,
+		Real lowerBoundary1, 
+		Real upperBoundary1, // A
 		Real lowerBoundary2,
-		Real upperBoundary2,
+		Real upperBoundary2, // B
 		Real& intersectionDistance,
 		Real& boundary1,
 		Real& boundary2
@@ -1913,20 +1943,30 @@ namespace dyno
 			{
 				if (upperBoundary1 > upperBoundary2)
 				{
-					intersectionDistance = upperBoundary2 - lowerBoundary2;
+					//     |---B---|
+					//   |-----A-----|
+					//intersectionDistance = upperBoundary2 - lowerBoundary2;
 					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
 					{
+						//      |---B---|(->)
+						//   |-----A-----|
 						boundary1 = upperBoundary1;
 						boundary2 = lowerBoundary2;
+						intersectionDistance = upperBoundary1 - lowerBoundary2;
 					}
 					else
 					{
+						// (<-)|---B---|
+						//    |-----A-----|
 						boundary1 = lowerBoundary1;
 						boundary2 = upperBoundary2;
+						intersectionDistance = upperBoundary2 - lowerBoundary1;
 					}
 				}
 				else
 				{
+					//	    |---B---|(->)
+					//   |----A----|
 					intersectionDistance = upperBoundary1 - lowerBoundary2;
 					boundary1 = upperBoundary1;
 					boundary2 = lowerBoundary2;
@@ -1936,27 +1976,39 @@ namespace dyno
 			{
 				if (upperBoundary1 > upperBoundary2)
 				{
+					//	(<-)|---B---|
+					//        |----A----|
 					intersectionDistance = upperBoundary2 - lowerBoundary1;
 					boundary1 = lowerBoundary1;
 					boundary2 = upperBoundary2;
 				}
 				else
 				{
-					intersectionDistance = upperBoundary1 - lowerBoundary1;
+					//     |-----B------|
+					//        |---A---|
+					//intersectionDistance = upperBoundary1 - lowerBoundary1;
 					if (upperBoundary2 - lowerBoundary1 > upperBoundary1 - lowerBoundary2)
 					{
+						//	   |-----B-----|(->)
+						//      |---A---|
 						boundary1 = upperBoundary1;
 						boundary2 = lowerBoundary2;
+						intersectionDistance = upperBoundary1 - lowerBoundary2;
 					}
 					else
 					{
+						//	   (<-)|------B------|
+						//              |---A---|
 						boundary1 = lowerBoundary1;
 						boundary2 = upperBoundary2;
+						intersectionDistance = upperBoundary2 - lowerBoundary1;
 					}
 				}
 			}
 			return true;
 		}
+		// |---A---| |---B---|
+		// |---B---| |---A---|
 		intersectionDistance = Real(0.0f);
 		return false;
 	}

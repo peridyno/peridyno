@@ -82,6 +82,25 @@ bool ImGui::radioWithIconButton(const char* label, const char* tooltip, bool v)
     return res;
 }
 
+
+bool ImGui::clickButton(const char* label, const char* tooltip)
+{
+    bool res = false;
+    ImGui::PushID(label);
+    ImGui::PushStyleColor(ImGuiCol_Button, ExColorsVal[ImGuiExColVal_Button_1]);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ExColorsVal[ImGuiExColVal_ButtonHovered_1]);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ExColorsVal[ImGuiExColVal_ButtonActive_1]);
+    if (ImGui::Button(label))
+    {
+        res = true;
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip(tooltip);
+    ImGui::PopStyleColor(3);
+    ImGui::PopID();
+    return res;
+}
+
 void ImGui::toggleButton(ImTextureID texId, const char* label, bool *v)
 {
     if (*v == true)

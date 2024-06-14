@@ -56,11 +56,11 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(Real, BaumgarteBias, 0.2, "");
+		DEF_VAR(Real, BaumgarteBias, 0.3, "");
 
 		DEF_VAR(uint, SubStepping, 10, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 20, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
 
 		DEF_VAR(Real, LinearDamping, 0.1, "");
 
