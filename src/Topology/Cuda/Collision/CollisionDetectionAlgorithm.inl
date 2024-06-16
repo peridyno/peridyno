@@ -1021,7 +1021,7 @@ namespace dyno
 		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
-		printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
+		//printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
 		if (cnt1 == 1 || cnt2 == 1)
 		{
 			m.normal = (boundary1 < boundary2) ? -axisNormal : axisNormal;

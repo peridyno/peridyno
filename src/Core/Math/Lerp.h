@@ -78,7 +78,7 @@ namespace dyno
 		const float w01 = (1.0f - fx) * fy;
 		const float w11 = fx * fy;
 
-		return w00 * array2d(i0, j0) + w01 * array2d(i0, j1) + w10 * array2d(i1, j0) * w11 * array2d(i1, j1);
+		return w00 * array2d(i0, j0) + w01 * array2d(i0, j1) + w10 * array2d(i1, j0) + w11 * array2d(i1, j1);
 	};
 
 	template<typename T, DeviceType deviceType>

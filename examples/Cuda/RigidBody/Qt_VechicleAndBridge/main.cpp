@@ -190,17 +190,17 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	//Visualize rigid bodies
 	
- 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
- 	jeep->stateTopology()->connect(mapper->inDiscreteElements());
- 	jeep->graphicsPipeline()->pushModule(mapper);
- 
- 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
- 	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
- 	sRender->setAlpha(0.8f);
- 	sRender->setRoughness(0.7f);
- 	sRender->setMetallic(3.0f);
- 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
- 	jeep->graphicsPipeline()->pushModule(sRender);
+//  	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+//  	jeep->stateTopology()->connect(mapper->inDiscreteElements());
+//  	jeep->graphicsPipeline()->pushModule(mapper);
+//  
+//  	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+//  	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+//  	sRender->setAlpha(0.8f);
+//  	sRender->setRoughness(0.7f);
+//  	sRender->setMetallic(3.0f);
+//  	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+// 	jeep->graphicsPipeline()->pushModule(sRender);
 
 	//TODO: to enable using internal modules inside a node
 	//Visualize contact normals
