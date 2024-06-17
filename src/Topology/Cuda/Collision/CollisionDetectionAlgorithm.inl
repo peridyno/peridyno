@@ -973,13 +973,11 @@ namespace dyno
 		Vector<Real, 3> boundaryPoints2[8];
 		cnt1 = cnt2 = 0;
 
-		if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
-			||
-			abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+		Real boundaryMin = glm::min(boundary1, boundary2);
+		Real boundaryMax = glm::max(boundary1, boundary2);
+		if (abs(cap.startPoint().dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints1[cnt1++] = cap.startPoint();
-		if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
-			||
-			abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
+		if (abs(cap.endPoint().dot(axisNormal)  - boundaryMin) < abs(sMax))
 			boundaryPoints1[cnt1++] = cap.endPoint();
 		
 
@@ -990,35 +988,35 @@ namespace dyno
 		Vector<Real, 3> extent = box.extent;
 		Vector<Real, 3> p;
 		p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
-		if (abs(p.dot(axisNormal) - boundary2) < abs(sMax))
+		if (abs(p.dot(axisNormal) - boundaryMin) < abs(sMax))
 			boundaryPoints2[cnt2++] = p;
 
 		printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, sMax);
@@ -1454,7 +1452,7 @@ namespace dyno
 		// like SAT (Select collision direction)
 		{ 
 			Real sMax = (Real)INT_MAX;
-			Real sIntersect;
+			Real sIntersect; // >0
 			Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
 			Real l1, u1, l2, u2;
 			Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
@@ -1571,10 +1569,10 @@ namespace dyno
 
 			setupContactCaps(boundary1, boundary2, axis, cap, box, -sMax, m);
 
-			for (uint i = 0; i < m.contactCount; i++)
-			{
-				m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
-			}
+			//for (uint i = 0; i < m.contactCount; i++)
+			//{
+			//	m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
+			//}
 		}
 	}
 
