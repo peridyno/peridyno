@@ -36,7 +36,7 @@ cloth.set_visible(True)
 staticTriangularMesh.set_visible(True)
 
 scene.print_node_info(True)
-scene.print_module_info(True)
+scene.print_simulation_info(True)
 
 scene.add_node(staticTriangularMesh)
 scene.add_node(boundary)

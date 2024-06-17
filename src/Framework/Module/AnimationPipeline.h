@@ -25,6 +25,7 @@ namespace dyno
 		AnimationPipeline(Node* node);
 		virtual ~AnimationPipeline();
 
-	private:
+	protected:
+		bool printDebugInfo() override;
 	};
 }

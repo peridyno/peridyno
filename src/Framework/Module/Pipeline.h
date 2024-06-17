@@ -81,8 +81,6 @@ namespace dyno
 
 		void updateExecutionQueue();
 
-		void printModuleInfo(bool enabled);
-
 		void forceUpdate();
 
 		/**
@@ -101,6 +99,8 @@ namespace dyno
 
 		bool requireUpdate() final;
 
+		virtual bool printDebugInfo();
+
 	private:
 		void reconstructPipeline();
 
@@ -112,8 +112,6 @@ namespace dyno
 		std::list<std::shared_ptr<Module>>  mModuleList;
 
 		std::list<std::shared_ptr<Module>> mPersistentModule;
-
-		Node* mNode;
 
 		bool mTiming = false;
 	};

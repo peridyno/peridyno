@@ -269,13 +269,21 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Separator();
 
 				if (scene) {
+					bool canPrintValidationInfo = scene->isValidationInfoPrintable();
+					if (ImGui::Checkbox("Print Validation Info", &canPrintValidationInfo))
+						scene->printValidationInfo(canPrintValidationInfo);
+
 					bool canPrintNodeInfo = scene->isNodeInfoPrintable();
 					if (ImGui::Checkbox("Print Node Info", &canPrintNodeInfo))
 						scene->printNodeInfo(canPrintNodeInfo);
 
-					bool canPrintModuleInfo = scene->isModuleInfoPrintable();
-					if (ImGui::Checkbox("Print Module Info", &canPrintModuleInfo))
-						scene->printModuleInfo(canPrintModuleInfo);
+					bool canPrintSimulationInfo = scene->isSimulationInfoPrintable();
+					if (ImGui::Checkbox("Print Simulation Info", &canPrintSimulationInfo))
+						scene->printSimulationInfo(canPrintSimulationInfo);
+
+					bool canPrintRenderingInfo = scene->isRenderingInfoPrintable();
+					if (ImGui::Checkbox("Print Rendering Info", &canPrintRenderingInfo))
+						scene->printRenderingInfo(canPrintRenderingInfo);
 				}
 
 				ImGui::Separator();

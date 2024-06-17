@@ -39,6 +39,20 @@ namespace dyno
 		this->changed = clock::now();
 	}
 
+	bool GLVisualModule::validateInputs()
+	{
+		//If any input field is empty, return false;
+		for (auto f_in : fields_input)
+		{
+			if (!f_in->isOptional() && f_in->isEmpty())
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	void GLVisualModule::setColor(const Color& color)
 	{
 		this->varBaseColor()->setValue(color);

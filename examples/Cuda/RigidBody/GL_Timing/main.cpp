@@ -98,7 +98,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	 * 
 	 */
 	scn->printNodeInfo(true);
-	scn->printModuleInfo(true);
+	scn->printSimulationInfo(true);
 
 	return scn;
 }

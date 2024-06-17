@@ -47,7 +47,7 @@ std::shared_ptr<SceneGraph> createScene()
 	cloth->setVisible(true);
 
 	scn->printNodeInfo(true);
-	scn->printModuleInfo(true);
+	scn->printSimulationInfo(true);
 
 	return scn;
 }

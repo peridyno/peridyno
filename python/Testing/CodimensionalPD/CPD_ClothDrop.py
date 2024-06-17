@@ -17,7 +17,7 @@ cloth.graphics_pipeline().push_module(surfaceRendererCloth)
 cloth.set_visible(True)
 
 scn.print_node_info(True)
-scn.print_module_info(True)
+scn.print_simulation_info(True)
 
 scn.add_node(cloth)
 

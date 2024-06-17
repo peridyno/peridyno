@@ -279,9 +279,19 @@ namespace dyno
 		mNodeTiming = enabled;
 	}
 
-	void SceneGraph::printModuleInfo(bool enabled)
+	void SceneGraph::printSimulationInfo(bool enabled)
 	{
-		mModuleTiming = enabled;
+		mSimulationTiming = enabled;
+	}
+
+	void SceneGraph::printRenderingInfo(bool enabled)
+	{
+		mRenderingTiming = enabled;
+	}
+
+	void SceneGraph::printValidationInfo(bool enabled)
+	{
+		mValidationInfo = enabled;
 	}
 
 	bool SceneGraph::load(std::string name)

@@ -53,10 +53,14 @@ namespace dyno
 		void reset(std::shared_ptr<Node> node);
 
 		void printNodeInfo(bool enabled);
-		void printModuleInfo(bool enabled);
+		void printSimulationInfo(bool enabled);
+		void printRenderingInfo(bool enabled);
+		void printValidationInfo(bool enabled);
 
 		bool isNodeInfoPrintable() { return mNodeTiming; }
-		bool isModuleInfoPrintable() { return mModuleTiming; }
+		bool isSimulationInfoPrintable() { return mSimulationTiming; }
+		bool isRenderingInfoPrintable() { return mRenderingTiming; }
+		bool isValidationInfoPrintable() { return mValidationInfo; }
 
 		virtual bool load(std::string name);
 
@@ -257,7 +261,10 @@ namespace dyno
 		NodeList mNodeQueue;
 
 		bool mNodeTiming = false;
-		bool mModuleTiming = false;
+		bool mSimulationTiming = false;
+		bool mRenderingTiming = false;
+
+		bool mValidationInfo = false;
 
 		EWorkMode mWorkMode = EDIT_MODE;
 
