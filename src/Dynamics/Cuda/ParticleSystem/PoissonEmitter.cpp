@@ -14,6 +14,8 @@ namespace dyno
 		this->varWidth()->setRange(0.01, 10.0f);
 		this->varHeight()->setRange(0.01, 10.0f);
 
+		this->varSamplingDistance()->setValue(0.008f);
+
 		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PoissonEmitter<TDataType>::tranformChanged, this));

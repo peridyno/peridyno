@@ -52,7 +52,7 @@ namespace dyno
 
 		group->addAction(
 			"Triangular Mesh Boundary",
-			"ToolBarIco/ParticleSystem/SemiAnalvticalSFI_yellow.png",
+			"ToolBarIco/ParticleSystem/SemiAnalvticalSFI.png",
 			[=]()->std::shared_ptr<Node> { return std::make_shared<TriangularMeshBoundary<DataType3f>>(); });
 	}
 
