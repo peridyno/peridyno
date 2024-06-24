@@ -56,6 +56,11 @@ public:
 	void updateNode();
 	void updateModule();
 
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
+
 public:
 	struct FieldWidgetMeta {
 		using constructor_t = Wt::WContainerWidget* (*)(dyno::FBase*);
@@ -75,18 +80,9 @@ private:
 	std::shared_ptr<dyno::Module> mModule;
 	Wt::WTable* table;
 
-	//std::unique_ptr<Wt::WContainerWidget> mWidget;
+	Wt::Signal<int> changeValue_;
 
 	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
 
 	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };
-
-#define DECLARE_FIELD_WIDGET \
-	static int reg_field_widget; \
-	static Wt::WContainerWidget* createWidget(dyno::FBase*);
-
-#define IMPL_FIELD_WIDGET(_data_type_, _type_) \
-	int _type_::reg_field_widget = \
-		dyno::WParameterDataNode::registerWidget(dyno::WParameterDataNode::FieldWidgetMeta {&typeid(_data_type_), &_type_::createWidget}); \
-	Wt::WContainerWidget* _type_::createWidget(dyno::FBase* f) { return new _type_(f); }

@@ -260,6 +260,8 @@ void WParameterDataNode::addScalarFieldWidget(Wt::WTable* table, std::string lab
 			cell1->setWidth(widgetWidth);
 
 			cell1->addWidget(std::unique_ptr<Wt::WContainerWidget>(std::move(mWidget)));
+
+			changeValue_.emit(1);
 		}
 	}
 }

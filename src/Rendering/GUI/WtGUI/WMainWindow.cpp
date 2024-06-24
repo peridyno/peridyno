@@ -122,6 +122,8 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
 
+	mParameterDataNode->changeValue().connect(this, &WMainWindow::step);
+
 	// vertical layout
 
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
