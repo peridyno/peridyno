@@ -1,6 +1,11 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+
 #include "imgui_extend.h"
 #include "Platform.h"
 #include "Math/SimpleMath.h"
+
+thread_local ImGuiContext* MyImGuiTLS;
 
 namespace ImGui{
 ImVec4      ExColorsVal[ImGuiExColVal_COUNT];

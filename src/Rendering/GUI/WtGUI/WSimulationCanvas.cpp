@@ -83,7 +83,7 @@ WSimulationCanvas::WSimulationCanvas()
 	// initialize OpenGL context and RenderEngine
 	this->initializeGL();
 
-	this->toggleImGUI();
+	//this->toggleImGUI();
 }
 
 WSimulationCanvas::~WSimulationCanvas()
@@ -133,8 +133,6 @@ void WSimulationCanvas::initializeGL()
 		mImGuiCtx = new ImGuiBackendWt(this);
 		// Setup Dear ImGui context
 		ImGui::StyleColorsDark();
-		const char* glsl_version = "#version 130";
-		ImGui_ImplOpenGL3_Init(glsl_version);
 
 		// Get Context scale
 		float xscale, yscale;
@@ -142,6 +140,9 @@ void WSimulationCanvas::initializeGL()
 
 		// Initialize ImWindow
 		mImWindow.initialize(xscale);
+
+		const char* glsl_version = "#version 130";
+		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
 
 	// create framebuffer here...
@@ -254,8 +255,8 @@ void WSimulationCanvas::update()
 		if (showImGUI())
 		{
 			// Start the Dear ImGui frame
-			ImGui_ImplOpenGL3_NewFrame();
 			mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
+			ImGui_ImplOpenGL3_NewFrame();
 
 			ImGui::NewFrame();
 

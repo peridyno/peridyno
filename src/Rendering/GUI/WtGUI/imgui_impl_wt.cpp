@@ -1,11 +1,12 @@
 #include "imgui.h"
 #include "imgui_impl_wt.h"
-#include "imgui_internal.h"
+//#include "imgui_internal.h"
 
 ImGuiBackendWt::ImGuiBackendWt(Wt::WContainerWidget* parent)
 {
 	IMGUI_CHECKVERSION();
-	ctx = ImGui::CreateContext();	
+	ctx = ImGui::CreateContext();
+	ImGui::SetCurrentContext(ctx);
 }
 
 ImGuiBackendWt::~ImGuiBackendWt()
@@ -16,7 +17,7 @@ ImGuiBackendWt::~ImGuiBackendWt()
 void ImGuiBackendWt::NewFrame(int width, int height)
 {
 	ImGui::SetCurrentContext(ctx);
-	auto& io = ctx->IO;
+	auto& io = ImGui::GetIO();
 	io.DisplaySize.x = width;
 	io.DisplaySize.y = height;
 }
