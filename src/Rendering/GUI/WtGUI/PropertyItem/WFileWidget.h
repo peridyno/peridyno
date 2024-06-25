@@ -27,6 +27,10 @@ public:
 
 	//Called when the widget is updated
 	void updateField();
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
 
 private:
 	dyno::FBase* mfield;
@@ -34,6 +38,7 @@ private:
 	Wt::WLineEdit* mfilename;
 	//Wt::WPushButton* uploadButton;
 	Wt::WFileUpload* upload;
+	Wt::Signal<int> changeValue_;
 
 	void uploadFile();
 	void fileTooLarge();

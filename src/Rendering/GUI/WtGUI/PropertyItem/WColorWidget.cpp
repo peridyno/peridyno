@@ -53,5 +53,6 @@ void WColorWidget::updateField()
 		float b = float(v3) / 255;
 
 		f->setValue(dyno::Color(r, g, b));
+		changeValue_.emit(1);
 	}
 }

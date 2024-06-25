@@ -30,6 +30,7 @@ private:
 	void stop();
 	void step();
 	void reset();
+	void updateCanvas();
 
 private:
 

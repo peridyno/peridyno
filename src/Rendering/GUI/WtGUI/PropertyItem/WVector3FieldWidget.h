@@ -20,6 +20,12 @@ public:
 	//Called when the widget is updated
 	void updateField();
 
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
+
+
 private:
 	dyno::FBase* mfield;
 	Wt::WHBoxLayout* layout;
@@ -28,4 +34,5 @@ private:
 	Wt::WDoubleSpinBox* mData3;
 
 	dyno::Vec3f value;// active in "QVector3FieldWidget(QString name, Vec3f* v);"
+	Wt::Signal<int> changeValue_;
 };

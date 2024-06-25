@@ -33,6 +33,7 @@ void WIntegerFieldWidget::updateField()
 		return;
 
 	f->setValue(v);
+	changeValue_.emit(1);
 }
 
 WUIntegerFieldWidget::WUIntegerFieldWidget(dyno::FBase* field)
@@ -68,4 +69,5 @@ void WUIntegerFieldWidget::updateField()
 		return;
 
 	f->setValue(v);
+	changeValue_.emit(1);
 }

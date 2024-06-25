@@ -61,6 +61,8 @@ public:
 		return changeValue_;
 	}
 
+	void emit();
+
 public:
 	struct FieldWidgetMeta {
 		using constructor_t = Wt::WContainerWidget* (*)(dyno::FBase*);
@@ -79,8 +81,9 @@ private:
 	std::shared_ptr<dyno::Node> mNode;
 	std::shared_ptr<dyno::Module> mModule;
 	Wt::WTable* table;
-
 	Wt::Signal<int> changeValue_;
+
+	void castToDerived(Wt::WContainerWidget* fw);
 
 	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
 

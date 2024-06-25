@@ -122,7 +122,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
 
-	mParameterDataNode->changeValue().connect(this, &WMainWindow::step);
+	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 
 	// vertical layout
 
@@ -256,6 +256,16 @@ void WMainWindow::reset()
 		mReset = true;
 	}
 
+	Wt::log("info") << mScene->getFrameNumber();
+}
+
+void WMainWindow::updateCanvas()
+{
+	if (mScene)
+	{
+		mSceneCanvas->update();
+	}
+	Wt::log("info") << "updateCanvas!!!";
 	Wt::log("info") << mScene->getFrameNumber();
 }
 
