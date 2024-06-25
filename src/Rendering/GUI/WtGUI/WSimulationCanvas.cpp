@@ -191,27 +191,36 @@ void WSimulationCanvas::layoutSizeChanged(int width, int height)
 
 void WSimulationCanvas::onMousePressed(const Wt::WMouseEvent& evt)
 {
-	Wt::Coordinates coord = evt.widget();
-	mCamera->registerPoint(coord.x, coord.y);
-
+	if (!mImGuiCtx->handleMousePressed(evt))
+	{
+		Wt::Coordinates coord = evt.widget();
+		mCamera->registerPoint(coord.x, coord.y);
+	}
+	scheduleRender();
 }
 
 void WSimulationCanvas::onMouseDrag(const Wt::WMouseEvent& evt)
 {
-	Wt::Coordinates coord = evt.widget();
-
-	if (evt.button() == Wt::MouseButton::Left) {
-		mCamera->rotateToPoint(coord.x, coord.y);
-	}
-	else if (evt.button() == Wt::MouseButton::Middle) {
-		mCamera->translateToPoint(coord.x, coord.y);
+	if (!mImGuiCtx->handleMouseDrag(evt))
+	{
+		Wt::Coordinates coord = evt.widget();
+		if (evt.button() == Wt::MouseButton::Left) {
+			mCamera->rotateToPoint(coord.x, coord.y);
+		}
+		else if (evt.button() == Wt::MouseButton::Middle) {
+			mCamera->translateToPoint(coord.x, coord.y);
+		}
 	}
 	scheduleRender();
 }
 
 void WSimulationCanvas::onMouseReleased(const Wt::WMouseEvent& evt)
 {
+	if (!mImGuiCtx->handleMouseReleased(evt))
+	{
 
+	}
+	scheduleRender();
 }
 
 void WSimulationCanvas::onMouseWheeled(const Wt::WMouseEvent& evt)
