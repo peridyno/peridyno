@@ -25,7 +25,8 @@
 #include "GLWireframeVisualModule.h"
 
 #include "FilePath.h"
-
+#include "SkinInfo.h"
+#include "JointInfo.h"
 
 
 namespace dyno
@@ -74,6 +75,9 @@ namespace dyno
 
 		typedef unsigned char byte;
 		typedef int joint;
+		typedef int shape;
+		typedef int mesh;
+		typedef int primitive;
 		typedef int scene;
 
 		GltfLoader();
@@ -95,15 +99,13 @@ namespace dyno
 
 		DEF_VAR_STATE(Mat4f, Transform, Mat4f::identityMatrix(), "Transform");
 
-		DEF_ARRAY_STATE(Vec4f, BindJoints_0, DeviceType::GPU, "BindJoints_0");
-		DEF_ARRAY_STATE(Vec4f, BindJoints_1, DeviceType::GPU, "BindJoints_1");
-		DEF_ARRAY_STATE(Vec4f, Weights_0, DeviceType::GPU, "Weights_0");
-		DEF_ARRAY_STATE(Vec4f, Weights_1, DeviceType::GPU, "Weights_1");
+		DEF_INSTANCE_STATE(SkinInfo, Skin, "SkinInfo");
 
 		DEF_ARRAY_STATE(Mat4f, JointInverseBindMatrix, DeviceType::GPU, "JointInverseBindMatrix");
 		DEF_ARRAY_STATE(Mat4f, JointLocalMatrix, DeviceType::GPU, "JointLocalMatrix");
 		DEF_ARRAY_STATE(Mat4f, JointWorldMatrix, DeviceType::GPU, "JointWorldMatrix");
 		
+		DEF_INSTANCE_STATE(JointInfo,JointsData,"JointsInfo");
 	
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
@@ -165,12 +167,6 @@ namespace dyno
 		std::map<int, std::string> mesh_Name;
 		std::map<int, Mat4f> node_matrix;
 
-		std::vector<Vec4f> meshVertex_joint_weight_0;
-		std::vector<Vec4f> meshVertex_bind_joint_0;
-
-		std::vector<Vec4f> meshVertex_joint_weight_1;
-		std::vector<Vec4f> meshVertex_bind_joint_1;
-
 		CArray<Mat4f> mesh_Matrix;
 
 		std::shared_ptr<GLWireframeVisualModule> jointLineRender;
@@ -184,6 +180,7 @@ namespace dyno
 		DArray<Mat4f> d_mesh_Matrix;
 		DArray<int> d_shape_meshId;
 
+		std::map<int, std::vector<Vec2u>> skin_VerticeRange;
 
 	private:
 

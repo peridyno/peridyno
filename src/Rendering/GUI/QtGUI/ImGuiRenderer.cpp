@@ -43,7 +43,7 @@ const QHash<int, ImGuiKey> keyMap = {
     { Qt::Key_V, ImGuiKey_V },
     { Qt::Key_X, ImGuiKey_X },
     { Qt::Key_Y, ImGuiKey_Y },
-    { Qt::Key_Z, ImGuiKey_Z },
+    { Qt::Key_Z, ImGuiKey_Z }
     //{ Qt::MiddleButton, ImGuiMouseButton_Middle }
 };
 

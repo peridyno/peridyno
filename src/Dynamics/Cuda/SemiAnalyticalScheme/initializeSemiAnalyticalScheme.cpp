@@ -5,6 +5,7 @@
 #include "ParticleSystem/ParticleSystem.h"
 
 #include "SemiAnalyticalSFINode.h"
+#include "TriangularMeshBoundary.h"
 
 #include "ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalSummationDensity.h"
@@ -49,7 +50,10 @@ namespace dyno
 			"ToolBarIco/ParticleSystem/SemiAnalvticalSFI_yellow.png",
 			[=]()->std::shared_ptr<Node> { return std::make_shared<SemiAnalyticalSFINode<DataType3f>>(); });
 
-
+		group->addAction(
+			"Triangular Mesh Boundary",
+			"ToolBarIco/ParticleSystem/SemiAnalvticalSFI.png",
+			[=]()->std::shared_ptr<Node> { return std::make_shared<TriangularMeshBoundary<DataType3f>>(); });
 	}
 
 	dyno::PluginEntry* SemiAnalyticalScheme::initStaticPlugin()

@@ -7,7 +7,9 @@
 #include "ParticleSystem/CircularEmitter.h"
 #include "ParticleSystem/SquareEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
-
+#include "GLPointVisualModule.h"
+#include "ColorMapping.h"
+#include "Module/CalculateNorm.h"
 
 #include "NodeFactory.h"
 
@@ -45,30 +47,48 @@ namespace dyno
 		NodeFactory* factory = NodeFactory::instance();
 
 		auto page = factory->addPage(
-			"Dual Particle System", 
+			"Particle System",
 			"ToolBarIco/DualParticleSystem/DualParticleSystem_v4.png");
 
 		auto group = page->addGroup("Dual Particle System");
 
-// 		group->addAction(
-// 			"Round Particle Emitter", 
-// 			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
-// 			[=]()->std::shared_ptr<Node> { return std::make_shared<CircularEmitter<DataType3f>>(); });
-// 
-// 		group->addAction(
-// 			"Square Particle Emitter",
-// 			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
-// 			[=]()->std::shared_ptr<Node> { return std::make_shared<SquareEmitter<DataType3f>>(); });
 
 		group->addAction(
 			"Dual Particle Fluid",
 			"ToolBarIco/DualParticleSystem/DualParticleFluid_v4.png",
-			[=]()->std::shared_ptr<Node> { return std::make_shared<DualParticleFluidSystem<DataType3f>>(); });
+			[=]()->std::shared_ptr<Node> { 
+				
+				auto fluid = std::make_shared<DualParticleFluidSystem<DataType3f>>();
 
-		//group->addAction(
-		//	"SIMPLE Iteration Particle Fluid",
-		//	"ToolBarIco/DualParticleSystem/SIMPLEIterationParticleFluid.png",
-		//	[=]()->std::shared_ptr<Node> { return std::make_shared<DualParticleFluid<DataType3f>>(); });
+				auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+				fluid->stateVelocity()->connect(calculateNorm->inVec());
+				fluid->graphicsPipeline()->pushModule(calculateNorm);
+
+				auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+				colorMapper->varMax()->setValue(5.0f);
+				calculateNorm->outNorm()->connect(colorMapper->inScalar());
+				fluid->graphicsPipeline()->pushModule(colorMapper);
+
+				auto ptRender = std::make_shared<GLPointVisualModule>();
+				ptRender->setColor(Color(1, 0, 0));
+				ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+
+				fluid->statePointSet()->connect(ptRender->inPointSet());
+				colorMapper->outColor()->connect(ptRender->inColor());
+				fluid->graphicsPipeline()->pushModule(ptRender);
+
+				auto vpRender = std::make_shared<GLPointVisualModule>();
+				vpRender->setColor(Color(1, 1, 0));
+				vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+				fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
+				vpRender->varPointSize()->setValue(0.0005);
+				fluid->graphicsPipeline()->pushModule(vpRender);
+
+				return fluid; 
+			});
+
+
+	
 	}
 
 }

@@ -10,6 +10,7 @@
 
 #include "ParticleSystem/CircularEmitter.h"
 #include "ParticleSystem/SquareEmitter.h"
+#include "ParticleSystem/PoissonEmitter.h"
 
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
@@ -90,6 +91,20 @@ namespace dyno
 				emitter->stateOutline()->connect(wireRender->inEdgeSet());
 				emitter->graphicsPipeline()->pushModule(wireRender);
 				return emitter;;
+			});
+
+		group->addAction(
+			"Poisson Emitter",
+			//"ToolBarIco/ParticleSystem/PoissonEmitter.png",
+			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
+			[=]()->std::shared_ptr<Node> {
+				auto emitter = std::make_shared<PoissonEmitter<DataType3f>>();
+
+				auto wireRender = std::make_shared<GLWireframeVisualModule>();
+				wireRender->setColor(Color(0, 1, 0));
+				emitter->stateOutline()->connect(wireRender->inEdgeSet());
+				emitter->graphicsPipeline()->pushModule(wireRender);
+				return emitter;
 			});
 
 		group->addAction(

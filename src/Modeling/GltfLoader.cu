@@ -110,7 +110,7 @@ namespace dyno
 		this->varImportAnimation()->attach(callback);
 		this->varFileName()->attach(callback);
 
-
+		
 		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::updateTransform, this));
 
 		this->varLocation()->attach(callbackTransform);
@@ -159,9 +159,12 @@ namespace dyno
 		showBoundingBox->outBoundingBox()->connect(bbRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(bbRender);
 
+		this->stateSkin()->setDataPtr(std::make_shared<SkinInfo>());
+		this->stateJointsData()->setDataPtr(std::make_shared<JointInfo>());
+
 		this->stateTextureMesh()->promoteOuput();
 
-
+		this->setForceUpdate(true);
 
 	}
 
@@ -236,13 +239,14 @@ namespace dyno
 		//get InverseBindMatrix (Global)
 		this->buildInverseBindMatrices(all_Joints);
 
-
 		std::vector<Mat4f> localMatrix;
-		localMatrix.resize(all_Joints.size());
-		for (size_t k = 0; k < all_Joints.size(); k++)
+		localMatrix.resize(maxJointId + 1);
+
+		for (auto jId : all_Joints)
 		{
-			localMatrix[k] = joint_matrix[k];
+			localMatrix[jId] = joint_matrix[jId];
 		}
+
 		this->stateJointLocalMatrix()->assign(localMatrix);
 
 
@@ -316,103 +320,113 @@ namespace dyno
 
 		std::map<int, int> shape_meshId;
 
-		for (int mId = 0; mId < model.meshes.size(); mId++)
+
+		//skin_VerticeRange;
 		{
-			// import Mesh
-			std::vector<dyno::TopologyModule::Triangle> vertexIndex;
-			std::vector<dyno::TopologyModule::Triangle> normalIndex;
-			std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
-
-			int primNum = model.meshes[mId].primitives.size();
-
-			for (size_t pId = 0; pId < primNum; pId++)	//shape
+			int tempShapeId = 0;
+			int tempSize = 0;
+			for (int mId = 0; mId < model.meshes.size(); mId++)
 			{
+				// import Mesh
+				std::vector<dyno::TopologyModule::Triangle> vertexIndex;
+				std::vector<dyno::TopologyModule::Triangle> normalIndex;
+				std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
 
-				primitive_PointOffest = (vertices.size());
+				int primNum = model.meshes[mId].primitives.size();
 
-				//current primitive
-				const tinygltf::Primitive& primitive = model.meshes[mId].primitives[pId];
-
-				std::map<std::string, int> attributesName = primitive.attributes;
-
-
-				//Set Vertices
-				getVec3fByAttributeName(model, primitive, std::string("POSITION"), vertices);
-
-
-				//Set Normal
-				getVec3fByAttributeName(model, primitive, std::string("NORMAL"), normals);
-
-				//Set TexCoord
-
-				getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_0"), texCoord0);
-
-				getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_1"), texCoord1);
-
-
-
-				//Set Triangles
-
-				if (primitive.mode == TINYGLTF_MODE_TRIANGLES)
+				for (size_t pId = 0; pId < primNum; pId++)	//shape
 				{
 
-					std::vector<TopologyModule::Triangle> tempTriangles;
+					primitive_PointOffest = (vertices.size());
 
-					getTriangles(model, primitive, tempTriangles, primitive_PointOffest);
+					//current primitive
+					const tinygltf::Primitive& primitive = model.meshes[mId].primitives[pId];
 
-					vertexIndex = (tempTriangles);
-					normalIndex = (tempTriangles);
-					texCoordIndex = (tempTriangles);
+					std::map<std::string, int> attributesName = primitive.attributes;
 
-					reShapes[currentShape] = std::make_shared<Shape>();
-					shape_meshId[currentShape] = mId;		// set shapeId - meshId;
-					reShapes[currentShape]->vertexIndex.assign(vertexIndex);
-					reShapes[currentShape]->normalIndex.assign(normalIndex);
-					reShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
+					
+					//Set Vertices
+					getVec3fByAttributeName(model, primitive, std::string("POSITION"), vertices);
+					skin_VerticeRange[tempShapeId].push_back(Vec2u(tempSize, vertices.size() - 1));
+					tempShapeId++;
+					tempSize = vertices.size();
 
-					getBoundingBoxByName(model, primitive, std::string("POSITION"), reShapes[currentShape]->boundingBox, reShapes[currentShape]->boundingTransform);//,Transform3f& transform
+					//Set Normal
+					getVec3fByAttributeName(model, primitive, std::string("NORMAL"), normals);
 
-					shapeCenter.push_back(reShapes[currentShape]->boundingTransform.translation());
+					//Set TexCoord
 
-					int matId = primitive.material;
-					if (matId != -1 && matId < reMats.size())//
+					getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_0"), texCoord0);
+
+					getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_1"), texCoord1);
+
+
+
+					//Set Triangles
+
+					if (primitive.mode == TINYGLTF_MODE_TRIANGLES)
 					{
-						reShapes[currentShape]->material = reMats[matId];
-						//printf("shape_materialID : %d - %d\n",currentShape,matId);
 
-						//printf("texture size %d - %d:\n", reMats[matId]->texColor.nx(), reMats[matId]->texColor.ny());
+						std::vector<TopologyModule::Triangle> tempTriangles;
+
+						getTriangles(model, primitive, tempTriangles, primitive_PointOffest);
+
+						vertexIndex = (tempTriangles);
+						normalIndex = (tempTriangles);
+						texCoordIndex = (tempTriangles);
+
+						reShapes[currentShape] = std::make_shared<Shape>();
+						shape_meshId[currentShape] = mId;		// set shapeId - meshId;
+						reShapes[currentShape]->vertexIndex.assign(vertexIndex);
+						reShapes[currentShape]->normalIndex.assign(normalIndex);
+						reShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
+
+						getBoundingBoxByName(model, primitive, std::string("POSITION"), reShapes[currentShape]->boundingBox, reShapes[currentShape]->boundingTransform);//,Transform3f& transform
+
+						shapeCenter.push_back(reShapes[currentShape]->boundingTransform.translation());
+
+						int matId = primitive.material;
+						if (matId != -1 && matId < reMats.size())//
+						{
+							reShapes[currentShape]->material = reMats[matId];
+							//printf("shape_materialID : %d - %d\n",currentShape,matId);
+
+							//printf("texture size %d - %d:\n", reMats[matId]->texColor.nx(), reMats[matId]->texColor.ny());
+						}
+						else
+						{
+							reShapes[currentShape]->material = NULL;
+						}
+
+						//else //
+						//{
+						//	auto newMat = std::make_shared<Material>();
+
+						//	newMat->ambient = { 0,0,0 };
+						//	newMat->diffuse = Vec3f(0.5, 0.5, 0.5);
+						//	newMat->alpha = 1;
+						//	newMat->specular = Vec3f(1, 1, 1);
+						//	newMat->roughness = 0.5;
+
+						//	reMats.push_back(newMat);
+
+						//	reShapes[currentShape]->material = reMats[reMats.size() - 1];
+						//	printf("shape_materialID : %d - %d\n", currentShape, currentShape);
+						//}
+
+
+
+						trianglesVector.insert(trianglesVector.end(), tempTriangles.begin(), tempTriangles.end());
+
 					}
-					else
-					{
-						reShapes[currentShape]->material = NULL;
-					}
-
-					//else //
-					//{
-					//	auto newMat = std::make_shared<Material>();
-
-					//	newMat->ambient = { 0,0,0 };
-					//	newMat->diffuse = Vec3f(0.5, 0.5, 0.5);
-					//	newMat->alpha = 1;
-					//	newMat->specular = Vec3f(1, 1, 1);
-					//	newMat->roughness = 0.5;
-
-					//	reMats.push_back(newMat);
-
-					//	reShapes[currentShape]->material = reMats[reMats.size() - 1];
-					//	printf("shape_materialID : %d - %d\n", currentShape, currentShape);
-					//}
-
-
-
-					trianglesVector.insert(trianglesVector.end(), tempTriangles.begin(), tempTriangles.end());
+					currentShape++;
 
 				}
-				currentShape++;
-
+				this->stateShapeCenter()->getDataPtr()->setPoints(shapeCenter);
 			}
-			this->stateShapeCenter()->getDataPtr()->setPoints(shapeCenter);
 		}
+
+		
 
 
 
@@ -420,55 +434,99 @@ namespace dyno
 
 		
 		texMesh->shapeIds().resize(vertices.size());
-
-		//Scene_SkinNodesId;
-
-		std::vector<joint> skinJoints;
-		for (auto skin : model.skins)
+		
+		//Import Skin;
 		{
-			auto& joints = skin.joints;
-			skinJoints.insert(skinJoints.end(), joints.begin(), joints.end());
-		}
+			//Update ;
+			std::map<int,std::vector<joint>> shape_skinJoint;
 
-
-		for (int mId = 0; mId < model.meshes.size(); mId++)
-		{
-			// import Mesh
-			int primNum = model.meshes[mId].primitives.size();
-
-
-			for (size_t pId = 0; pId < primNum; pId++)
+			for (size_t i = 0; i < model.skins.size(); i++)
 			{
-
-				getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_0"), meshVertex_joint_weight_0);//
-
-				getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_1"), meshVertex_joint_weight_1);//
-
-				getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_0"), meshVertex_bind_joint_0, skinJoints);
-
-				getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_1"), meshVertex_bind_joint_1, skinJoints);
+				auto joints = model.skins[i].joints;
+				shape_skinJoint[i] = joints;
 			}
+
+
+			std::map<int, std::vector<joint>> skinNode_MeshId;
+			std::map<mesh, std::vector<shape>> meshNode_Primitive;
+
+			for (size_t i = 0; i < model.nodes.size(); i++)
+			{
+				if (model.nodes[i].skin != -1)
+				{
+					skinNode_MeshId[i].push_back(model.nodes[i].mesh);
+				}
+			}
+		
+			{
+				int tempShapeId = 0;
+
+				for (int mId = 0; mId < model.meshes.size(); mId++)
+				{
+					int primNum = model.meshes[mId].primitives.size();
+
+					for (size_t pId = 0; pId < primNum; pId++)
+					{
+						meshNode_Primitive[mId].push_back(tempShapeId);
+						tempShapeId++;
+					}
+				}
+			}
+
+
+			
+			auto SkinData = this->stateSkin()->getDataPtr();
+			SkinData->clearSkinInfo();
+			{
+				int tempShapeId = 0;
+				for (int mId = 0; mId < model.meshes.size(); mId++)
+				{
+					int primNum = model.meshes[mId].primitives.size();
+
+					for (size_t pId = 0; pId < primNum; pId++)
+					{
+						std::vector<joint> skinJoints;
+
+						if (shape_skinJoint.find(primNum) != shape_skinJoint.end())
+							skinJoints = shape_skinJoint[tempShapeId];
+
+						if (skinJoints.size())
+						{
+
+							std::vector<Vec4f> weight0;
+							std::vector<Vec4f> weight1;
+
+							std::vector<Vec4f> joint0;
+							std::vector<Vec4f> joint1;
+
+							getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_0"), weight0);//
+
+							getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_1"), weight1);//
+
+							getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_0"), joint0, skinJoints);
+
+							getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_1"), joint1, skinJoints);
+
+							SkinData->pushBack_Data(weight0, weight1, joint0, joint1);
+
+
+						}
+						tempShapeId++;
+					}
+				}
+			}
+			
+			for (auto it : skin_VerticeRange) 
+			{
+				SkinData->skin_VerticeRange[it.first] = it.second;
+			}
+			
 		}
-		//replace JointId from Skin
-
-//		int skeleton;             // The index of the node used as a skeleton root
-//		std::vector<int> joints;  // Indices of skeleton nodes
-
-
-
-		this->stateBindJoints_0()->assign(meshVertex_bind_joint_0);
-		this->stateBindJoints_1()->assign(meshVertex_bind_joint_1);
-
-		this->stateWeights_0()->assign(meshVertex_joint_weight_0);
-		this->stateWeights_1()->assign(meshVertex_joint_weight_1);
-
-
 
 
 		for (int i = 0; i < texMesh->shapes().size(); i++)
 		{
 			auto it = texMesh->shapes()[i];
-			//printf(" i = %d, triangle = %d, v = %d \n",i, texMesh->shapes()[i]->vertexIndex.size(),vertex_shapeId.size());
 
 			cuExecute(texMesh->shapes()[i]->vertexIndex.size(),
 				updateVertexId_Shape,
@@ -543,31 +601,17 @@ namespace dyno
 		}
 
 
-
-
-		//if (all_Joints.empty())
-		//{
-		//	auto vL = this->varLocation()->getValue();
-		//	auto vS = this->varScale()->getValue();
-
-		//	Quat<float> q = computeQuaternion();
-
-		//	auto RV = [&](const Coord& v)->Coord {
-		//		return vL + q.rotate(v - vL);
-		//	};
-
-		//	int numpt = vertices.size();
-
-		//	for (int i = 0; i < numpt; i++)
-		//	{
-		//		vertices[i] = RV(vertices[i] * vS + RV(vL));
-		//	}
-		//	texMesh->vertices().assign(vertices);
-		//	initialPosition.assign(vertices);
-		//}
-
-
 		this->updateTransform();
+		
+		this->stateSkin()->getDataPtr()->mesh = texMesh;
+
+		this->stateSkin()->getDataPtr()->initialPosition = initialPosition;
+
+		this->stateSkin()->getDataPtr()->initialNormal = initialNormal;
+
+		this->updateAnimation(0);
+		this->stateJointsData()->getDataPtr()->UpdateJointInfo(this->stateJointInverseBindMatrix()->getData(), this->stateJointLocalMatrix()->getData(), this->stateJointWorldMatrix()->getData());
+
 
 	}
 
@@ -581,16 +625,22 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateStates()
 	{
-		if (joint_output.empty() || this->varImportAnimation()->getValue())
+		if (joint_output.empty() || !this->varImportAnimation()->getValue())
 			return;
 
 		updateAnimation(this->stateFrameNumber()->getValue());
-	};
+		auto jointInfo = this->stateJointsData()->getDataPtr();
+		
+		this->stateJointsData()->getDataPtr()->UpdateJointInfo(this->stateJointInverseBindMatrix()->getData(), this->stateJointLocalMatrix()->getData(), this->stateJointWorldMatrix()->getData());
+	}; 
 
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateAnimation(int frameNumber)
 	{
+		if (joint_output.empty() || all_Joints.empty() || joint_matrix.empty())
+			return;
+
 		auto mesh = this->stateTextureMesh()->getDataPtr();
 
 		this->updateAnimationMatrix(all_Joints, frameNumber);
@@ -607,37 +657,59 @@ namespace dyno
 			this->stateTransform()->getValue()
 		);
 
+
 		//update Points
-		cuExecute(mesh->vertices().size(),
-			PointsAnimation,
-			initialPosition,
-			mesh->vertices(),
-			this->stateJointInverseBindMatrix()->getData(),
-			this->stateJointWorldMatrix()->getData(),
 
-			this->stateBindJoints_0()->getData(),
-			this->stateBindJoints_1()->getData(),
-			this->stateWeights_0()->getData(),
-			this->stateWeights_1()->getData(),
-			this->stateTransform()->getValue(),
-			false
-		);
+		auto& skinInfo = this->stateSkin()->getData();
 
-		//update Normals
-		cuExecute(mesh->vertices().size(),
-			PointsAnimation,
-			initialNormal,
-			mesh->normals(),
-			this->stateJointInverseBindMatrix()->getData(),
-			this->stateJointWorldMatrix()->getData(),
 
-			this->stateBindJoints_0()->getData(),
-			this->stateBindJoints_1()->getData(),
-			this->stateWeights_0()->getData(),
-			this->stateWeights_1()->getData(),
-			this->stateTransform()->getValue(),
-			true
-		);
+		for (size_t i = 0; i < skinInfo.size(); i++)//
+		{
+			auto& bindJoint0 = skinInfo.V_jointID_0[i];
+			auto& bindJoint1 = skinInfo.V_jointID_1[i];
+
+			auto& bindWeight0 = skinInfo.V_jointWeight_0[i];
+			auto& bindWeight1 = skinInfo.V_jointWeight_1[i];
+
+			for (size_t j = 0; j < skin_VerticeRange[i].size(); j++)
+			{
+				//
+				Vec2u& range = skinInfo.skin_VerticeRange[i][j];
+
+				skinAnimation(initialPosition,
+					mesh->vertices(),
+					this->stateJointInverseBindMatrix()->getData(),
+					this->stateJointWorldMatrix()->getData(),
+
+					bindJoint0,
+					bindJoint1,
+					bindWeight0,
+					bindWeight1,
+					this->stateTransform()->getValue(),
+					false,
+					range
+				);
+
+				//update Normals
+
+				skinAnimation(
+					initialNormal,
+					mesh->normals(),
+					this->stateJointInverseBindMatrix()->getData(),
+					this->stateJointWorldMatrix()->getData(),
+
+					bindJoint0,
+					bindJoint1,
+					bindWeight0,
+					bindWeight1,
+					this->stateTransform()->getValue(),
+					true,
+					range
+				);
+
+			}
+		}
+		
 
 	};
 
@@ -791,11 +863,6 @@ namespace dyno
 		c_joint_Mat4f.resize(maxJointId + 1);
 
 
-		for (size_t i = 0; i < maxJointId + 1; i++)
-		{
-			c_joint_Mat4f.push_back(Mat4f::identityMatrix());
-		}
-
 		for (size_t i = 0; i < allJoints.size(); i++)
 		{
 			joint jointId = allJoints[i];
@@ -924,6 +991,7 @@ namespace dyno
 		{
 			if(varImportAnimation()->getValue())
 				updateAnimation(this->stateFrameNumber()->getValue());
+			
 		}
 
 		if (this->stateTextureMesh()->getDataPtr()->vertices().size())
@@ -1017,6 +1085,16 @@ namespace dyno
 				this->stateTransform()->getValue()
 			);
 		}
+		else 
+		{
+			auto& reShapes = this->stateTextureMesh()->getDataPtr()->shapes();
+
+			for (size_t i = 0; i < shapeNum; i++)
+			{
+				reShapes[i]->boundingTransform.translation() = Vec3f(0);
+			}
+			
+		}
 
 		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
 
@@ -1095,7 +1173,7 @@ namespace dyno
 
 
 
-	template< typename Coord, typename Vec4f, typename Mat4f >
+	template< typename Coord, typename Vec4f, typename Mat4f ,typename Vec2u>
 	__global__ void PointsAnimation(
 		DArray<Coord> intialPosition,
 		DArray<Coord> worldPosition,
@@ -1108,15 +1186,20 @@ namespace dyno
 		DArray<Vec4f> weights_1,
 
 		Mat4f transform,
-		bool isNormal
+		bool isNormal,
+
+		Vec2u range
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= worldPosition.size()) return;
 
+		if (pId<range[0] || pId>range[1])
+			return;
 
 		Vec4f result = Vec4f(0, 0, 0, float(!isNormal));
 
+		int skinInfoVertexId = pId - range[0];
 
 		Coord offest;
 
@@ -1127,8 +1210,8 @@ namespace dyno
 		{
 			for (unsigned int i = 0; i < 4; i++)
 			{
-				int jointId = int(bind_joints_0[pId][i]);
-				Real weight = weights_0[pId][i];
+				int jointId = int(bind_joints_0[skinInfoVertexId][i]);
+				Real weight = weights_0[skinInfoVertexId][i];
 
 				offest = intialPosition[pId];
 				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
@@ -1140,8 +1223,8 @@ namespace dyno
 		{
 			for (unsigned int i = 0; i < 4; i++)
 			{
-				int jointId = int(bind_joints_1[pId][i]);
-				Real weight = weights_1[pId][i];
+				int jointId = int(bind_joints_1[skinInfoVertexId][i]);
+				Real weight = weights_1[skinInfoVertexId][i];
 
 				offest = intialPosition[pId];
 				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
@@ -1211,10 +1294,6 @@ namespace dyno
 		joint_AnimaMatrix.clear();
 		Scene_Name.clear();
 		all_Joints.clear();
-		meshVertex_bind_joint_0.clear();
-		meshVertex_bind_joint_1.clear();
-		meshVertex_joint_weight_0.clear();
-		meshVertex_joint_weight_1.clear();
 
 		initialPosition.clear();
 		d_joints.clear();
@@ -1230,15 +1309,13 @@ namespace dyno
 		d_mesh_Matrix.clear();
 		d_shape_meshId.clear();
 		unCenterPosition.clear();
+		skin_VerticeRange.clear();
 
 		maxJointId = -1;
 		jointNum = -1;
 		meshNum = -1;
 
-		this->stateBindJoints_0()->clear();
-		this->stateBindJoints_1()->clear();
-		this->stateWeights_0()->clear();
-		this->stateWeights_1()->clear();
+
 
 		this->stateInitialMatrix()->clear();
 		this->stateJointInverseBindMatrix()->clear();
@@ -1247,8 +1324,6 @@ namespace dyno
 		this->stateJointWorldMatrix()->clear();
 		this->stateTexCoord_0()->clear();
 		this->stateTexCoord_1()->clear();
-		this->stateWeights_0()->clear();
-		this->stateWeights_1()->clear();
 		this->stateTextureMesh()->getDataPtr()->clear();
 
 	}
