@@ -134,15 +134,18 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
 	panel0->setTitle("Node Tree");
 	panel0->setCollapsible(true);
+	panel0->setMargin(0);
 	//panel0->setStyleClass("scrollable-content");
 
 	auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	treeView->setMargin(0);
 	treeView->setSortingEnabled(false);
 	treeView->setSelectionMode(Wt::SelectionMode::Single);
 	treeView->setEditTriggers(Wt::EditTrigger::None);
 	treeView->setColumnResizeEnabled(true);
 	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 300);
+	treeView->setColumnWidth(0, 100);
+	treeView->setColumnWidth(1, 280);
 
 	// module list
 	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
@@ -252,6 +255,7 @@ void WMainWindow::reset()
 
 		mScene->setFrameNumber(0);
 		mScene->reset();
+		mSceneCanvas->update();
 
 		mReset = true;
 	}
