@@ -64,7 +64,7 @@ scn.add_node(emitter)
 scn.add_node(emitter2)
 scn.add_node(fluid)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()

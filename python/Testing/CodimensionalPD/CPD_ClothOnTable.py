@@ -40,7 +40,7 @@ scn.add_node(mesh)
 scn.add_node(boundary)
 scn.add_node(cloth)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()

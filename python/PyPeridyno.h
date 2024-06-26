@@ -7,7 +7,9 @@
 #include "PyIO.h"
 #include "PyExpand.h"
 
+#include "Rendering/PyRenderCore.h"
 #include "Rendering/PyGlfwGUI.h"
+#include "Rendering/PyImWidgets.h"
 #include "Rendering/PyRendering.h"
 #include "Rendering/PyQtGUI.h"
 

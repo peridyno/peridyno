@@ -23,7 +23,7 @@ namespace dyno
 	class ImChart : public ImWidget
 	{
 		DECLARE_CLASS(ImChart)
-	public:			
+	public:
 		ImChart();
 		~ImChart() override;
 
@@ -33,10 +33,10 @@ namespace dyno
 	public:
 		DECLARE_ENUM(InputMode,
 			Var = 0,
-			Array= 1);
+			Array = 1);
 
 		DEF_VAR_IN(unsigned, FrameNumber, "");
-		DEF_VAR_IN(Real,Value,"");
+		DEF_VAR_IN(Real, Value, "");
 		DEF_ARRAY_IN(Real, Array, DeviceType::GPU, "");
 
 		DEF_ENUM(InputMode, InputMode, InputMode::Array, "");
@@ -45,9 +45,9 @@ namespace dyno
 		DEF_VAR(Real, Max, Real(1), "");
 		DEF_VAR(bool, FixHeight, false, "");
 		//DEF_VAR(bool, FixCount, false, "");
-		DEF_VAR(int, Count,-1,"");
+		DEF_VAR(int, Count, -1, "");
 		DEF_VAR(std::string, Title, "chart", "");
-		DEF_VAR(bool,OutputFile,false,"");
+		DEF_VAR(bool, OutputFile, false, "");
 		DEF_VAR(std::string, OutputPath, "D:/outputTxt", "OutputPath");
 
 
@@ -65,7 +65,7 @@ namespace dyno
 
 	private:
 
-        ImVec2              		mCoord = ImVec2(0,0);
+		ImVec2              		mCoord = ImVec2(0, 0);
 #ifdef CUDA_BACKEND
 		Reduction<Real> 			m_reduce_real;
 #endif // CUDA_BACKEND
@@ -74,7 +74,7 @@ namespace dyno
 		VkReduce<Real>				m_reduce_real;
 #endif // VK_BACKEND
 
-		
+
 		float min = -1;
 		float max = 1;
 
@@ -87,7 +87,7 @@ namespace dyno
 		std::shared_ptr<Node> mNode;
 
 		int frameNumber = 0;
-		int count=20;
+		int count = 20;
 
 		std::string file_postfix = ".txt";
 
