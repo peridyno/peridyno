@@ -171,11 +171,6 @@ void declare_gltf_loader(py::module& m, std::string typestr) {
 
 		.def("state_transform", &Class::stateTransform, py::return_value_policy::reference)
 
-		.def("state_bind_joints_0", &Class::stateBindJoints_0, py::return_value_policy::reference)
-		.def("state_bind_joints_1", &Class::stateBindJoints_1, py::return_value_policy::reference)
-		.def("state_weights_0", &Class::stateWeights_0, py::return_value_policy::reference)
-		.def("state_weights_1", &Class::stateWeights_1, py::return_value_policy::reference)
-
 		.def("state_joint_inverse_bind_matrix", &Class::stateJointInverseBindMatrix, py::return_value_policy::reference)
 		.def("state_joint_local_matrix", &Class::stateJointLocalMatrix, py::return_value_policy::reference)
 		.def("state_jont_world_matrix", &Class::stateJointWorldMatrix, py::return_value_policy::reference)

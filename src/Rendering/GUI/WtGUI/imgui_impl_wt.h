@@ -12,6 +12,10 @@ public:
 
 	void NewFrame(int width, int height);
 
+	bool handleMousePressed(const Wt::WMouseEvent& evt);
+	bool handleMouseDrag(const Wt::WMouseEvent& evt);
+	bool handleMouseReleased(const Wt::WMouseEvent& evt);
+
 private:
 	ImGuiContext* ctx;
 };

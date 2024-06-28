@@ -83,7 +83,7 @@ WSimulationCanvas::WSimulationCanvas()
 	// initialize OpenGL context and RenderEngine
 	this->initializeGL();
 
-	this->toggleImGUI();
+	//this->toggleImGUI();
 }
 
 WSimulationCanvas::~WSimulationCanvas()
@@ -133,8 +133,6 @@ void WSimulationCanvas::initializeGL()
 		mImGuiCtx = new ImGuiBackendWt(this);
 		// Setup Dear ImGui context
 		ImGui::StyleColorsDark();
-		const char* glsl_version = "#version 130";
-		ImGui_ImplOpenGL3_Init(glsl_version);
 
 		// Get Context scale
 		float xscale, yscale;
@@ -142,6 +140,9 @@ void WSimulationCanvas::initializeGL()
 
 		// Initialize ImWindow
 		mImWindow.initialize(xscale);
+
+		const char* glsl_version = "#version 130";
+		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
 
 	// create framebuffer here...
@@ -190,27 +191,36 @@ void WSimulationCanvas::layoutSizeChanged(int width, int height)
 
 void WSimulationCanvas::onMousePressed(const Wt::WMouseEvent& evt)
 {
-	Wt::Coordinates coord = evt.widget();
-	mCamera->registerPoint(coord.x, coord.y);
-
+	if (!mImGuiCtx->handleMousePressed(evt))
+	{
+		Wt::Coordinates coord = evt.widget();
+		mCamera->registerPoint(coord.x, coord.y);
+	}
+	scheduleRender();
 }
 
 void WSimulationCanvas::onMouseDrag(const Wt::WMouseEvent& evt)
 {
-	Wt::Coordinates coord = evt.widget();
-
-	if (evt.button() == Wt::MouseButton::Left) {
-		mCamera->rotateToPoint(coord.x, coord.y);
-	}
-	else if (evt.button() == Wt::MouseButton::Middle) {
-		mCamera->translateToPoint(coord.x, coord.y);
+	if (!mImGuiCtx->handleMouseDrag(evt))
+	{
+		Wt::Coordinates coord = evt.widget();
+		if (evt.button() == Wt::MouseButton::Left) {
+			mCamera->rotateToPoint(coord.x, coord.y);
+		}
+		else if (evt.button() == Wt::MouseButton::Middle) {
+			mCamera->translateToPoint(coord.x, coord.y);
+		}
 	}
 	scheduleRender();
 }
 
 void WSimulationCanvas::onMouseReleased(const Wt::WMouseEvent& evt)
 {
+	if (!mImGuiCtx->handleMouseReleased(evt))
+	{
 
+	}
+	scheduleRender();
 }
 
 void WSimulationCanvas::onMouseWheeled(const Wt::WMouseEvent& evt)
@@ -254,8 +264,8 @@ void WSimulationCanvas::update()
 		if (showImGUI())
 		{
 			// Start the Dear ImGui frame
-			ImGui_ImplOpenGL3_NewFrame();
 			mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
+			ImGui_ImplOpenGL3_NewFrame();
 
 			ImGui::NewFrame();
 
