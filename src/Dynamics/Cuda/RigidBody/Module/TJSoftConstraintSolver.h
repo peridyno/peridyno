@@ -56,9 +56,9 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 20, "");
 
-		DEF_VAR(uint, SubStepping, 10, "");
+		DEF_VAR(uint, SubStepping, 20, "");
 
 		DEF_VAR(Real, LinearDamping, 0.1, "");
 
@@ -96,6 +96,7 @@ namespace dyno
 
 	private:
 		void initializeJacobian(Real dt);
+		void initializeRelaxation();
 
 	private:
 		DArray<Coord> mJ;

@@ -92,16 +92,19 @@ namespace dyno
 
 	private:
 		void initializeJacobian(Real dt);
+		void initializeRelaxation();
 
 	private:
 		DArray<Coord> mJ;
 		DArray<Coord> mB;
+		DArray<Real> mD;
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
 
 		DArray<Real> mEta;
 		DArray<Real> mLambda;
+		DArray<Real> mLambdaJoint;
 
 		DArray<ContactPair> mContactsInLocalFrame;
 
@@ -112,5 +115,9 @@ namespace dyno
 		DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;	
+
+		std::vector<float> errors;
+		int cnt = 0;
+
 	};
 }

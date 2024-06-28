@@ -34,7 +34,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	rigidBody.linearVelocity = Vec3f(1, 0, 0);
 	auto oldBoxActor = rigid->addBox(oldbox, rigidBody);
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		newbox.center = oldbox.center + Vec3f(0.0, 0.2, 0);
 		newbox.halfLength = oldbox.halfLength;

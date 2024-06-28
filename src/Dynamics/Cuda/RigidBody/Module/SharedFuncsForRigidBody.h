@@ -212,6 +212,21 @@ namespace dyno
 		float dt
 	);
 
+	void JacobiIterationStrict(
+		DArray<float> lambda,
+		DArray<Vec3f> impulse,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<float> eta,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<int> nbq,
+		DArray<float> d,
+		DArray<float> mass,
+		float mu,
+		float g,
+		float dt
+	);
+
 	void JacobiIterationForSoft(
 		DArray<float> lambda,
 		DArray<Vec3f> impulse,
@@ -251,46 +266,38 @@ namespace dyno
 	);
 
 
-	template<typename Coord, typename Real, typename Constraint>
-	__global__ void checkOutError(
-		DArray<Coord> J,
-		DArray<Coord> mImpulse,
-		DArray<Constraint> constraints,
-		DArray<Real> eta,
-		DArray<Real> error
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		if (tId >= constraints.size())
-			return;
+	Real checkOutError(
+		DArray<Vec3f> J,
+		DArray<Vec3f> mImpulse,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<float> eta
+	);
 
-		int idx1 = constraints[tId].bodyId1;
-		int idx2 = constraints[tId].bodyId2;
+	void calculateDiagnals(
+		DArray<float> d,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B
+	);
 
-		Real tmp = 0;
-		tmp += J[4 * tId].dot(mImpulse[idx1 * 2]) + J[4 * tId + 1].dot(mImpulse[idx1 * 2 + 1]);
-		if (idx2 != INVALID)
-			tmp += J[4 * tId + 2].dot(mImpulse[idx2 * 2]) + J[4 * tId + 3].dot(mImpulse[idx2 * 2 + 1]);
+	void preConditionJ(
+		DArray<Vec3f> J,
+		DArray<float> d,
+		DArray<float> eta
+	);
 
-		Real e = tmp - eta[tId];
-		error[tId] = e * e;
-	}
+	bool saveVectorToFile(
+		const std::vector<float>& vec,
+		const std::string& filename
+	);
 
-	template<typename Real>
-	Real getErrorNorm(
-		CArray<Real> error
-	)
-	{
-		Real tmp = 0;
-		int num = error.size();
-		for (int i = 0; i < num; i++)
-		{
-			tmp += error[i];
-		}
-		return sqrt(tmp);
-	}
 
-	
+	void calculateEtaVectorForRelaxation(
+		DArray<float> eta,
+		DArray<Vec3f> J,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray <TConstraintPair<float>> constraints
+	);
 
 
 

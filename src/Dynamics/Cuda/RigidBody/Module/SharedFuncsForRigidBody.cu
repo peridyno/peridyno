@@ -1403,6 +1403,53 @@ namespace dyno
 			beta,
 			dt);
 	}
+	template<typename Coord, typename Constraint, typename Real>
+	__global__ void SF_calculateEtaVectorForRelaxation(
+		DArray<Real> eta,
+		DArray<Coord> J,
+		DArray<Coord> velocity,
+		DArray<Coord> angular_velocity,
+		DArray<Constraint> constraints
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= constraints.size())
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		Real eta_i = Real(0);
+
+		eta_i -= J[4 * tId].dot(velocity[idx1]);
+		eta_i -= J[4 * tId + 1].dot(angular_velocity[idx1]);
+
+		if (idx2 != INVALID)
+		{
+			eta_i -= J[4 * tId + 2].dot(velocity[idx2]);
+			eta_i -= J[4 * tId + 3].dot(angular_velocity[idx2]);
+		}
+
+		eta[tId] = eta_i;
+	}
+
+
+	void calculateEtaVectorForRelaxation(
+		DArray<float> eta,
+		DArray<Vec3f> J,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray <TConstraintPair<float>> constraints
+	)
+	{
+		cuExecute(constraints.size(),
+			SF_calculateEtaVectorForRelaxation,
+			eta,
+			J,
+			velocity,
+			angular_velocity,
+			constraints);
+	}
 
 	template<typename Coord, typename Constraint, typename Real, typename Quat>
 	__global__ void SF_calculateEtaVectorForPJSoft(
@@ -2889,7 +2936,7 @@ namespace dyno
 			if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
 				Real mass_avl = mass[idx1];
-				Real lambda_new = minimum(maximum(lambda[tId] + (tmp / (K_1[tId] * stepInverse)), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);
+				Real lambda_new = minimum(maximum(lambda[tId] + (tmp / (K_1[tId] *stepInverse)), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);
 				delta_lambda = lambda_new - lambda[tId];
 			}
 
@@ -3472,6 +3519,98 @@ namespace dyno
 		}
 	}
 
+	template<typename Real, typename Coord, typename Constraint>
+	__global__ void SF_JacobiIterationStrict(
+		DArray<Real> lambda,
+		DArray<Coord> impulse,
+		DArray<Coord> J,
+		DArray<Coord> B,
+		DArray<Real> eta,
+		DArray<Constraint> constraints,
+		DArray<int> nbq,
+		DArray<Real> d,
+		DArray<Real> mass,
+		Real mu,
+		Real g,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= constraints.size())
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		Real tmp = eta[tId];
+
+		tmp -= J[4 * tId].dot(impulse[idx1 * 2]);
+		tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]);
+
+		if (idx2 != INVALID)
+		{
+			tmp -= J[4 * tId + 2].dot(impulse[idx2 * 2]);
+			tmp -= J[4 * tId + 3].dot(impulse[idx2 * 2 + 1]);
+		}
+
+		int stepInverse = 0;
+		if (constraints[tId].type == ConstraintType::CN_FRICTION || constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+		{
+			if (idx2 != INVALID)
+			{
+				stepInverse = nbq[idx1] + nbq[idx2];
+			}
+			else
+			{
+				stepInverse = nbq[idx1];
+			}
+		}
+		else
+		{
+			stepInverse = 5;
+		}
+
+		Real omega = Real(1) / stepInverse;
+
+		if (d[tId] > EPSILON)
+		{
+			Real delta_lambda = (tmp / d[tId]) * omega;
+			if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+			{
+				Real lambda_new = maximum(0.0f, lambda[tId] + (tmp / (d[tId] * stepInverse)));
+				delta_lambda = lambda_new - lambda[tId];
+			}
+			if (constraints[tId].type == ConstraintType::CN_FRICTION)
+			{
+				Real mass_avl = mass[idx1];
+				Real lambda_new = minimum(maximum(lambda[tId] + (tmp / (d[tId] * stepInverse)), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);
+				delta_lambda = lambda_new - lambda[tId];
+			}
+
+			lambda[tId] += delta_lambda;
+
+			atomicAdd(&impulse[idx1 * 2][0], B[4 * tId][0] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2][1], B[4 * tId][1] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2][2], B[4 * tId][2] * delta_lambda);
+
+			atomicAdd(&impulse[idx1 * 2 + 1][0], B[4 * tId + 1][0] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2 + 1][1], B[4 * tId + 1][1] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2 + 1][2], B[4 * tId + 1][2] * delta_lambda);
+
+			if (idx2 != INVALID)
+			{
+				atomicAdd(&impulse[idx2 * 2][0], B[4 * tId + 2][0] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2][1], B[4 * tId + 2][1] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2][2], B[4 * tId + 2][2] * delta_lambda);
+
+				atomicAdd(&impulse[idx2 * 2 + 1][0], B[4 * tId + 3][0] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2 + 1][1], B[4 * tId + 3][1] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2 + 1][2], B[4 * tId + 3][2] * delta_lambda);
+			}
+		}
+
+	}
+
 	void JacobiIteration(
 		DArray<float> lambda,
 		DArray<Vec3f> impulse,
@@ -3506,6 +3645,38 @@ namespace dyno
 			g,
 			dt);
 	}
+
+	void JacobiIterationStrict(
+		DArray<float> lambda,
+		DArray<Vec3f> impulse,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<float> eta,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<int> nbq,
+		DArray<float> d,
+		DArray<float> mass,
+		float mu,
+		float g,
+		float dt
+	)
+	{
+		cuExecute(constraints.size(),
+			SF_JacobiIterationStrict,
+			lambda,
+			impulse,
+			J,
+			B,
+			eta,
+			constraints,
+			nbq,
+			d,
+			mass,
+			mu,
+			g,
+			dt);
+	}
+
 
 	void JacobiIterationForSoft(
 		DArray<float> lambda,
@@ -3608,7 +3779,150 @@ namespace dyno
 			dt);
 	}
 
+	template<typename Coord, typename Real>
+	__global__ void SF_calculateDiagnals(
+		DArray<Real> D,
+		DArray<Coord> J,
+		DArray<Coord> B
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= D.size())
+			return;
 
+		Real d = J[4 * tId].dot(B[4 * tId]) + J[4 * tId + 1].dot(B[4 * tId + 1]) + J[4 * tId + 2].dot(B[4 * tId + 2]) + J[4 * tId + 3].dot(B[4 * tId + 3]);
+
+		D[tId] = d;
+	}
+
+	void calculateDiagnals(
+		DArray<float> d,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B
+	)
+	{
+		cuExecute(d.size(),
+			SF_calculateDiagnals,
+			d,
+			J,
+			B);
+	}
+
+	template<typename Coord, typename Real>
+	__global__ void SF_preConditionJ(
+		DArray<Coord> J,
+		DArray<Real> d,
+		DArray<Real> eta
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= d.size())
+			return;
+
+		if (d[tId] > EPSILON)
+		{
+			Real d_inv = 1 / d[tId];
+			J[4 * tId] = d_inv * J[4 * tId];
+			J[4 * tId + 1] = d_inv * J[4 * tId + 1];
+			J[4 * tId + 2] = d_inv * J[4 * tId + 2];
+			J[4 * tId + 3] = d_inv * J[4 * tId + 3];
+
+			eta[tId] = d_inv * eta[tId];
+		}
+	}
+
+	void preConditionJ(
+		DArray<Vec3f> J,
+		DArray<float> d,
+		DArray<float> eta
+	)
+	{
+		cuExecute(d.size(),
+			SF_preConditionJ,
+			J,
+			d,
+			eta);
+	}
+
+	template<typename Coord, typename Real, typename Constraint>
+	__global__ void SF_checkOutError(
+		DArray<Coord> J,
+		DArray<Coord> mImpulse,
+		DArray<Constraint> constraints,
+		DArray<Real> eta,
+		DArray<Real> error
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= constraints.size())
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		Real tmp = 0;
+		tmp += J[4 * tId].dot(mImpulse[idx1 * 2]) + J[4 * tId + 1].dot(mImpulse[idx1 * 2 + 1]);
+		if (idx2 != INVALID)
+			tmp += J[4 * tId + 2].dot(mImpulse[idx2 * 2]) + J[4 * tId + 3].dot(mImpulse[idx2 * 2 + 1]);
+
+		Real e = tmp - eta[tId];
+		error[tId] = e * e;
+	}
+
+
+
+	Real checkOutError(
+		DArray<Vec3f> J,
+		DArray<Vec3f> mImpulse,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<float> eta
+	)
+	{
+		DArray<float> error;
+		error.resize(eta.size());
+		error.reset();
+
+		cuExecute(eta.size(),
+			SF_checkOutError,
+			J,
+			mImpulse,
+			constraints,
+			eta,
+			error);
+
+		CArray<float> errorHost;
+		errorHost.assign(error);
+
+		Real tmp = 0.0f;
+		int num = errorHost.size();
+		for (int i = 0; i < num; i++)
+		{
+			tmp += errorHost[i];
+		}
+		error.clear();
+		errorHost.clear();
+		return sqrt(tmp);
+	}
+
+	bool saveVectorToFile(
+		const std::vector<float>& vec,
+		const std::string& filename
+	)
+	{
+		std::ofstream file(filename);
+		if (!file.is_open()) {
+			std::cerr << "Failed to open file." << std::endl;
+			return false; 
+		}
+
+		for (float f : vec)
+		{
+			file << f << " ";
+		}
+
+		file.close();
+		return true;
+	}
 	
 	
 }
