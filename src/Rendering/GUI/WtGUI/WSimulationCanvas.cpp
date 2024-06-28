@@ -124,6 +124,7 @@ void WSimulationCanvas::initializeGL()
 	makeCurrent();
 
 	mRenderEngine->initialize();
+	mRenderEngine->setDefaultEnvmap();
 
 	if (showImGUI())
 	{
