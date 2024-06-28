@@ -26,7 +26,7 @@ int main()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->varFileName()->setValue(getAssetPath()+std::string("gltf/Robot/RobotTest.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
+	gltf->varFileName()->setValue(getAssetPath()+std::string("gltf/Robot/RobotTest2.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
 	gltf->varUseInstanceTransform()->setValue(false);
 	gltf->varImportAnimation()->setValue(true); 
 	gltf->setVisible(false);
