@@ -261,6 +261,9 @@ void WSimulationCanvas::update()
 		mFramebuffer.bind();
 		mRenderEngine->draw(mScene.get(), mRenderParams);
 
+		mRenderEngine->planeScale = planeScale;
+		mRenderEngine->rulerScale = rulerScale;
+
 		if (showImGUI())
 		{
 			// Start the Dear ImGui frame
