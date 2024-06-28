@@ -254,6 +254,15 @@ void WSimulationCanvas::update()
 		mRenderEngine->rulerScale *= mCamera->unitScale();
 
 		mFramebuffer.bind();
+		// heck: ImGUI widgets need to render twice...
+		if (showImGUI())
+		{
+			// Start the Dear ImGui frame
+			mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
+			mImWindow.draw(this);
+			mImGuiCtx->Render();
+		}
+
 		mRenderEngine->draw(mScene.get(), mRenderParams);
 
 		mRenderEngine->planeScale = planeScale;
