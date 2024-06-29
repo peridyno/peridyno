@@ -12,8 +12,6 @@
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
 
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
 #include "imgui_impl_wt.h"
 
 using namespace dyno;
@@ -100,7 +98,6 @@ WSimulationCanvas::~WSimulationCanvas()
 	mImageData.resize(0);
 	mJpegBuffer.resize(0);
 
-	ImGui_ImplOpenGL3_Shutdown();
 	glfwDestroyWindow(mContext);
 	//glfwTerminate();
 	Wt::log("warning") << "WSimulationCanvas destory";
@@ -127,6 +124,7 @@ void WSimulationCanvas::initializeGL()
 	makeCurrent();
 
 	mRenderEngine->initialize();
+	mRenderEngine->setDefaultEnvmap();
 
 	if (showImGUI())
 	{
@@ -140,9 +138,6 @@ void WSimulationCanvas::initializeGL()
 
 		// Initialize ImWindow
 		mImWindow.initialize(xscale);
-
-		const char* glsl_version = "#version 130";
-		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
 
 	// create framebuffer here...
@@ -259,6 +254,15 @@ void WSimulationCanvas::update()
 		mRenderEngine->rulerScale *= mCamera->unitScale();
 
 		mFramebuffer.bind();
+		// heck: ImGUI widgets need to render twice...
+		if (showImGUI())
+		{
+			// Start the Dear ImGui frame
+			mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
+			mImWindow.draw(this);
+			mImGuiCtx->Render();
+		}
+
 		mRenderEngine->draw(mScene.get(), mRenderParams);
 
 		mRenderEngine->planeScale = planeScale;
@@ -268,14 +272,8 @@ void WSimulationCanvas::update()
 		{
 			// Start the Dear ImGui frame
 			mImGuiCtx->NewFrame(mCamera->viewportWidth(), mCamera->viewportHeight());
-			ImGui_ImplOpenGL3_NewFrame();
-
-			ImGui::NewFrame();
-
 			mImWindow.draw(this);
-
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			mImGuiCtx->Render();
 		}
 
 		// dump framebuffer
