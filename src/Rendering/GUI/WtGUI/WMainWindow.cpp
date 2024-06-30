@@ -251,6 +251,8 @@ void WMainWindow::reset()
 		mScene->setFrameNumber(0);
 		mScene->reset();
 
+		mSceneCanvas->update();
+
 		mReset = true;
 	}
 
