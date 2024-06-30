@@ -124,7 +124,6 @@ void WSimulationCanvas::initializeGL()
 	makeCurrent();
 
 	mRenderEngine->initialize();
-	mRenderEngine->setDefaultEnvmap();
 
 	if (showImGUI())
 	{
@@ -246,12 +245,7 @@ void WSimulationCanvas::update()
 		mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
 		mRenderParams.transforms.view = mCamera->getViewMat();
 		mRenderParams.transforms.proj = mCamera->getProjMat();
-
-		// Jian SHI: hack for unit scaling...
-		float planeScale = mRenderEngine->planeScale;
-		float rulerScale = mRenderEngine->rulerScale;
-		mRenderEngine->planeScale *= mCamera->unitScale();
-		mRenderEngine->rulerScale *= mCamera->unitScale();
+		mRenderParams.unitScale = mCamera->unitScale();
 
 		mFramebuffer.bind();
 		// heck: ImGUI widgets need to render twice...
@@ -264,9 +258,6 @@ void WSimulationCanvas::update()
 		}
 
 		mRenderEngine->draw(mScene.get(), mRenderParams);
-
-		mRenderEngine->planeScale = planeScale;
-		mRenderEngine->rulerScale = rulerScale;
 
 		if (showImGUI())
 		{

@@ -194,18 +194,10 @@ namespace dyno
 		mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
 		mRenderParams.transforms.view = mCamera->getViewMat();
 		mRenderParams.transforms.proj = mCamera->getProjMat();
-
-		// Jian SHI: hack for unit scaling...
-		float planeScale = mRenderEngine->planeScale;
-		float rulerScale = mRenderEngine->rulerScale;
-		mRenderEngine->planeScale *= mCamera->unitScale();
-		mRenderEngine->rulerScale *= mCamera->unitScale();
+		mRenderParams.unitScale = mCamera->unitScale();
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
-
-		mRenderEngine->planeScale = planeScale;
-		mRenderEngine->rulerScale = rulerScale;
 
 		// Draw ImGui
 		if (showImGUI())
