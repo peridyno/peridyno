@@ -78,11 +78,6 @@ bool Node::isVisible()
 void Node::setVisible(bool visible)
 {
 	mRenderingEnabled = visible;
-
-	if (visible)
-		this->graphicsPipeline()->enable();
-	else
-		this->graphicsPipeline()->disable();
 }
 
 float Node::getDt()
@@ -200,7 +195,10 @@ void Node::postUpdateStates()
 
 void Node::updateGraphicsContext()
 {
-	this->graphicsPipeline()->update();
+	if (mRenderingEnabled)
+	{
+		this->graphicsPipeline()->update();
+	}
 }
 
 void Node::resetStates()

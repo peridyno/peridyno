@@ -66,8 +66,6 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
-//	fluid->animationPipeline()->disable();
-
 	//Barricade
 	auto barricade = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	barricade->varFileName()->setValue(getAssetPath() + "bowl/barricade.obj");

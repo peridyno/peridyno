@@ -104,10 +104,7 @@ namespace dyno
 					timer.start();
 				}
 
-				if (node->isActive())
-				{
-					node->update();
-				}
+				node->update();
 
 				if (mTiming) {
 					timer.stop();
