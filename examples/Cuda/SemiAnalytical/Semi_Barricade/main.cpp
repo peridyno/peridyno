@@ -102,7 +102,7 @@ int main()
 {
 	GlfwApp window;
 	window.setSceneGraph(createScene());
-	window.initialize(1024, 768);
+	window.initialize(1920, 1080);
 	window.mainLoop();
 
 	return 0;

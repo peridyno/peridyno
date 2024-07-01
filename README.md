@@ -2,7 +2,7 @@
 
 
 
-![](data/logo/Logo.png)
+![](screenshots/Logo.png)
 
 
 
@@ -15,7 +15,7 @@ PeriDyno is a CUDA-based, highly parallal physics engine targeted at providing r
 
 ## Platforms
 
-**Windows 10**: fully tested
+**Windows 10/11**: fully tested
 
 **Linux**: should work as well, yet not guranteed.
 
@@ -27,7 +27,7 @@ IDE:
 
 CUDA:
 
-- Latest tests were done based on CUDA Toolkit 11.4, should be compatible will other old versions.
+- Latest tests were done based on CUDA Toolkit 12.2, should be compatible will other old versions.
 
 Graphics:
 
@@ -38,6 +38,7 @@ Graphics:
 Optional:
 
 - Qt: https://download.qt.io/
+- Wt: https://www.webtoolkit.eu/wt/
 - VTK: https://github.com/Kitware/VTK
 - Alembic: https://github.com/alembic/alembic
 - Imath: https://github.com/AcademySoftwareFoundation/Imath
@@ -69,11 +70,23 @@ With a scene moded by PeriDyno, it can either be run as a GFLW application, Qt a
 
 - GLFW application
 
-<img src="data/screenshots/glfwapp.png" style="zoom:80%;" />
+[<img src="screenshots/glfwapp.png" style="zoom:80%;" />](https://github.com/peridyno/peridyno/tree/master/examples/Cuda/SemiAnalytical/Semi_Barricade)
 
 - Qt application
 
-[<img src="data/screenshots/qtapp.png" style="zoom:80%;" />](https://github.com/peridyno/peridyno/assets/66506655/466ba7ee-851b-489c-aa7a-4493b3552476.mp4)
+[<img src="screenshots/qtapp.png" style="zoom:80%;" />](https://github.com/peridyno/peridyno/assets/66506655/466ba7ee-851b-489c-aa7a-4493b3552476.mp4)
+
+- Web application
+
+[<img src="screenshots/wtapp.png" style="zoom:80%;" />](https://github.com/peridyno/peridyno/tree/master/examples/Cuda/WtGUI/Wt_Barricade)
+
+
+
+# Other resources
+
+- Documentation: www.peridyno.com
+- API: https://peridyno.com/doxygen/html/index.html
+- Cources: https://www.bilibili.com/video/BV15M4y1U76M/
 
 # License
 
