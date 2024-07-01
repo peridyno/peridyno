@@ -35,6 +35,17 @@ public:
 
 	void update();
 
+public:
+	//Mouse interaction
+	void onMousePressed(const Wt::WMouseEvent& evt);
+	void onMouseDrag(const Wt::WMouseEvent& evt);
+	void onMouseReleased(const Wt::WMouseEvent& evt);
+	void onMouseWheeled(const Wt::WMouseEvent& evt);
+
+	//Keyboard interaction
+	void onKeyWentDown(const Wt::WKeyEvent& evt);
+	void onKeyWentUp(const Wt::WKeyEvent& evt);
+
 protected:
 	void initializeGL();
 	void makeCurrent();
@@ -42,12 +53,6 @@ protected:
 
 	void render(Wt::WFlags<Wt::RenderFlag> flags) override;
 	void layoutSizeChanged(int width, int height) override;
-
-private:
-	void onMousePressed(const Wt::WMouseEvent& evt);
-	void onMouseDrag(const Wt::WMouseEvent& evt);
-	void onMouseReleased(const Wt::WMouseEvent& evt);
-	void onMouseWheeled(const Wt::WMouseEvent& evt);
 
 	int width = 800;
 	int height = 600;
@@ -72,4 +77,8 @@ private:
 	// internal framebuffer
 	dyno::Framebuffer mFramebuffer;
 	dyno::Texture2D	mFrameColor;
+
+	bool mMouseButtonDown = false;
+
+	int mtempCursorX = -1;
 };

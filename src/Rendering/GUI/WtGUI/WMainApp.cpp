@@ -1,5 +1,6 @@
 #include "WMainApp.h"
 #include "WMainWindow.h"
+#include "WSimulationCanvas.h"
 
 #include <Wt/WLinkedCssStyleSheet.h>
 #include <Wt/WEnvironment.h>
@@ -202,6 +203,9 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 	window = layout->addWidget(std::make_unique<WMainWindow>());
 
 	window->setScene(SceneGraphFactory::instance()->createDefaultScene());
+
+ 	this->globalKeyWentDown().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentDown);
+	this->globalKeyWentUp().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentUp);
 }
 
 WMainApp::~WMainApp()

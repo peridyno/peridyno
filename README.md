@@ -23,7 +23,7 @@ PeriDyno is a CUDA-based, highly parallal physics engine targeted at providing r
 
 IDE:
 
-- Visual studio 2017+
+- Visual studio 2019+
 
 CUDA:
 
@@ -37,8 +37,8 @@ Graphics:
 
 Optional:
 
-- Qt: https://download.qt.io/
-- Wt: https://www.webtoolkit.eu/wt/
+- Qt(5.13+): https://download.qt.io/
+- Wt(4.10.2+): https://www.webtoolkit.eu/wt/
 - VTK: https://github.com/Kitware/VTK
 - Alembic: https://github.com/alembic/alembic
 - Imath: https://github.com/AcademySoftwareFoundation/Imath
@@ -86,7 +86,7 @@ With a scene moded by PeriDyno, it can either be run as a GFLW application, Qt a
 
 - Documentation: www.peridyno.com
 - API: https://peridyno.com/doxygen/html/index.html
-- Cources: https://www.bilibili.com/video/BV15M4y1U76M/
+- Courses: https://www.bilibili.com/video/BV15M4y1U76M/
 
 # License
 
