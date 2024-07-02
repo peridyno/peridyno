@@ -289,15 +289,20 @@ namespace dyno
 			auto cap = caps[ids.bodyId2 - elementOffset.capsuleIndex()];
 			auto tet = tets[ids.bodyId1 - elementOffset.tetIndex()];
 
-			CollisionDetection<Real>::request(manifold, tet, cap);
+			// CollisionDetection<Real>::request(manifold, tet, cap);
+			Segment3D seg = cap.centerline();
+			Real radius = cap.radius;
+			CollisionDetection<Real>::request(manifold, tet, seg, 0.f, radius);
 		}
 		else if (eleType_j == ET_TET && eleType_i == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_CAPSULE, ET_TET))
 		{
 			//TODO: consider dHat
 			auto cap = caps[ids.bodyId1 - elementOffset.capsuleIndex()];
 			auto tet = tets[ids.bodyId2 - elementOffset.tetIndex()];
-
-			CollisionDetection<Real>::request(manifold, cap, tet);
+			//CollisionDetection<Real>::request(manifold, cap, tet);
+			Segment3D seg = cap.centerline();
+			Real radius = cap.radius;
+			CollisionDetection<Real>::request(manifold, seg, tet, radius, 0.f);
 		}
 		else if (eleType_i == ET_CAPSULE && eleType_j == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_CAPSULE, ET_CAPSULE))	//capsule-capsule
 		{
@@ -314,20 +319,25 @@ namespace dyno
 			auto cap = caps[ids.bodyId2 - elementOffset.capsuleIndex()];
 			auto box = boxes[ids.bodyId1 - elementOffset.boxIndex()];
 
-			cap.radius += dHat;
-			box.extent += dHat;
+			// cap.radius += dHat;
+			// box.extent += dHat;
 
-			CollisionDetection<Real>::request(manifold, box, cap);
+			// CollisionDetection<Real>::request(manifold, box, cap);
+			Segment3D seg = cap.centerline();
+			Real radius = cap.radius;
+			CollisionDetection<Real>::request(manifold, box, seg, 0.f, radius);
 		}
 		else if (eleType_j == ET_BOX && eleType_i == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_CAPSULE, ET_BOX))
 		{
 			auto cap = caps[ids.bodyId1 - elementOffset.capsuleIndex()];
 			auto box = boxes[ids.bodyId2 - elementOffset.boxIndex()];
 
-			cap.radius += dHat;
-			box.extent += dHat;
-
-			CollisionDetection<Real>::request(manifold, cap, box);
+			// cap.radius += dHat;
+			// box.extent += dHat;
+			// CollisionDetection<Real>::request(manifold, cap, box);
+			Segment3D seg = cap.centerline();
+			Real radius = cap.radius;
+			CollisionDetection<Real>::request(manifold, seg, box, radius, 0.f);
 		}
 		else if (eleType_i == ET_SPHERE && eleType_j == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_SPHERE, ET_CAPSULE))			//sphere-capsule
 		{

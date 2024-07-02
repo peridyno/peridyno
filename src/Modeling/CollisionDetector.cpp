@@ -95,8 +95,10 @@ namespace dyno
 
 			auto sA = modelA->outCapsule()->getValue();
 			auto sB = modelB->outCube()->getValue();
-
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			Segment3D seg = sA.centerline();
+			Real radius1 = sA.radius;
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, seg, sB, radius1, 0.f);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::CUBE && shapeB->getShapeType() == BasicShapeType::SPHERE)		//cube-sphere
 		{

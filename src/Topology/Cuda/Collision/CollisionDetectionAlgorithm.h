@@ -12,12 +12,24 @@ namespace dyno
 		using Coord3D = Vector<Real, 3>;
 		using Matrix3D = SquareMatrix<Real, 3>;
 		using Transform3D = Transform<Real, 3>;
+		using Tet3D = TTet3D<Real>;
 		using Manifold = TManifold<Real>;
 		using Sphere3D = TSphere3D<Real>;
+		using Segment3D = TSegment3D<Real>;
 		using OBox3D = TOrientedBox3D<Real>;
 		using Capsule3D = TCapsule3D<Real>;
 		using Triangle3D = TTriangle3D<Real>;
 
+		//--------------------------------------------------------------------------------------------------
+		// Minkowski Sum + Separating Axis Theorem for Round Primitives
+		DYN_FUNC static void MSDF(const OBox3D& box, const Segment3D& seg, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Segment3D& seg, const Real radiusA, const Real radiusB); 
+		DYN_FUNC static void request(Manifold& m, const Segment3D& seg, const OBox3D& box, const Real radiusA, const Real radiusB);
+
+		
+		DYN_FUNC static void MSDF(const Tet3D& tet, const Segment3D& seg, Real& depth, Coord3D& normal, Real& boundary1, Real &boundary2, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Segment3D& seg, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Segment3D& seg, const Tet3D& tet, const Real radiusA, const Real radiusB); 
 		//--------------------------------------------------------------------------------------------------
 		// Resources:
 		// https://box2d.googlecode.com/files/GDC2007_ErinCatto.zip

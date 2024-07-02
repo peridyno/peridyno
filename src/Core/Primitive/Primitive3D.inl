@@ -2398,10 +2398,10 @@ namespace dyno
 		}
 
 		// Find parameter values of closest points
-		// on each segment��s infinite line. Denominator
+		// on each segment's infinite line. Denominator
 		// assumed at this point to be ����det����,
 		// which is always positive. We can check
-		// value of numerators to see if we��re outside
+		// value of numerators to see if we are outside
 		// the [0, 1] x [0, 1] domain.
 		Real sNum = b * e - c * d;
 		Real tNum = a * e - b * d;
@@ -2488,18 +2488,70 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TSegment3D<Real> TSegment3D<Real>::proximity(const TRectangle3D<Real>& rectangle) const
 	{
-		TLine3D<Real> line(startPoint(), direction());
-		TSegment3D<Real> pq = line.proximity(rectangle);
+		Coord3D N = rectangle.axis[0].cross(rectangle.axis[1]);
+		Coord3D D = v1 - v0;
+		Real maxT = D.norm();
+		D.normalize();
+		
+		Coord3D Q = v0 - rectangle.center;
+		Real DdN = D.dot(N);
+		Real absDdN = abs(DdN);
+		if (absDdN > REAL_EPSILON)
+		{
+			// The Seg and rectangle are not parallel, so the seg
+			// intersects the plane of the rectangle.
+			// Solve Q + t*D = s0*W0 + s1*W1 (Q = diff, D = line direction(unit),
+			// W0 = edge 0 direction, W1 = edge 1 direction, N = Cross(W0,W1))
+			// by
+			//   s0 = Dot(W1,Cross(D,Q)) / Dot(D,N)
+			//   s1 = -Dot(W0,Cross(D,Q)) / Dot(D,N)
+			//   t = -Dot(Q,N) / Dot(D,N)
+			Coord3D DxQ = D.cross(Q);
+			Real W1dDxQ = rectangle.axis[1].dot(DxQ);
+			if (abs(W1dDxQ) <= rectangle.extent[0] * absDdN)
+			{
+				Real W0dDxQ = rectangle.axis[0].dot(DxQ);
+				if (abs(W0dDxQ) <= rectangle.extent[1] * absDdN)
+				{
+					Real t = -Q.dot(N) / DdN;
+					if (t >= 0.f && t <= maxT)
+					{
+						Real s0 = W1dDxQ / DdN;
+						Real s1 = -W0dDxQ / DdN;
+						printf("inter\n");
+						return TSegment3D<Real>(v0 + t * D, rectangle.center + s0 * rectangle.axis[0] + s1 * rectangle.axis[1]);
+					}
+				}
+			}
+		}
+		printf("prox\n");
+		Real minDS = REAL_MAX;
+		TSegment3D<Real> minPQ;
+		// Edge -Edge
+		for (int i = 0; i < 4; i++)
+		{
+			TSegment3D<Real> pq = proximity(rectangle.edge(i));
+			if (pq.lengthSquared() < minDS)
+			{
+				minDS = pq.lengthSquared();
+				minPQ = pq;
+			}
+		}
 
-		Real t = parameter(pq.startPoint());
-
-		if (t < Real(0))
-			return TPoint3D<Real>(startPoint()).project(rectangle) - TPoint3D<Real>(startPoint());
-
-		if (t > Real(1))
-			return TPoint3D<Real>(endPoint()).project(rectangle) - TPoint3D<Real>(endPoint());
-
-		return pq;
+		// Point - Face
+		for (int i = 0; i < 2; i++)
+		{
+			Coord3D v = (i == 0)? v0 : v1;
+			TPoint3D<Real> p(v);
+			TPoint3D<Real> q = TPoint3D<Real>(p).project(rectangle);
+			TSegment3D<Real> pq = q - p;
+			if (pq.lengthSquared() < minDS)
+			{
+				minDS = pq.lengthSquared();
+				minPQ = pq;
+			}
+		}
+		return minPQ;
 	}
 
 	template<typename Real>
@@ -3019,19 +3071,21 @@ namespace dyno
 	DYN_FUNC TPoint3D<Real> TRectangle3D<Real>::vertex(const int i) const
 	{
 		int id = i % 4;
+		Coord3D u = axis[0] * extent[0];
+		Coord3D v = axis[1] * extent[1];
 		switch (id)
 		{
 		case 0:
-			return TPoint3D<Real>(center - axis[0] - axis[1]);
+			return TPoint3D<Real>(center - u - v);
 			break;
 		case 1:
-			return TPoint3D<Real>(center + axis[0] - axis[1]);
+			return TPoint3D<Real>(center + u - v);
 			break;
 		case 2:
-			return TPoint3D<Real>(center + axis[0] + axis[1]);
+			return TPoint3D<Real>(center + u + v);
 			break;
 		default:
-			return TPoint3D<Real>(center - axis[0] + axis[1]);
+			return TPoint3D<Real>(center - u + v);
 			break;
 		}
 	}
