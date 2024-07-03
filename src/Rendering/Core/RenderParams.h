@@ -59,6 +59,7 @@ namespace dyno
 		// 2 = Transparency
 		int mode = 0;
 
+		float unitScale = 1.0f;
 	};
 
 }

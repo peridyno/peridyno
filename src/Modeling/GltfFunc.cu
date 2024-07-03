@@ -648,14 +648,14 @@ namespace dyno
 
 	void importAnimation(
 		tinygltf::Model model,
-		std::map<joint, Vec3i> joint_output,
-		std::map<joint, Vec3f> joint_input,
-		std::map<joint, std::vector<Vec3f>> joint_T_f_anim,
-		std::map<joint, std::vector<Real>> joint_T_Time,
-		std::map<joint, std::vector<Vec3f>> joint_S_f_anim,
-		std::map<joint, std::vector<Real>> joint_S_Time,
-		std::map<joint, std::vector<Quat<float>>> joint_R_f_anim,
-		std::map<joint, std::vector<Real>> joint_R_Time
+		std::map<joint, Vec3i>& joint_output,
+		std::map<joint, Vec3f>& joint_input,
+		std::map<joint, std::vector<Vec3f>>& joint_T_f_anim,
+		std::map<joint, std::vector<Real>>& joint_T_Time,
+		std::map<joint, std::vector<Vec3f>>& joint_S_f_anim,
+		std::map<joint, std::vector<Real>>& joint_S_Time,
+		std::map<joint, std::vector<Quat<float>>>& joint_R_f_anim,
+		std::map<joint, std::vector<Real>>& joint_R_Time
 	)
 	{
 		using namespace tinygltf;
@@ -751,5 +751,131 @@ namespace dyno
 
 
 
+	template< typename Coord, typename Vec4f, typename Mat4f, typename Vec2u>
+	__global__ void PointsAnimation(
+		DArray<Coord> intialPosition,
+		DArray<Coord> worldPosition,
+		DArray<Mat4f> joint_inverseBindMatrix,
+		DArray<Mat4f> WorldMatrix,
+
+		DArray<Vec4f> bind_joints_0,
+		DArray<Vec4f> bind_joints_1,
+		DArray<Vec4f> weights_0,
+		DArray<Vec4f> weights_1,
+
+		Mat4f transform,
+		bool isNormal,
+
+		Vec2u range
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= worldPosition.size()) return;
+
+		if (pId<range[0] || pId>range[1])
+			return;
+
+		Vec4f result = Vec4f(0, 0, 0, float(!isNormal));
+
+		int skinInfoVertexId = pId - range[0];
+
+		Coord offest;
+
+		bool j0 = bind_joints_0.size();
+		bool j1 = bind_joints_1.size();
+
+		if (j0)
+		{
+			for (unsigned int i = 0; i < 4; i++)
+			{
+				int jointId = int(bind_joints_0[skinInfoVertexId][i]);
+				Real weight = weights_0[skinInfoVertexId][i];
+
+				offest = intialPosition[pId];
+				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
+
+				result += (transform * WorldMatrix[jointId] * v_bone_space) * weight;
+			}
+		}
+		if (j1)
+		{
+			for (unsigned int i = 0; i < 4; i++)
+			{
+				int jointId = int(bind_joints_1[skinInfoVertexId][i]);
+				Real weight = weights_1[skinInfoVertexId][i];
+
+				offest = intialPosition[pId];
+				Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
+
+				result += (WorldMatrix[jointId] * v_bone_space) * weight;
+			}
+		}
+
+		//result = transform * result;
+
+		if (j0 | j1)
+		{
+			worldPosition[pId][0] = result[0];
+			worldPosition[pId][1] = result[1];
+			worldPosition[pId][2] = result[2];
+		}
+
+		if (isNormal)
+			worldPosition[pId] = worldPosition[pId].normalize();
+
+	}
+
+	template< typename Vec3f, typename Vec4f, typename Mat4f, typename Vec2u>
+	void skinAnimation(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Mat4f>& joint_inverseBindMatrix,
+		DArray<Mat4f>& WorldMatrix,
+
+		DArray<Vec4f>& bind_joints_0,
+		DArray<Vec4f>& bind_joints_1,
+		DArray<Vec4f>& weights_0,
+		DArray<Vec4f>& weights_1,
+
+		Mat4f transform,
+		bool isNormal,
+
+		Vec2u range
+	)
+	{
+
+		cuExecute(intialPosition.size(),
+			PointsAnimation,
+			intialPosition,
+			worldPosition,
+			joint_inverseBindMatrix,
+			WorldMatrix,
+
+			bind_joints_0,
+			bind_joints_1,
+			weights_0,
+			weights_1,
+			transform,
+			isNormal,
+			range
+		);
+
+	}
+
+	template void skinAnimation<Vec3f, Vec4f , Mat4f, Vec2u>(DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Mat4f>& joint_inverseBindMatrix,
+		DArray<Mat4f>& WorldMatrix,
+
+		DArray<Vec4f>& bind_joints_0,
+		DArray<Vec4f>& bind_joints_1,
+		DArray<Vec4f>& weights_0,
+		DArray<Vec4f>& weights_1,
+
+		Mat4f transform,
+		bool isNormal,
+
+		Vec2u range
+		);
 
 }

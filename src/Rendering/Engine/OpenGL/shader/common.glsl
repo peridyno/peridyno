@@ -17,6 +17,7 @@ layout(std140, binding = 0) uniform RenderParams
 	int height;
 	int index;
 	int mode;
+	float scale;
 } uRenderParams;
 
 // PBR material parameters

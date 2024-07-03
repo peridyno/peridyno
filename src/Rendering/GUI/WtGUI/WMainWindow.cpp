@@ -257,6 +257,8 @@ void WMainWindow::reset()
 		mScene->reset();
 		mSceneCanvas->update();
 
+		mSceneCanvas->update();
+
 		mReset = true;
 	}
 

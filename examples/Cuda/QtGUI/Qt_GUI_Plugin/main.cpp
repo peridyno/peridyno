@@ -28,7 +28,7 @@ int main()
 	dynoIO::initStaticPlugin();
 
 	QtApp app;
-	app.initialize(1366, 800);
+	app.initialize(1920, 1080);
 	app.mainLoop();
 
 	return 0;

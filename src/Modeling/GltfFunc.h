@@ -61,14 +61,14 @@ namespace dyno
 
 	void importAnimation(
 		tinygltf::Model model,
-		std::map<joint, Vec3i> joint_output,
-		std::map<joint, Vec3f> joint_input,
-		std::map<joint, std::vector<Vec3f>> joint_T_f_anim,
-		std::map<joint, std::vector<Real>> joint_T_Time,
-		std::map<joint, std::vector<Vec3f>> joint_S_f_anim,
-		std::map<joint, std::vector<Real>> joint_S_Time,
-		std::map<joint, std::vector<Quat<float>>> joint_R_f_anim,
-		std::map<joint, std::vector<Real>> joint_R_Time
+		std::map<joint, Vec3i>& joint_output,
+		std::map<joint, Vec3f>& joint_input,
+		std::map<joint, std::vector<Vec3f>>& joint_T_f_anim,
+		std::map<joint, std::vector<Real>>& joint_T_Time,
+		std::map<joint, std::vector<Vec3f>>& joint_S_f_anim,
+		std::map<joint, std::vector<Real>>& joint_S_Time,
+		std::map<joint, std::vector<Quat<float>>>& joint_R_f_anim,
+		std::map<joint, std::vector<Real>>& joint_R_Time
 	);
 
 
@@ -110,6 +110,24 @@ namespace dyno
 		CArray<Mat4f>& mesh_Matrix
 	);
 
+
+	template< typename Vec3f, typename Vec4f, typename Mat4f, typename Vec2u>
+	void skinAnimation(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Mat4f>& joint_inverseBindMatrix,
+		DArray<Mat4f>& WorldMatrix,
+
+		DArray<Vec4f>& bind_joints_0,
+		DArray<Vec4f>& bind_joints_1,
+		DArray<Vec4f>& weights_0,
+		DArray<Vec4f>& weights_1,
+
+		Mat4f transform,
+		bool isNormal,
+
+		Vec2u range
+	);
 
 
 

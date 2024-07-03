@@ -404,7 +404,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(instanceRender);
 
 	//**********Add Nodes
-	fluid->animationPipeline()->disable();
+	fluid->setActive(false);
 
 	//**********Boundary 2
 	auto pipe = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
