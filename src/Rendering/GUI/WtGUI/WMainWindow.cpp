@@ -69,16 +69,19 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	menu->setMargin(5, Wt::Side::Right);
 
 	auto sampleWidget = new WSampleWidget();
-	auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	auto pythonWidget = new WPythonWidget;
 
+	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
+	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
+
+	/*paramsWidget->valueChanged().connect([=]() {
+		mSceneCanvas->update();
+		});*/
+
 	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));
-	menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
+
 	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
 
-	paramsWidget->valueChanged().connect([=]() {
-		mSceneCanvas->update();
-		});
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene) setScene(scene);
@@ -224,7 +227,10 @@ void WMainWindow::start()
 		Wt::WApplication* app = Wt::WApplication::instance();
 		while (this->bRunFlag)
 		{
-			step();
+			mScene->takeOneFrame();
+			mSceneCanvas->update();
+			Wt::log("info") << "Step!!!";
+			Wt::log("info") << mScene->getFrameNumber();
 			app->processEvents();
 		}
 	}
@@ -239,6 +245,7 @@ void WMainWindow::step()
 {
 	if (mScene)
 	{
+		stop();
 		mScene->takeOneFrame();
 		mSceneCanvas->update();
 	}
