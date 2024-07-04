@@ -2,9 +2,9 @@
 
 void declare_gltf_app(py::module& m) {
 	using Class = dyno::GlfwApp;
-	using Parent = dyno::AppBase;
+	//using Parent = dyno::AppBase;
 	std::string pyclass_name = std::string("GlfwApp");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init())
 		.def("set_scenegraph", &dyno::GlfwApp::setSceneGraph)
 		.def("initialize", &dyno::GlfwApp::initialize)
@@ -16,9 +16,9 @@ void declare_gltf_app(py::module& m) {
 void declare_gltf_render_window(py::module& m)
 {
 	using Class = dyno::GlfwRenderWindow;
-	using Parent = dyno::RenderWindow;
+	//using Parent = dyno::RenderWindow;
 	std::string pyclass_name = std::string("GlfwRenderWindow");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init())
 		.def("initialize", &dyno::GlfwRenderWindow::initialize)
 		.def("main_loop", &dyno::GlfwRenderWindow::mainLoop)
@@ -46,13 +46,12 @@ void declare_gltf_render_window(py::module& m)
 
 void pybind_glfw_gui(py::module& m)
 {
-
-	py::class_<dyno::AppBase>(m)
-		.def("initialize", &dyno::AppBase::initialize)
-		.def("main_loop", &dyno::AppBase::mainLoop)
-		.def("get_scene_graph", &dyno::AppBase::getSceneGraph)
-		.def("set_scene_graph", &dyno::AppBase::setSceneGraph)
-		.def("set_scene_graph_creator", &dyno::AppBase::setSceneGraphCreator);
+	//py::class_<dyno::AppBase>(m, "AppBase")
+	//	.def("initialize", &dyno::AppBase::initialize)
+	//	.def("main_loop", &dyno::AppBase::mainLoop)
+	//	.def("get_scene_graph", &dyno::AppBase::getSceneGraph)
+	//	.def("set_scene_graph", &dyno::AppBase::setSceneGraph)
+	//	.def("set_scene_graph_creator", &dyno::AppBase::setSceneGraphCreator);
 
 	declare_gltf_app(m);
 	declare_gltf_render_window(m);
