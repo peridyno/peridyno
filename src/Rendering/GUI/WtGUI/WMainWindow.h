@@ -49,4 +49,6 @@ private:
 
 	std::shared_ptr<dyno::SceneGraph>	mScene = nullptr;
 	std::shared_ptr<dyno::Node> mActiveNode;
+
+	Wt::WPushButton* startButton;
 };

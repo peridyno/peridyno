@@ -16,7 +16,6 @@
 
 using namespace dyno;
 
-
 std::map<Wt::Key, PKeyboardType> WKeyMap =
 {
 	{Wt::Key::Unknown, PKEY_UNKNOWN},
@@ -121,8 +120,8 @@ WSimulationCanvas::WSimulationCanvas()
 	this->mouseDragged().connect(this, &WSimulationCanvas::onMouseDrag);
 	this->mouseWentUp().connect(this, &WSimulationCanvas::onMouseReleased);
 
-// 	this->keyWentDown().connect(this, &WSimulationCanvas::onKeyWentDown);
-// 	this->keyWentUp().connect(this, &WSimulationCanvas::onKeyWentUp);
+	// 	this->keyWentDown().connect(this, &WSimulationCanvas::onKeyWentDown);
+	// 	this->keyWentUp().connect(this, &WSimulationCanvas::onKeyWentUp);
 
 	this->setAttributeValue("oncontextmenu", "return false;");
 
@@ -191,14 +190,13 @@ WSimulationCanvas::~WSimulationCanvas()
 	glfwDestroyWindow(mContext);
 	//glfwTerminate();
 	Wt::log("warning") << "WSimulationCanvas destory";
-
 }
 
 void WSimulationCanvas::initializeGL()
 {
 	// initialize render engine and target
 	glfwInit();
-	// Set all the required options for GLFW    
+	// Set all the required options for GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -239,7 +237,7 @@ void WSimulationCanvas::initializeGL()
 	mFramebuffer.create();
 	mFramebuffer.bind();
 	const unsigned int GL_COLOR_ATTACHMENT0 = 0x8CE0;
-	mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mFrameColor);	// 
+	mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mFrameColor);	//
 	unsigned int buffers[]{ GL_COLOR_ATTACHMENT0 };
 	mFramebuffer.drawBuffers(1, buffers);
 	mFramebuffer.unbind();
@@ -333,6 +331,7 @@ void WSimulationCanvas::onMouseWheeled(const Wt::WMouseEvent& evt)
 
 void WSimulationCanvas::onKeyWentDown(const Wt::WKeyEvent& evt)
 {
+	Wt::log("Error") << "´¥·¢ÁË";
 	PKeyboardEvent keyEvent;
 	keyEvent.key = WKeyMap.find(evt.key()) == WKeyMap.end() ? PKEY_UNKNOWN : WKeyMap[evt.key()];
 	keyEvent.action = AT_PRESS;
@@ -354,7 +353,6 @@ void WSimulationCanvas::onKeyWentDown(const Wt::WKeyEvent& evt)
 
 void WSimulationCanvas::onKeyWentUp(const Wt::WKeyEvent& evt)
 {
-
 }
 
 void WSimulationCanvas::render(Wt::WFlags<Wt::RenderFlag> flags)
@@ -441,5 +439,4 @@ void WSimulationCanvas::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 
 		scheduleRender();
 	}
-
 }

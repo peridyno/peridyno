@@ -82,7 +82,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
 
-
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene) setScene(scene);
 		});
@@ -202,22 +201,48 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto layout2 = widget2->setLayout(std::make_unique<Wt::WHBoxLayout>());
 	//widget2->setHeight(5);
 	layout2->setContentsMargins(0, 0, 0, 0);
-	auto startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
+	startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
 	auto stopButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Stop"));
 	auto stepButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Step"));
 	auto resetButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
 
+	startButton->setId("startButton");
+	stopButton->setId("stopButton");
+	stepButton->setId("stepButton");
+	resetButton->setId("resetButton");
+
 	// actions
-	stepButton->clicked().connect(this, &WMainWindow::step);
 	startButton->clicked().connect(this, &WMainWindow::start);
 	stopButton->clicked().connect(this, &WMainWindow::stop);
+	stepButton->clicked().connect(this, &WMainWindow::step);
 	resetButton->clicked().connect(this, &WMainWindow::reset);
+
+	//startButton->clicked().connect([=] {
+	//	startButton->doJavaScript("var startButton = document.getElementById('startButton');"
+	//		"startButton.blur();");
+	//	});
+
+	stopButton->clicked().connect([=] {
+		stopButton->doJavaScript("var stopButton = document.getElementById('stopButton');"
+			"stopButton.blur();");
+		});
+	stepButton->clicked().connect([=] {
+		stepButton->doJavaScript("var stepButton = document.getElementById('stepButton');"
+			"stepButton.blur();");
+		});
+	resetButton->clicked().connect([=] {
+		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
+			"resetButton.blur();");
+		});
 }
 
 void WMainWindow::start()
 {
+	startButton->doJavaScript("var startButton = document.getElementById('startButton');"
+		"startButton.blur();");
 	if (mScene)
 	{
+		mSceneCanvas->setFocus();
 		if (mReset)
 		{
 			mScene->reset();
@@ -238,6 +263,7 @@ void WMainWindow::start()
 
 void WMainWindow::stop()
 {
+	mSceneCanvas->setFocus(true);
 	this->bRunFlag = false;
 }
 
