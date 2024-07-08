@@ -617,5 +617,37 @@ namespace dyno
 			offset.capsuleIndex());
 	}
 
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::clearRigidBodySystem()
+	{
+		mHostRigidBodyStates.clear();
+
+		mHostSpheres.clear();
+		mHostBoxes.clear();
+		mHostTets.clear();
+		mHostCapsules.clear();
+
+		mDeviceRigidBodyStates.clear();
+
+		mDeviceSpheres.clear();
+		mDeviceBoxes.clear();
+		mDeviceTets.clear();
+		mDeviceCapsules.clear();
+
+		mHostJointsBallAndSocket.clear();
+		mHostJointsSlider.clear();
+		mHostJointsHinge.clear();
+		mHostJointsFixed.clear();
+		mHostJointsPoint.clear();
+
+		m_numOfSamples = 0;
+
+		m_deviceSamples.clear();
+		m_deviceNormals.clear();
+
+		samples.clear();
+		normals.clear();
+	}
+
 	DEFINE_CLASS(RigidBodySystem);
 }
