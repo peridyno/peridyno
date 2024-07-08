@@ -297,10 +297,10 @@ namespace dyno
 			mHostCap3D.clear();
 			for (auto& cap : m_capLists)
 			{
+				//TODO: fix the problem
 				Capsule3D cap3d;
 				cap3d.radius = this->varRadius()->getData();
-				cap3d.segment.v0 = cap.v0;
-				cap3d.segment.v1 = cap.v1;
+				cap3d.center = 0.5f * (cap.v0 + cap.v1);
 				mHostCap3D.push_back(cap3d);
 			}		
 
@@ -380,8 +380,9 @@ namespace dyno
 			for (auto& cap : m_capLists)
 			{
 				auto &cap3d = mHostCap3D[index++];
-				cap3d.segment.v0 = cap.v0;
-				cap3d.segment.v1 = cap.v1;
+				cap3d.center = 0.5f * (cap.v0 + cap.v1);
+// 				cap3d.segment.v0 = cap.v0;
+// 				cap3d.segment.v1 = cap.v1;
 			}		
 
 			auto& caps = topo->getCaps();

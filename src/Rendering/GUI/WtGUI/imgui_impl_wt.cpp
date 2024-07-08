@@ -2,6 +2,7 @@
 #include <imgui_internal.h>
 
 #include "imgui_impl_wt.h"
+#include "imgui_impl_opengl3.h"
 
 #include <Wt/WEvent.h>
 
@@ -10,11 +11,16 @@ ImGuiBackendWt::ImGuiBackendWt(Wt::WContainerWidget* parent)
 	IMGUI_CHECKVERSION();
 	ctx = ImGui::CreateContext();
 	ImGui::SetCurrentContext(ctx);
+
+	const char* glsl_version = "#version 130";
+	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 ImGuiBackendWt::~ImGuiBackendWt()
 {
-	//ImGui::DestroyContext(ctx);
+	ImGui::SetCurrentContext(ctx);
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui::DestroyContext(ctx);
 }
 
 void ImGuiBackendWt::NewFrame(int width, int height)
@@ -24,6 +30,20 @@ void ImGuiBackendWt::NewFrame(int width, int height)
 	io.DisplaySize.x = width;
 	io.DisplaySize.y = height;
 
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui::NewFrame();
+
+	//while (ctx->InputEventsQueue.Size > 0)
+	//{
+	//	ImGui::EndFrame();
+	//	ImGui::NewFrame();
+	//}
+}
+
+void ImGuiBackendWt::Render()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 bool ImGuiBackendWt::handleMousePressed(const Wt::WMouseEvent& evt)

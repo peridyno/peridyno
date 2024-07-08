@@ -14,6 +14,7 @@ class WNodeDataModel;
 class WModuleDataModel;
 class WParameterDataNode;
 class WSimulationCanvas;
+class WPushButton;
 class WMainWindow : public Wt::WContainerWidget
 {
 public:
@@ -21,6 +22,8 @@ public:
 	~WMainWindow();
 
 	void setScene(std::shared_ptr<dyno::SceneGraph> scene);
+
+	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
 private:
 	void initMenu(Wt::WMenu*);
@@ -30,6 +33,7 @@ private:
 	void stop();
 	void step();
 	void reset();
+	void updateCanvas();
 
 private:
 
@@ -45,4 +49,6 @@ private:
 
 	std::shared_ptr<dyno::SceneGraph>	mScene = nullptr;
 	std::shared_ptr<dyno::Node> mActiveNode;
+
+	Wt::WPushButton* startButton;
 };

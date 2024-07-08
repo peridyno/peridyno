@@ -110,6 +110,7 @@ void WFileWidget::updateField()
 		path.set_path(filePath);
 		f->setValue(path);
 		f->update();
+		changeValue_.emit(1);
 	}
 	else
 	{

@@ -54,7 +54,7 @@ rigid.graphics_pipeline().push_module(pointRender)
 
 scn.add_node(rigid)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()

@@ -22,3 +22,6 @@
 [submodule "external/stb"]
 	path = external/stb
 	url = https://gitee.com/peridyno/stb.git
+[submodule "data"]
+	path = data
+	url = https://gitee.com/peridyno/data.git

@@ -104,10 +104,7 @@ namespace dyno
 					timer.start();
 				}
 
-				if (node->isActive())
-				{
-					node->update();
-				}
+				node->update();
 
 				if (mTiming) {
 					timer.stop();
@@ -151,7 +148,8 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				dt = node->getDt() < dt ? node->getDt() : dt;
+				if(node != nullptr && node->isActive())
+					dt = node->getDt() < dt ? node->getDt() : dt;
 			}
 
 			float dt;

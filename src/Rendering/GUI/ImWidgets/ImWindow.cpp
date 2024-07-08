@@ -316,6 +316,8 @@ void ImWindow::draw(RenderWindow* app)
 		
 		// Right Sidebar
 		{
+			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 50, 30));
+
 			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36 / 255.0, 36 / 255.0, 36 / 255.0, 255 / 255.0));
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 5.f));
@@ -361,7 +363,7 @@ void ImWindow::draw(RenderWindow* app)
 			if (ImGui::radioWithIconButton(ICON_FA_DRAW_POLYGON, "Primitives", app->getSelectionMode() == RenderWindow::PRIMITIVE_MODE))
 				app->setSelectionMode(RenderWindow::PRIMITIVE_MODE);
 
-			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
+			//ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
 			ImGui::End();	
 			ImGui::PopStyleColor();
 			ImGui::PopStyleVar(2);
@@ -370,14 +372,21 @@ void ImWindow::draw(RenderWindow* app)
 		// Bottom Right Widget
 		{
 			std::string rEngineName = engine->name();
-			ImGui::Begin("Top Left Widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-
 			Vec3f eyePos = camera->getEyePos();
 			Vec3f tarPos = camera->getTargetPos();
-			ImGui::Text("Eye: (%.2f, %.2f, %.2f) | Target: (%.2f, %.2f, %.2f) | Rendered by %s: %.1f FPS", eyePos.x, eyePos.y, eyePos.z, tarPos.x, tarPos.y, tarPos.z, rEngineName.c_str(), ImGui::GetIO().Framerate);
 
-			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, io.DisplaySize.y - ImGui::GetWindowSize().y));
+			char text[512];
+			sprintf(text,
+				"Eye: (%.2f, %.2f, %.2f) | Target: (%.2f, %.2f, %.2f) | Rendered by %s: %.1f FPS",
+				eyePos.x, eyePos.y, eyePos.z,
+				tarPos.x, tarPos.y, tarPos.z,
+				rEngineName.c_str(), ImGui::GetIO().Framerate);
 
+			ImVec2 textSize = ImGui::CalcTextSize(text);
+			int padding = 8;// border padding
+			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - textSize.x - padding * 2, io.DisplaySize.y- textSize.y - padding *2));
+			ImGui::Begin("Top Left Widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::Text(text);
 			ImGui::End();
 		}
 

@@ -9,7 +9,7 @@ land.var_scale().set_value(dyno.Vector3f([1, 64, 1]))
 
 scn.add_node(land)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.render_window().get_camera().set_unit_scale(512)

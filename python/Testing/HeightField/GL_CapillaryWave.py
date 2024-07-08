@@ -16,7 +16,7 @@ root.graphics_pipeline().push_module(sRender)
 
 scn.add_node(root)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.render_window().get_camera().set_unit_scale(52)

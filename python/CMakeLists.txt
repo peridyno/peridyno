@@ -23,7 +23,7 @@ elseif(UNIX)
 endif()
 
 link_libraries(Core Interaction Framework IO Modeling Topology)
-link_libraries(GlfwGUI RenderCore GLRenderEngine ImWidgets QtGUI WtGUI)
+link_libraries(GlfwGUI RenderCore GLRenderEngine ImWidgets QtGUI)
 link_libraries(DualParticleSystem HeightField Multiphysics ParticleSystem Peridynamics RigidBody SemiAnalyticalScheme Volume)
 
 file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)

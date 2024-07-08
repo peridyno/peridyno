@@ -73,10 +73,12 @@ void WVector3iFieldWidget::updateField()
 	{
 		dyno::FVar<dyno::Vec3i>* f = TypeInfo::cast<dyno::FVar<dyno::Vec3i>>(mfield);
 		f->setValue(dyno::Vec3i(v1, v2, v3));
+		changeValue_.emit(1);
 	}
 	else if (template_name == std::string(typeid(dyno::Vec3u).name()))
 	{
 		dyno::FVar<dyno::Vec3u>* f = TypeInfo::cast<dyno::FVar<dyno::Vec3u>>(mfield);
 		f->setValue(dyno::Vec3u(v1, v2, v3));
+		changeValue_.emit(1);
 	}
 }

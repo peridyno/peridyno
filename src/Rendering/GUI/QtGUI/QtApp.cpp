@@ -63,8 +63,6 @@ namespace dyno {
         mMainWindow = std::make_shared<PMainWindow>(this);
         mMainWindow->resize(width, height);
         mMainWindow->show();
-
-        this->renderWindow()->getRenderEngine()->setDefaultEnvmap();
     }
 
     void QtApp::mainLoop()

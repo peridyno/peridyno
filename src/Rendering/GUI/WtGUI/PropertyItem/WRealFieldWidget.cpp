@@ -51,11 +51,13 @@ void WRealFieldWidget::updateField()
 		dyno::FVar<float>* f = TypeInfo::cast<dyno::FVar<float>>(mfield);
 		f->setValue((float)v);
 		f->update();
+		changeValue_.emit(1);
 	}
 	else if (template_name == std::string(typeid(double).name()))
 	{
 		dyno::FVar<double>* f = TypeInfo::cast<dyno::FVar<double>>(mfield);
 		f->setValue(v);
 		f->update();
+		changeValue_.emit(1);
 	};
 }

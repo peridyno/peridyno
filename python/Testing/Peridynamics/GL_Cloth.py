@@ -42,7 +42,7 @@ scn.add_node(plane)
 scn.add_node(cloth)
 scn.add_node(root)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(800, 600, True)
 app.main_loop()

@@ -21,9 +21,12 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_semi_analytical_scheme(m);
 	pybind_volume(m);
 
+	pybind_render_core(m);
+	pybind_im_widgets(m);
 	pybind_glfw_gui(m);
 	pybind_qt_gui(m);
 	pybind_rendering(m);
+
 
 	m.def("get_asset_path", &getAssetPath, "Get the asset path");
 	m.def("get_plugin_path", &getPluginPath, "Get the plugin path");

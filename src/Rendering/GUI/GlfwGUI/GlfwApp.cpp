@@ -24,9 +24,6 @@ namespace dyno
 		mRenderWindow = std::make_shared<GlfwRenderWindow>();
 
 		mRenderWindow->initialize(width, height);
-
-		//Load envmap
-		mRenderWindow->getRenderEngine()->setDefaultEnvmap();
 	}
 
 	void GlfwApp::mainLoop()
