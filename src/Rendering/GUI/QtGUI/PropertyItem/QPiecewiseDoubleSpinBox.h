@@ -32,6 +32,7 @@
 #include "Format.h"
 #include "FCallBackFunc.h"
 #include "QtGUI/Common.h"
+#include "Core/Vector.h"
 
 //C++
 #include <memory>
@@ -168,5 +169,58 @@ namespace dyno
 		bool current = false;
 	};
 
+
+	class QVec3fWidget : public QWidget
+	{
+		Q_OBJECT
+	public:
+
+		explicit QVec3fWidget(Vec3f v)
+		{
+			v0 = new QPiecewiseDoubleSpinBox;
+			v1 = new QPiecewiseDoubleSpinBox;
+			v2 = new QPiecewiseDoubleSpinBox;
+
+			v0->setRealValue(v[0]);
+			v1->setRealValue(v[1]);
+			v2->setRealValue(v[2]);
+
+			QHBoxLayout* layout = new QHBoxLayout;
+
+			layout->addWidget(v0);
+			layout->addWidget(v1);
+			layout->addWidget(v2);
+
+			QObject::connect(v0, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+			QObject::connect(v1, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+			QObject::connect(v2, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+		}
+
+		~QVec3fWidget() 
+		{
+			delete v0;
+			delete v1;
+			delete v2;
+		}
+
+		Vec3f getValue() 
+		{
+			return Vec3f(v0->getRealValue(), v1->getRealValue(), v2->getRealValue());
+		};
+
+	Q_SIGNALS:
+
+		void vec3fChange();
+
+	protected:
+
+	private:
+
+		QPiecewiseDoubleSpinBox* v0 = NULL;
+		QPiecewiseDoubleSpinBox* v1 = NULL;
+		QPiecewiseDoubleSpinBox* v2 = NULL;
+
+
+	};
 
 }
