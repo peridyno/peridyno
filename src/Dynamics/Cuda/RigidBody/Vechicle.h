@@ -6,6 +6,7 @@
 #include "Topology/TriangleSet.h"
 
 #include "STL/Pair.h"
+#include "VehicleInfo.h"
 
 namespace dyno 
 {
@@ -39,6 +40,9 @@ namespace dyno
 
 		void updateInstanceTransform();
 
+		void clearVechicle();
+
+
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
 
@@ -49,6 +53,10 @@ namespace dyno
 		DArray<BindingPair> mBindingPairDevice;
 		DArray<int> mBindingTagDevice;
 	};
+
+
+
+
 
 	template<typename TDataType>
 	class Jeep : virtual public ParametricModel<TDataType>, virtual public Vechicle<TDataType>
@@ -64,4 +72,23 @@ namespace dyno
 	protected:
 		void resetStates() override;
 	};
+
+
+	template<typename TDataType>
+	class ConfigurableVehicle : virtual public ParametricModel<TDataType>, virtual public Vechicle<TDataType>
+	{
+		DECLARE_TCLASS(ConfigurableVehicle, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		ConfigurableVehicle();
+		~ConfigurableVehicle() override;
+
+		DEF_VAR(VehicleBind,VehicleConfiguration, VehicleBind(4), "");
+
+	protected:
+		void resetStates() override;
+	};
+
 }

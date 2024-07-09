@@ -140,6 +140,8 @@ namespace dyno
 
 		void updateTopology() override;
 
+		void clearRigidBodySystem();
+
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
 

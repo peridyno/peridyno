@@ -17,6 +17,12 @@
 
 #include "Module/CarDriver.h"
 
+#include "Module/CarDriver.h"
+
+#include <Module/GLPhotorealisticInstanceRender.h>
+#include <Mapping/DiscreteElementsToTriangleSet.h>
+#include "GLSurfaceVisualModule.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(Vechicle, TDataType)
@@ -92,6 +98,13 @@ namespace dyno
 		this->animationPipeline()->pushModule(driver);
 
 		this->inTriangleSet()->tagOptional(true);
+
+
+		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
+		this->inTextureMesh()->connect(prRender->inTextureMesh());
+		this->stateInstanceTransform()->connect(prRender->inTransform());
+		this->graphicsPipeline()->pushModule(prRender);
+
 	}
 
 	template<typename TDataType>
@@ -111,7 +124,9 @@ namespace dyno
 
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
-		uint N = texMesh->shapes().size();
+		uint N = 0;
+		if(!this->inTextureMesh()->isEmpty())
+			N = texMesh->shapes().size();
 
 		CArrayList<Transform3f> tms;
 		CArray<uint> instanceNum(N);
@@ -122,7 +137,9 @@ namespace dyno
 		{
 			instanceNum[mBindingPair[i].first]++;
 		}
-		tms.resize(instanceNum);
+
+		if(instanceNum.size()>0)
+			tms.resize(instanceNum);
 
 		//Initialize CArrayList
 		for (uint i = 0; i < N; i++)
@@ -190,6 +207,16 @@ namespace dyno
 		mBindingPair.push_back(shapeId);
 	}
 
+	template<typename TDataType>
+	void Vechicle<TDataType>::clearVechicle()
+	{
+		mBindingPair.clear();
+		mBindingPairDevice.clear();
+		mBindingTagDevice.clear();
+		mInitialRot.clear();
+		mActors.clear();
+	}
+
 	DEFINE_CLASS(Vechicle);
 
 	//Jeep
@@ -241,10 +268,10 @@ namespace dyno
 		rigidbody.offset = Vec3f(0.0f);
 
 		auto spareTireActor = this->addBox(box2, rigidbody, 100);
-		auto frontLeftSteerActor = this->addBox(box3, rigidbody, 1000);
-		auto frontRightSteerActor = this->addBox(box4, rigidbody, 1000);
+		//auto frontLeftSteerActor = this->addBox(box3, rigidbody, 100);
+		//auto frontRightSteerActor = this->addBox(box4, rigidbody, 100);
 
-		Real wheel_velocity = 10;
+		Real wheel_velocity = 12;
 
 		auto frontLeftTireActor = this->addCapsule(capsule1, rigidbody, 100);
 		auto frontRightTireActor = this->addCapsule(capsule2, rigidbody, 100);
@@ -252,12 +279,12 @@ namespace dyno
 		auto rearRightTireActor = this->addCapsule(capsule4, rigidbody, 100);
 
 		//front rear
-		auto& joint1 = this->createHingeJoint(frontLeftTireActor, frontLeftSteerActor);
+		auto& joint1 = this->createHingeJoint(frontLeftTireActor, bodyActor);
 		joint1.setAnchorPoint(frontLeftTireActor->center);
 		joint1.setMoter(wheel_velocity);
 		joint1.setAxis(Vec3f(1, 0, 0));
 
-		auto& joint2 = this->createHingeJoint(frontRightTireActor, frontRightSteerActor);
+		auto& joint2 = this->createHingeJoint(frontRightTireActor, bodyActor);
 		joint2.setAnchorPoint(frontRightTireActor->center);
 		joint2.setMoter(wheel_velocity);
 		joint2.setAxis(Vec3f(1, 0, 0));
@@ -277,10 +304,10 @@ namespace dyno
 		//FixedJoint<Real> joint5(0, 1);
 		auto& joint5 = this->createFixedJoint(bodyActor, spareTireActor);
 		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
-		auto& joint6 = this->createFixedJoint(bodyActor, frontLeftSteerActor);
-		joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
-		auto& joint7 = this->createFixedJoint(bodyActor, frontRightSteerActor);
-		joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
+		//auto& joint6 = this->createFixedJoint(bodyActor, frontLeftSteerActor);
+		//joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
+		//auto& joint7 = this->createFixedJoint(bodyActor, frontRightSteerActor);
+		//joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
 
 		this->bind(bodyActor, Pair<uint, uint>(5, 0));
 		this->bind(spareTireActor, Pair<uint, uint>(4, 0));
@@ -294,6 +321,7 @@ namespace dyno
 		this->animationPipeline()->pushModule(driver);
 		this->stateQuaternion()->connect(driver->inQuaternion());
 		this->stateTopology()->connect(driver->inTopology());
+
 	}
 
 	template<typename TDataType>
@@ -329,4 +357,206 @@ namespace dyno
 	}
 
 	DEFINE_CLASS(Jeep);
+
+
+
+	//ConfigurableVehicle
+	IMPLEMENT_TCLASS(ConfigurableVehicle, TDataType)
+
+	template<typename TDataType>
+	ConfigurableVehicle<TDataType>::ConfigurableVehicle()
+		: ParametricModel<TDataType>()
+		, Vechicle<TDataType>()
+	{
+		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		this->stateTopology()->connect(mapper->inDiscreteElements());
+		this->graphicsPipeline()->pushModule(mapper);
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+		sRender->setAlpha(0.2f);
+		sRender->setRoughness(0.7f);
+		sRender->setMetallic(3.0f);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(sRender);
+
+
+		this->inTriangleSet()->tagOptional(true);
+		this->inTextureMesh()->tagOptional(true);
+	}
+
+	template<typename TDataType>
+	ConfigurableVehicle<TDataType>::~ConfigurableVehicle()
+	{
+
+	}
+
+	template<typename TDataType>
+	void ConfigurableVehicle<TDataType>::resetStates()
+	{
+		this->clearRigidBodySystem();
+		this->clearVechicle();
+
+
+		if (!this->varVehicleConfiguration()->getValue().isValid())
+			return;
+
+		
+		auto texMesh = this->inTextureMesh()->constDataPtr();
+		const auto config = this->varVehicleConfiguration()->getValue();		
+
+		const auto rigidInfo = config.vehicleRigidBodyInfo;
+		const auto jointInfo = config.vehicleJointInfo;
+
+		// **************************** Create RigidBody  **************************** //
+
+		RigidBodyInfo rigidbody;
+
+		std::vector<std::shared_ptr<PdActor>> Actors;
+
+		Actors.resize(rigidInfo.size());
+
+		for (size_t i = 0; i < rigidInfo.size(); i++)
+		{
+			auto type = rigidInfo[i].shapeType;
+			auto shapeId = rigidInfo[i].meshShapeId;
+			auto offset = rigidInfo[i].offsetTransform;
+
+			Vec3f up;
+			Vec3f down;
+			Vec3f T;
+
+			if (shapeId != -1) 
+			{
+				up = texMesh->shapes()[shapeId]->boundingBox.v1;
+				down = texMesh->shapes()[shapeId]->boundingBox.v0;
+				T = texMesh->shapes()[shapeId]->boundingTransform.translation();
+			}
+			else 
+			{
+				
+				
+			}
+
+			BoxInfo currentBox;
+			CapsuleInfo currentCapsule;		//RadiusºÍHalfLengthÉèÖÃ¡£OffsetÉèÖÃ
+			SphereInfo currentSphere;
+
+			switch (type)
+			{
+			case dyno::Box:
+
+				if (shapeId != -1) 
+				{
+					auto center = T;
+					currentBox.center = Vec3f(center.x, center.y, center.z);
+					currentBox.halfLength = (up - down) / 2 ;
+					currentBox.rot = Quat1f(offset.rotation());
+				}
+				Actors[i] = this->addBox(currentBox, rigidbody, 100);
+				break;
+
+			case dyno::Tet:
+				printf("Need Tet Configuration\n");
+				break;
+
+			case dyno::Capsule:
+
+				if (shapeId != -1)
+				{
+					currentCapsule.center = T;
+					currentCapsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+					currentCapsule.halfLength = (up.y - down.y) / 2 / 5;
+					currentCapsule.radius = std::abs(up.y - down.y) / 2 ;
+				}
+				Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+				break;
+
+			case dyno::Sphere:
+
+				if (shapeId != -1)
+				{
+					currentSphere.center = T;
+					currentSphere.rot = Quat1f(offset.rotation());
+					currentSphere.radius = std::abs(up.y - down.y) / 2;
+				}
+				Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+				break;
+
+			case dyno::Tri:
+				printf("Need Tri Configuration\n");
+				break;
+
+			case dyno::OtherShape:
+				printf("Need OtherShape Configuration\n");
+				break;
+
+			default:
+				break;
+			}
+
+			if (shapeId != -1) 
+			{
+				////bindShapetoActor
+				this->bind(Actors[i], Pair<uint, uint>(shapeId, 0));
+				
+			}
+
+		}
+
+		for (size_t i = 0; i < jointInfo.size(); i++) 
+		{
+			////Actor
+
+			auto type = jointInfo[i].type;
+			int first = jointInfo[i].JointName1.rigidId;
+			int second = jointInfo[i].JointName2.rigidId;
+			Real speed = jointInfo[i].v_moter;
+			auto axis = jointInfo[i].Axis;
+			auto anchorOffset = jointInfo[i].anchorPoint;
+
+			if (first == -1 || second == -1)
+				continue;
+
+			if (type == Hinge) 
+			{
+				auto& joint = this->createHingeJoint(Actors[first], Actors[second]);
+				joint.setAnchorPoint(Actors[first]->center + anchorOffset);
+				joint.setMoter(speed);
+				joint.setAxis(axis);
+			}
+			
+			
+		}
+
+
+
+		/***************** Reset *************/
+		Vechicle<TDataType>::resetStates();
+
+		auto loc = this->varLocation()->getValue();
+
+		Coord tr = Coord(loc.x, loc.y, loc.z);
+
+		CArray<Coord> hostCenter;
+		hostCenter.assign(this->stateCenter()->constData());
+
+		for (uint i = 0; i < hostCenter.size(); i++)
+		{
+			hostCenter[i] += tr;
+		}
+
+		this->stateCenter()->assign(hostCenter);
+
+		this->updateTopology();
+
+		this->updateInstanceTransform();
+
+		hostCenter.clear();
+
+
+
+	}
+
+	DEFINE_CLASS(ConfigurableVehicle);
 }
