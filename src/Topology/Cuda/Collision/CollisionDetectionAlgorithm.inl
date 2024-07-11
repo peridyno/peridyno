@@ -676,12 +676,14 @@ namespace dyno
 		Vec3f axisNormal = m.normal;
 		auto checkFace = [&](Vec3f c, Vec3f Nx, Vec3f Ny, Vec3f Nz, Real Ex, Real Ey)
 		{
+			if (count >= 8) return;
 			Rectangle3D rect(c, Nx, Ny, Vec2f(Ex, Ey));
 			// inter & prox
 			auto minPQ = seg.proximity(rect);
 			Real gap = (Nz.dot(minPQ.direction()) < 0) ? radiusA + radiusB : radiusA;
 			if (minPQ.length() < gap)
 			{
+				if (count >= 8) return;
 				m.contacts[count].penetration = depth;
 				m.contacts[count].position = minPQ.endPoint();
 				count++;
@@ -696,6 +698,7 @@ namespace dyno
 				TSegment3D<Real> pq = q - p;
 				if (pq.length() < gap)
 				{
+					if (count >= 8) return;
 					m.contacts[count].penetration = depth;
 					m.contacts[count].position = pq.endPoint();
 					count++;
@@ -869,6 +872,7 @@ namespace dyno
 		Vec3f axisNormal = m.normal;
 		auto checkFace = [&](Vec3f v0, Vec3f v1, Vec3f v2, Vec3f Nz)
 		{
+			if (count >= 8) return;
 			Triangle3D tri(v0, v1, v2);
 			// inter & prox
 			auto minPQ = seg.proximity(tri);
@@ -877,11 +881,12 @@ namespace dyno
 			Real gap = (Nz.dot(minPQ.direction()) < 0) ? radiusA + radiusB : radiusB;
 			if (minPQ.length() < gap)
 			{
+				if (count >= 8) return;
 				m.contacts[count].penetration = depth;
 				m.contacts[count].position = minPQ.endPoint();
 				count++;
 			}
-
+			
 			// if parallel need to check the two points on segment
 			for (int i = 0; i < 2; i++)
 			{
@@ -891,6 +896,7 @@ namespace dyno
 				TSegment3D<Real> pq = q - p;
 				if (pq.length() < gap)
 				{
+					if (count >= 8) return;
 					m.contacts[count].penetration = depth;
 					m.contacts[count].position = pq.endPoint();
 					count++;
