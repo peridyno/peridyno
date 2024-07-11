@@ -22,14 +22,40 @@ namespace dyno
 
 		//--------------------------------------------------------------------------------------------------
 		// Minkowski Sum + Separating Axis Theorem for Round Primitives
-		DYN_FUNC static void MSDF(const OBox3D& box, const Segment3D& seg, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
-		DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Segment3D& seg, const Real radiusA, const Real radiusB); 
-		DYN_FUNC static void request(Manifold& m, const Segment3D& seg, const OBox3D& box, const Real radiusA, const Real radiusB);
+		// Round Primitive	: [Sphere, Capsule(Segment), Triangle, Tetrahedron, Box]
 
+		// MSDF(A, B)		: Minkowski Sum Signed Distance Function, return the depth and normal on B's boundary.
+		// request(A, B)	: Generate contact points, depth and normal on B's boundary.
 		
-		DYN_FUNC static void MSDF(const Tet3D& tet, const Segment3D& seg, Real& depth, Coord3D& normal, Real& boundary1, Real &boundary2, const Real radiusA, const Real radiusB);
-		DYN_FUNC static void request(Manifold& m, const Tet3D& tet, const Segment3D& seg, const Real radiusA, const Real radiusB);
-		DYN_FUNC static void request(Manifold& m, const Segment3D& seg, const Tet3D& tet, const Real radiusA, const Real radiusB); 
+		// [Seg - Sphere]
+		DYN_FUNC static void MSDF(const Segment3D& segA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Segment3D& segB, const Real radiusA, const Real radiusB);
+		
+		// [Seg - Seg]
+		DYN_FUNC static void MSDF(const Segment3D& segA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB);
+
+		// [Box - Seg]
+		DYN_FUNC static void MSDF(const OBox3D& boxA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Segment3D& segB, const Real radiusA, const Real radiusB); 
+		DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
+
+		// [Tet- Seg]
+		DYN_FUNC static void MSDF(const Tet3D& tetA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundary1, Real &boundary2, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Segment3D& segB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Tet3D& tetB, const Real radiusA, const Real radiusB); 
+		
+		// [Tri - Seg]
+		DYN_FUNC static void MSDF(const Triangle3D& triA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Segment3D& segB, const Real radiusA, const Real radiusB);
+		DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
+		
+
+
+
+
+
 		//--------------------------------------------------------------------------------------------------
 		// Resources:
 		// https://box2d.googlecode.com/files/GDC2007_ErinCatto.zip

@@ -506,6 +506,86 @@ namespace dyno
 		}
 	}
 
+	// ---------------------------------------- [   Sphere   ] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void projectOnAxis(
+		Real& lowerBoundary,
+		Real& upperBoundary,
+		const Vec3f axisNormal,
+		Sphere3D sphere,
+		const Real radius
+	)
+	{
+		lowerBoundary = upperBoundary = sphere.center.dot(axisNormal);
+
+		lowerBoundary -= radius;
+		upperBoundary += radius;
+	}
+
+	// ---------------------------------------- [ Segment ] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void projectOnAxis(
+		Real& lowerBoundary,
+		Real& upperBoundary,
+		const Vec3f axisNormal,
+		Segment3D seg,
+		const Real radius
+	)
+	{
+		lowerBoundary = upperBoundary = seg.v0.dot(axisNormal);
+		lowerBoundary = glm::min(lowerBoundary, seg.v1.dot(axisNormal));
+		upperBoundary = glm::max(upperBoundary, seg.v1.dot(axisNormal));
+
+		lowerBoundary -= radius;
+		upperBoundary += radius;
+	}
+
+	// ---------------------------------------- [   Tri   ] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void projectOnAxis(
+		Real& lowerBoundary,
+		Real& upperBoundary,
+		const Vec3f axisNormal,
+		Triangle3D tri,
+		const Real radius
+	)
+	{
+		lowerBoundary = upperBoundary = tri.v[0].dot(axisNormal);
+
+		lowerBoundary = glm::min(lowerBoundary, tri.v[1].dot(axisNormal));
+		upperBoundary = glm::max(upperBoundary, tri.v[1].dot(axisNormal));
+		lowerBoundary = glm::min(lowerBoundary, tri.v[2].dot(axisNormal));
+		upperBoundary = glm::max(upperBoundary, tri.v[2].dot(axisNormal));
+
+		lowerBoundary -= radius;
+		upperBoundary += radius;
+	}
+
+
+	// ---------------------------------------- [   Tet   ] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void projectOnAxis(
+		Real& lowerBoundary,
+		Real& upperBoundary,
+		const Vec3f axisNormal,
+		Tet3D tet,
+		const Real radius
+	)
+	{
+		lowerBoundary = upperBoundary = tet.v[0].dot(axisNormal);
+		lowerBoundary = glm::min(lowerBoundary, tet.v[1].dot(axisNormal));
+		upperBoundary = glm::max(upperBoundary, tet.v[1].dot(axisNormal));
+		lowerBoundary = glm::min(lowerBoundary, tet.v[2].dot(axisNormal));
+		upperBoundary = glm::max(upperBoundary, tet.v[2].dot(axisNormal));
+		lowerBoundary = glm::min(lowerBoundary, tet.v[3].dot(axisNormal));
+		upperBoundary = glm::max(upperBoundary, tet.v[3].dot(axisNormal));
+
+		lowerBoundary -= radius;
+		upperBoundary += radius;
+	}
+
+
+
 
 	// ---------------------------------------- [   Box   ] ----------------------------------------
 	template<typename Real>
@@ -558,82 +638,424 @@ namespace dyno
 		upperBoundary += radius;
 	}
 
-	// ---------------------------------------- [ Segment ] ----------------------------------------
+	// ---------------------------------------- [Seg - Sphere] ----------------------------------------
 	template<typename Real>
-	DYN_FUNC inline void projectOnAxis(
-		Real& lowerBoundary,
-		Real& upperBoundary,
-		const Vec3f axisNormal,
-		Segment3D seg,
-		const Real radius
-	)
+	DYN_FUNC inline void checkSignedDistanceAxis(Real& intersectionDistance, Real& BoundaryA, Real& BoundaryB, const Vec3f axisNormal, Segment3D& segA, Sphere3D& sphereB, const Real radiusA, const Real radiusB)
 	{
-		lowerBoundary = seg.v0.dot(axisNormal);
-		upperBoundary = seg.v0.dot(axisNormal);
-		lowerBoundary = glm::min(lowerBoundary, seg.v1.dot(axisNormal));
-		upperBoundary = glm::max(upperBoundary, seg.v1.dot(axisNormal));
+		// Contact normal on B
+		Real lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB;
 
-		lowerBoundary -= radius;
-		upperBoundary += radius;
+		//projection to axis
+		projectOnAxis(lowerBoundaryA, upperBoundaryA, axisNormal, segA, radiusA);
+		projectOnAxis(lowerBoundaryB, upperBoundaryB, axisNormal, sphereB, radiusB);
+
+		return checkSignedDistance(lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB, intersectionDistance, BoundaryA, BoundaryB);
 	}
 
-	// ---------------------------------------- [   Tet   ] ----------------------------------------
 	template<typename Real>
-	DYN_FUNC inline void projectOnAxis(
-		Real& lowerBoundary,
-		Real& upperBoundary,
-		const Vec3f axisNormal,
-		Tet3D tet,
-		const Real radius
-	)
+	DYN_FUNC void CollisionDetection<Real>::MSDF(const Segment3D& segA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB)
 	{
-		lowerBoundary = tet.v[0].dot(axisNormal);
-		upperBoundary = tet.v[0].dot(axisNormal);
-		lowerBoundary = glm::min(lowerBoundary, tet.v[1].dot(axisNormal));
-		upperBoundary = glm::max(upperBoundary, tet.v[1].dot(axisNormal));
-		lowerBoundary = glm::min(lowerBoundary, tet.v[2].dot(axisNormal));
-		upperBoundary = glm::max(upperBoundary, tet.v[2].dot(axisNormal));
-		lowerBoundary = glm::min(lowerBoundary, tet.v[3].dot(axisNormal));
-		upperBoundary = glm::max(upperBoundary, tet.v[3].dot(axisNormal));
+		depth = -REAL_infinity;
+		bool sign = true; // < 0
+		auto checkAxis = [&](Vec3f N)
+		{
+			Real D = 0;
+			Real bA, bB;
+			if (N.norm() > EPSILON) N /= N.norm();
+			checkSignedDistanceAxis(D, bA, bB, N, segA, sphereB, radiusA, radiusB);
 
-		lowerBoundary -= radius;
-		upperBoundary += radius;
+			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
+		};
+		Vec3f axisTmp;
+
+		// Minkowski Face Normal
+		// None
+		
+		//Minkowski Point-Edge Normal
+		// check direction of minimum distance from B's point to A's edge
+		Vec3f pB = sphereB.center;
+		Point3D queryP(pB);
+		Point3D projP = queryP.project(segA);
+		axisTmp = (projP - queryP).direction();
+		checkAxis(axisTmp);
 	}
 
-	// ---------------------------------------- [Seg - Box] ----------------------------------------
-	template<typename Real> 
-	DYN_FUNC inline void checkSignedDistanceAxis(
-		Real& intersectionDistance,
-		Real& boundaryA,
-		Real& boundaryB,
-		const Vec3f axisNormal,
-		OrientedBox3D box,
-		Segment3D seg,
-		const Real radiusA,
-		const Real radiusB
-	)
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphereA, const Segment3D& segB, const Real radiusA, const Real radiusB)
 	{
-		// Contact normal on seg
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// Contact normal on sphere
+		MSDF(segB, sphereA, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
+
+		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
+		{
+			m.normal = -normal; // contact normal on segB
+			//setupContactOnSeg(sphereA, segB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& segA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB)
+	{
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// Contact normal on sphere
+		MSDF(segA, sphereB, depth, normal, boundaryA, boundaryB, radiusA, radiusB);
+
+		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
+		{
+			m.normal = normal; // contact normal on sphereB
+			//setupContactOnSphere(segA, sphereB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+
+	// ---------------------------------------- [Seg - Seg] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void checkSignedDistanceAxis(Real& intersectionDistance, Real& boundaryA, Real& boundaryB, const Vec3f axisNormal, Segment3D segA, Segment3D segB, const Real radiusA, const Real radiusB)
+	{
+		// Contact normal on B
 		Real lowerboundaryA, upperboundaryA, lowerboundaryB, upperboundaryB;
 
 		//projection to axis
-		projectOnAxis(lowerboundaryA, upperboundaryA, axisNormal, box, radiusA);
-		projectOnAxis(lowerboundaryB, upperboundaryB, axisNormal, seg, radiusB);
+		projectOnAxis(lowerboundaryA, upperboundaryA, axisNormal, segA, radiusA);
+		projectOnAxis(lowerboundaryB, upperboundaryB, axisNormal, segB, radiusB);
 
 		checkSignedDistance(lowerboundaryA, upperboundaryA, lowerboundaryB, upperboundaryB, intersectionDistance, boundaryA, boundaryB);
 	}
 
 
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::MSDF(const OBox3D& box, const Segment3D& seg, Real& depth, Coord3D& normal, Real& boundaryA, Real &boundaryB, const Real radiusA, const Real radiusB)
+	DYN_FUNC void CollisionDetection<Real>::MSDF(const Segment3D& segA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB)
 	{
-		depth = - REAL_infinity;
+		depth = -REAL_infinity;
 		bool sign = true; // < 0
 		auto checkAxis = [&](Vec3f N)
 		{
 			Real D = 0;
 			Real bA, bB;
-			checkSignedDistanceAxis(D, bA, bB, N, box, seg, radiusA, radiusB);
+			if (N.norm() > EPSILON) N /= N.norm();
+			checkSignedDistanceAxis(D, bA, bB, N, segA, segB, radiusA, radiusB);
+
+			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
+		};
+		Vec3f axisTmp;
+
+		// Minkowski Face Normal
+		// 1. segA x segB
+		Vec3f dirSegA = segA.direction();
+		Vec3f dirSegB = segB.direction();
+		axisTmp = dirSegA.cross(dirSegB);
+		checkAxis(axisTmp);
+
+		// Minkowski Point-Edge Normal
+		// check direction of minimum distance from B's point to A's edge
+		for (int j = 0; j < 2; j++)
+		{
+			Vec3f pB = (j == 0) ? (segB.v0) : (segB.v1);
+			Point3D queryP(pB);
+			Point3D projP = queryP.project(segA);
+			axisTmp = (projP - queryP).direction();
+			checkAxis(axisTmp);
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB)
+	{
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// contact normal on segB
+		MSDF(segA, segB, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
+
+		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
+		{
+			m.normal = -normal; // contact normal on segB
+			//setupContactOnSeg(segA, segB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+	// ---------------------------------------- [Tri - Seg] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void checkSignedDistanceAxis(Real& intersectionDistance, Real& BoundaryA, Real& BoundaryB, const Vec3f axisNormal, Triangle3D& triA, Segment3D& segB, const Real radiusA, const Real radiusB)
+	{
+		// Contact normal on B
+		Real lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB;
+
+		//projection to axis
+		projectOnAxis(lowerBoundaryA, upperBoundaryA, axisNormal, triA, radiusA);
+		projectOnAxis(lowerBoundaryB, upperBoundaryB, axisNormal, segB, radiusB);
+
+		return checkSignedDistance(lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB, intersectionDistance, BoundaryA, BoundaryB);
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::MSDF(const Triangle3D& triA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB)
+	{
+		depth = -REAL_infinity;
+		bool sign = true; // < 0
+		auto checkAxis = [&](Vec3f N)
+		{
+			Real D = 0;
+			Real bA, bB;
+			if (N.norm() > EPSILON) N /= N.norm();
+			checkSignedDistanceAxis(D, bA, bB, N, triA, segB, radiusA, radiusB);
+
+			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
+		};
+		Vec3f axisTmp;
+
+		// Minkowski Face Normal
+		// 1. tri face 
+		axisTmp = triA.normal();
+		checkAxis(axisTmp);
+
+		// 2. edge cross
+		Vec3f dirSeg = segB.direction();
+		for (int i = 0; i < 2; i++)
+			for (int j = i + 1; j < 3; ++j)
+			{
+				Vec3f triDir = triA.v[j] - triA.v[i];
+				axisTmp = dirSeg.cross(triDir);
+				checkAxis(axisTmp);
+			}
+
+		// Minkowski Point-Edge Normal
+		// check direction of minimum distance from B's point to A's edge
+		for (int j = 0; j < 2; j++)
+		{
+			Vec3f pB = (j == 0) ? (segB.v0) : (segB.v1);
+			Point3D queryP(pB);
+			Point3D projP = queryP.project(triA);
+			axisTmp = (projP - queryP).direction();
+			checkAxis(axisTmp);
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Triangle3D& triA, const Segment3D& segB, const Real radiusA, const Real radiusB)
+	{
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// Contact normal on seg
+		MSDF(triA, segB, depth, normal, boundaryA, boundaryB, radiusA, radiusB);
+
+		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
+		{
+			m.normal = -normal; // contact normal on seg
+			//setupContactOnSeg(triA, segB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& segA, const Triangle3D& triB, const Real radiusA, const Real radiusB)
+	{
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// Contact normal on seg
+		MSDF(triB, segA, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
+
+		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
+		{
+			m.normal = normal; // contact normal on tri
+			//setupContactOnTri(segA, triB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+
+	// ---------------------------------------- [Tet- Seg] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void checkSignedDistanceAxis(Real& intersectionDistance, Real& BoundaryA, Real& BoundaryB, const Vec3f axisNormal, Tet3D tetA, Segment3D segB, const Real radiusA, const Real radiusB)
+	{
+		// Contact normal on B
+		Real lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB;
+
+		//projection to axis
+		projectOnAxis(lowerBoundaryA, upperBoundaryA, axisNormal, tetA, radiusA);
+		projectOnAxis(lowerBoundaryB, upperBoundaryB, axisNormal, segB, radiusB);
+
+		return checkSignedDistance(lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB, intersectionDistance, BoundaryA, BoundaryB);
+	}
+
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::MSDF(const Tet3D& tetA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB)
+	{
+		depth = -REAL_infinity;
+		bool sign = true; // < 0
+		auto checkAxis = [&](Vec3f N)
+		{
+			Real D = 0;
+			Real bA, bB;
+			if (N.norm() > EPSILON) N /= N.norm();
+			checkSignedDistanceAxis(D, bA, bB, N, tetA, segB, radiusA, radiusB);
+
+			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
+		};
+		Vec3f axisTmp;
+
+		// Minkowski Face Normal
+		// 1. tet face (u, v, w)
+		for (int i = 0; i < 4; ++i)
+		{
+			axisTmp = tetA.face(i).normal();
+			checkAxis(axisTmp);
+		}
+
+		// 2. edge cross
+		Vec3f dirSeg = segB.direction();
+		for (int i = 0; i < 3; i++)
+			for (int j = i + 1; j < 4; ++j)
+			{
+				Vec3f tetDir = tetA.v[j] - tetA.v[i];
+				axisTmp = dirSeg.cross(tetDir);
+				checkAxis(axisTmp);
+			}
+
+		// Minkowski Point-Edge Normal
+		// check direction of minimum distance from B's point to A's edge
+		for (int j = 0; j < 2; j++)
+		{
+			Vec3f pB = (j == 0) ? (segB.v0) : (segB.v1);
+			Point3D queryP(pB);
+			Point3D projP = queryP.project(tetA);
+			axisTmp = (projP - queryP).direction();
+			checkAxis(axisTmp);
+		}
+	}
+
+	template<typename Real>
+	DYN_FUNC inline void setupContactOnTet(
+		Segment3D seg,
+		Tet3D tet,
+		const Real radiusA,
+		const Real radiusB,
+		const Real depth, // <0 
+		TManifold<Real>& m)
+	{
+		//Gen contact point on tet
+
+		int count = 0;
+		Vec3f axisNormal = m.normal;
+		auto checkFace = [&](Vec3f v0, Vec3f v1, Vec3f v2, Vec3f Nz)
+		{
+			if (count >= 8) return;
+			Triangle3D tri(v0, v1, v2);
+			// inter & prox
+			auto minPQ = seg.proximity(tri);
+			// -: outside
+			// +: inside
+			Real gap = (Nz.dot(minPQ.direction()) < 0) ? radiusA + radiusB : radiusB;
+			if (minPQ.length() < gap)
+			{
+				if (count >= 8) return;
+				m.contacts[count].penetration = depth;
+				m.contacts[count].position = minPQ.endPoint();
+				count++;
+			}
+
+			// if parallel need to check the two points on segment
+			for (int i = 0; i < 2; i++)
+			{
+				Vec3f v = (i == 0) ? seg.v0 : seg.v1;
+				TPoint3D<Real> p(v);
+				TPoint3D<Real> q = TPoint3D<Real>(p).project(tri);
+				TSegment3D<Real> pq = q - p;
+				if (pq.length() < gap)
+				{
+					if (count >= 8) return;
+					m.contacts[count].penetration = depth;
+					m.contacts[count].position = pq.endPoint();
+					count++;
+				}
+			}
+		};
+
+		// Check intersection and proximity for each tri face
+		Vec3f centerTet = tet.barycenter().origin;
+		for (int i = 0; i < 4; i++)
+		{
+			// Outer norm on tri face.
+			Vec3f outerNorm = tet.face(i).normal();
+			Vec3f dir = centerTet - tet.face(i).v[0];
+			if (dir.dot(outerNorm) > 0.f)
+				outerNorm = -outerNorm;
+			checkFace(tet.face(i).v[0], tet.face(i).v[1], tet.face(i).v[2], outerNorm);
+		}
+
+		m.contactCount = count;
+
+		printf("tet contact:%d\n", count);
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& segA, const Tet3D& tetB, const Real radiusA, const Real radiusB)
+	{
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// Contact normal on seg
+		MSDF(tetB, segA, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
+
+		if (REAL_LESS(depth, 0))
+		{
+			// Contact normal on tet
+			m.normal = -normal;
+			setupContactOnTet(segA, tetB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tetA, const Segment3D& segB, const Real radiusA, const Real radiusB)
+	{
+		Real depth, boundaryA, boundaryB;
+		Vec3f normal;
+		// Contact normal on seg
+		MSDF(tetA, segB, depth, normal, boundaryA, boundaryB, radiusA, radiusB);
+
+		if (REAL_LESS(depth, 0))
+		{
+			// Contact normal on seg
+			m.normal = normal;
+			setupContactOnTet(segB, tetA, radiusB, radiusA, depth, m);
+			//setupContactOnSeg(triA, segB, radiusA, radiusB, depth, m);
+		}
+		else m.contactCount = 0;
+	}
+
+
+	// ---------------------------------------- [Box - Seg] ----------------------------------------
+	template<typename Real>
+	DYN_FUNC inline void checkSignedDistanceAxis(Real& intersectionDistance, Real& boundaryA, Real& boundaryB, const Vec3f axisNormal, OrientedBox3D boxA, Segment3D segB, const Real radiusA, const Real radiusB)
+	{
+		// Contact normal on B
+		Real lowerboundaryA, upperboundaryA, lowerboundaryB, upperboundaryB;
+
+		//projection to axis
+		projectOnAxis(lowerboundaryA, upperboundaryA, axisNormal, boxA, radiusA);
+		projectOnAxis(lowerboundaryB, upperboundaryB, axisNormal, segB, radiusB);
+
+		checkSignedDistance(lowerboundaryA, upperboundaryA, lowerboundaryB, upperboundaryB, intersectionDistance, boundaryA, boundaryB);
+	}
+
+
+	template<typename Real>
+	DYN_FUNC void CollisionDetection<Real>::MSDF(const OBox3D& boxA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB)
+	{
+		depth = -REAL_infinity;
+		bool sign = true; // < 0
+		auto checkAxis = [&](Vec3f N)
+		{
+			Real D = 0;
+			Real bA, bB;
+			if (N.norm() > EPSILON) N /= N.norm();
+			checkSignedDistanceAxis(D, bA, bB, N, boxA, segB, radiusA, radiusB);
 
 			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
 		};
@@ -641,45 +1063,30 @@ namespace dyno
 
 		// Minkowski Face Normal
 		// 1. box face (u, v, w)
-		axisTmp = box.u / box.u.norm(); checkAxis(axisTmp);
-		axisTmp = box.v / box.v.norm(); checkAxis(axisTmp);
-		axisTmp = box.w / box.w.norm(); checkAxis(axisTmp);
+		axisTmp = boxA.u / boxA.u.norm(); checkAxis(axisTmp);
+		axisTmp = boxA.v / boxA.v.norm(); checkAxis(axisTmp);
+		axisTmp = boxA.w / boxA.w.norm(); checkAxis(axisTmp);
 		// 2. edge cross
-		Vec3f dirSeg = seg.direction();
+		Vec3f dirSeg = segB.direction();
 		for (int j = 0; j < 3; j++)
 		{
-			Vec3f boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
+			Vec3f boxDir = (j == 0) ? (boxA.u) : ((j == 1) ? (boxA.v) : (boxA.w));
 			axisTmp = dirSeg.cross(boxDir);
-			if (axisTmp.norm() > EPSILON)
-			{
-				axisTmp /= axisTmp.norm();
-			}
-			else //parallel, choose an arbitary direction
-			{
-				if (abs(dirSeg[0]) > EPSILON)
-					axisTmp = Vec3f(dirSeg[1], -dirSeg[0], 0);
-				else
-					axisTmp = Vec3f(0, dirSeg[2], -dirSeg[1]);
-				axisTmp /= axisTmp.norm();
-			}
 			checkAxis(axisTmp);
 		}
-		
+
 		// Minkowski Point-Edge Normal
-		Vec3f cenSeg = (seg.v0 + seg.v1) / 2;
+		// check direction of minimum distance from B's point to A's edge
 		for (int j = 0; j < 2; j++)
 		{
-			Vec3f rB = (j == 0) ? (seg.v0 - cenSeg) : (seg.v1 - cenSeg);
-			Point3D queryP(cenSeg + rB);
-			Point3D projP = queryP.project(box);
+			Vec3f pB = (j == 0) ? (segB.v0) : (segB.v1);
+			Point3D queryP(pB);
+			Point3D projP = queryP.project(boxA);
 			axisTmp = (projP - queryP).direction();
-			if (axisTmp.norm() > EPSILON)
-			{
-				axisTmp /= axisTmp.norm();
-				checkAxis(axisTmp);
-			}
+			checkAxis(axisTmp);
 		}
 	}
+
 
 	template<typename Real>
 	DYN_FUNC inline void setupContactOnBox(
@@ -689,7 +1096,7 @@ namespace dyno
 		const Real radiusB,
 		const Real depth, // <0 
 		TManifold<Real>& m)
-	{ 
+	{
 		//Gen contact point on box
 		int count = 0;
 		Vec3f axisNormal = m.normal;
@@ -711,7 +1118,7 @@ namespace dyno
 			// if parallel need to check the two points on segment
 			for (int i = 0; i < 2; i++)
 			{
-				Vec3f v = (i == 0)? seg.v0 : seg.v1;
+				Vec3f v = (i == 0) ? seg.v0 : seg.v1;
 				TPoint3D<Real> p(v);
 				TPoint3D<Real> q = TPoint3D<Real>(p).project(rect);
 				TSegment3D<Real> pq = q - p;
@@ -751,219 +1158,36 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& seg, const OBox3D& box, const Real radiusA, const Real radiusB)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& segA, const OBox3D& boxB, const Real radiusA, const Real radiusB)
 	{
 		Real depth, boundaryA, boundaryB;
 		Vec3f normal;
 		// contact normal on seg
-		MSDF(box, seg, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
-		
+		MSDF(boxB, segA, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
+
 		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
 		{
-			m.normal = - normal; // contact normal on box
-			setupContactOnBox(seg, box, radiusA, radiusB, depth, m);
+			m.normal = -normal; // contact normal on box
+			setupContactOnBox(segA, boxB, radiusA, radiusB, depth, m);
 		}
 		else m.contactCount = 0;
 	}
 
 	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Segment3D& seg, const Real radiusA, const Real radiusB)
+	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& boxA, const Segment3D& segB, const Real radiusA, const Real radiusB)
 	{
 		Real depth, boundaryA, boundaryB;
 		Vec3f normal;
 		// contact normal on seg
-		MSDF(box, seg, depth, normal, boundaryA, boundaryB, radiusA, radiusB);
-		
+		MSDF(boxA, segB, depth, normal, boundaryA, boundaryB, radiusA, radiusB);
+
 		if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
 		{
 			m.normal = normal; // contact normal on seg
-			setupContactOnBox(seg, box, radiusB, radiusA, depth, m);
-		}
-		else m.contactCount = 0;
-	}	
-
-	// ---------------------------------------- [Seg - Tet] ----------------------------------------
-	template<typename Real>
-	DYN_FUNC inline void checkSignedDistanceAxis(
-		Real& intersectionDistance,
-		Real& BoundaryA,
-		Real& BoundaryB,
-		const Vec3f axisNormal,
-		Tet3D tet,
-		Segment3D seg,
-		const Real radiusA,
-		const Real radiusB
-	)
-	{
-		// Contact normal on seg
-		Real lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB;
-
-		//projection to axis
-		projectOnAxis(lowerBoundaryA, upperBoundaryA, axisNormal, tet, radiusA);
-		projectOnAxis(lowerBoundaryB, upperBoundaryB, axisNormal, seg, radiusB);
-	
-		return checkSignedDistance(lowerBoundaryA, upperBoundaryA, lowerBoundaryB, upperBoundaryB, intersectionDistance, BoundaryA, BoundaryB);
-	} 
-
-
-	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::MSDF(const Tet3D& tet, const Segment3D& seg, Real& depth, Coord3D& normal, Real& boundaryA, Real &boundaryB, const Real radiusA, const Real radiusB)
-	{
-		depth = - REAL_infinity;
-		bool sign = true; // < 0
-		auto checkAxis = [&](Vec3f N)
-		{
-			Real D = 0;
-			Real bA, bB;
-			checkSignedDistanceAxis(D, bA, bB, N, tet, seg, radiusA, radiusB);
-
-			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
-		};
-		Vec3f axisTmp;
-
-		// Minkowski Face Normal
-		// 1. tet face (u, v, w)
-		for(int i = 0; i < 4; ++i)
-		{
-			axisTmp = tet.face(i).normal();
-			checkAxis(axisTmp);
-		}
-
-		// 2. edge cross
-		Vec3f dirSeg = seg.direction();
-		for (int i = 0; i < 3; i++)
-			for(int j = i + 1; j < 4; ++j)
-			{
-				Vec3f tetDir = tet.v[j] - tet.v[i];
-				axisTmp = dirSeg.cross(tetDir);
-				if (axisTmp.norm() > EPSILON)
-				{
-					axisTmp /= axisTmp.norm();
-				}
-				else //parallel, choose an arbitary direction
-				{
-					if (abs(dirSeg[0]) > EPSILON)
-						axisTmp = Vec3f(dirSeg[1], -dirSeg[0], 0);
-					else
-						axisTmp = Vec3f(0, dirSeg[2], -dirSeg[1]);
-					axisTmp /= axisTmp.norm();
-				}
-				checkAxis(axisTmp);
-			}
-		
-		// Minkowski Point-Edge Normal
-		Vec3f cenSeg = (seg.v0 + seg.v1) / 2;
-		for (int j = 0; j < 2; j++)
-		{
-			Vec3f rB = (j == 0) ? (seg.v0 - cenSeg) : (seg.v1 - cenSeg);
-			Point3D queryP(cenSeg + rB);
-			Point3D projP = queryP.project(tet);
-			axisTmp = (projP - queryP).direction();
-			if (axisTmp.norm() > EPSILON)
-			{
-				axisTmp /= axisTmp.norm();
-				checkAxis(axisTmp);
-			}
-		}
-	}
-
-	template<typename Real>
-	DYN_FUNC inline void setupContactOnTet(
-		Segment3D seg,
-		Tet3D tet,
-		const Real radiusA,
-		const Real radiusB,
-		const Real depth, // <0 
-		TManifold<Real>& m)
-	{ 
-		//Gen contact point on tet
-		
-		int count = 0;
-		Vec3f axisNormal = m.normal;
-		auto checkFace = [&](Vec3f v0, Vec3f v1, Vec3f v2, Vec3f Nz)
-		{
-			if (count >= 8) return;
-			Triangle3D tri(v0, v1, v2);
-			// inter & prox
-			auto minPQ = seg.proximity(tri);
-			// -: outside
-			// +: inside
-			Real gap = (Nz.dot(minPQ.direction()) < 0) ? radiusA + radiusB : radiusB;
-			if (minPQ.length() < gap)
-			{
-				if (count >= 8) return;
-				m.contacts[count].penetration = depth;
-				m.contacts[count].position = minPQ.endPoint();
-				count++;
-			}
-			
-			// if parallel need to check the two points on segment
-			for (int i = 0; i < 2; i++)
-			{
-				Vec3f v = (i == 0) ? seg.v0 : seg.v1;
-				TPoint3D<Real> p(v);
-				TPoint3D<Real> q = TPoint3D<Real>(p).project(tri);
-				TSegment3D<Real> pq = q - p;
-				if (pq.length() < gap)
-				{
-					if (count >= 8) return;
-					m.contacts[count].penetration = depth;
-					m.contacts[count].position = pq.endPoint();
-					count++;
-				}
-			}
-		};
-
-		// Check intersection and proximity for each tri face
-		Vec3f centerTet = tet.barycenter().origin;
-		for (int i = 0; i < 4; i++)
-		{
-			// Outer norm on tri face.
-			Vec3f outerNorm = tet.face(i).normal();
-			Vec3f dir = centerTet - tet.face(i).v[0];
-			if (dir.dot(outerNorm) > 0.f)
-				outerNorm = -outerNorm;
-			checkFace(tet.face(i).v[0], tet.face(i).v[1], tet.face(i).v[2], outerNorm);
-		}
-
-		m.contactCount = count;
-
-		printf("tet contact:%d\n", count);
-	}
-
-	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Segment3D& seg, const Tet3D& tet, const Real radiusA, const Real radiusB)
-	{
-		Real depth, boundaryA, boundaryB;
-		Vec3f normal;
-		// Contact normal on seg
-		MSDF(tet, seg, depth, normal, boundaryB, boundaryA, radiusB, radiusA);
-		
-		if (REAL_LESS(depth, 0))
-		{
-			// Contact normal on tet
-			m.normal = -normal;
-			setupContactOnTet(seg, tet, radiusA, radiusB, depth, m);
+			setupContactOnBox(segB, boxA, radiusB, radiusA, depth, m);
 		}
 		else m.contactCount = 0;
 	}
-
-	template<typename Real>
-	DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Segment3D& seg, const Real radiusA, const Real radiusB)
-	{
-		Real depth, boundaryA, boundaryB;
-		Vec3f normal;
-		// Contact normal on seg
-		MSDF(tet, seg, depth, normal,boundaryA,  boundaryB, radiusA, radiusB);
-		
-		if (REAL_LESS(depth, 0))
-		{
-			// Contact normal on seg
-			m.normal = normal;
-			setupContactOnTet(seg, tet, radiusB, radiusA, depth, m);
-		}
-		else m.contactCount = 0;
-	}	
 
 	//--------------------------------------------------------------------------------------------------
 	template<typename Real>
