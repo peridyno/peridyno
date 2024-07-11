@@ -42,7 +42,7 @@ namespace dyno
 		if (mDefaultCreator != nullptr)
 			return mDefaultCreator();
 
-		return nullptr;
+		return std::make_shared<SceneGraph>();
 	}
 
 	void SceneGraphFactory::setDefaultCreator(SceneGraphCreator creator)

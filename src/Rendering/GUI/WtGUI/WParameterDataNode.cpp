@@ -241,9 +241,61 @@ Wt::WContainerWidget* WParameterDataNode::createFieldWidget(dyno::FBase* field)
 	return fw;
 }
 
+void WParameterDataNode::emit()
+{
+	changeValue_.emit(1);
+}
+
+void WParameterDataNode::castToDerived(Wt::WContainerWidget* fw)
+{
+
+	if (WRealFieldWidget* realWidget = dynamic_cast<WRealFieldWidget*>(fw))
+	{
+		realWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WVector3FieldWidget* vec3fWidget = dynamic_cast<WVector3FieldWidget*>(fw))
+	{
+		vec3fWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WVector3iFieldWidget* vec3iWidget = dynamic_cast<WVector3iFieldWidget*>(fw))
+	{
+		vec3iWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WBoolFieldWidget* boolWidget = dynamic_cast<WBoolFieldWidget*>(fw))
+	{
+		boolWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WIntegerFieldWidget* intWidget = dynamic_cast<WIntegerFieldWidget*>(fw))
+	{
+		intWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WUIntegerFieldWidget* intuWidget = dynamic_cast<WUIntegerFieldWidget*>(fw))
+	{
+		intuWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WEnumFieldWidget* enumWidget = dynamic_cast<WEnumFieldWidget*>(fw))
+	{
+		enumWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WColorWidget* colorWidget = dynamic_cast<WColorWidget*>(fw))
+	{
+		colorWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else if (WFileWidget* fileWidget = dynamic_cast<WFileWidget*>(fw))
+	{
+		fileWidget->changeValue().connect(this, &WParameterDataNode::emit);
+	}
+	else
+	{
+		Wt::log("info") << "Error with dynamic_cast!";
+	}
+
+}
+
 void WParameterDataNode::addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth, int widgetWidth)
 {
 	Wt::WContainerWidget* fw = createFieldWidget(field);
+	castToDerived(fw);
 	if (fw)
 	{
 		std::unique_ptr<Wt::WContainerWidget> mWidget(fw);

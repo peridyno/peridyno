@@ -53,7 +53,7 @@ rigid.graphics_pipeline().push_module(sRender)
 
 scn.add_node(rigid)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.set_window_title("Empty GUI")

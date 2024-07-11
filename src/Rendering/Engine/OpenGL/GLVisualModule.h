@@ -66,6 +66,8 @@ namespace dyno
 		virtual void preprocess() override final;
 		virtual void postprocess() override final;
 
+		bool validateInputs() override final;
+
 	protected:
 		// methods for create/update/release OpenGL rendering content
 		virtual bool initializeGL() = 0;

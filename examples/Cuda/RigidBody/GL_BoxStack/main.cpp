@@ -47,7 +47,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(1, 1, 0));
+	sRender->setColor(Color::SteelBlue2());
 	sRender->setAlpha(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
@@ -65,12 +65,12 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
-	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
+	wireRender->setColor(Color(0, 0, 0));
+	mapper->outTriangleSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
 	//Visualize contact points
-	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	/*auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
@@ -78,7 +78,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	pointRender->setColor(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-	rigid->graphicsPipeline()->pushModule(pointRender);
+	rigid->graphicsPipeline()->pushModule(pointRender);*/
 
 	return scn;
 }

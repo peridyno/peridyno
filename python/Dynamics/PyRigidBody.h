@@ -87,6 +87,7 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 		.def("create_slider_joint", &Class::createSliderJoint, py::return_value_policy::reference)
 		.def("create_hinge_joint", &Class::createHingeJoint, py::return_value_policy::reference)
 		.def("create_fixed_joint", &Class::createFixedJoint, py::return_value_policy::reference)
+		.def("create_unilateral_fixed_joint", &Class::createUnilateralFixedJoint, py::return_value_policy::reference)
 		.def("create_point_joint", &Class::createPointJoint, py::return_value_policy::reference)
 		.def("point_inertia", &Class::pointInertia)
 		.def("get_dt", &Class::getDt)

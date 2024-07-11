@@ -27,6 +27,8 @@ namespace dyno
 		this->stateForce()->connect(peri->inForce());
 		this->stateBonds()->connect(peri->inBonds());
 		this->animationPipeline()->pushModule(peri);
+
+		this->setDt(0.001f);
 	}
 
 	template<typename TDataType>

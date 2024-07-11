@@ -69,16 +69,18 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	menu->setMargin(5, Wt::Side::Right);
 
 	auto sampleWidget = new WSampleWidget();
-	auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	auto pythonWidget = new WPythonWidget;
 
-	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));
-	menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
-	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
+	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
+	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
 
-	paramsWidget->valueChanged().connect([=]() {
+	/*paramsWidget->valueChanged().connect([=]() {
 		mSceneCanvas->update();
-		});
+		});*/
+
+	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));
+
+	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene) setScene(scene);
@@ -122,6 +124,8 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
 
+	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
+
 	// vertical layout
 
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -132,15 +136,18 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
 	panel0->setTitle("Node Tree");
 	panel0->setCollapsible(true);
+	panel0->setMargin(0);
 	//panel0->setStyleClass("scrollable-content");
 
 	auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	treeView->setMargin(0);
 	treeView->setSortingEnabled(false);
 	treeView->setSelectionMode(Wt::SelectionMode::Single);
 	treeView->setEditTriggers(Wt::EditTrigger::None);
 	treeView->setColumnResizeEnabled(true);
 	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 300);
+	treeView->setColumnWidth(0, 100);
+	treeView->setColumnWidth(1, 280);
 
 	// module list
 	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
@@ -194,22 +201,48 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto layout2 = widget2->setLayout(std::make_unique<Wt::WHBoxLayout>());
 	//widget2->setHeight(5);
 	layout2->setContentsMargins(0, 0, 0, 0);
-	auto startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
+	startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
 	auto stopButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Stop"));
 	auto stepButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Step"));
 	auto resetButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
 
+	startButton->setId("startButton");
+	stopButton->setId("stopButton");
+	stepButton->setId("stepButton");
+	resetButton->setId("resetButton");
+
 	// actions
-	stepButton->clicked().connect(this, &WMainWindow::step);
 	startButton->clicked().connect(this, &WMainWindow::start);
 	stopButton->clicked().connect(this, &WMainWindow::stop);
+	stepButton->clicked().connect(this, &WMainWindow::step);
 	resetButton->clicked().connect(this, &WMainWindow::reset);
+
+	//startButton->clicked().connect([=] {
+	//	startButton->doJavaScript("var startButton = document.getElementById('startButton');"
+	//		"startButton.blur();");
+	//	});
+
+	stopButton->clicked().connect([=] {
+		stopButton->doJavaScript("var stopButton = document.getElementById('stopButton');"
+			"stopButton.blur();");
+		});
+	stepButton->clicked().connect([=] {
+		stepButton->doJavaScript("var stepButton = document.getElementById('stepButton');"
+			"stepButton.blur();");
+		});
+	resetButton->clicked().connect([=] {
+		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
+			"resetButton.blur();");
+		});
 }
 
 void WMainWindow::start()
 {
+	startButton->doJavaScript("var startButton = document.getElementById('startButton');"
+		"startButton.blur();");
 	if (mScene)
 	{
+		mSceneCanvas->setFocus();
 		if (mReset)
 		{
 			mScene->reset();
@@ -219,7 +252,10 @@ void WMainWindow::start()
 		Wt::WApplication* app = Wt::WApplication::instance();
 		while (this->bRunFlag)
 		{
-			step();
+			mScene->takeOneFrame();
+			mSceneCanvas->update();
+			Wt::log("info") << "Step!!!";
+			Wt::log("info") << mScene->getFrameNumber();
 			app->processEvents();
 		}
 	}
@@ -227,6 +263,7 @@ void WMainWindow::start()
 
 void WMainWindow::stop()
 {
+	mSceneCanvas->setFocus(true);
 	this->bRunFlag = false;
 }
 
@@ -234,6 +271,7 @@ void WMainWindow::step()
 {
 	if (mScene)
 	{
+		stop();
 		mScene->takeOneFrame();
 		mSceneCanvas->update();
 	}
@@ -250,10 +288,23 @@ void WMainWindow::reset()
 
 		mScene->setFrameNumber(0);
 		mScene->reset();
+		mSceneCanvas->update();
+
+		mSceneCanvas->update();
 
 		mReset = true;
 	}
 
+	Wt::log("info") << mScene->getFrameNumber();
+}
+
+void WMainWindow::updateCanvas()
+{
+	if (mScene)
+	{
+		mSceneCanvas->update();
+	}
+	Wt::log("info") << "updateCanvas!!!";
 	Wt::log("info") << mScene->getFrameNumber();
 }
 

@@ -16,6 +16,7 @@ namespace dyno
 	GLWireframeVisualModule::GLWireframeVisualModule()
 	{
 		this->setName("wireframe_renderer");
+		this->varBaseColor()->setValue(Color::Grey21());
 		this->varRadius()->setRange(0.001, 0.01);
 	}
 

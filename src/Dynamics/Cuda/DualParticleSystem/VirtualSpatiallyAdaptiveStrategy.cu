@@ -646,6 +646,8 @@ namespace dyno
 		gridSize = this->varSamplingDistance()->getData();
 		int num = this->inRPosition()->size();
 
+		if (num == 0) return;
+
 		int node_num = num * (int)(this->varCandidatePointCount()->getDataPtr()->currentKey());
 
 		if (m_anchorPoint.size() != node_num)

@@ -226,6 +226,7 @@ namespace dyno
 			this->varSlop()->getValue(),
 			this->varDampingRatio()->getValue(),
 			this->varHertz()->getValue(),
+			this->varSubStepping()->getValue(),
 			dt
 		);
 

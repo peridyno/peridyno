@@ -18,6 +18,8 @@
  */
 #pragma once
 #include "QFieldWidget.h"
+#include <QMouseEvent>
+
 
 namespace dyno
 {
@@ -33,6 +35,17 @@ namespace dyno
 
 	public slots:
 		void tagAsOuput(int status);
+
+		void showMenu(void);
+
+	protected:
+
+		void mousePressEvent(QMouseEvent* event) override;
+
+		FBase* mfield = NULL;
+
+	private:
+
 
 	};
 }

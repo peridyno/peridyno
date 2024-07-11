@@ -16,7 +16,7 @@ namespace dyno
 		: Module()
 	{
 		assert(node != nullptr);
-		mNode = node;
+		this->setParentNode(node);
 	}
 
 	Pipeline::~Pipeline()
@@ -45,7 +45,7 @@ namespace dyno
 		mModuleUpdated = true;
 		mModuleMap[id] = m;
 		
-		mNode->addModule(m);
+		this->getParentNode()->addModule(m);
 	}
 	
 	void Pipeline::popModule(std::shared_ptr<Module> m)
@@ -53,7 +53,7 @@ namespace dyno
 		ObjectId id = m->objectId();
 
 		mModuleMap.erase(id);
-		mNode->deleteModule(m);
+		this->getParentNode()->deleteModule(m);
 
 		mModuleUpdated = true;
 	}
@@ -75,7 +75,7 @@ namespace dyno
 
 	void Pipeline::pushPersistentModule(std::shared_ptr<Module> m)
 	{
-		mNode->addModule(m);
+		this->getParentNode()->addModule(m);
 		mPersistentModule.push_back(m);
 
 		mModuleUpdated = true;
@@ -94,11 +94,6 @@ namespace dyno
 	void Pipeline::updateExecutionQueue()
 	{
 		reconstructPipeline();
-	}
-
-	void Pipeline::printModuleInfo(bool enabled)
-	{
-		mTiming = enabled;
 	}
 
 	void Pipeline::forceUpdate()
@@ -127,14 +122,14 @@ namespace dyno
 #endif // CUDA_BACKEND
 			for(auto m : mModuleList)
 			{
-				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
+				if (this->printDebugInfo()) {
 					timer.start();
 				}
 
 				//update the module
 				m->update();
 
-				if (mNode->getSceneGraph()->isModuleInfoPrintable()) {
+				if (this->printDebugInfo()) {
 					timer.stop();
 
 					std::stringstream name;
@@ -154,22 +149,27 @@ namespace dyno
 		return true;
 	}
 
+	bool Pipeline::printDebugInfo()
+	{
+		return true;
+	}
+
 	FBase* Pipeline::promoteOutputToNode(FBase* base)
 	{
-		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
+		if (this->getParentNode() != nullptr && base->getFieldType() != FieldTypeEnum::Out)
 			return nullptr;
 
-		mNode->addOutputField(base);
+		this->getParentNode()->addOutputField(base);
 
 		return base;
 	}
 
 	void Pipeline::demoteOutputFromNode(FBase* base)
 	{
-		if (mNode != nullptr && base->getFieldType() != FieldTypeEnum::Out)
+		if (this->getParentNode() != nullptr && base->getFieldType() != FieldTypeEnum::Out)
 			return;
 
-		mNode->removeOutputField(base);
+		this->getParentNode()->removeOutputField(base);
 	}
 
 	void Pipeline::reconstructPipeline()
@@ -211,7 +211,7 @@ namespace dyno
 			}
 		};
 
-		auto& fields = mNode->getAllFields();
+		auto& fields = this->getParentNode()->getAllFields();
 		retrieveModules(baseId, fields);
 
 // 		for each (auto m in mPersistentModule)

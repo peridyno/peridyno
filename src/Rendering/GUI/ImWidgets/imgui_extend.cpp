@@ -1,18 +1,27 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+
 #include "imgui_extend.h"
 #include "Platform.h"
 #include "Math/SimpleMath.h"
+
+thread_local ImGuiContext* MyImGuiTLS;
 
 namespace ImGui{
 ImVec4      ExColorsVal[ImGuiExColVal_COUNT];
 };
 
-void ImGui::BeginHorizontal(){
+void ImGui::BeginHorizontal(){    
+    // patch for thread local context...
+    GImGui = GetCurrentContext();
     ImGuiWindow* window = GetCurrentWindow();
     // window->DC.CursorPos = window->DC.CursorMaxPos = ImVec2(bar_rect.Min.x + window->DC.MenuBarOffset.x, bar_rect.Min.y + window->DC.MenuBarOffset.y);
     window->DC.LayoutType = ImGuiLayoutType_Horizontal;
 }
 
 void ImGui::EndHorizontal(){
+    // patch for thread local context...
+    GImGui = GetCurrentContext();
     ImGuiWindow* window = GetCurrentWindow();
     window->DC.LayoutType = ImGuiLayoutType_Vertical;
 }
@@ -149,6 +158,9 @@ void ImGui::toggleButton(const char* label, bool *v)
     }
 }
 bool ImGui::ImageButtonWithText(ImTextureID texId,const char* label,const ImVec2& imageSize, const ImVec2 &uv0, const ImVec2 &uv1, int frame_padding, const ImVec4 &bg_col, const ImVec4 &tint_col) {
+
+    // patch for thread local context...
+    GImGui = GetCurrentContext(); 
     ImGuiWindow* window = GetCurrentWindow();
     
     if (window->SkipItems)
@@ -231,7 +243,8 @@ ImU32 ImGui::VecToImU(const dyno::Vec3f *v)
 bool ImGui::ColorBar(char* label, float* values, ImU32* col, int length, int num_type)
 {
 	if (col == nullptr ) return false;
-//	ImGuiContext* g = GetCurrentContext();
+    // patch for thread local context...
+    GImGui = GetCurrentContext();
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
         return false;

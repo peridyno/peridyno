@@ -343,6 +343,10 @@ namespace dyno
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 			layout->addWidget(fw, j, 0);
 		}
+		else 
+		{
+			std::cout <<(field->getObjectName());
+		}
 	}
 
 	void PPropertyWidget::addArrayFieldWidget(FBase* field)

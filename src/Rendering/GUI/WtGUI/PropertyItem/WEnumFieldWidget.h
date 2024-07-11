@@ -21,6 +21,10 @@ public:
 
 	//Called when the widget is updated
 	void updateField(int index);
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
 
 private:
 	dyno::FBase* mfield;
@@ -28,4 +32,5 @@ private:
 	Wt::WComboBox* mData;
 
 	std::map<int, int> mComboxIndexMap;
+	Wt::Signal<int> changeValue_;
 };

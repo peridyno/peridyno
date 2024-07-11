@@ -1,5 +1,6 @@
 #include "Module.h"
 #include "Node.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {
@@ -107,10 +108,15 @@ namespace dyno
 		{
 			if (!f_in->isOptional() && f_in->isEmpty())
 			{
-				std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
-					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
+				Node* par = this->getParentNode();
+				if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
+				{
+					std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
+						std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-				Log::sendMessage(Log::Error, errMsg);
+					Log::sendMessage(Log::Error, errMsg);
+				}
+
 				return false;
 			}
 		}
@@ -125,10 +131,14 @@ namespace dyno
 		{
 			if (f_out->isEmpty())
 			{
-				std::string errMsg = std::string("The output field ") + f_out->getObjectName() +
-					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not prepared!");
+				Node* par = this->getParentNode();
+				if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
+				{
+					std::string errMsg = std::string("The output field ") + f_out->getObjectName() +
+						std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not prepared!");
 
-				Log::sendMessage(Log::Error, errMsg);
+					Log::sendMessage(Log::Error, errMsg);
+				}
 				return false;
 			}
 		}

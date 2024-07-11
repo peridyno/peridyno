@@ -61,7 +61,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
-	fluid->animationPipeline()->disable();
+	fluid->setActive(false);
 
 	//Setup boundaries
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());

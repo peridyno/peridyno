@@ -70,7 +70,7 @@ scn.add_node(initialParticles2)
 scn.add_node(fluid)
 scn.add_node(boundary)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()

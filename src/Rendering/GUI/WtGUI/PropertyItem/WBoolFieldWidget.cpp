@@ -38,4 +38,5 @@ void WBoolFieldWidget::updateField()
 	}
 	f->setValue(false);
 	f->update();
+	changeValue_.emit(1);
 }

@@ -108,6 +108,7 @@ namespace dyno
 		float slop,
 		float zeta,
 		float hertz,
+		float substepping,
 		float dt
 	);
 	

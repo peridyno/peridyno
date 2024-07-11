@@ -4,6 +4,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         RigidBody
         ParticleSystem
         Peridynamics
+        DualParticleSystem
         SemiAnalyticalScheme
         Multiphysics
         QtGUI)

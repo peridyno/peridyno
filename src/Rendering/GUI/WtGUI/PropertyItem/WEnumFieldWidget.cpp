@@ -53,4 +53,5 @@ void WEnumFieldWidget::updateField(int index)
 	f->getDataPtr()->setCurrentKey(mComboxIndexMap[index]);
 
 	f->update();
+	changeValue_.emit(1);
 }

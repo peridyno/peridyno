@@ -237,6 +237,7 @@ namespace dyno
 			this->varSlop()->getValue(),
 			this->varDampingRatio()->getValue(),
 			this->varHertz()->getData(),
+			1.0,
 			dt
 		);
 

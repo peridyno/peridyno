@@ -29,6 +29,7 @@ namespace dyno
 		this->setName("point_renderer");
 		this->inColor()->tagOptional(true);
 		this->varPointSize()->setRange(0.001f, 1.0f);
+		this->varBaseColor()->setValue(Color::Grey81());
 		this->varForceUpdate()->setValue(true);
 	}
 

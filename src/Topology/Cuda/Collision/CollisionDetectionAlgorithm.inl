@@ -1,3 +1,4 @@
+#include "Platform.h"
 #include "Primitive/Primitive3D.h"
 #include "Vector/Vector3D.h"
 
@@ -387,11 +388,10 @@ namespace dyno
 		Real& boundaryB		// B
 	)
 	{
-
 		if (!((lowerBoundaryA > upperBoundaryB) || (lowerBoundaryB > upperBoundaryA)))
 		{
-			// boundaryA < boundaryB :B (<-)
-			// boundaryB < boundaryA :B (->)
+			// boundaryB < boundaryA :B (->) [default: N]
+			// boundaryA < boundaryB :B (<-) [-N]
 			if (lowerBoundaryA < lowerBoundaryB)
 			{
 				if (upperBoundaryA > upperBoundaryB)
@@ -461,8 +461,8 @@ namespace dyno
 		}
 		else
 		{
-			// boundaryA < boundaryB :B (->)
-			// boundaryB < boundaryA :B (<-)
+			// boundaryA < boundaryB :B (->) [default: N]
+			// boundaryB < boundaryA :B (<-) [-N]
 			// |---A---| (->) |---B---|
 			if (upperBoundaryA < lowerBoundaryB)
 			{
@@ -479,6 +479,33 @@ namespace dyno
 			}
 		}
 	}
+
+	template<typename Real>
+	DYN_FUNC inline void updateSDF(
+		Real& boundaryA,
+		Real& boundaryB,
+		Real& depth,
+		Vec3f& normal,
+		Real currentBoundaryA,
+		Real currentBoundaryB,
+		Real currentDepth,
+		Vec3f currentN
+	)
+	{
+		// SDF Calculate on Convex Hull
+		// - : minimum distance
+		// + : maximum distance
+		currentN = ((currentBoundaryB < currentBoundaryA) ^ (REAL_LESS(currentDepth, 0))) ? 
+					-currentN : currentN;
+		if (REAL_LESS(currentDepth, 0) && REAL_GREAT(currentDepth , depth))
+		{
+			depth = currentDepth;
+			normal = currentN;
+			boundaryA = currentBoundaryA;
+			boundaryB = currentBoundaryB;
+		}
+	}
+
 
 	// ---------------------------------------- [   Box   ] ----------------------------------------
 	template<typename Real>
@@ -530,6 +557,7 @@ namespace dyno
 		lowerBoundary -= radius;
 		upperBoundary += radius;
 	}
+
 	// ---------------------------------------- [ Segment ] ----------------------------------------
 	template<typename Real>
 	DYN_FUNC inline void projectOnAxis(
@@ -601,22 +629,13 @@ namespace dyno
 	{
 		depth = - REAL_infinity;
 		bool sign = true; // < 0
-		auto checkAxis = [&](Vec3f& N)
+		auto checkAxis = [&](Vec3f N)
 		{
 			Real D = 0;
 			Real bA, bB;
 			checkSignedDistanceAxis(D, bA, bB, N, box, seg, radiusA, radiusB);
 
-			// SDF Calculate on Convex Hull
-			// - : minimum distance
-			// + : maximum distance
-			if (REAL_LESS(D, 0) && REAL_GREAT(D , depth))
-			{
-				depth = D;
-				normal = (bB < bA)? N : -N;
-				boundaryA = bA;
-				boundaryB = bB;
-			}
+			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
 		};
 		Vec3f axisTmp;
 
@@ -792,22 +811,13 @@ namespace dyno
 	{
 		depth = - REAL_infinity;
 		bool sign = true; // < 0
-		auto checkAxis = [&](Vec3f& N)
+		auto checkAxis = [&](Vec3f N)
 		{
 			Real D = 0;
 			Real bA, bB;
 			checkSignedDistanceAxis(D, bA, bB, N, tet, seg, radiusA, radiusB);
 
-			// SDF Calculate on Convex Hull
-			// - : minimum distance
-			// + : maximum distance
-			if (REAL_LESS(D, 0) && REAL_GREAT(D , depth))
-			{
-				depth = D;
-				normal = (bB < bA)? N : -N;
-				boundaryA = bA;
-				boundaryB = bB;
-			}
+			updateSDF(boundaryA, boundaryB, depth, normal, bA, bB, D, N);
 		};
 		Vec3f axisTmp;
 
@@ -1604,7 +1614,7 @@ namespace dyno
 		if (abs(p.dot(axisNormal) - boundaryMin) < abs(depth))
 			boundaryPoints2[cnt2++] = p;
 
-		printf("cnt1 = %d, cnt2 = %d  %.3lf\n", cnt1, cnt2, depth);
+		printf("cnt1 = %d, cnt2 = %d,  dep=%.3lf\n", cnt1, cnt2, depth);
 		if (cnt1 == 1 || cnt2 == 1)
 		{
 			m.normal = (boundary1 < boundary2) ? -axisNormal : axisNormal;

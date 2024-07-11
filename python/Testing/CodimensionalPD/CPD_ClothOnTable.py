@@ -34,13 +34,13 @@ cloth.set_visible(True)
 mesh.set_visible(True)
 
 scn.print_node_info(True)
-scn.print_module_info(True)
+scn.print_simulation_info(True)
 
 scn.add_node(mesh)
 scn.add_node(boundary)
 scn.add_node(cloth)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()

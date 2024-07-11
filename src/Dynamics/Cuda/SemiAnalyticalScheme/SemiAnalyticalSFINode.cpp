@@ -93,6 +93,7 @@ namespace dyno
 		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
 		this->animationPipeline()->pushModule(pshiftModule);
 
+		this->setDt(0.001f);
 	}
 
 	template<typename TDataType>

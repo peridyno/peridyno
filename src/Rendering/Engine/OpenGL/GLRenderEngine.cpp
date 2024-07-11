@@ -70,6 +70,8 @@ namespace dyno
 
 		mShadowMap->initialize();
 		mEnvmap->initialize();
+
+		this->setDefaultEnvmap();
 	}
 
 	void GLRenderEngine::terminate()
@@ -362,10 +364,11 @@ namespace dyno
 		// since the grid is transparent, we handle it between opacity and transparent objects
 		if (this->showGround)
 		{
+			float unitScale = rparams.unitScale;
 			// only draw to color buffer, so we can pick through
 			mFramebuffer.drawBuffers(1, attachments);
 			mRenderHelper->drawGround(params, 
-				this->planeScale, this->rulerScale,
+				this->planeScale * unitScale, this->rulerScale * unitScale,
 				Vec4f(this->planeColor.r, this->planeColor.g, this->planeColor.b, this->planeColor.a),
 				Vec4f(this->rulerColor.r, this->rulerColor.g, this->rulerColor.b, this->rulerColor.a));
 		}

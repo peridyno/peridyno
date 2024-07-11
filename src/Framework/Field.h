@@ -305,6 +305,8 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray2D);
 
+		~FArray2D() override;
+
 		inline uint size() override {
 			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
@@ -321,6 +323,15 @@ namespace dyno {
 			return this->constDataPtr() == nullptr;
 		}
 	};
+
+	template<typename T, DeviceType deviceType>
+	FArray2D<T, deviceType>::~FArray2D()
+	{
+		if (m_data.use_count() == 1)
+		{
+			m_data->clear();
+		}
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArray2D<T, deviceType>::assign(DArray2D<T>& vals)
@@ -391,6 +402,8 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray3D);
 
+		~FArray3D() override;
+
 		inline uint size() override {
 			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
@@ -407,6 +420,15 @@ namespace dyno {
 			return this->constDataPtr() == nullptr;
 		}
 	};
+
+	template<typename T, DeviceType deviceType>
+	FArray3D<T, deviceType>::~FArray3D()
+	{
+		if (m_data.use_count() == 1)
+		{
+			m_data->clear();
+		}
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArray3D<T, deviceType>::assign(DArray3D<T>& vals)
@@ -474,6 +496,8 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArrayList);
 
+		~FArrayList() override;
+
 		inline uint size() override {
 			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
@@ -490,6 +514,15 @@ namespace dyno {
 			return this->constDataPtr() == nullptr;
 		}
 	};
+
+	template<typename T, DeviceType deviceType>
+	FArrayList<T, deviceType>::~FArrayList()
+	{
+		if (m_data.use_count() == 1)
+		{
+			m_data->clear();
+		}
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArrayList<T, deviceType>::assign(const ArrayList<T, DeviceType::CPU>& src)

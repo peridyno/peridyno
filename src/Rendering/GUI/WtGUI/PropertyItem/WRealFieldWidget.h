@@ -30,6 +30,11 @@ public:
 	//Called when the widget is updated
 	void updateField();
 
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
+
 private:
 	Wt::Signal<> mSignal;
 	Wt::Signal<> fieldChanged;
@@ -38,4 +43,5 @@ private:
 	Wt::WDoubleSpinBox* mData;
 	dyno::FVar<float>* mFloatField;
 	dyno::FVar<double>* mDoubleField;
+	Wt::Signal<int> changeValue_;
 };

@@ -33,11 +33,16 @@ public:
 
 	//Called when the widget is updated
 	void updateField();
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
 
 private:
 	dyno::FBase* mfield;
 	Wt::WHBoxLayout* layout;
 	Wt::WSpinBox* mData;
+	Wt::Signal<int> changeValue_;
 };
 
 class WUIntegerFieldWidget : public Wt::WContainerWidget
@@ -55,9 +60,14 @@ public:
 
 	//Called when the widget is updated
 	void updateField();
+	Wt::Signal<int>& changeValue()
+	{
+		return changeValue_;
+	}
 
 private:
 	dyno::FBase* mfield;
 	Wt::WHBoxLayout* layout;
 	Wt::WSpinBox* mData;
+	Wt::Signal<int> changeValue_;
 };

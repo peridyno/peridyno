@@ -15,6 +15,8 @@ namespace dyno
 	{
 		this->setName("surface_renderer");
 
+		this->varBaseColor()->setValue(Color::SteelBlue2());
+
 		this->inColor()->tagOptional(true);
 
 		this->inNormal()->tagOptional(true);

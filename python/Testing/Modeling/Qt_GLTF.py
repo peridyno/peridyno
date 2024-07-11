@@ -6,7 +6,7 @@ gltf.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/JeepG
 
 scn.add_node(gltf)
 
-app = dyno.GLfwApp()
+app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
 app.main_loop()
