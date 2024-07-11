@@ -135,31 +135,33 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	// node tree
 	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
 	panel0->setTitle("Node Tree");
-	panel0->setCollapsible(true);
+	panel0->setCollapsible(false);
 	panel0->setMargin(0);
+	panel0->setCentralWidget(std::make_unique<WtNodeFlowWidget>());
 	//panel0->setStyleClass("scrollable-content");
 
-	auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
-	treeView->setMargin(0);
-	treeView->setSortingEnabled(false);
-	treeView->setSelectionMode(Wt::SelectionMode::Single);
-	treeView->setEditTriggers(Wt::EditTrigger::None);
-	treeView->setColumnResizeEnabled(true);
-	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 100);
-	treeView->setColumnWidth(1, 280);
+	//auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	//treeView->setMargin(0);
+	//treeView->setSortingEnabled(false);
+	//treeView->setSelectionMode(Wt::SelectionMode::Single);
+	//treeView->setEditTriggers(Wt::EditTrigger::None);
+	//treeView->setColumnResizeEnabled(true);
+	//treeView->setModel(mNodeDataModel);
+	//treeView->setColumnWidth(0, 100);
+	//treeView->setColumnWidth(1, 280);
+	//treeView->setSortingEnabled(false);
 
 	// module list
-	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
-	panel1->setTitle("Module List");
-	panel1->setCollapsible(true);
-	panel1->setStyleClass("scrollable-content");
-	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
-	treeView->setSortingEnabled(false);
-	tableView->setSortingEnabled(false);
-	tableView->setSelectionMode(Wt::SelectionMode::Single);
-	tableView->setEditTriggers(Wt::EditTrigger::None);
-	tableView->setModel(mModuleDataModel);
+	//auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
+	//panel1->setTitle("Module List");
+	//panel1->setCollapsible(true);
+	//panel1->setStyleClass("scrollable-content");
+	//auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
+
+	//tableView->setSortingEnabled(false);
+	//tableView->setSelectionMode(Wt::SelectionMode::Single);
+	//tableView->setEditTriggers(Wt::EditTrigger::None);
+	//tableView->setModel(mModuleDataModel);
 
 	// Parameter list
 	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>(), 6);
@@ -168,29 +170,29 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	panel2->setStyleClass("scrollable-content");
 
 	// action for selection change
-	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto node = mNodeDataModel->getNode(idx);
-			mModuleDataModel->setNode(node);
-			mParameterDataNode->setNode(node);
-			mParameterDataNode->createParameterPanel(panel2);
-		});
+	//treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+	//	{
+	//		auto node = mNodeDataModel->getNode(idx);
+	//		mModuleDataModel->setNode(node);
+	//		mParameterDataNode->setNode(node);
+	//		mParameterDataNode->createParameterPanel(panel2);
+	//	});
 
-	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto module = mModuleDataModel->getModule(idx);
-			mParameterDataNode->setModule(module);
-			mParameterDataNode->createParameterPanelModule(panel2);
-		});
+	//tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+	//	{
+	//		auto module = mModuleDataModel->getModule(idx);
+	//		mParameterDataNode->setModule(module);
+	//		mParameterDataNode->createParameterPanelModule(panel2);
+	//	});
 
-	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto mod = mModuleDataModel->getModule(idx);
-			if (mod->getModuleType() == "VisualModule")
-			{
-				Wt::log("info") << mod->getName();
-			}
-		});
+	//tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+	//	{
+	//		auto mod = mModuleDataModel->getModule(idx);
+	//		if (mod->getModuleType() == "VisualModule")
+	//		{
+	//			Wt::log("info") << mod->getName();
+	//		}
+	//	});
 
 	// simulation control
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
