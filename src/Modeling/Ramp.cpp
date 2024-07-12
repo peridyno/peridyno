@@ -1,6 +1,4 @@
 #include "Ramp.h"
-#include "Vector/Vector3D.h"
-#include "Vector/Vector2D.h"
 
 namespace dyno {
 
@@ -640,11 +638,4 @@ namespace dyno {
 
 
 	}
-
-
-
-
-
-
-
 }

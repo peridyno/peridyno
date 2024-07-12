@@ -28,7 +28,8 @@
 #include "TriangularMeshConstraint.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Topology/TriangleSet.h"
-#include "../../../Modeling/PointsBehindMesh.h"
+
+#include "Commands/PointsBehindMesh.h"
 
 namespace dyno
 {

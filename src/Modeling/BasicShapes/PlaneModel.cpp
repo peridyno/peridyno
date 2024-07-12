@@ -40,8 +40,6 @@ namespace dyno
 
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setColor(Color(1.0f, 1.0f, 1.0f));
-		tsRender->setVisible(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 

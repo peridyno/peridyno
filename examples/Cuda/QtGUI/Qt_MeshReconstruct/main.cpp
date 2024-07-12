@@ -16,7 +16,7 @@
 
 #include "DualParticleSystem/SurfaceLevelSetConstructionNode.h"
 #include "Mapping\MarchingCubes.h"
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
 #include "ParticleSystem/CubeSampler.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 

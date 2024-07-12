@@ -4,10 +4,10 @@
 
 #include "Collision/CollisionDetectionAlgorithm.h"
 
-#include "PlaneModel.h"
-#include "CubeModel.h"
-#include "SphereModel.h"
-#include "CapsuleModel.h"
+#include "BasicShapes/PlaneModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
+#include "BasicShapes/CapsuleModel.h"
 
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
