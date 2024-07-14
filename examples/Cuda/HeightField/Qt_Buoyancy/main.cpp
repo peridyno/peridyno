@@ -19,7 +19,7 @@
 
 #include <HeightField/Ocean.h>
 #include <HeightField/OceanPatch.h>
-#include <HeightField/Coupling.h>
+#include <HeightField/RigidWaterCoupling.h>
 #include <HeightField/Wake.h>
 
 #include <HeightField/Module/Steer.h>
@@ -93,7 +93,7 @@ std::shared_ptr<SceneGraph> createScene()
 	boat->stateQuaternion()->connect(steer->inQuaternion());
 	boat->animationPipeline()->pushModule(steer);
 
-	auto coupling = scn->addNode(std::make_shared<Coupling<DataType3f>>());
+	auto coupling = scn->addNode(std::make_shared<RigidWaterCoupling<DataType3f>>());
 	boat->connect(wake->importVessel());
 	boat->connect(coupling->importVessels());
 	ocean->connect(coupling->importOcean());

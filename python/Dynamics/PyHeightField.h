@@ -67,10 +67,10 @@ void declare_capillary_wave(py::module& m, std::string typestr) {
 		.def("move_dynamic_region", &Class::moveDynamicRegion);
 }
 
-#include "HeightField/Coupling.h"
+#include "HeightField/RigidWaterCoupling.h"
 template <typename TDataType>
 void declare_coupling(py::module& m, std::string typestr) {
-	using Class = dyno::Coupling<TDataType>;
+	using Class = dyno::RigidWaterCoupling<TDataType>;
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("Coupling") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

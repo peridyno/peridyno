@@ -52,10 +52,12 @@ namespace dyno
 
 		mNx = floor((w - 0.5f * ps) / ps) + 1;
 		mNy = floor((h - 0.5f * ps) / ps) + 1;
-		mNz = this->varLayer()->getValue();
+		mNz = this->varLayer()->getValue() == 0 ? 1 : this->varLayer()->getValue();
 
 		mPosition.resize(mNx, mNy, mNz);
+
 		mMask.resize(mNx, mNy, mNz);
+		mMask.reset();
 
 		mPositionBuffer.resize(mNx, mNy, mNz);
 		mMaskBuffer.resize(mNx, mNy, mNz);
@@ -323,12 +325,11 @@ namespace dyno
 		DArray2D<Coord4D> grid,
 		DArray3D<Coord3D> point3d,
 		Coord3D origin,
+		Real grid_spacing,
 		Real s)
 	{
 		uint i = blockIdx.x * blockDim.x + threadIdx.x;
 		uint j = blockIdx.y * blockDim.y + threadIdx.y;
-
-		Real grid_spacing = 1.0;
 
 		uint width = point3d.nx();
 		uint height = point3d.ny();
@@ -338,8 +339,8 @@ namespace dyno
 		for (uint k = 0; k < point3d.nz(); k++)
 		{
 			Coord3D pos = point3d(i, j, k);
-			Real grid_fx = (i + pos.x) * s / grid_spacing;
-			Real grid_fy = (j + pos.y) * s / grid_spacing;
+			Real grid_fx = (i + pos.x) * s;
+			Real grid_fy = (j + pos.y) * s;
 
 			if (grid_fx < 0.0f) grid_fx = 0.0f;
 			if (grid_fx > width - 1) grid_fx = width - 1.0f;
@@ -365,7 +366,7 @@ namespace dyno
 			Coord4D gp = w00 * gp00 + w10 * gp10 + w01 * gp01 + w11 * gp11;
 
 			uint id = point3d.index(i, j, k);
-			points[id] = origin + Coord3D((pos.x + i) * s, gp.x + gp.w - k * s, (pos.z + j) * s);
+			points[id] = origin + Coord3D((pos.x + i) * s * grid_spacing, gp.x + gp.w - k * s * grid_spacing, (pos.z + j) * s * grid_spacing);
 		}
 	}
 
@@ -382,7 +383,9 @@ namespace dyno
 
 		auto& points = pointSet->getPoints();
 
-		auto origin = granular->varOrigin()->getValue();
+		auto heights = granular->stateHeightField()->getDataPtr();
+		auto origin = heights->getOrigin();
+		auto gridSpacing = heights->getGridSpacing();
 
 		uint num = mPosition.size();
 
@@ -394,6 +397,7 @@ namespace dyno
 			computeGrid,
 			mPosition,
 			origin,
+			gridSpacing,
 			ps);
 	}
 
