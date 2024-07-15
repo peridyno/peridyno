@@ -418,9 +418,12 @@ namespace dyno
 
 		for (size_t i = 0; i < rigidInfo.size(); i++)
 		{
+
+			rigidbody.offset = rigidInfo[i].Offset;
+
 			auto type = rigidInfo[i].shapeType;
 			auto shapeId = rigidInfo[i].meshShapeId;
-			auto offset = rigidInfo[i].offsetTransform;
+			auto transform = rigidInfo[i].transform;
 
 			Vec3f up;
 			Vec3f down;
@@ -441,61 +444,110 @@ namespace dyno
 			BoxInfo currentBox;
 			CapsuleInfo currentCapsule;		//RadiusºÍHalfLengthÉèÖÃ¡£OffsetÉèÖÃ
 			SphereInfo currentSphere;
+			TetInfo currentTet;
 
-			switch (type)
-			{
-			case dyno::Box:
-
-				if (shapeId != -1) 
-				{
-					auto center = T;
-					currentBox.center = Vec3f(center.x, center.y, center.z);
-					currentBox.halfLength = (up - down) / 2 ;
-					currentBox.rot = Quat1f(offset.rotation());
-				}
-				Actors[i] = this->addBox(currentBox, rigidbody, 100);
-				break;
-
-			case dyno::Tet:
-				printf("Need Tet Configuration\n");
-				break;
-
-			case dyno::Capsule:
-
-				if (shapeId != -1)
-				{
-					currentCapsule.center = T;
-					currentCapsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-					currentCapsule.halfLength = (up.y - down.y) / 2 / 5;
-					currentCapsule.radius = std::abs(up.y - down.y) / 2 ;
-				}
-				Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
-				break;
-
-			case dyno::Sphere:
-
-				if (shapeId != -1)
-				{
-					currentSphere.center = T;
-					currentSphere.rot = Quat1f(offset.rotation());
-					currentSphere.radius = std::abs(up.y - down.y) / 2;
-				}
-				Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
-				break;
-
-			case dyno::Tri:
-				printf("Need Tri Configuration\n");
-				break;
-
-			case dyno::OtherShape:
-				printf("Need OtherShape Configuration\n");
-				break;
-
-			default:
-				break;
-			}
 
 			if (shapeId != -1) 
+			{
+				switch (type)
+				{
+				case dyno::Box:
+					currentBox.center = T + rigidInfo[i].transform.translation();;
+					currentBox.halfLength = (up - down) / 2 * rigidInfo[i].halfLength;
+					currentBox.rot = Quat1f(transform.rotation());
+
+					Actors[i] = this->addBox(currentBox, rigidbody, 100);
+					break;
+
+				case dyno::Tet:
+					printf("Need Tet Configuration\n");
+					break;
+
+				case dyno::Capsule:
+					currentCapsule.center = T + rigidInfo[i].transform.translation();
+					currentCapsule.rot = Quat1f(transform.rotation());
+					currentCapsule.halfLength = (up.y - down.y) / 2 * rigidInfo[i].capsuleLength;
+					currentCapsule.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
+
+					Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+					break;
+
+				case dyno::Sphere:
+					currentSphere.center = T + rigidInfo[i].transform.translation();
+					currentSphere.rot = Quat1f(transform.rotation());
+					currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
+					
+					Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+					break;
+
+				case dyno::Tri:
+					printf("Need Tri Configuration\n");
+					Actors[i] = NULL;
+					break;
+
+				case dyno::OtherShape:
+					printf("Need OtherShape Configuration\n");
+					Actors[i] = NULL;
+					break;
+
+				default:
+					break;
+				}
+			}
+			else if(shapeId == -1)
+			{
+				switch (type)
+				{
+				case dyno::Box:
+					currentBox.center = rigidInfo[i].transform.translation();
+					currentBox.halfLength = rigidInfo[i].halfLength;
+					currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
+
+					Actors[i] = this->addBox(currentBox, rigidbody, 100);
+					break;
+
+				case dyno::Tet:
+					printf("Need Tet Configuration\n");
+					currentTet.v[0] = rigidInfo[i].tet[0];
+					currentTet.v[1] = rigidInfo[i].tet[1];
+					currentTet.v[2] = rigidInfo[i].tet[2];
+					currentTet.v[3] = rigidInfo[i].tet[3];
+
+					break;
+
+				case dyno::Capsule:
+					currentCapsule.center = rigidInfo[i].transform.translation();
+					currentCapsule.rot = Quat<Real>(rigidInfo[i].transform.rotation());
+					currentCapsule.halfLength = rigidInfo[i].capsuleLength;
+					currentCapsule.radius = rigidInfo[i].radius;
+
+					Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+					break;
+
+				case dyno::Sphere:
+					currentSphere.center = rigidInfo[i].transform.translation();
+					currentSphere.rot = Quat<Real>(rigidInfo[i].transform.rotation());
+					currentSphere.radius = rigidInfo[i].radius;
+
+					Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+					break;
+
+				case dyno::Tri:
+					printf("Need Tri Configuration\n");
+					break;
+
+				case dyno::OtherShape:
+					printf("Need OtherShape Configuration\n");
+					break;
+
+				default:
+					break;
+				}
+				
+			}
+
+			
+			if (shapeId != -1 && Actors[i] != NULL)
 			{
 				////bindShapetoActor
 				this->bind(Actors[i], Pair<uint, uint>(shapeId, 0));
@@ -507,7 +559,6 @@ namespace dyno
 		for (size_t i = 0; i < jointInfo.size(); i++) 
 		{
 			////Actor
-
 			auto type = jointInfo[i].type;
 			int first = jointInfo[i].JointName1.rigidId;
 			int second = jointInfo[i].JointName2.rigidId;
@@ -517,19 +568,18 @@ namespace dyno
 
 			if (first == -1 || second == -1)
 				continue;
+			if (Actors[first] == NULL || Actors[second] == NULL)
+				continue;
 
 			if (type == Hinge) 
 			{
 				auto& joint = this->createHingeJoint(Actors[first], Actors[second]);
 				joint.setAnchorPoint(Actors[first]->center + anchorOffset);
-				joint.setMoter(speed);
+				if(jointInfo[i].useMoter)
+					joint.setMoter(speed);
 				joint.setAxis(axis);
-			}
-			
-			
+			}		
 		}
-
-
 
 		/***************** Reset *************/
 		Vechicle<TDataType>::resetStates();

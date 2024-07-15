@@ -19,7 +19,7 @@ namespace dyno
 	{
 		//this->lineEdit()->setMouseTracking(true);
 
-		connect(this->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(LineEditStart()));
+		connect(this->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(LineEditStart(const QString&)));
 		connect(this, SIGNAL(valueChanged(double)), this, SLOT(LineEditFinished(double)));
 		connect(this, SIGNAL(valueChanged(double)), this, SLOT(ModifyValueAndUpdate(double)));
 		
@@ -28,8 +28,28 @@ namespace dyno
 
 	}
 
-	void QPiecewiseDoubleSpinBox::LineEditStart()
+	QPiecewiseDoubleSpinBox::QPiecewiseDoubleSpinBox(Real v,QWidget* parent)
+		: QDoubleSpinBox(parent)
 	{
+
+		this->setRealValue(v);
+
+		connect(this->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(LineEditStart(const QString&)));
+		connect(this, SIGNAL(valueChanged(double)), this, SLOT(LineEditFinished(double)));
+		connect(this, SIGNAL(valueChanged(double)), this, SLOT(ModifyValueAndUpdate(double)));
+
+		this->setDecimals(decimalsMax);
+		this->setKeyboardTracking(false);
+
+
+	}
+
+	void QPiecewiseDoubleSpinBox::LineEditStart(const QString& qStr)
+	{
+		const auto& value = qStr.toDouble();
+		this->setValue(value);
+		emit valueChanged(value);
+
 		return;
 	}
 

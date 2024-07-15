@@ -58,12 +58,19 @@ namespace dyno {
 	{	
 		VehicleRigidBodyInfo() {};
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f offset = Transform3f()) //
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type) //
 		{
 			shapeName = name;
 			meshShapeId = shapeId;
 			shapeType = type;
-			offsetTransform = offset;
+		};
+
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans) //
+		{
+			shapeName = name;
+			meshShapeId = shapeId;
+			shapeType = type;
+			transform = trans;
 		};
 
 		//Shape:
@@ -71,11 +78,21 @@ namespace dyno {
 
 		int meshShapeId = -1;
 		ConfigShapeType shapeType = ConfigShapeType::Capsule;
-		Transform3f offsetTransform = Transform3f(Vec3f(0), Mat3f::identityMatrix(), Vec3f(1));
+		Transform3f transform = Transform3f(Vec3f(0), Mat3f::identityMatrix(), Vec3f(1));
 
-		Vec3f boundingBoxV0;
-		Vec3f boundingBoxV1;
-		Transform3f boundingTransform;
+		Vec3f Offset = Vec3f(0);
+		//if MeshShapeId
+
+		Vec3f halfLength = Vec3f(1);	// if(type == Box);
+		
+		float radius = 1;	//	if(type == Sphere);  if(type == Capsule);
+
+		std::vector<Vec3f> tet = {Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };	//	if(type == Tet);
+
+		float capsuleLength = 1;	// if(type == Capsule);
+
+		ConfigMotionType motion = ConfigMotionType::Dynamic;
+
 	};
 
 
