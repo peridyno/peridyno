@@ -23,11 +23,12 @@
 #include <PlaneModel.h>
 
 #include "GltfLoader.h"
-#include "ConvertToTextureMesh.h"
+//#include "ConvertToTextureMesh.h"
 #include "CubeModel.h"
 #include "CapsuleModel.h"
 #include "SphereModel.h"
 #include "GltfLoader.h"
+#include "Transform.h"
 
 using namespace std;
 using namespace dyno;
@@ -35,19 +36,6 @@ using namespace dyno;
 std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
-	//auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	// 
-	//auto convertBody = scn->addNode(std::make_shared<ConvertToTextureMesh<DataType3f>>());
-	//cube->stateTriangleSet()->connect(convertBody->inTopology());
-	// 
-	//auto capsuleL = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
-	//auto convertL = scn->addNode(std::make_shared<ConvertToTextureMesh<DataType3f>>());
-	//capsuleL->stateTriangleSet()->connect(convertL->inTopology());
-	// 
-	//auto capsuleR = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
-	//auto convertR = scn->addNode(std::make_shared<ConvertToTextureMesh<DataType3f>>());
-	//capsuleR->stateTriangleSet()->connect(convertR->inTopology());
 
 	auto configCar = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
 
@@ -60,17 +48,25 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	VehicleBind configData;
 
-	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(std::string("LF"), 0), 0, Capsule));
-	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(std::string("LB"), 1), 1, Capsule));
-	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(std::string("RF"), 2), 2, Capsule));
-	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(std::string("RB"), 3), 3, Capsule));
-	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(std::string("BackWheel"), 4), 4, Box));
-	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(std::string("Body"), 5), 5, Box));
+	Vec3f angle = Vec3f(0,0,90);
+	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
+	;
+	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LF", 0), 0, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));//
+	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LB", 1), 1, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
+	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("RF", 2), 2, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
+	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("RB", 3), 3, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
+	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("BackWheel", 4), 4, Box));
+	configData.vehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Body", 5), 5, Box));
 
-	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(std::string("LF"), 0), Name_Shape(std::string("Body"), 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(std::string("LB"), 1), Name_Shape(std::string("Body"), 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(std::string("RF"), 2), Name_Shape(std::string("Body"), 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(std::string("RB"), 3), Name_Shape(std::string("Body"), 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	for (size_t i = 0; i < 4; i++)
+	{
+		configData.vehicleRigidBodyInfo[i].capsuleLength = 0.3;
+	}
+
+	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LF", 0), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LB", 1), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RF", 2), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.vehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RB", 3), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
 
 
 	configCar->varVehicleConfiguration()->setValue(configData);

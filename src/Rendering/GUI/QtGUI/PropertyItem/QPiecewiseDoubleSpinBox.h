@@ -55,6 +55,8 @@ namespace dyno
 	public:
 		explicit QPiecewiseDoubleSpinBox(QWidget* parent = nullptr);
 
+		QPiecewiseDoubleSpinBox(Real v, QWidget* parent);
+
 		double getRealValue() 
 		{
 			return realValue;
@@ -116,7 +118,7 @@ namespace dyno
 		void ModifyValue(double);
 		void ModifyValueAndUpdate(double);
 		void LineEditFinished(double);
-		void LineEditStart();
+		void LineEditStart(const QString& qStr);
 		
 		void toggleDecimals(bool v) 
 		{
@@ -152,6 +154,11 @@ namespace dyno
 		{
 
 		}
+		explicit QToggleLabel(std::string text,QWidget* parent = nullptr)
+			: QLabel(parent)
+		{
+			this->setText(QString(text.c_str()));
+		}
 
 	Q_SIGNALS:
 		void toggle(bool high);
@@ -170,23 +177,37 @@ namespace dyno
 	};
 
 
-	class QVec3fWidget : public QWidget
+	class mVec3fWidget : public QWidget
 	{
 		Q_OBJECT
 	public:
 
-		explicit QVec3fWidget(Vec3f v)
+		explicit mVec3fWidget(Vec3f v,std::string name,QWidget* parent = nullptr)
 		{
+			this->setContentsMargins(0, 0, 0, 0);
+			QHBoxLayout* layout = new QHBoxLayout;
+
+			nameLabel = new QToggleLabel(name.c_str());
+
+			nameLabel->setMinimumWidth(90);
+
+			this->setLayout(layout);
+
 			v0 = new QPiecewiseDoubleSpinBox;
 			v1 = new QPiecewiseDoubleSpinBox;
 			v2 = new QPiecewiseDoubleSpinBox;
+
+			setRange(-999999,999999);
 
 			v0->setRealValue(v[0]);
 			v1->setRealValue(v[1]);
 			v2->setRealValue(v[2]);
 
-			QHBoxLayout* layout = new QHBoxLayout;
+			v0->setMinimumWidth(90);
+			v1->setMinimumWidth(90);
+			v2->setMinimumWidth(90);
 
+			layout->addWidget(nameLabel);
 			layout->addWidget(v0);
 			layout->addWidget(v1);
 			layout->addWidget(v2);
@@ -194,9 +215,13 @@ namespace dyno
 			QObject::connect(v0, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
 			QObject::connect(v1, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
 			QObject::connect(v2, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+
+			QObject::connect(nameLabel, SIGNAL(toggle(bool)), v0, SLOT(toggleDecimals(bool)));
+			QObject::connect(nameLabel, SIGNAL(toggle(bool)), v1, SLOT(toggleDecimals(bool)));
+			QObject::connect(nameLabel, SIGNAL(toggle(bool)), v2, SLOT(toggleDecimals(bool)));
 		}
 
-		~QVec3fWidget() 
+		~mVec3fWidget()
 		{
 			delete v0;
 			delete v1;
@@ -207,6 +232,153 @@ namespace dyno
 		{
 			return Vec3f(v0->getRealValue(), v1->getRealValue(), v2->getRealValue());
 		};
+
+		void setLabelMinimumWidth(int max)
+		{
+			nameLabel->setMinimumWidth(max);
+		}
+
+		void setRange(double min,double max) 
+		{
+			v0->setRange(min, max);
+			v1->setRange(min, max);
+			v2->setRange(min, max);
+		}
+
+		void setRange(double min0, double max0, double min1, double max1, double min2, double max2)
+		{
+			v0->setRange(min0, max0);
+			v1->setRange(min1, max1);
+			v2->setRange(min2, max2);
+		}
+
+	Q_SIGNALS:
+
+		void vec3fChange();
+
+	protected:
+
+	private:
+
+		QPiecewiseDoubleSpinBox* v0 = NULL;
+		QPiecewiseDoubleSpinBox* v1 = NULL;
+		QPiecewiseDoubleSpinBox* v2 = NULL;
+
+		QToggleLabel* nameLabel;
+
+	};
+
+
+
+	class mPiecewiseDoubleSpinBox : public QWidget
+	{
+		Q_OBJECT
+	public:
+
+		explicit mPiecewiseDoubleSpinBox(double value, std::string name, QWidget* parent = nullptr)
+		{
+			this->setContentsMargins(0, 0, 0, 0);
+			QHBoxLayout* layout = new QHBoxLayout;
+
+			nameLabel = new QToggleLabel(name.c_str());
+			nameLabel->setMinimumWidth(90);
+
+			this->setLayout(layout);
+
+			spinBox = new QPiecewiseDoubleSpinBox;
+			spinBox->setRealValue(value);
+
+			spinBox->setRange(-99999999, 99999999);
+
+			layout->addWidget(nameLabel);
+			layout->addWidget(spinBox);
+
+			QObject::connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit valueChange(); });
+
+			QObject::connect(nameLabel, SIGNAL(toggle(bool)), spinBox, SLOT(toggleDecimals(bool)));
+
+		}
+
+		~mPiecewiseDoubleSpinBox()
+		{
+			delete spinBox;
+			delete nameLabel;
+		}
+
+		double getValue()
+		{
+			return spinBox->getRealValue();
+		};
+
+		void setLabelMinimumWidth(int max)
+		{
+			nameLabel->setMinimumWidth(max);
+		}
+
+		void setRange(double min,double max) 
+		{
+			spinBox->setRange(min,max);
+		}
+
+	Q_SIGNALS:
+
+		void valueChange();
+
+	protected:
+
+	private:
+
+		QPiecewiseDoubleSpinBox* spinBox = NULL;
+
+		QToggleLabel* nameLabel = NULL;
+	};
+
+
+
+	class QVec3fWidget : public QWidget
+	{
+		Q_OBJECT
+	public:
+
+		explicit QVec3fWidget(Vec3f v, QWidget* parent = nullptr)
+		{
+			this->setContentsMargins(0, 0, 0, 0);
+			QHBoxLayout* layout = new QHBoxLayout;
+
+			this->setLayout(layout);
+
+			v0 = new QPiecewiseDoubleSpinBox;
+			v1 = new QPiecewiseDoubleSpinBox;
+			v2 = new QPiecewiseDoubleSpinBox;
+
+			v0->setRealValue(v[0]);
+			v1->setRealValue(v[1]);
+			v2->setRealValue(v[2]);
+
+
+			layout->addWidget(v0);
+			layout->addWidget(v1);
+			layout->addWidget(v2);
+
+			QObject::connect(v0, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+			QObject::connect(v1, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+			QObject::connect(v2, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {emit vec3fChange(); });
+
+		}
+
+		~QVec3fWidget()
+		{
+			delete v0;
+			delete v1;
+			delete v2;
+		}
+
+		Vec3f getValue()
+		{
+			return Vec3f(v0->getRealValue(), v1->getRealValue(), v2->getRealValue());
+		};
+
+
 
 	Q_SIGNALS:
 
@@ -222,5 +394,6 @@ namespace dyno
 
 
 	};
+
 
 }
