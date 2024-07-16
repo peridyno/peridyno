@@ -1,0 +1,33 @@
+#include "WtNodeGraphicsObject.h"
+
+WtNodePainter::WtNodePainter() {}
+
+WtNodePainter::~WtNodePainter() {}
+
+void WtNodePainter::paint(Wt::WPainter* painter)
+{
+	//drawNodeRect();
+}
+
+
+void WtNodePainter::drawNodeRect(Wt::WPainter* painter, NodeGeometry const& geom, WtNodeDataModel const* model, WtNodeGraphicsObject& graphicsObject)
+{
+	//WtNodeStyle const& nodeStyle = model->nodeStyle();
+	//Wt::WColor color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+}
+
+//WtNodeGraphicsObject
+
+WtNodeGraphicsObject::WtNodeGraphicsObject() {}
+
+WtNodeGraphicsObject::~WtNodeGraphicsObject() {}
+
+bool WtNodeGraphicsObject::isSelected()
+{
+	return _selected;
+}
+
+void WtNodeGraphicsObject::setSelected(bool selected)
+{
+	_selected = selected;
+}
