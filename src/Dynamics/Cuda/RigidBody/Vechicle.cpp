@@ -405,8 +405,8 @@ namespace dyno
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 		const auto config = this->varVehicleConfiguration()->getValue();		
 
-		const auto rigidInfo = config.vehicleRigidBodyInfo;
-		const auto jointInfo = config.vehicleJointInfo;
+		const auto rigidInfo = config.mVehicleRigidBodyInfo;
+		const auto jointInfo = config.mVehicleJointInfo;
 
 		// **************************** Create RigidBody  **************************** //
 
@@ -453,7 +453,7 @@ namespace dyno
 				{
 				case dyno::Box:
 					currentBox.center = T + rigidInfo[i].transform.translation();;
-					currentBox.halfLength = (up - down) / 2 * rigidInfo[i].halfLength;
+					currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
 					currentBox.rot = Quat1f(transform.rotation());
 
 					Actors[i] = this->addBox(currentBox, rigidbody, 100);
@@ -500,7 +500,7 @@ namespace dyno
 				{
 				case dyno::Box:
 					currentBox.center = rigidInfo[i].transform.translation();
-					currentBox.halfLength = rigidInfo[i].halfLength;
+					currentBox.halfLength = rigidInfo[i].mHalfLength;
 					currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 
 					Actors[i] = this->addBox(currentBox, rigidbody, 100);
@@ -542,43 +542,72 @@ namespace dyno
 
 				default:
 					break;
-				}
-				
+				}			
 			}
-
-			
+	
 			if (shapeId != -1 && Actors[i] != NULL)
 			{
 				////bindShapetoActor
 				this->bind(Actors[i], Pair<uint, uint>(shapeId, 0));
 				
 			}
-
 		}
 
 		for (size_t i = 0; i < jointInfo.size(); i++) 
 		{
 			////Actor
-			auto type = jointInfo[i].type;
-			int first = jointInfo[i].JointName1.rigidId;
-			int second = jointInfo[i].JointName2.rigidId;
-			Real speed = jointInfo[i].v_moter;
-			auto axis = jointInfo[i].Axis;
-			auto anchorOffset = jointInfo[i].anchorPoint;
+			auto type = jointInfo[i].mJointType;
+			int first = jointInfo[i].mRigidBodyName_1.rigidBodyId;
+			int second = jointInfo[i].mRigidBodyName_2.rigidBodyId;
+			Real speed = jointInfo[i].mMoter;
+			auto axis = jointInfo[i].mAxis;
+			auto anchorOffset = jointInfo[i].mAnchorPoint;
 
 			if (first == -1 || second == -1)
 				continue;
 			if (Actors[first] == NULL || Actors[second] == NULL)
 				continue;
 
+			//joint (Actor,Actor)
 			if (type == Hinge) 
 			{
 				auto& joint = this->createHingeJoint(Actors[first], Actors[second]);
 				joint.setAnchorPoint(Actors[first]->center + anchorOffset);
-				if(jointInfo[i].useMoter)
-					joint.setMoter(speed);
 				joint.setAxis(axis);
+				if (jointInfo[i].mUseMoter)
+					joint.setMoter(speed);
+				if (jointInfo[i].mUseRange)
+					joint.setRange(jointInfo[i].mMin, jointInfo[i].mMax);
 			}		
+			if (type == Slider) 
+			{
+				auto& sliderJoint = this->createSliderJoint(Actors[first], Actors[second]);
+				sliderJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
+				sliderJoint.setAxis(axis);
+				if(jointInfo[i].mUseMoter)
+					sliderJoint.setMoter(speed);
+				if(jointInfo[i].mUseRange)
+					sliderJoint.setRange(jointInfo[i].mMin, jointInfo[i].mMax);
+			}
+			if (type == Fixed)
+			{
+				auto& fixedJoint1 = this->createFixedJoint(Actors[first], Actors[second]);
+				fixedJoint1.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
+			}
+			if (type == Point)
+			{
+				auto& pointJoint = this->createPointJoint(Actors[first]);
+				pointJoint.setAnchorPoint(Actors[first]->center + anchorOffset);	
+			}
+			if (type == BallAndSocket) 
+			{
+				auto& ballAndSocketJoint = this->createBallAndSocketJoint(Actors[first], Actors[second]);
+				ballAndSocketJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
+			}
+
+			//Joint(Actor)
+
+
 		}
 
 		/***************** Reset *************/

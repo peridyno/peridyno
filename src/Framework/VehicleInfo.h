@@ -45,12 +45,12 @@ namespace dyno {
 		Name_Shape(std::string n,int Id = -1) 
 		{
 			name = n;
-			rigidId = Id;
+			rigidBodyId = Id;
 		}
 
 		//Var
 		std::string name = "";
-		int rigidId = -1;
+		int rigidBodyId = -1;
 
 	};
 
@@ -83,7 +83,7 @@ namespace dyno {
 		Vec3f Offset = Vec3f(0);
 		//if MeshShapeId
 
-		Vec3f halfLength = Vec3f(1);	// if(type == Box);
+		Vec3f mHalfLength = Vec3f(1);	// if(type == Box);
 		
 		float radius = 1;	//	if(type == Sphere);  if(type == Capsule);
 
@@ -113,31 +113,31 @@ namespace dyno {
 			Real max = 0
 		) 
 		{
-			JointName1 = Name1;
-			JointName2 = Name2;
-			useMoter = Moter;
-			useRange = Range;
-			anchorPoint = Point;
-			d_min = min;
-			d_max = max;
-			v_moter = moter;
-			Axis = Axi;
-			type = typeIn;
+			mRigidBodyName_1 = Name1;
+			mRigidBodyName_2 = Name2;
+			mUseMoter = Moter;
+			mUseRange = Range;
+			mAnchorPoint = Point;
+			mMin = min;
+			mMax = max;
+			mMoter = moter;
+			mAxis = Axi;
+			mJointType = typeIn;
 		}
 
-		ConfigJointType type;
-		Name_Shape JointName1;
-		Name_Shape JointName2;
+		ConfigJointType mJointType;
+		Name_Shape mRigidBodyName_1;
+		Name_Shape mRigidBodyName_2;
 		//************************  Joint  ************************:
 		//Vec2i Joint_Actor = Vec2i(-1, -1);//update ElementType bodyType1;ElementType bodyType2;PdActor* actor1 = nullptr;PdActor* actor2 = nullptr;
-		bool useMoter = false;
-		bool useRange = false;
+		bool mUseMoter = false;
+		bool mUseRange = false;
 		// anchor point in body local space
-		Vector<Real, 3> anchorPoint = Vec3f(0);
-		Real d_min = 0;
-		Real d_max = 0;
-		Real v_moter = 0;
-		Vector<Real, 3> Axis = Vector<Real, 3>(1,0,0);
+		Vector<Real, 3> mAnchorPoint = Vec3f(0);
+		Real mMin = 0;
+		Real mMax = 0;
+		Real mMoter = 0;
+		Vector<Real, 3> mAxis = Vector<Real, 3>(1,0,0);
 	};
 
 	class VehicleBind 
@@ -146,22 +146,22 @@ namespace dyno {
 		VehicleBind() {};
 		VehicleBind(int size) 
 		{
-			vehicleRigidBodyInfo.resize(size);
-			vehicleJointInfo.resize(size);
+			mVehicleRigidBodyInfo.resize(size);
+			mVehicleJointInfo.resize(size);
 		}
 		~VehicleBind() 
 		{
-			vehicleRigidBodyInfo.clear();
-			vehicleJointInfo.clear();
+			mVehicleRigidBodyInfo.clear();
+			mVehicleJointInfo.clear();
 		}
 
 		bool isValid() 
 		{
-			return vehicleRigidBodyInfo.size();
+			return mVehicleRigidBodyInfo.size();
 		}
 
-		std::vector<VehicleRigidBodyInfo> vehicleRigidBodyInfo;
-		std::vector<VehicleJointInfo> vehicleJointInfo;
+		std::vector<VehicleRigidBodyInfo> mVehicleRigidBodyInfo;
+		std::vector<VehicleJointInfo> mVehicleJointInfo;
 
 	};
 
