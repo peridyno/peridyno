@@ -20,15 +20,15 @@
 
 #include <Module/GLPhotorealisticInstanceRender.h>
 
-#include <PlaneModel.h>
+#include <BasicShapes/PlaneModel.h>
 
 #include "GltfLoader.h"
 //#include "ConvertToTextureMesh.h"
-#include "CubeModel.h"
-#include "CapsuleModel.h"
-#include "SphereModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/CapsuleModel.h"
+#include "BasicShapes/SphereModel.h"
 #include "GltfLoader.h"
-#include "Transform.h"
+#include "Commands/Transform.h"
 
 using namespace std;
 using namespace dyno;
