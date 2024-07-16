@@ -106,15 +106,15 @@ namespace dyno
 		//Set label tips
 		nameLabel->setToolTip(name);
 
-		spinner1 = new QPiecewiseDoubleSpinBox;
+		spinner1 = new QPiecewiseDoubleSpinBox(value[0]);
 		spinner1->setMinimumWidth(30);
 		spinner1->setRange(-100000, 100000);
 
-		spinner2 = new QPiecewiseDoubleSpinBox;
+		spinner2 = new QPiecewiseDoubleSpinBox(value[1]);
 		spinner2->setMinimumWidth(30);
 		spinner2->setRange(-100000, 100000);
 
-		spinner3 = new QPiecewiseDoubleSpinBox;
+		spinner3 = new QPiecewiseDoubleSpinBox(value[2]);
 		spinner3->setMinimumWidth(30);
 		spinner3->setRange(-100000, 100000);
 
@@ -125,13 +125,6 @@ namespace dyno
 		layout->addWidget(spinner3, 0, 3);
 		layout->setSpacing(3);
 
-		double v1 = value[0];
-		double v2 = value[1];
-		double v3 = value[2];
-
-		spinner1->setRealValue(v1);
-		spinner2->setRealValue(v2);
-		spinner3->setRealValue(v3);
 
 		QObject::connect(nameLabel, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
 		QObject::connect(nameLabel, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
