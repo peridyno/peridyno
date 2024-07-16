@@ -20,7 +20,7 @@
 
 #include <Module/GLPhotorealisticInstanceRender.h>
 
-#include <PlaneModel.h>
+#include <BasicShapes/PlaneModel.h>
 
 #include "GltfLoader.h"
 

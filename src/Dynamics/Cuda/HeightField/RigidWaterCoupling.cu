@@ -1,4 +1,4 @@
-#include "Coupling.h"
+#include "RigidWaterCoupling.h"
 
 #include "Math/Lerp.h"
 
@@ -7,20 +7,18 @@
 namespace dyno
 {
 	template<typename TDataType>
-	Coupling<TDataType>::Coupling()
+	RigidWaterCoupling<TDataType>::RigidWaterCoupling()
 		: Node()
 	{
 	}
 
 	template<typename TDataType>
-	Coupling<TDataType>::~Coupling()
+	RigidWaterCoupling<TDataType>::~RigidWaterCoupling()
 	{
-		mForce.clear();
-		mTorque.clear();
 	}
 
 	template<typename TDataType>
-	void Coupling<TDataType>::resetStates()
+	void RigidWaterCoupling<TDataType>::resetStates()
 	{
 	}
 
@@ -70,7 +68,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Coupling<TDataType>::updateStates()
+	void RigidWaterCoupling<TDataType>::updateStates()
 	{
 		Real dt = this->stateTimeStep()->getData();
 
@@ -131,5 +129,5 @@ namespace dyno
 		}
 	}
 
-	DEFINE_CLASS(Coupling);
+	DEFINE_CLASS(RigidWaterCoupling);
 }

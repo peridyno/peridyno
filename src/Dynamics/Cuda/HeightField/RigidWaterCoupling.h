@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Xiaowei He
+ * Copyright 2017-2022 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,42 @@
  * limitations under the License.
  */
 #pragma once
-#include "BasicShapes/BasicShape.h"
 
-#include "Topology/PointSet.h"
-#include "Topology/EdgeSet.h"
+#include "Ocean.h"
+#include "Vessel.h"
 
-namespace dyno 
+#include "Algorithm/Reduction.h"
+
+namespace dyno
 {
-	/**
-	 * This example demonstrates how to compute the contact manifold between two basic shapes
-	 */
 	template<typename TDataType>
-	class CollisionDetector : public Node
+	class RigidWaterCoupling : public Node
 	{
-		DECLARE_TCLASS(CollisionDetector, TDataType);
+		DECLARE_TCLASS(RigidWaterCoupling, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
+		typedef typename TDataType::Matrix Matrix;
 
-		CollisionDetector();
-		~CollisionDetector() override {};
-
-		std::string getNodeType() override { return "Collision"; }
-
-	public:
-		DEF_NODE_PORT(BasicShape<TDataType>, ShapeA, "");
-
-		DEF_NODE_PORT(BasicShape<TDataType>, ShapeB, "");
+		RigidWaterCoupling();
+		~RigidWaterCoupling() override;
 
 	public:
-		DEF_INSTANCE_STATE(PointSet<TDataType>, Contacts, "");
+		DEF_VAR(Real, Damping, Real(0.98), "Translational damping");
+		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");
 
-		DEF_INSTANCE_STATE(EdgeSet<TDataType>, Normals, "");
+		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
+		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
 
 	protected:
 		void resetStates() override;
+		void updateStates() override;
 
-		bool validateInputs() override;
+	private:
+		DArray<Coord> mForce;
+		DArray<Coord> mTorque;
+
+		Reduction<Coord> mReduce;
 	};
+
+	IMPLEMENT_TCLASS(RigidWaterCoupling, TDataType)
 }

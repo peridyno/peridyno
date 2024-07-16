@@ -225,6 +225,7 @@ void WSimulationCanvas::initializeGL()
 
 		// Initialize ImWindow
 		mImWindow.initialize(xscale);
+		mImWindow.setEnableViewManipulate(false);
 	}
 
 	// create framebuffer here...

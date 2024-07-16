@@ -1,10 +1,12 @@
 #include <QtApp.h>
 
 #include "initializeModeling.h"
-#include "PointFromCurve.h"
+#include "Commands/PointFromCurve.h"
+#include "Commands/Sweep.h"
+#include "Commands/Extrude.h"
+
 #include "ObjIO/OBJexporter.h"
-#include "Sweep.h"
-#include "Extrude.h"
+
 #include "Curve.h"
 #include "Ramp.h"
 #include "Canvas.h"

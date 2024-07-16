@@ -3,8 +3,9 @@
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
-#include "CylinderModel.h"
-#include "ConeModel.h"
+#include "BasicShapes/CylinderModel.h"
+#include "BasicShapes/ConeModel.h"
+
 #include "ColorMapping.h"
 
 namespace dyno

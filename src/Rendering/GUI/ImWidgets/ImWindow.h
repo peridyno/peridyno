@@ -20,6 +20,8 @@ namespace dyno
 		void mouseReleaseEvent(const PMouseEvent& event);
 		void mouseMoveEvent(const PMouseEvent& event);
 
+		void setEnableViewManipulate(bool flag);
+
 	public:
 		bool cameraLocked();
 
@@ -32,7 +34,6 @@ namespace dyno
 		bool mDisenableCamera = false;
 		bool mViewManipulator = true;
 
-
 		int mEditMode = 0;	// 0 - translate, 1 - scale, 2 - rotate
 
 		// cursor status
@@ -43,5 +44,8 @@ namespace dyno
 		PButtonType mButtonType = BT_UNKOWN;
 		PActionType	mButtonAction = AT_UNKOWN;
 		PModifierBits mButtonMode = MB_NO_MODIFIER;
+
+		// whether user can change view by manipulator
+		bool mEnableViewManipulate = true;
 	};
 }

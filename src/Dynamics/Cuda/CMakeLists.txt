@@ -117,7 +117,7 @@ if(PERIDYNO_LIBRARY_HEIGHTFIELD)
 endif()
 
 if(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME)
-    set(LIB_DEPENDENCY ParticleSystem)
+    set(LIB_DEPENDENCY ParticleSystem Modeling)
     build_library(SemiAnalyticalScheme LIB_DEPENDENCY)
 endif()
 

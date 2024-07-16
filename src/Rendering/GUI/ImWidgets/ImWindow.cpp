@@ -444,6 +444,11 @@ void ImWindow::mouseMoveEvent(const PMouseEvent& event)
 	mCurY = event.y;
 }
 
+void dyno::ImWindow::setEnableViewManipulate(bool flag)
+{
+	this->mEnableViewManipulate = flag;
+}
+
 void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
 {
 	// reset mouse status
@@ -554,7 +559,7 @@ void ImWindow::drawViewManipulator(Camera* camera)
 		0);
 
 	// if nothing changes
-	if (view == view0) return;
+	if (view == view0 || !this->mEnableViewManipulate) return;
 
 	glm::mat4 invView = glm::inverse(view);
 	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1) / camera->unitScale();

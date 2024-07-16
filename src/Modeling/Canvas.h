@@ -1,5 +1,6 @@
+#ifndef CANVAS_H
+#define CANVAS_H
 
-#pragma once
 #include <vector>
 #include <memory>
 #include <string>
@@ -98,3 +99,4 @@ namespace dyno {
 
 }
 
+#endif

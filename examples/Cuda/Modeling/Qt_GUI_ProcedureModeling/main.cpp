@@ -1,13 +1,13 @@
 #include <QtApp.h>
 #include "initializeModeling.h"
 
-#include "CubeModel.h"
-#include "Merge.h"
-#include "CopyModel.h"
-#include "Turning.h"
-#include "Extrude.h"
-#include "Sweep.h"
-#include "PointFromCurve.h"
+#include "BasicShapes/CubeModel.h"
+#include "Commands/Merge.h"
+#include "Commands/CopyModel.h"
+#include "Commands/Turning.h"
+#include "Commands/Extrude.h"
+#include "Commands/Sweep.h"
+#include "Commands/PointFromCurve.h"
 
 #include "ObjIO/ObjPointLoader.h"
 

@@ -240,24 +240,34 @@ namespace dyno
 		box3.halfLength = Vec3f(0.2f);
 		box4.center = Vec3f(-0.812, 0.450, 1.722);
 		box4.halfLength = Vec3f(0.2f);
-		CapsuleInfo capsule1, capsule2, capsule3, capsule4;
+// 		CapsuleInfo capsule1, capsule2, capsule3, capsule4;
+// 
+// 		capsule1.center = Vec3f(0.812, 0.450, 1.722);
+// 		capsule1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+// 		capsule1.halfLength = 0.1495;
+// 		capsule1.radius = 0.450;
+// 		capsule2.center = Vec3f(-0.812, 0.450, 1.722);
+// 		capsule2.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+// 		capsule2.halfLength = 0.1495;
+// 		capsule2.radius = 0.450;
+// 		capsule3.center = Vec3f(-0.812, 0.450, -1.426);
+// 		capsule3.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+// 		capsule3.halfLength = 0.1495;
+// 		capsule3.radius = 0.450;
+// 		capsule4.center = Vec3f(0.812, 0.450, -1.426);
+// 		capsule4.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+// 		capsule4.halfLength = 0.1495;
+// 		capsule4.radius = 0.450;
 
-		capsule1.center = Vec3f(0.812, 0.450, 1.722);
-		capsule1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule1.halfLength = 0.1495;
-		capsule1.radius = 0.450;
-		capsule2.center = Vec3f(-0.812, 0.450, 1.722);
-		capsule2.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule2.halfLength = 0.1495;
-		capsule2.radius = 0.450;
-		capsule3.center = Vec3f(-0.812, 0.450, -1.426);
-		capsule3.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule3.halfLength = 0.1495;
-		capsule3.radius = 0.450;
-		capsule4.center = Vec3f(0.812, 0.450, -1.426);
-		capsule4.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule4.halfLength = 0.1495;
-		capsule4.radius = 0.450;
+		SphereInfo sphere1, sphere2, sphere3, sphere4;
+		sphere1.center = Vec3f(0.812, 0.450, 1.722);
+		sphere1.radius = 0.450;
+		sphere2.center = Vec3f(-0.812, 0.450, 1.722);
+		sphere2.radius = 0.450;
+		sphere3.center = Vec3f(-0.812, 0.450, -1.426);
+		sphere3.radius = 0.450;
+		sphere4.center = Vec3f(0.812, 0.450, -1.426);
+		sphere4.radius = 0.450;
 
 		RigidBodyInfo rigidbody;
 
@@ -273,10 +283,14 @@ namespace dyno
 
 		Real wheel_velocity = 12;
 
-		auto frontLeftTireActor = this->addCapsule(capsule1, rigidbody, 100);
-		auto frontRightTireActor = this->addCapsule(capsule2, rigidbody, 100);
-		auto rearLeftTireActor = this->addCapsule(capsule3, rigidbody, 100);
-		auto rearRightTireActor = this->addCapsule(capsule4, rigidbody, 100);
+// 		auto frontLeftTireActor = this->addCapsule(capsule1, rigidbody, 100);
+// 		auto frontRightTireActor = this->addCapsule(capsule2, rigidbody, 100);
+// 		auto rearLeftTireActor = this->addCapsule(capsule3, rigidbody, 100);
+// 		auto rearRightTireActor = this->addCapsule(capsule4, rigidbody, 100);
+		auto frontLeftTireActor = this->addSphere(sphere1, rigidbody, 100);
+		auto frontRightTireActor = this->addSphere(sphere2, rigidbody, 100);
+		auto rearLeftTireActor = this->addSphere(sphere3, rigidbody, 100);
+		auto rearRightTireActor = this->addSphere(sphere4, rigidbody, 100);
 
 		//front rear
 		auto& joint1 = this->createHingeJoint(frontLeftTireActor, bodyActor);
