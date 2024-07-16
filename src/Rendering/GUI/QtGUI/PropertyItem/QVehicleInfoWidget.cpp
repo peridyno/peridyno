@@ -94,7 +94,7 @@ namespace dyno
 			switch (mCurrentType)
 			{
 			case dyno::Box:
-				mHalfLengthWidget = new mVec3fWidget(rigidInfo.halfLength, std::string("Half Length"));
+				mHalfLengthWidget = new mVec3fWidget(rigidInfo.mHalfLength, std::string("Half Length"));
 				mainLayout->addWidget(mHalfLengthWidget);
 				QObject::connect(mHalfLengthWidget, QOverload<>::of(&mVec3fWidget::vec3fChange), [=]() {updateData(); });
 
@@ -151,7 +151,7 @@ namespace dyno
 	void QRigidBodyDetail::updateData()
 	{
 
-		mRigidBodyData->halfLength = mOffsetWidget->getValue();
+		mRigidBodyData->mHalfLength = mOffsetWidget->getValue();
 
 		Quat<Real> q = Quat<Real>(mRotationWidget->getValue()[2] * M_PI / 180, mRotationWidget->getValue()[1] * M_PI / 180, mRotationWidget->getValue()[0] * M_PI / 180);
 
@@ -161,7 +161,7 @@ namespace dyno
 		switch (mCurrentType)
 		{
 		case dyno::Box:
-			mRigidBodyData->halfLength = mHalfLengthWidget->getValue();
+			mRigidBodyData->mHalfLength = mHalfLengthWidget->getValue();
 			break;
 
 		case dyno::Tet:
@@ -205,7 +205,7 @@ namespace dyno
 
 		this->setContentsMargins(0, 0, 0, 0);
 
-		mCurrentType = jointInfo.type;
+		mCurrentType = jointInfo.mJointType;
 
 		auto mainLayout = new QVBoxLayout;
 		mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -216,8 +216,8 @@ namespace dyno
 
 
 		auto title = new QLabel(QString((std::string("<b>") +std::string("Joint:  ") 
-			+ jointInfo.JointName1.name + std::string(" - ") 
-			+ jointInfo.JointName2.name + std::string("</b>")).c_str()), this);
+			+ jointInfo.mRigidBodyName_1.name + std::string(" - ")
+			+ jointInfo.mRigidBodyName_2.name + std::string("</b>")).c_str()), this);
 		title->setAlignment(Qt::AlignCenter);
 		auto titleLayout = new QHBoxLayout;
 		titleLayout->addWidget(title);
@@ -225,16 +225,18 @@ namespace dyno
 		titleLayout->setContentsMargins(0, 10, 0, 15);
 		mainLayout->addItem(titleLayout);
 
-		mAnchorPointWidget = new mVec3fWidget(jointInfo.anchorPoint, std::string("AnchorPoint"), this);
-		mAxisWidget = new mVec3fWidget(jointInfo.Axis, std::string("Axis"), this);
+		mAnchorPointWidget = new mVec3fWidget(jointInfo.mAnchorPoint, std::string("AnchorPoint"), this);
+		mAxisWidget = new mVec3fWidget(jointInfo.mAxis, std::string("Axis"), this);
 
 
 		mNameLabel = new QToggleLabel("Range", this);
 		mNameLabel->setMinimumWidth(90);
 		mUseRangeWidget = new QCheckBox(this);
-		mUseRangeWidget->setChecked(jointInfo.useRange);
-		mMinWidget = new QPiecewiseDoubleSpinBox(jointInfo.d_min, this);
-		mMaxWidget = new QPiecewiseDoubleSpinBox(jointInfo.d_max, this);
+		mUseRangeWidget->setChecked(jointInfo.mUseRange);
+		mMinWidget = new QPiecewiseDoubleSpinBox(jointInfo.mMin, this);
+		mMaxWidget = new QPiecewiseDoubleSpinBox(jointInfo.mMax, this);
+		mMinWidget->setRange(-9999999999,99999999999);
+		mMaxWidget->setRange(-9999999999, 99999999999);
 		mMinWidget->setMinimumWidth(120);
 		mMaxWidget->setMinimumWidth(120);
 
@@ -268,11 +270,11 @@ namespace dyno
 
 	void QJointBodyDetail::updateData()
 	{
-		mJointData->anchorPoint = mAnchorPointWidget->getValue();
-		mJointData->Axis = mAxisWidget->getValue();
-		mJointData->useRange = mUseRangeWidget->checkState();
-		mJointData->d_min = mMinWidget->getRealValue();
-		mJointData->d_max = mMaxWidget->getRealValue();
+		mJointData->mAnchorPoint = mAnchorPointWidget->getValue();
+		mJointData->mAxis = mAxisWidget->getValue();
+		mJointData->mUseRange = mUseRangeWidget->checkState();
+		mJointData->mMin = mMinWidget->getRealValue();
+		mJointData->mMax = mMaxWidget->getRealValue();
 
 		emit jointChange();
 	}
@@ -372,7 +374,7 @@ namespace dyno
 	VehicleRigidBodyInfo RigidBodyItemLayout::value()
 	{
 		mRigidInfo.shapeName.name = mNameInput->text().toStdString();
-		mRigidInfo.shapeName.rigidId = mElementIndex;
+		mRigidInfo.shapeName.rigidBodyId = mElementIndex;
 		mRigidInfo.meshShapeId = mShapeIDSpin->value();
 		mRigidInfo.shapeType = mVecShapeType[mTypeCombox->currentIndex()];
 		return mRigidInfo;
@@ -390,7 +392,7 @@ namespace dyno
 
 		mRigidInfo.transform = v.transform;
 		mRigidInfo.Offset = v.Offset;
-		mRigidInfo.halfLength = v.halfLength;
+		mRigidInfo.mHalfLength = v.mHalfLength;
 		mRigidInfo.radius = v.radius;
 		mRigidInfo.tet = v.tet;
 		mRigidInfo.capsuleLength = v.capsuleLength;
@@ -509,12 +511,12 @@ namespace dyno
 	VehicleJointInfo mJointItemLayout::value()
 	{
 		//jointInfo.Joint_Actor = ActorId;
-		mJointInfo.JointName1.name = mNameInput1->currentText().toStdString();
-		mJointInfo.JointName2.name = mNameInput2->currentText().toStdString();
+		mJointInfo.mRigidBodyName_1.name = mNameInput1->currentText().toStdString();
+		mJointInfo.mRigidBodyName_2.name = mNameInput2->currentText().toStdString();
 
-		mJointInfo.type = mVecJointType[mTypeInput->currentIndex()];
-		mJointInfo.useMoter = mUseMoter->isChecked();
-		mJointInfo.v_moter = mMoterInput->value();
+		mJointInfo.mJointType = mVecJointType[mTypeInput->currentIndex()];
+		mJointInfo.mUseMoter = mUseMoter->isChecked();
+		mJointInfo.mMoter = mMoterInput->value();
 
 
 		return mJointInfo;
@@ -522,17 +524,17 @@ namespace dyno
 
 	void mJointItemLayout::setValue(const VehicleJointInfo& v)
 	{
-		mName1_ObjID = (v.JointName1.rigidId);
-		mName2_ObjID = (v.JointName2.rigidId);
+		mName1_ObjID = (v.mRigidBodyName_1.rigidBodyId);
+		mName2_ObjID = (v.mRigidBodyName_2.rigidBodyId);
 
 		//Type
-		mUseMoter->setChecked(v.useMoter);
-		mJointInfo.useRange = v.useRange;
-		mJointInfo.anchorPoint = v.anchorPoint;
-		mJointInfo.d_min = v.d_min;
-		mJointInfo.d_max = v.d_max;
-		mMoterInput->setValue(v.v_moter);
-		mJointInfo.Axis = v.Axis;
+		mUseMoter->setChecked(v.mUseMoter);
+		mJointInfo.mUseRange = v.mUseRange;
+		mJointInfo.mAnchorPoint = v.mAnchorPoint;
+		mJointInfo.mMin = v.mMin;
+		mJointInfo.mMax = v.mMax;
+		mMoterInput->setValue(v.mMoter);
+		mJointInfo.mAxis = v.mAxis;
 	}
 
 	
@@ -686,16 +688,16 @@ namespace dyno
 
 	void QVehicleInfoWidget::updateWidget()
 	{
-		for (size_t i = 0; i < mVec.vehicleRigidBodyInfo.size(); i++)
+		for (size_t i = 0; i < mVec.mVehicleRigidBodyInfo.size(); i++)
 		{
-			createItemWidget(mVec.vehicleRigidBodyInfo[i]);
+			createItemWidget(mVec.mVehicleRigidBodyInfo[i]);
 		}
 
 		bulidQueryMap();
 
-		for (size_t i = 0; i < mVec.vehicleJointInfo.size(); i++)
+		for (size_t i = 0; i < mVec.mVehicleJointInfo.size(); i++)
 		{
-			createJointItemWidget(mVec.vehicleJointInfo[i]);
+			createJointItemWidget(mVec.mVehicleJointInfo[i]);
 		}
 		updateJointComboBox();
 		updateVector();
@@ -803,30 +805,30 @@ namespace dyno
 	{
 		//*******************************  UpdateData  *******************************//
 
-		mVec.vehicleRigidBodyInfo.clear();
+		mVec.mVehicleRigidBodyInfo.clear();
 		for (size_t i = 0; i < mRigidBodyItems.size(); i++)
 		{
-			mVec.vehicleRigidBodyInfo.push_back(mRigidBodyItems[i]->value());
+			mVec.mVehicleRigidBodyInfo.push_back(mRigidBodyItems[i]->value());
 		}
 
 		//*******************************  bulidQueryMap  *******************************//
 		bulidQueryMap();
 
 		//*******************************  UpdateData  *******************************//
-		mVec.vehicleJointInfo.clear();
+		mVec.mVehicleJointInfo.clear();
 
 		//update Rigid ID
 		for (size_t i = 0; i < mJointItems.size(); i++)
 		{
 			auto& jointItem = mJointItems[i];
-			mVec.vehicleJointInfo.push_back(jointItem->value());
-			auto& jointInfo = mVec.vehicleJointInfo[i];
+			mVec.mVehicleJointInfo.push_back(jointItem->value());
+			auto& jointInfo = mVec.mVehicleJointInfo[i];
 
-			if (jointInfo.JointName1.name != std::string(""))
-				jointInfo.JointName1.rigidId = mName2RigidId[jointInfo.JointName1.name];
+			if (jointInfo.mRigidBodyName_1.name != std::string(""))
+				jointInfo.mRigidBodyName_1.rigidBodyId = mName2RigidId[jointInfo.mRigidBodyName_1.name];
 
-			if (jointInfo.JointName2.name != std::string(""))
-				jointInfo.JointName2.rigidId = mName2RigidId[jointInfo.JointName2.name];
+			if (jointInfo.mRigidBodyName_2.name != std::string(""))
+				jointInfo.mRigidBodyName_2.rigidBodyId = mName2RigidId[jointInfo.mRigidBodyName_2.name];
 		}
 		emit vectorChange();
 	}
