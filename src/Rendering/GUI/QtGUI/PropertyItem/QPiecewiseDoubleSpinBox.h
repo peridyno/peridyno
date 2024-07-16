@@ -55,17 +55,13 @@ namespace dyno
 	public:
 		explicit QPiecewiseDoubleSpinBox(QWidget* parent = nullptr);
 
-		QPiecewiseDoubleSpinBox(Real v, QWidget* parent);
+		QPiecewiseDoubleSpinBox(Real v, QWidget* parent = nullptr);
 
 		double getRealValue() 
 		{
 			return realValue;
 		}
-		double setRealValue(double val)
-		{
-			realValue = val;
-			return realValue;
-		}
+
 		
 		QLineEdit* getLineEdit() 
 		{
@@ -86,6 +82,12 @@ namespace dyno
 		void mouseMoveEvent(QMouseEvent* event) override;
 
 		void contextMenuEvent(QContextMenuEvent* event) override;
+
+		double setRealValue(double val)
+		{
+			realValue = val;
+			return realValue;
+		}
 
 	protected:
 		
@@ -199,9 +201,9 @@ namespace dyno
 
 			setRange(-999999,999999);
 
-			v0->setRealValue(v[0]);
-			v1->setRealValue(v[1]);
-			v2->setRealValue(v[2]);
+			v0->setValue(v[0]);
+			v1->setValue(v[1]);
+			v2->setValue(v[2]);
 
 			v0->setMinimumWidth(90);
 			v1->setMinimumWidth(90);
@@ -286,7 +288,7 @@ namespace dyno
 			this->setLayout(layout);
 
 			spinBox = new QPiecewiseDoubleSpinBox;
-			spinBox->setRealValue(value);
+			spinBox->setValue(value);
 
 			spinBox->setRange(-99999999, 99999999);
 
@@ -351,9 +353,9 @@ namespace dyno
 			v1 = new QPiecewiseDoubleSpinBox;
 			v2 = new QPiecewiseDoubleSpinBox;
 
-			v0->setRealValue(v[0]);
-			v1->setRealValue(v[1]);
-			v2->setRealValue(v[2]);
+			v0->setValue(v[0]);
+			v1->setValue(v[1]);
+			v2->setValue(v[2]);
 
 
 			layout->addWidget(v0);
