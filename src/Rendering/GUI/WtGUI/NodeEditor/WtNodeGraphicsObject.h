@@ -5,6 +5,7 @@
 #include <Wt/WColor.h>
 
 #include "WtNode.h"
+#include "WtNodeStyle.h"
 
 class WtNodeGraphicsObject;
 

@@ -7,12 +7,14 @@ WtNodePainter::~WtNodePainter() {}
 void WtNodePainter::paint(Wt::WPainter* painter)
 {
 	//drawNodeRect();
-}
 
+	WtNodeStyle nodeStyle;
+	WtConnectionStyle connectStyle;
+	WtFlowViewStyle flowStyle;
+}
 
 void WtNodePainter::drawNodeRect(Wt::WPainter* painter, NodeGeometry const& geom, WtNodeDataModel const* model, WtNodeGraphicsObject& graphicsObject)
 {
-	//WtNodeStyle const& nodeStyle = model->nodeStyle();
 	//Wt::WColor color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 }
 

@@ -12,7 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 include_directories(${PROJECT_SOURCE_DIR}/external)
 
 # add sources
-file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h")
+file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h" "${LIB_SRC_DIR}/*.hpp")
 add_library(${LIB_NAME} SHARED ${SOURCES})
 
 foreach(SRC IN ITEMS ${SOURCES})
