@@ -10,35 +10,36 @@ namespace dyno {
 	Ramp::Ramp(Direction dir)
 	{ 
 		Dirmode= dir;
+		useSquard = false;
 	}
 
 	Ramp::Ramp(const Ramp& ramp)
 	{
+		useSquard = false;
 		this->Dirmode = ramp.Dirmode;
 		//this->Bordermode = ramp.Bordermode;
-		this->MyCoord = ramp.MyCoord;
+		this->mCoord = ramp.mCoord;
 		this->FE_MyCoord = ramp.FE_MyCoord;
 		this->FE_HandleCoord = ramp.FE_HandleCoord;
-		this->FinalCoord = ramp.FinalCoord;
+		this->mFinalCoord = ramp.mFinalCoord;
 		this->Originalcoord = ramp.Originalcoord;
 		this->OriginalHandlePoint = ramp.OriginalHandlePoint;
 
-		this->myBezierPoint = ramp.myBezierPoint;
+		this->mBezierPoint = ramp.mBezierPoint;
 		this->myBezierPoint_H = ramp.myBezierPoint_H;
-		this->resamplePoint = ramp.resamplePoint;
+		this->mResamplePoint = ramp.mResamplePoint;
 		this->myHandlePoint = ramp.myHandlePoint;
 
-		this->lengthArray = ramp.lengthArray;
+		this->mLengthArray = ramp.mLengthArray;
 		this->length_EndPoint_Map = ramp.length_EndPoint_Map;
 
-		this->InterpMode = ramp.InterpMode;
+		this->mInterpMode = ramp.mInterpMode;
 
-		this->remapRange[8] = ramp.InterpMode;// "MinX","MinY","MaxX","MaxY"
+		this->remapRange[8] = ramp.mInterpMode;// "MinX","MinY","MaxX","MaxY"
 
 		this->lockSize = ramp.lockSize;
 		this->useCurve = ramp.useCurve;
-		this->displayUseRamp = ramp.displayUseRamp;
-		this->useRamp = ramp.useRamp;
+
 		this->useSquard = ramp.useSquard;
 		this->curveClose = ramp.curveClose;
 		this->resample = ramp.resample;
@@ -53,7 +54,6 @@ namespace dyno {
 		this->NminY = ramp.NminY;
 		this->NmaxY = ramp.NmaxY;
 
-		this->handleDefaultLength = ramp.handleDefaultLength;
 		this->segment = ramp.segment;
 		this->resampleResolution = ramp.resampleResolution;
 
@@ -62,25 +62,20 @@ namespace dyno {
 		this->yLess = ramp.yLess;
 		this->yGreater = ramp.yGreater;
 
-		this->generatorMin = ramp.generatorMin;
-		this->generatorMax = ramp.generatorMax;
-
-		this->customHandle = ramp.customHandle;
-
 	}
 
 	float Ramp::getCurveValueByX(float inputX)
 	{
-		if (FinalCoord.size())
+		if (mFinalCoord.size())
 		{
-			int l = FinalCoord.size();
+			int l = mFinalCoord.size();
 			for (size_t i = 0; i < l;i ++)
 			{
-				xLess = (FinalCoord[i].x > inputX) ? xLess : FinalCoord[i].x;
-				yLess = (FinalCoord[i].x > inputX) ? yLess : FinalCoord[i].y;
+				xLess = (mFinalCoord[i].x > inputX) ? xLess : mFinalCoord[i].x;
+				yLess = (mFinalCoord[i].x > inputX) ? yLess : mFinalCoord[i].y;
 
-				xGreater = (FinalCoord[l - i - 1].x < inputX) ? xGreater : FinalCoord[l - i - 1].x;
-				yGreater = (FinalCoord[l - i - 1].x < inputX) ? yGreater : FinalCoord[l - i - 1].y;
+				xGreater = (mFinalCoord[l - i - 1].x < inputX) ? xGreater : mFinalCoord[l - i - 1].x;
+				yGreater = (mFinalCoord[l - i - 1].x < inputX) ? yGreater : mFinalCoord[l - i - 1].y;
 			}
 			if (xGreater !=xLess) 
 			{
@@ -98,70 +93,14 @@ namespace dyno {
 	}
 
 
-	void Ramp::addPoint(float x, float y)
-	{
-		Coord2D a = Coord2D(x,y);
-		MyCoord.push_back(a);
 
-		UpdateFieldFinalCoord();
 
-	}
-
-	void Ramp::addPointAndHandlePoint(Coord2D point, Coord2D handle_1, Coord2D handle_2)
-	{
-
-		MyCoord.push_back(point);
-		myHandlePoint.push_back(handle_1);
-		myHandlePoint.push_back(handle_2);
-
-		UpdateFieldFinalCoord();
-	}
 
 
 	// C++ Bezier
 	void Ramp::updateBezierCurve()
 	{
-		myBezierPoint.clear();
-
-		int n = MyCoord.size();
-		int bn = myHandlePoint.size();
-
-		if (bn != 2 * n) 
-		{
-			rebuildHandlePoint(MyCoord);
-		}
-
-		for (int i = 0; i < n - 1; i++)
-		{
-			Coord2D p0 = MyCoord[i];
-			Coord2D p1 = myHandlePoint[2 * i + 1];
-			Coord2D p2 = myHandlePoint[2 * (i + 1)];
-			Coord2D p3 = MyCoord[i + 1];
-			updateBezierPointToBezierSet(p0, p1, p2, p3, myBezierPoint);
-		}
-		if (curveClose && n >= 3) 
-		{
-			Coord2D p0 = MyCoord[ n - 1 ];
-			Coord2D p1 = myHandlePoint[bn-1];
-			Coord2D p2 = myHandlePoint[0];
-			Coord2D p3 = MyCoord[0];
-			updateBezierPointToBezierSet(p0, p1, p2, p3, myBezierPoint);
-		}
-		if (curveClose) 
-		{
-			if (MyCoord.size())
-			{
-				myBezierPoint.push_back(MyCoord[0]);
-			}
-		}
-		else 
-		{
-			if (MyCoord.size()) 
-			{
-				myBezierPoint.push_back(MyCoord[MyCoord.size() - 1]);
-			}
-		}
-		
+		Canvas::updateBezierCurve();
 
 		if (resample) 
 		{
@@ -179,68 +118,6 @@ namespace dyno {
 	}
 
 
-	void Ramp::resamplePointFromLine(std::vector<Coord2D> pointSet)
-	{
-		Coord2D P;//画点
-		float uL = Spacing / 100;
-		float curL = 0;
-		int n;
-		if (length_EndPoint_Map.size()) 
-		{
-			n = (--length_EndPoint_Map.end())->first / uL;
-		}
-		double addTempLength = 0;
-		
-		resamplePoint.clear();
-		if (MyCoord.size() >= 2) 
-		{
-			for (size_t i = 0; i < lengthArray.size(); i++)
-			{
-				double tempL = lengthArray[i];
-				auto it = length_EndPoint_Map.find(tempL);
-				EndPoint ep = it->second;
-
-				while (true)
-				{
-					if (addTempLength >= lengthArray[i])
-					{
-						break;
-					}
-					else
-					{
-						double subL = lengthArray[i] - addTempLength;
-						double curLineL;
-						if (i > 0)
-						{
-							curLineL = lengthArray[i] - lengthArray[i - 1];
-						}
-						else
-						{
-							curLineL = lengthArray[0];
-						}
-						double per = 1 - subL / curLineL;
-
-						P.x = per * (pointSet[ep.second].x - pointSet[ep.first].x) + pointSet[ep.first].x;
-						P.y = per * (pointSet[ep.second].y - pointSet[ep.first].y) + pointSet[ep.first].y;
-
-						resamplePoint.push_back(P);
-						addTempLength += uL;
-					}
-
-				}
-
-			}
-			if (curveClose) 
-			{
-				resamplePoint.push_back(MyCoord[0]);
-			}
-			else 
-			{
-				resamplePoint.push_back(MyCoord[MyCoord.size() - 1]);
-			}
-		}
-	}
-
 
 	void Ramp::updateResampleBezierCurve() 
 	{
@@ -248,42 +125,42 @@ namespace dyno {
 		segment = resampleResolution;
 		myBezierPoint_H.clear();
 
-		int n = MyCoord.size();
+		int n = mCoord.size();
 		int bn = myHandlePoint.size();
 
 		if (bn != 2 * n)
 		{
-			rebuildHandlePoint(MyCoord);
+			rebuildHandlePoint(mCoord);
 		}
 
 		for (int i = 0; i < n - 1; i++)
 		{
-			Coord2D p0 = MyCoord[i];
+			Coord2D p0 = mCoord[i];
 			Coord2D p1 = myHandlePoint[2 * i + 1];
 			Coord2D p2 = myHandlePoint[2 * (i + 1)];
-			Coord2D p3 = MyCoord[i + 1];
+			Coord2D p3 = mCoord[i + 1];
 			updateBezierPointToBezierSet(p0, p1, p2, p3, myBezierPoint_H);
 		}
 		if (curveClose && n >= 3)
 		{
-			Coord2D p0 = MyCoord[n - 1];
+			Coord2D p0 = mCoord[n - 1];
 			Coord2D p1 = myHandlePoint[bn - 1];
 			Coord2D p2 = myHandlePoint[0];
-			Coord2D p3 = MyCoord[0];
+			Coord2D p3 = mCoord[0];
 			updateBezierPointToBezierSet(p0, p1, p2, p3, myBezierPoint_H);
 		}
 		if (curveClose)
 		{
-			if (MyCoord.size()) 
+			if (mCoord.size())
 			{
-				myBezierPoint_H.push_back(MyCoord[0]);
+				myBezierPoint_H.push_back(mCoord[0]);
 			}
 		}
 		else
 		{
-			if (MyCoord.size())
+			if (mCoord.size())
 			{
-				myBezierPoint_H.push_back(MyCoord[MyCoord.size() - 1]);
+				myBezierPoint_H.push_back(mCoord[mCoord.size() - 1]);
 			}
 		}
 
@@ -292,108 +169,11 @@ namespace dyno {
 		segment = temp;
 	}
 
-	void Ramp::updateResampleLinearLine()
-	{
-		std::vector<Coord2D> temp;
-		temp.assign(MyCoord.begin(),MyCoord.end());
-		if (curveClose&&temp.size()>= 3) 
-		{
-			temp.push_back(MyCoord[0]);
-		}
-		buildSegMent_Length_Map(temp);
-		resamplePointFromLine(temp);
-
-	}
 
 
-	void Ramp::rebuildHandlePoint(std::vector<Coord2D> coordSet)
-	{
-		myHandlePoint.clear();
-		int ptnum = coordSet.size();
-		for (size_t i = 0;i < ptnum; i++ )
-		{
-			dyno::Vec2f P(coordSet[i].x, coordSet[i].y);
-			dyno::Vec2f p1;
-			dyno::Vec2f p2;
-			dyno::Vec2f N;
 
-			int id = i;
-			int f;
-			int s;
-			if (ptnum < 2)
-			{
-				N = Vec2f(1, 0);
-			}
-			else
-			{
-				f = id - 1;
-				s = id + 1;
-				if (id == 0)//首点
-				{
-					N[0] = coordSet[s].x - coordSet[id].x;
-					N[1] = coordSet[s].y - coordSet[id].y;
-				}
-				else if (id == ptnum - 1)//末点
-				{
-					N[0] = coordSet[id].x - coordSet[f].x;
-					N[1] = coordSet[id].y - coordSet[f].y;
-				}
-				else//中间点
-				{
-					N[0] = coordSet[s].x - coordSet[f].x;
-					N[1] = coordSet[s].y - coordSet[f].y;
-				}
-			}
-
-			N.normalize();
-			double length = 0.05;
-			p1 = P - N * length;
-			p2 = P + N * length;
-
-			myHandlePoint.push_back(Coord2D(p1));
-			myHandlePoint.push_back(Coord2D(p2));	
-
-		}
-	}
 
 	//bezier point
-	void Ramp::updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3, std::vector<Coord2D>& bezierSet)
-	{
-		Coord2D P[4] = { p0,p1,p2,p3 };
-		Coord2D Pt[4] = { p0,p1,p2,p3 };
-
-		int n = 4;
-		Coord2D Pf;
-		Coord2D lastP = p0;
-		double t;
-		float unit = 1 / segment;
-
-		for (t = 0; t < 1 ; t += unit)
-		{
-			P[0] = p0;
-			P[1] = p1;
-			P[2] = p2;
-			P[3] = p3;
-
-			int x = n;
-			while (1)
-			{
-				if (x == 1)
-					break;
-				for (int i = 0; i < x - 1; i++)
-				{
-					Pf.x = (P[i + 1].x - P[i].x) * t + P[i].x;
-					Pf.y = (P[i + 1].y - P[i].y) * t + P[i].y;
-					P[i] = Pf;
-
-				}
-				x--;
-			}
-			bezierSet.push_back(Pf);
-
-		}
-
-	}
 
 	double Ramp::calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet)
 	{
@@ -408,117 +188,15 @@ namespace dyno {
 		return length;
 	}
 
-	void Ramp::buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet)
-	{
-		length_EndPoint_Map.clear();
-		lengthArray.clear();
-		std::vector<Coord2D> temp;
-
-		double length = 0;
-
-		int n = BezierPtSet.size();
-		if (BezierPtSet.size()) 
-		{
-			for (size_t k = 0; k < n - 1; k++)
-			{
-				int e = k;
-				int f = k + 1;
-				length += sqrt(std::pow((BezierPtSet[f].x - BezierPtSet[e].x), 2) + std::pow((BezierPtSet[f].y - BezierPtSet[e].y), 2));
-				lengthArray.push_back(length);
-				length_EndPoint_Map[length] = EndPoint(e, f);
-
-			}
-		}
-
-	}
 
 
 	//widget to field;
-	void Ramp::addItemMyCoord(float x, float y)
-	{
-		Coord2D s;
-		s.set(x, y);
-		MyCoord.push_back(s);
-	}
-
-	void Ramp::addFloatItemToCoord(float x, float y, std::vector<Coord2D>& coordArray)
-	{
-		Coord2D s;
-		s.set(x, y);
-		coordArray.push_back(s);
-	}
-
-	void Ramp::addItemOriginalCoord(int x, int y) 
-	{
-		OriginalCoord s;
-		s.set(x, y);
-		Originalcoord.push_back(s);
-	}
-
-	void Ramp::addItemHandlePoint(int x, int y)
-	{
-		OriginalCoord s;
-		s.set(x, y);
-		OriginalHandlePoint.push_back(s);
-	}
-
-	void Ramp::clearMyCoord()
-	{
-		MyCoord.clear();
-		Originalcoord.clear();
-		OriginalHandlePoint.clear();
-		myBezierPoint.clear();
-		myHandlePoint.clear();
-	}
-
-	void Ramp::setCurveClose(bool s)
-	{
-		this->curveClose = s;
-
-		UpdateFieldFinalCoord();
-	}
-
-	void Ramp::useBezier() 
-	{
-		setInterpMode(true);
-	}
-
-	void Ramp::useLinear()
-	{
-		setInterpMode(false);
-	}
 
 
-	void Ramp::setInterpMode(bool useBezier)
-	{
-		useCurve = useBezier;
-		if (useBezier) 
-		{
-			this->InterpMode = Ramp::Interpolation::Bezier;
-		}
-		else 
-		{
-			this->InterpMode = Ramp::Interpolation::Linear;
-		}	
-	}
-
-	void Ramp::setResample(bool s) 
-	{
-		this->resample = s;
-		UpdateFieldFinalCoord();
-	}
-
-	void Ramp::setSpacing(double s) 
-	{
-		this->Spacing = s;
-		UpdateFieldFinalCoord();
-	}
 
 
-	void Ramp::setUseSquard(bool s) 
-	{
-		useSquard = s;
-	}
+
+
 
 	void Ramp::borderCloseResort() 
 	{
@@ -535,23 +213,23 @@ namespace dyno {
 		Coord2D E1(-1, -1, -1);
 		Coord2D E2(-1, -1, -1);
 
-		for (int i = 0; i < MyCoord.size(); i++)
+		for (int i = 0; i < mCoord.size(); i++)
 		{
-			if (MyCoord[i].x == 0)
+			if (mCoord[i].x == 0)
 			{
-				Cfirst = MyCoord[i];
+				Cfirst = mCoord[i];
 				F1 = tempHandle[2 * i];
 				F2 = tempHandle[2 * i + 1];
 			}
-			else if (MyCoord[i].x == 1)
+			else if (mCoord[i].x == 1)
 			{
-				Cend = MyCoord[i];
+				Cend = mCoord[i];
 				E1 = tempHandle[2 * i];
 				E2 = tempHandle[2 * i + 1];
 			}
 			else
 			{
-				FE_MyCoord.push_back(MyCoord[i]);
+				FE_MyCoord.push_back(mCoord[i]);
 				FE_HandleCoord.push_back(tempHandle[2 * i]);
 				FE_HandleCoord.push_back(tempHandle[2 * i + 1]);
 			}
@@ -594,21 +272,21 @@ namespace dyno {
 		borderCloseResort();
 
 
-		FinalCoord.clear();
+		mFinalCoord.clear();
 
 		if (useCurve )
 		{
 			if (resample) 
 			{
-				if (MyCoord.size() >= 2)
+				if (mCoord.size() >= 2)
 				{
 					updateBezierCurve();
 				}
-				FinalCoord.assign(resamplePoint.begin(),resamplePoint.end());
+				mFinalCoord.assign(mResamplePoint.begin(), mResamplePoint.end());
 			}
 			else 
 			{
-				FinalCoord.assign(myBezierPoint.begin(), myBezierPoint.end());
+				mFinalCoord.assign(mBezierPoint.begin(), mBezierPoint.end());
 			}
 		}
 		else if ( !useCurve ) 
@@ -616,24 +294,24 @@ namespace dyno {
 
 			if (resample) 
 			{
-				if (MyCoord.size() >= 2)
+				if (mCoord.size() >= 2)
 				{
 
 					updateResampleLinearLine();
 				}
-				FinalCoord.assign(resamplePoint.begin(), resamplePoint.end());
+				mFinalCoord.assign(mResamplePoint.begin(), mResamplePoint.end());
 			}
 			else
 			{
-				FinalCoord.assign(MyCoord.begin(), MyCoord.end());
+				mFinalCoord.assign(mCoord.begin(), mCoord.end());
 			}
 		}
 		
 
-		for (size_t i = 0; i < FinalCoord.size(); i++)
+		for (size_t i = 0; i < mFinalCoord.size(); i++)
 		{
-			FinalCoord[i].x = (NmaxX - NminX) * FinalCoord[i].x + NminX;
-			FinalCoord[i].y = (NmaxY - NminY) * FinalCoord[i].y + NminY;
+			mFinalCoord[i].x = (NmaxX - NminX) * mFinalCoord[i].x + NminX;
+			mFinalCoord[i].y = (NmaxY - NminY) * mFinalCoord[i].y + NminY;
 		}
 
 

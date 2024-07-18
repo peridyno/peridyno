@@ -10,6 +10,7 @@
 #include "Commands/PointFromCurve.h"
 
 #include "ObjIO/ObjPointLoader.h"
+#include "ConvertToTextureMesh.h"
 
 
 using namespace dyno;
@@ -116,6 +117,10 @@ int main()
 
 	sweepFromOBJ->varLocation()->setValue(Vec3f(-1, 0, 0));
 
+	auto toTextureMesh = scn->addNode(std::make_shared <ConvertToTextureMesh<DataType3f>>());
+	toTextureMesh->varDiffuseTexture()->setValue(getAssetPath()+"Texture/CheckerBoard.png");
+
+	Turn->stateTriangleSet()->connect(toTextureMesh->inTopology());
 
 	Modeling::initStaticPlugin();
 

@@ -46,7 +46,7 @@ namespace dyno
 
 
 		//Enum List    InterpMode
-		int curIndex2 = int(f->getValue().InterpMode);
+		int curIndex2 = int(f->getValue().mInterpMode);
 		int enumNum2 = f->getValue().InterpolationCount;
 		QComboBox* combox2 = new QComboBox;
 		combox2->setMaximumWidth(256);
@@ -232,8 +232,6 @@ namespace dyno
 		//if (f->getDataPtr()->InterpMode == Ramp::Interpolation::Bezier) { boolName->setVisible(0); Checkbox->setVisible(0); }
 
 
-
-
 		if (f->getValue().useSquardButton)
 		{
 			QToggleButton* unfold = new QToggleButton(f->getValue().useSquard);
@@ -248,21 +246,14 @@ namespace dyno
 		}
 
 
-		QHBoxLayout* HlayoutUseRamp = new QHBoxLayout;
-		HlayoutUseRamp->setContentsMargins(0, 0, 0, 0);
-		HlayoutUseRamp->setSpacing(0);
-
-
 		QVBoxLayout* TotalLayout = new QVBoxLayout();
 		TotalLayout->setContentsMargins(0, 0, 0, 0);
 		TotalLayout->setSpacing(5);
-		if (f->getValue().displayUseRamp == true) { TotalLayout->addLayout(HlayoutUseRamp); }
 		TotalLayout->addLayout(Gridlayout);
 		TotalLayout->addLayout(Hlayout1);
 		TotalLayout->addLayout(Hlayout2);
 		TotalLayout->addLayout(boolLayout);
 		TotalLayout->addLayout(SpacingHlayout);
-		printf("widget  :  %d \n", int(f->getValue().displayUseRamp));
 
 		this->setLayout(TotalLayout);
 		
@@ -1334,7 +1325,7 @@ namespace dyno
 		s.clearMyCoord();
 		for (auto it : floatCoord)
 		{
-			s.addFloatItemToCoord(it.x, it.y, s.MyCoord);
+			s.addFloatItemToCoord(it.x, it.y, s.mCoord);
 		}
 
 		for (size_t i = 0; i < reSortCoordArray.size(); i++)
@@ -1362,8 +1353,6 @@ namespace dyno
 		s.resample = LineResample;
 		s.useSquard = isSquard;
 		s.Spacing = spacing;
-		s.displayUseRamp = field->getValue().displayUseRamp;
-		s.useRamp = useRamp;
 
 		s.NminX = NminX;
 		s.NmaxX = NmaxX;
@@ -1372,8 +1361,8 @@ namespace dyno
 
 		s.curveClose = curveClose;
 
-		if (useBezier) { s.InterpMode = Ramp::Interpolation::Bezier; }
-		else { s.InterpMode = Ramp::Interpolation::Linear; }
+		if (useBezier) { s.mInterpMode = Ramp::Interpolation::Bezier; }
+		else { s.mInterpMode = Ramp::Interpolation::Linear; }
 
 
 
@@ -1556,7 +1545,7 @@ namespace dyno
 		isSquard = field->getValue().useSquard;
 		lockSize = field->getValue().lockSize;
 
-		if (field->getValue().InterpMode == Ramp::Interpolation::Bezier) { InterpMode = Bezier; }
+		if (field->getValue().mInterpMode == Ramp::Interpolation::Bezier) { InterpMode = Bezier; }
 		else { InterpMode = Linear; }
 
 

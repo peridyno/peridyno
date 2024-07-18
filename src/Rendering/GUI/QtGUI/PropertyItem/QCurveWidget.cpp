@@ -35,7 +35,7 @@ namespace dyno
 		//Enum List    Direction Mode
 
 		//Enum List    InterpMode
-		int curIndex2 = int(f->getValue().InterpMode);
+		int curIndex2 = int(f->getValue().mInterpMode);
 		int enumNum2 = f->getValue().InterpolationCount;
 		QComboBox* combox2 = new QComboBox;
 		combox2->setMaximumWidth(256);
@@ -288,7 +288,7 @@ namespace dyno
 			if (field->getValue().Originalcoord.empty())		//If there is no data from the Widget in the field, it is initialized from the field
 			{
 
-				this->copyFromField(field->getValue().MyCoord, reSortCoordArray);
+				this->copyFromField(field->getValue().mCoord, reSortCoordArray);
 				CoordArray.assign(reSortCoordArray.begin(), reSortCoordArray.end());
 				buildCoordToResortMap();
 				this->copyFromField(field->getValue().myHandlePoint, HandlePoints);
@@ -1287,7 +1287,7 @@ namespace dyno
 		s.clearMyCoord();
 		for (auto it : floatCoord)
 		{
-			s.addFloatItemToCoord(it.x, it.y, s.MyCoord);
+			s.addFloatItemToCoord(it.x, it.y, s.mCoord);
 		}
 
 		for (auto it : handleFloatCoord)
@@ -1317,8 +1317,8 @@ namespace dyno
 
 		s.curveClose = curveClose;
 
-		if (useBezier) { s.InterpMode = Curve::Interpolation::Bezier; }
-		else { s.InterpMode = Curve::Interpolation::Linear; }
+		if (useBezier) { s.mInterpMode = Curve::Interpolation::Bezier; }
+		else { s.mInterpMode = Curve::Interpolation::Linear; }
 
 		s.updateBezierCurve();
 		s.UpdateFieldFinalCoord();
@@ -1499,7 +1499,7 @@ namespace dyno
 		isSquard = field->getValue().useSquard;
 		lockSize = field->getValue().lockSize;
 
-		if (field->getValue().InterpMode == Ramp::Interpolation::Bezier) { InterpMode = Bezier; }
+		if (field->getValue().mInterpMode == Ramp::Interpolation::Bezier) { InterpMode = Bezier; }
 		else { InterpMode = Linear; }
 
 

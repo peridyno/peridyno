@@ -23,48 +23,27 @@ namespace dyno {
 
 		~Ramp() { ; };
 
-		void varChanged();
+		//Ramp
 		float getCurveValueByX(float inputX);
-		void addItemMyCoord(float x, float y);
-		void addItemBezierCoord(float x, float y);
-		void addFloatItemToCoord(float x, float y, std::vector<Coord2D>& coordArray);
-		void addItemOriginalCoord(int x, int y);
-		void addPoint(float x, float y);
-		void setCurveClose(bool s);
-		void addPointAndHandlePoint(Coord2D point, Coord2D handle_1, Coord2D handle_2);
-		void clearMyCoord();
-		void addItemHandlePoint(int x, int y);
-		void UpdateFieldFinalCoord();
-		void updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3, std::vector<Coord2D>& bezierSet);
-		void updateBezierCurve();
-		void rebuildHandlePoint(std::vector<Coord2D> s);
-		double calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet);
-		void setInterpMode(bool useBezier);
-		void setUseSquard(bool s);
-		void useBezier();
-		void useLinear();
-		void setResample(bool s);
-		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord(); }
-		void remapY(double minY, double maxY) { NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
-		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
 
-		void buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet);
-		void updateResampleLinearLine();
+		void updateBezierCurve();
+		double calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet);
+
+
+
 		void updateResampleBezierCurve();
-		void resamplePointFromLine(std::vector<Coord2D> pointSet);
+
 
 		void setRange_MinX(float min, float max) { remapRange[0] = min; remapRange[1] = max; }// "MinX", "MinY", "MaxX", "MaxY"
 		void setRange_MaxX(float min, float max) { remapRange[4] = min; remapRange[5] = max; }
 		void setRange_MinY(float min, float max) { remapRange[2] = min; remapRange[3] = max; }
 		void setRange_MaxY(float min, float max) { remapRange[6] = min; remapRange[7] = max; }
 		void setRange(float min, float max) { setRange_MinX(min, max); setRange_MaxX(min, max); setRange_MinY(min, max); setRange_MaxY(min, max); };
-		//void setBorderMode(BorderMode border) { this->Bordermode = border; UpdateFieldFinalCoord();}
-		void setSpacing(double s);
-		void borderCloseResort();
-		void setDisplayUseRamp(bool v);
-		void setUseRamp(bool v);
 
-		void convertCoordToStr(std::string VarName, std::vector<Ramp::Coord2D> Array, std::string& Str)
+		void borderCloseResort();
+
+
+		/*void convertCoordToStr(std::string VarName, std::vector<Ramp::Coord2D> Array, std::string& Str)
 		{
 			Str.append(VarName + " ");
 			for (int i = 0; i < Array.size(); i++)
@@ -143,16 +122,6 @@ namespace dyno {
 			return;
 		}
 
-		void setVarByStr(std::string Str, Direction& value)
-		{
-			if (std::isdigit(Str[0]))
-			{
-				value = Direction(std::stoi(Str));
-			}
-			return;
-		}
-
-
 		void setVarByStr(std::string Str, Interpolation& value)
 		{
 			if (std::isdigit(Str[0]))
@@ -160,63 +129,24 @@ namespace dyno {
 				value = Interpolation(std::stoi(Str));
 			}
 			return;
-		}
+		}*/
 
-		//must save
+
+
+
+
+
+		void UpdateFieldFinalCoord() override;
+	public:
+		//ave
 		Direction Dirmode = x;
-		//BorderMode Bordermode = Close;
-		Interpolation InterpMode = Linear;
 
-		std::vector<Coord2D> MyCoord;
-		std::vector<Coord2D> myHandlePoint;
-
-		//
-		std::string InterpStrings[int(Direction::count)] = { "Linear","Bezier" };
 		std::string DirectionStrings[int(Direction::count)] = { "x","y" };
-
-		std::vector<Coord2D> myBezierPoint;
-		std::vector<Coord2D> myBezierPoint_H;
-		std::vector<Coord2D> resamplePoint;
-
-		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
-		std::vector<OriginalCoord> OriginalHandlePoint;//qt HandlePoint Coord
+		std::vector<Coord2D> myBezierPoint_H;//
 
 		std::vector<Coord2D> FE_MyCoord;
 		std::vector<Coord2D> FE_HandleCoord;
-		std::vector<Coord2D> FinalCoord;
 
-		std::vector<double> lengthArray;
-		std::map<float, EndPoint> length_EndPoint_Map;
-
-		//must save
-		float remapRange[8] = { -3,3,-3,3,-3,3,-3,3 };// "MinX","MinY","MaxX","MaxY"
-
-		bool lockSize = false;
-		bool useCurve = false;
-
-
-		bool resample = true;
-
-		bool curveClose = false;
-		bool useColseButton = true;
-
-		bool useSquard = false;
-		bool useSquardButton = false;
-
-		float Spacing = 5;
-
-		double NminX = 0;
-		double NmaxX = 1;
-		double NminY = 0;
-		double NmaxY = 1;
-
-		int handleDefaultLength = 18;
-		float segment = 10;
-		float resampleResolution = 20;
-
-
-		bool displayUseRamp = false;   // Display UseRamp checkbox for RampWidget;
-		bool useRamp = false;    // Enable curve data ,enabled when displayEnable is true
 
 	private:
 		float xLess = 1;
@@ -224,10 +154,6 @@ namespace dyno {
 		float yLess = 1;
 		float yGreater = 0;
 
-		bool generatorMin = true;
-		bool generatorMax = true;
-
-		bool customHandle = false;
 
 	};
 
@@ -266,7 +192,7 @@ namespace dyno {
 				}
 				else if (countMyCoord > 0 && countMyCoord % 2 == 0)
 				{
-					ramp->MyCoord.push_back(Ramp::Coord2D(tempCoord, std::stod(substr)));
+					ramp->mCoord.push_back(Ramp::Coord2D(tempCoord, std::stod(substr)));
 				}
 			}
 			else if (currentVarName == "myHandlePoint")
@@ -289,10 +215,6 @@ namespace dyno {
 				ramp->setVarByStr(substr, ramp->useSquard);
 			else if (currentVarName == "Spacing")
 				ramp->setVarByStr(substr, ramp->Spacing);
-			else if (currentVarName == "displayUseRamp")
-				ramp->setVarByStr(substr, ramp->displayUseRamp);
-			else if (currentVarName == "useRamp")
-				ramp->setVarByStr(substr, ramp->useRamp);
 			else if (currentVarName == "NminX")
 				ramp->setVarByStr(substr, ramp->NminX);
 			else if (currentVarName == "NmaxX")
@@ -304,9 +226,7 @@ namespace dyno {
 			else if (currentVarName == "curveClose")
 				ramp->setVarByStr(substr, ramp->curveClose);
 			else if (currentVarName == "InterpMode")
-				ramp->setVarByStr(substr, ramp->InterpMode);
-			//else if (currentVarName == "Bordermode")
-			//	ramp->setVarByStr(substr, ramp->Bordermode);
+				ramp->setVarByStr(substr, ramp->mInterpMode);
 			else if (currentVarName == "Dirmode")
 				ramp->setVarByStr(substr, ramp->Dirmode);
 			else if (currentVarName == "lockSize")
@@ -315,14 +235,10 @@ namespace dyno {
 				ramp->setVarByStr(substr, ramp->useColseButton);
 			else if (currentVarName == "useSquardButton")
 				ramp->setVarByStr(substr, ramp->useSquardButton);
-			else if (currentVarName == "handleDefaultLength")
-				ramp->setVarByStr(substr, ramp->handleDefaultLength);
 			else if (currentVarName == "segment")
 				ramp->setVarByStr(substr, ramp->segment);
 			else if (currentVarName == "resampleResolution")
 				ramp->setVarByStr(substr, ramp->resampleResolution);
-			else if (currentVarName == "displayUseRamp")
-				ramp->setVarByStr(substr, ramp->displayUseRamp);
 			else if (currentVarName == "useSquardButton")
 				ramp->setVarByStr(substr, ramp->useSquardButton);
 			else if (currentVarName == "useSquardButton")
