@@ -7,10 +7,6 @@ WtNodePainter::~WtNodePainter() {}
 void WtNodePainter::paint(Wt::WPainter* painter)
 {
 	//drawNodeRect();
-
-	WtNodeStyle nodeStyle;
-	WtConnectionStyle connectStyle;
-	WtFlowViewStyle flowStyle;
 }
 
 void WtNodePainter::drawNodeRect(Wt::WPainter* painter, NodeGeometry const& geom, WtNodeDataModel const* model, WtNodeGraphicsObject& graphicsObject)

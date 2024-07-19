@@ -7,7 +7,12 @@
 #include "WtNode.h"
 #include "WtNodeStyle.h"
 
+class WtNode;
+class NodeState;
+class NodeGeometry;
 class WtNodeGraphicsObject;
+class WtNodeDataModel;
+class WtFlowScene;
 
 class WtNodePainter
 {

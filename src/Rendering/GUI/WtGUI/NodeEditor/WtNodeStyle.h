@@ -18,7 +18,9 @@ public:
 
 private:
 	virtual void loadJsonText(std::string jsonText) = 0;
+
 	virtual void loadJsonFile(std::string fileName) = 0;
+
 	virtual void loadJsonFromByteArray(std::string const& jsonData) = 0;
 };
 
@@ -26,6 +28,7 @@ class WtNodeStyle : public Style
 {
 public:
 	WtNodeStyle();
+
 	WtNodeStyle(std::string jsonText);
 
 public:
@@ -33,7 +36,9 @@ public:
 
 private:
 	void loadJsonText(std::string jsonText) override;
+
 	void loadJsonFile(std::string fileName) override;
+
 	void loadJsonFromByteArray(std::string const& jsonData) override;
 
 public:
@@ -69,27 +74,36 @@ class WtConnectionStyle : public Style
 {
 public:
 	WtConnectionStyle();
+
 	WtConnectionStyle(std::string jsonText);
 
 public:
 	static void setConnectionStyle(std::string jsonText);
 
 	Wt::WColor constructionColor() const;
+
 	Wt::WColor normalColor() const;
 	//Wt::WColor normalColor(std::string typeId) const;
+
 	Wt::WColor selectedColor() const;
+
 	Wt::WColor selectedHaloColor() const;
+
 	Wt::WColor hoveredColor() const;
 
 	float lineWidth() const;
+
 	float constructionLineWidth() const;
+
 	float pointDiameter() const;
 
 	bool useDataDefinedColors() const;
 
 private:
 	void loadJsonText(std::string jsonText) override;
+
 	void loadJsonFile(std::string fileName) override;
+
 	void loadJsonFromByteArray(std::string const& jsonData) override;
 
 private:
@@ -111,6 +125,7 @@ class WtFlowViewStyle : public Style
 {
 public:
 	WtFlowViewStyle();
+
 	WtFlowViewStyle(std::string jsonText);
 
 public:
@@ -118,7 +133,9 @@ public:
 
 private:
 	void loadJsonText(std::string jsonText) override;
+
 	void loadJsonFile(std::string fileName) override;
+
 	void loadJsonFromByteArray(std::string const& jsonData) override;
 
 public:
@@ -131,18 +148,25 @@ class WtStyleCollection
 {
 public:
 	static WtNodeStyle const& nodeStyle();
+
 	static WtConnectionStyle const& connectionStyle();
+
 	static WtFlowViewStyle const& flowViewStyle();
 
 public:
 	static void setNodeStyle(WtNodeStyle);
+
 	static void setConnectionStyle(WtConnectionStyle);
+
 	static void setFlowViewStyle(WtFlowViewStyle);
 
 private:
 	WtStyleCollection() = default;
+
 	WtStyleCollection(WtStyleCollection const&) = delete;
+
 	WtStyleCollection& operator=(WtStyleCollection const&) = delete;
+
 	static WtStyleCollection& instance();
 
 private:
