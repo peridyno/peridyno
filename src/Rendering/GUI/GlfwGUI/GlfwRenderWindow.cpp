@@ -215,6 +215,11 @@ namespace dyno
 			// update rendering params
 			mRenderParams.width = mCamera->viewportWidth();
 			mRenderParams.height = mCamera->viewportHeight();
+
+			// check if window is minimized
+			if (mRenderParams.width == 0 || mRenderParams.height == 0)
+				continue;
+
 			mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
 			mRenderParams.transforms.view = mCamera->getViewMat();
 			mRenderParams.transforms.proj = mCamera->getProjMat();
