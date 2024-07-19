@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include <GlfwApp.h>
 
 #include <SceneGraph.h>
 
@@ -93,11 +93,11 @@ std::shared_ptr<SceneGraph> creatCar()
 
 		Vec3f offset = Vec3f(0.0f, -0.721, 0.159);
 		rigidbody.offset = offset;
-		auto bodyActor = jeep->addBox(box1, rigidbody, 1000);
+		auto bodyActor = jeep->addBox(box1, rigidbody, 100);
 
 		rigidbody.offset = Vec3f(0.0f);
 
-		auto spareTireActor = jeep->addBox(box2, rigidbody, 1000);
+		auto spareTireActor = jeep->addBox(box2, rigidbody);
 
 		Real wheel_velocity = 30;
 
@@ -105,10 +105,10 @@ std::shared_ptr<SceneGraph> creatCar()
 		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
 		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
 		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);*/
-		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody, 100);
-		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody, 100);
-		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody, 100);
-		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody, 100);
+		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody);
+		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody);
+		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody);
+		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody);
 
 
 		//front rear
@@ -190,7 +190,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 int main()
 {
-	QtApp app;
+	GlfwApp app;
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 

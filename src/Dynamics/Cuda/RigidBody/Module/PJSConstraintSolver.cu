@@ -1,7 +1,7 @@
 #include "PJSConstraintSolver.h"
 #include "SharedFuncsForRigidBody.h"
-#define USE_RELAXATION
-#define FILE_NAME "E:/work/MatrixSolve/Pyramid.txt"
+//#define USE_RELAXATION
+#define FILE_NAME "D:/Work Code/peridyno/Data/v2.txt"
 namespace dyno
 {
 	IMPLEMENT_TCLASS(PJSConstraintSolver, TDataType)
@@ -240,20 +240,10 @@ namespace dyno
 		if (this->varFrictionEnabled()->getData())
 		{
 			constraint_size += 3 * contact_size;
-			if (mLambdaJoint.size() != constraint_size - contact_size * 3)
-			{
-				mLambdaJoint.resize(constraint_size - contact_size * 3);
-				mLambdaJoint.reset();
-			}
 		}
 		else
 		{
 			constraint_size = contact_size;
-			if (mLambdaJoint.size() != constraint_size - contact_size)
-			{
-				mLambdaJoint.resize(constraint_size - contact_size);
-				mLambdaJoint.reset();
-			}
 		}
 
 		if (ballAndSocketJoint_size != 0)
@@ -409,7 +399,7 @@ namespace dyno
 		mK_3.resize(constraint_size);
 		mEta.resize(constraint_size);
 		mLambda.resize(constraint_size);
-		mD.resize(constraint_size);
+		
 
 		
 
@@ -420,7 +410,7 @@ namespace dyno
 		mK_3.reset();
 		mEta.reset();
 		mLambda.reset();
-		mD.reset();
+		
 
 		mContactNumber.reset();
 
@@ -434,6 +424,8 @@ namespace dyno
 			mVelocityConstraints
 		);
 
+		mErrors.resize(constraint_size);
+		mErrors.reset();
 
 		calculateEtaVectorForPJSBaumgarte(
 			mEta,
@@ -443,11 +435,11 @@ namespace dyno
 			this->inCenter()->getData(),
 			this->inQuaternion()->getData(),
 			mVelocityConstraints,
+			mErrors,
 			this->varSlop()->getValue(),
-			this->varBaumgarteBias()->getValue(),
+			this->varBaumgarteRate()->getValue(),
 			dt
 		);
-
 		
 		calculateK(
 			mVelocityConstraints,
@@ -467,11 +459,6 @@ namespace dyno
 				this->inContacts()->getData(),
 				mContactNumber);
 		}
-
-		if(this->varFrictionEnabled()->getValue())
-			mLambda.assign(mLambdaJoint, mLambdaJoint.size(), contact_size * 3, 0);
-		else
-			mLambda.assign(mLambdaJoint, mLambdaJoint.size(), contact_size, 0);
 	}
 
 	template<typename TDataType>
@@ -511,7 +498,11 @@ namespace dyno
 		{
 			int contact_size = this->inContacts()->size();
 			initializeJacobian(dt);
+			errors.push_back(checkOutErrors(mErrors));
 			int constraint_size = mVelocityConstraints.size();
+
+
+
 			for (int i = 0; i < this->varIterationNumberForVelocitySolver()->getValue(); i++)
 			{
 				JacobiIteration(
@@ -531,6 +522,7 @@ namespace dyno
 					dt
 				);
 			}
+
 			Real norm = checkOutError(
 				mJ,
 				mImpulseC,
@@ -538,10 +530,7 @@ namespace dyno
 				mEta
 			);
 
-			if(this->varFrictionEnabled()->getValue())
-				mLambdaJoint.assign(mLambda, mLambdaJoint.size(), 0, contact_size * 3);
-			else
-				mLambdaJoint.assign(mLambda, mLambdaJoint.size(), 0, contact_size);
+			
 			errors.push_back(norm);
 
 			updateVelocity(
@@ -617,12 +606,7 @@ namespace dyno
 
 
 		
-		cnt++;
-		if (cnt == 1000)
-		{
-			saveVectorToFile(errors, FILE_NAME);
-			std::cin.get();
-		}
+		
 	}
 
 	DEFINE_CLASS(PJSConstraintSolver);

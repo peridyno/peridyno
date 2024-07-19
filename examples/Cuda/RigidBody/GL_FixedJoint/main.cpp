@@ -27,7 +27,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	BoxInfo newBox, oldBox;
 	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(1, 0.0, 1.0);
+	rigidBody.linearVelocity = Vec3f(1.0, 0.0, 1.0);
 	oldBox.center = Vec3f(0, 0.1, 0);
 	oldBox.halfLength = Vec3f(0.02, 0.02, 0.02);
 	auto oldBoxActor = rigid->addBox(oldBox, rigidBody);

@@ -1,6 +1,6 @@
 #include "TJSoftConstraintSolver.h"
 #include "SharedFuncsForRigidBody.h"
-#define USE_RELAXATION
+//#define USE_RELAXATION
 namespace dyno
 {
 	IMPLEMENT_TCLASS(TJSoftConstraintSolver, TDataType)

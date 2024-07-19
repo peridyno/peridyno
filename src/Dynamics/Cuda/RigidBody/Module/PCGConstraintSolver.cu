@@ -1,24 +1,25 @@
-#include "TJConstraintSolver.h"
+#include "PCGConstraintSolver.h"
 #include "SharedFuncsForRigidBody.h"
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(TJConstraintSolver, TDataType)
+	IMPLEMENT_TCLASS(PCGConstraintSolver, TDataType)
 
 	template<typename TDataType>
-	TJConstraintSolver<TDataType>::TJConstraintSolver()
+	PCGConstraintSolver<TDataType>::PCGConstraintSolver()
 		:ConstraintModule()
 	{
 		this->inContacts()->tagOptional(true);
 	}
 
 	template<typename TDataType>
-	TJConstraintSolver<TDataType>::~TJConstraintSolver()
+	PCGConstraintSolver<TDataType>::~PCGConstraintSolver()
 	{
+
 	}
 
 	template<typename TDataType>
-	void TJConstraintSolver<TDataType>::initializeJacobian(Real dt)
+	void PCGConstraintSolver<TDataType>::initializeJacobian(Real dt)
 	{
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
@@ -71,9 +72,20 @@ namespace dyno
 		}
 
 		mVelocityConstraints.resize(constraint_size);
-
+		
 		if (contact_size != 0)
 		{
+			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
+				mContactsInLocalFrame.resize(this->inContacts()->size());
+			}
+
+			setUpContactsInLocalFrame(
+				mContactsInLocalFrame,
+				this->inContacts()->getData(),
+				this->inCenter()->getData(),
+				this->inRotationMatrix()->getData()
+			);
+
 			auto& contacts = this->inContacts()->getData();
 			setUpContactAndFrictionConstraints(
 				mVelocityConstraints,
@@ -174,24 +186,40 @@ namespace dyno
 
 		auto sizeOfRigids = this->inCenter()->size();
 		mContactNumber.resize(sizeOfRigids);
+		mContactNumber.reset();
 
 		mJ.resize(4 * constraint_size);
 		mB.resize(4 * constraint_size);
+		mEta.resize(constraint_size);
+		mLambda.resize(constraint_size);
+		mResidual.resize(constraint_size);
+		mP.resize(constraint_size);
+		tmpArray.resize(constraint_size);
+		mAp.resize(constraint_size);
+		mZ.resize(constraint_size);
+		mCFM.resize(constraint_size);
+		mERP.resize(constraint_size);
+
 		mK_1.resize(constraint_size);
 		mK_2.resize(constraint_size);
 		mK_3.resize(constraint_size);
-		mEta.resize(constraint_size);
-		mLambda.resize(constraint_size);
 
 		mJ.reset();
 		mB.reset();
+		mEta.reset();
+		mLambda.reset();
+		mResidual.reset();
+		tmpArray.reset();
+		mAp.reset();
+		mP.reset();
+		mZ.reset();
+		mCFM.reset();
+		mERP.reset();
+
+
 		mK_1.reset();
 		mK_2.reset();
 		mK_3.reset();
-		mEta.reset();
-		mLambda.reset();
-
-		mContactNumber.reset();
 
 		calculateJacobianMatrix(
 			mJ,
@@ -203,7 +231,36 @@ namespace dyno
 			mVelocityConstraints
 		);
 
-		calculateK(
+		buildCFMAndERP(
+			mJ,
+			mB,
+			mVelocityConstraints,
+			mCFM,
+			mERP,
+			this->varFrequency()->getValue(),
+			this->varDampingRatio()->getValue(),
+			dt
+		);
+
+
+		mErrors.resize(constraint_size);
+		mErrors.reset();
+
+		calculateEtaVectorWithERP(
+			mEta,
+			mJ,
+			this->inVelocity()->getData(),
+			this->inAngularVelocity()->getData(),
+			this->inCenter()->getData(),
+			this->inQuaternion()->getData(),
+			mVelocityConstraints,
+			mERP,
+			this->varSlop()->getValue(),
+			dt
+		);
+
+
+		calculateKWithCFM(
 			mVelocityConstraints,
 			mJ,
 			mB,
@@ -212,26 +269,10 @@ namespace dyno
 			this->inMass()->getData(),
 			mK_1,
 			mK_2,
-			mK_3
+			mK_3,
+			mCFM
 		);
 
-		mErrors.resize(constraint_size);
-		mErrors.reset();
-
-
-		calculateEtaVectorForPJSBaumgarte(
-			mEta,
-			mJ,
-			this->inVelocity()->getData(),
-			this->inAngularVelocity()->getData(),
-			this->inCenter()->getData(),
-			this->inQuaternion()->getData(),
-			mVelocityConstraints,
-			mErrors,
-			this->varSlop()->getValue(),
-			this->varBaumgarteBias()->getValue() / this->varSubStepping()->getValue(),
-			dt
-		);
 
 		if (contact_size != 0)
 		{
@@ -241,8 +282,9 @@ namespace dyno
 		}
 	}
 
+
 	template<typename TDataType>
-	void TJConstraintSolver<TDataType>::constrain()
+	void PCGConstraintSolver<TDataType>::constrain()
 	{
 		uint bodyNum = this->inCenter()->size();
 
@@ -255,103 +297,208 @@ namespace dyno
 
 		Real dt = this->inTimeStep()->getData();
 
+		if (this->varGravityEnabled()->getValue())
+		{
+			setUpGravity(
+				mImpulseExt,
+				this->varGravityValue()->getValue(),
+				dt
+			);
+		}
+
+		updateVelocity(
+			this->inVelocity()->getData(),
+			this->inAngularVelocity()->getData(),
+			mImpulseExt,
+			this->varLinearDamping()->getValue(),
+			this->varAngularDamping()->getValue(),
+			dt
+		);
+
+		Real cg_cost, jacobi_cost, init_cost;
+		clock_t start, finish;
+		
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0)
 		{
-			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
-				mContactsInLocalFrame.resize(this->inContacts()->size());
-			}
+			float r_norm_old = 0.0;
+			float r_norm_new = 0.0;
+			float alpha = 0.0;
 
-			setUpContactsInLocalFrame(
-				mContactsInLocalFrame,
-				this->inContacts()->getData(),
-				this->inCenter()->getData(),
-				this->inRotationMatrix()->getData()
+			start = clock();
+			initializeJacobian(dt);
+			finish = clock();
+			init_cost = float(finish - start) / CLOCKS_PER_SEC;
+			start = clock();
+			int constraint_size = mVelocityConstraints.size();
+
+			//r = b - Ax
+			calculateLinearSystemLHS(
+				mJ,
+				mB,
+				mImpulseC,
+				mLambda,
+				tmpArray,
+				mCFM,
+				mVelocityConstraints
 			);
 
-			Real dh = dt / this->varSubStepping()->getValue();
+			vectorSub(
+				mResidual,
+				tmpArray,
+				mEta,
+				mVelocityConstraints
+			);
 
-			for (int i = 0; i < this->varSubStepping()->getValue(); i++)
+
+			// z = M^{-1} r
+			preconditionedResidual(
+				mResidual,
+				mZ,
+				mK_1,
+				mK_2,
+				mK_3,
+				mVelocityConstraints
+			);
+			
+			mP.assign(mZ);
+			r_norm_old = vectorNorm(mResidual, mP);
+			float r_norm_init = r_norm_old;
+
+
+			if (r_norm_old > EPSILON)
 			{
-				if (this->varGravityEnabled()->getValue())
+				for (int i = 0; i < this->varIterationNumberForVelocitySolverCG()->getValue(); i++)
 				{
-					setUpGravity(
-						mImpulseExt,
-						this->varGravityValue()->getValue(),
-						dh
-					);
-				}
-
-
-				updateVelocity(
-					this->inVelocity()->getData(),
-					this->inAngularVelocity()->getData(),
-					mImpulseExt,
-					this->varLinearDamping()->getValue(),
-					this->varAngularDamping()->getValue(),
-					dh
-				);
-
-				mImpulseC.reset();
-				initializeJacobian(dh);
-				for (int j = 0; j < this->varIterationNumberForVelocitySolver()->getValue(); j++)
-				{
-					JacobiIteration(
-						mLambda,
-						mImpulseC,
+					// compute Ap
+					mImpulseC.reset();
+					calculateLinearSystemLHS(
 						mJ,
 						mB,
+						mImpulseC,
+						mP,
+						mAp,
+						mCFM,
+						mVelocityConstraints
+					);
+
+					alpha = r_norm_old / vectorNorm(mP, mAp);
+
+					// x += alpha * p
+					vectorMultiplyScale(
+						tmpArray,
+						mP,
+						alpha,
+						mVelocityConstraints
+					);
+					vectorAdd(
+						mLambda,
+						mLambda,
+						tmpArray,
+						mVelocityConstraints
+					);
+					// clamp x
+					vectorClamp(mLambda, mVelocityConstraints);
+					
+					// recompute r
+					mImpulseC.reset();
+					calculateLinearSystemLHS(
+						mJ,
+						mB,
+						mImpulseC,
+						mLambda,
+						tmpArray,
+						mCFM,
+						mVelocityConstraints
+					);
+
+
+					vectorSub(
+						mResidual,
+						tmpArray,
 						mEta,
-						mVelocityConstraints,
-						mContactNumber,
+						mVelocityConstraints
+					);
+
+					preconditionedResidual(
+						mResidual,
+						mZ,
 						mK_1,
 						mK_2,
 						mK_3,
-						this->inMass()->getData(),
-						this->varFrictionCoefficient()->getData(),
-						this->varGravityValue()->getData(),
-						dh
+						mVelocityConstraints
 					);
+
+					r_norm_new = vectorNorm(mResidual, mZ);
+					if (r_norm_new <= this->varTolerance()->getValue())
+						break;
+
+
+					// compute p = r + (r_norm_new / r_norm_old) * p
+					if (r_norm_old > EPSILON && r_norm_new > EPSILON)
+					{
+						vectorMultiplyScale(
+							tmpArray,
+							mP,
+							(r_norm_new / r_norm_old),
+							mVelocityConstraints
+						);
+						vectorAdd(
+							mP,
+							tmpArray,
+							mZ,
+							mVelocityConstraints);
+					}
+					r_norm_old = r_norm_new;
 				}
 
-				updateVelocity(
-					this->inVelocity()->getData(),
-					this->inAngularVelocity()->getData(),
+				mImpulseC.reset();
+				calculateImpulseByLambda(
+					mLambda,
+					mVelocityConstraints,
 					mImpulseC,
-					this->varLinearDamping()->getValue(),
-					this->varAngularDamping()->getValue(),
-					dh
-				);
-
-				updateGesture(
-					this->inCenter()->getData(),
-					this->inQuaternion()->getData(),
-					this->inRotationMatrix()->getData(),
-					this->inInertia()->getData(),
-					this->inVelocity()->getData(),
-					this->inAngularVelocity()->getData(),
-					this->inInitialInertia()->getData(),
-					dh
+					mB
 				);
 			}
-		}
+			finish = clock();
+			cg_cost = float(finish - start) / CLOCKS_PER_SEC;
 
-		else
-		{
-			if (this->varGravityEnabled()->getValue())
+			start = clock();
+			
+			for (int i = 0; i < this->varIterationNumberForVelocitySolverJacobi()->getValue(); i++)
 			{
-				setUpGravity(
-					mImpulseExt,
-					this->varGravityValue()->getValue(),
+				JacobiIterationForCFM(
+					mLambda,
+					mImpulseC,
+					mJ,
+					mB,
+					mEta,
+					mVelocityConstraints,
+					mContactNumber,
+					mK_1,
+					mK_2,
+					mK_3,
+					this->inMass()->getData(),
+					mCFM,
+					this->varFrictionCoefficient()->getData(),
+					this->varGravityValue()->getData(),
 					dt
 				);
 			}
 
+			finish = clock();
+			jacobi_cost = float(finish - start) / CLOCKS_PER_SEC;
 
+
+			printf("init_cost : %lf, cg cost : %lf, jacobi cost : %lf\n", init_cost, cg_cost, jacobi_cost);
+
+
+
+ 
 			updateVelocity(
 				this->inVelocity()->getData(),
 				this->inAngularVelocity()->getData(),
-				mImpulseExt,
+				mImpulseC,
 				this->varLinearDamping()->getValue(),
 				this->varAngularDamping()->getValue(),
 				dt
@@ -368,8 +515,22 @@ namespace dyno
 				dt
 			);
 		}
+		else
+		{
+			updateGesture(
+				this->inCenter()->getData(),
+				this->inQuaternion()->getData(),
+				this->inRotationMatrix()->getData(),
+				this->inInertia()->getData(),
+				this->inVelocity()->getData(),
+				this->inAngularVelocity()->getData(),
+				this->inInitialInertia()->getData(),
+				dt
+			);
+		}
+
 
 	}
 
-	DEFINE_CLASS(TJConstraintSolver);
+	DEFINE_CLASS(PCGConstraintSolver);
 }
