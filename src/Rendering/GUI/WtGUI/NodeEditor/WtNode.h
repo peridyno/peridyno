@@ -16,11 +16,11 @@ class WtNodeGraphicsObject;
 class WtNodeDataModel;
 class WtStyleCollection;
 
-class NodeGeometry
+class WtNodeGeometry
 {
 public:
-	NodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel);
-	~NodeGeometry();
+	WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel);
+	~WtNodeGeometry();
 
 public:
 	unsigned int height() const { return _height; };
@@ -97,27 +97,28 @@ public:
 
 	Wt::WRectF boundingRect() const;
 
-	void recalculateSize() const;
+	void recalculateSize(Wt::WFontMetrics fontMetrics) const;
 
-	void recalculateSize(Wt::WFont const& font) const;
+	//void recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const;
 
-	Wt::WPointF portScenePosition(PortType index, PortType portType, Wt::WTransform const& t = Wt::WTransform()) const;
+	Wt::WPointF portScenePosition(PortIndex index, PortType portType, Wt::WTransform const& t = Wt::WTransform()) const;
 
 	PortIndex checkHitScenePoint(PortType portType, Wt::WPointF point, Wt::WTransform const& t = Wt::WTransform()) const;
 
 	PortIndex hoverHitScenePoint(PortType portType, Wt::WPointF point, Wt::WTransform const& t = Wt::WTransform()) const;
 
-	PortIndex hoverHitPortArea(PortType portType,
-		Wt::WPointF const scenePoint,
-		Wt::WTransform const& sceneTransform,
-		NodeGeometry const& geom,
-		WtNodeDataModel const* mode) const;
+	//PortIndex hoverHitPortArea(PortType portType,
+	//	Wt::WPointF const scenePoint,
+	//	Wt::WTransform const& sceneTransform,
+	//	NodeGeometry const& geom,
+	//	WtNodeDataModel const* mode,
+	//	Wt::WFontMetrics const& metrics) const;
 
-	PortIndex findHitPort(PortType portType,
-		Wt::WPointF const scenePoint,
-		Wt::WTransform const& sceneTransform,
-		NodeGeometry const& geom,
-		WtNodeDataModel const* model) const;
+	//PortIndex findHitPort(PortType portType,
+	//	Wt::WPointF const scenePoint,
+	//	Wt::WTransform const& sceneTransform,
+	//	NodeGeometry const& geom,
+	//	WtNodeDataModel const* model) const;
 
 	bool checkHitHotKey0(Wt::WPointF point, Wt::WTransform const& t = Wt::WTransform()) const;
 
@@ -172,7 +173,7 @@ private:
 	//mutable Wt::WFontMetrics _boldFontMetrics;
 };
 
-class NodeState
+class WtNodeState
 {
 public:
 	enum ReactToConnectionState
@@ -182,7 +183,56 @@ public:
 	};
 
 public:
-	NodeState(std::unique_ptr<WtNodeDataModel> const& model);
+	WtNodeState(std::unique_ptr<WtNodeDataModel> const& model);
+
+public:
+	//using ConnectionPtrSet = std::unordered_map<QUuid, QtConnection*>;
+
+	/// Returns vector of connections ID.
+	/// Some of them can be empty (null)
+	//std::vector<ConnectionPtrSet> const& getEntries(PortType) const;
+
+	//std::vector<ConnectionPtrSet>& getEntries(PortType);
+
+	//ConnectionPtrSet connections(PortType portType, PortIndex portIndex) const;
+
+	//void
+	//	setConnection(PortType portType,
+	//		PortIndex portIndex,
+	//		QtConnection& connection);
+
+	//void
+	//	eraseConnection(PortType portType,
+	//		PortIndex portIndex,
+	//		QUuid id);
+
+	ReactToConnectionState reaction() const;
+
+	PortType reactingPortType() const;
+
+	NodeDataType reactingDataType() const;
+
+	void setReaction(ReactToConnectionState reaction,
+		PortType reactingPortType = PortType::None,
+		NodeDataType reactingDataType =
+		NodeDataType());
+
+	bool isReacting() const;
+
+	void setResizing(bool resizing);
+
+	bool resizing() const;
+
+private:
+	//std::vector<ConnectionPtrSet> _inConnections;
+	//std::vector<ConnectionPtrSet> _outConnections;
+
+	ReactToConnectionState _reaction;
+	PortType     _reactingPortType;
+	NodeDataType _reactingDataType;
+
+	bool _resizing;
+
 
 };
 
@@ -215,13 +265,13 @@ public:
 
 	void setGraphicsObject(std::unique_ptr<WtNodeGraphicsObject>&& graphics);
 
-	NodeGeometry& nodeGeometry();
+	WtNodeGeometry& nodeGeometry();
 
-	NodeGeometry const& nodeGeometry() const;
+	WtNodeGeometry const& nodeGeometry() const;
 
-	NodeState const& nodeState() const;
+	WtNodeState const& nodeState() const;
 
-	NodeState& nodeState();
+	WtNodeState& nodeState();
 
 	WtNodeDataModel* nodeDataModel() const;
 
@@ -241,10 +291,10 @@ private:
 
 	std::unique_ptr<WtNodeDataModel> _nodeDataModel;
 
-	NodeState _nodeState;
+	WtNodeState _nodeState;
 
-	NodeGeometry _nodeGeometry;
+	WtNodeGeometry _nodeGeometry;
 
-	//std::unique_ptr<WtNodeGraphicsObject> _nodeGraphicsObject;
+	std::unique_ptr<WtNodeGraphicsObject> _nodeGraphicsObject;
 
 };
