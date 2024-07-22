@@ -20,7 +20,7 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
 #include "Topology/TextureMesh.h"
-
+#include "Color.h"
 #include "FilePath.h"
 
 
@@ -42,7 +42,10 @@ namespace dyno
 
 		DEF_VAR(FilePath, DiffuseTexture, "", "");
 		DEF_VAR(FilePath, NormalTexture, "", "");
-		DEF_VAR(bool,UseBoundingTransform,false,"Active MovePointsToCenter,useBoundingTransform");
+		DEF_VAR(Real, UvScaleU, 9, "");
+		DEF_VAR(Real, UvScaleV, 9, "");
+		DEF_VAR(bool,UseBoundingTransform,false,"");
+
 		DEF_INSTANCE_IN(TopologyModule, Topology, "");
 
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
@@ -50,10 +53,23 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
+		void varChanged();
+
+		void createTextureMesh();
+
+		void createUV();
+
+		void createMaterial();
+
+		void createNormal();
+
+		void moveToCenter();
+
 	private:
 
 
 	};
 
 	IMPLEMENT_TCLASS(ConvertToTextureMesh, TDataType);
+
 }
