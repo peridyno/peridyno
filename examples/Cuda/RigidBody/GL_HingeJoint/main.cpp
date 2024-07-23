@@ -29,20 +29,20 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	RigidBodyInfo rigidBody;
 	BoxInfo newbox, oldbox;
-	oldbox.center = Vec3f(-1.0, 0.2, 0.5);
-	oldbox.halfLength = Vec3f(0.02, 0.08, 0.02);
+	oldbox.center = 2.0 * Vec3f(-1.0, 0.2, 0.5);
+	oldbox.halfLength = 2.0 * Vec3f(0.02, 0.08, 0.02);
 	rigidBody.linearVelocity = Vec3f(1, 0, 0);
 	auto oldBoxActor = rigid->addBox(oldbox, rigidBody);
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 10; i++)
 	{
-		newbox.center = oldbox.center + Vec3f(0.0, 0.2, 0);
+		newbox.center = oldbox.center + 2.0 * Vec3f(0.0, 0.2, 0);
 		newbox.halfLength = oldbox.halfLength;
 		auto newBoxActor = rigid->addBox(newbox, rigidBody);
 		auto& hingeJoint = rigid->createHingeJoint(oldBoxActor, newBoxActor);
 		hingeJoint.setAnchorPoint((oldbox.center + newbox.center) / 2);
 		hingeJoint.setAxis(Vec3f(0, 0, 1));
-		hingeJoint.setRange(-M_PI/3, M_PI/3);
+		hingeJoint.setRange(-M_PI/2, M_PI/2);
 		oldbox = newbox;
 		oldBoxActor = newBoxActor;
 	}

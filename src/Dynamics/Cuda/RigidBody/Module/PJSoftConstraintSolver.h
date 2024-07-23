@@ -64,7 +64,7 @@ namespace dyno
 
 		DEF_VAR(Real, DampingRatio, 1.0, "");
 
-		DEF_VAR(Real, Hertz, 30, "");
+		DEF_VAR(Real, Hertz, 300, "");
 
 
 	public:

@@ -1,4 +1,4 @@
-/**
+ /**
  * Copyright 2017-2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,16 +38,14 @@ namespace dyno
 		CarDriver();
 		~CarDriver() override {};
 
-		DEF_VAR(int,BodyId,0,"Body ID");
-
-		DEF_VAR(std::vector<int>, DrivingWheel, std::vector<int>{0}, "");
-		DEF_VAR(std::vector<int>, SteeringWheel, std::vector<int>{0},"");
-
-		DEF_ARRAY_IN(Quat<Real>, Quaternion, DeviceType::GPU, "Quaternion");
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, Topology, "Topology");
 
 
 	protected:
 		void onEvent(PKeyboardEvent event) override;
+
+	private:
+		int speed = 0;
+		Real angle = 0.0f;
 	};
 }

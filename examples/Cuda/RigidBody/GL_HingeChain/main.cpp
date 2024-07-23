@@ -27,7 +27,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 	RigidBodyInfo rigidBody;
-	Real scale = 0.5;
+	Real scale = 2.5;
 	SphereInfo sphere;
 	sphere.center = scale * Vec3f(-4.6, 20, 0.5);
 	sphere.radius = scale * 2.5;

@@ -65,10 +65,10 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto boxActor5 = rigid->addBox(box5, rigidBody);
 
 
-	/*auto& fixedJoint1 = rigid->createFixedJoint(boxActor2, boxActor4);
+	auto& fixedJoint1 = rigid->createFixedJoint(boxActor2, boxActor4);
 	fixedJoint1.setAnchorPoint(Vec3f(0, 0.1, -0.2));
 	auto& fixedJoint2 = rigid->createFixedJoint(boxActor2, boxActor5);
-	fixedJoint2.setAnchorPoint(Vec3f(0, 0.1, 0.2));*/
+	fixedJoint2.setAnchorPoint(Vec3f(0, 0.1, 0.2));
 
 
 

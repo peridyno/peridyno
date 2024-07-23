@@ -3503,7 +3503,7 @@ namespace dyno
 			tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]) + J[4 * tId + 3].dot(impulse[idx2 * 2 + 1]);
 			if (K_1[tId] > 0)
 			{
-				Real delta_lambda = tmp * K_1[tId] * stepInverse;
+				Real delta_lambda = tmp * K_1[tId] * omega;
 				lambda[tId] += delta_lambda;
 				atomicAdd(&impulse[idx1 * 2][0], B[4 * tId][0] * delta_lambda);
 				atomicAdd(&impulse[idx1 * 2][1], B[4 * tId][1] * delta_lambda);
@@ -3613,12 +3613,7 @@ namespace dyno
 				Real lambda_new = maximum(0.0f, lambda[tId] + (tmp * K_1[tId] * omega));
 				delta_lambda = lambda_new - lambda[tId];
 			}
-			if (constraints[tId].type == ConstraintType::CN_FRICTION)
-			{
-				Real mass_avl = mass[idx1];
-				Real lambda_new = minimum(maximum(lambda[tId] + (tmp * K_1[tId] * omega), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);
-				delta_lambda = lambda_new - lambda[tId];
-			}
+			
 
 			lambda[tId] += delta_lambda;
 
@@ -4803,6 +4798,8 @@ namespace dyno
 		if (tId >= ans.size())
 			return;
 		ans[tId] = minuend[tId] - subtranhend[tId];
+
+		
 	}
 
 	void vectorSub(
@@ -4949,6 +4946,42 @@ namespace dyno
 		impulse.clear();
 	}
 
+
+	template<typename Real>
+	__global__ void SF_vectorInnerProduct(
+		DArray<Real> v1,
+		DArray<Real> v2,
+		DArray<Real> result
+	)
+	{
+		__shared__ float tmp[64];
+		int index = threadIdx.x + blockIdx.x * blockDim.x;
+		int thread = threadIdx.x;
+
+		int N = v1.size();
+
+		tmp[thread] = (index < N) ? v1[index] * v2[index] : 0;
+
+		__syncthreads();
+
+		for (int stride = blockDim.x / 2; stride > 0; stride /= 2)
+		{
+			if (thread < stride)
+			{
+				tmp[thread] += tmp[thread + stride];
+			}
+			__syncthreads();
+		}
+
+
+		if (thread == 0)
+		{
+			atomicAdd(&result[0], tmp[0]);
+		}
+
+	}
+
+
 	template<typename Real>
 	__global__ void SF_vectorNorm(
 		DArray<Real> a,
@@ -4969,25 +5002,18 @@ namespace dyno
 	)
 	{
 		DArray<float> c;
-		c.resize(a.size());
+		c.resize(1);
 		c.reset();
 
-		cuExecute(c.size(),
-			SF_vectorNorm,
+		cuExecute(a.size(),
+			SF_vectorInnerProduct,
 			a,
 			b,
 			c);
 
-		float tmp = 0.0f;
 		CArray<float> c_host;
 		c_host.assign(c);
-		c.clear();
-		for (int i = 0; i < c_host.size(); i++)
-		{
-			tmp += c_host[i];
-		}
-
-		return tmp;
+		return c_host[0];
 	}
 
 	template<typename Real, typename Constraint>
@@ -5022,7 +5048,7 @@ namespace dyno
 	}
 
 	template<typename Real, typename Constraint>
-	__global__ void SF_vectorClamp(
+	__global__ void SF_vectorClampSupport(
 		DArray<Real> v,
 		DArray<Constraint> constraints
 	)
@@ -5035,25 +5061,51 @@ namespace dyno
 		{
 			if (v[tId] < 0)
 				v[tId] = 0;
-		}
-
-		if (!constraints[tId].isValid)
-		{
-			if (v[tId] != 0)
-				v[tId] = 0;
-		}
-		
+		}	
 	}
 
-	void vectorClamp(
+	void vectorClampSupport(
 		DArray<float> v,
 		DArray<TConstraintPair<float>> constraints
 	)
 	{
 		cuExecute(v.size(),
-			SF_vectorClamp,
+			SF_vectorClampSupport,
 			v,
 			constraints);
+	}
+	template<typename Real, typename Constraint>
+	__global__ void SF_vectorClampFriction(
+		DArray<Real> v,
+		DArray<Constraint> constraints,
+		Real mu,
+		int contact_size
+	)
+	{
+		int tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= v.size())
+			return;
+		if (constraints[tId].type == ConstraintType::CN_FRICTION)
+		{
+			Real support = abs(v[tId % contact_size]);
+			v[tId] = minimum(maximum(v[tId], -mu * support), mu * support);
+		}
+	}
+
+
+	void vectorClampFriction(
+		DArray<float> v,
+		DArray<TConstraintPair<float>> constraints,
+		int contact_size,
+		float mu
+	)
+	{
+		cuExecute(v.size(),
+			SF_vectorClampFriction,
+			v,
+			constraints,
+			mu,
+			contact_size);
 	}
 	
 

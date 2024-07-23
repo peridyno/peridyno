@@ -10,6 +10,7 @@
 #include "RigidBody/Module/PJSConstraintSolver.h"
 #include "RigidBody/Module/PJSoftConstraintSolver.h"
 #include "RigidBody/Module/PCGConstraintSolver.h"
+#include "RigidBody/Module/CarDriver.h"
 
 //Module headers
 #include "RigidBody/Module/ContactsUnion.h"
@@ -62,8 +63,8 @@ namespace dyno
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
 		this->stateTopology()->connect(iterSolver->inDiscreteElements());
 		merge->outContacts()->connect(iterSolver->inContacts());
-
 		this->animationPipeline()->pushModule(iterSolver);
+
 
 		this->setDt(0.016f);
 	}
@@ -108,7 +109,7 @@ namespace dyno
 		bd.position = b.center + bd.offset;
 
 		bd.mass = density * lx * ly * lz;
-		printf("Box mass : %lf\n", bd.mass);
+		//printf("Box mass : %lf\n", bd.mass);
 		bd.inertia = 1.0f / 12.0f * bd.mass
 			* Mat3f(ly * ly + lz * lz, 0, 0,
 				0, lx * lx + lz * lz, 0,
@@ -144,7 +145,7 @@ namespace dyno
 		if (bd.mass <= 0.0f) {
 			bd.mass = 4 / 3.0f*M_PI*r*r*r*density;
 		}
-		printf("Sphere mass : %lf\n", bd.mass);
+		//printf("Sphere mass : %lf\n", bd.mass);
 		float I11 = r * r;
 		bd.inertia = 0.4f * bd.mass
 			* Mat3f(I11, 0, 0,

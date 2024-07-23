@@ -391,9 +391,16 @@ namespace dyno
 		DArray<TConstraintPair<float>>& constraints
 	);
 
-	void vectorClamp(
+	void vectorClampSupport(
 		DArray<float> v,
 		DArray<TConstraintPair<float>> constraints
+	);
+
+	void vectorClampFriction(
+		DArray<float> v,
+		DArray<TConstraintPair<float>> constraints,
+		int contact_size,
+		float mu
 	);
 
 	void matrixMultiplyVec(

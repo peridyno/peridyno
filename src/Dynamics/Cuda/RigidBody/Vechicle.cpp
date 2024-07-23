@@ -9,6 +9,7 @@
 #include "Module/PJSoftConstraintSolver.h"
 #include "Module/PJSConstraintSolver.h"
 #include "Module/PCGConstraintSolver.h"
+#include "Module/CarDriver.h"
 
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
@@ -35,15 +36,7 @@ namespace dyno
 		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
 
-		auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
-		elementQuery->outContacts()->connect(contactMapper->inContacts());
-		contactMapper->varScale()->setValue(3.0);
-		this->graphicsPipeline()->pushModule(contactMapper);
-
-		auto wireRender = std::make_shared<GLWireframeVisualModule>();
-		wireRender->setColor(Color(1, 0, 0));
-		contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireRender);
+		
 
 // 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
 // 		this->stateTopology()->connect(cdBV->inDiscreteElements());
@@ -85,11 +78,15 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		auto driver = std::make_shared<SimpleVechicleDriver>();
+		/*auto driver = std::make_shared<SimpleVechicleDriver>();
 
 		this->stateFrameNumber()->connect(driver->inFrameNumber());
 		this->stateInstanceTransform()->connect(driver->inInstanceTransform());
 
+		this->animationPipeline()->pushModule(driver);*/
+
+		auto driver = std::make_shared<CarDriver<DataType3f>>();
+		this->stateTopology()->connect(driver->inTopology());
 		this->animationPipeline()->pushModule(driver);
 
 		this->inTriangleSet()->tagOptional(true);
@@ -290,11 +287,6 @@ namespace dyno
 		this->bind(rearLeftTireActor, Pair<uint, uint>(2, 0));
 		this->bind(rearRightTireActor, Pair<uint, uint>(3, 0));
 
-
-		auto driver = std::make_shared<CarDriver<DataType3f>>();
-		this->animationPipeline()->pushModule(driver);
-		this->stateQuaternion()->connect(driver->inQuaternion());
-		this->stateTopology()->connect(driver->inTopology());
 	}
 
 	template<typename TDataType>

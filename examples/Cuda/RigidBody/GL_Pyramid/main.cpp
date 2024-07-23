@@ -28,11 +28,11 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	BoxInfo box;
 	int N = 8;
-	for (int i = N; i > 0; i--) {
+	for (int i = N; i >= 0; i--) {
 		for (int j = 0; j < i + 1; j++) {
-			box.center = 0.5f * Vec3f(0.5f, 0.065 + 0.15f * (N - i), 0.12f + 0.2f * j + 0.1f * (N - i));
-			box.halfLength = 0.5f * Vec3f(0.065f, 0.065f, 0.1f);
-			if(i == 1)
+			box.center = 5.0f * Vec3f(0.5f, 0.065 + 0.15f * (N - i), 0.12f + 0.2f * j + 0.1f * (N - i));
+			box.halfLength = 5.0f * Vec3f(0.065f, 0.065f, 0.1f);
+			if(i == 0)
 				auto boxAt = rigid->addBox(box, rigidBody, 10000);
 			else
 				auto boxAt = rigid->addBox(box, rigidBody);

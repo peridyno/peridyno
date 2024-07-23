@@ -69,7 +69,7 @@ namespace dyno
 
 		DEF_VAR(Real, AngularDamping, 0.1, "");
 
-		DEF_VAR(Real, Tolerance, 0.000001, "");
+		DEF_VAR(Real, Tolerance, 0.00001, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -109,11 +109,13 @@ namespace dyno
 
 		DArray<Real> mEta;
 		DArray<Real> mLambda;
+		DArray<Real> mLambdaOldJoint;
 
 
 		DArray<ContactPair> mContactsInLocalFrame;
 		DArray<Constraint> mVelocityConstraints;
 
+		DArray<Real> mResidualOld;
 		DArray<Real> mResidual;
 		DArray<Real> tmpArray;
 		DArray<Real> mP;
@@ -133,6 +135,7 @@ namespace dyno
 
 		DArray<Real> mA;
 		DArray<Real> mZ;
+		DArray<Real> mZold;
 
 		DArray<Real> mCFM;
 		DArray<Real> mERP;

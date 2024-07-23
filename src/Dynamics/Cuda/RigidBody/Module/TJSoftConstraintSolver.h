@@ -56,9 +56,9 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 100, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
 
-		DEF_VAR(uint, SubStepping, 30, "");
+		DEF_VAR(uint, SubStepping, 10, "");
 
 		DEF_VAR(Real, LinearDamping, 0.1, "");
 
@@ -66,7 +66,7 @@ namespace dyno
 
 		DEF_VAR(Real, DampingRatio, 1.0, "");
 
-		DEF_VAR(Real, Hertz, 900, "");
+		DEF_VAR(Real, Hertz, 300, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");

@@ -203,7 +203,7 @@ namespace dyno
 		mK_1.resize(constraint_size);
 		mK_2.resize(constraint_size);
 		mK_3.resize(constraint_size);
-
+		
 		mJ.reset();
 		mB.reset();
 		mEta.reset();
@@ -314,10 +314,7 @@ namespace dyno
 			this->varAngularDamping()->getValue(),
 			dt
 		);
-
-		Real cg_cost, jacobi_cost, init_cost;
-		clock_t start, finish;
-		
+	
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0)
 		{
@@ -325,12 +322,39 @@ namespace dyno
 			float r_norm_new = 0.0;
 			float alpha = 0.0;
 
-			start = clock();
+
 			initializeJacobian(dt);
-			finish = clock();
-			init_cost = float(finish - start) / CLOCKS_PER_SEC;
-			start = clock();
+
 			int constraint_size = mVelocityConstraints.size();
+			int contact_size = this->inContacts()->size();
+
+			if (mLambdaOldJoint.size() != 0 && topo->totalJointSize() > 0)
+			{
+				if (this->varFrictionEnabled()->getValue())
+				{
+					mLambda.assign(mLambdaOldJoint, constraint_size - 3 * contact_size, 3 * contact_size, 0);
+				}
+				else
+				{
+					mLambda.assign(mLambdaOldJoint, constraint_size - contact_size, contact_size, 0);
+				}
+			}
+			else
+			{
+				if (topo->totalJointSize() > 0)
+				{
+					if (this->varFrictionEnabled()->getValue())
+					{
+						mLambdaOldJoint.resize(constraint_size - 3 * contact_size);
+						mLambdaOldJoint.assign(mLambda, constraint_size - 3 * contact_size, 0, 3 * contact_size);
+					}
+					else
+					{
+						mLambdaOldJoint.resize(constraint_size - contact_size);
+						mLambdaOldJoint.assign(mLambda, constraint_size - contact_size, 0, 3 * contact_size);
+					}
+				}
+			}
 
 			//r = b - Ax
 			calculateLinearSystemLHS(
@@ -398,7 +422,18 @@ namespace dyno
 						mVelocityConstraints
 					);
 					// clamp x
-					vectorClamp(mLambda, mVelocityConstraints);
+					vectorClampSupport(
+						mLambda,
+						mVelocityConstraints
+					);
+
+					vectorClampFriction(
+						mLambda,
+						mVelocityConstraints,
+						this->inContacts()->size(),
+						this->varFrictionCoefficient()->getValue()
+					);
+
 					
 					// recompute r
 					mImpulseC.reset();
@@ -420,6 +455,8 @@ namespace dyno
 						mVelocityConstraints
 					);
 
+					mZold.assign(mZ);
+
 					preconditionedResidual(
 						mResidual,
 						mZ,
@@ -430,25 +467,26 @@ namespace dyno
 					);
 
 					r_norm_new = vectorNorm(mResidual, mZ);
-					if (r_norm_new <= this->varTolerance()->getValue())
+					float r_norm_true = vectorNorm(mResidual, mResidual);
+					//printf("%lf\n", r_norm_true);
+					if (r_norm_true <= this->varTolerance()->getValue())
 						break;
 
+					float r_norm_spec = vectorNorm(mResidual, mZold);
 
 					// compute p = r + (r_norm_new / r_norm_old) * p
-					if (r_norm_old > EPSILON && r_norm_new > EPSILON)
-					{
-						vectorMultiplyScale(
-							tmpArray,
-							mP,
-							(r_norm_new / r_norm_old),
-							mVelocityConstraints
-						);
-						vectorAdd(
-							mP,
-							tmpArray,
-							mZ,
-							mVelocityConstraints);
-					}
+					Real r_tmp = r_norm_new - r_norm_spec < 0 ? 0 : r_norm_new - r_norm_spec;
+					vectorMultiplyScale(
+						tmpArray,
+						mP,
+						(r_tmp / r_norm_old),
+						mVelocityConstraints
+					);
+					vectorAdd(
+						mP,
+						tmpArray,
+						mZ,
+						mVelocityConstraints);
 					r_norm_old = r_norm_new;
 				}
 
@@ -459,11 +497,16 @@ namespace dyno
 					mImpulseC,
 					mB
 				);
-			}
-			finish = clock();
-			cg_cost = float(finish - start) / CLOCKS_PER_SEC;
 
-			start = clock();
+				if (this->varFrictionEnabled()->getValue())
+				{
+					mLambdaOldJoint.assign(mLambda, constraint_size - 3 * contact_size, 0, 3 * contact_size);
+				}
+				else
+				{
+					mLambdaOldJoint.assign(mLambda, constraint_size - contact_size, 0, contact_size);
+				}
+			}
 			
 			for (int i = 0; i < this->varIterationNumberForVelocitySolverJacobi()->getValue(); i++)
 			{
@@ -486,14 +529,6 @@ namespace dyno
 				);
 			}
 
-			finish = clock();
-			jacobi_cost = float(finish - start) / CLOCKS_PER_SEC;
-
-
-			printf("init_cost : %lf, cg cost : %lf, jacobi cost : %lf\n", init_cost, cg_cost, jacobi_cost);
-
-
-
  
 			updateVelocity(
 				this->inVelocity()->getData(),
@@ -514,6 +549,7 @@ namespace dyno
 				this->inInitialInertia()->getData(),
 				dt
 			);
+
 		}
 		else
 		{
