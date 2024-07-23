@@ -12,7 +12,6 @@
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
 
-
 WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel)
 	: _width(100)
 	, _height(150)
@@ -42,7 +41,6 @@ WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel
 		////f.setBold(true);
 		////this->InitText();
 		//_boldFontMetrics = Wt::WFontMetrics(f);
-
 }
 
 WtNodeGeometry::~WtNodeGeometry()
@@ -113,7 +111,6 @@ void WtNodeGeometry::ShowPortTips()const
 	//	}
 
 	//}
-
 }
 
 unsigned int WtNodeGeometry::nSources() const
@@ -238,7 +235,6 @@ void WtNodeGeometry::recalculateSize(Wt::WFontMetrics fontMetrics) const
 	}
 }
 
-
 //void NodeGeometry::recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const
 //{
 //	Wt::WFontMetrics fontMetrics(font);
@@ -299,7 +295,6 @@ Wt::WPointF WtNodeGeometry::portScenePosition(PortIndex index, PortType portType
 	return t.map(result);
 }
 
-
 PortIndex WtNodeGeometry::checkHitScenePoint(PortType portType, Wt::WPointF const scenePoint, Wt::WTransform const& sceneTransform) const
 {
 	auto const& nodeStyle = WtStyleCollection::nodeStyle();
@@ -332,7 +327,6 @@ PortIndex WtNodeGeometry::checkHitScenePoint(PortType portType, Wt::WPointF cons
 	return result;
 }
 
-
 PortIndex WtNodeGeometry::hoverHitScenePoint(PortType portType, Wt::WPointF const scenePoint, Wt::WTransform const& sceneTransform) const
 {
 	auto const& nodeStyle = WtStyleCollection::nodeStyle();
@@ -361,8 +355,6 @@ PortIndex WtNodeGeometry::hoverHitScenePoint(PortType portType, Wt::WPointF cons
 
 	return result;
 }
-
-
 
 //PortIndex NodeGeometry::hoverHitPortArea(
 //	PortType portType,
@@ -531,7 +523,6 @@ unsigned int WtNodeGeometry::captionHeight() const
 	return captionHeightSpacing();
 }
 
-
 //unsigned int
 //NodeGeometry::
 //captionWidth() const
@@ -546,7 +537,6 @@ unsigned int WtNodeGeometry::captionHeight() const
 //
 //	return w;
 //}
-
 
 //unsigned int
 //NodeGeometry::
@@ -566,25 +556,23 @@ unsigned int WtNodeGeometry::captionHeight() const
 //	return _boldFontMetrics.boundingRect(msg).width();
 //}
 
-
 //Wt::WPointF
 //NodeGeometry::
 //calculateNodePositionBetweenNodePorts(PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
 //	PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
 //	WtNode& newNode)
 //{
-//	//Calculating the nodes position in the scene. It'll be positioned half way between the two ports that it "connects". 
+//	//Calculating the nodes position in the scene. It'll be positioned half way between the two ports that it "connects".
 //	//The first line calculates the halfway point between the ports (node position + port position on the node for both nodes averaged).
 //	//The second line offsets this coordinate with the size of the new node, so that the new nodes center falls on the originally
 //	//calculated coordinate, instead of it's upper left corner.
-//	// 
+//	//
 //	//auto converterNodePos = (sourceNode->nodeGraphicsObject().pos() + sourceNode->nodeGeometry().portScenePosition(sourcePortIndex, sourcePort) +
 //	//	targetNode->nodeGraphicsObject().pos() + targetNode->nodeGeometry().portScenePosition(targetPortIndex, targetPort)) / 2.0f;
 //	//converterNodePos.setX(converterNodePos.x() - newNode.nodeGeometry().width() / 2.0f);
 //	//converterNodePos.setY(converterNodePos.y() - newNode.nodeGeometry().height() / 2.0f);
 //	//return converterNodePos;
 //}
-
 
 unsigned int WtNodeGeometry::portWidth(PortType portType) const
 {
@@ -675,18 +663,15 @@ WtNodeState::ReactToConnectionState WtNodeState::reaction() const
 	return _reaction;
 }
 
-
 PortType WtNodeState::reactingPortType() const
 {
 	return _reactingPortType;
 }
 
-
 NodeDataType WtNodeState::reactingDataType() const
 {
 	return _reactingDataType;
 }
-
 
 void WtNodeState::setReaction(
 	ReactToConnectionState reaction,
@@ -705,21 +690,15 @@ bool WtNodeState::isReacting() const
 	return _reaction == REACTING;
 }
 
-
 void WtNodeState::setResizing(bool resizing)
 {
 	_resizing = resizing;
 }
 
-
 bool WtNodeState::resizing() const
 {
 	return _resizing;
 }
-
-
-
-
 
 WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
 	: _nodeDataModel(std::move(dataModel))
@@ -760,12 +739,10 @@ void WtNode::resetReactionToConnection()
 	//_nodeGraphicsObject->update();
 }
 
-
 WtNodeGraphicsObject const& WtNode::nodeGraphicsObject() const
 {
 	return *_nodeGraphicsObject.get();
 }
-
 
 WtNodeGraphicsObject& WtNode::nodeGraphicsObject()
 {
@@ -779,24 +756,20 @@ void WtNode::setGraphicsObject(std::unique_ptr<WtNodeGraphicsObject>&& graphics)
 	//_nodeGeometry.recalculateSize();
 }
 
-
 WtNodeGeometry& WtNode::nodeGeometry()
 {
 	return _nodeGeometry;
 }
-
 
 WtNodeGeometry const& WtNode::nodeGeometry() const
 {
 	return _nodeGeometry;
 }
 
-
 WtNodeState const& WtNode::nodeState() const
 {
 	return _nodeState;
 }
-
 
 WtNodeState& WtNode::nodeState()
 {
@@ -811,15 +784,14 @@ WtNodeDataModel* WtNode::nodeDataModel() const
 void WtNode::propagateData(std::shared_ptr<WtNodeData> nodeData,
 	PortIndex inPortIndex) const
 {
-	_nodeDataModel->setInData(std::move(nodeData), inPortIndex);
+	//_nodeDataModel->setInData(std::move(nodeData), inPortIndex);
 
-	//Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
-	_nodeGraphicsObject->setGeometryChanged();
-	//_nodeGeometry.recalculateSize();
-	//_nodeGraphicsObject->update();
-	_nodeGraphicsObject->moveConnections();
+	////Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
+	//_nodeGraphicsObject->setGeometryChanged();
+	////_nodeGeometry.recalculateSize();
+	////_nodeGraphicsObject->update();
+	//_nodeGraphicsObject->moveConnections();
 }
-
 
 //void WtNode::onDataUpdated(PortIndex index)
 //{
