@@ -75,5 +75,7 @@ void WtNodeFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	Wt::WRectF boundary = Wt::WRectF(-diam, -diam, 2.0 * diam + 10, 2.0 * diam + 15);
 	painter.drawRect(boundary);
 
+
+
 	painter.save();
 }
