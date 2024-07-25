@@ -24,11 +24,9 @@
 
 #include "GltfLoader.h"
 //#include "ConvertToTextureMesh.h"
-#include "BasicShapes/CubeModel.h"
-#include "BasicShapes/CapsuleModel.h"
-#include "BasicShapes/SphereModel.h"
+
 #include "GltfLoader.h"
-#include "Commands/Transform.h"
+#include "BasicShapes/PlaneModel.h"
 
 using namespace std;
 using namespace dyno;
@@ -70,6 +68,15 @@ std::shared_ptr<SceneGraph> creatCar()
 
 
 	configCar->varVehicleConfiguration()->setValue(configData);
+
+	configCar->varRotation()->setValue(Vec3f(0,45,0));
+	
+	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
+	plane->varLengthX()->setValue(50);
+	plane->varLengthZ()->setValue(50);
+
+	plane->stateTriangleSet()->connect(configCar->inTriangleSet());
+
 
 	return scn;
 }
