@@ -54,11 +54,11 @@ namespace dyno
 // 		this->stateTopology()->connect(cdBV->inDiscreteElements());
 // 		this->animationPipeline()->pushModule(cdBV);
 
-		/*auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
+		auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
 		this->stateTopology()->connect(cdBV->inDiscreteElements());
-		this->inTriangleSet()->connect(cdBV->inTriangleSet());*/
-		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
-		this->stateTopology()->connect(cdBV->inDiscreteElements());
+		this->inTriangleSet()->connect(cdBV->inTriangleSet());
+		// 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
+		// 		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->animationPipeline()->pushModule(cdBV);
 
 
@@ -177,7 +177,60 @@ namespace dyno
 		tms.clear();
 		bindingPair.clear();
 		tags.clear();
+
+		this->transform();
 	}
+
+
+	template<typename TDataType>
+	void Vechicle<TDataType>::transform()
+	{
+		auto quat = this->computeQuaternion();
+		Coord location = this->varLocation()->getValue();
+
+		////************************** initial mInitialRot *************************//
+
+		mInitialRot.assign(this->stateRotationMatrix()->constData());
+
+		//***************************** Translation *************************//
+
+		CArray<Coord> hostCenter;
+		hostCenter.assign(this->stateCenter()->constData());
+
+		for (uint i = 0; i < hostCenter.size(); i++)
+		{
+			hostCenter[i] = quat.rotate(hostCenter[i]) + location;
+		}
+
+		this->stateCenter()->assign(hostCenter);
+
+		//***************************** Rotation *************************//
+
+		CArray<Quat<Real>> hostQuaternion;
+		hostQuaternion.assign(this->stateQuaternion()->constData());
+
+		for (uint i = 0; i < hostQuaternion.size(); i++)
+		{
+			hostQuaternion[i] = quat * hostQuaternion[i];
+		}
+		this->stateQuaternion()->assign(hostQuaternion);
+
+
+		CArray<Mat3f> hostRotation;
+		hostRotation.assign(this->stateRotationMatrix()->constData());
+
+		for (uint i = 0; i < hostRotation.size(); i++)
+		{
+			hostRotation[i] = quat.toMatrix3x3() * hostRotation[i];
+		}
+		this->stateRotationMatrix()->assign(hostRotation);
+
+		hostCenter.clear();
+		hostQuaternion.clear();
+		hostRotation.clear();
+
+	}
+
 
 	template<typename TDataType>
 	void Vechicle<TDataType>::updateStates()
@@ -227,109 +280,18 @@ namespace dyno
 		: ParametricModel<TDataType>()
 		, Vechicle<TDataType>()
 	{
-		BoxInfo box1, box2, box3, box4;
-		//car body
-		box1.center = Vec3f(0, 1.171, -0.011);
-		box1.halfLength = Vec3f(1.011, 0.793, 2.4);
+		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		this->stateTopology()->connect(mapper->inDiscreteElements());
+		this->graphicsPipeline()->pushModule(mapper);
 
-
-		box2.center = Vec3f(0, 1.044, -2.254);
-		box2.halfLength = Vec3f(0.447, 0.447, 0.15);
-
-		box3.center = Vec3f(0.812, 0.450, 1.722);
-		box3.halfLength = Vec3f(0.2f);
-		box4.center = Vec3f(-0.812, 0.450, 1.722);
-		box4.halfLength = Vec3f(0.2f);
-// 		CapsuleInfo capsule1, capsule2, capsule3, capsule4;
-// 
-// 		capsule1.center = Vec3f(0.812, 0.450, 1.722);
-// 		capsule1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-// 		capsule1.halfLength = 0.1495;
-// 		capsule1.radius = 0.450;
-// 		capsule2.center = Vec3f(-0.812, 0.450, 1.722);
-// 		capsule2.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-// 		capsule2.halfLength = 0.1495;
-// 		capsule2.radius = 0.450;
-// 		capsule3.center = Vec3f(-0.812, 0.450, -1.426);
-// 		capsule3.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-// 		capsule3.halfLength = 0.1495;
-// 		capsule3.radius = 0.450;
-// 		capsule4.center = Vec3f(0.812, 0.450, -1.426);
-// 		capsule4.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-// 		capsule4.halfLength = 0.1495;
-// 		capsule4.radius = 0.450;
-
-		SphereInfo sphere1, sphere2, sphere3, sphere4;
-		sphere1.center = Vec3f(0.812, 0.450, 1.722);
-		sphere1.radius = 0.450;
-		sphere2.center = Vec3f(-0.812, 0.450, 1.722);
-		sphere2.radius = 0.450;
-		sphere3.center = Vec3f(-0.812, 0.450, -1.426);
-		sphere3.radius = 0.450;
-		sphere4.center = Vec3f(0.812, 0.450, -1.426);
-		sphere4.radius = 0.450;
-
-		RigidBodyInfo rigidbody;
-
-		Vec3f offset = Vec3f(0.0f, -0.721f, 0.148f);
-		rigidbody.offset = offset;
-		auto bodyActor = this->addBox(box1, rigidbody, 10);
-
-		rigidbody.offset = Vec3f(0.0f);
-
-		auto spareTireActor = this->addBox(box2, rigidbody, 100);
-		//auto frontLeftSteerActor = this->addBox(box3, rigidbody, 100);
-		//auto frontRightSteerActor = this->addBox(box4, rigidbody, 100);
-
-		Real wheel_velocity = 12;
-
-// 		auto frontLeftTireActor = this->addCapsule(capsule1, rigidbody, 100);
-// 		auto frontRightTireActor = this->addCapsule(capsule2, rigidbody, 100);
-// 		auto rearLeftTireActor = this->addCapsule(capsule3, rigidbody, 100);
-// 		auto rearRightTireActor = this->addCapsule(capsule4, rigidbody, 100);
-		auto frontLeftTireActor = this->addSphere(sphere1, rigidbody, 100);
-		auto frontRightTireActor = this->addSphere(sphere2, rigidbody, 100);
-		auto rearLeftTireActor = this->addSphere(sphere3, rigidbody, 100);
-		auto rearRightTireActor = this->addSphere(sphere4, rigidbody, 100);
-
-		//front rear
-		auto& joint1 = this->createHingeJoint(frontLeftTireActor, bodyActor);
-		joint1.setAnchorPoint(frontLeftTireActor->center);
-		joint1.setMoter(wheel_velocity);
-		joint1.setAxis(Vec3f(1, 0, 0));
-
-		auto& joint2 = this->createHingeJoint(frontRightTireActor, bodyActor);
-		joint2.setAnchorPoint(frontRightTireActor->center);
-		joint2.setMoter(wheel_velocity);
-		joint2.setAxis(Vec3f(1, 0, 0));
-
-		//back rear
-		auto& joint3 = this->createHingeJoint(rearLeftTireActor, bodyActor);
-		joint3.setAnchorPoint(rearLeftTireActor->center);
-		joint3.setMoter(wheel_velocity);
-		joint3.setAxis(Vec3f(1, 0, 0));
-
-		auto& joint4 = this->createHingeJoint(rearRightTireActor, bodyActor);
-		joint4.setAnchorPoint(rearRightTireActor->center);
-		joint4.setMoter(wheel_velocity);
-		joint4.setAxis(Vec3f(1, 0, 0));
-
-
-		//FixedJoint<Real> joint5(0, 1);
-		auto& joint5 = this->createFixedJoint(bodyActor, spareTireActor);
-		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
-		//auto& joint6 = this->createFixedJoint(bodyActor, frontLeftSteerActor);
-		//joint6.setAnchorPoint((bodyActor->center + frontLeftSteerActor->center) / 2);
-		//auto& joint7 = this->createFixedJoint(bodyActor, frontRightSteerActor);
-		//joint7.setAnchorPoint((bodyActor->center + frontRightSteerActor->center) / 2);
-
-		this->bind(bodyActor, Pair<uint, uint>(5, 0));
-		this->bind(spareTireActor, Pair<uint, uint>(4, 0));
-		this->bind(frontLeftTireActor, Pair<uint, uint>(0, 0));
-		this->bind(frontRightTireActor, Pair<uint, uint>(1, 0));
-		this->bind(rearLeftTireActor, Pair<uint, uint>(2, 0));
-		this->bind(rearRightTireActor, Pair<uint, uint>(3, 0));
-
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+		sRender->setAlpha(0.2f);
+		sRender->setRoughness(0.7f);
+		sRender->setMetallic(3.0f);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(sRender);
+		sRender->setVisible(false);
 
 		auto driver = std::make_shared<CarDriver<DataType3f>>();
 		this->animationPipeline()->pushModule(driver);
@@ -347,27 +309,99 @@ namespace dyno
 	template<typename TDataType>
 	void Jeep<TDataType>::resetStates()
 	{
-		Vechicle<TDataType>::resetStates();
+		this->clearRigidBodySystem();
+		this->clearVechicle();
 
-		auto loc = this->varLocation()->getValue();
-		
-		Coord tr = Coord(loc.x, loc.y, loc.z);
-		
-		CArray<Coord> hostCenter;
-		hostCenter.assign(this->stateCenter()->constData());
+		RigidBodyInfo rigidbody;
+		auto texMesh = this->inTextureMesh()->constDataPtr();
 
-		for (uint i = 0; i < hostCenter.size(); i++)
+		//wheel
+		std::vector <int> Wheel_Id = { 0,1,2,3 };
+		std::map<int, CapsuleInfo> wheels;
+		std::map<int, std::shared_ptr<PdActor>> Actors;
+		//Capsule
+		for (auto it : Wheel_Id)
 		{
-			hostCenter[i] += tr;
+			auto up = texMesh->shapes()[it]->boundingBox.v1;
+			auto down = texMesh->shapes()[it]->boundingBox.v0;
+
+			wheels[it].center = texMesh->shapes()[it]->boundingTransform.translation();
+			wheels[it].rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+			wheels[it].halfLength = 0.1;
+			wheels[it].radius = std::abs(up.y - down.y) / 2;
+		}
+		//Actor
+		for (auto it : Wheel_Id)
+		{
+			Actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
+		}
+		//bindShapetoActor
+		for (auto it : Wheel_Id)
+		{
+			this->bind(Actors[it], Pair<uint, uint>(it, 0));
 		}
 
-		this->stateCenter()->assign(hostCenter);
+
+		//body
+		int body = 5;
+		int backWheel = 4;
+
+		std::vector <int> box_Id = { body,backWheel };
+		std::map<int, BoxInfo> boxs;
+		//box
+		for (auto it : box_Id)
+		{
+			auto up = texMesh->shapes()[it]->boundingBox.v1;
+			auto down = texMesh->shapes()[it]->boundingBox.v0;
+
+			auto center = texMesh->shapes()[it]->boundingTransform.translation();
+			boxs[it].center = Vec3f(center.x, center.y, center.z);
+
+			boxs[it].halfLength = (up - down) / 2;
+
+
+		}
+		//Actor
+		for (auto it : box_Id)
+		{
+			Vec3f offset = Vec3f(0.0f, 0.0f, 0.0f);
+
+			rigidbody.offset = offset;
+			Actors[it] = this->addBox(boxs[it], rigidbody, 100);
+		}
+		//bindShapetoActor
+		for (auto it : box_Id)
+		{
+			this->bind(Actors[it], Pair<uint, uint>(it, 0));
+		}
+
+		rigidbody.offset = Vec3f(0);
+
+		Real wheel_velocity = 10;
+
+		//wheel to Body
+		for (auto it : Wheel_Id)
+		{
+			auto& joint = this->createHingeJoint(Actors[it], Actors[body]);
+			joint.setAnchorPoint(Actors[it]->center);
+			joint.setMoter(wheel_velocity);
+			joint.setAxis(Vec3f(1, 0, 0));
+		}
+
+		auto& jointBackWheel_Body = this->createFixedJoint(Actors[backWheel], Actors[body]);
+		jointBackWheel_Body.setAnchorPoint(Actors[backWheel]->center);		//set and offset
+
+
+
+		//**************************************************//
+		Vechicle<TDataType>::resetStates();
+
 
 		this->updateTopology();
 
 		this->updateInstanceTransform();
 
-		hostCenter.clear();
+		
 	}
 
 	DEFINE_CLASS(Jeep);
@@ -393,7 +427,7 @@ namespace dyno
 		sRender->setMetallic(3.0f);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
-
+		sRender->setVisible(false);
 
 		this->inTriangleSet()->tagOptional(true);
 		this->inTextureMesh()->tagOptional(true);
@@ -456,7 +490,7 @@ namespace dyno
 			}
 
 			BoxInfo currentBox;
-			CapsuleInfo currentCapsule;		//Radius∫ÕHalfLength…Ë÷√°£Offset…Ë÷√
+			CapsuleInfo currentCapsule;		
 			SphereInfo currentSphere;
 			TetInfo currentTet;
 

@@ -11,7 +11,7 @@
 namespace dyno 
 {
 	template<typename TDataType>
-	class Vechicle : virtual public RigidBodySystem<TDataType>
+	class Vechicle : virtual public ParametricModel<TDataType>, virtual public RigidBodySystem<TDataType>
 	{
 		DECLARE_TCLASS(Vechicle, TDataType)
 	public:
@@ -42,15 +42,19 @@ namespace dyno
 
 		void clearVechicle();
 
+		void transform();
+
+	protected:
+
+		DArray<Matrix> mInitialRot;
 
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
 
 		std::vector<std::shared_ptr<PdActor>> mActors;
 
-		DArray<Matrix> mInitialRot;
-
 		DArray<BindingPair> mBindingPairDevice;
+
 		DArray<int> mBindingTagDevice;
 	};
 
@@ -59,7 +63,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class Jeep : virtual public ParametricModel<TDataType>, virtual public Vechicle<TDataType>
+	class Jeep : virtual public Vechicle<TDataType>
 	{
 		DECLARE_TCLASS(Jeep, TDataType)
 	public:
@@ -75,7 +79,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class ConfigurableVehicle : virtual public ParametricModel<TDataType>, virtual public Vechicle<TDataType>
+	class ConfigurableVehicle : virtual public Vechicle<TDataType>
 	{
 		DECLARE_TCLASS(ConfigurableVehicle, TDataType)
 	public:
