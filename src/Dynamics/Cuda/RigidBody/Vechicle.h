@@ -6,11 +6,12 @@
 #include "Topology/TriangleSet.h"
 
 #include "STL/Pair.h"
+#include "VehicleInfo.h"
 
 namespace dyno 
 {
 	template<typename TDataType>
-	class Vechicle : virtual public RigidBodySystem<TDataType>
+	class Vechicle : virtual public ParametricModel<TDataType>, virtual public RigidBodySystem<TDataType>
 	{
 		DECLARE_TCLASS(Vechicle, TDataType)
 	public:
@@ -39,19 +40,30 @@ namespace dyno
 
 		void updateInstanceTransform();
 
+		void clearVechicle();
+
+		void transform();
+
+	protected:
+
+		DArray<Matrix> mInitialRot;
+
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
 
 		std::vector<std::shared_ptr<PdActor>> mActors;
 
-		DArray<Matrix> mInitialRot;
-
 		DArray<BindingPair> mBindingPairDevice;
+
 		DArray<int> mBindingTagDevice;
 	};
 
+
+
+
+
 	template<typename TDataType>
-	class Jeep : virtual public ParametricModel<TDataType>, virtual public Vechicle<TDataType>
+	class Jeep : virtual public Vechicle<TDataType>
 	{
 		DECLARE_TCLASS(Jeep, TDataType)
 	public:
@@ -64,4 +76,23 @@ namespace dyno
 	protected:
 		void resetStates() override;
 	};
+
+
+	template<typename TDataType>
+	class ConfigurableVehicle : virtual public Vechicle<TDataType>
+	{
+		DECLARE_TCLASS(ConfigurableVehicle, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		ConfigurableVehicle();
+		~ConfigurableVehicle() override;
+
+		DEF_VAR(VehicleBind,VehicleConfiguration, VehicleBind(4), "");
+
+	protected:
+		void resetStates() override;
+	};
+
 }
