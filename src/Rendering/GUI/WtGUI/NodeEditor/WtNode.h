@@ -8,7 +8,7 @@
 
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
-#include "WtNodeDate.hpp"
+#include "WtNodeData.hpp"
 #include "WtNodeStyle.h"
 #include <memory>
 

@@ -137,7 +137,7 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	panel0->setTitle("Node Tree");
 	panel0->setCollapsible(false);
 	panel0->setMargin(0);
-	panel0->setCentralWidget(std::make_unique<WtNodeFlowWidget>());
+	panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
 	//panel0->setStyleClass("scrollable-content");
 
 	//auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WtNodeDate.hpp"
+#include "WtNodeData.hpp"
 #include "WtNodeStyle.h"
 
 enum class NodeValidationState

@@ -709,11 +709,11 @@ WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
 	//_nodeGeometry.recalculateSize();
 
 	//// propagate data: model => node
-	//connect(_nodeDataModel.get(), &QtNodeDataModel::dataUpdated,
-	//	this, &QtNode::onDataUpdated);
+	//connect(_nodeDataModel.get(), &WtNodeDataModel::dataUpdated,
+	//	this, &WtNode::onDataUpdated);
 
-	//connect(_nodeDataModel.get(), &QtNodeDataModel::embeddedWidgetSizeUpdated,
-	//	this, &QtNode::onNodeSizeUpdated);
+	//connect(_nodeDataModel.get(), &WtNodeDataModel::embeddedWidgetSizeUpdated,
+	//	this, &WtNode::onNodeSizeUpdated);
 }
 
 WtNode::~WtNode() = default;

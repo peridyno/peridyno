@@ -2,7 +2,7 @@
 
 #include <Wt/WContainerWidget.h>
 #include "WParameterDataNode.h"
-#include "NodeEditor/WtNodeFlowWidget.h"
+#include "NodeEditor/WtFlowWidget.h"
 
 namespace dyno
 {

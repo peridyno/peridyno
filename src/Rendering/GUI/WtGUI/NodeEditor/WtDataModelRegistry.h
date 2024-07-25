@@ -129,15 +129,15 @@ private:
 		// Assert always fires, but the compiler doesn't know this:
 		static_assert(!std::is_same<T, T>::value,
 			"The ModelCreator must return a std::unique_ptr<T>, where T "
-			"inherits from QtNodeDataModel");
+			"inherits from WtNodeDataModel");
 	};
 
 	template <typename T>
 	struct UnwrapUniquePtr<std::unique_ptr<T>>
 	{
-		static_assert(std::is_base_of<QtNodeDataModel, T>::value,
+		static_assert(std::is_base_of<WtNodeDataModel, T>::value,
 			"The ModelCreator must return a std::unique_ptr<T>, where T "
-			"inherits from QtNodeDataModel");
+			"inherits from WtNodeDataModel");
 		using type = T;
 	};
 

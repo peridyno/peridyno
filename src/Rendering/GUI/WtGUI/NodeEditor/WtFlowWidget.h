@@ -8,11 +8,11 @@
 
 class WGridLayout;
 
-class WtNodeFlowWidget : public Wt::WPaintedWidget
+class WtFlowWidget : public Wt::WPaintedWidget
 {
 public:
-	WtNodeFlowWidget();
-	~WtNodeFlowWidget();
+	WtFlowWidget();
+	~WtFlowWidget();
 
 public:
 	void onMouseMove(const Wt::WMouseEvent& event);
