@@ -9,6 +9,8 @@
 
 #include "Topology/DiscreteElements.h"
 
+#include "Algorithm/Reduction.h"
+
 namespace dyno 
 {
 	void ApplyTransform(

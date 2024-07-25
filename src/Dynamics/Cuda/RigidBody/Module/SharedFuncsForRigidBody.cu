@@ -4954,46 +4954,17 @@ namespace dyno
 		DArray<Real> result
 	)
 	{
-		__shared__ float tmp[64];
 		int index = threadIdx.x + blockIdx.x * blockDim.x;
-		int thread = threadIdx.x;
 
 		int N = v1.size();
 
-		tmp[thread] = (index < N) ? v1[index] * v2[index] : 0;
-
-		__syncthreads();
-
-		for (int stride = blockDim.x / 2; stride > 0; stride /= 2)
-		{
-			if (thread < stride)
-			{
-				tmp[thread] += tmp[thread + stride];
-			}
-			__syncthreads();
-		}
-
-
-		if (thread == 0)
-		{
-			atomicAdd(&result[0], tmp[0]);
-		}
-
-	}
-
-
-	template<typename Real>
-	__global__ void SF_vectorNorm(
-		DArray<Real> a,
-		DArray<Real> b,
-		DArray<Real> c
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		if (tId >= a.size())
+		if (index >= N)
 			return;
-		c[tId] = a[tId] * b[tId];
+
+		result[index] = v1[index] * v2[index];
 	}
+
+
 
 
 	float vectorNorm(
@@ -5002,7 +4973,7 @@ namespace dyno
 	)
 	{
 		DArray<float> c;
-		c.resize(1);
+		c.resize(a.size());
 		c.reset();
 
 		cuExecute(a.size(),
@@ -5011,9 +4982,8 @@ namespace dyno
 			b,
 			c);
 
-		CArray<float> c_host;
-		c_host.assign(c);
-		return c_host[0];
+		Reduction<float> reduction;
+		return reduction.accumulate(c.begin(), c.size());
 	}
 
 	template<typename Real, typename Constraint>
@@ -5251,7 +5221,15 @@ namespace dyno
 
 
 		Real d = 0.0;
-		d += J[4 * tId].dot(B[4 * tId]) + J[4 * tId + 1].dot(B[4 * tId + 1]) + J[4 * tId + 2].dot(B[4 * tId + 2]) + J[4 * tId + 3].dot(B[4 * tId + 3]);
+		int idx2 = constraints[tId].bodyId2;
+		if (idx2 != INVALID)
+		{
+			d += J[4 * tId].dot(B[4 * tId]) + J[4 * tId + 1].dot(B[4 * tId + 1]) + J[4 * tId + 2].dot(B[4 * tId + 2]) + J[4 * tId + 3].dot(B[4 * tId + 3]);
+		}
+		else
+		{
+			d += J[4 * tId].dot(B[4 * tId]) + J[4 * tId + 1].dot(B[4 * tId + 1]);
+		}
 		
 		Real m_eff = 1 / d;
 		Real omega = 2 * M_PI * hertz;
