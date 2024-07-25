@@ -39,7 +39,7 @@ public:
 	WtDataModelRegistry& operator=(WtDataModelRegistry&&) = default;
 
 public:
-	template<typename ModeType>
+	template<typename ModelType>
 	void registerModel(RegistryItemCreator creator, std::string const& category = "Nodes")
 	{
 		const std::string name = computeName<ModelType>(HasStaticMethodName<ModelType>{}, creator);
@@ -120,7 +120,7 @@ private:
 	template<typename ModelType>
 	static std::string computeName(std::false_type, RegistryItemCreator const& creator)
 	{
-		return creator->name();
+		return creator()->name();
 	}
 
 	template <typename T>

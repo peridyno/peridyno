@@ -114,7 +114,7 @@ std::string WtNodeWidget::caption() const
 std::string WtNodeWidget::name() const
 {
 	return mNode->caption();
-	//return std::string::fromStdString(mNode->getClassInfo()->getClassName());
+	//return mNode->getClassInfo()->getClassName();
 }
 
 std::string WtNodeWidget::nodeTips() const
