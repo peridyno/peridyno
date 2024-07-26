@@ -4,6 +4,7 @@
 #include "WtNodeData.hpp"
 #include "WtNodeWidget.h"
 
+#include "SceneGraphFactory.h"
 #include "SceneGraph.h"
 #include "FBase.h"
 

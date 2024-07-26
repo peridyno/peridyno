@@ -6,6 +6,7 @@
 #include <Wt/WFont.h>
 #include <Wt/WTransform.h>
 
+#include "uuid.h"
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
 #include "WtNodeData.hpp"
@@ -249,6 +250,7 @@ public:
 	//void restore(QJsonObject const& json) override;
 
 public:
+	uuids::uuid id() const;
 	//QUuid id() const;
 
 	void reactToPossibleConnection(PortType,
@@ -287,6 +289,7 @@ public:
 	void onNodeSizeUpdated();
 
 private:
+	uuids::uuid _uid;
 	//QUuid _uid;
 
 	std::unique_ptr<WtNodeDataModel> _nodeDataModel;

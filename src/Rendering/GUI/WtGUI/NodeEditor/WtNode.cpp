@@ -701,7 +701,8 @@ bool WtNodeState::resizing() const
 }
 
 WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
-	: _nodeDataModel(std::move(dataModel))
+	: _uid(uuids::uuid_name_generator)
+	, _nodeDataModel(std::move(dataModel))
 	, _nodeState(_nodeDataModel)
 	, _nodeGeometry(_nodeDataModel)
 	, _nodeGraphicsObject(nullptr)

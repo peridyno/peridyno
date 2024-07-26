@@ -25,3 +25,6 @@
 [submodule "data"]
 	path = data
 	url = https://gitee.com/peridyno/data.git
+[submodule "external/gsl"]
+	path = external/gsl
+	url = https://github.com/microsoft/GSL.git

@@ -27,6 +27,34 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 			ret->registerModel<WtNodeWidget>(category, creator);
 		}
 	}
+
+	//this->setRegistry(ret);
+	//createNodeGraphView();
+	//reorderAllNodes();
+	//connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
+	//connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
+	//connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
+	//connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
+	//connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
+	////connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
+	//connect(this, &QtFlowScene::nodeContextMenu, this, &QtNodeFlowScene::showContextMenu);
 }
 
 WtNodeFlowScene::~WtNodeFlowScene() {}
+
+void WtNodeFlowScene::createNodeGraphView()
+{
+	auto scn = dyno::SceneGraphFactory::instance()->active();
+
+	std::map<dyno::ObjectId, WtNode*> nodeMap;
+
+	auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
+		{
+			auto mId = m->objectId();
+
+			auto type = std::make_unique<WtNodeWidget>(m);
+
+			auto& node = this->createNode(std::move(type));
+		}
+}
+
