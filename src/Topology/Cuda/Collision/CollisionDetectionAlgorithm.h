@@ -41,7 +41,7 @@ namespace dyno
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
 
-        //[Tet - Sphere]
+        // [Tet - Sphere]
         DYN_FUNC static void MSDF(const Tet3D& tetA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Tet3D& tetB, const Real radiusA, const Real radiusB);

@@ -544,9 +544,8 @@ namespace dyno
         const Real radius
     )
     {
-        lowerBoundary = upperBoundary = seg.v0.dot(axisNormal);
-        lowerBoundary = glm::min(lowerBoundary, seg.v1.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, seg.v1.dot(axisNormal));
+        Real t = seg.v0.dot(axisNormal); lowerBoundary = upperBoundary = t;
+        t = seg.v1.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         lowerBoundary -= radius;
         upperBoundary += radius;
@@ -562,12 +561,9 @@ namespace dyno
         const Real radius
     )
     {
-        lowerBoundary = upperBoundary = tri.v[0].dot(axisNormal);
-
-        lowerBoundary = glm::min(lowerBoundary, tri.v[1].dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, tri.v[1].dot(axisNormal));
-        lowerBoundary = glm::min(lowerBoundary, tri.v[2].dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, tri.v[2].dot(axisNormal));
+        Real t = tri.v[0].dot(axisNormal); lowerBoundary = upperBoundary = t;
+        t = tri.v[1].dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        t = tri.v[2].dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         lowerBoundary -= radius;
         upperBoundary += radius;
@@ -584,13 +580,10 @@ namespace dyno
         const Real radius
     )
     {
-        lowerBoundary = upperBoundary = tet.v[0].dot(axisNormal);
-        lowerBoundary = glm::min(lowerBoundary, tet.v[1].dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, tet.v[1].dot(axisNormal));
-        lowerBoundary = glm::min(lowerBoundary, tet.v[2].dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, tet.v[2].dot(axisNormal));
-        lowerBoundary = glm::min(lowerBoundary, tet.v[3].dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, tet.v[3].dot(axisNormal));
+        Real t = tet.v[0].dot(axisNormal); lowerBoundary = upperBoundary = t;
+        t = tet.v[1].dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        t = tet.v[2].dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        t = tet.v[3].dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         lowerBoundary -= radius;
         upperBoundary += radius;
@@ -613,36 +606,30 @@ namespace dyno
         Vec3f w = box.w;
         Vec3f extent = box.extent;
         Vec3f p;
+
         p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
-        lowerBoundary = upperBoundary = p.dot(axisNormal);
+        Real t = p.dot(axisNormal); lowerBoundary = upperBoundary = t;
 
         p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-        p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
+		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-        p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
+		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-        p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
+		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-        p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
+		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-        p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
-        lowerBoundary = glm::min(lowerBoundary, p.dot(axisNormal));
-        upperBoundary = glm::max(upperBoundary, p.dot(axisNormal));
+		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
+		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         lowerBoundary -= radius;
         upperBoundary += radius;
@@ -669,43 +656,12 @@ namespace dyno
         // Minkowski Face Normal
         // None
 
-        //Minkowski Point-Point Normal
+        // Minkowski Point-Point Normal
         // check direction of minimum distance from B's Point to A's Point
         axisTmp = (sphereB.center - sphereA.center);
         checkAxis(axisTmp);
     }
 
-    template<typename Real>
-    DYN_FUNC inline void setupContactOnSphere(
-        Sphere3D sphereA,
-        Sphere3D sphereB,
-        const Real radiusA,
-        const Real radiusB,
-        const Real depth, // <0 
-        TManifold<Real>& m)
-    {
-        //Gen contact point on Sphere
-        int count = 0;
-        Vec3f axisNormal = m.normal;
-
-        auto setContact = [&](Segment3D minPQ, Real gap)
-        {
-            if (minPQ.length() < gap)
-            {
-                if (count >= 8) return;
-                m.contacts[count].penetration = depth;
-                m.contacts[count].position = minPQ.endPoint() - m.normal * (sphereB.radius);
-                count++;
-            }
-        };
-
-        Segment3D minPQ(sphereA.center, sphereB.center);
-        Real gap = radiusA + sphereA.radius + radiusB + sphereB.radius;
-
-        setContact(minPQ, gap);
-        m.contactCount = count;
-
-    }
 
     template<typename Real>
     DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB)
@@ -718,7 +674,14 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = -normal; // contact normal on sphereB
-            setupContactOnSphere(sphereA, sphereB, radiusA, radiusB, depth, m);
+
+            auto setupContactOnSphere = [&]()
+            {
+				Vec3f contactPoint = sphereB.center - m.normal * (sphereB.radius);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnSphere();
         }
         else m.contactCount = 0;
     }
@@ -764,6 +727,17 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = -normal; // contact normal on segB
+
+            auto setupContactOnSeg = [&]()
+            {
+                Point3D pA = sphereA.center;
+                Point3D pB = pA.project(segB);
+				Vec3f contactPoint = pB - m.normal * (radiusB);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnSeg();
+
             //setupContactOnSeg(sphereA, segB, radiusA, radiusB, depth, m);
         }
         else m.contactCount = 0;
@@ -780,7 +754,15 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = normal; // contact normal on sphereB
-            //setupContactOnSphere(segA, sphereB, radiusA, radiusB, depth, m);
+
+            auto setupContactOnSphere = [&]()
+            {
+                Vec3f contactPoint = sphereB.center - m.normal * (sphereB.radius);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnSphere();
+
         }
         else m.contactCount = 0;
     }
@@ -826,8 +808,16 @@ namespace dyno
 
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
-            m.normal = -normal; // contact normal on segB
-            //setupContactOnSeg(sphereA, segB, radiusA, radiusB, depth, m);
+            m.normal = -normal; // contact normal on triB
+            auto setupContactOnTri = [&]()
+            {
+                Point3D pA = sphereA.center;
+                Point3D pB = pA.project(triB);
+                Vec3f contactPoint = pB - m.normal * (radiusB);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnTri();
         }
         else m.contactCount = 0;
     }
@@ -843,7 +833,13 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = normal; // contact normal on sphereB
-            //setupContactOnSphere(segA, sphereB, radiusA, radiusB, depth, m);
+            auto setupContactOnSphere = [&]()
+            {
+                Vec3f contactPoint = sphereB.center - m.normal * (sphereB.radius);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnSphere();
         }
         else m.contactCount = 0;
     }
@@ -890,7 +886,15 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = -normal; // contact normal on segB
-            //setupContactOnSeg(sphereA, segB, radiusA, radiusB, depth, m);
+            auto setupContactOnTet = [&]()
+            {
+                Point3D pA = sphereA.center;
+                Point3D pB = pA.project(tetB);
+                Vec3f contactPoint = pB - m.normal * (radiusB);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnTet();
         }
         else m.contactCount = 0;
     }
@@ -906,7 +910,13 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = normal; // contact normal on sphereB
-            //setupContactOnSphere(segA, sphereB, radiusA, radiusB, depth, m);
+            auto setupContactOnSphere = [&]()
+            {
+                Vec3f contactPoint = sphereB.center - m.normal * (sphereB.radius);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnSphere();
         }
         else m.contactCount = 0;
     }
@@ -952,8 +962,16 @@ namespace dyno
 
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
-            m.normal = -normal; // contact normal on segB
-            //setupContactOnSeg(sphereA, segB, radiusA, radiusB, depth, m);
+            m.normal = -normal; // contact normal on boxB
+            auto setupContactOnBox = [&]()
+            {
+                Point3D pA = sphereA.center;
+                Point3D pB = pA.project(boxB);
+                Vec3f contactPoint = pB - m.normal * (radiusB);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnBox();
         }
         else m.contactCount = 0;
     }
@@ -969,7 +987,13 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = normal; // contact normal on sphereB
-            //setupContactOnSphere(segA, sphereB, radiusA, radiusB, depth, m);
+            auto setupContactOnSphere = [&]()
+            {
+                Vec3f contactPoint = sphereB.center - m.normal * (sphereB.radius);
+                m.pushContact(contactPoint, depth);
+            };
+
+            setupContactOnSphere();
         }
         else m.contactCount = 0;
     }
@@ -1024,7 +1048,14 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = -normal; // contact normal on segB
-            //setupContactOnSeg(segA, segB, radiusA, radiusB, depth, m);
+            auto setupContactOnSeg = [&]()
+			{
+				Real gap = radiusA + radiusB;
+
+				m.pushContact(contactPoint, depth);
+			};
+
+            setupContactOnSeg();
         }
         else m.contactCount = 0;
     }
@@ -1210,8 +1241,8 @@ namespace dyno
             // Outer norm on tri face.
             Vec3f outerNorm = tet.face(i).normal();
             Vec3f dir = centerTet - tet.face(i).v[0];
-            if (dir.dot(outerNorm) > 0.f)
-                outerNorm = -outerNorm;
+            if (dir.dot(outerNorm) > 0.f) outerNorm = -outerNorm;
+
             checkFace(tet.face(i).v[0], tet.face(i).v[1], tet.face(i).v[2], outerNorm);
         }
 
