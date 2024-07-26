@@ -169,6 +169,11 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	# Wt GUI to support web applications, off by default
 	option(PERIDYNO_WT_GUI "Enable building web applications" OFF)
 
+	# Add Plugins gsl
+	if(PERIDYNO_WT_GUI)
+		add_subdirectory(external/gsl)
+	endif()
+
 	# Add Plugin folder
 	if(PERIDYNO_LIBRARY_PLUGIN)
 		add_subdirectory(plugins)

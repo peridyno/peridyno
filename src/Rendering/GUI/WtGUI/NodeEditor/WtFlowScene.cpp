@@ -21,6 +21,6 @@ WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
 	node->setGraphicsObject(std::move(ngo));
 
 	auto nodePtr = node.get();
-	_nodes[node->id()] = std::move(node);
+	//_nodes[node->id()] = std::move(node);
 
 }

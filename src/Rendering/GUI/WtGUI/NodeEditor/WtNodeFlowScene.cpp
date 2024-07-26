@@ -55,6 +55,6 @@ void WtNodeFlowScene::createNodeGraphView()
 			auto type = std::make_unique<WtNodeWidget>(m);
 
 			auto& node = this->createNode(std::move(type));
-		}
+		};
 }
 

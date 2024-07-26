@@ -42,6 +42,10 @@ target_link_libraries(${LIB_NAME} PUBLIC Core Framework Topology ImWidgets GLRen
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/pybind11 pybind11)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
 
+# gsl for uuids
+find_package(GSL REQUIRED)
+target_link_libraries(${LIB_NAME} PRIVATE Microsoft.GSL::GSL)
+
 if(MSVC)
     set_target_properties(${LIB_NAME} 
 		PROPERTIES 

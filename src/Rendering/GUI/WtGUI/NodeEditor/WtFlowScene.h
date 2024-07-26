@@ -31,6 +31,6 @@ private:
 	// which is why it comes first in the class.
 	std::shared_ptr<WtDataModelRegistry> _registry;
 
-	std::unordered_map<QUuid, SharedConnection> _connections;
-	std::unordered_map<QUuid, UniqueNode>       _nodes;
+	//std::unordered_map<QUuid, SharedConnection> _connections;
+	//std::unordered_map<QUuid, UniqueNode>       _nodes;
 };
