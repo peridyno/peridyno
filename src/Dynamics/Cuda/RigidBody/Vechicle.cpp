@@ -8,6 +8,8 @@
 #include "Module/PJSNJSConstraintSolver.h"
 #include "Module/PJSoftConstraintSolver.h"
 #include "Module/PJSConstraintSolver.h"
+#include "Module/PCGConstraintSolver.h"
+#include "Module/CarDriver.h"
 
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
@@ -40,15 +42,7 @@ namespace dyno
 		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
 
-		auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
-		elementQuery->outContacts()->connect(contactMapper->inContacts());
-		contactMapper->varScale()->setValue(3.0);
-		this->graphicsPipeline()->pushModule(contactMapper);
-
-		auto wireRender = std::make_shared<GLWireframeVisualModule>();
-		wireRender->setColor(Color(1, 0, 0));
-		contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireRender);
+		
 
 // 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
 // 		this->stateTopology()->connect(cdBV->inDiscreteElements());
@@ -67,7 +61,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<PJSConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<PCGConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -90,11 +84,15 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		auto driver = std::make_shared<SimpleVechicleDriver>();
+		/*auto driver = std::make_shared<SimpleVechicleDriver>();
 
 		this->stateFrameNumber()->connect(driver->inFrameNumber());
 		this->stateInstanceTransform()->connect(driver->inInstanceTransform());
 
+		this->animationPipeline()->pushModule(driver);*/
+
+		auto driver = std::make_shared<CarDriver<DataType3f>>();
+		this->stateTopology()->connect(driver->inTopology());
 		this->animationPipeline()->pushModule(driver);
 
 		this->inTriangleSet()->tagOptional(true);
@@ -283,21 +281,6 @@ namespace dyno
 		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 		this->stateTopology()->connect(mapper->inDiscreteElements());
 		this->graphicsPipeline()->pushModule(mapper);
-
-		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-		sRender->setAlpha(0.2f);
-		sRender->setRoughness(0.7f);
-		sRender->setMetallic(3.0f);
-		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-		this->graphicsPipeline()->pushModule(sRender);
-		sRender->setVisible(false);
-
-		auto driver = std::make_shared<CarDriver<DataType3f>>();
-		this->animationPipeline()->pushModule(driver);
-		this->stateQuaternion()->connect(driver->inQuaternion());
-		this->stateTopology()->connect(driver->inTopology());
-
 	}
 
 	template<typename TDataType>

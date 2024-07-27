@@ -1,4 +1,4 @@
-#include <QtApp.h>
+ #include <QtApp.h>
 
 #include <SceneGraph.h>
 
@@ -35,7 +35,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		rigidBody.linearVelocity = Vec3f(0, 0, 0);
 		newBox.center = oldBox.center + Vec3f(0.0, 0.12f, 0.0);

@@ -215,6 +215,10 @@ namespace dyno
 			mK_3
 		);
 
+		mErrors.resize(constraint_size);
+		mErrors.reset();
+
+
 		calculateEtaVectorForPJSBaumgarte(
 			mEta,
 			mJ,
@@ -223,6 +227,7 @@ namespace dyno
 			this->inCenter()->getData(),
 			this->inQuaternion()->getData(),
 			mVelocityConstraints,
+			mErrors,
 			this->varSlop()->getValue(),
 			this->varBaumgarteBias()->getValue() / this->varSubStepping()->getValue(),
 			dt

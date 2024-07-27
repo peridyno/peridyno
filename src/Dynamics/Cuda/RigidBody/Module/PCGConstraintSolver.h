@@ -16,17 +16,18 @@
  */
 
 #pragma once
+
 #include "Module/ConstraintModule.h"
 #include "RigidBody/RigidBodyShared.h"
-
 #include "Topology/DiscreteElements.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class TJSoftConstraintSolver : public ConstraintModule
+	class PCGConstraintSolver : public ConstraintModule
 	{
-		DECLARE_TCLASS(TJSoftConstraintSolver, TDataType)
+		DECLARE_TCLASS(PCGConstraintSolver, TDataType)
+
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -42,8 +43,8 @@ namespace dyno
 		typedef typename FixedJoint<Real> FixedJoint;
 		typedef typename PointJoint<Real> PointJoint;
 
-		TJSoftConstraintSolver();
-		~TJSoftConstraintSolver();
+		PCGConstraintSolver();
+		~PCGConstraintSolver();
 
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
@@ -52,21 +53,23 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 100, "");
+		DEF_VAR(Real, FrictionCoefficient, 10, "");
 
-		DEF_VAR(Real, Slop, 0, "");
+		DEF_VAR(Real, Slop, 0.001, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
+		DEF_VAR(Real, Frequency, 30, "");
 
-		DEF_VAR(uint, SubStepping, 10, "");
+		DEF_VAR(Real, DampingRatio, 1.0, "");
+
+		DEF_VAR(uint, IterationNumberForVelocitySolverCG, 30, "");
+
+		DEF_VAR(uint, IterationNumberForVelocitySolverJacobi, 0, "");
 
 		DEF_VAR(Real, LinearDamping, 0.1, "");
 
 		DEF_VAR(Real, AngularDamping, 0.1, "");
 
-		DEF_VAR(Real, DampingRatio, 1.0, "");
-
-		DEF_VAR(Real, Hertz, 300, "");
+		DEF_VAR(Real, Tolerance, 0.00001, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -90,13 +93,12 @@ namespace dyno
 		DEF_ARRAY_IN(ContactPair, Contacts, DeviceType::GPU, "");
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
-
+	
 	protected:
 		void constrain() override;
 
 	private:
 		void initializeJacobian(Real dt);
-		void initializeRelaxation();
 
 	private:
 		DArray<Coord> mJ;
@@ -107,15 +109,36 @@ namespace dyno
 
 		DArray<Real> mEta;
 		DArray<Real> mLambda;
+		DArray<Real> mLambdaOldJoint;
+
 
 		DArray<ContactPair> mContactsInLocalFrame;
-
 		DArray<Constraint> mVelocityConstraints;
+
+		DArray<Real> mResidualOld;
+		DArray<Real> mResidual;
+		DArray<Real> tmpArray;
+		DArray<Real> mP;
+		DArray<Real> mAp;
+		
+		int cnt = 0;
+		DArray<Real> mErrors;
+
+		std::vector<float> residuals;
+
 
 		DArray<int> mContactNumber;
 
 		DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;
+
+		DArray<Real> mA;
+		DArray<Real> mZ;
+		DArray<Real> mZold;
+
+		DArray<Real> mCFM;
+		DArray<Real> mERP;
+		
 	};
 }

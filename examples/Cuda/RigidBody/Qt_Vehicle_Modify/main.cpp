@@ -54,10 +54,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		box2.center = Vec3f(0, 1.044, -2.254) + tr;
 		box2.halfLength = Vec3f(0.447, 0.447, 0.15);
 
-		box3.center = Vec3f(0.812, 0.450, 1.722) + tr;
-		box3.halfLength = Vec3f(0.2f);
-		box4.center = Vec3f(-0.812, 0.450, 1.722) + tr;
-		box4.halfLength = Vec3f(0.2f);
+		
 		/*CapsuleInfo capsule1, capsule2, capsule3, capsule4;
 
 		capsule1.center = Vec3f(0.812, 0.450, 1.722) + tr;
@@ -86,10 +83,14 @@ std::shared_ptr<SceneGraph> creatCar()
 		sphere4.center = Vec3f(0.812, 0.450, -1.426) + tr;
 		sphere4.radius = 0.450;
 
-		box5.center = Vec3f(0, 1.171, 1.722) + tr;
-		box5.halfLength = Vec3f(0.8, 0.1, 0.1);
+		box3.center = Vec3f(0.812, 0.450, 1.722) + tr;
+		box3.halfLength = Vec3f(0.15, 0.15, 0.15) + tr;
+		box4.center = Vec3f(-0.8122, 0.450, 1.722) + tr;
+		box4.halfLength = Vec3f(0.15, 0.15, 0.15) + tr;
 
+		
 
+		
 
 
 		RigidBodyInfo rigidbody;
@@ -104,28 +105,29 @@ std::shared_ptr<SceneGraph> creatCar()
 
 		auto spareTireActor = jeep->addBox(box2, rigidbody);
 
-		Real wheel_velocity = 20;
+		Real wheel_velocity = 10;
 
 		/*auto frontLeftTireActor = jeep->addCapsule(capsule1, rigidbody, 100);
 		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
 		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
 		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);*/
-		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody, 50);
-		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody, 50);
-		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody, 50);
-		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody, 50);
+		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody, 500);
+		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody, 500);
+		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody, 500);
+		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody, 500);
 
+		auto frontLeftActor = jeep->addBox(box3, rigidbody, 5000);
+		auto frontRightActor = jeep->addBox(box4, rigidbody, 5000);
 
-		auto frontActor = jeep->addBox(box5, rigidbody, 25000);
 		//auto rearActor = jeep->addBox(box6, rigidbody, 25000);
 
 		//front rear
-		auto& joint1 = jeep->createHingeJoint(frontLeftTireActor, frontActor);
+		auto& joint1 = jeep->createHingeJoint(frontLeftTireActor, frontLeftActor);
 		joint1.setAnchorPoint(frontLeftTireActor->center);
 		//joint1.setMoter(wheel_velocity);
 		joint1.setAxis(Vec3f(1, 0, 0));
 
-		auto& joint2 = jeep->createHingeJoint(frontRightTireActor, frontActor);
+		auto& joint2 = jeep->createHingeJoint(frontRightTireActor, frontRightActor);
 		joint2.setAnchorPoint(frontRightTireActor->center);
 		//joint2.setMoter(wheel_velocity);
 		joint2.setAxis(Vec3f(1, 0, 0));
@@ -133,12 +135,12 @@ std::shared_ptr<SceneGraph> creatCar()
 		//back rear
 		auto& joint3 = jeep->createHingeJoint(rearLeftTireActor, bodyActor);
 		joint3.setAnchorPoint(rearLeftTireActor->center);
-		joint3.setMoter(wheel_velocity);
+		//joint3.setMoter(wheel_velocity);
 		joint3.setAxis(Vec3f(1, 0, 0));
 
 		auto& joint4 = jeep->createHingeJoint(rearRightTireActor, bodyActor);
 		joint4.setAnchorPoint(rearRightTireActor->center);
-		joint4.setMoter(wheel_velocity);
+		//joint4.setMoter(wheel_velocity);
 		joint4.setAxis(Vec3f(1, 0, 0));
 
 
@@ -146,10 +148,17 @@ std::shared_ptr<SceneGraph> creatCar()
 		joint5.setAnchorPoint((bodyActor->center + spareTireActor->center) / 2);
 
 
-		auto& joint6 = jeep->createHingeJoint(bodyActor, frontActor);
-		joint6.setAnchorPoint(frontActor->center);
+		auto& joint6 = jeep->createHingeJoint(bodyActor, frontLeftActor);
+		joint6.setAnchorPoint(frontLeftActor->center);
 		joint6.setAxis(Vec3f(0, 1, 0));
-		joint6.setRange(M_PI / 24, M_PI / 24);
+		joint6.setRange(0, 0);
+
+		auto& joint7 = jeep->createHingeJoint(bodyActor, frontRightActor);
+		joint7.setAnchorPoint(frontRightActor->center);
+		joint7.setAxis(Vec3f(0, 1, 0));
+		joint7.setRange(0, 0);
+
+		
 
 
 		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
