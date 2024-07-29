@@ -12,7 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 include_directories(${PROJECT_SOURCE_DIR}/external)
 
 # add sources
-file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h" "${LIB_SRC_DIR}/*.hpp")
+file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h" "${LIB_SRC_DIR}/*.hpp", "${LIB_SRC_DIR}/*.ipp")
 add_library(${LIB_NAME} SHARED ${SOURCES})
 
 foreach(SRC IN ITEMS ${SOURCES})
@@ -28,6 +28,10 @@ target_link_libraries(${LIB_NAME} PRIVATE glfw)
 find_package(CUDAToolkit REQUIRED)
 target_link_libraries(${LIB_NAME} PRIVATE CUDA::nvjpeg)
 
+# boost
+find_package(Boost REQUIRED)
+target_link_libraries(${LIB_NAME} PUBLIC Boost::boost)
+
 # Wt
 find_package(wt REQUIRED)
 set_target_properties(Wt::Wt PROPERTIES MAP_IMPORTED_CONFIG_RELEASE RelWithDebInfo)
@@ -41,10 +45,6 @@ target_link_libraries(${LIB_NAME} PUBLIC Core Framework Topology ImWidgets GLRen
 # Jian: put pybind11 at end since there could be header conflict for node.h
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/pybind11 pybind11)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
-
-# gsl for uuids
-find_package(GSL REQUIRED)
-target_link_libraries(${LIB_NAME} PRIVATE Microsoft.GSL::GSL)
 
 if(MSVC)
     set_target_properties(${LIB_NAME} 

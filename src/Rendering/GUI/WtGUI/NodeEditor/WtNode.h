@@ -4,9 +4,11 @@
 #include <Wt/WFontMetrics.h>
 #include <Wt/WRectF.h>
 #include <Wt/WFont.h>
-#include <Wt/WTransform.h>
+#include <Wt/WTransform.h> 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
-#include "uuid.h"
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
 #include "WtNodeData.hpp"
@@ -250,8 +252,7 @@ public:
 	//void restore(QJsonObject const& json) override;
 
 public:
-	uuids::uuid id() const;
-	//QUuid id() const;
+	boost::uuids::uuid id() const;
 
 	void reactToPossibleConnection(PortType,
 		NodeDataType const&,
@@ -289,8 +290,7 @@ public:
 	void onNodeSizeUpdated();
 
 private:
-	uuids::uuid _uid;
-	//QUuid _uid;
+	boost::uuids::uuid _uid;
 
 	std::unique_ptr<WtNodeDataModel> _nodeDataModel;
 
