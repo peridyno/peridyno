@@ -701,7 +701,8 @@ bool WtNodeState::resizing() const
 }
 
 WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
-	: _nodeDataModel(std::move(dataModel))
+	: _uid(boost::uuids::random_generator()())
+	, _nodeDataModel(std::move(dataModel))
 	, _nodeState(_nodeDataModel)
 	, _nodeGeometry(_nodeDataModel)
 	, _nodeGraphicsObject(nullptr)
@@ -717,6 +718,11 @@ WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
 }
 
 WtNode::~WtNode() = default;
+
+boost::uuids::uuid WtNode::id() const
+{
+	return _uid;
+}
 
 //void WtNode::reactToPossibleConnection(PortType reactingPortType, NodeDataType const& reactingDataType, Wt::WPointF const& scenePoint)
 //{

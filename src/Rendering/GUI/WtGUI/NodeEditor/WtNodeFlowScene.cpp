@@ -55,6 +55,14 @@ void WtNodeFlowScene::createNodeGraphView()
 			auto type = std::make_unique<WtNodeWidget>(m);
 
 			auto& node = this->createNode(std::move(type));
+
+			nodeMap[mId] = &node;
+
+			Wt::WPointF posView(m->bx(), m->by());
+
+			//TODO:Position
+			/*node.nodeGraphicsObject().setPos(posView);
+			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
+			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());*/
 		};
 }
-
