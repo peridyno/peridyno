@@ -8,6 +8,7 @@
 
 #include "WtNode.h"
 #include "WtNodeStyle.h"
+#include "WtFlowScene.h"
 
 class WtNode;
 class WtNodeState;
@@ -37,7 +38,7 @@ public:
 class WtNodeGraphicsObject
 {
 public:
-	WtNodeGraphicsObject();
+	WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node);
 	virtual ~WtNodeGraphicsObject();
 	WtNode& node();
 	WtNode const& node() const;
@@ -73,9 +74,9 @@ public:
 	void isSelect();
 
 private:
-	//WtFlowScene& _scene;
+	WtFlowScene& _scene;
 
-	//WtNode& _node;
+	WtNode& _node;
 
 	Wt::WPainter* _defaultPainter;
 

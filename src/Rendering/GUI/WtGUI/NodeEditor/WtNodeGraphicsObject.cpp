@@ -48,10 +48,16 @@ void WtNodePainter::drawNodeRect(Wt::WPainter* painter, WtNodeGeometry const& ge
 
 //WtNodeGraphicsObject
 
-//WtNodeGraphicsObject::WtNodeGraphicsObject() {}
-//
-//WtNodeGraphicsObject::~WtNodeGraphicsObject() {}
-//
+WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node)
+	: _scene(scene)
+	, _node(node)
+	, _locked(false)
+{
+
+}
+
+WtNodeGraphicsObject::~WtNodeGraphicsObject() {}
+
 //bool WtNodeGraphicsObject::isSelected()
 //{
 //	return _selected;
