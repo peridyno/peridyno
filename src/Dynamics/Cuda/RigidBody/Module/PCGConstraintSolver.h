@@ -139,6 +139,8 @@ namespace dyno
 
 		DArray<Real> mCFM;
 		DArray<Real> mERP;
+
+		int mJointSize = -1;
 		
 	};
 }

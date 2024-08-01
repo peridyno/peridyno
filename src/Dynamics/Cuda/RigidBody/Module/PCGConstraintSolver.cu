@@ -328,6 +328,12 @@ namespace dyno
 			int constraint_size = mVelocityConstraints.size();
 			int contact_size = this->inContacts()->size();
 
+			if (topo->totalJointSize()!= mJointSize)
+			{
+				mJointSize = topo->totalJointSize();
+				mLambdaOldJoint.resize(0);
+			}
+
 			if (mLambdaOldJoint.size() != 0 && topo->totalJointSize() > 0)
 			{
 				if (this->varFrictionEnabled()->getValue())
