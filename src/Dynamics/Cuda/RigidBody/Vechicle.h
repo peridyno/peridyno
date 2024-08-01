@@ -26,6 +26,11 @@ namespace dyno
 		void bind(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
 
 	public:
+		/**
+		 * @brief Creates multiple vehicles and specifies the transformations for each vehicle
+		 */
+		DEF_VAR(std::vector<Transform3f>, VehiclesTransform, std::vector<Transform3f>{Transform3f()}, "");
+
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet of the boundary");
@@ -57,9 +62,6 @@ namespace dyno
 
 		DArray<int> mBindingTagDevice;
 	};
-
-
-
 
 
 	template<typename TDataType>

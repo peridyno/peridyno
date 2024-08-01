@@ -69,7 +69,7 @@ namespace dyno
 		mVec3fWidget* mTetWidget_1 = nullptr;
 		mVec3fWidget* mTetWidget_2 = nullptr;
 		mVec3fWidget* mTetWidget_3 = nullptr;
-		QComboBox* mMotionWidget = nullptr;	//还没实现！！！
+		QComboBox* mMotionWidget = nullptr;	
 
 		//Source data
 		VehicleRigidBodyInfo* mRigidBodyData = nullptr;
