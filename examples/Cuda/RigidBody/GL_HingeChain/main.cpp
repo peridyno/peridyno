@@ -27,11 +27,11 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 	RigidBodyInfo rigidBody;
-	Real scale = 0.5;
+	Real scale = 2.5;
 	SphereInfo sphere;
 	sphere.center = scale * Vec3f(-4.6, 20, 0.5);
 	sphere.radius = scale * 2.5;
-	auto sphereActor = rigid->addSphere(sphere, rigidBody, 0.01);
+	//auto sphereActor = rigid->addSphere(sphere, rigidBody, 0.001);
 	BoxInfo newbox, oldbox;
 	oldbox.center = scale * Vec3f(-2.0, 20, 0.5);
 	oldbox.halfLength = scale * Vec3f(0.05, 0.09, 0.02);
@@ -39,11 +39,11 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	auto oldBoxActor = rigid->addBox(oldbox, rigidBody);
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	auto& hingeJoint1 = rigid->createHingeJoint(oldBoxActor, sphereActor);
+	/*auto& hingeJoint1 = rigid->createHingeJoint(oldBoxActor, sphereActor);
 	hingeJoint1.setAnchorPoint((oldbox.center + sphere.center) / 2);
-	hingeJoint1.setAxis(Vec3f(0, 0, 1));
+	hingeJoint1.setAxis(Vec3f(0, 0, 1));*/
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		newbox.center = oldbox.center + scale * Vec3f(0.2, 0, 0);
 		newbox.halfLength = oldbox.halfLength;
@@ -56,7 +56,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		oldbox = newbox;
 		oldBoxActor = newBoxActor;
 
-		if (i == 49)
+		if (i == 19)
 		{
 			auto& pointJoint = rigid->createPointJoint(newBoxActor);
 			pointJoint.setAnchorPoint(newbox.center);

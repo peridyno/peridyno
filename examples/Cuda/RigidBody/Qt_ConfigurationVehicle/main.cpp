@@ -76,7 +76,16 @@ std::shared_ptr<SceneGraph> creatCar()
 	plane->varLengthZ()->setValue(50);
 
 	plane->stateTriangleSet()->connect(configCar->inTriangleSet());
+	
+	std::vector<Transform3f> vehicleTransforms;
 
+	vehicleTransforms.push_back(Transform3f(Vec3f(0),Quat1f(0,Vec3f(0,1,0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(3, 0.5,-1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(-3,0.5,-1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(-6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+
+	configCar->varVehiclesTransform()->setValue(vehicleTransforms);
 
 	return scn;
 }

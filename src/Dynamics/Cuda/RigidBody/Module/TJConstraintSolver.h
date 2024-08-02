@@ -114,5 +114,7 @@ namespace dyno
 		DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;
+
+		DArray<Real> mErrors;
 	};
 }
