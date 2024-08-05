@@ -9,7 +9,6 @@ namespace dyno
 		: ParticleApproximation<TDataType>()
 	{
 		this->varIterationNumber()->setValue(3);
-		this->varKappa()->setValue(200);
 		this->varRestDensity()->setValue(Real(1000));
 
 		mSummation = std::make_shared<SummationDensity<TDataType>>();
@@ -59,7 +58,7 @@ namespace dyno
 
 			if (r > EPSILON)
 			{
-				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
+				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r) / rho_0;
 				grad_ci += g;
 				lamda_i += g.dot(g);
 			}
@@ -102,7 +101,7 @@ namespace dyno
 			Real r = (pos_i - posArr[j]).norm();
 			if (r > EPSILON)
 			{
-				Coord dp_ij = kappa * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
+				Coord dp_ij = kappa * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r) / rho_0;
 				dP_i += dp_ij;
 
 				atomicAdd(&dPos[pId][0], dp_ij[0]);
