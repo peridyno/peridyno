@@ -22,8 +22,8 @@ namespace dyno
 	{
 		auto patch = this->getOceanPatch();
 
-		auto Nx = this->varExtentX()->getData();
-		auto Nz = this->varExtentZ()->getData();
+		auto Nx = this->varExtentX()->getValue();
+		auto Nz = this->varExtentZ()->getValue();
 
 		auto patchHeights = patch->stateHeightField()->getDataPtr();
 		auto oceanHeights = this->stateHeightField()->getDataPtr();
