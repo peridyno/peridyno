@@ -4,7 +4,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	LargeOcean<TDataType>::LargeOcean()
-		: Node()
+		: OceanBase<TDataType>()
 	{
 		auto ts = std::make_shared<TriangleSet<TDataType>>();
 
@@ -97,12 +97,6 @@ namespace dyno
 			LO_UpdateBumpMap,
 			this->stateBumpMap()->getData(),
 			disp);
-	}
-
-	template<typename TDataType>
-	bool LargeOcean<TDataType>::validateInputs()
-	{
-		return this->getOceanPatch() != nullptr;
 	}
 
 	DEFINE_CLASS(LargeOcean);

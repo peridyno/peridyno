@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2022 Xiaowei He
+ * Copyright 2017-2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,24 @@
  * limitations under the License.
  */
 #pragma once
-#include "OceanBase.h"
-
-#include "CapillaryWave.h"
+#include "OceanPatch.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class Ocean : public OceanBase<TDataType>
+	class OceanBase : public Node
 	{
-		DECLARE_TCLASS(Ocean, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Ocean();
-		~Ocean() override;
+		OceanBase();
+		~OceanBase() override;
 
 	public:
-		DEF_VAR(uint, ExtentX, 1, "");
-		DEF_VAR(uint, ExtentZ, 1, "");
-
-		DEF_VAR(Real, WaterLevel, 0, "");
-
-		DEF_NODE_PORTS(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
-
-		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
+		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 
 	protected:
-		void resetStates() override;
-		void updateStates() override;
+		bool validateInputs() override;
 	};
-
-	IMPLEMENT_TCLASS(Ocean, TDataType)
 }

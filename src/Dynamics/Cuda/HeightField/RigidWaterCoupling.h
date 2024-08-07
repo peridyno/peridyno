@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "Ocean.h"
+#include "OceanBase.h"
 #include "Vessel.h"
 
 #include "Algorithm/Reduction.h"
@@ -38,7 +38,7 @@ namespace dyno
 		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");
 
 		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
-		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
+		DEF_NODE_PORT(OceanBase<TDataType>, Ocean, "Ocean");
 
 	protected:
 		void resetStates() override;

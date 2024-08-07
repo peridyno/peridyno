@@ -75,6 +75,8 @@ namespace dyno
 		auto vessels = this->getVessels();
 		auto ocean = this->getOcean();
 
+		auto patch = ocean->getOceanPatch();
+
 		for (auto mesh : vessels)
 		{
 			auto& triangles = mesh->stateEnvelope()->getData();
@@ -97,7 +99,7 @@ namespace dyno
 				mTorque.resize(num);
 			}
 
-			auto heights = ocean->stateHeightField()->getDataPtr();
+			auto heights = patch->stateHeightField()->getDataPtr();
 			auto& displacements = heights->getDisplacement();
 			Coord origin = heights->getOrigin();
 			Real h = heights->getGridSpacing();

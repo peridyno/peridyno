@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 #pragma once
-#include "OceanPatch.h"
+#include "OceanBase.h"
+
 #include "Topology/TriangleSet.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class LargeOcean : public Node
+	class LargeOcean : public OceanBase<TDataType>
 	{
 		DECLARE_TCLASS(LargeOcean, TDataType)
 	public:
@@ -31,8 +32,6 @@ namespace dyno
 		~LargeOcean() override;
 
 	public:
-		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
-
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "Topology");
 
 		DEF_ARRAY_STATE(Vec2f, TexCoord, DeviceType::GPU, "");
@@ -44,8 +43,6 @@ namespace dyno
 	protected:
 		void resetStates() override;
 		void updateStates() override;
-
-		bool validateInputs() override;
 	};
 
 	IMPLEMENT_TCLASS(LargeOcean, TDataType)
