@@ -11,6 +11,8 @@
 #include "Export.hpp"
 #include "WtNode.h"
 #include "WtDataModelRegistry.h"
+#include "WtConnectionGraphicsObject.h"
+#include "WtConnection.h"
 #include <memory>
 
 class WtNodeDataModel;
@@ -33,7 +35,43 @@ public:
 
 public:
 
+	std::shared_ptr<WtConnection> createConnection(PortType connectedPort,
+		WtNode& node,
+		PortIndex portIndex);
+
+	std::shared_ptr<WtConnection> createConnection(WtNode& nodeIn,
+		PortIndex portIndexIn,
+		WtNode& nodeOut,
+		PortIndex portIndexOut,
+		TypeConverter const& converter = TypeConverter{});
+
+	//std::shared_ptr<WtConnection> restoreConnection(QJsonObject const& connectionJson);
+
+	void deleteConnection(WtConnection& connection);
+
 	WtNode& createNode(std::unique_ptr<WtNodeDataModel>&& dataModel);
+
+	//QtNode& restoreNode(QJsonObject const& nodeJson);
+
+	WtDataModelRegistry& registry() const;
+
+	void setRegistry(std::shared_ptr<WtDataModelRegistry> registry);
+
+	void iterateOverNodes(std::function<void(WtNode*)> const& visitor);
+
+	void iterateOverNodeData(std::function<void(WtNodeDataModel*)> const& visitor);
+
+	void iterateOverNodeDataDependentOrder(std::function<void(WtNodeDataModel*)> const& visitor);
+
+	Wt::WPointF getNodePosition(WtNode const& node) const;
+
+	void setNodePosition(WtNode& node, Wt::WPointF const& pos) const;
+
+	//QSizeF getNodeSize(WtNode const& node) const;
+
+	void removeNode(WtNode& node);
+
+	void clearNode(WtNode& node);
 
 public:
 
@@ -52,6 +90,10 @@ public:
 	void save() const;
 
 	void load();
+
+	//QByteArray saveToMemory() const;
+
+	//void loadFromMemory(const QByteArray& data);
 
 private:
 

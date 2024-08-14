@@ -17,11 +17,14 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node)
 	drawNodeRect(painter, geom, model, graphicsObject);
 }
 
-void WtNodePainter::drawNodeRect(Wt::WPainter* painter, WtNodeGeometry const& geom, WtNodeDataModel const* model, WtNodeGraphicsObject const& graphicsObject)
+void WtNodePainter::drawNodeRect(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeDataModel const* model,
+	WtNodeGraphicsObject const& graphicsObject)
 {
-
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
-	//auto color = graphicsObject. ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
 	auto color = nodeStyle.NormalBoundaryColor;
 	if (geom.hovered())
@@ -43,8 +46,47 @@ void WtNodePainter::drawNodeRect(Wt::WPainter* painter, WtNodeGeometry const& ge
 	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
 		: Wt::WRectF(-diam, 0.0f, 2.0 * diam + geom.width(), diam + geom.height());
 
-	painter->drawRect(boundary);
+	//gradient
 
+	if (model->captionVisible())
+	{
+		painter->drawRect(boundary);
+	}
+	else
+	{
+		painter->drawRect(boundary);
+	}
+}
+
+void drawHotKeys(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeDataModel const* model,
+	WtNodeGraphicsObject const& graphicsObject)
+{
+	WtNodeStyle const& nodeStyle = model->nodeStyle();
+
+	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+
+	const Wt::WPen& pen = painter->pen();
+
+	if (model->captionVisible() && model->hotkeyEnabled())
+	{
+		unsigned int captionHeight = geom.captionHeight();
+		unsigned int keyWidth = geom.hotkeyWidth();
+		unsigned int keyShift = geom.hotkeyIncline();
+		unsigned int keyOffset = geom.hotkeyOffset();
+
+		float diam = nodeStyle.ConnectionPointDiameter;
+
+		//Wt different
+		Wt::WRectF key0();
+
+		double const radius = 6.0;
+
+		//Wt different
+		painter->setPen(Wt::WPen());
+	}
 }
 
 void WtNodePainter::drawHotKeys(
@@ -65,7 +107,6 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node)
 	, _node(node)
 	, _locked(false)
 {
-
 }
 
 WtNodeGraphicsObject::~WtNodeGraphicsObject() {}

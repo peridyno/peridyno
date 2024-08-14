@@ -12,10 +12,26 @@ WtFlowScene::WtFlowScene(std::shared_ptr<WtDataModelRegistry> registry)
 
 WtFlowScene::WtFlowScene()
 {
-
 }
 
 WtFlowScene::~WtFlowScene() {}
+
+//std::shared_ptr<WtConnection> createConnection(PortType connectedPort,
+//	WtNode& node,
+//	PortIndex portIndex)
+//{
+//	auto connection = std::make_shared<WtConnection>(connectedPort, node, portIndex);
+//
+//	//auto cgo = detail::make_unique<WtConnectionGraphicsObject>(*this, *connection);
+//}
+//
+//std::shared_ptr<WtConnection> createConnection(WtNode& nodeIn,
+//	PortIndex portIndexIn,
+//	WtNode& nodeOut,
+//	PortIndex portIndexOut,
+//	TypeConverter const& converter = TypeConverter{})
+//{
+//}
 
 WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
 {
@@ -32,7 +48,6 @@ WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
 
 void WtFlowScene::clearScene()
 {
-
 }
 
 std::vector<WtNode*> WtFlowScene::allNodes() const
