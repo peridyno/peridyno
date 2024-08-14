@@ -7,6 +7,9 @@
 #include "SceneGraphFactory.h"
 #include "SceneGraph.h"
 #include "FBase.h"
+#include "Action.h"
+#include "DirectedAcyclicGraph.h"
+#include "AutoLayoutDAG.h"
 
 using dyno::SceneGraph;
 

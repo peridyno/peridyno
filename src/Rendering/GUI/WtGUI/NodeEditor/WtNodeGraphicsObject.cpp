@@ -22,6 +22,7 @@ void WtNodePainter::drawNodeRect(Wt::WPainter* painter, WtNodeGeometry const& ge
 
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 	//auto color = graphicsObject. ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+
 	auto color = nodeStyle.NormalBoundaryColor;
 	if (geom.hovered())
 	{
@@ -44,6 +45,17 @@ void WtNodePainter::drawNodeRect(Wt::WPainter* painter, WtNodeGeometry const& ge
 
 	painter->drawRect(boundary);
 
+}
+
+void WtNodePainter::drawHotKeys(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeDataModel const* model,
+	WtNodeGraphicsObject const& graphicsObject)
+{
+	WtNodeStyle const& nodeStyle = model->nodeStyle();
+
+	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 }
 
 //WtNodeGraphicsObject

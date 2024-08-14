@@ -26,7 +26,7 @@ public:
 public:
 	static void paint(Wt::WPainter* painter, WtNode& node);
 	static void drawNodeRect(Wt::WPainter* painter, WtNodeGeometry const& geom, WtNodeDataModel const* model, WtNodeGraphicsObject const& graphicsObject);
-	static void drawHotKeys(Wt::WPainter* painter);
+	static void drawHotKeys(Wt::WPainter* painter, WtNodeGeometry const& geom, WtNodeDataModel const* model, WtNodeGraphicsObject const& graphicsObject);
 	static void drawModelName(Wt::WPainter* painter);
 	static void drawEntryLabels(Wt::WPainter* painter);
 	static void drawConnectionPoints(Wt::WPainter* painter);

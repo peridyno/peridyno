@@ -73,6 +73,9 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	WtNodeStyle nodeStyle;
 	float diam = nodeStyle.ConnectionPointDiameter;
-	Wt::WRectF boundary = Wt::WRectF(-diam, -diam, 2.0 * diam + 10, 2.0 * diam + 15);
+
+	Wt::log("Error") << diam;
+	//Wt::WRectF boundary = Wt::WRectF(-diam, -diam, 2.0 * diam + 10, 2.0 * diam + 15);
+	Wt::WRectF boundary = Wt::WRectF(10, 10, 30, 30);
 	painter.drawRect(boundary);
 }
