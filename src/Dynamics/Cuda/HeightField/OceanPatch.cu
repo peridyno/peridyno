@@ -212,6 +212,8 @@ namespace dyno
             shifts,
             this->stateDisplacement()->getData(),
             choppiness);
+
+       // topo->rasterize();
     }
 
     template<typename Coord, typename Complex>
