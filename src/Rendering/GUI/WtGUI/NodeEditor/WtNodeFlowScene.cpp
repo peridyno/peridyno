@@ -1,6 +1,7 @@
 #include "WtNodeFlowScene.h"
 
 WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
+	: WtFlowScene()
 {
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
@@ -22,15 +23,16 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 					auto dat = std::make_unique<WtNodeWidget>(std::move(new_node));
 					return dat;
 				};
-
 			std::string category = node->getNodeType();
 			ret->registerModel<WtNodeWidget>(category, creator);
 		}
 	}
 
-	//this->setRegistry(ret);
-	//createNodeGraphView();
+	this->setRegistry(ret);
+
+	createNodeGraphView();
 	//reorderAllNodes();
+
 	//connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
 	//connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
 	//connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
@@ -77,111 +79,111 @@ void WtNodeFlowScene::createNodeGraphView()
 		addNodeWidget(it.get());
 	}
 
-	auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
-		{
-			auto inId = nd->objectId();
+	//auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
+	//	{
+	//		auto inId = nd->objectId();
 
-			if (nodeMap.find(inId) != nodeMap.end())
-			{
-				auto inBlock = nodeMap[nd->objectId()];
+	//		if (nodeMap.find(inId) != nodeMap.end())
+	//		{
+	//			auto inBlock = nodeMap[nd->objectId()];
 
-				auto ports = nd->getImportNodes();
+	//			auto ports = nd->getImportNodes();
 
-				for (int i = 0; i < ports.size(); i++)
-				{
-					dyno::NodePortType pType = ports[i]->getPortType();
-					if (dyno::Single == pType)
-					{
-						auto node = ports[i]->getNodes()[0];
-						if (node != nullptr)
-						{
-							auto outId = node->objectId();
-							if (nodeMap.find(outId) != nodeMap.end())
-							{
-								auto outBlock = nodeMap[node->objectId()];
-								//createConnection(*inBlock, i, *outBlock, 0);
-							}
-						}
-					}
-					else if (dyno::Multiple == pType)
-					{
-						//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
-						//we still have to call clear to avoid memory leak.
-						auto& nodes = ports[i]->getNodes();
-						//ports[i]->clear();
-						for (int j = 0; j < nodes.size(); j++)
-						{
-							if (nodes[j] != nullptr)
-							{
-								auto outId = nodes[j]->objectId();
-								if (nodeMap.find(outId) != nodeMap.end())
-								{
-									auto outBlock = nodeMap[outId];
-									//createConnection(*inBlock, i, *outBlock, 0);
-								}
-							}
-						}
-						//nodes.clear();
-					}
-				}
+	//			for (int i = 0; i < ports.size(); i++)
+	//			{
+	//				dyno::NodePortType pType = ports[i]->getPortType();
+	//				if (dyno::Single == pType)
+	//				{
+	//					auto node = ports[i]->getNodes()[0];
+	//					if (node != nullptr)
+	//					{
+	//						auto outId = node->objectId();
+	//						if (nodeMap.find(outId) != nodeMap.end())
+	//						{
+	//							auto outBlock = nodeMap[node->objectId()];
+	//							//createConnection(*inBlock, i, *outBlock, 0);
+	//						}
+	//					}
+	//				}
+	//				else if (dyno::Multiple == pType)
+	//				{
+	//					//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
+	//					//we still have to call clear to avoid memory leak.
+	//					auto& nodes = ports[i]->getNodes();
+	//					//ports[i]->clear();
+	//					for (int j = 0; j < nodes.size(); j++)
+	//					{
+	//						if (nodes[j] != nullptr)
+	//						{
+	//							auto outId = nodes[j]->objectId();
+	//							if (nodeMap.find(outId) != nodeMap.end())
+	//							{
+	//								auto outBlock = nodeMap[outId];
+	//								//createConnection(*inBlock, i, *outBlock, 0);
+	//							}
+	//						}
+	//					}
+	//					//nodes.clear();
+	//				}
+	//			}
 
-				auto fieldInp = nd->getInputFields();
-				for (int i = 0; i < fieldInp.size(); i++)
-				{
-					auto fieldSrc = fieldInp[i]->getSource();
-					if (fieldSrc != nullptr) {
-						auto parSrc = fieldSrc->parent();
-						if (parSrc != nullptr)
-						{
-							//To handle fields from node states or outputs
-							dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
+	//			auto fieldInp = nd->getInputFields();
+	//			for (int i = 0; i < fieldInp.size(); i++)
+	//			{
+	//				auto fieldSrc = fieldInp[i]->getSource();
+	//				if (fieldSrc != nullptr) {
+	//					auto parSrc = fieldSrc->parent();
+	//					if (parSrc != nullptr)
+	//					{
+	//						//To handle fields from node states or outputs
+	//						dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
 
-							//To handle fields that are exported from module outputs
-							if (nodeSrc == nullptr)
-							{
-								dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-								if (moduleSrc != nullptr)
-									nodeSrc = moduleSrc->getParentNode();
-							}
+	//						//To handle fields that are exported from module outputs
+	//						if (nodeSrc == nullptr)
+	//						{
+	//							dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+	//							if (moduleSrc != nullptr)
+	//								nodeSrc = moduleSrc->getParentNode();
+	//						}
 
-							if (nodeSrc != nullptr)
-							{
-								auto outId = nodeSrc->objectId();
-								auto fieldsOut = nodeSrc->getOutputFields();
+	//						if (nodeSrc != nullptr)
+	//						{
+	//							auto outId = nodeSrc->objectId();
+	//							auto fieldsOut = nodeSrc->getOutputFields();
 
-								unsigned int outFieldIndex = 0;
-								bool fieldFound = false;
-								for (auto f : fieldsOut)
-								{
-									if (f == fieldSrc)
-									{
-										fieldFound = true;
-										break;
-									}
-									outFieldIndex++;
-								}
+	//							unsigned int outFieldIndex = 0;
+	//							bool fieldFound = false;
+	//							for (auto f : fieldsOut)
+	//							{
+	//								if (f == fieldSrc)
+	//								{
+	//									fieldFound = true;
+	//									break;
+	//								}
+	//								outFieldIndex++;
+	//							}
 
-								if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
+	//							if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
 
-								if (fieldFound && nodeMap.find(outId) != nodeMap.end())
-								{
-									auto outBlock = nodeMap[outId];
-									//createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
-								}
-							}
-						}
-					}
-				}
-			}
-		};
+	//							if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+	//							{
+	//								auto outBlock = nodeMap[outId];
+	//								//createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	};
 
-	for (auto it = scn->begin(); it != scn->end(); it++)
-	{
-		createNodeConnections(it.get());
-	}
+	//for (auto it = scn->begin(); it != scn->end(); it++)
+	//{
+	//	createNodeConnections(it.get());
+	//}
 
 	// 		// 	clearScene();
-	// 		// 
+	// 		//
 	// 		for (auto it = scn->begin(); it != scn->end(); it++)
 	// 		{
 	// 			auto node_ptr = it.get();
@@ -383,7 +385,6 @@ void WtNodeFlowScene::enablePhysics(WtNode& n, bool checked)
 
 void WtNodeFlowScene::showContextMenu(WtNode& n, const Wt::WPointF& pos)
 {
-
 }
 
 void WtNodeFlowScene::showThisNodeOnly(WtNode& n)

@@ -66,16 +66,17 @@ void WtFlowWidget::zoomOut()
 void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);
-	//WtNode node;
-	//WtNodePainter::paint(&painter, node);
-	painter.scale(mZoomFactor, mZoomFactor);
-	painter.translate(mTranlate);
+	////WtNode node;
+	////WtNodePainter::paint(&painter, node);
+	//painter.scale(mZoomFactor, mZoomFactor);
+	//painter.translate(mTranlate);
 
-	WtNodeStyle nodeStyle;
-	float diam = nodeStyle.ConnectionPointDiameter;
+	//WtNodeStyle nodeStyle;
+	//float diam = nodeStyle.ConnectionPointDiameter;
 
-	Wt::log("Error") << diam;
-	//Wt::WRectF boundary = Wt::WRectF(-diam, -diam, 2.0 * diam + 10, 2.0 * diam + 15);
-	Wt::WRectF boundary = Wt::WRectF(10, 10, 30, 30);
-	painter.drawRect(boundary);
+	////Wt::WRectF boundary = Wt::WRectF(-diam, -diam, 2.0 * diam + 10, 2.0 * diam + 15);
+	//Wt::WRectF boundary = Wt::WRectF(10, 10, 30, 30);
+	//painter.drawRect(boundary);
+
+	node_scene = new WtNodeFlowScene(&painter);
 }

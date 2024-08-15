@@ -4,7 +4,7 @@
 #include <Wt/WFontMetrics.h>
 #include <Wt/WRectF.h>
 #include <Wt/WFont.h>
-#include <Wt/WTransform.h> 
+#include <Wt/WTransform.h>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -14,6 +14,7 @@
 #include "WtNodeData.hpp"
 #include "WtNodeStyle.h"
 #include <memory>
+#include <unordered_map>
 
 class WtNodeGraphicsObject;
 class WtNodeDataModel;
@@ -189,7 +190,7 @@ public:
 	WtNodeState(std::unique_ptr<WtNodeDataModel> const& model);
 
 public:
-	//using ConnectionPtrSet = std::unordered_map<QUuid, QtConnection*>;
+	using ConnectionPtrSet = std::unordered_map<boost::uuids::uuid, WtConnection*>;
 
 	/// Returns vector of connections ID.
 	/// Some of them can be empty (null)
@@ -202,12 +203,12 @@ public:
 	//void
 	//	setConnection(PortType portType,
 	//		PortIndex portIndex,
-	//		QtConnection& connection);
+	//		WtConnection& connection);
 
 	//void
 	//	eraseConnection(PortType portType,
 	//		PortIndex portIndex,
-	//		QUuid id);
+	//		boost::uuids::uuid id);
 
 	ReactToConnectionState reaction() const;
 
@@ -227,16 +228,14 @@ public:
 	bool resizing() const;
 
 private:
-	//std::vector<ConnectionPtrSet> _inConnections;
-	//std::vector<ConnectionPtrSet> _outConnections;
+	std::vector<ConnectionPtrSet> _inConnections;
+	std::vector<ConnectionPtrSet> _outConnections;
 
 	ReactToConnectionState _reaction;
 	PortType     _reactingPortType;
 	NodeDataType _reactingDataType;
 
 	bool _resizing;
-
-
 };
 
 class WtNode
@@ -299,5 +298,4 @@ private:
 	WtNodeGeometry _nodeGeometry;
 
 	std::unique_ptr<WtNodeGraphicsObject> _nodeGraphicsObject;
-
 };

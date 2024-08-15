@@ -31,4 +31,6 @@ private:
 	Wt::WPointF mLastDelta;
 	Wt::WPointF mTranlate = Wt::WPointF(0, 0);
 	bool isDragging = false;
+
+	WtNodeFlowScene* node_scene = nullptr;
 };

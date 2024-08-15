@@ -599,14 +599,12 @@ unsigned int WtNodeGeometry::portWidth(PortType portType) const
 WtNodeState::WtNodeState(std::unique_ptr<WtNodeDataModel> const& model)
 //: _inConnections(model->nPorts(PortType::In))
 //, _outConnections(model->nPorts(PortType::Out))
-	:_reaction(NOT_REACTING)
+	: _reaction(NOT_REACTING)
 	, _reactingPortType(PortType::None)
 	, _resizing(false)
 {}
 
-//std::vector<NodeState::ConnectionPtrSet> const&
-//NodeState::
-//getEntries(PortType portType) const
+//std::vector<WtNodeState::ConnectionPtrSet> const& WtNodeState::getEntries(PortType portType) const
 //{
 //	if (portType == PortType::In)
 //		return _inConnections;
@@ -614,10 +612,7 @@ WtNodeState::WtNodeState(std::unique_ptr<WtNodeDataModel> const& model)
 //		return _outConnections;
 //}
 //
-//
-//std::vector<NodeState::ConnectionPtrSet>&
-//NodeState::
-//getEntries(PortType portType)
+//std::vector<WtNodeState::ConnectionPtrSet>& WtNodeState::getEntries(PortType portType)
 //{
 //	if (portType == PortType::In)
 //		return _inConnections;
@@ -625,22 +620,17 @@ WtNodeState::WtNodeState(std::unique_ptr<WtNodeDataModel> const& model)
 //		return _outConnections;
 //}
 //
-//
-//NodeState::ConnectionPtrSet
-//NodeState::
-//connections(PortType portType, PortIndex portIndex) const
+//WtNodeState::ConnectionPtrSet WtNodeState::connections(PortType portType, PortIndex portIndex) const
 //{
 //	auto const& connections = getEntries(portType);
 //
 //	return connections[portIndex];
 //}
 //
-//
-//void
-//NodeState::
-//setConnection(PortType portType,
+//void WtNodeState::setConnection(
+//	PortType portType,
 //	PortIndex portIndex,
-//	QtConnection& connection)
+//	WtConnection& connection)
 //{
 //	auto& connections = getEntries(portType);
 //
@@ -648,12 +638,10 @@ WtNodeState::WtNodeState(std::unique_ptr<WtNodeDataModel> const& model)
 //		&connection));
 //}
 //
-//
-//void
-//NodeState::
-//eraseConnection(PortType portType,
+//void WtNodeState::eraseConnection(
+//	PortType portType,
 //	PortIndex portIndex,
-//	QUuid id)
+//	boost::uuids::uuid id)
 //{
 //	getEntries(portType)[portIndex].erase(id);
 //}
