@@ -4,7 +4,7 @@ WtNodePainter::WtNodePainter() {}
 
 WtNodePainter::~WtNodePainter() {}
 
-void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node)
+void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const& scene)
 {
 	WtNodeGeometry const& geom = node.nodeGeometry();
 
@@ -80,7 +80,7 @@ void drawHotKeys(
 		float diam = nodeStyle.ConnectionPointDiameter;
 
 		//Wt different
-		Wt::WRectF key0();
+		Wt::WRectF key0(geom.width() + diam - 20, -diam, 20, diam + captionHeight);
 
 		double const radius = 6.0;
 
@@ -102,14 +102,73 @@ void WtNodePainter::drawHotKeys(
 
 //WtNodeGraphicsObject
 
-WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node)
+WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter)
 	: _scene(scene)
 	, _node(node)
+	, _painter(painter)
 	, _locked(false)
 {
+
+	paint(_painter);
 }
 
 WtNodeGraphicsObject::~WtNodeGraphicsObject() {}
+
+WtNode& WtNodeGraphicsObject::node()
+{
+	return _node;
+}
+
+
+WtNode const& WtNodeGraphicsObject::node() const
+{
+	return _node;
+}
+
+void WtNodeGraphicsObject::embedQWidget()
+{
+
+}
+
+Wt::WRectF WtNodeGraphicsObject::boundingRect() const
+{
+	return _node.nodeGeometry().boundingRect();
+}
+
+void WtNodeGraphicsObject::setGeometryChanged()
+{
+	//prepareGeometryChange();
+}
+
+void WtNodeGraphicsObject::moveConnections() const
+{
+	WtNodeState const& nodeState = _node.nodeState();
+
+	//for (PortType portType : {PortType::In, PortType::Out})
+	//{
+	//	auto const& connectionEntries = nodeState.getEntries(portType);
+
+	//	for (auto const& connections : connectionEntries)
+	//	{
+	//		for (auto& con : connections)
+	//			con.second->getConnectionGraphicsObject().move();
+	//	}
+	//}
+}
+
+void WtNodeGraphicsObject::lock(bool locked)
+{
+	_locked = locked;
+
+	//setFlag(QGraphicsItem::ItemIsMovable, !locked);
+	//setFlag(QGraphicsItem::ItemIsFocusable, !locked);
+	//setFlag(QGraphicsItem::ItemIsSelectable, !locked);
+}
+
+void WtNodeGraphicsObject::paint(Wt::WPainter* painter)
+{
+	WtNodePainter::paint(painter, _node, _scene);
+}
 
 //bool WtNodeGraphicsObject::isSelected()
 //{

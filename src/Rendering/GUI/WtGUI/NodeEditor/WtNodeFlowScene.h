@@ -80,6 +80,8 @@ private:
 
 	bool mEditingEnabled = true;
 
+	Wt::WPainter* _painter;
+
 	float mDx = 100.0f;
 	float mDy = 50.0f;
 };

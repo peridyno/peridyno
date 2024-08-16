@@ -101,7 +101,7 @@ public:
 
 	Wt::WRectF boundingRect() const;
 
-	void recalculateSize(Wt::WFontMetrics fontMetrics) const;
+	void recalculateSize() const;
 
 	//void recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const;
 

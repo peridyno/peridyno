@@ -3,6 +3,9 @@
 WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 	: WtFlowScene()
 {
+
+	_painter = painter;
+
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
 	int id = 0;
@@ -27,6 +30,8 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 			ret->registerModel<WtNodeWidget>(category, creator);
 		}
 	}
+
+
 
 	this->setRegistry(ret);
 
@@ -60,7 +65,7 @@ void WtNodeFlowScene::createNodeGraphView()
 
 			auto type = std::make_unique<WtNodeWidget>(m);
 
-			auto& node = this->createNode(std::move(type));
+			auto& node = this->createNode(std::move(type), _painter);
 
 			nodeMap[mId] = &node;
 
@@ -69,9 +74,6 @@ void WtNodeFlowScene::createNodeGraphView()
 			//node.nodeGraphicsObject().setPos(posView);
 			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
 			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
-
-			//singal
-			//this->nodePlaced(node);
 		};
 
 	for (auto it = scn->begin(); it != scn->end(); it++)
@@ -182,13 +184,13 @@ void WtNodeFlowScene::createNodeGraphView()
 	//	createNodeConnections(it.get());
 	//}
 
-	// 		// 	clearScene();
-	// 		//
-	// 		for (auto it = scn->begin(); it != scn->end(); it++)
-	// 		{
-	// 			auto node_ptr = it.get();
-	// 			std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
-	// 		}
+			// 	clearScene();
+			//
+	//for (auto it = scn->begin(); it != scn->end(); it++)
+	//{
+	//	auto node_ptr = it.get();
+	//	std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
+	//}
 
 	nodeMap.clear();
 }
@@ -297,7 +299,7 @@ void WtNodeFlowScene::addNodeByString(std::string NodeName)
 
 			auto type = std::make_unique<WtNodeWidget>(m);
 
-			auto& node = this->createNode(std::move(type));
+			auto& node = this->createNode(std::move(type), _painter);
 
 			Wt::WPointF posView(m->bx(), m->by());
 

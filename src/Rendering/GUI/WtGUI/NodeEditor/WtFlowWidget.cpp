@@ -68,8 +68,8 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	Wt::WPainter painter(paintDevice);
 	////WtNode node;
 	////WtNodePainter::paint(&painter, node);
-	//painter.scale(mZoomFactor, mZoomFactor);
-	//painter.translate(mTranlate);
+	painter.scale(mZoomFactor, mZoomFactor);
+	painter.translate(mTranlate);
 
 	//WtNodeStyle nodeStyle;
 	//float diam = nodeStyle.ConnectionPointDiameter;

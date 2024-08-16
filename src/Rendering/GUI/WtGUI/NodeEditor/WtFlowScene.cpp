@@ -33,10 +33,10 @@ WtFlowScene::~WtFlowScene() {}
 //{
 //}
 
-WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
+WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPainter* painter)
 {
 	auto node = detail::make_unique<WtNode>(std::move(dataModel));
-	auto ngo = detail::make_unique<WtNodeGraphicsObject>(*this, *node);
+	auto ngo = detail::make_unique<WtNodeGraphicsObject>(*this, *node, painter);
 
 	node->setGraphicsObject(std::move(ngo));
 

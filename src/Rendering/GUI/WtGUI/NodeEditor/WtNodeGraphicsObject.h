@@ -27,7 +27,7 @@ public:
 
 public:
 
-	static void paint(Wt::WPainter* painter, WtNode& node);
+	static void paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const& scene);
 
 	static void drawNodeRect(
 		Wt::WPainter* painter,
@@ -52,18 +52,23 @@ public:
 class WtNodeGraphicsObject
 {
 public:
-	WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node);
+	WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter);
+
 	virtual ~WtNodeGraphicsObject();
+
 	WtNode& node();
+
 	WtNode const& node() const;
+
 	Wt::WRectF boundingRect() const;
+
 	void setGeometryChanged();
 
 	/// Visits all attached connections and corrects
 	/// their corresponding end points.
 	void moveConnections() const;
 
-	enum { Type = 65537 };
+	enum { Type = 65538 };
 
 	int	type() const { return Type; }
 
@@ -87,12 +92,18 @@ public:
 
 	void isSelect();
 
+protected:
+	void paint(Wt::WPainter* painter);
+
+private:
+	void embedQWidget();
+
 private:
 	WtFlowScene& _scene;
 
 	WtNode& _node;
 
-	Wt::WPainter* _defaultPainter;
+	Wt::WPainter* _painter;
 
 	bool _locked;
 

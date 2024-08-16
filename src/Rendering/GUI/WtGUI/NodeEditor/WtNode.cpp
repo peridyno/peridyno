@@ -197,42 +197,42 @@ Wt::WRectF WtNodeGeometry::boundingRect() const
 		_height + 2 * addon);
 }
 
-void WtNodeGeometry::recalculateSize(Wt::WFontMetrics fontMetrics) const
+void WtNodeGeometry::recalculateSize() const
 {
-	_entryHeight = fontMetrics.height();
+	//_entryHeight = fontMetrics.height();
 
-	{
-		unsigned int maxNumOfEntries = std::max(_nSinks, _nSources);
-		unsigned int step = _entryHeight + _spacing;
-		_height = step * maxNumOfEntries;
-	}
+	//{
+	//	unsigned int maxNumOfEntries = std::max(_nSinks, _nSources);
+	//	unsigned int step = _entryHeight + _spacing;
+	//	_height = step * maxNumOfEntries;
+	//}
 
-	//if (auto w = _dataModel->embeddedWidget())
+	///*if (auto w = _dataModel->embeddedWidget())
 	//{
 	//	_height = std::max(_height, static_cast<unsigned>(w->height()));
-	//}
+	//}*/
 
-	_height += captionHeight();
+	//_height += captionHeight();
 
-	_inputPortWidth = portWidth(PortType::In);
-	_outputPortWidth = portWidth(PortType::Out);
+	//_inputPortWidth = portWidth(PortType::In);
+	//_outputPortWidth = portWidth(PortType::Out);
 
-	_width = _inputPortWidth + _outputPortWidth + 2 * _spacing;
+	//_width = _inputPortWidth + _outputPortWidth + 2 * _spacing;
 
-	//if (auto w = _dataModel->embeddedWidget())
+	////if (auto w = _dataModel->embeddedWidget())
+	////{
+	////	_width += w->width();
+	////}
+
+	////_width = std::max(_width, captionWidth());
+
+	//if (_dataModel->validationState() != NodeValidationState::Valid)
 	//{
-	//	_width += w->width();
+	//	//_width = std::max(_width, validationWidth());
+	//	//_height += validationHeight() + _spacing;
+
+	//	_height += _spacing;
 	//}
-
-	//_width = std::max(_width, captionWidth());
-
-	if (_dataModel->validationState() != NodeValidationState::Valid)
-	{
-		//_width = std::max(_width, validationWidth());
-		//_height += validationHeight() + _spacing;
-
-		_height += _spacing;
-	}
 }
 
 //void NodeGeometry::recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const
@@ -747,7 +747,7 @@ void WtNode::setGraphicsObject(std::unique_ptr<WtNodeGraphicsObject>&& graphics)
 {
 	_nodeGraphicsObject = std::move(graphics);
 
-	//_nodeGeometry.recalculateSize();
+	_nodeGeometry.recalculateSize();
 }
 
 WtNodeGeometry& WtNode::nodeGeometry()

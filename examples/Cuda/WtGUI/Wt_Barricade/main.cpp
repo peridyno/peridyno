@@ -98,10 +98,12 @@ std::shared_ptr<SceneGraph> createScene()
 	return scn;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	WtApp app;
+
 	app.setSceneGraphCreator(&createScene);
+	app.setSceneGraph(createScene());
 
 	app.mainLoop();
 
