@@ -1,3 +1,5 @@
 set(LIB_DEPENDENCY
-    WtGUI)
+    WtGUI
+    Modeling
+)
 add_example(Wt_EmptyGUI WtGUI LIB_DEPENDENCY)

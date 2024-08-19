@@ -41,10 +41,25 @@ public:
 		WtNodeDataModel const* model,
 		WtNodeGraphicsObject const& graphicsObject);
 
-	static void drawModelName(Wt::WPainter* painter);
+	static void drawModelName(
+		Wt::WPainter* painter,
+		WtNodeGeometry const& geom,
+		WtNodeState const& state,
+		WtNodeDataModel const* model
+	);
+
 	static void drawEntryLabels(Wt::WPainter* painter);
-	static void drawConnectionPoints(Wt::WPainter* painter);
-	static void drawFilledConnectionPoints(Wt::WPainter* painter);
+
+	static void drawConnectionPoints(
+		Wt::WPainter* painter,
+		WtNodeGeometry const& geom,
+		WtNodeState const& state,
+		WtNodeDataModel const* model,
+		WtFlowScene const& scene
+	);
+
+	//static void drawFilledConnectionPoints(Wt::WPainter* painter);
+
 	static void drawResizeRect(Wt::WPainter* painter);
 	static void drawValidationRect(Wt::WPainter* painter);
 };

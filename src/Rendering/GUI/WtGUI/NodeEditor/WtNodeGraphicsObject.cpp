@@ -15,6 +15,9 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const
 	WtNodeDataModel const* model = node.nodeDataModel();
 
 	drawNodeRect(painter, geom, model, graphicsObject);
+
+	drawHotKeys(painter, geom, model, graphicsObject);
+
 }
 
 void WtNodePainter::drawNodeRect(
@@ -68,6 +71,8 @@ void drawHotKeys(
 
 	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
+	auto color = nodeStyle.SelectedBoundaryColor;
+
 	const Wt::WPen& pen = painter->pen();
 
 	if (model->captionVisible() && model->hotkeyEnabled())
@@ -85,8 +90,125 @@ void drawHotKeys(
 		double const radius = 6.0;
 
 		//Wt different
-		painter->setPen(Wt::WPen());
+		Wt::WPen pen = Wt::WPen(color);
+		pen.setWidth(nodeStyle.HoveredPenWidth);
+		painter->setPen(pen);
+
+		if (graphicsObject.hotKey0Hovered())
+		{
+			pen.setWidth(nodeStyle.HoveredPenWidth);
+			painter->setPen(pen);
+		}
+		else
+		{
+			pen.setWidth(nodeStyle.PenWidth);
+			painter->setPen(pen);
+		}
+
+		if (graphicsObject.isHotKey0Checked())
+		{
+			painter->setBrush(nodeStyle.GradientColor0);
+		}
+		else
+		{
+			painter->setBrush(nodeStyle.HotKeyColor0);
+		}
+
+		Wt::WPointF points[4];
+		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
+		points[1] = Wt::WPointF(geom.width() + diam - keyOffset, -diam);
+		points[2] = Wt::WPointF(geom.width() + diam - keyShift - keyOffset, captionHeight);
+		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+
+		painter->drawPolygon(points, 4);
+
+		if (graphicsObject.hotKey1Hovered())
+		{
+			pen.setWidth(nodeStyle.HoveredPenWidth);
+			painter->setPen(pen);
+		}
+		else
+		{
+			pen.setWidth(nodeStyle.PenWidth);
+			painter->setPen(pen);
+		}
+
+		if (graphicsObject.isHotKey1Checked())
+		{
+			painter->setBrush(nodeStyle.GradientColor0);
+		}
+		else
+		{
+			painter->setBrush(nodeStyle.HotKeyColor1);
+		}
+
+		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
+		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+		points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyWidth - keyOffset, captionHeight);
+		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, -diam);
+
+		painter->drawPolygon(points, 4);
 	}
+}
+
+void WtNodePainter::drawConnectionPoints(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeState const& state,
+	WtNodeDataModel const* model,
+	WtFlowScene const& scene
+)
+{
+	WtNodeStyle const& nodeStyle = model->nodeStyle();
+	auto const& connectionStyle = WtStyleCollection::connectionStyle();
+
+	float diameter = nodeStyle.ConnectionPointDiameter;
+	auto reducedDiameter = diameter * 0.6;
+
+	for (PortType portType : {PortType::Out, PortType::In})
+	{
+		//size_t n = state.getEntries(portType).size();
+
+		int n = 10;
+		for (unsigned int i = 0; i < n; i++)
+		{
+			Wt::WPointF p = geom.portScenePosition(i, portType);
+
+			auto const& dataType = model->dataType(portType, i);
+
+			//bool canConnect = (state.getEntries(portType)[i].empty() ||
+			//	(portType == PortType::Out &&
+			//		model->portOutConnectionPolicy(i) == WtNodeDataModel::ConnectionPolicy::Many));
+
+			double r = 1.0;
+
+			//if (state.isReacting() && canConnect && portType == state.reactingPortType())
+			//{
+			//	//auto diff = geom.draggingPos() - p;
+			//	//double dist = std::sqrt();
+			//	bool typeConvertable = false;
+			//}
+		}
+
+	}
+}
+
+void WtNodePainter::drawModelName(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeState const& state,
+	WtNodeDataModel const* model
+)
+{
+	WtNodeStyle const& nodeStyle = model->nodeStyle();
+
+	if (!model->captionVisible())
+		return;
+
+	std::string const& name = model->caption();
+
+	Wt::WFont f = painter->font();
+
 }
 
 void WtNodePainter::drawHotKeys(
