@@ -394,6 +394,17 @@ namespace dyno
 		DYN_FUNC int intersect(const TAlignedBox3D<Real>& abox, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const;
 
+		// [Rounded Primitive]
+		// return the closest intersection point's parameter (para >= 0) and outside normal.
+		// return <0 means no intersection
+		// Base on https://iquilezles.org/articles/intersectors/
+		//DYN_FUNC Real intersect(const TSphere3D<Real>& sphere, const Real radius, Coord3D& normal) const;
+		//DYN_FUNC Real intersect(const TCapsule3D<Real>& capsule, const Real radius, Coord3D& normal) const;
+		//DYN_FUNC Real intersect(const TTriangle3D<Real>& triangle, const Real radius, Coord3D& normal) const;
+		//DYN_FUNC Real intersect(const TTet3D<Real>& tet, const Real radius, Coord3D& normal) const;
+		//DYN_FUNC Real intersect(const TAlignedBox3D<Real>& abox, const Real radius, Coord3D& normal) const;
+		//DYN_FUNC Real intersect(const TOrientedBox3D<Real>& obb, const Real radius, Coord3D& normal) const;
+
 		DYN_FUNC Real parameter(const Coord3D& pos) const;
 
 		DYN_FUNC bool isValid() const;
@@ -440,7 +451,7 @@ namespace dyno
 		DYN_FUNC int intersect(const TSphere3D<Real>& sphere, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TAlignedBox3D<Real>& abox, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const;
-
+		
 		DYN_FUNC Real length() const;
 		DYN_FUNC Real lengthSquared() const;
 
@@ -657,6 +668,7 @@ namespace dyno
 	public:
 		DYN_FUNC TCapsule3D();
 		DYN_FUNC TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl);
+		DYN_FUNC TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r);
 		DYN_FUNC TCapsule3D(const TCapsule3D<Real>& capsule);
 
 		DYN_FUNC Real volume() const;

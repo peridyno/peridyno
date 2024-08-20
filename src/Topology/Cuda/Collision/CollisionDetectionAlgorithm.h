@@ -4,6 +4,67 @@
 
 namespace dyno
 {
+    enum SeparationType
+    {
+        CT_POINT = 0,
+        CT_EDGE,
+        CT_FACEA,
+        CT_FACEB
+    };
+
+    template<typename Real>
+    class TSeparationData
+    {
+        using Tet3D = TTet3D<Real>;
+        using Sphere3D = TSphere3D<Real>;
+        using Segment3D = TSegment3D<Real>;
+        using OBox3D = TOrientedBox3D<Real>;
+        using Capsule3D = TCapsule3D<Real>;
+        using Triangle3D = TTriangle3D<Real>;
+        using Rectangle3D = TRectangle3D<Real>;
+
+
+        Vector<Real, 3> separation_normal;
+        Vector<Real, 3> separation_point[4];
+        Real separation_distance = -REAL_infinity;
+        SeparationType separation_type = CT_POINT;
+        int separation_flag = 0;        // [0 A-B, 1 B-A]
+
+    public:
+		void reverse() { separation_flag = 1 - separation_flag; }
+
+        Real depth() { return separation_distance; }
+        Vector<Real, 3> normal() { return (separation_flag == 1) ? -separation_normal : separation_normal; }
+        SeparationType type() { return separation_type; }
+
+		int face() { return (separation_type == CT_FACEB) ^ (separation_flag); } // 0: A, 1: B
+        Vector<Real, 3> point(int i) { return separation_point[i]; }
+        Vector<Real, 3> pointA() { return separation_point[0 ^ separation_flag]; }
+        Vector<Real, 3> pointB() { return separation_point[1 ^ separation_flag]; }
+		Triangle3D tri() { return Triangle3D(separation_point[0], separation_point[1], separation_point[2]); }
+		Rectangle3D rect() { return Rectangle3D(separation_point[0], separation_point[1], separation_point[2], separation_point[3]); }
+
+        void update(SeparationType type, Real BoundaryA, Real BoundaryB, Real Depth, Vec3f N, Vec3f a0, Vec3f a1, Vec3f a2 = Vec3f(0.), Vec3f a3 = Vec3f(0.))
+        {
+            N = ((BoundaryA < BoundaryB) ^ (REAL_LESS(Depth, 0))) ? -N : N;
+            if (!REAL_LESS(Depth, 0.f))
+            {
+                separation_distance = Depth;
+                separation_normal = N;
+            }
+            else if (REAL_GREAT(Depth, separation_distance))
+            {
+                separation_type = type;
+                separation_distance = Depth;
+                separation_normal = N;
+                separation_point[0] = a0;
+                separation_point[1] = a1;
+                separation_point[2] = a2;
+                separation_point[3] = a3;
+            }
+        }
+    };
+
     template<typename Real>
     class CollisionDetection
     {
@@ -13,12 +74,14 @@ namespace dyno
         using Matrix3D = SquareMatrix<Real, 3>;
         using Transform3D = Transform<Real, 3>;
         using Tet3D = TTet3D<Real>;
-        using Manifold = TManifold<Real>;
         using Sphere3D = TSphere3D<Real>;
         using Segment3D = TSegment3D<Real>;
         using OBox3D = TOrientedBox3D<Real>;
         using Capsule3D = TCapsule3D<Real>;
         using Triangle3D = TTriangle3D<Real>;
+
+        using Manifold = TManifold<Real>;
+        using SeparationData = TSeparationData<Real>;
 
         //--------------------------------------------------------------------------------------------------
         // Minkowski Sum + Separating Axis Theorem for Round Primitives
@@ -28,76 +91,91 @@ namespace dyno
         // request(A, B)	: Generate contact points, depth and normal on B's boundary.
         
         // [Sphere - Sphere]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Sphere3D& sphereA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
 
         // [Seg - Sphere]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Segment3D& segA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Segment3D& segA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         
         // [Tri - Sphere]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Triangle3D& triA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Triangle3D& triA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
 
         // [Tet - Sphere]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Tet3D& tetA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Tet3D& tetA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
 
         // [Box - Sphere]
+		DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const OBox3D& boxA, const Sphere3D& sphereB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
 
         // [Seg - Seg]
+		DYN_FUNC static void MSDF(SeparationData& sat, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Segment3D& segA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB);
 
         // [Tri - Seg]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Triangle3D& triA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Triangle3D& triA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
 
         // [Tet- Seg]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Tet3D& tetA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Tet3D& tetA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundary1, Real &boundary2, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Tet3D& tetB, const Real radiusA, const Real radiusB); 
 
         // [Box - Seg]
+        DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const OBox3D& boxA, const Segment3D& segB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
 
         // [Tri - Tri]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Triangle3D& triA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Triangle3D& triA, const Triangle3D& triB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
 
         // [Tet - Tri]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Tet3D& tetA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Tet3D& tetA, const Triangle3D& triB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
 
         // [Box - Tri]
+        DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const OBox3D& boxA, const Triangle3D& triB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Triangle3D& triB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
 
         // [Tet - Tet]
+        DYN_FUNC static void MSDF(SeparationData& sat, const Tet3D& tetA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const Tet3D& tetA, const Tet3D& tetB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
 
         // [Box - Tet]
+        DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const OBox3D& boxA, const Tet3D& tetB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
         
         // [Box - Box]
+        DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void MSDF(const OBox3D& boxA, const OBox3D& boxB, Real& depth, Coord3D& normal, Real& boundaryA, Real& boundaryB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
