@@ -56,7 +56,8 @@ namespace dyno
 			auto sA = modelA->outCube()->getValue();
 			auto sB = modelB->outCube()->getValue();
 
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, sB, 0.01f, 0.01f);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::SPHERE && shapeB->getShapeType() == BasicShapeType::SPHERE)		//sphere-sphere
 		{
@@ -66,7 +67,8 @@ namespace dyno
 			auto sA = modelA->outSphere()->getValue();
 			auto sB = modelB->outSphere()->getValue();
 
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, sB, 0.0f, 0.0f);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::CAPSULE && shapeB->getShapeType() == BasicShapeType::CAPSULE)		//capsule-capsule
 		{
@@ -90,8 +92,10 @@ namespace dyno
 
 			auto sA = modelA->outCube()->getValue();
 			auto sB = modelB->outCapsule()->getValue();
-
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			Segment3D seg = sB.centerline();
+			Real radius2 = sB.radius;
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, seg, 0.01f, radius2);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::CAPSULE && shapeB->getShapeType() == BasicShapeType::CUBE)		//capsule-cube
 		{
@@ -103,7 +107,7 @@ namespace dyno
 			Segment3D seg = sA.centerline();
 			Real radius1 = sA.radius;
 			//CollisionDetection<Real>::request(manifold, sA, sB);
-			CollisionDetection<Real>::request(manifold, seg, sB, radius1, 0.1f);
+			CollisionDetection<Real>::request(manifold, seg, sB, radius1, 0.01f);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::CUBE && shapeB->getShapeType() == BasicShapeType::SPHERE)		//cube-sphere
 		{
@@ -113,7 +117,8 @@ namespace dyno
 			auto sA = modelA->outCube()->getValue();
 			auto sB = modelB->outSphere()->getValue();
 
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, sB, 0.01f, 0.f);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::SPHERE && shapeB->getShapeType() == BasicShapeType::CUBE)		//sphere-cube
 		{
@@ -123,7 +128,8 @@ namespace dyno
 			auto sA = modelA->outSphere()->getValue();
 			auto sB = modelB->outCube()->getValue();
 
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, sB, 0.f, 0.01f);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::SPHERE && shapeB->getShapeType() == BasicShapeType::CAPSULE)		//sphere-cube
 		{
@@ -133,7 +139,11 @@ namespace dyno
 			auto sA = modelA->outSphere()->getValue();
 			auto sB = modelB->outCapsule()->getValue();
 
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			Segment3D seg = sB.centerline();
+			Real radius2 = sB.radius;
+
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, seg, 0.f, radius2);
 		}
 		else if (shapeA->getShapeType() == BasicShapeType::CAPSULE && shapeB->getShapeType() == BasicShapeType::SPHERE)		//sphere-cube
 		{
@@ -142,8 +152,11 @@ namespace dyno
 
 			auto sA = modelA->outCapsule()->getValue();
 			auto sB = modelB->outSphere()->getValue();
+			Segment3D seg = sA.centerline();
+			Real radius1 = sA.radius;
 
-			CollisionDetection<Real>::request(manifold, sA, sB);
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, seg, sB, radius1, 0.f);
 		}
 		else
 			std::cout << "Not supported yet" << std::endl;

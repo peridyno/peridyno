@@ -3732,6 +3732,34 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TSegment3D<Real> TTet3D<Real>::edge(const int index) const
+	{
+		switch (index)
+		{
+		case 0:
+			return TSegment3D<Real>(v[0], v[1]);
+			break;
+		case 1:
+			return TSegment3D<Real>(v[0], v[2]);
+			break;
+		case 2:
+			return TSegment3D<Real>(v[0], v[3]);
+			break;
+		case 3:
+			return TSegment3D<Real>(v[1], v[2]);
+			break;
+		case 4:
+			return TSegment3D<Real>(v[1], v[3]);
+			break;
+		case 5:
+			return TSegment3D<Real>(v[2], v[3]);
+			break;
+		default:
+			break;
+		}
+	}
+
+	template<typename Real>
 	DYN_FUNC TTriangle3D<Real> TTet3D<Real>::face(const int index) const
 	{
 		switch (index)
@@ -4393,6 +4421,70 @@ namespace dyno
 		v = obb.v;
 		w = obb.w;
 		extent = obb.extent;
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TOrientedBox3D<Real>::vertex(const int i) const
+	{
+		int id = i % 8;
+		Coord3D hu = u * extent[0];
+		Coord3D hv = v * extent[1];
+		Coord3D hw = w * extent[2];
+
+		return TPoint3D<Real>(center + (2 * (id & 1) - 1) * hu + (2 * ((id >> 1) & 1) - 1) * hv + (2 * ((id >> 2) & 1) - 1) * hw);
+	}
+
+	template<typename Real>
+	DYN_FUNC TSegment3D<Real> TOrientedBox3D<Real>::edge(const int i) const
+	{
+		int id = i % 12;
+		Vec2u table[12] = { Vec2u(0, 1), Vec2u(1, 3), Vec2u(2, 3), Vec2u(0, 2),
+			Vec2u(0, 4), Vec2u(1, 5), Vec2u(2, 6), Vec2u(3, 7),
+			Vec2u(4, 5), Vec2u(5, 7), Vec2u(6, 7), Vec2u(4, 6)};
+		return vertex(table[id][0]) - vertex(table[id][1]);
+	}
+
+	template<typename Real>
+	DYN_FUNC TRectangle3D<Real> TOrientedBox3D<Real>::face(const int index) const
+	{
+		int id = index % 6;
+		Coord3D c = center;
+		Coord3D Nx, Ny;
+		Coord2D Ext = Coord2D(0.f);
+		switch (id)
+		{
+		case 0:
+			c -= v * extent[1];
+			Nx = u; Ny = w;
+			Ext = Coord2D(extent[0], extent[2]);
+			break;
+		case 1:
+			c += v * extent[1];
+			Nx = w; Ny = u;
+			Ext = Coord2D(extent[2], extent[0]);
+			break;
+		case 2:
+			c -= u * extent[0];
+			Nx = w; Ny = v;
+			Ext = Coord2D(extent[2], extent[1]);
+			break;
+		case 3:
+			c += u * extent[0];
+			Nx = v; Ny = w;
+			Ext = Coord2D(extent[1], extent[2]);
+			break; 
+		case 4:
+			c -= w * extent[2];
+			Nx = v; Ny = u;
+			Ext = Coord2D(extent[1], extent[0]);
+			break;
+		default:
+			c += w * extent[2];
+			Nx = u; Ny = v;
+			Ext = Coord2D(extent[0], extent[1]);
+			break;
+		}
+		return TRectangle3D<Real>(c, Nx, Ny, Ext);
 	}
 
 

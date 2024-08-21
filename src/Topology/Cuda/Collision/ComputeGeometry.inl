@@ -1086,9 +1086,9 @@ namespace dyno
             if (res == 4)
             {
                 Vec3f q01 = q[1] - q[0];
-                Vec3f q02 = q[2] - q[2];
-                Vec3f q03 = q[3] - q[2];
-                if (REAL_LESS(Dot(q01.cross(q02), q01.cross(q03)), 0.f)) Swap(q[2], q[3]);
+                Vec3f q02 = q[2] - q[0];
+                Vec3f q03 = q[3] - q[0];
+                if (REAL_GREAT(Dot(q01.cross(q02), q01.cross(q03)), 0.f)) Swap(q[2], q[3]);
             }
             return res;
         }
@@ -1166,9 +1166,9 @@ namespace dyno
             if (res == 4)
             {
                 Vec3f q01 = q[1] - q[0];
-                Vec3f q02 = q[2] - q[2];
-                Vec3f q03 = q[3] - q[2];
-                if (REAL_LESS(Dot(q01.cross(q02), q01.cross(q03)), 0.f)) Swap(q[2], q[3]);
+                Vec3f q02 = q[2] - q[0];
+                Vec3f q03 = q[3] - q[0];
+                if (REAL_GREAT(Dot(q01.cross(q02), q01.cross(q03)), 0.f)) Swap(q[2], q[3]);
             }
 
             return res;   
@@ -1238,6 +1238,21 @@ namespace dyno
             for (int i = 0; i < n; ++i)
                 p2d[i] = Vec2f(p[i][lookup[0]], p[i][lookup[1]]);
             
+            if (n == 1)
+            {
+                // Check Point inside Rect
+                Vec2f center = (a2d[0] + a2d[1] + a2d[2]) / 3.0f;
+                float t[2];
+                int num_intr = intrPolyWithLine(t, 4, a2d, p2d[0], center);
+                int num_inside = 0;
+                for (int j = 0; j < num_intr; ++j)
+                {
+                    if (REAL_GREAT(t[j], 0.f)) num_inside++;
+                }
+                if (num_inside == 1) q[res++] = p[0];
+                return res;
+            }
+
             // Check Polygon Edge Intr with Tri
             for (int i = 0; i < n; ++i)
             {
@@ -1310,6 +1325,20 @@ namespace dyno
             for (int i = 0; i < n; ++i)
                 p2d[i] = Vec2f(p[i][lookup[0]], p[i][lookup[1]]);
             
+            if (n == 1)
+            {
+				// Check Point inside Rect
+                Vec2f center = (a2d[0] + a2d[1] + a2d[2] + a2d[3]) * 0.25f;
+                float t[2];
+                int num_intr = intrPolyWithLine(t, 4, a2d, p2d[0], center);
+                int num_inside = 0;
+                for (int j = 0; j < num_intr; ++j)
+                {
+                    if (REAL_GREAT(t[j], 0.f)) num_inside++;
+                }
+                if (num_inside == 1) q[res++] = p[0];
+                return res;
+            }
             // Check Polygon Edge Intr with Rect
             for (int i = 0; i < n; ++i)
             {
@@ -1322,7 +1351,7 @@ namespace dyno
                     if (REAL_GREAT(t[j], 0.f))
                     {
                         num_inside++;
-                        if (REAL_LESS(t[j], 1.f) )
+                        if (REAL_LESS(t[j], 1.f) && (ni != 0 || i != 1) ) // same edge
                             q[res++] = p[i] + (p[ni] - p[i]) * t[j];
                     }
                 }

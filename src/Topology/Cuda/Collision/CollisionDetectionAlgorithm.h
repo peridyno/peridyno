@@ -8,8 +8,10 @@ namespace dyno
     {
         CT_POINT = 0,
         CT_EDGE,
-        CT_FACEA,
-        CT_FACEB
+        CT_TRIA,
+        CT_TRIB,
+        CT_RECTA,
+        CT_RECTB
     };
 
     template<typename Real>
@@ -36,17 +38,17 @@ namespace dyno
         Real depth() { return separation_distance; }
         Vector<Real, 3> normal() { return (separation_flag == 1) ? -separation_normal : separation_normal; }
         SeparationType type() { return separation_type; }
+        SeparationType face() { return SeparationType(int(separation_type) ^ separation_flag); } // 0: A, 1: B
 
-		int face() { return (separation_type == CT_FACEB) ^ (separation_flag); } // 0: A, 1: B
         Vector<Real, 3> point(int i) { return separation_point[i]; }
         Vector<Real, 3> pointA() { return separation_point[0 ^ separation_flag]; }
         Vector<Real, 3> pointB() { return separation_point[1 ^ separation_flag]; }
 		Triangle3D tri() { return Triangle3D(separation_point[0], separation_point[1], separation_point[2]); }
-		Rectangle3D rect() { return Rectangle3D(separation_point[0], separation_point[1], separation_point[2], separation_point[3]); }
+		Rectangle3D rect() { return Rectangle3D(separation_point[0], separation_point[1], separation_point[2], Vec2f(separation_point[3][0], separation_point[3][1])); }
 
         void update(SeparationType type, Real BoundaryA, Real BoundaryB, Real Depth, Vec3f N, Vec3f a0, Vec3f a1, Vec3f a2 = Vec3f(0.), Vec3f a3 = Vec3f(0.))
         {
-            N = ((BoundaryA < BoundaryB) ^ (REAL_LESS(Depth, 0))) ? -N : N;
+            N = ((BoundaryA < BoundaryB) ^ (REAL_LESS(Depth, 0))) ? N : -N;
             if (!REAL_LESS(Depth, 0.f))
             {
                 separation_distance = Depth;

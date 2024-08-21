@@ -706,6 +706,7 @@ namespace dyno
 		DYN_FUNC TTet3D(const TTet3D<Real>& tet);
 
 		DYN_FUNC TTriangle3D<Real> face(const int index) const;
+		DYN_FUNC TSegment3D<Real> edge(const int index) const;
 
 		DYN_FUNC Real volume() const;
 
@@ -784,6 +785,10 @@ namespace dyno
 		DYN_FUNC TOrientedBox3D(const Coord3D c, const Quat<Real> rot, const Coord3D ext);
 
 		DYN_FUNC TOrientedBox3D(const TOrientedBox3D<Real>& obb);
+
+		DYN_FUNC TPoint3D<Real> vertex(const int i) const;
+		DYN_FUNC TSegment3D<Real> edge(const int i) const;
+		DYN_FUNC TRectangle3D<Real> face(const int i) const;
 
 		DYN_FUNC Real volume();
 
