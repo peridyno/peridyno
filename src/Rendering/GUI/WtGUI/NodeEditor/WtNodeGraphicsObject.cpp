@@ -18,6 +18,10 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const
 
 	drawHotKeys(painter, geom, model, graphicsObject);
 
+	drawConnectionPoints(painter, geom, state, model, scene);
+
+	drawModelName(painter, geom, state, model);
+
 }
 
 void WtNodePainter::drawNodeRect(
@@ -65,7 +69,8 @@ void drawHotKeys(
 	Wt::WPainter* painter,
 	WtNodeGeometry const& geom,
 	WtNodeDataModel const* model,
-	WtNodeGraphicsObject const& graphicsObject)
+	WtNodeGraphicsObject const& graphicsObject
+)
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
@@ -174,13 +179,14 @@ void WtNodePainter::drawConnectionPoints(
 		{
 			Wt::WPointF p = geom.portScenePosition(i, portType);
 
-			auto const& dataType = model->dataType(portType, i);
+			//TODO:Bug
+			//auto const& dataType = model->dataType(portType, i);
 
 			//bool canConnect = (state.getEntries(portType)[i].empty() ||
 			//	(portType == PortType::Out &&
 			//		model->portOutConnectionPolicy(i) == WtNodeDataModel::ConnectionPolicy::Many));
 
-			double r = 1.0;
+			//double r = 1.0;
 
 			//if (state.isReacting() && canConnect && portType == state.reactingPortType())
 			//{
@@ -209,6 +215,19 @@ void WtNodePainter::drawModelName(
 
 	Wt::WFont f = painter->font();
 
+	f.setWeight(Wt::FontWeight::Bold);
+
+	Wt::WRectF position(10, 10, 10, 10);
+	float diam = nodeStyle.ConnectionPointDiameter;
+	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
+		: Wt::WRectF(-diam, 0.0f, 2.0 * diam + geom.width(), diam + geom.height());
+
+	painter->setFont(f);
+	//painter->setPen(nodeStyle.FontColor);
+	painter->drawText(boundary, Wt::AlignmentFlag::Left, Wt::WString(name));
+
+	f.setWeight(Wt::FontWeight::Normal);
+	painter->setFont(f);
 }
 
 void WtNodePainter::drawHotKeys(
