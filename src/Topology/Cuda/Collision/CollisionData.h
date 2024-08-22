@@ -77,7 +77,7 @@ namespace dyno
 		TContact<Real> contacts[8];
 		int contactCount = 0;
 
-		void pushContact(const Vector<Real, 3>& pos, const Real& dep)
+		DYN_FUNC void pushContact(const Vector<Real, 3>& pos, const Real& dep)
 		{
 			if (contactCount >= 8) return;
 			contacts[contactCount].position = pos;
@@ -85,7 +85,7 @@ namespace dyno
 			contactCount++;
 		}
 
-		void pushContact(const TContact<Real>& contact)
+		DYN_FUNC void pushContact(const TContact<Real>& contact)
 		{
 			if (contactCount >= 8) return;
 			contacts[contactCount] = contact;

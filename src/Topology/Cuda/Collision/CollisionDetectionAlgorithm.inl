@@ -544,7 +544,6 @@ namespace dyno
         if (N.norm() > EPSILON) N /= N.norm(); else return;
         checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
 
-
         if (!checkPointInBoundary(pA, N, bA, radiusA + rA) || !checkPointInBoundary(pB, N, bB, radiusB + rB)) return;
         sat.update(SeparationType::CT_POINT, bA, bB, D, N, pA, pB);
     }
@@ -646,6 +645,30 @@ namespace dyno
     {
         Vec3f contactPoint = sat.pointB() - m.normal * (sphereB.radius);
         m.pushContact(contactPoint, sat.depth());
+    }
+
+    template<typename Real>
+    DYN_FUNC inline int ClippingWithTri(
+        Vector<Real, 3>* q,
+        const TTriangle3D<Real>& triA,
+        const TSphere3D<Real>& sphereB,
+        const Vector<Real, 3>& transA,
+        const Vector<Real, 3>& transB
+    )
+    {
+        return 0;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline int ClippingWithRect(
+        Vector<Real, 3>* q,
+        const TRectangle3D<Real>& rectA,
+        const TSphere3D<Real>& sphereB,
+        const Vector<Real, 3>& transA,
+        const Vector<Real, 3>& transB
+    )
+    {
+        return 0;
     }
 
     // ---------------------------------------- [ Segment ] ----------------------------------------
@@ -902,10 +925,11 @@ namespace dyno
         return num;
     }
 
-    template<typename Real>
+    template<typename Real, typename Shape>
     DYN_FUNC inline void setupContactOnTri(
         TManifold<Real>& m,
         TSeparationData<Real>& sat,
+        const Shape& shapeA,
         const TTriangle3D<Real>& triB,
         const Real radiusA,
         const Real radiusB)
@@ -930,6 +954,14 @@ namespace dyno
             transA = m.normal * (radiusA + depth); // depth < 0
             transB = -m.normal * radiusB;
             int num = ClippingWithRect(q, sat.rect(), triB, transA, transB);
+            for (int i = 0; i < num; ++i) m.pushContact(q[i], depth);
+        }
+        else if (sat.face() == CT_TRIB)
+        {
+            Vec3f q[6]; Vec3f transA, transB;
+            transA = m.normal * (radiusA + depth); // depth < 0
+            transB = -m.normal * (radiusB);
+            int num = ClippingWithTri(q, sat.tri(), shapeA, transB, transA);
             for (int i = 0; i < num; ++i) m.pushContact(q[i], depth);
         }
     };
@@ -998,10 +1030,11 @@ namespace dyno
         return num;
     }
 
-    template<typename Real>
+    template<typename Real, typename Shape>
     DYN_FUNC inline void setupContactOnTet(
         TManifold<Real>& m,
         TSeparationData<Real>& sat,
+        const Shape& shapeA,
         const TTet3D<Real>& tetB,
         const Real radiusA,
         const Real radiusB)
@@ -1026,6 +1059,14 @@ namespace dyno
             transA = m.normal * (radiusA + depth); // depth < 0
             transB = -m.normal * radiusB;
             int num = ClippingWithRect(q, sat.rect(), tetB, transA, transB);
+            for (int i = 0; i < num; ++i) m.pushContact(q[i], depth);
+        }
+        else if (sat.face() == CT_TRIB)
+        {
+            Vec3f q[6]; Vec3f transA, transB;
+            transA = m.normal * (radiusA + depth); // depth < 0
+            transB = -m.normal * (radiusB);
+            int num = ClippingWithTri(q, sat.tri(), shapeA, transB, transA);
             for (int i = 0; i < num; ++i) m.pushContact(q[i], depth);
         }
     };
@@ -1121,10 +1162,11 @@ namespace dyno
     }
 
 
-    template<typename Real>
+    template<typename Real, typename Shape>
     DYN_FUNC inline void setupContactOnBox(
         TManifold<Real>& m,
         TSeparationData<Real>& sat,
+        const Shape& shapeA,
         const TOrientedBox3D<Real>& boxB,
         const Real radiusA,
         const Real radiusB)
@@ -1149,6 +1191,14 @@ namespace dyno
             transA = m.normal * (radiusA + depth); // depth < 0
             transB = -m.normal * radiusB;
             int num = ClippingWithRect(q, sat.rect(), boxB, transA, transB);
+            for (int i = 0; i < num; ++i) m.pushContact(q[i], depth);
+        }
+        else if (sat.face() == CT_RECTB)
+        {
+            Vec3f q[6]; Vec3f transA, transB;
+            transA = m.normal * (radiusA + depth); // depth < 0
+            transB = -m.normal * (radiusB);
+            int num = ClippingWithRect(q, sat.rect(), shapeA, transB, transA);
             for (int i = 0; i < num; ++i) m.pushContact(q[i], depth);
         }
     };
@@ -1177,7 +1227,6 @@ namespace dyno
         if (REAL_LESS(sat.depth(), 0) && REAL_GREAT(sat.depth(), -REAL_infinity))
         {
             m.normal = sat.normal(); // contact normal on sphereB
-
 
             setupContactOnSphere(m, sat, sphereB, radiusA, radiusB);
         }
@@ -1280,7 +1329,7 @@ namespace dyno
 			sat.reverse();              // contact normal on triB
             m.normal = sat.normal(); 
 
-            setupContactOnTri(m, sat, triB, radiusA, radiusB);
+            setupContactOnTri(m, sat, sphereA, triB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -1337,13 +1386,8 @@ namespace dyno
             sat.reverse();              // contact normal on tetB
             m.normal = sat.normal();
 
-            auto setupContactOnTet = [&]()
-            {
-                Vec3f contactPoint = sat.pointB();
-                m.pushContact(contactPoint, depth);
-            };
+            setupContactOnTet(m, sat, sphereA, tetB, radiusA, radiusB);
 
-            setupContactOnTet();
         }
         else m.contactCount = 0;
     }
@@ -1394,19 +1438,13 @@ namespace dyno
         // Contact normal on sphereA
         MSDF(sat, boxB, sphereA, radiusB, radiusA);
         Real depth = sat.depth();
-
+        //printf("Dep :%f\n", depth);
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             sat.reverse();              // contact normal on boxB
             m.normal = sat.normal();
 
-            auto setupContactOnBox = [&]()
-            {
-                Vec3f contactPoint = sat.pointB();
-                m.pushContact(contactPoint, depth);
-            };
-
-            setupContactOnBox();
+            setupContactOnBox(m, sat, sphereA, boxB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -1422,14 +1460,6 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = sat.normal(); // contact normal on sphereB
-
-            /*
-            auto setupContactOnSphere = [&]()
-            {
-                Vec3f contactPoint = sat.pointB() - m.normal * (sphereB.radius);
-                m.pushContact(contactPoint, depth);
-            };
-            */
 
             setupContactOnSphere(m, sat, sphereB, radiusA, radiusB);
         }
@@ -1646,7 +1676,7 @@ namespace dyno
 			sat.reverse();              // contact normal on triB
             m.normal = sat.normal(); // contact normal on triB
 
-            setupContactOnTri(m, sat, triB, radiusA, radiusB);
+            setupContactOnTri(m, sat, segA, triB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -1819,7 +1849,7 @@ namespace dyno
             sat.reverse();
             m.normal = sat.normal(); // contact normal on tetB
 
-            setupContactOnTet(m, sat, tetB, radiusA, radiusB);
+            setupContactOnTet(m, sat, segA, tetB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2022,7 +2052,7 @@ namespace dyno
             sat.reverse();
             m.normal = sat.normal(); // contact normal on boxB
 
-            setupContactOnBox(m, sat, boxB, radiusA, radiusB);
+            setupContactOnBox(m, sat, segA, boxB, radiusA, radiusB);
 
         }
         else m.contactCount = 0;
@@ -2150,7 +2180,7 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             m.normal = sat.normal(); // contact normal on triB
-            setupContactOnTri(m, sat, triB, radiusA, radiusB);
+            setupContactOnTri(m, sat, triA, triB, radiusA, radiusB);
 
         }
         else m.contactCount = 0;
@@ -2270,7 +2300,7 @@ namespace dyno
             sat.reverse();          // contact normal on tetB
             m.normal = sat.normal(); 
 
-            setupContactOnTet(m, sat, tetB, radiusA, radiusB);
+            setupContactOnTet(m, sat, triA, tetB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2287,7 +2317,7 @@ namespace dyno
         {
             m.normal = sat.normal(); // contact normal on triB
 
-            setupContactOnTri(m, sat, triB, radiusA, radiusB);
+            setupContactOnTri(m, sat, tetA, triB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2400,7 +2430,7 @@ namespace dyno
             sat.reverse();          // contact normal on boxB
             m.normal = sat.normal();
 
-            setupContactOnBox(m, sat, boxB, radiusA, radiusB);
+            setupContactOnBox(m, sat, triA, boxB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2417,7 +2447,7 @@ namespace dyno
         {
             m.normal = sat.normal(); // contact normal on triB
 
-            setupContactOnTri(m, sat, triB, radiusA, radiusB);
+            setupContactOnTri(m, sat, boxA, triB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2427,9 +2457,9 @@ namespace dyno
     template<typename Real>
     DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Tet3D& tetA, const Tet3D& tetB, const Real radiusA, const Real radiusB)
     {
-        auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, tetA, segB, radiusA, radiusB, pA, pB); };
-        auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, tetA, segB, radiusA, radiusB, edgeA, edgeB); };
-        auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, tetA, segB, radiusA, radiusB, face, type); };
+        auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, tetA, tetB, radiusA, radiusB, pA, pB); };
+        auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, tetA, tetB, radiusA, radiusB, edgeA, edgeB); };
+        auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, tetA, tetB, radiusA, radiusB, face, type); };
 
         // Minkowski Face Normal
         // tet face
@@ -2543,7 +2573,7 @@ namespace dyno
         {
             m.normal = sat.normal(); // contact normal on tetB
 
-            setupContactOnTet(m, sat, tetB, radiusA, radiusB);
+            setupContactOnTet(m, sat, tetA, tetB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2579,7 +2609,7 @@ namespace dyno
         // Minkowski Point-Point Normal
         for (int j = 0; j < 8; j++)
         {
-            Vec3f pA = boxA.vertex(i).origin;
+            Vec3f pA = boxA.vertex(j).origin;
             Point3D queryP(pA);
             Point3D projP = queryP.project(tetB);
             checkAxisP(pA, projP.origin);
@@ -2663,7 +2693,7 @@ namespace dyno
             sat.reverse();          // contact normal on boxB
             m.normal = sat.normal();
 
-            setupContactOnBox(m, sat, boxB, radiusA, radiusB);
+            setupContactOnBox(m, sat, tetA, boxB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2680,7 +2710,7 @@ namespace dyno
         {
             m.normal = sat.normal(); // contact normal on tetB
 
-            setupContactOnTet(m, sat, tetB, radiusA, radiusB);
+            setupContactOnTet(m, sat, boxA, tetB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -2794,7 +2824,7 @@ namespace dyno
         {
             m.normal = sat.normal(); // contact normal on boxB
 
-            setupContactOnBox(m, sat, boxB, radiusA, radiusB);
+            setupContactOnBox(m, sat, boxA, boxB, radiusA, radiusB);
         }
         else m.contactCount = 0;
     }
@@ -3449,7 +3479,7 @@ namespace dyno
         if (abs(p.dot(axisNormal) - boundaryMin) < abs(depth))
             boundaryPoints2[cnt2++] = p;
 
-        printf("cnt1 = %d, cnt2 = %d,  dep=%.3lf\n", cnt1, cnt2, depth);
+        // printf("cnt1 = %d, cnt2 = %d,  dep=%.3lf\n", cnt1, cnt2, depth);
         if (cnt1 == 1 || cnt2 == 1)
         {
             m.normal = (boundary1 < boundary2) ? -axisNormal : axisNormal;

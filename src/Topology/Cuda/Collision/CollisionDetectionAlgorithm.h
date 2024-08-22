@@ -33,22 +33,22 @@ namespace dyno
         int separation_flag = 0;        // [0 A-B, 1 B-A]
 
     public:
-		void reverse() { separation_flag = 1 - separation_flag; }
+        DYN_FUNC void reverse() { separation_flag = 1 - separation_flag; }
 
-        Real depth() { return separation_distance; }
-        Vector<Real, 3> normal() { return (separation_flag == 1) ? -separation_normal : separation_normal; }
-        SeparationType type() { return separation_type; }
-        SeparationType face() { return SeparationType(int(separation_type) ^ separation_flag); } // 0: A, 1: B
+        DYN_FUNC Real depth() { return separation_distance; }
+        DYN_FUNC Vector<Real, 3> normal() { return (separation_flag == 1) ? -separation_normal : separation_normal; }
+        DYN_FUNC SeparationType type() { return separation_type; }
+        DYN_FUNC SeparationType face() { return SeparationType(int(separation_type) ^ separation_flag); } // 0: A, 1: B
 
-        Vector<Real, 3> point(int i) { return separation_point[i]; }
-        Vector<Real, 3> pointA() { return separation_point[0 ^ separation_flag]; }
-        Vector<Real, 3> pointB() { return separation_point[1 ^ separation_flag]; }
-		Triangle3D tri() { return Triangle3D(separation_point[0], separation_point[1], separation_point[2]); }
-		Rectangle3D rect() { return Rectangle3D(separation_point[0], separation_point[1], separation_point[2], Vec2f(separation_point[3][0], separation_point[3][1])); }
+        DYN_FUNC Vector<Real, 3> point(int i) { return separation_point[i]; }
+        DYN_FUNC Vector<Real, 3> pointA() { return separation_point[0 ^ separation_flag]; }
+        DYN_FUNC Vector<Real, 3> pointB() { return separation_point[1 ^ separation_flag]; }
+        DYN_FUNC Triangle3D tri() { return Triangle3D(separation_point[0], separation_point[1], separation_point[2]); }
+        DYN_FUNC Rectangle3D rect() { return Rectangle3D(separation_point[0], separation_point[1], separation_point[2], Vec2f(separation_point[3][0], separation_point[3][1])); }
 
-        void update(SeparationType type, Real BoundaryA, Real BoundaryB, Real Depth, Vec3f N, Vec3f a0, Vec3f a1, Vec3f a2 = Vec3f(0.), Vec3f a3 = Vec3f(0.))
+        DYN_FUNC void update(SeparationType type, Real BoundaryA, Real BoundaryB, Real Depth, Vec3f N, Vec3f a0, Vec3f a1, Vec3f a2 = Vec3f(0.), Vec3f a3 = Vec3f(0.))
         {
-            N = ((BoundaryA < BoundaryB) ^ (REAL_LESS(Depth, 0))) ? N : -N;
+			N = ((BoundaryA < BoundaryB) ^ (REAL_LESS(Depth, 0))) ? N : -N;  // [Question: why -N]
             if (!REAL_LESS(Depth, 0.f))
             {
                 separation_distance = Depth;

@@ -1181,6 +1181,9 @@ namespace dyno
             Vec2f oA = a0;
             Vec2f dA = a1 - a0;
             int res = 0;
+
+            assert(n >= 3);
+
             for (int i = 0; i < n; i++)
             {
                 int ni = (i == n - 1) ? 0 : i + 1;
@@ -1201,6 +1204,18 @@ namespace dyno
                     if (d * d2 < 0.f) continue; // up endpoint
                 }
                 t[res++] = tA;
+            }
+            if (res > 2)
+            {
+                for (int i = 0; i < res; ++i)
+                {
+                    Vec2f b = a0 + t[i] * (a1 - a0);
+                    printf(" t %f p: %f %f\n", t[i], b[0], b[1]);
+                }
+                for (int i = 0; i < n; ++i)
+					printf("p: %f %f\n", p[i][0], p[i][1]);
+				printf("a0 %f %f\n", a0[0], a0[1]);
+                printf("a1 %f %f\n", a1[0], a1[1]);
             }
             assert(res <= 2);
             return res;
@@ -1243,7 +1258,7 @@ namespace dyno
                 // Check Point inside Rect
                 Vec2f center = (a2d[0] + a2d[1] + a2d[2]) / 3.0f;
                 float t[2];
-                int num_intr = intrPolyWithLine(t, 4, a2d, p2d[0], center);
+                int num_intr = intrPolyWithLine(t, 3, a2d, p2d[0], center);
                 int num_inside = 0;
                 for (int j = 0; j < num_intr; ++j)
                 {
@@ -1320,10 +1335,8 @@ namespace dyno
             // Proj
             Vec3f a[4]; Vec2f a2d[4]; Vec2f p2d[4];
             a[0] = a0; a[1] = a1; a[2] = a2; a[3] = a3;
-            for (int i = 0; i < 4; ++i)
-                a2d[i] = Vec2f(a[i][lookup[0]], a[i][lookup[1]]);
-            for (int i = 0; i < n; ++i)
-                p2d[i] = Vec2f(p[i][lookup[0]], p[i][lookup[1]]);
+            for (int i = 0; i < 4; ++i) a2d[i] = Vec2f(a[i][lookup[0]], a[i][lookup[1]]);
+            for (int i = 0; i < n; ++i) p2d[i] = Vec2f(p[i][lookup[0]], p[i][lookup[1]]);
             
             if (n == 1)
             {

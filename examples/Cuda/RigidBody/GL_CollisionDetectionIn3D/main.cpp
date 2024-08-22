@@ -234,7 +234,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-
+	rigid->setDt(0.005);
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
