@@ -57,7 +57,8 @@ namespace dyno
 		DArray<uint> v0,
 		DArray<uint> v1,
 		DArray<uint> target,
-		int sizeV0
+		int sizeV0,
+		int shapeSize
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -66,7 +67,7 @@ namespace dyno
 		if (pId < sizeV0)
 			target[pId] = v0[pId];
 		else
-			target[pId] = v1[pId - sizeV0] + sizeV0;
+			target[pId] = v1[pId - sizeV0] + shapeSize;
 	}
 
 	template<typename Triangle>
@@ -148,7 +149,8 @@ namespace dyno
 			shapeIds01,
 			shapeIds02,
 			out->shapeIds(),
-			shapeIds01.size()
+			shapeIds01.size(),
+			texMesh01->shapes().size()
 		);
 
 
