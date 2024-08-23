@@ -37,6 +37,17 @@ namespace dyno
 	}
 
 	template <typename Real>
+	DYN_FUNC Quat<Real>::Quat(const Vector<Real, 3> u0, const Vector<Real, 3> u1)
+	{
+		Vector<Real, 3> c = u0.cross(u1);
+		x = c[0];
+		y = c[1];
+		z = c[2];
+		w = u0.dot(u1) + u0.norm() * u1.norm();
+		normalize();
+	}
+
+	template <typename Real>
 	DYN_FUNC Quat<Real>::Quat(const Quat<Real> & quat) :
 		w(quat.w),
 		y(quat.y),

@@ -50,6 +50,7 @@ namespace dyno
 		 */
 		DYN_FUNC Quat(Real rot, const Vector<Real, 3> &axis);  //init from the rotation axis and angle(in radian)
 
+		DYN_FUNC Quat(const Vector<Real, 3> u0, const Vector<Real, 3> u1); // u0 --[rot]--> u1
 		DYN_FUNC Quat(const Quat<Real> &);
 		DYN_FUNC explicit Quat(const SquareMatrix<Real, 3> &);   //init from a 3x3matrix
 		DYN_FUNC explicit Quat(const SquareMatrix<Real, 4> &);    //init from a 4x4matrix
