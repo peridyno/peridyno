@@ -14,7 +14,7 @@ void pybind_peridynamics(py::module& m)
 	declare_fixed_points<dyno::DataType3f>(m, "3f");
 	declare_fracture_module<dyno::DataType3f>(m, "3f");
 	declare_granular_module<dyno::DataType3f>(m, "3f");
-	declare_one_dim_elasticity_module<dyno::DataType3f>(m, "3f");
+	//declare_one_dim_elasticity_module<dyno::DataType3f>(m, "3f");
 	declare_peridynamics<dyno::DataType3f>(m, "3f");
 	declare_semi_implicit_hyperelasticity_solver<dyno::DataType3f>(m, "3f");
 

@@ -79,11 +79,12 @@
 
 #include "StaticTriangularMesh.h"
 
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
 #include "ParticleSystem/CubeSampler.h"
-#include "SphereModel.h"
+
 #include "Mapping/MergeTriangleSet.h"
-#include "Merge.h"
+#include "Commands/Merge.h"
 #include "ColorMapping.h"
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"

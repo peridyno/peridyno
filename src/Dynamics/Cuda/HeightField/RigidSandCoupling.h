@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2022 Xiaowei He
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,41 +15,35 @@
  */
 #pragma once
 
-#include "Ocean.h"
-#include "Vessel.h"
+#include "HeightField/GranularMedia.h"
 
-#include "Algorithm/Reduction.h"
+#include "RigidBody/RigidBodySystem.h"
 
 namespace dyno
 {
+	/**
+	 * @brief This class implements a coupling between a granular media and a rigid body system
+	 */
+
 	template<typename TDataType>
-	class Coupling : public Node
+	class RigidSandCoupling : public Node
 	{
-		DECLARE_TCLASS(Coupling, TDataType)
+		DECLARE_TCLASS(RigidWaterCoupling, TDataType)
 	public:
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		Coupling();
-		~Coupling() override;
+		RigidSandCoupling();
+		~RigidSandCoupling() override;
 
 	public:
-		DEF_VAR(Real, Damping, Real(0.98), "Translational damping");
-		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");
-
-		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
-		DEF_NODE_PORT(Ocean<TDataType>, Ocean, "Ocean");
+		DEF_NODE_PORT(GranularMedia<TDataType>, GranularMedia, "Granular media");
+		DEF_NODE_PORT(RigidBodySystem<TDataType>, RigidBodySystem, "Rigid body system");
 
 	protected:
 		void resetStates() override;
 		void updateStates() override;
-
-	private:
-		DArray<Coord> mForce;
-		DArray<Coord> mTorque;
-
-		Reduction<Coord> mReduce;
 	};
 
-	IMPLEMENT_TCLASS(Coupling, TDataType)
+	IMPLEMENT_TCLASS(RigidSandCoupling, TDataType)
 }

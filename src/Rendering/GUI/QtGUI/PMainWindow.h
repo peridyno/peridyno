@@ -57,7 +57,8 @@
 
 #include "NodeEditor/QtNodeFlowWidget.h"
 #include "NodeEditor/QtModuleFlowWidget.h"
-#include "../../external/nodeeditor/include/nodes/internal/QtNode.hpp"
+
+#include "nodes/internal/QtNode.hpp"
 
 
 QT_FORWARD_DECLARE_CLASS(QMenu)

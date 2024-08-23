@@ -7,7 +7,7 @@
 
 #include <Multiphysics/VolumeBoundary.h>
 
-#include <PlaneModel.h>
+#include <BasicShapes/PlaneModel.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>

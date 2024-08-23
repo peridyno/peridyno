@@ -21,8 +21,8 @@
 #include "Topology/TextureMesh.h"
 
 #include "Module/TopologyMapping.h"
-#include "PlaneModel.h"
-#include "SphereModel.h"
+#include "BasicShapes/PlaneModel.h"
+#include "BasicShapes/SphereModel.h"
 #include "Module/GroupModule.h"
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"

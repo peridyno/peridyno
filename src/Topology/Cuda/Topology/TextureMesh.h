@@ -88,7 +88,7 @@ namespace dyno
 			mNormals.clear();
 			mTexCoords.clear();
 			mMaterials.clear();
-			mMaterials.clear();
+			mShapeIds.clear();
 			mShapes.clear();
 		}
 

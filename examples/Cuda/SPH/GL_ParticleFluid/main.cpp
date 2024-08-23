@@ -16,7 +16,7 @@
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
-#include <CubeModel.h>
+#include <BasicShapes/CubeModel.h>
 
 #include <ParticleSystem/CubeSampler.h>
 

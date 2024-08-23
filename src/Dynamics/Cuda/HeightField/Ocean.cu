@@ -4,7 +4,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	Ocean<TDataType>::Ocean()
-		: Node()
+		: OceanBase<TDataType>()
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		this->stateHeightField()->setDataPtr(heights);
@@ -22,8 +22,8 @@ namespace dyno
 	{
 		auto patch = this->getOceanPatch();
 
-		auto Nx = this->varExtentX()->getData();
-		auto Nz = this->varExtentZ()->getData();
+		auto Nx = this->varExtentX()->getValue();
+		auto Nz = this->varExtentZ()->getValue();
 
 		auto patchHeights = patch->stateHeightField()->getDataPtr();
 		auto oceanHeights = this->stateHeightField()->getDataPtr();
@@ -31,7 +31,7 @@ namespace dyno
 		Real h = patchHeights->getGridSpacing();
 		oceanHeights->setExtents(Nx * patchHeights->width(), Nz * patchHeights->height());
 		oceanHeights->setGridSpacing(h);
-		oceanHeights->setOrigin(Vec3f(-0.5 * h * oceanHeights->width(), 0, -0.5 * h * oceanHeights->height()));
+		oceanHeights->setOrigin(patchHeights->getOrigin());
 
 		Real level = this->varWaterLevel()->getValue();
 
@@ -138,12 +138,6 @@ namespace dyno
 				waveDisp,
 				h);
 		}
-	}
-
-	template<typename TDataType>
-	bool Ocean<TDataType>::validateInputs()
-	{
-		return this->getOceanPatch() != nullptr;
 	}
 
 	DEFINE_CLASS(Ocean);

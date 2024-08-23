@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "Math/Lerp.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(HeightField, TDataType)
@@ -29,7 +31,10 @@ namespace dyno
 	void HeightField<TDataType>::setExtents(uint nx, uint ny)
 	{
 		mDisplacement.resize(nx, ny);
+		mHeights.resize(nx, ny);
+
 		mDisplacement.reset();
+		mHeights.reset();
 	}
 
 	template<typename TDataType>
@@ -50,6 +55,7 @@ namespace dyno
 		mOrigin = hf.mOrigin;
 		mGridSpacing = hf.mGridSpacing;
 		mDisplacement.assign(hf.mDisplacement);
+		mHeights.assign(hf.mHeights);
 	}
 
 	template <typename Real, typename Coord>
@@ -110,6 +116,50 @@ namespace dyno
 // 			m_coords,
 // 			t);
 // 		cuSynchronize();
+	}
+
+	//Back tracing using the semi-Lagrangian scheme
+	template <typename Real, typename Coord>
+	__global__ void HF_RasterizeDisplacements(
+		DArray2D<Real> vertical,
+		DArray2D<Coord> displacements,
+		Coord origin,
+		Real h)
+	{
+		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+		uint nx = displacements.nx();
+		uint ny = displacements.ny();
+
+		if (i < nx && j < ny)
+		{
+			Coord disp_ij = displacements(i, j);
+
+			Coord interp_ij = bilinear(displacements, i - disp_ij.x / h, j - disp_ij.z / h, LerpMode::REPEAT);
+
+			vertical(i, j) = interp_ij.y;
+		}
+	}
+
+	template<typename TDataType>
+	DArray2D<TDataType::Real>& HeightField<TDataType>::calculateHeightField()
+	{
+		uint nx = mDisplacement.nx();
+		uint ny = mDisplacement.ny();
+
+		if (nx != mHeights.nx() || ny != mHeights.ny()) {
+			mHeights.resize(nx, ny);
+		}
+		
+		cuExecute2D(make_uint2(nx, ny),
+			HF_RasterizeDisplacements,
+			mHeights,
+			mDisplacement,
+			mOrigin,
+			mGridSpacing);
+		
+		return mHeights;
 	}
 
 	DEFINE_CLASS(HeightField);

@@ -1,6 +1,7 @@
-#include "Curve.h"
 #include "Vector/Vector3D.h"
 #include "Vector/Vector2D.h"
+
+#include "Curve.h"
 
 namespace dyno {
 
@@ -531,8 +532,4 @@ namespace dyno {
 	//	pointSet.setPoints(vertices);
 
 	//}
-
-
-
-
 }

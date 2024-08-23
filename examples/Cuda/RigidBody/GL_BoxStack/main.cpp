@@ -35,7 +35,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		{
 			for (int k = 0; k < dim; k++)
 			{
-				box.center = Vec3f(2 * i * h - h * dim, h + (2.1f) * j * h, 2 * k * h - h * dim);
+				box.center = Vec3f(2 * i * h - h * dim, h + (2.01f) * j * h, 2 * k * h - h * dim);
 				box.halfLength = Vec3f(h, h, h);
 				auto boxAt = rigid->addBox(box, rigidBody);
 			}

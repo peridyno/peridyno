@@ -13,9 +13,10 @@ namespace dyno
     {	
         #define REAL_infinity 1.0e30
         #define REAL_ZERO 1.0e-5
-        #define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
-        #define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
-        #define REAL_LESS(a,b) ((a + EPSILON < b)? true: false) 
+        #define REAL_EPS 1e-4
+        #define	REAL_EQUAL(a,b)  (((a < b + REAL_EPS) && (a > b - REAL_EPS)) ? true : false)
+        #define REAL_GREAT(a,b) ((a > REAL_EPS + b)? true: false) 
+        #define REAL_LESS(a,b) ((a + REAL_EPS < b)? true: false) 
 
         template<typename T>
         DYN_FUNC void Swap(T& a, T& b) { T c = a; a = b; b = c;}
@@ -1201,12 +1202,34 @@ namespace dyno
                     int nni = (ni == n - 1) ? 0 : ni + 1;
                     Vec2f ndB = p[nni] - p[ni];
                     float d2 = DotPerp(dA, ndB);
-                    if (d * d2 < 0.f) continue; // up endpoint
+                    if (REAL_GREAT(d * d2 , 0.f)) continue; // up endpoint
                 }
                 t[res++] = tA;
             }
             if (res > 2)
             {
+                for (int i = 0; i < n; i++)
+                {
+                    int ni = (i == n - 1) ? 0 : i + 1;
+                    Vec2f oB = p[i];
+                    Vec2f dB = p[ni] - oB;
+                    float tA, tB; // tB \in [0, 1]
+                    float d = DotPerp(dA, dB);
+                    if (REAL_EQUAL(d, 0.f)) continue;
+                    tA = DotPerp(dB, oA - oB) / d;
+                    // if (REAL_EQUAL(tA, 1.f)) continue;
+                    tB = DotPerp(dA, oA - oB) / d;
+                    printf("tA tB :%f %f\n", tA, tB);
+                    if (REAL_LESS(tB, 0.f) || REAL_GREAT(tB, 1.f)) continue;
+                    if (REAL_EQUAL(tB, 1.f))
+                    {
+                        int nni = (ni == n - 1) ? 0 : ni + 1;
+                        Vec2f ndB = p[nni] - p[ni];
+                        float d2 = DotPerp(dA, ndB);
+                        printf("dd %f %f\n", d, d2);
+                        if (REAL_GREAT(d * d2, 0.f)) continue; // up endpoint
+                    }
+                }
                 for (int i = 0; i < res; ++i)
                 {
                     Vec2f b = a0 + t[i] * (a1 - a0);

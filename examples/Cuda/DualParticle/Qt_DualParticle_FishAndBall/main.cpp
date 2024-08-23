@@ -10,7 +10,7 @@
 #include <ImColorbar.h>
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
-#include <SphereModel.h>
+#include <BasicShapes/SphereModel.h>
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>

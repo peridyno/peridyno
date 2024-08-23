@@ -54,9 +54,9 @@ namespace dyno
 
 		DEF_VAR(Real, FrictionCoefficient, 100, "");
 
-		DEF_VAR(Real, Slop, 0, "");
+		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(Real, BaumgarteBias, 0.3, "");
+		DEF_VAR(Real, BaumgarteRate, 0.2, "");
 
 		DEF_VAR(uint, IterationNumberForVelocitySolver, 300, "");
 
@@ -92,10 +92,12 @@ namespace dyno
 
 	private:
 		void initializeJacobian(Real dt);
+		void initializeRelaxation();
 
 	private:
 		DArray<Coord> mJ;
 		DArray<Coord> mB;
+		DArray<Real> mD;
 
 		DArray<Coord> mImpulseC;
 		DArray<Coord> mImpulseExt;
@@ -112,5 +114,12 @@ namespace dyno
 		DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;	
+
+		std::vector<float> errors;
+		int cnt = 0;
+
+		DArray<Real> mErrors;
+		DArray<Real> mA;
+
 	};
 }

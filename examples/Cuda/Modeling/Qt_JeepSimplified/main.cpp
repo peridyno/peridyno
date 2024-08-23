@@ -82,9 +82,11 @@
 
 #include "StaticTriangularMesh.h"
 
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
+
 #include "ParticleSystem/CubeSampler.h"
-#include "SphereModel.h"
+
 #include "Mapping/MergeTriangleSet.h"
 #include "Mapping/TextureMeshToTriangleSet.h"
 #include "Mapping/MergeTriangleSet.h"

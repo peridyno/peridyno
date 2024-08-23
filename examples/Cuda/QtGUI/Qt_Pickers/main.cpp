@@ -9,8 +9,8 @@
 
 #include "SurfaceMeshLoader.h"
 
-#include "CylinderModel.h"
-#include "CubeModel.h"
+#include "BasicShapes/CylinderModel.h"
+#include "BasicShapes/CubeModel.h"
 
 #include "ParticleSystem/CubeSampler.h"
 

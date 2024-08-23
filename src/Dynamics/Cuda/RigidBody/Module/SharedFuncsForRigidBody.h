@@ -9,6 +9,8 @@
 
 #include "Topology/DiscreteElements.h"
 
+#include "Algorithm/Reduction.h"
+
 namespace dyno 
 {
 	void ApplyTransform(
@@ -92,8 +94,22 @@ namespace dyno
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotation_q,
 		DArray <TConstraintPair<float>> constraints,
+		DArray<float> errors,
 		float slop,
 		float beta,
+		float dt
+	);
+
+	void calculateEtaVectorWithERP(
+		DArray<float> eta,
+		DArray<Vec3f> J,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotation_q,
+		DArray <TConstraintPair<float>> constraints,
+		DArray<float> ERP,
+		float slop,
 		float dt
 	);
 
@@ -195,6 +211,20 @@ namespace dyno
 		DArray<Mat3f> K_3
 	);
 
+	void calculateKWithCFM(
+		DArray<TConstraintPair<float>> constraints,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> inertia,
+		DArray<float> mass,
+		DArray<float> K_1,
+		DArray<Mat2f> K_2,
+		DArray<Mat3f> K_3,
+		DArray<float> CFM
+	);
+
+
 	void JacobiIteration(
 		DArray<float> lambda,
 		DArray<Vec3f> impulse,
@@ -206,6 +236,39 @@ namespace dyno
 		DArray<float> K_1,
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
+		DArray<float> mass,
+		float mu,
+		float g,
+		float dt
+	);
+
+	void JacobiIterationForCFM(
+		DArray<float> lambda,
+		DArray<Vec3f> impulse,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<float> eta,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<int> nbq,
+		DArray<float> K_1,
+		DArray<Mat2f> K_2,
+		DArray<Mat3f> K_3,
+		DArray<float> mass,
+		DArray<float> CFM,
+		float mu,
+		float g,
+		float dt
+	);
+
+	void JacobiIterationStrict(
+		DArray<float> lambda,
+		DArray<Vec3f> impulse,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<float> eta,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<int> nbq,
+		DArray<float> d,
 		DArray<float> mass,
 		float mu,
 		float g,
@@ -251,55 +314,152 @@ namespace dyno
 	);
 
 
-	template<typename Coord, typename Real, typename Constraint>
-	__global__ void checkOutError(
-		DArray<Coord> J,
-		DArray<Coord> mImpulse,
-		DArray<Constraint> constraints,
-		DArray<Real> eta,
-		DArray<Real> error
-	)
-	{
-		int tId = threadIdx.x + blockIdx.x * blockDim.x;
-		if (tId >= constraints.size())
-			return;
+	Real checkOutError(
+		DArray<Vec3f> J,
+		DArray<Vec3f> mImpulse,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<float> eta
+	);
 
-		int idx1 = constraints[tId].bodyId1;
-		int idx2 = constraints[tId].bodyId2;
+	void calculateDiagnals(
+		DArray<float> d,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B
+	);
 
-		Real tmp = 0;
-		tmp += J[4 * tId].dot(mImpulse[idx1 * 2]) + J[4 * tId + 1].dot(mImpulse[idx1 * 2 + 1]);
-		if (idx2 != INVALID)
-			tmp += J[4 * tId + 2].dot(mImpulse[idx2 * 2]) + J[4 * tId + 3].dot(mImpulse[idx2 * 2 + 1]);
+	void preConditionJ(
+		DArray<Vec3f> J,
+		DArray<float> d,
+		DArray<float> eta
+	);
 
-		Real e = tmp - eta[tId];
-		error[tId] = e * e;
-	}
+	bool saveVectorToFile(
+		const std::vector<float>& vec,
+		const std::string& filename
+	);
 
-	template<typename Real>
-	Real getErrorNorm(
-		CArray<Real> error
-	)
-	{
-		Real tmp = 0;
-		int num = error.size();
-		for (int i = 0; i < num; i++)
-		{
-			tmp += error[i];
-		}
-		return sqrt(tmp);
-	}
 
+	void calculateEtaVectorForRelaxation(
+		DArray<float> eta,
+		DArray<Vec3f> J,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray <TConstraintPair<float>> constraints
+	);
+
+	double checkOutErrors(
+		DArray<float> errors
+	);
 	
 
 
+	void calculateMatrixA(
+		DArray<Vec3f> &J,
+		DArray<Vec3f> &B,
+		DArray<float> &A,
+		DArray<TConstraintPair<float>> &constraints,
+		float k
+	);
 
+	bool saveMatrixToFile(
+		DArray<float> &Matrix,
+		int n,
+		const std::string& filename
+	);
 
+	bool saveVectorToFile(
+		DArray<float>& vec,
+		const std::string& filename
+	);
 
+	void vectorSub(
+		DArray<float> &ans,
+		DArray<float> &subtranhend,
+		DArray<float> &minuend,
+		DArray<TConstraintPair<float>> &constraints
+	);
 
+	void vectorAdd(
+		DArray<float>& ans,
+		DArray<float>& v1,
+		DArray<float>& v2,
+		DArray<TConstraintPair<float>>& constraints
+	);
 
+	void vectorMultiplyScale(
+		DArray<float> &ans,
+		DArray<float> &initialVec,
+		float scale,
+		DArray<TConstraintPair<float>>& constraints
+	);
 
+	void vectorClampSupport(
+		DArray<float> v,
+		DArray<TConstraintPair<float>> constraints
+	);
 
-	
+	void vectorClampFriction(
+		DArray<float> v,
+		DArray<TConstraintPair<float>> constraints,
+		int contact_size,
+		float mu
+	);
 
+	void matrixMultiplyVec(
+		DArray<Vec3f> &J,
+		DArray<Vec3f> &B,
+		DArray<float> &lambda,
+		DArray<float> &ans,
+		DArray<TConstraintPair<float>> &constraints,
+		int bodyNum
+	);
+
+	float vectorNorm(
+		DArray<float> &a,
+		DArray<float> &b
+	);
+
+	void vectorMultiplyVector(
+		DArray<float>& v1,
+		DArray<float>& v2,
+		DArray<float>& ans,
+		DArray<TConstraintPair<float>>& constraints
+	);
+
+	void calculateImpulseByLambda(
+		DArray<float> lambda,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<Vec3f> impulse,
+		DArray<Vec3f> B
+	);
+
+	void preconditionedResidual(
+		DArray<float> &residual,
+		DArray<float> &ans,
+		DArray<float> &k_1,
+		DArray<Mat2f> &k_2,
+		DArray<Mat3f> &k_3,
+		DArray<TConstraintPair<float>> &constraints
+	);
+
+	void buildCFMAndERP(
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<float> CFM,
+		DArray<float> ERP,
+		float hertz,
+		float zeta,
+		float dt
+	);
+
+	void calculateLinearSystemLHS(
+		DArray<Vec3f>& J,
+		DArray<Vec3f>& B,
+		DArray<Vec3f>& impulse,
+		DArray<float>& lambda,
+		DArray<float>& ans,
+		DArray<float>& CFM,
+		DArray<TConstraintPair<float>>& constraints
+	);
 }

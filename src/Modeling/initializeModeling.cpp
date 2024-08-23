@@ -2,21 +2,22 @@
 
 #include "NodeFactory.h"
 
-#include "PlaneModel.h"
-#include "CubeModel.h"
-#include "SphereModel.h"
-#include "CylinderModel.h"
-#include "ConeModel.h"
-#include "Turning.h"
-#include "Merge.h"
+#include "BasicShapes/PlaneModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
+#include "BasicShapes/CylinderModel.h"
+#include "BasicShapes/ConeModel.h"
+#include "BasicShapes/CapsuleModel.h"
+
+#include "Commands/Turning.h"
+#include "Commands/Merge.h"
+#include "Commands/Turning.h"
 
 #include "StaticTriangularMesh.h"
 #include "GLWireframeVisualModule.h"
 #include "GLSurfaceVisualModule.h"
-#include "Turning.h"
 
 #include "Mapping/MergeTriangleSet.h"
-#include "CapsuleModel.h"
 
 namespace dyno 
 {

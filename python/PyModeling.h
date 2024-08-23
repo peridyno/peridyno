@@ -1,7 +1,7 @@
 #pragma once
 #include "PyCommon.h"
 
-#include "CapsuleModel.h"
+#include "BasicShapes/CapsuleModel.h"
 template <typename TDataType>
 void declare_capsule_model(py::module& m, std::string typestr) {
 	using Class = dyno::CapsuleModel<TDataType>;
@@ -22,7 +22,7 @@ void declare_capsule_model(py::module& m, std::string typestr) {
 		.def("out_capsule", &Class::outCapsule, py::return_value_policy::reference);
 }
 
-#include "ConeModel.h"
+#include "BasicShapes/ConeModel.h"
 template <typename TDataType>
 void declare_cone_model(py::module& m, std::string typestr) {
 	using Class = dyno::ConeModel<TDataType>;
@@ -42,7 +42,7 @@ void declare_cone_model(py::module& m, std::string typestr) {
 		.def("out_cone", &Class::outCone, py::return_value_policy::reference);
 }
 
-#include "CopyModel.h"
+#include "Commands/CopyModel.h"
 template <typename TDataType>
 void declare_copy_model(py::module& m, std::string typestr) {
 	using Class = dyno::CopyModel<TDataType>;
@@ -63,7 +63,7 @@ void declare_copy_model(py::module& m, std::string typestr) {
 		.value("Multiply", Class::ScaleMode::Multiply);
 }
 
-#include "CopyToPoint.h"
+#include "Commands/CopyToPoint.h"
 template <typename TDataType>
 void declare_copy_to_point(py::module& m, std::string typestr) {
 	using Class = dyno::CopyToPoint<TDataType>;
@@ -81,7 +81,7 @@ void declare_copy_to_point(py::module& m, std::string typestr) {
 		.value("Multiply", Class::ScaleMode::Multiply);
 }
 
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
 template <typename TDataType>
 void declare_cube_model(py::module& m, std::string typestr) {
 	using Class = dyno::CubeModel<TDataType>;
@@ -103,7 +103,7 @@ void declare_cube_model(py::module& m, std::string typestr) {
 		.def("out_cube", &Class::outCube, py::return_value_policy::reference);
 }
 
-#include "CylinderModel.h"
+#include "BasicShapes/CylinderModel.h"
 template <typename TDataType>
 void declare_cylinder_model(py::module& m, std::string typestr) {
 	using Class = dyno::CylinderModel<TDataType>;
@@ -138,7 +138,7 @@ void declare_ear_clipper(py::module& m, std::string typestr) {
 	//.def("poly_clip", &Class::polyClip);
 }
 
-#include "Extrude.h"
+#include "Commands/Extrude.h"
 template <typename TDataType>
 void declare_extrude_model(py::module& m, std::string typestr) {
 	using Class = dyno::ExtrudeModel<TDataType>;
@@ -197,7 +197,7 @@ void declare_group(py::module& m, std::string typestr) {
 		.def("in_primitive_id", &Class::inPrimitiveId, py::return_value_policy::reference);
 }
 
-#include "Merge.h"
+#include "Commands/Merge.h"
 template <typename TDataType>
 void declare_merge(py::module& m, std::string typestr) {
 	using Class = dyno::Merge<TDataType>;
@@ -248,7 +248,7 @@ void declare_normal(py::module& m, std::string typestr) {
 		.def("state_transforms_cone", &Class::stateTransformsCone, py::return_value_policy::reference);
 }
 
-#include "PlaneModel.h"
+#include "BasicShapes/PlaneModel.h"
 template <typename TDataType>
 void declare_plane_model(py::module& m, std::string typestr) {
 	using Class = dyno::PlaneModel<TDataType>;
@@ -285,7 +285,7 @@ void declare_point_clip(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
-#include "PointFromCurve.h"
+#include "Commands/PointFromCurve.h"
 template <typename TDataType>
 void declare_point_from_curve(py::module& m, std::string typestr) {
 	using Class = dyno::PointFromCurve<TDataType>;
@@ -299,7 +299,7 @@ void declare_point_from_curve(py::module& m, std::string typestr) {
 		.def("state_edge_set", &Class::stateEdgeSet, py::return_value_policy::reference);
 }
 
-#include "PolyExtrude.h"
+#include "Commands/PolyExtrude.h"
 template <typename TDataType>
 void declare_poly_extrude(py::module& m, std::string typestr) {
 	using Class = dyno::PolyExtrude<TDataType>;
@@ -315,7 +315,7 @@ void declare_poly_extrude(py::module& m, std::string typestr) {
 		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference);
 }
 
-#include "SphereModel.h"
+#include "BasicShapes/SphereModel.h"
 template <typename TDataType>
 void declare_sphere_model(py::module& m, std::string typestr) {
 	using Class = dyno::SphereModel<TDataType>;
@@ -377,7 +377,7 @@ void declare_static_triangular_mesh(py::module& m, std::string typestr) {
 	//.def("set_visible", &Class::setVisible);
 }
 
-#include "Sweep.h"
+#include "Commands/Sweep.h"
 template <typename TDataType>
 void declare_sweep_model(py::module& m, std::string typestr) {
 	using Class = dyno::SweepModel<TDataType>;
@@ -396,7 +396,7 @@ void declare_sweep_model(py::module& m, std::string typestr) {
 		.def("in_curve", &Class::inCurve, py::return_value_policy::reference);
 }
 
-#include "Transform.h"
+#include "Commands/Transform.h"
 template <typename TDataType>
 void declare_transform_model(py::module& m, std::string typestr) {
 	using Class = dyno::TransformModel<TDataType>;
@@ -418,7 +418,7 @@ void declare_transform_model(py::module& m, std::string typestr) {
 		.value("Null_", Class::inputType::Null_);
 }
 
-#include "Turning.h"
+#include "Commands/Turning.h"
 template <typename TDataType>
 void declare_turning_model(py::module& m, std::string typestr) {
 	using Class = dyno::TurningModel<TDataType>;

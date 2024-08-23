@@ -23,7 +23,7 @@
 
 #include "Module/ComputeModule.h"
 
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
 

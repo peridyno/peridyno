@@ -304,20 +304,20 @@ void declare_granular_module(py::module& m, std::string typestr) {
 		.def(py::init<>());
 }
 
-#include "Peridynamics/Module/OneDimElasticityModule.h"
-template <typename TDataType>
-void declare_one_dim_elasticity_module(py::module& m, std::string typestr) {
-	using Class = dyno::OneDimElasticityModule<TDataType>;
-	using Parent = dyno::ConstraintModule;
-	std::string pyclass_name = std::string("OneDimElasticityModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("constrain", &Class::constrain)
-		.def("solve_elasticity", &Class::solveElasticity)
-		.def("set_iteration_number", &Class::setIterationNumber)
-		.def("get_iteration_number", &Class::getIterationNumber)
-		.def("set_material_stiffness", &Class::setMaterialStiffness);
-}
+// #include "Peridynamics/Module/OneDimElasticityModule.h"
+// template <typename TDataType>
+// void declare_one_dim_elasticity_module(py::module& m, std::string typestr) {
+// 	using Class = dyno::OneDimElasticityModule<TDataType>;
+// 	using Parent = dyno::ConstraintModule;
+// 	std::string pyclass_name = std::string("OneDimElasticityModule") + typestr;
+// 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+// 		.def(py::init<>())
+// 		.def("constrain", &Class::constrain)
+// 		.def("solve_elasticity", &Class::solveElasticity)
+// 		.def("set_iteration_number", &Class::setIterationNumber)
+// 		.def("get_iteration_number", &Class::getIterationNumber)
+// 		.def("set_material_stiffness", &Class::setMaterialStiffness);
+// }
 
 #include "Peridynamics/Module/Peridynamics.h"
 template <typename TDataType>

@@ -140,6 +140,8 @@ namespace dyno
 
 		void updateTopology() override;
 
+		void clearRigidBodySystem();
+
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "A toggle to control the friction");
 
@@ -147,9 +149,9 @@ namespace dyno
 
 		DEF_VAR(Real, GravityValue, 9.8, "");
 
-		DEF_VAR(Real, FrictionCoefficient, 2.0, "");
+		DEF_VAR(Real, FrictionCoefficient, 200, "");
 
-		DEF_VAR(Real, Slop, 0.001, "");
+		DEF_VAR(Real, Slop, 0.0001, "");
 
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
