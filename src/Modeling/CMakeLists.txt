@@ -6,6 +6,7 @@ file(
     LIST_DIRECTORIES false
     CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c*"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.inl"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 )
 

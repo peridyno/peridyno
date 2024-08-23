@@ -97,7 +97,7 @@ void createCapsuleBox(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
 	rigid->addBox(box, rigidBody);
 
 	CapsuleInfo capsule;
-	capsule.center = Vec3f(-1.3, 0.3, 0.35);
+	capsule.center = Vec3f(-1.3, 0.3, 0.5);
 	capsule.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	capsule.halfLength = 0.1f;
 	capsule.radius = 0.1f;

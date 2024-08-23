@@ -20,8 +20,8 @@
 #include <GLSurfaceVisualModule.h>
 #include <GLInstanceVisualModule.h>
 
-#include "PlaneModel.h"
-#include "SphereModel.h"
+#include "BasicShapes/PlaneModel.h"
+#include "BasicShapes/SphereModel.h"
 
 #include "initializeModeling.h"
 #include "ParticleSystem/initializeParticleSystem.h"

@@ -148,7 +148,7 @@ namespace dyno
         this->stateDisplacement()->resize(res, res);
 
         auto topo = this->stateHeightField()->getDataPtr();
-        Real h = this->varPatchSize()->getData() / res;
+        Real h = this->varPatchSize()->getValue() / res;
         topo->setExtents(res, res);
         topo->setGridSpacing(h);
         topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
@@ -159,9 +159,9 @@ namespace dyno
     template<typename TDataType>
     void OceanPatch<TDataType>::updateStates()
     {
-        Real timeScaled = this->varTimeScale()->getData() * this->stateElapsedTime()->getData();
+        Real timeScaled = this->varTimeScale()->getValue() * this->stateElapsedTime()->getValue();
 
-        uint res = this->varResolution()->getData();
+        uint res = this->varResolution()->getValue();
 
         cuExecute2D(make_uint2(res, res),
             OP_GenerateSpectrumKernel,
@@ -212,6 +212,8 @@ namespace dyno
             shifts,
             this->stateDisplacement()->getData(),
             choppiness);
+
+       // topo->rasterize();
     }
 
     template<typename Coord, typename Complex>

@@ -242,6 +242,8 @@ namespace dyno
 			//TODO: consider dHat
 			auto tetA = tets[ids.bodyId1 - elementOffset.tetIndex()];
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetIndex()];
+			//CollisionDetection<Real>::request(manifold, tetA, tetB);
+
 			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
 		}
 		else if (eleType_i == ET_TET && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_TET, ET_BOX))
@@ -317,6 +319,7 @@ namespace dyno
 			//CollisionDetection<Real>::request(manifold, tri, tet);
 
 			CollisionDetection<Real>::request(manifold, tri, tet, dHat, dHat);
+			
 		}
 		//Capsule with other primitives
 		else if (eleType_i == ET_TET && eleType_j == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_TET, ET_CAPSULE))		//tet-capsule

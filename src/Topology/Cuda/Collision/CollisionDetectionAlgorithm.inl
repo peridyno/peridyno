@@ -2349,9 +2349,9 @@ namespace dyno
         // Minkowski Point-Point Normal
         for (int j = 0; j < 8; j++)
         {
-            Vec3f pA = boxA.vertex(i).origin;
+            Vec3f pA = boxA.vertex(j).origin;
             Point3D queryP(pA);
-            Point3D projP = queryP.project(tetB);
+            Point3D projP = queryP.project(triB);
             checkAxisP(pA, projP.origin);
         }
 

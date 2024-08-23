@@ -7,11 +7,11 @@ using namespace dyno;
 #include "initializeModeling.h"
 #include "initializeIO.h"
 
-#include "CubeModel.h"
-#include "SphereModel.h"
-#include "PlaneModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
+#include "BasicShapes/PlaneModel.h"
 #include "Normal.h"
-#include "PointsBehindMesh.h"
+#include "Commands/PointsBehindMesh.h"
 #include "SemiAnalyticalScheme/ParticleRelaxtionOnMesh.h"
 
 #include <ParticleSystem/SquareEmitter.h>

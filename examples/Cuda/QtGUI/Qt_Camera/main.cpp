@@ -1,5 +1,5 @@
 #include <QtApp.h>
-#include <CubeModel.h>
+#include <BasicShapes/CubeModel.h>
 
 using namespace dyno;
 

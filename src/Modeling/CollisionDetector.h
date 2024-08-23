@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "BasicShape.h"
+#include "BasicShapes/BasicShape.h"
 
 #include "Topology/PointSet.h"
 #include "Topology/EdgeSet.h"

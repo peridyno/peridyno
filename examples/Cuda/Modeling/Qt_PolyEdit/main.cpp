@@ -2,13 +2,14 @@
 
 //#include "TrianglePickerNode.h"
 #include "initializeModeling.h"
-#include "PointFromCurve.h"
+#include "Commands/PointFromCurve.h"
 
-#include "Sweep.h"
-#include "SphereModel.h"
-#include "PolyExtrude.h"
+#include "Commands/Sweep.h"
+#include "BasicShapes/SphereModel.h"
+#include "Commands/PolyExtrude.h"
+#include "Commands/CopyToPoint.h"
+
 #include "Group.h"
-#include "CopyToPoint.h"
 
 //ObjIO
 #include "ObjIO/OBJexporter.h"

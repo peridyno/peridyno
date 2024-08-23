@@ -26,10 +26,9 @@
 #include "DataTypes.h"
 #include "Module/ComputeModule.h"
 
-#include "CubeModel.h"
-#include "SphereModel.h"
-#include "CapsuleModel.h"
-#include "BasicShape.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
+#include "BasicShapes/CapsuleModel.h"
 #include "CollisionDetector.h"
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>

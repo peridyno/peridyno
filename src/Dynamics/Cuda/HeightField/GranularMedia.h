@@ -44,7 +44,9 @@ namespace dyno
 		DEF_VAR(uint, Width, 64, "");
 		DEF_VAR(uint, Height, 64, "");
 
-		DEF_VAR(Real, Depth, 0.7f, "Depth of the dilute layer");
+		DEF_VAR(Real, Depth, 1.0f, "Depth");
+
+		DEF_VAR(Real, DepthOfDiluteLayer, 0.7f, "Depth of the dilute layer");
 		DEF_VAR(Real, CoefficientOfDragForce, 0.7f, "The drag force coefficient");
 		DEF_VAR(Real, CoefficientOfFriction, 0.95f, "The frictional coefficient exerted on the dilute layer");
 
@@ -52,6 +54,7 @@ namespace dyno
 
 		DEF_VAR(Real, Gravity, -9.8, "");
 
+	public:
 		DEF_ARRAY2D_STATE(Real, LandScape, DeviceType::GPU, "");
 
 		DEF_ARRAY2D_STATE(Coord4D, Grid, DeviceType::GPU, "");

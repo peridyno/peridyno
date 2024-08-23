@@ -1,4 +1,4 @@
-#include "Coupling.h"
+#include "RigidWaterCoupling.h"
 
 #include "Math/Lerp.h"
 
@@ -7,20 +7,18 @@
 namespace dyno
 {
 	template<typename TDataType>
-	Coupling<TDataType>::Coupling()
+	RigidWaterCoupling<TDataType>::RigidWaterCoupling()
 		: Node()
 	{
 	}
 
 	template<typename TDataType>
-	Coupling<TDataType>::~Coupling()
+	RigidWaterCoupling<TDataType>::~RigidWaterCoupling()
 	{
-		mForce.clear();
-		mTorque.clear();
 	}
 
 	template<typename TDataType>
-	void Coupling<TDataType>::resetStates()
+	void RigidWaterCoupling<TDataType>::resetStates()
 	{
 	}
 
@@ -30,7 +28,7 @@ namespace dyno
 		DArray<Coord> torque,
 		DArray<Coord> vertices,
 		DArray<Triangle> indices,
-		DArray2D<Coord> heights,
+		DArray2D<Real> heights,
 		Coord barycenter,
 		Coord gravity,
 		Coord origin,
@@ -54,10 +52,8 @@ namespace dyno
 
 		Coord triangle_center = (v0 + v1 + v2) / Real(3);
 
-		Coord d_i = bilinear(heights, (triangle_center.x - origin.x) / spacing, (triangle_center.z - origin.z) / spacing);
-
 		//Calculate buoyancy
-		Real sea_level = d_i.y;
+		Real sea_level = bilinear(heights, (triangle_center.x - origin.x) / spacing, (triangle_center.z - origin.z) / spacing);
 		Real h = triangle_center.y < sea_level ? (sea_level - triangle_center.y) : Real(0);
 
 		Real pressure = rho * gravity.norm() * h;
@@ -70,12 +66,14 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Coupling<TDataType>::updateStates()
+	void RigidWaterCoupling<TDataType>::updateStates()
 	{
 		Real dt = this->stateTimeStep()->getData();
 
 		auto vessels = this->getVessels();
 		auto ocean = this->getOcean();
+
+		auto patch = ocean->getOceanPatch();
 
 		for (auto mesh : vessels)
 		{
@@ -99,8 +97,8 @@ namespace dyno
 				mTorque.resize(num);
 			}
 
-			auto heights = ocean->stateHeightField()->getDataPtr();
-			auto& displacements = heights->getDisplacement();
+			auto heights = patch->stateHeightField()->getDataPtr();
+			auto& displacements = heights->calculateHeightField();
 			Coord origin = heights->getOrigin();
 			Real h = heights->getGridSpacing();
 
@@ -131,5 +129,5 @@ namespace dyno
 		}
 	}
 
-	DEFINE_CLASS(Coupling);
+	DEFINE_CLASS(RigidWaterCoupling);
 }
