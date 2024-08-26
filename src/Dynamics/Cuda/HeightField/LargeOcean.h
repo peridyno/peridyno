@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2022 Xiaowei He
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,36 @@
  * limitations under the License.
  */
 #pragma once
-
 #include "OceanBase.h"
-#include "Vessel.h"
 
-#include "Algorithm/Reduction.h"
+#include "Topology/TriangleSet.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class RigidWaterCoupling : public Node
+	class LargeOcean : public OceanBase<TDataType>
 	{
-		DECLARE_TCLASS(RigidWaterCoupling, TDataType)
+		DECLARE_TCLASS(LargeOcean, TDataType)
 	public:
+		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TDataType::Matrix Matrix;
 
-		RigidWaterCoupling();
-		~RigidWaterCoupling() override;
+		LargeOcean();
+		~LargeOcean() override;
 
 	public:
-		DEF_VAR(Real, Damping, Real(0.98), "Translational damping");
-		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "Topology");
 
-		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
-		DEF_NODE_PORT(OceanBase<TDataType>, Ocean, "Ocean");
+		DEF_ARRAY_STATE(Vec2f, TexCoord, DeviceType::GPU, "");
+
+		DEF_ARRAY_STATE(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
+
+		DEF_ARRAY2D_STATE(Vec4f, BumpMap, DeviceType::GPU, "");
 
 	protected:
 		void resetStates() override;
 		void updateStates() override;
-
-	private:
-		DArray<Coord> mForce;
-		DArray<Coord> mTorque;
-
-		Reduction<Coord> mReduce;
 	};
 
-	IMPLEMENT_TCLASS(RigidWaterCoupling, TDataType)
+	IMPLEMENT_TCLASS(LargeOcean, TDataType)
 }

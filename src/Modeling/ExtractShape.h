@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2022 Xiaowei He
+ * Copyright 2022 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,43 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
+#include "Node.h"
+#include "Topology/TextureMesh.h"
 
-#include "OceanBase.h"
-#include "Vessel.h"
-
-#include "Algorithm/Reduction.h"
 
 namespace dyno
 {
+	/**
+	 * @brief A class to merge TextureMeshs.
+	 */
+
 	template<typename TDataType>
-	class RigidWaterCoupling : public Node
+	class ExtractShape: public Node
 	{
-		DECLARE_TCLASS(RigidWaterCoupling, TDataType)
+		DECLARE_TCLASS(ExtractShape, TDataType);
+
 	public:
+		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		RigidWaterCoupling();
-		~RigidWaterCoupling() override;
+		typedef typename TopologyModule::Triangle Triangle;
+
+		ExtractShape();
+
+		~ExtractShape();
 
 	public:
-		DEF_VAR(Real, Damping, Real(0.98), "Translational damping");
-		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");
 
-		DEF_NODE_PORTS(Vessel<TDataType>, Vessel, "Vessel");
-		DEF_NODE_PORT(OceanBase<TDataType>, Ocean, "Ocean");
+		DEF_VAR(std::vector<int>, ShapeId, std::vector<int>{0},"");
+
+		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "TextureMesh01");
+
+		DEF_INSTANCE_STATE(TextureMesh, Target, "");
+
 
 	protected:
 		void resetStates() override;
-		void updateStates() override;
+
 
 	private:
-		DArray<Coord> mForce;
-		DArray<Coord> mTorque;
 
-		Reduction<Coord> mReduce;
+
 	};
 
-	IMPLEMENT_TCLASS(RigidWaterCoupling, TDataType)
+
+
+	IMPLEMENT_TCLASS(ExtractShape, TDataType);
 }

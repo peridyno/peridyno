@@ -4,7 +4,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(TextureMeshToTriangleSet, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	TextureMeshToTriangleSet<TDataType>::TextureMeshToTriangleSet()
 		: TopologyMapping()
 	{
@@ -36,8 +36,29 @@ namespace dyno
 
 		Coord s = globalT.scale();
 
-		vertices[tId] = globalT.rotation() * Coord(v.x * s.x, v.y * s.y, v.z * s.z)+globalT.translation();
+		vertices[tId] = globalT.rotation() * Coord(v.x * s.x, v.y * s.y, v.z * s.z) + globalT.translation();
 	}
+
+	template <typename Coord, typename Transform>
+	__global__ void TransformVertices(
+		DArray<Coord> vertices,
+		DArray<uint> shapeIds,
+		DArray<Transform> localTransform
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= vertices.size()) return;
+
+		uint shapeId = shapeIds[tId];
+		Coord v = vertices[tId];
+
+		Transform locT = localTransform[shapeId];
+		Coord s = locT.scale();
+
+		vertices[tId] = locT.rotation() * Coord(v.x * s.x, v.y * s.y, v.z * s.z) + locT.translation();	
+
+	}
+
 
 	template<typename TDataType>
 	bool TextureMeshToTriangleSet<TDataType>::apply()
@@ -92,6 +113,29 @@ namespace dyno
 				mesh->shapeIds(),
 				devT,
 				this->inTransform()->constData());
+
+			hostT.clear();
+			devT.clear();
+		}
+		else
+		{
+			uint N = mesh->shapes().size();
+			CArray<Transform> hostT(N);
+			DArray<Transform> devT(N);
+
+			for (uint i = 0; i < N; i++)
+			{
+				hostT[i] = mesh->shapes()[i]->boundingTransform;
+			}
+
+			devT.assign(hostT);
+
+			cuExecute(vertices.size(),
+				TransformVertices,
+				vertices,
+				mesh->shapeIds(),
+				devT
+			);
 
 			hostT.clear();
 			devT.clear();

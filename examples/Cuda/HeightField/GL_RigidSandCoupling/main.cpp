@@ -15,6 +15,13 @@
 #include "GltfLoader.h"
 #include "RigidBody/Vechicle.h"
 
+#include "Collision/NeighborElementQuery.h"
+#include "Collision/CollistionDetectionBoundingBox.h"
+
+#include "RigidBody/Module/PJSConstraintSolver.h"
+
+#include "RigidBody/Module/ContactsUnion.h"
+
 #include <Module/GLPhotorealisticInstanceRender.h>
 
 using namespace std;
@@ -32,6 +39,51 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 	jeep->varLocation()->setValue(Vec3f(0.0f, 0.0f, -10.0f));
+
+	//Replace the animation pipeline for jeep
+	{
+		jeep->animationPipeline()->clear();
+
+		auto defaultTopo = std::make_shared<DiscreteElements<DataType3f>>();
+		jeep->stateTopology()->setDataPtr(std::make_shared<DiscreteElements<DataType3f>>());
+
+		auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
+		jeep->stateTopology()->connect(elementQuery->inDiscreteElements());
+		jeep->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+		jeep->stateAttribute()->connect(elementQuery->inAttribute());
+		jeep->animationPipeline()->pushModule(elementQuery);
+		//elementQuery->varSelfCollision()->setValue(false);
+
+		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<DataType3f>>();
+		jeep->stateTopology()->connect(cdBV->inDiscreteElements());
+		jeep->animationPipeline()->pushModule(cdBV);
+
+		auto merge = std::make_shared<ContactsUnion<DataType3f>>();
+		elementQuery->outContacts()->connect(merge->inContactsA());
+		cdBV->outContacts()->connect(merge->inContactsB());
+
+		jeep->animationPipeline()->pushModule(merge);
+
+		auto iterSolver = std::make_shared<PJSConstraintSolver<DataType3f>>();
+		jeep->stateTimeStep()->connect(iterSolver->inTimeStep());
+		jeep->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
+		jeep->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
+		jeep->varGravityValue()->connect(iterSolver->varGravityValue());
+		jeep->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
+		jeep->varSlop()->connect(iterSolver->varSlop());
+		jeep->stateMass()->connect(iterSolver->inMass());
+
+		jeep->stateCenter()->connect(iterSolver->inCenter());
+		jeep->stateVelocity()->connect(iterSolver->inVelocity());
+		jeep->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
+		jeep->stateRotationMatrix()->connect(iterSolver->inRotationMatrix());
+		jeep->stateInertia()->connect(iterSolver->inInertia());
+		jeep->stateQuaternion()->connect(iterSolver->inQuaternion());
+		jeep->stateInitialInertia()->connect(iterSolver->inInitialInertia());
+		jeep->stateTopology()->connect(iterSolver->inDiscreteElements());
+		merge->outContacts()->connect(iterSolver->inContacts());
+		jeep->animationPipeline()->pushModule(iterSolver);
+	}
 
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
