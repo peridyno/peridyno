@@ -87,6 +87,7 @@ NodeDataType WtNodeWidget::dataType(PortType portType, PortIndex portIndex) cons
 		}
 		else {
 			auto& outputFields = this->getOutputFields();
+
 			std::string str = outputFields[portIndex - 1]->getClassName();
 
 			return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };

@@ -189,6 +189,62 @@ Wt::WColor WtConnectionStyle::normalColor() const
 	return NormalColor;
 }
 
+Wt::WColor WtConnectionStyle::normalColor(std::string typeID) const
+{
+
+	std::hash<std::string> hasher;
+
+	std::size_t hash_value = hasher(typeID);
+
+	std::mt19937 gen(static_cast<unsigned int>(hash_value));
+
+	std::uniform_int_distribution<> hueDist(0, 255);
+
+	int hue = hueDist(gen);
+
+	int sat = 120 + hash_value % 129;
+
+	return fromHSL(hash_value, sat, 160);
+}
+
+Wt::WColor WtConnectionStyle::fromHSL(int h, int s, int l) const
+{
+	double hue = h / 255.0;
+	double saturation = s / 255.0;
+	double lightness = l / 255.0;
+
+	double c = (1 - abs(2 * lightness - 1)) * saturation;
+	double x = c * (1 - abs(fmod(hue * 6, 2) - 1));
+	double m = lightness - c / 2;
+
+	double r = 0, g = 0, b = 0;
+
+	if (0 <= hue && hue < 1 / 6) {
+		r = c; g = x; b = 0;
+	}
+	else if (1 / 6 <= hue && hue < 1 / 3) {
+		r = x; g = c; b = 0;
+	}
+	else if (1 / 3 <= hue && hue < 1 / 2) {
+		r = 0; g = c; b = x;
+	}
+	else if (1 / 2 <= hue && hue < 2 / 3) {
+		r = 0; g = x; b = c;
+	}
+	else if (2 / 3 <= hue && hue < 5 / 6) {
+		r = x; g = 0; b = c;
+	}
+	else if (5 / 6 <= hue && hue < 1) {
+		r = c; g = 0; b = x;
+	}
+
+	r = (r + m) * 255;
+	g = (g + m) * 255;
+	b = (b + m) * 255;
+
+	return Wt::WColor(r, g, b);
+}
+
 Wt::WColor WtConnectionStyle::selectedColor() const
 {
 	return SelectedColor;

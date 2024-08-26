@@ -505,8 +505,7 @@ int WtNodeGeometry::equivalentWidgetHeight() const
 {
 	if (_dataModel->validationState() != NodeValidationState::Valid)
 	{
-		//return height() - captionHeight() + validationHeight();
-		return height() - captionHeight() + 0;
+		return height() - captionHeight() + validationHeight();
 	}
 
 	return height() - captionHeight();
@@ -597,36 +596,36 @@ unsigned int WtNodeGeometry::portWidth(PortType portType) const
 }
 
 WtNodeState::WtNodeState(std::unique_ptr<WtNodeDataModel> const& model)
-//: _inConnections(model->nPorts(PortType::In))
-//, _outConnections(model->nPorts(PortType::Out))
-	: _reaction(NOT_REACTING)
+	: _inConnections(model->nPorts(PortType::In))
+	, _outConnections(model->nPorts(PortType::Out))
+	, _reaction(NOT_REACTING)
 	, _reactingPortType(PortType::None)
 	, _resizing(false)
 {}
 
-//std::vector<WtNodeState::ConnectionPtrSet> const& WtNodeState::getEntries(PortType portType) const
-//{
-//	if (portType == PortType::In)
-//		return _inConnections;
-//	else
-//		return _outConnections;
-//}
-//
-//std::vector<WtNodeState::ConnectionPtrSet>& WtNodeState::getEntries(PortType portType)
-//{
-//	if (portType == PortType::In)
-//		return _inConnections;
-//	else
-//		return _outConnections;
-//}
-//
-//WtNodeState::ConnectionPtrSet WtNodeState::connections(PortType portType, PortIndex portIndex) const
-//{
-//	auto const& connections = getEntries(portType);
-//
-//	return connections[portIndex];
-//}
-//
+std::vector<WtNodeState::ConnectionPtrSet> const& WtNodeState::getEntries(PortType portType) const
+{
+	if (portType == PortType::In)
+		return _inConnections;
+	else
+		return _outConnections;
+}
+
+std::vector<WtNodeState::ConnectionPtrSet>& WtNodeState::getEntries(PortType portType)
+{
+	if (portType == PortType::In)
+		return _inConnections;
+	else
+		return _outConnections;
+}
+
+WtNodeState::ConnectionPtrSet WtNodeState::connections(PortType portType, PortIndex portIndex) const
+{
+	auto const& connections = getEntries(portType);
+
+	return connections[portIndex];
+}
+
 //void WtNodeState::setConnection(
 //	PortType portType,
 //	PortIndex portIndex,
@@ -637,14 +636,14 @@ WtNodeState::WtNodeState(std::unique_ptr<WtNodeDataModel> const& model)
 //	connections.at(portIndex).insert(std::make_pair(connection.id(),
 //		&connection));
 //}
-//
-//void WtNodeState::eraseConnection(
-//	PortType portType,
-//	PortIndex portIndex,
-//	boost::uuids::uuid id)
-//{
-//	getEntries(portType)[portIndex].erase(id);
-//}
+
+void WtNodeState::eraseConnection(
+	PortType portType,
+	PortIndex portIndex,
+	boost::uuids::uuid id)
+{
+	getEntries(portType)[portIndex].erase(id);
+}
 
 WtNodeState::ReactToConnectionState WtNodeState::reaction() const
 {

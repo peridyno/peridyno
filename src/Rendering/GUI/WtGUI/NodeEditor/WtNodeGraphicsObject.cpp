@@ -165,38 +165,129 @@ void WtNodePainter::drawConnectionPoints(
 )
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
+
 	auto const& connectionStyle = WtStyleCollection::connectionStyle();
 
 	float diameter = nodeStyle.ConnectionPointDiameter;
+
 	auto reducedDiameter = diameter * 0.6;
 
 	for (PortType portType : {PortType::Out, PortType::In})
 	{
-		//size_t n = state.getEntries(portType).size();
+		size_t n = state.getEntries(portType).size();
 
-		int n = 10;
 		for (unsigned int i = 0; i < n; i++)
 		{
 			Wt::WPointF p = geom.portScenePosition(i, portType);
 
 			//TODO:Bug
-			//auto const& dataType = model->dataType(portType, i);
+			auto const& dataType = model->dataType(portType, i);
 
-			//bool canConnect = (state.getEntries(portType)[i].empty() ||
-			//	(portType == PortType::Out &&
-			//		model->portOutConnectionPolicy(i) == WtNodeDataModel::ConnectionPolicy::Many));
+			bool canConnect = (state.getEntries(portType)[i].empty() ||
+				(portType == PortType::Out &&
+					model->portOutConnectionPolicy(i) == WtNodeDataModel::ConnectionPolicy::Many));
 
-			//double r = 1.0;
+			double r = 1.0;
 
-			//if (state.isReacting() && canConnect && portType == state.reactingPortType())
-			//{
-			//	//auto diff = geom.draggingPos() - p;
-			//	//double dist = std::sqrt();
-			//	bool typeConvertable = false;
-			//}
+			if (state.isReacting() && canConnect && portType == state.reactingPortType())
+			{
+				Wt::WPointF diff = Wt::WPointF(geom.draggingPos().x() - p.x(), geom.draggingPos().y() - p.y());
+
+				double dist = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
+
+				bool typeConvertable = false;
+
+				{
+					if (portType == PortType::In)
+					{
+						typeConvertable = scene.registry().getTypeConverter(state.reactingDataType(), dataType) != nullptr;
+					}
+					else
+					{
+						typeConvertable = scene.registry().getTypeConverter(dataType, state.reactingDataType()) != nullptr;
+					}
+				}
+
+				if (state.reactingDataType().id == dataType.id || typeConvertable)
+				{
+					double const thres = 40.0;
+					r = (dist < thres) ?
+						(2.0 - dist / thres) :
+						1.0;
+				}
+				else
+				{
+					double const thres = 80.0;
+					r = (dist < thres) ?
+						(dist / thres) :
+						1.0;
+				}
+			}
+
+			//TODO: change the ports appearance according to the connection states
+			if (connectionStyle.useDataDefinedColors())
+			{
+				painter->setBrush(connectionStyle.normalColor(dataType.id));
+			}
+			else
+			{
+				painter->setBrush(nodeStyle.ConnectionPointColor);
+			}
+
+			double w = diameter * 0.4 * r;
+			double h = diameter * 0.8 * r;
+			Wt::WPointF vert[5];
+			vert[0] = Wt::WPointF(p.x() - w, p.y() - h);
+			vert[1] = Wt::WPointF(p.x() - w, p.y() + h);
+			vert[2] = Wt::WPointF(p.x() + w, p.y() + h);
+			vert[3] = Wt::WPointF(p.x() + (2.5 * w), p.y());
+			vert[4] = Wt::WPointF(p.x() + w, p.y() - h);
+
+			double dr = diameter * 1 * r;
+			Wt::WPointF diamond[4];
+			diamond[0] = Wt::WPointF(p.x(), p.y() + dr);
+			diamond[1] = Wt::WPointF(p.x() + dr, p.y());
+			diamond[2] = Wt::WPointF(p.x(), p.y() - dr);
+			diamond[3] = Wt::WPointF(p.x() - dr, p.y());
+
+			double odr = diameter * 1.1 * r;
+			double idr = diameter * 0.3 * r;
+			Wt::WPointF diamond_out[4];
+			diamond_out[0] = Wt::WPointF(p.x(), p.y() + odr);
+			diamond_out[1] = Wt::WPointF(p.x() + odr, p.y());
+			diamond_out[2] = Wt::WPointF(p.x(), p.y() - odr);
+			diamond_out[3] = Wt::WPointF(p.x() - odr, p.y());
+
+			Wt::WPointF diamond_inner[4];
+			diamond_inner[0] = Wt::WPointF(p.x(), p.y() + idr);
+			diamond_inner[1] = Wt::WPointF(p.x() + idr, p.y());
+			diamond_inner[2] = Wt::WPointF(p.x(), p.y() - idr);
+			diamond_inner[3] = Wt::WPointF(p.x() - idr, p.y());
+
+			double rx = reducedDiameter * r;
+			double ry = reducedDiameter * r;
+			Wt::WRectF drawRect = Wt::WRectF(p.x() - rx, p.y() - ry, 2 * rx, 2 * ry);
+
+			switch (dataType.shape)
+			{
+			case PortShape::Point:
+				painter->drawEllipse(drawRect);
+				break;
+			case PortShape::Bullet:
+				painter->drawPolygon(diamond_out, 4);
+				painter->setBrush(Wt::StandardColor::White);
+				painter->drawPolygon(diamond_inner, 4);
+
+				break;
+			case PortShape::Diamond:
+				painter->drawPolygon(diamond, 4);
+				break;
+
+			default:
+				break;
+			}
 		}
-
-	}
+	};
 }
 
 void WtNodePainter::drawModelName(
@@ -239,6 +330,22 @@ void WtNodePainter::drawHotKeys(
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
 	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+}
+
+void WtNodePainter::drawEntryLabels(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeState const& state,
+	WtNodeDataModel const* model)
+{
+	for (PortType portType : { PortType::Out, PortType::In })
+	{
+		auto const& nodeStyle = model->nodeStyle();
+
+		auto& entries = state.getEntries(portType);
+
+		size_t n = entries.size();
+	}
 }
 
 //WtNodeGraphicsObject

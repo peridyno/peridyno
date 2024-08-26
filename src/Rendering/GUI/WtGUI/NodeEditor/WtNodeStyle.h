@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <random>
 
 #include "Platform.h"
 #include "json.hpp"
@@ -78,12 +79,15 @@ public:
 	WtConnectionStyle(std::string jsonText);
 
 public:
+	Wt::WColor fromHSL(int h, int s, int l) const;
+
 	static void setConnectionStyle(std::string jsonText);
 
 	Wt::WColor constructionColor() const;
 
 	Wt::WColor normalColor() const;
-	//Wt::WColor normalColor(std::string typeId) const;
+
+	Wt::WColor normalColor(std::string typeId) const;
 
 	Wt::WColor selectedColor() const;
 

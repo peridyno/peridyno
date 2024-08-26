@@ -48,7 +48,11 @@ public:
 		WtNodeDataModel const* model
 	);
 
-	static void drawEntryLabels(Wt::WPainter* painter);
+	static void drawEntryLabels(
+		Wt::WPainter* painter,
+		WtNodeGeometry const& geom,
+		WtNodeState const& state,
+		WtNodeDataModel const* model);
 
 	static void drawConnectionPoints(
 		Wt::WPainter* painter,

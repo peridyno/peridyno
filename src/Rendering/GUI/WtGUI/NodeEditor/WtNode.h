@@ -8,6 +8,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_hash.hpp>
 
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
@@ -111,18 +112,18 @@ public:
 
 	PortIndex hoverHitScenePoint(PortType portType, Wt::WPointF point, Wt::WTransform const& t = Wt::WTransform()) const;
 
-	//PortIndex hoverHitPortArea(PortType portType,
-	//	Wt::WPointF const scenePoint,
-	//	Wt::WTransform const& sceneTransform,
-	//	NodeGeometry const& geom,
-	//	WtNodeDataModel const* mode,
-	//	Wt::WFontMetrics const& metrics) const;
+	PortIndex hoverHitPortArea(PortType portType,
+		Wt::WPointF const scenePoint,
+		Wt::WTransform const& sceneTransform,
+		WtNodeGeometry const& geom,
+		WtNodeDataModel const* mode,
+		Wt::WFontMetrics const& metrics) const;
 
-	//PortIndex findHitPort(PortType portType,
-	//	Wt::WPointF const scenePoint,
-	//	Wt::WTransform const& sceneTransform,
-	//	NodeGeometry const& geom,
-	//	WtNodeDataModel const* model) const;
+	PortIndex findHitPort(PortType portType,
+		Wt::WPointF const scenePoint,
+		Wt::WTransform const& sceneTransform,
+		WtNodeGeometry const& geom,
+		WtNodeDataModel const* model) const;
 
 	bool checkHitHotKey0(Wt::WPointF point, Wt::WTransform const& t = Wt::WTransform()) const;
 
@@ -138,10 +139,10 @@ public:
 
 	unsigned int validationWidth() const;
 
-	//static Wt::WPointF calculateNodePositionBetweenNodePorts(
-	//	PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
-	//	PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
-	//	WtNode& newNode);
+	static Wt::WPointF calculateNodePositionBetweenNodePorts(
+		PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
+		PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
+		WtNode& newNode);
 
 	unsigned int captionHeight() const;
 
@@ -194,21 +195,21 @@ public:
 
 	/// Returns vector of connections ID.
 	/// Some of them can be empty (null)
-	//std::vector<ConnectionPtrSet> const& getEntries(PortType) const;
+	std::vector<ConnectionPtrSet> const& getEntries(PortType) const;
 
-	//std::vector<ConnectionPtrSet>& getEntries(PortType);
+	std::vector<ConnectionPtrSet>& getEntries(PortType);
 
-	//ConnectionPtrSet connections(PortType portType, PortIndex portIndex) const;
+	ConnectionPtrSet connections(PortType portType, PortIndex portIndex) const;
 
-	//void
-	//	setConnection(PortType portType,
-	//		PortIndex portIndex,
-	//		WtConnection& connection);
+	void setConnection(
+		PortType portType,
+		PortIndex portIndex,
+		WtConnection& connection);
 
-	//void
-	//	eraseConnection(PortType portType,
-	//		PortIndex portIndex,
-	//		boost::uuids::uuid id);
+	void eraseConnection(
+		PortType portType,
+		PortIndex portIndex,
+		boost::uuids::uuid id);
 
 	ReactToConnectionState reaction() const;
 
@@ -216,7 +217,8 @@ public:
 
 	NodeDataType reactingDataType() const;
 
-	void setReaction(ReactToConnectionState reaction,
+	void setReaction(
+		ReactToConnectionState reaction,
 		PortType reactingPortType = PortType::None,
 		NodeDataType reactingDataType =
 		NodeDataType());
