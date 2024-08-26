@@ -5,6 +5,11 @@
 
 namespace dyno
 {
+	#define REAL_infinity 1.0e30
+	#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
+	#define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
+	#define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
+
 	template<typename Real>
 	DYN_FUNC TPoint3D<Real>::TPoint3D()
 	{
@@ -1919,6 +1924,7 @@ namespace dyno
 	{
 		origin = pos;
 		direction = dir;
+		direction.normalize();
 	}
 
 	template<typename Real>
@@ -2302,6 +2308,339 @@ namespace dyno
 		}
 	}
 
+	// ------------------------------------------------ [Ray - Shape] ------------------------------------------------
+	/*
+	template<typename Real>
+	DYN_FUNC Real TRay3D<Real>::intersect(const TSphere3D<Real>& sphere, const Real radius, Coord3D& normal) const
+	{
+		Real ra = sphere.radius + radius;
+		Coord3D oc = origin - sphere.center;
+		Real b = oc.dot(direction);
+		Real c = oc.dot(oc) - ra * ra;
+		Real h = b * b - c;
+		if (h < Real(0)) return -1.f; // no intersection
+		h = sqrt(h);
+		Real t0 = -b - h;
+		Real t1 = -b + h;
+		if (t1 < Real(0)) return -1.f; // no intersection
+
+		// find intersection
+		t0 = (t0 < Real(0)) ? t1 : t0;
+		normal = (origin + t0 * direction - sphere.center) / ra;
+		return t0;
+	}
+
+
+	template<typename Real>
+	DYN_FUNC Real TRay3D<Real>::intersect(const TCapsule3D<Real>& capsule, const Real radius, Coord3D& normal) const
+	{
+		Coord3D ba = capsule.endPoint() - capsule.startPoint(); Coord3D oa = origin - capsule.startPoint(); Coord3D rd = direction; Real ra = capsule.radius + radius;
+
+		Real baba = ba.dot(ba);
+		Real bard = ba.dot(rd);
+		Real baoa = ba.dot(oa);
+		Real rdoa = rd.dot(oa);
+		Real oaoa = oa.dot(oa);
+		Real a = baba - bard * bard;
+		Real b = baba * rdoa - baoa * bard;
+		Real c = baba * oaoa - baoa * baoa - ra * ra * baba;
+		Real h = b * b - a * c;
+		Coord3D oc = oa;
+		if (h >= Real(0)) // parallel will be ignored.
+		{
+			Real t = (fIn) ? (-b + sqrt(h)) / a : (-b - sqrt(h)) / a;
+			Real y = baoa + t * bard;
+			// body (Distance to line is const)
+			if (y > 0.0 && y < baba)
+			{
+				normal = (oa + t * rd - ba * (y / baba)) / ra;
+				return t;
+			}
+			if (REAL_GREAT(y, 0.f)) oc = origin - capsule.endPoint();
+		}
+		// caps (Distance to point is const)
+		b = rd.dot(oc);
+		c = oc.dot(oc) - ra * ra;
+		h = b * b - c;
+		if (h > Real(0))
+		{
+			t = -b - sqrt(h);
+			normal = (t * rd + oc) / ra;
+			return t;
+		}
+		return -1.f; // no intersection
+	}
+
+
+	template<typename Real>
+	DYN_FUNC Real TRay3D<Real>::intersect(const TTriangle3D<Real>& triangle, const Real radius, Coord3D& normal) const
+	{
+		// Triangle Space (v0- [V0V1,Normal x V0V1, Normal])
+		//v2\					
+		//	 \		       nY
+		//  v0\_______v1   |__nX   
+		Coord3D oA = triangle.v[0];
+		Coord3D nX = triangle.v[1] - triangle.v[0]; 
+		Coord3D nZ = triangle.normal(); // (v01).cross(v02)
+		Coord3D nY = nZ.cross(nX); // 
+		nX.normalize(); nY.normalize(); nZ.normalize();
+
+		Coord3D v0 = Coord3D(0.f, 0.f, 0.f);
+		Coord3D v1 = triangle.v[1] - oA; v1 = Coord3D(v1.dot(nX), 0.f, 0.f);  // v1.x > 0
+		Coord3D v2 = triangle.v[2] - oA; v2 = Coord3D(v2.dot(nX), v2.dot(nY), 0.f); // v2.y > 0
+		Coord3D ro = origin - oA;		 ro = Coord3D(ro.dot(nX), ro.dot(nY), ro.dot(nZ));
+		Coord3D rd = direction;			 rd = Coord3D(rd.dot(nX), rd.dot(nY), rd.dot(nZ)); rd.normalize();
+		Real rad = radius;
+
+		// check whether ray origin is inside {inside: find fmax t; outside: find fmin t}
+		bool fIn = (TPoint3D<Real>(origin).distance(triangle) - radius < 0.f);
+		Real sIn = (fIn) ? 1.f : -1.f;
+		para = (fIn) ? -1.f : REAL_infinity;
+		auto check_t = [&](const Real& t, const Real& para)
+		{
+			return (t > Real(0)) && ((fIn) ^ (t < para));
+		};
+
+		// bounding box  
+
+		Coord3D lS = Coord3D(min(v2.x, 0.f ), 0.f, 0.f) - Coord3D(rad);
+		Coord3D uS = Coord3D(max(v2.x, v1.x), v2.y, 0.f) + Coord3D(rad);
+		
+		// parallel to axis
+		if (REAL_EQUAL(rd.x, 0.f) && (REAL_LESS(ro.x, lS.x) || REAL_GREAT(ro.x, uS.x))) return -1.f;
+		if (REAL_EQUAL(rd.y, 0.f) && (REAL_LESS(ro.y, lS.y) || REAL_GREAT(ro.y, uS.y))) return -1.f;
+		if (REAL_EQUAL(rd.z, 0.f) && (REAL_LESS(ro.z, lS.z) || REAL_GREAT(ro.z, uS.z))) return -1.f;
+		Coord3D m = Coord3D(1.0 / rdS.x, 1.0 / rdS.y, 1.0 / rdS.z);
+		Coord3D k = ro * m;
+		Coord3D n1 = lS * m;
+		Coord3D n2 = uS * m;
+		Coord3D t1 = n1 - k;
+		Coord3D t2 = n2 - k;
+		Real tN = -REAL_infinity; // Near 
+		Real tF = +REAL_infinity; // Far  
+
+		// nan will be ignored.
+		if (!REAL_EQUAL(rd.x, 0.f)) tN = fmax(tN, t1.x), tF = fmin(tF, t2.x);
+		if (!REAL_EQUAL(rd.y, 0.f)) tN = fmax(tN, t1.y), tF = fmin(tF, t2.y);
+		if (!REAL_EQUAL(rd.z, 0.f)) tN = fmax(tN, t1.z), tF = fmin(tF, t2.z);
+
+		if (tN > tF || tF < Real(0)) return -1.f; // no intersection
+		Real t = (fIn) ? tF : tN;
+
+		// convert to upside (z > 0) ((will be failure when origin is outside and close to sphere or cylinder)
+		Coord3D pos = ro + t * rd;
+		Coord3D s = Coord3D(1); 
+		if (REAL_LESS(pos.z, 0.f)) s.z = -1;
+		pos *= s;
+		ro *= s;
+		rd *= s;
+		
+		// face
+		if (REAL_EQUAL(pos.z, rad))
+		{
+			// Affine
+			// Affine to unit right triangle: [1, 1] * (v1.x * v2.y) = [base, base]
+			// \					
+			//	\			=>		|
+			//   \_______			|____
+			// Affine M = [v2.y , -v2.x] 
+			//            [0,      v1.x] (v1.x >0, v2.y > 0)
+			// q = Mp     (q.x >= 0, q.y >= 0, q.x + q.y <= base)
+			Real base = v1.x * v2.y;
+			pos.x = pos.x * v2.y - pos.y * v2.x;
+			pos.y = pos.y * v1.x;
+			if (!REAL_LESS(pos.x, 0.f) && !REAL_LESS(pos.y, 0.f) && REAL_LESS(pos.x + pos.y, base))
+			{
+				para = t;
+				normal = s * nZ;
+				if (para > 0.f)
+				{
+					// Rotate ray to world space (Para is same)
+					normal = normal[0] * nX + normal[1] * nY + normal[2] * nZ;
+					normal.normalize(); // maybe not necessary
+				}
+				return para;
+			}
+		}
+
+		// edge (3 Cylinder)
+		{
+			
+		}
+
+		// corner (3 Sphere)
+		{
+			Coord3D v = 
+		}
+
+
+		if (para > 0.f)
+		{
+			// Rotate ray to world space (Para is same)
+			normal = normal[0] * nX + normal[1] * nY + normal[2] * nZ;
+			normal.normalize(); // maybe not necessary
+		}
+		return para;
+	}
+
+
+	template<typename Real>
+	DYN_FUNC Real TRay3D<Real>::intersect(const TAlignedBox3D<Real>& abox, const Real radius, Coord3D& normal) const
+	{
+		Coord3D oA = (abox.v1 + abox.v0) * 0.5f;
+		Coord3D siz = (abox.v1 - abox.v0) * 0.5f;
+		Coord3D ro = origin - oA;
+		Coord3D rd = direction;
+		Real rad = radius;
+		Real para;
+
+		// check whether ray origin is inside {inside: find fmax t; outside: find fmin t}
+		bool fIn = (TPoint3D<Real>(origin).distance(abox) - radius < 0.f);
+		Real sIn = (fIn) ? 1.f : -1.f;
+		para = (fIn) ? -1.f : REAL_infinity;
+		auto check_t = [&](const Real& t, const Real& para)
+		{
+			return (t > Real(0)) && ((fIn) ^ (t < para));
+		};
+
+		// bounding box
+		// parallel to axis
+		if (REAL_EQUAL(rd.x, 0.f) && (REAL_LESS(ro.x, -siz.x - rad) || REAL_GREAT(ro.x, siz.x + rad))) return -1.f;
+		if (REAL_EQUAL(rd.y, 0.f) && (REAL_LESS(ro.y, -siz.y - rad) || REAL_GREAT(ro.y, siz.y + rad))) return -1.f;
+		if (REAL_EQUAL(rd.z, 0.f) && (REAL_LESS(ro.z, -siz.z - rad) || REAL_GREAT(ro.z, siz.z + rad))) return -1.f;
+
+		Coord3D m = Coord3D(1.0 / rd.x, 1.0 / rd.y, 1.0 / rd.z);
+		Coord3D n = m * ro;
+		m = abs(m);
+		Coord3D k = m * (siz + Coord3D(rad));
+		Coord3D t1 = -n - k; 
+		Coord3D t2 = -n + k;
+
+		Real tN = -REAL_infinity; // Near 
+		Real tF = +REAL_infinity; // Far  
+
+		// nan will be ignored.
+		if (!REAL_EQUAL(rd.x, 0.f)) { tN = fmax(tN, t1.x); tF = fmin(tF, t2.x); }
+		if (!REAL_EQUAL(rd.y, 0.f)) { tN = fmax(tN, t1.y); tF = fmin(tF, t2.y); }
+		if (!REAL_EQUAL(rd.z, 0.f)) { tN = fmax(tN, t1.z); tF = fmin(tF, t2.z); }
+
+		if (tN > tF || tF < Real(0)) return -1.f; // no intersection
+		Real t = (fIn) ? tF: tN;
+
+		// convert to first octant (will be failure when origin is outside and close to sphere or cylinder)
+		Coord3D pos = ro + t * rd;
+		Coord3D s = Coord3D((1 << (pos.x > 0)) - 1, (1 << (pos.y > 0)) - 1, (1 << (pos.z > 0)) - 1); // sign(pos)
+		ro *= s;
+		rd *= s;
+		pos *= s;
+
+		// faces
+		pos -= siz;
+		Coord3D t_pos = Coord3D(fmax(pos.x, pos.y), fmax(pos.y, pos.z), fmax(pos.z, pos.x));
+		if (!REAL_GREAT(t_pos.x, 0.f) || !REAL_GREAT(t_pos.y, 0.f) || !REAL_GREAT(t_pos.z, 0.f)) // [contain rad == 0]
+		{
+			para = t;
+			normal = s * Coord3D(REAL_EQUAL(pos.x, rad), REAL_EQUAL(pos.y, rad), REAL_EQUAL(pos.z, rad));
+			return para;
+		}
+
+		// some precomputation
+		Coord3D oc = ro - siz; // ro - ao
+		Coord3D dd = rd * rd;
+		Coord3D oo = oc * oc;
+		Coord3D od = oc * rd;
+		Real rad2 = rad * rad;
+
+		// corner (Sphere)
+		{
+			Real b = od.x + od.y + od.z;
+			Real c = oo.x + oo.y + oo.z - rad2;
+			Real h = b * b - c;
+			if (h > Real(0)) {
+				t = -b + sIn * sqrt(h);
+				if (check_t(t, para)) {
+					para = t;
+					normal = s * (oc + t * rd) / rad;
+				}
+			}
+		}
+
+		// edge X (Cylinder)
+		{
+			Real a = dd.y + dd.z;
+			Real b = od.y + od.z;
+			Real c = oo.y + oo.z - rad2;
+			Real h = b * b - a * c;
+			if (h > 0.0 && !REAL_EQUAL(a, 0.f))
+			{
+				t = (- b + sIn * sqrt(h)) / a;
+				if (check_t(t, para) && abs(ro.x + rd.x * t) < siz.x)
+				{
+					para = t;
+					normal = s * Coord3D(0.f, oc.y + t * rd.y, oc.z + t * rd.z) / rad;
+				}
+			}
+		}
+
+		// edge Y (Cylinder)
+		{
+			Real a = dd.z + dd.x;
+			Real b = od.z + od.x;
+			Real c = oo.z + oo.x - rad2;
+			Real h = b * b - a * c;
+			if (h > 0.0 && !REAL_EQUAL(a, 0.f))
+			{
+				t = (-b + sIn * sqrt(h)) / a;
+				if (check_t(t, para) && abs(ro.y + rd.y * t) < siz.y)
+				{
+					para = t;
+					normal = s * Coord3D(oc.x + t * rd.x, 0.f, oc.z + t * rd.z) / rad;
+				}
+			}
+		}
+
+		// edge Z (Cylinder)
+		{
+			Real a = dd.x + dd.y;
+			Real b = od.x + od.y;
+			Real c = oo.x + oo.y - rad2;
+			Real h = b * b - a * c;
+			if (h > 0.0 && !REAL_EQUAL(a, 0.f))
+			{
+				t = (-b + sIn * sqrt(h)) / a;
+				if (check_t(t, para) && abs(ro.z + rd.z * t) < siz.z)
+				{
+					para = t;
+					normal = s * Coord3D(oc.x + t * rd.x, oc.y + t * rd.y, 0.f) / rad;
+				}
+			}
+		}
+
+		if (para > 1e19) para = -1.f;
+		return para;
+	}
+	
+
+	template<typename Real>
+	DYN_FUNC Real TRay3D<Real>::intersect(const TOrientedBox3D<Real>& obb, const Real radius, Coord3D& normal) const
+	{
+		// Rotate ray to box space
+		Coord3D ro = origin - obb.center;
+		Coord3D rd = direction;
+		Coord3D roPrime(ro.dot(obb.u), ro.dot(obb.v), ro.dot(obb.w));
+		Coord3D rdPrime(rd.dot(obb.u), rd.dot(obb.v), rd.dot(obb.w)); rdPrime.normalize();
+		TRay3D<Real> rPrime(roPrime, rdPrime);
+		Coord3D nPrime;
+		Real para = rPrime.intersect(TAlignedBox3D<Real>(-obb.extent, obb.extent), radius, nPrime);
+		if (para > 0.f)
+		{
+			// Rotate ray to world space (Para is same)
+			normal = nPrime[0] * obb.u + nPrime[1] * obb.v + nPrime[2] * obb.w;
+			normal.normalize(); // maybe not necessary
+		}
+		return para;
+	}
+
 	template<typename Real>
 	DYN_FUNC int TRay3D<Real>::intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const
 	{
@@ -2332,6 +2671,7 @@ namespace dyno
 			return 0;
 		}
 	}
+	*/
 
 	template<typename Real>
 	DYN_FUNC Real TRay3D<Real>::parameter(const Coord3D& pos) const
@@ -2398,10 +2738,10 @@ namespace dyno
 		}
 
 		// Find parameter values of closest points
-		// on each segment��s infinite line. Denominator
+		// on each segment's infinite line. Denominator
 		// assumed at this point to be ����det����,
 		// which is always positive. We can check
-		// value of numerators to see if we��re outside
+		// value of numerators to see if we are outside
 		// the [0, 1] x [0, 1] domain.
 		Real sNum = b * e - c * d;
 		Real tNum = a * e - b * d;
@@ -2488,18 +2828,70 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TSegment3D<Real> TSegment3D<Real>::proximity(const TRectangle3D<Real>& rectangle) const
 	{
-		TLine3D<Real> line(startPoint(), direction());
-		TSegment3D<Real> pq = line.proximity(rectangle);
+		Coord3D N = rectangle.axis[0].cross(rectangle.axis[1]);
+		Coord3D D = v1 - v0;
+		Real maxT = D.norm();
+		D.normalize();
+		
+		Coord3D Q = v0 - rectangle.center;
+		Real DdN = D.dot(N);
+		Real absDdN = abs(DdN);
+		if (absDdN > REAL_EPSILON)
+		{
+			// The Seg and rectangle are not parallel, so the seg
+			// intersects the plane of the rectangle.
+			// Solve Q + t*D = s0*W0 + s1*W1 (Q = diff, D = line direction(unit),
+			// W0 = edge 0 direction, W1 = edge 1 direction, N = Cross(W0,W1))
+			// by
+			//   s0 = Dot(W1,Cross(D,Q)) / Dot(D,N)
+			//   s1 = -Dot(W0,Cross(D,Q)) / Dot(D,N)
+			//   t = -Dot(Q,N) / Dot(D,N)
+			Coord3D DxQ = D.cross(Q);
+			Real W1dDxQ = rectangle.axis[1].dot(DxQ);
+			if (abs(W1dDxQ) <= rectangle.extent[0] * absDdN)
+			{
+				Real W0dDxQ = rectangle.axis[0].dot(DxQ);
+				if (abs(W0dDxQ) <= rectangle.extent[1] * absDdN)
+				{
+					Real t = -Q.dot(N) / DdN;
+					if (t >= 0.f && t <= maxT)
+					{
+						Real s0 = W1dDxQ / DdN;
+						Real s1 = -W0dDxQ / DdN;
+						printf("inter\n");
+						return TSegment3D<Real>(v0 + t * D, rectangle.center + s0 * rectangle.axis[0] + s1 * rectangle.axis[1]);
+					}
+				}
+			}
+		}
+		printf("prox\n");
+		Real minDS = REAL_MAX;
+		TSegment3D<Real> minPQ;
+		// Edge -Edge
+		for (int i = 0; i < 4; i++)
+		{
+			TSegment3D<Real> pq = proximity(rectangle.edge(i));
+			if (pq.lengthSquared() < minDS)
+			{
+				minDS = pq.lengthSquared();
+				minPQ = pq;
+			}
+		}
 
-		Real t = parameter(pq.startPoint());
-
-		if (t < Real(0))
-			return TPoint3D<Real>(startPoint()).project(rectangle) - TPoint3D<Real>(startPoint());
-
-		if (t > Real(1))
-			return TPoint3D<Real>(endPoint()).project(rectangle) - TPoint3D<Real>(endPoint());
-
-		return pq;
+		// Point - Face
+		for (int i = 0; i < 2; i++)
+		{
+			Coord3D v = (i == 0)? v0 : v1;
+			TPoint3D<Real> p(v);
+			TPoint3D<Real> q = TPoint3D<Real>(p).project(rectangle);
+			TSegment3D<Real> pq = q - p;
+			if (pq.lengthSquared() < minDS)
+			{
+				minDS = pq.lengthSquared();
+				minPQ = pq;
+			}
+		}
+		return minPQ;
 	}
 
 	template<typename Real>
@@ -3019,19 +3411,21 @@ namespace dyno
 	DYN_FUNC TPoint3D<Real> TRectangle3D<Real>::vertex(const int i) const
 	{
 		int id = i % 4;
+		Coord3D u = axis[0] * extent[0];
+		Coord3D v = axis[1] * extent[1];
 		switch (id)
 		{
 		case 0:
-			return TPoint3D<Real>(center - axis[0] - axis[1]);
+			return TPoint3D<Real>(center - u - v);
 			break;
 		case 1:
-			return TPoint3D<Real>(center + axis[0] - axis[1]);
+			return TPoint3D<Real>(center + u - v);
 			break;
 		case 2:
-			return TPoint3D<Real>(center + axis[0] + axis[1]);
+			return TPoint3D<Real>(center + u + v);
 			break;
 		default:
-			return TPoint3D<Real>(center - axis[0] + axis[1]);
+			return TPoint3D<Real>(center - u + v);
 			break;
 		}
 	}
@@ -3258,6 +3652,17 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r)
+	{
+		center = 0.5f * (v0 + v1);
+		Real len = (v1 - v0).norm();
+
+		rotation = Quat<Real>((0, 1, 0), v1 - v0);
+		radius = Real(r);
+		halfLength = Real(len * 0.5f);
+	}
+
+	template<typename Real>
 	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl)
 		: center(c)
 		, rotation(q)
@@ -3324,6 +3729,34 @@ namespace dyno
 		v[1] = tet.v[1];
 		v[2] = tet.v[2];
 		v[3] = tet.v[3];
+	}
+
+	template<typename Real>
+	DYN_FUNC TSegment3D<Real> TTet3D<Real>::edge(const int index) const
+	{
+		switch (index)
+		{
+		case 0:
+			return TSegment3D<Real>(v[0], v[1]);
+			break;
+		case 1:
+			return TSegment3D<Real>(v[0], v[2]);
+			break;
+		case 2:
+			return TSegment3D<Real>(v[0], v[3]);
+			break;
+		case 3:
+			return TSegment3D<Real>(v[1], v[2]);
+			break;
+		case 4:
+			return TSegment3D<Real>(v[1], v[3]);
+			break;
+		case 5:
+			return TSegment3D<Real>(v[2], v[3]);
+			break;
+		default:
+			break;
+		}
 	}
 
 	template<typename Real>
@@ -3988,6 +4421,70 @@ namespace dyno
 		v = obb.v;
 		w = obb.w;
 		extent = obb.extent;
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TOrientedBox3D<Real>::vertex(const int i) const
+	{
+		int id = i % 8;
+		Coord3D hu = u * extent[0];
+		Coord3D hv = v * extent[1];
+		Coord3D hw = w * extent[2];
+
+		return TPoint3D<Real>(center + (2 * (id & 1) - 1) * hu + (2 * ((id >> 1) & 1) - 1) * hv + (2 * ((id >> 2) & 1) - 1) * hw);
+	}
+
+	template<typename Real>
+	DYN_FUNC TSegment3D<Real> TOrientedBox3D<Real>::edge(const int i) const
+	{
+		int id = i % 12;
+		Vec2u table[12] = { Vec2u(0, 1), Vec2u(1, 3), Vec2u(2, 3), Vec2u(0, 2),
+			Vec2u(0, 4), Vec2u(1, 5), Vec2u(2, 6), Vec2u(3, 7),
+			Vec2u(4, 5), Vec2u(5, 7), Vec2u(6, 7), Vec2u(4, 6)};
+		return vertex(table[id][0]) - vertex(table[id][1]);
+	}
+
+	template<typename Real>
+	DYN_FUNC TRectangle3D<Real> TOrientedBox3D<Real>::face(const int index) const
+	{
+		int id = index % 6;
+		Coord3D c = center;
+		Coord3D Nx, Ny;
+		Coord2D Ext = Coord2D(0.f);
+		switch (id)
+		{
+		case 0:
+			c -= v * extent[1];
+			Nx = u; Ny = w;
+			Ext = Coord2D(extent[0], extent[2]);
+			break;
+		case 1:
+			c += v * extent[1];
+			Nx = w; Ny = u;
+			Ext = Coord2D(extent[2], extent[0]);
+			break;
+		case 2:
+			c -= u * extent[0];
+			Nx = w; Ny = v;
+			Ext = Coord2D(extent[2], extent[1]);
+			break;
+		case 3:
+			c += u * extent[0];
+			Nx = v; Ny = w;
+			Ext = Coord2D(extent[1], extent[2]);
+			break; 
+		case 4:
+			c -= w * extent[2];
+			Nx = v; Ny = u;
+			Ext = Coord2D(extent[1], extent[0]);
+			break;
+		default:
+			c += w * extent[2];
+			Nx = u; Ny = v;
+			Ext = Coord2D(extent[0], extent[1]);
+			break;
+		}
+		return TRectangle3D<Real>(c, Nx, Ny, Ext);
 	}
 
 
