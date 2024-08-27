@@ -1081,9 +1081,15 @@ namespace dyno
 				unCenterPosition,
 				this->stateTextureMesh()->getDataPtr()->vertices(),
 				this->stateTextureMesh()->getDataPtr()->shapeIds(),
-				d_ShapeCenter,
-				this->stateTransform()->getValue()
+				d_ShapeCenter
 			);
+
+			auto& reShapes = this->stateTextureMesh()->getDataPtr()->shapes();
+
+			for (size_t i = 0; i < shapeNum; i++)
+			{
+				reShapes[i]->boundingTransform.translation() = reShapes[i]->boundingTransform.translation() + this->varLocation()->getValue();
+			}
 		}
 		else 
 		{
@@ -1092,8 +1098,7 @@ namespace dyno
 			for (size_t i = 0; i < shapeNum; i++)
 			{
 				reShapes[i]->boundingTransform.translation() = Vec3f(0);
-			}
-			
+			}		
 		}
 
 		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
@@ -1455,13 +1460,12 @@ namespace dyno
 	}
 
 
-	template< typename Coord, typename uint, typename Mat4f >
+	template< typename Coord, typename uint>
 	__global__ void ShapeToCenter(
 		DArray<Coord> iniPos,
 		DArray<Coord> finalPos,
 		DArray<uint> shapeId,
-		DArray<Coord> t,
-		Mat4f m
+		DArray<Coord> t
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -1470,7 +1474,6 @@ namespace dyno
 		finalPos[pId] = iniPos[pId] - t[shapeId[pId]];
 		Vec4f P = Vec4f(finalPos[pId][0], finalPos[pId][1], finalPos[pId][2], 1);
 
-		P = m * P;
 		finalPos[pId] = Coord(P[0], P[1], P[2]);
 
 	}
