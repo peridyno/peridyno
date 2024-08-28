@@ -129,7 +129,7 @@ public:
 
 	bool checkHitHotKey1(Wt::WPointF point, Wt::WTransform const& t = Wt::WTransform()) const;
 
-	//QRect resizeRect() const;
+	Wt::WRectF resizeRect() const;
 
 	Wt::WPointF widgetPosition() const;
 
@@ -139,10 +139,10 @@ public:
 
 	unsigned int validationWidth() const;
 
-	static Wt::WPointF calculateNodePositionBetweenNodePorts(
-		PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
-		PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
-		WtNode& newNode);
+	//static Wt::WPointF calculateNodePositionBetweenNodePorts(
+	//	PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
+	//	PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
+	//	WtNode& newNode);
 
 	unsigned int captionHeight() const;
 

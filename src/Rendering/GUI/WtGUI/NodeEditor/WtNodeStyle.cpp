@@ -209,38 +209,59 @@ Wt::WColor WtConnectionStyle::normalColor(std::string typeID) const
 
 Wt::WColor WtConnectionStyle::fromHSL(int h, int s, int l) const
 {
-	double hue = h / 255.0;
-	double saturation = s / 255.0;
-	double lightness = l / 255.0;
+	int r, g, b;
+	if (s == 0)
+	{
+		// 饱和度为0，表示灰色，RGB值相等
+		r = g = b = static_cast<int>(l * 255);
+	}
+	else
+	{
+		float q = l < 0.5f ? l * (1 + s) : l + s - l * s;
+		float p = 2 * l - q;
+		float hk = h / 360.0f;
 
-	double c = (1 - abs(2 * lightness - 1)) * saturation;
-	double x = c * (1 - abs(fmod(hue * 6, 2) - 1));
-	double m = lightness - c / 2;
+		// 计算RGB的临时值
+		float tr = hk + 1.0f / 3.0f;
+		float tg = hk;
+		float tb = hk - 1.0f / 3.0f;
 
-	double r = 0, g = 0, b = 0;
+		// 将临时值转换到0-1范围内
+		tr = tr - static_cast<int>(tr);
+		tg = tg - static_cast<int>(tg);
+		tb = tb - static_cast<int>(tb);
 
-	if (0 <= hue && hue < 1 / 6) {
-		r = c; g = x; b = 0;
-	}
-	else if (1 / 6 <= hue && hue < 1 / 3) {
-		r = x; g = c; b = 0;
-	}
-	else if (1 / 3 <= hue && hue < 1 / 2) {
-		r = 0; g = c; b = x;
-	}
-	else if (1 / 2 <= hue && hue < 2 / 3) {
-		r = 0; g = x; b = c;
-	}
-	else if (2 / 3 <= hue && hue < 5 / 6) {
-		r = x; g = 0; b = c;
-	}
-	else if (5 / 6 <= hue && hue < 1) {
-		r = c; g = 0; b = x;
-	}
+		// 调整负值
+		if (tr < 0) tr += 1;
+		if (tg < 0) tg += 1;
+		if (tb < 0) tb += 1;
 
-	r = (r + m) * 255;
-	g = (g + m) * 255;
-	b = (b + m) * 255;
+		// 计算RGB值
+		float rf, gf, bf;
+
+		// 红色通道
+		if (tr < 1.0f / 6.0f) rf = p + (q - p) * 6.0f * tr;
+		else if (tr < 0.5f) rf = q;
+		else if (tr < 2.0f / 3.0f) rf = p + (q - p) * (2.0f / 3.0f - tr) * 6.0f;
+		else rf = p;
+
+		// 绿色通道
+		if (tg < 1.0f / 6.0f) gf = p + (q - p) * 6.0f * tg;
+		else if (tg < 0.5f) gf = q;
+		else if (tg < 2.0f / 3.0f) gf = p + (q - p) * (2.0f / 3.0f - tg) * 6.0f;
+		else gf = p;
+
+		// 蓝色通道
+		if (tb < 1.0f / 6.0f) bf = p + (q - p) * 6.0f * tb;
+		else if (tb < 0.5f) bf = q;
+		else if (tb < 2.0f / 3.0f) bf = p + (q - p) * (2.0f / 3.0f - tb) * 6.0f;
+		else bf = p;
+
+		// 转换为整数并限制在0-255范围内
+		r = static_cast<int>(rf * 255);
+		g = static_cast<int>(gf * 255);
+		b = static_cast<int>(bf * 255);
+	}
 
 	return Wt::WColor(r, g, b);
 }

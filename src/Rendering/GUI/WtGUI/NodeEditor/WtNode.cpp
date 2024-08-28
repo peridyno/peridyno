@@ -173,6 +173,16 @@ bool WtNodeGeometry::checkHitHotKey1(Wt::WPointF point, Wt::WTransform const& t 
 	return false;
 }
 
+Wt::WRectF WtNodeGeometry::resizeRect() const
+{
+	unsigned int rectSize = 7;
+
+	return Wt::WRectF(_width - rectSize,
+		_height - rectSize,
+		rectSize,
+		rectSize);
+}
+
 //TODO:NodeGeometry need transplant
 
 Wt::WRectF WtNodeGeometry::entryBoundingRect() const
@@ -265,7 +275,7 @@ Wt::WPointF WtNodeGeometry::portScenePosition(PortIndex index, PortType portType
 
 	totalHeight += captionHeight();
 
-	//totalHeight += step * index;
+	totalHeight += step * index;
 
 	// TODO: why?
 	totalHeight += step / 2.0;
@@ -501,15 +511,15 @@ PortIndex WtNodeGeometry::hoverHitScenePoint(PortType portType, Wt::WPointF cons
 //	return Wt::WPointF();
 //}
 
-int WtNodeGeometry::equivalentWidgetHeight() const
-{
-	if (_dataModel->validationState() != NodeValidationState::Valid)
-	{
-		return height() - captionHeight() + validationHeight();
-	}
-
-	return height() - captionHeight();
-}
+//int WtNodeGeometry::equivalentWidgetHeight() const
+//{
+//	if (_dataModel->validationState() != NodeValidationState::Valid)
+//	{
+//		return height() - captionHeight() + validationHeight();
+//	}
+//
+//	return height() - captionHeight();
+//}
 
 unsigned int WtNodeGeometry::captionHeight() const
 {

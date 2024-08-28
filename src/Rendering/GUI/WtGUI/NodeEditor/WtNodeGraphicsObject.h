@@ -64,8 +64,16 @@ public:
 
 	//static void drawFilledConnectionPoints(Wt::WPainter* painter);
 
-	static void drawResizeRect(Wt::WPainter* painter);
-	static void drawValidationRect(Wt::WPainter* painter);
+	static void drawResizeRect(
+		Wt::WPainter* painter,
+		WtNodeGeometry const& geom,
+		WtNodeDataModel const* model);
+
+	static void drawValidationRect(
+		Wt::WPainter* painter,
+		WtNodeGeometry const& geom,
+		WtNodeDataModel const* model,
+		WtNodeGraphicsObject const& graphicsObject);
 };
 
 class WtNodeGraphicsObject

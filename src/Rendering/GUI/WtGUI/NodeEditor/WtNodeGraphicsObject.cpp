@@ -22,6 +22,12 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const
 
 	drawModelName(painter, geom, state, model);
 
+	drawEntryLabels(painter, geom, state, model);
+
+	drawResizeRect(painter, geom, model);
+
+	//drawValidationRect(painter, geom, model, graphicsObject);
+
 }
 
 void WtNodePainter::drawNodeRect(
@@ -277,7 +283,6 @@ void WtNodePainter::drawConnectionPoints(
 				painter->drawPolygon(diamond_out, 4);
 				painter->setBrush(Wt::StandardColor::White);
 				painter->drawPolygon(diamond_inner, 4);
-
 				break;
 			case PortShape::Diamond:
 				painter->drawPolygon(diamond, 4);
@@ -315,7 +320,7 @@ void WtNodePainter::drawModelName(
 
 	painter->setFont(f);
 	//painter->setPen(nodeStyle.FontColor);
-	painter->drawText(boundary, Wt::AlignmentFlag::Left, Wt::WString(name));
+	painter->drawText(boundary, Wt::AlignmentFlag::Center, Wt::WString(name));
 
 	f.setWeight(Wt::FontWeight::Normal);
 	painter->setFont(f);
@@ -345,6 +350,60 @@ void WtNodePainter::drawEntryLabels(
 		auto& entries = state.getEntries(portType);
 
 		size_t n = entries.size();
+
+		for (size_t i = 0; i < n; ++i)
+		{
+			Wt::WPointF p = geom.portScenePosition((PortIndex)i, portType);
+
+			if (entries[i].empty())
+				painter->setPen(Wt::StandardColor::Red);
+			else
+				painter->setPen(Wt::StandardColor::Black);
+
+			std::string s;
+
+			if (model->portCaptionVisible(portType, (PortIndex)i))
+				s = model->portCaption(portType, (PortIndex)i);
+			else
+				s = model->dataType(portType, (PortIndex)i).name;
+
+			/*auto rect = metrics.boundingRect(5);
+
+			p.setY(p.y() + rect.height() / 4.0);
+
+			switch (portType)
+			{
+			case PortType::In:
+				p.setX(5.0);
+				break;
+
+			case PortType::Out:
+				p.setX(geom.width() - 5.0 - rect.width());
+				break;
+
+			default:
+				break;
+			}*/
+
+			Wt::WPointF bottomRight(p.x() - 8, p.y() + 6);
+			Wt::WPointF topLeft(p.x() - 50, p.y() - 6);
+			Wt::WRectF nameRect(topLeft, bottomRight);
+
+			painter->drawText(nameRect, Wt::AlignmentFlag::Right, Wt::WString(s));
+		}
+	}
+}
+
+void WtNodePainter::drawResizeRect(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeDataModel const* model
+)
+{
+	if (model->resizable())
+	{
+		painter->setBrush(Wt::StandardColor::Gray);
+		painter->drawEllipse(geom.resizeRect());
 	}
 }
 
