@@ -177,18 +177,24 @@ namespace dyno
 				}
 
 			}
+			if (mOffset.size() >= shapes.size())
+			{
+				uint offset_i = sizeof(Transform3f) * mOffset[i];
+				mVAO.bindVertexBuffer(&mXTransformBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 0, 1);
+				// bind the scale vector
+				mVAO.bindVertexBuffer(&mXTransformBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), offset_i + sizeof(Vec3f), 1);
+				// bind the rotation matrix
+				mVAO.bindVertexBuffer(&mXTransformBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 2 * sizeof(Vec3f), 1);
+				mVAO.bindVertexBuffer(&mXTransformBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 3 * sizeof(Vec3f), 1);
+				mVAO.bindVertexBuffer(&mXTransformBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 4 * sizeof(Vec3f), 1);
+				mVAO.bind();
+				glDrawArraysInstanced(GL_TRIANGLES, 0, numTriangles * 3, mLists[i].size());
 
-			uint offset_i = sizeof(Transform3f) * mOffset[i];
-			mVAO.bindVertexBuffer(&mXTransformBuffer, 3, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 0, 1);
-			// bind the scale vector
-			mVAO.bindVertexBuffer(&mXTransformBuffer, 4, 3, GL_FLOAT, sizeof(Transform3f), offset_i + sizeof(Vec3f), 1);
-			// bind the rotation matrix
-			mVAO.bindVertexBuffer(&mXTransformBuffer, 5, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 2 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mXTransformBuffer, 6, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 3 * sizeof(Vec3f), 1);
-			mVAO.bindVertexBuffer(&mXTransformBuffer, 7, 3, GL_FLOAT, sizeof(Transform3f), offset_i + 4 * sizeof(Vec3f), 1);
-			mVAO.bind();
-			glDrawArraysInstanced(GL_TRIANGLES, 0, numTriangles * 3, mLists[i].size());
-
+			}
+			else 
+			{
+				printf( "GLPhotorealisticInstanceRender::inTransform Is Error !!!!!!\n");
+			}
 			mVAO.unbind();
 
 		}

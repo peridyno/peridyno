@@ -54,6 +54,9 @@ namespace dyno {
 
 	};
 
+	/**
+	 * @brief The Rigid body information is stored in mVehicleJointInfo.
+	 */
 	struct VehicleRigidBodyInfo 
 	{	
 		VehicleRigidBodyInfo() {};
@@ -79,24 +82,19 @@ namespace dyno {
 		int meshShapeId = -1;
 		ConfigShapeType shapeType = ConfigShapeType::Capsule;
 		Transform3f transform = Transform3f(Vec3f(0), Mat3f::identityMatrix(), Vec3f(1));
-
 		Vec3f Offset = Vec3f(0);
-		//if MeshShapeId
 
-		Vec3f mHalfLength = Vec3f(1);	// if(type == Box);
-		
-		float radius = 1;	//	if(type == Sphere);  if(type == Capsule);
-
+		Vec3f mHalfLength = Vec3f(1);		// if(type == Box);	
+		float radius = 1;					//	if(type == Sphere);  if(type == Capsule);
 		std::vector<Vec3f> tet = {Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };	//	if(type == Tet);
-
-		float capsuleLength = 1;	// if(type == Capsule);
-
+		float capsuleLength = 1;			// if(type == Capsule);
 		ConfigMotionType motion = ConfigMotionType::Dynamic;
 
 	};
 
-
-
+	/**
+	 * @brief The joint information is stored in mVehicleJointInfo.
+	 */
 	struct VehicleJointInfo
 	{
 		VehicleJointInfo() {};
@@ -128,11 +126,8 @@ namespace dyno {
 		ConfigJointType mJointType;
 		Name_Shape mRigidBodyName_1;
 		Name_Shape mRigidBodyName_2;
-		//************************  Joint  ************************:
-		//Vec2i Joint_Actor = Vec2i(-1, -1);//update ElementType bodyType1;ElementType bodyType2;PdActor* actor1 = nullptr;PdActor* actor2 = nullptr;
 		bool mUseMoter = false;
 		bool mUseRange = false;
-		// anchor point in body local space
 		Vector<Real, 3> mAnchorPoint = Vec3f(0);
 		Real mMin = 0;
 		Real mMax = 0;
@@ -140,6 +135,12 @@ namespace dyno {
 		Vector<Real, 3> mAxis = Vector<Real, 3>(1,0,0);
 	};
 
+
+	/**
+	 * @brief The VehicleBind class is used to record information about created rigid bodies and joints.
+			  Rigid bodies information is stored in mVehicleRigidBodyInfo.
+			  Toints information is stored in mVehicleJointInfo.
+	 */
 	class VehicleBind 
 	{
 	public:
@@ -147,6 +148,11 @@ namespace dyno {
 		VehicleBind(int size) 
 		{
 			mVehicleRigidBodyInfo.resize(size);
+			for (int i = 0; i < mVehicleRigidBodyInfo.size(); i++)
+			{
+				mVehicleRigidBodyInfo[i].shapeName = Name_Shape(std::string("Rigid") + std::to_string(i),i);
+				mVehicleRigidBodyInfo[i].meshShapeId = i;
+			}
 			mVehicleJointInfo.resize(size);
 		}
 		~VehicleBind() 
