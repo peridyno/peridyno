@@ -225,21 +225,24 @@ namespace dyno
 				int capsNum = caps.size() / vehicleNum;
 
 				//***************************** Copy Translation *************************//
+				for (uint j = 0; j < spheresNum; j++)
+				{
+					
+					hostCenter[i * spheresNum + j] = q.rotate(hostCenter[i * spheresNum + j ]) + pos;
+				}
 
 				for (uint j = 0; j < boxesNum; j++)
 				{
-					hostCenter[i * boxesNum + j] = q.rotate(hostCenter[i * boxesNum + j]) + pos;
+					int offset = spheres.size();
+					hostCenter[i * boxesNum + j + offset] = q.rotate(hostCenter[i * boxesNum + j + offset]) + pos;
 				}
-				for (uint j = 0; j < spheresNum; j++)
-				{
-					int offset = boxes.size();
-					hostCenter[i * spheresNum + j + offset] = q.rotate(hostCenter[i * spheresNum + j + offset]) + pos;
-				}
+
 				for (uint j = 0; j < tetsNum; j++)
 				{
 					int offset = boxes.size() + spheres.size();
 					hostCenter[i * tetsNum + j + offset] = q.rotate(hostCenter[i * tetsNum + j + offset]) + pos;
 				}
+
 				for (uint j = 0; j < capsNum; j++)
 				{
 					int offset = boxes.size() + spheres.size() + tets.size();
@@ -248,14 +251,15 @@ namespace dyno
 
 				//***************************** Copy Rotation *************************//
 
-				for (uint j = 0; j < boxesNum; j++)
-				{
-					hostQuaternion[i * boxesNum + j] = q * hostQuaternion[i * boxesNum + j];
-				}
 				for (uint j = 0; j < spheresNum; j++)
 				{
-					int offset = boxes.size();
-					hostQuaternion[i * spheresNum + j + offset] = q * hostQuaternion[i * spheresNum + j + offset];
+					
+					hostQuaternion[i * spheresNum + j] = q * hostQuaternion[i * spheresNum + j ];
+				}
+				for (uint j = 0; j < boxesNum; j++)
+				{
+					int offset = spheres.size();
+					hostQuaternion[i * boxesNum + j + offset] = q * hostQuaternion[i * boxesNum + j + offset];
 				}
 				for (uint j = 0; j < tetsNum; j++)
 				{
@@ -269,14 +273,14 @@ namespace dyno
 				}
 
 
+				for (uint j = 0; j < spheresNum; j++)
+				{			
+					hostRotation[i * spheresNum + j] = q.toMatrix3x3() * hostRotation[i * spheresNum + j ];
+				}
 				for (uint j = 0; j < boxesNum; j++)
 				{
-					hostRotation[i * boxesNum + j] = q.toMatrix3x3() * hostRotation[i * boxesNum + j];
-				}
-				for (uint j = 0; j < spheresNum; j++)
-				{
-					int offset = boxes.size();
-					hostRotation[i * spheresNum + j + offset] = q.toMatrix3x3() * hostRotation[i * spheresNum + j + offset];
+					int offset = spheres.size();
+					hostRotation[i * boxesNum + j + offset] = q.toMatrix3x3() * hostRotation[i * boxesNum + j + offset];
 				}
 				for (uint j = 0; j < tetsNum; j++)
 				{
@@ -542,8 +546,9 @@ namespace dyno
 		this->clearRigidBodySystem();
 		this->clearVechicle();
 
+		
 
-		if (!this->varVehicleConfiguration()->getValue().isValid())
+		if (!this->varVehicleConfiguration()->getValue().isValid()&& !bool(this->varVehiclesTransform()->getValue().size())|| this->inTextureMesh()->isEmpty())
 			return;
 
 		
@@ -571,6 +576,9 @@ namespace dyno
 				auto type = rigidInfo[i].shapeType;
 				auto shapeId = rigidInfo[i].meshShapeId;
 				auto transform = rigidInfo[i].transform;
+
+				if (shapeId > texMesh->shapes().size() - 1)
+					continue;
 
 				Vec3f up;
 				Vec3f down;
@@ -760,6 +768,10 @@ namespace dyno
 		/***************** Reset *************/
 		Vechicle<TDataType>::resetStates();
 
+
+		this->updateTopology();
+
+		this->updateInstanceTransform();
 
 	}
 
