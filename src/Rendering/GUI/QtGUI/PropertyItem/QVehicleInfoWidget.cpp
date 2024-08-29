@@ -293,7 +293,7 @@ namespace dyno
 
 		mShapeIDSpin = new QSpinBox;
 		mShapeIDSpin->setRange(-1, 2000);
-		mShapeIDSpin->setValue(-1);
+		mShapeIDSpin->setValue(id);
 		mRemoveButton = new QPushButton("Delete");
 		mOffsetButton = new QPushButton("Edit");
 
