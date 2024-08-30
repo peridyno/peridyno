@@ -183,6 +183,22 @@ Wt::WRectF WtNodeGeometry::resizeRect() const
 		rectSize);
 }
 
+unsigned int WtNodeGeometry::validationHeight() const
+{
+	std::string msg = _dataModel->validationMessage();
+
+	//Error:No Metrics
+	return 10;
+}
+
+unsigned int WtNodeGeometry::validationWidth() const
+{
+	std::string msg = _dataModel->validationMessage();
+
+	//Error:No Metrics
+	return 10;
+}
+
 //TODO:NodeGeometry need transplant
 
 Wt::WRectF WtNodeGeometry::entryBoundingRect() const
@@ -475,17 +491,6 @@ PortIndex WtNodeGeometry::hoverHitScenePoint(PortType portType, Wt::WPointF cons
 //
 //}
 
-//QRect
-//NodeGeometry::
-//resizeRect() const
-//{
-//	unsigned int rectSize = 7;
-//
-//	return QRect(_width - rectSize,
-//		_height - rectSize,
-//		rectSize,
-//		rectSize);
-//}
 
 //Wt::WPointF NodeGeometry::widgetPosition() const
 //{

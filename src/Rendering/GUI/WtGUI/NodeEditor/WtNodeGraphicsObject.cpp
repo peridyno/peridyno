@@ -26,7 +26,7 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const
 
 	drawResizeRect(painter, geom, model);
 
-	//drawValidationRect(painter, geom, model, graphicsObject);
+	drawValidationRect(painter, geom, model, graphicsObject);
 
 }
 
@@ -335,6 +335,88 @@ void WtNodePainter::drawHotKeys(
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
 	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+
+	auto color = nodeStyle.NormalBoundaryColor;
+
+	const Wt::WPen& pen = painter->pen();
+
+	if (model->captionVisible() && model->hotkeyEnabled())
+	{
+		unsigned int captionHeight = geom.captionHeight();
+		unsigned int keyWidth = geom.hotkeyWidth();
+		unsigned int keyShift = geom.hotkeyIncline();
+		unsigned int keyOffset = geom.hotkeyOffset();
+
+		float diam = nodeStyle.ConnectionPointDiameter;
+
+		Wt::WRectF key0(geom.width() + diam - 20, -diam, 20, diam + captionHeight);
+
+		double const radius = 6.0;
+
+		Wt::WPen p(color);
+		p.setWidth(nodeStyle.PenWidth);
+		painter->setPen(p);
+
+		//if (graphicsObject.hotKey0Hovered())
+		//{
+		//	Wt::WPen p1(color);
+		//	p1.setWidth(nodeStyle.HoveredPenWidth);
+		//	painter->setPen(p1);
+		//}
+		//else
+		//{
+		//	Wt::WPen p1(color);
+		//	p1.setWidth(nodeStyle.PenWidth);
+		//	painter->setPen(p1);
+		//}
+
+		//if (graphicsObject.isHotKey0Checked())
+		//{
+		//	painter->setBrush(nodeStyle.GradientColor0);
+		//}
+		//else
+		//{
+		//	painter->setBrush(nodeStyle.HotKeyColor0);
+		//}
+
+		Wt::WPointF points[4];
+		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
+		points[1] = Wt::WPointF(geom.width() + diam - keyOffset, -diam);
+		points[2] = Wt::WPointF(geom.width() + diam - keyShift - keyOffset, captionHeight);
+		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+
+		painter->drawPolygon(points, 4);
+
+		//if (graphicsObject.hotKey1Hovered())
+		//{
+		//	Wt::WPen p2(color);
+		//	p2.setWidth(nodeStyle.HoveredPenWidth);
+		//	painter->setPen(p2);
+		//}
+		//else
+		//{
+		//	Wt::WPen p2(color);
+		//	p2.setWidth(nodeStyle.PenWidth);
+		//	painter->setPen(p2);
+		//}
+
+		//if (graphicsObject.isHotKey1Checked())
+		//{
+		//	painter->setBrush(nodeStyle.GradientColor0);
+		//}
+		//else
+		//{
+		//	painter->setBrush(nodeStyle.HotKeyColor1);
+		//}
+
+		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
+		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+		points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyWidth - keyOffset, captionHeight);
+		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, -diam);
+
+		painter->drawPolygon(points, 4);
+
+	}
 }
 
 void WtNodePainter::drawEntryLabels(
@@ -404,6 +486,62 @@ void WtNodePainter::drawResizeRect(
 	{
 		painter->setBrush(Wt::StandardColor::Gray);
 		painter->drawEllipse(geom.resizeRect());
+	}
+}
+
+void WtNodePainter::drawValidationRect(
+	Wt::WPainter* painter,
+	WtNodeGeometry const& geom,
+	WtNodeDataModel const* model,
+	WtNodeGraphicsObject const& graphicsObject
+)
+{
+	auto modelValidationState = model->validationState();
+
+	if (modelValidationState != NodeValidationState::Valid)
+	{
+		WtNodeStyle const& nodeStyle = model->nodeStyle();
+
+		//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+
+		auto color = nodeStyle.NormalBoundaryColor;
+
+		if (geom.hovered())
+		{
+			Wt::WPen p(color);
+			p.setWidth(Wt::WLength(nodeStyle.HoveredPenWidth, Wt::LengthUnit::Pixel));
+			painter->setPen(p);
+		}
+		else
+		{
+			Wt::WPen p(color);
+			p.setWidth(Wt::WLength(nodeStyle.PenWidth, Wt::LengthUnit::Pixel));
+			painter->setPen(p);
+		}
+
+		if (modelValidationState == NodeValidationState::Error)
+		{
+			painter->setBrush(nodeStyle.ErrorColor);
+		}
+		else
+		{
+			painter->setBrush(nodeStyle.WarningColor);
+		}
+
+		double const radius = 3.0;
+
+		float diam = nodeStyle.ConnectionPointDiameter;
+
+		Wt::WRectF boundary(-diam,
+			-diam + geom.height() - geom.validationHeight(),
+			2.0 * diam + geom.width(),
+			2.0 * diam + geom.validationHeight());
+
+		painter->drawRect(boundary);
+
+		painter->setBrush(Wt::StandardColor::Gray);
+
+		//No ErrorMsg
 	}
 }
 
