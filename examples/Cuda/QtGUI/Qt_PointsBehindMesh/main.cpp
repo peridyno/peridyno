@@ -30,29 +30,28 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setLowerBound(Vec3f(-15.5, -15.0, -15.5));
 	scn->setGravity(Vec3f(0.0f, -0.0f, 0.0f));
 
-	//auto meshes = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
-	//meshes->varLocation()->setValue(Vec3f(0., 1.0, 0.));
-	//meshes->varLatitude()->setValue(4);
-	//meshes->varScale()->setValue(Vec3f(0.4, 0.4, 0.4));
-	//meshes->varLongitude()->setValue(4);
-	//auto meshes = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	
-	auto meshes = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	meshes->varLocation()->setValue(Vec3f(0., 1.0, 0.));
-	meshes->varScale()->setValue(Vec3f(0.4, 0.4, 0.4));
+	auto meshes_1 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	meshes_1->varLocation()->setValue(Vec3f(0., 1.0, 0.));
+	meshes_1->varLatitude()->setValue(8);
+	meshes_1->varScale()->setValue(Vec3f(0.6, 0.6, 0.6));
+	meshes_1->varLongitude()->setValue(8);
 
-	auto pointset = scn->addNode(std::make_shared<PointsBehindMesh<DataType3f>>());
-	pointset->varSamplingDistance()->setValue(0.005);
-	pointset->varThickness()->setValue(0.045);
-	meshes->stateTriangleSet()->connect(pointset->inTriangleSet());
-	pointset->graphicsPipeline()->disable();
+	auto pointset_1 = scn->addNode(std::make_shared<PointsBehindMesh<DataType3f>>());
+	pointset_1->varSamplingDistance()->setValue(0.005);
+	pointset_1->varThickness()->setValue(0.045);
+	meshes_1->stateTriangleSet()->connect(pointset_1->inTriangleSet());
+	//pointset0->graphicsPipeline()->disable();
 
+	auto meshes_2 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	meshes_2->varLocation()->setValue(Vec3f(1., 1.0, 0.));
+	meshes_2->varScale()->setValue(Vec3f(0.4, 0.4, 0.4));
 
-	auto relaxion = scn->addNode(std::make_shared<ParticleRelaxtionOnMesh<DataType3f>>());
-	pointset->statePointNormal()->connect(relaxion->inParticleNormal());
-	pointset->stateGhostPointSet()->connect(relaxion->inPointSet());
-	pointset->outPointBelongTriangleIndex()->connect(relaxion->inParticleBelongTriangleIndex());
-	meshes->stateTriangleSet()->connect(relaxion->inTriangleSet());
+	auto pointset_2 = scn->addNode(std::make_shared<ParticleRelaxtionOnMesh<DataType3f>>());
+	pointset_2->varSamplingDistance()->setValue(0.005);
+	pointset_2->varThickness()->setValue(0.045);
+	meshes_2->stateTriangleSet()->connect(pointset_2->inTriangleSet());
+	pointset_2->graphicsPipeline()->clear();
+
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
@@ -62,14 +61,14 @@ std::shared_ptr<SceneGraph> createScene()
 	ptRender->setColor(Color(1, 0, 0));
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
-	relaxion->stateVelocity()->connect(calculateNorm->inVec());
-	relaxion->statePointSet()->connect(ptRender->inPointSet());
+	pointset_2->stateVelocity()->connect(calculateNorm->inVec());
+	pointset_2->stateGhostPointSet()->connect(ptRender->inPointSet());
 	calculateNorm->outNorm()->connect(colorMapper->inScalar());
 	colorMapper->outColor()->connect(ptRender->inColor());
 
-	relaxion->graphicsPipeline()->pushModule(calculateNorm);
-	relaxion->graphicsPipeline()->pushModule(colorMapper);
-	relaxion->graphicsPipeline()->pushModule(ptRender);
+	pointset_2->graphicsPipeline()->pushModule(calculateNorm);
+	pointset_2->graphicsPipeline()->pushModule(colorMapper);
+	pointset_2->graphicsPipeline()->pushModule(ptRender);
 
 	return scn;
 }

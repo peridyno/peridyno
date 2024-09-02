@@ -17,8 +17,6 @@ namespace dyno
 		mNormalForceFlag.clear();
 	}
 
-
-
 	template<typename Real, typename Coord>
 	__global__ void NormalForce_UpdateVelocity(
 		DArray<Coord> forces,
@@ -32,7 +30,7 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= forces.size()) return;
-		
+
 		if (!flags[pId])
 		{
 			forces[pId] = Coord(0.0f);
@@ -91,14 +89,11 @@ namespace dyno
 
 		Real min_d = 0.0f;
 		int min_triID = -1;
-		
+
 		int triangleID = particleMeshID[pId];
 		int& A_id = triangles[triangleID][0];
 		int& B_id = triangles[triangleID][1];
 		int& C_id = triangles[triangleID][2];
-
-		//if (pId % 1000 == 0)
-		//	printf("%d - %d, %d, %d\r\n", pId, A_id, B_id, C_id);
 
 		Real d_ab = PointToEdgeDistance(positions[pId], vertices[A_id], vertices[B_id]);
 		Real d_bc = PointToEdgeDistance(positions[pId], vertices[B_id], vertices[C_id]);
@@ -115,12 +110,7 @@ namespace dyno
 		if (distance > 0) {
 			NormalForceFlag[pId] = false;
 		}
-		
-
 	}
-
-
-
 
 	template<typename TDataType>
 	void NormalForce<TDataType>::constrain()
@@ -142,13 +132,10 @@ namespace dyno
 		}
 
 		auto ts = this->inTriangleSet()->constDataPtr();
-		//ts->updateTriangle2Edge();
 		auto& vertices = ts->getPoints();
 		auto& triangles = ts->getTriangles();
 		auto& edge2tri = ts->getEdge2Triangle();
 		auto& tri2edge = ts->getTriangle2Edge();
-
-		//std::cout << edge2tri.size() << ", " << tri2edge.size() << std::endl;
 
 		cuExecute(num, NormalForce_EmptyEdge,
 			mNormalForceFlag,
@@ -172,11 +159,7 @@ namespace dyno
 			this->varStrength()->getValue()
 		);
 
-
-
 	}
-
-
 
 	DEFINE_CLASS(NormalForce);
 }
