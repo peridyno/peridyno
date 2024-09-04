@@ -121,11 +121,13 @@ public:
 	/// New WtConnection is attached to the port of the given WtNode.
 	/// The port has parameters (portType, portIndex).
 	/// The opposite connection end will require anothre port.
-	WtConnection(PortType portType,
+	WtConnection(
+		PortType portType,
 		WtNode& node,
 		PortIndex portIndex);
 
-	WtConnection(WtNode& nodeIn,
+	WtConnection(
+		WtNode& nodeIn,
 		PortIndex portIndexIn,
 		WtNode& nodeOut,
 		PortIndex portIndexOut,

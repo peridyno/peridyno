@@ -553,7 +553,9 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _painter(painter)
 	, _locked(false)
 {
-
+	_origin.setX(100);
+	_origin.setY(100);
+	_painter->translate(_origin);
 	paint(_painter);
 }
 
@@ -623,4 +625,9 @@ void WtNodeGraphicsObject::paint(Wt::WPainter* painter)
 //void WtNodeGraphicsObject::setSelected(bool selected)
 //{
 //	_selected = selected;
+//}
+
+//Wt::WPointF WtNodeGraphicsObject::pos()
+//{
+//
 //}

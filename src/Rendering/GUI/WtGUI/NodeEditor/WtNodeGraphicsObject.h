@@ -117,6 +117,12 @@ public:
 
 	void setHotKey1Hovered(bool h) { _hotKey1Hovered = h; }
 
+	void setPos(Wt::WPointF point);
+
+	void setPos(int x, int y);
+
+	Wt::WPointF pos();
+
 	void isSelect();
 
 protected:
@@ -150,6 +156,8 @@ private:
 
 	int HelpTimerID = -1;
 	int PortTimerID = -1;
+
+	Wt::WPointF _origin;
 
 	// either nullptr or owned by parent QGraphicsItem
 	//QGraphicsProxyWidget* _proxyWidget;

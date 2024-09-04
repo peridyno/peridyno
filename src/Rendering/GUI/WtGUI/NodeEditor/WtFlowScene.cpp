@@ -97,10 +97,11 @@ void WtFlowScene::iterateOverNodeDataDependentOrder(std::function<void(WtNodeDat
 
 				for (auto& conn : connections)
 				{
-					if (visitedNodesSet.find(conn.second->getNode(PortType::Out)->id()) == visitedNodesSet.end())
+					/*if (visitedNodesSet.find(conn.second->getNode(PortType::Out)->id()) == visitedNodesSet.end())
 					{
 						return false;
-					}
+					}*/
+					return false;
 				}
 			}
 
@@ -127,16 +128,19 @@ void WtFlowScene::iterateOverNodeDataDependentOrder(std::function<void(WtNodeDat
 	}
 }
 
-Wt::WPointF WtFlowScene::getNodePosition(const WtNode& node) const
-{
-	//return node.nodeGraphicsObject().pos();
-}
-
-Wt::WPointF WtFlowScene::setNodePosition(WtNode& node, const Wt::WPointF& pos) const
-{
-	node.nodeGraphicsObject().setPos(pos);
-	node.nodeGraphicsObject().moveConnections();
-}
+//Wt::WPointF WtFlowScene::getNodePosition(const WtNode& node) const
+//{
+//	node.nodeGraphicsObject.pos()
+//		std::cout << << std::endl;
+//	return Wt::WPointF(1, 1);
+//	//return node.nodeGraphicsObject().pos();
+//}
+//
+//Wt::WPointF WtFlowScene::setNodePosition(WtNode& node, const Wt::WPointF& pos) const
+//{
+//	//node.nodeGraphicsObject().setPos(pos);
+//	node.nodeGraphicsObject().moveConnections();
+//}
 
 void WtFlowScene::removeNode(WtNode& node)
 {
@@ -156,7 +160,7 @@ void WtFlowScene::clearNode(WtNode& node)
 		{
 			for (auto const& pair : connections)
 			{
-				deleteConnection(*pair.second);
+				//deleteConnection(*pair.second);
 			}
 		}
 	}
