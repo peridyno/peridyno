@@ -16,7 +16,7 @@ using dyno::SceneGraph;
 class WtNodeFlowScene : public WtFlowScene
 {
 public:
-	//WtNodeFlowScene(std::shared_ptr<WtDataModelRegistry> registry, Wt::WPainter* painter);
+	WtNodeFlowScene(std::shared_ptr<WtDataModelRegistry> registry, Wt::WPainter* painter);
 	WtNodeFlowScene(Wt::WPainter* painter);
 	~WtNodeFlowScene();
 

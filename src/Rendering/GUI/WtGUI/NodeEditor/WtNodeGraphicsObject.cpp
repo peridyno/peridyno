@@ -27,7 +27,6 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const
 	drawResizeRect(painter, geom, model);
 
 	drawValidationRect(painter, geom, model, graphicsObject);
-
 }
 
 void WtNodePainter::drawNodeRect(
@@ -415,7 +414,6 @@ void WtNodePainter::drawHotKeys(
 		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, -diam);
 
 		painter->drawPolygon(points, 4);
-
 	}
 }
 
@@ -553,8 +551,8 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _painter(painter)
 	, _locked(false)
 {
-	_origin.setX(100);
-	_origin.setY(100);
+	_origin.setX(150);
+	_origin.setY(0);
 	_painter->translate(_origin);
 	paint(_painter);
 }
@@ -566,7 +564,6 @@ WtNode& WtNodeGraphicsObject::node()
 	return _node;
 }
 
-
 WtNode const& WtNodeGraphicsObject::node() const
 {
 	return _node;
@@ -574,7 +571,6 @@ WtNode const& WtNodeGraphicsObject::node() const
 
 void WtNodeGraphicsObject::embedQWidget()
 {
-
 }
 
 Wt::WRectF WtNodeGraphicsObject::boundingRect() const

@@ -37,12 +37,14 @@ public:
 
 	std::shared_ptr<WtConnection> createConnection(PortType connectedPort,
 		WtNode& node,
-		PortIndex portIndex);
+		PortIndex portIndex,
+		Wt::WPainter* painter);
 
 	std::shared_ptr<WtConnection> createConnection(WtNode& nodeIn,
 		PortIndex portIndexIn,
 		WtNode& nodeOut,
 		PortIndex portIndexOut,
+		Wt::WPainter* painter,
 		TypeConverter const& converter = TypeConverter{});
 
 	//std::shared_ptr<WtConnection> restoreConnection(QJsonObject const& connectionJson);

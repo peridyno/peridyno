@@ -98,15 +98,16 @@ public:
 
 	virtual void outputConnectionDeleted(WtConnection const&) {}
 
-	void dataUpdated(PortIndex index);
+	//signal
+	//void dataUpdated(PortIndex index);
 
-	void dataInvalidated(PortIndex index);
+	//void dataInvalidated(PortIndex index);
 
-	void computingStarted();
+	//void computingStarted();
 
-	void computingFinished();
+	//void computingFinished();
 
-	void embeddedWidgetSizeUpdated();
+	//void embeddedWidgetSizeUpdated();
 
 private:
 	WtNodeStyle _nodeStyle;

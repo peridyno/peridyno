@@ -491,7 +491,6 @@ PortIndex WtNodeGeometry::hoverHitScenePoint(PortType portType, Wt::WPointF cons
 //
 //}
 
-
 //Wt::WPointF NodeGeometry::widgetPosition() const
 //{
 //	if (auto w = _dataModel->embeddedWidget())
@@ -641,16 +640,16 @@ WtNodeState::ConnectionPtrSet WtNodeState::connections(PortType portType, PortIn
 	return connections[portIndex];
 }
 
-//void WtNodeState::setConnection(
-//	PortType portType,
-//	PortIndex portIndex,
-//	WtConnection& connection)
-//{
-//	auto& connections = getEntries(portType);
-//
-//	connections.at(portIndex).insert(std::make_pair(connection.id(),
-//		&connection));
-//}
+void WtNodeState::setConnection(
+	PortType portType,
+	PortIndex portIndex,
+	WtConnection& connection)
+{
+	auto& connections = getEntries(portType);
+
+	connections.at(portIndex).insert(std::make_pair(connection.id(),
+		&connection));
+}
 
 void WtNodeState::eraseConnection(
 	PortType portType,
@@ -801,32 +800,32 @@ void WtNode::propagateData(std::shared_ptr<WtNodeData> nodeData,
 	//_nodeGraphicsObject->moveConnections();
 }
 
-//void WtNode::onDataUpdated(PortIndex index)
-//{
-//	auto nodeData = _nodeDataModel->outData(index);
-//
-//	auto connections = _nodeState.connections(PortType::Out, index);
-//
-//	for (auto const& c : connections)
-//		c.second->propagateData(nodeData);
-//}
+void WtNode::onDataUpdated(PortIndex index)
+{
+	auto nodeData = _nodeDataModel->outData(index);
 
-//void WtNode::onNodeSizeUpdated()
-//{
-//	if (nodeDataModel()->embeddedWidget())
-//	{
-//		nodeDataModel()->embeddedWidget()->adjustSize();
-//	}
-//	nodeGeometry().recalculateSize();
-//	for (PortType type : {PortType::In, PortType::Out})
-//	{
-//		for (auto& conn_set : nodeState().getEntries(type))
-//		{
-//			for (auto& pair : conn_set)
-//			{
-//				QtConnection* conn = pair.second;
-//				conn->getConnectionGraphicsObject().move();
-//			}
-//		}
-//	}
-//}
+	auto connections = _nodeState.connections(PortType::Out, index);
+
+	for (auto const& c : connections)
+		c.second->propagateData(nodeData);
+}
+
+void WtNode::onNodeSizeUpdated()
+{
+	/*if (nodeDataModel()->embeddedWidget())
+	{
+		nodeDataModel()->embeddedWidget()->adjustSize();
+	}*/
+	nodeGeometry().recalculateSize();
+	for (PortType type : {PortType::In, PortType::Out})
+	{
+		for (auto& conn_set : nodeState().getEntries(type))
+		{
+			for (auto& pair : conn_set)
+			{
+				WtConnection* conn = pair.second;
+				//conn->getConnectionGraphicsObject().move();
+			}
+		}
+	}
+}

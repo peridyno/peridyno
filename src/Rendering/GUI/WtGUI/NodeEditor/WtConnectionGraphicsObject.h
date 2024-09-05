@@ -29,7 +29,7 @@ class WtConnectionGraphicsObject
 {
 public:
 
-	WtConnectionGraphicsObject(WtFlowScene& scene, WtConnection& connection);
+	WtConnectionGraphicsObject(WtFlowScene& scene, WtConnection& connection, Wt::WPainter* painter);
 
 	virtual ~WtConnectionGraphicsObject();
 
@@ -51,11 +51,10 @@ public:
 
 	void lock(bool locked);
 
-	//protected:
-	//
-	//	void paint(Wt::WPainter* painter,
-	//		QStyleOptionGraphicsItem const* option,
-	//		QWidget* widget = 0) override;
+	bool isSelected() const;
+protected:
+
+	void paint(Wt::WPainter* painter);
 	//
 	//	void
 	//		mousePressEvent(QGraphicsSceneMouseEvent* event) override;

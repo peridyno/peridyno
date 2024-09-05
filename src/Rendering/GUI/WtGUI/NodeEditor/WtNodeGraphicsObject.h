@@ -121,7 +121,7 @@ public:
 
 	void setPos(int x, int y);
 
-	Wt::WPointF pos();
+	Wt::WPointF pos() const;
 
 	void isSelect();
 

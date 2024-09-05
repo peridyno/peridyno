@@ -19,6 +19,79 @@ WtFlowScene::~WtFlowScene()
 	clearScene();
 }
 
+std::shared_ptr<WtConnection> WtFlowScene::createConnection(
+	PortType connectedPort,
+	WtNode& node,
+	PortIndex portIndex,
+	Wt::WPainter* painter)
+{
+	auto connection = std::make_shared<WtConnection>(connectedPort, node, portIndex);
+
+	auto cgo = detail::make_unique<WtConnectionGraphicsObject>(*this, *connection, painter);
+
+	// after this function connection points are set to node port
+	connection->setGraphicsObject(std::move(cgo));
+
+	_connections[connection->id()] = connection;
+
+	// Note: this connection isn't truly created yet. It's only partially created.
+	// Thus, don't send the connectionCreated(...) signal.
+
+	/*connect(connection.get(),
+		&QtConnection::connectionCompleted,
+		this,
+		[this](QtConnection const& c) {
+			connectionCreated(c);
+		});*/
+
+	return connection;
+}
+
+std::shared_ptr<WtConnection> WtFlowScene::createConnection(
+	WtNode& nodeIn,
+	PortIndex portIndexIn,
+	WtNode& nodeOut,
+	PortIndex portIndexOut,
+	Wt::WPainter* painter,
+	TypeConverter const& converter)
+{
+	auto connection = std::make_shared<WtConnection>(
+		nodeIn,
+		portIndexIn,
+		nodeOut,
+		portIndexOut,
+		converter);
+
+	auto cgo = detail::make_unique<WtConnectionGraphicsObject>(*this, *connection, painter);
+
+	nodeIn.nodeState().setConnection(PortType::In, portIndexIn, *connection);
+
+	nodeOut.nodeState().setConnection(PortType::Out, portIndexOut, *connection);
+
+	// after this function connection points are set to node port
+	connection->setGraphicsObject(std::move(cgo));
+
+	// trigger data propagation
+	nodeOut.onDataUpdated(portIndexOut);
+
+	_connections[connection->id()] = connection;
+
+	//signal
+	//connectionCreated(*connection);
+
+	return connection;
+}
+
+void WtFlowScene::deleteConnection(WtConnection& connection)
+{
+	auto it = _connections.find(connection.id());
+	if (it != _connections.end())
+	{
+		connection.removeFromNodes();
+		_connections.erase(it);
+	}
+}
+
 WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPainter* painter)
 {
 	auto node = detail::make_unique<WtNode>(std::move(dataModel));
@@ -130,12 +203,9 @@ void WtFlowScene::iterateOverNodeDataDependentOrder(std::function<void(WtNodeDat
 
 //Wt::WPointF WtFlowScene::getNodePosition(const WtNode& node) const
 //{
-//	node.nodeGraphicsObject.pos()
-//		std::cout << << std::endl;
-//	return Wt::WPointF(1, 1);
-//	//return node.nodeGraphicsObject().pos();
+//	return node.nodeGraphicsObject().pos();
 //}
-//
+
 //Wt::WPointF WtFlowScene::setNodePosition(WtNode& node, const Wt::WPointF& pos) const
 //{
 //	//node.nodeGraphicsObject().setPos(pos);
@@ -182,3 +252,23 @@ std::vector<WtNode*> WtFlowScene::allNodes() const
 
 	return nodes;
 }
+
+//std::vector<WtNode*> WtFlowScene::selectedNodes() const
+//{
+//	//QList<QGraphicsItem*> graphicsItems = selectedItems();
+//
+//	//std::vector<WtNode*> ret;
+//	//ret.reserve(graphicsItems.size());
+//
+//	//for (QGraphicsItem* item : graphicsItems)
+//	//{
+//	//	auto ngo = qgraphicsitem_cast<QtNodeGraphicsObject*>(item);
+//
+//	//	if (ngo != nullptr)
+//	//	{
+//	//		ret.push_back(&ngo->node());
+//	//	}
+//	//}
+//
+//	//return ret;
+//}

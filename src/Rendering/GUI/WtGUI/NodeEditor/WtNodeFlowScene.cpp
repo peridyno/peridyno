@@ -3,7 +3,6 @@
 WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 	: WtFlowScene()
 {
-
 	_painter = painter;
 
 	auto classMap = dyno::Object::getClassMap();
@@ -30,8 +29,6 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 			ret->registerModel<WtNodeWidget>(category, creator);
 		}
 	}
-
-
 
 	this->setRegistry(ret);
 
@@ -81,116 +78,116 @@ void WtNodeFlowScene::createNodeGraphView()
 		addNodeWidget(it.get());
 	}
 
-	//auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
-	//	{
-	//		auto inId = nd->objectId();
+	auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
+		{
+			auto inId = nd->objectId();
 
-	//		if (nodeMap.find(inId) != nodeMap.end())
-	//		{
-	//			auto inBlock = nodeMap[nd->objectId()];
+			if (nodeMap.find(inId) != nodeMap.end())
+			{
+				auto inBlock = nodeMap[nd->objectId()];
 
-	//			auto ports = nd->getImportNodes();
+				auto ports = nd->getImportNodes();
 
-	//			for (int i = 0; i < ports.size(); i++)
-	//			{
-	//				dyno::NodePortType pType = ports[i]->getPortType();
-	//				if (dyno::Single == pType)
-	//				{
-	//					auto node = ports[i]->getNodes()[0];
-	//					if (node != nullptr)
-	//					{
-	//						auto outId = node->objectId();
-	//						if (nodeMap.find(outId) != nodeMap.end())
-	//						{
-	//							auto outBlock = nodeMap[node->objectId()];
-	//							//createConnection(*inBlock, i, *outBlock, 0);
-	//						}
-	//					}
-	//				}
-	//				else if (dyno::Multiple == pType)
-	//				{
-	//					//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
-	//					//we still have to call clear to avoid memory leak.
-	//					auto& nodes = ports[i]->getNodes();
-	//					//ports[i]->clear();
-	//					for (int j = 0; j < nodes.size(); j++)
-	//					{
-	//						if (nodes[j] != nullptr)
-	//						{
-	//							auto outId = nodes[j]->objectId();
-	//							if (nodeMap.find(outId) != nodeMap.end())
-	//							{
-	//								auto outBlock = nodeMap[outId];
-	//								//createConnection(*inBlock, i, *outBlock, 0);
-	//							}
-	//						}
-	//					}
-	//					//nodes.clear();
-	//				}
-	//			}
+				for (int i = 0; i < ports.size(); i++)
+				{
+					dyno::NodePortType pType = ports[i]->getPortType();
+					if (dyno::Single == pType)
+					{
+						auto node = ports[i]->getNodes()[0];
+						if (node != nullptr)
+						{
+							auto outId = node->objectId();
+							if (nodeMap.find(outId) != nodeMap.end())
+							{
+								auto outBlock = nodeMap[node->objectId()];
+								createConnection(*inBlock, i, *outBlock, 0, _painter);
+							}
+						}
+					}
+					else if (dyno::Multiple == pType)
+					{
+						//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
+						//we still have to call clear to avoid memory leak.
+						auto& nodes = ports[i]->getNodes();
+						//ports[i]->clear();
+						for (int j = 0; j < nodes.size(); j++)
+						{
+							if (nodes[j] != nullptr)
+							{
+								auto outId = nodes[j]->objectId();
+								if (nodeMap.find(outId) != nodeMap.end())
+								{
+									auto outBlock = nodeMap[outId];
+									createConnection(*inBlock, i, *outBlock, 0, _painter);
+								}
+							}
+						}
+						nodes.clear();
+					}
+				}
 
-	//			auto fieldInp = nd->getInputFields();
-	//			for (int i = 0; i < fieldInp.size(); i++)
-	//			{
-	//				auto fieldSrc = fieldInp[i]->getSource();
-	//				if (fieldSrc != nullptr) {
-	//					auto parSrc = fieldSrc->parent();
-	//					if (parSrc != nullptr)
-	//					{
-	//						//To handle fields from node states or outputs
-	//						dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
+				auto fieldInp = nd->getInputFields();
+				for (int i = 0; i < fieldInp.size(); i++)
+				{
+					auto fieldSrc = fieldInp[i]->getSource();
+					if (fieldSrc != nullptr) {
+						auto parSrc = fieldSrc->parent();
+						if (parSrc != nullptr)
+						{
+							//To handle fields from node states or outputs
+							dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
 
-	//						//To handle fields that are exported from module outputs
-	//						if (nodeSrc == nullptr)
-	//						{
-	//							dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-	//							if (moduleSrc != nullptr)
-	//								nodeSrc = moduleSrc->getParentNode();
-	//						}
+							//To handle fields that are exported from module outputs
+							if (nodeSrc == nullptr)
+							{
+								dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+								if (moduleSrc != nullptr)
+									nodeSrc = moduleSrc->getParentNode();
+							}
 
-	//						if (nodeSrc != nullptr)
-	//						{
-	//							auto outId = nodeSrc->objectId();
-	//							auto fieldsOut = nodeSrc->getOutputFields();
+							if (nodeSrc != nullptr)
+							{
+								auto outId = nodeSrc->objectId();
+								auto fieldsOut = nodeSrc->getOutputFields();
 
-	//							unsigned int outFieldIndex = 0;
-	//							bool fieldFound = false;
-	//							for (auto f : fieldsOut)
-	//							{
-	//								if (f == fieldSrc)
-	//								{
-	//									fieldFound = true;
-	//									break;
-	//								}
-	//								outFieldIndex++;
-	//							}
+								unsigned int outFieldIndex = 0;
+								bool fieldFound = false;
+								for (auto f : fieldsOut)
+								{
+									if (f == fieldSrc)
+									{
+										fieldFound = true;
+										break;
+									}
+									outFieldIndex++;
+								}
 
-	//							if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
+								if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
 
-	//							if (fieldFound && nodeMap.find(outId) != nodeMap.end())
-	//							{
-	//								auto outBlock = nodeMap[outId];
-	//								//createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	};
+								if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+								{
+									auto outBlock = nodeMap[outId];
+									createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex, _painter);
+								}
+							}
+						}
+					}
+				}
+			}
+		};
 
-	//for (auto it = scn->begin(); it != scn->end(); it++)
-	//{
-	//	createNodeConnections(it.get());
-	//}
+	for (auto it = scn->begin(); it != scn->end(); it++)
+	{
+		createNodeConnections(it.get());
+	}
 
-			// 	clearScene();
-			//
-	//for (auto it = scn->begin(); it != scn->end(); it++)
-	//{
-	//	auto node_ptr = it.get();
-	//	std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
-	//}
+	clearScene();
+
+	for (auto it = scn->begin(); it != scn->end(); it++)
+	{
+		auto node_ptr = it.get();
+		std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
+	}
 
 	nodeMap.clear();
 }
@@ -335,35 +332,35 @@ void WtNodeFlowScene::deleteNode(WtNode& n)
 	}
 }
 
-//void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)
-//{
-//	if (node == nullptr)
-//		return;
-//
-//	auto qNodeWidget = std::make_unique<WtNodeWidget>(node);
-//	auto& qNode = createNode(std::move(qNodeWidget));
-//
-//	//Calculate the position for the newly create node to avoid overlapping
-//	auto& _nodes = this->nodes();
-//	float y = -10000.0f;
-//	for (auto const& _node : _nodes)
-//	{
-//		WtNodeGeometry& geo = _node.second->nodeGeometry();
-//		WtNodeGraphicsObject& obj = _node.second->nodeGraphicsObject();
-//
-//		float h = geo.height();
-//
-//		//Wt::WPointF pos = obj.pos();
-//
-//		//y = std::max(y, float(pos.y() + h));
-//	}
-//
-//	Wt::WPointF posView(0.0f, y + 50.0f);
-//
-//	//qNode.nodeGraphicsObject().setPos(posView);
-//
-//	// emit nodePlaced(qNode);
-//}
+void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)
+{
+	if (node == nullptr)
+		return;
+
+	auto qNodeWidget = std::make_unique<WtNodeWidget>(node);
+	auto& qNode = createNode(std::move(qNodeWidget), _painter);
+
+	//Calculate the position for the newly create node to avoid overlapping
+	//auto& _nodes = this->nodes();
+	//float y = -10000.0f;
+	//for (auto const& _node : _nodes)
+	//{
+	//	WtNodeGeometry& geo = _node.second->nodeGeometry();
+	//	WtNodeGraphicsObject& obj = _node.second->nodeGraphicsObject();
+
+	//	float h = geo.height();
+
+	//	//Wt::WPointF pos = obj.pos();
+
+	//	//y = std::max(y, float(pos.y() + h));
+	//}
+
+	//Wt::WPointF posView(0.0f, y + 50.0f);
+
+	//qNode.nodeGraphicsObject().setPos(posView);
+
+	// emit nodePlaced(qNode);
+}
 
 void WtNodeFlowScene::enableRendering(WtNode& n, bool checked)
 {
@@ -510,189 +507,9 @@ void WtNodeFlowScene::showHelper(WtNode& n)
 	Wt::log("info") << "Show something about this node";
 }
 
-//void WtNodeFlowScene::reorderAllNodes()
-//{
-//	auto scn = dyno::SceneGraphFactory::instance()->active();
-//
-//	dyno::DirectedAcyclicGraph graph;
-//
-//	auto constructDAG = [&](std::shared_ptr<Node> nd) -> void
-//		{
-//
-//			auto inId = nd->objectId();
-//
-//			auto ports = nd->getImportNodes();
-//
-//			graph.addOtherVertices(inId);
-//			graph.removeID();
-//
-//			bool NodeConnection = false;
-//			bool FieldConnection = false;
-//			for (int i = 0; i < ports.size(); i++)
-//			{
-//				dyno::NodePortType pType = ports[i]->getPortType();
-//				if (dyno::Single == pType)
-//				{
-//					auto node = ports[i]->getNodes()[0];
-//					if (node != nullptr)
-//					{
-//						auto outId = node->objectId();
-//
-//						graph.addEdge(outId, inId);
-//
-//						graph.removeID(outId, inId);
-//					}
-//				}
-//				else if (dyno::Multiple == pType)
-//				{
-//					auto& nodes = ports[i]->getNodes();
-//					for (int j = 0; j < nodes.size(); j++)
-//					{
-//						if (nodes[j] != nullptr)
-//						{
-//							auto outId = nodes[j]->objectId();
-//
-//							graph.addEdge(outId, inId);
-//							graph.removeID(outId, inId);
-//
-//						}
-//					}
-//					//nodes.clear();
-//				}
-//
-//			}
-//
-//
-//			auto fieldInp = nd->getInputFields();
-//			for (int i = 0; i < fieldInp.size(); i++)//遍历每个Node的Inputfield
-//			{
-//				auto fieldSrc = fieldInp[i]->getSource();
-//				if (fieldSrc != nullptr) {
-//					auto parSrc = fieldSrc->parent();
-//					if (parSrc != nullptr)
-//					{
-//						Node* nodeSrc = dynamic_cast<Node*>(parSrc);
-//
-//						// Otherwise parSrc is a field of Module
-//						if (nodeSrc == nullptr)
-//						{
-//							dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-//							if (moduleSrc != nullptr)
-//								nodeSrc = moduleSrc->getParentNode();
-//						}
-//
-//						if (nodeSrc != nullptr)
-//						{
-//							auto outId = nodeSrc->objectId();
-//
-//							graph.addEdge(outId, inId);
-//
-//							graph.removeID(outId, inId);
-//						}
-//					}
-//				}
-//			}
-//		};
-//	for (auto it = scn->begin(); it != scn->end(); it++)
-//	{
-//		constructDAG(it.get());
-//	}
-//
-//
-//	dyno::AutoLayoutDAG layout(&graph);
-//	layout.update();
-//
-//	//Set up the mapping from ObjectId to QtNode
-//	auto& _nodes = this->nodes();
-//	std::map<dyno::ObjectId, WtNode*> qtNodeMapper;
-//	std::map<dyno::ObjectId, Node*> nodeMapper;
-//	for (auto const& _node : _nodes)
-//	{
-//		auto const& qtNode = _node.second;
-//		auto model = qtNode->nodeDataModel();
-//
-//		auto nodeData = dynamic_cast<WtNodeWidget*>(model);
-//
-//		if (model != nullptr)
-//		{
-//			auto node = nodeData->getNode();
-//			if (node != nullptr)
-//			{
-//				qtNodeMapper[node->objectId()] = qtNode.get();
-//				nodeMapper[node->objectId()] = node.get();
-//			}
-//		}
-//	}
-//	float tempOffsetY = 0.0f;
-//
-//	float offsetX = 0.0f;
-//	for (size_t l = 0; l < layout.layerNumber(); l++)
-//	{
-//		auto& xc = layout.layer(l);
-//
-//		float offsetY = 0.0f;
-//		float xMax = 0.0f;
-//		for (size_t index = 0; index < xc.size(); index++)
-//		{
-//			dyno::ObjectId id = xc[index];
-//			if (qtNodeMapper.find(id) != qtNodeMapper.end())
-//			{
-//				WtNode* qtNode = qtNodeMapper[id];
-//				WtNodeGeometry& geo = qtNode->nodeGeometry();
-//
-//				float w = geo.width();
-//				float h = geo.height();
-//
-//				xMax = std::max(xMax, w);
-//
-//				Node* node = nodeMapper[id];
-//
-//				node->setBlockCoord(offsetX, offsetY);
-//
-//				offsetY += (h + mDy);
-//
-//			}
-//		}
-//
-//		offsetX += (xMax + mDx);
-//
-//		tempOffsetY = std::max(tempOffsetY, offsetY);
-//
-//
-//
-//	}
-//
-//	//离散节点的排序
-//	auto otherVertices = layout.getOtherVertices();
-//	float width = 0;
-//	float heigth = 0;
-//	std::set<dyno::ObjectId>::iterator it;
-//
-//	float ofstY = tempOffsetY;
-//	float ofstX = 0;
-//	for (it = otherVertices.begin(); it != otherVertices.end(); it++)
-//	{
-//		dyno::ObjectId id = *it;
-//		if (qtNodeMapper.find(id) != qtNodeMapper.end())
-//		{
-//			WtNode* qtNode = qtNodeMapper[id];
-//			WtNodeGeometry& geo = qtNode->nodeGeometry();
-//			width = geo.width();
-//			heigth = geo.height();
-//
-//			Node* node = nodeMapper[id];
-//
-//
-//			node->setBlockCoord(ofstX, ofstY);
-//			ofstX += width + mDx;
-//
-//		}
-//
-//	}
-//
-//
-//	qtNodeMapper.clear();
-//	nodeMapper.clear();
-//
-//	updateNodeGraphView();
-//}
+void WtNodeFlowScene::reorderAllNodes()
+{
+	auto scn = dyno::SceneGraphFactory::instance()->active();
+
+	dyno::DirectedAcyclicGraph graph;
+}
