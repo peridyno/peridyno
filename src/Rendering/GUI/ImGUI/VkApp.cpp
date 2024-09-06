@@ -59,7 +59,7 @@ std::string VkApp::getShadersPath() const
 void VkApp::prepare()
 {
 	if (ctx->enableDebugMarkers) {
-		vks::debugmarker::setup(ctx->deviceHandle());
+		//vks::debugmarker::setup(ctx->deviceHandle());
 	}
 	initSwapchain();
 	createCommandPool();

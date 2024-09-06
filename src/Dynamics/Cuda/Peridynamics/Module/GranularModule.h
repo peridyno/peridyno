@@ -12,13 +12,12 @@ namespace dyno {
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		GranularModule();
 		~GranularModule() override {};
 
 	protected:
-		//bool initializeImpl() override;
 		void computeMaterialStiffness() override;
 
 	private:

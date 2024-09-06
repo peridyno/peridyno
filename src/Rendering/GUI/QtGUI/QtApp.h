@@ -21,6 +21,11 @@ namespace dyno {
 
         void setSceneGraph(std::shared_ptr<SceneGraph> scn);
 
+        /**
+         * Set customized window title; otherwise, the default title will be shown
+         */
+        void setWindowTitle(const std::string& str);
+
         RenderWindow* renderWindow();
 
     private:

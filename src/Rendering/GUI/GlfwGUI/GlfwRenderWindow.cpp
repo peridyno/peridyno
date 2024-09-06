@@ -9,9 +9,6 @@
 #include "Module/MouseInputModule.h"
 #include "Log.h"
 
-#ifdef CUDA_BACKEND
-	#include "Image_IO/image_io.h"
-#endif
 #include <RenderEngine.h>
 #include <OrbitCamera.h>
 #include <TrackballCamera.h>
@@ -30,6 +27,9 @@
 #include "ImGuizmo.h"
 
 #include <ImWidget.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
 
 namespace dyno 
 {
@@ -198,39 +198,41 @@ namespace dyno
 		// Main loop
 		while (!glfwWindowShouldClose(mWindow))
 		{
-			
 			glfwPollEvents();
 
 			if (mAnimationToggle){
 
-				if (mSaveScreenToggle)
+				if (this->isScreenRecordingOn())
 				{
-					if (activeScene->getFrameNumber() % mSaveScreenInterval == 0)
-						saveScreen();
+					saveScreen(activeScene->getFrameNumber());
 				}
 
 				activeScene->takeOneFrame();
 			}
 			
 			activeScene->updateGraphicsContext();
-				
-			// Jian SHI: hack for unit scaling...
-			float planeScale = mRenderParams.planeScale;
-			float rulerScale = mRenderParams.rulerScale;
-			mRenderParams.planeScale *= mCamera->unitScale();
-			mRenderParams.rulerScale *= mCamera->unitScale();
 
-			mRenderEngine->draw(activeScene.get(), mCamera.get(), mRenderParams);
+			// update rendering params
+			mRenderParams.width = mCamera->viewportWidth();
+			mRenderParams.height = mCamera->viewportHeight();
 
-			mRenderParams.planeScale = planeScale;
-			mRenderParams.rulerScale = rulerScale;
+			// check if window is minimized
+			if (mRenderParams.width == 0 || mRenderParams.height == 0)
+				continue;
+
+			mRenderParams.transforms.model = glm::mat4(1);	 // TODO: world transform?
+			mRenderParams.transforms.view = mCamera->getViewMat();
+			mRenderParams.transforms.proj = mCamera->getProjMat();
+			mRenderParams.unitScale = mCamera->unitScale();
+
+			mRenderEngine->draw(activeScene.get(), mRenderParams);
 
 			// Start the Dear ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			if(mShowImWindow)
+			if(showImGUI())
 				mImWindow.draw(this);
 
 // 			// Draw widgets
@@ -278,6 +280,11 @@ namespace dyno
 		return mWindowTitle;
 	}
 
+	void GlfwRenderWindow::setWindowTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(mWindow, title.c_str());
+	}
+
 	void GlfwRenderWindow::setCursorPos(double x, double y)
 	{
 		mCursorPosX = x;
@@ -294,9 +301,7 @@ namespace dyno
 		return mCursorPosY;
 	}
 
-
-
-	bool GlfwRenderWindow::saveScreen(const std::string &file_name) const
+	void GlfwRenderWindow::onSaveScreen(const std::string &filename)
 	{
 		int width;
 		int height;
@@ -307,28 +312,12 @@ namespace dyno
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
-		//TODO:
-#ifdef CUDA_BACKEND
-		Image image(width, height, Image::RGB, data);
-		image.flipVertically();
-		bool status = ImageIO::save(file_name, &image);
-		delete[] data;
-		return status;
-#else
-		return false;
-#endif
-	}
 
-	bool GlfwRenderWindow::saveScreen()
-	{
-		std::stringstream adaptor;
-		adaptor << mSaveScreenIndex++;
-		std::string index_str;
-		adaptor >> index_str;
-		std::string file_name = mOutputPath + std::string("screen_capture_") + index_str + std::string(".ppm");
-		return saveScreen(file_name);
-	}
+		stbi_flip_vertically_on_write(true);
+		int status = stbi_write_bmp(filename.c_str(), width, height, 3, data);
 
+		delete data;
+	}
 
 	void GlfwRenderWindow::turnOnVSync()
 	{
@@ -343,11 +332,6 @@ namespace dyno
 	void GlfwRenderWindow::toggleAnimation()
 	{
 		mAnimationToggle = !mAnimationToggle;
-	}
-
-	void GlfwRenderWindow::toggleImGUI()
-	{
-		mShowImWindow = !mShowImWindow;
 	}
 
 	int GlfwRenderWindow::getWidth()
@@ -375,6 +359,7 @@ namespace dyno
 		glfwSetCursorPosCallback(mWindow, mCursorPosFunc);
 		glfwSetCursorEnterCallback(mWindow, mCursorEnterFunc);
 		glfwSetScrollCallback(mWindow, mScrollFunc);
+
 	}
 
 	void GlfwRenderWindow::drawScene(void)
@@ -389,21 +374,25 @@ namespace dyno
 
 		GlfwRenderWindow* activeWindow = (GlfwRenderWindow*)glfwGetWindowUserPointer(window);
 
-		// handle picking
-		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
-			activeWindow->getButtonAction() == GLFW_PRESS &&
-			activeWindow->getButtonMode() == 0 &&
-			action == GLFW_RELEASE) {
+		// Object selection
+		if (activeWindow->getSelectionMode() == RenderWindow::OBJECT_MODE)
+		{
+			// handle picking
+			if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
+				activeWindow->getButtonAction() == GLFW_PRESS &&
+				activeWindow->getButtonMode() == 0 &&
+				action == GLFW_RELEASE) {
 
-			// in picking
-			int x = fmin(xpos, activeWindow->getCursorPosX());
-			int y = fmax(ypos, activeWindow->getCursorPosY());
-			int w = fabs(xpos - activeWindow->getCursorPosX());
-			int h = fabs(ypos - activeWindow->getCursorPosY());
-			// flip y to texture space...
-			y = activeWindow->getHeight() - y - 1;
+				// in picking
+				int x = fmin(xpos, activeWindow->getCursorPosX());
+				int y = fmax(ypos, activeWindow->getCursorPosY());
+				int w = fabs(xpos - activeWindow->getCursorPosX());
+				int h = fabs(ypos - activeWindow->getCursorPosY());
+				// flip y to texture space...
+				y = activeWindow->getHeight() - y - 1;
 
-			const auto& selection = activeWindow->select(x, y, w, h);
+				const auto& selection = activeWindow->select(x, y, w, h);
+			}
 		}
 
 		auto camera = activeWindow->getCamera();
@@ -412,26 +401,44 @@ namespace dyno
 		activeWindow->setButtonAction(action);
 		activeWindow->setButtonMode(mods);
 
-		PMouseEvent mouseEvent;
-		mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
-		mouseEvent.buttonType = (PButtonType)button;
-		mouseEvent.actionType = (PActionType)action;
-		mouseEvent.mods = (PModifierBits)activeWindow->getButtonMode();
-		mouseEvent.camera = camera;
-		mouseEvent.x = (float)xpos;
-		mouseEvent.y = (float)ypos;
+		// Primitive selection
+		if (activeWindow->getSelectionMode() == RenderWindow::PRIMITIVE_MODE)
+		{
+			PMouseEvent mouseEvent;
+			mouseEvent.ray = camera->castRayInWorldSpace((float)xpos, (float)ypos);
+			mouseEvent.buttonType = (PButtonType)button;
+			mouseEvent.actionType = (PActionType)action;
+			mouseEvent.mods = (PModifierBits)activeWindow->getButtonMode();
+			mouseEvent.camera = camera;
+			mouseEvent.x = (float)xpos;
+			mouseEvent.y = (float)ypos;
 
-		auto activeScene = SceneGraphFactory::instance()->active();
+			auto activeScene = SceneGraphFactory::instance()->active();
 
-		activeScene->onMouseEvent(mouseEvent);
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
+			{
+				activeScene->onMouseEvent(mouseEvent, activeWindow->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
+			
+
+			if (action == GLFW_PRESS)
+			{
+				activeWindow->imWindow()->mousePressEvent(mouseEvent);
+			}
+
+			if (action == GLFW_RELEASE)
+			{
+				activeWindow->imWindow()->mouseReleaseEvent(mouseEvent);
+			}
+		}
 
 		if (action == GLFW_PRESS)
 		{
 			// if(mOpenCameraRotate)
 			camera->registerPoint((float)xpos, (float)ypos);
 			activeWindow->setButtonState(GLFW_DOWN);
-
-			activeWindow->imWindow()->mousePressEvent(mouseEvent);
 		}
 		else
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -439,16 +446,21 @@ namespace dyno
 		if (action == GLFW_RELEASE)
 		{
 			activeWindow->setButtonState(GLFW_UP);
-
-			activeWindow->imWindow()->mouseReleaseEvent(mouseEvent);
 		}
 
-
 		// update cursor position record
-		if (action == GLFW_PRESS)
+		
+		if (action == GLFW_PRESS) 
+		{
 			activeWindow->setCursorPos(xpos, ypos);
-		else
+			activeWindow->mCursorTempX = xpos;
+		}
+		else 
+		{
 			activeWindow->setCursorPos(-1, -1);
+			activeWindow->mCursorTempX = -1;
+		}
+
 	}
 
 	void GlfwRenderWindow::cursorPosCallback(GLFWwindow* window, double x, double y)
@@ -476,15 +488,26 @@ namespace dyno
 			camera->rotateToPoint(x, y);
 		}
 		else if (
-			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT && 
+			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_MIDDLE &&
 			activeWindow->getButtonState() == GLFW_DOWN && 
 			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
 			!activeWindow->mImWindow.cameraLocked()) 
 		{
 			camera->translateToPoint(x, y);
 		}
-
-		activeWindow->imWindow()->mouseMoveEvent(mouseEvent);
+		else if (
+			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_RIGHT &&
+			activeWindow->getButtonState() == GLFW_DOWN &&
+			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
+			!activeWindow->mImWindow.cameraLocked())////
+		{
+			if (activeWindow->mCursorTempX != -1) 
+			{
+				camera->zoom(-0.005 * (x - activeWindow->mCursorTempX));
+				activeWindow->mCursorTempX = x;
+			}
+		}
+		activeWindow->imWindow()->mouseMoveEvent(mouseEvent); 
 	}
 
 	void GlfwRenderWindow::cursorEnterCallback(GLFWwindow* window, int entered)

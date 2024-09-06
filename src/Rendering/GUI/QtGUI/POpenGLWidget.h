@@ -20,7 +20,14 @@
 //Qt
 #include <QWidget>
 #include <QOpenGLExtraFunctions>
-#include <QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#else
+	#include <QOpenGLWidget>
+#endif
+
+#include <QOpenGLFramebufferObject>
+
 #include <QTimer>
 
 //#include <GL/glu.h>
@@ -52,7 +59,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		POpenGLWidget();
+		POpenGLWidget(QWidget* parent = nullptr);
 		~POpenGLWidget();
 
 		void mainLoop() override {};
@@ -67,11 +74,18 @@ namespace dyno
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void wheelEvent(QWheelEvent *event) override;
 
+		void keyPressEvent(QKeyEvent* event) override;
+		void keyReleaseEvent(QKeyEvent* event) override;
+
 		void onSelected(const Selection& s) override;
+
+		void onSaveScreen(const std::string& filename) override;
 
 	public slots:
 		void updateGrpahicsContext();
 		void updateGraphicsContext(Node* node);
+
+		void updateOneFrame(int frame);
 
 	signals:
 		void nodeSelected(std::shared_ptr<Node> node);
@@ -82,9 +96,11 @@ namespace dyno
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		int			 mCursorX = -1;
 		int			 mCursorY = -1;
-		
+		int          mtempCursorX = -1;
 		// Qt
 		QTimer timer;
+
+		QOpenGLFramebufferObject* mFBO = nullptr;
 
 		// 
 		ImWindow mImWindow;

@@ -1,6 +1,6 @@
 #pragma once
 #include "ParticleSystem.h"
-#include "Attribute.h"
+#include "Collision/Attribute.h"
 
 namespace dyno 
 {

@@ -8,7 +8,7 @@ namespace dyno
 
 	template<typename TDataType>
 	GhostFluid<TDataType>::GhostFluid()
-		: Node()
+		: ParticleSystem<TDataType>()
 	{
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
 		model->varSmoothingLength()->setValue(0.01);
@@ -20,6 +20,8 @@ namespace dyno
 		this->stateNormal()->connect(model->inNormal());
 		this->stateAttribute()->connect(model->inAttribute());
 		this->animationPipeline()->pushModule(model);
+
+		this->setDt(0.001f);
 	}
 
 	__global__ void SetupFluidAttributes(

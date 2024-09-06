@@ -9,6 +9,7 @@ namespace dyno
 		TopologyMapping();
 		virtual ~TopologyMapping();
 
+	protected:
 		virtual bool apply() = 0;
 
 	private:

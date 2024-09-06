@@ -1,7 +1,7 @@
 #pragma once
 #include "Module/NumericalIntegrator.h"
 
-#include "../Attribute.h"
+#include "Collision/Attribute.h"
 
 namespace dyno {
 	template<typename TDataType>

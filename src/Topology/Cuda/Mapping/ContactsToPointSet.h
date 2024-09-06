@@ -9,6 +9,7 @@ namespace dyno
 	template<typename TDataType>
 	class ContactsToPointSet : public TopologyMapping
 	{
+		DECLARE_TCLASS(ContactsToPointSet, TDataType);
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

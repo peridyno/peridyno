@@ -13,8 +13,8 @@ add_library(${LIB_NAME} SHARED ${LIB_SRC})
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/GUI")
 
 target_include_directories(${LIB_NAME} PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
+	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/>
+    $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/ImWidgets>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/GUI>)
 	
@@ -32,6 +32,9 @@ elseif(UNIX)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Release")
     endif()
 endif()
+
+set_target_properties(${LIB_NAME} PROPERTIES
+    OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 
 target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 

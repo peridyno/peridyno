@@ -1,5 +1,9 @@
 #include "MarchingCubesHelper.h"
 
+#include "Topology/EdgeSet.h"
+
+#include <thrust/sort.h>
+
 namespace dyno
 {
 	__device__
@@ -680,6 +684,7 @@ namespace dyno
 	template<typename Coord, typename Triangle>
 	__global__ void ConstructTriangles(
 		DArray<Coord> vertices,
+		DArray<EKey> edgeIds,
 		DArray<Triangle> triangles,
 		DArray<int> vertNum,
 		DArray3D<Real> distances,
@@ -718,6 +723,16 @@ namespace dyno
 		field[6] = distances(i + 1, j + 1, k + 1);
 		field[7] = distances(i, j + 1, k + 1);
 
+		uint vIds[8];
+		vIds[0] = distances.index(i, j, k);
+		vIds[1] = distances.index(i + 1, j, k);
+		vIds[2] = distances.index(i + 1, j + 1, k);
+		vIds[3] = distances.index(i, j + 1, k);
+		vIds[4] = distances.index(i, j, k + 1);
+		vIds[5] = distances.index(i + 1, j, k + 1);
+		vIds[6] = distances.index(i + 1, j + 1, k + 1);
+		vIds[7] = distances.index(i, j + 1, k + 1);
+
 		Coord vertlist[12];
 		vertlist[0] = vertexInterp(isoValue, v[0], v[1], field[0], field[1]);
 		vertlist[1] = vertexInterp(isoValue, v[1], v[2], field[1], field[2]);
@@ -733,6 +748,22 @@ namespace dyno
 		vertlist[9] = vertexInterp(isoValue, v[1], v[5], field[1], field[5]);
 		vertlist[10] = vertexInterp(isoValue, v[2], v[6], field[2], field[6]);
 		vertlist[11] = vertexInterp(isoValue, v[3], v[7], field[3], field[7]);
+
+		EKey edgelist[12];
+		edgelist[0] = EKey(vIds[0], vIds[1]);
+		edgelist[1] = EKey(vIds[1], vIds[2]);
+		edgelist[2] = EKey(vIds[2], vIds[3]);
+		edgelist[3] = EKey(vIds[3], vIds[0]);
+
+		edgelist[4] = EKey(vIds[4], vIds[5]);
+		edgelist[5] = EKey(vIds[5], vIds[6]);
+		edgelist[6] = EKey(vIds[6], vIds[7]);
+		edgelist[7] = EKey(vIds[7], vIds[4]);
+
+		edgelist[8] = EKey(vIds[0], vIds[4]);
+		edgelist[9] = EKey(vIds[1], vIds[5]);
+		edgelist[10] = EKey(vIds[2], vIds[6]);
+		edgelist[11] = EKey(vIds[3], vIds[7]);
 
 		uint cubeindex;
 		cubeindex = uint(distances(i, j, k) < isoValue);
@@ -750,24 +781,92 @@ namespace dyno
 
 		int radix = vertNum[index1D];
 
+		EKey e[3];
 		for (int n = 0; n < numVerts; n += 3)
 		{
 			uint edge;
 			edge = triTable[cubeindex][n];
 			v[0] = vertlist[edge];
+			e[0] = edgelist[edge];
 
 			edge = triTable[cubeindex][n + 1];
 			v[1] = vertlist[edge];
+			e[1] = edgelist[edge];
 
 			edge = triTable[cubeindex][n + 2];
 			v[2] = vertlist[edge];
+			e[2] = edgelist[edge];
 
 			triangles[radix / 3] = Triangle(radix, radix + 1, radix + 2);
 
-			vertices[radix++] = v[0];
-			vertices[radix++] = v[1];
-			vertices[radix++] = v[2];
+			vertices[radix] = v[0];	edgeIds[radix++] = e[0];
+			vertices[radix] = v[1];	edgeIds[radix++] = e[1];
+			vertices[radix] = v[2];	edgeIds[radix++] = e[2];
 		}
+	}
+
+	__global__ void MCH_InitIndex(
+		DArray<uint> index)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= index.size()) return;
+
+		index[tId] = tId;
+	}
+
+	template<typename EKey>
+	__global__ void MCH_CountEdgeKeys(
+		DArray<int> counter,
+		DArray<EKey> keys)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= keys.size()) return;
+
+		if (tId == keys.size() - 1 || keys[tId] != keys[tId + 1])
+			counter[tId] = 1;
+		else
+			counter[tId] = 0;
+	}
+
+	template<typename Triangle>
+	__global__ void MCH_SetupNewTriangleIndex(
+		DArray<Triangle> triangles,
+		DArray<EKey> eKeys,
+		DArray<int> radix,
+		DArray<uint> ids,
+		DArray<uint> rIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= triangles.size()) return;
+
+		Triangle t = triangles[tId];
+
+		uint v0 = rIds[t[0]];
+		uint v1 = rIds[t[1]];
+		uint v2 = rIds[t[2]];
+
+		triangles[tId] = Triangle(v0, v1, v2);
+	}
+
+	template<typename Coord>
+	__global__ void MCH_SetupNewVertices(
+		DArray<Coord> newVertices,
+		DArray<Coord> vertices,
+		DArray<uint> rIds,
+		DArray<EKey> keys,
+		DArray<int> radix,
+		DArray<uint> ids)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= vertices.size()) return;
+
+		if (tId == vertices.size() - 1 || keys[tId] != keys[tId + 1]) {
+			newVertices[radix[tId]] = vertices[ids[tId]];
+		}
+
+		rIds[ids[tId]] = radix[tId];
+
+//		printf("%d %d \n", tId, ids[tId]);
 	}
 
 	template<typename TDataType>
@@ -780,15 +879,62 @@ namespace dyno
 		Real isoValue, 
 		Real h)
 	{
+		DArray<EKey> eKeys(vertices.size());
+		DArray<uint> ids(vertices.size());
+		DArray<int> counter(vertices.size());
+		DArray<uint> rIds(vertices.size());
+
 		cuExecute3D(make_uint3(distances.nx() - 1, distances.ny() - 1, distances.nz() - 1),
 			ConstructTriangles,
 			vertices,
+			eKeys,
 			triangles,
 			vertNum,
 			distances,
 			origin,
 			isoValue,
 			h);
+
+		cuExecute(ids.size(),
+			MCH_InitIndex,
+			ids);
+
+		thrust::sort_by_key(thrust::device, eKeys.begin(), eKeys.begin() + eKeys.size(), ids.begin());
+
+		cuExecute(eKeys.size(),
+			MCH_CountEdgeKeys,
+			counter,
+			eKeys);
+
+		int num = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
+		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+
+		DArray<Coord> newVertices(num);
+
+		cuExecute(vertices.size(),
+			MCH_SetupNewVertices,
+			newVertices,
+			vertices,
+			rIds,
+			eKeys,
+			counter,
+			ids);
+
+		cuExecute(triangles.size(),
+			MCH_SetupNewTriangleIndex,
+			triangles,
+			eKeys,
+			counter,
+			ids,
+			rIds);
+
+		vertices.assign(newVertices);
+
+		ids.clear();
+		rIds.clear();
+		eKeys.clear();
+		counter.clear();
+		newVertices.clear();
 	}
 
 	template<typename Real, typename Coord>
@@ -986,9 +1132,9 @@ namespace dyno
 
 			triangles[radix / 3] = Triangle(radix, radix + 1, radix + 2);
 
-			vertices[radix] = v[0];	sdfValues[radix] = scalar[0];	radix++;
-			vertices[radix] = v[1];	sdfValues[radix] = scalar[1];	radix++;
-			vertices[radix] = v[2];	sdfValues[radix] = scalar[2];	radix++;
+			vertices[radix] = v[0];	sdfValues[radix] = c[0];	radix++;
+			vertices[radix] = v[1];	sdfValues[radix] = c[1];	radix++;
+			vertices[radix] = v[2];	sdfValues[radix] = c[2];	radix++;
 		}
 	}
 
@@ -1012,6 +1158,352 @@ namespace dyno
 			distances,
 			sdf.lowerBound(),
 			sdf.getH(),
+			plane);
+	}
+
+	template<typename Real, typename Coord>
+	__global__ void CountVerticeNumberForOctree(
+		DArray<uint> num,
+		DArray<Coord> vertices,
+		DArray<Real> sdfs,
+		Real isoValue)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= num.size()) return;
+
+		int vIdx = 8 * pId;
+
+		uint cubeindex;
+		cubeindex = uint(sdfs[vIdx] < isoValue);
+		cubeindex += uint(sdfs[vIdx + 1] < isoValue) * 2;
+		cubeindex += uint(sdfs[vIdx + 2] < isoValue) * 4;
+		cubeindex += uint(sdfs[vIdx + 3] < isoValue) * 8;
+		cubeindex += uint(sdfs[vIdx + 4] < isoValue) * 16;
+		cubeindex += uint(sdfs[vIdx + 5] < isoValue) * 32;
+		cubeindex += uint(sdfs[vIdx + 6] < isoValue) * 64;
+		cubeindex += uint(sdfs[vIdx + 7] < isoValue) * 128;
+
+		num[pId] = numVertsTable[cubeindex];
+	}
+
+	template<typename TDataType>
+	void MarchingCubesHelper<TDataType>::countVerticeNumberForOctree(
+		DArray<uint>& num, 
+		DArray<Coord>& vertices, 
+		DArray<Real>& sdfs, 
+		Real isoValue)
+	{
+		cuExecute(num.size(),
+			CountVerticeNumberForOctree,
+			num,
+			vertices,
+			sdfs,
+			isoValue);
+	}
+
+	template<typename Real, typename Coord>
+	__global__ void ConstructTrianglesForOctree(
+		DArray<Coord> triangleVertices,
+		DArray<TopologyModule::Triangle> triangles,
+		DArray<uint> vertNum,
+		DArray<Coord> cellVertices,
+		DArray<Real> sdfs,
+		Real isoValue)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= vertNum.size()) return;
+
+		int vIdx = 8 * pId;
+
+		Coord v[8];
+		v[0] = cellVertices[vIdx];
+		v[1] = cellVertices[vIdx + 1];
+		v[2] = cellVertices[vIdx + 2];
+		v[3] = cellVertices[vIdx + 3];
+		v[4] = cellVertices[vIdx + 4];
+		v[5] = cellVertices[vIdx + 5];
+		v[6] = cellVertices[vIdx + 6];
+		v[7] = cellVertices[vIdx + 7];
+
+		Real field[8];
+		field[0] = sdfs[vIdx];
+		field[1] = sdfs[vIdx + 1];
+		field[2] = sdfs[vIdx + 2];
+		field[3] = sdfs[vIdx + 3];
+		field[4] = sdfs[vIdx + 4];
+		field[5] = sdfs[vIdx + 5];
+		field[6] = sdfs[vIdx + 6];
+		field[7] = sdfs[vIdx + 7];
+
+		Coord vertlist[12];
+		vertlist[0] = vertexInterp(isoValue, v[0], v[1], field[0], field[1]);
+		vertlist[1] = vertexInterp(isoValue, v[1], v[2], field[1], field[2]);
+		vertlist[2] = vertexInterp(isoValue, v[2], v[3], field[2], field[3]);
+		vertlist[3] = vertexInterp(isoValue, v[3], v[0], field[3], field[0]);
+
+		vertlist[4] = vertexInterp(isoValue, v[4], v[5], field[4], field[5]);
+		vertlist[5] = vertexInterp(isoValue, v[5], v[6], field[5], field[6]);
+		vertlist[6] = vertexInterp(isoValue, v[6], v[7], field[6], field[7]);
+		vertlist[7] = vertexInterp(isoValue, v[7], v[4], field[7], field[4]);
+
+		vertlist[8] = vertexInterp(isoValue, v[0], v[4], field[0], field[4]);
+		vertlist[9] = vertexInterp(isoValue, v[1], v[5], field[1], field[5]);
+		vertlist[10] = vertexInterp(isoValue, v[2], v[6], field[2], field[6]);
+		vertlist[11] = vertexInterp(isoValue, v[3], v[7], field[3], field[7]);
+
+		uint cubeindex;
+		cubeindex = uint(sdfs[vIdx] < isoValue);
+		cubeindex += uint(sdfs[vIdx + 1] < isoValue) * 2;
+		cubeindex += uint(sdfs[vIdx + 2] < isoValue) * 4;
+		cubeindex += uint(sdfs[vIdx + 3] < isoValue) * 8;
+		cubeindex += uint(sdfs[vIdx + 4] < isoValue) * 16;
+		cubeindex += uint(sdfs[vIdx + 5] < isoValue) * 32;
+		cubeindex += uint(sdfs[vIdx + 6] < isoValue) * 64;
+		cubeindex += uint(sdfs[vIdx + 7] < isoValue) * 128;
+
+		uint numVerts = numVertsTable[cubeindex];
+
+		int radix = vertNum[pId];
+
+		for (int n = 0; n < numVerts; n += 3)
+		{
+			uint edge;
+			edge = triTable[cubeindex][n];
+			v[0] = vertlist[edge];
+
+			edge = triTable[cubeindex][n + 1];
+			v[1] = vertlist[edge];
+
+			edge = triTable[cubeindex][n + 2];
+			v[2] = vertlist[edge];
+
+			triangles[radix / 3] = TopologyModule::Triangle(radix, radix + 1, radix + 2);
+
+			triangleVertices[radix++] = v[0];
+			triangleVertices[radix++] = v[1];
+			triangleVertices[radix++] = v[2];
+		}
+	}
+
+	template<typename TDataType>
+	void MarchingCubesHelper<TDataType>::constructTrianglesForOctree(
+		DArray<Coord>& triangleVertices,
+		DArray<TopologyModule::Triangle>& triangles,
+		DArray<uint>& num,
+		DArray<Coord>& cellVertices,
+		DArray<Real>& sdfs,
+		Real isoValue)
+	{
+		cuExecute(num.size(),
+			ConstructTrianglesForOctree,
+			triangleVertices,
+			triangles,
+			num,
+			cellVertices,
+			sdfs,
+			isoValue);
+	}
+
+	template<typename Real, typename Coord>
+	__global__ void MCH_CountVertexNumberForOctreeClipper(
+		DArray<uint> num,
+		DArray<Coord> vertices,
+		TPlane3D<Real> plane)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= num.size()) return;
+
+		int vIdx = 8 * pId;
+
+		Real d;
+		TPoint3D<Real> p;
+
+		Real isoValue = 0.0;
+
+		uint cubeindex;
+
+		p = vertices[vIdx];
+		d = p.distance(plane);
+		cubeindex = uint(d < isoValue);
+
+		p = vertices[vIdx + 1];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 2;
+
+		p = vertices[vIdx + 2];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 4;
+
+		p = vertices[vIdx + 3];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 8;
+
+		p = vertices[vIdx + 4];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 16;
+
+		p = vertices[vIdx + 5];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 32;
+
+		p = vertices[vIdx + 6];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 64;
+
+		p = vertices[vIdx + 7];
+		d = p.distance(plane);
+		cubeindex += uint(d < isoValue) * 128;
+
+		num[pId] = numVertsTable[cubeindex];
+	}
+
+	template<typename TDataType>
+	void MarchingCubesHelper<TDataType>::countVerticeNumberForOctreeClipper(
+		DArray<uint>& num, 
+		DArray<Coord>& vertices,  
+		TPlane3D<Real> plane)
+	{
+		cuExecute(num.size(),
+			MCH_CountVertexNumberForOctreeClipper,
+			num,
+			vertices,
+			plane);
+	}
+
+	template<typename Real, typename Coord>
+	__global__ void MCH_ConstructTrianglesForOctreeClipper(
+		DArray<Real> vertSDFs,
+		DArray<Coord> triangleVertices,
+		DArray<TopologyModule::Triangle> triangles,
+		DArray<uint> vertNum,
+		DArray<Coord> cellVertices,
+		DArray<Real> sdfs,
+		TPlane3D<Real> plane)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= vertNum.size()) return;
+
+		int vIdx = 8 * pId;
+
+		Coord v[8];
+		v[0] = cellVertices[vIdx];
+		v[1] = cellVertices[vIdx + 1];
+		v[2] = cellVertices[vIdx + 2];
+		v[3] = cellVertices[vIdx + 3];
+		v[4] = cellVertices[vIdx + 4];
+		v[5] = cellVertices[vIdx + 5];
+		v[6] = cellVertices[vIdx + 6];
+		v[7] = cellVertices[vIdx + 7];
+
+		Real isoValue = Real(0);
+
+		Real field[8];
+		field[0] = sdfs[vIdx];
+		field[1] = sdfs[vIdx + 1];
+		field[2] = sdfs[vIdx + 2];
+		field[3] = sdfs[vIdx + 3];
+		field[4] = sdfs[vIdx + 4];
+		field[5] = sdfs[vIdx + 5];
+		field[6] = sdfs[vIdx + 6];
+		field[7] = sdfs[vIdx + 7];
+
+		uint cubeindex;
+		TPoint3D<Real> pos;
+		pos = cellVertices[vIdx];
+		Real d0 = pos.distance(plane);
+		cubeindex = uint(d0 < isoValue);
+
+		pos = cellVertices[vIdx + 1];
+		Real d1 = pos.distance(plane);
+		cubeindex += uint(d1 < isoValue) * 2;
+
+		pos = cellVertices[vIdx + 2];
+		Real d2 = pos.distance(plane);
+		cubeindex += uint(d2 < isoValue) * 4;
+
+		pos = cellVertices[vIdx + 3];
+		Real d3 = pos.distance(plane);
+		cubeindex += uint(d3 < isoValue) * 8;
+
+		pos = cellVertices[vIdx + 4];
+		Real d4 = pos.distance(plane);
+		cubeindex += uint(d4 < isoValue) * 16;
+
+		pos = cellVertices[vIdx + 5];
+		Real d5 = pos.distance(plane);
+		cubeindex += uint(d5 < isoValue) * 32;
+
+		pos = cellVertices[vIdx + 6];
+		Real d6 = pos.distance(plane);
+		cubeindex += uint(d6 < isoValue) * 64;
+
+		pos = cellVertices[vIdx + 7];
+		Real d7 = pos.distance(plane);
+		cubeindex += uint(d7 < isoValue) * 128;
+
+		Real scalar[12];
+		Coord vertlist[12];
+		vertlist[0] = vertexInterp(scalar[0], v[0], v[1], field[0], field[1], d0, d1);
+		vertlist[1] = vertexInterp(scalar[1], v[1], v[2], field[1], field[2], d1, d2);
+		vertlist[2] = vertexInterp(scalar[2], v[2], v[3], field[2], field[3], d2, d3);
+		vertlist[3] = vertexInterp(scalar[3], v[3], v[0], field[3], field[0], d3, d0);
+
+		vertlist[4] = vertexInterp(scalar[4], v[4], v[5], field[4], field[5], d4, d5);
+		vertlist[5] = vertexInterp(scalar[5], v[5], v[6], field[5], field[6], d5, d6);
+		vertlist[6] = vertexInterp(scalar[6], v[6], v[7], field[6], field[7], d6, d7);
+		vertlist[7] = vertexInterp(scalar[7], v[7], v[4], field[7], field[4], d7, d4);
+
+		vertlist[8] = vertexInterp(scalar[8], v[0], v[4], field[0], field[4], d0, d4);
+		vertlist[9] = vertexInterp(scalar[9], v[1], v[5], field[1], field[5], d1, d5);
+		vertlist[10] = vertexInterp(scalar[10], v[2], v[6], field[2], field[6], d2, d6);
+		vertlist[11] = vertexInterp(scalar[10], v[3], v[7], field[3], field[7], d3, d7);
+
+		uint numVerts = numVertsTable[cubeindex];
+
+		int radix = vertNum[pId];
+
+		Real c[3];
+		for (int n = 0; n < numVerts; n += 3)
+		{
+			uint edge;
+			edge = triTable[cubeindex][n];
+			v[0] = vertlist[edge];
+			c[0] = scalar[edge];
+
+			edge = triTable[cubeindex][n + 1];
+			v[1] = vertlist[edge];
+			c[1] = scalar[edge];
+
+			edge = triTable[cubeindex][n + 2];
+			v[2] = vertlist[edge];
+			c[2] = scalar[edge];
+
+			triangles[radix / 3] = TopologyModule::Triangle(radix, radix + 1, radix + 2);
+
+			triangleVertices[radix] = v[0];	vertSDFs[radix] = c[0];	radix++;
+			triangleVertices[radix] = v[1];	vertSDFs[radix] = c[1];	radix++;
+			triangleVertices[radix] = v[2];	vertSDFs[radix] = c[2];	radix++;
+		}
+	}
+
+	template<typename TDataType>
+	void MarchingCubesHelper<TDataType>::constructTrianglesForOctreeClipper(
+		DArray<Real>& vertSDFs,
+		DArray<Coord>& triangleVertices, 
+		DArray<TopologyModule::Triangle>& triangles, 
+		DArray<uint>& num, 
+		DArray<Coord>& cellVertices, 
+		DArray<Real>& sdfs,
+		TPlane3D<Real> plane)
+	{
+		cuExecute(num.size(),
+			MCH_ConstructTrianglesForOctreeClipper,
+			vertSDFs,
+			triangleVertices,
+			triangles,
+			num,
+			cellVertices,
+			sdfs,
 			plane);
 	}
 

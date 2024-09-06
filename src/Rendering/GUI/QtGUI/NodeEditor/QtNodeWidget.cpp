@@ -98,6 +98,7 @@ namespace Qt
 
 				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
 			}
+			
 			break;
 
 		case PortType::None:
@@ -158,7 +159,7 @@ namespace Qt
 		case PortType::Out:
 			if (portIndex == 0) {
 				//return dyno::FormatBlockPortName(mNode->getClassInfo()->getClassName());
-				return dyno::FormatBlockPortName("Out");
+				return dyno::FormatBlockPortName("");
 			}
 			else {
 				auto& outputFields = this->getOutputFields();
@@ -207,6 +208,7 @@ namespace Qt
 				auto& outputFields = this->getOutputFields();
 				return fieldTip(outputFields[portIndex - 1]);
 			}
+
 			break;
 
 		case PortType::None:
@@ -304,7 +306,13 @@ namespace Qt
 					std::string className = fieldInp->getField()->getClassName();
 					if (className == dyno::InstanceBase::className())
 					{
-						return true;
+						dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp->getField());
+						dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp->getField());
+
+						if (instIn != nullptr && instOut != nullptr)
+							return instIn->canBeConnectedBy(instOut);
+
+						return false;
 					}
 					else
 						return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
@@ -354,7 +362,6 @@ namespace Qt
 	{
 		modelValidationState = NodeValidationState::Valid;
 	}
-
 
 	std::vector<FBase*>& QtNodeWidget::getOutputFields() const
 	{

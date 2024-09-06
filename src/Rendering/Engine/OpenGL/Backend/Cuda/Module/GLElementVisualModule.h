@@ -5,9 +5,9 @@
 #include "Topology/DiscreteElements.h"
 
 #include "GLVisualModule.h"
-#include "CudaBuffer.h"
-#include "gl/VertexArray.h"
-#include "gl/Shader.h"
+#include "GraphicsObject/GPUBuffer.h"
+#include "GraphicsObject/VertexArray.h"
+#include "GraphicsObject/Shader.h"
 
 
 namespace dyno
@@ -30,23 +30,23 @@ namespace dyno
 		DEF_VAR_IN(float, TimeStep, "dt");
 
 	protected:
-		virtual void updateGraphicsContext() override;
+		virtual void updateImpl() override;
 
-		virtual void paintGL(GLRenderPass mode) override;
+		virtual void paintGL(const RenderParams& rparams) override;
 		virtual void updateGL() override;
 		virtual bool initializeGL() override;
-		virtual void destroyGL() override;
+		virtual void releaseGL() override;
 
 		void updateStarted() override;
 		void updateEnded() override;
 
 	private:
 
-		gl::Program* mShaderProgram;
-		gl::VertexArray	mVAO;
+		Program* mShaderProgram;
+		VertexArray	mVAO;
 
-		gl::CudaBuffer	mVertexBuffer;
-		gl::CudaBuffer 	mIndexBuffer;
+		XBuffer<Vec3f>	mVertexBuffer;
+		XBuffer<Vec3i> 	mIndexBuffer;
 
 		unsigned int	mDrawCount = 0;
 

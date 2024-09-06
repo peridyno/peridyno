@@ -50,6 +50,7 @@ namespace dyno
 		 */
 		DYN_FUNC Quat(Real rot, const Vector<Real, 3> &axis);  //init from the rotation axis and angle(in radian)
 
+		DYN_FUNC Quat(const Vector<Real, 3> u0, const Vector<Real, 3> u1); // u0 --[rot]--> u1
 		DYN_FUNC Quat(const Quat<Real> &);
 		DYN_FUNC explicit Quat(const SquareMatrix<Real, 3> &);   //init from a 3x3matrix
 		DYN_FUNC explicit Quat(const SquareMatrix<Real, 4> &);    //init from a 4x4matrix
@@ -102,9 +103,20 @@ namespace dyno
 
 		DYN_FUNC static inline Quat<Real> identity() { return Quat<Real>(0, 0, 0, 1); }
 		DYN_FUNC static inline Quat<Real> fromEulerAngles(const Real& yaw, const Real& pitch, const Real& roll) {
-			return Quat<Real>(M_PI * yaw / 180, Vector<Real, 3>(1, 0, 0))
-				 * Quat<Real>(M_PI * pitch / 180, Vector<Real, 3>(0, 1, 0))
-				 * Quat<Real>(M_PI * roll / 180, Vector<Real, 3>(0, 0, 1));
+			Real cr = glm::cos(roll * 0.5);
+			Real sr = glm::sin(roll * 0.5);
+			Real cp = glm::cos(pitch * 0.5);
+			Real sp = glm::sin(pitch * 0.5);
+			Real cy = glm::cos(yaw * 0.5);
+			Real sy = glm::sin(yaw * 0.5);
+
+			Quat<Real> q;
+			q.w = cr * cp * cy + sr * sp * sy;
+			q.x = sr * cp * cy - cr * sp * sy;
+			q.y = cr * sp * cy + sr * cp * sy;
+			q.z = cr * cp * sy - sr * sp * cy;
+
+			return q;
 		}
 
 	public:

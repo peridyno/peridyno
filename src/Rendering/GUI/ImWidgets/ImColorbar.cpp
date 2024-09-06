@@ -79,7 +79,9 @@ namespace dyno
 			mNum = 1;
 			col[0] = ImGui::VecToImU(&mBaseColor);
 			val[0] = 0.0;
+			
 		}
+
 		mCol = col;
 		mVal = val;
 	}

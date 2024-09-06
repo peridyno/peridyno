@@ -15,7 +15,8 @@
  */
 #pragma once
 #include "Module/ConstraintModule.h"
-#include "Module/TopologyModule.h"
+
+#include "Topology/TriangleSet.h"
 
 namespace dyno
 {
@@ -29,12 +30,14 @@ namespace dyno
 		typedef typename TopologyModule::Triangle Triangle;
 
 		TriangularMeshConstraint();
-		virtual ~TriangularMeshConstraint();
+		~TriangularMeshConstraint() override;
 
-		void constrain() override;
 
 	public:
-		DEF_VAR(Real, Threshold, 0.0065, "Threshold for collision detection");
+		DEF_VAR(Real, Thickness, 0.0065, "Threshold for collision detection");
+
+		DEF_VAR(Real, TangentialFriction, 0, "Tangential friction");
+		DEF_VAR(Real, NormalFriction, 0, "Normal friction");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time Step");
@@ -42,12 +45,14 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
-		DEF_ARRAY_IN(Triangle, TriangleIndex, DeviceType::GPU, "triangle_index");
-		DEF_ARRAY_IN(Coord, TriangleVertex, DeviceType::GPU, "triangle_vertex");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_ARRAYLIST_IN(int, TriangleNeighborIds, DeviceType::GPU, "triangle neighbors");
 
 	protected:
+		void constrain() override;
+
+	private:
 		DArray<Coord> mPosBuffer;
 
 		DArray<Coord> mPreviousPosition;

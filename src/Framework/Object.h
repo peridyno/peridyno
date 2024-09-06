@@ -93,7 +93,7 @@ public:  \
 
 #define IMPLEMENT_CLASS_COMMON_1(name, T1, func) \
 template<typename T1>		\
-const ClassInfo name<T1>::ms_classinfo(std::string(_STR(name))+std::string("<")+T1::getName()+std::string(">"), \
+const ClassInfo name<T1>::ms_classinfo(std::string(_STR(name)).append("<").append(T1::getName()).append(">"), \
             (ObjectConstructorFn) func); \
 							\
 template<typename T1>		\

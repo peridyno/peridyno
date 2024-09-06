@@ -32,6 +32,31 @@ namespace dyno
 		void pushModule(std::shared_ptr<Module> m);
 
 		void popModule(std::shared_ptr<Module> m);
+
+		template<class TModule>
+		std::shared_ptr<TModule> createModule()
+		{
+			std::shared_ptr<TModule> m = std::make_shared<TModule>();
+			this->pushModule(m);
+
+			return m;
+		}
+
+		/**
+		 * Return the first module with TModule type
+		 */
+		template<class TModule>
+		std::shared_ptr<TModule> findFirstModule()
+		{
+			auto& modules = this->activeModules();
+			for (auto m : modules)
+			{
+				auto child = TypeInfo::cast<TModule>(m);
+				if (child != nullptr)
+					return child;
+			}
+			return nullptr;
+		}
 		
 		// clear pipeline and module
 		void clear();
@@ -56,14 +81,12 @@ namespace dyno
 
 		void updateExecutionQueue();
 
-		void printModuleInfo(bool enabled);
-
 		void forceUpdate();
 
 		/**
 		 * Turn a module output field to a node output node
 		 */
-		void promoteOutputToNode(FBase* base);
+		FBase* promoteOutputToNode(FBase* base);
 
 		/**
 		 * Withdraw a module output field from the node
@@ -76,6 +99,8 @@ namespace dyno
 
 		bool requireUpdate() final;
 
+		virtual bool printDebugInfo();
+
 	private:
 		void reconstructPipeline();
 
@@ -87,8 +112,6 @@ namespace dyno
 		std::list<std::shared_ptr<Module>>  mModuleList;
 
 		std::list<std::shared_ptr<Module>> mPersistentModule;
-
-		Node* mNode;
 
 		bool mTiming = false;
 	};

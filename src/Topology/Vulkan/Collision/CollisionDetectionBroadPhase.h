@@ -1,5 +1,5 @@
 #pragma once
-#include "Module/CollisionModel.h"
+#include "Module/ComputeModule.h"
 #include "Primitive/Primitive3D.h"
 
 #include "Catalyzer/VkReduce.h"
@@ -13,15 +13,11 @@ namespace dyno
 // 		dyno::Vec3f v1;
 // 	};
 
-	class CollisionDetectionBroadPhase : public CollisionModel
+	class CollisionDetectionBroadPhase : public ComputeModule
 	{
 	public:
 		CollisionDetectionBroadPhase();
 		virtual ~CollisionDetectionBroadPhase();
-
-		bool initializeImpl() override;
-
-		void doCollision() override;
 
 	public:
 		float mGridSizeLimit;	// "Limit the smallest grid size";
@@ -39,6 +35,9 @@ namespace dyno
 
 		DEF_ARRAY_OUT(Vec2u, Contacts, DeviceType::GPU, "");
 		//VkDeviceArray<Vec2u> mContactList;
+
+	protected:
+		void compute() override;
 
 	private:
 		std::shared_ptr<VkReduce<int>> vkr;

@@ -14,12 +14,17 @@
 **
 **  May 2018
 **
+**	Modified to support both CPU and GPU, implemented by Xiaowei He
+**  October, 2023
+** 
 **************************************************************************/
 
 #ifndef SVD3_CUDA2_H
 #define SVD3_CUDA2_H
 
+#ifdef __NVCC__
 #include <cuda.h>
+#endif
 #include "math.h" // CUDA math library
 
 #define gone					1065353216
@@ -32,7 +37,20 @@
 
 union un { float f; unsigned int ui; };
 
-__device__ __forceinline__
+#ifndef __NVCC__
+#define max(x, y) (x > y ? x : y)
+#define fadd_rn(x, y) (x + y)
+#define fsub_rn(x, y) (x - y)
+#define frsqrt_rn(x) (1.0 / sqrt(x))
+#else
+#define max(x, y) (x > y ? x : y)
+#define fadd_rn(x, y) __fadd_rn(x, y)
+#define fsub_rn(x, y) __fsub_rn(x, y)
+#define frsqrt_rn(x) __frsqrt_rn(x)
+#endif // __NVCC__
+
+#ifndef __NVCC__
+__host__ __forceinline__
 void svd(
 	float a11, float a12, float a13, float a21, float a22, float a23, float a31, float a32, float a33,			// input A     
     float &u11, float &u12, float &u13, float &u21, float &u22, float &u23, float &u31, float &u32, float &u33,	// output U      
@@ -42,6 +60,18 @@ void svd(
 	//float &s23, float &s31, float &s32, 
 	float &s33,	// output S
 	float &v11, float &v12, float &v13, float &v21, float &v22, float &v23, float &v31, float &v32, float &v33	// output V
+#else
+__device__ __forceinline__
+void svd(
+	float a11, float a12, float a13, float a21, float a22, float a23, float a31, float a32, float a33,			// input A     
+	float& u11, float& u12, float& u13, float& u21, float& u22, float& u23, float& u31, float& u32, float& u33,	// output U      
+	float& s11,
+	//float &s12, float &s13, float &s21, 
+	float& s22,
+	//float &s23, float &s31, float &s32, 
+	float& s33,	// output S
+	float& v11, float& v12, float& v13, float& v21, float& v22, float& v23, float& v31, float& v32, float& v33	// output V
+#endif
 )
 {
 	un Sa11, Sa21, Sa31, Sa12, Sa22, Sa32, Sa13, Sa23, Sa33;
@@ -62,39 +92,39 @@ void svd(
 
 	Ss11.f = Sa11.f*Sa11.f;									
 	Stmp1.f = Sa21.f*Sa21.f;								
-	Ss11.f = __fadd_rn(Stmp1.f, Ss11.f);					
+	Ss11.f = fadd_rn(Stmp1.f, Ss11.f);					
 	Stmp1.f = Sa31.f*Sa31.f;								
-	Ss11.f = __fadd_rn(Stmp1.f, Ss11.f);					
+	Ss11.f = fadd_rn(Stmp1.f, Ss11.f);					
 
 	Ss21.f = Sa12.f*Sa11.f;									
 	Stmp1.f = Sa22.f*Sa21.f;								
-	Ss21.f = __fadd_rn(Stmp1.f, Ss21.f);					
+	Ss21.f = fadd_rn(Stmp1.f, Ss21.f);					
 	Stmp1.f = Sa32.f*Sa31.f;								
-	Ss21.f = __fadd_rn(Stmp1.f, Ss21.f);					
+	Ss21.f = fadd_rn(Stmp1.f, Ss21.f);					
 
 	Ss31.f = Sa13.f*Sa11.f;									
 	Stmp1.f = Sa23.f*Sa21.f;								
-	Ss31.f = __fadd_rn(Stmp1.f, Ss31.f);					
+	Ss31.f = fadd_rn(Stmp1.f, Ss31.f);					
 	Stmp1.f = Sa33.f*Sa31.f;								
-	Ss31.f = __fadd_rn(Stmp1.f, Ss31.f);					
+	Ss31.f = fadd_rn(Stmp1.f, Ss31.f);					
 
 	Ss22.f = Sa12.f*Sa12.f;									
 	Stmp1.f = Sa22.f*Sa22.f;								
-	Ss22.f = __fadd_rn(Stmp1.f, Ss22.f);					
+	Ss22.f = fadd_rn(Stmp1.f, Ss22.f);					
 	Stmp1.f = Sa32.f*Sa32.f;								
-	Ss22.f = __fadd_rn(Stmp1.f, Ss22.f);					
+	Ss22.f = fadd_rn(Stmp1.f, Ss22.f);					
 
 	Ss32.f = Sa13.f*Sa12.f;									
 	Stmp1.f = Sa23.f*Sa22.f;								
-	Ss32.f = __fadd_rn(Stmp1.f, Ss32.f);					
+	Ss32.f = fadd_rn(Stmp1.f, Ss32.f);					
 	Stmp1.f = Sa33.f*Sa32.f;								
-	Ss32.f = __fadd_rn(Stmp1.f, Ss32.f);					
+	Ss32.f = fadd_rn(Stmp1.f, Ss32.f);					
 
 	Ss33.f = Sa13.f*Sa13.f;									
 	Stmp1.f = Sa23.f*Sa23.f;								
-	Ss33.f = __fadd_rn(Stmp1.f, Ss33.f);					
+	Ss33.f = fadd_rn(Stmp1.f, Ss33.f);					
 	Stmp1.f = Sa33.f*Sa33.f;								
-	Ss33.f = __fadd_rn(Stmp1.f, Ss33.f);					
+	Ss33.f = fadd_rn(Stmp1.f, Ss33.f);					
 
 	Sqvs.f = 1.f; Sqvvx.f = 0.f; Sqvvy.f = 0.f; Sqvvz.f = 0.f;
 
@@ -104,7 +134,7 @@ void svd(
 	for (int i = 0; i < 4; i++)
 	{
 		Ssh.f = Ss21.f * 0.5f;									
-		Stmp5.f = __fsub_rn(Ss11.f, Ss22.f);					       
+		Stmp5.f = fsub_rn(Ss11.f, Ss22.f);					       
 		
 		Stmp2.f = Ssh.f*Ssh.f;                                         
 		Stmp1.ui = (Stmp2.f >= gtiny_number) ? 0xffffffff : 0;	   
@@ -115,8 +145,8 @@ void svd(
 		
 		Stmp1.f = Ssh.f*Ssh.f;									       
 		Stmp2.f = Sch.f*Sch.f;									       
-		Stmp3.f = __fadd_rn(Stmp1.f, Stmp2.f);					       
-		Stmp4.f = __frsqrt_rn(Stmp3.f);							       
+		Stmp3.f = fadd_rn(Stmp1.f, Stmp2.f);					       
+		Stmp4.f = frsqrt_rn(Stmp3.f);							       
 		
 		Ssh.f = Stmp4.f*Ssh.f;									       
 		Sch.f = Stmp4.f*Sch.f;									       
@@ -132,9 +162,9 @@ void svd(
 		
 		Stmp1.f = Ssh.f * Ssh.f;								       
 		Stmp2.f = Sch.f * Sch.f;								
-		Sc.f = __fsub_rn(Stmp2.f, Stmp1.f);						
+		Sc.f = fsub_rn(Stmp2.f, Stmp1.f);						
 		Ss.f = Sch.f * Ssh.f;									       
-		Ss.f = __fadd_rn(Ss.f, Ss.f);							       
+		Ss.f = fadd_rn(Ss.f, Ss.f);							       
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("GPU s %.20g, c %.20g, sh %.20g, ch %.20g\n", Ss.f, Sc.f, Ssh.f, Sch.f);
@@ -143,7 +173,7 @@ void svd(
 		// Perform the actual Givens conjugation
 		//###########################################################
 
-		Stmp3.f = __fadd_rn(Stmp1.f, Stmp2.f);							
+		Stmp3.f = fadd_rn(Stmp1.f, Stmp2.f);							
 		Ss33.f = Ss33.f * Stmp3.f;										
 		Ss31.f = Ss31.f * Stmp3.f;										
 		Ss32.f = Ss32.f * Stmp3.f;										
@@ -153,8 +183,8 @@ void svd(
 		Stmp2.f = Ss.f * Ss32.f;										                                
 		Ss31.f = Sc.f * Ss31.f;											                                
 		Ss32.f = Sc.f * Ss32.f;											                                
-		Ss31.f = __fadd_rn(Stmp2.f, Ss31.f);							                                
-		Ss32.f = __fsub_rn(Ss32.f, Stmp1.f);							                                
+		Ss31.f = fadd_rn(Stmp2.f, Ss31.f);							                                
+		Ss32.f = fsub_rn(Ss32.f, Stmp1.f);							                                
 		
 		Stmp2.f = Ss.f*Ss.f;											                                
 		Stmp1.f = Ss22.f*Stmp2.f;										                                
@@ -162,17 +192,17 @@ void svd(
 		Stmp4.f = Sc.f*Sc.f;											                                
 		Ss11.f = Ss11.f*Stmp4.f;										                                
 		Ss22.f = Ss22.f*Stmp4.f;										                                
-		Ss11.f = __fadd_rn(Ss11.f, Stmp1.f);							                                
-		Ss22.f = __fadd_rn(Ss22.f, Stmp3.f);							                                
-		Stmp4.f = __fsub_rn(Stmp4.f, Stmp2.f);							                                
-		Stmp2.f = __fadd_rn(Ss21.f, Ss21.f);							                                
+		Ss11.f = fadd_rn(Ss11.f, Stmp1.f);							                                
+		Ss22.f = fadd_rn(Ss22.f, Stmp3.f);							                                
+		Stmp4.f = fsub_rn(Stmp4.f, Stmp2.f);							                                
+		Stmp2.f = fadd_rn(Ss21.f, Ss21.f);							                                
 		Ss21.f = Ss21.f*Stmp4.f;										                                
 		Stmp4.f = Sc.f*Ss.f;											                                
 		Stmp2.f = Stmp2.f*Stmp4.f;										                                
 		Stmp5.f = Stmp5.f*Stmp4.f;										                                
-		Ss11.f = __fadd_rn(Ss11.f, Stmp2.f);							                                
-		Ss21.f = __fsub_rn(Ss21.f, Stmp5.f);							                                
-		Ss22.f = __fsub_rn(Ss22.f, Stmp2.f);							                                
+		Ss11.f = fadd_rn(Ss11.f, Stmp2.f);							                                
+		Ss21.f = fsub_rn(Ss21.f, Stmp5.f);							                                
+		Ss22.f = fsub_rn(Ss22.f, Stmp2.f);							                                
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("%.20g\n", Ss11.f);
@@ -194,10 +224,10 @@ void svd(
 		Sqvvy.f = Sch.f*Sqvvy.f;										                        
 		Sqvvz.f = Sch.f*Sqvvz.f;										                        
 
-		Sqvvz.f = __fadd_rn(Sqvvz.f, Ssh.f);							                                
-		Sqvs.f = __fsub_rn(Sqvs.f, Stmp3.f);							                                
-		Sqvvx.f = __fadd_rn(Sqvvx.f, Stmp2.f);							                                
-		Sqvvy.f = __fsub_rn(Sqvvy.f, Stmp1.f);							                            
+		Sqvvz.f = fadd_rn(Sqvvz.f, Ssh.f);							                                
+		Sqvs.f = fsub_rn(Sqvs.f, Stmp3.f);							                                
+		Sqvvx.f = fadd_rn(Sqvvx.f, Stmp2.f);							                                
+		Sqvvy.f = fsub_rn(Sqvvy.f, Stmp1.f);							                            
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("GPU q %.20g %.20g %.20g %.20g\n", Sqvvx.f, Sqvvy.f, Sqvvz.f, Sqvs.f);
@@ -207,7 +237,7 @@ void svd(
 		// (1->3)
 		//////////////////////////////////////////////////////////////////////////
 		Ssh.f = Ss32.f * 0.5f;									 
-		Stmp5.f = __fsub_rn(Ss22.f, Ss33.f);					                         
+		Stmp5.f = fsub_rn(Ss22.f, Ss33.f);					                         
 		
 		Stmp2.f = Ssh.f * Ssh.f;                                         
 		Stmp1.ui = (Stmp2.f >= gtiny_number) ? 0xffffffff : 0;	     
@@ -218,8 +248,8 @@ void svd(
 		
 		Stmp1.f = Ssh.f * Ssh.f;								             
 		Stmp2.f = Sch.f * Sch.f;								             
-		Stmp3.f = __fadd_rn(Stmp1.f, Stmp2.f);					                 
-		Stmp4.f = __frsqrt_rn(Stmp3.f);							             
+		Stmp3.f = fadd_rn(Stmp1.f, Stmp2.f);					                 
+		Stmp4.f = frsqrt_rn(Stmp3.f);							             
 		
 		Ssh.f = Stmp4.f * Ssh.f;								             
 		Sch.f = Stmp4.f * Sch.f;								             
@@ -235,9 +265,9 @@ void svd(
 		
 		Stmp1.f = Ssh.f * Ssh.f;								             
 		Stmp2.f = Sch.f * Sch.f;								             
-		Sc.f = __fsub_rn(Stmp2.f, Stmp1.f);						     
+		Sc.f = fsub_rn(Stmp2.f, Stmp1.f);						     
 		Ss.f = Sch.f*Ssh.f;										     
-		Ss.f = __fadd_rn(Ss.f, Ss.f);							                 
+		Ss.f = fadd_rn(Ss.f, Ss.f);							                 
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("GPU s %.20g, c %.20g, sh %.20g, ch %.20g\n", Ss.f, Sc.f, Ssh.f, Sch.f);
@@ -247,7 +277,7 @@ void svd(
 		// Perform the actual Givens conjugation
 		//###########################################################
 
-		Stmp3.f = __fadd_rn(Stmp1.f, Stmp2.f);						
+		Stmp3.f = fadd_rn(Stmp1.f, Stmp2.f);						
 		Ss11.f = Ss11.f * Stmp3.f;									
 		Ss21.f = Ss21.f * Stmp3.f;									
 		Ss31.f = Ss31.f * Stmp3.f;									
@@ -257,8 +287,8 @@ void svd(
 		Stmp2.f = Ss.f*Ss31.f;										              
 		Ss21.f = Sc.f*Ss21.f;										                  
 		Ss31.f = Sc.f*Ss31.f;										                  
-		Ss21.f = __fadd_rn(Stmp2.f, Ss21.f);						                              
-		Ss31.f = __fsub_rn(Ss31.f, Stmp1.f);						                              
+		Ss21.f = fadd_rn(Stmp2.f, Ss21.f);						                              
+		Ss31.f = fsub_rn(Ss31.f, Stmp1.f);						                              
 		
 		Stmp2.f = Ss.f*Ss.f;										              
 		Stmp1.f = Ss33.f*Stmp2.f;									              
@@ -266,17 +296,17 @@ void svd(
 		Stmp4.f = Sc.f * Sc.f;										              
 		Ss22.f = Ss22.f * Stmp4.f;									                  
 		Ss33.f = Ss33.f * Stmp4.f;									                  
-		Ss22.f = __fadd_rn(Ss22.f, Stmp1.f);						                              
-		Ss33.f = __fadd_rn(Ss33.f, Stmp3.f);						                              
-		Stmp4.f = __fsub_rn(Stmp4.f, Stmp2.f);						                      
-		Stmp2.f = __fadd_rn(Ss32.f, Ss32.f);						                              
+		Ss22.f = fadd_rn(Ss22.f, Stmp1.f);						                              
+		Ss33.f = fadd_rn(Ss33.f, Stmp3.f);						                              
+		Stmp4.f = fsub_rn(Stmp4.f, Stmp2.f);						                      
+		Stmp2.f = fadd_rn(Ss32.f, Ss32.f);						                              
 		Ss32.f = Ss32.f*Stmp4.f;									                  
 		Stmp4.f = Sc.f*Ss.f;										              
 		Stmp2.f = Stmp2.f*Stmp4.f;									              
 		Stmp5.f = Stmp5.f*Stmp4.f;									              
-		Ss22.f = __fadd_rn(Ss22.f, Stmp2.f);						                              
-		Ss32.f = __fsub_rn(Ss32.f, Stmp5.f);						                  
-		Ss33.f = __fsub_rn(Ss33.f, Stmp2.f);						                  
+		Ss22.f = fadd_rn(Ss22.f, Stmp2.f);						                              
+		Ss32.f = fsub_rn(Ss32.f, Stmp5.f);						                  
+		Ss33.f = fsub_rn(Ss33.f, Stmp2.f);						                  
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("%.20g\n", Ss11.f);
@@ -298,10 +328,10 @@ void svd(
 		Sqvvy.f = Sch.f*Sqvvy.f;										                          
 		Sqvvz.f = Sch.f*Sqvvz.f;										                          
 
-		Sqvvx.f = __fadd_rn(Sqvvx.f, Ssh.f);							                                  
-		Sqvs.f = __fsub_rn(Sqvs.f, Stmp1.f);							                                  
-		Sqvvy.f = __fadd_rn(Sqvvy.f, Stmp3.f);							                                  
-		Sqvvz.f = __fsub_rn(Sqvvz.f, Stmp2.f);							 
+		Sqvvx.f = fadd_rn(Sqvvx.f, Ssh.f);							                                  
+		Sqvs.f = fsub_rn(Sqvs.f, Stmp1.f);							                                  
+		Sqvvy.f = fadd_rn(Sqvvy.f, Stmp3.f);							                                  
+		Sqvvz.f = fsub_rn(Sqvvz.f, Stmp2.f);							 
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("GPU q %.20g %.20g %.20g %.20g\n", Sqvvx.f, Sqvvy.f, Sqvvz.f, Sqvs.f);
@@ -312,7 +342,7 @@ void svd(
 		//////////////////////////////////////////////////////////////////////////
 
 		Ssh.f = Ss31.f * 0.5f;									  
-		Stmp5.f = __fsub_rn(Ss33.f, Ss11.f);					                          
+		Stmp5.f = fsub_rn(Ss33.f, Ss11.f);					                          
 		
 		Stmp2.f = Ssh.f*Ssh.f;                                            
 		Stmp1.ui = (Stmp2.f >= gtiny_number) ? 0xffffffff : 0;	      
@@ -323,8 +353,8 @@ void svd(
 		
 		Stmp1.f = Ssh.f*Ssh.f;									          
 		Stmp2.f = Sch.f*Sch.f;									          
-		Stmp3.f = __fadd_rn(Stmp1.f, Stmp2.f);					                      
-		Stmp4.f = __frsqrt_rn(Stmp3.f);							              
+		Stmp3.f = fadd_rn(Stmp1.f, Stmp2.f);					                      
+		Stmp4.f = frsqrt_rn(Stmp3.f);							              
 		
 		Ssh.f = Stmp4.f*Ssh.f;									          
 		Sch.f = Stmp4.f*Sch.f;									          
@@ -340,9 +370,9 @@ void svd(
 		
 		Stmp1.f = Ssh.f*Ssh.f;									          
 		Stmp2.f = Sch.f*Sch.f;									          
-		Sc.f = __fsub_rn(Stmp2.f, Stmp1.f);						      
+		Sc.f = fsub_rn(Stmp2.f, Stmp1.f);						      
 		Ss.f = Sch.f*Ssh.f;										      
-		Ss.f = __fadd_rn(Ss.f, Ss.f);							                  
+		Ss.f = fadd_rn(Ss.f, Ss.f);							                  
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("GPU s %.20g, c %.20g, sh %.20g, ch %.20g\n", Ss.f, Sc.f, Ssh.f, Sch.f);
@@ -352,7 +382,7 @@ void svd(
 		// Perform the actual Givens conjugation
 		//###########################################################
 
-		Stmp3.f = __fadd_rn(Stmp1.f, Stmp2.f);							
+		Stmp3.f = fadd_rn(Stmp1.f, Stmp2.f);							
 		Ss22.f = Ss22.f * Stmp3.f;										
 		Ss32.f = Ss32.f * Stmp3.f;										
 		Ss21.f = Ss21.f * Stmp3.f;										
@@ -362,8 +392,8 @@ void svd(
 		Stmp2.f = Ss.f*Ss21.f;											                
 		Ss32.f = Sc.f*Ss32.f;											                    
 		Ss21.f = Sc.f*Ss21.f;											                    
-		Ss32.f = __fadd_rn(Stmp2.f, Ss32.f);							                                
-		Ss21.f = __fsub_rn(Ss21.f, Stmp1.f);							                                
+		Ss32.f = fadd_rn(Stmp2.f, Ss32.f);							                                
+		Ss21.f = fsub_rn(Ss21.f, Stmp1.f);							                                
 		
 		Stmp2.f = Ss.f*Ss.f;											                
 		Stmp1.f = Ss11.f*Stmp2.f;										                
@@ -371,17 +401,17 @@ void svd(
 		Stmp4.f = Sc.f*Sc.f;											                
 		Ss33.f = Ss33.f*Stmp4.f;										                    
 		Ss11.f = Ss11.f*Stmp4.f;										                    
-		Ss33.f = __fadd_rn(Ss33.f, Stmp1.f);							                                
-		Ss11.f = __fadd_rn(Ss11.f, Stmp3.f);							                                
-		Stmp4.f = __fsub_rn(Stmp4.f, Stmp2.f);							                        
-		Stmp2.f = __fadd_rn(Ss31.f, Ss31.f);							                                
+		Ss33.f = fadd_rn(Ss33.f, Stmp1.f);							                                
+		Ss11.f = fadd_rn(Ss11.f, Stmp3.f);							                                
+		Stmp4.f = fsub_rn(Stmp4.f, Stmp2.f);							                        
+		Stmp2.f = fadd_rn(Ss31.f, Ss31.f);							                                
 		Ss31.f = Ss31.f*Stmp4.f;										                    
 		Stmp4.f = Sc.f*Ss.f;											                
 		Stmp2.f = Stmp2.f*Stmp4.f;										                
 		Stmp5.f = Stmp5.f*Stmp4.f;										                
-		Ss33.f = __fadd_rn(Ss33.f, Stmp2.f);							                                
-		Ss31.f = __fsub_rn(Ss31.f, Stmp5.f);							                                
-		Ss11.f = __fsub_rn(Ss11.f, Stmp2.f);							                                
+		Ss33.f = fadd_rn(Ss33.f, Stmp2.f);							                                
+		Ss31.f = fsub_rn(Ss31.f, Stmp5.f);							                                
+		Ss11.f = fsub_rn(Ss11.f, Stmp2.f);							                                
 
 #ifdef DEBUG_JACOBI_CONJUGATE
 		printf("%.20g\n", Ss11.f);
@@ -403,10 +433,10 @@ void svd(
 		Sqvvy.f = Sch.f*Sqvvy.f;										                            
 		Sqvvz.f = Sch.f*Sqvvz.f;										                            
 
-		Sqvvy.f = __fadd_rn(Sqvvy.f, Ssh.f);							                                    
-		Sqvs.f = __fsub_rn(Sqvs.f, Stmp2.f);							                        
-		Sqvvz.f = __fadd_rn(Sqvvz.f, Stmp1.f);							                                    
-		Sqvvx.f = __fsub_rn(Sqvvx.f, Stmp3.f);							
+		Sqvvy.f = fadd_rn(Sqvvy.f, Ssh.f);							                                    
+		Sqvs.f = fsub_rn(Sqvs.f, Stmp2.f);							                        
+		Sqvvz.f = fadd_rn(Sqvvz.f, Stmp1.f);							                                    
+		Sqvvx.f = fsub_rn(Sqvvx.f, Stmp3.f);							
 #endif
 	}
 
@@ -416,19 +446,19 @@ void svd(
 
 	Stmp2.f = Sqvs.f*Sqvs.f;
 	Stmp1.f = Sqvvx.f*Sqvvx.f;
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);
 	Stmp1.f = Sqvvy.f*Sqvvy.f; 
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);
 	Stmp1.f = Sqvvz.f*Sqvvz.f; 
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);
 
-	Stmp1.f = __frsqrt_rn(Stmp2.f);
+	Stmp1.f = frsqrt_rn(Stmp2.f);
 	Stmp4.f = Stmp1.f*0.5f;
 	Stmp3.f = Stmp1.f*Stmp4.f;
 	Stmp3.f = Stmp1.f*Stmp3.f;
 	Stmp3.f = Stmp2.f*Stmp3.f;
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);
 
 	Sqvs.f = Sqvs.f*Stmp1.f;
 	Sqvvx.f = Sqvvx.f*Stmp1.f;
@@ -443,29 +473,29 @@ void svd(
 	Stmp2.f = Sqvvy.f*Sqvvy.f;
 	Stmp3.f = Sqvvz.f*Sqvvz.f;
 	Sv11.f = Sqvs.f*Sqvs.f;
-	Sv22.f = __fsub_rn(Sv11.f, Stmp1.f);
-	Sv33.f = __fsub_rn(Sv22.f, Stmp2.f);
-	Sv33.f = __fadd_rn(Sv33.f, Stmp3.f);
-	Sv22.f = __fadd_rn(Sv22.f, Stmp2.f);
-	Sv22.f = __fsub_rn(Sv22.f, Stmp3.f);
-	Sv11.f = __fadd_rn(Sv11.f, Stmp1.f);
-	Sv11.f = __fsub_rn(Sv11.f, Stmp2.f);
-	Sv11.f = __fsub_rn(Sv11.f, Stmp3.f);
-	Stmp1.f = __fadd_rn(Sqvvx.f, Sqvvx.f);
-	Stmp2.f = __fadd_rn(Sqvvy.f, Sqvvy.f);
-	Stmp3.f = __fadd_rn(Sqvvz.f, Sqvvz.f);
+	Sv22.f = fsub_rn(Sv11.f, Stmp1.f);
+	Sv33.f = fsub_rn(Sv22.f, Stmp2.f);
+	Sv33.f = fadd_rn(Sv33.f, Stmp3.f);
+	Sv22.f = fadd_rn(Sv22.f, Stmp2.f);
+	Sv22.f = fsub_rn(Sv22.f, Stmp3.f);
+	Sv11.f = fadd_rn(Sv11.f, Stmp1.f);
+	Sv11.f = fsub_rn(Sv11.f, Stmp2.f);
+	Sv11.f = fsub_rn(Sv11.f, Stmp3.f);
+	Stmp1.f = fadd_rn(Sqvvx.f, Sqvvx.f);
+	Stmp2.f = fadd_rn(Sqvvy.f, Sqvvy.f);
+	Stmp3.f = fadd_rn(Sqvvz.f, Sqvvz.f);
 	Sv32.f = Sqvs.f*Stmp1.f;
 	Sv13.f = Sqvs.f*Stmp2.f;
 	Sv21.f = Sqvs.f*Stmp3.f;
 	Stmp1.f = Sqvvy.f*Stmp1.f;
 	Stmp2.f = Sqvvz.f*Stmp2.f;
 	Stmp3.f = Sqvvx.f*Stmp3.f;
-	Sv12.f = __fsub_rn(Stmp1.f, Sv21.f);
-	Sv23.f = __fsub_rn(Stmp2.f, Sv32.f);
-	Sv31.f = __fsub_rn(Stmp3.f, Sv13.f);
-	Sv21.f = __fadd_rn(Stmp1.f, Sv21.f);
-	Sv32.f = __fadd_rn(Stmp2.f, Sv32.f);
-	Sv13.f = __fadd_rn(Stmp3.f, Sv13.f);
+	Sv12.f = fsub_rn(Stmp1.f, Sv21.f);
+	Sv23.f = fsub_rn(Stmp2.f, Sv32.f);
+	Sv31.f = fsub_rn(Stmp3.f, Sv13.f);
+	Sv21.f = fadd_rn(Stmp1.f, Sv21.f);
+	Sv32.f = fadd_rn(Stmp2.f, Sv32.f);
+	Sv13.f = fadd_rn(Stmp3.f, Sv13.f);
 
 	///###########################################################
 	// Multiply (from the right) with V
@@ -477,17 +507,17 @@ void svd(
 	Sa13.f = Sv13.f*Sa11.f;
 	Sa11.f = Sv11.f*Sa11.f;
 	Stmp1.f = Sv21.f*Stmp2.f;
-	Sa11.f = __fadd_rn(Sa11.f, Stmp1.f);
+	Sa11.f = fadd_rn(Sa11.f, Stmp1.f);
 	Stmp1.f = Sv31.f*Stmp3.f;
-	Sa11.f = __fadd_rn(Sa11.f, Stmp1.f);
+	Sa11.f = fadd_rn(Sa11.f, Stmp1.f);
 	Stmp1.f = Sv22.f*Stmp2.f;
-	Sa12.f = __fadd_rn(Sa12.f, Stmp1.f);
+	Sa12.f = fadd_rn(Sa12.f, Stmp1.f);
 	Stmp1.f = Sv32.f*Stmp3.f;
-	Sa12.f = __fadd_rn(Sa12.f, Stmp1.f);
+	Sa12.f = fadd_rn(Sa12.f, Stmp1.f);
 	Stmp1.f = Sv23.f*Stmp2.f;
-	Sa13.f = __fadd_rn(Sa13.f, Stmp1.f);
+	Sa13.f = fadd_rn(Sa13.f, Stmp1.f);
 	Stmp1.f = Sv33.f*Stmp3.f;
-	Sa13.f = __fadd_rn(Sa13.f, Stmp1.f);
+	Sa13.f = fadd_rn(Sa13.f, Stmp1.f);
 
 	Stmp2.f = Sa22.f;
 	Stmp3.f = Sa23.f;
@@ -495,17 +525,17 @@ void svd(
 	Sa23.f = Sv13.f*Sa21.f;
 	Sa21.f = Sv11.f*Sa21.f;
 	Stmp1.f = Sv21.f*Stmp2.f;
-	Sa21.f = __fadd_rn(Sa21.f, Stmp1.f);
+	Sa21.f = fadd_rn(Sa21.f, Stmp1.f);
 	Stmp1.f = Sv31.f*Stmp3.f;
-	Sa21.f = __fadd_rn(Sa21.f, Stmp1.f);
+	Sa21.f = fadd_rn(Sa21.f, Stmp1.f);
 	Stmp1.f = Sv22.f*Stmp2.f;
-	Sa22.f = __fadd_rn(Sa22.f, Stmp1.f);
+	Sa22.f = fadd_rn(Sa22.f, Stmp1.f);
 	Stmp1.f = Sv32.f*Stmp3.f;
-	Sa22.f = __fadd_rn(Sa22.f, Stmp1.f);
+	Sa22.f = fadd_rn(Sa22.f, Stmp1.f);
 	Stmp1.f = Sv23.f*Stmp2.f;
-	Sa23.f = __fadd_rn(Sa23.f, Stmp1.f);
+	Sa23.f = fadd_rn(Sa23.f, Stmp1.f);
 	Stmp1.f = Sv33.f*Stmp3.f;
-	Sa23.f = __fadd_rn(Sa23.f, Stmp1.f);
+	Sa23.f = fadd_rn(Sa23.f, Stmp1.f);
 
 	Stmp2.f = Sa32.f;
 	Stmp3.f = Sa33.f;
@@ -513,17 +543,17 @@ void svd(
 	Sa33.f = Sv13.f*Sa31.f;
 	Sa31.f = Sv11.f*Sa31.f;
 	Stmp1.f = Sv21.f*Stmp2.f;
-	Sa31.f = __fadd_rn(Sa31.f, Stmp1.f);
+	Sa31.f = fadd_rn(Sa31.f, Stmp1.f);
 	Stmp1.f = Sv31.f*Stmp3.f;
-	Sa31.f = __fadd_rn(Sa31.f, Stmp1.f);
+	Sa31.f = fadd_rn(Sa31.f, Stmp1.f);
 	Stmp1.f = Sv22.f*Stmp2.f;
-	Sa32.f = __fadd_rn(Sa32.f, Stmp1.f);
+	Sa32.f = fadd_rn(Sa32.f, Stmp1.f);
 	Stmp1.f = Sv32.f*Stmp3.f;
-	Sa32.f = __fadd_rn(Sa32.f, Stmp1.f);
+	Sa32.f = fadd_rn(Sa32.f, Stmp1.f);
 	Stmp1.f = Sv23.f*Stmp2.f;
-	Sa33.f = __fadd_rn(Sa33.f, Stmp1.f);
+	Sa33.f = fadd_rn(Sa33.f, Stmp1.f);
 	Stmp1.f = Sv33.f*Stmp3.f;
-	Sa33.f = __fadd_rn(Sa33.f, Stmp1.f);
+	Sa33.f = fadd_rn(Sa33.f, Stmp1.f);
 
 	//###########################################################
 	// Permute columns such that the singular values are sorted
@@ -531,21 +561,21 @@ void svd(
 
 	Stmp1.f = Sa11.f*Sa11.f;								
 	Stmp4.f = Sa21.f*Sa21.f;								
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);					
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);					
 	Stmp4.f = Sa31.f*Sa31.f;								
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);					
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);					
 
 	Stmp2.f = Sa12.f*Sa12.f;								
 	Stmp4.f = Sa22.f*Sa22.f;								
-	Stmp2.f = __fadd_rn(Stmp2.f, Stmp4.f);					
+	Stmp2.f = fadd_rn(Stmp2.f, Stmp4.f);					
 	Stmp4.f = Sa32.f*Sa32.f;								
-	Stmp2.f = __fadd_rn(Stmp2.f, Stmp4.f);					
+	Stmp2.f = fadd_rn(Stmp2.f, Stmp4.f);					
 
 	Stmp3.f = Sa13.f*Sa13.f;								
 	Stmp4.f = Sa23.f*Sa23.f;								
-	Stmp3.f = __fadd_rn(Stmp3.f, Stmp4.f);					
+	Stmp3.f = fadd_rn(Stmp3.f, Stmp4.f);					
 	Stmp4.f = Sa33.f*Sa33.f;								
-	Stmp3.f = __fadd_rn(Stmp3.f, Stmp4.f);					
+	Stmp3.f = fadd_rn(Stmp3.f, Stmp4.f);					
 
 	// Swap columns 1-2 if necessary
 	Stmp4.ui = (Stmp1.f < Stmp2.f) ? 0xffffffff : 0;	
@@ -589,7 +619,7 @@ void svd(
 	Stmp5.f = -2.f;											
 	Stmp5.ui = Stmp5.ui&Stmp4.ui;							
 	Stmp4.f = 1.f;											
-	Stmp4.f = __fadd_rn(Stmp4.f, Stmp5.f);					
+	Stmp4.f = fadd_rn(Stmp4.f, Stmp5.f);					
 
 	Sa12.f = Sa12.f*Stmp4.f;								
 	Sa22.f = Sa22.f*Stmp4.f;								
@@ -642,7 +672,7 @@ void svd(
 	Stmp5.f = -2.f;											
 	Stmp5.ui = Stmp5.ui&Stmp4.ui;							
 	Stmp4.f = 1.f;											
-	Stmp4.f = __fadd_rn(Stmp4.f, Stmp5.f);					
+	Stmp4.f = fadd_rn(Stmp4.f, Stmp5.f);					
 
 	Sa11.f = Sa11.f*Stmp4.f;								
 	Sa21.f = Sa21.f*Stmp4.f;								
@@ -695,7 +725,7 @@ void svd(
 	Stmp5.f = -2.f;											
 	Stmp5.ui = Stmp5.ui&Stmp4.ui;							
 	Stmp4.f = 1.f;											
-	Stmp4.f = __fadd_rn(Stmp4.f, Stmp5.f);					
+	Stmp4.f = fadd_rn(Stmp4.f, Stmp5.f);					
 
 	Sa13.f = Sa13.f*Stmp4.f;								
 	Sa23.f = Sa23.f*Stmp4.f;								
@@ -718,25 +748,25 @@ void svd(
 	Ssh.ui = Ssh.ui&Sa21.ui;							
 
 	Stmp5.f = 0.f;										
-	Sch.f = __fsub_rn(Stmp5.f, Sa11.f);					
+	Sch.f = fsub_rn(Stmp5.f, Sa11.f);					
 	Sch.f = max(Sch.f, Sa11.f);							
 	Sch.f = max(Sch.f, gsmall_number);					
 	Stmp5.ui = (Sa11.f >= Stmp5.f) ? 0xffffffff : 0;	
 
 	Stmp1.f = Sch.f*Sch.f;								
 	Stmp2.f = Ssh.f*Ssh.f;								
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);				
-	Stmp1.f = __frsqrt_rn(Stmp2.f);						
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);				
+	Stmp1.f = frsqrt_rn(Stmp2.f);						
 
 	Stmp4.f = Stmp1.f*0.5f;							
 	Stmp3.f = Stmp1.f*Stmp4.f;						
 	Stmp3.f = Stmp1.f*Stmp3.f;						
 	Stmp3.f = Stmp2.f*Stmp3.f;						
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);			
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);			
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);			
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);			
 	Stmp1.f = Stmp1.f*Stmp2.f;						
 
-	Sch.f = __fadd_rn(Sch.f, Stmp1.f);				
+	Sch.f = fadd_rn(Sch.f, Stmp1.f);				
 
 	Stmp1.ui = ~Stmp5.ui&Ssh.ui;					
 	Stmp2.ui = ~Stmp5.ui&Sch.ui;					
@@ -747,24 +777,24 @@ void svd(
 
 	Stmp1.f = Sch.f*Sch.f;							
 	Stmp2.f = Ssh.f*Ssh.f;							
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);			
-	Stmp1.f = __frsqrt_rn(Stmp2.f);					
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);			
+	Stmp1.f = frsqrt_rn(Stmp2.f);					
 
 	Stmp4.f = Stmp1.f*0.5f;							
 	Stmp3.f = Stmp1.f*Stmp4.f;						
 	Stmp3.f = Stmp1.f*Stmp3.f;						
 	Stmp3.f = Stmp2.f*Stmp3.f;						
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);			
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);			
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);			
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);			
 
 	Sch.f = Sch.f*Stmp1.f;							
 	Ssh.f = Ssh.f*Stmp1.f;							
 
 	Sc.f = Sch.f*Sch.f;								
 	Ss.f = Ssh.f*Ssh.f;								
-	Sc.f = __fsub_rn(Sc.f, Ss.f);					
+	Sc.f = fsub_rn(Sc.f, Ss.f);					
 	Ss.f = Ssh.f*Sch.f;								
-	Ss.f = __fadd_rn(Ss.f, Ss.f);					
+	Ss.f = fadd_rn(Ss.f, Ss.f);					
 
 	//###########################################################
 	// Rotate matrix A
@@ -774,22 +804,22 @@ void svd(
 	Stmp2.f = Ss.f*Sa21.f;									
 	Sa11.f = Sc.f*Sa11.f;									
 	Sa21.f = Sc.f*Sa21.f;									
-	Sa11.f = __fadd_rn(Sa11.f, Stmp2.f);					
-	Sa21.f = __fsub_rn(Sa21.f, Stmp1.f);					
+	Sa11.f = fadd_rn(Sa11.f, Stmp2.f);					
+	Sa21.f = fsub_rn(Sa21.f, Stmp1.f);					
 
 	Stmp1.f = Ss.f*Sa12.f;									
 	Stmp2.f = Ss.f*Sa22.f;									
 	Sa12.f = Sc.f*Sa12.f;									
 	Sa22.f = Sc.f*Sa22.f;									
-	Sa12.f = __fadd_rn(Sa12.f, Stmp2.f);					
-	Sa22.f = __fsub_rn(Sa22.f, Stmp1.f);					
+	Sa12.f = fadd_rn(Sa12.f, Stmp2.f);					
+	Sa22.f = fsub_rn(Sa22.f, Stmp1.f);					
 
 	Stmp1.f = Ss.f*Sa13.f;									
 	Stmp2.f = Ss.f*Sa23.f;									
 	Sa13.f = Sc.f*Sa13.f;									
 	Sa23.f = Sc.f*Sa23.f;									
-	Sa13.f = __fadd_rn(Sa13.f, Stmp2.f);					
-	Sa23.f = __fsub_rn(Sa23.f, Stmp1.f);					
+	Sa13.f = fadd_rn(Sa13.f, Stmp2.f);					
+	Sa23.f = fsub_rn(Sa23.f, Stmp1.f);					
 
 	//###########################################################
 	// Update matrix U
@@ -799,22 +829,22 @@ void svd(
 	Stmp2.f = Ss.f*Su12.f;
 	Su11.f = Sc.f*Su11.f;
 	Su12.f = Sc.f*Su12.f;
-	Su11.f = __fadd_rn(Su11.f, Stmp2.f);
-	Su12.f = __fsub_rn(Su12.f, Stmp1.f);
+	Su11.f = fadd_rn(Su11.f, Stmp2.f);
+	Su12.f = fsub_rn(Su12.f, Stmp1.f);
 
 	Stmp1.f = Ss.f*Su21.f;
 	Stmp2.f = Ss.f*Su22.f;
 	Su21.f = Sc.f*Su21.f;
 	Su22.f = Sc.f*Su22.f;
-	Su21.f = __fadd_rn(Su21.f, Stmp2.f);
-	Su22.f = __fsub_rn(Su22.f, Stmp1.f);
+	Su21.f = fadd_rn(Su21.f, Stmp2.f);
+	Su22.f = fsub_rn(Su22.f, Stmp1.f);
 
 	Stmp1.f = Ss.f*Su31.f;								
 	Stmp2.f = Ss.f*Su32.f;								
 	Su31.f = Sc.f*Su31.f;
 	Su32.f = Sc.f*Su32.f;
-	Su31.f = __fadd_rn(Su31.f, Stmp2.f);
-	Su32.f = __fsub_rn(Su32.f, Stmp1.f);
+	Su31.f = fadd_rn(Su31.f, Stmp2.f);
+	Su32.f = fsub_rn(Su32.f, Stmp1.f);
 
 	// Second Givens rotation
 
@@ -823,25 +853,25 @@ void svd(
 	Ssh.ui = Ssh.ui&Sa31.ui;							
 
 	Stmp5.f = 0.f;										
-	Sch.f = __fsub_rn(Stmp5.f, Sa11.f);					
+	Sch.f = fsub_rn(Stmp5.f, Sa11.f);					
 	Sch.f = max(Sch.f, Sa11.f);							
 	Sch.f = max(Sch.f, gsmall_number);					
 	Stmp5.ui = (Sa11.f >= Stmp5.f) ? 0xffffffff : 0;	
 
 	Stmp1.f = Sch.f*Sch.f;								
 	Stmp2.f = Ssh.f*Ssh.f;								
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);				
-	Stmp1.f = __frsqrt_rn(Stmp2.f);						
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);				
+	Stmp1.f = frsqrt_rn(Stmp2.f);						
 
 	Stmp4.f = Stmp1.f*0.5;							
 	Stmp3.f = Stmp1.f*Stmp4.f;						
 	Stmp3.f = Stmp1.f*Stmp3.f;						
 	Stmp3.f = Stmp2.f*Stmp3.f;						
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);			
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);			
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);			
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);			
 	Stmp1.f = Stmp1.f*Stmp2.f;						
 
-	Sch.f = __fadd_rn(Sch.f, Stmp1.f);				
+	Sch.f = fadd_rn(Sch.f, Stmp1.f);				
 
 	Stmp1.ui = ~Stmp5.ui&Ssh.ui;					
 	Stmp2.ui = ~Stmp5.ui&Sch.ui;					
@@ -852,24 +882,24 @@ void svd(
 
 	Stmp1.f = Sch.f*Sch.f;							
 	Stmp2.f = Ssh.f*Ssh.f;							
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);			
-	Stmp1.f = __frsqrt_rn(Stmp2.f);					
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);			
+	Stmp1.f = frsqrt_rn(Stmp2.f);					
 
 	Stmp4.f = Stmp1.f*0.5f;									
 	Stmp3.f = Stmp1.f*Stmp4.f;								
 	Stmp3.f = Stmp1.f*Stmp3.f;								
 	Stmp3.f = Stmp2.f*Stmp3.f;								
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);					
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);					
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);					
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);					
 
 	Sch.f = Sch.f*Stmp1.f;									
 	Ssh.f = Ssh.f*Stmp1.f;									
 
 	Sc.f = Sch.f*Sch.f;										
 	Ss.f = Ssh.f*Ssh.f;										
-	Sc.f = __fsub_rn(Sc.f, Ss.f);							
+	Sc.f = fsub_rn(Sc.f, Ss.f);							
 	Ss.f = Ssh.f*Sch.f;										
-	Ss.f = __fadd_rn(Ss.f, Ss.f);							
+	Ss.f = fadd_rn(Ss.f, Ss.f);							
 
 	//###########################################################
 	// Rotate matrix A
@@ -879,22 +909,22 @@ void svd(
 	Stmp2.f = Ss.f*Sa31.f;									
 	Sa11.f = Sc.f*Sa11.f;									
 	Sa31.f = Sc.f*Sa31.f;									
-	Sa11.f = __fadd_rn(Sa11.f, Stmp2.f);					
-	Sa31.f = __fsub_rn(Sa31.f, Stmp1.f);					
+	Sa11.f = fadd_rn(Sa11.f, Stmp2.f);					
+	Sa31.f = fsub_rn(Sa31.f, Stmp1.f);					
 
 	Stmp1.f = Ss.f*Sa12.f;									
 	Stmp2.f = Ss.f*Sa32.f;									
 	Sa12.f = Sc.f*Sa12.f;									
 	Sa32.f = Sc.f*Sa32.f;									
-	Sa12.f = __fadd_rn(Sa12.f, Stmp2.f);					
-	Sa32.f = __fsub_rn(Sa32.f, Stmp1.f);					
+	Sa12.f = fadd_rn(Sa12.f, Stmp2.f);					
+	Sa32.f = fsub_rn(Sa32.f, Stmp1.f);					
 
 	Stmp1.f = Ss.f*Sa13.f;									
 	Stmp2.f = Ss.f*Sa33.f;									
 	Sa13.f = Sc.f*Sa13.f;									
 	Sa33.f = Sc.f*Sa33.f;									
-	Sa13.f = __fadd_rn(Sa13.f, Stmp2.f);					
-	Sa33.f = __fsub_rn(Sa33.f, Stmp1.f);					
+	Sa13.f = fadd_rn(Sa13.f, Stmp2.f);					
+	Sa33.f = fsub_rn(Sa33.f, Stmp1.f);					
 
 	//###########################################################
 	// Update matrix U
@@ -904,22 +934,22 @@ void svd(
 	Stmp2.f = Ss.f*Su13.f;
 	Su11.f = Sc.f*Su11.f;
 	Su13.f = Sc.f*Su13.f;
-	Su11.f = __fadd_rn(Su11.f, Stmp2.f);
-	Su13.f = __fsub_rn(Su13.f, Stmp1.f);
+	Su11.f = fadd_rn(Su11.f, Stmp2.f);
+	Su13.f = fsub_rn(Su13.f, Stmp1.f);
 
 	Stmp1.f = Ss.f*Su21.f;
 	Stmp2.f = Ss.f*Su23.f;
 	Su21.f = Sc.f*Su21.f;
 	Su23.f = Sc.f*Su23.f;
-	Su21.f = __fadd_rn(Su21.f, Stmp2.f);
-	Su23.f = __fsub_rn(Su23.f, Stmp1.f);
+	Su21.f = fadd_rn(Su21.f, Stmp2.f);
+	Su23.f = fsub_rn(Su23.f, Stmp1.f);
 
 	Stmp1.f = Ss.f*Su31.f;
 	Stmp2.f = Ss.f*Su33.f;
 	Su31.f = Sc.f*Su31.f;
 	Su33.f = Sc.f*Su33.f;
-	Su31.f = __fadd_rn(Su31.f, Stmp2.f);
-	Su33.f = __fsub_rn(Su33.f, Stmp1.f);
+	Su31.f = fadd_rn(Su31.f, Stmp2.f);
+	Su33.f = fsub_rn(Su33.f, Stmp1.f);
 
 	// Third Givens Rotation
 
@@ -928,25 +958,25 @@ void svd(
 	Ssh.ui = Ssh.ui&Sa32.ui;							
 
 	Stmp5.f = 0.f;										
-	Sch.f = __fsub_rn(Stmp5.f, Sa22.f);					
+	Sch.f = fsub_rn(Stmp5.f, Sa22.f);					
 	Sch.f = max(Sch.f, Sa22.f);							
 	Sch.f = max(Sch.f, gsmall_number);					
 	Stmp5.ui = (Sa22.f >= Stmp5.f) ? 0xffffffff : 0;	
 
 	Stmp1.f = Sch.f*Sch.f;								
 	Stmp2.f = Ssh.f*Ssh.f;								
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);				
-	Stmp1.f = __frsqrt_rn(Stmp2.f);						
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);				
+	Stmp1.f = frsqrt_rn(Stmp2.f);						
 
 	Stmp4.f = Stmp1.f*0.5f;							
 	Stmp3.f = Stmp1.f*Stmp4.f;						
 	Stmp3.f = Stmp1.f*Stmp3.f;						
 	Stmp3.f = Stmp2.f*Stmp3.f;						
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);			
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);			
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);			
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);			
 	Stmp1.f = Stmp1.f*Stmp2.f;						
 
-	Sch.f = __fadd_rn(Sch.f, Stmp1.f);				
+	Sch.f = fadd_rn(Sch.f, Stmp1.f);				
 
 	Stmp1.ui = ~Stmp5.ui&Ssh.ui;					
 	Stmp2.ui = ~Stmp5.ui&Sch.ui;					
@@ -957,24 +987,24 @@ void svd(
 
 	Stmp1.f = Sch.f*Sch.f;							
 	Stmp2.f = Ssh.f*Ssh.f;							
-	Stmp2.f = __fadd_rn(Stmp1.f, Stmp2.f);			
-	Stmp1.f = __frsqrt_rn(Stmp2.f);					
+	Stmp2.f = fadd_rn(Stmp1.f, Stmp2.f);			
+	Stmp1.f = frsqrt_rn(Stmp2.f);					
 
 	Stmp4.f = Stmp1.f*0.5f;							
 	Stmp3.f = Stmp1.f*Stmp4.f;						
 	Stmp3.f = Stmp1.f*Stmp3.f;						
 	Stmp3.f = Stmp2.f*Stmp3.f;						
-	Stmp1.f = __fadd_rn(Stmp1.f, Stmp4.f);			
-	Stmp1.f = __fsub_rn(Stmp1.f, Stmp3.f);			
+	Stmp1.f = fadd_rn(Stmp1.f, Stmp4.f);			
+	Stmp1.f = fsub_rn(Stmp1.f, Stmp3.f);			
 
 	Sch.f = Sch.f*Stmp1.f;							
 	Ssh.f = Ssh.f*Stmp1.f;							
 
 	Sc.f = Sch.f*Sch.f;								
 	Ss.f = Ssh.f*Ssh.f;								
-	Sc.f = __fsub_rn(Sc.f, Ss.f);					
+	Sc.f = fsub_rn(Sc.f, Ss.f);					
 	Ss.f = Ssh.f*Sch.f;								
-	Ss.f = __fadd_rn(Ss.f, Ss.f);					
+	Ss.f = fadd_rn(Ss.f, Ss.f);					
 
 	//###########################################################
 	// Rotate matrix A
@@ -984,22 +1014,22 @@ void svd(
 	Stmp2.f = Ss.f*Sa31.f;									
 	Sa21.f = Sc.f*Sa21.f;									
 	Sa31.f = Sc.f*Sa31.f;									
-	Sa21.f = __fadd_rn(Sa21.f, Stmp2.f);					
-	Sa31.f = __fsub_rn(Sa31.f, Stmp1.f);					
+	Sa21.f = fadd_rn(Sa21.f, Stmp2.f);					
+	Sa31.f = fsub_rn(Sa31.f, Stmp1.f);					
 
 	Stmp1.f = Ss.f*Sa22.f;									
 	Stmp2.f = Ss.f*Sa32.f;									
 	Sa22.f = Sc.f*Sa22.f;									
 	Sa32.f = Sc.f*Sa32.f;									
-	Sa22.f = __fadd_rn(Sa22.f, Stmp2.f);					
-	Sa32.f = __fsub_rn(Sa32.f, Stmp1.f);					
+	Sa22.f = fadd_rn(Sa22.f, Stmp2.f);					
+	Sa32.f = fsub_rn(Sa32.f, Stmp1.f);					
 
 	Stmp1.f = Ss.f*Sa23.f;									
 	Stmp2.f = Ss.f*Sa33.f;									
 	Sa23.f = Sc.f*Sa23.f;									
 	Sa33.f = Sc.f*Sa33.f;									
-	Sa23.f = __fadd_rn(Sa23.f, Stmp2.f);					
-	Sa33.f = __fsub_rn(Sa33.f, Stmp1.f);					
+	Sa23.f = fadd_rn(Sa23.f, Stmp2.f);					
+	Sa33.f = fsub_rn(Sa33.f, Stmp1.f);					
 
 	//###########################################################
 	// Update matrix U
@@ -1009,22 +1039,22 @@ void svd(
 	Stmp2.f = Ss.f*Su13.f;
 	Su12.f = Sc.f*Su12.f;									
 	Su13.f = Sc.f*Su13.f;									
-	Su12.f = __fadd_rn(Su12.f, Stmp2.f);
-	Su13.f = __fsub_rn(Su13.f, Stmp1.f);
+	Su12.f = fadd_rn(Su12.f, Stmp2.f);
+	Su13.f = fsub_rn(Su13.f, Stmp1.f);
 
 	Stmp1.f = Ss.f*Su22.f;
 	Stmp2.f = Ss.f*Su23.f;
 	Su22.f = Sc.f*Su22.f;
 	Su23.f = Sc.f*Su23.f;
-	Su22.f = __fadd_rn(Su22.f, Stmp2.f);
-	Su23.f = __fsub_rn(Su23.f, Stmp1.f);
+	Su22.f = fadd_rn(Su22.f, Stmp2.f);
+	Su23.f = fsub_rn(Su23.f, Stmp1.f);
 
 	Stmp1.f = Ss.f*Su32.f;
 	Stmp2.f = Ss.f*Su33.f;
 	Su32.f = Sc.f*Su32.f;
 	Su33.f = Sc.f*Su33.f;
-	Su32.f = __fadd_rn(Su32.f, Stmp2.f);					
-	Su33.f = __fsub_rn(Su33.f, Stmp1.f);					
+	Su32.f = fadd_rn(Su32.f, Stmp2.f);					
+	Su33.f = fsub_rn(Su33.f, Stmp1.f);					
 
 	v11 = Sv11.f; v12 = Sv12.f; v13 = Sv13.f;
 	v21 = Sv21.f; v22 = Sv22.f; v23 = Sv23.f;

@@ -74,4 +74,18 @@ namespace dyno
 	};
 
 	IMPLEMENT_CLASS(PrintFloat);
+
+	class PrintVector : public DebugInfo
+	{
+		DECLARE_CLASS(PrintVector);
+	public:
+		PrintVector();
+		~PrintVector() {};
+
+		DEF_VAR_IN(Vec3f, Vector, "Input value");
+
+		void print() override;
+	};
+
+	IMPLEMENT_CLASS(PrintVector);
 }

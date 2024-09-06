@@ -4,10 +4,13 @@
 #include <QCheckBox>
 #include <QLabel>
 
+#include "Field.h"
 #include "Format.h"
 
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(bool, QBoolFieldWidget)
+
 	QBoolFieldWidget::QBoolFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{

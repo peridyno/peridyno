@@ -83,7 +83,7 @@ namespace dyno
 
 	template<typename TDataType>
 	SurfaceTension<TDataType>::SurfaceTension()
-		: ForceModule()
+		: ComputeModule()
 		, m_intensity(Real(1))
 		, m_soothingLength(Real(0.0125))
 	{
@@ -91,14 +91,8 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SurfaceTension<TDataType>::updateImpl()
+	void SurfaceTension<TDataType>::compute()
 	{
-	}
-
-	template<typename TDataType>
-	bool SurfaceTension<TDataType>::applyForce()
-	{
-		return true;
 	}
 
 	DEFINE_CLASS(SurfaceTension);

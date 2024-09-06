@@ -20,16 +20,9 @@
 #include "FBase.h"
 
 #include "Array/Array.h"
-
-#ifdef CUDA_BACKEND
-	#include "Array/Array2D.h"
-	#include "Array/Array3D.h"
-	#include "Array/ArrayList.h"
-#endif
-
-#ifdef VK_BACKEND
-	#include "Array/ArrayList.h"
-#endif
+#include "Array/Array2D.h"
+#include "Array/Array3D.h"
+#include "Array/ArrayList.h"
 
 namespace dyno {
 	/*!
@@ -42,12 +35,17 @@ namespace dyno {
 	public:
 		typedef T				VarType;
 		typedef T				DataType;
-		typedef FVar<T>		FieldType;
+		typedef FVar<T>			FieldType;
 
-		DEFINE_FIELD_FUNC(FieldType, DataType, FVar);
+		FVar() : FBase("", "") {}
+		FVar(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
+			: FBase(name, description, fieldType, parent) {}
 
 		FVar(T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent);
 		~FVar() override;
+
+		const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }
+		const std::string getClassName() override { return "FVar"; }
 
 		uint size() override { return 1; }
 
@@ -58,8 +56,43 @@ namespace dyno {
 		bool deserialize(const std::string& str) override { return false; }
 
 		bool isEmpty() override {
-			return this->getDataPtr() == nullptr;
+			return this->constDataPtr() == nullptr;
 		}
+
+		bool connect(FieldType* dst)
+		{
+			this->connectField(dst);
+			return true;
+		}
+
+		bool connect(FBase* dst) override {
+			FieldType* derived = dynamic_cast<FieldType*>(dst);
+			if (derived == nullptr) return false;
+			return this->connect(derived);
+		}
+
+		DataType getData() {
+			auto dataPtr = this->constDataPtr();
+			assert(dataPtr != nullptr);
+			return *dataPtr;
+		}
+
+		std::shared_ptr<DataType>& constDataPtr()
+		{
+			FBase* topField = this->getTopField();
+			FieldType* derived = dynamic_cast<FieldType*>(topField);
+			return derived->m_data;
+		}
+
+	private:
+		std::shared_ptr<DataType>& getDataPtr()
+		{
+			FBase* topField = this->getTopField();
+			FieldType* derived = dynamic_cast<FieldType*>(topField);
+			return derived->m_data;
+		}
+
+		std::shared_ptr<DataType> m_data = nullptr;
 	};
 
 	template<typename T>
@@ -96,7 +129,7 @@ namespace dyno {
 	template<typename T>
 	T FVar<T>::getValue()
 	{
-		std::shared_ptr<T>& data = this->getDataPtr();
+		std::shared_ptr<T>& data = this->constDataPtr();
 
 		return *data;
 	}
@@ -124,7 +157,7 @@ namespace dyno {
 		~FArray() override;
 
 		inline uint size() override {
-			auto ref = this->getDataPtr();
+			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
@@ -164,7 +197,7 @@ namespace dyno {
 
 		data->resize(num);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -178,7 +211,7 @@ namespace dyno {
 
 		data->assign(val);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -192,7 +225,7 @@ namespace dyno {
 
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -206,7 +239,7 @@ namespace dyno {
 
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 
 #ifndef NO_BACKEND
@@ -221,7 +254,7 @@ namespace dyno {
 
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 #endif
 
@@ -236,7 +269,7 @@ namespace dyno {
 
 		data->reset();
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -250,7 +283,7 @@ namespace dyno {
 
 		data->clear();
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T>
@@ -259,7 +292,6 @@ namespace dyno {
 	template<typename T>
 	using DeviceArrayField = FArray<T, DeviceType::GPU>;
 
-#ifdef CUDA_BACKEND
 	/**
 	 * Define field for Array2D
 	 */
@@ -273,8 +305,10 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray2D);
 
+		~FArray2D() override;
+
 		inline uint size() override {
-			auto ref = this->getDataPtr();
+			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
@@ -286,9 +320,18 @@ namespace dyno {
 		void assign(DArray2D<T>& vals);
 
 		bool isEmpty() override {
-			return this->getDataPtr() == nullptr;
+			return this->constDataPtr() == nullptr;
 		}
 	};
+
+	template<typename T, DeviceType deviceType>
+	FArray2D<T, deviceType>::~FArray2D()
+	{
+		if (m_data.use_count() == 1)
+		{
+			m_data->clear();
+		}
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArray2D<T, deviceType>::assign(DArray2D<T>& vals)
@@ -298,10 +341,10 @@ namespace dyno {
 		{
 			data = std::make_shared<Array2D<T, deviceType>>();
 		}
-	
+
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -315,7 +358,7 @@ namespace dyno {
 
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -329,7 +372,7 @@ namespace dyno {
 
 		data->reset();
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -340,10 +383,10 @@ namespace dyno {
 		if (data == nullptr) {
 			data = std::make_shared<Array2D<T, deviceType>>();
 		}
-		
+
 		data->resize(ny, ny);
 
-		this->tick();
+		//this->tick();
 	}
 
 	/**
@@ -359,8 +402,10 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArray3D);
 
+		~FArray3D() override;
+
 		inline uint size() override {
-			auto ref = this->getDataPtr();
+			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
@@ -372,9 +417,18 @@ namespace dyno {
 		void assign(DArray3D<T>& vals);
 
 		bool isEmpty() override {
-			return this->getDataPtr() == nullptr;
+			return this->constDataPtr() == nullptr;
 		}
 	};
+
+	template<typename T, DeviceType deviceType>
+	FArray3D<T, deviceType>::~FArray3D()
+	{
+		if (m_data.use_count() == 1)
+		{
+			m_data->clear();
+		}
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArray3D<T, deviceType>::assign(DArray3D<T>& vals)
@@ -386,7 +440,7 @@ namespace dyno {
 
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -399,7 +453,7 @@ namespace dyno {
 
 		data->assign(vals);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -412,7 +466,7 @@ namespace dyno {
 
 		data->reset();
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -422,12 +476,13 @@ namespace dyno {
 
 		if (data == nullptr)
 			data = std::make_shared<Array3D<T, deviceType>>();
-		
+
 		data->resize(nx, ny, nz);
 
-		this->tick();
+		//this->tick();
 	}
 
+#ifdef CUDA_BACKEND
 	/**
 	 * Define field for Array
 	 */
@@ -441,8 +496,10 @@ namespace dyno {
 
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArrayList);
 
+		~FArrayList() override;
+
 		inline uint size() override {
-			auto ref = this->getDataPtr();
+			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
@@ -454,9 +511,18 @@ namespace dyno {
 		void assign(const ArrayList<T, DeviceType::GPU>& src);
 
 		bool isEmpty() override {
-			return this->getDataPtr() == nullptr;
+			return this->constDataPtr() == nullptr;
 		}
 	};
+
+	template<typename T, DeviceType deviceType>
+	FArrayList<T, deviceType>::~FArrayList()
+	{
+		if (m_data.use_count() == 1)
+		{
+			m_data->clear();
+		}
+	}
 
 	template<typename T, DeviceType deviceType>
 	void FArrayList<T, deviceType>::assign(const ArrayList<T, DeviceType::CPU>& src)
@@ -468,7 +534,7 @@ namespace dyno {
 
 		data->assign(src);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -481,7 +547,7 @@ namespace dyno {
 
 		data->assign(src);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -494,7 +560,7 @@ namespace dyno {
 
 		data->resize(num);
 
-		this->tick();
+		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -507,7 +573,7 @@ namespace dyno {
 
 		data->resize(arr);
 
-		this->tick();
+		//this->tick();
 	}
 #endif
 
@@ -605,7 +671,7 @@ namespace dyno {
 		DEFINE_FIELD_FUNC(FieldType, DataType, FArrayList);
 
 		inline uint size() override {
-			auto ref = this->getDataPtr();
+			auto ref = this->constDataPtr();
 			return ref == nullptr ? 0 : ref->size();
 		}
 
@@ -617,7 +683,7 @@ namespace dyno {
 // 		void assign(const ArrayList<T, DeviceType::GPU>& src);
 
 		bool isEmpty() override {
-			return this->getDataPtr() == nullptr;
+			return this->constDataPtr() == nullptr;
 		}
 	};
 
@@ -676,4 +742,4 @@ namespace dyno {
 #endif
 }
 
-//#nclude "FSerialization.inl"
+#include "FSerialization.inl"

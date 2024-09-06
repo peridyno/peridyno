@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "../Attribute.h"
+#include "Collision/Attribute.h"
 
 //Framework
 #include "Module/ConstraintModule.h"

@@ -44,9 +44,11 @@ endif()
 
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Engine")
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
- 
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+endif()
+
+
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
 set_target_properties(${LIB_NAME} PROPERTIES
@@ -55,16 +57,13 @@ set_target_properties(${LIB_NAME} PROPERTIES
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
 target_include_directories(${LIB_NAME} PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Framework>
-    $<BUILD_INTERFACE:${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/filesystem>
+    $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Framework>
+    $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external/filesystem>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/filesystem>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>
     #$<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/filesystem>
 	)
-
-#To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
-target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 
 target_link_libraries(${LIB_NAME} Core)
 
@@ -96,7 +95,13 @@ file(GLOB FRAMEWORK_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Framework/*.h")
 install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework)
 
 file(GLOB FRAMEWORK_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Module/*.h")
-install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Module)
+install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework/Module)
+
+file(GLOB FRAMEWORK_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Node/*.h")
+install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework/Node)
+
+file(GLOB FRAMEWORK_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Plugin/*.h")
+install(FILES ${FRAMEWORK_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework/Plugin)
 
 file(GLOB MAPPING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Mapping/*.h")
 install(FILES ${MAPPING_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Framework/Mapping)

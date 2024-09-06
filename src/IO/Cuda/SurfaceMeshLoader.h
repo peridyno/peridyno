@@ -11,7 +11,7 @@ namespace dyno
 	*	\brief	Load a triangular mesh
 	*/
 	template<typename TDataType>
-	class SurfaceMeshLoader : public GeometryLoader
+	class SurfaceMeshLoader : public GeometryLoader<TDataType>
 	{
 		DECLARE_TCLASS(SurfaceMeshLoader, TDataType)
 	public:

@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "Vector.h"
+#include <Vector.h>
+#include <RenderParams.h>
 
 namespace dyno
 {
-	class AxisRenderer;
 	class BBoxRenderer;
 	class GroundRenderer;
 	class BackgroundRenderer;
@@ -30,13 +30,14 @@ namespace dyno
 		GLRenderHelper();
 		~GLRenderHelper();
 
-		void drawGround(float planeScale, float rulerScale = 1.f);
-		void drawAxis(float lineWidth = 2.f);
-		void drawBBox(Vec3f pmin, Vec3f pmax, int type = 0);
+		void drawGround(const RenderParams& rparams, 
+			float planeScale, float rulerScale = 1.f,
+			dyno::Vec4f planeColor = { 0.3, 0.3, 0.3, 0.5 },
+			dyno::Vec4f rulerColor = { 0.1, 0.1, 0.1, 0.5 });
+		void drawBBox(const RenderParams& rparams, Vec3f pmin, Vec3f pmax, int type = 0);
 		void drawBackground(Vec3f color0, Vec3f color1);
 
 	private:
-		AxisRenderer*			mAxisRenderer = NULL;
 		BBoxRenderer*			mBBoxRenderer = NULL;
 		GroundRenderer*			mGroundRenderer = NULL;
 		BackgroundRenderer*		mBackgroundRenderer = NULL;

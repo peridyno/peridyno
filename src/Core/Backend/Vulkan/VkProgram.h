@@ -161,6 +161,9 @@ namespace dyno {
 		void restoreInherentCmdBuffer();
 
 	protected:
+		void pushFormalParameter(VkVariable* arg);
+		void pushFormalConstant(VkVariable* arg);
+
 		void pushArgument(VkVariable* arg);
 		void pushConstant(VkVariable* arg);
 		void pushDeviceBuffer(VkVariable* arg);
@@ -170,6 +173,9 @@ namespace dyno {
 		VkPipelineShaderStageCreateInfo createComputeStage(std::string fileName);
 
 		VkContext* ctx = nullptr;
+
+		std::vector<VkVariable*> mFormalParamters;
+		std::vector<VkVariable*> mFormalConstants;
 
 		std::vector<VkVariable*> mAllArgs;
 		std::vector<VkVariable*> mBufferArgs;
@@ -223,15 +229,15 @@ namespace dyno {
 			switch (variable->type())
 			{
 			case VariableType::DeviceBuffer:
-				this->pushDeviceBuffer(variable);
+				this->pushFormalParameter(variable);
 				nBuffer++;
 				break;
 			case VariableType::Uniform:
-				this->pushUniform(variable);
+				this->pushFormalParameter(variable);
 				nUniform++;
 				break;
 			case VariableType::Constant:
-				this->pushConstant(variable);
+				this->pushFormalConstant(variable);
 				break;
 			default:
 				break;
@@ -240,11 +246,11 @@ namespace dyno {
 
 		//Create descriptor set layout
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
-		for (size_t i = 0; i < mAllArgs.size(); i++)
+		for (size_t i = 0; i < mFormalParamters.size(); i++)
 		{
-			if (mAllArgs[i]->type() == VariableType::DeviceBuffer || mAllArgs[i]->type() == VariableType::Uniform)
+			if (mFormalParamters[i]->type() == VariableType::DeviceBuffer || mFormalParamters[i]->type() == VariableType::Uniform)
 			{
-				setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VkVariable::descriptorType(mAllArgs[i]->type()), VK_SHADER_STAGE_COMPUTE_BIT, i));
+				setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VkVariable::descriptorType(mFormalParamters[i]->type()), VK_SHADER_STAGE_COMPUTE_BIT, i));
 			}
 		}
 
@@ -285,6 +291,16 @@ namespace dyno {
 	{
 		std::initializer_list<VkVariable*> variables{args...};
 
+#ifndef NDEBUG
+		assert(mFormalParamters.size() == variables.size());
+		for (std::size_t i = 0; i < variables.size(); i++)
+		{
+			auto variable = *(variables.begin() + i);
+			assert(mFormalParamters[i]->type() == variable->type());
+		}
+#endif // !NDEBUG
+
+
 		mAllArgs.clear();
 		mBufferArgs.clear();
 		mUniformArgs.clear();
@@ -306,16 +322,6 @@ namespace dyno {
 				break;
 			}
 		}
-
-#ifndef NDEBUG
-		assert(mAllArgs.size() == variables.size());
-		for (std::size_t i = 0; i < variables.size(); i++)
-		{
-			auto variable = *(variables.begin() + i);
-			assert(mAllArgs[i]->type() == variable->type());
-		}
-#endif // !NDEBUG
-
 
 		//Create descriptor set layout
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
@@ -354,6 +360,15 @@ namespace dyno {
 	{
 		std::initializer_list<VkVariable*> variables{ args... };
 
+#ifndef NDEBUG
+		assert(mFormalParamters.size() == variables.size());
+		for (std::size_t i = 0; i < variables.size(); i++)
+		{
+			auto variable = *(variables.begin() + i);
+			assert(mFormalParamters[i]->type() == variable->type());
+		}
+#endif // !NDEBUG
+
 		mAllArgs.clear();
 		mBufferArgs.clear();
 		mUniformArgs.clear();
@@ -376,16 +391,6 @@ namespace dyno {
 			}
 		}
 
-#ifndef NDEBUG
-		assert(mAllArgs.size() == variables.size());
-		for (std::size_t i = 0; i < variables.size(); i++)
-		{
-			auto variable = *(variables.begin() + i);
-			assert(mAllArgs[i]->type() == variable->type());
-		}
-#endif // !NDEBUG
-
-
 		//Create descriptor set layout
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 		for (size_t i = 0; i < variables.size(); i++)
@@ -400,8 +405,6 @@ namespace dyno {
 		vkUpdateDescriptorSets(ctx->deviceHandle(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
 		writeDescriptorSets.clear();
 	}
-
-
 
 	class VkMultiProgram
 	{

@@ -11,9 +11,6 @@ namespace dyno
 	{
 		srand(time(0));
 
-		this->varSamplingDistance()->setRange(0.001, 1.0);
-		this->varVelocityMagnitude()->setRange(0.0, 10.0);
-
 		this->varWidth()->setRange(0.01, 10.0f);
 		this->varHeight()->setRange(0.01, 10.0f);
 

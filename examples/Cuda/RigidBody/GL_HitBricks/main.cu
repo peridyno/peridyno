@@ -127,6 +127,9 @@ int main()
 	GlfwApp app;
 	app.setSceneGraph(creatBricks());
 	app.initialize(1280, 768);
+
+	app.renderWindow()->setSelectionMode(RenderWindow::PRIMITIVE_MODE);
+
 	app.mainLoop();
 
 	return 0;

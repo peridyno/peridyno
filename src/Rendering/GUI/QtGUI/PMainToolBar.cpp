@@ -197,10 +197,14 @@ namespace dyno
 		mLogAct->setCheckable(true);
 		configGroup->AddAction(QToolButton::DelayedPopup, mLogAct);
 
-		mEditAct = new QAction(QPixmap(path + "icon/ToolBarIco/Edit/Settings_v2.png"), "Settings");
-		configGroup->AddAction(QToolButton::DelayedPopup, mEditAct);
+		mSettingAct = new QAction(QPixmap(path + "icon/ToolBarIco/Edit/Settings_v2.png"), "Settings");
+		configGroup->AddAction(QToolButton::DelayedPopup, mSettingAct);
 
 		connect(mLogAct, &QAction::triggered, this, [=]() { emit logActTriggered(); });
+		connect(mSettingAct, &QAction::triggered, this, [=]() { emit settingTriggered(); });
+		
 	}
+
+	
 }
 

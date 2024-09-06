@@ -1,11 +1,18 @@
 #include "GLRenderHelper.h"
 
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
-#include "gl/Texture.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
+#include "GraphicsObject/Texture.h"
 
 #include <glad/glad.h>
 #include <vector>
+
+#include "plane.vert.h"
+#include "plane.frag.h"
+#include "bbox.vert.h"
+#include "bbox.frag.h"
+#include "screen.vert.h"
+#include "background.frag.h"
 
 namespace dyno
 {
@@ -14,8 +21,10 @@ namespace dyno
 	public:
 		GroundRenderer()
 		{
-			mProgram = gl::ShaderFactory::createShaderProgram("plane.vert", "plane.frag");
-			mPlane = gl::Mesh::Plane(1.f);
+			mProgram = Program::createProgramSPIRV(
+				PLANE_VERT, sizeof(PLANE_VERT),
+				PLANE_FRAG, sizeof(PLANE_FRAG));
+			mPlane = Mesh::Plane(1.f);
 
 			// create ruler texture
 			const int k = 50;
@@ -44,6 +53,8 @@ namespace dyno
 			mRulerTex.genMipmap();
 			// set anisotropy
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
+
+			mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		}
 
 		~GroundRenderer()
@@ -55,79 +66,44 @@ namespace dyno
 
 			mProgram->release();
 			delete mProgram;
+
+			mUniformBlock.release();
 		}
 
 
-		void draw(float planeScale, float rulerScale)
+		void draw(const RenderParams& rparams,
+			float planeScale,
+			float rulerScale,
+			dyno::Vec4f planeColor,
+			dyno::Vec4f rulerColor)
 		{
+			mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+			mUniformBlock.bindBufferBase(0);
+
 			mRulerTex.bind(GL_TEXTURE1);
+
+			glEnable(GL_BLEND); 
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			
 			mProgram->use();
 			mProgram->setFloat("uPlaneScale", planeScale);
 			mProgram->setFloat("uRulerScale", rulerScale);
+			mProgram->setVec4("uPlaneColor", planeColor);
+			mProgram->setVec4("uRulerColor", rulerColor);
 
 			mPlane->draw();
 
-			gl::glCheckError();
+			glDisable(GL_BLEND);
+
+			glCheckError();
 		}
 
 	private:
-		gl::Mesh*			mPlane;
-		gl::Texture2D 		mRulerTex;
-		gl::Program*		mProgram;
-	};
+		Mesh*			mPlane;
+		Texture2D 		mRulerTex;
+		Program*		mProgram;
 
-	class AxisRenderer
-	{
-	public:
-		AxisRenderer()
-		{
-			mProgram = gl::ShaderFactory::createShaderProgram("axis.vert", "axis.frag");
-
-			mAxisVBO.create(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-			float vertices[] = {
-				// +x			// color...
-				0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-				1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-				// +y
-				0.f, 0.f, 0.f, 0.f, 1.f, 0.f,
-				0.f, 1.f, 0.f, 0.f, 1.f, 0.f,
-				// +z
-				0.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-				0.f, 0.f, 1.f, 0.f, 0.f, 1.f,
-			};
-			mAxisVBO.load(vertices, sizeof(vertices) * 4);
-
-			mAxisVAO.create();
-			mAxisVAO.bindVertexBuffer(&mAxisVBO, 0, 3, GL_FLOAT, sizeof(vertices) / 6, 0, 0);
-			mAxisVAO.bindVertexBuffer(&mAxisVBO, 1, 3, GL_FLOAT, sizeof(vertices) / 6, sizeof(float) * 3, 0);
-		}
-
-		~AxisRenderer()
-		{
-			mProgram->release();
-			delete mProgram;
-
-			mAxisVBO.release();
-			mAxisVAO.release();
-		}
-
-		void draw(float lineWidth = 2.f)
-		{
-			mProgram->use();
-			mAxisVAO.bind();
-
-			glDisable(GL_DEPTH_TEST);
-			glDrawArrays(GL_LINES, 0, 6);
-			glEnable(GL_DEPTH_TEST);
-
-			mAxisVAO.unbind();
-		}
-
-	private:
-		gl::VertexArray	mAxisVAO;
-		gl::Buffer		mAxisVBO;
-		gl::Program*	mProgram;
+		Buffer			mUniformBlock;
 	};
 
 	class BBoxRenderer
@@ -135,11 +111,16 @@ namespace dyno
 	public:
 		BBoxRenderer()
 		{
-			mProgram = gl::ShaderFactory::createShaderProgram("bbox.vert", "bbox.frag");
+			mProgram = Program::createProgramSPIRV(
+				BBOX_VERT, sizeof(BBOX_VERT), 
+				BBOX_FRAG, sizeof(BBOX_FRAG));
+
 			mCubeVBO.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 			mCubeVBO.load(0, 8 * 3 * sizeof(float));
 			mCubeVAO.create();
 			mCubeVAO.bindVertexBuffer(&mCubeVBO, 0, 3, GL_FLOAT, 0, 0, 0);
+
+			mUniformBlock.create(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 		}
 
 		~BBoxRenderer()
@@ -149,9 +130,11 @@ namespace dyno
 
 			mProgram->release();
 			delete mProgram;
+
+			mUniformBlock.release();
 		}
 
-		void draw(Vec3f p0, Vec3f p1, int type)
+		void draw(const RenderParams& rparams, Vec3f p0, Vec3f p1, int type)
 		{
 			float vertices[]{
 				p0[0], p0[1], p0[2],
@@ -164,6 +147,9 @@ namespace dyno
 				p1[0], p1[1], p1[2],
 				p1[0], p1[1], p0[2],
 			};
+
+			mUniformBlock.load((void*)&rparams, sizeof(RenderParams));
+			mUniformBlock.bindBufferBase(0);
 
 			mCubeVBO.load(vertices, sizeof(vertices));
 			mCubeVAO.bind();
@@ -201,13 +187,15 @@ namespace dyno
 			}
 
 			mCubeVAO.unbind();
-			gl::glCheckError();
+			glCheckError();
 		}
 
 	private:
-		gl::VertexArray	mCubeVAO;
-		gl::Buffer		mCubeVBO;
-		gl::Program*	mProgram;
+		VertexArray	mCubeVAO;
+		Buffer		mCubeVBO;
+		Program*	mProgram;
+
+		Buffer		mUniformBlock;
 	};
 
 	class BackgroundRenderer
@@ -216,8 +204,10 @@ namespace dyno
 		BackgroundRenderer()
 		{
 			// create a quad object
-			mScreenQuad = gl::Mesh::ScreenQuad();
-			mBackgroundProgram = gl::ShaderFactory::createShaderProgram("screen.vert", "background.frag");
+			mScreenQuad = Mesh::ScreenQuad();
+			mBackgroundProgram = Program::createProgramSPIRV(
+				SCREEN_VERT, sizeof(SCREEN_VERT),
+				BACKGROUND_FRAG, sizeof(BACKGROUND_FRAG));
 		}
 
 		~BackgroundRenderer() {
@@ -240,15 +230,14 @@ namespace dyno
 
 	private:
 		// background
-		gl::Program*	mBackgroundProgram;
-		gl::Mesh*		mScreenQuad;
+		Program*	mBackgroundProgram;
+		Mesh*		mScreenQuad;
 	};
 
 
 
 	GLRenderHelper::GLRenderHelper()
 	{
-		mAxisRenderer = new AxisRenderer();
 		mBBoxRenderer = new BBoxRenderer();
 		mGroundRenderer = new GroundRenderer();
 		mBackgroundRenderer = new BackgroundRenderer();
@@ -256,28 +245,24 @@ namespace dyno
 
 	GLRenderHelper::~GLRenderHelper()
 	{
-		if (mAxisRenderer) delete mAxisRenderer;
 		if (mBBoxRenderer) delete mBBoxRenderer;
 		if (mGroundRenderer) delete mGroundRenderer;
 		if (mBackgroundRenderer) delete mBackgroundRenderer;
 	}
 
-	void GLRenderHelper::drawGround(float planeScale, float rulerScale)
+	void GLRenderHelper::drawGround(const RenderParams& rparams, 
+		float planeScale, float rulerScale,
+		dyno::Vec4f planeColor, dyno::Vec4f rulerColor)
 	{
+		
 		if (mGroundRenderer != NULL)
-			mGroundRenderer->draw(planeScale, rulerScale);
+			mGroundRenderer->draw(rparams, planeScale, rulerScale, planeColor, rulerColor);
 	}
 
-	void GLRenderHelper::drawAxis(float lineWidth)
-	{
-		if (mAxisRenderer != NULL)
-			mAxisRenderer->draw(lineWidth);
-	}
-
-	void GLRenderHelper::drawBBox(Vec3f p0, Vec3f p1, int type)
+	void GLRenderHelper::drawBBox(const RenderParams& rparams, Vec3f p0, Vec3f p1, int type)
 	{
 		if (mBBoxRenderer != NULL)
-			mBBoxRenderer->draw(p0, p1, type);
+			mBBoxRenderer->draw(rparams, p0, p1, type);
 	}
 
 	void GLRenderHelper::drawBackground(Vec3f color0, Vec3f color1)

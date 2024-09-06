@@ -6,6 +6,8 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
+#if 0
+
 #include "VulkanDebug.h"
 #include <iostream>
 
@@ -259,3 +261,4 @@ namespace vks
 	};
 }
 
+#endif

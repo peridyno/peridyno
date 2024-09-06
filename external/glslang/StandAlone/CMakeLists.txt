@@ -34,7 +34,7 @@
 add_library(glslang-default-resource-limits
             ${CMAKE_CURRENT_SOURCE_DIR}/ResourceLimits.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/resource_limits_c.cpp)
-set_property(TARGET glslang-default-resource-limits PROPERTY FOLDER glslang)
+set_property(TARGET glslang-default-resource-limits PROPERTY FOLDER ThirdParty/glslang)
 set_property(TARGET glslang-default-resource-limits PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(glslang-default-resource-limits
@@ -44,7 +44,7 @@ target_include_directories(glslang-default-resource-limits
 set(SOURCES StandAlone.cpp DirStackFileIncluder.h)
 
 add_executable(glslangValidator ${SOURCES})
-set_property(TARGET glslangValidator PROPERTY FOLDER glslang)
+set_property(TARGET glslangValidator PROPERTY FOLDER ThirdParty/glslang)
 glslang_set_link_args(glslangValidator)
 
 set(LIBRARIES

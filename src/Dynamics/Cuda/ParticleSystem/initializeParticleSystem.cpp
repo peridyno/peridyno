@@ -4,12 +4,13 @@
 #include "Module/ParticleIntegrator.h"
 #include "Module/ImplicitViscosity.h"
 #include "Module/SummationDensity.h"
-#include "Module/DensityPBD.h"
+#include "Module/IterativeDensitySolver.h"
 #include "Module/BoundaryConstraint.h"
 #include "Module/VariationalApproximateProjection.h"
 
 #include "ParticleSystem/CircularEmitter.h"
 #include "ParticleSystem/SquareEmitter.h"
+#include "ParticleSystem/PoissonEmitter.h"
 
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
@@ -19,7 +20,11 @@
 #include "ColorMapping.h"
 
 #include "ParticleFluid.h"
-#include "StaticBoundary.h"
+
+#include "SphereSampler.h"
+#include "CubeSampler.h"
+#include "SphereSampler.h"
+#include "PoissonDiskSampling.h"
 
 #include "NodeFactory.h"
 
@@ -89,6 +94,20 @@ namespace dyno
 			});
 
 		group->addAction(
+			"Poisson Emitter",
+			//"ToolBarIco/ParticleSystem/PoissonEmitter.png",
+			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
+			[=]()->std::shared_ptr<Node> {
+				auto emitter = std::make_shared<PoissonEmitter<DataType3f>>();
+
+				auto wireRender = std::make_shared<GLWireframeVisualModule>();
+				wireRender->setColor(Color(0, 1, 0));
+				emitter->stateOutline()->connect(wireRender->inEdgeSet());
+				emitter->graphicsPipeline()->pushModule(wireRender);
+				return emitter;
+			});
+
+		group->addAction(
 			"Particle Fluid",
 			"ToolBarIco/ParticleSystem/ParticleFluid.png",
 			[=]()->std::shared_ptr<Node> { 
@@ -104,7 +123,8 @@ namespace dyno
 				fluid->graphicsPipeline()->pushModule(colorMapper);
 
 				auto ptRender = std::make_shared<GLPointVisualModule>();
-				ptRender->setColor(Color(1, 0, 0));
+				ptRender->varBaseColor()->setValue(Color(1, 0, 0));
+				ptRender->varPointSize()->setValue(0.002f);
 				ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
 				fluid->statePointSet()->connect(ptRender->inPointSet());
@@ -116,12 +136,26 @@ namespace dyno
 			});
 
 		group->addAction(
-			"Boundary",
-			"ToolBarIco/RigidBody/StaticBoundary.png",
-			[=]()->std::shared_ptr<Node> { 
-				auto  boundary = std::make_shared<StaticBoundary<DataType3f>>();
-				boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(0.5, 1, 0.5), 0.02, true);
-				return boundary; });
+			"Sphere Sampler",
+			"ToolBarIco/Modeling/SphereSampler_v3.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<SphereSampler<DataType3f>>();
+			});
+
+
+		group->addAction(
+			"Cube Sampler",
+			"ToolBarIco/Modeling/CubeSampler.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<CubeSampler<DataType3f>>();
+			});
+
+		group->addAction(
+			"Poisson Disk Sampler",
+			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PoissonDiskSampling<DataType3f>>();
+			});
 	}
 }
 

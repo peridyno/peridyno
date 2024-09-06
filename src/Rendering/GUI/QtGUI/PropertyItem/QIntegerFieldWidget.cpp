@@ -2,8 +2,14 @@
 
 #include <QGridLayout>
 
+#include "Field.h"
+#include "QPiecewiseSpinBox.h"
+
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(int, QIntegerFieldWidget)
+	IMPL_FIELD_WIDGET(uint, QUIntegerFieldWidget)
+
 	QIntegerFieldWidget::QIntegerFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
@@ -20,21 +26,28 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
+		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
-		name->setText(FormatFieldWidgetName(field->getObjectName()));
+		QFontMetrics fontMetrics(name->font());
+		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
+		name->setText(elide);
+		//Set label tips
+		name->setToolTip(str);
 
-		QSpinBox* spinner = new QSpinBox;
-		spinner->setValue(f->getData());
+		QPiecewiseSpinBox* spinner = new QPiecewiseSpinBox;
+		spinner->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
 
 
 		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+
 	}
 
 	void QIntegerFieldWidget::changeValue(int value)
 	{
+
 		FVar<int>* f = TypeInfo::cast<FVar<int>>(field());
 		if (f == nullptr)
 			return;
@@ -59,15 +72,17 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
-		name->setFixedSize(100, 18);
+		name->setFixedHeight(18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		QSpinBox* spinner = new QSpinBox;
-		spinner->setMaximum(1000000);
-		spinner->setValue(f->getData());
+		QPiecewiseSpinBox* spinner = new QPiecewiseSpinBox;
+		spinner->setFixedWidth(100);
+		spinner->setRange(castMinimum<uint>(field->getMin()), castMaximum<int>(field->getMax()));
+		spinner->setValue(f->getValue());
 
 		layout->addWidget(name, 0, 0);
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
+		layout->setSpacing(3);
 
 		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
 	}

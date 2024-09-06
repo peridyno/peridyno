@@ -21,131 +21,101 @@
 #include <GLSurfaceVisualModule.h>
 #include <GLWireframeVisualModule.h>
 
+#include <initializeModeling.h>
+
+#include "DataTypes.h"
 #include "Module/ComputeModule.h"
 
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
+#include "BasicShapes/SphereModel.h"
+#include "BasicShapes/CapsuleModel.h"
+#include "CollisionDetector.h"
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
 #include <Collision/CollisionDetectionAlgorithm.h>
+#include <memory>
 
 using namespace std;
 using namespace dyno;
-
-/**
- * This example demonstrates how to compute the contact manifold between two OBBs
- */
-
-
-template<typename TDataType>
-class ComputeContactManifold : public ComputeModule
-{
-	DECLARE_TCLASS(ComputeContactManifold, TDataType);
-public:
-	typedef typename TDataType::Real Real;
-	typedef typename TDataType::Coord Coord;
-
-	ComputeContactManifold() {};
-	
-	DEF_VAR_IN(TOrientedBox3D<Real>, CubeA, "");
-
-	DEF_VAR_IN(TOrientedBox3D<Real>, CubeB, "");
-
-	DEF_INSTANCE_OUT(EdgeSet<TDataType>, EdgeSet, "");
-	
-protected:
-	void compute() override {
-		auto cubeA = this->inCubeA()->getData();
-		auto cubeB = this->inCubeB()->getData();
-
-		TManifold<Real> manifold;
-
-		CollisionDetection<Real>::request(manifold, cubeA, cubeB);
-
-		if (this->outEdgeSet()->isEmpty()){
-			this->outEdgeSet()->allocate();
-		}
-
-		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Edge> edges;
-
-
-		uint num = manifold.contactCount;
-		for (uint i = 0; i < num; i++)
-		{
-			vertices.push_back(manifold.contacts[i].position);
-			edges.push_back(TopologyModule::Edge(i, (i + 1) % num));
-		}
-
-		auto edgeSet = this->outEdgeSet()->getDataPtr();
-		edgeSet->setPoints(vertices);
-		edgeSet->setEdges(edges);
-
-		vertices.clear();
-		edges.clear();
-	};
-
-private:
-
-};
-
-IMPLEMENT_TCLASS(ComputeContactManifold, TDataType);
-
-template<typename TDataType>
-class SAT : public Node
-{
-	DECLARE_TCLASS(SAT, TDataType);
-public:
-	typedef typename TDataType::Coord Coord;
-
-	SAT() {
-
-		auto computeContacts= std::make_shared<ComputeContactManifold<TDataType>>();
-		this->inCubeA()->connect(computeContacts->inCubeA());
-		this->inCubeB()->connect(computeContacts->inCubeB());
-		this->graphicsPipeline()->pushModule(computeContacts);
-
-		auto pointRender = std::make_shared<GLPointVisualModule>();
-		pointRender->varPointSize()->setValue(0.02);
-		pointRender->varBaseColor()->setValue(Color(1.0f, 0.0f, 0.0f));
-		computeContacts->outEdgeSet()->connect(pointRender->inPointSet());
-		this->graphicsPipeline()->pushModule(pointRender);
-
-		auto wireRender = std::make_shared<GLWireframeVisualModule>();
-		wireRender->varRenderMode()->getDataPtr()->setCurrentKey(GLWireframeVisualModule::CYLINDER);
-		computeContacts->outEdgeSet()->connect(wireRender->inEdgeSet());
-		this->graphicsPipeline()->pushModule(wireRender);
-	};
-
-	DEF_VAR_IN(TOrientedBox3D<Real>, CubeA, "");
-
-	DEF_VAR_IN(TOrientedBox3D<Real>, CubeB, "");
-
-private:
-
-};
-
-IMPLEMENT_TCLASS(SAT, TDataType);
 
 std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto cubeA = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cubeA->varLocation()->setValue(Vec3f(0.6f, 0.5f, 0.0f));
+	auto cube = [&](Vec3f x)
+	{
+		auto c = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+		c->varLocation()->setValue(x);
+		return c;
+	};
 
-	auto cubeB = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cubeB->varLocation()->setValue(Vec3f(-0.6f, 0.5f, 0.0f));
+	auto sphere = [&](Vec3f x, float r)
+	{
+		auto s = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+		s->varLocation()->setValue(x);
+		s->varRadius()->setValue(r);
+		return s;
+	};
 
-	auto sat = scn->addNode(std::make_shared<SAT<DataType3f>>());
+	auto capsule = [&](Vec3f x, Vec3f rot, float r, float h)
+	{
+		auto c = scn->addNode(std::make_shared<CapsuleModel<DataType3f>>());
+		c->varLocation()->setValue(x);
+		c->varRadius()->setValue(r);
+		c->varHeight()->setValue(h);
+		c->varRotation()->setValue(rot);
+		return c;
+	};
 
-	cubeA->outCube()->connect(sat->inCubeA());
-	cubeB->outCube()->connect(sat->inCubeB());
+	std::shared_ptr<BasicShape<DataType3f>> cubes[4], spheres[4], capsules[4];
 
+	cubes[0] = cube(Vec3f(1.478f, 0.5f, 0.0f));
+	cubes[1] = cube(Vec3f(0.598f, 0.932f, -0.737f));
+	// cubes[2] = cube(Vec3f(-0.6f, 0.5f, 0.0f));
+	// cubes[3] = cube(Vec3f(-0.6f, 0.5f, 0.0f));
+
+	spheres[0] = sphere(Vec3f(1.281f, 0.371f, 2.079f), 0.5f);
+	spheres[1] = sphere(Vec3f(1.829f, 1.031f, 2.155f), 0.5f);
+	spheres[2] = sphere(Vec3f(2.303f, 0.928f, 0.609f), 0.5f);
+	spheres[3] = sphere(Vec3f(-0.172f, 0.611f, 1.549f), 0.5f);
+
+	capsules[0] = capsule(Vec3f(-0.756f, 0.722f, 1.434f), Vec3f(-92.316f, -64.865f, 1.434f), 0.25f, 0.5f);
+	capsules[1] = capsule(Vec3f(-1.267f, 0.477f, 1.739f), Vec3f(-59.821f, -19.591f, 1.434f), 0.25f, 0.5f);
+	capsules[2] = capsule(Vec3f(0.712f, 0.734f, 0.674f), Vec3f(-149.690f, 69.503f, -57.249f), 0.25f, 0.5f);
+	// capsules[3] = capsule(Vec3f(-0.6f, 0.5f, 0.0f), 0.25f, 0.5f);
+	
+	
+	auto satC2C = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+	cubes[0]->connect(satC2C->importShapeB());
+	cubes[1]->connect(satC2C->importShapeA());
+
+	auto satS2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+	spheres[0]->connect(satS2S->importShapeB());
+	spheres[1]->connect(satS2S->importShapeA());
+
+	auto satCa2Ca = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+	capsules[0]->connect(satCa2Ca->importShapeB());
+	capsules[1]->connect(satCa2Ca->importShapeA());
+
+	auto satC2Ca = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+	cubes[0]->connect(satC2Ca->importShapeB());
+	capsules[2]->connect(satC2Ca->importShapeA());
+
+
+	auto satC2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+	cubes[0]->connect(satC2S->importShapeB());
+	spheres[2]->connect(satC2S->importShapeA());
+
+	auto satCa2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+	capsules[0]->connect(satCa2S->importShapeB());
+	spheres[3]->connect(satCa2S->importShapeA());
 	return scn;
 }
 
 int main()
 {
+	Modeling::initStaticPlugin();
+
 	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1280, 768);

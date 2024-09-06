@@ -124,10 +124,10 @@ namespace dyno {
 
 		void setSpace(Coord lo, Real h, Real L);
 
-		void construct(DArray<Coord>& points, Real radius);
-		void construct(DArray<AABB>& aabb);
+		void construct(const DArray<Coord>& points, Real radius);
+		void construct(const DArray<AABB>& aabb);
 
-		void construct(DArray<OctreeNode>& nodes);
+		void construct(const DArray<OctreeNode>& nodes);
 
 		int getLevelMax() { return m_level_max; }
 
@@ -177,6 +177,7 @@ namespace dyno {
 		DArray<OctreeNode> m_all_nodes;
 		DArray<OctreeNode> m_post_ordered_nodes;
 
+		DArray<int> data_count;
 		DArray<int> duplicates_count;
 		DArray<int> node_count;
 		DArray<OctreeNode> aux_nodes;

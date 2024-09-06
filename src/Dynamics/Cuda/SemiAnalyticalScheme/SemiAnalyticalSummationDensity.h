@@ -1,7 +1,7 @@
 #pragma once
 #include "ParticleSystem/Module/ParticleApproximation.h"
 
-#include "Module/TopologyModule.h"
+#include "Topology/TriangleSet.h"
 
 namespace dyno {
 	/**
@@ -47,8 +47,8 @@ namespace dyno {
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Particle position");
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 		DEF_ARRAYLIST_IN(int, NeighborTriIds, DeviceType::GPU, "triangle neighbors");//
-		DEF_ARRAY_IN(Triangle, TriangleInd, DeviceType::GPU, "triangle_index");
-		DEF_ARRAY_IN(Coord, TriangleVer, DeviceType::GPU, "triangle_vertex");
+
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Return the particle density");
 

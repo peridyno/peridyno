@@ -30,6 +30,8 @@ namespace dyno {
 		std::shared_ptr<VkProgram> mScan;
 
 		std::shared_ptr<VkProgram> mAdd;
+
+		std::shared_ptr<VkProgram> mSub;
 	};
 }
 #include "VkScan.inl"

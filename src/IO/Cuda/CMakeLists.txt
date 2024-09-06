@@ -8,10 +8,6 @@ file(
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h*"
 )
 
-if(${LIB_NAME} STREQUAL "IO")
-    list(APPEND LIB_SRC "${PROJECT_SOURCE_DIR}/external/tinyxml/tinyxml2.cpp")
-endif()
-
 if(WIN32)
     add_library(${LIB_NAME} SHARED ${LIB_SRC})
 elseif(UNIX)
@@ -54,7 +50,7 @@ endif()
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
 target_include_directories(${LIB_NAME} PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/IO/Cuda>
+    $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/IO/Cuda>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>)
 

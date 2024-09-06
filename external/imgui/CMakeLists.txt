@@ -7,7 +7,7 @@ file(GLOB_RECURSE IMGUI_SRC
 
 add_library(imgui SHARED ${IMGUI_SRC})
 set_target_properties(imgui PROPERTIES
-    OUTPUT_NAME "imgui-1.8.3")
+    OUTPUT_NAME "imgui-1.90.8")
 
 set_target_properties(imgui PROPERTIES FOLDER "ThirdParty")
 

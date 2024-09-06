@@ -180,6 +180,14 @@ std::shared_ptr<Data>& getDataPtr()									\
 {																	\
 	FBase* topField = this->getTopField();						\
 	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
+	derived->tick();												\
+	return derived->m_data;											\
+}																	\
+\
+std::shared_ptr<Data>& constDataPtr()								\
+{																	\
+	FBase* topField = this->getTopField();						\
+	DerivedField* derived = dynamic_cast<DerivedField*>(topField);	\
 	return derived->m_data;											\
 }																	\
 \
@@ -195,7 +203,6 @@ std::shared_ptr<Data> allocate()									\
 bool connect(DerivedField* dst)										\
 {																	\
 	this->connectField(dst);										\
-	this->update();													\
 	return true;													\
 }																	\
 bool connect(FBase* dst) override {									\
@@ -205,6 +212,11 @@ bool connect(FBase* dst) override {									\
 }																	\
 Data& getData() {													\
 	auto dataPtr = this->getDataPtr();								\
+	assert(dataPtr != nullptr);										\
+	return *dataPtr;												\
+}																	\
+const Data& constData() {											\
+	auto dataPtr = this->constDataPtr();							\
 	assert(dataPtr != nullptr);										\
 	return *dataPtr;												\
 }																	\

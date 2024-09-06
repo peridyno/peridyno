@@ -9,6 +9,13 @@ namespace dyno
 		EdgeSet();
 		~EdgeSet() override;
 
+		void setEdges(const DArray<Edge>& edges);
+		void setEdges(const std::vector<Edge>& edges);
+
+		DArray<Edge>& getEdges() { return mEdgeIndex; }
+
+		void copyFrom(EdgeSet& es);
+
 	protected:
 		/**
 		 * Override updateEdges to update edges in a special way

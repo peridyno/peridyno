@@ -21,22 +21,23 @@
 #include <Module/VisualModule.h>
 
 #include <Color.h>
+#include <RenderParams.h>
 
 namespace dyno
 {
 	// render pass
-	enum class GLRenderPass
+	struct GLRenderMode
 	{
-		COLOR  = 0,			// common color pass(opacity)
-		SHADOW = 1,			// shadow map pass
-		TRANSPARENCY = 2,	// transparency pass
+		const static int COLOR = 0;			// common color pass(opacity)
+		const static int SHADOW = 1;		// shadow map pass
+		const static int TRANSPARENCY = 2;	// transparency pass
 	};
 
 	class GLVisualModule : public VisualModule
 	{
 	public:
 		GLVisualModule();
-		~GLVisualModule();
+		~GLVisualModule() override;
 
 		// basic Disney PBR material properties
 		void setColor(const Color& color);
@@ -46,7 +47,10 @@ namespace dyno
 
 		virtual bool isTransparent() const;
 
-		void draw(GLRenderPass pass);
+		void draw(const RenderParams& rparams);
+
+		// Attention: that this method should be called within OpenGL context
+		void release();
 
 	public:
 		DEF_VAR(Color, BaseColor, Color(0.8f, 0.8f, 0.8f), "");
@@ -55,25 +59,33 @@ namespace dyno
 		DEF_VAR(Real, Alpha, 1.0f, "");
 
 	protected:
-		virtual void updateGraphicsContext();
+		// override methods from Module
+		virtual void updateImpl() override;
 
-		virtual bool initializeGL() = 0;
-		virtual void destroyGL() = 0;
-		virtual void updateGL() = 0;
-		virtual void paintGL(GLRenderPass pass) = 0;
+		// we use preprocess and postprocess method for update lock and timestamp
+		virtual void preprocess() override final;
+		virtual void postprocess() override final;
 
-		friend class GLRenderEngine;
+		bool validateInputs() override final;
 
 	protected:
+		// methods for create/update/release OpenGL rendering content
+		virtual bool initializeGL() = 0;
+		virtual void releaseGL() = 0;
+		virtual void updateGL() = 0;
+
+		virtual void paintGL(const RenderParams& rparams) = 0;
+
+	private:
 		bool isGLInitialized = false;
-	
-		using clock=std::chrono::high_resolution_clock;
+
+		// mutex for sync data
+		std::mutex	updateMutex;
+
+		using clock = std::chrono::high_resolution_clock;
 		// the timestamp when graphics context is changed by calling updateGraphicsContext
 		clock::time_point changed;
 		// the timestamp when GL resource is updated by updateGL
 		clock::time_point updated;
-
-		// mutex for sync data
-		std::mutex	updateMutex;
 	};
 };

@@ -171,7 +171,13 @@ namespace Qt
 				std::string className = fieldInp->getField()->getClassName();
 				if (className == dyno::InstanceBase::className())
 				{
-					return true;
+					dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp->getField());
+					dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp->getField());
+
+					if (instIn != nullptr && instOut != nullptr)
+						return instIn->canBeConnectedBy(instOut);
+
+					return false;
 				}
 				else
 					return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();

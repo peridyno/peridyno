@@ -21,6 +21,8 @@
 
 namespace dyno 
 {
+	typedef std::function<std::shared_ptr<SceneGraph>()> SceneGraphCreator;
+
 	class SceneGraphFactory
 	{
 	public:
@@ -34,6 +36,10 @@ namespace dyno
 		 * @return std::shared_ptr<SceneGraph> 
 		 */
 		std::shared_ptr<SceneGraph> createNewScene();
+
+		std::shared_ptr<SceneGraph> createDefaultScene();
+
+		void setDefaultCreator(SceneGraphCreator creator);
 
 		void pushScene(std::shared_ptr<SceneGraph> scn);
 
@@ -51,6 +57,8 @@ namespace dyno
 	private:
 		static std::atomic<SceneGraphFactory*> pInstance;
 		static std::mutex mMutex;
+
+		SceneGraphCreator mDefaultCreator;
 	};
 
 }

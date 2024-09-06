@@ -11,7 +11,7 @@
 #include "ParticleSystem/Module/SummationDensity.h"
 #include "ParticleSystem/Module/Kernel.h"
 
-#include "ParticleSystem/Attribute.h"
+#include "Collision/Attribute.h"
 #include "IntersectionArea.h"
 #include "Algorithm/Function2Pt.h"
 
@@ -1375,7 +1375,7 @@ void SemiAnalyticalIncompressibilityModule<TDataType>::constrain()
 {
     //return true;
 
-    Real dt = getParent()->getDt();
+    Real dt = getParentNode()->getDt();
 
     //		int start_f = Start.getValue();
     //		cudaMemcpy(m_velocityAll.getValue().getDataPtr() + start_f, m_particle_velocity.getValue().getDataPtr(), num_f * sizeof(Coord), cudaMemcpyDeviceToDevice);

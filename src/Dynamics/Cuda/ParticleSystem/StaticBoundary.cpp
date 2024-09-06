@@ -46,6 +46,8 @@ namespace dyno
 	template<typename TDataType>
 	void StaticBoundary<TDataType>::updateStates()
 	{
+
+		
 		Real dt = this->stateTimeStep()->getData();
 
 		auto pSys = this->getParticleSystems();
@@ -57,7 +59,12 @@ namespace dyno
 				auto posFd = pSys[i]->statePosition();
 				auto velFd = pSys[i]->stateVelocity();
 				if (!posFd->isEmpty() && !velFd->isEmpty())
+				{
+					m_obstacles[t]->varNormalFriction()->setValue(this->varNormalFriction()->getValue());
+					m_obstacles[t]->varTangentialFriction()->setValue(this->varTangentialFriction()->getValue());
 					m_obstacles[t]->constrain(posFd->getData(), velFd->getData(), dt);
+				}
+
 			}
 		} 
 	}

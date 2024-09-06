@@ -1,3 +1,4 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "ImWindow.h"
 
 #include <cmath>
@@ -5,6 +6,8 @@
 #include <imgui_impl_opengl3.h>
 
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "imgui_extend.h"
 #include "picture.h"
@@ -146,30 +149,9 @@ void ImWindow::draw(RenderWindow* app)
 				}
 
 				ImGui::Separator();
-				if (ImGui::Button("Auto Focus"))
-				{
-					if (scene) {
-						auto box = scene->boundingBox();
-
-						float len = box.maxLength();
-						Vec3f center = 0.5f * (box.upper + box.lower);
-
-						Vec3f eyePos = camera->getEyePos();
-						Vec3f tarPos = camera->getTargetPos();
-						Vec3f dir = eyePos - tarPos;
-						dir.normalize();
-
-						camera->setEyePos(center + len * dir);
-						camera->setTargetPos(center);
-
-						float unit = std::floor(std::log(len));
-						camera->setUnitScale(std::pow(10.0f, (float)unit));
-					}
-
-				}
 
 				float distanceUnit = camera->unitScale();
-				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 10.0f))
+				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
 					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();
@@ -177,34 +159,31 @@ void ImWindow::draw(RenderWindow* app)
 
 			if (ImGui::BeginMenu("Lighting", "")) {
 
-				float iBgGray[2] = { rparams.bgColor0[0], rparams.bgColor1[0] };
+				float iBgGray[2] = { engine->bgColor0[0], engine->bgColor1[0] };
 				RenderParams::Light iLight = rparams.light;
 
-				ImGui::DragFloat2("BG color", iBgGray, 0.01f, 0.0f, 1.0f, "%.2f", 0);
-				rparams.bgColor0 = glm::vec3(iBgGray[0]);
-				rparams.bgColor1 = glm::vec3(iBgGray[1]);
+				ImGui::SliderFloat2("BG color", iBgGray, 0.0f, 1.0f, "%.2f", 0);
+				engine->bgColor0 = glm::vec3(iBgGray[0]);
+				engine->bgColor1 = glm::vec3(iBgGray[1]);
 
 				ImGui::Text("Ambient Light");
 
 				ImGui::beginTitle("Ambient Light Scale");
-				ImGui::DragFloat("", &iLight.ambientScale, 0.01f, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.ambientScale, 0.0f, 1.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 
 				ImGui::Text("Main Light");
 				ImGui::beginTitle("Main Light Scale");
-				ImGui::DragFloat("", &iLight.mainLightScale, 0.01f, 0.0f, 5.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 5.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 
 				// Light Direction
 				ImGui::Text("Main Light Direction");
-
-				glm::mat4 view = camera->getViewMat();
-				glm::mat4 inverse_view = glm::transpose(view);// view R^-1 = R^T
-				glm::vec3 tmpLightDir = glm::vec3(view * glm::vec4(iLight.mainLightDirection, 0));
+				glm::vec3 tmpLightDir = iLight.mainLightDirection;
 				vec3 vL(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
 
 				ImGui::beginTitle("Light dir");
@@ -215,16 +194,18 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::BeginGroup();
 				ImGui::PushItemWidth(120 * .5 - 2);
 				ImGui::beginTitle("Light dir editor x");
-				ImGui::DragFloat("", (float*)(&vL[0]), 0.01f, -1.0f, 1.0f, "x:%.2f", 0); ImGui::endTitle();
+				ImGui::SliderFloat("", (float*)(&vL[0]), -1.0f, 1.0f, "x:%.2f", 0); ImGui::endTitle();
 				ImGui::beginTitle("Light dir editor y");
-				ImGui::DragFloat("", (float*)(&vL[1]), 0.01f, -1.0f, 1.0f, "y:%.2f", 0); ImGui::endTitle();
+				ImGui::SliderFloat("", (float*)(&vL[1]), -1.0f, 1.0f, "y:%.2f", 0); ImGui::endTitle();
 				ImGui::beginTitle("Light dir editor z");
-				ImGui::DragFloat("", (float*)(&vL[2]), 0.01f, -1.0f, 1.0f, "z:%.2f", 0); ImGui::endTitle();
+				ImGui::SliderFloat("", (float*)(&vL[2]), -1.0f, 1.0f, "z:%.2f", 0); ImGui::endTitle();
 				ImGui::PopItemWidth();
 				ImGui::EndGroup();
 
-				tmpLightDir = glm::vec3(inverse_view * glm::vec4(vL[0], vL[1], vL[2], 0));
-				iLight.mainLightDirection = glm::vec3(-tmpLightDir[0], -tmpLightDir[1], -tmpLightDir[2]);
+				tmpLightDir = glm::vec3(-vL[0], -vL[1], -vL[2]);
+				float len = length(tmpLightDir);
+
+				iLight.mainLightDirection = len < EPSILON ? tmpLightDir : tmpLightDir / len;
 
 				// Light Shadow
 				bool shadow = iLight.mainLightShadow != 0;
@@ -236,44 +217,80 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Auxiliary", "")) {
+			if (ImGui::BeginMenu("Environment")) {
+				if (ImGui::RadioButton("Standard", &engine->envStyle, 0))
+				{
+					engine->setEnvStyle(EEnvStyle::Standard);
+				}
+				
+				if (ImGui::RadioButton("Studio", &engine->envStyle, 1))
+				{
+					engine->setEnvStyle(EEnvStyle::Studio);
+				}
 
+				if (engine->envStyle == EEnvStyle::Studio)
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Draw Environment Map", &engine->bDrawEnvmap);
+					ImGui::DragFloat("Environment Scale", &engine->enmapScale, 0.01f, 0.0f, 1.0f);
+				}
+
+				ImGui::Separator();
+
+				if (scene)
+				{
+					ImGui::Checkbox("Show Bounding Box", &(engine->showSceneBounds));
+					ImGui::Spacing();
+
+					Vec3f lowerBound = scene->getLowerBound();
+					float lo[3] = { lowerBound[0], lowerBound[1], lowerBound[2] };
+					ImGui::SliderFloat3("Lower Bound", lo, -10.0f, 10.0f);
+					scene->setLowerBound(Vec3f(lo[0], lo[1], lo[2]));
+
+					Vec3f upperBound = scene->getUpperBound();
+					float up[3] = { upperBound[0], upperBound[1], upperBound[2] };
+					ImGui::SliderFloat3("Upper Bound", up, -10.0f, 10.0f);
+					scene->setUpperBound(Vec3f(up[0], up[1], up[2]));
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Auxiliary", "")) {
 				ImGui::Checkbox("Lock Camera", &mDisenableCamera);
 				ImGui::Spacing();
 
 				ImGui::Checkbox("Show View Manipulator", &mViewManipulator);
 				ImGui::Spacing();
 
-				ImGui::Checkbox("Show Background", &(rparams.showGround));
+				ImGui::Checkbox("Show Background", &(engine->showGround));
 				ImGui::Spacing();
 
 				ImGui::Separator();
 
 				if (scene) {
+					bool canPrintValidationInfo = scene->isValidationInfoPrintable();
+					if (ImGui::Checkbox("Print Validation Info", &canPrintValidationInfo))
+						scene->printValidationInfo(canPrintValidationInfo);
+
 					bool canPrintNodeInfo = scene->isNodeInfoPrintable();
 					if (ImGui::Checkbox("Print Node Info", &canPrintNodeInfo))
 						scene->printNodeInfo(canPrintNodeInfo);
 
-					bool canPrintModuleInfo = scene->isModuleInfoPrintable();
-					if (ImGui::Checkbox("Print Module Info", &canPrintModuleInfo))
-						scene->printModuleInfo(canPrintModuleInfo);
+					bool canPrintSimulationInfo = scene->isSimulationInfoPrintable();
+					if (ImGui::Checkbox("Print Simulation Info", &canPrintSimulationInfo))
+						scene->printSimulationInfo(canPrintSimulationInfo);
 
-					ImGui::Separator();
-
-					ImGui::Checkbox("Show Bounding Box", &(rparams.showSceneBounds));
-					ImGui::Spacing();
-
-					Vec3f lowerBound = scene->getLowerBound();
-					float lo[3] = { lowerBound[0], lowerBound[1], lowerBound[2] };
-					ImGui::InputFloat3("Lower Bound", lo);
-					scene->setLowerBound(Vec3f(lo[0], lo[1], lo[2]));
-
-					Vec3f upperBound = scene->getUpperBound();
-					float up[3] = { upperBound[0], upperBound[1], upperBound[2] };
-					ImGui::InputFloat3("Upper Bound", up);
-					scene->setUpperBound(Vec3f(up[0], up[1], up[2]));
+					bool canPrintRenderingInfo = scene->isRenderingInfoPrintable();
+					if (ImGui::Checkbox("Print Rendering Info", &canPrintRenderingInfo))
+						scene->printRenderingInfo(canPrintRenderingInfo);
 				}
 
+				ImGui::Separator();
+
+				ImGui::Checkbox("Screen Recording", &app->isScreenRecordingOn());
+				ImGui::SliderInt("Interval", &app->screenRecordingInterval(), 1, 100);
 
 				ImGui::EndMenu();
 			}
@@ -299,14 +316,14 @@ void ImWindow::draw(RenderWindow* app)
 		
 		// Right Sidebar
 		{
-			
+			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 50, 30));
 
 			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36 / 255.0, 36 / 255.0, 36 / 255.0, 255 / 255.0));
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 5.f));
 			ImGui::Begin("Right Sidebar", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 			
-			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ARROWS_ALT, "Translate", mEditMode == 0))
+			if (ImGui::radioWithIconButton(ICON_FA_ARROWS_ALT, "Translate", mEditMode == 0))
 				mEditMode = 0;
 			if (ImGui::radioWithIconButton(ICON_FA_EXPAND_ALT, "Scale", mEditMode == 1))
 				mEditMode = 1;
@@ -314,19 +331,62 @@ void ImWindow::draw(RenderWindow* app)
 				mEditMode = 2;
 			ImGui::Separator(); // --------
 
-			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
+			if (ImGui::clickButton(ICON_FA_EXPAND, "Focus"))
+			{
+				if (scene) {
+					auto node = app->getCurrentSelectedNode();
+					auto box = node != nullptr ? node->boundingBox() : scene->boundingBox();
+
+					float len = std::max(box.maxLength(), 0.001f);
+					Vec3f center = 0.5f * (box.upper + box.lower);
+
+					Vec3f eyePos = camera->getEyePos();
+					Vec3f tarPos = camera->getTargetPos();
+					Vec3f dir = eyePos - tarPos;
+					dir.normalize();
+
+					float unit = len;
+
+					Vec3f target = center / unit;
+					Vec3f eye = target + 2.2f * dir;
+					camera->setEyePos(eye);
+					camera->setTargetPos(target);
+
+					camera->setUnitScale(unit);
+				}
+			}
+
+			ImGui::Separator(); // --------
+
+			if (ImGui::radioWithIconButton(ICON_FA_LOCATION_ARROW, "Object", app->getSelectionMode() == RenderWindow::OBJECT_MODE))
+				app->setSelectionMode(RenderWindow::OBJECT_MODE);
+			if (ImGui::radioWithIconButton(ICON_FA_DRAW_POLYGON, "Primitives", app->getSelectionMode() == RenderWindow::PRIMITIVE_MODE))
+				app->setSelectionMode(RenderWindow::PRIMITIVE_MODE);
+
+			//ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, menu_y));
 			ImGui::End();	
 			ImGui::PopStyleColor();
 			ImGui::PopStyleVar(2);
 		}
 
-		// Bottom Right widget
+		// Bottom Right Widget
 		{
 			std::string rEngineName = engine->name();
-			ImGui::Begin("Bottom Left widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-			ImGui::Text("Rendered by %s: %.1f FPS", rEngineName.c_str(), ImGui::GetIO().Framerate);
+			Vec3f eyePos = camera->getEyePos();
+			Vec3f tarPos = camera->getTargetPos();
 
-			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - ImGui::GetWindowSize().x, io.DisplaySize.y - ImGui::GetWindowSize().y));
+			char text[512];
+			sprintf(text,
+				"Eye: (%.2f, %.2f, %.2f) | Target: (%.2f, %.2f, %.2f) | Rendered by %s: %.1f FPS",
+				eyePos.x, eyePos.y, eyePos.z,
+				tarPos.x, tarPos.y, tarPos.z,
+				rEngineName.c_str(), ImGui::GetIO().Framerate);
+
+			ImVec2 textSize = ImGui::CalcTextSize(text);
+			int padding = 8;// border padding
+			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - textSize.x - padding * 2, io.DisplaySize.y- textSize.y - padding *2));
+			ImGui::Begin("Top Left Widget", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::Text(text);
 			ImGui::End();
 		}
 
@@ -352,8 +412,11 @@ void ImWindow::draw(RenderWindow* app)
 	// draw a rect for selection area 
 	drawSelectedRegion();
 
-	// current active node
-	drawNodeManipulator(app->getCurrentSelectedNode(), camera->getViewMat(), camera->getProjMat());
+	if (scene->getWorkMode() == SceneGraph::EDIT_MODE)
+	{
+		// current active node
+		drawNodeManipulator(app->getCurrentSelectedNode(), camera->getViewMat(), camera->getProjMat());
+	}
 
 	// view manipulator
 	if(mViewManipulator)
@@ -379,6 +442,11 @@ void ImWindow::mouseMoveEvent(const PMouseEvent& event)
 {
 	mCurX = event.x;
 	mCurY = event.y;
+}
+
+void dyno::ImWindow::setEnableViewManipulate(bool flag)
+{
+	this->mEnableViewManipulate = flag;
 }
 
 void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
@@ -426,52 +494,60 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 	// TODO: type conversion...
 	auto node = std::dynamic_pointer_cast<ParametricModel<DataType3f>>(n);
 
-	// TODO: parameterized operation
-	auto nodeOp = ImGuizmo::TRANSLATE;
+	if (!node) return;
+
+	// get original transform
+	dyno::Vec3f t0 = node->varLocation()->getData();
+	dyno::Vec3f r0 = node->varRotation()->getData();
+	dyno::Vec3f s0 = node->varScale()->getData();
+
+	auto op   = ImGuizmo::TRANSLATE;
+	auto mode = ImGuizmo::WORLD;
 
 	switch (mEditMode) {
 	case 0:
-		nodeOp = ImGuizmo::TRANSLATE;
+		op = ImGuizmo::TRANSLATE;
 		break;
 	case 1:
-		nodeOp = ImGuizmo::SCALE;
+		op = ImGuizmo::SCALE;
+		mode = ImGuizmo::LOCAL;
 		break;
 	case 2:
-		nodeOp = ImGuizmo::ROTATE;
+		op = ImGuizmo::ROTATE;
 		break;
 	default:
 		break;
 	}
-
 	if (node != 0) {
-		float m[16];
 		// build transform matrix
+		glm::mat4 m;
+		ImGuizmo::RecomposeMatrixFromComponents(t0.getDataPtr(), r0.getDataPtr(), s0.getDataPtr(), &m[0][0]);
+		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], op, mode, &m[0][0], NULL, NULL, NULL, NULL))
 		{
-			auto t = node->varLocation()->getData();
-			auto s = node->varScale()->getData();
-			auto r = node->varRotation()->getData();			
-			ImGuizmo::RecomposeMatrixFromComponents(t.getDataPtr(), r.getDataPtr(), s.getDataPtr(), m);
-		}
+			dyno::Vec3f t1;
+			dyno::Vec3f r1;
+			dyno::Vec3f s1;
 
-		if (ImGuizmo::Manipulate(&view[0][0], &proj[0][0], nodeOp, ImGuizmo::WORLD, m, NULL, NULL, NULL, NULL))
-		{
-			float t[3], s[3], r[3];
-			ImGuizmo::DecomposeMatrixToComponents(m, t, r, s);
-			// apply
-			if (nodeOp == ImGuizmo::TRANSLATE) 
-				node->varLocation()->setValue(Vec3f(t[0], t[1], t[2]));
-			if (nodeOp == ImGuizmo::SCALE) 
-				node->varScale()->setValue(Vec3f(s[0], s[1], s[2]));
-			if (nodeOp == ImGuizmo::ROTATE) 
-				node->varRotation()->setValue(Vec3f(r[0], r[1], r[2]));
+			ImGuizmo::DecomposeMatrixToComponents(&m[0][0], t1.getDataPtr(), r1.getDataPtr(), s1.getDataPtr());
 
-			// notify the update of node?
+			if (op == ImGuizmo::SCALE) {
+				// scale apply in local space
+				node->varScale()->setValue(s1);
+			}
+			if (op == ImGuizmo::TRANSLATE) {
+				node->varLocation()->setValue(t1);
+			}
+
+			if (op == ImGuizmo::ROTATE) {
+				node->varRotation()->setValue(r1);
+			}
+
 			node->updateGraphicsContext();
 		}
 	}
 }
 
-void dyno::ImWindow::drawViewManipulator(Camera* camera)
+void ImWindow::drawViewManipulator(Camera* camera)
 {
 	glm::mat4 view = camera->getViewMat();
 	glm::mat4 view0 = view;
@@ -483,7 +559,7 @@ void dyno::ImWindow::drawViewManipulator(Camera* camera)
 		0);
 
 	// if nothing changes
-	if (view == view0) return;
+	if (view == view0 || !this->mEnableViewManipulate) return;
 
 	glm::mat4 invView = glm::inverse(view);
 	glm::vec4 eye = invView * glm::vec4(0, 0, 0, 1) / camera->unitScale();

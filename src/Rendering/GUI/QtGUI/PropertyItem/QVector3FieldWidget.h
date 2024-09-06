@@ -18,6 +18,8 @@
  */
 #pragma once
 #include "QFieldWidget.h"
+#include "QtGUI/PPropertyWidget.h"
+#include "Vector/Vector3D.h"
 
 namespace dyno
 {
@@ -25,8 +27,14 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
+		DECLARE_FIELD_WIDGET
+
 		QVector3FieldWidget(FBase* field);
+		QVector3FieldWidget(QString name, Vec3f v);
 		~QVector3FieldWidget() override;
+
+	signals:
+		void vec3fChange(double,double,double);
 
 	public slots:
 		//Called when the widget is updated
@@ -35,10 +43,18 @@ namespace dyno
 		//Called when the field is updated
 		void updateWidget();
 
+		void vec3fValueChange(double);
+
+
+
 	private:
-		mDoubleSpinBox* spinner1;
-		mDoubleSpinBox* spinner2;
-		mDoubleSpinBox* spinner3;
+		QPiecewiseDoubleSpinBox* spinner1;
+		QPiecewiseDoubleSpinBox* spinner2;
+		QPiecewiseDoubleSpinBox* spinner3;
+
+		Vec3f value;// active in "QVector3FieldWidget(QString name, Vec3f* v);"
 	};
+
+
 
 }

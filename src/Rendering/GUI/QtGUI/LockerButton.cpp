@@ -21,9 +21,8 @@ LockerButton::LockerButton(QWidget* parent)
     mainLayout->addWidget(mImageLabel);
     mainLayout->addWidget(mTextLabel);
     
-    mainLayout->setMargin(0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-    mainLayout->setAlignment(0);
     this->setLayout(mainLayout);
 }
 

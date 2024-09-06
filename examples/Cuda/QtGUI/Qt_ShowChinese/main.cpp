@@ -13,25 +13,25 @@ class ChineseNode : public Node
 	DECLARE_CLASS(ChineseNode);
 public:
 	ChineseNode() {
-		this->varScalar()->setObjectName("±êÁ¿");
-		this->varVector()->setObjectName("Ê¸Á¿");
+		this->varScalar()->setObjectName(u8"æ ‡é‡");
+		this->varVector()->setObjectName(u8"çŸ¢é‡");
 
-		this->stateTimeStep()->setObjectName("Ê±¼ä²½³¤");
-		this->stateElapsedTime()->setObjectName("Ê±¿Ì");
-		this->stateFrameNumber()->setObjectName("µ±Ç°Ö¡");
+		this->stateTimeStep()->setObjectName(u8"æ—¶é—´æ­¥é•¿");
+		this->stateElapsedTime()->setObjectName(u8"æ—¶åˆ»");
+		this->stateFrameNumber()->setObjectName(u8"å½“å‰å¸§");
 	};
 	~ChineseNode() {};
 
 	std::string caption() override {
-		return "²âÊÔÖĞÎÄ";
+		return u8"æµ‹è¯•ä¸­æ–‡";
 	}
 
 	std::string description() override {
-		return "ÕâÊÇÒ»¸öÖĞÎÄ½Úµã";
+		return u8"è¿™æ˜¯ä¸€ä¸ªä¸­æ–‡èŠ‚ç‚¹";
 	}
 
 	std::string getNodeType() override {
-		return "ÖĞÎÄ½Úµã";
+		return u8"ä¸­æ–‡èŠ‚ç‚¹";
 	}
 
 	DEF_VAR(float, Scalar, 1.0f, "Define a scalar");

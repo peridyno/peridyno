@@ -11,8 +11,10 @@ namespace dyno
 // 		this->inSmoothingLength()->setValue(Real(0.011));
 // 		this->inSamplingDistance()->setValue(Real(0.005));
 
-		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ParticleApproximation<TDataType>::calculateScalingFactor, this));
+		auto callback = std::make_shared<FCallBackFunc>(
+			std::bind(&ParticleApproximation<TDataType>::calculateScalingFactor, this));
 
+		this->varKernelType()->attach(callback);
 		this->inSmoothingLength()->attach(callback);
 		this->inSamplingDistance()->attach(callback);
 
@@ -28,13 +30,13 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleApproximation<TDataType>::calculateScalingFactor()
 	{
-		Real d = this->inSamplingDistance()->getData();
-		Real H = this->inSmoothingLength()->getData();
+		Real d = this->inSamplingDistance()->getValue();
+		Real H = this->inSmoothingLength()->getValue();
 
 		Real V = d * d*d;
 
 		Kernel<Real>* kern;
-		switch (this->varKernelType()->getDataPtr()->currentKey())
+		switch (this->varKernelType()->currentKey())
 		{
 		case KT_Spiky:
 			kern = new SpikyKernel<Real>();

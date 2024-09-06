@@ -17,57 +17,164 @@
 #include <map>
 #include <string>
 
-typedef std::map<int, std::string> EnumMap;
-//typedef std::map<std::string, enum_map>	enum_map_list;
+#include "Field.h"
 
-#define DECLARE_ENUM(enum_type,...)					\
-enum enum_type{										\
-	__VA_ARGS__										\
-};													\
-const std::string full_name_##enum_type = #__VA_ARGS__;
-
-bool parse_enum_string(const std::string& enum_str, EnumMap& enumKeyValueList);
-
-
-class PEnum
+namespace dyno
 {
-public:
-	PEnum(std::string enum_name, int val, const std::string enum_str)
+
+	typedef std::map<int, std::string> EnumMap;
+	//typedef std::map<std::string, enum_map>	enum_map_list;
+
+	#define DECLARE_ENUM(enum_type,...)					\
+		enum enum_type{										\
+			__VA_ARGS__										\
+		};													\
+	const std::string full_name_##enum_type = #__VA_ARGS__;
+
+	bool parse_enum_string(const std::string& enum_str, EnumMap& enumKeyValueList);
+
+
+	class PEnum
 	{
-		parse_enum_string(enum_str, m_enum_map);
-		m_enum_value = val;
-		m_enum_name = enum_name;
-	}
-	
-	inline bool operator== (const int val) const
+	public:
+		PEnum()
+		{
+			m_enum_name = "";
+			m_enum_value = -1;
+		}
+
+		PEnum(std::string enum_name, int val, const std::string enum_str)
+		{
+			parse_enum_string(enum_str, m_enum_map);
+			m_enum_value = val;
+			m_enum_name = enum_name;
+		}
+
+		inline bool operator== (const int val) const
+		{
+			return m_enum_value == val;
+		}
+
+		inline bool operator!= (const int val) const
+		{
+			return m_enum_value != val;
+		}
+
+		int currentKey() { return m_enum_value; }
+
+		std::string currentString() {
+			return m_enum_map[m_enum_value];
+		}
+
+		void setCurrentKey(int index);
+
+		EnumMap& enumMap() { return m_enum_map; }
+
+	private:
+		std::string m_enum_name;
+		int m_enum_value;
+
+		EnumMap m_enum_map;
+	};
+
+	/*!
+	*	\class	FVar<PEnum>
+	*	\brief	Specialization for the field type of PEnum.
+	*/
+	template<>
+	class FVar<PEnum> : public FBase
 	{
-		return m_enum_value == val;
-	}
+	public:
+		typedef PEnum				VarType;
+		typedef PEnum				DataType;
+		typedef FVar<PEnum>			FieldType;
 
-	inline bool operator!= (const int val) const
-	{
-		return m_enum_value != val;
-	}
+		DEFINE_FIELD_FUNC(FieldType, DataType, FVar);
 
-	int currentKey() { return m_enum_value; }
+		FVar(VarType value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
+			: FBase(name, description, fieldType, parent) 
+		{
+			this->setValue(value);
+		}
 
-	std::string currentString() {
-		return m_enum_map[m_enum_value];
-	}
+		~FVar() override {};
 
-	void setCurrentKey(int index);
+		uint size() override { return 1; }
 
-	EnumMap& enumMap() { return m_enum_map; }
+		void setValue(VarType val) {
+			std::shared_ptr<VarType>& data = this->getDataPtr();
+			if (data == nullptr)
+			{
+				data = std::make_shared<VarType>(val);
+			}
+			else
+			{
+				*data = val;
+			}
 
-private:
-	std::string m_enum_name;
-	int m_enum_value;
+			this->update();
 
-	EnumMap m_enum_map;
-};
+			this->tick();
+		}
+
+		VarType getValue() {
+			std::shared_ptr<VarType>& data = this->constDataPtr();
+			return *data;
+		}
+
+		int currentKey() {
+			std::shared_ptr<VarType>& data = this->constDataPtr();
+			return data->currentKey();
+		}
+
+		void setCurrentKey(int index) 
+		{
+			std::shared_ptr<VarType>& data = this->getDataPtr();
+			
+			data->setCurrentKey(index);
+
+			///Call other functions
+			this->update();
+
+			//Notify this field is updated
+			this->tick();
+		}
+
+		std::string serialize()
+		{
+			if (isEmpty())
+				return "";
+
+			int key = this->constDataPtr()->currentKey();
+
+			std::stringstream ss;
+			ss << key;
+
+			return ss.str();
+		}
+
+		bool deserialize(const std::string& str)
+		{
+			if (str.empty())
+				return false;
+
+			int key = std::stoi(str);
+
+			this->getDataPtr()->setCurrentKey(key);
+
+			return true;
+		}
+
+		bool isEmpty() override {
+			return this->constDataPtr() == nullptr;
+		}
+	};
+
 
 #define DEF_ENUM(enum_type, enum_name, enum_value, desc)				\
 private:									\
 	FVar<PEnum> var_##enum_name = FVar<PEnum>(PEnum(#enum_type, enum_value, full_name_##enum_type), std::string(#enum_name), desc, FieldTypeEnum::Param, this);			\
 public:										\
 	inline FVar<PEnum>* var##enum_name() {return &var_##enum_name;}
+
+}

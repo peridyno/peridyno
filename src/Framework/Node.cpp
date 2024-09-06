@@ -5,18 +5,17 @@
 
 namespace dyno
 {
-Node::Node(std::string name)
+Node::Node()
 	: OBase()
-	, m_node_name(name)
-	, m_dt(0.016f)
-	, m_mass(1.0f)
+	, m_node_name("default")
+	, mDt(0.016f)
 {
 }
 
 
 Node::~Node()
 {
-	m_module_list.clear();
+	mModuleList.clear();
 
 // 	for (auto port : mImportNodes)
 // 	{
@@ -51,14 +50,14 @@ std::string Node::getNodeType()
 	return "Default";
 }
 
-bool Node::isControllable()
+bool Node::isAutoSync()
 {
-	return m_controllable;
+	return mAutoSync;
 }
 
-void Node::setControllable(bool con)
+void Node::setAutoSync(bool con)
 {
-	m_controllable = con;
+	mAutoSync = con;
 }
 
 bool Node::isActive()
@@ -83,12 +82,12 @@ void Node::setVisible(bool visible)
 
 float Node::getDt()
 {
-	return m_dt;
+	return mDt;
 }
 
 void Node::setDt(Real dt)
 {
-	m_dt = dt;
+	mDt = dt;
 }
 
 void Node::setSceneGraph(SceneGraph* scn)
@@ -136,24 +135,50 @@ void Node::updateStates()
 
 void Node::update()
 {
-	if (this->validateInputs())
+	if (!this->validateInputs()) {
+		return;
+	}
+
+	if (this->requireUpdate())
 	{
 		this->preUpdateStates();
 
-		this->updateStates();
+		if (mPhysicsEnabled)
+			this->updateStates();
 
 		this->postUpdateStates();
 
 		this->updateTopology();
 
-		this->tick();
+		//reset parameters
+		for (auto param : fields_param)
+		{
+			param->tack();
+		}
+
+		//reset input fields
+		for (auto f_in : fields_input)
+		{
+			f_in->tack();
+		}
+
+		//tag all output fields as modifed
+		for (auto f_out : fields_output)
+		{
+			f_out->tick();
+		}
 	}
 }
 
 void Node::reset()
 {
 	if (this->validateInputs()) {
+		this->stateElapsedTime()->setValue(0.0f);
+		this->stateFrameNumber()->setValue(0);
+
 		this->resetStates();
+
+		//When the node is reset, call tick() to force updating all modules
 		this->tick();
 	}
 }
@@ -170,15 +195,15 @@ void Node::postUpdateStates()
 
 void Node::updateGraphicsContext()
 {
-	this->graphicsPipeline()->update();
-
-	this->tick();
+	if (mRenderingEnabled)
+	{
+		this->graphicsPipeline()->update();
+	}
 }
 
 void Node::resetStates()
 {
-	this->stateElapsedTime()->setValue(0.0f);
-	this->stateFrameNumber()->setValue(0);
+	this->resetPipeline()->update();
 }
 
 bool Node::validateInputs()
@@ -191,12 +216,41 @@ bool Node::validateInputs()
 			std::string errMsg = std::string("The field ") + f_in->getObjectName() +
 				std::string(" in Node ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-			std::cout << errMsg << std::endl;
+			Log::sendMessage(Log::Info, errMsg);
 			return false;
 		}
 	}
 
 	return true;
+}
+
+bool Node::requireUpdate()
+{
+	//TODO: improve the following rules
+	if (mForceUpdate)
+		return true;
+
+	//check input fields
+	bool modified = false;
+
+	if (mImportNodes.size() > 0)
+	{
+		return true;
+	}
+	 
+
+	for (auto f_in : fields_input)
+	{
+		modified |= f_in->isModified();
+	}
+
+	//check control fields
+	for (auto var : fields_param)
+	{
+		modified |= var->isModified();
+	}
+
+	return modified;
 }
 
 void Node::tick()
@@ -235,22 +289,31 @@ void Node::tick()
 // 	addModule(m_context);
 // }
 
+std::shared_ptr<Pipeline> Node::resetPipeline()
+{
+	if (mResetPipeline == nullptr)
+	{
+		mResetPipeline = std::make_shared<AnimationPipeline>(this);
+	}
+	return mResetPipeline;
+}
+
 std::shared_ptr<AnimationPipeline> Node::animationPipeline()
 {
-	if (m_animation_pipeline == nullptr)
+	if (mAnimationPipeline == nullptr)
 	{
-		m_animation_pipeline = std::make_shared<AnimationPipeline>(this);
+		mAnimationPipeline = std::make_shared<AnimationPipeline>(this);
 	}
-	return m_animation_pipeline;
+	return mAnimationPipeline;
 }
 
 std::shared_ptr<GraphicsPipeline> Node::graphicsPipeline()
 {
-	if (m_render_pipeline == nullptr)
+	if (mGraphicsPipeline == nullptr)
 	{
-		m_render_pipeline = std::make_shared<GraphicsPipeline>(this);
+		mGraphicsPipeline = std::make_shared<GraphicsPipeline>(this);
 	}
-	return m_render_pipeline;
+	return mGraphicsPipeline;
 }
 
 /*
@@ -294,43 +357,12 @@ bool Node::addModule(std::shared_ptr<Module> module)
 	bool ret = true;
 	ret &= addToModuleList(module);
 
-	std::string mType = module->getModuleType();
-	if (std::string("TopologyModule").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<TopologyModule>(module);
-		m_topology = downModule;
-	}
-	else if (std::string("TopologyMapping").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<TopologyMapping>(module);
-		this->addToTopologyMappingList(downModule);
-	}
 	return ret;
-}
-
-void Node::initialize()
-{
-	this->resetStates();
-
-	this->animationPipeline()->updateExecutionQueue();
-	this->graphicsPipeline()->updateExecutionQueue();
 }
 
 bool Node::deleteModule(std::shared_ptr<Module> module)
 {
 	bool ret = true;
-
-	std::string mType = module->getModuleType();
-
-	if (std::string("TopologyModule").compare(mType) == 0)
-	{
-		m_topology = nullptr;
-	}
-	else if (std::string("TopologyMapping").compare(mType) == 0)
-	{
-		auto downModule = TypeInfo::cast<TopologyMapping>(module);
-		this->deleteFromTopologyMappingList(downModule);
-	}
 
 	ret &= deleteFromModuleList(module);
 		
@@ -406,6 +438,11 @@ bool Node::appendExportNode(NodePort* nodePort)
 
 bool Node::removeExportNode(NodePort* nodePort)
 {
+	//TODO: this is a hack, otherwise the app will crash
+	if (mExportNodes.size() == 0) {
+		return false;
+	}
+
 	auto it = find(mExportNodes.begin(), mExportNodes.end(), nodePort);
 	if (it == mExportNodes.end()) {
 		Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, false));
@@ -423,18 +460,10 @@ void Node::updateTopology()
 
 }
 
-// void Node::traverseBottomUp(Action* act)
-// {
-// 	doTraverseBottomUp(act);
-// }
-// 
-// void Node::traverseTopDown(Action* act)
-// {
-// 	doTraverseTopDown(act);
-// }
-
 bool Node::connect(NodePort* nPort)
 {
+	nPort->notify();
+
 	return this->appendExportNode(nPort);
 }
 
@@ -492,6 +521,11 @@ uint Node::sizeOfImportNodes() const
 	}
 
 	return n;
+}
+
+void Node::setForceUpdate(bool b)
+{
+	mForceUpdate = b;
 }
 
 // Node* Node::addDescendant(Node* descent)
@@ -571,7 +605,7 @@ std::shared_ptr<Module> Node::getModule(std::string name)
 {
 	std::shared_ptr<Module> base = nullptr;
 	std::list<std::shared_ptr<Module>>::iterator iter;
-	for (iter = m_module_list.begin(); iter != m_module_list.end(); iter++)
+	for (iter = mModuleList.begin(); iter != mModuleList.end(); iter++)
 	{
 		if ((*iter)->getName() == name)
 		{
@@ -604,11 +638,11 @@ bool Node::hasModule(std::string name)
 
 bool Node::addToModuleList(std::shared_ptr<Module> module)
 {
-	auto found = std::find(m_module_list.begin(), m_module_list.end(), module);
-	if (found == m_module_list.end())
+	auto found = std::find(mModuleList.begin(), mModuleList.end(), module);
+	if (found == mModuleList.end())
 	{
-		m_module_list.push_back(module);
-		module->setParent(this);
+		mModuleList.push_back(module);
+		module->setParentNode(this);
 		return true;
 	}
 
@@ -617,10 +651,10 @@ bool Node::addToModuleList(std::shared_ptr<Module> module)
 
 bool Node::deleteFromModuleList(std::shared_ptr<Module> module)
 {
-	auto found = std::find(m_module_list.begin(), m_module_list.end(), module);
-	if (found != m_module_list.end())
+	auto found = std::find(mModuleList.begin(), mModuleList.end(), module);
+	if (found != mModuleList.end())
 	{
-		m_module_list.erase(found);
+		mModuleList.erase(found);
 		return true;
 	}
 

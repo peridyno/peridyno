@@ -24,6 +24,8 @@
 
 #include "imgui/imgui.h"
 
+#include <glm/glm.hpp>
+
 #if defined(__ANDROID__)
 #include "VulkanAndroid.h"
 #endif

@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "gl/Buffer.h"
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
+#include "GraphicsObject/Buffer.h"
+#include "GraphicsObject/Framebuffer.h"
+#include "GraphicsObject/Texture.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
 
 #include <vector>
 #include <RenderEngine.h>
@@ -33,28 +33,43 @@ namespace dyno
 	class ShadowMap
 	{
 	public:
-		ShadowMap(int w = 1024, int h = 1024);
+		ShadowMap(int size = 1024);
 		~ShadowMap();
 
-		void update(dyno::SceneGraph* scene, Camera* camera, const dyno::RenderParams& rparams);
+		void initialize();
+		void release();
+
+		void update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams);
+
+		// bind uniform block and texture
+		void bind(int shadowUniformLoc = 3, int shadowTexSlot = 5);
+
+		int  getSize() const;
+		void setSize(int size);
+
+		int  getNumBlurIterations() const;
+		void setNumBlurIterations(int iter);
 
 	private:
 		// framebuffers
-		gl::Framebuffer		mFramebuffer;
-		gl::Texture2D		mShadowTex;
-		gl::Texture2D		mShadowDepth;
-		gl::Texture2D		mShadowBlur;
+		Framebuffer		mFramebuffer;
+		Texture2D		mShadowTex;
+		Texture2D		mShadowDepth;
+		Texture2D		mShadowBlur;
 
-		gl::Program*		mBlurProgram;
-		gl::Mesh*			mQuad;
+		Program*		mBlurProgram;
+		Mesh*			mQuad;
 
 
-		gl::Buffer		mTransformUBO;		// uniform buffer for light MVP matrices
-		gl::Buffer		mShadowMatrixUBO;	// uniform buffer for shadow lookup matrices
+		Buffer			mShadowUniform;	// uniform buffer for shadow lookup matrices
+
+		bool			sizeUpdated = false;
+		int				size = -1;
+
+		// num of blur interations for VSM
+		int				blurIters = 1;
 
 	public:
-		int				width;
-		int				height;
 
 		// patch to color bleeding, min p_max
 		float			minValue = 0.1f;

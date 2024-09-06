@@ -31,12 +31,14 @@ namespace dyno
 
 		/**
 		 * @brief Calculate the possible intersection for a moving point and a moving triangle. We assume both the point and the triangle move along a straight line.
+		 * In case both the point and triangle does not move, it return 1 and t = 1.0;
 		 * 
 		 * @param triangle_sweep 
 		 * @param t 
+		 * @param threshold
 		 * @return DYN_FUNC intersect 
 		 */
-		DYN_FUNC int intersect(const TTriangleSweep3D<Real>& triangle_sweep, typename TTriangle3D<Real>::Param& baryc, Real& t, Real threshold = Real(0.0001)) const;
+		DYN_FUNC bool intersect(const TTriangleSweep3D<Real>& triangle_sweep, typename TTriangle3D<Real>::Param& baryc, Real& t, const Real threshold = Real(0.00001)) const;
 
 		/**
 		 * @brief Return the intermediate state for a point

@@ -51,7 +51,7 @@ add_library(GenericCodeGen STATIC
     GenericCodeGen/CodeGen.cpp
     GenericCodeGen/Link.cpp)
 set_property(TARGET GenericCodeGen PROPERTY POSITION_INDEPENDENT_CODE ON)
-set_property(TARGET GenericCodeGen PROPERTY FOLDER glslang)
+set_property(TARGET GenericCodeGen PROPERTY FOLDER ThirdParty/glslang)
 
 ################################################################################
 # MachineIndependent
@@ -132,7 +132,7 @@ endif(ENABLE_HLSL)
 
 add_library(MachineIndependent STATIC ${MACHINEINDEPENDENT_SOURCES} ${MACHINEINDEPENDENT_HEADERS})
 set_property(TARGET MachineIndependent PROPERTY POSITION_INDEPENDENT_CODE ON)
-set_property(TARGET MachineIndependent PROPERTY FOLDER glslang)
+set_property(TARGET MachineIndependent PROPERTY FOLDER ThirdParty/glslang)
 
 glslang_add_build_info_dependency(MachineIndependent)
 
@@ -172,6 +172,8 @@ target_link_libraries(glslang PRIVATE OGLCompiler OSDependent MachineIndependent
 target_include_directories(glslang PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+set_property(TARGET glslang PROPERTY FOLDER ThirdParty/glslang)
 
 glslang_add_build_info_dependency(glslang)
 

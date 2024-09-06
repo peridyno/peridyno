@@ -87,7 +87,7 @@ namespace dyno {
 			else {
 				const Real d = Real(1) - q;
 				const Real hh = h * h;
-				return -45.0f / ((Real)M_PI * hh*h) *d*d * scale;
+				return -45.0f / ((Real)M_PI * hh*hh) *d*d * scale;
 			}
 		}
 

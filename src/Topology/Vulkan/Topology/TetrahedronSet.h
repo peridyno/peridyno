@@ -9,6 +9,12 @@ namespace dyno
 		TetrahedronSet();
 		~TetrahedronSet() override;
 
+		void setTetrahedrons(std::vector<TopologyModule::Tetrahedron>& indices);
+
+		void copyFrom(TetrahedronSet& es);
+
+		DArray<TopologyModule::Tetrahedron>& getTetrahedrons() { return mTetrahedronIndex; }
+
 	protected:
 		void updateTopology() override;
 	

@@ -16,13 +16,13 @@ namespace dyno
 			mVertices.insert(v);
 		}
 
-		for(auto s : OtherVerticesDirect)
+		for (auto s : OtherVerticesDirect)
 		{
 			OtherVertices.insert(s);
 
 		}
 
-		for(auto it : edges)
+		for (auto it : edges)
 		{
 			ObjectId v = it.first;
 			for  (auto w : it.second)

@@ -5,6 +5,7 @@
 #include <ImWindow.h>
 
 #include "AppBase.h"
+#include "GlfwRenderWindow.h"
 
 namespace dyno 
 {
@@ -20,7 +21,9 @@ namespace dyno
 
         void mainLoop() override;
 
+        void setWindowTitle(const std::string& title);
+
 	private:
-		std::shared_ptr<RenderWindow> mRenderWindow;
+		std::shared_ptr<GlfwRenderWindow> mRenderWindow;
     };
 }

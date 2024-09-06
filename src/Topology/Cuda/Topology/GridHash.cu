@@ -55,9 +55,18 @@ namespace dyno
 
 		Coord nSeg = (_hi - _lo) / ds;
 
-		nx = (int)ceil(nSeg[0]) + 1 + 2 * padding;
-		ny = (int)ceil(nSeg[1]) + 1 + 2 * padding;
-		nz = (int)ceil(nSeg[2]) + 1 + 2 * padding;
+		nx = (int)ceil(nSeg[0]);
+		ny = (int)ceil(nSeg[1]);
+		nz = (int)ceil(nSeg[2]);
+
+		//To avoid values less or equal to zero
+		nx = nx < 1 ? 1 : nx;
+		ny = ny < 1 ? 1 : ny;
+		nz = nz < 1 ? 1 : nz;
+
+		nx += 2 * padding;
+		ny += 2 * padding;
+		nz += 2 * padding;
 		hi = lo + Coord((Real)nx, (Real)ny, (Real)nz) * ds;
 
 		num = nx * ny * nz;
@@ -76,7 +85,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, DArray<typename TDataType::Coord> pos)
+	__global__ void K_CalculateParticleNumber(GridHash<TDataType> hash, const DArray<typename TDataType::Coord> pos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= pos.size()) return;
@@ -102,7 +111,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GridHash<TDataType>::construct(DArray<Coord>& pos)
+	void GridHash<TDataType>::construct(const DArray<Coord>& pos)
 	{
 		clear();
 

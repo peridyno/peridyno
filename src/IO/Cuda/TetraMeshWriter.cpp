@@ -20,17 +20,6 @@ namespace dyno
 	{
 	}
 
-	template<typename TDataType>
-	void TetraMeshWriter<TDataType>::setNamePrefix(std::string prefix)
-	{
-		this->name_prefix = prefix;
-	}
-
-	template<typename TDataType>
-	void TetraMeshWriter<TDataType>::setOutputPath(std::string path)
-	{
-		this->output_path = path;
-	}
 
 	template<typename TDataType>
 	bool TetraMeshWriter<TDataType>::updatePtr() 
@@ -41,38 +30,43 @@ namespace dyno
 		this->ptr_triangles = &( this->ptr_TetrahedronSet->getTriangles() );
 		this->ptr_tri2tet = &( this->ptr_TetrahedronSet->getTri2Tet() );
 		this->ptr_vertices = &( this->ptr_TetrahedronSet->getPoints() );
+		this->ptr_tets = &( this->ptr_TetrahedronSet->getTetrahedrons() );
 	}
 
 	template<typename TDataType>
-	bool TetraMeshWriter<TDataType>::outputSurfaceMesh() 
+	void TetraMeshWriter<TDataType>::output() 
 	{
 		if (this->ptr_tri2tet == nullptr || this->ptr_triangles == nullptr || this->ptr_vertices == nullptr) {
 			printf("------Tetra Mesh Writer: array nullptr \n");
-			return false;
+			return;
 		}
 
-		std::stringstream ss; ss << m_output_index;
-		std::string filename = output_path + "/" + this->name_prefix + ss.str() + this->file_postfix;
+		std::string filename = this->constructFileName() + this->file_postfix;
 		std::ofstream output(filename.c_str(), std::ios::out);
 
 		if (!output.is_open()) {
 			printf("------Tetra Mesh Writer: open file failed \n");
-			return false;
+			return;
 		}
+
+		printf("Output Surface!!!!!!!!\n");
 
 		this->updatePtr();
 
 		CArray<Coord> host_vertices;
 		CArray<Triangle> host_triangles;
 		CArray<Tri2Tet> host_tri2tet;
+		CArray<Tetrahedron> host_tets;
 
 		host_vertices.resize( (*(this->ptr_vertices)).size() );
 		host_triangles.resize( (*(this->ptr_triangles)).size() );
 		host_tri2tet.resize( (*(this->ptr_tri2tet)).size() );
+		host_tets.resize((*(this->ptr_tets)).size());
 
 		host_vertices.assign(*(this->ptr_vertices));
 		host_triangles.assign(*(this->ptr_triangles));
 		host_tri2tet.assign(*(this->ptr_tri2tet));
+		host_tets.assign(*(this->ptr_tets));
 
 		for (uint i = 0; i < host_vertices.size(); ++i) {
 			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;
@@ -82,7 +76,30 @@ namespace dyno
 			bool isOnSurface = false;
 			if (tmp[0] < 0 || tmp[1] < 0) { isOnSurface = true; }
 			if (isOnSurface) {
-				output << "f " << host_triangles[i][0] << " " << host_triangles[i][1] << " " << host_triangles[i][2] << std::endl;
+				int idx_vertex;
+				bool reverse = false;
+				int idx_tet = tmp[0] < 0 ? tmp[1] : tmp[0]; 
+				for (idx_vertex = 0; idx_vertex < 4; idx_vertex++)
+				{
+
+					if (host_tets[idx_tet][idx_vertex] != host_triangles[i][0]
+						&& host_tets[idx_tet][idx_vertex] != host_triangles[i][1]
+						&& host_tets[idx_tet][idx_vertex] != host_triangles[i][2]
+						)
+						break;
+				}
+				idx_vertex = host_tets[idx_tet][idx_vertex];
+				if (
+					((host_vertices[host_triangles[i][1]] - host_vertices[host_triangles[i][0]]).cross
+					(host_vertices[host_triangles[i][2]] - host_vertices[host_triangles[i][1]]))
+					.dot
+					(host_vertices[idx_vertex] - host_vertices[host_triangles[i][0]]) > 0
+					)
+					reverse = true;
+				if(!reverse)	
+					output << "f " << host_triangles[i][0] + 1 << " " << host_triangles[i][1] + 1 << " " << host_triangles[i][2] + 1 << std::endl;
+				else
+					output << "f " << host_triangles[i][0] + 1<< " " << host_triangles[i][2] + 1<< " " << host_triangles[i][1] + 1<< std::endl;
 			}
 		}
 
@@ -90,25 +107,10 @@ namespace dyno
 		host_triangles.clear();
 		host_tri2tet.clear();
 
-		this->m_output_index ++;
-		return true;
+		return;
 	}
 
-	template<typename TDataType>
-	void TetraMeshWriter<TDataType>::updateImpl() 
-	{
-		printf("===========Tetra Mesh Writer============\n");
 
-		if (this->m_output_index >= this->max_output_files) { return; }
-
-		if (this->current_idle_frame <= 0) {
-			this->current_idle_frame = this->idle_frame_num;
-			this->outputSurfaceMesh();
-		}
-		else {
-			this->current_idle_frame--;
-		}
-	}
 
 	DEFINE_CLASS(TetraMeshWriter);
 }

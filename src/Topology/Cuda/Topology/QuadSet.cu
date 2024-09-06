@@ -10,13 +10,16 @@ namespace dyno
 
 	template<typename TDataType>
 	QuadSet<TDataType>::QuadSet()
-		: TriangleSet<TDataType>()
+		: EdgeSet<TDataType>()
 	{
 	}
 
 	template<typename TDataType>
 	QuadSet<TDataType>::~QuadSet()
 	{
+		mQuads.clear();
+		mVer2Quad.clear();
+		mEdg2Quad.clear();
 	}
 
 	template<typename Quad>
@@ -54,25 +57,25 @@ namespace dyno
 	template<typename TDataType>
 	DArrayList<int>& QuadSet<TDataType>::getVertex2Quads()
 	{
-		DArray<uint> counter(this->m_coords.size());
+		DArray<uint> counter(this->mCoords.size());
 		counter.reset();
 
-		cuExecute(m_quads.size(),
+		cuExecute(mQuads.size(),
 			QS_CountQuads,
 			counter,
-			m_quads);
+			mQuads);
 
-		m_ver2Quad.resize(counter);
+		mVer2Quad.resize(counter);
 
 		counter.reset();
-		cuExecute(m_quads.size(),
+		cuExecute(mQuads.size(),
 			QS_SetupQuadIds,
-			m_ver2Quad,
-			m_quads);
+			mVer2Quad,
+			mQuads);
 
 		counter.clear();
 
-		return m_ver2Quad;
+		return mVer2Quad;
 	}
 
 	template<typename EKey, typename Quad>
@@ -145,7 +148,7 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::updateEdges()
 	{
-		uint quadSize = m_quads.size();
+		uint quadSize = mQuads.size();
 		DArray<EKey> keys;
 		DArray<int> quadIds;
 
@@ -156,7 +159,7 @@ namespace dyno
 			QS_SetupKeys,
 			keys,
 			quadIds,
-			m_quads);
+			mQuads);
 
 		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), quadIds.begin());
 
@@ -171,14 +174,14 @@ namespace dyno
 		int edgeNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
-		edg2Quad.resize(edgeNum);
+		mEdg2Quad.resize(edgeNum);
 
 		auto& pEdges = this->getEdges();
 		pEdges.resize(edgeNum);
 		cuExecute(keys.size(),
 			QS_SetupEdges,
 			pEdges,
-			edg2Quad,
+			mEdg2Quad,
 			keys,
 			counter,
 			quadIds);
@@ -191,25 +194,33 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::setQuads(std::vector<Quad>& quads)
 	{
-		m_quads.resize(quads.size());
-		m_quads.assign(quads);
-
-		//this->updateTriangles();
+		mQuads.assign(quads);
 	}
 
+	template<typename TDataType>
+	void QuadSet<TDataType>::setQuads(DArray<Quad>& quads)
+	{
+		mQuads.assign(quads);
+	}
 
 	template<typename TDataType>
 	void QuadSet<TDataType>::copyFrom(QuadSet<TDataType>& quadSet)
 	{
-		m_ver2Quad.assign(quadSet.m_ver2Quad);
+		mVer2Quad.assign(quadSet.mVer2Quad);
 
-		m_quads.resize(quadSet.m_quads.size());
-		m_quads.assign(quadSet.m_quads);
+		mQuads.resize(quadSet.mQuads.size());
+		mQuads.assign(quadSet.mQuads);
 
-		edg2Quad.resize(quadSet.edg2Quad.size());
-		edg2Quad.assign(quadSet.edg2Quad);
+		mEdg2Quad.resize(quadSet.mEdg2Quad.size());
+		mEdg2Quad.assign(quadSet.mEdg2Quad);
 
 		EdgeSet<TDataType>::copyFrom(quadSet);
+	}
+
+	template<typename TDataType>
+	bool QuadSet<TDataType>::isEmpty()
+	{
+		return mQuads.size() == 0 && EdgeSet<TDataType>::isEmpty();
 	}
 
 	template<typename Coord, typename Quad>
@@ -249,7 +260,7 @@ namespace dyno
 	{
 		this->updateQuads();
 
-		TriangleSet<TDataType>::updateTopology();
+		EdgeSet<TDataType>::updateTopology();
 	}
 
 	template<typename TDataType>
@@ -260,7 +271,7 @@ namespace dyno
 
 		auto& vn = this->outVertexNormal()->getData();
 
-		uint vertSize = this->m_coords.size();
+		uint vertSize = this->mCoords.size();
 
 		if (vn.size() != vertSize) {
 			vn.resize(vertSize);
@@ -271,36 +282,9 @@ namespace dyno
 		cuExecute(vertSize,
 			QS_SetupVertexNormals,
 			vn,
-			this->m_coords,
-			m_quads,
+			this->mCoords,
+			mQuads,
 			vert2Quad);
-	}
-
-	template<typename Triangle, typename Quad>
-	__global__ void TS_SetupTriangles(
-		DArray<Triangle> triangles,
-		DArray<Quad> quads)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= quads.size()) return;
-
-		Quad quad = quads[tId];
-		triangles[2 * tId] = Triangle(quad[0], quad[1], quad[2]);
-		triangles[2 * tId + 1] = Triangle(quad[0], quad[2], quad[3]);
-	}
-
-	template<typename TDataType>
-	void QuadSet<TDataType>::updateTriangles()
-	{
-		uint quadSize = m_quads.size();
-
-		auto& pTri = this->getTriangles();
-		pTri.resize(2 * quadSize);
-
-		cuExecute(quadSize,
-			TS_SetupTriangles,
-			pTri,
-			m_quads);
 	}
 
 	DEFINE_CLASS(QuadSet);

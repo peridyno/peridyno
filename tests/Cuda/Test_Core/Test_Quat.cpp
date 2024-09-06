@@ -27,3 +27,19 @@ TEST(Quat, func)
 
 	EXPECT_EQ(abs(angle - 0.2f) < 10*EPSILON, true);
 }
+
+TEST(Quat, mat3)
+{
+	Quat<float> q(0.0f, 0.0f, 0.957910538f, 0.287067115f);
+	auto mat3 = q.toMatrix3x3();
+	Quat<float> q2(mat3);
+
+	EXPECT_EQ((q2 - q).norm() < EPSILON, true);
+
+	q = Quat<float>(0.5f, 0.6f, 0.9f, 1.0f);
+	q.normalize();
+	mat3 = q.toMatrix3x3();
+	q2 = Quat<float>(mat3);
+
+	EXPECT_EQ((q2 - q).norm() < EPSILON, true);
+}

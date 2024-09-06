@@ -2,9 +2,9 @@
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 #include "Module/TopologyModule.h"
-#include "SurfaceInteraction.h"
-#include "EdgeInteraction.h"
-#include "PointInteraction.h"
+#include "Module/SurfaceInteraction.h"
+#include "Module/EdgeInteraction.h"
+#include "Module/PointInteraction.h"
 
 namespace dyno
 {
@@ -55,8 +55,8 @@ namespace dyno
 
 		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
-		EdgePickerNode(std::string name = "default");
-		~EdgePickerNode();
+		EdgePickerNode();
+		~EdgePickerNode() override;
 
 		std::string getNodeType();
 

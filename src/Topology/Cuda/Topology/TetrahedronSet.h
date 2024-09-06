@@ -20,22 +20,26 @@ namespace dyno
 		void setTetrahedrons(std::vector<Tetrahedron>& tetrahedrons);
 		void setTetrahedrons(DArray<Tetrahedron>& tetrahedrons);
 
-		DArray<Tetrahedron>& getTetrahedrons() { return m_tethedrons; }
-		DArray<::dyno::TopologyModule::Tri2Tet>& getTri2Tet() { return tri2Tet; }
+		DArray<Tetrahedron>& getTetrahedrons() { return mTethedrons; }
+		DArray<::dyno::TopologyModule::Tri2Tet>& getTri2Tet() { return mTri2Tet; }
 
 		DArrayList<int>& getVer2Tet();
 
 		void getVolume(DArray<Real>& volume);
 
-		void copyFrom(TetrahedronSet<TDataType> tetSet);
+		void copyFrom(TetrahedronSet<TDataType>& tetSet);
+
+		bool isEmpty() override;
 
 	protected:
 		void updateTriangles() override;
 
 	private:
-		DArray<Tetrahedron> m_tethedrons;
-		DArray<::dyno::TopologyModule::Tri2Tet> tri2Tet;
-		DArrayList<int> m_ver2Tet;
+		DArray<Tetrahedron> mTethedrons;
+
+		DArray<::dyno::TopologyModule::Tri2Tet> mTri2Tet;
+
+		DArrayList<int> mVer2Tet;
 	};
 }
 

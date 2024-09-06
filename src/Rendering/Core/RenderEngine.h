@@ -21,44 +21,19 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "RenderParams.h"
+
 namespace dyno
 {
 	class SceneGraph;
 	class Node;
 	class Camera;
+	struct RenderParams;
 
-	struct RenderParams
-	{		
-
-		// illumination settings
-		struct Light
-		{
-			// ambient light
-			glm::vec3	ambientColor = glm::vec3(0.05f);
-			float		ambientScale = 1.f;
-
-			// directional light
-			glm::vec3	mainLightColor = glm::vec3(1.f);
-			float		mainLightScale = 5.f;
-			glm::vec3	mainLightDirection = glm::vec3(0.4f, 0.6f, 0.8f);
-			float		mainLightShadow = 1.f;	// 0 - disable shadow; otherwise enable shadow
-
-			// camera light
-			glm::vec3	cameraLightColor = glm::vec3(0.1f);
-			float		cameraLightScale = 1.f;
-		} light;
-
-		 
-		// Backcolor gray scale
-		glm::vec3	bgColor0 = glm::vec3(0.2f);
-		glm::vec3	bgColor1 = glm::vec3(0.8f);
-
-		// some render options...
-		bool  showGround = true;
-		float planeScale = 3.f;
-		float rulerScale = 1.f;
-
-		bool showSceneBounds = false;
+	enum EEnvStyle
+	{
+		Standard = 0,
+		Studio = 1
 	};
 
 	// data structure for mouse selection
@@ -90,12 +65,39 @@ namespace dyno
 		virtual void initialize() = 0;
 		virtual void terminate() = 0;
 
-		virtual void draw(SceneGraph* scene, Camera* camera, const RenderParams& rparams) = 0;
+		virtual void draw(SceneGraph* scene, const RenderParams& rparams) = 0;
 
 
 		virtual Selection select(int x, int y, int w, int h) = 0;
 
 		virtual std::string name() const = 0;
+
+		virtual void setDefaultEnvmap() {};
+
+		void setUseEnvmapBackground(bool flag) { bDrawEnvmap = flag; }
+		void setEnvmapScale(float scale) { enmapScale = scale; }
+
+		virtual void setEnvStyle(EEnvStyle style) { envStyle = style; }
+
+	public:
+
+		// Backcolor gray scale
+		glm::vec3 bgColor0 = glm::vec3(0.2f);
+		glm::vec3 bgColor1 = glm::vec3(0.8f);
+
+		// some render options...
+		bool  showGround = true;
+		float planeScale = 3.f;
+		float rulerScale = 1.f;
+		glm::vec4 planeColor = { 0.3, 0.3, 0.3, 0.5 };
+		glm::vec4 rulerColor = { 0.0, 0.0, 0.0, 0.5 };
+
+		bool  bDrawEnvmap = false;
+		float enmapScale = 0.0f;
+
+		bool  showSceneBounds = false;
+
+		int envStyle = 0;
 	};
 };
 

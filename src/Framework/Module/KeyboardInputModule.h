@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Xiaowei He
+ * Copyright 2021-2023 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #include "InputModule.h"
 
 #include <queue>
+#include <mutex>
 
 namespace dyno
 {
@@ -37,6 +38,9 @@ namespace dyno
 
 		bool requireUpdate() override;
 
+	private:
 		std::queue<PKeyboardEvent> mEventQueue;
+
+		std::mutex	mMutex;
 	};
 }

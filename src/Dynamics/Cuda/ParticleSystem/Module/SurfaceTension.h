@@ -1,10 +1,10 @@
 #pragma once
-#include "Module/ForceModule.h"
+#include "Module/ComputeModule.h"
 
 namespace dyno {
 
 	template<typename TDataType>
-	class SurfaceTension : public ForceModule
+	class SurfaceTension : public ComputeModule
 	{
 	public:
 		typedef typename TDataType::Real Real;
@@ -13,14 +13,13 @@ namespace dyno {
 		SurfaceTension();
 		~SurfaceTension() override {};
 		
-		void updateImpl() override;
-
-		bool applyForce() override;
 
 		void setIntensity(Real intensity) { m_intensity = intensity; }
 		void setSmoothingLength(Real len) { m_soothingLength = len; }
 
 	private:
+		void compute() override;
+
 		Real m_intensity;
 		Real m_soothingLength;
 	};

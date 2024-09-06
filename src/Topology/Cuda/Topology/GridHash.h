@@ -20,7 +20,7 @@ namespace dyno{
 
 		void setSpace(Real _h, Coord _lo, Coord _hi);
 
-		void construct(DArray<Coord>& pos);
+		void construct(const DArray<Coord>& pos);
 
 		void clear();
 

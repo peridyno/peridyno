@@ -24,7 +24,19 @@ namespace dyno {
 #endif // CUDA_BACKEND
 
         mMainWindow = nullptr;
+
+        //To fix the displace scaling issue
+        QApplication::setAttribute(Qt::AA_Use96Dpi);
+        qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
+
         mQApp = std::make_shared<QApplication>(argc, argv);
+
+        //Set default GUI style
+		QFile file(":/dyno/DarkStyle.qss");
+		file.open(QIODevice::ReadOnly);
+
+		QString style = file.readAll();
+		mQApp->setStyleSheet(style);
 
 		//To resolver the error "Cannot queue arguments of type of Log::Message" for multi-thread applications
 		qRegisterMetaType<Log::Message>("Log::Message");
@@ -50,18 +62,11 @@ namespace dyno {
 
         mMainWindow = std::make_shared<PMainWindow>(this);
         mMainWindow->resize(width, height);
+        mMainWindow->show();
     }
 
     void QtApp::mainLoop()
-    {
-        QFile file(":/dyno/DarkStyle.qss");
-        //QFile file(":/dyno/DarkStyle.qss");
-        file.open(QIODevice::ReadOnly);
-
-        QString style = file.readAll();
-        mQApp->setStyleSheet(style);
-
-        mMainWindow->show();
+    {       
         mQApp->exec();
     }
 
@@ -71,9 +76,15 @@ namespace dyno {
         SceneGraphFactory::instance()->pushScene(scn);
 	}
 
-    RenderWindow* QtApp::renderWindow()
+	void QtApp::setWindowTitle(const std::string& str)
+	{
+        mMainWindow->setWindowTitle(QString::fromStdString(str));
+	}
+
+	RenderWindow* QtApp::renderWindow()
 	{
         return dynamic_cast<RenderWindow*>(mMainWindow->openglWidget());
 	}
 
 }
+ 

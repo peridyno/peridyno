@@ -18,11 +18,11 @@
 #include "Node.h"
 #include "NodeIterator.h"
 
-#include "Module/MouseInputModule.h"
+#include "Module/InputModule.h"
 
 #include <mutex>
 
-namespace dyno 
+namespace dyno
 {
 	typedef std::list<Node*> NodeList;
 
@@ -35,16 +35,11 @@ namespace dyno
 
 		~SceneGraph();
 
-// 		void setRootNode(std::shared_ptr<Node> root) { mRoot = root; }
-// 		std::shared_ptr<Node> getRootNode() { return mRoot; }
-
-		virtual bool initialize();
-		bool isInitialized() { return mInitialized; }
-		bool isEmpty() {
-			return mNodeMap.size() == 0;
-		}
-
-		void invalid();
+		enum EWorkMode
+		{
+			EDIT_MODE,
+			RUNNING_MODE
+		};
 
 		virtual void advance(float dt);
 		virtual void takeOneFrame();
@@ -58,10 +53,14 @@ namespace dyno
 		void reset(std::shared_ptr<Node> node);
 
 		void printNodeInfo(bool enabled);
-		void printModuleInfo(bool enabled);
+		void printSimulationInfo(bool enabled);
+		void printRenderingInfo(bool enabled);
+		void printValidationInfo(bool enabled);
 
 		bool isNodeInfoPrintable() { return mNodeTiming; }
-		bool isModuleInfoPrintable() { return mModuleTiming; }
+		bool isSimulationInfoPrintable() { return mSimulationTiming; }
+		bool isRenderingInfoPrintable() { return mRenderingTiming; }
+		bool isValidationInfoPrintable() { return mValidationInfo; }
 
 		virtual bool load(std::string name);
 
@@ -92,7 +91,7 @@ namespace dyno
 			if (tNode == nullptr ||
 				mNodeMap.find(tNode->objectId()) != mNodeMap.end())
 				return nullptr;
-				
+
 			mNodeMap[tNode->objectId()] = tNode;
 			mQueueUpdateRequired = true;
 
@@ -104,6 +103,12 @@ namespace dyno
 		void deleteNode(std::shared_ptr<Node> node);
 
 		void propagateNode(std::shared_ptr<Node> node);
+
+		bool isEmpty() {
+			return mNodeMap.size() == 0;
+		}
+
+		EWorkMode getWorkMode() { return mWorkMode; }
 
 	public:
 		static SceneGraph& getInstance();
@@ -118,7 +123,7 @@ namespace dyno
 
 		inline int getFrameNumber() { return mFrameNumber; }
 		inline void setFrameNumber(int n) { mFrameNumber = n; }
-		
+
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
 
@@ -131,7 +136,7 @@ namespace dyno
 		void setLowerBound(Vec3f lowerBound);
 		void setUpperBound(Vec3f upperBound);
 
-		inline Iterator begin() { 
+		inline Iterator begin() {
 
 			updateExecutionQueue();
 
@@ -147,6 +152,8 @@ namespace dyno
 
 	public:
 		void onMouseEvent(PMouseEvent event);
+
+		void onMouseEvent(PMouseEvent event, std::shared_ptr<Node> node);
 
 		void onKeyboardEvent(PKeyboardEvent event);
 
@@ -190,6 +197,20 @@ namespace dyno
 			traverseForward(node, &action);
 		}
 
+		/**
+		 * @brief Breadth-first tree traversal starting from a specific node, only those whose mAutoSync turned-on will be visited.
+		 *
+		 * @param node  Root node
+		 * @param act 	Operation on the node
+		 */
+		void traverseForwardWithAutoSync(std::shared_ptr<Node> node, Action* act);
+
+		template<class Act, class ... Args>
+		void traverseForwardWithAutoSync(std::shared_ptr<Node> node, Args&& ... args) {
+			Act action(std::forward<Args>(args)...);
+			traverseForwardWithAutoSync(node, &action);
+		}
+
 	protected:
 		//void retriveExecutionQueue(std::list<Node*>& nQueue);
 
@@ -202,7 +223,6 @@ namespace dyno
 			, mFrameRate(25)
 			, mFrameNumber(0)
 			, mFrameCost(0)
-			, mInitialized(false)
 			, mLowerBound(-1, -1, -1)
 			, mUpperBound(1, 1, 1)
 		{
@@ -217,7 +237,6 @@ namespace dyno
 		SceneGraph& operator=(const SceneGraph&) = delete;
 
 	private:
-		bool mInitialized;
 		bool mAdvativeInterval = true;
 
 		float mElapsedTime;
@@ -242,7 +261,12 @@ namespace dyno
 		NodeList mNodeQueue;
 
 		bool mNodeTiming = false;
-		bool mModuleTiming = false;
+		bool mSimulationTiming = false;
+		bool mRenderingTiming = false;
+
+		bool mValidationInfo = false;
+
+		EWorkMode mWorkMode = EDIT_MODE;
 
 		/**
 		 * A  lock to guarantee consistency across threads

@@ -12,9 +12,4 @@ namespace dyno
 	{
 
 	}
-
-	void ImWidget::updateGraphicsContext()
-	{
-		this->update();
-	}
 }

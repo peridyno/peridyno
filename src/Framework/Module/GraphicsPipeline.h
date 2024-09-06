@@ -23,5 +23,8 @@ namespace dyno
 	public:
 		GraphicsPipeline(Node* node);
 		virtual ~GraphicsPipeline();
+
+	protected:
+		bool printDebugInfo() override;
 	};
 }

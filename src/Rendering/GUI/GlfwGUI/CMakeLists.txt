@@ -11,11 +11,7 @@ file(
     "${LIB_SRC_DIR}/*.*"
 )
 
-if(WIN32)
-    add_library(${LIB_NAME} SHARED ${LIB_SRC})
-elseif(UNIX)
-    add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
-endif()
+add_library(${LIB_NAME} SHARED ${LIB_SRC}) 
 
 foreach(SRC IN ITEMS ${LIB_SRC})
     get_filename_component(SRC_PATH "${SRC}" PATH)
@@ -29,7 +25,10 @@ if(WIN32)
 endif()
 file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/GUI")
-set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+    set_target_properties(${LIB_NAME} PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCH_FLAGS}")
+endif()
 
 set_target_properties(${LIB_NAME} PROPERTIES
     OUTPUT_NAME "dyno${LIB_NAME}-${PERIDYNO_LIBRARY_VERSION}")
@@ -48,8 +47,8 @@ elseif(UNIX)
 endif()
 
 target_include_directories(${LIB_NAME} PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
+	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/>
+    $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/GlfwGUI>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
 

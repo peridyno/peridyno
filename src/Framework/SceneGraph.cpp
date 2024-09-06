@@ -6,6 +6,9 @@
 
 #include "Module/VisualModule.h"
 
+#include "Module/MouseInputModule.h"
+#include "Module/KeyboardInputModule.h"
+
 #include "SceneLoaderFactory.h"
 
 #include "Timer.h"
@@ -64,53 +67,13 @@ namespace dyno
 		mNodeQueue.clear();
 	}
 
-	bool SceneGraph::initialize()
-	{
-		if (mInitialized)
-		{
-			return true;
-		}
- 		//TODO: check initialization
-// 		if (mRoot == nullptr)
-// 		{
-// 			return false;
-// 		}
-
-		class InitAct : public Action
-		{
-		public:
-			void process(Node* node) override {
-				node->initialize();
-
-				auto& list = node->getModuleList();
-				std::list<std::shared_ptr<Module>>::iterator iter = list.begin();
-				for (; iter != list.end(); iter++)
-				{
-					(*iter)->initialize();
-				}
-				
-				node->graphicsPipeline()->update();
-			}
-		};
-
-		this->traverseForward<InitAct>();
-		mInitialized = true;
-
-		return mInitialized;
-	}
-
-	void SceneGraph::invalid()
-	{
-		mInitialized = false;
-	}
-
 	void SceneGraph::advance(float dt)
 	{
 		class AdvanceAct : public Action
 		{
 		public:
 			AdvanceAct(float dt, float t, bool bTiming = false) {
-				mDt = dt; 
+				mDt = dt;
 				mElapsedTime = t;
 				mTiming = bTiming;
 			};
@@ -136,21 +99,12 @@ namespace dyno
 				CTimer timer;
 #endif // CUDA_BACKEND
 
-				
+
 				if (mTiming) {
 					timer.start();
 				}
 
-				if (node->isActive())
-				{
-					auto customModules = node->getCustomModuleList();
-					for (std::list<std::shared_ptr<CustomModule>>::iterator iter = customModules.begin(); iter != customModules.end(); iter++)
-					{
-						(*iter)->update();
-					}
-
-					node->update();
-				}
+				node->update();
 
 				if (mTiming) {
 					timer.stop();
@@ -159,7 +113,7 @@ namespace dyno
 					std::stringstream ss;
 					name << std::setw(40) << node->getClassInfo()->getClassName();
 					ss << std::setprecision(10) << timer.getElapsedTime();
-					
+
 					std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
 					Log::sendMessage(Log::Info, info);
 				}
@@ -169,7 +123,7 @@ namespace dyno
 			float mElapsedTime;
 
 			bool mTiming = false;
-		};	
+		};
 
 		this->traverseForward<AdvanceAct>(dt, mElapsedTime, mNodeTiming);
 
@@ -182,10 +136,10 @@ namespace dyno
 
 		std::cout << "****************    Frame " << mFrameNumber << " Started    ****************" << std::endl;
 
-// 		if (mRoot == nullptr)
-// 		{
-// 			return;
-// 		}
+		// 		if (mRoot == nullptr)
+		// 		{
+		// 			return;
+		// 		}
 
 		float t = 0.0f;
 		float dt = 0.0f;
@@ -194,7 +148,8 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				dt = node->getDt() < dt ? node->getDt() : dt;
+				if(node != nullptr && node->isActive())
+					dt = node->getDt() < dt ? node->getDt() : dt;
 			}
 
 			float dt;
@@ -225,15 +180,15 @@ namespace dyno
 			this->advance(interval - t);
 		}
 
-// 		class UpdateGrpahicsContextAct : public Action
-// 		{
-// 		public:
-// 			void process(Node* node) override {
-// 				node->graphicsPipeline()->update();
-// 			}
-// 		};
-// 
-// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
+		// 		class UpdateGrpahicsContextAct : public Action
+		// 		{
+		// 		public:
+		// 			void process(Node* node) override {
+		// 				node->graphicsPipeline()->update();
+		// 			}
+		// 		};
+		// 
+		// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
 
 		this->traverseForward<PostProcessing>();
 
@@ -242,6 +197,8 @@ namespace dyno
 		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
 
 		mFrameNumber++;
+
+		mWorkMode = RUNNING_MODE;
 
 		mSync.unlock();
 	}
@@ -268,7 +225,7 @@ namespace dyno
 
 	}
 
-	dyno::NBoundingBox SceneGraph::boundingBox()
+	NBoundingBox SceneGraph::boundingBox()
 	{
 		NBoundingBox box;
 		for (auto it = this->begin(); it != this->end(); it++)
@@ -292,9 +249,6 @@ namespace dyno
 					return;
 				}
 
-				node->stateFrameNumber()->setValue(0);
-				node->stateElapsedTime()->setValue(0.0f);
-
 				node->reset();
 			}
 		};
@@ -303,6 +257,8 @@ namespace dyno
 
 		mElapsedTime = 0.0f;
 		mFrameNumber = 0;
+
+		mWorkMode = EDIT_MODE;
 
 		mSync.unlock();
 	}
@@ -321,9 +277,19 @@ namespace dyno
 		mNodeTiming = enabled;
 	}
 
-	void SceneGraph::printModuleInfo(bool enabled)
+	void SceneGraph::printSimulationInfo(bool enabled)
 	{
-		mModuleTiming = enabled;
+		mSimulationTiming = enabled;
+	}
+
+	void SceneGraph::printRenderingInfo(bool enabled)
+	{
+		mRenderingTiming = enabled;
+	}
+
+	void SceneGraph::printValidationInfo(bool enabled)
+	{
+		mValidationInfo = enabled;
 	}
 
 	bool SceneGraph::load(std::string name)
@@ -404,9 +370,69 @@ namespace dyno
 		this->traverseForward(&eventAct);
 	}
 
+	void SceneGraph::onMouseEvent(PMouseEvent event, std::shared_ptr<Node> node)
+	{
+		if (node == nullptr || !node->isVisible())
+			return;
+
+		for (auto iter : node->animationPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<MouseInputModule*>(iter.get());
+			if (m)
+			{
+				m->enqueueEvent(event);
+			}
+		}
+
+		for (auto iter : node->graphicsPipeline()->activeModules())
+		{
+			auto m = dynamic_cast<MouseInputModule*>(iter.get());
+			if (m)
+			{
+				m->enqueueEvent(event);
+			}
+		}
+	}
+
 	void SceneGraph::onKeyboardEvent(PKeyboardEvent event)
 	{
+		class KeyboardEventAct : public Action
+		{
+		public:
+			KeyboardEventAct(PKeyboardEvent event) { mKeyboardEvent = event; }
+			~KeyboardEventAct() override {}
 
+		private:
+			void process(Node* node) override
+			{
+				if (!node->isVisible())
+					return;
+
+				for (auto iter : node->animationPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<KeyboardInputModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mKeyboardEvent);
+					}
+				}
+
+				for (auto iter : node->graphicsPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<KeyboardInputModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mKeyboardEvent);
+					}
+				}
+			}
+
+			PKeyboardEvent mKeyboardEvent;
+		};
+
+		KeyboardEventAct eventAct(event);
+
+		this->traverseForward(&eventAct);
 	}
 
 	//Used to traverse the whole scene graph
@@ -417,7 +443,7 @@ namespace dyno
 		auto imports = node->getImportNodes();
 		for (auto port : imports) {
 			auto& inNodes = port->getNodes();
-			for (auto inNode :  inNodes) {
+			for (auto inNode : inNodes) {
 				if (inNode != nullptr && !visited[inNode->objectId()]) {
 					DFS(inNode, nodeQueue, visited);
 				}
@@ -425,9 +451,9 @@ namespace dyno
 		}
 
 		auto inFields = node->getInputFields();
-		for(auto f : inFields) {
+		for (auto f : inFields) {
 			auto* src = f->getSource();
-			if (src != nullptr)	{
+			if (src != nullptr) {
 				auto* inNode = dynamic_cast<Node*>(src->parent());
 				if (inNode != nullptr && !visited[inNode->objectId()]) {
 					DFS(inNode, nodeQueue, visited);
@@ -446,9 +472,9 @@ namespace dyno
 		}
 
 		auto outFields = node->getOutputFields();
-		for(auto f : outFields) {
+		for (auto f : outFields) {
 			auto& sinks = f->getSinks();
-			for(auto sink : sinks) {
+			for (auto sink : sinks) {
 				if (sink != nullptr) {
 					auto exNode = dynamic_cast<Node*>(sink->parent());
 					if (exNode != nullptr && !visited[exNode->objectId()]) {
@@ -460,54 +486,63 @@ namespace dyno
 	};
 
 	//Used to traverse the scene graph from a specific node
-	void BFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
+	void BFS(Node* node, NodeList& list, std::map<ObjectId, bool>& visited) {
 
 		visited[node->objectId()] = true;
 
-		nodeQueue.push_back(node);
+		std::queue<Node*> queue;
+		queue.push(node);
 
-		auto exports = node->getExportNodes();
-		for (auto port : exports) {
-			auto exNode = port->getParent();
-			if (exNode != nullptr && !visited[node->objectId()]) {
-				BFS(exNode, nodeQueue, visited);
+		while (!queue.empty())
+		{
+			auto fn = queue.front();
+			queue.pop();
+
+			list.push_back(fn);
+
+			auto exports = fn->getExportNodes();
+			for (auto port : exports) {
+				auto next = port->getParent();
+				if (next != nullptr && !visited[next->objectId()]) {
+					queue.push(next);
+				}
 			}
-		}
 
-		auto outFields = node->getOutputFields();
-		for(auto f : outFields) {
-			auto& sinks = f->getSinks();
-			for(auto sink : sinks) {
-				if (sink != nullptr) {
-					auto exNode = dynamic_cast<Node*>(sink->parent());
-					if (exNode != nullptr && !visited[exNode->objectId()]) {
-						BFS(exNode, nodeQueue, visited);
+			auto outFields = fn->getOutputFields();
+			for (auto f : outFields) {
+				auto& sinks = f->getSinks();
+				for (auto sink : sinks) {
+					if (sink != nullptr) {
+						auto next = dynamic_cast<Node*>(sink->parent());
+						if (next != nullptr && !visited[next->objectId()]) {
+							queue.push(next);
+						}
 					}
 				}
 			}
 		}
 	};
 
-// 	void SceneGraph::retriveExecutionQueue(std::list<Node*>& nQueue)
-// 	{
-// 		nQueue.clear();
-// 
-// 		std::map<ObjectId, bool> visited;
-// 		for (auto& nm : mNodeMap) {
-// 			visited[nm.first] = false;
-// 		}
-// 
-// 		for (auto& n : mNodeMap) {
-// 			if (!visited[n.first]) {
-// 
-// 				Node* node = n.second.get();
-// 
-// 				DFS(node, nQueue, visited);
-// 			}
-// 		}
-// 
-// 		visited.clear();
-// 	}
+	// 	void SceneGraph::retriveExecutionQueue(std::list<Node*>& nQueue)
+	// 	{
+	// 		nQueue.clear();
+	// 
+	// 		std::map<ObjectId, bool> visited;
+	// 		for (auto& nm : mNodeMap) {
+	// 			visited[nm.first] = false;
+	// 		}
+	// 
+	// 		for (auto& n : mNodeMap) {
+	// 			if (!visited[n.first]) {
+	// 
+	// 				Node* node = n.second.get();
+	// 
+	// 				DFS(node, nQueue, visited);
+	// 			}
+	// 		}
+	// 
+	// 		visited.clear();
+	// 	}
 
 	void SceneGraph::updateExecutionQueue()
 	{
@@ -522,7 +557,7 @@ namespace dyno
 		}
 
 		for (auto& n : mNodeMap) {
-			if (!visited[n.first])	{
+			if (!visited[n.first]) {
 
 				Node* node = n.second.get();
 
@@ -586,6 +621,67 @@ namespace dyno
 		visited.clear();
 	}
 
+	//Used to traverse the scene graph from a specific node
+	void BFSWithAutoSync(Node* node, NodeList& list, std::map<ObjectId, bool>& visited) {
+
+		visited[node->objectId()] = true;
+
+		std::queue<Node*> queue;
+		queue.push(node);
+
+		while (!queue.empty())
+		{
+			auto fn = queue.front();
+			queue.pop();
+
+			list.push_back(fn);
+
+			auto exports = fn->getExportNodes();
+			for (auto port : exports) {
+				auto next = port->getParent();
+				if (next != nullptr && next->isAutoSync() && !visited[next->objectId()]) {
+					queue.push(next);
+				}
+			}
+
+			auto outFields = fn->getOutputFields();
+			for (auto f : outFields) {
+				auto& sinks = f->getSinks();
+				for (auto sink : sinks) {
+					if (sink != nullptr) {
+						auto next = dynamic_cast<Node*>(sink->parent());
+						if (next != nullptr && next->isAutoSync() && !visited[next->objectId()]) {
+							queue.push(next);
+						}
+					}
+				}
+			}
+		}
+	};
+
+	void SceneGraph::traverseForwardWithAutoSync(std::shared_ptr<Node> node, Action* act)
+	{
+		std::map<ObjectId, bool> visited;
+		for (auto& nm : mNodeMap) {
+			visited[nm.first] = false;
+		}
+
+		NodeList list;
+		BFSWithAutoSync(node.get(), list, visited);
+
+		for (auto it = list.begin(); it != list.end(); ++it)
+		{
+			Node* node = *it;
+
+			act->start(node);
+			act->process(node);
+			act->end(node);
+		}
+
+		list.clear();
+		visited.clear();
+	}
+
 	void SceneGraph::deleteNode(std::shared_ptr<Node> node)
 	{
 		if (node == nullptr ||
@@ -596,20 +692,6 @@ namespace dyno
 		mQueueUpdateRequired = true;
 	}
 
-	void DownwardDFS(Node* node, std::map<ObjectId, bool>& visited) {
-
-		visited[node->objectId()] = true;
-		node->update();
-
-		auto exports = node->getExportNodes();
-		for (auto port : exports) {
-			auto exNode = port->getParent();
-			if (exNode != nullptr && !visited[node->objectId()]) {
-				DownwardDFS(exNode, visited);
-			}
-		}
-	};
-
 	void SceneGraph::propagateNode(std::shared_ptr<Node> node)
 	{
 		std::map<ObjectId, bool> visited;
@@ -618,7 +700,7 @@ namespace dyno
 			visited[(*it)->objectId()] = false;
 		}
 
-		DownwardDFS(node.get(), visited);
+		//DownwardDFS(node.get(), visited);
 
 		visited.clear();
 	}

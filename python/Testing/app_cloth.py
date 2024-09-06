@@ -14,9 +14,8 @@ boundary.load_sphere(dyno.Vector3f([0.5, 0.7, 0.5]), 0.08, 0.005, False, True)
 boundary.add_particle_system(cloth)
 scn.add_node(boundary)
 
-
 pointRender = dyno.GLPointVisualModule3f()
-pointRender.set_color(dyno.Vector3f([1, 0.2, 1]))
+pointRender.set_color(dyno.Color(1, 0.2, 1))
 pointRender.set_colorMapMode(pointRender.ColorMapMode.PER_OBJECT_SHADER)
 cloth.current_topology().connect(pointRender.in_pointSet())
 cloth.state_velocity().connect(pointRender.in_color())
@@ -28,8 +27,7 @@ surfaceRenderer = dyno.GLSurfaceVisualModule3f()
 cloth.current_topology().connect(surfaceRenderer.in_triangleSet())
 cloth.graphics_pipeline().push_module(surfaceRenderer)
 
-
 app = dyno.GLApp()
 app.set_scenegraph(scn)
-app.create_window(1024, 768)
+app.initialize(1280, 768, True)
 app.main_loop()

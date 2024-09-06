@@ -1,4 +1,4 @@
-set(LIB_NAME Core)
+﻿set(LIB_NAME Core)
 
 file(
     GLOB_RECURSE LIB_SRC 
@@ -20,6 +20,11 @@ if(WIN32)
         source_group("${GROUP_PATH}" FILES "${SRC}")
     endforeach()
 endif()
+
+#add Platform.h
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Platform.h.in" "${CMAKE_CURRENT_BINARY_DIR}/Platform.h")
+
+set(PLATFORM_FILE "${CMAKE_CURRENT_BINARY_DIR}/Platform.h")
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     file(GLOB_RECURSE GPU_SRC 
@@ -101,13 +106,15 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
     #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
     target_include_directories(${LIB_NAME} PUBLIC 
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Core>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Core/Backend/Cuda>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/eigen>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Core>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Core/Backend/Cuda>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external/eigen>
+        $<BUILD_INTERFACE:${PERIDYNO_ROOT}/external/glm-0.9.9.7>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>
+        $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}/Backend/Cuda>
         $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7>)
 
 	#To disable the warning "calling a constexpr __host__ function("***") from a __host__ __device__ function("***") is not allowed."
@@ -146,21 +153,39 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	file(GLOB CORE_ARRAY_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Array/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/Array/*.inl")
 	install(FILES ${CORE_ARRAY_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Array)
 
+    file(GLOB CORE_ARRAY_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/CCD/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/CCD/*.inl")
+	install(FILES ${CORE_ARRAY_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/CCD)
+
+    file(GLOB CORE_ARRAY_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Primitive/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/Primitive/*.inl")
+	install(FILES ${CORE_ARRAY_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Primitive)
+
+    file(GLOB CORE_ARRAY_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Math/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/Math/*.inl")
+	install(FILES ${CORE_ARRAY_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Math)
+
 	file(GLOB CORE_ARRAY_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/STL/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/STL/*.inl")
 	install(FILES ${CORE_ARRAY_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/STL)
 
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Platform.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h")
+    file(GLOB BACKEND_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/*.*")
+	install(FILES ${BACKEND_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Backend/Cuda)
 
-	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h"  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/)
+    file(GLOB BACKEND_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Algorithm/*.*")
+	install(FILES ${BACKEND_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Backend/Cuda/Algorithm)
+
+    file(GLOB BACKEND_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/Array/*.*")
+	install(FILES ${BACKEND_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Backend/Cuda/Array)
+
+    file(GLOB BACKEND_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/Backend/Cuda/SparseMatrix/*.*")
+	install(FILES ${BACKEND_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/Backend/Cuda/SparseMatrix)
+
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Platform.h"  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/)
 
 	install(DIRECTORY "${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7/" DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7/)
 
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	target_include_directories(${LIB_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Core>
 	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/Core/Backend/Vulkan>)
-
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Platform.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h")
 
 	include_directories(${CMAKE_SOURCE_DIR}/external/glslang/glslang/Include)
 
@@ -193,6 +218,7 @@ else()
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/eigen>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7>)
@@ -232,9 +258,7 @@ else()
 	file(GLOB CORE_ARRAY_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/STL/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/STL/*.inl")
 	install(FILES ${CORE_ARRAY_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/STL)
 
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Platform.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h")
-
-	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/Platform.h"  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/)
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Platform.h"  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Core/)
 
 	install(DIRECTORY "${CMAKE_SOURCE_DIR}/external/glm-0.9.9.7/" DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/glm-0.9.9.7/)
 

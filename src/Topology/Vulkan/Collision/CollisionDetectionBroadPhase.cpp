@@ -8,7 +8,7 @@
 namespace dyno
 {
 	CollisionDetectionBroadPhase::CollisionDetectionBroadPhase()
-		: dyno::CollisionModel()
+		: ComputeModule()
 	{
 		vkr = std::make_shared<VkReduce<int>>();
 		vks = std::make_shared<VkScan<int>>();
@@ -20,7 +20,7 @@ namespace dyno
 				BUFFER(AlignedBox3D),		//AABB
 				BUFFER(uint32_t),			//collision type
 				BUFFER(uint32_t),			//shape type
-				UNIFORM(uint32_t))				//number of AABBs
+				CONSTANT(uint32_t))				//number of AABBs
 		);
 		kernel("CollisionCounterInBroadPhase")->load(getAssetPath() + "shaders/glsl/collision/CollisionCounterInBroadPhase.comp.spv");
 
@@ -32,7 +32,7 @@ namespace dyno
 				BUFFER(AlignedBox3D),		//AABB
 				BUFFER(uint32_t),			//collision type
 				BUFFER(uint32_t),			//shape type
-				UNIFORM(uint32_t))				//number of AABBs
+				CONSTANT(uint32_t))				//number of AABBs
 		);
 		kernel("CollisionDetectionInBroadPhase")->load(getAssetPath() + "shaders/glsl/collision/CollisionDetectionInBroadPhase.comp.spv");
 	}
@@ -41,12 +41,7 @@ namespace dyno
 	{
 	}
 
-	bool CollisionDetectionBroadPhase::initializeImpl()
-	{
-		return true;
-	}
-
-	void CollisionDetectionBroadPhase::doCollision()
+	void CollisionDetectionBroadPhase::compute()
 	{
 		uint num = this->inBoundingBox()->size();
 

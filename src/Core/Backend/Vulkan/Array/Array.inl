@@ -126,6 +126,12 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const Array<T, DeviceType::GPU>& src)
 	{
+		if (src.size() == 0)
+		{
+			mData.clear();
+			return;
+		}
+
 		if (mData.size() != src.size())
 			this->resize(src.size());
 
@@ -169,6 +175,6 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::assign(const Array<T, DeviceType::GPU>& src, const uint count, const uint dstOffset, const uint srcOffset)
 	{
-		//cuSafeCall(cudaMemcpy(mData + dstOffset, src.begin() + srcOffset, count * sizeof(T), cudaMemcpyDeviceToDevice));
+		vkTransfer(mData, (uint64_t)dstOffset, *src.handle(), (uint64_t)srcOffset, (uint64_t)count);
 	}
 }

@@ -48,14 +48,12 @@ Group::Group(const QString& name, QWidget* parent) : QFrame(parent)
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
 
     QHBoxLayout* separatorLayout = new QHBoxLayout(this);
-    separatorLayout->setMargin(0);
     separatorLayout->setContentsMargins(0, 0, 0, 0);
     separatorLayout->setSpacing(0);
     separatorLayout->setDirection(QBoxLayout::LeftToRight);
     setLayout(separatorLayout);
 
     QVBoxLayout* outerLayout = new QVBoxLayout();
-    outerLayout->setMargin(0);
     outerLayout->setContentsMargins(0, 0, 0, 0);
     outerLayout->setSpacing(0);
     outerLayout->setDirection(QBoxLayout::TopToBottom);
@@ -69,7 +67,6 @@ Group::Group(const QString& name, QWidget* parent) : QFrame(parent)
     innerFrame->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
     innerLayout = new QHBoxLayout(innerFrame);
-    innerLayout->setMargin(0);
     innerLayout->setContentsMargins(2, 4, 2, 0);
     innerLayout->setSpacing(4);
     innerLayout->setDirection(QBoxLayout::LeftToRight);

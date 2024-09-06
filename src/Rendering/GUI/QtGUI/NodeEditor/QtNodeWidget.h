@@ -45,6 +45,8 @@ namespace Qt
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 
+		bool allowExported() const override { return true; }
+
 		/**
 		 * @brief To test whether nodaData can be set as the input data for portIndex
 		 * 

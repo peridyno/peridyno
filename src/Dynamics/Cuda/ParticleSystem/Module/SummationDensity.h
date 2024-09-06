@@ -19,8 +19,8 @@
 namespace dyno {
 	/**
 	 * @brief The standard summation density
-	 * 
-	 * @tparam TDataType 
+	 *
+	 * @tparam TDataType
 	 */
 	template<typename TDataType>
 	class SummationDensity : public virtual ParticleApproximation<TDataType>
@@ -34,7 +34,7 @@ namespace dyno {
 		~SummationDensity() override {};
 
 		void compute() override;
-	
+
 	public:
 		void compute(
 			DArray<Real>& rho,
@@ -80,7 +80,7 @@ namespace dyno {
 		Real getParticleMass() {
 			return m_particle_mass;
 		}
-		
+
 	private:
 		void calculateParticleMass();
 

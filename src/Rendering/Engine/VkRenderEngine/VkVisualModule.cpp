@@ -10,4 +10,10 @@ namespace dyno
 	VkVisualModule::~VkVisualModule()
 	{
 	}
+
+	void VkVisualModule::updateImpl()
+	{
+		this->updateGraphicsContext();
+	}
+
 }

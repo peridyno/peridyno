@@ -15,8 +15,8 @@ int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
- 	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
- 	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
+	auto root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+	root->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
 
 	auto bunny = scn->addNode(std::make_shared<ElasticBody<DataType3f>>());
 	bunny->connect(root->importParticleSystems());
@@ -40,5 +40,3 @@ int main()
 
 	return 0;
 }
-
-

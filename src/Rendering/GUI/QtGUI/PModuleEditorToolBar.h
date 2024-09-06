@@ -20,10 +20,11 @@
 #include <QToolButton>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QFrame>
 
 namespace dyno
 {
-	class PModuleEditorToolBar : public QWidget
+	class PModuleEditorToolBar : public QFrame
 	{
 		Q_OBJECT
 	public:
@@ -38,10 +39,12 @@ namespace dyno
 		QAction* reorderAction() { return mActionReorder; }
 
 	signals:
+		void showResetPipeline();
 		void showGraphicsPipeline();
 		void showAnimationPipeline();
 
 	public slots:
+		void resetButtonClicked();
 		void animationButtonClicked();
 		void renderingButtonClicked();
 
@@ -52,6 +55,7 @@ namespace dyno
 		QAction* mActionReorder;
 		QAction* mActionUpdate;
 
+		QPushButton* mResetButton;
 		QPushButton* mAnimationButton;
 		QPushButton* mRenderingButton;
 	};

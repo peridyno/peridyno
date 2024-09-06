@@ -297,7 +297,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void LinearBVH<TDataType>::construct(DArray<AABB>& aabb)
+	void LinearBVH<TDataType>::construct(const DArray<AABB>& aabb)
 	{
 		uint num = aabb.size();
 

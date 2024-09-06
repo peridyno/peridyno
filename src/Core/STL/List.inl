@@ -34,8 +34,8 @@ namespace dyno
 		//return nullptr if the data buffer is full
 		if (m_size >= this->m_maxSize) return nullptr;
 		
-		
-		int index = atomicAdd(&(this->m_size), 1+(val-val));
+		const uint one = 1;
+		int index = atomicAdd(&(this->m_size), one);
 		//int index = atomicAdd(&(this->m_size), 1);
 		//int index = 0;//Onlinux platform, this is a bug, not yet resolved.
 

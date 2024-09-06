@@ -21,17 +21,18 @@
 
 #include <RenderEngine.h>
 
-#include "gl/Buffer.h"
-#include "gl/Texture.h"
-#include "gl/Framebuffer.h"
-#include "gl/Shader.h"
-#include "gl/Mesh.h"
+#include "GraphicsObject/Buffer.h"
+#include "GraphicsObject/Texture.h"
+#include "GraphicsObject/Framebuffer.h"
+#include "GraphicsObject/Shader.h"
+#include "GraphicsObject/Mesh.h"
 
 
 namespace dyno
 {
 	class SSAO;
 	class FXAA;
+	class Envmap;
 	class ShadowMap;
 	class GLRenderHelper;
 	class GLVisualModule;
@@ -46,20 +47,36 @@ namespace dyno
 		virtual void initialize() override;
 		virtual void terminate() override;
 
-		virtual void draw(dyno::SceneGraph* scene, Camera* camera, const RenderParams& rparams) override;
+		virtual void draw(dyno::SceneGraph* scene, const RenderParams& rparams) override;
 
 		virtual std::string name() const override;
 
 		// get the selected nodes on given rect area
 		Selection select(int x, int y, int w, int h) override;
 
-	private:
-		void setupInternalFramebuffer();
-		void resizeFramebuffer(int w, int h);
-		
-		void setupTransparencyPass();
+		// use MSAA samples
+		void setMSAA(int samples);
+		int  getMSAA() const;
 
-		void updateRenderModules(dyno::SceneGraph* scene);
+		void setFXAA(bool flag);
+		int getFXAA() const;
+
+		void setShadowMapSize(int size);
+		int  getShadowMapSize() const;
+
+		void setShadowBlurIters(int iters);
+		int  getShadowBlurIters() const;
+
+		void setDefaultEnvmap() override;
+		void setEnvmap(const std::string& path);
+
+		void setEnvStyle(EEnvStyle style) override;
+
+	private:
+		void createFramebuffer();
+		void resizeFramebuffer(int w, int h, int samples);
+		void setupTransparencyPass();
+		void updateRenderItems(dyno::SceneGraph* scene);
 
 	private:
 
@@ -77,30 +94,37 @@ namespace dyno
 
 	private:
 		// internal framebuffer
-		gl::Framebuffer	mFramebuffer;
-		gl::Texture2D	mColorTex;
-		gl::Texture2D	mDepthTex;
-		gl::Texture2D	mIndexTex;			// indices for object/mesh/primitive etc.
+		Framebuffer				mFramebuffer;
+		Texture2DMultiSample	mColorTex;
+		Texture2DMultiSample	mDepthTex;
+		Texture2DMultiSample	mIndexTex;			// indices for object/mesh/primitive etc.
+
+		// non-multisample framebuffer for select
+		Framebuffer				mSelectFramebuffer;
+		Texture2D				mSelectIndexTex;
 
 		// for linked-list OIT
-		const int		MAX_OIT_NODES = 1024 * 1024 * 8;
-		gl::Buffer		mFreeNodeIdx;
-		gl::Buffer		mLinkedListBuffer;
-		gl::Texture2D	mHeadIndexTex;
-		gl::Program*	mBlendProgram;
+		const int				MAX_OIT_NODES = 1024 * 1024 * 8;
+		Buffer					mFreeNodeIdx;
+		Buffer					mLinkedListBuffer;
+		Texture2DMultiSample	mHeadIndexTex;
+		Program*				mBlendProgram;
 
-		gl::Mesh*		mScreenQuad = 0;
+		GLRenderHelper*			mRenderHelper;
+		ShadowMap*				mShadowMap;
 
-		// uniform buffers
-		gl::Buffer		mTransformUBO;
-		gl::Buffer		mLightUBO;
-		gl::Buffer		mVariableUBO;
-
-		GLRenderHelper* mRenderHelper;
-		ShadowMap*		mShadowMap;
 		// anti-aliasing
-		bool			bEnableFXAA = true;
-		FXAA*			mFXAAFilter;
+		
+		// MSAA samples
+		int						mMSAASamples = 4;
 
+		// FXAA
+		bool					bEnableFXAA = false;
+		FXAA*					mFXAAFilter;
+
+		// Envmap
+		Envmap*					mEnvmap = 0;
+		
+		Mesh* mScreenQuad = 0;
 	};
 };

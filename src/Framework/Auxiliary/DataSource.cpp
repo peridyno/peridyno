@@ -7,55 +7,37 @@ namespace dyno
 		return false;
 	}
 
-	IMPLEMENT_CLASS(FloatSource);
+	IMPLEMENT_TCLASS(FloatingNumber, TDataType);
 
-	FloatSource::FloatSource()
+	template<typename TDataType>
+	FloatingNumber<TDataType>::FloatingNumber()
 	{
-		this->outFloat()->setValue(this->varValue()->getData());
+		this->outFloating()->setValue(this->varValue()->getData());
 
 		auto callback = std::make_shared<FCallBackFunc>(
-			[=]() {this->outFloat()->setValue(this->varValue()->getData()); }
+			[=]() {this->outFloating()->setValue(this->varValue()->getData()); }
 		);
 
 		this->varValue()->attach(callback);
 	}
 
-	IMPLEMENT_CLASS(DoubleSource);
+	template class FloatingNumber<DataType3f>;
+	template class FloatingNumber<DataType3d>;
 
-	DoubleSource::DoubleSource()
+	IMPLEMENT_TCLASS(Vector3Source, TDataType);
+
+	template<typename TDataType>
+	Vector3Source<TDataType>::Vector3Source()
 	{
-		this->outDouble()->setValue(this->varValue()->getData());
+		this->outVector()->setValue(this->varValue()->getData());
 
 		auto callback = std::make_shared<FCallBackFunc>(
-			[=]() {this->outDouble()->setValue(this->varValue()->getData()); }
+			[=]() {this->outVector()->setValue(this->varValue()->getData()); }
 		);
 
 		this->varValue()->attach(callback);
 	}
 
-	IMPLEMENT_CLASS(Vec3fSource);
-
-	Vec3fSource::Vec3fSource()
-	{
-		this->outVector3f()->setValue(this->varValue()->getData());
-
-		auto callback = std::make_shared<FCallBackFunc>(
-			[=]() {this->outVector3f()->setValue(this->varValue()->getData()); }
-		);
-
-		this->varValue()->attach(callback);
-	}
-
-	IMPLEMENT_CLASS(Vec3dSource);
-
-	Vec3dSource::Vec3dSource()
-	{
-		this->outVector3d()->setValue(this->varValue()->getData());
-
-		auto callback = std::make_shared<FCallBackFunc>(
-			[=]() {this->outVector3d()->setValue(this->varValue()->getData()); }
-		);
-
-		this->varValue()->attach(callback);
-	}
+	template class Vector3Source<DataType3f>;
+	template class Vector3Source<DataType3d>;
 }

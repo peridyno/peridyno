@@ -10,9 +10,9 @@
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Mapping/MergeTriangleSet.h"
 
-#include "ParticleWriter.h"
+#include "Collision/NeighborPointQuery.h"
 
 #include "Module/CalculateNorm.h"
 
@@ -22,10 +22,9 @@
 #include <GLSurfaceVisualModule.h>
 #include <GLInstanceVisualModule.h>
 
-#include <GLRenderEngine.h>
-
 #include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
+#include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
 
 #include "StaticTriangularMesh.h"
@@ -67,8 +66,6 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
-	fluid->animationPipeline()->disable();
-
 	//Barricade
 	auto barricade = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	barricade->varFileName()->setValue(getAssetPath() + "bowl/barricade.obj");
@@ -78,7 +75,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sRenderf->setColor(Color(0.8f, 0.52f, 0.25f));
 	sRenderf->setVisible(true);
 	sRenderf->varUseVertexNormal()->setValue(true);	// use generated smooth normal
-	barricade->stateTopology()->connect(sRenderf->inTriangleSet());
+	barricade->stateTriangleSet()->connect(sRenderf->inTriangleSet());
 	barricade->graphicsPipeline()->pushModule(sRenderf);
 
 	//Scene boundary
@@ -87,22 +84,16 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->graphicsPipeline()->disable();
 
 	//SFI node
-	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
+	auto sfi = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
 	auto pbd = std::make_shared<SemiAnalyticalPositionBasedFluidModel<DataType3f>>();
 	pbd->varSmoothingLength()->setValue(0.0085);
 
-	sfi->animationPipeline()->clear();
-	sfi->stateTimeStep()->connect(pbd->inTimeStep());
-	sfi->statePosition()->connect(pbd->inPosition());
-	sfi->stateVelocity()->connect(pbd->inVelocity());
-	sfi->stateForceDensity()->connect(pbd->inForce());
-	sfi->stateTriangleVertex()->connect(pbd->inTriangleVertex());
-	sfi->stateTriangleIndex()->connect(pbd->inTriangleIndex());
-	sfi->animationPipeline()->pushModule(pbd);
+	auto merge = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
+	boundary->stateTriangleSet()->connect(merge->inFirst());
+	barricade->stateTriangleSet()->connect(merge->inSecond());
 
 	fluid->connect(sfi->importParticleSystems());
-	barricade->connect(sfi->importBoundaryMeshs());
-	boundary->connect(sfi->importBoundaryMeshs());
+	merge->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	return scn;
 }
@@ -111,7 +102,7 @@ int main()
 {
 	GlfwApp window;
 	window.setSceneGraph(createScene());
-	window.initialize(1024, 768);
+	window.initialize(1920, 1080);
 	window.mainLoop();
 
 	return 0;

@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "TriangleSet.h"
+#include "EdgeSet.h"
 
 namespace dyno
 {
@@ -97,7 +97,7 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	class QuadSet : public TriangleSet<TDataType>
+	class QuadSet : public EdgeSet<TDataType>
 	{
 	public:
 		typedef typename TDataType::Real Real;
@@ -107,8 +107,10 @@ namespace dyno
 		QuadSet();
 		~QuadSet();
 
-		DArray<Quad>& getQuads() { return m_quads; }
+		DArray<Quad>& getQuads() { return mQuads; }
+
 		void setQuads(std::vector<Quad>& quads);
+		void setQuads(DArray<Quad>& quads);
 
 		DArrayList<int>& getVertex2Quads();
 
@@ -116,6 +118,9 @@ namespace dyno
 
 		void copyFrom(QuadSet<TDataType>& quadSet);
 		
+		bool isEmpty() override;
+
+	public:
 		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
 
 	protected:
@@ -123,15 +128,15 @@ namespace dyno
 
 		void updateEdges() override;
 
-		void updateTriangles() override;
-		void updateVertexNormal() override;
+		void updateVertexNormal();
 
 		virtual void updateQuads() {};
 
-		DArray<Quad> m_quads;
-		DArrayList<int> m_ver2Quad;
+	private:
+		DArray<Quad> mQuads;
+		DArrayList<int> mVer2Quad;
 
-		DArray<::dyno::TopologyModule::Edg2Quad> edg2Quad;
+		DArray<::dyno::TopologyModule::Edg2Quad> mEdg2Quad;
 	};
 }
 

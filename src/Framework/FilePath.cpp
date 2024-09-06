@@ -23,4 +23,6 @@ namespace dyno {
 
 		return true;
 	}
+
+	template class FVar<FilePath>;
 }

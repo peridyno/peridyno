@@ -58,6 +58,7 @@
 #include <QPainter>
 #include <QImage>
 #include <QColor>
+#include <QActionGroup>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QGridLayout>
@@ -74,41 +75,6 @@
 
 namespace dyno
 {
-
-	QColor bgColorForName(const QString &name)
-	{
-		if (name == "Black")
-			return QColor("#D8D8D8");
-		if (name == "White")
-			return QColor("#F1F1F1");
-		if (name == "Red")
-			return QColor("#F1D8D8");
-		if (name == "Green")
-			return QColor("#D8E4D8");
-		if (name == "Blue")
-			return QColor("#D8D8F1");
-		if (name == "Yellow")
-			return QColor("#F1F0D8");
-		return QColor(name).light(110);
-	}
-
-	QColor fgColorForName(const QString &name)
-	{
-		if (name == "Black")
-			return QColor("#6C6C6C");
-		if (name == "White")
-			return QColor("#F8F8F8");
-		if (name == "Red")
-			return QColor("#F86C6C");
-		if (name == "Green")
-			return QColor("#6CB26C");
-		if (name == "Blue")
-			return QColor("#6C6CF8");
-		if (name == "Yellow")
-			return QColor("#F8F76C");
-		return QColor(name);
-	}
-
 	PDockWidget::PDockWidget(const QString &colorName, QMainWindow *parent, Qt::WindowFlags flags) : 
 		QDockWidget(parent, flags), 
 		mainWindow(parent)
@@ -346,9 +312,6 @@ namespace dyno
 
 	void PDockWidget::resizeEvent(QResizeEvent *e)
 	{
-		if (BlueTitleBar *btb = qobject_cast<BlueTitleBar*>(titleBarWidget()))
-			btb->updateMask();
-
 		QDockWidget::resizeEvent(e);
 	}
 
@@ -452,152 +415,4 @@ namespace dyno
 		setFeatures(on ? features() | DockWidgetVerticalTitleBar
 			: features() & ~DockWidgetVerticalTitleBar);
 	}
-
-	QSize BlueTitleBar::minimumSizeHint() const
-	{
-		QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget());
-		Q_ASSERT(dw != 0);
-		QSize result(leftPm.width() + rightPm.width(), centerPm.height());
-		if (dw->features() & QDockWidget::DockWidgetVerticalTitleBar)
-			result.transpose();
-		return result;
-	}
-
-	BlueTitleBar::BlueTitleBar(QWidget *parent)
-		: QWidget(parent)
-		, leftPm(QPixmap(":/res/titlebarLeft.png"))
-		, centerPm(QPixmap(":/res/titlebarCenter.png"))
-		, rightPm(QPixmap(":/res/titlebarRight.png"))
-	{
-	}
-
-	void BlueTitleBar::paintEvent(QPaintEvent*)
-	{
-		QPainter painter(this);
-		QRect rect = this->rect();
-
-		QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget());
-		Q_ASSERT(dw != 0);
-
-		if (dw->features() & QDockWidget::DockWidgetVerticalTitleBar) {
-			QSize s = rect.size();
-			s.transpose();
-			rect.setSize(s);
-
-			painter.translate(rect.left(), rect.top() + rect.width());
-			painter.rotate(-90);
-			painter.translate(-rect.left(), -rect.top());
-		}
-
-		painter.drawPixmap(rect.topLeft(), leftPm);
-		painter.drawPixmap(rect.topRight() - QPoint(rightPm.width() - 1, 0), rightPm);
-		QBrush brush(centerPm);
-		painter.fillRect(rect.left() + leftPm.width(), rect.top(),
-			rect.width() - leftPm.width() - rightPm.width(),
-			centerPm.height(), centerPm);
-	}
-
-	void BlueTitleBar::mouseReleaseEvent(QMouseEvent *event)
-	{
-		QPoint pos = event->pos();
-
-		QRect rect = this->rect();
-
-		QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget());
-		Q_ASSERT(dw != 0);
-
-		if (dw->features() & QDockWidget::DockWidgetVerticalTitleBar) {
-			QPoint p = pos;
-			pos.setX(rect.left() + rect.bottom() - p.y());
-			pos.setY(rect.top() + p.x() - rect.left());
-
-			QSize s = rect.size();
-			s.transpose();
-			rect.setSize(s);
-		}
-
-		const int buttonRight = 7;
-		const int buttonWidth = 20;
-		int right = rect.right() - pos.x();
-		int button = (right - buttonRight) / buttonWidth;
-		switch (button) {
-		case 0:
-			event->accept();
-			dw->close();
-			break;
-		case 1:
-			event->accept();
-			dw->setFloating(!dw->isFloating());
-			break;
-		case 2: {
-			event->accept();
-			QDockWidget::DockWidgetFeatures features = dw->features();
-			if (features & QDockWidget::DockWidgetVerticalTitleBar)
-				features &= ~QDockWidget::DockWidgetVerticalTitleBar;
-			else
-				features |= QDockWidget::DockWidgetVerticalTitleBar;
-			dw->setFeatures(features);
-			break;
-		}
-		default:
-			event->ignore();
-			break;
-		}
-	}
-
-	void BlueTitleBar::updateMask()
-	{
-		QDockWidget *dw = qobject_cast<QDockWidget*>(parent());
-		Q_ASSERT(dw != 0);
-
-		QRect rect = dw->rect();
-		QPixmap bitmap(dw->size());
-
-		{
-			QPainter painter(&bitmap);
-
-			// initialize to transparent
-			painter.fillRect(rect, Qt::color0);
-
-			QRect contents = rect;
-			contents.setTopLeft(geometry().bottomLeft());
-			contents.setRight(geometry().right());
-			contents.setBottom(contents.bottom() - y());
-			painter.fillRect(contents, Qt::color1);
-
-			// let's paint the titlebar
-			QRect titleRect = this->geometry();
-
-			if (dw->features() & QDockWidget::DockWidgetVerticalTitleBar) {
-				QSize s = rect.size();
-				s.transpose();
-				rect.setSize(s);
-
-				QSize s2 = size();
-				s2.transpose();
-				titleRect.setSize(s2);
-
-				painter.translate(rect.left(), rect.top() + rect.width());
-				painter.rotate(-90);
-				painter.translate(-rect.left(), -rect.top());
-			}
-
-			contents.setTopLeft(titleRect.bottomLeft());
-			contents.setRight(titleRect.right());
-			contents.setBottom(rect.bottom() - y());
-
-			QRect rect = titleRect;
-
-			painter.drawPixmap(rect.topLeft(), leftPm.mask());
-			painter.fillRect(rect.left() + leftPm.width(), rect.top(),
-				rect.width() - leftPm.width() - rightPm.width(),
-				centerPm.height(), Qt::color1);
-			painter.drawPixmap(rect.topRight() - QPoint(rightPm.width() - 1, 0), rightPm.mask());
-
-			painter.fillRect(contents, Qt::color1);
-		}
-
-		dw->setMask(bitmap);
-	}
-
 }

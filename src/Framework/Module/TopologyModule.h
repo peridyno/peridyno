@@ -21,7 +21,7 @@ namespace dyno
 {
 	typedef int PointType;
 
-class TopologyModule : public Module
+class TopologyModule : public OBase
 {
 	DECLARE_CLASS(TopologyModule)
 
@@ -49,7 +49,7 @@ public:
 	typedef VectorND<PointType, 2>	Quad2Hex;
 	typedef VectorND<PointType, 2>	Edg2Hex;
 	
-
+	typedef VectorND<PointType, 2>	Edg2Poly;
 	
 public:
 	TopologyModule();
@@ -61,10 +61,11 @@ public:
 	inline void tagAsUnchanged() { m_topologyChanged = false; }
 	inline bool isTopologyChanged() { return m_topologyChanged; }
 
-	std::string getModuleType() override { return "TopologyModule"; }
+	//std::string getModuleType() override { return "TopologyModule"; }
+
+	void update();
 
 protected:
-	void updateImpl() override;
 
 	virtual void updateTopology() {};
 

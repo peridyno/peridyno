@@ -2,9 +2,10 @@
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 #include "Module/TopologyModule.h"
-#include "SurfaceInteraction.h"
-#include "EdgeInteraction.h"
-#include "PointInteraction.h"
+
+#include "Module/SurfaceInteraction.h"
+#include "Module/EdgeInteraction.h"
+#include "Module/PointInteraction.h"
 
 namespace dyno
 {
@@ -41,8 +42,8 @@ namespace dyno
 		DEF_VAR(Real, PointOtherSize, 0.01f, "");
 		DEF_VAR(bool, ToggleIndexOutput, true, "The toggle of index output");
 
-		PointPickerNode(std::string name = "default");
-		~PointPickerNode();
+		PointPickerNode();
+		~PointPickerNode() override;
 
 		std::string getNodeType();
 

@@ -4,6 +4,10 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <atomic>
+#include <chrono>
+#include <mutex>
+#include <condition_variable>
 
 #include <nodes/QNode>
 
@@ -32,7 +36,15 @@ namespace dyno
 
 		void run() override;
 
+		/**
+		 * @brief Reset the simulation
+		 */
 		void reset(int num);
+
+		/**
+		 * @brief Continue the simulation from the current frame
+		 */
+		void proceed(int num);
 
 		void startUpdatingGraphicsContext();
 		void stopUpdatingGraphicsContext();
@@ -40,36 +52,48 @@ namespace dyno
 		void setTotalFrames(int num);
 
 		int getCurrentFrameNum();
+
+		bool isPaused() {
+			return mPaused;
+		}
+
+		bool isRunning() {
+			return mRunning;
+		}
+
 	Q_SIGNALS:
 		//Note: should not be emitted from the user
 
 		void sceneGraphChanged();
 
-		void oneFrameFinished();
+		void oneFrameFinished(int frame);
 		void simulationFinished();
 
 	public slots:
 		void resetNode(std::shared_ptr<Node> node);
 		void resetQtNode(Qt::QtNode& node);
 
+		void syncNode(std::shared_ptr<Node> node);
+
 	private:
 		PSimulationThread();
 
-		int mTotalFrame;
+		void notify();
 
-		bool mReset = false;
-		bool mPaused = true;
-		
-		bool mRunning = true;
-		bool mFinished = false;
+		std::atomic<int> mTotalFrame;
 
-		bool mUpdatingGraphicsContext = false;
+		bool mReset;
+	 	std::atomic<bool> mPaused;
+		std::atomic<bool> mRunning;
+		bool mFinished;
 
-		std::shared_ptr<Node> mActiveNode = nullptr;
+		std::atomic<bool> mUpdatingGraphicsContext;
 
-		int mTimeOut = 10000;
+		std::shared_ptr<Node> mActiveNode;
 
-		QMutex mMutex;
+		std::chrono::milliseconds mTimeOut;
+		std::timed_mutex mMutex;
+		std::condition_variable_any mCond;
 	};
 }
 

@@ -2,9 +2,14 @@
 
 #include <QHBoxLayout>
 
+#include "Field.h"
+#include "QPiecewiseDoubleSpinBox.h"
+
 namespace dyno
 {
-	QRealFieldWidget::QRealFieldWidget(FBase* field)
+	IMPL_FIELD_WIDGET(float, QRealFieldWidget)
+
+		QRealFieldWidget::QRealFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
 		//this->setStyleSheet("border:none");
@@ -14,7 +19,7 @@ namespace dyno
 
 		this->setLayout(layout);
 
-		QLabel* name = new QLabel();
+		QToggleLabel* name = new QToggleLabel();
 		name->setFixedHeight(24);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
@@ -22,35 +27,40 @@ namespace dyno
 		slider->setRange(field->getMin(), field->getMax());
 		slider->setMinimumWidth(60);
 
-		QDoubleSpinner* spinner = new QDoubleSpinner;
+		std::string template_name = field->getTemplateName();
+		if (template_name == std::string(typeid(float).name()))
+		{
+			FVar<float>* f = TypeInfo::cast<FVar<float>>(field);
+
+			spinner = new QPiecewiseDoubleSpinBox(f->getValue());
+			slider->setValue((double)f->getValue());
+		}
+		else if (template_name == std::string(typeid(double).name()))
+		{
+			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
+
+			spinner = new QPiecewiseDoubleSpinBox(f->getValue());
+			slider->setValue(f->getValue());
+		}
+
 		spinner->setRange(field->getMin(), field->getMax());
-		spinner->setFixedWidth(80);
-		spinner->setDecimals(3);
+		spinner->setFixedWidth(100);
 
 		layout->addWidget(name, 0);
 		layout->addWidget(slider, 1);
 		layout->addStretch();
 		layout->addWidget(spinner, 2);
-
-		std::string template_name = field->getTemplateName();
-		if (template_name == std::string(typeid(float).name()))
-		{
-			FVar<float>* f = TypeInfo::cast<FVar<float>>(field);
-			slider->setValue((double)f->getValue());
-			spinner->setValue((double)f->getValue());
-		}
-		else if(template_name == std::string(typeid(double).name()))
-		{
-			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
-			slider->setValue(f->getValue());
-			spinner->setValue(f->getValue());
-		}
+		layout->setSpacing(3);
 
 		FormatFieldWidgetName(field->getObjectName());
 
-		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(setValue(double)));
+		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(ModifyValueAndUpdate(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
 		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+
+		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
+
+		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -61,16 +71,17 @@ namespace dyno
 	{
 		std::string template_name = field()->getTemplateName();
 
+		double v = spinner->getRealValue();
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)value);
+			f->setValue((float)v);
 			f->update();
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(value);
+			f->setValue(v);
 			f->update();
 		}
 

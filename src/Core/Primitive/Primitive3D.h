@@ -14,6 +14,7 @@
 #include "Matrix.h"
 #include "Quat.h"
 
+// Temporary code, to be removed in the  
 namespace px
 {
 	struct Plane3D
@@ -112,7 +113,7 @@ namespace dyno
 	template <typename Real> class TOrientedBox3D;
 	template <typename Real> class TCylinder3D;
 	template <typename Real> class TCone3D;
-
+	template <typename Real> class TGrid3D;
 
 	template<typename Real>
 	class TPoint3D
@@ -439,7 +440,7 @@ namespace dyno
 		DYN_FUNC int intersect(const TSphere3D<Real>& sphere, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TAlignedBox3D<Real>& abox, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const;
-
+		
 		DYN_FUNC Real length() const;
 		DYN_FUNC Real lengthSquared() const;
 
@@ -482,6 +483,7 @@ namespace dyno
 		 */
 		Coord3D normal;
 	};
+
 
 	template<typename Real>
 	class TTriangle3D
@@ -607,46 +609,44 @@ namespace dyno
 	class TCylinder3D
 	{
 	public:
-		typedef  Vector<Real, 2> Coord2D;
 		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCylinder3D();
-		DYN_FUNC TCylinder3D(const Real& radius, const Real& row, const Real &columns, const Real &height, const Real& end_segment_, const Coord3D& center_);
-		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& Cylinder);
-		DYN_FUNC Real volume();
+		DYN_FUNC TCylinder3D(const Coord3D& c, const Real& h, const Real &r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1));
+		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& cylinder);
+		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height * scale[0] * scale[1] * scale[2]; }
 
-		DYN_FUNC bool isValid();
 		Coord3D center;
-		Real radius;
-		Real row;
-		Real columns;
 		Real height;
-		Real end_segment;
+		Real radius;
+
+		Coord3D scale;
+		Quat<Real> rotation;
 	};
 
 	template<typename Real>
 	class TCone3D
 	{
 	public:
-		typedef  Vector<Real, 2> Coord2D;
 		typedef  Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TCone3D();
-		DYN_FUNC TCone3D(const Real& radius, const Real& row, const Real& columns, const Real& height);
-		DYN_FUNC TCone3D(const TCone3D<Real>& Cone);
-		DYN_FUNC Real volume();
+		DYN_FUNC TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1));
+		DYN_FUNC TCone3D(const TCone3D<Real>& cone);
+		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height / Real(3); }
 
-		DYN_FUNC bool isValid();
-
-		Real radius;
-		Real row;
-		Real columns;
+		//Center of the bottom circle
+		Coord3D center;
 		Real height;
+		Real radius;
 
+		Coord3D scale;
+		Quat<Real> rotation;
 	};
 
+	// The centerline is set to align with the Y-axis in default 
 	template<typename Real>
 	class TCapsule3D
 	{
@@ -656,16 +656,25 @@ namespace dyno
 
 	public:
 		DYN_FUNC TCapsule3D();
+		DYN_FUNC TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl);
 		DYN_FUNC TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r);
 		DYN_FUNC TCapsule3D(const TCapsule3D<Real>& capsule);
 
-		DYN_FUNC Real volume();
+		DYN_FUNC Real volume() const;
 
-		DYN_FUNC bool isValid();
-		DYN_FUNC TAlignedBox3D<Real> aabb();
+		DYN_FUNC bool isValid() const;
+		DYN_FUNC TAlignedBox3D<Real> aabb() const;
 
+		// return the two ends
+		DYN_FUNC inline Coord3D startPoint() const { return center - rotation.rotate(halfLength * Coord3D(0, 1, 0)); }
+		DYN_FUNC inline Coord3D endPoint() const { return center + rotation.rotate(halfLength * Coord3D(0, 1, 0)); }
+
+		DYN_FUNC inline TSegment3D<Real> centerline() const { return TSegment3D<Real>(startPoint(), endPoint()); }
+
+		Coord3D center;
+		Quat<Real> rotation;
 		Real radius;
-		TSegment3D<Real> segment;
+		Real halfLength;
 	};
 
 	/**
@@ -686,10 +695,11 @@ namespace dyno
 		DYN_FUNC TTet3D(const TTet3D<Real>& tet);
 
 		DYN_FUNC TTriangle3D<Real> face(const int index) const;
+		DYN_FUNC TSegment3D<Real> edge(const int index) const;
 
 		DYN_FUNC Real volume() const;
 
-		DYN_FUNC bool isValid();
+		DYN_FUNC bool isValid() const;
 
 		//DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
 		DYN_FUNC bool intersect(const TTet3D<Real>& tet, Coord3D& interNorm, Real& interDist, Coord3D& p1, Coord3D& p2, int need_distance = 1) const;
@@ -701,6 +711,10 @@ namespace dyno
 		// http://rodolphe-vaillant.fr/entry/127/find-a-tetrahedron-circumcenter
 		DYN_FUNC TPoint3D<Real> circumcenter() const;
 		DYN_FUNC TPoint3D<Real> barycenter() const;
+
+		DYN_FUNC bool contain(Coord3D p);
+
+		DYN_FUNC Vector<Real, 4> computeBarycentricCoordinates(const Coord3D& p);
 
 		Coord3D v[4];
 	};
@@ -760,6 +774,10 @@ namespace dyno
 		DYN_FUNC TOrientedBox3D(const Coord3D c, const Quat<Real> rot, const Coord3D ext);
 
 		DYN_FUNC TOrientedBox3D(const TOrientedBox3D<Real>& obb);
+
+		DYN_FUNC TPoint3D<Real> vertex(const int i) const;
+		DYN_FUNC TSegment3D<Real> edge(const int i) const;
+		DYN_FUNC TRectangle3D<Real> face(const int i) const;
 
 		DYN_FUNC Real volume();
 
@@ -860,9 +878,7 @@ namespace dyno
 	typedef TOrientedBox3D<double> OrientedBox3D;
 	typedef TCylinder3D<double> Cylinder3D;
 	typedef TCone3D<double> Cone3D;
-
 #endif
-
 }
 
 #include "Primitive3D.inl"

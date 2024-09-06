@@ -88,7 +88,7 @@ namespace dyno
 	DArrayList<int>& HexahedronSet<TDataType>::getVer2Hex()
 	{
 		DArray<uint> counter;
-		counter.resize(this->m_coords.size());
+		counter.resize(this->mCoords.size());
 		counter.reset();
 
 		cuExecute(m_hexahedrons.size(),
@@ -138,7 +138,6 @@ namespace dyno
 		ids[6 * tId + 3] = tId;
 		ids[6 * tId + 4] = tId;
 		ids[6 * tId + 5] = tId;
-
 	}
 
 	template<typename QKey>

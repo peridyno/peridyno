@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 #include <QSlider>
 #include <QLabel>
+#include <QCheckBox>
 #include "PAnimationQSlider.h"
 
 QT_FORWARD_DECLARE_CLASS(QSpinBox)
@@ -24,6 +25,8 @@ namespace dyno
 		~PAnimationWidget();
 
 	signals:
+		void simulationStarted();
+		void simulationStopped();
 
 	public slots:
 		void toggleSimulation();
@@ -31,28 +34,29 @@ namespace dyno
 
 		void simulationFinished();
 
-		void updateSlider();
+		void updateSlider(int frame);
 
 		void buildIconLabel(QLabel* Label, QPixmap* Icon,  QPushButton*btn, int size);
 
-	public:
-		QPushButton*	m_startSim;
-		QPushButton*	m_resetSim;
+		void totalFrameChanged(int num);
 
-		QPixmap* Starticon;
-		QPixmap* Pauseicon;
-		QPixmap* Reseticon;
-		QPixmap* Finishicon;
+		void runForever(int state);
 
-		QLabel* ResetLabel;
-		QLabel* StartLabel;
+	private:
+		QPushButton*	mStartSim;
+		QPushButton*	mResetSim;
+
+		QPixmap* mStartIcon;
+		QPixmap* mPauseIcon;
+		QPixmap* mResetIcon;
+		QPixmap* mFinishIcon;
+
+		QLabel* mResetLabel;
+		QLabel* mStartLabel;
 		
+		QCheckBox* mPersistent;
 		QSpinBox* mTotalFrameSpinbox;
 
-		QScrollBar*	m_sim_scrollbar;
-
-		bool m_sim_started = false;
-		
 		PAnimationQSlider* mFrameSlider;
 
 	private:

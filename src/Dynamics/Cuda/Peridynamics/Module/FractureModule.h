@@ -11,7 +11,7 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef TPair<TDataType> NPair;
+		typedef typename TBond<TDataType> Bond;
 
 		FractureModule();
 		~FractureModule() override {};

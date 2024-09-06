@@ -28,6 +28,9 @@ namespace dyno
 
 namespace Qt
 {
+	QPointF SimStatePos = QPointF(0.0f, 0.0f);
+	QPointF RenStatePos = QPointF(0.0f, 0.0f);
+
 	QtModuleFlowScene::QtModuleFlowScene(std::shared_ptr<QtDataModelRegistry> registry,
 		QObject* parent)
 		: QtFlowScene(registry, parent)
@@ -125,7 +128,7 @@ namespace Qt
 		if (node == nullptr)
 			return;
 
-		auto mlist = node->getModuleList();
+		auto& mlist = node->getModuleList();
 
 		std::map<dyno::ObjectId, QtNode*> moduleMap;
 
@@ -134,7 +137,6 @@ namespace Qt
 			mActivePipeline = node->animationPipeline();
 
 		auto& modules = mActivePipeline->allModules();
-
 
 		auto addModuleWidget = [&](std::shared_ptr<Module> m) -> void
 		{
@@ -155,15 +157,20 @@ namespace Qt
 
 		//Create a dummy module to store all state variables
 		mStates = std::make_shared<dyno::States>();
+
 		auto& fields = node->getAllFields();
 		for (auto field : fields)
 		{
-			if (field->getFieldType() == dyno::FieldTypeEnum::State 
-					|| field->getFieldType() == dyno::FieldTypeEnum::In)
+			if (field->getFieldType() == dyno::FieldTypeEnum::State
+				|| field->getFieldType() == dyno::FieldTypeEnum::In)
 			{
 				mStates->addOutputField(field);
 			}
 		}
+
+
+		QPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;
+		mStates->setBlockCoord(pos.x(), pos.y());
 
 		addModuleWidget(mStates);
 
@@ -236,6 +243,18 @@ namespace Qt
 		{
 			m->setBlockCoord(newLocation.x(), newLocation.y());
 		}
+	}
+
+	void QtModuleFlowScene::showResetPipeline()
+	{
+		auto pipeline = mNode->resetPipeline();
+
+		if (mNode == nullptr || mActivePipeline == pipeline)
+			return;
+
+		mActivePipeline = pipeline;
+
+		updateModuleGraphView();
 	}
 
 	void QtModuleFlowScene::showAnimationPipeline()
@@ -379,7 +398,6 @@ namespace Qt
 			}
 		}
 
-		//DOTO: optimize the position for the dummy module
 		float offsetX = 0.0f;
 		for (size_t l = 0; l < layout.layerNumber(); l++)
 		{
@@ -410,6 +428,14 @@ namespace Qt
 
 			offsetX += (xMax + mDx);
 		}
+
+		if (mActivePipeline == mNode->animationPipeline()) {
+			SimStatePos = QPointF(mStates->bx(), mStates->by());
+		}
+		else {
+			RenStatePos = QPointF(mStates->bx(), mStates->by());
+		}
+			
 
 		qtNodeMapper.clear();
 		moduleMapper.clear();

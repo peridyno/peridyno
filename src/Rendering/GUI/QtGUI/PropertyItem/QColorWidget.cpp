@@ -4,8 +4,13 @@
 #include <QPainter>
 #include <QColorDialog>
 
+//RenderCore
+#include "Color.h"
+
 namespace dyno
 {
+	IMPL_FIELD_WIDGET(Color, QColorWidget)
+
 	QColorButton::QColorButton(QWidget* pParent) :
 		QPushButton(pParent),
 		mMargin(5),
@@ -48,6 +53,7 @@ namespace dyno
 
 		//ColorDialog.setWindowIcon(GetIcon("color--pencil"));
 		colorDialog.setCurrentColor(mColor);
+		colorDialog.adjustSize();
 		colorDialog.exec();
 
 		disconnect(&colorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
@@ -107,9 +113,13 @@ namespace dyno
 		this->setLayout(layout);
 
 		QLabel* name = new QLabel();
+		QString str = FormatFieldWidgetName(field->getObjectName());
 		name->setFixedSize(100, 18);
-		name->setText(FormatFieldWidgetName(field->getObjectName()));
-		name->setWordWrap(true);
+		QFontMetrics fontMetrics(name->font());
+		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
+		name->setText(elide);
+		//Set label tips
+		name->setToolTip(str);
 
 		spinner1 = new QSpinBox;
 		spinner1->setMinimumWidth(30);

@@ -16,7 +16,7 @@ namespace dyno
 		HeightField();
 		~HeightField() override;
 
-		void copyFrom(HeightField<TDataType>& pointSet);
+		void copyFrom(HeightField<TDataType>& hf);
 
 		void scale(Real s);
 		void scale(Coord s);
@@ -40,15 +40,15 @@ namespace dyno
 
 		DArray2D<Coord>& getDisplacement() { return mDisplacement; }
 
+		DArray2D<Real>& calculateHeightField();
+
 	protected:
 		Coord mOrigin;
-
-// 		Real mDx;
-// 		Real mDz;
 
 		Real mGridSpacing;
 
 		DArray2D<Coord> mDisplacement;
+		DArray2D<Real> mHeights;
 	};
 }
 

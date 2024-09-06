@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Topology/NeighborPointQuery.h"
+#include "Collision/NeighborPointQuery.h"
 
 using namespace dyno;
 

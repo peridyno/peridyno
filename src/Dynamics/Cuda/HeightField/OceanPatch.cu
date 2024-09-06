@@ -4,79 +4,10 @@
 
 #include <math_constants.h>
 
-namespace dyno 
+#include <fstream>
+
+namespace dyno
 {
-    template<typename Real>
-    __device__  Complex<Real> complex_exp(Real arg)
-    {
-        return Complex<Real>(cosf(arg), sinf(arg));
-    }
-
-    // generate wave heightfield at time t based on initial heightfield and dispersion relationship
-    template <typename Real, typename Complex>
-    __global__ void OP_GenerateSpectrumKernel(
-        DArray2D<Complex> h0,
-        DArray2D<Complex> ht,
-        unsigned int    in_width,
-        unsigned int    out_width,
-        unsigned int    out_height,
-        Real           t,
-        Real           patchSize)
-    {
-        unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
-        unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
-        unsigned int in_index = y * in_width + x;
-        unsigned int in_mindex = (out_height - y) * in_width + (out_width - x);  // mirrored
-        unsigned int out_index = y * out_width + x;
-
-        // calculate wave vector
-        Complex k((-(int)out_width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize), (-(int)out_width / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize));
-
-        // calculate dispersion w(k)
-        Real k_len = k.normSquared();
-        Real w = sqrtf(9.81f * k_len);
-
-        if ((x < out_width) && (y < out_height))
-        {
-            Complex h0_k = h0[in_index];
-            Complex h0_mk = h0[in_mindex];
-
-            // output frequency-space complex values
-            ht[out_index] = h0_k * complex_exp(w * t) + h0_mk.conjugate() * complex_exp(-w * t);
-        }
-    }
-
-    template <typename Real, typename Complex>
-    __global__ void OP_GenerateDispalcementKernel(
-        DArray2D<Complex>      ht,
-        DArray2D<Complex>      Dxt,
-        DArray2D<Complex>      Dzt,
-        unsigned int width,
-        unsigned int height,
-        Real patchSize)
-    {
-        unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
-        unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
-        unsigned int id = y * width + x;
-
-        // calculate wave vector
-        Real kx = (-(int)width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
-        Real ky = (-(int)height / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
-        Real k_squared = kx * kx + ky * ky;
-        if (k_squared == 0.0f)
-        {
-            k_squared = 1.0f;
-        }
-        kx = kx / sqrtf(k_squared);
-        ky = ky / sqrtf(k_squared);
-
-        Complex ht_ij = ht(x, y);
-        Complex idoth = Complex(-ht_ij.imagPart(), ht_ij.realPart());
-
-        Dxt(x, y) = kx * idoth;
-        Dzt(x, y) = ky * idoth;
-    }
-
     template<typename TDataType>
     OceanPatch<TDataType>::OceanPatch()
         : Node()
@@ -100,6 +31,10 @@ namespace dyno
         mSpectrumHeight = this->varResolution()->getData() + 4;
 
         this->varWindDirection()->setRange(0, 360);
+
+        auto callback = std::make_shared<FCallBackFunc>(std::bind(&OceanPatch<TDataType>::resetWindType, this));
+
+        this->varWindType()->attach(callback);
     }
 
     template<typename TDataType>
@@ -111,43 +46,112 @@ namespace dyno
         mDzt.clear();
     }
 
+	template<typename Real>
+	__device__  Complex<Real> complex_exp(Real arg)
+	{
+		return Complex<Real>(cosf(arg), sinf(arg));
+	}
+
+	// generate wave heightfield at time t based on initial heightfield and dispersion relationship
+	template <typename Real, typename Complex>
+	__global__ void OP_GenerateSpectrumKernel(
+		DArray2D<Complex> h0,
+		DArray2D<Complex> ht,
+		unsigned int    in_width,
+		unsigned int    out_width,
+		unsigned int    out_height,
+		Real           t,
+		Real           patchSize)
+	{
+		unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+		unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
+		unsigned int in_index = y * in_width + x;
+		unsigned int in_mindex = (out_height - y) * in_width + (out_width - x);  // mirrored
+		unsigned int out_index = y * out_width + x;
+
+		// calculate wave vector
+		Complex k((-(int)out_width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize), (-(int)out_width / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize));
+
+		// calculate dispersion w(k)
+		Real k_len = k.normSquared();
+		Real w = sqrtf(9.81f * k_len);
+
+		if ((x < out_width) && (y < out_height))
+		{
+			Complex h0_k = h0[in_index];
+			Complex h0_mk = h0[in_mindex];
+
+			// output frequency-space complex values
+			ht[out_index] = h0_k * complex_exp(w * t) + h0_mk.conjugate() * complex_exp(-w * t);
+		}
+	}
+
+	template <typename Real, typename Complex>
+	__global__ void OP_GenerateDispalcementKernel(
+		DArray2D<Complex>      ht,
+		DArray2D<Complex>      Dxt,
+		DArray2D<Complex>      Dzt,
+		unsigned int width,
+		unsigned int height,
+		Real patchSize)
+	{
+		unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+		unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
+		unsigned int id = y * width + x;
+
+		// calculate wave vector
+		Real kx = (-(int)width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
+		Real ky = (-(int)height / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
+		Real k_squared = kx * kx + ky * ky;
+		if (k_squared == 0.0f)
+		{
+			k_squared = 1.0f;
+		}
+		kx = kx / sqrtf(k_squared);
+		ky = ky / sqrtf(k_squared);
+
+		Complex ht_ij = ht(x, y);
+		Complex idoth = Complex(-ht_ij.imagPart(), ht_ij.realPart());
+
+		Dxt(x, y) = kx * idoth;
+		Dzt(x, y) = ky * idoth;
+	}
+
     template<typename TDataType>
     void OceanPatch<TDataType>::resetWindType()
     {
-        int windType = this->varWindType()->getData();
-        mWindSpeed = mParams[windType].windSpeed;
-        mAmplitude = mParams[windType].A;
-        mChoppiness = mParams[windType].choppiness;
-        mGlobalShift = mParams[windType].global;
+        int windType = this->varWindType()->getValue();
+        this->varAmplitude()->setValue(mParams[windType].A);
+        this->varWindSpeed()->setValue(mParams[windType].windSpeed);
+        this->varChoppiness()->setValue(mParams[windType].choppiness);
+        this->varGlobalShift()->setValue(mParams[windType].global);
     }
 
     template<typename TDataType>
     void OceanPatch<TDataType>::resetStates()
     {
-		resetWindType();
+        uint res = this->varResolution()->getValue();
 
-        uint res = this->varResolution()->getData();
+        cufftPlan2d(&fftPlan, res, res, CUFFT_C2C);
 
-		cufftPlan2d(&fftPlan, res, res, CUFFT_C2C);
-
-		int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Complex);
-		mH0.resize(mSpectrumWidth, mSpectrumHeight);
+        int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Complex);
+        mH0.resize(mSpectrumWidth, mSpectrumHeight);
 
         Complex* host_h0 = (Complex*)malloc(spectrumSize);
-		generateH0(host_h0);
+        generateH0(host_h0);
 
-		cuSafeCall(cudaMemcpy(mH0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
+        cuSafeCall(cudaMemcpy(mH0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
-		mHt.resize(res, res);
-		mDxt.resize(res, res);
-		mDzt.resize(res, res);
-		this->stateDisplacement()->resize(res, res);
+        mHt.resize(res, res);
+        mDxt.resize(res, res);
+        mDzt.resize(res, res);
+        this->stateDisplacement()->resize(res, res);
 
-		auto topo = this->stateHeightField()->getDataPtr();
-		Real h = this->varPatchSize()->getData() / res;
-		topo->setExtents(res, res);
-		topo->setGridSpacing(h);
-		topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
+        auto topo = this->stateHeightField()->getDataPtr();
+        Real h = this->varPatchSize()->getValue() / res;
+        topo->setExtents(res, res);
+        topo->setGridSpacing(h);
+        topo->setOrigin(Vec3f(-0.5 * h * topo->width(), 0, -0.5 * h * topo->height()));
 
         this->update();
     }
@@ -155,58 +159,62 @@ namespace dyno
     template<typename TDataType>
     void OceanPatch<TDataType>::updateStates()
     {
-        Real timeScaled = this->varTimeScale()->getData() * this->stateElapsedTime()->getData();
+        Real timeScaled = this->varTimeScale()->getValue() * this->stateElapsedTime()->getValue();
 
-		uint res = this->varResolution()->getData();
+        uint res = this->varResolution()->getValue();
 
-		cuExecute2D(make_uint2(res, res),
-			OP_GenerateSpectrumKernel,
-			mH0,
-			mHt,
-			mSpectrumWidth,
-			res,
-			res,
+        cuExecute2D(make_uint2(res, res),
+            OP_GenerateSpectrumKernel,
+            mH0,
+            mHt,
+            mSpectrumWidth,
+            res,
+            res,
             timeScaled,
-			this->varPatchSize()->getData());
+            this->varPatchSize()->getData());
 
-		cuExecute2D(make_uint2(res, res),
-			OP_GenerateDispalcementKernel,
-			mHt,
-			mDxt,
-			mDzt,
-			res,
-			res,
-			this->varPatchSize()->getData());
+        cuExecute2D(make_uint2(res, res),
+            OP_GenerateDispalcementKernel,
+            mHt,
+            mDxt,
+            mDzt,
+            res,
+            res,
+            this->varPatchSize()->getData());
 
-		cufftExecC2C(fftPlan, (float2*)mHt.begin(), (float2*)mHt.begin(), CUFFT_INVERSE);
-		cufftExecC2C(fftPlan, (float2*)mDxt.begin(), (float2*)mDxt.begin(), CUFFT_INVERSE);
-		cufftExecC2C(fftPlan, (float2*)mDzt.begin(), (float2*)mDzt.begin(), CUFFT_INVERSE);
+        cufftExecC2C(fftPlan, (float2*)mHt.begin(), (float2*)mHt.begin(), CUFFT_INVERSE);
+        cufftExecC2C(fftPlan, (float2*)mDxt.begin(), (float2*)mDxt.begin(), CUFFT_INVERSE);
+        cufftExecC2C(fftPlan, (float2*)mDzt.begin(), (float2*)mDzt.begin(), CUFFT_INVERSE);
 
-		cuExecute2D(make_uint2(res, res),
-			O_UpdateDisplacement,
-			this->stateDisplacement()->getData(),
-			mHt,
-			mDxt,
-			mDzt,
-			res);
+        cuExecute2D(make_uint2(res, res),
+            O_UpdateDisplacement,
+            this->stateDisplacement()->getData(),
+            mHt,
+            mDxt,
+            mDzt,
+            res);
     }
 
-	template<typename TDataType>
-	void OceanPatch<TDataType>::postUpdateStates()
-	{
-		auto topo = this->stateHeightField()->getDataPtr();
+    template<typename TDataType>
+    void OceanPatch<TDataType>::postUpdateStates()
+    {
+        auto choppiness = this->varChoppiness()->getValue();
 
-		auto& shifts = topo->getDisplacement();
+        auto topo = this->stateHeightField()->getDataPtr();
 
-		uint2 extent;
-		extent.x = shifts.nx();
-		extent.y = shifts.ny();
-		cuExecute2D(extent,
-			O_UpdateTopology,
-			shifts,
-			this->stateDisplacement()->getData(),
-			mChoppiness);
-	}
+        auto& shifts = topo->getDisplacement();
+
+        uint2 extent;
+        extent.x = shifts.nx();
+        extent.y = shifts.ny();
+        cuExecute2D(extent,
+            CW_UpdateHeightDisp,
+            shifts,
+            this->stateDisplacement()->getData(),
+            choppiness);
+
+       // topo->rasterize();
+    }
 
     template<typename Coord, typename Complex>
     __global__ void O_UpdateDisplacement(
@@ -230,7 +238,7 @@ namespace dyno
     }
 
     template <typename Coord>
-    __global__ void O_UpdateTopology(
+    __global__ void CW_UpdateHeightDisp(
         DArray2D<Coord> displacement,
         DArray2D<Coord> dis,
         float choppiness)
@@ -253,7 +261,9 @@ namespace dyno
     template<typename TDataType>
     void OceanPatch<TDataType>::generateH0(Complex* h0)
     {
-        Real windDir = M_PI * this->varWindDirection()->getData() / Real(180);
+        Real windDir = M_PI * this->varWindDirection()->getValue() / Real(180);
+        Real windSpeed = this->varWindSpeed()->getValue();
+        Real amplitude = this->varAmplitude()->getValue();
 
         auto phillips = [=](Real Kx, Real Ky, Real Vdir, Real V, Real A, Real dir_depend) -> Real
         {
@@ -303,7 +313,7 @@ namespace dyno
                 Real kx = (-(int)res / 2.0f + x) * (2.0f * CUDART_PI_F / this->varPatchSize()->getData());
                 Real ky = (-(int)res / 2.0f + y) * (2.0f * CUDART_PI_F / this->varPatchSize()->getData());
 
-                Real P = std::sqrt(phillips(kx, ky, windDir, mWindSpeed, mAmplitude, mDirDepend));
+                Real P = std::sqrt(phillips(kx, ky, windDir, windSpeed, amplitude, mDirDepend));
 
                 if (std::abs(kx) < EPSILON && std::abs(ky) == EPSILON)
                 {
@@ -317,7 +327,7 @@ namespace dyno
                 Real h0_im = Ei * P * CUDART_SQRT_HALF_F;
 
                 int i = y * mSpectrumWidth + x;
-				h0[i] = Complex(h0_re, h0_im);
+                h0[i] = Complex(h0_re, h0_im);
             }
         }
     }

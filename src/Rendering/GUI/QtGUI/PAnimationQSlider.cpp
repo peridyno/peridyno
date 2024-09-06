@@ -118,7 +118,7 @@ namespace dyno
 
 				int tickNum = minimum() + (tickInterval() * i);
 
-				auto tickX = (((rect.width() - 10.0f) / (maximum() - minimum()))* tickInterval() * i) - (fontMetrics.width(QString::number(tickNum)) / 2);
+				auto tickX = (((rect.width() - 10.0f) / (maximum() - minimum()))* tickInterval() * i) - (fontMetrics.horizontalAdvance(QString::number(tickNum)) / 2);
 
 				auto tickY = (rect.height() + fontHeight) / 2;
 
@@ -155,7 +155,7 @@ namespace dyno
 	void PAnimationQSlider::mouseMoveEvent(QMouseEvent* event)
 	{
 		QFontMetrics fontMetrics = QFontMetrics(this->font());
-		int labelWidth = fontMetrics.width(QString::number(this->value()))+fontMetrics.width("0");                // 背景标签的宽度为当前帧数字符串宽度加1个字符的宽度
+		int labelWidth = fontMetrics.horizontalAdvance(QString::number(this->value()))+fontMetrics.horizontalAdvance("0");                // 背景标签的宽度为当前帧数字符串宽度加1个字符的宽度
 
 		m_displayLabel->move(12 + (this->width() - 10) * (this->value() - this->minimum()) / (this->maximum() - this->minimum()), 2);  //向下偏移2个单位以对齐slider的sub-page
 		m_displayLabel->setText(QString::number(this->value()));

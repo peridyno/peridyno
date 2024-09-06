@@ -103,11 +103,11 @@ namespace dyno
 			x[0] = -b / (2 * a);
 			return 0;
 		}
-		T q = -(b + sgn(b) * sqrt(d)) / 2;
+		T q = -(b + sgn(b) * glm::sqrt(d)) / 2;
 		int i = 0;
-		if (abs(a) > 1e-12 * abs(q))
+		if (glm::abs(a) > 1e-12 * glm::abs(q))
 			x[i++] = q / a;
-		if (abs(q) > 1e-12 * abs(c))
+		if (glm::abs(q) > 1e-12 * glm::abs(c))
 			x[i++] = c / q;
 		if (i == 2 && x[0] > x[1])
 			fswap(x[0], x[1]);
@@ -121,7 +121,7 @@ namespace dyno
 			// quadratic approximation around x0, assuming y' = 0
 			T y0 = d + x0 * (c + x0 * (b + x0 * a)),
 				ddy0 = 2 * b + x0 * (6 * a);
-			x0 += init_dir * sqrt(abs(2 * y0 / ddy0));
+			x0 += init_dir * glm::sqrt(glm::abs(2 * y0 / ddy0));
 		}
 		for (int iter = 0; iter < 100; iter++) {
 			T y = d + x0 * (c + x0 * (b + x0 * a));
@@ -129,7 +129,7 @@ namespace dyno
 			if (dy == 0)
 				return x0;
 			T x1 = x0 - y / dy;
-			if (abs(x0 - x1) < 1e-6)
+			if (glm::abs(x0 - x1) < 1e-6)
 				return x0;
 			x0 = x1;
 		}

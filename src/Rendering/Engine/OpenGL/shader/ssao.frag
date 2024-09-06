@@ -12,8 +12,8 @@ layout(binding=3) uniform sampler2D texture3;
 // SSAO noise tex
 layout(binding=4) uniform sampler2D texNoise;
 
-in  vec2 texCoord;
-out vec3 FragOut;
+layout(location=0) in  vec2 texCoord;
+layout(location=0) out vec3 FragOut;
 
 layout (std140, binding=0) uniform TransformUniformBlock
 {

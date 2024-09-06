@@ -64,6 +64,15 @@ namespace dyno {
 			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getTopField());
 			std::shared_ptr<T> data = std::static_pointer_cast<T>(ins->objectPointer());
 
+			this->tick();
+
+			return data;
+		}
+
+		std::shared_ptr<T> constDataPtr() {
+			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getTopField());
+			std::shared_ptr<T> data = std::static_pointer_cast<T>(ins->objectPointer());
+
 			return data;
 		}
 
@@ -71,17 +80,22 @@ namespace dyno {
 		{
 			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getTopField());
 			ins->setObjectPointer(sPtr);
+
+			this->tick();
 		}
 
 		std::shared_ptr<T> allocate() {
 			if (mData == nullptr) {
 				mData = std::make_shared<T>();
 			}
+
+			this->tick();
+
 			return mData;
 		}
 
 		bool isEmpty() override {
-			return this->getDataPtr() == nullptr;
+			return this->constDataPtr() == nullptr;
 		}
 
 		bool connect(FBase* dst) override {
@@ -124,7 +138,7 @@ namespace dyno {
 		}
 
 		bool canBeConnectedBy(InstanceBase* ins) final {
-			std::shared_ptr<Object> dataPtr = ins->isEmpty() ? ins->standardObjectPointer() : ins->objectPointer();
+			std::shared_ptr<Object> dataPtr = ins->standardObjectPointer();
 			auto dPtr = std::dynamic_pointer_cast<T>(dataPtr);
 
 			return dPtr == nullptr ? false : true;

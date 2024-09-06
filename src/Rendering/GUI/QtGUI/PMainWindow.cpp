@@ -54,11 +54,8 @@
 #include "PAnimationWidget.h"
 
 #include "PIODockWidget.h"
-#include "PLogWidget.h"
 #include "PConsoleWidget.h"
-//#include "PSceneGraphWidget.h"
 #include "PPropertyWidget.h"
-//#include "PModuleListWidget.h"
 #include "PSimulationThread.h"
 #include "PModuleEditor.h"
 
@@ -86,7 +83,11 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QDebug>
-#include <QtWidgets/QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#else
+	#include <QtWidgets/QOpenGLWidget>
+#endif
 #include <QtSvg/QSvgRenderer>
 #include <QHBoxLayout>
 #include <QDialog>
@@ -96,6 +97,7 @@
 #include "NodeEditor/QtNodeWidget.h"
 
 #include "nodes/QDataModelRegistry"
+#include "nodes/QNode"
 #include "ToolBar/TabToolbar.h"
 #include "ToolBar/Page.h"
 #include "ToolBar/Group.h"
@@ -107,6 +109,9 @@
 
 #include "PMainToolBar.h"
 #include "PModuleEditorToolBar.h"
+#include "PSettingEditor.h"
+#include "SceneGraphFactory.h"
+
 
 namespace dyno
 {
@@ -116,16 +121,14 @@ namespace dyno
 		QtApp* app,
 		QWidget *parent, Qt::WindowFlags flags)
 		: QMainWindow(parent, flags),
-		m_statusBar(nullptr),
-		m_propertyWidget(nullptr),
-		m_animationWidget(nullptr)
+		mStatusBar(nullptr),
+		mPropertyWidget(nullptr),
+		mAnimationWidget(nullptr)
 	{
 		setObjectName("MainWindow");
 		setWindowTitle(QString("PeriDyno Studio ") + QString::number(PERIDYNO_VERSION_MAJOR) + QString(".") + QString::number(PERIDYNO_VERSION_MINOR) + QString(".") + QString::number(PERIDYNO_VERSION_PATCH) + QString(":  An AI-targeted physical simulation platform"));
 		setWindowIcon(QIcon(QString::fromStdString(getAssetPath() + "logo/logo5.png")));
 
-
-		mOpenGLWidget = new POpenGLWidget();
 		setCentralView();
 
 
@@ -135,16 +138,23 @@ namespace dyno
 
 		setupToolBar();
 
+		setupSettingEditor();
+
 		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
-		//connect(mToolBar, &PMainToolBar::nodeCreated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
-		//connect(m_propertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
+		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
+		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
+
 		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
+		
+		connect(mToolBar, &PMainToolBar::settingTriggered, this, &PMainWindow::showSettingEditor);
+
+		connect(this, &PMainWindow::updateSetting, mSettingEditor->getSettingWidget(), &PSettingWidget::updateData);
 
 		statusBar()->showMessage(tr("Status Bar"));
 	}
@@ -178,47 +188,19 @@ namespace dyno
 		centralWidget->setLayout(mainLayout);
 
 		//Setup views
-		
 		QTabWidget* tabWidget = new QTabWidget();
 		tabWidget->setObjectName(QStringLiteral("tabWidget"));
 		tabWidget->setGeometry(QRect(140, 60, 361, 241));
 		
-// 		//VTK-based visualization widget
-// 		m_vtkOpenglWidget = new PVTKOpenGLWidget();
-// 		m_vtkOpenglWidget->setObjectName(QStringLiteral("tabView"));
-// 		m_vtkOpenglWidget->layout()->setMargin(0);
-// 		tabWidget->addTab(m_vtkOpenglWidget, QString());
-// 		tabWidget->setTabText(tabWidget->indexOf(m_vtkOpenglWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
-// 
-// 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished()), m_vtkOpenglWidget, SLOT(prepareRenderingContex()));
-// 		mainLayout->addWidget(tabWidget, 0, 0);
-
-
-// 		m_moduleFlowView = new PModuleFlowWidget();
-// 		m_moduleFlowView->setObjectName(QStringLiteral("tabEditor"));
-// 		tabWidget->addTab(m_moduleFlowView, QString());
-// 		tabWidget->setTabText(tabWidget->indexOf(m_moduleFlowView), QApplication::translate("MainWindow", "Module Editor", Q_NULLPTR));
-
-		//OpenGL-based visualization widget
-// 		mOpenGLWidget->setObjectName(QStringLiteral("tabView"));
-// 		mOpenGLWidget->layout()->setMargin(0);
-// 		tabWidget->addTab(mOpenGLWidget, QString());
-// 		tabWidget->setTabText(tabWidget->indexOf(mOpenGLWidget), QApplication::translate("MainWindow", "View", Q_NULLPTR));
-		
+		mOpenGLWidget = new POpenGLWidget(this);
+		mOpenGLWidget->setContentsMargins(0, 0, 0, 0);
 		mainLayout->addWidget(mOpenGLWidget, 1);
 		
 		//Setup animation widget
-		m_animationWidget = new PAnimationWidget(this);
-		m_animationWidget->layout()->setMargin(0);
+		mAnimationWidget = new PAnimationWidget(this);
+		mAnimationWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
- 	//	QWidget* viewWidget = new QWidget();
- 	//	QHBoxLayout* hLayout = new QHBoxLayout();
-	//	viewWidget->setLayout(hLayout);
- 	//	hLayout->addWidget(m_vtkOpenglWidget, 1);
- 	//	hLayout->addWidget(m_flowView, 1);
-
- 		mainLayout->addWidget(m_animationWidget, 0);
-		
+ 		mainLayout->addWidget(mAnimationWidget, 0);
 	}
 
 	void PMainWindow::showAboutMsg()
@@ -252,41 +234,9 @@ namespace dyno
 
 	void PMainWindow::setupStatusBar()
 	{
-		m_statusBar = new PStatusBar(this);
-		setStatusBar(m_statusBar);
+		mStatusBar = new PStatusBar(this);
+		setStatusBar(mStatusBar);
 	}
-
-/*	void PMainWindow::setupMenuBar()
-	{
-		QMenu *menu = menuBar()->addMenu(tr("&File"));
-
-		menu->addAction(tr("New ..."), this, &PMainWindow::newScene);
-		menu->addAction(tr("Load ..."), this, &PMainWindow::loadScene);
-		menu->addAction(tr("Save ..."), this, &PMainWindow::saveScene);
-
-		menu->addSeparator();
-		menu->addAction(tr("&Quit"), this, &QWidget::close);
-
-		mainWindowMenu = menuBar()->addMenu(tr("&View"));
-		mainWindowMenu->addAction(tr("FullScreen"), this, &PMainWindow::fullScreen);
-
-#ifdef Q_OS_OSX
-		toolBarMenu->addSeparator();
-
-		action = toolBarMenu->addAction(tr("Unified"));
-		action->setCheckable(true);
-		action->setChecked(unifiedTitleAndToolBarOnMac());
-		connect(action, &QAction::toggled, this, &QMainWindow::setUnifiedTitleAndToolBarOnMac);
-#endif
-
-		windowMenu = menuBar()->addMenu(tr("&Window"));
-		for (int i = 0; i < toolBars.count(); ++i)
-			windowMenu->addMenu(toolBars.at(i)->toolbarMenu());
-
-		aboutMenu = menuBar()->addMenu(tr("&Help"));
-		aboutMenu->addAction(tr("Show Help ..."), this, &PMainWindow::showHelp);
-		aboutMenu->addAction(tr("About ..."), this, &PMainWindow::showAbout);
-	}*/
 
 	void PMainWindow::saveScene()
 	{
@@ -310,29 +260,29 @@ namespace dyno
 		return;
 	}
 
-	void PMainWindow::showModuleEditor()
+	void PMainWindow::showModuleEditor(Qt::QtNode& s)
 	{
-		auto nodes = mNodeFlowView->flowScene()->selectedNodes();
 		Qt::QtNodeWidget* clickedNode = nullptr;
-		if (nodes.size() > 0) {
-			clickedNode = dynamic_cast<Qt::QtNodeWidget*>(nodes[0]->nodeDataModel());
-		}
+
+		clickedNode = dynamic_cast<Qt::QtNodeWidget*>(s.nodeDataModel());
 
 		if (clickedNode == nullptr)
 			return;
-		
-		PModuleEditor* moduelEditor = new PModuleEditor(clickedNode);
-		moduelEditor->setWindowTitle("Module Flow Editor");
-		moduelEditor->resize(1024, 600);
-		moduelEditor->setMinimumSize(512, 360);
 
-		moduelEditor->setWindowModality(Qt::ApplicationModal);
-		moduelEditor->setAttribute(Qt::WA_ShowModal, true);
-		moduelEditor->setAttribute(Qt::WA_DeleteOnClose, true);
-		moduelEditor->show();
+		QString caption = s.nodeDataModel()->caption();
 
-		connect(moduelEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
-		connect(moduelEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
+		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode);
+		moduleEditor->setWindowTitle("Module Editor -- " + caption);
+		moduleEditor->resize(1024, 600);
+		moduleEditor->setMinimumSize(512, 360);
+
+		moduleEditor->setWindowModality(Qt::WindowModal);
+		moduleEditor->setAttribute(Qt::WA_ShowModal, true);
+		moduleEditor->setAttribute(Qt::WA_DeleteOnClose, true);
+		moduleEditor->show();
+
+		connect(moduleEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduleEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 	}
 
 	void PMainWindow::showMessage()
@@ -381,8 +331,8 @@ namespace dyno
 		propertyDockWidget->setWindowIcon(qtIcon);
 		propertyDockWidget->setMinimumWidth(580);
 		addDockWidget(sets[2].area, propertyDockWidget);
-		m_propertyWidget = new PPropertyWidget();
-		propertyDockWidget->setWidget(m_propertyWidget);
+		mPropertyWidget = new PPropertyWidget();
+		propertyDockWidget->setWidget(mPropertyWidget);
 		
 		mIoDockerWidget = new PIODockWidget(this, Qt::WindowFlags(sets[1].flags));
 		mIoDockerWidget->setWindowIcon(qtIcon);
@@ -392,16 +342,16 @@ namespace dyno
 		setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showNodeProperty);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, mPropertyWidget, &PPropertyWidget::showProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
 
-		connect(m_propertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::fieldUpdated);
+		connect(mPropertyWidget, &PPropertyWidget::stateFieldUpdated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::fieldUpdated);
 
 		// between OpenGL and property widget
 		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
-			m_propertyWidget->showProperty(node);
+			mPropertyWidget->showNodeProperty(node);
 			// TODO: high light selected node in node editor
 			auto qNodes = mNodeFlowView->flowScene()->allNodes();
 			for (auto qNode : qNodes)
@@ -425,14 +375,44 @@ namespace dyno
 					mOpenGLWidget->update();
 				}
 			});
+
+		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()
+			{
+				mOpenGLWidget->setFocus();
+			});
+
+		connect(mAnimationWidget, &PAnimationWidget::simulationStopped, [=]()
+			{
+			});
 	}
 
 	void PMainWindow::mousePressEvent(QMouseEvent *event)
 	{
-		// 	QLichtThread* m_thread = new QLichtThread(openGLWidget->winId());
-		// 	m_thread->start();
-
-		
 	}
+
+	void PMainWindow::setupSettingEditor()
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+
+		mSettingEditor = new PSettingEditor(nullptr);
+		mSettingEditor->setRenderEngine(mOpenGLWidget->getRenderEngine());
+
+	}
+
+	void PMainWindow::showSettingEditor() 
+	{	
+		if (mSettingEditor == nullptr)
+			return;
+
+		updateSettingData();
+		mSettingEditor->show();
+	}
+
+	void PMainWindow::updateSettingData() 
+	{
+		emit updateSetting();
+	}
+
+
 
 }

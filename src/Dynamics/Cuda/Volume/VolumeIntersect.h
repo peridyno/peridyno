@@ -13,7 +13,7 @@ namespace dyno {
 		VolumeIntersect();
 		~VolumeIntersect() override;
 
-		void updateVolume() override {};
+		//void updateVolume() override {};
 
 	public:
 		DEF_NODE_PORT(Volume<TDataType>, A, "");

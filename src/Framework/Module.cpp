@@ -1,5 +1,6 @@
 #include "Module.h"
 #include "Node.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {
@@ -59,6 +60,7 @@ namespace dyno
 		}
 
 		if (this->requireUpdate()) {
+
 			//pre processing
 			this->preprocess();
 
@@ -75,7 +77,7 @@ namespace dyno
 			}
 
 			//reset input fields
-			for(auto f_in : fields_input)
+			for (auto f_in : fields_input)
 			{
 				f_in->tack();
 			}
@@ -106,10 +108,15 @@ namespace dyno
 		{
 			if (!f_in->isOptional() && f_in->isEmpty())
 			{
-				std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
-					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
+				Node* par = this->getParentNode();
+				if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
+				{
+					std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
+						std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-				std::cout << errMsg << std::endl;
+					Log::sendMessage(Log::Error, errMsg);
+				}
+
 				return false;
 			}
 		}
@@ -124,10 +131,14 @@ namespace dyno
 		{
 			if (f_out->isEmpty())
 			{
-				std::string errMsg = std::string("The output field ") + f_out->getObjectName() +
-					std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not prepared!");
+				Node* par = this->getParentNode();
+				if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
+				{
+					std::string errMsg = std::string("The output field ") + f_out->getObjectName() +
+						std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not prepared!");
 
-				Log::sendMessage(Log::Error, errMsg);
+					Log::sendMessage(Log::Error, errMsg);
+				}
 				return false;
 			}
 		}
@@ -152,7 +163,7 @@ namespace dyno
 
 	bool Module::requireUpdate()
 	{
-		if (this->varForceUpdate()->getData())
+		if (this->varForceUpdate()->getValue())
 		{
 			return true;
 		}
@@ -179,7 +190,7 @@ namespace dyno
 		m_module_name = name;
 	}
 
-	void Module::setParent(Node* node)
+	void Module::setParentNode(Node* node)
 	{
 		m_node = node;
 	}
@@ -187,6 +198,24 @@ namespace dyno
 	std::string Module::getName()
 	{
 		return m_module_name;
+	}
+
+	Node* Module::getParentNode()
+	{
+		if (m_node == NULL) {
+			Log::sendMessage(Log::Error, "Parent node is not set!");
+		}
+
+		return m_node;
+	}
+
+	dyno::SceneGraph* Module::getSceneGraph()
+	{
+		auto node = this->getParentNode();
+
+		if (node == NULL) return NULL;
+
+		return node->getSceneGraph();
 	}
 
 	void Module::setUpdateAlways(bool b)
@@ -221,6 +250,10 @@ namespace dyno
 		switch (field->getFieldType())
 		{
 		case FieldTypeEnum::In:
+			ret = addInputField(field);
+			break;
+
+		case FieldTypeEnum::IO:
 			ret = addInputField(field);
 			break;
 

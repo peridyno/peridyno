@@ -1,16 +1,31 @@
 #include "PSimulationThread.h"
 
+#include <memory>
+#include <mutex>
+#include <utility>
+
+#include "Node.h"
 #include "SceneGraph.h"
 #include "SceneGraphFactory.h"
 
+#include "Action.h"
+
 #include "NodeEditor/QtNodeWidget.h"
 
+using namespace std::chrono_literals;
 namespace dyno
 {
 	QWaitCondition m_wait_condition;
 
 	PSimulationThread::PSimulationThread()
-		: mTotalFrame(1000)
+		: 
+		mTotalFrame(1000),
+		mReset(false),
+		mPaused(true),
+		mRunning(true),
+		mFinished(false),
+		mUpdatingGraphicsContext(false),
+		mTimeOut(10000)
 	{
 	}
 
@@ -28,16 +43,18 @@ namespace dyno
 	void PSimulationThread::resume()
 	{
 		mPaused = false;
+		notify();
 	}
 
 	void PSimulationThread::stop()
 	{
 		mRunning = false;
+		notify();
 	}
 
 	void PSimulationThread::createNewScene()
 	{
-		if (mMutex.tryLock(mTimeOut))
+		if (mMutex.try_lock_for(mTimeOut))
 		{
 			SceneGraphFactory::instance()->createNewScene();
 			this->reset(0);
@@ -52,9 +69,10 @@ namespace dyno
 		}
 	}
 
+
 	void PSimulationThread::createNewScene(std::shared_ptr<SceneGraph> scn)
 	{
-		if (mMutex.tryLock(mTimeOut))
+		if (mMutex.try_lock_for(mTimeOut))
 		{
 			SceneGraphFactory::instance()->pushScene(scn);
 			scn->reset();
@@ -72,7 +90,7 @@ namespace dyno
 
 	void PSimulationThread::closeCurrentScene()
 	{
-		if (mMutex.tryLock(mTimeOut))
+		if (mMutex.try_lock_for(mTimeOut))
 		{
 			SceneGraphFactory::instance()->popScene();
 			this->reset(0);
@@ -89,7 +107,7 @@ namespace dyno
 
 	void PSimulationThread::closeAllScenes()
 	{
-		if (mMutex.tryLock(mTimeOut))
+		if (mMutex.try_lock_for(mTimeOut))
 		{
 			SceneGraphFactory::instance()->popAllScenes();
 			this->reset(0);
@@ -104,52 +122,61 @@ namespace dyno
 		}
 	}
 
+	void PSimulationThread::notify() {
+		mCond.notify_one();
+	}
+
 	void PSimulationThread::run()
 	{
-		while (mRunning)
+		for(;;)
 		{
-			mMutex.lock();
-
+			std::unique_lock<decltype(mMutex)> lock(mMutex);
 			auto scn = SceneGraphFactory::instance()->active();
 
-			if (!mUpdatingGraphicsContext)
+			bool has_frame = scn->getFrameNumber() < mTotalFrame;
+
+			while(mRunning && (mUpdatingGraphicsContext || (!mReset && mPaused))) {
+				mCond.wait_for(lock, 500ms);
+			}
+
+			if(!mRunning) break;
+
+			if (mReset)
 			{
-				if (mReset)
-				{
-					if (mActiveNode == nullptr) {
-						scn->reset();
+				if (mActiveNode == nullptr) {
+					scn->reset(); 
 
-						mFinished = false;
-					}
-					else {
-						scn->reset(mActiveNode);
+					mFinished = false;
+				}
+				else {
+					scn->reset(mActiveNode);
 
-						mActiveNode = nullptr;
-					}
-
-					mReset = false;
-
-					emit(oneFrameFinished());
+					mActiveNode = nullptr;
 				}
 
-				if (!mPaused && scn->getFrameNumber() < mTotalFrame)
+				mReset = false;
+
+				emit oneFrameFinished(scn->getFrameNumber());
+			}
+
+			if(!mPaused) {
+				if (scn->getFrameNumber() < mTotalFrame)
 				{
 					scn->takeOneFrame();
 
 					this->startUpdatingGraphicsContext();
 
-					emit(oneFrameFinished());
+					emit oneFrameFinished(scn->getFrameNumber());
 				}
-				else if (!mFinished && scn->getFrameNumber() >= mTotalFrame)
+
+				if (scn->getFrameNumber() >= mTotalFrame)
 				{
 					mPaused = true;
-					mFinished = true;
-
-					emit(simulationFinished());
+					if(!std::exchange(mFinished,true)) {
+						emit simulationFinished();
+					}
 				}
 			}
-
-			mMutex.unlock();
 		}
 	}
 
@@ -168,14 +195,26 @@ namespace dyno
 
 		//Note: should set mReset at the end
 		mReset = true;
+		notify();
+	}
+
+	void PSimulationThread::proceed(int num)
+	{
+		this->pause();
+
+		mFinished = false;
+
+		mTotalFrame = num;
+
+		notify();
 	}
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
-		mActiveNode = node;
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->reset(node);
 
-		//Note: should set mReset at the end
-		mReset = true;
+		notify();
 	}
 
 	void PSimulationThread::resetQtNode(Qt::QtNode& node)
@@ -190,6 +229,24 @@ namespace dyno
 		}
 	}
 
+	void PSimulationThread::syncNode(std::shared_ptr<Node> node)
+	{
+		auto scn = SceneGraphFactory::instance()->active();
+
+		class SyncNodeAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->reset();
+				node->updateGraphicsContext();
+			}
+		};
+
+		scn->traverseForwardWithAutoSync<SyncNodeAct>(node);
+
+		notify();
+	}
+
 	void PSimulationThread::startUpdatingGraphicsContext()
 	{
 		mUpdatingGraphicsContext = true;
@@ -198,11 +255,13 @@ namespace dyno
 	void PSimulationThread::stopUpdatingGraphicsContext()
 	{
 		mUpdatingGraphicsContext = false;
+		notify();
 	}
 
 	void PSimulationThread::setTotalFrames(int num)
 	{
 		mTotalFrame = num;
+		notify();
 	}
 
 	int PSimulationThread::getCurrentFrameNum() 

@@ -3,6 +3,7 @@ if(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME)
         Core 
         Framework 
         IO 
+        Modeling
         GLRenderEngine 
         SemiAnalyticalScheme 
         RigidBody 

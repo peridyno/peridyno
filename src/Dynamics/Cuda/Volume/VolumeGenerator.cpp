@@ -14,7 +14,7 @@ namespace dyno
 		//: Volume()
 	{
 		this->inPadding()->setValue(10);
-		this->inSpacing()->setValue(0.1);
+		this->inSpacing()->setValue(0.05);
 	}
 
 	template<typename TDataType>
@@ -23,65 +23,84 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void VolumeGenerator<TDataType>::load(std::string filename)
+	void VolumeGenerator<TDataType>::resetStates()
 	{
-// 		closedSurface = std::make_shared<TriangleSet<TDataType>>();
-// 		closedSurface->loadObjFile(filename);
+		if (this->inTriangleSet()->isEmpty() == false) {
+			this->loadClosedSurface();
 
+			if (this->outGenSDF()->isEmpty()) {
+				this->outGenSDF()->allocate();
+			}
+			DistanceField3D<TDataType>& sdf = this->outGenSDF()->getDataPtr()->getSDF();
+
+			Coord p0(origin.x, origin.y, origin.z);
+			Coord p1(maxPoint.x, maxPoint.y, maxPoint.z);
+
+			sdf.setSpace(p0, p1, ni - 1, nj - 1, nk - 1);
+			sdf.setDistance(phi);
+		}
+
+		printf("VolumeGenerator ok \n");
+	}
+
+	template<typename TDataType>
+	void VolumeGenerator<TDataType>::loadClosedSurface()
+	{
 		Vec3f min_box(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 		Vec3f max_box(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
-		std::ifstream infile(filename);
-		if (!infile) {
-			std::cerr << "Failed to open. Terminating.\n";
-			exit(-1);
+		DArray<Coord> mPoints = inTriangleSet()->getDataPtr()->getPoints();
+		DArray<Triangle> mTriangles = inTriangleSet()->getDataPtr()->getTriangles();
+		
+		CArray<Coord> cPoints;
+		cPoints.resize(mPoints.size());
+		cPoints.assign(mPoints);
+
+		CArray<Triangle> cTriangles;
+		cTriangles.resize(mTriangles.size());
+		cTriangles.assign(mTriangles);
+
+		vertList.clear();
+		faceList.clear();
+
+		for (int i = 0; i < cPoints.size(); i++) {
+			Coord point = cPoints[i];
+			vertList.pushBack(point);
+			min_box = min_box.minimum(point);
+			max_box = max_box.maximum(point);
 		}
-
-		int ignored_lines = 0;
-		std::string line;
-		while (!infile.eof()) {
-			std::getline(infile, line);
-
-			//.obj files sometimes contain vertex normals indicated by "vn"
-			if (line.substr(0, 1) == std::string("v") && line.substr(0, 2) != std::string("vn")) {
-				std::stringstream data(line);
-				char c;
-				Vec3f point;
-				data >> c >> point[0] >> point[1] >> point[2];
-				vertList.pushBack(point);
-				min_box = min_box.minimum(point);
-				max_box = max_box.maximum(point);
-			}
-			else if (line.substr(0, 1) == std::string("f")) {
-				std::stringstream data(line);
-				char c;
-				int v0, v1, v2;
-				data >> c >> v0 >> v1 >> v2;
-				faceList.pushBack(Vec3ui(v0 - 1, v1 - 1, v2 - 1));
-			}
-			else if (line.substr(0, 2) == std::string("vn")) {
-				std::cerr << "Obj-loader is not able to parse vertex normals, please strip them from the input file. \n";
-				exit(-2);
-			}
-			else {
-				++ignored_lines;
-			}
+	
+		for (int i = 0; i < cTriangles.size(); i++) {
+			faceList.pushBack(Vec3ui(cTriangles[i][0], cTriangles[i][1], cTriangles[i][2]));
 		}
-		infile.close();
-
+		
 		uint padding = this->inPadding()->getData();
 		Real dx = this->inSpacing()->getData();
 		Vec3f unit(1, 1, 1);
-		min_box -= padding * dx*unit;
-		max_box += padding * dx*unit;
+		min_box -= padding * dx * unit;
+		max_box += padding * dx * unit;
 
 		ni = std::floor((max_box[0] - min_box[0]) / dx);
 		nj = std::floor((max_box[1] - min_box[1]) / dx);
 		nk = std::floor((max_box[2] - min_box[2]) / dx);
-
+		
 		origin = min_box;
+		maxPoint = max_box;
 
 		makeLevelSet();
+	
+		printf("Uniform grids: %f %f %f, %f %f %f, %f, %d %d %d, %d \n", origin[0], origin[1], origin[2], maxPoint[0], maxPoint[1], maxPoint[2], dx, ni, nj, nk, padding);
+	}
+
+	template<typename TDataType>
+	void VolumeGenerator<TDataType>::load(std::string filename)
+	{
+		std::shared_ptr<TriangleSet<TDataType>> triSet = std::make_shared<TriangleSet<TDataType>>();
+		triSet->loadObjFile(filename);
+
+		this->inTriangleSet()->setDataPtr(triSet);
+
+		this->inTriangleSet()->getDataPtr()->update();
 	}
 
 	// find distance x0 is from segment x1-x2
@@ -301,12 +320,6 @@ namespace dyno
 				}
 			}
 		}
-	}
-
-	template<typename TDataType>
-	void VolumeGenerator<TDataType>::updateVolume()
-	{
-
 	}
 
 	DEFINE_CLASS(VolumeGenerator);

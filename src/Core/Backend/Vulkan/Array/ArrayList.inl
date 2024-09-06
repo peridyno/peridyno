@@ -39,6 +39,8 @@ namespace dyno
 		inline bool isGPU() const { return true; }
 		inline bool isEmpty() const { return mIndex.size() == 0; }
 
+		void clear();
+
 	public:
 		DArray<uint> mIndex;
 		DArray<T> mElements;
@@ -117,4 +119,12 @@ namespace dyno
 	{
 
 	}
+
+	template<typename T>
+	void ArrayList<T, DeviceType::GPU>::clear()
+	{
+		mIndex.clear();
+		mElements.clear();
+	}
+
 }

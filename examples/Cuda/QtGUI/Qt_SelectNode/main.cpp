@@ -1,7 +1,7 @@
 #include <QtApp.h>
 #include <GLRenderEngine.h>
 
-#include <SphereModel.h>
+#include <BasicShapes/SphereModel.h>
 
 using namespace dyno;
 

@@ -85,27 +85,34 @@ namespace dyno {
 
 		inline Coord lowerBound() { return m_left; }
 
-		inline Coord upperBound() { return Coord(m_left[0] + m_distance.nx() * m_h[0], m_left[1] + m_distance.ny() * m_h[1], m_left[2] + m_distance.nz() * m_h[2]); }
+		inline Coord upperBound() { return Coord(m_left[0] + (m_distance.nx() - 1) * m_h[0], m_left[1] + (m_distance.ny() - 1) * m_h[1], m_left[2] + (m_distance.nz() - 1) * m_h[2]); }
 
+
+		void assign(DistanceField3D<TDataType>& sdf) {
+			m_left = sdf.m_left;
+			m_h = sdf.m_h;
+			m_bInverted = sdf.m_bInverted;
+			m_distance.assign(sdf.m_distance);
+		}
 
 		DArray3D<Real>& getMDistance() { return m_distance; }
 
-		void setDistance(CArray3D<Real>& distance) {
+		void setDistance(CArray3D<Real> distance) {
 			m_distance.assign(distance);
 		}
 
 		Coord getH() { return m_h; }
+
+		/**
+		 * @brief Invert the signed distance field
+		 *
+		 */
+		void invertSDF();
 		
 	private:
 		GPU_FUNC inline Real lerp(Real a, Real b, Real alpha) const {
 			return (1.0f - alpha)*a + alpha *b;
 		}
-
-		/**
-		 * @brief Invert the signed distance field
-		 * 
-		 */
-		void invertSDF();
 
 		/**
 		 * @brief Lower left corner

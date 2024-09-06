@@ -8,11 +8,9 @@ namespace dyno
 {
 	QString FormatFieldWidgetName(std::string name)
 	{
-		QTextCodec* codec = QTextCodec::codecForName("GB2312");
+		QString qName = QString::fromStdString(name.c_str());
 
-		QString qName = codec->toUnicode(name.c_str());
-
-		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+		bool isChinese = qName.contains(QRegularExpression("[\u4e00-\u9fa5]"));
 
 		//If the string contains Chinese, show all the original string without splitting
 		if (isChinese)
@@ -36,11 +34,9 @@ namespace dyno
 
 	QString FormatBlockPortName(std::string name)
 	{
-		QTextCodec* codec = QTextCodec::codecForName("GB2312");
+		QString qName = QString::fromStdString(name.c_str());
 
-		QString qName = codec->toUnicode(name.c_str());
-
-		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+		bool isChinese = qName.contains(QRegularExpression("[\u4e00-\u9fa5]"));
 
 		//If the string contains Chinese, show all the original string without splitting
 		if (isChinese)
@@ -67,11 +63,9 @@ namespace dyno
 
 	QString FormatBlockCaptionName(std::string name)
 	{
-		QTextCodec* codec = QTextCodec::codecForName("GB2312");
+		QString qName = QString::fromStdString(name.c_str());
 
-		QString qName = codec->toUnicode(name.c_str());
-
-		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
+		bool isChinese = qName.contains(QRegularExpression("[\u4e00-\u9fa5]"));
 
 		//If the string contains Chinese, show all the original string without splitting
 		if (isChinese)
@@ -100,7 +94,7 @@ namespace dyno
 	{
 		QTextCodec* codec = QTextCodec::codecForName("GB2312");
 
-		QString desc = codec->toUnicode(name.c_str());
+		QString desc = QString::fromStdString(name.c_str());
 
 // 		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));
 // 

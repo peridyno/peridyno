@@ -39,6 +39,25 @@ namespace dyno
 		CN_FLUID_NONPENETRATION,
 		CN_GLOBAL_NONPENETRATION,
 		CN_LOACL_NONPENETRATION,
+		CN_ANCHOR_EQUAL_1,
+		CN_ANCHOR_EQUAL_2,
+		CN_ANCHOR_EQUAL_3,
+		CN_ANCHOR_TRANS_1,
+		CN_ANCHOR_TRANS_2,
+		CN_BAN_ROT_1,
+		CN_BAN_ROT_2,
+		CN_BAN_ROT_3,
+		CN_ALLOW_ROT1D_1,
+		CN_ALLOW_ROT1D_2,
+		CN_JOINT_SLIDER_MIN,
+		CN_JOINT_SLIDER_MAX,
+		CN_JOINT_SLIDER_MOTER,
+		CN_JOINT_HINGE_MIN,
+		CN_JOINT_HINGE_MAX,
+		CN_JOINT_HINGE_MOTER,
+		CN_JOINT_NO_MOVE_1,
+		CN_JOINT_NO_MOVE_2,
+		CN_JOINT_NO_MOVE_3,
 		CN_UNKNOWN
 	};
 
@@ -47,16 +66,31 @@ namespace dyno
 	{
 	public:
 		Vector<Real, 3> position;			// World coordinate of contact
-		Real penetration;			// Depth of penetration from collision
+		Real penetration;			// Depth of penetration from collision whose value is assumed to be negative when interpenetration occurs
 	};
 
 	template<typename Real>
 	struct TManifold
 	{
 	public:
-		Vector<Real, 3> normal;				// From A to B
+		Vector<Real, 3> normal;				// on B
 		TContact<Real> contacts[8];
 		int contactCount = 0;
+
+		DYN_FUNC void pushContact(const Vector<Real, 3>& pos, const Real& dep)
+		{
+			if (contactCount >= 8) return;
+			contacts[contactCount].position = pos;
+			contacts[contactCount].penetration = dep;
+			contactCount++;
+		}
+
+		DYN_FUNC void pushContact(const TContact<Real>& contact)
+		{
+			if (contactCount >= 8) return;
+			contacts[contactCount] = contact;
+			contactCount++;
+		}
 	};
 
 	template<typename Real>
@@ -144,7 +178,12 @@ namespace dyno
 		int localTag1;
 		int localTag2;
 
-		Real interpenetration = 0.0f;//inter_dist
+		/**
+		 * A positive value representing the interpenetration distance
+		 */
+		Real interpenetration = 0.0f;
+		Real d_min;
+		Real d_max;
 
 		Vector<Real, 3> pos1;
 		Vector<Real, 3> pos2;
@@ -152,6 +191,11 @@ namespace dyno
 		Vector<Real, 3> normal1;
 		Vector<Real, 3> normal2;
 
+		Vector<Real, 3> axis;
+
 		ConstraintType type;
+
+		bool isValid;
+
 	};
 }

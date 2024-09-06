@@ -15,8 +15,8 @@ namespace dyno
 	template<typename TDataType>
 	EdgeSet<TDataType>::~EdgeSet()
 	{
-		
-
+		mEdges.clear();
+		mVer2Edge.clear();
 	}
 
 	__global__ void K_CountNumber(
@@ -47,6 +47,59 @@ namespace dyno
 		ids[v1].atomicInsert(v0);
 	}
 	
+	template<typename TDataType>
+	void EdgeSet<TDataType>::requestPointNeighbors(DArrayList<int>& lists)
+	{
+		if (this->mCoords.isEmpty())
+			return;
+
+		DArray<uint> counts;
+		counts.resize(this->mCoords.size());
+		counts.reset();
+
+		cuExecute(mEdges.size(),
+			K_CountNumber,
+			counts,
+			mEdges);
+
+		lists.resize(counts);
+
+		cuExecute(mEdges.size(),
+			K_StoreIds,
+			lists,
+			mEdges);
+
+		counts.clear();
+	}
+
+	template<typename TDataType>
+	void EdgeSet<TDataType>::copyFrom(EdgeSet<TDataType>& edgeSet)
+	{
+		mEdges.resize(edgeSet.mEdges.size());
+		mEdges.assign(edgeSet.mEdges);
+
+		mVer2Edge.assign(edgeSet.mVer2Edge);
+
+		PointSet<TDataType>::copyFrom(edgeSet);
+	}
+
+	template<typename TDataType>
+	void EdgeSet<TDataType>::setEdges(std::vector<Edge>& edges)
+	{
+		mEdges.assign(edges);
+
+		this->tagAsChanged();
+	}
+
+	template<typename TDataType>
+	void EdgeSet<TDataType>::setEdges(DArray<Edge>& edges)
+	{
+		mEdges.resize(edges.size());
+		mEdges.assign(edges);
+
+		this->tagAsChanged();
+	}
+
 	template<typename Edge>
 	__global__ void ES_CountEdges(
 		DArray<uint> counter,
@@ -76,91 +129,46 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	DArrayList<int>& EdgeSet<TDataType>::getVer2Edge()
-	{
-		DArray<uint> counter;
-		counter.resize(this->m_coords.size());
-		counter.reset();
-
-		cuExecute(m_edges.size(),
-			ES_CountEdges,
-			counter,
-			m_edges);
-
-		m_ver2Edge.resize(counter);
-
-		counter.reset();
-		cuExecute(m_edges.size(),
-			ES_SetupEdgeIds,
-			m_ver2Edge,
-			m_edges);
-
-		counter.clear();
-
-		return m_ver2Edge;
-	}
-
-
-	template<typename TDataType>
-	void EdgeSet<TDataType>::updatePointNeighbors()
-	{
-		if (this->m_coords.isEmpty())
-			return;
-
-		DArray<uint> counts;
-		counts.resize(this->m_coords.size());
-		counts.reset();
-		
-		cuExecute(m_edges.size(),
-			K_CountNumber,
-			counts,
-			m_edges);
-
-		this->m_pointNeighbors.resize(counts);
-
-		cuExecute(m_edges.size(),
-			K_StoreIds,
-			this->m_pointNeighbors,
-			m_edges);
-
-		counts.clear();
-	}
-
-	template<typename TDataType>
-	void EdgeSet<TDataType>::loadSmeshFile(std::string filename)
-	{
-	}
-
-	template<typename TDataType>
-	void EdgeSet<TDataType>::copyFrom(EdgeSet<TDataType>& edgeSet)
-	{
-		m_edges.resize(edgeSet.m_edges.size());
-		m_edges.assign(edgeSet.m_edges);
-
-		PointSet<TDataType>::copyFrom(edgeSet);
-	}
-
-	template<typename TDataType>
-	void EdgeSet<TDataType>::setEdges(std::vector<Edge>& edges)
-	{
-		m_edges.assign(edges);
-
-		this->tagAsChanged();
-	}
-
-	template<typename TDataType>
-	void EdgeSet<TDataType>::setEdges(DArray<Edge>& edges)
-	{
-		m_edges.resize(edges.size());
-		m_edges.assign(edges);
-
-		this->tagAsChanged();
-	}
-
-	template<typename TDataType>
 	void EdgeSet<TDataType>::updateTopology()
 	{
 		this->updateEdges();
+
+		//Update the vertex to edge mapping
+		DArray<uint> counter;
+		counter.resize(this->mCoords.size());
+		counter.reset();
+
+		cuExecute(mEdges.size(),
+			ES_CountEdges,
+			counter,
+			mEdges);
+
+		mVer2Edge.resize(counter);
+
+		counter.reset();
+		cuExecute(mEdges.size(),
+			ES_SetupEdgeIds,
+			mVer2Edge,
+			mEdges);
+
+		counter.clear();
+
+		PointSet<TDataType>::updateTopology();
+	}
+
+	template<typename TDataType>
+	bool EdgeSet<TDataType>::isEmpty()
+	{
+		return mEdges.size() == 0 && PointSet<TDataType>::isEmpty();
+	}
+
+	template<typename TDataType>
+	void EdgeSet<TDataType>::clear()
+	{
+		mEdges.clear();
+		mVer2Edge.clear();
+
+		PointSet<TDataType>::clear();
 	}
 
 	DEFINE_CLASS(EdgeSet);

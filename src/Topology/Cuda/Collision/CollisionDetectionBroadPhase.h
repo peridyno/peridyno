@@ -1,18 +1,18 @@
 #pragma once
-#include "Module/CollisionModel.h"
+#include "Module/ComputeModule.h"
 
 #include "Algorithm/Reduction.h"
 #include "Primitive/Primitive3D.h"
 
+#include "Topology/LinearBVH.h"
 
 namespace dyno
 {
 	typedef typename ::dyno::TAlignedBox3D<Real> AABB;
-
 	typedef unsigned long long int PKey;
 
 	template<typename TDataType>
-	class CollisionDetectionBroadPhase : public CollisionModel
+	class CollisionDetectionBroadPhase : public ComputeModule
 	{
 		DECLARE_TCLASS(CollisionDetectionBroadPhase, TDataType)
 	public:
@@ -21,15 +21,7 @@ namespace dyno
 		typedef typename TDataType::Matrix Matrix;
 
 		CollisionDetectionBroadPhase();
-		virtual ~CollisionDetectionBroadPhase();
-
-		void doCollision() override;
-
-		bool isSupport(std::shared_ptr<CollidableObject> obj) override { return true; }
-		void setSelfCollision(bool s)
-		{
-			self_collision = s;
-		}
+		~CollisionDetectionBroadPhase() override;
 
 	public:
 		DECLARE_ENUM(EStructure,
@@ -40,11 +32,16 @@ namespace dyno
 
 		DEF_VAR(Real, GridSizeLimit, 0.005, "Limit the smallest grid size");
 
+		DEF_VAR(bool, SelfCollision, false, "");
+
 		DEF_ARRAY_IN(AABB, Source, DeviceType::GPU, "");
 
 		DEF_ARRAY_IN(AABB, Target, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_OUT(int, ContactList, DeviceType::GPU, "Contact pairs");
+
+	protected:
+		void compute() override;
 
 	private:
 		void doCollisionWithSparseOctree();
@@ -53,8 +50,6 @@ namespace dyno
 	private:
 		Reduction<Real> m_reduce_real;
 		Reduction<Coord> m_reduce_coord;
-
-		bool self_collision = false;
 
 		DArray<Real> mH;
 
@@ -66,6 +61,8 @@ namespace dyno
 
 		DArray<int> mIds;
 		DArray<PKey> mKeys;
+
+		LinearBVH<TDataType> bvh;
 	};
 
 	IMPLEMENT_TCLASS(CollisionDetectionBroadPhase, TDataType)

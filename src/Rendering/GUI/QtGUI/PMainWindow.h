@@ -58,6 +58,9 @@
 #include "NodeEditor/QtNodeFlowWidget.h"
 #include "NodeEditor/QtModuleFlowWidget.h"
 
+#include "nodes/internal/QtNode.hpp"
+
+
 QT_FORWARD_DECLARE_CLASS(QMenu)
 
 // class Qt::PNodeFlowWidget;
@@ -79,6 +82,7 @@ namespace dyno
 
 	class QtApp;
 	class ImWidget;
+	class PSettingEditor;
 
 //	QT_FORWARD_DECLARE_CLASS(QLichtWidget)
 
@@ -91,7 +95,7 @@ namespace dyno
 
 		explicit PMainWindow(QtApp* app,
 			QWidget *parent = Q_NULLPTR,
-			Qt::WindowFlags flags = 0);
+			Qt::WindowFlags flags = Qt::WindowFlags());
 
 		void mainLoop();
 		void createWindow(int width, int height);
@@ -111,11 +115,21 @@ namespace dyno
 		void showHelp();
 		void showAbout();
 
-		void showModuleEditor();
+		void showModuleEditor(Qt::QtNode& n);
 
 		void showMessage();
 
 		void addNodeByName(std::string name);
+
+		void showAboutMsg();
+		
+		//Setting Editor
+
+		void showSettingEditor();
+
+
+	signals:
+		void updateSetting ();
 
 	private:
 		void setCentralView();
@@ -123,10 +137,13 @@ namespace dyno
 		void setupStatusBar();
 //		void setupMenuBar();
 		void setupAllWidgets();
+		void setupSettingEditor();
+		void updateSettingData();
 
 	protected:
 		void mousePressEvent(QMouseEvent *event) override;
 
+	private:
 		QApplication* application;
 
 		QList<PToolBar*> toolBars;
@@ -135,24 +152,19 @@ namespace dyno
 
 		Qt::QtNodeFlowWidget*		mNodeFlowView;
 		
-		PStatusBar*				m_statusBar;
+		PStatusBar*				mStatusBar;
 		POpenGLWidget*			mOpenGLWidget;
-		//PVTKOpenGLWidget*		m_vtkOpenglWidget;
-		
-		PPropertyWidget*		m_propertyWidget;
-		PAnimationWidget*		m_animationWidget;
+
+		PPropertyWidget*		mPropertyWidget;
+		PAnimationWidget*		mAnimationWidget;
 
 		PMainToolBar*			mToolBar = nullptr;
 
 		PIODockWidget* mIoDockerWidget = nullptr;
-// 
-// 		PModuleFlowWidget*		m_moduleFlowView;
-// 		PModuleListWidget*		m_moduleListWidget;
-// 		PSceneGraphWidget*		m_scenegraphWidget;
+
+		PSettingEditor* mSettingEditor = nullptr;
 
 
-	public slots:
-		void showAboutMsg();
 	};
 
 }
