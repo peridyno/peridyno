@@ -68,6 +68,12 @@ namespace dyno
 			std::shared_ptr<Node> node = 0;
 			int   instance = -1;
 			int	  primitive = -1;
+			
+			Item(std::shared_ptr<Node> _node, int _instance,int _primitive){
+				node = _node;
+				instance = _instance;
+				primitive = _primitive;
+			}
 		};
 
 		int x = -1;

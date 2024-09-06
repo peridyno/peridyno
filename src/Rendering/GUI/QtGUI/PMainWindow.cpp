@@ -403,7 +403,7 @@ namespace dyno
 		connect(mOpenGLWidget, &POpenGLWidget::nodeSelected, [=](std::shared_ptr<Node> node) {
 			m_propertyWidget->showProperty(node);
 			// TODO: high light selected node in node editor
-			auto& qNodes = mNodeFlowView->flowScene()->allNodes();
+			auto qNodes = mNodeFlowView->flowScene()->allNodes();
 			for (auto qNode : qNodes)
 			{
 				if (dynamic_cast<Qt::QtNodeWidget*>(qNode->nodeDataModel())->getNode() == node)

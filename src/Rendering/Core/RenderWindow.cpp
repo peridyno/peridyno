@@ -32,7 +32,7 @@ const dyno::Selection& dyno::RenderWindow::select(int x, int y, int w, int h)
 void dyno::RenderWindow::select(std::shared_ptr<Node> node, int instance, int primitive)
 {
 	selectedObject = dyno::Selection();
-	selectedObject.items.push_back({ node, instance, primitive});
+	selectedObject.items.push_back(dyno::Selection::Item(node, instance, primitive));
 }
 
 std::shared_ptr<dyno::Node> dyno::RenderWindow::getCurrentSelectedNode()
