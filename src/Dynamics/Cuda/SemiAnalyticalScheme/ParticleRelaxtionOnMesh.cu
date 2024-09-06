@@ -6,7 +6,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(ParticleRelaxtionOnMesh, TDataType)
 
-		template<typename TDataType>
+	template<typename TDataType>
 	ParticleRelaxtionOnMesh<TDataType>::ParticleRelaxtionOnMesh()
 		: PointsBehindMesh<TDataType>()
 	{
@@ -22,11 +22,11 @@ namespace dyno
 		samplingDistance->varValue()->setValue(Real(0.005));
 		this->animationPipeline()->pushModule(samplingDistance);
 
-		ptr_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
-		this->stateDelta()->connect(ptr_integrator->inTimeStep());
-		this->statePosition()->connect(ptr_integrator->inPosition());
-		this->stateVelocity()->connect(ptr_integrator->inVelocity());
-		this->stateForce()->connect(ptr_integrator->inForceDensity());
+		//ptr_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+		//this->stateDelta()->connect(ptr_integrator->inTimeStep());
+		//this->statePosition()->connect(ptr_integrator->inPosition());
+		//this->stateVelocity()->connect(ptr_integrator->inVelocity());
+		//this->stateForce()->connect(ptr_integrator->inForceDensity());
 
 		ptr_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		smoothingLength->outFloating()->connect(ptr_nbrQuery->inRadius());
@@ -74,7 +74,7 @@ namespace dyno
 		this->stateVelocity()->connect(ptr_normalForce->inVelocity());
 		this->statePointBelongTriangleIndex()->connect(ptr_normalForce->inParticleMeshID());
 		ptr_nbrQueryTri->outNeighborIds()->connect(ptr_normalForce->inTriangleNeighborIds());
-
+		
 
 	}
 
@@ -92,7 +92,7 @@ namespace dyno
 
 	}
 
-
+	
 	template<typename TDataType>
 	void ParticleRelaxtionOnMesh<TDataType>::loadInitialStates()
 	{
@@ -103,6 +103,33 @@ namespace dyno
 		this->stateForce()->reset();
 	}
 
+	template<typename Real, typename Coord>
+	__global__ void K_UpdatePosition(
+		DArray<Coord> pos,
+		DArray<Coord> vel,
+		Real delta)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= pos.size()) return;
+		pos[pId] += delta * (vel[pId]);
+	}
+
+
+
+
+	template<typename TDataType>
+	void ParticleRelaxtionOnMesh<TDataType>::updatePositions()
+	{
+		
+		int num = this->statePosition()->size();
+
+		cuExecute(num,
+			K_UpdatePosition,
+			this->statePosition()->getData(),
+			this->stateVelocity()->getData(),
+			this->stateDelta()->getValue()
+		);
+	}
 
 	template<typename TDataType>
 	void  ParticleRelaxtionOnMesh<TDataType>::particleRelaxion()
@@ -114,14 +141,14 @@ namespace dyno
 			if (i % 5 == 0) std::cout << ".";
 			ptr_nbrQuery->inRadius()->setValue(this->varPointNeighborLength()->getValue());
 			ptr_nbrQuery->update();
-
+			
 			ptr_density->varIterationNumber()->setValue(this->varDensityIteration()->getValue());
 			ptr_density->update();
-
+			
 			ptr_viscosity->varViscosity()->setValue(this->varViscosityStrength()->getValue());
 			ptr_viscosity->update();
-
-			ptr_integrator->update();
+			
+			this->updatePositions();
 
 			ptr_nbrQueryTri->inRadius()->setValue(this->varMeshNeighborLength()->getValue());
 			ptr_nbrQueryTri->update();
@@ -142,7 +169,7 @@ namespace dyno
 	{
 
 		this->PointsBehindMesh<TDataType>::resetStates();
-
+		
 		loadInitialStates();
 
 		this->particleRelaxion();

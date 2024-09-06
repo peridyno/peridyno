@@ -34,7 +34,7 @@ namespace dyno
 {
 
 	/*
-	*	@brief£ºGenerate points benhind triangle meshes,
+	*	@brief£ºGenerate points benhind triangle meshes, 
 	*	@biref: and slightly shift the particles benhind triangle meshes to obtain more regular distribution.
 	*
 	*/
@@ -77,6 +77,7 @@ namespace dyno
 
 		void particleRelaxion();
 
+		void updatePositions();
 	private:
 
 		void loadInitialStates();
@@ -85,15 +86,15 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Force on each particle");
 
-		std::shared_ptr<ParticleIntegrator<TDataType>> ptr_integrator;
+	
 		std::shared_ptr<NeighborPointQuery<TDataType>> ptr_nbrQuery;
 		std::shared_ptr<IterativeDensitySolver<TDataType>> ptr_density;
 		std::shared_ptr<ImplicitViscosity<TDataType>> ptr_viscosity;
 		std::shared_ptr<NeighborTriangleQuery<TDataType>> ptr_nbrQueryTri;
 		std::shared_ptr<TriangularMeshConstraint<TDataType>> ptr_meshCollision;
 		std::shared_ptr<NormalForce<TDataType>> ptr_normalForce;
-
+		
 	};
 
-
+	
 }
