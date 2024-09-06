@@ -5,6 +5,8 @@
 #include <Wt/WColor.h>
 #include <Wt/WPen.h>
 #include <Wt/WGradient.h>
+#include <Wt/WAbstractArea.h>
+#include <Wt/WRectArea.h>
 
 #include "WtNode.h"
 #include "WtNodeStyle.h"
@@ -125,6 +127,11 @@ public:
 
 	void isSelect();
 
+	//void onMouseMove(const Wt::WMouseEvent& event);
+	void onMouseWentDown(const Wt::WKeyEvent& event);
+	//void onMouseWentUp(const Wt::WMouseEvent& event);
+	//void onMouseWheel(const Wt::WMouseEvent& event);
+
 protected:
 	void paint(Wt::WPainter* painter);
 
@@ -157,8 +164,17 @@ private:
 	int HelpTimerID = -1;
 	int PortTimerID = -1;
 
-	Wt::WPointF _origin;
+
+	// use for move
+	Wt::WPointF _origin = Wt::WPointF(0, 0);
+
+	Wt::WPointF mLastMousePos;
+	Wt::WPointF mLastDelta;
+	bool isDragging;
 
 	// either nullptr or owned by parent QGraphicsItem
 	//QGraphicsProxyWidget* _proxyWidget;
+public:
+
+	WtNodeGraphicsObject() = default;
 };

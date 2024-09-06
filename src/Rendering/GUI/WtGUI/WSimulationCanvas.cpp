@@ -331,7 +331,6 @@ void WSimulationCanvas::onMouseWheeled(const Wt::WMouseEvent& evt)
 
 void WSimulationCanvas::onKeyWentDown(const Wt::WKeyEvent& evt)
 {
-	Wt::log("Error") << "´¥·¢ÁË";
 	PKeyboardEvent keyEvent;
 	keyEvent.key = WKeyMap.find(evt.key()) == WKeyMap.end() ? PKEY_UNKNOWN : WKeyMap[evt.key()];
 	keyEvent.action = AT_PRESS;
