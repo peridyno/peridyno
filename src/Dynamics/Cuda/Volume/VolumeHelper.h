@@ -217,7 +217,7 @@ namespace dyno {
 			int level3_num,
 			int grid_total_num);
 
-		static void VolumeHelper<TDataType>::finestLevelBoolean(
+		static void finestLevelBoolean(
 			DArray<VoxelOctreeNode<Coord>>& grid0,
 			DArray<Real>& grid0_value,
 			DArray<Coord>& grid0_object,
@@ -248,7 +248,7 @@ namespace dyno {
 			int m_nz,
 			int boolean);
 
-		static void VolumeHelper<TDataType>::finestLevelReconstruction(
+		static void finestLevelReconstruction(
 			DArray<PositionNode>& recon_node,
 			DArray<Real>& recon_sdf,
 			DArray<Coord>& recon_object,
@@ -265,7 +265,7 @@ namespace dyno {
 			int level_0,
 			int& level_0_recon);
 
-		static void VolumeHelper<TDataType>::finestLevelReconstBoolean(
+		static void finestLevelReconstBoolean(
 			DArray<VoxelOctreeNode<Coord>>& grid0,
 			DArray<Real>& grid0_value,
 			DArray<Coord>& grid0_object,
@@ -293,7 +293,7 @@ namespace dyno {
 			int m_nz,
 			int boolean);
 
-		static void VolumeHelper<TDataType>::updateBooleanSigned(
+		static void updateBooleanSigned(
 			DArray<Real>& leaf_value,
 			DArray<int>& leaf_index,
 			DArray<Real>& leaf_value_a,
