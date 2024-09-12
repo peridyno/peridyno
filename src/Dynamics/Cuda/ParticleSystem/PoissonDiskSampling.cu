@@ -8,13 +8,12 @@ namespace dyno
 {
 	template <typename TDataType>
 	PoissonDiskSampling<TDataType>::PoissonDiskSampling()
-		: Sampler<TDataType>()
+		: SdfSampler<TDataType>()
 	{
-			m_SDF = std::make_shared<DistanceField3D<DataType3f>>();
-			this->varSamplingDistance()->setRange(0.001, 1.0);
-			area_a = this->varBox_a()->getData() - Coord(this->varSamplingDistance()->getData() * 3);
-			area_b = this->varBox_b()->getData() + Coord(this->varSamplingDistance()->getData() * 3);
-			desired_points = pointNumberRecommend();
+		this->varSpacing()->setRange(0.001, 1.0);
+		area_a = this->varBox_a()->getData() - Coord(this->varSpacing()->getData() * 3);
+		area_b = this->varBox_b()->getData() + Coord(this->varSpacing()->getData() * 3);
+		desired_points = pointNumberRecommend();
 	};
 
 	template <typename TDataType>
@@ -22,31 +21,19 @@ namespace dyno
 	{
 		int num = 0;
 		Coord box = area_b - area_a;
-		Real r = this->varSamplingDistance()->getData();
+		Real r = this->varSpacing()->getData();
 		return
-			this->varDimension()->getData() == 3 ?
-			(area_b[0] - area_a[0]) * (area_b[1] - area_a[1]) * (area_b[2] - area_a[2]) / (r * r * r)
-			: (area_b[0] - area_a[0]) * (area_b[1] - area_a[1]) / (r * r );
+			(area_b[0] - area_a[0]) * (area_b[1] - area_a[1]) * (area_b[2] - area_a[2]) / (r * r * r);
 	};
 
 	template <typename TDataType>
 	void PoissonDiskSampling<TDataType>::ConstructGrid()
 	{
-		auto r = this->varSamplingDistance()->getData();
+		auto r = this->varSpacing()->getData();
 
-		if (this->varDimension()->getData() == 2)
-		{
-			dx = r / sqrt(2);
-		}
-		else if (this->varDimension()->getData() == 3)
-		{
-			dx = r / sqrt(3);
-		}
-		else
-		{
-			exit(0);
-		}
-		
+		dx = r / sqrt(3);
+
+
 		if (dx < EPSILON)
 		{
 			std::cout << " The smapling distance in Poisson disk sampling module can not be ZERO!!!! " << std::endl;
@@ -57,7 +44,7 @@ namespace dyno
 		ny = abs(area_b[1] - area_a[1]) / dx;
 		nz = abs(area_b[2] - area_a[2]) / dx;
 
-		gnum = this->varDimension()->getData() == 3 ? nx * ny * nz: gnum = nx * ny;
+		gnum = nx * ny * nz;
 
 		m_grid.resize(gnum);
 		for (int i = 0; i < gnum; i++)	m_grid[i] = -1;
@@ -70,26 +57,15 @@ namespace dyno
 		GridIndex index;
 		index.i = (int)((point[0] - area_a[0]) / dx);
 		index.j = (int)((point[1] - area_a[1]) / dx);
-		if (this->varDimension()->getData() == 2) {
-			index.k = 0;
-		}
-		else if (this->varDimension()->getData() == 3) {
-			index.k = (int)((point[2] - area_a[2]) / dx);
-		}
-		else
-		{
-			exit(0);
-		}
+		index.k = (int)((point[2] - area_a[2]) / dx);
 
 		return index;
 	};
 
-
-
 	template <typename TDataType>
 	int PoissonDiskSampling<TDataType>::indexTransform(int i, int j, int k)
 	{
-		return this->varDimension()->getData() == 3 ? i + j * nx + k * nx * ny : i + j * nx;
+		return  i + j * nx + k * nx * ny;
 	};
 
 
@@ -97,15 +73,15 @@ namespace dyno
 	bool PoissonDiskSampling<TDataType>::collisionJudge2D(Coord point)
 	{
 		bool flag = false;
-		auto r = this->varSamplingDistance()->getData();
+		auto r = this->varSpacing()->getData();
 		GridIndex d_index;
 		d_index = searchGrid(point);
-		for(int i = -2; i < 3; i++)
+		for (int i = -2; i < 3; i++)
 			for (int j = -2; j < 3; j++)
 			{
 				int mi = d_index.i + i;
 				int mj = d_index.j + j;
-				if ((mi > 0) && ( mj > 0) && (mi < nx) && (mj < ny)) 
+				if ((mi > 0) && (mj > 0) && (mi < nx) && (mj < ny))
 				{
 					int index = indexTransform(mi, mj, d_index.k);
 					if (m_grid[index] != -1)
@@ -126,12 +102,12 @@ namespace dyno
 	{
 
 		bool flag = false;
-		auto r = this->varSamplingDistance()->getData();
+		auto r = this->varSpacing()->getData();
 		GridIndex d_index;
 		d_index = searchGrid(point);
 		for (int i = -2; i < 3; i++)
 			for (int j = -2; j < 3; j++)
-				for(int k = -2; k < 3; k++)
+				for (int k = -2; k < 3; k++)
 				{
 
 					int mi = d_index.i + i;
@@ -155,11 +131,14 @@ namespace dyno
 
 
 	template<typename TDataType>
-	bool PoissonDiskSampling<TDataType>::loadSdf()
+	std::shared_ptr<DistanceField3D<TDataType>> PoissonDiskSampling<TDataType>::loadSdf()
 	{
 		auto varfilename = this->varSdfFileName()->getData();
 		auto filename = varfilename.string();
-		if (filename.size()>0)
+
+		std::shared_ptr<DistanceField3D<TDataType>> sdf = std::make_shared<DistanceField3D<TDataType>>();
+
+		if (filename.size() > 0)
 		{
 
 			if (filename.size() < 5 || filename.substr(filename.size() - 4) != std::string(".sdf")) {
@@ -173,30 +152,27 @@ namespace dyno
 				exit(-1);
 			}
 
-			m_SDF->loadSDF(filename, false);
 
-			area_a = m_SDF->lowerBound();
-			area_b = m_SDF->upperBound();
+
+			sdf->loadSDF(filename, false);
+
+			area_a = sdf->lowerBound();
+			area_b = sdf->upperBound();
 
 			this->varBox_a()->setValue(area_a);
 			this->varBox_b()->setValue(area_b);
 
-			m_h = m_SDF->getH();
-			m_left = m_SDF->lowerBound();
+			m_h = sdf->getH();
+			m_left = sdf->lowerBound();
 
-			std::cout << "SDF is loaded: "<< area_a << ", " << area_b << std::endl;
+			std::cout << "SDF is loaded: " << area_a << ", " << area_b << std::endl;
 
-			return true;
+			return sdf;
 		}
 		else
 		{
-			std::cout << "No SDF. " << std::endl;
-			return false;
+			return sdf;
 		}
-	
-
-		//std::cout << a << ", " << b << std::endl;
-	
 	};
 
 	template<typename Real, typename Coord, typename TDataType>
@@ -214,7 +190,7 @@ namespace dyno
 		Coord normal;
 		df.getDistance(pos, temp_dist, normal);
 		dist[pId] = temp_dist;
-			
+
 	}
 
 
@@ -222,21 +198,21 @@ namespace dyno
 	template <typename TDataType>
 	TDataType::Real PoissonDiskSampling<TDataType>::lerp(Real a, Real b, Real alpha)
 	{
-		return (1.0f - alpha)*a + alpha * b;
+		return (1.0f - alpha) * a + alpha * b;
 	};
 
 
 	template <typename TDataType>
-	TDataType::Real PoissonDiskSampling<TDataType>::getDistanceFromSDF(Coord &p, 
-		Coord &normal)
+	TDataType::Real PoissonDiskSampling<TDataType>::getDistanceFromSDF(Coord& p,
+		Coord& normal)
 	{
 		if (!SDF_flag) {
 			return -100;
 		}
-			
+
 		Real d = 0.0f;
 
-		Coord fp = (p - m_left)*Coord(1.0 / m_h[0], 1.0 / m_h[1], 1.0 / m_h[2]);
+		Coord fp = (p - m_left) * Coord(1.0 / m_h[0], 1.0 / m_h[1], 1.0 / m_h[2]);
 		const int i = (int)floor(fp[0]);
 		const int j = (int)floor(fp[1]);
 		const int k = (int)floor(fp[2]);
@@ -302,9 +278,9 @@ namespace dyno
 	TDataType::Coord PoissonDiskSampling<TDataType>::getOnePointInsideSDF()
 	{
 		Coord normal(0.0f);
-		for (Real ax = area_a[0]; ax < area_b[0]; ax += this->varSamplingDistance()->getData())
-			for (Real ay = area_a[1]; ay < area_b[1]; ay += this->varSamplingDistance()->getData())
-				for (Real az = area_a[2]; az < area_b[2]; az += this->varSamplingDistance()->getData())
+		for (Real ax = area_a[0]; ax < area_b[0]; ax += this->varSpacing()->getData())
+			for (Real ay = area_a[1]; ay < area_b[1]; ay += this->varSpacing()->getData())
+				for (Real az = area_a[2]; az < area_b[2]; az += this->varSpacing()->getData())
 				{
 					Real dr = getDistanceFromSDF(Coord(ax, ay, az), normal);
 					if (dr < 0.0f)
@@ -319,43 +295,40 @@ namespace dyno
 	void PoissonDiskSampling<TDataType>::resetStates()
 	{
 
-		if (this->varDimension()->getData() < 2 || this->varDimension()->getData() > 3)
-		{
-			std::cout << "The dimension of PoissonDiskSampler is unacceptable!" << std::endl;
-			exit(0);
-		}
+		Real r = this->varSpacing()->getData();
 
-		Real dx = this->varSamplingDistance()->getData() ;
+		auto vol = this->getVolume();
 
-		area_a = this->varBox_a()->getData() - Coord(dx * 3);
-		area_b = this->varBox_b()->getData() + Coord(dx * 3);
+		//Adaptive mesh to uniform mesh
+		inputSDF = this->convert2Uniform(vol, r);
 
-		SDF_flag = loadSdf();
+		Coord minPoint = inputSDF->lowerBound();
+		Coord maxPoint = inputSDF->upperBound();
+		area_a = minPoint - Coord(r * 3);
+		area_b = maxPoint + Coord(r * 3);
+		this->varBox_a()->setValue(area_a);
+		this->varBox_b()->setValue(area_b);
+		m_h = inputSDF->getH();
+		m_left = inputSDF->lowerBound();
 
-		if (SDF_flag)
-		{
-			host_dist.resize(m_SDF->nx(), m_SDF->ny(), m_SDF->nz());
-			host_dist.assign(m_SDF->getMDistance());
-		}
+		host_dist.resize(inputSDF->nx(), inputSDF->ny(), inputSDF->nz());
+		host_dist.assign(inputSDF->getMDistance());
 
-		desired_points = pointNumberRecommend() ;
+		SDF_flag = true;
+
+
+		desired_points = pointNumberRecommend();
 
 		std::cout << "Poisson Disk Sampling Start." << std::endl;
 
-		auto r = this->varSamplingDistance()->getData();
-
 		Coord normal(0.0f);
-
-		ConstructGrid();
+		this->ConstructGrid();
 		seed_point = (area_a + (area_b - area_a)) / 2;
 
 		/*The seed point must be inside the .SDF boundary */
-		if (SDF_flag) {
-			seed_point = getOnePointInsideSDF();
-		}
+		seed_point = getOnePointInsideSDF();
 
 		points.push_back(seed_point);
-
 		gridIndex = searchGrid(seed_point);
 		int index = indexTransform(gridIndex.i, gridIndex.j, gridIndex.k);
 		m_grid[index] = 0;
@@ -378,47 +351,22 @@ namespace dyno
 				Real dr = (1 + (Real)(rand() % 100) / 100.0f) * r;
 				Coord offset(0.0f);
 
-				if (this->varDimension()->getData() == 2)
-				{
-					offset = Coord(cos(theta) * dr, sin(theta) * dr, 0.0f);
-				}
-				if (this->varDimension()->getData() == 3)
-				{
-					offset = Coord(cos(theta) * sin(phi) * dr, sin(theta)* sin(phi) * dr, cos(phi)* r);
-				}
+				offset = Coord(cos(theta) * sin(phi) * dr, sin(theta) * sin(phi) * dr, cos(phi) * r);
 
 				Coord new_point = source + offset;
 
-				if (this->varDimension()->getData() == 3 &&
-					((new_point[0] > area_a[0] + dx * 3) && (new_point[0] < area_b[0] - dx * 3)
-						&& (new_point[1] > area_a[1] + dx * 3) && (new_point[1] < area_b[1] - dx * 3)
-						&& (new_point[2] > area_a[2] + dx * 3) && (new_point[2] < area_b[2] - dx * 3)
-						)
-					)
+				if (((new_point[0] > area_a[0] + r * 3) && (new_point[0] < area_b[0] - r * 3)
+					&& (new_point[1] > area_a[1] + r * 3) && (new_point[1] < area_b[1] - r * 3)
+					&& (new_point[2] > area_a[2] + r * 3) && (new_point[2] < area_b[2] - r * 3)
+					))
 				{
-
-					if (!collisionJudge(new_point) && (tail < desired_points) && ( getDistanceFromSDF(new_point, normal) < 0.0f)) {
+					if (!collisionJudge(new_point) && (tail < desired_points) && (getDistanceFromSDF(new_point, normal) < 0.0f)) {
 						points.push_back(new_point);
 						gridIndex = searchGrid(new_point);
 						m_grid[indexTransform(gridIndex.i, gridIndex.j, gridIndex.k)] = tail;
 						tail++;
 					}
 				}
-
-				if (this->varDimension()->getData() == 2 &&
-					((new_point[0] > area_a[0] + dx * 3) && (new_point[0] < area_b[0] - dx * 3)
-						&& (new_point[1] > area_a[1] + dx * 3) && (new_point[1] < area_b[1] - dx * 3)
-						)
-					)
-				{
-					if (!collisionJudge2D(new_point) && (tail < desired_points) && (getDistanceFromSDF(new_point, normal) < 0.0f)) {
-						points.push_back(new_point);
-						gridIndex = searchGrid(new_point);
-						m_grid[indexTransform(gridIndex.i, gridIndex.j, gridIndex.k)] = tail;
-						tail++;
-					}
-				}
-
 			}
 		}
 

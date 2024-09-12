@@ -8,9 +8,9 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(SdfSampler, TDataType)
 
-	__global__ void C_PointCount(
-		DArray3D<int> distance,
-		DArray<int> VerticesFlag)
+		__global__ void C_PointCount(
+			DArray3D<int> distance,
+			DArray<int> VerticesFlag)
 	{
 		uint i = threadIdx.x + blockDim.x * blockIdx.x;
 		uint j = threadIdx.y + blockDim.y * blockIdx.y;
@@ -20,13 +20,13 @@ namespace dyno
 		uint ny = distance.ny();
 		uint nz = distance.nz();
 
-		if (i >= nx || j >= ny|| k >= nz) return;
-		uint tId = i + j * nx  + k * ny  * nx ;
+		if (i >= nx || j >= ny || k >= nz) return;
+		uint tId = i + j * nx + k * ny * nx;
 		//hexahedronFlag[tId] = 0;
 
-		if (i >= nx - 1 || j >= ny - 1 || k >= nz -1) return;
+		if (i >= nx - 1 || j >= ny - 1 || k >= nz - 1) return;
 
-		
+
 		if (distance(i, j, k) == 1 &&
 			distance(i + 1, j, k) == 1 &&
 
@@ -106,15 +106,15 @@ namespace dyno
 
 
 		Coord point = minPoint + Coord(i * dx, j * dx, k * dx);
-	
+
 		Real a;
 		Coord normal;
 		inputSDF.getDistance(point, a, normal);
-	
+
 		if (a <= 0) {
 			atomicExch(&distance(i, j, k), 1);
 		}
-		
+
 
 
 		point = minPoint + Coord(i * dx + (j * dx) / tan(theta),
@@ -124,7 +124,7 @@ namespace dyno
 
 	template<typename TDataType>
 	SdfSampler<TDataType>::SdfSampler()
-		: Node()
+		: Sampler<TDataType>()
 	{
 		this->varSpacing()->setRange(0.02, 1);
 		this->varCubeTilt()->setRange(0, 80);
@@ -135,6 +135,8 @@ namespace dyno
 		this->varAlpha()->setRange(0, 360);
 		this->varBeta()->setRange(0, 360);
 		this->varGamma()->setRange(0, 360);
+
+		this->statePointSet()->promoteOuput();
 	}
 
 	template<typename TDataType>
@@ -236,9 +238,9 @@ namespace dyno
 		auto inputSDF = this->convert2Uniform(vol, dx);
 
 
-		if (this->outPointSet()->isEmpty()) {
+		if (this->statePointSet()->isEmpty()) {
 			auto pts = std::make_shared<PointSet<TDataType>>();
-			this->outPointSet()->setDataPtr(pts);
+			this->statePointSet()->setDataPtr(pts);
 		}
 
 		Coord minPoint = inputSDF->lowerBound();
@@ -282,7 +284,7 @@ namespace dyno
 			C_PointCount,
 			distance,
 			VerticesFlag);
-		
+
 
 		CArray<int> CVerticesFlag;
 		CVerticesFlag.assign(VerticesFlag);
@@ -305,7 +307,7 @@ namespace dyno
 			VerticesFlagScan);
 
 		if (vertices.size() >= 0) {
-			auto topo = this->outPointSet()->getDataPtr();
+			auto topo = this->statePointSet()->getDataPtr();
 			topo->setPoints(vertices);
 			topo->update();
 		}

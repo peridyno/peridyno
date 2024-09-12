@@ -68,7 +68,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//pointset_1->graphicsPipeline()->clear();
 
 	auto ghost2 = scn->addNode(std::make_shared<MakeGhostParticles<DataType3f>>());
-	pointset_1->stateGhostPointSet()->connect(ghost2->inPoints());
+	pointset_1->statePointSet()->connect(ghost2->inPoints());
 	pointset_1->statePointNormal()->connect(ghost2->stateNormal());
 
 	//Create a cube
@@ -118,7 +118,7 @@ std::shared_ptr<SceneGraph> createScene()
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->setColor(Color(0.6, 0.5, 0.2));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-		pointset_1->stateGhostPointSet()->connect(ptRender->inPointSet());
+		pointset_1->statePointSet()->connect(ptRender->inPointSet());
 		pointset_1->graphicsPipeline()->pushModule(ptRender);
 	}
 	return scn;

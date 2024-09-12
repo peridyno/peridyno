@@ -22,7 +22,8 @@
 #include "Sampler.h"
 #include "FilePath.h"
 #include "Topology/DistanceField3D.h"
-
+#include <Volume/VolumeOctree.h>
+#include "SdfSampler.h"
 namespace dyno
 {
 	struct GridIndex
@@ -31,7 +32,7 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	class PoissonDiskSampling : public Sampler<TDataType>
+	class PoissonDiskSampling : public SdfSampler<TDataType>
 	{
 		DECLARE_TCLASS(PoissonDiskSampling, TDataType);
 
@@ -45,12 +46,7 @@ namespace dyno
 		bool collisionJudge2D(Coord point);
 		bool collisionJudge(Coord point);
 
-		bool loadSdf();
-
-
-		DEF_VAR(Real, SamplingDistance, 0.005, "Sampling distance");
-
-		DEF_VAR(int, Dimension, 3, "Dimensions of sampling erea ");
+		std::shared_ptr<DistanceField3D<TDataType>> loadSdf();
 
 		DEF_VAR(Coord, Box_a, 0.0f, "Lower boudary of the sampling area");
 		DEF_VAR(Coord, Box_b, 0.1f, "Upper boundary of the sampling area");
@@ -60,13 +56,14 @@ namespace dyno
 
 		Real lerp(Real a, Real b, Real alpha);
 
-		Real getDistanceFromSDF(Coord &p, Coord &normal);
+		Real getDistanceFromSDF(Coord& p, Coord& normal);
 
 		std::shared_ptr<DistanceField3D<TDataType>>  getSDF() {
-			return m_SDF;
+			return inputSDF;
 		}
 
 		Coord getOnePointInsideSDF();
+
 	private:
 
 	protected:
@@ -76,14 +73,13 @@ namespace dyno
 		GridIndex searchGrid(Coord point);
 		int indexTransform(int i, int j, int k);
 
-
 		int pointNumberRecommend();
 
 		std::vector<int> m_grid;
 
 		int gnum;		//total number of grids
 		int nx, ny, nz;		//grid number 
- 
+
 		Coord area_a, area_b;	//box 
 
 		Coord seed_point;	// Initial point
@@ -92,17 +88,17 @@ namespace dyno
 
 		std::vector<Coord> points;
 
-		unsigned int desired_points;	
+		unsigned int desired_points;
 
 		GridIndex gridIndex;
 
 		unsigned int attempted_Times = 10;
 
-		std::shared_ptr<DistanceField3D<TDataType>> m_SDF;
+		std::shared_ptr<DistanceField3D<TDataType>> inputSDF;
 
 		bool SDF_flag = false;
 
-		DArray<Real> m_dist;  
+		DArray<Real> m_dist;
 
 
 		//SDF in host.

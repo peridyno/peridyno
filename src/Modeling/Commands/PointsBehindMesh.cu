@@ -9,8 +9,8 @@ namespace dyno
 	PointsBehindMesh<TDataType>::PointsBehindMesh()
 		: Node()
 	{
-		this->stateGhostPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
-		this->stateGhostPointSet()->promoteOuput();
+		this->statePointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+		this->statePointSet()->promoteOuput();
 
 		this->statePlane()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
@@ -39,7 +39,7 @@ namespace dyno
 		ptRender->setColor(Color(0, 0.5, 1));
 		ptRender->varPointSize()->setValue(0.005f);
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-		this->stateGhostPointSet()->connect(ptRender->inPointSet());
+		this->statePointSet()->connect(ptRender->inPointSet());
 		this->graphicsPipeline()->pushModule(ptRender);
 
 		m_NeighborPointQuery = std::make_shared<NeighborPointQuery<TDataType>>();
@@ -659,11 +659,11 @@ namespace dyno
 			);
 		}
 
-		auto& ghostPointSet = this->stateGhostPointSet()->getData();
+		auto& ghostPointSet = this->statePointSet()->getData();
 		this->statePosition()->getData().clear();
 		this->statePosition()->getData().assign(lastPoints);
-		this->stateGhostPointSet()->getData().clear();
-		this->stateGhostPointSet()->getData().setPoints(lastPoints);
+		this->statePointSet()->getData().clear();
+		this->statePointSet()->getData().setPoints(lastPoints);
 
 		this->outSamplingDistance()->setValue(this->varSamplingDistance()->getValue());
 		this->statePointBelongTriangleIndex()->assign(mPointOfTriangleId);

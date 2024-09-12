@@ -60,21 +60,15 @@ namespace dyno
 
 		DEF_VAR(bool, GeneratingDirection, true, "");
 
-
-
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
-
-
-		DEF_INSTANCE_STATE(PointSet<TDataType>, GhostPointSet, "");
+		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
 
 		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Plane, "");
 
-		DEF_ARRAY_STATE(Coord, PointNormal, DeviceType::GPU, "Normal Vector of Ghost Point");
-
-
+		DEF_ARRAY_STATE(Coord, PointNormal, DeviceType::GPU, "Normal Vector of the point set");
 
 		DEF_VAR_OUT(bool, PointGrowthDirection, "");
 

@@ -20,10 +20,12 @@
 #include <cmath>
 #include <Volume/VolumeOctree.h>
 
+#include "Sampler.h"
+
 namespace dyno {
 
 	template<typename TDataType>
-	class SdfSampler : public Node
+	class SdfSampler : public Sampler<TDataType>
 	{
 		DECLARE_TCLASS(SdfSampler, TDataType)
 	public:
@@ -45,15 +47,15 @@ namespace dyno {
 	public:
 		DEF_NODE_PORT(VolumeOctree<TDataType>, Volume, "");
 
-		DEF_INSTANCE_OUT(PointSet<TDataType>, PointSet, "");
+		//DEF_INSTANCE_OUT(PointSet<TDataType>, PointSet, "");
 
 		DEF_VAR(float, Spacing, Real(0.02), " ");
 
 		DEF_VAR(Vec3f, CubeTilt, 0, "Cube Init Rotation");
 
-		DEF_VAR(Vec3f, X, Coord(1, 0.0f, 0.0f), "Init X Rotation");
-		DEF_VAR(Vec3f, Y, Coord(0.0f, 1, 0.0f), "Init Y Rotation");
-		DEF_VAR(Vec3f, Z, Coord(0.0f, 0.0f, 1), "Init Z Rotation");
+		DEF_VAR(Vec3f, X, Coord(1, 0.0f, 0.0f), "Cube Init X Rotation");
+		DEF_VAR(Vec3f, Y, Coord(0.0f, 1, 0.0f), "Cube Init Y Rotation");
+		DEF_VAR(Vec3f, Z, Coord(0.0f, 0.0f, 1), "Cube Init Z Rotation");
 
 		DEF_VAR(Real, Alpha, Real(0), " ");
 		DEF_VAR(Real, Beta, Real(0), " ");

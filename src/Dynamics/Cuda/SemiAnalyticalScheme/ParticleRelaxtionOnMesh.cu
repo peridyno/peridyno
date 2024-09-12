@@ -176,12 +176,12 @@ namespace dyno
 
 		if (!this->statePosition()->isEmpty())
 		{
-			this->stateGhostPointSet()->getData().clear();
-			this->stateGhostPointSet()->getData().setPoints(this->statePosition()->getData());
+			this->statePointSet()->getData().clear();
+			this->statePointSet()->getData().setPoints(this->statePosition()->getData());
 		}
 		else
 		{
-			this->stateGhostPointSet()->getData().clear();
+			this->statePointSet()->getData().clear();
 		}
 	}
 
