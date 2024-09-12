@@ -33,7 +33,7 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
 	this->setRegistry(ret);
 
 	createNodeGraphView();
-	//reorderAllNodes();
+	reorderAllNodes();
 
 	//connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
 	//connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
@@ -68,7 +68,10 @@ void WtNodeFlowScene::createNodeGraphView()
 
 			Wt::WPointF posView(m->bx(), m->by());
 
-			//node.nodeGraphicsObject().setPos(posView);
+			node.nodeGraphicsObject().setPos(posView);
+			std::cout << "!!!" << std::endl;
+			std::cout << m->bx() << std::endl;
+			std::cout <<  m->by() << std::endl;
 			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
 			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
 		};
@@ -122,7 +125,7 @@ void WtNodeFlowScene::createNodeGraphView()
 								}
 							}
 						}
-						nodes.clear();
+						//nodes.clear();
 					}
 				}
 
@@ -181,13 +184,12 @@ void WtNodeFlowScene::createNodeGraphView()
 		createNodeConnections(it.get());
 	}
 
-	clearScene();
-
-	for (auto it = scn->begin(); it != scn->end(); it++)
-	{
-		auto node_ptr = it.get();
-		std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
-	}
+	//clearScene();
+	//for (auto it = scn->begin(); it != scn->end(); it++)
+	//{
+	//	auto node_ptr = it.get();
+	//	std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
+	//}
 
 	nodeMap.clear();
 }
@@ -300,8 +302,9 @@ void WtNodeFlowScene::addNodeByString(std::string NodeName)
 
 			Wt::WPointF posView(m->bx(), m->by());
 
-			//node.nodeGraphicsObject().setPos(posView);
+			node.nodeGraphicsObject().setPos(posView);
 
+			// signal
 			//this->nodePlaced(node);
 		};
 
@@ -341,24 +344,25 @@ void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)
 	auto& qNode = createNode(std::move(qNodeWidget), _painter);
 
 	//Calculate the position for the newly create node to avoid overlapping
-	//auto& _nodes = this->nodes();
-	//float y = -10000.0f;
-	//for (auto const& _node : _nodes)
-	//{
-	//	WtNodeGeometry& geo = _node.second->nodeGeometry();
-	//	WtNodeGraphicsObject& obj = _node.second->nodeGraphicsObject();
+	auto& _nodes = this->nodes();
+	float y = -10000.0f;
+	for (auto const& _node : _nodes)
+	{
+		WtNodeGeometry& geo = _node.second->nodeGeometry();
+		WtNodeGraphicsObject& obj = _node.second->nodeGraphicsObject();
 
-	//	float h = geo.height();
+		float h = geo.height();
 
-	//	//Wt::WPointF pos = obj.pos();
+		Wt::WPointF pos = obj.pos();
 
-	//	//y = std::max(y, float(pos.y() + h));
-	//}
+		y = std::max(y, float(pos.y() + h));
+	}
 
-	//Wt::WPointF posView(0.0f, y + 50.0f);
+	Wt::WPointF posView(0.0f, y + 50.0f);
 
-	//qNode.nodeGraphicsObject().setPos(posView);
+	qNode.nodeGraphicsObject().setPos(posView);
 
+	// signal
 	// emit nodePlaced(qNode);
 }
 
@@ -512,4 +516,182 @@ void WtNodeFlowScene::reorderAllNodes()
 	auto scn = dyno::SceneGraphFactory::instance()->active();
 
 	dyno::DirectedAcyclicGraph graph;
+
+	auto constructDAG = [&](std::shared_ptr<Node> nd) -> void
+		{
+			auto inId = nd->objectId();
+			auto ports = nd->getImportNodes();
+
+			graph.addOtherVertices(inId);
+			graph.removeID();
+
+			bool NodeConnection = false;
+			bool FieldConnection = false;
+
+			for (int i = 0; i < ports.size(); i++)
+			{
+				dyno::NodePortType pType = ports[i]->getPortType();
+
+				if (dyno::Single == pType)
+				{
+					auto node = ports[i]->getNodes()[0];
+					if (node != nullptr)
+					{
+						auto outId = node->objectId();
+
+						graph.addEdge(outId, inId);
+
+						graph.removeID(outId, inId);
+					}
+				}
+				else if (dyno::Multiple == pType)
+				{
+					auto& nodes = ports[i]->getNodes();
+
+					for (int j = 0; j < nodes.size(); j++)
+					{
+						if (nodes[j] != nullptr)
+						{
+							auto outId = nodes[j]->objectId();
+
+							graph.addEdge(outId, inId);
+							graph.removeID(outId, inId);
+						}
+					}
+					//nodes.clear();
+				}
+			}
+
+			auto fieldInp = nd->getInputFields();
+
+			for (int i = 0; i < fieldInp.size(); i++)//遍历每个Node的Inputfield
+			{
+				auto fieldSrc = fieldInp[i]->getSource();
+
+				if (fieldSrc != nullptr) {
+					auto parSrc = fieldSrc->parent();
+
+					if (parSrc != nullptr)
+					{
+						Node* nodeSrc = dynamic_cast<Node*>(parSrc);
+
+						// Otherwise parSrc is a field of Module
+						if (nodeSrc == nullptr)
+						{
+							dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+							if (moduleSrc != nullptr)
+								nodeSrc = moduleSrc->getParentNode();
+						}
+
+						if (nodeSrc != nullptr)
+						{
+							auto outId = nodeSrc->objectId();
+
+							graph.addEdge(outId, inId);
+
+							graph.removeID(outId, inId);
+						}
+					}
+				}
+			}
+		};
+
+	for (auto it = scn->begin(); it != scn->end(); it++)
+	{
+		constructDAG(it.get());
+	}
+
+	dyno::AutoLayoutDAG layout(&graph);
+	layout.update();
+
+	//Set up the mapping from ObjectId to QtNode
+	auto& _nodes = this->nodes();
+	std::map<dyno::ObjectId, WtNode*> qtNodeMapper;
+	std::map<dyno::ObjectId, Node*> nodeMapper;
+
+	for (auto const& _node : _nodes)
+	{
+		auto const& qtNode = _node.second;
+		auto model = qtNode->nodeDataModel();
+
+		auto nodeData = dynamic_cast<WtNodeWidget*>(model);
+
+		if (model != nullptr)
+		{
+			auto node = nodeData->getNode();
+			if (node != nullptr)
+			{
+				qtNodeMapper[node->objectId()] = qtNode.get();
+				nodeMapper[node->objectId()] = node.get();
+			}
+		}
+	}
+
+	float tempOffsetY = 0.0f;
+	float offsetX = 0.0f;
+
+	for (size_t l = 0; l < layout.layerNumber(); l++)
+	{
+		auto& xc = layout.layer(l);
+
+		float offsetY = 0.0f;
+		float xMax = 0.0f;
+
+		for (size_t index = 0; index < xc.size(); index++)
+		{
+			dyno::ObjectId id = xc[index];
+			if (qtNodeMapper.find(id) != qtNodeMapper.end())
+			{
+				WtNode* qtNode = qtNodeMapper[id];
+				WtNodeGeometry& geo = qtNode->nodeGeometry();
+
+				float w = geo.width();
+				float h = geo.height();
+
+				xMax = std::max(xMax, w);
+
+				Node* node = nodeMapper[id];
+
+				node->setBlockCoord(offsetX, offsetY);
+
+				offsetY += (h + mDy);
+			}
+		}
+
+		offsetX += (xMax + mDx);
+
+		tempOffsetY = std::max(tempOffsetY, offsetY);
+	}
+
+	//离散节点的排序
+	auto otherVertices = layout.getOtherVertices();
+	float width = 0;
+	float heigth = 0;
+	std::set<dyno::ObjectId>::iterator it;
+
+	float ofstY = tempOffsetY;
+	float ofstX = 0;
+
+	for (it = otherVertices.begin(); it != otherVertices.end(); it++)
+	{
+		dyno::ObjectId id = *it;
+
+		if (qtNodeMapper.find(id) != qtNodeMapper.end())
+		{
+			WtNode* qtNode = qtNodeMapper[id];
+			WtNodeGeometry& geo = qtNode->nodeGeometry();
+			width = geo.width();
+			heigth = geo.height();
+
+			Node* node = nodeMapper[id];
+
+			node->setBlockCoord(ofstX, ofstY);
+			ofstX += width + mDx;
+		}
+	}
+
+	qtNodeMapper.clear();
+	nodeMapper.clear();
+
+	updateNodeGraphView();
 }

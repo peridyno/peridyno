@@ -119,7 +119,7 @@ public:
 
 	void setHotKey1Hovered(bool h) { _hotKey1Hovered = h; }
 
-	void setPos(Wt::WPointF point);
+	void setPos(Wt::WPointF pos);
 
 	void setPos(int x, int y);
 
@@ -163,7 +163,6 @@ private:
 
 	int HelpTimerID = -1;
 	int PortTimerID = -1;
-
 
 	// use for move
 	Wt::WPointF _origin = Wt::WPointF(0, 0);

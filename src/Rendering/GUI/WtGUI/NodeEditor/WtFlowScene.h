@@ -108,6 +108,6 @@ private:
 	// which is why it comes first in the class.
 	std::shared_ptr<WtDataModelRegistry> _registry;
 
-	boost::unordered_map<boost::uuids::uuid, SharedConnection> _connections;
-	boost::unordered_map<boost::uuids::uuid, UniqueNode>       _nodes;
+	std::unordered_map<boost::uuids::uuid, SharedConnection> _connections;
+	std::unordered_map<boost::uuids::uuid, UniqueNode>       _nodes;
 };

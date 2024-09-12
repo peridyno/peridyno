@@ -551,15 +551,6 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _painter(painter)
 	, _locked(false)
 {
-	_origin.setX(150);
-	_origin.setY(0);
-	_painter->translate(_origin);
-
-	paint(_painter);
-
-	//_painter->translate(Wt::WPointF(-150, 0));
-
-
 
 	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);
 	//this->mouseMoved().connect(this, &WtNodeGraphicsObject::onMouseMove);
@@ -638,11 +629,30 @@ Wt::WPointF WtNodeGraphicsObject::pos() const
 	return _origin;
 }
 
+void WtNodeGraphicsObject::setPos(int x, int y)
+{
+	_origin.setX(x);
+	_origin.setY(y);
+	_painter->translate(_origin);
+	paint(_painter);
+	_origin.setX(-x);
+	_origin.setY(-y);
+	_painter->translate(_origin);
+}
+
+void WtNodeGraphicsObject::setPos(Wt::WPointF pos)
+{
+	_origin = pos;
+	_painter->translate(_origin);
+	paint(_painter);
+	_origin.setX(-pos.x());
+	_origin.setY(-pos.y());
+	_painter->translate(_origin);
+}
+
 void WtNodeGraphicsObject::onMouseWentDown(const Wt::WKeyEvent& event)
 {
 	//isDragging = true;
 	//mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
 	//mLastDelta = Wt::WPointF(0, 0);
-
-	std::cout << "hahahahah" << std::endl;
 }
