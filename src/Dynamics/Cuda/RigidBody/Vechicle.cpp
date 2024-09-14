@@ -103,6 +103,7 @@ namespace dyno
 		this->stateInstanceTransform()->connect(prRender->inTransform());
 		this->graphicsPipeline()->pushModule(prRender);
 
+		this->setForceUpdate(true);
 	}
 
 	template<typename TDataType>
