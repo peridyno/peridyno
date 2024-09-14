@@ -24,44 +24,20 @@ namespace dyno {
 		}
 		Curve(const Curve& curve);
 
-
 		~Curve() { };
 
-	public:
-
-
-
-	private:
-
-
-
-	public:
-	
-		//interface:
-
-		//Qt:
-
+		/**
+		 * @brief Resample Bezier curve.
+		 */
 		void updateResampleBezierCurve(std::vector<Coord2D>& myBezierPoint_H);
-
-
-		//Remapping Coord
-		
-		//IO
-		
+		/**
+		 * @brief Updating the data of a Field
+		 */
 		void UpdateFieldFinalCoord() override;
 
-		
-
 	private:
 
-
-
-
 	};
-
-
-
-
 
 	template<>
 	std::string FVar<Curve>::serialize()
@@ -73,14 +49,14 @@ namespace dyno {
 		this->getValue().convertCoordToStr("myHandlePoint", this->getValue().Curve::myHandlePoint, finalText);
 
 		//serialize Var
-		this->getValue().convertVarToStr("useCurve", this->getValue().useCurve, finalText);
+		this->getValue().convertVarToStr("useCurve", this->getValue().useBezierInterpolation, finalText);
 		this->getValue().convertVarToStr("resample", this->getValue().resample, finalText);
 		this->getValue().convertVarToStr("useSquard", this->getValue().useSquard, finalText);
 		this->getValue().convertVarToStr("Spacing", this->getValue().Spacing, finalText);
 
 		this->getValue().convertVarToStr("NminX", this->getValue().NminX, finalText);
 		this->getValue().convertVarToStr("NmaxX", this->getValue().NmaxX, finalText);
-		this->getValue().convertVarToStr("NminY", this->getValue().NminY, finalText);
+		this->getValue().convertVarToStr("NminY", this->getValue().mNewMinY, finalText);
 		this->getValue().convertVarToStr("NmaxY", this->getValue().NmaxY, finalText);
 
 		this->getValue().convertVarToStr("curveClose", this->getValue().curveClose, finalText);
@@ -88,7 +64,6 @@ namespace dyno {
 		this->getValue().convertVarToStr("lockSize", this->getValue().lockSize, finalText);
 		this->getValue().convertVarToStr("useColseButton", this->getValue().useColseButton, finalText);
 		this->getValue().convertVarToStr("useSquardButton", this->getValue().useSquardButton, finalText);
-
 
 		{
 			finalText.append("remapRange");
@@ -161,7 +136,7 @@ namespace dyno {
 				}
 			}
 			else if (currentVarName == "useCurve")
-				ramp->setVarByStr(substr, ramp->useCurve);
+				ramp->setVarByStr(substr, ramp->useBezierInterpolation);
 			else if (currentVarName == "resample")
 				ramp->setVarByStr(substr, ramp->resample);
 			else if (currentVarName == "useSquard")
@@ -173,7 +148,7 @@ namespace dyno {
 			else if (currentVarName == "NmaxX")
 				ramp->setVarByStr(substr, ramp->NmaxX);
 			else if (currentVarName == "NminY")
-				ramp->setVarByStr(substr, ramp->NminY);
+				ramp->setVarByStr(substr, ramp->mNewMinY);
 			else if (currentVarName == "NmaxY")
 				ramp->setVarByStr(substr, ramp->NmaxY);
 			else if (currentVarName == "curveClose")

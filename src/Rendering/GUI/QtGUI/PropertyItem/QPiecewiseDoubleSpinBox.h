@@ -195,9 +195,9 @@ namespace dyno
 
 			this->setLayout(layout);
 
-			v0 = new QPiecewiseDoubleSpinBox;
-			v1 = new QPiecewiseDoubleSpinBox;
-			v2 = new QPiecewiseDoubleSpinBox;
+			v0 = new QPiecewiseDoubleSpinBox(parent);
+			v1 = new QPiecewiseDoubleSpinBox(parent);
+			v2 = new QPiecewiseDoubleSpinBox(parent);
 
 			setRange(-999999,999999);
 
@@ -287,7 +287,7 @@ namespace dyno
 
 			this->setLayout(layout);
 
-			spinBox = new QPiecewiseDoubleSpinBox;
+			spinBox = new QPiecewiseDoubleSpinBox(parent);
 			spinBox->setValue(value);
 
 			spinBox->setRange(-99999999, 99999999);
@@ -349,9 +349,9 @@ namespace dyno
 
 			this->setLayout(layout);
 
-			v0 = new QPiecewiseDoubleSpinBox;
-			v1 = new QPiecewiseDoubleSpinBox;
-			v2 = new QPiecewiseDoubleSpinBox;
+			v0 = new QPiecewiseDoubleSpinBox(parent);
+			v1 = new QPiecewiseDoubleSpinBox(parent);
+			v2 = new QPiecewiseDoubleSpinBox(parent);
 
 			v0->setValue(v[0]);
 			v1->setValue(v[1]);

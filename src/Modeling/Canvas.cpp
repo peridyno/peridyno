@@ -278,7 +278,7 @@ void dyno::Canvas::buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet)
 
 void dyno::Canvas::setInterpMode(bool useBezier)
 {
-	useCurve = useBezier;
+	useBezierInterpolation = useBezier;
 	if (useBezier)
 	{
 		this->mInterpMode = Interpolation::Bezier;

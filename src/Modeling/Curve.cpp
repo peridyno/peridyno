@@ -32,7 +32,7 @@ namespace dyno {
 		this->remapRange[8] = curve.mInterpMode;// "MinX","MinY","MaxX","MaxY"
 
 		this->lockSize = curve.lockSize;
-		this->useCurve = curve.useCurve;
+		this->useBezierInterpolation = curve.useBezierInterpolation;
 
 		this->useSquard = curve.useSquard;
 		this->curveClose = curve.curveClose;
@@ -45,7 +45,7 @@ namespace dyno {
 
 		this->NminX = curve.NminX;
 		this->NmaxX = curve.NmaxX;
-		this->NminY = curve.NminY;
+		this->mNewMinY = curve.mNewMinY;
 		this->NmaxY = curve.NmaxY;
 
 		this->segment = curve.segment;
@@ -98,7 +98,7 @@ namespace dyno {
 		for (size_t i = 0; i < mFinalCoord.size(); i++)
 		{
 			mFinalCoord[i].x = (NmaxX - NminX) * mFinalCoord[i].x + NminX;
-			mFinalCoord[i].y = (NmaxY - NminY) * mFinalCoord[i].y + NminY;
+			mFinalCoord[i].y = (NmaxY - mNewMinY) * mFinalCoord[i].y + mNewMinY;
 		}
 
 

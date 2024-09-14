@@ -38,7 +38,7 @@ namespace dyno {
 		this->remapRange[8] = ramp.mInterpMode;// "MinX","MinY","MaxX","MaxY"
 
 		this->lockSize = ramp.lockSize;
-		this->useCurve = ramp.useCurve;
+		this->useBezierInterpolation = ramp.useBezierInterpolation;
 
 		this->useSquard = ramp.useSquard;
 		this->curveClose = ramp.curveClose;
@@ -51,7 +51,7 @@ namespace dyno {
 
 		this->NminX = ramp.NminX;
 		this->NmaxX = ramp.NmaxX;
-		this->NminY = ramp.NminY;
+		this->mNewMinY = ramp.mNewMinY;
 		this->NmaxY = ramp.NmaxY;
 
 		this->segment = ramp.segment;
@@ -104,7 +104,7 @@ namespace dyno {
 
 		if (resample) 
 		{
-			if (useCurve) 
+			if (useBezierInterpolation)
 			{
 				updateResampleBezierCurve();
 				resamplePointFromLine(myBezierPoint_H);
@@ -274,7 +274,7 @@ namespace dyno {
 
 		mFinalCoord.clear();
 
-		if (useCurve )
+		if (useBezierInterpolation)
 		{
 			if (resample) 
 			{
@@ -289,7 +289,7 @@ namespace dyno {
 				mFinalCoord.assign(mBezierPoint.begin(), mBezierPoint.end());
 			}
 		}
-		else if ( !useCurve ) 
+		else if ( !useBezierInterpolation)
 		{
 
 			if (resample) 
@@ -311,7 +311,7 @@ namespace dyno {
 		for (size_t i = 0; i < mFinalCoord.size(); i++)
 		{
 			mFinalCoord[i].x = (NmaxX - NminX) * mFinalCoord[i].x + NminX;
-			mFinalCoord[i].y = (NmaxY - NminY) * mFinalCoord[i].y + NminY;
+			mFinalCoord[i].y = (NmaxY - mNewMinY) * mFinalCoord[i].y + mNewMinY;
 		}
 
 

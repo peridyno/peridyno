@@ -2,7 +2,7 @@
  * Program:   Qt-based widget to visualize Vec3f or Vec3d
  * Module:    QVector3FieldWidget.h
  *
- * Copyright 2023 Xiaowei He
+ * Copyright 2023 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -20,123 +20,31 @@ namespace dyno {
 		Ramp(Direction dir);
 		Ramp(const Ramp& ramp);
 
-
 		~Ramp() { ; };
 
-		//Ramp
+		/**
+		 * @brief Get the value value"Y" of the curve by value"X" .
+		 */
 		float getCurveValueByX(float inputX);
+		/**
+		 * @brief Update the data of the Bezier curve points.
+		 */
+		void updateBezierCurve()override;
 
-		void updateBezierCurve();
 		double calculateLengthForPointSet(std::vector<Coord2D> BezierPtSet);
-
-
-
+		/**
+		 * @brief Resample Bezier curve.
+		 */
 		void updateResampleBezierCurve();
-
-
-		void setRange_MinX(float min, float max) { remapRange[0] = min; remapRange[1] = max; }// "MinX", "MinY", "MaxX", "MaxY"
-		void setRange_MaxX(float min, float max) { remapRange[4] = min; remapRange[5] = max; }
-		void setRange_MinY(float min, float max) { remapRange[2] = min; remapRange[3] = max; }
-		void setRange_MaxY(float min, float max) { remapRange[6] = min; remapRange[7] = max; }
-		void setRange(float min, float max) { setRange_MinX(min, max); setRange_MaxX(min, max); setRange_MinY(min, max); setRange_MaxY(min, max); };
-
+		/**
+		 * @brief Reordering points on canvas boundaries.
+		 */		
 		void borderCloseResort();
-
-
-		/*void convertCoordToStr(std::string VarName, std::vector<Ramp::Coord2D> Array, std::string& Str)
-		{
-			Str.append(VarName + " ");
-			for (int i = 0; i < Array.size(); i++)
-			{
-				std::string tempTextX = std::to_string(Array[i].x);
-				std::string tempTextY = std::to_string(Array[i].y);
-				Str.append(tempTextX + " " + tempTextY);
-				if (i != Array.size() - 1)
-				{
-					Str.append(" ");
-				}
-			}
-			Str.append(" ");
-		}
-
-		template <typename T>
-		void convertVarToStr(std::string VarName, T value, std::string& Str)
-		{
-			int temp = int(value);
-			Str.append(VarName + " ");
-			Str.append(std::to_string(temp));
-			Str.append(" ");
-			std::cout << std::endl << Str;
-		}
-
-		template<>
-		void convertVarToStr(std::string VarName, float value, std::string& Str)
-		{
-			Str.append(VarName + " ");
-			Str.append(std::to_string(value));
-			Str.append(" ");
-			std::cout << std::endl << Str;
-		}
-
-		template<>
-		void convertVarToStr(std::string VarName, double value, std::string& Str)
-		{
-			Str.append(VarName + " ");
-			Str.append(std::to_string(value));
-			Str.append(" ");
-			std::cout << std::endl << Str;
-		}
-
-
-		void setVarByStr(std::string Str, double& value)
-		{
-			if (std::isdigit(Str[0]) | (Str[0] == '-'))
-			{
-				value = std::stod(Str);
-			}
-			return;
-		}
-		void setVarByStr(std::string Str, float& value)
-		{
-			if (std::isdigit(Str[0]) | (Str[0] == '-'))
-			{
-				value = float(std::stod(Str));
-			}
-			return;
-		}
-		void setVarByStr(std::string Str, int& value)
-		{
-			if (std::isdigit(Str[0]) | (Str[0] == '-'))
-			{
-				value = std::stoi(Str);
-			}
-			return;
-		}
-
-		void setVarByStr(std::string Str, bool& value)
-		{
-			if (std::isdigit(Str[0]))
-			{
-				value = bool(std::stoi(Str));
-			}
-			return;
-		}
-
-		void setVarByStr(std::string Str, Interpolation& value)
-		{
-			if (std::isdigit(Str[0]))
-			{
-				value = Interpolation(std::stoi(Str));
-			}
-			return;
-		}*/
-
-
-
-
-
-
+		/**
+		 * @brief Updating the data of a Field
+		 */
 		void UpdateFieldFinalCoord() override;
+
 	public:
 		//ave
 		Direction Dirmode = x;
@@ -208,7 +116,7 @@ namespace dyno {
 				}
 			}
 			else if (currentVarName == "useCurve")
-				ramp->setVarByStr(substr, ramp->useCurve);
+				ramp->setVarByStr(substr, ramp->useBezierInterpolation);
 			else if (currentVarName == "resample")
 				ramp->setVarByStr(substr, ramp->resample);
 			else if (currentVarName == "useSquard")
@@ -220,7 +128,7 @@ namespace dyno {
 			else if (currentVarName == "NmaxX")
 				ramp->setVarByStr(substr, ramp->NmaxX);
 			else if (currentVarName == "NminY")
-				ramp->setVarByStr(substr, ramp->NminY);
+				ramp->setVarByStr(substr, ramp->mNewMinY);
 			else if (currentVarName == "NmaxY")
 				ramp->setVarByStr(substr, ramp->NmaxY);
 			else if (currentVarName == "curveClose")

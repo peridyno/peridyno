@@ -115,8 +115,8 @@ namespace dyno {
 
 		//
 		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord(); }
-		void remapY(double minY, double maxY) { NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
-		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; NminY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
+		void remapY(double minY, double maxY) { mNewMinY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
+		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; mNewMinY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
 		
 		void setRange_MinX(float min, float max) { remapRange[0] = min; remapRange[1] = max; }// "MinX", "MinY", "MaxX", "MaxY"
 		void setRange_MaxX(float min, float max) { remapRange[4] = min; remapRange[5] = max; }
@@ -267,11 +267,11 @@ namespace dyno {
 
 		double NminX = 0;
 		double NmaxX = 1;
-		double NminY = 0;
+		double mNewMinY = 0;
 		double NmaxY = 1;
 
 		bool lockSize = false;
-		bool useCurve = false;
+		bool useBezierInterpolation = false;
 		bool resample = true;
 		bool curveClose = false;
 		bool useColseButton = true;
