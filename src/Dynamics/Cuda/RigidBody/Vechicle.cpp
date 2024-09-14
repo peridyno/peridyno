@@ -61,7 +61,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<PCGConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -576,6 +576,7 @@ namespace dyno
 				auto type = rigidInfo[i].shapeType;
 				auto shapeId = rigidInfo[i].meshShapeId;
 				auto transform = rigidInfo[i].transform;
+				Real density = rigidInfo[i].mDensity;
 
 				if (shapeId > texMesh->shapes().size() - 1)
 					continue;
@@ -611,7 +612,7 @@ namespace dyno
 						currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat1f(transform.rotation());
 
-						Actors[i] = this->addBox(currentBox, rigidbody, 100);
+						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
 					case dyno::Tet:
@@ -624,7 +625,7 @@ namespace dyno
 						currentCapsule.halfLength = (up.y - down.y) / 2 * rigidInfo[i].capsuleLength;
 						currentCapsule.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
-						Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
@@ -632,7 +633,7 @@ namespace dyno
 						currentSphere.rot = Quat1f(transform.rotation());
 						currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
-						Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
 					case dyno::Tri:
@@ -658,7 +659,7 @@ namespace dyno
 						currentBox.halfLength = rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 
-						Actors[i] = this->addBox(currentBox, rigidbody, 100);
+						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
 					case dyno::Tet:
@@ -676,7 +677,7 @@ namespace dyno
 						currentCapsule.halfLength = rigidInfo[i].capsuleLength;
 						currentCapsule.radius = rigidInfo[i].radius;
 
-						Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
@@ -684,7 +685,7 @@ namespace dyno
 						currentSphere.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 						currentSphere.radius = rigidInfo[i].radius;
 
-						Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
 					case dyno::Tri:
@@ -723,7 +724,7 @@ namespace dyno
 				if (Actors[first] == NULL || Actors[second] == NULL)
 					continue;
 
-				//joint (Actor,Actor)
+
 				if (type == Hinge)
 				{
 					auto& joint = this->createHingeJoint(Actors[first], Actors[second]);
@@ -733,6 +734,7 @@ namespace dyno
 						joint.setMoter(speed);
 					if (jointInfo[i].mUseRange)
 						joint.setRange(jointInfo[i].mMin, jointInfo[i].mMax);
+
 				}
 				if (type == Slider)
 				{
@@ -761,6 +763,8 @@ namespace dyno
 				}
 
 				//Joint(Actor)
+		
+				
 
 
 			}
