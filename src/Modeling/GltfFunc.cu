@@ -249,7 +249,7 @@ namespace dyno
 			const float* dataPtr = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 
 			for (size_t i = 0; i < accessor.count; ++i) {
-				result.push_back(Quat<float>(dataPtr[i * 4 + 0], dataPtr[i * 4 + 1], dataPtr[i * 4 + 2], dataPtr[i * 4 + 3]));
+				result.push_back(Quat<float>(dataPtr[i * 4 + 0], dataPtr[i * 4 + 1], dataPtr[i * 4 + 2], dataPtr[i * 4 + 3]).normalize());
 			}
 		}
 
@@ -380,6 +380,7 @@ namespace dyno
 		tinygltf::Model model
 	)
 	{
+		
 		for (size_t k = 0; k < all_Joints.size(); k++)
 		{
 			joint jId = all_Joints[k];

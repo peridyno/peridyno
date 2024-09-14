@@ -112,7 +112,7 @@ namespace dyno
 		DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
-		
+		DEF_INSTANCE_STATE(JointAnimationInfo, Animation,"");
 
 
 	protected:
@@ -154,8 +154,8 @@ namespace dyno
 		std::vector<std::string> Scene_Name;
 		std::map<joint, std::string> joint_Name;
 
-		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,//�����任����
-		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,//����ʱ���
+		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,
+		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,
 		
 		std::vector<int> all_Nodes;
 		std::vector<joint> all_Joints;
@@ -195,7 +195,7 @@ namespace dyno
 
 		void InitializationData();
 
-		std::vector<int> getJointDirByJointIndex(int Index);
+
 
 		void updateAnimationMatrix(const std::vector<joint>& all_Joints, int currentframe);
 
