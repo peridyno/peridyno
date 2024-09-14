@@ -134,7 +134,7 @@ namespace dyno
 					mtl->texColor.bind(GL_TEXTURE10);
 				}
 				else {
-					mShaderProgram->setInt("uColorMode", 0);
+					mShaderProgram->setInt("uColorMode", 1);
 				}
 
 				if (mtl->texBump.isValid()) {
