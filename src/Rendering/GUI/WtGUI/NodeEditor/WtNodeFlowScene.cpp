@@ -69,9 +69,6 @@ void WtNodeFlowScene::createNodeGraphView()
 			Wt::WPointF posView(m->bx(), m->by());
 
 			node.nodeGraphicsObject().setPos(posView);
-			std::cout << "!!!" << std::endl;
-			std::cout << m->bx() << std::endl;
-			std::cout <<  m->by() << std::endl;
 			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
 			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
 		};

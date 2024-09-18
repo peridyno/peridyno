@@ -84,7 +84,7 @@ static void drawHoveredOrSelected(Wt::WPainter* painter, WtConnection const& con
 
 		p.setWidth(2 * lineWidth);
 		p.setColor(Wt::WColor(Wt::StandardColor::Red));
-		//p.setColor(selected ? connectionStyle.selectedHaloColor() : connectionStyle.hoveredColor());
+		p.setColor(selected ? connectionStyle.selectedHaloColor() : connectionStyle.hoveredColor());
 
 		painter->setPen(p);
 		painter->setBrush(Wt::BrushStyle::None);
@@ -136,7 +136,9 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 	auto const& graphicsObject = connection.getConnectionGraphicsObject();
 	bool const selected = graphicsObject.isSelected();
 
+	// bug
 	auto cubic = cubicPath(geom);
+
 	if (gradientColor)
 	{
 		painter->setBrush(Wt::BrushStyle::None);
@@ -163,8 +165,9 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 				p.setColor(Wt::WColor(Wt::StandardColor::Red));
 				painter->setPen(p);
 			}
-			//painter->drawLine(cubic.pointAtPercent(ratioPrev),
-			//	cubic.pointAtPercent(ratio));
+			//painter->drawLine(cubic.pointAtPercent(ratioPrev), cubic.pointAtPercent(ratio));
+			painter->drawLine(Wt::WPointF(10, 10), Wt::WPointF(100, 100));
+			//painter->drawPath(cubic);
 		}
 
 		{
@@ -187,7 +190,7 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 
 		painter->setPen(p);
 		painter->setBrush(Wt::BrushStyle::None);
-
+		std::cout << "!!!!!!" << std::endl;
 		painter->drawPath(cubic);
 	}
 }
@@ -323,5 +326,5 @@ void WtConnectionGraphicsObject::addGraphicsEffect()
 
 bool WtConnectionGraphicsObject::isSelected() const
 {
-	return true;
+	return false;
 }
