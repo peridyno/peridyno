@@ -3,7 +3,9 @@
 
 #include <ObjIO/TexturedMesh.h>
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 using namespace std;
 using namespace dyno;
