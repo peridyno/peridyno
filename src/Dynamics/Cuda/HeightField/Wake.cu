@@ -151,10 +151,10 @@ namespace dyno
 
 			uint num = indices.size();
 
-			if (mDeviceGrid.nx() != mWeight.nx() || mDeviceGrid.ny() != mWeight.ny())
+			if (this->mDeviceGrid.nx() != mWeight.nx() || this->mDeviceGrid.ny() != mWeight.ny())
 			{
-				mWeight.resize(mDeviceGrid.nx(), mDeviceGrid.ny());
-				mSource.resize(mDeviceGrid.nx(), mDeviceGrid.ny());
+				mWeight.resize(this->mDeviceGrid.nx(), this->mDeviceGrid.ny());
+				mSource.resize(this->mDeviceGrid.nx(), this->mDeviceGrid.ny());
 			}
 
 			mWeight.reset();
@@ -164,7 +164,7 @@ namespace dyno
 				W_AccumlateTrails,
 				mSource,
 				mWeight,
-				mDeviceGrid,
+				this->mDeviceGrid,
 				vertices,
 				indices,
 				waveOrigin,
@@ -175,14 +175,14 @@ namespace dyno
 
 			Real mag = this->varMagnitude()->getValue();
 
-			cuExecute2D(make_uint2(mDeviceGrid.nx(), mDeviceGrid.ny()),
+			cuExecute2D(make_uint2(this->mDeviceGrid.nx(), this->mDeviceGrid.ny()),
 				W_AddTrails,
 				mSource,
 				mWeight,
-				mDeviceGrid,
+				this->mDeviceGrid,
 				mag);
 
-			mDeviceGridNext.assign(mDeviceGrid);
+			this->mDeviceGridNext.assign(this->mDeviceGrid);
 		}
 	}
 

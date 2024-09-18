@@ -97,8 +97,8 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	CodimensionalPD<TDataType>::CodimensionalPD(Real Xi_IN, Real E_IN, Real kb_IN, Real timeStep = 1e-3,
-		std::string name = "default"): TriangularSystem<TDataType>(){
+	CodimensionalPD<TDataType>::CodimensionalPD(Real Xi_IN, Real E_IN, Real kb_IN, Real timeStep,
+		std::string name): TriangularSystem<TDataType>(){
 
 		this->varHorizon()->setValue(0.0085);
 		auto interaction = std::make_shared<DragVertexInteraction<TDataType>>();

@@ -90,7 +90,7 @@ namespace dyno {
 			std::cout << std::endl << Str;
 		}
 
-		template<>
+		//template<>
 		void convertVarToStr(std::string VarName, float value, std::string& Str)
 		{
 			Str.append(VarName + " ");
@@ -99,7 +99,7 @@ namespace dyno {
 			std::cout << std::endl << Str;
 		}
 
-		template<>
+		//template<>
 		void convertVarToStr(std::string VarName, double value, std::string& Str)
 		{
 			Str.append(VarName + " ");
@@ -232,7 +232,7 @@ namespace dyno {
 	};
 
 	template<>
-	bool FVar<Ramp>::deserialize(const std::string& str)
+	inline bool FVar<Ramp>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;

@@ -99,14 +99,14 @@ namespace dyno
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
-		//SplineÂ·¾¶ÇúÏß ÇúÏßµã
+		//SplineÂ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ßµï¿½
 		CArray<Coord> c_point1;
 
 		c_point1.assign(SplineIn);
 
 		int lengthV = SplineIn.size();
 		totalIndex = lengthV;
-		//Curve2»·ÐÎÇúÏß ÇúÏßµã
+		//Curve2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ßµï¿½
 
 		CArray<Coord> c_point2;
 		c_point2.assign(VertexIn2);
@@ -124,7 +124,7 @@ namespace dyno
 		Coord LocationTemp2 = {0,1,0};
 
 
-		//½¨Á¢ËÄÔªÊýÒÔ½øÐÐµÝ¹é±ä»»
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôªï¿½ï¿½ï¿½Ô½ï¿½ï¿½ÐµÝ¹ï¿½ä»»
 
 
 		for (size_t i = 0; i < lengthV; i++) 
@@ -232,7 +232,7 @@ namespace dyno
 
 		//Transform
 
-		Quat<Real> q2 = computeQuaternion();
+		Quat<Real> q2 = this->computeQuaternion();
 
 		q2.normalize();
 
@@ -278,14 +278,16 @@ namespace dyno
 	template<typename TDataType>
 	void SweepModel<TDataType>::displayChanged()
 	{
-		auto SurfaceModule = this->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	
+		auto SurfaceModule = this->graphicsPipeline()->template findFirstModule<dyno::GLSurfaceVisualModule>();
 		SurfaceModule->setVisible(this->varDisplaySurface()->getValue());
 
-		auto wireModule = this->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
+		auto wireModule = this->graphicsPipeline()->template findFirstModule<dyno::GLWireframeVisualModule>();
 		wireModule->setVisible(this->varDisplayWireframe()->getValue());
 	
-		auto pointModule = this->graphicsPipeline()->findFirstModule<GLPointVisualModule>();
-		pointModule->setVisible(this->varDisplayPoints()->getValue());
+		auto pointModule = this->graphicsPipeline()->template findFirstModule<dyno::GLPointVisualModule>();
+		pointModule->setVisible(this->varDisplayPoints()->getValue());	
+		
 	}
 
 	DEFINE_CLASS(SweepModel);

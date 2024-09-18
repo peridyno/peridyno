@@ -26,7 +26,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename Transform<Real, 3> Transform;
+		typedef typename ::dyno::Transform<Real, 3> Transform;
 
 		ComputeParticleAnisotropy();
 		~ComputeParticleAnisotropy();

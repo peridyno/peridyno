@@ -23,38 +23,38 @@ namespace dyno
 
 #define cuIntegralAdh(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == 0)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::integral(r, h, s);	\
 			};																\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, this->mScalingFactor);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == 1)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::integral(r, h, s);					\
 			};															\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, this->mScalingFactor);	\
 		}																\
 		cuSynchronize();												\
 	}
 
 #define cuIntegral(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == 0)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::integral(r, h, s);	\
 			};																\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, this->mScalingFactor);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == 1)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::integral(r, h, s);					\
 			};															\
-			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, mScalingFactor);	\
+			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, this->mScalingFactor);	\
 		}																\
 		cuSynchronize();												\
 	}

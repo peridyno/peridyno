@@ -32,7 +32,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TopologyModule::Triangle Triangle;
-		typedef typename TAlignedBox3D<Real> AABB;
+		typedef typename ::dyno::TAlignedBox3D<Real> AABB;
 
 		NeighborTriangleQuery();
 		~NeighborTriangleQuery() override;

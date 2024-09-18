@@ -2084,7 +2084,7 @@ namespace dyno
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, triA, triB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, triA, triB, radiusA, radiusB, edgeA, edgeB); };
-        auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, triA, triB, radiusA, radiusB, face, type); };
+        auto checkAxisT = [&](Triangle3D face, SeparationType type) { checkAxisTri(sat, triA, triB, radiusA, radiusB, face, type); };
         
         // Minkowski Face Normal
         // tri face
@@ -2194,7 +2194,7 @@ namespace dyno
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, tetA, triB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, tetA, triB, radiusA, radiusB, edgeA, edgeB); };
-        auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, tetA, triB, radiusA, radiusB, face, type); };
+        auto checkAxisT = [&](Triangle3D face, SeparationType type) { checkAxisTri(sat, tetA, triB, radiusA, radiusB, face, type); };
 
         // Minkowski Face Normal
         // face
@@ -2459,7 +2459,7 @@ namespace dyno
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, tetA, tetB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, tetA, tetB, radiusA, radiusB, edgeA, edgeB); };
-        auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, tetA, tetB, radiusA, radiusB, face, type); };
+        auto checkAxisT = [&](Triangle3D face, SeparationType type) { checkAxisTri(sat, tetA, tetB, radiusA, radiusB, face, type); };
 
         // Minkowski Face Normal
         // tet face
@@ -2722,7 +2722,7 @@ namespace dyno
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, boxA, boxB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, boxA, boxB, radiusA, radiusB, edgeA, edgeB); };
-        auto checkAxisR = [&](Rectangle3D face, auto type) { checkAxisRect(sat, boxA, boxB, radiusA, radiusB, face, type); };
+        auto checkAxisR = [&](Rectangle3D face, SeparationType type) { checkAxisRect(sat, boxA, boxB, radiusA, radiusB, face, type); };
 
         // Minkowski Face Normal
         // face

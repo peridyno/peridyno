@@ -339,7 +339,7 @@ namespace dyno
 						//reigon 7
 						t = 0.0;
 						nd = -d;
-						if (REAL_LESS(nd, 0.0) || REAL_EQUAL(0.0)) {
+						if (REAL_LESS(nd, 0.0) || REAL_EQUAL(nd, 0.0)) {
 							s = 0.0;
 						}
 						else if(REAL_GREAT(nd,a)||REAL_EQUAL(nd,a)){

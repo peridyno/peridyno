@@ -140,7 +140,7 @@ namespace dyno
 			this->tick();
 		}
 
-		std::string serialize()
+		inline std::string serialize()
 		{
 			if (isEmpty())
 				return "";
@@ -153,7 +153,7 @@ namespace dyno
 			return ss.str();
 		}
 
-		bool deserialize(const std::string& str)
+		inline bool deserialize(const std::string& str)
 		{
 			if (str.empty())
 				return false;

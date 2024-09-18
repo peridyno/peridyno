@@ -74,7 +74,8 @@ namespace dyno {
 		};
 
 		//Shape:
-		Name_Shape shapeName = "";
+		Name_Shape shapeName;
+
 
 		int meshShapeId = -1;
 		ConfigShapeType shapeType = ConfigShapeType::Capsule;

@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
+#include <cstring> 
 
 namespace dyno {
 

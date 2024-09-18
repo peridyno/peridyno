@@ -39,8 +39,9 @@ namespace dyno
 		uint height();
 
 		DArray2D<Coord>& getDisplacement() { return mDisplacement; }
+		DArray2D<Real>& getHeights() { return mHeights; }
 
-		DArray2D<Real>& calculateHeightField();
+		void calculateHeightField();
 
 	protected:
 		Coord mOrigin;

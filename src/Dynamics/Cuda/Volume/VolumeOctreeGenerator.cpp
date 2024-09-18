@@ -212,14 +212,14 @@ namespace dyno
 			grid_total_num = grid0.size() + grid1.size() + gridT.size();
 			grid_total.resize(grid_total_num);
 			grid_total_value.resize(grid_total_num);
-			m_object.resize(grid_total_num);
-			m_normal.resize(grid_total_num);
+			this->m_object.resize(grid_total_num);
+			this->m_normal.resize(grid_total_num);
 
 			VolumeHelper<TDataType>::collectionGridsThree(
 				grid_total,
 				grid_total_value,
-				m_object,
-				m_normal,
+				this->m_object,
+				this->m_normal,
 				grid0,
 				grid0_value,
 				grid0_object,
@@ -295,14 +295,14 @@ namespace dyno
 			grid_total_num = grid0.size() + grid1.size() + grid2.size() + gridT.size();
 			grid_total.resize(grid_total_num);
 			grid_total_value.resize(grid_total_num);
-			m_object.resize(grid_total_num);
-			m_normal.resize(grid_total_num);
+			this->m_object.resize(grid_total_num);
+			this->m_normal.resize(grid_total_num);
 
 			VolumeHelper<TDataType>::collectionGridsFour(
 				grid_total,
 				grid_total_value,
-				m_object,
-				m_normal,
+				this->m_object,
+				this->m_normal,
 				grid0,
 				grid0_value,
 				grid0_object,
@@ -412,14 +412,14 @@ namespace dyno
 			grid_total_num = grid0.size() + grid1.size() + grid2.size() + grid3.size() + gridT.size();
 			grid_total.resize(grid_total_num);
 			grid_total_value.resize(grid_total_num);
-			m_object.resize(grid_total_num);
-			m_normal.resize(grid_total_num);
+			this->m_object.resize(grid_total_num);
+			this->m_normal.resize(grid_total_num);
 
 			VolumeHelper<TDataType>::collectionGridsFive(
 				grid_total,
 				grid_total_value,
-				m_object,
-				m_normal,
+				this->m_object,
+				this->m_normal,
 				grid0,
 				grid0_value,
 				grid0_object,

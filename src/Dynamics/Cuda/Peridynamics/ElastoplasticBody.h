@@ -1,6 +1,5 @@
 #pragma once
-#include "Particlesystem/ParticleSystem.h"
-
+#include "ParticleSystem/ParticleSystem.h"
 #include "Bond.h"
 
 namespace dyno
@@ -16,7 +15,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TBond<TDataType> Bond;
+		typedef typename dyno::TBond<TDataType> Bond;
 
 		ElastoplasticBody();
 		~ElastoplasticBody() override;

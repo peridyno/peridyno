@@ -3,7 +3,7 @@
 namespace dyno 
 {
 	template<>
-	std::string FVar<bool>::serialize()
+	inline std::string FVar<bool>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -13,7 +13,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<bool>::deserialize(const std::string& str)
+	inline bool FVar<bool>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -25,7 +25,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<int>::serialize()
+	inline std::string FVar<int>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -39,7 +39,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<int>::deserialize(const std::string& str)
+	inline bool FVar<int>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -51,7 +51,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<uint>::serialize()
+	inline std::string FVar<uint>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -65,7 +65,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<uint>::deserialize(const std::string& str)
+	inline bool FVar<uint>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -77,7 +77,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<float>::serialize()
+	inline std::string FVar<float>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -91,7 +91,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<float>::deserialize(const std::string& str)
+	inline bool FVar<float>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -103,7 +103,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<double>::serialize()
+	inline std::string FVar<double>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -117,7 +117,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<double>::deserialize(const std::string& str)
+	inline bool FVar<double>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -129,7 +129,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<Vec3f>::serialize()
+	inline std::string FVar<Vec3f>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -143,7 +143,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<Vec3f>::deserialize(const std::string& str)
+	inline bool FVar<Vec3f>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -167,7 +167,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<Vec3i>::serialize()
+	inline std::string FVar<Vec3i>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -181,7 +181,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<Vec3i>::deserialize(const std::string& str)
+	inline bool FVar<Vec3i>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -204,7 +204,7 @@ namespace dyno
 	}
 
 	template<>
-	std::string FVar<Vec3d>::serialize()
+	inline std::string FVar<Vec3d>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -218,7 +218,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<Vec3d>::deserialize(const std::string& str)
+	inline bool FVar<Vec3d>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;
@@ -263,7 +263,7 @@ namespace dyno
 // 	}
 
 	template<>
-	std::string FVar<std::string>::serialize()
+	inline std::string FVar<std::string>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -274,7 +274,7 @@ namespace dyno
 	}
 
 	template<>
-	bool FVar<std::string>::deserialize(const std::string& str)
+	inline bool FVar<std::string>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;

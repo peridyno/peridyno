@@ -99,6 +99,110 @@ namespace dyno
 			es.clear();
 	}
 
+	bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
+	{
+		int x, y, comp;
+		stbi_set_flip_vertically_on_load(true);
+
+		float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
+
+		if (data) {
+			img.resize(x, y);
+			for (int x0 = 0; x0 < x; x0++)
+			{
+				for (int y0 = 0; y0 < y; y0++)
+				{
+					int idx = (y0 * x + x0) * comp;
+					for (int c0 = 0; c0 < comp; c0++) {
+						img(x0, y0)[c0] = data[idx + c0];
+					}
+				}
+			}
+			STBI_FREE(data);
+		}
+
+		return data != 0;
+	}
+
+	void loadMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename)
+	{
+		const std::vector<tinygltf::Material>& sourceMaterials = model.materials;
+
+		auto& reMats = texMesh->materials();
+		reMats.clear();
+		if (sourceMaterials.size()) //use materials.size()
+		{
+			reMats.resize(sourceMaterials.size());
+		}
+
+
+		std::vector<tinygltf::Texture>& textures = model.textures;
+		std::vector<tinygltf::Image>& images = model.images;
+		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
+		texture[0, 0] = dyno::Vec4f(1);
+
+
+		for (int matId = 0; matId < sourceMaterials.size(); matId++)
+		{
+			auto material = sourceMaterials[matId];
+			auto color = material.pbrMetallicRoughness.baseColorFactor;
+			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
+
+			auto metallic = material.pbrMetallicRoughness.metallicFactor;
+
+			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
+			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
+
+			reMats[matId] = std::make_shared<Material>();
+			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
+			reMats[matId]->alpha = color[3];
+			reMats[matId]->metallic = metallic;
+			reMats[matId]->roughness = roughness;
+
+			std::string colorUri = getTexUri(textures, images, colorTexId);
+
+			if (!colorUri.empty())
+			{
+				auto root = filename.path().parent_path();
+				colorUri = (root / colorUri).string();
+
+				if (loadImage(colorUri.c_str(), texture))
+				{
+					reMats[matId]->texColor.assign(texture);
+				}
+			}
+			else
+			{
+				if (reMats[matId]->texColor.size())
+					reMats[matId]->texColor.clear();
+			}
+
+			auto bumpTexId = material.normalTexture.index;
+			auto scale = material.normalTexture.scale;
+			std::string bumpUri = getTexUri(textures, images, bumpTexId);
+
+			if (!bumpUri.empty())
+			{
+				auto root = filename.path().parent_path();
+				bumpUri = (root / bumpUri).string();
+
+				if (loadImage(bumpUri.c_str(), texture))
+				{
+					reMats[matId]->texBump.assign(texture);
+					reMats[matId]->bumpScale = scale;
+				}
+			}
+			else
+			{
+				if (reMats[matId]->texBump.size())
+					reMats[matId]->texBump.clear();
+			}
+
+		}
+
+
+	}
+
 	template<typename TDataType>
 	GltfLoader<TDataType>::GltfLoader()
 	{
@@ -168,9 +272,21 @@ namespace dyno
 
 	}
 
+	template<typename Triangle>
+	__global__ void updateVertexId_Shape(
+		DArray<Triangle> triangle,
+		DArray<uint> ID_shapeId,
+		int shapeId
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= triangle.size()) return;
 
+		ID_shapeId[triangle[pId][0]] = shapeId;
+		ID_shapeId[triangle[pId][1]] = shapeId;
+		ID_shapeId[triangle[pId][2]] = shapeId;
 
-
+	}
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::varChanged()
@@ -888,6 +1004,19 @@ namespace dyno
 
 	};
 
+	template<typename uint>
+	__global__ void  C_Shape_PointCounter(
+		DArray<int> counter,
+		DArray<uint> point_ShapeIds,
+		uint target
+		)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= point_ShapeIds.size()) return;
+
+		counter[tId] = (point_ShapeIds[tId]== target) ? 1 : 0;
+	}
+
 	template<typename TDataType>
 	void GltfLoader<TDataType>::buildInverseBindMatrices(const std::vector<joint>& all_Joints)
 	{
@@ -975,7 +1104,7 @@ namespace dyno
 		Vec3f scale = this->varScale()->getValue();
 		Mat4f mT = Mat4f(1, 0, 0, location[0], 0, 1, 0, location[1], 0, 0, 1, location[2], 0, 0, 0, 1);
 		Mat4f mS = Mat4f(scale[0], 0, 0, 0, 0, scale[1], 0, 0, 0, 0, scale[2], 0, 0, 0, 0, 1);
-		Mat4f mR = computeQuaternion().toMatrix4x4();
+		Mat4f mR = this->computeQuaternion().toMatrix4x4();
 		Mat4f transform = mT * mS * mR;
 
 		this->stateTransform()->setValue(transform);
@@ -1159,25 +1288,6 @@ namespace dyno
 		
 	}
 
-
-	template<typename Triangle>
-	__global__ void updateVertexId_Shape(
-		DArray<Triangle> triangle,
-		DArray<uint> ID_shapeId,
-		int shapeId
-	)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= triangle.size()) return;
-
-		ID_shapeId[triangle[pId][0]] = shapeId;
-		ID_shapeId[triangle[pId][1]] = shapeId;
-		ID_shapeId[triangle[pId][2]] = shapeId;
-
-	}
-
-
-
 	template< typename Coord, typename Vec4f, typename Mat4f ,typename Vec2u>
 	__global__ void PointsAnimation(
 		DArray<Coord> intialPosition,
@@ -1353,113 +1463,6 @@ namespace dyno
 	}
 
 
-	bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
-	{
-		int x, y, comp;
-		stbi_set_flip_vertically_on_load(true);
-
-		float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
-
-		if (data) {
-			img.resize(x, y);
-			for (int x0 = 0; x0 < x; x0++)
-			{
-				for (int y0 = 0; y0 < y; y0++)
-				{
-					int idx = (y0 * x + x0) * comp;
-					for (int c0 = 0; c0 < comp; c0++) {
-						img(x0, y0)[c0] = data[idx + c0];
-					}
-				}
-			}
-			STBI_FREE(data);
-		}
-
-		return data != 0;
-	}
-
-
-
-	void loadMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename)
-	{
-		const std::vector<tinygltf::Material>& sourceMaterials = model.materials;
-
-		auto& reMats = texMesh->materials();
-		reMats.clear();
-		if (sourceMaterials.size()) //use materials.size()
-		{
-			reMats.resize(sourceMaterials.size());
-		}
-
-
-		std::vector<tinygltf::Texture>& textures = model.textures;
-		std::vector<tinygltf::Image>& images = model.images;
-		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
-		texture[0, 0] = dyno::Vec4f(1);
-
-
-		for (int matId = 0; matId < sourceMaterials.size(); matId++)
-		{
-			auto material = sourceMaterials[matId];
-			auto color = material.pbrMetallicRoughness.baseColorFactor;
-			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
-
-			auto metallic = material.pbrMetallicRoughness.metallicFactor;
-
-			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
-			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
-
-			reMats[matId] = std::make_shared<Material>();
-			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
-			reMats[matId]->alpha = color[3];
-			reMats[matId]->metallic = metallic;
-			reMats[matId]->roughness = roughness;
-
-			std::string colorUri = getTexUri(textures, images, colorTexId);
-
-			if (!colorUri.empty())
-			{
-				auto root = filename.path().parent_path();
-				colorUri = (root / colorUri).string();
-
-				if (loadImage(colorUri.c_str(), texture))
-				{
-					reMats[matId]->texColor.assign(texture);
-				}
-			}
-			else
-			{
-				if (reMats[matId]->texColor.size())
-					reMats[matId]->texColor.clear();
-			}
-
-			auto bumpTexId = material.normalTexture.index;
-			auto scale = material.normalTexture.scale;
-			std::string bumpUri = getTexUri(textures, images, bumpTexId);
-
-			if (!bumpUri.empty())
-			{
-				auto root = filename.path().parent_path();
-				bumpUri = (root / bumpUri).string();
-
-				if (loadImage(bumpUri.c_str(), texture))
-				{
-					reMats[matId]->texBump.assign(texture);
-					reMats[matId]->bumpScale = scale;
-				}
-			}
-			else
-			{
-				if (reMats[matId]->texBump.size())
-					reMats[matId]->texBump.clear();
-			}
-
-		}
-
-
-	}
-
-
 	template< typename Coord, typename uint>
 	__global__ void ShapeToCenter(
 		DArray<Coord> iniPos,
@@ -1502,21 +1505,6 @@ namespace dyno
 			}
 		}
 	}
-
-
-	template<typename uint>
-	__global__ void  C_Shape_PointCounter(
-		DArray<int> counter,
-		DArray<uint> point_ShapeIds,
-		uint target
-		)
-	{
-		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
-		if (tId >= point_ShapeIds.size()) return;
-
-		counter[tId] = (point_ShapeIds[tId]== target) ? 1 : 0;
-	}
-
 
 	template<typename Coord>
 	__global__ void  C_SetupPoints(

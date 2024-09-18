@@ -329,7 +329,7 @@ namespace dyno
 
 			//TransformModel
 
-			Quat<Real> q = computeQuaternion();
+			Quat<Real> q = this->computeQuaternion();
 
 			q.normalize();
 

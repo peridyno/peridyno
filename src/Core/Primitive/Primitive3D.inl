@@ -3188,7 +3188,7 @@ namespace dyno
 	DYN_FUNC TSphere3D<Real>::TSphere3D()
 	{
 		center = Coord3D(0);
-		rotation = Quat<Real>();
+		rotation = ::dyno::Quat<Real>();
 		radius = 1;
 	}
 
@@ -3196,12 +3196,12 @@ namespace dyno
 	DYN_FUNC TSphere3D<Real>::TSphere3D(const Coord3D& c, const Real& r)
 	{
 		center = c;
-		rotation = Quat<Real>();
+		rotation = ::dyno::Quat<Real>();
 		radius = r < 0 ? 0 : r;
 	}
 
 	template<typename Real>
-	DYN_FUNC dyno::TSphere3D<Real>::TSphere3D(const Coord3D& c, const Quat<Real>& rot, const Real& r)
+	DYN_FUNC dyno::TSphere3D<Real>::TSphere3D(const Coord3D& c, const ::dyno::Quat<Real>& rot, const Real& r)
 	{
 		center = c;
 		rotation = rot;
@@ -3241,7 +3241,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot, const Coord3D& s)
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const ::dyno::Quat<Real>& rot, const Coord3D& s)
 	{
 		center = c;
 		height = h;
@@ -3276,7 +3276,7 @@ namespace dyno
 
 
 	template<typename Real>
-	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot, const Coord3D& s)
+	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const ::dyno::Quat<Real>& rot, const Coord3D& s)
 	{
 		center = c;
 		height = h;
@@ -3312,7 +3312,7 @@ namespace dyno
 	DYN_FUNC TCapsule3D<Real>::TCapsule3D()
 	{
 		center = Coord3D(0, 0, 0);
-		rotation = Quat<Real>();
+		rotation = ::dyno::Quat<Real>();
 		radius = Real(1);
 		halfLength = Real(1);
 	}
@@ -3323,13 +3323,13 @@ namespace dyno
 		center = 0.5f * (v0 + v1);
 		Real len = (v1 - v0).norm();
 
-		rotation = Quat<Real>((0, 1, 0), v1 - v0);
+		rotation = ::dyno::Quat<Real>((0, 1, 0), v1 - v0);
 		radius = Real(r);
 		halfLength = Real(len * 0.5f);
 	}
 
 	template<typename Real>
-	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl)
+	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& c, const ::dyno::Quat<Real>& q, const Real& r, const Real& hl)
 		: center(c)
 		, rotation(q)
 		, radius(r)
@@ -4068,7 +4068,7 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC TOrientedBox3D<Real>::TOrientedBox3D(const Coord3D c, const Quat<Real> rot, const Coord3D ext)
+	DYN_FUNC TOrientedBox3D<Real>::TOrientedBox3D(const Coord3D c, const ::dyno::Quat<Real> rot, const Coord3D ext)
 	{
 		center = c;
 		extent = ext;

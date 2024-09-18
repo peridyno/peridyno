@@ -98,7 +98,9 @@ namespace dyno
 			}
 
 			auto heights = patch->stateHeightField()->getDataPtr();
-			auto& displacements = heights->calculateHeightField();
+			heights->calculateHeightField();
+			auto& displacements = heights->getHeights();
+
 			Coord origin = heights->getOrigin();
 			Real h = heights->getGridSpacing();
 

@@ -11,7 +11,7 @@ namespace dyno
     void(*Log::receiver)(const Message&) = nullptr;
     Log::MessageType Log::sLogLevel = Log::DebugInfo;
 
-    std::atomic<Log*> Log::sLogInstance = nullptr;
+    std::atomic<Log*> Log::sLogInstance(nullptr);
     std::queue<Log::Message> Log::sMessageQueue;
 
 #define LOG_DEBUG(format, ...) Log::instance()->writeMessage(Log::DebugInfo, format, ##__VA_ARGS__)

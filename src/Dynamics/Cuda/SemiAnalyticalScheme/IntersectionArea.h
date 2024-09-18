@@ -30,7 +30,7 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC inline Real calculateIntersectionArea(const TPoint3D<Real>& pt, const TTriangle3D<Real>& triangle, const Real& R)
 	{
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename ::dyno::Vector<Real, 3> Coord3D;
 
 		Real R2 = R * R;
 

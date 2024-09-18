@@ -89,7 +89,7 @@ namespace dyno
 
 		//Transform Coord
 
-		Quat<Real> q2 = computeQuaternion();
+		Quat<Real> q2 = this->computeQuaternion();
 
 		q2.normalize();
 

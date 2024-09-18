@@ -22,8 +22,8 @@ namespace dyno
 	class TPointSweep3D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename ::dyno::Vector<Real, 2> Coord2D;
+		typedef typename ::dyno::Vector<Real, 3> Coord3D;
 
 	public:
 		DYN_FUNC TPointSweep3D(TPoint3D<Real>& start, TPoint3D<Real>& end);

@@ -220,14 +220,16 @@ namespace dyno
 
 
 	template <typename TDataType>
-	TDataType::Real PoissonDiskSampling<TDataType>::lerp(Real a, Real b, Real alpha)
+	typename TDataType::Real PoissonDiskSampling<TDataType>::lerp(typename TDataType::Real a, 
+	                                                              typename TDataType::Real b, 
+																  typename TDataType::Real alpha)
 	{
 		return (1.0f - alpha)*a + alpha * b;
-	};
+	}
 
 
 	template <typename TDataType>
-	TDataType::Real PoissonDiskSampling<TDataType>::getDistanceFromSDF(Coord &p, 
+	typename TDataType::Real PoissonDiskSampling<TDataType>::getDistanceFromSDF(Coord &p, 
 		Coord &normal)
 	{
 		if (!SDF_flag) {
@@ -296,24 +298,24 @@ namespace dyno
 
 		d = (1.0f - gamma) * dxy0 + gamma * dxy1;
 		return d;
-	};
+	}
 
 	template<typename TDataType>
-	TDataType::Coord PoissonDiskSampling<TDataType>::getOnePointInsideSDF()
+	typename PoissonDiskSampling<TDataType>::Coord  PoissonDiskSampling<TDataType>::getOnePointInsideSDF()
 	{
 		Coord normal(0.0f);
 		for (Real ax = area_a[0]; ax < area_b[0]; ax += this->varSamplingDistance()->getData())
 			for (Real ay = area_a[1]; ay < area_b[1]; ay += this->varSamplingDistance()->getData())
 				for (Real az = area_a[2]; az < area_b[2]; az += this->varSamplingDistance()->getData())
 				{
-					Real dr = getDistanceFromSDF(Coord(ax, ay, az), normal);
+					Coord position(ax, ay, az);
+					Real dr = getDistanceFromSDF(position, normal);
 					if (dr < 0.0f)
 					{
 						return Coord(ax, ay, az);
 					}
 				}
-	};
-
+	}
 
 	template<typename TDataType>
 	void PoissonDiskSampling<TDataType>::resetStates()

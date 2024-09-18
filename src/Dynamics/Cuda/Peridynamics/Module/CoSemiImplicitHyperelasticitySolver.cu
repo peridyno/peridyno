@@ -44,12 +44,12 @@ namespace dyno
 	template<typename TDataType>
 	CoSemiImplicitHyperelasticitySolver<TDataType>::~CoSemiImplicitHyperelasticitySolver()
 	{
-		mWeights.clear();
-		mDisplacement.clear();
-		mInvK.clear();
-		mF.clear();
-		mPosBuf.clear();
-		mPosBuf_March.clear();
+		this->mWeights.clear();
+		this->mDisplacement.clear();
+		this->mInvK.clear();
+		this->mF.clear();
+		this->mPosBuf.clear();
+		this->mPosBuf_March.clear();
 	}
 
 	template <typename Real, typename Coord, typename Matrix>
@@ -81,8 +81,9 @@ namespace dyno
 	template<typename TDataType>
 	void CoSemiImplicitHyperelasticitySolver<TDataType>::solveElasticity()
 	{
-		cudaMemcpyToSymbol(ENERGY_FUNC, &this->inEnergyModels()->getData(), sizeof(EnergyModels<Real>));
-
+		//cudaMemcpyToSymbol(ENERGY_FUNC, &this->inEnergyModels()->getData(), sizeof(EnergyModels<Real>));
+		auto energyData = this->inEnergyModels()->getData();
+		cudaMemcpyToSymbol(ENERGY_FUNC, &energyData, sizeof(EnergyModels<Real>));
 		enforceHyperelasticity();
 	}
 
@@ -899,7 +900,7 @@ namespace dyno
 		m_source.resize(num);         
 		m_A.resize(num);
 		m_gradientMagnitude.resize(num);
-		mPosBuf.resize(num);
+		this->mPosBuf.resize(num);
 
 		m_fraction.resize(num);
 
@@ -942,7 +943,7 @@ namespace dyno
 		// initialize y_now, y_next_iter
 		y_current.assign(this->inY()->getData());
 		this->inMarchPosition()->getData().assign(this->inY()->getData());
-		mPosBuf.assign(this->inY()->getData());
+		this->mPosBuf.assign(this->inY()->getData());
 
 
 		// do Jacobi method Loop
@@ -998,9 +999,9 @@ namespace dyno
 				cuExecute(y_current.size(),
 					HM_ComputeNextPosition,
 					this->inMarchPosition()->getData(),
-					mPosBuf,
-					m_volume,
-					m_source,
+					this->mPosBuf,
+					this->m_volume,
+					this->m_source,
 					m_A);
 
 				//sub steping
@@ -1064,13 +1065,13 @@ namespace dyno
 			// do Jacobi method Loop
 			mContactRule->initCCDBroadPhase();
 
-			this->inMarchPosition()->getData().assign(mPosBuf);
+			this->inMarchPosition()->getData().assign(this->mPosBuf);
 			convergeFlag = false; // converge or not
 			iterCount = 0;
 			alpha = 1.0f;
 			max_grad_mag = 1e3;
 	}
-		mPosBuf_March.assign(mPosBuf);
+		mPosBuf_March.assign(this->mPosBuf);
 
 		while (iterCount < this->varIterationNumber()->getData() && max_grad_mag >= this->grad_res_eps) {
 			m_source.reset();
@@ -1195,7 +1196,7 @@ namespace dyno
 			this->inY()->getData(),
 			this->inVelocity()->getData(),
 			this->inMarchPosition()->getData(),
-			mPosBuf,
+			this->mPosBuf,
 			this->inAttribute()->getData(),
 			this->inTimeStep()->getData());
 		

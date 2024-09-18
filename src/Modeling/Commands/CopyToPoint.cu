@@ -63,7 +63,7 @@ namespace dyno
 		unsigned CopyNumber = c_target.size();
 
 		Coord Location;
-		////¹¹½¨vertices¼°triangle
+		////ï¿½ï¿½ï¿½ï¿½verticesï¿½ï¿½triangle
 		//for (int i = 0; i < lengthV; i++)
 		//{
 		//	Location = { c_point[i][0], c_point[i][1], c_point[i][2] };
@@ -75,14 +75,14 @@ namespace dyno
 		//}
 
 
-		//¹¹½¨Copy¶à±ßÐÎ
-		//¶¥µã
+		//ï¿½ï¿½ï¿½ï¿½Copyï¿½ï¿½ï¿½ï¿½ï¿½
+		//ï¿½ï¿½ï¿½ï¿½
 		if (!this->inTargetPointSet()->isEmpty()) 
 		{
 
 			for(int i = 0;i < CopyNumber; i++)
 			{
-				////½¨Á¢ËÄÔªÊýÒÔ½øÐÐµÝ¹é±ä»»
+				////ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôªï¿½ï¿½ï¿½Ô½ï¿½ï¿½ÐµÝ¹ï¿½ä»»
 				//Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180 * (i + 1), Coord(1, 0, 0))
 				//	* Quat<Real>(M_PI * rot[1] / 180 * (i + 1), Coord(0, 1, 0))
 				//	* Quat<Real>(M_PI * rot[2] / 180 * (i + 1), Coord(0, 0, 1));
@@ -109,13 +109,13 @@ namespace dyno
 				{
 					Location = { c_point[j][0], c_point[j][1], c_point[j][2] };
 
-					//Location = RV(Location * RealScale) + center * (i+1);//Ìí¼Ó±ä»»RV(Location * RealScale + RV(center * (i + 1)))
+					//Location = RV(Location * RealScale) + center * (i+1);//ï¿½ï¿½ï¿½Ó±ä»»RV(Location * RealScale + RV(center * (i + 1)))
 					Location = Location + c_target[i];
 					vertices.push_back(Location);
 				}
 			}
 			
-			//Ãæ
+			//ï¿½ï¿½
 			for (int i = 0; i < CopyNumber; i++) 
 			{
 				for (int j = 0; j < lengthT; j++)
@@ -129,13 +129,13 @@ namespace dyno
 
 		}
 
-		//ÕûÌå±ä»»
+		//ï¿½ï¿½ï¿½ï¿½ä»»
 		
 		auto centert = this->varLocation()->getData();
 		auto rott = this->varRotation()->getData();
 		auto scalet= this->varScale()->getData();
 
-		Quat<Real> qt = computeQuaternion();
+		Quat<Real> qt = this->computeQuaternion();
 
 		qt.normalize();
 

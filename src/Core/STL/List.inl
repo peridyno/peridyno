@@ -35,9 +35,8 @@ namespace dyno
 		if (m_size >= this->m_maxSize) return nullptr;
 		
 		const uint one = 1;
-		int index = atomicAdd(&(this->m_size), one);
-		//int index = atomicAdd(&(this->m_size), 1);
-		//int index = 0;//Onlinux platform, this is a bug, not yet resolved.
+		//int index = atomicAdd(&(this->m_size), one);
+		int index = atomicAdd(&(this->m_size), 1 + val - val);//Onlinux platform, this is a bug, not yet resolved.
 
 		this->m_startLoc[index] = val;
 

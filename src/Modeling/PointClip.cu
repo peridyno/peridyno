@@ -121,7 +121,7 @@ namespace dyno
 		}
 
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 
