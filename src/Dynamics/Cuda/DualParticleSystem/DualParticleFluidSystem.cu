@@ -23,9 +23,9 @@ namespace dyno
 
 	template<typename TDataType>
 	DualParticleFluidSystem<TDataType>::DualParticleFluidSystem()
-		: ParticleFluid<TDataType>()
+		: DualParticleFluidSystem<TDataType>(2)
 	{
-		this->DualParticleFluidSystem<TDataType>::DualParticleFluidSystem(2);
+		//this->DualParticleFluidSystem<TDataType>::DualParticleFluidSystem(2);
 	}
 
 

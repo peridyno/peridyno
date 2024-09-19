@@ -72,7 +72,7 @@ namespace dyno
 
 				//assert(key_allsize == key_count);
 
-				const long long* t = curve->getKeyTime();
+				const long int* t = curve->getKeyTime();
 				const float* v = curve->getKeyValue();
 				times.assign(t, t + key_count);
 				values.assign(v, v + key_count);
@@ -203,7 +203,7 @@ namespace dyno
 	template<typename TDataType>
 	bool SkeletonLoader<TDataType>::scale(Real s)
 	{
-		this->m_jointMap[0]->scale(s);
+		m_jointMap[0]->scale(s);
 		
 		return true;
 	}
@@ -211,7 +211,7 @@ namespace dyno
 	template<typename TDataType>
 	bool SkeletonLoader<TDataType>::translate(Coord t)
 	{
-		this->m_jointMap[0]->translate(t);
+		m_jointMap[0]->translate(t);
 		return true;
 	}
 
@@ -231,7 +231,7 @@ namespace dyno
 		{
 			std::vector<Coord> v0;
 			std::vector<Coord> v1;
-			for (auto joint : this->m_jointMap)
+			for (auto joint : m_jointMap)
 			{
 				joint->getGlobalQuat();
 				joint->getGlobalCoord();
@@ -243,7 +243,7 @@ namespace dyno
 			m_T.clear();
 			m_R.clear();
 
-			for (auto joint : this->m_jointMap)
+			for (auto joint : m_jointMap)
 			{
 				for (auto joint_son : joint->children)
 				{
@@ -314,14 +314,14 @@ namespace dyno
 	template<typename TDataType>
 	void SkeletonLoader<TDataType>::updateTopology()
 	{
-		if (this->m_jointMap.empty())
+		if (m_jointMap.empty())
 		{
 			printf("Load Skeleton failed.");
 			return;
 		}		
 		
         //Animation
-        for (auto joint : this->m_jointMap)
+        for (auto joint : m_jointMap)
         {
 			// static int first = 0;
 			// if(first < 7)
@@ -343,7 +343,7 @@ namespace dyno
 			int index = 0;
 			std::vector<Coord> v0;
 			std::vector<Coord> v1;			
-			for (auto joint : this->m_jointMap)
+			for (auto joint : m_jointMap)
 			{
 				for (auto joint_son : joint->children)
 				{

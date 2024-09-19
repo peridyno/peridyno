@@ -38,7 +38,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-        typedef std::vector<std::shared_ptr<JointTree<typename TDataType>>> JointList;
+        typedef std::vector<std::shared_ptr<JointTree<TDataType>>> JointList;
 
 		SkeletonLoader();
 		virtual ~SkeletonLoader();

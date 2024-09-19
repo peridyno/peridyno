@@ -15,7 +15,7 @@
 #include "ParticleSystem/StaticBoundary.h"
 
 #include "DualParticleSystem/SurfaceLevelSetConstructionNode.h"
-#include "Mapping\MarchingCubes.h"
+#include "Mapping/MarchingCubes.h"
 #include "BasicShapes/CubeModel.h"
 #include "ParticleSystem/CubeSampler.h"
 #include "ParticleSystem/MakeParticleSystem.h"

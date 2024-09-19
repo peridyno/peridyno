@@ -1,6 +1,6 @@
 #include "ArrayTools.h"
-#include "Algorithm/Scan.h"
-#include "Algorithm/Reduction.h"
+#include "../Algorithm/Scan.h"
+#include "../Algorithm/Reduction.h"
 
 namespace dyno
 {

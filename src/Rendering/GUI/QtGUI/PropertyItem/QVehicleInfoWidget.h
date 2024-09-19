@@ -27,7 +27,7 @@
 #include <QLineEdit>
 #include "qcheckbox.h"
 #include "QPiecewiseDoubleSpinBox.h"
-#include "qpushbutton.h"
+#include <QPushButton>
 
 
 namespace dyno

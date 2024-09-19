@@ -5,7 +5,7 @@
 #include "Commands/Sweep.h"
 #include "Commands/Extrude.h"
 
-#include "ObjIO/OBJexporter.h"
+//#include "ObjIO/OBJexporter.h"
 
 #include "Curve.h"
 #include "Ramp.h"

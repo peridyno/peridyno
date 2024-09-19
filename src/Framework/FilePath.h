@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ghc/fs_std.hpp>
+#include <vector>
 
 namespace dyno 
 {
@@ -26,7 +27,7 @@ namespace dyno
 
 		bool is_path() { return _is_path; }
 
-		std::vector<std::string>& extensions() { return exts; }
+		std::vector<std::string>& extensions() { return this->exts; }
 
 		void add_extension(const std::string ext) { exts.push_back(ext); }
 
