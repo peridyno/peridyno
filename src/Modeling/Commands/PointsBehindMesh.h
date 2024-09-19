@@ -28,8 +28,8 @@ namespace dyno
 {
 
 	/*
-	*	@brief£ºThe node is to generate ghost Points benhind triangle meshes.
-	* 
+	*	@brief£ºThe node is to generate Points benhind triangle meshes.
+	*
 	*	@Implementation:
 	*		#Step1: Square plane regions are generating for each triangle mesh;
 	*		#Step2: Caculate the basic vectors for every square plane region, and generate the candinite points in the square plane region;
@@ -41,7 +41,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class PointsBehindMesh : public Normal<TDataType>
+	class PointsBehindMesh : public Node
 	{
 		DECLARE_TCLASS(PointsBehindMesh, TDataType);
 
@@ -58,7 +58,13 @@ namespace dyno
 
 		DEF_VAR(Real, SamplingDistance, Real(0.05), "");
 
-		DEF_VAR_OUT(Real, SamplingDistance, "");
+		DEF_VAR(bool, GeneratingDirection, true, "");
+
+
+
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+
+
 
 		DEF_INSTANCE_STATE(PointSet<TDataType>, GhostPointSet, "");
 
@@ -68,12 +74,13 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Coord, PointNormal, DeviceType::GPU, "Normal Vector of Ghost Point");
 
-		DEF_VAR(bool, GeneratingDirection, true, "");
+
 
 		DEF_VAR_OUT(bool, PointGrowthDirection, "");
 
-		DEF_ARRAY_OUT(int, PointBelongTriangleIndex, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(int, PointBelongTriangleIndex, DeviceType::GPU, "");
 
+		DEF_VAR_OUT(Real, SamplingDistance, "");
 
 	protected:
 		void resetStates() override;
@@ -102,6 +109,8 @@ namespace dyno
 		DArray<int> mPointOfTriangleId;
 
 		DArray<int> mSeedOfTriangleId;
+
+		DArray<Coord> mTriangleNormal;
 
 		std::shared_ptr<NeighborPointQuery<TDataType>> m_NeighborPointQuery;
 

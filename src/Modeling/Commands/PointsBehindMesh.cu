@@ -7,7 +7,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	PointsBehindMesh<TDataType>::PointsBehindMesh()
-		: Normal<TDataType>()
+		: Node()
 	{
 		this->stateGhostPointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->stateGhostPointSet()->promoteOuput();
@@ -20,7 +20,7 @@ namespace dyno
 		this->statePointNormal()->allocate();
 		this->statePointNormal()->promoteOuput();
 
-		this->outPointBelongTriangleIndex()->allocate();
+		this->statePointBelongTriangleIndex()->allocate();
 
 
 		//auto tsRender = std::make_shared<GLSurfaceVisualModule>();
@@ -112,11 +112,11 @@ namespace dyno
 			C = v1;
 		}
 
-		Coord AB =  square_b[tId] - square_a[tId] ;
+		Coord AB = square_b[tId] - square_a[tId];
 		Coord n_AB = AB / AB.norm();
-		Coord AC =  C - square_a[tId];
+		Coord AC = C - square_a[tId];
 		Coord proj_O = square_a[tId] + (AC.dot(n_AB)) * (n_AB);
-		Coord trans_vec =  C - proj_O;
+		Coord trans_vec = C - proj_O;
 
 		square_c[tId] = square_a[tId] + trans_vec;
 		square_d[tId] = square_b[tId] + trans_vec;
@@ -151,7 +151,7 @@ namespace dyno
 		t0[2] = v_id + 2;
 
 		Triangle& t1 = NewTriangles[t_id + 1];
-		
+
 		t1[0] = v_id + 1;
 		t1[1] = v_id + 2;
 		t1[2] = v_id + 3;
@@ -185,7 +185,7 @@ namespace dyno
 
 		n_z = n_x.cross(n_y);
 		n_z = n_z / n_z.norm();
-  	}
+	}
 
 
 	template<typename Coord, typename Real, typename Triangle>
@@ -226,10 +226,10 @@ namespace dyno
 				//if (count < size) {
 				Coord candi = square_a[tId] + (Real)(j)*dx * basic_x[tId] + (Real)(i)*dx * basic_y[tId];
 				Real value = WhetherPointInsideTriangle(v0, v1, v2, candi);
-				if (value < 100000000 * dx * dx * EPSILON){
-						size++;
+				if (value < 100000000 * dx * dx * EPSILON) {
+					size++;
 				}
-				
+
 			}
 		}
 	}
@@ -272,12 +272,12 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= PointSize.size()) return;
 
-	
+
 		int num_x = (int)((square_a[tId] - square_c[tId]).norm() / dx);
 		int num_y = (int)((square_a[tId] - square_b[tId]).norm() / dx);
 		int& begin = tIndex[tId];
 		int& size = PointSize[tId];
-		
+
 
 		Triangle t = triangles[tId];
 		const Coord& v0 = vertices[t[0]];
@@ -292,7 +292,7 @@ namespace dyno
 			{
 				//int count = i + j * num_x;
 				if (counter < size) {
-					
+
 					Coord candi = square_a[tId] + (Real)(j)*dx * basic_x[tId] + (Real)(i)*dx * basic_y[tId];
 					Real value = WhetherPointInsideTriangle(v0, v1, v2, candi);
 
@@ -381,7 +381,7 @@ namespace dyno
 	__global__ void CalculateGhostCounter(
 		DArray<int> counter,
 		DArray<bool> flags
-		)
+	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= flags.size()) return;
@@ -406,24 +406,59 @@ namespace dyno
 		{
 			lastPoints[radix[pId]] = originalPoints[pId];
 			lastNormals[radix[pId]] = originalNormals[pId];
- 		}
+		}
 	}
 
+	template< typename Coord>
+	__global__ void PtsBehindMesh_UpdateTriangleNormal(
+		DArray<TopologyModule::Triangle> d_triangles,
+		DArray<Coord> d_points,
+		DArray<Coord> normal,
+		float length,
+		bool normalization)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= d_triangles.size()) return;
 
+		int a = d_triangles[pId][0];
+		int b = d_triangles[pId][1];
+		int c = d_triangles[pId][2];
+
+		float x = (d_points[a][0] + d_points[b][0] + d_points[c][0]) / 3;
+		float y = (d_points[a][1] + d_points[b][1] + d_points[c][1]) / 3;
+		float z = (d_points[a][2] + d_points[b][2] + d_points[c][2]) / 3;
+
+		Coord ca = d_points[b] - d_points[a];
+		Coord cb = d_points[b] - d_points[c];
+		Coord dirNormal;
+
+		if (normalization)
+			dirNormal = ca.cross(cb).normalize() * -1 * length;
+		else
+			dirNormal = ca.cross(cb) * -1 * length;
+
+		normal[pId] = dirNormal.normalize();
+
+	}
 
 	template<typename TDataType>
 	void PointsBehindMesh<TDataType>::resetStates()
 	{
-		Normal<TDataType>::resetStates();
+		//Normal<TDataType>::resetStates();
 
 		int triangle_num = this->inTriangleSet()->getData().getTriangles().size();
-		auto& m_triangle_normal = this->stateNormal()->getData();
+		//auto& m_triangle_normal = this->stateNormal()->getData();
 
 		if (triangle_num == 0) return;
 
 		this->outPointGrowthDirection()->setValue(this->varGeneratingDirection()->getValue());
 
 		Real dx = this->varSamplingDistance()->getValue();
+
+		if (mTriangleNormal.size() != triangle_num)
+		{
+			mTriangleNormal.resize(triangle_num);
+		}
 
 		if (msquare_1.size() != triangle_num)
 		{
@@ -440,11 +475,25 @@ namespace dyno
 			mBasicVector_z.resize(triangle_num);
 			mThinPointSize.resize(triangle_num);
 		}
-	
+
 		if (mTriangleTempt.size() != 2 * triangle_num)
 			mTriangleTempt.resize(2 * triangle_num);
 		if (mVerticesTempt.size() != 4 * triangle_num)
 			mVerticesTempt.resize(4 * triangle_num);
+
+		cuExecute(triangle_num,
+			PtsBehindMesh_UpdateTriangleNormal,
+			this->inTriangleSet()->getData().getTriangles(), //DArray<TopologyModule::Triangle> d_triangles,
+			this->inTriangleSet()->getData().getPoints(),
+			//DArray<TopologyModule::Edge> edges,
+			//DArray<Coord> normal_points,
+			mTriangleNormal,
+			//DArray<Coord> triangleCenter,
+			0.2f,
+			true
+		);
+
+
 
 		cuExecute(triangle_num,
 			CalculateSquareFromTriangle,
@@ -466,7 +515,7 @@ namespace dyno
 			mVerticesTempt
 		);
 
-		auto& temp_triangleSet= this->statePlane()->getData();
+		auto& temp_triangleSet = this->statePlane()->getData();
 		temp_triangleSet.setTriangles(mTriangleTempt);
 		temp_triangleSet.setPoints(mVerticesTempt);
 
@@ -510,7 +559,7 @@ namespace dyno
 		DArray<int> tIndex;
 		tIndex.assign(mThinPointSize);
 
-	
+
 		DArray<Coord> mThinPointNormal;
 		mThinPointNormal.resize(total_ghostpoint_number);
 
@@ -530,19 +579,19 @@ namespace dyno
 			this->inTriangleSet()->getData().getPoints(),
 			mBasicVector_x,
 			mBasicVector_y,
-			this->stateNormal()->getData(),
+			mTriangleNormal, //this->stateNormal()->getData(),
 			msquare_1,
 			msquare_2,
 			msquare_3,
 			msquare_4,
 			this->varSamplingDistance()->getValue()
 		);
-		
+
 		int pointLayerCount = (int)(this->varThickness()->getValue() / this->varSamplingDistance()->getValue());
 		pointLayerCount = pointLayerCount < 1 ? 1 : pointLayerCount;
 
-		mThickPoints.resize(mThinPoints.size()* pointLayerCount);
-		
+		mThickPoints.resize(mThinPoints.size() * pointLayerCount);
+
 		mPointOfTriangleId.resize(mThinPoints.size() * pointLayerCount);
 
 
@@ -572,7 +621,7 @@ namespace dyno
 		this->statePosition()->connect(m_NeighborPointQuery->inPosition());
 		m_NeighborPointQuery->inRadius()->setValue(this->varSamplingDistance()->getValue() * 1.0);
 		m_NeighborPointQuery->update();
-	
+
 		cuExecute(mThickPoints.size(),
 			CalculateRemovingPointFlag,
 			mRemovingFlag,
@@ -617,10 +666,10 @@ namespace dyno
 		this->stateGhostPointSet()->getData().setPoints(lastPoints);
 
 		this->outSamplingDistance()->setValue(this->varSamplingDistance()->getValue());
-		this->outPointBelongTriangleIndex()->assign(mPointOfTriangleId);
+		this->statePointBelongTriangleIndex()->assign(mPointOfTriangleId);
 
 
-		
+
 
 		tIndex.clear();
 		lastPoints.clear();
