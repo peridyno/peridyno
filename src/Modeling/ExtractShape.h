@@ -17,6 +17,7 @@
 #pragma once
 #include "Node.h"
 #include "Topology/TextureMesh.h"
+#include "Topology/TriangleSet.h"
 
 
 namespace dyno
@@ -45,10 +46,11 @@ namespace dyno
 
 		DEF_VAR(std::vector<int>, ShapeId, std::vector<int>{0},"");
 
-		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "TextureMesh01");
+		DEF_VAR(std::vector<Transform3f>, ShapeTransform, std::vector<Transform3f>{Transform3f()}, "");
 
-		DEF_INSTANCE_STATE(TextureMesh, Target, "");
+		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "Input TextureMesh");
 
+		DEF_INSTANCE_STATE(TextureMesh, Result, "Output TextureMesh");
 
 	protected:
 		void resetStates() override;
