@@ -93,6 +93,8 @@ namespace dyno {
 		ConfigMotionType motion = ConfigMotionType::Dynamic;
 
 		Real mDensity = 100;
+
+		uint rigidGroup = 0;
 	};
 
 	/**

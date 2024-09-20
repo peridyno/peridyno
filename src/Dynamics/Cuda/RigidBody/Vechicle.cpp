@@ -561,16 +561,27 @@ namespace dyno
 
 		// **************************** Create RigidBody  **************************** //
 		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		int maxGroup = 0;
+		for (size_t i = 0; i < rigidInfo.size(); i++)
+		{
+			if (rigidInfo[i].rigidGroup > maxGroup)
+				maxGroup = rigidInfo[i].rigidGroup;
+		}
+
 		for (size_t j = 0; j < vehicleNum; j++)
 		{
 			RigidBodyInfo rigidbody;
-			rigidbody.bodyId = j;
+
 			std::vector<std::shared_ptr<PdActor>> Actors;
 
 			Actors.resize(rigidInfo.size());
 
+			printf("---------------\n");
+
 			for (size_t i = 0; i < rigidInfo.size(); i++)
 			{
+				rigidbody.bodyId = j * (maxGroup+1) + rigidInfo[i].rigidGroup;
+				printf("%d\n", rigidbody.bodyId);
 
 				rigidbody.offset = rigidInfo[i].Offset;
 
