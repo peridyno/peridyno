@@ -90,9 +90,10 @@ namespace dyno
 		
 		auto render = std::make_shared<GLPhotorealisticRender>();
 		this->stateTextureMesh()->connect(render->inTextureMesh());
+		this->stateTextureMesh()->promoteOuput();
 
 		this->graphicsPipeline()->pushModule(render);
-
+		this->setForceUpdate(false);
 	}
 
 	template<typename TDataType>
@@ -231,8 +232,8 @@ namespace dyno
 	template<typename TDataType>
 	void TextureMeshMerge<TDataType>::resetStates()
 	{
-		auto texMesh01 = this->inFirst()->getDataPtr();
-		auto texMesh02 = this->inSecond()->getDataPtr();
+		auto texMesh01 = this->inFirst()->constDataPtr();
+		auto texMesh02 = this->inSecond()->constDataPtr();
 
 		auto out = this->stateTextureMesh()->getDataPtr();
 		

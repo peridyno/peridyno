@@ -132,12 +132,13 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(surfaceRender);
 
 		this->stateResult()->setDataPtr(std::make_shared<TextureMesh>());
+		this->stateResult()->promoteOuput();
 
 		auto render = std::make_shared<GLPhotorealisticRender>();
 		this->stateResult()->connect(render->inTextureMesh());
 
 		this->graphicsPipeline()->pushModule(render);
-
+		this->setForceUpdate(false);
 	}
 
 	template<typename TDataType>
@@ -150,8 +151,8 @@ namespace dyno
 	void ExtractShape<TDataType>::resetStates()
 	{
 		auto extractId = this->varShapeId()->getValue();
-		std::sort(extractId.begin(), extractId.end());
-		extractId.erase(std::unique(extractId.begin(), extractId.end()), extractId.end());
+		//std::sort(extractId.begin(), extractId.end());
+		//extractId.erase(std::unique(extractId.begin(), extractId.end()), extractId.end());
 
 		auto inTexMesh = this->inInTextureMesh()->constDataPtr();
 
@@ -311,9 +312,18 @@ namespace dyno
 				{
 					auto currentT = currentShape->boundingTransform;
 					auto userT = userTransform[i];
-					element->boundingTransform.translation() = currentT.translation() + userT.translation();
-					element->boundingTransform.scale() = currentT.scale() * userT.scale();
-					element->boundingTransform.rotation() = userT.rotation() * currentT.rotation();
+					if (this->varOffset()->getValue()) 
+					{
+						element->boundingTransform.translation() = currentT.translation() + userT.translation();
+						element->boundingTransform.scale() = currentT.scale() * userT.scale();
+						element->boundingTransform.rotation() = userT.rotation() * currentT.rotation();
+					}
+					else 
+					{
+						element->boundingTransform.translation() = userT.translation();
+						element->boundingTransform.scale() = userT.scale();
+						element->boundingTransform.rotation() = currentT.rotation();
+					}
 				}
 				else
 					element->boundingTransform = currentShape->boundingTransform;
@@ -321,6 +331,8 @@ namespace dyno
 				element->material = currentShape->material;
 
 				outShapes.push_back(element);
+
+				d_triangle.clear();
 			}
 
 		}
@@ -333,7 +345,12 @@ namespace dyno
 		out->materials() = outMaterials;
 		out->shapes() = outShapes;
 
-		
+		d_extractVertices.clear();
+		d_extractNormals.clear();
+		d_extractTexCoords.clear();
+		d_extractShapeIds.clear();
+		d_range.clear();
+		d_size.clear();
 
 	}
 

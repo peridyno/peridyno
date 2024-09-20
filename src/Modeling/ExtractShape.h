@@ -48,6 +48,8 @@ namespace dyno
 
 		DEF_VAR(std::vector<Transform3f>, ShapeTransform, std::vector<Transform3f>{Transform3f()}, "");
 
+		DEF_VAR(bool, Offset, true, "");
+
 		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "Input TextureMesh");
 
 		DEF_INSTANCE_STATE(TextureMesh, Result, "Output TextureMesh");
