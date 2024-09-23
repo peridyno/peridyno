@@ -86,22 +86,10 @@ namespace dyno
 		mainLayout->addItem(motionLayout);
 
 
-
-		mRigidGroup = new QSpinBox(this);
-		QHBoxLayout* rigidGroupLayout = new QHBoxLayout;
-		rigidGroupLayout->addWidget(new QLabel("Rigidbody Group", this));
-		rigidGroupLayout->addWidget(mRigidGroup);
-		rigidGroupLayout->setContentsMargins(9, 0, 8, 0);
-		mRigidGroup->setValue(mRigidBodyData->rigidGroup);
-		mRigidGroup->setRange(0,100);
-		mainLayout->addItem(rigidGroupLayout);
-
-
 		QObject::connect(mTranslationWidget, QOverload<>::of(&mVec3fWidget::vec3fChange), [=]() {updateData(); });
 		QObject::connect(mRotationWidget, QOverload<>::of(&mVec3fWidget::vec3fChange), [=]() {updateData(); });
 		QObject::connect(mScaleWidget, QOverload<>::of(&mVec3fWidget::vec3fChange), [=]() {updateData(); });
 		QObject::connect(mMotionWidget, QOverload<int>::of(&QComboBox::currentIndexChanged), [=]() {updateData(); });
-		QObject::connect(mRigidGroup, QOverload<int>::of(&QSpinBox::valueChanged), [=]() {updateData(); });
 
 
 		if (true)
@@ -157,6 +145,17 @@ namespace dyno
 				break;
 			}
 		}
+
+		mRigidGroup = new QSpinBox(this);
+		QHBoxLayout* rigidGroupLayout = new QHBoxLayout;
+		rigidGroupLayout->addWidget(new QLabel("Rigidbody Group", this));
+		rigidGroupLayout->addWidget(mRigidGroup);
+		rigidGroupLayout->setContentsMargins(9, 0, 8, 0);
+		mRigidGroup->setValue(mRigidBodyData->rigidGroup);
+		mRigidGroup->setRange(0, 100);
+		mainLayout->addItem(rigidGroupLayout);
+
+		QObject::connect(mRigidGroup, QOverload<int>::of(&QSpinBox::valueChanged), [=]() {updateData(); });
 
 		mainLayout->addStretch();
 
