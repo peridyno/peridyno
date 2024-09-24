@@ -45,6 +45,16 @@ public:
 	bool hovered() const { return _hovered; }
 	void setHovered(bool hovered) { _hovered = hovered; }
 
+	Wt::WPointF out()
+	{
+		return _out;
+	}
+
+	Wt::WPointF in()
+	{
+		return _in;
+	}
+
 private:
 	// local object coordinates
 	Wt::WPointF _in;

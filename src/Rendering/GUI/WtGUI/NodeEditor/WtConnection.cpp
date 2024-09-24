@@ -274,7 +274,7 @@ PortType WtConnection::requiredPort() const
 
 void WtConnection::setGraphicsObject(std::unique_ptr<WtConnectionGraphicsObject>&& graphics)
 {
-	//_connectionGraphicsObject = std::move(graphics);
+	_connectionGraphicsObject = std::move(graphics);
 
 	// This function is only called when the ConnectionGraphicsObject
 	// is newly created. At this moment both end coordinates are (0, 0)
@@ -283,25 +283,24 @@ void WtConnection::setGraphicsObject(std::unique_ptr<WtConnectionGraphicsObject>
 	// By moving the whole object to the QtNode Port position
 	// we position both connection ends correctly.
 
-//	if (requiredPort() != PortType::None)
-//	{
-//
-//		/*PortType attachedPort = oppositePort(requiredPort());
-//
-//		PortIndex attachedPortIndex = getPortIndex(attachedPort);
-//
-//		auto node = getNode(attachedPort);*/
-//
-//		//Wt::WTransform nodeSceneTransform = node->nodeGraphicsObject().sceneTransform();
-//		//
-//		//Wt::WPointF pos = node->nodeGeometry().portScenePosition(attachedPortIndex,
-//		//	attachedPort,
-//		//	nodeSceneTransform);
-//		//
-//		//_connectionGraphicsObject->setPos(pos);
-//	}
-//
-//	_connectionGraphicsObject->move();
+	if (requiredPort() != PortType::None)
+	{
+		PortType attachedPort = oppositePort(requiredPort());
+
+		PortIndex attachedPortIndex = getPortIndex(attachedPort);
+
+		auto node = getNode(attachedPort);
+
+		Wt::WTransform nodeSceneTransform = node->nodeGraphicsObject().sceneTransform();
+
+		Wt::WPointF pos = node->nodeGeometry().portScenePosition(attachedPortIndex,
+			attachedPort,
+			nodeSceneTransform);
+
+		_connectionGraphicsObject->setPos(pos);
+	}
+
+	_connectionGraphicsObject->move();
 }
 
 PortIndex WtConnection::getPortIndex(PortType portType) const

@@ -614,16 +614,6 @@ void WtNodeGraphicsObject::paint(Wt::WPainter* painter)
 	WtNodePainter::paint(painter, _node, _scene);
 }
 
-//bool WtNodeGraphicsObject::isSelected()
-//{
-//	return _selected;
-//}
-//
-//void WtNodeGraphicsObject::setSelected(bool selected)
-//{
-//	_selected = selected;
-//}
-
 Wt::WPointF WtNodeGraphicsObject::pos() const
 {
 	return _origin;
@@ -648,6 +638,11 @@ void WtNodeGraphicsObject::setPos(Wt::WPointF pos)
 	_origin.setX(-pos.x());
 	_origin.setY(-pos.y());
 	_painter->translate(_origin);
+}
+
+bool WtNodeGraphicsObject::isSelected() const
+{
+	return false;
 }
 
 void WtNodeGraphicsObject::onMouseWentDown(const Wt::WKeyEvent& event)

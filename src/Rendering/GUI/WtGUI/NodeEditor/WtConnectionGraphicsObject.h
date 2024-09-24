@@ -51,7 +51,31 @@ public:
 
 	void lock(bool locked);
 
-	bool isSelected() const;
+	void setPos(int x, int y)
+	{
+		_origin.setX(x);
+		_origin.setY(y);
+		_painter->translate(_origin);
+		paint(_painter);
+		_origin.setX(-x);
+		_origin.setY(-y);
+		_painter->translate(_origin);
+	}
+
+	void setPos(Wt::WPointF pos)
+	{
+		_origin = pos;
+		_painter->translate(_origin);
+		paint(_painter);
+		_origin.setX(-pos.x());
+		_origin.setY(-pos.y());
+		_painter->translate(_origin);
+	}
+
+	bool isSelected() const
+	{
+		return false;
+	}
 protected:
 
 	void paint(Wt::WPainter* painter);
@@ -80,4 +104,9 @@ private:
 	WtFlowScene& _scene;
 
 	WtConnection& _connection;
+
+	// use for move
+	Wt::WPointF _origin = Wt::WPointF(0, 0);
+
+	Wt::WPainter* _painter;
 };

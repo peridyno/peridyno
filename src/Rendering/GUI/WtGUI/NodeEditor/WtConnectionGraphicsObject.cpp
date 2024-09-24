@@ -190,7 +190,7 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 
 		painter->setPen(p);
 		painter->setBrush(Wt::BrushStyle::None);
-		std::cout << "!!!!!!" << std::endl;
+		//std::cout << "!!!!!!" << std::endl;
 		painter->drawPath(cubic);
 	}
 }
@@ -225,6 +225,7 @@ void WtConnectionPainter::paint(
 WtConnectionGraphicsObject::WtConnectionGraphicsObject(WtFlowScene& scene, WtConnection& connection, Wt::WPainter* painter)
 	: _scene(scene)
 	, _connection(connection)
+	, _painter(painter)
 {
 	//_scene.addItem(this);
 	//setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -237,7 +238,7 @@ WtConnectionGraphicsObject::WtConnectionGraphicsObject(WtFlowScene& scene, WtCon
 
 	//setZValue(-1.0);
 
-	paint(painter);
+	//paint(_painter);
 }
 
 WtConnectionGraphicsObject::~WtConnectionGraphicsObject()
@@ -279,20 +280,23 @@ void WtConnectionGraphicsObject::move()
 
 			auto const& nodeGeom = node->nodeGeometry();
 
-			//Wt::WPointF scenePos =
-			//	nodeGeom.portScenePosition(_connection.getPortIndex(portType),
-			//		portType,
-			//		nodeGraphics.sceneTransform());
+			Wt::WPointF scenePos = nodeGeom.portScenePosition(
+				_connection.getPortIndex(portType),
+				portType,
+				nodeGraphics.sceneTransform());
 
 			//Wt::WTransform sceneTransform = this->sceneTransform();
+			Wt::WTransform sceneTransform(2, 0, 0, 1, 0, 0);
 
-			//Wt::WPointF connectionPos = sceneTransform.inverted().map(scenePos);
+			Wt::WPointF connectionPos = sceneTransform.inverted().map(scenePos);
 
-			//_connection.connectionGeometry().setEndPoint(portType,
-			//	connectionPos);
+			_connection.connectionGeometry().setEndPoint(portType, connectionPos);
+
+			paint(_painter);
 
 			//_connection.getConnectionGraphicsObject().setGeometryChanged();
 			//_connection.getConnectionGraphicsObject().update();
+
 		}
 	}
 }
@@ -322,9 +326,4 @@ void WtConnectionGraphicsObject::addGraphicsEffect()
 	//auto effect = new ConnectionBlurEffect(this);
 	//effect->setOffset(4, 4);
 	//effect->setColor(QColor(Qt::gray).darker(800));
-}
-
-bool WtConnectionGraphicsObject::isSelected() const
-{
-	return false;
 }

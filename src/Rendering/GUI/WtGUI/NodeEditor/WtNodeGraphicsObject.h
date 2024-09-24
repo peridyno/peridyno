@@ -125,7 +125,13 @@ public:
 
 	Wt::WPointF pos() const;
 
-	void isSelect();
+	bool isSelected() const;
+
+	Wt::WTransform sceneTransform() const
+	{
+		return Wt::WTransform(1, 0, 0, 1, 0, 0);
+	}
+
 
 	//void onMouseMove(const Wt::WMouseEvent& event);
 	void onMouseWentDown(const Wt::WKeyEvent& event);
