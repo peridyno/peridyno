@@ -95,20 +95,20 @@ std::pair<Wt::WPointF, Wt::WPointF> WtConnectionGeometry::pointsC1C2() const
 
 	if (xDistance <= 0)
 	{
-		double yDistance = _in.y() - _out.y() + 20;
+		double yDistance = _in.y() - _out.y();
 
 		double vector = yDistance < 0 ? -1.0 : 1.0;
 
 		verticalOffset = std::min(defaultOffset, std::abs(yDistance)) * vector;
 
 		ratioX = 1.0;
+		std::cout << "!!!" << std::endl;
 	}
 
 	horizontalOffset *= ratioX;
 
 	Wt::WPointF c1(_out.x() + horizontalOffset, _out.y() + verticalOffset);
-
-	Wt::WPointF c2(_in.x() + horizontalOffset, _in.y() + verticalOffset);
+	Wt::WPointF c2(_in.x() - horizontalOffset, _in.y() - verticalOffset);
 
 	return std::make_pair(c1, c2);
 }
@@ -299,7 +299,6 @@ void WtConnection::setGraphicsObject(std::unique_ptr<WtConnectionGraphicsObject>
 
 		_connectionGraphicsObject->setPos(pos);
 	}
-
 	_connectionGraphicsObject->move();
 }
 

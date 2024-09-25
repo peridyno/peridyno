@@ -118,7 +118,6 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 		auto dataTypeIn = connection.dataType(PortType::In);
 
 		gradientColor = (dataTypeOut.id != dataTypeIn.id);
-
 		normalColorOut = connectionStyle.normalColor(dataTypeOut.id);
 		normalColorIn = connectionStyle.normalColor(dataTypeIn.id);
 		// no darker()
@@ -166,7 +165,7 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 				painter->setPen(p);
 			}
 			//painter->drawLine(cubic.pointAtPercent(ratioPrev), cubic.pointAtPercent(ratio));
-			painter->drawLine(Wt::WPointF(10, 10), Wt::WPointF(100, 100));
+			//painter->drawLine(Wt::WPointF(10, 10), Wt::WPointF(100, 100));
 			//painter->drawPath(cubic);
 		}
 
@@ -185,12 +184,14 @@ static void drawNormalLine(Wt::WPainter* painter, WtConnection const& connection
 
 		if (selected)
 		{
-			p.setColor(selectedColor);
+			//p.setColor(selectedColor);
+			p.setColor(Wt::WColor(Wt::StandardColor::Yellow));
 		}
+
+
 
 		painter->setPen(p);
 		painter->setBrush(Wt::BrushStyle::None);
-		//std::cout << "!!!!!!" << std::endl;
 		painter->drawPath(cubic);
 	}
 }
@@ -280,25 +281,28 @@ void WtConnectionGraphicsObject::move()
 
 			auto const& nodeGeom = node->nodeGeometry();
 
+			Wt::WPointF origin = node->nodeGraphicsObject().getOrigin();
+
 			Wt::WPointF scenePos = nodeGeom.portScenePosition(
 				_connection.getPortIndex(portType),
 				portType,
 				nodeGraphics.sceneTransform());
 
 			//Wt::WTransform sceneTransform = this->sceneTransform();
-			Wt::WTransform sceneTransform(2, 0, 0, 1, 0, 0);
+			Wt::WTransform sceneTransform(1, 0, 0, 1, 0, 0);
 
 			Wt::WPointF connectionPos = sceneTransform.inverted().map(scenePos);
 
-			_connection.connectionGeometry().setEndPoint(portType, connectionPos);
+			Wt::WPointF result = Wt::WPointF(connectionPos.x() - origin.x(), connectionPos.y() - origin.y());
 
-			paint(_painter);
+			_connection.connectionGeometry().setEndPoint(portType, result);
 
 			//_connection.getConnectionGraphicsObject().setGeometryChanged();
 			//_connection.getConnectionGraphicsObject().update();
 
 		}
 	}
+	paint(_painter);
 }
 
 void WtConnectionGraphicsObject::lock(bool locked)

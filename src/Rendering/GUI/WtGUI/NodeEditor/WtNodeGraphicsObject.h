@@ -132,6 +132,11 @@ public:
 		return Wt::WTransform(1, 0, 0, 1, 0, 0);
 	}
 
+	Wt::WPointF getOrigin()
+	{
+		return _origin;
+	}
+
 
 	//void onMouseMove(const Wt::WMouseEvent& event);
 	void onMouseWentDown(const Wt::WKeyEvent& event);
