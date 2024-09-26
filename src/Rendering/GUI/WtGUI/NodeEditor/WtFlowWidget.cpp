@@ -79,5 +79,4 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	//painter.drawRect(boundary);
 
 	node_scene = new WtNodeFlowScene(&painter);
-
 }

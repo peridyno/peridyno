@@ -36,9 +36,9 @@ void WtNodePainter::drawNodeRect(
 	WtNodeGraphicsObject const& graphicsObject)
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
-	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
-	auto color = nodeStyle.NormalBoundaryColor;
+	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+
 	if (geom.hovered())
 	{
 		Wt::WPen p(color);
@@ -53,6 +53,7 @@ void WtNodePainter::drawNodeRect(
 	}
 
 	float diam = nodeStyle.ConnectionPointDiameter;
+
 	double const radius = 6.0;
 
 	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
@@ -62,7 +63,20 @@ void WtNodePainter::drawNodeRect(
 
 	if (model->captionVisible())
 	{
+		unsigned int captionHeight = geom.captionHeight();
+
+		double captionRatio = (double)captionHeight / geom.height();
+
+		painter->setBrush(Wt::WColor(Wt::StandardColor::Cyan));
+
 		painter->drawRect(boundary);
+
+		Wt::WPen p;
+		p.setColor(color);
+		p.setWidth(nodeStyle.PenWidth);
+
+		painter->setPen(p);
+		painter->drawLine(Wt::WPointF(-diam, geom.captionHeight()), Wt::WPointF(diam + geom.width(), geom.captionHeight()));
 	}
 	else
 	{
@@ -551,7 +565,6 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _painter(painter)
 	, _locked(false)
 {
-
 	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);
 	//this->mouseMoved().connect(this, &WtNodeGraphicsObject::onMouseMove);
 	//this->mouseWentUp().connect(this, &WtNodeGraphicsObject::onMouseWentUp);

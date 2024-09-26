@@ -12,7 +12,7 @@
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
 
-WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel)
+WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel, Wt::WPaintDevice* paintDevice)
 	: _width(100)
 	, _height(150)
 	, _inputPortWidth(70)
@@ -28,7 +28,7 @@ WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel
 	, _nSinks(dataModel->nPorts(PortType::In))
 	, _draggingPos(-1000, -1000)
 	, _dataModel(dataModel)
-	//, _fontMetrics(Wt::WFont())
+	, _fontMetrics(paintDevice->fontMetrics())
 	//, _boldFontMetrics(Wt::WFont())
 	//, TipsWidget(new QDialog)
 	//, TipsWidget_(new QDockWidget)
@@ -37,10 +37,10 @@ WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel
 	, isNodeTipsShow(new bool(false))
 {
 	//Wt::WFont f;
-	//Wt::WFontMetrics test(f, 1, 1, 1)
-		////f.setBold(true);
-		////this->InitText();
-		//_boldFontMetrics = Wt::WFontMetrics(f);
+	//Wt::WFontMetrics test(f, 1, 1, 1);
+	////f.setBold(true);
+	////this->InitText();
+	//_boldFontMetrics = Wt::WFontMetrics(f);
 }
 
 WtNodeGeometry::~WtNodeGeometry()
@@ -225,40 +225,39 @@ Wt::WRectF WtNodeGeometry::boundingRect() const
 
 void WtNodeGeometry::recalculateSize() const
 {
-	//_entryHeight = fontMetrics.height();
+	_entryHeight = _fontMetrics.height();
 
-	//{
-	//	unsigned int maxNumOfEntries = std::max(_nSinks, _nSources);
-	//	unsigned int step = _entryHeight + _spacing;
-	//	_height = step * maxNumOfEntries;
-	//}
+	{
+		unsigned int maxNumOfEntries = std::max(_nSinks, _nSources);
+		unsigned int step = _entryHeight + _spacing;
+		_height = step * maxNumOfEntries;
+	}
 
-	///*if (auto w = _dataModel->embeddedWidget())
+	//if (auto w = _dataModel->embeddedWidget())
 	//{
 	//	_height = std::max(_height, static_cast<unsigned>(w->height()));
-	//}*/
-
-	//_height += captionHeight();
-
-	//_inputPortWidth = portWidth(PortType::In);
-	//_outputPortWidth = portWidth(PortType::Out);
-
-	//_width = _inputPortWidth + _outputPortWidth + 2 * _spacing;
-
-	////if (auto w = _dataModel->embeddedWidget())
-	////{
-	////	_width += w->width();
-	////}
-
-	////_width = std::max(_width, captionWidth());
-
-	//if (_dataModel->validationState() != NodeValidationState::Valid)
-	//{
-	//	//_width = std::max(_width, validationWidth());
-	//	//_height += validationHeight() + _spacing;
-
-	//	_height += _spacing;
 	//}
+
+	_height += captionHeight();
+
+	_inputPortWidth = portWidth(PortType::In);
+	_outputPortWidth = portWidth(PortType::Out);
+
+	_width = _inputPortWidth + _outputPortWidth + 2 * _spacing;
+
+	//if (auto w = _dataModel->embeddedWidget())
+	//{
+	//	_width += w->width();
+	//}
+
+	_width = std::max(_width, captionWidth());
+
+	if (_dataModel->validationState() != NodeValidationState::Valid)
+	{
+		_width = std::max(_width, validationWidth());
+		_height += validationHeight() + _spacing;
+		_height += _spacing;
+	}
 }
 
 //void NodeGeometry::recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const
@@ -532,24 +531,21 @@ unsigned int WtNodeGeometry::captionHeight() const
 
 	std::string name = _dataModel->caption();
 
-	//return _boldFontMetrics.boundingRect(name).height() + captionHeightSpacing();
-	return captionHeightSpacing();
+	return _fontMetrics.height() + captionHeightSpacing();
 }
 
-//unsigned int
-//NodeGeometry::
-//captionWidth() const
-//{
-//	if (!_dataModel->captionVisible())
-//		return 0;
-//
-//	std::string name = _dataModel->caption();
-//
-//	unsigned int w = _dataModel->hotkeyEnabled() ? 2 * captionHeight() + _boldFontMetrics.boundingRect(name).width() + 2 * hotkeyWidth() + hotkeyIncline()
-//		: 2 * captionHeight() + _boldFontMetrics.boundingRect(name).width();
-//
-//	return w;
-//}
+unsigned int WtNodeGeometry::captionWidth() const
+{
+	if (!_dataModel->captionVisible())
+		return 0;
+
+	std::string name = _dataModel->caption();
+
+	// no width, bug
+	unsigned int w = _dataModel->hotkeyEnabled() ? 2 * captionHeight() + _fontMetrics.height() + 2 * hotkeyWidth() + hotkeyIncline() : 2 * captionHeight() + _fontMetrics.height();
+
+	return w;
+}
 
 //unsigned int
 //NodeGeometry::
@@ -701,16 +697,16 @@ bool WtNodeState::resizing() const
 	return _resizing;
 }
 
-WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel)
+WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPaintDevice* paintDevice)
 	: _uid(boost::uuids::random_generator()())
 	, _nodeDataModel(std::move(dataModel))
 	, _nodeState(_nodeDataModel)
-	, _nodeGeometry(_nodeDataModel)
+	, _nodeGeometry(_nodeDataModel, paintDevice)
 	, _nodeGraphicsObject(nullptr)
 {
-	//_nodeGeometry.recalculateSize();
+	_nodeGeometry.recalculateSize();
 
-	//// propagate data: model => node
+	// propagate data: model => node
 	//connect(_nodeDataModel.get(), &WtNodeDataModel::dataUpdated,
 	//	this, &WtNode::onDataUpdated);
 
@@ -791,13 +787,13 @@ WtNodeDataModel* WtNode::nodeDataModel() const
 void WtNode::propagateData(std::shared_ptr<WtNodeData> nodeData,
 	PortIndex inPortIndex) const
 {
-	//_nodeDataModel->setInData(std::move(nodeData), inPortIndex);
+	_nodeDataModel->setInData(std::move(nodeData), inPortIndex);
 
-	////Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
-	//_nodeGraphicsObject->setGeometryChanged();
-	////_nodeGeometry.recalculateSize();
-	////_nodeGraphicsObject->update();
-	//_nodeGraphicsObject->moveConnections();
+	//Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
+	_nodeGraphicsObject->setGeometryChanged();
+	_nodeGeometry.recalculateSize();
+	//_nodeGraphicsObject->update();
+	_nodeGraphicsObject->moveConnections();
 }
 
 void WtNode::onDataUpdated(PortIndex index)

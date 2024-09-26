@@ -60,7 +60,7 @@ using json = nlohmann::json;
 
 WtNodeStyle::WtNodeStyle()
 {
-	std::string filePath = getAssetPath() + "../external/nodeeditor/resources/DefaultStyle.json";
+	std::string filePath = getAssetPath() + "../src/Rendering/GUI/WtGUI/resources/WtDefaultStyle.json";
 	loadJsonFile(filePath);
 }
 
@@ -191,7 +191,6 @@ Wt::WColor WtConnectionStyle::normalColor() const
 
 Wt::WColor WtConnectionStyle::normalColor(std::string typeID) const
 {
-
 	std::hash<std::string> hasher;
 
 	std::size_t hash_value = hasher(typeID);

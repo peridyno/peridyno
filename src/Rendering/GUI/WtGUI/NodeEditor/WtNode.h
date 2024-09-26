@@ -24,7 +24,7 @@ class WtStyleCollection;
 class WtNodeGeometry
 {
 public:
-	WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel);
+	WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel, Wt::WPaintDevice* paintDevice);
 	~WtNodeGeometry();
 
 public:
@@ -174,7 +174,7 @@ private:
 
 	std::unique_ptr<WtNodeDataModel> const& _dataModel;
 
-	//mutable Wt::WFontMetrics _fontMetrics;
+	mutable Wt::WFontMetrics _fontMetrics;
 	//mutable Wt::WFontMetrics _boldFontMetrics;
 };
 
@@ -243,7 +243,7 @@ private:
 class WtNode
 {
 public:
-	WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel);
+	WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPaintDevice* paintDevice);
 
 	virtual ~WtNode();
 

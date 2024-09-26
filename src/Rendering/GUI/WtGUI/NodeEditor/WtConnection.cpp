@@ -102,7 +102,6 @@ std::pair<Wt::WPointF, Wt::WPointF> WtConnectionGeometry::pointsC1C2() const
 		verticalOffset = std::min(defaultOffset, std::abs(yDistance)) * vector;
 
 		ratioX = 1.0;
-		std::cout << "!!!" << std::endl;
 	}
 
 	horizontalOffset *= ratioX;
@@ -112,7 +111,6 @@ std::pair<Wt::WPointF, Wt::WPointF> WtConnectionGeometry::pointsC1C2() const
 
 	return std::make_pair(c1, c2);
 }
-
 
 // WtConnectionState
 WtConnectionState::~WtConnectionState()
@@ -379,7 +377,6 @@ WtConnectionGeometry& WtConnection::connectionGeometry()
 {
 	return _connectionGeometry;
 }
-
 
 WtConnectionGeometry const& WtConnection::connectionGeometry() const
 {
