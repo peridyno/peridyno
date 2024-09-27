@@ -346,7 +346,7 @@ namespace dyno
 		auto& nbrIds = this->outNeighborIds()->getData();
 
 		uint numPt  = this->inPosition()->getDataPtr()->size();
-		uint sizeLimit = this->varSizeLimit()->getData();
+		uint sizeLimit = this->varSizeLimit()->getValue();
 		
 		nbrIds.resize(numPt, sizeLimit);
 
@@ -365,7 +365,6 @@ namespace dyno
 			hiBound = hiBound.minimum(hiLimit);
 			loBound = loBound.maximum(loLimit);
 		}
-
 
 		GridHash<TDataType> hashGrid;
 		hashGrid.setSpace(h, loBound - Coord(h), hiBound + Coord(h));
