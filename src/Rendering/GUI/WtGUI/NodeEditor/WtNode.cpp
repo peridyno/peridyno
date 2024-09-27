@@ -187,19 +187,35 @@ unsigned int WtNodeGeometry::validationHeight() const
 {
 	std::string msg = _dataModel->validationMessage();
 
-	//Error:No Metrics
-	return 10;
+	return _fontMetrics.height();
 }
 
 unsigned int WtNodeGeometry::validationWidth() const
 {
 	std::string msg = _dataModel->validationMessage();
 
-	//Error:No Metrics
-	return 10;
+	return calculateWidth(msg);
 }
 
 //TODO:NodeGeometry need transplant
+
+std::string WtNodeGeometry::strFormat(std::string str) const
+{
+	std::string trueName;
+
+	size_t pos = str.find('<');
+
+	if (pos != std::string::npos)
+	{
+		trueName = str.substr(0, pos);
+	}
+	else
+	{
+		trueName = str;
+	}
+
+	return trueName;
+}
 
 Wt::WRectF WtNodeGeometry::entryBoundingRect() const
 {
@@ -259,24 +275,6 @@ void WtNodeGeometry::recalculateSize() const
 		_height += _spacing;
 	}
 }
-
-//void NodeGeometry::recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const
-//{
-//	Wt::WFontMetrics fontMetrics(font);
-//	Wt::WFont boldFont = font;
-//
-//	boldFont.setBold(true);
-//
-//	Wt::WFontMetrics boldFontMetrics(boldFont);
-//
-//	if (_boldFontMetrics != boldFontMetrics)
-//	{
-//		_fontMetrics = fontMetrics;
-//		_boldFontMetrics = boldFontMetrics;
-//
-//		recalculateSize();
-//	}
-//}
 
 Wt::WPointF WtNodeGeometry::portScenePosition(PortIndex index, PortType portType, Wt::WTransform const& t) const
 {
@@ -539,35 +537,29 @@ unsigned int WtNodeGeometry::captionWidth() const
 	if (!_dataModel->captionVisible())
 		return 0;
 
-	std::string name = _dataModel->caption();
+	std::string name = strFormat(_dataModel->caption());
 
 	// no width, bug
-	unsigned int w = _dataModel->hotkeyEnabled() ? 2 * captionHeight() + _fontMetrics.height() + 2 * hotkeyWidth() + hotkeyIncline() : 2 * captionHeight() + _fontMetrics.height();
+	unsigned int w = _dataModel->hotkeyEnabled() ? 2 * captionHeight() + calculateWidth(name) + 2 * hotkeyWidth() + hotkeyIncline() : 2 * captionHeight() + calculateWidth(name);
 
 	return w;
 }
 
-//unsigned int
-//NodeGeometry::
-//validationHeight() const
-//{
-//	std::string msg = _dataModel->validationMessage();
-//
-//	return _boldFontMetrics.boundingRect(msg).height();
-//}
+double WtNodeGeometry::calculateWidth(std::string str) const
+{
+	double height = _fontMetrics.height();
+	int widthNum = str.size();
+	return height * widthNum / 2.5;
+}
 
-//unsigned int
-//NodeGeometry::
-//validationWidth() const
-//{
-//	std::string msg = _dataModel->validationMessage();
-//
-//	return _boldFontMetrics.boundingRect(msg).width();
-//}
+double WtNodeGeometry::calculateWidth(int num) const
+{
+	double height = _fontMetrics.height();
+	return height * num / 2.5;
+}
 
-//Wt::WPointF
-//NodeGeometry::
-//calculateNodePositionBetweenNodePorts(PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
+//Wt::WPointF WtNodeGeometry::calculateNodePositionBetweenNodePorts(
+//	PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
 //	PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
 //	WtNode& newNode)
 //{
@@ -575,7 +567,7 @@ unsigned int WtNodeGeometry::captionWidth() const
 //	//The first line calculates the halfway point between the ports (node position + port position on the node for both nodes averaged).
 //	//The second line offsets this coordinate with the size of the new node, so that the new nodes center falls on the originally
 //	//calculated coordinate, instead of it's upper left corner.
-//	//
+//
 //	//auto converterNodePos = (sourceNode->nodeGraphicsObject().pos() + sourceNode->nodeGeometry().portScenePosition(sourcePortIndex, sourcePort) +
 //	//	targetNode->nodeGraphicsObject().pos() + targetNode->nodeGeometry().portScenePosition(targetPortIndex, targetPort)) / 2.0f;
 //	//converterNodePos.setX(converterNodePos.x() - newNode.nodeGeometry().width() / 2.0f);

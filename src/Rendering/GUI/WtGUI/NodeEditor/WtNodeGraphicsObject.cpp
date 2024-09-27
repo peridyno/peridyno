@@ -53,7 +53,6 @@ void WtNodePainter::drawNodeRect(
 	}
 
 	float diam = nodeStyle.ConnectionPointDiameter;
-
 	double const radius = 6.0;
 
 	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
@@ -93,9 +92,7 @@ void drawHotKeys(
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
-
-	auto color = nodeStyle.SelectedBoundaryColor;
+	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
 	const Wt::WPen& pen = painter->pen();
 
@@ -320,20 +317,24 @@ void WtNodePainter::drawModelName(
 	if (!model->captionVisible())
 		return;
 
-	std::string const& name = model->caption();
+	std::string const& name = geom.strFormat(model->caption());
+
+	Wt::WFontMetrics metrics = painter->device()->fontMetrics();
+
+	Wt::WPointF position(0, 0);
 
 	Wt::WFont f = painter->font();
 
 	f.setWeight(Wt::FontWeight::Bold);
 
-	Wt::WRectF position(10, 10, 10, 10);
 	float diam = nodeStyle.ConnectionPointDiameter;
-	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
-		: Wt::WRectF(-diam, 0.0f, 2.0 * diam + geom.width(), diam + geom.height());
+
+	Wt::WRectF boundary(position, position);
 
 	painter->setFont(f);
-	//painter->setPen(nodeStyle.FontColor);
-	painter->drawText(boundary, Wt::AlignmentFlag::Center, Wt::WString(name));
+	painter->setPen(Wt::WPen(nodeStyle.FontColor));
+	painter->drawRect(boundary);
+	painter->drawText(boundary, Wt::AlignmentFlag::Left, Wt::WString(name));
 
 	f.setWeight(Wt::FontWeight::Normal);
 	painter->setFont(f);
@@ -347,9 +348,7 @@ void WtNodePainter::drawHotKeys(
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-	//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
-
-	auto color = nodeStyle.NormalBoundaryColor;
+	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
 	const Wt::WPen& pen = painter->pen();
 
@@ -461,29 +460,29 @@ void WtNodePainter::drawEntryLabels(
 			else
 				s = model->dataType(portType, (PortIndex)i).name;
 
-			/*auto rect = metrics.boundingRect(5);
+			Wt::WFontMetrics metrics = painter->device()->fontMetrics();
 
-			p.setY(p.y() + rect.height() / 4.0);
+			Wt::WPointF topLeft, bottomRight;
 
 			switch (portType)
 			{
 			case PortType::In:
-				p.setX(5.0);
+				topLeft = Wt::WPointF(p.x() + 10, p.y() - metrics.height() / 3);
+				bottomRight = Wt::WPointF(p.x() + 50, p.y() + 6);
+				painter->drawText(Wt::WRectF(topLeft, bottomRight), Wt::AlignmentFlag::Left, Wt::WString(s));
 				break;
 
 			case PortType::Out:
-				p.setX(geom.width() - 5.0 - rect.width());
+				topLeft = Wt::WPointF(p.x() - 50, p.y() - 6);
+				bottomRight = Wt::WPointF(p.x() - 10, p.y() + metrics.height() / 3);
+				painter->drawText(Wt::WRectF(topLeft, bottomRight), Wt::AlignmentFlag::Right, Wt::WString(s));
 				break;
 
 			default:
 				break;
-			}*/
+			}
 
-			Wt::WPointF bottomRight(p.x() - 8, p.y() + 6);
-			Wt::WPointF topLeft(p.x() - 50, p.y() - 6);
-			Wt::WRectF nameRect(topLeft, bottomRight);
 
-			painter->drawText(nameRect, Wt::AlignmentFlag::Right, Wt::WString(s));
 		}
 	}
 }
@@ -514,9 +513,7 @@ void WtNodePainter::drawValidationRect(
 	{
 		WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-		//auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
-
-		auto color = nodeStyle.NormalBoundaryColor;
+		auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
 		if (geom.hovered())
 		{
@@ -565,6 +562,7 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _painter(painter)
 	, _locked(false)
 {
+
 	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);
 	//this->mouseMoved().connect(this, &WtNodeGraphicsObject::onMouseMove);
 	//this->mouseWentUp().connect(this, &WtNodeGraphicsObject::onMouseWentUp);

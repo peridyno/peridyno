@@ -1,5 +1,7 @@
 set(LIB_DEPENDENCY
     Modeling
     SemiAnalyticalScheme
-    WtGUI)
+    WtGUI
+    ParticleSystem
+)
 add_example(Wt_Barricade WtGUI LIB_DEPENDENCY)

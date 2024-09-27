@@ -98,11 +98,17 @@ public:
 	void HidePortTips()const;
 
 public:
+	std::string strFormat(std::string str) const;
+
 	Wt::WRectF entryBoundingRect() const;
 
 	Wt::WRectF boundingRect() const;
 
 	void recalculateSize() const;
+
+	double calculateWidth(std::string) const;
+
+	double calculateWidth(int num) const;
 
 	//void recalculateSize(Wt::WFont const& font, Wt::WFontMetrics fontMetrics) const;
 
