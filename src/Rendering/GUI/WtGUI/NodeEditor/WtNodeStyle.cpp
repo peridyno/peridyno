@@ -191,19 +191,27 @@ Wt::WColor WtConnectionStyle::normalColor() const
 
 Wt::WColor WtConnectionStyle::normalColor(std::string typeID) const
 {
-	std::hash<std::string> hasher;
+	//std::hash<std::string> hasher;
+	//std::size_t hash_value = hasher(typeID);
+	//std::mt19937 gen(static_cast<unsigned int>(hash_value));
+	//std::uniform_int_distribution<> hueDist(0, 255);
+	//int hue = hueDist(gen);
+	//int sat = 120 + hash_value % 129;
+	//return fromHSL(hash_value, sat, 160);
 
-	std::size_t hash_value = hasher(typeID);
+	if (typeID == "port")
+	{
+		return Wt::WColor(198, 241, 79);
+	}
+	else if (typeID == "FInstance")
+	{
+		return Wt::WColor(207, 174, 113);
+	}
+	else
+	{
+		return Wt::WColor(Wt::StandardColor::Black);
+	}
 
-	std::mt19937 gen(static_cast<unsigned int>(hash_value));
-
-	std::uniform_int_distribution<> hueDist(0, 255);
-
-	int hue = hueDist(gen);
-
-	int sat = 120 + hash_value % 129;
-
-	return fromHSL(hash_value, sat, 160);
 }
 
 Wt::WColor WtConnectionStyle::fromHSL(int h, int s, int l) const

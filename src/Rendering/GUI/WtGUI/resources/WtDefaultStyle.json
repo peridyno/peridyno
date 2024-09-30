@@ -13,7 +13,7 @@
     "GradientColor3": [ 73, 73, 73 ],
     "ShadowColor": [ 0, 0, 0 ],
     "FontColor": "black",
-    "FontColorFaded": [ 200, 200, 200 ],
+    "FontColorFaded": [ 0, 0, 0 ],
     "ConnectionPointColor": [ 169, 169, 169 ],
     "FilledConnectionPointColor": "cyan",
     "ErrorColor": "red",

@@ -66,7 +66,7 @@ void WtNodePainter::drawNodeRect(
 
 		double captionRatio = (double)captionHeight / geom.height();
 
-		painter->setBrush(Wt::WColor(Wt::StandardColor::Cyan));
+		painter->setBrush(Wt::WColor(Wt::StandardColor::White));
 
 		painter->drawRect(boundary);
 
@@ -369,27 +369,27 @@ void WtNodePainter::drawHotKeys(
 		p.setWidth(nodeStyle.PenWidth);
 		painter->setPen(p);
 
-		//if (graphicsObject.hotKey0Hovered())
-		//{
-		//	Wt::WPen p1(color);
-		//	p1.setWidth(nodeStyle.HoveredPenWidth);
-		//	painter->setPen(p1);
-		//}
-		//else
-		//{
-		//	Wt::WPen p1(color);
-		//	p1.setWidth(nodeStyle.PenWidth);
-		//	painter->setPen(p1);
-		//}
+		if (graphicsObject.hotKey0Hovered())
+		{
+			Wt::WPen p1(color);
+			p1.setWidth(nodeStyle.HoveredPenWidth);
+			painter->setPen(p1);
+		}
+		else
+		{
+			Wt::WPen p1(color);
+			p1.setWidth(nodeStyle.PenWidth);
+			painter->setPen(p1);
+		}
 
-		//if (graphicsObject.isHotKey0Checked())
-		//{
-		//	painter->setBrush(nodeStyle.GradientColor0);
-		//}
-		//else
-		//{
-		//	painter->setBrush(nodeStyle.HotKeyColor0);
-		//}
+		if (graphicsObject.isHotKey0Checked())
+		{
+			painter->setBrush(nodeStyle.GradientColor0);
+		}
+		else
+		{
+			painter->setBrush(nodeStyle.HotKeyColor0);
+		}
 
 		Wt::WPointF points[4];
 		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
@@ -399,27 +399,27 @@ void WtNodePainter::drawHotKeys(
 
 		painter->drawPolygon(points, 4);
 
-		//if (graphicsObject.hotKey1Hovered())
-		//{
-		//	Wt::WPen p2(color);
-		//	p2.setWidth(nodeStyle.HoveredPenWidth);
-		//	painter->setPen(p2);
-		//}
-		//else
-		//{
-		//	Wt::WPen p2(color);
-		//	p2.setWidth(nodeStyle.PenWidth);
-		//	painter->setPen(p2);
-		//}
+		if (graphicsObject.hotKey1Hovered())
+		{
+			Wt::WPen p2(color);
+			p2.setWidth(nodeStyle.HoveredPenWidth);
+			painter->setPen(p2);
+		}
+		else
+		{
+			Wt::WPen p2(color);
+			p2.setWidth(nodeStyle.PenWidth);
+			painter->setPen(p2);
+		}
 
-		//if (graphicsObject.isHotKey1Checked())
-		//{
-		//	painter->setBrush(nodeStyle.GradientColor0);
-		//}
-		//else
-		//{
-		//	painter->setBrush(nodeStyle.HotKeyColor1);
-		//}
+		if (graphicsObject.isHotKey1Checked())
+		{
+			painter->setBrush(nodeStyle.GradientColor0);
+		}
+		else
+		{
+			painter->setBrush(nodeStyle.HotKeyColor1);
+		}
 
 		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
 		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
@@ -449,9 +449,9 @@ void WtNodePainter::drawEntryLabels(
 			Wt::WPointF p = geom.portScenePosition((PortIndex)i, portType);
 
 			if (entries[i].empty())
-				painter->setPen(Wt::StandardColor::Red);
+				painter->setPen(nodeStyle.FontColorFaded);
 			else
-				painter->setPen(Wt::StandardColor::Black);
+				painter->setPen(nodeStyle.FontColor);
 
 			std::string s;
 
