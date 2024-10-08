@@ -93,12 +93,7 @@ namespace dyno
 					return;
 				}
 
-#ifdef CUDA_BACKEND
-				GTimer timer;
-#else
 				CTimer timer;
-#endif // CUDA_BACKEND
-
 
 				if (mTiming) {
 					timer.start();
@@ -135,11 +130,9 @@ namespace dyno
 		mSync.lock();
 
 		std::cout << "****************    Frame " << mFrameNumber << " Started    ****************" << std::endl;
-
-		// 		if (mRoot == nullptr)
-		// 		{
-		// 			return;
-		// 		}
+		
+		CTimer timer;
+		timer.start();
 
 		float t = 0.0f;
 		float dt = 0.0f;
@@ -194,7 +187,9 @@ namespace dyno
 
 		this->traverseForward<AssignFrameNumberAct>(mFrameNumber);
 
-		std::cout << "----------------    Frame " << mFrameNumber << " Ended      ----------------" << std::endl << std::endl;
+		timer.stop();
+
+		std::cout << "----------------    Frame " << mFrameNumber << " Ended! ( " << timer.getElapsedTime() << " ms in Total)  ----------------" << std::endl << std::endl;
 
 		mFrameNumber++;
 

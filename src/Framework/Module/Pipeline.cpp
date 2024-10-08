@@ -115,11 +115,7 @@ namespace dyno
 	{
 		if (mUpdateEnabled)
 		{
-#ifdef CUDA_BACKEND
-			GTimer timer;
-#else
 			CTimer timer;
-#endif // CUDA_BACKEND
 			for(auto m : mModuleList)
 			{
 				if (this->printDebugInfo()) {

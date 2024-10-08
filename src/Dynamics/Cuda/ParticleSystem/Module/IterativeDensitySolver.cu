@@ -33,11 +33,11 @@ namespace dyno
 	template <typename Real, typename Coord, typename Kernel>
 	__global__ void IDS_ComputeLambdas(
 		DArray<Real> lambdaArr,
-		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
 		Real rho_0,
 		Real smoothingLength,
+		Real samplingDistance,
 		Kernel gradient,
 		Real scale)
 	{
@@ -46,8 +46,10 @@ namespace dyno
 
 		Coord pos_i = posArr[pId];
 
-		Real lamda_i = Real(0);
+		Real gg_i = Real(0);
 		Coord grad_ci(0);
+
+		Real V_0 = samplingDistance * samplingDistance * samplingDistance;
 
 		List<int>& list_i = neighbors[pId];
 		int nbSize = list_i.size();
@@ -58,19 +60,38 @@ namespace dyno
 
 			if (r > EPSILON)
 			{
-				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r) / rho_0;
+				Coord g = V_0 * gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
 				grad_ci += g;
-				lamda_i += g.dot(g);
+
+				Real gg_j = g.dot(g);
+
+				atomicAdd(&lambdaArr[pId], gg_j);
+				atomicAdd(&lambdaArr[j], gg_j);
+
+				gg_i += g.dot(g);
 			}
 		}
 
-		lamda_i += grad_ci.dot(grad_ci);
+		gg_i += grad_ci.dot(grad_ci);
+
+		atomicAdd(&lambdaArr[pId], gg_i);
+	}
+
+	template <typename Real>
+	__global__ void IDS_ClumpLambdas(
+		DArray<Real> lambdaArr,
+		DArray<Real> rhoArr,
+		Real rho_0)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= rhoArr.size()) return;
 
 		Real rho_i = rhoArr[pId];
+		Real lambda_i = lambdaArr[pId];
 
-		lamda_i = -(rho_i - rho_0) / (lamda_i + 0.001f);
+		lambda_i = -(rho_i - rho_0) / (lambda_i + EPSILON) / rho_0;
 
-		lambdaArr[pId] = lamda_i > 0.0f ? 0.0f : lamda_i;
+		lambdaArr[pId] = lambda_i > 0.0f ? 0.0f : lambda_i;
 	}
 
 	template <typename Real, typename Coord, typename Kernel>
@@ -80,6 +101,7 @@ namespace dyno
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
 		Real smoothingLength,
+		Real samplingDistance,
 		Real kappa,
 		Real rho_0,
 		Real dt,
@@ -92,6 +114,8 @@ namespace dyno
 		Coord pos_i = posArr[pId];
 		Real lamda_i = lambdas[pId];
 
+		Real V_0 = samplingDistance * samplingDistance * samplingDistance;
+
 		Coord dP_i(0);
 		List<int>& list_i = neighbors[pId];
 		int nbSize = list_i.size();
@@ -101,7 +125,7 @@ namespace dyno
 			Real r = (pos_i - posArr[j]).norm();
 			if (r > EPSILON)
 			{
-				Coord dp_ij = kappa * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r) / rho_0;
+				Coord dp_ij = V_0 * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
 				dP_i += dp_ij;
 
 				atomicAdd(&dPos[pId][0], dp_ij[0]);
@@ -182,14 +206,22 @@ namespace dyno
 		mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
 		mSummation->update();
 
+		mLamda.reset();
+
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			IDS_ComputeLambdas,
 			mLamda,
-			mSummation->outDensity()->getData(),
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
 			rho_0,
-			this->inSmoothingLength()->getValue());
+			this->inSmoothingLength()->getValue(),
+			this->inSamplingDistance()->getValue());
+
+		cuExecute(num,
+			IDS_ClumpLambdas,
+			mLamda,
+			mSummation->outDensity()->constData(),
+			rho_0);
 
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			IDS_ComputeDisplacement,
@@ -198,6 +230,7 @@ namespace dyno
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getValue(),
+			this->inSamplingDistance()->getValue(),
 			this->varKappa()->getValue(),
 			rho_0,
 			dt);

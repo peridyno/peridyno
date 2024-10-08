@@ -485,9 +485,15 @@ namespace dyno
 		}
 	}
 
+#include "Timer.h"
+
 	template<typename TDataType>
 	void NeighborElementQuery<TDataType>::compute()
 	{
+		return;
+		CTimer timer;
+		timer.start();
+
 		auto inTopo = this->inDiscreteElements()->getDataPtr();
 
 		if (this->outContacts()->isEmpty())
@@ -513,6 +519,7 @@ namespace dyno
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
 		Real dHat = this->varDHead()->getValue();
+
 
 		cuExecute(t_num,
 			NEQ_SetupAABB,
@@ -695,6 +702,9 @@ namespace dyno
 		contactNum.clear();
 		deviceIds.clear();
 		nbr_cons_tmp.clear();
+
+		timer.stop();
+		std::cout << "Collision: " << timer.getElapsedTime() << std::endl;
 	}
 
 	DEFINE_CLASS(NeighborElementQuery);
