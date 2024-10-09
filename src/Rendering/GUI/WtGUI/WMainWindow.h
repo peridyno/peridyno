@@ -28,7 +28,8 @@ public:
 
 private:
 	void initMenu(Wt::WMenu*);
-	void initLeftPanel(Wt::WContainerWidget*);
+	Wt::WWidget* initLeftPanel(Wt::WContainerWidget*);
+	Wt::WWidget* initTreePanel();
 
 	void start();
 	void stop();

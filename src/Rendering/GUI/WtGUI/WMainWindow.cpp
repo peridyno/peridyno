@@ -22,6 +22,8 @@
 #include <Wt/WTable.h>
 #include <Wt/WColorPicker.h>
 #include <Wt/WLogger.h>
+#include <Wt/WTabWidget.h>
+#include <Wt/WTextArea.h>
 
 #include <fstream>
 
@@ -50,7 +52,7 @@ WMainWindow::WMainWindow()
 
 	// scene info panel
 	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::West);
-	widget0->setWidth(400);
+	widget0->setWidth(600);
 	initLeftPanel(widget0);
 
 	// menu
@@ -91,7 +93,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 			if (sample != NULL)
 			{
 				pythonItem->select();
-
 				std::string path = sample->source();
 				std::ifstream ifs(path);
 				if (ifs.is_open())
@@ -117,7 +118,9 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 		});
 }
 
-void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
+
+
+Wt::WWidget* WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 {
 	// create data model
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
@@ -127,7 +130,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 
 	// vertical layout
-
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 	parent->setMargin(0);
@@ -137,34 +139,34 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	panel0->setTitle("Node Tree");
 	panel0->setCollapsible(false);
 	panel0->setMargin(0);
-	panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
+	//panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
 	//panel0->setStyleClass("scrollable-content");
 
-	//auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
-	//treeView->setMargin(0);
-	//treeView->setSortingEnabled(false);
-	//treeView->setSelectionMode(Wt::SelectionMode::Single);
-	//treeView->setEditTriggers(Wt::EditTrigger::None);
-	//treeView->setColumnResizeEnabled(true);
-	//treeView->setModel(mNodeDataModel);
-	//treeView->setColumnWidth(0, 100);
-	//treeView->setColumnWidth(1, 280);
-	//treeView->setSortingEnabled(false);
+	auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	treeView->setMargin(0);
+	treeView->setSortingEnabled(false);
+	treeView->setSelectionMode(Wt::SelectionMode::Single);
+	treeView->setEditTriggers(Wt::EditTrigger::None);
+	treeView->setColumnResizeEnabled(true);
+	treeView->setModel(mNodeDataModel);
+	treeView->setColumnWidth(0, 100);
+	treeView->setColumnWidth(1, 280);
+	treeView->setSortingEnabled(false);
 
 	// module list
-	//auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
-	//panel1->setTitle("Module List");
-	//panel1->setCollapsible(true);
-	//panel1->setStyleClass("scrollable-content");
-	//auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
+	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
+	panel1->setTitle("Module List");
+	panel1->setCollapsible(true);
+	panel1->setStyleClass("scrollable-content");
+	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
 
-	//tableView->setSortingEnabled(false);
-	//tableView->setSelectionMode(Wt::SelectionMode::Single);
-	//tableView->setEditTriggers(Wt::EditTrigger::None);
-	//tableView->setModel(mModuleDataModel);
+	tableView->setSortingEnabled(false);
+	tableView->setSelectionMode(Wt::SelectionMode::Single);
+	tableView->setEditTriggers(Wt::EditTrigger::None);
+	tableView->setModel(mModuleDataModel);
 
 	// Parameter list
-	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>(), 6);
+	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
 	panel2->setTitle("Control Variable");
 	panel2->setCollapsible(true);
 	panel2->setStyleClass("scrollable-content");
@@ -236,6 +238,8 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
 			"resetButton.blur();");
 		});
+
+	return
 }
 
 void WMainWindow::start()
