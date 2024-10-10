@@ -3,7 +3,7 @@
 WtFlowWidget::WtFlowWidget() :Wt::WPaintedWidget()
 {
 	mZoomFactor = 1.0;
-	resize(600, 600);
+	resize(600, 900);
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
@@ -66,17 +66,8 @@ void WtFlowWidget::zoomOut()
 void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);
-	////WtNode node;
-	////WtNodePainter::paint(&painter, node);
 	painter.scale(mZoomFactor, mZoomFactor);
 	painter.translate(mTranlate);
-
-	//WtNodeStyle nodeStyle;
-	//float diam = nodeStyle.ConnectionPointDiameter;
-
-	////Wt::WRectF boundary = Wt::WRectF(-diam, -diam, 2.0 * diam + 10, 2.0 * diam + 15);
-	//Wt::WRectF boundary = Wt::WRectF(10, 10, 30, 30);
-	//painter.drawRect(boundary);
 
 	node_scene = new WtNodeFlowScene(&painter);
 }

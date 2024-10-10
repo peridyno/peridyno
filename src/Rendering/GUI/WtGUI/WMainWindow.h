@@ -28,8 +28,9 @@ public:
 
 private:
 	void initMenu(Wt::WMenu*);
-	Wt::WWidget* initLeftPanel(Wt::WContainerWidget*);
-	Wt::WWidget* initTreePanel();
+	void initLeftPanel(Wt::WContainerWidget*);
+	std::unique_ptr<Wt::WWidget> initNodeGraphics();
+	std::unique_ptr<Wt::WWidget> initNodeTree();
 
 	void start();
 	void stop();

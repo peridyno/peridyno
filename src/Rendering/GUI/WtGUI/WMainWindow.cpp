@@ -118,26 +118,31 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 		});
 }
 
-
-
-Wt::WWidget* WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
+std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 {
-	// create data model
-	mNodeDataModel = std::make_shared<WNodeDataModel>();
-	mModuleDataModel = std::make_shared<WModuleDataModel>();
-	mParameterDataNode = std::make_shared<WParameterDataNode>();
+	auto panel0 = std::make_unique<Wt::WPanel>();
+	panel0->setTitleBar(false);
+	panel0->setCollapsible(false);
+	panel0->setMargin(0);
+	//panel0->setHeight(900);
+	panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
 
-	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
+	return panel0;
+}
 
+std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
+{
+	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
+	//rootWidget->setHeight(900);
 	// vertical layout
-	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
-	parent->setMargin(0);
+	rootWidget->setMargin(0);
 
 	// node tree
-	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
+	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
 	panel0->setTitle("Node Tree");
-	panel0->setCollapsible(false);
+	panel0->setCollapsible(true);
 	panel0->setMargin(0);
 	//panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
 	//panel0->setStyleClass("scrollable-content");
@@ -154,10 +159,10 @@ Wt::WWidget* WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	treeView->setSortingEnabled(false);
 
 	// module list
-	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>(), 2);
+	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>());
 	panel1->setTitle("Module List");
 	panel1->setCollapsible(true);
-	panel1->setStyleClass("scrollable-content");
+	//panel1->setStyleClass("scrollable-content");
 	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
 
 	tableView->setSortingEnabled(false);
@@ -166,38 +171,60 @@ Wt::WWidget* WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	tableView->setModel(mModuleDataModel);
 
 	// Parameter list
-	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
+	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
 	panel2->setTitle("Control Variable");
 	panel2->setCollapsible(true);
-	panel2->setStyleClass("scrollable-content");
+	//panel2->setStyleClass("scrollable-content");
 
-	// action for selection change
-	//treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto node = mNodeDataModel->getNode(idx);
-	//		mModuleDataModel->setNode(node);
-	//		mParameterDataNode->setNode(node);
-	//		mParameterDataNode->createParameterPanel(panel2);
-	//	});
+	//action for selection change
+	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto node = mNodeDataModel->getNode(idx);
+			mModuleDataModel->setNode(node);
+			mParameterDataNode->setNode(node);
+			mParameterDataNode->createParameterPanel(panel2);
+		});
 
-	//tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto module = mModuleDataModel->getModule(idx);
-	//		mParameterDataNode->setModule(module);
-	//		mParameterDataNode->createParameterPanelModule(panel2);
-	//	});
+	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto module = mModuleDataModel->getModule(idx);
+			mParameterDataNode->setModule(module);
+			mParameterDataNode->createParameterPanelModule(panel2);
+		});
 
-	//tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto mod = mModuleDataModel->getModule(idx);
-	//		if (mod->getModuleType() == "VisualModule")
-	//		{
-	//			Wt::log("info") << mod->getName();
-	//		}
-	//	});
+	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto mod = mModuleDataModel->getModule(idx);
+			if (mod->getModuleType() == "VisualModule")
+			{
+				Wt::log("info") << mod->getName();
+			}
+		});
+	return rootWidget;
+}
+
+void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
+{
+	// create data model
+	mNodeDataModel = std::make_shared<WNodeDataModel>();
+	mModuleDataModel = std::make_shared<WModuleDataModel>();
+	mParameterDataNode = std::make_shared<WParameterDataNode>();
+
+	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
+
+	// vertical layout
+	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	layout->setContentsMargins(0, 0, 0, 0);
+	parent->setMargin(0);
+
+	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
+	Wt::WTabWidget* tab = widget0->addNew<Wt::WTabWidget>();
+	tab->setHeight(900);
+	tab->addTab(initNodeTree(), "NodeGraphics", Wt::ContentLoading::Lazy);
+	tab->addTab(initNodeGraphics(), "NodeTree", Wt::ContentLoading::Lazy);
 
 	// simulation control
-	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>(), 1);
+	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
 	panel3->setTitle("Simulation Control");
 	panel3->setCollapsible(false);
 	//panel3->setHeight(50);
@@ -238,8 +265,6 @@ Wt::WWidget* WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
 			"resetButton.blur();");
 		});
-
-	return
 }
 
 void WMainWindow::start()
