@@ -51,14 +51,24 @@ WMainWindow::WMainWindow()
 	mSceneCanvas = layout->addWidget(std::make_unique<WSimulationCanvas>(), Wt::LayoutPosition::Center);
 
 	// scene info panel
-	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::West);
+	widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::West);
 	widget0->setWidth(600);
+
+	// create data model
+	mNodeDataModel = std::make_shared<WNodeDataModel>();
+	mModuleDataModel = std::make_shared<WModuleDataModel>();
+	mParameterDataNode = std::make_shared<WParameterDataNode>();
+
+	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
+
 	initLeftPanel(widget0);
 
 	// menu
 	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::East);
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
+
+
 }
 
 WMainWindow::~WMainWindow()
@@ -85,7 +95,12 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
-		if (scene) setScene(scene);
+		if (scene)
+		{
+			setScene(scene);
+			initLeftPanel(widget0);
+		}
+
 		});
 
 	sampleWidget->clicked().connect([=](Sample* sample)
@@ -125,7 +140,14 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	panel0->setCollapsible(false);
 	panel0->setMargin(0);
 	//panel0->setHeight(900);
-	panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
+	auto scn = dyno::SceneGraphFactory::instance()->active();
+	if (!mScene)
+	{
+		setScene(scn);
+	}
+	panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene));
+
+
 
 	return panel0;
 }
@@ -205,12 +227,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
 
 void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 {
-	// create data model
-	mNodeDataModel = std::make_shared<WNodeDataModel>();
-	mModuleDataModel = std::make_shared<WModuleDataModel>();
-	mParameterDataNode = std::make_shared<WParameterDataNode>();
 
-	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 
 	// vertical layout
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -220,8 +237,9 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
 	Wt::WTabWidget* tab = widget0->addNew<Wt::WTabWidget>();
 	tab->setHeight(900);
-	tab->addTab(initNodeTree(), "NodeGraphics", Wt::ContentLoading::Lazy);
-	tab->addTab(initNodeGraphics(), "NodeTree", Wt::ContentLoading::Lazy);
+	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
+	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
+
 
 	// simulation control
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());

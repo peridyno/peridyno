@@ -1,8 +1,9 @@
 #include "WtFlowWidget.h"
 
-WtFlowWidget::WtFlowWidget() :Wt::WPaintedWidget()
+WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene) :Wt::WPaintedWidget()
 {
 	mZoomFactor = 1.0;
+	mScene = scene;
 	resize(600, 900);
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
@@ -69,5 +70,5 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	painter.scale(mZoomFactor, mZoomFactor);
 	painter.translate(mTranlate);
 
-	node_scene = new WtNodeFlowScene(&painter);
+	node_scene = new WtNodeFlowScene(&painter, mScene);
 }

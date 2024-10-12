@@ -11,7 +11,7 @@ class WGridLayout;
 class WtFlowWidget : public Wt::WPaintedWidget
 {
 public:
-	WtFlowWidget();
+	WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
 	~WtFlowWidget();
 
 public:
@@ -33,4 +33,5 @@ private:
 	bool isDragging = false;
 
 	WtNodeFlowScene* node_scene = nullptr;
+	std::shared_ptr<dyno::SceneGraph> mScene;
 };

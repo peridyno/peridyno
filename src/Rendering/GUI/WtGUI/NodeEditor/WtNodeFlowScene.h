@@ -17,7 +17,7 @@ class WtNodeFlowScene : public WtFlowScene
 {
 public:
 	WtNodeFlowScene(std::shared_ptr<WtDataModelRegistry> registry, Wt::WPainter* painter);
-	WtNodeFlowScene(Wt::WPainter* painter);
+	WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene);
 	~WtNodeFlowScene();
 
 	void addNodeByString(std::string NodeName);
@@ -84,4 +84,6 @@ private:
 
 	float mDx = 100.0f;
 	float mDy = 50.0f;
+
+	std::shared_ptr<dyno::SceneGraph> mScene = nullptr;
 };

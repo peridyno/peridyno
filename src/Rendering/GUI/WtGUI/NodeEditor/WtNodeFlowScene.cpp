@@ -1,9 +1,10 @@
 #include "WtNodeFlowScene.h"
 
-WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter)
+WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowScene()
 {
 	_painter = painter;
+	mScene = scene;
 
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
@@ -48,7 +49,8 @@ WtNodeFlowScene::~WtNodeFlowScene() {}
 
 void WtNodeFlowScene::createNodeGraphView()
 {
-	auto scn = dyno::SceneGraphFactory::instance()->active();
+	//auto scn = dyno::SceneGraphFactory::instance()->active();
+	auto scn = mScene;
 
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
 
@@ -510,7 +512,9 @@ void WtNodeFlowScene::showHelper(WtNode& n)
 
 void WtNodeFlowScene::reorderAllNodes()
 {
-	auto scn = dyno::SceneGraphFactory::instance()->active();
+	//auto scn = dyno::SceneGraphFactory::instance()->active();
+
+	auto scn = mScene;
 
 	dyno::DirectedAcyclicGraph graph;
 
