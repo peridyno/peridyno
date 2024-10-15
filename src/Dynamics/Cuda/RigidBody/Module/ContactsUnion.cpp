@@ -26,7 +26,7 @@ namespace dyno
 			outData.assign(*inDataA, inDataA->size());
 
 		if (inDataB != nullptr)
-			outData.assign(*inDataB, inDataB->size(), inDataA->size(), 0);
+			outData.assign(*inDataB, inDataB->size(), inDataA == nullptr ? 0 : inDataA->size(), 0);
 	}
 
 

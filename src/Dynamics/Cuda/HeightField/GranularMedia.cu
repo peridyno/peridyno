@@ -210,12 +210,13 @@ namespace dyno
 		Real depth,
 		Real dragging,
 		Real GRAVITY,
+		Real h,
 		Real mu)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
 
-		const Real grid_spacing2 = 2;
+		const Real grid_spacing2 = 2 * h;
 
 		uint width = grid.nx();
 		uint height = grid.ny();
@@ -247,7 +248,7 @@ namespace dyno
 
 			Real  h_d = depth;
 
-			float2 sliding_dir;
+			Vector<Real, 2> sliding_dir;
 			sliding_dir.x = (sw - se) / grid_spacing2;
 			sliding_dir.y = (sn - ss) / grid_spacing2;
 			Real gradient = sqrtf(sliding_dir.x * sliding_dir.x + sliding_dir.y * sliding_dir.y);
@@ -324,7 +325,7 @@ namespace dyno
 	}
 
 	template<typename Coord3D, typename Coord4D>
-	__global__ void UpdateHeightField(
+	__global__ void  UpdateHeightField(
 		DArray2D<Coord3D> heightfield,
 		DArray2D<Coord4D> grid)
 	{
@@ -344,6 +345,40 @@ namespace dyno
 			heightfield(i, j) = Coord3D(0, gxy.x, 0);
 		}
 	}
+	template<typename Coord3D, typename Coord4D>
+	__global__ void GM_SetGrid(
+		DArray2D<Coord3D> heightfield,
+		DArray2D<Coord4D> grid,
+		Real depthOffset)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		int j = threadIdx.y + blockIdx.y * blockDim.y;
+
+		int width = heightfield.nx();
+		int height = heightfield.ny();
+		if (i == 0)
+		{
+			grid(i, j) = Coord4D(heightfield(0, j == 0 ? j:j-1).y + depthOffset, 0.0f, 0.0f, 0.0f);
+		}
+		else if (j == 0)
+		{
+			grid(i, j) = Coord4D(heightfield(i == 0 ? i : i - 1, 0).y + depthOffset, 0.0f, 0.0f, 0.0f);
+		}
+		else
+		{
+			if (i < width + 1 && j < height + 1)
+			{
+				grid(i, j) = Coord4D(heightfield(i - 1, j - 1).y + depthOffset, 0.0f, 0.0f, 0.0f);
+			}
+			else
+			{
+				if(i == width + 1)
+					grid(i, j) = Coord4D(heightfield(i - 2, j == height + 1 ? j - 2 : j - 1).y + depthOffset, 0.0f, 0.0f, 0.0f);
+				else if(j == height + 1)
+					grid(i, j) = Coord4D(heightfield(i == width + 1 ? i - 2 :i - 1, j - 2).y + depthOffset, 0.0f, 0.0f, 0.0f);
+			}	
+		}
+	}
 
 	template<typename TDataType>
 	void GranularMedia<TDataType>::resetStates()
@@ -357,8 +392,12 @@ namespace dyno
 		auto s = this->varSpacing()->getValue();
 		auto o = this->varOrigin()->getValue();
 
+		auto d = this->varDepth()->getValue();
+
 		this->stateGrid()->resize(exW, exH);
 		this->stateGridNext()->resize(exW, exH);
+
+		auto topo = this->stateHeightField()->getDataPtr();
 
 		CArray2D<Coord4D> initializer(exW, exH);
 
@@ -366,19 +405,13 @@ namespace dyno
 		{
 			for (uint j = 0; j < exH; j++)
 			{
-				if (abs(i - exW / 2) < 10 && abs(j - exW / 2) < 10)
-				{
-					initializer(i, j) = Coord4D(5, 0, 0, 0);
-				}
-				else
-					initializer(i, j) = Coord4D(0, 0, 0, 0);
+				initializer(i, j) = Coord4D(d, 0, 0, 0);
 			}
 		}
 
 		this->stateGrid()->assign(initializer);
 		this->stateGridNext()->assign(initializer);
 
-		auto topo = this->stateHeightField()->getDataPtr();
 		topo->setExtents(w, h);
 		topo->setGridSpacing(s);
 		topo->setOrigin(o);
@@ -394,6 +427,10 @@ namespace dyno
 			UpdateHeightField,
 			disp,
 			grid);
+
+		initializer.clear();
+
+		Node::resetStates();
 	}
 
 	template<typename TDataType>
@@ -405,9 +442,11 @@ namespace dyno
 		uint2 dim = make_uint2(grid.nx(), grid.ny());
 
 		Real dt = this->stateTimeStep()->getValue();
-		Real depth = this->varDepth()->getValue();
+		Real d_hat = this->varDepthOfDiluteLayer()->getValue();
 		Real dragging = this->varCoefficientOfDragForce()->getValue();
 		Real mu = this->varCoefficientOfFriction()->getValue();
+
+		Real h = this->varSpacing()->getValue();
 
 		Real G = abs(this->varGravity()->getValue());
 
@@ -428,9 +467,10 @@ namespace dyno
 			grid,
 			grid_next,
 			dt,
-			depth,
+			d_hat,
 			dragging,
 			G,
+			h,
 			mu);
 
 		auto hf = this->stateHeightField()->getDataPtr();

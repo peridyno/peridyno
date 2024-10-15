@@ -9,7 +9,7 @@
 #include <ImColorbar.h>
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
-#include <CubeModel.h>
+#include <BasicShapes/CubeModel.h>
 #include <ParticleSystem/CubeSampler.h>
 #include <ParticleSystem/PoissonEmitter.h>
 

@@ -28,39 +28,30 @@
 #include "TriangularMeshConstraint.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Topology/TriangleSet.h"
-#include "../../../Modeling/PointsBehindMesh.h"
+#include "../../../Modeling/Commands/PointsBehindMesh.h"
 
 namespace dyno
 {
 
 	/*
-	*	@brief£ºSlightly shift the particles benhind triangle meshes to obtain more regular distribution.
+	*	@brief£ºGenerate points benhind triangle meshes, 
+	*	@biref: and slightly shift the particles benhind triangle meshes to obtain more regular distribution.
 	*
 	*/
 
 
 	template<typename TDataType>
-	class ParticleRelaxtionOnMesh : public ParticleSystem<TDataType>
+	class ParticleRelaxtionOnMesh : public PointsBehindMesh<TDataType>
 	{
 		DECLARE_TCLASS(ParticleRelaxtionOnMesh, TDataType)
+
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
 		ParticleRelaxtionOnMesh();
+
 		~ParticleRelaxtionOnMesh() override;
-
-		//DEF_NODE_PORTS(ParticleSystem<TDataType>, InitialState, "Initial Fluid Particles");
-
-		//DEF_NODE_PORT(PointsBehindMesh<TDataType>, PointsBehindMesh, "Input PointsBehindMesh Node");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
-
-		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
-
-		DEF_ARRAY_IN(Coord, ParticleNormal, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(int, ParticleBelongTriangleIndex, DeviceType::GPU, "");
 
 		DEF_VAR(int, IterationNumber, 30, "");
 
@@ -79,18 +70,23 @@ namespace dyno
 		DEF_VAR(int, DensityIteration, 5, "");
 
 	protected:
+
 		void resetStates() override;
 
 		void preUpdateStates();
 
 		void particleRelaxion();
 
+		void updatePositions();
 	private:
+
 		void loadInitialStates();
 
+		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
+		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Force on each particle");
 
-		std::shared_ptr<ParticleIntegrator<TDataType>> ptr_integrator;
+	
 		std::shared_ptr<NeighborPointQuery<TDataType>> ptr_nbrQuery;
 		std::shared_ptr<IterativeDensitySolver<TDataType>> ptr_density;
 		std::shared_ptr<ImplicitViscosity<TDataType>> ptr_viscosity;

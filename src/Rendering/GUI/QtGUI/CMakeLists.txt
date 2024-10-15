@@ -113,7 +113,7 @@ endif()
 
 # target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
 target_link_libraries(${LIB_NAME} PUBLIC
-	Core Framework RenderCore GLRenderEngine ImWidgets imgui
+	Core Framework RenderCore GLRenderEngine ImWidgets imgui Modeling
 	Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Core 
     Qt${QT_VERSION_MAJOR}::Gui 

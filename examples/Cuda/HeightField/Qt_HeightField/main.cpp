@@ -5,7 +5,7 @@
 #include <HeightField/Ocean.h>
 #include <HeightField/OceanPatch.h>
 #include <HeightField/CapillaryWave.h>
-#include <HeightField/Coupling.h>
+#include <HeightField/RigidWaterCoupling.h>
 #include <HeightField/initializeHeightField.h>
 #include <RigidBody/RigidBodySystem.h>
 #include "Mapping/HeightFieldToTriangleSet.h"

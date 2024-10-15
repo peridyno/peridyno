@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 #pragma once
-#include "OceanPatch.h"
+#include "OceanBase.h"
+
 #include "CapillaryWave.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class Ocean : public Node
+	class Ocean : public OceanBase<TDataType>
 	{
 		DECLARE_TCLASS(Ocean, TDataType)
 	public:
@@ -28,7 +29,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		Ocean();
-		~Ocean();
+		~Ocean() override;
 
 	public:
 		DEF_VAR(uint, ExtentX, 1, "");
@@ -36,7 +37,6 @@ namespace dyno
 
 		DEF_VAR(Real, WaterLevel, 0, "");
 
-		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 		DEF_NODE_PORTS(CapillaryWave<TDataType>, CapillaryWave, "Capillary Wave");
 
 		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
@@ -44,8 +44,6 @@ namespace dyno
 	protected:
 		void resetStates() override;
 		void updateStates() override;
-
-		bool validateInputs() override;
 	};
 
 	IMPLEMENT_TCLASS(Ocean, TDataType)

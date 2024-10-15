@@ -440,7 +440,7 @@ namespace dyno
 		DYN_FUNC int intersect(const TSphere3D<Real>& sphere, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TAlignedBox3D<Real>& abox, TSegment3D<Real>& interSeg) const;
 		DYN_FUNC int intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const;
-
+		
 		DYN_FUNC Real length() const;
 		DYN_FUNC Real lengthSquared() const;
 
@@ -657,6 +657,7 @@ namespace dyno
 	public:
 		DYN_FUNC TCapsule3D();
 		DYN_FUNC TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl);
+		DYN_FUNC TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r);
 		DYN_FUNC TCapsule3D(const TCapsule3D<Real>& capsule);
 
 		DYN_FUNC Real volume() const;
@@ -694,6 +695,7 @@ namespace dyno
 		DYN_FUNC TTet3D(const TTet3D<Real>& tet);
 
 		DYN_FUNC TTriangle3D<Real> face(const int index) const;
+		DYN_FUNC TSegment3D<Real> edge(const int index) const;
 
 		DYN_FUNC Real volume() const;
 
@@ -772,6 +774,10 @@ namespace dyno
 		DYN_FUNC TOrientedBox3D(const Coord3D c, const Quat<Real> rot, const Coord3D ext);
 
 		DYN_FUNC TOrientedBox3D(const TOrientedBox3D<Real>& obb);
+
+		DYN_FUNC TPoint3D<Real> vertex(const int i) const;
+		DYN_FUNC TSegment3D<Real> edge(const int i) const;
+		DYN_FUNC TRectangle3D<Real> face(const int i) const;
 
 		DYN_FUNC Real volume();
 

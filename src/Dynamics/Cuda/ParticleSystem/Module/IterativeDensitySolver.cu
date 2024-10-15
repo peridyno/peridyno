@@ -9,7 +9,6 @@ namespace dyno
 		: ParticleApproximation<TDataType>()
 	{
 		this->varIterationNumber()->setValue(3);
-		this->varKappa()->setValue(200);
 		this->varRestDensity()->setValue(Real(1000));
 
 		mSummation = std::make_shared<SummationDensity<TDataType>>();
@@ -32,13 +31,13 @@ namespace dyno
 
 
 	template <typename Real, typename Coord, typename Kernel>
-	__global__ void K_ComputeLambdas(
+	__global__ void IDS_ComputeLambdas(
 		DArray<Real> lambdaArr,
-		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
 		Real rho_0,
 		Real smoothingLength,
+		Real samplingDistance,
 		Kernel gradient,
 		Real scale)
 	{
@@ -47,8 +46,10 @@ namespace dyno
 
 		Coord pos_i = posArr[pId];
 
-		Real lamda_i = Real(0);
+		Real gg_i = Real(0);
 		Coord grad_ci(0);
+
+		Real V_0 = samplingDistance * samplingDistance * samplingDistance;
 
 		List<int>& list_i = neighbors[pId];
 		int nbSize = list_i.size();
@@ -59,29 +60,50 @@ namespace dyno
 
 			if (r > EPSILON)
 			{
-				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
+				Coord g = V_0 * gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
 				grad_ci += g;
-				lamda_i += g.dot(g);
+
+				Real gg_j = g.dot(g);
+
+				atomicAdd(&lambdaArr[pId], gg_j);
+				atomicAdd(&lambdaArr[j], gg_j);
+
+				gg_i += g.dot(g);
 			}
 		}
 
-		lamda_i += grad_ci.dot(grad_ci);
+		gg_i += grad_ci.dot(grad_ci);
+
+		atomicAdd(&lambdaArr[pId], gg_i);
+	}
+
+	template <typename Real>
+	__global__ void IDS_ClumpLambdas(
+		DArray<Real> lambdaArr,
+		DArray<Real> rhoArr,
+		Real rho_0)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= rhoArr.size()) return;
 
 		Real rho_i = rhoArr[pId];
+		Real lambda_i = lambdaArr[pId];
 
-		lamda_i = -(rho_i - rho_0) / (lamda_i + 0.001f);
+		lambda_i = -(rho_i - rho_0) / (lambda_i + EPSILON) / rho_0;
 
-		lambdaArr[pId] = lamda_i > 0.0f ? 0.0f : lamda_i;
+		lambdaArr[pId] = lambda_i > 0.0f ? 0.0f : lambda_i;
 	}
 
 	template <typename Real, typename Coord, typename Kernel>
-	__global__ void K_ComputeDisplacement(
+	__global__ void IDS_ComputeDisplacement(
 		DArray<Coord> dPos,
 		DArray<Real> lambdas,
 		DArray<Coord> posArr,
 		DArrayList<int> neighbors,
 		Real smoothingLength,
+		Real samplingDistance,
 		Real kappa,
+		Real rho_0,
 		Real dt,
 		Kernel gradient,
 		Real scale)
@@ -92,7 +114,7 @@ namespace dyno
 		Coord pos_i = posArr[pId];
 		Real lamda_i = lambdas[pId];
 
-		Real rho_0 = Real(1000);
+		Real V_0 = samplingDistance * samplingDistance * samplingDistance;
 
 		Coord dP_i(0);
 		List<int>& list_i = neighbors[pId];
@@ -103,7 +125,7 @@ namespace dyno
 			Real r = (pos_i - posArr[j]).norm();
 			if (r > EPSILON)
 			{
-				Coord dp_ij = kappa * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
+				Coord dp_ij = V_0 * (pos_i - posArr[j]) * (lamda_i + lambdas[j]) * gradient(r, smoothingLength, scale) * (1.0 / r);
 				dP_i += dp_ij;
 
 				atomicAdd(&dPos[pId][0], dp_ij[0]);
@@ -125,7 +147,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_UpdatePosition(
+	__global__ void IDS_UpdatePosition(
 		DArray<Coord> posArr,
 		DArray<Coord> velArr,
 		DArray<Coord> dPos,
@@ -135,20 +157,6 @@ namespace dyno
 		if (pId >= posArr.size()) return;
 
 		posArr[pId] += dPos[pId];
-	}
-
-
-	template <typename Real>
-	__global__ void K_DensityErrorCompute(
-		DArray<Real> error,
-		DArray<Real> density,
-		Real density0
-	) {
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= density.size()) return;
-
-		error[pId] = abs(density[pId] - density0) / density0;
-
 	}
 
 	template<typename TDataType>
@@ -172,28 +180,6 @@ namespace dyno
 
 		int it = 0;
 
-
-		DArray<Real> error;
-		error.resize(num);
-		error.reset();
-
-		mSummation->varRestDensity()->setValue(this->varRestDensity()->getValue());
-		mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
-		mSummation->update();
-
-		cuExecute(num,
-			K_DensityErrorCompute,
-			error,
-			mSummation->outDensity()->getData(),
-			Real(1000));
-
-		m_arithmetic = Arithmetic<float>::Create(num);
-
-		Real rr = m_arithmetic->Dot(error, error);
-		Real MaxError = sqrt(rr / error.size());
-		Reduction<Real> reduce;
-
-
 		int itNum = this->varIterationNumber()->getValue();
 		while (it++ < itNum)
 		{
@@ -201,19 +187,6 @@ namespace dyno
 			mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
 			mSummation->update();
 
-// 			cuExecute(num,
-// 				K_DensityErrorCompute,
-// 				error,
-// 				mSummation->outDensity()->getData(),
-// 				Real(1000));
-// 
-// 			auto& mm_density = mSummation->outDensity()->getData();
-// 			Real total_error = m_arithmetic->Dot(error, error) / error.size();
-// 
-// 			Real everage_value = reduce.average(mm_density.begin(), mm_density.size());
-// 			Real max_value = reduce.maximum(mm_density.begin(), mm_density.size());
-// 			std::cout << it << "::" << total_error / MaxError << " ::" << max_value << " ::" << everage_value << std::endl;
-	
 			takeOneIteration();
 		}
 
@@ -233,26 +206,37 @@ namespace dyno
 		mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
 		mSummation->update();
 
+		mLamda.reset();
+
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
-			K_ComputeLambdas,
+			IDS_ComputeLambdas,
 			mLamda,
-			mSummation->outDensity()->getData(),
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
 			rho_0,
-			this->inSmoothingLength()->getValue());
+			this->inSmoothingLength()->getValue(),
+			this->inSamplingDistance()->getValue());
+
+		cuExecute(num,
+			IDS_ClumpLambdas,
+			mLamda,
+			mSummation->outDensity()->constData(),
+			rho_0);
 
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
-			K_ComputeDisplacement,
+			IDS_ComputeDisplacement,
 			mDeltaPos,
 			mLamda,
 			this->inPosition()->getData(),
 			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getValue(),
+			this->inSamplingDistance()->getValue(),
 			this->varKappa()->getValue(),
+			rho_0,
 			dt);
 
-		cuExecute(num, K_UpdatePosition,
+		cuExecute(num, 
+			IDS_UpdatePosition,
 			this->inPosition()->getData(),
 			this->inVelocity()->getData(),
 			mDeltaPos,

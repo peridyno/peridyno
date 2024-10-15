@@ -16,7 +16,9 @@
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
-#include <CubeModel.h>
+#include <BasicShapes/CubeModel.h>
+
+#include <StaticTriangularMesh.h>
 
 #include <ParticleSystem/CubeSampler.h>
 
@@ -31,8 +33,8 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Create a cube
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0.6, 0.5, 0.5));
-	cube->varLength()->setValue(Vec3f(0.2, 0.2, 0.2));
+	cube->varLocation()->setValue(Vec3f(0.6, 0.6, 0.5));
+	cube->varLength()->setValue(Vec3f(0.5, 0.5, 0.5));
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
@@ -48,7 +50,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->varReshuffleParticles()->setValue(true);
-	//fluid->loadParticles(Vec3f(0.5, 0.2, 0.4), Vec3f(0.7, 1.5, 0.6), 0.005);
 	initialParticles->connect(fluid->importInitialStates());
 
 	//Create a boundary
@@ -56,6 +57,9 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
 	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 	fluid->connect(boundary->importParticleSystems());
+
+	auto staticMesh = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	staticMesh->varFileName()->setValue(getAssetPath() + "bowl/bowl.obj");
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());

@@ -73,9 +73,24 @@ namespace dyno
 	struct TManifold
 	{
 	public:
-		Vector<Real, 3> normal;				// From A to B
+		Vector<Real, 3> normal;				// on B
 		TContact<Real> contacts[8];
 		int contactCount = 0;
+
+		DYN_FUNC void pushContact(const Vector<Real, 3>& pos, const Real& dep)
+		{
+			if (contactCount >= 8) return;
+			contacts[contactCount].position = pos;
+			contacts[contactCount].penetration = dep;
+			contactCount++;
+		}
+
+		DYN_FUNC void pushContact(const TContact<Real>& contact)
+		{
+			if (contactCount >= 8) return;
+			contacts[contactCount] = contact;
+			contactCount++;
+		}
 	};
 
 	template<typename Real>

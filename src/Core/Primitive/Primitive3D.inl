@@ -5,6 +5,11 @@
 
 namespace dyno
 {
+	#define REAL_infinity 1.0e30
+	#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
+	#define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
+	#define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
+
 	template<typename Real>
 	DYN_FUNC TPoint3D<Real>::TPoint3D()
 	{
@@ -1919,6 +1924,7 @@ namespace dyno
 	{
 		origin = pos;
 		direction = dir;
+		direction.normalize();
 	}
 
 	template<typename Real>
@@ -2398,10 +2404,10 @@ namespace dyno
 		}
 
 		// Find parameter values of closest points
-		// on each segment��s infinite line. Denominator
+		// on each segment's infinite line. Denominator
 		// assumed at this point to be ����det����,
 		// which is always positive. We can check
-		// value of numerators to see if we��re outside
+		// value of numerators to see if we are outside
 		// the [0, 1] x [0, 1] domain.
 		Real sNum = b * e - c * d;
 		Real tNum = a * e - b * d;
@@ -2488,18 +2494,70 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TSegment3D<Real> TSegment3D<Real>::proximity(const TRectangle3D<Real>& rectangle) const
 	{
-		TLine3D<Real> line(startPoint(), direction());
-		TSegment3D<Real> pq = line.proximity(rectangle);
+		Coord3D N = rectangle.axis[0].cross(rectangle.axis[1]);
+		Coord3D D = v1 - v0;
+		Real maxT = D.norm();
+		D.normalize();
+		
+		Coord3D Q = v0 - rectangle.center;
+		Real DdN = D.dot(N);
+		Real absDdN = abs(DdN);
+		if (absDdN > REAL_EPSILON)
+		{
+			// The Seg and rectangle are not parallel, so the seg
+			// intersects the plane of the rectangle.
+			// Solve Q + t*D = s0*W0 + s1*W1 (Q = diff, D = line direction(unit),
+			// W0 = edge 0 direction, W1 = edge 1 direction, N = Cross(W0,W1))
+			// by
+			//   s0 = Dot(W1,Cross(D,Q)) / Dot(D,N)
+			//   s1 = -Dot(W0,Cross(D,Q)) / Dot(D,N)
+			//   t = -Dot(Q,N) / Dot(D,N)
+			Coord3D DxQ = D.cross(Q);
+			Real W1dDxQ = rectangle.axis[1].dot(DxQ);
+			if (abs(W1dDxQ) <= rectangle.extent[0] * absDdN)
+			{
+				Real W0dDxQ = rectangle.axis[0].dot(DxQ);
+				if (abs(W0dDxQ) <= rectangle.extent[1] * absDdN)
+				{
+					Real t = -Q.dot(N) / DdN;
+					if (t >= 0.f && t <= maxT)
+					{
+						Real s0 = W1dDxQ / DdN;
+						Real s1 = -W0dDxQ / DdN;
+						printf("inter\n");
+						return TSegment3D<Real>(v0 + t * D, rectangle.center + s0 * rectangle.axis[0] + s1 * rectangle.axis[1]);
+					}
+				}
+			}
+		}
+		printf("prox\n");
+		Real minDS = REAL_MAX;
+		TSegment3D<Real> minPQ;
+		// Edge -Edge
+		for (int i = 0; i < 4; i++)
+		{
+			TSegment3D<Real> pq = proximity(rectangle.edge(i));
+			if (pq.lengthSquared() < minDS)
+			{
+				minDS = pq.lengthSquared();
+				minPQ = pq;
+			}
+		}
 
-		Real t = parameter(pq.startPoint());
-
-		if (t < Real(0))
-			return TPoint3D<Real>(startPoint()).project(rectangle) - TPoint3D<Real>(startPoint());
-
-		if (t > Real(1))
-			return TPoint3D<Real>(endPoint()).project(rectangle) - TPoint3D<Real>(endPoint());
-
-		return pq;
+		// Point - Face
+		for (int i = 0; i < 2; i++)
+		{
+			Coord3D v = (i == 0)? v0 : v1;
+			TPoint3D<Real> p(v);
+			TPoint3D<Real> q = TPoint3D<Real>(p).project(rectangle);
+			TSegment3D<Real> pq = q - p;
+			if (pq.lengthSquared() < minDS)
+			{
+				minDS = pq.lengthSquared();
+				minPQ = pq;
+			}
+		}
+		return minPQ;
 	}
 
 	template<typename Real>
@@ -3019,19 +3077,21 @@ namespace dyno
 	DYN_FUNC TPoint3D<Real> TRectangle3D<Real>::vertex(const int i) const
 	{
 		int id = i % 4;
+		Coord3D u = axis[0] * extent[0];
+		Coord3D v = axis[1] * extent[1];
 		switch (id)
 		{
 		case 0:
-			return TPoint3D<Real>(center - axis[0] - axis[1]);
+			return TPoint3D<Real>(center - u - v);
 			break;
 		case 1:
-			return TPoint3D<Real>(center + axis[0] - axis[1]);
+			return TPoint3D<Real>(center + u - v);
 			break;
 		case 2:
-			return TPoint3D<Real>(center + axis[0] + axis[1]);
+			return TPoint3D<Real>(center + u + v);
 			break;
 		default:
-			return TPoint3D<Real>(center - axis[0] + axis[1]);
+			return TPoint3D<Real>(center - u + v);
 			break;
 		}
 	}
@@ -3258,6 +3318,17 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& v0, const Coord3D& v1, const Real& r)
+	{
+		center = 0.5f * (v0 + v1);
+		Real len = (v1 - v0).norm();
+
+		rotation = Quat<Real>((0, 1, 0), v1 - v0);
+		radius = Real(r);
+		halfLength = Real(len * 0.5f);
+	}
+
+	template<typename Real>
 	DYN_FUNC TCapsule3D<Real>::TCapsule3D(const Coord3D& c, const Quat<Real>& q, const Real& r, const Real& hl)
 		: center(c)
 		, rotation(q)
@@ -3324,6 +3395,34 @@ namespace dyno
 		v[1] = tet.v[1];
 		v[2] = tet.v[2];
 		v[3] = tet.v[3];
+	}
+
+	template<typename Real>
+	DYN_FUNC TSegment3D<Real> TTet3D<Real>::edge(const int index) const
+	{
+		switch (index)
+		{
+		case 0:
+			return TSegment3D<Real>(v[0], v[1]);
+			break;
+		case 1:
+			return TSegment3D<Real>(v[0], v[2]);
+			break;
+		case 2:
+			return TSegment3D<Real>(v[0], v[3]);
+			break;
+		case 3:
+			return TSegment3D<Real>(v[1], v[2]);
+			break;
+		case 4:
+			return TSegment3D<Real>(v[1], v[3]);
+			break;
+		case 5:
+			return TSegment3D<Real>(v[2], v[3]);
+			break;
+		default:
+			break;
+		}
 	}
 
 	template<typename Real>
@@ -3988,6 +4087,70 @@ namespace dyno
 		v = obb.v;
 		w = obb.w;
 		extent = obb.extent;
+	}
+
+	template<typename Real>
+	DYN_FUNC TPoint3D<Real> TOrientedBox3D<Real>::vertex(const int i) const
+	{
+		int id = i % 8;
+		Coord3D hu = u * extent[0];
+		Coord3D hv = v * extent[1];
+		Coord3D hw = w * extent[2];
+
+		return TPoint3D<Real>(center + (2 * (id & 1) - 1) * hu + (2 * ((id >> 1) & 1) - 1) * hv + (2 * ((id >> 2) & 1) - 1) * hw);
+	}
+
+	template<typename Real>
+	DYN_FUNC TSegment3D<Real> TOrientedBox3D<Real>::edge(const int i) const
+	{
+		int id = i % 12;
+		Vec2u table[12] = { Vec2u(0, 1), Vec2u(1, 3), Vec2u(2, 3), Vec2u(0, 2),
+			Vec2u(0, 4), Vec2u(1, 5), Vec2u(2, 6), Vec2u(3, 7),
+			Vec2u(4, 5), Vec2u(5, 7), Vec2u(6, 7), Vec2u(4, 6)};
+		return vertex(table[id][0]) - vertex(table[id][1]);
+	}
+
+	template<typename Real>
+	DYN_FUNC TRectangle3D<Real> TOrientedBox3D<Real>::face(const int index) const
+	{
+		int id = index % 6;
+		Coord3D c = center;
+		Coord3D Nx, Ny;
+		Coord2D Ext = Coord2D(0.f);
+		switch (id)
+		{
+		case 0:
+			c -= v * extent[1];
+			Nx = u; Ny = w;
+			Ext = Coord2D(extent[0], extent[2]);
+			break;
+		case 1:
+			c += v * extent[1];
+			Nx = w; Ny = u;
+			Ext = Coord2D(extent[2], extent[0]);
+			break;
+		case 2:
+			c -= u * extent[0];
+			Nx = w; Ny = v;
+			Ext = Coord2D(extent[2], extent[1]);
+			break;
+		case 3:
+			c += u * extent[0];
+			Nx = v; Ny = w;
+			Ext = Coord2D(extent[1], extent[2]);
+			break; 
+		case 4:
+			c -= w * extent[2];
+			Nx = v; Ny = u;
+			Ext = Coord2D(extent[1], extent[0]);
+			break;
+		default:
+			c += w * extent[2];
+			Nx = u; Ny = v;
+			Ext = Coord2D(extent[0], extent[1]);
+			break;
+		}
+		return TRectangle3D<Real>(c, Nx, Ny, Ext);
 	}
 
 
