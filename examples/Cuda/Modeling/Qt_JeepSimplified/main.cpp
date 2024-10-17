@@ -188,16 +188,6 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->stateInstanceTransform()->connect(prRender->inTransform());
 	jeep->graphicsPipeline()->pushModule(prRender);
 
-	// Import Road
-	//auto road = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
-	//road->varFileName()->setValue(getAssetPath() + "Jeep/Road/Road.obj");
-	//road->varScale()->setValue(Vec3f(0.04) * total_scale);
-	//road->varLocation()->setValue(Vec3f(0, 0, 3.5));
-	//auto glRoad = road->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
-	//glRoad->setColor(color);
-
-	//road->outTriangleSet()->connect(jeep->inTriangleSet());
-
 
 	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
@@ -207,14 +197,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	gltfRoad->stateTextureMesh()->connect(roadMeshConverter->inTextureMesh());
 	gltfRoad->animationPipeline()->pushModule(roadMeshConverter);
 
-// 	auto roadInstance = scn->addNode(std::make_shared<GenerateInstances>());
-// 	gltfRoad->stateTextureMesh()->connect(roadInstance->inTextureMesh());
-// 
-// 	auto texMeshConverterRoad = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
-// 	roadInstance->inTextureMesh()->connect(texMeshConverterRoad->inTextureMesh());
-// 	//gltfRoad->stateInstanceTransform()->connect(texMeshConverterRoad->inTransform());
-// 	roadInstance->animationPipeline()->pushModule(texMeshConverterRoad);
-// 	roadInstance->stateTransform()->connect(texMeshConverterRoad->inTransform());
+	auto tsJeep = gltfRoad->animationPipeline()->promoteOutputToNode(roadMeshConverter->outTriangleSet());
 
 	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
 	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
@@ -225,8 +208,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
 	jeep->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
-// 	texMeshConverterRoad->outTriangleSet()->connect(tsMerger->inSecond());
-// 	texMeshConverterRoad->outTriangleSet()->connect(jeep->inTriangleSet());
+	tsJeep->connect(tsMerger->inSecond());
+
+	tsJeep->connect(jeep->inTriangleSet());
 
 	//*************************************** Cube Sample ***************************************//
 	// Cube 
