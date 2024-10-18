@@ -8,7 +8,7 @@
 
 # Overview
 
-PeriDyno is a CUDA-based, highly parallal physics engine targeted at providing real-time simulation of physical environments for intelligent agents. 
+PeriDyno is a CUDA-based, highly parallel physics engine targeted at providing real-time simulation of physical environments for intelligent agents. 
 
 # Installation
 
@@ -17,7 +17,7 @@ PeriDyno is a CUDA-based, highly parallal physics engine targeted at providing r
 
 **Windows 10/11**: fully tested
 
-**Linux**: should work as well, yet not guranteed.
+**Linux**: should work as well, yet not guaranteed.
 
 ### Prerequisites:
 
@@ -45,7 +45,7 @@ Optional:
 
 ### Installation:
 
-Aside from those optional, other libraries are integrated inside the project to simplify the installation. Use the following git command to download the project as well as other dependences.
+Aside from those optional, other libraries are integrated inside the project to simplify the installation. Use the following git command to download the project as well as other dependencies.
 
 ```
 git clone --recursive https://github.com/peridyno/peridyno.git
@@ -55,7 +55,7 @@ git clone --recursive https://github.com/peridyno/peridyno.git
 
 Check whether CMake has been installed on your system, if not, visit https://cmake.org/download/ to download the lastest version. 
 
-**Preferred**: Run cmake-gui.exe, set the top two entries with the source code and binary directories.  **Configure** the libararies you want to build, then click the **Generate** button to build the project. 
+**Preferred**: Run cmake-gui.exe, set the top two entries with the source code and binary directories.  **Configure** the libraries you want to build, then click the **Generate** button to build the project. 
 
 A more convient way to build the project with a default setting is as follows
 
