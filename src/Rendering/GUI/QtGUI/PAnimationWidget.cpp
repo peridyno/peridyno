@@ -25,7 +25,7 @@ namespace dyno
 		mResetIcon(nullptr),
 		mFinishIcon(nullptr)
 	{
-		mTotalFrame = 800;
+		mTotalFrame = PSimulationThread::instance()->getTotalFrames();
 
 		QHBoxLayout* layout = new QHBoxLayout();
 		setLayout(layout);
@@ -33,7 +33,7 @@ namespace dyno
 		QGridLayout* frameLayout	= new QGridLayout();
 
 		mTotalFrameSpinbox = new QSpinBox();
-		mTotalFrameSpinbox->setFixedSize(60, 29);
+		mTotalFrameSpinbox->setFixedSize(96, 29);
 		mTotalFrameSpinbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 		mTotalFrameSpinbox->setMaximum(1000000);
@@ -100,6 +100,8 @@ namespace dyno
 		connect(mPersistent, SIGNAL(stateChanged(int)), this, SLOT(runForever(int)));
 
 		PSimulationThread::instance()->start();
+
+
 	}
 
 	PAnimationWidget::~PAnimationWidget()

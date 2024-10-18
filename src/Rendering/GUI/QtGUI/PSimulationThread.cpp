@@ -264,7 +264,7 @@ namespace dyno
 		notify();
 	}
 
-	int PSimulationThread::getCurrentFrameNum() 
+	int PSimulationThread::getCurrentFrameNum()
 	{
 		auto scn = SceneGraphFactory::instance()->active();
 		return scn->getFrameNumber();
