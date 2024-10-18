@@ -642,7 +642,7 @@ void WtNodeState::setConnection(
 void WtNodeState::eraseConnection(
 	PortType portType,
 	PortIndex portIndex,
-	boost::uuids::uuid id)
+	Wt::Guid id)
 {
 	getEntries(portType)[portIndex].erase(id);
 }
@@ -690,7 +690,7 @@ bool WtNodeState::resizing() const
 }
 
 WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPaintDevice* paintDevice)
-	: _uid(boost::uuids::random_generator()())
+	: _uid(Wt::newGuid())
 	, _nodeDataModel(std::move(dataModel))
 	, _nodeState(_nodeDataModel)
 	, _nodeGeometry(_nodeDataModel, paintDevice)
@@ -708,7 +708,7 @@ WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPaintDevice* p
 
 WtNode::~WtNode() = default;
 
-boost::uuids::uuid WtNode::id() const
+Wt::Guid WtNode::id() const
 {
 	return _uid;
 }

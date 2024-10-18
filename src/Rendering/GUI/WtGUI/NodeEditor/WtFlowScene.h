@@ -3,10 +3,7 @@
 #include <Wt/WPaintDevice.h>
 #include <Wt/WPaintedWidget.h>
 #include <Wt/WPainter.h>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/unordered_map.hpp>
+#include "guid.hpp"
 
 #include "Export.hpp"
 #include "WtNode.h"
@@ -77,9 +74,9 @@ public:
 
 public:
 
-	std::unordered_map<boost::uuids::uuid, std::unique_ptr<WtNode> > const& nodes() const;
+	std::unordered_map<Wt::Guid, std::unique_ptr<WtNode> > const& nodes() const;
 
-	std::unordered_map<boost::uuids::uuid, std::shared_ptr<WtConnection> > const& connections() const;
+	std::unordered_map<Wt::Guid, std::shared_ptr<WtConnection> > const& connections() const;
 
 	std::vector<WtNode*> allNodes() const;
 
@@ -108,6 +105,6 @@ private:
 	// which is why it comes first in the class.
 	std::shared_ptr<WtDataModelRegistry> _registry;
 
-	std::unordered_map<boost::uuids::uuid, SharedConnection> _connections;
-	std::unordered_map<boost::uuids::uuid, UniqueNode>       _nodes;
+	std::unordered_map<Wt::Guid, SharedConnection> _connections;
+	std::unordered_map<Wt::Guid, UniqueNode>       _nodes;
 };

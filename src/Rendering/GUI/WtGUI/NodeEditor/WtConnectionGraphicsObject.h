@@ -3,9 +3,8 @@
 #include <Wt/WPainter.h>
 #include <Wt/WPainterPath.h>
 #include <Wt/WRectF.h>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+
+#include "guid.hpp"
 
 #include "WtConnection.h"
 

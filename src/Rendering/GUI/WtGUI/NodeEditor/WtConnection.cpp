@@ -147,7 +147,7 @@ WtConnection::WtConnection(
 	PortType portType,
 	WtNode& node,
 	PortIndex portIndex)
-	: _uid(boost::uuids::random_generator()())
+	: _uid(Wt::newGuid())
 	, _outPortIndex(INVALID_PORT)
 	, _inPortIndex(INVALID_PORT)
 	, _connectionState()
@@ -163,7 +163,7 @@ WtConnection::WtConnection(
 	WtNode& nodeOut,
 	PortIndex portIndexOut,
 	TypeConverter converter)
-	: _uid(boost::uuids::random_generator()())
+	: _uid(Wt::Guid())
 	, _outNode(&nodeOut)
 	, _inNode(&nodeIn)
 	, _outPortIndex(portIndexOut)
@@ -234,7 +234,7 @@ WtConnection::~WtConnection()
 //	return connectionJson;
 //}
 
-boost::uuids::uuid WtConnection::id() const
+Wt::Guid WtConnection::id() const
 {
 	return _uid;
 }

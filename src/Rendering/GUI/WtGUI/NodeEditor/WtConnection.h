@@ -3,9 +3,7 @@
 #include <Wt/WPointF.h>
 #include <Wt/WRectF.h>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include "guid.hpp"
 
 #include "WtNodeData.hpp"
 
@@ -156,7 +154,7 @@ public:
 
 public:
 
-	boost::uuids::uuid id() const;
+	Wt::Guid id() const;
 
 	/// Remembers the end being dragged.
 	/// Invalidates WtNode address.
@@ -219,7 +217,7 @@ public: // data propagation
 
 private:
 
-	boost::uuids::uuid _uid;
+	Wt::Guid _uid;
 
 private:
 

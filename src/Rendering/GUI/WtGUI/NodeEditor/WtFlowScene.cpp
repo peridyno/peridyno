@@ -135,7 +135,7 @@ void WtFlowScene::iterateOverNodeData(std::function<void(WtNodeDataModel*)> cons
 
 void WtFlowScene::iterateOverNodeDataDependentOrder(std::function<void(WtNodeDataModel*)> const& visitor)
 {
-	std::set<boost::uuids::uuid> visitedNodesSet;
+	std::set<Wt::Guid> visitedNodesSet;
 
 	auto isNodeLeaf = [](WtNode const& node, WtNodeDataModel const& model)
 		{
@@ -239,12 +239,12 @@ void WtFlowScene::clearNode(WtNode& node)
 	_nodes.erase(node.id());
 }
 
-std::unordered_map<boost::uuids::uuid, std::unique_ptr<WtNode> > const& WtFlowScene::nodes() const
+std::unordered_map<Wt::Guid, std::unique_ptr<WtNode> > const& WtFlowScene::nodes() const
 {
 	return _nodes;
 }
 
-std::unordered_map<boost::uuids::uuid, std::shared_ptr<WtConnection> > const& WtFlowScene::connections() const
+std::unordered_map<Wt::Guid, std::shared_ptr<WtConnection> > const& WtFlowScene::connections() const
 {
 	return _connections;
 }
@@ -272,7 +272,7 @@ std::vector<WtNode*> WtFlowScene::allNodes() const
 	std::transform(_nodes.begin(),
 		_nodes.end(),
 		std::back_inserter(nodes),
-		[](std::pair<boost::uuids::uuid const, std::unique_ptr<WtNode>> const& p) { return p.second.get(); });
+		[](std::pair<Wt::Guid const, std::unique_ptr<WtNode>> const& p) { return p.second.get(); });
 
 	return nodes;
 }

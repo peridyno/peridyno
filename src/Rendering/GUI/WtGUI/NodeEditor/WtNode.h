@@ -5,10 +5,8 @@
 #include <Wt/WRectF.h>
 #include <Wt/WFont.h>
 #include <Wt/WTransform.h>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/uuid_hash.hpp>
+
+#include "guid.hpp"
 
 #include "WtNodeGraphicsObject.h"
 #include "WtNodeDataModel.h"
@@ -197,7 +195,7 @@ public:
 	WtNodeState(std::unique_ptr<WtNodeDataModel> const& model);
 
 public:
-	using ConnectionPtrSet = std::unordered_map<boost::uuids::uuid, WtConnection*>;
+	using ConnectionPtrSet = std::unordered_map<Wt::Guid, WtConnection*>;
 
 	/// Returns vector of connections ID.
 	/// Some of them can be empty (null)
@@ -215,7 +213,7 @@ public:
 	void eraseConnection(
 		PortType portType,
 		PortIndex portIndex,
-		boost::uuids::uuid id);
+		Wt::Guid id);
 
 	ReactToConnectionState reaction() const;
 
@@ -259,7 +257,7 @@ public:
 	//void restore(QJsonObject const& json) override;
 
 public:
-	boost::uuids::uuid id() const;
+	Wt::Guid id() const;
 
 	void reactToPossibleConnection(PortType,
 		NodeDataType const&,
@@ -297,7 +295,7 @@ public:
 	void onNodeSizeUpdated();
 
 private:
-	boost::uuids::uuid _uid;
+	Wt::Guid _uid;
 
 	std::unique_ptr<WtNodeDataModel> _nodeDataModel;
 

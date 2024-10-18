@@ -28,10 +28,6 @@ target_link_libraries(${LIB_NAME} PRIVATE glfw)
 find_package(CUDAToolkit REQUIRED)
 target_link_libraries(${LIB_NAME} PRIVATE CUDA::nvjpeg)
 
-# boost
-find_package(Boost REQUIRED)
-target_link_libraries(${LIB_NAME} PUBLIC Boost::boost)
-
 # Wt
 find_package(wt REQUIRED)
 set_target_properties(Wt::Wt PROPERTIES MAP_IMPORTED_CONFIG_RELEASE RelWithDebInfo)
