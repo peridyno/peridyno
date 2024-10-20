@@ -12,7 +12,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	VariationalApproximateProjection<TDataType>::VariationalApproximateProjection()
-		: ConstraintModule()
+		: ParticleApproximation<TDataType>()
 		, mAirPressure(Real(0))
 		, m_reduce(NULL)
 		, m_arithmetic(NULL)
@@ -91,7 +91,7 @@ namespace dyno
 
 
 	template <typename Real, typename Coord>
-	__global__ void VC_ComputeAlpha
+	__global__ void VAP_ComputeAlpha
 	(
 		DArray<Real> alpha,
 		DArray<Coord> position,
@@ -124,7 +124,7 @@ namespace dyno
 	}
 
 	template <typename Real>
-	__global__ void VC_CorrectAlpha
+	__global__ void VAP_CorrectAlpha
 	(
 		DArray<Real> alpha,
 		Real maxAlpha)
@@ -141,7 +141,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_ComputeDiagonalElement
+	__global__ void VAP_ComputeDiagonalElement
 	(
 		DArray<Real> AiiFluid,
 		DArray<Real> AiiTotal,
@@ -193,7 +193,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_ComputeDiagonalElement
+	__global__ void VAP_ComputeDiagonalElement
 	(
 		DArray<Real> diaA,
 		DArray<Real> alpha,
@@ -229,7 +229,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_DetectSurface
+	__global__ void VAP_DetectSurface
 	(
 		DArray<Real> Aii,
 		DArray<bool> bSurface,
@@ -299,7 +299,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_ComputeDivergence
+	__global__ void VAP_ComputeDivergence
 	(
 		DArray<Real> divergence,
 		DArray<Real> alpha,
@@ -378,7 +378,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_CompensateSource
+	__global__ void VAP_CompensateSource
 	(
 		DArray<Real> divergence,
 		DArray<Real> density,
@@ -401,7 +401,7 @@ namespace dyno
 
 	// compute Ax;
 	template <typename Real, typename Coord>
-	__global__ void VC_ComputeAx
+	__global__ void VAP_ComputeAx
 	(
 		DArray<Real> residual,
 		DArray<Real> pressure,
@@ -441,7 +441,7 @@ namespace dyno
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void VC_UpdateVelocity1rd
+	__global__ void VAP_UpdateVelocity1rd
 	(
 		DArray<Real> preArr,
 		DArray<Real> aiiArr,
@@ -536,7 +536,7 @@ namespace dyno
 
 
 // 	template <typename Real, typename Coord>
-// 	__global__ void VC_UpdateVelocityBoundaryCorrected(
+// 	__global__ void VAP_UpdateVelocityBoundaryCorrected(
 // 		DArray<Real> pressure,
 // 		DArray<Real> alpha,
 // 		DArray<bool> bSurface,
@@ -752,7 +752,7 @@ namespace dyno
 // 	}
 
 	template<typename TDataType>
-	void VariationalApproximateProjection<TDataType>::constrain()
+	void VariationalApproximateProjection<TDataType>::compute()
 	{
 		int num = this->inPosition()->size();
 
@@ -789,7 +789,7 @@ namespace dyno
 			uint pDims = cudaGridSize(num, BLOCK_SIZE);
 
 			mAlpha.reset();
-			VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
+			VAP_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
 				mAlpha,
 				this->inPosition()->getData(),
 				this->inAttribute()->getData(),
@@ -798,12 +798,12 @@ namespace dyno
 
 			mAlphaMax = m_reduce->maximum(mAlpha.begin(), mAlpha.size());
 
-			VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
+			VAP_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
 				mAlpha,
 				mAlphaMax);
 
 			mAiiFluid.reset();
-			VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
+			VAP_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
 				mAiiFluid,
 				mAlpha,
 				this->inPosition()->getData(),
@@ -817,26 +817,26 @@ namespace dyno
 			std::cout << "Max A: " << mAMax << std::endl;
 		}
 
-		Real dt = this->inTimeStep()->getData();
+		Real dt = this->inTimeStep()->getValue();
 
 		uint pDims = cudaGridSize(this->inPosition()->size(), BLOCK_SIZE);
 
 		//compute alpha_i = sigma w_j and A_i = sigma w_ij / r_ij / r_ij
 		mAlpha.reset();
-		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
+		VAP_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
 			mAlpha, 
 			this->inPosition()->getData(),
 			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(), 
-			this->inSmoothingLength()->getData());
-		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
+			this->inSmoothingLength()->getValue());
+		VAP_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
 			mAlpha, 
 			mAlphaMax);
 
 		//compute the diagonal elements of the coefficient matrix
 		mAiiFluid.reset();
 		mAiiTotal.reset();
-		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
+		VAP_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
 			mAiiFluid, 
 			mAiiTotal, 
 			mAlpha, 
@@ -847,7 +847,7 @@ namespace dyno
 
 		mIsSurface.reset();
 		mAii.reset();
-		VC_DetectSurface << <pDims, BLOCK_SIZE >> > (
+		VAP_DetectSurface << <pDims, BLOCK_SIZE >> > (
 			mAii, 
 			mIsSurface, 
 			mAiiFluid,
@@ -863,7 +863,7 @@ namespace dyno
 		//compute the source term
 		mDensityCalculator->compute();
 		mDivergence.reset();
-		VC_ComputeDivergence << <pDims, BLOCK_SIZE >> > (
+		VAP_ComputeDivergence << <pDims, BLOCK_SIZE >> > (
 			mDivergence, 
 			mAlpha, 
 			mDensityCalculator->outDensity()->getData(),
@@ -879,7 +879,7 @@ namespace dyno
 			this->inSmoothingLength()->getData(),
 			dt);
 
-		VC_CompensateSource << <pDims, BLOCK_SIZE >> > (
+		VAP_CompensateSource << <pDims, BLOCK_SIZE >> > (
 			mDivergence, 
 			mDensityCalculator->outDensity()->getData(),
 			this->inAttribute()->getData(),
@@ -889,7 +889,7 @@ namespace dyno
 		
 		//solve the linear system of equations with a conjugate gradient method.
 		m_y.reset();
-		VC_ComputeAx << <pDims, BLOCK_SIZE >> > (
+		VAP_ComputeAx << <pDims, BLOCK_SIZE >> > (
 			m_y, 
 			mPressure, 
 			mAii, 
@@ -909,7 +909,7 @@ namespace dyno
 		{
 			m_y.reset();
 			//VC_ComputeAx << <pDims, BLOCK_SIZE >> > (*yArr, *pArr, *aiiArr, *alphaArr, *posArr, *attArr, *neighborArr);
-			VC_ComputeAx << <pDims, BLOCK_SIZE >> > (
+			VAP_ComputeAx << <pDims, BLOCK_SIZE >> > (
 				m_y, 
 				m_p, 
 				mAii, 
@@ -917,7 +917,7 @@ namespace dyno
 				this->inPosition()->getData(),
 				this->inAttribute()->getData(),
 				this->inNeighborIds()->getData(),
-				this->inSmoothingLength()->getData());
+				this->inSmoothingLength()->getValue());
 
 			float alpha = rr / m_arithmetic->Dot(m_p, m_y);
 			Function2Pt::saxpy(mPressure, m_p, mPressure, alpha);
@@ -952,7 +952,7 @@ namespace dyno
 // 			this->inSmoothingLength()->getData(),
 // 			dt);
 
-		VC_UpdateVelocity1rd << <pDims, BLOCK_SIZE >> > (
+		VAP_UpdateVelocity1rd << <pDims, BLOCK_SIZE >> > (
 			mPressure,
 			mAlpha,
 			mIsSurface,
@@ -960,8 +960,8 @@ namespace dyno
  			this->inVelocity()->getData(),
 			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
-			this->varRestDensity()->getData(),
-			this->inSmoothingLength()->getData(),
+			this->varRestDensity()->getValue(),
+			this->inSmoothingLength()->getValue(),
 			dt);
 	}
 

@@ -14,11 +14,10 @@ namespace dyno
 		model->varSmoothingLength()->setValue(0.01);
 		
 		this->stateTimeStep()->connect(model->inTimeStep());
-		this->statePosition()->connect(model->inPosition());
-		this->stateVelocity()->connect(model->inVelocity());
-		this->stateForce()->connect(model->inForce());
-		this->stateNormal()->connect(model->inNormal());
-		this->stateAttribute()->connect(model->inAttribute());
+		this->statePositionMerged()->connect(model->inPosition());
+		this->stateVelocityMerged()->connect(model->inVelocity());
+		this->stateNormalMerged()->connect(model->inNormal());
+		this->stateAttributeMerged()->connect(model->inAttribute());
 		this->animationPipeline()->pushModule(model);
 
 		this->setDt(0.001f);
@@ -48,104 +47,121 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GhostFluid<TDataType>::preUpdateStates()
+	void GhostFluid<TDataType>::resetStates()
 	{
-		auto boundaryParticles	= this->getBoundaryParticles();
-		auto fluidParticles		= this->getFluidParticles();
+		auto boundaryParticles = this->getBoundaryParticles();
+		auto fluidParticles = this->getFluidParticles();
 
-		int pNum = 0;
-		pNum += boundaryParticles != nullptr ? boundaryParticles->statePosition()->size() : 0;
-		pNum += fluidParticles != nullptr ? fluidParticles->statePosition()->size() : 0;
+		int totalNumber = 0;
+		uint numOfGhostParticles = boundaryParticles != nullptr ? boundaryParticles->statePosition()->size() : 0;
+		uint numOfFluidParticles = fluidParticles != nullptr ? fluidParticles->statePosition()->size() : 0;
 
-		if (pNum <= 0)
+		totalNumber += (numOfFluidParticles + numOfGhostParticles);
+
+		if (totalNumber <= 0)
 			return;
 
-		if (pNum != this->statePosition()->size())
-		{
-			this->statePosition()->resize(pNum);
-			this->stateVelocity()->resize(pNum);
-			this->stateForce()->resize(pNum);
-			this->stateAttribute()->resize(pNum);
-			this->stateNormal()->resize(pNum);
+		//Initialize state fields for merged data
+		if (totalNumber != this->statePositionMerged()->size()) {
+			this->statePositionMerged()->resize(totalNumber);
+			this->stateVelocityMerged()->resize(totalNumber);
+			this->stateAttributeMerged()->resize(totalNumber);
+			this->stateNormalMerged()->resize(totalNumber);
 		}
 
-		auto& pos = this->statePosition()->getData();
-		auto& vel = this->stateVelocity()->getData();
-		auto& force = this->stateForce()->getData();
-
-		force.reset();
+		auto& posMerged = this->statePositionMerged()->getData();
+		auto& velMerged = this->stateVelocityMerged()->getData();
 
 		int offset = 0;
 		if (fluidParticles != nullptr)
 		{
-			auto& fPos = fluidParticles->statePosition()->getData();
-			auto& fVel = fluidParticles->stateVelocity()->getData();
-			pos.assign(fPos, fPos.size(), 0, 0);
-			vel.assign(fVel, fVel.size(), 0, 0);
+			auto& fPos = fluidParticles->statePosition()->constData();
+			auto& fVel = fluidParticles->stateVelocity()->constData();
+			posMerged.assign(fPos, fPos.size(), 0, 0);
+			velMerged.assign(fVel, fVel.size(), 0, 0);
 
 			offset += fPos.size();
 		}
-		
-		auto& normals = this->stateNormal()->getData();
-		normals.reset();
+
+		auto& normMerged = this->stateNormalMerged()->getData();
+		normMerged.reset();
 
 		if (boundaryParticles != nullptr)
 		{
-			auto& bPos = boundaryParticles->statePosition()->getData();
-			auto& bVel = boundaryParticles->stateVelocity()->getData();
-			auto& bNor = boundaryParticles->stateNormal()->getData();
-			pos.assign(bPos, bPos.size(), offset, 0);
-			vel.assign(bVel, bVel.size(), offset, 0);
-			normals.assign(bNor, bNor.size(), offset, 0);
+			auto& bPos = boundaryParticles->statePosition()->constData();
+			auto& bVel = boundaryParticles->stateVelocity()->constData();
+			auto& bNor = boundaryParticles->stateNormal()->constData();
+			posMerged.assign(bPos, bPos.size(), offset, 0);
+			velMerged.assign(bVel, bVel.size(), offset, 0);
+			normMerged.assign(bNor, bNor.size(), offset, 0);
 		}
 
 
-		auto& atts = this->stateAttribute()->getData();
+		auto& attMerged = this->stateAttributeMerged()->getData();
 		if (fluidParticles != nullptr)
 		{
 			cuExecute(offset,
 				SetupFluidAttributes,
-				atts,
+				attMerged,
 				offset);
 		}
-		
+
 		if (boundaryParticles != nullptr)
 		{
 			auto& bAtt = boundaryParticles->stateAttribute()->getData();
 			cuExecute(bAtt.size(),
 				SetupBoundaryAttributes,
-				atts,
+				attMerged,
 				bAtt,
 				offset);
+		}
+
+		//Initialize state fields for the fluid
+		if (numOfFluidParticles != this->statePosition()->size()) {
+			this->statePosition()->resize(totalNumber);
+			this->stateVelocity()->resize(totalNumber);
+		}
+
+		//Initialize the PointSet for fluid particles
+		if (!this->statePosition()->isEmpty())
+		{
+			auto& fPos = fluidParticles->statePosition()->constData();
+			auto& fVel = fluidParticles->stateVelocity()->constData();
+			this->statePosition()->assign(fPos);
+			this->stateVelocity()->assign(fVel);
+
+			auto points = this->statePointSet()->getDataPtr();
+			points->setPoints(this->statePosition()->getData());
+		}
+		else
+		{
+			auto points = this->statePointSet()->getDataPtr();
+			points->clear();
 		}
 	}
 
 	template<typename TDataType>
 	void GhostFluid<TDataType>::postUpdateStates()
 	{
-		auto boundaryParticles = this->getBoundaryParticles();
-		auto fluidParticles = this->getFluidParticles();
-
 		auto& pos = this->statePosition()->getData();
 		auto& vel = this->stateVelocity()->getData();
 
-		int offset = 0;
-		if (fluidParticles != nullptr)
-		{
-			auto& fPos = fluidParticles->statePosition()->getData();
-			auto& fVel = fluidParticles->stateVelocity()->getData();
-			fPos.assign(pos, fPos.size(), 0, 0);
-			fVel.assign(vel, fVel.size(), 0, 0);
+		auto& posMerged = this->statePositionMerged()->constData();
+		auto& velMerged = this->stateVelocityMerged()->constData();
 
-			offset += fPos.size();
+		pos.assign(posMerged, pos.size());
+		vel.assign(velMerged, vel.size());
+
+		//Initialize the PointSet for fluid particles
+		if (!this->statePosition()->isEmpty())
+		{
+			auto points = this->statePointSet()->getDataPtr();
+			points->setPoints(this->statePosition()->getData());
 		}
-
-		if (boundaryParticles != nullptr)
+		else
 		{
-			auto& bPos = boundaryParticles->statePosition()->getData();
-			auto& bVel = boundaryParticles->stateVelocity()->getData();
-			bPos.assign(pos, bPos.size(), 0, offset);
-			bVel.assign(vel, bVel.size(), 0, offset);
+			auto points = this->statePointSet()->getDataPtr();
+			points->clear();
 		}
 	}
 

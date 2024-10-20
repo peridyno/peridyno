@@ -30,16 +30,10 @@ namespace dyno
 		 */
 		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "Particle position");
 
-
 		/**
 		 * @brief Particle velocity
 		 */
 		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Particle velocity");
-
-		/**
-		 * @brief Particle force
-		 */
-		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Force on each particle");
 
 		/**
 		 * @brief A topology

@@ -61,7 +61,6 @@ namespace dyno
 		{
 			this->statePosition()->resize(pts.size());
 			this->stateVelocity()->resize(pts.size());
-			this->stateForce()->resize(pts.size());
 
 			this->statePosition()->getData().assign(pts);
 			this->stateVelocity()->getDataPtr()->reset();

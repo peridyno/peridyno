@@ -37,7 +37,6 @@ namespace dyno
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
 		this->stateAttribute()->connect(integrator->inAttribute());
-		this->stateForce()->connect(integrator->inForceDensity());
 		this->animationPipeline()->pushModule(integrator);
 		//超弹性求解模块
 		auto hyperElasticity = std::make_shared<SemiImplicitHyperelasticitySolver<TDataType>>();

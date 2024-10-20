@@ -47,7 +47,6 @@ std::shared_ptr<SceneGraph> createScene()
 		fluid->stateTimeStep()->connect(integrator->inTimeStep());
 		fluid->statePosition()->connect(integrator->inPosition());
 		fluid->stateVelocity()->connect(integrator->inVelocity());
-		fluid->stateForce()->connect(integrator->inForceDensity());
 		fluid->animationPipeline()->pushModule(integrator);
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();

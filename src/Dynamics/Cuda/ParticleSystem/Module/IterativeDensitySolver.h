@@ -16,6 +16,9 @@
 #pragma once
 #include "ParticleApproximation.h"
 #include "Algorithm/Arithmetic.h"
+
+#include "Collision/Attribute.h"
+
 namespace dyno {
 
 	template<typename TDataType> class SummationDensity;
@@ -49,6 +52,12 @@ namespace dyno {
 		 * @brief Particle velocities
 		 */
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Input particle velocity");
+
+		/**
+		 * @brief Attribute
+		 * Particle attribute
+		 */
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
 
 		/**
 		 * @brief Neighboring particles' ids

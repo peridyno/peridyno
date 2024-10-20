@@ -24,7 +24,6 @@ namespace dyno
 		this->stateReferencePosition()->connect(peri->inX());
 		this->statePosition()->connect(peri->inY());
 		this->stateVelocity()->connect(peri->inVelocity());
-		this->stateForce()->connect(peri->inForce());
 		this->stateBonds()->connect(peri->inBonds());
 		this->animationPipeline()->pushModule(peri);
 

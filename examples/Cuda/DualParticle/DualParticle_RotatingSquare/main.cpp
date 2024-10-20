@@ -149,7 +149,6 @@ std::shared_ptr<SceneGraph> createScene()
 		fluid->statePosition()->connect(m_integrator->inPosition());
 		fluid->stateVelocity()->connect(m_integrator->inVelocity());
 		fluid->stateParticleAttribute()->connect(m_integrator->inAttribute());
-		fluid->stateForce()->connect(m_integrator->inForceDensity());
 		fluid->animationPipeline()->pushModule(m_integrator);
 
 		auto m_visModule = std::make_shared<ImplicitViscosity<DataType3f>>();

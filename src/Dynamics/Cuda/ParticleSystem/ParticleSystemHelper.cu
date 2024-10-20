@@ -80,7 +80,6 @@ namespace dyno
 	void ParticleSystemHelper<TDataType>::reorderParticles(
 		DArray<Coord>& pos, 
 		DArray<Coord>& vel, 
-		DArray<Coord>& force,
 		DArray<OcKey>& morton)
 	{
 		DArray<uint> idsInOrder(pos.size());
@@ -105,13 +104,6 @@ namespace dyno
 		cuExecute(vel.size(),
 			PSH_ReorderParticles,
 			vel,
-			buffer,
-			idsInOrder);
-
-		buffer.assign(force);
-		cuExecute(force.size(),
-			PSH_ReorderParticles,
-			force,
 			buffer,
 			idsInOrder);
 

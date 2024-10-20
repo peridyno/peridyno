@@ -30,9 +30,6 @@ namespace dyno
 		this->statePosition()->assign(pts->getPoints());
 		this->stateVelocity()->assign(hostVel);
 
-		this->stateForce()->resize(inTopo.getPoints().size());
-		this->stateForce()->reset();
-
 		hostVel.clear();
 	}
 

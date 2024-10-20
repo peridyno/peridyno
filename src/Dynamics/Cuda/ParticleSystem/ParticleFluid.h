@@ -41,7 +41,7 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-		void preUpdateStates();
+		void preUpdateStates() override;
 
 	private:
 		void loadInitialStates();

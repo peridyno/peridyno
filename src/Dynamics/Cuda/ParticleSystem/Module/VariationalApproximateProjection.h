@@ -17,8 +17,8 @@
 
 #include "Collision/Attribute.h"
 
-//Framework
-#include "Module/ConstraintModule.h"
+//ParticleSystem
+#include "ParticleApproximation.h"
 
 namespace dyno 
 {
@@ -34,7 +34,7 @@ namespace dyno
 	 * 			Refer to "A Variational Staggered Particle Framework for Incompressible Free-Surface Flows", [arXiv:2001.09421], 2020.
 	 */
 	template<typename TDataType>
-	class VariationalApproximateProjection : public ConstraintModule
+	class VariationalApproximateProjection : public ParticleApproximation<TDataType>
 	{
 		DECLARE_TCLASS(VariationalApproximateProjection, TDataType)
 	public:
@@ -44,16 +44,10 @@ namespace dyno
 		VariationalApproximateProjection();
 		~VariationalApproximateProjection() override;
 		
-		void constrain() override;
-
 	public:
 		DEF_VAR(Real, RestDensity, Real(1000), "");
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
-
-		DEF_VAR_IN(Real, SamplingDistance, "");
-
-		DEF_VAR_IN(Real, SmoothingLength, "");
 
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 
@@ -66,8 +60,8 @@ namespace dyno
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
 
-// 	protected:
-// 		bool initializeImpl() override;
+	protected:
+		void compute() override;
 
 	private:
 		Real mAlphaMax;

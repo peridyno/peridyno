@@ -20,14 +20,24 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		GhostFluid();
-		virtual ~GhostFluid() {};
+		~GhostFluid() override {};
+
+		/**
+		 * @brief Particle position for both the fluid and solid
+		 */
+		DEF_ARRAY_STATE(Coord, PositionMerged, DeviceType::GPU, "Particle position");
+
+		/**
+		 * @brief Particle velocity
+		 */
+		DEF_ARRAY_STATE(Coord, VelocityMerged, DeviceType::GPU, "Particle velocity");
 
 		/**
 		 * @brief Particle force
 		 */
-		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
+		DEF_ARRAY_STATE(Attribute, AttributeMerged, DeviceType::GPU, "Particle attribute");
 
-		DEF_ARRAY_STATE(Coord, Normal, DeviceType::GPU, "Particle normal");
+		DEF_ARRAY_STATE(Coord, NormalMerged, DeviceType::GPU, "Particle normal");
 
 
 	public:
@@ -35,7 +45,8 @@ namespace dyno
 		DEF_NODE_PORT(GhostParticles<TDataType>, BoundaryParticles, "Boundary particles");
 
 	protected:
-		void preUpdateStates() override;
+		void resetStates() override;
+
 		void postUpdateStates() override;
 	};
 }

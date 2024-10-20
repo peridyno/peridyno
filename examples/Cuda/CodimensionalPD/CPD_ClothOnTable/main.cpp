@@ -51,27 +51,8 @@ std::shared_ptr<SceneGraph> createScene()
 	return scn;
 }
 
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
-
-
 int main()
 {
-	Log::setUserReceiver(&RecieveLogMessage);
-
 	GlfwApp window;
 	window.setSceneGraph(createScene());
 
