@@ -29,7 +29,6 @@ void pybind_particle_system(py::module& m)
 	declare_particle_approximation<dyno::DataType3f>(m, "3f");
 	declare_iterative_densitySolver<dyno::DataType3f>(m, "3f");
 	declare_linear_damping<dyno::DataType3f>(m, "3f");
-	declare_particle_integrator<dyno::DataType3f>(m, "3f");
 	declare_poisson_plane<dyno::DataType3f>(m, "3f");
 	declare_position_based_fluid_model<dyno::DataType3f>(m, "3f");
 	declare_projection_based_fluid_model<dyno::DataType3f>(m, "3f");

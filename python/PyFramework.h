@@ -91,7 +91,6 @@ using Log = dyno::Log;
 //new
 using Color = dyno::Color;
 using ConstraintModule = dyno::ConstraintModule;
-using NumericalIntegrator = dyno::NumericalIntegrator;
 using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
 using GroupModule = dyno::GroupModule;

@@ -179,15 +179,10 @@ void declare_co_semi_implicit_hyperelasticity_solver(py::module& m, std::string 
 template <typename TDataType>
 void declare_dampling_particle_integrator(py::module& m, std::string typestr) {
 	using Class = dyno::DamplingParticleIntegrator<TDataType>;
-	using Parent = dyno::NumericalIntegrator;
+	using Parent = dyno::ComputeModule;
 	std::string pyclass_name = std::string("DamplingParticleIntegrator") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>()) // 绑定默认构造函数
-		.def("begin", &Class::begin) // 绑定 begin 方法
-		.def("end", &Class::end) // 绑定 end 方法
-		.def("integrate", &Class::integrate) // 绑定 integrate 方法
-		.def("update_velocity", &Class::updateVelocity)
-		.def("update_position", &Class::updatePosition)
 		.def("in_contact_force", &Class::inContactForce, py::return_value_policy::reference)
 		.def("in_dynamic_force", &Class::inDynamicForce, py::return_value_policy::reference)
 		.def("in_norm", &Class::inNorm, py::return_value_policy::reference)
@@ -196,8 +191,7 @@ void declare_dampling_particle_integrator(py::module& m, std::string typestr) {
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
 		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_force_density", &Class::inForceDensity, py::return_value_policy::reference);
+		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/DragSurfaceInteraction.h"
