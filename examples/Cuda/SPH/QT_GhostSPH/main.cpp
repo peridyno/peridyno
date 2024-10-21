@@ -32,63 +32,6 @@ using namespace dyno;
 
 bool useVTK = false;
 
-std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
-{
-	auto ghost = std::make_shared<GhostParticles<DataType3f>>();
-
-	std::vector<Vec3f> host_pos;
-	std::vector<Vec3f> host_vel;
-	std::vector<Vec3f> host_force;
-	std::vector<Vec3f> host_normal;
-	std::vector<Attribute> host_attribute;
-
-	Vec3f low(-0.2, -0.015, -0.2);
-	Vec3f high(0.2, -0.005, 0.2);
-
-	Real s = 0.005f;
-	int m_iExt = 0;
-
-	float omega = 1.0f;
-	float half_s = -s / 2.0f;
-
-	int num = 0;
-
-	for (float x = low.x - m_iExt * s; x <= high.x + m_iExt * s; x += s) {
-		for (float y = low.y - m_iExt * s; y <= high.y + m_iExt * s; y += s) {
-			for (float z = low.z - m_iExt * s; z <= high.z + m_iExt * s; z += s) {
-				Attribute attri;
-				attri.setFluid();
-				attri.setDynamic();
-
-				host_pos.push_back(Vec3f(x, y, z));
-				host_vel.push_back(Vec3f(0));
-				host_force.push_back(Vec3f(0));
-				host_normal.push_back(Vec3f(0, 1, 0));
-				host_attribute.push_back(attri);
-			}
-		}
-	}
-
-	ghost->statePosition()->resize(num);
-	ghost->stateVelocity()->resize(num);
-
-	ghost->stateNormal()->resize(num);
-	ghost->stateAttribute()->resize(num);
-
-	ghost->statePosition()->assign(host_pos);
-	ghost->stateVelocity()->assign(host_vel);
-	ghost->stateNormal()->assign(host_normal);
-	ghost->stateAttribute()->assign(host_attribute);
-
-	host_pos.clear();
-	host_vel.clear();
-	host_force.clear();
-	host_normal.clear();
-	host_attribute.clear();
-
-	return ghost;
-}
-
 std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();

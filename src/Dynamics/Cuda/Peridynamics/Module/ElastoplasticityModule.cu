@@ -1,11 +1,11 @@
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 #include "ElastoplasticityModule.h"
 #include "Node.h"
 #include "Matrix/MatrixFunc.h"
 //#include "ParticleSystem/Kernel.h"
 #include "ParticleSystem/Module/Kernel.h"
-#include <thrust/scan.h>
-#include <thrust/reduce.h>
+//#include <thrust/scan.h>
+//#include <thrust/reduce.h>
 //#include "svd3_cuda2.h"
 
 namespace dyno
