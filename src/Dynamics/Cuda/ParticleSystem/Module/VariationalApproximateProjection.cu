@@ -282,14 +282,16 @@ namespace dyno
 		Real diagT_i = AiiTotal[pId];
 		Real aii = diagF_i;
 		Real diagS_i = diagT_i - diagF_i;
-		Real threshold = 0.0f;
-		if (bNearWall && diagT_i < maxA*(1.0f - threshold))
+
+		//A hack, further improvements should be done to impose the exact solid boundary condition
+		Real threshold = 1.5f;
+		if (bNearWall && diagT_i < threshold * maxA)
 		{
 			bSurface_i = true;
-			aii = maxA - (diagT_i - diagF_i);
+			aii = threshold * maxA - (diagT_i - diagF_i);
 		}
 
-		if (!bNearWall && diagF_i < maxA*(1.0f - threshold))
+		if (!bNearWall && diagF_i < maxA)
 		{
 			bSurface_i = true;
 			aii = maxA;
@@ -859,6 +861,8 @@ namespace dyno
 			mAMax);
 
 		int itor = 0;
+
+		mPressure.reset();
 
 		//compute the source term
 		mDensityCalculator->compute();
