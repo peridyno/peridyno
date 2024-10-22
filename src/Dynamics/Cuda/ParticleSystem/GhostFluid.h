@@ -47,6 +47,8 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
+		void preUpdateStates() override;
+
 		void postUpdateStates() override;
 	};
 }

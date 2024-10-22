@@ -141,6 +141,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void GhostFluid<TDataType>::preUpdateStates()
+	{
+
+	}
+
+	template<typename TDataType>
 	void GhostFluid<TDataType>::postUpdateStates()
 	{
 		auto& pos = this->statePosition()->getData();

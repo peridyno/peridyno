@@ -34,8 +34,6 @@ namespace dyno
 		LinearDamping();
 		~LinearDamping() override;
 
-		void constrain() override;
-
 	public:
 		DEF_VAR(Real, DampingCoefficient, 0.9, "");
 
@@ -43,6 +41,9 @@ namespace dyno
 		* @brief Particle velocity
 		*/
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+
+	protected:
+		void constrain() override;
 	};
 
 	IMPLEMENT_TCLASS(LinearDamping, TDataType)

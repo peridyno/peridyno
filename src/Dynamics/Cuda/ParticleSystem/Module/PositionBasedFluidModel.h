@@ -1,6 +1,8 @@
 #pragma once
 #include "Module/GroupModule.h"
 
+#include "Collision/Attribute.h"
+
 namespace dyno
 {
 	/*!
@@ -30,5 +32,7 @@ namespace dyno
 
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "");
 	};
 }

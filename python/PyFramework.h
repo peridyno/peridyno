@@ -10,6 +10,7 @@
 #include "Module/GraphicsPipeline.h"
 #include "Module/MouseInputModule.h"
 #include "Module/OutputModule.h"
+#include "Module/ConstraintModule.h"
 
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"

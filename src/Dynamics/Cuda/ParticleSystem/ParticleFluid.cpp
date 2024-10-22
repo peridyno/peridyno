@@ -55,6 +55,7 @@ namespace dyno
 		viscosity->varViscosity()->setValue(Real(1.0));
 		this->stateTimeStep()->connect(viscosity->inTimeStep());
 		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
+		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
 		this->statePosition()->connect(viscosity->inPosition());
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -101,7 +102,7 @@ namespace dyno
 				DArray<Coord>& new_pos = this->statePosition()->getData();
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();
 
-				//Assign attributes from intial states
+				//Assign attributes from initial states
 				if (curNum > 0)
 				{
 					new_pos.assign(pBuf, curNum, 0, 0);

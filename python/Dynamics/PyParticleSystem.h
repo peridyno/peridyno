@@ -61,14 +61,14 @@ void declare_boundary_constraint(py::module& m, std::string typestr) {
 template <typename TDataType>
 void declare_implicit_viscosity(py::module& m, std::string typestr) {
 	using Class = dyno::ImplicitViscosity<TDataType>;
-	using Parent = dyno::ConstraintModule;
+	using Parent = dyno::ParticleApproximation<TDataType>;
 	std::string pyclass_name = std::string("ImplicitViscosity") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("constrain", &Class::constrain)
 		.def("var_viscosity", &Class::varViscosity, py::return_value_policy::reference)
 		.def("var_interation_number", &Class::varInterationNumber, py::return_value_policy::reference)
 		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
 		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
@@ -122,7 +122,6 @@ void declare_linear_damping(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LinearDamping") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("constrain", &Class::constrain)
 		.def("var_damping_coefficient", &Class::varDampingCoefficient, py::return_value_policy::reference)
 		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference);
 }
@@ -235,16 +234,16 @@ void declare_summation_density(py::module& m, std::string typestr) {
 		.def("out_density", &Class::outDensity, py::return_value_policy::reference);
 }
 
-#include "ParticleSystem/Module/SurfaceTension.h"
+#include "ParticleSystem/Module/SurfaceEnergyForce.h"
 template <typename TDataType>
 void declare_surface_tension(py::module& m, std::string typestr) {
-	using Class = dyno::SurfaceTension<TDataType>;
-	using Parent = dyno::ComputeModule;
+	using Class = dyno::SurfaceEnergyForce<TDataType>;
+	using Parent = dyno::ParticleApproximation<TDataType>;
 	std::string pyclass_name = std::string("SurfaceTension") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_intensity", &Class::setIntensity)
-		.def("set_smoothing_length", &Class::setSmoothingLength);
+		.def("in_position", &Class::inPosition)
+		.def("in_velocity", &Class::inVelocity);
 }
 
 #include "ParticleSystem/Module/VariationalApproximateProjection.h"
