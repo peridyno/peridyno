@@ -62,4 +62,5 @@ const inline std::string getPluginPath() {
 	return "${PERIDYNO_PLUGIN_PATH}/";
 }
 
-//#define SIMULATION2D
+#define ${QT_GUI_SUPPORTED}
+#define ${WT_GUI_SUPPORTED}
