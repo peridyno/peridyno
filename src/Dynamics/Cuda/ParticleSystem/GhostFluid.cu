@@ -8,7 +8,7 @@ namespace dyno
 
 	template<typename TDataType>
 	GhostFluid<TDataType>::GhostFluid()
-		: ParticleSystem<TDataType>()
+		: ParticleFluid<TDataType>()
 	{
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
 		model->varSmoothingLength()->setValue(0.01);
@@ -21,6 +21,38 @@ namespace dyno
 		this->animationPipeline()->pushModule(model);
 
 		this->setDt(0.001f);
+	}
+
+	template<typename TDataType>
+	void GhostFluid<TDataType>::resetStates()
+	{
+		ParticleFluid<TDataType>::resetStates();
+
+		constructMergedArrays();
+	}
+
+	template<typename TDataType>
+	void GhostFluid<TDataType>::preUpdateStates()
+	{
+		ParticleFluid<TDataType>::preUpdateStates();
+
+		//To ensure updates on fluid particles by other nodes can be mapped onto the merged arrays
+		constructMergedArrays();
+	}
+
+	template<typename TDataType>
+	void GhostFluid<TDataType>::postUpdateStates()
+	{
+		auto& pos = this->statePosition()->getData();
+		auto& vel = this->stateVelocity()->getData();
+
+		auto& posMerged = this->statePositionMerged()->constData();
+		auto& velMerged = this->stateVelocityMerged()->constData();
+
+		pos.assign(posMerged, pos.size());
+		vel.assign(velMerged, vel.size());
+
+		ParticleFluid<TDataType>::postUpdateStates();
 	}
 
 	__global__ void SetupFluidAttributes(
@@ -47,14 +79,16 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void GhostFluid<TDataType>::resetStates()
+	void GhostFluid<TDataType>::constructMergedArrays()
 	{
+		auto& pos = this->statePosition()->constData();
+		auto& vel = this->stateVelocity()->constData();
+
 		auto boundaryParticles = this->getBoundaryParticles();
-		auto fluidParticles = this->getFluidParticles();
 
 		int totalNumber = 0;
 		uint numOfGhostParticles = boundaryParticles != nullptr ? boundaryParticles->statePosition()->size() : 0;
-		uint numOfFluidParticles = fluidParticles != nullptr ? fluidParticles->statePosition()->size() : 0;
+		uint numOfFluidParticles = pos.size();
 
 		totalNumber += (numOfFluidParticles + numOfGhostParticles);
 
@@ -73,15 +107,10 @@ namespace dyno
 		auto& velMerged = this->stateVelocityMerged()->getData();
 
 		int offset = 0;
-		if (fluidParticles != nullptr)
-		{
-			auto& fPos = fluidParticles->statePosition()->constData();
-			auto& fVel = fluidParticles->stateVelocity()->constData();
-			posMerged.assign(fPos, fPos.size(), 0, 0);
-			velMerged.assign(fVel, fVel.size(), 0, 0);
+		posMerged.assign(pos, pos.size(), 0, 0);
+		velMerged.assign(vel, vel.size(), 0, 0);
 
-			offset += fPos.size();
-		}
+		offset += pos.size();
 
 		auto& normMerged = this->stateNormalMerged()->getData();
 		normMerged.reset();
@@ -96,9 +125,9 @@ namespace dyno
 			normMerged.assign(bNor, bNor.size(), offset, 0);
 		}
 
-
+		//Initialize the attribute field
 		auto& attMerged = this->stateAttributeMerged()->getData();
-		if (fluidParticles != nullptr)
+		if (numOfFluidParticles != 0)
 		{
 			cuExecute(offset,
 				SetupFluidAttributes,
@@ -114,60 +143,6 @@ namespace dyno
 				attMerged,
 				bAtt,
 				offset);
-		}
-
-		//Initialize state fields for the fluid
-		if (numOfFluidParticles != this->statePosition()->size()) {
-			this->statePosition()->resize(totalNumber);
-			this->stateVelocity()->resize(totalNumber);
-		}
-
-		//Initialize the PointSet for fluid particles
-		if (!this->statePosition()->isEmpty())
-		{
-			auto& fPos = fluidParticles->statePosition()->constData();
-			auto& fVel = fluidParticles->stateVelocity()->constData();
-			this->statePosition()->assign(fPos);
-			this->stateVelocity()->assign(fVel);
-
-			auto points = this->statePointSet()->getDataPtr();
-			points->setPoints(this->statePosition()->getData());
-		}
-		else
-		{
-			auto points = this->statePointSet()->getDataPtr();
-			points->clear();
-		}
-	}
-
-	template<typename TDataType>
-	void GhostFluid<TDataType>::preUpdateStates()
-	{
-
-	}
-
-	template<typename TDataType>
-	void GhostFluid<TDataType>::postUpdateStates()
-	{
-		auto& pos = this->statePosition()->getData();
-		auto& vel = this->stateVelocity()->getData();
-
-		auto& posMerged = this->statePositionMerged()->constData();
-		auto& velMerged = this->stateVelocityMerged()->constData();
-
-		pos.assign(posMerged, pos.size());
-		vel.assign(velMerged, vel.size());
-
-		//Initialize the PointSet for fluid particles
-		if (!this->statePosition()->isEmpty())
-		{
-			auto points = this->statePointSet()->getDataPtr();
-			points->setPoints(this->statePosition()->getData());
-		}
-		else
-		{
-			auto points = this->statePointSet()->getDataPtr();
-			points->clear();
 		}
 	}
 

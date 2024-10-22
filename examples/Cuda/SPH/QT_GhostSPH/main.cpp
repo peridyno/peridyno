@@ -92,7 +92,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sampler->statePointSet()->promoteOuput()->connect(fluidParticles->inPoints());
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
-	fluidParticles->connect(incompressibleFluid->importFluidParticles());
+	fluidParticles->connect(incompressibleFluid->importInitialStates());
 	ghost2->connect(incompressibleFluid->importBoundaryParticles());
 
 	{

@@ -84,6 +84,11 @@ namespace dyno
 
 			pts.assign(this->statePosition()->getData());
 		}
+		else
+		{
+			auto points = this->statePointSet()->getDataPtr();
+			points->clear();
+		}
 	}
 
 	DEFINE_CLASS(ParticleSystem);

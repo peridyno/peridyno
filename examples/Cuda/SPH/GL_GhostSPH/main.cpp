@@ -97,7 +97,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
 	incompressibleFluid->setDt(0.001f);
-	fluid->connect(incompressibleFluid->importFluidParticles());
+	fluid->connect(incompressibleFluid->importInitialStates());
 	ghost->connect(incompressibleFluid->importBoundaryParticles());
 // 	incompressibleFluid->setFluidParticles(fluid);
 // 	incompressibleFluid->setBoundaryParticles(ghost);

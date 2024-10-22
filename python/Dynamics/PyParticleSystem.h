@@ -343,8 +343,7 @@ void declare_ghost_fluid(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("state_attribute_merged", &Class::stateAttributeMerged, py::return_value_policy::reference)
 		.def("state_normal_merged", &Class::stateNormalMerged, py::return_value_policy::reference)
-		.def("import_fluid_particles", &Class::importFluidParticles, py::return_value_policy::reference)
-		.def("get_fluid_particles", &Class::getFluidParticles)
+		.def("import_initial_states", &Class::importInitialStates, py::return_value_policy::reference)
 		.def("import_boundary_particles", &Class::importBoundaryParticles, py::return_value_policy::reference)
 		.def("get_boundary_particles", &Class::getBoundaryParticles);
 }

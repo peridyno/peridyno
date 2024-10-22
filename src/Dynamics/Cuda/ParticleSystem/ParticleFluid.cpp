@@ -88,7 +88,6 @@ namespace dyno
 			{
 				DArray<Coord> pBuf;
 				DArray<Coord> vBuf;
-				DArray<Coord> fBuf;
 
 				if (curNum > 0)
 				{

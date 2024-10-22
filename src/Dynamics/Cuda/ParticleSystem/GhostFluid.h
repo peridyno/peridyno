@@ -1,5 +1,5 @@
 #pragma once
-#include "ParticleSystem.h"
+#include "ParticleFluid.h"
 #include "GhostParticles.h"
 
 namespace dyno
@@ -12,7 +12,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class GhostFluid : public ParticleSystem<TDataType>
+	class GhostFluid : public ParticleFluid<TDataType>
 	{
 		DECLARE_TCLASS(GhostFluid, TDataType)
 	public:
@@ -41,8 +41,7 @@ namespace dyno
 
 
 	public:
-		DEF_NODE_PORT(ParticleSystem<TDataType>, FluidParticles, "Fluid particles");
-		DEF_NODE_PORT(GhostParticles<TDataType>, BoundaryParticles, "Boundary particles");
+		DEF_NODE_PORT(GhostParticles<TDataType>, BoundaryParticles, "Initial boundary ghost particles");
 
 	protected:
 		void resetStates() override;
@@ -50,5 +49,8 @@ namespace dyno
 		void preUpdateStates() override;
 
 		void postUpdateStates() override;
+
+	private:
+		void constructMergedArrays();
 	};
 }
