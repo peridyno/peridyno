@@ -1,7 +1,6 @@
 #include <QtApp.h>
 
 #include "SceneGraph.h"
-#include "SphereModel.h"
 
 #include "GlfwGUI/GlfwApp.h"
 
