@@ -9,11 +9,16 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Sc
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
 	int id = 0;
-	for (auto const c : *classMap)
+
+	/*for (auto const c : *classMap)
 	{
 		id++;
 
 		std::string str = c.first;
+		if (str == "LargeOcean<DataType3f>")
+		{
+			continue;
+		}
 		auto obj = dyno::Object::createObject(str);
 		std::shared_ptr<dyno::Node> node(dynamic_cast<dyno::Node*>(obj));
 
@@ -29,7 +34,7 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Sc
 			std::string category = node->getNodeType();
 			ret->registerModel<WtNodeWidget>(category, creator);
 		}
-	}
+	}*/
 
 	this->setRegistry(ret);
 
@@ -565,7 +570,7 @@ void WtNodeFlowScene::reorderAllNodes()
 
 			auto fieldInp = nd->getInputFields();
 
-			for (int i = 0; i < fieldInp.size(); i++)//±éÀúÃ¿¸öNodeµÄInputfield
+			for (int i = 0; i < fieldInp.size(); i++)//ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Nodeï¿½ï¿½Inputfield
 			{
 				auto fieldSrc = fieldInp[i]->getSource();
 
@@ -664,7 +669,7 @@ void WtNodeFlowScene::reorderAllNodes()
 		tempOffsetY = std::max(tempOffsetY, offsetY);
 	}
 
-	//ÀëÉ¢½ÚµãµÄÅÅÐò
+	//ï¿½ï¿½É¢ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	auto otherVertices = layout.getOtherVertices();
 	float width = 0;
 	float heigth = 0;
