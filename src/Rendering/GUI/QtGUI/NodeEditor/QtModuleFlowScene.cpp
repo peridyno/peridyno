@@ -53,14 +53,15 @@ namespace Qt
 			QString str = QString::fromStdString(c.first);
 			dyno::Object* obj = dyno::Object::createObject(str.toStdString());
 			std::shared_ptr<dyno::Module> module(dynamic_cast<dyno::Module*>(obj));
-			//dyno::Module* module = dynamic_cast<dyno::Module*>(obj);
 
 			if (module != nullptr)
 			{
-				QtDataModelRegistry::RegistryItemCreator creator = [str, module]() {
-					auto dat = std::make_unique<QtModuleWidget>(module);
-					dat->setName(str);
-					return dat; };
+				QtDataModelRegistry::RegistryItemCreator creator = [str]() {
+					auto new_obj = dyno::Object::createObject(str.toStdString());
+					std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(new_obj));
+					auto dat = std::make_unique<QtModuleWidget>(new_module);
+					return dat; 
+				};
 
 				QString category = QString::fromStdString(module->getModuleType());
 				ret->registerModel<QtModuleWidget>(category, creator);
