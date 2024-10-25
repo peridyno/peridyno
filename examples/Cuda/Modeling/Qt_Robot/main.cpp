@@ -1,5 +1,4 @@
 #include <QtApp.h>
-using namespace dyno;
 
 #include "RigidBody/initializeRigidBody.h"
 #include "ParticleSystem/initializeParticleSystem.h"
@@ -7,27 +6,22 @@ using namespace dyno;
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 #include "Volume/initializeVolume.h"
 #include "Multiphysics/initializeMultiphysics.h"
-
 #include "initializeModeling.h"
 #include "initializeIO.h"
 #include "GltfLoader.h"
-
 #include <GLRenderEngine.h>
 #include "JointDeform.h"
-#include "AnimationMixer.h"
-
-#include "RigidBody/SkeletonRigidBody.h"
 #include "SkeletonLoader/SkeletonLoader.h"
 #include "RigidBody/Module/AnimationDriver.h"
 #include "RigidBody/Module/CarDriver.h"
 #include "BasicShapes/PlaneModel.h"
-//#include "Ik.h"
+#include "RigidBody/Vechicle.h"
 
 
 /**
  * @brief This example demonstrate how to load plugin libraries in a static way
  */
-
+using namespace dyno;
 int main()
 {
 

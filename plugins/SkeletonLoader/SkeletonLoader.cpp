@@ -61,26 +61,19 @@ namespace dyno
 		int animationStackCount = mFbxScene->getAnimationStackCount();
 		int embeddedDataCount = mFbxScene->getEmbeddedDataCount();
 
-
-
-
 		printf("objectCount : %d \n", objectCount);
 		printf("meshCount : %d \n", meshCount);
 		printf("geoCount : %d \n", geoCount);
-		printf("animationStackCount : %d \n", animationStackCount);
-		printf("embeddedDataCount : %d \n", embeddedDataCount);
 
-
-		printf("meshCount : %d\n",meshCount);
+		//printf("meshCount : %d\n",meshCount);
 		for (int id = 0; id < meshCount; id++)
 		{
-			printf("*****************:\n");
-			std::cout << mFbxScene->getMesh(id)->name << std::endl;
+			//printf("*****************:\n");
+			//std::cout << mFbxScene->getMesh(id)->name << std::endl;
 
 			const ofbx::Mesh* currentMesh = (const ofbx::Mesh*)mFbxScene->getMesh(id);
-			std:: cout<< "Mesh Name :  " << currentMesh->name << "\n";
+			//std:: cout<< "Mesh Name :  " << currentMesh->name << "\n";
 			
-
 			std::shared_ptr<FbxMeshInfo> meshInfo = std::make_shared<FbxMeshInfo>();
 
 			auto geoMatrix = currentMesh->getGeometricMatrix();
@@ -100,26 +93,20 @@ namespace dyno
 			meshInfo->pivot = Vec3f(pivot.x, pivot.y, pivot.z);
 			meshInfo->name = currentMesh->name;
 			
-			//顶点属性都呗通过多边形索引，重新写入了。如10个四边面，按照四边面顶点id重新把顶点位置写一遍。就成了40个顶点位置。N,UV同理。
-			auto positionCount = currentMesh->getGeometry()->getGeometryData().getPositions().count;	//indices是vertex ID
+			auto positionCount = currentMesh->getGeometry()->getGeometryData().getPositions().count;	
 			float tempScale = 0.01;
-
-
 
 
 			for (size_t i = 0; i < positionCount; i++)
 			{
 				auto pos = currentMesh->getGeometry()->getGeometryData().getPositions().get(i) ;
-
-				//printf("P - %d : %f,%f,%f\n", i, pos.x, pos.y, pos.z);
 				meshInfo->vertices.push_back(Vec3f(pos.x,pos.y,pos.z) * tempScale);
 			}
 
 			for (size_t i = 0; i < positionCount; i++)
 			{
-				auto indices = currentMesh->getGeometry()->getGeometryData().getPositions().indices[i];		//indices是多边形顶点序号ID，也可以理解为pointId不同于vertexId		
+				auto indices = currentMesh->getGeometry()->getGeometryData().getPositions().indices[i];		
 				meshInfo->verticeId_pointId.push_back(indices);	
-				//printf("PIndex - %d : %d\n", i, indices);
 			}
 
 
@@ -128,7 +115,6 @@ namespace dyno
 			{
 				auto n = currentMesh->getGeometry()->getGeometryData().getNormals().get(i);
 				meshInfo->normals.push_back(Vec3f(n.x,n.y,n.z));
-				//printf("N - %d : %f,%f,%f\n", i, n.x, n.y, n.z);
 			}
 
 			auto uvCount = currentMesh->getGeometry()->getGeometryData().getUVs().count;
@@ -136,7 +122,6 @@ namespace dyno
 			{
 				auto uv = currentMesh->getGeometry()->getGeometryData().getUVs().get(i);
 				meshInfo->texcoords.push_back(Vec2f(uv.x,uv.y));
-				//printf("UV - %d : %f,%f,\n", i, uv.x, uv.y);
 			}
 
 			auto colorCount = currentMesh->getGeometry()->getGeometryData().getColors().count;
@@ -144,18 +129,10 @@ namespace dyno
 			{
 				auto color = currentMesh->getGeometry()->getGeometryData().getColors().get(i);
 				meshInfo->verticesColor.push_back(Vec3f(color.x, color.y, color.z));
-				//printf("Color - %d : %f,%f,%f\n", i, color.x, color.y, color.z);
 			}
 
 			auto partitionCount = currentMesh->getGeometry()->getGeometryData().getPartitionCount();
 		
-			printf("PartitionCount : %d\n", partitionCount);
-
-
-			printf("Poly:");
-
-
-			
 
 			for (size_t i = 0; i < partitionCount; i++)
 			{
@@ -163,8 +140,6 @@ namespace dyno
 
 				CArrayList<uint> polygons;
 				CArray<uint> counter;
-
-
 
 				for (size_t j = 0; j < polygonCount; j++)
 				{
@@ -187,7 +162,6 @@ namespace dyno
 					{
 						int polyId = k + from;
 						index.insert(polyId);
-						//printf("%d, ", polyId);
 
 						Vec3f pos = meshInfo->vertices[polyId];
 						if (pos.x > boundingMax.x)boundingMax.x = pos.x;
@@ -233,7 +207,6 @@ namespace dyno
 					}
 				}
 
-				printf("Tri: %d\n", polygonCount);
 				TopologyModule::Triangle tri;
 				std::vector<TopologyModule::Triangle> triangles;
 				for (size_t j = 0; j < polygonCount; j++)
@@ -249,7 +222,6 @@ namespace dyno
 						tri[1] = k + from + 1;
 						tri[2] = k + from + 2;
 
-						//printf("%d ,%d ,%d \n", tri[0], tri[1], tri[2]);
 						triangles.push_back(tri);
 					}
 				}
@@ -260,11 +232,10 @@ namespace dyno
 
 			//Material
 			auto matCount = currentMesh->getMaterialCount();
-			mFbxScene;
 			for (size_t i = 0; i < matCount; i++)
 			{
 				auto mat = currentMesh->getMaterial(i);
-				std::cout << mat->name << "\n";
+				//std::cout << mat->name << "\n";
 
 				auto diffuseTex = mat->getTexture(ofbx::Texture::DIFFUSE);
 				if (diffuseTex)
@@ -349,17 +320,6 @@ namespace dyno
 					}
 				}
 
-				
-				////auto s = mFbxScene->getEmbeddedBase64Data(0);
-				//auto saa = mFbxScene->getEmbeddedFilename(0);
-
-				//for (const ofbx::u8* ptr = saa.begin; ptr <= saa.end; ++ptr) {
-				//	std::cout << *ptr << " ";
-				//}
-
-
-				//loadTexture();
-
 				meshInfo->materials.push_back(material);
 			}
 
@@ -370,13 +330,9 @@ namespace dyno
 			{
 				auto poseMatrix = pose->getMatrix();
 
-				printf("*****************:\n");
-				std::cout << "Pose : " << pose->name << "\n";
-				std::cout << "Pose ->getNode: " << pose->getNode()->name << "\n";
 
-				//Skin
-				printf("*****************:\n");
-				printf("skin:\n");
+				////Skin
+
 				auto clusterCount = currentMesh->getSkin()->getClusterCount();
 				for (size_t i = 0; i < clusterCount; i++)
 				{
@@ -384,22 +340,19 @@ namespace dyno
 					auto cluster = currentMesh->getSkin()->getCluster(i);
 
 					auto clusteName = cluster->name;
-					std::cout << "Object Name: " << clusteName << "\n";
+					//std::cout << "Object Name: " << clusteName << "\n";
 
 					auto JointName = cluster->getLink()->name;
-					std::cout << "Link Name: " << JointName << "\n";
+					//std::cout << "Link Name: " << JointName << "\n";
 
 					////clusteName - JointName ;
 					//pushBone(cluster->getLink());
 
 					auto indicesCount = cluster->getIndicesCount();
-					printf("indicesCount: %d\n", indicesCount);
 
 					for (size_t j = 0; j < indicesCount; j++)
 					{
 						auto indices = cluster->getIndices()[j];
-						//printf("Idx: %d\n", indices);
-
 					}
 
 					auto weightCount = cluster->getWeightsCount();
@@ -408,15 +361,11 @@ namespace dyno
 					{
 						auto weights = cluster->getWeights()[j];
 
-						//printf("Weight: %f\n", weights);
 					}
-					//weight重新解析一下
 
 				}
 			}
 			
-			//BindPose保存了初始的骨骼世界空间变换矩阵，用以保存初始状态 其中旋转对应Maya中骨骼朝向从世界空间到当前骨骼空间的旋转。位置表示当前世界坐标。
-
 			mMeshs.push_back(meshInfo);
 		}
 
@@ -446,16 +395,11 @@ namespace dyno
 				const ofbx::AnimationLayer* layer = stack->getLayer(j);
 				for (int k = 0; layer->getCurveNode(k); ++k) {
 					const ofbx::AnimationCurveNode* node = layer->getCurveNode(k);
-					auto nodeTrans = node->getNodeLocalTransform(0);	//这个用做不导入动画时候的默认值，一般取value[0]
-					std::cout << node->name << " - transform: " << nodeTrans.x << ", "<< nodeTrans.y <<", "<< nodeTrans.z <<"\n";
+					auto nodeTrans = node->getNodeLocalTransform(0);	
+					//std::cout << node->name << " - transform: " << nodeTrans.x << ", "<< nodeTrans.y <<", "<< nodeTrans.z <<"\n";
 
 					char property[32];
 					node->getBoneLinkProperty().toString(property);
-
-					std::cout << node->name << " - bone:";
-					if (node->getBone())
-						std::cout << node->getBone()->name;
-					std::cout << " - property:" << property << "\n";
 
 					getCurveValue(node);
 					
@@ -463,12 +407,6 @@ namespace dyno
 			}
 		}
 
-		//print
-		for (size_t i = 0; i < mBones.size(); i++)
-		{
-			std::cout << mBones[i]->name << ", " << mBones[i]->m_Rotation_Values[0].size() << std::endl;
-
-		};
 
 		updateHierarchicalScene();
 

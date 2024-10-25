@@ -214,7 +214,7 @@ namespace dyno
 			auto it = parentTag.find(std::string(bone->name));
 
 			if (it != parentTag.end()) {
-				std::cout << "Bone already exists : " << std::distance(parentTag.begin(), it) << std::endl;
+				//std::cout << "Bone already exists : " << std::distance(parentTag.begin(), it) << std::endl;
 			}
 			else {
 
@@ -241,7 +241,7 @@ namespace dyno
 					name_ParentObj[std::string(bone->name)] = nullptr;
 				}
 
-				std::cout << "pushBone : " << std::string(bone->name) << " parent : " <<parentTag[std::string(bone->name)] << "\n";
+				//std::cout << "pushBone : " << std::string(bone->name) << " parent : " <<parentTag[std::string(bone->name)] << "\n";
 
 
 			}					
@@ -291,22 +291,6 @@ namespace dyno
 	
 			}
 
-			for (size_t i = 0; i < mBones.size(); i++)
-			{
-				std::cout << mBones[i]->name << "*********************\n";
-
-				std::cout << "\nParent : ";
-				for (size_t j = 0; j < mBones[i]->parent.size(); j++)
-				{
-					std::cout << mBones[i]->parent[j]->name << ",";
-				}
-				std::cout << "\nChild : ";
-				for (size_t j = 0; j < mBones[i]->child.size(); j++)
-				{
-					std::cout << mBones[i]->child[j]->name << ",";
-				}
-				std::cout << "\n";
-			}
 		}
 
 		std::shared_ptr<ModelObject> getModelObjectByName(std::string name)
@@ -338,8 +322,6 @@ namespace dyno
 
 			if (propertyData == "Lcl Translation")
 			{
-				printf("has Curve\n");
-
 				auto x = node->getCurve(0);
 				auto y = node->getCurve(1);
 				auto z = node->getCurve(2);
@@ -381,8 +363,6 @@ namespace dyno
 
 			if (propertyData == "Lcl Rotation")
 			{
-				printf("has Curve\n");
-
 				auto x = node->getCurve(0);
 				auto y = node->getCurve(1);
 				auto z = node->getCurve(2);
@@ -426,8 +406,6 @@ namespace dyno
 
 			if (propertyData == "Lcl Scaling")
 			{
-				printf("has Curve\n");
-
 				auto x = node->getCurve(0);
 				auto y = node->getCurve(1);
 				auto z = node->getCurve(2);
