@@ -1,91 +1,138 @@
 #include <QtApp.h>
 
 #include <SceneGraph.h>
-
 #include <RigidBody/Vechicle.h>
-
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 #include <GLWireframeVisualModule.h>
-
 #include <Mapping/DiscreteElementsToTriangleSet.h>
 #include <Mapping/ContactsToEdgeSet.h>
 #include <Mapping/ContactsToPointSet.h>
 #include <Mapping/AnchorPointToPointSet.h>
-
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionTriangleSet.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
-
 #include <Module/GLPhotorealisticInstanceRender.h>
-
 #include <BasicShapes/PlaneModel.h>
-
 #include "GltfLoader.h"
-//#include "ConvertToTextureMesh.h"
-
 #include "GltfLoader.h"
 #include "BasicShapes/PlaneModel.h"
+#include "RigidBody/Module/CarDriver.h"
+#include <Eigen/Dense>
+#include "BasicShapes/PlaneModel.h"
+#include "SkeletonLoader/SkeletonLoader.h"
+#include "RigidBody/Module/AnimationDriver.h"
+
 
 using namespace std;
 using namespace dyno;
+
 
 std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto configCar = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
 
-	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
-	gltf->setVisible(false);
 
-	gltf->stateTextureMesh()->connect(configCar->inTextureMesh());
+	auto fbx = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	fbx->varFileName()->setValue(getAssetPath() + "fbx/Dog.fbx");
+	fbx->reset();
+	fbx->setVisible(false);
 
+	auto robot = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	fbx->stateTextureMesh()->connect(robot->inTextureMesh());
 
 	VehicleBind configData;
 
-	Vec3f angle = Vec3f(0,0,90);
+	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
-	;
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LF", 0), 0, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LB", 1), 1, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("RF", 2), 2, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("RB", 3), 3, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("BackWheel", 4), 4, Box));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Body", 5), 5, Box));
 
-	for (size_t i = 0; i < 4; i++)
+	std::string body = std::string("Model::Robot_GLTF:Body");
+	std::string lf_up = std::string("Model::Robot_GLTF:LF_Up");
+	std::string lf_down = std::string("Model::Robot_GLTF:LF_Down");
+	std::string lb_up = std::string("Model::Robot_GLTF:LB_Up");
+	std::string lb_down = std::string("Model::Robot_GLTF:LB_Down");
+	std::string rf_up = std::string("Model::Robot_GLTF:RF_Up");
+	std::string rf_down = std::string("Model::Robot_GLTF:RF_Down");
+	std::string rb_up = std::string("Model::Robot_GLTF:RB_Up");
+	std::string rb_down = std::string("Model::Robot_GLTF:RB_Down");
+
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(body, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(body), Box, Transform3f(), 100));//
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_up, 1), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_down, 2), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_up, 3), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_down, 4), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_up, 5), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_down, 6), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_up, 7), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_down, 8), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_down), Box, Transform3f(), 100));
+
+	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
 	{
-		configData.mVehicleRigidBodyInfo[i].capsuleLength = 0.3;
+		configData.mVehicleRigidBodyInfo[i].radius = 0.2;
 	}
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LF", 0), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LB", 1), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RF", 2), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RB", 3), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	Vec3f offset = Vec3f(0, 0.17, 0);
+
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lf_up, 1), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lf_down, 2), Name_Shape(lf_up, 1), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lb_up, 3), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lb_down, 4), Name_Shape(lb_up, 3), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rf_up, 5), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rf_down, 6), Name_Shape(rf_up, 5), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rb_up, 7), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rb_down, 8), Name_Shape(rb_up, 7), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lf_up, 1), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lf_down, 2), Name_Shape(lf_up, 1), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lb_up, 3), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lb_down, 4), Name_Shape(lb_up, 3), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rf_up, 5), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rf_down, 6), Name_Shape(rf_up, 5), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rb_up, 7), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rb_down, 8), Name_Shape(rb_up, 7), Hinge, Vec3f(1, 0, 0), offset, true, 0));
 
 
-	configCar->varVehicleConfiguration()->setValue(configData);
+	robot->varVehicleConfiguration()->setValue(configData);
+	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
 
-	configCar->varRotation()->setValue(Vec3f(0,45,0));
-	
+	std::vector<std::string> hinge_DriveObjName(configData.mVehicleJointInfo.size(), "NULL");
+
+	hinge_DriveObjName[0] = std::string("Model::LFU_2");
+	hinge_DriveObjName[1] = std::string("Model::LFD_3");
+	hinge_DriveObjName[2] = std::string("Model::LBU_5");
+	hinge_DriveObjName[3] = std::string("Model::LBD_6");
+	hinge_DriveObjName[4] = std::string("Model::RFU_8");
+	hinge_DriveObjName[5] = std::string("Model::RFD_9");
+	hinge_DriveObjName[6] = std::string("Model::RBU_11");
+	hinge_DriveObjName[7] = std::string("Model::RBD_12");
+
+	hinge_DriveObjName[8] = std::string("Model::LFU_2");
+	hinge_DriveObjName[9] = std::string("Model::LFD_3");
+	hinge_DriveObjName[10] = std::string("Model::LBU_5");
+	hinge_DriveObjName[11] = std::string("Model::LBD_6");
+	hinge_DriveObjName[12] = std::string("Model::RFU_8");
+	hinge_DriveObjName[13] = std::string("Model::RFD_9");
+	hinge_DriveObjName[14] = std::string("Model::RBU_11");
+	hinge_DriveObjName[15] = std::string("Model::RBD_12");
+
+	animDriver->varDriverName()->setValue(hinge_DriveObjName);
+
+	robot->animationPipeline()->pushModule(animDriver);
+	robot->stateTimeStep()->connect(animDriver->inDeltaTime());
+	fbx->stateHierarchicalScene()->connect(animDriver->inHierarchicalScene());
+	robot->stateTopology()->connect(animDriver->inTopology());
+
+
+	auto carDriver = robot->animationPipeline()->findFirstModule<CarDriver<DataType3f>>();
+	robot->animationPipeline()->popModule(carDriver);
+
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varLengthX()->setValue(50);
-	plane->varLengthZ()->setValue(50);
+	plane->varScale()->setValue(Vec3f(20));
 
-	plane->stateTriangleSet()->connect(configCar->inTriangleSet());
-	
-	std::vector<Transform3f> vehicleTransforms;
+	plane->stateTriangleSet()->connect(robot->inTriangleSet());
 
-	vehicleTransforms.push_back(Transform3f(Vec3f(0),Quat1f(0,Vec3f(0,1,0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(3, 0.5,-1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(-3,0.5,-1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(-6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
-
-	configCar->varVehiclesTransform()->setValue(vehicleTransforms);
 
 	return scn;
 }

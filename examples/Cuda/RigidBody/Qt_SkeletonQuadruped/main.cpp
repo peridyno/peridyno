@@ -58,15 +58,15 @@ std::shared_ptr<SceneGraph> creatCar()
 	std::string rb_up = std::string("Model::Robot_GLTF:RB_Up");
 	std::string rb_down = std::string("Model::Robot_GLTF:RB_Down");
 
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(body, 0), fbx->findMeshIDbyName(body), Box, Transform3f(), 100));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_up, 1), fbx->findMeshIDbyName(lf_up), Box, Transform3f(),100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_down, 2), fbx->findMeshIDbyName(lf_down), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_up, 3), fbx->findMeshIDbyName(lb_up), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_down, 4), fbx->findMeshIDbyName(lb_down), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_up, 5), fbx->findMeshIDbyName(rf_up), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_down, 6), fbx->findMeshIDbyName(rf_down), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_up, 7), fbx->findMeshIDbyName(rb_up), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_down, 8), fbx->findMeshIDbyName(rb_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(body, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(body), Box, Transform3f(), 100));//
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_up, 1), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_up), Box, Transform3f(),100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_down, 2), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_up, 3), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_down, 4), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_up, 5), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_down, 6), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_down), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_up, 7), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_up), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_down, 8), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_down), Box, Transform3f(), 100));
 
 	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
 	{
