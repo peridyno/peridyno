@@ -110,16 +110,21 @@ namespace dyno
 		int ny = floor((hi[1] - lo[1]) / distance);
 		int nz = floor((hi[2] - lo[2]) / distance);
 
-		m_cSDF->setSpace(lo - 20 *distance, hi + 20 * distance, nx + 30, ny + 30, nz + 30);
+		uint padding = 5;
+
+		m_cSDF->setSpace(lo - padding *distance, hi + padding * distance, nx + 2 * padding, ny + 2 * padding, nz + 2 * padding);
 		m_cSDF->loadBox(lo, hi, inverted);
 	}
+
 
 	template<typename TDataType>
 	void BoundaryConstraint<TDataType>::setSphere(Coord center, Real r, Real distance, bool inverted)
 	{
 		int nx = floor(2 * r / distance);
 
-		m_cSDF->setSpace(center - r - 5 * distance, center + r + 5 * distance, nx + 10, nx + 10, nx + 10);
+		uint padding = 5;
+
+		m_cSDF->setSpace(center - r - padding * distance, center + r + padding * distance, nx + 2 * padding, nx + 2 * padding, nx + 2 * padding);
 		m_cSDF->loadSphere(center, r, inverted);
 	}
 
@@ -129,7 +134,9 @@ namespace dyno
 		int nx = floor(2 * r / distance);
 		int ny = floor(0.5 * height / distance);
 
-		m_cSDF->setSpace(center - height - r - 5 * distance, center + height  + r + 5 * distance, nx + 10, ny + 10, nx + 10);
+		uint padding = 5;
+
+		m_cSDF->setSpace(center - height - r - padding * distance, center + height  + r + padding * distance, nx + 2 * padding, ny + 2 * padding, nx + 2 * padding);
 		m_cSDF->loadCylinder(center, r, height, axis, inverted);
 	}
 

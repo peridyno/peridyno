@@ -41,7 +41,6 @@ namespace dyno
 		this->stateTimeStep()->connect(integrator->inTimeStep());
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
-		this->stateForceDensity()->connect(integrator->inForceDensity());
 		this->animationPipeline()->pushModule(integrator);
 
 		//neighbor query
@@ -210,7 +209,6 @@ namespace dyno
 		{
 			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
 			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-			DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
 			int num = points.size();
 
 			new_pos.assign(points, num, offset);
@@ -244,13 +242,11 @@ namespace dyno
 		{
 			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
 			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-			DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
-			
+
 			int num = points.size();
 
 			points.assign(new_pos, num, 0, offset);
 			vels.assign(new_vel, num, 0, offset);
-			forces.assign(new_force, num, 0, offset);
 
 			offset += num;
 		}

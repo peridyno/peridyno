@@ -50,6 +50,7 @@ namespace dyno
 		void stopUpdatingGraphicsContext();
 
 		void setTotalFrames(int num);
+		inline int getTotalFrames() { return mTotalFrame; }
 
 		int getCurrentFrameNum();
 

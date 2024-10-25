@@ -35,7 +35,6 @@ namespace dyno
 		this->stateTimeStep()->connect(integrator->inTimeStep());
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
-		this->stateForce()->connect(integrator->inForceDensity());
 		this->animationPipeline()->pushModule(integrator);
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
@@ -56,6 +55,7 @@ namespace dyno
 		viscosity->varViscosity()->setValue(Real(1.0));
 		this->stateTimeStep()->connect(viscosity->inTimeStep());
 		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
+		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
 		this->statePosition()->connect(viscosity->inPosition());
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -88,26 +88,20 @@ namespace dyno
 			{
 				DArray<Coord> pBuf;
 				DArray<Coord> vBuf;
-				DArray<Coord> fBuf;
 
 				if (curNum > 0)
 				{
 					pBuf.assign(this->statePosition()->getData());
 					vBuf.assign(this->stateVelocity()->getData());
-					fBuf.assign(this->stateForce()->getData());
 				}
 
 				this->statePosition()->resize(totalNum);
 				this->stateVelocity()->resize(totalNum);
 
-				//Currently, the force is simply set to zero
-				this->stateForce()->resize(totalNum);
-				this->stateForce()->reset();
-
 				DArray<Coord>& new_pos = this->statePosition()->getData();
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();
 
-				//Assign attributes from intial states
+				//Assign attributes from initial states
 				if (curNum > 0)
 				{
 					new_pos.assign(pBuf, curNum, 0, 0);
@@ -115,7 +109,6 @@ namespace dyno
 
 					pBuf.clear();
 					vBuf.clear();
-					fBuf.clear();
 				}
 
 				//Assign attributes from emitters
@@ -141,12 +134,11 @@ namespace dyno
 		{
 			auto& pos = this->statePosition()->getData();
 			auto& vel = this->stateVelocity()->getData();
-			auto& force = this->stateForce()->getData();
 
 			DArray<OcKey> morton(pos.size());
 
 			ParticleSystemHelper<TDataType>::calculateMortonCode(morton, pos, Real(0.005));
-			ParticleSystemHelper<TDataType>::reorderParticles(pos, vel, force, morton);
+			ParticleSystemHelper<TDataType>::reorderParticles(pos, vel, morton);
 
 			morton.clear();
 		}
@@ -168,14 +160,11 @@ namespace dyno
 
 			this->statePosition()->resize(totalNum);
 			this->stateVelocity()->resize(totalNum);
-			this->stateForce()->resize(totalNum);
-			this->stateForce()->reset();
 
 			if (totalNum > 0)
 			{
 				DArray<Coord>& new_pos = this->statePosition()->getData();
 				DArray<Coord>& new_vel = this->stateVelocity()->getData();
-				DArray<Coord>& new_force = this->stateForce()->getData();
 
 				int offset = 0;
 				for (int i = 0; i < initials.size(); i++)
@@ -197,7 +186,6 @@ namespace dyno
 		else {
 			this->statePosition()->resize(0);
 			this->stateVelocity()->resize(0);
-			this->stateForce()->resize(0);
 		}
 	}
 

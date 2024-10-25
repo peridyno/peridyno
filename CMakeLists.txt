@@ -174,10 +174,18 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 		add_subdirectory(plugins)
 	endif()
 
+	# Add mocro definitions for GUIs
+	set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
+	set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
+
 	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
+		set(QT_GUI_SUPPORTED "QT_GUI_SUPPORTED")
 	endif()
 
+	if(PERIDYNO_WT_GUI)
+		set(WT_GUI_SUPPORTED "WT_GUI_SUPPORTED")
+	endif()
 
 	option(PERIDYNO_EXAMPLE "Enable building examples" ON)
 	if(PERIDYNO_EXAMPLE)

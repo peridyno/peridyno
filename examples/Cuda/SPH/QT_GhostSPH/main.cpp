@@ -71,9 +71,12 @@ std::shared_ptr<SceneGraph> createScene()
 	pointset_1->statePointSet()->connect(ghost2->inPoints());
 	pointset_1->statePointNormal()->connect(ghost2->stateNormal());
 
+//	auto ghost2 = scn->addNode(createGhostParticles());
+
+
 	//Create a cube
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0.0, 0.15, 0.0));
+	cube->varLocation()->setValue(Vec3f(0.0, 0.3, 0.0));
 	cube->varLength()->setValue(Vec3f(0.2, 0.2, 0.2));
 	cube->graphicsPipeline()->disable();
 
@@ -89,7 +92,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sampler->statePointSet()->promoteOuput()->connect(fluidParticles->inPoints());
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
-	fluidParticles->connect(incompressibleFluid->importFluidParticles());
+	fluidParticles->connect(incompressibleFluid->importInitialStates());
 	ghost2->connect(incompressibleFluid->importBoundaryParticles());
 
 	{
@@ -97,20 +100,20 @@ std::shared_ptr<SceneGraph> createScene()
 		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 		colorMapper->varMax()->setValue(5.0f);
 
-		fluidParticles->stateVelocity()->connect(calculateNorm->inVec());
+		incompressibleFluid->stateVelocity()->connect(calculateNorm->inVec());
 		calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
-		fluidParticles->graphicsPipeline()->pushModule(calculateNorm);
-		fluidParticles->graphicsPipeline()->pushModule(colorMapper);
+		incompressibleFluid->graphicsPipeline()->pushModule(calculateNorm);
+		incompressibleFluid->graphicsPipeline()->pushModule(colorMapper);
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->setColor(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
-		fluidParticles->statePointSet()->connect(ptRender->inPointSet());
+		incompressibleFluid->statePointSet()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 
-		fluidParticles->graphicsPipeline()->pushModule(ptRender);
+		incompressibleFluid->graphicsPipeline()->pushModule(ptRender);
 	}
 
 

@@ -11,6 +11,8 @@ namespace dyno
 		this->varIterationNumber()->setValue(3);
 		this->varRestDensity()->setValue(Real(1000));
 
+		this->inAttribute()->tagOptional(true);
+
 		mSummation = std::make_shared<SummationDensity<TDataType>>();
 
 		this->inSmoothingLength()->connect(mSummation->inSmoothingLength());
@@ -159,6 +161,23 @@ namespace dyno
 		posArr[pId] += dPos[pId];
 	}
 
+	template <typename Real, typename Coord>
+	__global__ void IDS_UpdatePosition(
+		DArray<Coord> posArr,
+		DArray<Coord> velArr,
+		DArray<Coord> dPos,
+		DArray<Attribute> attributes,
+		Real dt)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= posArr.size()) return;
+
+		if (attributes[pId].isDynamic())
+		{
+			posArr[pId] += dPos[pId];
+		}
+	}
+
 	template<typename TDataType>
 	void IterativeDensitySolver<TDataType>::compute()
 	{
@@ -235,12 +254,25 @@ namespace dyno
 			rho_0,
 			dt);
 
-		cuExecute(num, 
-			IDS_UpdatePosition,
-			this->inPosition()->getData(),
-			this->inVelocity()->getData(),
-			mDeltaPos,
-			dt);
+		if (this->inAttribute()->isEmpty())
+		{
+			cuExecute(num,
+				IDS_UpdatePosition,
+				this->inPosition()->getData(),
+				this->inVelocity()->getData(),
+				mDeltaPos,
+				dt);
+		}
+		else
+		{
+			cuExecute(num,
+				IDS_UpdatePosition,
+				this->inPosition()->getData(),
+				this->inVelocity()->getData(),
+				mDeltaPos,
+				this->inAttribute()->constData(),
+				dt);
+		}
 	}
 
 	template <typename Real, typename Coord>

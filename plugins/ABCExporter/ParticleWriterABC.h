@@ -36,7 +36,7 @@ namespace dyno
 	public:
 		DEF_INSTANCE_IN(PointSet<TDataType>, PointSet, "");
 		DEF_ARRAY_IN(Real, Color, DeviceType::GPU, "");
-
+		DEF_VAR(int, Interval, 8.0f, "Output interval frame number");
 	private:
 		int m_output_index = 0;
 		int time_idx = 0;

@@ -9,7 +9,7 @@ namespace dyno
 
 	template<typename TDataType>
 	DamplingParticleIntegrator<TDataType>::DamplingParticleIntegrator()
-		:NumericalIntegrator()
+		:ComputeModule()
 	{
 		this->inAttribute()->tagOptional(true);
 	}
@@ -17,8 +17,6 @@ namespace dyno
 	template<typename TDataType>
 	void DamplingParticleIntegrator<TDataType>::begin()
 	{
-		if (!this->inPosition()->isEmpty())
-			this->inForceDensity()->getDataPtr()->reset();
 	}
 
 
@@ -47,16 +45,15 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
 		DArray<Coord> vel,
-		DArray<Coord> forceDensity,
 		DArray<Coord> contactForce,
 		DArray<Coord> Norm,
 		Coord gravity,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= forceDensity.size()) return;
+		if (pId >= vel.size()) return;
 
-		vel[pId] += dt * (forceDensity[pId] + gravity);
+		vel[pId] += dt * (gravity);
 	}
 
 
@@ -65,7 +62,6 @@ namespace dyno
 	__global__ void K_UpdateVelocity(
 		DArray<Coord> vel,
 		DArray<Coord> pos,
-		DArray<Coord> forceDensity,
 		DArray<Coord> contactForce,
 		DArray<Coord> Norm,
 		DArray<Attribute> atts,
@@ -73,13 +69,13 @@ namespace dyno
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= forceDensity.size()) return;
+		if (pId >= vel.size()) return;
 
 		Attribute att = atts[pId];
 
 		if (att.isDynamic())
 		{
-				vel[pId] += dt * (forceDensity[pId] + gravity);	
+				vel[pId] += dt * (gravity);	
 		}
 	}
 
@@ -88,7 +84,6 @@ namespace dyno
 		DArray<Coord> Norm,
 		DArray<Coord> Force,
 		DArray<Coord> Velocity,
-		DArray<Coord> ForceDensity,
 		Real mu,
 		Coord g,
 		Real dt)
@@ -96,7 +91,7 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= Norm.size()) return;
 		
-		Coord f = Force[pId] + g + ForceDensity[pId];
+		Coord f = Force[pId] + g;
 		if (f.dot(Norm[pId]) <= EPSILON)//enforced
 		{
 			Coord f_n = f.dot(Norm[pId]) * Norm[pId];
@@ -121,9 +116,7 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void K_Friction(
 		DArray<Coord> Norm,
-		DArray<Coord> Force,
 		DArray<Coord> Velocity,
-		DArray<Coord> ForceDensity,
 		DArray<Attribute> atts,
 		Real mu,
 		Coord g,
@@ -137,7 +130,7 @@ namespace dyno
 		if (att.isDynamic())
 		{
 
-			Coord f = Force[pId] + g + ForceDensity[pId];
+			Coord f = g;
 			if (f.dot(Norm[pId]) <= EPSILON)//enforced
 			{
 				Coord f_n = f.dot(Norm[pId]) * Norm[pId];
@@ -178,7 +171,6 @@ namespace dyno
 			cuExecute(total_num,
 				K_UpdateVelocity,
 				this->inVelocity()->getData(),
-				this->inForceDensity()->getData(),
 				this->inContactForce()->getData(),
 				this->inNorm()->getData(),
 				gravity,
@@ -191,7 +183,6 @@ namespace dyno
 					this->inNorm()->getData(),
 					this->inContactForce()->getData(),
 					this->inVelocity()->getData(),
-					this->inForceDensity()->getData(),
 					this->inMu()->getData(),
 					gravity,
 					dt);
@@ -209,7 +200,6 @@ namespace dyno
 				K_UpdateVelocity,
 				this->inVelocity()->getData(),
 				this->inPosition()->getData(),
-				this->inForceDensity()->getData(),
 				this->inContactForce()->getData(),
 				this->inNorm()->getData(),
 				this->inAttribute()->getData(),
@@ -221,9 +211,7 @@ namespace dyno
 				cuExecute(total_num,
 					K_Friction,
 					this->inNorm()->getData(),
-					this->inContactForce()->getData(),
 					this->inVelocity()->getData(),
-					this->inForceDensity()->getData(),
 					this->inAttribute()->getData(),
 					this->inMu()->getData(),
 					gravity,
@@ -313,7 +301,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void DamplingParticleIntegrator<TDataType>::updateImpl()
+	void DamplingParticleIntegrator<TDataType>::compute()
 	{
 		this->begin();
 		this->integrate();

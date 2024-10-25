@@ -105,7 +105,8 @@ std::shared_ptr<SceneGraph> creatScene();
 void importOtherModel(std::shared_ptr<SceneGraph> scn);
 
 std::shared_ptr<SceneGraph> creatScene()
-{	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+{
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 
 	//***************************************Scene Setting***************************************//
@@ -117,13 +118,13 @@ std::shared_ptr<SceneGraph> creatScene()
 
 
 	// Create Var
-	Vec3f velocity = Vec3f(0,0,6);
+	Vec3f velocity = Vec3f(0, 0, 6);
 	Color color = Color(1, 1, 1);
 
 	Vec3f LocationBody = Vec3f(0, 0.01, -1);
 
-	Vec3f anglurVel = Vec3f(100,0,0); 
-	Vec3f scale = Vec3f(0.4,0.4,0.4);
+	Vec3f anglurVel = Vec3f(100, 0, 0);
+	Vec3f scale = Vec3f(0.4, 0.4, 0.4);
 
 
 
@@ -147,7 +148,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	wheelLocation.push_back(Vec3f(-0.17, 0.1, 0.36) + LocationBody);
 	wheelLocation.push_back(Vec3f(-0.17, 0.1, -0.3) + LocationBody);
 
-	for (int i = 0; i < 4; i++) 
+	for (int i = 0; i < 4; i++)
 	{
 		auto ObjWheel = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
 		ObjWheel->varFileName()->setValue(getAssetPath() + wheelPath[i]);
@@ -297,7 +298,7 @@ void importOtherModel(std::shared_ptr<SceneGraph> scn)
 	ObjRoadText->varLocation()->setValue(LocationRoad);
 	auto glRoadText = ObjRoadText->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	glRoadText->setColor(Color(4, 4, 4));
-	
+
 }
 
 int main()

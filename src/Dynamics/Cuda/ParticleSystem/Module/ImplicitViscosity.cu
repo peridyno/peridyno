@@ -3,21 +3,22 @@
 
 namespace dyno
 {
-//	IMPLEMENT_TCLASS(ImplicitViscosity, TDataType)
-
-	template<typename Real>
-	__device__ Real IV_Weight(const Real r, const Real h)
+	template<typename TDataType>
+	ImplicitViscosity<TDataType>::ImplicitViscosity()
+		:ParticleApproximation<TDataType>()
 	{
-		Real q = r / h;
-		if (q > 1.0f) return 0.0;
-		else {
-			const Real d = 1.0f - q;
-			const Real hh = h*h;
-			return 45.0f / (13.0f * (Real)M_PI * hh *h) *d;
-		}
+		this->varKernelType()->setCurrentKey(EKernelType::KT_Smooth);
+		this->varViscosity()->setValue(Real(0.05));
 	}
 
-	template<typename Real, typename Coord>
+	template<typename TDataType>
+	ImplicitViscosity<TDataType>::~ImplicitViscosity()
+	{
+		mVelOld.clear();
+		mVelBuf.clear();
+	}
+
+	template<typename Real, typename Coord, typename Kernel>
 	__global__ void IV_ApplyViscosity(
 		DArray<Coord> velNew,
 		DArray<Coord> posArr,
@@ -26,7 +27,9 @@ namespace dyno
 		DArrayList<int> neighbors,
 		Real viscosity,
 		Real smoothingLength,
-		Real dt)
+		Real dt,
+		Kernel weight,
+		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velNew.size()) return;
@@ -45,38 +48,24 @@ namespace dyno
 
 			if (r > EPSILON)
 			{
-				Real weight = IV_Weight(r, smoothingLength);
-				totalWeight += weight;
-				dv_i += weight * velBuf[j];
+				Real w = weight(r, smoothingLength, scale);
+				totalWeight += w;
+				dv_i += w * velBuf[j];
 			}
 		}
 
-		Real b = dt*viscosity / smoothingLength;
+		Real b = dt * viscosity / smoothingLength;
 		b = totalWeight < EPSILON ? 0.0f : b;
 
 		totalWeight = totalWeight < EPSILON ? 1.0f : totalWeight;
 
 		dv_i /= totalWeight;
 
-		velNew[pId] = velOld[pId] / (1.0f + b) + dv_i*b / (1.0f + b);
+		velNew[pId] = velOld[pId] / (1.0f + b) + dv_i * b / (1.0f + b);
 	}
 
 	template<typename TDataType>
-	ImplicitViscosity<TDataType>::ImplicitViscosity()
-		:ConstraintModule()
-	{
-		this->varViscosity()->setValue(Real(0.05));
-	}
-
-	template<typename TDataType>
-	ImplicitViscosity<TDataType>::~ImplicitViscosity()
-	{
-		mVelOld.clear();
-		mVelBuf.clear();
-	}
-
-	template<typename TDataType>
-	void ImplicitViscosity<TDataType>::constrain()
+	void ImplicitViscosity<TDataType>::compute()
 	{
 		auto& poss = this->inPosition()->getData();
 		auto& vels = this->inVelocity()->getData();
@@ -98,7 +87,7 @@ namespace dyno
 		for (int t = 0; t < iterNum; t++)
 		{
 			mVelBuf.assign(vels);
-			cuExecute(num,
+			cuZerothOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 				IV_ApplyViscosity,
 				vels,
 				poss,

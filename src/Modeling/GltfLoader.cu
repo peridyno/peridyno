@@ -656,6 +656,8 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateStates()
 	{
+		ParametricModel<TDataType>::updateStates();
+
 		if (joint_output.empty() || !this->varImportAnimation()->getValue() || (this->joint_R_f_anim.empty()&&this->joint_T_f_anim.empty()&&this->joint_S_f_anim.empty()))
 			return;
 

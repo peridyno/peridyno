@@ -35,7 +35,6 @@ namespace dyno
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
 		this->stateAttribute()->connect(integrator->inAttribute());
-		this->stateForce()->connect(integrator->inForceDensity());
 		this->stateDynamicForce()->connect(integrator->inDynamicForce());
 		this->stateNorm()->connect(integrator->inNorm());
 		integrator->inMu()->setValue(0.00);
@@ -117,12 +116,11 @@ namespace dyno
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
 		this->stateAttribute()->connect(integrator->inAttribute());
-		this->stateForce()->connect(integrator->inForceDensity());
-		this->stateDynamicForce()->connect(integrator->inDynamicForce());
 		this->stateNorm()->connect(integrator->inNorm());
 		integrator->inMu()->setValue(0.00);
 		integrator->inAirDisspation()->setValue(0.999);
 		this->stateContactForce()->connect(integrator->inContactForce());
+		this->stateDynamicForce()->connect(integrator->inDynamicForce());
 		this->animationPipeline()->pushModule(integrator);
 
 		auto hyperElasticity = std::make_shared<CoSemiImplicitHyperelasticitySolver<TDataType>>();

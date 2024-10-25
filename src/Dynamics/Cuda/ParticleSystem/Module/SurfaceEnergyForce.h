@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Xiaowei He
+ * Copyright 2017-2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,42 +16,46 @@
 #pragma once
 #include "ParticleApproximation.h"
 
-namespace dyno 
-{
+namespace dyno {
+
 	/**
-	 * @brief This class implements an implicit solver for artificial viscosity based on the XSPH method.
+	 * @brief An implementation of the energy-based surface model proposed by He et al.[2024].
+	 * 		  Refer to "Robust Simulation of Sparsely Sampled Thin Features in SPH-Based Free Surface Flows",  ACM TOG 2014, for more details
 	 */
 	template<typename TDataType>
-	class ImplicitViscosity : public ParticleApproximation<TDataType>
+	class SurfaceEnergyForce : public ParticleApproximation<TDataType>
 	{
-		DECLARE_TCLASS(ImplicitViscosity, TDataType)
+		DECLARE_TCLASS(SurfaceEnergyForce, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ImplicitViscosity();
-		~ImplicitViscosity() override;
+		SurfaceEnergyForce();
+		~SurfaceEnergyForce() override;
 		
+		DEF_VAR(Real, Kappa, Real(1), "Surface tension coefficient");
+
+		DEF_VAR(Real, RestDensity, Real(1000), "Rest density");
+
 	public:
-		DEF_VAR(Real, Viscosity, 0.05, "");
-
-		DEF_VAR(int, InterationNumber, 3, "");
-
-		DEF_VAR_IN(Real, TimeStep, "");
+		DEF_VAR_IN(Real, TimeStep, "Time step size!");
 
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");
 
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
+		/**
+		 * @brief Neighboring particles
+		 *
+		 */
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
 	public:
 		void compute() override;
 
 	private:
-		DArray<Coord> mVelOld;
-		DArray<Coord> mVelBuf;
+		DArray<Real> mFreeSurfaceEnergy;
 	};
 
-	IMPLEMENT_TCLASS(ImplicitViscosity, TDataType)
+	IMPLEMENT_TCLASS(SurfaceEnergyForce, TDataType);
 }

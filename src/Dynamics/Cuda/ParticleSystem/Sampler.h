@@ -31,6 +31,8 @@ namespace dyno
 
 		Sampler();
 
+		std::string getNodeType() override { return "Sampler"; }
+
 	public:
 		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
 	};

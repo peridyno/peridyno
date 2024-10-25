@@ -29,12 +29,14 @@ namespace dyno
 	template<typename TDataType>
 	void ParticleWriterABC<TDataType>::output()
 	{
-		if (time_idx % 8 != 0)
+		if (time_idx % this->varInterval()->getValue() != 0)
 		{
 			time_idx++;
 			return;
 		}
 		time_idx++;
+
+		std::cout << "............Writer .abc file............" << std::endl;
 
 		auto& inPos = this->inPointSet()->getDataPtr()->getPoints();
 		auto& inColor = this->inColor()->getData();

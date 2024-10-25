@@ -1,5 +1,5 @@
 #include <GlfwApp.h>
-
+#include <QtGUI/QtApp.h>
 #include <SceneGraph.h>
 #include <Log.h>
 
@@ -62,14 +62,12 @@ std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 
 	ghost->statePosition()->resize(num);
 	ghost->stateVelocity()->resize(num);
-	ghost->stateForce()->resize(num);
 
 	ghost->stateNormal()->resize(num);
 	ghost->stateAttribute()->resize(num);
 
 	ghost->statePosition()->assign(host_pos);
 	ghost->stateVelocity()->assign(host_vel);
-	ghost->stateForce()->assign(host_force);
 	ghost->stateNormal()->assign(host_normal);
 	ghost->stateAttribute()->assign(host_attribute);
 
@@ -98,7 +96,8 @@ std::shared_ptr<SceneGraph> createScene()
 	auto ghost = scn->addNode(createGhostParticles());
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
-	fluid->connect(incompressibleFluid->importFluidParticles());
+	incompressibleFluid->setDt(0.001f);
+	fluid->connect(incompressibleFluid->importInitialStates());
 	ghost->connect(incompressibleFluid->importBoundaryParticles());
 // 	incompressibleFluid->setFluidParticles(fluid);
 // 	incompressibleFluid->setBoundaryParticles(ghost);
@@ -112,27 +111,20 @@ std::shared_ptr<SceneGraph> createScene()
 		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 		colorMapper->varMax()->setValue(5.0f);
 
-		fluid->stateVelocity()->connect(calculateNorm->inVec());
+		incompressibleFluid->stateVelocity()->connect(calculateNorm->inVec());
 		calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
-		fluid->graphicsPipeline()->pushModule(calculateNorm);
-		fluid->graphicsPipeline()->pushModule(colorMapper);
+		incompressibleFluid->graphicsPipeline()->pushModule(calculateNorm);
+		incompressibleFluid->graphicsPipeline()->pushModule(colorMapper);
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->setColor(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
-		fluid->statePointSet()->connect(ptRender->inPointSet());
+		incompressibleFluid->statePointSet()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 
-		fluid->graphicsPipeline()->pushModule(ptRender);
-
-		// A simple color bar widget for node
-		auto colorBar = std::make_shared<ImColorbar>();
-		colorBar->varMax()->setValue(5.0f);
-		calculateNorm->outNorm()->connect(colorBar->inScalar());
-		// add the widget to app
-		fluid->graphicsPipeline()->pushModule(colorBar);
+		incompressibleFluid->graphicsPipeline()->pushModule(ptRender);
 	}
 	
 	{
@@ -150,7 +142,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp app;
+	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
 	app.mainLoop();

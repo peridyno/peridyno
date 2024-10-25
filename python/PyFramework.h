@@ -10,6 +10,7 @@
 #include "Module/GraphicsPipeline.h"
 #include "Module/MouseInputModule.h"
 #include "Module/OutputModule.h"
+#include "Module/ConstraintModule.h"
 
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"
@@ -91,7 +92,6 @@ using Log = dyno::Log;
 //new
 using Color = dyno::Color;
 using ConstraintModule = dyno::ConstraintModule;
-using NumericalIntegrator = dyno::NumericalIntegrator;
 using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
 using GroupModule = dyno::GroupModule;

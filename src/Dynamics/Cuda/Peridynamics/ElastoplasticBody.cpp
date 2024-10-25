@@ -33,7 +33,6 @@ namespace dyno
 		this->stateTimeStep()->connect(m_integrator->inTimeStep());
 		this->statePosition()->connect(m_integrator->inPosition());
 		this->stateVelocity()->connect(m_integrator->inVelocity());
-		this->stateForce()->connect(m_integrator->inForceDensity());
 		this->animationPipeline()->pushModule(m_integrator);
 		
 		auto m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();

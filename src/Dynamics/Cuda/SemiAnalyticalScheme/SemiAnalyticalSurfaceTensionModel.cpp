@@ -27,7 +27,6 @@ namespace dyno
 		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
 		this->inVelocity()->connect(integrator->inVelocity());
-		this->inForceDensity()->connect(integrator->inForceDensity());
 		this->pushModule(integrator);
 
 		//neighbor query

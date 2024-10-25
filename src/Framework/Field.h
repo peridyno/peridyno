@@ -167,11 +167,11 @@ namespace dyno {
 		void clear();
 
 		void assign(const T& val);
-		void assign(std::vector<T>& vals);
+		void assign(const std::vector<T>& vals);
 #ifndef NO_BACKEND
-		void assign(DArray<T>& vals);
+		void assign(const DArray<T>& vals);
 #endif
-		void assign(CArray<T>& vals);
+		void assign(const CArray<T>& vals);
 
 		bool isEmpty() override {
 			return this->size() == 0;
@@ -215,7 +215,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray<T, deviceType>::assign(std::vector<T>& vals)
+	void FArray<T, deviceType>::assign(const std::vector<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -229,7 +229,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray<T, deviceType>::assign(CArray<T>& vals)
+	void FArray<T, deviceType>::assign(const CArray<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -244,7 +244,7 @@ namespace dyno {
 
 #ifndef NO_BACKEND
 	template<typename T, DeviceType deviceType>
-	void FArray<T, deviceType>::assign(DArray<T>& vals)
+	void FArray<T, deviceType>::assign(const DArray<T>& vals)
 	{
 		std::shared_ptr<Array<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -316,8 +316,8 @@ namespace dyno {
 
 		void reset();
 
-		void assign(CArray2D<T>& vals);
-		void assign(DArray2D<T>& vals);
+		void assign(const CArray2D<T>& vals);
+		void assign(const DArray2D<T>& vals);
 
 		bool isEmpty() override {
 			return this->constDataPtr() == nullptr;
@@ -334,7 +334,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray2D<T, deviceType>::assign(DArray2D<T>& vals)
+	void FArray2D<T, deviceType>::assign(const DArray2D<T>& vals)
 	{
 		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -348,7 +348,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray2D<T, deviceType>::assign(CArray2D<T>& vals)
+	void FArray2D<T, deviceType>::assign(const CArray2D<T>& vals)
 	{
 		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -413,8 +413,8 @@ namespace dyno {
 
 		void reset();
 
-		void assign(CArray3D<T>& vals);
-		void assign(DArray3D<T>& vals);
+		void assign(const CArray3D<T>& vals);
+		void assign(const DArray3D<T>& vals);
 
 		bool isEmpty() override {
 			return this->constDataPtr() == nullptr;
@@ -431,7 +431,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray3D<T, deviceType>::assign(DArray3D<T>& vals)
+	void FArray3D<T, deviceType>::assign(const DArray3D<T>& vals)
 	{
 		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
 
@@ -444,7 +444,7 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
-	void FArray3D<T, deviceType>::assign(CArray3D<T>& vals)
+	void FArray3D<T, deviceType>::assign(const CArray3D<T>& vals)
 	{
 		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
 

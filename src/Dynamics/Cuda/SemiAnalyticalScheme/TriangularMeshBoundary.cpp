@@ -127,7 +127,6 @@ namespace dyno
 		{
 			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
 			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-			DArray<Coord>& forces = particleSystems[i]->stateForce()->getData();
 
 			int num = points.size();
 

@@ -58,9 +58,6 @@ namespace dyno
 		this->stateVelocity()->resize(num);
 		this->stateVelocity()->reset();
 
-		this->stateForce()->resize(num);
-		this->stateForce()->reset();
-
 		std::vector<Attribute> host_attribute;
 		Attribute attri;
 		attri.setRigid();

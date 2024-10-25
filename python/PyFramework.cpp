@@ -425,20 +425,6 @@ void pybind_framework(py::module& m)
 		.def("module_list", &GroupModule::moduleList, py::return_value_policy::reference)
 		.def("set_parent_node", &GroupModule::setParentNode);
 
-	py::class_<NumericalIntegrator, Module, std::shared_ptr<NumericalIntegrator>>(m, "NumericalIntegrator")
-		.def(py::init<>()) // 绑定默认构造函数
-		.def("begin", &NumericalIntegrator::begin) // 绑定 begin 方法
-		.def("end", &NumericalIntegrator::end) // 绑定 end 方法
-		.def("integrate", &NumericalIntegrator::integrate) // 绑定 integrate 方法
-		.def("set_mass_id", &NumericalIntegrator::setMassID) // 绑定 setMassID 方法
-		.def("set_force_id", &NumericalIntegrator::setForceID) // 绑定 setForceID 方法
-		.def("set_torque_id", &NumericalIntegrator::setTorqueID) // 绑定 setTorqueID 方法
-		.def("set_position_id", &NumericalIntegrator::setPositionID) // 绑定 setPositionID 方法
-		.def("set_velocity_id", &NumericalIntegrator::setVelocityID) // 绑定 setVelocityID 方法
-		.def("set_position_pre_id", &NumericalIntegrator::setPositionPreID) // 绑定 setPositionPreID 方法
-		.def("set_velocity_pre_id", &NumericalIntegrator::setVelocityPreID) // 绑定 setVelocityPreID 方法
-		.def("get_module_type", &NumericalIntegrator::getModuleType); // 绑定 getModuleType 方法
-
 	py::class_<TopologyMappingdyno, Module, std::shared_ptr< TopologyMappingdyno>>(m, "TopologyMappingdyno");
 
 	py::enum_<typename dyno::PButtonType>(m, "PButtonType")

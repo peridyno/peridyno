@@ -5,41 +5,25 @@
 
 namespace dyno
 {
-	//IMPLEMENT_TCLASS(ParticleIntegrator, TDataType)
+	IMPLEMENT_TCLASS(ParticleIntegrator, TDataType)
 
 	template<typename TDataType>
 	ParticleIntegrator<TDataType>::ParticleIntegrator()
-		: NumericalIntegrator()
+		: ComputeModule()
 	{
 		this->inAttribute()->tagOptional(true);
-	}
-
-	template<typename TDataType>
-	void ParticleIntegrator<TDataType>::begin()
-	{
-		if (!this->inPosition()->isEmpty())
-		{
-			this->inForceDensity()->getDataPtr()->reset();
-		}
-	}
-
-	template<typename TDataType>
-	void ParticleIntegrator<TDataType>::end()
-	{
-
 	}
 
 	template<typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
 		DArray<Coord> vel,
-		DArray<Coord> forceDensity,
 		Coord gravity,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= forceDensity.size()) return;
+		if (pId >= vel.size()) return;
 
-		vel[pId] += dt * (forceDensity[pId] + gravity);
+		vel[pId] += dt * (gravity);
 	}
 
 
@@ -48,19 +32,18 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void K_UpdateVelocity(
 		DArray<Coord> vel,
-		DArray<Coord> forceDensity,
 		DArray<Attribute> atts,
 		Coord gravity,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= forceDensity.size()) return;
+		if (pId >= vel.size()) return;
 
 		Attribute att = atts[pId];
 
 		if (att.isDynamic())
 		{
-			vel[pId] += dt * (forceDensity[pId] + gravity);
+			vel[pId] += dt * (gravity);
 		}
 	}
 
@@ -82,7 +65,6 @@ namespace dyno
 			cuExecute(total_num,
 				K_UpdateVelocity,
 				this->inVelocity()->getData(),
-				this->inForceDensity()->getData(),
 				gravity,
 				dt);
 		}
@@ -91,7 +73,6 @@ namespace dyno
 			cuExecute(total_num,
 				K_UpdateVelocity,
 				this->inVelocity()->getData(),
-				this->inForceDensity()->getData(),
 				this->inAttribute()->getData(),
 				gravity,
 				dt);
@@ -162,27 +143,11 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool ParticleIntegrator<TDataType>::integrate()
+	void ParticleIntegrator<TDataType>::compute()
 	{
-		if (!this->inPosition()->isEmpty())
-		{
-			updatePosition();
-			updateVelocity();
-		}
-
-		return true;
+		updatePosition();
+		updateVelocity();
 	}
-
-
-	template<typename TDataType>
-	void ParticleIntegrator<TDataType>::updateImpl()
-	{
-		this->begin();
-		this->integrate();
-		this->end();
-	}
-
-
 
 	DEFINE_CLASS(ParticleIntegrator);
 }
