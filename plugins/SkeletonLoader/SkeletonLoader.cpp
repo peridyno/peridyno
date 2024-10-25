@@ -1,6 +1,10 @@
 #include "SkeletonLoader.h"
+#include "GLPhotorealisticRender.h"
+#include <stb/stb_image.h>
+#define STB_IMAGE_IMPLEMENTATION
 
 #define AXIS 0
+
 
 namespace dyno
 {
@@ -8,16 +12,28 @@ namespace dyno
 
 	template<typename TDataType>
 	SkeletonLoader<TDataType>::SkeletonLoader()
-		: Node()
+		: ParametricModel<TDataType>()
 	{
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
 		this->stateTopology()->setDataPtr(defaultTopo);
+		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
+		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
+
+		auto texmeshRender = std::make_shared<GLPhotorealisticRender>();
+		this->stateTextureMesh()->connect(texmeshRender->inTextureMesh());
+		this->graphicsPipeline()->pushModule(texmeshRender);
+
+		this->stateHierarchicalScene()->setDataPtr(std::make_shared<HierarchicalScene>());
 	}
+
 
 	template<typename TDataType>
 	SkeletonLoader<TDataType>::~SkeletonLoader()
 	{
-		
+		mMeshs.clear();
+		mBones.clear();
+		this->stateHierarchicalScene()->getDataPtr()->clear();
 	}
 
 	template<typename TDataType>
@@ -33,362 +49,499 @@ namespace dyno
 		auto* content = new ofbx::u8[file_size];
 		fread(content, 1, file_size, fp);
 
-		this->g_scene = ofbx::load((ofbx::u8*)content, file_size, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
+		this->mFbxScene = ofbx::load((ofbx::u8*)content, file_size, (ofbx::u64)ofbx::LoadFlags::NONE);
+
+		float mFbxScale = this->mFbxScene->getGlobalSettings()->UnitScaleFactor;
+
+
+
+		int objectCount = mFbxScene->getAllObjectCount();
+		int meshCount = mFbxScene->getMeshCount();
+		int geoCount = mFbxScene->getGeometryCount();
+		int animationStackCount = mFbxScene->getAnimationStackCount();
+		int embeddedDataCount = mFbxScene->getEmbeddedDataCount();
+
+
+
+
+		printf("objectCount : %d \n", objectCount);
+		printf("meshCount : %d \n", meshCount);
+		printf("geoCount : %d \n", geoCount);
+		printf("animationStackCount : %d \n", animationStackCount);
+		printf("embeddedDataCount : %d \n", embeddedDataCount);
+
+
+		printf("meshCount : %d\n",meshCount);
+		for (int id = 0; id < meshCount; id++)
+		{
+			printf("*****************:\n");
+			std::cout << mFbxScene->getMesh(id)->name << std::endl;
+
+			const ofbx::Mesh* currentMesh = (const ofbx::Mesh*)mFbxScene->getMesh(id);
+			std:: cout<< "Mesh Name :  " << currentMesh->name << "\n";
+			
+
+			std::shared_ptr<FbxMeshInfo> meshInfo = std::make_shared<FbxMeshInfo>();
+
+			auto geoMatrix = currentMesh->getGeometricMatrix();
+			auto gloTf = currentMesh->getGlobalTransform();
+			auto pivot = currentMesh->getRotationPivot();
+			auto locTf = currentMesh->getLocalTransform();
+			auto locR = currentMesh->getLocalRotation();
+			auto locS = currentMesh->getLocalScaling();
+			auto locT = currentMesh->getLocalTranslation();
+			auto preR = currentMesh->getPreRotation();
+
+
+			meshInfo->localTranslation = Vec3f(locT.x, locT.y, locT.z);
+			meshInfo->localRotation = Vec3f(locR.x, locR.y, locR.z);
+			meshInfo->localScale = Vec3f(locS.x, locS.y, locS.z);
+			meshInfo->preRotation = Vec3f(preR.x, preR.y, preR.z);
+			meshInfo->pivot = Vec3f(pivot.x, pivot.y, pivot.z);
+			meshInfo->name = currentMesh->name;
+			
+			//顶点属性都呗通过多边形索引，重新写入了。如10个四边面，按照四边面顶点id重新把顶点位置写一遍。就成了40个顶点位置。N,UV同理。
+			auto positionCount = currentMesh->getGeometry()->getGeometryData().getPositions().count;	//indices是vertex ID
+			float tempScale = 0.01;
+
+
+
+
+			for (size_t i = 0; i < positionCount; i++)
+			{
+				auto pos = currentMesh->getGeometry()->getGeometryData().getPositions().get(i) ;
+
+				//printf("P - %d : %f,%f,%f\n", i, pos.x, pos.y, pos.z);
+				meshInfo->vertices.push_back(Vec3f(pos.x,pos.y,pos.z) * tempScale);
+			}
+
+			for (size_t i = 0; i < positionCount; i++)
+			{
+				auto indices = currentMesh->getGeometry()->getGeometryData().getPositions().indices[i];		//indices是多边形顶点序号ID，也可以理解为pointId不同于vertexId		
+				meshInfo->verticeId_pointId.push_back(indices);	
+				//printf("PIndex - %d : %d\n", i, indices);
+			}
+
+
+			auto normalCount = currentMesh->getGeometry()->getGeometryData().getNormals().count;
+			for (size_t i = 0; i < normalCount; i++)
+			{
+				auto n = currentMesh->getGeometry()->getGeometryData().getNormals().get(i);
+				meshInfo->normals.push_back(Vec3f(n.x,n.y,n.z));
+				//printf("N - %d : %f,%f,%f\n", i, n.x, n.y, n.z);
+			}
+
+			auto uvCount = currentMesh->getGeometry()->getGeometryData().getUVs().count;
+			for (size_t i = 0; i < uvCount; i++)
+			{
+				auto uv = currentMesh->getGeometry()->getGeometryData().getUVs().get(i);
+				meshInfo->texcoords.push_back(Vec2f(uv.x,uv.y));
+				//printf("UV - %d : %f,%f,\n", i, uv.x, uv.y);
+			}
+
+			auto colorCount = currentMesh->getGeometry()->getGeometryData().getColors().count;
+			for (size_t i = 0; i < colorCount; i++)
+			{
+				auto color = currentMesh->getGeometry()->getGeometryData().getColors().get(i);
+				meshInfo->verticesColor.push_back(Vec3f(color.x, color.y, color.z));
+				//printf("Color - %d : %f,%f,%f\n", i, color.x, color.y, color.z);
+			}
+
+			auto partitionCount = currentMesh->getGeometry()->getGeometryData().getPartitionCount();
+		
+			printf("PartitionCount : %d\n", partitionCount);
+
+
+			printf("Poly:");
+
+
+			
+
+			for (size_t i = 0; i < partitionCount; i++)
+			{
+				auto polygonCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygon_count;
+
+				CArrayList<uint> polygons;
+				CArray<uint> counter;
+
+
+
+				for (size_t j = 0; j < polygonCount; j++)
+				{
+					auto verticesCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].vertex_count;
+					counter.pushBack(verticesCount);
+				}
+				polygons.resize(counter);
+
+				Vec3f boundingMax = Vec3f(-FLT_MAX);
+				Vec3f boundingMin = Vec3f(FLT_MAX);
+
+				for (size_t j = 0; j < polygonCount; j++)
+				{
+					auto& index = polygons[j];
+
+					auto from = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].from_vertex;
+					auto verticesCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].vertex_count;
+
+					for (size_t k = 0; k < verticesCount; k++)
+					{
+						int polyId = k + from;
+						index.insert(polyId);
+						//printf("%d, ", polyId);
+
+						Vec3f pos = meshInfo->vertices[polyId];
+						if (pos.x > boundingMax.x)boundingMax.x = pos.x;
+						else boundingMax.x = boundingMax.x;
+
+						if (pos.y > boundingMax.y)boundingMax.y = pos.y;
+						else boundingMax.y = boundingMax.y;
+
+						if (pos.z > boundingMax.z)boundingMax.z = pos.z;
+						else  boundingMax.z = boundingMax.z;
+
+						if (pos.x < boundingMin.x)boundingMin.x = pos.x;
+						else boundingMin.x = boundingMin.x;
+
+						if (pos.y < boundingMin.y)boundingMin.y =pos.y;
+						else boundingMin.y = boundingMin.y;
+
+						if (pos.z < boundingMin.z)boundingMin.z = pos.z;
+						else boundingMin.z = boundingMin.z;
+
+
+					}
+				}
+				meshInfo->facegroup_polygons.push_back(polygons);
+				meshInfo->boundingBox.push_back(TAlignedBox3D<Real>(boundingMin, boundingMax));
+				if(this->varUseInstanceTransform()->getValue())
+					meshInfo->boundingTransform.push_back(Transform3f((boundingMax + boundingMin) / 2,Mat3f::identityMatrix(),Vec3f(1)));
+				else
+					meshInfo->boundingTransform.push_back(Transform3f());
+
+				for (size_t j = 0; j < polygonCount; j++)
+				{
+					auto& index = polygons[j];
+
+					auto from = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].from_vertex;
+					auto verticesCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].vertex_count;
+
+					for (size_t k = 0; k < verticesCount; k++)
+					{
+						int polyId = k + from;
+
+						meshInfo->vertices[polyId] = meshInfo->vertices[polyId] - meshInfo->boundingTransform[i].translation();
+					}
+				}
+
+				printf("Tri: %d\n", polygonCount);
+				TopologyModule::Triangle tri;
+				std::vector<TopologyModule::Triangle> triangles;
+				for (size_t j = 0; j < polygonCount; j++)
+				{
+					auto from = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].from_vertex;
+					auto verticesCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].vertex_count;
+
+					for (size_t k = 0; k < verticesCount - 2; k++)
+					{
+						int polyId = k + from;
+
+						tri[0] = from;
+						tri[1] = k + from + 1;
+						tri[2] = k + from + 2;
+
+						//printf("%d ,%d ,%d \n", tri[0], tri[1], tri[2]);
+						triangles.push_back(tri);
+					}
+				}
+
+				meshInfo->facegroup_triangles.push_back(triangles);
+
+			}
+
+			//Material
+			auto matCount = currentMesh->getMaterialCount();
+			mFbxScene;
+			for (size_t i = 0; i < matCount; i++)
+			{
+				auto mat = currentMesh->getMaterial(i);
+				std::cout << mat->name << "\n";
+
+				auto diffuseTex = mat->getTexture(ofbx::Texture::DIFFUSE);
+				if (diffuseTex)
+					auto relativeFileName = diffuseTex->getRelativeFileName();
+
+				auto normalTex = mat->getTexture(ofbx::Texture::NORMAL);
+				if (normalTex)
+					auto relativeFileName = normalTex->getRelativeFileName();
+
+				std::shared_ptr<Material> material = std::make_shared<Material>();
+				material->baseColor = Vec3f(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b);
+				material->roughness = 1;
+
+
+
+				{
+					auto texture = mat->getTexture(ofbx::Texture::TextureType::DIFFUSE);
+					std::string textureName;
+					if (texture)
+					{
+						auto it = texture->getRelativeFileName();
+						for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
+							textureName += *ptr;
+						}
+
+					}
+
+					size_t found = textureName.find_last_of("\\");
+
+					if (found != std::string::npos) {
+						std::string filename = textureName.substr(found + 1);
+
+						auto fbxFile = this->varFileName()->getValue();
+						size_t foundPath = fbxFile.string().find_last_of("/");
+						std::string path = fbxFile.string().substr(0, foundPath);
+
+
+						std::string loadPath = path + std::string("\\\\") + filename;
+						loadPath.pop_back();
+						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
+						textureData[0, 0] = dyno::Vec4f(1);
+
+						if (loadTexture(loadPath.c_str(), textureData))
+							material->texColor.assign(textureData);
+
+					}
+				}
+				
+
+				{
+					auto texture = mat->getTexture(ofbx::Texture::TextureType::NORMAL);
+					std::string textureName;
+					if (texture)
+					{
+						auto it = texture->getRelativeFileName();
+						for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
+							textureName += *ptr;
+						}
+
+					}
+
+					size_t found = textureName.find_last_of("\\");
+
+					if (found != std::string::npos) {
+						std::string filename = textureName.substr(found + 1);
+
+						auto fbxFile = this->varFileName()->getValue();
+						size_t foundPath = fbxFile.string().find_last_of("/");
+						std::string path = fbxFile.string().substr(0, foundPath);
+
+
+						std::string loadPath = path + std::string("\\\\") + filename;
+						loadPath.pop_back();
+
+						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
+						textureData[0, 0] = dyno::Vec4f(1);
+
+
+						if (loadTexture(loadPath.c_str(), textureData))
+							material->texBump.assign(textureData);
+
+					}
+				}
+
+				
+				////auto s = mFbxScene->getEmbeddedBase64Data(0);
+				//auto saa = mFbxScene->getEmbeddedFilename(0);
+
+				//for (const ofbx::u8* ptr = saa.begin; ptr <= saa.end; ++ptr) {
+				//	std::cout << *ptr << " ";
+				//}
+
+
+				//loadTexture();
+
+				meshInfo->materials.push_back(material);
+			}
+
+
+			//Pose
+			auto pose = currentMesh->getPose();
+			if (pose) 
+			{
+				auto poseMatrix = pose->getMatrix();
+
+				printf("*****************:\n");
+				std::cout << "Pose : " << pose->name << "\n";
+				std::cout << "Pose ->getNode: " << pose->getNode()->name << "\n";
+
+				//Skin
+				printf("*****************:\n");
+				printf("skin:\n");
+				auto clusterCount = currentMesh->getSkin()->getClusterCount();
+				for (size_t i = 0; i < clusterCount; i++)
+				{
+
+					auto cluster = currentMesh->getSkin()->getCluster(i);
+
+					auto clusteName = cluster->name;
+					std::cout << "Object Name: " << clusteName << "\n";
+
+					auto JointName = cluster->getLink()->name;
+					std::cout << "Link Name: " << JointName << "\n";
+
+					////clusteName - JointName ;
+					//pushBone(cluster->getLink());
+
+					auto indicesCount = cluster->getIndicesCount();
+					printf("indicesCount: %d\n", indicesCount);
+
+					for (size_t j = 0; j < indicesCount; j++)
+					{
+						auto indices = cluster->getIndices()[j];
+						//printf("Idx: %d\n", indices);
+
+					}
+
+					auto weightCount = cluster->getWeightsCount();
+
+					for (size_t j = 0; j < weightCount; j++)
+					{
+						auto weights = cluster->getWeights()[j];
+
+						//printf("Weight: %f\n", weights);
+					}
+					//weight重新解析一下
+
+				}
+			}
+			
+			//BindPose保存了初始的骨骼世界空间变换矩阵，用以保存初始状态 其中旋转对应Maya中骨骼朝向从世界空间到当前骨骼空间的旋转。位置表示当前世界坐标。
+
+			mMeshs.push_back(meshInfo);
+		}
+
+		updateTextureMesh();
+
+		//Get Bones
+		auto allObj = mFbxScene->getAllObjects();
+		int objCount = mFbxScene->getAllObjectCount();
+
+		std::map<std::string, std::string> parentTag;
+		std::map<std::string, std::shared_ptr<ModelObject>> nameParentObj;
+
+		for (size_t objId = 0; objId < objCount; objId++)
+		{
+			//Bone
+			if (allObj[objId]->getType() == ofbx::Object::Type::LIMB_NODE)
+			{
+				pushBone(allObj[objId],parentTag, nameParentObj);
+			}
+		}
+
+		buildHierarchy(parentTag, nameParentObj);
+
+		for (int i = 0, n = mFbxScene->getAnimationStackCount(); i < n; ++i) {
+			const ofbx::AnimationStack* stack = mFbxScene->getAnimationStack(i);
+			for (int j = 0; stack->getLayer(j); ++j) {
+				const ofbx::AnimationLayer* layer = stack->getLayer(j);
+				for (int k = 0; layer->getCurveNode(k); ++k) {
+					const ofbx::AnimationCurveNode* node = layer->getCurveNode(k);
+					auto nodeTrans = node->getNodeLocalTransform(0);	//这个用做不导入动画时候的默认值，一般取value[0]
+					std::cout << node->name << " - transform: " << nodeTrans.x << ", "<< nodeTrans.y <<", "<< nodeTrans.z <<"\n";
+
+					char property[32];
+					node->getBoneLinkProperty().toString(property);
+
+					std::cout << node->name << " - bone:";
+					if (node->getBone())
+						std::cout << node->getBone()->name;
+					std::cout << " - property:" << property << "\n";
+
+					getCurveValue(node);
+					
+				}
+			}
+		}
+
+		//print
+		for (size_t i = 0; i < mBones.size(); i++)
+		{
+			std::cout << mBones[i]->name << ", " << mBones[i]->m_Rotation_Values[0].size() << std::endl;
+
+		};
+
+		updateHierarchicalScene();
 
 		delete[] content;
 		fclose(fp);
 
-		return true;		
+
+
+
+		return true;
+
+
+
+
 	}
 
 
-	template<typename TDataType>
-	void SkeletonLoader<TDataType>::getAnimationCurve(const ofbx::Object& object, std::shared_ptr<JointTree<TDataType>> parent)
-	{
-		if (object.getType() != ofbx::Object::Type::ANIMATION_CURVE_NODE) return;
-		if (strlen(object.name) != 1) return;
-		auto AnimObject = (ofbx::AnimationCurveNode*)&object;
-		Real d[3];
-		d[0] = AnimObject->getAnimationDX();
-		d[1] = AnimObject->getAnimationDY();
-		d[2] = AnimObject->getAnimationDZ();
-		auto curve0 = AnimObject->getCurve(0);
-		int key_allsize = (curve0 == nullptr)? 1: curve0->getKeyCount();
-		auto animCurve = std::make_shared<dyno::AnimationCurve<TDataType>>(key_allsize, d[0], d[1], d[2]);
-
-		for (int i = 0; i < 3; ++i)
-		{
-			std::vector<long long> times;
-			std::vector<float> values;
-			
-			auto curve = AnimObject->getCurve(i);
-			if (curve == nullptr)
-			{
-				times.push_back(0);
-				values.push_back(d[i]);
-			}
-			else {
-				int key_count = curve->getKeyCount();
-
-				//assert(key_allsize == key_count);
-
-				const long long* t = curve->getKeyTime();
-				const float* v = curve->getKeyValue();
-				times.assign(t, t + key_count);
-				values.assign(v, v + key_count);
-			}
-
-			animCurve->set(i, times, values);
-		}
-
-		switch (object.name[0])
-		{
-		case 'T':
-			parent->setAnimTranslation(animCurve);
-			break;
-		case 'R':
-			parent->setAnimRotation(animCurve);
-			break;
-		case 'S':
-			parent->setAnimScaling(animCurve);
-			break;		
-		default:
-			break;
-		}
-	}
 
 
-	template<typename TDataType>
-	void SkeletonLoader<TDataType>::getModelProperties(const ofbx::Object& object, std::shared_ptr<JointTree<TDataType>> cur)
-	{
-		cur->id = object.id;
-
-		//FIXME Pre可能出错了
-		copyVecR(cur->PreRotation, object.getPreRotation());
-		copyVecT(cur->LclTranslation, object.getLocalTranslation());
-		copyVecR(cur->LclRotation, object.getLocalRotation());
-		copyVec(cur->LclScaling, object.getLocalScaling());
-		cur->CurTranslation = cur->LclTranslation;
-		cur->CurRotation = cur->LclRotation;
-		cur->CurScaling = cur->LclScaling;
-
-		//DFS 序
-		m_jointMap.push_back(cur);
-	}	
-
-	template<typename TDataType>
-	void SkeletonLoader<TDataType>::getLimbNode(const ofbx::Object& object, std::shared_ptr<JointTree<TDataType>> parent)
-	{
-		if (object.getType() != ofbx::Object::Type::LIMB_NODE) return;
-
-		std::shared_ptr<JointTree<TDataType>> cur;
-
-		if (object.getType() == ofbx::Object::Type::LIMB_NODE){
-
-			cur = std::make_shared<JointTree<TDataType>>();
-			if(parent != nullptr) parent->children.push_back(cur);
-			cur->parent = parent;
-			getModelProperties(object, cur);
-		}
-		int i = 0;
-		while (ofbx::Object* child = object.resolveObjectLink(i))
-		{
-			if (object.getType() == ofbx::Object::Type::LIMB_NODE) 
-			{
-				getLimbNode(*child, cur);
-				// animation curve node
-				getAnimationCurve(*child, cur);
-			}
-			else getLimbNode(*child, parent);
-			++i;
-		}	
-	}
-	template<typename TDataType>
-	void SkeletonLoader<TDataType>::getNodes(const ofbx::IScene& scene)
-	{
-		const ofbx::Object* root = scene.getRoot();
-		if (root) {
-			int i = 0;
-			while (ofbx::Object* child = root->resolveObjectLink(i))
-			{
-				getLimbNode(*child, nullptr);
-				++i;
-			}			
-		}		
-	}
 
 	template<typename TDataType>
 	void SkeletonLoader<TDataType>::loadFBX()
 	{
 		auto filename = this->varFileName()->getData();
 		std::string filepath = filename.string();
-		m_jointMap.clear();
+		mMeshs.clear();
+		mBones.clear();
+		this->stateHierarchicalScene()->getDataPtr()->clear();
+
 		initFBX(filepath.c_str());
-		getNodes(*g_scene);
+
+
+
 	}
 
-	// 以重心为坐标原点的旋转、平移四元数转换
-	template<typename TDataType>
-	void SkeletonLoader<TDataType>::getCenterQuat(Coord v0, Coord v1, Quat<Real> &T, Quat<Real> &R)
-	{
-		Coord center = (v0 + v1) / 2.f;
-		Coord tmp = v1 - v0;
-		Vec3f dir = Vec3f(tmp[0], tmp[1], tmp[2]).normalize();
-
-		float cos2;
-		Vec3f axis;
-		switch (AXIS)
-		{
-		case 0: // X (1, 0, 0) × dir = u
-			cos2 = dir.x; 
-			axis = Vec3f(0, -dir.z, dir.y).normalize();
-			break;
-		case 1: // Y (0, 1, 0) × dir = u
-			cos2 = dir.y; 
-			axis = Vec3f(dir.z, 0, -dir.x).normalize();
-			break;
-		default: // Z (0, 0, 1) × dir = u
-			cos2 = dir.z; 
-			axis = Vec3f(-dir.y, dir.x, 0).normalize();
-			break;					
-		}
-		float cos1 = sqrtf((1 + cos2) / 2.0); 
-		float sin1 = sqrtf((1 - cos2) / 2.0);
-		Quat<Real> q(axis.x * sin1, axis.y * sin1, axis.z * sin1, cos1);
-		Quat<Real> t(center[0], center[1], center[2], 0.f);
-		T = t;
-		R = q;
-	}
-
-	template<typename TDataType>
-	bool SkeletonLoader<TDataType>::scale(Real s)
-	{
-		this->m_jointMap[0]->scale(s);
-		
-		return true;
-	}
 	
-	template<typename TDataType>
-	bool SkeletonLoader<TDataType>::translate(Coord t)
-	{
-		this->m_jointMap[0]->translate(t);
-		return true;
-	}
 
-	Vec3f DEBUG_T(0.25, 0.0, 0.0); // 用于平移骨架，以便对比演示
-	
 	template<typename TDataType>
 	void SkeletonLoader<TDataType>::resetStates()
 	{
+
 		loadFBX();
-		if (m_jointMap.empty())
-		{
-			printf("Load Skeleton failed.");
-			return;
-		}
 
-        // init Bone
-		{
-			std::vector<Coord> v0;
-			std::vector<Coord> v1;
-			for (auto joint : this->m_jointMap)
-			{
-				joint->getGlobalQuat();
-				joint->getGlobalCoord();
-			}
-			
-			int id_joint = 0;
-			int id_cap = 0;
-			m_capLists.clear();
-			m_T.clear();
-			m_R.clear();
-
-			for (auto joint : this->m_jointMap)
-			{
-				for (auto joint_son : joint->children)
-				{
-					m_capLists.push_back(JCapsule{id_joint, id_cap, 
-													joint->GlCoord, joint_son->GlCoord});
-					Vec3f t0 = joint->GlCoord;
-					Vec3f t1 = joint_son->GlCoord;
-					t0 += DEBUG_T;
-					t1 += DEBUG_T;
-					v0.push_back(t0);
-					v1.push_back(t1);
-																	
-					Quat<Real> t, r;
-					getCenterQuat(joint->GlCoord, joint_son->GlCoord, t, r);
-					m_T.push_back(t);
-					m_R.push_back(r);
-					++id_cap;
-				}
-				++id_joint;
-			}
-			m_numCaps = id_cap;
-			m_numjoints = id_joint;
-
-
-			// vector -> DArray
-			this->outCapsule()->allocate();
-			this->outCapsule()->getData().resize(m_numCaps);
-			this->outCapsule()->getData().assign(m_capLists);
-
-			this->outTranslate()->allocate();
-			this->outTranslate()->getData().resize(m_numCaps);
-			this->outTranslate()->getData().assign(m_T);
-
-			this->outRotate()->allocate();
-			this->outRotate()->getData().resize(m_numCaps);
-			this->outRotate()->getData().assign(m_R);
-
-			this->outPosV()->allocate();
-			this->outPosV()->getData().resize(m_numCaps);
-			this->outPosV()->getData().assign(v0);
-
-			this->outPosU()->allocate();
-			this->outPosU()->getData().resize(m_numCaps);
-			this->outPosU()->getData().assign(v1);
-			
-		}
-
-		// Init Capsule Topology
-		{
-			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
-			mHostCap3D.clear();
-			for (auto& cap : m_capLists)
-			{
-				//TODO: fix the problem
-				Capsule3D cap3d;
-				cap3d.radius = this->varRadius()->getData();
-				cap3d.center = 0.5f * (cap.v0 + cap.v1);
-				mHostCap3D.push_back(cap3d);
-			}		
-
-			auto& caps = topo->getCaps();
-			caps.resize(mHostCap3D.size());
-			caps.assign(mHostCap3D);
-
-		}
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::updateTopology()
+	bool SkeletonLoader<TDataType>::loadTexture(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
 	{
-		if (this->m_jointMap.empty())
-		{
-			printf("Load Skeleton failed.");
-			return;
-		}		
-		
-        //Animation
-        for (auto joint : this->m_jointMap)
-        {
-			// static int first = 0;
-			// if(first < 7)
-			{
-           		joint->applyAnimationAll(this->stateElapsedTime()->getData());
-				// first++;
-			}
-            // joint->applyAnimationAll(0.05);
-        }
-        
-		for (auto joint : m_jointMap)
-		{
-			joint->getGlobalQuat();
-			joint->getGlobalCoord();
-		}
 
-		// Update Bone
-		{
-			int index = 0;
-			std::vector<Coord> v0;
-			std::vector<Coord> v1;			
-			for (auto joint : this->m_jointMap)
+		int x, y, comp;
+		stbi_set_flip_vertically_on_load(true);
+
+		float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
+		if (data == 0)
+			return false;
+
+		if (data) {
+			img.resize(x, y);
+			for (int x0 = 0; x0 < x; x0++)
 			{
-				for (auto joint_son : joint->children)
+				for (int y0 = 0; y0 < y; y0++)
 				{
-					m_capLists[index].v0 = joint->GlCoord;
-					m_capLists[index].v1 = joint_son->GlCoord;
-					Quat<Real> t, r;
-					getCenterQuat(joint->GlCoord, joint_son->GlCoord, t, r);
-					m_T[index] = t;
-					m_R[index] = r;
-
-					Vec3f t0 = joint->GlCoord;
-					Vec3f t1 = joint_son->GlCoord;
-					t0 += DEBUG_T;
-					t1 += DEBUG_T;					
-					v0.push_back(t0);
-					v1.push_back(t1);
-					
-					index++;
+					int idx = (y0 * x + x0) * comp;
+					for (int c0 = 0; c0 < comp; c0++) {
+						img(x0, y0)[c0] = data[idx + c0];
+					}
 				}
 			}
-
-			this->outCapsule()->getData().assign(m_capLists);
-			this->outTranslate()->getData().assign(m_T);
-			this->outRotate()->getData().assign(m_R);
-
-			this->outPosV()->getData().assign(v0);
-			this->outPosU()->getData().assign(v1);
 		}
-		
-		// Update Capsule Topology
-		{
-			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
-			int index = 0;
-			for (auto& cap : m_capLists)
-			{
-				auto &cap3d = mHostCap3D[index++];
-				cap3d.center = 0.5f * (cap.v0 + cap.v1);
-// 				cap3d.segment.v0 = cap.v0;
-// 				cap3d.segment.v1 = cap.v1;
-			}		
 
-			auto& caps = topo->getCaps();
-			caps.assign(mHostCap3D);
-		}
-    }
+		delete data;
+		return true;
+	}
 
 	DEFINE_CLASS(SkeletonLoader);
 }

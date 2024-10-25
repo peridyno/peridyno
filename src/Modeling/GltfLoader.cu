@@ -219,7 +219,10 @@ namespace dyno
 		////import Animation
 		importAnimation(model, joint_output, joint_input, joint_T_f_anim, joint_T_Time, joint_S_f_anim, joint_S_Time, joint_R_f_anim, joint_R_Time);
 
-
+		for (int i = 0; i<model.nodes.size();i++)
+		{
+			node_Name[i] = model.nodes[i].name;
+		}
 
 		// import Scenes:
 		std::map<scene, std::vector<int>> Scene_Nodes;
@@ -624,6 +627,8 @@ namespace dyno
 			joint_scale,
 			joint_rotation
 		);
+
+		this->stateJointsData()->getDataPtr()->setJointName(joint_Name);
 
 		this->stateAnimation()->getDataPtr()->setAnimationData(
 			joint_T_f_anim,
@@ -1329,7 +1334,7 @@ namespace dyno
 		all_Nodes.clear();
 		all_Meshs.clear();
 		nodeId_Dir.clear();
-		mesh_Name.clear();
+
 		meshId_Dir.clear();
 		node_matrix.clear();
 
@@ -1337,6 +1342,8 @@ namespace dyno
 		d_shape_meshId.clear();
 		unCenterPosition.clear();
 		skin_VerticeRange.clear();
+		node_Name.clear();
+
 
 		maxJointId = -1;
 		jointNum = -1;

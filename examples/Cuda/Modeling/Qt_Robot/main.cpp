@@ -17,8 +17,11 @@ using namespace dyno;
 #include "AnimationMixer.h"
 
 #include "RigidBody/SkeletonRigidBody.h"
-
-#include "Ik.h"
+#include "SkeletonLoader/SkeletonLoader.h"
+#include "RigidBody/Module/AnimationDriver.h"
+#include "RigidBody/Module/CarDriver.h"
+#include "BasicShapes/PlaneModel.h"
+//#include "Ik.h"
 
 
 /**
@@ -31,94 +34,155 @@ int main()
 	//Create SceneGraph
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto idle = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	idle->varFileName()->setValue(getAssetPath()+std::string("gltf/Character/Idle.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	idle->varUseInstanceTransform()->setValue(false);
-	idle->varImportAnimation()->setValue(true);
-	idle->setVisible(false);
+	auto fbx = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	fbx->varFileName()->setValue(getAssetPath() + "fbx/HumanoidRobot.fbx");
+	fbx->reset();
 
-	auto walk = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	walk->varFileName()->setValue(getAssetPath() + std::string("gltf/Character/Walk.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	walk->varUseInstanceTransform()->setValue(false);
-	walk->varImportAnimation()->setValue(true);
-	walk->setVisible(false);
-
-	auto run = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	run->varFileName()->setValue(getAssetPath() + std::string("gltf/Character/Run.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	run->varUseInstanceTransform()->setValue(false);
-	run->varImportAnimation()->setValue(true);
-	run->setVisible(false);
-
-	auto mixer = scn->addNode(std::make_shared<AnimationMixer<DataType3f>>());
-	idle->stateAnimation()->connect(mixer->inIdle());
-	idle->stateTextureMesh()->connect(mixer->inTextureMesh());
-	walk->stateAnimation()->connect(mixer->inWalk());
-
-	auto skeletonBody = scn->addNode(std::make_shared<SkeletonRigidBody<DataType3f>>());
-	mixer->stateElementsCenter()->promoteOuput()->connect(skeletonBody->inElementsCenter());
-	mixer->stateElementsQuaternion()->promoteOuput()->connect(skeletonBody->inElementsQuaternion());
-	mixer->stateElementsRotationMatrix()->promoteOuput()->connect(skeletonBody->inElementsRotation());
-	mixer->stateElementsLength()->promoteOuput()->connect(skeletonBody->inElementsLength());
-	mixer->stateElementsRadius()->promoteOuput()->connect(skeletonBody->inElementsRadius());
+	auto robot = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	fbx->stateTextureMesh()->connect(robot->inTextureMesh());
+	fbx->setVisible(false);
 
 
-	idle->stateJointsData()->promoteOuput()->connect(mixer->inSkeleton());
+	VehicleBind configData;
 
-	auto deformer = scn->addNode(std::make_shared<JointDeform<DataType3f>>());
-	idle->stateSkin()->connect(deformer->inSkin());
-	mixer->stateJoint()->connect(deformer->inJoint());
-	mixer->stateInstanceTransform()->connect(deformer->inInstanceTransform());
+	Vec3f angle = Vec3f(0, 0, 90);
+	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
+
+	std::string Hip = std::string("model:Hip");
+
+	std::string Trochanter_R = std::string("model:Trochanter_R");
+	std::string Thigh_R = std::string("model:Thigh_R");
+	std::string Shank_R = std::string("model:Shank_R");
+	std::string Foot_R = std::string("model:Foot_R");
+
+	std::string Trochanter_L = std::string("model:Trochanter_L");
+	std::string Thigh_L = std::string("model:Thigh_L");
+	std::string Shank_L = std::string("model:Shank_L");
+	std::string Foot_L = std::string("model:Foot_L");
+
+	std::string Spine = std::string("model:Spine");
+	std::string Body = std::string("model:Body");
+	std::string Neck = std::string("model:Neck");
+	std::string Head = std::string("model:Head");
+
+	std::string Shoulder_R = std::string("model:Shoulder_R");
+	std::string UpperArm_R = std::string("model:UpperArm_R");
+	std::string LowerArm_R = std::string("model:LowerArm_R");
+	std::string Wrist_R = std::string("model:Wrist_R");
+	std::string Hand_R = std::string("model:Hand_R");
+
+	std::string Shoulder_L = std::string("model:Shoulder_L");
+	std::string UpperArm_L = std::string("model:UpperArm_L");
+	std::string LowerArm_L = std::string("model:LowerArm_L");
+	std::string Wrist_L = std::string("model:Wrist_L");
+	std::string Hand_L = std::string("model:Hand_L");
 
 
-	// hard code
-	idle->stateTextureMesh()->getData().materials()[0]->metallic = 1.f;
-	idle->stateTextureMesh()->getData().materials()[0]->roughness = 0.15f;
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hip, 0), fbx->findMeshIDbyName(Hip), Box, Transform3f(), 100));//
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Trochanter_R, 1), fbx->findMeshIDbyName(Trochanter_R), Box, Transform3f(), 100));//
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Thigh_R, 2), fbx->findMeshIDbyName(Thigh_R), Box, Transform3f(), 100));//
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shank_R, 3), fbx->findMeshIDbyName(Shank_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Foot_R, 4), fbx->findMeshIDbyName(Foot_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Trochanter_L, 5), fbx->findMeshIDbyName(Trochanter_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Thigh_L, 6), fbx->findMeshIDbyName(Thigh_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shank_L, 7), fbx->findMeshIDbyName(Shank_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Foot_L, 8), fbx->findMeshIDbyName(Foot_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Spine, 9), fbx->findMeshIDbyName(Spine), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Body, 10), fbx->findMeshIDbyName(Body), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Neck, 11), fbx->findMeshIDbyName(Neck), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Head, 12), fbx->findMeshIDbyName(Head), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_R, 13), fbx->findMeshIDbyName(Shoulder_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_R, 14), fbx->findMeshIDbyName(UpperArm_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_R, 15), fbx->findMeshIDbyName(LowerArm_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_R, 16), fbx->findMeshIDbyName(Wrist_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_R, 17), fbx->findMeshIDbyName(Hand_R), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_L, 18), fbx->findMeshIDbyName(Shoulder_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_L, 19), fbx->findMeshIDbyName(UpperArm_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_L, 20), fbx->findMeshIDbyName(LowerArm_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_L, 21), fbx->findMeshIDbyName(Wrist_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_L, 22), fbx->findMeshIDbyName(Hand_L), Box, Transform3f(), 100));
 
+	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
+	{
+		configData.mVehicleRigidBodyInfo[i].radius = 0.2;
+	}
 
-	////Jump
-	// 
-	//auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	//gltf->varFileName()->setValue(getAssetPath() + std::string("gltf/Character/Character_Jump_26F.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	//gltf->varUseInstanceTransform()->setValue(false);
-	//gltf->varImportAnimation()->setValue(true);
-	//gltf->setVisible(false);
+	Vec3f offset = Vec3f(0, 0, 0);
+	Vec3f shankOffset = Vec3f(0, 0.25, 0);
+	Vec3f thighOffset = Vec3f(0, 0.28, 0);
+	Vec3f footOffset = Vec3f(0, 0, 0.02);
+	Vec3f bodyOffset = Vec3f(0, -0.25, 0);
+	Vec3f handOffset = Vec3f(0.02, 0, 0);
 
-	//auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	//gltf->varFileName()->setValue(getAssetPath() + std::string("gltf/Character/Character_Land_26F.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	//gltf->varUseInstanceTransform()->setValue(false);
-	//gltf->varImportAnimation()->setValue(true);
-	//gltf->setVisible(false);
+	Vec3f axis = Vec3f(-1,0,0);
 
-	//auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	//gltf->varFileName()->setValue(getAssetPath() + std::string("gltf/Character/Character_Loop_90F.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	//gltf->varUseInstanceTransform()->setValue(false);
-	//gltf->varImportAnimation()->setValue(true);
-	//gltf->setVisible(false);
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Trochanter_R, 1), Name_Shape(Hip, 0), Hinge, axis, offset, true, 0,true,-90,90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Trochanter_L, 5), Name_Shape(Hip, 0), Hinge, axis, offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_R, 2), Name_Shape(Hip, 0), Hinge, axis, thighOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_L, 6), Name_Shape(Hip, 0), Hinge, axis, thighOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shank_R, 3), Name_Shape(Thigh_R, 2), Hinge, axis, shankOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shank_L, 7), Name_Shape(Thigh_L, 6), Hinge, axis, shankOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Foot_R, 4), Name_Shape(Shank_R, 3), Hinge, axis, footOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Foot_L, 8), Name_Shape(Shank_L, 7), Hinge, axis, footOffset, true, 0, true, -90, 90));
 
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Spine, 9), Name_Shape(Hip, 0), Fixed, Vec3f(0, 1, 0), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Body, 10), Name_Shape(Spine, 9), Fixed, Vec3f(1, 0, 0), bodyOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Neck, 11), Name_Shape(Body, 10), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Head, 12), Name_Shape(Neck, 11), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shoulder_R, 13), Name_Shape(Body, 10), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shoulder_L, 18), Name_Shape(Body, 10), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(UpperArm_R, 14), Name_Shape(Shoulder_R, 13), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(UpperArm_L, 19), Name_Shape(Shoulder_L, 18), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
 
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(LowerArm_R, 15), Name_Shape(UpperArm_R, 14), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(LowerArm_L, 20), Name_Shape(UpperArm_L, 19), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
 
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Wrist_R, 16), Name_Shape(LowerArm_R, 15), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Wrist_L, 21), Name_Shape(LowerArm_L, 20), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Hand_R, 17), Name_Shape(Wrist_R, 16), Fixed, Vec3f(1, 0, 0), handOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Hand_L, 22), Name_Shape(Wrist_L, 21), Fixed, Vec3f(1, 0, 0), -handOffset, true, 0, true, -90, 90));
 
-	//auto gltf2 = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	//gltf2->varFileName()->setValue(std::string("C:/Users/dell/Desktop/RobotRun_V2.gltf"));//std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf")
-	//gltf2->varUseInstanceTransform()->setValue(false);
-	//gltf2->varImportAnimation()->setValue(true);
-	//gltf2->setVisible(false);
+	//
 
-	//auto jointDeform = scn->addNode(std::make_shared<JointDeform<DataType3f>>());
-	//gltf->stateJointsData()->connect(jointDeform->inJoint());
-	//gltf->stateSkin()->connect(jointDeform->inSkin());
 	//
 
 
-	//gltf->stateAnimation()->connect(Mixer->inAnimation01());
-	//gltf->stateAnimation()->connect(Mixer->inAnimation02());
-	//gltf->stateJointsData()->connect(Mixer->inSkeleton());
 
-	//Mixer->stateJoint()->connect(jointDeform->inJoint());
+	robot->varVehicleConfiguration()->setValue(configData);
+	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
+	robot->animationPipeline()->pushModule(animDriver);
+
+	std::vector<std::string> driveName(8, "NULL");
+
+	driveName[0] = std::string("Hip_R");
+	driveName[1] = std::string("Hip_L");
+	driveName[2] = std::string("Hip_R");
+	driveName[3] = std::string("Hip_L");
+
+	driveName[4] = std::string("Knee_R");
+	driveName[5] = std::string("Knee_L");
+	driveName[6] = std::string("Ankle_R");
+	driveName[7] = std::string("Ankle_L");
 
 
 
-	//auto ik = scn->addNode(std::make_shared<IK<DataType3f>>());
+	animDriver->varDriverName()->setValue(driveName);
+	animDriver->varSpeed()->setValue(1);
+	robot->stateTimeStep()->connect(animDriver->inDeltaTime());
+	fbx->stateHierarchicalScene()->connect(animDriver->inHierarchicalScene());
+	robot->stateTopology()->connect(animDriver->inTopology());
+	//robot->varGravityValue()->setValue(0);
+
+	robot->varGravityValue()->setValue(0);
+
+	auto carDriver = robot->animationPipeline()->findFirstModule<CarDriver<DataType3f>>();
+	robot->animationPipeline()->popModule(carDriver);
+
+	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
+	plane->varScale()->setValue(Vec3f(20));
+
 
 
 	Modeling::initStaticPlugin();

@@ -57,20 +57,6 @@ namespace dyno
 	{
 		DArray<int> jointIds;
 		jointIds.assign(mAllJoints);
-		CArray<Vec3f> tt;
-		CArray<Vec3f> ss;
-		CArray<Quat1f> rr;
-		CArray<Mat4f> mm;
-		tt.assign(mCurrentTranslation);
-		ss.assign(mCurrentScale);
-		rr.assign(mCurrentRotation);
-		mm.assign(mJointLocalMatrix);
-
-		mCurrentTranslation.assign(tt);
-		mCurrentScale.assign(ss);
-		mCurrentRotation.assign(rr);
-		mJointLocalMatrix.assign(mm);
-		mJointLocalMatrix.resize(mCurrentTranslation.size());
 
 		cuExecute(mAllJoints.size(),
 			updateLocalMatrix,
@@ -107,8 +93,8 @@ namespace dyno
 
 		mJointWorldMatrix.assign(c_joint_Mat4f);
 
-		CArray<Mat4f> c_JointMatrix;
-		c_JointMatrix.assign(mJointWorldMatrix);
+		//CArray<Mat4f> c_JointMatrix;
+		//c_JointMatrix.assign(mJointWorldMatrix);
 
 		//for (size_t i = 0; i < c_JointMatrix.size(); i++)
 		//{
@@ -145,6 +131,12 @@ namespace dyno
 		mBindPoseTranslation = j.mBindPoseTranslation;
 		mBindPoseScale = j.mBindPoseScale;
 		mBindPoseRotation = j.mBindPoseRotation;
+
+		mCurrentTranslation.assign(j.mCurrentTranslation);
+		mCurrentRotation.assign(j.mCurrentRotation);
+		mCurrentScale.assign(j.mCurrentScale);
+
+		mJointName = j.mJointName;
 	}
 
 	bool JointInfo::isEmpty()

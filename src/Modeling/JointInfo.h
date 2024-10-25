@@ -82,7 +82,12 @@ namespace dyno {
 
 		void updateCurrentPose(std::map<joint, Vec3f> t, std::map<joint, Vec3f> s, std::map<joint, Quat1f> r);
 
+		void setJointName(const std::map<int,std::string> name) { this->mJointName = name; }
+
 	public:
+
+		std::map<int, std::string> mJointName;
+
 		DArray<Mat4f> mJointInverseBindMatrix;
 		DArray<Mat4f> mJointLocalMatrix;
 		DArray<Mat4f> mJointWorldMatrix;

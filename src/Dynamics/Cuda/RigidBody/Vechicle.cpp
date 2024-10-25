@@ -576,12 +576,10 @@ namespace dyno
 
 			Actors.resize(rigidInfo.size());
 
-			printf("---------------\n");
 
 			for (size_t i = 0; i < rigidInfo.size(); i++)
 			{
 				rigidbody.bodyId = j * (maxGroup+1) + rigidInfo[i].rigidGroup;
-				printf("%d\n", rigidbody.bodyId);
 
 				rigidbody.offset = rigidInfo[i].Offset;
 

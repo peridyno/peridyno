@@ -124,6 +124,11 @@ namespace dyno
 		void updateStates() override;
 
 
+
+	public:
+
+		std::map<int, std::string> node_Name;
+
 	private:
 
 		DArray<Coord> initialPosition;
@@ -164,7 +169,7 @@ namespace dyno
 		std::map<joint, std::vector<int>> nodeId_Dir;
 		std::map<int, std::vector<int>> meshId_Dir;
 
-		std::map<int, std::string> mesh_Name;
+
 		std::map<int, Mat4f> node_matrix;
 
 		CArray<Mat4f> mesh_Matrix;

@@ -16,14 +16,15 @@
 #pragma once
 #include "Module/KeyboardInputModule.h"
 #include "Topology/DiscreteElements.h"
+#include "Topology/HierarchicalModel.h"
 #include "EventDispatcher.h"
 
 namespace dyno 
 {
 	template<typename TDataType>
-	class QuadrupedDriver : public KeyboardInputModule
+	class AnimationDriver : public KeyboardInputModule
 	{
-		DECLARE_TCLASS(QuadrupedDriver, TDataType);
+		DECLARE_TCLASS(AnimationDriver, TDataType);
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -36,12 +37,14 @@ namespace dyno
 		typedef typename PointJoint<Real> PointJoint;
 		typedef typename dyno::Quat<Real> TQuat;
 
-		QuadrupedDriver();
-		~QuadrupedDriver() override {};
+		AnimationDriver();
+		~AnimationDriver() override {};
 
-		DEF_VAR(Real, Speed,1,"Speed");
+		DEF_VAR(Real, Speed,4,"Speed");
+		DEF_VAR(std::vector<std::string>, DriverName, std::vector<std::string>(), "Speed");
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, Topology, "Topology");
+		DEF_INSTANCE_IN(HierarchicalScene, HierarchicalScene,"Animation objects");
 		DEF_VAR_IN(Real, DeltaTime,"");
 
 
