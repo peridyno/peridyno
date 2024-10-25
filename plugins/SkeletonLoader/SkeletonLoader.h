@@ -37,24 +37,7 @@ namespace dyno
 	*	\class	SkeletonLoader
 	*	\brief	Load a Skeleton 
 	*/
-	class FbxMeshInfo : public ModelObject
-	{
-	public:
-		FbxMeshInfo() {};
-
-		std::vector<Vec3f> vertices;
-		std::vector<int> verticeId_pointId;
-		std::vector<Vec3f> normals;
-		std::vector<Vec2f> texcoords;
-		std::vector<Vec3f> verticesColor;
-		std::vector<std::vector<TopologyModule::Triangle>> facegroup_triangles;
-		std::vector<CArrayList<uint>> facegroup_polygons;
-
-		std::vector<std::shared_ptr<Material>> materials;
-
-		std::vector<TAlignedBox3D<Real>> boundingBox;
-		std::vector<Transform3f> boundingTransform;
-	};
+	
 	
 	template<typename TDataType>
 	class SkeletonLoader : public ParametricModel<TDataType>
@@ -93,20 +76,6 @@ namespace dyno
 		*/
 		DEF_VAR(FilePath, FileName, "", "");
 		
-	public:
-
-		int findMeshIDbyName(std::string name) 
-		{
-			int id = 0;
-			for (auto it : mMeshs){
-				if (it->name == name)
-					return id;
-
-				id++;
-			}
-			return -1;
-		}
-
 
 
 	protected:
@@ -114,19 +83,22 @@ namespace dyno
 
 		ofbx::IScene* mFbxScene = nullptr;
 
-		std::vector<std::shared_ptr<FbxMeshInfo>> mMeshs;
-		std::vector<std::shared_ptr<Bone>> mBones;
+
+
 
 	private:
 
-		void updateHierarchicalScene() 
+		void updateHierarchicalScene( const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, const std::vector< std::shared_ptr<Bone>>& bonesInfo)
 		{
 			auto hierarchicalScene = this->stateHierarchicalScene()->getDataPtr();
 
-			for (auto it : mMeshs)
+			for (auto it : meshsInfo)
+			{
 				hierarchicalScene->mModelObjects.push_back(it);
+				hierarchicalScene->mMeshs.push_back(it);
+			}
 
-			for (auto it : mBones)
+			for (auto it : bonesInfo)
 				hierarchicalScene->mModelObjects.push_back(it);
 
 			const ofbx::GlobalSettings* settings = mFbxScene->getGlobalSettings();
@@ -137,7 +109,7 @@ namespace dyno
 
 		bool loadTexture(const char* path, dyno::CArray2D<dyno::Vec4f>& img);
 
-		void updateTextureMesh() 
+		void updateTextureMesh(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo)
 		{
 			auto texMesh = this->stateTextureMesh()->getDataPtr();
 
@@ -149,7 +121,7 @@ namespace dyno
 			std::vector<Vec3f> texNormals;
 			std::vector<Vec2f> texCoords;
 
-			for (auto it : mMeshs)
+			for (auto it : meshsInfo)
 			{
 				mesh_VerticesNum.push_back(it->vertices.size());
 				mesh_NormalNum.push_back(it->normals.size());
@@ -169,14 +141,14 @@ namespace dyno
 
 			int tempID = 0;
 			int offset = 0;
-			for (size_t i = 0; i < mMeshs.size(); i++)
+			for (size_t i = 0; i < meshsInfo.size(); i++)
 			{
 				auto shape = std::make_shared<Shape>();
 
-				int meshFaceGroupNum = mMeshs[i]->facegroup_triangles.size();
+				int meshFaceGroupNum = meshsInfo[i]->facegroup_triangles.size();
 				for (size_t j = 0; j < meshFaceGroupNum; j++)
 				{
-					auto triangles = mMeshs[i]->facegroup_triangles[j];
+					auto triangles = meshsInfo[i]->facegroup_triangles[j];
 
 					for (size_t k = 0; k < triangles.size(); k++)
 					{
@@ -193,10 +165,10 @@ namespace dyno
 
 					tempID ++;
 
-					texMesh->materials().push_back(mMeshs[i]->materials[j]);
-					shape->material = mMeshs[i]->materials[j];
-					shape->boundingBox = mMeshs[i]->boundingBox[j];
-					shape->boundingTransform = mMeshs[i]->boundingTransform[j];
+					texMesh->materials().push_back(meshsInfo[i]->materials[j]);
+					shape->material = meshsInfo[i]->materials[j];
+					shape->boundingBox = meshsInfo[i]->boundingBox[j];
+					shape->boundingTransform = meshsInfo[i]->boundingTransform[j];
 
 
 					texMesh->shapes().push_back(shape);
@@ -209,13 +181,11 @@ namespace dyno
 
 
 
-		void pushBone(const ofbx::Object* bone, std::map<std::string,std::string>& parentTag,std::map<std::string,std::shared_ptr<ModelObject>>& name_ParentObj)
+		void pushBone(const ofbx::Object* bone, std::map<std::string,std::string>& parentTag,std::map<std::string,std::shared_ptr<ModelObject>>& name_ParentObj ,std::vector<std::shared_ptr<Bone>>& bonesInfo)
 		{
 			auto it = parentTag.find(std::string(bone->name));
 
-			if (it != parentTag.end()) {
-				//std::cout << "Bone already exists : " << std::distance(parentTag.begin(), it) << std::endl;
-			}
+			if (it != parentTag.end()) {}
 			else {
 
 				auto temp = std::make_shared<Bone>();
@@ -227,22 +197,19 @@ namespace dyno
 				temp->localScale = Vec3f(bone->getLocalScaling().x, bone->getLocalScaling().y, bone->getLocalScaling().z);
 				temp->pivot = Vec3f(bone->getRotationPivot().x, bone->getRotationPivot().y, bone->getRotationPivot().z);
 
-				mBones.push_back(temp);
+				bonesInfo.push_back(temp);
 
 
 				if (bone->parent) 
 				{
 					parentTag[std::string(bone->name)] = std::string(bone->parent->name);
-					name_ParentObj[std::string(bone->name)] = mBones[mBones.size() - 1];
+					name_ParentObj[std::string(bone->name)] = bonesInfo[bonesInfo.size() - 1];
 				}
 				else 
 				{
 					parentTag[std::string(bone->name)] = std::string("No parent object");
 					name_ParentObj[std::string(bone->name)] = nullptr;
 				}
-
-				//std::cout << "pushBone : " << std::string(bone->name) << " parent : " <<parentTag[std::string(bone->name)] << "\n";
-
 
 			}					
 		}
@@ -293,27 +260,14 @@ namespace dyno
 
 		}
 
-		std::shared_ptr<ModelObject> getModelObjectByName(std::string name)
-		{
-			for (size_t i = 0; i < mMeshs.size(); i++)
-			{
-				if (mMeshs[i]->name == name)
-					return mMeshs[i];
-			}
-			for (size_t i = 0; i < mBones.size(); i++)
-			{
-				if (mBones[i]->name == name)
-					return mBones[i];
-			}
-			return nullptr;
-		}
+
 
 		void getCurveValue(const ofbx::AnimationCurveNode* node) 
 		{
 			if (!node->getBone())
 				return;
 
-			auto bone = getModelObjectByName(std::string(node->getBone()->name));
+			auto bone = this->stateHierarchicalScene()->constDataPtr()->getObjectByName(std::string(node->getBone()->name));
 
 			if (bone == nullptr)
 				return;

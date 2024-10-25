@@ -25,14 +25,15 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(texmeshRender);
 
 		this->stateHierarchicalScene()->setDataPtr(std::make_shared<HierarchicalScene>());
+		this->setForceUpdate(false);
+
 	}
 
 
 	template<typename TDataType>
 	SkeletonLoader<TDataType>::~SkeletonLoader()
 	{
-		mMeshs.clear();
-		mBones.clear();
+		this->stateTextureMesh()->getDataPtr()->clear();
 		this->stateHierarchicalScene()->getDataPtr()->clear();
 	}
 
@@ -66,6 +67,7 @@ namespace dyno
 		printf("geoCount : %d \n", geoCount);
 
 		//printf("meshCount : %d\n",meshCount);
+		std::vector<std::shared_ptr<MeshInfo>> meshs;
 		for (int id = 0; id < meshCount; id++)
 		{
 			//printf("*****************:\n");
@@ -74,7 +76,7 @@ namespace dyno
 			const ofbx::Mesh* currentMesh = (const ofbx::Mesh*)mFbxScene->getMesh(id);
 			//std:: cout<< "Mesh Name :  " << currentMesh->name << "\n";
 			
-			std::shared_ptr<FbxMeshInfo> meshInfo = std::make_shared<FbxMeshInfo>();
+			std::shared_ptr<MeshInfo> meshInfo = std::make_shared<MeshInfo>();
 
 			auto geoMatrix = currentMesh->getGeometricMatrix();
 			auto gloTf = currentMesh->getGlobalTransform();
@@ -366,10 +368,10 @@ namespace dyno
 				}
 			}
 			
-			mMeshs.push_back(meshInfo);
+			meshs.push_back(meshInfo);
 		}
 
-		updateTextureMesh();
+		updateTextureMesh(meshs);
 
 		//Get Bones
 		auto allObj = mFbxScene->getAllObjects();
@@ -378,17 +380,21 @@ namespace dyno
 		std::map<std::string, std::string> parentTag;
 		std::map<std::string, std::shared_ptr<ModelObject>> nameParentObj;
 
+		std::vector<std::shared_ptr<Bone>> bonesInfo;
 		for (size_t objId = 0; objId < objCount; objId++)
 		{
 			//Bone
 			if (allObj[objId]->getType() == ofbx::Object::Type::LIMB_NODE)
 			{
-				pushBone(allObj[objId],parentTag, nameParentObj);
+				pushBone(allObj[objId],parentTag, nameParentObj, bonesInfo);
 			}
 		}
 
 		buildHierarchy(parentTag, nameParentObj);
 
+		updateHierarchicalScene(meshs, bonesInfo);
+
+		//Update joints animation curve;
 		for (int i = 0, n = mFbxScene->getAnimationStackCount(); i < n; ++i) {
 			const ofbx::AnimationStack* stack = mFbxScene->getAnimationStack(i);
 			for (int j = 0; stack->getLayer(j); ++j) {
@@ -396,19 +402,16 @@ namespace dyno
 				for (int k = 0; layer->getCurveNode(k); ++k) {
 					const ofbx::AnimationCurveNode* node = layer->getCurveNode(k);
 					auto nodeTrans = node->getNodeLocalTransform(0);	
-					//std::cout << node->name << " - transform: " << nodeTrans.x << ", "<< nodeTrans.y <<", "<< nodeTrans.z <<"\n";
 
 					char property[32];
 					node->getBoneLinkProperty().toString(property);
 
-					getCurveValue(node);
-					
+					getCurveValue(node);	
 				}
 			}
 		}
 
 
-		updateHierarchicalScene();
 
 		delete[] content;
 		fclose(fp);
@@ -432,9 +435,9 @@ namespace dyno
 	{
 		auto filename = this->varFileName()->getData();
 		std::string filepath = filename.string();
-		mMeshs.clear();
-		mBones.clear();
+
 		this->stateHierarchicalScene()->getDataPtr()->clear();
+		this->stateTextureMesh()->getDataPtr()->clear();
 
 		initFBX(filepath.c_str());
 

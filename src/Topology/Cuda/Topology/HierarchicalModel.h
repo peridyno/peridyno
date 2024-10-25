@@ -4,8 +4,9 @@
 #include "AnimationCurve.h"
 #include <iterator>
 #include <random>
-
+#include "TextureMesh.h"
 #include "Quat.h"
+
 namespace dyno
 {
 	class ModelObject;
@@ -56,15 +57,36 @@ namespace dyno
 	public:
 		Bone() {};
 
-
-
-
 	};
+
+	class MeshInfo : public ModelObject
+	{
+	public:
+		MeshInfo() {};
+
+		std::vector<Vec3f> vertices;
+		std::vector<int> verticeId_pointId;
+		std::vector<Vec3f> normals;
+		std::vector<Vec2f> texcoords;
+		std::vector<Vec3f> verticesColor;
+		std::vector<std::vector<TopologyModule::Triangle>> facegroup_triangles;
+		std::vector<CArrayList<uint>> facegroup_polygons;
+
+		std::vector<std::shared_ptr<Material>> materials;
+
+		std::vector<TAlignedBox3D<Real>> boundingBox;
+		std::vector<Transform3f> boundingTransform;
+	};
+
 
 	class HierarchicalScene : public Object
 	{
 	public:
-		HierarchicalScene() {}
+		HierarchicalScene() 
+		{
+			mTimeStart = -1;
+			mTimeEnd = -1;
+		}
 		~HierarchicalScene() { clear(); }
 
 		void clear() 
@@ -72,7 +94,17 @@ namespace dyno
 			mModelObjects.clear();
 		}
 
-		std::vector<std::shared_ptr<ModelObject>> mModelObjects;
+		int findMeshIndexByName(std::string name)
+		{
+			int id = 0;
+			for (auto it : mMeshs) {
+				if (it->name == name)
+					return id;
+
+				id++;
+			}
+			return -1;
+		}
 
 		std::shared_ptr<ModelObject> getObjectByName(std::string name)
 		{
@@ -85,6 +117,23 @@ namespace dyno
 
 			return nullptr;
 		}
+
+		int getObjIndexByName(std::string name)
+		{
+			int id = 0;
+			for (auto it : mModelObjects) {
+				if (it->name == name)
+					return id;
+
+				id++;
+			}
+			return -1;
+		}
+
+	public:
+
+		std::vector<std::shared_ptr<ModelObject>> mModelObjects;
+		std::vector<std::shared_ptr<MeshInfo>> mMeshs;
 
 		float mTimeStart = -1;
 		float mTimeEnd = -1;
