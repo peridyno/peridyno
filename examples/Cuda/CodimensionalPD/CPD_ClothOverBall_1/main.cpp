@@ -26,12 +26,22 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->loadCube(Vec3f(-1.5, 0, -1.5), Vec3f(1.5, 3, 1.5), 0.005f, true);
 	boundary->loadSDF(getAssetPath() + "cloth_shell/ball/ball_small_size_15.sdf", false);
 
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 500, 0.0005, 1e-3));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->setDt(0.001f);
 	cloth->loadSurface(getAssetPath() + "cloth_shell/cloth_size_17_alt/cloth_40k_1.obj");
 	cloth->connect(boundary->importTriangularSystems());
-	cloth->setGrad_ite_eps(0);
-	cloth->setMaxIteNumber(10);
+	{
+		auto solver = cloth->animationPipeline()->findFirstModule<CoSemiImplicitHyperelasticitySolver<DataType3f>>();
+
+		solver->setGrad_res_eps(0);
+		solver->varIterationNumber()->setValue(10);
+
+		solver->setS(0.1);
+		solver->setXi(0.15);
+		solver->setE(500);
+		solver->setK_bend(0.0005);
+	}
+
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRendererCloth->setColor(Color(0.4, 0.4, 1.0));
 

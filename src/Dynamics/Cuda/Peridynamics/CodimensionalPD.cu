@@ -6,11 +6,6 @@
 #include "Mapping/PointSetToPointSet.h"
 
 #include "Module/CoSemiImplicitHyperelasticitySolver.h"
-#include "Module/DamplingParticleIntegrator.h"
-
-
-#include "Module/DragSurfaceInteraction.h"
-#include "Module/DragVertexInteraction.h"
 
 namespace dyno
 {
@@ -21,29 +16,15 @@ namespace dyno
 		: TriangularSystem<TDataType>()
 	{
 		this->varHorizon()->setValue(0.0085);
-		auto interaction = std::make_shared<DragVertexInteraction<TDataType>>();
-		interaction->varCacheEvent()->setValue(false);
-		this->stateTriangleSet()->connect(interaction->inInitialTriangleSet());
-		this->statePosition()->connect(interaction->inPosition());
-		this->stateVelocity()->connect(interaction->inVelocity());
-		this->stateAttribute()->connect(interaction->inAttribute());
-		this->stateTimeStep()->connect(interaction->inTimeStep());
-		this->animationPipeline()->pushModule(interaction);
 
-		auto integrator = std::make_shared<DamplingParticleIntegrator<TDataType>>();
+		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());
 		this->statePosition()->connect(integrator->inPosition());
 		this->stateVelocity()->connect(integrator->inVelocity());
 		this->stateAttribute()->connect(integrator->inAttribute());
-		this->stateDynamicForce()->connect(integrator->inDynamicForce());
-		this->stateNorm()->connect(integrator->inNorm());
-		integrator->inMu()->setValue(0.00);
-		integrator->inAirDisspation()->setValue(1.0);
-		this->stateContactForce()->connect(integrator->inContactForce());
 		this->animationPipeline()->pushModule(integrator);
 
 		auto hyperElasticity = std::make_shared<CoSemiImplicitHyperelasticitySolver<TDataType>>();
-		this->mHyperElasticity = hyperElasticity;
 		this->varHorizon()->connect(hyperElasticity->inHorizon());
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
 		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
@@ -57,28 +38,8 @@ namespace dyno
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateMaxLength()->connect(hyperElasticity->inUnit());
 		this->stateOldPosition()->connect(hyperElasticity->inOldPosition());
-		this->stateMarchPosition()->connect(hyperElasticity->inMarchPosition());
-		this->stateDynamicForce()->connect(hyperElasticity->inDynamicForce());
 		this->stateTriangleSet()->connect(hyperElasticity->inTriangularMesh());
-		this->stateContactForce()->connect(hyperElasticity->inContactForce());
 
-	
-		hyperElasticity->setS(0.1);
-		hyperElasticity->setXi(0.15);
-		hyperElasticity->setE(2000.0);
-		hyperElasticity->setK_bend(0.01);
-		
-
-		auto contact = hyperElasticity->getContactRulePtr();
-		this->stateTriangleSet()->connect(contact->inTriangularMesh());
-		this->stateOldPosition()->connect(contact->inOldPosition());
-		this->stateVelocity()->connect(contact->inVelocity());
-		this->stateTimeStep()->connect(contact->inTimeStep());
-		this->stateMaxLength()->connect(contact->inUnit());
-		this->stateMarchPosition()->connect(contact->inNewPosition());
-
-
-		
 		this->animationPipeline()->pushModule(hyperElasticity);
 		
 		EnergyModels<Real> funcs;
@@ -93,85 +54,6 @@ namespace dyno
 		this->varEnergyModel()->setValue(funcs);
 
 		this->setDt(0.001f);
-	}
-
-	template<typename TDataType>
-	CodimensionalPD<TDataType>::CodimensionalPD(Real Xi_IN, Real E_IN, Real kb_IN, Real timeStep = 1e-3,
-		std::string name = "default"): TriangularSystem<TDataType>(){
-
-		this->varHorizon()->setValue(0.0085);
-		auto interaction = std::make_shared<DragVertexInteraction<TDataType>>();
-		interaction->varCacheEvent()->setValue(false);
-		this->stateTriangleSet()->connect(interaction->inInitialTriangleSet());
-		this->statePosition()->connect(interaction->inPosition());
-		this->stateVelocity()->connect(interaction->inVelocity());
-		this->stateAttribute()->connect(interaction->inAttribute());
-		this->stateTimeStep()->connect(interaction->inTimeStep());
-		this->animationPipeline()->pushModule(interaction);
-		this->stateTimeStep()->setValue(timeStep);
-		this->setDt(timeStep);
-
-		auto integrator = std::make_shared<DamplingParticleIntegrator<TDataType>>();
-		this->stateTimeStep()->connect(integrator->inTimeStep());
-		this->statePosition()->connect(integrator->inPosition());
-		this->stateVelocity()->connect(integrator->inVelocity());
-		this->stateAttribute()->connect(integrator->inAttribute());
-		this->stateNorm()->connect(integrator->inNorm());
-		integrator->inMu()->setValue(0.00);
-		integrator->inAirDisspation()->setValue(0.999);
-		this->stateContactForce()->connect(integrator->inContactForce());
-		this->stateDynamicForce()->connect(integrator->inDynamicForce());
-		this->animationPipeline()->pushModule(integrator);
-
-		auto hyperElasticity = std::make_shared<CoSemiImplicitHyperelasticitySolver<TDataType>>();
-		this->mHyperElasticity = hyperElasticity;
-		this->varHorizon()->connect(hyperElasticity->inHorizon());
-		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
-		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
-		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
-		this->stateRestPosition()->connect(hyperElasticity->inX());
-		this->statePosition()->connect(hyperElasticity->inY());
-		this->stateVelocity()->connect(hyperElasticity->inVelocity());
-		this->stateRestNorm()->connect(hyperElasticity->inRestNorm());
-		this->stateNorm()->connect(hyperElasticity->inNorm());
-		this->stateRestShape()->connect(hyperElasticity->inBonds());
-		this->stateAttribute()->connect(hyperElasticity->inAttribute());
-		this->stateMaxLength()->connect(hyperElasticity->inUnit());
-		this->stateOldPosition()->connect(hyperElasticity->inOldPosition());
-		this->stateMarchPosition()->connect(hyperElasticity->inMarchPosition());
-		this->stateDynamicForce()->connect(hyperElasticity->inDynamicForce());
-		this->stateTriangleSet()->connect(hyperElasticity->inTriangularMesh());
-		this->stateContactForce()->connect(hyperElasticity->inContactForce());
-
-
-		hyperElasticity->setS(0.1);
-		hyperElasticity->setXi(Xi_IN);
-		hyperElasticity->setE(E_IN);
-		hyperElasticity->setK_bend(kb_IN);
-
-
-		auto contact = hyperElasticity->getContactRulePtr();
-		this->stateTriangleSet()->connect(contact->inTriangularMesh());
-		this->stateOldPosition()->connect(contact->inOldPosition());
-		this->stateVelocity()->connect(contact->inVelocity());
-		this->stateTimeStep()->connect(contact->inTimeStep());
-		this->stateMaxLength()->connect(contact->inUnit());
-		this->stateMarchPosition()->connect(contact->inNewPosition());
-
-
-
-		this->animationPipeline()->pushModule(hyperElasticity);
-
-		EnergyModels<Real> funcs;
-		Real s0 = hyperElasticity->getS0(E_IN, kb_IN);
-		Real s1 = hyperElasticity->getS1(E_IN, kb_IN);
-		funcs.linearModel = LinearModel<Real>(48000, 12000);
-		funcs.neohookeanModel = NeoHookeanModel<Real>(s0,s1);
-		funcs.stvkModel = StVKModel<Real>(1, 12000);
-		funcs.xuModel = XuModel<Real>(hyperElasticity->getE());
-		funcs.fiberModel = FiberModel<Real>(1, 1, 1);
-
-		this->varEnergyModel()->setValue(funcs);
 	}
 
 	template<typename TDataType>
@@ -368,35 +250,14 @@ namespace dyno
 		triSet->updateAngleWeightedVertexNormal(this->stateRestNorm()->getData());
 
 	
-		this->stateNorm()->resize(vNum);
-		this->stateNorm()->getData().assign(this->stateRestNorm()->getData(), this->stateRestNorm()->getData().size());
+		this->stateNorm()->assign(this->stateRestNorm()->getData());
 
 		
-		this->stateRestPosition()->resize(vNum);
 		this->stateRestPosition()->assign(triSet->getPoints());
-
-		this->stateVerticesRef()->resize(vNum);
-		this->stateVerticesRef()->getData().assign(triSet->getPoints(), triSet->getPoints().size());
 	
-		this->stateOldPosition()->resize(vNum);
-		this->stateOldPosition()->getData().assign(triSet->getPoints(), triSet->getPoints().size());
+		this->stateOldPosition()->assign(triSet->getPoints());
 
-		this->stateMarchPosition()->resize(vNum);
-		this->stateMarchPosition()->getData().assign(triSet->getPoints(), triSet->getPoints().size());
-
-		this->stateAttribute()->resize(vNum);
-		this->stateAttribute()->getData().assign(host_attribute, host_attribute.size());
-
-
-		this->stateVertexRotation()->resize(vNum);
-
-		this->stateDynamicForce()->resize(vNum);
-
-		this->stateContactForce()->resize(vNum);
-
-		cuExecute(vNum,
-			InitRotation,
-			this->stateVertexRotation()->getData());
+		this->stateAttribute()->assign(host_attribute);
 
 		host_attribute.clear();
 
@@ -405,7 +266,6 @@ namespace dyno
 
 		this->updateVolume();
 		this->updateRestShape();
-		printf("end of reset States\n");
 	}
 
 

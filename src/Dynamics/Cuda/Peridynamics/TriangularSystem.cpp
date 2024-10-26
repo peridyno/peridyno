@@ -19,17 +19,6 @@ namespace dyno
 		//Create a node for surface mesh rendering
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		this->stateTriangleSet()->setDataPtr(triSet);
-
-		this->FixedIds.allocate();
-		this->FixedPos.allocate();
-
-		auto m_fixed = std::make_shared<FixedPoints<TDataType>>();
-		this->statePosition()->connect(m_fixed->inPosition());
-		this->stateVelocity()->connect(m_fixed->inVelocity());
-		this->FixedIds.connect(&m_fixed->FixedIds);
-		this->FixedPos.connect(&m_fixed->FixedPos);
-		//this->animationPipeline()->pushModule(m_fixed);
-		this->animationPipeline()->pushModule(m_fixed);
 	}
 
 	template<typename TDataType>
@@ -38,30 +27,9 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TriangularSystem<TDataType>::updateTopology()
-	{
-		auto triSet = this->stateTriangleSet()->getDataPtr();
-
-		triSet->getPoints().assign(this->statePosition()->getData());
-	}
-
-// 	template<typename TDataType>
-// 	std::shared_ptr<Node> TriangleSystem<TDataType>::getSurface()
-// 	{
-// 		return mSurfaceNode;
-// 	}
-	
-	template<typename TDataType>
 	void TriangularSystem<TDataType>::loadSurface(std::string filename)
 	{
 		this->stateTriangleSet()->getDataPtr()->loadObjFile(filename);
-	}
-
-	template<typename TDataType>
-	void TriangularSystem<TDataType>::addFixedParticle(int id, Coord pos)
-	{
-		m_fixedIds.push_back(id);
-		m_fixedPos.push_back(pos);
 	}
 
 	template<typename TDataType>
@@ -88,26 +56,26 @@ namespace dyno
 		auto triSet = this->stateTriangleSet()->getDataPtr();
 		if (triSet == nullptr) return;
 
-		printf("m_fixedPos size = %d\n", m_fixedIds.size());
-		this->FixedIds.resize(m_fixedIds.size());
-		this->FixedPos.resize(m_fixedIds.size());
-		
-		this->FixedIds.getData().assign(m_fixedIds);
-		this->FixedPos.getData().assign(m_fixedPos);
-		
 		auto& pts = triSet->getPoints();
 
 		if (pts.size() > 0)
 		{
 			this->statePosition()->resize(pts.size());
 			this->stateVelocity()->resize(pts.size());
-			this->stateForce()->resize(pts.size());
 
 			this->statePosition()->getData().assign(pts);
 			this->stateVelocity()->getDataPtr()->reset();
 		}
 
 		Node::resetStates();
+	}
+
+	template<typename TDataType>
+	void TriangularSystem<TDataType>::postUpdateStates()
+	{
+		auto triSet = this->stateTriangleSet()->getDataPtr();
+
+		triSet->getPoints().assign(this->statePosition()->getData());
 	}
 
 	DEFINE_CLASS(TriangularSystem);

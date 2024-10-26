@@ -11,6 +11,9 @@
 #include <GLSurfaceVisualModule.h>
 #include "TriangleMeshWriter.h"
 #include "Peridynamics/CodimensionalPD.h"
+#include "Peridynamics/Module/DragSurfaceInteraction.h"
+#include "Peridynamics/Module/DragVertexInteraction.h"
+
 #include "StaticTriangularMesh.h"
 using namespace std;
 using namespace dyno;
@@ -29,11 +32,33 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->loadCube(Vec3f(-1.5,0,-1.5), Vec3f(1.5,3,1.5), 0.005f, true);
 	boundary->loadSDF(getAssetPath() + "cloth_shell/v1/woman_v1.sdf", false);
 
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.02, 1000,0.1,5e-4));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->loadSurface(getAssetPath() + "cloth_shell/v1/cloth_highMesh.obj");
 	cloth->connect(boundary->importTriangularSystems()); 
-	cloth->setMaxIteNumber(10);
-	cloth->setContactMaxIte(20);
+	cloth->setDt(5e-4);
+
+	{
+		auto solver = cloth->animationPipeline()->findFirstModule<CoSemiImplicitHyperelasticitySolver<DataType3f>>();
+
+		solver->setContactMaxIte(20);
+		solver->varIterationNumber()->setValue(10);
+
+		solver->setS(0.1);
+		solver->setXi(0.02);
+		solver->setE(1000);
+		solver->setK_bend(0.1);
+	}
+
+	{
+		auto interaction = std::make_shared<DragVertexInteraction<DataType3f>>();
+		interaction->varCacheEvent()->setValue(false);
+		cloth->stateTriangleSet()->connect(interaction->inInitialTriangleSet());
+		cloth->statePosition()->connect(interaction->inPosition());
+		cloth->stateVelocity()->connect(interaction->inVelocity());
+		cloth->stateAttribute()->connect(interaction->inAttribute());
+		cloth->stateTimeStep()->connect(interaction->inTimeStep());
+		cloth->animationPipeline()->pushModule(interaction);
+	}
 
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRendererCloth->setColor(Color(0.4,0.4,1.0));

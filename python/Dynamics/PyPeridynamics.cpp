@@ -7,7 +7,6 @@ void pybind_peridynamics(py::module& m)
 	declare_contact_rule<dyno::DataType3f>(m, "3f");
 	declare_linear_elasticity_solver<dyno::DataType3f>(m, "3f");
 	declare_co_semi_implicit_hyperelasticity_solver<dyno::DataType3f>(m, "3f");
-	declare_dampling_particle_integrator<dyno::DataType3f>(m, "3f");
 	declare_drag_surface_interaction<dyno::DataType3f>(m, "3f");
 	declare_drag_vertex_interaction<dyno::DataType3f>(m, "3f");
 	declare_elastoplasticity_module<dyno::DataType3f>(m, "3f");

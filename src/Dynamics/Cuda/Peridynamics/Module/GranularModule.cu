@@ -4,6 +4,8 @@
 
 namespace dyno
 {
+	IMPLEMENT_TCLASS(GranularModule, TDataType)
+
 	template<typename TDataType>
 	GranularModule<TDataType>::GranularModule()
 		: ElastoplasticityModule<TDataType>()

@@ -1,12 +1,5 @@
-//#include <cuda_runtime.h>
 #include "ElastoplasticityModule.h"
-#include "Node.h"
 #include "Matrix/MatrixFunc.h"
-//#include "ParticleSystem/Kernel.h"
-#include "ParticleSystem/Module/Kernel.h"
-//#include <thrust/scan.h>
-//#include <thrust/reduce.h>
-//#include "svd3_cuda2.h"
 
 namespace dyno
 {
@@ -16,14 +9,8 @@ namespace dyno
 	ElastoplasticityModule<TDataType>::ElastoplasticityModule()
 		: LinearElasticitySolver<TDataType>()
 	{
-		this->attachField(&m_c, "c", "cohesion!", false);
-		this->attachField(&m_phi, "phi", "friction angle!", false);
-
-		m_c.setValue(0.001);
-		m_phi.setValue(60.0 / 180.0);
-
-		m_reconstuct_all_neighborhood.setValue(false);
-		m_incompressible.setValue(true);
+		this->varCohesion()->setRange(0.0f, 1.0f);
+		this->varFrictionAngle()->setRange(0.0f, 1.0f);
 
 		mDensityPBD = std::make_shared<IterativeDensitySolver<TDataType>>();
 		mDensityPBD->varIterationNumber()->setValue(1);
@@ -32,6 +19,16 @@ namespace dyno
 		this->inY()->connect(mDensityPBD->inPosition());
 		this->inVelocity()->connect(mDensityPBD->inVelocity());
 		this->inNeighborIds()->connect(mDensityPBD->inNeighborIds());
+	}
+
+	template<typename TDataType>
+	ElastoplasticityModule<TDataType>::~ElastoplasticityModule()
+	{
+		m_bYield.clear();
+		m_invF.clear();
+		m_yiled_I1.clear();
+		m_yield_J2.clear();
+		m_I1.clear();
 	}
 
 	__device__ Real Hardening(Real rho)
@@ -57,7 +54,6 @@ namespace dyno
 		DArray<Real> arrI1,
 		DArray<Coord> X,
 		DArray<Coord> Y,
-		DArray<Real> density,
 		DArray<Real> bulk_stiffiness,
 		DArrayList<Bond> bonds,
 		Real horizon,
@@ -84,6 +80,7 @@ namespace dyno
 		//compute the first and second invariants of the deformation state, i.e., I1 and J2
 		int size_i = bonds_i.size();
 		Real total_weight = Real(0);
+		// Compute e^{iso} in Equation (16)
 		for (int ne = 0; ne < size_i; ne++)
 		{
 			Bond bond_ij = bonds_i[ne];
@@ -113,6 +110,7 @@ namespace dyno
 			I1_i = 1.0f;
 		}
 
+		// Compute e^{dev} in Equation (16)
 		for (int ne = 0; ne < size_i; ne++)
 		{
 			Bond bond_ij = bonds_i[ne];
@@ -143,20 +141,19 @@ namespace dyno
 		Real yield_I1_i = 0.0f;
 		Real yield_J2_i = 0.0f;
 
+		//Equation (17)
 		Real s_J2 = J2_i*mu*bulk_stiffiness[i];
 		Real s_D1 = D1*lambda*bulk_stiffiness[i];
 
-		//Drucker-Prager yield criterion
+		//Drucker-Prager yield criterion not violated
 		if (s_J2 <= s_A + B*s_D1)
 		{
-			//bulk_stiffiness[i] = 10.0f;
-			//invDeform[i] = Matrix::identityMatrix();
 			yield_I1[i] = Real(0);
 			yield_J2[i] = Real(0);
 
 			bYield[i] = false;
 		}
-		else
+		else //Equation (18)
 		{
 			//bulk_stiffiness[i] = 0.0f;
 			if (s_A + B*s_D1 > 0.0f)
@@ -179,6 +176,7 @@ namespace dyno
 			yield_I1[i] = yield_I1_i;
 			yield_J2[i] = yield_J2_i;
 		}
+
 		arrI1[i] = I1_i;
 	}
 
@@ -274,7 +272,7 @@ namespace dyno
 		while (iter < total)
 		{
 			this->enforceElasticity();
-			if (m_incompressible.getData() == true) {
+			if (this->varIncompressible()->getValue() == true) {
 				mDensityPBD->update();
 			}
 			
@@ -295,7 +293,6 @@ namespace dyno
 		this->reconstructRestShape();
 	}
 
-
 	template<typename TDataType>
 	void ElastoplasticityModule<TDataType>::applyYielding()
 	{
@@ -312,7 +309,6 @@ namespace dyno
 			m_I1,
 			this->inX()->getData(),
 			this->inY()->getData(),
-			mDensityPBD->outDensity()->getData(),
 			this->mBulkStiffness,
 			this->inBonds()->getData(),
 			this->inHorizon()->getData(),
@@ -331,7 +327,6 @@ namespace dyno
 			this->inBonds()->getData());
 		cuSynchronize();
 	}
-
 
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void PM_ReconstructRestShape(
@@ -506,7 +501,7 @@ namespace dyno
 
 		auto& pts = this->inY()->getData();
 		
-		if (m_reconstuct_all_neighborhood.getData())
+		if (this->varRenewNeighborhood()->getValue())
 		{
 			cuExecute(m_bYield.size(),
 				PM_EnableAllReconstruction,
@@ -547,41 +542,12 @@ namespace dyno
 			this->inBonds()->getData(),
 			this->inHorizon()->getData());
 
-		this->inBonds()->getDataPtr()->assign(newBonds);
+		this->inBonds()->assign(newBonds);
 
 		newBonds.clear();
 		index.clear();
 		cuSynchronize();
 	}
-
-
-	template<typename TDataType>
-	void ElastoplasticityModule<TDataType>::enableFullyReconstruction()
-	{
-		m_reconstuct_all_neighborhood.setValue(true);
-	}
-
-
-
-	template<typename TDataType>
-	void ElastoplasticityModule<TDataType>::disableFullyReconstruction()
-	{
-		m_reconstuct_all_neighborhood.setValue(false);
-	}
-
-
-	template<typename TDataType>
-	void ElastoplasticityModule<TDataType>::enableIncompressibility()
-	{
-		m_incompressible.setValue(true);
-	}
-
-	template<typename TDataType>
-	void ElastoplasticityModule<TDataType>::disableIncompressibility()
-	{
-		m_incompressible.setValue(false);
-	}
-
 
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void EM_RotateRestShape(
@@ -676,19 +642,6 @@ namespace dyno
 			this->inBonds()->getData(),
 			this->inHorizon()->getData());
 		cuSynchronize();
-	}
-
-	template<typename TDataType>
-	void ElastoplasticityModule<TDataType>::setCohesion(Real c)
-	{
-		m_c.setValue(c);
-	}
-
-
-	template<typename TDataType>
-	void ElastoplasticityModule<TDataType>::setFrictionAngle(Real phi)
-	{
-		m_phi.setValue(phi/180);
 	}
 
 	DEFINE_CLASS(ElastoplasticityModule);

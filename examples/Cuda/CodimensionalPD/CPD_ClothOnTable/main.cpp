@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
 #include <Log.h>
@@ -25,7 +25,7 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->loadCube(Vec3f(-1.5, 0, -1.5), Vec3f(1.5, 3, 1.5), 0.005f, true);
 	boundary->loadSDF(getAssetPath() + "cloth_shell/table/table.sdf", false);
 
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.3,8000,0.003,7e-4));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	//also try:
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.3, 8000, 0.03,7e-4));
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.3, 8000, 0.3,7e-4));
@@ -53,7 +53,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(createScene());
 
 	window.initialize(1024, 768);

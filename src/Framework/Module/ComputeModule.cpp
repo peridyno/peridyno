@@ -1,5 +1,4 @@
 #include "ComputeModule.h"
-#include "Node.h"
 
 namespace dyno
 {

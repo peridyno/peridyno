@@ -255,7 +255,6 @@ namespace dyno
 		: ConstraintModule()
 	{
 		this->inHorizon()->setValue(0.0125);
-		this->inNeighborIds()->tagOptional(true);
 	}
 
 

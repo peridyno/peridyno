@@ -8,7 +8,7 @@
 #include "Collision/NeighborPointQuery.h"
 
 #include "Module/LinearElasticitySolver.h"
-#include "Module/Peridynamics.h"
+#include "Module/ProjectivePeridynamics.h"
 #include "Module/FixedPoints.h"
 
 #include "SharedFunc.h"
