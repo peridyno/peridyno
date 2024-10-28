@@ -316,6 +316,8 @@ namespace dyno {
 
 		void reset();
 
+		void clear();
+
 		void assign(const CArray2D<T>& vals);
 		void assign(const DArray2D<T>& vals);
 
@@ -376,6 +378,18 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
+	void FArray2D<T, deviceType>::clear()
+	{
+		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<Array2D<T, deviceType>>();
+		}
+
+		data->clear();
+	}
+
+	template<typename T, DeviceType deviceType>
 	void FArray2D<T, deviceType>::resize(uint nx, uint ny)
 	{
 		std::shared_ptr<Array2D<T, deviceType>>& data = this->getDataPtr();
@@ -412,6 +426,8 @@ namespace dyno {
 		void resize(const uint nx, const uint ny, const uint nz);
 
 		void reset();
+
+		void clear();
 
 		void assign(const CArray3D<T>& vals);
 		void assign(const DArray3D<T>& vals);
@@ -470,6 +486,18 @@ namespace dyno {
 	}
 
 	template<typename T, DeviceType deviceType>
+	void FArray3D<T, deviceType>::clear()
+	{
+		std::shared_ptr<FArray3D<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<FArray3D<T, deviceType>>();
+		}
+
+		data->clear();
+	}
+
+	template<typename T, DeviceType deviceType>
 	void FArray3D<T, deviceType>::resize(const uint nx, const uint ny, const uint nz)
 	{
 		std::shared_ptr<Array3D<T, deviceType>>& data = this->getDataPtr();
@@ -506,6 +534,8 @@ namespace dyno {
 		void resize(uint num);
 
 		void resize(const Array<int, deviceType>& arr);
+
+		void clear();
 
 		void assign(const ArrayList<T, DeviceType::CPU>& src);
 		void assign(const ArrayList<T, DeviceType::GPU>& src);
@@ -574,6 +604,18 @@ namespace dyno {
 		data->resize(arr);
 
 		//this->tick();
+	}
+
+	template<typename T, DeviceType deviceType>
+	void FArrayList<T, deviceType>::clear()
+	{
+		std::shared_ptr<ArrayList<T, deviceType>>& data = this->getDataPtr();
+		if (data == nullptr)
+		{
+			data = std::make_shared<ArrayList<T, deviceType>>();
+		}
+
+		data->clear();
 	}
 #endif
 

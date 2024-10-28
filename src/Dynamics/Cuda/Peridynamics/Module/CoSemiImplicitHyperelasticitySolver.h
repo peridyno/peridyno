@@ -42,11 +42,11 @@ namespace dyno
 
 		DEF_ARRAY_IN(Coord, RestNorm, DeviceType::GPU, "Vertex Rest Normal");
 
+		DEF_ARRAY_IN(Coord, Norm, DeviceType::GPU, "Vertex Normal");
+
 		DEF_ARRAY_IN(Coord, OldPosition, DeviceType::GPU, "");
 
-		DEF_ARRAY_IN(Coord, MarchPosition, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Coord, Norm, DeviceType::GPU, "Vertex Normal");
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle Attribute");
 
 		DEF_VAR_IN(Real, Unit, "mesh unit");
 
@@ -54,7 +54,7 @@ namespace dyno
 
 		void setXi(Real xi_) { 
 			this->xi = xi_; 
-			mContactRule->inXi()->setValue(this->xi);
+			mContactRule->varXi()->setValue(this->xi);
 		}
 
 		void setK_bend(Real k) {
@@ -81,7 +81,7 @@ namespace dyno
 		}
 		void setS(Real s_) {
 			this->s = s_;
-			mContactRule->inS()->setValue(this->s);
+			mContactRule->varS()->setValue(this->s);
 		}
 
 		Real getS(Real E, Real nv) { return this->s; }
@@ -101,12 +101,9 @@ namespace dyno
 		}
 
 	public:
-		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle Attribute");
 		std::shared_ptr<ContactRule<TDataType>> getContactRulePtr() {
 			return mContactRule;
 		}
-		DEF_ARRAY_IN(Coord, DynamicForce, DeviceType::GPU, "");
-		DEF_ARRAY_IN(Coord, ContactForce, DeviceType::GPU, "");
 	protected:
 		void initializeVolume();
 		void enforceHyperelasticity();
@@ -139,6 +136,7 @@ namespace dyno
 		DArray<Matrix> m_matV;
 		DArray<Matrix> m_matR;
 		DArray<Coord> y_current;
+		DArray<Coord> y_next;
 		DArray<Coord> y_pre;
 		DArray<Coord> y_residual;
 		DArray<Coord> y_gradC;

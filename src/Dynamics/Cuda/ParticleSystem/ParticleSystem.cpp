@@ -53,17 +53,13 @@ namespace dyno
 	void ParticleSystem<TDataType>::resetStates()
 	{
 		auto ptSet = this->statePointSet()->getDataPtr();
-		if (ptSet == nullptr) return;
-
-		auto pts = ptSet->getPoints();
-
-		if (pts.size() > 0)
-		{
-			this->statePosition()->resize(pts.size());
-			this->stateVelocity()->resize(pts.size());
-
-			this->statePosition()->getData().assign(pts);
-			this->stateVelocity()->getDataPtr()->reset();
+		if (ptSet != nullptr) {
+			if (!this->statePosition()->isEmpty())
+			{
+				ptSet->setPoints(this->statePosition()->constData());
+			}
+			else
+				ptSet->clear();
 		}
 
 		Node::resetStates();

@@ -20,8 +20,6 @@ namespace dyno
 		TriangularSystem();
 		~TriangularSystem() override;
 
-		void addFixedParticle(int id, Coord pos);
-
 		virtual bool translate(Coord t);
 		virtual bool scale(Real s);
 
@@ -37,11 +35,6 @@ namespace dyno
 		 */
 		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Vertex velocity");
 
-		/**
-		 * @brief Vertex velocity
-		 */
-		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Vertex force");
-
 	public:
 		
 		void loadSurface(std::string filename);
@@ -49,16 +42,8 @@ namespace dyno
 		//std::shared_ptr<Node> getSurface();
 
 	protected:
-		void updateTopology() override;
 		void resetStates() override;
 
-		std::shared_ptr<Node> mSurfaceNode;
-
-		std::vector<int> m_fixedIds;
-		std::vector<Coord> m_fixedPos;
-
-		DeviceArrayField<int> FixedIds;
-		DeviceArrayField<Coord> FixedPos;
-//		virtual void setVisible(bool visible) override;
+		void postUpdateStates() override;
 	};
 }

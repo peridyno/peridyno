@@ -24,7 +24,7 @@ std::shared_ptr<SceneGraph> createScene()
 	
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
 	boundary->loadCube(Vec3f(-4, -1.5, -3), Vec3f(2, -0.001, 3), 0.005f, false);
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15,4000,0.005,0.0005));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	//can try£º
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15,8000,0.005,0.0005));
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15,2000,0.005,0.0005));

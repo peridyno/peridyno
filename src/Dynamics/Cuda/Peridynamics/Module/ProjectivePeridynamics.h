@@ -28,27 +28,26 @@ namespace dyno
 	*	Refer to He et al' "Projective peridynamics for modeling versatile elastoplastic materials" for details.
 	*/
 	template<typename TDataType>
-	class Peridynamics : public GroupModule
+	class ProjectivePeridynamics : public GroupModule
 	{
-		DECLARE_TCLASS(Peridynamics, TDataType)
+		DECLARE_TCLASS(ProjectivePeridynamics, TDataType)
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TBond<TDataType> Bond;
 
-		Peridynamics();
-		~Peridynamics() override {};
+		ProjectivePeridynamics();
+		~ProjectivePeridynamics() override {};
 
 	public:
-		DEF_VAR(Real, Horizon, 0.0085, "");
-
 		DEF_VAR_IN(Real, TimeStep, "Time step size!");
+
+		DEF_VAR_IN(Real, Horizon, "");
 
 		DEF_ARRAY_IN(Coord, X, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Y, DeviceType::GPU, "");
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
-		DEF_ARRAY_IN(Coord, Force, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_IN(Bond, Bonds, DeviceType::GPU, "Storing neighbors");
 

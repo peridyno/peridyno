@@ -27,8 +27,20 @@ namespace dyno {
 		typedef typename TBond<TDataType> Bond;
 
 		ElastoplasticityModule();
-		~ElastoplasticityModule() override {};
+		~ElastoplasticityModule() override;
 
+	public:
+		DEF_VAR(Real, Cohesion, 0.0, "Cohesion between particles");
+
+		DEF_VAR(Real, FrictionAngle, Real(1.0f / 3.0f), "Cohesion between particles");
+
+		DEF_VAR(bool, Incompressible, true, "Incompressible or not");
+
+		DEF_VAR(bool, RenewNeighborhood, false, "Whether to renew particle neighbors every time step");
+
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
+	
+	protected:
 		void constrain() override;
 
 		void solveElasticity() override;
@@ -40,39 +52,21 @@ namespace dyno {
 		void rotateRestShape();
 		void reconstructRestShape();
 
-		void setCohesion(Real c);
-		void setFrictionAngle(Real phi);
-
-		void enableFullyReconstruction();
-		void disableFullyReconstruction();
-
-		void enableIncompressibility();
-		void disableIncompressibility();
-
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
-
 	protected:
 		inline Real computeA()
 		{
-			Real phi = m_phi.getData();
-			return (Real)6.0 * m_c.getData() * cos(phi) / (3.0f + sin(phi)) / std::sqrt(3.0f);
+			Real phi = this->varFrictionAngle()->getValue() * M_PI;
+			return (Real)6.0 * this->varCohesion()->getValue() * cos(phi) / (3.0f + sin(phi)) / std::sqrt(3.0f);
 		}
 
 
 		inline Real computeB()
 		{
-			Real phi = m_phi.getData();
+			Real phi = this->varFrictionAngle()->getValue() * M_PI;
 			return (Real)2.0f * sin(phi) / (3.0f + sin(phi)) / std::sqrt(3.0f);
 		}
 
 	private:
-
-		FVar<Real> m_c;
-		FVar<Real> m_phi;
-
-		FVar<bool> m_reconstuct_all_neighborhood;
-		FVar<bool> m_incompressible;
-
 		DArray<bool> m_bYield;
 		DArray<Matrix> m_invF;
 		DArray<Real> m_yiled_I1;

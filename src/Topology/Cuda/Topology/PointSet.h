@@ -38,8 +38,8 @@ namespace dyno
 
 		void copyFrom(PointSet<TDataType>& pointSet);
 
-		void setPoints(std::vector<Coord>& pos);
-		void setPoints(DArray<Coord>& pos);
+		void setPoints(const std::vector<Coord>& pos);
+		void setPoints(const DArray<Coord>& pos);
 		void setSize(int size);
 		
 

@@ -45,9 +45,9 @@ namespace dyno
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangularMesh, "");
 
-		DEF_VAR_IN(Real, Xi, "Thickness");
+		DEF_VAR(Real, Xi, Real(0.15), "Thickness");
 
-		DEF_VAR_IN(Real, S, "Refactor s");
+		DEF_VAR(Real, S, Real(0.1), "Refactor s");
 
 		DEF_VAR_IN(Real, Unit, "Maximum primitive size (edge length)");
 

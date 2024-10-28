@@ -8,7 +8,7 @@
 #include "Collision/NeighborPointQuery.h"
 
 #include "Module/LinearElasticitySolver.h"
-#include "Module/Peridynamics.h"
+#include "Module/ProjectivePeridynamics.h"
 #include "Module/FixedPoints.h"
 
 #include "Auxiliary/DataSource.h"
@@ -66,7 +66,6 @@ namespace dyno
 
 		this->statePosition()->resize(pts.size());
 		this->stateVelocity()->resize(pts.size());
-		this->stateForce()->resize(pts.size());
 
 		this->statePosition()->assign(pts);
 		this->stateVelocity()->reset();
