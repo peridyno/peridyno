@@ -70,7 +70,6 @@ namespace dyno
 		this->inVelocity()->connect(pshiftModule->inVelocity());
 		nbrQuery->outNeighborIds()->connect(pshiftModule->inNeighborIds());
 		this->inTriangleSet()->connect(pshiftModule->inTriangleSet());
-		this->inAttribute()->connect(pshiftModule->inAttribute());
 		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
 		this->varSurfaceTension()->connect(pshiftModule->varSurfaceTension());
 		this->varAdhesionIntensity()->connect(pshiftModule->varAdhesionIntensity());

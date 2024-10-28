@@ -1,4 +1,4 @@
-#include "GlfwGUI/GlfwApp.h"
+#include "UbiApp.h"
 
 #include "SceneGraph.h"
 #include "Log.h"
@@ -100,7 +100,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp window;
+	UbiApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1920, 1080);
 	window.mainLoop();

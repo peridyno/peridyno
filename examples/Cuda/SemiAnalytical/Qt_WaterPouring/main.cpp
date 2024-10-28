@@ -78,7 +78,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//SFI node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
 
-	fluid->connect(sfi->importParticleSystems());
+	fluid->connect(sfi->importInitialStates());
 	merge->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	return scn;

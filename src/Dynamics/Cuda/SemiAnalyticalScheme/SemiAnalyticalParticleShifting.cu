@@ -205,7 +205,6 @@ namespace dyno {
 		DArray<Real> rhoArr,//rDensity
 		DArray<Coord> curPos,
 		DArray<Coord> originPos,
-		DArray<Attribute> attArr,
 		DArrayList<int> neighbors,
 		Real mass,
 		Real h,
@@ -216,7 +215,6 @@ namespace dyno {
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;
-		if (!attArr[pId].isDynamic()) return;
 
 		Real a1 = inertia;
 		Real a2 = bulk;
@@ -340,12 +338,10 @@ namespace dyno {
 	template <typename Coord>
 	__global__ void SAPS_UpdatePosition(
 		DArray<Coord> grads,
-		DArray<Coord> curPos,
-		DArray<Attribute> attArr)
+		DArray<Coord> curPos)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= curPos.size()) return;
-		if (!attArr[pId].isDynamic()) return;
 		
 		curPos[pId] += grads[pId];
 	}
@@ -355,45 +351,41 @@ namespace dyno {
 		DArray<Coord> velArr,
 		DArray<Coord> curArr,
 		DArray<Coord> originArr,
-		DArray<Attribute> attArr,
 		DArray<Coord> TriDir,//normal of boundary
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velArr.size()) return;
 
-		if (attArr[pId].isDynamic())
-		{
-			Plane3D PL(curArr[pId], TriDir[pId]);
-			Point3D origP(originArr[pId]);
-			Point3D projectedP = origP.project(PL);
-			Coord boundary_vec = projectedP.origin - curArr[pId];
-			if (boundary_vec.norm() > 0)
-				boundary_vec /= boundary_vec.norm();
+		Plane3D PL(curArr[pId], TriDir[pId]);
+		Point3D origP(originArr[pId]);
+		Point3D projectedP = origP.project(PL);
+		Coord boundary_vec = projectedP.origin - curArr[pId];
+		if (boundary_vec.norm() > 0)
+			boundary_vec /= boundary_vec.norm();
 
-			Real fr = 0.97f;//0.96f
-			boundary_vec *= fr;
-			boundary_vec[0] = 1.0f - abs(boundary_vec[0]);
-			boundary_vec[1] = 1.0f - abs(boundary_vec[1]);
-			boundary_vec[2] = 1.0f - abs(boundary_vec[2]);
+		Real fr = 0.97f;//0.96f
+		boundary_vec *= fr;
+		boundary_vec[0] = 1.0f - abs(boundary_vec[0]);
+		boundary_vec[1] = 1.0f - abs(boundary_vec[1]);
+		boundary_vec[2] = 1.0f - abs(boundary_vec[2]);
 
-			velArr[pId] += (curArr[pId] - originArr[pId]) / dt;
+		velArr[pId] += (curArr[pId] - originArr[pId]) / dt;
 
-			//*********boundary friction part
-			if (boundary_vec.norm() > 0) {
-				if (abs(boundary_vec[0]) > fr)
-					velArr[pId][0] *= boundary_vec[0];
-				else
-					velArr[pId][0] *= fr;
-				if (abs(boundary_vec[1]) > fr)
-					velArr[pId][1] *= boundary_vec[1];
-				else
-					velArr[pId][1] *= fr;
-				if (abs(boundary_vec[2]) > fr)
-					velArr[pId][2] *= boundary_vec[2];
-				else
-					velArr[pId][2] *= fr;
-			}
+		//*********boundary friction part
+		if (boundary_vec.norm() > 0) {
+			if (abs(boundary_vec[0]) > fr)
+				velArr[pId][0] *= boundary_vec[0];
+			else
+				velArr[pId][0] *= fr;
+			if (abs(boundary_vec[1]) > fr)
+				velArr[pId][1] *= boundary_vec[1];
+			else
+				velArr[pId][1] *= fr;
+			if (abs(boundary_vec[2]) > fr)
+				velArr[pId][2] *= boundary_vec[2];
+			else
+				velArr[pId][2] *= fr;
 		}
 	}
 
@@ -457,7 +449,6 @@ namespace dyno {
 				mCalculateDensity->outDensity()->getData(),
 				this->inPosition()->getData(),
 				mPosBuf,
-				this->inAttribute()->getData(),
 				this->inNeighborIds()->getData(),
 				mass,
 				this->inSmoothingLength()->getData(),
@@ -469,8 +460,7 @@ namespace dyno {
 			cuExecute(num,
 				SAPS_UpdatePosition,
 				mDeltaPos,
-				this->inPosition()->getData(),
-				this->inAttribute()->getData());
+				this->inPosition()->getData());
 		}
 
 		cuExecute(num,
@@ -478,7 +468,6 @@ namespace dyno {
 			this->inVelocity()->getData(),
 			this->inPosition()->getData(),
 			mPosBuf,
-			this->inAttribute()->getData(),
 			mBoundaryDir,
 			dt);
 	};

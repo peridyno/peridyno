@@ -24,8 +24,11 @@ namespace dyno
 
 	template<typename TDataType>
 	SemiAnalyticalSFINode<TDataType>::SemiAnalyticalSFINode()
-		: Node()
+		: ParticleFluid<TDataType>()
 	{
+		//Clear the animation pipeline in ParticleFluid
+		this->animationPipeline()->clear();
+
 		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
 		smoothingLength->setName("Smoothing Length");
 		smoothingLength->varValue()->setValue(Real(0.012));
@@ -72,6 +75,7 @@ namespace dyno
 		viscosity->varViscosity()->setValue(Real(0.5));//0.5
 		this->stateTimeStep()->connect(viscosity->inTimeStep());
 		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
+		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
 		this->statePosition()->connect(viscosity->inPosition());
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -88,7 +92,7 @@ namespace dyno
 		this->inTriangleSet()->connect(pshiftModule->inTriangleSet());
 // 		this->stateTriangleVertex()->connect(pshiftModule->inTriangleVer());
 // 		this->stateTriangleIndex()->connect(pshiftModule->inTriangleInd());
-		this->stateAttribute()->connect(pshiftModule->inAttribute());
+//		this->stateAttribute()->connect(pshiftModule->inAttribute());
 		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
 		this->animationPipeline()->pushModule(pshiftModule);
 
@@ -125,131 +129,23 @@ namespace dyno
 			this->stateTimeStep()->connect(pbd->inTimeStep());
 			this->statePosition()->connect(pbd->inPosition());
 			this->stateVelocity()->connect(pbd->inVelocity());
-			this->stateForceDensity()->connect(pbd->inForce());
-// 			this->stateTriangleVertex()->connect(pbd->inTriangleVertex());
-// 			this->stateTriangleIndex()->connect(pbd->inTriangleIndex());
 			this->inTriangleSet()->connect(pbd->inTriangleSet());
 			this->animationPipeline()->pushModule(pbd);
 		}
 
-		auto& particleSystems = this->getParticleSystems();
-
-		//add particle system
-		int pNum = 0;
-		for (int i = 0; i < particleSystems.size(); i++) {
-			pNum += particleSystems[i]->statePosition()->size();
-		}
-
-		this->statePosition()->resize(pNum);
-		this->stateVelocity()->resize(pNum);
-		this->stateForceDensity()->resize(pNum);
-		this->stateAttribute()->resize(pNum);
-
-		DArray<Coord>& allpoints = this->statePosition()->getData();
-		DArray<Coord>& allvels = this->stateVelocity()->getData();
-		DArray<Attribute>& allattrs = this->stateAttribute()->getData();
-
-		int offset = 0;
-		for (int i = 0; i < particleSystems.size(); i++)
-		{
-			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
-			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-
-			int num = points.size();
-			bool fixx = false;
-
-			
-			allpoints.assign(points, num, 0, offset);
-			allvels.assign(vels, num, 0, offset);
-
-			offset += num;
-		}
-		
-		SetupAttributesForSFI(allattrs);
-
-// 		auto triSet = this->inTriangleSet()->getDataPtr();
-// 		this->stateTriangleVertex()->assign(triSet->getPoints());
-// 		this->stateTriangleIndex()->assign(triSet->getTriangles());
+		ParticleFluid<TDataType>::resetStates();
 	}
 
 	template<typename TDataType>
 	void SemiAnalyticalSFINode<TDataType>::preUpdateStates()
 	{
-		auto& particleSystems = this->getParticleSystems();
-
-		int cur_num = this->statePosition()->size();
-
-		if (particleSystems.size() == 0)
-			return;
-
-		int new_num = 0;
-		for (int i = 0; i < particleSystems.size(); i++)
-		{
-			new_num += particleSystems[i]->statePosition()->size();
-		}
-
-		if (new_num != cur_num)
-		{
-			this->statePosition()->resize(new_num);
-			this->stateVelocity()->resize(new_num);
-			this->stateForceDensity()->resize(new_num);
-			this->stateAttribute()->resize(new_num);
-		}
-
-		if (this->statePosition()->size() <= 0)
-			return;
-
-		auto& new_pos = this->statePosition()->getData();
-		auto& new_vel = this->stateVelocity()->getData();
-		auto& new_force = this->stateForceDensity()->getData();
-		auto& new_atti = this->stateAttribute()->getData();
-
-		int offset = 0;
-		for (int i = 0; i < particleSystems.size(); i++)//update particle system
-		{
-			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
-			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-			int num = points.size();
-
-			new_pos.assign(points, num, offset);
-			new_vel.assign(vels, num, offset);
-
-			offset += num;
-		}
-
-		this->stateForceDensity()->reset();
-		SetupAttributesForSFI(new_atti);
-		
-// 		auto triSet = this->inTriangleSet()->getDataPtr();
-// 		this->stateTriangleVertex()->assign(triSet->getPoints());
-// 		this->stateTriangleIndex()->assign(triSet->getTriangles());
+		ParticleFluid<TDataType>::preUpdateStates();
 	}
 
 	template<typename TDataType>
 	void SemiAnalyticalSFINode<TDataType>::postUpdateStates()
 	{
-		auto& particleSystems = this->getParticleSystems();
-
-		if (particleSystems.size() <= 0 || this->stateVelocity()->size() <= 0)
-			return;
-
-		auto& new_pos = this->statePosition()->getData();
-		auto& new_vel = this->stateVelocity()->getData();
-		auto& new_force = this->stateForceDensity()->getData();
-		
-		uint offset = 0;
-		for (int i = 0; i < particleSystems.size(); i++)//extend current particles
-		{
-			DArray<Coord>& points = particleSystems[i]->statePosition()->getData();
-			DArray<Coord>& vels = particleSystems[i]->stateVelocity()->getData();
-
-			int num = points.size();
-
-			points.assign(new_pos, num, 0, offset);
-			vels.assign(new_vel, num, 0, offset);
-
-			offset += num;
-		}
+		ParticleFluid<TDataType>::postUpdateStates();
 	}
 
 	DEFINE_CLASS(SemiAnalyticalSFINode);

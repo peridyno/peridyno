@@ -79,7 +79,6 @@ void declare_semi_analytical_particle_shifting(py::module& m, std::string typest
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
 		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
 		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
 		.def("in_neighbor_tri_ids", &Class::inNeighborTriIds, py::return_value_policy::reference)
 		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference);
@@ -117,7 +116,6 @@ void declare_semi_analytical_position_based_fluid_model(py::module& m, std::stri
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
 		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_force", &Class::inForce, py::return_value_policy::reference)
 		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference);
 }
 
@@ -125,21 +123,15 @@ void declare_semi_analytical_position_based_fluid_model(py::module& m, std::stri
 template <typename TDataType>
 void declare_semi_analytical_sfi_node(py::module& m, std::string typestr) {
 	using Class = dyno::SemiAnalyticalSFINode<TDataType>;
-	using Parent = dyno::Node;
+	using Parent = dyno::ParticleFluid<TDataType>;
 	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_particle_system", &Class::getParticleSystems)
-		.def("add_particle_system", &Class::addParticleSystem)
-		.def("remove_particle_system", &Class::removeParticleSystem)
-		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
+		.def("import_initial_states", &Class::importInitialStates, py::return_value_policy::reference)
 		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
 		.def("var_fast", &Class::varFast, py::return_value_policy::reference)
-		.def("var_sync_boundary", &Class::varSyncBoundary, py::return_value_policy::reference)
 		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("state_force_density", &Class::stateForceDensity, py::return_value_policy::reference)
-		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference);
+		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalSummationDensity.h"

@@ -1,9 +1,8 @@
 #pragma once
-#include "Node.h"
+#include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"
 
-#include "Collision/Attribute.h"
 
 namespace  dyno
 {
@@ -17,7 +16,7 @@ namespace  dyno
 	*/
 
 	template<typename TDataType>
-	class SemiAnalyticalSFINode : public Node
+	class SemiAnalyticalSFINode : public ParticleFluid<TDataType>
 	{
 		DECLARE_TCLASS(SemiAnalyticalSFINode, TDataType)
 	public:
@@ -29,19 +28,11 @@ namespace  dyno
 		~SemiAnalyticalSFINode() override;
 
 	public:
-		DEF_NODE_PORTS(ParticleSystem<TDataType>, ParticleSystem, "Particle Systems");
-
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "Boundary triangular surface");
 		
 	public:
 		DEF_VAR(Bool, Fast, false, "");
 		DEF_VAR(Bool, SyncBoundary, false, "");
-
-		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "Particle position");
-		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Particle velocity");
-		DEF_ARRAY_STATE(Coord, ForceDensity, DeviceType::GPU, "Force density");
-
-		DEF_ARRAY_STATE(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
 		
 	protected:
 		void resetStates() override;
