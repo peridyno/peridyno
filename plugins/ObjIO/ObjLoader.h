@@ -3,6 +3,7 @@
 #include "Topology/TriangleSet.h"
 #include "Field.h"
 #include "FilePath.h"
+#include "Node/ParametricModel.h"
 
 namespace dyno
 {
@@ -15,7 +16,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class ObjMesh : public Node
+	class ObjMesh : public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(ObjMesh, TDataType)
 	public:
@@ -31,9 +32,9 @@ namespace dyno
 		//void update() override;
 
 	public:
-		DEF_VAR(Vec3f, Location, 0, "Node location");
-		DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-		DEF_VAR(Vec3f, Scale, Vec3f(1.0f), "Node scale");
+		//DEF_VAR(Vec3f, Location, 0, "Node location");
+		//DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
+		//DEF_VAR(Vec3f, Scale, Vec3f(1.0f), "Node scale");
 
 		DEF_VAR(FilePath, FileName, "", "");
 
