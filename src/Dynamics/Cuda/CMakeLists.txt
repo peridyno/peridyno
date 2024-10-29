@@ -91,7 +91,7 @@ option(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM "Enable binding the dual-particle sch
 option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine  Volume)
+    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine  Volume)
     build_library(ParticleSystem LIB_DEPENDENCY)
 endif()
 

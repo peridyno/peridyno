@@ -4,8 +4,8 @@
 
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"

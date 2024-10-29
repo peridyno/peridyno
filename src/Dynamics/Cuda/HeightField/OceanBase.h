@@ -28,6 +28,8 @@ namespace dyno
 		OceanBase();
 		~OceanBase() override;
 
+		std::string getNodeType() override { return "Height Fields"; }
+
 	public:
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 

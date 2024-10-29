@@ -1,10 +1,12 @@
 #pragma once
 #include "../PyCommon.h"
 
-#include "ParticleSystem/SquareEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
-#include "ParticleSystem/CircularEmitter.h"
 #include "ParticleSystem/GhostParticles.h"
+
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
+
 #include "Peridynamics/ElasticBody.h"
 #include "Peridynamics/Module/LinearElasticitySolver.h"
 
@@ -140,7 +142,7 @@ void declare_particle_integrator(py::module& m, std::string typestr) {
 		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference);
 }
 
-#include "ParticleSystem/Module/PoissonPlane.h"
+#include "Samplers/PoissonPlane.h"
 template <typename TDataType>
 void declare_poisson_plane(py::module& m, std::string typestr) {
 	using Class = dyno::PoissonPlane<TDataType>;
@@ -287,7 +289,6 @@ void declare_particle_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_particles", &Class::loadParticles)
 		.def("get_node_type", &Class::getNodeType)
 		.def("get_dt", &Class::getDt)
 		//DEF_ARRAY_STATE
@@ -307,7 +308,7 @@ void declare_circular_emitter(py::module& m, std::string typestr) {
 		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference);
 }
 
-#include "ParticleSystem/Sampler.h"
+#include "Samplers/Sampler.h"
 template <typename TDataType>
 void declare_sampler(py::module& m, std::string typestr) {
 	using Class = dyno::Sampler<TDataType>;
@@ -319,7 +320,7 @@ void declare_sampler(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
-#include "ParticleSystem/CubeSampler.h"
+#include "Samplers/CubeSampler.h"
 template <typename TDataType>
 void declare_cube_sampler(py::module& m, std::string typestr) {
 	using Class = dyno::CubeSampler<TDataType>;
@@ -426,7 +427,7 @@ void declare_poisson_disk_sampling(py::module& m, std::string typestr) {
 		.def("get_one_point_inside_sdf", &Class::getOnePointInsideSDF);
 }
 
-#include "ParticleSystem/PoissonEmitter.h"
+#include "ParticleSystem/Emitters/PoissonEmitter.h"
 template <typename TDataType>
 void declare_poisson_emitter(py::module& m, std::string typestr) {
 	using Class = dyno::PoissonEmitter<TDataType>;
@@ -446,20 +447,7 @@ void declare_poisson_emitter(py::module& m, std::string typestr) {
 		.export_values();
 }
 
-#include "ParticleSystem/SamplingPoints.h"
-template <typename TDataType>
-void declare_sampling_points(py::module& m, std::string typestr) {
-	using Class = dyno::SamplingPoints<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("SamplingPoints") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("disable_render", &Class::disableRender)
-		.def("point_size", &Class::pointSize)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
-}
-
-#include "ParticleSystem/SphereSampler.h"
+#include "Samplers/SphereSampler.h"
 template <typename TDataType>
 void declare_sphere_sampler(py::module& m, std::string typestr) {
 	using Class = dyno::SphereSampler<TDataType>;

@@ -18,7 +18,7 @@ namespace dyno
 	template<typename TDataType>
 	void GhostParticles<TDataType>::resetStates()
 	{
-		this->updateTopology();
+		ParticleSystem<TDataType>::resetStates();
 	}
 
 	DEFINE_CLASS(GhostParticles);

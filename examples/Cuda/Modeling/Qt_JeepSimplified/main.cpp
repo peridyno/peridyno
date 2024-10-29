@@ -6,7 +6,7 @@
 
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 
 //#include <Multiphysics/SolidFluidCoupling.h>
 
@@ -25,8 +25,8 @@
 
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "RigidBody/Vechicle.h"
@@ -50,8 +50,8 @@
 
 #include "RigidBody/RigidBody.h"
 #include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 
@@ -85,7 +85,7 @@
 #include "BasicShapes/CubeModel.h"
 #include "BasicShapes/SphereModel.h"
 
-#include "ParticleSystem/CubeSampler.h"
+#include "Samplers/CubeSampler.h"
 
 #include "Mapping/MergeTriangleSet.h"
 #include "Mapping/TextureMeshToTriangleSet.h"

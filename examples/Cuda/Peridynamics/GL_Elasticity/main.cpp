@@ -15,7 +15,8 @@
 // ParticleSystem
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/MakeParticleSystem.h"
-#include <ParticleSystem/CubeSampler.h>
+
+#include <Samplers/CubeSampler.h>
 
 using namespace dyno;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He & Shusen Liu
+ * Copyright 2022 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,49 @@
  */
 
 #pragma once
-#include "Node.h"
+#include "Node/ParametricModel.h"
 
-#include "Primitive/Primitive3D.h"
-#include "Topology/PointSet.h"
+#include "GLSurfaceVisualModule.h"
+#include "GLWireframeVisualModule.h"
+#include "Curve.h"
 
 namespace dyno
 {
+
+
 	template<typename TDataType>
-	class Sampler : public Node
+	class PointFromCurve : public ParametricModel<TDataType>
 	{
+		DECLARE_TCLASS(PointFromCurve, TDataType);
+
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Sampler();
-
-		std::string getNodeType() override { return "Sampler"; }
+		PointFromCurve();
 
 	public:
-		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
+
+		DEF_VAR(Real, UniformScale, 1, "Uniform Scale");
+
+		DEF_VAR(Curve, Curve, Curve::CurveMode::Open, "");
+
+		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "Points");
+
+		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "Curve");
+
+
+
+	protected:
+		void resetStates() override;
+
+
+	private:
+		void varChanged();
+
 	};
+
+
+
+	IMPLEMENT_TCLASS(PointFromCurve, TDataType);
 }

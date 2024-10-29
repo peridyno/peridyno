@@ -135,6 +135,8 @@ namespace dyno
 
 		Mat3f pointInertia(Coord v1);
 
+		std::string getNodeType() override { return "Rigid Bodies"; }
+
 	protected:
 		void resetStates() override;
 

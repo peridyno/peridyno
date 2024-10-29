@@ -37,6 +37,7 @@ namespace dyno
 
 		NBoundingBox boundingBox() override;
 
+		std::string getNodeType() override { return "Rigid Bodies"; }
 	public:
 		DEF_VAR(Coord, BarycenterOffset, Coord(0), "The center offset defined in vessel's local frame");
 

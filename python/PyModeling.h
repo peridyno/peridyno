@@ -285,7 +285,7 @@ void declare_point_clip(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
-#include "Commands/PointFromCurve.h"
+#include "Samplers/PointFromCurve.h"
 template <typename TDataType>
 void declare_point_from_curve(py::module& m, std::string typestr) {
 	using Class = dyno::PointFromCurve<TDataType>;

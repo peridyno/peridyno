@@ -43,6 +43,7 @@ namespace dyno {
         OceanPatch();
         ~OceanPatch();
 
+        std::string getNodeType() override { return "Height Fields"; }
     public:
         DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
 

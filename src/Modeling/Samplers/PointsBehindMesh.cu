@@ -1,4 +1,6 @@
 #include "PointsBehindMesh.h"
+
+#include "GLPointVisualModule.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
@@ -7,7 +9,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	PointsBehindMesh<TDataType>::PointsBehindMesh()
-		: Node()
+		: Sampler<TDataType>()
 	{
 		this->statePointSet()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 		this->statePointSet()->promoteOuput();

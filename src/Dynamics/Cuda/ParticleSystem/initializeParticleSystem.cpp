@@ -8,9 +8,9 @@
 #include "Module/BoundaryConstraint.h"
 #include "Module/VariationalApproximateProjection.h"
 
-#include "ParticleSystem/CircularEmitter.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/PoissonEmitter.h"
+#include "Emitters/CircularEmitter.h"
+#include "Emitters/SquareEmitter.h"
+#include "Emitters/PoissonEmitter.h"
 
 #include "GLWireframeVisualModule.h"
 #include "GLPointVisualModule.h"
@@ -21,9 +21,6 @@
 
 #include "ParticleFluid.h"
 
-#include "SphereSampler.h"
-#include "CubeSampler.h"
-#include "SphereSampler.h"
 #include "PoissonDiskSampling.h"
 
 #include "NodeFactory.h"
@@ -133,21 +130,6 @@ namespace dyno
 				fluid->graphicsPipeline()->pushModule(ptRender);
 
 				return fluid; 
-			});
-
-		group->addAction(
-			"Sphere Sampler",
-			"ToolBarIco/Modeling/SphereSampler_v3.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<SphereSampler<DataType3f>>();
-			});
-
-
-		group->addAction(
-			"Cube Sampler",
-			"ToolBarIco/Modeling/CubeSampler.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<CubeSampler<DataType3f>>();
 			});
 
 		group->addAction(

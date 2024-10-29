@@ -12,15 +12,12 @@ namespace dyno
 	template<typename TDataType>
 	class ParticleSystem : public Node
 	{
-		DECLARE_TCLASS(ParticleSystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
 		ParticleSystem();
 		~ParticleSystem() override;
-
- 		void loadParticles(Coord lo, Coord hi, Real distance);
 
 		std::string getNodeType() override;
 

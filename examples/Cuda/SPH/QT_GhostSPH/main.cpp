@@ -8,7 +8,7 @@
 #include "ParticleSystem/MakeGhostParticles.h"
 #include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/GhostFluid.h>
-#include <ParticleSystem/CubeSampler.h>
+#include <Samplers/CubeSampler.h>
 #include "ParticleSystem/MakeParticleSystem.h"
 
 #include <Module/CalculateNorm.h>
@@ -22,7 +22,7 @@
 #include <BasicShapes/CubeModel.h>
 #include <BasicShapes/SphereModel.h>
 #include <BasicShapes/PlaneModel.h>
-#include "Commands/PointsBehindMesh.h"
+#include "Samplers/PointsBehindMesh.h"
 #include "SemiAnalyticalScheme/ParticleRelaxtionOnMesh.h"
 #include "ObjIO/ObjLoader.h"
 #include "GLSurfaceVisualModule.h"

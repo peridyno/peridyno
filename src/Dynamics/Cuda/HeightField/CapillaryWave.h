@@ -35,6 +35,8 @@ namespace dyno
 		CapillaryWave();
 		~CapillaryWave() override;
 
+		std::string getNodeType() override { return "Height Fields"; }
+
 	public:
 		DEF_VAR(Real, WaterLevel, 2, "");
 

@@ -34,6 +34,8 @@ namespace dyno {
 			Minus = 2,
 			);
 
+		std::string getNodeType() override;
+
 	protected:
 		void resetStates() override;
 

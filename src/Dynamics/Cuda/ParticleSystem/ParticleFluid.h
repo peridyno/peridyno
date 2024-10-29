@@ -15,7 +15,8 @@
  */
 #pragma once
 #include "ParticleSystem.h"
-#include "ParticleEmitter.h"
+
+#include "Emitters/ParticleEmitter.h"
 
 #include "Topology/PointSet.h"
 

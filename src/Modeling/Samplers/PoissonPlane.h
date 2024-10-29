@@ -18,7 +18,6 @@
 #include "Node.h"
 
 #include "Topology/PointSet.h"
-#include "../SamplingPoints.h"
 #include "Module/ComputeModule.h"
 
 

@@ -20,7 +20,7 @@
 #include <cmath>
 #include <Volume/VolumeOctree.h>
 
-#include "Sampler.h"
+#include "Samplers/Sampler.h"
 
 namespace dyno {
 

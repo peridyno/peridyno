@@ -2,7 +2,7 @@
 #include <SceneGraph.h>
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -17,7 +17,7 @@
 #include "DualParticleSystem/SurfaceLevelSetConstructionNode.h"
 #include "Mapping\MarchingCubes.h"
 #include "BasicShapes/CubeModel.h"
-#include "ParticleSystem/CubeSampler.h"
+#include "Samplers/CubeSampler.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 
 

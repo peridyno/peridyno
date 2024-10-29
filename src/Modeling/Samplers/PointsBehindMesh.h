@@ -15,12 +15,9 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
-#include "GLSurfaceVisualModule.h"
-#include "GLWireframeVisualModule.h"
+#include "Samplers/Sampler.h"
 #include "Topology/PolygonSet.h"
 #include "Topology/TriangleSet.h"
-#include "../../../Modeling/Normal.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Algorithm/Scan.h"
 
@@ -41,7 +38,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class PointsBehindMesh : public Node
+	class PointsBehindMesh : public Sampler<TDataType>
 	{
 		DECLARE_TCLASS(PointsBehindMesh, TDataType);
 
@@ -52,7 +49,7 @@ namespace dyno
 		typedef typename TopologyModule::Triangle Triangle;
 
 		PointsBehindMesh();
-		~PointsBehindMesh() {};
+		~PointsBehindMesh() override {};
 
 		DEF_VAR(Real, Thickness, Real(0.2), "");
 
@@ -61,8 +58,6 @@ namespace dyno
 		DEF_VAR(bool, GeneratingDirection, true, "");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
-
-		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");
 
 		DEF_ARRAY_STATE(Coord, Position, DeviceType::GPU, "");
 

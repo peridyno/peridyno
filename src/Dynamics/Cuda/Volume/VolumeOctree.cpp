@@ -24,5 +24,11 @@ namespace dyno
 	{
 	}
 
+	template<typename TDataType>
+	std::string VolumeOctree<TDataType>::getNodeType()
+	{
+		return "Volume";
+	}
+
 	DEFINE_CLASS(VolumeOctree);
 }

@@ -16,7 +16,7 @@
 
  //#pragma once
 #include "ParticleSystem/ParticleFluid.h"
-#include "ParticleSystem/ParticleEmitter.h"
+#include "ParticleSystem/Emitters/ParticleEmitter.h"
 #include "Topology/PointSet.h"
 #include "Collision/Attribute.h"
 #include "VirtualSpatiallyAdaptiveStrategy.h"

@@ -17,7 +17,7 @@
 #include "ParticleEmitter.h"
 
 #include "Topology/EdgeSet.h"
-#include "Module/PoissonPlane.h"
+#include "Samplers/PoissonPlane.h"
 
 namespace dyno
 {
@@ -41,7 +41,7 @@ namespace dyno
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, Outline, "Outline of the emitter");
 
 		DECLARE_ENUM(EmitterShape,
-		Square = 0,
+			Square = 0,
 			Round = 1);
 
 		DEF_ENUM(EmitterShape, EmitterShape, EmitterShape::Round, "ScaleMode");
@@ -59,9 +59,5 @@ namespace dyno
 		std::shared_ptr< PoissonPlane<TDataType>> mPlane;
 	};
 	
-
-
-
-
 	IMPLEMENT_TCLASS(PoissonEmitter, TDataType)
 }

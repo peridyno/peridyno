@@ -12,7 +12,7 @@
 #include "BasicShapes/SphereModel.h"
 #include "BasicShapes/PlaneModel.h"
 #include "Normal.h"
-#include "Commands/PointsBehindMesh.h"
+#include "Samplers/PointsBehindMesh.h"
 #include "SemiAnalyticalScheme/ParticleRelaxtionOnMesh.h"
 
 #include "Volume/VolumeOctreeGenerator.h"

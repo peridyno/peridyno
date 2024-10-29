@@ -1,7 +1,8 @@
 #include <QtApp.h>
 
 #include "initializeModeling.h"
-#include "Commands/PointFromCurve.h"
+#include "Samplers/PointFromCurve.h"
+
 #include "Commands/Sweep.h"
 #include "Commands/Extrude.h"
 

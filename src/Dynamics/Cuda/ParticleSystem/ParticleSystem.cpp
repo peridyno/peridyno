@@ -4,8 +4,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(ParticleSystem, TDataType)
-
 	template<typename TDataType>
 	ParticleSystem<TDataType>::ParticleSystem()
 		: Node()
@@ -22,31 +20,7 @@ namespace dyno
 	template<typename TDataType>
 	std::string ParticleSystem<TDataType>::getNodeType()
 	{
-		return "ParticleSystem";
-	}
-
-	template<typename TDataType>
-	void ParticleSystem<TDataType>::loadParticles(Coord lo, Coord hi, Real distance)
-	{
-		std::vector<Coord> vertList;
-		for (Real x = lo[0]; x <= hi[0]; x += distance)
-		{
-			for (Real y = lo[1]; y <= hi[1]; y += distance)
-			{
-				for (Real z = lo[2]; z <= hi[2]; z += distance)
-				{
-					Coord p = Coord(x, y, z);
-					vertList.push_back(Coord(x, y, z));
-				}
-			}
-		}
-
-		auto ptSet = this->statePointSet()->getDataPtr();
-		ptSet->setPoints(vertList);
-
-		std::cout << "particle number: " << vertList.size() << std::endl;
-
-		vertList.clear();
+		return "Particle Fluids";
 	}
 
 	template<typename TDataType>

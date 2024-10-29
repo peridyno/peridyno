@@ -1,6 +1,4 @@
-#include "GLPointVisualModule.h"
 #include "PoissonPlane.h"
-#include <ctime> 
 
 namespace dyno
 {

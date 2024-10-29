@@ -21,7 +21,45 @@
 using namespace std;
 using namespace dyno;
 
-bool useVTK = false;
+std::shared_ptr<ParticleSystem<DataType3f>> createFluidParticles()
+{
+	auto fluid = std::make_shared<ParticleSystem<DataType3f>>();
+
+	std::vector<Vec3f> host_pos;
+	std::vector<Vec3f> host_vel;
+
+	Vec3f lo(-0.1, 0.0, -0.1);
+	Vec3f hi(0.1f, 0.1f, 0.1f);
+
+	Real s = 0.005f;
+	int m_iExt = 0;
+
+	float omega = 1.0f;
+	float half_s = -s / 2.0f;
+
+	int num = 0;
+
+	for (float x = lo[0]; x <= hi[0]; x += s)
+	{
+		for (float y = lo[1]; y <= hi[1]; y += s)
+		{
+			for (float z = lo[2]; z <= hi[2]; z += s)
+			{
+				Vec3f p = Vec3f(x, y, z);
+				host_pos.push_back(Vec3f(x, y, z));
+				host_vel.push_back(Vec3f(0));
+			}
+		}
+	}
+
+	fluid->statePosition()->assign(host_pos);
+	fluid->stateVelocity()->assign(host_vel);
+
+	host_pos.clear();
+	host_vel.clear();
+
+	return fluid;
+}
 
 std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 {
@@ -90,8 +128,7 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
 	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
-	auto fluid = scn->addNode(std::make_shared<ParticleSystem<DataType3f>>());
-	fluid->loadParticles(Vec3f(-0.1, 0.0, -0.1), Vec3f(0.105, 0.1, 0.105), 0.005);
+	auto fluid = scn->addNode(createFluidParticles());
 
 	auto ghost = scn->addNode(createGhostParticles());
 

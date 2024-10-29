@@ -14,7 +14,8 @@
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 #include "Auxiliary/DataSource.h"
-#include <ParticleSystem/CubeSampler.h>
+
+#include <Samplers/CubeSampler.h>
 #include "PointsLoader.h"
 using namespace std;
 using namespace dyno;

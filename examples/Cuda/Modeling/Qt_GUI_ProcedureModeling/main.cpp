@@ -7,7 +7,8 @@
 #include "Commands/Turning.h"
 #include "Commands/Extrude.h"
 #include "Commands/Sweep.h"
-#include "Commands/PointFromCurve.h"
+
+#include "Samplers/PointFromCurve.h"
 
 #include "ObjIO/ObjPointLoader.h"
 

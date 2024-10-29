@@ -10,8 +10,8 @@
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <ParticleSystem/CubeSampler.h>
-#include <ParticleSystem/PoissonEmitter.h>
+#include <Samplers/CubeSampler.h>
+#include <ParticleSystem/Emitters/PoissonEmitter.h>
 
 using namespace std;
 using namespace dyno;

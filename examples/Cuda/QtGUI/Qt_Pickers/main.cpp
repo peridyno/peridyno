@@ -12,7 +12,7 @@
 #include "BasicShapes/CylinderModel.h"
 #include "BasicShapes/CubeModel.h"
 
-#include "ParticleSystem/CubeSampler.h"
+#include "Samplers/CubeSampler.h"
 
 #include "initializeModeling.h"
 #include "initializeInteraction.h"

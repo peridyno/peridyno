@@ -20,7 +20,7 @@
 
 #include <StaticTriangularMesh.h>
 
-#include <ParticleSystem/CubeSampler.h>
+#include <Samplers/CubeSampler.h>
 
 using namespace std;
 using namespace dyno;

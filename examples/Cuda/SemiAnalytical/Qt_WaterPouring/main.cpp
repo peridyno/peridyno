@@ -2,8 +2,8 @@
 
 #include "SceneGraph.h"
 
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
@@ -39,30 +39,6 @@ std::shared_ptr<SceneGraph> createScene()
 	auto emitter = scn->addNode(std::make_shared<CircularEmitter<DataType3f>>());
 	emitter->varLocation()->setValue(Vec3f(0.0f, 1.0f, 0.0f));
 
-	//Particle fluid node
-	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	emitter->connect(fluid->importParticleEmitters());
-
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->varPointSize()->setValue(0.002);
-	ptRender->setColor(Color(1, 0, 0));
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	colorMapper->varMax()->setValue(5.0f);
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-	colorMapper->outColor()->connect(ptRender->inColor());
-	fluid->statePointSet()->connect(ptRender->inPointSet());
-
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
-	fluid->graphicsPipeline()->pushModule(colorMapper);
-	fluid->graphicsPipeline()->pushModule(ptRender);
-
-	fluid->setActive(false);
-
 	//Setup boundaries
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varScale()->setValue(Vec3f(2.0f, 0.0f, 2.0f));
@@ -77,8 +53,27 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//SFI node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
+	{
+		auto ptRender = std::make_shared<GLPointVisualModule>();
+		ptRender->varPointSize()->setValue(0.002);
+		ptRender->setColor(Color(1, 0, 0));
+		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
-	fluid->connect(sfi->importInitialStates());
+		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+		colorMapper->varMax()->setValue(5.0f);
+		sfi->stateVelocity()->connect(calculateNorm->inVec());
+		calculateNorm->outNorm()->connect(colorMapper->inScalar());
+
+		colorMapper->outColor()->connect(ptRender->inColor());
+		sfi->statePointSet()->connect(ptRender->inPointSet());
+
+		sfi->graphicsPipeline()->pushModule(calculateNorm);
+		sfi->graphicsPipeline()->pushModule(colorMapper);
+		sfi->graphicsPipeline()->pushModule(ptRender);
+	}
+
+	emitter->connect(sfi->importParticleEmitters());
 	merge->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	return scn;

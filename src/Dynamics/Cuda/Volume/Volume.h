@@ -15,6 +15,8 @@ namespace dyno {
 		Volume();
 		~Volume() override;
 
+		std::string getNodeType() override;
+
 		virtual void updateVolume() {};
 
 	public:

@@ -4,7 +4,7 @@
 
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 
 #include <Module/CalculateNorm.h>
 
@@ -25,7 +25,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Create a particle-based fluid solver
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
 	emitter->connect(fluid->importParticleEmitters());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();

@@ -24,6 +24,8 @@ namespace dyno
 		RigidBody();
 		~RigidBody() override;
 
+		std::string getNodeType() override { return "Rigid Bodies"; }
+
 	public:
 		DEF_VAR(Coord, Gravity, Coord(0.0, -9.8, 0.0), "Gravity");
 
