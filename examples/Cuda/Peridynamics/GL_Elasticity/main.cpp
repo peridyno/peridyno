@@ -3,7 +3,11 @@
 #include <SceneGraph.h>
 #include <Peridynamics/ElasticBody.h>
 
-#include <ParticleSystem/StaticBoundary.h>
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 // Internal OpenGL Renderer
 #include <GLRenderEngine.h>
@@ -45,9 +49,21 @@ std::shared_ptr<SceneGraph> createScene()
 
 	initialParticles->connect(bunny->importSolidParticles());
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(0), Vec3f(1), 0.005f, true);
-	bunny->connect(boundary->importParticleSystems());
+	//Create a container
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.5f));
+	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+
+	bunny->connect(container->importParticleSystems());
 
 	auto pointRenderer = std::make_shared<GLPointVisualModule>();
 	pointRenderer->varPointSize()->setValue(0.005);

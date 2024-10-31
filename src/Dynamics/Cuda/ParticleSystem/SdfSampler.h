@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Node.h"
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 #include "Topology/HexahedronSet.h"
 #include <cmath>
 #include <Volume/VolumeOctree.h>

@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.h"
+#include "Volume/Volume.h"
 
 #include "ParticleSystem/ParticleSystem.h"
 #include "Peridynamics/TriangularSystem.h"
@@ -20,16 +20,14 @@ namespace dyno
 		VolumeBoundary();
 		~VolumeBoundary() override;
 
-		void translate(Coord t);
-
-		std::shared_ptr<Node> loadSDF(std::string filename, bool bOutBoundary = false);
-		std::shared_ptr<Node> loadCube(Coord lo, Coord hi, Real distance = 0.005f, bool bOutBoundary = false);
-
-		void loadShpere(Coord center, Real r, Real distance = 0.005f, bool bOutBoundary = false, bool bVisible = false);
+		std::string getNodeType() override { return "Multiphysics"; }
 
 	public:
-		DEF_VAR(Real, TangentialFriction, 0, "Tangential friction");
-		DEF_VAR(Real, NormalFriction, 0, "Normal friction");
+		DEF_VAR(Real, NormalFriction, Real(0.95), "Normal friction");
+		DEF_VAR(Real, TangentialFriction, Real(0), "Tangential friction");
+		
+	public:
+		DEF_NODE_PORTS(Volume<TDataType>, Volume, "Level sets used as boundary");
 
 		DEF_NODE_PORTS(ParticleSystem<TDataType>, ParticleSystem, "Particle Systems");
 
@@ -40,12 +38,12 @@ namespace dyno
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "");
 
 	protected:
-		void updateVolume();
-
 		void updateStates() override;
 
 	private:
-		std::vector<std::shared_ptr<BoundaryConstraint<TDataType>>> m_obstacles;
+		void updateVolume();
+
+		std::shared_ptr <BoundaryConstraint<TDataType>> mBoundaryConstraint;
 	};
 
 	IMPLEMENT_TCLASS(VolumeBoundary, TDataType)

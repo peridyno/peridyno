@@ -5,7 +5,6 @@
 
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/GhostParticles.h"
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/GhostFluid.h>
 
 #include <Module/CalculateNorm.h>

@@ -16,7 +16,7 @@
 #pragma once
 #include "Node.h"
 
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
 
 namespace dyno
@@ -38,7 +38,7 @@ namespace dyno
 
 		DEF_VAR(Real, GridSpacing, Real(0.05), "");
 
-		DEF_INSTANCE_IN(SignedDistanceField<TDataType>, LevelSet, "A 3D signed distance field");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "An iso surface");
 

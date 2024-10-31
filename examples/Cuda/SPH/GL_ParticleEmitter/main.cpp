@@ -2,8 +2,13 @@
 
 #include <SceneGraph.h>
 
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
+
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 
 #include <Module/CalculateNorm.h>
@@ -45,8 +50,18 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
 	//Create a container
-	auto container = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	container->loadCube(Vec3f(0.0f), Vec3f(1.0), 0.02, true);
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.5f));
+	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
 	
 	fluid->connect(container->importParticleSystems());
 

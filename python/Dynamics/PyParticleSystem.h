@@ -471,39 +471,6 @@ void declare_square_emitter(py::module& m, std::string typestr) {
 		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference);
 }
 
-#include "ParticleSystem/StaticBoundary.h"
-template <typename TDataType>
-void declare_static_boundary(py::module& m, std::string typestr) {
-	using Class = dyno::StaticBoundary<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("StaticBoundary") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		//public
-		.def("load_sdf", &Class::loadSDF)
-		.def("load_cube", &Class::loadCube)
-		.def("load_sphere", &Class::loadShpere)
-		.def("translate", &Class::translate)
-		.def("scale", &Class::scale)
-		.def("reset_states", &Class::resetStates)
-		//DEF_VAR
-		.def("var_tangential_friction", &Class::varTangentialFriction, py::return_value_policy::reference)
-		.def("var_normal_friction", &Class::varNormalFriction, py::return_value_policy::reference)
-		.def("var_cube_vertex_lo", &Class::varCubeVertex_lo, py::return_value_policy::reference)
-		.def("var_cube_vertex_hi", &Class::varCubeVertex_hi, py::return_value_policy::reference)
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		//DEF_NODE_PORTS
-		.def("get_particle_system", &Class::getParticleSystems)
-		.def("add_particle_system", &Class::addParticleSystem)
-		.def("remove_particle_system", &Class::removeParticleSystem)
-		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
-
-		.def("get_rigid_body", &Class::getRigidBodys)
-		.def("add_rigid_body", &Class::addRigidBody)
-		.def("remove_rigid_body", &Class::removeRigidBody)
-		.def("import_rigid_bodys", &Class::importRigidBodys, py::return_value_policy::reference);
-}
-
 void declare_particle_system_initializer(py::module& m);
 
 void declare_particle_type(py::module& m);

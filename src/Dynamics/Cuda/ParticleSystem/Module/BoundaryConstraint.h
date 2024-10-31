@@ -20,6 +20,8 @@ namespace dyno {
 
 		bool constrain(DArray<Coord>& position, DArray<Coord>& velocity, Real dt);
 
+		void constrain(DArray<Coord>& position, DArray<Coord>& velocity, DistanceField3D<TDataType>& sdf, Real dt);
+
 		void load(std::string filename, bool inverted = false);
 		void setCube(Coord lo, Coord hi, Real distance, bool inverted = false);
 		void setSphere(Coord center, Real r, Real distance, bool inverted = false);
@@ -34,6 +36,4 @@ namespace dyno {
 
 		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
 	};
-
-	//IMPLEMENT_TCLASS(BoundaryConstraint, TDataType)
 }

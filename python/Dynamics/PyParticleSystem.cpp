@@ -39,5 +39,4 @@ void pybind_particle_system(py::module& m)
 	declare_poisson_emitter<dyno::DataType3f>(m, "3f");
 	declare_sphere_sampler<dyno::DataType3f>(m, "3f");
 	declare_square_emitter<dyno::DataType3f>(m, "3f");
-	declare_static_boundary<dyno::DataType3f>(m, "3f");
 }

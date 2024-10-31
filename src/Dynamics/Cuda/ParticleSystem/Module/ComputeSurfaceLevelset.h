@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2023 Shusen Liu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,36 @@
  * limitations under the License.
  */
 #pragma once
-#include "Node.h"
-
+#include "Module/ConstraintModule.h"
 #include "Topology/LevelSet.h"
-#include "Topology/TriangleSet.h"
+#include "ParticleSystem/Module/Kernel.h"
+
 
 namespace dyno
 {
 	template<typename TDataType>
-	class VolumeClipper : public Node
+	class ComputeSurfaceLevelset : public ConstraintModule
 	{
-		DECLARE_TCLASS(VolumeClipper, TDataType)
+		DECLARE_TCLASS(ComputeSurfaceLevelset, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		VolumeClipper();
-		~VolumeClipper() override;
+		ComputeSurfaceLevelset();
+		~ComputeSurfaceLevelset();
 
-	public:
-		DEF_VAR(Coord, Translation, Coord(0), "");
-		DEF_VAR(Coord, Rotation, Coord(0), "");
-
-		DEF_ARRAY_STATE(Real, Field, DeviceType::GPU, "Signed distance field defined on trianglular vertices");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Plane, "");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
+		void constrain() override;
+	
+		DEF_ARRAY_IN(Coord, Points, DeviceType::GPU, "Point positions");
 
 		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
-	protected:
-		void resetStates() override;
+		DEF_VAR_IN(Real, GridSpacing, "Grid spacing");
+
+	private:
+		SpikyKernel<Real> m_kernel;
+	
 	};
 
-	IMPLEMENT_TCLASS(VolumeClipper, TDataType)
+	IMPLEMENT_TCLASS(ComputeSurfaceLevelset, TDataType)
 }

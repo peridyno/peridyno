@@ -1,5 +1,5 @@
 #include "Volume.h"
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 
 namespace dyno
 {
@@ -7,10 +7,7 @@ namespace dyno
 	Volume<TDataType>::Volume()
 		: Node()
 	{
- 		auto sdf = std::make_shared<SignedDistanceField<TDataType>>();
-// 		this->setTopologyModule(TypeInfo::cast<TopologyModule>(sdf));
-		this->stateTopology()->setDataPtr(TypeInfo::cast<TopologyModule>(sdf));
-
+ 		this->stateLevelSet()->setDataPtr(std::make_shared<LevelSet<TDataType>>());
 	}
 
 	template<typename TDataType>

@@ -65,8 +65,7 @@ void declare_volume(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Volume") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_sdf", &Class::stateSDF, py::return_value_policy::reference)
-		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference);
+		.def("state_levelset", &Class::stateLevelSet, py::return_value_policy::reference);
 }
 
 #include "Volume/VolumeBool.h"

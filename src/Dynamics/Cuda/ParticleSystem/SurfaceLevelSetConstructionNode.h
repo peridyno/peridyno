@@ -16,7 +16,7 @@
 
 #include "Node.h"
 #include "ParticleSystem/ParticleSystem.h"
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
 #include "Mapping/MarchingCubes.h"
 namespace dyno
@@ -38,7 +38,7 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Coord, Points, DeviceType::GPU, "Point positions");
 
-		DEF_INSTANCE_STATE(SignedDistanceField<TDataType>, LevelSet, "A 3D signed distance field");
+		DEF_INSTANCE_STATE(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
 

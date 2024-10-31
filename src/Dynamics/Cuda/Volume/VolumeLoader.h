@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,29 @@
  * limitations under the License.
  */
 #pragma once
-#include "Node.h"
-
-#include "Topology/LevelSet.h"
-#include "Topology/TriangleSet.h"
+#include "Volume.h"
+#include "FilePath.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class VolumeClipper : public Node
+	class VolumeLoader : public Volume<TDataType>
 	{
-		DECLARE_TCLASS(VolumeClipper, TDataType)
+		DECLARE_TCLASS(VolumeLoader, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		VolumeClipper();
-		~VolumeClipper() override;
+		VolumeLoader();
+		~VolumeLoader() override;
 
 	public:
-		DEF_VAR(Coord, Translation, Coord(0), "");
-		DEF_VAR(Coord, Rotation, Coord(0), "");
-
-		DEF_ARRAY_STATE(Real, Field, DeviceType::GPU, "Signed distance field defined on trianglular vertices");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Plane, "");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
-
-		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
+		DEF_VAR(FilePath, FileName, "", "A file with a suffix .sdf");
 
 	protected:
 		void resetStates() override;
-	};
 
-	IMPLEMENT_TCLASS(VolumeClipper, TDataType)
+	private:
+		bool loadFile();
+	};
 }

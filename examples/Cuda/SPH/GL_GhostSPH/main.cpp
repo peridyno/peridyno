@@ -3,9 +3,14 @@
 #include <SceneGraph.h>
 #include <Log.h>
 
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
+
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/GhostParticles.h"
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/GhostFluid.h>
 
 #include <Module/CalculateNorm.h>
@@ -124,9 +129,20 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
-	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
+
+	//Create a container
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(boundary->importVolumes());
 
 	auto fluid = scn->addNode(createFluidParticles());
 

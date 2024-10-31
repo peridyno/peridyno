@@ -8,7 +8,7 @@ namespace dyno
 	VolumeClipper<TDataType>::VolumeClipper()
 		: Node()
 	{
-		auto levelSet = std::make_shared<SignedDistanceField<TDataType>>();
+		auto levelSet = std::make_shared<LevelSet<TDataType>>();
 		this->inLevelSet()->setDataPtr(levelSet);
 	}
 

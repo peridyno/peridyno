@@ -1,24 +1,26 @@
 #include <QtApp.h>
 #include <SceneGraph.h>
+
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
+
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <Module/CalculateNorm.h>
+
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
-
 #include <GLSurfaceVisualModule.h>
-#include <ColorMapping.h>
-#include <ImColorbar.h>
-#include "Node/GLPointVisualNode.h"
-#include "Node/GLSurfaceVisualNode.h"
-#include "ParticleSystem/StaticBoundary.h"
 
-#include "DualParticleSystem/SurfaceLevelSetConstructionNode.h"
 #include "Mapping\MarchingCubes.h"
 #include "BasicShapes/CubeModel.h"
 #include "Samplers/CubeSampler.h"
+
 #include "ParticleSystem/MakeParticleSystem.h"
+#include "ParticleSystem/SurfaceLevelSetConstructionNode.h"
 
 
 using namespace std;
@@ -53,9 +55,20 @@ std::shared_ptr<SceneGraph> createScene()
 	initialParticles->connect(fluid->importInitialStates());
 	emitter->connect(fluid->importParticleEmitters());
 
-	std::shared_ptr<StaticBoundary<DataType3f>> root = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	root->loadCube(Vec3f(0.0f, 0.0f, 0.0f), Vec3f(1.0f, 1.0f, 1.0f), 0.02, true);
-	fluid->connect(root->importParticleSystems());
+	//Create a container
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.5f));
+	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+	fluid->connect(container->importParticleSystems());
 
 	auto meshRe = scn->addNode(std::make_shared<SurfaceLevelSetConstructionNode<DataType3f>>());
 	meshRe->stateGridSpacing()->setValue(0.005);

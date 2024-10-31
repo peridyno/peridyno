@@ -815,10 +815,10 @@ void declare_quad_set(py::module& m, std::string typestr) {
 		.def("out_vertex_normal", &Class::outVertexNormal, py::return_value_policy::reference);
 }
 
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 template <typename TDataType>
 void declare_signed_distance_fieldt(py::module& m, std::string typestr) {
-	using Class = dyno::SignedDistanceField<TDataType>;
+	using Class = dyno::LevelSet<TDataType>;
 	using Parent = dyno::TopologyModule;
 	std::string pyclass_name = std::string("SignedDistanceField") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

@@ -1,7 +1,6 @@
 #include <GlfwApp.h>
 #include "SceneGraph.h"
 #include <Log.h>
-#include "ParticleSystem/StaticBoundary.h"
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>

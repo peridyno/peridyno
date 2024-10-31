@@ -1,9 +1,6 @@
 #include <GlfwApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
-#include <ParticleSystem/StaticBoundary.h>
-
 #include <Multiphysics/VolumeBoundary.h>
 
 #include <GLRenderEngine.h>
@@ -13,6 +10,7 @@
 #include "Peridynamics/CodimensionalPD.h"
 #include "StaticTriangularMesh.h"
 #include "ManualControl.h"
+
 using namespace std;
 using namespace dyno;
 
@@ -23,7 +21,6 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(5, 3, 5));
 	
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-4, -1.5, -3), Vec3f(2, -0.001, 3), 0.005f, false);
 	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	//can try£º
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15,8000,0.005,0.0005));
@@ -52,27 +49,8 @@ std::shared_ptr<SceneGraph> createScene()
 	return scn;
 }
 
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
-
-
 int main()
 {
-	Log::setUserReceiver(&RecieveLogMessage);
-
 	GlfwApp window;
 	window.setSceneGraph(createScene());
 

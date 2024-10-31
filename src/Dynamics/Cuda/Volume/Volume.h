@@ -1,7 +1,7 @@
 #pragma once
 #include "Node.h"
 
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 
 namespace dyno {
 
@@ -20,8 +20,6 @@ namespace dyno {
 		virtual void updateVolume() {};
 
 	public:
-		DEF_INSTANCE_STATE(SignedDistanceField<TDataType>, SDF, "");
-
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(LevelSet<TDataType>, LevelSet, "");
 	};
 }

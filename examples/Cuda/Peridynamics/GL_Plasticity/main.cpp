@@ -4,7 +4,11 @@
 #include <Log.h>
 #include <Topology/PointSet.h>
 
-#include <ParticleSystem/StaticBoundary.h>
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 #include <Peridynamics/ElastoplasticBody.h>
 #include <Peridynamics/ElasticBody.h>
@@ -122,17 +126,29 @@ std::shared_ptr<SceneGraph> createScene()
 	auto surfaceVisualizer2 = scn->addNode(std::make_shared<GLSurfaceVisualNode<DataType3f>>());
 	topoMapper2->outShape()->connect(surfaceVisualizer2->inTriangleSet());*/
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.5f, 0.0f, -0.5f), Vec3f(0.5f, 1.0f, 0.5f), 0.005, true);
-	elastoplasticBody->connect(boundary->importParticleSystems());
-	//elasticBody->connect(boundary->importParticleSystems());
+	//Create a container
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.5f, 1.0f, 0.5f));
+	cubeBoundary->varLength()->setValue(Vec3f(2.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+
+	elastoplasticBody->connect(container->importParticleSystems());
+	//elasticBody->connect(container->importParticleSystems());
 
 	return scn;
 }
 
 int main(int argc, char* argv[])
 {
-	UbiApp app(GUIType::GUI_QT);
+	UbiApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
 	app.mainLoop();

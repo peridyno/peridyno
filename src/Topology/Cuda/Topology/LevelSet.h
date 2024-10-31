@@ -17,7 +17,7 @@
 namespace dyno {
 
 	template<typename TDataType>
-	class SignedDistanceField : public TopologyModule {
+	class LevelSet : public TopologyModule {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

@@ -36,6 +36,8 @@ namespace dyno
 		AdaptiveBoundary();
 		~AdaptiveBoundary() override;
 
+		std::string getNodeType() override { return "Multiphysics"; }
+
 	public:
 		DEF_VAR(Real, TangentialFriction, 0.0, "Tangential friction");
 		DEF_VAR(Real, NormalFriction, 1.0, "Normal friction");

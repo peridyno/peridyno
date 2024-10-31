@@ -1,8 +1,6 @@
 #include <GlfwApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
-#include <ParticleSystem/StaticBoundary.h>
 
 #include <Multiphysics/VolumeBoundary.h>
 

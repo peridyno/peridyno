@@ -94,7 +94,18 @@ namespace dyno
 		return true;
 	}
 
-
+	template<typename TDataType>
+	void BoundaryConstraint<TDataType>::constrain(DArray<Coord>& position, DArray<Coord>& velocity, DistanceField3D<TDataType>& sdf, Real dt)
+	{
+		uint pDim = cudaGridSize(position.size(), BLOCK_SIZE);
+		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
+			position,
+			velocity,
+			sdf,
+			this->varNormalFriction()->getData(),
+			this->varTangentialFriction()->getData(),
+			dt);
+	}
 
 	template<typename TDataType>
 	void BoundaryConstraint<TDataType>::load(std::string filename, bool inverted)

@@ -1,12 +1,10 @@
 //#include <GlfwApp.h>
 #include <QtApp.h>
 #include <SceneGraph.h>
-#include <Log.h>
 
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/GhostParticles.h"
 #include "ParticleSystem/MakeGhostParticles.h"
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/GhostFluid.h>
 #include <Samplers/CubeSampler.h>
 #include "ParticleSystem/MakeParticleSystem.h"

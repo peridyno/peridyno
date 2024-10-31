@@ -3,7 +3,6 @@
 #include "SceneGraph.h"
 
 #include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/Emitters/SquareEmitter.h"
 #include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"

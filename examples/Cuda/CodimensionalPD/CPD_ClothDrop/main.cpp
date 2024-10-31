@@ -1,15 +1,12 @@
 #include <UbiApp.h>
-#include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <Multiphysics/VolumeBoundary.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 
 #include "Peridynamics/CodimensionalPD.h"
-#include "../Modeling/StaticTriangularMesh.h"
+#include "StaticTriangularMesh.h"
+
 #include "ManualControl.h"
 
 using namespace std;
@@ -51,11 +48,11 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	UbiApp window(GUIType::GUI_QT);
-	window.setSceneGraph(createScene());
+	UbiApp app;
+	app.setSceneGraph(createScene());
 
-	window.initialize(1024, 768);
-	window.mainLoop();
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

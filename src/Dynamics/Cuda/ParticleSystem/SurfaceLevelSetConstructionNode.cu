@@ -1,18 +1,15 @@
 #include "SurfaceLevelSetConstructionNode.h"
-#include "ComputeSurfaceLevelset.h"
-
-
+#include "Module/ComputeSurfaceLevelset.h"
 
 namespace dyno
 {
 	IMPLEMENT_TCLASS(SurfaceLevelSetConstructionNode, TDataType)
 
-
 	template<typename TDataType>
 	SurfaceLevelSetConstructionNode<TDataType> ::SurfaceLevelSetConstructionNode()
 		:Node()
 	{
-		this->stateLevelSet()->setDataPtr(std::make_shared<SignedDistanceField<TDataType>>());
+		this->stateLevelSet()->setDataPtr(std::make_shared<LevelSet<TDataType>>());
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->statePoints()->allocate();
 

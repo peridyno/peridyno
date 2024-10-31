@@ -41,10 +41,6 @@ void declare_volume_boundary(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("VolumeBoundary") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("translate", &Class::translate)
-		.def("load_sdf", &Class::loadSDF)
-		.def("load_cube", &Class::loadCube)
-		.def("load_shpere", &Class::loadShpere)
 		//DEF_VAR
 		.def("var_tangential_friction", &Class::varTangentialFriction, py::return_value_policy::reference)
 		.def("var_normal_friction", &Class::varNormalFriction, py::return_value_policy::reference)

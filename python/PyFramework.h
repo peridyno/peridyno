@@ -56,7 +56,6 @@
 #include "GltfLoader.h"
 #include "GeometryLoader.h"
 #include "ParticleSystem/MakeParticleSystem.h"
-#include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/ParticleFluid.h"
 #include "StaticTriangularMesh.h"
 #include "Multiphysics/VolumeBoundary.h"

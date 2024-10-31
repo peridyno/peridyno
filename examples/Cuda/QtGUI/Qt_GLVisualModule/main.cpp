@@ -2,7 +2,6 @@
 
 #include <SceneGraph.h>
 
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>

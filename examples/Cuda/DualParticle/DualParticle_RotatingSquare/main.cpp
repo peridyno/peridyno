@@ -1,7 +1,7 @@
 #include <GlfwApp.h>
 #include "SceneGraph.h"
 #include <Log.h>
-#include "ParticleSystem/StaticBoundary.h"
+
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -34,8 +34,8 @@ std::shared_ptr<SceneGraph> createScene()
 	scene->setUpperBound(Vec3f(3.0));
 	scene->setLowerBound(Vec3f(-3.0));
 
-	std::shared_ptr<StaticBoundary<DataType3f>> root = scene->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	root->loadCube(Vec3f(-2.40f, 0.0f, -2.40f), Vec3f(2.40f, 1.0f, 2.40f), 0.02, true);
+// 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+// 	root->loadCube(Vec3f(-2.40f, 0.0f, -2.40f), Vec3f(2.40f, 1.0f, 2.40f), 0.02, true);
 
 
 	//Create a cube
@@ -60,7 +60,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto fluid = scene->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
 	initialParticles->connect(fluid->importInitialStates());
-	fluid->connect(root->importParticleSystems());
 
 	fluid->animationPipeline()->clear();
 	{

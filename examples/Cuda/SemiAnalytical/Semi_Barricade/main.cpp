@@ -1,10 +1,14 @@
 #include "UbiApp.h"
 
 #include "SceneGraph.h"
-#include "Log.h"
+
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 #include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/Emitters/SquareEmitter.h"
 #include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"

@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Shusen Liu
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module/ConstraintModule.h"
-#include "Topology/SignedDistanceField.h"
-#include "ParticleSystem/Module/Kernel.h"
-
+#include "Volume.h"
+#include "BasicShapes/BasicShape.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class ComputeSurfaceLevelset : public ConstraintModule
+	class BasicShapeToVolume : public Volume<TDataType>
 	{
-		DECLARE_TCLASS(ComputeSurfaceLevelset, TDataType)
+		DECLARE_TCLASS(BasicShapeToVolume, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		ComputeSurfaceLevelset();
-		~ComputeSurfaceLevelset();
+		BasicShapeToVolume();
+		~BasicShapeToVolume() override;
 
-		void constrain() override;
-	
-		DEF_ARRAY_IN(Coord, Points, DeviceType::GPU, "Point positions");
+	public:
+		DEF_VAR(bool, Inerted, false, "");
 
-		DEF_INSTANCE_IN(SignedDistanceField<TDataType>, LevelSet, "A 3D signed distance field");
+		DEF_VAR(Real, GridSpacing, 0.05f, "The grid spacing used in discretizing the basic shape");
 
-		DEF_VAR_IN(Real, GridSpacing, "Grid spacing");
+	public:
+		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
+
+	protected:
+		void resetStates() override;
 
 	private:
-		SpikyKernel<Real> m_kernel;
-	
+		void convert();
 	};
-
-	IMPLEMENT_TCLASS(ComputeSurfaceLevelset, TDataType)
 }

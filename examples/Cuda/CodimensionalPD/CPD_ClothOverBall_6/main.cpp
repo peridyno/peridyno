@@ -1,14 +1,14 @@
 #include <GlfwApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
+#include <Volume/VolumeLoader.h>
 #include <Multiphysics/VolumeBoundary.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 #include "Peridynamics/CodimensionalPD.h"
-#include "../Modeling/StaticTriangularMesh.h"
+#include "StaticTriangularMesh.h"
 using namespace std;
 using namespace dyno;
 
@@ -20,10 +20,11 @@ std::shared_ptr<SceneGraph> createScene()
 	auto object = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	object->varFileName()->setValue(getAssetPath() + "cloth_shell/ball/ball_model.obj");
 
+	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/ball/ball_small_size_15.sdf");
 
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-1.5, 0, -1.5), Vec3f(1.5, 3, 1.5), 0.005f, true);
-	boundary->loadSDF(getAssetPath() + "cloth_shell/ball/ball_small_size_15.sdf", false);
+	volLoader->connect(boundary->importVolumes());
 
 	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->loadSurface(getAssetPath() + "cloth_shell/cloth_size_17_alt/cloth_40k_6.obj");

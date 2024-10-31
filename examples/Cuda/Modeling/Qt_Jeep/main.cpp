@@ -1,103 +1,32 @@
 #include <QtApp.h>
-#include "ObjIO/ObjLoader.h"
-#include <QtApp.h>
-
 #include <SceneGraph.h>
 
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
+
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
+#include <ParticleSystem/MakeParticleSystem.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 
-//#include <Multiphysics/SolidFluidCoupling.h>
-
-#include <Module/CalculateNorm.h>
-#include <Peridynamics/HyperelasticBody.h>
-#include <Peridynamics/Cloth.h>
-#include <Peridynamics/Thread.h>
-
-
-#include "Node/GLPointVisualNode.h"
-#include "Node/GLSurfaceVisualNode.h"
-
-#include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 
+#include <Commands/Merge.h>
 
-#include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/Emitters/SquareEmitter.h"
-#include "ParticleSystem/Emitters/CircularEmitter.h"
-#include "ParticleSystem/ParticleFluid.h"
+#include <BasicShapes/CubeModel.h>
+#include <Samplers/CubeSampler.h>
 
-#include "Topology/TriangleSet.h"
-#include "Collision/NeighborPointQuery.h"
+#include <Node/GLPointVisualNode.h>
 
-#include "ParticleWriter.h"
-#include "EigenValueWriter.h"
-
-#include "Module/CalculateNorm.h"
+#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 
 #include <ColorMapping.h>
-
-
-#include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
-#include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
-
-
-#include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/Emitters/SquareEmitter.h"
-#include "ParticleSystem/Emitters/CircularEmitter.h"
-#include "ParticleSystem/ParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-
-#include "Topology/TriangleSet.h"
-#include "Collision/NeighborPointQuery.h"
-
-#include "ParticleWriter.h"
-#include "EigenValueWriter.h"
-
-#include "Module/CalculateNorm.h"
-
-#include <ColorMapping.h>
-
-#include <GLPointVisualModule.h>
-#include <GLSurfaceVisualModule.h>
-#include <GLInstanceVisualModule.h>
-
-
-#include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
-
-#include <GLRenderEngine.h>
-
-#include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
-
-#include "StaticTriangularMesh.h"
-
-#include "BasicShapes/CubeModel.h"
-#include "BasicShapes/SphereModel.h"
-#include "Samplers/CubeSampler.h"
-
-#include "Mapping/MergeTriangleSet.h"
-#include "Commands/Merge.h"
-#include "ColorMapping.h"
-
-#include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/Module/IterativeDensitySolver.h"
-
-#include "Collision/NeighborPointQuery.h"
-#include "Collision/NeighborTriangleQuery.h"
-
-#include "SemiAnalyticalScheme/SemiAnalyticalPBD.h"
-#include "SemiAnalyticalScheme/TriangularMeshConstraint.h"
 
 #include "Auxiliary/DataSource.h"
+
+#include <ObjIO/ObjLoader.h>
 
 using namespace dyno;
 
@@ -239,9 +168,20 @@ std::shared_ptr<SceneGraph> creatScene()
 	mergeRoad->stateTriangleSet()->promoteOuput()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
-	auto staticBoundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	staticBoundary->loadCube(Vec3f(-1.0, 0, -1.5), Vec3f(1.0, 2, 3.0), 0.02, true);
-	fluid->connect(staticBoundary->importParticleSystems());
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 1.0f, 0.75f));
+	cubeBoundary->varLength()->setValue(Vec3f(2.0f, 2.0f, 4.5f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+
+	fluid->connect(container->importParticleSystems());
 
 	//firstModule
 	auto colormapping = visualizer->graphicsPipeline()->findFirstModule<ColorMapping<DataType3f>>();
