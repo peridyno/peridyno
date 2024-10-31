@@ -195,10 +195,19 @@ namespace dyno
 
 				auto& quads = polygonIndices[incre];
 
-				quads.insert(v3);
-				quads.insert(v2);
-				quads.insert(v1);
-				quads.insert(v0);
+				if ((nx + nz) % 2 == 0) {
+					quads.insert(v3);
+					quads.insert(v2);
+					quads.insert(v1);
+					quads.insert(v0);
+				}
+				else {
+					quads.insert(v2);
+					quads.insert(v1);
+					quads.insert(v0);
+					quads.insert(v3);
+				}
+				
 
 				incre++;
 			}
