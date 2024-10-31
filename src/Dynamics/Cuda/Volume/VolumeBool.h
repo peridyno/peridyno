@@ -31,8 +31,7 @@ namespace dyno {
 		DECLARE_ENUM(BoolType,
 			Intersect = 0,
 			Union = 1,
-			Minus = 2,
-			);
+			Minus = 2);
 
 		std::string getNodeType() override;
 

@@ -1,6 +1,6 @@
 #include "SparseMarchingCubes.h"
 
-#include "Mapping/MarchingCubesHelper.h"
+#include "Module/MarchingCubesHelper.h"
 
 #include "GLSurfaceVisualModule.h"
 

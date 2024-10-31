@@ -1,12 +1,12 @@
-#include "SurfaceLevelSetConstructionNode.h"
-#include "Module/ComputeSurfaceLevelset.h"
+#include "ParticleSkinning.h"
+#include "ComputeSurfaceLevelset.h"
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(SurfaceLevelSetConstructionNode, TDataType)
+	IMPLEMENT_TCLASS(ParticleSkinning, TDataType)
 
 	template<typename TDataType>
-	SurfaceLevelSetConstructionNode<TDataType> ::SurfaceLevelSetConstructionNode()
+	ParticleSkinning<TDataType> ::ParticleSkinning()
 		:Node()
 	{
 		this->stateLevelSet()->setDataPtr(std::make_shared<LevelSet<TDataType>>());
@@ -22,15 +22,14 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SurfaceLevelSetConstructionNode<TDataType> ::resetStates() {
-		SurfaceLevelSetConstructionNode<TDataType>::preUpdateStates();
+	void ParticleSkinning<TDataType>::resetStates() {
+		this->updateLevelset();
 	};
 
 	template<typename TDataType>
-	void SurfaceLevelSetConstructionNode<TDataType> ::preUpdateStates() {
-		this->UpdateLevelset();
+	void ParticleSkinning<TDataType>::preUpdateStates() {
+		this->updateLevelset();
 	};
-
 
 	template<typename Coord>
 	__global__ void constrGridPosition(
@@ -62,7 +61,7 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	void SurfaceLevelSetConstructionNode<TDataType> ::constrGridPositionArray() {
+	void ParticleSkinning<TDataType> ::constrGridPositionArray() {
 	
 		auto& sdf = this->stateLevelSet()->getDataPtr()->getSDF();
 		auto& leveset = this->stateLevelSet()->getDataPtr()->getSDF().getMDistance();
@@ -88,7 +87,7 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	void SurfaceLevelSetConstructionNode<TDataType> ::UpdateLevelset() 
+	void ParticleSkinning<TDataType>::updateLevelset() 
 	{
 
 		auto& sdf = this->stateLevelSet()->getDataPtr()->getSDF();
@@ -135,5 +134,5 @@ namespace dyno
 		};
 
 
-	DEFINE_CLASS(SurfaceLevelSetConstructionNode);
+	DEFINE_CLASS(ParticleSkinning);
 }

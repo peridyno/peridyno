@@ -1,6 +1,6 @@
 #include "VolumeToTriangleSet.h"
 
-#include "Mapping/MarchingCubesHelper.h"
+#include "MarchingCubesHelper.h"
 
 namespace dyno
 {

@@ -3,6 +3,6 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
         ParticleSystem 
         Multiphysics
         QtGUI)
-    add_example(Qt_MeshReconstruct SPH LIB_DEPENDENCY)
+    add_example(Qt_ParticleSkinning SPH LIB_DEPENDENCY)
 endif()
 

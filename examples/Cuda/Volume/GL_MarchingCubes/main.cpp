@@ -1,12 +1,13 @@
-#include <QtApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
 
-#include "Mapping/MarchingCubes.h"
+#include "Volume/VolumeClipper.h"
+
+#include "Volume/MarchingCubes.h"
 
 #include "Node/GLSurfaceVisualNode.h"
 
-#include "Mapping/VolumeClipper.h"
 #include "GLSurfaceVisualModule.h"
 
 #include "ColorMapping.h"
@@ -50,7 +51,7 @@ std::shared_ptr<SceneGraph> createClipper()
 
 int main()
 {
-	QtApp app;
+	UbiApp app;
 
 	app.setSceneGraph(createClipper());
 	app.initialize(1024, 768);

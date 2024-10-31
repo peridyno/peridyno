@@ -15,12 +15,13 @@
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 
-#include "Mapping\MarchingCubes.h"
+#include "Volume/MarchingCubes.h"
 #include "BasicShapes/CubeModel.h"
 #include "Samplers/CubeSampler.h"
 
 #include "ParticleSystem/MakeParticleSystem.h"
-#include "ParticleSystem/SurfaceLevelSetConstructionNode.h"
+
+#include "Multiphysics/ParticleSkinning.h"
 
 
 using namespace std;
@@ -70,7 +71,7 @@ std::shared_ptr<SceneGraph> createScene()
 	cube2vol->connect(container->importVolumes());
 	fluid->connect(container->importParticleSystems());
 
-	auto meshRe = scn->addNode(std::make_shared<SurfaceLevelSetConstructionNode<DataType3f>>());
+	auto meshRe = scn->addNode(std::make_shared<ParticleSkinning<DataType3f>>());
 	meshRe->stateGridSpacing()->setValue(0.005);
 	fluid->connect(meshRe->importParticleSystem());
 

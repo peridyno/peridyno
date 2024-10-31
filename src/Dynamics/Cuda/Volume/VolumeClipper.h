@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Shusen Liu
+ * Copyright 2022 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,47 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#pragma once
 #include "Node.h"
-#include "ParticleSystem/ParticleSystem.h"
+
 #include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
-#include "Mapping/MarchingCubes.h"
+
 namespace dyno
 {
 	template<typename TDataType>
-	class SurfaceLevelSetConstructionNode : public Node
+	class VolumeClipper : public Node
 	{
-		DECLARE_TCLASS(SurfaceLevelSetConstructionNode, TDataType)
+		DECLARE_TCLASS(VolumeClipper, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SurfaceLevelSetConstructionNode() ;
-		~SurfaceLevelSetConstructionNode() {};
+		VolumeClipper();
+		~VolumeClipper() override;
 
-		void UpdateLevelset();
+		std::string getNodeType() override { return "Volume"; }
 
-		DEF_NODE_PORT(ParticleSystem<TDataType>, ParticleSystem, "Initial Fluid Particles");
+	public:
+		DEF_VAR(Coord, Translation, Coord(0), "");
+		DEF_VAR(Coord, Rotation, Coord(0), "");
 
-		DEF_ARRAY_STATE(Coord, Points, DeviceType::GPU, "Point positions");
+		DEF_ARRAY_STATE(Real, Field, DeviceType::GPU, "Signed distance field defined on trianglular vertices");
 
-		DEF_INSTANCE_STATE(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Plane, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
 
-		DEF_ARRAY_STATE(Coord, GridPoistion, DeviceType::GPU, "Grid positions");
-
-		DEF_VAR_STATE(Real, GridSpacing, 0.01, "Grid spacing");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
 	protected:
-		void resetStates();
-
-		void preUpdateStates();
-
-		void constrGridPositionArray();
-
+		void resetStates() override;
 	};
 
-
+	IMPLEMENT_TCLASS(VolumeClipper, TDataType)
 }

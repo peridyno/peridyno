@@ -1,6 +1,6 @@
 #include "MarchingCubes.h"
 
-#include "MarchingCubesHelper.h"
+#include "Module/MarchingCubesHelper.h"
 
 namespace dyno
 {

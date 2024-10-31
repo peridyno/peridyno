@@ -420,7 +420,7 @@ void declare_frame_to_point_set(py::module& m, std::string typestr) {
 		.def("apply", &Class::apply);
 }
 
-#include "Mapping/MarchingCubes.h"
+#include "Volume/MarchingCubes.h"
 template <typename TDataType>
 void declare_marching_cubes(py::module& m, std::string typestr) {
 	using Class = dyno::MarchingCubes<TDataType>;
@@ -434,7 +434,7 @@ void declare_marching_cubes(py::module& m, std::string typestr) {
 		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
-#include "Mapping/MarchingCubesHelper.h"
+#include "Volume/Module/MarchingCubesHelper.h"
 template <typename TDataType>
 void declare_marching_cubes_helper(py::module& m, std::string typestr) {
 	using Class = dyno::MarchingCubesHelper<TDataType>;
@@ -525,7 +525,7 @@ void declare_texture_mesh_to_triangle_set(py::module& m, std::string typestr) {
 		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
-#include "Mapping/VolumeClipper.h"
+#include "Volume/VolumeClipper.h"
 template <typename TDataType>
 void declare_volume_clipper(py::module& m, std::string typestr) {
 	using Class = dyno::VolumeClipper<TDataType>;

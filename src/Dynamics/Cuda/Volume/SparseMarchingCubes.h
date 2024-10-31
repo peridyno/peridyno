@@ -29,6 +29,8 @@ namespace dyno
 		SparseMarchingCubes();
 		~SparseMarchingCubes() override;
 
+		std::string getNodeType() override { return "Volume"; }
+
 	public:
 		DEF_VAR(Real, IsoValue, Real(0), "Iso value");
 

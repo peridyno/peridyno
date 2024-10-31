@@ -22,31 +22,36 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class VolumeClipper : public Node
+	class MarchingCubes : public Node
 	{
-		DECLARE_TCLASS(VolumeClipper, TDataType)
+		DECLARE_TCLASS(MarchingCubes, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		VolumeClipper();
-		~VolumeClipper() override;
+		MarchingCubes();
+
+		~MarchingCubes() override;
+
+		std::string getNodeType() override { return "Volume"; }
 
 	public:
-		DEF_VAR(Coord, Translation, Coord(0), "");
-		DEF_VAR(Coord, Rotation, Coord(0), "");
+		DEF_VAR(Real, IsoValue, Real(0), "Iso value");
 
-		DEF_ARRAY_STATE(Real, Field, DeviceType::GPU, "Signed distance field defined on trianglular vertices");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Plane, "");
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
+		DEF_VAR(Real, GridSpacing, Real(0.05), "");
 
 		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
+		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "An iso surface");
+
 	protected:
 		void resetStates() override;
+
+		void updateStates() override;
+
+	private:
+		void constructSurfaceMesh();
 	};
 
-	IMPLEMENT_TCLASS(VolumeClipper, TDataType)
+	IMPLEMENT_TCLASS(MarchingCubes, TDataType)
 }

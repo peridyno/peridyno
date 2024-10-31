@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2023 Shusen Liu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Node.h"
+
+#include "ParticleSystem/ParticleSystem.h"
 
 #include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
@@ -22,34 +22,39 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class MarchingCubes : public Node
+	class ParticleSkinning : public Node
 	{
-		DECLARE_TCLASS(MarchingCubes, TDataType)
+		DECLARE_TCLASS(ParticleSkinning, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		MarchingCubes();
-
-		~MarchingCubes() override;
+		ParticleSkinning() ;
+		~ParticleSkinning() override {};
 
 	public:
-		DEF_VAR(Real, IsoValue, Real(0), "Iso value");
+		DEF_NODE_PORT(ParticleSystem<TDataType>, ParticleSystem, "Initial Fluid Particles");
 
-		DEF_VAR(Real, GridSpacing, Real(0.05), "");
+		DEF_ARRAY_STATE(Coord, Points, DeviceType::GPU, "Point positions");
 
-		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
+		DEF_INSTANCE_STATE(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
-		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "An iso surface");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
+
+		DEF_ARRAY_STATE(Coord, GridPoistion, DeviceType::GPU, "Grid positions");
+
+		DEF_VAR_STATE(Real, GridSpacing, 0.01, "Grid spacing");
 
 	protected:
 		void resetStates() override;
 
-		void updateStates() override;
+		void preUpdateStates() override;
 
 	private:
-		void constructSurfaceMesh();
+		void updateLevelset();
+
+		void constrGridPositionArray();
 	};
 
-	IMPLEMENT_TCLASS(MarchingCubes, TDataType)
+
 }

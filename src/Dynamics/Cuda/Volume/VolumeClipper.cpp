@@ -1,6 +1,6 @@
 #include "VolumeClipper.h"
 
-#include "MarchingCubesHelper.h"
+#include "Module/MarchingCubesHelper.h"
 
 namespace dyno
 {
