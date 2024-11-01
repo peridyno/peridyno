@@ -19,6 +19,7 @@ namespace dyno
 	{
 		//this->lineEdit()->setMouseTracking(true);
 		this->setRange(-999999, 999999);
+		this->setContentsMargins(0, 0, 0, 0);
 
 		connect(this, SIGNAL(valueChanged(double)), this, SLOT(ModifyValueAndUpdate(double)));
 		connect(this->lineEdit(), SIGNAL(textEdited(const QString&)), this, SLOT(LineEditStart(const QString&)));

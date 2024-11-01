@@ -28,6 +28,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	bool BasicShapeToVolume<TDataType>::validateInputs()
+	{
+		return this->getShape() != nullptr;
+	}
+
+	template<typename TDataType>
 	void BasicShapeToVolume<TDataType>::convert()
 	{
 		auto levelset = this->stateLevelSet()->getDataPtr();

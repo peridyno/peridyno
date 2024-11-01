@@ -6,7 +6,6 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Peridynamics
         SemiAnalyticalScheme
         Multiphysics
-        QtGUI
-        ObjIO)
-    add_example(Qt_GUI_Curve Modeling LIB_DEPENDENCY)
+        QtGUI)
+    add_example(Qt_TextureMeshEdit Modeling LIB_DEPENDENCY)
 endif()

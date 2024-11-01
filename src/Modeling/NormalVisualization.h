@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "../Framework/Node.h"
+#include "Node.h"
 #include "Topology/TriangleSet.h"
 
 #include "GLWireframeVisualModule.h"
@@ -27,7 +27,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class Normal :public Node
+	class NormalVisualization : public Node
 	{
 		DECLARE_TCLASS(Normal, TDataType);
 
@@ -35,8 +35,8 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Normal();
-		~Normal() 
+		NormalVisualization();
+		~NormalVisualization()
 		{
 			d_points.clear();
 			d_edges.clear();
@@ -44,6 +44,8 @@ namespace dyno
 			d_normal.clear();
 			triangleCenter.clear();
 		}
+
+		std::string getNodeType() override { return "Visualization"; }
 
 	public:
 		DEF_VAR(Real, Length, 0.2, "LinLength");
@@ -87,5 +89,5 @@ namespace dyno
 		DArray<Coord> triangleCenter;
 	};
 
-	IMPLEMENT_TCLASS(Normal, TDataType);
+	IMPLEMENT_TCLASS(NormalVisualization, TDataType);
 }

@@ -61,19 +61,21 @@ namespace dyno {
 	{	
 		VehicleRigidBodyInfo() {};
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type) //
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type,Real density = 100) //
 		{
 			shapeName = name;
 			meshShapeId = shapeId;
 			shapeType = type;
+			mDensity = density;
 		};
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans) //
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans, Real density = 100) //
 		{
 			shapeName = name;
 			meshShapeId = shapeId;
 			shapeType = type;
 			transform = trans;
+			mDensity = density;
 		};
 
 		//Shape:
@@ -90,6 +92,9 @@ namespace dyno {
 		float capsuleLength = 1;			// if(type == Capsule);
 		ConfigMotionType motion = ConfigMotionType::Dynamic;
 
+		Real mDensity = 100;
+
+		uint rigidGroup = 0;
 	};
 
 	/**

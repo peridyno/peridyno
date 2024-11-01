@@ -13,37 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
-#include "Volume.h"
-#include "BasicShapes/BasicShape.h"
+#include "Node.h"
 
 namespace dyno
 {
+
 	template<typename TDataType>
-	class BasicShapeToVolume : public Volume<TDataType>
+	class ModelEditing : public Node
 	{
-		DECLARE_TCLASS(BasicShapeToVolume, TDataType)
 	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
+		ModelEditing() {};
 
-		BasicShapeToVolume();
-		~BasicShapeToVolume() override;
+		std::string getNodeType() override { return "Model Editing"; }
 
-	public:
-		DEF_VAR(bool, Inerted, false, "");
-
-		DEF_VAR(Real, GridSpacing, 0.05f, "The grid spacing used in discretizing the basic shape");
-
-	public:
-		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
-
-	protected:
-		void resetStates() override;
-
-		bool validateInputs() override;
-
-	private:
-		void convert();
 	};
 }

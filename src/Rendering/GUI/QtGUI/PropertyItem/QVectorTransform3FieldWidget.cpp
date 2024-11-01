@@ -145,9 +145,9 @@ namespace dyno
 		mS1 = new QPiecewiseDoubleSpinBox;
 		mS2 = new QPiecewiseDoubleSpinBox;
 
-		mS0->setValue(0);
-		mS1->setValue(0);
-		mS2->setValue(0);
+		mS0->setValue(1);
+		mS1->setValue(1);
+		mS2->setValue(1);
 
 		QHBoxLayout* layout_T = new QHBoxLayout();
 		QHBoxLayout* layout_R = new QHBoxLayout();

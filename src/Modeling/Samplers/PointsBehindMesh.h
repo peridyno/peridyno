@@ -18,6 +18,7 @@
 #include "Samplers/Sampler.h"
 #include "Topology/PolygonSet.h"
 #include "Topology/TriangleSet.h"
+#include "NormalVisualization.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Algorithm/Scan.h"
 

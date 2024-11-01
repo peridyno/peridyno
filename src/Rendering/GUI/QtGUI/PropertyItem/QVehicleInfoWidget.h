@@ -28,6 +28,7 @@
 #include "qcheckbox.h"
 #include "QPiecewiseDoubleSpinBox.h"
 #include "qpushbutton.h"
+#include "qspinbox.h"
 
 
 namespace dyno
@@ -70,6 +71,7 @@ namespace dyno
 		mVec3fWidget* mTetWidget_2 = nullptr;
 		mVec3fWidget* mTetWidget_3 = nullptr;
 		QComboBox* mMotionWidget = nullptr;	
+		QSpinBox* mRigidGroup = nullptr;
 
 		//Source data
 		VehicleRigidBodyInfo* mRigidBodyData = nullptr;

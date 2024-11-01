@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuzhong Guo
+ * Copyright 2022 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,54 +16,60 @@
 
 #pragma once
 #include "ModelEditing.h"
-#include "Topology/TextureMesh.h"
+
 #include "Topology/TriangleSet.h"
+#include "Topology/PolygonSet.h"
+#include "Topology/TextureMesh.h"
+#include "Color.h"
+#include "FilePath.h"
 
 
 namespace dyno
 {
-	/**
-	 * @brief A class to merge TextureMeshs.
-	 */
-
 	template<typename TDataType>
-	class ExtractShape : public ModelEditing<TDataType>
+	class ConvertToTextureMesh : public ModelEditing<TDataType>
 	{
-		DECLARE_TCLASS(ExtractShape, TDataType);
+		DECLARE_TCLASS(CubeModel, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TDataType::Matrix Matrix;
-
 		typedef typename TopologyModule::Triangle Triangle;
 
-		ExtractShape();
-
-		~ExtractShape();
+		ConvertToTextureMesh();
 
 	public:
 
-		DEF_VAR(std::vector<int>, ShapeId, std::vector<int>{0},"");
+		DEF_VAR(FilePath, DiffuseTexture, "", "");
+		DEF_VAR(FilePath, NormalTexture, "", "");
+		DEF_VAR(Real, UvScaleU, 9, "");
+		DEF_VAR(Real, UvScaleV, 9, "");
+		DEF_VAR(bool,UseBoundingTransform,false,"");
 
-		DEF_VAR(std::vector<Transform3f>, ShapeTransform, std::vector<Transform3f>{Transform3f()}, "");
+		DEF_INSTANCE_IN(TopologyModule, Topology, "");
 
-		DEF_VAR(bool, Offset, true, "");
-
-		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "Input TextureMesh");
-
-		DEF_INSTANCE_STATE(TextureMesh, Result, "Output TextureMesh");
+		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
 	protected:
 		void resetStates() override;
 
+		void varChanged();
+
+		void createTextureMesh();
+
+		void createUV();
+
+		void createMaterial();
+
+		void createNormal();
+
+		void moveToCenter();
 
 	private:
 
 
 	};
 
+	IMPLEMENT_TCLASS(ConvertToTextureMesh, TDataType);
 
-
-	IMPLEMENT_TCLASS(ExtractShape, TDataType);
 }

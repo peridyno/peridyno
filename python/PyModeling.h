@@ -219,10 +219,10 @@ void declare_merge(py::module& m, std::string typestr) {
 		.value("Tick", Class::UpdateMode::Tick);
 }
 
-#include "Normal.h"
+#include "NormalVisualization.h"
 template <typename TDataType>
 void declare_normal(py::module& m, std::string typestr) {
-	using Class = dyno::Normal<TDataType>;
+	using Class = dyno::NormalVisualization<TDataType>;
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("Normal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

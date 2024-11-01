@@ -144,6 +144,9 @@ namespace dyno
 		this->stateJointSet()->connect(jointLineRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(jointLineRender);
 
+		this->stateAnimation()->setDataPtr(std::make_shared<JointAnimationInfo>());
+		this->stateAnimation()->promoteOuput();
+
 		auto glShapeCenter = std::make_shared<GLPointVisualModule>();
 		glShapeCenter->setColor(Color(1.0f, 1.0f, 0.0f));
 		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue() * 2);
@@ -216,7 +219,10 @@ namespace dyno
 		////import Animation
 		importAnimation(model, joint_output, joint_input, joint_T_f_anim, joint_T_Time, joint_S_f_anim, joint_S_Time, joint_R_f_anim, joint_R_Time);
 
-
+		for (int i = 0; i<model.nodes.size();i++)
+		{
+			node_Name[i] = model.nodes[i].name;
+		}
 
 		// import Scenes:
 		std::map<scene, std::vector<int>> Scene_Nodes;
@@ -487,7 +493,7 @@ namespace dyno
 					{
 						std::vector<joint> skinJoints;
 
-						if (shape_skinJoint.find(primNum) != shape_skinJoint.end())
+						if (shape_skinJoint.find(0) != shape_skinJoint.end())
 							skinJoints = shape_skinJoint[tempShapeId];
 
 						if (skinJoints.size())
@@ -610,9 +616,39 @@ namespace dyno
 		this->stateSkin()->getDataPtr()->initialNormal = initialNormal;
 
 		this->updateAnimation(0);
-		this->stateJointsData()->getDataPtr()->UpdateJointInfo(this->stateJointInverseBindMatrix()->getData(), this->stateJointLocalMatrix()->getData(), this->stateJointWorldMatrix()->getData());
 
+		this->stateJointsData()->getDataPtr()->UpdateJointInfo(
+			this->stateJointInverseBindMatrix()->getData(),
+			this->stateJointLocalMatrix()->getData(),
+			this->stateJointWorldMatrix()->getData(),
+			all_Joints,
+			jointId_joint_Dir,
+			joint_translation,
+			joint_scale,
+			joint_rotation
+		);
 
+		this->stateJointsData()->getDataPtr()->setJointName(joint_Name);
+
+		this->stateAnimation()->getDataPtr()->setAnimationData(
+			joint_T_f_anim,
+			joint_T_Time,
+			joint_S_f_anim,
+			joint_S_Time,
+			joint_R_f_anim,
+			joint_R_Time,
+			this->stateJointsData()->getDataPtr()
+			);
+		printf("%d,%d,%d,%d,%d,%d,%d,%d\n", 
+			all_Joints.size(),
+			jointId_joint_Dir.size(),
+			joint_T_f_anim.size(),
+			joint_T_Time.size(),
+			joint_S_f_anim.size(),
+			joint_S_Time.size(),
+			joint_R_f_anim.size(),
+			joint_R_Time.size()
+			);
 	}
 
 
@@ -633,7 +669,16 @@ namespace dyno
 		updateAnimation(this->stateFrameNumber()->getValue());
 		auto jointInfo = this->stateJointsData()->getDataPtr();
 		
-		this->stateJointsData()->getDataPtr()->UpdateJointInfo(this->stateJointInverseBindMatrix()->getData(), this->stateJointLocalMatrix()->getData(), this->stateJointWorldMatrix()->getData());
+		this->stateJointsData()->getDataPtr()->UpdateJointInfo(
+			this->stateJointInverseBindMatrix()->getData(), 
+			this->stateJointLocalMatrix()->getData(), 
+			this->stateJointWorldMatrix()->getData(),
+			all_Joints,
+			jointId_joint_Dir,
+			joint_translation,
+			joint_scale,
+			joint_rotation
+		);
 	}; 
 
 
@@ -717,33 +762,13 @@ namespace dyno
 
 
 	template<typename TDataType>
-	std::vector<int> GltfLoader<TDataType>::getJointDirByJointIndex(int Index)
-	{
-		std::vector<int> jointDir;
-		std::map<int, std::vector<int>>::const_iterator iter;
-
-		//get skeletal chain
-		iter = jointId_joint_Dir.find(Index);
-		if (iter == jointId_joint_Dir.end())
-		{
-			std::cout << "Error: not found JointIndex \n";
-			return jointDir;
-		}
-
-		jointDir = iter->second;
-		return jointDir;
-	}
-
-
-
-	template<typename TDataType>
 	void GltfLoader<TDataType>::updateAnimationMatrix(const std::vector<joint>& all_Joints, int currentframe)
 	{
 		joint_AnimaMatrix = joint_matrix;
 
 		for (auto jId : all_Joints)
 		{
-			const std::vector<int>& jD = getJointDirByJointIndex(jId);
+			const std::vector<int>& jD = getJointDirByJointIndex(jId,jointId_joint_Dir);
 
 			Mat4f tempMatrix = Mat4f::identityMatrix();
 
@@ -838,7 +863,7 @@ namespace dyno
 
 		Vec3f result = Vec3f(0);
 
-		const std::vector<int>& jD = getJointDirByJointIndex(jointId);
+		const std::vector<int>& jD =  getJointDirByJointIndex(jointId, jointId_joint_Dir);
 
 		Mat4f tempMatrix = Mat4f::identityMatrix();
 
@@ -868,7 +893,7 @@ namespace dyno
 		for (size_t i = 0; i < allJoints.size(); i++)
 		{
 			joint jointId = allJoints[i];
-			const std::vector<int>& jD = getJointDirByJointIndex(jointId);
+			const std::vector<int>& jD = getJointDirByJointIndex(jointId, jointId_joint_Dir);
 
 
 
@@ -912,7 +937,7 @@ namespace dyno
 		{
 			joint jointId = all_Joints[i];
 
-			const std::vector<int>& jD = getJointDirByJointIndex(jointId);
+			const std::vector<int>& jD = getJointDirByJointIndex(jointId, jointId_joint_Dir);
 
 			Mat4f tempMatrix = Mat4f::identityMatrix();
 
@@ -1309,7 +1334,7 @@ namespace dyno
 		all_Nodes.clear();
 		all_Meshs.clear();
 		nodeId_Dir.clear();
-		mesh_Name.clear();
+
 		meshId_Dir.clear();
 		node_matrix.clear();
 
@@ -1317,6 +1342,8 @@ namespace dyno
 		d_shape_meshId.clear();
 		unCenterPosition.clear();
 		skin_VerticeRange.clear();
+		node_Name.clear();
+
 
 		maxJointId = -1;
 		jointNum = -1;

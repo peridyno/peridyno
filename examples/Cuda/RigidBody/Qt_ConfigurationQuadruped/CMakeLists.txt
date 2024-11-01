@@ -5,5 +5,5 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
         QtGUI
         SkeletonLoader
         ObjIO)
-    add_example(Qt_ConfigurationVehicle RigidBody LIB_DEPENDENCY)
+    add_example(Qt_ConfigurationQuadruped RigidBody LIB_DEPENDENCY)
 endif()

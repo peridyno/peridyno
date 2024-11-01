@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node.h"
+#include "ModelEditing.h"
 #include "Topology/TextureMesh.h"
 
 
@@ -26,7 +26,7 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class TextureMeshMerge : public Node
+	class TextureMeshMerge : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(TextureMeshMerge, TDataType);
 

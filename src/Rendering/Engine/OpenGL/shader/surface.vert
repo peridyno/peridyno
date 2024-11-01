@@ -83,6 +83,9 @@ void main(void) {
 		if(uColorMode == 0) {	
 			vs.color = instance_color;
 		}
+		if(uColorMode == 1) {	
+			vs.color = uMtl.color;
+		}
 	}
 	mat4 MV = uRenderParams.view * modelMat;
 

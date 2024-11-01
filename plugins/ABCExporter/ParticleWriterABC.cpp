@@ -19,6 +19,10 @@ namespace dyno
 	ParticleWriterABC<TDataType>::ParticleWriterABC()
 	: OutputModule()
 	{
+		this->inPointSet()->tagOptional(true);
+		this->inColor()->tagOptional(true);
+		this->inPosition()->tagOptional(true);
+
 	}
 
 	template<typename TDataType>
@@ -37,11 +41,28 @@ namespace dyno
 		time_idx++;
 
 		std::cout << "............Writer .abc file............" << std::endl;
+		DArray<Vec3f>* inPos = nullptr;
+		if (!this->inPointSet()->isEmpty())
+			inPos = &this->inPointSet()->constDataPtr()->getPoints();
+		else if (!this->inPosition()->isEmpty())
+			inPos = &this->inPosition()->getData();
+		else 
+		{
+			std::cout << "Error : No inPointSet or inPosition input!!\n";
+			return;
+		}
 
-		auto& inPos = this->inPointSet()->getDataPtr()->getPoints();
-		auto& inColor = this->inColor()->getData();
+		DArray<Real>* inColor = nullptr;
+		if (!this->inColor()->isEmpty())
+			inColor = &this->inColor()->getData();
 
-		assert(inPos.size() == inColor.size());
+		if (inColor != nullptr)
+			if (inColor->size() != inColor->size()) 
+			{
+				std::cout << "Error inColor Input!!\n";
+				return;
+			}
+
 
 		std::stringstream ss; ss << m_output_index;
 		std::string filename = this->varOutputPath()->getValue().string() + std::string("fluid_pos_") + ss.str() + std::string(".abc");
@@ -51,17 +72,20 @@ namespace dyno
 		Alembic::AbcGeom::OObject topObj(archive, Alembic::AbcGeom::kTop);
 		Alembic::AbcGeom::OPoints ptsObj(topObj, "somePoints");
 
-		int total_num = inPos.size();
+		//CPU Data
+		int total_num = inPos->size();
 		CArray<Coord> host_position;
-		CArray<Real> host_mapping;
 		host_position.resize(total_num);
-		host_mapping.resize(total_num);
+		host_position.assign(*inPos);
 
-		host_position.assign(inPos);
-		host_mapping.assign(inColor);
+		CArray<Real> host_mapping;
+		if (inColor != nullptr) 
+		{
+			host_mapping.resize(total_num);
+			host_mapping.assign(*inColor);
+		}
 
-		
-
+		//Alembic Data
 		std::vector< Alembic::AbcGeom::V3f > positions;
 		std::vector< Alembic::AbcGeom::V3f > velocities;
 		std::vector< Alembic::Util::uint64_t > ids;
@@ -72,10 +96,12 @@ namespace dyno
 				positions.push_back(Alembic::AbcGeom::V3f(host_position[i][0], host_position[i][1], host_position[i][2]));
 				velocities.push_back(Alembic::AbcGeom::V3f(0, 0, 0));
 				ids.push_back(i);
-				widths.push_back(host_mapping[i]);
-			//if(i % 100000 == 0)
-			//printf("pressure: %.3lf\n", host_mapping[i]);
+				if (inColor != nullptr)
+					widths.push_back(host_mapping[i]);
+				else
+					widths.push_back(Alembic::Util::float32_t(0));
 		}
+
 		Alembic::AbcGeom::OFloatGeomParam::Sample widthSamp;
 		widthSamp.setScope(Alembic::AbcGeom::kVertexScope);
 		widthSamp.setVals(Alembic::AbcGeom::FloatArraySample(widths));

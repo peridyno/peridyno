@@ -23,13 +23,14 @@
 #include <BasicShapes/PlaneModel.h>
 
 #include "GltfLoader.h"
-//#include "ConvertToTextureMesh.h"
 
 #include "GltfLoader.h"
 #include "BasicShapes/PlaneModel.h"
 
+
 using namespace std;
 using namespace dyno;
+
 
 std::shared_ptr<SceneGraph> creatCar()
 {
@@ -46,7 +47,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	VehicleBind configData;
 
-	Vec3f angle = Vec3f(0,0,90);
+	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
 	;
 	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LF", 0), 0, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));//
@@ -69,19 +70,19 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	configCar->varVehicleConfiguration()->setValue(configData);
 
-	configCar->varRotation()->setValue(Vec3f(0,45,0));
-	
+	configCar->varRotation()->setValue(Vec3f(0, 45, 0));
+
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varLengthX()->setValue(50);
 	plane->varLengthZ()->setValue(50);
 
 	plane->stateTriangleSet()->connect(configCar->inTriangleSet());
-	
+
 	std::vector<Transform3f> vehicleTransforms;
 
-	vehicleTransforms.push_back(Transform3f(Vec3f(0),Quat1f(0,Vec3f(0,1,0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(3, 0.5,-1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(-3,0.5,-1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(-3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
 	vehicleTransforms.push_back(Transform3f(Vec3f(6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
 	vehicleTransforms.push_back(Transform3f(Vec3f(-6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
 
@@ -103,5 +104,3 @@ int main()
 
 	return 0;
 }
-
-
