@@ -28,7 +28,7 @@ namespace dyno
 		typedef typename ::dyno::Quat<Real> TQuat;
 
 		ObjPoint();
-
+		std::string getNodeType() override { return "IO"; }
 		//void update() override;
 
 	public:

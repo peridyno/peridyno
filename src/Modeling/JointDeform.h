@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node.h"
+#include "ModelEditing.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 
@@ -35,7 +35,7 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class JointDeform : public Node
+	class JointDeform : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(JointDeform, TDataType);
 

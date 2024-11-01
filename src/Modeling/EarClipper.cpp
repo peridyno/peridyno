@@ -9,7 +9,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	EarClipper<TDataType>::EarClipper()
-		:Node()
+		: ModelEditing<TDataType>()
 	{
 
 	}

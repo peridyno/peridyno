@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "BasicShapes/BasicShape.h"
+#include "ModelEditing.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
@@ -27,7 +27,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class ConvertToTextureMesh : public Node
+	class ConvertToTextureMesh : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(CubeModel, TDataType);
 

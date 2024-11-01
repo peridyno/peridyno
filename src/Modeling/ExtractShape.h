@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node.h"
+#include "ModelEditing.h"
 #include "Topology/TextureMesh.h"
 #include "Topology/TriangleSet.h"
 
@@ -27,7 +27,7 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class ExtractShape: public Node
+	class ExtractShape : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(ExtractShape, TDataType);
 

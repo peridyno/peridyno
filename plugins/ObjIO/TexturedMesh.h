@@ -16,6 +16,7 @@ namespace dyno
 	public:
 		TexturedMesh();
 		~TexturedMesh() override;
+		std::string getNodeType() override { return "IO"; }
 
 	public:
 

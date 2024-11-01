@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "../Framework/Node.h"
+#include "Node.h"
 #include "Topology/TriangleSet.h"
 
 #include "GLWireframeVisualModule.h"
@@ -36,6 +36,8 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		VectorVisualNode();
+
+		std::string getNodeType() override { return "Visualization"; }
 
 		DECLARE_ENUM(LineMode,
 			Line = 0,

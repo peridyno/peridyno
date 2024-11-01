@@ -1,4 +1,4 @@
-#include "Normal.h"
+#include "NormalVisualization.h"
 #include "Topology/PointSet.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -10,21 +10,21 @@
 namespace dyno
 {
 	template<typename TDataType>
-	Normal<TDataType>::Normal()
+	NormalVisualization<TDataType>::NormalVisualization()
 		: Node()
 	{
 		this->varLength()->setRange(0, 02);
 		this->varLineWidth()->setRange(0,1);
 		this->stateNormalSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
 
-		auto callback = std::make_shared<FCallBackFunc>(std::bind(&Normal<TDataType>::varChanged, this));
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&NormalVisualization<TDataType>::varChanged, this));
 
 		this->varLength()->attach(callback);
 		this->varLineWidth()->attach(callback);
 		this->varArrowResolution()->attach(callback);
 
 
-		auto render_callback = std::make_shared<FCallBackFunc>(std::bind(&Normal<TDataType>::renderChanged, this));
+		auto render_callback = std::make_shared<FCallBackFunc>(std::bind(&NormalVisualization<TDataType>::renderChanged, this));
 		this->varLineWidth()->attach(render_callback);
 		this->varShowWireframe()->attach(render_callback);
 
@@ -71,28 +71,28 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void Normal<TDataType>::renderChanged() 
+	void NormalVisualization<TDataType>::renderChanged()
 	{
 
 	}
 
 
 	template<typename TDataType>
-	void Normal<TDataType>::resetStates()
+	void NormalVisualization<TDataType>::resetStates()
 	{
 		this->varChanged();
 		this->renderChanged();
 	}
 
 	template<typename TDataType>
-	void Normal<TDataType>::updateStates()
+	void NormalVisualization<TDataType>::updateStates()
 	{
 		this->varChanged();
 		//this->renderChanged();
 	}
 
 	template<typename TDataType>
-	void Normal<TDataType>::varChanged()
+	void NormalVisualization<TDataType>::varChanged()
 	{		
 		printf("varChanged\n");
 
@@ -319,5 +319,5 @@ namespace dyno
 	}
 
 
-	DEFINE_CLASS(Normal);
+	DEFINE_CLASS(NormalVisualization);
 }

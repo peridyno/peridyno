@@ -83,6 +83,8 @@ namespace dyno
 		GltfLoader();
 		~GltfLoader();
 
+		std::string getNodeType() override { return "IO"; }
+
 	public:
 
 		DEF_VAR(FilePath, FileName, "", "");
@@ -113,7 +115,6 @@ namespace dyno
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
 		DEF_INSTANCE_STATE(JointAnimationInfo, Animation,"");
-
 
 	protected:
 		void resetStates() override

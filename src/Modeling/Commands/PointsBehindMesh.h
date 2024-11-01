@@ -20,7 +20,7 @@
 #include "GLWireframeVisualModule.h"
 #include "Topology/PolygonSet.h"
 #include "Topology/TriangleSet.h"
-#include "../../../Modeling/Normal.h"
+#include "NormalVisualization.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Algorithm/Scan.h"
 

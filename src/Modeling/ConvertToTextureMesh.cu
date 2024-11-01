@@ -129,7 +129,7 @@ namespace dyno
 
 	template<typename TDataType>
 	ConvertToTextureMesh<TDataType>::ConvertToTextureMesh()
-		: Node()
+		: ModelEditing<TDataType>()
 	{
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
