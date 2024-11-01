@@ -11,7 +11,7 @@
 #include "BasicShapes/CubeModel.h"
 #include "BasicShapes/SphereModel.h"
 #include "BasicShapes/PlaneModel.h"
-#include "Normal.h"
+#include "NormalVisualization.h"
 #include "Commands/PointsBehindMesh.h"
 #include "SemiAnalyticalScheme/ParticleRelaxtionOnMesh.h"
 
