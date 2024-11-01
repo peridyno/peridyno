@@ -17,7 +17,6 @@
 #include "Module/KeyboardInputModule.h"
 #include "Topology/DiscreteElements.h"
 #include "Topology/HierarchicalModel.h"
-#include "EventDispatcher.h"
 
 namespace dyno 
 {
@@ -50,7 +49,7 @@ namespace dyno
 
 	public:
 
-		EventDispatcher<Vec3f> mDispatcher;
+
 
 	protected:
 

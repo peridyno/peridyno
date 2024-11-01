@@ -1,33 +1,9 @@
 #include <QtApp.h>
-
 #include <SceneGraph.h>
-
 #include <RigidBody/Vechicle.h>
-
-#include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
-#include <GLSurfaceVisualModule.h>
-#include <GLWireframeVisualModule.h>
-
-#include <Mapping/DiscreteElementsToTriangleSet.h>
-#include <Mapping/ContactsToEdgeSet.h>
-#include <Mapping/ContactsToPointSet.h>
-#include <Mapping/AnchorPointToPointSet.h>
-
-#include "Collision/NeighborElementQuery.h"
-#include "Collision/CollistionDetectionTriangleSet.h"
-#include "Collision/CollistionDetectionBoundingBox.h"
-
-#include <Module/GLPhotorealisticInstanceRender.h>
-
 #include <BasicShapes/PlaneModel.h>
-
-#include "GltfLoader.h"
-//#include "ConvertToTextureMesh.h"
-
 #include "GltfLoader.h"
 #include "BasicShapes/PlaneModel.h"
-
 #include "TextureMeshMerge.h"
 #include "ExtractShape.h"
 
