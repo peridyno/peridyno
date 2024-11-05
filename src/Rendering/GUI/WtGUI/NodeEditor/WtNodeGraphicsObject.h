@@ -123,7 +123,7 @@ public:
 
 	void setPos(int x, int y);
 
-	Wt::WPointF pos() const;
+	Wt::WPointF getPos() const;
 
 	bool isSelected() const;
 

@@ -120,8 +120,8 @@ WSimulationCanvas::WSimulationCanvas()
 	this->mouseDragged().connect(this, &WSimulationCanvas::onMouseDrag);
 	this->mouseWentUp().connect(this, &WSimulationCanvas::onMouseReleased);
 
-	// 	this->keyWentDown().connect(this, &WSimulationCanvas::onKeyWentDown);
-	// 	this->keyWentUp().connect(this, &WSimulationCanvas::onKeyWentUp);
+	//this->keyWentDown().connect(this, &WSimulationCanvas::onKeyWentDown);
+	//this->keyWentUp().connect(this, &WSimulationCanvas::onKeyWentUp);
 
 	this->setAttributeValue("oncontextmenu", "return false;");
 

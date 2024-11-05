@@ -58,6 +58,7 @@ void WtNodePainter::drawNodeRect(
 	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
 		: Wt::WRectF(-diam, 0.0f, 2.0 * diam + geom.width(), diam + geom.height());
 
+
 	//gradient
 
 	if (model->captionVisible())
@@ -625,7 +626,7 @@ void WtNodeGraphicsObject::paint(Wt::WPainter* painter)
 	WtNodePainter::paint(painter, _node, _scene);
 }
 
-Wt::WPointF WtNodeGraphicsObject::pos() const
+Wt::WPointF WtNodeGraphicsObject::getPos() const
 {
 	return _origin;
 }

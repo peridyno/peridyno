@@ -205,7 +205,7 @@ void WtFlowScene::iterateOverNodeDataDependentOrder(std::function<void(WtNodeDat
 
 Wt::WPointF WtFlowScene::getNodePosition(const WtNode& node) const
 {
-	return node.nodeGraphicsObject().pos();
+	return node.nodeGraphicsObject().getPos();
 }
 
 //Wt::WPointF WtFlowScene::setNodePosition(WtNode& node, const Wt::WPointF& pos) const

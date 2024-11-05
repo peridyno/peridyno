@@ -12,6 +12,7 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene) :Wt::WPainte
 	this->mouseMoved().connect(this, &WtFlowWidget::onMouseMove);
 	this->mouseWentUp().connect(this, &WtFlowWidget::onMouseWentUp);
 	this->mouseWheel().connect(this, &WtFlowWidget::onMouseWheel);
+	this->keyWentDown().connect(this, &WtFlowWidget::onKeyWentDown);
 }
 
 WtFlowWidget::~WtFlowWidget() {};
@@ -52,6 +53,15 @@ void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
 	}
 }
 
+void WtFlowWidget::onKeyWentDown(const Wt::WKeyEvent& event)
+{
+	std::cout << "aaa" << std::endl;
+	if (event.key() == Wt::Key::Up)
+	{
+		std::cout << "!!!" << std::endl;
+	}
+}
+
 void WtFlowWidget::zoomIn()
 {
 	mZoomFactor *= 1.1;
@@ -68,7 +78,30 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);
 	painter.scale(mZoomFactor, mZoomFactor);
-	painter.translate(mTranlate);
+	//painter.translate(mTranlate);
 
 	node_scene = new WtNodeFlowScene(&painter, mScene);
+
+	nodeMap = node_scene->getNodeMap();
+
+	for (auto it = mScene->begin(); it != mScene->end(); it++)
+	{
+		auto m = it.get();
+		auto node = nodeMap[m->objectId()];
+		if (m->objectId() == 2 || m->objectId() == 364)
+		{
+			moveNode(*node, mTranlate);
+		}
+	}
+}
+
+void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (true && nodeData != nullptr)
+	{
+		auto node = nodeData->getNode();
+		node->setBlockCoord(newLocaton.x(), newLocaton.y());
+	}
 }

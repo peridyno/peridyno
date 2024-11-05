@@ -65,6 +65,8 @@ public:
 	 */
 	void reorderAllNodes();
 
+	std::map<dyno::ObjectId, WtNode*> getNodeMap();
+
 private:
 	void showThisNodeOnly(WtNode& n);
 	void showAllNodes();
@@ -86,4 +88,6 @@ private:
 	float mDy = 50.0f;
 
 	std::shared_ptr<dyno::SceneGraph> mScene = nullptr;
+
+	std::map<dyno::ObjectId, WtNode*> OutNodeMap;
 };

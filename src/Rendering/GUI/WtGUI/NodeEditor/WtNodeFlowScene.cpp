@@ -66,14 +66,17 @@ void WtNodeFlowScene::createNodeGraphView()
 	auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
 		{
 			auto mId = m->objectId();
+			//std::cout << m->objectId() << std::endl;
 
 			auto type = std::make_unique<WtNodeWidget>(m);
 
 			auto& node = this->createNode(std::move(type), _painter);
 
 			nodeMap[mId] = &node;
+			OutNodeMap[mId] = &node;
 
 			Wt::WPointF posView(m->bx(), m->by());
+
 
 			node.nodeGraphicsObject().setPos(posView);
 			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
@@ -357,7 +360,7 @@ void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)
 
 		float h = geo.height();
 
-		Wt::WPointF pos = obj.pos();
+		Wt::WPointF pos = obj.getPos();
 
 		y = std::max(y, float(pos.y() + h));
 	}
@@ -699,5 +702,10 @@ void WtNodeFlowScene::reorderAllNodes()
 	qtNodeMapper.clear();
 	nodeMapper.clear();
 
-	updateNodeGraphView();
+	//updateNodeGraphView();
+}
+
+std::map<dyno::ObjectId, WtNode*> WtNodeFlowScene::getNodeMap()
+{
+	return OutNodeMap;
 }

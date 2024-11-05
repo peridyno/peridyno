@@ -19,8 +19,10 @@ public:
 	void onMouseWentDown(const Wt::WMouseEvent& event);
 	void onMouseWentUp(const Wt::WMouseEvent& event);
 	void onMouseWheel(const Wt::WMouseEvent& event);
+	void onKeyWentDown(const Wt::WKeyEvent& event);
 	void zoomIn();
 	void zoomOut();
+	void moveNode(WtNode& n, const Wt::WPointF& newLocaton);
 
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
@@ -34,4 +36,5 @@ private:
 
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;
+	std::map<dyno::ObjectId, WtNode*> nodeMap;
 };
