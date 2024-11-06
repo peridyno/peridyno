@@ -11,6 +11,7 @@
 #include "WtNode.h"
 #include "WtNodeStyle.h"
 #include "WtFlowScene.h"
+#include "WtFlowNodeData.h"
 
 class WtNode;
 class WtNodeState;
@@ -125,23 +126,16 @@ public:
 
 	Wt::WPointF getPos() const;
 
-	bool isSelected() const;
+	bool isSelected() const { return _selectChecked; }
+
+	bool setSelecteChecked(bool s) { _selectChecked = s; }
 
 	Wt::WTransform sceneTransform() const
 	{
 		return Wt::WTransform(1, 0, 0, 1, 0, 0);
 	}
 
-	Wt::WPointF getOrigin()
-	{
-		return _origin;
-	}
-
-
-	//void onMouseMove(const Wt::WMouseEvent& event);
-	void onMouseWentDown(const Wt::WKeyEvent& event);
-	//void onMouseWentUp(const Wt::WMouseEvent& event);
-	//void onMouseWheel(const Wt::WMouseEvent& event);
+	void setBoundingRect(Wt::WRectF r) const { _flowNodeData.setNodeBoundingRect(r); }
 
 protected:
 	void paint(Wt::WPainter* painter);
@@ -170,6 +164,8 @@ private:
 
 	bool _hotKey2Checked = false;
 
+	bool _selectChecked = false;
+
 	int _pressCounter = 0;
 
 	int HelpTimerID = -1;
@@ -178,9 +174,9 @@ private:
 	// use for move
 	Wt::WPointF _origin = Wt::WPointF(0, 0);
 
-	Wt::WPointF mLastMousePos;
-	Wt::WPointF mLastDelta;
-	bool isDragging;
+	WtFlowNodeData& _flowNodeData;
+
+
 
 	// either nullptr or owned by parent QGraphicsItem
 	//QGraphicsProxyWidget* _proxyWidget;

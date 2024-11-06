@@ -281,7 +281,7 @@ void WtConnectionGraphicsObject::move()
 
 			auto const& nodeGeom = node->nodeGeometry();
 
-			Wt::WPointF origin = node->nodeGraphicsObject().getOrigin();
+			Wt::WPointF origin = node->nodeGraphicsObject().getPos();
 
 			Wt::WPointF scenePos = nodeGeom.portScenePosition(
 				_connection.getPortIndex(portType),

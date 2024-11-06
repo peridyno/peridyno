@@ -91,6 +91,14 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 		if (m->objectId() == 2 || m->objectId() == 364)
 		{
 			moveNode(*node, mTranlate);
+			auto nodeData = node->flowNodeData();
+			auto p = nodeData.getNodeBoundingRect().bottomRight();
+			auto p1 = nodeData.getNodeOrigin();
+			std::cout << p1.x() << std::endl;
+			std::cout << p1.y() << std::endl;
+			std::cout << p.x() << std::endl;
+			std::cout << p.y() << std::endl;
+
 		}
 	}
 }

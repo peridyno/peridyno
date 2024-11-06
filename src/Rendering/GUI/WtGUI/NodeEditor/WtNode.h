@@ -12,6 +12,7 @@
 #include "WtNodeDataModel.h"
 #include "WtNodeData.hpp"
 #include "WtNodeStyle.h"
+#include "WtFlowNodeData.h"
 #include <memory>
 #include <unordered_map>
 
@@ -283,6 +284,8 @@ public:
 
 	WtNodeDataModel* nodeDataModel() const;
 
+	WtFlowNodeData& flowNodeData() { return _flowNodeData; }
+
 public:
 	/// Propagates incoming data to the underlying model.
 	void propagateData(std::shared_ptr<WtNodeData> nodeData, PortIndex inPortIndex) const;
@@ -304,4 +307,6 @@ private:
 	WtNodeGeometry _nodeGeometry;
 
 	std::unique_ptr<WtNodeGraphicsObject> _nodeGraphicsObject;
+
+	WtFlowNodeData _flowNodeData;
 };

@@ -59,6 +59,8 @@ void WtNodePainter::drawNodeRect(
 		: Wt::WRectF(-diam, 0.0f, 2.0 * diam + geom.width(), diam + geom.height());
 
 
+	graphicsObject.setBoundingRect(boundary);
+
 	//gradient
 
 	if (model->captionVisible())
@@ -562,6 +564,7 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _node(node)
 	, _painter(painter)
 	, _locked(false)
+	, _flowNodeData(node.flowNodeData())
 {
 
 	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);
@@ -636,6 +639,7 @@ void WtNodeGraphicsObject::setPos(int x, int y)
 	_origin.setX(x);
 	_origin.setY(y);
 	_painter->translate(_origin);
+	_flowNodeData.setNodeOrigin(_origin);
 	paint(_painter);
 	_origin.setX(-x);
 	_origin.setY(-y);
@@ -646,20 +650,9 @@ void WtNodeGraphicsObject::setPos(Wt::WPointF pos)
 {
 	_origin = pos;
 	_painter->translate(_origin);
+	_flowNodeData.setNodeOrigin(_origin);
 	paint(_painter);
 	_origin.setX(-pos.x());
 	_origin.setY(-pos.y());
 	_painter->translate(_origin);
-}
-
-bool WtNodeGraphicsObject::isSelected() const
-{
-	return false;
-}
-
-void WtNodeGraphicsObject::onMouseWentDown(const Wt::WKeyEvent& event)
-{
-	//isDragging = true;
-	//mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
-	//mLastDelta = Wt::WPointF(0, 0);
 }
